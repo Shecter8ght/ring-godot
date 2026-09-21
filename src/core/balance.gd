@@ -22,10 +22,10 @@ const CAPSULE_RADIUS := 0.35
 ## Наклон изометрии от горизонта (Duckov ≈ 55–60°: видно планировку, а не стены).
 const CAMERA_PITCH_DEG := 58.0
 const CAMERA_YAW_DEG := 45.0
-const CAMERA_DISTANCE := 22.0
+const CAMERA_DISTANCE := 28.0
 const CAMERA_FOV := 32.0
 const CAMERA_ZOOM_MIN := 12.0
-const CAMERA_ZOOM_MAX := 34.0
+const CAMERA_ZOOM_MAX := 50.0
 const CAMERA_ZOOM_STEP := 2.0
 ## Камера смещается к курсору: доля расстояния до курсора и предел, м.
 const CAMERA_CURSOR_LEAD := 0.28

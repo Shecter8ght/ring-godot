@@ -18,14 +18,27 @@ func _initialize() -> void:
 	root.add_child(inst)
 	current_scene = inst
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))
-	_run(scene_path, frames)
+	var suffix := ""
+	if args.size() > 2 and args[2] == "overview":
+		# Обзорная камера: вид сверху на весь сектор, чтобы проверять планировку.
+		suffix = "_overview"
+		await process_frame
+		var cam := Camera3D.new()
+		cam.fov = 45.0
+		cam.far = 1000.0
+		root.add_child(cam)
+		var center := Vector3(70, 0, 0)
+		cam.position = center + Vector3(-40, 190, 0)
+		cam.look_at(center, Vector3(1, 0, 0))
+		cam.current = true
+	_run(scene_path, frames, suffix)
 
 
-func _run(scene_path: String, frames: int) -> void:
+func _run(scene_path: String, frames: int, suffix: String) -> void:
 	for i in range(frames):
 		await process_frame
 	var img := root.get_viewport().get_texture().get_image()
-	var file_name := scene_path.get_file().get_basename() + ".png"
+	var file_name := scene_path.get_file().get_basename() + suffix + ".png"
 	var out := ProjectSettings.globalize_path(OUT_DIR + "/" + file_name)
 	var err := img.save_png(out)
 	print("smoke: %s -> %s (%s)" % [scene_path, out, error_string(err)])
