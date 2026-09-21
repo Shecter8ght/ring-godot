@@ -24,6 +24,8 @@ func _ready() -> void:
 	_mesh.mesh = box
 	_mesh.position = Vector3(width * 0.5, height * 0.5, 0.0)
 	_mesh.material_override = SectorMaterials.get_material("metal_plate")
+	_leaf.collision_layer = Hitscan.LAYER_DOOR
+	_leaf.collision_mask = 0
 	var col := BoxShape3D.new()
 	col.size = box.size
 	_shape.shape = col
@@ -39,6 +41,10 @@ func _ready() -> void:
 func _on_body_entered(body: Node3D) -> void:
 	if body is Player:
 		_players_near.append(body)
+	elif body is Marauder and not is_open:
+		# Мародёр открывает дверь сам — и это слышно.
+		toggle(body.global_position)
+		NoiseBus.emit(global_position, 10.0, "door")
 
 
 func _on_body_exited(body: Node3D) -> void:
@@ -50,6 +56,7 @@ func _process(delta: float) -> void:
 		var who := _players_near[0]
 		if (who as Player).is_local():
 			toggle(who.global_position)
+			NoiseBus.emit(global_position, 8.0, "door")
 	_leaf.rotation.y = lerp_angle(_leaf.rotation.y, _target_angle, minf(1.0, Balance.DOOR_SWING_SPEED * delta))
 
 

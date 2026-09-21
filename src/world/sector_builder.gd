@@ -529,11 +529,17 @@ func _annulus(st: SurfaceTool, a0: float, a1: float, r0: float, r1: float, y: fl
 # ---------------------------------------------------------------- узлы
 
 func _emit_meshes(root: Node3D) -> void:
-	var floors := Node3D.new()
+	# Полы — с коллайдерами: по ним печётся навмеш (визуальные меши для этого не читаем — дорого).
+	var floors := StaticBody3D.new()
 	floors.name = "Floors"
 	root.add_child(floors)
 	for mat_id in _floors:
-		floors.add_child(_mesh_node(_floors[mat_id], String(mat_id), false))
+		var fi := _mesh_node(_floors[mat_id], String(mat_id), false)
+		floors.add_child(fi)
+		var fcs := CollisionShape3D.new()
+		fcs.name = fi.name + "_col"
+		fcs.shape = (fi.mesh as ArrayMesh).create_trimesh_shape()
+		floors.add_child(fcs)
 	var walls := StaticBody3D.new()
 	walls.name = "Walls"
 	root.add_child(walls)

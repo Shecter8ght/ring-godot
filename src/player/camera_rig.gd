@@ -48,7 +48,24 @@ func _process(delta: float) -> void:
 	var want := _target.global_position + lead
 	global_position = global_position.lerp(want, minf(1.0, Balance.CAMERA_FOLLOW_SMOOTH * delta))
 	if _target is Player:
-		(_target as Player).cursor_ground = cursor
+		var pl := _target as Player
+		pl.cursor_ground = cursor
+		pl.cursor_body = _body_under_cursor()
+
+
+## Тело под курсором (мародёр): луч из камеры сквозь курсор по физике. Пусто — если под курсором пол/стена.
+func _body_under_cursor() -> Vector3:
+	var vp := get_viewport()
+	if vp == null or _target == null:
+		return Vector3.ZERO
+	var mouse := vp.get_mouse_position()
+	var from := _camera.project_ray_origin(mouse)
+	var dir := _camera.project_ray_normal(mouse)
+	var query := PhysicsRayQueryParameters3D.create(from, from + dir * 200.0, Hitscan.LAYER_WORLD | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DOOR)
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty() or not (hit.collider as Node).is_in_group("marauders"):
+		return Vector3.ZERO
+	return hit.position
 
 
 ## Пересечение луча из курсора с плоскостью пола игрока (y = высота цели).

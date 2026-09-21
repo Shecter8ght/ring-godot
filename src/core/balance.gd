@@ -47,8 +47,37 @@ const FOG_DENSITY := 0.005
 ## Скорость распахивания створки (чем больше, тем резче), 1/с.
 const DOOR_SWING_SPEED := 7.0
 
-# --- Зрение AI ---
-const AI_VIEW_DISTANCE := 28.0
+# --- Здоровье ---
+const PLAYER_HP := 100.0
+const MARAUDER_HP := 60.0
+
+# --- Пистолет игрока ---
+const PISTOL := {"damage": 22.0, "interval": 0.22, "mag": 8, "reload": 1.8, "spread_deg": 1.4, "range_m": 60.0, "noise_m": 60.0}
+
+# --- Шум игрока: радиус слышимости шагов по стойке, м ---
+const NOISE_STEP := {"stand": 7.0, "sprint": 14.0, "crouch": 3.0, "prone": 1.5}
+const NOISE_STEP_INTERVAL := 0.45
+
+# --- Мародёр ---
+const MARAUDER_COUNT := 4
+const MARAUDER_WALK := 1.5
+const MARAUDER_RUN := 3.4
+## Ближе этого до точки спавна игрока мародёры не появляются, м.
+const MARAUDER_SPAWN_MIN_DIST := 28.0
+## Зрение: дальность, полуугол конуса, и во сколько раз дальность меньше для сидящего/лежащего.
+const AI_VIEW_DISTANCE := 30.0
 const AI_VIEW_HALF_ANGLE_DEG := 60.0
-const AI_HEAR_GUNSHOT_M := 60.0
-const AI_HEAR_STEP_M := 8.0
+const AI_VIEW_STANCE_SCALE := {"stand": 1.0, "crouch": 0.7, "prone": 0.4}
+## Сколько секунд непрерывной видимости нужно, чтобы заметить (ближе — быстрее).
+const AI_NOTICE_SEC := 0.35
+## Память о цели после потери из виду, с.
+const AI_MEMORY_SEC := 12.0
+## Бой: дистанция открытия огня, интервал выстрелов, разброс, урон.
+const AI_ENGAGE_RANGE := 32.0
+const AI_FIRE_INTERVAL := 0.75
+const AI_SPREAD_DEG := 7.0
+const AI_DAMAGE := 9.0
+## Патруль: пауза на точке, с.
+const AI_PATROL_PAUSE := [1.5, 4.0]
+## Расследование: сколько стоять на месте шума, прежде чем вернуться к патрулю, с.
+const AI_INVESTIGATE_LINGER := 5.0
