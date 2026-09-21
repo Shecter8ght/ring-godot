@@ -51,6 +51,16 @@ static var _cutaway: Array[BaseMaterial3D] = []
 
 
 ## cutaway — вариант материала, который растворяется (дизеринг) вблизи камеры: для стен, не для полов.
+## Ткань баннеров: матовая, чуть просвечивает на солнце.
+static func _banner(i: int) -> Material:
+	var colors := [Color(0.12, 0.14, 0.36), Color(0.3, 0.12, 0.36), Color(0.45, 0.1, 0.1), Color(0.1, 0.25, 0.3)]
+	var m := StandardMaterial3D.new()
+	m.albedo_color = colors[i % colors.size()]
+	m.roughness = 0.95
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return m
+
+
 static func get_material(id: String, cutaway: bool = false) -> Material:
 	var key := id + ("#cut" if cutaway else "")
 	if _cache.has(key):
@@ -59,6 +69,8 @@ static func get_material(id: String, cutaway: bool = false) -> Material:
 	var mat: Material
 	if id in SPECIAL:
 		mat = _special(id)
+	elif id.begins_with("banner_"):
+		mat = _banner(int(id.trim_prefix("banner_")))
 	elif ResourceLoader.exists(path):
 		mat = load(path)
 		if cutaway:
@@ -74,6 +86,21 @@ static func get_material(id: String, cutaway: bool = false) -> Material:
 		_cutaway.append(bm)
 	_cache[key] = mat
 	return mat
+
+
+## Плоский цвет для процедурных пропсов — с вырезом у камеры, кэш по параметрам.
+static func flat(color: Color, rough: float, metal: float) -> Material:
+	var key := "flat:%s:%.2f:%.2f" % [color.to_html(false), rough, metal]
+	if _cache.has(key):
+		return _cache[key]
+	var m := StandardMaterial3D.new()
+	m.albedo_color = color
+	m.roughness = rough
+	m.metallic = metal
+	m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+	_cutaway.append(m)
+	_cache[key] = m
+	return m
 
 
 ## Камера зовёт каждый кадр: всё ближе near к камере — невидимо, дальше far — целиком.

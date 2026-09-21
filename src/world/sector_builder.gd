@@ -72,10 +72,12 @@ func build(path: String) -> Node3D:
 	_build_floors()
 	_build_walls()
 	_build_surroundings()
+	_build_overhead()
 	_emit_meshes(root)
 	_build_floor_collider(root)
 	_build_lights(root)
 	_build_markers(root)
+	_build_props(root)
 
 	root.set_meta("rooms", _rooms)
 	root.set_meta("camera_yaw", float(_def.get("camera_yaw", Balance.CAMERA_YAW_DEG)))
@@ -624,6 +626,60 @@ func _build_lights(root: Node3D) -> void:
 					omni.omni_range = 13.0
 					omni.omni_attenuation = 1.4
 					lights.add_child(omni)
+
+
+## Пропсы по правилам помещений (см. PropPlacement). Сид — из id сектора: расстановка воспроизводима.
+func _build_props(root: Node3D) -> void:
+	var props := Node3D.new()
+	props.name = "Props"
+	root.add_child(props)
+	var placement := PropPlacement.new()
+	placement.place(props, _rooms, _openings, root.get_meta("spawn", Vector3.ZERO), hash(String(_def.get("id", ""))))
+	root.set_meta("prop_count", placement.count)
+
+
+## Верхний слой: балки перекрытия поперёк помещений, вентиляционный короб вдоль коридора,
+## баннеры на колоннаде атриума — то, что делает коробки зданием при взгляде сверху.
+func _build_overhead() -> void:
+	var steel := _st(_walls, "steel_dark")
+	var duct := _st(_walls, "metal_plate")
+	for room in _rooms:
+		if bool(room.get("outdoor", false)) or bool(room.get("locked", false)):
+			continue
+		var a0 := float(room.a[0])
+		var a1 := float(room.a[1])
+		var r0 := float(room.r[0])
+		var r1 := float(room.r[1])
+		var t := String(room.get("type", ""))
+		if t == "atrium":
+			continue
+		if t == "corridor":
+			var rm := (r0 + r1) * 0.5
+			_wall_strip(duct, _arc_points(rm, a0, a1), 0.7, 0.5, _wall_h - 1.5)
+			continue
+		var rm2 := (r0 + r1) * 0.5
+		var len := deg_to_rad(a1 - a0) * rm2
+		var n := int(floor(len / 4.0))
+		for i in range(1, n + 1):
+			var a := lerpf(a0, a1, float(i) / float(n + 1))
+			_wall_strip(steel, PackedVector3Array([polar(a, r0 + 0.3), polar(a, r1 - 0.3)]), 0.25, 0.5, _wall_h - 0.6)
+	# баннеры: на каждой второй колонне колоннады
+	var banner_colors := [Color(0.12, 0.14, 0.36), Color(0.3, 0.12, 0.36), Color(0.45, 0.1, 0.1), Color(0.1, 0.25, 0.3)]
+	var k := 0
+	for op in _openings:
+		if String(op.kind) != "open" or String(op.wall) != "arc":
+			continue
+		var r := float(op.r)
+		var len := deg_to_rad(float(op.a[1]) - float(op.a[0])) * r
+		var n := int(floor(len / float(_arch.column_spacing)))
+		for i in range(1, n + 1, 2):
+			var a := float(op.a[0]) + rad_to_deg(len * float(i) / float(n + 1) / r)
+			var c: Color = banner_colors[k % banner_colors.size()]
+			k += 1
+			var st := _st(_walls, "banner_%d" % (k % banner_colors.size()))
+			var half := rad_to_deg(0.6 / r)
+			var pts := _arc_points(r + 0.45, a - half, a + half)
+			_wall_strip(st, pts, 0.04, 3.2, _wall_h - float(_arch.cornice_h) * 2.0 - 3.4)
 
 
 ## Точки эвакуации из проёмов kind=gate с полем extraction.
