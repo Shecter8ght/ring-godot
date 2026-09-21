@@ -4,6 +4,8 @@
 *.tres text eol=lf
 *.godot text eol=lf
 *.md text eol=lf
+# Батники: cmd читает их с CRLF, а из-за кириллицы в пути к Godot внутри стоит chcp 65001
+*.cmd text eol=crlf
 
 # Бинарные ассеты — через Git LFS
 *.glb filter=lfs diff=lfs merge=lfs -text
