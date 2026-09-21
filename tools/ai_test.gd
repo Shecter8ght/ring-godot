@@ -21,6 +21,19 @@ func _ready() -> void:
 	(m.get_node("Health") as Health).damaged.connect(func(amount: float, from: Vector3) -> void:
 		print("    мародёр получил %.0f урона, источник в %.1f м от игрока, t=%.1f" % [amount, from.distance_to(player.global_position), Time.get_ticks_msec() / 1000.0]))
 	print("    старт t=%.1f" % (Time.get_ticks_msec() / 1000.0))
+	# Дверь: встать в зону, нажать F, проверить, что открылась.
+	var spawn_pos := player.global_position
+	var door := level.get_node("f1_market/Doors").get_child(0) as Door
+	player.global_position = door.global_position + door.global_basis.x * (door.width * 0.5) + door.global_basis.z * 0.9 + Vector3.UP * 0.05
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	Input.action_press("interact")
+	await get_tree().process_frame
+	Input.action_release("interact")
+	await _wait(0.5)
+	print("[дверь] %s: открыта = %s, угол створки %.0f°" % [door.name, door.is_open, rad_to_deg(door.get_node("Leaf").rotation.y)])
+	player.global_position = spawn_pos
+	await get_tree().physics_frame
 	# Мародёр в 9 м от игрока, спиной к нему — увидеть не может, но услышит бег.
 	var away := (player.global_position - Vector3.ZERO).normalized()
 	m.global_position = player.global_position + away * 9.0 + Vector3(0, 0.1, 0)

@@ -35,6 +35,12 @@ func _ready() -> void:
 	health.hp = health.max_hp
 	_muzzle.visible = false
 	_apply_stance()
+	# Слушаем мир из своей позиции, а не из камеры в 28 м над головой.
+	if is_local():
+		var listener := AudioListener3D.new()
+		add_child(listener)
+		listener.position = Vector3(0, 1.5, 0)
+		listener.make_current()
 
 
 func is_alive() -> bool:
@@ -85,6 +91,8 @@ func _footsteps(delta: float) -> void:
 			if Input.is_action_pressed("sprint") and not aiming:
 				key = "sprint"
 	NoiseBus.emit(global_position, float(Balance.NOISE_STEP[key]), "step")
+	var step_db: Dictionary = {"stand": 0.0, "sprint": 4.0, "crouch": -8.0, "prone": -14.0}
+	Audio.play("step", global_position, float(step_db[key]))
 
 
 ## Стрельба хитсканом в точку под курсором, перезарядка на R.
@@ -97,10 +105,12 @@ func _combat(delta: float) -> void:
 		return
 	if Input.is_action_just_pressed("reload") and ammo < int(Balance.PISTOL.mag):
 		reload_timer = float(Balance.PISTOL.reload)
+		Audio.play("reload", global_position)
 		return
 	if Input.is_action_pressed("fire") and fire_timer <= 0.0:
 		if ammo <= 0:
 			reload_timer = float(Balance.PISTOL.reload)
+			Audio.play("reload", global_position)
 			return
 		ammo -= 1
 		fire_timer = float(Balance.PISTOL.interval)
@@ -117,6 +127,7 @@ func _combat(delta: float) -> void:
 		_muzzle.visible = true
 		get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
 		NoiseBus.emit(global_position, float(Balance.PISTOL.noise_m), "shot")
+		Audio.play("shot_pistol", from)
 
 
 func _read_stance() -> void:

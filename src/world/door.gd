@@ -34,6 +34,8 @@ func _ready() -> void:
 	zone.size = Vector3(width + 1.6, height, 3.0)
 	_zone_shape.shape = zone
 	_zone_shape.position = Vector3(width * 0.5, height * 0.5, 0.0)
+	_zone.collision_layer = 0
+	_zone.collision_mask = Hitscan.LAYER_PLAYER | Hitscan.LAYER_MARAUDER
 	_zone.body_entered.connect(_on_body_entered)
 	_zone.body_exited.connect(_on_body_exited)
 
@@ -63,6 +65,7 @@ func _process(delta: float) -> void:
 ## Открыть от того, кто открывает: сторона выбирается по знаку локального Z подошедшего.
 func toggle(from_world: Vector3) -> void:
 	is_open = not is_open
+	Audio.play("door", global_position)
 	if is_open:
 		var local := to_local(from_world)
 		_target_angle = (PI * 0.5) if local.z > 0.0 else (-PI * 0.5)

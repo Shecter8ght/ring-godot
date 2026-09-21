@@ -35,6 +35,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	# Вращение камеры вокруг игрока: Q/E, плавно, пока зажато.
+	var turn := Input.get_axis("camera_left", "camera_right")
+	if turn != 0.0:
+		rotation.y -= deg_to_rad(Balance.CAMERA_TURN_DEG_PER_SEC) * turn * delta
 	if _target == null:
 		_target = get_tree().get_first_node_in_group("players") as Node3D
 		if _target == null:

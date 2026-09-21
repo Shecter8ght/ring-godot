@@ -21,6 +21,7 @@ var _rng := RandomNumberGenerator.new()
 var _target_player: Player = null
 var _facing: float = 0.0
 var _nav_ready: bool = false
+var _step_timer: float = 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 @onready var _health: Health = $Health
@@ -164,6 +165,7 @@ func _shoot() -> void:
 	_muzzle.visible = true
 	get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
 	NoiseBus.emit(global_position, float(Balance.PISTOL.noise_m), "shot")
+	Audio.play("shot_ai", from)
 
 
 # ---------------------------------------------------------------- движение
@@ -187,6 +189,12 @@ func _move(delta: float) -> void:
 		velocity.y = 0.0
 	move_and_slide()
 	_body.rotation.y = _facing
+	# Шаги мародёра слышны игроку — так его можно засечь до того, как он тебя увидит.
+	if Vector2(velocity.x, velocity.z).length() > 0.3:
+		_step_timer -= delta
+		if _step_timer <= 0.0:
+			_step_timer = 0.55 if state == State.PATROL else 0.36
+			Audio.play("step_ai", global_position)
 
 
 func _snap(p: Vector3) -> Vector3:

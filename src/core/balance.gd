@@ -31,6 +31,8 @@ const CAMERA_ZOOM_STEP := 2.0
 const CAMERA_CURSOR_LEAD := 0.28
 const CAMERA_CURSOR_LEAD_MAX := 5.0
 const CAMERA_FOLLOW_SMOOTH := 8.0
+## Скорость вращения камеры по Q/E, град/с.
+const CAMERA_TURN_DEG_PER_SEC := 90.0
 ## Вырез стен у камеры: доли дистанции камеры, ближе near — стена невидима, дальше far — целая.
 ## Пол на дистанции ~0.85 (высота камеры), стена под камерой ~0.6 — попадает в вырез, игрок (1.0) — нет.
 const CAMERA_CUTAWAY_NEAR := 0.62

@@ -20,6 +20,9 @@ func take_damage(amount: float, from: Vector3) -> void:
 		return
 	hp = maxf(0.0, hp - amount)
 	damaged.emit(amount, from)
+	var owner_3d := get_parent() as Node3D
+	if owner_3d:
+		Audio.play("hit", owner_3d.global_position + Vector3.UP)
 	if hp <= 0.0:
 		alive = false
 		died.emit()
