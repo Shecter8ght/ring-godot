@@ -31,6 +31,14 @@ func _initialize() -> void:
 		cam.position = center + Vector3(-40, 190, 0)
 		cam.look_at(center, Vector3(1, 0, 0))
 		cam.current = true
+	elif args.size() > 2 and args[2].begins_with("at="):
+		# Поставить игрока в полярную точку сектора: at=угол,радиус — снимок «глазами» камеры игрока.
+		var parts := args[2].trim_prefix("at=").split(",")
+		suffix = "_at_%s_%s" % [parts[0], parts[1]]
+		await process_frame
+		var player := root.get_tree().get_first_node_in_group("players") as Node3D
+		if player:
+			player.global_position = SectorBuilder.polar(float(parts[0]), float(parts[1])) + Vector3(0, 0.05, 0)
 	_run(scene_path, frames, suffix)
 
 

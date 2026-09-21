@@ -40,6 +40,7 @@ func _process(delta: float) -> void:
 		if _target == null:
 			return
 	_camera.position.z = lerpf(_camera.position.z, _distance, minf(1.0, 6.0 * delta))
+	SectorMaterials.set_cutaway_distance(_camera.position.z * Balance.CAMERA_CUTAWAY_NEAR, _camera.position.z * Balance.CAMERA_CUTAWAY_FAR)
 	var cursor := cursor_on_ground()
 	var lead := (cursor - _target.global_position) * Balance.CAMERA_CURSOR_LEAD
 	lead.y = 0.0

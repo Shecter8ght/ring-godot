@@ -31,6 +31,10 @@ const CAMERA_ZOOM_STEP := 2.0
 const CAMERA_CURSOR_LEAD := 0.28
 const CAMERA_CURSOR_LEAD_MAX := 5.0
 const CAMERA_FOLLOW_SMOOTH := 8.0
+## Вырез стен у камеры: доли дистанции камеры, ближе near — стена невидима, дальше far — целая.
+## Пол на дистанции ~0.85 (высота камеры), стена под камерой ~0.6 — попадает в вырез, игрок (1.0) — нет.
+const CAMERA_CUTAWAY_NEAR := 0.62
+const CAMERA_CUTAWAY_FAR := 0.96
 
 # --- Свет и атмосфера ---
 const SUN_ENERGY := 1.6
@@ -38,6 +42,10 @@ const SUN_ELEVATION_DEG := 34.0
 const SUN_AZIMUTH_DEG := -140.0
 const AMBIENT_ENERGY := 0.35
 const FOG_DENSITY := 0.005
+
+# --- Двери ---
+## Скорость распахивания створки (чем больше, тем резче), 1/с.
+const DOOR_SWING_SPEED := 7.0
 
 # --- Зрение AI ---
 const AI_VIEW_DISTANCE := 28.0

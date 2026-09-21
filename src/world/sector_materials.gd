@@ -17,20 +17,67 @@ const FALLBACK := {
 	"metal_plate": Color(0.4, 0.4, 0.42),
 }
 
+## Процедурные материалы без текстур: стекло витрин, тёмная сталь рам, панель вывески.
+const SPECIAL := ["glass", "steel_dark", "sign_panel"]
+
 static var _cache: Dictionary = {}
 
 
-static func get_material(id: String) -> Material:
-	if _cache.has(id):
-		return _cache[id]
+static func _special(id: String) -> Material:
+	var m := StandardMaterial3D.new()
+	match id:
+		"glass":
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			m.albedo_color = Color(0.62, 0.72, 0.78, 0.22)
+			m.roughness = 0.08
+			m.metallic = 0.1
+			m.metallic_specular = 0.8
+			m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		"steel_dark":
+			m.albedo_color = Color(0.12, 0.12, 0.13)
+			m.roughness = 0.45
+			m.metallic = 0.85
+		"sign_panel":
+			m.albedo_color = Color(0.06, 0.06, 0.07)
+			m.roughness = 0.6
+			m.emission_enabled = true
+			m.emission = Color(0.9, 0.75, 0.5)
+			m.emission_energy_multiplier = 0.08
+	return m
+
+
+## Материалы стен с вырезом у камеры — их дистанции фейда обновляет камера каждый кадр.
+static var _cutaway: Array[BaseMaterial3D] = []
+
+
+## cutaway — вариант материала, который растворяется (дизеринг) вблизи камеры: для стен, не для полов.
+static func get_material(id: String, cutaway: bool = false) -> Material:
+	var key := id + ("#cut" if cutaway else "")
+	if _cache.has(key):
+		return _cache[key]
 	var path := "res://assets/materials/%s.tres" % id
 	var mat: Material
-	if ResourceLoader.exists(path):
+	if id in SPECIAL:
+		mat = _special(id)
+	elif ResourceLoader.exists(path):
 		mat = load(path)
+		if cutaway:
+			mat = mat.duplicate()
 	else:
 		var flat := StandardMaterial3D.new()
 		flat.albedo_color = FALLBACK.get(id, Color(0.6, 0.2, 0.6))
 		flat.roughness = 0.9
 		mat = flat
-	_cache[id] = mat
+	if cutaway and mat is BaseMaterial3D:
+		var bm := mat as BaseMaterial3D
+		bm.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+		_cutaway.append(bm)
+	_cache[key] = mat
 	return mat
+
+
+## Камера зовёт каждый кадр: всё ближе near к камере — невидимо, дальше far — целиком.
+static func set_cutaway_distance(near: float, far: float) -> void:
+	for m in _cutaway:
+		m.distance_fade_min_distance = near
+		m.distance_fade_max_distance = far

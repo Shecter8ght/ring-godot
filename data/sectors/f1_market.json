@@ -4,6 +4,8 @@
   "floor": 1,
   "angle": [-30, 30],
   "walls": { "height": 7.0, "thickness": 0.3, "fence_height": 2.2, "barrier_height": 2.6 },
+  "arch": { "storefront_h": 3.6, "door_h": 2.2, "shutter_h": 3.2, "gate_h": 4.5, "entrance_w": 3.2, "broken_pane_pct": 22 },
+  "camera_yaw": -45,
   "spawn": { "a": -12, "r": 100 },
   "rooms": [
     { "id": "atrium", "name": "Атриум", "type": "atrium", "a": [-30, 30], "r": [0.5, 25],
@@ -38,13 +40,17 @@
     { "id": "corridor_w", "name": "Служебный коридор (закрыто)", "type": "corridor", "a": [-36, -30], "r": [84, 90],
       "floor": "concrete_floor_worn_001", "wall": "concrete_wall_006", "locked": true },
     { "id": "corridor_e", "name": "Служебный коридор (закрыто)", "type": "corridor", "a": [30, 36], "r": [84, 90],
-      "floor": "concrete_floor_worn_001", "wall": "concrete_wall_006", "locked": true }
+      "floor": "concrete_floor_worn_001", "wall": "concrete_wall_006", "locked": true },
+    { "id": "shop_w", "name": "Закрытый сектор", "type": "retail", "a": [-40, -30], "r": [33, 84],
+      "floor": "worn_tile_floor", "wall": "painted_plaster_wall", "locked": true },
+    { "id": "shop_e", "name": "Закрытый сектор", "type": "retail", "a": [30, 40], "r": [33, 84],
+      "floor": "worn_tile_floor", "wall": "painted_plaster_wall", "locked": true }
   ],
   "openings": [
     { "wall": "arc", "r": 25, "a": [-30, 30], "kind": "open", "note": "атриум — галерея, колоннада" },
-    { "wall": "arc", "r": 33, "a": [-22, -16], "kind": "open", "note": "главный вход маркета" },
-    { "wall": "arc", "r": 33, "a": [-6, -1], "kind": "open", "note": "второй вход маркета" },
-    { "wall": "arc", "r": 33, "a": [12, 18], "kind": "open", "note": "вход электроники" },
+    { "wall": "arc", "r": 33, "a": [-27, -12], "kind": "storefront", "note": "витрина и главный вход маркета" },
+    { "wall": "arc", "r": 33, "a": [-8, 3], "kind": "storefront", "note": "второй вход маркета" },
+    { "wall": "arc", "r": 33, "a": [9, 22], "kind": "storefront", "note": "витрина электроники" },
     { "wall": "arc", "r": 75, "a": [-24, -22], "kind": "door" },
     { "wall": "arc", "r": 75, "a": [-11, -9], "kind": "door" },
     { "wall": "arc", "r": 75, "a": [10, 12], "kind": "door" },
