@@ -197,6 +197,21 @@ func _move(delta: float) -> void:
 			Audio.play("step_ai", global_position)
 
 
+## Вспышка на теле при попадании — видно, что пуля дошла.
+func hit_flash() -> void:
+	var overlay := StandardMaterial3D.new()
+	overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	overlay.albedo_color = Color(1.0, 0.25, 0.2, 0.55)
+	overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	for child in _body.get_children():
+		if child is MeshInstance3D:
+			(child as MeshInstance3D).material_overlay = overlay
+	get_tree().create_timer(0.09).timeout.connect(func() -> void:
+		for child in _body.get_children():
+			if child is MeshInstance3D:
+				(child as MeshInstance3D).material_overlay = null)
+
+
 func _snap(p: Vector3) -> Vector3:
 	var map := get_world_3d().navigation_map
 	return NavigationServer3D.map_get_closest_point(map, p)

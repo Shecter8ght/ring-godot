@@ -22,6 +22,7 @@ static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float,
 		var h := (body as Node).get_node_or_null("Health") as Health
 		if h:
 			h.take_damage(damage, from)
+	ImpactFx.spawn_hit(hit, d)
 	return hit
 
 
