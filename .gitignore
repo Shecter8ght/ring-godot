@@ -1,0 +1,16 @@
+# Godot
+.godot/
+*.import.tmp
+export/
+*.exe
+*.pck
+
+# Сырьё ассетов — не в git (см. AGENTS.md); готовое лежит в assets/ через LFS
+_asset_src/
+
+# Локальные
+.env
+*.log
+Thumbs.db
+desktop.ini
+референсы/

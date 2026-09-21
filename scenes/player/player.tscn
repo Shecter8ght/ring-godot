@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/player/player.gd" id="1_player"]
+
+[sub_resource type="CapsuleShape3D" id="capsule"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="mat_body"]
+albedo_color = Color(0.32, 0.34, 0.3, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="mat_face"]
+albedo_color = Color(0.78, 0.62, 0.15, 1)
+roughness = 0.6
+
+[sub_resource type="CapsuleMesh" id="mesh_body"]
+radius = 0.3
+height = 1.7
+
+[sub_resource type="BoxMesh" id="mesh_nose"]
+size = Vector3(0.2, 0.2, 0.35)
+
+[node name="Player" type="CharacterBody3D" groups=["players"]]
+script = ExtResource("1_player")
+
+[node name="Capsule" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("capsule")
+
+[node name="Body" type="Node3D" parent="."]
+
+[node name="Torso" type="MeshInstance3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("mesh_body")
+surface_material_override/0 = SubResource("mat_body")
+
+[node name="Nose" type="MeshInstance3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.35)
+mesh = SubResource("mesh_nose")
+surface_material_override/0 = SubResource("mat_face")
