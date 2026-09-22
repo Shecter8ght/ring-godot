@@ -1,0 +1,447 @@
+{
+  "coordinate_system": "Blender Z up; glTF/Godot Y up",
+  "units": "meters",
+  "vehicles": [
+    {
+      "type": "sedan",
+      "condition": "worn",
+      "blend": "RING_sedan_worn.blend",
+      "doors": [
+        {
+          "name": "Door_LF_Hinge",
+          "file": "RING_sedan_worn_Door_LF_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -0.8899999856948853,
+            -1.1399999856948853,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_LR_Hinge",
+          "file": "RING_sedan_worn_Door_LR_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -0.8899999856948853,
+            1.100000023841858,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RF_Hinge",
+          "file": "RING_sedan_worn_Door_RF_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            0.8899999856948853,
+            -1.1399999856948853,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RR_Hinge",
+          "file": "RING_sedan_worn_Door_RR_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            0.8899999856948853,
+            1.100000023841858,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        }
+      ],
+      "triangles": 25948,
+      "assembled_gltf": "RING_sedan_worn.gltf"
+    },
+    {
+      "type": "sedan",
+      "condition": "damaged",
+      "blend": "RING_sedan_damaged.blend",
+      "doors": [
+        {
+          "name": "Door_LF_Hinge",
+          "file": "RING_sedan_damaged_Door_LF_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -0.8899999856948853,
+            -1.1399999856948853,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_LR_Hinge",
+          "file": "RING_sedan_damaged_Door_LR_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -0.8899999856948853,
+            1.100000023841858,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RF_Hinge",
+          "file": "RING_sedan_damaged_Door_RF_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            0.8899999856948853,
+            -1.1399999856948853,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RR_Hinge",
+          "file": "RING_sedan_damaged_Door_RR_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            0.8899999856948853,
+            1.100000023841858,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        }
+      ],
+      "triangles": 28948,
+      "assembled_gltf": "RING_sedan_damaged.gltf"
+    },
+    {
+      "type": "sedan",
+      "condition": "wreck",
+      "blend": "RING_sedan_wreck.blend",
+      "doors": [
+        {
+          "name": "Door_LF_Hinge",
+          "file": "RING_sedan_wreck_Door_LF_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -0.8899999856948853,
+            -1.1399999856948853,
+            0.0
+          ],
+          "default_open_angle_rad": 0.4000000059604645
+        },
+        {
+          "name": "Door_LR_Hinge",
+          "file": "RING_sedan_wreck_Door_LR_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -0.8899999856948853,
+            1.100000023841858,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RF_Hinge",
+          "file": "RING_sedan_wreck_Door_RF_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            0.8899999856948853,
+            -1.1399999856948853,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RR_Hinge",
+          "file": "RING_sedan_wreck_Door_RR_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            0.8899999856948853,
+            1.100000023841858,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        }
+      ],
+      "triangles": 45264,
+      "assembled_gltf": "RING_sedan_wreck.gltf"
+    },
+    {
+      "type": "truck",
+      "condition": "worn",
+      "blend": "RING_truck_worn.blend",
+      "doors": [
+        {
+          "name": "Door_RearCargo_L_Hinge",
+          "file": "RING_truck_worn_Door_RearCargo_L_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -1.1100000143051147,
+            3.5899999141693115,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RearCargo_R_Hinge",
+          "file": "RING_truck_worn_Door_RearCargo_R_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.1100000143051147,
+            3.5899999141693115,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_L_Hinge",
+          "file": "RING_truck_worn_Door_L_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -1.059999942779541,
+            -3.240000009536743,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_R_Hinge",
+          "file": "RING_truck_worn_Door_R_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.059999942779541,
+            -3.240000009536743,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        }
+      ],
+      "triangles": 33046,
+      "assembled_gltf": "RING_truck_worn.gltf"
+    },
+    {
+      "type": "truck",
+      "condition": "damaged",
+      "blend": "RING_truck_damaged.blend",
+      "doors": [
+        {
+          "name": "Door_RearCargo_L_Hinge",
+          "file": "RING_truck_damaged_Door_RearCargo_L_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -1.1100000143051147,
+            3.5899999141693115,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RearCargo_R_Hinge",
+          "file": "RING_truck_damaged_Door_RearCargo_R_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.1100000143051147,
+            3.5899999141693115,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_L_Hinge",
+          "file": "RING_truck_damaged_Door_L_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -1.059999942779541,
+            -3.240000009536743,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_R_Hinge",
+          "file": "RING_truck_damaged_Door_R_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.059999942779541,
+            -3.240000009536743,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        }
+      ],
+      "triangles": 35046,
+      "assembled_gltf": "RING_truck_damaged.gltf"
+    },
+    {
+      "type": "truck",
+      "condition": "wreck",
+      "blend": "RING_truck_wreck.blend",
+      "doors": [
+        {
+          "name": "Door_RearCargo_L_Hinge",
+          "file": "RING_truck_wreck_Door_RearCargo_L_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -1.1100000143051147,
+            3.5899999141693115,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_RearCargo_R_Hinge",
+          "file": "RING_truck_wreck_Door_RearCargo_R_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.1100000143051147,
+            3.5899999141693115,
+            0.0
+          ],
+          "default_open_angle_rad": -0.33000001311302185
+        },
+        {
+          "name": "Door_L_Hinge",
+          "file": "RING_truck_wreck_Door_L_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            -1.059999942779541,
+            -3.240000009536743,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_R_Hinge",
+          "file": "RING_truck_wreck_Door_R_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.059999942779541,
+            -3.240000009536743,
+            0.0
+          ],
+          "default_open_angle_rad": -0.4699999988079071
+        }
+      ],
+      "triangles": 47170,
+      "assembled_gltf": "RING_truck_wreck.gltf"
+    },
+    {
+      "type": "bus",
+      "condition": "worn",
+      "blend": "RING_bus_worn.blend",
+      "doors": [
+        {
+          "name": "Door_1_A_Hinge",
+          "file": "RING_bus_worn_Door_1_A_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            -4.28000020980835,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_1_B_Hinge",
+          "file": "RING_bus_worn_Door_1_B_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            -3.299999952316284,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_2_A_Hinge",
+          "file": "RING_bus_worn_Door_2_A_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            0.9200000166893005,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_2_B_Hinge",
+          "file": "RING_bus_worn_Door_2_B_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            2.0399999618530273,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        }
+      ],
+      "triangles": 35248,
+      "assembled_gltf": "RING_bus_worn.gltf"
+    },
+    {
+      "type": "bus",
+      "condition": "damaged",
+      "blend": "RING_bus_damaged.blend",
+      "doors": [
+        {
+          "name": "Door_1_A_Hinge",
+          "file": "RING_bus_damaged_Door_1_A_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            -4.28000020980835,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_1_B_Hinge",
+          "file": "RING_bus_damaged_Door_1_B_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            -3.299999952316284,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_2_A_Hinge",
+          "file": "RING_bus_damaged_Door_2_A_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            0.9200000166893005,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_2_B_Hinge",
+          "file": "RING_bus_damaged_Door_2_B_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            2.0399999618530273,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        }
+      ],
+      "triangles": 37032,
+      "assembled_gltf": "RING_bus_damaged.gltf"
+    },
+    {
+      "type": "bus",
+      "condition": "wreck",
+      "blend": "RING_bus_wreck.blend",
+      "doors": [
+        {
+          "name": "Door_1_A_Hinge",
+          "file": "RING_bus_wreck_Door_1_A_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            -4.28000020980835,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_1_B_Hinge",
+          "file": "RING_bus_wreck_Door_1_B_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            -3.299999952316284,
+            0.0
+          ],
+          "default_open_angle_rad": 0.0
+        },
+        {
+          "name": "Door_2_A_Hinge",
+          "file": "RING_bus_wreck_Door_2_A_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            0.9200000166893005,
+            0.0
+          ],
+          "default_open_angle_rad": -0.25999999046325684
+        },
+        {
+          "name": "Door_2_B_Hinge",
+          "file": "RING_bus_wreck_Door_2_B_Hinge.gltf",
+          "hinge_blender_xyz_m": [
+            1.274999976158142,
+            2.0399999618530273,
+            0.0
+          ],
+          "default_open_angle_rad": 0.25999999046325684
+        }
+      ],
+      "triangles": 53254,
+      "assembled_gltf": "RING_bus_wreck.gltf"
+    }
+  ]
+}

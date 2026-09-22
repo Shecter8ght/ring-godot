@@ -29,6 +29,10 @@ TILE_M: dict[str, float] = {
     "painted_metal_shutter": 2.0,
     "corrugated_iron_02": 2.0,
     "metal_plate": 1.5,
+    # оружие: текстура ложится трипланарно на мелкие детали, плитка — четверть метра
+    "sapele_veneer": 0.35,
+    "natural_walnut_veneer": 0.35,
+    "green_metal_rust": 0.25,
 }
 
 
@@ -114,7 +118,13 @@ def main() -> None:
         )
         print(f"{src.name}: {', '.join(maps)}")
     credits.append("")
-    CREDITS.write_text("\n".join(credits), encoding="utf-8")
+    # раздел «Звук» пишет tools/import_audio.py — сохраняем его
+    tail = ""
+    if CREDITS.exists():
+        old = CREDITS.read_text(encoding="utf-8")
+        if "\n## Звук" in old:
+            tail = old[old.index("\n## Звук"):]
+    CREDITS.write_text("\n".join(credits) + tail, encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+{
+  "license": "CC0",
+  "source": "Poly Haven",
+  "assets": {
+    "blue_metal_plate": "https://polyhaven.com/a/blue_metal_plate",
+    "rusty_metal_sheet": "https://polyhaven.com/a/rusty_metal_sheet",
+    "rubber_tiles": "https://polyhaven.com/a/rubber_tiles",
+    "denim_fabric_06": "https://polyhaven.com/a/denim_fabric_06"
+  },
+  "sha256": {
+    "blue_metal_plate_diff_2k.jpg": "82855f6297ad07ea7ea4d1c501e6b56ed4c9c758653ca126bda9fd0ebba63c59",
+    "blue_metal_plate_nor_gl_2k.jpg": "4cd3069a918cf891295b369b26f47c0a0631c634d0fd1006b6b7412a8f2b3550",
+    "blue_metal_plate_rough_2k.jpg": "dd1726d8217fe4f6c3947cb20700d51774a0773e9abaeb4120769c8f6fce1d69",
+    "denim_fabric_06_diff_2k.jpg": "ddeaa6edd75e9bb8f01764a3cf591a88cf260b89dadc1ac9ab6185c03ff0cecf",
+    "denim_fabric_06_nor_gl_2k.jpg": "901f5ccd9f0a5c4957d6ce84efb0abf1e37fb41c011d96db4f98334019259e91",
+    "denim_fabric_06_rough_2k.jpg": "1fdbf0bc2ee32b8f8d7c8f7618a6c950a19566b802cf775822edebd3035ea199",
+    "rubber_tiles_diff_2k.jpg": "a14ed9c9b8235a71ce2d7d0d5d0d949a07b8e895d2b78cb3589a6c755bd95215",
+    "rubber_tiles_nor_gl_2k.jpg": "27b1e34b797cf4f8ccbfa8fba1736b0ec6d9e0e14522c095b68fe16d483f2aa5",
+    "rubber_tiles_rough_2k.jpg": "5679ff2440d15093bd60df56460199f3b31cdee14bb7bf1983be3af8b8fa60c2",
+    "rusty_metal_sheet_diff_2k.jpg": "1bba003f3da47728b7108fb54a8f51fec17b3d62d89eefb2bf711688e2e929b6",
+    "rusty_metal_sheet_nor_gl_2k.jpg": "dbcdb93c3cd9d332ed29e144540ef81798f637a8c5ccd057e52cad28b60f3750",
+    "rusty_metal_sheet_rough_2k.jpg": "f1fc8d5cfb6c6b55712c07b326934d94eb7aeb4f146b67c1823348af69cfddd4"
+  }
+}

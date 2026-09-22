@@ -22,6 +22,9 @@ var _target_player: Player = null
 var _facing: float = 0.0
 var _nav_ready: bool = false
 var _step_timer: float = 0.0
+var _ragdoll: Ragdoll
+var _last_hit_from: Vector3 = Vector3.ZERO
+var _last_damage: float = 0.0
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
 @onready var _health: Health = $Health
@@ -41,6 +44,10 @@ func _ready() -> void:
 	_agent.target_desired_distance = 0.8
 	_agent.radius = 0.4
 	_muzzle.visible = false
+	# пистолет в правой руке — видно, чем вооружён; при смерти прячется вместе с телом
+	var gun := WeaponModels.build("pistol")
+	gun.position = Vector3(-0.17, 1.24, 0.3)
+	_body.add_child(gun)
 	pause_timer = _rng.randf_range(0.5, 2.0)
 	# Навмеш печётся после загрузки сектора — пока его нет, стоим.
 	NavigationServer3D.map_changed.connect(func(_m: RID) -> void: _nav_ready = true)
@@ -125,7 +132,9 @@ func _on_noise(pos: Vector3, radius_m: float, _kind: String) -> void:
 	_agent.target_position = _snap(pos)
 
 
-func _on_damaged(_amount: float, from: Vector3) -> void:
+func _on_damaged(amount: float, from: Vector3) -> void:
+	_last_hit_from = from
+	_last_damage = amount
 	if state == State.DEAD:
 		return
 	# Попадание — улика: разворот в сторону выстрела, бежим смотреть.
@@ -239,10 +248,33 @@ func _snap(p: Vector3) -> Vector3:
 
 func _on_died() -> void:
 	state = State.DEAD
-	velocity = Vector3.ZERO
 	collision_layer = 0
 	collision_mask = 0
-	# тело падает
-	_body.rotation.x = -PI * 0.5
-	_body.position.y = 0.3
 	set_physics_process(false)
+	_spawn_ragdoll()
+
+
+## У клиентов сигнала died нет (урон считает хост) — смерть видна по синхронизированному alive.
+func _process(_delta: float) -> void:
+	if not _health.alive and _ragdoll == null:
+		collision_layer = 0
+		collision_mask = 0
+		_spawn_ragdoll()
+
+
+## Капсула прячется, падает регдолл, толкнутый от стрелявшего — сильнее от мощного попадания.
+func _spawn_ragdoll() -> void:
+	if _ragdoll != null:
+		return
+	var mat := (_body.get_node("Torso") as MeshInstance3D).get_surface_override_material(0)
+	var away := global_position - _last_hit_from
+	away.y = 0.0
+	away = away.normalized() if away.length() > 0.01 else -Vector3(sin(_facing), 0.0, cos(_facing))
+	var push: Dictionary = Balance.RAGDOLL_DEATH_PUSH
+	var imp := (away + Vector3.UP * 0.25) * (float(push.base) + float(push.per_damage) * _last_damage)
+	var xf := Transform3D(Basis(Vector3.UP, _body.rotation.y), global_position)
+	_ragdoll = Ragdoll.spawn(get_tree().current_scene, xf, velocity, imp, global_position + Vector3.UP * 1.25, mat, mat)
+	velocity = Vector3.ZERO
+	_body.visible = false
+	Audio.play("death", global_position + Vector3.UP * 1.5)
+	Audio.play("fall", global_position, -4.0)

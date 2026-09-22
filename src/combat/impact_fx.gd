@@ -184,6 +184,110 @@ func _flash(parent: Node, pos: Vector3, color: Color) -> void:
 	get_tree().create_timer(0.05).timeout.connect(l.queue_free)
 
 
+# ---------------------------------------------------------------- взрыв
+
+## Взрыв гранаты: вспышка света, огненный шар, клубы дыма, разлёт крошки, подпалина на полу.
+func explosion(pos: Vector3) -> void:
+	var parent := get_tree().current_scene
+	if parent == null:
+		return
+	var light := OmniLight3D.new()
+	light.light_color = Color(1.0, 0.72, 0.4)
+	light.light_energy = 18.0
+	light.omni_range = 14.0
+	light.shadow_enabled = true
+	parent.add_child(light)
+	light.global_position = pos + Vector3.UP * 0.6
+	var tw := light.create_tween()
+	tw.tween_property(light, "light_energy", 0.0, 0.4).set_ease(Tween.EASE_OUT)
+	tw.tween_callback(light.queue_free)
+	# огненный шар: яркие мягкие пятна, быстро раздуваются и темнеют
+	_puffs(parent, pos, 26, 0.55, Vector2(2.5, 7.0), Vector2(0.9, 1.6), 3.2, 2.0,
+		[Color(1.0, 0.95, 0.75, 1.0), Color(1.0, 0.55, 0.15, 0.9), Color(0.25, 0.15, 0.1, 0.0)], true)
+	# дым: медленно поднимается и расползается
+	_puffs(parent, pos + Vector3.UP * 0.3, 20, 2.8, Vector2(0.6, 2.2), Vector2(1.4, 2.4), 4.5, -0.6,
+		[Color(0.35, 0.33, 0.3, 0.0), Color(0.3, 0.29, 0.27, 0.55), Color(0.4, 0.39, 0.37, 0.0)], false)
+	# крошка и осколки во все стороны
+	var chips := GPUParticles3D.new()
+	chips.one_shot = true
+	chips.explosiveness = 1.0
+	chips.amount = 40
+	chips.lifetime = 1.1
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = Vector3.UP
+	pm.spread = 80.0
+	pm.initial_velocity_min = 5.0
+	pm.initial_velocity_max = 14.0
+	pm.gravity = Vector3(0, -9.8, 0)
+	pm.scale_min = 0.03
+	pm.scale_max = 0.08
+	pm.angular_velocity_min = -540.0
+	pm.angular_velocity_max = 540.0
+	pm.color = Color(0.3, 0.28, 0.25)
+	chips.process_material = pm
+	chips.draw_pass_1 = _chip_mesh
+	var cm := StandardMaterial3D.new()
+	cm.vertex_color_use_as_albedo = true
+	chips.material_override = cm
+	parent.add_child(chips)
+	chips.global_position = pos
+	chips.emitting = true
+	get_tree().create_timer(1.6).timeout.connect(chips.queue_free)
+	# подпалина
+	var world: World3D = (parent as Node3D).get_world_3d()
+	var q := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 0.5, pos + Vector3.DOWN * 2.0, Hitscan.LAYER_WORLD)
+	var floor_hit: Dictionary = world.direct_space_state.intersect_ray(q)
+	if not floor_hit.is_empty():
+		_place_decal(parent, _tex_splat, floor_hit.position, floor_hit.normal, _rng.randf_range(2.8, 3.6), Color(0.04, 0.035, 0.03, 0.85))
+
+
+## Облако мягких билбордов: огонь (светится, не отбрасывает тень) или дым.
+func _puffs(parent: Node, pos: Vector3, amount: int, life: float, speed: Vector2, scale: Vector2, grow: float, lift: float, colors: Array, glow: bool) -> void:
+	var p := GPUParticles3D.new()
+	p.one_shot = true
+	p.explosiveness = 0.9
+	p.amount = amount
+	p.lifetime = life
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = Vector3.UP
+	pm.spread = 180.0
+	pm.initial_velocity_min = speed.x
+	pm.initial_velocity_max = speed.y
+	pm.gravity = Vector3(0, lift, 0)
+	pm.damping_min = 3.0
+	pm.damping_max = 5.0
+	pm.scale_min = scale.x
+	pm.scale_max = scale.y
+	var sc := Curve.new()
+	sc.add_point(Vector2(0, 0.4))
+	sc.add_point(Vector2(1, grow / 2.0))
+	var sct := CurveTexture.new()
+	sct.curve = sc
+	pm.scale_curve = sct
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.35, 1.0])
+	grad.colors = PackedColorArray(colors)
+	var gt := GradientTexture1D.new()
+	gt.gradient = grad
+	pm.color_ramp = gt
+	p.process_material = pm
+	p.draw_pass_1 = _dust_mesh
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_texture = _tex_dust
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	if glow:
+		mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	p.material_override = mat
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(p)
+	p.global_position = pos
+	p.emitting = true
+	get_tree().create_timer(life + 0.5).timeout.connect(p.queue_free)
+
+
 # ---------------------------------------------------------------- кровь
 
 func _blood(parent: Node, pos: Vector3, dir: Vector3, body: Object) -> void:

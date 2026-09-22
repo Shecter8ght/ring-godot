@@ -7,6 +7,8 @@ const LAYER_WORLD := 1
 const LAYER_PLAYER := 2
 const LAYER_MARAUDER := 4
 const LAYER_DOOR := 8
+## Тела регдоллов и брошенные предметы: пули их толкают, AI сквозь них смотрит.
+const LAYER_DEBRIS := 16
 
 ## Возвращает словарь intersect_ray (пустой — промах) и наносит урон, если у попавшего есть Health.
 static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float, range_m: float, mask: int, damage: float, exclude: Array[RID], rng: RandomNumberGenerator) -> Dictionary:
@@ -24,6 +26,8 @@ static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float,
 			h.apply_or_request_damage(damage, from)
 		if body is Target:
 			(body as Target).on_hit(hit.position, d, damage)
+		if body is RagdollPart:
+			(body.get_parent() as Ragdoll).push(d * damage * Balance.BULLET_PUSH, hit.position)
 	ImpactFx.spawn_hit(hit, d)
 	return hit
 

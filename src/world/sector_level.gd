@@ -241,9 +241,8 @@ func _on_player_died() -> void:
 func _process(_delta: float) -> void:
 	if _local_player == null:
 		return
-	var status := "HP %d   Патроны %d/%d" % [int(_local_player.health.hp), _local_player.ammo, int(Balance.PISTOL.mag)]
-	if _local_player.reload_timer > 0.0:
-		status += "   перезарядка…"
+	# оружие, патроны и гранаты — в HUD камеры (CameraRig), здесь — здоровье
+	var status := "HP %d" % int(_local_player.health.hp)
 	if not _nav_baked:
 		status += "   (навмеш печётся)"
 	(_hud.get_node("Status") as Label).text = status

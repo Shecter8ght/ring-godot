@@ -29,6 +29,9 @@ TEXTURES: dict[str, str] = {
     "painted_metal_shutter": "роллеты магазинов",
     "corrugated_iron_02": "профлист, крыши доков",
     "metal_plate": "рампы и металлические полы",
+    "sapele_veneer": "дерево автомата (красноватый лак)",
+    "natural_walnut_veneer": "ореховое ложе дробовика и винтовки",
+    "green_metal_rust": "крашеный корпус гранаты",
 }
 
 # карта Poly Haven → имя файла у нас

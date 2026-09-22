@@ -110,7 +110,8 @@ func _spawn_number(at: Vector3, dmg: float, head: bool) -> void:
 	l.outline_size = 12
 	l.modulate = Color(1.0, 0.25, 0.2) if head else Color(1.0, 0.9, 0.4)
 	get_tree().current_scene.add_child(l)
-	l.global_position = at + Vector3(randf_range(-0.15, 0.15), 0.2, 0)
+	# разброс, чтобы цифры очереди не ложились одна на другую
+	l.global_position = at + Vector3(randf_range(-0.3, 0.3), randf_range(0.1, 0.45), randf_range(-0.2, 0.2))
 	var tw := l.create_tween().set_parallel(true)
 	tw.tween_property(l, "global_position:y", l.global_position.y + 1.0, 0.7).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tw.tween_property(l, "modulate:a", 0.0, 0.7).set_delay(0.25)

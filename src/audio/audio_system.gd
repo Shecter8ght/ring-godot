@@ -1,7 +1,8 @@
 extends Node
-## Звук без внешних файлов: все сэмплы синтезируются при старте (шум + огибающие + простые фильтры)
-## в AudioStreamWAV. Это запасной вариант по правилу проекта; записанные звуки из assets/audio
-## подменят синтетику по тем же именам, когда появятся. Autoload `Audio`.
+## Звук: записи из assets/audio (см. tools/import_audio.py и CREDITS), случайный вариант на
+## каждое проигрывание; выстрелы издалека — отдельными «дальними» записями. Для всего, у чего
+## записей нет (или без assets/audio вовсе), при старте синтезируется запасной звук
+## (шум + огибающие + простые фильтры) — игра обязана звучать и так. Autoload `Audio`.
 
 const MIX_RATE := 22050
 
@@ -18,7 +19,43 @@ const KINDS := {
 	"impact_metal": {"db": -5.0, "unit": 6.0, "max": 45.0},
 	"impact_glass": {"db": -4.0, "unit": 6.0, "max": 45.0},
 	"impact_soft": {"db": -10.0, "unit": 4.0, "max": 30.0},
+	"shot_rifle": {"db": 2.0, "unit": 9.0, "max": 110.0},
+	"shot_shotgun": {"db": 4.0, "unit": 9.0, "max": 110.0},
+	"shot_bolt": {"db": 5.0, "unit": 12.0, "max": 160.0},
+	"step_run": {"db": -12.0, "unit": 3.0, "max": 28.0},
+	"death": {"db": -2.0, "unit": 5.0, "max": 35.0},
+	"fall": {"db": -6.0, "unit": 4.0, "max": 25.0},
+	"reload_pistol": {"db": -8.0, "unit": 3.0, "max": 15.0},
+	"reload_rifle": {"db": -8.0, "unit": 3.0, "max": 15.0},
+	"reload_shotgun": {"db": -6.0, "unit": 3.0, "max": 18.0},
+	"bolt": {"db": -6.0, "unit": 3.0, "max": 18.0},
+	"pin": {"db": -10.0, "unit": 2.0, "max": 10.0},
+	"debris": {"db": -4.0, "unit": 6.0, "max": 40.0},
+	"explosion": {"db": 8.0, "unit": 14.0, "max": 220.0},
 }
+
+## Записанные звуки: вид -> ["группа/префикс", ...] в assets/audio. Префикс ловит только
+## файлы «префикс + номер»: "guns/pistol_" не цепляет "pistol_far_01".
+const SAMPLES := {
+	"shot_pistol": ["guns/pistol_"], "shot_ai": ["guns/pistol_"], "shot_rifle": ["guns/carbine_"],
+	"shot_shotgun": ["guns/shotgun_"], "shot_bolt": ["guns/marksman_"],
+	"step": ["steps/stone_"], "step_run": ["steps/stone_run_"], "step_ai": ["steps/stone_"],
+	"door": ["world/door_"], "hit": ["body/hit_"], "fall": ["body/fall_"],
+	"death": ["voice/rattle_groan_", "voice/rattle_gurgle_"],
+	"reload": ["guns/reload_pistol_"], "reload_pistol": ["guns/reload_pistol_"],
+	"reload_rifle": ["guns/reload_rifle_"], "reload_shotgun": ["guns/reload_shotgun_"], "bolt": ["guns/reload_shotgun_"],
+	"impact_hard": ["hits/concrete_", "hits/hard_"], "impact_metal": ["hits/metal_"],
+	"impact_glass": ["hits/glass_"], "impact_soft": ["hits/wood_"], "debris": ["world/debris_"],
+}
+## Выстрел дальше FAR_M от слушателя звучит «дальней» записью: хлопок с эхом, без щелчка.
+const FAR := {
+	"shot_pistol": "guns/pistol_far_", "shot_ai": "guns/pistol_far_", "shot_rifle": "guns/carbine_far_",
+	"shot_shotgun": "guns/shotgun_far_", "shot_bolt": "guns/marksman_far_",
+}
+const FAR_M := 30.0
+
+var _samples: Dictionary = {}
+var _far: Dictionary = {}
 
 var _streams: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
@@ -38,19 +75,37 @@ func _ready() -> void:
 	_streams["impact_metal"] = _make(_impact_metal())
 	_streams["impact_glass"] = _make(_impact_glass())
 	_streams["impact_soft"] = _make(_impact_soft())
-	var amb := _make(_ambient_loop(6.0))
-	amb.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	amb.loop_end = amb.data.size() / 2
+	_streams["shot_rifle"] = _make(_gunshot(0.28, 1.25))
+	_streams["shot_shotgun"] = _make(_gunshot(0.55, 0.7))
+	_streams["shot_bolt"] = _make(_gunshot(0.65, 1.35))
+	_streams["step_run"] = _streams["step"]
+	_streams["death"] = _streams["hit"]
+	_streams["fall"] = _streams["hit"]
+	for k in ["reload_pistol", "reload_rifle", "reload_shotgun", "bolt", "pin"]:
+		_streams[k] = _streams["reload"]
+	_streams["debris"] = _streams["impact_hard"]
+	_streams["explosion"] = _make(_explosion())
+	_load_samples()
 	_ambient = AudioStreamPlayer.new()
-	_ambient.stream = amb
-	_ambient.volume_db = -22.0
+	var amb_path := "res://assets/audio/ambient/building_wind_drips.ogg"
+	if ResourceLoader.exists(amb_path):
+		var ogg: AudioStreamOggVorbis = load(amb_path)
+		ogg.loop = true
+		_ambient.stream = ogg
+		_ambient.volume_db = -16.0
+	else:
+		var amb := _make(_ambient_loop(6.0))
+		amb.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		amb.loop_end = amb.data.size() / 2
+		_ambient.stream = amb
+		_ambient.volume_db = -22.0
 	_ambient.autoplay = true
 	add_child(_ambient)
 
 
 ## Звук в точке мира. Игрок слушает из своей позиции (AudioListener3D на игроке).
 func play(kind: String, pos: Vector3, extra_db: float = 0.0) -> void:
-	var stream: AudioStreamWAV = _streams.get(kind)
+	var stream: AudioStream = _pick(kind, pos)
 	if stream == null:
 		return
 	var spec: Dictionary = KINDS.get(kind, {"db": 0.0, "unit": 5.0, "max": 40.0})
@@ -65,6 +120,58 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0) -> void:
 	get_tree().current_scene.add_child(p)
 	p.global_position = pos
 	p.play()
+
+
+## Запись (или дальняя запись), иначе синтетика.
+func _pick(kind: String, pos: Vector3) -> AudioStream:
+	if _far.has(kind):
+		var listener := _listener_pos()
+		if listener.distance_to(pos) > FAR_M:
+			var far: Array = _far[kind]
+			return far[_rng.randi_range(0, far.size() - 1)]
+	if _samples.has(kind):
+		var arr: Array = _samples[kind]
+		return arr[_rng.randi_range(0, arr.size() - 1)]
+	return _streams.get(kind)
+
+
+func _listener_pos() -> Vector3:
+	var vp := get_viewport()
+	var l := vp.get_audio_listener_3d() if vp else null
+	if l:
+		return l.global_position
+	var cam := vp.get_camera_3d() if vp else null
+	return cam.global_position if cam else Vector3.ZERO
+
+
+func _load_samples() -> void:
+	for kind in SAMPLES:
+		var arr := _load_prefixes(SAMPLES[kind])
+		if not arr.is_empty():
+			_samples[kind] = arr
+	for kind in FAR:
+		var arr := _load_prefixes([FAR[kind]])
+		if not arr.is_empty():
+			_far[kind] = arr
+
+
+func _load_prefixes(prefixes: Array) -> Array:
+	var out: Array = []
+	for pr in prefixes:
+		var parts := String(pr).split("/")
+		var dir := "res://assets/audio/%s/" % parts[0]
+		if not DirAccess.dir_exists_absolute(dir):
+			continue
+		for f in ResourceLoader.list_directory(dir):
+			var stem := String(f).get_basename()
+			if not stem.begins_with(parts[1]):
+				continue
+			if not stem.trim_prefix(parts[1]).is_valid_int():
+				continue
+			var st: AudioStream = load(dir + f)
+			if st:
+				out.append(st)
+	return out
 
 
 # ---------------------------------------------------------------- синтез
@@ -219,6 +326,23 @@ func _impact_soft() -> PackedFloat32Array:
 		var t := float(i) / MIX_RATE
 		lp += (_noise() - lp) * 0.12
 		out[i] = lp * exp(-t * 40.0) * 2.2 + sin(TAU * 140.0 * t) * exp(-t * 35.0) * 0.4
+	return out
+
+
+## Взрыв: удар низкой частоты, рваный шум, долгий гул-хвост.
+func _explosion() -> PackedFloat32Array:
+	var n := int(1.8 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var lp2 := 0.0
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		lp += (_noise() - lp) * 0.06
+		lp2 += (lp - lp2) * 0.08
+		var boom := sin(TAU * (48.0 - 20.0 * t) * t) * exp(-t * 4.0) * 1.2
+		var crack := _noise() * exp(-t * 35.0)
+		out[i] = tanh((boom + lp2 * 6.0 * exp(-t * 1.8) + crack) * 1.3)
 	return out
 
 
