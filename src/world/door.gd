@@ -38,13 +38,32 @@ func _ready() -> void:
 	_zone.collision_mask = Hitscan.LAYER_PLAYER | Hitscan.LAYER_MARAUDER
 	_zone.body_entered.connect(_on_body_entered)
 	_zone.body_exited.connect(_on_body_exited)
+	if Net.is_networked():
+		_setup_sync()
+
+
+## Дверь строится одинаково на каждом peer из тех же данных сектора (детерминированно),
+## поэтому спавнер не нужен — просто синхронизируем состояние. Авторитет — хост по умолчанию.
+func _setup_sync() -> void:
+	var sync := MultiplayerSynchronizer.new()
+	var config := SceneReplicationConfig.new()
+	for prop in [".:is_open", "Leaf:rotation"]:
+		var path := NodePath(prop)
+		config.add_property(path)
+		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
+	sync.replication_config = config
+	# У свежего узла своё умалчиваемое authority (1) — не наследуется от родителя автоматически.
+	# Ставить его нужно ДО add_child: иначе спавнер путает pending-спавн с уже вошедшим в дерево узлом.
+	sync.set_multiplayer_authority(get_multiplayer_authority())
+	add_child(sync)
 
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is Player:
 		_players_near.append(body)
-	elif body is Marauder and not is_open:
-		# Мародёр открывает дверь сам — и это слышно.
+	elif body is Marauder and not is_open and is_multiplayer_authority():
+		# Мародёр открывает дверь сам — и это слышно. Тело мародёра реплицировано на всех peer,
+		# поэтому Area3D сработает у каждого; открывает только хост (он авторитет двери).
 		toggle(body.global_position)
 		NoiseBus.emit(global_position, 10.0, "door")
 
@@ -59,11 +78,18 @@ func _process(delta: float) -> void:
 		if (who as Player).is_local():
 			toggle(who.global_position)
 			NoiseBus.emit(global_position, 8.0, "door")
-	_leaf.rotation.y = lerp_angle(_leaf.rotation.y, _target_angle, minf(1.0, Balance.DOOR_SWING_SPEED * delta))
+	# Анимацию ведёт только авторитет (хост) — иначе локальный лерп к _target_angle=0 у клиента
+	# каждый кадр тянул бы створку обратно, деря с прилетающим по сети углом.
+	if is_multiplayer_authority():
+		_leaf.rotation.y = lerp_angle(_leaf.rotation.y, _target_angle, minf(1.0, Balance.DOOR_SWING_SPEED * delta))
 
 
 ## Открыть от того, кто открывает: сторона выбирается по знаку локального Z подошедшего.
+## Сеть: если мы не авторитет двери — просим хост, а не толкаем состояние сами.
 func toggle(from_world: Vector3) -> void:
+	if Net.is_networked() and not is_multiplayer_authority():
+		_request_toggle.rpc_id(1, from_world)
+		return
 	is_open = not is_open
 	Audio.play("door", global_position)
 	if is_open:
@@ -71,3 +97,9 @@ func toggle(from_world: Vector3) -> void:
 		_target_angle = (PI * 0.5) if local.z > 0.0 else (-PI * 0.5)
 	else:
 		_target_angle = 0.0
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_toggle(from_world: Vector3) -> void:
+	if is_multiplayer_authority():
+		toggle(from_world)

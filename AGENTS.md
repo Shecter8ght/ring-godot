@@ -26,6 +26,8 @@ tools/godot.cmd                       # редактор
 tools/godot.cmd --headless --import   # переимпорт: после новых ассетов И после нового файла с class_name
 tools/smoke.cmd <сцена> [кадров] [overview|at=угол,радиус]   # скриншот в docs/screens/, выход
 tools/godot.cmd res://tools/ai_test.tscn                     # прогон мародёра: шум → бой → выстрелы, печатает состояния
+tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
+                                                              # реальный ENet по 127.0.0.1, проверка репликации
 ```
 
 Godot: `D:\ПРОГРАММЫ\Godot_v4.5.1-stable_win64.exe\Godot_v4.5.1-stable_win64_console.exe`
@@ -42,7 +44,7 @@ src/combat/    health.gd, hitscan.gd (выстрел лучом + разброс
                поверхность в точке попадания), impact_fx.gd (частицы, декали, звук удара)
 src/audio/     audio_system.gd — синтез звуков при старте (запасной вариант без файлов)
 src/world/     сборка сектора из данных, коллизии, навигация, шум/зрение
-src/net/       лобби, хост/клиент, синхронизация
+src/net/       network.gd (autoload `Net` — host/join, `Net.is_networked()`), lobby.gd
 src/ui/        HUD, инвентарь, убежище
 scenes/        .tscn: один узел мира = одна сцена (player.tscn, marauder.tscn, props/*.tscn)
 data/          секторы как данные (.tres / .json), предметы, таблицы лута
@@ -61,7 +63,16 @@ docs/          STATUS.md (что сделано / что дальше), реше
    и `NoiseBus` (шаги, выстрелы, двери). Никакой телепатии.
    Слои физики: 1 world, 2 player, 4 marauder, 8 door (константы в `Hitscan`).
 4. **Сеть: авторитет у хоста.** Всё, что влияет на исход (урон, лут, AI), считается на хосте;
-   клиенты шлют ввод и получают состояние. `MultiplayerSynchronizer`/RPC — только через `src/net/`.
+   Player — исключение, его двигает владеющий peer (иначе движение дёргается), но его же дочерний
+   `Health` — снова хост. Marauder/Door целиком хост (умалчиваемый multiplayer authority узла = 1,
+   его не трогаем). Каждый узел сам ставит себе `MultiplayerSynchronizer` в своём `_ready()`
+   (см. `player.gd`/`marauder.gd`/`door.gd`/`health.gd`) — авторитет синхронизатора нужно выставлять
+   ДО `add_child`, иначе спавнер путает pending-спавн (реальная ошибка, на неё легко попасть).
+   **Ловушка Godot 4.5:** `multiplayer.has_multiplayer_peer()` и `multiplayer.is_server()` истинны
+   даже без единого реального игрока в сети (умалчиваемая «оффлайн» сессия сама себе хост,
+   unique_id=1) — проверять «есть ли реальная сеть» только через `Net.is_networked()`
+   (свой флаг в `src/net/network.gd`, взводится в `host()`/`join()`). `is_multiplayer_authority()`
+   и `is_server()` при этом остаются корректными и в оффлайне — их не заменять.
 5. **Сцены-ноды.** Каждая сущность — своя сцена с понятным деревом узлов, чтобы её можно было
    открыть в редакторе и поправить руками. Не прятать всё в один скрипт-монолит.
 6. **Ассеты.** Только CC0 / CC-BY (или собственные). Сырьё в `_asset_src/<id>/` + `license.txt`,

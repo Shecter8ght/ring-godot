@@ -12,7 +12,7 @@ func _ready() -> void:
 	get_tree().root.add_child(inst)
 	get_tree().current_scene = inst
 	var level := inst
-	while level.get_node_or_null("Marauders") == null:
+	while level.get_node("Marauders").get_child_count() == 0:
 		await get_tree().process_frame
 	await get_tree().physics_frame
 	var player := get_tree().get_first_node_in_group("players") as Player

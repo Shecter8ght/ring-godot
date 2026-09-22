@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="RING"
 config/description="Изометрический тактический extraction-шутер. Кооп на троих, военная часть 600×600 м."
-run/main_scene="res://scenes/levels/f1_market.tscn"
+run/main_scene="res://scenes/net/lobby.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -26,6 +26,7 @@ Balance="*res://src/core/balance.gd"
 NoiseBus="*res://src/core/noise_bus.gd"
 Audio="*res://src/audio/audio_system.gd"
 ImpactFx="*res://src/combat/impact_fx.gd"
+Net="*res://src/net/network.gd"
 
 [display]
 

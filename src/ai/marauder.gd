@@ -44,9 +44,29 @@ func _ready() -> void:
 	pause_timer = _rng.randf_range(0.5, 2.0)
 	# Навмеш печётся после загрузки сектора — пока его нет, стоим.
 	NavigationServer3D.map_changed.connect(func(_m: RID) -> void: _nav_ready = true)
+	if Net.is_networked():
+		_setup_sync()
+
+
+## Мародёр целиком авторитет хоста (умалчиваемый multiplayer authority узла — 1). AI и движение
+## считает только хост; остальные peer просто получают позицию/позу синхронизатором.
+func _setup_sync() -> void:
+	var sync := MultiplayerSynchronizer.new()
+	var config := SceneReplicationConfig.new()
+	for prop in [".:global_position", "Body:rotation", "Body:position", ".:state"]:
+		var path := NodePath(prop)
+		config.add_property(path)
+		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
+	sync.replication_config = config
+	# У свежего узла своё умалчиваемое authority (1) — не наследуется от родителя автоматически.
+	# Ставить его нужно ДО add_child: иначе спавнер путает pending-спавн с уже вошедшим в дерево узлом.
+	sync.set_multiplayer_authority(get_multiplayer_authority())
+	add_child(sync)
 
 
 func _physics_process(delta: float) -> void:
+	if Net.is_networked() and not is_multiplayer_authority():
+		return
 	if state == State.DEAD:
 		return
 	_perceive(delta)

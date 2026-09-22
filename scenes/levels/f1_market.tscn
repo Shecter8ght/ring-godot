@@ -70,10 +70,7 @@ directional_shadow_split_2 = 0.2
 directional_shadow_split_3 = 0.45
 directional_shadow_max_distance = 220.0
 
-[node name="Player" parent="." instance=ExtResource("1_player")]
-
 [node name="CameraRig" parent="." instance=ExtResource("2_rig")]
-target_path = NodePath("../Player")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

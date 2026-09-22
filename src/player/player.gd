@@ -41,6 +41,25 @@ func _ready() -> void:
 		add_child(listener)
 		listener.position = Vector3(0, 1.5, 0)
 		listener.make_current()
+	if Net.is_networked():
+		_setup_sync()
+
+
+## Позицию и позу владелец шлёт всем остальным сам (авторитет = peer_id, см. sector_level.gd —
+## отзывчивое движение важнее для игрока, чем для мародёра/двери). Health синхронизируется
+## отдельно, со своим (хостовым) авторитетом — урон всегда считает хост.
+func _setup_sync() -> void:
+	var sync := MultiplayerSynchronizer.new()
+	var config := SceneReplicationConfig.new()
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming"]:
+		var path := NodePath(prop)
+		config.add_property(path)
+		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
+	sync.replication_config = config
+	# У свежего узла своё умалчиваемое authority (1) — не наследуется от родителя автоматически.
+	# Ставить его нужно ДО add_child: иначе спавнер путает pending-спавн с уже вошедшим в дерево узлом.
+	sync.set_multiplayer_authority(get_multiplayer_authority())
+	add_child(sync)
 
 
 func is_alive() -> bool:

@@ -1,0 +1,97 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/net/lobby.gd" id="1_lobby"]
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_lobby")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.09, 0.1, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.86, 0.76, 1)
+theme_override_font_sizes/font_size = 28
+text = "RING"
+horizontal_alignment = 1
+
+[node name="NameRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Center/Panel/VBox/NameRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "Имя"
+
+[node name="NameEdit" type="LineEdit" parent="Center/Panel/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PreConnect" type="VBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="JoinRow" type="HBoxContainer" parent="Center/Panel/VBox/PreConnect"]
+layout_mode = 2
+
+[node name="AddressLabel" type="Label" parent="Center/Panel/VBox/PreConnect/JoinRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "IP хоста"
+
+[node name="AddressEdit" type="LineEdit" parent="Center/Panel/VBox/PreConnect/JoinRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ButtonsRow" type="HBoxContainer" parent="Center/Panel/VBox/PreConnect"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HostButton" type="Button" parent="Center/Panel/VBox/PreConnect/ButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Хост"
+
+[node name="JoinButton" type="Button" parent="Center/Panel/VBox/PreConnect/ButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Войти"
+
+[node name="Status" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.72, 0.6, 1)
+
+[node name="PlayersList" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.86, 0.6, 1)
+
+[node name="StartButton" type="Button" parent="Center/Panel/VBox"]
+layout_mode = 2
+text = "Начать рейд"
+
+[node name="LeaveButton" type="Button" parent="Center/Panel/VBox"]
+layout_mode = 2
+text = "Выйти"
