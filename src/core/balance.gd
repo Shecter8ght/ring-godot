@@ -45,6 +45,24 @@ const SUN_AZIMUTH_DEG := -140.0
 const AMBIENT_ENERGY := 0.35
 const FOG_DENSITY := 0.005
 
+# --- Ощущение выстрела ---
+## Тряска камеры от своего выстрела и от попадания по тебе (м смещения), затухание 1/с.
+const SHOT_SHAKE := 0.12
+const HURT_SHAKE := 0.35
+const SHAKE_DECAY := 9.0
+## Отдача: подброс ствола (корпуса) вверх, рад, и возврат, 1/с.
+const RECOIL_KICK := 0.12
+const RECOIL_RETURN := 14.0
+## Хитмаркер у курсора, с.
+const HITMARKER_SEC := 0.14
+
+# --- Мишени-попперы ---
+const TARGET_HEAD_MULT := 2.5
+const TARGET_KNOCK := 6.0
+const TARGET_SPRING := 90.0
+const TARGET_DAMP := 9.0
+const TARGET_DOWN_SEC := 1.6
+
 # --- Двери ---
 ## Скорость распахивания створки (чем больше, тем резче), 1/с.
 const DOOR_SWING_SPEED := 7.0

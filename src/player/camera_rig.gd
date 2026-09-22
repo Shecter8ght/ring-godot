@@ -7,6 +7,10 @@ extends Node3D
 
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
+var _shake: float = 0.0
+var _hitmarker: Control
+var _hitmarker_t: float = 0.0
+var _rng := RandomNumberGenerator.new()
 
 @onready var _pivot: Node3D = $Pivot
 @onready var _camera: Camera3D = $Pivot/Camera3D
@@ -19,6 +23,38 @@ func _ready() -> void:
 	_camera.fov = Balance.CAMERA_FOV
 	if target_path != NodePath():
 		_target = get_node(target_path)
+	_build_hitmarker()
+
+
+## Толчок камеры (выстрел, попадание по тебе); складывается и затухает сам.
+func add_shake(amount: float) -> void:
+	_shake = minf(_shake + amount, 1.0)
+
+
+## Крестик у курсора: попал; kill — крупнее и красный (голова/добил).
+func show_hitmarker(kill: bool) -> void:
+	_hitmarker_t = Balance.HITMARKER_SEC * (1.6 if kill else 1.0)
+	_hitmarker.modulate = Color(1.0, 0.25, 0.2) if kill else Color(1, 1, 1)
+	_hitmarker.scale = Vector2.ONE * (1.5 if kill else 1.0)
+
+
+func _build_hitmarker() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	add_child(layer)
+	_hitmarker = Control.new()
+	_hitmarker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hitmarker.visible = false
+	layer.add_child(_hitmarker)
+	for ang in [45.0, 135.0, 225.0, 315.0]:
+		var r := ColorRect.new()
+		r.color = Color(1, 1, 1)
+		r.size = Vector2(10, 2)
+		r.position = Vector2(6, -1)
+		r.pivot_offset = Vector2(-6, 1)
+		r.rotation_degrees = ang
+		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_hitmarker.add_child(r)
 
 
 func set_target(node: Node3D) -> void:
@@ -44,6 +80,15 @@ func _process(delta: float) -> void:
 		if _target == null:
 			return
 	_camera.position.z = lerpf(_camera.position.z, _distance, minf(1.0, 6.0 * delta))
+	# Тряска — смещение камеры в её плоскости; квадрат силы, чтобы мелкие толчки были мягкими.
+	_shake = maxf(0.0, _shake - Balance.SHAKE_DECAY * _shake * delta - 0.01 * delta)
+	var s := _shake * _shake * 4.0
+	_camera.position.x = _rng.randf_range(-s, s)
+	_camera.position.y = _rng.randf_range(-s, s)
+	_hitmarker_t -= delta
+	_hitmarker.visible = _hitmarker_t > 0.0
+	if _hitmarker.visible:
+		_hitmarker.position = get_viewport().get_mouse_position()
 	SectorMaterials.set_cutaway_distance(_camera.position.z * Balance.CAMERA_CUTAWAY_NEAR, _camera.position.z * Balance.CAMERA_CUTAWAY_FAR)
 	var cursor := cursor_on_ground()
 	var lead := (cursor - _target.global_position) * Balance.CAMERA_CURSOR_LEAD
@@ -67,7 +112,7 @@ func _body_under_cursor() -> Vector3:
 	var dir := _camera.project_ray_normal(mouse)
 	var query := PhysicsRayQueryParameters3D.create(from, from + dir * 200.0, Hitscan.LAYER_WORLD | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DOOR)
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty() or not (hit.collider as Node).is_in_group("marauders"):
+	if hit.is_empty() or not ((hit.collider as Node).is_in_group("marauders") or (hit.collider as Node).is_in_group("shootable")):
 		return Vector3.ZERO
 	return hit.position
 

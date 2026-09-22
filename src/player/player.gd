@@ -19,6 +19,8 @@ var ammo: int = int(Balance.PISTOL.mag)
 var fire_timer: float = 0.0
 var reload_timer: float = 0.0
 var _step_timer: float = 0.0
+## Текущий подброс корпуса от отдачи, рад — гаснет к нулю.
+var _recoil: float = 0.0
 var _rng := RandomNumberGenerator.new()
 
 @onready var _capsule: CollisionShape3D = $Capsule
@@ -33,6 +35,9 @@ func _ready() -> void:
 	_rng.randomize()
 	health.max_hp = Balance.PLAYER_HP
 	health.hp = health.max_hp
+	health.damaged.connect(func(_a: float, _f: Vector3) -> void:
+		if is_local() and _camera_rig is CameraRig:
+			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE))
 	_muzzle.visible = false
 	_apply_stance()
 	# Слушаем мир из своей позиции, а не из камеры в 28 м над головой.
@@ -88,6 +93,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_face_cursor(delta)
 	_footsteps(delta)
+	_recoil = move_toward(_recoil, 0.0, Balance.RECOIL_RETURN * _recoil * delta + 0.02 * delta)
+	_body.rotation.x = -_recoil
 
 
 ## Шаги слышны AI: радиус по стойке и бегу, только пока реально движемся.
@@ -143,6 +150,15 @@ func _combat(delta: float) -> void:
 		var hit := Hitscan.fire(get_world_3d(), from, dir.normalized(), spread, float(Balance.PISTOL.range_m),
 			Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER, float(Balance.PISTOL.damage), exclude, _rng)
 		Tracer.spawn(get_tree().current_scene, from, hit.get("position", hit.get("end", from)), Color(1.0, 0.85, 0.5))
+		_recoil += Balance.RECOIL_KICK
+		var rig := _camera_rig as CameraRig
+		if rig:
+			rig.add_shake(Balance.SHOT_SHAKE)
+			var c: Object = hit.get("collider")
+			if c is Target:
+				rig.show_hitmarker(hit.position.y - (c as Target).global_position.y >= (c as Target).head_height - 0.25)
+			elif c is Marauder:
+				rig.show_hitmarker(not ((c as Marauder).get_node("Health") as Health).alive)
 		_muzzle.visible = true
 		get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
 		NoiseBus.emit(global_position, float(Balance.PISTOL.noise_m), "shot")

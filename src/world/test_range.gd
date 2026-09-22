@@ -23,6 +23,12 @@ func _ready() -> void:
 	# Колонны — вертикальные ориентиры для теней.
 	for x in [-5.0, 0.0, 5.0]:
 		_box(Vector3(x, 2.0, -12), Vector3(0.6, 4, 0.6), wall)
+	# Мишени-попперы: веер на 4–8 м перед стеной и две сбоку за ящиками — лицом к точке старта.
+	for spot in [Vector3(-5.5, 0, -6.5), Vector3(-2, 0, -4.5), Vector3(1.5, 0, -6.8), Vector3(4.5, 0, -5.5), Vector3(6.5, 0, -1.5), Vector3(-6.5, 0, 0.5)]:
+		var t := Target.new()
+		_props.add_child(t)
+		t.position = spot
+		t.look_at(Vector3.ZERO, Vector3.UP, true)
 
 
 func _box(at: Vector3, size: Vector3, mat: Material) -> void:
