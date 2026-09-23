@@ -1,30 +1,38 @@
 class_name Raid
 extends Node
-## Состояние рейда: ключи группы, рубильники, эвакуация, итог. Считает хост, остальным
-## реплицируется синхронизатором (узел создаёт SectorLevel с одинаковым именем у всех peer).
+## Состояние рейда: рубильники, эвакуация, лут, итог. Считает хост, остальным реплицируется
+## синхронизатором (узел создаёт SectorLevel с одинаковым именем у всех peer).
 ##
-## Эвакуация: живой игрок стоит в зоне ExtractionPoint, зона открыта (рубильник включён, нужный
-## ключ у группы) — идёт отсчёт channel_s; вышел — сброс. Досчитал — игрок эвакуирован: пропадает
-## из мира, мародёры его больше не видят. Рейд окончен, когда каждый участник погиб или ушёл.
-## Ключи пока общие на группу (инвентаря ещё нет): подобрал один — открывает любой.
+## Эвакуация: живой игрок стоит в зоне ExtractionPoint, зона открыта (рубильник включён; нужный
+## ключ — в рюкзаке у кого-то из стоящих в зоне) — идёт отсчёт channel_s; вышел — сброс.
+## Досчитал — эвакуирован: пропадает из мира, выносит рюкзак. Рейд окончен, когда каждый
+## участник погиб или ушёл. Ключи — предметы в рюкзаке (data/items.json, категория key).
+## Лут: игроки просят хост (RPC ниже) взять из контейнера, выбросить, полечиться — хост проверяет
+## и меняет рюкзак (Inventory) и контейнер (LootContainer). Тела и выброшенное — динамические
+## LootContainer через спавнер (узел Drops).
 
 static var current: Raid
+
+const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
 
 ## Кто в рейде: peer_id -> имя. Заполняет хост при появлении игроков.
 var participants: Dictionary = {}
 ## Включённые рубильники: switch_id -> true.
 var switches: Dictionary = {}
-## Ключи группы: key_id -> true.
-var team_keys: Dictionary = {}
 ## Эвакуированные: peer_id -> имя точки.
 var extracted: Dictionary = {}
+## Сколько вынес (₽): peer_id -> ценность рюкзака в момент эвакуации.
+var loot_value: Dictionary = {}
 ## Отсчёт эвакуации: peer_id -> [id точки, секунд].
 var channel: Dictionary = {}
 ## Погибшие: peer_id -> true (хост — по сигналу Health).
 var dead: Dictionary = {}
 var over: bool = false
-## Названия ключей для подсказок: key_id -> «Ключ от серверной» (из KeyPickup сцены, лениво).
-var key_names: Dictionary = {}
+
+var ui: InventoryUI
+var _drops: Node3D
+var _drop_spawner: MultiplayerSpawner
+var _drop_count: int = 0
 
 var _hud: CanvasLayer
 var _progress: ProgressBar
@@ -38,9 +46,20 @@ var _summary_bg: ColorRect
 
 func _ready() -> void:
 	current = self
+	_drops = Node3D.new()
+	_drops.name = "Drops"
+	add_child(_drops)
 	_build_hud()
+	ui = InventoryUI.new()
+	ui.name = "InventoryUI"
+	add_child(ui)
 	if Net.is_networked():
 		_setup_sync()
+		_drop_spawner = MultiplayerSpawner.new()
+		_drop_spawner.name = "DropSpawner"
+		add_child(_drop_spawner)
+		_drop_spawner.spawn_path = _drops.get_path()
+		_drop_spawner.spawn_function = _make_drop
 
 
 func _exit_tree() -> void:
@@ -48,21 +67,17 @@ func _exit_tree() -> void:
 		current = null
 
 
-## Хост — авторитет (умалчиваемый 1). Словари всегда переприсваиваются копией: синхронизатор
-## сравнивает значения, изменение «на месте» он бы не заметил.
+## Хост — авторитет (умалчиваемый 1). Словари маленькие — шлём постоянно (ALWAYS): так их
+## получает и peer, чей узел создался позже изменения.
 func _setup_sync() -> void:
 	var sync := MultiplayerSynchronizer.new()
-	# постоянное имя: синхронизатор адресуется по пути, а автоимя (@MultiplayerSynchronizer@N)
-	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
+	sync.replication_interval = 0.1
 	var config := SceneReplicationConfig.new()
-	for prop in [".:participants", ".:switches", ".:team_keys", ".:extracted", ".:dead", ".:over"]:
+	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel"]:
 		var path := NodePath(prop)
 		config.add_property(path)
-		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
-	var ch := NodePath(".:channel")
-	config.add_property(ch)
-	config.property_set_replication_mode(ch, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	sync.replication_config = config
 	sync.set_multiplayer_authority(get_multiplayer_authority())
 	add_child(sync)
@@ -72,7 +87,7 @@ func _is_host() -> bool:
 	return not Net.is_networked() or multiplayer.is_server()
 
 
-# ---------------------------------------------------------------- состояние (хост)
+# ---------------------------------------------------------------- состояние
 
 func register(peer_id: int, display_name: String) -> void:
 	var p := participants.duplicate()
@@ -80,25 +95,24 @@ func register(peer_id: int, display_name: String) -> void:
 	participants = p
 
 
-func has_key(key_id: String) -> bool:
-	return key_id == "" or team_keys.has(key_id)
+func player_of(peer_id: int) -> Player:
+	for node in get_tree().get_nodes_in_group("all_players"):
+		var pl := node as Player
+		if pl and pl.peer_id == peer_id:
+			return pl
+	return null
+
+
+func local_player() -> Player:
+	return player_of(multiplayer.get_unique_id())
 
 
 func key_name(key_id: String) -> String:
-	if key_names.is_empty():
-		for n in get_tree().get_nodes_in_group("key_pickups"):
-			key_names[(n as KeyPickup).key_id] = (n as KeyPickup).display_name
-	return String(key_names.get(key_id, key_id))
+	return ItemDb.item_name(key_id)
 
 
 func is_extracted(peer_id: int) -> bool:
 	return extracted.has(peer_id)
-
-
-func add_key(key_id: String) -> void:
-	var k := team_keys.duplicate()
-	k[key_id] = true
-	team_keys = k
 
 
 func set_switch(switch_id: String, on: bool) -> void:
@@ -107,20 +121,30 @@ func set_switch(switch_id: String, on: bool) -> void:
 	switches = s
 
 
+## Хост: игрок погиб — рюкзак остаётся в теле, которое могут обыскать напарники.
 func mark_dead(peer_id: int) -> void:
 	if not _is_host():
 		return
 	var d := dead.duplicate()
 	d[peer_id] = true
 	dead = d
+	var pl := player_of(peer_id)
+	if pl and not pl.inventory.items.is_empty():
+		var who := String(Net.player_names.get(peer_id, participants.get(peer_id, "Игрок")))
+		spawn_drop(pl.global_position, "Тело: " + who, pl.inventory.take_all(), LootContainer.Look.BAG)
 	_check_over()
 
 
-## Открыта ли точка и, если нет, почему (для подсказки у зоны).
+## Открыта ли точка и, если нет, почему (для подсказки у зоны). Ключ должен быть у кого-то
+## из живых в зоне — группа проходит вместе с тем, у кого карта.
 func extraction_block_reason(ext: ExtractionPoint) -> String:
 	if ext.required_switch != "" and not bool(switches.get(ext.required_switch, false)):
 		return "нет питания — включи рубильник"
-	if ext.required_key != "" and not has_key(ext.required_key):
+	if ext.required_key != "":
+		for node in get_tree().get_nodes_in_group("players"):
+			var pl := node as Player
+			if pl and pl.is_alive() and ext.contains(pl.global_position) and pl.inventory.has(ext.required_key):
+				return ""
 		return "нужен предмет: " + key_name(ext.required_key)
 	return ""
 
@@ -153,6 +177,9 @@ func _extract(pl: Player, ext: ExtractionPoint) -> void:
 	var e := extracted.duplicate()
 	e[pl.peer_id] = ext.display_name
 	extracted = e
+	var v := loot_value.duplicate()
+	v[pl.peer_id] = pl.inventory.value()
+	loot_value = v
 	_check_over()
 
 
@@ -165,10 +192,120 @@ func _check_over() -> void:
 	over = true
 
 
+# ---------------------------------------------------------------- лут (просьбы к хосту)
+
+## Взять из контейнера n штук id (n <= 0 — всё, что есть этого id).
+func request_take(container: LootContainer, id: String, n: int) -> void:
+	if _is_host():
+		_take(multiplayer.get_unique_id(), container.get_path(), id, n)
+	else:
+		_rpc_take.rpc_id(1, container.get_path(), id, n)
+
+
+func request_take_all(container: LootContainer) -> void:
+	for it in container.items.duplicate(true):
+		request_take(container, String(it.id), int(it.n))
+
+
+func request_drop(id: String, n: int) -> void:
+	if _is_host():
+		_drop(multiplayer.get_unique_id(), id, n)
+	else:
+		_rpc_drop.rpc_id(1, id, n)
+
+
+func request_use_med(id: String) -> void:
+	if _is_host():
+		_use_med(multiplayer.get_unique_id(), id)
+	else:
+		_rpc_use_med.rpc_id(1, id)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_take(path: NodePath, id: String, n: int) -> void:
+	if multiplayer.is_server():
+		_take(multiplayer.get_remote_sender_id(), path, id, n)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_drop(id: String, n: int) -> void:
+	if multiplayer.is_server():
+		_drop(multiplayer.get_remote_sender_id(), id, n)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_use_med(id: String) -> void:
+	if multiplayer.is_server():
+		_use_med(multiplayer.get_remote_sender_id(), id)
+
+
+func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
+	var pl := player_of(peer_id)
+	var c := get_node_or_null(path) as LootContainer
+	if pl == null or c == null or not pl.is_alive() or is_extracted(peer_id):
+		return
+	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
+		return
+	var have := 0
+	for it in c.items:
+		if String(it.id) == id:
+			have = int(it.n)
+	var k := pl.inventory.add(id, mini(n, have) if n > 0 else have)
+	if k > 0:
+		c.take(id, k)
+		Audio.play("pin", c.global_position, -8.0)
+
+
+func _drop(peer_id: int, id: String, n: int) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	var k := pl.inventory.remove(id, n)
+	if k > 0:
+		var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
+		spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [{"id": id, "n": k}], LootContainer.Look.BAG)
+
+
+## Лечение: предмет уходит сразу, здоровье прибавляется через use.time (если игрок ещё жив).
+func _use_med(peer_id: int, id: String) -> void:
+	var pl := player_of(peer_id)
+	var use: Dictionary = ItemDb.item(id).get("use", {})
+	if pl == null or use.is_empty() or not pl.is_alive() or pl.health.hp >= pl.health.max_hp:
+		return
+	if pl.inventory.remove(id, 1) == 0:
+		return
+	get_tree().create_timer(float(use.time)).timeout.connect(func() -> void:
+		if is_instance_valid(pl) and pl.is_alive():
+			pl.health.heal(float(use.heal)))
+
+
+## Хост: положить на землю контейнер с вещами (тело, выброшенное). В сети — через спавнер,
+## чтобы появился у всех; содержимое едет в данных спавна.
+func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look) -> void:
+	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look)}
+	_drop_count += 1
+	if _drop_spawner:
+		_drop_spawner.spawn(data)
+	else:
+		_drops.add_child(_make_drop(data))
+
+
+func _make_drop(data: Dictionary) -> Node:
+	var c := LOOT_SCENE.instantiate() as LootContainer
+	c.name = String(data.name)
+	c.position = data.pos
+	c.display_name = String(data.display)
+	c.look = int(data.look) as LootContainer.Look
+	c.items = (data.items as Array).duplicate(true)
+	c.rolled = true
+	c.search_s = Balance.SEARCH_BODY_SEC
+	return c
+
+
 # ---------------------------------------------------------------- HUD (у каждого peer)
 
 func _process(delta: float) -> void:
-	var me := _local_player()
+	var me := local_player()
 	_update_channel_hud(me)
 	_update_prompt(me)
 	_toast_t -= delta
@@ -178,18 +315,15 @@ func _process(delta: float) -> void:
 		_restart()
 
 
+## Интерфейс рюкзака/лута открыт — игрок не стреляет и не целится (клики идут в кнопки).
+func ui_open() -> bool:
+	return ui != null and ui.is_open()
+
+
 ## Короткое сообщение внизу по центру («Заперто: нужен …»).
 func notify(text: String) -> void:
 	_toast.text = text
 	_toast_t = 2.5
-
-
-func _local_player() -> Player:
-	for node in get_tree().get_nodes_in_group("all_players"):
-		var pl := node as Player
-		if pl and pl.is_local():
-			return pl
-	return null
 
 
 func _update_channel_hud(me: Player) -> void:
@@ -220,7 +354,7 @@ func _update_channel_hud(me: Player) -> void:
 ## Подсказка «F — …» у ближайшего предмета, с которым можно что-то сделать.
 func _update_prompt(me: Player) -> void:
 	_prompt.visible = false
-	if me == null or not me.is_alive() or is_extracted(me.peer_id):
+	if me == null or not me.is_alive() or is_extracted(me.peer_id) or ui.is_looting():
 		return
 	var best: Interactable = null
 	var best_d := INF
@@ -237,6 +371,8 @@ func _update_prompt(me: Player) -> void:
 	_prompt.visible = true
 	_prompt.text = "F — " + best.prompt()
 	if Input.is_action_just_pressed("interact"):
+		if best is LootContainer:
+			ui.start_search(best as LootContainer)
 		best.request_use()
 
 
@@ -258,9 +394,9 @@ func _update_summary(me: Player) -> void:
 		# имя из лобби может прийти позже появления игрока — берём самое свежее
 		var who := String(Net.player_names.get(peer, participants[peer]))
 		if extracted.has(peer):
-			lines.append("%s — эвакуировался (%s)" % [who, String(extracted[peer])])
+			lines.append("%s — эвакуировался (%s), вынес на %s ₽" % [who, String(extracted[peer]), InventoryUI.money(int(loot_value.get(peer, 0)))])
 		elif dead.has(peer):
-			lines.append("%s — погиб" % who)
+			lines.append("%s — погиб, рюкзак остался в рейде" % who)
 		else:
 			lines.append("%s — ещё в рейде" % who)
 	lines.append("")
@@ -321,13 +457,13 @@ func _build_hud() -> void:
 	root.add_child(_summary_bg)
 	_summary = Label.new()
 	_summary.set_anchors_preset(Control.PRESET_CENTER)
-	_summary.offset_left = -360
-	_summary.offset_right = 360
+	_summary.offset_left = -420
+	_summary.offset_right = 420
 	_summary.offset_top = -170
 	_summary.offset_bottom = 170
 	_summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_summary.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_summary.add_theme_font_size_override("font_size", 26)
+	_summary.add_theme_font_size_override("font_size", 24)
 	_summary.add_theme_color_override("font_color", Color(0.95, 0.9, 0.8))
 	_summary.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	_summary.add_theme_constant_override("outline_size", 8)

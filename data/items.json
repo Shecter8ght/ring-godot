@@ -1,0 +1,32 @@
+{
+ "_comment": "Предметы. cells — сколько ячеек рюкзака занимает; value — цена, ₽; stack — сколько в одной ячейке; use — действие (heal: HP, time: с).",
+ "items": {
+  "bandage":        {"name": "Бинт",                    "cat": "med",   "cells": 1, "value": 800,   "stack": 3, "use": {"heal": 20, "time": 2.5}},
+  "painkillers":    {"name": "Обезболивающее",          "cat": "med",   "cells": 1, "value": 1500,  "stack": 2, "use": {"heal": 12, "time": 1.5}},
+  "medkit":         {"name": "Аптечка",                 "cat": "med",   "cells": 2, "value": 4000,  "stack": 1, "use": {"heal": 60, "time": 5.0}},
+  "water":          {"name": "Вода 0.5 л",              "cat": "food",  "cells": 1, "value": 300,   "stack": 1},
+  "canned":         {"name": "Тушёнка",                 "cat": "food",  "cells": 1, "value": 500,   "stack": 1},
+  "energy_bar":     {"name": "Шоколадный батончик",     "cat": "food",  "cells": 1, "value": 250,   "stack": 2},
+  "phone":          {"name": "Смартфон",                "cat": "tech",  "cells": 1, "value": 6000,  "stack": 1},
+  "headphones":     {"name": "Наушники",                "cat": "tech",  "cells": 1, "value": 3500,  "stack": 1},
+  "powerbank":      {"name": "Пауэрбанк",               "cat": "tech",  "cells": 1, "value": 2500,  "stack": 1},
+  "laptop":         {"name": "Ноутбук",                 "cat": "tech",  "cells": 4, "value": 18000, "stack": 1},
+  "gpu":            {"name": "Видеокарта",              "cat": "tech",  "cells": 3, "value": 25000, "stack": 1},
+  "camera":         {"name": "Фотоаппарат",             "cat": "tech",  "cells": 2, "value": 9000,  "stack": 1},
+  "server_drive":   {"name": "Диск с сервера",          "cat": "tech",  "cells": 1, "value": 20000, "stack": 1},
+  "watch":          {"name": "Наручные часы",           "cat": "value", "cells": 1, "value": 12000, "stack": 1},
+  "gold_chain":     {"name": "Золотая цепь",            "cat": "value", "cells": 1, "value": 15000, "stack": 1},
+  "diamond_ring":   {"name": "Кольцо с бриллиантом",    "cat": "value", "cells": 1, "value": 40000, "stack": 1},
+  "cash":           {"name": "Наличные",                "cat": "value", "cells": 1, "value": 5000,  "stack": 10},
+  "cigarettes":     {"name": "Сигареты",                "cat": "barter","cells": 1, "value": 700,   "stack": 5},
+  "lighter":        {"name": "Зажигалка",               "cat": "barter","cells": 1, "value": 200,   "stack": 3},
+  "perfume":        {"name": "Духи",                    "cat": "barter","cells": 1, "value": 3000,  "stack": 1},
+  "battery":        {"name": "Аккумулятор",             "cat": "tools", "cells": 2, "value": 3000,  "stack": 1},
+  "wires":          {"name": "Провода",                 "cat": "tools", "cells": 1, "value": 800,   "stack": 3},
+  "toolset":        {"name": "Набор инструментов",      "cat": "tools", "cells": 3, "value": 6000,  "stack": 1},
+  "documents":      {"name": "Документы охраны",        "cat": "intel", "cells": 1, "value": 8000,  "stack": 1},
+  "key_server":     {"name": "Ключ от серверной",       "cat": "key",   "cells": 1, "value": 3000,  "stack": 1},
+  "keycard_security": {"name": "Карта-ключ охраны",     "cat": "key",   "cells": 1, "value": 10000, "stack": 1},
+  "key_jewelry":    {"name": "Ключ от сейфовой",        "cat": "key",   "cells": 1, "value": 5000,  "stack": 1}
+ }
+}

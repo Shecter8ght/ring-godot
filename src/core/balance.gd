@@ -45,6 +45,12 @@ const INTERACT_RADIUS := 1.8
 const EXTRACT_ZONE_HEIGHT := 2.5
 ## Щелчок рубильника слышно далеко — мародёры идут проверить, м.
 const NOISE_SWITCH := 35.0
+## Рюкзак: вместимость в ячейках (размеры предметов — data/items.json).
+const BACKPACK_CELLS := 30
+## Обыск тела / выброшенного, с (у контейнеров на пропсах — data/loot.json).
+const SEARCH_BODY_SEC := 2.0
+## Контейнер на пропе — на этой высоте над полом (к ней меряется дальность «F»), м.
+const LOOT_POINT_HEIGHT := 0.6
 ## Компас вверху экрана: ширина полосы, px, и сколько градусов видно в обе стороны.
 const COMPASS_WIDTH := 560.0
 const COMPASS_SPAN_DEG := 75.0

@@ -54,8 +54,8 @@ func _run() -> void:
 	print("[host] игрок сдвинулся на %.2f м (host: %s -> %s)" % [before.distance_to(my_player.global_position), before, my_player.global_position])
 	# рейд: хост включает рубильник и берёт ключ — клиент должен это увидеть
 	Raid.current.set_switch("dock_gate", true)
-	Raid.current.add_key("key_server")
-	print("[host] рубильник включён, ключ от серверной взят")
+	my_player.inventory.add("key_server", 1)
+	print("[host] рубильник включён, ключ от серверной в рюкзаке хоста")
 	await get_tree().create_timer(1.0).timeout
 	_report("финал")
 	print("[host] мародёр HP после урона: %d" % int(h.hp))
@@ -66,7 +66,8 @@ func _run() -> void:
 		await get_tree().process_frame
 		waited += get_process_delta_time()
 	await get_tree().create_timer(0.3).timeout
-	print("[host] рейд: участники %s, ключи %s, эвакуированы %s" % [Raid.current.participants, Raid.current.team_keys, Raid.current.extracted])
+	var cp := Raid.current.player_of(client_id)
+	print("[host] рейд: участники %s, рюкзак клиента %s, эвакуированы %s, вынес %s" % [Raid.current.participants, cp.inventory.items if cp else [], Raid.current.extracted, Raid.current.loot_value])
 	print("[host] клиент эвакуирован: %s, игроков в мире %d" % [Raid.current.is_extracted(client_id), get_tree().get_nodes_in_group("players").size()])
 	# Не гасим сервер раньше клиента — иначе он получит server_disconnected и уйдёт в лобби
 	# посреди своих же проверок (так и вскрылась опечатка в путях lobby.tscn).

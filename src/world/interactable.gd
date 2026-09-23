@@ -24,22 +24,27 @@ func prompt() -> String:
 	return ""
 
 
-## Локальный игрок нажал F: без сети — сразу, в сети — просим хост.
+## Локальный игрок нажал F: без сети — сразу, в сети — просим хост (он узнает, кто просил).
 func request_use() -> void:
 	if Net.is_networked() and not multiplayer.is_server():
 		_request.rpc_id(1)
 	else:
-		_use()
+		_use(multiplayer.get_unique_id())
 
 
 @rpc("any_peer", "call_remote", "reliable")
 func _request() -> void:
-	if multiplayer.is_server() and can_use():
-		_use()
+	if not multiplayer.is_server() or not can_use():
+		return
+	# хост проверяет, что просящий действительно рядом
+	var peer := multiplayer.get_remote_sender_id()
+	var pl := Raid.current.player_of(peer) if Raid.current else null
+	if pl and pl.global_position.distance_to(global_position) <= Balance.INTERACT_RADIUS + 1.5:
+		_use(peer)
 
 
-## Действие на хосте — переопределяют наследники.
-func _use() -> void:
+## Действие на хосте от игрока peer_id — переопределяют наследники.
+func _use(_peer_id: int) -> void:
 	pass
 
 

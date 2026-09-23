@@ -1,8 +1,9 @@
 @tool
 class_name KeyPickup
 extends Interactable
-## Ключ / карта-ключ на полу. Подобрал — ключ у группы (Raid.team_keys): открывает двери
-## помещений с тем же "key" в данных кольца и точки эвакуации с required_key.
+## Ключ / карта-ключ на полу. Подобрал — предмет key_id в рюкзаке подобравшего (data/items.json):
+## открывает двери помещений с тем же "key" в данных кольца и точки эвакуации с required_key.
+## Лежит один: подобран — пропадает у всех (флаг taken реплицируется).
 
 @export var key_id: String = "key":
 	set(v):
@@ -13,31 +14,45 @@ extends Interactable
 		display_name = v
 		_rebuild()
 
+var taken: bool = false
+
 
 func _ready() -> void:
 	super._ready()
 	if not Engine.is_editor_hint():
 		add_to_group("key_pickups")
+		if Net.is_networked():
+			var sync := MultiplayerSynchronizer.new()
+			sync.name = "Sync"
+			var config := SceneReplicationConfig.new()
+			var path := NodePath(".:taken")
+			config.add_property(path)
+			config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
+			sync.replication_config = config
+			sync.set_multiplayer_authority(get_multiplayer_authority())
+			add_child(sync)
 
 
 func can_use() -> bool:
-	return Raid.current != null and not Raid.current.has_key(key_id)
+	return not taken
 
 
 func prompt() -> String:
 	return "взять: " + display_name
 
 
-func _use() -> void:
-	Raid.current.add_key(key_id)
+func _use(peer_id: int) -> void:
+	var pl := Raid.current.player_of(peer_id)
+	if pl == null or pl.inventory.add(key_id, 1) == 0:
+		return
+	taken = true
 	Audio.play("pin", global_position)
 
 
 func _process(_delta: float) -> void:
-	if Engine.is_editor_hint() or Raid.current == null or _vis == null:
+	if Engine.is_editor_hint() or _vis == null:
 		return
-	# подобран кем угодно — пропадает у всех (ключи группы синхронизированы)
-	_vis.visible = not Raid.current.has_key(key_id)
+	_vis.visible = not taken
 
 
 func _build_visual(parent: Node3D) -> void:

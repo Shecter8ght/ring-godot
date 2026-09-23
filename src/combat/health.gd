@@ -47,6 +47,12 @@ func take_damage(amount: float, from: Vector3) -> void:
 		died.emit()
 
 
+## Лечение (хост): не выше max_hp, мёртвых не поднимает.
+func heal(amount: float) -> void:
+	if alive:
+		hp = minf(max_hp, hp + amount)
+
+
 ## Точка входа для Hitscan: применяет урон сама, если мы авторитет по этому узлу (сингл/хост),
 ## иначе просит хост — так урон всегда считается один раз и в одном месте (правило AGENTS.md).
 func apply_or_request_damage(amount: float, from: Vector3) -> void:

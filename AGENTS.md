@@ -79,7 +79,11 @@ docs/          STATUS.md (что сделано / что дальше), реше
    и эвакуации (`extraction_point.tscn`). Перекрытия (этажи паркинга, навесы) — группа "decks":
    уровень прячет их над игроком в изометрии.
    Рейд — узел `Raid` (src/world/raid.gd, создаёт SectorLevel; хост считает, остальным синхронизируется):
-   ключи группы, рубильники, отсчёт эвакуации, итог. В сцене уровня: `key_pickup.tscn` (key_id),
+   рубильники, отсчёт эвакуации, лут (просьбы игроков к хосту), тела/выброшенное (спавнер Drops), итог.
+   Предметы и лут — данные: `data/items.json`, `data/loot.json` (какие пропсы обыскиваются, таблицы,
+   темы магазинов); код — `src/items/` (ItemDb, Inventory у каждого Player — авторитет хоста),
+   окно — `src/ui/inventory_ui.gd`. Контейнеры на пропсах строит SectorBuilder (Loot/Loot_N),
+   особые (сейф, стойка) — `loot_container.tscn` руками в сцене. Ключи — предметы в рюкзаке. В сцене уровня: `key_pickup.tscn` (key_id),
    `power_switch.tscn` (switch_id), у `ExtractionPoint` — required_key / required_switch;
    помещение с "key" в JSON запирает свои двери (Door.required_key). Синхронизаторам давать имя
    (`sync.name = "Sync"`): автоимя у каждого peer своё, и пакеты хоста не находят узел.

@@ -24,7 +24,7 @@ func prompt() -> String:
 	return "включить: " + display_name
 
 
-func _use() -> void:
+func _use(_peer_id: int) -> void:
 	Raid.current.set_switch(switch_id, true)
 	Audio.play("door", global_position)
 	NoiseBus.emit(global_position, Balance.NOISE_SWITCH, "switch")

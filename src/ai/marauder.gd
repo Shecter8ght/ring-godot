@@ -251,6 +251,11 @@ func _snap(p: Vector3) -> Vector3:
 
 func _on_died() -> void:
 	state = State.DEAD
+	# хост: тело можно обыскать (содержимое — по таблице «marauder»)
+	if Raid.current:
+		var rng := RandomNumberGenerator.new()
+		rng.randomize()
+		Raid.current.spawn_drop(global_position, "Мародёр", ItemDb.roll("marauder", rng), LootContainer.Look.NONE)
 	collision_layer = 0
 	collision_mask = 0
 	set_physics_process(false)

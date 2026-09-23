@@ -44,6 +44,8 @@ var _last_damage: float = 0.0
 @onready var _body: Node3D = $Body
 @onready var _muzzle: OmniLight3D = $Body/Muzzle
 @onready var health: Health = $Health
+## Рюкзак: меняет хост, видят все (см. Inventory). Создаётся в _ready.
+var inventory: Inventory
 @onready var _camera_rig: Node3D = get_tree().get_first_node_in_group("camera_rig")
 
 
@@ -66,6 +68,10 @@ func _ready() -> void:
 	for id in Balance.WEAPON_ORDER:
 		ammo_by[id] = int(Balance.WEAPONS[id].mag)
 	_muzzle.visible = false
+	# рюкзак — авторитет хоста (узел создан после выдачи авторитета Player — умалчиваемый 1)
+	inventory = Inventory.new()
+	inventory.name = "Inventory"
+	add_child(inventory)
 	# рука с оружием — не внутри Body: Body сжимается по стойке, оружие сжиматься не должно
 	_hand = Node3D.new()
 	_hand.name = "Hand"
@@ -211,6 +217,9 @@ func _footsteps(delta: float) -> void:
 ## Стрельба, перезарядка на R, смена оружия 1–4, граната G.
 func _combat(delta: float) -> void:
 	fire_timer -= delta
+	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
+	if Raid.current and Raid.current.ui_open():
+		return
 	for i in range(Balance.WEAPON_ORDER.size()):
 		if Input.is_action_just_pressed("weapon_%d" % (i + 1)):
 			_switch(String(Balance.WEAPON_ORDER[i]))
@@ -335,7 +344,7 @@ func _read_stance() -> void:
 	if Input.is_action_just_pressed("prone"):
 		stance = Stance.STAND if stance == Stance.PRONE else Stance.PRONE
 		_apply_stance()
-	aiming = Input.is_action_pressed("aim")
+	aiming = Input.is_action_pressed("aim") and not (Raid.current and Raid.current.ui_open())
 
 
 func _stance_key() -> String:

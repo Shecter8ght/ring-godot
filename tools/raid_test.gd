@@ -61,7 +61,7 @@ func _ready() -> void:
 		var key := inst.get_node("Interactables/KeyServer") as KeyPickup
 		await _teleport(key.global_position + Vector3(0.6, 0, 0))
 		await _press("interact")
-		_check("ключ от серверной у группы", _raid.has_key("key_server"), str(_raid.team_keys))
+		_check("ключ от серверной в рюкзаке", _player.inventory.has("key_server"), str(_player.inventory.items))
 		await _teleport(front)
 		await _press("interact")
 		await _wait(0.4)
@@ -74,10 +74,30 @@ func _ready() -> void:
 	var card := inst.get_node("Interactables/KeycardSecurity") as KeyPickup
 	await _teleport(card.global_position + Vector3(0.6, 0, 0))
 	await _press("interact")
-	_check("карта-ключ у группы", _raid.has_key("keycard_security"), "")
+	_check("карта-ключ в рюкзаке", _player.inventory.has("keycard_security"), "")
+	# лут: сейф ювелирного (дверь сейфовой заперта — телепорт внутрь), обыск и «взять всё»
+	var safe := inst.get_node("Interactables/JewelrySafe") as LootContainer
+	await _teleport(safe.global_position + safe.global_basis.z * -1.2)
+	await _press("interact")
+	await _wait(safe.search_s + 0.4)
+	_check("сейф обыскан — окно открыто", _raid.ui.is_looting() and safe.rolled and not safe.items.is_empty(), str(safe.items))
+	var before := _player.inventory.value()
+	_raid.request_take_all(safe)
+	await _frames(3)
+	_check("лут из сейфа в рюкзаке", _player.inventory.value() > before and safe.items.is_empty(), "%d ₽" % _player.inventory.value())
+	_save("raid_loot")
+	# лечение: ранить и дать бинт
+	_player.inventory.add("bandage", 1)
+	_player.health.hp = 50.0
+	_raid.ui.close_all()
+	await _press("use_med")
+	await _wait(float(ItemDb.item("bandage").use.time) + 0.3)
+	_check("бинт лечит", _player.health.hp > 50.0 and not _player.inventory.has("bandage"), "hp=%d" % int(_player.health.hp))
+	_player.health.hp = 1e9
 	await _teleport(garage.global_position)
 	await _wait(garage.channel_s + 1.0)
 	_check("эвакуирован", _raid.is_extracted(1), str(_raid.extracted))
+	_check("в итоге — ценность вынесенного", int(_raid.loot_value.get(1, 0)) > 0, str(_raid.loot_value))
 	_check("рейд окончен", _raid.over, "")
 	_check("игрок ушёл из мира", not _player.visible and not _player.is_in_group("players"), "")
 	await _frames(5)

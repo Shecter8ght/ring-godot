@@ -17,6 +17,10 @@ var _zones: Array[Dictionary] = []
 var _root: Node3D
 var _openings: Array = []
 var count: int = 0
+## Пропсы, которые обыскиваются (data/loot.json → containers): {kind, pos, room}. Сами
+## LootContainer ставит SectorBuilder — порядок и выбор детерминированы сидом, как и пропсы.
+var lootables: Array[Dictionary] = []
+var _room_id: String = ""
 
 
 func place(root: Node3D, rooms: Array, openings: Array, spawn: Vector3, seed_value: int) -> void:
@@ -38,6 +42,7 @@ func place(root: Node3D, rooms: Array, openings: Array, spawn: Vector3, seed_val
 	for room in rooms:
 		if bool(room.get("locked", false)):
 			continue
+		_room_id = String(room.get("id", ""))
 		match String(room.get("type", "")):
 			"retail":
 				_retail(room)
@@ -242,6 +247,9 @@ func _put(id: String, a: float, r: float, orient: String, variant: String = "", 
 	_root.add_child(node)
 	_taken.append(rect)
 	count += 1
+	var loot := ItemDb.container(id)
+	if not loot.is_empty() and _rng.randf() < float(loot.chance):
+		lootables.append({"kind": id, "pos": node.position, "room": _room_id})
 	return true
 
 

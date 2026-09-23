@@ -64,6 +64,7 @@ var _preview: bool = false
 var _cur_key: String = ""
 
 const DOOR_SCENE := preload("res://scenes/props/door.tscn")
+const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
 const ARCH_DEFAULT := {
 	"plinth_h": 0.4, "cornice_h": 0.35, "pilaster_w": 0.5, "pilaster_spacing": 6.0, "column_spacing": 6.0,
 	"storefront_h": 3.6, "door_h": 2.2, "shutter_h": 3.2, "gate_h": 4.5,
@@ -806,6 +807,28 @@ func _build_lights(root: Node3D) -> void:
 
 
 ## Пропсы по правилам помещений (см. PropPlacement). Сид — из id сектора: расстановка воспроизводима.
+## Контейнеры лута на пропсах: одинаковые имена у всех peer (Loot/Loot_N) — по ним RPC и
+## синхронизация. Таблица — по теме помещения (data/loot.json → rooms), иначе по типу пропа.
+func _build_loot(root: Node3D, lootables: Array[Dictionary]) -> void:
+	var folder := Node3D.new()
+	folder.name = "Loot"
+	root.add_child(folder)
+	var i := 0
+	for l in lootables:
+		var spec := ItemDb.container(String(l.kind))
+		var c := LOOT_SCENE.instantiate() as LootContainer
+		c.name = "Loot_%d" % i
+		i += 1
+		c.display_name = String(spec.name)
+		var themed := ItemDb.room_table(String(l.room))
+		# стеллажи, кассы и киоски берут тему магазина; шкафы/коробки — своё
+		c.table = themed if themed != "" and String(l.kind) in ["shelf_retail", "checkout", "kiosk", "shelf_warehouse"] else String(spec.table)
+		c.search_s = float(spec.search)
+		c.position = (l.pos as Vector3) + Vector3.UP * Balance.LOOT_POINT_HEIGHT
+		folder.add_child(c)
+	root.set_meta("loot_count", i)
+
+
 func _build_props(root: Node3D) -> void:
 	var props := Node3D.new()
 	props.name = "Props"
@@ -813,6 +836,7 @@ func _build_props(root: Node3D) -> void:
 	var placement := PropPlacement.new()
 	placement.place(props, _rooms, _openings, root.get_meta("spawn", Vector3.ZERO), hash(String(_def.get("id", ""))))
 	root.set_meta("prop_count", placement.count)
+	_build_loot(root, placement.lootables)
 	# меши пропсов склеиваются по клеткам — иначе каждая коробка на стеллаже отдельный вызов отрисовки
 	root.set_meta("prop_batches", PropBatcher.batch(props, PROP_BATCH_CELL, PROP_VIS_END))
 

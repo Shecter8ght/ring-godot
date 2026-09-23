@@ -121,7 +121,7 @@ def parse_level(tscn):
             node["key"] = props.get("required_key", '""').strip('"')
             node["switch"] = props.get("required_switch", '""').strip('"')
             out["extractions"].append(node)
-        elif scene.endswith("key_pickup.tscn") or scene.endswith("power_switch.tscn"):
+        elif scene.endswith("key_pickup.tscn") or scene.endswith("power_switch.tscn") or scene.endswith("loot_container.tscn"):
             node["switch"] = scene.endswith("power_switch.tscn")
             out["items"].append(node)
     return out

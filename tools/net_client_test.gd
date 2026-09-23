@@ -48,11 +48,25 @@ func _run() -> void:
 	_report("после движения хоста")
 	await get_tree().create_timer(1.5).timeout
 	_report("финал (должен увидеть урон по мародёру)")
-	print("[client] рейд: рубильники %s, ключи %s" % [Raid.current.switches, Raid.current.team_keys])
+	var host_pl := Raid.current.player_of(1)
+	print("[client] рейд: рубильники %s, рюкзак хоста (вижу) %s" % [Raid.current.switches, host_pl.inventory.items if host_pl else []])
 	# просим хост подобрать карту-ключ (как по F) и идём к остановке
-	(_level.get_node("Interactables/KeycardSecurity") as KeyPickup).request_use()
+	# лут по сети: подойти к сейфу, попросить хост бросить содержимое, забрать всё
+	var safe := _level.get_node("Interactables/JewelrySafe") as LootContainer
+	my_player.global_position = safe.global_position + safe.global_basis.z * -1.2 + Vector3(0, 0.1, 0)
+	await get_tree().create_timer(0.4).timeout
+	safe.request_use()
+	await get_tree().create_timer(0.6).timeout
+	print("[client] сейф: брошен %s, вижу %s" % [safe.rolled, safe.items])
+	Raid.current.request_take_all(safe)
+	await get_tree().create_timer(0.6).timeout
+	print("[client] после «взять всё»: сейф %s, мой рюкзак %s ₽" % [safe.items, my_player.inventory.value()])
+	var card := _level.get_node("Interactables/KeycardSecurity") as KeyPickup
+	my_player.global_position = card.global_position + Vector3(0.6, 0.1, 0)
+	await get_tree().create_timer(0.4).timeout
+	card.request_use()
 	await get_tree().create_timer(0.5).timeout
-	print("[client] карта-ключ у группы: %s" % Raid.current.has_key("keycard_security"))
+	print("[client] карта-ключ в моём рюкзаке: %s" % my_player.inventory.has("keycard_security"))
 	var bus := _level.get_node("Extractions/Bus") as ExtractionPoint
 	my_player.global_position = bus.global_position + Vector3(0, 0.1, 0)
 	await get_tree().create_timer(bus.channel_s + 2.0).timeout

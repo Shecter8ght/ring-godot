@@ -1,0 +1,38 @@
+{
+ "_comment": "Лут. containers — какие пропсы обыскиваются: chance — доля таких пропов с лутом, search — секунд на обыск, table — таблица по умолчанию. rooms — таблица по теме помещения (id комнаты в data/sectors), перекрывает table у стеллажей/касс. tables — rolls [мин, макс] бросков, entries [id, вес, [мин, макс] штук]; 'nothing' — пустой бросок.",
+ "containers": {
+  "checkout":        {"name": "Касса",            "chance": 1.0,  "search": 2.0, "table": "register"},
+  "shelf_retail":    {"name": "Стеллаж",          "chance": 0.12, "search": 1.5, "table": "shelf"},
+  "shelf_warehouse": {"name": "Стеллаж склада",   "chance": 0.35, "search": 2.0, "table": "storage"},
+  "box_stack":       {"name": "Коробки",          "chance": 0.35, "search": 2.0, "table": "storage"},
+  "pallet_boxes":    {"name": "Паллета",          "chance": 0.25, "search": 2.5, "table": "storage"},
+  "cabinet":         {"name": "Шкаф",             "chance": 0.7,  "search": 2.5, "table": "office"},
+  "desk":            {"name": "Стол",             "chance": 0.5,  "search": 1.5, "table": "office"},
+  "kiosk":           {"name": "Киоск",            "chance": 1.0,  "search": 2.0, "table": "kiosk"}
+ },
+ "rooms": {
+  "pharmacy": "pharmacy", "electronics": "electronics", "electronics_st": "electronics", "phones": "electronics",
+  "photo": "electronics", "service": "electronics", "jewelry": "jewelry", "watches": "jewelry",
+  "cosmetics": "cosmetics", "hyper": "grocery", "hyper_st": "grocery", "cold": "grocery", "coffee": "grocery",
+  "hardware": "tools", "diy": "tools", "diy_st": "tools", "electrical": "tools", "cpu": "security",
+  "bank": "bank", "press": "kiosk", "sport": "shelf", "clothes": "shelf", "department": "shelf"
+ },
+ "tables": {
+  "register":    {"rolls": [1, 2], "entries": [["cash", 5, [1, 3]], ["cigarettes", 2, [1, 2]], ["lighter", 1, [1, 1]], ["nothing", 2, [0, 0]]]},
+  "shelf":       {"rolls": [1, 1], "entries": [["water", 3, [1, 1]], ["energy_bar", 3, [1, 2]], ["lighter", 2, [1, 1]], ["perfume", 1, [1, 1]], ["nothing", 4, [0, 0]]]},
+  "grocery":     {"rolls": [1, 2], "entries": [["water", 4, [1, 1]], ["canned", 4, [1, 1]], ["energy_bar", 3, [1, 2]], ["cigarettes", 1, [1, 2]], ["nothing", 2, [0, 0]]]},
+  "pharmacy":    {"rolls": [1, 2], "entries": [["bandage", 5, [1, 3]], ["painkillers", 4, [1, 2]], ["medkit", 1, [1, 1]], ["nothing", 2, [0, 0]]]},
+  "electronics": {"rolls": [1, 2], "entries": [["phone", 3, [1, 1]], ["headphones", 3, [1, 1]], ["powerbank", 3, [1, 1]], ["camera", 1, [1, 1]], ["laptop", 1, [1, 1]], ["wires", 2, [1, 2]], ["nothing", 3, [0, 0]]]},
+  "jewelry":     {"rolls": [1, 1], "entries": [["watch", 3, [1, 1]], ["gold_chain", 2, [1, 1]], ["cash", 2, [1, 2]], ["nothing", 4, [0, 0]]]},
+  "cosmetics":   {"rolls": [1, 1], "entries": [["perfume", 4, [1, 1]], ["nothing", 3, [0, 0]]]},
+  "tools":       {"rolls": [1, 2], "entries": [["wires", 4, [1, 2]], ["battery", 2, [1, 1]], ["toolset", 1, [1, 1]], ["nothing", 3, [0, 0]]]},
+  "storage":     {"rolls": [1, 2], "entries": [["water", 3, [1, 1]], ["canned", 3, [1, 1]], ["wires", 2, [1, 2]], ["battery", 1, [1, 1]], ["cigarettes", 1, [1, 2]], ["nothing", 5, [0, 0]]]},
+  "office":      {"rolls": [1, 2], "entries": [["documents", 1, [1, 1]], ["cash", 2, [1, 1]], ["phone", 1, [1, 1]], ["powerbank", 2, [1, 1]], ["painkillers", 1, [1, 1]], ["lighter", 2, [1, 1]], ["nothing", 4, [0, 0]]]},
+  "security":    {"rolls": [2, 3], "entries": [["documents", 3, [1, 1]], ["bandage", 3, [1, 2]], ["cash", 2, [1, 2]], ["powerbank", 1, [1, 1]], ["nothing", 2, [0, 0]]]},
+  "bank":        {"rolls": [1, 2], "entries": [["cash", 5, [2, 5]], ["documents", 2, [1, 1]], ["nothing", 2, [0, 0]]]},
+  "kiosk":       {"rolls": [1, 2], "entries": [["cigarettes", 4, [1, 3]], ["lighter", 3, [1, 2]], ["energy_bar", 3, [1, 2]], ["cash", 1, [1, 1]]]},
+  "marauder":    {"rolls": [1, 3], "entries": [["bandage", 4, [1, 2]], ["painkillers", 2, [1, 1]], ["cash", 3, [1, 2]], ["cigarettes", 3, [1, 2]], ["canned", 1, [1, 1]], ["nothing", 2, [0, 0]]]},
+  "jewelry_safe": {"rolls": [3, 4], "entries": [["diamond_ring", 2, [1, 1]], ["gold_chain", 3, [1, 2]], ["watch", 3, [1, 1]], ["cash", 3, [3, 8]]]},
+  "server_rack": {"rolls": [1, 2], "entries": [["server_drive", 3, [1, 1]], ["gpu", 2, [1, 1]], ["wires", 2, [1, 2]]]}
+ }
+}

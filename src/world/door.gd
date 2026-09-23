@@ -6,7 +6,7 @@ extends Node3D
 @export var width: float = 1.0
 @export var height: float = 2.2
 @export var thickness: float = 0.05
-## Заперта, пока у группы нет этого ключа (Raid.team_keys); пусто — обычная дверь.
+## Заперта для тех, у кого в рюкзаке нет этого ключа (data/items.json); пусто — обычная дверь.
 ## Мародёры открывают любые двери — у них свои ключи.
 @export var required_key: String = ""
 
@@ -82,7 +82,7 @@ func _process(delta: float) -> void:
 	if not _players_near.is_empty() and Input.is_action_just_pressed("interact"):
 		var who := _players_near[0]
 		if (who as Player).is_local():
-			if _locked():
+			if not _can_open(who as Player):
 				Raid.current.notify("Заперто: нужен " + Raid.current.key_name(required_key))
 				return
 			toggle(who.global_position)
@@ -93,8 +93,11 @@ func _process(delta: float) -> void:
 		_leaf.rotation.y = lerp_angle(_leaf.rotation.y, _target_angle, minf(1.0, Balance.DOOR_SWING_SPEED * delta))
 
 
-func _locked() -> bool:
-	return required_key != "" and Raid.current != null and not Raid.current.has_key(required_key)
+## Ключ — предмет в рюкзаке того, кто открывает (закрыть открытую можно всегда).
+func _can_open(who: Player) -> bool:
+	if required_key == "" or is_open:
+		return true
+	return who != null and who.inventory.has(required_key)
 
 
 ## Открыть от того, кто открывает: сторона выбирается по знаку локального Z подошедшего.
@@ -114,5 +117,5 @@ func toggle(from_world: Vector3) -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func _request_toggle(from_world: Vector3) -> void:
-	if is_multiplayer_authority() and not _locked():
+	if is_multiplayer_authority() and (Raid.current == null or _can_open(Raid.current.player_of(multiplayer.get_remote_sender_id()))):
 		toggle(from_world)
