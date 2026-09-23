@@ -42,6 +42,17 @@ func _ready() -> void:
 		"маг %d, шум %.0f→%.0f, отдача %.3f→%.3f, эрго %.0f→%.0f" % [int(st.mag), float(st0.noise_m), float(st.noise_m), float(st0.kick), float(st.kick), float(st0.ergo), float(st.ergo)])
 	Profile.install_mod("primary", _idx("w_pistol")) # не обвес — не ставится
 	_check("чужое на верстак не ставится", Profile.weapon_mods("primary").size() == 3, "")
+	# обвес из рюкзака: коллиматор на пистолет, потом снять (ляжет в тайник)
+	Profile.money += 20000
+	Profile.buy("mod_rmr", 1)
+	Profile.stash_to_backpack(_idx("mod_rmr"), 1)
+	var bi := -1
+	for i in range(Profile.backpack.size()):
+		if String(Profile.backpack[i].id) == "mod_rmr":
+			bi = i
+	Profile.install_mod("secondary", bi, true)
+	_check("верстак: обвес из рюкзака", String(Profile.weapon_mods("secondary").get("optic", "")) == "mod_rmr" and Profile.backpack.size() == 4, str(Profile.weapon_mods("secondary")))
+	Profile.remove_mod("secondary", "optic")
 
 	# --- соло-рейд со снаряжением
 	Profile.pending_raid = true

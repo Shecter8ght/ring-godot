@@ -157,19 +157,21 @@ static func weapon_mods(weapon_slot: String) -> Dictionary:
 	return (equipment[weapon_slot] as Dictionary).get("mods", {})
 
 
-## Поставить обвес из тайника (запись idx) на надетое оружие; старый из того же слота — в тайник.
-static func install_mod(weapon_slot: String, idx: int) -> bool:
-	if not equipment.has(weapon_slot) or idx < 0 or idx >= stash.size():
+## Поставить обвес (запись idx тайника или рюкзака) на надетое оружие; старый из того же слота
+## ложится туда, откуда взят новый (место освободилось — обмен один на один).
+static func install_mod(weapon_slot: String, idx: int, from_backpack: bool = false) -> bool:
+	var src: Array = backpack if from_backpack else stash
+	if not equipment.has(weapon_slot) or idx < 0 or idx >= src.size():
 		return false
-	var mod := String(stash[idx].id)
+	var mod := String(src[idx].id)
 	var weapon: Dictionary = equipment[weapon_slot]
 	if not ItemDb.mod_fits(mod, String(weapon.id)):
 		return false
 	var slot := String(ItemDb.mod_spec(mod).slot)
-	ItemDb.remove_at(stash, idx, 1)
+	ItemDb.remove_at(src, idx, 1)
 	var mods: Dictionary = weapon.get("mods", {}).duplicate()
 	if mods.has(slot):
-		ItemDb.add_to(stash, ItemDb.make(String(mods[slot]), 1), -1)
+		ItemDb.add_to(src, ItemDb.make(String(mods[slot]), 1), -1)
 	mods[slot] = mod
 	weapon["mods"] = mods
 	save()

@@ -5,7 +5,8 @@ extends RefCounted
 ## выглядит грубо), тонкие детали — отдельными узлами. Размеры реальные, в метрах.
 ##
 ## Система координат модели: начало — середина пистолетной рукояти (где держит рука),
-## +Z — к дулу, +Y — вверх. В meta модели:
+## +Z — к дулу, +Y — вверх, **-X — правая сторона стрелка** (в руках модель развёрнута на 180°:
+## смотрит по -Z камеры), +X — левая. В meta модели:
 ##   muzzle  (Vector3) — дульный срез, откуда вылетает трассер и вспышка;
 ##   sight_h (float)   — высота линии прицеливания над началом (для вида из прицела);
 ##   ads_z   (float)   — на каком расстоянии перед глазом держать рукоять в прицеле;
@@ -71,18 +72,22 @@ static func _pistol(r: Node3D) -> void:
 		for k in range(8):
 			_box(r, Vector3(side * 0.01285, 0.0605, zr + 0.006 + k * 0.0042), Vector3(0.0008, 0.021, 0.0017), dark)
 	# окно выброса сверху-справа и казённая часть ствола в нём
-	_box(r, Vector3(0.004, slide_top - 0.0004, 0.052), Vector3(0.015, 0.0012, 0.034), dark)
-	_box(r, Vector3(0.0126, 0.068, 0.052), Vector3(0.0012, 0.013, 0.034), dark)
-	_cbox(r, Vector3(0.002, slide_top - 0.002, 0.05), Vector3(0.012, 0.004, 0.03), _mat("gunmetal"), 0.001)
+	_box(r, Vector3(-0.004, slide_top - 0.0004, 0.052), Vector3(0.015, 0.0012, 0.034), dark)
+	_box(r, Vector3(-0.0126, 0.068, 0.052), Vector3(0.0012, 0.013, 0.034), dark)
+	_cbox(r, Vector3(-0.002, slide_top - 0.002, 0.05), Vector3(0.012, 0.004, 0.03), _mat("gunmetal"), 0.001)
 	# ствол у дульного среза: торец чуть утоплен в затвор
 	_cyl(r, Vector3(0, bore_y, zf - 0.003), 0.0065, 0.006, _mat("gunmetal"))
 	_cyl(r, Vector3(0, bore_y, zf + 0.0002), 0.0045, 0.001, _mat("bore"))
-	# прицельные: мушка с белой точкой, целик с прорезью и точками
-	_cbox(r, Vector3(0, slide_top + 0.0033, zf - 0.009), Vector3(0.0036, 0.0066, 0.007), slide_m, 0.0008)
-	_box(r, Vector3(0, slide_top + 0.0048, zf - 0.0055), Vector3(0.0022, 0.0022, 0.0008), _mat("dot"))
+	# прицельные как у Glock: низкие, мушка 3.4 мм шириной, над затвором ~4.4 мм, точка — на её
+	# задней грани (к глазу); целик 17 мм шириной, прорезь 3.6 × 2.8 мм, точки по бокам прорези.
+	# Верх мушки и верх целика на одной линии — это и есть линия прицеливания (sight_h).
+	var sh := 0.0044
+	_cbox(r, Vector3(0, slide_top + sh * 0.5, zf - 0.009), Vector3(0.0034, sh, 0.0072), slide_m, 0.0006)
+	_box(r, Vector3(0, slide_top + sh - 0.0017, zf - 0.009 - 0.0037), Vector3(0.0018, 0.0018, 0.0006), _mat("dot"))
+	_cbox(r, Vector3(0, slide_top + 0.0008, zr + 0.009), Vector3(0.017, 0.0016, 0.0085), slide_m, 0.0004)
 	for side in [-1.0, 1.0]:
-		_cbox(r, Vector3(side * 0.0055, slide_top + 0.0033, zr + 0.009), Vector3(0.0065, 0.0066, 0.0085), slide_m, 0.0008)
-		_box(r, Vector3(side * 0.0045, slide_top + 0.0048, zr + 0.0047), Vector3(0.0018, 0.0018, 0.0008), _mat("dot"))
+		_cbox(r, Vector3(side * 0.00515, slide_top + sh * 0.5, zr + 0.009), Vector3(0.0067, sh, 0.0085), slide_m, 0.0006)
+		_box(r, Vector3(side * 0.0042, slide_top + sh - 0.0017, zr + 0.009 - 0.0044), Vector3(0.0016, 0.0016, 0.0006), _mat("dot"))
 	# рамка под затвором: от «хвоста» до пылезащитной части
 	var frame_bot := PISTOL_GRIP_TOP.y
 	_cbox(r, Vector3(0, (frame_bot + slide_bot) * 0.5, 0.058), Vector3(0.0235, slide_bot - frame_bot, 0.17), poly, 0.003)
@@ -113,12 +118,12 @@ static func _pistol(r: Node3D) -> void:
 	var trig := _cbox(r, Vector3(0, 0.022, 0.047), Vector3(0.0062, 0.021, 0.0045), poly, 0.0015)
 	trig.rotation.x = deg_to_rad(-8.0)
 	_box(r, Vector3(0, 0.02, 0.0495), Vector3(0.002, 0.012, 0.0015), dark)
-	# рычаг задержки затвора и флажок разборки — слева
-	_cbox(r, Vector3(-0.0125, slide_bot - 0.003, 0.03), Vector3(0.002, 0.004, 0.016), _mat("gunmetal"), 0.0006)
-	_cbox(r, Vector3(-0.0122, slide_bot - 0.004, 0.066), Vector3(0.0015, 0.003, 0.008), _mat("gunmetal"), 0.0005)
+	# рычаг задержки затвора и флажок разборки — слева (+X)
+	_cbox(r, Vector3(0.0125, slide_bot - 0.003, 0.03), Vector3(0.002, 0.004, 0.016), _mat("gunmetal"), 0.0006)
+	_cbox(r, Vector3(0.0122, slide_bot - 0.004, 0.066), Vector3(0.0015, 0.003, 0.008), _mat("gunmetal"), 0.0005)
 	r.set_meta("muzzle", Vector3(0, bore_y, zf + 0.001))
-	# линия прицеливания — верх мушки/прорези целика
-	r.set_meta("sight_h", slide_top + 0.0055)
+	# линия прицеливания — верх мушки и целика
+	r.set_meta("sight_h", slide_top + sh)
 	r.set_meta("ads_z", 0.36)
 
 
@@ -137,11 +142,11 @@ static func _rifle(r: Node3D) -> void:
 	# рёбра жёсткости на крышке
 	for i in range(3):
 		_box(r, Vector3(0, 0.08, -0.02 + i * 0.07), Vector3(0.034, 0.002, 0.004), gm)
-	# рукоятка затворной рамы справа
-	_cyl_x(r, Vector3(0.032, 0.058, 0.17), 0.0045, 0.022, gm)
-	_sphere(r, Vector3(0.044, 0.058, 0.17), 0.006, gm)
+	# рукоятка затворной рамы справа (-X)
+	_cyl_x(r, Vector3(-0.032, 0.058, 0.17), 0.0045, 0.022, gm)
+	_sphere(r, Vector3(-0.044, 0.058, 0.17), 0.006, gm)
 	# предохранитель-переводчик — длинная пластина справа
-	_cbox(r, Vector3(0.0225, 0.05, 0.045), Vector3(0.002, 0.012, 0.09), gm, 0.001)
+	_cbox(r, Vector3(-0.0225, 0.05, 0.045), Vector3(0.002, 0.012, 0.09), gm, 0.001)
 	# ствол, газовая трубка, газовый блок
 	_cyl(r, Vector3(0, 0.052, 0.22 + 0.19), 0.0085, 0.38, gm)
 	_cyl(r, Vector3(0, 0.077, 0.215 + 0.13), 0.0105, 0.23, steel)
@@ -151,19 +156,28 @@ static func _rifle(r: Node3D) -> void:
 		[Vector2(0.044, 0.036), Vector2(0.049, 0.043), Vector2(0.047, 0.042)] as Array[Vector2], wood)
 	_sweep(r, [Vector3(0, 0.084, 0.245), Vector3(0, 0.085, 0.385)] as Array[Vector3],
 		[Vector2(0.029, 0.017), Vector2(0.031, 0.018)] as Array[Vector2], wood, 0.45)
-	# колодка мушки и мушка в «ушах»
-	_cbox(r, Vector3(0, 0.068, 0.555), Vector3(0.018, 0.028, 0.022), steel, 0.002)
-	_box(r, Vector3(0, 0.089, 0.555), Vector3(0.0022, 0.016, 0.003), steel)
+	# основание мушки как у АК: хомут на стволе, высокая колонка, мушка-столбик в «ушах» (намушник
+	# открыт сверху, уши чуть выше мушки). Верх мушки — на линии прицеливания 0.100.
+	_cbox(r, Vector3(0, 0.062, 0.552), Vector3(0.02, 0.03, 0.026), steel, 0.002)
+	_cbox(r, Vector3(0, 0.082, 0.552), Vector3(0.015, 0.014, 0.018), steel, 0.002)
+	_cbox(r, Vector3(0, 0.094, 0.552), Vector3(0.0024, 0.012, 0.0028), steel, 0.0004)
 	for side in [-1.0, 1.0]:
-		_cbox(r, Vector3(side * 0.007, 0.088, 0.555), Vector3(0.002, 0.018, 0.012), steel, 0.0006)
+		_cbox(r, Vector3(side * 0.0078, 0.0915, 0.552), Vector3(0.0024, 0.027, 0.012), steel, 0.0006)
+	_cbox(r, Vector3(0, 0.0785, 0.552), Vector3(0.018, 0.004, 0.012), steel, 0.001)
 	# дульный тормоз со скосом и окнами
 	_part(_cyl(r, Vector3(0, 0.052, 0.605), 0.0115, 0.06, steel), "muzzle_device")
 	for i in range(2):
 		_part(_box(r, Vector3(0, 0.052, 0.595 + i * 0.02), Vector3(0.0235, 0.005, 0.008), _mat("bore")), "muzzle_device")
 	_part(_cyl(r, Vector3(0, 0.052, 0.6355), 0.006, 0.001, _mat("bore")), "muzzle_device")
-	# целик на коробке
-	_cbox(r, Vector3(0, 0.085, 0.2), Vector3(0.028, 0.012, 0.05), steel, 0.002)
-	_cbox(r, Vector3(0, 0.0905, 0.2), Vector3(0.024, 0.005, 0.036), gm, 0.001)
+	# прицельная колодка перед крышкой: высокий блок, планка-хомутик с движком, в конце планки —
+	# целик с U-прорезью 3 мм (глубина 3.5 мм), верх целика — линия прицеливания 0.100
+	_cbox(r, Vector3(0, 0.0845, 0.212), Vector3(0.03, 0.019, 0.048), steel, 0.002)
+	var leaf := _cbox(r, Vector3(0, 0.0955, 0.21), Vector3(0.02, 0.003, 0.058), steel, 0.0006)
+	leaf.rotation.x = deg_to_rad(-2.0)
+	_cbox(r, Vector3(0, 0.0968, 0.226), Vector3(0.025, 0.0055, 0.01), gm, 0.001)
+	_cbox(r, Vector3(0, 0.0954, 0.183), Vector3(0.025, 0.003, 0.003), steel, 0.0004)
+	for side in [-1.0, 1.0]:
+		_cbox(r, Vector3(side * 0.00675, 0.0975, 0.183), Vector3(0.0105, 0.005, 0.003), steel, 0.0004)
 	# магазин: одна гладкая дуга вперёд, чуть сужается книзу, ребро жёсткости по бокам
 	var mp: Array[Vector3] = []
 	var ms: Array[Vector2] = []
@@ -199,7 +213,7 @@ static func _rifle(r: Node3D) -> void:
 	swivel.rotation.z = PI * 0.5
 	_part(swivel, "stock")
 	r.set_meta("muzzle", Vector3(0, 0.052, 0.637))
-	r.set_meta("sight_h", 0.091)
+	r.set_meta("sight_h", 0.1)
 	r.set_meta("ads_z", 0.3)
 
 
@@ -211,16 +225,25 @@ static func _shotgun(r: Node3D) -> void:
 	var gm := _mat("gunmetal")
 	var wood := _mat("wood_walnut")
 	_cbox(r, Vector3(0, 0.045, 0.07), Vector3(0.042, 0.064, 0.2), steel, 0.005)
-	# окно выброса справа и затворная задержка
-	_box(r, Vector3(0.0212, 0.055, 0.1), Vector3(0.001, 0.022, 0.06), _mat("dark"))
-	_cbox(r, Vector3(-0.0215, 0.035, 0.02), Vector3(0.003, 0.008, 0.012), gm, 0.001)
+	# окно выброса справа (-X) и затворная задержка слева
+	_box(r, Vector3(-0.0212, 0.055, 0.1), Vector3(0.001, 0.022, 0.06), _mat("dark"))
+	_cbox(r, Vector3(0.0215, 0.035, 0.02), Vector3(0.003, 0.008, 0.012), gm, 0.001)
 	# ствол с вентилируемой планкой
 	_cyl(r, Vector3(0, 0.064, 0.17 + 0.25), 0.0105, 0.5, steel)
 	_cyl(r, Vector3(0, 0.064, 0.6705), 0.0072, 0.001, _mat("bore"))
 	_box(r, Vector3(0, 0.0765, 0.42), Vector3(0.006, 0.002, 0.48), steel)
 	for i in range(12):
 		_box(r, Vector3(0, 0.0735, 0.2 + i * 0.04), Vector3(0.004, 0.004, 0.006), steel)
-	_sphere(r, Vector3(0, 0.08, 0.66), 0.0028, _mat("brass"))
+	# прицельные как у автомата: мушка-столбик в «ушах» на планке у дула, целик с U-прорезью
+	# на передней кромке коробки; верх мушки и целика — линия прицеливания 0.092
+	_cbox(r, Vector3(0, 0.0795, 0.652), Vector3(0.012, 0.004, 0.02), steel, 0.001)
+	_cbox(r, Vector3(0, 0.0865, 0.652), Vector3(0.0024, 0.011, 0.0028), steel, 0.0004)
+	for side in [-1.0, 1.0]:
+		_cbox(r, Vector3(side * 0.0068, 0.0855, 0.652), Vector3(0.0022, 0.017, 0.012), steel, 0.0006)
+	_cbox(r, Vector3(0, 0.081, 0.16), Vector3(0.028, 0.008, 0.02), steel, 0.0015)
+	_cbox(r, Vector3(0, 0.08675, 0.155), Vector3(0.025, 0.0035, 0.004), steel, 0.0004)
+	for side in [-1.0, 1.0]:
+		_cbox(r, Vector3(side * 0.007, 0.0885, 0.155), Vector3(0.011, 0.007, 0.004), steel, 0.0004)
 	# подствольный магазин и хомут
 	_cyl(r, Vector3(0, 0.036, 0.17 + 0.21), 0.0115, 0.42, steel)
 	_cbox(r, Vector3(0, 0.05, 0.585), Vector3(0.024, 0.042, 0.016), steel, 0.003)
@@ -240,7 +263,7 @@ static func _shotgun(r: Node3D) -> void:
 	var trig := _cbox(r, Vector3(0, 0.015, 0.035), Vector3(0.006, 0.02, 0.005), gm, 0.0015)
 	trig.rotation.x = deg_to_rad(10.0)
 	r.set_meta("muzzle", Vector3(0, 0.064, 0.671))
-	r.set_meta("sight_h", 0.083)
+	r.set_meta("sight_h", 0.092)
 	r.set_meta("ads_z", 0.3)
 
 
@@ -267,10 +290,10 @@ static func _bolt(r: Node3D) -> void:
 	var barrel := _cyl(r, Vector3(0, 0.062, 0.2 + 0.3), 0.0115, 0.6, steel, 0.0078)
 	barrel.name = "Barrel"
 	_cyl(r, Vector3(0, 0.062, 0.8005), 0.0045, 0.001, _mat("bore"))
-	# рукоять затвора: стебель вправо-вниз и шар
-	var bolt_stem := _cyl_x(r, Vector3(0.028, 0.058, 0.03), 0.0038, 0.032, gm)
-	bolt_stem.rotation.z = PI * 0.5 + deg_to_rad(-25.0)
-	_sphere(r, Vector3(0.043, 0.05, 0.03), 0.0085, gm)
+	# рукоять затвора: стебель вправо (-X) и вниз, шар
+	var bolt_stem := _cyl_x(r, Vector3(-0.028, 0.058, 0.03), 0.0038, 0.032, gm)
+	bolt_stem.rotation.z = PI * 0.5 + deg_to_rad(25.0)
+	_sphere(r, Vector3(-0.043, 0.05, 0.03), 0.0085, gm)
 	_cyl(r, Vector3(0, 0.062, -0.005), 0.012, 0.012, gm)
 	# спуск
 	_cbox(r, Vector3(0, 0.002, 0.04), Vector3(0.012, 0.004, 0.06), gm, 0.0012)
@@ -288,7 +311,7 @@ static func _bolt(r: Node3D) -> void:
 	_cyl(r, Vector3(0, sy, -0.0602), 0.016, 0.001, _mat("lens"))
 	# барабанчики поправок сверху и справа, с рисками
 	_cyl(r, Vector3(0, sy + 0.021, 0.1), 0.0105, 0.016, _mat("scope"), 0.0105).rotation = Vector3.ZERO
-	_cyl_x(r, Vector3(0.021, sy, 0.1), 0.0105, 0.016, _mat("scope"))
+	_cyl_x(r, Vector3(-0.021, sy, 0.1), 0.0105, 0.016, _mat("scope"))
 	_box(r, Vector3(0, sy + 0.0292, 0.1), Vector3(0.002, 0.0004, 0.012), _mat("dot"))
 	# кольца и основания
 	for z in [0.03, 0.17]:

@@ -240,21 +240,26 @@ func _build_workbench() -> void:
 			row.add_child(_button("Снять", func() -> void: Profile.remove_mod(_wb_slot, sl)))
 			right.add_child(row)
 		var any := false
-		for i in range(Profile.stash.size()):
-			var id := String(Profile.stash[i].id)
-			if not ItemDb.mod_fits(id, String(weapon.id)) or String(ItemDb.mod_spec(id).slot) != sl:
-				continue
-			any = true
-			var idx := i
-			var row := HBoxContainer.new()
-			var l := _text("  + %s  —  %s" % [ItemDb.item_name(id), _fx_text(ItemDb.mod_spec(id))], Color(0.7, 0.8, 0.72))
-			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			row.add_child(l)
-			row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx)))
-			right.add_child(row)
+		# подходящее — и из тайника, и из рюкзака (подписано, откуда)
+		for from_bp in [false, true]:
+			var src: Array = Profile.backpack if from_bp else Profile.stash
+			for i in range(src.size()):
+				var id := String(src[i].id)
+				if not ItemDb.mod_fits(id, String(weapon.id)) or String(ItemDb.mod_spec(id).slot) != sl:
+					continue
+				any = true
+				var idx := i
+				var bp: bool = from_bp
+				var row := HBoxContainer.new()
+				var l := _text("  + %s  —  %s" % [ItemDb.item_name(id), _fx_text(ItemDb.mod_spec(id))], Color(0.7, 0.8, 0.72))
+				l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				row.add_child(l)
+				row.add_child(_text("рюкзак" if bp else "тайник", Color(0.55, 0.6, 0.65)))
+				row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx, bp)))
+				right.add_child(row)
 		if not mods.has(sl) and not any:
-			right.add_child(_text("  пусто — подходящего в тайнике нет", Color(0.5, 0.5, 0.5)))
+			right.add_child(_text("  пусто — подходящего в тайнике и рюкзаке нет", Color(0.5, 0.5, 0.5)))
 
 
 ## Шкалы характеристик: значение, полоса 0–100 и разница с оружием без обвесов (зелёным — лучше).

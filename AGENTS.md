@@ -47,6 +47,7 @@ tools/godot.cmd res://tools/raid_test.tscn                   # цикл рейд
 tools/godot.cmd res://tools/loadout_test.tscn                # убежище → рейд со снаряжением → эвакуация → убежище (тестовый профиль)
 tools/godot.cmd res://tools/hideout_shots.tscn               # снимки убежища и его окон в docs/screens/hideout_*.png
 tools/godot.cmd res://tools/mods_gallery.tscn                # витрина обвесов: сбоку, 3/4, крупные планы, вид из глаза
+tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика против солнца (блики, аберрация) и открытые прицельные из глаза
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 ```
@@ -61,7 +62,8 @@ src/core/      balance.gd (ВЕСЬ баланс — только здесь, au
 src/player/    персонаж игрока (стойки, прицел, движение), камера
 src/ai/        мародёры: marauder.gd (патруль/расследование/бой), perception.gd (зрение — единственный
                способ AI узнать позицию игрока)
-src/combat/    weapon_models.gd (процедурное оружие), weapon_mods.gd (обвесы: точки крепления MOUNTS
+src/combat/    weapon_models.gd (процедурное оружие; в руках модель развёрнута на 180°, поэтому
+               **-X модели — правая сторона стрелка**), weapon_mods.gd (обвесы: точки крепления MOUNTS
                сняты с геометрии моделей — новый обвес ставить от них и проверять mods_gallery),
                weapon_stats.gd (характеристики с обвесами — одно место расчёта), grenade.gd, ragdoll.gd, target.gd (мишени),
                health.gd, hitscan.gd (выстрел лучом + разброс), tracer.gd, surfaces.gd (из чего

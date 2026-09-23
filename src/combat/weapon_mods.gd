@@ -29,7 +29,7 @@ const MOUNTS := {
 		"grip": {"pos": Vector3(0, 0.0225, 0.35)},
 		"stock": {"pos": Vector3(0, 0.045, -0.07)},
 		"mag": {"pos": Vector3(0, 0.02, 0.128)},
-		"tac": {"pos": Vector3(0.0245, 0.046, 0.395), "side": true},
+		"tac": {"pos": Vector3(-0.0245, 0.046, 0.395), "side": true},
 	},
 	"shotgun": {
 		# плоский верх коробки 0.077; дульный срез 0.67; рукоятка — под цевьё-помпу (низ 0.014);
@@ -38,7 +38,7 @@ const MOUNTS := {
 		"muzzle": {"pos": Vector3(0, 0.064, 0.67), "bore_r": 0.0105},
 		"grip": {"pos": Vector3(0, 0.014, 0.33)},
 		"stock": {"pos": Vector3(0, 0.05, -0.03)},
-		"tac": {"pos": Vector3(0.012, 0.05, 0.585), "side": true},
+		"tac": {"pos": Vector3(-0.012, 0.05, 0.585), "side": true},
 	},
 	"bolt": {
 		# дульный срез 0.80 (ствол сужается до 0.0078); сошки — хомут под цевьём (низ ~0.0145)
@@ -113,15 +113,17 @@ static func _rail_z(root: Node3D, y0: float, z: float, length: float, x: float =
 	return y0 + RAIL_H
 
 
-## Короткая планка вертикально на боку (x — плоскость боковой поверхности, +X наружу).
+## Короткая планка вертикально на боку (x0 — плоскость боковой поверхности, наружу — по знаку x0;
+## -X — правая сторона стрелка). Возвращает x внешней грани.
 static func _rail_side(root: Node3D, x0: float, y: float, z: float, length: float) -> float:
 	var al := _mat("anodized")
-	WeaponModels._cbox(root, Vector3(x0 + 0.00175, y, z), Vector3(0.0035, 0.016, length), al, 0.0008)
+	var s := signf(x0) if x0 != 0.0 else 1.0
+	WeaponModels._cbox(root, Vector3(x0 + s * 0.00175, y, z), Vector3(0.0035, 0.016, length), al, 0.0008)
 	var n := int(floor(length / 0.01))
 	for i in range(n):
 		var zz := z - length * 0.5 + 0.005 + i * 0.01
-		WeaponModels._cbox(root, Vector3(x0 + 0.0035 + 0.00125, y, zz), Vector3(0.0025, 0.0212, 0.0052), al, 0.0005)
-	return x0 + RAIL_H
+		WeaponModels._cbox(root, Vector3(x0 + s * (0.0035 + 0.00125), y, zz), Vector3(0.0025, 0.0212, 0.0052), al, 0.0005)
+	return x0 + s * RAIL_H
 
 
 ## Основание прицела: подъём (если у ствола нужна проставка) + планка; возвращает высоту верха.
@@ -163,8 +165,8 @@ static func _red_dot(root: Node3D, m: Dictionary) -> void:
 	WeaponModels._cyl(root, Vector3(0, cy, zc - 0.0395), 0.0148, 0.001, _mat("glass"))
 	# барабанчики поправок сверху и справа, колпачок батареи слева
 	WeaponModels._cyl(root, Vector3(0, cy + 0.019, zc + 0.004), 0.0065, 0.008, al).rotation = Vector3.ZERO
-	WeaponModels._cyl_x(root, Vector3(0.019, cy, zc + 0.004), 0.0065, 0.008, al)
-	WeaponModels._cyl_x(root, Vector3(-0.0195, cy, zc - 0.008), 0.0075, 0.01, al)
+	WeaponModels._cyl_x(root, Vector3(-0.019, cy, zc + 0.004), 0.0065, 0.008, al)
+	WeaponModels._cyl_x(root, Vector3(0.0195, cy, zc - 0.008), 0.0075, 0.01, al)
 	# точка — на передней линзе, по оси
 	WeaponModels._sphere(root, Vector3(0, cy, zc + 0.0385), 0.0007, _mat("reticle"))
 	root.set_meta("sight_h", cy)
@@ -227,7 +229,7 @@ static func _scope4x(root: Node3D, m: Dictionary) -> void:
 	WeaponModels._cyl(root, Vector3(0, cy, zc - 0.0612), 0.015, 0.001, _mat("lens"))
 	WeaponModels._box(root, Vector3(0, cy + 0.0175, zc), Vector3(0.004, 0.003, 0.06), _mat("dot"))
 	WeaponModels._cyl(root, Vector3(0, cy + 0.02, zc + 0.012), 0.006, 0.006, al).rotation = Vector3.ZERO
-	WeaponModels._cyl_x(root, Vector3(0.02, cy, zc + 0.012), 0.006, 0.006, al)
+	WeaponModels._cyl_x(root, Vector3(-0.02, cy, zc + 0.012), 0.006, 0.006, al)
 	root.set_meta("sight_h", cy)
 	root.set_meta("scoped", true)
 	# окуляр и вынос глаза ~75 мм: глаз стоит за окуляром, а не у рукояти
@@ -366,7 +368,7 @@ static func _tac_body(root: Node3D, m: Dictionary) -> Node3D:
 	root.add_child(t)
 	if bool(m.get("side", false)):
 		var outer := _rail_side(root, p.x, p.y, p.z, 0.05)
-		t.position = Vector3(outer + 0.011, p.y, p.z)
+		t.position = Vector3(outer + signf(p.x) * 0.011, p.y, p.z)
 	else:
 		WeaponModels._cbox(root, Vector3(p.x, p.y - 0.004, p.z), Vector3(0.022, 0.008, 0.03), _mat("anodized"), 0.001)
 		# корпус касается хомута снизу (радиус корпуса 0.0105)

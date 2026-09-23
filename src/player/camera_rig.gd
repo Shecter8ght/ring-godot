@@ -32,6 +32,10 @@ var _scope_cam: Camera3D
 var _scope_view: TextureRect
 var _sway_t: float = 0.0
 var _scope_zoom: float = 1.0
+## Солнце сцены — для бликов в оптике (ищется один раз).
+var _sun: DirectionalLight3D
+## Солнце ближе этого угла к оси оптики — засветка и блик по краю линзы, град.
+const SCOPE_SUN_NEAR_DEG := 35.0
 var _weapon_label: Label
 var _compass: Compass
 
@@ -317,18 +321,101 @@ func _update_scope(zoom: float) -> void:
 	var rad_px := tan(half_main) * main_px_per_rad
 	_scope_view.position = c - Vector2(rad_px, rad_px)
 	_scope_view.size = Vector2(rad_px, rad_px) * 2.0
+	_update_scope_sun()
+
+
+## Солнце для бликов в оптике: где оно в окуляре и насколько близко к оси. Закрыто стеной или
+## крышей (луч к солнцу во что-то упёрся) — бликов нет.
+func _update_scope_sun() -> void:
+	var mat := _scope_view.material as ShaderMaterial
+	var sun := _sun_dir()
+	var near := 0.0
+	var inside := 0.0
+	var suv := Vector2(-9, -9)
+	var b := _scope_cam.global_basis
+	if sun != Vector3.ZERO:
+		near = smoothstep(cos(deg_to_rad(SCOPE_SUN_NEAR_DEG)), cos(deg_to_rad(2.0)), (-b.z).dot(sun))
+		if near > 0.0 and _sun_blocked(sun):
+			near = 0.0
+		var far := _scope_cam.global_position + sun * 1000.0
+		if near > 0.0 and not _scope_cam.is_position_behind(far):
+			suv = _scope_cam.unproject_position(far) / Vector2(_scope_vp.size)
+			inside = near * (1.0 - smoothstep(0.5, 0.62, (suv - Vector2(0.5, 0.5)).length()))
+	var sd := Vector2(sun.dot(b.x), -sun.dot(b.y))
+	mat.set_shader_parameter("sun_uv", suv)
+	mat.set_shader_parameter("sun_in", inside)
+	mat.set_shader_parameter("sun_near", near)
+	mat.set_shader_parameter("sun_dir", sd.normalized() if sd.length() > 1e-4 else Vector2(0, -1))
+
+
+## Направление на солнце (мировое): DirectionalLight3D сцены светит по своей -Z. Нет — ноль.
+func _sun_dir() -> Vector3:
+	if _sun == null or not is_instance_valid(_sun):
+		_sun = null
+		var scene := get_tree().current_scene
+		if scene:
+			for l in scene.find_children("*", "DirectionalLight3D", true, false):
+				if (l as DirectionalLight3D).visible:
+					_sun = l
+					break
+	if _sun == null:
+		return Vector3.ZERO
+	return _sun.global_basis.z.normalized()
+
+
+func _sun_blocked(sun: Vector3) -> bool:
+	var from := _scope_cam.global_position
+	var q := PhysicsRayQueryParameters3D.create(from, from + sun * 400.0, Hitscan.LAYER_WORLD)
+	return not get_world_3d().direct_space_state.intersect_ray(q).is_empty()
 
 
 ## Шейдер окуляра: круг, тонкие нити с толстыми «пеньками» к краю, тень по краю (выход зрачка).
+## Оптика как у настоящей: хроматическая аберрация растёт к краю (красный наружу, синий внутрь,
+## цветная кайма у края поля), солнце в поле — ореол, лучи и цепочка «призраков» по линии через
+## центр; солнце рядом с осью — засветка (контраст падает) и блик-полумесяц по краю линзы с его
+## стороны. Параметры солнца ставит _update_scope каждый кадр.
 func _ocular_material() -> ShaderMaterial:
 	var sh := Shader.new()
 	sh.code = """
 shader_type canvas_item;
 uniform float line_w = 0.0018;
+uniform float ca = 0.014;
+uniform vec2 sun_uv = vec2(-9.0);
+uniform float sun_in = 0.0;
+uniform float sun_near = 0.0;
+uniform vec2 sun_dir = vec2(0.0, -1.0);
+
 void fragment() {
 	vec2 c = UV - 0.5;
 	float r = length(c) * 2.0;
-	vec3 col = texture(TEXTURE, UV).rgb;
+	// аберрация: смещение каналов растёт квадратом радиуса
+	vec2 off = c * ca * r * r;
+	vec3 col = vec3(texture(TEXTURE, UV + off).r, texture(TEXTURE, UV).g, texture(TEXTURE, UV - off).b);
+	// кайма у края поля: холодная изнутри, тёплая снаружи
+	float rim = smoothstep(0.8, 0.97, r);
+	col += rim * vec3(0.05, 0.0, -0.03) * (0.5 + 0.5 * sin(r * 60.0));
+	// солнце в поле зрения: ядро, ореол, лучи-крест
+	vec2 s = sun_uv - 0.5;
+	vec2 q = c - s;
+	float d = length(q);
+	float core = exp(-d * 70.0) * 1.4 + exp(-d * 18.0) * 0.35;
+	float rays = (exp(-abs(q.y) * 300.0) * exp(-abs(q.x) * 5.0) + exp(-abs(q.x) * 300.0) * exp(-abs(q.y) * 5.0)) * 0.45;
+	vec3 flare = vec3(1.0, 0.9, 0.72) * (core + rays) * sun_in;
+	// «призраки» — отражения между линзами: по линии солнце — центр, за центром, в разных оттенках
+	for (int i = 0; i < 5; i++) {
+		float f = -0.35 - float(i) * 0.38;
+		float gr = 0.025 + 0.018 * float(i % 3);
+		float g = smoothstep(gr, gr * 0.55, length(c - s * f));
+		vec3 tint = i % 2 == 0 ? vec3(0.35, 0.6, 1.0) : vec3(0.7, 1.0, 0.45);
+		flare += tint * g * 0.3 * sun_in;
+	}
+	// засветка и блик по краю линзы со стороны солнца (солнце рядом, даже вне поля)
+	float side = max(dot(normalize(c + vec2(1e-5)), sun_dir), 0.0);
+	float crescent = smoothstep(0.62, 0.9, r) * smoothstep(1.0, 0.9, r) * pow(side, 3.0);
+	flare += vec3(1.0, 0.86, 0.62) * crescent * sun_near * 0.9;
+	col = mix(col, vec3(0.85, 0.8, 0.72), sun_near * 0.12);
+	col += flare;
+	// сетка поверх света (нити в светлом поле тёмные)
 	float ax = abs(c.x);
 	float ay = abs(c.y);
 	float thin = step(ax, line_w) + step(ay, line_w);
