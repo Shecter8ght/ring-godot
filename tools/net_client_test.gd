@@ -19,6 +19,10 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	# деньги от хоста пишутся в профиль — только в тестовый
+	Profile.use_file("user://profile_net_client.json", true)
+	Profile.ensure()
+	var money0 := Profile.money
 	await get_tree().create_timer(0.8).timeout
 	print("[client] подключаюсь…")
 	var err := Net.join("127.0.0.1", "Клиент")
@@ -36,6 +40,7 @@ func _run() -> void:
 			return
 	_level = get_tree().current_scene
 	print("[client] сцена сектора загружена, мой id=%d" % multiplayer.get_unique_id())
+	print("[client] деньги от хоста: %s (+%d ₽)" % ["OK" if Profile.money - money0 == 12345 else "НЕТ", Profile.money - money0])
 	await get_tree().create_timer(1.5).timeout
 	_report("после спавна")
 	var my_player := _find_local()

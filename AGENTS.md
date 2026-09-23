@@ -54,6 +54,7 @@ tools/godot.cmd res://tools/hideout_shots.tscn               # снимки уб
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
 tools/godot.cmd res://tools/mods_gallery.tscn                # витрина обвесов: сбоку, 3/4, крупные планы, вид из глаза
 tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика против солнца (блики, аберрация) и открытые прицельные из глаза
+toolsuild_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.5.1 + RING.pck, шаблоны не нужны)
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 ```

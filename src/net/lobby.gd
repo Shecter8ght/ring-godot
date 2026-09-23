@@ -8,6 +8,7 @@ extends Control
 @onready var _join_button: Button = $Center/Panel/VBox/PreConnect/ButtonsRow/JoinButton
 @onready var _start_button: Button = $Center/Panel/VBox/StartButton
 @onready var _leave_button: Button = $Center/Panel/VBox/LeaveButton
+var _admin_button: Button
 @onready var _status: Label = $Center/Panel/VBox/Status
 @onready var _players_list: Label = $Center/Panel/VBox/PlayersList
 @onready var _pre_connect: Control = $Center/Panel/VBox/PreConnect
@@ -27,17 +28,37 @@ func _ready() -> void:
 		Net.disconnect_all()
 		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE))
 	($Center/Panel/VBox as VBoxContainer).add_child(back)
-	_address_edit.text = "127.0.0.1"
+	# хост: деньги игрокам — то же окно, что в меню Esc
+	_admin_button = Button.new()
+	_admin_button.text = "Деньги игрокам (админ)"
+	_admin_button.pressed.connect(func() -> void: Pause.open_admin())
+	($Center/Panel/VBox as VBoxContainer).add_child(_admin_button)
+	Net.money_received.connect(func(t: String) -> void: _status.text = t)
+	# имя и адрес хоста — с прошлого раза
+	var cfg := ConfigFile.new()
+	cfg.load(CameraRig.SETTINGS_PATH)
+	_name_edit.text = String(cfg.get_value("net", "name", _name_edit.text))
+	_address_edit.text = String(cfg.get_value("net", "address", "127.0.0.1"))
 	_refresh()
 
 
+func _remember() -> void:
+	var cfg := ConfigFile.new()
+	cfg.load(CameraRig.SETTINGS_PATH)
+	cfg.set_value("net", "name", _name_edit.text)
+	cfg.set_value("net", "address", _address_edit.text)
+	cfg.save(CameraRig.SETTINGS_PATH)
+
+
 func _on_host_pressed() -> void:
+	_remember()
 	var err := Net.host(_name_edit.text)
 	_status.text = err if err != "" else "Сервер поднят на порту %d. Ждём остальных." % Net.PORT
 	_refresh()
 
 
 func _on_join_pressed() -> void:
+	_remember()
 	var err := Net.join(_address_edit.text, _name_edit.text)
 	_status.text = err if err != "" else "Подключаюсь…"
 	_refresh()
@@ -63,6 +84,7 @@ func _refresh() -> void:
 	_pre_connect.visible = not networked
 	_leave_button.visible = networked
 	_start_button.visible = Net.is_host()
+	_admin_button.visible = Net.is_host()
 	if networked:
 		var lines: Array[String] = []
 		for id in Net.player_names.keys():

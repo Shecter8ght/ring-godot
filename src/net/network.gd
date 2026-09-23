@@ -10,6 +10,8 @@ const MAX_PLAYERS := 3
 const LEVEL_SCENE := "res://scenes/levels/f1_ring.tscn"
 
 signal player_list_changed
+## Хост начислил деньги (текст для окна, где сейчас игрок).
+signal money_received(text: String)
 ## Открыт для чтения из lobby.gd: peer_id -> имя.
 var player_names: Dictionary = {}
 ## Свой флаг вместо multiplayer.has_multiplayer_peer(): в Godot 4.5 он true даже без реального
@@ -77,6 +79,28 @@ func start_level(scene: String) -> void:
 	# со снаряжением профиля — только если игрок пришёл в лобби из убежища (не тесты)
 	Profile.pending_raid = Profile.from_hideout
 	get_tree().change_scene_to_file(scene if scene != "" else LEVEL_SCENE)
+
+
+## Панель админа хоста: начислить amount ₽ игроку peer_id (себе — тоже). Деньги лежат в профиле
+## на компьютере игрока — туда и пишутся (хост — доверенный: играют друзья).
+func grant_money(peer_id: int, amount: int) -> void:
+	if not is_host() or amount == 0:
+		return
+	if peer_id == multiplayer.get_unique_id():
+		_receive_money(amount)
+	else:
+		_receive_money.rpc_id(peer_id, amount)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _receive_money(amount: int) -> void:
+	Profile.ensure()
+	Profile.money = maxi(0, Profile.money + amount)
+	Profile.save()
+	var text := "Хост начислил %s ₽ — на счету %s ₽" % [InventoryUI.money(amount), InventoryUI.money(Profile.money)]
+	if Raid.current:
+		Raid.current.notify(text)
+	money_received.emit(text)
 
 
 func _on_peer_connected(id: int) -> void:

@@ -42,6 +42,9 @@ var _main: VBoxContainer
 var _controls: VBoxContainer
 var _leave: Button
 var _view_btn: Button
+var _admin_btn: Button
+var _admin: VBoxContainer
+var _admin_rows: GridContainer
 var _mouse_before: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
 
 
@@ -80,11 +83,18 @@ func _ready() -> void:
 	title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
 	_main.add_child(title)
 	_main.add_child(_button("Продолжить", close_menu))
-	_main.add_child(_button("Управление", func() -> void: _controls.visible = not _controls.visible))
+	_main.add_child(_button("Управление", func() -> void:
+		_controls.visible = not _controls.visible
+		_admin.visible = false))
 	_view_btn = _button("", func() -> void:
 		CameraRig.set_first_person_mode(not CameraRig.first_person_mode)
 		_view_btn.text = _view_text())
 	_main.add_child(_view_btn)
+	_admin_btn = _button("Админ: деньги игрокам", func() -> void:
+		_admin.visible = not _admin.visible
+		_controls.visible = false
+		_fill_admin())
+	_main.add_child(_admin_btn)
 	_leave = _button("Покинуть рейд", _on_leave)
 	_main.add_child(_leave)
 	_main.add_child(_button("Выйти из игры", func() -> void: get_tree().quit()))
@@ -93,6 +103,10 @@ func _ready() -> void:
 	_controls.visible = false
 	h.add_child(_controls)
 	_fill_controls()
+	_build_admin(h)
+	Net.player_list_changed.connect(func() -> void:
+		if _admin.visible:
+			_fill_admin())
 
 
 func _button(text: String, cb: Callable) -> Button:
@@ -184,6 +198,8 @@ func open_menu() -> void:
 	shown = true
 	_root.visible = true
 	_controls.visible = false
+	_admin.visible = false
+	_admin_btn.visible = Net.is_host()
 	CameraRig.load_settings()
 	_view_btn.text = _view_text()
 	_mouse_before = Input.mouse_mode
@@ -196,6 +212,82 @@ func open_menu() -> void:
 	_leave.text = "Покинуть рейд (снаряжение останется там)" if Profile.pending_raid else "В убежище"
 	if not Net.is_networked():
 		get_tree().paused = true
+
+
+## Панель админа (только хост в сети): игроки из лобби, сумма, «Начислить».
+func _build_admin(h: HBoxContainer) -> void:
+	_admin = VBoxContainer.new()
+	_admin.add_theme_constant_override("separation", 8)
+	_admin.visible = false
+	h.add_child(_admin)
+	var head := Label.new()
+	head.text = "Деньги игрокам"
+	head.add_theme_font_size_override("font_size", 22)
+	head.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
+	_admin.add_child(head)
+	var hint := Label.new()
+	hint.text = "Сумма уходит на счёт игрока сразу (минус — списать)."
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_color_override("font_color", Color(0.7, 0.7, 0.68))
+	_admin.add_child(hint)
+	_admin_rows = GridContainer.new()
+	_admin_rows.columns = 5
+	_admin_rows.add_theme_constant_override("h_separation", 10)
+	_admin_rows.add_theme_constant_override("v_separation", 8)
+	_admin.add_child(_admin_rows)
+
+
+func _fill_admin() -> void:
+	for c in _admin_rows.get_children():
+		c.queue_free()
+	var ids: Array = Net.player_names.keys()
+	ids.sort()
+	for id in ids:
+		var peer := int(id)
+		var name := Label.new()
+		name.text = String(Net.player_names[id]) + (" (ты)" if peer == multiplayer.get_unique_id() else "")
+		name.add_theme_font_size_override("font_size", 17)
+		name.custom_minimum_size.x = 150
+		_admin_rows.add_child(name)
+		var amount := SpinBox.new()
+		amount.min_value = -10000000
+		amount.max_value = 10000000
+		amount.step = 1000
+		amount.value = 100000
+		amount.suffix = "₽"
+		amount.custom_minimum_size.x = 150
+		_admin_rows.add_child(amount)
+		var give := Button.new()
+		give.text = "Начислить"
+		give.focus_mode = Control.FOCUS_NONE
+		_admin_rows.add_child(give)
+		for quick in [100000, 1000000]:
+			var q := Button.new()
+			q.text = "+%s" % ("1 млн" if quick == 1000000 else "100 тыс")
+			q.focus_mode = Control.FOCUS_NONE
+			q.pressed.connect(func() -> void: _grant(peer, int(quick), q))
+			_admin_rows.add_child(q)
+		give.pressed.connect(func() -> void: _grant(peer, int(amount.value), give))
+
+
+func _grant(peer: int, amount: int, btn: Button) -> void:
+	Net.grant_money(peer, amount)
+	var was := btn.text
+	btn.text = "✓ отправлено"
+	btn.disabled = true
+	get_tree().create_timer(1.0, true, false, true).timeout.connect(func() -> void:
+		if is_instance_valid(btn):
+			btn.text = was
+			btn.disabled = false)
+
+
+## Открыть меню сразу на панели денег (кнопка в лобби).
+func open_admin() -> void:
+	if not shown:
+		open_menu()
+	_controls.visible = false
+	_admin.visible = true
+	_fill_admin()
 
 
 func _view_text() -> String:

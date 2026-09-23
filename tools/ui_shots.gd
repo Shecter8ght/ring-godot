@@ -30,6 +30,13 @@ func _ready() -> void:
 	(pause.get("_controls") as Control).visible = true
 	await _frames(4)
 	_save("ui_controls")
+	# панель админа хоста: поднять сервер (без клиентов — в списке только хост)
+	Net.host("Хост")
+	Net.player_names[2] = "Друг"   # для снимка: вторая строка
+	pause.open_admin()
+	await _frames(4)
+	_save("ui_admin")
+	Net.disconnect_all()
 	_press("pause")
 	await _frames(4)
 	print("ui_shots: меню закрыто — пауза снята: ", not get_tree().paused)
