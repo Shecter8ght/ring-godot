@@ -61,6 +61,12 @@ func _ready() -> void:
 	get_viewport().use_occlusion_culling = false
 
 
+## Отдача в прицеле: взгляд уходит вверх (pitch) и вбок (h, плюс — вправо) — навсегда, тянуть мышью.
+func add_recoil(pitch: float, h: float) -> void:
+	_look_pitch = clampf(_look_pitch + pitch, -Balance.ADS_PITCH_LIMIT, Balance.ADS_PITCH_LIMIT)
+	_look_yaw -= h
+
+
 ## Толчок камеры (выстрел, попадание по тебе, взрыв); складывается и затухает сам.
 func add_shake(amount: float) -> void:
 	_shake = minf(_shake + amount, 1.0)
@@ -203,13 +209,14 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		amp *= float(spec.get("braced_spread", 1.0))
 	var sway := Vector2(sin(_sway_t * 1.13) * 0.7 + sin(_sway_t * 2.71 + 1.3) * 0.3, sin(_sway_t * 0.87 + 0.5) * 0.6 + sin(_sway_t * 2.05) * 0.4) * amp
 	# отдача подкидывает взгляд, дальше игрок сам возвращает прицел
-	var pitch := _look_pitch + pl.recoil() * 0.6 + sway.y
-	var yaw := _look_yaw + sway.x
+	var pitch := _look_pitch + pl.recoil() + sway.y
+	var yaw := _look_yaw + sway.x - pl.recoil_h()
 	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, yaw + PI, 0.0)), pl.eye_position())
 	_ads_cam.global_position += _ads_cam.global_basis * Vector3(_rng.randf_range(-s, s), _rng.randf_range(-s, s), 0.0) * 0.15
 	# пули летят туда, куда смотрит прицел, — с раскачкой
 	pl.look_yaw = yaw
-	pl.look_pitch = _look_pitch + sway.y
+	# пули летят туда, куда сейчас смотрит ствол: с отдачей и раскачкой
+	pl.look_pitch = pitch
 	# модель в руках с обвесами: линия прицеливания на оси взгляда, рукоять — на ads_z перед глазом
 	var vm_key := wid + str(pl.weapon_mods)
 	if _viewmodel_id != vm_key:
@@ -236,8 +243,10 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# «довод»: пока ствол не дошёл (aim_time по эргономике), модель ниже линии и чуть ближе
 	var lift := (1.0 - pl.aim_progress()) * 0.035
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
-	_viewmodel.transform = Transform3D(Basis(Vector3.UP, PI).rotated(Vector3.RIGHT, pl.recoil() * 0.35),
-		Vector3(0.0, -sh - lift, -az + pl.recoil() * 0.12 + lift * 0.5))
+	# толчок в плечо: модель откатывается назад, дуло подскакивает, чуть заваливается; пружиной обратно
+	var kv := pl.kick_vis
+	var vm_basis := Basis(Vector3.UP, PI).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5)
+	_viewmodel.transform = Transform3D(vm_basis, Vector3(0.0, -sh - lift + kv * 0.004, -az + kv * 0.028 + lift * 0.5))
 	_set_scope(scoped and _viewmodel.has_meta("ocular"))
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)

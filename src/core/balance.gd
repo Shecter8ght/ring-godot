@@ -94,7 +94,13 @@ const HURT_SHAKE := 0.35
 const SHAKE_DECAY := 9.0
 ## Отдача: подброс ствола (корпуса) вверх, рад, и возврат, 1/с.
 const RECOIL_KICK := 0.12
-const RECOIL_RETURN := 14.0
+const RECOIL_RETURN := 6.0
+## Раскачка разброса очередью: за выстрел прибавка = подброс × RECOIL_BLOOM, потолок, спад в секунду;
+## в прицеле раскачка — эта доля.
+const RECOIL_BLOOM := 10.0
+const RECOIL_BLOOM_MAX := 1.5
+const RECOIL_BLOOM_DECAY := 2.5
+const RECOIL_BLOOM_ADS := 0.4
 ## Хитмаркер у курсора, с.
 const HITMARKER_SEC := 0.14
 
@@ -118,20 +124,23 @@ const PISTOL := {"damage": 22.0, "interval": 0.22, "mag": 8, "reload": 1.8, "spr
 
 # --- Оружие игрока ---
 ## auto — зажим ЛКМ стреляет очередью; interval — с между выстрелами (у болтовки/помпы — с
-## передёргиванием); pellets — сколько лучей за выстрел (дробь); kick — подброс ствола, рад;
-## shake — тряска камеры; sound/reload_sound/cycle_sound — виды звука в Audio.
+## передёргиванием); pellets — сколько лучей за выстрел (дробь); shake — тряска камеры;
+## sound/reload_sound/cycle_sound — виды звука в Audio.
+## Отдача (натуральная): kick — подброс ствола за выстрел, рад; kick_h — увод вбок (случайно ±,
+## со сдвигом kick_bias: плюс — вправо, у АК ствол уходит вправо-вверх); recover — какую долю
+## подброса руки возвращают сами (остальное остаётся — очередь «ползёт», её тянут мышью вниз).
 const WEAPONS := {
 	"pistol": {"name": "Пистолет", "damage": 22.0, "interval": 0.16, "mag": 12, "reload": 1.6, "spread_deg": 1.4,
-		"pellets": 1, "auto": false, "range_m": 60.0, "noise_m": 60.0, "kick": 0.1, "shake": 0.1,
+		"pellets": 1, "auto": false, "range_m": 60.0, "noise_m": 60.0, "kick": 0.05, "kick_h": 0.014, "kick_bias": 0.2, "recover": 0.8, "shake": 0.12,
 		"sound": "shot_pistol", "reload_sound": "reload_pistol", "cycle_sound": "", "ergo": 72},
 	"rifle": {"name": "Автомат", "damage": 19.0, "interval": 0.1, "mag": 30, "reload": 2.4, "spread_deg": 2.0,
-		"pellets": 1, "auto": true, "range_m": 90.0, "noise_m": 80.0, "kick": 0.055, "shake": 0.07,
+		"pellets": 1, "auto": true, "range_m": 90.0, "noise_m": 80.0, "kick": 0.026, "kick_h": 0.014, "kick_bias": 0.35, "recover": 0.3, "shake": 0.09,
 		"sound": "shot_rifle", "reload_sound": "reload_rifle", "cycle_sound": "", "ergo": 44},
 	"shotgun": {"name": "Дробовик", "damage": 12.0, "interval": 0.8, "mag": 6, "reload": 3.0, "spread_deg": 5.5,
-		"pellets": 8, "auto": false, "range_m": 35.0, "noise_m": 75.0, "kick": 0.3, "shake": 0.3,
+		"pellets": 8, "auto": false, "range_m": 35.0, "noise_m": 75.0, "kick": 0.09, "kick_h": 0.022, "kick_bias": 0.1, "recover": 0.6, "shake": 0.32,
 		"sound": "shot_shotgun", "reload_sound": "reload_shotgun", "cycle_sound": "reload_shotgun", "ergo": 40},
 	"bolt": {"name": "Винтовка", "damage": 95.0, "interval": 1.3, "mag": 5, "reload": 3.2, "spread_deg": 1.6,
-		"pellets": 1, "auto": false, "range_m": 160.0, "noise_m": 120.0, "kick": 0.35, "shake": 0.35,
+		"pellets": 1, "auto": false, "range_m": 160.0, "noise_m": 120.0, "kick": 0.08, "kick_h": 0.012, "kick_bias": 0.0, "recover": 0.75, "shake": 0.35,
 		"sound": "shot_bolt", "reload_sound": "reload_rifle", "cycle_sound": "bolt", "ergo": 30, "zoom": 6.0},
 }
 ## Эргономика (0–100, WeaponStats): время «довода» в прицел и раскачка прицела, от худшей к лучшей.

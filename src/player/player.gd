@@ -49,6 +49,10 @@ var reload_timer: float = 0.0
 var _step_timer: float = 0.0
 ## Текущий подброс ствола от отдачи, рад — гаснет к нулю.
 var _recoil: float = 0.0
+## Отдача: уход вбок (временный, рад), раскачка разброса, толчок модели в руках (0…, пружина).
+var _recoil_h: float = 0.0
+var _bloom: float = 0.0
+var kick_vis: float = 0.0
 var _rng := RandomNumberGenerator.new()
 var _hand: Node3D
 var _weapon_model: Node3D
@@ -142,6 +146,10 @@ func recoil() -> float:
 	return _recoil
 
 
+func recoil_h() -> float:
+	return _recoil_h
+
+
 func stance_key() -> String:
 	return _stance_key()
 
@@ -229,7 +237,27 @@ func _physics_process(delta: float) -> void:
 		_face_cursor(delta)
 	_footsteps(delta)
 	_recoil = move_toward(_recoil, 0.0, Balance.RECOIL_RETURN * _recoil * delta + 0.02 * delta)
+	_recoil_h = move_toward(_recoil_h, 0.0, Balance.RECOIL_RETURN * absf(_recoil_h) * delta + 0.01 * delta)
+	_bloom = move_toward(_bloom, 0.0, Balance.RECOIL_BLOOM_DECAY * delta)
+	kick_vis = move_toward(kick_vis, 0.0, 9.0 * kick_vis * delta + 0.2 * delta)
 	_body.rotation.x = -_recoil * 0.4
+
+
+## Отдача выстрела: подброс и увод вбок. В прицеле невозвращаемая доля уходит во взгляд навсегда
+## (очередь ползёт вверх — тяни вниз), возвращаемая — временно; от бедра — раскачка разброса.
+func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
+	var k := float(spec.braced_kick) if braced else 1.0
+	var kv := float(spec.kick) * k * _rng.randf_range(0.85, 1.15)
+	var kh := float(spec.get("kick_h", 0.0)) * k * (_rng.randf_range(-1.0, 1.0) + float(spec.get("kick_bias", 0.0)))
+	var back := float(spec.get("recover", 0.5))
+	if ads and rig:
+		rig.add_recoil(kv * (1.0 - back), kh * (1.0 - back))
+		_recoil += kv * back
+		_recoil_h += kh * back
+	else:
+		_recoil += kv
+	_bloom += kv * Balance.RECOIL_BLOOM
+	kick_vis += clampf(kv / 0.05, 0.3, 1.8)
 
 
 ## Оружие в правой руке у груди, повёрнуто с корпусом; высота — по стойке.
@@ -417,6 +445,8 @@ func _fire(spec: Dictionary) -> void:
 	var mult := lerpf(hip, float(spec.ads_spread), aim_progress()) if ads else hip
 	var braced := stance != Stance.STAND
 	var spread: float = float(spec.spread_deg) * mult * (float(spec.braced_spread) if braced else 1.0)
+	# очередь раскачивает: от бедра сильно, в прицеле — меньше (ствол ведут глазами)
+	spread *= 1.0 + minf(_bloom, Balance.RECOIL_BLOOM_MAX) * (Balance.RECOIL_BLOOM_ADS if ads else 1.0)
 	var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DEBRIS
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig
@@ -433,7 +463,7 @@ func _fire(spec: Dictionary) -> void:
 			elif c is Marauder:
 				rig.show_hitmarker(not ((c as Marauder).get_node("Health") as Health).alive)
 				marked = true
-	_recoil += float(spec.kick) * (float(spec.braced_kick) if braced else 1.0)
+	_apply_recoil(spec, braced, rig)
 	if rig:
 		rig.add_shake(float(spec.shake))
 	# глушитель: без вспышки, тише и слышно ближе

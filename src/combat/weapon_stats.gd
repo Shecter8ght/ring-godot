@@ -29,6 +29,7 @@ static func compute(weapon_id: String, mods: Dictionary) -> Dictionary:
 	for slot in mods:
 		var fx: Dictionary = (ItemDb.item(String(mods[slot])).get("mod", {}) as Dictionary).get("fx", {})
 		s.kick = float(s.kick) * float(fx.get("kick", 1.0))
+		s.kick_h = float(s.get("kick_h", 0.0)) * float(fx.get("kick", 1.0))
 		s.shake = float(s.shake) * float(fx.get("shake", 1.0))
 		s.spread_deg = float(s.spread_deg) * float(fx.get("spread", 1.0))
 		s.ads_spread = float(s.ads_spread) * float(fx.get("ads_spread", 1.0))
@@ -61,7 +62,7 @@ static func rows(s: Dictionary) -> Array:
 		["Скорострельность", 60.0 / float(s.interval), clampf(60.0 / float(s.interval) / 7.0, 0.0, 100.0), true, "%.0f выстр/мин"],
 		["Точность от бедра", _acc(float(s.spread_deg) * float(s.hip_spread)), _acc(float(s.spread_deg) * float(s.hip_spread)), true, "%.0f"],
 		["Точность в прицеле", _acc(float(s.spread_deg) * float(s.ads_spread)), _acc(float(s.spread_deg) * float(s.ads_spread)), true, "%.0f"],
-		["Отдача", float(s.kick) * 250.0, clampf(float(s.kick) * 250.0, 0.0, 100.0), false, "%.0f"],
+		["Отдача", float(s.kick) * 1100.0, clampf(float(s.kick) * 1100.0, 0.0, 100.0), false, "%.0f"],
 		["Эргономика", float(s.ergo), float(s.ergo), true, "%.0f"],
 		["Шумность", float(s.noise_m), clampf(float(s.noise_m) / 1.3, 0.0, 100.0), false, "%.0f м"],
 		["Дальность", float(s.range_m), clampf(float(s.range_m) / 1.7, 0.0, 100.0), true, "%.0f м"],
