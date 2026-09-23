@@ -24,6 +24,7 @@ var _viewmodel_id: String = ""
 var _dot: Control
 var _scope: Control
 var _weapon_label: Label
+var _compass: Compass
 
 @onready var _pivot: Node3D = $Pivot
 @onready var _camera: Camera3D = $Pivot/Camera3D
@@ -40,7 +41,7 @@ func _ready() -> void:
 	_ads_cam.name = "AdsCamera"
 	_ads_cam.top_level = true
 	_ads_cam.near = 0.05
-	_ads_cam.far = 400.0
+	_ads_cam.far = 900.0
 	add_child(_ads_cam)
 	_build_hud()
 
@@ -111,6 +112,9 @@ func _process(delta: float) -> void:
 		if _hitmarker.visible:
 			_hitmarker.position = get_viewport().get_mouse_position()
 	_update_hud(pl)
+	var cam := get_viewport().get_camera_3d()
+	if cam:
+		_compass.set_heading(cam.global_basis)
 
 
 func _process_iso(delta: float, s: float) -> void:
@@ -270,6 +274,69 @@ func _build_hud() -> void:
 	_weapon_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	_weapon_label.add_theme_constant_override("outline_size", 6)
 	layer.add_child(_weapon_label)
+	# компас — вверху по центру, и в изометрии, и в прицеле
+	_compass = Compass.new()
+	_compass.anchor_left = 0.5
+	_compass.anchor_right = 0.5
+	_compass.offset_left = -Balance.COMPASS_WIDTH * 0.5
+	_compass.offset_right = Balance.COMPASS_WIDTH * 0.5
+	_compass.offset_top = 10.0
+	_compass.offset_bottom = 58.0
+	_compass.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(_compass)
+
+
+## Полоса компаса: риски каждые 5°, крупнее каждые 15°, стороны света буквами, курс под центром.
+## Север — -Z мира (как на плане: docs/plans), восток — +X.
+class Compass extends Control:
+	const LETTERS := {0: "С", 45: "СВ", 90: "В", 135: "ЮВ", 180: "Ю", 225: "ЮЗ", 270: "З", 315: "СЗ"}
+	var heading: float = 0.0
+
+	## Курс по направлению взгляда камеры (горизонтальная проекция -Z базиса).
+	func set_heading(b: Basis) -> void:
+		var f := -b.z
+		f.y = 0.0
+		if f.length() < 0.001:
+			f = b.y
+			f.y = 0.0
+		var h := fposmod(rad_to_deg(atan2(f.x, -f.z)), 360.0)
+		if absf(h - heading) > 0.05:
+			heading = h
+			queue_redraw()
+
+	func _draw() -> void:
+		var w := size.x
+		var cx := w * 0.5
+		var span := Balance.COMPASS_SPAN_DEG
+		var ppd := w * 0.5 / span
+		var font := ThemeDB.fallback_font
+		var base_y := 16.0
+		draw_line(Vector2(0, base_y), Vector2(w, base_y), Color(1, 1, 1, 0.18), 1.0)
+		var start := int(floor((heading - span) / 5.0)) * 5
+		for deg in range(start, int(heading + span) + 5, 5):
+			var off := float(deg) - heading
+			if absf(off) > span:
+				continue
+			var x := cx + off * ppd
+			var fade := 1.0 - pow(absf(off) / span, 2.0)
+			var d := posmod(deg, 360)
+			var col := Color(0.92, 0.9, 0.84, 0.85 * fade)
+			if LETTERS.has(d):
+				var txt: String = LETTERS[d]
+				var fs := 18 if d % 90 == 0 else 14
+				var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+				draw_line(Vector2(x, base_y - 6), Vector2(x, base_y + 6), col, 2.0)
+				draw_string_outline(font, Vector2(x - tw * 0.5, base_y + 26), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 4, Color(0, 0, 0, 0.6 * fade))
+				draw_string(font, Vector2(x - tw * 0.5, base_y + 26), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+			elif d % 15 == 0:
+				draw_line(Vector2(x, base_y - 5), Vector2(x, base_y + 5), col, 1.5)
+			else:
+				draw_line(Vector2(x, base_y - 2), Vector2(x, base_y + 3), Color(col, col.a * 0.6), 1.0)
+		# метка центра и курс в градусах
+		draw_colored_polygon(PackedVector2Array([Vector2(cx - 5, 0), Vector2(cx + 5, 0), Vector2(cx, 7)]), Color(1, 0.85, 0.5, 0.95))
+		var hs := "%03d" % (int(round(heading)) % 360)
+		var hw := font.get_string_size(hs, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		draw_string(font, Vector2(cx - hw * 0.5, base_y + 44), hs, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 0.85, 0.5, 0.8))
 
 
 func _update_hud(pl: Player) -> void:
