@@ -36,6 +36,12 @@ func _ready() -> void:
 			await _look_dir(dir)
 			await _frames(10)
 			_save("scope_%s_%s" % [w[1], shot[0]])
+		if w[1] == "bolt":
+			# подсветка центра сетки — T
+			await _tap("flashlight")
+			await _frames(6)
+			_save("scope_bolt_illum")
+			await _tap("flashlight")
 		Input.action_release("aim")
 		await _frames(10)
 	# открытые прицельные из глаза: мушка в прорези целика, на фасад здания

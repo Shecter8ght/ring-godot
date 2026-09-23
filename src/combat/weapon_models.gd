@@ -320,6 +320,8 @@ static func _bolt(r: Node3D) -> void:
 	r.set_meta("muzzle", Vector3(0, 0.062, 0.801))
 	r.set_meta("sight_h", sy)
 	r.set_meta("ads_z", 0.13)
+	# сетка с подсветкой центра (включается T, как фонарь)
+	r.set_meta("reticle_illum", true)
 	# окуляр — сюда ложится картинка оптики (CameraRig: отдельный рендер)
 	r.set_meta("ocular", Vector3(0, sy, -0.0605))
 	r.set_meta("ocular_r", 0.0158)

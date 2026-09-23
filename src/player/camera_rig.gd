@@ -24,7 +24,6 @@ var _look_pitch: float = 0.0
 var _ads_cam: Camera3D
 var _viewmodel: Node3D
 var _viewmodel_id: String = ""
-var _dot: Control
 ## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
 var scope_active: bool = false
 var _scope_vp: SubViewport
@@ -188,7 +187,6 @@ func _set_ads(on: bool, pl: Player) -> void:
 	# отсечение за стенами — только из глаз: в изометрии стены у камеры растворены, и окклюдер
 	# спрятал бы то, что за невидимой стеной (в том числе игрока)
 	get_viewport().use_occlusion_culling = on
-	_dot.visible = on
 	if not on:
 		_set_scope(false)
 
@@ -242,8 +240,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		Vector3(0.0, -sh - lift, -az + pl.recoil() * 0.12 + lift * 0.5))
 	_set_scope(scoped and _viewmodel.has_meta("ocular"))
 	if scope_active:
-		_update_scope(float(spec.get("zoom", 4.0)))
-	_dot.visible = not scope_active
+		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
+		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
 
 
 ## Поле зрения глаз в прицеле: с оптикой — обычное (увеличение — в окуляре), иначе — по стволу.
@@ -306,8 +304,9 @@ func _set_scope(on: bool) -> void:
 
 ## Камера оптики — там же, где глаз, по той же оси; её поле зрения — чтобы в окуляре было
 ## увеличение zoom относительно основного вида. Окно — ровно на проекции окуляра.
-func _update_scope(zoom: float) -> void:
+func _update_scope(zoom: float, illum: bool = false) -> void:
 	_scope_zoom = zoom
+	(_scope_view.material as ShaderMaterial).set_shader_parameter("illum", 1.0 if illum else 0.0)
 	var ocular: Vector3 = _viewmodel.to_global(_viewmodel.get_meta("ocular"))
 	var r := float(_viewmodel.get_meta("ocular_r"))
 	_scope_cam.global_transform = _ads_cam.global_transform
@@ -386,6 +385,9 @@ uniform vec2 sun_uv = vec2(-9.0);
 uniform float sun_in = 0.0;
 uniform float sun_near = 0.0;
 uniform vec2 sun_dir = vec2(0.0, -1.0);
+// подсветка центра сетки: 0 — выкл, 1 — горит красным
+uniform float illum = 0.0;
+uniform vec3 illum_color = vec3(1.0, 0.12, 0.06);
 
 void fragment() {
 	vec2 c = UV - 0.5;
@@ -434,7 +436,14 @@ void fragment() {
 	float ay = abs(c.y);
 	float thin = step(ax, line_w) + step(ay, line_w);
 	float post = step(ax, line_w * 4.0) * step(0.2, ay) + step(ay, line_w * 4.0) * step(0.2, ax);
-	col = mix(col, vec3(0.01), clamp(thin + post, 0.0, 1.0));
+	// центр перекрестия (нити ближе 0.16 от центра и точка) с подсветкой светится, дальше — чёрные
+	float centre = step(r, 0.32);
+	float reticle = clamp(thin + post, 0.0, 1.0);
+	vec3 ink = mix(vec3(0.01), illum_color * 2.2, illum * centre);
+	col = mix(col, ink, reticle);
+	float dot_c = step(length(c), line_w * 2.2);
+	col = mix(col, illum_color * 2.6, illum * dot_c);
+	col += illum_color * illum * 0.35 * exp(-length(c) * 60.0);
 	col *= smoothstep(1.0, 0.72, r);
 	COLOR = vec4(col, 1.0 - smoothstep(0.97, 1.0, r));
 }
@@ -457,18 +466,7 @@ func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
-	# точка по центру в прицеле
-	_dot = Control.new()
-	_dot.set_anchors_preset(Control.PRESET_CENTER)
-	_dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_dot.visible = false
-	var d := ColorRect.new()
-	d.color = Color(1, 1, 1, 0.8)
-	d.size = Vector2(3, 3)
-	d.position = Vector2(-1.5, -1.5)
-	d.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_dot.add_child(d)
-	layer.add_child(_dot)
+	# точки по центру в прицеле нет: целятся по мушке, метке коллиматора или сетке оптики
 	_hitmarker = Control.new()
 	_hitmarker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hitmarker.visible = false
