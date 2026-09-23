@@ -38,6 +38,9 @@ var _ring: Dictionary = {}
 var _raid: Raid
 ## Перекрытия, спрятанные над игроком (паркинг, навесы): остаются только тенью.
 var _decks_hidden: Dictionary = {}
+## Где был свой игрок (задания «побывать в помещении»): проверка раз в полсекунды.
+var _visit_t: float = 0.0
+var _visited: Dictionary = {}
 
 @onready var _camera_rig: CameraRig = $CameraRig
 @onready var _hud: Control = $HUD/Root
@@ -343,10 +346,22 @@ func _update_decks() -> void:
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if hide else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 
+func _track_visit(delta: float) -> void:
+	_visit_t -= delta
+	if _visit_t > 0.0 or not Profile.pending_raid or not _local_player.is_alive():
+		return
+	_visit_t = 0.5
+	var id := String(SectorBuilder.owner_of(_rooms, _local_player.global_position).get("id", ""))
+	if id != "" and not _visited.has(id):
+		_visited[id] = true
+		Missions.on_visit(id)
+
+
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint() or _local_player == null:
 		return
 	_update_decks()
+	_track_visit(_delta)
 	# оружие, патроны и гранаты — в HUD камеры (CameraRig), здесь — здоровье
 	var status := "HP %d" % int(_local_player.health.hp)
 	if not _nav_baked:

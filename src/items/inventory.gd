@@ -10,6 +10,9 @@ const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистоле
 
 var items: Array = []
 var equipment: Dictionary = {}
+## Защищённый карман (модуль убежища): при смерти не выпадает — возвращается в профиль.
+var pocket: Array = []
+var pocket_grid: Vector2i = Vector2i.ZERO
 ## Хост выдал снаряжение из профиля (рейд из убежища) — владелец может заряжать магазины.
 var loadout_ready: bool = false
 
@@ -19,7 +22,7 @@ func _ready() -> void:
 		var sync := MultiplayerSynchronizer.new()
 		sync.name = "Sync"
 		var config := SceneReplicationConfig.new()
-		for prop in [".:items", ".:equipment", ".:loadout_ready"]:
+		for prop in [".:items", ".:equipment", ".:loadout_ready", ".:pocket", ".:pocket_grid"]:
 			var path := NodePath(prop)
 			config.add_property(path)
 			config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -71,13 +74,44 @@ func add_entry(entry: Dictionary) -> int:
 	return k
 
 
-## Кладёт экземпляр в конкретное место сетки (перетащили мышью); сколько положил (хост).
-func put_at(entry: Dictionary, x: int, y: int, r: bool) -> int:
-	var list := items.duplicate(true)
-	var k := ItemDb.put_at(list, entry, Balance.BACKPACK_GRID, x, y, r)
+## Кладёт экземпляр в конкретное место сетки into ("backpack" / "pocket"); сколько положил (хост).
+func put_at(entry: Dictionary, x: int, y: int, r: bool, into: String = "backpack") -> int:
+	var grid := pocket_grid if into == "pocket" else Balance.BACKPACK_GRID
+	if grid == Vector2i.ZERO:
+		return 0
+	var list := (pocket if into == "pocket" else items).duplicate(true)
+	var k := ItemDb.put_at(list, entry, grid, x, y, r)
 	if k > 0:
-		items = list
+		if into == "pocket":
+			pocket = list
+		else:
+			items = list
 	return k
+
+
+## Перенос между рюкзаком и карманом (или внутри одного) в клетку (x, y) (хост).
+func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> bool:
+	if src == dst:
+		if src == "pocket":
+			var pl := pocket.duplicate(true)
+			if not ItemDb.move_in(pl, pocket_grid, idx, x, y, r):
+				return false
+			pocket = pl
+			return true
+		return move(idx, x, y, r)
+	var from: Array = pocket if src == "pocket" else items
+	if idx < 0 or idx >= from.size():
+		return false
+	var k := put_at((from[idx] as Dictionary).duplicate(true), x, y, r, dst)
+	if k <= 0:
+		return false
+	var rest := from.duplicate(true)
+	ItemDb.remove_at(rest, idx, k)
+	if src == "pocket":
+		pocket = rest
+	else:
+		items = rest
+	return true
 
 
 ## Передвинуть запись idx внутри рюкзака (хост).

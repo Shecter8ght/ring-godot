@@ -461,8 +461,12 @@ func _fire(spec: Dictionary) -> void:
 				rig.show_hitmarker(hit.position.y - (c as Target).global_position.y >= (c as Target).head_height - 0.25)
 				marked = true
 			elif c is Marauder:
-				rig.show_hitmarker(not ((c as Marauder).get_node("Health") as Health).alive)
+				var killed := not ((c as Marauder).get_node("Health") as Health).alive
+				rig.show_hitmarker(killed)
 				marked = true
+				# задание «убить N» — только в рейде из убежища, засчитывает тот, чья пуля добила
+				if killed and Profile.pending_raid:
+					Missions.on_kill()
 	_apply_recoil(spec, braced, rig)
 	if rig:
 		rig.add_shake(float(spec.shake))

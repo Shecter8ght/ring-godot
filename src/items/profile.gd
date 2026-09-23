@@ -27,6 +27,13 @@ static var extractions: int = 0
 ## Открытые маршруты (id этажей из data/floors.json) и выбранный для следующего рейда.
 static var floors_open: Array = ["f1"]
 static var floor: String = "f1"
+## Модули убежища: id -> уровень (см. Upgrades, data/hideout.json).
+static var modules: Dictionary = {}
+## Задания: взятые (id -> счётчик) и сданные (см. Missions).
+static var missions_active: Dictionary = {}
+static var missions_done: Array = []
+## Защищённый карман: что в нём — не теряется при смерти (сетка — по модулю «карман»).
+static var pocket: Array = []
 static var _loaded: bool = false
 
 
@@ -41,6 +48,7 @@ static func ensure() -> void:
 		stash = d.get("stash", [])
 		equipment = d.get("equipment", {})
 		backpack = d.get("backpack", [])
+		pocket = d.get("pocket", [])
 		trust = int(d.get("trust", 0))
 		extractions = int(d.get("extractions", 0))
 		floors_open = d.get("floors_open", ["f1"])
@@ -49,6 +57,13 @@ static func ensure() -> void:
 		floor = String(d.get("floor", "f1"))
 		if not floor in floors_open:
 			floor = "f1"
+		modules = d.get("modules", {})
+		for k in modules:
+			modules[k] = int(modules[k])
+		missions_active = d.get("missions_active", {})
+		for k in missions_active:
+			missions_active[k] = int(missions_active[k])
+		missions_done = d.get("missions_done", [])
 		_fix_numbers()
 		_fit_grids()
 	else:
@@ -62,31 +77,38 @@ static func _starter() -> void:
 	stash = []
 	equipment = {}
 	backpack = []
+	pocket = []
 	trust = 0
 	extractions = 0
 	floors_open = ["f1"]
 	floor = "f1"
+	modules = {}
+	missions_active = {}
+	missions_done = []
 	for pair in Balance.START_STASH:
-		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), Balance.STASH_GRID)
+		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), stash_grid())
 
 
 ## JSON отдаёт числа как float — количества делаем целыми.
 static func _fix_numbers() -> void:
-	for list in [stash, backpack]:
+	for list in [stash, backpack, pocket]:
 		for it in list:
 			it.n = int(it.n)
 	for slot in equipment:
 		equipment[slot].n = 1
 
 
-## Тайник и рюкзак — сетки: записи без мест (старый профиль, вернувшиеся патроны) раскладываются
-## заново; что не влезло в рюкзак — в тайник, что не влезло в тайник — теряется (с предупреждением).
+## Тайник, рюкзак и карман — сетки: записи без мест (старый профиль, вернувшиеся патроны)
+## раскладываются заново; что не влезло в рюкзак или карман — в тайник, что не влезло в тайник —
+## теряется (с предупреждением).
 static func _fit_grids() -> void:
-	if not ItemDb.grid_ok(backpack, Balance.BACKPACK_GRID):
-		for e in ItemDb.pack(backpack, Balance.BACKPACK_GRID):
-			ItemDb.add_to(stash, e, Balance.STASH_GRID)
-	if not ItemDb.grid_ok(stash, Balance.STASH_GRID):
-		var lost := ItemDb.pack(stash, Balance.STASH_GRID)
+	for name in ["backpack", "pocket"]:
+		var list := list_of(name)
+		if not ItemDb.grid_ok(list, grid_of(name)):
+			for e in ItemDb.pack(list, grid_of(name)):
+				ItemDb.add_to(stash, e, stash_grid())
+	if not ItemDb.grid_ok(stash, stash_grid()):
+		var lost := ItemDb.pack(stash, stash_grid())
 		if not lost.is_empty():
 			push_warning("Profile: тайник переполнен, не поместилось: %s" % str(lost))
 
@@ -97,7 +119,8 @@ static func save() -> void:
 		push_error("Profile: не удалось записать " + path)
 		return
 	f.store_string(JSON.stringify({"money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
-		"trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor}, "  "))
+		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
+		"modules": modules, "missions_active": missions_active, "missions_done": missions_done}, "  "))
 
 
 ## Тесты: свой файл и чистый старт.
@@ -118,6 +141,45 @@ static func equipped_weapon() -> String:
 	return ""
 
 
+## Уровень доверия Михалыча (1–4) по очкам (Balance.TRUST_LEVELS).
+static func trust_level() -> int:
+	var lv := 0
+	for t in Balance.TRUST_LEVELS:
+		if trust >= int(t):
+			lv += 1
+	return maxi(lv, 1)
+
+
+## Сетка тайника — растёт с модулем «тайник».
+static func stash_grid() -> Vector2i:
+	var lv := clampi(int(modules.get("stash", 1)), 1, Balance.STASH_ROWS.size())
+	return Vector2i(Balance.STASH_GRID.x, int(Balance.STASH_ROWS[lv - 1]))
+
+
+## Сетка защищённого кармана (ZERO — кармана ещё нет).
+static func pocket_grid() -> Vector2i:
+	var lv := clampi(int(modules.get("pocket", 0)), 0, Balance.POCKET_GRIDS.size() - 1)
+	return Balance.POCKET_GRIDS[lv]
+
+
+static func list_of(name: String) -> Array:
+	match name:
+		"backpack":
+			return backpack
+		"pocket":
+			return pocket
+	return stash
+
+
+static func grid_of(name: String) -> Vector2i:
+	match name:
+		"backpack":
+			return Balance.BACKPACK_GRID
+		"pocket":
+			return pocket_grid()
+	return stash_grid()
+
+
 static func stash_cells() -> int:
 	return ItemDb.cells_of(stash)
 
@@ -126,30 +188,58 @@ static func backpack_cells() -> int:
 	return ItemDb.cells_of(backpack)
 
 
+## Сколько штук id в тайнике (все стопки).
+static func stash_count(id: String) -> int:
+	var c := 0
+	for e in stash:
+		if String(e.id) == id:
+			c += int(e.n)
+	return c
+
+
+## Забрать из тайника n штук id (детали на модули, сдача заданий); сколько забрал.
+static func take_from_stash(id: String, n: int) -> int:
+	var left := n
+	var i := stash.size() - 1
+	while i >= 0 and left > 0:
+		if String(stash[i].id) == id:
+			left -= int(ItemDb.remove_at(stash, i, left).n)
+		i -= 1
+	save()
+	return n - left
+
+
 # ---------------------------------------------------------------- убежище
 
-## Передвинуть запись внутри тайника или рюкзака (перетащили мышью).
-static func move_in(in_backpack: bool, idx: int, x: int, y: int, r: bool) -> bool:
-	var ok := ItemDb.move_in(backpack if in_backpack else stash, Balance.BACKPACK_GRID if in_backpack else Balance.STASH_GRID, idx, x, y, r)
+## Передвинуть запись внутри сетки name ("stash" / "backpack" / "pocket").
+static func move_in(name: String, idx: int, x: int, y: int, r: bool) -> bool:
+	var ok := ItemDb.move_in(list_of(name), grid_of(name), idx, x, y, r)
 	if ok:
 		save()
 	return ok
 
 
-## Перенести запись idx между тайником и рюкзаком прямо в место (x, y); false — не влезло.
-static func transfer_to(from_backpack: bool, idx: int, x: int, y: int, r: bool) -> bool:
-	var from: Array = backpack if from_backpack else stash
-	var to: Array = stash if from_backpack else backpack
-	var grid := Balance.STASH_GRID if from_backpack else Balance.BACKPACK_GRID
-	if idx < 0 or idx >= from.size():
+## Перенести запись idx из сетки from в сетку to прямо в место (x, y); false — не влезло.
+static func transfer(from: String, idx: int, to: String, x: int, y: int, r: bool) -> bool:
+	var src := list_of(from)
+	if idx < 0 or idx >= src.size() or grid_of(to) == Vector2i.ZERO:
 		return false
-	var e: Dictionary = (from[idx] as Dictionary).duplicate(true)
-	var k := ItemDb.put_at(to, e, grid, x, y, r)
+	var e: Dictionary = (src[idx] as Dictionary).duplicate(true)
+	var k := ItemDb.put_at(list_of(to), e, grid_of(to), x, y, r)
 	if k <= 0:
 		return false
-	ItemDb.remove_at(from, idx, k)
+	ItemDb.remove_at(src, idx, k)
 	save()
 	return true
+
+
+## Быстрый перенос (двойной клик / Ctrl): тайник → рюкзак, рюкзак и карман → тайник.
+static func quick_move(from: String, idx: int) -> bool:
+	var src := list_of(from)
+	if idx < 0 or idx >= src.size():
+		return false
+	var to := "backpack" if from == "stash" else "stash"
+	return _move(src, list_of(to), idx, int(src[idx].n), grid_of(to))
 
 
 ## Из тайника в рюкзак (n штук записи idx); false — не влезло.
@@ -158,7 +248,7 @@ static func stash_to_backpack(idx: int, n: int) -> bool:
 
 
 static func backpack_to_stash(idx: int, n: int) -> bool:
-	return _move(backpack, stash, idx, n, Balance.STASH_GRID)
+	return _move(backpack, stash, idx, n, stash_grid())
 
 
 static func _move(from: Array, to: Array, idx: int, n: int, cap: Vector2i) -> bool:
@@ -177,13 +267,13 @@ static func _move(from: Array, to: Array, idx: int, n: int, cap: Vector2i) -> bo
 
 ## Надеть из тайника; то, что было в слоте, — в тайник.
 static func equip_from_stash(idx: int) -> bool:
-	return equip_from(false, idx)
+	return equip_from("stash", idx)
 
 
 ## Надеть предмет из тайника или рюкзака; то, что было в слоте, — туда же (не влезло — в тайник).
-static func equip_from(in_backpack: bool, idx: int) -> bool:
-	var src: Array = backpack if in_backpack else stash
-	var grid := Balance.BACKPACK_GRID if in_backpack else Balance.STASH_GRID
+static func equip_from(from: String, idx: int) -> bool:
+	var src := list_of(from)
+	var grid := grid_of(from)
 	if idx < 0 or idx >= src.size():
 		return false
 	var id := String(src[idx].id)
@@ -198,7 +288,7 @@ static func equip_from(in_backpack: bool, idx: int) -> bool:
 	if equipment.has(slot):
 		var old: Dictionary = equipment[slot]
 		if ItemDb.add_to(src, old, grid) == 0:
-			ItemDb.add_to(stash, old, Balance.STASH_GRID)
+			ItemDb.add_to(stash, old, stash_grid())
 	equipment[slot] = entry
 	save()
 	return true
@@ -208,20 +298,20 @@ static func unequip(slot: String) -> bool:
 	if not equipment.has(slot):
 		return false
 	var probe: Dictionary = equipment[slot]
-	if ItemDb.room_in(stash, probe, Balance.STASH_GRID) <= 0:
+	if ItemDb.room_in(stash, probe, stash_grid()) <= 0:
 		return false
-	ItemDb.add_to(stash, probe, Balance.STASH_GRID)
+	ItemDb.add_to(stash, probe, stash_grid())
 	equipment.erase(slot)
 	save()
 	return true
 
 
 ## Снять прямо в место (x, y) тайника или рюкзака (перетащили из слота в сетку).
-static func unequip_to(slot: String, to_backpack: bool, x: int, y: int, r: bool) -> bool:
-	if not equipment.has(slot):
+static func unequip_to(slot: String, to_name: String, x: int, y: int, r: bool) -> bool:
+	if not equipment.has(slot) or grid_of(to_name) == Vector2i.ZERO:
 		return false
-	var to: Array = backpack if to_backpack else stash
-	var grid := Balance.BACKPACK_GRID if to_backpack else Balance.STASH_GRID
+	var to := list_of(to_name)
+	var grid := grid_of(to_name)
 	if ItemDb.put_at(to, equipment[slot], grid, x, y, r) <= 0:
 		return false
 	equipment.erase(slot)
@@ -249,14 +339,24 @@ static func install_mod(weapon_slot: String, idx: int, from_backpack: bool = fal
 	if not ItemDb.mod_fits(mod, String(weapon.id)):
 		return false
 	var slot := String(ItemDb.mod_spec(mod).slot)
+	if mod_block(mod) != "":
+		return false
 	ItemDb.remove_at(src, idx, 1)
 	var mods: Dictionary = weapon.get("mods", {}).duplicate()
 	if mods.has(slot):
-		ItemDb.add_to(src, ItemDb.make(String(mods[slot]), 1), Balance.BACKPACK_GRID if from_backpack else Balance.STASH_GRID)
+		ItemDb.add_to(src, ItemDb.make(String(mods[slot]), 1), Balance.BACKPACK_GRID if from_backpack else stash_grid())
 	mods[slot] = mod
 	weapon["mods"] = mods
 	save()
 	return true
+
+
+## Почему обвес нельзя поставить на верстаке этого уровня ("" — можно).
+static func mod_block(mod: String) -> String:
+	var need := int(Balance.WORKBENCH_SLOT_LEVEL.get(String(ItemDb.mod_spec(mod).get("slot", "")), 1))
+	if Upgrades.level("workbench") < need:
+		return "нужен верстак %d" % need
+	return ""
 
 
 static func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
@@ -264,9 +364,9 @@ static func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
 	if not mods.has(mod_slot):
 		return false
 	var e := ItemDb.make(String(mods[mod_slot]), 1)
-	if ItemDb.room_in(stash, e, Balance.STASH_GRID) <= 0:
+	if ItemDb.room_in(stash, e, stash_grid()) <= 0:
 		return false
-	ItemDb.add_to(stash, e, Balance.STASH_GRID)
+	ItemDb.add_to(stash, e, stash_grid())
 	mods.erase(mod_slot)
 	(equipment[weapon_slot] as Dictionary)["mods"] = mods
 	save()
@@ -285,10 +385,10 @@ static func sell_price(entry: Dictionary) -> int:
 
 static func buy(id: String, n: int) -> bool:
 	var cost := buy_price(id) * n
-	if cost > money or ItemDb.room_in(stash, ItemDb.make(id, n), Balance.STASH_GRID) < n:
+	if cost > money or ItemDb.room_in(stash, ItemDb.make(id, n), stash_grid()) < n:
 		return false
 	money -= cost
-	ItemDb.add_to(stash, ItemDb.make(id, n), Balance.STASH_GRID)
+	ItemDb.add_to(stash, ItemDb.make(id, n), stash_grid())
 	save()
 	return true
 
@@ -309,11 +409,21 @@ static func sell(idx: int, n: int) -> bool:
 ## Вход в рейд: снаряжение и рюкзак уходят с профиля (на кону), возвращаются при эвакуации.
 static func take_loadout() -> Dictionary:
 	ensure()
-	var out := {"equipment": equipment.duplicate(true), "backpack": backpack.duplicate(true)}
+	var out := {"equipment": equipment.duplicate(true), "backpack": backpack.duplicate(true),
+		"pocket": pocket.duplicate(true), "pocket_grid": pocket_grid()}
 	equipment = {}
 	backpack = []
 	save()
 	return out
+
+
+## Карман после рейда — и после эвакуации, и после смерти (он не теряется).
+static func set_pocket(items: Array) -> void:
+	ensure()
+	pocket = items.duplicate(true)
+	_fix_numbers()
+	_fit_grids()
+	save()
 
 
 ## Эвакуировался: снаряжение надето, вынесенное — в рюкзаке (разложить по тайнику — в убежище).

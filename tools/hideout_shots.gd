@@ -20,7 +20,7 @@ func _ready() -> void:
 	await _frames(240)
 	_save("hideout")
 	var level := get_tree().current_scene
-	for kind in [HideoutStation.Kind.STASH, HideoutStation.Kind.TRADER, HideoutStation.Kind.EXIT, HideoutStation.Kind.WORKBENCH]:
+	for kind in [HideoutStation.Kind.STASH, HideoutStation.Kind.TRADER, HideoutStation.Kind.EXIT, HideoutStation.Kind.WORKBENCH, HideoutStation.Kind.UPGRADES]:
 		for st in get_tree().get_nodes_in_group("interactables"):
 			if st is HideoutStation and (st as HideoutStation).kind == kind:
 				level.call("open_station", st)

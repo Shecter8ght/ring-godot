@@ -5,7 +5,7 @@ extends Interactable
 ## верстак (обвесы на надетое оружие).
 ## Ставится руками в сцену убежища и двигается мышкой; окно — HideoutUI.
 
-enum Kind { STASH, TRADER, EXIT, WORKBENCH }
+enum Kind { STASH, TRADER, EXIT, WORKBENCH, UPGRADES }
 
 @export var kind: Kind = Kind.STASH
 @export var display_name: String = "Тайник":

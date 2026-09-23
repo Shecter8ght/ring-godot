@@ -44,9 +44,22 @@ func _ready() -> void:
 		"маг %d, шум %.0f→%.0f, отдача %.3f→%.3f, эрго %.0f→%.0f" % [int(st.mag), float(st0.noise_m), float(st.noise_m), float(st0.kick), float(st.kick), float(st0.ergo), float(st.ergo)])
 	Profile.install_mod("primary", _idx("w_pistol")) # не обвес — не ставится
 	_check("чужое на верстак не ставится", Profile.weapon_mods("primary").size() == 3, "")
-	# обвес из рюкзака: коллиматор на пистолет, потом снять (ляжет в тайник)
-	Profile.money += 20000
+	# модули убежища: верстак 1 не ставит прицелы; генератор + верстак 2 — ставит
+	Profile.money += 200000
 	Profile.buy("mod_rmr", 1)
+	_check("верстак 1: коллиматор нельзя", Profile.mod_block("mod_rmr") != "", Profile.mod_block("mod_rmr"))
+	_check("генератор без деталей не строится", Upgrades.block("generator") != "", Upgrades.block("generator"))
+	for pair in [["battery", 2], ["wires", 5], ["toolset", 1], ["cigarettes", 5], ["lighter", 2]]:
+		ItemDb.add_to(Profile.stash, ItemDb.make(String(pair[0]), int(pair[1])), Profile.stash_grid())
+	Profile.trust = 3
+	var built := Upgrades.build("generator") and Upgrades.build("workbench") and Upgrades.build("pocket")
+	_check("модули построены: генератор, верстак 2, карман 2×2 — детали ушли", built and Upgrades.level("workbench") == 2 and Profile.pocket_grid() == Vector2i(2, 2)
+		and Profile.stash_count("battery") == 0 and Profile.mod_block("mod_rmr") == "", str(Profile.modules))
+	Profile.trust = 0
+	# в карман — бинт: он поедет в рейд и вернётся
+	Profile.buy("bandage", 1)
+	Profile.transfer("stash", _idx("bandage"), "pocket", 0, 0, false)
+	# обвес из рюкзака: коллиматор на пистолет, потом снять (ляжет в тайник)
 	Profile.stash_to_backpack(_idx("mod_rmr"), 1)
 	var bi := -1
 	for i in range(Profile.backpack.size()):
@@ -55,6 +68,15 @@ func _ready() -> void:
 	Profile.install_mod("secondary", bi, true)
 	_check("верстак: обвес из рюкзака", String(Profile.weapon_mods("secondary").get("optic", "")) == "mod_rmr" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("secondary")))
 	Profile.remove_mod("secondary", "optic")
+	# задания: без рации — одно; убил троих — сдал за деньги и доверие
+	_check("задание взято, второе — нет (слот один без рации)", Missions.take("m_kills3") and not Missions.take("m_dock"), str(Profile.missions_active))
+	for i in range(3):
+		Missions.on_kill()
+	var mm := Profile.money
+	var tr := Profile.trust
+	_check("задание выполнено и сдано: деньги и доверие", Missions.turn_in("m_kills3") and Profile.money > mm and Profile.trust > tr and "m_kills3" in Profile.missions_done,
+		"%d ₽, доверие %d" % [Profile.money - mm, Profile.trust - tr])
+	Profile.trust = 0
 	# этажи: первый открыт и выбран, второй закрыт до доверия
 	_check("этажи: 1F открыт и выбран, 2F закрыт по доверию", Floors.is_open("f1") and Profile.floor == "f1" and not Floors.is_open("f2") and Floors.unlock_block("f2").begins_with("доверие")
 		and Floors.start_block("f1") == "", Floors.unlock_block("f2"))
@@ -100,6 +122,7 @@ func _ready() -> void:
 	_check("профиль: снаряжение вернулось", Profile.equipment.has("primary") and Profile.equipment.has("armor"), str(Profile.equipment.keys()))
 	_check("профиль: патроны из магазина вернулись в рюкзак", back_ammo == 35 + 45, "5.45: %d" % back_ammo)
 	_check("профиль: обвесы остались на автомате", Profile.weapon_mods("primary").size() == 3, str(Profile.weapon_mods("primary")))
+	_check("карман: вернулся после рейда", Profile.pocket.size() == 1 and String(Profile.pocket[0].id) == "bandage", str(Profile.pocket))
 	_check("эвакуация добавила доверия Михалыча", Profile.extractions == 1 and Profile.trust >= Balance.TRUST_PER_EXTRACTION, "доверие %d, выходов %d" % [Profile.trust, Profile.extractions])
 	# доверие набрано — маршрут на 2F открывается за деньги, но этаж ещё не собран
 	Profile.trust = 3

@@ -36,5 +36,21 @@
   "mod_flashlight",
   "mod_laser",
   "mod_bipod"
- ]
+ ],
+ "_trust_comment": "С какого уровня доверия Михалыч продаёт предмет (нет в списке — с первого).",
+ "trust": {
+  "vest_heavy": 2,
+  "mod_holo": 2,
+  "mod_scope4x": 2,
+  "mod_supp_545": 2,
+  "mod_stock_tele": 2,
+  "mod_laser": 2,
+  "w_shotgun": 2,
+  "w_bolt": 3,
+  "ammo_762r": 3,
+  "mod_supp_762": 3,
+  "mod_bipod": 3,
+  "mod_supp_12": 3,
+  "medkit": 2
+ }
 }

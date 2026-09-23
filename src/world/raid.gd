@@ -32,6 +32,7 @@ var over: bool = false
 var ui: InventoryUI
 ## Владелец уже записал итог рейда в профиль (эвакуация) — один раз.
 var _profile_saved: bool = false
+var _death_saved: bool = false
 var _drops: Node3D
 var _drop_spawner: MultiplayerSpawner
 var _drop_count: int = 0
@@ -219,9 +220,9 @@ func request_drop(id: String, n: int) -> void:
 ## Владелец: отдать хосту снаряжение из профиля (вызывает уровень при появлении игрока).
 func submit_loadout(lo: Dictionary) -> void:
 	if _is_host():
-		_give_loadout(multiplayer.get_unique_id(), lo.equipment, lo.backpack)
+		_give_loadout(multiplayer.get_unique_id(), lo.equipment, lo.backpack, lo.get("pocket", []), lo.get("pocket_grid", Vector2i.ZERO))
 	else:
-		_rpc_give_loadout.rpc_id(1, lo.equipment, lo.backpack)
+		_rpc_give_loadout.rpc_id(1, lo.equipment, lo.backpack, lo.get("pocket", []), lo.get("pocket_grid", Vector2i.ZERO))
 
 
 ## Потратить патроны/гранату из рюкзака (перезарядка, бросок).
@@ -240,12 +241,32 @@ func request_move(idx: int, x: int, y: int, r: bool) -> void:
 		_rpc_move_item.rpc_id(1, idx, x, y, r)
 
 
-## Из контейнера — запись idx прямо в клетку (x, y) рюкзака (перетащили мышью).
-func request_take_to(container: LootContainer, idx: int, x: int, y: int, r: bool) -> void:
+## Из контейнера — запись idx прямо в клетку (x, y) рюкзака или кармана (перетащили мышью).
+func request_take_to(container: LootContainer, idx: int, x: int, y: int, r: bool, into: String = "backpack") -> void:
 	if _is_host():
-		_take_to(multiplayer.get_unique_id(), container.get_path(), idx, x, y, r)
+		_take_to(multiplayer.get_unique_id(), container.get_path(), idx, x, y, r, into)
 	else:
-		_rpc_take_to.rpc_id(1, container.get_path(), idx, x, y, r)
+		_rpc_take_to.rpc_id(1, container.get_path(), idx, x, y, r, into)
+
+
+## Между рюкзаком и карманом (или внутри одного) — в клетку (x, y).
+func request_grid_move(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
+	if _is_host():
+		_grid_move(multiplayer.get_unique_id(), src, idx, dst, x, y, r)
+	else:
+		_rpc_grid_move.rpc_id(1, src, idx, dst, x, y, r)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_grid_move(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
+	if multiplayer.is_server():
+		_grid_move(multiplayer.get_remote_sender_id(), src, idx, dst, x, y, r)
+
+
+func _grid_move(peer_id: int, src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
+	var pl := player_of(peer_id)
+	if pl and pl.is_alive():
+		pl.inventory.move_between(src, idx, dst, x, y, r)
 
 
 ## Из рюкзака — запись idx в контейнер (перетащили в окно лута).
@@ -263,9 +284,9 @@ func _rpc_move_item(idx: int, x: int, y: int, r: bool) -> void:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_take_to(path: NodePath, idx: int, x: int, y: int, r: bool) -> void:
+func _rpc_take_to(path: NodePath, idx: int, x: int, y: int, r: bool, into: String) -> void:
 	if multiplayer.is_server():
-		_take_to(multiplayer.get_remote_sender_id(), path, idx, x, y, r)
+		_take_to(multiplayer.get_remote_sender_id(), path, idx, x, y, r, into)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -290,12 +311,12 @@ func _near_container(pl: Player, path: NodePath) -> LootContainer:
 	return c
 
 
-func _take_to(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool) -> void:
+func _take_to(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool, into: String = "backpack") -> void:
 	var pl := player_of(peer_id)
 	var c := _near_container(pl, path)
 	if c == null or idx < 0 or idx >= c.items.size():
 		return
-	var k := pl.inventory.put_at((c.items[idx] as Dictionary).duplicate(true), x, y, r)
+	var k := pl.inventory.put_at((c.items[idx] as Dictionary).duplicate(true), x, y, r, into)
 	if k > 0:
 		c.take_at(idx, k)
 		Audio.play("pin", c.global_position, -8.0)
@@ -324,7 +345,7 @@ func request_equip(idx: int) -> void:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_give_loadout(eq: Dictionary, items: Array) -> void:
+func _rpc_give_loadout(eq: Dictionary, items: Array, pocket: Array, pgrid: Vector2i) -> void:
 	if multiplayer.is_server():
 		_give_loadout(multiplayer.get_remote_sender_id(), eq, items)
 
@@ -387,12 +408,14 @@ func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
 
 
 ## Хост: снаряжение из профиля игрока (рейд из убежища) — в его рюкзак и слоты.
-func _give_loadout(peer_id: int, eq: Dictionary, items: Array) -> void:
+func _give_loadout(peer_id: int, eq: Dictionary, items: Array, pocket: Array = [], pgrid: Vector2i = Vector2i.ZERO) -> void:
 	var pl := player_of(peer_id)
 	if pl == null:
 		return
 	pl.inventory.items = items.duplicate(true)
 	pl.inventory.equipment = eq.duplicate(true)
+	pl.inventory.pocket_grid = pgrid
+	pl.inventory.pocket = pocket.duplicate(true)
 	pl.inventory.loadout_ready = true
 
 
@@ -469,6 +492,7 @@ func _process(delta: float) -> void:
 	_toast.visible = _toast_t > 0.0
 	_update_summary(me)
 	_save_profile(me)
+	_save_death(me)
 	if Profile.pending_raid:
 		# рейд из убежища: закончил (ушёл или погиб) — Enter возвращает в убежище
 		if me != null and (not me.is_alive() or is_extracted(me.peer_id)) and Input.is_action_just_pressed("ui_accept"):
@@ -586,6 +610,22 @@ func _save_profile(me: Player) -> void:
 			rest.n = int(e.n) - placed
 			items.append(rest)
 	Profile.return_loadout(me.inventory.equipment, items, int(loot_value.get(me.peer_id, 0)))
+	Profile.set_pocket(me.inventory.pocket)
+	# задание «уйти через точку»: в итоге рейда — видимое имя, задания знают имя узла
+	for e in get_tree().get_nodes_in_group("extractions"):
+		var ext := e as ExtractionPoint
+		if ext and ext.display_name == String(extracted.get(me.peer_id, "")):
+			Missions.on_extract(String(ext.name))
+			break
+
+
+## Погиб (свой игрок, рейд из убежища): карман остаётся с тобой, «выжить подряд» — заново.
+func _save_death(me: Player) -> void:
+	if _death_saved or me == null or not me.loadout_mode or me.is_alive():
+		return
+	_death_saved = true
+	Profile.set_pocket(me.inventory.pocket)
+	Missions.on_death()
 
 
 ## В убежище: из сети выходим, рейд забыт.

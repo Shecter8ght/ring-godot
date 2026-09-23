@@ -1070,6 +1070,11 @@ transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.00
 kind = 2
 display_name = "Выход в рейд"
 
+[node name="UpgradeStation" parent="Stations" instance=ExtResource("st")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.600, 0.900, 6.200)
+kind = 4
+display_name = "Модули убежища"
+
 [node name="Spawn" type="Marker3D" parent="."]
 transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 0.100, 4.500)
 

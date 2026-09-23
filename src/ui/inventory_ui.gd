@@ -221,7 +221,7 @@ func _refresh_visibility() -> void:
 ## Сетки перестраиваются, только когда содержимое изменилось.
 func _refresh_lists(me: Player) -> void:
 	if _backpack_open:
-		var sig := str(me.inventory.items) + str(me.inventory.equipment)
+		var sig := str(me.inventory.items) + str(me.inventory.equipment) + str(me.inventory.pocket)
 		if sig != _bp_sig:
 			_bp_sig = sig
 			_bp_title.text = "Рюкзак   %d / %d ячеек   ·   %s ₽" % [me.inventory.cells_used(), Balance.BACKPACK_CELLS, money(me.inventory.value())]
@@ -245,11 +245,23 @@ func _refresh_lists(me: Player) -> void:
 			hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			hint.add_theme_font_size_override("font_size", 13)
 			_bp_list.add_child(hint)
-			_bp_grid.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
-				if src == _bp_grid:
-					Raid.current.request_move(idx, x, y, r)
-				elif src.role == "loot" and _looting:
-					Raid.current.request_take_to(_looting, idx, x, y, r))
+			var grids: Array[GridView] = [_bp_grid]
+			# защищённый карман: что в нём — не выпадет при смерти
+			if me.inventory.pocket_grid != Vector2i.ZERO:
+				var pl := _row_label("Защищённый карман — не теряется при смерти", Color(0.95, 0.82, 0.6))
+				pl.add_theme_font_size_override("font_size", 14)
+				_bp_list.add_child(pl)
+				var pk := GridView.new(me.inventory.pocket_grid, "pocket")
+				pk.set_items(me.inventory.pocket)
+				_bp_list.add_child(pk)
+				grids.append(pk)
+			for g in grids:
+				var dst := g.role
+				g.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
+					if src.role == "loot" and _looting:
+						Raid.current.request_take_to(_looting, idx, x, y, r, dst)
+					elif src.role in ["backpack", "pocket"]:
+						Raid.current.request_grid_move(src.role, idx, dst, x, y, r))
 			_bp_grid.activated.connect(func(idx: int) -> void: _use_item(me, idx))
 			_bp_grid.quick_move.connect(func(idx: int) -> void:
 				if _looting:

@@ -6,7 +6,10 @@ extends CanvasLayer
 ##  выход — с чем идёшь, этаж и маршрут (открыть у Михалыча за доверие и деньги, см. Floors),
 ##  «Соло-рейд» или «Кооп (лобби)»;
 ##  верстак — обвесы на надетое оружие: витрина ствола, характеристики (сравнение с «голым»),
-##  слоты: что стоит (снять) и что из тайника подходит (поставить, с кратким эффектом).
+##  слоты: что стоит (снять) и что из тайника подходит (поставить, с кратким эффектом);
+##  какие слоты доступны — по уровню верстака (модуль убежища);
+##  модули убежища — уровни, что нужно на следующий (деньги, детали, доверие), «Построить».
+##  У торговца ещё и задания: взять, прогресс, сдать (деньги и доверие).
 ## Esc или Tab — закрыть.
 
 const TRADER_PATH := "res://data/trader.json"
@@ -95,8 +98,8 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory"):
 		close_ui()
 		return
-	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
-		Profile.floor, str(Profile.floors_open), Profile.trust]
+	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
+		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active)]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -111,14 +114,17 @@ func _process(_delta: float) -> void:
 			_build_exit()
 		HideoutStation.Kind.WORKBENCH:
 			_build_workbench()
+		HideoutStation.Kind.UPGRADES:
+			_build_upgrades()
 
 
 # ---------------------------------------------------------------- тайник
 
 func _build_stash() -> void:
 	_title.text = "Тайник и снаряжение   ·   %s ₽" % InventoryUI.money(Profile.money)
-	var stash_col := _column("Тайник   %d / %d ячеек" % [Profile.stash_cells(), Balance.STASH_CELLS], 1.25)
-	var stash := GridView.new(Balance.STASH_GRID, "stash")
+	var sg := Profile.stash_grid()
+	var stash_col := _column("Тайник   %d / %d ячеек" % [Profile.stash_cells(), sg.x * sg.y], 1.25)
+	var stash := GridView.new(sg, "stash")
 	stash.set_items(Profile.stash)
 	stash_col.add_child(stash)
 	var gear := _column("Снаряжение", 0.8)
@@ -126,49 +132,46 @@ func _build_stash() -> void:
 		var s := String(slot)
 		var sv := SlotView.new(s)
 		sv.set_entry(Profile.equipment.get(s, {}))
-		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role == "backpack", idx))
+		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role, idx))
 		sv.unequip_requested.connect(func() -> void: Profile.unequip(s))
 		gear.add_child(sv)
-	gear.add_child(_text("Тащи мышью · R — повернуть на лету
-Двойной клик — надеть / перенести
-Ctrl+клик — в другую сетку
-Правая кнопка — действия", Color(0.6, 0.62, 0.6)))
+	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
 	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)
 	var bp := GridView.new(Balance.BACKPACK_GRID, "backpack")
 	bp.set_items(Profile.backpack)
 	bp_col.add_child(bp)
-	for view in [stash, bp]:
-		var v: GridView = view
-		var in_bp := v == bp
+	var views: Array[GridView] = [stash, bp]
+	# защищённый карман — если модуль построен: не теряется при смерти
+	var pg := Profile.pocket_grid()
+	if pg != Vector2i.ZERO:
+		bp_col.add_child(_text("Защищённый карман %d×%d — не теряется при смерти" % [pg.x, pg.y], Color(0.95, 0.82, 0.6)))
+		var pk := GridView.new(pg, "pocket")
+		pk.set_items(Profile.pocket)
+		bp_col.add_child(pk)
+		views.append(pk)
+	else:
+		bp_col.add_child(_text("Защищённого кармана нет — строится в «Модулях убежища».", Color(0.55, 0.57, 0.55)))
+	for v in views:
+		var name := v.role
 		v.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
 			if src == v:
-				Profile.move_in(in_bp, idx, x, y, r)
+				Profile.move_in(name, idx, x, y, r)
 			else:
-				Profile.transfer_to(not in_bp, idx, x, y, r))
-		v.slot_dropped.connect(func(slot: String, x: int, y: int, r: bool) -> void: Profile.unequip_to(slot, in_bp, x, y, r))
-		v.quick_move.connect(func(idx: int) -> void: _quick_move(in_bp, idx))
+				Profile.transfer(src.role, idx, name, x, y, r))
+		v.slot_dropped.connect(func(slot: String, x: int, y: int, r: bool) -> void: Profile.unequip_to(slot, name, x, y, r))
+		v.quick_move.connect(func(idx: int) -> void: Profile.quick_move(name, idx))
 		v.activated.connect(func(idx: int) -> void:
-			var list: Array = Profile.backpack if in_bp else Profile.stash
+			var list := Profile.list_of(name)
 			if idx < list.size() and not ItemDb.equip(String(list[idx].id)).is_empty():
-				Profile.equip_from(in_bp, idx)
+				Profile.equip_from(name, idx)
 			else:
-				_quick_move(in_bp, idx))
-		v.context.connect(func(idx: int, at: Vector2) -> void: _stash_menu(in_bp, idx, at))
-
-
-func _quick_move(from_bp: bool, idx: int) -> void:
-	var list: Array = Profile.backpack if from_bp else Profile.stash
-	if idx >= list.size():
-		return
-	if from_bp:
-		Profile.backpack_to_stash(idx, int(list[idx].n))
-	else:
-		Profile.stash_to_backpack(idx, int(list[idx].n))
+				Profile.quick_move(name, idx))
+		v.context.connect(func(idx: int, at: Vector2) -> void: _stash_menu(name, idx, at))
 
 
 ## Правая кнопка по предмету: что с ним можно сделать.
-func _stash_menu(in_bp: bool, idx: int, at: Vector2) -> void:
-	var list: Array = Profile.backpack if in_bp else Profile.stash
+func _stash_menu(name: String, idx: int, at: Vector2) -> void:
+	var list := Profile.list_of(name)
 	if idx >= list.size():
 		return
 	var id := String(list[idx].id)
@@ -176,12 +179,12 @@ func _stash_menu(in_bp: bool, idx: int, at: Vector2) -> void:
 	var acts: Array[Callable] = []
 	if not ItemDb.equip(id).is_empty():
 		menu.add_item("Надеть" if not ItemDb.equip(id).has("weapon") else "Взять (слот оружия)")
-		acts.append(func() -> void: Profile.equip_from(in_bp, idx))
-	menu.add_item("В тайник" if in_bp else "В рюкзак")
-	acts.append(func() -> void: _quick_move(in_bp, idx))
+		acts.append(func() -> void: Profile.equip_from(name, idx))
+	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
+	acts.append(func() -> void: Profile.quick_move(name, idx))
 	if int(list[idx].n) > 1:
 		menu.add_item("Разделить стопку пополам")
-		acts.append(func() -> void: _split(in_bp, idx))
+		acts.append(func() -> void: _split(name, idx))
 	menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
 	menu.popup_hide.connect(menu.queue_free)
 	_root.add_child(menu)
@@ -189,9 +192,9 @@ func _stash_menu(in_bp: bool, idx: int, at: Vector2) -> void:
 
 
 ## Половину стопки — отдельной стопкой в свободное место той же сетки.
-func _split(in_bp: bool, idx: int) -> void:
-	var list: Array = Profile.backpack if in_bp else Profile.stash
-	var grid := Balance.BACKPACK_GRID if in_bp else Balance.STASH_GRID
+func _split(name: String, idx: int) -> void:
+	var list := Profile.list_of(name)
+	var grid := Profile.grid_of(name)
 	var e: Dictionary = list[idx]
 	var half := int(e.n) / 2
 	var spot := ItemDb.find_spot(ItemDb.occupancy(list, grid), grid, String(e.id))
@@ -210,8 +213,10 @@ func _split(in_bp: bool, idx: int) -> void:
 # ---------------------------------------------------------------- торговец
 
 func _build_trader() -> void:
-	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust]
+	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d (уровень %d)" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust, Profile.trust_level()]
+	_missions_column()
 	var shop := _column("Купить", 1.0)
+	var need_trust: Dictionary = _trader.get("trust", {})
 	for id in _trader.get("stock", []):
 		var sid := String(id)
 		# патроны — пачкой (стопка), остальное — поштучно
@@ -219,9 +224,14 @@ func _build_trader() -> void:
 		var price := Profile.buy_price(sid) * n
 		var e := ItemDb.make(sid, n)
 		var row := _row(e, price)
-		var b := _button("Купить", func() -> void: Profile.buy(sid, n))
-		b.disabled = price > Profile.money
-		row.add_child(b)
+		var tl := int(need_trust.get(sid, 1))
+		if Profile.trust_level() < tl:
+			# сильное Михалыч продаёт только тем, кому доверяет
+			row.add_child(_text("доверие %d" % tl, Color(0.8, 0.5, 0.4)))
+		else:
+			var b := _button("Купить", func() -> void: Profile.buy(sid, n))
+			b.disabled = price > Profile.money
+			row.add_child(b)
 		shop.add_child(row)
 	var sell := _column("Продать из тайника", 1.0)
 	for i in range(Profile.stash.size()):
@@ -232,6 +242,82 @@ func _build_trader() -> void:
 		sell.add_child(row)
 	if Profile.stash.is_empty():
 		sell.add_child(_text("тайник пуст", Color(0.6, 0.6, 0.6)))
+
+
+## Задания Михалыча: взятые (прогресс, «Сдать»), предложенные («Взять» — пока есть свободные слоты).
+func _missions_column() -> void:
+	var col := _column("Задания   %d / %d" % [Profile.missions_active.size(), Missions.slots()], 1.1)
+	for id in Profile.missions_active.keys():
+		var m := Missions.find(String(id))
+		var mid := String(id)
+		var head := HBoxContainer.new()
+		var t := _text(Missions.line(mid), Color(1.0, 0.86, 0.6))
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(t)
+		var b := _button("Сдать", func() -> void: Missions.turn_in(mid))
+		b.disabled = not Missions.done(mid)
+		head.add_child(b)
+		col.add_child(head)
+		var d := _text("   %s  ·  %s ₽, доверие +%d" % [String(m.text), InventoryUI.money(int(m.reward.get("money", 0))), int(m.reward.get("trust", 0))], Color(0.66, 0.68, 0.66))
+		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(d)
+	col.add_child(HSeparator.new())
+	var free := Missions.slots() - Profile.missions_active.size()
+	for m in Missions.offered():
+		var mid := String(m.id)
+		var head := HBoxContainer.new()
+		var t := _text(String(m.name), Color(0.9, 0.9, 0.86))
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(t)
+		var b := _button("Взять", func() -> void: Missions.take(mid))
+		b.disabled = free <= 0
+		head.add_child(b)
+		col.add_child(head)
+		var d := _text("   %s  ·  %s ₽, доверие +%d" % [String(m.text), InventoryUI.money(int(m.reward.get("money", 0))), int(m.reward.get("trust", 0))], Color(0.6, 0.62, 0.6))
+		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(d)
+	if free <= 0:
+		col.add_child(_text("Больше заданий — с рацией (модули убежища).", Color(0.55, 0.57, 0.55)))
+
+
+# ---------------------------------------------------------------- модули убежища
+
+func _build_upgrades() -> void:
+	_title.text = "Модули убежища   ·   %s ₽   ·   доверие Михалыча: уровень %d" % [InventoryUI.money(Profile.money), Profile.trust_level()]
+	var col := _column("Что построено и что дальше", 1.0)
+	for m in Upgrades.all():
+		var id := String(m.id)
+		var lv := Upgrades.level(id)
+		var mx := Upgrades.max_level(id)
+		var head := HBoxContainer.new()
+		var t := _text("%s   —   уровень %d из %d" % [String(m.name), lv, mx], Color(1.0, 0.86, 0.6))
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(t)
+		var cost := Upgrades.next_cost(id)
+		if not cost.is_empty():
+			var b := _button("Построить", func() -> void: Upgrades.build(id))
+			b.disabled = Upgrades.block(id) != ""
+			head.add_child(b)
+		col.add_child(head)
+		var what := _text("   " + String(m.what), Color(0.7, 0.72, 0.7))
+		what.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(what)
+		if lv > 0:
+			col.add_child(_text("   сейчас: " + String((m.levels as Array)[lv - 1].effect), Color(0.6, 0.85, 0.6)))
+		if not cost.is_empty():
+			var parts: Array[String] = []
+			if int(cost.get("money", 0)) > 0:
+				parts.append("%s ₽" % InventoryUI.money(int(cost.money)))
+			for pair in cost.get("items", []):
+				var have := Profile.stash_count(String(pair[0]))
+				parts.append("%s %d/%d" % [ItemDb.item_name(String(pair[0])), mini(have, int(pair[1])), int(pair[1])])
+			var next := _text("   дальше: %s  ←  %s" % [String(cost.effect), ",  ".join(parts)], Color(0.85, 0.8, 0.7))
+			next.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			col.add_child(next)
+			var why := Upgrades.block(id)
+			if why != "":
+				col.add_child(_text("   " + why, Color(0.85, 0.55, 0.45)))
+		col.add_child(HSeparator.new())
 
 
 # ---------------------------------------------------------------- выход
@@ -369,7 +455,11 @@ func _build_workbench() -> void:
 				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				row.add_child(l)
 				row.add_child(_text("рюкзак" if bp else "тайник", Color(0.55, 0.6, 0.65)))
-				row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx, bp)))
+				var why := Profile.mod_block(id)
+				if why != "":
+					row.add_child(_text(why, Color(0.8, 0.5, 0.4)))
+				else:
+					row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx, bp)))
 				right.add_child(row)
 		if not mods.has(sl) and not any:
 			right.add_child(_text("  пусто — подходящего в тайнике и рюкзаке нет", Color(0.5, 0.5, 0.5)))
