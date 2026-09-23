@@ -353,8 +353,9 @@ func _use_med(peer_id: int, id: String) -> void:
 
 ## Хост: положить на землю контейнер с вещами (тело, выброшенное). В сети — через спавнер,
 ## чтобы появился у всех; содержимое едет в данных спавна.
-func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look) -> void:
-	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look)}
+## toss — откуда предмет «вываливается» к месту pos (смещение; ноль — появляется на месте).
+func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look, toss: Vector3 = Vector3.ZERO) -> void:
+	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look), "toss": toss}
 	_drop_count += 1
 	if _drop_spawner:
 		_drop_spawner.spawn(data)
@@ -370,6 +371,7 @@ func _make_drop(data: Dictionary) -> Node:
 	c.look = int(data.look) as LootContainer.Look
 	c.items = (data.items as Array).duplicate(true)
 	c.rolled = true
+	c.toss_from = data.get("toss", Vector3.ZERO)
 	c.search_s = Balance.SEARCH_BODY_SEC
 	return c
 

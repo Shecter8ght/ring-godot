@@ -570,7 +570,7 @@ func _die() -> void:
 	away.y = 0.0
 	away = away.normalized() if away.length() > 0.01 else -Vector3(sin(body_yaw()), 0.0, cos(body_yaw()))
 	var push: Dictionary = Balance.RAGDOLL_DEATH_PUSH
-	var imp := (away + Vector3.UP * 0.25) * (float(push.base) + float(push.per_damage) * _last_damage)
+	var imp := away * (float(push.base) + float(push.per_damage) * _last_damage)
 	var xf := Transform3D(Basis(Vector3.UP, body_yaw()), global_position)
 	_ragdoll = Ragdoll.spawn(get_tree().current_scene, xf, velocity, imp, global_position + Vector3.UP * 1.25, mat, mat)
 	_body.visible = false

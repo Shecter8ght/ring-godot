@@ -53,8 +53,8 @@ static func spawn(parent: Node, xf: Transform3D, velocity: Vector3, impulse: Vec
 		var b := RagdollPart.new()
 		b.name = id
 		b.mass = float(spec[3])
-		b.linear_damp = 0.4
-		b.angular_damp = 2.5
+		b.linear_damp = float(Balance.RAGDOLL_DAMP.linear)
+		b.angular_damp = float(Balance.RAGDOLL_DAMP.angular)
 		b.collision_layer = Hitscan.LAYER_DEBRIS
 		b.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS
 		b.continuous_cd = true
@@ -93,7 +93,7 @@ static func spawn(parent: Node, xf: Transform3D, velocity: Vector3, impulse: Vec
 		b.add_child(mi)
 		rd.add_child(b)
 		b.global_transform = xf * Transform3D(Basis.IDENTITY, spec[2])
-		b.linear_velocity = velocity
+		b.linear_velocity = velocity * Balance.RAGDOLL_CARRY
 		rd.bodies[id] = b
 	for j in JOINTS:
 		var joint := Generic6DOFJoint3D.new()

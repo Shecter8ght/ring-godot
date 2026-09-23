@@ -379,7 +379,9 @@ func _ocular_material() -> ShaderMaterial:
 	sh.code = """
 shader_type canvas_item;
 uniform float line_w = 0.0018;
-uniform float ca = 0.014;
+uniform float ca = 0.035;
+uniform float barrel = 0.22;
+uniform float edge_blur = 0.006;
 uniform vec2 sun_uv = vec2(-9.0);
 uniform float sun_in = 0.0;
 uniform float sun_near = 0.0;
@@ -388,12 +390,24 @@ uniform vec2 sun_dir = vec2(0.0, -1.0);
 void fragment() {
 	vec2 c = UV - 0.5;
 	float r = length(c) * 2.0;
-	// аберрация: смещение каналов растёт квадратом радиуса
-	vec2 off = c * ca * r * r;
-	vec3 col = vec3(texture(TEXTURE, UV + off).r, texture(TEXTURE, UV).g, texture(TEXTURE, UV - off).b);
+	// бочка: к краю картинка сжимается (прямые выгибаются наружу), центр чуть увеличен
+	vec2 w = c * (1.0 + barrel * r * r) / (1.0 + barrel);
+	vec2 uv = 0.5 + w;
+	// аберрация: смещение каналов растёт квадратом радиуса (красный наружу, синий внутрь)
+	vec2 off = w * ca * r * r;
+	vec3 col = vec3(texture(TEXTURE, uv + off).r, texture(TEXTURE, uv).g, texture(TEXTURE, uv - off).b);
+	// к краю — мягче (кривизна поля): четыре отсчёта вокруг, вес растёт к краю
+	float soft = smoothstep(0.45, 0.95, r);
+	vec3 blur = vec3(0.0);
+	for (int k = 0; k < 4; k++) {
+		float a = float(k) * 1.5708 + 0.785;
+		vec2 o = vec2(cos(a), sin(a)) * edge_blur * soft;
+		blur += vec3(texture(TEXTURE, uv + off + o).r, texture(TEXTURE, uv + o).g, texture(TEXTURE, uv - off + o).b);
+	}
+	col = mix(col, blur * 0.25, soft * 0.8);
 	// кайма у края поля: холодная изнутри, тёплая снаружи
 	float rim = smoothstep(0.8, 0.97, r);
-	col += rim * vec3(0.05, 0.0, -0.03) * (0.5 + 0.5 * sin(r * 60.0));
+	col += rim * vec3(0.12, -0.02, -0.08) + smoothstep(0.88, 0.97, r) * vec3(-0.06, 0.02, 0.14);
 	// солнце в поле зрения: ядро, ореол, лучи-крест
 	vec2 s = sun_uv - 0.5;
 	vec2 q = c - s;

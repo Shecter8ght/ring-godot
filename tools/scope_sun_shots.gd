@@ -31,8 +31,8 @@ func _ready() -> void:
 		for shot in [["sun", half * 0.55], ["edge", half + 4.0], ["away", 60.0]]:
 			var dir := sun.rotated(Vector3.UP, deg_to_rad(float(shot[1])))
 			if shot[0] == "away":
-				# на горизонт с постройками — видно аберрацию на контрастных краях
-				dir = (dir + Vector3.DOWN * 0.16).normalized()
+				# на угол фасада здания: по сетке блокаута видно бочку, по краю — аберрацию
+				dir = (SectorBuilder.polar(-83.0, 125.0) + Vector3(0, 7.0, 0) - _player.eye_position()).normalized()
 			await _look_dir(dir)
 			await _frames(10)
 			_save("scope_%s_%s" % [w[1], shot[0]])

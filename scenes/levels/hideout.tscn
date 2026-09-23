@@ -323,8 +323,8 @@ metadata/color = Color(0.300, 0.350, 0.400, 1)
 [node name="Lounge" type="Node3D" parent="Geometry"]
 
 [node name="Rug" type="CSGBox3D" parent="Geometry/Lounge"]
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.010, -3.200)
-size = Vector3(5.200, 0.020, 3.600)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.010, -6.900)
+size = Vector3(4.600, 0.020, 3.400)
 metadata/color = Color(0.420, 0.100, 0.080, 1)
 metadata/cut = false
 
@@ -335,7 +335,7 @@ use_collision = true
 metadata/color = Color(0.240, 0.280, 0.200, 1)
 
 [node name="SofaBack" type="CSGBox3D" parent="Geometry/Lounge"]
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.850, -5.850)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.850, -4.950)
 size = Vector3(3.400, 1.000, 0.250)
 use_collision = true
 metadata/color = Color(0.220, 0.260, 0.180, 1)
@@ -351,12 +351,6 @@ transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 2.30
 size = Vector3(0.250, 0.600, 1.000)
 use_collision = true
 metadata/color = Color(0.220, 0.260, 0.180, 1)
-
-[node name="CoffeeTable" type="CSGBox3D" parent="Geometry/Lounge"]
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.220, -3.200)
-size = Vector3(1.600, 0.440, 0.900)
-use_collision = true
-metadata/color = Color(0.250, 0.160, 0.100, 1)
 
 [node name="TvStand" type="CSGBox3D" parent="Geometry/Lounge"]
 transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.350, -8.700)

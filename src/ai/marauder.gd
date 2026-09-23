@@ -255,7 +255,13 @@ func _on_died() -> void:
 	if Raid.current:
 		var rng := RandomNumberGenerator.new()
 		rng.randomize()
-		Raid.current.spawn_drop(global_position, "Мародёр", ItemDb.roll("marauder", rng), LootContainer.Look.NONE)
+		# ящик вываливается из трупа в сторону стрелявшего (там точно свободно — его было видно)
+		var to_shooter := _last_hit_from - global_position
+		to_shooter.y = 0.0
+		to_shooter = to_shooter.normalized() if to_shooter.length() > 0.01 else Vector3(sin(_facing), 0.0, cos(_facing))
+		var rest := global_position + to_shooter * Balance.CRATE_TOSS_DIST
+		Raid.current.spawn_drop(rest, "Ящик мародёра", ItemDb.roll("marauder", rng), LootContainer.Look.CRATE,
+			global_position + Vector3.UP * 1.1 - rest)
 	collision_layer = 0
 	collision_mask = 0
 	set_physics_process(false)
@@ -279,7 +285,7 @@ func _spawn_ragdoll() -> void:
 	away.y = 0.0
 	away = away.normalized() if away.length() > 0.01 else -Vector3(sin(_facing), 0.0, cos(_facing))
 	var push: Dictionary = Balance.RAGDOLL_DEATH_PUSH
-	var imp := (away + Vector3.UP * 0.25) * (float(push.base) + float(push.per_damage) * _last_damage)
+	var imp := away * (float(push.base) + float(push.per_damage) * _last_damage)
 	var xf := Transform3D(Basis(Vector3.UP, _body.rotation.y), global_position)
 	_ragdoll = Ragdoll.spawn(get_tree().current_scene, xf, velocity, imp, global_position + Vector3.UP * 1.25, mat, mat)
 	velocity = Vector3.ZERO
