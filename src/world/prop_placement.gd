@@ -3,6 +3,9 @@ extends RefCounted
 ## Расстановка пропсов по смыслу помещения — в полярных координатах кольца.
 ## Ряды идут дугами вдоль помещения (стеллажи торгового зала, машины на парковке), а не россыпью:
 ## так читаются проходы и линии укрытий. Проёмы и точка спавна остаются свободными.
+## Полосы (прямая аллея, см. SectorBuilder) — свои правила в осях полосы; кольцевые помещения
+## под полосой пропсов не получают (проверка владельца точки по углам пропа). Узлы сцены уровня
+## в группе "prop_keepout" (эскалаторы) отдают прямоугольник, где пропсов быть не должно.
 
 ## Зазор между случайно поставленными пропами — не меньше ширины тела с запасом, м.
 const SCATTER_GAP := 1.0
@@ -21,15 +24,27 @@ var count: int = 0
 ## LootContainer ставит SectorBuilder — порядок и выбор детерминированы сидом, как и пропсы.
 var lootables: Array[Dictionary] = []
 var _room_id: String = ""
+var _rooms: Array = []
+## Запретные прямоугольники в мировых XZ: проёмы в стенах полос и keepout-узлы сцены.
+var _world_zones: Array[Rect2] = []
+## Занятые пропсами полос прямоугольники (мировые XZ).
+var _taken_world: Array[Rect2] = []
 
 
-func place(root: Node3D, rooms: Array, openings: Array, spawn: Vector3, seed_value: int) -> void:
+func place(root: Node3D, rooms: Array, openings: Array, spawn: Vector3, seed_value: int, keepouts: Array[Rect2] = []) -> void:
 	_root = root
 	_openings = openings
+	_rooms = rooms
 	_rng.seed = seed_value
 	_props = Props.new(seed_value + 1)
+	_world_zones.append_array(keepouts)
 	for op in openings:
-		if String(op.wall) == "arc":
+		if String(op.wall) == "along":
+			var a := SectorBuilder.strip_point(float(op.axis), float(op.s[0]) - 1.0, float(op.t))
+			var b := SectorBuilder.strip_point(float(op.axis), float(op.s[1]) + 1.0, float(op.t))
+			var zr := Rect2(Vector2(a.x, a.z), Vector2.ZERO).expand(Vector2(b.x, b.z))
+			_world_zones.append(zr.grow(DOOR_PAD))
+		elif String(op.wall) == "arc":
 			_zones.append({"a0": float(op.a[0]) - 1.0, "a1": float(op.a[1]) + 1.0, "r0": float(op.r) - DOOR_PAD, "r1": float(op.r) + DOOR_PAD})
 		else:
 			var rm := (float(op.r[0]) + float(op.r[1])) * 0.5
@@ -43,6 +58,10 @@ func place(root: Node3D, rooms: Array, openings: Array, spawn: Vector3, seed_val
 		if bool(room.get("locked", false)):
 			continue
 		_room_id = String(room.get("id", ""))
+		if SectorBuilder.is_strip(room):
+			if String(room.get("type", "")) == "gallery":
+				_strip_gallery(room)
+			continue
 		match String(room.get("type", "")):
 			"retail":
 				_retail(room)
@@ -185,6 +204,57 @@ func _parking(room: Dictionary) -> void:
 		_scatter(room, "cart", r0 + 2.0, r1 - 2.0, 3)
 
 
+## Аллея: по оси — клумбы, скамейки и урны с шагом, киоски реже; эскалаторы и проёмы обходятся
+## (keepout). Россыпью — брошенные тележки.
+func _strip_gallery(room: Dictionary) -> void:
+	var ax := float(room.axis)
+	var s0 := SectorBuilder._strip_s(float(room.r[0]), 0.0) + 3.0
+	var s1 := SectorBuilder._strip_s(float(room.r[1]), 0.0) - 3.0
+	var alt := ["planter", "bench", "bin", "bench", "kiosk"]
+	var s := s0
+	var k := 0
+	while s < s1:
+		_put_strip(String(alt[k % alt.size()]), ax, s, 0.0, 0.0)
+		s += 6.0
+		k += 1
+	for i in range(4):
+		var t := _rng.randf_range(float(room.t[0]) + 2.0, float(room.t[1]) - 2.0)
+		_put_strip("cart", ax, _rng.randf_range(s0, s1), t, _rng.randf_range(-PI, PI))
+
+
+## Проп в осях полосы: ширина (X пропа) — вдоль оси. Возвращает false, если место занято.
+func _put_strip(id: String, ax: float, s: float, t: float, yaw_extra: float) -> bool:
+	var sz := Props.size(id)
+	var pos := SectorBuilder.strip_point(ax, s, t)
+	var ext := maxf(sz.x, sz.z) * 0.5 if yaw_extra != 0.0 else 0.0
+	var d := SectorBuilder.polar(ax, 1.0)
+	var n := SectorBuilder.polar(ax + 90.0, 1.0)
+	var hx := d * (sz.x * 0.5) if ext == 0.0 else d * ext
+	var hz := n * (sz.z * 0.5) if ext == 0.0 else n * ext
+	var foot := Rect2(Vector2(pos.x, pos.z), Vector2.ZERO)
+	for c in [hx + hz, hx - hz, -hx + hz, -hx - hz]:
+		var q: Vector3 = pos + c
+		foot = foot.expand(Vector2(q.x, q.z))
+		if String(SectorBuilder.owner_of(_rooms, q).get("id", "")) != _room_id:
+			return false
+	for z in _world_zones:
+		if z.intersects(foot):
+			return false
+	for tk in _taken_world:
+		if tk.grow(0.5).intersects(foot):
+			return false
+	var node := _props.build(id, "")
+	node.position = pos
+	node.rotation.y = -deg_to_rad(ax) + yaw_extra
+	_root.add_child(node)
+	_taken_world.append(foot)
+	count += 1
+	var loot := ItemDb.container(id)
+	if not loot.is_empty() and _rng.randf() < float(loot.chance):
+		lootables.append({"kind": id, "pos": node.position, "room": _room_id})
+	return true
+
+
 # ---------------------------------------------------------------- размещение
 
 ## Ряд дугой на радиусе rr: единицы длиной w+gap вдоль угла; каждая breach_every-я — прореха.
@@ -235,6 +305,8 @@ func _put(id: String, a: float, r: float, orient: String, variant: String = "", 
 	var rect := {"a0": a - _deg(along * 0.5, r), "a1": a + _deg(along * 0.5, r), "r0": r - radial * 0.5, "r1": r + radial * 0.5}
 	if not force and not _free(rect, gap):
 		return false
+	if not force and not _inside_own_room(rect):
+		return false
 	var node := _props.build(id, variant)
 	node.position = SectorBuilder.polar(a, r)
 	var yaw := -deg_to_rad(a)
@@ -250,6 +322,26 @@ func _put(id: String, a: float, r: float, orient: String, variant: String = "", 
 	var loot := ItemDb.container(id)
 	if not loot.is_empty() and _rng.randf() < float(loot.chance):
 		lootables.append({"kind": id, "pos": node.position, "room": _room_id})
+	return true
+
+
+## Углы пропа — в своём помещении (его не перекрыла полоса) и вне запретных прямоугольников.
+func _inside_own_room(rect: Dictionary) -> bool:
+	var foot := Rect2()
+	var first := true
+	for a in [float(rect.a0), float(rect.a1)]:
+		for r in [float(rect.r0), float(rect.r1)]:
+			var q := SectorBuilder.polar(a, r)
+			if first:
+				foot = Rect2(Vector2(q.x, q.z), Vector2.ZERO)
+				first = false
+			else:
+				foot = foot.expand(Vector2(q.x, q.z))
+			if String(SectorBuilder.owner_of(_rooms, q).get("id", "")) != _room_id:
+				return false
+	for z in _world_zones:
+		if z.intersects(foot):
+			return false
 	return true
 
 

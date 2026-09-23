@@ -3,46 +3,58 @@
  "name": "1F · открытая половина кольца",
  "floor": 1,
  "angle": [
-  -120,
-  60
+  -180,
+  0
  ],
  "ring": {
-  "outer_r": 200,
-  "atrium_r": 68,
+  "outer_r": 125,
+  "atrium_r": 30,
   "zones": {
    "atr": [
     0.5,
-    68
+    30
    ],
    "gal": [
-    68,
-    80
+    30,
+    40
    ],
    "inn": [
-    80,
-    118
+    40,
+    65
    ],
    "st": [
-    118,
-    130
+    65,
+    79
    ],
    "out": [
-    130,
-    178
+    79,
+    109
    ],
    "back": [
-    178,
-    194
+    109,
+    121
    ],
    "svc": [
-    194,
-    200
+    121,
+    125
    ]
   },
   "sectors_deg": 60,
-  "site_r": 320
+  "site_r": 210
+ },
+ "alley": {
+  "axis": -90,
+  "half_width": 12
  },
  "sectors": [
+  {
+   "id": "nw",
+   "name": "Паркинг",
+   "a": [
+    -180,
+    -120
+   ]
+  },
   {
    "id": "n",
    "name": "Главный вход",
@@ -57,14 +69,6 @@
    "a": [
     -60,
     0
-   ]
-  },
-  {
-   "id": "e",
-   "name": "Паркинг",
-   "a": [
-    0,
-    60
    ]
   }
  ],
@@ -95,7 +99,7 @@
  "camera_yaw": -45,
  "spawn": {
   "a": -100,
-  "r": 262
+  "r": 176
  },
  "rooms": [
   {
@@ -103,28 +107,28 @@
    "name": "Атриум под куполом",
    "type": "atrium",
    "a": [
-    -120,
-    60
+    -180,
+    0
    ],
    "r": [
     0.5,
-    68
+    30
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall",
-   "note": "фонтан в центре, купол"
+   "note": "крытый атриум Ø60, фонтан в центре"
   },
   {
    "id": "gallery",
-   "name": "Галерея",
+   "name": "Галерея атриума",
    "type": "gallery",
    "a": [
-    -120,
-    60
+    -180,
+    0
    ],
    "r": [
-    68,
-    80
+    30,
+    40
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall",
@@ -135,59 +139,320 @@
    "name": "Кольцевая улица",
    "type": "gallery",
    "a": [
-    -120,
-    60
+    -180,
+    0
    ],
    "r": [
-    118,
-    130
+    65,
+    79
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall",
    "label_a": -100,
-   "note": "внутренняя улица под световыми фонарями"
+   "note": "пересекает главную аллею перекрёстком"
   },
   {
-   "id": "pass_in_ne",
-   "name": "Проход",
-   "type": "corridor",
-   "a": [
-    -61.5,
-    -58.5
+   "id": "alley_in",
+   "name": "Главная аллея",
+   "type": "gallery",
+   "axis": -90,
+   "t": [
+    -12,
+    12
    ],
    "r": [
-    80,
-    118
+    40,
+    65
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall"
   },
   {
-   "id": "pass_out_ne",
+   "id": "alley_out",
+   "name": "Главная аллея",
+   "type": "gallery",
+   "axis": -90,
+   "t": [
+    -12,
+    12
+   ],
+   "r": [
+    79,
+    115
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "note": "пара эскалаторов — узел сцены"
+  },
+  {
+   "id": "vestibule",
+   "name": "Главный вестибюль",
+   "type": "gallery",
+   "axis": -90,
+   "t": [
+    -12,
+    12
+   ],
+   "r": [
+    115,
+    125
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "note": "единственный вход для посетителей"
+  },
+  {
+   "id": "clothes",
+   "name": "Одежда",
+   "type": "retail",
+   "a": [
+    -118,
+    -90
+   ],
+   "r": [
+    79,
+    89
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "sport",
+   "name": "Спорттовары",
+   "type": "retail",
+   "a": [
+    -118,
+    -90
+   ],
+   "r": [
+    89,
+    99
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "jewelry",
+   "name": "Ювелирный",
+   "type": "retail",
+   "a": [
+    -118,
+    -90
+   ],
+   "r": [
+    99,
+    109
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "coffee",
+   "name": "Кофейня",
+   "type": "retail",
+   "a": [
+    -118,
+    -90
+   ],
+   "r": [
+    40,
+    52.5
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "pharmacy",
+   "name": "Аптека",
+   "type": "retail",
+   "a": [
+    -118,
+    -90
+   ],
+   "r": [
+    52.5,
+    65
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "jewelry_vault",
+   "name": "Сейфовая ювелирного",
+   "type": "storage",
+   "a": [
+    -118,
+    -104
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "key": "key_jewelry"
+  },
+  {
+   "id": "clothes_st",
+   "name": "Склад одежды",
+   "type": "storage",
+   "a": [
+    -104,
+    -90
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "phones",
+   "name": "Салон связи",
+   "type": "retail",
+   "a": [
+    -90,
+    -62
+   ],
+   "r": [
+    79,
+    89
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "electronics",
+   "name": "Электроника",
+   "type": "retail",
+   "a": [
+    -90,
+    -62
+   ],
+   "r": [
+    89,
+    99
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "photo",
+   "name": "Фото",
+   "type": "retail",
+   "a": [
+    -90,
+    -62
+   ],
+   "r": [
+    99,
+    109
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "bank",
+   "name": "Банк",
+   "type": "office",
+   "a": [
+    -90,
+    -62
+   ],
+   "r": [
+    40,
+    52.5
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "cosmetics",
+   "name": "Косметика",
+   "type": "retail",
+   "a": [
+    -90,
+    -62
+   ],
+   "r": [
+    52.5,
+    65
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "electronics_st",
+   "name": "Склад электроники",
+   "type": "storage",
+   "a": [
+    -90,
+    -76
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "staff",
+   "name": "Раздевалка персонала",
+   "type": "office",
+   "a": [
+    -76,
+    -62
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "pass_in_w",
    "name": "Проход",
    "type": "corridor",
    "a": [
-    -61.5,
-    -58.5
+    -122,
+    -118
    ],
    "r": [
-    130,
-    178
+    40,
+    65
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall"
   },
   {
-   "id": "core_ne",
+   "id": "pass_out_w",
+   "name": "Проход",
+   "type": "corridor",
+   "a": [
+    -122,
+    -118
+   ],
+   "r": [
+    79,
+    109
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "core_w",
    "name": "Техядро",
    "type": "utility",
    "a": [
-    -61.5,
-    -58.5
+    -122,
+    -118
    ],
    "r": [
-    178,
-    194
+    109,
+    121
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006",
@@ -199,12 +464,12 @@
    "name": "Проход",
    "type": "corridor",
    "a": [
-    -1.5,
-    1.5
+    -62,
+    -58
    ],
    "r": [
-    80,
-    118
+    40,
+    65
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall"
@@ -214,12 +479,12 @@
    "name": "Проход",
    "type": "corridor",
    "a": [
-    -1.5,
-    1.5
+    -62,
+    -58
    ],
    "r": [
-    130,
-    178
+    79,
+    109
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall"
@@ -229,12 +494,12 @@
    "name": "Техядро",
    "type": "utility",
    "a": [
-    -1.5,
-    1.5
+    -62,
+    -58
    ],
    "r": [
-    178,
-    194
+    109,
+    121
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006",
@@ -242,317 +507,92 @@
    "note": "лестницы, лифты, WC"
   },
   {
-   "id": "pass_in_n",
+   "id": "pass_in_nw",
    "name": "Проход",
    "type": "corridor",
    "a": [
-    -93,
-    -87
+    -152.5,
+    -147.5
    ],
    "r": [
-    80,
-    118
+    40,
+    65
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall"
   },
   {
-   "id": "pass_out_n",
-   "name": "Проход к выходу",
-   "type": "corridor",
-   "a": [
-    -93,
-    -87
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "large_floor_tiles_02",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "vestibule_n",
-   "name": "Главный вестибюль",
-   "type": "gallery",
-   "a": [
-    -93,
-    -87
-   ],
-   "r": [
-    178,
-    200
-   ],
-   "floor": "large_floor_tiles_02",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "pharmacy",
-   "name": "Аптека",
-   "type": "retail",
-   "a": [
-    -120,
-    -106.5
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "bank",
-   "name": "Банк",
-   "type": "office",
-   "a": [
-    -106.5,
-    -93.0
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "coffee",
-   "name": "Кофейня",
-   "type": "retail",
-   "a": [
-    -87,
-    -74.25
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "phones",
-   "name": "Салон связи",
-   "type": "retail",
-   "a": [
-    -74.25,
-    -61.5
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "department",
-   "name": "Универмаг",
-   "type": "retail",
-   "a": [
-    -120,
-    -103
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "jewelry",
-   "name": "Ювелирный",
-   "type": "retail",
-   "a": [
-    -103,
-    -93
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "sport",
-   "name": "Спорттовары",
-   "type": "retail",
-   "a": [
-    -87,
-    -77
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "clothes",
-   "name": "Одежда",
-   "type": "retail",
-   "a": [
-    -77,
-    -61.5
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "department_st",
-   "name": "Склад универмага",
-   "type": "storage",
-   "a": [
-    -120,
-    -103
-   ],
-   "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "jewelry_vault",
-   "name": "Сейфовая ювелирного",
-   "type": "storage",
-   "a": [
-    -103,
-    -93
-   ],
-   "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006",
-   "key": "key_jewelry"
-  },
-  {
-   "id": "sport_st",
-   "name": "Склад спорттоваров",
-   "type": "storage",
-   "a": [
-    -87,
-    -77
-   ],
-   "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "clothes_st",
-   "name": "Склад одежды",
-   "type": "storage",
-   "a": [
-    -77,
-    -61.5
-   ],
-   "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "pass_in_ne",
+   "id": "pass_out_nw",
    "name": "Проход",
    "type": "corridor",
    "a": [
-    -33,
-    -27
+    -152.5,
+    -147.5
    ],
    "r": [
-    80,
-    118
+    79,
+    109
    ],
    "floor": "large_floor_tiles_02",
    "wall": "painted_plaster_wall"
   },
   {
-   "id": "pass_out_ne",
-   "name": "Проход к выходу",
+   "id": "exit_nw",
+   "name": "Выход к паркингу",
    "type": "corridor",
    "a": [
-    -33,
-    -27
+    -152.5,
+    -147.5
    ],
    "r": [
-    130,
-    178
+    109,
+    125
    ],
    "floor": "large_floor_tiles_02",
-   "wall": "painted_plaster_wall"
+   "wall": "painted_plaster_wall",
+   "note": "пожарный выход, крытый переход к паркингу"
   },
   {
-   "id": "loading_bay",
-   "name": "Грузовой шлюз",
-   "type": "storage",
-   "a": [
-    -33,
-    -27
-   ],
-   "r": [
-    178,
-    200
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "flowers",
-   "name": "Цветы",
+   "id": "shoes",
+   "name": "Обувь",
    "type": "retail",
    "a": [
-    -58.5,
-    -45.75
+    -180,
+    -166.25
    ],
    "r": [
-    80,
-    118
+    40,
+    65
    ],
    "floor": "worn_tile_floor",
    "wall": "painted_plaster_wall"
   },
   {
-   "id": "optics",
-   "name": "Оптика",
+   "id": "watches",
+   "name": "Часы",
    "type": "retail",
    "a": [
-    -45.75,
-    -33.0
+    -166.25,
+    -152.5
    ],
    "r": [
-    80,
-    118
+    40,
+    65
    ],
    "floor": "worn_tile_floor",
    "wall": "painted_plaster_wall"
   },
   {
-   "id": "books",
-   "name": "Книги",
+   "id": "kids",
+   "name": "Детские товары",
    "type": "retail",
    "a": [
-    -27,
-    -14.25
+    -147.5,
+    -134.75
    ],
    "r": [
-    80,
-    118
+    40,
+    65
    ],
    "floor": "worn_tile_floor",
    "wall": "painted_plaster_wall"
@@ -562,27 +602,27 @@
    "name": "Игрушки",
    "type": "retail",
    "a": [
-    -14.25,
-    -1.5
+    -134.75,
+    -122.0
    ],
    "r": [
-    80,
-    118
+    40,
+    65
    ],
    "floor": "worn_tile_floor",
    "wall": "painted_plaster_wall"
   },
   {
-   "id": "hyper",
-   "name": "Гипермаркет",
+   "id": "diy",
+   "name": "Дом и ремонт",
    "type": "retail",
    "a": [
-    -58.5,
-    -33.0
+    -180,
+    -152.5
    ],
    "r": [
-    130,
-    178
+    79,
+    109
    ],
    "floor": "worn_tile_floor",
    "wall": "painted_plaster_wall"
@@ -592,12 +632,132 @@
    "name": "Хозтовары",
    "type": "retail",
    "a": [
-    -27,
-    -15
+    -147.5,
+    -122.0
    ],
    "r": [
-    130,
-    178
+    79,
+    109
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "diy_st",
+   "name": "Склад «Дом и ремонт»",
+   "type": "storage",
+   "a": [
+    -180,
+    -162.5
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "workshop",
+   "name": "Мастерская",
+   "type": "utility",
+   "a": [
+    -162.5,
+    -152.5
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "hardware_st",
+   "name": "Склад хозтоваров",
+   "type": "storage",
+   "a": [
+    -147.5,
+    -132.0
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "service",
+   "name": "Сервисный центр",
+   "type": "office",
+   "a": [
+    -132.0,
+    -122.0
+   ],
+   "r": [
+    109,
+    121
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "pass_in_ne",
+   "name": "Проход",
+   "type": "corridor",
+   "a": [
+    -32.5,
+    -27.5
+   ],
+   "r": [
+    40,
+    65
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "pass_out_ne",
+   "name": "Проход",
+   "type": "corridor",
+   "a": [
+    -32.5,
+    -27.5
+   ],
+   "r": [
+    79,
+    109
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "loading_bay",
+   "name": "Грузовой шлюз",
+   "type": "storage",
+   "a": [
+    -32.5,
+    -27.5
+   ],
+   "r": [
+    109,
+    125
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006"
+  },
+  {
+   "id": "flowers",
+   "name": "Цветы",
+   "type": "retail",
+   "a": [
+    -58,
+    -45.25
+   ],
+   "r": [
+    40,
+    65
    ],
    "floor": "worn_tile_floor",
    "wall": "painted_plaster_wall"
@@ -607,12 +767,72 @@
    "name": "Пресса и табак",
    "type": "retail",
    "a": [
-    -15,
-    -1.5
+    -45.25,
+    -32.5
    ],
    "r": [
-    130,
-    178
+    40,
+    65
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "books",
+   "name": "Книги",
+   "type": "retail",
+   "a": [
+    -27.5,
+    -13.75
+   ],
+   "r": [
+    40,
+    65
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "optics",
+   "name": "Оптика",
+   "type": "retail",
+   "a": [
+    -13.75,
+    0.0
+   ],
+   "r": [
+    40,
+    65
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "hyper",
+   "name": "Гипермаркет",
+   "type": "retail",
+   "a": [
+    -58,
+    -32.5
+   ],
+   "r": [
+    79,
+    109
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "department",
+   "name": "Универмаг",
+   "type": "retail",
+   "a": [
+    -27.5,
+    0.0
+   ],
+   "r": [
+    79,
+    109
    ],
    "floor": "worn_tile_floor",
    "wall": "painted_plaster_wall"
@@ -622,12 +842,12 @@
    "name": "Склад гипермаркета",
    "type": "storage",
    "a": [
-    -58.5,
-    -44.0
+    -58,
+    -43.5
    ],
    "r": [
-    178,
-    194
+    109,
+    121
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006"
@@ -637,12 +857,12 @@
    "name": "Холодильные камеры",
    "type": "storage",
    "a": [
-    -44.0,
-    -33.0
+    -43.5,
+    -32.5
    ],
    "r": [
-    178,
-    194
+    109,
+    121
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006"
@@ -652,12 +872,12 @@
    "name": "Электрощитовая",
    "type": "utility",
    "a": [
-    -27,
-    -20
+    -27.5,
+    -19.5
    ],
    "r": [
-    178,
-    194
+    109,
+    121
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006"
@@ -667,12 +887,12 @@
    "name": "Серверная",
    "type": "office",
    "a": [
-    -20,
-    -12
+    -19.5,
+    -11.5
    ],
    "r": [
-    178,
-    194
+    109,
+    121
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006",
@@ -683,222 +903,12 @@
    "name": "ЦПУ охраны",
    "type": "security",
    "a": [
-    -12,
-    -1.5
+    -11.5,
+    0.0
    ],
    "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "pass_in_e",
-   "name": "Проход",
-   "type": "corridor",
-   "a": [
-    27,
-    33
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "large_floor_tiles_02",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "pass_out_e",
-   "name": "Проход к выходу",
-   "type": "corridor",
-   "a": [
-    27,
-    33
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "large_floor_tiles_02",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "vestibule_e",
-   "name": "Восточный вход",
-   "type": "gallery",
-   "a": [
-    27,
-    33
-   ],
-   "r": [
-    178,
-    200
-   ],
-   "floor": "large_floor_tiles_02",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "shoes",
-   "name": "Обувь",
-   "type": "retail",
-   "a": [
-    1.5,
-    14.25
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "watches",
-   "name": "Часы",
-   "type": "retail",
-   "a": [
-    14.25,
-    27.0
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "cosmetics",
-   "name": "Косметика",
-   "type": "retail",
-   "a": [
-    33,
-    46.5
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "kids",
-   "name": "Детские товары",
-   "type": "retail",
-   "a": [
-    46.5,
-    60.0
-   ],
-   "r": [
-    80,
-    118
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "electronics",
-   "name": "Электроника",
-   "type": "retail",
-   "a": [
-    1.5,
-    17.0
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "photo",
-   "name": "Фото",
-   "type": "retail",
-   "a": [
-    17.0,
-    27.0
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "diy",
-   "name": "Дом и ремонт",
-   "type": "retail",
-   "a": [
-    33,
-    60
-   ],
-   "r": [
-    130,
-    178
-   ],
-   "floor": "worn_tile_floor",
-   "wall": "painted_plaster_wall"
-  },
-  {
-   "id": "electronics_st",
-   "name": "Склад электроники",
-   "type": "storage",
-   "a": [
-    1.5,
-    17.0
-   ],
-   "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "service",
-   "name": "Сервисный центр",
-   "type": "office",
-   "a": [
-    17.0,
-    27.0
-   ],
-   "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "diy_st",
-   "name": "Склад «Дом и ремонт»",
-   "type": "storage",
-   "a": [
-    33,
-    48
-   ],
-   "r": [
-    178,
-    194
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "staff",
-   "name": "Раздевалка персонала",
-   "type": "office",
-   "a": [
-    48,
-    60
-   ],
-   "r": [
-    178,
-    194
+    109,
+    121
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006"
@@ -908,12 +918,12 @@
    "name": "Служебный коридор",
    "type": "corridor",
    "a": [
-    -120,
-    -93
+    -180,
+    -152.5
    ],
    "r": [
-    194,
-    200
+    121,
+    125
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006"
@@ -923,12 +933,12 @@
    "name": "Служебный коридор",
    "type": "corridor",
    "a": [
-    -87,
-    -33
+    -147.5,
+    -32.5
    ],
    "r": [
-    194,
-    200
+    121,
+    125
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006"
@@ -938,27 +948,12 @@
    "name": "Служебный коридор",
    "type": "corridor",
    "a": [
-    -27,
-    27
+    -27.5,
+    0
    ],
    "r": [
-    194,
-    200
-   ],
-   "floor": "concrete_floor_worn_001",
-   "wall": "concrete_wall_006"
-  },
-  {
-   "id": "svc_3",
-   "name": "Служебный коридор",
-   "type": "corridor",
-   "a": [
-    33,
-    60
-   ],
-   "r": [
-    194,
-    200
+    121,
+    125
    ],
    "floor": "concrete_floor_worn_001",
    "wall": "concrete_wall_006"
@@ -968,12 +963,12 @@
    "name": "Кольцевой проезд",
    "type": "yard",
    "a": [
-    -120,
-    60
+    -180,
+    0
    ],
    "r": [
-    200,
-    215
+    125,
+    140
    ],
    "floor": "asphalt_02",
    "wall": "concrete_block_wall_02",
@@ -981,65 +976,49 @@
    "label_a": -68
   },
   {
-   "id": "dock_yard",
-   "name": "Грузовой двор",
-   "type": "yard",
-   "a": [
-    -58,
-    -34
-   ],
-   "r": [
-    215,
-    250
-   ],
-   "floor": "asphalt_02",
-   "wall": "concrete_block_wall_02",
-   "outdoor": true
-  },
-  {
    "id": "plaza_n",
    "name": "Площадь главного входа",
    "type": "yard",
    "a": [
-    -102,
-    -78
+    -104,
+    -76
    ],
    "r": [
-    215,
-    255
+    140,
+    185
    ],
    "floor": "large_floor_tiles_02",
    "wall": "concrete_block_wall_02",
    "outdoor": true,
-   "note": "клумбы с деревьями, кольцевая развязка"
+   "note": "клумбы, остановка автобуса"
   },
   {
-   "id": "lot_n",
-   "name": "Открытая парковка",
-   "type": "parking",
+   "id": "dock_yard",
+   "name": "Грузовой двор",
+   "type": "yard",
    "a": [
-    -120,
-    -104
+    -42,
+    -18
    ],
    "r": [
-    215,
-    270
+    140,
+    172
    ],
    "floor": "asphalt_02",
    "wall": "concrete_block_wall_02",
    "outdoor": true
   },
   {
-   "id": "lot_e",
+   "id": "lot_nw",
    "name": "Открытая парковка",
    "type": "parking",
    "a": [
-    44,
-    60
+    -178,
+    -160
    ],
    "r": [
-    215,
-    265
+    140,
+    195
    ],
    "floor": "asphalt_02",
    "wall": "concrete_block_wall_02",
@@ -1050,405 +1029,743 @@
   {
    "wall": "arc",
    "kind": "open",
-   "r": 68,
+   "r": 30,
    "a": [
-    -120,
-    60
+    -180,
+    0
    ],
    "note": "атриум открыт на галерею"
   },
   {
    "wall": "radial",
    "kind": "barrier",
-   "a": -120,
+   "a": -180,
    "r": [
     0.5,
-    68
+    30
    ]
   },
   {
    "wall": "radial",
    "kind": "locked",
-   "a": -120,
+   "a": -180,
    "r": [
-    68,
-    80
+    30,
+    40
    ]
   },
   {
    "wall": "radial",
    "kind": "locked",
-   "a": -120,
+   "a": -180,
    "r": [
-    118,
-    130
+    65,
+    79
    ]
   },
   {
    "wall": "radial",
    "kind": "locked",
-   "a": -120,
+   "a": -180,
    "r": [
-    194,
-    200
+    121,
+    125
    ]
   },
   {
    "wall": "radial",
    "kind": "barrier",
-   "a": 60,
+   "a": 0,
    "r": [
     0.5,
-    68
+    30
    ]
   },
   {
    "wall": "radial",
    "kind": "locked",
-   "a": 60,
+   "a": 0,
    "r": [
-    68,
-    80
+    30,
+    40
    ]
   },
   {
    "wall": "radial",
    "kind": "locked",
-   "a": 60,
+   "a": 0,
    "r": [
-    118,
-    130
+    65,
+    79
    ]
   },
   {
    "wall": "radial",
    "kind": "locked",
-   "a": 60,
+   "a": 0,
    "r": [
-    194,
-    200
+    121,
+    125
    ]
   },
   {
    "wall": "arc",
    "kind": "open",
-   "r": 80,
+   "r": 40,
    "a": [
-    -61.5,
-    -58.5
+    -107.458,
+    -72.542
    ]
   },
   {
    "wall": "arc",
    "kind": "open",
-   "r": 118,
+   "r": 65,
    "a": [
-    -61.5,
-    -58.5
+    -100.639,
+    -79.361
    ]
   },
   {
    "wall": "arc",
    "kind": "open",
-   "r": 130,
+   "r": 79,
    "a": [
-    -61.5,
-    -58.5
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 178,
-   "a": [
-    -60.29,
-    -59.71
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 194,
-   "a": [
-    -60.27,
-    -59.73
+    -98.737,
+    -81.263
    ]
   },
   {
    "wall": "arc",
    "kind": "open",
-   "r": 80,
+   "r": 115,
    "a": [
-    -1.5,
-    1.5
+    -95.99,
+    -84.01
    ]
   },
   {
    "wall": "arc",
-   "kind": "open",
-   "r": 118,
+   "kind": "storefront",
+   "r": 125,
    "a": [
-    -1.5,
-    1.5
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "open",
-   "r": 130,
-   "a": [
-    -1.5,
-    1.5
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 178,
-   "a": [
-    -0.29,
-    0.29
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 194,
-   "a": [
-    -0.27,
-    0.27
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "open",
-   "r": 178,
-   "a": [
-    -93,
-    -87
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "entrance",
-   "r": 200,
-   "a": [
-    -92,
-    -88
+    -95.509,
+    -91.836
    ],
-   "note": "стеклянные двери на улицу"
+   "note": ""
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 125,
+   "a": [
+    -91.836,
+    -88.164
+   ],
+   "note": "главный вход"
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 125,
+   "a": [
+    -88.164,
+    -84.491
+   ],
+   "note": ""
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -90,
+   "t": -12,
+   "s": [
+    121.513,
+    123.313
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -90,
+   "t": 12,
+   "s": [
+    121.513,
+    123.313
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": -12,
+   "s": [
+    79.599,
+    86.672
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 79,
+   "a": [
+    -115.111,
+    -101.626
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": -12,
+   "s": [
+    89.7,
+    96.758
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": -12,
+   "s": [
+    99.78,
+    106.827
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": -12,
+   "s": [
+    40.1,
+    49.167
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -116.419,
+    -109.039
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": -12,
+   "s": [
+    53.026,
+    61.967
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 65,
+   "a": [
+    -115.396,
+    -103.243
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 109,
+   "a": [
+    -111.473,
+    -110.527
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 121,
+   "a": [
+    -111.426,
+    -110.574
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 109,
+   "a": [
+    -100.633,
+    -99.687
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 121,
+   "a": [
+    -100.272,
+    -99.42
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": 12,
+   "s": [
+    79.599,
+    86.672
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 79,
+   "a": [
+    -78.374,
+    -64.889
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": 12,
+   "s": [
+    89.7,
+    96.758
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": 12,
+   "s": [
+    99.78,
+    106.827
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": 12,
+   "s": [
+    40.1,
+    49.167
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -70.961,
+    -63.581
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90,
+   "t": 12,
+   "s": [
+    53.026,
+    61.967
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 65,
+   "a": [
+    -76.757,
+    -64.604
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 109,
+   "a": [
+    -80.313,
+    -79.367
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 121,
+   "a": [
+    -80.58,
+    -79.728
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 109,
+   "a": [
+    -69.473,
+    -68.527
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 121,
+   "a": [
+    -69.426,
+    -68.574
+   ]
   },
   {
    "wall": "arc",
    "kind": "open",
-   "r": 80,
+   "r": 40,
    "a": [
-    -93,
-    -87
+    -122,
+    -118
    ]
   },
   {
    "wall": "arc",
    "kind": "open",
-   "r": 118,
+   "r": 65,
    "a": [
-    -93,
-    -87
+    -122,
+    -118
    ]
   },
   {
    "wall": "arc",
    "kind": "open",
-   "r": 130,
+   "r": 79,
    "a": [
-    -93,
-    -87
+    -122,
+    -118
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 109,
+   "a": [
+    -120.473,
+    -119.527
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 121,
+   "a": [
+    -120.426,
+    -119.574
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    -62,
+    -58
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 65,
+   "a": [
+    -62,
+    -58
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 79,
+   "a": [
+    -62,
+    -58
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 109,
+   "a": [
+    -60.473,
+    -59.527
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 121,
+   "a": [
+    -60.426,
+    -59.574
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    -152.5,
+    -147.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 65,
+   "a": [
+    -152.5,
+    -147.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 79,
+   "a": [
+    -152.5,
+    -147.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 109,
+   "a": [
+    -152.5,
+    -147.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 125,
+   "a": [
+    -150.458,
+    -149.542
+   ]
+  },
+  {
+   "wall": "radial",
+   "kind": "door",
+   "a": -152.5,
+   "r": [
+    122.1,
+    123.9
+   ]
+  },
+  {
+   "wall": "radial",
+   "kind": "door",
+   "a": -147.5,
+   "r": [
+    122.1,
+    123.9
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -117.97,
-    -108.53
+    -177.938,
+    -168.312
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -113.69,
-    -112.81
+    -173.918,
+    -172.332
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -104.47,
-    -95.03
+    -164.188,
+    -154.562
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -100.19,
-    -99.31
+    -160.168,
+    -158.582
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -85.09,
-    -76.16
+    -145.588,
+    -136.662
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -81.06,
-    -80.19
+    -141.918,
+    -140.332
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -72.34,
-    -63.41
+    -132.838,
+    -123.912
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -68.31,
-    -67.44
+    -129.168,
+    -127.582
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 130,
+   "r": 79,
    "a": [
-    -117.45,
-    -105.55
+    -175.875,
+    -156.625
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 130,
+   "r": 79,
    "a": [
-    -101.5,
-    -94.5
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 130,
-   "a": [
-    -85.5,
-    -78.5
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 130,
-   "a": [
-    -74.67,
-    -63.83
+    -143.675,
+    -125.825
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -111.79,
-    -111.21
+    -171.723,
+    -170.777
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -111.77,
-    -111.23
+    -171.676,
+    -170.824
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -98.29,
-    -97.71
+    -157.973,
+    -157.027
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -98.27,
-    -97.73
+    -157.926,
+    -157.074
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -82.29,
-    -81.71
+    -140.223,
+    -139.277
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -82.27,
-    -81.73
+    -140.176,
+    -139.324
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -69.54,
-    -68.96
+    -127.473,
+    -126.527
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -69.52,
-    -68.98
+    -127.426,
+    -126.574
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    -32.5,
+    -27.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 65,
+   "a": [
+    -32.5,
+    -27.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 79,
+   "a": [
+    -32.5,
+    -27.5
    ]
   },
   {
    "wall": "arc",
    "kind": "shutter",
-   "r": 178,
+   "r": 109,
    "a": [
     -31.5,
     -28.5
@@ -1457,475 +1774,210 @@
   {
    "wall": "arc",
    "kind": "gate",
-   "r": 200,
+   "r": 125,
    "a": [
-    -31.5,
-    -28.5
+    -32,
+    -28
    ],
    "note": "ворота на погрузку"
   },
   {
-   "wall": "arc",
-   "kind": "open",
-   "r": 80,
-   "a": [
-    -33,
-    -27
+   "wall": "radial",
+   "kind": "door",
+   "a": -32.5,
+   "r": [
+    122.1,
+    123.9
    ]
   },
   {
-   "wall": "arc",
-   "kind": "open",
-   "r": 118,
-   "a": [
-    -33,
-    -27
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "open",
-   "r": 130,
-   "a": [
-    -33,
-    -27
+   "wall": "radial",
+   "kind": "door",
+   "a": -27.5,
+   "r": [
+    122.1,
+    123.9
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -56.59,
-    -47.66
+    -56.087,
+    -47.163
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -52.56,
-    -51.69
+    -52.418,
+    -50.832
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -43.84,
-    -34.91
+    -43.337,
+    -34.413
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -39.81,
-    -38.94
+    -39.668,
+    -38.082
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -25.09,
-    -16.16
+    -25.438,
+    -15.812
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -21.06,
-    -20.19
+    -21.418,
+    -19.832
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 80,
+   "r": 40,
    "a": [
-    -12.34,
-    -3.41
+    -11.688,
+    -2.062
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 118,
+   "r": 65,
    "a": [
-    -8.31,
-    -7.44
+    -7.668,
+    -6.082
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 130,
+   "r": 79,
    "a": [
-    -54.67,
-    -36.83
+    -54.175,
+    -36.325
    ]
   },
   {
    "wall": "arc",
    "kind": "storefront",
-   "r": 130,
+   "r": 79,
    "a": [
-    -25.2,
-    -16.8
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 130,
-   "a": [
-    -12.97,
-    -3.53
+    -23.375,
+    -4.125
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -51.54,
-    -50.96
+    -51.223,
+    -50.277
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -51.52,
-    -50.98
+    -51.176,
+    -50.324
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -38.79,
-    -38.21
+    -38.473,
+    -37.527
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -38.77,
-    -38.23
+    -38.426,
+    -37.574
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -23.79,
-    -23.21
+    -23.973,
+    -23.027
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -23.77,
-    -23.23
+    -23.926,
+    -23.074
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -16.29,
-    -15.71
+    -15.973,
+    -15.027
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -16.27,
-    -15.73
+    -15.926,
+    -15.074
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 178,
+   "r": 109,
    "a": [
-    -7.04,
-    -6.46
+    -6.223,
+    -5.277
    ]
   },
   {
    "wall": "arc",
    "kind": "door",
-   "r": 194,
+   "r": 121,
    "a": [
-    -7.02,
-    -6.48
+    -6.176,
+    -5.324
    ]
-  },
-  {
-   "wall": "arc",
-   "kind": "open",
-   "r": 178,
-   "a": [
-    27,
-    33
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "entrance",
-   "r": 200,
-   "a": [
-    28,
-    32
-   ],
-   "note": "стеклянные двери на улицу"
-  },
-  {
-   "wall": "arc",
-   "kind": "open",
-   "r": 80,
-   "a": [
-    27,
-    33
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "open",
-   "r": 118,
-   "a": [
-    27,
-    33
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "open",
-   "r": 130,
-   "a": [
-    27,
-    33
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 80,
-   "a": [
-    3.41,
-    12.34
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 118,
-   "a": [
-    7.44,
-    8.31
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 80,
-   "a": [
-    16.16,
-    25.09
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 118,
-   "a": [
-    20.19,
-    21.06
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 80,
-   "a": [
-    35.02,
-    44.48
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 118,
-   "a": [
-    39.31,
-    40.19
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 80,
-   "a": [
-    48.52,
-    57.98
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 118,
-   "a": [
-    52.81,
-    53.69
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 130,
-   "a": [
-    3.83,
-    14.68
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 130,
-   "a": [
-    18.5,
-    25.5
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "storefront",
-   "r": 130,
-   "a": [
-    37.05,
-    55.95
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 178,
-   "a": [
-    8.96,
-    9.54
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 194,
-   "a": [
-    8.98,
-    9.52
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 178,
-   "a": [
-    21.71,
-    22.29
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 194,
-   "a": [
-    21.73,
-    22.27
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 178,
-   "a": [
-    40.21,
-    40.79
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 194,
-   "a": [
-    40.23,
-    40.77
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 178,
-   "a": [
-    53.71,
-    54.29
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 194,
-   "a": [
-    53.73,
-    54.27
-   ]
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 200,
-   "a": [
-    -50.6,
-    -50.0
-   ],
-   "note": "служебная дверь на двор"
-  },
-  {
-   "wall": "arc",
-   "kind": "gate",
-   "r": 200,
-   "a": [
-    -47,
-    -44
-   ],
-   "note": "ворота склада на двор"
-  },
-  {
-   "wall": "arc",
-   "kind": "door",
-   "r": 200,
-   "a": [
-    13.2,
-    13.7
-   ],
-   "note": "служебный выход"
   }
  ]
 }

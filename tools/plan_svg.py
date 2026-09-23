@@ -1,7 +1,7 @@
 """Чертёж сектора сверху из данных: data/sectors/<id>.json → docs/plans/<id>.svg.
 
-Рисует помещения (кольцевые секторы и прямоугольные постройки), проёмы по видам, точки эвакуации
-и спавна, запертую часть кольца, компас и масштаб. Нужен, чтобы обсуждать планировку до сборки
+Рисует помещения (кольцевые секторы, полосы-аллеи и прямоугольные постройки), проёмы по видам,
+эскалаторы, точки эвакуации и спавна, запертую часть кольца, компас и масштаб. Нужен, чтобы обсуждать планировку до сборки
 в Godot и видеть, что лежит в данных.
 
     python tools/plan_svg.py data/sectors/f1_ring.json
@@ -38,11 +38,32 @@ def arc_pts(a0, a1, r, step=1.0):
     return [xy(a0 + (a1 - a0) * i / (n - 1), r) for i in range(n)]
 
 
+def strip_xy(ax, s_, t):
+    a = math.radians(ax)
+    return (s_ * math.cos(a) - t * math.sin(a)) * PX, (s_ * math.sin(a) + t * math.cos(a)) * PX
+
+
+def strip_s(r, t):
+    return math.sqrt(max(r * r - t * t, 0.0))
+
+
+def in_strip(rm, a, r):
+    """Точка (a, r) под полосой rm."""
+    d = math.radians(a - rm["axis"])
+    s_, t = r * math.cos(d), r * math.sin(d)
+    return s_ > 0 and rm["t"][0] <= t <= rm["t"][1] and rm["r"][0] <= r <= rm["r"][1]
+
+
 def poly(pts):
     return " ".join(f"{x:.1f},{y:.1f}" for x, y in pts)
 
 
 def room_pts(rm):
+    if "axis" in rm:
+        ax, (t0, t1), (r0, r1) = rm["axis"], rm["t"], rm["r"]
+        n = 12
+        ts = [t0 + (t1 - t0) * i / n for i in range(n + 1)]
+        return [strip_xy(ax, strip_s(r1, t), t) for t in ts] + [strip_xy(ax, strip_s(r0, t), t) for t in reversed(ts)]
     if rm.get("shape") == "rect":
         a, r = rm["c"]["a"], rm["c"]["r"]
         w, d = rm["size"]
@@ -60,14 +81,30 @@ def room_pts(rm):
     return arc_pts(a0, a1, r1) + arc_pts(a1, a0, max(r0, 0.01))
 
 
+STRIPS = []
+
+
 def centroid(rm):
+    if "axis" in rm:
+        return strip_xy(rm["axis"], strip_s(sum(rm["r"]) / 2, 0), 0)
     if rm.get("shape") == "rect":
         return xy(rm["c"]["a"], rm["c"]["r"])
-    return xy(sum(rm["a"]) / 2, sum(rm["r"]) / 2)
+    return xy(label_angle(rm), sum(rm["r"]) / 2)
+
+
+def label_angle(rm):
+    """Середина видимой части дуги — помещение, которое режет аллея, подписываем мимо неё."""
+    a0, a1 = rm["a"]
+    rmid = sum(rm["r"]) / 2
+    seen = [a0 + (a1 - a0) * i / 40 for i in range(41)]
+    seen = [a for a in seen if not any(in_strip(st, a, rmid) for st in STRIPS)]
+    return rm.get("label_a", sum(seen) / len(seen) if seen else (a0 + a1) / 2)
 
 
 def room_size_px(rm):
     """Сколько места под подпись: ширина по дуге и глубина, px."""
+    if "axis" in rm:
+        return (rm["t"][1] - rm["t"][0]) * PX, (rm["r"][1] - rm["r"][0]) * PX
     if rm.get("shape") == "rect":
         return rm["size"][0] * PX, rm["size"][1] * PX
     rm_mid = sum(rm["r"]) / 2
@@ -94,7 +131,7 @@ BUILDING_FILL = {0: "#d3dde0", 1: "#bfc4c6", 2: "#9fa9ad", 3: "#e7e5df", 4: "#e7
 def parse_level(tscn):
     """Постройки (BlockoutBuilding), точки появления и эвакуации из .tscn уровня: положение,
     оси X/Z базиса и экспортированные свойства. Нет файла — пустые списки."""
-    out = {"buildings": [], "spawns": [], "extractions": [], "items": []}
+    out = {"buildings": [], "spawns": [], "extractions": [], "items": [], "escalators": []}
     if not tscn.exists():
         return out
     text = tscn.read_text(encoding="utf-8")
@@ -115,6 +152,13 @@ def parse_level(tscn):
             sz = [float(v) for v in re.findall(r"-?[\d.]+", props.get("size", "Vector2(20, 16)"))[1:]]
             node.update({"size": sz, "kind": int(props.get("kind", 0)), "levels": int(props.get("levels", 3))})
             out["buildings"].append(node)
+        elif scene.endswith("escalator.tscn"):
+            node["units"] = int(props.get("units", 2))
+            node["rise"] = float(props.get("rise", 6.0))
+            node["incline"] = float(props.get("incline_deg", 30.0))
+            node["step"] = float(props.get("step_width", 1.0))
+            node["top"] = float(props.get("top_platform", 3.0))
+            out["escalators"].append(node)
         elif scene.endswith("spawn_point.tscn"):
             out["spawns"].append(node)
         elif scene.endswith("extraction_point.tscn"):
@@ -158,8 +202,9 @@ def main(path):
     s.append(f'<text x="{lx:.0f}" y="{ly + 22:.0f}" font-size="13" fill="#8a8a86" text-anchor="middle">3 сектора: роллеты опущены, видно сквозь</text>')
 
     rooms = d["rooms"]
-    # сначала улица, потом здание, потом постройки
-    order = sorted(rooms, key=lambda rm: (rm.get("shape") == "rect", not rm.get("outdoor", False)))
+    STRIPS[:] = [rm for rm in rooms if "axis" in rm]
+    # сначала улица, потом здание, поверх — полосы аллеи (они главнее), потом постройки
+    order = sorted(rooms, key=lambda rm: (rm.get("shape") == "rect", not rm.get("outdoor", False), "axis" in rm))
     for rm in order:
         fill = FILL.get(rm["type"], "#eeeeee")
         if rm.get("locked"):
@@ -174,6 +219,8 @@ def main(path):
         color, width, dash = OPEN_KIND.get(o["kind"], ("#ff00ff", 3, None))
         if o["wall"] == "arc":
             pts = arc_pts(o["a"][0], o["a"][1], o["r"], 0.5)
+        elif o["wall"] == "along":
+            pts = [strip_xy(o["axis"], o["s"][0], o["t"]), strip_xy(o["axis"], o["s"][1], o["t"])]
         else:
             pts = [xy(o["a"], o["r"][0]), xy(o["a"], o["r"][1])]
         da = f' stroke-dasharray="{dash}"' if dash else ""
@@ -188,8 +235,10 @@ def main(path):
             x, y = xy(rm["label_a"], sum(rm["r"]) / 2)
         wpx, hpx = room_size_px(rm)
         rot = 0.0
-        if rm.get("shape") != "rect":
-            a_mid = rm.get("label_a", sum(rm["a"]) / 2)
+        if "axis" in rm:
+            y -= 0  # полоса: подпись в центре, без поворота
+        elif rm.get("shape") != "rect":
+            a_mid = label_angle(rm)
             if hpx < 22 and wpx > 60:
                 rot = a_mid + 90
             elif wpx < 30 and hpx > wpx:
@@ -245,6 +294,30 @@ def main(path):
             for i, ln in enumerate(wrap(name, max(8, int(b["size"][0] * PX / 7)))):
                 s.append(f'<text x="{x:.0f}" y="{y + i * 15:.0f}" font-size="13" text-anchor="middle" '
                          f'dominant-baseline="middle" fill="#1f1f1e" font-weight="600">{escape(ln)}</text>')
+    # эскалаторы: марш с поперечными ступенями, верхняя площадка, стрелка подъёма
+    for es in level["escalators"]:
+        run = es["rise"] / math.tan(math.radians(es["incline"]))
+        length = run + 2 * 2.4
+        uw = es["step"] + 0.64
+        w = es["units"] * uw + (es["units"] - 1) * 0.4
+
+        def to_w(lx, lz, es=es):
+            return ((es["o"][0] + es["bx"][0] * lx + es["bz"][0] * lz) * PX,
+                    (es["o"][2] + es["bx"][2] * lx + es["bz"][2] * lz) * PX)
+        body = [to_w(-w / 2, length / 2), to_w(w / 2, length / 2), to_w(w / 2, -length / 2), to_w(-w / 2, -length / 2)]
+        top = [to_w(-w / 2 - 0.3, -length / 2 + 2.4), to_w(w / 2 + 0.3, -length / 2 + 2.4),
+               to_w(w / 2 + 0.3, -length / 2 - es["top"]), to_w(-w / 2 - 0.3, -length / 2 - es["top"])]
+        s.append(f'<polygon points="{poly(top)}" fill="#d9d2ec" stroke="#5b4a93" stroke-width="1" stroke-dasharray="3 2"/>')
+        s.append(f'<polygon points="{poly(body)}" fill="#b9acd9" stroke="#3f3170" stroke-width="1.2"/>')
+        for k in range(1, 10):
+            z = length / 2 - 2.4 - run * k / 10
+            a, b = to_w(-w / 2, z), to_w(w / 2, z)
+            s.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#3f3170" stroke-width="0.6"/>')
+        a, b = to_w(0, length / 2 - 1.0), to_w(0, -length / 2 + 1.0)
+        s.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#3f3170" stroke-width="1.6"/>')
+        c = to_w(0, -length / 2 - es["top"] - 4)
+        s.append(f'<text x="{c[0]:.0f}" y="{c[1]:.0f}" font-size="10.5" text-anchor="middle" fill="#3f3170" font-weight="700">'
+                 f'эскалаторы ↑ 2F (штора)</text>')
     for e in level["extractions"]:
         x, y = e["o"][0] * PX, e["o"][2] * PX
         s.append(f'<polygon points="{x:.1f},{y - 13:.1f} {x + 12:.1f},{y + 9:.1f} {x - 12:.1f},{y + 9:.1f}" fill="#27a348" stroke="#0d4f1f" stroke-width="1.5"/>')

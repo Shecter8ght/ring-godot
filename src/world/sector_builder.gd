@@ -7,6 +7,13 @@ extends RefCounted
 ## один раз на линию, проёмы вырезают их. Ничего не кладётся руками — только данные.
 ## Постройки вокруг (паркинг, техкомплекс…) — отдельные сцены в сцене уровня, их двигают руками.
 ##
+## Полоса — прямое помещение вдоль оси (главная аллея от входа к атриуму): поля "axis" (угол оси,
+## град), "t" [t0,t1] — поперёк оси, м (плюс — в сторону роста угла), "r" [r0,r1] — пояс радиусов,
+## концы полосы — дуги. Полоса главнее кольцевых помещений: где она лежит, их нет (пол, стены,
+## пропсы обрезаются). Кольцевое помещение, которое полоса задевает, она режет на всю его глубину
+## по радиусу — пояса радиусов полос совпадают с поясами кольца. Стены вдоль полосы — линии
+## "along" (параметр — s, м вдоль оси от центра), проёмы в них: {"wall":"along","axis","t","s":[..]}.
+##
 ## Блокаут ("greybox": true в JSON): стены без текстур и декора, толщина — по классу конструкции
 ## (фасад / противопожарная / несущая / перегородка, числа в блоке "walls", нормы —
 ## docs/building_standards.md). Скрипт @tool: в редакторе строит превью без дверей и пропсов.
@@ -62,6 +69,8 @@ var _fire_angles: Array[float] = []
 var _preview: bool = false
 ## Ключ помещения по одну из сторон текущего отрезка стены — его дверь запирается (_doorway).
 var _cur_key: String = ""
+## Прямоугольники мировых XZ, где пропсов не ставить (узлы сцены группы "prop_keepout").
+var keepouts: Array[Rect2] = []
 
 const DOOR_SCENE := preload("res://scenes/props/door.tscn")
 const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
@@ -75,6 +84,72 @@ const ARCH_DEFAULT := {
 static func polar(a_deg: float, r: float) -> Vector3:
 	var a := deg_to_rad(a_deg)
 	return Vector3(r * cos(a), 0.0, r * sin(a))
+
+
+# ---------------------------------------------------------------- форма помещения
+
+static func is_strip(room: Dictionary) -> bool:
+	return room.has("axis")
+
+
+## Точка полосы: s — вдоль оси от центра кольца, t — поперёк.
+static func strip_point(axis_deg: float, s: float, t: float) -> Vector3:
+	return polar(axis_deg, s) + polar(axis_deg + 90.0, t)
+
+
+## Угол a внутри [a0, a1] с учётом перехода через ±180.
+static func angle_in(a: float, a0: float, a1: float, eps: float = 1e-6) -> bool:
+	var x := fposmod(a - a0 + eps, 360.0) - eps
+	return x <= a1 - a0 + eps
+
+
+## Точка внутри собственной формы помещения (без учёта того, что его режут полосы).
+static func in_shape(room: Dictionary, p: Vector3, eps: float = 1e-6) -> bool:
+	var r := Vector2(p.x, p.z).length()
+	if r < float(room.r[0]) - eps or r > float(room.r[1]) + eps:
+		return false
+	if is_strip(room):
+		var ax := float(room.axis)
+		var d := polar(ax, 1.0)
+		var t := p.dot(polar(ax + 90.0, 1.0))
+		return p.dot(d) > 0.0 and t >= float(room.t[0]) - eps and t <= float(room.t[1]) + eps
+	return angle_in(rad_to_deg(atan2(p.z, p.x)), float(room.a[0]), float(room.a[1]), eps)
+
+
+## Чьё место в точке: полосы главнее кольцевых помещений. Пусто — вне сектора.
+static func owner_of(rooms: Array, p: Vector3) -> Dictionary:
+	for room in rooms:
+		if is_strip(room) and in_shape(room, p):
+			return room
+	for room in rooms:
+		if not is_strip(room) and in_shape(room, p):
+			return room
+	return {}
+
+
+## Случайная точка внутри помещения с отступом pad от его границ (и от полос, что его режут).
+## Vector3.INF — не нашлось (помещение почти целиком под полосой).
+static func random_point(room: Dictionary, rooms: Array, rng: RandomNumberGenerator, pad: float) -> Vector3:
+	var id := String(room.get("id", ""))
+	for i in range(16):
+		var p: Vector3
+		var r := rng.randf_range(float(room.r[0]) + pad, float(room.r[1]) - pad)
+		if is_strip(room):
+			var t := rng.randf_range(float(room.t[0]) + pad, float(room.t[1]) - pad)
+			if absf(t) >= r:
+				continue
+			p = strip_point(float(room.axis), sqrt(r * r - t * t), t)
+		else:
+			var da := rad_to_deg(pad / maxf(r, 1.0))
+			p = polar(rng.randf_range(float(room.a[0]) + da, float(room.a[1]) - da), r)
+		var ok := true
+		for off in [Vector3(pad, 0, 0), Vector3(-pad, 0, 0), Vector3(0, 0, pad), Vector3(0, 0, -pad), Vector3.ZERO]:
+			if String(owner_of(rooms, p + off).get("id", "")) != id:
+				ok = false
+				break
+		if ok:
+			return p
+	return Vector3.INF
 
 
 static func load_def(path: String) -> Dictionary:
@@ -144,20 +219,98 @@ func _st(store: Dictionary, mat_id: String) -> SurfaceTool:
 
 func _build_floors() -> void:
 	for room in _rooms:
+		var st := _st(_floors, _floor_mat(String(room.get("floor", "concrete_floor_worn_001"))))
+		if is_strip(room):
+			_strip_floor(st, room)
+			continue
 		var a0 := float(room.a[0])
 		var a1 := float(room.a[1])
 		var r0 := float(room.r[0])
 		var r1 := float(room.r[1])
-		var st := _st(_floors, _floor_mat(String(room.get("floor", "concrete_floor_worn_001"))))
+		# полосы, что режут это помещение (пояс радиусов пересекается)
+		var cuts: Array = []
+		for s in _rooms:
+			if is_strip(s) and float(s.r[0]) < r1 - 1e-3 and float(s.r[1]) > r0 + 1e-3:
+				cuts.append(s)
 		var n := maxi(1, int(ceil(deg_to_rad(a1 - a0) * r1 / SEG_LEN)))
 		for i in range(n):
 			var aa := lerpf(a0, a1, float(i) / n)
 			var ab := lerpf(a0, a1, float(i + 1) / n)
-			var p00 := polar(aa, r0)
-			var p01 := polar(aa, r1)
-			var p10 := polar(ab, r0)
-			var p11 := polar(ab, r1)
-			_quad(st, p00, p10, p11, p01, Vector3.UP, _uv_xz(p00), _uv_xz(p10), _uv_xz(p11), _uv_xz(p01))
+			var pieces: Array[PackedVector3Array] = [PackedVector3Array([polar(aa, r0), polar(ab, r0), polar(ab, r1), polar(aa, r1)])]
+			for s in cuts:
+				pieces = _cut_strip(pieces, s)
+			for poly in pieces:
+				_poly(st, poly)
+
+
+## Пол полосы: столбцы по 1 м поперёк оси, концы — по дугам r0 и r1.
+func _strip_floor(st: SurfaceTool, room: Dictionary) -> void:
+	var ax := float(room.axis)
+	var t0 := float(room.t[0])
+	var t1 := float(room.t[1])
+	var r0 := float(room.r[0])
+	var r1 := float(room.r[1])
+	var n := maxi(1, int(ceil((t1 - t0) / SEG_LEN)))
+	for i in range(n):
+		var ta := lerpf(t0, t1, float(i) / n)
+		var tb := lerpf(t0, t1, float(i + 1) / n)
+		var sa0 := sqrt(maxf(r0 * r0 - ta * ta, 0.0))
+		var sb0 := sqrt(maxf(r0 * r0 - tb * tb, 0.0))
+		var sa1 := sqrt(maxf(r1 * r1 - ta * ta, 0.0))
+		var sb1 := sqrt(maxf(r1 * r1 - tb * tb, 0.0))
+		_poly(st, PackedVector3Array([strip_point(ax, sa0, ta), strip_point(ax, sb0, tb), strip_point(ax, sb1, tb), strip_point(ax, sa1, ta)]))
+
+
+## Вычитает из выпуклых кусков пола полосу (её поперечный пояс t0..t1 по эту сторону центра).
+func _cut_strip(pieces: Array[PackedVector3Array], strip: Dictionary) -> Array[PackedVector3Array]:
+	var ax := float(strip.axis)
+	var d := polar(ax, 1.0)
+	var pn := polar(ax + 90.0, 1.0)
+	var out: Array[PackedVector3Array] = []
+	for poly in pieces:
+		var c := Vector3.ZERO
+		for p in poly:
+			c += p
+		c /= float(poly.size())
+		if c.dot(d) <= 1.0:
+			out.append(poly)
+			continue
+		for part in [_clip_half(poly, -pn, -float(strip.t[0])), _clip_half(poly, pn, float(strip.t[1]))]:
+			if part.size() >= 3:
+				out.append(part)
+	return out
+
+
+## Часть выпуклого многоугольника, где p·n ≥ d (Сазерленд — Ходжмен по одной прямой).
+static func _clip_half(poly: PackedVector3Array, n: Vector3, d: float) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	var m := poly.size()
+	for i in range(m):
+		var a := poly[i]
+		var b := poly[(i + 1) % m]
+		var da := a.dot(n) - d
+		var db := b.dot(n) - d
+		if da >= 0.0:
+			out.append(a)
+		if (da >= 0.0) != (db >= 0.0):
+			out.append(a.lerp(b, da / (da - db)))
+	return out
+
+
+## Выпуклый многоугольник пола веером; обход выправляется так, чтобы лицевая смотрела вверх.
+func _poly(st: SurfaceTool, poly: PackedVector3Array) -> void:
+	for i in range(1, poly.size() - 1):
+		var a := poly[0]
+		var b := poly[i]
+		var c := poly[i + 1]
+		if (c - a).cross(b - a).y > 0.0:
+			var tmp := b
+			b = c
+			c = tmp
+		for p in [a, c, b]:
+			st.set_normal(Vector3.UP)
+			st.set_uv(_uv_xz(p))
+			st.add_vertex(p)
 
 
 func _uv_xz(p: Vector3) -> Vector2:
@@ -232,10 +385,16 @@ func _post(st: SurfaceTool, p: Vector3, dir: Vector3, w: float, t: float, h: flo
 
 
 # ---------------------------------------------------------------- линии стен
-# Линия — дуга (kind "arc", fixed = r, параметр = угол) или радиус (kind "radial", fixed = a, параметр = r).
+# Линия — дуга (kind "arc", fixed = r, параметр = угол), радиус (kind "radial", fixed = a, параметр = r)
+# или прямая вдоль оси полосы (kind "along", axis, fixed = t, параметр = s).
 
 func _line_point(line: Dictionary, p: float) -> Vector3:
-	return polar(p, float(line.fixed)) if String(line.kind) == "arc" else polar(float(line.fixed), p)
+	match String(line.kind):
+		"arc":
+			return polar(p, float(line.fixed))
+		"along":
+			return strip_point(float(line.axis), p, float(line.fixed))
+	return polar(float(line.fixed), p)
 
 
 ## Длина отрезка линии в метрах между параметрами p0 и p1.
@@ -274,20 +433,29 @@ func _arc_points(r: float, a0: float, a1: float) -> PackedVector3Array:
 # ---------------------------------------------------------------- стены по линиям
 
 func _room_at(a: float, r: float) -> Dictionary:
-	for room in _rooms:
-		if a >= float(room.a[0]) - 1e-6 and a <= float(room.a[1]) + 1e-6 and r >= float(room.r[0]) - 1e-6 and r <= float(room.r[1]) + 1e-6:
-			return room
-	return {}
+	return owner_of(_rooms, polar(a, r))
 
 
-func _opening_at(kind_wall: String, fixed: float, along: float) -> Dictionary:
+func _opening_at(kind_wall: String, fixed: float, along: float, axis: float = 0.0) -> Dictionary:
 	for op in _openings:
 		if String(op.wall) != kind_wall:
 			continue
-		var f := float(op.r) if kind_wall == "arc" else float(op.a)
+		var f := 0.0
+		var rng: Array
+		match kind_wall:
+			"arc":
+				f = float(op.r)
+				rng = op.a
+			"along":
+				if absf(float(op.axis) - axis) > 0.01:
+					continue
+				f = float(op.t)
+				rng = op.s
+			_:
+				f = float(op.a)
+				rng = op.r
 		if absf(f - fixed) > 0.01:
 			continue
-		var rng: Array = op.a if kind_wall == "arc" else op.r
 		if along >= float(rng[0]) - 1e-6 and along <= float(rng[1]) + 1e-6:
 			return op
 	return {}
@@ -297,16 +465,65 @@ func _build_walls() -> void:
 	# Линии: дуги по радиусу и радиальные по углу; на каждой — точки разбиения.
 	var arcs: Dictionary = {}
 	var rads: Dictionary = {}
+	var alongs: Dictionary = {}
 	for room in _rooms:
+		if is_strip(room):
+			continue
 		for r in [float(room.r[0]), float(room.r[1])]:
 			_add_breaks(arcs, r, [float(room.a[0]), float(room.a[1])])
 		for a in [float(room.a[0]), float(room.a[1])]:
 			_add_breaks(rads, a, [float(room.r[0]), float(room.r[1])])
+	# полосы: торцы — дуги, бока — прямые вдоль оси
+	for room in _rooms:
+		if not is_strip(room):
+			continue
+		var ax := float(room.axis)
+		for r in [float(room.r[0]), float(room.r[1])]:
+			_add_breaks(arcs, r, [ax + rad_to_deg(asin(float(room.t[0]) / r)), ax + rad_to_deg(asin(float(room.t[1]) / r))])
+		for t in [float(room.t[0]), float(room.t[1])]:
+			var key := "%.2f@%.2f" % [t, ax]
+			if not alongs.has(key):
+				alongs[key] = {"fixed": t, "axis": ax, "breaks": []}
+			_add_breaks(alongs, t, [_strip_s(float(room.r[0]), t), _strip_s(float(room.r[1]), t)], key)
 	for op in _openings:
-		if String(op.wall) == "arc":
-			_add_breaks(arcs, float(op.r), [float(op.a[0]), float(op.a[1])])
-		else:
-			_add_breaks(rads, float(op.a), [float(op.r[0]), float(op.r[1])])
+		match String(op.wall):
+			"arc":
+				_add_breaks(arcs, float(op.r), [float(op.a[0]), float(op.a[1])])
+			"along":
+				var key := "%.2f@%.2f" % [float(op.t), float(op.axis)]
+				if alongs.has(key):
+					_add_breaks(alongs, float(op.t), [float(op.s[0]), float(op.s[1])], key)
+			_:
+				_add_breaks(rads, float(op.a), [float(op.r[0]), float(op.r[1])])
+	# пересечения прямых полос с дугами и радиусами — чтобы по обе стороны каждого отрезка
+	# было ровно по одному помещению
+	for key in alongs:
+		var ln: Dictionary = alongs[key]
+		var t: float = ln.fixed
+		var ax: float = ln.axis
+		var s_min: float = (ln.breaks as Array).min()
+		var s_max: float = (ln.breaks as Array).max()
+		for ak in arcs:
+			var r: float = arcs[ak].fixed
+			if absf(t) < r:
+				var s := _strip_s(r, t)
+				if s > s_min and s < s_max:
+					_add_breaks(alongs, t, [s], key)
+				# точка разбиения только внутри уже существующей дуги — иначе она бы её удлинила
+				var ab := ax + rad_to_deg(asin(t / r))
+				if ab > (arcs[ak].breaks as Array).min() and ab < (arcs[ak].breaks as Array).max():
+					_add_breaks(arcs, r, [ab])
+		for rk in rads:
+			var a: float = rads[rk].fixed
+			var da := deg_to_rad(wrapf(a - ax, -180.0, 180.0))
+			if absf(sin(da)) < 1e-4 or signf(sin(da)) != signf(t) or cos(da) <= 0.0:
+				continue
+			var rr := t / sin(da)
+			var s2 := rr * cos(da)
+			if s2 > s_min and s2 < s_max:
+				_add_breaks(alongs, t, [s2], key)
+			if rr > (rads[rk].breaks as Array).min() and rr < (rads[rk].breaks as Array).max():
+				_add_breaks(rads, a, [rr])
 
 	for key in arcs:
 		var line := {"kind": "arc", "fixed": arcs[key].fixed}
@@ -332,10 +549,32 @@ func _build_walls() -> void:
 				continue
 			var mid := (r0 + r1) * 0.5
 			_emit_wall_segment(line, r0, r1, _room_at(a - EPS_A, mid), _room_at(a + EPS_A, mid), _opening_at("radial", a, mid))
+	for key in alongs:
+		var ln: Dictionary = alongs[key]
+		var line := {"kind": "along", "fixed": ln.fixed, "axis": ln.axis}
+		var t: float = ln.fixed
+		var ax: float = ln.axis
+		var br: Array = ln.breaks
+		br.sort()
+		for i in range(br.size() - 1):
+			var s0: float = br[i]
+			var s1: float = br[i + 1]
+			if s1 - s0 < 1e-4:
+				continue
+			var mid := (s0 + s1) * 0.5
+			var side_a := owner_of(_rooms, strip_point(ax, mid, t - EPS_R))
+			var side_b := owner_of(_rooms, strip_point(ax, mid, t + EPS_R))
+			_emit_wall_segment(line, s0, s1, side_a, side_b, _opening_at("along", t, mid, ax))
 
 
-func _add_breaks(lines: Dictionary, fixed: float, ends: Array) -> void:
-	var key := "%.2f" % fixed
+## Где прямая t полосы пересекает дугу r (по эту сторону центра), м вдоль оси.
+static func _strip_s(r: float, t: float) -> float:
+	return sqrt(maxf(r * r - t * t, 0.0))
+
+
+func _add_breaks(lines: Dictionary, fixed: float, ends: Array, key: String = "") -> void:
+	if key == "":
+		key = "%.2f" % fixed
 	if not lines.has(key):
 		lines[key] = {"fixed": fixed, "breaks": []}
 	for e in ends:
@@ -350,6 +589,9 @@ func _add_breaks(lines: Dictionary, fixed: float, ends: Array) -> void:
 
 func _emit_wall_segment(line: Dictionary, p0: float, p1: float, side_a: Dictionary, side_b: Dictionary, op: Dictionary) -> void:
 	if side_a.is_empty() and side_b.is_empty():
+		return
+	# линия проходит внутри одного помещения (кольцевую стену перекрыла полоса) — стены нет
+	if not side_a.is_empty() and String(side_a.get("id", "")) == String(side_b.get("id", "")):
 		return
 	var a_out: bool = side_a.is_empty() or bool(side_a.get("outdoor", false))
 	var b_out: bool = side_b.is_empty() or bool(side_b.get("outdoor", false))
@@ -400,9 +642,10 @@ func _wall_class(line: Dictionary, side_a: Dictionary, side_b: Dictionary, facad
 		return "facade"
 	if String(line.kind) == "arc":
 		return "structural"
-	for fa in _fire_angles:
-		if absf(float(line.fixed) - fa) <= FIRE_TOL_DEG:
-			return "fire"
+	if String(line.kind) == "radial":
+		for fa in _fire_angles:
+			if absf(float(line.fixed) - fa) <= FIRE_TOL_DEG:
+				return "fire"
 	for side in [side_a, side_b]:
 		if bool(side.get("core", false)) or String(side.get("type", "")) in ["corridor", "gallery", "atrium"]:
 			return "structural"
@@ -563,10 +806,7 @@ func _side_normal(line: Dictionary, p: float, room: Dictionary) -> Vector3:
 	if room.is_empty():
 		return n
 	var probe := _line_point(line, p) + n * 0.5
-	var pa := rad_to_deg(atan2(probe.z, probe.x))
-	var pr := probe.length()
-	var inside := pa >= float(room.a[0]) and pa <= float(room.a[1]) and pr >= float(room.r[0]) and pr <= float(room.r[1])
-	return n if inside else -n
+	return n if in_shape(room, probe) else -n
 
 
 ## Стеклянные панели между стойками; часть панелей выбита (детерминированно по позиции).
@@ -612,7 +852,7 @@ func _build_surroundings() -> void:
 		var a_min := 1e9
 		var a_max := -1e9
 		for room in _rooms:
-			if float(room.r[1]) <= r0 + 1e-3 or float(room.r[0]) >= r1 - 1e-3:
+			if is_strip(room) or float(room.r[1]) <= r0 + 1e-3 or float(room.r[0]) >= r1 - 1e-3:
 				continue
 			a_min = minf(a_min, float(room.a[0]))
 			a_max = maxf(a_max, float(room.a[1]))
@@ -765,6 +1005,10 @@ func _build_lights(root: Node3D) -> void:
 	for room in _rooms:
 		if bool(room.get("locked", false)):
 			continue
+		var outdoor := bool(room.get("outdoor", false))
+		if is_strip(room):
+			_strip_lights(lights, room)
+			continue
 		var a0 := float(room.a[0])
 		var a1 := float(room.a[1])
 		var r0 := float(room.r[0])
@@ -772,7 +1016,6 @@ func _build_lights(root: Node3D) -> void:
 		var rm := (r0 + r1) * 0.5
 		var arc_len := deg_to_rad(a1 - a0) * rm
 		var depth := r1 - r0
-		var outdoor := bool(room.get("outdoor", false))
 		# атриум освещён через купол; у большого кольца шаг реже — иначе сотни точечных огней
 		if not _ring.is_empty() and String(room.get("type", "")) == "atrium":
 			continue
@@ -786,6 +1029,8 @@ func _build_lights(root: Node3D) -> void:
 				var a := lerpf(a0, a1, (i + 0.5) / na)
 				var r := lerpf(r0, r1, (j + 0.5) / nr)
 				var pos := polar(a, r)
+				if String(owner_of(_rooms, pos).get("id", "")) != String(room.get("id", "")):
+					continue
 				if outdoor:
 					var spot := SpotLight3D.new()
 					spot.position = pos + Vector3(0, 8.0, 0)
@@ -804,6 +1049,29 @@ func _build_lights(root: Node3D) -> void:
 					omni.omni_range = 13.0
 					omni.omni_attenuation = 1.4
 					lights.add_child(omni)
+
+
+## Свет полосы — сеткой по её прямоугольнику (шаг как у помещений кольца).
+func _strip_lights(lights: Node3D, room: Dictionary) -> void:
+	var ax := float(room.axis)
+	var t0 := float(room.t[0])
+	var t1 := float(room.t[1])
+	var s0 := _strip_s(float(room.r[0]), 0.0)
+	var s1 := _strip_s(float(room.r[1]), 0.0)
+	var nt := maxi(1, int(round((t1 - t0) / 15.0)))
+	var ns := maxi(1, int(round((s1 - s0) / 15.0)))
+	for i in range(nt):
+		for j in range(ns):
+			var pos := strip_point(ax, lerpf(s0, s1, (j + 0.5) / ns), lerpf(t0, t1, (i + 0.5) / nt))
+			if String(owner_of(_rooms, pos).get("id", "")) != String(room.get("id", "")):
+				continue
+			var omni := OmniLight3D.new()
+			omni.position = pos + Vector3(0, minf(_wall_h - 1.0, 5.5), 0)
+			omni.light_color = Color(0.82, 0.92, 0.88)
+			omni.light_energy = 3.5
+			omni.omni_range = 13.0
+			omni.omni_attenuation = 1.4
+			lights.add_child(omni)
 
 
 ## Пропсы по правилам помещений (см. PropPlacement). Сид — из id сектора: расстановка воспроизводима.
@@ -834,7 +1102,7 @@ func _build_props(root: Node3D) -> void:
 	props.name = "Props"
 	root.add_child(props)
 	var placement := PropPlacement.new()
-	placement.place(props, _rooms, _openings, root.get_meta("spawn", Vector3.ZERO), hash(String(_def.get("id", ""))))
+	placement.place(props, _rooms, _openings, root.get_meta("spawn", Vector3.ZERO), hash(String(_def.get("id", ""))), keepouts)
 	root.set_meta("prop_count", placement.count)
 	_build_loot(root, placement.lootables)
 	# меши пропсов склеиваются по клеткам — иначе каждая коробка на стеллаже отдельный вызов отрисовки
@@ -847,7 +1115,7 @@ func _build_overhead() -> void:
 	var steel := _st(_walls, "steel_dark")
 	var duct := _st(_walls, "metal_plate")
 	for room in _rooms:
-		if bool(room.get("outdoor", false)) or bool(room.get("locked", false)):
+		if bool(room.get("outdoor", false)) or bool(room.get("locked", false)) or is_strip(room):
 			continue
 		var a0 := float(room.a[0])
 		var a1 := float(room.a[1])
@@ -897,6 +1165,8 @@ func _build_markers(root: Node3D) -> void:
 		m.name = String(op.extraction)
 		if String(op.wall) == "arc":
 			m.position = polar((float(op.a[0]) + float(op.a[1])) * 0.5, float(op.r))
+		elif String(op.wall) == "along":
+			m.position = strip_point(float(op.axis), (float(op.s[0]) + float(op.s[1])) * 0.5, float(op.t))
 		else:
 			m.position = polar(float(op.a), (float(op.r[0]) + float(op.r[1])) * 0.5)
 		# старые маркеры из JSON (f1_market) — не ExtractionPoint, своя группа

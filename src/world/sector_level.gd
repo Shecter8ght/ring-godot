@@ -50,6 +50,10 @@ func _ready() -> void:
 	_rng.randomize()
 	var t0 := Time.get_ticks_msec()
 	var builder := SectorBuilder.new()
+	# узлы сцены, под которыми пропсов быть не должно (эскалаторы) — уже в дереве: дети готовы раньше
+	for k in get_tree().get_nodes_in_group("prop_keepout"):
+		if k.has_method("keepout_rect"):
+			builder.keepouts.append(k.call("keepout_rect"))
 	var sector := builder.build(sector_path)
 	print("sector: собран за %d мс (пропсов %d, склеено в %d мешей)" % [Time.get_ticks_msec() - t0, int(sector.get_meta("prop_count", 0)), int(sector.get_meta("prop_batches", 0))])
 	sector.add_to_group("nav_source")
@@ -270,7 +274,7 @@ func _spawn_marauders() -> void:
 	print("sector: мародёров %d, попыток %d" % [placed, tries])
 
 
-## Случайная точка внутри случайного «жилого» помещения сектора (полярные границы с отступом).
+## Случайная точка внутри случайного «жилого» помещения сектора (с отступом от стен и полос).
 func _random_room_point() -> Vector3:
 	var candidates: Array = []
 	for room in _rooms:
@@ -280,11 +284,12 @@ func _random_room_point() -> Vector3:
 			candidates.append(room)
 	if candidates.is_empty():
 		return _spawn
-	var room: Dictionary = candidates[_rng.randi_range(0, candidates.size() - 1)]
-	var r := _rng.randf_range(float(room.r[0]) + 1.5, float(room.r[1]) - 1.5)
-	var pad := rad_to_deg(1.5 / maxf(r, 1.0))
-	var a := _rng.randf_range(float(room.a[0]) + pad, float(room.a[1]) - pad)
-	return SectorBuilder.polar(a, r)
+	for i in range(8):
+		var room: Dictionary = candidates[_rng.randi_range(0, candidates.size() - 1)]
+		var p := SectorBuilder.random_point(room, _rooms, _rng, 1.5)
+		if p != Vector3.INF:
+			return p
+	return _spawn
 
 
 
