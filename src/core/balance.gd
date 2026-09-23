@@ -114,17 +114,28 @@ const PISTOL := {"damage": 22.0, "interval": 0.22, "mag": 8, "reload": 1.8, "spr
 const WEAPONS := {
 	"pistol": {"name": "Пистолет", "damage": 22.0, "interval": 0.16, "mag": 12, "reload": 1.6, "spread_deg": 1.4,
 		"pellets": 1, "auto": false, "range_m": 60.0, "noise_m": 60.0, "kick": 0.1, "shake": 0.1,
-		"sound": "shot_pistol", "reload_sound": "reload_pistol", "cycle_sound": ""},
+		"sound": "shot_pistol", "reload_sound": "reload_pistol", "cycle_sound": "", "ergo": 72},
 	"rifle": {"name": "Автомат", "damage": 19.0, "interval": 0.1, "mag": 30, "reload": 2.4, "spread_deg": 2.0,
 		"pellets": 1, "auto": true, "range_m": 90.0, "noise_m": 80.0, "kick": 0.055, "shake": 0.07,
-		"sound": "shot_rifle", "reload_sound": "reload_rifle", "cycle_sound": ""},
+		"sound": "shot_rifle", "reload_sound": "reload_rifle", "cycle_sound": "", "ergo": 44},
 	"shotgun": {"name": "Дробовик", "damage": 12.0, "interval": 0.8, "mag": 6, "reload": 3.0, "spread_deg": 5.5,
 		"pellets": 8, "auto": false, "range_m": 35.0, "noise_m": 75.0, "kick": 0.3, "shake": 0.3,
-		"sound": "shot_shotgun", "reload_sound": "reload_shotgun", "cycle_sound": "reload_shotgun"},
+		"sound": "shot_shotgun", "reload_sound": "reload_shotgun", "cycle_sound": "reload_shotgun", "ergo": 40},
 	"bolt": {"name": "Винтовка", "damage": 95.0, "interval": 1.3, "mag": 5, "reload": 3.2, "spread_deg": 1.6,
 		"pellets": 1, "auto": false, "range_m": 160.0, "noise_m": 120.0, "kick": 0.35, "shake": 0.35,
-		"sound": "shot_bolt", "reload_sound": "reload_rifle", "cycle_sound": "bolt"},
+		"sound": "shot_bolt", "reload_sound": "reload_rifle", "cycle_sound": "bolt", "ergo": 30, "zoom": 6.0},
 }
+## Эргономика (0–100, WeaponStats): время «довода» в прицел и раскачка прицела, от худшей к лучшей.
+const AIM_TIME_SLOW := 0.5
+const AIM_TIME_FAST := 0.12
+## Раскачка в прицеле: амплитуда, рад (стоя; сидя ×0.6, лёжа ×0.3, на сошках ещё ×0.4).
+const SWAY_MAX := 0.012
+const SWAY_MIN := 0.0015
+const SWAY_STANCE := {"stand": 1.0, "crouch": 0.6, "prone": 0.3}
+## Оптика отдельным рендером: разрешение картинки в окуляре, px; поле зрения основной камеры в
+## прицеле с оптикой, град (сама оптика показывает своё, по кратности).
+const SCOPE_RT_SIZE := 768
+const SCOPE_MAIN_FOV := 52.0
 ## Порядок на клавишах 1–4.
 const WEAPON_ORDER := ["pistol", "rifle", "shotgun", "bolt"]
 

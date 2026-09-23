@@ -104,9 +104,25 @@ static func make(id: String, n: int) -> Dictionary:
 	return e
 
 
-## Предмет с состоянием (прочность) не складывается с другими такими же.
+## Предмет с состоянием (прочность, обвесы) не складывается с другими такими же.
 static func can_merge(a: Dictionary, b: Dictionary) -> bool:
-	return String(a.id) == String(b.id) and not a.has("dur") and not b.has("dur")
+	return String(a.id) == String(b.id) and not a.has("dur") and not b.has("dur") and not a.has("mods") and not b.has("mods")
+
+
+## Экземпляр со своим состоянием — всегда поштучно.
+static func _stateful(e: Dictionary) -> bool:
+	return e.has("dur") or e.has("mods")
+
+
+static func mod_spec(id: String) -> Dictionary:
+	return item(id).get("mod", {})
+
+
+## Обвес mod подходит на оружие weapon_item (id предмета) в свой слот.
+static func mod_fits(mod: String, weapon_item: String) -> bool:
+	var ms := mod_spec(mod)
+	var eq := equip(weapon_item)
+	return not ms.is_empty() and String(eq.get("weapon", "")) in ms.get("fits", []) and String(ms.slot) in eq.get("slots", [])
 
 
 ## Сколько ячеек займёт список предметов (стопки по stack).
@@ -123,7 +139,7 @@ static func room_in(list: Array, entry: Dictionary, cap: int) -> int:
 	if cap < 0:
 		return int(entry.n)
 	var free_cells := cap - cells_of(list)
-	if entry.has("dur"):
+	if _stateful(entry):
 		return 1 if free_cells >= cells(id) else 0
 	var st := stack(id)
 	var have := 0
@@ -168,6 +184,8 @@ static func label(entry: Dictionary) -> String:
 	var t := item_name(String(entry.id))
 	if entry.has("dur"):
 		t += " · %d/%d" % [int(entry.dur), int(equip(String(entry.id)).get("durability", 0))]
+	if entry.has("mods") and not (entry.mods as Dictionary).is_empty():
+		t += " · обвесов: %d" % (entry.mods as Dictionary).size()
 	return t
 
 
@@ -176,6 +194,8 @@ static func entry_value(entry: Dictionary) -> int:
 	var v := float(value(String(entry.id))) * int(entry.n)
 	if entry.has("dur"):
 		v *= clampf(float(entry.dur) / maxf(1.0, float(equip(String(entry.id)).get("durability", 1))), 0.2, 1.0)
+	for slot in entry.get("mods", {}):
+		v += float(value(String(entry.mods[slot])))
 	return int(v)
 
 

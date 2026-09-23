@@ -30,6 +30,18 @@ func _ready() -> void:
 	var m1 := Profile.money
 	Profile.sell(_idx("painkillers"), 2)
 	_check("продажа торговцу", Profile.money > m1 and _idx("painkillers") < 0, "%d ₽" % Profile.money)
+	# верстак: обвесы на автомат
+	for id in ["mod_mag_ext", "mod_supp_545", "mod_grip"]:
+		Profile.buy(id, 1)
+		Profile.install_mod("primary", _idx(id))
+	var wm := Profile.weapon_mods("primary")
+	_check("верстак: обвесы на автомате", wm.size() == 3 and _idx("mod_grip") < 0, str(wm))
+	var st := WeaponStats.compute("rifle", wm)
+	var st0 := WeaponStats.compute("rifle", {})
+	_check("характеристики: магазин 45, тише, меньше отдача, эргономика", int(st.mag) == 45 and float(st.noise_m) < float(st0.noise_m) and float(st.kick) < float(st0.kick) and bool(st.suppressed),
+		"маг %d, шум %.0f→%.0f, отдача %.3f→%.3f, эрго %.0f→%.0f" % [int(st.mag), float(st0.noise_m), float(st.noise_m), float(st0.kick), float(st.kick), float(st0.ergo), float(st.ergo)])
+	Profile.install_mod("primary", _idx("w_pistol")) # не обвес — не ставится
+	_check("чужое на верстак не ставится", Profile.weapon_mods("primary").size() == 3, "")
 
 	# --- соло-рейд со снаряжением
 	Profile.pending_raid = true
@@ -40,14 +52,14 @@ func _ready() -> void:
 	pl.health.hp = 100.0
 	await _wait(0.5)
 	_check("в рейде — снаряжение, профиль пуст (на кону)", pl.loadout_mode and pl.inventory.loadout_ready and Profile.equipment.is_empty(), str(pl.inventory.equipment.keys()))
-	_check("в руках автомат, магазин заряжен", pl.weapon_id == "rifle" and pl.ammo == 30, "%s %d" % [pl.weapon_id, pl.ammo])
-	_check("патроны в рюкзаке ушли в магазин", pl.inventory.count("ammo_545") == 90, "%d" % pl.inventory.count("ammo_545"))
+	_check("в руках автомат с обвесами, магазин на 45 заряжен", pl.weapon_id == "rifle" and pl.ammo == 45 and pl.weapon_mods.size() == 3, "%s %d %s" % [pl.weapon_id, pl.ammo, pl.weapon_mods])
+	_check("патроны в рюкзаке ушли в магазин", pl.inventory.count("ammo_545") == 75, "%d" % pl.inventory.count("ammo_545"))
 	pl.ammo = 5
 	Input.action_press("reload")
 	await _frames(2)
 	Input.action_release("reload")
 	await _wait(float(Balance.WEAPONS.rifle.reload) + 0.3)
-	_check("перезарядка из рюкзака", pl.ammo == 30 and pl.inventory.count("ammo_545") == 65, "магазин %d, в рюкзаке %d" % [pl.ammo, pl.inventory.count("ammo_545")])
+	_check("перезарядка из рюкзака", pl.ammo == 45 and pl.inventory.count("ammo_545") == 35, "магазин %d, в рюкзаке %d" % [pl.ammo, pl.inventory.count("ammo_545")])
 	var dur0 := float(pl.inventory.equipment.armor.dur)
 	pl.health.take_damage(40.0, pl.global_position + Vector3(0, 1, 5))
 	_check("броня снимает урон и изнашивается", pl.health.hp > 60.0 and float(pl.inventory.equipment.armor.dur) < dur0, "hp %d, броня %.0f" % [int(pl.health.hp), float(pl.inventory.equipment.armor.dur)])
@@ -70,7 +82,8 @@ func _ready() -> void:
 		if String(e.id) == "ammo_545":
 			back_ammo += int(e.n)
 	_check("профиль: снаряжение вернулось", Profile.equipment.has("primary") and Profile.equipment.has("armor"), str(Profile.equipment.keys()))
-	_check("профиль: патроны из магазина вернулись в рюкзак", back_ammo == 65 + 30, "5.45: %d" % back_ammo)
+	_check("профиль: патроны из магазина вернулись в рюкзак", back_ammo == 35 + 45, "5.45: %d" % back_ammo)
+	_check("профиль: обвесы остались на автомате", Profile.weapon_mods("primary").size() == 3, str(Profile.weapon_mods("primary")))
 	# Enter — в убежище
 	Input.action_press("ui_accept")
 	await _frames(2)

@@ -4,7 +4,10 @@ extends Node3D
 ## колесом, вращение Q/E или зажатой средней кнопкой мыши. Даёт игроку точку на земле под курсором.
 ## ПКМ — прицел от первого лица на весь экран: своя камера в глазах игрока, мышь захвачена и
 ## водит взглядом, WASD — как в шутере от первого лица, в руках — модель оружия, мушка по центру.
-## У болтовки вместо модели — оптика: узкое поле зрения и прицельная сетка. HUD остаётся.
+## Оптика (штатная у винтовки, 4× на планке) — отдельный рендер: вторая камера с узким полем
+## зрения рисует в свою текстуру, текстура ложится ровно на окуляр модели (проекция линзы на экран),
+## остальной экран — обычный вид из глаз. Сетка и тень по краю — шейдером окуляра.
+## Эргономика ствола (WeaponStats): «довод» в прицел и раскачка прицела.
 
 @export var target_path: NodePath
 
@@ -22,7 +25,13 @@ var _ads_cam: Camera3D
 var _viewmodel: Node3D
 var _viewmodel_id: String = ""
 var _dot: Control
-var _scope: Control
+## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
+var scope_active: bool = false
+var _scope_vp: SubViewport
+var _scope_cam: Camera3D
+var _scope_view: TextureRect
+var _sway_t: float = 0.0
+var _scope_zoom: float = 1.0
 var _weapon_label: Label
 var _compass: Compass
 
@@ -44,6 +53,7 @@ func _ready() -> void:
 	_ads_cam.far = 900.0
 	add_child(_ads_cam)
 	_build_hud()
+	_build_scope()
 	# в изометрии отсечения за стенами нет (см. _set_ads)
 	get_viewport().use_occlusion_culling = false
 
@@ -90,7 +100,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var mm := event as InputEventMouseMotion
 		if ads_active:
 			# вправо — поворот вправо; у оптики чувствительность меньше пропорционально полю зрения
-			var sens := Balance.ADS_SENS * (_ads_cam.fov / 62.0)
+			var sens := ads_sens()
 			_look_yaw -= mm.relative.x * sens
 			_look_pitch = clampf(_look_pitch - mm.relative.y * sens, -Balance.ADS_PITCH_LIMIT, Balance.ADS_PITCH_LIMIT)
 		elif _mmb:
@@ -157,7 +167,7 @@ func _set_ads(on: bool, pl: Player) -> void:
 		# взгляд — туда, куда уже смотрит корпус; по вертикали — горизонт
 		_look_yaw = pl.body_yaw()
 		_look_pitch = 0.0
-		_ads_cam.fov = float(Balance.ADS_FOV.get(pl.weapon_id, 60.0)) + 8.0
+		_ads_cam.fov = _ads_fov(pl) + 8.0
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_ads_cam.current = true
 		# без выреза стен: из глаз игрока стены вокруг должны быть целыми
@@ -174,40 +184,163 @@ func _set_ads(on: bool, pl: Player) -> void:
 	# отсечение за стенами — только из глаз: в изометрии стены у камеры растворены, и окклюдер
 	# спрятал бы то, что за невидимой стеной (в том числе игрока)
 	get_viewport().use_occlusion_culling = on
-	_scope.visible = false
 	_dot.visible = on
+	if not on:
+		_set_scope(false)
 
 
 func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var wid := pl.weapon_id
-	var scoped := wid == "bolt"
-	var fov: float = Balance.ADS_FOV.get(wid, 60.0)
-	_ads_cam.fov = lerpf(_ads_cam.fov, fov, minf(1.0, 14.0 * delta))
+	var spec := pl.spec() if wid != "" else {}
+	var scoped := bool(spec.get("scoped", false))
+	_ads_cam.fov = lerpf(_ads_cam.fov, _ads_fov(pl), minf(1.0, 14.0 * delta))
+	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
+	_sway_t += delta
+	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0))
+	if pl.stance != Player.Stance.STAND:
+		amp *= float(spec.get("braced_spread", 1.0))
+	var sway := Vector2(sin(_sway_t * 1.13) * 0.7 + sin(_sway_t * 2.71 + 1.3) * 0.3, sin(_sway_t * 0.87 + 0.5) * 0.6 + sin(_sway_t * 2.05) * 0.4) * amp
 	# отдача подкидывает взгляд, дальше игрок сам возвращает прицел
-	var pitch := _look_pitch + pl.recoil() * 0.6
-	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, _look_yaw + PI, 0.0)), pl.eye_position())
+	var pitch := _look_pitch + pl.recoil() * 0.6 + sway.y
+	var yaw := _look_yaw + sway.x
+	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, yaw + PI, 0.0)), pl.eye_position())
 	_ads_cam.global_position += _ads_cam.global_basis * Vector3(_rng.randf_range(-s, s), _rng.randf_range(-s, s), 0.0) * 0.15
-	pl.look_yaw = _look_yaw
-	pl.look_pitch = _look_pitch
-	# модель в руках: линия прицеливания на оси взгляда, рукоять — на ads_z перед глазом
-	if _viewmodel_id != wid:
+	# пули летят туда, куда смотрит прицел, — с раскачкой
+	pl.look_yaw = yaw
+	pl.look_pitch = _look_pitch + sway.y
+	# модель в руках с обвесами: линия прицеливания на оси взгляда, рукоять — на ads_z перед глазом
+	var vm_key := wid + str(pl.weapon_mods)
+	if _viewmodel_id != vm_key:
 		if _viewmodel:
 			_viewmodel.queue_free()
-		_viewmodel = WeaponModels.build(wid) if wid != "" else Node3D.new()
-		for mi in _viewmodel.find_children("*", "MeshInstance3D", true, false):
-			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			if mi.has_meta("hide_ads"):
-				mi.visible = false
+		_viewmodel = WeaponModels.build(wid, pl.weapon_mods) if wid != "" else Node3D.new()
+		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
+			var gi := mi as GeometryInstance3D
+			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			# слой 2 — только для глаз: камера оптики его не видит (иначе рисовала бы свой прицел)
+			gi.layers = 2
+			if gi.has_meta("hide_ads"):
+				gi.visible = false
+		# фонарь светит от модели на теле — у модели в руках свой не нужен
+		for n in _viewmodel.find_children("Flashlight", "SpotLight3D", true, false):
+			n.queue_free()
 		_ads_cam.add_child(_viewmodel)
-		_viewmodel_id = wid
-	_viewmodel.visible = not scoped
+		_viewmodel_id = vm_key
+	_viewmodel.visible = true
+	for n in _viewmodel.find_children("LaserBeam", "MeshInstance3D", true, false):
+		(n as MeshInstance3D).visible = pl.light_on
 	var sh: float = _viewmodel.get_meta("sight_h", 0.08)
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
+	# «довод»: пока ствол не дошёл (aim_time по эргономике), модель ниже линии и чуть ближе
+	var lift := (1.0 - pl.aim_progress()) * 0.035
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
 	_viewmodel.transform = Transform3D(Basis(Vector3.UP, PI).rotated(Vector3.RIGHT, pl.recoil() * 0.35),
-		Vector3(0.0, -sh, -az + pl.recoil() * 0.12))
-	_scope.visible = scoped
-	_dot.visible = not scoped
+		Vector3(0.0, -sh - lift, -az + pl.recoil() * 0.12 + lift * 0.5))
+	_set_scope(scoped and _viewmodel.has_meta("ocular"))
+	if scope_active:
+		_update_scope(float(spec.get("zoom", 4.0)))
+	_dot.visible = not scope_active
+
+
+## Поле зрения глаз в прицеле: с оптикой — обычное (увеличение — в окуляре), иначе — по стволу.
+func _ads_fov(pl: Player) -> float:
+	if pl.weapon_id == "":
+		return 60.0
+	var spec := pl.spec()
+	return Balance.SCOPE_MAIN_FOV if bool(spec.scoped) else float(spec.ads_fov)
+
+
+# ---------------------------------------------------------------- оптика отдельным рендером
+
+func _build_scope() -> void:
+	_scope_vp = SubViewport.new()
+	_scope_vp.name = "ScopeView"
+	_scope_vp.size = Vector2i(Balance.SCOPE_RT_SIZE, Balance.SCOPE_RT_SIZE)
+	_scope_vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_scope_vp.msaa_3d = Viewport.MSAA_2X
+	_scope_vp.use_occlusion_culling = true
+	add_child(_scope_vp)
+	_scope_cam = Camera3D.new()
+	_scope_cam.name = "ScopeCamera"
+	_scope_cam.near = 0.1
+	_scope_cam.far = 900.0
+	# без слоя 2: модель в руках (и сам прицел) в окуляр не попадает
+	_scope_cam.cull_mask = 0xFFFFF & ~2
+	_scope_cam.current = true
+	_scope_vp.add_child(_scope_cam)
+	var layer := CanvasLayer.new()
+	layer.layer = 9
+	add_child(layer)
+	_scope_view = TextureRect.new()
+	_scope_view.texture = _scope_vp.get_texture()
+	_scope_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_scope_view.stretch_mode = TextureRect.STRETCH_SCALE
+	_scope_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_scope_view.visible = false
+	_scope_view.material = _ocular_material()
+	layer.add_child(_scope_view)
+
+
+## Чувствительность мыши в прицеле: по полю зрения, в оптике — ещё и на кратность.
+func ads_sens() -> float:
+	var s := Balance.ADS_SENS * (_ads_cam.fov / 62.0)
+	return s / maxf(1.0, _scope_zoom) if scope_active else s
+
+
+## Поле зрения камеры оптики (для проверок).
+func scope_fov() -> float:
+	return _scope_cam.fov
+
+
+func _set_scope(on: bool) -> void:
+	if on == scope_active:
+		return
+	scope_active = on
+	_scope_view.visible = on
+	_scope_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+
+
+## Камера оптики — там же, где глаз, по той же оси; её поле зрения — чтобы в окуляре было
+## увеличение zoom относительно основного вида. Окно — ровно на проекции окуляра.
+func _update_scope(zoom: float) -> void:
+	_scope_zoom = zoom
+	var ocular: Vector3 = _viewmodel.to_global(_viewmodel.get_meta("ocular"))
+	var r := float(_viewmodel.get_meta("ocular_r"))
+	_scope_cam.global_transform = _ads_cam.global_transform
+	var dist := maxf(0.02, _ads_cam.global_position.distance_to(ocular))
+	# угол окуляра в основном виде и во сколько раз его «растянуть»
+	var half_main := atan(r / dist)
+	var main_px_per_rad := get_viewport().get_visible_rect().size.y * 0.5 / tan(deg_to_rad(_ads_cam.fov) * 0.5)
+	var half_scope := atan(tan(half_main) / maxf(1.0, zoom))
+	_scope_cam.fov = rad_to_deg(half_scope * 2.0)
+	var c := _ads_cam.unproject_position(ocular)
+	var rad_px := tan(half_main) * main_px_per_rad
+	_scope_view.position = c - Vector2(rad_px, rad_px)
+	_scope_view.size = Vector2(rad_px, rad_px) * 2.0
+
+
+## Шейдер окуляра: круг, тонкие нити с толстыми «пеньками» к краю, тень по краю (выход зрачка).
+func _ocular_material() -> ShaderMaterial:
+	var sh := Shader.new()
+	sh.code = """
+shader_type canvas_item;
+uniform float line_w = 0.0018;
+void fragment() {
+	vec2 c = UV - 0.5;
+	float r = length(c) * 2.0;
+	vec3 col = texture(TEXTURE, UV).rgb;
+	float ax = abs(c.x);
+	float ay = abs(c.y);
+	float thin = step(ax, line_w) + step(ay, line_w);
+	float post = step(ax, line_w * 4.0) * step(0.2, ay) + step(ay, line_w * 4.0) * step(0.2, ax);
+	col = mix(col, vec3(0.01), clamp(thin + post, 0.0, 1.0));
+	col *= smoothstep(1.0, 0.72, r);
+	COLOR = vec4(col, 1.0 - smoothstep(0.97, 1.0, r));
+}
+"""
+	var m := ShaderMaterial.new()
+	m.shader = sh
+	return m
 
 
 ## Дуло модели в руках (в прицеле) — отсюда трассер и вспышка.
@@ -223,26 +356,6 @@ func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
-	# оптика: чёрная виньетка с прозрачным кругом и тонкой сеткой; поля по бокам — чёрные
-	_scope = Control.new()
-	_scope.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_scope.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_scope.visible = false
-	layer.add_child(_scope)
-	var bg := ColorRect.new()
-	bg.color = Color.BLACK
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_scope.add_child(bg)
-	var lens := TextureRect.new()
-	lens.texture = _make_scope_texture(1024)
-	lens.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	lens.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	lens.set_anchors_preset(Control.PRESET_FULL_RECT)
-	lens.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_scope.add_child(lens)
-	# круг прозрачен только внутри линзы — фон вокруг закрываем маской по кругу
-	bg.material = _scope_mask_material()
 	# точка по центру в прицеле
 	_dot = Control.new()
 	_dot.set_anchors_preset(Control.PRESET_CENTER)
@@ -356,7 +469,7 @@ func _update_hud(pl: Player) -> void:
 	if pl.weapon_id == "":
 		_weapon_label.text = "без оружия      гранаты × %d" % pl.grenade_count()
 		return
-	var spec: Dictionary = Balance.WEAPONS[pl.weapon_id]
+	var spec := pl.spec()
 	var t := "%s   %d / %d" % [String(spec.name), pl.ammo, int(spec.mag)]
 	var reserve := pl.ammo_reserve()
 	if reserve >= 0:
@@ -364,43 +477,6 @@ func _update_hud(pl: Player) -> void:
 	if pl.reload_timer > 0.0:
 		t = "%s   перезарядка…" % String(spec.name)
 	_weapon_label.text = t + "      гранаты × %d" % pl.grenade_count()
-
-
-## Чёрный фон оптики с «дыркой» по кругу высоты экрана: шейдер режет круг по центру.
-func _scope_mask_material() -> ShaderMaterial:
-	var sh := Shader.new()
-	sh.code = """
-shader_type canvas_item;
-void fragment() {
-	vec2 px = FRAGCOORD.xy - (1.0 / SCREEN_PIXEL_SIZE) * 0.5;
-	float r = length(px) / ((1.0 / SCREEN_PIXEL_SIZE).y * 0.47);
-	COLOR = vec4(0.0, 0.0, 0.0, smoothstep(0.96, 1.0, r));
-}
-"""
-	var m := ShaderMaterial.new()
-	m.shader = sh
-	return m
-
-
-## Прицельная сетка оптики: тонкие нити, к краям утолщаются; мягкая тень по краю линзы.
-func _make_scope_texture(size: int) -> Texture2D:
-	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
-	var c := size * 0.5
-	var rad := size * 0.5
-	for y in range(size):
-		for x in range(size):
-			var dx := x - c
-			var dy := y - c
-			var r := sqrt(dx * dx + dy * dy)
-			var a := clampf((r - rad * 0.8) / (rad * 0.2), 0.0, 1.0) * 0.55
-			var col := Color(0, 0, 0, a)
-			var ax := absf(dx)
-			var ay := absf(dy)
-			var thick := 0.8 if r < rad * 0.5 else 3.5
-			if r < rad and ((ay <= thick and ax > 5.0) or (ax <= thick and ay > 5.0)):
-				col = Color(0, 0, 0, 0.92)
-			img.set_pixel(x, y, col)
-	return ImageTexture.create_from_image(img)
 
 
 # ---------------------------------------------------------------- лучи из курсора

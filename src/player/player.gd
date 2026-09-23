@@ -30,6 +30,14 @@ var combat_enabled: bool = true
 ## Сколько патронов заберёт текущая перезарядка (снаряжение); -1 — полный магазин (песочница).
 var _reload_take: int = -1
 var _auto_loaded: bool = false
+## Обвесы на оружии в руках (слот -> id): видят все peer (модель на теле). Ставит владелец.
+var weapon_mods: Dictionary = {}
+## Фонарь / ЛЦУ включены (T) — тоже видно всем.
+var light_on: bool = false
+## Песочница (тесты, витрина): обвесы по оружию, weapon_id -> {слот: id}.
+var sandbox_mods: Dictionary = {}
+## Сколько секунд держим прицел — «довод» по эргономике (WeaponStats.aim_time).
+var _aim_t: float = 0.0
 
 ## Оружие в руках и патроны: ammo — в текущем магазине, остальные — в ammo_by. "" — руки пусты.
 var weapon_id: String = "pistol"
@@ -107,7 +115,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -132,6 +140,33 @@ func body_yaw() -> float:
 
 func recoil() -> float:
 	return _recoil
+
+
+func stance_key() -> String:
+	return _stance_key()
+
+
+## Обвесы на оружии weapon (id в Balance.WEAPONS): из снаряжения, в песочнице — sandbox_mods.
+func mods_for(weapon: String) -> Dictionary:
+	if loadout_mode:
+		for slot in ["primary", "secondary"]:
+			var e: Dictionary = inventory.equipment.get(slot, {})
+			if not e.is_empty() and String(ItemDb.equip(String(e.id)).get("weapon", "")) == weapon:
+				return e.get("mods", {})
+		return {}
+	return sandbox_mods.get(weapon, {})
+
+
+## Характеристики оружия в руках с обвесами (WeaponStats).
+func spec() -> Dictionary:
+	return WeaponStats.compute(weapon_id, weapon_mods)
+
+
+## 0…1 — насколько ствол «дошёл» в прицел (по эргономике).
+func aim_progress() -> float:
+	if not ads or weapon_id == "":
+		return 0.0
+	return clampf(_aim_t / float(spec().aim_time), 0.0, 1.0)
 
 
 func eye_position() -> Vector3:
@@ -168,6 +203,13 @@ func _process(_delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_local() or not is_alive():
 		return
+	# обвесы в руках — для модели у всех и для характеристик; фонарь/ЛЦУ — T
+	var mods := mods_for(weapon_id) if weapon_id != "" else {}
+	if mods != weapon_mods:
+		weapon_mods = mods
+	if Input.is_action_just_pressed("flashlight"):
+		light_on = not light_on
+	_aim_t = _aim_t + delta if ads else 0.0
 	_read_stance()
 	_combat(delta)
 	var wish := _wish_direction()
@@ -192,17 +234,22 @@ func _physics_process(delta: float) -> void:
 
 ## Оружие в правой руке у груди, повёрнуто с корпусом; высота — по стойке.
 func _update_hand() -> void:
-	if _weapon_model_id != weapon_id:
+	var key := weapon_id + str(weapon_mods)
+	if _weapon_model_id != key:
 		if _weapon_model:
 			_weapon_model.queue_free()
-		_weapon_model = WeaponModels.build(weapon_id) if weapon_id != "" else Node3D.new()
+		_weapon_model = WeaponModels.build(weapon_id, weapon_mods) if weapon_id != "" else Node3D.new()
 		_hand.add_child(_weapon_model)
-		_weapon_model_id = weapon_id
+		_weapon_model_id = key
 		if ads:
 			set_first_person(true)
 	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
 	var yaw := _body.rotation.y
 	_hand.visible = health.alive
+	for n in _weapon_model.find_children("Flashlight", "SpotLight3D", true, false):
+		(n as SpotLight3D).visible = light_on
+	for n in _weapon_model.find_children("LaserBeam", "MeshInstance3D", true, false):
+		(n as MeshInstance3D).visible = light_on and not ads
 	_hand.position = Basis(Vector3.UP, yaw) * Vector3(-0.17, 1.24 * h, 0.24)
 	_hand.rotation = Vector3(-_recoil, yaw, 0.0)
 
@@ -241,7 +288,7 @@ func _combat(delta: float) -> void:
 		_throw_grenade()
 	if weapon_id == "":
 		return
-	var spec: Dictionary = Balance.WEAPONS[weapon_id]
+	var spec := spec()
 	if reload_timer > 0.0:
 		reload_timer -= delta
 		if reload_timer <= 0.0:
@@ -302,7 +349,7 @@ func _loadout_tick() -> void:
 			if String(w) == "":
 				continue
 			var ammo_item := inventory.ammo_for(String(w))
-			var take := mini(int(Balance.WEAPONS[w].mag), inventory.count(ammo_item) - int(used.get(ammo_item, 0)))
+			var take := mini(int(WeaponStats.compute(String(w), mods_for(String(w))).mag), inventory.count(ammo_item) - int(used.get(ammo_item, 0)))
 			ammo_by[w] = maxi(0, take)
 			used[ammo_item] = int(used.get(ammo_item, 0)) + maxi(0, take)
 		for ammo_item in used:
@@ -340,7 +387,7 @@ func _switch(id: String) -> void:
 	if weapon_id != "":
 		ammo_by[weapon_id] = ammo
 	weapon_id = id
-	ammo = int(ammo_by.get(id, 0 if loadout_mode else int(Balance.WEAPONS[id].mag)))
+	ammo = int(ammo_by.get(id, 0 if loadout_mode else int(WeaponStats.compute(id, mods_for(id)).mag)))
 	reload_timer = 0.0
 	fire_timer = 0.35
 	Audio.play("bolt", global_position, -6.0)
@@ -362,7 +409,12 @@ func _fire(spec: Dictionary) -> void:
 			dir = Vector3(sin(_body.rotation.y), 0.0, cos(_body.rotation.y))
 		dir = dir.normalized()
 	var exclude: Array[RID] = [get_rid()]
-	var spread: float = float(spec.spread_deg) * (float(Balance.ADS_SPREAD[weapon_id]) if ads else 1.0)
+	# разброс: от бедра (ЛЦУ включён — меньше), в прицеле — по мере «довода» к прицельному;
+	# сидя/лёжа на сошках — ещё меньше, и отдача тоже
+	var hip := float(spec.hip_spread) if light_on else 1.0
+	var mult := lerpf(hip, float(spec.ads_spread), aim_progress()) if ads else hip
+	var braced := stance != Stance.STAND
+	var spread: float = float(spec.spread_deg) * mult * (float(spec.braced_spread) if braced else 1.0)
 	var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DEBRIS
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig
@@ -379,14 +431,16 @@ func _fire(spec: Dictionary) -> void:
 			elif c is Marauder:
 				rig.show_hitmarker(not ((c as Marauder).get_node("Health") as Health).alive)
 				marked = true
-	_recoil += float(spec.kick)
+	_recoil += float(spec.kick) * (float(spec.braced_kick) if braced else 1.0)
 	if rig:
 		rig.add_shake(float(spec.shake))
-	_muzzle.global_position = muzzle
-	_muzzle.visible = true
-	get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
+	# глушитель: без вспышки, тише и слышно ближе
+	if not bool(spec.suppressed):
+		_muzzle.global_position = muzzle
+		_muzzle.visible = true
+		get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
 	NoiseBus.emit(global_position, float(spec.noise_m), "shot")
-	Audio.play(String(spec.sound), muzzle)
+	Audio.play(String(spec.sound), muzzle, float(spec.db))
 	# помпа/затвор — щелчок после выстрела
 	if String(spec.cycle_sound) != "":
 		get_tree().create_timer(0.35).timeout.connect(func() -> void:

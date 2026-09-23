@@ -1,5 +1,5 @@
 {
- "_comment": "Предметы. cells — ячеек рюкзака/тайника; value — цена, ₽; stack — сколько в одной ячейке; use — лечение (heal: HP, time: с); equip — надевается: slot primary/secondary/armor/helmet; у оружия weapon (id в Balance.WEAPONS) и ammo (предмет-патроны), у брони protect (доля снятого урона) и durability (сколько урона выдержит).",
+ "_comment": "Предметы. cells — ячеек рюкзака/тайника; value — цена, ₽; stack — сколько в одной ячейке; use — лечение (heal: HP, time: с); equip — надевается: slot primary/secondary/armor/helmet; у оружия weapon (id в Balance.WEAPONS) и ammo (предмет-патроны), у брони protect (доля снятого урона) и durability (сколько урона выдержит). mod — обвес: slot (optic/muzzle/grip/stock/mag/tac/bipod), fits — на какое оружие (id в Balance.WEAPONS), look — как выглядит (WeaponMods), fx — множители: kick, shake, spread, ads_spread, hip_spread, noise, damage; mag — прибавка магазина; scoped/ads_fov — оптика; suppressed/db — глушитель; braced_* — сошки лёжа/сидя. У оружия equip.slots — какие слоты есть.",
  "items": {
   "bandage": {
    "name": "Бинт",
@@ -203,7 +203,7 @@
    "stack": 1
   },
   "w_pistol": {
-   "name": "Пистолет ПМ-9",
+   "name": "Пистолет",
    "cat": "weapon",
    "cells": 2,
    "value": 12000,
@@ -211,11 +211,17 @@
    "equip": {
     "slot": "secondary",
     "weapon": "pistol",
-    "ammo": "ammo_9x19"
+    "ammo": "ammo_9x19",
+    "slots": [
+     "optic",
+     "muzzle",
+     "mag",
+     "tac"
+    ]
    }
   },
   "w_rifle": {
-   "name": "Автомат АК-545",
+   "name": "Автомат",
    "cat": "weapon",
    "cells": 6,
    "value": 48000,
@@ -223,11 +229,19 @@
    "equip": {
     "slot": "primary",
     "weapon": "rifle",
-    "ammo": "ammo_545"
+    "ammo": "ammo_545",
+    "slots": [
+     "optic",
+     "muzzle",
+     "grip",
+     "stock",
+     "mag",
+     "tac"
+    ]
    }
   },
   "w_shotgun": {
-   "name": "Дробовик МР-12",
+   "name": "Дробовик",
    "cat": "weapon",
    "cells": 5,
    "value": 26000,
@@ -235,11 +249,18 @@
    "equip": {
     "slot": "primary",
     "weapon": "shotgun",
-    "ammo": "ammo_12"
+    "ammo": "ammo_12",
+    "slots": [
+     "optic",
+     "muzzle",
+     "grip",
+     "stock",
+     "tac"
+    ]
    }
   },
   "w_bolt": {
-   "name": "Винтовка СВ-98",
+   "name": "Винтовка",
    "cat": "weapon",
    "cells": 6,
    "value": 65000,
@@ -247,7 +268,11 @@
    "equip": {
     "slot": "primary",
     "weapon": "bolt",
-    "ammo": "ammo_762r"
+    "ammo": "ammo_762r",
+    "slots": [
+     "muzzle",
+     "bipod"
+    ]
    }
   },
   "ammo_9x19": {
@@ -321,40 +346,355 @@
     "durability": 40
    }
   },
-  "mod_red_dot": {
-   "name": "Коллиматор",
+  "mod_rmr": {
+   "name": "Мини-коллиматор на затвор",
    "cat": "mod",
    "cells": 1,
-   "value": 9000,
-   "stack": 1
+   "value": 11000,
+   "stack": 1,
+   "mod": {
+    "slot": "optic",
+    "fits": [
+     "pistol"
+    ],
+    "look": "rmr",
+    "fx": {
+     "ads_spread": 0.7,
+     "ergo": -2
+    }
+   }
+  },
+  "mod_red_dot": {
+   "name": "Коллиматор (трубка 30 мм)",
+   "cat": "mod",
+   "cells": 1,
+   "value": 14000,
+   "stack": 1,
+   "mod": {
+    "slot": "optic",
+    "fits": [
+     "rifle",
+     "shotgun"
+    ],
+    "look": "red_dot",
+    "fx": {
+     "ads_spread": 0.72,
+     "ergo": -4
+    }
+   }
+  },
+  "mod_holo": {
+   "name": "Голографический прицел",
+   "cat": "mod",
+   "cells": 1,
+   "value": 19000,
+   "stack": 1,
+   "mod": {
+    "slot": "optic",
+    "fits": [
+     "rifle",
+     "shotgun"
+    ],
+    "look": "holo",
+    "fx": {
+     "ads_spread": 0.7,
+     "ergo": -5
+    }
+   }
   },
   "mod_scope4x": {
-   "name": "Оптика 4×",
-   "cat": "mod",
-   "cells": 1,
-   "value": 18000,
-   "stack": 1
-  },
-  "mod_suppressor": {
-   "name": "Глушитель",
+   "name": "Оптика 4×32",
    "cat": "mod",
    "cells": 2,
-   "value": 22000,
-   "stack": 1
+   "value": 26000,
+   "stack": 1,
+   "mod": {
+    "slot": "optic",
+    "fits": [
+     "rifle"
+    ],
+    "look": "scope4x",
+    "fx": {
+     "ads_spread": 0.4,
+     "scoped": true,
+     "ergo": -8,
+     "zoom": 4.0
+    }
+   }
+  },
+  "mod_supp_9": {
+   "name": "Глушитель 9 мм",
+   "cat": "mod",
+   "cells": 2,
+   "value": 16000,
+   "stack": 1,
+   "mod": {
+    "slot": "muzzle",
+    "fits": [
+     "pistol"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.35,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -6
+    },
+    "size": [
+     0.0155,
+     0.15
+    ]
+   }
+  },
+  "mod_supp_545": {
+   "name": "Глушитель 5.45",
+   "cat": "mod",
+   "cells": 2,
+   "value": 24000,
+   "stack": 1,
+   "mod": {
+    "slot": "muzzle",
+    "fits": [
+     "rifle"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.35,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -8
+    },
+    "size": [
+     0.019,
+     0.175
+    ]
+   }
+  },
+  "mod_supp_12": {
+   "name": "Глушитель 12 калибра",
+   "cat": "mod",
+   "cells": 3,
+   "value": 28000,
+   "stack": 1,
+   "mod": {
+    "slot": "muzzle",
+    "fits": [
+     "shotgun"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.45,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -10
+    },
+    "size": [
+     0.0235,
+     0.2
+    ]
+   }
+  },
+  "mod_supp_762": {
+   "name": "Глушитель 7.62",
+   "cat": "mod",
+   "cells": 2,
+   "value": 32000,
+   "stack": 1,
+   "mod": {
+    "slot": "muzzle",
+    "fits": [
+     "bolt"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.35,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -9
+    },
+    "size": [
+     0.021,
+     0.2
+    ]
+   }
+  },
+  "mod_comp": {
+   "name": "Компенсатор",
+   "cat": "mod",
+   "cells": 1,
+   "value": 7000,
+   "stack": 1,
+   "mod": {
+    "slot": "muzzle",
+    "fits": [
+     "rifle"
+    ],
+    "look": "compensator",
+    "fx": {
+     "kick": 0.72,
+     "shake": 0.8,
+     "noise": 1.1,
+     "ergo": -2
+    }
+   }
   },
   "mod_grip": {
-   "name": "Тактическая рукоятка",
+   "name": "Вертикальная рукоятка",
    "cat": "mod",
    "cells": 1,
    "value": 6000,
-   "stack": 1
+   "stack": 1,
+   "mod": {
+    "slot": "grip",
+    "fits": [
+     "rifle",
+     "shotgun"
+    ],
+    "look": "grip_vertical",
+    "fx": {
+     "kick": 0.8,
+     "spread": 0.88,
+     "ergo": 6
+    }
+   }
+  },
+  "mod_grip_angled": {
+   "name": "Угловая рукоятка",
+   "cat": "mod",
+   "cells": 1,
+   "value": 7500,
+   "stack": 1,
+   "mod": {
+    "slot": "grip",
+    "fits": [
+     "rifle",
+     "shotgun"
+    ],
+    "look": "grip_angled",
+    "fx": {
+     "kick": 0.88,
+     "ads_spread": 0.85,
+     "ergo": 9
+    }
+   }
+  },
+  "mod_stock_tele": {
+   "name": "Телескопический приклад",
+   "cat": "mod",
+   "cells": 2,
+   "value": 12000,
+   "stack": 1,
+   "mod": {
+    "slot": "stock",
+    "fits": [
+     "rifle",
+     "shotgun"
+    ],
+    "look": "stock_tele",
+    "fx": {
+     "kick": 0.78,
+     "ads_spread": 0.9,
+     "ergo": 12
+    }
+   }
   },
   "mod_mag_ext": {
-   "name": "Увеличенный магазин",
+   "name": "Магазин на 45 патронов",
+   "cat": "mod",
+   "cells": 2,
+   "value": 9000,
+   "stack": 1,
+   "mod": {
+    "slot": "mag",
+    "fits": [
+     "rifle"
+    ],
+    "look": "mag_ak45",
+    "fx": {
+     "mag": 15,
+     "ergo": -7
+    }
+   }
+  },
+  "mod_mag_pistol": {
+   "name": "Удлинённый магазин пистолета (+8)",
+   "cat": "mod",
+   "cells": 1,
+   "value": 4000,
+   "stack": 1,
+   "mod": {
+    "slot": "mag",
+    "fits": [
+     "pistol"
+    ],
+    "look": "mag_pistol_ext",
+    "fx": {
+     "mag": 8,
+     "ergo": -4
+    }
+   }
+  },
+  "mod_flashlight": {
+   "name": "Тактический фонарь",
+   "cat": "mod",
+   "cells": 1,
+   "value": 5000,
+   "stack": 1,
+   "mod": {
+    "slot": "tac",
+    "fits": [
+     "pistol",
+     "rifle",
+     "shotgun"
+    ],
+    "look": "flashlight",
+    "fx": {
+     "ergo": -2
+    }
+   }
+  },
+  "mod_laser": {
+   "name": "ЛЦУ (лазер)",
    "cat": "mod",
    "cells": 1,
    "value": 8000,
-   "stack": 1
+   "stack": 1,
+   "mod": {
+    "slot": "tac",
+    "fits": [
+     "pistol",
+     "rifle",
+     "shotgun"
+    ],
+    "look": "laser",
+    "fx": {
+     "hip_spread": 0.75,
+     "ergo": -1
+    }
+   }
+  },
+  "mod_bipod": {
+   "name": "Сошки",
+   "cat": "mod",
+   "cells": 2,
+   "value": 9000,
+   "stack": 1,
+   "mod": {
+    "slot": "bipod",
+    "fits": [
+     "bolt"
+    ],
+    "look": "bipod",
+    "fx": {
+     "braced_kick": 0.5,
+     "braced_spread": 0.7,
+     "ergo": -8
+    }
+   }
   }
  }
 }

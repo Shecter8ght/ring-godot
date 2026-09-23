@@ -11,16 +11,21 @@ func _ready() -> void:
 		Profile.equip_from_stash(_idx(id))
 	Profile.stash_to_backpack(_idx("ammo_545"), 90)
 	Profile.stash_to_backpack(_idx("bandage"), 4)
+	Profile.money = 400000
+	for id in ["mod_red_dot", "mod_supp_545", "mod_grip", "mod_stock_tele", "mod_mag_ext", "mod_flashlight", "mod_holo", "mod_scope4x", "mod_comp", "mod_rmr"]:
+		Profile.buy(id, 1)
+	for id in ["mod_red_dot", "mod_supp_545", "mod_grip", "mod_stock_tele", "mod_mag_ext", "mod_flashlight"]:
+		Profile.install_mod("primary", _idx(id))
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	await _frames(240)
 	_save("hideout")
 	var level := get_tree().current_scene
-	for kind in [HideoutStation.Kind.STASH, HideoutStation.Kind.TRADER, HideoutStation.Kind.EXIT]:
+	for kind in [HideoutStation.Kind.STASH, HideoutStation.Kind.TRADER, HideoutStation.Kind.EXIT, HideoutStation.Kind.WORKBENCH]:
 		for st in get_tree().get_nodes_in_group("interactables"):
 			if st is HideoutStation and (st as HideoutStation).kind == kind:
 				level.call("open_station", st)
 				break
-		await _frames(8)
+		await _frames(40)
 		_save("hideout_ui_%d" % kind)
 		(level.get("_ui") as HideoutUI).close_ui()
 		await _frames(2)

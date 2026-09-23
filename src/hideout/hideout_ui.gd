@@ -3,7 +3,9 @@ extends CanvasLayer
 ## Окна убежища (всё локально, в Profile):
 ##  тайник — три колонки: тайник ↔ снаряжение (слоты) ↔ рюкзак (с ним идёшь в рейд);
 ##  торговец — купить из ассортимента (data/trader.json) / продать из тайника;
-##  выход — с чем идёшь, «Соло-рейд» или «Кооп (лобби)».
+##  выход — с чем идёшь, «Соло-рейд» или «Кооп (лобби)»;
+##  верстак — обвесы на надетое оружие: витрина ствола, характеристики (сравнение с «голым»),
+##  слоты: что стоит (снять) и что из тайника подходит (поставить, с кратким эффектом).
 ## Esc или Tab — закрыть.
 
 const TRADER_PATH := "res://data/trader.json"
@@ -14,6 +16,15 @@ var _title: Label
 var _cols: HBoxContainer
 var _sig: String = ""
 var _trader: Dictionary = {}
+## Верстак: какое оружие собираем (слот снаряжения) и его витрина.
+var _wb_slot: String = "primary"
+var _preview: WeaponPreview
+
+const MOD_SLOT_NAMES := {"optic": "Прицел", "muzzle": "Дульное устройство", "grip": "Рукоятка",
+	"stock": "Приклад", "mag": "Магазин", "tac": "Фонарь / ЛЦУ", "bipod": "Сошки"}
+const FX_NAMES := {"kick": "отдача", "shake": "тряска", "spread": "разброс", "ads_spread": "разброс в прицеле",
+	"hip_spread": "разброс от бедра (вкл.)", "noise": "шум", "damage": "урон", "braced_kick": "отдача лёжа/сидя",
+	"braced_spread": "разброс лёжа/сидя"}
 
 
 func _ready() -> void:
@@ -81,7 +92,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory"):
 		close_ui()
 		return
-	var sig := "%d|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack)]
+	var sig := "%d|%d|%s|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -94,6 +105,8 @@ func _process(_delta: float) -> void:
 			_build_trader()
 		HideoutStation.Kind.EXIT:
 			_build_exit()
+		HideoutStation.Kind.WORKBENCH:
+			_build_workbench()
 
 
 # ---------------------------------------------------------------- тайник
@@ -179,6 +192,124 @@ func _build_exit() -> void:
 	go.add_child(_button("Кооп — лобби (хост / по IP)", func() -> void:
 		Profile.from_hideout = true
 		get_tree().change_scene_to_file("res://scenes/net/lobby.tscn")))
+
+
+# ---------------------------------------------------------------- верстак
+
+func _build_workbench() -> void:
+	_title.text = "Верстак — обвесы"
+	if not Profile.equipment.has(_wb_slot):
+		_wb_slot = "secondary" if Profile.equipment.has("secondary") else "primary"
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_theme_constant_override("separation", 8)
+	_cols.add_child(left)
+	var tabs := HBoxContainer.new()
+	left.add_child(tabs)
+	for ws in ["primary", "secondary"]:
+		var e: Dictionary = Profile.equipment.get(ws, {})
+		var b := _button("%s: %s" % [Inventory.SLOT_NAMES[ws], ItemDb.item_name(String(e.id)) if not e.is_empty() else "—"], func() -> void: _wb_slot = ws)
+		b.disabled = e.is_empty()
+		b.toggle_mode = true
+		b.button_pressed = ws == _wb_slot
+		tabs.add_child(b)
+	var weapon: Dictionary = Profile.equipment.get(_wb_slot, {})
+	if weapon.is_empty():
+		left.add_child(_text("Надень оружие в тайнике — обвесы ставятся на надетое.", Color(1.0, 0.7, 0.5)))
+		return
+	var wid := String(ItemDb.equip(String(weapon.id)).weapon)
+	var mods := Profile.weapon_mods(_wb_slot)
+	# витрина живёт между перестройками окна — пересобирается только модель
+	if _preview == null or not is_instance_valid(_preview):
+		_preview = WeaponPreview.new()
+	if _preview.get_parent():
+		_preview.get_parent().remove_child(_preview)
+	left.add_child(_preview)
+	_preview.show_weapon(wid, mods)
+	_stats(left, WeaponStats.compute(wid, mods), WeaponStats.compute(wid, {}))
+	# слоты обвесов
+	var right := _column("Слоты", 1.0)
+	for slot in ItemDb.equip(String(weapon.id)).get("slots", []):
+		var sl := String(slot)
+		right.add_child(_text(String(MOD_SLOT_NAMES.get(sl, sl)), Color(0.95, 0.82, 0.6)))
+		if mods.has(sl):
+			var row := HBoxContainer.new()
+			var l := _text("  " + ItemDb.item_name(String(mods[sl])), Color(0.92, 0.9, 0.85))
+			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(l)
+			row.add_child(_button("Снять", func() -> void: Profile.remove_mod(_wb_slot, sl)))
+			right.add_child(row)
+		var any := false
+		for i in range(Profile.stash.size()):
+			var id := String(Profile.stash[i].id)
+			if not ItemDb.mod_fits(id, String(weapon.id)) or String(ItemDb.mod_spec(id).slot) != sl:
+				continue
+			any = true
+			var idx := i
+			var row := HBoxContainer.new()
+			var l := _text("  + %s  —  %s" % [ItemDb.item_name(id), _fx_text(ItemDb.mod_spec(id))], Color(0.7, 0.8, 0.72))
+			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			row.add_child(l)
+			row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx)))
+			right.add_child(row)
+		if not mods.has(sl) and not any:
+			right.add_child(_text("  пусто — подходящего в тайнике нет", Color(0.5, 0.5, 0.5)))
+
+
+## Шкалы характеристик: значение, полоса 0–100 и разница с оружием без обвесов (зелёным — лучше).
+func _stats(parent: Container, s: Dictionary, base: Dictionary) -> void:
+	var rows := WeaponStats.rows(s)
+	var base_rows := WeaponStats.rows(base)
+	for i in range(rows.size()):
+		var r: Array = rows[i]
+		var b: Array = base_rows[i]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var name := _text(String(r[0]), Color(0.8, 0.8, 0.78))
+		name.custom_minimum_size.x = 190
+		row.add_child(name)
+		var bar := Control.new()
+		bar.custom_minimum_size = Vector2(220, 12)
+		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var bg := ColorRect.new()
+		bg.color = Color(1, 1, 1, 0.08)
+		bg.size = Vector2(220, 12)
+		bar.add_child(bg)
+		var fill := ColorRect.new()
+		fill.color = Color(0.95, 0.8, 0.5, 0.85)
+		fill.size = Vector2(220.0 * clampf(float(r[2]) / 100.0, 0.0, 1.0), 12)
+		bar.add_child(fill)
+		row.add_child(bar)
+		var val := _text(String(r[4]) % float(r[1]), Color(0.92, 0.9, 0.85))
+		val.custom_minimum_size.x = 150
+		row.add_child(val)
+		var d := float(r[1]) - float(b[1])
+		if absf(d) > 0.05:
+			var better := (d > 0.0) == bool(r[3])
+			row.add_child(_text("%+.0f" % d if absf(d) >= 1.0 else "%+.1f" % d, Color(0.55, 0.9, 0.5) if better else Color(1.0, 0.5, 0.4)))
+		parent.add_child(row)
+
+
+## «отдача −20%, эргономика +6, магазин +15»
+func _fx_text(ms: Dictionary) -> String:
+	var parts: Array[String] = []
+	var fx: Dictionary = ms.get("fx", {})
+	for k in fx:
+		var v: Variant = fx[k]
+		if k == "ergo":
+			parts.append("эргономика %+d" % int(v))
+		elif k == "mag":
+			parts.append("магазин +%d" % int(v))
+		elif k == "zoom":
+			parts.append("кратность %d×" % int(v))
+		elif k == "suppressed":
+			parts.append("без вспышки")
+		elif k == "db" or k == "scoped":
+			continue
+		elif FX_NAMES.has(k):
+			parts.append("%s %+d%%" % [FX_NAMES[k], int(round((float(v) - 1.0) * 100.0))])
+	return ", ".join(parts)
 
 
 # ---------------------------------------------------------------- вёрстка

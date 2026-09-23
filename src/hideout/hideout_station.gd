@@ -1,10 +1,11 @@
 @tool
 class_name HideoutStation
 extends Interactable
-## Точка в убежище, у которой F открывает окно: тайник со снаряжением, торговец, выход в рейд.
+## Точка в убежище, у которой F открывает окно: тайник со снаряжением, торговец, выход в рейд,
+## верстак (обвесы на надетое оружие).
 ## Ставится руками в сцену убежища и двигается мышкой; окно — HideoutUI.
 
-enum Kind { STASH, TRADER, EXIT }
+enum Kind { STASH, TRADER, EXIT, WORKBENCH }
 
 @export var kind: Kind = Kind.STASH
 @export var display_name: String = "Тайник":

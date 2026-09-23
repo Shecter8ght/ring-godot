@@ -8,7 +8,10 @@ extends RefCounted
 ## +Z — к дулу, +Y — вверх. В meta модели:
 ##   muzzle  (Vector3) — дульный срез, откуда вылетает трассер и вспышка;
 ##   sight_h (float)   — высота линии прицеливания над началом (для вида из прицела);
-##   ads_z   (float)   — на каком расстоянии перед глазом держать рукоять в прицеле.
+##   ads_z   (float)   — на каком расстоянии перед глазом держать рукоять в прицеле;
+##   ocular, ocular_r  — центр и радиус окуляра оптики (картинка оптики — отдельный рендер).
+## Детали, которые заменяют обвесы, помечены meta "part": "muzzle_device" (дульный тормоз),
+## "stock" (приклад), "mag" (магазин / пятка магазина) — WeaponMods их прячет и ставит своё.
 ## Это запасной вариант по правилу проекта: модели из assets/ встанут по тем же meta.
 
 const IDS := ["pistol", "rifle", "shotgun", "bolt", "grenade"]
@@ -17,7 +20,8 @@ static var _mats: Dictionary = {}
 static var _meshes: Dictionary = {}
 
 
-static func build(id: String) -> Node3D:
+## mods — слот -> id обвеса (data/items.json): подгоняются по точкам крепления модели (WeaponMods).
+static func build(id: String, mods: Dictionary = {}) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Weapon_" + id
 	match id:
@@ -31,6 +35,8 @@ static func build(id: String) -> Node3D:
 			_bolt(root)
 		"grenade":
 			_grenade(root)
+	if not mods.is_empty():
+		WeaponMods.fit(root, id, mods)
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	return root
@@ -64,8 +70,11 @@ static func _pistol(r: Node3D) -> void:
 		var g := _box(r, Vector3(0, -0.04 + i * 0.016, -0.016 + i * 0.005), Vector3(0.0296, 0.006, 0.02), _mat("polymer_grip"))
 		g.rotation.x = deg_to_rad(-18.0)
 	# пятка магазина
-	var base := _cbox(r, Vector3(0, -0.073, -0.022), Vector3(0.031, 0.009, 0.05), poly, 0.003)
+	# пятка — по оси рукояти вплотную к её низу (низ = центр + половина высоты вдоль оси)
+	var grip_down := Basis(Vector3.RIGHT, deg_to_rad(-18.0)) * Vector3.DOWN
+	var base := _cbox(r, Vector3(0, -0.018, -0.004) + grip_down * (0.0525 + 0.0045), Vector3(0.031, 0.009, 0.05), poly, 0.003)
 	base.rotation.x = deg_to_rad(-18.0)
+	_part(base, "mag")
 	# спусковая скоба — тор, вытянутый вперёд
 	# тор лежит в XZ; поворот вокруг Z ставит его в вертикальную плоскость вдоль ствола
 	var guard := _torus(r, Vector3(0, 0.008, 0.032), 0.013, 0.0165, poly)
@@ -119,10 +128,10 @@ static func _rifle(r: Node3D) -> void:
 	for side in [-1.0, 1.0]:
 		_cbox(r, Vector3(side * 0.007, 0.088, 0.555), Vector3(0.002, 0.018, 0.012), steel, 0.0006)
 	# дульный тормоз со скосом и окнами
-	_cyl(r, Vector3(0, 0.052, 0.605), 0.0115, 0.06, steel)
+	_part(_cyl(r, Vector3(0, 0.052, 0.605), 0.0115, 0.06, steel), "muzzle_device")
 	for i in range(2):
-		_box(r, Vector3(0, 0.052, 0.595 + i * 0.02), Vector3(0.0235, 0.005, 0.008), _mat("bore"))
-	_cyl(r, Vector3(0, 0.052, 0.6355), 0.006, 0.001, _mat("bore"))
+		_part(_box(r, Vector3(0, 0.052, 0.595 + i * 0.02), Vector3(0.0235, 0.005, 0.008), _mat("bore")), "muzzle_device")
+	_part(_cyl(r, Vector3(0, 0.052, 0.6355), 0.006, 0.001, _mat("bore")), "muzzle_device")
 	# целик на коробке
 	_cbox(r, Vector3(0, 0.085, 0.2), Vector3(0.028, 0.012, 0.05), steel, 0.002)
 	_cbox(r, Vector3(0, 0.0905, 0.2), Vector3(0.024, 0.005, 0.036), gm, 0.001)
@@ -136,13 +145,13 @@ static func _rifle(r: Node3D) -> void:
 		ms.append(Vector2(0.024, 0.056 - i * 0.0012))
 		q += Vector3(0, -cos(ang), sin(ang)) * 0.024
 		ang += deg_to_rad(4.2)
-	_sweep(r, mp, ms, _mat("polymer_plum"), 0.2)
+	_part(_sweep(r, mp, ms, _mat("polymer_plum"), 0.2), "mag")
 	var rp: Array[Vector3] = []
 	var rs: Array[Vector2] = []
 	for i in range(1, mp.size() - 1):
 		rp.append(mp[i])
 		rs.append(Vector2(0.0262, 0.008))
-	_sweep(r, rp, rs, _mat("polymer_plum"), 0.3)
+	_part(_sweep(r, rp, rs, _mat("polymer_plum"), 0.3), "mag")
 	# пистолетная рукоять
 	var grip := _cbox(r, Vector3(0, -0.02, -0.008), Vector3(0.03, 0.095, 0.042), _mat("polymer_plum"), 0.006)
 	grip.rotation.x = deg_to_rad(-16.0)
@@ -152,12 +161,14 @@ static func _rifle(r: Node3D) -> void:
 	var trig := _cbox(r, Vector3(0, 0.008, 0.047), Vector3(0.006, 0.02, 0.005), steel, 0.0015)
 	trig.rotation.x = deg_to_rad(10.0)
 	# приклад: узкая шейка у коробки, плавно раздаётся и опускается к затыльнику
-	_cheek(_sweep(r, [Vector3(0, 0.04, -0.07), Vector3(0, 0.03, -0.13), Vector3(0, 0.016, -0.22), Vector3(0, 0.0, -0.333)] as Array[Vector3],
-		[Vector2(0.034, 0.042), Vector2(0.035, 0.05), Vector2(0.039, 0.078), Vector2(0.041, 0.104)] as Array[Vector2], wood, 0.28))
-	_cheek(_sweep(r, [Vector3(0, -0.0005, -0.333), Vector3(0, -0.001, -0.342)] as Array[Vector3],
-		[Vector2(0.043, 0.107), Vector2(0.043, 0.107)] as Array[Vector2], steel, 0.25))
+	_part(_cheek(_sweep(r, [Vector3(0, 0.04, -0.07), Vector3(0, 0.03, -0.13), Vector3(0, 0.016, -0.22), Vector3(0, 0.0, -0.333)] as Array[Vector3],
+		[Vector2(0.034, 0.042), Vector2(0.035, 0.05), Vector2(0.039, 0.078), Vector2(0.041, 0.104)] as Array[Vector2], wood, 0.28)), "stock")
+	_part(_cheek(_sweep(r, [Vector3(0, -0.0005, -0.333), Vector3(0, -0.001, -0.342)] as Array[Vector3],
+		[Vector2(0.043, 0.107), Vector2(0.043, 0.107)] as Array[Vector2], steel, 0.25)), "stock")
 	# антабка
-	_torus(r, Vector3(0, -0.035, -0.2), 0.004, 0.0065, gm).rotation.z = PI * 0.5
+	var swivel := _torus(r, Vector3(0, -0.035, -0.2), 0.004, 0.0065, gm)
+	swivel.rotation.z = PI * 0.5
+	_part(swivel, "stock")
 	r.set_meta("muzzle", Vector3(0, 0.052, 0.637))
 	r.set_meta("sight_h", 0.091)
 	r.set_meta("ads_z", 0.3)
@@ -190,10 +201,10 @@ static func _shotgun(r: Node3D) -> void:
 	for i in range(7):
 		_cyl(r, Vector3(0, 0.036, 0.265 + i * 0.022), 0.02205, 0.0022, _mat("wood_dark"))
 	# шейка ложи опускается под руку и плавно переходит в приклад
-	_cheek(_sweep(r, [Vector3(0, 0.04, -0.025), Vector3(0, 0.022, -0.075), Vector3(0, 0.006, -0.125), Vector3(0, -0.012, -0.2), Vector3(0, -0.024, -0.3)] as Array[Vector3],
-		[Vector2(0.034, 0.05), Vector2(0.031, 0.046), Vector2(0.034, 0.058), Vector2(0.039, 0.09), Vector2(0.042, 0.112)] as Array[Vector2], wood, 0.3))
-	_cheek(_sweep(r, [Vector3(0, -0.0245, -0.3), Vector3(0, -0.025, -0.318)] as Array[Vector3],
-		[Vector2(0.044, 0.114), Vector2(0.044, 0.114)] as Array[Vector2], _mat("rubber"), 0.3))
+	_part(_cheek(_sweep(r, [Vector3(0, 0.04, -0.025), Vector3(0, 0.022, -0.075), Vector3(0, 0.006, -0.125), Vector3(0, -0.012, -0.2), Vector3(0, -0.024, -0.3)] as Array[Vector3],
+		[Vector2(0.034, 0.05), Vector2(0.031, 0.046), Vector2(0.034, 0.058), Vector2(0.039, 0.09), Vector2(0.042, 0.112)] as Array[Vector2], wood, 0.3)), "stock")
+	_part(_cheek(_sweep(r, [Vector3(0, -0.0245, -0.3), Vector3(0, -0.025, -0.318)] as Array[Vector3],
+		[Vector2(0.044, 0.114), Vector2(0.044, 0.114)] as Array[Vector2], _mat("rubber"), 0.3)), "stock")
 	# спусковая скоба и крючок
 	_cbox(r, Vector3(0, 0.004, 0.035), Vector3(0.012, 0.004, 0.06), gm, 0.0012)
 	_cbox(r, Vector3(0, 0.012, 0.063), Vector3(0.012, 0.018, 0.004), gm, 0.0012)
@@ -257,6 +268,9 @@ static func _bolt(r: Node3D) -> void:
 	r.set_meta("muzzle", Vector3(0, 0.062, 0.801))
 	r.set_meta("sight_h", sy)
 	r.set_meta("ads_z", 0.13)
+	# окуляр — сюда ложится картинка оптики (CameraRig: отдельный рендер)
+	r.set_meta("ocular", Vector3(0, sy, -0.0605))
+	r.set_meta("ocular_r", 0.0158)
 
 
 # ---------------------------------------------------------------- граната
@@ -340,6 +354,28 @@ static func _cyl(parent: Node3D, at: Vector3, r: float, length: float, mat: Mate
 	return mi
 
 
+## Открытая труба вдоль Z (без торцов) — корпус коллиматора: сквозь неё смотрят.
+static func _tube(parent: Node3D, at: Vector3, r: float, length: float, mat: Material) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var key := "tube:%.4f:%.4f" % [r, length]
+	if not _meshes.has(key):
+		var cm := CylinderMesh.new()
+		cm.top_radius = r
+		cm.bottom_radius = r
+		cm.height = length
+		cm.radial_segments = 32
+		cm.rings = 1
+		cm.cap_top = false
+		cm.cap_bottom = false
+		_meshes[key] = cm
+	mi.mesh = _meshes[key]
+	mi.rotation.x = PI * 0.5
+	mi.position = at
+	mi.material_override = mat
+	parent.add_child(mi)
+	return mi
+
+
 ## Цилиндр вдоль X (поперечные оси, барабанчики сбоку).
 static func _cyl_x(parent: Node3D, at: Vector3, r: float, length: float, mat: Material) -> MeshInstance3D:
 	var mi := _cyl(parent, at, r, length, mat)
@@ -379,6 +415,12 @@ static func _torus(parent: Node3D, at: Vector3, inner: float, outer: float, mat:
 	mi.position = at
 	mi.material_override = mat
 	parent.add_child(mi)
+	return mi
+
+
+## Метка заменяемой детали (см. шапку): обвес прячет её и ставит свою.
+static func _part(mi: MeshInstance3D, part: String) -> MeshInstance3D:
+	mi.set_meta("part", part)
 	return mi
 
 
@@ -594,6 +636,43 @@ static func _mat(id: String) -> StandardMaterial3D:
 		"olive_dark":
 			m.albedo_color = Color(0.17, 0.19, 0.11)
 			m.roughness = 0.75
+		# обвесы: анодированный алюминий (прицелы, планки), чёрный матовый полимер, сетка марки
+		"anodized", "anodized_2s":
+			m.albedo_color = Color(0.045, 0.045, 0.05)
+			m.metallic = 0.6
+			m.roughness = 0.42
+			if id == "anodized_2s":
+				# изнутри трубы тоже видно стенку
+				m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		"suppressor":
+			m.albedo_color = Color(0.06, 0.06, 0.065)
+			m.metallic = 0.4
+			m.roughness = 0.62
+		"reticle":
+			m.albedo_color = Color(1.0, 0.1, 0.08)
+			m.emission_enabled = true
+			m.emission = Color(1.0, 0.08, 0.05)
+			m.emission_energy_multiplier = 6.0
+			m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		"glass":
+			m.albedo_color = Color(0.55, 0.75, 0.8, 0.12)
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			m.metallic = 0.2
+			m.roughness = 0.02
+		"light_lens":
+			m.albedo_color = Color(0.9, 0.92, 0.95)
+			m.emission_enabled = true
+			m.emission = Color(1.0, 0.97, 0.9)
+			m.emission_energy_multiplier = 0.4
+			m.roughness = 0.05
+		"laser_beam":
+			m.albedo_color = Color(1.0, 0.1, 0.08, 0.35)
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			m.emission_enabled = true
+			m.emission = Color(1.0, 0.05, 0.03)
+			m.emission_energy_multiplier = 4.0
+			m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	# Поверхность: дерево и краска гранаты — фото-текстуры Poly Haven (CC0), трипланарно (у
 	# процедурных мешей нет UV); сталь и полимер — тонкий процедурный микрорельеф.
 	# Без assets/textures остаётся чистый цвет — игра обязана работать и так.
@@ -604,8 +683,10 @@ static func _mat(id: String) -> StandardMaterial3D:
 			_photo(m, "natural_walnut_veneer", 3.0, Color(0.42, 0.26, 0.15))
 		"olive":
 			_photo(m, "green_metal_rust", 9.0, Color(0.95, 1.0, 0.85))
-		"blued", "gunmetal", "scope":
+		"blued", "gunmetal", "scope", "anodized", "anodized_2s":
 			_micro(m, 28.0, 0.35, 0.9)
+		"suppressor":
+			_micro(m, 60.0, 0.8, 2.2)
 		"polymer", "polymer_plum":
 			_micro(m, 40.0, 0.6, 1.4)
 		"polymer_grip", "rubber":

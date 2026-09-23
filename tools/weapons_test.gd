@@ -79,7 +79,8 @@ func _ready() -> void:
 	await _look_at(target.global_position + Vector3(0, 1.5, 0))
 	await _frames(8)
 	_save("wt_scope")
-	_check("болтовка — оптика", get_viewport().get_camera_3d().fov < 25.0, "fov=%.1f" % get_viewport().get_camera_3d().fov)
+	_check("болтовка — оптика отдельным рендером", _rig.scope_active and _rig.scope_fov() < 10.0 and get_viewport().get_camera_3d().fov > 40.0,
+		"окуляр fov=%.1f, основной fov=%.1f" % [_rig.scope_fov(), get_viewport().get_camera_3d().fov])
 	Input.action_release("aim")
 	await _frames(6)
 	_check("отпустил ПКМ — изометрия", not _rig.ads_active and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "")
@@ -139,7 +140,7 @@ func _look_at(p: Vector3) -> void:
 		var pitch := atan2(d.y, Vector2(d.x, d.z).length())
 		var dy := wrapf(yaw - _player.look_yaw, -PI, PI)
 		var dp := pitch - _player.look_pitch
-		var sens := Balance.ADS_SENS * (get_viewport().get_camera_3d().fov / 62.0)
+		var sens := _rig.ads_sens()
 		_mouse_motion(Vector2(-dy / sens, -dp / sens))
 		await _frames(2)
 

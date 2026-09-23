@@ -148,6 +148,48 @@ static func unequip(slot: String) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- верстак
+
+## Обвесы на оружии в слоте снаряжения (primary/secondary): слот обвеса -> id.
+static func weapon_mods(weapon_slot: String) -> Dictionary:
+	if not equipment.has(weapon_slot):
+		return {}
+	return (equipment[weapon_slot] as Dictionary).get("mods", {})
+
+
+## Поставить обвес из тайника (запись idx) на надетое оружие; старый из того же слота — в тайник.
+static func install_mod(weapon_slot: String, idx: int) -> bool:
+	if not equipment.has(weapon_slot) or idx < 0 or idx >= stash.size():
+		return false
+	var mod := String(stash[idx].id)
+	var weapon: Dictionary = equipment[weapon_slot]
+	if not ItemDb.mod_fits(mod, String(weapon.id)):
+		return false
+	var slot := String(ItemDb.mod_spec(mod).slot)
+	ItemDb.remove_at(stash, idx, 1)
+	var mods: Dictionary = weapon.get("mods", {}).duplicate()
+	if mods.has(slot):
+		ItemDb.add_to(stash, ItemDb.make(String(mods[slot]), 1), -1)
+	mods[slot] = mod
+	weapon["mods"] = mods
+	save()
+	return true
+
+
+static func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
+	var mods := weapon_mods(weapon_slot).duplicate()
+	if not mods.has(mod_slot):
+		return false
+	var e := ItemDb.make(String(mods[mod_slot]), 1)
+	if ItemDb.room_in(stash, e, Balance.STASH_CELLS) <= 0:
+		return false
+	ItemDb.add_to(stash, e, -1)
+	mods.erase(mod_slot)
+	(equipment[weapon_slot] as Dictionary)["mods"] = mods
+	save()
+	return true
+
+
 # ---------------------------------------------------------------- торговец
 
 static func buy_price(id: String) -> int:

@@ -1063,8 +1063,8 @@ display_name = "Тайник и снаряжение"
 
 [node name="WorkbenchStation" parent="Stations" instance=ExtResource("st")]
 transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 0.900, -7.200)
-kind = 0
-display_name = "Верстак — снаряжение"
+kind = 3
+display_name = "Верстак — обвесы"
 
 [node name="TraderStation" parent="Stations" instance=ExtResource("st")]
 transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 0.900, -2.600)
