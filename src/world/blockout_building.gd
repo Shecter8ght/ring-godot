@@ -134,8 +134,16 @@ func _build_building() -> void:
 	]
 	for side in sides:
 		_wall_with_openings(walls, side[0], side[1], t, height)
-	walls.emit(_gen, "Walls", true, true)
+	var wb := walls.emit(_gen, "Walls", true, true)
 	slab.emit(_gen, "Floor", true, false)
+	# стены здания закрывают то, что за ними (в прицеле) — см. SectorBuilder._add_occluder
+	var meshes: Array[Mesh] = []
+	for c in wb.get_children():
+		if c is MeshInstance3D:
+			meshes.append((c as MeshInstance3D).mesh)
+	var oi := BlockoutMesh.make_occluder(meshes)
+	if oi:
+		_gen.add_child(oi)
 
 
 ## Прямая стена от a до b (в плане), с прорезанными проёмами дочерних BlockoutOpening,

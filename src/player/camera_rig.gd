@@ -44,6 +44,8 @@ func _ready() -> void:
 	_ads_cam.far = 900.0
 	add_child(_ads_cam)
 	_build_hud()
+	# в изометрии отсечения за стенами нет (см. _set_ads)
+	get_viewport().use_occlusion_culling = false
 
 
 ## Толчок камеры (выстрел, попадание по тебе, взрыв); складывается и затухает сам.
@@ -164,6 +166,9 @@ func _set_ads(on: bool, pl: Player) -> void:
 		if pl:
 			var ahead := pl.global_position + Vector3(sin(_look_yaw), 0.0, cos(_look_yaw)) * 6.0
 			Input.warp_mouse(_camera.unproject_position(ahead))
+	# отсечение за стенами — только из глаз: в изометрии стены у камеры растворены, и окклюдер
+	# спрятал бы то, что за невидимой стеной (в том числе игрока)
+	get_viewport().use_occlusion_culling = on
 	_scope.visible = false
 	_dot.visible = on
 

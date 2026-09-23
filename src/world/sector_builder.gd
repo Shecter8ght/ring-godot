@@ -18,6 +18,10 @@ const EPS_R := 0.05
 const EPS_A := 0.05
 ## Радиальная стена ближе этого к границе сектора — противопожарная (между пожарными отсеками), град.
 const FIRE_TOL_DEG := 2.0
+## Склейка пропсов: клетка, м, и дальность, дальше которой клетка не рисуется, м (изометрия видит
+## ~80 м от камеры; в прицеле дальше всё равно стены и дымка).
+const PROP_BATCH_CELL := 24.0
+const PROP_VIS_END := 110.0
 ## Пол закрытой части кольца по поясам (ключи ring.zones).
 const ZONE_FLOOR := {
 	"atr": "large_floor_tiles_02", "gal": "large_floor_tiles_02", "inn": "worn_tile_floor", "st": "large_floor_tiles_02",
@@ -681,6 +685,7 @@ func _emit_meshes(root: Node3D) -> void:
 		cs.name = mi.name + "_col"
 		cs.shape = (mi.mesh as ArrayMesh).create_trimesh_shape()
 		walls.add_child(cs)
+	_add_occluder(root, walls)
 	for mat_id in _glass:
 		var gi := _mesh_node(_glass[mat_id], String(mat_id), false)
 		walls.add_child(gi)
@@ -698,6 +703,20 @@ func _emit_meshes(root: Node3D) -> void:
 	root.add_child(signs)
 	for l in _labels:
 		signs.add_child(l)
+
+
+## Глухие стены — окклюдеры: что целиком за ними, не рисуется. Нужно в прицеле, где камера видит
+## на сотни метров. Рамы, стекло, вывески и баннеры не закрывают обзор — их не берём.
+func _add_occluder(root: Node3D, walls: Node3D) -> void:
+	var meshes: Array[Mesh] = []
+	for c in walls.get_children():
+		var mi := c as MeshInstance3D
+		if mi == null or String(mi.name) in ["steel_dark", "sign_panel"] or String(mi.name).begins_with("banner_"):
+			continue
+		meshes.append(mi.mesh)
+	var oi := BlockoutMesh.make_occluder(meshes)
+	if oi:
+		root.add_child(oi)
 
 
 func _mesh_node(st: SurfaceTool, mat_id: String, shadows: bool) -> MeshInstance3D:
@@ -778,6 +797,8 @@ func _build_props(root: Node3D) -> void:
 	var placement := PropPlacement.new()
 	placement.place(props, _rooms, _openings, root.get_meta("spawn", Vector3.ZERO), hash(String(_def.get("id", ""))))
 	root.set_meta("prop_count", placement.count)
+	# меши пропсов склеиваются по клеткам — иначе каждая коробка на стеллаже отдельный вызов отрисовки
+	root.set_meta("prop_batches", PropBatcher.batch(props, PROP_BATCH_CELL, PROP_VIS_END))
 
 
 ## Верхний слой: балки перекрытия поперёк помещений, вентиляционный короб вдоль коридора,

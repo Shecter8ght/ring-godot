@@ -94,3 +94,30 @@ func emit(parent: Node3D, body_name: String, collide: bool, cutaway: bool) -> St
 			cs.shape = (mi.mesh as ArrayMesh).create_trimesh_shape()
 			body.add_child(cs)
 	return body
+
+
+## Окклюдер из готовых мешей (все поверхности): по нему движок не рисует то, что целиком за ним.
+static func make_occluder(meshes: Array[Mesh]) -> OccluderInstance3D:
+	var verts := PackedVector3Array()
+	var idx := PackedInt32Array()
+	for m in meshes:
+		for s in range(m.get_surface_count()):
+			var a := m.surface_get_arrays(s)
+			var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+			var base := verts.size()
+			verts.append_array(v)
+			var src: Variant = a[Mesh.ARRAY_INDEX]
+			if src != null and (src as PackedInt32Array).size() > 0:
+				for i in (src as PackedInt32Array):
+					idx.append(base + i)
+			else:
+				for i in range(v.size()):
+					idx.append(base + i)
+	if verts.is_empty():
+		return null
+	var occ := ArrayOccluder3D.new()
+	occ.set_arrays(verts, idx)
+	var oi := OccluderInstance3D.new()
+	oi.name = "Occluder"
+	oi.occluder = occ
+	return oi

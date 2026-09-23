@@ -153,6 +153,24 @@ static func flat(color: Color, rough: float, metal: float) -> Material:
 	return m
 
 
+## Материал склеенных пропсов (PropBatcher): цвет — из вершин, общие только шероховатость
+## и металл. Тоже с вырезом у камеры.
+static func flat_vc(rough: float, metal: float) -> Material:
+	var key := "flatvc:%.2f:%.2f" % [rough, metal]
+	if _cache.has(key):
+		return _cache[key]
+	var m := StandardMaterial3D.new()
+	m.vertex_color_use_as_albedo = true
+	# цвета вершин взяты из albedo_color исходных материалов — они в sRGB
+	m.vertex_color_is_srgb = true
+	m.roughness = rough
+	m.metallic = metal
+	m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+	_cutaway.append(m)
+	_cache[key] = m
+	return m
+
+
 ## Камера зовёт каждый кадр: всё ближе near к камере — невидимо, дальше far — целиком.
 static func set_cutaway_distance(near: float, far: float) -> void:
 	for m in _cutaway:
