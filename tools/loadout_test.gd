@@ -98,6 +98,20 @@ func _ready() -> void:
 	Input.action_release("reload")
 	await _wait(float(Balance.WEAPONS.rifle.reload) + 0.3)
 	_check("перезарядка из рюкзака", pl.ammo == 45 and pl.inventory.count("ammo_545") == 35, "магазин %d, в рюкзаке %d" % [pl.ammo, pl.inventory.count("ammo_545")])
+	# обвес прямо в рейде: фонарь из рюкзака — на автомат, потом снять обратно
+	pl.inventory.add("mod_flashlight", 1)
+	var fi := -1
+	for i in range(pl.inventory.items.size()):
+		if String(pl.inventory.items[i].id) == "mod_flashlight":
+			fi = i
+	Raid.current.request_install_mod("primary", "backpack", fi)
+	await _frames(3)
+	_check("в рейде: фонарь поставлен на автомат, модель в руках с ним", String(pl.inventory.equipment.primary.mods.get("tac", "")) == "mod_flashlight" and pl.weapon_mods.has("tac") and not pl.inventory.has("mod_flashlight"),
+		str(pl.weapon_mods))
+	Raid.current.request_remove_mod("primary", "tac")
+	await _frames(3)
+	_check("в рейде: фонарь снят в рюкзак", not pl.inventory.equipment.primary.mods.has("tac") and pl.inventory.has("mod_flashlight"), str(pl.inventory.equipment.primary.mods))
+	pl.inventory.remove("mod_flashlight", 1)
 	var dur0 := float(pl.inventory.equipment.armor.dur)
 	pl.health.take_damage(40.0, pl.global_position + Vector3(0, 1, 5))
 	_check("броня снимает урон и изнашивается", pl.health.hp > 60.0 and float(pl.inventory.equipment.armor.dur) < dur0, "hp %d, броня %.0f" % [int(pl.health.hp), float(pl.inventory.equipment.armor.dur)])

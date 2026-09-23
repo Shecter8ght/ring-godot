@@ -134,6 +134,9 @@ func _build_stash() -> void:
 		sv.set_entry(Profile.equipment.get(s, {}))
 		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role, idx))
 		sv.unequip_requested.connect(func() -> void: Profile.unequip(s))
+		sv.mod_from.connect(func(src: GridView, idx: int) -> void:
+			if src.role in ["stash", "backpack"]:
+				Profile.install_mod(s, idx, src.role == "backpack"))
 		gear.add_child(sv)
 	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
 	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)

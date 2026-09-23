@@ -5,6 +5,9 @@ extends Control
 
 signal equip_from(src: GridView, idx: int)
 signal unequip_requested
+## Обвес бросили на оружие в слоте (поставить), правая кнопка по слоту (меню обвесов).
+signal mod_from(src: GridView, idx: int)
+signal context(screen_pos: Vector2)
 
 var slot: String = ""
 var entry: Dictionary = {}
@@ -60,6 +63,14 @@ func _gui_input(event: InputEvent) -> void:
 	if mb and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT and mb.double_click and not entry.is_empty():
 		unequip_requested.emit()
 		accept_event()
+	elif mb and mb.pressed and mb.button_index == MOUSE_BUTTON_RIGHT and not entry.is_empty():
+		context.emit(mb.global_position)
+		accept_event()
+
+
+## Обвес подходит к оружию в этом слоте.
+func _mod_fits(id: String) -> bool:
+	return not entry.is_empty() and ItemDb.mod_fits(id, String(entry.id))
 
 
 func _get_drag_data(_at: Vector2) -> Variant:
@@ -80,7 +91,8 @@ func _get_drag_data(_at: Vector2) -> Variant:
 func _can_drop_data(_at: Vector2, data: Variant) -> bool:
 	if not (data is Dictionary) or not (data as Dictionary).has("view"):
 		return false
-	var ok := _fits(String((data as Dictionary).id))
+	var id := String((data as Dictionary).id)
+	var ok := _fits(id) or _mod_fits(id)
 	_hover = 1 if ok else -1
 	queue_redraw()
 	return ok
@@ -89,7 +101,11 @@ func _can_drop_data(_at: Vector2, data: Variant) -> bool:
 func _drop_data(_at: Vector2, data: Variant) -> void:
 	_hover = 0
 	queue_redraw()
-	equip_from.emit((data as Dictionary).view, int((data as Dictionary).idx))
+	var d: Dictionary = data
+	if _mod_fits(String(d.id)):
+		mod_from.emit(d.view, int(d.idx))
+	else:
+		equip_from.emit(d.view, int(d.idx))
 
 
 func _notification(what: int) -> void:

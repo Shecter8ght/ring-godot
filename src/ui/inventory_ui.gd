@@ -234,9 +234,23 @@ func _refresh_lists(me: Player) -> void:
 				var sv := SlotView.new(String(slot))
 				sv.custom_minimum_size = Vector2(3.0 * GridView.CELL, 1.5 * GridView.CELL)
 				sv.set_entry(me.inventory.equipment.get(slot, {}))
+				var ws := String(slot)
 				sv.equip_from.connect(func(src: GridView, idx: int) -> void:
 					if src.role == "backpack":
 						Raid.current.request_equip(idx))
+				# обвес прямо в рейде: бросил на оружие — поставил (что умеет твой верстак)
+				sv.mod_from.connect(func(src: GridView, idx: int) -> void:
+					if src.role not in ["backpack", "pocket"]:
+						return
+					var list: Array = me.inventory.pocket if src.role == "pocket" else me.inventory.items
+					if idx >= list.size():
+						return
+					var why := Profile.mod_block(String(list[idx].id))
+					if why != "":
+						Raid.current.notify("Не поставить: " + why)
+					else:
+						Raid.current.request_install_mod(ws, src.role, idx))
+				sv.context.connect(func(at: Vector2) -> void: _mods_menu(me, ws, at))
 				slots.add_child(sv)
 			_bp_grid = GridView.new(Balance.BACKPACK_GRID, "backpack")
 			_bp_grid.set_items(me.inventory.items)
@@ -327,6 +341,22 @@ func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
 		acts.append(func() -> void: Raid.current.request_put(c, idx))
 	names.append("Выбросить")
 	acts.append(func() -> void: Raid.current.request_drop(id, int(it.n)))
+	_popup(at, names, acts)
+
+
+## Правая кнопка по оружию в слоте: снять обвес (в рюкзак).
+func _mods_menu(me: Player, weapon_slot: String, at: Vector2) -> void:
+	var w: Dictionary = me.inventory.equipment.get(weapon_slot, {})
+	var mods: Dictionary = w.get("mods", {})
+	if mods.is_empty():
+		Raid.current.notify("Обвесов нет — перетащи обвес из рюкзака на оружие")
+		return
+	var names: Array = []
+	var acts: Array = []
+	for ms in mods:
+		var mslot := String(ms)
+		names.append("Снять: " + ItemDb.item_name(String(mods[ms])))
+		acts.append(func() -> void: Raid.current.request_remove_mod(weapon_slot, mslot))
 	_popup(at, names, acts)
 
 

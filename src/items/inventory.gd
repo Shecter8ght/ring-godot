@@ -89,6 +89,54 @@ func put_at(entry: Dictionary, x: int, y: int, r: bool, into: String = "backpack
 	return k
 
 
+## Обвес из рюкзака / кармана (src, запись idx) — на оружие в слоте weapon_slot; старый из того
+## же слота обвеса — туда, откуда взят новый (хост). false — не подходит или некуда деть старый.
+func install_mod(weapon_slot: String, src: String, idx: int) -> bool:
+	var from: Array = (pocket if src == "pocket" else items).duplicate(true)
+	if not equipment.has(weapon_slot) or idx < 0 or idx >= from.size():
+		return false
+	var mod := String(from[idx].id)
+	var weapon: Dictionary = (equipment[weapon_slot] as Dictionary).duplicate(true)
+	if not ItemDb.mod_fits(mod, String(weapon.id)):
+		return false
+	var mslot := String(ItemDb.mod_spec(mod).slot)
+	ItemDb.remove_at(from, idx, 1)
+	var mods: Dictionary = weapon.get("mods", {}).duplicate()
+	if mods.has(mslot):
+		if ItemDb.add_to(from, ItemDb.make(String(mods[mslot]), 1), pocket_grid if src == "pocket" else Balance.BACKPACK_GRID) == 0:
+			return false
+	mods[mslot] = mod
+	weapon["mods"] = mods
+	var eq := equipment.duplicate(true)
+	eq[weapon_slot] = weapon
+	if src == "pocket":
+		pocket = from
+	else:
+		items = from
+	equipment = eq
+	return true
+
+
+## Снять обвес mod_slot с оружия weapon_slot — в рюкзак (хост). false — места нет.
+func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
+	if not equipment.has(weapon_slot):
+		return false
+	var weapon: Dictionary = (equipment[weapon_slot] as Dictionary).duplicate(true)
+	var mods: Dictionary = weapon.get("mods", {}).duplicate()
+	if not mods.has(mod_slot):
+		return false
+	var list := items.duplicate(true)
+	if ItemDb.add_to(list, ItemDb.make(String(mods[mod_slot]), 1), Balance.BACKPACK_GRID) == 0:
+		return false
+	mods.erase(mod_slot)
+	weapon["mods"] = mods
+	var eq := equipment.duplicate(true)
+	eq[weapon_slot] = weapon
+	items = list
+	equipment = eq
+	return true
+
+
 ## Перенос между рюкзаком и карманом (или внутри одного) в клетку (x, y) (хост).
 func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> bool:
 	if src == dst:

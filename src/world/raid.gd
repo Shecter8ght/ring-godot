@@ -336,6 +336,48 @@ func _put(peer_id: int, path: NodePath, idx: int) -> void:
 	c.rolled = true
 
 
+## Обвес на оружие прямо в рейде: из рюкзака/кармана (src, idx) — на оружие в слоте weapon_slot.
+func request_install_mod(weapon_slot: String, src: String, idx: int) -> void:
+	if _is_host():
+		_install_mod(multiplayer.get_unique_id(), weapon_slot, src, idx)
+	else:
+		_rpc_install_mod.rpc_id(1, weapon_slot, src, idx)
+
+
+func request_remove_mod(weapon_slot: String, mod_slot: String) -> void:
+	if _is_host():
+		_remove_mod(multiplayer.get_unique_id(), weapon_slot, mod_slot)
+	else:
+		_rpc_remove_mod.rpc_id(1, weapon_slot, mod_slot)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_install_mod(weapon_slot: String, src: String, idx: int) -> void:
+	if multiplayer.is_server():
+		_install_mod(multiplayer.get_remote_sender_id(), weapon_slot, src, idx)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_remove_mod(weapon_slot: String, mod_slot: String) -> void:
+	if multiplayer.is_server():
+		_remove_mod(multiplayer.get_remote_sender_id(), weapon_slot, mod_slot)
+
+
+func _install_mod(peer_id: int, weapon_slot: String, src: String, idx: int) -> void:
+	var pl := player_of(peer_id)
+	if pl and pl.is_alive() and pl.inventory.install_mod(weapon_slot, src, idx):
+		Audio.play("reload_pistol", pl.global_position, -6.0)
+
+
+func _remove_mod(peer_id: int, weapon_slot: String, mod_slot: String) -> void:
+	var pl := player_of(peer_id)
+	if pl and pl.is_alive():
+		if pl.inventory.remove_mod(weapon_slot, mod_slot):
+			Audio.play("reload_pistol", pl.global_position, -6.0)
+		elif peer_id == multiplayer.get_unique_id():
+			notify("Некуда положить — освободи место в рюкзаке")
+
+
 ## Надеть / взять в руки предмет из рюкзака (индекс в items).
 func request_equip(idx: int) -> void:
 	if _is_host():
