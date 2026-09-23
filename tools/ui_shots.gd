@@ -44,6 +44,22 @@ func _ready() -> void:
 	Raid.current.ui.call("_open_loot", safe)
 	await _frames(6)
 	_save("ui_inventory")
+	Raid.current.ui.call("close_all")
+	# от первого лица: у бедра, в наклоне вправо, в прицеле
+	me.global_position = SectorBuilder.polar(-90.0, 100.0) + Vector3(0, 0.1, 0)
+	CameraRig.first_person_mode = true
+	_press("weapon_2")
+	await _frames(20)
+	_save("ui_fps_hip")
+	Input.action_press("camera_right")
+	await _frames(30)
+	_save("ui_fps_lean")
+	Input.action_release("camera_right")
+	Input.action_press("aim")
+	await _frames(40)
+	_save("ui_fps_ads")
+	Input.action_release("aim")
+	CameraRig.first_person_mode = false
 	get_tree().quit(0)
 
 

@@ -14,6 +14,8 @@ var stance: Stance = Stance.STAND
 var aiming: bool = false
 ## Прицел от первого лица включён — ставит CameraRig.
 var ads: bool = false
+## Наклон (Q/E) от первого лица: -1 — влево, 1 — вправо; синхронизируется (AI видит высунувшегося).
+var lean: float = 0.0
 ## Направление взгляда в прицеле, рад (курс от +Z, тангаж вверх) — ставит CameraRig.
 var look_yaw: float = 0.0
 var look_pitch: float = 0.0
@@ -119,7 +121,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:lean"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -170,15 +172,26 @@ func spec() -> Dictionary:
 	return WeaponStats.compute(weapon_id, weapon_mods)
 
 
-## 0…1 — насколько ствол «дошёл» в прицел (по эргономике).
+## 0…1 — насколько ствол «дошёл» в прицел (по эргономике). ads — камера в глазах (прицел или
+## режим от первого лица), aiming — зажата ПКМ: без неё от первого лица оружие у бедра.
 func aim_progress() -> float:
-	if not ads or weapon_id == "":
+	if not ads or not aiming or weapon_id == "":
 		return 0.0
 	return clampf(_aim_t / float(spec().aim_time), 0.0, 1.0)
 
 
 func eye_position() -> Vector3:
-	return global_position + Vector3.UP * float(Balance.ADS_EYE[_stance_key()])
+	return global_position + Vector3.UP * float(Balance.ADS_EYE[_stance_key()]) + lean_vector()
+
+
+## Куда сдвинут глаз наклоном (вбок от взгляда, чуть ниже).
+func lean_vector() -> Vector3:
+	if absf(lean) < 0.001:
+		return Vector3.ZERO
+	# курс — по позе тела (синхронизируется), а не по взгляду: у хоста взгляда клиента нет
+	var y := body_yaw()
+	var right := Vector3(-cos(y), 0.0, sin(y))
+	return right * lean * Balance.LEAN_OFFSET + Vector3.DOWN * absf(lean) * 0.08
 
 
 ## Направление взгляда в прицеле.
@@ -217,7 +230,10 @@ func _physics_process(delta: float) -> void:
 		weapon_mods = mods
 	if Input.is_action_just_pressed("flashlight"):
 		light_on = not light_on
-	_aim_t = _aim_t + delta if ads else 0.0
+	_aim_t = _aim_t + delta if ads and aiming else 0.0
+	# наклон: Q/E только когда камера в глазах; в изометрии Q/E крутят камеру
+	var lean_to := Input.get_axis("camera_left", "camera_right") if ads and not PauseMenu.shown else 0.0
+	lean = move_toward(lean, lean_to, Balance.LEAN_SPEED * delta)
 	_read_stance()
 	_combat(delta)
 	var wish := _wish_direction()
@@ -442,11 +458,11 @@ func _fire(spec: Dictionary) -> void:
 	# разброс: от бедра (ЛЦУ включён — меньше), в прицеле — по мере «довода» к прицельному;
 	# сидя/лёжа на сошках — ещё меньше, и отдача тоже
 	var hip := float(spec.hip_spread) if light_on else 1.0
-	var mult := lerpf(hip, float(spec.ads_spread), aim_progress()) if ads else hip
+	var mult := lerpf(hip, float(spec.ads_spread), aim_progress()) if ads and aiming else hip
 	var braced := stance != Stance.STAND
 	var spread: float = float(spec.spread_deg) * mult * (float(spec.braced_spread) if braced else 1.0)
 	# очередь раскачивает: от бедра сильно, в прицеле — меньше (ствол ведут глазами)
-	spread *= 1.0 + minf(_bloom, Balance.RECOIL_BLOOM_MAX) * (Balance.RECOIL_BLOOM_ADS if ads else 1.0)
+	spread *= 1.0 + minf(_bloom, Balance.RECOIL_BLOOM_MAX) * (Balance.RECOIL_BLOOM_ADS if ads and aiming else 1.0)
 	var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DEBRIS
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig
@@ -547,6 +563,8 @@ func _stance_speed() -> float:
 			s = Balance.PLAYER_SPRINT_SPEED if Input.is_action_pressed("sprint") and not aiming else Balance.PLAYER_WALK_SPEED
 	if aiming:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
+	if absf(lean) > 0.3:
+		s *= Balance.LEAN_MOVE_SCALE
 	return s
 
 

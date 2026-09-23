@@ -12,6 +12,13 @@ extends Node3D
 @export var target_path: NodePath
 
 var ads_active: bool = false
+## Режим «от первого лица» (V или меню): камера всегда в глазах, ПКМ — прицел. Сохраняется в
+## user://settings.cfg.
+static var first_person_mode: bool = false
+static var _settings_loaded: bool = false
+const SETTINGS_PATH := "user://settings.cfg"
+var _crosshair: Control
+var _bob_t: float = 0.0
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
@@ -90,12 +97,47 @@ func set_target(node: Node3D) -> void:
 	_target = node
 
 
+static func load_settings() -> void:
+	if _settings_loaded:
+		return
+	_settings_loaded = true
+	# тесты и инструменты (res://tools/…) — всегда с умолчаниями, настройки игрока их не трогают
+	for a in OS.get_cmdline_args():
+		if String(a).begins_with("res://tools/"):
+			return
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS_PATH) == OK:
+		first_person_mode = bool(cfg.get_value("view", "first_person", false))
+
+
+static func set_first_person_mode(on: bool) -> void:
+	first_person_mode = on
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)
+	cfg.set_value("view", "first_person", on)
+	cfg.save(SETTINGS_PATH)
+
+
+## Открыто окно (рюкзак, карта, убежище, меню) — мышь нужна курсором, взгляд стоит.
+func _ui_blocking() -> bool:
+	if PauseMenu.shown or (Raid.current and Raid.current.ui_open()):
+		return true
+	for n in get_tree().get_nodes_in_group("esc_windows"):
+		if n.has_method("is_open") and bool(n.call("is_open")):
+			return true
+	return false
+
+
 ## Дистанция изометрии (зум): в тесном убежище ближе, чем в рейде.
 func set_distance(d: float) -> void:
 	_distance = clampf(d, Balance.CAMERA_ZOOM_MIN, Balance.CAMERA_ZOOM_MAX)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("view_toggle") and not event.is_echo():
+		set_first_person_mode(not first_person_mode)
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_MIDDLE:
@@ -107,7 +149,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_distance = minf(Balance.CAMERA_ZOOM_MAX, _distance + Balance.CAMERA_ZOOM_STEP)
 	elif event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
-		if ads_active:
+		if ads_active and not _ui_blocking():
 			# вправо — поворот вправо; у оптики чувствительность меньше пропорционально полю зрения
 			var sens := ads_sens()
 			_look_yaw -= mm.relative.x * sens
@@ -122,7 +164,8 @@ func _process(delta: float) -> void:
 		if _target == null:
 			return
 	var pl := _target as Player
-	var want_ads := pl != null and pl.is_local() and pl.is_alive() and pl.aiming
+	load_settings()
+	var want_ads := pl != null and pl.is_local() and pl.is_alive() and (pl.aiming or (first_person_mode and pl.combat_enabled))
 	if want_ads != ads_active:
 		_set_ads(want_ads, pl)
 	_shake = maxf(0.0, _shake - Balance.SHAKE_DECAY * _shake * delta - 0.01 * delta)
@@ -131,6 +174,10 @@ func _process(delta: float) -> void:
 	_hitmarker.visible = _hitmarker_t > 0.0
 	if ads_active:
 		_process_ads(pl, delta, s)
+		# окно открыто — курсор свободен; закрыли — снова взгляд мышью
+		var want_mouse := Input.MOUSE_MODE_VISIBLE if _ui_blocking() else Input.MOUSE_MODE_CAPTURED
+		if Input.mouse_mode != want_mouse and not PauseMenu.shown:
+			Input.mouse_mode = want_mouse
 		if _hitmarker.visible:
 			_hitmarker.position = get_viewport().get_visible_rect().size * 0.5
 	else:
@@ -219,17 +266,23 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var wid := pl.weapon_id
 	var spec := pl.spec() if wid != "" else {}
 	var scoped := bool(spec.get("scoped", false))
-	_ads_cam.fov = lerpf(_ads_cam.fov, _ads_fov(pl), minf(1.0, 14.0 * delta))
+	# без ПКМ (режим от первого лица) — широкий вид, оружие у бедра
+	var aim_t := pl.aim_progress()
+	var fov_to := _ads_fov(pl) if pl.aiming else Balance.FPS_FOV
+	_ads_cam.fov = lerpf(_ads_cam.fov, fov_to, minf(1.0, 12.0 * delta))
+	_crosshair.visible = not pl.aiming and not _ui_blocking()
 	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
 	_sway_t += delta
-	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0))
+	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
 	if pl.stance != Player.Stance.STAND:
 		amp *= float(spec.get("braced_spread", 1.0))
 	var sway := Vector2(sin(_sway_t * 1.13) * 0.7 + sin(_sway_t * 2.71 + 1.3) * 0.3, sin(_sway_t * 0.87 + 0.5) * 0.6 + sin(_sway_t * 2.05) * 0.4) * amp
 	# отдача подкидывает взгляд, дальше игрок сам возвращает прицел
 	var pitch := _look_pitch + pl.recoil() + sway.y
 	var yaw := _look_yaw + sway.x - pl.recoil_h()
-	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, yaw + PI, 0.0)), pl.eye_position())
+	# наклон — крен камеры (глаз уже сдвинут в eye_position)
+	var roll := -pl.lean * deg_to_rad(Balance.LEAN_ROLL_DEG)
+	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, yaw + PI, roll)), pl.eye_position())
 	_ads_cam.global_position += _ads_cam.global_basis * Vector3(_rng.randf_range(-s, s), _rng.randf_range(-s, s), 0.0) * 0.15
 	# пули летят туда, куда смотрит прицел, — с раскачкой
 	pl.look_yaw = yaw
@@ -258,14 +311,20 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		(n as MeshInstance3D).visible = pl.light_on
 	var sh: float = _viewmodel.get_meta("sight_h", 0.08)
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
-	# «довод»: пока ствол не дошёл (aim_time по эргономике), модель ниже линии и чуть ближе
-	var lift := (1.0 - pl.aim_progress()) * 0.035
+	# у бедра (без ПКМ) → в прицел: «довод» по эргономике (aim_progress), плавно
+	var k := smoothstep(0.0, 1.0, aim_t)
+	var ads_pos := Vector3(0.0, -sh, -az)
+	var hip_pos := Balance.FPS_HIP_POSE
+	# на ходу у бедра оружие покачивается
+	var moving := Vector2(pl.velocity.x, pl.velocity.z).length() > 0.5
+	_bob_t += delta * (8.0 if moving else 1.5)
+	var bob := Vector3(sin(_bob_t * 0.5) * 0.006, absf(sin(_bob_t)) * (0.01 if moving else 0.002), 0.0) * (1.0 - k)
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
 	# толчок в плечо: модель откатывается назад, дуло подскакивает, чуть заваливается; пружиной обратно
 	var kv := pl.kick_vis
-	var vm_basis := Basis(Vector3.UP, PI).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5)
-	_viewmodel.transform = Transform3D(vm_basis, Vector3(0.0, -sh - lift + kv * 0.004, -az + kv * 0.028 + lift * 0.5))
-	_set_scope(scoped and _viewmodel.has_meta("ocular"))
+	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k))
+	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + bob + Vector3(0.0, kv * 0.004, kv * 0.028))
+	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85)
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
@@ -493,7 +552,18 @@ func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
-	# точки по центру в прицеле нет: целятся по мушке, метке коллиматора или сетке оптики
+	# точки по центру в прицеле нет: целятся по мушке, метке коллиматора или сетке оптики;
+	# от первого лица без прицела — маленький крестик (куда летят пули от бедра)
+	_crosshair = Control.new()
+	_crosshair.set_anchors_preset(Control.PRESET_CENTER)
+	_crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_crosshair.visible = false
+	_crosshair.draw.connect(func() -> void:
+		var c := Color(1, 1, 1, 0.75)
+		for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
+			_crosshair.draw_line(d * 5.0, d * 11.0, Color(0, 0, 0, 0.5), 3.0)
+			_crosshair.draw_line(d * 5.0, d * 11.0, c, 1.5))
+	layer.add_child(_crosshair)
 	_hitmarker = Control.new()
 	_hitmarker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hitmarker.visible = false

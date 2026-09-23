@@ -26,7 +26,8 @@ const ACTIONS := [
 	["interact", "Двери, обыск, рубильники, подобрать"],
 	["inventory", "Рюкзак"],
 	["use_med", "Лечиться (из рюкзака)"],
-	["camera_left|camera_right", "Повернуть камеру"],
+	["camera_left|camera_right", "Изометрия — повернуть камеру; от первого лица — наклон"],
+	["view_toggle", "Вид: изометрия / от первого лица"],
 	["map", "Карта"],
 	["pause", "Меню"],
 ]
@@ -40,6 +41,7 @@ var _root: Control
 var _main: VBoxContainer
 var _controls: VBoxContainer
 var _leave: Button
+var _view_btn: Button
 var _mouse_before: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
 
 
@@ -79,6 +81,10 @@ func _ready() -> void:
 	_main.add_child(title)
 	_main.add_child(_button("Продолжить", close_menu))
 	_main.add_child(_button("Управление", func() -> void: _controls.visible = not _controls.visible))
+	_view_btn = _button("", func() -> void:
+		CameraRig.set_first_person_mode(not CameraRig.first_person_mode)
+		_view_btn.text = _view_text())
+	_main.add_child(_view_btn)
 	_leave = _button("Покинуть рейд", _on_leave)
 	_main.add_child(_leave)
 	_main.add_child(_button("Выйти из игры", func() -> void: get_tree().quit()))
@@ -178,6 +184,8 @@ func open_menu() -> void:
 	shown = true
 	_root.visible = true
 	_controls.visible = false
+	CameraRig.load_settings()
+	_view_btn.text = _view_text()
 	_mouse_before = Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var scene := get_tree().current_scene
@@ -188,6 +196,10 @@ func open_menu() -> void:
 	_leave.text = "Покинуть рейд (снаряжение останется там)" if Profile.pending_raid else "В убежище"
 	if not Net.is_networked():
 		get_tree().paused = true
+
+
+func _view_text() -> String:
+	return "Вид: от первого лица (V)" if CameraRig.first_person_mode else "Вид: изометрия (V)"
 
 
 func close_menu() -> void:
