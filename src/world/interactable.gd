@@ -84,7 +84,7 @@ func _box(parent: Node3D, pos: Vector3, size: Vector3, color: Color, glow: float
 func _label(parent: Node3D, text: String, y: float, color: Color) -> void:
 	var l := Label3D.new()
 	l.text = text
-	l.pixel_size = 0.01
+	l.pixel_size = 0.006
 	l.font_size = 40
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.modulate = color

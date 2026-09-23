@@ -67,6 +67,16 @@ func roll() -> void:
 	rolled = true
 
 
+## Хост: забрать до n штук из записи idx; возвращает, сколько забрал.
+func take_at(idx: int, n: int) -> int:
+	var list := items.duplicate(true)
+	var out := ItemDb.remove_at(list, idx, n)
+	if out.is_empty():
+		return 0
+	items = list
+	return int(out.n)
+
+
 ## Хост: забрать до n штук id; возвращает, сколько забрал.
 func take(id: String, n: int) -> int:
 	var list := items.duplicate(true)

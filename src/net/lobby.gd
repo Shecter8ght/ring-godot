@@ -20,6 +20,13 @@ func _ready() -> void:
 	_start_button.pressed.connect(_on_start_pressed)
 	_leave_button.pressed.connect(_on_leave_pressed)
 	_name_edit.text = "Игрок%d" % (randi() % 900 + 100)
+	# назад в убежище — из сети выходим
+	var back := Button.new()
+	back.text = "В убежище"
+	back.pressed.connect(func() -> void:
+		Net.disconnect_all()
+		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE))
+	($Center/Panel/VBox as VBoxContainer).add_child(back)
 	_address_edit.text = "127.0.0.1"
 	_refresh()
 

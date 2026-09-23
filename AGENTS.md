@@ -39,6 +39,8 @@ tools/smoke.cmd <сцена> [кадров] [overview[:x:z:высота]|at:уг
 tools/godot.cmd res://tools/ai_test.tscn                     # прогон мародёра: шум → бой → выстрелы, печатает состояния
 tools/godot.cmd --disable-vsync res://tools/perf_test.tscn   # FPS / вызовы отрисовки в изометрии и в прицеле по точкам
 tools/godot.cmd res://tools/raid_test.tscn                   # цикл рейда: рубильник, ключи, запертая дверь, эвакуация, итог
+tools/godot.cmd res://tools/loadout_test.tscn                # убежище → рейд со снаряжением → эвакуация → убежище (тестовый профиль)
+tools/godot.cmd res://tools/hideout_shots.tscn               # снимки убежища и его окон в docs/screens/hideout_*.png
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 ```
@@ -83,7 +85,14 @@ docs/          STATUS.md (что сделано / что дальше), реше
    Предметы и лут — данные: `data/items.json`, `data/loot.json` (какие пропсы обыскиваются, таблицы,
    темы магазинов); код — `src/items/` (ItemDb, Inventory у каждого Player — авторитет хоста),
    окно — `src/ui/inventory_ui.gd`. Контейнеры на пропсах строит SectorBuilder (Loot/Loot_N),
-   особые (сейф, стойка) — `loot_container.tscn` руками в сцене. Ключи — предметы в рюкзаке. В сцене уровня: `key_pickup.tscn` (key_id),
+   особые (сейф, стойка) — `loot_container.tscn` руками в сцене. Ключи — предметы в рюкзаке.
+   Убежище — `scenes/levels/hideout.tscn` (главная сцена игры): CSG-узлы (двигать руками; материал —
+   meta "mat"/"color"/"emit", см. hideout_level.gd), станции `hideout_station.tscn` (тайник, торговец,
+   выход). Профиль игрока — `Profile` (src/items/profile.gd, user://profile.json): деньги, тайник,
+   снаряжение, рюкзак; уходя в рейд — всё на кону (take_loadout), эвакуация возвращает. Рейд со
+   снаряжением только если `Profile.pending_raid` (убежище/лобби из убежища); запуск уровня напрямую
+   и тесты — «песочница» (все стволы, патроны без счёта, профиль не трогается). Тесты профиля —
+   только через `Profile.use_file("user://…_test.json", true)`. В сцене уровня: `key_pickup.tscn` (key_id),
    `power_switch.tscn` (switch_id), у `ExtractionPoint` — required_key / required_switch;
    помещение с "key" в JSON запирает свои двери (Door.required_key). Синхронизаторам давать имя
    (`sync.name = "Sync"`): автоимя у каждого peer своё, и пакеты хоста не находят узел.

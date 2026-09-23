@@ -71,6 +71,11 @@ func set_target(node: Node3D) -> void:
 	_target = node
 
 
+## Дистанция изометрии (зум): в тесном убежище ближе, чем в рейде.
+func set_distance(d: float) -> void:
+	_distance = clampf(d, Balance.CAMERA_ZOOM_MIN, Balance.CAMERA_ZOOM_MAX)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
@@ -188,7 +193,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if _viewmodel_id != wid:
 		if _viewmodel:
 			_viewmodel.queue_free()
-		_viewmodel = WeaponModels.build(wid)
+		_viewmodel = WeaponModels.build(wid) if wid != "" else Node3D.new()
 		for mi in _viewmodel.find_children("*", "MeshInstance3D", true, false):
 			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			if mi.has_meta("hide_ads"):
@@ -345,14 +350,20 @@ class Compass extends Control:
 
 
 func _update_hud(pl: Player) -> void:
-	if pl == null or not pl.is_local():
+	if pl == null or not pl.is_local() or not pl.combat_enabled:
 		_weapon_label.text = ""
+		return
+	if pl.weapon_id == "":
+		_weapon_label.text = "без оружия      гранаты × %d" % pl.grenade_count()
 		return
 	var spec: Dictionary = Balance.WEAPONS[pl.weapon_id]
 	var t := "%s   %d / %d" % [String(spec.name), pl.ammo, int(spec.mag)]
+	var reserve := pl.ammo_reserve()
+	if reserve >= 0:
+		t += "   · %d" % reserve
 	if pl.reload_timer > 0.0:
 		t = "%s   перезарядка…" % String(spec.name)
-	_weapon_label.text = t + "      гранаты × %d" % pl.grenades
+	_weapon_label.text = t + "      гранаты × %d" % pl.grenade_count()
 
 
 ## Чёрный фон оптики с «дыркой» по кругу высоты экрана: шейдер режет круг по центру.

@@ -51,6 +51,22 @@ const BACKPACK_CELLS := 30
 const SEARCH_BODY_SEC := 2.0
 ## Контейнер на пропе — на этой высоте над полом (к ней меряется дальность «F»), м.
 const LOOT_POINT_HEIGHT := 0.6
+
+# --- Убежище и торговец ---
+## Тайник: вместимость в ячейках.
+const STASH_CELLS := 300
+## Новый профиль: деньги и что лежит в тайнике ([id, штук]).
+const START_MONEY := 60000
+const START_STASH := [["w_pistol", 1], ["w_rifle", 1], ["ammo_9x19", 100], ["ammo_545", 120],
+	["bandage", 4], ["painkillers", 2], ["vest_light", 1], ["helmet", 1], ["grenade", 2]]
+## Торговец продаёт дороже цены предмета и покупает дешевле (с учётом износа брони).
+const TRADER_BUY_MULT := 1.25
+const TRADER_SELL_MULT := 0.55
+## Сцены: убежище (старт игры, между рейдами) и рейд.
+const HIDEOUT_SCENE := "res://scenes/levels/hideout.tscn"
+const RAID_SCENE := "res://scenes/levels/f1_ring.tscn"
+## Камера в убежище ближе — комната тесная.
+const HIDEOUT_CAMERA_DISTANCE := 20.0
 ## Компас вверху экрана: ширина полосы, px, и сколько градусов видно в обе стороны.
 const COMPASS_WIDTH := 560.0
 const COMPASS_SPAN_DEG := 75.0

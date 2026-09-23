@@ -220,18 +220,29 @@ func _refresh_visibility() -> void:
 ## Списки перестраиваются, только когда содержимое изменилось.
 func _refresh_lists(me: Player) -> void:
 	if _backpack_open:
-		var sig := str(me.inventory.items)
+		var sig := str(me.inventory.items) + str(me.inventory.equipment)
 		if sig != _bp_sig:
 			_bp_sig = sig
 			_bp_title.text = "Рюкзак   %d / %d ячеек   ·   %s ₽" % [me.inventory.cells_used(), Balance.BACKPACK_CELLS, money(me.inventory.value())]
 			_clear(_bp_list)
+			# снаряжение — сверху, приглушённо
+			for slot in Inventory.SLOTS:
+				var e: Dictionary = me.inventory.equipment.get(slot, {})
+				var text := "%s:  %s" % [Inventory.SLOT_NAMES[slot], ItemDb.label(e) if not e.is_empty() else "—"]
+				_bp_list.add_child(_row_label(text, Color(0.75, 0.8, 0.85)))
+			_bp_list.add_child(HSeparator.new())
 			if me.inventory.items.is_empty():
 				_bp_list.add_child(_row_label("пусто", Color(0.6, 0.6, 0.6)))
-			for it in me.inventory.items:
+			for i in range(me.inventory.items.size()):
+				var it: Dictionary = me.inventory.items[i]
 				var id := String(it.id)
-				var row := _row(id, int(it.n))
+				var idx := i
+				var row := _row_entry(it)
 				if ItemDb.item(id).has("use"):
 					row.add_child(_button("Лечиться", func() -> void: _try_heal_with(me, id)))
+				if not ItemDb.equip(id).is_empty():
+					var verb := "В руки" if ItemDb.equip(id).has("weapon") else "Надеть"
+					row.add_child(_button(verb, func() -> void: Raid.current.request_equip(idx)))
 				row.add_child(_button("Выбросить", func() -> void: Raid.current.request_drop(id, int(it.n))))
 				_bp_list.add_child(row)
 	if _looting:
@@ -247,7 +258,7 @@ func _refresh_lists(me: Player) -> void:
 			var c := _looting
 			for it in _looting.items:
 				var id := String(it.id)
-				var row := _row(id, int(it.n))
+				var row := _row_entry(it)
 				row.add_child(_button("Взять", func() -> void: Raid.current.request_take(c, id, int(it.n))))
 				_loot_list.add_child(row)
 			_take_all.disabled = _looting.items.is_empty()
@@ -292,6 +303,20 @@ func _panel(root: Control, left: float, right: float) -> Array:
 	list.add_theme_constant_override("separation", 4)
 	v.add_child(list)
 	return [p, title, list]
+
+
+## Строка предмета с состоянием (прочность брони) и ценой экземпляра.
+func _row_entry(e: Dictionary) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	var n := int(e.n)
+	var l := _row_label(ItemDb.label(e) + ("  ×%d" % n if n > 1 else ""), Color(0.92, 0.9, 0.85))
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(l)
+	var v := _row_label("%s ₽" % money(ItemDb.entry_value(e)), Color(0.7, 0.85, 0.65))
+	v.custom_minimum_size.x = 90
+	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.add_child(v)
+	return row
 
 
 func _row(id: String, n: int) -> HBoxContainer:

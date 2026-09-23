@@ -1,0 +1,12 @@
+{
+ "_comment": "Торговец в убежище: что продаёт (цена — value × Balance.TRADER_BUY_MULT, патроны — пачкой в стопку). Покупает всё из тайника (× TRADER_SELL_MULT, броня — с учётом износа).",
+ "name": "Торговец Михалыч",
+ "stock": [
+  "w_pistol", "w_shotgun", "w_rifle", "w_bolt",
+  "ammo_9x19", "ammo_545", "ammo_12", "ammo_762r", "grenade",
+  "vest_light", "vest_heavy", "helmet",
+  "bandage", "painkillers", "medkit",
+  "mod_red_dot", "mod_scope4x", "mod_grip", "mod_suppressor", "mod_mag_ext",
+  "water", "canned"
+ ]
+}

@@ -22,7 +22,16 @@ var cursor_ground: Vector3 = Vector3.ZERO
 ## Точка на теле противника под курсором (Vector3.ZERO — под курсором никого): выстрел идёт в неё.
 var cursor_body: Vector3 = Vector3.ZERO
 
-## Оружие в руках и патроны: ammo — в текущем магазине, остальные — в ammo_by.
+## Рейд из убежища: оружие только из снаряжения (1 — пистолет, 2 — основное), патроны и гранаты —
+## из рюкзака. false — «песочница» (тесты, запуск уровня напрямую): все стволы, патроны без счёта.
+var loadout_mode: bool = false
+## В убежище не стреляют.
+var combat_enabled: bool = true
+## Сколько патронов заберёт текущая перезарядка (снаряжение); -1 — полный магазин (песочница).
+var _reload_take: int = -1
+var _auto_loaded: bool = false
+
+## Оружие в руках и патроны: ammo — в текущем магазине, остальные — в ammo_by. "" — руки пусты.
 var weapon_id: String = "pistol"
 var ammo: int = int(Balance.WEAPONS.pistol.mag)
 var ammo_by: Dictionary = {}
@@ -72,6 +81,8 @@ func _ready() -> void:
 	inventory = Inventory.new()
 	inventory.name = "Inventory"
 	add_child(inventory)
+	# броня и шлем снимают часть урона (считается там же, где урон, — на хосте)
+	health.damage_filter = func(amount: float) -> float: return inventory.absorb(amount)
 	# рука с оружием — не внутри Body: Body сжимается по стойке, оружие сжиматься не должно
 	_hand = Node3D.new()
 	_hand.name = "Hand"
@@ -184,7 +195,7 @@ func _update_hand() -> void:
 	if _weapon_model_id != weapon_id:
 		if _weapon_model:
 			_weapon_model.queue_free()
-		_weapon_model = WeaponModels.build(weapon_id)
+		_weapon_model = WeaponModels.build(weapon_id) if weapon_id != "" else Node3D.new()
 		_hand.add_child(_weapon_model)
 		_weapon_model_id = weapon_id
 		if ads:
@@ -218,18 +229,23 @@ func _footsteps(delta: float) -> void:
 func _combat(delta: float) -> void:
 	fire_timer -= delta
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
-	if Raid.current and Raid.current.ui_open():
+	if not combat_enabled or (Raid.current and Raid.current.ui_open()):
 		return
-	for i in range(Balance.WEAPON_ORDER.size()):
-		if Input.is_action_just_pressed("weapon_%d" % (i + 1)):
-			_switch(String(Balance.WEAPON_ORDER[i]))
-	if Input.is_action_just_pressed("grenade") and grenades > 0 and fire_timer <= 0.0:
+	if loadout_mode:
+		_loadout_tick()
+	var keys := weapon_keys()
+	for i in range(keys.size()):
+		if Input.is_action_just_pressed("weapon_%d" % (i + 1)) and String(keys[i]) != "":
+			_switch(String(keys[i]))
+	if Input.is_action_just_pressed("grenade") and grenade_count() > 0 and fire_timer <= 0.0:
 		_throw_grenade()
+	if weapon_id == "":
+		return
 	var spec: Dictionary = Balance.WEAPONS[weapon_id]
 	if reload_timer > 0.0:
 		reload_timer -= delta
 		if reload_timer <= 0.0:
-			ammo = int(spec.mag)
+			ammo = int(spec.mag) if _reload_take < 0 else ammo + _reload_take
 		return
 	if Input.is_action_just_pressed("reload") and ammo < int(spec.mag):
 		_start_reload(spec)
@@ -243,17 +259,88 @@ func _combat(delta: float) -> void:
 
 
 func _start_reload(spec: Dictionary) -> void:
+	_reload_take = -1
+	if loadout_mode:
+		# патроны — из рюкзака: сколько есть, но не больше, чем влезет в магазин
+		var ammo_item := inventory.ammo_for(weapon_id)
+		_reload_take = mini(int(spec.mag) - ammo, inventory.count(ammo_item))
+		if _reload_take <= 0:
+			if Raid.current:
+				Raid.current.notify("Нет патронов: " + ItemDb.item_name(ammo_item))
+			return
+		Raid.current.request_consume(ammo_item, _reload_take)
 	reload_timer = float(spec.reload)
 	Audio.play(String(spec.reload_sound), global_position)
+
+
+## Клавиши 1…: в песочнице — все стволы, со снаряжением — [пистолет, основное] ("" — слот пуст).
+func weapon_keys() -> Array:
+	if not loadout_mode:
+		return Balance.WEAPON_ORDER
+	return [inventory.slot_weapon("secondary"), inventory.slot_weapon("primary")]
+
+
+func grenade_count() -> int:
+	return inventory.count("grenade") if loadout_mode else grenades
+
+
+## Остаток патронов к текущему оружию в рюкзаке (для HUD); -1 — без счёта.
+func ammo_reserve() -> int:
+	if not loadout_mode or weapon_id == "":
+		return -1
+	return inventory.count(inventory.ammo_for(weapon_id))
+
+
+## Снаряжение: в руках только то, что надето; первый раз — зарядить магазины из рюкзака.
+func _loadout_tick() -> void:
+	if not inventory.loadout_ready:
+		return
+	if not _auto_loaded:
+		_auto_loaded = true
+		var used := {}
+		for w in weapon_keys():
+			if String(w) == "":
+				continue
+			var ammo_item := inventory.ammo_for(String(w))
+			var take := mini(int(Balance.WEAPONS[w].mag), inventory.count(ammo_item) - int(used.get(ammo_item, 0)))
+			ammo_by[w] = maxi(0, take)
+			used[ammo_item] = int(used.get(ammo_item, 0)) + maxi(0, take)
+		for ammo_item in used:
+			if int(used[ammo_item]) > 0:
+				Raid.current.request_consume(String(ammo_item), int(used[ammo_item]))
+		weapon_id = ""
+	var keys := weapon_keys()
+	if not weapon_id in keys or weapon_id == "":
+		# оружие пропало из рук (сменил/не было) — берём основное, иначе пистолет
+		var pick := String(keys[1]) if String(keys[1]) != "" else String(keys[0])
+		if pick != weapon_id:
+			if weapon_id != "":
+				ammo_by[weapon_id] = ammo
+			weapon_id = pick
+			ammo = int(ammo_by.get(pick, 0))
+			reload_timer = 0.0
+
+
+## Магазины снаряжения обратно в патроны — при эвакуации (владелец, для профиля).
+func mag_ammo_items() -> Array:
+	var out: Array = []
+	if weapon_id != "":
+		ammo_by[weapon_id] = ammo
+	for w in ammo_by:
+		var ammo_item := inventory.ammo_for(String(w))
+		if ammo_item != "" and int(ammo_by[w]) > 0:
+			out.append({"id": ammo_item, "n": int(ammo_by[w])})
+	return out
 
 
 ## Смена оружия: патроны текущего магазина сохраняются, перезарядка прерывается.
 func _switch(id: String) -> void:
 	if id == weapon_id:
 		return
-	ammo_by[weapon_id] = ammo
+	if weapon_id != "":
+		ammo_by[weapon_id] = ammo
 	weapon_id = id
-	ammo = int(ammo_by.get(id, int(Balance.WEAPONS[id].mag)))
+	ammo = int(ammo_by.get(id, 0 if loadout_mode else int(Balance.WEAPONS[id].mag)))
 	reload_timer = 0.0
 	fire_timer = 0.35
 	Audio.play("bolt", global_position, -6.0)
@@ -317,7 +404,10 @@ func _muzzle_world() -> Vector3:
 
 ## Бросок: в прицеле — по взгляду, иначе — навесом в точку под курсором (не дальше max_range).
 func _throw_grenade() -> void:
-	grenades -= 1
+	if loadout_mode:
+		Raid.current.request_consume("grenade", 1)
+	else:
+		grenades -= 1
 	fire_timer = 0.6
 	var g: Dictionary = Balance.GRENADE
 	var from := eye_position() + Vector3.UP * 0.1

@@ -61,10 +61,11 @@ func join(address: String, display_name: String) -> String:
 
 
 ## Разрывает соединение и возвращает в состояние «не в сети» (для «Выйти в меню»).
+## Пир — «оффлайн», а не null: с null get_unique_id() и RPC падают (убежище, соло-рейд).
 func disconnect_all() -> void:
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close()
-	multiplayer.multiplayer_peer = null
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	_active = false
 	player_names.clear()
 
@@ -72,6 +73,8 @@ func disconnect_all() -> void:
 ## Только хост может позвать: переводит всех (включая себя) в сектор.
 @rpc("authority", "call_local", "reliable")
 func start_level() -> void:
+	# со снаряжением профиля — только если игрок пришёл в лобби из убежища (не тесты)
+	Profile.pending_raid = Profile.from_hideout
 	get_tree().change_scene_to_file(LEVEL_SCENE)
 
 
@@ -91,15 +94,17 @@ func _on_connected_to_server() -> void:
 
 
 func _on_connection_failed() -> void:
-	multiplayer.multiplayer_peer = null
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	_active = false
 
 
 func _on_server_disconnected() -> void:
-	multiplayer.multiplayer_peer = null
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	_active = false
 	player_names.clear()
 	player_list_changed.emit()
+	# хост ушёл: снаряжение, взятое в рейд, остаётся там (как при смерти); в лобби — дальше решать
+	Profile.pending_raid = false
 	get_tree().change_scene_to_file("res://scenes/net/lobby.tscn")
 
 

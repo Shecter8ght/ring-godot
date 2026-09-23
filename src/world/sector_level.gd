@@ -100,6 +100,7 @@ func _spawn_offline_player() -> void:
 	p.global_position = _spawn + Vector3(0, 0.05, 0)
 	_raid.register(1, "Ты")
 	_local_player = p
+	_apply_loadout(p)
 	_camera_rig.set_target(p)
 	_face_center(p.global_position)
 
@@ -191,6 +192,17 @@ func _find_local_player_when_ready() -> void:
 			await get_tree().process_frame
 	_camera_rig.set_target(_local_player)
 	_face_center(_local_player.global_position)
+	_apply_loadout(_local_player)
+
+
+## Рейд из убежища: снаряжение и рюкзак профиля уходят в рейд (на кону) — хост выдаёт их игроку.
+func _apply_loadout(p: Player) -> void:
+	if not Profile.pending_raid:
+		return
+	p.loadout_mode = true
+	p.weapon_id = ""
+	p.ammo = 0
+	_raid.submit_loadout(Profile.take_loadout())
 
 
 ## Навмеш печётся из коллайдеров и мешей сектора (двери не считаются — их AI открывает сам),

@@ -9,6 +9,8 @@ signal died
 
 var hp: float
 var alive: bool = true
+## Хост: урон до вычета здоровья проходит через фильтр (броня игрока снимает часть).
+var damage_filter: Callable
 
 
 func _ready() -> void:
@@ -40,6 +42,8 @@ func _setup_sync() -> void:
 func take_damage(amount: float, from: Vector3) -> void:
 	if not alive:
 		return
+	if damage_filter.is_valid():
+		amount = float(damage_filter.call(amount))
 	hp = maxf(0.0, hp - amount)
 	damaged.emit(amount, from)
 	if hp <= 0.0:

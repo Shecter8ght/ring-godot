@@ -30,6 +30,8 @@ var dead: Dictionary = {}
 var over: bool = false
 
 var ui: InventoryUI
+## Владелец уже записал итог рейда в профиль (эвакуация) — один раз.
+var _profile_saved: bool = false
 var _drops: Node3D
 var _drop_spawner: MultiplayerSpawner
 var _drop_count: int = 0
@@ -214,6 +216,48 @@ func request_drop(id: String, n: int) -> void:
 		_rpc_drop.rpc_id(1, id, n)
 
 
+## Владелец: отдать хосту снаряжение из профиля (вызывает уровень при появлении игрока).
+func submit_loadout(lo: Dictionary) -> void:
+	if _is_host():
+		_give_loadout(multiplayer.get_unique_id(), lo.equipment, lo.backpack)
+	else:
+		_rpc_give_loadout.rpc_id(1, lo.equipment, lo.backpack)
+
+
+## Потратить патроны/гранату из рюкзака (перезарядка, бросок).
+func request_consume(id: String, n: int) -> void:
+	if _is_host():
+		_consume(multiplayer.get_unique_id(), id, n)
+	else:
+		_rpc_consume.rpc_id(1, id, n)
+
+
+## Надеть / взять в руки предмет из рюкзака (индекс в items).
+func request_equip(idx: int) -> void:
+	if _is_host():
+		_equip(multiplayer.get_unique_id(), idx)
+	else:
+		_rpc_equip.rpc_id(1, idx)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_give_loadout(eq: Dictionary, items: Array) -> void:
+	if multiplayer.is_server():
+		_give_loadout(multiplayer.get_remote_sender_id(), eq, items)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_consume(id: String, n: int) -> void:
+	if multiplayer.is_server():
+		_consume(multiplayer.get_remote_sender_id(), id, n)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_equip(idx: int) -> void:
+	if multiplayer.is_server():
+		_equip(multiplayer.get_remote_sender_id(), idx)
+
+
 func request_use_med(id: String) -> void:
 	if _is_host():
 		_use_med(multiplayer.get_unique_id(), id)
@@ -246,14 +290,42 @@ func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
 		return
 	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
 		return
-	var have := 0
-	for it in c.items:
-		if String(it.id) == id:
-			have = int(it.n)
-	var k := pl.inventory.add(id, mini(n, have) if n > 0 else have)
-	if k > 0:
-		c.take(id, k)
-		Audio.play("pin", c.global_position, -8.0)
+	for i in range(c.items.size()):
+		if String(c.items[i].id) != id:
+			continue
+		# экземпляр как есть (у брони — своя прочность): сколько влезет в рюкзак
+		var entry: Dictionary = (c.items[i] as Dictionary).duplicate(true)
+		entry.n = mini(n, int(entry.n)) if n > 0 else int(entry.n)
+		var k := pl.inventory.add_entry(entry)
+		if k > 0:
+			c.take_at(i, k)
+			Audio.play("pin", c.global_position, -8.0)
+		return
+
+
+## Хост: снаряжение из профиля игрока (рейд из убежища) — в его рюкзак и слоты.
+func _give_loadout(peer_id: int, eq: Dictionary, items: Array) -> void:
+	var pl := player_of(peer_id)
+	if pl == null:
+		return
+	pl.inventory.items = items.duplicate(true)
+	pl.inventory.equipment = eq.duplicate(true)
+	pl.inventory.loadout_ready = true
+
+
+func _consume(peer_id: int, id: String, n: int) -> void:
+	var pl := player_of(peer_id)
+	if pl:
+		pl.inventory.remove(id, n)
+
+
+func _equip(peer_id: int, idx: int) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	var spill := pl.inventory.equip_from_items(idx)
+	if not spill.is_empty():
+		spawn_drop(pl.global_position, "Выброшено", [spill], LootContainer.Look.BAG)
 
 
 func _drop(peer_id: int, id: String, n: int) -> void:
@@ -311,7 +383,12 @@ func _process(delta: float) -> void:
 	_toast_t -= delta
 	_toast.visible = _toast_t > 0.0
 	_update_summary(me)
-	if over and Input.is_action_just_pressed("reload"):
+	_save_profile(me)
+	if Profile.pending_raid:
+		# рейд из убежища: закончил (ушёл или погиб) — Enter возвращает в убежище
+		if me != null and (not me.is_alive() or is_extracted(me.peer_id)) and Input.is_action_just_pressed("ui_accept"):
+			go_hideout()
+	elif over and Input.is_action_just_pressed("reload"):
 		_restart()
 
 
@@ -400,11 +477,32 @@ func _update_summary(me: Player) -> void:
 		else:
 			lines.append("%s — ещё в рейде" % who)
 	lines.append("")
-	if over:
+	if Profile.pending_raid:
+		lines.append("Enter — в убежище")
+	elif over:
 		lines.append("R — новый рейд" if _is_host() else "ждём хоста")
 	else:
 		lines.append("ждём остальных")
 	_summary.text = "\n".join(lines)
+
+
+## Эвакуировался (владелец): снаряжение, рюкзак и патроны из магазинов — обратно в профиль.
+## Погиб — ничего: снаряжение снято с профиля при входе в рейд и осталось в теле.
+func _save_profile(me: Player) -> void:
+	if _profile_saved or me == null or not me.loadout_mode or not is_extracted(me.peer_id):
+		return
+	_profile_saved = true
+	var items: Array = me.inventory.items.duplicate(true)
+	for e in me.mag_ammo_items():
+		ItemDb.add_to(items, e, -1)
+	Profile.return_loadout(me.inventory.equipment, items)
+
+
+## В убежище: из сети выходим, рейд забыт.
+func go_hideout() -> void:
+	Net.disconnect_all()
+	Profile.pending_raid = false
+	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 
 
 ## Новый рейд: хост переводит всех заново в сектор; без сети — перезагрузка сцены.

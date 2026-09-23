@@ -1,0 +1,104 @@
+extends Node
+## Сквозной прогон «убежище → рейд → эвакуация → убежище» на тестовом профиле (настоящий не
+## трогаем): надеть снаряжение, собрать рюкзак, купить/продать; в рейде — оружие из слотов,
+## магазины из рюкзака, перезарядка тратит патроны, броня снимает урон; эвакуация возвращает всё
+## в профиль; Enter — назад в убежище.
+## godot --path . res://tools/loadout_test.tscn
+
+const TEST_PROFILE := "user://profile_test.json"
+
+var _fails: int = 0
+
+
+func _ready() -> void:
+	await get_tree().process_frame
+	# смена сцены не должна удалить сам тест: отвязываем его от «текущей сцены»
+	get_tree().current_scene = null
+	Profile.use_file(TEST_PROFILE, true)
+
+	# --- убежище: всё локально, в профиле
+	_check("новый профиль: деньги и стартовый набор", Profile.money == Balance.START_MONEY and _idx("w_rifle") >= 0, "%d ₽, %d записей" % [Profile.money, Profile.stash.size()])
+	for id in ["w_rifle", "w_pistol", "vest_light", "helmet"]:
+		Profile.equip_from_stash(_idx(id))
+	_check("надето снаряжение", Profile.equipment.size() == 4, str(Profile.equipment.keys()))
+	for id in ["ammo_545", "ammo_9x19", "bandage", "grenade"]:
+		Profile.stash_to_backpack(_idx(id), int(Profile.stash[_idx(id)].n))
+	_check("рюкзак собран", Profile.backpack.size() == 4, "%d ячеек" % Profile.backpack_cells())
+	var m0 := Profile.money
+	Profile.buy("ammo_12", 20)
+	_check("покупка у торговца", Profile.money < m0 and _idx("ammo_12") >= 0, "%d ₽" % Profile.money)
+	var m1 := Profile.money
+	Profile.sell(_idx("painkillers"), 2)
+	_check("продажа торговцу", Profile.money > m1 and _idx("painkillers") < 0, "%d ₽" % Profile.money)
+
+	# --- соло-рейд со снаряжением
+	Profile.pending_raid = true
+	get_tree().change_scene_to_file(Balance.RAID_SCENE)
+	for i in range(40):
+		await get_tree().physics_frame
+	var pl := get_tree().get_first_node_in_group("players") as Player
+	pl.health.hp = 100.0
+	await _wait(0.5)
+	_check("в рейде — снаряжение, профиль пуст (на кону)", pl.loadout_mode and pl.inventory.loadout_ready and Profile.equipment.is_empty(), str(pl.inventory.equipment.keys()))
+	_check("в руках автомат, магазин заряжен", pl.weapon_id == "rifle" and pl.ammo == 30, "%s %d" % [pl.weapon_id, pl.ammo])
+	_check("патроны в рюкзаке ушли в магазин", pl.inventory.count("ammo_545") == 90, "%d" % pl.inventory.count("ammo_545"))
+	pl.ammo = 5
+	Input.action_press("reload")
+	await _frames(2)
+	Input.action_release("reload")
+	await _wait(float(Balance.WEAPONS.rifle.reload) + 0.3)
+	_check("перезарядка из рюкзака", pl.ammo == 30 and pl.inventory.count("ammo_545") == 65, "магазин %d, в рюкзаке %d" % [pl.ammo, pl.inventory.count("ammo_545")])
+	var dur0 := float(pl.inventory.equipment.armor.dur)
+	pl.health.take_damage(40.0, pl.global_position + Vector3(0, 1, 5))
+	_check("броня снимает урон и изнашивается", pl.health.hp > 60.0 and float(pl.inventory.equipment.armor.dur) < dur0, "hp %d, броня %.0f" % [int(pl.health.hp), float(pl.inventory.equipment.armor.dur)])
+	Input.action_press("weapon_1")
+	await _frames(3)
+	Input.action_release("weapon_1")
+	await _frames(2)
+	_check("1 — пистолет", pl.weapon_id == "pistol" and pl.ammo == 12, "%s %d" % [pl.weapon_id, pl.ammo])
+	# эвакуация через остановку
+	for m in get_tree().get_nodes_in_group("marauders"):
+		(m as Node).queue_free()
+	pl.health.hp = 1e9
+	var bus := get_tree().current_scene.get_node("Extractions/Bus") as ExtractionPoint
+	pl.global_position = bus.global_position + Vector3(0, 0.1, 0)
+	await _wait(bus.channel_s + 1.0)
+	_check("эвакуирован", Raid.current.is_extracted(1), "")
+	await _frames(3)
+	var back_ammo := 0
+	for e in Profile.backpack:
+		if String(e.id) == "ammo_545":
+			back_ammo += int(e.n)
+	_check("профиль: снаряжение вернулось", Profile.equipment.has("primary") and Profile.equipment.has("armor"), str(Profile.equipment.keys()))
+	_check("профиль: патроны из магазина вернулись в рюкзак", back_ammo == 65 + 30, "5.45: %d" % back_ammo)
+	# Enter — в убежище
+	Input.action_press("ui_accept")
+	await _frames(2)
+	Input.action_release("ui_accept")
+	for i in range(30):
+		await get_tree().process_frame
+	_check("Enter — назад в убежище", get_tree().current_scene and get_tree().current_scene.scene_file_path == Balance.HIDEOUT_SCENE and not Profile.pending_raid, str(get_tree().current_scene.scene_file_path if get_tree().current_scene else ""))
+	print("loadout_test: провалено %d" % _fails)
+	get_tree().quit(_fails)
+
+
+func _idx(id: String) -> int:
+	for i in range(Profile.stash.size()):
+		if String(Profile.stash[i].id) == id:
+			return i
+	return -1
+
+
+func _wait(sec: float) -> void:
+	await get_tree().create_timer(sec).timeout
+
+
+func _frames(n: int) -> void:
+	for i in range(n):
+		await get_tree().process_frame
+
+
+func _check(what: String, ok: bool, info: String) -> void:
+	if not ok:
+		_fails += 1
+	print("  [%s] %s  %s" % ["ok" if ok else "FAIL", what, info])
