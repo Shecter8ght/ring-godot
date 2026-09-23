@@ -219,6 +219,16 @@ func _build_trader() -> void:
 	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d (уровень %d)" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust, Profile.trust_level()]
 	_missions_column()
 	var shop := _column("Купить", 1.0)
+	if Profile.needs_rescue():
+		# без ствола и без денег — Михалыч выручает, иначе из этой ямы не выбраться
+		var kit: Array[String] = []
+		for pair in Balance.RESCUE_KIT:
+			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
+		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»", Color(1.0, 0.85, 0.55)))
+		var rescue := HBoxContainer.new()
+		rescue.add_child(_text(", ".join(kit), Color(0.86, 0.86, 0.82)))
+		rescue.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
+		shop.add_child(rescue)
 	var need_trust: Dictionary = _trader.get("trust", {})
 	for id in _trader.get("stock", []):
 		var sid := String(id)

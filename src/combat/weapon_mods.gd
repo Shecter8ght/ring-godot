@@ -59,6 +59,9 @@ static func fit(root: Node3D, weapon: String, mods: Dictionary) -> void:
 		if spec.is_empty() or not mounts.has(slot) or not weapon in spec.get("fits", []):
 			continue
 		var m: Dictionary = mounts[slot]
+		# прицел на планке — целик сложен: иначе торчит в нижней части окна прицела
+		if String(slot) == "optic":
+			_hide_part(root, "rear_sight")
 		match String(spec.look):
 			"red_dot":
 				_red_dot(root, m)
@@ -178,10 +181,14 @@ static func _holo(root: Node3D, m: Dictionary) -> void:
 	var top := _optic_base(root, m, 0.09)
 	var al := _mat("anodized")
 	var zc := p.z
-	# основание-корпус и батарея
+	# основание-корпус; батарея — поперёк в корпусе под окном (как у EOTech), крышка справа.
+	# Выше основания сзади ничего нет — иначе закрывало бы низ окна
 	WeaponModels._cbox(root, Vector3(0, top + 0.006, zc), Vector3(0.032, 0.012, 0.09), al, 0.0015)
-	WeaponModels._cbox(root, Vector3(0, top + 0.012 + 0.007, zc - 0.03), Vector3(0.03, 0.014, 0.03), al, 0.002)
-	WeaponModels._cyl_x(root, Vector3(0.017, top + 0.012 + 0.007, zc - 0.03), 0.004, 0.004, _mat("gunmetal"))
+	WeaponModels._cyl_x(root, Vector3(0, top + 0.006, zc + 0.022), 0.0062, 0.034, al)
+	WeaponModels._cyl_x(root, Vector3(0.0175, top + 0.006, zc + 0.022), 0.0045, 0.003, _mat("gunmetal"))
+	# кнопки яркости сзади — низкие, под линией окна
+	for bx in [-0.007, 0.007]:
+		WeaponModels._cbox(root, Vector3(bx, top + 0.0125, zc - 0.036), Vector3(0.008, 0.004, 0.008), _mat("rubber"), 0.001)
 	# окно: стойки по бокам и козырёк, стекло спереди и сзади
 	var wy := top + 0.012 + 0.013
 	for sx in [-1.0, 1.0]:

@@ -376,7 +376,30 @@ static func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
 # ---------------------------------------------------------------- торговец
 
 static func buy_price(id: String) -> int:
-	return int(ceil(float(ItemDb.value(id)) * Balance.TRADER_BUY_MULT))
+	var mult := Balance.TRADER_BUY_MULT
+	if String(ItemDb.item(id).get("cat", "")) == "mod":
+		mult *= Balance.TRADER_MOD_BUY_MULT
+	return int(ceil(float(ItemDb.value(id)) * mult))
+
+
+## Нет ни одного огнестрела (надето, рюкзак, карман, тайник) и не на что купить самый дешёвый.
+static func needs_rescue() -> bool:
+	ensure()
+	for list in [stash, backpack, pocket, equipment.values()]:
+		for e in list:
+			if String(ItemDb.equip(String(e.id)).get("weapon", "")) != "":
+				return false
+	return money < buy_price(String(Balance.RESCUE_KIT[0][0]))
+
+
+## Выручка Михалыча: набор из Balance.RESCUE_KIT в тайник. false — не положено или тайник полон.
+static func take_rescue() -> bool:
+	if not needs_rescue():
+		return false
+	for pair in Balance.RESCUE_KIT:
+		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), stash_grid())
+	save()
+	return true
 
 
 static func sell_price(entry: Dictionary) -> int:

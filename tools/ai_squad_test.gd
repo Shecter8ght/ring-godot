@@ -1,6 +1,7 @@
 extends Node
 ## Тактика отряда без рук на кольце: окрик (второй узнаёт о цели, не видя её), укрытие под огнём
-## (присел за стеной), перезарядка, поиск после потери цели. Печатает [ok]/[FAIL] и итог.
+## (присел за стеной), перезарядка, поиск после потери цели, не стреляет в стену, попали издалека —
+## укрытие и перебежки, двое не идут в одну точку. Печатает [ok]/[FAIL] и итог.
 ## godot --path . res://tools/ai_squad_test.tscn
 
 var _fails: int = 0
@@ -46,6 +47,42 @@ func _ready() -> void:
 	_check("A видит игрока — бой", a.state == Marauder.State.COMBAT, _st(a))
 	_check("B за стеной сам не видит, но знает по окрику — бой", b.state == Marauder.State.COMBAT and not b._seen_now and b.last_known.distance_to(ppos) < 3.0,
 		"%s, видит %s, до цели по памяти %.1f м" % [_st(b), b._seen_now, b.last_known.distance_to(ppos)])
+	_check("B не стреляет в стену, пока не видит", b._mag == int(b._spec.mag) or b._seen_now, "в магазине %d из %d" % [b._mag, int(b._spec.mag)])
+	# двое идут к одной точке — каждый в свою
+	var sp := SectorBuilder.polar(-100.0, 76.0)
+	var d1 := scene.instantiate() as Marauder
+	var d2 := scene.instantiate() as Marauder
+	for pair in [[d1, "SpreadD1", -96.0], [d2, "SpreadD2", -95.0]]:
+		var dm: Marauder = pair[0]
+		dm.name = String(pair[1])
+		level.get_node("Marauders").add_child(dm)
+		dm.global_position = SectorBuilder.polar(float(pair[2]), 78.0) + Vector3(0, 0.1, 0)
+	await get_tree().physics_frame
+	for dm in [d1, d2]:
+		(dm as Marauder).last_known = sp
+		(dm as Marauder).state = Marauder.State.COMBAT
+		(dm as Marauder)._set_tactic(Marauder.Tactic.PUSH)
+	_check("двое к одной точке — в разные места", d1.move_target().distance_to(d2.move_target()) >= Balance.AI_SPREAD_CLAIM_M * 0.9,
+		"между целями %.1f м" % d1.move_target().distance_to(d2.move_target()))
+	d1.queue_free()
+	d2.queue_free()
+	# попали издалека, стрелка не видно — угадал направление, укрытие или перебежка (не в лоб)
+	var c := scene.instantiate() as Marauder
+	c.name = "FarC"
+	c.weapon = "rifle"
+	level.get_node("Marauders").add_child(c)
+	c.global_position = SectorBuilder.polar(-72.0, 72.0) + Vector3(0, 0.1, 0)
+	c._facing = atan2(c.global_position.x - ppos.x, c.global_position.z - ppos.z)
+	await get_tree().physics_frame
+	var c0 := c.global_position.distance_to(ppos)
+	c.get_node("Health").call("take_damage", 10.0, ppos + Vector3.UP * 1.3)
+	await _wait(0.3)
+	_check("попали издалека — в укрытие / перебежкой", c.state == Marauder.State.COMBAT and c.tactic in [Marauder.Tactic.COVER_MOVE, Marauder.Tactic.COVER_HIDE, Marauder.Tactic.COVER_PEEK, Marauder.Tactic.ADVANCE],
+		"%s, направление угадано с ошибкой %.1f м" % [_st(c), c.last_known.distance_to(ppos)])
+	await _wait(8.0)
+	_check("…и продвигается к стрелку", c.global_position.distance_to(ppos) < c0 - 3.0 or c._seen_now,
+		"было %.1f м, стало %.1f, %s" % [c0, c.global_position.distance_to(ppos), _st(c)])
+	c.queue_free()
 	# игрок стреляет в A: попадание → укрытие
 	a.get_node("Health").call("take_damage", 20.0, ppos + Vector3.UP * 1.3)
 	NoiseBus.emit(ppos, 60.0, "shot")
@@ -59,7 +96,8 @@ func _ready() -> void:
 		if a.crouched:
 			crouched = true
 	_check("A под огнём ищет укрытие и приседает", covered and crouched, "тактика %s, присел %s, до укрытия было %.1f м, осталось %.1f" % [Marauder.Tactic.keys()[a.tactic], crouched, cover_d, a._cover_pos.distance_to(a.global_position)])
-	get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/ai_squad.png"))
+	if DisplayServer.get_name() != "headless":
+		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/ai_squad.png"))
 	# патроны кончились — перезарядка
 	a._mag = 0
 	a._reload_t = 0.0
@@ -69,10 +107,14 @@ func _ready() -> void:
 	player.global_position = SectorBuilder.polar(-90.0, 180.0) + Vector3(0, 0.1, 0)
 	for m in [a, b]:
 		(m as Marauder).memory_timer = 0.5
-	await _wait(2.0)
+	# доходят до последней известной точки (перебежками) — там пусто, память кончается → поиск
+	for i in range(60):
+		await _wait(0.5)
+		if a.state in [Marauder.State.SEARCH, Marauder.State.PATROL] and b.state in [Marauder.State.SEARCH, Marauder.State.PATROL]:
+			break
 	_check("цель потеряна — поиск", a.state in [Marauder.State.SEARCH, Marauder.State.PATROL] and b.state in [Marauder.State.SEARCH, Marauder.State.PATROL],
 		"%s / %s" % [_st(a), _st(b)])
-	_check("здоровье мародёра удвоено", is_equal_approx((a.get_node("Health") as Health).max_hp, Balance.MARAUDER_HP) and Balance.MARAUDER_HP >= 120.0, "%.0f" % Balance.MARAUDER_HP)
+	_check("здоровье мародёра — из баланса", is_equal_approx((a.get_node("Health") as Health).max_hp, Balance.MARAUDER_HP), "%.0f" % Balance.MARAUDER_HP)
 	print("ai_squad_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 

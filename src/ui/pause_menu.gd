@@ -90,7 +90,7 @@ func _ready() -> void:
 		CameraRig.set_first_person_mode(not CameraRig.first_person_mode)
 		_view_btn.text = _view_text())
 	_main.add_child(_view_btn)
-	_admin_btn = _button("Админ: деньги игрокам", func() -> void:
+	_admin_btn = _button("Админ: деньги", func() -> void:
 		_admin.visible = not _admin.visible
 		_controls.visible = false
 		_fill_admin())
@@ -199,7 +199,8 @@ func open_menu() -> void:
 	_root.visible = true
 	_controls.visible = false
 	_admin.visible = false
-	_admin_btn.visible = Net.is_host()
+	# в сети — только хосту; в соло и в убежище — себе
+	_admin_btn.visible = Net.is_host() or not Net.is_networked()
 	CameraRig.load_settings()
 	_view_btn.text = _view_text()
 	_mouse_before = Input.mouse_mode
@@ -240,12 +241,13 @@ func _build_admin(h: HBoxContainer) -> void:
 func _fill_admin() -> void:
 	for c in _admin_rows.get_children():
 		c.queue_free()
-	var ids: Array = Net.player_names.keys()
+	var names: Dictionary = Net.player_names if Net.is_networked() else {multiplayer.get_unique_id(): "Ты"}
+	var ids: Array = names.keys()
 	ids.sort()
 	for id in ids:
 		var peer := int(id)
 		var name := Label.new()
-		name.text = String(Net.player_names[id]) + (" (ты)" if peer == multiplayer.get_unique_id() else "")
+		name.text = String(names[id]) + (" (ты)" if Net.is_networked() and peer == multiplayer.get_unique_id() else "")
 		name.add_theme_font_size_override("font_size", 17)
 		name.custom_minimum_size.x = 150
 		_admin_rows.add_child(name)

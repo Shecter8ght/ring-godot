@@ -81,12 +81,12 @@ func start_level(scene: String) -> void:
 	get_tree().change_scene_to_file(scene if scene != "" else LEVEL_SCENE)
 
 
-## Панель админа хоста: начислить amount ₽ игроку peer_id (себе — тоже). Деньги лежат в профиле
+## Панель админа (хост в сети; в соло — себе): начислить amount ₽ игроку peer_id (себе — тоже). Деньги лежат в профиле
 ## на компьютере игрока — туда и пишутся (хост — доверенный: играют друзья).
 func grant_money(peer_id: int, amount: int) -> void:
-	if not is_host() or amount == 0:
+	if (is_networked() and not is_host()) or amount == 0:
 		return
-	if peer_id == multiplayer.get_unique_id():
+	if not is_networked() or peer_id == multiplayer.get_unique_id():
 		_receive_money(amount)
 	else:
 		_receive_money.rpc_id(peer_id, amount)
@@ -97,7 +97,8 @@ func _receive_money(amount: int) -> void:
 	Profile.ensure()
 	Profile.money = maxi(0, Profile.money + amount)
 	Profile.save()
-	var text := "Хост начислил %s ₽ — на счету %s ₽" % [InventoryUI.money(amount), InventoryUI.money(Profile.money)]
+	var who := "Хост начислил" if is_networked() and not is_host() else "Начислено"
+	var text := "%s %s ₽ — на счету %s ₽" % [who, InventoryUI.money(amount), InventoryUI.money(Profile.money)]
 	if Raid.current:
 		Raid.current.notify(text)
 	money_received.emit(text)

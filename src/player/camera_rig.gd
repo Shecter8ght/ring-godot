@@ -17,7 +17,6 @@ var ads_active: bool = false
 static var first_person_mode: bool = false
 static var _settings_loaded: bool = false
 const SETTINGS_PATH := "user://settings.cfg"
-var _crosshair: Control
 var _bob_t: float = 0.0
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
@@ -31,6 +30,8 @@ var _look_pitch: float = 0.0
 var _ads_cam: Camera3D
 var _viewmodel: Node3D
 var _viewmodel_id: String = ""
+## Приклад и затыльник модели в руках: у бедра видны, в прицеле (под щекой) — прячутся.
+var _cheek_parts: Array[GeometryInstance3D] = []
 ## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
 var scope_active: bool = false
 var _scope_vp: SubViewport
@@ -270,7 +271,6 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var aim_t := pl.aim_progress()
 	var fov_to := _ads_fov(pl) if pl.aiming else Balance.FPS_FOV
 	_ads_cam.fov = lerpf(_ads_cam.fov, fov_to, minf(1.0, 12.0 * delta))
-	_crosshair.visible = not pl.aiming and not _ui_blocking()
 	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
 	_sway_t += delta
 	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
@@ -299,8 +299,10 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			# слой 2 — только для глаз: камера оптики его не видит (иначе рисовала бы свой прицел)
 			gi.layers = 2
-			if gi.has_meta("hide_ads"):
-				gi.visible = false
+		_cheek_parts.clear()
+		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
+			if (mi as GeometryInstance3D).has_meta("hide_ads"):
+				_cheek_parts.append(mi as GeometryInstance3D)
 		# фонарь светит от модели на теле — у модели в руках свой не нужен
 		for n in _viewmodel.find_children("Flashlight", "SpotLight3D", true, false):
 			n.queue_free()
@@ -313,6 +315,9 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
 	# у бедра (без ПКМ) → в прицел: «довод» по эргономике (aim_progress), плавно
 	var k := smoothstep(0.0, 1.0, aim_t)
+	# приклад у бедра виден; вскинул к щеке — он под щекой и заслонял бы низ прицельной линии
+	for gi in _cheek_parts:
+		gi.visible = k < 0.6
 	var ads_pos := Vector3(0.0, -sh, -az)
 	var hip_pos := Balance.FPS_HIP_POSE
 	# на ходу у бедра оружие покачивается
@@ -552,18 +557,8 @@ func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
-	# точки по центру в прицеле нет: целятся по мушке, метке коллиматора или сетке оптики;
-	# от первого лица без прицела — маленький крестик (куда летят пули от бедра)
-	_crosshair = Control.new()
-	_crosshair.set_anchors_preset(Control.PRESET_CENTER)
-	_crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_crosshair.visible = false
-	_crosshair.draw.connect(func() -> void:
-		var c := Color(1, 1, 1, 0.75)
-		for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-			_crosshair.draw_line(d * 5.0, d * 11.0, Color(0, 0, 0, 0.5), 3.0)
-			_crosshair.draw_line(d * 5.0, d * 11.0, c, 1.5))
-	layer.add_child(_crosshair)
+	# прицельной метки на экране нет ни в прицеле, ни от бедра: целятся по мушке, метке
+	# коллиматора или сетке оптики, от бедра — по стволу
 	_hitmarker = Control.new()
 	_hitmarker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hitmarker.visible = false

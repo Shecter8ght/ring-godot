@@ -63,8 +63,13 @@ const STASH_GRID := Vector2i(10, 30)
 const START_MONEY := 60000
 const START_STASH := [["w_pistol", 1], ["w_rifle", 1], ["ammo_9x19", 100], ["ammo_545", 120],
 	["bandage", 4], ["painkillers", 2], ["vest_light", 1], ["helmet", 1], ["grenade", 2]]
+## Выручка Михалыча: остался без огнестрела и без денег на самый дешёвый ствол — бесплатный
+## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
+const RESCUE_KIT := [["w_pistol", 1], ["ammo_9x19", 50], ["bandage", 2]]
 ## Торговец продаёт дороже цены предмета и покупает дешевле (с учётом износа брони).
 const TRADER_BUY_MULT := 1.25
+## Обвесы — редкость: у Михалыча вдвое дороже обычной наценки (продать — по обычной цене).
+const TRADER_MOD_BUY_MULT := 2.0
 const TRADER_SELL_MULT := 0.55
 ## Доверие торговца: за каждую эвакуацию и сверху — если вынес на сумму не меньше порога, ₽.
 ## Пороги доверия и цены маршрутов на этажи — в data/floors.json.
@@ -136,7 +141,7 @@ const DOOR_SWING_SPEED := 7.0
 
 # --- Здоровье ---
 const PLAYER_HP := 100.0
-const MARAUDER_HP := 120.0
+const MARAUDER_HP := 100.0
 
 # --- Пистолет игрока ---
 const PISTOL := {"damage": 22.0, "interval": 0.22, "mag": 8, "reload": 1.8, "spread_deg": 1.4, "range_m": 60.0, "noise_m": 60.0}
@@ -153,7 +158,7 @@ const WEAPONS := {
 		"pellets": 1, "auto": false, "range_m": 60.0, "noise_m": 60.0, "kick": 0.05, "kick_h": 0.014, "kick_bias": 0.2, "recover": 0.8, "shake": 0.12,
 		"sound": "shot_pistol", "reload_sound": "reload_pistol", "cycle_sound": "", "ergo": 72},
 	"rifle": {"name": "Автомат", "damage": 19.0, "interval": 0.1, "mag": 30, "reload": 2.4, "spread_deg": 2.0,
-		"pellets": 1, "auto": true, "range_m": 90.0, "noise_m": 80.0, "kick": 0.026, "kick_h": 0.014, "kick_bias": 0.35, "recover": 0.3, "shake": 0.09,
+		"pellets": 1, "auto": true, "range_m": 90.0, "noise_m": 80.0, "kick": 0.022, "kick_h": 0.011, "kick_bias": 0.35, "recover": 0.36, "shake": 0.09,
 		"sound": "shot_rifle", "reload_sound": "reload_rifle", "cycle_sound": "", "ergo": 44},
 	"shotgun": {"name": "Дробовик", "damage": 12.0, "interval": 0.8, "mag": 6, "reload": 3.0, "spread_deg": 5.5,
 		"pellets": 8, "auto": false, "range_m": 35.0, "noise_m": 75.0, "kick": 0.09, "kick_h": 0.022, "kick_bias": 0.1, "recover": 0.6, "shake": 0.32,
@@ -239,14 +244,17 @@ const AI_SPREAD_DEG := 7.0
 const AI_DAMAGE := 9.0
 ## Оружие мародёров: доля в отряде (weight), магазин, перезарядка (с), интервал выстрелов (с),
 ## очередь (выстрелов) и пауза между очередями (с), урон за пулю/дробину, дробин, разброс (град),
-## дальность боя (м), шум выстрела (м), звук, модель.
+## дальность боя (м), шум выстрела (м), звук, модель; item/ammo — что выпадает с трупа (ствол и патроны).
 const AI_WEAPONS := {
 	"pistol": {"weight": 0.45, "mag": 12, "reload": 2.0, "interval": 0.42, "burst": 1, "burst_pause": 0.0,
-		"damage": 9.0, "pellets": 1, "spread": 5.5, "range": 28.0, "noise_m": 45.0, "sound": "shot_ai", "model": "pistol"},
+		"damage": 9.0, "pellets": 1, "spread": 5.5, "range": 28.0, "noise_m": 45.0, "sound": "shot_ai", "model": "pistol",
+		"item": "w_pistol", "ammo": "ammo_9x19"},
 	"rifle": {"weight": 0.4, "mag": 30, "reload": 2.6, "interval": 0.11, "burst": 3, "burst_pause": 0.75,
-		"damage": 11.0, "pellets": 1, "spread": 4.5, "range": 45.0, "noise_m": 80.0, "sound": "shot_rifle", "model": "rifle"},
+		"damage": 11.0, "pellets": 1, "spread": 4.5, "range": 45.0, "noise_m": 80.0, "sound": "shot_rifle", "model": "rifle",
+		"item": "w_rifle", "ammo": "ammo_545"},
 	"shotgun": {"weight": 0.15, "mag": 6, "reload": 3.2, "interval": 0.95, "burst": 1, "burst_pause": 0.0,
-		"damage": 7.0, "pellets": 8, "spread": 4.0, "range": 18.0, "noise_m": 90.0, "sound": "shot_shotgun", "model": "shotgun"},
+		"damage": 7.0, "pellets": 8, "spread": 4.0, "range": 18.0, "noise_m": 90.0, "sound": "shot_shotgun", "model": "shotgun",
+		"item": "w_shotgun", "ammo": "ammo_12"},
 }
 ## Точность: только что замеченная цель — разброс × AI_AIM_COLD, за AI_AIM_SETTLE_SEC сходится к 1.
 ## Цель бежит — × AI_TARGET_MOVING; сам на ходу — × AI_SELF_MOVING.
@@ -268,9 +276,26 @@ const AI_RETREAT_HP := 0.35
 const AI_RETREAT_HOLD := [6.0, 10.0]
 ## Обход: на сколько метров в сторону от цели заходит второй в отряде.
 const AI_FLANK_OFFSET := 11.0
-## Поиск после потери цели: сколько точек осмотреть вокруг последней известной, в радиусе, м.
-const AI_SEARCH_POINTS := 3
-const AI_SEARCH_RADIUS := 9.0
+## Поиск после потери цели: сколько точек осмотреть вокруг последней известной, до какого радиуса, м
+## (прочёсывание: от ближних к дальним, дугой; точки, которые уже смотрит другой, — пропускаются
+## ближе AI_SEARCH_CLAIM_M). После проверки шума — AI_INVESTIGATE_SEARCH точек.
+const AI_SEARCH_POINTS := 6
+const AI_SEARCH_RADIUS := 18.0
+const AI_SEARCH_CLAIM_M := 5.0
+const AI_INVESTIGATE_SEARCH := 2
+## Попадание от невидимого стрелка: направление угадывается с ошибкой (град), дальность — ± доля.
+const AI_HIT_DIR_ERR_DEG := 15.0
+const AI_HIT_DIST_ERR := 0.3
+## Продвижение перебежками к цели, которую не видно: шаг от и до, м; ближе AI_ADVANCE_MIN_DIST — идёт прямо.
+const AI_ADVANCE_STEP := [5.0, 12.0]
+const AI_ADVANCE_MIN_DIST := 10.0
+## Не толпиться: куда идёт другой мародёр ближе стольких метров — туда не идём, точка сдвигается
+## на AI_SPREAD_RADIUS в сторону. Шум, который уже проверяет другой отряд (AI_INVESTIGATE_SHARE_M
+## от него), не проверяем — если только он не ближе AI_INVESTIGATE_NEAR.
+const AI_SPREAD_CLAIM_M := 2.5
+const AI_SPREAD_RADIUS := [2.5, 6.0]
+const AI_INVESTIGATE_SHARE_M := 12.0
+const AI_INVESTIGATE_NEAR := 15.0
 ## Слух: падение тела товарища слышно в радиусе, м.
 const AI_DEATH_NOISE := 22.0
 ## Строй патруля: ведомые держатся на таком расстоянии за ведущим, м.

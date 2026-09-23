@@ -172,12 +172,13 @@ static func _rifle(r: Node3D) -> void:
 	# прицельная колодка перед крышкой: высокий блок, планка-хомутик с движком, в конце планки —
 	# целик с U-прорезью 3 мм (глубина 3.5 мм), верх целика — линия прицеливания 0.100
 	_cbox(r, Vector3(0, 0.0845, 0.212), Vector3(0.03, 0.019, 0.048), steel, 0.002)
-	var leaf := _cbox(r, Vector3(0, 0.0955, 0.21), Vector3(0.02, 0.003, 0.058), steel, 0.0006)
+	# планка с движком и целиком — «rear_sight»: с прицелом на крышке её не видно (опущена)
+	var leaf := _part(_cbox(r, Vector3(0, 0.0955, 0.21), Vector3(0.02, 0.003, 0.058), steel, 0.0006), "rear_sight")
 	leaf.rotation.x = deg_to_rad(-2.0)
-	_cbox(r, Vector3(0, 0.0968, 0.226), Vector3(0.025, 0.0055, 0.01), gm, 0.001)
-	_cbox(r, Vector3(0, 0.0954, 0.183), Vector3(0.025, 0.003, 0.003), steel, 0.0004)
+	_part(_cbox(r, Vector3(0, 0.0968, 0.226), Vector3(0.025, 0.0055, 0.01), gm, 0.001), "rear_sight")
+	_part(_cbox(r, Vector3(0, 0.0954, 0.183), Vector3(0.025, 0.003, 0.003), steel, 0.0004), "rear_sight")
 	for side in [-1.0, 1.0]:
-		_cbox(r, Vector3(side * 0.00675, 0.0975, 0.183), Vector3(0.0105, 0.005, 0.003), steel, 0.0004)
+		_part(_cbox(r, Vector3(side * 0.00675, 0.0975, 0.183), Vector3(0.0105, 0.005, 0.003), steel, 0.0004), "rear_sight")
 	# магазин: одна гладкая дуга вперёд, чуть сужается книзу, ребро жёсткости по бокам
 	var mp: Array[Vector3] = []
 	var ms: Array[Vector2] = []
@@ -241,9 +242,9 @@ static func _shotgun(r: Node3D) -> void:
 	for side in [-1.0, 1.0]:
 		_cbox(r, Vector3(side * 0.0068, 0.0855, 0.652), Vector3(0.0022, 0.017, 0.012), steel, 0.0006)
 	_cbox(r, Vector3(0, 0.081, 0.16), Vector3(0.028, 0.008, 0.02), steel, 0.0015)
-	_cbox(r, Vector3(0, 0.08675, 0.155), Vector3(0.025, 0.0035, 0.004), steel, 0.0004)
+	_part(_cbox(r, Vector3(0, 0.08675, 0.155), Vector3(0.025, 0.0035, 0.004), steel, 0.0004), "rear_sight")
 	for side in [-1.0, 1.0]:
-		_cbox(r, Vector3(side * 0.007, 0.0885, 0.155), Vector3(0.011, 0.007, 0.004), steel, 0.0004)
+		_part(_cbox(r, Vector3(side * 0.007, 0.0885, 0.155), Vector3(0.011, 0.007, 0.004), steel, 0.0004), "rear_sight")
 	# подствольный магазин и хомут
 	_cyl(r, Vector3(0, 0.036, 0.17 + 0.21), 0.0115, 0.42, steel)
 	_cbox(r, Vector3(0, 0.05, 0.585), Vector3(0.024, 0.042, 0.016), steel, 0.003)

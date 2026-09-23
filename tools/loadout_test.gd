@@ -32,7 +32,10 @@ func _ready() -> void:
 	var m1 := Profile.money
 	Profile.sell(_idx("painkillers"), 2)
 	_check("продажа торговцу", Profile.money > m1 and _idx("painkillers") < 0, "%d ₽" % Profile.money)
-	# верстак: обвесы на автомат
+	# верстак: обвесы на автомат (обвесы у Михалыча дорогие)
+	_check("обвесы дороже обычной наценки", Profile.buy_price("mod_grip") > int(ItemDb.value("mod_grip") * Balance.TRADER_BUY_MULT),
+		"рукоятка %d ₽" % Profile.buy_price("mod_grip"))
+	Profile.money += 150000
 	for id in ["mod_mag_ext", "mod_supp_545", "mod_grip"]:
 		Profile.buy(id, 1)
 		Profile.install_mod("primary", _idx(id))
@@ -152,6 +155,15 @@ func _ready() -> void:
 	for i in range(30):
 		await get_tree().process_frame
 	_check("Enter — назад в убежище", get_tree().current_scene and get_tree().current_scene.scene_file_path == Balance.HIDEOUT_SCENE and not Profile.pending_raid, str(get_tree().current_scene.scene_file_path if get_tree().current_scene else ""))
+	# выручка Михалыча: ни ствола, ни денег — бесплатный набор; со стволом — не положено
+	_check("со стволом выручки нет", not Profile.needs_rescue(), "")
+	Profile.equipment = {}
+	Profile.backpack = []
+	Profile.pocket = []
+	Profile.stash = Profile.stash.filter(func(e: Dictionary) -> bool: return String(ItemDb.equip(String(e.id)).get("weapon", "")) == "")
+	Profile.money = 1000
+	_check("без ствола и денег — выручка", Profile.needs_rescue() and Profile.take_rescue() and _idx("w_pistol") >= 0 and not Profile.needs_rescue(),
+		"пистолет в тайнике: %s" % (_idx("w_pistol") >= 0))
 	print("loadout_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 

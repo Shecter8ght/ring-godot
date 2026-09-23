@@ -136,4 +136,5 @@ func _check(what: String, ok: bool, info: String) -> void:
 
 
 func _save(n: String) -> void:
-	get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/%s.png" % n))
+	if DisplayServer.get_name() != "headless":
+		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/%s.png" % n))

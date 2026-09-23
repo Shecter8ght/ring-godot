@@ -7,12 +7,15 @@ extends CharacterBody3D
 ##
 ## Бой — тактики: ENGAGE (стоит и стреляет), COVER_MOVE → COVER_HIDE ↔ COVER_PEEK (укрытие:
 ## присел, выглянул, дал очередь), FLANK (второй в отряде заходит сбоку), PUSH (идёт к последней
-## известной точке). Оружие (AI_WEAPONS): пистолет, автомат очередями, дробовик; магазин и
+## известной точке), ADVANCE — перебежками от укрытия к укрытию к цели, которую не видно
+## (попали издалека — угадал направление, сел за укрытие и двигается к стрелку). Не стреляет, если
+## между стволом и целью стена. Не толпится: точки, куда уже идут другие, обходит; поиск —
+## прочёсывание дугой от ближних точек к дальним. Оружие (AI_WEAPONS): пистолет, автомат очередями, дробовик; магазин и
 ## перезарядка — в укрытии, если оно есть. Точность садится за AI_AIM_SETTLE_SEC после того, как
 ## заметил цель; бегущую цель и на бегу — хуже.
 
 enum State { PATROL, INVESTIGATE, COMBAT, SEARCH, RETREAT, DEAD }
-enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH }
+enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE }
 
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE := 1.05
@@ -56,6 +59,8 @@ var _peeks: int = 0
 var _hurt_t: float = 0.0
 var _suppress_t: float = 0.0
 var _search_left: int = 0
+var _search_total: int = 0
+var _search_ang: float = 0.0
 var _repath_t: float = 0.0
 var _say_label: Label3D
 var _capsule: CapsuleShape3D
@@ -225,8 +230,8 @@ func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node)
 	last_known = target
 	memory_timer = maxf(memory_timer, Balance.AI_MEMORY_SEC * 0.6)
 	if state != State.COMBAT:
-		# сам не видел — идёт туда, куда крикнули (второй в отряде — в обход)
-		_enter_combat(Tactic.FLANK if _rank() == 1 else Tactic.PUSH)
+		# сам не видел — идёт туда, куда крикнули (второй в отряде — в обход, далеко — перебежками)
+		_enter_combat(Tactic.FLANK if _rank() == 1 else _closing_tactic())
 
 
 func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
@@ -244,10 +249,67 @@ func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
 		return
 	if state == State.RETREAT:
 		return
+	# ведомый: шёпотом ведущему — проверяют отрядом, строем за ним
+	var lead := squad.leader() if squad else null
+	if lead != null and lead != self and lead.state in [State.PATROL, State.INVESTIGATE] \
+			and lead.global_position.distance_to(global_position) < 15.0:
+		lead.investigate_at(pos)
+		return
+	# другой отряд уже идёт смотреть это место — не толпимся (если шум не под самым носом)
+	if d > Balance.AI_INVESTIGATE_NEAR and _someone_checking(pos):
+		return
+	investigate_at(pos)
+
+
+## Проверить шум: идти к месту, постоять, осмотреться; потом прочесать рядом.
+func investigate_at(pos: Vector3) -> void:
+	if state == State.COMBAT or state == State.RETREAT or state == State.DEAD:
+		return
 	last_known = pos
 	state = State.INVESTIGATE
 	linger_timer = Balance.AI_INVESTIGATE_LINGER
 	_agent.target_position = _snap(pos)
+
+
+## Другой отряд уже проверяет / прочёсывает место рядом с pos.
+func _someone_checking(pos: Vector3) -> bool:
+	for n in get_tree().get_nodes_in_group("marauders"):
+		var m := n as Marauder
+		if m == self or m.squad == squad or not (m.state in [State.INVESTIGATE, State.SEARCH]):
+			continue
+		if m.last_known.distance_to(pos) < Balance.AI_INVESTIGATE_SHARE_M:
+			return true
+	return false
+
+
+## Куда сейчас идёт (для «не толпиться»): цель навигации.
+func move_target() -> Vector3:
+	return _agent.target_position
+
+
+## Кто-то другой (жив, в бою/поиске/проверке) уже идёт к точке или стоит ближе r.
+func _claimed_near(p: Vector3, r: float) -> bool:
+	for n in get_tree().get_nodes_in_group("marauders"):
+		var m := n as Marauder
+		if m == self or m.state in [State.DEAD, State.PATROL]:
+			continue
+		if m.move_target().distance_to(p) < r or m.global_position.distance_to(p) < r * 0.6:
+			return true
+	return false
+
+
+## Точка рядом с center, куда никто не идёт: сам center, если свободен, иначе в стороне.
+func _spread_point(center: Vector3) -> Vector3:
+	var c := _snap(center)
+	if not _claimed_near(c, Balance.AI_SPREAD_CLAIM_M):
+		return c
+	for i in range(8):
+		var a := _rng.randf() * TAU
+		var r := _rng.randf_range(float(Balance.AI_SPREAD_RADIUS[0]), float(Balance.AI_SPREAD_RADIUS[1]))
+		var p := _snap(center + Vector3(cos(a), 0.0, sin(a)) * r)
+		if absf(p.y - c.y) < 0.5 and not _claimed_near(p, Balance.AI_SPREAD_CLAIM_M):
+			return p
+	return c
 
 
 func _on_damaged(amount: float, from: Vector3) -> void:
@@ -256,14 +318,25 @@ func _on_damaged(amount: float, from: Vector3) -> void:
 	if state == State.DEAD:
 		return
 	_hurt_t = 2.5
-	# Попадание — улика: разворот в сторону выстрела.
-	last_known = from
-	memory_timer = maxf(memory_timer, Balance.AI_MEMORY_SEC * 0.5)
-	_facing = atan2(from.x - global_position.x, from.z - global_position.z)
+	# Попадание — улика: откуда прилетело, понятно примерно (направление ± AI_HIT_DIR_ERR_DEG,
+	# дальность ± AI_HIT_DIST_ERR); кого видит — того и так знает
+	if not _seen_now:
+		var to := from - global_position
+		to.y = 0.0
+		var guess := to.rotated(Vector3.UP, deg_to_rad(_rng.randf_range(-1.0, 1.0) * Balance.AI_HIT_DIR_ERR_DEG))
+		guess *= 1.0 + _rng.randf_range(-1.0, 1.0) * Balance.AI_HIT_DIST_ERR
+		last_known = global_position + guess
+	memory_timer = maxf(memory_timer, Balance.AI_MEMORY_SEC * 1.5)
+	_facing = atan2(last_known.x - global_position.x, last_known.z - global_position.z)
 	if state != State.COMBAT and state != State.RETREAT:
-		_enter_combat(Tactic.PUSH)
-		say("Где он?!")
+		state = State.COMBAT
+		say("По нам стреляют!")
 		_shout()
+		# стрелка не видно — сначала за укрытие, потом перебежками к нему
+		if _seen_now or not _try_cover(Balance.AI_COVER_RADIUS, false):
+			_set_tactic(Tactic.ENGAGE if _seen_now else Tactic.ADVANCE)
+	elif not _seen_now and tactic in [Tactic.ENGAGE, Tactic.PUSH, Tactic.FLANK, Tactic.ADVANCE]:
+		_try_cover(Balance.AI_COVER_RADIUS, false)
 	# тяжело ранен, товарищей рядом нет — отход
 	if _health.hp < _health.max_hp * Balance.AI_RETREAT_HP and _mates_near(15.0) == 0 and state != State.RETREAT:
 		_start_retreat()
@@ -312,8 +385,7 @@ func _investigate(delta: float) -> void:
 		# осматриваемся
 		_facing += delta * 1.2
 		if linger_timer <= 0.0:
-			state = State.PATROL
-			pause_timer = 0.5
+			_start_search(Balance.AI_INVESTIGATE_SEARCH)
 
 
 func _enter_combat(t: Tactic) -> void:
@@ -333,7 +405,11 @@ func _set_tactic(t: Tactic) -> void:
 			_agent.target_position = _snap(last_known + side * Balance.AI_FLANK_OFFSET - to.normalized() * 4.0)
 			say("Обхожу!")
 		Tactic.PUSH:
-			_agent.target_position = _snap(last_known)
+			_agent.target_position = _spread_point(last_known)
+		Tactic.ADVANCE:
+			if not _try_advance():
+				tactic = Tactic.PUSH
+				_agent.target_position = _spread_point(last_known)
 		Tactic.ENGAGE:
 			_agent.target_position = global_position
 		_:
@@ -361,7 +437,7 @@ func _combat(delta: float) -> void:
 				# только что ушёл из виду — подавляющий огонь туда, где был
 				_try_fire(true)
 			else:
-				_set_tactic(Tactic.FLANK if _rank() == 1 and _mates_near(30.0) > 0 else Tactic.PUSH)
+				_set_tactic(Tactic.FLANK if _rank() == 1 and _mates_near(30.0) > 0 else _closing_tactic())
 		Tactic.COVER_MOVE:
 			_set_crouch(false)
 			if _agent.is_navigation_finished() or global_position.distance_to(_cover_pos) < 0.9:
@@ -387,10 +463,13 @@ func _combat(delta: float) -> void:
 			if _tactic_t >= 0.0:
 				if not _cover_still_good() or _peeks >= 4 or (not _seen_now and _unseen_t > 3.0):
 					_peeks = 0
-					_set_tactic(Tactic.ENGAGE if _seen_now else Tactic.PUSH)
+					_set_tactic(Tactic.ENGAGE if _seen_now else _closing_tactic())
 				else:
 					_set_tactic(Tactic.COVER_HIDE)
 					_tactic_t = -_rng.randf_range(float(Balance.AI_COVER_HIDE[0]), float(Balance.AI_COVER_HIDE[1]))
+		Tactic.ADVANCE:
+			# перебежка не нашлась (иначе была бы COVER_MOVE) — идём как PUSH
+			_set_tactic(Tactic.PUSH)
 		Tactic.FLANK, Tactic.PUSH:
 			_set_crouch(false)
 			if _seen_now:
@@ -405,16 +484,77 @@ func _combat(delta: float) -> void:
 				_start_reload()
 
 
-func _start_search() -> void:
+## Цель не видно: далеко — перебежками по укрытиям, близко — прямо (каждый в свою точку).
+func _closing_tactic() -> Tactic:
+	return Tactic.ADVANCE if global_position.distance_to(last_known) > Balance.AI_ADVANCE_MIN_DIST else Tactic.PUSH
+
+
+## Перебежка: точка на AI_ADVANCE_STEP ближе к цели, лучше — закрытая от неё стеной; дошёл —
+## присел, выглянул, дальше. false — некуда (тогда PUSH).
+func _try_advance() -> bool:
+	var to := last_known - global_position
+	to.y = 0.0
+	var dist := to.length()
+	if dist < Balance.AI_ADVANCE_MIN_DIST:
+		return false
+	var dir := to / dist
+	var threat := last_known + Vector3.UP * 1.3
+	var space := get_world_3d().direct_space_state
+	var own_y := _snap(global_position).y
+	var map := get_world_3d().navigation_map
+	var best := Vector3.INF
+	var best_s := INF
+	for i in range(18):
+		var ang := _rng.randf_range(-0.9, 0.9)
+		var step := _rng.randf_range(float(Balance.AI_ADVANCE_STEP[0]), float(Balance.AI_ADVANCE_STEP[1]))
+		var cand := _snap(global_position + dir.rotated(Vector3.UP, ang) * step)
+		if absf(cand.y - own_y) > 0.3 or cand.distance_to(global_position) < 3.0:
+			continue
+		var nd := cand.distance_to(last_known)
+		if nd > dist - 2.5 or _claimed_near(cand, Balance.AI_SPREAD_CLAIM_M):
+			continue
+		var q := PhysicsRayQueryParameters3D.create(threat, cand + Vector3.UP * CROUCH_EYE, Hitscan.LAYER_WORLD)
+		var hidden := not space.intersect_ray(q).is_empty()
+		var score := nd + (0.0 if hidden else 7.0) + absf(ang) * 3.0
+		if score >= best_s:
+			continue
+		# и дойти туда можно без обхода через полкарты
+		var path := NavigationServer3D.map_get_path(map, global_position, cand, true)
+		var plen := 0.0
+		for k in range(1, path.size()):
+			plen += path[k - 1].distance_to(path[k])
+		if path.size() < 2 or plen > cand.distance_to(global_position) * 1.6 + 3.0:
+			continue
+		best = cand
+		best_s = score
+	if best == Vector3.INF:
+		return false
+	_cover_pos = best
+	_agent.target_position = best
+	# дошёл — одно «присел-выглянул» и дальше
+	_peeks = 3
+	memory_timer = maxf(memory_timer, Balance.AI_MEMORY_SEC * 0.6)
+	tactic = Tactic.COVER_MOVE
+	_tactic_t = 0.0
+	if _rng.randf() < 0.35:
+		say("Двигаюсь!")
+	return true
+
+
+func _start_search(points: int = Balance.AI_SEARCH_POINTS) -> void:
 	state = State.SEARCH
 	_set_crouch(false)
-	_search_left = Balance.AI_SEARCH_POINTS
-	_agent.target_position = _snap(last_known)
+	_search_left = points
+	_search_total = points
+	# прочёсывание дугой — от той стороны, откуда пришли, каждый в свою сторону
+	_search_ang = atan2(global_position.z - last_known.z, global_position.x - last_known.x) + (0.8 if hash(name) % 2 == 0 else -0.8)
+	_agent.target_position = _spread_point(last_known)
 	linger_timer = 1.5
-	say("Ушёл…")
+	say("Ушёл…" if points == Balance.AI_SEARCH_POINTS else "Проверю тут…")
 
 
-## Поиск: к последней точке, потом несколько мест вокруг неё, осматриваясь.
+## Поиск: к последней точке, потом прочёсывание вокруг — от ближних мест к дальним, дугой,
+## в стороне от тех, кого уже смотрят другие; на каждой — постоять, осмотреться.
 func _search(delta: float) -> void:
 	if _reload_t <= 0.0 and _mag < int(_spec.mag):
 		_start_reload()
@@ -429,9 +569,18 @@ func _search(delta: float) -> void:
 		pause_timer = 1.0
 		return
 	_search_left -= 1
-	var a := _rng.randf() * TAU
-	var r := _rng.randf_range(3.0, Balance.AI_SEARCH_RADIUS)
-	_agent.target_position = _snap(last_known + Vector3(cos(a), 0.0, sin(a)) * r)
+	var done := float(_search_total - _search_left) / float(maxi(_search_total, 1))
+	var r := lerpf(4.0, Balance.AI_SEARCH_RADIUS, done)
+	var sweep := 1.1 if hash(name) % 2 == 0 else -1.1
+	var target := last_known
+	for attempt in range(8):
+		var a := _search_ang + _rng.randf_range(-0.35, 0.35)
+		_search_ang += sweep
+		var p := _snap(last_known + Vector3(cos(a), 0.0, sin(a)) * r * _rng.randf_range(0.8, 1.1))
+		if p.distance_to(global_position) > 2.0 and not _claimed_near(p, Balance.AI_SEARCH_CLAIM_M):
+			target = p
+			break
+	_agent.target_position = target
 	linger_timer = _rng.randf_range(1.2, 2.4)
 
 
@@ -557,6 +706,9 @@ func _try_fire(suppress: bool = false) -> void:
 	if _mag <= 0:
 		_start_reload()
 		return
+	if not _line_of_fire():
+		# между стволом и целью стена — стрелять некуда (ни прицельно, ни «на подавление»)
+		return
 	if _shot_t > 0.0:
 		return
 	_shoot(suppress)
@@ -568,6 +720,15 @@ func _try_fire(suppress: bool = false) -> void:
 		_shot_t = float(_spec.interval)
 	else:
 		_shot_t = float(_spec.interval) + float(_spec.burst_pause) + (0.6 if suppress else 0.0)
+
+
+## Ствол → точка цели (по памяти) не упирается в стену / дверь раньше, чем за метр до неё.
+func _line_of_fire() -> bool:
+	var from := global_position + Vector3.UP * (1.0 if crouched else 1.4)
+	var target := last_known + Vector3.UP * 1.1
+	var q := PhysicsRayQueryParameters3D.create(from, target, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	return hit.is_empty() or from.distance_to(hit.position) > from.distance_to(target) - 1.0
 
 
 func _shoot(suppress: bool) -> void:
@@ -699,7 +860,13 @@ func _on_died() -> void:
 		to_shooter.y = 0.0
 		to_shooter = to_shooter.normalized() if to_shooter.length() > 0.01 else Vector3(sin(_facing), 0.0, cos(_facing))
 		var rest := global_position + to_shooter * Balance.CRATE_TOSS_DIST
-		Raid.current.spawn_drop(rest, "Ящик мародёра", ItemDb.roll("marauder", rng), LootContainer.Look.CRATE,
+		# его ствол и патроны: что осталось в магазине и немного запаса
+		var drop := ItemDb.roll("marauder", rng)
+		drop.push_front(ItemDb.make(String(_spec.item), 1))
+		var rounds := mini(_mag + rng.randi_range(0, int(_spec.mag)), ItemDb.stack(String(_spec.ammo)))
+		if rounds > 0:
+			drop.append(ItemDb.make(String(_spec.ammo), rounds))
+		Raid.current.spawn_drop(rest, "Ящик мародёра", drop, LootContainer.Look.CRATE,
 			global_position + Vector3.UP * 1.1 - rest)
 	collision_layer = 0
 	collision_mask = 0
