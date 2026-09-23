@@ -141,6 +141,24 @@ func _process(delta: float) -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam:
 		_compass.set_heading(cam.global_basis)
+	_compass.set_marks(_extraction_marks(pl))
+
+
+## Точки эвакуации для компаса: [курс°, расстояние м, заперта ли для меня]. Заперта — нет питания
+## (рубильник) или у меня нет нужного ключа.
+func _extraction_marks(pl: Player) -> Array:
+	var out: Array = []
+	if pl == null or Raid.current == null or not pl.combat_enabled:
+		return out
+	for x in get_tree().get_nodes_in_group("extractions"):
+		var ep := x as ExtractionPoint
+		if ep == null:
+			continue
+		var d := ep.global_position - pl.global_position
+		var bearing := fposmod(rad_to_deg(atan2(d.x, -d.z)), 360.0)
+		var locked := (ep.required_switch != "" and not bool(Raid.current.switches.get(ep.required_switch, false))) 			or (ep.required_key != "" and not pl.inventory.has(ep.required_key))
+		out.append([bearing, Vector2(d.x, d.z).length(), locked])
+	return out
 
 
 func _process_iso(delta: float, s: float) -> void:
@@ -522,6 +540,19 @@ func _build_hud() -> void:
 class Compass extends Control:
 	const LETTERS := {0: "С", 45: "СВ", 90: "В", 135: "ЮВ", 180: "Ю", 225: "ЮЗ", 270: "З", 315: "СЗ"}
 	var heading: float = 0.0
+	## Точки эвакуации: [курс°, расстояние, заперта].
+	var marks: Array = []
+	var _marks_sig: String = ""
+
+
+	func set_marks(m: Array) -> void:
+		var sig := ""
+		for k in m:
+			sig += "%d,%d,%s;" % [int(k[0]), int(float(k[1]) / 5.0), k[2]]
+		if sig != _marks_sig:
+			_marks_sig = sig
+			marks = m
+			queue_redraw()
 
 	## Курс по направлению взгляда камеры (горизонтальная проекция -Z базиса).
 	func set_heading(b: Basis) -> void:
@@ -563,6 +594,30 @@ class Compass extends Control:
 				draw_line(Vector2(x, base_y - 5), Vector2(x, base_y + 5), col, 1.5)
 			else:
 				draw_line(Vector2(x, base_y - 2), Vector2(x, base_y + 3), Color(col, col.a * 0.6), 1.0)
+		# точки эвакуации: зелёный треугольник (запертая — серый контур) и расстояние; за краем
+		# шкалы — прижата к краю
+		for m in marks:
+			var off := wrapf(float(m[0]) - heading, -180.0, 180.0)
+			var edge := absf(off) > span
+			var mx := cx + clampf(off, -span, span) * ppd
+			var locked := bool(m[2])
+			var green := Color(0.35, 0.95, 0.5, 0.95)
+			var grey := Color(0.75, 0.75, 0.72, 0.8)
+			var tri := PackedVector2Array([Vector2(mx, base_y - 9), Vector2(mx + 7, base_y + 4), Vector2(mx - 7, base_y + 4)])
+			if edge:
+				var sgn := signf(off)
+				tri = PackedVector2Array([Vector2(mx + sgn * 8, base_y), Vector2(mx - sgn * 2, base_y - 7), Vector2(mx - sgn * 2, base_y + 7)])
+			if locked:
+				var closed := tri.duplicate()
+				closed.append(tri[0])
+				draw_polyline(closed, grey, 1.6)
+			else:
+				draw_colored_polygon(tri, green)
+			if not edge:
+				var ds := "%d м" % int(round(float(m[1])))
+				var dw := font.get_string_size(ds, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+				draw_string_outline(font, Vector2(mx - dw * 0.5, base_y - 12), ds, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(0, 0, 0, 0.6))
+				draw_string(font, Vector2(mx - dw * 0.5, base_y - 12), ds, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, grey if locked else green)
 		# метка центра и курс в градусах
 		draw_colored_polygon(PackedVector2Array([Vector2(cx - 5, 0), Vector2(cx + 5, 0), Vector2(cx, 7)]), Color(1, 0.85, 0.5, 0.95))
 		var hs := "%03d" % (int(round(heading)) % 360)
