@@ -110,17 +110,23 @@ func _draw() -> void:
 		var it: Dictionary = items[i]
 		var r := _rect_of(i).grow(-1.5)
 		var cat := String(ItemDb.item(String(it.id)).get("cat", "misc"))
-		draw_rect(r, CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3)))
+		var col: Color = CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
+		# с иконкой — тёмная подложка цвета категории, без неё — плашка ярче
+		var has_icon := ItemIcons.get_icon(String(it.id)) != null
+		draw_rect(r, ItemIcons.backdrop(col) if has_icon else col)
+		ItemIcons.draw(self, String(it.id), r.grow(-3.0), bool(_layout[i][2]))
 		draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
 		# в маленькой клетке — короткая подпись (калибр, «Бинт»), полное имя — в подсказке
 		var name := ItemDb.item_name(String(it.id))
 		if r.size.x < 60:
 			name = String(ItemDb.item(String(it.id)).get("short", name))
-		var fs := 12 if r.size.x > 60 else 11
+		var fs := 11 if has_icon else (12 if r.size.x > 60 else 11)
+		draw_string_outline(_font, r.position + Vector2(4, fs + 2), name, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, fs, 3, Color(0, 0, 0, 0.7))
 		draw_string(_font, r.position + Vector2(4, fs + 2), name, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, fs, Color(0.95, 0.93, 0.88))
 		if int(it.n) > 1:
 			var t := str(int(it.n))
 			var w := _font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+			draw_string_outline(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 3, Color(0, 0, 0, 0.8))
 			draw_string(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1.0, 0.92, 0.6))
 		if it.has("dur"):
 			var mx := float(ItemDb.equip(String(it.id)).get("durability", 1))
@@ -176,10 +182,20 @@ func _get_drag_data(at: Vector2) -> Variant:
 	p.color = Color(0.9, 0.8, 0.5, 0.35)
 	p.size = Vector2(s) * CELL
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var l := Label.new()
-	l.text = ItemDb.item_name(String(items[i].id))
-	l.add_theme_font_size_override("font_size", 12)
-	p.add_child(l)
+	var tex := ItemIcons.get_icon(String(items[i].id))
+	if tex:
+		var tr := TextureRect.new()
+		tr.texture = tex
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.set_anchors_preset(Control.PRESET_FULL_RECT)
+		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		p.add_child(tr)
+	else:
+		var l := Label.new()
+		l.text = ItemDb.item_name(String(items[i].id))
+		l.add_theme_font_size_override("font_size", 12)
+		p.add_child(l)
 	var holder := Control.new()
 	holder.add_child(p)
 	p.position = -Vector2(grab) * CELL - Vector2(CELL, CELL) * 0.5
