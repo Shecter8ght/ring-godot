@@ -43,53 +43,82 @@ static func build(id: String, mods: Dictionary = {}) -> Node3D:
 
 
 # ---------------------------------------------------------------- пистолет
-# Современный компактный пистолет: полимерная рамка, стальной затвор с насечками.
+# По пропорциям Glock 17: затвор 186×29×25.5 мм со скошенными верхними гранями, полимерная рамка с
+# планкой на пылезащитной части, рукоять под 22° назад от вертикали (протяжка по оси — без «косины»),
+# прямоугольная спусковая скоба, «хвост» рамки под затвором, насечки на затворе, окно выброса сверху
+# справа, мушка с точкой и целик с прорезью, рычаг задержки, флажок разборки, пятка магазина.
+# Ось канала ствола — y 0.06; рукоять идёт от точки GRIP_TOP вниз-назад по GRIP_DIR.
+
+const PISTOL_GRIP_TOP := Vector3(0, 0.033, 0.006)
+const PISTOL_GRIP_LEN := 0.085
+const PISTOL_GRIP_ANGLE := 22.0
+
 
 static func _pistol(r: Node3D) -> void:
-	var steel := _mat("blued")
+	var slide_m := _mat("blued")
 	var poly := _mat("polymer")
-	# затвор
-	_cbox(r, Vector3(0, 0.058, 0.048), Vector3(0.027, 0.03, 0.188), steel, 0.004)
-	# насечки на затворе сзади, по обе стороны
+	var dark := _mat("dark")
+	var bore_y := 0.06
+	var slide_bot := 0.047
+	var slide_top := 0.076
+	var zf := 0.155
+	var zr := zf - 0.186
+	var zc := (zf + zr) * 0.5
+	# затвор: коробка с крупной фаской по рёбрам (у Glock верх скошен)
+	_cbox(r, Vector3(0, (slide_bot + slide_top) * 0.5, zc), Vector3(0.0255, slide_top - slide_bot, 0.186), slide_m, 0.0034)
+	# насечки сзади по бокам — вертикальные канавки
 	for side in [-1.0, 1.0]:
-		for i in range(7):
-			_box(r, Vector3(side * 0.0137, 0.058, -0.03 + i * 0.0045), Vector3(0.0012, 0.022, 0.0018), _mat("dark"))
-	# окно выброса гильзы — тёмная вставка справа
-	_box(r, Vector3(0.0137, 0.064, 0.07), Vector3(0.0012, 0.012, 0.03), _mat("dark"))
-	# ствол, чуть торчит из затвора
-	_cyl(r, Vector3(0, 0.06, 0.145), 0.0062, 0.012, _mat("gunmetal"))
-	_cyl(r, Vector3(0, 0.06, 0.1512), 0.0036, 0.001, _mat("bore"))
-	# рамка с направляющей под фонарь
-	_cbox(r, Vector3(0, 0.032, 0.058), Vector3(0.025, 0.022, 0.15), poly, 0.004)
-	for i in range(3):
-		_box(r, Vector3(0, 0.0205, 0.085 + i * 0.012), Vector3(0.02, 0.002, 0.005), poly)
-	# рукоять с наклоном и текстурой-«пупырками»
-	var grip := _cbox(r, Vector3(0, -0.018, -0.004), Vector3(0.029, 0.105, 0.046), poly, 0.006)
-	grip.rotation.x = deg_to_rad(-18.0)
-	for i in range(5):
-		var g := _box(r, Vector3(0, -0.04 + i * 0.016, -0.016 + i * 0.005), Vector3(0.0296, 0.006, 0.02), _mat("polymer_grip"))
-		g.rotation.x = deg_to_rad(-18.0)
-	# пятка магазина
-	# пятка — по оси рукояти вплотную к её низу (низ = центр + половина высоты вдоль оси)
-	var grip_down := Basis(Vector3.RIGHT, deg_to_rad(-18.0)) * Vector3.DOWN
-	var base := _cbox(r, Vector3(0, -0.018, -0.004) + grip_down * (0.0525 + 0.0045), Vector3(0.031, 0.009, 0.05), poly, 0.003)
-	base.rotation.x = deg_to_rad(-18.0)
+		for k in range(8):
+			_box(r, Vector3(side * 0.01285, 0.0605, zr + 0.006 + k * 0.0042), Vector3(0.0008, 0.021, 0.0017), dark)
+	# окно выброса сверху-справа и казённая часть ствола в нём
+	_box(r, Vector3(0.004, slide_top - 0.0004, 0.052), Vector3(0.015, 0.0012, 0.034), dark)
+	_box(r, Vector3(0.0126, 0.068, 0.052), Vector3(0.0012, 0.013, 0.034), dark)
+	_cbox(r, Vector3(0.002, slide_top - 0.002, 0.05), Vector3(0.012, 0.004, 0.03), _mat("gunmetal"), 0.001)
+	# ствол у дульного среза: торец чуть утоплен в затвор
+	_cyl(r, Vector3(0, bore_y, zf - 0.003), 0.0065, 0.006, _mat("gunmetal"))
+	_cyl(r, Vector3(0, bore_y, zf + 0.0002), 0.0045, 0.001, _mat("bore"))
+	# прицельные: мушка с белой точкой, целик с прорезью и точками
+	_cbox(r, Vector3(0, slide_top + 0.0033, zf - 0.009), Vector3(0.0036, 0.0066, 0.007), slide_m, 0.0008)
+	_box(r, Vector3(0, slide_top + 0.0048, zf - 0.0055), Vector3(0.0022, 0.0022, 0.0008), _mat("dot"))
+	for side in [-1.0, 1.0]:
+		_cbox(r, Vector3(side * 0.0055, slide_top + 0.0033, zr + 0.009), Vector3(0.0065, 0.0066, 0.0085), slide_m, 0.0008)
+		_box(r, Vector3(side * 0.0045, slide_top + 0.0048, zr + 0.0047), Vector3(0.0018, 0.0018, 0.0008), _mat("dot"))
+	# рамка под затвором: от «хвоста» до пылезащитной части
+	var frame_bot := PISTOL_GRIP_TOP.y
+	_cbox(r, Vector3(0, (frame_bot + slide_bot) * 0.5, 0.058), Vector3(0.0235, slide_bot - frame_bot, 0.17), poly, 0.003)
+	# «хвост» рамки (бобровый хвост) — назад под затвор
+	_cbox(r, Vector3(0, slide_bot - 0.004, zr + 0.007), Vector3(0.022, 0.008, 0.026), poly, 0.003)
+	# планка под фонарь: три поперечных паза снизу пылезащитной части
+	for k in range(3):
+		_box(r, Vector3(0, frame_bot - 0.0012, 0.104 + k * 0.011), Vector3(0.0215, 0.0026, 0.0045), poly)
+	_cbox(r, Vector3(0, frame_bot - 0.001, 0.115), Vector3(0.0185, 0.004, 0.036), poly, 0.001)
+	# рукоять — протяжка по наклонной оси: сечение 30×48 мм, к низу чуть уже
+	var d := Basis(Vector3.RIGHT, deg_to_rad(PISTOL_GRIP_ANGLE)) * Vector3.DOWN
+	var t := PISTOL_GRIP_TOP
+	# начинается внутри рамки (узко, по ширине рамки) — наклонный торец не оставляет щели у скобы
+	var pts: Array[Vector3] = [t - d * 0.012, t + d * 0.004, t + d * 0.03, t + d * 0.06, t + d * PISTOL_GRIP_LEN]
+	_sweep(r, pts, [Vector2(0.0232, 0.05), Vector2(0.0295, 0.05), Vector2(0.03, 0.049), Vector2(0.0302, 0.048), Vector2(0.03, 0.046)] as Array[Vector2], poly, 0.32)
+	# стиплинг — чуть шире рукояти в средней части, другой полимер
+	_sweep(r, [t + d * 0.018, t + d * 0.072] as Array[Vector3], [Vector2(0.0312, 0.043), Vector2(0.0312, 0.041)] as Array[Vector2], _mat("polymer_grip"), 0.35)
+	# пятка магазина — по оси рукояти вплотную к её низу
+	var base := _cbox(r, t + d * (PISTOL_GRIP_LEN + 0.0045), Vector3(0.0315, 0.009, 0.05), poly, 0.0025)
+	base.basis = Basis(Vector3.RIGHT, deg_to_rad(PISTOL_GRIP_ANGLE))
 	_part(base, "mag")
-	# спусковая скоба — тор, вытянутый вперёд
-	# тор лежит в XZ; поворот вокруг Z ставит его в вертикальную плоскость вдоль ствола
-	var guard := _torus(r, Vector3(0, 0.008, 0.032), 0.013, 0.0165, poly)
-	guard.rotation = Vector3(0, 0, PI * 0.5)
-	guard.scale = Vector3(1.0, 1.0, 1.35)
-	# спусковой крючок
-	var trig := _cbox(r, Vector3(0, 0.01, 0.027), Vector3(0.006, 0.02, 0.005), steel, 0.0015)
-	trig.rotation.x = deg_to_rad(12.0)
-	# прицельные: мушка и целик с прорезью, белые точки
-	_cbox(r, Vector3(0, 0.0765, 0.132), Vector3(0.004, 0.007, 0.006), steel, 0.001)
-	_box(r, Vector3(0, 0.079, 0.1325), Vector3(0.0022, 0.0022, 0.0062), _mat("dot"))
-	for side in [-1.0, 1.0]:
-		_cbox(r, Vector3(side * 0.0055, 0.0765, -0.036), Vector3(0.006, 0.007, 0.008), steel, 0.001)
-	r.set_meta("muzzle", Vector3(0, 0.06, 0.152))
-	r.set_meta("sight_h", 0.079)
+	# спусковая скоба: низ, передняя стенка с «зацепом», скругление угла
+	_cbox(r, Vector3(0, 0.007, 0.044), Vector3(0.013, 0.0068, 0.052), poly, 0.002)
+	_cbox(r, Vector3(0, 0.0205, 0.0695), Vector3(0.013, 0.028, 0.0072), poly, 0.002)
+	var corner := _cbox(r, Vector3(0, 0.0092, 0.0665), Vector3(0.013, 0.009, 0.009), poly, 0.003)
+	corner.rotation.x = deg_to_rad(45.0)
+	# спусковой крючок с предохранительной клавишей
+	var trig := _cbox(r, Vector3(0, 0.022, 0.047), Vector3(0.0062, 0.021, 0.0045), poly, 0.0015)
+	trig.rotation.x = deg_to_rad(-8.0)
+	_box(r, Vector3(0, 0.02, 0.0495), Vector3(0.002, 0.012, 0.0015), dark)
+	# рычаг задержки затвора и флажок разборки — слева
+	_cbox(r, Vector3(-0.0125, slide_bot - 0.003, 0.03), Vector3(0.002, 0.004, 0.016), _mat("gunmetal"), 0.0006)
+	_cbox(r, Vector3(-0.0122, slide_bot - 0.004, 0.066), Vector3(0.0015, 0.003, 0.008), _mat("gunmetal"), 0.0005)
+	r.set_meta("muzzle", Vector3(0, bore_y, zf + 0.001))
+	# линия прицеливания — верх мушки/прорези целика
+	r.set_meta("sight_h", slide_top + 0.0055)
 	r.set_meta("ads_z", 0.36)
 
 

@@ -12,13 +12,13 @@ extends RefCounted
 ## основание (для прицела — верх ствольной коробки/крышки; для рукоятки — низ цевья).
 const MOUNTS := {
 	"pistol": {
-		# мини-коллиматор — в вырез на затворе перед целиком; резьба — торец ствола;
-		# фонарь/ЛЦУ — на направляющую под рамкой; магазин — пятка под рукоятью
-		"optic": {"pos": Vector3(0, 0.073, 0.004), "rail": false},
-		"muzzle": {"pos": Vector3(0, 0.06, 0.151), "bore_r": 0.0062},
-		"tac": {"pos": Vector3(0, 0.021, 0.097), "side": false},
-		# низ рукояти: центр (0, −0.018, −0.004) + 0.0525 вдоль оси, наклонённой на −18°
-		"mag": {"pos": Vector3(0, -0.018, -0.004), "half": 0.0525, "tilt": -18.0},
+		# по модели «Glock»: вырез под мини-коллиматор — на затворе перед целиком (верх затвора 0.076);
+		# дульный срез 0.156; фонарь/ЛЦУ — на планку под пылезащитной частью рамки (низ 0.033);
+		# магазин — от верха рукояти по её оси (22° назад), длина рукояти 0.085
+		"optic": {"pos": Vector3(0, 0.076, 0.004), "rail": false},
+		"muzzle": {"pos": Vector3(0, 0.06, 0.156), "bore_r": 0.0065},
+		"tac": {"pos": Vector3(0, 0.031, 0.115), "side": false},
+		"mag": {"pos": Vector3(0, 0.033, 0.006), "half": 0.085, "tilt": 22.0},
 	},
 	"rifle": {
 		# планка на крышку ствольной коробки (крышка — цилиндр r 0.0205 по оси y 0.07, z 0.009–0.121,
@@ -351,7 +351,7 @@ static func _mag_pistol_ext(root: Node3D, m: Dictionary) -> void:
 	var down := tilt * Vector3.DOWN
 	# низ рукояти — отсюда вниз по её оси: вставка-удлинитель 24 мм и пятка
 	var bottom: Vector3 = (m.pos as Vector3) + down * float(m.half)
-	var sleeve := WeaponModels._cbox(root, bottom + down * 0.012, Vector3(0.028, 0.024, 0.044), _mat("polymer"), 0.003)
+	var sleeve := WeaponModels._cbox(root, bottom + down * 0.012, Vector3(0.0295, 0.024, 0.045), _mat("polymer"), 0.003)
 	sleeve.basis = tilt
 	var base := WeaponModels._cbox(root, bottom + down * (0.024 + 0.0045), Vector3(0.031, 0.009, 0.05), _mat("polymer"), 0.003)
 	base.basis = tilt
