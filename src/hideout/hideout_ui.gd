@@ -117,37 +117,94 @@ func _process(_delta: float) -> void:
 
 func _build_stash() -> void:
 	_title.text = "Тайник и снаряжение   ·   %s ₽" % InventoryUI.money(Profile.money)
-	var stash := _column("Тайник   %d / %d ячеек" % [Profile.stash_cells(), Balance.STASH_CELLS], 1.2)
-	for i in range(Profile.stash.size()):
-		var e: Dictionary = Profile.stash[i]
-		var idx := i
-		var row := _row(e, ItemDb.entry_value(e))
-		if not ItemDb.equip(String(e.id)).is_empty():
-			row.add_child(_button("Надеть", func() -> void: Profile.equip_from_stash(idx)))
-		row.add_child(_button("В рюкзак", func() -> void: Profile.stash_to_backpack(idx, int(e.n))))
-		stash.add_child(row)
-	if Profile.stash.is_empty():
-		stash.add_child(_text("пусто", Color(0.6, 0.6, 0.6)))
-	var gear := _column("Снаряжение", 0.9)
+	var stash_col := _column("Тайник   %d / %d ячеек" % [Profile.stash_cells(), Balance.STASH_CELLS], 1.25)
+	var stash := GridView.new(Balance.STASH_GRID, "stash")
+	stash.set_items(Profile.stash)
+	stash_col.add_child(stash)
+	var gear := _column("Снаряжение", 0.8)
 	for slot in Inventory.SLOTS:
 		var s := String(slot)
-		gear.add_child(_text(String(Inventory.SLOT_NAMES[s]), Color(0.7, 0.72, 0.75)))
-		if Profile.equipment.has(s):
-			var e: Dictionary = Profile.equipment[s]
-			var row := _row(e, ItemDb.entry_value(e))
-			row.add_child(_button("Снять", func() -> void: Profile.unequip(s)))
-			gear.add_child(row)
-		else:
-			gear.add_child(_text("—", Color(0.5, 0.5, 0.5)))
-	var bp := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 1.0)
-	for i in range(Profile.backpack.size()):
-		var e: Dictionary = Profile.backpack[i]
-		var idx := i
-		var row := _row(e, ItemDb.entry_value(e))
-		row.add_child(_button("В тайник", func() -> void: Profile.backpack_to_stash(idx, int(e.n))))
-		bp.add_child(row)
-	if Profile.backpack.is_empty():
-		bp.add_child(_text("пусто — положи патроны и медицину", Color(0.6, 0.6, 0.6)))
+		var sv := SlotView.new(s)
+		sv.set_entry(Profile.equipment.get(s, {}))
+		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role == "backpack", idx))
+		sv.unequip_requested.connect(func() -> void: Profile.unequip(s))
+		gear.add_child(sv)
+	gear.add_child(_text("Тащи мышью · R — повернуть на лету
+Двойной клик — надеть / перенести
+Ctrl+клик — в другую сетку
+Правая кнопка — действия", Color(0.6, 0.62, 0.6)))
+	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)
+	var bp := GridView.new(Balance.BACKPACK_GRID, "backpack")
+	bp.set_items(Profile.backpack)
+	bp_col.add_child(bp)
+	for view in [stash, bp]:
+		var v: GridView = view
+		var in_bp := v == bp
+		v.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
+			if src == v:
+				Profile.move_in(in_bp, idx, x, y, r)
+			else:
+				Profile.transfer_to(not in_bp, idx, x, y, r))
+		v.slot_dropped.connect(func(slot: String, x: int, y: int, r: bool) -> void: Profile.unequip_to(slot, in_bp, x, y, r))
+		v.quick_move.connect(func(idx: int) -> void: _quick_move(in_bp, idx))
+		v.activated.connect(func(idx: int) -> void:
+			var list: Array = Profile.backpack if in_bp else Profile.stash
+			if idx < list.size() and not ItemDb.equip(String(list[idx].id)).is_empty():
+				Profile.equip_from(in_bp, idx)
+			else:
+				_quick_move(in_bp, idx))
+		v.context.connect(func(idx: int, at: Vector2) -> void: _stash_menu(in_bp, idx, at))
+
+
+func _quick_move(from_bp: bool, idx: int) -> void:
+	var list: Array = Profile.backpack if from_bp else Profile.stash
+	if idx >= list.size():
+		return
+	if from_bp:
+		Profile.backpack_to_stash(idx, int(list[idx].n))
+	else:
+		Profile.stash_to_backpack(idx, int(list[idx].n))
+
+
+## Правая кнопка по предмету: что с ним можно сделать.
+func _stash_menu(in_bp: bool, idx: int, at: Vector2) -> void:
+	var list: Array = Profile.backpack if in_bp else Profile.stash
+	if idx >= list.size():
+		return
+	var id := String(list[idx].id)
+	var menu := PopupMenu.new()
+	var acts: Array[Callable] = []
+	if not ItemDb.equip(id).is_empty():
+		menu.add_item("Надеть" if not ItemDb.equip(id).has("weapon") else "Взять (слот оружия)")
+		acts.append(func() -> void: Profile.equip_from(in_bp, idx))
+	menu.add_item("В тайник" if in_bp else "В рюкзак")
+	acts.append(func() -> void: _quick_move(in_bp, idx))
+	if int(list[idx].n) > 1:
+		menu.add_item("Разделить стопку пополам")
+		acts.append(func() -> void: _split(in_bp, idx))
+	menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
+	menu.popup_hide.connect(menu.queue_free)
+	_root.add_child(menu)
+	menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
+
+
+## Половину стопки — отдельной стопкой в свободное место той же сетки.
+func _split(in_bp: bool, idx: int) -> void:
+	var list: Array = Profile.backpack if in_bp else Profile.stash
+	var grid := Balance.BACKPACK_GRID if in_bp else Balance.STASH_GRID
+	var e: Dictionary = list[idx]
+	var half := int(e.n) / 2
+	var spot := ItemDb.find_spot(ItemDb.occupancy(list, grid), grid, String(e.id))
+	if half <= 0 or spot.x < 0:
+		return
+	var part := e.duplicate(true)
+	part.n = half
+	part.x = spot.x
+	part.y = spot.y
+	part.r = spot.z == 1
+	e.n = int(e.n) - half
+	list.append(part)
+	Profile.save()
 
 
 # ---------------------------------------------------------------- торговец

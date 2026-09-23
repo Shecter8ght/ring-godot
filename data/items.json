@@ -10,7 +10,12 @@
    "use": {
     "heal": 20,
     "time": 2.5
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Бинт"
   },
   "painkillers": {
    "name": "Обезболивающее",
@@ -21,7 +26,12 @@
    "use": {
     "heal": 12,
     "time": 1.5
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Обезб."
   },
   "medkit": {
    "name": "Аптечка",
@@ -32,175 +42,287 @@
    "use": {
     "heal": 60,
     "time": 5.0
-   }
+   },
+   "size": [
+    2,
+    1
+   ],
+   "short": "Аптечка"
   },
   "water": {
    "name": "Вода 0.5 л",
    "cat": "food",
    "cells": 1,
    "value": 300,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ]
   },
   "canned": {
    "name": "Тушёнка",
    "cat": "food",
    "cells": 1,
    "value": 500,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ]
   },
   "energy_bar": {
    "name": "Шоколадный батончик",
    "cat": "food",
    "cells": 1,
    "value": 250,
-   "stack": 2
+   "stack": 2,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Батонч."
   },
   "phone": {
    "name": "Смартфон",
    "cat": "tech",
    "cells": 1,
    "value": 6000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ]
   },
   "headphones": {
    "name": "Наушники",
    "cat": "tech",
    "cells": 1,
    "value": 3500,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Наушн."
   },
   "powerbank": {
    "name": "Пауэрбанк",
    "cat": "tech",
    "cells": 1,
    "value": 2500,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Павербанк"
   },
   "laptop": {
    "name": "Ноутбук",
    "cat": "tech",
    "cells": 4,
    "value": 18000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    2,
+    2
+   ]
   },
   "gpu": {
    "name": "Видеокарта",
    "cat": "tech",
-   "cells": 3,
+   "cells": 2,
    "value": 25000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    2,
+    1
+   ]
   },
   "camera": {
    "name": "Фотоаппарат",
    "cat": "tech",
    "cells": 2,
    "value": 9000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    2,
+    1
+   ]
   },
   "server_drive": {
    "name": "Диск с сервера",
    "cat": "tech",
    "cells": 1,
    "value": 20000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Диск"
   },
   "watch": {
    "name": "Наручные часы",
    "cat": "value",
    "cells": 1,
    "value": 12000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ]
   },
   "gold_chain": {
    "name": "Золотая цепь",
    "cat": "value",
    "cells": 1,
    "value": 15000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Цепь"
   },
   "diamond_ring": {
    "name": "Кольцо с бриллиантом",
    "cat": "value",
    "cells": 1,
    "value": 40000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Кольцо"
   },
   "cash": {
    "name": "Наличные",
    "cat": "value",
    "cells": 1,
    "value": 5000,
-   "stack": 10
+   "stack": 10,
+   "size": [
+    1,
+    1
+   ]
   },
   "cigarettes": {
    "name": "Сигареты",
    "cat": "barter",
    "cells": 1,
    "value": 700,
-   "stack": 5
+   "stack": 5,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Сигар."
   },
   "lighter": {
    "name": "Зажигалка",
    "cat": "barter",
    "cells": 1,
    "value": 200,
-   "stack": 3
+   "stack": 3,
+   "size": [
+    1,
+    1
+   ]
   },
   "perfume": {
    "name": "Духи",
    "cat": "barter",
    "cells": 1,
    "value": 3000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ]
   },
   "battery": {
    "name": "Аккумулятор",
    "cat": "tools",
    "cells": 2,
    "value": 3000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    2
+   ]
   },
   "wires": {
    "name": "Провода",
    "cat": "tools",
    "cells": 1,
    "value": 800,
-   "stack": 3
+   "stack": 3,
+   "size": [
+    1,
+    1
+   ]
   },
   "toolset": {
    "name": "Набор инструментов",
    "cat": "tools",
    "cells": 3,
    "value": 6000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    3,
+    1
+   ]
   },
   "documents": {
    "name": "Документы охраны",
    "cat": "intel",
    "cells": 1,
    "value": 8000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Док-ты"
   },
   "key_server": {
    "name": "Ключ от серверной",
    "cat": "key",
    "cells": 1,
    "value": 3000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Ключ СРВ"
   },
   "keycard_security": {
    "name": "Карта-ключ охраны",
    "cat": "key",
    "cells": 1,
    "value": 10000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Карта"
   },
   "key_jewelry": {
    "name": "Ключ от сейфовой",
    "cat": "key",
    "cells": 1,
    "value": 5000,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Ключ ЮВЛ"
   },
   "w_pistol": {
    "name": "Пистолет",
@@ -218,12 +340,16 @@
      "mag",
      "tac"
     ]
-   }
+   },
+   "size": [
+    2,
+    1
+   ]
   },
   "w_rifle": {
    "name": "Автомат",
    "cat": "weapon",
-   "cells": 6,
+   "cells": 8,
    "value": 48000,
    "stack": 1,
    "equip": {
@@ -238,7 +364,11 @@
      "mag",
      "tac"
     ]
-   }
+   },
+   "size": [
+    4,
+    2
+   ]
   },
   "w_shotgun": {
    "name": "Дробовик",
@@ -257,12 +387,16 @@
      "stock",
      "tac"
     ]
-   }
+   },
+   "size": [
+    5,
+    1
+   ]
   },
   "w_bolt": {
    "name": "Винтовка",
    "cat": "weapon",
-   "cells": 6,
+   "cells": 10,
    "value": 65000,
    "stack": 1,
    "equip": {
@@ -273,78 +407,119 @@
      "muzzle",
      "bipod"
     ]
-   }
+   },
+   "size": [
+    5,
+    2
+   ]
   },
   "ammo_9x19": {
    "name": "Патроны 9×19",
    "cat": "ammo",
    "cells": 1,
    "value": 60,
-   "stack": 50
+   "stack": 50,
+   "size": [
+    1,
+    1
+   ],
+   "short": "9×19"
   },
   "ammo_545": {
    "name": "Патроны 5.45×39",
    "cat": "ammo",
    "cells": 1,
    "value": 90,
-   "stack": 60
+   "stack": 60,
+   "size": [
+    1,
+    1
+   ],
+   "short": "5.45"
   },
   "ammo_12": {
    "name": "Патроны 12/70 картечь",
    "cat": "ammo",
    "cells": 1,
    "value": 120,
-   "stack": 20
+   "stack": 20,
+   "size": [
+    1,
+    1
+   ],
+   "short": "12/70"
   },
   "ammo_762r": {
    "name": "Патроны 7.62×54R",
    "cat": "ammo",
    "cells": 1,
    "value": 250,
-   "stack": 20
+   "stack": 20,
+   "size": [
+    1,
+    1
+   ],
+   "short": "7.62R"
   },
   "grenade": {
    "name": "Граната РГД-5",
    "cat": "throw",
    "cells": 1,
    "value": 4500,
-   "stack": 1
+   "stack": 1,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Граната"
   },
   "vest_light": {
    "name": "Бронежилет лёгкий (кл. 2)",
    "cat": "armor",
-   "cells": 4,
+   "cells": 9,
    "value": 15000,
    "stack": 1,
    "equip": {
     "slot": "armor",
     "protect": 0.3,
     "durability": 50
-   }
+   },
+   "size": [
+    3,
+    3
+   ]
   },
   "vest_heavy": {
    "name": "Бронежилет тяжёлый (кл. 4)",
    "cat": "armor",
-   "cells": 6,
+   "cells": 12,
    "value": 55000,
    "stack": 1,
    "equip": {
     "slot": "armor",
     "protect": 0.5,
     "durability": 90
-   }
+   },
+   "size": [
+    3,
+    4
+   ]
   },
   "helmet": {
    "name": "Шлем стальной",
    "cat": "armor",
-   "cells": 3,
+   "cells": 4,
    "value": 12000,
    "stack": 1,
    "equip": {
     "slot": "helmet",
     "protect": 0.12,
     "durability": 40
-   }
+   },
+   "size": [
+    2,
+    2
+   ]
   },
   "mod_rmr": {
    "name": "Мини-коллиматор на затвор",
@@ -362,7 +537,12 @@
      "ads_spread": 0.7,
      "ergo": -2
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "RMR"
   },
   "mod_red_dot": {
    "name": "Коллиматор (трубка 30 мм)",
@@ -381,7 +561,12 @@
      "ads_spread": 0.72,
      "ergo": -4
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Коллим."
   },
   "mod_holo": {
    "name": "Голографический прицел",
@@ -400,7 +585,12 @@
      "ads_spread": 0.7,
      "ergo": -5
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Голо"
   },
   "mod_scope4x": {
    "name": "Оптика 4×32",
@@ -420,7 +610,11 @@
      "ergo": -8,
      "zoom": 4.0
     }
-   }
+   },
+   "size": [
+    2,
+    1
+   ]
   },
   "mod_supp_9": {
    "name": "Глушитель 9 мм",
@@ -445,7 +639,11 @@
      0.0155,
      0.15
     ]
-   }
+   },
+   "size": [
+    2,
+    1
+   ]
   },
   "mod_supp_545": {
    "name": "Глушитель 5.45",
@@ -470,7 +668,11 @@
      0.019,
      0.175
     ]
-   }
+   },
+   "size": [
+    2,
+    1
+   ]
   },
   "mod_supp_12": {
    "name": "Глушитель 12 калибра",
@@ -495,7 +697,11 @@
      0.0235,
      0.2
     ]
-   }
+   },
+   "size": [
+    3,
+    1
+   ]
   },
   "mod_supp_762": {
    "name": "Глушитель 7.62",
@@ -520,7 +726,11 @@
      0.021,
      0.2
     ]
-   }
+   },
+   "size": [
+    2,
+    1
+   ]
   },
   "mod_comp": {
    "name": "Компенсатор",
@@ -540,7 +750,12 @@
      "noise": 1.1,
      "ergo": -2
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Компенс."
   },
   "mod_grip": {
    "name": "Вертикальная рукоятка",
@@ -560,7 +775,12 @@
      "spread": 0.88,
      "ergo": 6
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Рукоятка"
   },
   "mod_grip_angled": {
    "name": "Угловая рукоятка",
@@ -580,7 +800,12 @@
      "ads_spread": 0.85,
      "ergo": 9
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Упор"
   },
   "mod_stock_tele": {
    "name": "Телескопический приклад",
@@ -600,7 +825,11 @@
      "ads_spread": 0.9,
      "ergo": 12
     }
-   }
+   },
+   "size": [
+    2,
+    1
+   ]
   },
   "mod_mag_ext": {
    "name": "Магазин на 45 патронов",
@@ -618,7 +847,12 @@
      "mag": 15,
      "ergo": -7
     }
-   }
+   },
+   "size": [
+    1,
+    2
+   ],
+   "short": "Маг. 45"
   },
   "mod_mag_pistol": {
    "name": "Удлинённый магазин пистолета (+8)",
@@ -636,7 +870,12 @@
      "mag": 8,
      "ergo": -4
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Маг.+"
   },
   "mod_flashlight": {
    "name": "Тактический фонарь",
@@ -655,7 +894,12 @@
     "fx": {
      "ergo": -2
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Фонарь"
   },
   "mod_laser": {
    "name": "ЛЦУ (лазер)",
@@ -675,7 +919,12 @@
      "hip_spread": 0.75,
      "ergo": -1
     }
-   }
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "ЛЦУ"
   },
   "mod_bipod": {
    "name": "Сошки",
@@ -694,7 +943,11 @@
      "braced_spread": 0.7,
      "ergo": -8
     }
-   }
+   },
+   "size": [
+    2,
+    1
+   ]
   }
  }
 }

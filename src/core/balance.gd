@@ -47,6 +47,8 @@ const EXTRACT_ZONE_HEIGHT := 2.5
 const NOISE_SWITCH := 35.0
 ## Рюкзак: вместимость в ячейках (размеры предметов — data/items.json).
 const BACKPACK_CELLS := 30
+## Сетка рюкзака, ш × в (ячеек — BACKPACK_CELLS).
+const BACKPACK_GRID := Vector2i(6, 5)
 ## Обыск тела / выброшенного, с (у контейнеров на пропсах — data/loot.json).
 const SEARCH_BODY_SEC := 2.0
 ## Контейнер на пропе — на этой высоте над полом (к ней меряется дальность «F»), м.
@@ -55,6 +57,8 @@ const LOOT_POINT_HEIGHT := 0.6
 # --- Убежище и торговец ---
 ## Тайник: вместимость в ячейках.
 const STASH_CELLS := 300
+## Сетка тайника, ш × в (ячеек — STASH_CELLS).
+const STASH_GRID := Vector2i(10, 30)
 ## Новый профиль: деньги и что лежит в тайнике ([id, штук]).
 const START_MONEY := 60000
 const START_STASH := [["w_pistol", 1], ["w_rifle", 1], ["ammo_9x19", 100], ["ammo_545", 120],

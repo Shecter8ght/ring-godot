@@ -22,8 +22,10 @@ func _ready() -> void:
 		Profile.equip_from_stash(_idx(id))
 	_check("надето снаряжение", Profile.equipment.size() == 4, str(Profile.equipment.keys()))
 	for id in ["ammo_545", "ammo_9x19", "bandage", "grenade"]:
-		Profile.stash_to_backpack(_idx(id), int(Profile.stash[_idx(id)].n))
-	_check("рюкзак собран", Profile.backpack.size() == 4, "%d ячеек" % Profile.backpack_cells())
+		# все стопки предмета (патроны лежат в тайнике несколькими стопками)
+		while _idx(id) >= 0 and Profile.stash_to_backpack(_idx(id), int(Profile.stash[_idx(id)].n)):
+			pass
+	_check("рюкзак собран — сетка без наложений", _ids(Profile.backpack) == 4 and ItemDb.grid_ok(Profile.backpack, Balance.BACKPACK_GRID), "%d ячеек, записей %d" % [Profile.backpack_cells(), Profile.backpack.size()])
 	var m0 := Profile.money
 	Profile.buy("ammo_12", 20)
 	_check("покупка у торговца", Profile.money < m0 and _idx("ammo_12") >= 0, "%d ₽" % Profile.money)
@@ -51,7 +53,7 @@ func _ready() -> void:
 		if String(Profile.backpack[i].id) == "mod_rmr":
 			bi = i
 	Profile.install_mod("secondary", bi, true)
-	_check("верстак: обвес из рюкзака", String(Profile.weapon_mods("secondary").get("optic", "")) == "mod_rmr" and Profile.backpack.size() == 4, str(Profile.weapon_mods("secondary")))
+	_check("верстак: обвес из рюкзака", String(Profile.weapon_mods("secondary").get("optic", "")) == "mod_rmr" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("secondary")))
 	Profile.remove_mod("secondary", "optic")
 	# этажи: первый открыт и выбран, второй закрыт до доверия
 	_check("этажи: 1F открыт и выбран, 2F закрыт по доверию", Floors.is_open("f1") and Profile.floor == "f1" and not Floors.is_open("f2") and Floors.unlock_block("f2").begins_with("доверие")
@@ -115,6 +117,14 @@ func _ready() -> void:
 	_check("Enter — назад в убежище", get_tree().current_scene and get_tree().current_scene.scene_file_path == Balance.HIDEOUT_SCENE and not Profile.pending_raid, str(get_tree().current_scene.scene_file_path if get_tree().current_scene else ""))
 	print("loadout_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
+
+
+## Сколько разных предметов в списке (стопки одного — одна позиция).
+func _ids(list: Array) -> int:
+	var seen := {}
+	for e in list:
+		seen[String(e.id)] = true
+	return seen.size()
 
 
 func _idx(id: String) -> int:

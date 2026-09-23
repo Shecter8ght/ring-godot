@@ -232,6 +232,89 @@ func request_consume(id: String, n: int) -> void:
 		_rpc_consume.rpc_id(1, id, n)
 
 
+## Сетка рюкзака: передвинуть запись idx в (x, y) с поворотом r.
+func request_move(idx: int, x: int, y: int, r: bool) -> void:
+	if _is_host():
+		_move_item(multiplayer.get_unique_id(), idx, x, y, r)
+	else:
+		_rpc_move_item.rpc_id(1, idx, x, y, r)
+
+
+## Из контейнера — запись idx прямо в клетку (x, y) рюкзака (перетащили мышью).
+func request_take_to(container: LootContainer, idx: int, x: int, y: int, r: bool) -> void:
+	if _is_host():
+		_take_to(multiplayer.get_unique_id(), container.get_path(), idx, x, y, r)
+	else:
+		_rpc_take_to.rpc_id(1, container.get_path(), idx, x, y, r)
+
+
+## Из рюкзака — запись idx в контейнер (перетащили в окно лута).
+func request_put(container: LootContainer, idx: int) -> void:
+	if _is_host():
+		_put(multiplayer.get_unique_id(), container.get_path(), idx)
+	else:
+		_rpc_put.rpc_id(1, container.get_path(), idx)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_move_item(idx: int, x: int, y: int, r: bool) -> void:
+	if multiplayer.is_server():
+		_move_item(multiplayer.get_remote_sender_id(), idx, x, y, r)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_take_to(path: NodePath, idx: int, x: int, y: int, r: bool) -> void:
+	if multiplayer.is_server():
+		_take_to(multiplayer.get_remote_sender_id(), path, idx, x, y, r)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_put(path: NodePath, idx: int) -> void:
+	if multiplayer.is_server():
+		_put(multiplayer.get_remote_sender_id(), path, idx)
+
+
+func _move_item(peer_id: int, idx: int, x: int, y: int, r: bool) -> void:
+	var pl := player_of(peer_id)
+	if pl and pl.is_alive():
+		pl.inventory.move(idx, x, y, r)
+
+
+## Контейнер рядом с игроком (обыскивать можно только в радиусе).
+func _near_container(pl: Player, path: NodePath) -> LootContainer:
+	var c := get_node_or_null(path) as LootContainer
+	if pl == null or c == null or not pl.is_alive() or is_extracted(pl.peer_id):
+		return null
+	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
+		return null
+	return c
+
+
+func _take_to(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool) -> void:
+	var pl := player_of(peer_id)
+	var c := _near_container(pl, path)
+	if c == null or idx < 0 or idx >= c.items.size():
+		return
+	var k := pl.inventory.put_at((c.items[idx] as Dictionary).duplicate(true), x, y, r)
+	if k > 0:
+		c.take_at(idx, k)
+		Audio.play("pin", c.global_position, -8.0)
+
+
+func _put(peer_id: int, path: NodePath, idx: int) -> void:
+	var pl := player_of(peer_id)
+	var c := _near_container(pl, path)
+	if c == null or idx < 0 or idx >= pl.inventory.items.size():
+		return
+	var out := pl.inventory.remove_at(idx, int(pl.inventory.items[idx].n))
+	if out.is_empty():
+		return
+	var list := c.items.duplicate(true)
+	ItemDb.add_to(list, out, Vector2i.ZERO)
+	c.items = list
+	c.rolled = true
+
+
 ## Надеть / взять в руки предмет из рюкзака (индекс в items).
 func request_equip(idx: int) -> void:
 	if _is_host():
@@ -496,7 +579,12 @@ func _save_profile(me: Player) -> void:
 	_profile_saved = true
 	var items: Array = me.inventory.items.duplicate(true)
 	for e in me.mag_ammo_items():
-		ItemDb.add_to(items, e, -1)
+		# патроны из магазинов — обратно в рюкзак; не влезло — без места, профиль разложит
+		var placed := ItemDb.add_to(items, e, Balance.BACKPACK_GRID)
+		if placed < int(e.n):
+			var rest: Dictionary = (e as Dictionary).duplicate(true)
+			rest.n = int(e.n) - placed
+			items.append(rest)
 	Profile.return_loadout(me.inventory.equipment, items, int(loot_value.get(me.peer_id, 0)))
 
 

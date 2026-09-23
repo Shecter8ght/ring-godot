@@ -33,6 +33,17 @@ func _ready() -> void:
 	_press("pause")
 	await _frames(4)
 	print("ui_shots: меню закрыто — пауза снята: ", not get_tree().paused)
+	# рюкзак и лут в рейде: в рюкзаке — немного вещей, рядом — сейф
+	var me := get_tree().get_first_node_in_group("players") as Player
+	for pair in [["ammo_545", 90], ["bandage", 3], ["medkit", 1], ["w_pistol", 1], ["vest_light", 1], ["gold_chain", 2]]:
+		me.inventory.add(String(pair[0]), int(pair[1]))
+	var safe := inst.get_node("Interactables/JewelrySafe") as LootContainer
+	safe.roll()
+	me.global_position = safe.global_position + safe.global_basis.z * -1.0
+	await _frames(3)
+	Raid.current.ui.call("_open_loot", safe)
+	await _frames(6)
+	_save("ui_inventory")
 	get_tree().quit(0)
 
 

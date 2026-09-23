@@ -5,7 +5,7 @@ extends CanvasLayer
 ## H — полечиться самым подходящим из рюкзака. Сами изменения делает хост (Raid.request_*),
 ## окно только показывает реплицированные списки и шлёт просьбы.
 
-const PANEL_W := 440.0
+const PANEL_W := 460.0
 
 var _backpack_open: bool = false
 var _searching: LootContainer
@@ -26,6 +26,7 @@ var _take_all: Button
 var _bar: ProgressBar
 var _bar_label: Label
 var _bp_sig: String = ""
+var _bp_grid: GridView
 var _loot_sig: String = ""
 
 
@@ -217,7 +218,7 @@ func _refresh_visibility() -> void:
 	_loot_sig = ""
 
 
-## Списки перестраиваются, только когда содержимое изменилось.
+## Сетки перестраиваются, только когда содержимое изменилось.
 func _refresh_lists(me: Player) -> void:
 	if _backpack_open:
 		var sig := str(me.inventory.items) + str(me.inventory.equipment)
@@ -225,26 +226,35 @@ func _refresh_lists(me: Player) -> void:
 			_bp_sig = sig
 			_bp_title.text = "Рюкзак   %d / %d ячеек   ·   %s ₽" % [me.inventory.cells_used(), Balance.BACKPACK_CELLS, money(me.inventory.value())]
 			_clear(_bp_list)
-			# снаряжение — сверху, приглушённо
+			# снаряжение: в слот тащат из рюкзака (надеть / взять в руки)
+			var slots := GridContainer.new()
+			slots.columns = 2
+			_bp_list.add_child(slots)
 			for slot in Inventory.SLOTS:
-				var e: Dictionary = me.inventory.equipment.get(slot, {})
-				var text := "%s:  %s" % [Inventory.SLOT_NAMES[slot], ItemDb.label(e) if not e.is_empty() else "—"]
-				_bp_list.add_child(_row_label(text, Color(0.75, 0.8, 0.85)))
-			_bp_list.add_child(HSeparator.new())
-			if me.inventory.items.is_empty():
-				_bp_list.add_child(_row_label("пусто", Color(0.6, 0.6, 0.6)))
-			for i in range(me.inventory.items.size()):
-				var it: Dictionary = me.inventory.items[i]
-				var id := String(it.id)
-				var idx := i
-				var row := _row_entry(it)
-				if ItemDb.item(id).has("use"):
-					row.add_child(_button("Лечиться", func() -> void: _try_heal_with(me, id)))
-				if not ItemDb.equip(id).is_empty():
-					var verb := "В руки" if ItemDb.equip(id).has("weapon") else "Надеть"
-					row.add_child(_button(verb, func() -> void: Raid.current.request_equip(idx)))
-				row.add_child(_button("Выбросить", func() -> void: Raid.current.request_drop(id, int(it.n))))
-				_bp_list.add_child(row)
+				var sv := SlotView.new(String(slot))
+				sv.custom_minimum_size = Vector2(3.0 * GridView.CELL, 1.5 * GridView.CELL)
+				sv.set_entry(me.inventory.equipment.get(slot, {}))
+				sv.equip_from.connect(func(src: GridView, idx: int) -> void:
+					if src.role == "backpack":
+						Raid.current.request_equip(idx))
+				slots.add_child(sv)
+			_bp_grid = GridView.new(Balance.BACKPACK_GRID, "backpack")
+			_bp_grid.set_items(me.inventory.items)
+			_bp_list.add_child(_bp_grid)
+			var hint := _row_label("Тащи мышью · R — повернуть · двойной клик — надеть / лечиться · правая кнопка — действия", Color(0.6, 0.62, 0.6))
+			hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			hint.add_theme_font_size_override("font_size", 13)
+			_bp_list.add_child(hint)
+			_bp_grid.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
+				if src == _bp_grid:
+					Raid.current.request_move(idx, x, y, r)
+				elif src.role == "loot" and _looting:
+					Raid.current.request_take_to(_looting, idx, x, y, r))
+			_bp_grid.activated.connect(func(idx: int) -> void: _use_item(me, idx))
+			_bp_grid.quick_move.connect(func(idx: int) -> void:
+				if _looting:
+					Raid.current.request_put(_looting, idx))
+			_bp_grid.context.connect(func(idx: int, at: Vector2) -> void: _backpack_menu(me, idx, at))
 	if _looting:
 		var sig2 := str(_looting.items) + str(_looting.rolled)
 		if sig2 != _loot_sig:
@@ -254,14 +264,68 @@ func _refresh_lists(me: Player) -> void:
 			if not _looting.rolled:
 				_loot_list.add_child(_row_label("…", Color(0.6, 0.6, 0.6)))
 			elif _looting.items.is_empty():
-				_loot_list.add_child(_row_label("пусто", Color(0.6, 0.6, 0.6)))
+				_loot_list.add_child(_row_label("пусто — сюда можно положить из рюкзака", Color(0.6, 0.6, 0.6)))
 			var c := _looting
-			for it in _looting.items:
-				var id := String(it.id)
-				var row := _row_entry(it)
-				row.add_child(_button("Взять", func() -> void: Raid.current.request_take(c, id, int(it.n))))
-				_loot_list.add_child(row)
+			var lg := GridView.new(Vector2i(Balance.BACKPACK_GRID.x, 2), "loot")
+			lg.auto_layout = true
+			lg.set_items(_looting.items)
+			_loot_list.add_child(lg)
+			lg.activated.connect(func(idx: int) -> void: _take_one(c, idx))
+			lg.quick_move.connect(func(idx: int) -> void: _take_one(c, idx))
+			lg.context.connect(func(idx: int, at: Vector2) -> void: _popup(at, ["Взять"], [func() -> void: _take_one(c, idx)]))
+			# из рюкзака — в контейнер (спрятать, оставить напарнику)
+			lg.dropped.connect(func(src: GridView, idx: int, _x: int, _y: int, _r: bool) -> void:
+				if src.role == "backpack":
+					Raid.current.request_put(c, idx))
 			_take_all.disabled = _looting.items.is_empty()
+
+
+func _take_one(c: LootContainer, idx: int) -> void:
+	if idx < c.items.size():
+		Raid.current.request_take(c, String(c.items[idx].id), int(c.items[idx].n))
+
+
+## Двойной клик по предмету рюкзака: лечиться / надеть / взять в руки.
+func _use_item(me: Player, idx: int) -> void:
+	if idx >= me.inventory.items.size():
+		return
+	var id := String(me.inventory.items[idx].id)
+	if ItemDb.item(id).has("use"):
+		_try_heal_with(me, id)
+	elif not ItemDb.equip(id).is_empty():
+		Raid.current.request_equip(idx)
+
+
+func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
+	if idx >= me.inventory.items.size():
+		return
+	var it: Dictionary = me.inventory.items[idx]
+	var id := String(it.id)
+	var names: Array[String] = []
+	var acts: Array[Callable] = []
+	if ItemDb.item(id).has("use"):
+		names.append("Лечиться")
+		acts.append(func() -> void: _try_heal_with(me, id))
+	if not ItemDb.equip(id).is_empty():
+		names.append("В руки" if ItemDb.equip(id).has("weapon") else "Надеть")
+		acts.append(func() -> void: Raid.current.request_equip(idx))
+	if _looting:
+		names.append("Положить в «%s»" % _looting.display_name)
+		var c := _looting
+		acts.append(func() -> void: Raid.current.request_put(c, idx))
+	names.append("Выбросить")
+	acts.append(func() -> void: Raid.current.request_drop(id, int(it.n)))
+	_popup(at, names, acts)
+
+
+func _popup(at: Vector2, names: Array, acts: Array) -> void:
+	var menu := PopupMenu.new()
+	for t in names:
+		menu.add_item(String(t))
+	menu.id_pressed.connect(func(i: int) -> void: (acts[i] as Callable).call())
+	menu.popup_hide.connect(menu.queue_free)
+	add_child(menu)
+	menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
 
 
 func _try_heal_with(me: Player, id: String) -> void:

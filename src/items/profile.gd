@@ -50,6 +50,7 @@ static func ensure() -> void:
 		if not floor in floors_open:
 			floor = "f1"
 		_fix_numbers()
+		_fit_grids()
 	else:
 		_starter()
 		save()
@@ -66,7 +67,7 @@ static func _starter() -> void:
 	floors_open = ["f1"]
 	floor = "f1"
 	for pair in Balance.START_STASH:
-		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), -1)
+		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), Balance.STASH_GRID)
 
 
 ## JSON отдаёт числа как float — количества делаем целыми.
@@ -76,6 +77,18 @@ static func _fix_numbers() -> void:
 			it.n = int(it.n)
 	for slot in equipment:
 		equipment[slot].n = 1
+
+
+## Тайник и рюкзак — сетки: записи без мест (старый профиль, вернувшиеся патроны) раскладываются
+## заново; что не влезло в рюкзак — в тайник, что не влезло в тайник — теряется (с предупреждением).
+static func _fit_grids() -> void:
+	if not ItemDb.grid_ok(backpack, Balance.BACKPACK_GRID):
+		for e in ItemDb.pack(backpack, Balance.BACKPACK_GRID):
+			ItemDb.add_to(stash, e, Balance.STASH_GRID)
+	if not ItemDb.grid_ok(stash, Balance.STASH_GRID):
+		var lost := ItemDb.pack(stash, Balance.STASH_GRID)
+		if not lost.is_empty():
+			push_warning("Profile: тайник переполнен, не поместилось: %s" % str(lost))
 
 
 static func save() -> void:
@@ -115,16 +128,40 @@ static func backpack_cells() -> int:
 
 # ---------------------------------------------------------------- убежище
 
+## Передвинуть запись внутри тайника или рюкзака (перетащили мышью).
+static func move_in(in_backpack: bool, idx: int, x: int, y: int, r: bool) -> bool:
+	var ok := ItemDb.move_in(backpack if in_backpack else stash, Balance.BACKPACK_GRID if in_backpack else Balance.STASH_GRID, idx, x, y, r)
+	if ok:
+		save()
+	return ok
+
+
+## Перенести запись idx между тайником и рюкзаком прямо в место (x, y); false — не влезло.
+static func transfer_to(from_backpack: bool, idx: int, x: int, y: int, r: bool) -> bool:
+	var from: Array = backpack if from_backpack else stash
+	var to: Array = stash if from_backpack else backpack
+	var grid := Balance.STASH_GRID if from_backpack else Balance.BACKPACK_GRID
+	if idx < 0 or idx >= from.size():
+		return false
+	var e: Dictionary = (from[idx] as Dictionary).duplicate(true)
+	var k := ItemDb.put_at(to, e, grid, x, y, r)
+	if k <= 0:
+		return false
+	ItemDb.remove_at(from, idx, k)
+	save()
+	return true
+
+
 ## Из тайника в рюкзак (n штук записи idx); false — не влезло.
 static func stash_to_backpack(idx: int, n: int) -> bool:
-	return _move(stash, backpack, idx, n, Balance.BACKPACK_CELLS)
+	return _move(stash, backpack, idx, n, Balance.BACKPACK_GRID)
 
 
 static func backpack_to_stash(idx: int, n: int) -> bool:
-	return _move(backpack, stash, idx, n, Balance.STASH_CELLS)
+	return _move(backpack, stash, idx, n, Balance.STASH_GRID)
 
 
-static func _move(from: Array, to: Array, idx: int, n: int, cap: int) -> bool:
+static func _move(from: Array, to: Array, idx: int, n: int, cap: Vector2i) -> bool:
 	if idx < 0 or idx >= from.size():
 		return false
 	var probe: Dictionary = (from[idx] as Dictionary).duplicate(true)
@@ -133,24 +170,35 @@ static func _move(from: Array, to: Array, idx: int, n: int, cap: int) -> bool:
 	if k <= 0:
 		return false
 	var out := ItemDb.remove_at(from, idx, mini(k, int(probe.n)))
-	ItemDb.add_to(to, out, -1)
+	ItemDb.add_to(to, out, cap)
 	save()
 	return true
 
 
 ## Надеть из тайника; то, что было в слоте, — в тайник.
 static func equip_from_stash(idx: int) -> bool:
-	if idx < 0 or idx >= stash.size():
+	return equip_from(false, idx)
+
+
+## Надеть предмет из тайника или рюкзака; то, что было в слоте, — туда же (не влезло — в тайник).
+static func equip_from(in_backpack: bool, idx: int) -> bool:
+	var src: Array = backpack if in_backpack else stash
+	var grid := Balance.BACKPACK_GRID if in_backpack else Balance.STASH_GRID
+	if idx < 0 or idx >= src.size():
 		return false
-	var id := String(stash[idx].id)
+	var id := String(src[idx].id)
 	var slot := String(ItemDb.equip(id).get("slot", ""))
 	if slot == "":
 		return false
-	var entry := ItemDb.remove_at(stash, idx, 1)
+	var entry := ItemDb.remove_at(src, idx, 1)
+	for key in ["x", "y", "r"]:
+		entry.erase(key)
 	if not entry.has("dur") and ItemDb.equip(id).has("durability"):
 		entry.dur = float(ItemDb.equip(id).durability)
 	if equipment.has(slot):
-		ItemDb.add_to(stash, equipment[slot], -1)
+		var old: Dictionary = equipment[slot]
+		if ItemDb.add_to(src, old, grid) == 0:
+			ItemDb.add_to(stash, old, Balance.STASH_GRID)
 	equipment[slot] = entry
 	save()
 	return true
@@ -160,9 +208,22 @@ static func unequip(slot: String) -> bool:
 	if not equipment.has(slot):
 		return false
 	var probe: Dictionary = equipment[slot]
-	if ItemDb.room_in(stash, probe, Balance.STASH_CELLS) <= 0:
+	if ItemDb.room_in(stash, probe, Balance.STASH_GRID) <= 0:
 		return false
-	ItemDb.add_to(stash, probe, -1)
+	ItemDb.add_to(stash, probe, Balance.STASH_GRID)
+	equipment.erase(slot)
+	save()
+	return true
+
+
+## Снять прямо в место (x, y) тайника или рюкзака (перетащили из слота в сетку).
+static func unequip_to(slot: String, to_backpack: bool, x: int, y: int, r: bool) -> bool:
+	if not equipment.has(slot):
+		return false
+	var to: Array = backpack if to_backpack else stash
+	var grid := Balance.BACKPACK_GRID if to_backpack else Balance.STASH_GRID
+	if ItemDb.put_at(to, equipment[slot], grid, x, y, r) <= 0:
+		return false
 	equipment.erase(slot)
 	save()
 	return true
@@ -191,7 +252,7 @@ static func install_mod(weapon_slot: String, idx: int, from_backpack: bool = fal
 	ItemDb.remove_at(src, idx, 1)
 	var mods: Dictionary = weapon.get("mods", {}).duplicate()
 	if mods.has(slot):
-		ItemDb.add_to(src, ItemDb.make(String(mods[slot]), 1), -1)
+		ItemDb.add_to(src, ItemDb.make(String(mods[slot]), 1), Balance.BACKPACK_GRID if from_backpack else Balance.STASH_GRID)
 	mods[slot] = mod
 	weapon["mods"] = mods
 	save()
@@ -203,9 +264,9 @@ static func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
 	if not mods.has(mod_slot):
 		return false
 	var e := ItemDb.make(String(mods[mod_slot]), 1)
-	if ItemDb.room_in(stash, e, Balance.STASH_CELLS) <= 0:
+	if ItemDb.room_in(stash, e, Balance.STASH_GRID) <= 0:
 		return false
-	ItemDb.add_to(stash, e, -1)
+	ItemDb.add_to(stash, e, Balance.STASH_GRID)
 	mods.erase(mod_slot)
 	(equipment[weapon_slot] as Dictionary)["mods"] = mods
 	save()
@@ -224,10 +285,10 @@ static func sell_price(entry: Dictionary) -> int:
 
 static func buy(id: String, n: int) -> bool:
 	var cost := buy_price(id) * n
-	if cost > money or ItemDb.room_in(stash, ItemDb.make(id, n), Balance.STASH_CELLS) < n:
+	if cost > money or ItemDb.room_in(stash, ItemDb.make(id, n), Balance.STASH_GRID) < n:
 		return false
 	money -= cost
-	ItemDb.add_to(stash, ItemDb.make(id, n), -1)
+	ItemDb.add_to(stash, ItemDb.make(id, n), Balance.STASH_GRID)
 	save()
 	return true
 
@@ -266,4 +327,5 @@ static func return_loadout(eq: Dictionary, items: Array, loot_value: int = 0) ->
 	equipment = eq.duplicate(true)
 	backpack = items.duplicate(true)
 	_fix_numbers()
+	_fit_grids()
 	save()

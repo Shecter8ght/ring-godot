@@ -1,7 +1,7 @@
 class_name Inventory
 extends Node
-## Рюкзак и снаряжение игрока в рейде. items — список {"id", "n"[, "dur"]}, вместимость —
-## Balance.BACKPACK_CELLS ячеек; equipment — слот ("primary", "secondary", "armor", "helmet") ->
+## Рюкзак и снаряжение игрока в рейде. items — список {"id", "n"[, "dur"], "x", "y", "r"} в сетке
+## Balance.BACKPACK_GRID (см. ItemDb: запись — стопка на своём месте); equipment — слот ("primary", "secondary", "armor", "helmet") ->
 ## экземпляр предмета. Меняет только хост (авторитет узла — 1, как у Health); у всех peer
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
@@ -54,7 +54,7 @@ func count(id: String) -> int:
 
 ## Сколько штук id влезет (с учётом неполной стопки).
 func room_for(id: String) -> int:
-	return ItemDb.room_in(items, ItemDb.make(id, 1 << 20), Balance.BACKPACK_CELLS)
+	return ItemDb.room_in(items, ItemDb.make(id, 1 << 20), Balance.BACKPACK_GRID)
 
 
 ## Кладёт до n штук id; возвращает, сколько положил (хост).
@@ -65,10 +65,28 @@ func add(id: String, n: int) -> int:
 ## Кладёт экземпляр (с прочностью и т.п.); возвращает, сколько штук влезло (хост).
 func add_entry(entry: Dictionary) -> int:
 	var list := items.duplicate(true)
-	var k := ItemDb.add_to(list, entry, Balance.BACKPACK_CELLS)
+	var k := ItemDb.add_to(list, entry, Balance.BACKPACK_GRID)
 	if k > 0:
 		items = list
 	return k
+
+
+## Кладёт экземпляр в конкретное место сетки (перетащили мышью); сколько положил (хост).
+func put_at(entry: Dictionary, x: int, y: int, r: bool) -> int:
+	var list := items.duplicate(true)
+	var k := ItemDb.put_at(list, entry, Balance.BACKPACK_GRID, x, y, r)
+	if k > 0:
+		items = list
+	return k
+
+
+## Передвинуть запись idx внутри рюкзака (хост).
+func move(idx: int, x: int, y: int, r: bool) -> bool:
+	var list := items.duplicate(true)
+	if not ItemDb.move_in(list, Balance.BACKPACK_GRID, idx, x, y, r):
+		return false
+	items = list
+	return true
 
 
 ## Забирает до n штук id (патроны, лекарства); возвращает, сколько забрал (хост).
@@ -121,7 +139,7 @@ func equip_from_items(idx: int) -> Dictionary:
 	var old: Dictionary = eq.get(slot, {})
 	eq[slot] = entry
 	var spill := {}
-	if not old.is_empty() and ItemDb.add_to(list, old, Balance.BACKPACK_CELLS) == 0:
+	if not old.is_empty() and ItemDb.add_to(list, old, Balance.BACKPACK_GRID) == 0:
 		spill = old
 	items = list
 	equipment = eq
