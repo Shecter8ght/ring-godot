@@ -11,6 +11,8 @@ const MATERIAL_KIND := {
 	"asphalt_02": "asphalt",
 	"painted_metal_shutter": "metal", "corrugated_iron_02": "metal", "metal_plate": "metal", "steel_dark": "metal",
 	"glass": "glass", "sign_panel": "plastic",
+	"gb_facade": "concrete", "gb_fire": "concrete", "gb_structural": "concrete", "gb_partition": "concrete",
+	"gb_fence": "concrete", "gb_slab": "concrete",
 }
 
 const PROP_KIND := {

@@ -1,15 +1,28 @@
+@tool
 class_name SectorBuilder
 extends RefCounted
 ## Собирает сектор кольца из данных (data/sectors/*.json) в узлы: полы, стены, проёмы, свет.
 ## Координаты — полярные от центра кольца: угол a в градусах (от +X к +Z), радиус r в метрах.
 ## Помещение — кольцевой сектор [a0,a1]×[r0,r1]; стены строятся по границам помещений
 ## один раз на линию, проёмы вырезают их. Ничего не кладётся руками — только данные.
+## Постройки вокруг (паркинг, техкомплекс…) — отдельные сцены в сцене уровня, их двигают руками.
+##
+## Блокаут ("greybox": true в JSON): стены без текстур и декора, толщина — по классу конструкции
+## (фасад / противопожарная / несущая / перегородка, числа в блоке "walls", нормы —
+## docs/building_standards.md). Скрипт @tool: в редакторе строит превью без дверей и пропсов.
 
 ## Длина сегмента дуги, м: чем меньше, тем круглее стены и полы.
 const SEG_LEN := 1.0
 ## Сдвиг от линии стены при поиске помещений по сторонам, м / град.
 const EPS_R := 0.05
 const EPS_A := 0.05
+## Радиальная стена ближе этого к границе сектора — противопожарная (между пожарными отсеками), град.
+const FIRE_TOL_DEG := 2.0
+## Пол закрытой части кольца по поясам (ключи ring.zones).
+const ZONE_FLOOR := {
+	"atr": "large_floor_tiles_02", "gal": "large_floor_tiles_02", "inn": "worn_tile_floor", "st": "large_floor_tiles_02",
+	"out": "worn_tile_floor", "back": "concrete_floor_worn_001", "svc": "concrete_floor_worn_001",
+}
 
 var _def: Dictionary
 var _rooms: Array = []
@@ -29,6 +42,15 @@ var _doors: Array[Door] = []
 var _labels: Array[Label3D] = []
 ## Архитектурные размеры (блок "arch" в JSON поверх ARCH_DEFAULT, м).
 var _arch: Dictionary = {}
+## Блокаут: серые классы стен вместо текстур, без декора (цоколь, карниз, пилястры, баннеры).
+var _greybox: bool = false
+## Толщина по классу стены (блок "walls"); чего нет — _base_t.
+var _thick: Dictionary = {}
+var _base_t: float = 0.3
+var _ring: Dictionary = {}
+var _fire_angles: Array[float] = []
+## Превью в редакторе: без дверей-сцен и пропсов (их скрипты работают только в игре).
+var _preview: bool = false
 
 const DOOR_SCENE := preload("res://scenes/props/door.tscn")
 const ARCH_DEFAULT := {
@@ -66,21 +88,33 @@ func build(path: String) -> Node3D:
 	_wall_t = float(walls.get("thickness", 0.3))
 	_fence_h = float(walls.get("fence_height", 2.2))
 	_barrier_h = float(walls.get("barrier_height", 2.6))
+	_base_t = _wall_t
+	_thick = walls
+	_greybox = bool(_def.get("greybox", false))
+	_ring = _def.get("ring", {})
+	_preview = Engine.is_editor_hint()
+	for sec in _def.get("sectors", []):
+		for a in sec.a:
+			if not float(a) in _fire_angles:
+				_fire_angles.append(float(a))
 	_arch = ARCH_DEFAULT.duplicate()
 	_arch.merge(_def.get("arch", {}), true)
 
 	_build_floors()
 	_build_walls()
 	_build_surroundings()
-	_build_overhead()
+	if not _greybox:
+		_build_overhead()
 	_emit_meshes(root)
 	_build_floor_collider(root)
 	_build_lights(root)
 	_build_markers(root)
-	_build_props(root)
+	if not _preview:
+		_build_props(root)
 
 	root.set_meta("rooms", _rooms)
-	root.set_meta("camera_yaw", float(_def.get("camera_yaw", Balance.CAMERA_YAW_DEG)))
+	root.set_meta("ring", _ring)
+	root.set_meta("camera_yaw", float(_def.get("camera_yaw", -45.0)))
 	var sp: Dictionary = _def.get("spawn", {})
 	root.set_meta("spawn", polar(float(sp.get("a", 0.0)), float(sp.get("r", 100.0))))
 	return root
@@ -310,7 +344,12 @@ func _emit_wall_segment(line: Dictionary, p0: float, p1: float, side_a: Dictiona
 	var indoor := side_b if a_out else side_a
 	var other := side_a if a_out else side_b
 	var facade := other.is_empty() or bool(other.get("outdoor", false))
+	var cls := _wall_class(line, side_a, side_b, facade)
+	# толщина — на отрезок: все помощники ниже (ригели, роллеты, косяки) берут её из _wall_t
+	_wall_t = float(_thick.get(cls, _base_t))
 	var mat := "concrete_panels" if facade else String(indoor.get("wall", "painted_plaster_wall"))
+	if _greybox:
+		mat = "gb_" + cls
 	var pts := _line_points(line, p0, p1)
 
 	if not op.is_empty():
@@ -328,21 +367,46 @@ func _emit_wall_segment(line: Dictionary, p0: float, p1: float, side_a: Dictiona
 			"locked":
 				_rolling_gate(line, p0, p1, mat, float(op.get("height", float(_arch.shutter_h))), true)
 			"barrier":
-				_wall_strip(_st(_walls, "concrete_block_wall_02"), pts, _wall_t * 2.0, _barrier_h)
+				_wall_strip(_st(_walls, _gb("concrete_block_wall_02", "gb_fence")), pts, _wall_t * 2.0, _barrier_h)
 		return
 
 	if a_out and b_out:
-		# двор–двор: границы нет; двор–пустота: ограда периметра
-		if side_a.is_empty() or side_b.is_empty():
+		# двор–двор: границы нет; двор–пустота: ограда периметра. У кольца территорию
+		# ограничивает забор участка (см. _build_ring_surroundings), дворы между собой открыты.
+		if (side_a.is_empty() or side_b.is_empty()) and _ring.is_empty():
 			_wall_strip(_st(_walls, "concrete_block_wall_02"), pts, _wall_t, _fence_h)
 		return
 	_solid_wall(line, p0, p1, mat)
+
+
+## Класс конструкции стены — от него толщина и серый тон в блокауте.
+## facade — наружная; fire — радиальная на границе сектора (пожарный отсек, REI 150);
+## structural — дуги между поясами кольца и стены коридоров/техядер; остальное — перегородки арендаторов.
+func _wall_class(line: Dictionary, side_a: Dictionary, side_b: Dictionary, facade: bool) -> String:
+	if facade:
+		return "facade"
+	if String(line.kind) == "arc":
+		return "structural"
+	for fa in _fire_angles:
+		if absf(float(line.fixed) - fa) <= FIRE_TOL_DEG:
+			return "fire"
+	for side in [side_a, side_b]:
+		if bool(side.get("core", false)) or String(side.get("type", "")) in ["corridor", "gallery", "atrium"]:
+			return "structural"
+	return "partition"
+
+
+## Текстурный материал или его серая замена в блокауте.
+func _gb(textured: String, grey: String) -> String:
+	return grey if _greybox else textured
 
 
 ## Глухая стена с цоколем, карнизом и пилястрами по концам и через шаг.
 func _solid_wall(line: Dictionary, p0: float, p1: float, mat: String) -> void:
 	var pts := _line_points(line, p0, p1)
 	_wall_strip(_st(_walls, mat), pts, _wall_t, _wall_h)
+	if _greybox:
+		return
 	_wall_strip(_st(_walls, "concrete_wall_006"), pts, _wall_t + 0.12, float(_arch.plinth_h))
 	_wall_strip(_st(_walls, mat), pts, _wall_t + 0.16, float(_arch.cornice_h), _wall_h - float(_arch.cornice_h))
 	_pilaster(line, p0, mat)
@@ -355,6 +419,8 @@ func _solid_wall(line: Dictionary, p0: float, p1: float, mat: String) -> void:
 
 
 func _pilaster(line: Dictionary, p: float, mat: String) -> void:
+	if _greybox:
+		return
 	var pos := _line_point(line, p)
 	var key := "%.1f,%.1f" % [pos.x, pos.z]
 	if _posts.has(key):
@@ -367,11 +433,28 @@ func _pilaster(line: Dictionary, p: float, mat: String) -> void:
 func _lintel(line: Dictionary, p0: float, p1: float, mat: String, y: float) -> void:
 	var pts := _line_points(line, p0, p1)
 	_wall_strip(_st(_walls, mat), pts, _wall_t, _wall_h - y, y)
+	if _greybox:
+		return
 	_wall_strip(_st(_walls, mat), pts, _wall_t + 0.16, float(_arch.cornice_h), _wall_h - float(_arch.cornice_h))
 
 
 ## Колоннада: проход без стены, балка только под перекрытием, колонны по концам и через шаг.
 func _colonnade(line: Dictionary, p0: float, p1: float, mat: String, _y: float) -> void:
+	if _greybox:
+		# балка перекрытия и колонны по сетке каркаса (квадратные, шаг column_grid)
+		_lintel(line, p0, p1, mat, _wall_h - 0.7)
+		var col := float(_thick.get("column", 0.6))
+		var clen := _line_len(line, p0, p1)
+		var cn := maxi(1, int(round(clen / float(_thick.get("column_grid", 9.0)))))
+		for i in range(cn + 1):
+			var cp := _line_advance(line, p0, clen * float(i) / float(cn))
+			var pos := _line_point(line, cp)
+			var key := "%.1f,%.1f" % [pos.x, pos.z]
+			if _posts.has(key):
+				continue
+			_posts[key] = true
+			_post(_st(_walls, "gb_structural"), pos, _line_dir(line, cp), col, col, _wall_h)
+		return
 	_lintel(line, p0, p1, mat, _wall_h - float(_arch.cornice_h) * 2.0)
 	_pilaster(line, p0, mat)
 	_pilaster(line, p1, mat)
@@ -386,9 +469,13 @@ func _doorway(line: Dictionary, p0: float, p1: float, mat: String, y: float) -> 
 	_lintel(line, p0, p1, mat, y)
 	_pilaster(line, p0, mat)
 	_pilaster(line, p1, mat)
-	var width := _line_len(line, p0, p1) - float(_arch.pilaster_w)
-	var hinge := _line_point(line, _line_advance(line, p0, float(_arch.pilaster_w) * 0.5))
+	# в блокауте пилястр нет — створка на весь проём
+	var jamb := 0.1 if _greybox else float(_arch.pilaster_w)
+	var width := _line_len(line, p0, p1) - jamb
+	var hinge := _line_point(line, _line_advance(line, p0, jamb * 0.5))
 	var dir := _line_dir(line, p0)
+	if _preview:
+		return
 	var door := DOOR_SCENE.instantiate() as Door
 	door.width = width
 	door.height = y - 0.05
@@ -402,9 +489,10 @@ func _rolling_gate(line: Dictionary, p0: float, p1: float, mat: String, y: float
 	_pilaster(line, p0, mat)
 	_pilaster(line, p1, mat)
 	var pts := _line_points(line, p0, p1)
-	_wall_strip(_st(_walls, "painted_metal_shutter"), pts, _wall_t + 0.3, 0.45, y - 0.45)
+	var shutter := _gb("painted_metal_shutter", "steel_dark")
+	_wall_strip(_st(_walls, shutter), pts, _wall_t + 0.3, 0.45, y - 0.45)
 	if closed:
-		_wall_strip(_st(_walls, "painted_metal_shutter"), pts, 0.06, y - 0.45)
+		_wall_strip(_st(_walls, shutter), pts, 0.06, y - 0.45)
 
 
 ## Витрина: стекло в стальных рамах по бокам, вход посередине с рулоном роллеты и вывеской.
@@ -421,7 +509,7 @@ func _storefront(line: Dictionary, p0: float, p1: float, mat: String, side_a: Di
 	_glass_run(line, e1, p1, y)
 	# вход: рулон роллеты и вывеска над ним
 	var ent := _line_points(line, e0, e1)
-	_wall_strip(_st(_walls, "painted_metal_shutter"), ent, _wall_t + 0.3, 0.45, y - 0.45)
+	_wall_strip(_st(_walls, _gb("painted_metal_shutter", "steel_dark")), ent, _wall_t + 0.3, 0.45, y - 0.45)
 	var shop := side_a if String(side_a.get("type", "")) == "retail" else side_b
 	var gallery_side := side_b if shop == side_a else side_a
 	if shop.is_empty():
@@ -429,7 +517,8 @@ func _storefront(line: Dictionary, p0: float, p1: float, mat: String, side_a: Di
 	var s0 := _line_advance(line, e0, -1.0)
 	var s1 := _line_advance(line, e1, 1.0)
 	var sign_pts := _line_points(line, s0, s1)
-	_wall_strip(_st(_walls, "sign_panel"), sign_pts, _wall_t + 0.24, float(_arch.sign_h), y + 0.5)
+	if not _greybox:
+		_wall_strip(_st(_walls, "sign_panel"), sign_pts, _wall_t + 0.24, float(_arch.sign_h), y + 0.5)
 	# подпись — в сторону галереи
 	var mid := _line_advance(line, e0, entrance * 0.5)
 	var pos := _line_point(line, mid)
@@ -486,6 +575,9 @@ func _glass_run(line: Dictionary, p0: float, p1: float, y: float) -> void:
 ## Окружение: кольцо продолжается за пределами сектора — полы, фасад и стена галереи без проёмов,
 ## асфальт вокруг здания. Каждый пояс радиусов достраивается там, где в нём нет помещений сектора.
 func _build_surroundings() -> void:
+	if not _ring.is_empty():
+		_build_ring_surroundings()
+		return
 	var bands := [
 		{"r": [0.5, 25.0], "floor": "large_floor_tiles_02"},
 		{"r": [25.0, 33.0], "floor": "large_floor_tiles_02", "wall_r": 33.0, "wall": "painted_plaster_wall", "wall_h": _wall_h},
@@ -511,6 +603,45 @@ func _build_surroundings() -> void:
 		if band.has("wall_r"):
 			_wall_strip(_st(_walls, String(band.wall)), _arc_points(float(band.wall_r), c0, c1), _wall_t, float(band.wall_h))
 	_annulus(_st(_floors, "asphalt_02"), 0.0, 360.0, 90.0, 420.0, -0.03)
+
+
+## Кольцо целиком: закрытая часть (полы поясов, несущие дуги), фасад на всю высоту здания по кругу,
+## асфальт участка и забор территории — проходима только открытая часть участка.
+func _build_ring_surroundings() -> void:
+	var outer := float(_ring.get("outer_r", 200.0))
+	var site := float(_ring.get("site_r", 300.0))
+	var a0 := float(_def.angle[0])
+	var a1 := float(_def.angle[1])
+	var c0 := a1
+	var c1 := a0 + 360.0
+	var zones: Dictionary = _ring.get("zones", {})
+	var inner_arcs: Array[float] = []
+	for key in zones:
+		var z: Array = zones[key]
+		_annulus(_st(_floors, String(ZONE_FLOOR.get(key, "concrete_floor_worn_001"))), c0, c1, float(z[0]), float(z[1]), 0.0)
+		if key != "atr" and float(z[0]) > 1.0:
+			inner_arcs.append(float(z[0]))
+	# несущие дуги закрытой части — за роллетами видно, что кольцо продолжается
+	var t_str := float(_thick.get("structural", _base_t))
+	for r in inner_arcs:
+		if r >= outer - 0.01:
+			continue
+		_wall_strip(_st(_walls, _gb("painted_plaster_wall", "gb_structural")), _arc_points(r, c0, c1), t_str, _wall_h)
+	# фасад: закрытая часть — во всю высоту здания; над открытой — верхние этажи поверх стен 1F
+	var t_fac := float(_thick.get("facade", _base_t))
+	var bh := float(_thick.get("building_height", _wall_h))
+	var fmat := _gb("concrete_panels", "gb_facade")
+	_wall_strip(_st(_walls, fmat), _arc_points(outer, c0, c1), t_fac, bh)
+	if bh > _wall_h:
+		_wall_strip(_st(_walls, fmat), _arc_points(outer, a0, a1), t_fac, bh - _wall_h, _wall_h)
+	# участок: асфальт вокруг и забор — дуга по краю открытой части и две радиальные отсечки
+	_annulus(_st(_floors, "asphalt_02"), 0.0, 360.0, outer, site + 40.0, -0.03)
+	var fence_h := float(_thick.get("site_fence_height", _fence_h))
+	var t_fence := float(_thick.get("fence", _base_t))
+	var fence := _st(_walls, _gb("concrete_block_wall_02", "gb_fence"))
+	_wall_strip(fence, _arc_points(site, a0, a1), t_fence, fence_h)
+	for a in [a0, a1]:
+		_wall_strip(fence, PackedVector3Array([polar(a, outer), polar(a, site)]), t_fence, fence_h)
 
 
 func _annulus(st: SurfaceTool, a0: float, a1: float, r0: float, r1: float, y: float) -> void:
@@ -606,7 +737,12 @@ func _build_lights(root: Node3D) -> void:
 		var arc_len := deg_to_rad(a1 - a0) * rm
 		var depth := r1 - r0
 		var outdoor := bool(room.get("outdoor", false))
+		# атриум освещён через купол; у большого кольца шаг реже — иначе сотни точечных огней
+		if not _ring.is_empty() and String(room.get("type", "")) == "atrium":
+			continue
 		var step := 22.0 if outdoor else 11.0
+		if not _ring.is_empty():
+			step = 32.0 if outdoor else 15.0
 		var na := maxi(1, int(round(arc_len / step)))
 		var nr := maxi(1, int(round(depth / step)))
 		for i in range(na):
@@ -622,7 +758,7 @@ func _build_lights(root: Node3D) -> void:
 					spot.light_energy = 9.0
 					spot.spot_range = 30.0
 					spot.spot_angle = 55.0
-					spot.shadow_enabled = true
+					spot.shadow_enabled = _ring.is_empty()
 					lights.add_child(spot)
 				else:
 					var omni := OmniLight3D.new()

@@ -9,6 +9,7 @@
 """
 import json
 import math
+import re
 import sys
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -84,6 +85,41 @@ def wrap(name, max_chars):
     if cur:
         lines.append(cur)
     return lines
+
+
+## Цвет постройки по BlockoutBuilding.Kind: 0 здание, 1 паркинг, 2 мачта, 3 навес, 4 остановка.
+BUILDING_FILL = {0: "#d3dde0", 1: "#bfc4c6", 2: "#9fa9ad", 3: "#e7e5df", 4: "#e7e5df"}
+
+
+def parse_level(tscn):
+    """Постройки (BlockoutBuilding), точки появления и эвакуации из .tscn уровня: положение,
+    оси X/Z базиса и экспортированные свойства. Нет файла — пустые списки."""
+    out = {"buildings": [], "spawns": [], "extractions": []}
+    if not tscn.exists():
+        return out
+    text = tscn.read_text(encoding="utf-8")
+    ext = dict(re.findall(r'\[ext_resource [^\]]*path="([^"]+)"[^\]]*id="([^"]+)"\]', text))
+    ids = {v: k for k, v in ext.items()}
+    for block in re.split(r"\n(?=\[node )", text):
+        m = re.match(r'\[node name="([^"]+)" parent="([^"]+)" instance=ExtResource\("([^"]+)"\)\]', block)
+        if not m:
+            continue
+        scene = ids.get(m.group(3), "")
+        props = dict(re.findall(r"^(\w+) = (.+)$", block, re.M))
+        t = [float(v) for v in re.findall(r"-?[\d.]+(?:e-?\d+)?", props.get("transform", "Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)"))[1:]] \
+            if "transform" in props else [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
+        # Transform3D(3) — отбрасываем «3» из имени; дальше 9 чисел базиса по столбцам и 3 — начало
+        node = {"bx": t[0:3], "bz": t[6:9], "o": t[9:12],
+                "name": props.get("display_name", '""').strip('"')}
+        if scene.endswith("blockout_building.tscn"):
+            sz = [float(v) for v in re.findall(r"-?[\d.]+", props.get("size", "Vector2(20, 16)"))[1:]]
+            node.update({"size": sz, "kind": int(props.get("kind", 0)), "levels": int(props.get("levels", 3))})
+            out["buildings"].append(node)
+        elif scene.endswith("spawn_point.tscn"):
+            out["spawns"].append(node)
+        elif scene.endswith("extraction_point.tscn"):
+            out["extractions"].append(node)
+    return out
 
 
 def main(path):
@@ -184,6 +220,34 @@ def main(path):
         x, y = xy(a, site + 28)
         s.append(f'<text x="{x:.0f}" y="{y:.0f}" font-size="20" text-anchor="middle" fill="#2c4a5a" font-weight="700">'
                  f'{escape(sc["name"].upper())}</text>')
+
+    # постройки, спавны и эвакуации из сцены уровня (их двигают руками в редакторе)
+    level = parse_level(Path("scenes/levels") / (Path(path).stem + ".tscn"))
+    for b in level["buildings"]:
+        pts = []
+        for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+            lx, lz = b["size"][0] * 0.5 * sx, b["size"][1] * 0.5 * sz
+            wx = b["o"][0] + b["bx"][0] * lx + b["bz"][0] * lz
+            wz = b["o"][2] + b["bx"][2] * lx + b["bz"][2] * lz
+            pts.append((wx * PX, wz * PX))
+        fill = BUILDING_FILL.get(b["kind"], "#d3dde0")
+        s.append(f'<polygon points="{poly(pts)}" fill="{fill}" stroke="#3c3c3a" stroke-width="1.3"/>')
+        name = b["name"] or ""
+        if b["kind"] == 1:
+            name += f' · {b["levels"]} уровня'
+        if name:
+            x, y = b["o"][0] * PX, b["o"][2] * PX
+            for i, ln in enumerate(wrap(name, max(8, int(b["size"][0] * PX / 7)))):
+                s.append(f'<text x="{x:.0f}" y="{y + i * 15:.0f}" font-size="13" text-anchor="middle" '
+                         f'dominant-baseline="middle" fill="#1f1f1e" font-weight="600">{escape(ln)}</text>')
+    for e in level["extractions"]:
+        x, y = e["o"][0] * PX, e["o"][2] * PX
+        s.append(f'<polygon points="{x:.1f},{y - 13:.1f} {x + 12:.1f},{y + 9:.1f} {x - 12:.1f},{y + 9:.1f}" fill="#27a348" stroke="#0d4f1f" stroke-width="1.5"/>')
+        s.append(f'<text x="{x + 16:.0f}" y="{y + 4:.0f}" font-size="11.5" fill="#0d4f1f" font-weight="700">{escape(e["name"])}</text>')
+    for sp in level["spawns"]:
+        x, y = sp["o"][0] * PX, sp["o"][2] * PX
+        s.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="8" fill="#2f6fd6" stroke="#fff" stroke-width="2"/>')
+        s.append(f'<text x="{x + 12:.0f}" y="{y + 4:.0f}" font-size="11" fill="#1f4a93" font-weight="600">{escape(sp["name"])}</text>')
 
     for e in d.get("extractions", []):
         x, y = xy(e["a"], e["r"])

@@ -1,3 +1,4 @@
+@tool
 extends Node3D
 ## Сцена сектора: строит геометрию из данных, печёт навмеш, спавнит игроков и мародёров.
 ## Свет и атмосферу задаёт WorldEnvironment/Sun в самой сцене — их можно крутить руками в редакторе.
@@ -7,13 +8,21 @@ extends Node3D
 ## изменений. С сетью — хост создаёт по Player на каждый peer (см. Net.PORT/MAX_PLAYERS) через
 ## MultiplayerSpawner, чтобы узел реплицировался остальным; мародёров хост спавнит так же.
 ## Авторитет см. в AGENTS.md: у Player — владеющий peer (кроме Health), у Marauder/Door — хост.
+##
+## Руками в сцене уровня: постройки (Buildings/*, BlockoutBuilding), точки появления (SpawnPoints/*)
+## и эвакуации (Extractions/*). Кольцо — из JSON; в редакторе видно превью (@tool), в сцену оно
+## не сохраняется.
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const MARAUDER_SCENE := preload("res://scenes/ai/marauder.tscn")
 ## В каких помещениях мародёры появляются и патрулируют.
 const AI_ROOM_TYPES := ["retail", "storage", "corridor", "gallery", "office", "security", "utility", "yard"]
 
-@export_file("*.json") var sector_path: String = "res://data/sectors/f1_market.json"
+@export_file("*.json") var sector_path: String = "res://data/sectors/f1_market.json":
+	set(v):
+		sector_path = v
+		if Engine.is_editor_hint() and is_inside_tree():
+			_build_editor_preview.call_deferred()
 
 var _rooms: Array = []
 var _spawn: Vector3 = Vector3.ZERO
@@ -25,12 +34,18 @@ var _marauders_root: Node3D
 var _player_spawner: MultiplayerSpawner
 var _marauder_spawner: MultiplayerSpawner
 var _marauders_spawned: int = 0
+var _ring: Dictionary = {}
+## Перекрытия, спрятанные над игроком (паркинг, навесы): остаются только тенью.
+var _decks_hidden: Dictionary = {}
 
 @onready var _camera_rig: CameraRig = $CameraRig
 @onready var _hud: Control = $HUD/Root
 
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		_build_editor_preview()
+		return
 	_rng.randomize()
 	var builder := SectorBuilder.new()
 	var sector := builder.build(sector_path)
@@ -39,8 +54,13 @@ func _ready() -> void:
 	move_child(sector, 0)
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
-	# Камера смотрит от атриума наружу: так витрины галереи обращены к камере, а не спиной.
-	if _camera_rig and sector.has_meta("camera_yaw"):
+	_ring = sector.get_meta("ring", {})
+	# точка появления из сцены уровня (узлы SpawnPoint) — одна случайная на рейд
+	var points := get_tree().get_nodes_in_group("spawn_points")
+	if not points.is_empty():
+		_spawn = (points[_rng.randi_range(0, points.size() - 1)] as Node3D).global_position
+	if _camera_rig and _ring.is_empty() and sector.has_meta("camera_yaw"):
+		# старый сектор: камера от атриума наружу — витрины галереи обращены к камере
 		_camera_rig.rotation_degrees.y = float(sector.get_meta("camera_yaw"))
 
 	# Контейнеры существуют всегда (offline-инструменты ищут "Marauders" по имени) — спавнеры
@@ -74,6 +94,16 @@ func _spawn_offline_player() -> void:
 	p.health.died.connect(_on_player_died)
 	_local_player = p
 	_camera_rig.set_target(p)
+	_face_center(p.global_position)
+
+
+## У кольца камера на старте смотрит от игрока к центру — здание перед глазами. Считается у
+## каждого peer по своему игроку (точку появления выбирает хост).
+func _face_center(pos: Vector3) -> void:
+	if _camera_rig == null or _ring.is_empty():
+		return
+	var to_center := -Vector2(pos.x, pos.z)
+	_camera_rig.rotation.y = -atan2(to_center.x, -to_center.y)
 
 
 func _setup_spawners() -> void:
@@ -153,6 +183,7 @@ func _find_local_player_when_ready() -> void:
 		if _local_player == null:
 			await get_tree().process_frame
 	_camera_rig.set_target(_local_player)
+	_face_center(_local_player.global_position)
 
 
 ## Навмеш печётся из коллайдеров и мешей сектора (двери не считаются — их AI открывает сам),
@@ -173,6 +204,10 @@ func _bake_navmesh() -> void:
 	nm.agent_max_slope = 40.0
 	nm.region_min_size = 4.0
 	nm.filter_baking_aabb = AABB(Vector3(-6, -1, -95), Vector3(140, 10, 190))
+	if not _ring.is_empty():
+		# весь участок кольца; по высоте — до крыши паркинга
+		var site := float(_ring.get("site_r", 300.0)) + 5.0
+		nm.filter_baking_aabb = AABB(Vector3(-site, -1, -site), Vector3(site * 2.0, 16, site * 2.0))
 	region.navigation_mesh = nm
 	add_child(region)
 	region.bake_finished.connect(_on_nav_baked)
@@ -238,9 +273,39 @@ func _on_player_died() -> void:
 		_hud.get_node("Dead").visible = true
 
 
+## Редактор: кольцо из JSON как превью (без дверей, пропсов и игроков) — видно, куда ставить постройки.
+func _build_editor_preview() -> void:
+	var old := get_node_or_null("_EditorPreview")
+	if old:
+		old.free()
+	var sector := SectorBuilder.new().build(sector_path)
+	sector.name = "_EditorPreview"
+	# без owner — превью не сохраняется в .tscn
+	add_child(sector)
+	move_child(sector, 0)
+
+
+## Перекрытие выше игрока не рисуется, но отбрасывает тень: изометрия смотрит сверху, иначе
+## вместо игрока на нижнем уровне паркинга видна крыша. В прицеле (от первого лица) видно всё.
+func _update_decks() -> void:
+	var ads := _camera_rig.ads_active
+	var eye_y := _local_player.global_position.y
+	for d in get_tree().get_nodes_in_group("decks"):
+		var deck := d as Node3D
+		var hide := not ads and float(deck.get_meta("deck_y", 0.0)) > eye_y + Balance.DECK_HIDE_ABOVE
+		if bool(_decks_hidden.get(deck, false)) == hide:
+			continue
+		_decks_hidden[deck] = hide
+		for c in deck.get_children():
+			var mi := c as MeshInstance3D
+			if mi:
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if hide else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+
+
 func _process(_delta: float) -> void:
-	if _local_player == null:
+	if Engine.is_editor_hint() or _local_player == null:
 		return
+	_update_decks()
 	# оружие, патроны и гранаты — в HUD камеры (CameraRig), здесь — здоровье
 	var status := "HP %d" % int(_local_player.health.hp)
 	if not _nav_baked:

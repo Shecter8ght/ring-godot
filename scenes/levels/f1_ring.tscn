@@ -1,0 +1,196 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="2_rig"]
+[ext_resource type="Script" path="res://src/world/sector_level.gd" id="3_level"]
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_building.tscn" id="4_bld"]
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_opening.tscn" id="5_open"]
+[ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="6_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="7_ext"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.2, 0.28, 0.42, 1)
+sky_horizon_color = Color(0.86, 0.55, 0.36, 1)
+sky_curve = 0.12
+ground_bottom_color = Color(0.1, 0.09, 0.09, 1)
+ground_horizon_color = Color(0.42, 0.38, 0.36, 1)
+sun_angle_max = 8.0
+sun_curve = 0.08
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 0.7
+tonemap_mode = 3
+tonemap_exposure = 1.35
+tonemap_white = 5.0
+ssao_enabled = true
+ssao_radius = 1.6
+ssao_intensity = 2.2
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_cascades = 6
+sdfgi_min_cell_size = 0.2
+sdfgi_energy = 1.2
+glow_enabled = true
+glow_intensity = 0.35
+glow_bloom = 0.08
+glow_hdr_threshold = 1.1
+fog_enabled = true
+fog_light_color = Color(0.7, 0.58, 0.5, 1)
+fog_light_energy = 0.6
+fog_density = 0.0012
+fog_sky_affect = 0.3
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.003
+volumetric_fog_albedo = Color(0.95, 0.85, 0.75, 1)
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_anisotropy = 0.6
+adjustment_enabled = true
+adjustment_contrast = 1.06
+adjustment_saturation = 1.0
+
+[node name="F1Ring" type="Node3D"]
+script = ExtResource("3_level")
+sector_path = "res://data/sectors/f1_ring.json"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.3420, -0.2273, 0.9118, 0.0000, 0.9703, 0.2419, -0.9397, 0.0827, -0.3319, 0, 30, 0)
+light_color = Color(1, 0.8, 0.58, 1)
+light_energy = 3.0
+light_angular_distance = 1.2
+shadow_enabled = true
+shadow_blur = 1.2
+directional_shadow_split_1 = 0.08
+directional_shadow_split_2 = 0.2
+directional_shadow_split_3 = 0.45
+directional_shadow_max_distance = 260.0
+
+[node name="CameraRig" parent="." instance=ExtResource("2_rig")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="HUD"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="HUD/Root"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 600.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.9, 0.86, 0.76, 1)
+theme_override_font_sizes/font_size = 20
+text = "HP 100   Патроны 8/8"
+
+[node name="Dead" type="Label" parent="HUD/Root"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(0.85, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 40
+text = "УБИТ  —  R: заново"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="TechComplex" parent="Buildings" instance=ExtResource("4_bld")]
+transform = Transform3D(-0.27564, 0, -0.96126, 0, 1, 0, 0.96126, 0, -0.27564, 238.393, 0.000, -68.358)
+kind = 0
+display_name = "Технический комплекс"
+size = Vector2(58, 40)
+height = 6.0
+wall_thickness = 0.4
+
+[node name="DoorFront" parent="Buildings/TechComplex" instance=ExtResource("5_open")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.000, 0.000, -20.000)
+width = 1.6
+
+[node name="GateFront" parent="Buildings/TechComplex" instance=ExtResource("5_open")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.000, 0.000, -20.000)
+kind = 1
+width = 5.0
+
+[node name="DoorSide" parent="Buildings/TechComplex" instance=ExtResource("5_open")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.000, 0.000, 0.000)
+width = 1.6
+
+[node name="RadioMast" parent="Buildings" instance=ExtResource("4_bld")]
+transform = Transform3D(-0.13917, 0, -0.99027, 0, 1, 0, 0.99027, 0, -0.13917, 275.295, 0.000, -38.690)
+kind = 2
+display_name = "Радиомачта"
+size = Vector2(6, 6)
+height = 42.0
+
+[node name="GarageA" parent="Buildings" instance=ExtResource("4_bld")]
+transform = Transform3D(0.46947, 0, -0.88295, 0, 1, 0, 0.88295, 0, 0.46947, 231.332, 0.000, 123.002)
+kind = 1
+display_name = "Паркинг A"
+size = Vector2(64, 72)
+levels = 3
+level_height = 3.2
+
+[node name="CoveredWalk" parent="Buildings" instance=ExtResource("4_bld")]
+transform = Transform3D(0.50000, 0, -0.86603, 0, 1, 0, 0.86603, 0, 0.50000, 184.463, 0.000, 106.500)
+kind = 3
+display_name = ""
+size = Vector2(8, 26)
+height = 4.0
+
+[node name="BusStop" parent="Buildings" instance=ExtResource("4_bld")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, -1.00000, 0.000, 0.000, -284.000)
+kind = 4
+display_name = ""
+size = Vector2(22, 6)
+height = 2.6
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="Plaza" parent="SpawnPoints" instance=ExtResource("6_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.496, 0.050, -258.020)
+display_name = "Площадь, у клумб"
+
+[node name="GarageL2" parent="SpawnPoints" instance=ExtResource("6_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 246.622, 3.250, 119.806)
+display_name = "Паркинг, 2-й уровень"
+
+[node name="Extractions" type="Node3D" parent="."]
+
+[node name="Bus" parent="Extractions" instance=ExtResource("7_ext")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000, 0.000, -276.000)
+display_name = "Автобусная остановка"
+radius = 5.0
+channel_s = 8.0
+rule = "Всегда открыта. Далеко от здания, подход через открытую площадь."
+
+[node name="Dock" parent="Extractions" instance=ExtResource("7_ext")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 169.497, 0.000, -175.519)
+display_name = "Выезд грузового двора"
+radius = 5.0
+channel_s = 10.0
+rule = "Ворота запитаны: сначала включить рубильник в электрощитовой."
+
+[node name="GarageExit" parent="Extractions" instance=ExtResource("7_ext")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 252.299, 0.000, 176.662)
+display_name = "Съезд паркинга (EXIT ONLY)"
+radius = 4.0
+channel_s = 6.0
+rule = "Нужна карта-ключ охраны из ЦПУ."

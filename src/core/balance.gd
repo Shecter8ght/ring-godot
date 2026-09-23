@@ -37,6 +37,11 @@ const CAMERA_TURN_DEG_PER_SEC := 90.0
 ## Пол на дистанции ~0.85 (высота камеры), стена под камерой ~0.6 — попадает в вырез, игрок (1.0) — нет.
 const CAMERA_CUTAWAY_NEAR := 0.62
 const CAMERA_CUTAWAY_FAR := 0.96
+## Перекрытие (этаж паркинга, крыша навеса) выше ног игрока больше чем на это — прячется, м.
+const DECK_HIDE_ABOVE := 1.9
+## Компас вверху экрана: ширина полосы, px, и сколько градусов видно в обе стороны.
+const COMPASS_WIDTH := 560.0
+const COMPASS_SPAN_DEG := 75.0
 
 # --- Свет и атмосфера ---
 const SUN_ENERGY := 1.6
@@ -129,7 +134,8 @@ const NOISE_STEP := {"stand": 7.0, "sprint": 14.0, "crouch": 3.0, "prone": 1.5}
 const NOISE_STEP_INTERVAL := 0.45
 
 # --- Мародёр ---
-const MARAUDER_COUNT := 4
+## Кольцо Ø400 (3 сектора) — в разы больше старого сектора, мародёров больше.
+const MARAUDER_COUNT := 12
 const MARAUDER_WALK := 1.5
 const MARAUDER_RUN := 3.4
 ## Ближе этого до точки спавна игрока мародёры не появляются, м.

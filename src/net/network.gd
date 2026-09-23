@@ -7,7 +7,7 @@ extends Node
 
 const PORT := 7777
 const MAX_PLAYERS := 3
-const LEVEL_SCENE := "res://scenes/levels/f1_market.tscn"
+const LEVEL_SCENE := "res://scenes/levels/f1_ring.tscn"
 
 signal player_list_changed
 ## Открыт для чтения из lobby.gd: peer_id -> имя.

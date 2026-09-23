@@ -1,3 +1,4 @@
+@tool
 class_name SectorMaterials
 extends RefCounted
 ## Материалы сектора по id: готовый PBR из assets/materials/<id>.tres, а если ассетов нет —
@@ -17,10 +18,57 @@ const FALLBACK := {
 	"metal_plate": Color(0.4, 0.4, 0.42),
 }
 
+## Блокаут: серые стены без текстур, классы по конструкции (см. docs/building_standards.md).
+## Тон различает класс: противопожарные — с красноватым оттенком, перегородки — светлее.
+const GREYBOX := {
+	"gb_facade": Color(0.56, 0.57, 0.58),
+	"gb_fire": Color(0.6, 0.5, 0.48),
+	"gb_structural": Color(0.62, 0.62, 0.6),
+	"gb_partition": Color(0.78, 0.77, 0.73),
+	"gb_fence": Color(0.5, 0.51, 0.49),
+	"gb_slab": Color(0.52, 0.52, 0.51),
+}
+## Сетка блокаута: тонкая линия каждый метр, жирная — каждые 4 м (размер плитки текстуры).
+const GRID_TILE_M := 4.0
+
 ## Процедурные материалы без текстур: стекло витрин, тёмная сталь рам, панель вывески.
 const SPECIAL := ["glass", "steel_dark", "sign_panel"]
 
 static var _cache: Dictionary = {}
+static var _grid_tex: Texture2D
+
+
+## Серая сетка 1 м / 4 м — по ней видно масштаб без текстур.
+static func _grid() -> Texture2D:
+	if _grid_tex:
+		return _grid_tex
+	var n := 512
+	var img := Image.create(n, n, true, Image.FORMAT_RGB8)
+	img.fill(Color(1, 1, 1))
+	var cell := n / 4
+	for i in range(n):
+		for k in range(4):
+			var major := k == 0
+			var w := 3 if major else 1
+			var c := Color(0.62, 0.62, 0.62) if major else Color(0.84, 0.84, 0.84)
+			for t in range(w):
+				var x := (k * cell + t) % n
+				img.set_pixel(x, i, c)
+				img.set_pixel(i, x, c)
+	img.generate_mipmaps()
+	_grid_tex = ImageTexture.create_from_image(img)
+	return _grid_tex
+
+
+static func _greybox(id: String) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = GREYBOX[id]
+	m.albedo_texture = _grid()
+	m.uv1_triplanar = true
+	m.uv1_world_triplanar = true
+	m.uv1_scale = Vector3.ONE / GRID_TILE_M
+	m.roughness = 0.92
+	return m
 
 
 static func _special(id: String) -> Material:
@@ -69,6 +117,8 @@ static func get_material(id: String, cutaway: bool = false) -> Material:
 	var mat: Material
 	if id in SPECIAL:
 		mat = _special(id)
+	elif GREYBOX.has(id):
+		mat = _greybox(id)
 	elif id.begins_with("banner_"):
 		mat = _banner(int(id.trim_prefix("banner_")))
 	elif ResourceLoader.exists(path):
