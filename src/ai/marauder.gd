@@ -59,6 +59,9 @@ func _ready() -> void:
 ## считает только хост; остальные peer просто получают позицию/позу синхронизатором.
 func _setup_sync() -> void:
 	var sync := MultiplayerSynchronizer.new()
+	# постоянное имя: синхронизатор адресуется по пути, а автоимя (@MultiplayerSynchronizer@N)
+	# у каждого peer своё — пакеты хоста не находили узел у клиента
+	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
 	for prop in [".:global_position", "Body:rotation", "Body:position", ".:state"]:
 		var path := NodePath(prop)

@@ -6,6 +6,9 @@ extends Node3D
 @export var width: float = 1.0
 @export var height: float = 2.2
 @export var thickness: float = 0.05
+## Заперта, пока у группы нет этого ключа (Raid.team_keys); пусто — обычная дверь.
+## Мародёры открывают любые двери — у них свои ключи.
+@export var required_key: String = ""
 
 var is_open: bool = false
 var _target_angle: float = 0.0
@@ -46,6 +49,9 @@ func _ready() -> void:
 ## поэтому спавнер не нужен — просто синхронизируем состояние. Авторитет — хост по умолчанию.
 func _setup_sync() -> void:
 	var sync := MultiplayerSynchronizer.new()
+	# постоянное имя: синхронизатор адресуется по пути, а автоимя (@MultiplayerSynchronizer@N)
+	# у каждого peer своё — пакеты хоста не находили узел у клиента
+	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
 	for prop in [".:is_open", "Leaf:rotation"]:
 		var path := NodePath(prop)
@@ -76,12 +82,19 @@ func _process(delta: float) -> void:
 	if not _players_near.is_empty() and Input.is_action_just_pressed("interact"):
 		var who := _players_near[0]
 		if (who as Player).is_local():
+			if _locked():
+				Raid.current.notify("Заперто: нужен " + Raid.current.key_name(required_key))
+				return
 			toggle(who.global_position)
 			NoiseBus.emit(global_position, 8.0, "door")
 	# Анимацию ведёт только авторитет (хост) — иначе локальный лерп к _target_angle=0 у клиента
 	# каждый кадр тянул бы створку обратно, деря с прилетающим по сети углом.
 	if is_multiplayer_authority():
 		_leaf.rotation.y = lerp_angle(_leaf.rotation.y, _target_angle, minf(1.0, Balance.DOOR_SWING_SPEED * delta))
+
+
+func _locked() -> bool:
+	return required_key != "" and Raid.current != null and not Raid.current.has_key(required_key)
 
 
 ## Открыть от того, кто открывает: сторона выбирается по знаку локального Z подошедшего.
@@ -101,5 +114,5 @@ func toggle(from_world: Vector3) -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func _request_toggle(from_world: Vector3) -> void:
-	if is_multiplayer_authority():
+	if is_multiplayer_authority() and not _locked():
 		toggle(from_world)

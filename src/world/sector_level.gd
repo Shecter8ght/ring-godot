@@ -35,6 +35,7 @@ var _player_spawner: MultiplayerSpawner
 var _marauder_spawner: MultiplayerSpawner
 var _marauders_spawned: int = 0
 var _ring: Dictionary = {}
+var _raid: Raid
 ## Перекрытия, спрятанные над игроком (паркинг, навесы): остаются только тенью.
 var _decks_hidden: Dictionary = {}
 
@@ -47,8 +48,10 @@ func _ready() -> void:
 		_build_editor_preview()
 		return
 	_rng.randomize()
+	var t0 := Time.get_ticks_msec()
 	var builder := SectorBuilder.new()
 	var sector := builder.build(sector_path)
+	print("sector: собран за %d мс (пропсов %d, склеено в %d мешей)" % [Time.get_ticks_msec() - t0, int(sector.get_meta("prop_count", 0)), int(sector.get_meta("prop_batches", 0))])
 	sector.add_to_group("nav_source")
 	add_child(sector)
 	move_child(sector, 0)
@@ -71,6 +74,10 @@ func _ready() -> void:
 	_marauders_root = Node3D.new()
 	_marauders_root.name = "Marauders"
 	add_child(_marauders_root)
+	# состояние рейда (ключи, рубильники, эвакуация, итог) — одно имя у всех peer
+	_raid = Raid.new()
+	_raid.name = "Raid"
+	add_child(_raid)
 
 	if not Net.is_networked():
 		_spawn_offline_player()
@@ -91,7 +98,7 @@ func _spawn_offline_player() -> void:
 	p.peer_id = 1
 	_players_root.add_child(p)
 	p.global_position = _spawn + Vector3(0, 0.05, 0)
-	p.health.died.connect(_on_player_died)
+	_raid.register(1, "Ты")
 	_local_player = p
 	_camera_rig.set_target(p)
 	_face_center(p.global_position)
@@ -153,7 +160,7 @@ func _spawn_one_player(peer_id: int, index: int) -> void:
 	var offset := Vector3(cos(index * TAU / 3.0), 0.0, sin(index * TAU / 3.0)) * 1.3
 	var pos := _spawn + offset + Vector3(0, 0.05, 0)
 	var node := _player_spawner.spawn({"peer_id": peer_id, "pos": pos}) as Player
-	node.health.died.connect(_on_player_died)
+	_raid.register(peer_id, String(Net.player_names.get(peer_id, "Игрок %d" % peer_id)))
 
 
 ## Присоединился уже во время рейда (лобби этого не предполагает, но не должно ломаться).
@@ -268,10 +275,6 @@ func _random_room_point() -> Vector3:
 	return SectorBuilder.polar(a, r)
 
 
-func _on_player_died() -> void:
-	if _local_player and not _local_player.is_alive():
-		_hud.get_node("Dead").visible = true
-
 
 ## Редактор: кольцо из JSON как превью (без дверей, пропсов и игроков) — видно, куда ставить постройки.
 func _build_editor_preview() -> void:
@@ -311,5 +314,4 @@ func _process(_delta: float) -> void:
 	if not _nav_baked:
 		status += "   (навмеш печётся)"
 	(_hud.get_node("Status") as Label).text = status
-	if not _local_player.is_alive() and Input.is_action_just_pressed("reload") and not Net.is_networked():
-		get_tree().reload_current_scene()
+	# смерть, эвакуация и «R — новый рейд» — в Raid

@@ -16,14 +16,37 @@ extends Marker3D
 @export_multiline var rule: String = ""
 ## Сколько стоять в зоне до эвакуации, с.
 @export var channel_s: float = 8.0
+## Открыта, только когда включён рубильник с этим id (PowerSwitch.switch_id); пусто — не нужен.
+@export var required_switch: String = ""
+## Открыта, только когда у группы есть ключ с этим id (KeyPickup.key_id); пусто — не нужен.
+@export var required_key: String = ""
 
 var _vis: Node3D
+var _disc_mat: StandardMaterial3D
+var _open_shown: int = -1
 
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		add_to_group("extractions")
 	_rebuild()
+
+
+## Точка внутри зоны: по плану — радиус, по высоте — Balance.EXTRACT_ZONE_HEIGHT.
+func contains(p: Vector3) -> bool:
+	var d := p - global_position
+	return Vector2(d.x, d.z).length() <= radius and absf(d.y) <= Balance.EXTRACT_ZONE_HEIGHT
+
+
+## Цвет зоны по состоянию: зелёная — открыта, красная — закрыта (рубильник/ключ).
+func _process(_delta: float) -> void:
+	if Engine.is_editor_hint() or Raid.current == null or _disc_mat == null:
+		return
+	var open := 1 if Raid.current.extraction_block_reason(self) == "" else 0
+	if open == _open_shown:
+		return
+	_open_shown = open
+	_disc_mat.albedo_color = Color(0.2, 0.85, 0.35, 0.28) if open == 1 else Color(0.9, 0.25, 0.2, 0.28)
 
 
 func _rebuild() -> void:
@@ -46,12 +69,14 @@ func _rebuild() -> void:
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	disc.material_override = m
+	_disc_mat = m
+	_open_shown = -1
 	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	disc.position.y = 0.03
 	_vis.add_child(disc)
 	var label := Label3D.new()
 	label.text = "ЭВАКУАЦИЯ · " + display_name
-	label.pixel_size = 0.02
+	label.pixel_size = 0.007
 	label.font_size = 48
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.modulate = Color(0.45, 1.0, 0.55)

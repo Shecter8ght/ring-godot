@@ -13,6 +13,7 @@ const MATERIAL_KIND := {
 	"glass": "glass", "sign_panel": "plastic",
 	"gb_facade": "concrete", "gb_fire": "concrete", "gb_structural": "concrete", "gb_partition": "concrete",
 	"gb_fence": "concrete", "gb_slab": "concrete",
+	"gbf_tile": "tile", "gbf_concrete": "concrete", "gbf_asphalt": "asphalt",
 }
 
 const PROP_KIND := {

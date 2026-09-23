@@ -297,6 +297,14 @@
 <text x="423" y="-417" font-size="11.5" fill="#0d4f1f" font-weight="700">Выезд грузового двора</text>
 <polygon points="605.5,411.0 617.5,433.0 593.5,433.0" fill="#27a348" stroke="#0d4f1f" stroke-width="1.5"/>
 <text x="622" y="428" font-size="11.5" fill="#0d4f1f" font-weight="700">Съезд паркинга (EXIT ONLY)</text>
+<rect x="412.9" y="-201.4" width="12" height="12" fill="#d98a1c" stroke="#4a3500" stroke-width="1.2" transform="rotate(45 418.9 -195.4)"/>
+<text x="429" y="-191" font-size="10.5" fill="#5a4200" font-weight="700">Рубильник ворот двора</text>
+<rect x="432.3" y="-59.8" width="12" height="12" fill="#c9a100" stroke="#4a3500" stroke-width="1.2" transform="rotate(45 438.3 -53.8)"/>
+<text x="448" y="-50" font-size="10.5" fill="#5a4200" font-weight="700">Ключ от серверной</text>
+<rect x="423.1" y="-129.0" width="12" height="12" fill="#c9a100" stroke="#4a3500" stroke-width="1.2" transform="rotate(45 429.1 -123.0)"/>
+<text x="439" y="-119" font-size="10.5" fill="#5a4200" font-weight="700">Карта-ключ охраны</text>
+<rect x="-47.7" y="-242.4" width="12" height="12" fill="#c9a100" stroke="#4a3500" stroke-width="1.2" transform="rotate(45 -41.7 -236.4)"/>
+<text x="-32" y="-232" font-size="10.5" fill="#5a4200" font-weight="700">Ключ от сейфовой</text>
 <circle cx="-109.2" cy="-619.2" r="8" fill="#2f6fd6" stroke="#fff" stroke-width="2"/>
 <text x="-97" y="-615" font-size="11" fill="#1f4a93" font-weight="600">Площадь, у клумб</text>
 <circle cx="591.9" cy="287.5" r="8" fill="#2f6fd6" stroke="#fff" stroke-width="2"/>
@@ -322,5 +330,5 @@
 <line x1="-552.0" y1="936.0" x2="-522.0" y2="936.0" stroke="#d8b41c" stroke-width="4.2"/><text x="-512.0" y="940.0" font-size="12.5">ворота</text>
 <line x1="-402.0" y1="936.0" x2="-372.0" y2="936.0" stroke="#c8322c" stroke-width="4.5"/><text x="-362.0" y="940.0" font-size="12.5">заперто навсегда</text>
 <line x1="-252.0" y1="936.0" x2="-222.0" y2="936.0" stroke="#c8322c" stroke-width="3.0" stroke-dasharray="2 3"/><text x="-212.0" y="940.0" font-size="12.5">ограждение</text>
-<polygon points="-552.0,958.0 -544.0,972.0 -560.0,972.0" fill="#27a348"/><text x="-536.0" y="970.0" font-size="12.5">эвакуация</text><circle cx="-394.0" cy="966.0" r="7" fill="#2f6fd6"/><text x="-380.0" y="970.0" font-size="12.5">спавн</text><rect x="-256.0" y="959.0" width="30" height="14" fill="none" stroke="#b0402f" stroke-width="2" stroke-dasharray="5 3"/><text x="-216.0" y="970.0" font-size="12.5">по ключу</text>
+<polygon points="-552.0,958.0 -544.0,972.0 -560.0,972.0" fill="#27a348"/><text x="-536.0" y="970.0" font-size="12.5">эвакуация</text><circle cx="-394.0" cy="966.0" r="7" fill="#2f6fd6"/><text x="-380.0" y="970.0" font-size="12.5">спавн</text><rect x="-256.0" y="959.0" width="30" height="14" fill="none" stroke="#b0402f" stroke-width="2" stroke-dasharray="5 3"/><text x="-216.0" y="970.0" font-size="12.5">по ключу</text><rect x="-102.0" y="960.0" width="12" height="12" fill="#c9a100" transform="rotate(45 -96.0 966.0)"/><text x="-82.0" y="970.0" font-size="12.5">ключ / рубильник</text>
 </svg>

@@ -22,6 +22,9 @@ func _ready() -> void:
 ## см. sector_level._spawn_player_node). Без этого урон применяется, но остальные его не видят.
 func _setup_sync() -> void:
 	var sync := MultiplayerSynchronizer.new()
+	# постоянное имя: синхронизатор адресуется по пути, а автоимя (@MultiplayerSynchronizer@N)
+	# у каждого peer своё — пакеты хоста не находили узел у клиента
+	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
 	for prop in [".:hp", ".:alive"]:
 		var path := NodePath(prop)

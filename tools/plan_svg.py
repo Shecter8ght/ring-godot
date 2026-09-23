@@ -94,7 +94,7 @@ BUILDING_FILL = {0: "#d3dde0", 1: "#bfc4c6", 2: "#9fa9ad", 3: "#e7e5df", 4: "#e7
 def parse_level(tscn):
     """Постройки (BlockoutBuilding), точки появления и эвакуации из .tscn уровня: положение,
     оси X/Z базиса и экспортированные свойства. Нет файла — пустые списки."""
-    out = {"buildings": [], "spawns": [], "extractions": []}
+    out = {"buildings": [], "spawns": [], "extractions": [], "items": []}
     if not tscn.exists():
         return out
     text = tscn.read_text(encoding="utf-8")
@@ -118,7 +118,12 @@ def parse_level(tscn):
         elif scene.endswith("spawn_point.tscn"):
             out["spawns"].append(node)
         elif scene.endswith("extraction_point.tscn"):
+            node["key"] = props.get("required_key", '""').strip('"')
+            node["switch"] = props.get("required_switch", '""').strip('"')
             out["extractions"].append(node)
+        elif scene.endswith("key_pickup.tscn") or scene.endswith("power_switch.tscn"):
+            node["switch"] = scene.endswith("power_switch.tscn")
+            out["items"].append(node)
     return out
 
 
@@ -244,6 +249,11 @@ def main(path):
         x, y = e["o"][0] * PX, e["o"][2] * PX
         s.append(f'<polygon points="{x:.1f},{y - 13:.1f} {x + 12:.1f},{y + 9:.1f} {x - 12:.1f},{y + 9:.1f}" fill="#27a348" stroke="#0d4f1f" stroke-width="1.5"/>')
         s.append(f'<text x="{x + 16:.0f}" y="{y + 4:.0f}" font-size="11.5" fill="#0d4f1f" font-weight="700">{escape(e["name"])}</text>')
+    for it in level["items"]:
+        x, y = it["o"][0] * PX, it["o"][2] * PX
+        col = "#d98a1c" if it["switch"] else "#c9a100"
+        s.append(f'<rect x="{x - 6:.1f}" y="{y - 6:.1f}" width="12" height="12" fill="{col}" stroke="#4a3500" stroke-width="1.2" transform="rotate(45 {x:.1f} {y:.1f})"/>')
+        s.append(f'<text x="{x + 10:.0f}" y="{y + 4:.0f}" font-size="10.5" fill="#5a4200" font-weight="700">{escape(it["name"])}</text>')
     for sp in level["spawns"]:
         x, y = sp["o"][0] * PX, sp["o"][2] * PX
         s.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="8" fill="#2f6fd6" stroke="#fff" stroke-width="2"/>')
@@ -292,7 +302,9 @@ def main(path):
              f'<text x="{lx + 16}" y="{y + 4}" font-size="12.5">эвакуация</text>'
              f'<circle cx="{lx + 158}" cy="{y}" r="7" fill="#2f6fd6"/><text x="{lx + 172}" y="{y + 4}" font-size="12.5">спавн</text>'
              f'<rect x="{lx + 296}" y="{y - 7}" width="30" height="14" fill="none" stroke="#b0402f" stroke-width="2" stroke-dasharray="5 3"/>'
-             f'<text x="{lx + 336}" y="{y + 4}" font-size="12.5">по ключу</text>')
+             f'<text x="{lx + 336}" y="{y + 4}" font-size="12.5">по ключу</text>'
+             f'<rect x="{lx + 450}" y="{y - 6}" width="12" height="12" fill="#c9a100" transform="rotate(45 {lx + 456} {y})"/>'
+             f'<text x="{lx + 470}" y="{y + 4}" font-size="12.5">ключ / рубильник</text>')
     s.append("</svg>")
 
     out = Path("docs/plans") / (Path(path).stem + ".svg")

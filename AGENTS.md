@@ -38,6 +38,7 @@ tools/smoke.cmd <сцена> [кадров] [overview[:x:z:высота]|at:уг
                                       # скриншот в docs/screens/, выход (cmd режет «=» и «,» — только «:»)
 tools/godot.cmd res://tools/ai_test.tscn                     # прогон мародёра: шум → бой → выстрелы, печатает состояния
 tools/godot.cmd --disable-vsync res://tools/perf_test.tscn   # FPS / вызовы отрисовки в изометрии и в прицеле по точкам
+tools/godot.cmd res://tools/raid_test.tscn                   # цикл рейда: рубильник, ключи, запертая дверь, эвакуация, итог
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 ```
@@ -77,6 +78,11 @@ docs/          STATUS.md (что сделано / что дальше), реше
    дочерние `blockout_opening.tscn`, режут ближайшую стену), точки появления (`spawn_point.tscn`)
    и эвакуации (`extraction_point.tscn`). Перекрытия (этажи паркинга, навесы) — группа "decks":
    уровень прячет их над игроком в изометрии.
+   Рейд — узел `Raid` (src/world/raid.gd, создаёт SectorLevel; хост считает, остальным синхронизируется):
+   ключи группы, рубильники, отсчёт эвакуации, итог. В сцене уровня: `key_pickup.tscn` (key_id),
+   `power_switch.tscn` (switch_id), у `ExtractionPoint` — required_key / required_switch;
+   помещение с "key" в JSON запирает свои двери (Door.required_key). Синхронизаторам давать имя
+   (`sync.name = "Sync"`): автоимя у каждого peer своё, и пакеты хоста не находят узел.
    Производительность: меши пропсов склеиваются (`PropBatcher`, клетка 24 м, дальше 110 м не
    рисуются) — не добавлять в сцену тысячи мелких MeshInstance; глухие стены — окклюдеры,
    отсечение за стенами включено только в прицеле (в изометрии стены у камеры растворены).

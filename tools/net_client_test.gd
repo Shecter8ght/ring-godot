@@ -30,8 +30,8 @@ func _run() -> void:
 	while not (get_tree().current_scene and get_tree().current_scene.has_method("_spawn_marauders")):
 		await get_tree().process_frame
 		t += get_process_delta_time()
-		if t > 10.0:
-			print("[client] сцена не загрузилась за 10с")
+		if t > 40.0:
+			print("[client] сцена не загрузилась за 40с")
 			get_tree().quit(1)
 			return
 	_level = get_tree().current_scene
@@ -48,6 +48,15 @@ func _run() -> void:
 	_report("после движения хоста")
 	await get_tree().create_timer(1.5).timeout
 	_report("финал (должен увидеть урон по мародёру)")
+	print("[client] рейд: рубильники %s, ключи %s" % [Raid.current.switches, Raid.current.team_keys])
+	# просим хост подобрать карту-ключ (как по F) и идём к остановке
+	(_level.get_node("Interactables/KeycardSecurity") as KeyPickup).request_use()
+	await get_tree().create_timer(0.5).timeout
+	print("[client] карта-ключ у группы: %s" % Raid.current.has_key("keycard_security"))
+	var bus := _level.get_node("Extractions/Bus") as ExtractionPoint
+	my_player.global_position = bus.global_position + Vector3(0, 0.1, 0)
+	await get_tree().create_timer(bus.channel_s + 2.0).timeout
+	print("[client] я эвакуирован: %s, итог виден: %s" % [Raid.current.is_extracted(multiplayer.get_unique_id()), Raid.current.extracted])
 	get_tree().quit(0)
 
 

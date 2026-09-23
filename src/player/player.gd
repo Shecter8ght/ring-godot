@@ -49,9 +49,15 @@ var _last_damage: float = 0.0
 
 func _ready() -> void:
 	add_to_group("players")
+	# "players" — кто сейчас в мире (его видят мародёры); "all_players" — все, включая ушедших
+	add_to_group("all_players")
 	_rng.randomize()
 	health.max_hp = Balance.PLAYER_HP
 	health.hp = health.max_hp
+	# смерть учитывает рейд (сигнал died приходит только у хоста — он и считает итог)
+	health.died.connect(func() -> void:
+		if Raid.current:
+			Raid.current.mark_dead(peer_id))
 	health.damaged.connect(func(amount: float, from: Vector3) -> void:
 		_last_hit_from = from
 		_last_damage = amount
@@ -80,6 +86,9 @@ func _ready() -> void:
 ## отдельно, со своим (хостовым) авторитетом — урон всегда считает хост.
 func _setup_sync() -> void:
 	var sync := MultiplayerSynchronizer.new()
+	# постоянное имя: синхронизатор адресуется по пути, а автоимя (@MultiplayerSynchronizer@N)
+	# у каждого peer своё — пакеты хоста не находили узел у клиента
+	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
 	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id"]:
 		var path := NodePath(prop)
@@ -129,6 +138,10 @@ func set_first_person(on: bool) -> void:
 
 
 func _process(_delta: float) -> void:
+	# эвакуирован (решает хост, видят все) — уходит из мира
+	if Raid.current and Raid.current.is_extracted(peer_id) and is_in_group("players"):
+		_leave_raid()
+		return
 	_update_hand()
 	# смерть видна у всех peer: у хоста — по сигналу, у клиентов — по синхронизированному alive
 	if not health.alive and _ragdoll == null:
@@ -386,6 +399,17 @@ func _apply_stance() -> void:
 
 
 ## Смерть: капсула прячется, падает регдолл, толкнутый от того, кто попал; камера — за телом.
+## Эвакуация: тело пропадает, коллизий нет, мародёры больше не видят (не в группе "players").
+func _leave_raid() -> void:
+	remove_from_group("players")
+	visible = false
+	collision_layer = 0
+	collision_mask = 0
+	velocity = Vector3.ZERO
+	set_physics_process(false)
+	Audio.play("door", global_position)
+
+
 func _die() -> void:
 	var torso := _body.get_node("Torso") as MeshInstance3D
 	var mat := torso.get_surface_override_material(0)

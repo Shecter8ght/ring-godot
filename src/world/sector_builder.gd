@@ -22,6 +22,11 @@ const FIRE_TOL_DEG := 2.0
 ## ~80 м от камеры; в прицеле дальше всё равно стены и дымка).
 const PROP_BATCH_CELL := 24.0
 const PROP_VIS_END := 110.0
+## Серые полы блокаута по текстурным (см. SectorMaterials.GREYBOX).
+const GREYBOX_FLOOR := {
+	"large_floor_tiles_02": "gbf_tile", "worn_tile_floor": "gbf_tile",
+	"concrete_floor_worn_001": "gbf_concrete", "asphalt_02": "gbf_asphalt",
+}
 ## Пол закрытой части кольца по поясам (ключи ring.zones).
 const ZONE_FLOOR := {
 	"atr": "large_floor_tiles_02", "gal": "large_floor_tiles_02", "inn": "worn_tile_floor", "st": "large_floor_tiles_02",
@@ -55,6 +60,8 @@ var _ring: Dictionary = {}
 var _fire_angles: Array[float] = []
 ## Превью в редакторе: без дверей-сцен и пропсов (их скрипты работают только в игре).
 var _preview: bool = false
+## Ключ помещения по одну из сторон текущего отрезка стены — его дверь запирается (_doorway).
+var _cur_key: String = ""
 
 const DOOR_SCENE := preload("res://scenes/props/door.tscn")
 const ARCH_DEFAULT := {
@@ -140,7 +147,7 @@ func _build_floors() -> void:
 		var a1 := float(room.a[1])
 		var r0 := float(room.r[0])
 		var r1 := float(room.r[1])
-		var st := _st(_floors, String(room.get("floor", "concrete_floor_worn_001")))
+		var st := _st(_floors, _floor_mat(String(room.get("floor", "concrete_floor_worn_001"))))
 		var n := maxi(1, int(ceil(deg_to_rad(a1 - a0) * r1 / SEG_LEN)))
 		for i in range(n):
 			var aa := lerpf(a0, a1, float(i) / n)
@@ -349,6 +356,7 @@ func _emit_wall_segment(line: Dictionary, p0: float, p1: float, side_a: Dictiona
 	var other := side_a if a_out else side_b
 	var facade := other.is_empty() or bool(other.get("outdoor", false))
 	var cls := _wall_class(line, side_a, side_b, facade)
+	_cur_key = String(side_a.get("key", side_b.get("key", "")))
 	# толщина — на отрезок: все помощники ниже (ригели, роллеты, косяки) берут её из _wall_t
 	_wall_t = float(_thick.get(cls, _base_t))
 	var mat := "concrete_panels" if facade else String(indoor.get("wall", "painted_plaster_wall"))
@@ -398,6 +406,13 @@ func _wall_class(line: Dictionary, side_a: Dictionary, side_b: Dictionary, facad
 		if bool(side.get("core", false)) or String(side.get("type", "")) in ["corridor", "gallery", "atrium"]:
 			return "structural"
 	return "partition"
+
+
+## Пол: в блокауте — серый по типу покрытия (плитка / бетон / асфальт — тоном различимы).
+func _floor_mat(textured: String) -> String:
+	if not _greybox:
+		return textured
+	return String(GREYBOX_FLOOR.get(textured, "gbf_concrete"))
 
 
 ## Текстурный материал или его серая замена в блокауте.
@@ -483,6 +498,7 @@ func _doorway(line: Dictionary, p0: float, p1: float, mat: String, y: float) -> 
 	var door := DOOR_SCENE.instantiate() as Door
 	door.width = width
 	door.height = y - 0.05
+	door.required_key = _cur_key
 	door.transform = Transform3D(Basis(dir, Vector3.UP, dir.cross(Vector3.UP).normalized()), hinge)
 	_doors.append(door)
 
@@ -603,10 +619,10 @@ func _build_surroundings() -> void:
 		var c1 := (a_min + 360.0) if a_min < 1e8 else 360.0
 		if c1 - c0 < 1.0:
 			continue
-		_annulus(_st(_floors, String(band.floor)), c0, c1, r0, r1, 0.0)
+		_annulus(_st(_floors, _floor_mat(String(band.floor))), c0, c1, r0, r1, 0.0)
 		if band.has("wall_r"):
 			_wall_strip(_st(_walls, String(band.wall)), _arc_points(float(band.wall_r), c0, c1), _wall_t, float(band.wall_h))
-	_annulus(_st(_floors, "asphalt_02"), 0.0, 360.0, 90.0, 420.0, -0.03)
+	_annulus(_st(_floors, _floor_mat("asphalt_02")), 0.0, 360.0, 90.0, 420.0, -0.03)
 
 
 ## Кольцо целиком: закрытая часть (полы поясов, несущие дуги), фасад на всю высоту здания по кругу,
@@ -622,7 +638,7 @@ func _build_ring_surroundings() -> void:
 	var inner_arcs: Array[float] = []
 	for key in zones:
 		var z: Array = zones[key]
-		_annulus(_st(_floors, String(ZONE_FLOOR.get(key, "concrete_floor_worn_001"))), c0, c1, float(z[0]), float(z[1]), 0.0)
+		_annulus(_st(_floors, _floor_mat(String(ZONE_FLOOR.get(key, "concrete_floor_worn_001")))), c0, c1, float(z[0]), float(z[1]), 0.0)
 		if key != "atr" and float(z[0]) > 1.0:
 			inner_arcs.append(float(z[0]))
 	# несущие дуги закрытой части — за роллетами видно, что кольцо продолжается
@@ -639,7 +655,7 @@ func _build_ring_surroundings() -> void:
 	if bh > _wall_h:
 		_wall_strip(_st(_walls, fmat), _arc_points(outer, a0, a1), t_fac, bh - _wall_h, _wall_h)
 	# участок: асфальт вокруг и забор — дуга по краю открытой части и две радиальные отсечки
-	_annulus(_st(_floors, "asphalt_02"), 0.0, 360.0, outer, site + 40.0, -0.03)
+	_annulus(_st(_floors, _floor_mat("asphalt_02")), 0.0, 360.0, outer, site + 40.0, -0.03)
 	var fence_h := float(_thick.get("site_fence_height", _fence_h))
 	var t_fence := float(_thick.get("fence", _base_t))
 	var fence := _st(_walls, _gb("concrete_block_wall_02", "gb_fence"))
@@ -859,5 +875,6 @@ func _build_markers(root: Node3D) -> void:
 			m.position = polar((float(op.a[0]) + float(op.a[1])) * 0.5, float(op.r))
 		else:
 			m.position = polar(float(op.a), (float(op.r[0]) + float(op.r[1])) * 0.5)
-		m.add_to_group("extractions")
+		# старые маркеры из JSON (f1_market) — не ExtractionPoint, своя группа
+		m.add_to_group("extraction_markers")
 		marks.add_child(m)
