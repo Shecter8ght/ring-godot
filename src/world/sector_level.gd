@@ -156,6 +156,7 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 	var m := MARAUDER_SCENE.instantiate() as Marauder
 	m.name = String(data.name)
 	m.position = data.pos
+	m.weapon = String(data.get("weapon", ""))
 	return m
 
 
@@ -256,9 +257,11 @@ func _on_nav_baked() -> void:
 		_spawn_marauders()
 
 
+## Отряды по AI_SQUAD_SIZE рядом друг с другом; оружие каждому — по долям AI_WEAPONS.
 func _spawn_marauders() -> void:
 	var placed := 0
 	var tries := 0
+	var squads := 0
 	while placed < Balance.MARAUDER_COUNT and tries < 200:
 		tries += 1
 		var p := _random_room_point()
@@ -267,18 +270,29 @@ func _spawn_marauders() -> void:
 		var snapped := NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, p)
 		if snapped.distance_to(p) > 3.0:
 			continue
-		var m: Marauder
-		if _marauder_spawner:
-			m = _marauder_spawner.spawn({"name": "Marauder%d" % placed, "pos": snapped + Vector3(0, 0.1, 0)}) as Marauder
-		else:
-			m = MARAUDER_SCENE.instantiate() as Marauder
-			m.name = "Marauder%d" % placed
-			_marauders_root.add_child(m)
-			m.global_position = snapped + Vector3(0, 0.1, 0)
-		m.patrol_point_provider = _random_room_point
-		placed += 1
+		var size := mini(_rng.randi_range(int(Balance.AI_SQUAD_SIZE[0]), int(Balance.AI_SQUAD_SIZE[1])), Balance.MARAUDER_COUNT - placed)
+		var squad := Squad.new()
+		squads += 1
+		for k in range(size):
+			var at := snapped
+			if k > 0:
+				var a := _rng.randf() * TAU
+				at = NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, snapped + Vector3(cos(a), 0.0, sin(a)) * (1.2 + k))
+			var wpn := Marauder.pick_weapon(_rng)
+			var m: Marauder
+			if _marauder_spawner:
+				m = _marauder_spawner.spawn({"name": "Marauder%d" % placed, "pos": at + Vector3(0, 0.1, 0), "weapon": wpn}) as Marauder
+			else:
+				m = MARAUDER_SCENE.instantiate() as Marauder
+				m.name = "Marauder%d" % placed
+				m.weapon = wpn
+				_marauders_root.add_child(m)
+				m.global_position = at + Vector3(0, 0.1, 0)
+			m.patrol_point_provider = _random_room_point
+			squad.add(m)
+			placed += 1
 	_marauders_spawned = placed
-	print("sector: мародёров %d, попыток %d" % [placed, tries])
+	print("sector: мародёров %d в %d отрядах, попыток %d" % [placed, squads, tries])
 
 
 ## Случайная точка внутри случайного «жилого» помещения сектора (с отступом от стен и полос).

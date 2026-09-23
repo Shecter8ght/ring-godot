@@ -111,7 +111,7 @@ const DOOR_SWING_SPEED := 7.0
 
 # --- Здоровье ---
 const PLAYER_HP := 100.0
-const MARAUDER_HP := 60.0
+const MARAUDER_HP := 120.0
 
 # --- Пистолет игрока ---
 const PISTOL := {"damage": 22.0, "interval": 0.22, "mag": 8, "reload": 1.8, "spread_deg": 1.4, "range_m": 60.0, "noise_m": 60.0}
@@ -204,11 +204,51 @@ const AI_VIEW_STANCE_SCALE := {"stand": 1.0, "crouch": 0.7, "prone": 0.4}
 const AI_NOTICE_SEC := 0.35
 ## Память о цели после потери из виду, с.
 const AI_MEMORY_SEC := 12.0
-## Бой: дистанция открытия огня, интервал выстрелов, разброс, урон.
+## Бой: дистанция открытия огня, интервал выстрелов, разброс, урон (старые — для ai_test/сектора).
 const AI_ENGAGE_RANGE := 32.0
 const AI_FIRE_INTERVAL := 0.75
 const AI_SPREAD_DEG := 7.0
 const AI_DAMAGE := 9.0
+## Оружие мародёров: доля в отряде (weight), магазин, перезарядка (с), интервал выстрелов (с),
+## очередь (выстрелов) и пауза между очередями (с), урон за пулю/дробину, дробин, разброс (град),
+## дальность боя (м), шум выстрела (м), звук, модель.
+const AI_WEAPONS := {
+	"pistol": {"weight": 0.45, "mag": 12, "reload": 2.0, "interval": 0.42, "burst": 1, "burst_pause": 0.0,
+		"damage": 9.0, "pellets": 1, "spread": 5.5, "range": 28.0, "noise_m": 45.0, "sound": "shot_ai", "model": "pistol"},
+	"rifle": {"weight": 0.4, "mag": 30, "reload": 2.6, "interval": 0.11, "burst": 3, "burst_pause": 0.75,
+		"damage": 11.0, "pellets": 1, "spread": 4.5, "range": 45.0, "noise_m": 80.0, "sound": "shot_rifle", "model": "rifle"},
+	"shotgun": {"weight": 0.15, "mag": 6, "reload": 3.2, "interval": 0.95, "burst": 1, "burst_pause": 0.0,
+		"damage": 7.0, "pellets": 8, "spread": 4.0, "range": 18.0, "noise_m": 90.0, "sound": "shot_shotgun", "model": "shotgun"},
+}
+## Точность: только что замеченная цель — разброс × AI_AIM_COLD, за AI_AIM_SETTLE_SEC сходится к 1.
+## Цель бежит — × AI_TARGET_MOVING; сам на ходу — × AI_SELF_MOVING.
+const AI_AIM_COLD := 2.4
+const AI_AIM_SETTLE_SEC := 1.4
+const AI_TARGET_MOVING := 1.5
+const AI_SELF_MOVING := 1.7
+## Окрик «контакт»: докуда слышно, м, и как часто повторять, пока видит цель, с.
+const AI_CALLOUT_RADIUS := 32.0
+const AI_CALLOUT_EVERY := 3.0
+## Укрытие: поиск в радиусе, м; сколько сидеть, прежде чем выглянуть, и сколько стрелять, выглянув, с.
+const AI_COVER_RADIUS := 10.0
+const AI_COVER_HIDE := [0.8, 1.8]
+const AI_COVER_PEEK := [1.2, 2.4]
+## В укрытие — после попадания или если рядом свистят пули (слышал выстрел цели ближе, м).
+const AI_SUPPRESS_RADIUS := 12.0
+## Раненый (меньше этой доли HP) без товарищей рядом — отходит в дальнее укрытие.
+const AI_RETREAT_HP := 0.35
+const AI_RETREAT_HOLD := [6.0, 10.0]
+## Обход: на сколько метров в сторону от цели заходит второй в отряде.
+const AI_FLANK_OFFSET := 11.0
+## Поиск после потери цели: сколько точек осмотреть вокруг последней известной, в радиусе, м.
+const AI_SEARCH_POINTS := 3
+const AI_SEARCH_RADIUS := 9.0
+## Слух: падение тела товарища слышно в радиусе, м.
+const AI_DEATH_NOISE := 22.0
+## Строй патруля: ведомые держатся на таком расстоянии за ведущим, м.
+const AI_FOLLOW_DIST := 2.6
+## Отряды: сколько в отряде (от и до).
+const AI_SQUAD_SIZE := [1, 3]
 ## Патруль: пауза на точке, с.
 const AI_PATROL_PAUSE := [1.5, 4.0]
 ## Расследование: сколько стоять на месте шума, прежде чем вернуться к патрулю, с.
