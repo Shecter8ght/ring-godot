@@ -30,6 +30,8 @@ const FX_NAMES := {"kick": "отдача", "shake": "тряска", "spread": "�
 
 func _ready() -> void:
 	layer = 20
+	# окно само закрывается по Esc — меню паузы тогда не открывается
+	add_to_group("esc_windows")
 	_trader = JSON.parse_string(FileAccess.get_file_as_string(TRADER_PATH)) as Dictionary
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)

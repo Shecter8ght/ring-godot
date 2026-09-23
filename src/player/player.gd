@@ -274,6 +274,8 @@ func _footsteps(delta: float) -> void:
 
 ## Стрельба, перезарядка на R, смена оружия 1–4, граната G.
 func _combat(delta: float) -> void:
+	if PauseMenu.shown:
+		return
 	fire_timer -= delta
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
 	if not combat_enabled or (Raid.current and Raid.current.ui_open()):
@@ -517,6 +519,8 @@ func _stance_speed() -> float:
 ## WASD: в прицеле — относительно взгляда (вперёд — куда смотришь), иначе — относительно камеры
 ## («вверх» на экране — от камеры вглубь).
 func _wish_direction() -> Vector3:
+	if PauseMenu.shown:
+		return Vector3.ZERO
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	if input.length_squared() == 0.0:
 		return Vector3.ZERO

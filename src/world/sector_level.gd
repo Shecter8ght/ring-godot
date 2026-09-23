@@ -62,6 +62,13 @@ func _ready() -> void:
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})
+	# карта этажа на M (только у кольца — у старого сектора плана нет)
+	if not _ring.is_empty():
+		var map := MapView.new()
+		map.name = "Map"
+		var ang: Array = SectorBuilder.load_def(sector_path).get("angle", [-180, 0])
+		map.setup(_rooms, _ring, Vector2(float(ang[0]), float(ang[1])))
+		add_child(map)
 	# точка появления из сцены уровня (узлы SpawnPoint) — одна случайная на рейд
 	var points := get_tree().get_nodes_in_group("spawn_points")
 	if not points.is_empty():
