@@ -95,6 +95,11 @@ func _ready() -> void:
 	inventory = Inventory.new()
 	inventory.name = "Inventory"
 	add_child(inventory)
+	# шаги слышно у всех: и свои, и напарника (по синхронизированной позиции и стойке)
+	var steps := Footsteps.new()
+	steps.name = "Footsteps"
+	steps.loud_db = func() -> float: return float(Balance.STEP_STANCE_DB.get(_stance_key(), 0.0))
+	add_child(steps)
 	# броня и шлем снимают часть урона (считается там же, где урон, — на хосте)
 	health.damage_filter = func(amount: float) -> float: return inventory.absorb(amount)
 	# рука с оружием — не внутри Body: Body сжимается по стойке, оружие сжиматься не должно
@@ -311,9 +316,8 @@ func _footsteps(delta: float) -> void:
 	var key := _stance_key()
 	if key == "stand" and Input.is_action_pressed("sprint") and not aiming:
 		key = "sprint"
+	# звук шагов — Footsteps (слышен у всех peer); здесь — шум, по которому слышат мародёры
 	NoiseBus.emit(global_position, float(Balance.NOISE_STEP[key]), "step")
-	var step_db: Dictionary = {"stand": 0.0, "sprint": 2.0, "crouch": -8.0, "prone": -14.0}
-	Audio.play("step_run" if key == "sprint" else "step", global_position, float(step_db[key]))
 
 
 ## Стрельба, перезарядка на R, смена оружия 1–4, граната G.

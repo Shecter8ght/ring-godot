@@ -12,6 +12,14 @@ const KINDS := {
 	"shot_ai": {"db": 1.0, "unit": 8.0, "max": 90.0},
 	"step": {"db": -16.0, "unit": 3.0, "max": 22.0},
 	"step_ai": {"db": -14.0, "unit": 3.0, "max": 26.0},
+	# шаги по поверхностям (Audio.step): occlude — за стеной глуше
+	"step_stone": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"step_stone_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
+	"step_dirt": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"step_dirt_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
+	"step_snow": {"db": -16.0, "unit": 3.0, "max": 24.0, "occlude": true},
+	"step_snow_run": {"db": -13.0, "unit": 3.0, "max": 30.0, "occlude": true},
+	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
 	"hit": {"db": -4.0, "unit": 5.0, "max": 30.0},
 	"reload": {"db": -8.0, "unit": 3.0, "max": 15.0},
@@ -40,6 +48,9 @@ const SAMPLES := {
 	"shot_pistol": ["guns/pistol_"], "shot_ai": ["guns/pistol_"], "shot_rifle": ["guns/carbine_"],
 	"shot_shotgun": ["guns/shotgun_"], "shot_bolt": ["guns/marksman_"],
 	"step": ["steps/stone_"], "step_run": ["steps/stone_run_"], "step_ai": ["steps/stone_"],
+	"step_stone": ["steps/stone_"], "step_stone_run": ["steps/stone_run_"],
+	"step_dirt": ["steps/dirt_"], "step_dirt_run": ["steps/dirt_run_"],
+	"step_snow": ["steps/snow_"], "step_snow_run": ["steps/snow_run_"], "step_metal": ["steps/metal_"],
 	"door": ["world/door_"], "hit": ["body/hit_"], "fall": ["body/fall_"],
 	"death": ["voice/rattle_groan_", "voice/rattle_gurgle_"],
 	"reload": ["guns/reload_pistol_"], "reload_pistol": ["guns/reload_pistol_"],
@@ -53,12 +64,23 @@ const FAR := {
 	"shot_shotgun": "guns/shotgun_far_", "shot_bolt": "guns/marksman_far_",
 }
 const FAR_M := 30.0
+## Поверхность под ногами (Surfaces) → набор записей шагов. Металл — камень + звонкий слой
+## step_metal (запись steps/metal_*, если есть, иначе синтез).
+const STEP_SET := {
+	"tile": "stone", "concrete": "stone", "plastic": "stone", "wood": "stone", "glass": "stone",
+	"metal": "stone", "asphalt": "dirt", "cardboard": "dirt", "fabric": "dirt", "snow": "snow",
+}
+
+## Сыгран шаг: вид звука и поверхность (для тестов и отладки).
+signal stepped(kind: String, surface: String, pos: Vector3)
 
 var _samples: Dictionary = {}
 var _far: Dictionary = {}
 
 var _streams: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
+## Последний сыгранный вариант по виду — подряд один и тот же не звучит.
+var _last_pick: Dictionary = {}
 var _ambient: AudioStreamPlayer
 
 
@@ -79,6 +101,9 @@ func _ready() -> void:
 	_streams["shot_shotgun"] = _make(_gunshot(0.55, 0.7))
 	_streams["shot_bolt"] = _make(_gunshot(0.65, 1.35))
 	_streams["step_run"] = _streams["step"]
+	for k in ["step_stone", "step_stone_run", "step_dirt", "step_dirt_run", "step_snow", "step_snow_run"]:
+		_streams[k] = _streams["step"]
+	_streams["step_metal"] = _make(_step_metal())
 	_streams["death"] = _streams["hit"]
 	_streams["fall"] = _streams["hit"]
 	for k in ["reload_pistol", "reload_rifle", "reload_shotgun", "bolt", "pin"]:
@@ -104,22 +129,84 @@ func _ready() -> void:
 
 
 ## Звук в точке мира. Игрок слушает из своей позиции (AudioListener3D на игроке).
-func play(kind: String, pos: Vector3, extra_db: float = 0.0) -> void:
+## pitch 0 — случайный тон ±8 %.
+func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0) -> void:
 	var stream: AudioStream = _pick(kind, pos)
 	if stream == null:
 		return
 	var spec: Dictionary = KINDS.get(kind, {"db": 0.0, "unit": 5.0, "max": 40.0})
+	var listener := _listener_pos()
+	var ears := _has_ears()
+	if ears and listener.distance_to(pos) > float(spec["max"]):
+		return
 	var p := AudioStreamPlayer3D.new()
 	p.stream = stream
 	p.volume_db = float(spec.db) + extra_db
 	p.unit_size = float(spec.unit)
 	p.max_distance = float(spec["max"])
 	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
-	p.pitch_scale = _rng.randf_range(0.92, 1.08)
+	p.pitch_scale = pitch if pitch > 0.0 else _rng.randf_range(0.92, 1.08)
+	if ears and bool(spec.get("occlude", false)) and _occluded(listener, pos):
+		# за стеной: тише и без верхов
+		p.volume_db -= Balance.AUDIO_OCCLUDED_DB
+		p.attenuation_filter_cutoff_hz = Balance.AUDIO_OCCLUDED_CUTOFF
 	p.finished.connect(p.queue_free)
 	get_tree().current_scene.add_child(p)
 	p.global_position = pos
 	p.play()
+
+
+## Шаг в точке pos: поверхность под ногами, бег/шаг, мародёр (ботинки ниже и громче), левая/правая.
+func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool) -> void:
+	# дальше, чем слышно бег, — не считаем (24 мародёра шагают всё время)
+	if _has_ears() and _listener_pos().distance_to(pos) > float(KINDS.step_stone_run["max"]):
+		return
+	var surf := _surface_under(pos)
+	var sset := String(STEP_SET.get(surf, "stone"))
+	var pitch := (0.97 if left else 1.02) * (0.93 if ai else 1.0) * _rng.randf_range(0.97, 1.03)
+	var db := extra_db + (1.5 if ai else 0.0)
+	var kind := "step_%s%s" % [sset, "_run" if run else ""]
+	play(kind, pos, db, pitch)
+	stepped.emit(kind, surf, pos)
+	if surf == "metal":
+		play("step_metal", pos, db + (2.0 if run else 0.0), pitch)
+
+
+## Из чего пол под точкой (Surfaces), "concrete" — если не понять.
+func _surface_under(pos: Vector3) -> String:
+	var world := get_viewport().find_world_3d() if get_viewport() else null
+	if world == null:
+		return "concrete"
+	var q := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 0.4, pos + Vector3.DOWN * 0.6, Hitscan.LAYER_WORLD)
+	var hit := world.direct_space_state.intersect_ray(q)
+	# бесконечная «земля» (WorldBoundary) лежит над полами двора — смотрим, что под ней
+	if not hit.is_empty() and _is_boundary(hit):
+		q.exclude = [(hit.collider as CollisionObject3D).get_rid()]
+		hit = world.direct_space_state.intersect_ray(q)
+	return Surfaces.kind_at(hit) if not hit.is_empty() else "concrete"
+
+
+func _is_boundary(hit: Dictionary) -> bool:
+	var co := hit.get("collider") as CollisionObject3D
+	if co == null:
+		return false
+	var sn := co.shape_owner_get_owner(co.shape_find_owner(int(hit.get("shape", 0)))) as CollisionShape3D
+	return sn != null and sn.shape is WorldBoundaryShape3D
+
+
+## Есть кто слушает (камера или AudioListener3D) — иначе расстояние до «ушей» не знаем.
+func _has_ears() -> bool:
+	var vp := get_viewport()
+	return vp != null and (vp.get_audio_listener_3d() != null or vp.get_camera_3d() != null)
+
+
+## Между ушами и источником — стена или дверь.
+func _occluded(listener: Vector3, pos: Vector3) -> bool:
+	var world := get_viewport().find_world_3d() if get_viewport() else null
+	if world == null or listener.distance_to(pos) < 1.5:
+		return false
+	var q := PhysicsRayQueryParameters3D.create(listener, pos + Vector3.UP * 0.4, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
+	return not world.direct_space_state.intersect_ray(q).is_empty()
 
 
 ## Запись (или дальняя запись), иначе синтетика.
@@ -131,7 +218,11 @@ func _pick(kind: String, pos: Vector3) -> AudioStream:
 			return far[_rng.randi_range(0, far.size() - 1)]
 	if _samples.has(kind):
 		var arr: Array = _samples[kind]
-		return arr[_rng.randi_range(0, arr.size() - 1)]
+		var i := _rng.randi_range(0, arr.size() - 1)
+		if arr.size() > 1 and i == int(_last_pick.get(kind, -1)):
+			i = (i + 1 + _rng.randi_range(0, arr.size() - 2)) % arr.size()
+		_last_pick[kind] = i
+		return arr[i]
 	return _streams.get(kind)
 
 
@@ -221,6 +312,19 @@ func _footstep() -> PackedFloat32Array:
 		lp += (_noise() - lp) * 0.18
 		var env := minf(1.0, t * 400.0) * exp(-t * 45.0)
 		out[i] = lp * env * 1.8
+	return out
+
+
+## Звонкий слой шага по металлу (решётка, лист, эскалатор): пара негармоничных обертонов + щелчок.
+func _step_metal() -> PackedFloat32Array:
+	var n := int(0.22 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		var ring := sin(TAU * 690.0 * t) * 0.5 + sin(TAU * 1130.0 * t) * 0.35 + sin(TAU * 1870.0 * t) * 0.2
+		var click := _noise() * exp(-t * 180.0)
+		out[i] = (ring * exp(-t * 26.0) * 0.55 + click * 0.5) * minf(1.0, t * 900.0)
 	return out
 
 

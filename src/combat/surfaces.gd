@@ -2,7 +2,8 @@ class_name Surfaces
 extends RefCounted
 ## Из чего сделана поверхность в точке попадания: по материалу меша (стены/полы сектора),
 ## по типу пропа или по телу. Возвращает вид: concrete, tile, asphalt, metal, glass, wood,
-## cardboard, fabric, plastic, flesh.
+## cardboard, fabric, plastic, flesh, snow. Для своих уровней из редактора: meta "surface" на
+## StaticBody3D или на CollisionShape3D (например "metal") — главнее всего остального.
 
 const MATERIAL_KIND := {
 	"large_floor_tiles_02": "tile", "worn_tile_floor": "tile",
@@ -36,6 +37,12 @@ static func kind_at(hit: Dictionary) -> String:
 	var node := body as Node
 	if node == null:
 		return "concrete"
+	if node is CollisionObject3D and hit.has("shape"):
+		var sn := (node as CollisionObject3D).shape_owner_get_owner((node as CollisionObject3D).shape_find_owner(int(hit.shape)))
+		if sn and sn.has_meta("surface"):
+			return String(sn.get_meta("surface"))
+	if node.has_meta("surface"):
+		return String(node.get_meta("surface"))
 	if node.get_parent() is Door:
 		return "metal"
 	if PROP_KIND.has(node.name):

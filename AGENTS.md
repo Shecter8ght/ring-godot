@@ -46,6 +46,8 @@ tools/smoke.cmd <сцена> [кадров] [overview[:x:z:высота]|at:уг
                                       # скриншот в docs/screens/, выход (cmd режет «=» и «,» — только «:»)
 tools/godot.cmd res://tools/ai_test.tscn                     # прогон мародёра: шум → бой → выстрелы, печатает состояния
 tools/godot.cmd res://tools/ai_squad_test.tscn               # тактика отряда: окрик, укрытие, перезарядка, поиск
+tools/godot.cmd --headless res://tools/steps_test.tscn      # шаги: поверхность под ногами, темп от скорости, глушение стеной
+python tools/import_model.py <id>                              # модель из _asset_src/<id> (+license.txt) в assets/models/props, CREDITS
 tools/godot.cmd res://tools/ui_shots.tscn                    # снимки: карта (M), меню (Esc), управление, рюкзак и лут
 tools/godot.cmd --disable-vsync res://tools/perf_test.tscn   # FPS / вызовы отрисовки в изометрии и в прицеле по точкам
 tools/godot.cmd res://tools/raid_test.tscn                   # цикл рейда: рубильник, ключи, запертая дверь, эвакуация, итог

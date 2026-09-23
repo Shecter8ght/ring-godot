@@ -221,6 +221,15 @@ const RAGDOLL_DAMP := {"linear": 1.4, "angular": 6.0}
 # --- Шум игрока: радиус слышимости шагов по стойке, м ---
 const NOISE_STEP := {"stand": 7.0, "sprint": 14.0, "crouch": 3.0, "prone": 1.5}
 const NOISE_STEP_INTERVAL := 0.45
+## Звук шагов (Footsteps): между шагами — STEP_STRIDE / скорость, но в пределах STEP_INTERVAL, с;
+## быстрее STEP_RUN_SPEED, м/с — бег (свои записи). Стена между ушами и шагами — глуше на
+## AUDIO_OCCLUDED_DB и без верхов (срез AUDIO_OCCLUDED_CUTOFF, Гц): за стеной слышно, но не ясно.
+const STEP_STRIDE := 1.2
+const STEP_INTERVAL := [0.26, 0.75]
+const STEP_RUN_SPEED := 3.8
+const STEP_STANCE_DB := {"stand": 0.0, "crouch": -8.0, "prone": -14.0}
+const AUDIO_OCCLUDED_DB := 8.0
+const AUDIO_OCCLUDED_CUTOFF := 700.0
 
 # --- Мародёр ---
 ## Кольцо (3 сектора): 24 мародёра отрядами по 1–3 — встречи часто, но не на каждом углу.

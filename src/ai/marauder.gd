@@ -39,7 +39,6 @@ var _rng := RandomNumberGenerator.new()
 var _target_player: Player = null
 var _facing: float = 0.0
 var _nav_ready: bool = false
-var _step_timer: float = 0.0
 var _ragdoll: Ragdoll
 var _last_hit_from: Vector3 = Vector3.ZERO
 var _last_damage: float = 0.0
@@ -97,6 +96,12 @@ func _ready() -> void:
 	gun.position = Vector3(-0.17, 1.24, 0.3 if weapon == "pistol" else 0.22)
 	_body.add_child(gun)
 	pause_timer = _rng.randf_range(0.5, 2.0)
+	# шаги слышны у всех peer (AI считает хост, позицию клиенты получают синхронизатором)
+	var steps := Footsteps.new()
+	steps.name = "Footsteps"
+	steps.ai = true
+	steps.loud_db = func() -> float: return -5.0 if crouched else 0.0
+	add_child(steps)
 	# Навмеш печётся после загрузки сектора — пока его нет, стоим (готовность проверяем в
 	# _physics_process: появившийся позже сигнала map_changed не должен стоять вечно).
 	NavigationServer3D.map_changed.connect(func(_m: RID) -> void: _nav_ready = true)
@@ -818,12 +823,7 @@ func _move(delta: float) -> void:
 		velocity.y = 0.0
 	move_and_slide()
 	_body.rotation.y = _facing
-	# Шаги мародёра слышны игроку — так его можно засечь до того, как он тебя увидит.
-	if Vector2(velocity.x, velocity.z).length() > 0.3:
-		_step_timer -= delta
-		if _step_timer <= 0.0:
-			_step_timer = 0.55 if state == State.PATROL else 0.36
-			Audio.play("step_ai", global_position)
+	# шаги (их слышно — так мародёра можно засечь раньше, чем он тебя) — Footsteps
 
 
 ## Вспышка на теле при попадании — видно, что пуля дошла.
