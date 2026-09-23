@@ -62,6 +62,11 @@ const START_STASH := [["w_pistol", 1], ["w_rifle", 1], ["ammo_9x19", 100], ["amm
 ## Торговец продаёт дороже цены предмета и покупает дешевле (с учётом износа брони).
 const TRADER_BUY_MULT := 1.25
 const TRADER_SELL_MULT := 0.55
+## Доверие торговца: за каждую эвакуацию и сверху — если вынес на сумму не меньше порога, ₽.
+## Пороги доверия и цены маршрутов на этажи — в data/floors.json.
+const TRUST_PER_EXTRACTION := 1
+const TRUST_BONUS := 1
+const TRUST_BONUS_VALUE := 60000
 ## Сцены: убежище (старт игры, между рейдами) и рейд.
 const HIDEOUT_SCENE := "res://scenes/levels/hideout.tscn"
 const RAID_SCENE := "res://scenes/levels/f1_ring.tscn"

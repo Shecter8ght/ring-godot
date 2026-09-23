@@ -70,12 +70,13 @@ func disconnect_all() -> void:
 	player_names.clear()
 
 
-## Только хост может позвать: переводит всех (включая себя) в сектор.
+## Только хост может позвать: переводит всех (включая себя) на этаж scene — выбранный хостом
+## в убежище маршрут (у клиентов маршрут может быть и не открыт: идут за хостом).
 @rpc("authority", "call_local", "reliable")
-func start_level() -> void:
+func start_level(scene: String) -> void:
 	# со снаряжением профиля — только если игрок пришёл в лобби из убежища (не тесты)
 	Profile.pending_raid = Profile.from_hideout
-	get_tree().change_scene_to_file(LEVEL_SCENE)
+	get_tree().change_scene_to_file(scene if scene != "" else LEVEL_SCENE)
 
 
 func _on_peer_connected(id: int) -> void:

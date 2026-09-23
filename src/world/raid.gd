@@ -495,7 +495,7 @@ func _save_profile(me: Player) -> void:
 	var items: Array = me.inventory.items.duplicate(true)
 	for e in me.mag_ammo_items():
 		ItemDb.add_to(items, e, -1)
-	Profile.return_loadout(me.inventory.equipment, items)
+	Profile.return_loadout(me.inventory.equipment, items, int(loot_value.get(me.peer_id, 0)))
 
 
 ## В убежище: из сети выходим, рейд забыт.
@@ -510,7 +510,7 @@ func _restart() -> void:
 	if not Net.is_networked():
 		get_tree().reload_current_scene()
 	elif multiplayer.is_server():
-		Net.start_level.rpc()
+		Net.start_level.rpc(get_tree().current_scene.scene_file_path)
 
 
 func _build_hud() -> void:

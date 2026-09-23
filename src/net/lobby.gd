@@ -44,7 +44,12 @@ func _on_join_pressed() -> void:
 
 
 func _on_start_pressed() -> void:
-	Net.start_level.rpc()
+	# из убежища — на выбранный этаж (плата за вылет — с хоста); иначе — первый этаж
+	var scene := Net.LEVEL_SCENE
+	if Profile.from_hideout:
+		scene = Floors.scene(Profile.floor)
+		Floors.pay_fee(Profile.floor)
+	Net.start_level.rpc(scene)
 
 
 func _on_leave_pressed() -> void:

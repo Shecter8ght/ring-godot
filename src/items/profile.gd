@@ -20,6 +20,13 @@ static var money: int = 0
 static var stash: Array = []
 static var equipment: Dictionary = {}
 static var backpack: Array = []
+## Доверие торговца (Михалыча): растёт за удачные эвакуации, открывает маршруты на этажи (Floors).
+static var trust: int = 0
+## Сколько раз выбрался из рейда живым.
+static var extractions: int = 0
+## Открытые маршруты (id этажей из data/floors.json) и выбранный для следующего рейда.
+static var floors_open: Array = ["f1"]
+static var floor: String = "f1"
 static var _loaded: bool = false
 
 
@@ -34,6 +41,14 @@ static func ensure() -> void:
 		stash = d.get("stash", [])
 		equipment = d.get("equipment", {})
 		backpack = d.get("backpack", [])
+		trust = int(d.get("trust", 0))
+		extractions = int(d.get("extractions", 0))
+		floors_open = d.get("floors_open", ["f1"])
+		if not "f1" in floors_open:
+			floors_open.append("f1")
+		floor = String(d.get("floor", "f1"))
+		if not floor in floors_open:
+			floor = "f1"
 		_fix_numbers()
 	else:
 		_starter()
@@ -46,6 +61,10 @@ static func _starter() -> void:
 	stash = []
 	equipment = {}
 	backpack = []
+	trust = 0
+	extractions = 0
+	floors_open = ["f1"]
+	floor = "f1"
 	for pair in Balance.START_STASH:
 		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), -1)
 
@@ -64,7 +83,8 @@ static func save() -> void:
 	if f == null:
 		push_error("Profile: не удалось записать " + path)
 		return
-	f.store_string(JSON.stringify({"money": money, "stash": stash, "equipment": equipment, "backpack": backpack}, "  "))
+	f.store_string(JSON.stringify({"money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
+		"trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor}, "  "))
 
 
 ## Тесты: свой файл и чистый старт.
@@ -236,8 +256,13 @@ static func take_loadout() -> Dictionary:
 
 
 ## Эвакуировался: снаряжение надето, вынесенное — в рюкзаке (разложить по тайнику — в убежище).
-static func return_loadout(eq: Dictionary, items: Array) -> void:
+## Удачный выход добавляет доверия торговца; вынес много — ещё больше.
+static func return_loadout(eq: Dictionary, items: Array, loot_value: int = 0) -> void:
 	ensure()
+	extractions += 1
+	trust += Balance.TRUST_PER_EXTRACTION
+	if loot_value >= Balance.TRUST_BONUS_VALUE:
+		trust += Balance.TRUST_BONUS
 	equipment = eq.duplicate(true)
 	backpack = items.duplicate(true)
 	_fix_numbers()

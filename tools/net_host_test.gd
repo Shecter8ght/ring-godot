@@ -30,7 +30,7 @@ func _run() -> void:
 	while multiplayer.get_peers().is_empty():
 		await get_tree().process_frame
 	print("[host] клиент подключился: id=%s" % str(multiplayer.get_peers()))
-	Net.start_level.rpc()
+	Net.start_level.rpc(Net.LEVEL_SCENE)
 	while not (get_tree().current_scene and get_tree().current_scene.has_method("_spawn_marauders")):
 		await get_tree().process_frame
 	_level = get_tree().current_scene

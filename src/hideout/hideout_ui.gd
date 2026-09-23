@@ -3,7 +3,8 @@ extends CanvasLayer
 ## Окна убежища (всё локально, в Profile):
 ##  тайник — три колонки: тайник ↔ снаряжение (слоты) ↔ рюкзак (с ним идёшь в рейд);
 ##  торговец — купить из ассортимента (data/trader.json) / продать из тайника;
-##  выход — с чем идёшь, «Соло-рейд» или «Кооп (лобби)»;
+##  выход — с чем идёшь, этаж и маршрут (открыть у Михалыча за доверие и деньги, см. Floors),
+##  «Соло-рейд» или «Кооп (лобби)»;
 ##  верстак — обвесы на надетое оружие: витрина ствола, характеристики (сравнение с «голым»),
 ##  слоты: что стоит (снять) и что из тайника подходит (поставить, с кратким эффектом).
 ## Esc или Tab — закрыть.
@@ -92,7 +93,8 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory"):
 		close_ui()
 		return
-	var sig := "%d|%d|%s|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot]
+	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
+		Profile.floor, str(Profile.floors_open), Profile.trust]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -149,7 +151,7 @@ func _build_stash() -> void:
 # ---------------------------------------------------------------- торговец
 
 func _build_trader() -> void:
-	_title.text = "%s   ·   у тебя %s ₽" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money)]
+	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust]
 	var shop := _column("Купить", 1.0)
 	for id in _trader.get("stock", []):
 		var sid := String(id)
@@ -185,13 +187,65 @@ func _build_exit() -> void:
 	if Profile.equipped_weapon() == "":
 		col.add_child(_text("Без оружия — надень его в тайнике.", Color(1.0, 0.55, 0.4)))
 	col.add_child(_text("Всё, что с собой, в рейде можно потерять.", Color(0.9, 0.75, 0.5)))
-	var go := _column("Куда", 0.7)
-	go.add_child(_button("Соло-рейд", func() -> void:
+	_floors_column()
+	var go := _column("Выход", 0.6)
+	var sel := Floors.find(Profile.floor)
+	go.add_child(_text("%s — %s" % [String(sel.get("name", "")), String(sel.get("route", ""))], Color(0.95, 0.82, 0.6)))
+	var fee := int(sel.get("fee", 0))
+	if fee > 0:
+		go.add_child(_text("Вылет — %s ₽" % InventoryUI.money(fee), Color(0.9, 0.75, 0.5)))
+	var block := Floors.start_block(Profile.floor)
+	var solo := _button("Соло-рейд", func() -> void:
+		Floors.pay_fee(Profile.floor)
 		Profile.pending_raid = true
-		get_tree().change_scene_to_file(Balance.RAID_SCENE)))
-	go.add_child(_button("Кооп — лобби (хост / по IP)", func() -> void:
+		get_tree().change_scene_to_file(Floors.scene(Profile.floor)))
+	solo.disabled = block != ""
+	go.add_child(solo)
+	var coop := _button("Кооп — лобби (хост / по IP)", func() -> void:
 		Profile.from_hideout = true
-		get_tree().change_scene_to_file("res://scenes/net/lobby.tscn")))
+		get_tree().change_scene_to_file("res://scenes/net/lobby.tscn"))
+	coop.disabled = block != ""
+	go.add_child(coop)
+	if block != "":
+		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
+	go.add_child(_text("Доверие Михалыча: %d   ·   выходов из рейда: %d" % [Profile.trust, Profile.extractions], Color(0.7, 0.72, 0.7)))
+
+
+## Этажи: внутри здания они отрезаны, у каждого свой путь снаружи. Открытый маршрут выбирается,
+## закрытый — открывается у Михалыча (доверие + плата за наводку).
+func _floors_column() -> void:
+	var col := _column("Этаж и маршрут", 1.1)
+	for f in Floors.all():
+		var id := String(f.id)
+		var box := VBoxContainer.new()
+		box.add_theme_constant_override("separation", 2)
+		var head := HBoxContainer.new()
+		var chosen := id == Profile.floor
+		var title := _text(("▶ " if chosen else "   ") + String(f.name), Color(1.0, 0.86, 0.6) if chosen else Color(0.9, 0.9, 0.86))
+		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(title)
+		if Floors.is_open(id):
+			if not chosen:
+				head.add_child(_button("Выбрать", func() -> void:
+					Profile.floor = id
+					Profile.save()))
+		else:
+			var b := _button("Открыть за %s ₽" % InventoryUI.money(int(f.price)), func() -> void: Floors.unlock(id))
+			b.disabled = Floors.unlock_block(id) != ""
+			head.add_child(b)
+		box.add_child(head)
+		var how := _text("   %s — %s" % [String(f.route), String(f.how)], Color(0.62, 0.64, 0.62))
+		how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(how)
+		var state := ""
+		if not Floors.is_open(id):
+			var why := Floors.unlock_block(id)
+			state = "закрыт — " + (why if why != "" else "Михалыч готов показать дорогу")
+		elif not Floors.built(id):
+			state = "маршрут открыт, этаж ещё не собран"
+		if state != "":
+			box.add_child(_text("   " + state, Color(0.85, 0.55, 0.45)))
+		col.add_child(box)
 
 
 # ---------------------------------------------------------------- верстак

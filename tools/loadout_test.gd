@@ -53,10 +53,13 @@ func _ready() -> void:
 	Profile.install_mod("secondary", bi, true)
 	_check("верстак: обвес из рюкзака", String(Profile.weapon_mods("secondary").get("optic", "")) == "mod_rmr" and Profile.backpack.size() == 4, str(Profile.weapon_mods("secondary")))
 	Profile.remove_mod("secondary", "optic")
+	# этажи: первый открыт и выбран, второй закрыт до доверия
+	_check("этажи: 1F открыт и выбран, 2F закрыт по доверию", Floors.is_open("f1") and Profile.floor == "f1" and not Floors.is_open("f2") and Floors.unlock_block("f2").begins_with("доверие")
+		and Floors.start_block("f1") == "", Floors.unlock_block("f2"))
 
-	# --- соло-рейд со снаряжением
+	# --- соло-рейд со снаряжением (на выбранный этаж — как кнопка в убежище)
 	Profile.pending_raid = true
-	get_tree().change_scene_to_file(Balance.RAID_SCENE)
+	get_tree().change_scene_to_file(Floors.scene(Profile.floor))
 	for i in range(40):
 		await get_tree().physics_frame
 	var pl := get_tree().get_first_node_in_group("players") as Player
@@ -95,6 +98,14 @@ func _ready() -> void:
 	_check("профиль: снаряжение вернулось", Profile.equipment.has("primary") and Profile.equipment.has("armor"), str(Profile.equipment.keys()))
 	_check("профиль: патроны из магазина вернулись в рюкзак", back_ammo == 35 + 45, "5.45: %d" % back_ammo)
 	_check("профиль: обвесы остались на автомате", Profile.weapon_mods("primary").size() == 3, str(Profile.weapon_mods("primary")))
+	_check("эвакуация добавила доверия Михалыча", Profile.extractions == 1 and Profile.trust >= Balance.TRUST_PER_EXTRACTION, "доверие %d, выходов %d" % [Profile.trust, Profile.extractions])
+	# доверие набрано — маршрут на 2F открывается за деньги, но этаж ещё не собран
+	Profile.trust = 3
+	Profile.money += 50000
+	var m2 := Profile.money
+	_check("маршрут на 2F открыт за доверие и деньги", Floors.unlock("f2") and Floors.is_open("f2") and Profile.money == m2 - int(Floors.find("f2").price),
+		"%d ₽" % Profile.money)
+	_check("2F: выход закрыт — этаж не собран", Floors.start_block("f2") == "этаж ещё не собран", Floors.start_block("f2"))
 	# Enter — в убежище
 	Input.action_press("ui_accept")
 	await _frames(2)
