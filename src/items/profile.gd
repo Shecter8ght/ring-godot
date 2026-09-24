@@ -40,6 +40,8 @@ static var quests: Dictionary = {}
 static var flags: Dictionary = {}
 ## Товары торговца, открытые сюжетом (без проверки доверия).
 static var unlocked_stock: Array = []
+## Условия следующего рейда (RaidConditions), выбранные у лестницы.
+static var next_conditions: Dictionary = {"time": "dusk", "weather": "clear", "power": "on"}
 static var _loaded: bool = false
 
 
@@ -73,6 +75,7 @@ static func ensure() -> void:
 		quests = d.get("quests", {})
 		flags = d.get("flags", {})
 		unlocked_stock = d.get("unlocked_stock", [])
+		next_conditions = d.get("next_conditions", next_conditions)
 		_fix_numbers()
 		_fit_grids()
 	else:
@@ -133,7 +136,7 @@ static func save() -> void:
 	f.store_string(JSON.stringify({"money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
 		"modules": modules, "missions_active": missions_active, "missions_done": missions_done,
-		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock}, "  "))
+		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "next_conditions": next_conditions}, "  "))
 
 
 ## Тесты: свой файл и чистый старт.

@@ -54,6 +54,9 @@ func _ready() -> void:
 		_build_editor_preview()
 		return
 	_rng.randomize()
+	# условия рейда — до всего остального (от них зависит свет и зрение мародёров)
+	RaidConditions.current = RaidConditions.for_new_raid()
+	RaidConditions.from_host = {}
 	var t0 := Time.get_ticks_msec()
 	var builder := SectorBuilder.new()
 	# узлы сцены, под которыми пропсов быть не должно (эскалаторы) — уже в дереве: дети готовы раньше
@@ -69,6 +72,10 @@ func _ready() -> void:
 	var ceil := sector.get_node_or_null("Ceilings")
 	if ceil:
 		ceil.reparent(self)
+	var atmo := RaidAtmosphere.new()
+	atmo.name = "Atmosphere"
+	add_child(atmo)
+	atmo.apply()
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})

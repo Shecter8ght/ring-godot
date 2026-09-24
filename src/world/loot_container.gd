@@ -80,6 +80,9 @@ func roll() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	items = ItemDb.roll(table, rng)
+	# тяжёлые условия рейда — лут богаче: лишний бросок
+	if rng.randf() < RaidConditions.loot_bonus():
+		items.append_array(ItemDb.roll(table, rng))
 	rolled = true
 
 

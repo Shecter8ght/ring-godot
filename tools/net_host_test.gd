@@ -33,7 +33,7 @@ func _run() -> void:
 	Profile.use_file("user://profile_net_host.json", true)
 	await get_tree().create_timer(0.3).timeout
 	Net.grant_money(multiplayer.get_peers()[0], 12345)   # панель админа: деньги клиенту
-	Net.start_level.rpc(Net.LEVEL_SCENE)
+	Net.start_level.rpc(Net.LEVEL_SCENE, RaidConditions.DEFAULT)
 	while not (get_tree().current_scene and get_tree().current_scene.has_method("_spawn_marauders")):
 		await get_tree().process_frame
 	_level = get_tree().current_scene

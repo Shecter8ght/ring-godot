@@ -63,6 +63,8 @@ func _ready() -> void:
 	_drops.name = "Drops"
 	add_child(_drops)
 	_build_hud()
+	# условия рейда — сводкой в начале
+	notify.call_deferred(RaidConditions.title())
 	quest_world = QuestWorld.new()
 	quest_world.name = "QuestWorld"
 	quest_world.raid = true
@@ -884,6 +886,12 @@ func _save_profile(me: Player) -> void:
 			rest.n = int(e.n) - placed
 			items.append(rest)
 	Profile.return_loadout(me.inventory.equipment, items, int(loot_value.get(me.peer_id, 0)))
+	# Михалыч доплачивает за риск условий: доля ценности вынесенного
+	var bonus := int(float(loot_value.get(me.peer_id, 0)) * RaidConditions.pay_bonus())
+	if bonus > 0:
+		Profile.money += bonus
+		Profile.save()
+		notify("Михалыч доплатит за риск: %s ₽" % InventoryUI.money(bonus))
 	Profile.set_pocket(me.inventory.pocket)
 	# задание «уйти через точку»: в итоге рейда — видимое имя, задания знают имя узла
 	for e in get_tree().get_nodes_in_group("extractions"):
@@ -944,7 +952,7 @@ func _restart() -> void:
 	if not Net.is_networked():
 		get_tree().reload_current_scene()
 	elif multiplayer.is_server():
-		Net.start_level.rpc(get_tree().current_scene.scene_file_path)
+		Net.start_level.rpc(get_tree().current_scene.scene_file_path, RaidConditions.current)
 
 
 func _build_hud() -> void:

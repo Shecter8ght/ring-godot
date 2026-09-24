@@ -74,10 +74,12 @@ func disconnect_all() -> void:
 
 ## Только хост может позвать: переводит всех (включая себя) на этаж scene — выбранный хостом
 ## в убежище маршрут (у клиентов маршрут может быть и не открыт: идут за хостом).
+## conditions — условия рейда хоста (RaidConditions), у всех одинаковые.
 @rpc("authority", "call_local", "reliable")
-func start_level(scene: String) -> void:
+func start_level(scene: String, conditions: Dictionary) -> void:
 	# со снаряжением профиля — только если игрок пришёл в лобби из убежища (не тесты)
 	Profile.pending_raid = Profile.from_hideout
+	RaidConditions.from_host = conditions
 	get_tree().change_scene_to_file(scene if scene != "" else LEVEL_SCENE)
 
 

@@ -23,7 +23,11 @@ static func can_see(world: World3D, eye: Vector3, forward: Vector3, target: Play
 	var point := target.global_position + Vector3.UP * float(TARGET_HEIGHT[key]) + target.lean_vector()
 	var to := point - eye
 	var dist := to.length()
-	var max_dist: float = Balance.AI_VIEW_DISTANCE * view * float(Balance.AI_VIEW_STANCE_SCALE[key])
+	# сколько видно — по освещённости места цели и её фонарю (условия рейда)
+	var base := Balance.AI_VIEW_DISTANCE
+	if RaidAtmosphere.current:
+		base = RaidAtmosphere.current.view_distance(target.global_position, target.has_light_on())
+	var max_dist: float = base * view * float(Balance.AI_VIEW_STANCE_SCALE[key])
 	if dist > max_dist:
 		return false
 	var flat := Vector3(to.x, 0.0, to.z).normalized()

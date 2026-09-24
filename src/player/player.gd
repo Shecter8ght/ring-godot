@@ -158,6 +158,11 @@ func hit_zone(point: Vector3) -> String:
 	return "head" if point.y - global_position.y >= float(Balance.HEAD_ZONE.get(_stance_key(), 99.0)) else "body"
 
 
+## Светит фонарём (фонарь на оружии в руках включён) — выдаёт издалека.
+func has_light_on() -> bool:
+	return light_on and String(weapon_mods.get("tac", "")) == "mod_flashlight"
+
+
 ## Лежит раненым.
 func is_downed() -> bool:
 	return health.alive and health.downed

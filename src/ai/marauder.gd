@@ -86,6 +86,8 @@ var _main_mag: int = 0
 var _main_gun: Node3D
 var _help_t: float = 0.0
 var _shown_down: bool = false
+var _torch: SpotLight3D
+var _torch_t: float = 0.0
 ## Спасатель: кого, фаза (0 — бежит, 1 — тащит, 2 — поднимает), сколько поднимает.
 var _rescue_target: Marauder = null
 var _rescue_phase: int = 0
@@ -154,6 +156,19 @@ func _ready() -> void:
 	_body.add_child(gun)
 	_main_gun = gun
 	pause_timer = _rng.randf_range(0.5, 2.0)
+	# в темноте — фонарь: мародёр видит, но и себя выдаёт (у каждого peer по условиям рейда)
+	_torch = SpotLight3D.new()
+	_torch.name = "Torch"
+	_torch.position = Vector3(0.15, 1.45, 0.25)
+	_torch.rotation.y = PI
+	_torch.rotation.x = deg_to_rad(-8.0)
+	_torch.light_color = Color(1.0, 0.95, 0.85)
+	_torch.light_energy = Balance.AI_TORCH_ENERGY
+	_torch.spot_range = Balance.AI_TORCH_RANGE
+	_torch.spot_angle = 26.0
+	_torch.shadow_enabled = false
+	_torch.visible = false
+	_body.add_child(_torch)
 	# шаги слышны у всех peer (AI считает хост, позицию клиенты получают синхронизатором)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
@@ -1339,7 +1354,12 @@ func _on_died() -> void:
 
 
 ## У клиентов сигнала died нет (урон считает хост) — смерть видна по синхронизированному alive.
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	# фонарь — раз в секунду: темно ли там, где он стоит
+	_torch_t -= delta
+	if _torch_t <= 0.0 and _torch:
+		_torch_t = 1.0
+		_torch.visible = _health.alive and not _health.downed and RaidAtmosphere.current != null and RaidAtmosphere.current.is_dark(global_position)
 	# раненый (видно у всех по синхронизированному downed): основное оружие убрано
 	if _health.downed != _shown_down:
 		_shown_down = _health.downed

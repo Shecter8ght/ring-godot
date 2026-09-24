@@ -99,7 +99,7 @@ func _process(_delta: float) -> void:
 		close_ui()
 		return
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
-		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active)]
+		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -365,6 +365,7 @@ func _build_exit() -> void:
 		col.add_child(_text("Без оружия — надень его в тайнике.", Color(1.0, 0.55, 0.4)))
 	col.add_child(_text("Всё, что с собой, в рейде можно потерять.", Color(0.9, 0.75, 0.5)))
 	_floors_column()
+	_conditions_column()
 	var go := _column("Выход", 0.6)
 	var sel := Floors.find(Profile.floor)
 	go.add_child(_text("%s — %s" % [String(sel.get("name", "")), String(sel.get("route", ""))], Color(0.95, 0.82, 0.6)))
@@ -386,6 +387,41 @@ func _build_exit() -> void:
 	if block != "":
 		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
 	go.add_child(_text("Доверие Михалыча: %d   ·   выходов из рейда: %d" % [Profile.trust, Profile.extractions], Color(0.7, 0.72, 0.7)))
+
+
+## Условия рейда: время, погода, электричество — выбор; риск, награда за него и что взять с собой.
+func _conditions_column() -> void:
+	var col := _column("Условия рейда", 1.0)
+	var c := RaidConditions.normalized(Profile.next_conditions)
+	for axis in [["time", "Время", Balance.RAID_TIME], ["weather", "Погода", Balance.RAID_WEATHER], ["power", "Электричество в ТЦ", Balance.RAID_POWER]]:
+		col.add_child(_text(String(axis[1]), Color(0.75, 0.75, 0.72)))
+		var row := HFlowContainer.new()
+		row.add_theme_constant_override("h_separation", 6)
+		for key in (axis[2] as Dictionary):
+			var k := String(key)
+			var ax := String(axis[0])
+			var chosen := String(c[ax]) == k
+			var b := _button(("▶ " if chosen else "") + String((axis[2] as Dictionary)[key].name), func() -> void:
+				var nc := RaidConditions.normalized(Profile.next_conditions)
+				nc[ax] = k
+				Profile.next_conditions = nc
+				Profile.save())
+			if chosen:
+				b.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
+			row.add_child(b)
+		col.add_child(row)
+	var r := RaidConditions.risk(c)
+	col.add_child(_text("Риск: %d   ·   лут богаче: %d%% контейнеров   ·   доплата Михалыча: +%d%% от вынесенного" % [
+		r, int(RaidConditions.loot_bonus(c) * 100.0), int(RaidConditions.pay_bonus(c) * 100.0)], Color(1.0, 0.8, 0.5)))
+	for h in RaidConditions.hints(c):
+		var l := _text("• " + h, Color(0.82, 0.82, 0.78))
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(l)
+	col.add_child(_button("Случайные условия", func() -> void:
+		var rng := RandomNumberGenerator.new()
+		rng.randomize()
+		Profile.next_conditions = RaidConditions.random(rng)
+		Profile.save()))
 
 
 ## Этажи: внутри здания они отрезаны, у каждого свой путь снаружи. Открытый маршрут выбирается,
