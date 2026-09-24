@@ -40,6 +40,7 @@ const EXTRA := [
 var _root: Control
 var _main: VBoxContainer
 var _controls: VBoxContainer
+var _settings: VBoxContainer
 var _leave: Button
 var _view_btn: Button
 var _admin_btn: Button
@@ -83,16 +84,14 @@ func _ready() -> void:
 	title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
 	_main.add_child(title)
 	_main.add_child(_button("Продолжить", close_menu))
-	_main.add_child(_button("Управление", func() -> void:
-		_controls.visible = not _controls.visible
-		_admin.visible = false))
+	_main.add_child(_button("Управление", func() -> void: _show_side(_controls)))
+	_main.add_child(_button("Настройки", func() -> void: _show_side(_settings)))
 	_view_btn = _button("", func() -> void:
 		CameraRig.set_first_person_mode(not CameraRig.first_person_mode)
 		_view_btn.text = _view_text())
 	_main.add_child(_view_btn)
 	_admin_btn = _button("Админ: деньги", func() -> void:
-		_admin.visible = not _admin.visible
-		_controls.visible = false
+		_show_side(_admin)
 		_fill_admin())
 	_main.add_child(_admin_btn)
 	_leave = _button("Покинуть рейд", _on_leave)
@@ -104,6 +103,7 @@ func _ready() -> void:
 	h.add_child(_controls)
 	_fill_controls()
 	_build_admin(h)
+	_build_settings(h)
 	Net.player_list_changed.connect(func() -> void:
 		if _admin.visible:
 			_fill_admin())
@@ -199,6 +199,7 @@ func open_menu() -> void:
 	_root.visible = true
 	_controls.visible = false
 	_admin.visible = false
+	_settings.visible = false
 	# в сети — только хосту; в соло и в убежище — себе
 	_admin_btn.visible = Net.is_host() or not Net.is_networked()
 	CameraRig.load_settings()
@@ -213,6 +214,93 @@ func open_menu() -> void:
 	_leave.text = "Покинуть рейд (снаряжение останется там)" if Profile.pending_raid else "В убежище"
 	if not Net.is_networked():
 		get_tree().paused = true
+
+
+## Справа от кнопок — одна панель за раз (управление, настройки, админ); повторное нажатие — закрыть.
+func _show_side(panel: Control) -> void:
+	var was := panel.visible
+	for p in [_controls, _settings, _admin]:
+		(p as Control).visible = false
+	panel.visible = not was
+
+
+## Настройки: графика, мышь, громкость — применяются сразу (Settings).
+func _build_settings(h: HBoxContainer) -> void:
+	_settings = VBoxContainer.new()
+	_settings.add_theme_constant_override("separation", 8)
+	_settings.custom_minimum_size.x = 460
+	_settings.visible = false
+	h.add_child(_settings)
+	_settings.add_child(_head("Настройки"))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 18)
+	grid.add_theme_constant_override("v_separation", 8)
+	_settings.add_child(grid)
+	grid.add_child(_label("Графика"))
+	var q := OptionButton.new()
+	q.focus_mode = Control.FOCUS_NONE
+	for k in Settings.QUALITY:
+		q.add_item(String(Settings.QUALITY_NAMES[k]))
+	q.selected = Settings.QUALITY.find(Settings.quality)
+	q.item_selected.connect(func(i: int) -> void: Settings.set_quality(String(Settings.QUALITY[i])))
+	grid.add_child(q)
+	grid.add_child(_label("Мышь от первого лица"))
+	grid.add_child(_slider(Settings.SENS_RANGE[0], Settings.SENS_RANGE[1], 0.05, Settings.sens_fps, "×%.2f",
+		func(v: float) -> void: Settings.set_sens(v, Settings.sens_iso)))
+	grid.add_child(_label("Поворот камеры (СКМ)"))
+	grid.add_child(_slider(Settings.SENS_RANGE[0], Settings.SENS_RANGE[1], 0.05, Settings.sens_iso, "×%.2f",
+		func(v: float) -> void: Settings.set_sens(Settings.sens_fps, v)))
+	for b in Settings.BUSES:
+		var bus := String(b)
+		grid.add_child(_label("Громкость: " + String(Settings.BUSES[b]).to_lower()))
+		grid.add_child(_slider(0.0, 1.0, 0.05, float(Settings.volume[bus]), "%.0f%%",
+			func(v: float) -> void: Settings.set_volume(bus, v), 100.0))
+	var hint := Label.new()
+	hint.text = "«Низко» — если тормозит: без глобального освещения, тумана и SSAO, рендер в 77 %."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.custom_minimum_size.x = 440
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_color_override("font_color", Color(0.7, 0.7, 0.68))
+	_settings.add_child(hint)
+
+
+func _head(text: String) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
+	return l
+
+
+func _label(text: String) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 16)
+	l.add_theme_color_override("font_color", Color(0.86, 0.86, 0.84))
+	return l
+
+
+## Ползунок с подписью значения справа; show_mult — множитель для подписи (доли → проценты).
+func _slider(lo: float, hi: float, step: float, value: float, fmt: String, cb: Callable, show_mult: float = 1.0) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	var s := HSlider.new()
+	s.min_value = lo
+	s.max_value = hi
+	s.step = step
+	s.value = value
+	s.custom_minimum_size = Vector2(190, 24)
+	s.focus_mode = Control.FOCUS_NONE
+	var v := Label.new()
+	v.custom_minimum_size.x = 56
+	v.text = fmt % (value * show_mult)
+	s.value_changed.connect(func(x: float) -> void:
+		v.text = fmt % (x * show_mult)
+		cb.call(x))
+	row.add_child(s)
+	row.add_child(v)
+	return row
 
 
 ## Панель админа (только хост в сети): игроки из лобби, сумма, «Начислить».
@@ -288,6 +376,7 @@ func open_admin() -> void:
 	if not shown:
 		open_menu()
 	_controls.visible = false
+	_settings.visible = false
 	_admin.visible = true
 	_fill_admin()
 

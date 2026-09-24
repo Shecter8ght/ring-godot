@@ -49,6 +49,14 @@ func _run() -> void:
 	await get_tree().create_timer(1.0).timeout
 	Input.action_release("move_left")
 	print("[client] сам сдвинулся на %.2f м" % before.distance_to(my_player.global_position))
+	# добиваю мародёра — урон считает хост, он же засчитывает убийство мне (задания — у меня)
+	var credited := [false]
+	Raid.current.kill_credited.connect(func() -> void: credited[0] = true)
+	var marauders := _level.get_node("Marauders")
+	var victim := marauders.get_child(marauders.get_child_count() - 1) as Marauder
+	(victim.get_node("Health") as Health).apply_or_request_damage(10000.0, my_player.global_position + Vector3.UP * 1.3)
+	await get_tree().create_timer(0.8).timeout
+	print("[client] убийство засчитано мне: %s" % ("OK" if credited[0] else "НЕТ"))
 	await get_tree().create_timer(1.5).timeout
 	_report("после движения хоста")
 	await get_tree().create_timer(1.5).timeout

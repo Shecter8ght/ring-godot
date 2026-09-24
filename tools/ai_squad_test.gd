@@ -28,11 +28,13 @@ func _ready() -> void:
 	var squad := Squad.new()
 	var a := scene.instantiate() as Marauder
 	a.name = "SquadA"
+	a.archetype = "gunner"
 	a.weapon = "rifle"
 	level.get_node("Marauders").add_child(a)
 	a.global_position = SectorBuilder.polar(-118.0, 72.0) + Vector3(0, 0.1, 0)
 	var b := scene.instantiate() as Marauder
 	b.name = "SquadB"
+	b.archetype = "gunner"
 	b.weapon = "pistol"
 	level.get_node("Marauders").add_child(b)
 	# в поперечном проходе за стеной: улицы не видно
@@ -55,6 +57,7 @@ func _ready() -> void:
 	for pair in [[d1, "SpreadD1", -96.0], [d2, "SpreadD2", -95.0]]:
 		var dm: Marauder = pair[0]
 		dm.name = String(pair[1])
+		dm.archetype = "gunner"
 		level.get_node("Marauders").add_child(dm)
 		dm.global_position = SectorBuilder.polar(float(pair[2]), 78.0) + Vector3(0, 0.1, 0)
 	await get_tree().physics_frame
@@ -69,6 +72,7 @@ func _ready() -> void:
 	# попали издалека, стрелка не видно — угадал направление, укрытие или перебежка (не в лоб)
 	var c := scene.instantiate() as Marauder
 	c.name = "FarC"
+	c.archetype = "gunner"
 	c.weapon = "rifle"
 	level.get_node("Marauders").add_child(c)
 	c.global_position = SectorBuilder.polar(-72.0, 72.0) + Vector3(0, 0.1, 0)
@@ -115,6 +119,34 @@ func _ready() -> void:
 	_check("цель потеряна — поиск", a.state in [Marauder.State.SEARCH, Marauder.State.PATROL] and b.state in [Marauder.State.SEARCH, Marauder.State.PATROL],
 		"%s / %s" % [_st(a), _st(b)])
 	_check("здоровье мародёра — из баланса", is_equal_approx((a.get_node("Health") as Health).max_hp, Balance.MARAUDER_HP), "%.0f" % Balance.MARAUDER_HP)
+	# типы: здоровье, броня, фигура; попадание «ведёт» и откидывает корпус; снайпер не сближается
+	var kinds := {}
+	for k in Balance.AI_ARCHETYPES:
+		var t := scene.instantiate() as Marauder
+		t.name = "Type_" + String(k)
+		t.archetype = String(k)
+		level.get_node("Marauders").add_child(t)
+		t.global_position = SectorBuilder.polar(-140.0 - 6.0 * kinds.size(), 72.0) + Vector3(0, 0.1, 0)
+		kinds[k] = t
+	await get_tree().physics_frame
+	var hp_ok := true
+	for k in kinds:
+		var t: Marauder = kinds[k]
+		hp_ok = hp_ok and is_equal_approx((t.get_node("Health") as Health).max_hp, Balance.MARAUDER_HP * float(Balance.AI_ARCHETYPES[k].hp)) 			and t.weapon in Balance.AI_ARCHETYPES[k].weapons
+	_check("типы: здоровье и оружие по типу", hp_ok, str(kinds.keys()))
+	var hv: Marauder = kinds["heavy"]
+	var hh := hv.get_node("Health") as Health
+	var before_hp := hh.hp
+	hh.take_damage(20.0, hv.global_position + Vector3(0, 1.3, 10))
+	_check("тяжёлый: броня снимает часть урона", is_equal_approx(before_hp - hh.hp, 20.0 * float(Balance.AI_ARCHETYPES.heavy.armor)), "прошло %.1f из 20" % (before_hp - hh.hp))
+	await get_tree().physics_frame
+	_check("попадание: повело и откинуло", hv._stagger_t > 0.0 and hv._body.rotation.x < -0.01, "%.2f с, наклон %.2f" % [hv._stagger_t, hv._body.rotation.x])
+	var sn: Marauder = kinds["sniper"]
+	var sn0 := sn.global_position
+	NoiseBus.shout(sn.global_position, 50.0, sn.global_position + Vector3(25, 0, 0), hv)
+	await _wait(3.0)
+	_check("снайпер держит позицию (окрик — не бежит)", sn.state == Marauder.State.COMBAT and sn.global_position.distance_to(sn0) < 1.5,
+		"%s, сдвинулся на %.1f м" % [_st(sn), sn.global_position.distance_to(sn0)])
 	print("ai_squad_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 

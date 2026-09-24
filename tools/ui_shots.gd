@@ -30,6 +30,11 @@ func _ready() -> void:
 	(pause.get("_controls") as Control).visible = true
 	await _frames(4)
 	_save("ui_controls")
+	(pause.get("_controls") as Control).visible = false
+	(pause.get("_settings") as Control).visible = true
+	await _frames(4)
+	_save("ui_settings")
+	(pause.get("_settings") as Control).visible = false
 	# панель админа хоста: поднять сервер (без клиентов — в списке только хост)
 	Net.host("Хост")
 	Net.player_names[2] = "Друг"   # для снимка: вторая строка
@@ -67,6 +72,13 @@ func _ready() -> void:
 	_save("ui_fps_ads")
 	Input.action_release("aim")
 	CameraRig.first_person_mode = false
+	# качество графики: тот же вид в изометрии — высоко и низко
+	await _frames(20)
+	_save("ui_quality_high")
+	Settings.set_quality("low")
+	await _frames(30)
+	_save("ui_quality_low")
+	Settings.set_quality("high")
 	get_tree().quit(0)
 
 

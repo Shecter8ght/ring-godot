@@ -156,7 +156,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_look_yaw -= mm.relative.x * sens
 			_look_pitch = clampf(_look_pitch - mm.relative.y * sens, -Balance.ADS_PITCH_LIMIT, Balance.ADS_PITCH_LIMIT)
 		elif _mmb:
-			rotation.y -= mm.relative.x * Balance.CAMERA_MMB_SENS
+			rotation.y -= mm.relative.x * Balance.CAMERA_MMB_SENS * Settings.sens_iso
 
 
 func _process(delta: float) -> void:
@@ -376,7 +376,7 @@ func _build_scope() -> void:
 
 ## Чувствительность мыши в прицеле: по полю зрения, в оптике — ещё и на кратность.
 func ads_sens() -> float:
-	var s := Balance.ADS_SENS * (_ads_cam.fov / 62.0)
+	var s := Balance.ADS_SENS * Settings.sens_fps * (_ads_cam.fov / 62.0)
 	return s / maxf(1.0, _scope_zoom) if scope_active else s
 
 

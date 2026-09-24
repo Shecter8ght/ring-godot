@@ -17,12 +17,13 @@ static func stance_key(p: Player) -> String:
 
 
 ## Видит ли наблюдатель с глазом eye, смотрящий вдоль forward, игрока target.
-static func can_see(world: World3D, eye: Vector3, forward: Vector3, target: Player, exclude: Array[RID]) -> bool:
+## view — множитель дальности (тип мародёра: у снайпера дальше).
+static func can_see(world: World3D, eye: Vector3, forward: Vector3, target: Player, exclude: Array[RID], view: float = 1.0) -> bool:
 	var key := stance_key(target)
 	var point := target.global_position + Vector3.UP * float(TARGET_HEIGHT[key]) + target.lean_vector()
 	var to := point - eye
 	var dist := to.length()
-	var max_dist: float = Balance.AI_VIEW_DISTANCE * float(Balance.AI_VIEW_STANCE_SCALE[key])
+	var max_dist: float = Balance.AI_VIEW_DISTANCE * view * float(Balance.AI_VIEW_STANCE_SCALE[key])
 	if dist > max_dist:
 		return false
 	var flat := Vector3(to.x, 0.0, to.z).normalized()

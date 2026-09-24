@@ -11,6 +11,9 @@ var hp: float
 var alive: bool = true
 ## Хост: урон до вычета здоровья проходит через фильтр (броня игрока снимает часть).
 var damage_filter: Callable
+## Хост: чей был последний урон (peer id стрелявшего игрока; 1 — хост или соло) — кому
+## засчитать убийство.
+var last_attacker: int = 0
 
 
 func _ready() -> void:
@@ -61,6 +64,7 @@ func heal(amount: float) -> void:
 ## иначе просит хост — так урон всегда считается один раз и в одном месте (правило AGENTS.md).
 func apply_or_request_damage(amount: float, from: Vector3) -> void:
 	if not Net.is_networked() or is_multiplayer_authority():
+		last_attacker = multiplayer.get_unique_id()
 		take_damage(amount, from)
 	else:
 		request_damage.rpc_id(1, amount, from)
@@ -69,4 +73,5 @@ func apply_or_request_damage(amount: float, from: Vector3) -> void:
 @rpc("any_peer", "call_remote", "reliable")
 func request_damage(amount: float, from: Vector3) -> void:
 	if is_multiplayer_authority():
+		last_attacker = multiplayer.get_remote_sender_id()
 		take_damage(amount, from)

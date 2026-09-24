@@ -160,6 +160,7 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 	m.name = String(data.name)
 	m.position = data.pos
 	m.weapon = String(data.get("weapon", ""))
+	m.archetype = String(data.get("arch", ""))
 	return m
 
 
@@ -274,6 +275,10 @@ func _spawn_marauders() -> void:
 		if snapped.distance_to(p) > 3.0:
 			continue
 		var size := mini(_rng.randi_range(int(Balance.AI_SQUAD_SIZE[0]), int(Balance.AI_SQUAD_SIZE[1])), Balance.MARAUDER_COUNT - placed)
+		# тип ведущего; снайпер ходит один, в отрядах снайперов нет
+		var lead_arch := Marauder.pick_archetype(_rng)
+		if bool(Balance.AI_ARCHETYPES[lead_arch].holds):
+			size = 1
 		var squad := Squad.new()
 		squads += 1
 		for k in range(size):
@@ -281,14 +286,18 @@ func _spawn_marauders() -> void:
 			if k > 0:
 				var a := _rng.randf() * TAU
 				at = NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, snapped + Vector3(cos(a), 0.0, sin(a)) * (1.2 + k))
-			var wpn := Marauder.pick_weapon(_rng)
+			var arch := lead_arch
+			while k > 0 and (arch == lead_arch and _rng.randf() < 0.4 or bool(Balance.AI_ARCHETYPES[arch].holds)):
+				arch = Marauder.pick_archetype(_rng)
+			var wpn := Marauder.weapon_for(arch, _rng)
 			var m: Marauder
 			if _marauder_spawner:
-				m = _marauder_spawner.spawn({"name": "Marauder%d" % placed, "pos": at + Vector3(0, 0.1, 0), "weapon": wpn}) as Marauder
+				m = _marauder_spawner.spawn({"name": "Marauder%d" % placed, "pos": at + Vector3(0, 0.1, 0), "weapon": wpn, "arch": arch}) as Marauder
 			else:
 				m = MARAUDER_SCENE.instantiate() as Marauder
 				m.name = "Marauder%d" % placed
 				m.weapon = wpn
+				m.archetype = arch
 				_marauders_root.add_child(m)
 				m.global_position = at + Vector3(0, 0.1, 0)
 			m.patrol_point_provider = _random_room_point

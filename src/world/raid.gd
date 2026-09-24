@@ -11,6 +11,9 @@ extends Node
 ## и меняет рюкзак (Inventory) и контейнер (LootContainer). Тела и выброшенное — динамические
 ## LootContainer через спавнер (узел Drops).
 
+## Мне засчитали убийство мародёра (для тестов и HUD).
+signal kill_credited
+
 static var current: Raid
 
 const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
@@ -502,6 +505,29 @@ func _use_med(peer_id: int, id: String) -> void:
 ## Хост: положить на землю контейнер с вещами (тело, выброшенное). В сети — через спавнер,
 ## чтобы появился у всех; содержимое едет в данных спавна.
 ## toss — откуда предмет «вываливается» к месту pos (смещение; ноль — появляется на месте).
+## Хост: мародёр убит — «убить N» засчитывается тому, чья пуля добила (задания — в его профиле,
+## на его компьютере), ему же метка убийства.
+func credit_kill(peer_id: int) -> void:
+	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
+		_kill_credited()
+	elif peer_id in multiplayer.get_peers():
+		_rpc_kill_credit.rpc_id(peer_id)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_kill_credit() -> void:
+	_kill_credited()
+
+
+func _kill_credited() -> void:
+	kill_credited.emit()
+	if Profile.pending_raid:
+		Missions.on_kill()
+	var me := local_player()
+	if me and Net.is_networked() and not multiplayer.is_server():
+		me.show_kill_marker()
+
+
 func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look, toss: Vector3 = Vector3.ZERO) -> void:
 	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look), "toss": toss}
 	_drop_count += 1

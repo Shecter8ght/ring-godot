@@ -22,8 +22,10 @@ const CROUCH_EYE := 1.05
 
 var state: State = State.PATROL
 var tactic: Tactic = Tactic.ENGAGE
-## Оружие (ключ Balance.AI_WEAPONS): ставит спавнер до добавления в дерево; пусто — случайное.
+## Оружие (ключ Balance.AI_WEAPONS): ставит спавнер до добавления в дерево; пусто — по типу.
 var weapon: String = ""
+## Тип (ключ Balance.AI_ARCHETYPES): разведчик, штурмовик, тяжёлый, снайпер; пусто — случайный.
+var archetype: String = ""
 var squad: Squad
 ## Откуда брать точки патруля: Callable() -> Vector3 (даёт сцена сектора).
 var patrol_point_provider: Callable
@@ -62,6 +64,13 @@ var _search_total: int = 0
 var _search_ang: float = 0.0
 var _repath_t: float = 0.0
 var _say_label: Label3D
+var _arch: Dictionary = {}
+var _base_scale: Vector3 = Vector3.ONE
+## Попадание: «повело» (медленнее, хуже целится) и откинуло корпус назад.
+var _stagger_t: float = 0.0
+var _flinch: float = 0.0
+## Пост (где появился) — у держащего позицию патруль вокруг него.
+var _post: Vector3 = Vector3.INF
 var _capsule: CapsuleShape3D
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
@@ -73,12 +82,26 @@ var _capsule: CapsuleShape3D
 func _ready() -> void:
 	add_to_group("marauders")
 	_rng.seed = hash(name) + int(global_position.x * 13.0)
+	if not Balance.AI_ARCHETYPES.has(archetype):
+		archetype = pick_archetype(_rng)
+	_arch = Balance.AI_ARCHETYPES[archetype]
 	if weapon == "" or not Balance.AI_WEAPONS.has(weapon):
-		weapon = pick_weapon(_rng)
+		weapon = weapon_for(archetype, _rng)
 	_spec = Balance.AI_WEAPONS[weapon]
 	_mag = int(_spec.mag)
-	_health.max_hp = Balance.MARAUDER_HP
+	_health.max_hp = Balance.MARAUDER_HP * float(_arch.hp)
 	_health.hp = _health.max_hp
+	# броня: проходит только доля урона
+	var armor := float(_arch.armor)
+	if armor < 1.0:
+		_health.damage_filter = func(a: float) -> float: return a * armor
+	# видно, кто перед тобой: цвет куртки и фигура (тяжёлый шире, разведчик уже)
+	_base_scale = _arch.scale
+	_body.scale = _base_scale
+	var torso := _body.get_node("Torso") as MeshInstance3D
+	var coat := (torso.get_surface_override_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D
+	coat.albedo_color = _arch.color
+	torso.set_surface_override_material(0, coat)
 	_health.died.connect(_on_died)
 	_health.damaged.connect(_on_damaged)
 	NoiseBus.noise.connect(_on_noise)
@@ -93,7 +116,7 @@ func _ready() -> void:
 	cs.shape = _capsule
 	# оружие в правой руке — видно, чем вооружён; при смерти прячется вместе с телом
 	var gun := WeaponModels.build(String(_spec.model))
-	gun.position = Vector3(-0.17, 1.24, 0.3 if weapon == "pistol" else 0.22)
+	gun.position = Vector3(-0.17, 1.24, 0.3 if weapon == "pistol" else 0.22) / _base_scale
 	_body.add_child(gun)
 	pause_timer = _rng.randf_range(0.5, 2.0)
 	# шаги слышны у всех peer (AI считает хост, позицию клиенты получают синхронизатором)
@@ -107,6 +130,35 @@ func _ready() -> void:
 	NavigationServer3D.map_changed.connect(func(_m: RID) -> void: _nav_ready = true)
 	if Net.is_networked():
 		_setup_sync()
+
+
+## Случайный тип по долям AI_ARCHETYPES.
+static func pick_archetype(rng: RandomNumberGenerator) -> String:
+	var total := 0.0
+	for k in Balance.AI_ARCHETYPES:
+		total += float(Balance.AI_ARCHETYPES[k].weight)
+	var pick := rng.randf() * total
+	for k in Balance.AI_ARCHETYPES:
+		pick -= float(Balance.AI_ARCHETYPES[k].weight)
+		if pick <= 0.0:
+			return String(k)
+	return "gunner"
+
+
+## Оружие для типа — случайное из его списка.
+static func weapon_for(arch: String, rng: RandomNumberGenerator) -> String:
+	var list: Array = Balance.AI_ARCHETYPES.get(arch, Balance.AI_ARCHETYPES.gunner).weapons
+	return String(list[rng.randi_range(0, list.size() - 1)])
+
+
+## Держит позицию (снайпер): не сближается, ищет глазами.
+func _holds() -> bool:
+	return bool(_arch.get("holds", false))
+
+
+## Память о цели по типу (разведчик забывает быстро, снайпер помнит долго).
+func _mem() -> float:
+	return Balance.AI_MEMORY_SEC * float(_arch.get("memory", 1.0))
 
 
 ## Случайное оружие по долям AI_WEAPONS.
@@ -150,6 +202,10 @@ func _physics_process(delta: float) -> void:
 		var map := get_world_3d().navigation_map
 		_nav_ready = NavigationServer3D.map_get_iteration_id(map) > 0 and not NavigationServer3D.map_get_regions(map).is_empty()
 	_hurt_t = maxf(0.0, _hurt_t - delta)
+	_stagger_t = maxf(0.0, _stagger_t - delta)
+	_flinch = move_toward(_flinch, 0.0, delta * 3.0)
+	if _post == Vector3.INF:
+		_post = global_position
 	_suppress_t = maxf(0.0, _suppress_t - delta)
 	_repath_t -= delta
 	_perceive(delta)
@@ -182,7 +238,7 @@ func _perceive(delta: float) -> void:
 		var player := p as Player
 		if player == null or not player.is_alive():
 			continue
-		if Perception.can_see(get_world_3d(), _eye(), fwd, player, exclude):
+		if Perception.can_see(get_world_3d(), _eye(), fwd, player, exclude, float(_arch.get("view", 1.0))):
 			seen = player
 			break
 	var was_seen := _seen_now
@@ -196,7 +252,7 @@ func _perceive(delta: float) -> void:
 			_unseen_t = 0.0
 			_target_player = seen
 			last_known = seen.global_position
-			memory_timer = Balance.AI_MEMORY_SEC
+			memory_timer = _mem()
 			if not was_seen:
 				# только что поймал в поле зрения — первые выстрелы мимо
 				_aim = Balance.AI_AIM_COLD
@@ -233,7 +289,7 @@ func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node)
 	if _seen_now:
 		return
 	last_known = target
-	memory_timer = maxf(memory_timer, Balance.AI_MEMORY_SEC * 0.6)
+	memory_timer = maxf(memory_timer, _mem() * 0.6)
 	if state != State.COMBAT:
 		# сам не видел — идёт туда, куда крикнули (второй в отряде — в обход, далеко — перебежками)
 		_enter_combat(Tactic.FLANK if _rank() == 1 else _closing_tactic())
@@ -273,7 +329,10 @@ func investigate_at(pos: Vector3) -> void:
 	last_known = pos
 	state = State.INVESTIGATE
 	linger_timer = Balance.AI_INVESTIGATE_LINGER
-	_agent.target_position = _snap(pos)
+	# держащий позицию — не идёт, только поворачивается на шум
+	_agent.target_position = global_position if _holds() else _snap(pos)
+	if _holds():
+		_face(pos)
 
 
 ## Другой отряд уже проверяет / прочёсывает место рядом с pos.
@@ -323,6 +382,10 @@ func _on_damaged(amount: float, from: Vector3) -> void:
 	if state == State.DEAD:
 		return
 	_hurt_t = 2.5
+	# повело: медленнее, целится хуже, следующий выстрел позже; корпус откинуло (тяжёлого — меньше)
+	_stagger_t = Balance.AI_HIT_STAGGER_SEC
+	_flinch = clampf(amount / 25.0, 0.4, 1.0) / float(_arch.get("hp", 1.0))
+	_shot_t = maxf(_shot_t, Balance.AI_HIT_FLINCH_DELAY)
 	# Попадание — улика: откуда прилетело, понятно примерно (направление ± AI_HIT_DIR_ERR_DEG,
 	# дальность ± AI_HIT_DIST_ERR); кого видит — того и так знает
 	if not _seen_now:
@@ -331,7 +394,7 @@ func _on_damaged(amount: float, from: Vector3) -> void:
 		var guess := to.rotated(Vector3.UP, deg_to_rad(_rng.randf_range(-1.0, 1.0) * Balance.AI_HIT_DIR_ERR_DEG))
 		guess *= 1.0 + _rng.randf_range(-1.0, 1.0) * Balance.AI_HIT_DIST_ERR
 		last_known = global_position + guess
-	memory_timer = maxf(memory_timer, Balance.AI_MEMORY_SEC * 1.5)
+	memory_timer = maxf(memory_timer, _mem() * 1.5)
 	_facing = atan2(last_known.x - global_position.x, last_known.z - global_position.z)
 	if state != State.COMBAT and state != State.RETREAT:
 		state = State.COMBAT
@@ -378,7 +441,12 @@ func _patrol(delta: float) -> void:
 		return
 	if _agent.is_navigation_finished():
 		pause_timer -= delta
-		if pause_timer <= 0.0 and patrol_point_provider.is_valid():
+		if pause_timer <= 0.0 and _holds() and _post != Vector3.INF:
+			# держит позицию: пара шагов у поста, долго смотрит
+			var a := _rng.randf() * TAU
+			_agent.target_position = _snap(_post + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(0.0, Balance.AI_HOLD_PATROL_R))
+			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 3.0
+		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
 			_agent.target_position = _snap(patrol_point_provider.call())
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1]))
 
@@ -435,7 +503,7 @@ func _combat(delta: float) -> void:
 				_try_fire()
 				if want_cover and _tactic_t > 0.4 and _try_cover(Balance.AI_COVER_RADIUS, false):
 					return
-			elif _seen_now:
+			elif _seen_now and not _holds():
 				# далеко — подходим на дальность своего оружия (дробовик — вплотную)
 				_agent.target_position = _snap(last_known)
 			elif _unseen_t < 1.5 and _mag > 0:
@@ -491,6 +559,8 @@ func _combat(delta: float) -> void:
 
 ## Цель не видно: далеко — перебежками по укрытиям, близко — прямо (каждый в свою точку).
 func _closing_tactic() -> Tactic:
+	if _holds():
+		return Tactic.ENGAGE
 	return Tactic.ADVANCE if global_position.distance_to(last_known) > Balance.AI_ADVANCE_MIN_DIST else Tactic.PUSH
 
 
@@ -538,7 +608,7 @@ func _try_advance() -> bool:
 	_agent.target_position = best
 	# дошёл — одно «присел-выглянул» и дальше
 	_peeks = 3
-	memory_timer = maxf(memory_timer, Balance.AI_MEMORY_SEC * 0.6)
+	memory_timer = maxf(memory_timer, _mem() * 0.6)
 	tactic = Tactic.COVER_MOVE
 	_tactic_t = 0.0
 	if _rng.randf() < 0.35:
@@ -553,7 +623,7 @@ func _start_search(points: int = Balance.AI_SEARCH_POINTS) -> void:
 	_search_total = points
 	# прочёсывание дугой — от той стороны, откуда пришли, каждый в свою сторону
 	_search_ang = atan2(global_position.z - last_known.z, global_position.x - last_known.x) + (0.8 if hash(name) % 2 == 0 else -0.8)
-	_agent.target_position = _spread_point(last_known)
+	_agent.target_position = global_position if _holds() else _spread_point(last_known)
 	linger_timer = 1.5
 	say("Ушёл…" if points == Balance.AI_SEARCH_POINTS else "Проверю тут…")
 
@@ -574,6 +644,10 @@ func _search(delta: float) -> void:
 		pause_timer = 1.0
 		return
 	_search_left -= 1
+	if _holds():
+		# ищет глазами с места
+		linger_timer = _rng.randf_range(2.0, 3.5)
+		return
 	var done := float(_search_total - _search_left) / float(maxi(_search_total, 1))
 	var r := lerpf(4.0, Balance.AI_SEARCH_RADIUS, done)
 	var sweep := 1.1 if hash(name) % 2 == 0 else -1.1
@@ -675,7 +749,7 @@ func _set_crouch(on: bool) -> void:
 	if crouched == on:
 		return
 	crouched = on
-	_body.scale = Vector3(1.0, 0.68 if on else 1.0, 1.0)
+	_body.scale = _base_scale * Vector3(1.0, 0.68 if on else 1.0, 1.0)
 	_capsule.height = 1.25 if on else 1.8
 	($Capsule as CollisionShape3D).position.y = _capsule.height * 0.5
 
@@ -749,6 +823,8 @@ func _shoot(suppress: bool) -> void:
 		spread *= Balance.AI_SELF_MOVING
 	if suppress:
 		spread *= 2.0
+	if _stagger_t > 0.0:
+		spread *= Balance.AI_HIT_STAGGER_SPREAD
 	var exclude: Array[RID] = [get_rid()]
 	var dir := (target - from).normalized()
 	for i in range(int(_spec.pellets)):
@@ -805,6 +881,9 @@ func _move(delta: float) -> void:
 		speed = lerpf(Balance.MARAUDER_WALK, Balance.MARAUDER_RUN, 0.55)
 	if crouched:
 		speed = Balance.MARAUDER_WALK * 0.7
+	speed *= float(_arch.get("speed", 1.0))
+	if _stagger_t > 0.0:
+		speed *= Balance.AI_HIT_STAGGER_SPEED
 	var wish := Vector3.ZERO
 	if _nav_ready and not _agent.is_navigation_finished():
 		var next := _agent.get_next_path_position()
@@ -823,6 +902,8 @@ func _move(delta: float) -> void:
 		velocity.y = 0.0
 	move_and_slide()
 	_body.rotation.y = _facing
+	# попадание откидывает корпус назад (Body:rotation синхронизируется — видно всем)
+	_body.rotation.x = -0.35 * _flinch
 	# шаги (их слышно — так мародёра можно засечь раньше, чем он тебя) — Footsteps
 
 
@@ -851,6 +932,9 @@ func _on_died() -> void:
 	_set_crouch(false)
 	# падение тела слышат соседи — придут смотреть
 	NoiseBus.emit(global_position, Balance.AI_DEATH_NOISE, "death")
+	# задание «убить N» — тому, чья пуля добила
+	if Raid.current:
+		Raid.current.credit_kill(_health.last_attacker)
 	# хост: тело можно обыскать (содержимое — по таблице «marauder»)
 	if Raid.current:
 		var rng := RandomNumberGenerator.new()

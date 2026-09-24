@@ -23,6 +23,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Balance="*res://src/core/balance.gd"
+Settings="*res://src/core/settings.gd"
 NoiseBus="*res://src/core/noise_bus.gd"
 Audio="*res://src/audio/audio_system.gd"
 ImpactFx="*res://src/combat/impact_fx.gd"

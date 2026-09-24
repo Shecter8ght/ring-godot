@@ -320,6 +320,12 @@ func _footsteps(delta: float) -> void:
 	NoiseBus.emit(global_position, float(Balance.NOISE_STEP[key]), "step")
 
 
+## Хост сообщил: мародёр убит моей пулей — метка убийства (у клиента смерть видна позже выстрела).
+func show_kill_marker() -> void:
+	if is_local() and _camera_rig is CameraRig:
+		(_camera_rig as CameraRig).show_hitmarker(true)
+
+
 ## Стрельба, перезарядка на R, смена оружия 1–4, граната G.
 func _combat(delta: float) -> void:
 	if PauseMenu.shown:
@@ -484,9 +490,6 @@ func _fire(spec: Dictionary) -> void:
 				var killed := not ((c as Marauder).get_node("Health") as Health).alive
 				rig.show_hitmarker(killed)
 				marked = true
-				# задание «убить N» — только в рейде из убежища, засчитывает тот, чья пуля добила
-				if killed and Profile.pending_raid:
-					Missions.on_kill()
 	_apply_recoil(spec, braced, rig)
 	if rig:
 		rig.add_shake(float(spec.shake))

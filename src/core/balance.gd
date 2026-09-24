@@ -264,7 +264,32 @@ const AI_WEAPONS := {
 	"shotgun": {"weight": 0.15, "mag": 6, "reload": 3.2, "interval": 0.95, "burst": 1, "burst_pause": 0.0,
 		"damage": 7.0, "pellets": 8, "spread": 4.0, "range": 18.0, "noise_m": 90.0, "sound": "shot_shotgun", "model": "shotgun",
 		"item": "w_shotgun", "ammo": "ammo_12"},
+	# винтовка снайпера — только у типа «снайпер» (weight 0: случайным оружием не выпадает)
+	"bolt": {"weight": 0.0, "mag": 5, "reload": 3.4, "interval": 1.7, "burst": 1, "burst_pause": 0.0,
+		"damage": 45.0, "pellets": 1, "spread": 0.9, "range": 80.0, "noise_m": 120.0, "sound": "shot_bolt", "model": "bolt",
+		"item": "w_bolt", "ammo": "ammo_762r"},
 }
+## Типы мародёров: доля среди всех (weight), оружие (ключи AI_WEAPONS, случайное из списка),
+## скорость ×, здоровье ×, броня (какая доля урона проходит), память ×, дальность зрения ×,
+## цвет куртки, фигура (масштаб), holds — держит позицию: не сближается, патруль у своего поста,
+## ищет глазами, а не ногами (снайпер ходит один).
+const AI_ARCHETYPES := {
+	"scout": {"name": "Разведчик", "weight": 0.3, "weapons": ["pistol"], "speed": 1.3, "hp": 0.85, "armor": 1.0,
+		"memory": 0.5, "view": 1.1, "color": Color(0.46, 0.4, 0.28), "scale": Vector3(0.9, 1.0, 0.9), "holds": false},
+	"gunner": {"name": "Штурмовик", "weight": 0.45, "weapons": ["rifle", "rifle", "pistol"], "speed": 1.0, "hp": 1.0, "armor": 0.85,
+		"memory": 1.0, "view": 1.0, "color": Color(0.36, 0.2, 0.16), "scale": Vector3(1.0, 1.0, 1.0), "holds": false},
+	"heavy": {"name": "Тяжёлый", "weight": 0.15, "weapons": ["shotgun"], "speed": 0.75, "hp": 1.5, "armor": 0.65,
+		"memory": 1.3, "view": 0.9, "color": Color(0.18, 0.22, 0.2), "scale": Vector3(1.18, 1.03, 1.18), "holds": false},
+	"sniper": {"name": "Снайпер", "weight": 0.1, "weapons": ["bolt"], "speed": 0.9, "hp": 0.9, "armor": 1.0,
+		"memory": 1.5, "view": 2.2, "color": Color(0.3, 0.33, 0.24), "scale": Vector3(0.95, 1.0, 0.95), "holds": true},
+}
+## Держит позицию: патрульные точки — не дальше стольких метров от поста, м.
+const AI_HOLD_PATROL_R := 12.0
+## Реакция на попадание: сколько секунд «ведёт» (скорость ×, разброс ×), задержка следующего выстрела, с.
+const AI_HIT_STAGGER_SEC := 0.45
+const AI_HIT_STAGGER_SPEED := 0.3
+const AI_HIT_STAGGER_SPREAD := 1.8
+const AI_HIT_FLINCH_DELAY := 0.3
 ## Точность: только что замеченная цель — разброс × AI_AIM_COLD, за AI_AIM_SETTLE_SEC сходится к 1.
 ## Цель бежит — × AI_TARGET_MOVING; сам на ходу — × AI_SELF_MOVING.
 const AI_AIM_COLD := 2.4

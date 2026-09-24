@@ -125,6 +125,7 @@ func _ready() -> void:
 		_ambient.stream = amb
 		_ambient.volume_db = -22.0
 	_ambient.autoplay = true
+	_ambient.bus = &"Ambient"
 	add_child(_ambient)
 
 
@@ -150,6 +151,7 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0)
 		# за стеной: тише и без верхов
 		p.volume_db -= Balance.AUDIO_OCCLUDED_DB
 		p.attenuation_filter_cutoff_hz = Balance.AUDIO_OCCLUDED_CUTOFF
+	p.bus = Settings.bus_for(kind)
 	p.finished.connect(p.queue_free)
 	get_tree().current_scene.add_child(p)
 	p.global_position = pos
