@@ -447,6 +447,8 @@ static func _light_node(t: Node3D, m: Dictionary, a: Dictionary, at: Vector3) ->
 	light.visible = false
 	# светит в глаза — слепит (LightGlare у игрока, мародёры целятся хуже)
 	light.add_to_group("glare_lights")
+	# по мокрому асфальту — отражённый луч дальше
+	light.add_child(WetBounce.new())
 	t.add_child(light)
 
 

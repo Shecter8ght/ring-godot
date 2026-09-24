@@ -120,12 +120,13 @@ def main() -> None:
         )
         print(f"{src.name}: {', '.join(maps)}")
     credits.append("")
-    # раздел «Звук» пишет tools/import_audio.py — сохраняем его
+    # разделы других скриптов («Звук» — import_audio, «Небо» — fetch_sky, …) — сохраняем
     tail = ""
     if CREDITS.exists():
         old = CREDITS.read_text(encoding="utf-8")
-        if "\n## Звук" in old:
-            tail = old[old.index("\n## Звук"):]
+        cut = old.find("\n## ", old.find("## Текстуры") + 1)
+        if cut >= 0:
+            tail = old[cut:]
     CREDITS.write_text("\n".join(credits) + tail, encoding="utf-8")
 
 

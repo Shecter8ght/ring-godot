@@ -26,6 +26,8 @@ const AI_ROOM_TYPES := ["retail", "storage", "corridor", "gallery", "office", "s
 
 var _rooms: Array = []
 var _spawn: Vector3 = Vector3.ZERO
+## Когда начался рейд (мс) — безопасный старт (SPAWN_SAFE).
+var _start_ms: int = Time.get_ticks_msec()
 var _rng := RandomNumberGenerator.new()
 var _nav_baked: bool = false
 var _local_player: Player = null
@@ -69,6 +71,12 @@ func _ready() -> void:
 	sector.add_to_group("nav_source")
 	add_child(sector)
 	move_child(sector, 0)
+	# доп. сцены из данных сектора ("extras"): улица — фонари, подстанция (правятся в редакторе
+	# отдельно от сцены уровня)
+	for path in SectorBuilder.load_def(sector_path).get("extras", []):
+		if ResourceLoader.exists(String(path)):
+			var extra := (load(String(path)) as PackedScene).instantiate()
+			add_child(extra)
 	# потолки и купол — не источник навмеша (иначе крыша станет «полом» для мародёров)
 	var ceil := sector.get_node_or_null("Ceilings")
 	if ceil:
@@ -378,7 +386,7 @@ func _spawn_marauders() -> void:
 		if p.distance_to(_spawn) < Balance.MARAUDER_SPAWN_MIN_DIST:
 			continue
 		var snapped := NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, p)
-		if snapped.distance_to(p) > 3.0:
+		if snapped.distance_to(p) > 3.0 or _sees_spawn(snapped):
 			continue
 		var size := mini(_rng.randi_range(int(Balance.AI_SQUAD_SIZE[0]), int(Balance.AI_SQUAD_SIZE[1])), Balance.MARAUDER_COUNT - placed)
 		# тип ведущего; снайпер ходит один, в отрядах снайперов нет
@@ -419,8 +427,27 @@ func _spawn_marauders() -> void:
 	print("sector: мародёров %d в %d отрядах, попыток %d" % [placed, squads, tries])
 
 
-## Случайная точка внутри случайного «жилого» помещения сектора (с отступом от стен и полос).
+## Видно ли точку появления игрока отсюда (открыто и ближе SPAWN_SAFE.los_m): там мародёра не ставим.
+func _sees_spawn(p: Vector3) -> bool:
+	if p.distance_to(_spawn) > float(Balance.SPAWN_SAFE.los_m):
+		return false
+	var q := PhysicsRayQueryParameters3D.create(p + Vector3.UP * 1.6, _spawn + Vector3.UP * 1.6, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
+	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
+
+
+## Случайная точка внутри случайного «жилого» помещения сектора (с отступом от стен и полос);
+## в начале рейда — не у точки появления игрока (SPAWN_SAFE).
 func _random_room_point() -> Vector3:
+	var safe: Dictionary = Balance.SPAWN_SAFE
+	var early := (Time.get_ticks_msec() - _start_ms) / 1000.0 < float(safe.sec)
+	for i in range(6):
+		var p := _room_point()
+		if not early or p.distance_to(_spawn) >= float(safe.radius):
+			return p
+	return _room_point()
+
+
+func _room_point() -> Vector3:
 	var candidates: Array = []
 	for room in _rooms:
 		if bool(room.get("locked", false)):

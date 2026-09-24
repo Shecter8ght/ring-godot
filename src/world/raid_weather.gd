@@ -88,6 +88,9 @@ func _apply_static() -> void:
 		e.fog_light_color = Color(0.62, 0.64, 0.66) if String(RaidConditions.current.time) != "night" else Color(0.05, 0.06, 0.08)
 		e.fog_density = 0.03 if w == "fog" else (0.006 if w == "rain" else 0.0)
 		e.fog_sky_affect = 0.9 if w == "fog" else 0.4
+		# ночью небо не серит (RaidAtmosphere: звёзды на чёрном)
+		if String(RaidConditions.current.time) == "night":
+			e.fog_sky_affect = minf(e.fog_sky_affect, float(Balance.NIGHT_ENV.fog_sky))
 	_set_overcast(w == "rain")
 	_set_rain(w == "rain")
 	changed.emit()
@@ -100,6 +103,9 @@ var _overcast: Array = []
 func _set_overcast(on: bool) -> void:
 	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D
 	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
+	# ночное небо: облака закрывают звёзды и Луну
+	if we and we.environment and we.environment.sky and we.environment.sky.sky_material is ShaderMaterial:
+		(we.environment.sky.sky_material as ShaderMaterial).set_shader_parameter("overcast", 1.0 if on else 0.0)
 	if on and _overcast.is_empty() and sun and we and we.environment:
 		var e := we.environment
 		_overcast = [sun.light_energy, e.background_energy_multiplier, e.ambient_light_energy]

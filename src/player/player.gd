@@ -740,7 +740,12 @@ func _toggle_tac(kind: String) -> void:
 	_send_ws(weapon_slot)
 
 
-## O: основной ↔ угловой прицел (если стоят оба).
+## O или СКМ от первого лица: основной ↔ угловой прицел (если стоят оба). Прицеливание не
+## сбрасывается — камера переводит линию прицеливания прямо (CameraRig, SIGHT_SWITCH_SEC).
+func toggle_sight() -> void:
+	_toggle_sight()
+
+
 func _toggle_sight() -> void:
 	var e := weapon_entry()
 	var sights := WeaponStats.sights_of(e)
@@ -749,7 +754,6 @@ func _toggle_sight() -> void:
 	var cur := WeaponStats.active_sight(e)
 	var nxt := String(sights[(sights.find(cur) + 1) % sights.size()])
 	_ws[weapon_slot].sight = nxt
-	_aim_t = 0.0
 	var mount := "optic_" + nxt
 	var name := ItemDb.item_name(WeaponDb.mod_id((e.mods as Dictionary).get(mount, ""))) if (e.mods as Dictionary).has(mount) else "штатный"
 	if Raid.current:

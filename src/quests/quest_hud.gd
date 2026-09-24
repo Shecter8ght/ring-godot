@@ -125,6 +125,7 @@ func _show_line() -> void:
 	var l: Array = _dlg_lines[_dlg_i]
 	var me := String(l[0]) == "player"
 	_dlg_who.text = PLAYER_WHO if me else String(l[0])
+	_dlg_text.text = String(l[1]) if l.size() > 1 else ""
 	_dlg_who.add_theme_color_override("font_color", PLAYER_COLOR if me else NPC_COLOR)
 	_dlg_text.add_theme_color_override("font_color", PLAYER_COLOR.lerp(Color.WHITE, 0.55) if me else Color(0.95, 0.94, 0.9))
 

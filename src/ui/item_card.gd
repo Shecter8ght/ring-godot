@@ -1,0 +1,65 @@
+class_name ItemCard
+extends PanelContainer
+## Плашка предмета для окон (торговец, схема оружия): иконка на подложке цвета категории, имя,
+## строка подробностей, цена; снизу — ряд кнопок (controls). Без иконки — плашка цвета категории.
+
+const W := 200.0
+
+var controls: HBoxContainer
+
+
+## entry — запись предмета (id, n, состояние) или {id}; sub — подробности; price — "" без цены;
+## plain — только имя (витрина торговца: новое, состояние писать незачем).
+static func make(entry: Dictionary, sub: String, price: String, width: float = W, plain: bool = false) -> ItemCard:
+	var c := ItemCard.new()
+	c.custom_minimum_size = Vector2(width, 0)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.11, 0.105, 0.1, 0.96)
+	sb.border_color = Color(0.95, 0.78, 0.5, 0.18)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(3)
+	sb.set_content_margin_all(8)
+	c.add_theme_stylebox_override("panel", sb)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	c.add_child(v)
+	var icon := IconBox.new()
+	icon.id = String(entry.get("id", ""))
+	icon.custom_minimum_size = Vector2(0, 78)
+	v.add_child(icon)
+	var n := int(entry.get("n", 1))
+	var title := ItemDb.item_name(String(entry.get("id", ""))) if plain else ItemDb.label(entry)
+	var name := _label(title + ("  ×%d" % n if n > 1 else ""), 14, Color(0.93, 0.91, 0.86))
+	v.add_child(name)
+	if sub != "":
+		v.add_child(_label(sub, 12, Color(0.66, 0.68, 0.66)))
+	if price != "":
+		v.add_child(_label(price, 14, Color(0.72, 0.87, 0.66)))
+	c.controls = HBoxContainer.new()
+	c.controls.add_theme_constant_override("separation", 4)
+	v.add_child(c.controls)
+	return c
+
+
+static func _label(t: String, size: int, color: Color) -> Label:
+	var l := Label.new()
+	l.text = t
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", color)
+	return l
+
+
+## Иконка предмета на подложке (как в сетках инвентаря).
+class IconBox:
+	extends Control
+	var id: String = ""
+
+	func _draw() -> void:
+		var cat := String(ItemDb.item(id).get("cat", "misc"))
+		var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
+		var r := Rect2(Vector2.ZERO, size)
+		var has := ItemIcons.get_icon(id) != null
+		draw_rect(r, ItemIcons.backdrop(col) if has else col)
+		ItemIcons.draw(self, id, r.grow(-4.0), false)
+		draw_rect(r, Color(1, 1, 1, 0.12), false, 1.0)

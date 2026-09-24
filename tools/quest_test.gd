@@ -21,6 +21,11 @@ func _ready() -> void:
 	# 1. Сергей: квест доступен, разговор начинает
 	_check("квест доступен у Сергея", Quests.state(Q) == "AVAILABLE" and not Quests.talk_options("trader").is_empty(), Quests.state(Q))
 	var opt: Dictionary = Quests.talk_options("trader")[0]
+	# окно разговора показывает и кто говорит, и текст реплики
+	if Quests.hud:
+		Quests.hud.start_dialogue(Quests.dialogue(String(opt.quest), String(opt.dialogue)), func() -> void: pass)
+		_check("разговор: видно, кто говорит, и текст", Quests.hud._dlg_who.text != "" and Quests.hud._dlg_text.text != "", Quests.hud._dlg_text.text)
+		Quests.hud._dlg.visible = false
 	Quests.finish_talk(String(opt.quest), "trader", String(opt.dialogue))
 	_check("разговор — квест начат, цель: следы Антона", Quests.state(Q) == "ACTIVE" and String(Quests.objective(Q).id) == "backpack", _obj())
 	# 2. рейд: только место текущего этапа, Антона нет

@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3]
+
+[ext_resource type="Shader" path="res://src/world/night_sky.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sky/qwantani_night_puresky.hdr" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sky/moon_lroc_color.jpg" id="3"]
+
+[resource]
+resource_name = "night_sky"
+shader = ExtResource("1")
+shader_parameter/stars_tex = ExtResource("2")
+shader_parameter/has_stars_tex = true
+shader_parameter/stars_energy = 0.25
+shader_parameter/stars_floor = 0.6
+shader_parameter/moon_tex = ExtResource("3")
+shader_parameter/has_moon_tex = true
+shader_parameter/moon_azimuth = 140.0
+shader_parameter/moon_elevation = 32.0
+shader_parameter/moon_size = 2.2
+shader_parameter/moon_energy = 5.0
+shader_parameter/halo_strength = 0.12
+shader_parameter/halo_size = 5.0

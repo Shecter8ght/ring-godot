@@ -125,6 +125,8 @@ func _ready() -> void:
 	_check("консоль: коды ТЗ, give ammo, set weapon durability, damage plate", bad.is_empty() and pl.inventory.count("ammo_545_ap") == ap0 + 120
 		and is_equal_approx(float(pl.inventory.equipment.primary.dur), 25.0) and float(pl.inventory.equipment.armor.plates.front.dur) < float(ItemDb.max_dur("plate_ceramic")),
 		str(bad))
+	# выданное консолью — прочь из рюкзака (иначе трофеям с трупа не хватит места)
+	pl.inventory.remove("ammo_545_ap", pl.inventory.count("ammo_545_ap"))
 
 	# CASE 17: ИИ тратит патроны; после смерти — остаток в магазине, запасные целы
 	var m := (preload("res://scenes/ai/marauder.tscn") as PackedScene).instantiate() as Marauder

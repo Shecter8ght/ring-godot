@@ -44,6 +44,8 @@ var _viewmodel_id: String = ""
 var _cheek_parts: Array[GeometryInstance3D] = []
 ## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
 var scope_active: bool = false
+## 0 — основной прицел, 1 — угловой (плавно между ними при переключении).
+var _sight_k: float = 0.0
 var _scope_vp: SubViewport
 var _scope_cam: Camera3D
 var _scope_view: TextureRect
@@ -321,6 +323,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_mmb = mb.pressed
+			# от первого лица СКМ — основной / угловой прицел (камеру она там не крутит)
+			if mb.pressed and ads_active and not _ui_blocking():
+				var pl := _target as Player
+				if pl and pl.is_local():
+					pl.toggle_sight()
 		elif mb.pressed and not ads_active:
 			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
 				_distance = maxf(Balance.CAMERA_ZOOM_MIN, _distance - Balance.CAMERA_ZOOM_STEP)
@@ -509,13 +516,17 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var sh: float = _viewmodel.get_meta("sight_h", 0.08)
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
 	# выбранный прицел: угловой — ствол заваливается по крену кронштейна, его линия — на оси взгляда
+	# переход между прицелами — прямо, не опуская оружия: линия и крен плавно к выбранному
+	var want_off := 1.0 if String(spec.get("sight", "primary")) == "offset" and _viewmodel.has_meta("sight_offset") else 0.0
+	_sight_k = move_toward(_sight_k, want_off, delta / Balance.SIGHT_SWITCH_SEC)
 	var sx := 0.0
 	var sroll := 0.0
-	if String(spec.get("sight", "primary")) == "offset" and _viewmodel.has_meta("sight_offset"):
+	if _viewmodel.has_meta("sight_offset") and _sight_k > 0.0:
 		var so: Dictionary = _viewmodel.get_meta("sight_offset")
-		sx = float(so.x)
-		sh = float(so.h)
-		sroll = float(so.roll)
+		var e := smoothstep(0.0, 1.0, _sight_k)
+		sx = float(so.x) * e
+		sh = lerpf(sh, float(so.h), e)
+		sroll = float(so.roll) * e
 	# у бедра (без ПКМ) → в прицел: «довод» по эргономике (aim_progress), плавно
 	var k := smoothstep(0.0, 1.0, aim_t)
 	# приклад у бедра виден; вскинул к щеке — он под щекой и заслонял бы низ прицельной линии
@@ -533,7 +544,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var kv := pl.kick_vis
 	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
 	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + bob + Vector3(0.0, kv * 0.004, kv * 0.028))
-	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85)
+	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05)
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))

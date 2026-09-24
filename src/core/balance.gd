@@ -148,7 +148,7 @@ const PLAYER_HP := 100.0
 const RAID_TIME := {
 	"day": {"name": "День", "risk": 0, "sun_elev": 48.0, "sun_energy": 2.2, "sun_color": Color(1.0, 0.95, 0.88), "sky": 1.0, "ambient": 1.0, "exposure": 0.9, "view": 60.0},
 	"dusk": {"name": "Закат", "risk": 1, "sun_elev": 12.0, "sun_energy": 2.6, "sun_color": Color(1.0, 0.74, 0.5), "sky": 1.0, "ambient": 1.0, "exposure": 1.0, "view": 45.0},
-	"night": {"name": "Ночь", "risk": 2, "sun_elev": 35.0, "sun_energy": 0.14, "sun_color": Color(0.55, 0.66, 0.95), "sky": 0.03, "ambient": 0.12, "exposure": 1.25, "view": 25.0},
+	"night": {"name": "Ночь", "risk": 2, "sun_elev": 35.0, "sun_energy": 0.2, "sun_color": Color(0.70, 0.78, 1.0), "sky": 0.03, "ambient": 0.12, "exposure": 1.25, "view": 25.0},
 }
 ## Погода: риск, во сколько раз хуже видно на улице (view), слышно (hear — радиус шума).
 const RAID_WEATHER := {
@@ -288,7 +288,10 @@ const MARAUDER_COUNT := 24
 const MARAUDER_WALK := 1.5
 const MARAUDER_RUN := 3.4
 ## Ближе этого до точки спавна игрока мародёры не появляются, м.
-const MARAUDER_SPAWN_MIN_DIST := 28.0
+const MARAUDER_SPAWN_MIN_DIST := 45.0
+## Безопасный старт: мародёр не появляется в прямой видимости точки появления ближе los_m;
+## первые sec секунд рейда маршруты патруля обходят круг radius вокруг неё.
+const SPAWN_SAFE := {"radius": 40.0, "sec": 150.0, "los_m": 90.0}
 ## Зрение: дальность (без уровня — запасная; в рейде — RaidAtmosphere по условиям), полуугол
 ## конуса, и во сколько раз дальность меньше для сидящего/лежащего.
 const AI_VIEW_DISTANCE := 45.0
@@ -301,8 +304,25 @@ const AI_VIEW_LASER := 35.0
 ## Брошенный свет: осветительная ракета и химсвет — цвет, сила, радиус, сколько горит, с.
 const THROWN_LIGHTS := {
 	"flare": {"color": Color(1.0, 0.32, 0.22), "energy": 9.0, "range": 20.0, "sec": 60.0, "shadow": true},
-	"chemlight": {"color": Color(0.35, 1.0, 0.45), "energy": 1.4, "range": 6.0, "sec": 600.0, "shadow": true},
+	"chemlight": {"color": Color(0.35, 1.0, 0.45), "energy": 1.0, "range": 9.0, "sec": 600.0, "shadow": true,
+		"indirect": 2.6, "blur": 2.5},
 }
+## Брошенный свет после приземления: медленнее settle_speed м/с дольше settle_sec — замирает
+## (не катается, свет не скачет); не позже max_roll_sec после первого касания.
+## Уличный фонарь (StreetLamp): цвет, сила, дальность и угол конуса, отражённый свет, свечение
+## в тумане, яркость рассеивателя; дальше fade_begin м от камеры гаснет, тень — ближе shadow_m.
+const STREET_LAMP := {"color": Color(1.0, 0.84, 0.62), "energy": 7.0, "range": 26.0, "angle": 62.0, "indirect": 1.6,
+	"fog": 1.2, "lens": 9.0, "fade_begin": 110.0, "shadow_m": 45.0}
+## Отражённый от мокрой земли луч фонаря (WetBounce): вклад плёнки и луж в отражение, доля
+## отражения в упор (к касательной — до 1), общий множитель яркости, во сколько раз шире конус;
+## считается раз в tick с, если фонарь ближе max_cam_m к камере.
+const WET_BOUNCE := {"film": 0.35, "puddle": 0.65, "base": 0.08, "energy": 0.9, "spread": 1.35, "tick": 0.05, "max_cam_m": 45.0}
+## Ночное окружение (небо — шейдер night_sky, Луна — свет «Sun»): рассеянный свет ровным
+## тёмно-холодным цветом (звёзды не светят), свечение — только от очень яркого (диск Луны, маяки),
+## объёмный туман слабее (× fog_k).
+const NIGHT_ENV := {"ambient_color": Color(0.09, 0.11, 0.16), "glow_threshold": 1.3, "glow_intensity": 0.4, "glow_bloom": 0.0,
+	"fog_k": 0.55, "fog_sky": 0.08, "moon_fog": 0.12}
+const THROWN_SETTLE := {"settle_speed": 0.35, "settle_sec": 0.25, "max_roll_sec": 2.0, "roll_damp": 9.0}
 ## Ракета: кто в радиусе горит — виден минимум на столько, м; мародёр ближе FLARE_BLIND_M,
 ## глядя на неё, целится как только что заметивший (слепит).
 const FLARE_LIT_VIEW := 45.0
@@ -316,6 +336,8 @@ const FLASHLIGHT_BLIND_M := 15.0
 ## jam_base × (1 + износ² × jam_worn) (износ = (100 − прочность)/100); устранить — clear_sec.
 const WEAPON_WEAR := {"spread": 0.8, "jam_base": 0.012, "jam_worn": 25.0, "clear_sec": 0.9}
 ## Досыпать россыпь в отстёгиваемый магазин (снаряжённых нет) — дольше смены магазина во столько.
+## Переключение основной ↔ угловой прицел от первого лица, с (без опускания оружия).
+const SIGHT_SWITCH_SEC := 0.22
 const RELOAD_TOPUP_K := 1.6
 ## Изометрия (ПКМ переводит в прицел от первого лица — там выбранный прицел и работает), от бедра:
 ## угловой коллиматор выбран — разброс × offset_hip (навскидку), крупная оптика — × scope_hip;

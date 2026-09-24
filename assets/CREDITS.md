@@ -39,3 +39,8 @@
 - `assets/textures/ring_vehicles/` — Rusty Metal Sheet, Amal Kumar, CC0 1.0, https://polyhaven.com/a/rusty_metal_sheet
 - `assets/textures/ring_vehicles/` — Rubber Tiles, Amal Kumar, CC0 1.0, https://polyhaven.com/a/rubber_tiles
 - `assets/textures/ring_vehicles/` — Denim Fabric 06, Greg Zaal (фото), Rico Cilliers (обработка), CC0 1.0, https://polyhaven.com/a/denim_fabric_06
+
+## Небо (assets/sky)
+
+- `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
+- `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба

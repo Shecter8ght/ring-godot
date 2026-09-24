@@ -8,6 +8,10 @@ var _pivot: Node3D
 var _model: Node3D
 var _cam: Camera3D
 var _key: String = ""
+## Вращается (витрина) или стоит сбоку дулом вправо (схема оружия — точки крепления видны).
+var spin: bool = true
+## Масштаб ствола (точки крепления из данных — в осях основы).
+var _scale: float = 1.0
 
 
 func _ready() -> void:
@@ -78,7 +82,13 @@ func show_weapon(weapon_id: String, mods: Dictionary) -> void:
 		first = false
 	_model.position = -box.get_center()
 	var size := maxf(box.size.z, box.size.y * 2.0)
-	_cam.position = Vector3(size * 1.02, size * 0.26, 0.0)
+	_scale = float(WeaponDb.weapon(weapon_id).get("scale", 1.0))
+	_pivot.rotation = Vector3.ZERO
+	if spin:
+		_cam.position = Vector3(size * 1.02, size * 0.26, 0.0)
+	else:
+		# сбоку слева от ствола: дуло (+Z) — вправо на экране
+		_cam.position = Vector3(-size * 1.05, size * 0.12, 0.0)
 	_cam.look_at(Vector3.ZERO, Vector3.UP)
 
 
@@ -93,5 +103,15 @@ func _relative(n: Node3D) -> Transform3D:
 
 
 func _process(delta: float) -> void:
-	if _pivot:
+	if _pivot and spin:
 		_pivot.rotate_y(delta * 0.35)
+
+
+## Точка в осях основы модели (например, точка крепления из data/weapons.json) → место на витрине.
+func project(p: Vector3) -> Vector2:
+	if _model == null or _cam == null:
+		return size * 0.5
+	var world := _model.global_transform * (p * _scale)
+	var vp := _cam.unproject_position(world)
+	var k := size / Vector2(_vp.size) if _vp.size.x > 0 else Vector2.ONE
+	return vp * k

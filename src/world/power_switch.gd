@@ -12,20 +12,27 @@ extends Interactable
 	set(v):
 		display_name = v
 		_rebuild()
+## Туда-сюда (иначе — только включить) и положение до первого щелчка.
+@export var toggle: bool = false
+@export var default_on: bool = false
 
 var _lamp: MeshInstance3D
 
 
+func is_on() -> bool:
+	return Raid.current != null and bool(Raid.current.switches.get(switch_id, default_on))
+
+
 func can_use() -> bool:
-	return Raid.current != null and not bool(Raid.current.switches.get(switch_id, false))
+	return Raid.current != null and (toggle or not is_on())
 
 
 func prompt() -> String:
-	return "включить: " + display_name
+	return ("выключить: " if is_on() else "включить: ") + display_name
 
 
 func _use(_peer_id: int) -> void:
-	Raid.current.set_switch(switch_id, true)
+	Raid.current.set_switch(switch_id, not is_on() if toggle else true)
 	Audio.play("door", global_position)
 	NoiseBus.emit(global_position, Balance.NOISE_SWITCH, "switch")
 
@@ -33,7 +40,7 @@ func _use(_peer_id: int) -> void:
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint() or Raid.current == null or _lamp == null:
 		return
-	var on := bool(Raid.current.switches.get(switch_id, false))
+	var on := is_on()
 	var m := _lamp.material_override as StandardMaterial3D
 	var c := Color(0.3, 1.0, 0.4) if on else Color(1.0, 0.25, 0.15)
 	if m.albedo_color != c:

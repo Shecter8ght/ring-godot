@@ -80,7 +80,7 @@ static func _normalize(a: PackedStringArray) -> PackedStringArray:
 ## Код из ТЗ (AR_06, 545_AP, LPVO_01, OFFSET_RED_DOT_01, CAR_03, PLATE_06…) или id → id предмета;
 ## сборка (AR_06_PATROL) → "preset:…". Не нашлось — как есть.
 static func resolve(code: String) -> String:
-	if code.begins_with("preset:") or not ItemDb.item(code).is_empty():
+	if code.begins_with("preset:") or ItemDb.exists(code):
 		return code
 	var up := code.to_upper()
 	if not WeaponDb.preset(up).is_empty():
@@ -125,7 +125,7 @@ static func _give(pl: Player, id: String, n: int) -> String:
 		var rng := RandomNumberGenerator.new()
 		rng.randomize()
 		e = WeaponDb.make_weapon(id.trim_prefix("preset:"), rng, [100, 100])
-	elif ItemDb.item(id).is_empty():
+	elif not ItemDb.exists(id):
 		return "нет такого предмета: " + id
 	else:
 		e = ItemDb.make(WeaponDb.canonical(id), maxi(1, n))

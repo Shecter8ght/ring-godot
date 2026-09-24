@@ -22,7 +22,11 @@ var _sig: String = ""
 var _trader: Dictionary = {}
 ## Верстак: какое оружие собираем (слот снаряжения) и его витрина.
 var _wb_slot: String = "primary"
-var _preview: WeaponPreview
+## Торговец: вкладка, количество расходников к покупке, оружие на схеме обвеса (где и uid).
+var _trader_tab: String = "buy"
+var _qty: Dictionary = {}
+var _tb_where: String = "equip:primary"
+var _tb_uid: String = ""
 
 const MOD_SLOT_NAMES := {"optic": "Прицел", "muzzle": "Дульное устройство", "grip": "Рукоятка",
 	"stock": "Приклад", "mag": "Магазин", "tac": "Фонарь / ЛЦУ", "bipod": "Сошки"}
@@ -86,6 +90,9 @@ func open(kind: int) -> void:
 	_kind = kind
 	_sig = ""
 	_root.visible = true
+	# Сергею есть что сказать — сразу на задания
+	if kind == HideoutStation.Kind.TRADER and not Quests.talk_options("trader").is_empty():
+		_trader_tab = "tasks"
 
 
 func close_ui() -> void:
@@ -100,9 +107,15 @@ func _process(_delta: float) -> void:
 		return
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
+	sig += "|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid]
 	if sig == _sig:
 		return
 	_sig = sig
+	# прокрутка колонок — вернуть после перестройки (купил с конца списка — список не прыгает)
+	var scrolls := {}
+	for c in _cols.get_children():
+		for sc in c.find_children("*", "ScrollContainer", true, false):
+			scrolls[_scroll_key(sc as ScrollContainer)] = (sc as ScrollContainer).scroll_vertical
 	for c in _cols.get_children():
 		c.queue_free()
 	match _kind:
@@ -116,6 +129,34 @@ func _process(_delta: float) -> void:
 			_build_workbench()
 		HideoutStation.Kind.UPGRADES:
 			_build_upgrades()
+	# строки-абзацы в колонках переносятся по словам: длинная строка не раздвигает окно за экран
+	for l in _cols.find_children("*", "Label", true, false):
+		if l.get_parent() is VBoxContainer and (l as Label).autowrap_mode == TextServer.AUTOWRAP_OFF:
+			(l as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	for b in _cols.find_children("*", "Button", true, false):
+		if b.get_parent() is VBoxContainer and not b.get_parent().get_parent() is MountBoard:
+			(b as Button).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_restore_scroll(scrolls)
+
+
+## Ключ колонки для прокрутки: заголовок её колонки (он у колонки неизменен).
+func _scroll_key(sc: ScrollContainer) -> String:
+	var box := sc.get_parent()
+	if box and box.get_child_count() > 0 and box.get_child(0) is Label:
+		return (box.get_child(0) as Label).text.get_slice("   ", 0)
+	return str(sc.get_index())
+
+
+func _restore_scroll(scrolls: Dictionary) -> void:
+	if scrolls.is_empty():
+		return
+	# прокрутка встанет, когда содержимое разложится по высоте
+	for i in range(2):
+		await get_tree().process_frame
+	for sc in _cols.find_children("*", "ScrollContainer", true, false):
+		var k := _scroll_key(sc as ScrollContainer)
+		if scrolls.has(k) and not (sc as Node).is_queued_for_deletion():
+			(sc as ScrollContainer).scroll_vertical = int(scrolls[k])
 
 
 # ---------------------------------------------------------------- тайник
@@ -249,52 +290,256 @@ func _split(name: String, idx: int) -> void:
 
 func _build_trader() -> void:
 	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d (уровень %d)" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust, Profile.trust_level()]
-	_missions_column()
+	# вкладки слева: купить, обвес оружия, продать, задания (разговор — отметка)
+	var tabs := VBoxContainer.new()
+	tabs.custom_minimum_size.x = 170
+	tabs.add_theme_constant_override("separation", 6)
+	_cols.add_child(tabs)
+	var talk := not Quests.talk_options("trader").is_empty()
+	for t in [["buy", "Купить"], ["mods", "Обвес оружия"], ["sell", "Продать"], ["tasks", "Задания" + ("  •" if talk else "")]]:
+		var key := String(t[0])
+		var b := _button(String(t[1]), func() -> void: _trader_tab = key)
+		b.toggle_mode = true
+		b.button_pressed = _trader_tab == key
+		b.custom_minimum_size.y = 36
+		b.add_theme_font_size_override("font_size", 16)
+		if key == "tasks" and talk:
+			b.add_theme_color_override("font_color", Color(1.0, 0.72, 0.45))
+		tabs.add_child(b)
+	match _trader_tab:
+		"buy":
+			_trader_buy()
+		"mods":
+			_trader_mods()
+		"sell":
+			_trader_sell()
+		_:
+			_missions_column()
+
+
+## Купить: карточки по разделам; у расходников — количество (− / +).
+func _trader_buy() -> void:
 	var shop := _column("Купить", 1.0)
 	if Profile.needs_rescue():
 		# без ствола и без денег — Михалыч выручает, иначе из этой ямы не выбраться
 		var kit: Array[String] = []
 		for pair in Balance.RESCUE_KIT:
 			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
-		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»", Color(1.0, 0.85, 0.55)))
-		var rescue := HBoxContainer.new()
-		rescue.add_child(_text(", ".join(kit), Color(0.86, 0.86, 0.82)))
-		rescue.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
-		shop.add_child(rescue)
+		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55)))
+		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
 	var need_trust: Dictionary = _trader.get("trust", {})
-	# разделы по виду: оружие, патроны, магазины, обвес, броня, разное
 	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение"}
 	var last_head := ""
+	var flow: HFlowContainer = null
 	for id in _trader.get("stock", []):
 		var sid := String(id)
 		var head := String(heads.get(String(ItemDb.item(sid).cat), "Разное"))
 		if head != last_head:
 			last_head = head
 			shop.add_child(_text(head, Color(0.95, 0.82, 0.6)))
-		# патроны — пачкой (стопка), остальное — поштучно
-		var n := ItemDb.stack(sid) if ItemDb.item(sid).cat == "ammo" else 1
+			flow = HFlowContainer.new()
+			flow.add_theme_constant_override("h_separation", 8)
+			flow.add_theme_constant_override("v_separation", 8)
+			shop.add_child(flow)
+		var stackable := ItemDb.stack(sid) > 1
+		var n := _qty_of(sid) if stackable else 1
 		var price := Profile.buy_price(sid) * n
-		var e := ItemDb.make(sid, n)
-		var row := _row(e, price)
+		var card := ItemCard.make({"id": sid, "n": n}, _sub_of(sid), "%s ₽" % InventoryUI.money(price), ItemCard.W, true)
 		var tl := int(need_trust.get(sid, 1))
-		# открытое сюжетом — без проверки доверия
 		if Profile.trust_level() < tl and not sid in Profile.unlocked_stock:
 			# сильное Михалыч продаёт только тем, кому доверяет
-			row.add_child(_text("доверие %d" % tl, Color(0.8, 0.5, 0.4)))
+			card.controls.add_child(_text("доверие %d" % tl, Color(0.8, 0.5, 0.4)))
+			card.modulate = Color(1, 1, 1, 0.6)
 		else:
+			if stackable:
+				card.controls.add_child(_button("−", func() -> void: _step_qty(sid, -1)))
+				card.controls.add_child(_button("+", func() -> void: _step_qty(sid, 1)))
 			var b := _button("Купить", func() -> void: Profile.buy(sid, n))
 			b.disabled = price > Profile.money
-			row.add_child(b)
-		shop.add_child(row)
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			card.controls.add_child(b)
+		flow.add_child(card)
+
+
+## Сколько брать расходника: патроны — шагом 10 (от 10 до 5 стопок), остальное — поштучно.
+func _qty_step(sid: String) -> int:
+	return 10 if String(ItemDb.item(sid).cat) == "ammo" else 1
+
+
+func _qty_of(sid: String) -> int:
+	var step := _qty_step(sid)
+	return int(_qty.get(sid, mini(ItemDb.stack(sid), 30) if step > 1 else 1))
+
+
+func _step_qty(sid: String, dir: int) -> void:
+	var step := _qty_step(sid)
+	_qty[sid] = clampi(_qty_of(sid) + dir * step, step, ItemDb.stack(sid) * 5)
+
+
+## Короткая строка под именем: чем предмет важен (класс и калибр, урон и пробитие, эффект, класс брони).
+func _sub_of(id: String) -> String:
+	var w := WeaponDb.weapon(id)
+	if not w.is_empty():
+		return "%s · %s" % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber))]
+	var a := WeaponDb.ammo(id)
+	if not a.is_empty():
+		return "урон %d · пробитие %d" % [int(a.damage), int(a.pen)]
+	var at := WeaponDb.attachment(id)
+	if not at.is_empty():
+		return _fx_text(at)
+	var mg := WeaponDb.magazine(id)
+	if not mg.is_empty():
+		return "на %d · %s" % [int(mg.capacity), WeaponDb.caliber_name(WeaponDb.mag_caliber(id))]
+	for d in [WeaponDb.plate(id), WeaponDb.helmet(id)]:
+		if not (d as Dictionary).is_empty():
+			return "класс %d" % int(d["class"])
+	var v := WeaponDb.vest(id)
+	if not v.is_empty():
+		return "плиты: " + ("спереди и сзади" if not (v.get("plates", []) as Array).is_empty() else "нет")
+	return String(ItemDb.item(id).get("desc", ""))
+
+
+## Обвес оружия: выбрать своё оружие (надетое, в тайнике, в рюкзаке) и собрать его на схеме —
+## купить у Михалыча и сразу поставить или поставить своё из наличия.
+func _trader_mods() -> void:
+	var pick := _column("Своё оружие", 0.55)
+	var ref := _weapon_ref()
+	var any := false
+	for src in [["equip:primary", Profile.equipment.get("primary", {})], ["equip:secondary", Profile.equipment.get("secondary", {})]]:
+		var e: Dictionary = src[1]
+		if e.is_empty():
+			continue
+		any = true
+		var where := String(src[0])
+		_weapon_pick_card(pick, e, "надето: " + Inventory.SLOT_NAMES[where.trim_prefix("equip:")], ref[0] == where,
+			func() -> void:
+				_tb_where = where
+				_tb_uid = "")
+	for ln in ["stash", "backpack"]:
+		var list: Array = Profile.list_of(ln)
+		for i in range(list.size()):
+			var e: Dictionary = list[i]
+			if not WeaponDb.is_weapon(String(e.id)):
+				continue
+			any = true
+			var lname: String = ln
+			var ei := i
+			_weapon_pick_card(pick, e, "тайник" if ln == "stash" else "рюкзак", ref[0] == lname and int(ref[1]) == i,
+				func() -> void:
+					var le: Dictionary = Profile.list_of(lname)[ei]
+					if not le.has("uid"):
+						le["uid"] = "%d" % (Time.get_ticks_usec() % 1000000000)
+					_tb_where = lname
+					_tb_uid = String(le.uid))
+	if not any:
+		pick.add_child(_text("Оружия нет — купи во вкладке «Купить».", Color(0.7, 0.6, 0.5)))
+		return
+	var weapon: Dictionary = ref[2]
+	var col := _column("Схема: %s" % ItemDb.item_name(String(weapon.get("id", ""))), 1.4)
+	if weapon.is_empty():
+		col.add_child(_text("Выбери оружие слева.", Color(0.7, 0.7, 0.66)))
+		return
+	var board := MountBoard.new()
+	board.candidates = func(m: String) -> Array: return _trader_candidates(m)
+	board.remove = func(m: String) -> void:
+		var r := _weapon_ref()
+		Profile.strip_part(String(r[0]), int(r[1]), "mod:" + m)
+	col.add_child(board)
+	board.setup(weapon)
+	var spec := WeaponStats.compute(weapon)
+	col.add_child(_text("Точность в прицеле %s · отдача %.3f · эргономика %d · шум %d м · %.1f кг" % [
+		"%.2f°" % float(spec.ads_spread), float(spec.kick), int(spec.ergo), int(spec.noise_m), float(spec.weight)], Color(0.8, 0.82, 0.78)))
+	col.add_child(_text("Клик по квадратику у точки крепления: купить у Михалыча и сразу поставить или поставить своё. Снятое — в тайник.", Color(0.6, 0.62, 0.6)))
+
+
+func _weapon_pick_card(parent: Control, e: Dictionary, where: String, chosen: bool, pick: Callable) -> void:
+	var card := ItemCard.make(e, where, "", 260.0)
+	if chosen:
+		card.controls.add_child(_text("▶ на схеме", Color(1.0, 0.86, 0.6)))
+	else:
+		card.controls.add_child(_button("Выбрать", pick))
+	parent.add_child(card)
+
+
+## Выбранное на схеме оружие: [где, индекс, запись] ("equip:<слот>", -1 — надетое; список и индекс —
+## в тайнике / рюкзаке, найден по uid — индексы сдвигаются, когда из списка что-то уходит).
+func _weapon_ref() -> Array:
+	if _tb_where.begins_with("equip:"):
+		var e: Dictionary = Profile.equipment.get(_tb_where.trim_prefix("equip:"), {})
+		if not e.is_empty():
+			return [_tb_where, -1, e]
+	elif _tb_uid != "":
+		var list := Profile.list_of(_tb_where)
+		for i in range(list.size()):
+			if String((list[i] as Dictionary).get("uid", "")) == _tb_uid:
+				return [_tb_where, i, list[i]]
+	for slot in ["primary", "secondary"]:
+		if Profile.equipment.has(slot):
+			return ["equip:" + slot, -1, Profile.equipment[slot]]
+	return ["", -1, {}]
+
+
+## В точку mount выбранного оружия: из ассортимента (купить и поставить) и своё из наличия.
+func _trader_candidates(mount: String) -> Array:
+	var ref := _weapon_ref()
+	var weapon: Dictionary = ref[2]
+	var out: Array = []
+	if weapon.is_empty():
+		return out
+	var probe := weapon.duplicate(true)
+	(probe.mods as Dictionary).erase(mount)
+	var need_trust: Dictionary = _trader.get("trust", {})
+	for id in _trader.get("stock", []):
+		var sid := String(id)
+		if WeaponDb.attachment(sid).is_empty() or not mount in WeaponDb.mounts_for(probe, sid):
+			continue
+		var price := Profile.buy_price(sid)
+		var why := WeaponDb.attach_block(probe, mount, sid)
+		var tl := int(need_trust.get(sid, 1))
+		if Profile.trust_level() < tl and not sid in Profile.unlocked_stock:
+			why = "доверие %d" % tl
+		elif price > Profile.money and why == "":
+			why = "не хватает денег"
+		out.append({"id": sid, "sub": "%s ₽ · %s" % [InventoryUI.money(price), _fx_text(WeaponDb.attachment(sid))],
+			"act": "Купить и поставить", "why": why, "action": func() -> void: _buy_fit(sid, mount)})
+	out.append_array(_owned_candidates(weapon, mount, String(ref[0]), false, int(ref[1])))
+	return out
+
+
+## Купить обвес и сразу поставить на выбранное оружие (вытесненное — в тайник).
+func _buy_fit(sid: String, mount: String) -> void:
+	if not Profile.buy(sid, 1):
+		return
+	var si := -1
+	for i in range(Profile.stash.size() - 1, -1, -1):
+		if String(Profile.stash[i].id) == sid:
+			si = i
+			break
+	var ref := _weapon_ref()
+	if si >= 0 and String(ref[0]) != "":
+		Profile.fit_part(String(ref[0]), int(ref[1]), "stash", si, mount)
+
+
+## Продать: карточки тайника с ценой (стопку — целиком или по одной).
+func _trader_sell() -> void:
 	var sell := _column("Продать из тайника", 1.0)
+	if Profile.stash.is_empty():
+		sell.add_child(_text("тайник пуст", Color(0.6, 0.6, 0.6)))
+		return
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 8)
+	flow.add_theme_constant_override("v_separation", 8)
+	sell.add_child(flow)
 	for i in range(Profile.stash.size()):
 		var e: Dictionary = Profile.stash[i]
 		var idx := i
-		var row := _row(e, Profile.sell_price(e))
-		row.add_child(_button("Продать", func() -> void: Profile.sell(idx, int(e.n))))
-		sell.add_child(row)
-	if Profile.stash.is_empty():
-		sell.add_child(_text("тайник пуст", Color(0.6, 0.6, 0.6)))
+		var card := ItemCard.make(e, "", "%s ₽" % InventoryUI.money(Profile.sell_price(e)))
+		if int(e.n) > 1:
+			card.controls.add_child(_button("1 шт.", func() -> void: Profile.sell(idx, 1)))
+		var b := _button("Продать", func() -> void: Profile.sell(idx, int(e.n)))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.controls.add_child(b)
+		flow.add_child(card)
 
 
 ## Задания Михалыча: взятые (прогресс, «Сдать»), предложенные («Взять» — пока есть свободные слоты).
@@ -524,14 +769,12 @@ func _build_workbench() -> void:
 		left.add_child(_text("Надень оружие в тайнике — обвесы ставятся на надетое.", Color(1.0, 0.7, 0.5)))
 		return
 	var wid := String(weapon.id)
-	var mods := Profile.weapon_mods(_wb_slot)
-	# витрина живёт между перестройками окна — пересобирается только модель
-	if _preview == null or not is_instance_valid(_preview):
-		_preview = WeaponPreview.new()
-	if _preview.get_parent():
-		_preview.get_parent().remove_child(_preview)
-	left.add_child(_preview)
-	_preview.show_weapon(wid, mods)
+	# схема: от точек крепления — квадратики; клик — что подходит из тайника и рюкзака
+	var board := MountBoard.new()
+	board.candidates = func(m: String) -> Array: return _owned_candidates(weapon, m, "equip:" + _wb_slot, true)
+	board.remove = func(m: String) -> void: Profile.remove_mod(_wb_slot, m)
+	left.add_child(board)
+	board.setup(weapon)
 	# карточка: калибр, состояние, магазин и патрон, вес
 	var spec := WeaponStats.compute(weapon)
 	var mag: Dictionary = weapon.get("mag", {}) if weapon.get("mag") is Dictionary else {}
@@ -540,70 +783,52 @@ func _build_workbench() -> void:
 		"встроенный магазин" if w.has("internal_mag") else ItemDb.item_name(String(mag.get("id", ""))) if String(mag.get("id", "")) != "" else "без магазина",
 		int(weapon.get("dur", 100)), float(spec.weight)], Color(0.85, 0.85, 0.8)))
 	left.add_child(_text("Заряжено: %d / %d  %s — урон %d, пробитие %d" % [int(mag.get("rounds", 0)), int(spec.mag), ItemDb.item_name(String(spec.ammo)), int(spec.damage), int(spec.pen)], Color(0.8, 0.85, 0.75)))
+	left.add_child(_text("Клик по квадратику у точки крепления — поставить или снять.", Color(0.6, 0.62, 0.6)))
+	# справа: характеристики (сравнение с «голым») и магазин
+	var right := _column("Характеристики", 1.0)
 	var bare := weapon.duplicate(true)
 	bare["mods"] = {}
-	_stats(left, spec, WeaponStats.compute(bare))
-	# точки крепления: что стоит, что можно поставить (по интерфейсу крепления)
-	var right := _column("Крепления", 1.0)
+	_stats(right, spec, WeaponStats.compute(bare))
 	right.add_child(_button("Снарядить магазины из тайника и рюкзака", func() -> void: Profile.load_all_mags()))
-	var mounts := WeaponDb.mounts_of(wid)
-	for mount in WeaponDb.MOUNTS:
-		if not mounts.has(mount):
-			continue
-		var sl := String(mount)
-		right.add_child(_text("%s  [%s]" % [String(WeaponDb.MOUNT_NAMES.get(sl, sl)), String(mounts[sl])], Color(0.95, 0.82, 0.6)))
-		if mods.has(sl):
-			var row := HBoxContainer.new()
-			var l := _text("  " + ItemDb.item_name(WeaponDb.mod_id(mods[sl])), Color(0.92, 0.9, 0.85))
-			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			row.add_child(l)
-			row.add_child(_button("Снять", func() -> void: Profile.remove_mod(_wb_slot, sl)))
-			right.add_child(row)
-		var probe := weapon.duplicate(true)
-		(probe.mods as Dictionary).erase(sl)
-		var any := false
-		# подходящее — и из тайника, и из рюкзака (подписано, откуда)
-		for from_bp in [false, true]:
-			var src: Array = Profile.backpack if from_bp else Profile.stash
-			for i in range(src.size()):
-				var id := String(src[i].id)
-				if WeaponDb.attachment(id).is_empty() or not sl in WeaponDb.mounts_for(probe, id):
-					continue
-				any = true
-				var idx := i
-				var bp: bool = from_bp
-				var row := HBoxContainer.new()
-				var l := _text("  + %s  —  %s" % [ItemDb.item_name(id), _fx_text(WeaponDb.attachment(id))], Color(0.7, 0.8, 0.72))
-				l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-				row.add_child(l)
-				row.add_child(_text("рюкзак" if bp else "тайник", Color(0.55, 0.6, 0.65)))
-				var why := Profile.mod_block(id, sl)
-				if why == "":
-					why = WeaponDb.attach_block(probe, sl, id)
-				if why != "":
-					row.add_child(_text(why, Color(0.8, 0.5, 0.4)))
-				else:
-					row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx, bp, sl)))
-				right.add_child(row)
-		if not mods.has(sl) and not any:
-			right.add_child(_text("  пусто — подходящего в тайнике и рюкзаке нет", Color(0.5, 0.5, 0.5)))
 	# магазин — сменить на подходящий из тайника / рюкзака
 	if not w.has("internal_mag"):
 		right.add_child(_text("Магазин  [%s]" % String(w.get("mag_if", "")), Color(0.95, 0.82, 0.6)))
 		for from_bp in [false, true]:
 			var src: Array = Profile.backpack if from_bp else Profile.stash
-			for i in range(src.size()):
-				if not WeaponDb.mag_fits(wid, String(src[i].id)):
+			for i2 in range(src.size()):
+				if not WeaponDb.mag_fits(wid, String(src[i2].id)):
 					continue
-				var idx := i
+				var idx := i2
 				var bp: bool = from_bp
 				var row := HBoxContainer.new()
-				var l := _text("  ⇄ " + ItemDb.label(src[i]), Color(0.7, 0.8, 0.72))
+				var l := _text("  ⇄ " + ItemDb.label(src[i2]), Color(0.7, 0.8, 0.72))
 				l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				row.add_child(l)
 				row.add_child(_button("Вставить", func() -> void: Profile.fit_part("equip:" + _wb_slot, -1, "backpack" if bp else "stash", idx, "")))
 				right.add_child(row)
+
+
+## Что из своего (тайник и рюкзак) встаёт в точку mount оружия weapon (запись where / idx в профиле):
+## [{id, sub, act, action, why}] для схемы оружия. bench — ставит верстак (его уровень решает).
+func _owned_candidates(weapon: Dictionary, mount: String, where: String, bench: bool, idx: int = -1) -> Array:
+	var out: Array = []
+	var probe := weapon.duplicate(true)
+	(probe.mods as Dictionary).erase(mount)
+	for src_name in ["stash", "backpack"]:
+		var src: Array = Profile.list_of(src_name)
+		for i in range(src.size()):
+			var id := String(src[i].id)
+			if WeaponDb.attachment(id).is_empty() or not mount in WeaponDb.mounts_for(probe, id):
+				continue
+			var si := i
+			var sn: String = src_name
+			var why := Profile.mod_block(id, mount) if bench else ""
+			if why == "":
+				why = WeaponDb.attach_block(probe, mount, id)
+			out.append({"id": id, "sub": "%s · %s" % ["тайник" if sn == "stash" else "рюкзак", _fx_text(WeaponDb.attachment(id))],
+				"act": "Поставить", "why": why,
+				"action": func() -> void: Profile.fit_part(where, idx, sn, si, mount)})
+	return out
 
 
 ## Шкалы характеристик: значение, полоса 0–100 и разница с оружием без обвесов (зелёным — лучше).

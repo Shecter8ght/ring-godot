@@ -37,6 +37,27 @@ func _ready() -> void:
 		_save("hideout_ui_%d" % kind)
 		(level.get("_ui") as HideoutUI).close_ui()
 		await _frames(2)
+	# торговец: вкладки (карточки, схема обвеса с выбором своего оружия, продажа)
+	var ui := level.get("_ui") as HideoutUI
+	for st in get_tree().get_nodes_in_group("interactables"):
+		if st is HideoutStation and (st as HideoutStation).kind == HideoutStation.Kind.TRADER:
+			level.call("open_station", st)
+			break
+	for tab in ["buy", "mods", "sell"]:
+		ui._trader_tab = tab
+		await _frames(40)
+		_save("hideout_trader_%s" % tab)
+	# схема: клик по квадратику прицела — список (купить и поставить / своё)
+	ui._trader_tab = "mods"
+	await _frames(20)
+	var boards := ui.find_children("*", "MountBoard", true, false)
+	if not boards.is_empty():
+		var b := boards[0] as MountBoard
+		for slot in b._slots:
+			if String(slot) == "optic_primary":
+				(b._slots[slot] as Button).pressed.emit()
+		await _frames(20)
+		_save("hideout_trader_board_popup")
 	get_tree().quit(0)
 
 

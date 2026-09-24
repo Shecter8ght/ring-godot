@@ -89,6 +89,7 @@
   "site_fence_height": 3.0
  },
  "greybox": true,
+ "extras": ["res://scenes/world/f1_street.tscn"],
  "arch": {
   "storefront_h": 3.6,
   "door_h": 2.1,

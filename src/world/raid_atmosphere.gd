@@ -7,6 +7,11 @@ extends Node
 
 static var current: RaidAtmosphere
 
+## Ночное небо: материал с параметрами в инспекторе (HDRI звёзд, карта Луны NASA) или, если
+## ассетов нет, тот же шейдер без текстур (процедурные звёзды, серый диск).
+const NIGHT_SKY := "res://assets/materials/night_sky.tres"
+const NIGHT_SHADER := "res://src/world/night_sky.gdshader"
+
 var _indoor_cache: Dictionary = {}
 
 
@@ -24,13 +29,19 @@ func apply() -> void:
 	var t := RaidConditions.spec("time")
 	var level := get_parent()
 	var sun := level.get_node_or_null("Sun") as DirectionalLight3D
+	var night := String(c.time) == "night"
+	var sky_mat: ShaderMaterial = night_sky_material() if night else null
 	if sun:
-		# курс солнца — как в сцене; высота, цвет и сила — по времени
+		# курс солнца — как в сцене; высота, цвет и сила — по времени. Ночью это Луна: куда её
+		# поставили в материале неба (диск в шейдере — ровно по этому свету)
 		var yaw := sun.global_rotation.y
 		sun.global_rotation = Vector3(-deg_to_rad(float(t.sun_elev)), yaw, 0.0)
+		if sky_mat:
+			sun.global_rotation = Vector3(-deg_to_rad(float(sky_mat.get_shader_parameter("moon_elevation"))),
+				deg_to_rad(float(sky_mat.get_shader_parameter("moon_azimuth"))), 0.0)
 		sun.light_energy = float(t.sun_energy)
 		sun.light_color = t.sun_color
-		sun.light_volumetric_fog_energy = 1.6 if String(c.time) != "night" else 0.4
+		sun.light_volumetric_fog_energy = 1.6 if not night else float(Balance.NIGHT_ENV.moon_fog)
 	var we := level.find_child("WorldEnvironment", false, false) as WorldEnvironment
 	if we and we.environment:
 		var e := we.environment
@@ -39,7 +50,53 @@ func apply() -> void:
 		if e.sky and e.sky.sky_material is PhysicalSkyMaterial:
 			(e.sky.sky_material as PhysicalSkyMaterial).energy_multiplier = float(t.sky)
 		e.tonemap_exposure = float(t.get("exposure", 1.0))
+		_apply_night(e, sky_mat)
 	_apply_power(String(c.power))
+
+
+## Ночь: своё небо (звёзды, Луна), рассеянный свет ровным цветом, умеренное свечение; днём —
+## всё как в сцене (окружение общее для всех загрузок уровня — исходное запоминается).
+func _apply_night(e: Environment, sky_mat: ShaderMaterial) -> void:
+	if not e.has_meta("day"):
+		e.set_meta("day", {"sky": e.sky, "ambient_source": e.ambient_light_source, "ambient_color": e.ambient_light_color,
+			"glow_threshold": e.glow_hdr_threshold, "glow_intensity": e.glow_intensity, "glow_bloom": e.glow_bloom,
+			"fog_density": e.volumetric_fog_density})
+	var day: Dictionary = e.get_meta("day")
+	if sky_mat == null:
+		e.sky = day.sky
+		e.ambient_light_source = int(day.ambient_source)
+		e.ambient_light_color = day.ambient_color
+		e.glow_hdr_threshold = float(day.glow_threshold)
+		e.glow_intensity = float(day.glow_intensity)
+		e.glow_bloom = float(day.glow_bloom)
+		e.volumetric_fog_density = float(day.fog_density)
+		return
+	var n: Dictionary = Balance.NIGHT_ENV
+	# материал общий между рейдами — облачность ставим по погоде этого рейда
+	sky_mat.set_shader_parameter("overcast", 1.0 if String(RaidConditions.current.get("weather", "")) == "rain" else 0.0)
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	# карта неба крупнее: в гладкой луже читается диск Луны
+	sky.radiance_size = Sky.RADIANCE_SIZE_512
+	e.sky = sky
+	# яркость задаёт сам шейдер — множитель фона не душит звёзды
+	e.background_energy_multiplier = 1.0
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	e.ambient_light_color = n.ambient_color
+	e.glow_hdr_threshold = float(n.glow_threshold)
+	e.glow_intensity = float(n.glow_intensity)
+	e.glow_bloom = float(n.glow_bloom)
+	e.volumetric_fog_density = float(day.fog_density) * float(n.fog_k)
+	# туман не серит небо — звёзды на чёрном
+	e.fog_sky_affect = minf(e.fog_sky_affect, float(n.fog_sky))
+
+
+static func night_sky_material() -> ShaderMaterial:
+	if ResourceLoader.exists(NIGHT_SKY):
+		return load(NIGHT_SKY) as ShaderMaterial
+	var m := ShaderMaterial.new()
+	m.shader = load(NIGHT_SHADER)
+	return m
 
 
 ## Электричество ТЦ: есть — всё горит; нет — темно; аварийное — каждый третий огонь, красный,

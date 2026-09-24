@@ -39,6 +39,12 @@ static func item(id: String) -> Dictionary:
 	return _items.get(WeaponDb.canonical(id), {"name": id, "cat": "misc", "cells": 1, "value": 0, "stack": 1})
 
 
+## Есть ли такой предмет (item() на незнакомый id отдаёт заглушку, не пустоту).
+static func exists(id: String) -> bool:
+	_ensure()
+	return _items.has(WeaponDb.canonical(id))
+
+
 ## Вес одной штуки, кг.
 static func weight(id: String) -> float:
 	var it := item(id)

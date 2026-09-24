@@ -51,6 +51,20 @@ func _ready() -> void:
 		CameraRig.first_person_mode = false
 		await _frames(40)
 		_save("asphalt_%s_%s_iso" % [tod, st[0]])
+	# в сторону Луны: небо, звёзды, диск и ореол; и по ясной погоде (облака не закрывают)
+	var sun := level.get_node_or_null("Sun") as DirectionalLight3D
+	if sun:
+		for clear in [false, true]:
+			if clear:
+				RaidWeather.current._set_overcast(false)
+			var md := sun.global_basis.z
+			CameraRig.first_person_mode = true
+			await _frames(10)
+			rig._look_yaw = atan2(md.x, md.z)
+			rig._look_pitch = clampf(asin(md.y) - 0.15, -1.2, 1.2)
+			await _frames(60)
+			_save("asphalt_%s_moon%s" % [tod, "_clear" if clear else ""])
+		CameraRig.first_person_mode = false
 	get_tree().quit(0)
 
 
