@@ -133,6 +133,45 @@ static func bus_for(kind: String) -> StringName:
 func _on_node_added(n: Node) -> void:
 	if n is WorldEnvironment:
 		_apply_env.call_deferred(n as WorldEnvironment)
+	elif n is OmniLight3D or n is SpotLight3D:
+		soften(n as Light3D)
+
+
+## Мягкий свет от любого источника: спад по расстоянию плавнее (яркость пересчитана так, чтобы
+## на обычном расстоянии свет был тот же, а горячее пятно под лампой — мягче), край конуса
+## размыт, блик мягче, больше отражённого (SDFGI) и свечения в воздухе (объёмный туман), край
+## тени размыт. Один раз на источник; свет, которому нужна чёткость, — meta "crisp".
+static func soften(l: Light3D) -> void:
+	if l.has_meta("crisp") or l.has_meta("soft"):
+		return
+	l.set_meta("soft", true)
+	l.light_specular = minf(l.light_specular, 0.45)
+	l.light_indirect_energy = maxf(l.light_indirect_energy, 1.6)
+	l.light_volumetric_fog_energy = maxf(l.light_volumetric_fog_energy, 1.6)
+	l.shadow_blur = maxf(l.shadow_blur, 1.6)
+	var range_m := 0.0
+	var decay := 1.0
+	if l is OmniLight3D:
+		range_m = (l as OmniLight3D).omni_range
+		decay = (l as OmniLight3D).omni_attenuation
+	elif l is SpotLight3D:
+		range_m = (l as SpotLight3D).spot_range
+		decay = (l as SpotLight3D).spot_attenuation
+		(l as SpotLight3D).spot_angle_attenuation = minf((l as SpotLight3D).spot_angle_attenuation, 0.8)
+	var soft := minf(decay, SOFT_DECAY)
+	if soft < decay:
+		# на «рабочем» расстоянии яркость как была
+		var ref := clampf(range_m * 0.35, 1.0, 6.0)
+		l.light_energy *= pow(ref, soft - decay)
+		if l is OmniLight3D:
+			(l as OmniLight3D).omni_attenuation = soft
+		else:
+			(l as SpotLight3D).spot_attenuation = soft
+	if l.shadow_enabled and l.light_size <= 0.0:
+		l.light_size = 0.15 if l is OmniLight3D else 0.06
+
+
+const SOFT_DECAY := 0.8
 
 
 func apply_graphics() -> void:
@@ -182,3 +221,8 @@ func _apply_env(we: WorldEnvironment) -> void:
 	e.ssr_enabled = bool(o.ssr) and hi
 	e.ssao_enabled = bool(o.ssao) and (hi or mid)
 	e.volumetric_fog_enabled = bool(o.fog) and (hi or mid)
+	# свечение вокруг ярких мест — широкое и мягкое (дальние уровни), свет «обволакивает»
+	if e.glow_enabled and not e.has_meta("soft_glow"):
+		e.set_meta("soft_glow", true)
+		for lv in [[3, 1.0], [4, 0.8], [5, 0.7], [6, 0.45], [7, 0.15]]:
+			e.set_glow_level(int(lv[0]) - 1, maxf(e.get_glow_level(int(lv[0]) - 1), float(lv[1])))

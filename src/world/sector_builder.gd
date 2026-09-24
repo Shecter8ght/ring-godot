@@ -202,6 +202,7 @@ func build(path: String) -> Node3D:
 	_emit_meshes(root)
 	_build_floor_collider(root)
 	_build_lights(root)
+	_build_beacons(root)
 	_emit_ceilings(root)
 	_build_markers(root)
 	if not _preview:
@@ -969,6 +970,8 @@ func _emit_ceilings(root: Node3D) -> void:
 		mi.name = "Ceiling_" + String(mat_id)
 		mi.layers = CEILING_LAYER
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# потолок смотрит вниз — сверху его не видно; дождю нужен двусторонний двойник
+		mi.add_to_group("rain_block", true)
 		body.add_child(mi)
 		_shadow_twin(body, mi)
 		var cs := CollisionShape3D.new()
@@ -1035,10 +1038,42 @@ func _build_atrium_shaft(parent: Node3D, atrium_r: float, floors: int) -> void:
 		var mi := _mesh_node(store[mat_id], String(mat_id), false)
 		mi.name = "Shaft_" + String(mat_id)
 		mi.layers = CEILING_LAYER
+		mi.add_to_group("rain_block", true)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		parent.add_child(mi)
 		if String(mat_id) != "glass":
 			_shadow_twin(parent, mi)
+
+
+## Заградительные огни (временно — пока ТЦ не собран в редакторе, там их ставят руками):
+## по верху фасада кольца через ~30 м, по краю шахты атриума, на вершине купола — мигающий.
+func _build_beacons(root: Node3D) -> void:
+	if _ring.is_empty():
+		return
+	var folder := Node3D.new()
+	folder.name = "ObstructionLights"
+	root.add_child(folder)
+	var outer := float(_ring.get("outer_r", 200.0))
+	var bh := float(_thick.get("building_height", _wall_h))
+	var n := maxi(8, int(TAU * outer / 30.0))
+	for i in range(n):
+		# чуть снаружи фасада — свет ложится на стену
+		_beacon(folder, polar(360.0 * float(i) / n - 180.0, outer + 0.45) + Vector3.UP * (bh + 0.1), false)
+	var floors := int(_ring.get("floors", 4))
+	var atr := float(_ring.get("atrium_r", 30.0))
+	var gal_r := float((_ring.get("zones", {}).get("gal", [atr, atr + 10.0]) as Array)[1])
+	var top := _wall_h * float(floors)
+	for i in range(4):
+		_beacon(folder, polar(45.0 + 90.0 * i, gal_r + 0.2) + Vector3.UP * (top + 0.15), false)
+	_beacon(folder, Vector3(0.0, top + atr * 0.32 + 0.35, 0.0), true)
+
+
+func _beacon(parent: Node3D, at: Vector3, flashing: bool) -> void:
+	var b := ObstructionLight.new()
+	b.name = "Beacon_%d" % parent.get_child_count()
+	b.flashing = flashing
+	b.position = at
+	parent.add_child(b)
 
 
 ## Кольцо лицом вниз (низ перекрытия).
@@ -1086,6 +1121,8 @@ func _build_dome(parent: Node3D, radius: float, base_y: float) -> void:
 	glass.material_override = gm
 	glass.layers = CEILING_LAYER
 	glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# стекло глубину не пишет — дождю нужен его непрозрачный двойник (RainOcclusion)
+	glass.add_to_group("rain_block", true)
 	parent.add_child(glass)
 	var steel := SectorMaterials.get_material(_gb("steel_dark", "gb_structural"), true)
 	var ribs := SurfaceTool.new()

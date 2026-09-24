@@ -1,7 +1,7 @@
 class_name RaidWeather
 extends Node
 ## Погода в рейде (RaidConditions.current.weather) и её смена по ходу рейда:
-## дождь — капли (частицы у камеры, крыша их останавливает), мокрый асфальт, шум дождя (под
+## дождь — капли, брызги и лужи шейдерами (RainFx: под крышей не капает и сухо), шум дождя (под
 ## крышей — глухо, по перекрытию), гром; хуже слышно (радиус шума × hear) и видно на улице;
 ## ясно — может начаться дождь (раскаты за минуту), туман — может рассеяться (снайперы снова
 ## снайперы); жара — на улице пересвечено и марево, если на тебе нет очков от солнца.
@@ -18,10 +18,9 @@ var _rain_at: float = INF
 var _fog_lift_at: float = INF
 var _t: float = 0.0
 var _thundered: bool = false
-var _rain: GPUParticles3D
-var _rain_col: GPUParticlesCollisionHeightField3D
+var _rain: RainFx
+var _rain_k: float = 0.0
 var _rain_sound: AudioStreamPlayer
-var _wet: Array = []
 var _haze: ColorRect
 var _haze_k: float = 0.0
 var _indoor_t: float = 0.0
@@ -35,7 +34,6 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	if current == self:
 		current = null
-	_set_wet(false)
 
 
 func _ready() -> void:
@@ -80,7 +78,6 @@ func _apply_static() -> void:
 		e.fog_sky_affect = 0.9 if w == "fog" else 0.4
 	_set_overcast(w == "rain")
 	_set_rain(w == "rain")
-	_set_wet(w == "rain")
 	changed.emit()
 
 
@@ -143,12 +140,13 @@ func _tick_local(delta: float) -> void:
 		var want := -8.0 if _outdoor else -17.0
 		_rain_sound.volume_db = move_toward(_rain_sound.volume_db, want, delta * 12.0)
 	if _rain:
-		var cam := get_viewport().get_camera_3d()
-		var focus := me.global_position
-		_rain.global_position = Vector3(focus.x, focus.y + 22.0, focus.z)
-		if _rain_col:
-			_rain_col.global_position = Vector3(focus.x, focus.y + 6.0, focus.z)
-		_rain.visible = cam != null
+		# начинается и кончается плавно
+		_rain_k = move_toward(_rain_k, 1.0 if is_raining() else 0.0, delta / 12.0)
+		_rain.set_amount(_rain_k)
+		var rig := get_tree().get_first_node_in_group("camera_rig")
+		var fp := rig != null and bool(rig.get("ads_active"))
+		var bright := {"day": 1.0, "dusk": 0.55, "night": 0.22}.get(String(RaidConditions.current.time), 1.0) as float
+		_rain.track(me, get_viewport().get_camera_3d(), fp, bright)
 	# жара: на улице без очков — пересвет и марево
 	var hot := String(RaidConditions.current.weather) == "heat" and _outdoor and not bool(ItemDb.equip(me.eyes_item()).get("uv", false))
 	_haze_k = move_toward(_haze_k, 1.0 if hot else 0.0, delta * 0.8)
@@ -159,40 +157,9 @@ func _tick_local(delta: float) -> void:
 
 func _set_rain(on: bool) -> void:
 	if on and _rain == null:
-		_rain = GPUParticles3D.new()
+		_rain = RainFx.new()
 		_rain.name = "Rain"
-		_rain.amount = 9000
-		_rain.lifetime = 1.3
-		_rain.visibility_aabb = AABB(Vector3(-30, -30, -30), Vector3(60, 60, 60))
-		_rain.collision_base_size = 0.02
-		var pm := ParticleProcessMaterial.new()
-		pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-		pm.emission_box_extents = Vector3(28, 0.5, 28)
-		pm.direction = Vector3(0.08, -1, 0.04)
-		pm.spread = 2.0
-		pm.initial_velocity_min = 20.0
-		pm.initial_velocity_max = 24.0
-		pm.gravity = Vector3(0, -9.8, 0)
-		pm.collision_mode = ParticleProcessMaterial.COLLISION_HIDE_ON_CONTACT
-		_rain.process_material = pm
-		var q := QuadMesh.new()
-		q.size = Vector2(0.03, 0.7)
-		var m := StandardMaterial3D.new()
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		m.albedo_color = Color(0.78, 0.82, 0.88, 0.42)
-		m.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
-		m.billboard_keep_scale = true
-		q.material = m
-		_rain.draw_pass_1 = q
-		_rain.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		get_parent().add_child(_rain)
-		# крыша и перекрытия останавливают капли — под ними не капает
-		_rain_col = GPUParticlesCollisionHeightField3D.new()
-		_rain_col.size = Vector3(60, 40, 60)
-		_rain_col.resolution = GPUParticlesCollisionHeightField3D.RESOLUTION_512
-		_rain_col.update_mode = GPUParticlesCollisionHeightField3D.UPDATE_MODE_ALWAYS
-		get_parent().add_child(_rain_col)
 		_rain_sound = AudioStreamPlayer.new()
 		_rain_sound.stream = Audio.rain_loop()
 		_rain_sound.bus = &"Ambient"
@@ -202,31 +169,10 @@ func _set_rain(on: bool) -> void:
 	elif not on and _rain:
 		_rain.queue_free()
 		_rain = null
-		if _rain_col:
-			_rain_col.queue_free()
-			_rain_col = null
+		_rain_k = 0.0
 		if _rain_sound:
 			_rain_sound.queue_free()
 			_rain_sound = null
-
-
-## Мокрый асфальт: блестит и темнее (материалы общие — вернуть при выходе с уровня).
-func _set_wet(on: bool) -> void:
-	if on and _wet.is_empty():
-		for id in ["asphalt_02", "gbf_asphalt", "concrete_floor_worn_001", "gbf_concrete"]:
-			for shadows in [false, true]:
-				var m := SectorMaterials.get_material(id, shadows) as BaseMaterial3D
-				if m == null:
-					continue
-				_wet.append([m, m.roughness, m.albedo_color])
-				m.roughness = 0.18
-				m.albedo_color = m.albedo_color.darkened(0.25)
-	elif not on:
-		for w in _wet:
-			var m := w[0] as BaseMaterial3D
-			m.roughness = float(w[1])
-			m.albedo_color = w[2]
-		_wet.clear()
 
 
 func _thunder() -> void:

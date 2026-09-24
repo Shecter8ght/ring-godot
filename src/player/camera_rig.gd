@@ -69,11 +69,14 @@ func _ready() -> void:
 		_target = get_node(target_path)
 	# потолки и купол — только от первого лица: изометрия смотрит сверху сквозь них
 	_camera.cull_mask &= ~SectorBuilder.CEILING_LAYER
+	# служебная геометрия карты дождя — никому из игровых камер
+	_camera.cull_mask &= ~RainOcclusion.LAYER
 	_ads_cam = Camera3D.new()
 	_ads_cam.name = "AdsCamera"
 	_ads_cam.top_level = true
 	_ads_cam.near = 0.05
 	_ads_cam.far = 900.0
+	_ads_cam.cull_mask &= ~RainOcclusion.LAYER
 	add_child(_ads_cam)
 	_build_hud()
 	_build_scope()
@@ -493,7 +496,7 @@ func _build_scope() -> void:
 	_scope_cam.near = 0.1
 	_scope_cam.far = 900.0
 	# без слоя 2: модель в руках (и сам прицел) в окуляр не попадает
-	_scope_cam.cull_mask = 0xFFFFF & ~2
+	_scope_cam.cull_mask = 0xFFFFF & ~2 & ~RainOcclusion.LAYER
 	_scope_cam.current = true
 	_scope_vp.add_child(_scope_cam)
 	var layer := CanvasLayer.new()

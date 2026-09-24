@@ -1,7 +1,7 @@
 extends Node
 ## Замер производительности уровня: встаёт в несколько точек, меряет кадр в изометрии и в прицеле
 ## (ПКМ) — FPS, вызовы отрисовки, объекты, треугольники. Печатает таблицу и выходит.
-## godot --path . res://tools/perf_test.tscn [-- res://scenes/levels/xxx.tscn]
+## godot --path . res://tools/perf_test.tscn [-- res://scenes/levels/xxx.tscn]; PERF_COND=night:rain:on — условия
 
 ## Точки замера: угол, радиус, курс взгляда (град от севера по часовой).
 const SPOTS := [
@@ -17,6 +17,11 @@ const MEASURE_FRAMES := 120
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	var scene := args[0] if args.size() > 0 else "res://scenes/levels/f1_ring.tscn"
+	# условия рейда: PERF_COND=время:погода:свет (например night:rain:on)
+	var pc := OS.get_environment("PERF_COND").split(":")
+	if pc.size() == 3:
+		RaidConditions.from_host = {"time": pc[0], "weather": pc[1], "power": pc[2]}
+		RaidEvents.enabled = false
 	await get_tree().process_frame
 	var inst: Node = load(scene).instantiate()
 	get_tree().root.add_child(inst)

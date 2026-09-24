@@ -59,6 +59,8 @@ static func throw(parent: Node, k: String, from: Vector3, velocity: Vector3) -> 
 	if k == "flare":
 		g.add_to_group("flares")
 	parent.add_child(g)
+	# смягчение света (Settings.soften) при входе в дерево пересчитало яркость — от неё и мерцать
+	g._base_energy = g._light.light_energy
 	g.global_position = from
 	g.linear_velocity = velocity
 	g.angular_velocity = Vector3(randf_range(-6, 6), randf_range(-3, 3), randf_range(-6, 6))
