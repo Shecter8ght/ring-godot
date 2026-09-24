@@ -168,6 +168,45 @@ func _ready() -> void:
 			break
 	_check("мародёр грабит контейнер: самое ценное — в сумку", not looter.pack.is_empty() and String(looter.pack[0].id) == "gold_chain" and box.items.size() < 3,
 		"сумка %s, в ящике %s" % [looter.pack, box.items])
+	# роли отрядов: трое вступают в бой у одной цели — штурм, обход, прикрытие
+	Squad.engaged.clear()
+	var tgt := SectorBuilder.polar(-100.0, 72.0)
+	var roles: Array = []
+	var cover_m: Marauder = null
+	for k in range(3):
+		var sq := Squad.new()
+		var m := scene.instantiate() as Marauder
+		m.name = "Role%d" % k
+		m.archetype = "gunner"
+		m.weapon = "rifle"
+		level.get_node("Marauders").add_child(m)
+		m.global_position = SectorBuilder.polar(-130.0 + 12.0 * k, 72.0) + Vector3(0, 0.1, 0)
+		sq.add(m)
+		await get_tree().physics_frame
+		m.last_known = tgt
+		m.memory_timer = 20.0
+		m._enter_combat(Marauder.Tactic.PUSH)
+		roles.append(sq.role)
+		if sq.role == Squad.Role.COVER:
+			cover_m = m
+	_check("роли по порядку: штурм, обход, прикрытие", roles == [Squad.Role.ASSAULT, Squad.Role.FLANK, Squad.Role.COVER], str(roles))
+	_check("прикрытие идёт на позицию с обзором", cover_m != null and cover_m.tactic == Marauder.Tactic.OVERWATCH, Marauder.Tactic.keys()[cover_m.tactic] if cover_m else "-")
+	# граната: штурм, цель пропала из виду 2 с назад, 15 м
+	var gm := level.get_node("Marauders/Role0") as Marauder
+	gm.global_position = tgt + Vector3(15, 0.1, 0)
+	gm.last_known = tgt
+	gm._seen_now = false
+	gm._unseen_t = 2.0
+	gm._grenade_t = 0.0
+	for n in get_tree().get_nodes_in_group("marauders"):
+		if n != gm:
+			(n as Node3D).global_position += Vector3(0, 0, 60)
+	gm._try_grenade(0.016)
+	await get_tree().process_frame
+	var nades := 0
+	for n in get_tree().root.find_children("Grenade*", "", true, false):
+		nades += 1
+	_check("штурм кидает гранату туда, где цель скрылась", gm._grenades == 0 and nades > 0, "гранат осталось %d, в мире %d" % [gm._grenades, nades])
 	print("ai_squad_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 

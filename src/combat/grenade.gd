@@ -8,12 +8,15 @@ extends RigidBody3D
 var _fuse: float = 0.0
 var _thrower: RID
 var _bounced: float = 0.0
+## Считать ли урон этой гранатой (граната мародёра у клиентов — только картинка и звук).
+var _damage: bool = true
 
 
-static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID) -> Grenade:
+static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, deal_damage: bool = true) -> Grenade:
 	var g := Grenade.new()
 	g.name = "Grenade"
 	g._thrower = thrower
+	g._damage = deal_damage
 	g.mass = 0.6
 	g.collision_layer = Hitscan.LAYER_DEBRIS
 	g.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS
@@ -78,7 +81,7 @@ func _explode() -> void:
 			if body is Target:
 				(body as Target).on_hit(point, (point - pos).normalized(), dmg)
 			var h := body.get_node_or_null("Health") as Health
-			if h:
+			if h and _damage:
 				# подорвался на ней — насмерть; дальше — ранит (осколки, броня помогает)
 				var feet := pos.distance_to(body.global_position + Vector3.UP * 0.5)
 				h.apply_or_request_damage(dmg, pos, "blast_close" if feet < Balance.GRENADE_LETHAL_M else "blast")

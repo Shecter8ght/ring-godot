@@ -19,7 +19,7 @@ extends CharacterBody3D
 ## заметил цель; бегущую цель и на бегу — хуже.
 
 enum State { PATROL, INVESTIGATE, COMBAT, SEARCH, RETREAT, DEAD, DOWNED, RESCUE }
-enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE }
+enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE, OVERWATCH }
 
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE := 1.05
@@ -90,6 +90,13 @@ var _torch: SpotLight3D
 var _torch_t: float = 0.0
 var _blind_t: float = 0.0
 var _fogged: bool = false
+## Гранаты: сколько осталось, когда можно следующую.
+var _grenades: int = 0
+var _grenade_t: float = 0.0
+## Прикрытие: пришёл на позицию.
+var _overwatch_ready: bool = false
+## Обход (отряд обхода) уже сделан в этом бою.
+var _flanked: bool = false
 ## Спасатель: кого, фаза (0 — бежит, 1 — тащит, 2 — поднимает), сколько поднимает.
 var _rescue_target: Marauder = null
 var _rescue_phase: int = 0
@@ -123,6 +130,7 @@ func _ready() -> void:
 		weapon = weapon_for(archetype, _rng)
 	_spec = Balance.AI_WEAPONS[weapon]
 	_mag = int(_spec.mag)
+	_grenades = int(Balance.AI_GRENADE.count)
 	_health.max_hp = Balance.MARAUDER_HP * float(_arch.hp)
 	_health.hp = _health.max_hp
 	# броня: проходит только доля урона
@@ -687,7 +695,18 @@ func _investigate(delta: float) -> void:
 func _enter_combat(t: Tactic) -> void:
 	_drop_loot_claim()
 	state = State.COMBAT
+	# отряд вступил в бой — роль (штурм / обход / прикрытие); сам — по роли, если не видит цель
+	if squad and not _holds():
+		var r := squad.engage(last_known)
+		if not _seen_now and t != Tactic.ENGAGE:
+			t = _closing_tactic()
+		if r == Squad.Role.COVER and not _seen_now:
+			t = Tactic.OVERWATCH
 	_set_tactic(t)
+
+
+func _role() -> Squad.Role:
+	return squad.role if squad else Squad.Role.NONE
 
 
 func _set_tactic(t: Tactic) -> void:
@@ -695,12 +714,27 @@ func _set_tactic(t: Tactic) -> void:
 	_tactic_t = 0.0
 	match t:
 		Tactic.FLANK:
-			# заходим сбоку: точка на AI_FLANK_OFFSET в сторону от линии «мы — цель»
+			# заходим сбоку: точка в стороне от линии «мы — цель»; отряд обхода — широко и все
+			# в одну сторону (своим маршрутом), иначе — второй в отряде, недалеко
 			var to := last_known - global_position
 			to.y = 0.0
-			var side := Vector3(to.z, 0.0, -to.x).normalized() * (1.0 if _rng.randf() < 0.5 else -1.0)
-			_agent.target_position = _snap(last_known + side * Balance.AI_FLANK_OFFSET - to.normalized() * 4.0)
+			var wide := _role() == Squad.Role.FLANK
+			var sgn := squad.flank_side if wide and squad else (1.0 if _rng.randf() < 0.5 else -1.0)
+			var side := Vector3(to.z, 0.0, -to.x).normalized() * sgn
+			var off := Balance.AI_ROLE_FLANK_OFFSET if wide else Balance.AI_FLANK_OFFSET
+			_agent.target_position = _spread_point(last_known + side * off - to.normalized() * (2.0 if wide else 4.0))
 			say("Обхожу!")
+		Tactic.OVERWATCH:
+			_overwatch_ready = false
+			var ow := _overwatch_point()
+			if ow == Vector3.INF:
+				tactic = Tactic.ADVANCE
+				if not _try_advance():
+					tactic = Tactic.PUSH
+					_agent.target_position = _spread_point(last_known)
+			else:
+				_agent.target_position = ow
+				say("Прикрываю!")
 		Tactic.PUSH:
 			_agent.target_position = _spread_point(last_known)
 		Tactic.ADVANCE:
@@ -715,6 +749,9 @@ func _set_tactic(t: Tactic) -> void:
 
 func _combat(delta: float) -> void:
 	_tactic_t += delta
+	if squad and _rank() == 0:
+		squad.tick_calm()
+	_try_grenade(delta)
 	var dist := global_position.distance_to(last_known)
 	var rng_m := float(_spec.range)
 	var want_cover := _hurt_t > 0.0 or _suppress_t > 0.0 or (_mag == 0 and _reload_t > 0.0)
@@ -767,12 +804,29 @@ func _combat(delta: float) -> void:
 		Tactic.ADVANCE:
 			# перебежка не нашлась (иначе была бы COVER_MOVE) — идём как PUSH
 			_set_tactic(Tactic.PUSH)
+		Tactic.OVERWATCH:
+			# прикрытие: дошёл до позиции — держит место: видит — стреляет, не видит — поливает
+			# туда, где цель была, если есть линия огня
+			if not _overwatch_ready:
+				_set_crouch(false)
+				if _agent.is_navigation_finished():
+					_overwatch_ready = true
+			else:
+				_face(last_known)
+				_set_crouch(_hurt_t > 0.0)
+				if _seen_now and dist <= rng_m:
+					_try_fire()
+				elif _unseen_t < 10.0 and dist <= rng_m:
+					_try_fire(true)
+				if _mag == 0 and _reload_t <= 0.0:
+					_start_reload()
 		Tactic.FLANK, Tactic.PUSH:
 			_set_crouch(false)
 			if _seen_now:
 				_set_tactic(Tactic.ENGAGE)
 			elif _agent.is_navigation_finished():
 				if tactic == Tactic.FLANK:
+					_flanked = true
 					_set_tactic(Tactic.PUSH)
 				else:
 					# дошли, а там пусто — осматриваемся, дальше поиск по памяти
@@ -785,7 +839,85 @@ func _combat(delta: float) -> void:
 func _closing_tactic() -> Tactic:
 	if _holds():
 		return Tactic.ENGAGE
+	match _role():
+		Squad.Role.COVER:
+			return Tactic.OVERWATCH
+		Squad.Role.FLANK:
+			# отряд обхода: сначала широкий обход, потом — как все
+			if not _flanked:
+				return Tactic.FLANK
 	return Tactic.ADVANCE if global_position.distance_to(last_known) > Balance.AI_ADVANCE_MIN_DIST else Tactic.PUSH
+
+
+## Позиция прикрытия: в AI_OVERWATCH_DIST от цели, с линией взгляда на неё, недалеко от себя
+## (путь без большого обхода). Vector3.INF — нет такой.
+func _overwatch_point() -> Vector3:
+	var space := get_world_3d().direct_space_state
+	var map := get_world_3d().navigation_map
+	var target := last_known + Vector3.UP * 1.2
+	var to_me := global_position - last_known
+	to_me.y = 0.0
+	var base := atan2(to_me.z, to_me.x)
+	var best := Vector3.INF
+	var best_s := INF
+	for i in range(24):
+		var a := base + _rng.randf_range(-1.2, 1.2)
+		var r := _rng.randf_range(float(Balance.AI_OVERWATCH_DIST[0]), float(Balance.AI_OVERWATCH_DIST[1]))
+		var cand := _snap(last_known + Vector3(cos(a), 0.0, sin(a)) * r)
+		if cand.distance_to(last_known) < float(Balance.AI_OVERWATCH_DIST[0]) * 0.8 or _claimed_near(cand, 3.0):
+			continue
+		var q := PhysicsRayQueryParameters3D.create(cand + Vector3.UP * EYE_HEIGHT, target, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
+		if not space.intersect_ray(q).is_empty():
+			continue
+		var travel := cand.distance_to(global_position)
+		if travel >= best_s:
+			continue
+		var path := NavigationServer3D.map_get_path(map, global_position, cand, true)
+		var plen := 0.0
+		for k in range(1, path.size()):
+			plen += path[k - 1].distance_to(path[k])
+		if path.size() < 2 or plen > travel * 1.6 + 10.0:
+			continue
+		best = cand
+		best_s = travel
+	return best
+
+
+## Граната: штурм (и изредка любой), цель не видна недолго, но память свежая; дальность броска;
+## своих у точки нет. Бросок видят все peer, урон считает хост.
+func _try_grenade(delta: float) -> void:
+	_grenade_t -= delta
+	if _grenades <= 0 or _grenade_t > 0.0 or _health.downed or _seen_now:
+		return
+	var g: Dictionary = Balance.AI_GRENADE
+	if _unseen_t < float(g.min_unseen) or _unseen_t > 8.0:
+		return
+	if _role() != Squad.Role.ASSAULT and _rng.randf() > 0.15:
+		_grenade_t = 4.0
+		return
+	var d := global_position.distance_to(last_known)
+	if d < float(g.range[0]) or d > float(g.range[1]):
+		return
+	for n in get_tree().get_nodes_in_group("marauders"):
+		if n != self and (n as Node3D).global_position.distance_to(last_known) < float(g.safe_m):
+			_grenade_t = 3.0
+			return
+	_grenades -= 1
+	_grenade_t = float(g.cooldown)
+	var from := global_position + Vector3.UP * 1.6
+	var t := clampf(d / 13.0, 0.5, 1.3)
+	var v := (last_known - from) / t + Vector3.UP * 0.5 * 9.8 * t
+	say("Граната!")
+	if Net.is_networked():
+		_rpc_grenade.rpc(from, v)
+	else:
+		_rpc_grenade(from, v)
+
+
+@rpc("authority", "call_local", "reliable")
+func _rpc_grenade(from: Vector3, v: Vector3) -> void:
+	# у всех — видно и слышно; урон — только у хоста (он и бросал)
+	Grenade.throw(get_tree().current_scene, from, v, get_rid(), multiplayer.is_server() or not Net.is_networked())
 
 
 ## Перебежка: точка на AI_ADVANCE_STEP ближе к цели, лучше — закрытая от неё стеной; дошёл —
@@ -841,6 +973,7 @@ func _try_advance() -> bool:
 
 
 func _start_search(points: int = Balance.AI_SEARCH_POINTS) -> void:
+	_flanked = false
 	state = State.SEARCH
 	_set_crouch(false)
 	_search_left = points

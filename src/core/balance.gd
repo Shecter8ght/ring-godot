@@ -392,6 +392,17 @@ const AI_LOOT_SEARCH_MULT := 4.0
 const AI_LOOT_SEARCH_MIN := 3.0
 const AI_LOOT_TAKE := 2
 const AI_LOOT_PACK_MAX := 6
+## Роли отрядов в бою (по порядку вступления в бой у одной цели, в радиусе AI_ROLE_RADIUS):
+## штурм (давит, гранаты), обход (широко, на AI_ROLE_FLANK_OFFSET в сторону), прикрытие
+## (позиция с обзором цели в AI_OVERWATCH_DIST, держит место огнём). Роль гаснет, когда отряд
+## AI_ROLE_FORGET_SEC не в бою.
+const AI_ROLE_RADIUS := 60.0
+const AI_ROLE_FLANK_OFFSET := 20.0
+const AI_OVERWATCH_DIST := [15.0, 35.0]
+const AI_ROLE_FORGET_SEC := 25.0
+## Гранаты мародёров: дальность броска (от и до, м), перезарядка, с, сколько у каждого, цель не
+## видна хотя бы столько, с; своих ближе AI_GRENADE_SAFE_M к точке — не кидает.
+const AI_GRENADE := {"range": [8.0, 22.0], "cooldown": 18.0, "count": 1, "min_unseen": 1.5, "safe_m": 7.0}
 ## Держит позицию: патрульные точки — не дальше стольких метров от поста, м.
 const AI_HOLD_PATROL_R := 12.0
 ## Реакция на попадание: сколько секунд «ведёт» (скорость ×, разброс ×), задержка следующего выстрела, с.
