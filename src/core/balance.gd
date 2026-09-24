@@ -162,6 +162,18 @@ const RAID_POWER := {
 	"emergency": {"name": "Аварийное освещение", "risk": 1},
 	"off": {"name": "Электричества нет", "risk": 2},
 }
+## Погода меняется в рейде: ясно → дождь (шанс, через сколько секунд, гром за столько до него),
+## туман → рассеется (шанс, через сколько).
+const WEATHER_CHANGE := {"rain_chance": 0.3, "rain_after": [180.0, 600.0], "thunder_lead": 50.0,
+	"fog_lift_chance": 0.4, "fog_lift_after": [300.0, 720.0]}
+## Выносливость: запас, расход на бег в секунду, восстановление в секунду (после паузы, с);
+## выдохся — бег снова с порога. В жару на улице расход × STAMINA_HEAT.
+const STAMINA_MAX := 100.0
+const STAMINA_DRAIN := 11.0
+const STAMINA_REGEN := 16.0
+const STAMINA_REGEN_DELAY := 1.0
+const STAMINA_RESUME := 25.0
+const STAMINA_HEAT := 1.7
 ## За очко риска: шанс лишнего броска в контейнере, доплата Михалыча (доля вынесенного).
 const RISK_LOOT_BONUS := 0.12
 const RISK_PAY_BONUS := 0.05

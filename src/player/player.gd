@@ -67,6 +67,10 @@ var _last_damage: float = 0.0
 var _give_up_t: float = 0.0
 ## Несёт раненого NPC (сюжет, QuestWorld): медленно, только пистолет.
 var carrying: bool = false
+## Выносливость: бег тратит, отдых восстанавливает; выдохся — не бежит до порога.
+var stamina: float = Balance.STAMINA_MAX
+var _winded: bool = false
+var _rest_t: float = 0.0
 ## ПНВ включён (N; нужен ПНВ в слоте «глаза») и сколько заряда осталось, с.
 var nvg_on: bool = false
 var nvg_charge: float = Balance.NVG_BATTERY_SEC
@@ -159,6 +163,30 @@ func hit_zone(point: Vector3) -> String:
 	if health.downed or stance == Stance.PRONE:
 		return "body"
 	return "head" if point.y - global_position.y >= float(Balance.HEAD_ZONE.get(_stance_key(), 99.0)) else "body"
+
+
+func _can_sprint() -> bool:
+	return not _winded and stamina > 0.0
+
+
+## Бег тратит выносливость (в жару на улице — быстрее), стоишь или идёшь — восстанавливается.
+func _tick_stamina(delta: float) -> void:
+	var running := _can_sprint() and Input.is_action_pressed("sprint") and not aiming and stance == Stance.STAND \
+		and Vector2(velocity.x, velocity.z).length() > Balance.PLAYER_WALK_SPEED + 0.3
+	if running:
+		var k := 1.0
+		if String(RaidConditions.current.get("weather", "")) == "heat" and RaidAtmosphere.current and not RaidAtmosphere.current.is_indoor(global_position):
+			k = Balance.STAMINA_HEAT
+		stamina = maxf(0.0, stamina - Balance.STAMINA_DRAIN * k * delta)
+		_rest_t = Balance.STAMINA_REGEN_DELAY
+		if stamina <= 0.0:
+			_winded = true
+	else:
+		_rest_t -= delta
+		if _rest_t <= 0.0:
+			stamina = minf(Balance.STAMINA_MAX, stamina + Balance.STAMINA_REGEN * delta)
+		if _winded and stamina >= Balance.STAMINA_RESUME:
+			_winded = false
 
 
 ## Светит фонарём (фонарь на оружии в руках включён) — выдаёт издалека.
@@ -322,6 +350,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		_face_cursor(delta)
 	_footsteps(delta)
+	_tick_stamina(delta)
 	_recoil = move_toward(_recoil, 0.0, Balance.RECOIL_RETURN * _recoil * delta + 0.02 * delta)
 	_recoil_h = move_toward(_recoil_h, 0.0, Balance.RECOIL_RETURN * absf(_recoil_h) * delta + 0.01 * delta)
 	_bloom = move_toward(_bloom, 0.0, Balance.RECOIL_BLOOM_DECAY * delta)
@@ -716,7 +745,7 @@ func _stance_speed() -> float:
 		Stance.PRONE:
 			s = Balance.PLAYER_PRONE_SPEED
 		_:
-			s = Balance.PLAYER_SPRINT_SPEED if Input.is_action_pressed("sprint") and not aiming else Balance.PLAYER_WALK_SPEED
+			s = Balance.PLAYER_SPRINT_SPEED if _can_sprint() and Input.is_action_pressed("sprint") and not aiming else Balance.PLAYER_WALK_SPEED
 	if aiming:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
 	if absf(lean) > 0.3:

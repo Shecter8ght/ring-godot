@@ -30,6 +30,8 @@ var _down_label: Label
 var _muffle: AudioEffectLowPassFilter
 ## ПНВ: зелёная усиленная картинка с зерном.
 var _nvg_fx: ColorRect
+## Выносливость — тонкая полоса внизу, пока не полная.
+var _stamina_bar: ProgressBar
 var _hitmarker_t: float = 0.0
 var _rng := RandomNumberGenerator.new()
 var _mmb: bool = false
@@ -309,6 +311,9 @@ func _process(delta: float) -> void:
 			_hitmarker.position = get_viewport().get_mouse_position()
 	_update_hud(pl)
 	_update_hurt(pl, delta)
+	if _stamina_bar and pl and pl.is_local():
+		_stamina_bar.visible = pl.stamina < Balance.STAMINA_MAX - 0.5 and pl.combat_enabled
+		_stamina_bar.value = pl.stamina
 	if _nvg_fx:
 		var on := pl != null and pl.is_local() and pl.nvg_on
 		if on != _nvg_fx.visible:
@@ -709,6 +714,23 @@ func _build_hud() -> void:
 	_nvg_fx.visible = false
 	layer.add_child(_nvg_fx)
 	layer.move_child(_nvg_fx, 0)
+	_stamina_bar = ProgressBar.new()
+	_stamina_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_stamina_bar.offset_left = -120
+	_stamina_bar.offset_right = 120
+	_stamina_bar.offset_top = -34
+	_stamina_bar.offset_bottom = -28
+	_stamina_bar.max_value = Balance.STAMINA_MAX
+	_stamina_bar.show_percentage = false
+	var sfill := StyleBoxFlat.new()
+	sfill.bg_color = Color(0.85, 0.82, 0.55, 0.85)
+	var sbg := StyleBoxFlat.new()
+	sbg.bg_color = Color(0, 0, 0, 0.45)
+	_stamina_bar.add_theme_stylebox_override("fill", sfill)
+	_stamina_bar.add_theme_stylebox_override("background", sbg)
+	_stamina_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stamina_bar.visible = false
+	layer.add_child(_stamina_bar)
 	_down_label = Label.new()
 	_down_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_down_label.position = Vector2(-460, 96)

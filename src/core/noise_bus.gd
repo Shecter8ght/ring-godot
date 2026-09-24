@@ -16,6 +16,8 @@ func shout(from: Vector3, radius_m: float, target: Vector3, speaker: Node) -> vo
 
 
 func emit(pos: Vector3, radius_m: float, kind: String) -> void:
+	# в дождь слышно хуже — шум доносится ближе
+	radius_m *= float(RaidConditions.spec("weather").get("hear", 1.0))
 	if Net.is_networked() and not multiplayer.is_server():
 		_report.rpc_id(1, pos, radius_m, kind)
 	else:

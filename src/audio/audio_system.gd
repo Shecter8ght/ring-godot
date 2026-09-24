@@ -21,6 +21,7 @@ const KINDS := {
 	"step_snow_run": {"db": -13.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"heartbeat": {"db": -4.0, "unit": 3.0, "max": 6.0},
+	"thunder": {"db": 6.0, "unit": 60.0, "max": 400.0},
 	# мародёр роется в контейнере — слышно за стеной
 	"rummage": {"db": -13.0, "unit": 3.0, "max": 22.0, "occlude": true},
 	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
@@ -109,6 +110,7 @@ func _ready() -> void:
 		_streams[k] = _streams["step"]
 	_streams["step_metal"] = _make(_step_metal())
 	_streams["heartbeat"] = _make(_heartbeat())
+	_streams["thunder"] = _make(_thunder())
 	_streams["rummage"] = _streams["impact_soft"]
 	_streams["death"] = _streams["hit"]
 	_streams["fall"] = _streams["hit"]
@@ -153,6 +155,9 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0)
 	p.max_distance = float(spec["max"])
 	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
 	p.pitch_scale = pitch if pitch > 0.0 else _rng.randf_range(0.92, 1.08)
+	# дождь перекрывает шаги и отчасти выстрелы
+	if String(RaidConditions.current.get("weather", "")) == "rain" and Raid.current != null:
+		p.volume_db -= 6.0 if kind.begins_with("step") else (3.0 if kind.begins_with("shot") else 0.0)
 	if ears and bool(spec.get("occlude", false)) and _occluded(listener, pos):
 		# за стеной: тише и без верхов
 		p.volume_db -= Balance.AUDIO_OCCLUDED_DB
@@ -333,6 +338,44 @@ func _step_metal() -> PackedFloat32Array:
 		var ring := sin(TAU * 690.0 * t) * 0.5 + sin(TAU * 1130.0 * t) * 0.35 + sin(TAU * 1870.0 * t) * 0.2
 		var click := _noise() * exp(-t * 180.0)
 		out[i] = (ring * exp(-t * 26.0) * 0.55 + click * 0.5) * minf(1.0, t * 900.0)
+	return out
+
+
+var _rain_loop: AudioStreamWAV
+
+
+## Шум дождя — 4 с петлёй: «розовый» шум с каплями.
+func rain_loop() -> AudioStream:
+	if _rain_loop:
+		return _rain_loop
+	var n := int(4.0 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var b0 := 0.0
+	var b1 := 0.0
+	for i in range(n):
+		var w := _noise()
+		b0 = 0.97 * b0 + w * 0.08
+		b1 = 0.6 * b1 + w * 0.3
+		var drop := _noise() * 0.6 if _rng.randf() < 0.004 else 0.0
+		out[i] = (b0 + b1 * 0.5 + drop) * 0.5
+	_rain_loop = _make(out)
+	_rain_loop.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	_rain_loop.loop_end = n
+	return _rain_loop
+
+
+## Гром: низкий раскат — шум через фильтр, медленная огибающая с толчками.
+func _thunder() -> PackedFloat32Array:
+	var n := int(3.5 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		lp += (_noise() - lp) * 0.02
+		var env := minf(1.0, t * 6.0) * exp(-t * 0.9) * (0.7 + 0.3 * sin(t * 7.0))
+		out[i] = lp * env * 3.0
 	return out
 
 

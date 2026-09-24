@@ -89,6 +89,7 @@ var _shown_down: bool = false
 var _torch: SpotLight3D
 var _torch_t: float = 0.0
 var _blind_t: float = 0.0
+var _fogged: bool = false
 ## Спасатель: кого, фаза (0 — бежит, 1 — тащит, 2 — поднимает), сколько поднимает.
 var _rescue_target: Marauder = null
 var _rescue_phase: int = 0
@@ -170,6 +171,9 @@ func _ready() -> void:
 	_torch.shadow_enabled = false
 	_torch.visible = false
 	_body.add_child(_torch)
+	if RaidWeather.current:
+		RaidWeather.current.changed.connect(_on_weather)
+	_on_weather.call_deferred()
 	# шаги слышны у всех peer (AI считает хост, позицию клиенты получают синхронизатором)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
@@ -210,9 +214,24 @@ func hit_zone(point: Vector3) -> String:
 	return "head" if point.y - global_position.y >= hz else "body"
 
 
-## Держит позицию (снайпер): не сближается, ищет глазами.
+## Держит позицию (снайпер): не сближается, ищет глазами. В тумане снайпер — обычный боец.
 func _holds() -> bool:
-	return bool(_arch.get("holds", false))
+	return bool(_arch.get("holds", false)) and not _fogged
+
+
+## Погода сменилась (или рейд начался): в тумане снайпер убирает винтовку и воюет с пистолетом;
+## туман ушёл — снова винтовка.
+func _on_weather() -> void:
+	var fog := String(RaidConditions.current.get("weather", "")) == "fog"
+	if not bool(_arch.get("holds", false)) or fog == _fogged or _health.downed:
+		return
+	_fogged = fog
+	_spec = Balance.AI_WEAPONS.pistol if fog else Balance.AI_WEAPONS[weapon]
+	_mag = int(_spec.mag)
+	_reload_t = 0.0
+	if _main_gun:
+		_main_gun.visible = not fog
+	say("Ничего не видно — ближе работаем" if fog else "Туман ушёл. На позицию.")
 
 
 ## Память о цели по типу (разведчик забывает быстро, снайпер помнит долго).
@@ -572,6 +591,9 @@ func _pick_loot() -> bool:
 			continue
 		var d := c.global_position.distance_to(global_position)
 		if d > Balance.AI_LOOT_RANGE:
+			continue
+		# в дождь — под крышей
+		if RaidWeather.current and RaidWeather.current.is_raining() and RaidAtmosphere.current and not RaidAtmosphere.current.is_indoor(c.global_position):
 			continue
 		var s := d + _rng.randf() * 20.0
 		if s < best_s:

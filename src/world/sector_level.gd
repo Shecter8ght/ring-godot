@@ -76,6 +76,9 @@ func _ready() -> void:
 	atmo.name = "Atmosphere"
 	add_child(atmo)
 	atmo.apply()
+	var weather := RaidWeather.new()
+	weather.name = "Weather"
+	add_child(weather)
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})
