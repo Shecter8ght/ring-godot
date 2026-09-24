@@ -58,6 +58,7 @@ var _compass: Compass
 
 @onready var _pivot: Node3D = $Pivot
 @onready var _camera: Camera3D = $Pivot/Camera3D
+var _glare: LightGlare
 
 
 func _ready() -> void:
@@ -79,6 +80,9 @@ func _ready() -> void:
 	_ads_cam.cull_mask &= ~RainOcclusion.LAYER
 	add_child(_ads_cam)
 	_build_hud()
+	_glare = LightGlare.new()
+	_glare.name = "Glare"
+	add_child(_glare)
 	_build_scope()
 	# в изометрии отсечения за стенами нет (см. _set_ads)
 	get_viewport().use_occlusion_culling = false
@@ -144,21 +148,39 @@ func _ui_blocking() -> bool:
 	return false
 
 
+## ПНВ — как в Tarkov / Arma / Ground Branch: не «кислотный» зелёный, а бледный фосфор;
+## автоматическая регулировка яркости трубки (ABC: светлая сцена — усиление меньше, в темноте —
+## больше), яркое мягко уходит в ореол, а не выжигает кадр; чёрное — не ноль (свечение экрана);
+## трубка чуть мягкая, зерно тонкое и сильнее в темноте, круглая виньетка с мягким краем.
 const NVG_SHADER := """
 shader_type canvas_item;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+uniform vec3 phosphor = vec3(0.56, 0.96, 0.66);
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+float lum(vec3 c) { return dot(c, vec3(0.3, 0.59, 0.11)); }
 void fragment() {
-	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
-	float l = dot(c, vec3(0.3, 0.59, 0.11));
-	// усиление: тёмное вытягивается, яркое — в засветку
-	l = 1.0 - exp(-l * 14.0);
-	float n = hash(SCREEN_UV * vec2(1920.0, 1080.0) + TIME * 37.0) - 0.5;
-	l = clamp(l + n * 0.09, 0.0, 1.0);
+	vec2 px = SCREEN_PIXEL_SIZE;
+	// мягкость трубки: крест из 5 выборок
+	float l = lum(texture(screen_tex, SCREEN_UV).rgb) * 0.4;
+	l += lum(texture(screen_tex, SCREEN_UV + vec2(px.x, 0.0) * 1.5).rgb) * 0.15;
+	l += lum(texture(screen_tex, SCREEN_UV - vec2(px.x, 0.0) * 1.5).rgb) * 0.15;
+	l += lum(texture(screen_tex, SCREEN_UV + vec2(0.0, px.y) * 1.5).rgb) * 0.15;
+	l += lum(texture(screen_tex, SCREEN_UV - vec2(0.0, px.y) * 1.5).rgb) * 0.15;
+	// ABC: средняя яркость кадра (верхний мип) задаёт усиление
+	float avg = lum(textureLod(screen_tex, vec2(0.5), 9.0).rgb);
+	float gain = clamp(0.3 / (avg + 0.004), 2.0, 30.0);
+	float v = 1.0 - exp(-l * gain);
+	// ореол вокруг ярких источников (фонарь, ракета, окно) — из размытого мипа
+	float glow = lum(textureLod(screen_tex, SCREEN_UV, 4.0).rgb) * gain;
+	v += max(glow - 0.9, 0.0) * 0.25;
+	// потолок яркости — экран трубки не бьёт в глаза; пол — фосфор светится и в «чёрном»
+	v = 0.035 + 0.8 * (1.0 - exp(-v * 1.6));
+	float n = hash(floor(SCREEN_UV / px / 1.5) + fract(TIME * 13.0) * 97.0) - 0.5;
+	v += n * mix(0.07, 0.025, v);
 	vec2 d = SCREEN_UV - 0.5;
-	d.x *= SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
-	float vig = smoothstep(0.62, 0.38, length(d));
-	COLOR = vec4(vec3(0.18, 1.0, 0.3) * l * vig, 1.0);
+	d.x *= px.y / px.x;
+	float vig = smoothstep(0.68, 0.40, length(d));
+	COLOR = vec4(phosphor * clamp(v, 0.0, 1.0) * vig, 1.0);
 }
 """
 
@@ -182,6 +204,33 @@ void fragment() {
 """
 
 
+## ИК-подсветка ПНВ: слабый широкий луч по взгляду — в полной темноте (ночь, свет отключён)
+## трубке нечего усиливать. Только у себя (узел камеры), с тенью — сквозь стены не светит.
+var _nvg_ir: SpotLight3D
+
+
+func _tick_nvg_ir(on: bool) -> void:
+	if on and _nvg_ir == null:
+		_nvg_ir = SpotLight3D.new()
+		_nvg_ir.name = "NvgIr"
+		_nvg_ir.top_level = true
+		_nvg_ir.light_color = Color(0.9, 0.95, 1.0)
+		_nvg_ir.light_energy = 0.9
+		_nvg_ir.spot_range = 32.0
+		_nvg_ir.spot_angle = 48.0
+		_nvg_ir.spot_attenuation = 0.6
+		_nvg_ir.shadow_enabled = true
+		_nvg_ir.light_specular = 0.1
+		_nvg_ir.light_volumetric_fog_energy = 0.0
+		_nvg_ir.set_meta("crisp", true)
+		add_child(_nvg_ir)
+	if _nvg_ir:
+		_nvg_ir.visible = on
+		var cam := get_viewport().get_camera_3d()
+		if on and cam:
+			_nvg_ir.global_transform = cam.global_transform
+
+
 ## ПНВ усиливает свет, которого глазом не видно: у себя — ярче окружение и выдержка.
 func _nvg_env(on: bool) -> void:
 	var we := get_tree().current_scene.find_child("WorldEnvironment", false, false) as WorldEnvironment if get_tree().current_scene else null
@@ -190,8 +239,9 @@ func _nvg_env(on: bool) -> void:
 	var e := we.environment
 	if on:
 		e.set_meta("nvg_prev", [e.ambient_light_energy, e.tonemap_exposure])
+		# усиление мягкое: остальное делает трубка (ABC в шейдере), иначе яркое выжигается
 		e.ambient_light_energy = maxf(e.ambient_light_energy, 0.5) * 3.0
-		e.tonemap_exposure *= 2.5
+		e.tonemap_exposure *= 1.5
 	elif e.has_meta("nvg_prev"):
 		var prev: Array = e.get_meta("nvg_prev")
 		e.ambient_light_energy = float(prev[0])
@@ -322,7 +372,10 @@ func _process(delta: float) -> void:
 		if on != _nvg_fx.visible:
 			_nvg_env(on)
 		_nvg_fx.visible = on
+		_tick_nvg_ir(on)
 	var cam := get_viewport().get_camera_3d()
+	if _glare:
+		_glare.tick(cam, pl if pl and pl.is_local() else null, ads_active, pl != null and pl.is_local() and pl.nvg_on, delta)
 	if cam:
 		_compass.set_heading(cam.global_basis)
 	_compass.set_marks(_extraction_marks(pl))
@@ -441,14 +494,16 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			if (mi as GeometryInstance3D).has_meta("hide_ads"):
 				_cheek_parts.append(mi as GeometryInstance3D)
-		# фонарь светит от модели на теле — у модели в руках свой не нужен
+		# фонарь у себя светит от модели в руках: луч идёт за стволом (у модели на теле он погашен)
 		for n in _viewmodel.find_children("Flashlight", "SpotLight3D", true, false):
-			n.queue_free()
+			n.set_meta("own", true)
 		_ads_cam.add_child(_viewmodel)
 		_viewmodel_id = vm_key
 	_viewmodel.visible = true
 	for n in _viewmodel.find_children("LaserBeam", "MeshInstance3D", true, false):
 		(n as MeshInstance3D).visible = pl.light_on
+	for n in _viewmodel.find_children("Flashlight", "SpotLight3D", true, false):
+		(n as SpotLight3D).visible = pl.light_on
 	var sh: float = _viewmodel.get_meta("sight_h", 0.08)
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
 	# у бедра (без ПКМ) → в прицел: «довод» по эргономике (aim_progress), плавно
@@ -683,6 +738,13 @@ void fragment() {
 
 
 ## Дуло модели в руках (в прицеле) — отсюда трассер и вспышка.
+## Луч ствола модели в руках: [дуло, направление] (дуло у модели по +Z); нет модели — [].
+func barrel_ray() -> Array:
+	if _viewmodel == null or not _viewmodel.visible or not ads_active:
+		return []
+	return [_viewmodel.to_global(_viewmodel.get_meta("muzzle", Vector3.ZERO)), _viewmodel.global_basis.z.normalized()]
+
+
 func viewmodel_muzzle() -> Vector3:
 	if _viewmodel and _viewmodel.visible:
 		return _viewmodel.to_global(_viewmodel.get_meta("muzzle", Vector3.ZERO))

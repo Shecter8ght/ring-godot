@@ -139,16 +139,24 @@ func _on_node_added(n: Node) -> void:
 
 ## Мягкий свет от любого источника: спад по расстоянию плавнее (яркость пересчитана так, чтобы
 ## на обычном расстоянии свет был тот же, а горячее пятно под лампой — мягче), край конуса
-## размыт, блик мягче, больше отражённого (SDFGI) и свечения в воздухе (объёмный туман), край
-## тени размыт. Один раз на источник; свет, которому нужна чёткость, — meta "crisp".
+## размыт, блик мягче, больше отражённого (SDFGI), край тени чуть размыт. Сквозь стены не
+## светит: свечение в воздухе (объёмный туман) — только у источников с тенью (у бестеневого оно
+## шло бы сквозь стену), смещения тени малые (иначе свет подтекает по стыку стены с полом и
+## под тонкие перемычки), без PCSS (он тоже подтекает у стыков). Один раз на источник; свет,
+## которому нужна чёткость, — meta "crisp".
 static func soften(l: Light3D) -> void:
 	if l.has_meta("crisp") or l.has_meta("soft"):
 		return
 	l.set_meta("soft", true)
 	l.light_specular = minf(l.light_specular, 0.45)
-	l.light_indirect_energy = maxf(l.light_indirect_energy, 1.6)
-	l.light_volumetric_fog_energy = maxf(l.light_volumetric_fog_energy, 1.6)
-	l.shadow_blur = maxf(l.shadow_blur, 1.6)
+	l.light_indirect_energy = maxf(l.light_indirect_energy, 1.3)
+	if l.shadow_enabled:
+		l.light_volumetric_fog_energy = maxf(l.light_volumetric_fog_energy, 1.4)
+		l.shadow_blur = maxf(l.shadow_blur, 1.2)
+		l.shadow_bias = minf(l.shadow_bias, 0.04)
+		l.shadow_normal_bias = minf(l.shadow_normal_bias, 0.5)
+	else:
+		l.light_volumetric_fog_energy = minf(l.light_volumetric_fog_energy, 0.35)
 	var range_m := 0.0
 	var decay := 1.0
 	if l is OmniLight3D:
@@ -167,8 +175,6 @@ static func soften(l: Light3D) -> void:
 			(l as OmniLight3D).omni_attenuation = soft
 		else:
 			(l as SpotLight3D).spot_attenuation = soft
-	if l.shadow_enabled and l.light_size <= 0.0:
-		l.light_size = 0.15 if l is OmniLight3D else 0.06
 
 
 const SOFT_DECAY := 0.8
@@ -222,7 +228,11 @@ func _apply_env(we: WorldEnvironment) -> void:
 	e.ssao_enabled = bool(o.ssao) and (hi or mid)
 	e.volumetric_fog_enabled = bool(o.fog) and (hi or mid)
 	# свечение вокруг ярких мест — широкое и мягкое (дальние уровни), свет «обволакивает»
+	# свет заливает помещение: отражённый (SDFGI) — с повторными отскоками
+	if hi and e.sdfgi_enabled:
+		e.sdfgi_bounce_feedback = maxf(e.sdfgi_bounce_feedback, 0.8)
 	if e.glow_enabled and not e.has_meta("soft_glow"):
 		e.set_meta("soft_glow", true)
-		for lv in [[3, 1.0], [4, 0.8], [5, 0.7], [6, 0.45], [7, 0.15]]:
+		# дальние уровни слабые: широкий ореол переползал через края стен у ярких мест
+		for lv in [[3, 1.0], [4, 0.75], [5, 0.55], [6, 0.18]]:
 			e.set_glow_level(int(lv[0]) - 1, maxf(e.get_glow_level(int(lv[0]) - 1), float(lv[1])))

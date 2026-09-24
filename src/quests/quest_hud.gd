@@ -8,6 +8,12 @@ extends CanvasLayer
 
 const TOAST_SEC := 3.2
 const SUB_SEC := 2.6
+## Реплики игрока (кто = "player") — своим цветом и подписью «Я»; собеседник — янтарный;
+## строка без «кто» в субтитрах — описание (что видишь), светлая.
+const PLAYER_WHO := "Я"
+const PLAYER_COLOR := Color(0.62, 0.84, 0.95)
+const NPC_COLOR := Color(1.0, 0.78, 0.45)
+const DESC_COLOR := Color(0.95, 0.93, 0.86)
 
 var _root: Control
 var _tracker: VBoxContainer
@@ -117,8 +123,10 @@ func start_dialogue(lines: Array, done: Callable) -> void:
 
 func _show_line() -> void:
 	var l: Array = _dlg_lines[_dlg_i]
-	_dlg_who.text = String(l[0])
-	_dlg_text.text = String(l[1])
+	var me := String(l[0]) == "player"
+	_dlg_who.text = PLAYER_WHO if me else String(l[0])
+	_dlg_who.add_theme_color_override("font_color", PLAYER_COLOR if me else NPC_COLOR)
+	_dlg_text.add_theme_color_override("font_color", PLAYER_COLOR.lerp(Color.WHITE, 0.55) if me else Color(0.95, 0.94, 0.9))
 
 
 func _advance() -> void:
@@ -138,9 +146,18 @@ func _next_sub() -> void:
 		_subs.visible = false
 		_sub_t = 0.0
 		return
-	_subs.text = String(_sub_queue.pop_front())
+	var e: Variant = _sub_queue.pop_front()
+	var color := DESC_COLOR
+	if e is Array and (e as Array).size() >= 2:
+		var me := String(e[0]) == "player"
+		_subs.text = "%s: %s" % [PLAYER_WHO if me else String(e[0]), String(e[1])]
+		color = PLAYER_COLOR if me else NPC_COLOR
+	else:
+		_subs.text = String(e)
+	_subs.add_theme_color_override("font_color", color)
 	_subs.visible = true
-	_sub_t = SUB_SEC
+	# длинную фразу — дольше
+	_sub_t = maxf(SUB_SEC, _subs.text.length() * 0.055)
 
 
 # ---------------------------------------------------------------- кадр и ввод

@@ -143,7 +143,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:lean"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:lean", ".:look_pitch"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -288,6 +288,9 @@ func _process(_delta: float) -> void:
 	if Raid.current and Raid.current.is_extracted(peer_id) and is_in_group("players"):
 		_leave_raid()
 		return
+	# взгляд вверх-вниз есть только от первого лица; в изометрии ствол — по горизонту
+	if is_local() and not ads:
+		look_pitch = 0.0
 	_update_hand()
 	# смерть видна у всех peer: у хоста — по сигналу, у клиентов — по синхронизированному alive
 	if not health.alive and _ragdoll == null:
@@ -389,12 +392,14 @@ func _update_hand() -> void:
 	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
 	var yaw := _body.rotation.y
 	_hand.visible = health.alive
+	# от первого лица у себя светит фонарь модели в руках (CameraRig) — там, куда смотрит ствол
 	for n in _weapon_model.find_children("Flashlight", "SpotLight3D", true, false):
-		(n as SpotLight3D).visible = light_on
+		(n as SpotLight3D).visible = light_on and not (ads and is_local())
 	for n in _weapon_model.find_children("LaserBeam", "MeshInstance3D", true, false):
 		(n as MeshInstance3D).visible = light_on and not ads
 	_hand.position = Basis(Vector3.UP, yaw) * Vector3(-0.17, 1.24 * h, 0.24)
-	_hand.rotation = Vector3(-_recoil, yaw, 0.0)
+	# ствол (и фонарь на нём) — туда, куда смотрит игрок, и вверх-вниз (look_pitch синхронизируется)
+	_hand.rotation = Vector3(-_recoil - look_pitch, yaw, 0.0)
 
 
 ## Шаги слышны AI: радиус по стойке и бегу, только пока реально движемся.
@@ -574,6 +579,17 @@ func _fire(spec: Dictionary) -> void:
 	if ads:
 		from = eye_position()
 		dir = look_dir()
+		# у бедра (не вскинул к прицелу) пуля идёт по стволу — модель в руках смещена и довёрнута,
+		# в наклоне ещё и с креном; в прицеле линия прицеливания на оси взгляда
+		var rig0 := _camera_rig as CameraRig
+		if rig0 and aim_progress() < 0.9:
+			var ray := rig0.barrel_ray()
+			if not ray.is_empty():
+				dir = ray[1]
+				# дуло за стеной (упёрся) — стреляем от глаза, но по стволу
+				var q := PhysicsRayQueryParameters3D.create(from, ray[0], Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR, [get_rid()])
+				if get_world_3d().direct_space_state.intersect_ray(q).is_empty():
+					from = ray[0]
 	else:
 		from = global_position + Vector3.UP * 1.3
 		var target := cursor_body if cursor_body != Vector3.ZERO else cursor_ground + Vector3.UP * 1.3

@@ -402,6 +402,8 @@ static func _flashlight(root: Node3D, m: Dictionary) -> void:
 	light.shadow_enabled = true
 	light.light_volumetric_fog_energy = 2.0
 	light.visible = false
+	# светит в глаза — слепит (LightGlare у игрока, мародёры целятся хуже)
+	light.add_to_group("glare_lights")
 	t.add_child(light)
 
 

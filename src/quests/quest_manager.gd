@@ -19,6 +19,10 @@ extends Node
 ##   have_item {item}        — предмет в рюкзаке (pickup_item)
 ##   extracted {items, npcs} — эвакуация (reach_extraction, extract_with_item, extract_with_npc, survive)
 ##   kill {arch}             — добил мародёра (kill_targets, n штук, arch — тип или пусто)
+##
+## Реплики: в диалогах [кто, текст], кто = "player" — герой (подпись «Я», свой цвет); в lines
+## мест и say / say_start целей — строка (описание) или [кто, текст]. say — цель выполнена,
+## say_start — цель стала текущей: герой говорит сам, без этого квест «немой».
 
 signal changed
 ## Короткое сообщение на экране («Найдена улика», «Задание обновлено»).
@@ -249,6 +253,9 @@ func _complete_objective(qid: String) -> void:
 		_flags()[String(k)] = fl[k]
 	if o.has("toast"):
 		notice.emit(String(o.toast))
+	# что говорит / думает игрок, когда цель выполнена
+	if not (o.get("say", []) as Array).is_empty():
+		subtitles.emit(o.say)
 	s["count"] = 0
 	s["obj"] = int(s.get("obj", 0)) + 1
 	var objs: Array = stage(qid).get("objectives", [])
@@ -259,6 +266,9 @@ func _complete_objective(qid: String) -> void:
 			_complete_quest(qid)
 			return
 	var nxt := objective(qid)
+	# и когда новая цель стала текущей
+	if not (nxt.get("say_start", []) as Array).is_empty():
+		subtitles.emit(nxt.say_start)
 	var t := String(nxt.get("type", ""))
 	if t in ["reach_extraction", "extract_with_item", "extract_with_npc", "survive"]:
 		notice.emit("Нужно эвакуироваться")

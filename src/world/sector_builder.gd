@@ -23,6 +23,27 @@ const SEG_LEN := 1.0
 ## Слой отрисовки потолков, купола и светильников: видны только от первого лица (камера
 ## изометрии его не рисует). Тени они отбрасывают в обоих видах — свет одинаковый.
 const CEILING_LAYER := 1 << 19
+## Потолочный свет по типу помещения: [цвет, яркость ×]. "" — остальное.
+const LAMP_LOOK := {
+	"retail": [Color(0.96, 0.93, 0.86), 1.0],
+	"gallery": [Color(0.9, 0.93, 0.92), 1.0],
+	"corridor": [Color(0.84, 0.92, 0.95), 0.82],
+	"office": [Color(1.0, 0.9, 0.78), 0.9],
+	"security": [Color(0.86, 0.9, 1.0), 0.8],
+	"storage": [Color(0.8, 0.93, 0.9), 0.68],
+	"utility": [Color(0.76, 0.95, 0.82), 0.58],
+	"": [Color(0.82, 0.92, 0.88), 0.9],
+}
+## Панель светильника: свечение = цвет экземпляра (его пишет и RaidAtmosphere) × яркость.
+const LAMP_SHADER := """
+shader_type spatial;
+uniform float energy = 3.2;
+void fragment() {
+	ALBEDO = vec3(0.92);
+	ROUGHNESS = 0.4;
+	EMISSION = COLOR.rgb * energy;
+}
+"""
 ## Сдвиг от линии стены при поиске помещений по сторонам, м / град.
 const EPS_R := 0.05
 const EPS_A := 0.05
@@ -57,6 +78,8 @@ var _floors: Dictionary = {}
 var _ceilings: Dictionary = {}
 ## Светильники на потолке: [точка, помещение] — корпуса ставит _emit_ceilings.
 var _lamps: Array = []
+## Цвет панели каждого светильника (как у его огня, с яркостью).
+var _lamp_colors: Array[Color] = []
 ## Стекло — отдельным мешем: без теней и с прозрачностью.
 var _glass: Dictionary = {}
 ## Где уже стоит пилястра/колонна — чтобы на стыках стен не было двойных.
@@ -985,19 +1008,20 @@ func _emit_ceilings(root: Node3D) -> void:
 	# корпуса светильников — белые панели на потолке над каждым огнём
 	var lamp_mesh := BoxMesh.new()
 	lamp_mesh.size = Vector3(1.4, 0.08, 0.36)
-	var lamp_mat := StandardMaterial3D.new()
-	lamp_mat.albedo_color = Color(0.95, 0.97, 0.95)
-	lamp_mat.emission_enabled = true
-	lamp_mat.emission = Color(0.85, 0.95, 0.9)
-	lamp_mat.emission_energy_multiplier = 2.5
+	var lamp_sh := Shader.new()
+	lamp_sh.code = LAMP_SHADER
+	var lamp_mat := ShaderMaterial.new()
+	lamp_mat.shader = lamp_sh
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
 	mm.mesh = lamp_mesh
 	mm.instance_count = _lamps.size()
 	for i in range(_lamps.size()):
 		var p: Vector3 = _lamps[i]
 		var yaw := atan2(p.x, p.z) + PI * 0.5
 		mm.set_instance_transform(i, Transform3D(Basis(Vector3.UP, yaw), p + Vector3.UP * (_wall_h - 0.05)))
+		mm.set_instance_color(i, _lamp_colors[i])
 	var lamps := MultiMeshInstance3D.new()
 	lamps.name = "Lamps"
 	lamps.multimesh = mm
@@ -1005,6 +1029,7 @@ func _emit_ceilings(root: Node3D) -> void:
 	lamps.layers = CEILING_LAYER
 	lamps.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	lamps.add_to_group("mall_lamps")
+	lamps.set_meta("base_colors", _lamp_colors.duplicate())
 	body.add_child(lamps)
 
 
@@ -1154,7 +1179,19 @@ func _shadow_twin(parent: Node3D, mi: MeshInstance3D) -> void:
 	twin.mesh = mi.mesh
 	twin.transform = mi.transform
 	twin.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	twin.material_override = _shadow_mat()
 	parent.add_child(twin)
+
+
+static var _shadow_material: StandardMaterial3D
+
+
+## Материал теневых двойников: непрозрачный, двусторонний, без растворения у камеры.
+static func _shadow_mat() -> StandardMaterial3D:
+	if _shadow_material == null:
+		_shadow_material = StandardMaterial3D.new()
+		_shadow_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return _shadow_material
 
 
 ## Точка купола: t — от края (0) к зениту (1), a — азимут; base_y — высота опоры.
@@ -1199,7 +1236,12 @@ func _emit_meshes(root: Node3D) -> void:
 	root.add_child(walls)
 	for mat_id in _walls:
 		var mi := _mesh_node(_walls[mat_id], String(mat_id), true)
+		# стена растворяется у камеры (изометрия), а в проходе теней «камера» — сам свет: у ракеты
+		# и фонаря стены были бы дырявыми и свет шёл насквозь. Тень — от двойника без растворения,
+		# двустороннего (иначе у тонких перемычек и по стыку с полом свет подтекает)
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		walls.add_child(mi)
+		_shadow_twin(walls, mi)
 		var cs := CollisionShape3D.new()
 		cs.name = mi.name + "_col"
 		cs.shape = (mi.mesh as ArrayMesh).create_trimesh_shape()
@@ -1304,15 +1346,7 @@ func _build_lights(root: Node3D) -> void:
 					spot.shadow_enabled = _ring.is_empty()
 					lights.add_child(spot)
 				else:
-					var omni := OmniLight3D.new()
-					omni.position = pos + Vector3(0, minf(_wall_h - 1.0, 5.5), 0)
-					omni.light_color = Color(0.82, 0.92, 0.88)
-					omni.light_energy = 3.5
-					omni.omni_range = 13.0
-					omni.omni_attenuation = 1.4
-					omni.add_to_group("mall_lights")
-					lights.add_child(omni)
-					_lamps.append(pos)
+					_lamp(lights, pos, room)
 
 
 ## Свет полосы — сеткой по её прямоугольнику (шаг как у помещений кольца).
@@ -1329,15 +1363,29 @@ func _strip_lights(lights: Node3D, room: Dictionary) -> void:
 			var pos := strip_point(ax, lerpf(s0, s1, (j + 0.5) / ns), lerpf(t0, t1, (i + 0.5) / nt))
 			if String(owner_of(_rooms, pos).get("id", "")) != String(room.get("id", "")):
 				continue
-			var omni := OmniLight3D.new()
-			omni.position = pos + Vector3(0, minf(_wall_h - 1.0, 5.5), 0)
-			omni.light_color = Color(0.82, 0.92, 0.88)
-			omni.light_energy = 3.5
-			omni.omni_range = 13.0
-			omni.omni_attenuation = 1.4
-			omni.add_to_group("mall_lights")
-			lights.add_child(omni)
-			_lamps.append(pos)
+			_lamp(lights, pos, room)
+
+
+## Потолочный светильник: огонь + панель (в MultiMesh ламп, её цвет — _lamp_colors). Свет по
+## типу помещения (LAMP_LOOK: магазин тёплый и яркий, склад и техника — холодный и тусклый) и
+## с разбросом ±12 % от места (одинаково у всех peer) — помещения залиты по-разному. Огонь знает
+## номер своей панели (meta "lamp"): RaidAtmosphere гасит / красит / мигает их вместе.
+func _lamp(lights: Node3D, pos: Vector3, room: Dictionary) -> void:
+	var look: Array = LAMP_LOOK.get(String(room.get("type", "")), LAMP_LOOK[""])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(Vector2i(int(pos.x * 10.0), int(pos.z * 10.0)))
+	var k := float(look[1]) * rng.randf_range(0.88, 1.12)
+	var omni := OmniLight3D.new()
+	omni.position = pos + Vector3(0, minf(_wall_h - 1.0, 5.5), 0)
+	omni.light_color = look[0]
+	omni.light_energy = 3.5 * k
+	omni.omni_range = 14.0
+	omni.omni_attenuation = 1.4
+	omni.set_meta("lamp", _lamps.size())
+	omni.add_to_group("mall_lights")
+	lights.add_child(omni)
+	_lamps.append(pos)
+	_lamp_colors.append(Color(look[0]) * clampf(k, 0.4, 1.3))
 
 
 ## Пропсы по правилам помещений (см. PropPlacement). Сид — из id сектора: расстановка воспроизводима.

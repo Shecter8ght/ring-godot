@@ -73,7 +73,10 @@ func _apply_power(power: String) -> void:
 				if i % 9 == 0:
 					l.set_meta("flicker", true)
 		i += 1
+	_sync_panels()
 	for n in get_tree().get_nodes_in_group("mall_lamps"):
+		if n.has_meta("base_colors"):
+			continue
 		var mm := n as GeometryInstance3D
 		if not mm.has_meta("orig_mat"):
 			mm.set_meta("orig_mat", mm.material_override)
@@ -117,6 +120,34 @@ func _process(delta: float) -> void:
 		var l := n as Light3D
 		if l.visible and l.has_meta("flicker"):
 			l.light_energy = 1.1 if randf() > 0.25 else randf_range(0.0, 0.4)
+	_sync_panels()
+
+
+## Панели светильников повторяют свой огонь: погас — тёмная, аварийный — красная, мигает вместе
+## с ним (у огня meta "lamp" — номер панели в MultiMesh).
+func _sync_panels() -> void:
+	var panels: Array = []
+	for n in get_tree().get_nodes_in_group("mall_lamps"):
+		if n is MultiMeshInstance3D and n.has_meta("base_colors"):
+			panels.append(n)
+	if panels.is_empty():
+		return
+	for n in get_tree().get_nodes_in_group("mall_lights"):
+		var l := n as Light3D
+		if not l.has_meta("lamp"):
+			continue
+		var i := int(l.get_meta("lamp"))
+		for p in panels:
+			var mmi := p as MultiMeshInstance3D
+			var base: Array = mmi.get_meta("base_colors")
+			if i >= base.size():
+				continue
+			var c := Color.BLACK
+			if l.visible:
+				var o: Array = l.get_meta("orig", [true, l.light_color, l.light_energy])
+				var k := l.light_energy / maxf(float(o[2]), 0.001)
+				c = (Color(base[i]) if l.light_color == o[1] else l.light_color * 0.55) * clampf(k, 0.0, 1.5)
+			mmi.multimesh.set_instance_color(i, c)
 
 
 # ---------------------------------------------------------------- видимость

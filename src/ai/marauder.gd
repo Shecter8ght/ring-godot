@@ -186,8 +186,10 @@ func _ready() -> void:
 	_torch.light_energy = Balance.AI_TORCH_ENERGY
 	_torch.spot_range = Balance.AI_TORCH_RANGE
 	_torch.spot_angle = 26.0
-	_torch.shadow_enabled = false
+	# с тенью: иначе луч светит сквозь стены
+	_torch.shadow_enabled = true
 	_torch.visible = false
+	_torch.add_to_group("glare_lights")
 	_body.add_child(_torch)
 	if RaidWeather.current:
 		RaidWeather.current.changed.connect(_on_weather)
@@ -409,9 +411,41 @@ func _perceive(delta: float) -> void:
 			if to.length() < Balance.FLARE_BLIND_M and fwd.dot(Vector3(to.x, 0.0, to.z).normalized()) > 0.8:
 				_aim = maxf(_aim, Balance.AI_AIM_COLD)
 				break
+		# фонарь светит в глаза (видно сам фонарь, луч на мне, смотрю на него) — слепит так же
+		if _flashlight_glare():
+			_aim = maxf(_aim, Balance.AI_AIM_COLD)
 	# прицел садится, пока цель на виду
 	if _seen_now:
 		_aim = move_toward(_aim, 1.0, delta * (Balance.AI_AIM_COLD - 1.0) / Balance.AI_AIM_SETTLE_SEC)
+
+
+## Фонарь на оружии светит мне в лицо: близко (FLASHLIGHT_BLIND_M), я в луче, смотрю в его
+## сторону и между нами нет стены. Это то, что видит глаз, а не знание, где игрок.
+func _flashlight_glare() -> bool:
+	var eye := _eye()
+	var fwd := Vector3(sin(_facing), 0.0, cos(_facing))
+	for n in get_tree().get_nodes_in_group("glare_lights"):
+		var l := n as SpotLight3D
+		if l == null or not l.is_visible_in_tree() or is_ancestor_of(l):
+			continue
+		# свои не слепят: свой фонарь товарищ в лицо не наводит
+		var holder := l.get_parent()
+		while holder and not (holder is Marauder or holder is Player):
+			holder = holder.get_parent()
+		if holder is Marauder and (holder as Marauder).faction == faction:
+			continue
+		var to_me := eye - l.global_position
+		var d := to_me.length()
+		if d > Balance.FLASHLIGHT_BLIND_M or d < 0.1:
+			continue
+		if (-l.global_basis.z).dot(to_me / d) < cos(deg_to_rad(l.spot_angle * 0.8)):
+			continue
+		if fwd.dot(Vector3(-to_me.x, 0.0, -to_me.z).normalized()) < 0.6:
+			continue
+		var q := PhysicsRayQueryParameters3D.create(eye, l.global_position, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
+		if get_world_3d().direct_space_state.intersect_ray(q).is_empty():
+			return true
+	return false
 
 
 ## Враг другой фракции в поле зрения (раз в 0.3 с; цель держим, пока видна).
