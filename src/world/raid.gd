@@ -159,6 +159,8 @@ func mark_dead(peer_id: int) -> void:
 func extraction_block_reason(ext: ExtractionPoint) -> String:
 	if ext.required_switch != "" and not bool(switches.get(ext.required_switch, false)):
 		return "нет питания — включи рубильник"
+	if ext.required_switch != "" and String(RaidConditions.current.get("power", "on")) == "off":
+		return "в ТЦ нет электричества — ворота не открыть"
 	if ext.required_key != "":
 		for node in get_tree().get_nodes_in_group("players"):
 			var pl := node as Player
@@ -676,6 +678,9 @@ func _use_med(peer_id: int, id: String) -> void:
 ## Хост: мародёр убит — «убить N» засчитывается тому, чья пуля добила (задания — в его профиле,
 ## на его компьютере), ему же метка убийства.
 func credit_kill(peer_id: int, arch: String = "") -> void:
+	# убил ИИ (ЧВК, жильцы, мародёры друг друга) — никому
+	if peer_id <= 0:
+		return
 	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
 		_kill_credited(arch)
 	elif peer_id in multiplayer.get_peers():
@@ -893,6 +898,8 @@ func _save_profile(me: Player) -> void:
 		Profile.save()
 		notify("Михалыч доплатит за риск: %s ₽" % InventoryUI.money(bonus))
 	Profile.set_pocket(me.inventory.pocket)
+	if RaidEvents.current:
+		RaidEvents.current.on_local_extracted(me)
 	# задание «уйти через точку»: в итоге рейда — видимое имя, задания знают имя узла
 	for e in get_tree().get_nodes_in_group("extractions"):
 		var ext := e as ExtractionPoint

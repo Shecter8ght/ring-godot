@@ -36,6 +36,7 @@ var _marauder_spawner: MultiplayerSpawner
 var _marauders_spawned: int = 0
 ## Охрана сюжетного места, заказанная до готовности навмеша: [[точка, сколько, радиус], …].
 var _pending_guards: Array = []
+var _pending_squads: Array = []
 var _guard_count: int = 0
 var _ring: Dictionary = {}
 var _raid: Raid
@@ -79,6 +80,9 @@ func _ready() -> void:
 	var weather := RaidWeather.new()
 	weather.name = "Weather"
 	add_child(weather)
+	var events := RaidEvents.new()
+	events.name = "Events"
+	add_child(events)
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})
@@ -181,7 +185,49 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 	if data.has("home"):
 		m.home = data.home
 		m.home_radius = float(data.get("home_r", 0.0))
+	if bool(data.get("hostile", false)):
+		m.set_meta("hostile", true)
 	return m
+
+
+## Хост: отряд из archs (типы AI_ARCHETYPES) у точки at. opts: home + home_r — держатся у места
+## (жильцы, охрана), hostile — жильцы враждебны сразу, target — сразу идут проверить точку (ЧВК к
+## грузу). До готовности навмеша — в очередь.
+func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> void:
+	if _marauders_spawned == 0:
+		_pending_squads.append([at, archs, opts])
+		return
+	var map := get_world_3d().navigation_map
+	var squad := Squad.new()
+	var n := archs.size()
+	var first: Marauder = null
+	for k in range(n):
+		var a := TAU * float(k) / float(maxi(n, 1)) + _rng.randf() * 0.5
+		var p := NavigationServer3D.map_get_closest_point(map, at + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(1.5, 3.5))
+		var arch := String(archs[k])
+		var wpn := Marauder.weapon_for(arch, _rng)
+		var nm := "%s%d" % [arch.capitalize(), _guard_count]
+		_guard_count += 1
+		var data := {"name": nm, "pos": p + Vector3(0, 0.1, 0), "weapon": wpn, "arch": arch}
+		if opts.has("home"):
+			data["home"] = opts.home
+			data["home_r"] = float(opts.get("home_r", 6.0))
+		if bool(opts.get("hostile", false)):
+			data["hostile"] = true
+		var m: Marauder
+		if _marauder_spawner:
+			m = _marauder_spawner.spawn(data) as Marauder
+		else:
+			m = _spawn_marauder_node(data) as Marauder
+			_marauders_root.add_child(m)
+			m.global_position = data.pos
+		m.patrol_point_provider = _random_room_point
+		squad.add(m)
+		if first == null:
+			first = m
+	var target: Vector3 = opts.get("target", Vector3.INF)
+	if first and target != Vector3.INF:
+		first.investigate_at.call_deferred(target)
 
 
 ## Хост: отряд, который держится у точки (сюжетное место — «здесь их много»): n бойцов, не
@@ -359,6 +405,9 @@ func _spawn_marauders() -> void:
 	for g in _pending_guards:
 		spawn_guards(g[0], int(g[1]), float(g[2]))
 	_pending_guards.clear()
+	for q in _pending_squads:
+		spawn_squad(q[0], q[1], q[2])
+	_pending_squads.clear()
 	print("sector: мародёров %d в %d отрядах, попыток %d" % [placed, squads, tries])
 
 

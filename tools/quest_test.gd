@@ -13,6 +13,8 @@ var _level: Node
 
 
 func _ready() -> void:
+	RaidEvents.enabled = false
+	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	Profile.use_file(TEST_PROFILE, true)
 	Profile.ensure()
 	await get_tree().process_frame

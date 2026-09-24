@@ -10,13 +10,16 @@ var _thrower: RID
 var _bounced: float = 0.0
 ## Считать ли урон этой гранатой (граната мародёра у клиентов — только картинка и звук).
 var _damage: bool = true
+## Кто бросил: -1 — игрок этого peer (убийство — ему), 0 — ИИ (никому).
+var _attacker: int = -1
 
 
-static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, deal_damage: bool = true) -> Grenade:
+static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, deal_damage: bool = true, attacker: int = -1) -> Grenade:
 	var g := Grenade.new()
 	g.name = "Grenade"
 	g._thrower = thrower
 	g._damage = deal_damage
+	g._attacker = attacker
 	g.mass = 0.6
 	g.collision_layer = Hitscan.LAYER_DEBRIS
 	g.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS
@@ -84,7 +87,7 @@ func _explode() -> void:
 			if h and _damage:
 				# подорвался на ней — насмерть; дальше — ранит (осколки, броня помогает)
 				var feet := pos.distance_to(body.global_position + Vector3.UP * 0.5)
-				h.apply_or_request_damage(dmg, pos, "blast_close" if feet < Balance.GRENADE_LETHAL_M else "blast")
+				h.apply_or_request_damage(dmg, pos, "blast_close" if feet < Balance.GRENADE_LETHAL_M else "blast", _attacker)
 	for rd in get_tree().get_nodes_in_group("ragdolls"):
 		var r := rd as Ragdoll
 		var c := r.chest()

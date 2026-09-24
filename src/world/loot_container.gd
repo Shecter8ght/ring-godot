@@ -83,6 +83,9 @@ func roll() -> void:
 	# тяжёлые условия рейда — лут богаче: лишний бросок
 	if rng.randf() < RaidConditions.loot_bonus():
 		items.append_array(ItemDb.roll(table, rng))
+	# магазин на сигнализации — там ещё не грабили
+	if is_inside_tree() and AlarmZone.boosts(global_position, get_tree()):
+		items.append_array(ItemDb.roll(table, rng))
 	rolled = true
 
 

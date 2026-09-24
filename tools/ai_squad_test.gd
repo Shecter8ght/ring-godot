@@ -9,6 +9,8 @@ var _said: Array[String] = []
 
 
 func _ready() -> void:
+	RaidEvents.enabled = false
+	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame
 	var inst: Node = load("res://scenes/levels/f1_ring.tscn").instantiate()
 	get_tree().root.add_child(inst)
@@ -122,6 +124,9 @@ func _ready() -> void:
 	# типы: здоровье, броня, фигура; попадание «ведёт» и откидывает корпус; снайпер не сближается
 	var kinds := {}
 	for k in Balance.AI_ARCHETYPES:
+		# ЧВК и жильцы — другие фракции, воюют с мародёрами (их проверяет events_test)
+		if String(Balance.AI_ARCHETYPES[k].get("faction", "marauder")) != "marauder":
+			continue
 		var t := scene.instantiate() as Marauder
 		t.name = "Type_" + String(k)
 		t.archetype = String(k)

@@ -16,6 +16,26 @@ static func stance_key(p: Player) -> String:
 	return "stand"
 
 
+## Видит ли ИИ другого ИИ (враждебная фракция): тот же конус и луч, точка — грудь (лежащий — ниже);
+## освещённость места — как для игрока.
+static func can_see_body(world: World3D, eye: Vector3, forward: Vector3, body: Node3D, exclude: Array[RID], view: float = 1.0, downed: bool = false) -> bool:
+	var point := body.global_position + Vector3.UP * (0.35 if downed else 1.3)
+	var to := point - eye
+	var dist := to.length()
+	var base := Balance.AI_VIEW_DISTANCE
+	if RaidAtmosphere.current:
+		base = RaidAtmosphere.current.view_distance(body.global_position, false)
+	if dist > base * view:
+		return false
+	var flat := Vector3(to.x, 0.0, to.z).normalized()
+	var fwd := Vector3(forward.x, 0.0, forward.z).normalized()
+	if dist > 2.0 and fwd.dot(flat) < cos(deg_to_rad(Balance.AI_VIEW_HALF_ANGLE_DEG)):
+		return false
+	var query := PhysicsRayQueryParameters3D.create(eye, point, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER, exclude)
+	var hit := world.direct_space_state.intersect_ray(query)
+	return not hit.is_empty() and hit.collider == body
+
+
 ## Видит ли наблюдатель с глазом eye, смотрящий вдоль forward, игрока target.
 ## view — множитель дальности (тип мародёра: у снайпера дальше).
 static func can_see(world: World3D, eye: Vector3, forward: Vector3, target: Player, exclude: Array[RID], view: float = 1.0) -> bool:

@@ -7,6 +7,8 @@ const LEVEL := "res://scenes/levels/f1_market.tscn"
 
 
 func _ready() -> void:
+	RaidEvents.enabled = false
+	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame
 	var inst: Node = load(LEVEL).instantiate()
 	get_tree().root.add_child(inst)

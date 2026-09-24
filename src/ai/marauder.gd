@@ -43,6 +43,13 @@ var crouched: bool = false
 
 var _rng := RandomNumberGenerator.new()
 var _target_player: Player = null
+## Цель — ИИ другой фракции (ЧВК, жильцы, мародёры — кому кто враг).
+var _foe: Marauder = null
+var _foe_t: float = 0.0
+## Фракция (из типа): marauder / pmc / resident.
+var faction: String = "marauder"
+## Жильцы: враждебны игроку (сразу или после того, как к ним полезли).
+var hostile_to_players: bool = true
 var _facing: float = 0.0
 var _nav_ready: bool = false
 var _ragdoll: Ragdoll
@@ -126,6 +133,9 @@ func _ready() -> void:
 	if not Balance.AI_ARCHETYPES.has(archetype):
 		archetype = pick_archetype(_rng)
 	_arch = Balance.AI_ARCHETYPES[archetype]
+	faction = String(_arch.get("faction", "marauder"))
+	if faction == "resident" and not has_meta("hostile"):
+		hostile_to_players = false
 	if weapon == "" or not Balance.AI_WEAPONS.has(weapon):
 		weapon = weapon_for(archetype, _rng)
 	_spec = Balance.AI_WEAPONS[weapon]
@@ -330,6 +340,9 @@ func _perceive(delta: float) -> void:
 		var player := p as Player
 		if player == null or not player.is_alive():
 			continue
+		# жилец не трогает игрока, пока тот к ним не полез
+		if not hostile_to_players and not _trespass(player):
+			continue
 		if Perception.can_see(get_world_3d(), _eye(), fwd, player, exclude, float(_arch.get("view", 1.0))):
 			if player.is_downed():
 				if seen_down == null:
@@ -340,9 +353,27 @@ func _perceive(delta: float) -> void:
 	# лежащий — не угроза, пока стреляют другие; стреляет сам или тихо — добить
 	if seen == null and seen_down != null and _may_finish(seen_down):
 		seen = seen_down
+	# игроков не видно — может, видно врага другой фракции
+	var foe: Marauder = null
+	if seen == null:
+		foe = _scan_foes(delta, fwd, exclude)
 	var was_seen := _seen_now
 	_seen_now = false
-	if seen:
+	if seen == null and foe:
+		_foe = foe
+		_target_player = null
+		_seen_now = true
+		_unseen_t = 0.0
+		last_known = foe.global_position
+		memory_timer = _mem()
+		if not was_seen:
+			_aim = Balance.AI_AIM_COLD
+		if state != State.COMBAT and state != State.RETREAT and state != State.DOWNED and state != State.RESCUE:
+			_enter_combat(Tactic.ENGAGE)
+			say(_foe_shout(foe))
+			_shout()
+	elif seen:
+		_foe = null
 		# Заметить — не мгновенно: чем ближе, тем быстрее.
 		var dist := global_position.distance_to(seen.global_position)
 		notice_timer += delta * clampf(30.0 / maxf(dist, 1.0), 1.0, 6.0)
@@ -383,6 +414,55 @@ func _perceive(delta: float) -> void:
 		_aim = move_toward(_aim, 1.0, delta * (Balance.AI_AIM_COLD - 1.0) / Balance.AI_AIM_SETTLE_SEC)
 
 
+## Враг другой фракции в поле зрения (раз в 0.3 с; цель держим, пока видна).
+func _scan_foes(delta: float, fwd: Vector3, exclude: Array[RID]) -> Marauder:
+	var hostile: Array = Balance.AI_HOSTILE.get(faction, [])
+	if hostile.is_empty():
+		return null
+	var view := float(_arch.get("view", 1.0))
+	if _foe and is_instance_valid(_foe) and _foe.state != State.DEAD:
+		if Perception.can_see_body(get_world_3d(), _eye(), fwd, _foe, exclude, view, _foe.state == State.DOWNED):
+			return _foe
+	_foe_t -= delta
+	if _foe_t > 0.0:
+		return null
+	_foe_t = 0.3
+	var best: Marauder = null
+	var best_d := INF
+	for n in get_tree().get_nodes_in_group("marauders"):
+		var m := n as Marauder
+		if m == null or m == self or m.state == State.DEAD or not m.faction in hostile:
+			continue
+		var d := m.global_position.distance_to(global_position)
+		if d < best_d and Perception.can_see_body(get_world_3d(), _eye(), fwd, m, exclude, view, m.state == State.DOWNED):
+			best = m
+			best_d = d
+	return best
+
+
+func _foe_shout(foe: Marauder) -> String:
+	match foe.faction:
+		"pmc":
+			return "Периметр! Наёмники!"
+		"resident":
+			return "Тут крысы засели!"
+	return "Мародёры!"
+
+
+## Жильцы: игрок полез к ним — зашёл близко к их магазину (дом) или стрелял рядом / попал.
+func _trespass(p: Player) -> bool:
+	return home != Vector3.INF and p.global_position.distance_to(home) < float(Balance.RESIDENTS.trespass_m) + home_radius * 0.5
+
+
+## Жильцы: вся группа стала враждебной игрокам.
+func provoke() -> void:
+	if faction != "resident" or hostile_to_players:
+		return
+	for m in (squad.alive() if squad else [self]):
+		(m as Marauder).hostile_to_players = true
+	say("Пошли вон отсюда!")
+
+
 ## Добить лежащего игрока можно, если давно никто не стрелял — или стреляет он сам.
 func _may_finish(p: Player) -> bool:
 	return _shot_heard_t >= Balance.AI_FINISH_QUIET_SEC or _shot_heard_pos.distance_to(p.global_position) < 2.5
@@ -396,6 +476,9 @@ func _shout() -> void:
 
 func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node) -> void:
 	if speaker == self or state in [State.DEAD, State.RETREAT, State.DOWNED, State.RESCUE]:
+		return
+	# окрик — только своим
+	if speaker is Marauder and (speaker as Marauder).faction != faction:
 		return
 	if global_position.distance_to(from) > radius_m:
 		return
@@ -414,6 +497,9 @@ func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
 	if kind == "shot" and global_position.distance_to(pos) <= radius_m:
 		_shot_heard_t = 0.0
 		_shot_heard_pos = pos
+		# жильцы: стреляют у самого их магазина — значит, к ним
+		if faction == "resident" and home != Vector3.INF and pos.distance_to(home) < float(Balance.RESIDENTS.trespass_m) + home_radius:
+			provoke()
 	if state == State.DOWNED or state == State.RESCUE:
 		return
 	var d := global_position.distance_to(pos)
@@ -500,6 +586,9 @@ func _on_damaged(amount: float, from: Vector3) -> void:
 	if state == State.DEAD:
 		return
 	_hurt_t = 2.5
+	# в жильца попал игрок — вся группа враждебна
+	if faction == "resident" and _health.last_attacker > 0:
+		provoke()
 	# повело: медленнее, целится хуже, следующий выстрел позже; корпус откинуло (тяжёлого — меньше)
 	_stagger_t = Balance.AI_HIT_STAGGER_SEC
 	_flinch = clampf(amount / 25.0, 0.4, 1.0) / float(_arch.get("hp", 1.0))
@@ -574,7 +663,7 @@ func _patrol(delta: float) -> void:
 			var ha := _rng.randf() * TAU
 			_agent.target_position = _snap(home + Vector3(cos(ha), 0.0, sin(ha)) * _rng.randf_range(1.0, home_radius))
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 1.5
-		elif pause_timer <= 0.0 and not _holds() and _pick_loot():
+		elif pause_timer <= 0.0 and not _holds() and bool(_arch.get("loots", true)) and _pick_loot():
 			pass
 		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
 			_agent.target_position = _snap(patrol_point_provider.call())
@@ -917,7 +1006,7 @@ func _try_grenade(delta: float) -> void:
 @rpc("authority", "call_local", "reliable")
 func _rpc_grenade(from: Vector3, v: Vector3) -> void:
 	# у всех — видно и слышно; урон — только у хоста (он и бросал)
-	Grenade.throw(get_tree().current_scene, from, v, get_rid(), multiplayer.is_server() or not Net.is_networked())
+	Grenade.throw(get_tree().current_scene, from, v, get_rid(), multiplayer.is_server() or not Net.is_networked(), 0)
 
 
 ## Перебежка: точка на AI_ADVANCE_STEP ближе к цели, лучше — закрытая от неё стеной; дошёл —
@@ -1091,6 +1180,8 @@ func _call_for_help() -> void:
 			continue
 		var d := m.global_position.distance_to(global_position)
 		if d > Balance.AI_RESCUE_RADIUS:
+			continue
+		if m.faction != faction:
 			continue
 		var s := d * (1.0 if m.squad == squad else 1.8)
 		if s < best_s:
@@ -1356,8 +1447,11 @@ func _gun_pos() -> Vector3:
 func _shoot(suppress: bool) -> void:
 	var from := _gun_pos()
 	var h := 1.1
+	var at_ai := _foe != null and is_instance_valid(_foe) and _target_player == null
 	if _target_player and is_instance_valid(_target_player):
 		h = float(Perception.TARGET_HEIGHT[Perception.stance_key(_target_player)])
+	elif at_ai:
+		h = 0.35 if _foe.state == State.DOWNED else 1.2
 	var target := last_known + Vector3.UP * h
 	var spread := float(_spec.spread) * _aim
 	if _target_player and is_instance_valid(_target_player) and _target_player.velocity.length() > 2.0:
@@ -1373,8 +1467,10 @@ func _shoot(suppress: bool) -> void:
 	var exclude: Array[RID] = [get_rid()]
 	var dir := (target - from).normalized()
 	for i in range(int(_spec.pellets)):
+		# по ИИ другой фракции — пули бьют и ИИ; урон от ИИ никому из игроков не засчитывается
+		var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER | (Hitscan.LAYER_MARAUDER if at_ai else 0)
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(_spec.range) * 1.5,
-			Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER, float(_spec.damage), exclude, _rng)
+			mask, float(_spec.damage), exclude, _rng, 0)
 		if i == 0 or i % 3 == 0:
 			Tracer.spawn(get_tree().current_scene, from, hit.get("position", hit.get("end", from)), Color(1.0, 0.6, 0.35))
 	_muzzle.visible = true
@@ -1502,7 +1598,7 @@ func _on_died() -> void:
 		# лёжа стрелял из пистолета — выпадает основное оружие и патроны к нему
 		var wspec: Dictionary = Balance.AI_WEAPONS[weapon]
 		var in_mag := _main_mag if not _main_spec.is_empty() else _mag
-		var drop := ItemDb.roll("marauder", rng)
+		var drop := ItemDb.roll(String(_arch.get("loot_table", "marauder")), rng)
 		drop.push_front(ItemDb.make(String(wspec.item), 1))
 		var rounds := mini(in_mag + rng.randi_range(0, int(wspec.mag)), ItemDb.stack(String(wspec.ammo)))
 		if rounds > 0:

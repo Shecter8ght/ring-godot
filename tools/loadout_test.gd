@@ -11,6 +11,8 @@ var _fails: int = 0
 
 
 func _ready() -> void:
+	RaidEvents.enabled = false
+	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame
 	# смена сцены не должна удалить сам тест: отвязываем его от «текущей сцены»
 	get_tree().current_scene = null

@@ -371,7 +371,33 @@ const AI_ARCHETYPES := {
 		"helmet": true},
 	"sniper": {"name": "Снайпер", "weight": 0.1, "weapons": ["bolt"], "speed": 0.9, "hp": 0.9, "armor": 1.0,
 		"memory": 1.5, "view": 2.2, "color": Color(0.3, 0.33, 0.24), "scale": Vector3(0.95, 1.0, 0.95), "holds": true},
+	# третья сторона — не выпадают случайно (weight 0): ставят события и уровень
+	"pmc": {"name": "ЧВК «Периметр»", "weight": 0.0, "weapons": ["rifle"], "speed": 1.05, "hp": 1.3, "armor": 0.6,
+		"memory": 1.4, "view": 1.2, "color": Color(0.1, 0.12, 0.15), "scale": Vector3(1.08, 1.02, 1.08), "holds": false,
+		"helmet": true, "faction": "pmc", "loots": false, "loot_table": "pmc"},
+	"resident": {"name": "Жилец", "weight": 0.0, "weapons": ["pistol", "shotgun", "pistol"], "speed": 0.95, "hp": 1.0, "armor": 1.0,
+		"memory": 1.0, "view": 0.9, "color": Color(0.55, 0.48, 0.38), "scale": Vector3(0.96, 0.98, 0.96), "holds": false,
+		"faction": "resident", "loots": false, "loot_table": "resident"},
 }
+## Кто кому враг (фракции ИИ). Игрок — враг мародёрам и ЧВК; жильцам — только если к ним полез
+## (зашёл к ним, стрелял рядом, попал) или группа враждебная с самого начала.
+const AI_HOSTILE := {"marauder": ["pmc", "resident"], "pmc": ["marauder", "resident"], "resident": ["marauder", "pmc"]}
+## Жильцы: сколько групп, по сколько, доля враждебных сразу; ближе стольких метров к их
+## магазину — «полез к ним»; враждебные стреляют с такого расстояния.
+const RESIDENTS := {"groups": [1, 2], "size": [2, 3], "hostile_share": 0.3, "trespass_m": 7.0, "hostile_m": 22.0}
+## События рейда (RaidEvents): шансы и когда (от и до, с). Отключение / авария генератора — только
+## если свет был; сирена: сколько воет, докуда слышно; задание по рации: какие вещи, во сколько
+## раз дороже цены платит Михалыч; починка генератора, с.
+const RAID_EVENTS := {
+	"outage_chance": 0.25, "outage_at": [180.0, 720.0],
+	"generator_chance": 0.25, "generator_at": [180.0, 720.0], "repair_sec": 8.0,
+	"drop_chance": 0.35, "drop_at": [240.0, 780.0], "drop_noise_m": 160.0, "drop_smoke_sec": 90.0,
+	"pmc_chance": 0.35, "pmc_at": [300.0, 900.0],
+	"alarm_shops": 2, "alarm_sec": 120.0, "alarm_noise_m": 70.0,
+	"radio_items": ["laptop", "gpu", "server_drive", "camera", "documents", "diamond_ring"], "radio_at": [120.0, 360.0], "radio_mult": 3,
+}
+## ЧВК: сколько в группе.
+const PMC_SQUAD := 4
 ## Раненый мародёр кричит — товарищи в радиусе, м, идут спасать: тащат за укрытие (до
 ## AI_DRAG_COVER_M), поднимают за AI_REVIVE_SEC. Лёжа стреляет из пистолета.
 const AI_RESCUE_RADIUS := 28.0

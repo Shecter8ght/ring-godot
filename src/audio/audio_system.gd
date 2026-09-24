@@ -22,6 +22,9 @@ const KINDS := {
 	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"heartbeat": {"db": -4.0, "unit": 3.0, "max": 6.0},
 	"thunder": {"db": 6.0, "unit": 60.0, "max": 400.0},
+	"breaker": {"db": 2.0, "unit": 10.0, "max": 80.0},
+	"heli": {"db": 10.0, "unit": 60.0, "max": 500.0},
+	"engine": {"db": 2.0, "unit": 15.0, "max": 160.0},
 	# мародёр роется в контейнере — слышно за стеной
 	"rummage": {"db": -13.0, "unit": 3.0, "max": 22.0, "occlude": true},
 	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
@@ -111,6 +114,9 @@ func _ready() -> void:
 	_streams["step_metal"] = _make(_step_metal())
 	_streams["heartbeat"] = _make(_heartbeat())
 	_streams["thunder"] = _make(_thunder())
+	_streams["breaker"] = _streams["impact_metal"]
+	_streams["heli"] = _make(_rotor(9.0))
+	_streams["engine"] = _make(_engine())
 	_streams["rummage"] = _streams["impact_soft"]
 	_streams["death"] = _streams["hit"]
 	_streams["fall"] = _streams["hit"]
@@ -363,6 +369,79 @@ func rain_loop() -> AudioStream:
 	_rain_loop.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	_rain_loop.loop_end = n
 	return _rain_loop
+
+
+var _siren: AudioStreamWAV
+var _hum: AudioStreamWAV
+
+
+## Сирена сигнализации: два тона по очереди, петлёй.
+func siren_loop() -> AudioStream:
+	if _siren:
+		return _siren
+	var n := int(1.6 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var ph := 0.0
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		var f := 960.0 if fmod(t, 0.8) < 0.4 else 720.0
+		ph += TAU * f / MIX_RATE
+		out[i] = (sin(ph) * 0.5 + sin(ph * 2.0) * 0.15) * 0.8
+	_siren = _make(out)
+	_siren.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	_siren.loop_end = n
+	return _siren
+
+
+## Гул генератора: низкий тон с дребезгом, петлёй.
+func hum_loop() -> AudioStream:
+	if _hum:
+		return _hum
+	var n := int(1.0 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		out[i] = (sin(TAU * 50.0 * t) * 0.5 + sin(TAU * 100.0 * t) * 0.25 + sin(TAU * 150.0 * t) * 0.1) * (0.8 + 0.2 * sin(TAU * 7.0 * t))
+	_hum = _make(out)
+	_hum.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	_hum.loop_end = n
+	return _hum
+
+
+## Вертолёт: хлопки лопастей по шуму, нарастает и уходит.
+func _rotor(dur: float) -> PackedFloat32Array:
+	var n := int(dur * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		lp += (_noise() - lp) * 0.08
+		var blade := pow(maxf(0.0, sin(TAU * 11.0 * t)), 6.0)
+		var env := sin(PI * t / dur)
+		out[i] = lp * (0.3 + blade * 1.4) * env
+	return out
+
+
+## Мотор машины: низкое урчание, заглох, хлопки дверей.
+func _engine() -> PackedFloat32Array:
+	var n := int(3.0 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var ph := 0.0
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		var f := lerpf(42.0, 18.0, clampf(t / 1.8, 0.0, 1.0))
+		ph += TAU * f / MIX_RATE
+		var v := (sin(ph) + sin(ph * 2.0) * 0.4) * (0.4 if t < 1.8 else 0.0)
+		for d in [2.2, 2.6]:
+			var dt: float = t - float(d)
+			if dt >= 0.0:
+				v += _noise() * exp(-dt * 40.0) * 0.8
+		out[i] = v
+	return out
 
 
 ## Гром: низкий раскат — шум через фильтр, медленная огибающая с толчками.

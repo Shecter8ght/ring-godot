@@ -143,9 +143,9 @@ func heal(amount: float) -> void:
 
 ## Точка входа для Hitscan: применяет урон сама, если мы авторитет по этому узлу (сингл/хост),
 ## иначе просит хост — так урон всегда считается один раз и в одном месте (правило AGENTS.md).
-func apply_or_request_damage(amount: float, from: Vector3, zone: String = "") -> void:
+func apply_or_request_damage(amount: float, from: Vector3, zone: String = "", attacker: int = -1) -> void:
 	if not Net.is_networked() or is_multiplayer_authority():
-		last_attacker = multiplayer.get_unique_id()
+		last_attacker = multiplayer.get_unique_id() if attacker < 0 else attacker
 		take_damage(amount, from, zone)
 	else:
 		request_damage.rpc_id(1, amount, from, zone)

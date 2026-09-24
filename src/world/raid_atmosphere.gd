@@ -43,11 +43,24 @@ func apply() -> void:
 
 
 ## Электричество ТЦ: есть — всё горит; нет — темно; аварийное — каждый третий огонь, красный,
-## тусклый, часть мигает.
+## тусклый, часть мигает. Можно менять по ходу рейда (события) — исходное запоминается.
+func apply_power(power: String) -> void:
+	_apply_power(power)
+
+
 func _apply_power(power: String) -> void:
 	var i := 0
 	for n in get_tree().get_nodes_in_group("mall_lights"):
 		var l := n as Light3D
+		if not l.has_meta("orig"):
+			l.set_meta("orig", [l.visible, l.light_color, l.light_energy, (l as OmniLight3D).omni_range if l is OmniLight3D else 0.0])
+		var o: Array = l.get_meta("orig")
+		l.visible = bool(o[0])
+		l.light_color = o[1]
+		l.light_energy = float(o[2])
+		if l is OmniLight3D:
+			(l as OmniLight3D).omni_range = float(o[3])
+		l.remove_meta("flicker")
 		match power:
 			"off":
 				l.visible = false
@@ -62,10 +75,12 @@ func _apply_power(power: String) -> void:
 		i += 1
 	for n in get_tree().get_nodes_in_group("mall_lamps"):
 		var mm := n as GeometryInstance3D
-		var m := mm.material_override as StandardMaterial3D
-		if m == null:
+		if not mm.has_meta("orig_mat"):
+			mm.set_meta("orig_mat", mm.material_override)
+		var base := mm.get_meta("orig_mat") as StandardMaterial3D
+		if base == null:
 			continue
-		m = m.duplicate() as StandardMaterial3D
+		var m := base.duplicate() as StandardMaterial3D
 		match power:
 			"off":
 				m.emission_enabled = false
@@ -73,17 +88,19 @@ func _apply_power(power: String) -> void:
 				m.emission = Color(0.9, 0.15, 0.1)
 				m.emission_energy_multiplier = 0.6
 		mm.material_override = m
-	# вывески без питания не светятся
-	if power != "on":
-		for sign in get_parent().find_children("Signs", "Node3D", true, false):
-			for l in sign.find_children("*", "Label3D", true, false):
-				(l as Label3D).modulate = (l as Label3D).modulate.darkened(0.8 if power == "off" else 0.6)
-	# прожекторы дворов — тоже от сети ТЦ
+	# прожекторы дворов и вывески — тоже от сети ТЦ
 	var lights := get_parent().find_child("Lights", true, false)
-	if lights and power != "on":
+	if lights:
 		for n in lights.get_children():
 			if n is SpotLight3D:
-				(n as SpotLight3D).visible = false
+				(n as SpotLight3D).visible = power == "on"
+	for sign in get_parent().find_children("Signs", "Node3D", true, false):
+		for l in sign.find_children("*", "Label3D", true, false):
+			var lb := l as Label3D
+			if not lb.has_meta("orig"):
+				lb.set_meta("orig", lb.modulate)
+			var om: Color = lb.get_meta("orig")
+			lb.modulate = om if power == "on" else om.darkened(0.8 if power == "off" else 0.6)
 
 
 var _flick_t: float = 0.0

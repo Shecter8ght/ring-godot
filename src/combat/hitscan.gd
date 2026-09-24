@@ -11,7 +11,8 @@ const LAYER_DOOR := 8
 const LAYER_DEBRIS := 16
 
 ## Возвращает словарь intersect_ray (пустой — промах) и наносит урон, если у попавшего есть Health.
-static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float, range_m: float, mask: int, damage: float, exclude: Array[RID], rng: RandomNumberGenerator) -> Dictionary:
+## attacker — кто стрелял (peer игрока; 0 — ИИ: убийство никому не засчитывается; -1 — сам этот peer).
+static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float, range_m: float, mask: int, damage: float, exclude: Array[RID], rng: RandomNumberGenerator, attacker: int = -1) -> Dictionary:
 	var d := _spread(dir, spread_deg, rng)
 	var query := PhysicsRayQueryParameters3D.create(from, from + d * range_m, mask, exclude)
 	query.collide_with_areas = false
@@ -25,7 +26,7 @@ static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float,
 		if h:
 			# куда попали: голова / корпус (игрок, мародёр знают свою высоту головы по стойке)
 			var zone := String(body.call("hit_zone", hit.position)) if body.has_method("hit_zone") else ""
-			h.apply_or_request_damage(damage, from, zone)
+			h.apply_or_request_damage(damage, from, zone, attacker)
 		if body is Target:
 			(body as Target).on_hit(hit.position, d, damage)
 		if body is RagdollPart:
