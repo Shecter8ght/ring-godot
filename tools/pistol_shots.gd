@@ -33,8 +33,8 @@ func _ready() -> void:
 	var mid := Vector3(0, 0.02, 0.06)
 	var views := {"right": Vector3(0.62, 0.0, 0.0), "left": Vector3(-0.62, 0.0, 0.0), "top": Vector3(0.001, 0.6, 0.0),
 		"34": Vector3(0.38, 0.22, 0.38), "back": Vector3(0.18, 0.12, -0.45)}
-	for kit in [{}, {"optic": "mod_rmr", "muzzle": "mod_supp_9", "mag": "mod_mag_pistol", "tac": "mod_flashlight"}]:
-		var w := WeaponModels.build("pistol", kit)
+	for kit in [{}, WeaponDb.preset("HG_03_TAC").get("mods", {})]:
+		var w := WeaponModels.build("wpn_hg_03", kit)
 		add_child(w)
 		for v in views:
 			if not kit.is_empty() and v != "right" and v != "34":

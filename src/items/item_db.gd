@@ -15,17 +15,58 @@ const LOOT_PATH := "res://data/loot.json"
 static var _items: Dictionary = {}
 static var _loot: Dictionary = {}
 
+## Вес предмета без поля weight — по категории, кг.
+const DEFAULT_WEIGHT := {"med": 0.15, "food": 0.4, "tech": 0.6, "value": 0.1, "barter": 0.2, "tools": 0.5, "intel": 0.2,
+	"key": 0.05, "throw": 0.4, "misc": 0.3}
+
 
 static func _ensure() -> void:
 	if not _items.is_empty():
 		return
 	_items = (JSON.parse_string(FileAccess.get_file_as_string(ITEMS_PATH)) as Dictionary).get("items", {})
+	# арсенал: оружие, патроны, магазины, обвес, броня — свои файлы данных (WeaponDb)
+	_items.merge(WeaponDb.items())
+	# у оружия слот надевания — из его определения
+	for id in WeaponDb.ids("weapons"):
+		var it: Dictionary = _items[id]
+		if not it.has("equip"):
+			it["equip"] = {"slot": String((it.weapon as Dictionary).slot), "weapon": String(id)}
 	_loot = JSON.parse_string(FileAccess.get_file_as_string(LOOT_PATH)) as Dictionary
 
 
 static func item(id: String) -> Dictionary:
 	_ensure()
-	return _items.get(id, {"name": id, "cat": "misc", "cells": 1, "value": 0, "stack": 1})
+	return _items.get(WeaponDb.canonical(id), {"name": id, "cat": "misc", "cells": 1, "value": 0, "stack": 1})
+
+
+## Вес одной штуки, кг.
+static func weight(id: String) -> float:
+	var it := item(id)
+	return float(it.get("weight", DEFAULT_WEIGHT.get(String(it.cat), 0.3)))
+
+
+## Вес записи: штуки + всё, что в ней (обвес, магазин с патронами, плиты).
+static func entry_weight(e: Dictionary) -> float:
+	var w := weight(String(e.id)) * int(e.get("n", 1))
+	for m in e.get("mods", {}):
+		w += weight(WeaponDb.mod_id(e.mods[m]))
+	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	if not mag.is_empty():
+		if String(mag.get("id", "")) != "":
+			w += weight(String(mag.id))
+		w += weight(String(mag.get("ammo", ""))) * int(mag.get("rounds", 0))
+	if e.has("rounds"):
+		w += weight(String(e.get("ammo", ""))) * int(e.rounds)
+	for s in e.get("plates", {}):
+		w += weight(String(e.plates[s].id))
+	return w
+
+
+static func weight_of(list: Array) -> float:
+	var w := 0.0
+	for it in list:
+		w += entry_weight(it)
+	return w
 
 
 static func item_name(id: String) -> String:
@@ -101,18 +142,50 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 			pick -= float(e[1])
 			if pick <= 0.0:
 				var id := String(e[0])
+				# по тегам и тиру: случайный предмет арсенала (см. WeaponDb.pick)
+				if id.begins_with("pick:"):
+					id = WeaponDb.pick(id.trim_prefix("pick:"), rng)
+					if id == "":
+						break
 				if id != "nothing":
 					var n := rng.randi_range(int(e[2][0]), int(e[2][1]))
-					if equip(id).has("durability"):
-						# броня из лута — отдельными экземплярами, с изношенной прочностью
+					var opts: Dictionary = e[3] if e.size() > 3 and e[3] is Dictionary else {}
+					if id.begins_with("table:"):
 						for k in range(n):
-							var one := make(id, 1)
-							one.dur = roundf(float(one.dur) * rng.randf_range(0.4, 1.0))
-							out.append(one)
+							out.append_array(roll(id.trim_prefix("table:"), rng))
+					elif id.begins_with("preset:"):
+						# готовая сборка: обвес, магазин (патронов — часть), износ (dur — в процентах)
+						for k in range(n):
+							var w := WeaponDb.make_weapon(id.trim_prefix("preset:"), rng, opts.get("dur", []))
+							if not w.is_empty():
+								_partial_mag(w, rng, opts)
+								out.append(w)
+					elif _stateful(make(id, 1)):
+						# со своим состоянием — поштучно, изношенное: wear — доля [мин, макс]
+						for k in range(n):
+							out.append(_worn(make(id, 1), rng, opts.get("wear", [0.4, 1.0])))
 					else:
-						_merge(out, id, n)
+						_merge(out, WeaponDb.canonical(id), n)
 				break
 	return out
+
+
+## Износ найденного: прочность × случайная доля; плиты — отдельно.
+static func _worn(one: Dictionary, rng: RandomNumberGenerator, wear: Array) -> Dictionary:
+	if one.has("dur"):
+		one.dur = roundf(float(one.dur) * rng.randf_range(float(wear[0]), float(wear[1])))
+	for s in one.get("plates", {}):
+		one.plates[s].dur = roundf(float(one.plates[s].dur) * rng.randf_range(float(wear[0]), float(wear[1])))
+	return one
+
+
+## Лут: в магазине найденного оружия — не полный боекомплект (rounds — доля [мин, макс]).
+static func _partial_mag(w: Dictionary, rng: RandomNumberGenerator, opts: Dictionary) -> void:
+	var mag: Dictionary = w.get("mag", {})
+	if mag.is_empty():
+		return
+	var r: Array = opts.get("rounds", [0.0, 1.0])
+	mag.rounds = int(round(float(mag.rounds) * rng.randf_range(float(r[0]), float(r[1]))))
 
 
 static func _merge(list: Array, id: String, n: int) -> void:
@@ -127,34 +200,51 @@ static func equip(id: String) -> Dictionary:
 	return item(id).get("equip", {})
 
 
-## Новый экземпляр предмета: у брони — полная прочность ("dur").
+## Новый экземпляр предмета (id по алиасам): оружие — новое, с пустым штатным магазином;
+## магазин — пустой; броня, шлем, плита — полная прочность.
 static func make(id: String, n: int) -> Dictionary:
+	id = WeaponDb.canonical(id)
 	var e := {"id": id, "n": n}
-	var eq := equip(id)
-	if eq.has("durability"):
-		e["dur"] = float(eq.durability)
+	if WeaponDb.is_weapon(id):
+		e.n = 1
+		var w := WeaponDb.weapon(id)
+		e["dur"] = 100.0
+		e["mods"] = {}
+		e["mag"] = {"id": "" if w.has("internal_mag") else WeaponDb.default_mag(id), "ammo": WeaponDb.default_ammo(String(w.caliber)), "rounds": 0}
+		e["sight"] = "primary"
+	elif not WeaponDb.magazine(id).is_empty():
+		e.n = 1
+		e["ammo"] = WeaponDb.default_ammo(WeaponDb.mag_caliber(id))
+		e["rounds"] = 0
+	elif not WeaponDb.vest(id).is_empty():
+		var v := WeaponDb.make_vest(id)
+		v.n = 1
+		return v
+	elif not WeaponDb.helmet(id).is_empty():
+		e["dur"] = float(WeaponDb.helmet(id).durability)
+	elif not WeaponDb.plate(id).is_empty():
+		e["dur"] = float(WeaponDb.plate(id).durability)
 	return e
 
 
-## Предмет с состоянием (прочность, обвесы) не складывается с другими такими же.
+## Предмет с состоянием (прочность, обвес, магазин, патроны в магазине, плиты) не складывается.
 static func can_merge(a: Dictionary, b: Dictionary) -> bool:
-	return String(a.id) == String(b.id) and not a.has("dur") and not b.has("dur") and not a.has("mods") and not b.has("mods")
+	return String(a.id) == String(b.id) and not _stateful(a) and not _stateful(b)
 
 
 ## Экземпляр со своим состоянием — всегда поштучно.
 static func _stateful(e: Dictionary) -> bool:
-	return e.has("dur") or e.has("mods")
+	return e.has("dur") or e.has("mods") or e.has("mag") or e.has("rounds") or e.has("plates")
 
 
+## Определение обвеса (data/weapons.json → attach).
 static func mod_spec(id: String) -> Dictionary:
-	return item(id).get("mod", {})
+	return WeaponDb.attachment(id)
 
 
-## Обвес mod подходит на оружие weapon_item (id предмета) в свой слот.
-static func mod_fits(mod: String, weapon_item: String) -> bool:
-	var ms := mod_spec(mod)
-	var eq := equip(weapon_item)
-	return not ms.is_empty() and String(eq.get("weapon", "")) in ms.get("fits", []) and String(ms.slot) in eq.get("slots", [])
+## Обвес mod встаёт на оружие-запись weapon_entry хоть в какую-то точку (свободную или на замену).
+static func mod_fits(mod: String, weapon_entry: Dictionary) -> bool:
+	return not WeaponDb.mounts_for(weapon_entry, mod).is_empty()
 
 
 ## Сколько ячеек занято (стопки по stack).
@@ -381,23 +471,65 @@ static func remove_at(list: Array, idx: int, n: int) -> Dictionary:
 	return out
 
 
-## Название с состоянием: «Бронежилет лёгкий (кл. 2) · 32/50».
+## Наибольшая прочность предмета (оружие — 100; броня, шлем, плита — из данных; 0 — без износа).
+static func max_dur(id: String) -> float:
+	if WeaponDb.is_weapon(id):
+		return 100.0
+	var v := WeaponDb.vest(id)
+	if not v.is_empty():
+		return float((v.soft as Dictionary).durability) if v.get("soft") != null else 0.0
+	if not WeaponDb.helmet(id).is_empty():
+		return float(WeaponDb.helmet(id).durability)
+	if not WeaponDb.plate(id).is_empty():
+		return float(WeaponDb.plate(id).durability)
+	return 0.0
+
+
+## Название с состоянием: «Автомат 5.45×39 · 91% · 17/30 5.45», «Магазин … · 17/30 5.45»,
+## «Плитоносец … · перед 21/72 · зад 70/72», «Шлем … · 32/50».
 static func label(entry: Dictionary) -> String:
-	var t := item_name(String(entry.id))
-	if entry.has("dur"):
-		t += " · %d/%d" % [int(entry.dur), int(equip(String(entry.id)).get("durability", 0))]
-	if entry.has("mods") and not (entry.mods as Dictionary).is_empty():
-		t += " · обвесов: %d" % (entry.mods as Dictionary).size()
+	var id := String(entry.id)
+	var t := item_name(id)
+	if WeaponDb.is_weapon(id):
+		t += " · %d%%" % int(entry.get("dur", 100))
+		var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
+		if not mag.is_empty():
+			t += " · %d/%d %s" % [int(mag.get("rounds", 0)), WeaponDb.capacity(entry), String(item(String(mag.get("ammo", ""))).get("short", ""))]
+		if not (entry.get("mods", {}) as Dictionary).is_empty():
+			t += " · обвес: %d" % (entry.mods as Dictionary).size()
+		return t
+	if entry.has("rounds"):
+		return t + " · %d/%d %s" % [int(entry.rounds), int(WeaponDb.magazine(id).get("capacity", 0)), String(item(String(entry.get("ammo", ""))).get("short", ""))]
+	if entry.has("plates"):
+		var pl: Dictionary = entry.plates
+		for s in ["front", "back"]:
+			if s in WeaponDb.vest(id).get("plates", []):
+				t += " · %s %s" % ["перед" if s == "front" else "зад", ("%d/%d" % [int(pl[s].dur), int(max_dur(String(pl[s].id)))]) if pl.has(s) else "—"]
+		return t
+	if entry.has("dur") and max_dur(id) > 0.0:
+		t += " · %d/%d" % [int(entry.dur), int(max_dur(id))]
 	return t
 
 
-## Цена с учётом износа брони.
+## Цена с учётом износа и того, что внутри (обвес, магазин с патронами, плиты).
 static func entry_value(entry: Dictionary) -> int:
-	var v := float(value(String(entry.id))) * int(entry.n)
-	if entry.has("dur"):
-		v *= clampf(float(entry.dur) / maxf(1.0, float(equip(String(entry.id)).get("durability", 1))), 0.2, 1.0)
+	var id := String(entry.id)
+	var v := float(value(id)) * int(entry.get("n", 1))
+	var mx := max_dur(id)
+	if entry.has("dur") and mx > 0.0:
+		v *= clampf(float(entry.dur) / mx, 0.2, 1.0)
 	for slot in entry.get("mods", {}):
-		v += float(value(String(entry.mods[slot])))
+		v += float(value(WeaponDb.mod_id(entry.mods[slot])))
+	var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
+	if not mag.is_empty():
+		if String(mag.get("id", "")) != "":
+			v += float(value(String(mag.id)))
+		v += float(value(String(mag.get("ammo", "")))) * int(mag.get("rounds", 0))
+	if entry.has("rounds"):
+		v += float(value(String(entry.get("ammo", "")))) * int(entry.rounds)
+	for s in entry.get("plates", {}):
+		var p: Dictionary = entry.plates[s]
+		v += float(value(String(p.id))) * clampf(float(p.dur) / maxf(1.0, max_dur(String(p.id))), 0.2, 1.0)
 	return int(v)
 
 

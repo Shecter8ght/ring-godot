@@ -160,7 +160,8 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0)
 	var p := AudioStreamPlayer3D.new()
 	p.stream = stream
 	p.volume_db = float(spec.db) + extra_db
-	p.unit_size = float(spec.unit)
+	# в гарнитуре тихое слышно дальше
+	p.unit_size = float(spec.unit) * float(Settings.headset.get("hear_k", 1.0))
 	p.max_distance = float(spec["max"])
 	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
 	p.pitch_scale = pitch if pitch > 0.0 else _rng.randf_range(0.92, 1.08)

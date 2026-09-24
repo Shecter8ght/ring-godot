@@ -20,6 +20,7 @@ func _ready() -> void:
 	var player := get_tree().get_first_node_in_group("players") as Player
 	var m := level.get_node("Marauders").get_child(0) as Marauder
 	player.health.hp = 100000.0  # чтобы дожить до проверки своих выстрелов
+	player.health.head_protected = func() -> bool: return true
 	(m.get_node("Health") as Health).damaged.connect(func(amount: float, from: Vector3) -> void:
 		print("    мародёр получил %.0f урона, источник в %.1f м от игрока, t=%.1f" % [amount, from.distance_to(player.global_position), Time.get_ticks_msec() / 1000.0]))
 	print("    старт t=%.1f" % (Time.get_ticks_msec() / 1000.0))

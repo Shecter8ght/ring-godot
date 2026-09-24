@@ -137,13 +137,16 @@ func _ready() -> void:
 	var hp_ok := true
 	for k in kinds:
 		var t: Marauder = kinds[k]
-		hp_ok = hp_ok and is_equal_approx((t.get_node("Health") as Health).max_hp, Balance.MARAUDER_HP * float(Balance.AI_ARCHETYPES[k].hp)) 			and t.weapon in Balance.AI_ARCHETYPES[k].weapons
-	_check("типы: здоровье и оружие по типу", hp_ok, str(kinds.keys()))
+		var ak: Dictionary = Balance.AI_ARCHETYPES[k]
+		var los := [String(ak.loadout), String((ak.get("leader", {}) as Dictionary).get("loadout", ""))]
+		hp_ok = hp_ok and is_equal_approx((t.get_node("Health") as Health).max_hp, Balance.MARAUDER_HP * float(ak.hp)) and t.loadout_id in los and t.equipment.has("primary")
+	_check("типы: здоровье и снаряжение по выкладке типа", hp_ok, str(kinds.keys()))
+	# бывалый всегда в броне: слабая пуля в грудь не пробивает — только заброневая травма
 	var hv: Marauder = kinds["heavy"]
 	var hh := hv.get_node("Health") as Health
 	var before_hp := hh.hp
-	hh.take_damage(20.0, hv.global_position + Vector3(0, 1.3, 10))
-	_check("тяжёлый: броня снимает часть урона", is_equal_approx(before_hp - hh.hp, 20.0 * float(Balance.AI_ARCHETYPES.heavy.armor)), "прошло %.1f из 20" % (before_hp - hh.hp))
+	hh.take_damage(20.0, hv.global_position + Vector3(0, 1.3, 10), "thorax", hv.global_position + Vector3(0, 1.3, 0), {"pen": 1.0, "armor_dmg": 2.0})
+	_check("бывалый: броня держит слабую пулю", before_hp - hh.hp > 0.0 and before_hp - hh.hp < 20.0, "прошло %.1f из 20" % (before_hp - hh.hp))
 	await get_tree().physics_frame
 	_check("попадание: повело и откинуло", hv._stagger_t > 0.0 and hv._body.rotation.x < -0.01, "%.2f с, наклон %.2f" % [hv._stagger_t, hv._body.rotation.x])
 	var sn: Marauder = kinds["sniper"]

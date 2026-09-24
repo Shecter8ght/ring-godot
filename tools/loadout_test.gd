@@ -38,28 +38,32 @@ func _ready() -> void:
 	_check("обвесы дороже обычной наценки", Profile.buy_price("mod_grip") > int(ItemDb.value("mod_grip") * Balance.TRADER_BUY_MULT),
 		"рукоятка %d ₽" % Profile.buy_price("mod_grip"))
 	Profile.money += 150000
-	for id in ["mod_mag_ext", "mod_supp_545", "mod_grip"]:
+	var st0 := WeaponStats.compute(Profile.equipment.primary)
+	for id in ["mod_supp_545", "mod_grip"]:
 		Profile.buy(id, 1)
 		Profile.install_mod("primary", _idx(id))
+	# магазин на 45 — не обвес, а магазин: вставить в автомат (штатный на 30 — в тайник)
+	Profile.buy("mag_545_45", 1)
+	Profile.fit_part("equip:primary", -1, "stash", _idx("mag_545_45"))
 	var wm := Profile.weapon_mods("primary")
-	_check("верстак: обвесы на автомате", wm.size() == 3 and _idx("mod_grip") < 0, str(wm))
-	var st := WeaponStats.compute("rifle", wm)
-	var st0 := WeaponStats.compute("rifle", {})
-	_check("характеристики: магазин 45, тише, меньше отдача, эргономика", int(st.mag) == 45 and float(st.noise_m) < float(st0.noise_m) and float(st.kick) < float(st0.kick) and bool(st.suppressed),
+	_check("верстак: обвес по точкам крепления, магазин на 45 вставлен", wm.has("muzzle") and wm.has("underbarrel") and _idx("mod_grip") < 0
+		and String(Profile.equipment.primary.mag.id) == "mag_545_45", str(wm) + " " + str(Profile.equipment.primary.mag))
+	var st := WeaponStats.compute(Profile.equipment.primary)
+	_check("характеристики: магазин 45, тише, меньше отдача", int(st.mag) == 45 and float(st.noise_m) < float(st0.noise_m) and float(st.kick) < float(st0.kick) and bool(st.suppressed),
 		"маг %d, шум %.0f→%.0f, отдача %.3f→%.3f, эрго %.0f→%.0f" % [int(st.mag), float(st0.noise_m), float(st.noise_m), float(st0.kick), float(st.kick), float(st0.ergo), float(st.ergo)])
 	Profile.install_mod("primary", _idx("w_pistol")) # не обвес — не ставится
-	_check("чужое на верстак не ставится", Profile.weapon_mods("primary").size() == 3, "")
+	_check("чужое на верстак не ставится", Profile.weapon_mods("primary").size() == 2, "")
 	# модули убежища: верстак 1 не ставит прицелы; генератор + верстак 2 — ставит
 	Profile.money += 200000
 	Profile.buy("mod_rmr", 1)
-	_check("верстак 1: коллиматор нельзя", Profile.mod_block("mod_rmr") != "", Profile.mod_block("mod_rmr"))
+	_check("верстак 1: коллиматор нельзя", Profile.mod_block("mod_rmr", "optic_primary") != "", Profile.mod_block("mod_rmr", "optic_primary"))
 	_check("генератор без деталей не строится", Upgrades.block("generator") != "", Upgrades.block("generator"))
 	for pair in [["battery", 2], ["wires", 5], ["toolset", 1], ["cigarettes", 5], ["lighter", 2]]:
 		ItemDb.add_to(Profile.stash, ItemDb.make(String(pair[0]), int(pair[1])), Profile.stash_grid())
 	Profile.trust = 3
 	var built := Upgrades.build("generator") and Upgrades.build("workbench") and Upgrades.build("pocket")
 	_check("модули построены: генератор, верстак 2, карман 2×2 — детали ушли", built and Upgrades.level("workbench") == 2 and Profile.pocket_grid() == Vector2i(2, 2)
-		and Profile.stash_count("battery") == 0 and Profile.mod_block("mod_rmr") == "", str(Profile.modules))
+		and Profile.stash_count("battery") == 0 and Profile.mod_block("mod_rmr", "optic_primary") == "", str(Profile.modules))
 	Profile.trust = 0
 	# в карман — бинт: он поедет в рейд и вернётся
 	Profile.buy("bandage", 1)
@@ -68,11 +72,11 @@ func _ready() -> void:
 	Profile.stash_to_backpack(_idx("mod_rmr"), 1)
 	var bi := -1
 	for i in range(Profile.backpack.size()):
-		if String(Profile.backpack[i].id) == "mod_rmr":
+		if String(Profile.backpack[i].id) == WeaponDb.canonical("mod_rmr"):
 			bi = i
 	Profile.install_mod("secondary", bi, true)
-	_check("верстак: обвес из рюкзака", String(Profile.weapon_mods("secondary").get("optic", "")) == "mod_rmr" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("secondary")))
-	Profile.remove_mod("secondary", "optic")
+	_check("верстак: обвес из рюкзака (мини-коллиматор на затвор)", WeaponDb.mod_id(Profile.weapon_mods("secondary").get("optic_primary", "")) == "optic_rmr_01" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("secondary")))
+	Profile.remove_mod("secondary", "optic_primary")
 	# задания: без рации — одно; убил троих — сдал за деньги и доверие
 	_check("задание взято, второе — нет (слот один без рации)", Missions.take("m_kills3") and not Missions.take("m_dock"), str(Profile.missions_active))
 	for i in range(3):
@@ -95,36 +99,42 @@ func _ready() -> void:
 	pl.health.hp = 100.0
 	await _wait(0.5)
 	_check("в рейде — снаряжение, профиль пуст (на кону)", pl.loadout_mode and pl.inventory.loadout_ready and Profile.equipment.is_empty(), str(pl.inventory.equipment.keys()))
-	_check("в руках автомат с обвесами, магазин на 45 заряжен", pl.weapon_id == "rifle" and pl.ammo == 45 and pl.weapon_mods.size() == 3, "%s %d %s" % [pl.weapon_id, pl.ammo, pl.weapon_mods])
-	_check("патроны в рюкзаке ушли в магазин", pl.inventory.count("ammo_545") == 75, "%d" % pl.inventory.count("ammo_545"))
+	_check("в руках автомат с обвесом, магазин на 45 снаряжён из рюкзака", pl.weapon_id == "wpn_ar_03" and pl.ammo == 45 and pl.weapon_mods.size() == 2, "%s %d %s" % [pl.weapon_id, pl.ammo, pl.weapon_mods])
+	_check("патроны в рюкзаке ушли в магазин", pl.inventory.count("ammo_545_std") == 75, "%d" % pl.inventory.count("ammo_545_std"))
+	# расстрелял до 5 — перезарядка: снаряжённых магазинов в рюкзаке нет — досыпка россыпью
+	pl._ws[pl.weapon_slot].rounds = 5
 	pl.ammo = 5
 	Input.action_press("reload")
 	await _frames(2)
 	Input.action_release("reload")
-	await _wait(float(Balance.WEAPONS.rifle.reload) + 0.3)
-	_check("перезарядка из рюкзака", pl.ammo == 45 and pl.inventory.count("ammo_545") == 35, "магазин %d, в рюкзаке %d" % [pl.ammo, pl.inventory.count("ammo_545")])
+	await _wait(float(pl.spec().reload) * Balance.RELOAD_TOPUP_K + 0.5)
+	_check("перезарядка из рюкзака (досыпка)", pl.ammo == 45 and pl.inventory.count("ammo_545_std") == 35, "магазин %d, в рюкзаке %d" % [pl.ammo, pl.inventory.count("ammo_545_std")])
 	# обвес прямо в рейде: фонарь из рюкзака — на автомат, потом снять обратно
 	pl.inventory.add("mod_flashlight", 1)
 	var fi := -1
 	for i in range(pl.inventory.items.size()):
-		if String(pl.inventory.items[i].id) == "mod_flashlight":
+		if String(pl.inventory.items[i].id) == "tac_flashlight_01":
 			fi = i
 	Raid.current.request_install_mod("primary", "backpack", fi)
 	await _frames(3)
-	_check("в рейде: фонарь поставлен на автомат, модель в руках с ним", String(pl.inventory.equipment.primary.mods.get("tac", "")) == "mod_flashlight" and pl.weapon_mods.has("tac") and not pl.inventory.has("mod_flashlight"),
+	_check("в рейде: фонарь поставлен на автомат (сбоку справа), модель в руках с ним", WeaponDb.mod_id(pl.inventory.equipment.primary.mods.get("side_right", "")) == "tac_flashlight_01" and pl.weapon_mods.has("side_right") and not pl.inventory.has("tac_flashlight_01"),
 		str(pl.weapon_mods))
-	Raid.current.request_remove_mod("primary", "tac")
+	Raid.current.request_remove_mod("primary", "side_right")
 	await _frames(3)
-	_check("в рейде: фонарь снят в рюкзак", not pl.inventory.equipment.primary.mods.has("tac") and pl.inventory.has("mod_flashlight"), str(pl.inventory.equipment.primary.mods))
-	pl.inventory.remove("mod_flashlight", 1)
+	_check("в рейде: фонарь снят в рюкзак", not pl.inventory.equipment.primary.mods.has("side_right") and pl.inventory.has("tac_flashlight_01"), str(pl.inventory.equipment.primary.mods))
+	pl.inventory.remove("tac_flashlight_01", 1)
+	# броня: слабые пули в грудь спереди — жилет держит (травма меньше), изнашивается
 	var dur0 := float(pl.inventory.equipment.armor.dur)
-	pl.health.take_damage(40.0, pl.global_position + Vector3(0, 1, 5))
-	_check("броня снимает урон и изнашивается", pl.health.hp > 60.0 and float(pl.inventory.equipment.armor.dur) < dur0, "hp %d, броня %.0f" % [int(pl.health.hp), float(pl.inventory.equipment.armor.dur)])
+	var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
+	var hp0 := pl.health.hp
+	for i in range(4):
+		pl.health.take_damage(20.0, pl.global_position + fwd * 5.0 + Vector3.UP, "thorax", pl.global_position + Vector3.UP * 1.2, {"pen": 8.0, "armor_dmg": 10.0})
+	_check("броня держит слабую пулю и изнашивается", hp0 - pl.health.hp < 60.0 and float(pl.inventory.equipment.armor.dur) < dur0, "урон %d из 80, броня %.0f→%.0f" % [int(hp0 - pl.health.hp), dur0, float(pl.inventory.equipment.armor.dur)])
 	Input.action_press("weapon_1")
 	await _frames(3)
 	Input.action_release("weapon_1")
 	await _frames(2)
-	_check("1 — пистолет", pl.weapon_id == "pistol" and pl.ammo == 12, "%s %d" % [pl.weapon_id, pl.ammo])
+	_check("1 — пистолет (магазин снаряжён)", pl.weapon_id == "wpn_hg_03" and pl.ammo == 17, "%s %d" % [pl.weapon_id, pl.ammo])
 	# эвакуация через остановку
 	for m in get_tree().get_nodes_in_group("marauders"):
 		(m as Node).queue_free()
@@ -136,11 +146,11 @@ func _ready() -> void:
 	await _frames(3)
 	var back_ammo := 0
 	for e in Profile.backpack:
-		if String(e.id) == "ammo_545":
+		if String(e.id) == "ammo_545_std":
 			back_ammo += int(e.n)
 	_check("профиль: снаряжение вернулось", Profile.equipment.has("primary") and Profile.equipment.has("armor"), str(Profile.equipment.keys()))
-	_check("профиль: патроны из магазина вернулись в рюкзак", back_ammo == 35 + 45, "5.45: %d" % back_ammo)
-	_check("профиль: обвесы остались на автомате", Profile.weapon_mods("primary").size() == 3, str(Profile.weapon_mods("primary")))
+	_check("профиль: россыпь в рюкзаке, магазин в автомате полный", back_ammo == 35 and int(Profile.equipment.primary.mag.rounds) == 45, "5.45: %d, в магазине %d" % [back_ammo, int(Profile.equipment.primary.mag.rounds)])
+	_check("профиль: обвес остался на автомате", Profile.weapon_mods("primary").size() == 2, str(Profile.weapon_mods("primary")))
 	_check("карман: вернулся после рейда", Profile.pocket.size() == 1 and String(Profile.pocket[0].id) == "bandage", str(Profile.pocket))
 	_check("эвакуация добавила доверия Михалыча", Profile.extractions == 1 and Profile.trust >= Balance.TRUST_PER_EXTRACTION, "доверие %d, выходов %d" % [Profile.trust, Profile.extractions])
 	# доверие набрано — маршрут на 2F открывается за деньги, но этаж ещё не собран
@@ -164,7 +174,7 @@ func _ready() -> void:
 	Profile.pocket = []
 	Profile.stash = Profile.stash.filter(func(e: Dictionary) -> bool: return String(ItemDb.equip(String(e.id)).get("weapon", "")) == "")
 	Profile.money = 1000
-	_check("без ствола и денег — выручка", Profile.needs_rescue() and Profile.take_rescue() and _idx("w_pistol") >= 0 and not Profile.needs_rescue(),
+	_check("без ствола и денег — выручка", Profile.needs_rescue() and Profile.take_rescue() and _idx("wpn_hg_01") >= 0 and not Profile.needs_rescue(),
 		"пистолет в тайнике: %s" % (_idx("w_pistol") >= 0))
 	print("loadout_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
@@ -180,7 +190,7 @@ func _ids(list: Array) -> int:
 
 func _idx(id: String) -> int:
 	for i in range(Profile.stash.size()):
-		if String(Profile.stash[i].id) == id:
+		if String(Profile.stash[i].id) == WeaponDb.canonical(id):
 			return i
 	return -1
 

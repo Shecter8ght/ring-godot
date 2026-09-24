@@ -72,9 +72,14 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 
-## Обвес подходит к оружию в этом слоте.
+## Предмет встаёт в то, что в этом слоте: обвес на оружие, магазин в оружие, плита в плитоносец.
 func _mod_fits(id: String) -> bool:
-	return not entry.is_empty() and ItemDb.mod_fits(id, String(entry.id))
+	if entry.is_empty():
+		return false
+	var eid := String(entry.id)
+	if WeaponDb.is_weapon(eid):
+		return ItemDb.mod_fits(id, entry) or WeaponDb.mag_fits(eid, id)
+	return not WeaponDb.plate(id).is_empty() and entry.has("plates")
 
 
 func _get_drag_data(_at: Vector2) -> Variant:

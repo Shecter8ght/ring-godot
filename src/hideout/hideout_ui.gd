@@ -134,9 +134,16 @@ func _build_stash() -> void:
 		sv.set_entry(Profile.equipment.get(s, {}))
 		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role, idx))
 		sv.unequip_requested.connect(func() -> void: Profile.unequip(s))
+		# на оружие — обвес или магазин, в плитоносец — плиту
 		sv.mod_from.connect(func(src: GridView, idx: int) -> void:
-			if src.role in ["stash", "backpack"]:
-				Profile.install_mod(s, idx, src.role == "backpack"))
+			if not src.role in ["stash", "backpack"]:
+				return
+			var it: Dictionary = Profile.list_of(src.role)[idx]
+			if not WeaponDb.attachment(String(it.id)).is_empty():
+				Profile.install_mod(s, idx, src.role == "backpack")
+			else:
+				Profile.fit_part("equip:" + s, -1, src.role, idx, ""))
+		sv.context.connect(func(at: Vector2) -> void: _parts_menu("equip:" + s, -1, Profile.equipment.get(s, {}), at))
 		gear.add_child(sv)
 	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
 	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)
@@ -185,9 +192,34 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 		acts.append(func() -> void: Profile.equip_from(name, idx))
 	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
 	acts.append(func() -> void: Profile.quick_move(name, idx))
+	# оружие, жилет: снять обвес, магазин, плиту — в тайник
+	for p in Gear.parts(list[idx]):
+		var part := String(p[1])
+		menu.add_item(String(p[0]))
+		acts.append(func() -> void: Profile.strip_part(name, idx, part))
+	if list[idx].has("rounds") or not WeaponDb.ammo(id).is_empty():
+		menu.add_item("Снарядить магазины")
+		acts.append(func() -> void: Profile.load_all_mags())
 	if int(list[idx].n) > 1:
 		menu.add_item("Разделить стопку пополам")
 		acts.append(func() -> void: _split(name, idx))
+	menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
+	menu.popup_hide.connect(menu.queue_free)
+	_root.add_child(menu)
+	menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
+
+
+## Правая кнопка по слоту снаряжения: что снять (обвес, магазин, плиты) — в тайник.
+func _parts_menu(where: String, idx: int, e: Dictionary, at: Vector2) -> void:
+	var parts := Gear.parts(e)
+	if parts.is_empty():
+		return
+	var menu := PopupMenu.new()
+	var acts: Array[Callable] = []
+	for p in parts:
+		var part := String(p[1])
+		menu.add_item(String(p[0]))
+		acts.append(func() -> void: Profile.strip_part(where, idx, part))
 	menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
 	menu.popup_hide.connect(menu.queue_free)
 	_root.add_child(menu)
@@ -230,8 +262,15 @@ func _build_trader() -> void:
 		rescue.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
 		shop.add_child(rescue)
 	var need_trust: Dictionary = _trader.get("trust", {})
+	# разделы по виду: оружие, патроны, магазины, обвес, броня, разное
+	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение"}
+	var last_head := ""
 	for id in _trader.get("stock", []):
 		var sid := String(id)
+		var head := String(heads.get(String(ItemDb.item(sid).cat), "Разное"))
+		if head != last_head:
+			last_head = head
+			shop.add_child(_text(head, Color(0.95, 0.82, 0.6)))
 		# патроны — пачкой (стопка), остальное — поштучно
 		var n := ItemDb.stack(sid) if ItemDb.item(sid).cat == "ammo" else 1
 		var price := Profile.buy_price(sid) * n
@@ -484,7 +523,7 @@ func _build_workbench() -> void:
 	if weapon.is_empty():
 		left.add_child(_text("Надень оружие в тайнике — обвесы ставятся на надетое.", Color(1.0, 0.7, 0.5)))
 		return
-	var wid := String(ItemDb.equip(String(weapon.id)).weapon)
+	var wid := String(weapon.id)
 	var mods := Profile.weapon_mods(_wb_slot)
 	# витрина живёт между перестройками окна — пересобирается только модель
 	if _preview == null or not is_instance_valid(_preview):
@@ -493,44 +532,78 @@ func _build_workbench() -> void:
 		_preview.get_parent().remove_child(_preview)
 	left.add_child(_preview)
 	_preview.show_weapon(wid, mods)
-	_stats(left, WeaponStats.compute(wid, mods), WeaponStats.compute(wid, {}))
-	# слоты обвесов
-	var right := _column("Слоты", 1.0)
-	for slot in ItemDb.equip(String(weapon.id)).get("slots", []):
-		var sl := String(slot)
-		right.add_child(_text(String(MOD_SLOT_NAMES.get(sl, sl)), Color(0.95, 0.82, 0.6)))
+	# карточка: калибр, состояние, магазин и патрон, вес
+	var spec := WeaponStats.compute(weapon)
+	var mag: Dictionary = weapon.get("mag", {}) if weapon.get("mag") is Dictionary else {}
+	var w := WeaponDb.weapon(wid)
+	left.add_child(_text("%s · %s · %s · износ %d%% · %.1f кг" % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber)),
+		"встроенный магазин" if w.has("internal_mag") else ItemDb.item_name(String(mag.get("id", ""))) if String(mag.get("id", "")) != "" else "без магазина",
+		int(weapon.get("dur", 100)), float(spec.weight)], Color(0.85, 0.85, 0.8)))
+	left.add_child(_text("Заряжено: %d / %d  %s — урон %d, пробитие %d" % [int(mag.get("rounds", 0)), int(spec.mag), ItemDb.item_name(String(spec.ammo)), int(spec.damage), int(spec.pen)], Color(0.8, 0.85, 0.75)))
+	var bare := weapon.duplicate(true)
+	bare["mods"] = {}
+	_stats(left, spec, WeaponStats.compute(bare))
+	# точки крепления: что стоит, что можно поставить (по интерфейсу крепления)
+	var right := _column("Крепления", 1.0)
+	right.add_child(_button("Снарядить магазины из тайника и рюкзака", func() -> void: Profile.load_all_mags()))
+	var mounts := WeaponDb.mounts_of(wid)
+	for mount in WeaponDb.MOUNTS:
+		if not mounts.has(mount):
+			continue
+		var sl := String(mount)
+		right.add_child(_text("%s  [%s]" % [String(WeaponDb.MOUNT_NAMES.get(sl, sl)), String(mounts[sl])], Color(0.95, 0.82, 0.6)))
 		if mods.has(sl):
 			var row := HBoxContainer.new()
-			var l := _text("  " + ItemDb.item_name(String(mods[sl])), Color(0.92, 0.9, 0.85))
+			var l := _text("  " + ItemDb.item_name(WeaponDb.mod_id(mods[sl])), Color(0.92, 0.9, 0.85))
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(l)
 			row.add_child(_button("Снять", func() -> void: Profile.remove_mod(_wb_slot, sl)))
 			right.add_child(row)
+		var probe := weapon.duplicate(true)
+		(probe.mods as Dictionary).erase(sl)
 		var any := false
 		# подходящее — и из тайника, и из рюкзака (подписано, откуда)
 		for from_bp in [false, true]:
 			var src: Array = Profile.backpack if from_bp else Profile.stash
 			for i in range(src.size()):
 				var id := String(src[i].id)
-				if not ItemDb.mod_fits(id, String(weapon.id)) or String(ItemDb.mod_spec(id).slot) != sl:
+				if WeaponDb.attachment(id).is_empty() or not sl in WeaponDb.mounts_for(probe, id):
 					continue
 				any = true
 				var idx := i
 				var bp: bool = from_bp
 				var row := HBoxContainer.new()
-				var l := _text("  + %s  —  %s" % [ItemDb.item_name(id), _fx_text(ItemDb.mod_spec(id))], Color(0.7, 0.8, 0.72))
+				var l := _text("  + %s  —  %s" % [ItemDb.item_name(id), _fx_text(WeaponDb.attachment(id))], Color(0.7, 0.8, 0.72))
 				l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				row.add_child(l)
 				row.add_child(_text("рюкзак" if bp else "тайник", Color(0.55, 0.6, 0.65)))
-				var why := Profile.mod_block(id)
+				var why := Profile.mod_block(id, sl)
+				if why == "":
+					why = WeaponDb.attach_block(probe, sl, id)
 				if why != "":
 					row.add_child(_text(why, Color(0.8, 0.5, 0.4)))
 				else:
-					row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx, bp)))
+					row.add_child(_button("Поставить", func() -> void: Profile.install_mod(_wb_slot, idx, bp, sl)))
 				right.add_child(row)
 		if not mods.has(sl) and not any:
 			right.add_child(_text("  пусто — подходящего в тайнике и рюкзаке нет", Color(0.5, 0.5, 0.5)))
+	# магазин — сменить на подходящий из тайника / рюкзака
+	if not w.has("internal_mag"):
+		right.add_child(_text("Магазин  [%s]" % String(w.get("mag_if", "")), Color(0.95, 0.82, 0.6)))
+		for from_bp in [false, true]:
+			var src: Array = Profile.backpack if from_bp else Profile.stash
+			for i in range(src.size()):
+				if not WeaponDb.mag_fits(wid, String(src[i].id)):
+					continue
+				var idx := i
+				var bp: bool = from_bp
+				var row := HBoxContainer.new()
+				var l := _text("  ⇄ " + ItemDb.label(src[i]), Color(0.7, 0.8, 0.72))
+				l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				row.add_child(l)
+				row.add_child(_button("Вставить", func() -> void: Profile.fit_part("equip:" + _wb_slot, -1, "backpack" if bp else "stash", idx, "")))
+				right.add_child(row)
 
 
 ## Шкалы характеристик: значение, полоса 0–100 и разница с оружием без обвесов (зелёным — лучше).
@@ -580,7 +653,11 @@ func _fx_text(ms: Dictionary) -> String:
 		elif k == "zoom":
 			parts.append("кратность %d×" % int(v))
 		elif k == "suppressed":
-			parts.append("без вспышки")
+			parts.append("глушитель")
+		elif k == "flash":
+			parts.append("вспышка %d%%" % int(round(float(v) * 100.0)))
+		elif k == "aim":
+			parts.append("вскидка %+d%%" % int(round((float(v) - 1.0) * 100.0)))
 		elif k == "db" or k == "scoped":
 			continue
 		elif FX_NAMES.has(k):

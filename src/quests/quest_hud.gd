@@ -245,8 +245,12 @@ func _run(cmd: String) -> void:
 				out = Quests.dev_describe()
 			_:
 				out = "quest start|stage|reset|completeObjective|list <id> [n]"
+	elif a.size() >= 1 and a[0] in ["give", "mount", "unmount", "sight", "light", "laser", "spawn", "plate", "dur", "stats", "list", "arsenal"]:
+		# арсенал: выдать, обвес, прицел / фонарь / ЛЦУ, ИИ с выкладкой, плиты, износ
+		out = ArsenalDev.run(get_tree(), a.slice(1) if a[0] == "arsenal" else a)
 	elif a.size() >= 1 and a[0] == "help":
-		out = "quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list"
+		out = "quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+" + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"
 	_console_out.text = out

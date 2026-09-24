@@ -64,6 +64,8 @@ tools/godot.cmd res://tools/ui_shots.tscn                    # снимки: к�
 tools/godot.cmd --disable-vsync res://tools/perf_test.tscn   # FPS / вызовы отрисовки в изометрии и в прицеле по точкам
 tools/godot.cmd res://tools/raid_test.tscn                   # цикл рейда: рубильник, ключи, запертая дверь, эвакуация, итог
 tools/godot.cmd res://tools/loadout_test.tscn                # убежище → рейд со снаряжением → эвакуация → убежище (тестовый профиль)
+tools/godot.cmd --headless res://tools/arsenal_test.tscn     # арсенал, CASE 1–20 ТЗ: прицелы (FPS/изометрия), фонарь+ЛЦУ, пробитие, плиты, ИИ-патроны, снятие с трупа, сохранение
+tools/godot.cmd --headless res://tools/compile_check.tscn    # все скрипты собираются (с автозагрузками) — после больших правок
 tools/godot.cmd res://tools/hideout_shots.tscn               # снимки убежища и его окон в docs/screens/hideout_*.png
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
 tools/godot.cmd res://tools/mods_gallery.tscn                # витрина обвесов: сбоку, 3/4, крупные планы, вид из глаза

@@ -5,8 +5,8 @@ extends Node
 ## экземпляр предмета. Меняет только хост (авторитет узла — 1, как у Health); у всех peer
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
-const SLOTS := ["primary", "secondary", "armor", "helmet", "eyes"]
-const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистолет", "armor": "Броня", "helmet": "Шлем", "eyes": "Глаза"}
+const SLOTS := ["primary", "secondary", "armor", "helmet", "ears", "eyes"]
+const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистолет", "armor": "Броня", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза"}
 
 var items: Array = []
 var equipment: Dictionary = {}
@@ -89,52 +89,128 @@ func put_at(entry: Dictionary, x: int, y: int, r: bool, into: String = "backpack
 	return k
 
 
-## Обвес из рюкзака / кармана (src, запись idx) — на оружие в слоте weapon_slot; старый из того
-## же слота обвеса — туда, откуда взят новый (хост). false — не подходит или некуда деть старый.
-func install_mod(weapon_slot: String, src: String, idx: int) -> bool:
+## Обвес из рюкзака / кармана (src, запись idx) — на оружие в слоте weapon_slot, в точку mount
+## ("" — первая подходящая); снятый с этой точки — туда, откуда взят новый (хост). "" — ошибок нет.
+func install_mod(weapon_slot: String, src: String, idx: int, mount: String = "") -> String:
 	var from: Array = (pocket if src == "pocket" else items).duplicate(true)
 	if not equipment.has(weapon_slot) or idx < 0 or idx >= from.size():
-		return false
-	var mod := String(from[idx].id)
-	var weapon: Dictionary = (equipment[weapon_slot] as Dictionary).duplicate(true)
-	if not ItemDb.mod_fits(mod, String(weapon.id)):
-		return false
-	var mslot := String(ItemDb.mod_spec(mod).slot)
+		return "нечего ставить"
+	var r := Gear.fit(equipment[weapon_slot], from[idx], mount)
+	if String(r[2]) != "":
+		return String(r[2])
 	ItemDb.remove_at(from, idx, 1)
-	var mods: Dictionary = weapon.get("mods", {}).duplicate()
-	if mods.has(mslot):
-		if ItemDb.add_to(from, ItemDb.make(String(mods[mslot]), 1), pocket_grid if src == "pocket" else Balance.BACKPACK_GRID) == 0:
-			return false
-	mods[mslot] = mod
-	weapon["mods"] = mods
+	if not (r[1] as Dictionary).is_empty() and ItemDb.add_to(from, r[1], pocket_grid if src == "pocket" else Balance.BACKPACK_GRID) == 0:
+		return "некуда положить снятое"
 	var eq := equipment.duplicate(true)
-	eq[weapon_slot] = weapon
+	eq[weapon_slot] = r[0]
 	if src == "pocket":
 		pocket = from
 	else:
 		items = from
 	equipment = eq
-	return true
+	return ""
 
 
-## Снять обвес mod_slot с оружия weapon_slot — в рюкзак (хост). false — места нет.
-func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
-	if not equipment.has(weapon_slot):
+## Снять часть (обвес "mod:<точка>", плиту "plate:<сторона>", магазин "mag") с предмета в слоте
+## снаряжения — в рюкзак (хост). false — места нет.
+func strip_equipped(slot: String, part: String) -> bool:
+	if not equipment.has(slot):
 		return false
-	var weapon: Dictionary = (equipment[weapon_slot] as Dictionary).duplicate(true)
-	var mods: Dictionary = weapon.get("mods", {}).duplicate()
-	if not mods.has(mod_slot):
+	var r := Gear.strip(equipment[slot], part)
+	if (r[1] as Dictionary).is_empty():
 		return false
 	var list := items.duplicate(true)
-	if ItemDb.add_to(list, ItemDb.make(String(mods[mod_slot]), 1), Balance.BACKPACK_GRID) == 0:
+	if ItemDb.add_to(list, r[1], Balance.BACKPACK_GRID) < int((r[1] as Dictionary).n):
 		return false
-	mods.erase(mod_slot)
-	weapon["mods"] = mods
 	var eq := equipment.duplicate(true)
-	eq[weapon_slot] = weapon
+	eq[slot] = r[0]
 	items = list
 	equipment = eq
 	return true
+
+
+## Совместимость со старым вызовом (слот обвеса = точка крепления).
+func remove_mod(weapon_slot: String, mount: String) -> bool:
+	return strip_equipped(weapon_slot, "mod:" + mount)
+
+
+## Снять часть с предмета в рюкзаке items[idx] — в рюкзак же (хост).
+func strip_item(idx: int, part: String) -> bool:
+	if idx < 0 or idx >= items.size():
+		return false
+	var list := items.duplicate(true)
+	var r := Gear.strip(list[idx], part)
+	if (r[1] as Dictionary).is_empty():
+		return false
+	var keep: Dictionary = r[0]
+	for k in ["x", "y", "r"]:
+		if (list[idx] as Dictionary).has(k):
+			keep[k] = list[idx][k]
+	list[idx] = keep
+	if ItemDb.add_to(list, r[1], Balance.BACKPACK_GRID) < int((r[1] as Dictionary).n):
+		return false
+	items = list
+	return true
+
+
+## Состояние оружия от владельца (патроны в магазине, износ, прицел, фонари/лазеры) — в запись
+## слота (хост). Ревизию не трогает: это эхо владельца, а не новость для него.
+func apply_weapon_state(slot: String, st: Dictionary) -> void:
+	if not equipment.has(slot):
+		return
+	var e: Dictionary = (equipment[slot] as Dictionary).duplicate(true)
+	if int(st.get("rev", -1)) != int(e.get("rev", 0)):
+		# владелец ещё не видел последнюю перемену (сменили магазин / обвес) — его состояние устарело
+		return
+	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	if not mag.is_empty():
+		mag.rounds = clampi(int(st.get("rounds", mag.get("rounds", 0))), 0, WeaponDb.capacity(e))
+		e["mag"] = mag
+	e["dur"] = clampf(float(st.get("dur", e.get("dur", 100.0))), 0.0, 100.0)
+	e["sight"] = String(st.get("sight", e.get("sight", "primary")))
+	var mods: Dictionary = e.get("mods", {})
+	var tac: Dictionary = st.get("tac", {})
+	for m in mods:
+		if not (mods[m] is Dictionary):
+			mods[m] = {"id": String(mods[m])}
+		if tac.has(m):
+			(mods[m] as Dictionary)["light"] = bool((tac[m] as Dictionary).get("light", false))
+			(mods[m] as Dictionary)["laser"] = bool((tac[m] as Dictionary).get("laser", false))
+	var eq := equipment.duplicate(true)
+	eq[slot] = e
+	equipment = eq
+
+
+## Перезарядка оружия в слоте (хост): сначала — состояние владельца, потом смена магазина из
+## рюкзака или досыпка россыпью (Gear.reload_weapon). Возвращает вид ("swap"/"topup") и выпавшее.
+func reload_slot(slot: String, st: Dictionary) -> Array:
+	apply_weapon_state(slot, st)
+	if not equipment.has(slot):
+		return ["", {}]
+	var list := items.duplicate(true)
+	var r := Gear.reload_weapon(equipment[slot], list, Balance.BACKPACK_GRID)
+	if String(r[2]) == "":
+		return ["", {}]
+	items = list
+	var eq := equipment.duplicate(true)
+	eq[slot] = r[0]
+	equipment = eq
+	return [String(r[2]), r[1]]
+
+
+## Начало рейда (хост): пустые магазины в рюкзаке и оружие в слотах снарядить россыпью.
+func prepare_mags() -> void:
+	var list := items.duplicate(true)
+	var eq := equipment.duplicate(true)
+	var extra: Array = []
+	for slot in ["primary", "secondary"]:
+		if eq.has(slot):
+			extra.append(eq[slot])
+	if Gear.load_mags(list, extra) > 0:
+		for e in extra:
+			Gear._bump(e)
+		items = list
+		equipment = eq
 
 
 ## Перенос между рюкзаком и карманом (или внутри одного) в клетку (x, y) (хост).
@@ -232,34 +308,16 @@ func slot_item(slot: String) -> String:
 	return String((equipment.get(slot, {}) as Dictionary).get("id", ""))
 
 
-## Какое оружие (id в Balance.WEAPONS) в слоте, "" — пусто.
+## Какое оружие (id предмета) в слоте, "" — пусто.
 func slot_weapon(slot: String) -> String:
 	var id := slot_item(slot)
-	return String(ItemDb.equip(id).get("weapon", "")) if id != "" else ""
+	return id if WeaponDb.is_weapon(id) else ""
 
 
-## Патроны (id предмета) к оружию weapon_id из снаряжения.
-func ammo_for(weapon_id: String) -> String:
-	for slot in ["primary", "secondary"]:
-		if slot_weapon(slot) == weapon_id:
-			return String(ItemDb.equip(slot_item(slot)).get("ammo", ""))
-	return ""
-
-
-## Броня и шлем снимают часть урона, пока целы; износ — по снятому (хост, из Health).
-func absorb(amount: float, zone: String = "") -> float:
-	var eq := equipment.duplicate(true)
-	var taken := 0.0
-	# в голову — только шлем, в корпус — только броня; взрыв и неизвестно куда — оба
-	var slots: Array = ["helmet"] if zone == "head" else (["armor"] if zone == "body" else ["armor", "helmet"])
-	for slot in slots:
-		var e: Dictionary = eq.get(slot, {})
-		if e.is_empty() or float(e.get("dur", 0.0)) <= 0.0:
-			continue
-		var part := amount * float(ItemDb.equip(String(e.id)).get("protect", 0.0))
-		part = minf(part, float(e.dur))
-		e.dur = maxf(0.0, float(e.dur) - part)
-		taken += part
-	if taken > 0.0:
-		equipment = eq
-	return amount - taken
+## Попадание по снаряжению (хост, из Health): броня, плиты, шлем — Armor. forward — куда смотрит
+## корпус. Возвращает [урон, насмерть?]; износ брони записывается в снаряжение.
+func absorb(amount: float, zone: String, from: Vector3, at: Vector3, forward: Vector3, bullet: Dictionary, rng: RandomNumberGenerator) -> Array:
+	var r := Armor.hit(equipment, amount, zone, from, at, forward, bullet, rng)
+	if String(r.layer) != "":
+		equipment = r.equipment
+	return [float(r.damage), bool(r.lethal)]

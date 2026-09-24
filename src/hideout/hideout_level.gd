@@ -28,7 +28,10 @@ func _ready() -> void:
 	_player.combat_enabled = false
 	add_child(_player)
 	_player.global_position = _spawn.global_position
-	_player.weapon_id = Profile.equipped_weapon()
+	# в руках — основное из снаряжения (как выглядит, с обвесом)
+	var we := Profile.equipped_entry()
+	_player.weapon_id = String(we.get("id", ""))
+	_player.weapon_mods = we.get("mods", {})
 	_camera_rig.set_target(_player)
 	_camera_rig.rotation.y = _spawn.rotation.y
 	_camera_rig.set_distance(Balance.HIDEOUT_CAMERA_DISTANCE)

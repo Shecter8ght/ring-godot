@@ -81,7 +81,7 @@ func _ready() -> void:
 	var xf2: Transform3D = gp.panes[pick2].xf
 	var n2 := xf2.basis.z.normalized()
 	for k in range(8):
-		Hitscan.fire(world, xf2.origin + n2 * 3.0, -n2, 2.0, 12.0, Hitscan.LAYER_WORLD, float(Balance.WEAPONS.shotgun.damage) if Balance.get("WEAPONS") else 12.0, [] as Array[RID], rng)
+		Hitscan.fire(world, xf2.origin + n2 * 3.0, -n2, 2.0, 12.0, Hitscan.LAYER_WORLD, float(WeaponStats.compute(WeaponDb.make_weapon("SG_02_BASE", rng)).damage), [] as Array[RID], rng)
 	await get_tree().process_frame
 	_check("дробь выбила сразу", bool(gp.panes[pick2].broken), "прочность %.0f" % float(gp.panes[pick2].hp))
 	if DisplayServer.get_name() != "headless":

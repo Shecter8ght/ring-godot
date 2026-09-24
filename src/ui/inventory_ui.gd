@@ -225,19 +225,24 @@ func _refresh_lists(me: Player) -> void:
 				sv.equip_from.connect(func(src: GridView, idx: int) -> void:
 					if src.role == "backpack":
 						Raid.current.request_equip(idx))
-				# обвес прямо в рейде: бросил на оружие — поставил (что умеет твой верстак)
+				# прямо в рейде: бросил на оружие обвес или магазин, в плитоносец — плиту; обвес — что
+				# умеет твой верстак
 				sv.mod_from.connect(func(src: GridView, idx: int) -> void:
-					if src.role not in ["backpack", "pocket"]:
+					if src.role != "backpack":
+						Raid.current.notify("Сначала переложи в рюкзак")
 						return
-					var list: Array = me.inventory.pocket if src.role == "pocket" else me.inventory.items
-					if idx >= list.size():
+					if idx >= me.inventory.items.size():
 						return
-					var why := Profile.mod_block(String(list[idx].id))
-					if why != "":
-						Raid.current.notify("Не поставить: " + why)
-					else:
-						Raid.current.request_install_mod(ws, src.role, idx))
-				sv.context.connect(func(at: Vector2) -> void: _mods_menu(me, ws, at))
+					var iid := String(me.inventory.items[idx].id)
+					if not WeaponDb.attachment(iid).is_empty():
+						var mount := WeaponDb.free_mount_for(me.inventory.equipment.get(ws, {}), iid)
+						var why := Profile.mod_block(iid, mount)
+						if why != "":
+							Raid.current.notify("Не поставить: " + why)
+							return
+					Raid.current.request_fit("equip:" + ws, -1, idx, ""))
+				sv.context.connect(func(at: Vector2) -> void: _parts_menu(me.inventory.equipment.get(ws, {}), at,
+					func(part: String) -> void: Raid.current.request_strip("equip:" + ws, -1, part)))
 				slots.add_child(sv)
 			_bp_grid = GridView.new(Balance.BACKPACK_GRID, "backpack")
 			_bp_grid.set_items(me.inventory.items)
@@ -285,7 +290,17 @@ func _refresh_lists(me: Player) -> void:
 			_loot_list.add_child(lg)
 			lg.activated.connect(func(idx: int) -> void: _take_one(c, idx))
 			lg.quick_move.connect(func(idx: int) -> void: _take_one(c, idx))
-			lg.context.connect(func(idx: int, at: Vector2) -> void: _popup(at, ["Взять"], [func() -> void: _take_one(c, idx)]))
+			# с трупа и из ящика: взять целиком или снять только ценное (прицел, плиту, магазин)
+			lg.context.connect(func(idx: int, at: Vector2) -> void:
+				if idx >= c.items.size():
+					return
+				var names: Array = ["Взять"]
+				var acts: Array = [func() -> void: _take_one(c, idx)]
+				for p in Gear.parts(c.items[idx]):
+					var part := String(p[1])
+					names.append(String(p[0]))
+					acts.append(func() -> void: Raid.current.request_strip("loot", idx, part, c))
+				_popup(at, names, acts))
 			# из рюкзака — в контейнер (спрятать, оставить напарнику)
 			lg.dropped.connect(func(src: GridView, idx: int, _x: int, _y: int, _r: bool) -> void:
 				if src.role == "backpack":
@@ -295,7 +310,7 @@ func _refresh_lists(me: Player) -> void:
 
 func _take_one(c: LootContainer, idx: int) -> void:
 	if idx < c.items.size():
-		Raid.current.request_take(c, String(c.items[idx].id), int(c.items[idx].n))
+		Raid.current.request_take_idx(c, idx)
 
 
 ## Двойной клик по предмету рюкзака: лечиться / надеть / взять в руки.
@@ -322,6 +337,14 @@ func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
 	if not ItemDb.equip(id).is_empty():
 		names.append("В руки" if ItemDb.equip(id).has("weapon") else "Надеть")
 		acts.append(func() -> void: Raid.current.request_equip(idx))
+	# оружие, жилет: снять обвес, магазин, плиту — в рюкзак
+	for p in Gear.parts(it):
+		var part := String(p[1])
+		names.append(String(p[0]))
+		acts.append(func() -> void: Raid.current.request_strip("backpack", idx, part))
+	if it.has("rounds") or not WeaponDb.ammo(id).is_empty():
+		names.append("Снарядить магазины")
+		acts.append(func() -> void: Raid.current.request_load_mags())
 	if _looting:
 		names.append("Положить в «%s»" % _looting.display_name)
 		var c := _looting
@@ -331,19 +354,18 @@ func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
 	_popup(at, names, acts)
 
 
-## Правая кнопка по оружию в слоте: снять обвес (в рюкзак).
-func _mods_menu(me: Player, weapon_slot: String, at: Vector2) -> void:
-	var w: Dictionary = me.inventory.equipment.get(weapon_slot, {})
-	var mods: Dictionary = w.get("mods", {})
-	if mods.is_empty():
-		Raid.current.notify("Обвесов нет — перетащи обвес из рюкзака на оружие")
+## Правая кнопка по предмету в слоте: что с него можно снять (обвес, магазин, плиты) — в рюкзак.
+func _parts_menu(e: Dictionary, at: Vector2, strip: Callable) -> void:
+	var parts := Gear.parts(e)
+	if parts.is_empty():
+		Raid.current.notify("Снимать нечего — перетащи обвес, магазин или плиту из рюкзака сюда")
 		return
 	var names: Array = []
 	var acts: Array = []
-	for ms in mods:
-		var mslot := String(ms)
-		names.append("Снять: " + ItemDb.item_name(String(mods[ms])))
-		acts.append(func() -> void: Raid.current.request_remove_mod(weapon_slot, mslot))
+	for p in parts:
+		var part := String(p[1])
+		names.append(String(p[0]))
+		acts.append(func() -> void: strip.call(part))
 	_popup(at, names, acts)
 
 

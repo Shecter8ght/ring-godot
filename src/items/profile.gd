@@ -76,6 +76,9 @@ static func ensure() -> void:
 		flags = d.get("flags", {})
 		unlocked_stock = d.get("unlocked_stock", [])
 		next_conditions = d.get("next_conditions", next_conditions)
+		for i in range(unlocked_stock.size()):
+			unlocked_stock[i] = WeaponDb.canonical(String(unlocked_stock[i]))
+		_migrate()
 		_fix_numbers()
 		_fit_grids()
 	else:
@@ -150,11 +153,16 @@ static func use_file(p: String, fresh: bool) -> void:
 
 ## Оружие в руках для вида в убежище: основное, иначе пистолет, иначе "".
 static func equipped_weapon() -> String:
+	return String(equipped_entry().get("id", ""))
+
+
+## Оружие в снаряжении (основное, иначе пистолет) — запись; {} — нет.
+static func equipped_entry() -> Dictionary:
 	ensure()
 	for slot in ["primary", "secondary"]:
-		if equipment.has(slot):
-			return String(ItemDb.equip(String(equipment[slot].id)).get("weapon", ""))
-	return ""
+		if equipment.has(slot) and WeaponDb.is_weapon(String(equipment[slot].id)):
+			return equipment[slot]
+	return {}
 
 
 ## Уровень доверия Михалыча (1–4) по очкам (Balance.TRUST_LEVELS).
@@ -337,56 +345,132 @@ static func unequip_to(slot: String, to_name: String, x: int, y: int, r: bool) -
 
 # ---------------------------------------------------------------- верстак
 
-## Обвесы на оружии в слоте снаряжения (primary/secondary): слот обвеса -> id.
+## Обвес на оружии в слоте снаряжения (primary/secondary): точка → {id, …}.
 static func weapon_mods(weapon_slot: String) -> Dictionary:
 	if not equipment.has(weapon_slot):
 		return {}
 	return (equipment[weapon_slot] as Dictionary).get("mods", {})
 
 
-## Поставить обвес (запись idx тайника или рюкзака) на надетое оружие; старый из того же слота
-## ложится туда, откуда взят новый (место освободилось — обмен один на один).
-static func install_mod(weapon_slot: String, idx: int, from_backpack: bool = false) -> bool:
+## Поставить обвес (запись idx тайника или рюкзака) на надетое оружие в точку mount ("" — первая
+## подходящая); снятый оттуда ложится туда, откуда взят новый.
+static func install_mod(weapon_slot: String, idx: int, from_backpack: bool = false, mount: String = "") -> bool:
 	var src: Array = backpack if from_backpack else stash
 	if not equipment.has(weapon_slot) or idx < 0 or idx >= src.size():
 		return false
 	var mod := String(src[idx].id)
-	var weapon: Dictionary = equipment[weapon_slot]
-	if not ItemDb.mod_fits(mod, String(weapon.id)):
+	var target := mount
+	if target == "":
+		target = WeaponDb.free_mount_for(equipment[weapon_slot], mod)
+		if target == "":
+			var all := WeaponDb.mounts_for(equipment[weapon_slot], mod)
+			target = String(all[0]) if not all.is_empty() else ""
+	if target == "" or mod_block(mod, target) != "":
 		return false
-	var slot := String(ItemDb.mod_spec(mod).slot)
-	if mod_block(mod) != "":
-		return false
-	ItemDb.remove_at(src, idx, 1)
-	var mods: Dictionary = weapon.get("mods", {}).duplicate()
-	if mods.has(slot):
-		ItemDb.add_to(src, ItemDb.make(String(mods[slot]), 1), Balance.BACKPACK_GRID if from_backpack else stash_grid())
-	mods[slot] = mod
-	weapon["mods"] = mods
-	save()
-	return true
+	return fit_part("equip:" + weapon_slot, -1, "backpack" if from_backpack else "stash", idx, target)
 
 
-## Почему обвес нельзя поставить на верстаке этого уровня ("" — можно).
-static func mod_block(mod: String) -> String:
-	var need := int(Balance.WORKBENCH_SLOT_LEVEL.get(String(ItemDb.mod_spec(mod).get("slot", "")), 1))
+## Почему обвес нельзя поставить на верстаке этого уровня в точку mount ("" — можно).
+static func mod_block(_mod: String, mount: String = "") -> String:
+	var need := int(Balance.WORKBENCH_SLOT_LEVEL.get(mount, 1))
 	if Upgrades.level("workbench") < need:
 		return "нужен верстак %d" % need
 	return ""
 
 
-static func remove_mod(weapon_slot: String, mod_slot: String) -> bool:
-	var mods := weapon_mods(weapon_slot).duplicate()
-	if not mods.has(mod_slot):
+static func remove_mod(weapon_slot: String, mount: String) -> bool:
+	return strip_part("equip:" + weapon_slot, -1, "mod:" + mount)
+
+
+## Запись по месту: "equip:<слот>" или список ("stash" / "backpack" / "pocket") и индекс.
+static func _entry_at(where: String, idx: int) -> Dictionary:
+	if where.begins_with("equip:"):
+		return equipment.get(where.trim_prefix("equip:"), {})
+	var list := list_of(where)
+	return list[idx] if idx >= 0 and idx < list.size() else {}
+
+
+static func _set_entry(where: String, idx: int, e: Dictionary) -> void:
+	if where.begins_with("equip:"):
+		equipment[where.trim_prefix("equip:")] = e
+		return
+	var list := list_of(where)
+	var old: Dictionary = list[idx]
+	for k in ["x", "y", "r"]:
+		if old.has(k):
+			e[k] = old[k]
+	list[idx] = e
+
+
+## Снять часть с предмета (обвес "mod:<точка>", плиту "plate:<сторона>", магазин "mag") — в тайник.
+static func strip_part(where: String, idx: int, part: String) -> bool:
+	var e := _entry_at(where, idx)
+	if e.is_empty():
 		return false
-	var e := ItemDb.make(String(mods[mod_slot]), 1)
-	if ItemDb.room_in(stash, e, stash_grid()) <= 0:
+	var r := Gear.strip(e, part)
+	var got: Dictionary = r[1]
+	if got.is_empty() or ItemDb.room_in(stash, got, stash_grid()) < int(got.n):
 		return false
-	ItemDb.add_to(stash, e, stash_grid())
-	mods.erase(mod_slot)
-	(equipment[weapon_slot] as Dictionary)["mods"] = mods
+	_set_entry(where, idx, r[0])
+	ItemDb.add_to(stash, got, stash_grid())
 	save()
 	return true
+
+
+## Поставить предмет из списка src (запись src_idx) в предмет where/idx (обвес, плиту, магазин);
+## вытесненное — туда же, откуда взят новый.
+static func fit_part(where: String, idx: int, src: String, src_idx: int, hint: String = "") -> bool:
+	var e := _entry_at(where, idx)
+	var from := list_of(src)
+	if e.is_empty() or src_idx < 0 or src_idx >= from.size() or (where == src and idx == src_idx):
+		return false
+	var r := Gear.fit(e, from[src_idx], hint)
+	if String(r[2]) != "":
+		return false
+	var probe := from.duplicate(true)
+	ItemDb.remove_at(probe, src_idx, 1)
+	if not (r[1] as Dictionary).is_empty() and ItemDb.add_to(probe, r[1], grid_of(src)) == 0:
+		return false
+	# цель в том же списке, что источник, — её индекс мог сдвинуться
+	var ti := idx
+	if where == src and src_idx < idx and int(from[src_idx].n) <= 1:
+		ti -= 1
+	from.clear()
+	from.append_array(probe)
+	_set_entry(where, ti, r[0])
+	save()
+	return true
+
+
+## Снарядить магазины и оружие россыпью: сначала из рюкзака, потом из тайника.
+static func load_all_mags() -> int:
+	var extra: Array = []
+	for slot in ["primary", "secondary"]:
+		if equipment.has(slot):
+			extra.append(equipment[slot])
+	var used := Gear.load_mags(backpack, extra)
+	used += Gear.load_mags(stash, extra)
+	if used > 0:
+		save()
+	return used
+
+
+## Старые сохранения (до арсенала): id по алиасам, обвес по точкам, магазины, прочность. Что не
+## встало — в тайник.
+static func _migrate() -> void:
+	var spill: Array = []
+	for list in [stash, backpack, pocket]:
+		for i in range(list.size()):
+			var r := WeaponDb.migrate(list[i])
+			list[i] = r[0]
+			spill.append_array(r[1])
+	for slot in equipment.keys():
+		var r := WeaponDb.migrate(equipment[slot])
+		equipment[slot] = r[0]
+		spill.append_array(r[1])
+	# старая броня в слоте — может не встать своим слотом (плитоносец надевается в armor)
+	for e in spill:
+		ItemDb.add_to(stash, e, stash_grid())
 
 
 # ---------------------------------------------------------------- торговец

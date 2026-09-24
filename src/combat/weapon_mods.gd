@@ -1,96 +1,129 @@
 class_name WeaponMods
 extends RefCounted
-## Обвесы на процедурные модели оружия. Каждый ставится в точку крепления конкретного ствола
-## (MOUNTS — снято с геометрии WeaponModels, метры, оси модели: +Z к дулу, +Y вверх):
-## прицел — на планку (планка ставится, если её нет), линия прицеливания — через центр линзы;
-## глушитель/компенсатор — на резьбу ствола, дульный срез переезжает на торец; рукоятка — на
-## планку под цевьём; приклад, магазин — вместо штатных (они помечены meta "part" и прячутся).
-## Меняет meta модели: sight_h (новая линия прицеливания), muzzle, scoped.
-## Фонарь и ЛЦУ дают узлы "Flashlight" (SpotLight3D) и "LaserBeam" — включает игрок (T).
-
-## Точки крепления по оружию: слот -> {pos, ...}. surface — поверхность, на которую ложится
-## основание (для прицела — верх ствольной коробки/крышки; для рукоятки — низ цевья).
-const MOUNTS := {
-	"pistol": {
-		# по модели «Glock»: вырез под мини-коллиматор — на затворе перед целиком (верх затвора 0.076);
-		# дульный срез 0.156; фонарь/ЛЦУ — на планку под пылезащитной частью рамки (низ 0.033);
-		# магазин — от верха рукояти по её оси (22° назад), длина рукояти 0.085
-		"optic": {"pos": Vector3(0, 0.076, 0.004), "rail": false},
-		"muzzle": {"pos": Vector3(0, 0.06, 0.156), "bore_r": 0.0065},
-		"tac": {"pos": Vector3(0, 0.031, 0.115), "side": false},
-		"mag": {"pos": Vector3(0, 0.033, 0.006), "half": 0.085, "tilt": 22.0},
-	},
-	"rifle": {
-		# планка на крышку ствольной коробки (крышка — цилиндр r 0.0205 по оси y 0.07, z 0.009–0.121,
-		# верх 0.0905) — утоплена на 2 мм, длиной с крышку; тормоз снимается — резьба 0.575;
-		# рукоятка — под нижнюю накладку цевья (низ ~0.0225); фонарь — на боковую планку цевья справа
-		"optic": {"pos": Vector3(0, 0.0885, 0.065), "rail": true, "rail_len": 0.11, "riser": 0.0},
-		"muzzle": {"pos": Vector3(0, 0.052, 0.575), "bore_r": 0.0085, "replace": true},
-		"grip": {"pos": Vector3(0, 0.0225, 0.35)},
-		"stock": {"pos": Vector3(0, 0.045, -0.07)},
-		"mag": {"pos": Vector3(0, 0.02, 0.128)},
-		"tac": {"pos": Vector3(-0.0245, 0.046, 0.395), "side": true},
-	},
-	"shotgun": {
-		# плоский верх коробки 0.077; дульный срез 0.67; рукоятка — под цевьё-помпу (низ 0.014);
-		# фонарь — на хомут подствольного магазина справа
-		"optic": {"pos": Vector3(0, 0.077, 0.07), "rail": true, "rail_len": 0.16, "riser": 0.0},
-		"muzzle": {"pos": Vector3(0, 0.064, 0.67), "bore_r": 0.0105},
-		"grip": {"pos": Vector3(0, 0.014, 0.33)},
-		"stock": {"pos": Vector3(0, 0.05, -0.03)},
-		"tac": {"pos": Vector3(-0.012, 0.05, 0.585), "side": true},
-	},
-	"bolt": {
-		# дульный срез 0.80 (ствол сужается до 0.0078); сошки — хомут под цевьём (низ ~0.0145)
-		"muzzle": {"pos": Vector3(0, 0.062, 0.8), "bore_r": 0.0078},
-		"bipod": {"pos": Vector3(0, 0.0145, 0.47)},
-	},
-}
+## Обвес на процедурные модели оружия. Точки крепления (сокеты) — в данных: data/weapons.json →
+## models.<основа>.sockets (метры, оси модели: +Z к дулу, +Y вверх, −X — правая сторона стрелка);
+## обвес — по своему виду (attach.look). Сокета нет — обвес не рисуется (характеристики работают).
+## Прицел — на планку (ставится, если её нет), линия прицеливания — через центр линзы;
+## угловой — на кронштейн 45° (поворотный узел по крену roll), его линия — отдельно (meta
+## sight_offset); глушитель/компенсатор — на резьбу, дульный срез переезжает на торец; рукоятка —
+## под цевьё; приклад, магазин — вместо штатных (помечены meta "part" и прячутся).
+## Меняет meta модели: sight_h (основная линия прицеливания), sight_offset {x, h, roll}, muzzle,
+## scoped. Фонари и ЛЦУ — узлы "Flashlight_<точка>" (SpotLight3D) и "LaserBeam_<точка>" с meta
+## "mount": включает игрок (T — фонари, L — лазеры) по состоянию обвеса.
 
 ## Высота планки Пикатинни (основание + зубцы), м.
 const RAIL_H := 0.006
 
 
-static func fit(root: Node3D, weapon: String, mods: Dictionary) -> void:
-	var mounts: Dictionary = MOUNTS.get(weapon, {})
-	for slot in mods:
-		var id := String(mods[slot])
-		var spec: Dictionary = ItemDb.item(id).get("mod", {})
-		if spec.is_empty() or not mounts.has(slot) or not weapon in spec.get("fits", []):
+## Сокет точки mount у основы model_key: словарь с Vector3 pos (из массива данных); {} — нет.
+static func socket(model_key: String, mount: String) -> Dictionary:
+	var sk: Dictionary = (WeaponDb.model(model_key).get("sockets", {}) as Dictionary).get(mount, {})
+	if sk.is_empty():
+		return {}
+	var m := sk.duplicate(true)
+	var p: Array = sk.get("pos", [0, 0, 0])
+	m.pos = Vector3(float(p[0]), float(p[1]), float(p[2]))
+	return m
+
+
+## mods — точка → {id[, light, laser]} (или просто id у старых записей).
+static func fit(root: Node3D, model_key: String, mods: Dictionary) -> void:
+	for mount in mods:
+		var id := WeaponDb.mod_id(mods[mount])
+		var a := WeaponDb.attachment(id)
+		if a.is_empty():
 			continue
-		var m: Dictionary = mounts[slot]
-		# прицел на планке — целик сложен: иначе торчит в нижней части окна прицела
-		if String(slot) == "optic":
+		var m := socket(model_key, String(mount))
+		if m.is_empty():
+			continue
+		m["mount"] = String(mount)
+		m["att"] = a
+		if String(mount) == "optic_primary":
+			# прицел на планке — целик сложен: иначе торчит в нижней части окна прицела
 			_hide_part(root, "rear_sight")
-		match String(spec.look):
-			"red_dot":
-				_red_dot(root, m)
-			"holo":
-				_holo(root, m)
-			"rmr":
-				_rmr(root, m)
-			"scope4x":
-				_scope4x(root, m)
-			"suppressor":
-				_suppressor(root, m, float(spec.size[0]), float(spec.size[1]))
-			"compensator":
-				_compensator(root, m)
-			"grip_vertical":
-				_grip_vertical(root, m)
-			"grip_angled":
-				_grip_angled(root, m)
-			"stock_tele":
-				_stock_tele(root, m)
-			"mag_ak45":
-				_mag_ak45(root, m)
-			"mag_pistol_ext":
-				_mag_pistol_ext(root, m)
-			"flashlight":
-				_flashlight(root, m)
-			"laser":
-				_laser(root, m)
-			"bipod":
-				_bipod(root, m)
+		if String(mount) == "optic_offset":
+			_offset_optic(root, m, a)
+			continue
+		_build_look(root, m, a)
+	# основная линия прицеливания и угловая — для камеры (CameraRig выбирает по прицелу)
+	root.set_meta("sight_primary", {"x": 0.0, "h": float(root.get_meta("sight_h", 0.0)), "roll": 0.0})
+
+
+## Деталь обвеса по виду look.
+static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
+	match String(a.get("look", "")):
+		"red_dot":
+			_red_dot(root, m)
+		"holo":
+			_holo(root, m)
+		"rmr":
+			_rmr(root, m)
+		"scope4x":
+			_scope4x(root, m)
+		"lpvo":
+			_scope4x(root, m, 1.25, 1.1)
+		"scope8x":
+			_scope4x(root, m, 1.55, 1.35)
+		"suppressor":
+			var sz: Array = a.get("size_m", [0.019, 0.175])
+			_suppressor(root, m, float(sz[0]), float(sz[1]))
+		"compensator", "flash_hider":
+			_compensator(root, m)
+		"grip_vertical":
+			_scaled(root, m, float(a.get("scale", 1.0)), _grip_vertical)
+		"grip_angled":
+			_scaled(root, m, float(a.get("scale", 1.0)), _grip_angled)
+		"stock_tele":
+			_stock_tele(root, m)
+		"flashlight":
+			_flashlight(root, m, a, 1.0)
+		"flashlight_hp":
+			_flashlight(root, m, a, 1.3)
+		"laser":
+			_laser(root, m)
+		"combo":
+			_combo(root, m, a)
+		"bipod":
+			_bipod(root, m)
+
+
+## Деталь в масштабе k вокруг точки сокета (короткая / массивная рукоятка).
+static func _scaled(root: Node3D, m: Dictionary, k: float, build: Callable) -> void:
+	if is_equal_approx(k, 1.0):
+		build.call(root, m)
+		return
+	var n := Node3D.new()
+	n.position = m.pos
+	n.scale = Vector3.ONE * k
+	root.add_child(n)
+	var mm := m.duplicate()
+	mm.pos = Vector3.ZERO
+	build.call(n, mm)
+
+
+## Угловой прицел: кронштейн 45° на планке (поворотный узел по крену сокета), на нём мини-коллиматор.
+## Его линия прицеливания в осях модели — meta sight_offset {x, h, roll}.
+static func _offset_optic(root: Node3D, m: Dictionary, a: Dictionary) -> void:
+	var roll := deg_to_rad(float(m.get("roll", 45.0)))
+	var pivot := Node3D.new()
+	pivot.name = "OffsetMount"
+	pivot.position = m.pos
+	pivot.rotation.z = roll
+	root.add_child(pivot)
+	var al := _mat("anodized")
+	# кронштейн: клин от планки к площадке
+	WeaponModels._cbox(pivot, Vector3(0, 0.004, 0), Vector3(0.022, 0.008, 0.032), al, 0.0012)
+	var sub := {"pos": Vector3(0, 0.008, 0), "rail": false}
+	match String(a.get("look", "rmr")):
+		"red_dot":
+			_red_dot(pivot, sub)
+		"holo":
+			_holo(pivot, sub)
+		_:
+			_rmr(pivot, sub)
+	var h := float(pivot.get_meta("sight_h", 0.02))
+	var pt := pivot.transform * Vector3(0, h, 0)
+	root.set_meta("sight_offset", {"x": pt.x, "h": pt.y, "roll": roll})
 
 
 # ---------------------------------------------------------------- общее
@@ -221,18 +254,19 @@ static func _rmr(root: Node3D, m: Dictionary) -> void:
 
 
 ## Оптика 4×: призменный корпус, объектив и окуляр, волоконный указатель сверху.
-static func _scope4x(root: Node3D, m: Dictionary) -> void:
+static func _scope4x(root: Node3D, m: Dictionary, len_k: float = 1.0, obj_k: float = 1.0) -> void:
 	var p: Vector3 = m.pos
 	var top := _optic_base(root, m, 0.1)
 	var al := _mat("anodized")
 	var zc := p.z
 	WeaponModels._cbox(root, Vector3(0, top + 0.005, zc), Vector3(0.026, 0.01, 0.05), al, 0.0015)
 	var cy := top + 0.01 + 0.017
-	WeaponModels._cbox(root, Vector3(0, cy, zc), Vector3(0.036, 0.034, 0.075), al, 0.004)
-	WeaponModels._cyl(root, Vector3(0, cy, zc + 0.052), 0.0165, 0.03, al, 0.0205)
-	WeaponModels._cyl(root, Vector3(0, cy, zc + 0.069), 0.0205, 0.004, al)
+	WeaponModels._cbox(root, Vector3(0, cy, zc), Vector3(0.036, 0.034, 0.075 * len_k), al, 0.004)
+	var fz := 0.0375 * len_k
+	WeaponModels._cyl(root, Vector3(0, cy, zc + fz + 0.015), 0.0165, 0.03, al, 0.0205 * obj_k)
+	WeaponModels._cyl(root, Vector3(0, cy, zc + fz + 0.032), 0.0205 * obj_k, 0.004, al)
 	WeaponModels._cyl(root, Vector3(0, cy, zc - 0.049), 0.0175, 0.024, al, 0.016)
-	WeaponModels._cyl(root, Vector3(0, cy, zc + 0.0712), 0.018, 0.001, _mat("lens"))
+	WeaponModels._cyl(root, Vector3(0, cy, zc + fz + 0.0342), 0.018 * obj_k, 0.001, _mat("lens"))
 	WeaponModels._cyl(root, Vector3(0, cy, zc - 0.0612), 0.015, 0.001, _mat("lens"))
 	WeaponModels._box(root, Vector3(0, cy + 0.0175, zc), Vector3(0.004, 0.003, 0.06), _mat("dot"))
 	WeaponModels._cyl(root, Vector3(0, cy + 0.02, zc + 0.012), 0.006, 0.006, al).rotation = Vector3.ZERO
@@ -383,24 +417,33 @@ static func _tac_body(root: Node3D, m: Dictionary) -> Node3D:
 	return t
 
 
-static func _flashlight(root: Node3D, m: Dictionary) -> void:
+static func _flashlight(root: Node3D, m: Dictionary, a: Dictionary, size_k: float) -> void:
 	var t := _tac_body(root, m)
 	var al := _mat("anodized")
-	WeaponModels._cyl(t, Vector3(0, 0, 0), 0.0105, 0.07, al)
-	WeaponModels._cyl(t, Vector3(0, 0, 0.042), 0.0128, 0.016, al, 0.0132)
-	WeaponModels._cyl(t, Vector3(0, 0, 0.0505), 0.0115, 0.001, _mat("light_lens"))
+	WeaponModels._cyl(t, Vector3(0, 0, 0), 0.0105 * size_k, 0.07, al)
+	WeaponModels._cyl(t, Vector3(0, 0, 0.042), 0.0128 * size_k, 0.016, al, 0.0132 * size_k)
+	WeaponModels._cyl(t, Vector3(0, 0, 0.0505), 0.0115 * size_k, 0.001, _mat("light_lens"))
 	WeaponModels._cyl(t, Vector3(0, 0, -0.037), 0.009, 0.006, _mat("rubber"))
+	_light_node(t, m, a, Vector3(0, 0, 0.052))
+
+
+## Луч фонаря по данным обвеса (attach.light: дальность, угол, сила, отражённый, блик, в воздухе).
+static func _light_node(t: Node3D, m: Dictionary, a: Dictionary, at: Vector3) -> void:
+	var ls: Dictionary = a.get("light", {})
 	var light := SpotLight3D.new()
-	light.name = "Flashlight"
-	light.position = Vector3(0, 0, 0.052)
+	light.name = "Flashlight_" + String(m.get("mount", ""))
+	light.set_meta("mount", String(m.get("mount", "")))
+	light.position = at
 	light.rotation.y = PI
 	light.light_color = Color(1.0, 0.96, 0.9)
-	light.light_energy = 6.0
-	light.spot_range = 30.0
-	light.spot_angle = 22.0
+	light.light_energy = float(ls.get("energy", 6.0))
+	light.spot_range = float(ls.get("range", 30.0))
+	light.spot_angle = float(ls.get("angle", 22.0))
 	light.spot_attenuation = 0.8
+	light.light_indirect_energy = float(ls.get("indirect", 1.3))
+	light.light_specular = float(ls.get("specular", 0.5))
 	light.shadow_enabled = true
-	light.light_volumetric_fog_energy = 2.0
+	light.light_volumetric_fog_energy = float(ls.get("fog", 2.0))
 	light.visible = false
 	# светит в глаза — слепит (LightGlare у игрока, мародёры целятся хуже)
 	light.add_to_group("glare_lights")
@@ -413,8 +456,13 @@ static func _laser(root: Node3D, m: Dictionary) -> void:
 	WeaponModels._cbox(t, Vector3(0, 0, 0), Vector3(0.024, 0.02, 0.046), al, 0.003)
 	WeaponModels._cyl(t, Vector3(0, 0.003, 0.0235), 0.003, 0.002, _mat("reticle"))
 	WeaponModels._cbox(t, Vector3(0, 0.011, -0.006), Vector3(0.01, 0.003, 0.014), _mat("rubber"), 0.001)
+	_beam_node(t, m, Vector3(0, 0.003, 0.0245))
+
+
+static func _beam_node(t: Node3D, m: Dictionary, at: Vector3) -> void:
 	var beam := MeshInstance3D.new()
-	beam.name = "LaserBeam"
+	beam.name = "LaserBeam_" + String(m.get("mount", ""))
+	beam.set_meta("mount", String(m.get("mount", "")))
 	var cm := CylinderMesh.new()
 	cm.top_radius = 0.0012
 	cm.bottom_radius = 0.0012
@@ -423,10 +471,21 @@ static func _laser(root: Node3D, m: Dictionary) -> void:
 	beam.mesh = cm
 	beam.material_override = _mat("laser_beam")
 	beam.rotation.x = PI * 0.5
-	beam.position = Vector3(0, 0.003, 0.0245 + 20.0)
+	beam.position = at + Vector3(0, 0, 20.0)
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	beam.visible = false
 	t.add_child(beam)
+
+
+## Блок фонарь + ЛЦУ: корпус с линзой и окошком лазера; фонарь и лазер — независимо.
+static func _combo(root: Node3D, m: Dictionary, a: Dictionary) -> void:
+	var t := _tac_body(root, m)
+	var al := _mat("anodized")
+	WeaponModels._cbox(t, Vector3(0, -0.002, 0), Vector3(0.03, 0.028, 0.07), al, 0.003)
+	WeaponModels._cyl(t, Vector3(0, -0.004, 0.036), 0.0105, 0.002, _mat("light_lens"))
+	WeaponModels._cyl(t, Vector3(0, 0.009, 0.036), 0.003, 0.002, _mat("reticle"))
+	_light_node(t, m, a, Vector3(0, -0.004, 0.038))
+	_beam_node(t, m, Vector3(0, 0.009, 0.037))
 
 
 ## Сошки: хомут под цевьём, ось, две сложенные вперёд ноги с резиновыми пятками.

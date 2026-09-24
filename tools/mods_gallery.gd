@@ -1,15 +1,17 @@
-﻿extends Node3D
-## Витрина обвесов: каждый ствол с полным комплектом — сбоку, в три четверти и крупные планы узлов
-## крепления (прицел, дульное, под цевьём, приклад). Для проверки посадки глазами.
+extends Node3D
+## Витрина обвесов: стволы со сборками из data/weapons.json (presets) — сбоку, в три четверти и
+## крупные планы узлов крепления (прицел, дульное, под цевьём, приклад), вид из глаза по основному
+## и угловому прицелу. Для проверки посадки глазами.
 ## godot --path . res://tools/mods_gallery.tscn → docs/screens/mods_*.png
 
+## Витрина → сборка (оружие и обвес по точкам крепления).
 const KITS := {
-	"pistol": {"optic": "mod_rmr", "muzzle": "mod_supp_9", "mag": "mod_mag_pistol", "tac": "mod_flashlight"},
-	"rifle": {"optic": "mod_red_dot", "muzzle": "mod_supp_545", "grip": "mod_grip", "stock": "mod_stock_tele", "mag": "mod_mag_ext", "tac": "mod_flashlight"},
-	"rifle_b": {"optic": "mod_scope4x", "muzzle": "mod_comp", "grip": "mod_grip_angled", "tac": "mod_laser"},
-	"rifle_c": {"optic": "mod_holo"},
-	"shotgun": {"optic": "mod_holo", "muzzle": "mod_supp_12", "grip": "mod_grip", "stock": "mod_stock_tele", "tac": "mod_flashlight"},
-	"bolt": {"muzzle": "mod_supp_762", "bipod": "mod_bipod"},
+	"pistol": "HG_03_TAC",
+	"rifle": "AR_04_TAC",
+	"rifle_b": "AR_06_MARKSMAN",
+	"rifle_c": "AR_06_PATROL",
+	"shotgun": "SG_04_BREACH",
+	"bolt": "DMR_01_BASE",
 }
 ## Крупные планы: точка на модели, куда смотреть, и отступ камеры.
 const CLOSEUPS := {
@@ -52,10 +54,14 @@ func _ready() -> void:
 	cam.current = true
 	for kit in KITS:
 		var weapon := String(kit).split("_")[0]
-		var w := WeaponModels.build(weapon, KITS[kit])
+		var pr := WeaponDb.preset(String(KITS[kit]))
+		var mods: Dictionary = pr.get("mods", {})
+		var w := WeaponModels.build(String(pr.weapon), mods)
 		add_child(w)
-		for n in w.find_children("Flashlight", "SpotLight3D", true, false):
+		for n in w.find_children("Flashlight*", "SpotLight3D", true, false):
 			(n as SpotLight3D).visible = true
+		for n in w.find_children("LaserBeam*", "MeshInstance3D", true, false):
+			(n as MeshInstance3D).visible = true
 		# вид справа (+X), целиком
 		var len := 1.25 if weapon == "bolt" else (0.4 if weapon == "pistol" else 1.1)
 		var mid := Vector3(0, 0.03, 0.05 if weapon == "pistol" else 0.22)
@@ -77,13 +83,24 @@ func _ready() -> void:
 			await _frames(4)
 			_save("mods_%s_%s" % [kit, c[0]])
 		# вид из глаза вдоль линии прицеливания — для прицелов
-		if (KITS[kit] as Dictionary).has("optic"):
+		if mods.has("optic_primary"):
 			var sh: float = w.get_meta("sight_h")
 			cam.fov = 40.0
 			cam.position = Vector3(0, sh, -0.3)
 			cam.look_at(Vector3(0, sh, 1.0))
 			await _frames(4)
 			_save("mods_%s_eye" % kit)
+		# угловой: ствол завален на крен кронштейна — глаз по линии углового прицела
+		if w.has_meta("sight_offset"):
+			var so: Dictionary = w.get_meta("sight_offset")
+			# точка линии — уже в осях модели; «верх» прицела — повёрнут кронштейном
+			var cant := Basis(Vector3(0, 0, 1), float(so.roll))
+			var eye := Vector3(float(so.x), float(so.h), 0.0)
+			cam.fov = 40.0
+			cam.position = eye + Vector3(0, 0, -0.3)
+			cam.look_at(eye + Vector3(0, 0, 1.0), cant * Vector3.UP)
+			await _frames(4)
+			_save("mods_%s_eye_offset" % kit)
 		w.queue_free()
 		await _frames(2)
 	get_tree().quit(0)

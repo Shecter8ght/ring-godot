@@ -24,6 +24,10 @@ var sens_fps: float = 1.0
 var sens_iso: float = 1.0
 ## Громкость по шине, 0–1.
 var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.0, "Ambient": 1.0}
+## Гарнитура на ушах своего игрока (data/armor.json → headsets[…].headset): поправки шин, дБ, и
+## насколько дальше слышно (hear_k). Не сохраняется — это снаряжение, а не настройка.
+var headset: Dictionary = {}
+const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_db"}
 
 var _tool_run: bool = false
 var _defaults: Dictionary = {}
@@ -116,7 +120,15 @@ func _apply_audio() -> void:
 			continue
 		var v := float(volume[b])
 		AudioServer.set_bus_mute(i, v <= 0.001)
-		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(v, 0.001)))
+		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(v, 0.001)) + float(headset.get(String(HEADSET_DB.get(b, "")), 0.0)))
+
+
+## Надел / снял гарнитуру: выстрелы глушатся, шаги и мелочь — громче (активная).
+func set_headset(h: Dictionary) -> void:
+	if h == headset:
+		return
+	headset = h
+	_apply_audio()
 
 
 ## Шина для вида звука (Audio.play).

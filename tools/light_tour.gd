@@ -71,7 +71,7 @@ func _glare_part() -> void:
 	# фонарь на оружии от первого лица — туда же, куда ствол (смотрим вверх)
 	me.nvg_on = false
 	me.loadout_mode = false
-	me.sandbox_mods = {me.weapon_id: {"tac": "mod_flashlight"}}
+	me.set_sandbox_mods(me.weapon_slot if me.weapon_slot != "" else "AR_03_BASE", {"side_right": "tac_flashlight_01"})
 	me.light_on = true
 	await _fps("tour_flashlight_up", SectorBuilder.polar(-100.0, 72.0), SectorBuilder.polar(-96.0, 72.0) + Vector3(0, 5.0, 0))
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig

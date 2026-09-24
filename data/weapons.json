@@ -1,0 +1,4970 @@
+{
+ "_comment": "Арсенал (см. docs/design/weapons.md). Предметы здесь — обычные предметы ItemDb (name, cat, size, value, stack, weight, tier, rarity, tags) + свой блок: weapon / ammo / mag / attach. weapon.mounts — точка крепления → интерфейс; attach.fits — какие интерфейсы подходят; blocks — какие точки занимает заодно. models — процедурные основы: точки крепления в осях модели (+Z к дулу, -X — правая сторона стрелка). presets — готовые сборки (ИИ, лут, песочница). aliases — старые id → новые (сохранения не ломаются). Экземпляр (прочность, обвес, магазин, прицел, фонарь/лазер) — в записи предмета, не здесь.",
+ "calibers": {
+  "9x18": {
+   "name": "9×18"
+  },
+  "9x19": {
+   "name": "9×19"
+  },
+  "9x39": {
+   "name": "9×39"
+  },
+  "12x70": {
+   "name": "12/70"
+  },
+  "545x39": {
+   "name": "5.45×39"
+  },
+  "556x45": {
+   "name": "5.56×45"
+  },
+  "762x39": {
+   "name": "7.62×39"
+  },
+  "762x51": {
+   "name": "7.62×51"
+  },
+  "762x54r": {
+   "name": "7.62×54R"
+  }
+ },
+ "models": {
+  "pistol": {
+   "anim": "pistol",
+   "sockets": {
+    "optic_primary": {
+     "pos": [
+      0,
+      0.076,
+      0.004
+     ],
+     "rail": false
+    },
+    "muzzle": {
+     "pos": [
+      0,
+      0.06,
+      0.156
+     ],
+     "bore_r": 0.0065
+    },
+    "underbarrel": {
+     "pos": [
+      0,
+      0.031,
+      0.115
+     ],
+     "side": false
+    },
+    "mag": {
+     "pos": [
+      0,
+      0.033,
+      0.006
+     ],
+     "half": 0.085,
+     "tilt": 22.0
+    }
+   }
+  },
+  "rifle": {
+   "anim": "rifle",
+   "sockets": {
+    "optic_primary": {
+     "pos": [
+      0,
+      0.0885,
+      0.065
+     ],
+     "rail": true,
+     "rail_len": 0.11,
+     "riser": 0.0
+    },
+    "optic_offset": {
+     "pos": [
+      -0.0135,
+      0.093,
+      0.128
+     ],
+     "roll": 45.0
+    },
+    "muzzle": {
+     "pos": [
+      0,
+      0.052,
+      0.575
+     ],
+     "bore_r": 0.0085,
+     "replace": true
+    },
+    "underbarrel": {
+     "pos": [
+      0,
+      0.0225,
+      0.35
+     ]
+    },
+    "stock": {
+     "pos": [
+      0,
+      0.045,
+      -0.07
+     ]
+    },
+    "mag": {
+     "pos": [
+      0,
+      0.02,
+      0.128
+     ]
+    },
+    "side_right": {
+     "pos": [
+      -0.0245,
+      0.046,
+      0.395
+     ],
+     "side": true
+    },
+    "side_left": {
+     "pos": [
+      0.0245,
+      0.046,
+      0.395
+     ],
+     "side": true
+    }
+   }
+  },
+  "shotgun": {
+   "anim": "shotgun",
+   "sockets": {
+    "optic_primary": {
+     "pos": [
+      0,
+      0.077,
+      0.07
+     ],
+     "rail": true,
+     "rail_len": 0.16,
+     "riser": 0.0
+    },
+    "optic_offset": {
+     "pos": [
+      -0.0135,
+      0.083,
+      0.14
+     ],
+     "roll": 45.0
+    },
+    "muzzle": {
+     "pos": [
+      0,
+      0.064,
+      0.67
+     ],
+     "bore_r": 0.0105
+    },
+    "underbarrel": {
+     "pos": [
+      0,
+      0.014,
+      0.33
+     ]
+    },
+    "stock": {
+     "pos": [
+      0,
+      0.05,
+      -0.03
+     ]
+    },
+    "side_right": {
+     "pos": [
+      -0.012,
+      0.05,
+      0.585
+     ],
+     "side": true
+    },
+    "side_left": {
+     "pos": [
+      0.012,
+      0.05,
+      0.585
+     ],
+     "side": true
+    }
+   }
+  },
+  "bolt": {
+   "anim": "bolt",
+   "integral_scope": true,
+   "sockets": {
+    "muzzle": {
+     "pos": [
+      0,
+      0.062,
+      0.8
+     ],
+     "bore_r": 0.0078
+    },
+    "underbarrel": {
+     "pos": [
+      0,
+      0.0145,
+      0.47
+     ]
+    }
+   }
+  }
+ },
+ "weapons": {
+  "wpn_hg_01": {
+   "name": "Пистолет компактный 9×18",
+   "cat": "weapon",
+   "size": [
+    2,
+    1
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.73,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "POLICE"
+   ],
+   "code": "HG_01",
+   "desc": "Старый и простой: надёжен, но слабый патрон и ничего не поставить.",
+   "weapon": {
+    "slot": "secondary",
+    "class": "PISTOL",
+    "caliber": "9x18",
+    "model": "pistol",
+    "scale": 1.0,
+    "length": 0.16,
+    "stats": {
+     "spread": 1.8,
+     "ads_spread": 0.5,
+     "ads_fov": 62.0,
+     "kick": 0.055,
+     "kick_h": 0.015,
+     "kick_bias": 0.2,
+     "recover": 0.8,
+     "shake": 0.12,
+     "ergo": 70,
+     "rpm": 360,
+     "auto": false,
+     "reload": 1.8,
+     "range": 45,
+     "noise": 55,
+     "reliability": 0.965,
+     "wear": 0.02
+    },
+    "mounts": {},
+    "mag_if": "MAG_PM",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_pistol",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_hg_02": {
+   "name": "Пистолет служебный 9×19",
+   "cat": "weapon",
+   "size": [
+    2,
+    1
+   ],
+   "value": 12000,
+   "stack": 1,
+   "weight": 0.95,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "code": "HG_02",
+   "desc": "Служебный пистолет: 9×19, планка под фонарь, резьба под глушитель.",
+   "weapon": {
+    "slot": "secondary",
+    "class": "PISTOL",
+    "caliber": "9x19",
+    "model": "pistol",
+    "scale": 1.0,
+    "length": 0.2,
+    "stats": {
+     "spread": 1.5,
+     "ads_spread": 0.5,
+     "ads_fov": 62.0,
+     "kick": 0.05,
+     "kick_h": 0.014,
+     "kick_bias": 0.2,
+     "recover": 0.8,
+     "shake": 0.12,
+     "ergo": 72,
+     "rpm": 375,
+     "auto": false,
+     "reload": 1.7,
+     "range": 55,
+     "noise": 60,
+     "reliability": 0.975,
+     "wear": 0.02
+    },
+    "mounts": {
+     "underbarrel": "PISTOL_RAIL",
+     "muzzle": "THREAD_9"
+    },
+    "mag_if": "MAG_P9",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_pistol",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_hg_03": {
+   "name": "Пистолет полимерный 9×19",
+   "cat": "weapon",
+   "size": [
+    2,
+    1
+   ],
+   "value": 16000,
+   "stack": 1,
+   "weight": 0.7,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "code": "HG_03",
+   "desc": "Современный: лёгкий, точный, вырез под мини-коллиматор.",
+   "weapon": {
+    "slot": "secondary",
+    "class": "PISTOL",
+    "caliber": "9x19",
+    "model": "pistol",
+    "scale": 1.0,
+    "length": 0.19,
+    "stats": {
+     "spread": 1.3,
+     "ads_spread": 0.5,
+     "ads_fov": 62.0,
+     "kick": 0.047,
+     "kick_h": 0.013,
+     "kick_bias": 0.2,
+     "recover": 0.8,
+     "shake": 0.12,
+     "ergo": 76,
+     "rpm": 375,
+     "auto": false,
+     "reload": 1.6,
+     "range": 60,
+     "noise": 60,
+     "reliability": 0.985,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "SLIDE_RMR",
+     "underbarrel": "PISTOL_RAIL",
+     "muzzle": "THREAD_9"
+    },
+    "mag_if": "MAG_P9",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_pistol",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_hg_04": {
+   "name": "Пистолет «Периметр» П-17",
+   "cat": "weapon",
+   "size": [
+    2,
+    1
+   ],
+   "value": 34000,
+   "stack": 1,
+   "weight": 0.74,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "HG_04",
+   "desc": "Штатный пистолет «Периметра». Доведённый спуск, мягкая отдача.",
+   "weapon": {
+    "slot": "secondary",
+    "class": "PISTOL",
+    "caliber": "9x19",
+    "model": "pistol",
+    "scale": 1.0,
+    "length": 0.19,
+    "stats": {
+     "spread": 1.2,
+     "ads_spread": 0.48,
+     "ads_fov": 62.0,
+     "kick": 0.043,
+     "kick_h": 0.012,
+     "kick_bias": 0.2,
+     "recover": 0.85,
+     "shake": 0.11,
+     "ergo": 80,
+     "rpm": 400,
+     "auto": false,
+     "reload": 1.5,
+     "range": 62,
+     "noise": 60,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "SLIDE_RMR",
+     "underbarrel": "PISTOL_RAIL",
+     "muzzle": "THREAD_9"
+    },
+    "mag_if": "MAG_P9",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_pistol",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_smg_01": {
+   "name": "ПП компактный 9×19",
+   "cat": "weapon",
+   "size": [
+    3,
+    2
+   ],
+   "value": 22000,
+   "stack": 1,
+   "weight": 2.1,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "POLICE",
+    "SCAV"
+   ],
+   "code": "SMG_01",
+   "desc": "Лёгкий и скорострельный, пистолетный патрон.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SMG",
+    "caliber": "9x19",
+    "model": "rifle",
+    "scale": 0.74,
+    "length": 0.5,
+    "stats": {
+     "spread": 2.4,
+     "ads_spread": 0.4,
+     "ads_fov": 58.0,
+     "kick": 0.02,
+     "kick_h": 0.012,
+     "kick_bias": 0.35,
+     "recover": 0.4,
+     "shake": 0.07,
+     "ergo": 62,
+     "rpm": 900,
+     "auto": true,
+     "reload": 2.1,
+     "range": 50,
+     "noise": 60,
+     "reliability": 0.97,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "side_right": "RAIL_SIDE",
+     "muzzle": "THREAD_9"
+    },
+    "mag_if": "MAG_SMG9",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_smg_02": {
+   "name": "ПП тактический 9×19",
+   "cat": "weapon",
+   "size": [
+    3,
+    2
+   ],
+   "value": 36000,
+   "stack": 1,
+   "weight": 2.5,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "code": "SMG_02",
+   "desc": "Полноценная платформа под обвес: планки со всех сторон.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SMG",
+    "caliber": "9x19",
+    "model": "rifle",
+    "scale": 0.76,
+    "length": 0.55,
+    "stats": {
+     "spread": 2.1,
+     "ads_spread": 0.38,
+     "ads_fov": 58.0,
+     "kick": 0.018,
+     "kick_h": 0.011,
+     "kick_bias": 0.35,
+     "recover": 0.42,
+     "shake": 0.07,
+     "ergo": 66,
+     "rpm": 800,
+     "auto": true,
+     "reload": 2.0,
+     "range": 55,
+     "noise": 60,
+     "reliability": 0.98,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_9",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_SMG9",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_smg_03": {
+   "name": "ПП «Периметр»",
+   "cat": "weapon",
+   "size": [
+    3,
+    2
+   ],
+   "value": 58000,
+   "stack": 1,
+   "weight": 2.4,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "SMG_03",
+   "desc": "Оружие штурмовых двоек «Периметра» для помещений.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SMG",
+    "caliber": "9x19",
+    "model": "rifle",
+    "scale": 0.76,
+    "length": 0.55,
+    "stats": {
+     "spread": 1.9,
+     "ads_spread": 0.36,
+     "ads_fov": 58.0,
+     "kick": 0.016,
+     "kick_h": 0.01,
+     "kick_bias": 0.35,
+     "recover": 0.45,
+     "shake": 0.065,
+     "ergo": 70,
+     "rpm": 850,
+     "auto": true,
+     "reload": 1.9,
+     "range": 58,
+     "noise": 60,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_9",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_SMG9",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_sg_01": {
+   "name": "Ружьё двуствольное 12/70",
+   "cat": "weapon",
+   "size": [
+    5,
+    1
+   ],
+   "value": 9000,
+   "stack": 1,
+   "weight": 3.2,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "HUNTING"
+   ],
+   "code": "SG_01",
+   "desc": "Охотничья двустволка. Два выстрела — и перезарядка.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SHOTGUN",
+    "caliber": "12x70",
+    "model": "shotgun",
+    "scale": 0.96,
+    "length": 1.1,
+    "stats": {
+     "spread": 5.5,
+     "ads_spread": 0.85,
+     "ads_fov": 62.0,
+     "kick": 0.1,
+     "kick_h": 0.022,
+     "kick_bias": 0.1,
+     "recover": 0.6,
+     "shake": 0.34,
+     "ergo": 45,
+     "rpm": 400,
+     "auto": false,
+     "reload": 2.4,
+     "range": 30,
+     "noise": 80,
+     "reliability": 0.995,
+     "wear": 0.02
+    },
+    "mounts": {},
+    "internal_mag": 2,
+    "sound": "shot_shotgun",
+    "reload_sound": "reload_shotgun",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_sg_02": {
+   "name": "Ружьё помповое 12/70",
+   "cat": "weapon",
+   "size": [
+    5,
+    1
+   ],
+   "value": 26000,
+   "stack": 1,
+   "weight": 3.4,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "POLICE",
+    "SCAV"
+   ],
+   "code": "SG_02",
+   "desc": "Помпа: надёжна и сильна вблизи.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SHOTGUN",
+    "caliber": "12x70",
+    "model": "shotgun",
+    "scale": 1.0,
+    "length": 1.05,
+    "stats": {
+     "spread": 5.5,
+     "ads_spread": 0.85,
+     "ads_fov": 62.0,
+     "kick": 0.09,
+     "kick_h": 0.022,
+     "kick_bias": 0.1,
+     "recover": 0.6,
+     "shake": 0.32,
+     "ergo": 40,
+     "rpm": 75,
+     "auto": false,
+     "reload": 3.0,
+     "range": 35,
+     "noise": 75,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_12",
+     "stock": "STOCK_SG"
+    },
+    "internal_mag": 6,
+    "sound": "shot_shotgun",
+    "reload_sound": "reload_shotgun",
+    "cycle_sound": "reload_shotgun"
+   }
+  },
+  "wpn_sg_03": {
+   "name": "Ружьё полуавтоматическое 12/70",
+   "cat": "weapon",
+   "size": [
+    5,
+    1
+   ],
+   "value": 42000,
+   "stack": 1,
+   "weight": 3.6,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "code": "SG_03",
+   "desc": "Полуавтомат: быстрые повторные выстрелы.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SHOTGUN",
+    "caliber": "12x70",
+    "model": "shotgun",
+    "scale": 1.0,
+    "length": 1.05,
+    "stats": {
+     "spread": 5.0,
+     "ads_spread": 0.8,
+     "ads_fov": 62.0,
+     "kick": 0.085,
+     "kick_h": 0.02,
+     "kick_bias": 0.1,
+     "recover": 0.6,
+     "shake": 0.3,
+     "ergo": 48,
+     "rpm": 240,
+     "auto": false,
+     "reload": 3.3,
+     "range": 38,
+     "noise": 75,
+     "reliability": 0.975,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "muzzle": "THREAD_12",
+     "stock": "STOCK_SG"
+    },
+    "internal_mag": 7,
+    "sound": "shot_shotgun",
+    "reload_sound": "reload_shotgun",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_sg_04": {
+   "name": "Ружьё тактическое 12/70",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 48000,
+   "stack": 1,
+   "weight": 3.8,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "code": "SG_04",
+   "desc": "Магазинное ружьё под обвес — любимое оружие штурмовиков.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SHOTGUN",
+    "caliber": "12x70",
+    "model": "shotgun",
+    "scale": 1.0,
+    "length": 1.0,
+    "stats": {
+     "spread": 4.8,
+     "ads_spread": 0.78,
+     "ads_fov": 62.0,
+     "kick": 0.08,
+     "kick_h": 0.019,
+     "kick_bias": 0.1,
+     "recover": 0.62,
+     "shake": 0.3,
+     "ergo": 52,
+     "rpm": 300,
+     "auto": false,
+     "reload": 2.6,
+     "range": 40,
+     "noise": 75,
+     "reliability": 0.975,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_12",
+     "stock": "STOCK_SG"
+    },
+    "mag_if": "MAG_S12",
+    "sound": "shot_shotgun",
+    "reload_sound": "reload_shotgun",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_01": {
+   "name": "Автомат старый 7.62×39",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 38000,
+   "stack": 1,
+   "weight": 3.8,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "code": "AR_01",
+   "desc": "Старый, тяжёлый, неубиваемый. Бьёт сильно, прыгает в руках.",
+   "weapon": {
+    "slot": "primary",
+    "class": "ASSAULT_RIFLE",
+    "caliber": "762x39",
+    "model": "rifle",
+    "scale": 1.0,
+    "length": 0.88,
+    "stats": {
+     "spread": 2.3,
+     "ads_spread": 0.36,
+     "ads_fov": 56.0,
+     "kick": 0.03,
+     "kick_h": 0.013,
+     "kick_bias": 0.35,
+     "recover": 0.34,
+     "shake": 0.1,
+     "ergo": 40,
+     "rpm": 600,
+     "auto": true,
+     "reload": 2.5,
+     "range": 100,
+     "noise": 85,
+     "reliability": 0.985,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "DOVETAIL",
+     "muzzle": "THREAD_762",
+     "stock": "STOCK_AK"
+    },
+    "mag_if": "MAG_AK762",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_02": {
+   "name": "Автомат укороченный 7.62×39",
+   "cat": "weapon",
+   "size": [
+    3,
+    2
+   ],
+   "value": 36000,
+   "stack": 1,
+   "weight": 3.0,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "code": "AR_02",
+   "desc": "Короткий и вёрткий, но отдача злая.",
+   "weapon": {
+    "slot": "primary",
+    "class": "ASSAULT_RIFLE",
+    "caliber": "762x39",
+    "model": "rifle",
+    "scale": 0.86,
+    "length": 0.73,
+    "stats": {
+     "spread": 2.6,
+     "ads_spread": 0.38,
+     "ads_fov": 57.0,
+     "kick": 0.034,
+     "kick_h": 0.016,
+     "kick_bias": 0.38,
+     "recover": 0.34,
+     "shake": 0.11,
+     "ergo": 50,
+     "rpm": 700,
+     "auto": true,
+     "reload": 2.4,
+     "range": 80,
+     "noise": 85,
+     "reliability": 0.98,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "DOVETAIL",
+     "muzzle": "THREAD_762",
+     "stock": "STOCK_AK"
+    },
+    "mag_if": "MAG_AK762",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_03": {
+   "name": "Автомат 5.45×39",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 48000,
+   "stack": 1,
+   "weight": 3.4,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "code": "AR_03",
+   "desc": "Стандартный автомат. Крышка с планкой, боковая планка, резьба.",
+   "weapon": {
+    "slot": "primary",
+    "class": "ASSAULT_RIFLE",
+    "caliber": "545x39",
+    "model": "rifle",
+    "scale": 1.0,
+    "length": 0.94,
+    "stats": {
+     "spread": 2.0,
+     "ads_spread": 0.35,
+     "ads_fov": 56.0,
+     "kick": 0.022,
+     "kick_h": 0.011,
+     "kick_bias": 0.35,
+     "recover": 0.36,
+     "shake": 0.09,
+     "ergo": 44,
+     "rpm": 600,
+     "auto": true,
+     "reload": 2.4,
+     "range": 90,
+     "noise": 80,
+     "reliability": 0.985,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_545",
+     "stock": "STOCK_AK"
+    },
+    "mag_if": "MAG_AK545",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_04": {
+   "name": "Автомат модернизированный 5.45×39",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 72000,
+   "stack": 1,
+   "weight": 3.5,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY"
+   ],
+   "code": "AR_04",
+   "desc": "Модернизированный: цевьё с планками, современный приклад.",
+   "weapon": {
+    "slot": "primary",
+    "class": "ASSAULT_RIFLE",
+    "caliber": "545x39",
+    "model": "rifle",
+    "scale": 1.0,
+    "length": 0.94,
+    "stats": {
+     "spread": 1.8,
+     "ads_spread": 0.33,
+     "ads_fov": 58.0,
+     "kick": 0.019,
+     "kick_h": 0.01,
+     "kick_bias": 0.33,
+     "recover": 0.4,
+     "shake": 0.085,
+     "ergo": 52,
+     "rpm": 650,
+     "auto": true,
+     "reload": 2.3,
+     "range": 95,
+     "noise": 80,
+     "reliability": 0.985,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_545",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_AK545",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_05": {
+   "name": "Карабин современный 5.56×45",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 78000,
+   "stack": 1,
+   "weight": 3.1,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "POLICE"
+   ],
+   "code": "AR_05",
+   "desc": "Лёгкий точный карабин, удобный под любой обвес.",
+   "weapon": {
+    "slot": "primary",
+    "class": "CARBINE",
+    "caliber": "556x45",
+    "model": "rifle",
+    "scale": 1.0,
+    "length": 0.84,
+    "stats": {
+     "spread": 1.6,
+     "ads_spread": 0.32,
+     "ads_fov": 58.0,
+     "kick": 0.017,
+     "kick_h": 0.009,
+     "kick_bias": 0.3,
+     "recover": 0.42,
+     "shake": 0.08,
+     "ergo": 58,
+     "rpm": 750,
+     "auto": true,
+     "reload": 2.2,
+     "range": 100,
+     "noise": 80,
+     "reliability": 0.975,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_556",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_STANAG",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_06": {
+   "name": "Штурмовая винтовка «Периметр» 5.45",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 140000,
+   "stack": 1,
+   "weight": 3.6,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "AR_06",
+   "desc": "Основная винтовка бойцов «Периметра». Мягкая, послушная, дорогая.",
+   "weapon": {
+    "slot": "primary",
+    "class": "ASSAULT_RIFLE",
+    "caliber": "545x39",
+    "model": "rifle",
+    "scale": 1.0,
+    "length": 0.92,
+    "stats": {
+     "spread": 1.5,
+     "ads_spread": 0.3,
+     "ads_fov": 58.0,
+     "kick": 0.016,
+     "kick_h": 0.008,
+     "kick_bias": 0.28,
+     "recover": 0.45,
+     "shake": 0.075,
+     "ergo": 62,
+     "rpm": 700,
+     "auto": true,
+     "reload": 2.1,
+     "range": 110,
+     "noise": 80,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_545",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_AK545",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_07": {
+   "name": "Карабин «Периметр» 5.56",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 150000,
+   "stack": 1,
+   "weight": 3.2,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "AR_07",
+   "desc": "Короткий карабин командиров групп.",
+   "weapon": {
+    "slot": "primary",
+    "class": "CARBINE",
+    "caliber": "556x45",
+    "model": "rifle",
+    "scale": 1.0,
+    "length": 0.84,
+    "stats": {
+     "spread": 1.4,
+     "ads_spread": 0.3,
+     "ads_fov": 58.0,
+     "kick": 0.015,
+     "kick_h": 0.008,
+     "kick_bias": 0.28,
+     "recover": 0.46,
+     "shake": 0.072,
+     "ergo": 66,
+     "rpm": 800,
+     "auto": true,
+     "reload": 2.0,
+     "range": 105,
+     "noise": 80,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_556",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_STANAG",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_ar_08": {
+   "name": "Тяжёлая винтовка «Периметр» 7.62×51",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 190000,
+   "stack": 1,
+   "weight": 4.3,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "AR_08",
+   "desc": "Мощный патрон на длинной дистанции. Отдача серьёзная.",
+   "weapon": {
+    "slot": "primary",
+    "class": "ASSAULT_RIFLE",
+    "caliber": "762x51",
+    "model": "rifle",
+    "scale": 1.08,
+    "length": 1.0,
+    "stats": {
+     "spread": 1.5,
+     "ads_spread": 0.28,
+     "ads_fov": 58.0,
+     "kick": 0.03,
+     "kick_h": 0.014,
+     "kick_bias": 0.3,
+     "recover": 0.38,
+     "shake": 0.12,
+     "ergo": 48,
+     "rpm": 600,
+     "auto": true,
+     "reload": 2.5,
+     "range": 140,
+     "noise": 100,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_762",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_SR25",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_dmr_01": {
+   "name": "Марксманская винтовка старая 7.62×54R",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 90000,
+   "stack": 1,
+   "weight": 4.3,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY"
+   ],
+   "code": "DMR_01",
+   "desc": "Полуавтомат со штатным 4× прицелом.",
+   "weapon": {
+    "slot": "primary",
+    "class": "DMR",
+    "caliber": "762x54r",
+    "model": "bolt",
+    "scale": 1.0,
+    "length": 1.22,
+    "stats": {
+     "spread": 1.4,
+     "ads_spread": 0.05,
+     "ads_fov": 16.0,
+     "kick": 0.06,
+     "kick_h": 0.013,
+     "kick_bias": 0.0,
+     "recover": 0.7,
+     "shake": 0.3,
+     "ergo": 34,
+     "rpm": 150,
+     "auto": false,
+     "reload": 2.8,
+     "range": 160,
+     "noise": 115,
+     "reliability": 0.98,
+     "wear": 0.02
+    },
+    "mounts": {
+     "muzzle": "THREAD_762"
+    },
+    "mag_if": "MAG_SVD",
+    "sound": "shot_bolt",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": "",
+    "integral": {
+     "zoom": 4.0
+    }
+   }
+  },
+  "wpn_dmr_02": {
+   "name": "Марксманская винтовка 7.62×51",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 120000,
+   "stack": 1,
+   "weight": 4.6,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY"
+   ],
+   "code": "DMR_02",
+   "desc": "Точный полуавтомат под современную оптику.",
+   "weapon": {
+    "slot": "primary",
+    "class": "DMR",
+    "caliber": "762x51",
+    "model": "rifle",
+    "scale": 1.12,
+    "length": 1.05,
+    "stats": {
+     "spread": 1.2,
+     "ads_spread": 0.12,
+     "ads_fov": 50.0,
+     "kick": 0.045,
+     "kick_h": 0.012,
+     "kick_bias": 0.2,
+     "recover": 0.55,
+     "shake": 0.2,
+     "ergo": 42,
+     "rpm": 300,
+     "auto": false,
+     "reload": 2.6,
+     "range": 170,
+     "noise": 110,
+     "reliability": 0.98,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_762",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_SR25",
+    "sound": "shot_bolt",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_dmr_03": {
+   "name": "Марксманская винтовка «Периметр»",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 210000,
+   "stack": 1,
+   "weight": 4.4,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "DMR_03",
+   "desc": "Оружие марксманов «Периметра»: дальняя оптика и угловой коллиматор.",
+   "weapon": {
+    "slot": "primary",
+    "class": "DMR",
+    "caliber": "762x51",
+    "model": "rifle",
+    "scale": 1.12,
+    "length": 1.05,
+    "stats": {
+     "spread": 0.95,
+     "ads_spread": 0.1,
+     "ads_fov": 50.0,
+     "kick": 0.04,
+     "kick_h": 0.01,
+     "kick_bias": 0.2,
+     "recover": 0.58,
+     "shake": 0.18,
+     "ergo": 48,
+     "rpm": 300,
+     "auto": false,
+     "reload": 2.5,
+     "range": 180,
+     "noise": 110,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "optic_offset": "OFFSET_45",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_762",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_SR25",
+    "sound": "shot_bolt",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": ""
+   }
+  },
+  "wpn_sr_01": {
+   "name": "Винтовка болтовая 7.62×54R",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 65000,
+   "stack": 1,
+   "weight": 4.4,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "HUNTING",
+    "SCAV",
+    "MILITARY"
+   ],
+   "code": "SR_01",
+   "desc": "Болтовка с оптикой 6×: медленно и насмерть.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SNIPER",
+    "caliber": "762x54r",
+    "model": "bolt",
+    "scale": 1.0,
+    "length": 1.23,
+    "stats": {
+     "spread": 1.6,
+     "ads_spread": 0.03,
+     "ads_fov": 16.0,
+     "kick": 0.08,
+     "kick_h": 0.012,
+     "kick_bias": 0.0,
+     "recover": 0.75,
+     "shake": 0.35,
+     "ergo": 30,
+     "rpm": 46,
+     "auto": false,
+     "reload": 3.2,
+     "range": 160,
+     "noise": 120,
+     "reliability": 0.995,
+     "wear": 0.02
+    },
+    "mounts": {
+     "muzzle": "THREAD_762",
+     "underbarrel": "BIPOD_CLAMP"
+    },
+    "internal_mag": 5,
+    "sound": "shot_bolt",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": "bolt",
+    "integral": {
+     "zoom": 6.0
+    }
+   }
+  },
+  "wpn_sr_02": {
+   "name": "Снайперская винтовка «Периметр» 7.62×51",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 240000,
+   "stack": 1,
+   "weight": 5.8,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "SR_02",
+   "desc": "Болтовая винтовка снайперов «Периметра», прицел 8×.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SNIPER",
+    "caliber": "762x51",
+    "model": "bolt",
+    "scale": 1.0,
+    "length": 1.15,
+    "stats": {
+     "spread": 1.2,
+     "ads_spread": 0.02,
+     "ads_fov": 14.0,
+     "kick": 0.065,
+     "kick_h": 0.01,
+     "kick_bias": 0.0,
+     "recover": 0.78,
+     "shake": 0.3,
+     "ergo": 40,
+     "rpm": 55,
+     "auto": false,
+     "reload": 2.8,
+     "range": 190,
+     "noise": 115,
+     "reliability": 0.995,
+     "wear": 0.02
+    },
+    "mounts": {
+     "muzzle": "THREAD_762",
+     "underbarrel": "BIPOD_CLAMP"
+    },
+    "mag_if": "MAG_SR25",
+    "sound": "shot_bolt",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": "bolt",
+    "integral": {
+     "zoom": 8.0
+    }
+   }
+  },
+  "wpn_sp_01": {
+   "name": "Карабин бесшумный 9×39",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 160000,
+   "stack": 1,
+   "weight": 2.6,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER",
+    "RARE"
+   ],
+   "code": "SP_01",
+   "desc": "Встроенный глушитель и тяжёлая дозвуковая пуля — тихо и больно.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SPECIAL",
+    "caliber": "9x39",
+    "model": "rifle",
+    "scale": 0.9,
+    "length": 0.9,
+    "stats": {
+     "spread": 1.9,
+     "ads_spread": 0.35,
+     "ads_fov": 58.0,
+     "kick": 0.024,
+     "kick_h": 0.012,
+     "kick_bias": 0.33,
+     "recover": 0.42,
+     "shake": 0.08,
+     "ergo": 56,
+     "rpm": 800,
+     "auto": true,
+     "reload": 2.2,
+     "range": 70,
+     "noise": 28,
+     "reliability": 0.975,
+     "wear": 0.02
+    },
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "side_right": "RAIL_SIDE"
+    },
+    "mag_if": "MAG_VSS",
+    "sound": "shot_pistol",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": "",
+    "integral": {
+     "suppressed": true,
+     "db": -14.0
+    }
+   }
+  }
+ },
+ "ammo": {
+  "ammo_918_pst": {
+   "name": "Патроны 9×18 ПСт",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 45,
+   "stack": 50,
+   "weight": 0.01,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "SCAV",
+    "POLICE"
+   ],
+   "short": "9×18",
+   "ammo": {
+    "caliber": "9x18",
+    "damage": 26,
+    "pen": 10,
+    "armor_dmg": 14,
+    "pellets": 1,
+    "velocity": 315,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_918_ap": {
+   "name": "Патроны 9×18 бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 110,
+   "stack": 50,
+   "weight": 0.01,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "9×18 БП",
+   "ammo": {
+    "caliber": "9x18",
+    "damage": 22,
+    "pen": 24,
+    "armor_dmg": 20,
+    "pellets": 1,
+    "velocity": 330,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_919_exp": {
+   "name": "Патроны 9×19 экспансивные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 70,
+   "stack": 50,
+   "weight": 0.012,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "POLICE"
+   ],
+   "short": "9×19 ЭКС",
+   "ammo": {
+    "caliber": "9x19",
+    "damage": 36,
+    "pen": 4,
+    "armor_dmg": 8,
+    "pellets": 1,
+    "velocity": 360,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   },
+   "desc": "Тяжело ранит незащищённого, броню почти не берёт."
+  },
+  "ammo_919_fmj": {
+   "name": "Патроны 9×19 FMJ",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 60,
+   "stack": 50,
+   "weight": 0.012,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "POLICE",
+    "MILITARY"
+   ],
+   "short": "9×19",
+   "ammo": {
+    "caliber": "9x19",
+    "damage": 30,
+    "pen": 15,
+    "armor_dmg": 14,
+    "pellets": 1,
+    "velocity": 370,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_919_ap": {
+   "name": "Патроны 9×19 бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 160,
+   "stack": 50,
+   "weight": 0.012,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "9×19 БП",
+   "ammo": {
+    "caliber": "9x19",
+    "damage": 26,
+    "pen": 30,
+    "armor_dmg": 22,
+    "pellets": 1,
+    "velocity": 440,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_939_sp5": {
+   "name": "Патроны 9×39 снайперские",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 240,
+   "stack": 40,
+   "weight": 0.023,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "9×39",
+   "ammo": {
+    "caliber": "9x39",
+    "damage": 48,
+    "pen": 30,
+    "armor_dmg": 30,
+    "pellets": 1,
+    "velocity": 290,
+    "range_k": 0.8,
+    "accuracy": 0.85,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_939_sp6": {
+   "name": "Патроны 9×39 бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 420,
+   "stack": 40,
+   "weight": 0.023,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "9×39 БП",
+   "ammo": {
+    "caliber": "9x39",
+    "damage": 44,
+    "pen": 46,
+    "armor_dmg": 40,
+    "pellets": 1,
+    "velocity": 300,
+    "range_k": 0.8,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_12_buck": {
+   "name": "Картечь 12/70",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 80,
+   "stack": 30,
+   "weight": 0.04,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "HUNTING",
+    "SCAV",
+    "POLICE"
+   ],
+   "short": "12 карт.",
+   "ammo": {
+    "caliber": "12x70",
+    "damage": 12,
+    "pen": 4,
+    "armor_dmg": 5,
+    "pellets": 8,
+    "velocity": 400,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   },
+   "desc": "Восемь картечин: страшно вблизи, бесполезно по броне."
+  },
+  "ammo_12_hbuck": {
+   "name": "Картечь крупная 12/70",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 120,
+   "stack": 30,
+   "weight": 0.04,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "HUNTING",
+    "POLICE"
+   ],
+   "short": "12 кр.карт.",
+   "ammo": {
+    "caliber": "12x70",
+    "damage": 16,
+    "pen": 7,
+    "armor_dmg": 7,
+    "pellets": 6,
+    "velocity": 410,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_12_slug": {
+   "name": "Пуля 12/70",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 150,
+   "stack": 30,
+   "weight": 0.04,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "HUNTING",
+    "POLICE"
+   ],
+   "short": "12 пуля",
+   "ammo": {
+    "caliber": "12x70",
+    "damage": 75,
+    "pen": 18,
+    "armor_dmg": 34,
+    "pellets": 1,
+    "velocity": 430,
+    "range_k": 1.0,
+    "accuracy": 0.6,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_12_apslug": {
+   "name": "Пуля бронебойная 12/70",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 380,
+   "stack": 30,
+   "weight": 0.04,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "12 БП",
+   "ammo": {
+    "caliber": "12x70",
+    "damage": 62,
+    "pen": 34,
+    "armor_dmg": 40,
+    "pellets": 1,
+    "velocity": 470,
+    "range_k": 1.0,
+    "accuracy": 0.6,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_545_old": {
+   "name": "Патроны 5.45×39 старые",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 60,
+   "stack": 60,
+   "weight": 0.011,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "5.45 ст.",
+   "ammo": {
+    "caliber": "545x39",
+    "damage": 36,
+    "pen": 24,
+    "armor_dmg": 22,
+    "pellets": 1,
+    "velocity": 880,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   },
+   "desc": "Со складов: дешёвые, пробивают хуже."
+  },
+  "ammo_545_std": {
+   "name": "Патроны 5.45×39",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 90,
+   "stack": 60,
+   "weight": 0.011,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "5.45",
+   "ammo": {
+    "caliber": "545x39",
+    "damage": 38,
+    "pen": 32,
+    "armor_dmg": 28,
+    "pellets": 1,
+    "velocity": 900,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_545_ap": {
+   "name": "Патроны 5.45×39 бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 260,
+   "stack": 60,
+   "weight": 0.011,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "5.45 БП",
+   "ammo": {
+    "caliber": "545x39",
+    "damage": 34,
+    "pen": 48,
+    "armor_dmg": 38,
+    "pellets": 1,
+    "velocity": 890,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_556_civ": {
+   "name": "Патроны 5.56×45 гражданские",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 80,
+   "stack": 60,
+   "weight": 0.012,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "HUNTING"
+   ],
+   "short": "5.56 гр.",
+   "ammo": {
+    "caliber": "556x45",
+    "damage": 42,
+    "pen": 18,
+    "armor_dmg": 18,
+    "pellets": 1,
+    "velocity": 920,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   },
+   "desc": "Полуоболочечные: рвут мягкую цель, броню — нет."
+  },
+  "ammo_556_std": {
+   "name": "Патроны 5.56×45",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 100,
+   "stack": 60,
+   "weight": 0.012,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER",
+    "POLICE"
+   ],
+   "short": "5.56",
+   "ammo": {
+    "caliber": "556x45",
+    "damage": 38,
+    "pen": 33,
+    "armor_dmg": 28,
+    "pellets": 1,
+    "velocity": 940,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_556_ap": {
+   "name": "Патроны 5.56×45 бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 300,
+   "stack": 60,
+   "weight": 0.012,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "5.56 БП",
+   "ammo": {
+    "caliber": "556x45",
+    "damage": 34,
+    "pen": 50,
+    "armor_dmg": 38,
+    "pellets": 1,
+    "velocity": 960,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76239_std": {
+   "name": "Патроны 7.62×39",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 100,
+   "stack": 40,
+   "weight": 0.016,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY",
+    "HUNTING"
+   ],
+   "short": "7.62×39",
+   "ammo": {
+    "caliber": "762x39",
+    "damage": 44,
+    "pen": 30,
+    "armor_dmg": 32,
+    "pellets": 1,
+    "velocity": 720,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76239_hvy": {
+   "name": "Патроны 7.62×39 экспансивные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 120,
+   "stack": 40,
+   "weight": 0.016,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "HUNTING",
+    "SCAV"
+   ],
+   "short": "7.62 ЭКС",
+   "ammo": {
+    "caliber": "762x39",
+    "damage": 54,
+    "pen": 20,
+    "armor_dmg": 28,
+    "pellets": 1,
+    "velocity": 700,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76239_ap": {
+   "name": "Патроны 7.62×39 бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 280,
+   "stack": 40,
+   "weight": 0.016,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "7.62 БП",
+   "ammo": {
+    "caliber": "762x39",
+    "damage": 40,
+    "pen": 46,
+    "armor_dmg": 40,
+    "pellets": 1,
+    "velocity": 740,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76251_std": {
+   "name": "Патроны 7.62×51",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 180,
+   "stack": 40,
+   "weight": 0.025,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "7.62×51",
+   "ammo": {
+    "caliber": "762x51",
+    "damage": 56,
+    "pen": 42,
+    "armor_dmg": 40,
+    "pellets": 1,
+    "velocity": 830,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76251_match": {
+   "name": "Патроны 7.62×51 снайперские",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 260,
+   "stack": 40,
+   "weight": 0.025,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "7.62 сн.",
+   "ammo": {
+    "caliber": "762x51",
+    "damage": 58,
+    "pen": 44,
+    "armor_dmg": 40,
+    "pellets": 1,
+    "velocity": 820,
+    "range_k": 1.25,
+    "accuracy": 0.7,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76251_ap": {
+   "name": "Патроны 7.62×51 бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 480,
+   "stack": 40,
+   "weight": 0.025,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "7.62×51 БП",
+   "ammo": {
+    "caliber": "762x51",
+    "damage": 50,
+    "pen": 58,
+    "armor_dmg": 50,
+    "pellets": 1,
+    "velocity": 850,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76254_std": {
+   "name": "Патроны 7.62×54R",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 140,
+   "stack": 40,
+   "weight": 0.022,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "HUNTING",
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "7.62R",
+   "ammo": {
+    "caliber": "762x54r",
+    "damage": 58,
+    "pen": 42,
+    "armor_dmg": 42,
+    "pellets": 1,
+    "velocity": 830,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  },
+  "ammo_76254_ap": {
+   "name": "Патроны 7.62×54R бронебойные",
+   "cat": "ammo",
+   "size": [
+    1,
+    1
+   ],
+   "value": 420,
+   "stack": 40,
+   "weight": 0.022,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "7.62R БП",
+   "ammo": {
+    "caliber": "762x54r",
+    "damage": 52,
+    "pen": 56,
+    "armor_dmg": 50,
+    "pellets": 1,
+    "velocity": 840,
+    "range_k": 1.0,
+    "accuracy": 1.0,
+    "ricochet": 0.1,
+    "frag": 0.0
+   }
+  }
+ },
+ "magazines": {
+  "mag_918_8": {
+   "name": "Магазин 9×18 на 8",
+   "cat": "mag",
+   "size": [
+    1,
+    1
+   ],
+   "value": 800,
+   "stack": 1,
+   "weight": 0.08,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "POLICE",
+    "SCAV"
+   ],
+   "short": "8",
+   "mag": {
+    "if": "MAG_PM",
+    "capacity": 8,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_919_17": {
+   "name": "Магазин пистолетный 9×19 на 17",
+   "cat": "mag",
+   "size": [
+    1,
+    1
+   ],
+   "value": 1200,
+   "stack": 1,
+   "weight": 0.1,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "POLICE",
+    "MILITARY",
+    "SCAV"
+   ],
+   "short": "17",
+   "mag": {
+    "if": "MAG_P9",
+    "capacity": 17,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_919_33": {
+   "name": "Магазин пистолетный 9×19 на 33",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 5000,
+   "stack": 1,
+   "weight": 0.2,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "short": "33",
+   "mag": {
+    "if": "MAG_P9",
+    "capacity": 33,
+    "reload_k": 1.15,
+    "ergo": -4,
+    "reliability": 0.97,
+    "look": "mag_pistol_ext"
+   }
+  },
+  "mag_smg9_30": {
+   "name": "Магазин ПП 9×19 на 30",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 2000,
+   "stack": 1,
+   "weight": 0.2,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "POLICE",
+    "MILITARY",
+    "SCAV"
+   ],
+   "short": "30",
+   "mag": {
+    "if": "MAG_SMG9",
+    "capacity": 30,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_smg9_50": {
+   "name": "Магазин ПП 9×19 на 50",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.38,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "50",
+   "mag": {
+    "if": "MAG_SMG9",
+    "capacity": 50,
+    "reload_k": 1.2,
+    "ergo": -6,
+    "reliability": 0.97
+   }
+  },
+  "mag_s12_8": {
+   "name": "Магазин 12/70 на 8",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 3500,
+   "stack": 1,
+   "weight": 0.32,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "8",
+   "mag": {
+    "if": "MAG_S12",
+    "capacity": 8,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_s12_20": {
+   "name": "Барабан 12/70 на 20",
+   "cat": "mag",
+   "size": [
+    2,
+    2
+   ],
+   "value": 14000,
+   "stack": 1,
+   "weight": 1.1,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "20",
+   "mag": {
+    "if": "MAG_S12",
+    "capacity": 20,
+    "reload_k": 1.35,
+    "ergo": -12,
+    "reliability": 0.95
+   }
+  },
+  "mag_762_30": {
+   "name": "Магазин 7.62×39 на 30",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 2500,
+   "stack": 1,
+   "weight": 0.33,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "30",
+   "mag": {
+    "if": "MAG_AK762",
+    "capacity": 30,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_762_40": {
+   "name": "Магазин 7.62×39 на 40",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 7000,
+   "stack": 1,
+   "weight": 0.45,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "40",
+   "mag": {
+    "if": "MAG_AK762",
+    "capacity": 40,
+    "reload_k": 1.15,
+    "ergo": -6,
+    "reliability": 0.98,
+    "look": "mag_ak45"
+   }
+  },
+  "mag_545_30": {
+   "name": "Магазин 5.45×39 на 30",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 2000,
+   "stack": 1,
+   "weight": 0.23,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "30",
+   "mag": {
+    "if": "MAG_AK545",
+    "capacity": 30,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_545_45": {
+   "name": "Магазин 5.45×39 на 45",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 9000,
+   "stack": 1,
+   "weight": 0.36,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "45",
+   "mag": {
+    "if": "MAG_AK545",
+    "capacity": 45,
+    "reload_k": 1.15,
+    "ergo": -7,
+    "reliability": 0.98,
+    "look": "mag_ak45"
+   }
+  },
+  "mag_545_60": {
+   "name": "Магазин 5.45×39 на 60 (4-рядный)",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 16000,
+   "stack": 1,
+   "weight": 0.52,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "60",
+   "mag": {
+    "if": "MAG_AK545",
+    "capacity": 60,
+    "reload_k": 1.3,
+    "ergo": -11,
+    "reliability": 0.95,
+    "look": "mag_ak45"
+   }
+  },
+  "mag_556_30": {
+   "name": "Магазин 5.56×45 на 30",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 2500,
+   "stack": 1,
+   "weight": 0.16,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER",
+    "POLICE"
+   ],
+   "short": "30",
+   "mag": {
+    "if": "MAG_STANAG",
+    "capacity": 30,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_556_40": {
+   "name": "Магазин 5.56×45 на 40",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.23,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "40",
+   "mag": {
+    "if": "MAG_STANAG",
+    "capacity": 40,
+    "reload_k": 1.12,
+    "ergo": -5,
+    "reliability": 0.98,
+    "look": "mag_ak45"
+   }
+  },
+  "mag_556_60": {
+   "name": "Магазин 5.56×45 на 60",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 18000,
+   "stack": 1,
+   "weight": 0.5,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "60",
+   "mag": {
+    "if": "MAG_STANAG",
+    "capacity": 60,
+    "reload_k": 1.3,
+    "ergo": -10,
+    "reliability": 0.95,
+    "look": "mag_ak45"
+   }
+  },
+  "mag_76251_10": {
+   "name": "Магазин 7.62×51 на 10",
+   "cat": "mag",
+   "size": [
+    1,
+    1
+   ],
+   "value": 4000,
+   "stack": 1,
+   "weight": 0.18,
+   "tier": 3,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "10",
+   "mag": {
+    "if": "MAG_SR25",
+    "capacity": 10,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_76251_20": {
+   "name": "Магазин 7.62×51 на 20",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 7000,
+   "stack": 1,
+   "weight": 0.28,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "20",
+   "mag": {
+    "if": "MAG_SR25",
+    "capacity": 20,
+    "reload_k": 1.1,
+    "ergo": -3,
+    "reliability": 1.0
+   }
+  },
+  "mag_svd_10": {
+   "name": "Магазин 7.62×54R на 10",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 4000,
+   "stack": 1,
+   "weight": 0.23,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "10",
+   "mag": {
+    "if": "MAG_SVD",
+    "capacity": 10,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_939_10": {
+   "name": "Магазин 9×39 на 10",
+   "cat": "mag",
+   "size": [
+    1,
+    1
+   ],
+   "value": 5000,
+   "stack": 1,
+   "weight": 0.12,
+   "tier": 3,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "10",
+   "mag": {
+    "if": "MAG_VSS",
+    "capacity": 10,
+    "reload_k": 1.0,
+    "ergo": 0.0,
+    "reliability": 1.0
+   }
+  },
+  "mag_939_20": {
+   "name": "Магазин 9×39 на 20",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 9000,
+   "stack": 1,
+   "weight": 0.2,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "20",
+   "mag": {
+    "if": "MAG_VSS",
+    "capacity": 20,
+    "reload_k": 1.1,
+    "ergo": -3,
+    "reliability": 1.0
+   }
+  }
+ },
+ "attachments": {
+  "optic_rmr_01": {
+   "name": "Мини-коллиматор",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 11000,
+   "stack": 1,
+   "weight": 0.05,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "short": "RMR",
+   "attach": {
+    "type": "OPTIC_RED_DOT",
+    "fits": [
+     "SLIDE_RMR",
+     "OFFSET_45",
+     "RAIL_TOP"
+    ],
+    "look": "rmr",
+    "fx": {
+     "ads_spread": 0.7,
+     "ergo": -1
+    },
+    "role": "BOTH",
+    "zoom": 0.0,
+    "aim_k": 1.12,
+    "desc": "Маленький: на затвор пистолета, на планку или на угловой кронштейн."
+   }
+  },
+  "optic_offset_rd_01": {
+   "name": "Угловой мини-коллиматор 45°",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 16000,
+   "stack": 1,
+   "weight": 0.09,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Угл.",
+   "attach": {
+    "type": "OFFSET_RED_DOT",
+    "fits": [
+     "OFFSET_45"
+    ],
+    "look": "rmr",
+    "fx": {
+     "ads_spread": 0.8,
+     "ergo": -2
+    },
+    "role": "SECONDARY",
+    "zoom": 0.0,
+    "aim_k": 1.25,
+    "desc": "На 45° справа: наклонил ствол — и работаешь вблизи, не снимая дальнюю оптику."
+   }
+  },
+  "optic_rd_01": {
+   "name": "Коллиматор-трубка",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 9000,
+   "stack": 1,
+   "weight": 0.2,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "POLICE",
+    "MILITARY"
+   ],
+   "short": "Колл.",
+   "attach": {
+    "type": "OPTIC_RED_DOT",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "red_dot",
+    "fx": {
+     "ads_spread": 0.65,
+     "ergo": -3
+    },
+    "role": "PRIMARY",
+    "zoom": 0.0,
+    "aim_k": 1.08
+   }
+  },
+  "optic_rd_dt_01": {
+   "name": "Коллиматор на «ласточкин хвост»",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.3,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "Колл.ЛХ",
+   "attach": {
+    "type": "OPTIC_RED_DOT",
+    "fits": [
+     "DOVETAIL"
+    ],
+    "look": "red_dot",
+    "fx": {
+     "ads_spread": 0.68,
+     "ergo": -4
+    },
+    "role": "PRIMARY",
+    "zoom": 0.0,
+    "aim_k": 1.05,
+    "desc": "Боковое крепление для старых автоматов."
+   }
+  },
+  "optic_holo_01": {
+   "name": "Голографический прицел",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 20000,
+   "stack": 1,
+   "weight": 0.33,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Голо",
+   "attach": {
+    "type": "OPTIC_HOLOGRAPHIC",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "holo",
+    "fx": {
+     "ads_spread": 0.58,
+     "ergo": -4
+    },
+    "role": "PRIMARY",
+    "zoom": 0.0,
+    "aim_k": 1.1
+   }
+  },
+  "optic_2x_01": {
+   "name": "Прицел 2×",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 18000,
+   "stack": 1,
+   "weight": 0.35,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "2×",
+   "attach": {
+    "type": "OPTIC_2X",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "scope4x",
+    "fx": {
+     "ads_spread": 0.5,
+     "ergo": -6
+    },
+    "role": "PRIMARY",
+    "zoom": 2.0,
+    "aim_k": 0.95
+   }
+  },
+  "optic_4x_01": {
+   "name": "Оптика 4×32",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 26000,
+   "stack": 1,
+   "weight": 0.45,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "4×",
+   "attach": {
+    "type": "OPTIC_4X",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "scope4x",
+    "fx": {
+     "ads_spread": 0.4,
+     "ergo": -8
+    },
+    "role": "PRIMARY",
+    "zoom": 4.0,
+    "aim_k": 0.85
+   }
+  },
+  "optic_pso_01": {
+   "name": "Оптика 4× на «ласточкин хвост»",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 22000,
+   "stack": 1,
+   "weight": 0.6,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "SCAV"
+   ],
+   "short": "ПСО",
+   "attach": {
+    "type": "OPTIC_4X",
+    "fits": [
+     "DOVETAIL"
+    ],
+    "look": "scope4x",
+    "fx": {
+     "ads_spread": 0.42,
+     "ergo": -10
+    },
+    "role": "PRIMARY",
+    "zoom": 4.0,
+    "aim_k": 0.8
+   }
+  },
+  "optic_lpvo_01": {
+   "name": "LPVO 1–6×",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 58000,
+   "stack": 1,
+   "weight": 0.62,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "LPVO",
+   "attach": {
+    "type": "OPTIC_LPVO",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "lpvo",
+    "fx": {
+     "ads_spread": 0.36,
+     "ergo": -9
+    },
+    "role": "PRIMARY",
+    "zoom": 5.0,
+    "aim_k": 0.85,
+    "desc": "Переменная кратность: вблизи — почти коллиматор, вдаль — 6×."
+   }
+  },
+  "optic_8x_01": {
+   "name": "Оптика 8×",
+   "cat": "mod",
+   "size": [
+    3,
+    1
+   ],
+   "value": 64000,
+   "stack": 1,
+   "weight": 0.8,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "8×",
+   "attach": {
+    "type": "OPTIC_8X",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "scope8x",
+    "fx": {
+     "ads_spread": 0.3,
+     "ergo": -12
+    },
+    "role": "PRIMARY",
+    "zoom": 8.0,
+    "aim_k": 0.72,
+    "blocks": [
+     "optic_offset"
+    ],
+    "desc": "Длинная труба закрывает место под угловой прицел."
+   }
+  },
+  "optic_12x_01": {
+   "name": "Оптика 12×",
+   "cat": "mod",
+   "size": [
+    3,
+    1
+   ],
+   "value": 82000,
+   "stack": 1,
+   "weight": 0.95,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "12×",
+   "attach": {
+    "type": "OPTIC_12X",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "scope8x",
+    "fx": {
+     "ads_spread": 0.25,
+     "ergo": -14
+    },
+    "role": "PRIMARY",
+    "zoom": 12.0,
+    "aim_k": 0.65,
+    "blocks": [
+     "optic_offset"
+    ]
+   }
+  },
+  "muzzle_fh_545_01": {
+   "name": "Пламегаситель 5.45",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 3000,
+   "stack": 1,
+   "weight": 0.07,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "ПГ",
+   "attach": {
+    "type": "FLASH_HIDER",
+    "fits": [
+     "THREAD_545"
+    ],
+    "look": "flash_hider",
+    "fx": {
+     "kick": 0.95,
+     "flash": 0.35
+    }
+   }
+  },
+  "muzzle_comp_545_01": {
+   "name": "Компенсатор 5.45",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 7000,
+   "stack": 1,
+   "weight": 0.1,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Компенс.",
+   "attach": {
+    "type": "COMPENSATOR",
+    "fits": [
+     "THREAD_545"
+    ],
+    "look": "compensator",
+    "fx": {
+     "kick": 0.72,
+     "kick_h": 0.85,
+     "shake": 0.8,
+     "noise": 1.1,
+     "ergo": -2
+    }
+   }
+  },
+  "muzzle_brake_762_01": {
+   "name": "Дульный тормоз 7.62",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.14,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "SCAV"
+   ],
+   "short": "ДТК",
+   "attach": {
+    "type": "MUZZLE_BRAKE",
+    "fits": [
+     "THREAD_762"
+    ],
+    "look": "compensator",
+    "fx": {
+     "kick": 0.7,
+     "kick_h": 0.9,
+     "shake": 0.8,
+     "noise": 1.2,
+     "ergo": -3
+    }
+   }
+  },
+  "muzzle_comp_556_01": {
+   "name": "Компенсатор 5.56",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.1,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Компенс.",
+   "attach": {
+    "type": "COMPENSATOR",
+    "fits": [
+     "THREAD_556"
+    ],
+    "look": "compensator",
+    "fx": {
+     "kick": 0.74,
+     "kick_h": 0.85,
+     "shake": 0.8,
+     "noise": 1.1,
+     "ergo": -2
+    }
+   }
+  },
+  "muzzle_fh_556_01": {
+   "name": "Пламегаситель 5.56",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 3500,
+   "stack": 1,
+   "weight": 0.06,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "POLICE"
+   ],
+   "short": "ПГ",
+   "attach": {
+    "type": "FLASH_HIDER",
+    "fits": [
+     "THREAD_556"
+    ],
+    "look": "flash_hider",
+    "fx": {
+     "kick": 0.96,
+     "flash": 0.35
+    }
+   }
+  },
+  "muzzle_supp_9_01": {
+   "name": "Глушитель 9 мм",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 18000,
+   "stack": 1,
+   "weight": 0.25,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Глуш. 9",
+   "attach": {
+    "type": "SUPPRESSOR",
+    "fits": [
+     "THREAD_9"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.35,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -6,
+     "flash": 0.0
+    },
+    "size_m": [
+     0.017,
+     0.14
+    ]
+   }
+  },
+  "muzzle_supp_545_01": {
+   "name": "Глушитель 5.45",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 24000,
+   "stack": 1,
+   "weight": 0.45,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Глуш. 5.45",
+   "attach": {
+    "type": "SUPPRESSOR",
+    "fits": [
+     "THREAD_545"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.35,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -8,
+     "kick": 0.88,
+     "flash": 0.0
+    },
+    "size_m": [
+     0.019,
+     0.175
+    ]
+   }
+  },
+  "muzzle_supp_556_01": {
+   "name": "Глушитель 5.56",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 26000,
+   "stack": 1,
+   "weight": 0.45,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Глуш. 5.56",
+   "attach": {
+    "type": "SUPPRESSOR",
+    "fits": [
+     "THREAD_556"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.35,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -8,
+     "kick": 0.88,
+     "flash": 0.0
+    },
+    "size_m": [
+     0.019,
+     0.175
+    ]
+   }
+  },
+  "muzzle_supp_762_01": {
+   "name": "Глушитель 7.62",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 30000,
+   "stack": 1,
+   "weight": 0.6,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Глуш. 7.62",
+   "attach": {
+    "type": "SUPPRESSOR",
+    "fits": [
+     "THREAD_762"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.4,
+     "db": -12,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -10,
+     "kick": 0.86,
+     "flash": 0.0
+    },
+    "size_m": [
+     0.021,
+     0.2
+    ]
+   }
+  },
+  "muzzle_supp_12_01": {
+   "name": "Глушитель 12 калибра",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 22000,
+   "stack": 1,
+   "weight": 0.55,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Глуш. 12",
+   "attach": {
+    "type": "SUPPRESSOR",
+    "fits": [
+     "THREAD_12"
+    ],
+    "look": "suppressor",
+    "fx": {
+     "noise": 0.5,
+     "db": -10,
+     "damage": 0.95,
+     "suppressed": true,
+     "ergo": -9,
+     "flash": 0.0
+    },
+    "size_m": [
+     0.024,
+     0.18
+    ]
+   }
+  },
+  "grip_vertical_01": {
+   "name": "Рукоятка вертикальная",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 6000,
+   "stack": 1,
+   "weight": 0.1,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY",
+    "POLICE"
+   ],
+   "short": "Рук. верт.",
+   "attach": {
+    "type": "VERTICAL_GRIP",
+    "fits": [
+     "RAIL_BOTTOM"
+    ],
+    "look": "grip_vertical",
+    "fx": {
+     "kick": 0.8,
+     "spread": 0.9,
+     "ergo": 4
+    },
+    "desc": "Меньше подброс ствола."
+   }
+  },
+  "grip_angled_01": {
+   "name": "Рукоятка угловая",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.08,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Рук. угл.",
+   "attach": {
+    "type": "ANGLED_GRIP",
+    "fits": [
+     "RAIL_BOTTOM"
+    ],
+    "look": "grip_angled",
+    "fx": {
+     "kick": 0.93,
+     "aim": 1.18,
+     "ergo": 8
+    },
+    "desc": "Быстрее вскидка и довод в прицел."
+   }
+  },
+  "grip_compact_01": {
+   "name": "Рукоятка короткая",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 5000,
+   "stack": 1,
+   "weight": 0.06,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "short": "Рук. кор.",
+   "attach": {
+    "type": "COMPACT_GRIP",
+    "fits": [
+     "RAIL_BOTTOM"
+    ],
+    "look": "grip_vertical",
+    "fx": {
+     "kick": 0.88,
+     "kick_h": 0.92,
+     "aim": 1.06,
+     "ergo": 5
+    },
+    "scale": 0.65
+   }
+  },
+  "grip_heavy_01": {
+   "name": "Рукоятка массивная",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 7000,
+   "stack": 1,
+   "weight": 0.32,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY"
+   ],
+   "short": "Рук. тяж.",
+   "attach": {
+    "type": "HEAVY_GRIP",
+    "fits": [
+     "RAIL_BOTTOM"
+    ],
+    "look": "grip_vertical",
+    "fx": {
+     "kick": 0.68,
+     "kick_h": 0.78,
+     "ergo": -6,
+     "aim": 0.92
+    },
+    "scale": 1.2,
+    "desc": "Сильно гасит отдачу, но ствол тяжелеет."
+   }
+  },
+  "grip_handstop_01": {
+   "name": "Упор для руки",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 3000,
+   "stack": 1,
+   "weight": 0.03,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER",
+    "POLICE"
+   ],
+   "short": "Упор",
+   "attach": {
+    "type": "HAND_STOP",
+    "fits": [
+     "RAIL_BOTTOM",
+     "RAIL_SIDE"
+    ],
+    "look": "grip_angled",
+    "fx": {
+     "kick": 0.95,
+     "aim": 1.1,
+     "ergo": 7
+    },
+    "scale": 0.6
+   }
+  },
+  "bipod_01": {
+   "name": "Сошки",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 9000,
+   "stack": 1,
+   "weight": 0.4,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "HUNTING",
+    "MILITARY"
+   ],
+   "short": "Сошки",
+   "attach": {
+    "type": "BIPOD",
+    "fits": [
+     "BIPOD_CLAMP",
+     "RAIL_BOTTOM"
+    ],
+    "look": "bipod",
+    "fx": {
+     "braced_kick": 0.5,
+     "braced_spread": 0.7,
+     "ergo": -8
+    }
+   }
+  },
+  "stock_fixed_heavy_ak": {
+   "name": "Приклад деревянный тяжёлый",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 4000,
+   "stack": 1,
+   "weight": 0.9,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "Прикл. дер.",
+   "attach": {
+    "type": "FIXED_HEAVY",
+    "fits": [
+     "STOCK_AK"
+    ],
+    "look": "stock_tele",
+    "fx": {
+     "kick": 0.8,
+     "ergo": -4
+    }
+   }
+  },
+  "stock_fixed_light_ak": {
+   "name": "Приклад лёгкий",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 6000,
+   "stack": 1,
+   "weight": 0.4,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "Прикл. лёгк.",
+   "attach": {
+    "type": "FIXED_LIGHT",
+    "fits": [
+     "STOCK_AK",
+     "STOCK_SG"
+    ],
+    "look": "stock_tele",
+    "fx": {
+     "kick": 0.9,
+     "ergo": 3
+    }
+   }
+  },
+  "stock_tele_ak_01": {
+   "name": "Телескопический приклад",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 12000,
+   "stack": 1,
+   "weight": 0.45,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "POLICE"
+   ],
+   "short": "Прикл. тел.",
+   "attach": {
+    "type": "TELESCOPIC",
+    "fits": [
+     "STOCK_AK",
+     "STOCK_SG"
+    ],
+    "look": "stock_tele",
+    "fx": {
+     "kick": 0.78,
+     "ads_spread": 0.9,
+     "ergo": 10
+    }
+   }
+  },
+  "stock_fold_ak_01": {
+   "name": "Складной приклад",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.35,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "short": "Прикл. скл.",
+   "attach": {
+    "type": "FOLDING",
+    "fits": [
+     "STOCK_AK"
+    ],
+    "look": "stock_tele",
+    "fx": {
+     "kick": 0.9,
+     "ergo": 5
+    },
+    "foldable": true
+   }
+  },
+  "stock_tele_ar_01": {
+   "name": "Приклад телескопический (AR)",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 11000,
+   "stack": 1,
+   "weight": 0.3,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "POLICE"
+   ],
+   "short": "Прикл. AR",
+   "attach": {
+    "type": "TELESCOPIC",
+    "fits": [
+     "STOCK_AR"
+    ],
+    "look": "stock_tele",
+    "fx": {
+     "kick": 0.8,
+     "ergo": 9
+    }
+   }
+  },
+  "stock_perimeter_01": {
+   "name": "Приклад «Периметр» тактический",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 26000,
+   "stack": 1,
+   "weight": 0.4,
+   "tier": 4,
+   "rarity": "rare",
+   "tags": [
+    "PERIMETER",
+    "RARE"
+   ],
+   "short": "Прикл. П",
+   "attach": {
+    "type": "PERIMETER_TACTICAL",
+    "fits": [
+     "STOCK_AR"
+    ],
+    "look": "stock_tele",
+    "fx": {
+     "kick": 0.7,
+     "kick_h": 0.85,
+     "ads_spread": 0.88,
+     "ergo": 13
+    }
+   }
+  },
+  "tac_flashlight_01": {
+   "name": "Тактический фонарь",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 5000,
+   "stack": 1,
+   "weight": 0.12,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "POLICE",
+    "MILITARY",
+    "SCAV"
+   ],
+   "short": "Фонарь",
+   "attach": {
+    "type": "FLASHLIGHT",
+    "fits": [
+     "RAIL_SIDE",
+     "PISTOL_RAIL",
+     "RAIL_BOTTOM"
+    ],
+    "look": "flashlight",
+    "fx": {
+     "ergo": -1
+    },
+    "light": {
+     "range": 30.0,
+     "angle": 22.0,
+     "energy": 6.0,
+     "indirect": 1.3,
+     "specular": 0.5,
+     "fog": 2.0,
+     "view": 1.0
+    },
+    "desc": "Светит в тёмных помещениях — и выдаёт тебя."
+   }
+  },
+  "tac_flashlight_hp_01": {
+   "name": "Фонарь светодиодный мощный",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 14000,
+   "stack": 1,
+   "weight": 0.2,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Фонарь HP",
+   "attach": {
+    "type": "FLASHLIGHT",
+    "fits": [
+     "RAIL_SIDE",
+     "PISTOL_RAIL",
+     "RAIL_BOTTOM"
+    ],
+    "look": "flashlight_hp",
+    "fx": {
+     "ergo": -2
+    },
+    "light": {
+     "range": 60.0,
+     "angle": 15.0,
+     "energy": 14.0,
+     "indirect": 2.6,
+     "specular": 1.0,
+     "fog": 3.5,
+     "view": 1.6
+    },
+    "desc": "Узкий пучок вдвое дальше и ярче. Слепит — и видно его издалека."
+   }
+  },
+  "tac_laser_01": {
+   "name": "ЛЦУ (лазер)",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 8000,
+   "stack": 1,
+   "weight": 0.08,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "POLICE"
+   ],
+   "short": "ЛЦУ",
+   "attach": {
+    "type": "LASER",
+    "fits": [
+     "RAIL_SIDE",
+     "PISTOL_RAIL",
+     "RAIL_BOTTOM"
+    ],
+    "look": "laser",
+    "fx": {
+     "ergo": -1
+    },
+    "laser": {
+     "hip_spread": 0.75,
+     "iso_aim": 1.15
+    },
+    "desc": "Точка показывает, куда смотрит ствол: точнее от бедра."
+   }
+  },
+  "tac_combo_01": {
+   "name": "Фонарь + ЛЦУ (блок)",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 22000,
+   "stack": 1,
+   "weight": 0.18,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Блок",
+   "attach": {
+    "type": "FLASHLIGHT_LASER_COMBO",
+    "fits": [
+     "RAIL_SIDE",
+     "PISTOL_RAIL",
+     "RAIL_BOTTOM"
+    ],
+    "look": "combo",
+    "fx": {
+     "ergo": -2
+    },
+    "light": {
+     "range": 30.0,
+     "angle": 22.0,
+     "energy": 6.0,
+     "indirect": 1.3,
+     "specular": 0.5,
+     "fog": 2.0,
+     "view": 1.0
+    },
+    "laser": {
+     "hip_spread": 0.75,
+     "iso_aim": 1.15
+    },
+    "desc": "Фонарь и лазер в одном корпусе, включаются по отдельности."
+   }
+  }
+ },
+ "presets": {
+  "HG_01_BASE": {
+   "weapon": "wpn_hg_01",
+   "mods": {},
+   "mag": "mag_918_8",
+   "ammo": [
+    [
+     "ammo_918_pst",
+     1
+    ]
+   ],
+   "dur": [
+    40,
+    90
+   ],
+   "sight": "primary"
+  },
+  "HG_02_BASE": {
+   "weapon": "wpn_hg_02",
+   "mods": {},
+   "mag": "mag_919_17",
+   "ammo": [
+    [
+     "ammo_919_fmj",
+     1
+    ]
+   ],
+   "dur": [
+    45,
+    90
+   ],
+   "sight": "primary"
+  },
+  "HG_03_BASE": {
+   "weapon": "wpn_hg_03",
+   "mods": {},
+   "mag": "mag_919_17",
+   "ammo": [
+    [
+     "ammo_919_fmj",
+     1
+    ]
+   ],
+   "dur": [
+    60,
+    95
+   ],
+   "sight": "primary"
+  },
+  "HG_03_TAC": {
+   "weapon": "wpn_hg_03",
+   "mods": {
+    "optic_primary": "optic_rmr_01",
+    "underbarrel": "tac_flashlight_01"
+   },
+   "mag": "mag_919_17",
+   "ammo": [
+    [
+     "ammo_919_fmj",
+     1
+    ]
+   ],
+   "dur": [
+    70,
+    95
+   ],
+   "sight": "primary"
+  },
+  "HG_04_BASE": {
+   "weapon": "wpn_hg_04",
+   "mods": {
+    "optic_primary": "optic_rmr_01",
+    "underbarrel": "tac_flashlight_01"
+   },
+   "mag": "mag_919_17",
+   "ammo": [
+    [
+     "ammo_919_fmj",
+     0.6
+    ],
+    [
+     "ammo_919_ap",
+     0.4
+    ]
+   ],
+   "dur": [
+    82,
+    100
+   ],
+   "sight": "primary"
+  },
+  "SMG_01_BASE": {
+   "weapon": "wpn_smg_01",
+   "mods": {},
+   "mag": "mag_smg9_30",
+   "ammo": [
+    [
+     "ammo_919_fmj",
+     1
+    ]
+   ],
+   "dur": [
+    35,
+    80
+   ],
+   "sight": "primary"
+  },
+  "SMG_02_TAC": {
+   "weapon": "wpn_smg_02",
+   "mods": {
+    "optic_primary": "optic_rd_01",
+    "side_right": "tac_flashlight_01",
+    "underbarrel": "grip_vertical_01"
+   },
+   "mag": "mag_smg9_30",
+   "ammo": [
+    [
+     "ammo_919_fmj",
+     1
+    ]
+   ],
+   "dur": [
+    55,
+    90
+   ],
+   "sight": "primary"
+  },
+  "SMG_03_CQB": {
+   "weapon": "wpn_smg_03",
+   "mods": {
+    "optic_primary": "optic_holo_01",
+    "side_left": "tac_flashlight_hp_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_angled_01",
+    "muzzle": "muzzle_supp_9_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_smg9_30",
+   "ammo": [
+    [
+     "ammo_919_ap",
+     0.5
+    ],
+    [
+     "ammo_919_fmj",
+     0.5
+    ]
+   ],
+   "dur": [
+    82,
+    100
+   ],
+   "sight": "primary"
+  },
+  "SG_01_BASE": {
+   "weapon": "wpn_sg_01",
+   "mods": {},
+   "ammo": [
+    [
+     "ammo_12_buck",
+     1
+    ]
+   ],
+   "dur": [
+    40,
+    90
+   ],
+   "sight": "primary"
+  },
+  "SG_02_BASE": {
+   "weapon": "wpn_sg_02",
+   "mods": {},
+   "ammo": [
+    [
+     "ammo_12_buck",
+     0.8
+    ],
+    [
+     "ammo_12_slug",
+     0.2
+    ]
+   ],
+   "dur": [
+    40,
+    85
+   ],
+   "sight": "primary"
+  },
+  "SG_02_TAC": {
+   "weapon": "wpn_sg_02",
+   "mods": {
+    "optic_primary": "optic_rd_01",
+    "side_right": "tac_flashlight_01"
+   },
+   "ammo": [
+    [
+     "ammo_12_buck",
+     0.6
+    ],
+    [
+     "ammo_12_hbuck",
+     0.4
+    ]
+   ],
+   "dur": [
+    50,
+    90
+   ],
+   "sight": "primary"
+  },
+  "SG_03_BASE": {
+   "weapon": "wpn_sg_03",
+   "mods": {
+    "optic_primary": "optic_rd_01"
+   },
+   "ammo": [
+    [
+     "ammo_12_buck",
+     0.7
+    ],
+    [
+     "ammo_12_slug",
+     0.3
+    ]
+   ],
+   "dur": [
+    55,
+    90
+   ],
+   "sight": "primary"
+  },
+  "SG_04_BREACH": {
+   "weapon": "wpn_sg_04",
+   "mods": {
+    "optic_primary": "optic_holo_01",
+    "side_left": "tac_flashlight_hp_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_vertical_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_s12_8",
+   "ammo": [
+    [
+     "ammo_12_hbuck",
+     0.5
+    ],
+    [
+     "ammo_12_apslug",
+     0.5
+    ]
+   ],
+   "dur": [
+    82,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_01_WORN": {
+   "weapon": "wpn_ar_01",
+   "mods": {},
+   "mag": "mag_762_30",
+   "ammo": [
+    [
+     "ammo_76239_std",
+     1
+    ]
+   ],
+   "dur": [
+    30,
+    70
+   ],
+   "sight": "primary"
+  },
+  "AR_01_PSO": {
+   "weapon": "wpn_ar_01",
+   "mods": {
+    "optic_primary": "optic_pso_01"
+   },
+   "mag": "mag_762_30",
+   "ammo": [
+    [
+     "ammo_76239_std",
+     0.8
+    ],
+    [
+     "ammo_76239_ap",
+     0.2
+    ]
+   ],
+   "dur": [
+    45,
+    80
+   ],
+   "sight": "primary"
+  },
+  "AR_02_BASE": {
+   "weapon": "wpn_ar_02",
+   "mods": {
+    "stock": "stock_fold_ak_01"
+   },
+   "mag": "mag_762_30",
+   "ammo": [
+    [
+     "ammo_76239_std",
+     0.8
+    ],
+    [
+     "ammo_76239_hvy",
+     0.2
+    ]
+   ],
+   "dur": [
+    35,
+    75
+   ],
+   "sight": "primary"
+  },
+  "AR_03_BASE": {
+   "weapon": "wpn_ar_03",
+   "mods": {},
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     0.7
+    ],
+    [
+     "ammo_545_old",
+     0.3
+    ]
+   ],
+   "dur": [
+    35,
+    80
+   ],
+   "sight": "primary"
+  },
+  "AR_03_RD": {
+   "weapon": "wpn_ar_03",
+   "mods": {
+    "optic_primary": "optic_rd_01",
+    "muzzle": "muzzle_fh_545_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     1
+    ]
+   ],
+   "dur": [
+    45,
+    85
+   ],
+   "sight": "primary"
+  },
+  "AR_04_BASE": {
+   "weapon": "wpn_ar_04",
+   "mods": {
+    "optic_primary": "optic_rd_01",
+    "underbarrel": "grip_vertical_01",
+    "muzzle": "muzzle_fh_545_01",
+    "stock": "stock_tele_ar_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     1
+    ]
+   ],
+   "dur": [
+    55,
+    90
+   ],
+   "sight": "primary"
+  },
+  "AR_04_TAC": {
+   "weapon": "wpn_ar_04",
+   "mods": {
+    "optic_primary": "optic_holo_01",
+    "side_right": "tac_flashlight_01",
+    "underbarrel": "grip_angled_01",
+    "muzzle": "muzzle_comp_545_01",
+    "stock": "stock_tele_ar_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     0.8
+    ],
+    [
+     "ammo_545_ap",
+     0.2
+    ]
+   ],
+   "dur": [
+    60,
+    92
+   ],
+   "sight": "primary"
+  },
+  "AR_05_BASE": {
+   "weapon": "wpn_ar_05",
+   "mods": {
+    "optic_primary": "optic_rd_01",
+    "muzzle": "muzzle_fh_556_01",
+    "stock": "stock_tele_ar_01"
+   },
+   "mag": "mag_556_30",
+   "ammo": [
+    [
+     "ammo_556_std",
+     0.7
+    ],
+    [
+     "ammo_556_civ",
+     0.3
+    ]
+   ],
+   "dur": [
+    55,
+    90
+   ],
+   "sight": "primary"
+  },
+  "AR_05_TAC": {
+   "weapon": "wpn_ar_05",
+   "mods": {
+    "optic_primary": "optic_holo_01",
+    "side_left": "tac_flashlight_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_vertical_01",
+    "muzzle": "muzzle_comp_556_01",
+    "stock": "stock_tele_ar_01"
+   },
+   "mag": "mag_556_30",
+   "ammo": [
+    [
+     "ammo_556_std",
+     1
+    ]
+   ],
+   "dur": [
+    60,
+    95
+   ],
+   "sight": "primary"
+  },
+  "AR_06_BASE": {
+   "weapon": "wpn_ar_06",
+   "mods": {
+    "optic_primary": "optic_rd_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     1
+    ]
+   ],
+   "dur": [
+    80,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_06_PATROL": {
+   "weapon": "wpn_ar_06",
+   "mods": {
+    "optic_primary": "optic_holo_01",
+    "side_left": "tac_flashlight_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_vertical_01",
+    "muzzle": "muzzle_comp_545_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     0.7
+    ],
+    [
+     "ammo_545_ap",
+     0.3
+    ]
+   ],
+   "dur": [
+    80,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_06_CQB": {
+   "weapon": "wpn_ar_06",
+   "mods": {
+    "optic_primary": "optic_rd_01",
+    "side_left": "tac_flashlight_hp_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_compact_01",
+    "muzzle": "muzzle_fh_545_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     0.6
+    ],
+    [
+     "ammo_545_ap",
+     0.4
+    ]
+   ],
+   "dur": [
+    80,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_06_SUPPRESSED": {
+   "weapon": "wpn_ar_06",
+   "mods": {
+    "optic_primary": "optic_holo_01",
+    "side_left": "tac_combo_01",
+    "underbarrel": "grip_angled_01",
+    "muzzle": "muzzle_supp_545_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     0.5
+    ],
+    [
+     "ammo_545_ap",
+     0.5
+    ]
+   ],
+   "dur": [
+    80,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_06_MARKSMAN": {
+   "weapon": "wpn_ar_06",
+   "mods": {
+    "optic_primary": "optic_lpvo_01",
+    "optic_offset": "optic_offset_rd_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_vertical_01",
+    "muzzle": "muzzle_comp_545_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_545_30",
+   "ammo": [
+    [
+     "ammo_545_std",
+     0.6
+    ],
+    [
+     "ammo_545_ap",
+     0.4
+    ]
+   ],
+   "dur": [
+    80,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_07_PATROL": {
+   "weapon": "wpn_ar_07",
+   "mods": {
+    "optic_primary": "optic_holo_01",
+    "side_left": "tac_flashlight_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_angled_01",
+    "muzzle": "muzzle_comp_556_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_556_30",
+   "ammo": [
+    [
+     "ammo_556_std",
+     0.7
+    ],
+    [
+     "ammo_556_ap",
+     0.3
+    ]
+   ],
+   "dur": [
+    82,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_07_LEADER": {
+   "weapon": "wpn_ar_07",
+   "mods": {
+    "optic_primary": "optic_lpvo_01",
+    "optic_offset": "optic_offset_rd_01",
+    "side_left": "tac_flashlight_hp_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "grip_angled_01",
+    "muzzle": "muzzle_supp_556_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_556_30",
+   "ammo": [
+    [
+     "ammo_556_std",
+     0.5
+    ],
+    [
+     "ammo_556_ap",
+     0.5
+    ]
+   ],
+   "dur": [
+    85,
+    100
+   ],
+   "sight": "primary"
+  },
+  "AR_08_BASE": {
+   "weapon": "wpn_ar_08",
+   "mods": {
+    "optic_primary": "optic_4x_01",
+    "optic_offset": "optic_offset_rd_01",
+    "underbarrel": "grip_heavy_01",
+    "muzzle": "muzzle_brake_762_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_76251_20",
+   "ammo": [
+    [
+     "ammo_76251_std",
+     0.7
+    ],
+    [
+     "ammo_76251_ap",
+     0.3
+    ]
+   ],
+   "dur": [
+    80,
+    100
+   ],
+   "sight": "primary"
+  },
+  "DMR_01_BASE": {
+   "weapon": "wpn_dmr_01",
+   "mods": {},
+   "mag": "mag_svd_10",
+   "ammo": [
+    [
+     "ammo_76254_std",
+     1
+    ]
+   ],
+   "dur": [
+    40,
+    85
+   ],
+   "sight": "primary"
+  },
+  "DMR_02_BASE": {
+   "weapon": "wpn_dmr_02",
+   "mods": {
+    "optic_primary": "optic_4x_01",
+    "underbarrel": "bipod_01",
+    "stock": "stock_tele_ar_01"
+   },
+   "mag": "mag_76251_10",
+   "ammo": [
+    [
+     "ammo_76251_std",
+     1
+    ]
+   ],
+   "dur": [
+    55,
+    90
+   ],
+   "sight": "primary"
+  },
+  "DMR_03_MARKSMAN": {
+   "weapon": "wpn_dmr_03",
+   "mods": {
+    "optic_primary": "optic_lpvo_01",
+    "optic_offset": "optic_offset_rd_01",
+    "side_right": "tac_laser_01",
+    "underbarrel": "bipod_01",
+    "muzzle": "muzzle_supp_762_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_76251_20",
+   "ammo": [
+    [
+     "ammo_76251_match",
+     0.6
+    ],
+    [
+     "ammo_76251_ap",
+     0.4
+    ]
+   ],
+   "dur": [
+    85,
+    100
+   ],
+   "sight": "primary"
+  },
+  "DMR_03_LONG": {
+   "weapon": "wpn_dmr_03",
+   "mods": {
+    "optic_primary": "optic_8x_01",
+    "underbarrel": "bipod_01",
+    "muzzle": "muzzle_supp_762_01",
+    "stock": "stock_perimeter_01"
+   },
+   "mag": "mag_76251_20",
+   "ammo": [
+    [
+     "ammo_76251_match",
+     1
+    ]
+   ],
+   "dur": [
+    85,
+    100
+   ],
+   "sight": "primary"
+  },
+  "SR_01_BASE": {
+   "weapon": "wpn_sr_01",
+   "mods": {},
+   "ammo": [
+    [
+     "ammo_76254_std",
+     1
+    ]
+   ],
+   "dur": [
+    40,
+    90
+   ],
+   "sight": "primary"
+  },
+  "SR_02_BASE": {
+   "weapon": "wpn_sr_02",
+   "mods": {
+    "muzzle": "muzzle_supp_762_01",
+    "underbarrel": "bipod_01"
+   },
+   "mag": "mag_76251_10",
+   "ammo": [
+    [
+     "ammo_76251_match",
+     0.6
+    ],
+    [
+     "ammo_76251_ap",
+     0.4
+    ]
+   ],
+   "dur": [
+    85,
+    100
+   ],
+   "sight": "primary"
+  },
+  "SP_01_BASE": {
+   "weapon": "wpn_sp_01",
+   "mods": {
+    "optic_primary": "optic_rd_01"
+   },
+   "mag": "mag_939_20",
+   "ammo": [
+    [
+     "ammo_939_sp5",
+     0.7
+    ],
+    [
+     "ammo_939_sp6",
+     0.3
+    ]
+   ],
+   "dur": [
+    75,
+    100
+   ],
+   "sight": "primary"
+  }
+ },
+ "sandbox": [
+  "HG_03_BASE",
+  "AR_03_BASE",
+  "SG_02_BASE",
+  "SR_01_BASE"
+ ],
+ "aliases": {
+  "w_pistol": "wpn_hg_03",
+  "w_rifle": "wpn_ar_03",
+  "w_shotgun": "wpn_sg_02",
+  "w_bolt": "wpn_sr_01",
+  "ammo_9x19": "ammo_919_fmj",
+  "ammo_545": "ammo_545_std",
+  "ammo_12": "ammo_12_buck",
+  "ammo_762r": "ammo_76254_std",
+  "mod_rmr": "optic_rmr_01",
+  "mod_red_dot": "optic_rd_01",
+  "mod_holo": "optic_holo_01",
+  "mod_scope4x": "optic_4x_01",
+  "mod_supp_9": "muzzle_supp_9_01",
+  "mod_supp_545": "muzzle_supp_545_01",
+  "mod_supp_12": "muzzle_supp_12_01",
+  "mod_supp_762": "muzzle_supp_762_01",
+  "mod_comp": "muzzle_comp_545_01",
+  "mod_grip": "grip_vertical_01",
+  "mod_grip_angled": "grip_angled_01",
+  "mod_stock_tele": "stock_tele_ak_01",
+  "mod_mag_ext": "mag_545_45",
+  "mod_mag_pistol": "mag_919_33",
+  "mod_flashlight": "tac_flashlight_01",
+  "mod_laser": "tac_laser_01",
+  "mod_bipod": "bipod_01",
+  "vest_light": "vest_police",
+  "vest_heavy": "vest_army",
+  "helmet": "helmet_military_old"
+ }
+}

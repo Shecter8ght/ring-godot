@@ -57,11 +57,16 @@ func _player_rules(me: Player) -> void:
 	h.take_damage(30.0, Vector3.ZERO, "head")
 	h.take_damage(80.0, Vector3.ZERO, "head")
 	_check("в голову без шлема — смерть", not h.alive and not h.downed, "")
-	# в шлеме — лёг
-	_fresh(h)
-	me.inventory.equipment = {"helmet": ItemDb.make("helmet", 1)}
-	h.take_damage(150.0, Vector3.ZERO, "head")
-	_check("в голову в шлеме — лёг", h.alive and h.downed, "")
+	# в шлеме: пуля остановлена — контузия, лёг (шлем закрывает не всю голову — несколько попыток)
+	var saved := false
+	for i in range(12):
+		_fresh(h)
+		me.inventory.equipment = {"helmet": ItemDb.make("helmet_perimeter_heavy", 1)}
+		h.take_damage(900.0, Vector3.ZERO, "head", Vector3.INF, {"pen": 2.0, "armor_dmg": 2.0})
+		if h.alive and h.downed:
+			saved = true
+			break
+	_check("в голову в шлеме (пуля остановлена) — лёг", saved, "")
 	me.inventory.equipment = {}
 	# граната под ногами
 	_fresh(h)
@@ -97,7 +102,7 @@ func _player_rules(me: Player) -> void:
 	_check("аптечка лёжа — встал с 30 %", h.alive and not h.downed and is_equal_approx(h.hp, h.max_hp * Balance.REVIVE_HP) and not me.inventory.has("medkit"), "hp %.0f" % h.hp)
 	# зона попадания: голова стоя (поднятый остаётся лёжа — встаёт сам)
 	me.stance = Player.Stance.STAND
-	_check("зона: голова / корпус по высоте", me.hit_zone(me.global_position + Vector3.UP * 1.7) == "head" and me.hit_zone(me.global_position + Vector3.UP * 1.1) == "body", "")
+	_check("зона: голова / корпус по высоте", me.hit_zone(me.global_position + Vector3.UP * 1.7) == "head" and me.hit_zone(me.global_position + Vector3.UP * 1.3) == "thorax", me.hit_zone(me.global_position + Vector3.UP * 1.3))
 	_fresh(h)
 
 
@@ -143,6 +148,8 @@ func _marauder_rules() -> void:
 	var a := scene.instantiate() as Marauder
 	a.name = "DownA"
 	a.archetype = "gunner"
+	# у бывалого всегда есть пистолет — лёжа стреляет из него
+	a.loadout_id = "scav_veteran"
 	a.weapon = "rifle"
 	var b := scene.instantiate() as Marauder
 	b.name = "MedicB"
@@ -158,7 +165,7 @@ func _marauder_rules() -> void:
 	a.last_known = SectorBuilder.polar(-90.0, 100.0)
 	(a.get_node("Health") as Health).take_damage(300.0, a.last_known, "body")
 	await get_tree().physics_frame
-	_check("мародёр лёг раненым — пистолет", a.state == Marauder.State.DOWNED and a._spec == Balance.AI_WEAPONS.pistol, Marauder.State.keys()[a.state])
+	_check("мародёр лёг раненым — пистолет", a.state == Marauder.State.DOWNED and String(a._spec["class"]) == "PISTOL", Marauder.State.keys()[a.state])
 	_check("товарищ идёт спасать", b.state == Marauder.State.RESCUE and a.rescuer == b, Marauder.State.keys()[b.state])
 	var up := false
 	for i in range(50):
@@ -171,15 +178,24 @@ func _marauder_rules() -> void:
 	var ah := a.get_node("Health") as Health
 	ah.take_damage(10.0, Vector3.ZERO, "head")
 	_check("мародёру в голову без шлема — смерть", not ah.alive, "")
-	var hv := scene.instantiate() as Marauder
-	hv.name = "HelmetH"
-	hv.archetype = "heavy"
-	_level.get_node("Marauders").add_child(hv)
-	hv.global_position = SectorBuilder.polar(-130.0, 72.0) + Vector3(0, 0.1, 0)
-	await get_tree().physics_frame
-	(hv.get_node("Health") as Health).take_damage(500.0, Vector3.ZERO, "head")
-	_check("тяжёлому в шлеме в голову — лёг", (hv.get_node("Health") as Health).downed, "")
-	for m in [b, hv]:
+	# в шлеме пуля остановлена — лёг (шлем закрывает не всю голову — несколько попыток)
+	var helm: Array = []
+	var saved := false
+	for i in range(6):
+		var hv := scene.instantiate() as Marauder
+		hv.name = "HelmetH%d" % i
+		hv.archetype = "heavy"
+		_level.get_node("Marauders").add_child(hv)
+		helm.append(hv)
+		hv.global_position = SectorBuilder.polar(-130.0 - 2.0 * i, 72.0) + Vector3(0, 0.1, 0)
+		await get_tree().physics_frame
+		hv.equipment["helmet"] = ItemDb.make("helmet_perimeter_heavy", 1)
+		(hv.get_node("Health") as Health).take_damage(900.0, Vector3.ZERO, "head", Vector3.INF, {"pen": 2.0, "armor_dmg": 2.0})
+		if (hv.get_node("Health") as Health).downed:
+			saved = true
+			break
+	_check("тяжёлому в шлеме в голову — лёг", saved, "")
+	for m in [b] + helm:
 		(m as Node).queue_free()
 	if is_instance_valid(a):
 		a.queue_free()

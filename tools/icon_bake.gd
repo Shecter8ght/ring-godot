@@ -13,7 +13,9 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	var only := OS.get_cmdline_user_args()
 	var ids: Array = []
-	var items: Dictionary = (JSON.parse_string(FileAccess.get_file_as_string(ItemDb.ITEMS_PATH)) as Dictionary).get("items", {})
+	var items: Dictionary = (JSON.parse_string(FileAccess.get_file_as_string(ItemDb.ITEMS_PATH)) as Dictionary).get("items", {}).duplicate()
+	# арсенал (data/weapons.json, armor.json) — те же иконки
+	items.merge(WeaponDb.items())
 	for id in items:
 		if only.is_empty() or String(id) in only:
 			ids.append(String(id))

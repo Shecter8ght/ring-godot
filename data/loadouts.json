@@ -1,0 +1,851 @@
+{
+ "_comment": "Снаряжение ИИ (см. docs/design/weapons.md, п.9): списки [пресет/предмет, вес]; \"\" — ничего. primary/secondary — пресеты оружия (data/weapons.json → presets), spare_mags — запасных магазинов к основному [мин, макс] (снаряжены тем же патроном), armor/plates/helmet/headset — предметы, meds — [id, шанс, [мин, макс]], dur — износ оружия и брони (перекрывает пресет), loot_table — прочий лут на теле, skill — меткость ×. Тип ИИ → снаряжение: Balance.AI_ARCHETYPES.loadout.",
+ "loadouts": {
+  "civilian": {
+   "name": "Мирный",
+   "primary": [
+    [
+     "HG_01_BASE",
+     0.4
+    ],
+    [
+     "SG_01_BASE",
+     0.4
+    ],
+    [
+     "AR_01_WORN",
+     0.08
+    ],
+    [
+     "SG_02_BASE",
+     0.12
+    ]
+   ],
+   "secondary": [],
+   "spare_mags": [
+    0,
+    1
+   ],
+   "armor": [
+    [
+     "",
+     0.85
+    ],
+    [
+     "vest_homemade",
+     0.15
+    ]
+   ],
+   "plates": [
+    [
+     "",
+     1
+    ]
+   ],
+   "helmet": [
+    [
+     "",
+     0.9
+    ],
+    [
+     "helmet_hardhat",
+     0.1
+    ]
+   ],
+   "headset": [
+    [
+     "",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "bandage",
+     0.6,
+     [
+      1,
+      2
+     ]
+    ]
+   ],
+   "loot_table": "resident",
+   "skill": 1.0
+  },
+  "scav_poor": {
+   "name": "Мародёр-оборванец",
+   "primary": [
+    [
+     "HG_01_BASE",
+     0.45
+    ],
+    [
+     "SG_01_BASE",
+     0.25
+    ],
+    [
+     "SMG_01_BASE",
+     0.2
+    ],
+    [
+     "AR_01_WORN",
+     0.1
+    ]
+   ],
+   "secondary": [],
+   "spare_mags": [
+    0,
+    1
+   ],
+   "armor": [
+    [
+     "",
+     0.8
+    ],
+    [
+     "vest_homemade",
+     0.2
+    ]
+   ],
+   "plates": [
+    [
+     "",
+     1
+    ]
+   ],
+   "helmet": [
+    [
+     "",
+     0.85
+    ],
+    [
+     "helmet_hardhat",
+     0.15
+    ]
+   ],
+   "headset": [
+    [
+     "",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "bandage",
+     0.5,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "loot_table": "marauder",
+   "dur": [
+    25,
+    65
+   ],
+   "skill": 0.85
+  },
+  "scav_standard": {
+   "name": "Мародёр",
+   "primary": [
+    [
+     "AR_03_BASE",
+     0.35
+    ],
+    [
+     "AR_01_WORN",
+     0.2
+    ],
+    [
+     "AR_02_BASE",
+     0.12
+    ],
+    [
+     "SMG_01_BASE",
+     0.13
+    ],
+    [
+     "SG_02_BASE",
+     0.1
+    ],
+    [
+     "AR_03_RD",
+     0.1
+    ]
+   ],
+   "secondary": [
+    [
+     "",
+     0.6
+    ],
+    [
+     "HG_01_BASE",
+     0.25
+    ],
+    [
+     "HG_02_BASE",
+     0.15
+    ]
+   ],
+   "spare_mags": [
+    1,
+    3
+   ],
+   "armor": [
+    [
+     "",
+     0.45
+    ],
+    [
+     "vest_old",
+     0.25
+    ],
+    [
+     "vest_police",
+     0.2
+    ],
+    [
+     "carrier_simple",
+     0.1
+    ]
+   ],
+   "plates": [
+    [
+     "plate_steel_homemade",
+     0.6
+    ],
+    [
+     "plate_steel",
+     0.4
+    ]
+   ],
+   "helmet": [
+    [
+     "",
+     0.6
+    ],
+    [
+     "helmet_military_old",
+     0.3
+    ],
+    [
+     "helmet_police",
+     0.1
+    ]
+   ],
+   "headset": [
+    [
+     "",
+     0.85
+    ],
+    [
+     "headset_passive",
+     0.15
+    ]
+   ],
+   "meds": [
+    [
+     "bandage",
+     0.7,
+     [
+      1,
+      2
+     ]
+    ],
+    [
+     "painkillers",
+     0.3,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "loot_table": "marauder",
+   "dur": [
+    30,
+    75
+   ],
+   "skill": 1.0
+  },
+  "scav_veteran": {
+   "name": "Мародёр бывалый",
+   "primary": [
+    [
+     "AR_03_RD",
+     0.25
+    ],
+    [
+     "AR_04_BASE",
+     0.2
+    ],
+    [
+     "SG_02_TAC",
+     0.2
+    ],
+    [
+     "AR_01_PSO",
+     0.15
+    ],
+    [
+     "SMG_02_TAC",
+     0.1
+    ],
+    [
+     "AR_05_BASE",
+     0.1
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_02_BASE",
+     0.6
+    ],
+    [
+     "HG_03_BASE",
+     0.4
+    ]
+   ],
+   "spare_mags": [
+    2,
+    3
+   ],
+   "armor": [
+    [
+     "vest_police",
+     0.3
+    ],
+    [
+     "vest_army",
+     0.2
+    ],
+    [
+     "carrier_simple",
+     0.3
+    ],
+    [
+     "carrier_tactical",
+     0.2
+    ]
+   ],
+   "plates": [
+    [
+     "plate_steel",
+     0.5
+    ],
+    [
+     "plate_composite",
+     0.3
+    ],
+    [
+     "plate_ceramic",
+     0.2
+    ]
+   ],
+   "helmet": [
+    [
+     "helmet_military_old",
+     0.4
+    ],
+    [
+     "helmet_army",
+     0.35
+    ],
+    [
+     "",
+     0.25
+    ]
+   ],
+   "headset": [
+    [
+     "",
+     0.5
+    ],
+    [
+     "headset_passive",
+     0.3
+    ],
+    [
+     "headset_active",
+     0.2
+    ]
+   ],
+   "meds": [
+    [
+     "bandage",
+     0.6,
+     [
+      1,
+      2
+     ]
+    ],
+    [
+     "medkit",
+     0.4,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "loot_table": "marauder",
+   "dur": [
+    40,
+    85
+   ],
+   "skill": 1.1
+  },
+  "scav_sniper": {
+   "name": "Мародёр-стрелок",
+   "primary": [
+    [
+     "SR_01_BASE",
+     0.7
+    ],
+    [
+     "DMR_01_BASE",
+     0.3
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_01_BASE",
+     0.5
+    ],
+    [
+     "HG_02_BASE",
+     0.5
+    ]
+   ],
+   "spare_mags": [
+    1,
+    2
+   ],
+   "armor": [
+    [
+     "",
+     0.6
+    ],
+    [
+     "vest_old",
+     0.4
+    ]
+   ],
+   "plates": [
+    [
+     "",
+     1
+    ]
+   ],
+   "helmet": [
+    [
+     "",
+     0.7
+    ],
+    [
+     "helmet_military_old",
+     0.3
+    ]
+   ],
+   "headset": [
+    [
+     "",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "bandage",
+     0.6,
+     [
+      1,
+      2
+     ]
+    ]
+   ],
+   "loot_table": "marauder",
+   "dur": [
+    40,
+    85
+   ],
+   "skill": 1.0
+  },
+  "scav_leader": {
+   "name": "Главарь мародёров",
+   "primary": [
+    [
+     "AR_04_TAC",
+     0.4
+    ],
+    [
+     "AR_05_TAC",
+     0.3
+    ],
+    [
+     "SG_02_TAC",
+     0.3
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_03_TAC",
+     1
+    ]
+   ],
+   "spare_mags": [
+    3,
+    4
+   ],
+   "armor": [
+    [
+     "carrier_tactical",
+     0.6
+    ],
+    [
+     "vest_army",
+     0.4
+    ]
+   ],
+   "plates": [
+    [
+     "plate_ceramic",
+     0.5
+    ],
+    [
+     "plate_military",
+     0.3
+    ],
+    [
+     "plate_composite",
+     0.2
+    ]
+   ],
+   "helmet": [
+    [
+     "helmet_army",
+     0.6
+    ],
+    [
+     "helmet_tactical",
+     0.4
+    ]
+   ],
+   "headset": [
+    [
+     "headset_active",
+     0.7
+    ],
+    [
+     "headset_tactical",
+     0.3
+    ]
+   ],
+   "meds": [
+    [
+     "medkit",
+     1.0,
+     [
+      1,
+      2
+     ]
+    ],
+    [
+     "painkillers",
+     0.5,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "loot_table": "marauder",
+   "dur": [
+    55,
+    92
+   ],
+   "skill": 1.2
+  },
+  "perimeter_rifleman": {
+   "name": "«Периметр» стрелок",
+   "primary": [
+    [
+     "AR_06_PATROL",
+     0.6
+    ],
+    [
+     "AR_06_SUPPRESSED",
+     0.2
+    ],
+    [
+     "AR_07_PATROL",
+     0.2
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_04_BASE",
+     1
+    ]
+   ],
+   "spare_mags": [
+    3,
+    3
+   ],
+   "armor": [
+    [
+     "carrier_perimeter_std",
+     1
+    ]
+   ],
+   "plates": [
+    [
+     "plate_perimeter",
+     0.5
+    ],
+    [
+     "plate_military",
+     0.5
+    ]
+   ],
+   "helmet": [
+    [
+     "helmet_perimeter_combat",
+     1
+    ]
+   ],
+   "headset": [
+    [
+     "headset_perimeter",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "medkit",
+     1.0,
+     [
+      1,
+      2
+     ]
+    ]
+   ],
+   "loot_table": "pmc",
+   "dur": [
+    80,
+    100
+   ],
+   "skill": 1.25
+  },
+  "perimeter_breacher": {
+   "name": "«Периметр» штурмовик",
+   "primary": [
+    [
+     "SG_04_BREACH",
+     0.5
+    ],
+    [
+     "AR_06_CQB",
+     0.3
+    ],
+    [
+     "SMG_03_CQB",
+     0.2
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_04_BASE",
+     1
+    ]
+   ],
+   "spare_mags": [
+    3,
+    4
+   ],
+   "armor": [
+    [
+     "carrier_perimeter_assault",
+     1
+    ]
+   ],
+   "plates": [
+    [
+     "plate_perimeter",
+     0.6
+    ],
+    [
+     "plate_military",
+     0.4
+    ]
+   ],
+   "helmet": [
+    [
+     "helmet_perimeter_heavy",
+     1
+    ]
+   ],
+   "headset": [
+    [
+     "headset_perimeter",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "medkit",
+     1.0,
+     [
+      1,
+      2
+     ]
+    ]
+   ],
+   "loot_table": "pmc",
+   "dur": [
+    80,
+    100
+   ],
+   "skill": 1.2
+  },
+  "perimeter_marksman": {
+   "name": "«Периметр» марксман",
+   "primary": [
+    [
+     "DMR_03_MARKSMAN",
+     0.7
+    ],
+    [
+     "AR_06_MARKSMAN",
+     0.3
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_04_BASE",
+     1
+    ]
+   ],
+   "spare_mags": [
+    2,
+    3
+   ],
+   "armor": [
+    [
+     "carrier_perimeter_std",
+     1
+    ]
+   ],
+   "plates": [
+    [
+     "plate_military",
+     0.7
+    ],
+    [
+     "plate_perimeter",
+     0.3
+    ]
+   ],
+   "helmet": [
+    [
+     "helmet_perimeter_combat",
+     1
+    ]
+   ],
+   "headset": [
+    [
+     "headset_perimeter",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "medkit",
+     1.0,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "loot_table": "pmc",
+   "dur": [
+    82,
+    100
+   ],
+   "skill": 1.3
+  },
+  "perimeter_leader": {
+   "name": "«Периметр» командир",
+   "primary": [
+    [
+     "AR_07_LEADER",
+     1
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_04_BASE",
+     1
+    ]
+   ],
+   "spare_mags": [
+    3,
+    4
+   ],
+   "armor": [
+    [
+     "carrier_perimeter_std",
+     1
+    ]
+   ],
+   "plates": [
+    [
+     "plate_perimeter",
+     1
+    ]
+   ],
+   "helmet": [
+    [
+     "helmet_perimeter_combat",
+     1
+    ]
+   ],
+   "headset": [
+    [
+     "headset_perimeter",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "medkit",
+     1.0,
+     [
+      2,
+      3
+     ]
+    ],
+    [
+     "painkillers",
+     1.0,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "loot_table": "pmc",
+   "dur": [
+    85,
+    100
+   ],
+   "skill": 1.3
+  }
+ },
+ "pmc_squad": [
+  "perimeter_leader",
+  "perimeter_rifleman",
+  "perimeter_breacher",
+  "perimeter_marksman"
+ ]
+}

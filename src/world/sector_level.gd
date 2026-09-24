@@ -180,7 +180,7 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 	var m := MARAUDER_SCENE.instantiate() as Marauder
 	m.name = String(data.name)
 	m.position = data.pos
-	m.weapon = String(data.get("weapon", ""))
+	m.loadout_id = String(data.get("loadout", ""))
 	m.archetype = String(data.get("arch", ""))
 	if data.has("home"):
 		m.home = data.home
@@ -192,7 +192,7 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 
 ## Хост: отряд из archs (типы AI_ARCHETYPES) у точки at. opts: home + home_r — держатся у места
 ## (жильцы, охрана), hostile — жильцы враждебны сразу, target — сразу идут проверить точку (ЧВК к
-## грузу). До готовности навмеша — в очередь.
+## грузу), loadout — выкладка всем (data/loadouts.json). До готовности навмеша — в очередь.
 func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> void:
 	if _marauders_spawned == 0:
 		_pending_squads.append([at, archs, opts])
@@ -205,10 +205,16 @@ func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> void:
 		var a := TAU * float(k) / float(maxi(n, 1)) + _rng.randf() * 0.5
 		var p := NavigationServer3D.map_get_closest_point(map, at + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(1.5, 3.5))
 		var arch := String(archs[k])
-		var wpn := Marauder.weapon_for(arch, _rng)
+		var wpn := Marauder.loadout_for(arch, _rng)
+		# «Периметр» — группа по ролям: командир, стрелок, штурмовик, марксман
+		if arch == "pmc" and not WeaponDb.pmc_squad().is_empty():
+			wpn = String(WeaponDb.pmc_squad()[k % WeaponDb.pmc_squad().size()])
+		# выкладка задана явно (консоль разработчика, события)
+		if opts.has("loadout"):
+			wpn = String(opts.loadout)
 		var nm := "%s%d" % [arch.capitalize(), _guard_count]
 		_guard_count += 1
-		var data := {"name": nm, "pos": p + Vector3(0, 0.1, 0), "weapon": wpn, "arch": arch}
+		var data := {"name": nm, "pos": p + Vector3(0, 0.1, 0), "loadout": wpn, "arch": arch}
 		if opts.has("home"):
 			data["home"] = opts.home
 			data["home_r"] = float(opts.get("home_r", 6.0))
@@ -242,16 +248,16 @@ func spawn_guards(at: Vector3, n: int, radius: float) -> void:
 		var a := TAU * float(k) / float(maxi(n, 1)) + _rng.randf() * 0.5
 		var p := NavigationServer3D.map_get_closest_point(map, at + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(2.0, radius * 0.6))
 		var arch := "heavy" if k == 0 else ("gunner" if k % 2 == 1 else "scout")
-		var wpn := Marauder.weapon_for(arch, _rng)
+		var wpn := Marauder.loadout_for(arch, _rng)
 		var nm := "Guard%d" % _guard_count
 		_guard_count += 1
 		var m: Marauder
 		if _marauder_spawner:
-			m = _marauder_spawner.spawn({"name": nm, "pos": p + Vector3(0, 0.1, 0), "weapon": wpn, "arch": arch, "home": at, "home_r": radius}) as Marauder
+			m = _marauder_spawner.spawn({"name": nm, "pos": p + Vector3(0, 0.1, 0), "loadout": wpn, "arch": arch, "home": at, "home_r": radius}) as Marauder
 		else:
 			m = MARAUDER_SCENE.instantiate() as Marauder
 			m.name = nm
-			m.weapon = wpn
+			m.loadout_id = wpn
 			m.archetype = arch
 			m.home = at
 			m.home_radius = radius
@@ -315,6 +321,7 @@ func _apply_loadout(p: Player) -> void:
 		return
 	p.loadout_mode = true
 	p.weapon_id = ""
+	p.weapon_slot = ""
 	p.ammo = 0
 	_raid.submit_loadout(Profile.take_loadout())
 
@@ -360,7 +367,7 @@ func _on_nav_baked() -> void:
 		_spawn_marauders()
 
 
-## Отряды по AI_SQUAD_SIZE рядом друг с другом; оружие каждому — по долям AI_WEAPONS.
+## Отряды по AI_SQUAD_SIZE рядом друг с другом; снаряжение каждому — по выкладке архетипа (data/loadouts.json).
 func _spawn_marauders() -> void:
 	var placed := 0
 	var tries := 0
@@ -388,14 +395,14 @@ func _spawn_marauders() -> void:
 			var arch := lead_arch
 			while k > 0 and (arch == lead_arch and _rng.randf() < 0.4 or bool(Balance.AI_ARCHETYPES[arch].holds)):
 				arch = Marauder.pick_archetype(_rng)
-			var wpn := Marauder.weapon_for(arch, _rng)
+			var wpn := Marauder.loadout_for(arch, _rng)
 			var m: Marauder
 			if _marauder_spawner:
-				m = _marauder_spawner.spawn({"name": "Marauder%d" % placed, "pos": at + Vector3(0, 0.1, 0), "weapon": wpn, "arch": arch}) as Marauder
+				m = _marauder_spawner.spawn({"name": "Marauder%d" % placed, "pos": at + Vector3(0, 0.1, 0), "loadout": wpn, "arch": arch}) as Marauder
 			else:
 				m = MARAUDER_SCENE.instantiate() as Marauder
 				m.name = "Marauder%d" % placed
-				m.weapon = wpn
+				m.loadout_id = wpn
 				m.archetype = arch
 				_marauders_root.add_child(m)
 				m.global_position = at + Vector3(0, 0.1, 0)

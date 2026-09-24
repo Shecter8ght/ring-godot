@@ -7,15 +7,23 @@ func _ready() -> void:
 	get_tree().current_scene = null
 	Profile.use_file("user://profile_shots.json", true)
 	# немного снаряжения — чтобы окна были не пустыми
-	for id in ["w_rifle", "w_pistol", "vest_light"]:
+	for id in ["wpn_ar_03", "wpn_hg_03", "vest_police"]:
 		Profile.equip_from_stash(_idx(id))
-	Profile.stash_to_backpack(_idx("ammo_545"), 90)
+	Profile.stash_to_backpack(_idx("ammo_545_std"), 90)
 	Profile.stash_to_backpack(_idx("bandage"), 4)
 	Profile.money = 400000
-	for id in ["mod_red_dot", "mod_supp_545", "mod_grip", "mod_stock_tele", "mod_mag_ext", "mod_flashlight", "mod_holo", "mod_scope4x", "mod_comp", "mod_rmr"]:
+	Profile.trust = 3
+	# верстак 2 — ставятся и прицелы, и фонари сбоку
+	for pair in [["battery", 2], ["wires", 5], ["toolset", 1], ["cigarettes", 5], ["lighter", 2]]:
+		ItemDb.add_to(Profile.stash, ItemDb.make(String(pair[0]), int(pair[1])), Profile.stash_grid())
+	Upgrades.build("generator")
+	Upgrades.build("workbench")
+	for id in ["optic_rd_01", "muzzle_supp_545_01", "grip_vertical_01", "stock_tele_ak_01", "tac_flashlight_01", "tac_laser_01",
+			"optic_holo_01", "optic_4x_01", "muzzle_comp_545_01", "optic_rmr_01", "mag_545_45", "plate_steel"]:
 		Profile.buy(id, 1)
-	for id in ["mod_red_dot", "mod_supp_545", "mod_grip", "mod_stock_tele", "mod_mag_ext", "mod_flashlight"]:
+	for id in ["optic_rd_01", "muzzle_supp_545_01", "grip_vertical_01", "stock_tele_ak_01", "tac_flashlight_01"]:
 		Profile.install_mod("primary", _idx(id))
+	Profile.fit_part("equip:primary", -1, "stash", _idx("mag_545_45"))
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	await _frames(240)
 	_save("hideout")

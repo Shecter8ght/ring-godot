@@ -21,11 +21,19 @@ static var _mats: Dictionary = {}
 static var _meshes: Dictionary = {}
 
 
-## mods — слот -> id обвеса (data/items.json): подгоняются по точкам крепления модели (WeaponMods).
+## id — предмет-оружие (data/weapons.json: основа model, масштаб scale, встроенный глушитель) или
+## сама основа ("pistol", "rifle", "shotgun", "bolt", "grenade"). mods — точка → {id, …}: обвес
+## по сокетам основы (WeaponMods). Масштаб — внешним узлом: meta (дуло, линии прицела) пересчитаны.
 static func build(id: String, mods: Dictionary = {}) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Weapon_" + id
-	match id:
+	var key := id
+	var scale := 1.0
+	var w := WeaponDb.weapon(id)
+	if not w.is_empty():
+		key = String(w.model)
+		scale = float(w.get("scale", 1.0))
+	match key:
 		"pistol":
 			_pistol(root)
 		"rifle":
@@ -36,11 +44,38 @@ static func build(id: String, mods: Dictionary = {}) -> Node3D:
 			_bolt(root)
 		"grenade":
 			_grenade(root)
-	if not mods.is_empty():
-		WeaponMods.fit(root, id, mods)
+	# встроенный глушитель (бесшумный карабин) — на резьбу, как съёмный
+	if bool((w.get("integral", {}) as Dictionary).get("suppressed", false)):
+		var ms := WeaponMods.socket(key, "muzzle")
+		if not ms.is_empty():
+			WeaponMods._suppressor(root, ms, 0.021, 0.2)
+	WeaponMods.fit(root, key, mods)
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	return root
+	if is_equal_approx(scale, 1.0):
+		return root
+	# масштаб основы: геометрия — во внутреннем узле, meta — в осях внешнего
+	var outer := Node3D.new()
+	outer.name = root.name
+	root.name = "Scaled"
+	root.scale = Vector3.ONE * scale
+	outer.add_child(root)
+	for k in root.get_meta_list():
+		var v: Variant = root.get_meta(k)
+		if v is Vector3 or v is float:
+			outer.set_meta(k, v * scale)
+		elif v is Dictionary:
+			var d := (v as Dictionary).duplicate()
+			for dk in ["x", "h"]:
+				if d.has(dk):
+					d[dk] = float(d[dk]) * scale
+			outer.set_meta(k, d)
+		else:
+			outer.set_meta(k, v)
+	# ads_z — вынос глаза, от масштаба не зависит
+	if root.has_meta("ads_z"):
+		outer.set_meta("ads_z", root.get_meta("ads_z"))
+	return outer
 
 
 # ---------------------------------------------------------------- пистолет

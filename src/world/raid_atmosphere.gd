@@ -174,7 +174,7 @@ func is_dark(p: Vector3) -> bool:
 
 ## Дальше скольких метров мародёр не разглядит того, кто стоит в точке p; own_light — у него
 ## включён фонарь (выдаёт издалека).
-func view_distance(p: Vector3, own_light: bool) -> float:
+func view_distance(p: Vector3, own_light: bool, light_k: float = 1.0, laser: bool = false) -> float:
 	var c := RaidConditions.current
 	var d := float(RaidConditions.spec("time").view)
 	if is_indoor(p):
@@ -194,5 +194,7 @@ func view_distance(p: Vector3, own_light: bool) -> float:
 			d = maxf(d, Balance.FLARE_LIT_VIEW)
 			break
 	if own_light:
-		d = maxf(d, Balance.AI_VIEW_FLASHLIGHT)
+		d = maxf(d, Balance.AI_VIEW_FLASHLIGHT * light_k)
+	elif laser and d < Balance.AI_VIEW_LASER:
+		d = Balance.AI_VIEW_LASER
 	return d

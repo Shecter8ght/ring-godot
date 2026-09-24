@@ -20,7 +20,7 @@ func _ready() -> void:
 	# площадь у входа — открытое небо; солнце низко на западе-северо-западе
 	_player.global_position = SectorBuilder.polar(-100.0, 176.0) + Vector3(0, 0.05, 0)
 	var sun := (get_tree().current_scene.find_children("*", "DirectionalLight3D", true, false)[0] as DirectionalLight3D).global_basis.z
-	_player.sandbox_mods = {"rifle": {"optic": "mod_scope4x"}}
+	_player.set_sandbox_mods("AR_03_BASE", {"optic_primary": "optic_4x_01"})
 	for w in [["weapon_4", "bolt"], ["weapon_2", "rifle4x"]]:
 		_tap(String(w[0]))
 		await get_tree().create_timer(0.4).timeout
@@ -45,7 +45,7 @@ func _ready() -> void:
 		Input.action_release("aim")
 		await _frames(10)
 	# открытые прицельные из глаза: мушка в прорези целика, на фасад здания
-	_player.sandbox_mods = {}
+	_player.set_sandbox_mods("AR_03_BASE", {})
 	var facade := SectorBuilder.polar(-92.0, 125.0) + Vector3(0, 1.6, 0)
 	for w in [["weapon_1", "pistol"], ["weapon_2", "rifle"], ["weapon_3", "shotgun"]]:
 		_tap(String(w[0]))

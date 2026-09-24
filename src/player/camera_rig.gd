@@ -496,24 +496,33 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			if (mi as GeometryInstance3D).has_meta("hide_ads"):
 				_cheek_parts.append(mi as GeometryInstance3D)
 		# фонарь у себя светит от модели в руках: луч идёт за стволом (у модели на теле он погашен)
-		for n in _viewmodel.find_children("Flashlight", "SpotLight3D", true, false):
+		for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
 			n.set_meta("own", true)
 			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_ads_cam.add_child(_viewmodel)
 		_viewmodel_id = vm_key
 	_viewmodel.visible = true
-	for n in _viewmodel.find_children("LaserBeam", "MeshInstance3D", true, false):
-		(n as MeshInstance3D).visible = pl.light_on
-	for n in _viewmodel.find_children("Flashlight", "SpotLight3D", true, false):
-		(n as SpotLight3D).visible = pl.light_on
+	for n in _viewmodel.find_children("LaserBeam*", "MeshInstance3D", true, false):
+		(n as MeshInstance3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
+	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
+		(n as SpotLight3D).visible = Player.tac_on(pl.weapon_mods, n, "light")
 	var sh: float = _viewmodel.get_meta("sight_h", 0.08)
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
+	# выбранный прицел: угловой — ствол заваливается по крену кронштейна, его линия — на оси взгляда
+	var sx := 0.0
+	var sroll := 0.0
+	if String(spec.get("sight", "primary")) == "offset" and _viewmodel.has_meta("sight_offset"):
+		var so: Dictionary = _viewmodel.get_meta("sight_offset")
+		sx = float(so.x)
+		sh = float(so.h)
+		sroll = float(so.roll)
 	# у бедра (без ПКМ) → в прицел: «довод» по эргономике (aim_progress), плавно
 	var k := smoothstep(0.0, 1.0, aim_t)
 	# приклад у бедра виден; вскинул к щеке — он под щекой и заслонял бы низ прицельной линии
 	for gi in _cheek_parts:
 		gi.visible = k < 0.6
-	var ads_pos := Vector3(0.0, -sh, -az)
+	var cant := Basis(Vector3(0, 0, 1), -sroll)
+	var ads_pos := -(Basis(Vector3.UP, PI) * cant * Vector3(sx, sh, 0.0)) + Vector3(0.0, 0.0, -az)
 	var hip_pos := Balance.FPS_HIP_POSE
 	# на ходу у бедра оружие покачивается
 	var moving := Vector2(pl.velocity.x, pl.velocity.z).length() > 0.5
@@ -522,7 +531,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
 	# толчок в плечо: модель откатывается назад, дуло подскакивает, чуть заваливается; пружиной обратно
 	var kv := pl.kick_vis
-	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k))
+	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
 	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + bob + Vector3(0.0, kv * 0.004, kv * 0.028))
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85)
 	if scope_active:
@@ -535,7 +544,8 @@ func _ads_fov(pl: Player) -> float:
 	if pl.weapon_id == "":
 		return 60.0
 	var spec := pl.spec()
-	return Balance.SCOPE_MAIN_FOV if bool(spec.scoped) else float(spec.ads_fov)
+	# в убежище оружие в руках — для вида, характеристик нет
+	return Balance.SCOPE_MAIN_FOV if bool(spec.get("scoped", false)) else float(spec.get("ads_fov", 60.0))
 
 
 # ---------------------------------------------------------------- оптика отдельным рендером
@@ -951,10 +961,18 @@ func _update_hud(pl: Player) -> void:
 		_weapon_label.text = "без оружия      гранаты × %d" % pl.grenade_count()
 		return
 	var spec := pl.spec()
-	var t := "%s   %d / %d" % [String(spec.name), pl.ammo, int(spec.mag)]
+	var t := "%s   %d / %d %s" % [String(spec.name), pl.ammo, int(spec.mag), String(ItemDb.item(String(spec.ammo)).get("short", ""))]
 	var reserve := pl.ammo_reserve()
 	if reserve >= 0:
 		t += "   · %d" % reserve
+	if (spec.sights as Array).size() > 1:
+		t += "   [%s]" % ("угловой" if String(spec.sight) == "offset" else "основной")
+	if pl.light_on:
+		t += "   СВЕТ"
+	if pl.laser_on:
+		t += "   ЛЦУ"
+	if pl.is_jammed():
+		t += "   ЗАДЕРЖКА (R)"
 	if pl.reload_timer > 0.0:
 		t = "%s   перезарядка…" % String(spec.name)
 	_weapon_label.text = t + "      гранаты × %d" % pl.grenade_count()

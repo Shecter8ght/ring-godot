@@ -14,7 +14,7 @@ extends CharacterBody3D
 ## прочёсывание дугой от ближних точек к дальним. Тяжело ранен (DOWNED) — лежит, стреляет из
 ## пистолета, зовёт; ближайший товарищ, который слышал (AI_RESCUE_RADIUS), идёт спасать (RESCUE):
 ## лежит на виду — тащит за укрытие, потом поднимает (аптечка, AI_REVIVE_SEC). Лежащего игрока
-## добивает, только если никто другой не стреляет (AI_FINISH_QUIET_SEC). Оружие (AI_WEAPONS): пистолет, автомат очередями, дробовик; магазин и
+## добивает, только если никто другой не стреляет (AI_FINISH_QUIET_SEC). Оружие — из снаряжения (data/loadouts.json), стреляет по классу (AI_CLASS); магазин и
 ## перезарядка — в укрытии, если оно есть. Точность садится за AI_AIM_SETTLE_SEC после того, как
 ## заметил цель; бегущую цель и на бегу — хуже.
 
@@ -26,8 +26,24 @@ const CROUCH_EYE := 1.05
 
 var state: State = State.PATROL
 var tactic: Tactic = Tactic.ENGAGE
-## Оружие (ключ Balance.AI_WEAPONS): ставит спавнер до добавления в дерево; пусто — по типу.
+## Снаряжение (id в data/loadouts.json): ставит спавнер до добавления в дерево; пусто — по типу.
+var loadout_id: String = ""
+## Совместимость (тесты, старые спавнеры): оружие ключом — pistol / rifle / shotgun / bolt или пресет.
 var weapon: String = ""
+## Что на нём: оружие (primary, secondary — записи с магазином и обвесом), броня с плитами,
+## шлем, гарнитура; запасные магазины (россыпь — для встроенных) и аптечки. Выпадает при смерти
+## тем, что осталось (патроны тратятся по-настоящему).
+var equipment: Dictionary = {}
+var spare: Array = []
+var meds: Array = []
+## Какое оружие в руках: primary / secondary.
+var _active: String = "primary"
+## Прежнее оружие, пока раненый / в тумане с пистолетом.
+var _main_slot: String = ""
+## Патроны кончились совсем.
+var _dry: bool = false
+## Старые ключи оружия → пресеты.
+const LEGACY_WEAPON := {"pistol": "HG_02_BASE", "rifle": "AR_03_BASE", "shotgun": "SG_02_BASE", "bolt": "SR_01_BASE"}
 ## Тип (ключ Balance.AI_ARCHETYPES): разведчик, штурмовик, тяжёлый, снайпер; пусто — случайный.
 var archetype: String = ""
 var squad: Squad
@@ -88,8 +104,6 @@ var _post: Vector3 = Vector3.INF
 ## Раненый: кто идёт спасать (null — никто), кто тащит; основное оружие на время пистолета.
 var rescuer: Marauder = null
 var dragged_by: Marauder = null
-var _main_spec: Dictionary = {}
-var _main_mag: int = 0
 var _main_gun: Node3D
 var _help_t: float = 0.0
 var _shown_down: bool = false
@@ -136,20 +150,22 @@ func _ready() -> void:
 	faction = String(_arch.get("faction", "marauder"))
 	if faction == "resident" and not has_meta("hostile"):
 		hostile_to_players = false
-	if weapon == "" or not Balance.AI_WEAPONS.has(weapon):
-		weapon = weapon_for(archetype, _rng)
-	_spec = Balance.AI_WEAPONS[weapon]
-	_mag = int(_spec.mag)
+	if loadout_id == "":
+		loadout_id = loadout_for(archetype, _rng)
+	_equip_loadout()
+	_use("primary" if equipment.has("primary") else "secondary")
 	_grenades = int(Balance.AI_GRENADE.count)
 	_health.max_hp = Balance.MARAUDER_HP * float(_arch.hp)
 	_health.hp = _health.max_hp
-	# броня: проходит только доля урона
-	var armor := float(_arch.armor)
-	if armor < 1.0:
-		_health.damage_filter = func(a: float, _zone: String) -> float: return a * armor
-	# тяжело ранен вместо смерти; в шлеме (тяжёлый) голова держит
+	# броня, плиты, шлем — Armor (хост)
+	_health.damage_filter = func(a: float, zone: String, from: Vector3, at: Vector3, bullet: Dictionary) -> Array:
+		var p := at if at != Vector3.INF else global_position + Vector3.UP * 1.3
+		var r := Armor.hit(equipment, a, zone, from, p, Vector3(sin(_facing), 0.0, cos(_facing)), bullet, _rng)
+		if String(r.layer) != "":
+			equipment = r.equipment
+		return [float(r.damage), bool(r.lethal)]
+	# тяжело ранен вместо смерти
 	_health.can_down = true
-	_health.head_protected = func() -> bool: return bool(_arch.get("helmet", false))
 	_health.downed_changed.connect(_on_downed_changed)
 	# видно, кто перед тобой: цвет куртки и фигура (тяжёлый шире, разведчик уже)
 	_base_scale = _arch.scale
@@ -170,11 +186,8 @@ func _ready() -> void:
 	var cs := $Capsule as CollisionShape3D
 	_capsule = (cs.shape as CapsuleShape3D).duplicate()
 	cs.shape = _capsule
-	# оружие в правой руке — видно, чем вооружён; при смерти прячется вместе с телом
-	var gun := WeaponModels.build(String(_spec.model))
-	gun.position = Vector3(-0.17, 1.24, 0.3 if weapon == "pistol" else 0.22) / _base_scale
-	_body.add_child(gun)
-	_main_gun = gun
+	# оружие в правой руке — видно, чем вооружён (с обвесом); при смерти прячется вместе с телом
+	_show_gun()
 	pause_timer = _rng.randf_range(0.5, 2.0)
 	# в темноте — фонарь: мародёр видит, но и себя выдаёт (у каждого peer по условиям рейда)
 	_torch = SpotLight3D.new()
@@ -188,6 +201,7 @@ func _ready() -> void:
 	_torch.spot_angle = 26.0
 	# с тенью: иначе луч светит сквозь стены
 	_torch.shadow_enabled = true
+	_fade(_torch)
 	_torch.visible = false
 	_torch.add_to_group("glare_lights")
 	_body.add_child(_torch)
@@ -220,18 +234,157 @@ static func pick_archetype(rng: RandomNumberGenerator) -> String:
 	return "gunner"
 
 
-## Оружие для типа — случайное из его списка.
+## Снаряжение для типа (с шансом — главарь).
+static func loadout_for(arch: String, rng: RandomNumberGenerator) -> String:
+	var a: Dictionary = Balance.AI_ARCHETYPES.get(arch, Balance.AI_ARCHETYPES.gunner)
+	var lead: Dictionary = a.get("leader", {})
+	if not lead.is_empty() and rng.randf() < float(lead.chance):
+		return String(lead.loadout)
+	return String(a.get("loadout", "scav_standard"))
+
+
+## Совместимость со старыми спавнерами.
 static func weapon_for(arch: String, rng: RandomNumberGenerator) -> String:
-	var list: Array = Balance.AI_ARCHETYPES.get(arch, Balance.AI_ARCHETYPES.gunner).weapons
-	return String(list[rng.randi_range(0, list.size() - 1)])
+	return loadout_for(arch, rng)
 
 
-## Куда попала пуля: голова — выше HEAD_ZONE (присел — ниже), лежащий — всё корпус.
+## Снаряжение из data/loadouts.json: оружие по пресетам, запасные магазины тем же патроном,
+## броня с плитами, шлем, гарнитура, аптечки; износ — dur снаряжения.
+func _equip_loadout() -> void:
+	var lo := WeaponDb.loadout(loadout_id)
+	if lo.is_empty():
+		lo = WeaponDb.loadout("scav_standard")
+	var dr: Array = lo.get("dur", [])
+	var p1 := _pick(lo.get("primary", []))
+	if weapon != "":
+		p1 = String(LEGACY_WEAPON.get(weapon, weapon)) if not WeaponDb.preset(String(LEGACY_WEAPON.get(weapon, weapon))).is_empty() else p1
+	if p1 != "":
+		equipment["primary"] = WeaponDb.make_weapon(p1, _rng, dr)
+	var p2 := _pick(lo.get("secondary", []))
+	if p2 != "":
+		equipment["secondary"] = WeaponDb.make_weapon(p2, _rng, dr)
+	var sm: Array = lo.get("spare_mags", [1, 2])
+	for slot in ["primary", "secondary"]:
+		if not equipment.has(slot):
+			continue
+		var e: Dictionary = equipment[slot]
+		var mag: Dictionary = e.mag
+		var n := _rng.randi_range(int(sm[0]), int(sm[1])) if slot == "primary" else 1
+		var pr := WeaponDb.preset(p1 if slot == "primary" else p2)
+		var cap := WeaponDb.capacity(e)
+		if String(mag.get("id", "")) == "":
+			spare.append({"id": String(mag.ammo), "n": cap * n})
+		else:
+			for k in range(n):
+				var aid := WeaponDb.pick_ammo(pr.get("ammo", []), _rng, String(WeaponDb.weapon(String(e.id)).caliber))
+				spare.append(WeaponDb.make_mag(String(mag.id), aid, cap))
+	var wear := _rng.randf_range(float(dr[0]), float(dr[1])) / 100.0 if dr.size() == 2 else 1.0
+	var vid := _pick(lo.get("armor", []))
+	if vid != "":
+		var ps := {}
+		for side in ["front", "back"]:
+			var pid := _pick(lo.get("plates", []))
+			if pid != "":
+				ps[side] = pid
+		equipment["armor"] = WeaponDb.make_vest(vid, ps, wear)
+	var hid := _pick(lo.get("helmet", []))
+	if hid != "":
+		var h := ItemDb.make(hid, 1)
+		h.dur = roundf(float(h.dur) * wear)
+		equipment["helmet"] = h
+	var ear := _pick(lo.get("headset", []))
+	if ear != "":
+		equipment["ears"] = ItemDb.make(ear, 1)
+	for m in lo.get("meds", []):
+		if _rng.randf() < float(m[1]):
+			meds.append({"id": String(m[0]), "n": _rng.randi_range(int(m[2][0]), int(m[2][1]))})
+
+
+## Взвешенный выбор из [[id, вес], …]; "" — ничего.
+func _pick(list: Array) -> String:
+	var total := 0.0
+	for e in list:
+		total += float(e[1])
+	if total <= 0.0:
+		return ""
+	var r := _rng.randf() * total
+	for e in list:
+		r -= float(e[1])
+		if r <= 0.0:
+			return String(e[0])
+	return String(list[0][0])
+
+
+## Взять в руки оружие slot: патроны прежнего остаются в его магазине.
+func _use(slot: String) -> void:
+	if not equipment.has(slot):
+		return
+	if equipment.has(_active) and _active != slot and not _spec.is_empty():
+		(equipment[_active].mag as Dictionary)["rounds"] = _mag
+	_active = slot
+	var e: Dictionary = equipment[slot]
+	_spec = _ai_spec(e)
+	_mag = int((e.mag as Dictionary).get("rounds", 0))
+	_reload_t = 0.0
+	_burst_left = 0
+	if _body and is_inside_tree():
+		_show_gun()
+
+
+## Характеристики для ИИ: оружие и патрон (WeaponStats) + как ИИ стреляет этим классом (AI_CLASS).
+func _ai_spec(e: Dictionary) -> Dictionary:
+	var ws := WeaponStats.compute(e)
+	var c: Dictionary = Balance.AI_CLASS.get(String(ws["class"]), Balance.AI_CLASS.ASSAULT_RIFLE)
+	var skill := float(WeaponDb.loadout(loadout_id).get("skill", 1.0))
+	return {"class": String(ws["class"]), "mag": int(ws.mag), "reload": float(ws.reload) * Balance.AI_RELOAD_K,
+		"interval": maxf(float(ws.interval), float(c.interval_min)), "burst": int(c.burst) if bool(ws.auto) else 1,
+		"burst_pause": float(c.burst_pause), "damage": float(ws.damage) * Balance.AI_DAMAGE_K, "pellets": int(ws.pellets),
+		"spread": float(c.spread) / maxf(skill, 0.3), "range": float(c.range), "noise_m": float(ws.noise_m),
+		"sound": String(ws.sound), "reload_sound": String(ws.reload_sound), "pen": float(ws.pen), "armor_dmg": float(ws.armor_dmg),
+		"flash": float(ws.flash)}
+
+
+## Модель оружия в руке — по тому, что в руках.
+func _show_gun() -> void:
+	if _main_gun:
+		_main_gun.queue_free()
+		_main_gun = null
+	if not equipment.has(_active):
+		return
+	var e: Dictionary = equipment[_active]
+	var gun := WeaponModels.build(String(e.id), e.get("mods", {}))
+	for l in gun.find_children("Flashlight_*", "SpotLight3D", true, false):
+		_fade(l as Light3D)
+	var pistol := String(WeaponDb.weapon(String(e.id)).get("class", "")) == "PISTOL"
+	gun.position = Vector3(-0.17, 1.24, 0.3 if pistol else 0.22) / _base_scale
+	_body.add_child(gun)
+	_main_gun = gun
+
+
+## Фонарь ИИ далеко от камеры гаснет, тень — только вблизи (Balance.AI_LIGHT_FADE).
+static func _fade(l: Light3D) -> void:
+	var f: Dictionary = Balance.AI_LIGHT_FADE
+	l.distance_fade_enabled = true
+	l.distance_fade_begin = float(f.begin)
+	l.distance_fade_length = float(f.length)
+	l.distance_fade_shadow = float(f.shadow)
+
+
+## Куда попала пуля: голова (присел — ниже), ноги, руки (сбоку от оси корпуса), грудь; лежащий —
+## голова или грудь.
 func hit_zone(point: Vector3) -> String:
-	if _health.downed:
-		return "body"
 	var hz := float(Balance.HEAD_ZONE["crouch" if crouched else "stand"]) * _base_scale.y
-	return "head" if point.y - global_position.y >= hz else "body"
+	var dy := point.y - global_position.y
+	if dy >= hz and not _health.downed:
+		return "head"
+	if _health.downed:
+		return "thorax"
+	if dy < hz * float(Balance.ZONE_SHAPE.legs):
+		return "legs"
+	var d := point - global_position
+	d.y = 0.0
+	var f := Vector3(sin(_facing), 0.0, cos(_facing))
+	return "arms" if (d - f * d.dot(f)).length() > float(Balance.ZONE_SHAPE.arms_w) * _base_scale.x else "thorax"
 
 
 ## Держит позицию (снайпер): не сближается, ищет глазами. В тумане снайпер — обычный боец.
@@ -246,30 +399,16 @@ func _on_weather() -> void:
 	if not bool(_arch.get("holds", false)) or fog == _fogged or _health.downed:
 		return
 	_fogged = fog
-	_spec = Balance.AI_WEAPONS.pistol if fog else Balance.AI_WEAPONS[weapon]
-	_mag = int(_spec.mag)
-	_reload_t = 0.0
-	if _main_gun:
-		_main_gun.visible = not fog
+	if not equipment.has("secondary"):
+		_fogged = false
+		return
+	_use("secondary" if fog else "primary")
 	say("Ничего не видно — ближе работаем" if fog else "Туман ушёл. На позицию.")
 
 
 ## Память о цели по типу (разведчик забывает быстро, снайпер помнит долго).
 func _mem() -> float:
 	return Balance.AI_MEMORY_SEC * float(_arch.get("memory", 1.0))
-
-
-## Случайное оружие по долям AI_WEAPONS.
-static func pick_weapon(rng: RandomNumberGenerator) -> String:
-	var total := 0.0
-	for k in Balance.AI_WEAPONS:
-		total += float(Balance.AI_WEAPONS[k].weight)
-	var pick := rng.randf() * total
-	for k in Balance.AI_WEAPONS:
-		pick -= float(Balance.AI_WEAPONS[k].weight)
-		if pick <= 0.0:
-			return String(k)
-	return "pistol"
 
 
 ## Мародёр целиком авторитет хоста (умалчиваемый multiplayer authority узла — 1). AI и движение
@@ -1179,10 +1318,10 @@ func _on_downed_changed(on: bool) -> void:
 		state = State.DOWNED
 		crouched = false
 		_apply_shape()
-		_main_spec = _spec
-		_main_mag = _mag
-		_spec = Balance.AI_WEAPONS.pistol
-		_mag = int(_spec.mag)
+		# лёжа — пистолет (если есть)
+		_main_slot = _active
+		if equipment.has("secondary"):
+			_use("secondary")
 		_reload_t = 0.0
 		_burst_left = 0
 		_agent.target_position = global_position
@@ -1193,10 +1332,9 @@ func _on_downed_changed(on: bool) -> void:
 	else:
 		rescuer = null
 		dragged_by = null
-		if not _main_spec.is_empty():
-			_spec = _main_spec
-			_mag = _main_mag
-			_main_spec = {}
+		if _main_slot != "" and _main_slot != _active:
+			_use(_main_slot)
+		_main_slot = ""
 		_apply_shape()
 		say("Живой!")
 		memory_timer = maxf(memory_timer, _mem())
@@ -1376,7 +1514,7 @@ func _cover_point(radius: float, far: bool) -> Vector3:
 			var to_threat := cand.distance_to(last_known)
 			var score := travel - (to_threat * 0.8 if far else 0.0)
 			# не лезть ближе к угрозе (кроме дробовика — ему вблизи и надо)
-			if not far and weapon != "shotgun" and to_threat < global_position.distance_to(last_known) - 3.0:
+			if not far and String(_spec.get("class", "")) != "SHOTGUN" and to_threat < global_position.distance_to(last_known) - 3.0:
 				score += 6.0
 			cands.append([score, cand, travel])
 	cands.sort_custom(func(x: Array, y: Array) -> bool: return float(x[0]) < float(y[0]))
@@ -1425,17 +1563,84 @@ func _tick_weapon(delta: float) -> void:
 	if _reload_t > 0.0:
 		_reload_t -= delta
 		if _reload_t <= 0.0:
-			_mag = int(_spec.mag)
+			_finish_reload()
 
 
+## Перезарядка — своими запасными магазинами (россыпью — у ружья и болтовки). Нечем — второе
+## оружие; и там пусто — «Пустой!» (дальше только отходит).
 func _start_reload() -> void:
-	if _reload_t > 0.0 or _mag >= int(_spec.mag):
+	if _reload_t > 0.0 or _mag >= int(_spec.mag) or _dry:
+		return
+	if not _can_reload(_active):
+		var other := "secondary" if _active == "primary" else "primary"
+		if equipment.has(other) and (int((equipment[other].mag as Dictionary).get("rounds", 0)) > 0 or _can_reload(other)):
+			_use(other)
+			say("Перехожу на запасное!" if other == "secondary" else "Основное!")
+			return
+		if _mag <= 0:
+			_dry = true
+			say("Пустой!")
+			if state == State.COMBAT:
+				_start_retreat()
 		return
 	_reload_t = float(_spec.reload)
 	_burst_left = 0
-	Audio.play("reload_" + ("pistol" if weapon == "pistol" else weapon), global_position)
+	Audio.play(String(_spec.get("reload_sound", "reload_rifle")), global_position)
 	if state == State.COMBAT:
 		say("Перезаряжаюсь!")
+
+
+## Есть чем зарядить оружие slot.
+func _can_reload(slot: String) -> bool:
+	if not equipment.has(slot):
+		return false
+	var e: Dictionary = equipment[slot]
+	var mag: Dictionary = e.mag
+	for it in spare:
+		if String(mag.get("id", "")) == "":
+			if WeaponDb.ammo_fits(String(e.id), String(it.id)) and not it.has("rounds") and int(it.n) > 0:
+				return true
+		elif WeaponDb.mag_fits(String(e.id), String(it.id)) and int(it.get("rounds", 0)) > 0:
+			return true
+	return false
+
+
+func _finish_reload() -> void:
+	var e: Dictionary = equipment.get(_active, {})
+	if e.is_empty():
+		return
+	var mag: Dictionary = e.mag
+	mag["rounds"] = _mag
+	if String(mag.get("id", "")) == "":
+		# россыпью в ружьё / болтовку
+		var cap := WeaponDb.capacity(e)
+		for it in spare:
+			if _mag >= cap:
+				break
+			if WeaponDb.ammo_fits(String(e.id), String(it.id)) and not it.has("rounds") and int(it.n) > 0 and (_mag == 0 or String(it.id) == String(mag.ammo)):
+				var k := mini(cap - _mag, int(it.n))
+				it.n = int(it.n) - k
+				_mag += k
+				mag["ammo"] = String(it.id)
+		spare = spare.filter(func(it: Dictionary) -> bool: return it.has("rounds") or int(it.n) > 0)
+	else:
+		# сменить магазин: самый полный подходящий; пустой старый — в подсумок (выпадет с тела)
+		var best := -1
+		for i in range(spare.size()):
+			var it: Dictionary = spare[i]
+			if WeaponDb.mag_fits(String(e.id), String(it.id)) and int(it.get("rounds", 0)) > 0 and (best < 0 or int(it.rounds) > int(spare[best].rounds)):
+				best = i
+		if best < 0:
+			return
+		var fresh: Dictionary = spare[best]
+		spare.remove_at(best)
+		spare.append(WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), _mag))
+		mag["id"] = String(fresh.id)
+		mag["ammo"] = String(fresh.get("ammo", ""))
+		_mag = int(fresh.rounds)
+	mag["rounds"] = _mag
+	# патрон мог смениться — характеристики тоже
+	_spec = _ai_spec(e)
 
 
 ## Выстрел, если готов: очередь, пауза между очередями, магазин. suppress — по памяти, реже и хуже.
@@ -1455,6 +1660,8 @@ func _try_fire(suppress: bool = false) -> void:
 		return
 	_shoot(suppress)
 	_mag -= 1
+	if equipment.has(_active):
+		(equipment[_active].mag as Dictionary)["rounds"] = _mag
 	if _burst_left <= 0:
 		_burst_left = int(_spec.burst)
 	_burst_left -= 1
@@ -1504,11 +1711,12 @@ func _shoot(suppress: bool) -> void:
 		# по ИИ другой фракции — пули бьют и ИИ; урон от ИИ никому из игроков не засчитывается
 		var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER | (Hitscan.LAYER_MARAUDER if at_ai else 0)
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(_spec.range) * 1.5,
-			mask, float(_spec.damage), exclude, _rng, 0)
+			mask, float(_spec.damage), exclude, _rng, 0, {"pen": float(_spec.pen), "armor_dmg": float(_spec.armor_dmg)})
 		if i == 0 or i % 3 == 0:
 			Tracer.spawn(get_tree().current_scene, from, hit.get("position", hit.get("end", from)), Color(1.0, 0.6, 0.35))
-	_muzzle.visible = true
-	get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
+	if float(_spec.get("flash", 1.0)) > 0.05:
+		_muzzle.visible = true
+		get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
 	# свои выстрелы товарищи слышат как «бой» — не как свист пуль у себя
 	NoiseBus.emit(global_position, float(_spec.noise_m), "shot_ai")
 	Audio.play(String(_spec.sound), from)
@@ -1628,15 +1836,22 @@ func _on_died() -> void:
 		to_shooter.y = 0.0
 		to_shooter = to_shooter.normalized() if to_shooter.length() > 0.01 else Vector3(sin(_facing), 0.0, cos(_facing))
 		var rest := global_position + to_shooter * Balance.CRATE_TOSS_DIST
-		# его ствол и патроны: что осталось в магазине и немного запаса
-		# лёжа стрелял из пистолета — выпадает основное оружие и патроны к нему
-		var wspec: Dictionary = Balance.AI_WEAPONS[weapon]
-		var in_mag := _main_mag if not _main_spec.is_empty() else _mag
-		var drop := ItemDb.roll(String(_arch.get("loot_table", "marauder")), rng)
-		drop.push_front(ItemDb.make(String(wspec.item), 1))
-		var rounds := mini(in_mag + rng.randi_range(0, int(wspec.mag)), ItemDb.stack(String(wspec.ammo)))
-		if rounds > 0:
-			drop.append(ItemDb.make(String(wspec.ammo), rounds))
+		# что было на нём — как есть: оружие с обвесом, износом и остатком в магазине, запасные
+		# магазины (сколько не расстрелял), броня с плитами (как её побили), шлем, аптечки
+		if equipment.has(_active):
+			(equipment[_active].mag as Dictionary)["rounds"] = _mag
+		var drop: Array = []
+		for slot in ["primary", "secondary", "armor", "helmet", "ears"]:
+			if equipment.has(slot):
+				drop.append((equipment[slot] as Dictionary).duplicate(true))
+		for it in spare:
+			if it.has("rounds") or int(it.n) > 0:
+				drop.append((it as Dictionary).duplicate(true))
+		for it in meds:
+			drop.append((it as Dictionary).duplicate(true))
+		var lt := String(WeaponDb.loadout(loadout_id).get("loot_table", ""))
+		if lt != "":
+			drop.append_array(ItemDb.roll(lt, rng))
 		# награбленное — тоже здесь
 		drop.append_array(pack)
 		pack = []
@@ -1654,7 +1869,14 @@ func _process(delta: float) -> void:
 	_torch_t -= delta
 	if _torch_t <= 0.0 and _torch:
 		_torch_t = 1.0
-		_torch.visible = _health.alive and not _health.downed and RaidAtmosphere.current != null and RaidAtmosphere.current.is_dark(global_position)
+		var dark := _health.alive and not _health.downed and RaidAtmosphere.current != null and RaidAtmosphere.current.is_dark(global_position)
+		# фонарь на оружии — светит он (куда ствол), налобный не нужен
+		var gun_light := false
+		if _main_gun:
+			for l in _main_gun.find_children("Flashlight_*", "SpotLight3D", true, false):
+				(l as Light3D).visible = dark
+				gun_light = true
+		_torch.visible = dark and not gun_light
 	# раненый (видно у всех по синхронизированному downed): основное оружие убрано
 	if _health.downed != _shown_down:
 		_shown_down = _health.downed

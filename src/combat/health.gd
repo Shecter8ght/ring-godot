@@ -22,9 +22,10 @@ var down_hp: float = 0.0
 var bleed_t: float = 0.0
 ## Сколько раз ложился за рейд.
 var downs: int = 0
-## () -> bool: голова защищена (шлем) — попадание в голову не насмерть.
+## () -> bool: голова защищена всегда (тесты) — попадание в голову не насмерть.
 var head_protected: Callable
-## Хост: урон до вычета здоровья проходит через фильтр (броня игрока снимает часть).
+## Хост: урон до вычета здоровья проходит через фильтр брони (Armor):
+## (amount, zone, from, at, bullet) -> [урон, насмерть?]. Нет фильтра — голова насмерть.
 var damage_filter: Callable
 ## Хост: чей был последний урон (peer id стрелявшего игрока; 1 — хост или соло) — кому
 ## засчитать убийство.
@@ -57,14 +58,19 @@ func _setup_sync() -> void:
 	add_child(sync)
 
 
-## zone: "" (неизвестно), "body", "head", "blast", "blast_close" — броня (damage_filter) и
-## смертельность зависят от неё.
-func take_damage(amount: float, from: Vector3, zone: String = "") -> void:
+## zone: "" (неизвестно), "head", "thorax", "arms", "legs", "blast", "blast_close"; at — куда
+## попали; bullet — {pen, armor_dmg} пули (пусто — осколки). Броня (damage_filter) решает, сколько
+## прошло и насмерть ли голова.
+func take_damage(amount: float, from: Vector3, zone: String = "", at: Vector3 = Vector3.INF, bullet: Dictionary = {}) -> void:
 	if not alive:
 		return
-	var lethal := zone == "blast_close" or (zone == "head" and not (head_protected.is_valid() and bool(head_protected.call())))
+	var lethal := zone == "blast_close" or (zone == "head" and not damage_filter.is_valid())
 	if damage_filter.is_valid():
-		amount = float(damage_filter.call(amount, zone))
+		var r: Array = damage_filter.call(amount, zone, from, at, bullet)
+		amount = float(r[0])
+		lethal = lethal or bool(r[1])
+	if lethal and zone == "head" and head_protected.is_valid() and bool(head_protected.call()):
+		lethal = false
 	# в голову без шлема, подорвался на гранате — смерть сразу, сколько бы ни было здоровья
 	if lethal:
 		hp = 0.0
@@ -143,16 +149,16 @@ func heal(amount: float) -> void:
 
 ## Точка входа для Hitscan: применяет урон сама, если мы авторитет по этому узлу (сингл/хост),
 ## иначе просит хост — так урон всегда считается один раз и в одном месте (правило AGENTS.md).
-func apply_or_request_damage(amount: float, from: Vector3, zone: String = "", attacker: int = -1) -> void:
+func apply_or_request_damage(amount: float, from: Vector3, zone: String = "", attacker: int = -1, at: Vector3 = Vector3.INF, bullet: Dictionary = {}) -> void:
 	if not Net.is_networked() or is_multiplayer_authority():
 		last_attacker = multiplayer.get_unique_id() if attacker < 0 else attacker
-		take_damage(amount, from, zone)
+		take_damage(amount, from, zone, at, bullet)
 	else:
-		request_damage.rpc_id(1, amount, from, zone)
+		request_damage.rpc_id(1, amount, from, zone, at, bullet)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func request_damage(amount: float, from: Vector3, zone: String = "") -> void:
+func request_damage(amount: float, from: Vector3, zone: String = "", at: Vector3 = Vector3.INF, bullet: Dictionary = {}) -> void:
 	if is_multiplayer_authority():
 		last_attacker = multiplayer.get_remote_sender_id()
-		take_damage(amount, from, zone)
+		take_damage(amount, from, zone, at, bullet)

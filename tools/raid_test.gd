@@ -115,7 +115,10 @@ func _ready() -> void:
 func _teleport(p: Vector3) -> void:
 	_player.global_position = p + Vector3(0, 0.1, 0)
 	_player.velocity = Vector3.ZERO
-	await _frames(4)
+	# зоны (двери, выходы) замечают тело только на физическом шаге
+	for i in range(3):
+		await get_tree().physics_frame
+	await _frames(2)
 
 
 func _press(action: String) -> void:

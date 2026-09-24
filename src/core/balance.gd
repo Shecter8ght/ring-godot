@@ -61,11 +61,11 @@ const STASH_CELLS := 300
 const STASH_GRID := Vector2i(10, 30)
 ## Новый профиль: деньги и что лежит в тайнике ([id, штук]).
 const START_MONEY := 60000
-const START_STASH := [["w_pistol", 1], ["w_rifle", 1], ["ammo_9x19", 100], ["ammo_545", 120],
-	["bandage", 4], ["painkillers", 2], ["vest_light", 1], ["helmet", 1], ["grenade", 2]]
+const START_STASH := [["wpn_hg_03", 1], ["wpn_ar_03", 1], ["ammo_919_fmj", 100], ["ammo_545_std", 120],
+	["mag_545_30", 1], ["mag_919_17", 1], ["bandage", 4], ["painkillers", 2], ["vest_police", 1], ["helmet_military_old", 1], ["grenade", 2]]
 ## Выручка Михалыча: остался без огнестрела и без денег на самый дешёвый ствол — бесплатный
 ## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
-const RESCUE_KIT := [["w_pistol", 1], ["ammo_9x19", 50], ["bandage", 2]]
+const RESCUE_KIT := [["wpn_hg_01", 1], ["ammo_918_pst", 48], ["bandage", 2]]
 ## Торговец продаёт дороже цены предмета и покупает дешевле (с учётом износа брони).
 const TRADER_BUY_MULT := 1.25
 ## Обвесы — редкость: у Михалыча вдвое дороже обычной наценки (продать — по обычной цене).
@@ -79,7 +79,7 @@ const TRUST_LEVELS := [0, 3, 6, 10]
 ## Модули убежища (data/hideout.json): с какого уровня верстака ставится обвес в слот;
 ## сетка защищённого кармана по уровню (0 — кармана нет); строк тайника по уровню;
 ## сколько заданий одновременно — без рации / с рацией.
-const WORKBENCH_SLOT_LEVEL := {"muzzle": 1, "grip": 1, "stock": 1, "mag": 1, "optic": 2, "tac": 2, "bipod": 2}
+const WORKBENCH_SLOT_LEVEL := {"muzzle": 1, "underbarrel": 1, "stock": 1, "optic_primary": 2, "optic_offset": 2, "side_left": 2, "side_right": 2}
 const POCKET_GRIDS := [Vector2i(0, 0), Vector2i(2, 2), Vector2i(3, 3)]
 const STASH_ROWS := [30, 40, 50]
 const MISSION_SLOTS := [1, 3]
@@ -176,6 +176,8 @@ const STAMINA_RESUME := 25.0
 const STAMINA_HEAT := 1.7
 ## За очко риска: шанс лишнего броска в контейнере, доплата Михалыча (доля вынесенного).
 const RISK_LOOT_BONUS := 0.12
+## Вес редкости в выборке лута по тегам ("pick:" в data/loot.json).
+const LOOT_RARITY_W := {"common": 6.0, "uncommon": 2.5, "rare": 0.7}
 const RISK_PAY_BONUS := 0.05
 
 # --- Тяжёлое ранение («лежит») ---
@@ -212,30 +214,11 @@ const HEAD_ZONE := {"stand": 1.47, "crouch": 0.97}
 const GRENADE_LETHAL_M := 1.6
 const MARAUDER_HP := 100.0
 
-# --- Пистолет игрока ---
-const PISTOL := {"damage": 22.0, "interval": 0.22, "mag": 8, "reload": 1.8, "spread_deg": 1.4, "range_m": 60.0, "noise_m": 60.0}
-
 # --- Оружие игрока ---
-## auto — зажим ЛКМ стреляет очередью; interval — с между выстрелами (у болтовки/помпы — с
-## передёргиванием); pellets — сколько лучей за выстрел (дробь); shake — тряска камеры;
-## sound/reload_sound/cycle_sound — виды звука в Audio.
+## Сами стволы, патроны, магазины, обвес — data/weapons.json (характеристики — WeaponStats).
 ## Отдача (натуральная): kick — подброс ствола за выстрел, рад; kick_h — увод вбок (случайно ±,
 ## со сдвигом kick_bias: плюс — вправо, у АК ствол уходит вправо-вверх); recover — какую долю
 ## подброса руки возвращают сами (остальное остаётся — очередь «ползёт», её тянут мышью вниз).
-const WEAPONS := {
-	"pistol": {"name": "Пистолет", "damage": 22.0, "interval": 0.16, "mag": 12, "reload": 1.6, "spread_deg": 1.4,
-		"pellets": 1, "auto": false, "range_m": 60.0, "noise_m": 60.0, "kick": 0.05, "kick_h": 0.014, "kick_bias": 0.2, "recover": 0.8, "shake": 0.12,
-		"sound": "shot_pistol", "reload_sound": "reload_pistol", "cycle_sound": "", "ergo": 72},
-	"rifle": {"name": "Автомат", "damage": 19.0, "interval": 0.1, "mag": 30, "reload": 2.4, "spread_deg": 2.0,
-		"pellets": 1, "auto": true, "range_m": 90.0, "noise_m": 80.0, "kick": 0.022, "kick_h": 0.011, "kick_bias": 0.35, "recover": 0.36, "shake": 0.09,
-		"sound": "shot_rifle", "reload_sound": "reload_rifle", "cycle_sound": "", "ergo": 44},
-	"shotgun": {"name": "Дробовик", "damage": 12.0, "interval": 0.8, "mag": 6, "reload": 3.0, "spread_deg": 5.5,
-		"pellets": 8, "auto": false, "range_m": 35.0, "noise_m": 75.0, "kick": 0.09, "kick_h": 0.022, "kick_bias": 0.1, "recover": 0.6, "shake": 0.32,
-		"sound": "shot_shotgun", "reload_sound": "reload_shotgun", "cycle_sound": "reload_shotgun", "ergo": 40},
-	"bolt": {"name": "Винтовка", "damage": 95.0, "interval": 1.3, "mag": 5, "reload": 3.2, "spread_deg": 1.6,
-		"pellets": 1, "auto": false, "range_m": 160.0, "noise_m": 120.0, "kick": 0.08, "kick_h": 0.012, "kick_bias": 0.0, "recover": 0.75, "shake": 0.35,
-		"sound": "shot_bolt", "reload_sound": "reload_rifle", "cycle_sound": "bolt", "ergo": 30, "zoom": 6.0},
-}
 ## Эргономика (0–100, WeaponStats): время «довода» в прицел и раскачка прицела, от худшей к лучшей.
 const AIM_TIME_SLOW := 0.5
 const AIM_TIME_FAST := 0.12
@@ -247,14 +230,8 @@ const SWAY_STANCE := {"stand": 1.0, "crouch": 0.6, "prone": 0.3}
 ## прицеле с оптикой, град (сама оптика показывает своё, по кратности).
 const SCOPE_RT_SIZE := 768
 const SCOPE_MAIN_FOV := 52.0
-## Порядок на клавишах 1–4.
-const WEAPON_ORDER := ["pistol", "rifle", "shotgun", "bolt"]
 
 # --- Прицел от первого лица (ПКМ) ---
-## Разброс в прицеле — доля от стрельбы с бедра; у болтовки через оптику почти ноль.
-const ADS_SPREAD := {"pistol": 0.5, "rifle": 0.35, "shotgun": 0.85, "bolt": 0.03}
-## Поле зрения в прицеле, град; у болтовки — оптика (вид через прицельную сетку, без модели).
-const ADS_FOV := {"pistol": 62.0, "rifle": 56.0, "shotgun": 62.0, "bolt": 16.0}
 ## Чувствительность мыши в прицеле, рад на пиксель; у оптики — медленнее пропорционально FOV.
 const ADS_SENS := 0.0024
 ## Высота глаз по стойке, м.
@@ -312,8 +289,10 @@ const MARAUDER_SPAWN_MIN_DIST := 28.0
 const AI_VIEW_DISTANCE := 45.0
 ## В помещении видно на столько, м: свет есть, аварийный, темно днём (свет с улицы), темно ночью.
 const AI_VIEW_INDOOR := {"lit": 50.0, "emergency": 25.0, "dark_day": 28.0, "dark_night": 12.0}
-## С включённым фонарём тебя видно минимум на столько, м.
+## С включённым фонарём тебя видно минимум на столько, м (× view фонаря: мощный — дальше).
 const AI_VIEW_FLASHLIGHT := 70.0
+## Включённый ЛЦУ в темноте (луч в дыму и пыли, точка на стене) — видно минимум на столько, м.
+const AI_VIEW_LASER := 35.0
 ## Брошенный свет: осветительная ракета и химсвет — цвет, сила, радиус, сколько горит, с.
 const THROWN_LIGHTS := {
 	"flare": {"color": Color(1.0, 0.32, 0.22), "energy": 9.0, "range": 20.0, "sec": 60.0, "shadow": true},
@@ -326,6 +305,30 @@ const FLARE_BLIND_M := 12.0
 ## Фонарь на оружии в лицо ближе стольких метров — слепит мародёра (целится как только что
 ## заметивший), как ракета.
 const FLASHLIGHT_BLIND_M := 15.0
+
+# --- Арсенал (data/weapons.json, data/armor.json; docs/design/weapons.md) ---
+## Износ оружия: разброс × (1 + износ² × spread); задержка за выстрел = (1 − надёжность) ×
+## jam_base × (1 + износ² × jam_worn) (износ = (100 − прочность)/100); устранить — clear_sec.
+const WEAPON_WEAR := {"spread": 0.8, "jam_base": 0.012, "jam_worn": 25.0, "clear_sec": 0.9}
+## Досыпать россыпь в отстёгиваемый магазин (снаряжённых нет) — дольше смены магазина во столько.
+const RELOAD_TOPUP_K := 1.6
+## Изометрия (ПКМ переводит в прицел от первого лица — там выбранный прицел и работает), от бедра:
+## угловой коллиматор выбран — разброс × offset_hip (навскидку), крупная оптика — × scope_hip;
+## zoom_per_x — на будущее: приближение камеры за кратность.
+const ISO_AIM := {"offset_hip": 0.88, "scope_hip": 1.1, "zoom_per_x": 0.035}
+## Защита класса брони (0–5): против пробития патрона (pen).
+const ARMOR_CLASS_PROT := [0.0, 12.0, 22.0, 34.0, 46.0, 56.0]
+## Пробитие: защита = класс × (dur_floor + (1 − dur_floor) × доля прочности); шанс пробить —
+## плавная ступень pen в окне ±window вокруг защиты. Пробила — проходит урон × от through_min
+## до 1 (на full_over сверх защиты — весь); не пробила — тупая травма (blunt слоя), износ слоя —
+## armor_dmg × wear_stopped (пробила — × wear_pen) × износ материала.
+const ARMOR := {"dur_floor": 0.55, "window": 10.0, "through_min": 0.6, "full_over": 20.0, "wear_stopped": 1.0, "wear_pen": 0.6}
+## Зоны попадания: множитель урона. Голова без шлема или сквозь шлем — насмерть (Health).
+const ZONE_DAMAGE := {"thorax": 1.0, "arms": 0.6, "legs": 0.7}
+## Высоты зон (доля роста): ниже legs — ноги; руки — дальше arms_w от оси корпуса.
+const ZONE_SHAPE := {"legs": 0.5, "arms_w": 0.2}
+## Вес: до free_kg — без штрафа; к max_kg — скорость × speed_min, расход выносливости × stamina_max.
+const CARRY := {"free_kg": 22.0, "max_kg": 50.0, "speed_min": 0.72, "stamina_max": 1.8}
 ## Витринное стекло: урон пули по нему = урон × bullet_k (прочность панели 100); треснувшее
 ## ниже collapse_below — осыпается само через collapse_sec; пуля за стеклом — урон × pass_k;
 ## звон осколков слышно на noise_m.
@@ -335,6 +338,9 @@ const NVG_BATTERY_SEC := 1200.0
 ## Фонарь мародёра в темноте: сила и дальность луча.
 const AI_TORCH_ENERGY := 4.0
 const AI_TORCH_RANGE := 24.0
+## Фонари ИИ (налобный и на оружии) дальше begin м от камеры плавно гаснут (за length м), тень —
+## только ближе shadow м: много мародёров с фонарями ночью не роняют кадр.
+const AI_LIGHT_FADE := {"begin": 70.0, "length": 20.0, "shadow": 28.0}
 const AI_VIEW_HALF_ANGLE_DEG := 60.0
 const AI_VIEW_STANCE_SCALE := {"stand": 1.0, "crouch": 0.7, "prone": 0.4}
 ## Сколько секунд непрерывной видимости нужно, чтобы заметить (ближе — быстрее).
@@ -349,42 +355,44 @@ const AI_DAMAGE := 9.0
 ## Оружие мародёров: доля в отряде (weight), магазин, перезарядка (с), интервал выстрелов (с),
 ## очередь (выстрелов) и пауза между очередями (с), урон за пулю/дробину, дробин, разброс (град),
 ## дальность боя (м), шум выстрела (м), звук, модель; item/ammo — что выпадает с трупа (ствол и патроны).
-const AI_WEAPONS := {
-	"pistol": {"weight": 0.45, "mag": 12, "reload": 2.0, "interval": 0.42, "burst": 1, "burst_pause": 0.0,
-		"damage": 9.0, "pellets": 1, "spread": 5.5, "range": 28.0, "noise_m": 45.0, "sound": "shot_ai", "model": "pistol",
-		"item": "w_pistol", "ammo": "ammo_9x19"},
-	"rifle": {"weight": 0.4, "mag": 30, "reload": 2.6, "interval": 0.11, "burst": 3, "burst_pause": 0.75,
-		"damage": 11.0, "pellets": 1, "spread": 4.5, "range": 45.0, "noise_m": 80.0, "sound": "shot_rifle", "model": "rifle",
-		"item": "w_rifle", "ammo": "ammo_545"},
-	"shotgun": {"weight": 0.15, "mag": 6, "reload": 3.2, "interval": 0.95, "burst": 1, "burst_pause": 0.0,
-		"damage": 7.0, "pellets": 8, "spread": 4.0, "range": 18.0, "noise_m": 90.0, "sound": "shot_shotgun", "model": "shotgun",
-		"item": "w_shotgun", "ammo": "ammo_12"},
-	# винтовка снайпера — только у типа «снайпер» (weight 0: случайным оружием не выпадает)
-	"bolt": {"weight": 0.0, "mag": 5, "reload": 3.4, "interval": 1.7, "burst": 1, "burst_pause": 0.0,
-		"damage": 45.0, "pellets": 1, "spread": 0.9, "range": 80.0, "noise_m": 120.0, "sound": "shot_bolt", "model": "bolt",
-		"item": "w_bolt", "ammo": "ammo_762r"},
+## Как ИИ стреляет по классу оружия (само оружие, магазины и патроны — из снаряжения ИИ,
+## data/loadouts.json): очередь, пауза между очередями, не чаще interval_min, разброс, дальность
+## боя. Урон — от патрона × AI_DAMAGE_K (пробитие брони — как у патрона).
+const AI_CLASS := {
+	"PISTOL": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.42, "spread": 5.5, "range": 28.0},
+	"SMG": {"burst": 4, "burst_pause": 0.6, "interval_min": 0.08, "spread": 5.0, "range": 32.0},
+	"SHOTGUN": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.6, "spread": 4.0, "range": 18.0},
+	"ASSAULT_RIFLE": {"burst": 3, "burst_pause": 0.75, "interval_min": 0.11, "spread": 4.5, "range": 45.0},
+	"CARBINE": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.1, "spread": 4.2, "range": 45.0},
+	"DMR": {"burst": 1, "burst_pause": 0.5, "interval_min": 0.9, "spread": 1.4, "range": 70.0},
+	"SNIPER": {"burst": 1, "burst_pause": 0.0, "interval_min": 1.7, "spread": 0.9, "range": 80.0},
+	"SPECIAL": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.11, "spread": 4.5, "range": 40.0},
 }
-## Типы мародёров: доля среди всех (weight), оружие (ключи AI_WEAPONS, случайное из списка),
-## скорость ×, здоровье ×, броня (какая доля урона проходит), память ×, дальность зрения ×,
-## цвет куртки, фигура (масштаб), holds — держит позицию: не сближается, патруль у своего поста,
-## ищет глазами, а не ногами (снайпер ходит один).
+## Урон пуль ИИ по игроку — доля урона патрона (ИИ стреляет часто и много).
+const AI_DAMAGE_K := 0.36
+## Сколько ИИ перезаряжается, с: время оружия × это.
+const AI_RELOAD_K := 1.1
+## Типы мародёров: доля среди всех (weight), снаряжение (loadout — data/loadouts.json: оружие,
+## магазины, броня, шлем, гарнитура, аптечки; leader — с этим шансом главарь), скорость ×,
+## здоровье ×, память ×, дальность зрения ×, цвет куртки, фигура (масштаб), holds — держит
+## позицию: не сближается, патруль у своего поста, ищет глазами, а не ногами (снайпер ходит один).
 const AI_ARCHETYPES := {
-	"scout": {"name": "Разведчик", "weight": 0.3, "weapons": ["pistol"], "speed": 1.3, "hp": 0.85, "armor": 1.0,
+	"scout": {"name": "Разведчик", "weight": 0.3, "loadout": "scav_poor", "speed": 1.3, "hp": 0.85,
 		"memory": 0.5, "view": 1.1, "color": Color(0.46, 0.4, 0.28), "scale": Vector3(0.9, 1.0, 0.9), "holds": false},
-	"gunner": {"name": "Штурмовик", "weight": 0.45, "weapons": ["rifle", "rifle", "pistol"], "speed": 1.0, "hp": 1.0, "armor": 0.85,
+	"gunner": {"name": "Штурмовик", "weight": 0.45, "loadout": "scav_standard", "leader": {"chance": 0.1, "loadout": "scav_leader"}, "speed": 1.0, "hp": 1.0,
 		"memory": 1.0, "view": 1.0, "color": Color(0.36, 0.2, 0.16), "scale": Vector3(1.0, 1.0, 1.0), "holds": false},
-	"heavy": {"name": "Тяжёлый", "weight": 0.15, "weapons": ["shotgun"], "speed": 0.75, "hp": 1.5, "armor": 0.65,
-		"memory": 1.3, "view": 0.9, "color": Color(0.18, 0.22, 0.2), "scale": Vector3(1.18, 1.03, 1.18), "holds": false,
-		"helmet": true},
-	"sniper": {"name": "Снайпер", "weight": 0.1, "weapons": ["bolt"], "speed": 0.9, "hp": 0.9, "armor": 1.0,
+	"heavy": {"name": "Бывалый", "weight": 0.15, "loadout": "scav_veteran", "speed": 0.85, "hp": 1.2,
+		"memory": 1.3, "view": 0.95, "color": Color(0.18, 0.22, 0.2), "scale": Vector3(1.18, 1.03, 1.18), "holds": false},
+	"sniper": {"name": "Снайпер", "weight": 0.1, "loadout": "scav_sniper", "speed": 0.9, "hp": 0.9,
 		"memory": 1.5, "view": 2.2, "color": Color(0.3, 0.33, 0.24), "scale": Vector3(0.95, 1.0, 0.95), "holds": true},
 	# третья сторона — не выпадают случайно (weight 0): ставят события и уровень
-	"pmc": {"name": "ЧВК «Периметр»", "weight": 0.0, "weapons": ["rifle"], "speed": 1.05, "hp": 1.3, "armor": 0.6,
+	# «Периметр» — не толще людей: опасны снаряжением (броня, патроны), меткостью и слаженностью
+	"pmc": {"name": "ЧВК «Периметр»", "weight": 0.0, "loadout": "perimeter_rifleman", "speed": 1.05, "hp": 1.0,
 		"memory": 1.4, "view": 1.2, "color": Color(0.1, 0.12, 0.15), "scale": Vector3(1.08, 1.02, 1.08), "holds": false,
-		"helmet": true, "faction": "pmc", "loots": false, "loot_table": "pmc"},
-	"resident": {"name": "Жилец", "weight": 0.0, "weapons": ["pistol", "shotgun", "pistol"], "speed": 0.95, "hp": 1.0, "armor": 1.0,
+		"faction": "pmc", "loots": false},
+	"resident": {"name": "Жилец", "weight": 0.0, "loadout": "civilian", "speed": 0.95, "hp": 1.0,
 		"memory": 1.0, "view": 0.9, "color": Color(0.55, 0.48, 0.38), "scale": Vector3(0.96, 0.98, 0.96), "holds": false,
-		"faction": "resident", "loots": false, "loot_table": "resident"},
+		"faction": "resident", "loots": false},
 }
 ## Кто кому враг (фракции ИИ). Игрок — враг мародёрам и ЧВК; жильцам — только если к ним полез
 ## (зашёл к ним, стрелял рядом, попал) или группа враждебная с самого начала.

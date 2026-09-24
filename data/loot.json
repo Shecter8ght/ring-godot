@@ -1,5 +1,5 @@
 {
- "_comment": "Лут. containers — какие пропсы обыскиваются: chance — доля таких пропов с лутом, search — секунд на обыск, table — таблица по умолчанию. rooms — таблица по теме помещения (id комнаты в data/sectors), перекрывает table у стеллажей/касс. tables — rolls [мин, макс] бросков, entries [id, вес, [мин, макс] штук]; 'nothing' — пустой бросок. Обвесы — редкость: только охрана и изредка мародёры (у торговца — × TRADER_MOD_BUY_MULT).",
+ "_comment": "Лут. containers — какие пропсы обыскиваются: chance — доля таких пропов с лутом, search — секунд на обыск, table — таблица по умолчанию. rooms — таблица по теме помещения (id комнаты в data/sectors), перекрывает table у стеллажей/касс. tables — rolls [мин, макс] бросков, entries [id, вес, [мин, макс] штук, {опции}]; 'nothing' — пустой бросок. id может быть: предмет; 'table:<id>' — бросок по другой таблице; 'preset:<id>' — готовая сборка оружия (data/weapons.json → presets); 'pick:kind=…;tags=…;tier=…;min_tier=…' — случайный предмет арсенала по виду, тегам и тиру (вес — по редкости, Balance.LOOT_RARITY_W). Опции: dur — износ оружия [мин, макс] %, rounds — доля патронов в магазине [мин, макс], wear — износ брони [мин, макс] доля. Редкое (T4, бронебойные, LPVO, глушители, плиты) — почти только с «Периметра» и в сбросах.",
  "containers": {
   "checkout": {
    "name": "Касса",
@@ -572,23 +572,79 @@
      ]
     ],
     [
-     "ammo_9x19",
-     3,
+     "pick:kind=ammo;tags=POLICE;tier=2",
+     4,
      [
-      20,
-      50
+      15,
+      40
      ]
     ],
     [
-     "ammo_12",
-     2,
+     "preset:SG_01_BASE",
+     0.6,
      [
-      10,
-      20
-     ]
+      1,
+      1
+     ],
+     {
+      "dur": [
+       30,
+       80
+      ],
+      "rounds": [
+       0.0,
+       1.0
+      ]
+     }
     ],
     [
-     "w_shotgun",
+     "preset:HG_02_BASE",
+     0.5,
+     [
+      1,
+      1
+     ],
+     {
+      "dur": [
+       40,
+       90
+      ],
+      "rounds": [
+       0.0,
+       1.0
+      ]
+     }
+    ],
+    [
+     "pick:kind=vest;tags=POLICE;tier=2",
+     1,
+     [
+      1,
+      1
+     ],
+     {
+      "wear": [
+       0.4,
+       0.9
+      ]
+     }
+    ],
+    [
+     "helmet_police",
+     0.7,
+     [
+      1,
+      1
+     ],
+     {
+      "wear": [
+       0.4,
+       0.9
+      ]
+     }
+    ],
+    [
+     "pick:kind=mag;tags=POLICE;tier=2",
      1,
      [
       1,
@@ -596,16 +652,16 @@
      ]
     ],
     [
-     "vest_light",
-     1,
+     "pick:kind=mod;tags=POLICE;tier=2",
+     1.2,
      [
       1,
       1
      ]
     ],
     [
-     "helmet",
-     1,
+     "headset_passive",
+     0.4,
      [
       1,
       1
@@ -620,35 +676,11 @@
      ]
     ],
     [
-     "mod_red_dot",
-     0.4,
-     [
-      1,
-      1
-     ]
-    ],
-    [
      "nothing",
      1,
      [
       0,
       0
-     ]
-    ],
-    [
-     "mod_flashlight",
-     0.4,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "mod_holo",
-     0.4,
-     [
-      1,
-      1
      ]
     ]
    ]
@@ -764,48 +796,46 @@
      ]
     ],
     [
-     "ammo_9x19",
-     4,
+     "pick:kind=ammo;tags=SCAV;tier=2",
+     5,
      [
       10,
       30
      ]
     ],
     [
-     "ammo_545",
-     2,
+     "pick:kind=mag;tags=SCAV;tier=2",
+     0.6,
      [
-      15,
-      40
+      1,
+      1
      ]
     ],
     [
-     "ammo_12",
-     1,
+     "pick:kind=mod;tags=SCAV;tier=2",
+     0.5,
      [
-      6,
-      14
+      1,
+      1
      ]
+    ],
+    [
+     "pick:kind=plate;tags=SCAV;tier=2",
+     0.25,
+     [
+      1,
+      1
+     ],
+     {
+      "wear": [
+       0.3,
+       0.8
+      ]
+     }
     ],
     [
      "grenade",
      1,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "vest_light",
-     1,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "mod_grip",
-     0.15,
      [
       1,
       1
@@ -817,30 +847,6 @@
      [
       0,
       0
-     ]
-    ],
-    [
-     "mod_comp",
-     0.15,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "mod_laser",
-     0.15,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "mod_mag_pistol",
-     0.15,
-     [
-      1,
-      1
      ]
     ]
    ]
@@ -924,11 +930,43 @@
    ],
    "entries": [
     [
-     "ammo_12",
+     "ammo_12_buck",
      2,
      [
       5,
       15
+     ]
+    ],
+    [
+     "ammo_12_slug",
+     1,
+     [
+      5,
+      10
+     ]
+    ],
+    [
+     "ammo_556_civ",
+     0.5,
+     [
+      10,
+      20
+     ]
+    ],
+    [
+     "headset_passive",
+     0.5,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "bipod_01",
+     0.2,
+     [
+      1,
+      1
      ]
     ],
     [
@@ -956,27 +994,11 @@
    ],
    "entries": [
     [
-     "vest_heavy",
-     2,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "helmet",
-     3,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "ammo_545",
+     "pick:kind=ammo;tags=PERIMETER",
      5,
      [
-      30,
-      60
+      20,
+      50
      ]
     ],
     [
@@ -988,28 +1010,34 @@
      ]
     ],
     [
-     "mod_holo",
-     1,
+     "pick:kind=mag;tags=PERIMETER",
+     1.5,
      [
       1,
       1
      ]
     ],
     [
-     "mod_supp_545",
-     1,
+     "pick:kind=mod;tags=PERIMETER;min_tier=2",
+     1.5,
      [
       1,
       1
      ]
     ],
     [
-     "mod_scope4x",
-     0.6,
+     "pick:kind=plate;tags=PERIMETER|MILITARY;min_tier=3",
+     0.8,
      [
       1,
       1
-     ]
+     ],
+     {
+      "wear": [
+       0.5,
+       1.0
+      ]
+     }
     ],
     [
      "nvg",
@@ -1084,15 +1112,23 @@
      ]
     ],
     [
-     "ammo_9x19",
-     3,
+     "ammo_918_pst",
+     2,
      [
       10,
       30
      ]
     ],
     [
-     "ammo_12",
+     "ammo_919_fmj",
+     1,
+     [
+      10,
+      30
+     ]
+    ],
+    [
+     "ammo_12_buck",
      2,
      [
       6,
@@ -1132,24 +1168,84 @@
      ]
     ],
     [
-     "ammo_545",
+     "pick:kind=ammo;tags=MILITARY;min_tier=2",
      4,
      [
-      60,
-      90
+      40,
+      80
      ]
     ],
     [
-     "ammo_762r",
+     "pick:kind=preset;tags=MILITARY;tier=3",
+     1.2,
+     [
+      1,
+      1
+     ],
+     {
+      "dur": [
+       60,
+       100
+      ],
+      "rounds": [
+       0.5,
+       1.0
+      ]
+     }
+    ],
+    [
+     "pick:kind=vest;min_tier=3",
+     1,
+     [
+      1,
+      1
+     ],
+     {
+      "wear": [
+       0.6,
+       1.0
+      ]
+     }
+    ],
+    [
+     "pick:kind=plate;min_tier=3",
+     1,
+     [
+      1,
+      1
+     ],
+     {
+      "wear": [
+       0.6,
+       1.0
+      ]
+     }
+    ],
+    [
+     "pick:kind=helmet;min_tier=3",
+     0.8,
+     [
+      1,
+      1
+     ],
+     {
+      "wear": [
+       0.6,
+       1.0
+      ]
+     }
+    ],
+    [
+     "pick:kind=mod;tags=MILITARY;min_tier=2",
      2,
      [
-      20,
-      40
+      1,
+      1
      ]
     ],
     [
-     "vest_heavy",
-     1,
+     "pick:kind=mag;tags=MILITARY;min_tier=2",
+     1.5,
      [
       1,
       1
@@ -1157,22 +1253,6 @@
     ],
     [
      "nvg",
-     1,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "mod_scope4x",
-     1,
-     [
-      1,
-      1
-     ]
-    ],
-    [
-     "mod_holo",
      1,
      [
       1,

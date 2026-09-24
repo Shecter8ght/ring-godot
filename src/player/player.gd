@@ -27,27 +27,38 @@ var cursor_ground: Vector3 = Vector3.ZERO
 ## Точка на теле противника под курсором (Vector3.ZERO — под курсором никого): выстрел идёт в неё.
 var cursor_body: Vector3 = Vector3.ZERO
 
-## Рейд из убежища: оружие только из снаряжения (1 — пистолет, 2 — основное), патроны и гранаты —
-## из рюкзака. false — «песочница» (тесты, запуск уровня напрямую): все стволы, патроны без счёта.
+## Рейд из убежища: оружие только из снаряжения (1 — пистолет, 2 — основное), магазины, патроны и
+## гранаты — из рюкзака. false — «песочница» (тесты, запуск уровня напрямую): стволы из
+## WeaponDb.sandbox(), патроны без счёта.
 var loadout_mode: bool = false
 ## В убежище не стреляют.
 var combat_enabled: bool = true
-## Сколько патронов заберёт текущая перезарядка (снаряжение); -1 — полный магазин (песочница).
-var _reload_take: int = -1
-var _auto_loaded: bool = false
-## Обвесы на оружии в руках (слот -> id): видят все peer (модель на теле). Ставит владелец.
+## Оружие в руках: id предмета ("" — руки пусты) и откуда оно (слот снаряжения / ключ песочницы).
+var weapon_id: String = ""
+var weapon_slot: String = ""
+## Обвес в руках с состоянием фонарей/ЛЦУ (точка → {id, light, laser}): модель на теле у всех.
 var weapon_mods: Dictionary = {}
-## Фонарь / ЛЦУ включены (T) — тоже видно всем.
+## Горит фонарь / ЛЦУ на оружии в руках (выдаёт, слепит) — видят все.
 var light_on: bool = false
-## Песочница (тесты, витрина): обвесы по оружию, weapon_id -> {слот: id}.
-var sandbox_mods: Dictionary = {}
+var laser_on: bool = false
+## Песочница: стволы по ключам (пресеты WeaponDb.sandbox()) — записи оружия.
+var sandbox_weapons: Dictionary = {}
+## Состояние оружия у владельца (патроны, износ, прицел, фонари/ЛЦУ, задержка) — слот → словарь;
+## хосту уходит при перезарядке, смене оружия, переключениях и паузе в стрельбе.
+var _ws: Dictionary = {}
+var _ws_dirty: bool = false
+var _ws_sync_t: float = 0.0
+## Патронов в магазине оружия в руках (HUD).
+var ammo: int = 0
+## Перезарядка: что делаем ("swap", "topup", "clear" — устранить задержку), для какого слота, какую
+## ревизию записи ждём от хоста.
+var _reload_kind: String = ""
+var _reload_slot: String = ""
+var _reload_rev: int = -1
+var _reload_wait: float = 0.0
+var _sandbox_picked: bool = false
 ## Сколько секунд держим прицел — «довод» по эргономике (WeaponStats.aim_time).
 var _aim_t: float = 0.0
-
-## Оружие в руках и патроны: ammo — в текущем магазине, остальные — в ammo_by. "" — руки пусты.
-var weapon_id: String = "pistol"
-var ammo: int = int(Balance.WEAPONS.pistol.mag)
-var ammo_by: Dictionary = {}
 var grenades: int = Balance.GRENADES_START
 var fire_timer: float = 0.0
 var reload_timer: float = 0.0
@@ -102,8 +113,6 @@ func _ready() -> void:
 		_last_damage = amount
 		if is_local() and _camera_rig is CameraRig:
 			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE))
-	for id in Balance.WEAPON_ORDER:
-		ammo_by[id] = int(Balance.WEAPONS[id].mag)
 	_muzzle.visible = false
 	# рюкзак — авторитет хоста (узел создан после выдачи авторитета Player — умалчиваемый 1)
 	inventory = Inventory.new()
@@ -114,13 +123,12 @@ func _ready() -> void:
 	steps.name = "Footsteps"
 	steps.loud_db = func() -> float: return float(Balance.STEP_STANCE_DB.get(_stance_key(), 0.0))
 	add_child(steps)
-	# броня и шлем снимают часть урона (считается там же, где урон, — на хосте)
-	health.damage_filter = func(amount: float, zone: String) -> float: return inventory.absorb(amount, zone)
-	# тяжело ранен вместо смерти; в голову в шлеме — не насмерть
+	# броня, плиты, шлем — Armor (считается там же, где урон, — на хосте)
+	health.damage_filter = func(amount: float, zone: String, from: Vector3, at: Vector3, bullet: Dictionary) -> Array:
+		var p := at if at != Vector3.INF else global_position + Vector3.UP * 1.3
+		return inventory.absorb(amount, zone, from, p, Vector3(sin(body_yaw()), 0.0, cos(body_yaw())), bullet, _rng)
+	# тяжело ранен вместо смерти
 	health.can_down = true
-	health.head_protected = func() -> bool:
-		var h: Dictionary = inventory.equipment.get("helmet", {})
-		return not h.is_empty() and float(h.get("dur", 0.0)) > 0.0
 	# рука с оружием — не внутри Body: Body сжимается по стойке, оружие сжиматься не должно
 	_hand = Node3D.new()
 	_hand.name = "Hand"
@@ -145,7 +153,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:lean", ".:look_pitch"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -160,11 +168,45 @@ func is_alive() -> bool:
 	return health.alive
 
 
-## Куда попала пуля: голова — выше HEAD_ZONE по стойке; лёжа (и раненым) — всё «корпус».
+## Куда попала пуля: голова — выше HEAD_ZONE по стойке; ноги — ниже доли роста; руки — дальше
+## от оси корпуса; остальное — грудь. Лёжа (и раненым) — голова или грудь.
 func hit_zone(point: Vector3) -> String:
+	var hz := float(Balance.HEAD_ZONE.get(_stance_key(), 99.0))
+	var dy := point.y - global_position.y
+	if dy >= hz:
+		return "head"
 	if health.downed or stance == Stance.PRONE:
-		return "body"
-	return "head" if point.y - global_position.y >= float(Balance.HEAD_ZONE.get(_stance_key(), 99.0)) else "body"
+		return "thorax"
+	if dy < hz * float(Balance.ZONE_SHAPE.legs):
+		return "legs"
+	var d := point - global_position
+	d.y = 0.0
+	var f := Vector3(sin(body_yaw()), 0.0, cos(body_yaw()))
+	return "arms" if (d - f * d.dot(f)).length() > float(Balance.ZONE_SHAPE.arms_w) else "thorax"
+
+
+## Что на себе, кг: рюкзак, карман, снаряжение (с обвесом, магазинами, плитами).
+func carried_kg() -> float:
+	if not loadout_mode or inventory == null:
+		return 0.0
+	var w := ItemDb.weight_of(inventory.items) + ItemDb.weight_of(inventory.pocket)
+	for slot in inventory.equipment:
+		w += ItemDb.entry_weight(inventory.equipment[slot])
+	return w
+
+
+## Перегруз: 0 до free_kg, 1 на max_kg.
+func _over() -> float:
+	var c: Dictionary = Balance.CARRY
+	return clampf((carried_kg() - float(c.free_kg)) / (float(c.max_kg) - float(c.free_kg)), 0.0, 1.0)
+
+
+func carry_speed_k() -> float:
+	return lerpf(1.0, float(Balance.CARRY.speed_min), _over())
+
+
+func carry_stamina_k() -> float:
+	return lerpf(1.0, float(Balance.CARRY.stamina_max), _over())
 
 
 func _can_sprint() -> bool:
@@ -179,7 +221,7 @@ func _tick_stamina(delta: float) -> void:
 		var k := 1.0
 		if String(RaidConditions.current.get("weather", "")) == "heat" and RaidAtmosphere.current and not RaidAtmosphere.current.is_indoor(global_position):
 			k = Balance.STAMINA_HEAT
-		stamina = maxf(0.0, stamina - Balance.STAMINA_DRAIN * k * delta)
+		stamina = maxf(0.0, stamina - Balance.STAMINA_DRAIN * k * carry_stamina_k() * delta)
 		_rest_t = Balance.STAMINA_REGEN_DELAY
 		if stamina <= 0.0:
 			_winded = true
@@ -193,7 +235,17 @@ func _tick_stamina(delta: float) -> void:
 
 ## Светит фонарём (фонарь на оружии в руках включён) — выдаёт издалека.
 func has_light_on() -> bool:
-	return light_on and String(weapon_mods.get("tac", "")) == "mod_flashlight"
+	return light_on
+
+
+## Насколько дальше видно светящего (мощный фонарь — дальше): наибольшее у включённых.
+func light_view() -> float:
+	var k := 1.0
+	for m in weapon_mods:
+		var md: Dictionary = weapon_mods[m] if weapon_mods[m] is Dictionary else {}
+		if bool(md.get("light", false)):
+			k = maxf(k, float((WeaponDb.attachment(String(md.get("id", ""))).get("light", {}) as Dictionary).get("view", 1.0)))
+	return k
 
 
 ## Лежит раненым.
@@ -231,26 +283,120 @@ func stance_key() -> String:
 	return _stance_key()
 
 
-## Обвесы на оружии weapon (id в Balance.WEAPONS): из снаряжения, в песочнице — sandbox_mods.
-func mods_for(weapon: String) -> Dictionary:
-	if loadout_mode:
-		for slot in ["primary", "secondary"]:
-			var e: Dictionary = inventory.equipment.get(slot, {})
-			if not e.is_empty() and String(ItemDb.equip(String(e.id)).get("weapon", "")) == weapon:
-				return e.get("mods", {})
+## Запись оружия в слоте key (как есть у хоста / в песочнице, без состояния владельца).
+func _base_entry(key: String) -> Dictionary:
+	if key == "":
 		return {}
-	return sandbox_mods.get(weapon, {})
+	if loadout_mode:
+		var e: Dictionary = inventory.equipment.get(key, {})
+		return e if WeaponDb.is_weapon(String(e.get("id", ""))) else {}
+	_ensure_sandbox()
+	return sandbox_weapons.get(key, {})
 
 
-## Характеристики оружия в руках с обвесами (WeaponStats).
+func _ensure_sandbox() -> void:
+	if not sandbox_weapons.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	for p in WeaponDb.sandbox():
+		sandbox_weapons[String(p)] = WeaponDb.make_weapon(String(p), rng, [100, 100])
+
+
+## Песочница (тесты, витрина): обвес на ствол по ключу, точка → id.
+func set_sandbox_mods(key: String, mods: Dictionary) -> void:
+	_ensure_sandbox()
+	if not sandbox_weapons.has(key):
+		return
+	var e: Dictionary = sandbox_weapons[key]
+	var m := {}
+	for mount in mods:
+		m[String(mount)] = {"id": WeaponDb.canonical(String(mods[mount]))}
+	e["mods"] = m
+	Gear._bump(e)
+
+
+## Запись оружия с состоянием владельца (патроны, износ, прицел, фонари и лазеры).
+func entry_of(key: String) -> Dictionary:
+	var base := _base_entry(key)
+	if base.is_empty():
+		return {}
+	_ws_sync(key, base)
+	var st: Dictionary = _ws[key]
+	var e := base.duplicate(true)
+	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	mag["rounds"] = int(st.rounds)
+	mag["ammo"] = String(st.ammo)
+	e["mag"] = mag
+	e["dur"] = float(st.dur)
+	e["sight"] = String(st.sight)
+	var mods: Dictionary = e.get("mods", {})
+	for m in mods:
+		var md: Dictionary = mods[m] if mods[m] is Dictionary else {"id": String(mods[m])}
+		var t: Dictionary = (st.tac as Dictionary).get(m, {})
+		md["light"] = bool(t.get("light", false))
+		md["laser"] = bool(t.get("laser", false))
+		mods[m] = md
+	e["mods"] = mods
+	return e
+
+
+## Состояние владельца заводится из записи и перечитывается, если хозяин её поменял (ревизия:
+## сменили магазин, обвес).
+func _ws_sync(key: String, base: Dictionary) -> void:
+	var rev := int(base.get("rev", 0))
+	if _ws.has(key) and int(_ws[key].rev) == rev and String(_ws[key].id) == String(base.id):
+		return
+	var mag: Dictionary = base.get("mag", {}) if base.get("mag") is Dictionary else {}
+	var tac := {}
+	var mods: Dictionary = base.get("mods", {})
+	for m in mods:
+		if mods[m] is Dictionary:
+			tac[m] = {"light": bool((mods[m] as Dictionary).get("light", false)), "laser": bool((mods[m] as Dictionary).get("laser", false))}
+	var jam := bool(_ws[key].get("jam", false)) if _ws.has(key) and String(_ws[key].id) == String(base.id) else false
+	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": String(mag.get("ammo", "")),
+		"dur": float(base.get("dur", 100.0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam}
+
+
+## Оружие в руках со своим состоянием.
+func weapon_entry() -> Dictionary:
+	return entry_of(weapon_slot)
+
+
+## Характеристики оружия в руках (WeaponStats от экземпляра).
 func spec() -> Dictionary:
-	return WeaponStats.compute(weapon_id, weapon_mods)
+	return WeaponStats.compute(weapon_entry())
 
 
-## 0…1 — насколько ствол «дошёл» в прицел (по эргономике). ads — камера в глазах (прицел или
-## режим от первого лица), aiming — зажата ПКМ: без неё от первого лица оружие у бедра.
+## Состояние для хоста (Inventory.apply_weapon_state).
+func _ws_state(key: String) -> Dictionary:
+	var st: Dictionary = _ws.get(key, {})
+	return {"rev": int(st.get("rev", 0)), "rounds": int(st.get("rounds", 0)), "dur": float(st.get("dur", 100.0)),
+		"sight": String(st.get("sight", "primary")), "tac": (st.get("tac", {}) as Dictionary).duplicate(true)}
+
+
+func _send_ws(key: String) -> void:
+	_ws_dirty = false
+	if loadout_mode and Raid.current and _ws.has(key):
+		Raid.current.request_weapon_state(key, _ws_state(key))
+
+
+## Снаряжение с состоянием оружия владельца — для профиля при эвакуации.
+func equipment_state() -> Dictionary:
+	var eq := inventory.equipment.duplicate(true)
+	for key in ["primary", "secondary"]:
+		if eq.has(key) and WeaponDb.is_weapon(String((eq[key] as Dictionary).get("id", ""))):
+			eq[key] = entry_of(key)
+	return eq
+
+
+## Задержка у оружия в руках (устраняется R).
+func is_jammed() -> bool:
+	return bool((_ws.get(weapon_slot, {}) as Dictionary).get("jam", false))
+
+
 func aim_progress() -> float:
-	if not ads or not aiming or weapon_id == "":
+	if not ads or not aiming or weapon_id == "" or spec().is_empty():
 		return 0.0
 	return clampf(_aim_t / float(spec().aim_time), 0.0, 1.0)
 
@@ -307,13 +453,22 @@ func _process(_delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_local() or not is_alive():
 		return
-	# обвесы в руках — для модели у всех и для характеристик; фонарь/ЛЦУ — T
-	var mods := mods_for(weapon_id) if weapon_id != "" else {}
-	if mods != weapon_mods:
-		weapon_mods = mods
-	if Input.is_action_just_pressed("flashlight"):
-		light_on = not light_on
-	_aim_t = _aim_t + delta if ads and aiming else 0.0
+	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
+	if weapon_slot != "":
+		var we := weapon_entry()
+		var mods: Dictionary = we.get("mods", {})
+		if mods != weapon_mods:
+			weapon_mods = mods
+		var lit := false
+		var las := false
+		for m in mods:
+			lit = lit or bool((mods[m] as Dictionary).get("light", false))
+			las = las or bool((mods[m] as Dictionary).get("laser", false))
+		if lit != light_on:
+			light_on = lit
+		if las != laser_on:
+			laser_on = las
+	_aim_t = _aim_t + delta if aiming and weapon_id != "" else 0.0
 	# наклон: Q/E только когда камера в глазах; в изометрии Q/E крутят камеру
 	var lean_to := Input.get_axis("camera_left", "camera_right") if ads and not PauseMenu.shown else 0.0
 	lean = move_toward(lean, lean_to, Balance.LEAN_SPEED * delta)
@@ -399,14 +554,21 @@ func _update_hand() -> void:
 	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
 	var yaw := _body.rotation.y
 	_hand.visible = health.alive
-	# от первого лица у себя светит фонарь модели в руках (CameraRig) — там, куда смотрит ствол
-	for n in _weapon_model.find_children("Flashlight", "SpotLight3D", true, false):
-		(n as SpotLight3D).visible = light_on and not (ads and is_local())
-	for n in _weapon_model.find_children("LaserBeam", "MeshInstance3D", true, false):
-		(n as MeshInstance3D).visible = light_on and not ads
+	# фонари и лазеры — каждый по своему состоянию; от первого лица у себя светит модель в руках
+	# (CameraRig) — там, куда смотрит ствол
+	for n in _weapon_model.find_children("Flashlight*", "SpotLight3D", true, false):
+		(n as SpotLight3D).visible = tac_on(weapon_mods, n, "light") and not (ads and is_local())
+	for n in _weapon_model.find_children("LaserBeam*", "MeshInstance3D", true, false):
+		(n as MeshInstance3D).visible = tac_on(weapon_mods, n, "laser") and not (ads and is_local())
 	_hand.position = Basis(Vector3.UP, yaw) * Vector3(-0.17, 1.24 * h, 0.24)
 	# ствол (и фонарь на нём) — туда, куда смотрит игрок, и вверх-вниз (look_pitch синхронизируется)
 	_hand.rotation = Vector3(-_recoil - look_pitch, yaw, 0.0)
+
+
+## Включён ли фонарь / лазер (kind: light / laser) того узла модели (meta "mount") по обвесу mods.
+static func tac_on(mods: Dictionary, node: Node, kind: String) -> bool:
+	var m := String(node.get_meta("mount", ""))
+	return mods.has(m) and mods[m] is Dictionary and bool((mods[m] as Dictionary).get(kind, false))
 
 
 ## Шаги слышны AI: радиус по стойке и бегу, только пока реально движемся.
@@ -447,13 +609,13 @@ func _combat(delta: float) -> void:
 		if Input.is_action_just_pressed("weapon_%d" % (i + 1)) and String(keys[i]) != "" and String(keys[i]) in allowed_weapons():
 			_switch(String(keys[i]))
 	# лёжа раненым и таща раненого — только пистолет (нет — руки пусты, гранаты можно)
-	if not weapon_id in allowed_weapons() and weapon_id != "":
+	if not loadout_mode and weapon_slot == "" and not _sandbox_picked:
+		# песочница: сразу в руках первый ствол (пистолет)
+		_sandbox_picked = true
+		_switch(String(keys[0]), false)
+	if not weapon_slot in allowed_weapons() and weapon_slot != "":
 		var pistol := String(allowed_weapons()[0]) if not allowed_weapons().is_empty() else ""
-		if pistol != "":
-			_switch(pistol)
-		else:
-			ammo_by[weapon_id] = ammo
-			weapon_id = ""
+		_switch(pistol, pistol != "")
 	if Input.is_action_just_pressed("grenade") and grenade_count() > 0 and fire_timer <= 0.0:
 		_throw_grenade()
 	for pair in [["throw_flare", "flare"], ["throw_chem", "chemlight"]]:
@@ -462,43 +624,146 @@ func _combat(delta: float) -> void:
 	_tick_nvg(delta)
 	if weapon_id == "":
 		return
+	if Input.is_action_just_pressed("flashlight"):
+		_toggle_tac("light")
+	if Input.is_action_just_pressed("laser"):
+		_toggle_tac("laser")
+	if Input.is_action_just_pressed("toggle_sight"):
+		_toggle_sight()
 	var spec := spec()
+	_ws_sync_t -= delta
+	if _ws_dirty and _ws_sync_t <= 0.0:
+		_send_ws(weapon_slot)
 	if reload_timer > 0.0:
 		reload_timer -= delta
 		if reload_timer <= 0.0:
-			ammo = int(spec.mag) if _reload_take < 0 else ammo + _reload_take
+			_finish_reload(spec)
 		return
-	if Input.is_action_just_pressed("reload") and ammo < int(spec.mag):
-		_start_reload(spec)
+	if Input.is_action_just_pressed("reload"):
+		if is_jammed():
+			_start_clear(spec)
+		elif ammo < int(spec.mag):
+			_start_reload(spec)
 		return
 	var trigger := Input.is_action_pressed("fire") if bool(spec.auto) else Input.is_action_just_pressed("fire")
 	if trigger and fire_timer <= 0.0:
+		if is_jammed():
+			fire_timer = 0.3
+			Audio.play("pin", global_position, -8.0)
+			return
 		if ammo <= 0:
 			_start_reload(spec)
 			return
 		_fire(spec)
 
 
+## Перезарядка: в снаряжении — смена магазина из рюкзака или досыпка россыпью (делает хост,
+## Inventory.reload_slot); в песочнице — полный магазин.
 func _start_reload(spec: Dictionary) -> void:
-	_reload_take = -1
+	_reload_kind = "full"
+	_reload_slot = weapon_slot
+	var t := float(spec.reload)
 	if loadout_mode:
-		# патроны — из рюкзака: сколько есть, но не больше, чем влезет в магазин
-		var ammo_item := inventory.ammo_for(weapon_id)
-		_reload_take = mini(int(spec.mag) - ammo, inventory.count(ammo_item))
-		if _reload_take <= 0:
+		var e := weapon_entry()
+		var kind := Gear.reload_kind(e, inventory.items)
+		if kind == "":
 			if Raid.current:
-				Raid.current.notify("Нет патронов: " + ItemDb.item_name(ammo_item))
+				Raid.current.notify("Нечем зарядить: " + WeaponDb.caliber_name(String(spec.caliber)))
 			return
-		Raid.current.request_consume(ammo_item, _reload_take)
-	reload_timer = float(spec.reload)
+		_reload_kind = kind
+		_reload_rev = int(e.get("rev", 0))
+		_reload_wait = 1.5
+		Raid.current.request_reload(weapon_slot, _ws_state(weapon_slot))
+		_ws_dirty = false
+		# досыпать россыпью в отстёгиваемый магазин — дольше, чем сменить
+		if kind == "topup" and not WeaponDb.weapon(weapon_id).has("internal_mag"):
+			t *= Balance.RELOAD_TOPUP_K
+	reload_timer = t
 	Audio.play(String(spec.reload_sound), global_position)
 
 
-## Клавиши 1…: в песочнице — все стволы, со снаряжением — [пистолет, основное] ("" — слот пуст).
+## Задержка: передёрнуть (R) — патроны не тратятся.
+func _start_clear(_spec: Dictionary) -> void:
+	_reload_kind = "clear"
+	_reload_slot = weapon_slot
+	reload_timer = float(Balance.WEAPON_WEAR.clear_sec)
+	Audio.play("bolt", global_position, -4.0)
+
+
+func _finish_reload(spec: Dictionary) -> void:
+	if _reload_kind == "clear":
+		if _ws.has(_reload_slot):
+			_ws[_reload_slot].jam = false
+		_ws_dirty = true
+		return
+	if not loadout_mode:
+		if _ws.has(_reload_slot):
+			_ws[_reload_slot].rounds = int(spec.mag)
+			_ws[_reload_slot].jam = false
+		ammo = int(spec.mag)
+		return
+	# хост поменял запись (ревизия выросла) — состояние перечитается; ответ ещё в пути — подождать
+	var base := _base_entry(_reload_slot)
+	if int(base.get("rev", 0)) == _reload_rev and _reload_wait > 0.0:
+		_reload_wait -= 0.1
+		reload_timer = 0.1
+		return
+	entry_of(_reload_slot)
+	if _ws.has(_reload_slot):
+		_ws[_reload_slot].jam = false
+	if _reload_slot == weapon_slot:
+		ammo = int((_ws.get(weapon_slot, {}) as Dictionary).get("rounds", 0))
+
+
+## T / L: все фонари (kind light) или лазеры (laser) на оружии в руках — вкл/выкл разом.
+func _toggle_tac(kind: String) -> void:
+	var e := weapon_entry()
+	var mods: Dictionary = e.get("mods", {})
+	var mounts: Array = []
+	var any_on := false
+	for m in mods:
+		if WeaponDb.attachment(WeaponDb.mod_id(mods[m])).has(kind):
+			mounts.append(m)
+			any_on = any_on or bool((mods[m] as Dictionary).get(kind, false))
+	if mounts.is_empty():
+		if Raid.current:
+			Raid.current.notify("Нет фонаря на оружии" if kind == "light" else "Нет ЛЦУ на оружии")
+		return
+	var st: Dictionary = _ws[weapon_slot]
+	for m in mounts:
+		var t: Dictionary = (st.tac as Dictionary).get(m, {})
+		t[kind] = not any_on
+		st.tac[m] = t
+	Audio.play("pin", global_position, -14.0)
+	if Raid.current:
+		Raid.current.notify(("Фонарь: " if kind == "light" else "ЛЦУ: ") + ("выкл" if any_on else "вкл"))
+	_send_ws(weapon_slot)
+
+
+## O: основной ↔ угловой прицел (если стоят оба).
+func _toggle_sight() -> void:
+	var e := weapon_entry()
+	var sights := WeaponStats.sights_of(e)
+	if sights.size() < 2:
+		return
+	var cur := WeaponStats.active_sight(e)
+	var nxt := String(sights[(sights.find(cur) + 1) % sights.size()])
+	_ws[weapon_slot].sight = nxt
+	_aim_t = 0.0
+	var mount := "optic_" + nxt
+	var name := ItemDb.item_name(WeaponDb.mod_id((e.mods as Dictionary).get(mount, ""))) if (e.mods as Dictionary).has(mount) else "штатный"
+	if Raid.current:
+		Raid.current.notify(("Основной: " if nxt == "primary" else "Угловой: ") + name)
+	Audio.play("pin", global_position, -16.0)
+	_send_ws(weapon_slot)
+
+
+## Клавиши 1…: в песочнице — стволы песочницы, со снаряжением — [пистолет, основное] (слоты;
+## "" — пусто).
 func weapon_keys() -> Array:
 	if not loadout_mode:
-		return Balance.WEAPON_ORDER
-	return [inventory.slot_weapon("secondary"), inventory.slot_weapon("primary")]
+		return WeaponDb.sandbox()
+	return ["secondary" if inventory.slot_weapon("secondary") != "" else "", "primary" if inventory.slot_weapon("primary") != "" else ""]
 
 
 func grenade_count() -> int:
@@ -513,74 +778,65 @@ func allowed_weapons() -> Array:
 	return keys.filter(func(k: Variant) -> bool: return String(k) != "")
 
 
-## Остаток патронов к текущему оружию в рюкзаке (для HUD); -1 — без счёта.
+## Россыпь патронов к оружию в руках в рюкзаке + патроны в снаряжённых магазинах (HUD); -1 — без счёта.
 func ammo_reserve() -> int:
 	if not loadout_mode or weapon_id == "":
 		return -1
-	return inventory.count(inventory.ammo_for(weapon_id))
+	var cal := String(WeaponDb.weapon(weapon_id).get("caliber", ""))
+	var n := 0
+	for it in inventory.items:
+		if it.has("rounds") and WeaponDb.mag_fits(weapon_id, String(it.id)):
+			n += int(it.rounds)
+		elif String(WeaponDb.ammo(String(it.id)).get("caliber", "")) == cal:
+			n += int(it.n)
+	return n
 
 
-## Снаряжение: в руках только то, что надето; первый раз — зарядить магазины из рюкзака.
+## Снаряжение: в руках только то, что надето (основное, иначе пистолет).
 func _loadout_tick() -> void:
 	if not inventory.loadout_ready:
 		return
-	if not _auto_loaded:
-		_auto_loaded = true
-		var used := {}
-		for w in weapon_keys():
-			if String(w) == "":
-				continue
-			var ammo_item := inventory.ammo_for(String(w))
-			var take := mini(int(WeaponStats.compute(String(w), mods_for(String(w))).mag), inventory.count(ammo_item) - int(used.get(ammo_item, 0)))
-			ammo_by[w] = maxi(0, take)
-			used[ammo_item] = int(used.get(ammo_item, 0)) + maxi(0, take)
-		for ammo_item in used:
-			if int(used[ammo_item]) > 0:
-				Raid.current.request_consume(String(ammo_item), int(used[ammo_item]))
-		weapon_id = ""
 	var keys := weapon_keys()
 	if is_downed() or is_burdened():
 		# раненым / таща раненого — только пистолет (выбирает _combat)
 		return
-	if not weapon_id in keys or weapon_id == "":
+	if weapon_slot == "" or not weapon_slot in keys or _base_entry(weapon_slot).is_empty():
 		# оружие пропало из рук (сменил/не было) — берём основное, иначе пистолет
 		var pick := String(keys[1]) if String(keys[1]) != "" else String(keys[0])
-		if pick != weapon_id:
-			if weapon_id != "":
-				ammo_by[weapon_id] = ammo
-			weapon_id = pick
-			ammo = int(ammo_by.get(pick, 0))
-			reload_timer = 0.0
+		if pick != weapon_slot or _base_entry(weapon_slot).is_empty():
+			_switch(pick, false)
 
 
-## Магазины снаряжения обратно в патроны — при эвакуации (владелец, для профиля).
-func mag_ammo_items() -> Array:
-	var out: Array = []
-	if weapon_id != "":
-		ammo_by[weapon_id] = ammo
-	for w in ammo_by:
-		var ammo_item := inventory.ammo_for(String(w))
-		if ammo_item != "" and int(ammo_by[w]) > 0:
-			out.append({"id": ammo_item, "n": int(ammo_by[w])})
-	return out
-
-
-## Смена оружия: патроны текущего магазина сохраняются, перезарядка прерывается.
-func _switch(id: String) -> void:
-	if id == weapon_id:
+## Смена оружия: состояние прежнего уходит хосту, перезарядка прерывается.
+func _switch(key: String, sound: bool = true) -> void:
+	if key == weapon_slot and weapon_id != "" and not _base_entry(key).is_empty():
 		return
-	if weapon_id != "":
-		ammo_by[weapon_id] = ammo
-	weapon_id = id
-	ammo = int(ammo_by.get(id, 0 if loadout_mode else int(WeaponStats.compute(id, mods_for(id)).mag)))
+	if weapon_slot != "" and _ws.has(weapon_slot):
+		_send_ws(weapon_slot)
+	weapon_slot = key
+	var e := entry_of(key)
+	weapon_id = String(e.get("id", ""))
+	ammo = int((e.get("mag", {}) as Dictionary).get("rounds", 0)) if e.get("mag") is Dictionary else 0
 	reload_timer = 0.0
+	_aim_t = 0.0
 	fire_timer = 0.35
-	Audio.play("bolt", global_position, -6.0)
+	if sound and weapon_id != "":
+		Audio.play("bolt", global_position, -6.0)
 
 
 func _fire(spec: Dictionary) -> void:
-	ammo -= 1
+	var st: Dictionary = _ws[weapon_slot]
+	st.rounds = int(st.rounds) - 1
+	ammo = int(st.rounds)
+	st.dur = maxf(0.0, float(st.dur) - float(spec.wear))
+	_ws_dirty = true
+	_ws_sync_t = 0.6
 	fire_timer = float(spec.interval)
+	# задержка — редко; на изношенном чаще
+	if _rng.randf() < float(spec.jam):
+		st.jam = true
+		if Raid.current:
+			Raid.current.notify("Задержка! R — устранить")
 	var from: Vector3
 	var dir: Vector3
 	if ads:
@@ -605,10 +861,19 @@ func _fire(spec: Dictionary) -> void:
 			dir = Vector3(sin(_body.rotation.y), 0.0, cos(_body.rotation.y))
 		dir = dir.normalized()
 	var exclude: Array[RID] = [get_rid()]
-	# разброс: от бедра (ЛЦУ включён — меньше), в прицеле — по мере «довода» к прицельному;
-	# сидя/лёжа на сошках — ещё меньше, и отдача тоже
-	var hip := float(spec.hip_spread) if light_on else 1.0
-	var mult := lerpf(hip, float(spec.ads_spread), aim_progress()) if ads and aiming else hip
+	# разброс: от бедра (ЛЦУ включён — меньше, hip_spread), в прицеле — по мере «довода» к
+	# прицельному (выбранный прицел: у углового — свой довод и точность); сидя/лёжа на сошках —
+	# ещё меньше, и отдача тоже
+	var hip := float(spec.hip_spread)
+	var mult := hip
+	if ads and aiming:
+		mult = lerpf(hip, float(spec.ads_spread), aim_progress())
+	elif not ads:
+		# изометрия, от бедра: угловой коллиматор — навскидку точнее, крупная оптика мешает
+		if String(spec.sight) == "offset":
+			mult *= float(Balance.ISO_AIM.offset_hip)
+		elif bool(spec.scoped):
+			mult *= float(Balance.ISO_AIM.scope_hip)
 	var braced := stance != Stance.STAND
 	var spread: float = float(spec.spread_deg) * mult * (float(spec.braced_spread) if braced else 1.0)
 	if is_downed():
@@ -619,8 +884,9 @@ func _fire(spec: Dictionary) -> void:
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig
 	var marked := false
+	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg)}
 	for i in range(int(spec.pellets)):
-		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(spec.range_m), mask, float(spec.damage), exclude, _rng)
+		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(spec.range_m), mask, float(spec.damage), exclude, _rng, -1, bullet)
 		if i < 3:
 			Tracer.spawn(get_tree().current_scene, muzzle, hit.get("position", hit.get("end", from)), Color(1.0, 0.85, 0.5))
 		var c: Object = hit.get("collider")
@@ -635,9 +901,10 @@ func _fire(spec: Dictionary) -> void:
 	_apply_recoil(spec, braced, rig)
 	if rig:
 		rig.add_shake(float(spec.shake))
-	# глушитель: без вспышки, тише и слышно ближе
-	if not bool(spec.suppressed):
+	# вспышка: пламегаситель гасит, глушитель — почти нет
+	if float(spec.flash) > 0.05:
 		_muzzle.global_position = muzzle
+		_muzzle.light_energy = 3.0 * float(spec.flash)
 		_muzzle.visible = true
 		get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
 	NoiseBus.emit(global_position, float(spec.noise_m), "shot")
@@ -657,13 +924,20 @@ func _muzzle_world() -> Vector3:
 	return global_position + Vector3.UP * 1.3
 
 
-## Бросок: в прицеле — по взгляду, иначе — навесом в точку под курсором (не дальше max_range).
+## Ушёл со сцены (конец рейда, убежище) — поправки гарнитуры снимаются; свой игрок, пока жив,
+## ставит их заново каждый кадр.
+func _exit_tree() -> void:
+	Settings.set_headset({})
+
+
 ## Что надето на глаза: ПНВ / очки / "".
 func eyes_item() -> String:
 	return String((inventory.equipment.get("eyes", {}) as Dictionary).get("id", "")) if inventory else ""
 
 
 func _tick_nvg(delta: float) -> void:
+	# гарнитура на ушах — поправки звука (своему игроку)
+	Settings.set_headset(WeaponDb.headset(String((inventory.equipment.get("ears", {}) as Dictionary).get("id", ""))) if inventory and health.alive else {})
 	var has := bool(ItemDb.equip(eyes_item()).get("nvg", false))
 	if Input.is_action_just_pressed("nvg") and not PauseMenu.shown:
 		if not has:
@@ -771,6 +1045,8 @@ func _stance_speed() -> float:
 			s = Balance.PLAYER_SPRINT_SPEED if _can_sprint() and Input.is_action_pressed("sprint") and not aiming else Balance.PLAYER_WALK_SPEED
 	if aiming:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
+	# перегруз: тяжелее free_kg — медленнее
+	s *= carry_speed_k()
 	if absf(lean) > 0.3:
 		s *= Balance.LEAN_MOVE_SCALE
 	if is_dragging():

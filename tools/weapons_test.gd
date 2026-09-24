@@ -31,7 +31,7 @@ func _ready() -> void:
 	# 2. смена оружия клавишами
 	_tap("weapon_2")
 	await _frames(4)
-	_check("клавиша 2 — автомат", _player.weapon_id == "rifle", _player.weapon_id)
+	_check("клавиша 2 — автомат", _player.weapon_id == "wpn_ar_03", _player.weapon_id)
 
 	# 3. прицел: камера от первого лица, мышь захвачена
 	Input.action_press("aim")
@@ -91,12 +91,18 @@ func _ready() -> void:
 	m.global_position = _player.global_position + Vector3(0, 0.1, -5)
 	m.set_physics_process(false)
 	await _frames(3)
+	# без брони: проверяется регдолл, а не пробитие (дробь бронежилет не берёт)
+	for s in ["armor", "helmet"]:
+		m.equipment.erase(s)
 	_tap("weapon_3")
 	await get_tree().create_timer(0.4).timeout
 	Input.action_press("aim")
 	await _frames(4)
 	await _look_at(m.global_position + Vector3(0, 1.2, 0))
-	for i in range(3):
+	for i in range(4):
+		# лёг раненым — добить лежащего
+		if (m.get_node("Health") as Health).downed:
+			await _look_at(m.global_position + Vector3(0, 0.25, 0))
 		Input.action_press("fire")
 		await _frames(2)
 		Input.action_release("fire")
@@ -106,7 +112,8 @@ func _ready() -> void:
 	Input.action_release("aim")
 	await get_tree().create_timer(0.8).timeout
 	var rd := get_tree().get_first_node_in_group("ragdolls") as Ragdoll
-	_check("мародёр умер — регдолл", rd != null, "")
+	var mh := m.get_node("Health") as Health
+	_check("мародёр умер — регдолл", rd != null, "жив %s, лёг %s, hp %.0f, патронов %d, оружие %s" % [mh.alive, mh.downed, mh.hp, _player.ammo, _player.weapon_id])
 	if rd:
 		var chest := rd.chest()
 		_check("регдолл лёг", chest.global_position.y < 0.7, "грудь на высоте %.2f" % chest.global_position.y)
