@@ -1,6 +1,7 @@
 class_name Marauder
 extends CharacterBody3D
-## Мародёр: патруль отрядом → расследование шума → бой → поиск, раненый — отход.
+## Мародёр: ходит отрядом по контейнерам и грабит их (ведущий роется, отряд прикрывает; сумка
+## выпадает с трупа) → расследование шума → бой → поиск, раненый — отход.
 ## Позицию игрока получает только через Perception.can_see (зрение), NoiseBus.noise (слух) и
 ## NoiseBus.callout (окрик товарища, который сам видел цель) — никакого прямого чтения.
 ## Ходит по навмешу сектора, двери открывает сам (см. door.gd). Считает только хост.
@@ -86,6 +87,14 @@ var _shown_down: bool = false
 var _rescue_target: Marauder = null
 var _rescue_phase: int = 0
 var _rescue_t: float = 0.0
+## Грабёж: куда идёт ведущий, сколько роется, что уже взял (сумка), где уже был.
+## Метки «этот контейнер наш» — общие для всех: id контейнера -> [мародёр, время, мс].
+static var _loot_claims: Dictionary = {}
+var pack: Array = []
+var _loot_target: LootContainer = null
+var _loot_t: float = -1.0
+var _rummage_t: float = 0.0
+var _visited: Dictionary = {}
 ## Слышал выстрел игрока: сколько секунд назад и где (добивать лежащего — только в тишине).
 var _shot_heard_t: float = 99.0
 var _shot_heard_pos: Vector3 = Vector3.INF
@@ -483,7 +492,8 @@ func _mates_near(r: float) -> int:
 
 
 func _patrol(delta: float) -> void:
-	_set_crouch(false)
+	if _loot_t < 0.0:
+		_set_crouch(false)
 	if not _nav_ready:
 		return
 	var lead := squad.leader() if squad else null
@@ -497,14 +507,116 @@ func _patrol(delta: float) -> void:
 		return
 	if _agent.is_navigation_finished():
 		pause_timer -= delta
+		if _loot_tick(delta):
+			return
 		if pause_timer <= 0.0 and _holds() and _post != Vector3.INF:
 			# держит позицию: пара шагов у поста, долго смотрит
 			var a := _rng.randf() * TAU
 			_agent.target_position = _snap(_post + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(0.0, Balance.AI_HOLD_PATROL_R))
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 3.0
+		elif pause_timer <= 0.0 and not _holds() and _pick_loot():
+			pass
 		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
 			_agent.target_position = _snap(patrol_point_provider.call())
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1]))
+
+
+# ---------------------------------------------------------------- грабёж
+
+## Выбрать контейнер: ближний (с разбросом), не пустой, не занятый другими, где ещё не был.
+func _pick_loot() -> bool:
+	if pack.size() >= Balance.AI_LOOT_PACK_MAX:
+		return false
+	var now := Time.get_ticks_msec()
+	var best: LootContainer = null
+	var best_s := INF
+	for n in get_tree().get_nodes_in_group("loot_containers"):
+		var c := n as LootContainer
+		if c == null or (c.rolled and c.items.is_empty()) or _visited.has(c.get_instance_id()):
+			continue
+		var claim: Array = _loot_claims.get(c.get_instance_id(), [])
+		if not claim.is_empty() and is_instance_valid(claim[0]) and claim[0] != self and now - int(claim[1]) < int(Balance.AI_LOOT_CLAIM_SEC * 1000.0):
+			continue
+		var d := c.global_position.distance_to(global_position)
+		if d > Balance.AI_LOOT_RANGE:
+			continue
+		var s := d + _rng.randf() * 20.0
+		if s < best_s:
+			best = c
+			best_s = s
+	if best == null:
+		return false
+	_drop_loot_claim()
+	_loot_target = best
+	_loot_t = -1.0
+	_loot_claims[best.get_instance_id()] = [self, now]
+	_agent.target_position = _snap(best.global_position)
+	return true
+
+
+func _drop_loot_claim() -> void:
+	if _loot_target and is_instance_valid(_loot_target):
+		var claim: Array = _loot_claims.get(_loot_target.get_instance_id(), [])
+		if not claim.is_empty() and claim[0] == self:
+			_loot_claims.erase(_loot_target.get_instance_id())
+	_loot_target = null
+	_loot_t = -1.0
+
+
+## Ведущий у контейнера: присел, роется (слышно), забрал ценное. true — занят грабежом.
+func _loot_tick(delta: float) -> bool:
+	if _loot_target == null:
+		return false
+	if not is_instance_valid(_loot_target) or (_loot_target.rolled and _loot_target.items.is_empty() and _loot_t < 0.0):
+		_drop_loot_claim()
+		return false
+	if _loot_t < 0.0:
+		var to_c := _loot_target.global_position - global_position
+		if Vector2(to_c.x, to_c.z).length() > 2.4:
+			# ещё идёт; застрял (дошёл, а не рядом) — бросить
+			if _agent.is_navigation_finished():
+				_visited[_loot_target.get_instance_id()] = true
+				_drop_loot_claim()
+				return false
+			return true
+		_loot_t = maxf(Balance.AI_LOOT_SEARCH_MIN, _loot_target.search_s * Balance.AI_LOOT_SEARCH_MULT)
+		_agent.target_position = global_position
+	_set_crouch(true)
+	_face(_loot_target.global_position)
+	_loot_t -= delta
+	_rummage_t -= delta
+	if _rummage_t <= 0.0:
+		_rummage_t = _rng.randf_range(0.5, 1.1)
+		Audio.play("rummage", _loot_target.global_position, _rng.randf_range(-3.0, 0.0))
+	if _loot_t > 0.0:
+		return true
+	_take_loot(_loot_target)
+	_visited[_loot_target.get_instance_id()] = true
+	_drop_loot_claim()
+	_set_crouch(false)
+	# разбирает, что взял, осматривается — и дальше
+	pause_timer = _rng.randf_range(2.0, 5.0)
+	return true
+
+
+## Забрать из контейнера самое ценное (до AI_LOOT_TAKE записей) в сумку.
+func _take_loot(c: LootContainer) -> void:
+	c.roll()
+	var list := c.items.duplicate(true)
+	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return ItemDb.entry_value(a) > ItemDb.entry_value(b))
+	var took := 0
+	for e in list:
+		if took >= Balance.AI_LOOT_TAKE or pack.size() >= Balance.AI_LOOT_PACK_MAX:
+			break
+		var n := c.take(String(e.id), int(e.n))
+		if n <= 0:
+			continue
+		var got: Dictionary = (e as Dictionary).duplicate(true)
+		got.n = n
+		pack.append(got)
+		took += 1
+	if took > 0 and _rng.randf() < 0.3:
+		say("Есть кое-что")
 
 
 func _investigate(delta: float) -> void:
@@ -518,6 +630,7 @@ func _investigate(delta: float) -> void:
 
 
 func _enter_combat(t: Tactic) -> void:
+	_drop_loot_claim()
 	state = State.COMBAT
 	_set_tactic(t)
 
@@ -1178,6 +1291,7 @@ func _snap(p: Vector3) -> Vector3:
 
 func _on_died() -> void:
 	_release_rescue()
+	_drop_loot_claim()
 	if rescuer and is_instance_valid(rescuer):
 		rescuer._rescue_target = null
 	state = State.DEAD
@@ -1205,6 +1319,9 @@ func _on_died() -> void:
 		var rounds := mini(in_mag + rng.randi_range(0, int(wspec.mag)), ItemDb.stack(String(wspec.ammo)))
 		if rounds > 0:
 			drop.append(ItemDb.make(String(wspec.ammo), rounds))
+		# награбленное — тоже здесь
+		drop.append_array(pack)
+		pack = []
 		Raid.current.spawn_drop(rest, "Ящик мародёра", drop, LootContainer.Look.CRATE,
 			global_position + Vector3.UP * 1.1 - rest)
 	collision_layer = 0

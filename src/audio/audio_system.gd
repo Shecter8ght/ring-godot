@@ -21,6 +21,8 @@ const KINDS := {
 	"step_snow_run": {"db": -13.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"heartbeat": {"db": -4.0, "unit": 3.0, "max": 6.0},
+	# мародёр роется в контейнере — слышно за стеной
+	"rummage": {"db": -13.0, "unit": 3.0, "max": 22.0, "occlude": true},
 	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
 	"hit": {"db": -4.0, "unit": 5.0, "max": 30.0},
 	"reload": {"db": -8.0, "unit": 3.0, "max": 15.0},
@@ -58,6 +60,7 @@ const SAMPLES := {
 	"reload_rifle": ["guns/reload_rifle_"], "reload_shotgun": ["guns/reload_shotgun_"], "bolt": ["guns/reload_shotgun_"],
 	"impact_hard": ["hits/concrete_", "hits/hard_"], "impact_metal": ["hits/metal_"],
 	"impact_glass": ["hits/glass_"], "impact_soft": ["hits/wood_"], "debris": ["world/debris_"],
+	"rummage": ["hits/wood_", "world/debris_"],
 }
 ## Выстрел дальше FAR_M от слушателя звучит «дальней» записью: хлопок с эхом, без щелчка.
 const FAR := {
@@ -106,6 +109,7 @@ func _ready() -> void:
 		_streams[k] = _streams["step"]
 	_streams["step_metal"] = _make(_step_metal())
 	_streams["heartbeat"] = _make(_heartbeat())
+	_streams["rummage"] = _streams["impact_soft"]
 	_streams["death"] = _streams["hit"]
 	_streams["fall"] = _streams["hit"]
 	for k in ["reload_pistol", "reload_rifle", "reload_shotgun", "bolt", "pin"]:

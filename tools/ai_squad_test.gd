@@ -147,6 +147,27 @@ func _ready() -> void:
 	await _wait(3.0)
 	_check("снайпер держит позицию (окрик — не бежит)", sn.state == Marauder.State.COMBAT and sn.global_position.distance_to(sn0) < 1.5,
 		"%s, сдвинулся на %.1f м" % [_st(sn), sn.global_position.distance_to(sn0)])
+	# грабёж: одиночка у ближайшего контейнера — идёт, роется, забирает самое ценное в сумку
+	var lp := SectorBuilder.polar(-150.0, 100.0)
+	var box: LootContainer = null
+	for cn in get_tree().get_nodes_in_group("loot_containers"):
+		var cc := cn as LootContainer
+		if box == null or cc.global_position.distance_to(lp) < box.global_position.distance_to(lp):
+			box = cc
+	box.rolled = true
+	box.items = [ItemDb.make("gold_chain", 2), ItemDb.make("bandage", 1), ItemDb.make("water", 1)]
+	var looter := scene.instantiate() as Marauder
+	looter.name = "Looter"
+	looter.archetype = "scout"
+	looter.patrol_point_provider = func() -> Vector3: return looter.global_position
+	level.get_node("Marauders").add_child(looter)
+	looter.global_position = NavigationServer3D.map_get_closest_point(looter.get_world_3d().navigation_map, box.global_position + Vector3(4, 0, 0)) + Vector3(0, 0.1, 0)
+	for i in range(40):
+		await _wait(0.5)
+		if not looter.pack.is_empty():
+			break
+	_check("мародёр грабит контейнер: самое ценное — в сумку", not looter.pack.is_empty() and String(looter.pack[0].id) == "gold_chain" and box.items.size() < 3,
+		"сумка %s, в ящике %s" % [looter.pack, box.items])
 	print("ai_squad_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 
