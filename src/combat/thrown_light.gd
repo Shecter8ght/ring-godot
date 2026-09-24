@@ -18,7 +18,7 @@ static func throw(parent: Node, k: String, from: Vector3, velocity: Vector3) -> 
 	g.kind = k
 	g.mass = 0.3
 	g.collision_layer = Hitscan.LAYER_DEBRIS
-	g.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS
+	g.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS | Hitscan.LAYER_GLASS
 	g.continuous_cd = true
 	var pm := PhysicsMaterial.new()
 	pm.bounce = 0.25

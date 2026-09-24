@@ -82,6 +82,8 @@ var _lamps: Array = []
 var _lamp_colors: Array[Color] = []
 ## Стекло — отдельным мешем: без теней и с прозрачностью.
 var _glass: Dictionary = {}
+## Витринные панели (GlassPanes): каждая отдельно — простреливается и разбивается.
+var _panes: Array = []
 ## Где уже стоит пилястра/колонна — чтобы на стыках стен не было двойных.
 var _posts: Dictionary = {}
 var _doors: Array[Door] = []
@@ -875,9 +877,8 @@ func _glass_run(line: Dictionary, p0: float, p1: float, y: float) -> void:
 		return
 	var n := maxi(1, int(round(len / float(_arch.pane_w))))
 	var steel := _st(_walls, "steel_dark")
-	# нижняя и верхняя рейки рамы
+	# верхняя рейка рамы; нижняя (подоконник) — у каждой панели своя (GlassPanes: выбили — проходим)
 	var pts := _line_points(line, p0, p1)
-	_wall_strip(steel, pts, 0.12, float(_arch.plinth_h))
 	_wall_strip(steel, pts, 0.12, 0.12, y - 0.12)
 	for i in range(n + 1):
 		var p := _line_advance(line, p0, len * float(i) / float(n))
@@ -887,9 +888,15 @@ func _glass_run(line: Dictionary, p0: float, p1: float, y: float) -> void:
 		var q1 := _line_advance(line, p0, len * float(i + 1) / float(n))
 		var c := _line_point(line, (q0 + q1) * 0.5)
 		var broken := (hash("%.1f:%.1f" % [c.x, c.z]) % 100) < int(_arch.broken_pane_pct)
-		if broken:
-			continue
-		_wall_strip(_st(_glass, "glass"), _line_points(line, q0, q1), 0.02, y - float(_arch.plinth_h) - 0.12, float(_arch.plinth_h))
+		var a := _line_point(line, q0)
+		var b := _line_point(line, q1)
+		var x := b - a
+		var w := x.length()
+		x = x.normalized()
+		var plinth := float(_arch.plinth_h)
+		var h := y - plinth - 0.12
+		_panes.append({"xf": Transform3D(Basis(x, Vector3.UP, x.cross(Vector3.UP).normalized()), (a + b) * 0.5 + Vector3.UP * (plinth + h * 0.5)),
+			"size": Vector2(w, h), "floor_y": 0.0, "sill": Vector3(w, plinth, 0.12), "broken": broken})
 
 
 ## Окружение: кольцо продолжается за пределами сектора — полы, фасад и стена галереи без проёмов,
@@ -1247,6 +1254,10 @@ func _emit_meshes(root: Node3D) -> void:
 		cs.shape = (mi.mesh as ArrayMesh).create_trimesh_shape()
 		walls.add_child(cs)
 	_add_occluder(root, walls)
+	if not _panes.is_empty():
+		var gp := GlassPanes.new()
+		gp.setup(_panes)
+		root.add_child(gp)
 	for mat_id in _glass:
 		var gi := _mesh_node(_glass[mat_id], String(mat_id), false)
 		walls.add_child(gi)

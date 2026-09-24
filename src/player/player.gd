@@ -17,6 +17,8 @@ var aiming: bool = false
 var ads: bool = false
 ## Наклон (Q/E) от первого лица: -1 — влево, 1 — вправо; синхронизируется (AI видит высунувшегося).
 var lean: float = 0.0
+## Слой своего тела от первого лица (свет «из глаз» его не затеняет).
+const OWN_BODY_LAYER := 1 << 17
 ## Направление взгляда в прицеле, рад (курс от +Z, тангаж вверх) — ставит CameraRig.
 var look_yaw: float = 0.0
 var look_pitch: float = 0.0
@@ -276,11 +278,16 @@ func look_dir() -> Vector3:
 ## но тень оставляем — на полу видно, где стоишь.
 func set_first_person(on: bool) -> void:
 	var mode := GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if on else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	# своё тело от первого лица — на отдельном слое: тень от солнца и ламп есть, а свет «из глаз»
+	# (ИК-подсветка ПНВ, фонарь в руках) его в тенях не видит — иначе перед камерой тень-прямоугольник
+	var layer := OWN_BODY_LAYER if on and is_local() else 1
 	for mi in _body.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).cast_shadow = mode
+		(mi as MeshInstance3D).layers = layer
 	if _weapon_model:
 		for mi in _weapon_model.find_children("*", "MeshInstance3D", true, false):
 			(mi as MeshInstance3D).cast_shadow = mode
+			(mi as MeshInstance3D).layers = layer
 
 
 func _process(_delta: float) -> void:

@@ -22,7 +22,7 @@ static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, 
 	g._attacker = attacker
 	g.mass = 0.6
 	g.collision_layer = Hitscan.LAYER_DEBRIS
-	g.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS
+	g.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS | Hitscan.LAYER_GLASS
 	g.continuous_cd = true
 	var pm := PhysicsMaterial.new()
 	pm.bounce = 0.35
@@ -94,6 +94,10 @@ func _explode() -> void:
 		if c and c.global_position.distance_to(pos) < radius:
 			var k := 1.0 - c.global_position.distance_to(pos) / radius
 			r.push(((c.global_position - pos).normalized() + Vector3.UP * 0.6) * float(spec.push) * k, c.global_position)
+	# стёкла рядом вылетают (решает хост — у него урон)
+	if _damage:
+		for gp in get_tree().get_nodes_in_group("glass_panes"):
+			(gp as GlassPanes).blast(pos, radius * 1.3)
 	NoiseBus.emit(pos, float(spec.noise_m), "shot")
 	ImpactFx.explosion(pos)
 	Audio.play("explosion", pos)

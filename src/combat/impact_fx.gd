@@ -69,7 +69,9 @@ func spawn_hit(hit: Dictionary, dir: Vector3) -> void:
 		_blood(parent, pos, dir, hit.collider)
 	else:
 		_particles(parent, kind, pos, n, dir)
-		_decal(parent, kind, pos, n)
+		# на витрине след рисуют трещины самой панели (GlassPanes), а выбитая — без висящих в воздухе дыр
+		if kind != "glass":
+			_decal(parent, kind, pos, n)
 		if bool(FX[kind].get("spark", false)):
 			_flash(parent, pos + n * 0.1, Color(1.0, 0.8, 0.5) if kind == "metal" else Color(0.8, 0.9, 1.0))
 	Audio.play(String(SOUND.get(kind, "impact_hard")), pos)

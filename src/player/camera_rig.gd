@@ -220,6 +220,7 @@ func _tick_nvg_ir(on: bool) -> void:
 		_nvg_ir.spot_angle = 48.0
 		_nvg_ir.spot_attenuation = 0.6
 		_nvg_ir.shadow_enabled = true
+		_nvg_ir.shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_nvg_ir.light_specular = 0.1
 		_nvg_ir.light_volumetric_fog_energy = 0.0
 		_nvg_ir.set_meta("crisp", true)
@@ -497,6 +498,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		# фонарь у себя светит от модели в руках: луч идёт за стволом (у модели на теле он погашен)
 		for n in _viewmodel.find_children("Flashlight", "SpotLight3D", true, false):
 			n.set_meta("own", true)
+			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_ads_cam.add_child(_viewmodel)
 		_viewmodel_id = vm_key
 	_viewmodel.visible = true

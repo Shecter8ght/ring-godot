@@ -56,7 +56,7 @@ static func spawn(parent: Node, xf: Transform3D, velocity: Vector3, impulse: Vec
 		b.linear_damp = float(Balance.RAGDOLL_DAMP.linear)
 		b.angular_damp = float(Balance.RAGDOLL_DAMP.angular)
 		b.collision_layer = Hitscan.LAYER_DEBRIS
-		b.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS
+		b.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_DEBRIS | Hitscan.LAYER_GLASS
 		b.continuous_cd = true
 		var cs := CollisionShape3D.new()
 		var mi := MeshInstance3D.new()

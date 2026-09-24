@@ -326,7 +326,8 @@ func _bake_navmesh() -> void:
 	region.name = "NavRegion"
 	var nm := NavigationMesh.new()
 	nm.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
-	nm.geometry_collision_mask = Hitscan.LAYER_WORLD
+	# целое стекло — стена для навигации; выбитое — проём (GlassPanes ставит связку)
+	nm.geometry_collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_GLASS
 	nm.geometry_source_geometry_mode = NavigationMesh.SOURCE_GEOMETRY_GROUPS_WITH_CHILDREN
 	nm.geometry_source_group_name = "nav_source"
 	nm.cell_size = 0.25

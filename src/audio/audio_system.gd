@@ -33,6 +33,8 @@ const KINDS := {
 	"impact_hard": {"db": -6.0, "unit": 5.0, "max": 40.0},
 	"impact_metal": {"db": -5.0, "unit": 6.0, "max": 45.0},
 	"impact_glass": {"db": -4.0, "unit": 6.0, "max": 45.0},
+	# витрина осыпалась: звон и шорох осколков
+	"glass_break": {"db": 1.0, "unit": 8.0, "max": 70.0},
 	"impact_soft": {"db": -10.0, "unit": 4.0, "max": 30.0},
 	"shot_rifle": {"db": 2.0, "unit": 9.0, "max": 110.0},
 	"shot_shotgun": {"db": 4.0, "unit": 9.0, "max": 110.0},
@@ -104,6 +106,7 @@ func _ready() -> void:
 	_streams["impact_hard"] = _make(_impact_hard())
 	_streams["impact_metal"] = _make(_impact_metal())
 	_streams["impact_glass"] = _make(_impact_glass())
+	_streams["glass_break"] = _make(_glass_break())
 	_streams["impact_soft"] = _make(_impact_soft())
 	_streams["shot_rifle"] = _make(_gunshot(0.28, 1.25))
 	_streams["shot_shotgun"] = _make(_gunshot(0.55, 0.7))
@@ -563,6 +566,27 @@ func _impact_glass() -> PackedFloat32Array:
 			if t > on:
 				v += sin(TAU * tones[k] * (t - on)) * exp(-(t - on) * 12.0) * 0.18
 		out[i] = v
+	return out
+
+
+## Витрина осыпалась: хруст в начале, потом сотни звонких осколков с затуханием (0.9 с).
+func _glass_break() -> PackedFloat32Array:
+	var n := int(0.9 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var tinks: Array = []
+	for k in range(38):
+		# осколки падают не сразу: гуще в начале
+		tinks.append([pow(_rng.randf(), 1.8) * 0.7, _rng.randf_range(2400.0, 7800.0), _rng.randf_range(0.05, 0.22)])
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		var v := _noise() * (exp(-t * 18.0) * 0.9 + exp(-t * 4.0) * 0.12)
+		for tk in tinks:
+			var on: float = tk[0]
+			if t > on:
+				var dt := t - on
+				v += sin(TAU * float(tk[1]) * dt) * exp(-dt * 30.0) * float(tk[2])
+		out[i] = clampf(v, -1.0, 1.0) * 0.8
 	return out
 
 
