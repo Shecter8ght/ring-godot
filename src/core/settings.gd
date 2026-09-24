@@ -236,7 +236,14 @@ func _apply_env(we: WorldEnvironment) -> void:
 	var mid := quality == "medium"
 	e.sdfgi_enabled = bool(o.sdfgi) and hi
 	e.ssil_enabled = bool(o.ssil) and hi
-	e.ssr_enabled = bool(o.ssr) and hi
+	# отражения в экранном пространстве — мокрый асфальт и лужи (средне и высоко)
+	e.ssr_enabled = hi or mid
+	if e.ssr_enabled:
+		# длинный луч и слабое затухание — отражение в луже во всю высоту здания (подобрано ssr_probe)
+		e.ssr_max_steps = 256 if hi else 128
+		e.ssr_fade_in = 0.15
+		e.ssr_fade_out = 0.3
+		e.ssr_depth_tolerance = 0.5
 	e.ssao_enabled = bool(o.ssao) and (hi or mid)
 	e.volumetric_fog_enabled = bool(o.fog) and (hi or mid)
 	# свечение вокруг ярких мест — широкое и мягкое (дальние уровни), свет «обволакивает»

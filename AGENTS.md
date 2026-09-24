@@ -57,6 +57,8 @@ tools/godot.cmd res://tools/rain_test.tscn                  # дождь шей�
 tools/godot.cmd res://tools/light_shots.tscn                # заградительные огни (ночь/туман горят, ясный день — нет), мягкий свет ТЦ; снимки light_*
 tools/godot.cmd res://tools/light_tour.tscn                 # свет: помещения ночью, аварийный (панели = огни), ракета/химсвет за стеной, засвет от фонаря, фонарь на оружии за взглядом, ПНВ; снимки tour_* (TOUR_ONLY=glare — только засвет/ПНВ)
 tools/godot.cmd res://tools/glass_test.tscn                 # витрины: пуля пробивает, трещины, осыпается сама, дробь выбивает, проём — путь ИИ и проход; снимки glass_*
+tools/godot.cmd res://tools/asphalt_shots.tscn              # мокрый асфальт: сухо / сыро / лужи, от первого лица и изометрия (ASPH_TIME=day|dusk|night); снимки asphalt_*
+tools/godot.cmd res://tools/ssr_probe.tscn                  # SSR движка: зеркало и мокрый асфальт при разных настройках отражений; снимки ssr_probe_*
 tools/godot.cmd res://tools/ceiling_shots.tscn             # потолки и купол атриума: от первого лица вверх и изометрия
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона
 python tools/import_model.py <id>                              # модель из _asset_src/<id> (+license.txt) в assets/models/props, CREDITS

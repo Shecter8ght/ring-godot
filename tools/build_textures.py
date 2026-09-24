@@ -21,7 +21,8 @@ TILE_M: dict[str, float] = {
     "large_floor_tiles_02": 2.0,
     "worn_tile_floor": 1.5,
     "concrete_floor_worn_001": 3.0,
-    "asphalt_02": 4.0,
+    # реально 3 м; чуть крупнее — издали не рябит (повтор ломает шейдер мокрого асфальта)
+    "asphalt_02": 4.5,
     "painted_plaster_wall": 3.0,
     "concrete_wall_006": 3.0,
     "concrete_panels": 4.0,
@@ -108,7 +109,8 @@ def main() -> None:
         maps = [m for m in ("albedo", "normal", "arm", "rough", "ao") if (src / f"{m}.jpg").exists()]
         dest = OUT_TEX / src.name
         dest.mkdir(parents=True, exist_ok=True)
-        for m in maps:
+        # высоты — только текстурой (их читает шейдер мокрого асфальта), в .tres не идут
+        for m in maps + (["height"] if (src / "height.jpg").exists() else []):
             shutil.copy2(src / f"{m}.jpg", dest / f"{m}.jpg")
         (OUT_MAT / f"{src.name}.tres").write_text(material_tres(src.name, maps), encoding="utf-8")
         credits.append(

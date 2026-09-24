@@ -25,6 +25,9 @@ var _haze: ColorRect
 var _haze_k: float = 0.0
 var _indoor_t: float = 0.0
 var _outdoor: bool = true
+## Сырость земли: плёнка и лужи (0..1) — копятся в дождь, сохнут после (Balance.WET_GROUND).
+var wet: float = 0.0
+var puddles: float = 0.0
 
 
 func _enter_tree() -> void:
@@ -34,11 +37,20 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	if current == self:
 		current = null
+	# материал асфальта общий (кэш) — следующий уровень начинается сухим
+	wet = 0.0
+	puddles = 0.0
+	_push_wet(0.0)
 
 
 func _ready() -> void:
 	_rng.randomize()
 	_apply_static()
+	# рейд начался в дождь — льёт давно: мокро, лужи налиты
+	if is_raining():
+		wet = float(Balance.WET_GROUND.start[0])
+		puddles = float(Balance.WET_GROUND.start[1])
+	_push_wet(0.0)
 	if not Net.is_networked() or multiplayer.is_server():
 		var w := String(RaidConditions.current.weather)
 		var sch: Dictionary = Balance.WEATHER_CHANGE
@@ -124,7 +136,30 @@ func _process(delta: float) -> void:
 			Raid.current.notify("Туман рассеялся")
 	if is_raining() and _rng.randf() < delta / 40.0:
 		_thunder()
+	_tick_wet(delta)
 	_tick_local(delta)
+
+
+## Сырость: в дождь плёнка набегает быстро, лужи — медленно; без дождя плёнка сохнет первой,
+## лужи стоят дольше. У всех peer одинаково (от того же дождя), по сети не шлётся.
+func _tick_wet(delta: float) -> void:
+	var g: Dictionary = Balance.WET_GROUND
+	if _rain_k > 0.01:
+		wet = minf(1.0, wet + delta * _rain_k / float(g.film_up_sec))
+		puddles = minf(float(g.puddle_max), puddles + delta * _rain_k / float(g.puddle_up_sec))
+	else:
+		wet = maxf(0.0, wet - delta / float(g.film_dry_sec))
+		puddles = maxf(0.0, puddles - delta / float(g.puddle_dry_sec))
+	_push_wet(_rain_k)
+
+
+func _push_wet(rain: float) -> void:
+	var m := SectorMaterials.get_material("asphalt_02") as ShaderMaterial
+	if m == null:
+		return
+	m.set_shader_parameter("wetness", wet)
+	m.set_shader_parameter("puddles", puddles)
+	m.set_shader_parameter("rain", rain)
 
 
 ## Для своего игрока: шум дождя (на улице / под крышей), жара без очков, капли за камерой.

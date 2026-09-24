@@ -11,6 +11,8 @@ extends Node3D
 const DROPS := 16000
 const SPLASHES := 1800
 ## Материалы пола, на которые ложится мокрый слой (под крышей его гасит карта).
+## Асфальт с текстурами мокнет сам (шейдер wet_asphalt, сырость — RaidWeather); здесь — его
+## серая замена без ассетов.
 const WET_MATS := ["asphalt_02", "gbf_asphalt", "concrete_floor_worn_001", "gbf_concrete", "gbf_tile"]
 
 var occlusion: RainOcclusion
@@ -269,6 +271,10 @@ func _ready() -> void:
 		occlusion.bind(m)
 	_drops = _quads("RainDrops", DROPS, _drop_mat)
 	_splash = _quads("RainSplash", SPLASHES, _splash_mat)
+	# мокрый асфальт под крышей сух — ему та же карта
+	var asph := SectorMaterials.get_material("asphalt_02") as ShaderMaterial
+	if asph:
+		occlusion.bind(asph)
 	for id in WET_MATS:
 		for cut in [false, true]:
 			var m := SectorMaterials.get_material(id, cut) as BaseMaterial3D
@@ -279,6 +285,12 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	# карта уходит вместе с дождём — асфальт считает всё открытым (сохнет везде одинаково)
+	var asph := SectorMaterials.get_material("asphalt_02") as ShaderMaterial
+	if asph:
+		# без карты (occ_size ~ 0) всё вне её — открыто небу
+		asph.set_shader_parameter("occ_tex", null)
+		asph.set_shader_parameter("occ_size", 0.0001)
 	for m in _wet_on:
 		if is_instance_valid(m) and m.next_pass == _wet_mat:
 			m.next_pass = null

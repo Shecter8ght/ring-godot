@@ -1,0 +1,19 @@
+[gd_resource type="ShaderMaterial" load_steps=6 format=3]
+
+[ext_resource type="Shader" path="res://src/world/wet_asphalt.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/asphalt_02/albedo.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/textures/asphalt_02/normal.jpg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/textures/asphalt_02/arm.jpg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/textures/asphalt_02/height.jpg" id="5"]
+
+[resource]
+resource_name = "asphalt_02_wet"
+shader = ExtResource("1")
+shader_parameter/albedo_tex = ExtResource("2")
+shader_parameter/normal_tex = ExtResource("3")
+shader_parameter/arm_tex = ExtResource("4")
+shader_parameter/height_tex = ExtResource("5")
+shader_parameter/tile_m = 4.5
+shader_parameter/wetness = 0.0
+shader_parameter/puddles = 0.0
+shader_parameter/rain = 0.0

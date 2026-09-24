@@ -36,6 +36,8 @@ TEXTURES: dict[str, str] = {
 
 # карта Poly Haven → имя файла у нас
 MAPS = {"Diffuse": "albedo", "nor_gl": "normal", "arm": "arm", "Rough": "rough", "AO": "ao"}
+# доп. карты для отдельных наборов: асфальту — высоты (вода собирается во впадинах, шейдер мокрой земли)
+EXTRA_MAPS: dict[str, dict[str, str]] = {"asphalt_02": {"Displacement": "height"}}
 
 
 def get_json(url: str) -> dict:
@@ -56,7 +58,7 @@ def fetch(asset_id: str, info: dict) -> None:
     files = get_json(f"https://api.polyhaven.com/files/{asset_id}")
     got: list[str] = []
     total = 0
-    for key, name in MAPS.items():
+    for key, name in {**MAPS, **EXTRA_MAPS.get(asset_id, {})}.items():
         # arm заменяет rough+ao; если есть — остальные не нужны
         if key in ("Rough", "AO") and "arm" in files:
             continue

@@ -119,6 +119,13 @@ static func get_material(id: String, cutaway: bool = false) -> Material:
 		return _cache[key]
 	var path := "res://assets/materials/%s.tres" % id
 	var mat: Material
+	# у материала может быть свой шейдер (асфальт — мокрый, сырость ведёт RainFx): <id>_wet.tres;
+	# полы у камеры не растворяются — вариант с вырезом тот же
+	var wet_path := "res://assets/materials/%s_wet.tres" % id
+	if ResourceLoader.exists(wet_path):
+		mat = load(wet_path)
+		_cache[key] = mat
+		return mat
 	if id in SPECIAL:
 		mat = _special(id)
 	elif GREYBOX.has(id):
