@@ -175,6 +175,8 @@ func _raid() -> void:
 		await get_tree().physics_frame
 	var me := _raid_node().local_player()
 	me.health.hp = 1e9
+	# мародёры бродят и стреляют — в голову было бы насмерть; тест не про бой
+	me.health.head_protected = func() -> bool: return true
 
 
 func _free_level() -> void:
