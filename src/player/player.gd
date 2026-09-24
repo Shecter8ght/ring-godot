@@ -67,6 +67,9 @@ var _last_damage: float = 0.0
 var _give_up_t: float = 0.0
 ## Несёт раненого NPC (сюжет, QuestWorld): медленно, только пистолет.
 var carrying: bool = false
+## ПНВ включён (N; нужен ПНВ в слоте «глаза») и сколько заряда осталось, с.
+var nvg_on: bool = false
+var nvg_charge: float = Balance.NVG_BATTERY_SEC
 
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
@@ -412,6 +415,10 @@ func _combat(delta: float) -> void:
 			weapon_id = ""
 	if Input.is_action_just_pressed("grenade") and grenade_count() > 0 and fire_timer <= 0.0:
 		_throw_grenade()
+	for pair in [["throw_flare", "flare"], ["throw_chem", "chemlight"]]:
+		if Input.is_action_just_pressed(String(pair[0])) and fire_timer <= 0.0:
+			_throw_light(String(pair[1]))
+	_tick_nvg(delta)
 	if weapon_id == "":
 		return
 	var spec := spec()
@@ -599,6 +606,63 @@ func _muzzle_world() -> Vector3:
 
 
 ## Бросок: в прицеле — по взгляду, иначе — навесом в точку под курсором (не дальше max_range).
+## Что надето на глаза: ПНВ / очки / "".
+func eyes_item() -> String:
+	return String((inventory.equipment.get("eyes", {}) as Dictionary).get("id", "")) if inventory else ""
+
+
+func _tick_nvg(delta: float) -> void:
+	var has := bool(ItemDb.equip(eyes_item()).get("nvg", false))
+	if Input.is_action_just_pressed("nvg") and not PauseMenu.shown:
+		if not has:
+			if Raid.current:
+				Raid.current.notify("ПНВ нет — надень его в слот «Глаза»")
+		elif nvg_charge <= 0.0:
+			Raid.current.notify("ПНВ: батарея села")
+		else:
+			nvg_on = not nvg_on
+			Audio.play("pin", global_position, -14.0)
+	if not has:
+		nvg_on = false
+	if nvg_on:
+		nvg_charge -= delta
+		if nvg_charge <= 0.0:
+			nvg_on = false
+			if Raid.current:
+				Raid.current.notify("ПНВ: батарея села")
+
+
+## Ракета / химсвет: из рюкзака (в песочнице — без счёта); бросок видят все peer.
+func _throw_light(k: String) -> void:
+	if loadout_mode:
+		if inventory.count(k) <= 0:
+			if Raid.current:
+				Raid.current.notify("Нет: " + ItemDb.item_name(k))
+			return
+		Raid.current.request_consume(k, 1)
+	fire_timer = 0.5
+	var from := eye_position() + Vector3.UP * 0.1
+	var v: Vector3
+	if ads:
+		from += look_dir() * 0.4
+		v = look_dir() * 11.0 + Vector3.UP * 2.0
+	else:
+		var to := cursor_ground - global_position
+		to.y = 0.0
+		to = to.limit_length(16.0)
+		var t := clampf(to.length() / 11.0, 0.4, 1.2)
+		v = (global_position + to - from) / t + Vector3.UP * 0.5 * 9.8 * t
+	if Net.is_networked():
+		_rpc_throw_light.rpc(k, from, v)
+	else:
+		_rpc_throw_light(k, from, v)
+
+
+@rpc("authority", "call_local", "reliable")
+func _rpc_throw_light(k: String, from: Vector3, v: Vector3) -> void:
+	ThrownLight.throw(get_tree().current_scene, k, from, v)
+
+
 func _throw_grenade() -> void:
 	if loadout_mode:
 		Raid.current.request_consume("grenade", 1)

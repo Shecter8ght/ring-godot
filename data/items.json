@@ -948,6 +948,62 @@
     2,
     1
    ]
+  },
+  "nvg": {
+   "name": "ПНВ",
+   "cat": "tools",
+   "cells": 2,
+   "value": 42000,
+   "stack": 1,
+   "equip": {
+    "slot": "eyes",
+    "nvg": true
+   },
+   "size": [
+    2,
+    1
+   ],
+   "short": "ПНВ"
+  },
+  "sunglasses": {
+   "name": "Очки от солнца",
+   "cat": "tools",
+   "cells": 1,
+   "value": 2500,
+   "stack": 1,
+   "equip": {
+    "slot": "eyes",
+    "uv": true
+   },
+   "size": [
+    1,
+    1
+   ],
+   "short": "Очки"
+  },
+  "flare": {
+   "name": "Осветительная ракета",
+   "cat": "throw",
+   "cells": 1,
+   "value": 1600,
+   "stack": 3,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Ракета"
+  },
+  "chemlight": {
+   "name": "Химсвет",
+   "cat": "throw",
+   "cells": 1,
+   "value": 300,
+   "stack": 10,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Химсвет"
   }
  }
 }

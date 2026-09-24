@@ -28,6 +28,8 @@ var _hurt_amount: float = 0.0
 var _beat_t: float = 0.0
 var _down_label: Label
 var _muffle: AudioEffectLowPassFilter
+## ПНВ: зелёная усиленная картинка с зерном.
+var _nvg_fx: ColorRect
 var _hitmarker_t: float = 0.0
 var _rng := RandomNumberGenerator.new()
 var _mmb: bool = false
@@ -137,6 +139,24 @@ func _ui_blocking() -> bool:
 	return false
 
 
+const NVG_SHADER := """
+shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void fragment() {
+	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
+	float l = dot(c, vec3(0.3, 0.59, 0.11));
+	// усиление: тёмное вытягивается, яркое — в засветку
+	l = 1.0 - exp(-l * 14.0);
+	float n = hash(SCREEN_UV * vec2(1920.0, 1080.0) + TIME * 37.0) - 0.5;
+	l = clamp(l + n * 0.09, 0.0, 1.0);
+	vec2 d = SCREEN_UV - 0.5;
+	d.x *= SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
+	float vig = smoothstep(0.62, 0.38, length(d));
+	COLOR = vec4(vec3(0.18, 1.0, 0.3) * l * vig, 1.0);
+}
+"""
+
 const HURT_SHADER := """
 shader_type canvas_item;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
@@ -155,6 +175,23 @@ void fragment() {
 	COLOR = vec4(c, 1.0);
 }
 """
+
+
+## ПНВ усиливает свет, которого глазом не видно: у себя — ярче окружение и выдержка.
+func _nvg_env(on: bool) -> void:
+	var we := get_tree().current_scene.find_child("WorldEnvironment", false, false) as WorldEnvironment if get_tree().current_scene else null
+	if we == null or we.environment == null:
+		return
+	var e := we.environment
+	if on:
+		e.set_meta("nvg_prev", [e.ambient_light_energy, e.tonemap_exposure])
+		e.ambient_light_energy = maxf(e.ambient_light_energy, 0.5) * 3.0
+		e.tonemap_exposure *= 2.5
+	elif e.has_meta("nvg_prev"):
+		var prev: Array = e.get_meta("nvg_prev")
+		e.ambient_light_energy = float(prev[0])
+		e.tonemap_exposure = float(prev[1])
+		e.remove_meta("nvg_prev")
 
 
 ## Ранения на экране: лёжа — сильно (кровь, серость, пульс, стук сердца, глухой звук, таймер);
@@ -272,6 +309,11 @@ func _process(delta: float) -> void:
 			_hitmarker.position = get_viewport().get_mouse_position()
 	_update_hud(pl)
 	_update_hurt(pl, delta)
+	if _nvg_fx:
+		var on := pl != null and pl.is_local() and pl.nvg_on
+		if on != _nvg_fx.visible:
+			_nvg_env(on)
+		_nvg_fx.visible = on
 	var cam := get_viewport().get_camera_3d()
 	if cam:
 		_compass.set_heading(cam.global_basis)
@@ -656,6 +698,17 @@ func _build_hud() -> void:
 	_hurt_fx.material = sm
 	_hurt_fx.visible = false
 	layer.add_child(_hurt_fx)
+	_nvg_fx = ColorRect.new()
+	_nvg_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_nvg_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var nsh := Shader.new()
+	nsh.code = NVG_SHADER
+	var nm := ShaderMaterial.new()
+	nm.shader = nsh
+	_nvg_fx.material = nm
+	_nvg_fx.visible = false
+	layer.add_child(_nvg_fx)
+	layer.move_child(_nvg_fx, 0)
 	_down_label = Label.new()
 	_down_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_down_label.position = Vector2(-460, 96)

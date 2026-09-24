@@ -88,6 +88,7 @@ var _help_t: float = 0.0
 var _shown_down: bool = false
 var _torch: SpotLight3D
 var _torch_t: float = 0.0
+var _blind_t: float = 0.0
 ## Спасатель: кого, фаза (0 — бежит, 1 — тащит, 2 — поднимает), сколько поднимает.
 var _rescue_target: Marauder = null
 var _rescue_phase: int = 0
@@ -341,6 +342,15 @@ func _perceive(delta: float) -> void:
 			memory_timer -= delta
 			if memory_timer <= 0.0:
 				_start_search()
+	# горящая ракета рядом, смотрит на неё — слепит: целится как только что заметивший
+	_blind_t -= delta
+	if _blind_t <= 0.0:
+		_blind_t = 0.5
+		for f in get_tree().get_nodes_in_group("flares"):
+			var to := (f as Node3D).global_position - global_position
+			if to.length() < Balance.FLARE_BLIND_M and fwd.dot(Vector3(to.x, 0.0, to.z).normalized()) > 0.8:
+				_aim = maxf(_aim, Balance.AI_AIM_COLD)
+				break
 	# прицел садится, пока цель на виду
 	if _seen_now:
 		_aim = move_toward(_aim, 1.0, delta * (Balance.AI_AIM_COLD - 1.0) / Balance.AI_AIM_SETTLE_SEC)

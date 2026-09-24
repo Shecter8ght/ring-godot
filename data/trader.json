@@ -35,7 +35,11 @@
   "mod_mag_pistol",
   "mod_flashlight",
   "mod_laser",
-  "mod_bipod"
+  "mod_bipod",
+  "sunglasses",
+  "chemlight",
+  "flare",
+  "nvg"
  ],
  "_trust_comment": "С какого уровня доверия Михалыч продаёт предмет (нет в списке — с первого).",
  "trust": {
@@ -51,6 +55,7 @@
   "mod_supp_762": 3,
   "mod_bipod": 3,
   "mod_supp_12": 3,
-  "medkit": 2
+  "medkit": 2,
+  "nvg": 2
  }
 }

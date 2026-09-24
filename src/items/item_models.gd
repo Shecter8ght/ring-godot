@@ -25,6 +25,25 @@ static func build(id: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Item_" + id
 	match id:
+		"nvg":
+			# корпус с креплением и два окуляра
+			_cbox(root, Vector3(0, 0, 0), Vector3(0.12, 0.06, 0.07), _m(Color(0.16, 0.17, 0.15), 0.7), 0.01)
+			for sx in [-0.032, 0.032]:
+				_cyl(root, Vector3(sx, 0.0, 0.055), 0.022, 0.05, _m(Color(0.12, 0.12, 0.11), 0.6)).rotation.x = PI * 0.5
+				_cyl(root, Vector3(sx, 0.0, 0.082), 0.018, 0.003, _m(Color(0.2, 0.45, 0.3, 0.9), 0.1, 0.3, true)).rotation.x = PI * 0.5
+			_box(root, Vector3(0, 0.045, -0.02), Vector3(0.05, 0.03, 0.03), _m(Color(0.1, 0.1, 0.1), 0.8))
+		"sunglasses":
+			for sx in [-0.034, 0.034]:
+				_cbox(root, Vector3(sx, 0, 0), Vector3(0.056, 0.036, 0.006), _m(Color(0.08, 0.07, 0.05, 0.85), 0.05, 0.4, true), 0.012)
+			_box(root, Vector3(0, 0.012, 0), Vector3(0.016, 0.005, 0.006), _m(Color(0.7, 0.62, 0.35), 0.3, 0.9))
+			for sx in [-0.064, 0.064]:
+				_box(root, Vector3(sx, 0.01, -0.05), Vector3(0.004, 0.005, 0.1), _m(Color(0.7, 0.62, 0.35), 0.3, 0.9))
+		"flare":
+			_cyl(root, Vector3.ZERO, 0.018, 0.16, _m(Color(0.75, 0.12, 0.08), 0.7)).rotation.z = PI * 0.5
+			_cyl(root, Vector3(0.085, 0, 0), 0.019, 0.02, _m(Color(0.15, 0.15, 0.15), 0.6)).rotation.z = PI * 0.5
+		"chemlight":
+			_cyl(root, Vector3.ZERO, 0.008, 0.15, _m(Color(0.4, 1.0, 0.5, 0.8), 0.2, 0.0, true)).rotation.z = PI * 0.5
+			_cyl(root, Vector3(0.08, 0, 0), 0.009, 0.015, _m(Color(0.2, 0.2, 0.2), 0.6)).rotation.z = PI * 0.5
 		"bandage":
 			_cyl(root, Vector3.ZERO, 0.035, 0.07, _m(Color(0.93, 0.92, 0.88), 0.9)).rotation.z = PI * 0.5
 			_box(root, Vector3(0, -0.034, 0.05), Vector3(0.068, 0.002, 0.1), _m(Color(0.9, 0.89, 0.85), 0.9))

@@ -139,6 +139,12 @@ func view_distance(p: Vector3, own_light: bool) -> float:
 			_:
 				d = float(ind.dark_day if String(c.time) != "night" else ind.dark_night)
 	d *= float(RaidConditions.spec("weather").get("view", 1.0)) if not is_indoor(p) else 1.0
+	# в свете ракеты видно всех, кто рядом с ней
+	for f in get_tree().get_nodes_in_group("flares"):
+		var fl := f as ThrownLight
+		if fl and fl.global_position.distance_to(p) <= fl.radius():
+			d = maxf(d, Balance.FLARE_LIT_VIEW)
+			break
 	if own_light:
 		d = maxf(d, Balance.AI_VIEW_FLASHLIGHT)
 	return d

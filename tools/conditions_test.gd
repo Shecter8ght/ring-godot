@@ -61,6 +61,38 @@ func _ready() -> void:
 	await _load()
 	var night_seen := _sees_at(35.0)
 	_check("35 м на улице: днём видит, ночью нет", day_seen and not night_seen, "днём %s, ночью %s" % [day_seen, night_seen])
+	# снаряжение под темноту: ПНВ в слоте «глаза», ракета освещает место
+	RaidConditions.from_host = {"time": "night", "weather": "clear", "power": "off"}
+	await _load()
+	var me := Raid.current.local_player()
+	var inn := SectorBuilder.polar(-100.0, 36.0)
+	me.global_position = inn + Vector3(0, 0.1, 0)
+	Input.action_press("nvg")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	Input.action_release("nvg")
+	_check("ПНВ без ПНВ в слоте не включить", not me.nvg_on, "")
+	me.inventory.equipment = {"eyes": ItemDb.make("nvg", 1)}
+	await get_tree().physics_frame
+	Input.action_press("nvg")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	Input.action_release("nvg")
+	_check("ПНВ в слоте «глаза» — включается, садится", me.nvg_on and me.nvg_charge < Balance.NVG_BATTERY_SEC, "заряд %.1f" % me.nvg_charge)
+	if shots:
+		CameraRig.first_person_mode = true
+		await get_tree().create_timer(1.5).timeout
+		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/cond_nvg.png"))
+		me.nvg_on = false
+	var dark := RaidAtmosphere.current.view_distance(inn + Vector3(3, 0, 0), false)
+	me._rpc_throw_light("flare", inn + Vector3(3, 0.4, 0), Vector3.ZERO)
+	await get_tree().create_timer(0.5).timeout
+	_check("ракета: место освещено — видно издалека", RaidAtmosphere.current.view_distance(inn + Vector3(3, 0, 0), false) >= Balance.FLARE_LIT_VIEW and dark < 20.0,
+		"%.0f → %.0f м" % [dark, RaidAtmosphere.current.view_distance(inn + Vector3(3, 0, 0), false)])
+	if shots:
+		await get_tree().create_timer(1.0).timeout
+		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/cond_flare.png"))
+		CameraRig.first_person_mode = false
 	print("conditions_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 

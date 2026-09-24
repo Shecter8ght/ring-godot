@@ -5,8 +5,8 @@ extends Node
 ## экземпляр предмета. Меняет только хост (авторитет узла — 1, как у Health); у всех peer
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
-const SLOTS := ["primary", "secondary", "armor", "helmet"]
-const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистолет", "armor": "Броня", "helmet": "Шлем"}
+const SLOTS := ["primary", "secondary", "armor", "helmet", "eyes"]
+const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистолет", "armor": "Броня", "helmet": "Шлем", "eyes": "Глаза"}
 
 var items: Array = []
 var equipment: Dictionary = {}
