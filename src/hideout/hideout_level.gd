@@ -35,6 +35,10 @@ func _ready() -> void:
 	_ui = HideoutUI.new()
 	add_child(_ui)
 	_build_hud()
+	# сюжет в убежище: кто вернулся, что изменилось (по флагам)
+	var qw := QuestWorld.new()
+	qw.name = "QuestWorld"
+	add_child(qw)
 
 
 ## CSG и меши сцены: материал из meta — чтобы сцену можно было собирать и править руками.

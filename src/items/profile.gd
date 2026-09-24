@@ -34,6 +34,12 @@ static var missions_active: Dictionary = {}
 static var missions_done: Array = []
 ## Защищённый карман: что в нём — не теряется при смерти (сетка — по модулю «карман»).
 static var pocket: Array = []
+## Сюжетные квесты (см. Quests, data/quests): id -> {state, stage, obj, clues, count}.
+static var quests: Dictionary = {}
+## Сюжетные флаги мира (anton_rescued, sergey_secret_revealed…) — их читают будущие квесты.
+static var flags: Dictionary = {}
+## Товары торговца, открытые сюжетом (без проверки доверия).
+static var unlocked_stock: Array = []
 static var _loaded: bool = false
 
 
@@ -64,6 +70,9 @@ static func ensure() -> void:
 		for k in missions_active:
 			missions_active[k] = int(missions_active[k])
 		missions_done = d.get("missions_done", [])
+		quests = d.get("quests", {})
+		flags = d.get("flags", {})
+		unlocked_stock = d.get("unlocked_stock", [])
 		_fix_numbers()
 		_fit_grids()
 	else:
@@ -85,6 +94,9 @@ static func _starter() -> void:
 	modules = {}
 	missions_active = {}
 	missions_done = []
+	quests = {}
+	flags = {}
+	unlocked_stock = []
 	for pair in Balance.START_STASH:
 		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), stash_grid())
 
@@ -120,7 +132,8 @@ static func save() -> void:
 		return
 	f.store_string(JSON.stringify({"money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
-		"modules": modules, "missions_active": missions_active, "missions_done": missions_done}, "  "))
+		"modules": modules, "missions_active": missions_active, "missions_done": missions_done,
+		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock}, "  "))
 
 
 ## Тесты: свой файл и чистый старт.

@@ -73,6 +73,9 @@ var _base_scale: Vector3 = Vector3.ONE
 ## Попадание: «повело» (медленнее, хуже целится) и откинуло корпус назад.
 var _stagger_t: float = 0.0
 var _flinch: float = 0.0
+## Охрана сюжетного места: держится в радиусе home_radius от home, не уходит грабить.
+var home: Vector3 = Vector3.INF
+var home_radius: float = 0.0
 ## Пост (где появился) — у держащего позицию патруль вокруг него.
 var _post: Vector3 = Vector3.INF
 ## Раненый: кто идёт спасать (null — никто), кто тащит; основное оружие на время пистолета.
@@ -514,6 +517,11 @@ func _patrol(delta: float) -> void:
 			var a := _rng.randf() * TAU
 			_agent.target_position = _snap(_post + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(0.0, Balance.AI_HOLD_PATROL_R))
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 3.0
+		elif pause_timer <= 0.0 and home_radius > 0.0 and home != Vector3.INF:
+			# охраняет место: ходит вокруг, смотрит
+			var ha := _rng.randf() * TAU
+			_agent.target_position = _snap(home + Vector3(cos(ha), 0.0, sin(ha)) * _rng.randf_range(1.0, home_radius))
+			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 1.5
 		elif pause_timer <= 0.0 and not _holds() and _pick_loot():
 			pass
 		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
@@ -1300,7 +1308,7 @@ func _on_died() -> void:
 	NoiseBus.emit(global_position, Balance.AI_DEATH_NOISE, "death")
 	# задание «убить N» — тому, чья пуля добила
 	if Raid.current:
-		Raid.current.credit_kill(_health.last_attacker)
+		Raid.current.credit_kill(_health.last_attacker, archetype)
 	# хост: тело можно обыскать (содержимое — по таблице «marauder»)
 	if Raid.current:
 		var rng := RandomNumberGenerator.new()

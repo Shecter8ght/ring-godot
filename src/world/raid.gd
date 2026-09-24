@@ -52,6 +52,8 @@ var _summary: Label
 var _summary_bg: ColorRect
 ## Держим F над раненым напарником — сколько секунд (поднять за REVIVE_SEC).
 var _revive_t: float = 0.0
+## Сюжет в этом рейде (места квестов, раненый NPC) — у каждого игрока свой.
+var quest_world: QuestWorld
 var _delta: float = 0.0
 
 
@@ -61,6 +63,10 @@ func _ready() -> void:
 	_drops.name = "Drops"
 	add_child(_drops)
 	_build_hud()
+	quest_world = QuestWorld.new()
+	quest_world.name = "QuestWorld"
+	quest_world.raid = true
+	add_child(quest_world)
 	ui = InventoryUI.new()
 	ui.name = "InventoryUI"
 	add_child(ui)
@@ -667,20 +673,21 @@ func _use_med(peer_id: int, id: String) -> void:
 ## toss — откуда предмет «вываливается» к месту pos (смещение; ноль — появляется на месте).
 ## Хост: мародёр убит — «убить N» засчитывается тому, чья пуля добила (задания — в его профиле,
 ## на его компьютере), ему же метка убийства.
-func credit_kill(peer_id: int) -> void:
+func credit_kill(peer_id: int, arch: String = "") -> void:
 	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
-		_kill_credited()
+		_kill_credited(arch)
 	elif peer_id in multiplayer.get_peers():
-		_rpc_kill_credit.rpc_id(peer_id)
+		_rpc_kill_credit.rpc_id(peer_id, arch)
 
 
 @rpc("authority", "call_remote", "reliable")
-func _rpc_kill_credit() -> void:
-	_kill_credited()
+func _rpc_kill_credit(arch: String) -> void:
+	_kill_credited(arch)
 
 
-func _kill_credited() -> void:
+func _kill_credited(arch: String = "") -> void:
 	kill_credited.emit()
+	Quests.event("kill", {"arch": arch})
 	if Profile.pending_raid:
 		Missions.on_kill()
 	var me := local_player()
@@ -722,6 +729,7 @@ func _process(delta: float) -> void:
 	_update_summary(me)
 	_save_profile(me)
 	_save_death(me)
+	_quest_hooks(me)
 	if Profile.pending_raid:
 		# рейд из убежища: закончил (ушёл или погиб) — Enter возвращает в убежище
 		if me != null and (not me.is_alive() or is_extracted(me.peer_id)) and Input.is_action_just_pressed("ui_accept"):
@@ -892,6 +900,36 @@ func _save_death(me: Player) -> void:
 	_death_saved = true
 	Profile.set_pocket(me.inventory.pocket)
 	Missions.on_death()
+
+
+## Сюжет: эвакуировался (с тем, что вынес) или погиб — сообщить квестам один раз.
+func _quest_hooks(me: Player) -> void:
+	if quest_world == null or me == null:
+		return
+	if is_extracted(me.peer_id):
+		quest_world.on_local_extracted()
+	elif not me.is_alive():
+		quest_world.on_local_lost()
+
+
+## Охрана сюжетного места: ставит хост (клиент просит).
+func request_quest_guards(pos: Vector3, n: int, radius: float) -> void:
+	if _is_host():
+		_spawn_quest_guards(pos, n, radius)
+	else:
+		_rpc_quest_guards.rpc_id(1, pos, n, radius)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_quest_guards(pos: Vector3, n: int, radius: float) -> void:
+	if multiplayer.is_server():
+		_spawn_quest_guards(pos, n, radius)
+
+
+func _spawn_quest_guards(pos: Vector3, n: int, radius: float) -> void:
+	var lvl := get_parent()
+	if lvl and lvl.has_method("spawn_guards"):
+		lvl.call("spawn_guards", pos, n, radius)
 
 
 ## В убежище: из сети выходим, рейд забыт.

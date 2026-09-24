@@ -1,0 +1,74 @@
+# Сюжетные квесты
+
+Система — `src/quests/`, данные — `data/quests/`. Первый квест — «Не вернулся»
+(`data/quests/missing_anton.json`). Торговые задания Михалыча (`Missions`, `data/missions.json`)
+— отдельная, более простая система; сюжет её не заменяет.
+
+## Устройство
+
+| Слой | Где | Что |
+|---|---|---|
+| Данные | `data/quests/<id>.json`, список — `index.json` | этапы, цели, диалоги, места в мире, награда, флаги |
+| Состояние | `Profile.quests`, `Profile.flags`, `Profile.unlocked_stock` | что сделано; сохраняется в профиль (user://profile.json) |
+| Логика | `quest_manager.gd` (autoload `Quests`) | состояния, события → цели, рейд (копия до эвакуации), награды, отладка |
+| Мир | `quest_world.gd` (создают Raid и HideoutLevel), `quest_site.gd`, `quest_props.gd`, `quest_anchor.gd` | места квестов на уровне, заглушки сцен, осмотр/обыск/зона, раненый NPC на плече, охрана этапа |
+| Интерфейс | `quest_hud.gd` (внутри `Quests`) | цель справа сверху, сообщения, реплики, разговор, журнал (J), консоль разработчика (`) |
+
+### Состояния
+- Квест: `LOCKED` (не выполнено `requires`) → `AVAILABLE` → `ACTIVE` → `COMPLETED` / `FAILED`.
+- Текущая цель (`Quests.status`): `OBJECTIVE` → `WAITING_FOR_EXTRACTION` (найдено — уйти живым)
+  → `RETURN_TO_NPC` (поговорить).
+
+### Рейд
+Всё, что сделано в рейде, — в копии состояния; в профиль — только при эвакуации. Погиб / ушёл
+через меню — копия выброшена, этап повторяется (улика снова лежит, раненый снова ждёт).
+
+### Цели (`objectives[].type`) и события мира
+| Тип | Засчитывает событие |
+|---|---|
+| `talk` (npc, dialogue) | разговор в убежище дочитан |
+| `interact`, `find_clue` (site) | F у места (find_clue ещё кладёт улику в журнал: `clue`) |
+| `search_location` (site) | обыск: `search_s` секунд рядом |
+| `enter_zone` (site) | вошёл в радиус `zone` |
+| `pickup_item` (item) | предмет в рюкзаке |
+| `reach_extraction`, `survive` | эвакуация |
+| `extract_with_item` (item) | эвакуация с предметом в рюкзаке |
+| `extract_with_npc` (npc) | эвакуация, неся NPC (или он в 5 м) |
+| `kill_targets` (n, arch) | добил мародёров (тип — по желанию) |
+
+Поля цели: `text`, `hint`, `clue {title, text}`, `toast`, `set_flags {…}`.
+Поля этапа: `title`, `objectives`, `guards {site, n, radius}` — мародёры держатся у места.
+Поля квеста: `title`, `giver` (кто даёт: `trader`), `summary`, `offer`, `requires {trust_level,
+flags, quests}`, `reward {money, trust, items, unlock_stock}`, `flags_on_complete`, `dialogues`,
+`sites`.
+
+### Места (`sites`)
+- `level` — сцена (`f1_ring`, `hideout`).
+- `anchor` — где: `polar [угол, радиус]` (кольцо), `node + local` (относительно узла уровня —
+  например `Buildings/GarageA`), `near + offset` (рядом с другим местом), `pos`. **Узел
+  `QuestAnchor` с тем же `site_id` в сцене уровня главнее** — поставил мышкой, место переехало.
+- `props` — заглушки: `backpack, blood, drops, casings, butts, crate, chair, note, papers, tarp,
+  ammo_taped, cabinet, bundle, red_gate, cot, item (id)`.
+- `prompt` + `lines` — осмотр; `search_s`; `zone`; `npc` (раненый: несут на плече);
+  `when_flags` — место есть всегда, когда флаги совпали (Антон в убежище).
+- На уровне стоят все места текущего этапа (сцена рассказывает историю), осмотреть можно только
+  место текущей цели.
+
+## Новый квест
+1. `data/quests/<id>.json` по образцу `missing_anton.json`, строка в `index.json`.
+2. Места — `anchor` в данных или `QuestAnchor` в сцене.
+3. Проверка: консоль разработчика (`), `tools/quest_test` как пример прогона.
+
+Код трогать нужно только для нового **типа** цели или события.
+
+## Отладка
+Консоль (`) — только при запуске из проекта (в `RING.zip` её нет):
+`quest start missing_anton`, `quest stage missing_anton 3`, `quest completeObjective`,
+`quest reset missing_anton`, `quest list`. Команды пишут сразу в профиль.
+
+## Что временно
+- Заглушки сцен — простые меши (замена: модели через `ModelProp` / сцены в `props`).
+- Раненый NPC — фигура из коробок; «на плече» — та же фигура; анимаций нет.
+- NPC и места — личные: в коопе напарник их не видит (квест — у каждого свой).
+- Разговоры — текстом внизу экрана, без выбора реплик.
+- Антон в убежище — лежит на койке, говорит две фразы.

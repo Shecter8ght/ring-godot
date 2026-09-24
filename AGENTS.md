@@ -49,6 +49,8 @@ tools/godot.cmd res://tools/ai_squad_test.tscn               # тактика о
 tools/godot.cmd --headless res://tools/steps_test.tscn      # шаги: поверхность под ногами, темп от скорости, глушение стеной
 tools/godot.cmd --headless res://tools/settings_test.tscn   # настройки: шины громкости, качество графики, мышь
 tools/godot.cmd --headless res://tools/downed_test.tscn    # тяжёлое ранение: лечь, добить, голова/граната, поднять, тащить, спасение мародёров
+tools/godot.cmd --headless res://tools/quest_test.tscn     # сюжет «Не вернулся» целиком: этапы, смерть, эвакуация, сохранение, Антон, второй квест из данных
+tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона
 python tools/import_model.py <id>                              # модель из _asset_src/<id> (+license.txt) в assets/models/props, CREDITS
 tools/godot.cmd res://tools/ui_shots.tscn                    # снимки: карта (M), меню (Esc), управление, рюкзак и лут
 tools/godot.cmd --disable-vsync res://tools/perf_test.tscn   # FPS / вызовы отрисовки в изометрии и в прицеле по точкам
@@ -73,6 +75,8 @@ src/core/      balance.gd (ВЕСЬ баланс — только здесь, au
 src/player/    персонаж игрока (стойки, прицел, движение), камера
 src/ai/        мародёры: marauder.gd (патруль/расследование/бой), perception.gd (зрение — единственный
                способ AI узнать позицию игрока)
+src/quests/    сюжетные квесты (autoload Quests, docs/design/quests.md): данные data/quests, состояние в Profile,
+               QuestWorld/QuestSite — места в мире, QuestAnchor — место руками в сцене
 src/combat/    weapon_models.gd (процедурное оружие; в руках модель развёрнута на 180°, поэтому
                **-X модели — правая сторона стрелка**), weapon_mods.gd (обвесы: точки крепления MOUNTS
                сняты с геометрии моделей — новый обвес ставить от них и проверять mods_gallery),

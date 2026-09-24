@@ -34,6 +34,9 @@ var _marauders_root: Node3D
 var _player_spawner: MultiplayerSpawner
 var _marauder_spawner: MultiplayerSpawner
 var _marauders_spawned: int = 0
+## Охрана сюжетного места, заказанная до готовности навмеша: [[точка, сколько, радиус], …].
+var _pending_guards: Array = []
+var _guard_count: int = 0
 var _ring: Dictionary = {}
 var _raid: Raid
 ## Перекрытия, спрятанные над игроком (паркинг, навесы): остаются только тенью.
@@ -161,7 +164,42 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 	m.position = data.pos
 	m.weapon = String(data.get("weapon", ""))
 	m.archetype = String(data.get("arch", ""))
+	if data.has("home"):
+		m.home = data.home
+		m.home_radius = float(data.get("home_r", 0.0))
 	return m
+
+
+## Хост: отряд, который держится у точки (сюжетное место — «здесь их много»): n бойцов, не
+## уходят грабить дальше radius. До готовности навмеша — в очередь.
+func spawn_guards(at: Vector3, n: int, radius: float) -> void:
+	if _marauders_spawned == 0:
+		_pending_guards.append([at, n, radius])
+		return
+	var map := get_world_3d().navigation_map
+	var squad := Squad.new()
+	for k in range(n):
+		var a := TAU * float(k) / float(maxi(n, 1)) + _rng.randf() * 0.5
+		var p := NavigationServer3D.map_get_closest_point(map, at + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(2.0, radius * 0.6))
+		var arch := "heavy" if k == 0 else ("gunner" if k % 2 == 1 else "scout")
+		var wpn := Marauder.weapon_for(arch, _rng)
+		var nm := "Guard%d" % _guard_count
+		_guard_count += 1
+		var m: Marauder
+		if _marauder_spawner:
+			m = _marauder_spawner.spawn({"name": nm, "pos": p + Vector3(0, 0.1, 0), "weapon": wpn, "arch": arch, "home": at, "home_r": radius}) as Marauder
+		else:
+			m = MARAUDER_SCENE.instantiate() as Marauder
+			m.name = nm
+			m.weapon = wpn
+			m.archetype = arch
+			m.home = at
+			m.home_radius = radius
+			_marauders_root.add_child(m)
+			m.global_position = p + Vector3(0, 0.1, 0)
+		m.patrol_point_provider = _random_room_point
+		squad.add(m)
+	print("sector: охрана у %s — %d" % [at, n])
 
 
 ## Хост: по игроку на каждый уже подключённый peer (себя и остальных из лобби).
@@ -304,6 +342,9 @@ func _spawn_marauders() -> void:
 			squad.add(m)
 			placed += 1
 	_marauders_spawned = placed
+	for g in _pending_guards:
+		spawn_guards(g[0], int(g[1]), float(g[2]))
+	_pending_guards.clear()
 	print("sector: мародёров %d в %d отрядах, попыток %d" % [placed, squads, tries])
 
 

@@ -238,7 +238,8 @@ func _build_trader() -> void:
 		var e := ItemDb.make(sid, n)
 		var row := _row(e, price)
 		var tl := int(need_trust.get(sid, 1))
-		if Profile.trust_level() < tl:
+		# открытое сюжетом — без проверки доверия
+		if Profile.trust_level() < tl and not sid in Profile.unlocked_stock:
 			# сильное Михалыч продаёт только тем, кому доверяет
 			row.add_child(_text("доверие %d" % tl, Color(0.8, 0.5, 0.4)))
 		else:
@@ -260,6 +261,18 @@ func _build_trader() -> void:
 ## Задания Михалыча: взятые (прогресс, «Сдать»), предложенные («Взять» — пока есть свободные слоты).
 func _missions_column() -> void:
 	var col := _column("Задания   %d / %d" % [Profile.missions_active.size(), Missions.slots()], 1.1)
+	# сюжет: Сергею есть что сказать — разговор (взять квест или отчитаться)
+	for opt in Quests.talk_options("trader"):
+		var o: Dictionary = opt
+		var head := HBoxContainer.new()
+		var t := _text(String(o.label), Color(1.0, 0.72, 0.45))
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		head.add_child(t)
+		head.add_child(_button("Поговорить", func() -> void: _talk(String(o.quest), String(o.dialogue))))
+		col.add_child(head)
+	if not Quests.talk_options("trader").is_empty():
+		col.add_child(HSeparator.new())
 	for id in Profile.missions_active.keys():
 		var m := Missions.find(String(id))
 		var mid := String(id)
@@ -291,6 +304,12 @@ func _missions_column() -> void:
 		col.add_child(d)
 	if free <= 0:
 		col.add_child(_text("Больше заданий — с рацией (модули убежища).", Color(0.55, 0.57, 0.55)))
+
+
+## Разговор с Сергеем по сюжету: окно торговли закрывается, реплики — внизу экрана.
+func _talk(qid: String, did: String) -> void:
+	close_ui()
+	Quests.hud.start_dialogue(Quests.dialogue(qid, did), func() -> void: Quests.finish_talk(qid, "trader", did))
 
 
 # ---------------------------------------------------------------- модули убежища

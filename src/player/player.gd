@@ -65,6 +65,8 @@ var _last_hit_from: Vector3 = Vector3.ZERO
 var _last_damage: float = 0.0
 ## Лёжа держит X — сколько секунд (сдаться).
 var _give_up_t: float = 0.0
+## Несёт раненого NPC (сюжет, QuestWorld): медленно, только пистолет.
+var carrying: bool = false
 
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
@@ -164,6 +166,11 @@ func is_downed() -> bool:
 ## Тащит раненого (стреляет только из пистолета, идёт медленно).
 func is_dragging() -> bool:
 	return Raid.current != null and Raid.current.drag_target_of(peer_id) != 0
+
+
+## Тащит напарника или несёт раненого NPC — руки заняты.
+func is_burdened() -> bool:
+	return carrying or is_dragging()
 
 
 func is_local() -> bool:
@@ -448,7 +455,7 @@ func grenade_count() -> int:
 ## Что можно держать сейчас: раненым и таща раненого — только пистолет.
 func allowed_weapons() -> Array:
 	var keys := weapon_keys()
-	if is_downed() or is_dragging():
+	if is_downed() or is_burdened():
 		return [keys[0]] if String(keys[0]) != "" else []
 	return keys.filter(func(k: Variant) -> bool: return String(k) != "")
 
@@ -479,7 +486,7 @@ func _loadout_tick() -> void:
 				Raid.current.request_consume(String(ammo_item), int(used[ammo_item]))
 		weapon_id = ""
 	var keys := weapon_keys()
-	if is_downed() or is_dragging():
+	if is_downed() or is_burdened():
 		# раненым / таща раненого — только пистолет (выбирает _combat)
 		return
 	if not weapon_id in keys or weapon_id == "":
@@ -647,6 +654,8 @@ func _stance_speed() -> float:
 		s *= Balance.LEAN_MOVE_SCALE
 	if is_dragging():
 		s = minf(s, Balance.DRAG_SPEED)
+	if carrying:
+		s = minf(s, Balance.CARRY_SPEED)
 	return s
 
 
