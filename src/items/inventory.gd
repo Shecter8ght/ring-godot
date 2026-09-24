@@ -247,10 +247,12 @@ func ammo_for(weapon_id: String) -> String:
 
 
 ## Броня и шлем снимают часть урона, пока целы; износ — по снятому (хост, из Health).
-func absorb(amount: float) -> float:
+func absorb(amount: float, zone: String = "") -> float:
 	var eq := equipment.duplicate(true)
 	var taken := 0.0
-	for slot in ["armor", "helmet"]:
+	# в голову — только шлем, в корпус — только броня; взрыв и неизвестно куда — оба
+	var slots: Array = ["helmet"] if zone == "head" else (["armor"] if zone == "body" else ["armor", "helmet"])
+	for slot in slots:
 		var e: Dictionary = eq.get(slot, {})
 		if e.is_empty() or float(e.get("dur", 0.0)) <= 0.0:
 			continue

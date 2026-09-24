@@ -30,6 +30,8 @@ var loot_value: Dictionary = {}
 var channel: Dictionary = {}
 ## Погибшие: peer_id -> true (хост — по сигналу Health).
 var dead: Dictionary = {}
+## Кто кого тащит: peer тащащего -> peer раненого (хост проверяет, видят все).
+var drags: Dictionary = {}
 var over: bool = false
 
 var ui: InventoryUI
@@ -48,6 +50,9 @@ var _toast: Label
 var _toast_t: float = 0.0
 var _summary: Label
 var _summary_bg: ColorRect
+## Держим F над раненым напарником — сколько секунд (поднять за REVIVE_SEC).
+var _revive_t: float = 0.0
+var _delta: float = 0.0
 
 
 func _ready() -> void:
@@ -80,7 +85,7 @@ func _setup_sync() -> void:
 	sync.name = "Sync"
 	sync.replication_interval = 0.1
 	var config := SceneReplicationConfig.new()
-	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel"]:
+	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -158,10 +163,12 @@ func extraction_block_reason(ext: ExtractionPoint) -> String:
 func _physics_process(delta: float) -> void:
 	if not _is_host() or over:
 		return
+	_check_drags()
 	var ch := {}
 	for node in get_tree().get_nodes_in_group("players"):
 		var pl := node as Player
-		if pl == null or not pl.is_alive() or is_extracted(pl.peer_id):
+		# раненый сам не эвакуируется — только если его дотащили
+		if pl == null or not pl.is_alive() or pl.is_downed() or is_extracted(pl.peer_id):
 			continue
 		for e in get_tree().get_nodes_in_group("extractions"):
 			var ext := e as ExtractionPoint
@@ -182,11 +189,146 @@ func _physics_process(delta: float) -> void:
 func _extract(pl: Player, ext: ExtractionPoint) -> void:
 	var e := extracted.duplicate()
 	e[pl.peer_id] = ext.display_name
-	extracted = e
 	var v := loot_value.duplicate()
 	v[pl.peer_id] = pl.inventory.value()
+	# дотащил раненого до точки — уходят оба
+	var carried := player_of(drag_target_of(pl.peer_id))
+	if carried and carried.is_downed():
+		e[carried.peer_id] = ext.display_name + " (вынесли раненым)"
+		v[carried.peer_id] = carried.inventory.value()
+	extracted = e
 	loot_value = v
+	var d := drags.duplicate()
+	d.erase(pl.peer_id)
+	drags = d
 	_check_over()
+
+
+# ---------------------------------------------------------------- раненые: поднять, тащить, сдаться
+
+func drag_target_of(peer_id: int) -> int:
+	return int(drags.get(peer_id, 0))
+
+
+## Кто тащит раненого peer_id (null — никто).
+func dragger_of(peer_id: int) -> Player:
+	for k in drags:
+		if int(drags[k]) == peer_id:
+			return player_of(int(k))
+	return null
+
+
+## Раненый напарник рядом с me (для подсказки «поднять / тащить»).
+func downed_mate_near(me: Player) -> Player:
+	var best: Player = null
+	var best_d := Balance.REVIVE_RADIUS
+	for n in get_tree().get_nodes_in_group("players"):
+		var pl := n as Player
+		if pl == null or pl == me or not pl.is_downed():
+			continue
+		var d := pl.global_position.distance_to(me.global_position)
+		if d <= best_d:
+			best = pl
+			best_d = d
+	return best
+
+
+func request_revive(target_peer: int) -> void:
+	if _is_host():
+		_revive(multiplayer.get_unique_id(), target_peer)
+	else:
+		_rpc_revive.rpc_id(1, target_peer)
+
+
+func request_drag(target_peer: int, on: bool) -> void:
+	if _is_host():
+		_drag(multiplayer.get_unique_id(), target_peer, on)
+	else:
+		_rpc_drag.rpc_id(1, target_peer, on)
+
+
+func request_give_up() -> void:
+	if _is_host():
+		_give_up(multiplayer.get_unique_id())
+	else:
+		_rpc_give_up.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_revive(target_peer: int) -> void:
+	if multiplayer.is_server():
+		_revive(multiplayer.get_remote_sender_id(), target_peer)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_drag(target_peer: int, on: bool) -> void:
+	if multiplayer.is_server():
+		_drag(multiplayer.get_remote_sender_id(), target_peer, on)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_give_up() -> void:
+	if multiplayer.is_server():
+		_give_up(multiplayer.get_remote_sender_id())
+
+
+## Хост: rescuer поднимает раненого target — рядом, сам не ранен, аптечка из его рюкзака.
+func _revive(rescuer_peer: int, target_peer: int) -> void:
+	var r := player_of(rescuer_peer)
+	var t := player_of(target_peer)
+	if r == null or t == null or not r.is_alive() or r.is_downed() or not t.is_downed():
+		return
+	if r.global_position.distance_to(t.global_position) > Balance.REVIVE_RADIUS + 0.8:
+		return
+	if r.inventory.remove("medkit", 1) == 0:
+		return
+	t.health.revive(Balance.REVIVE_HP)
+	_clear_drag_of(target_peer)
+
+
+func _drag(dragger_peer: int, target_peer: int, on: bool) -> void:
+	var d := drags.duplicate()
+	if not on:
+		d.erase(dragger_peer)
+		drags = d
+		return
+	var r := player_of(dragger_peer)
+	var t := player_of(target_peer)
+	if r == null or t == null or not r.is_alive() or r.is_downed() or not t.is_downed() or dragger_of(target_peer) != null:
+		return
+	if r.global_position.distance_to(t.global_position) > Balance.REVIVE_RADIUS + 0.8:
+		return
+	d[dragger_peer] = target_peer
+	drags = d
+
+
+func _give_up(peer_id: int) -> void:
+	var pl := player_of(peer_id)
+	if pl and pl.is_downed():
+		pl.health.give_up()
+
+
+func _clear_drag_of(target_peer: int) -> void:
+	var d := drags.duplicate()
+	for k in drags:
+		if int(drags[k]) == target_peer:
+			d.erase(k)
+	drags = d
+
+
+## Хост: тащить можно, пока оба на месте — тащащий цел, раненый лежит, не разошлись.
+func _check_drags() -> void:
+	if drags.is_empty():
+		return
+	var d := drags.duplicate()
+	for k in drags:
+		var r := player_of(int(k))
+		var t := player_of(int(drags[k]))
+		if r == null or t == null or not r.is_alive() or r.is_downed() or not t.is_downed() \
+				or is_extracted(r.peer_id) or r.global_position.distance_to(t.global_position) > 3.0:
+			d.erase(k)
+	if d.size() != drags.size():
+		drags = d
 
 
 func _check_over() -> void:
@@ -490,10 +632,28 @@ func _drop(peer_id: int, id: String, n: int) -> void:
 
 
 ## Лечение: предмет уходит сразу, здоровье прибавляется через use.time (если игрок ещё жив).
+## Лёжа раненым: аптечка — подняться (REVIVE_SELF_SEC), бинт — дольше не истечь кровью.
 func _use_med(peer_id: int, id: String) -> void:
 	var pl := player_of(peer_id)
 	var use: Dictionary = ItemDb.item(id).get("use", {})
-	if pl == null or use.is_empty() or not pl.is_alive() or pl.health.hp >= pl.health.max_hp:
+	if pl == null or use.is_empty() or not pl.is_alive():
+		return
+	if pl.is_downed():
+		if id != "medkit" and id != "bandage":
+			return
+		if pl.inventory.remove(id, 1) == 0:
+			return
+		var wait := Balance.REVIVE_SELF_SEC if id == "medkit" else float(use.time)
+		get_tree().create_timer(wait).timeout.connect(func() -> void:
+			if not is_instance_valid(pl) or not pl.is_downed():
+				return
+			if id == "medkit":
+				pl.health.revive(Balance.REVIVE_HP)
+				_clear_drag_of(pl.peer_id)
+			else:
+				pl.health.add_bleed(Balance.DOWN_BANDAGE_SEC))
+		return
+	if pl.health.hp >= pl.health.max_hp:
 		return
 	if pl.inventory.remove(id, 1) == 0:
 		return
@@ -553,6 +713,7 @@ func _make_drop(data: Dictionary) -> Node:
 # ---------------------------------------------------------------- HUD (у каждого peer)
 
 func _process(delta: float) -> void:
+	_delta = delta
 	var me := local_player()
 	_update_channel_hud(me)
 	_update_prompt(me)
@@ -605,10 +766,47 @@ func _update_channel_hud(me: Player) -> void:
 	_progress_label.text = "ЭВАКУАЦИЯ · %s — %.1f с" % [here.display_name, maxf(0.0, here.channel_s - t)]
 
 
-## Подсказка «F — …» у ближайшего предмета, с которым можно что-то сделать.
+## Подсказка «F — …» у ближайшего предмета, с которым можно что-то сделать. Рядом раненый
+## напарник — «поднять» (держать F, аптечка) и «тащить» (X).
 func _update_prompt(me: Player) -> void:
 	_prompt.visible = false
 	if me == null or not me.is_alive() or is_extracted(me.peer_id) or ui.is_looting():
+		_revive_t = 0.0
+		return
+	if me.is_downed():
+		_revive_t = 0.0
+		return
+	var mate := downed_mate_near(me)
+	if mate:
+		_prompt.visible = true
+		var dragging := drag_target_of(me.peer_id) == mate.peer_id
+		_prompt.text = "F (держать) — поднять (аптечка)   ·   X — %s" % ("отпустить" if dragging else "тащить")
+		if Input.is_action_just_pressed("drag") and not PauseMenu.shown:
+			request_drag(mate.peer_id, not dragging)
+		if Input.is_action_pressed("interact") and not PauseMenu.shown:
+			if not me.inventory.has("medkit"):
+				if Input.is_action_just_pressed("interact"):
+					notify("Нужна аптечка")
+			else:
+				_revive_t += _delta
+				_progress.visible = true
+				_progress_label.visible = true
+				_progress.max_value = Balance.REVIVE_SEC
+				_progress.value = _revive_t
+				_progress_label.text = "Поднимаю: %s" % String(Net.player_names.get(mate.peer_id, participants.get(mate.peer_id, "напарник")))
+				if _revive_t >= Balance.REVIVE_SEC:
+					_revive_t = 0.0
+					request_revive(mate.peer_id)
+		else:
+			_revive_t = 0.0
+		return
+	_revive_t = 0.0
+	if drag_target_of(me.peer_id) != 0:
+		# раненый отстал (проверит хост) — отпустить можно и так
+		_prompt.visible = true
+		_prompt.text = "X — отпустить"
+		if Input.is_action_just_pressed("drag"):
+			request_drag(drag_target_of(me.peer_id), false)
 		return
 	var best: Interactable = null
 	var best_d := INF

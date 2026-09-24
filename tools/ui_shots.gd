@@ -79,6 +79,16 @@ func _ready() -> void:
 	await _frames(30)
 	_save("ui_quality_low")
 	Settings.set_quality("high")
+	# тяжёлое ранение: экран и меню «чем помочь себе»
+	me.health.hp = 100.0
+	me.health.take_damage(150.0, me.global_position + Vector3(0, 1, 5), "body")
+	me.inventory.add("medkit", 1)
+	me.inventory.add("bandage", 2)
+	await _frames(60)
+	_save("ui_downed")
+	_press("use_med")
+	await _frames(6)
+	_save("ui_downed_meds")
 	get_tree().quit(0)
 
 

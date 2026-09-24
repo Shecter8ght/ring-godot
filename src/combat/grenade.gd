@@ -79,7 +79,9 @@ func _explode() -> void:
 				(body as Target).on_hit(point, (point - pos).normalized(), dmg)
 			var h := body.get_node_or_null("Health") as Health
 			if h:
-				h.apply_or_request_damage(dmg, pos)
+				# подорвался на ней — насмерть; дальше — ранит (осколки, броня помогает)
+				var feet := pos.distance_to(body.global_position + Vector3.UP * 0.5)
+				h.apply_or_request_damage(dmg, pos, "blast_close" if feet < Balance.GRENADE_LETHAL_M else "blast")
 	for rd in get_tree().get_nodes_in_group("ragdolls"):
 		var r := rd as Ragdoll
 		var c := r.chest()

@@ -10,11 +10,14 @@ extends CharacterBody3D
 ## известной точке), ADVANCE — перебежками от укрытия к укрытию к цели, которую не видно
 ## (попали издалека — угадал направление, сел за укрытие и двигается к стрелку). Не стреляет, если
 ## между стволом и целью стена. Не толпится: точки, куда уже идут другие, обходит; поиск —
-## прочёсывание дугой от ближних точек к дальним. Оружие (AI_WEAPONS): пистолет, автомат очередями, дробовик; магазин и
+## прочёсывание дугой от ближних точек к дальним. Тяжело ранен (DOWNED) — лежит, стреляет из
+## пистолета, зовёт; ближайший товарищ, который слышал (AI_RESCUE_RADIUS), идёт спасать (RESCUE):
+## лежит на виду — тащит за укрытие, потом поднимает (аптечка, AI_REVIVE_SEC). Лежащего игрока
+## добивает, только если никто другой не стреляет (AI_FINISH_QUIET_SEC). Оружие (AI_WEAPONS): пистолет, автомат очередями, дробовик; магазин и
 ## перезарядка — в укрытии, если оно есть. Точность садится за AI_AIM_SETTLE_SEC после того, как
 ## заметил цель; бегущую цель и на бегу — хуже.
 
-enum State { PATROL, INVESTIGATE, COMBAT, SEARCH, RETREAT, DEAD }
+enum State { PATROL, INVESTIGATE, COMBAT, SEARCH, RETREAT, DEAD, DOWNED, RESCUE }
 enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE }
 
 const EYE_HEIGHT := 1.6
@@ -71,6 +74,21 @@ var _stagger_t: float = 0.0
 var _flinch: float = 0.0
 ## Пост (где появился) — у держащего позицию патруль вокруг него.
 var _post: Vector3 = Vector3.INF
+## Раненый: кто идёт спасать (null — никто), кто тащит; основное оружие на время пистолета.
+var rescuer: Marauder = null
+var dragged_by: Marauder = null
+var _main_spec: Dictionary = {}
+var _main_mag: int = 0
+var _main_gun: Node3D
+var _help_t: float = 0.0
+var _shown_down: bool = false
+## Спасатель: кого, фаза (0 — бежит, 1 — тащит, 2 — поднимает), сколько поднимает.
+var _rescue_target: Marauder = null
+var _rescue_phase: int = 0
+var _rescue_t: float = 0.0
+## Слышал выстрел игрока: сколько секунд назад и где (добивать лежащего — только в тишине).
+var _shot_heard_t: float = 99.0
+var _shot_heard_pos: Vector3 = Vector3.INF
 var _capsule: CapsuleShape3D
 
 @onready var _agent: NavigationAgent3D = $NavigationAgent3D
@@ -94,7 +112,11 @@ func _ready() -> void:
 	# броня: проходит только доля урона
 	var armor := float(_arch.armor)
 	if armor < 1.0:
-		_health.damage_filter = func(a: float) -> float: return a * armor
+		_health.damage_filter = func(a: float, _zone: String) -> float: return a * armor
+	# тяжело ранен вместо смерти; в шлеме (тяжёлый) голова держит
+	_health.can_down = true
+	_health.head_protected = func() -> bool: return bool(_arch.get("helmet", false))
+	_health.downed_changed.connect(_on_downed_changed)
 	# видно, кто перед тобой: цвет куртки и фигура (тяжёлый шире, разведчик уже)
 	_base_scale = _arch.scale
 	_body.scale = _base_scale
@@ -118,6 +140,7 @@ func _ready() -> void:
 	var gun := WeaponModels.build(String(_spec.model))
 	gun.position = Vector3(-0.17, 1.24, 0.3 if weapon == "pistol" else 0.22) / _base_scale
 	_body.add_child(gun)
+	_main_gun = gun
 	pause_timer = _rng.randf_range(0.5, 2.0)
 	# шаги слышны у всех peer (AI считает хост, позицию клиенты получают синхронизатором)
 	var steps := Footsteps.new()
@@ -149,6 +172,14 @@ static func pick_archetype(rng: RandomNumberGenerator) -> String:
 static func weapon_for(arch: String, rng: RandomNumberGenerator) -> String:
 	var list: Array = Balance.AI_ARCHETYPES.get(arch, Balance.AI_ARCHETYPES.gunner).weapons
 	return String(list[rng.randi_range(0, list.size() - 1)])
+
+
+## Куда попала пуля: голова — выше HEAD_ZONE (присел — ниже), лежащий — всё корпус.
+func hit_zone(point: Vector3) -> String:
+	if _health.downed:
+		return "body"
+	var hz := float(Balance.HEAD_ZONE["crouch" if crouched else "stand"]) * _base_scale.y
+	return "head" if point.y - global_position.y >= hz else "body"
 
 
 ## Держит позицию (снайпер): не сближается, ищет глазами.
@@ -207,10 +238,15 @@ func _physics_process(delta: float) -> void:
 	if _post == Vector3.INF:
 		_post = global_position
 	_suppress_t = maxf(0.0, _suppress_t - delta)
+	_shot_heard_t += delta
 	_repath_t -= delta
 	_perceive(delta)
 	_tick_weapon(delta)
 	match state:
+		State.DOWNED:
+			_downed(delta)
+		State.RESCUE:
+			_rescue(delta)
 		State.PATROL:
 			_patrol(delta)
 		State.INVESTIGATE:
@@ -232,6 +268,7 @@ func _eye() -> Vector3:
 
 func _perceive(delta: float) -> void:
 	var seen: Player = null
+	var seen_down: Player = null
 	var fwd := Vector3(sin(_facing), 0.0, cos(_facing))
 	var exclude: Array[RID] = [get_rid()]
 	for p in get_tree().get_nodes_in_group("players"):
@@ -239,8 +276,15 @@ func _perceive(delta: float) -> void:
 		if player == null or not player.is_alive():
 			continue
 		if Perception.can_see(get_world_3d(), _eye(), fwd, player, exclude, float(_arch.get("view", 1.0))):
-			seen = player
-			break
+			if player.is_downed():
+				if seen_down == null:
+					seen_down = player
+			else:
+				seen = player
+				break
+	# лежащий — не угроза, пока стреляют другие; стреляет сам или тихо — добить
+	if seen == null and seen_down != null and _may_finish(seen_down):
+		seen = seen_down
 	var was_seen := _seen_now
 	_seen_now = false
 	if seen:
@@ -256,7 +300,7 @@ func _perceive(delta: float) -> void:
 			if not was_seen:
 				# только что поймал в поле зрения — первые выстрелы мимо
 				_aim = Balance.AI_AIM_COLD
-			if state != State.COMBAT and state != State.RETREAT:
+			if state != State.COMBAT and state != State.RETREAT and state != State.DOWNED and state != State.RESCUE:
 				_enter_combat(Tactic.ENGAGE)
 				say("Контакт!")
 				_shout()
@@ -275,6 +319,11 @@ func _perceive(delta: float) -> void:
 		_aim = move_toward(_aim, 1.0, delta * (Balance.AI_AIM_COLD - 1.0) / Balance.AI_AIM_SETTLE_SEC)
 
 
+## Добить лежащего игрока можно, если давно никто не стрелял — или стреляет он сам.
+func _may_finish(p: Player) -> bool:
+	return _shot_heard_t >= Balance.AI_FINISH_QUIET_SEC or _shot_heard_pos.distance_to(p.global_position) < 2.5
+
+
 ## Окрик: товарищи в радиусе узнают, где цель (сами её могут и не видеть).
 func _shout() -> void:
 	_callout_t = Balance.AI_CALLOUT_EVERY
@@ -282,7 +331,7 @@ func _shout() -> void:
 
 
 func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node) -> void:
-	if speaker == self or state == State.DEAD or state == State.RETREAT:
+	if speaker == self or state in [State.DEAD, State.RETREAT, State.DOWNED, State.RESCUE]:
 		return
 	if global_position.distance_to(from) > radius_m:
 		return
@@ -297,6 +346,11 @@ func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node)
 
 func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
 	if state == State.DEAD:
+		return
+	if kind == "shot" and global_position.distance_to(pos) <= radius_m:
+		_shot_heard_t = 0.0
+		_shot_heard_pos = pos
+	if state == State.DOWNED or state == State.RESCUE:
 		return
 	var d := global_position.distance_to(pos)
 	if d > radius_m:
@@ -324,7 +378,7 @@ func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
 
 ## Проверить шум: идти к месту, постоять, осмотреться; потом прочесать рядом.
 func investigate_at(pos: Vector3) -> void:
-	if state == State.COMBAT or state == State.RETREAT or state == State.DEAD:
+	if state in [State.COMBAT, State.RETREAT, State.DEAD, State.DOWNED, State.RESCUE]:
 		return
 	last_known = pos
 	state = State.INVESTIGATE
@@ -396,6 +450,8 @@ func _on_damaged(amount: float, from: Vector3) -> void:
 		last_known = global_position + guess
 	memory_timer = maxf(memory_timer, _mem() * 1.5)
 	_facing = atan2(last_known.x - global_position.x, last_known.z - global_position.z)
+	if state == State.DOWNED or state == State.RESCUE or _health.downed:
+		return
 	if state != State.COMBAT and state != State.RETREAT:
 		state = State.COMBAT
 		say("По нам стреляют!")
@@ -690,11 +746,190 @@ func _retreat(delta: float) -> void:
 		_start_search()
 
 
+# ---------------------------------------------------------------- тяжело ранен, спасение
+
+## Лёг раненым (хост): пистолет вместо основного, зовёт; поднялся — обратно в бой.
+func _on_downed_changed(on: bool) -> void:
+	if on:
+		_release_rescue()
+		state = State.DOWNED
+		crouched = false
+		_apply_shape()
+		_main_spec = _spec
+		_main_mag = _mag
+		_spec = Balance.AI_WEAPONS.pistol
+		_mag = int(_spec.mag)
+		_reload_t = 0.0
+		_burst_left = 0
+		_agent.target_position = global_position
+		say("Меня зацепило!")
+		NoiseBus.emit(global_position, Balance.AI_RESCUE_RADIUS, "death")
+		_help_t = 0.0
+		_call_for_help()
+	else:
+		rescuer = null
+		dragged_by = null
+		if not _main_spec.is_empty():
+			_spec = _main_spec
+			_mag = _main_mag
+			_main_spec = {}
+		_apply_shape()
+		say("Живой!")
+		memory_timer = maxf(memory_timer, _mem())
+		_enter_combat(Tactic.ENGAGE)
+		_try_cover(Balance.AI_COVER_RADIUS, false)
+
+
+## Раненый зовёт: ближайший живой товарищ, который слышит (свой отряд — в первую очередь), идёт спасать.
+func _call_for_help() -> void:
+	var best: Marauder = null
+	var best_s := INF
+	for n in get_tree().get_nodes_in_group("marauders"):
+		var m := n as Marauder
+		if m == self or m.state in [State.DEAD, State.DOWNED, State.RESCUE, State.RETREAT]:
+			continue
+		var d := m.global_position.distance_to(global_position)
+		if d > Balance.AI_RESCUE_RADIUS:
+			continue
+		var s := d * (1.0 if m.squad == squad else 1.8)
+		if s < best_s:
+			best = m
+			best_s = s
+	if best:
+		best.start_rescue(self)
+
+
+func start_rescue(who: Marauder) -> void:
+	who.rescuer = self
+	_rescue_target = who
+	_rescue_phase = 0
+	_rescue_t = 0.0
+	state = State.RESCUE
+	crouched = false
+	_apply_shape()
+	_agent.target_position = _snap(who.global_position)
+	say("Держись, иду!")
+
+
+## Бросить спасение (сам ранен / умер / тот умер): раненого — отпустить.
+func _release_rescue() -> void:
+	var t := _rescue_target
+	_rescue_target = null
+	if t and is_instance_valid(t):
+		if t.rescuer == self:
+			t.rescuer = null
+		if t.dragged_by == self:
+			t.dragged_by = null
+
+
+## Лежит: отстреливается из пистолета, ждёт помощи; никто не идёт — зовёт снова.
+func _downed(delta: float) -> void:
+	_face(last_known)
+	if _seen_now and global_position.distance_to(last_known) <= float(_spec.range):
+		_try_fire()
+	if rescuer == null or not is_instance_valid(rescuer) or rescuer.state != State.RESCUE:
+		rescuer = null
+		_help_t += delta
+		if _help_t >= 4.0:
+			_help_t = 0.0
+			_call_for_help()
+
+
+## Раненого тащат — тело на «верёвке» за тем, кто тащит; иначе лежит на месте.
+func _move_downed(delta: float) -> void:
+	velocity = Vector3.ZERO
+	if dragged_by and is_instance_valid(dragged_by) and dragged_by.state == State.RESCUE:
+		var off := global_position - dragged_by.global_position
+		off.y = 0.0
+		if off.length() < 0.05:
+			off = -Vector3(sin(dragged_by._facing), 0.0, cos(dragged_by._facing))
+		var goal := dragged_by.global_position + off.normalized() * Balance.DRAG_DIST
+		var pull := (goal - global_position) / maxf(delta, 0.001)
+		velocity.x = clampf(pull.x, -6.0, 6.0)
+		velocity.z = clampf(pull.z, -6.0, 6.0)
+	if not is_on_floor():
+		velocity.y -= 9.8
+	move_and_slide()
+	_body.rotation.y = _facing
+	# лежит лицом вниз (Body:rotation синхронизируется)
+	_body.rotation.x = 1.35
+
+
+## Спасатель: добежать, лежит на виду — утащить за укрытие, поднять.
+func _rescue(delta: float) -> void:
+	var t := _rescue_target
+	if t == null or not is_instance_valid(t) or t.state != State.DOWNED:
+		_end_rescue()
+		return
+	var d := global_position.distance_to(t.global_position)
+	match _rescue_phase:
+		0:
+			_set_crouch(false)
+			if _repath_t <= 0.0:
+				_repath_t = 0.5
+				_agent.target_position = _snap(t.global_position)
+			# по пути отвечает огнём, если видит
+			if _seen_now and global_position.distance_to(last_known) <= float(_spec.range):
+				_try_fire()
+			if d <= 1.4:
+				last_known = t.last_known
+				var threat := t.last_known + Vector3.UP * 1.3
+				var q := PhysicsRayQueryParameters3D.create(threat, t.global_position + Vector3.UP * 0.5, Hitscan.LAYER_WORLD)
+				var exposed := get_world_3d().direct_space_state.intersect_ray(q).is_empty()
+				var cover := _cover_point(Balance.AI_DRAG_COVER_M, false) if exposed else Vector3.INF
+				if cover != Vector3.INF:
+					_rescue_phase = 1
+					t.dragged_by = self
+					_agent.target_position = cover
+					say("Тащу! Прикрой!")
+				else:
+					_rescue_phase = 2
+					_rescue_t = 0.0
+		1:
+			if _agent.is_navigation_finished() or d > 3.0:
+				t.dragged_by = null
+				_rescue_phase = 2
+				_rescue_t = 0.0
+		2:
+			_agent.target_position = global_position
+			_set_crouch(true)
+			_face(t.global_position)
+			_rescue_t += delta
+			if _rescue_t >= Balance.AI_REVIVE_SEC:
+				t._health.revive(Balance.REVIVE_HP)
+				_end_rescue()
+
+
+func _end_rescue() -> void:
+	_release_rescue()
+	if state != State.RESCUE:
+		return
+	_set_crouch(false)
+	if memory_timer > 0.0:
+		_enter_combat(_closing_tactic())
+	else:
+		state = State.PATROL
+		pause_timer = 1.0
+
+
 # ---------------------------------------------------------------- укрытие
 
 ## Ищет рядом место, которое стена закрывает от угрозы (last_known), и идёт туда.
 ## far — отход: чем дальше от угрозы, тем лучше.
 func _try_cover(radius: float, far: bool) -> bool:
+	var best := _cover_point(radius, far)
+	if best == Vector3.INF:
+		return false
+	_cover_pos = best
+	_agent.target_position = best
+	if state == State.COMBAT:
+		_set_tactic(Tactic.COVER_MOVE)
+	return true
+
+
+## Точка укрытия от last_known в радиусе (Vector3.INF — нет): стена закрывает присевшего,
+## дойти можно без большого обхода.
+func _cover_point(radius: float, far: bool) -> Vector3:
 	var threat := last_known + Vector3.UP * 1.3
 	var space := get_world_3d().direct_space_state
 	var cands: Array = []
@@ -730,13 +965,7 @@ func _try_cover(radius: float, far: bool) -> bool:
 		if path.size() >= 2 and plen <= float(c[2]) * 1.5 + 4.0:
 			best = c[1]
 			break
-	if best == Vector3.INF:
-		return false
-	_cover_pos = best
-	_agent.target_position = best
-	if state == State.COMBAT:
-		_set_tactic(Tactic.COVER_MOVE)
-	return true
+	return best
 
 
 ## Укрытие всё ещё закрывает от того места, где цель сейчас (по памяти)?
@@ -749,8 +978,13 @@ func _set_crouch(on: bool) -> void:
 	if crouched == on:
 		return
 	crouched = on
-	_body.scale = _base_scale * Vector3(1.0, 0.68 if on else 1.0, 1.0)
-	_capsule.height = 1.25 if on else 1.8
+	_apply_shape()
+
+
+## Фигура и коллизия по позе: стоит, присел, лежит раненым.
+func _apply_shape() -> void:
+	_body.scale = _base_scale * Vector3(1.0, 0.68 if crouched else 1.0, 1.0)
+	_capsule.height = 0.8 if _health.downed else (1.25 if crouched else 1.8)
 	($Capsule as CollisionShape3D).position.y = _capsule.height * 0.5
 
 
@@ -785,6 +1019,9 @@ func _try_fire(suppress: bool = false) -> void:
 	if _mag <= 0:
 		_start_reload()
 		return
+	if _target_player and is_instance_valid(_target_player) and _target_player.is_downed() and not _may_finish(_target_player):
+		# лежащего не добивает, пока стреляет кто-то другой
+		return
 	if not _line_of_fire():
 		# между стволом и целью стена — стрелять некуда (ни прицельно, ни «на подавление»)
 		return
@@ -803,15 +1040,20 @@ func _try_fire(suppress: bool = false) -> void:
 
 ## Ствол → точка цели (по памяти) не упирается в стену / дверь раньше, чем за метр до неё.
 func _line_of_fire() -> bool:
-	var from := global_position + Vector3.UP * (1.0 if crouched else 1.4)
+	var from := _gun_pos()
 	var target := last_known + Vector3.UP * 1.1
 	var q := PhysicsRayQueryParameters3D.create(from, target, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR, [get_rid()])
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	return hit.is_empty() or from.distance_to(hit.position) > from.distance_to(target) - 1.0
 
 
+## Откуда стреляет: стоя, присев, лёжа.
+func _gun_pos() -> Vector3:
+	return global_position + Vector3.UP * (0.35 if _health.downed else (1.0 if crouched else 1.4))
+
+
 func _shoot(suppress: bool) -> void:
-	var from := global_position + Vector3.UP * (1.0 if crouched else 1.4)
+	var from := _gun_pos()
 	var h := 1.1
 	if _target_player and is_instance_valid(_target_player):
 		h = float(Perception.TARGET_HEIGHT[Perception.stance_key(_target_player)])
@@ -825,6 +1067,8 @@ func _shoot(suppress: bool) -> void:
 		spread *= 2.0
 	if _stagger_t > 0.0:
 		spread *= Balance.AI_HIT_STAGGER_SPREAD
+	if _health.downed:
+		spread *= Balance.DOWN_SPREAD
 	var exclude: Array[RID] = [get_rid()]
 	var dir := (target - from).normalized()
 	for i in range(int(_spec.pellets)):
@@ -876,7 +1120,12 @@ func _show_say(text: String) -> void:
 # ---------------------------------------------------------------- движение
 
 func _move(delta: float) -> void:
+	if state == State.DOWNED:
+		_move_downed(delta)
+		return
 	var speed := Balance.MARAUDER_WALK if state == State.PATROL else Balance.MARAUDER_RUN
+	if state == State.RESCUE:
+		speed = Balance.AI_DRAG_SPEED if _rescue_phase == 1 else (Balance.MARAUDER_RUN if _rescue_phase == 0 else 0.0)
 	if state == State.SEARCH or state == State.INVESTIGATE:
 		speed = lerpf(Balance.MARAUDER_WALK, Balance.MARAUDER_RUN, 0.55)
 	if crouched:
@@ -928,6 +1177,9 @@ func _snap(p: Vector3) -> Vector3:
 
 
 func _on_died() -> void:
+	_release_rescue()
+	if rescuer and is_instance_valid(rescuer):
+		rescuer._rescue_target = null
 	state = State.DEAD
 	_set_crouch(false)
 	# падение тела слышат соседи — придут смотреть
@@ -945,11 +1197,14 @@ func _on_died() -> void:
 		to_shooter = to_shooter.normalized() if to_shooter.length() > 0.01 else Vector3(sin(_facing), 0.0, cos(_facing))
 		var rest := global_position + to_shooter * Balance.CRATE_TOSS_DIST
 		# его ствол и патроны: что осталось в магазине и немного запаса
+		# лёжа стрелял из пистолета — выпадает основное оружие и патроны к нему
+		var wspec: Dictionary = Balance.AI_WEAPONS[weapon]
+		var in_mag := _main_mag if not _main_spec.is_empty() else _mag
 		var drop := ItemDb.roll("marauder", rng)
-		drop.push_front(ItemDb.make(String(_spec.item), 1))
-		var rounds := mini(_mag + rng.randi_range(0, int(_spec.mag)), ItemDb.stack(String(_spec.ammo)))
+		drop.push_front(ItemDb.make(String(wspec.item), 1))
+		var rounds := mini(in_mag + rng.randi_range(0, int(wspec.mag)), ItemDb.stack(String(wspec.ammo)))
 		if rounds > 0:
-			drop.append(ItemDb.make(String(_spec.ammo), rounds))
+			drop.append(ItemDb.make(String(wspec.ammo), rounds))
 		Raid.current.spawn_drop(rest, "Ящик мародёра", drop, LootContainer.Look.CRATE,
 			global_position + Vector3.UP * 1.1 - rest)
 	collision_layer = 0
@@ -960,6 +1215,13 @@ func _on_died() -> void:
 
 ## У клиентов сигнала died нет (урон считает хост) — смерть видна по синхронизированному alive.
 func _process(_delta: float) -> void:
+	# раненый (видно у всех по синхронизированному downed): основное оружие убрано
+	if _health.downed != _shown_down:
+		_shown_down = _health.downed
+		if _main_gun:
+			_main_gun.visible = not _shown_down
+		# у клиентов пули ищут тело своей физикой — коллизия лежащего тоже низкая
+		_apply_shape()
 	if not _health.alive and _ragdoll == null:
 		collision_layer = 0
 		collision_mask = 0

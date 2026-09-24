@@ -26,6 +26,9 @@ var _take_all: Button
 var _bar: ProgressBar
 var _bar_label: Label
 var _bp_sig: String = ""
+## Меню «чем лечиться» (H): кнопки по видам лекарств в рюкзаке, 1…N — выбрать, Esc — закрыть.
+var _med_menu: PanelContainer
+var _med_ids: Array[String] = []
 var _bp_grid: GridView
 var _loot_sig: String = ""
 
@@ -97,7 +100,7 @@ func _ready() -> void:
 
 
 func is_open() -> bool:
-	return _backpack_open or _looting != null
+	return _backpack_open or _looting != null or (_med_menu != null and _med_menu.visible)
 
 
 func is_looting() -> bool:
@@ -114,6 +117,8 @@ func start_search(c: LootContainer) -> void:
 
 
 func close_all() -> void:
+	if _med_menu:
+		_med_menu.visible = false
 	_backpack_open = false
 	_searching = null
 	_looting = null
@@ -145,7 +150,14 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel") and is_open():
 		close_all()
 	if Input.is_action_just_pressed("use_med"):
-		_try_heal(me)
+		if _med_menu and _med_menu.visible:
+			_med_menu.visible = false
+		else:
+			_open_med_menu(me)
+	if _med_menu and _med_menu.visible:
+		for i in range(_med_ids.size()):
+			if Input.is_action_just_pressed("weapon_%d" % (i + 1)):
+				_pick_med(me, _med_ids[i])
 	_tick_search(me, delta)
 	# отошёл от контейнера — окно закрывается
 	if _looting and (not is_instance_valid(_looting) or _looting.global_position.distance_to(me.global_position) > Balance.INTERACT_RADIUS + 1.0):
@@ -173,31 +185,6 @@ func _tick_search(me: Player, delta: float) -> void:
 	if _search_t >= _searching.search_s:
 		_searched[_searching.get_path()] = true
 		_open_loot(_searching)
-
-
-## Самое подходящее лекарство: не больше, чем нужно (аптечка — если не хватает много).
-func _try_heal(me: Player) -> void:
-	if _heal_t > 0.0 or me.health.hp >= me.health.max_hp:
-		return
-	var missing := me.health.max_hp - me.health.hp
-	var best := ""
-	var best_score := INF
-	for it in me.inventory.items:
-		var use: Dictionary = ItemDb.item(String(it.id)).get("use", {})
-		if use.is_empty():
-			continue
-		var score := absf(float(use.heal) - missing)
-		if score < best_score:
-			best_score = score
-			best = String(it.id)
-	if best == "":
-		Raid.current.notify("Нечем лечиться")
-		return
-	var use: Dictionary = ItemDb.item(best).use
-	Raid.current.request_use_med(best)
-	_heal_total = float(use.time)
-	_heal_t = _heal_total
-	_bar_label.text = "Лечение: " + ItemDb.item_name(best)
 
 
 func _tick_heal(delta: float) -> void:
@@ -370,12 +357,91 @@ func _popup(at: Vector2, names: Array, acts: Array) -> void:
 	menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
 
 
+## H: чем лечиться — лекарства из рюкзака по видам. Лёжа раненым: аптечка — подняться, бинт —
+## остановить кровь (+DOWN_BANDAGE_SEC), остальное не поможет.
+func _open_med_menu(me: Player) -> void:
+	var down := me.is_downed()
+	if _heal_t > 0.0:
+		return
+	if not down and me.health.hp >= me.health.max_hp:
+		Raid.current.notify("Ты цел — лечиться не нужно")
+		return
+	var counts := {}
+	for it in me.inventory.items:
+		if not ItemDb.item(String(it.id)).get("use", {}).is_empty():
+			counts[String(it.id)] = int(counts.get(String(it.id), 0)) + int(it.n)
+	if counts.is_empty():
+		Raid.current.notify("Нечем лечиться")
+		return
+	if _med_menu == null:
+		_med_menu = PanelContainer.new()
+		_med_menu.set_anchors_preset(Control.PRESET_CENTER)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.06, 0.06, 0.06, 0.94)
+		sb.border_color = Color(0.9, 0.3, 0.25, 0.5)
+		sb.set_border_width_all(1)
+		sb.set_content_margin_all(14)
+		_med_menu.add_theme_stylebox_override("panel", sb)
+		add_child(_med_menu)
+	for c in _med_menu.get_children():
+		c.queue_free()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	_med_menu.add_child(box)
+	var head := Label.new()
+	head.text = "Лёжа: чем помочь себе" if down else "Чем лечиться"
+	head.add_theme_font_size_override("font_size", 18)
+	head.add_theme_color_override("font_color", Color(1.0, 0.8, 0.7))
+	box.add_child(head)
+	_med_ids.clear()
+	for id in counts:
+		var sid := String(id)
+		var use: Dictionary = ItemDb.item(sid).use
+		var what := "+%d, %.0f с" % [int(use.heal), float(use.time)]
+		var ok := true
+		if down:
+			if sid == "medkit":
+				what = "подняться, %.0f с" % Balance.REVIVE_SELF_SEC
+			elif sid == "bandage":
+				what = "перевязать: +%.0f с до смерти" % Balance.DOWN_BANDAGE_SEC
+			else:
+				what = "лёжа не поможет"
+				ok = false
+		_med_ids.append(sid)
+		var b := Button.new()
+		b.text = "%d   %s × %d   —   %s" % [_med_ids.size(), ItemDb.item_name(sid), int(counts[id]), what]
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.disabled = not ok
+		b.focus_mode = Control.FOCUS_NONE
+		b.custom_minimum_size = Vector2(420, 34)
+		b.pressed.connect(func() -> void: _pick_med(me, sid))
+		box.add_child(b)
+	var hint := Label.new()
+	hint.text = "1–%d или мышью · H / Esc — закрыть" % _med_ids.size()
+	hint.add_theme_font_size_override("font_size", 13)
+	hint.add_theme_color_override("font_color", Color(0.65, 0.65, 0.62))
+	box.add_child(hint)
+	_med_menu.visible = true
+	_med_menu.reset_size()
+	_med_menu.position = (get_viewport().get_visible_rect().size - _med_menu.get_combined_minimum_size()) * 0.5
+
+
+func _pick_med(me: Player, id: String) -> void:
+	_med_menu.visible = false
+	_try_heal_with(me, id)
+	_bar_label.text = ("Поднимаюсь: " if me.is_downed() and id == "medkit" else "Лечение: ") + ItemDb.item_name(id)
+
+
 func _try_heal_with(me: Player, id: String) -> void:
-	if _heal_t > 0.0 or me.health.hp >= me.health.max_hp:
+	var down := me.is_downed()
+	if _heal_t > 0.0 or (not down and me.health.hp >= me.health.max_hp):
+		return
+	if down and id != "medkit" and id != "bandage":
+		Raid.current.notify("Лёжа поможет только аптечка (подняться) или бинт")
 		return
 	var use: Dictionary = ItemDb.item(id).use
 	Raid.current.request_use_med(id)
-	_heal_total = float(use.time)
+	_heal_total = Balance.REVIVE_SELF_SEC if down and id == "medkit" else float(use.time)
 	_heal_t = _heal_total
 	_bar_label.text = "Лечение: " + ItemDb.item_name(id)
 

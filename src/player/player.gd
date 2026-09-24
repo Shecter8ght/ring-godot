@@ -3,7 +3,8 @@ extends CharacterBody3D
 ## Игрок: движение по стойкам относительно камеры, корпус смотрит на курсор.
 ## В прицеле (ПКМ, см. CameraRig) — вид от первого лица: взгляд ведёт мышь, WASD — относительно
 ## взгляда, выстрел — из глаз по оси взгляда. Оружие: 1–4 пистолет/автомат/дробовик/винтовка,
-## G — граната. Смерть — регдолл.
+## G — граната. Смерть — регдолл. Тяжело ранен (Health.downed) — лежит, ползёт, стреляет только
+## из пистолета, кидает гранаты; его могут поднять (аптечка) и тащить (X); X (держать) — сдаться.
 ## Сеть: узлом владеет тот peer, чей id записан в `peer_id`; чужих игроков двигает синхронизация.
 
 enum Stance { STAND, CROUCH, PRONE }
@@ -62,6 +63,8 @@ var _weapon_model_id: String = ""
 var _ragdoll: Ragdoll
 var _last_hit_from: Vector3 = Vector3.ZERO
 var _last_damage: float = 0.0
+## Лёжа держит X — сколько секунд (сдаться).
+var _give_up_t: float = 0.0
 
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
@@ -101,7 +104,12 @@ func _ready() -> void:
 	steps.loud_db = func() -> float: return float(Balance.STEP_STANCE_DB.get(_stance_key(), 0.0))
 	add_child(steps)
 	# броня и шлем снимают часть урона (считается там же, где урон, — на хосте)
-	health.damage_filter = func(amount: float) -> float: return inventory.absorb(amount)
+	health.damage_filter = func(amount: float, zone: String) -> float: return inventory.absorb(amount, zone)
+	# тяжело ранен вместо смерти; в голову в шлеме — не насмерть
+	health.can_down = true
+	health.head_protected = func() -> bool:
+		var h: Dictionary = inventory.equipment.get("helmet", {})
+		return not h.is_empty() and float(h.get("dur", 0.0)) > 0.0
 	# рука с оружием — не внутри Body: Body сжимается по стойке, оружие сжиматься не должно
 	_hand = Node3D.new()
 	_hand.name = "Hand"
@@ -139,6 +147,23 @@ func _setup_sync() -> void:
 
 func is_alive() -> bool:
 	return health.alive
+
+
+## Куда попала пуля: голова — выше HEAD_ZONE по стойке; лёжа (и раненым) — всё «корпус».
+func hit_zone(point: Vector3) -> String:
+	if health.downed or stance == Stance.PRONE:
+		return "body"
+	return "head" if point.y - global_position.y >= float(Balance.HEAD_ZONE.get(_stance_key(), 99.0)) else "body"
+
+
+## Лежит раненым.
+func is_downed() -> bool:
+	return health.alive and health.downed
+
+
+## Тащит раненого (стреляет только из пистолета, идёт медленно).
+func is_dragging() -> bool:
+	return Raid.current != null and Raid.current.drag_target_of(peer_id) != 0
 
 
 func is_local() -> bool:
@@ -239,14 +264,39 @@ func _physics_process(delta: float) -> void:
 	# наклон: Q/E только когда камера в глазах; в изометрии Q/E крутят камеру
 	var lean_to := Input.get_axis("camera_left", "camera_right") if ads and not PauseMenu.shown else 0.0
 	lean = move_toward(lean, lean_to, Balance.LEAN_SPEED * delta)
-	_read_stance()
+	var down := is_downed()
+	if down:
+		# раненый лежит; X (держать) — сдаться
+		if stance != Stance.PRONE:
+			stance = Stance.PRONE
+			_apply_stance()
+		aiming = Input.is_action_pressed("aim") and not (Raid.current and Raid.current.ui_open())
+		_give_up_t = _give_up_t + delta if Input.is_action_pressed("drag") and not PauseMenu.shown else 0.0
+		if _give_up_t >= Balance.GIVE_UP_SEC and Raid.current:
+			_give_up_t = -INF
+			Raid.current.request_give_up()
+	else:
+		_give_up_t = 0.0
+		_read_stance()
 	_combat(delta)
-	var wish := _wish_direction()
-	var speed := _stance_speed()
-	var target := wish * speed
-	var rate := Balance.PLAYER_ACCEL if wish.length() > 0.0 else Balance.PLAYER_DECEL
-	velocity.x = move_toward(velocity.x, target.x, rate * delta)
-	velocity.z = move_toward(velocity.z, target.z, rate * delta)
+	var dragger: Player = Raid.current.dragger_of(peer_id) if down and Raid.current else null
+	if dragger:
+		# тащат: тело — на «верёвке» за тем, кто тащит
+		var off := global_position - dragger.global_position
+		off.y = 0.0
+		if off.length() < 0.05:
+			off = -Vector3(sin(dragger.body_yaw()), 0.0, cos(dragger.body_yaw()))
+		var goal := dragger.global_position + off.normalized() * Balance.DRAG_DIST
+		var pull := (goal - global_position) / maxf(delta, 0.001)
+		velocity.x = clampf(pull.x, -6.0, 6.0)
+		velocity.z = clampf(pull.z, -6.0, 6.0)
+	else:
+		var wish := _wish_direction()
+		var speed := _stance_speed()
+		var target := wish * speed
+		var rate := Balance.PLAYER_ACCEL if wish.length() > 0.0 else Balance.PLAYER_DECEL
+		velocity.x = move_toward(velocity.x, target.x, rate * delta)
+		velocity.z = move_toward(velocity.z, target.z, rate * delta)
 	if not is_on_floor():
 		velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
 	else:
@@ -338,8 +388,16 @@ func _combat(delta: float) -> void:
 		_loadout_tick()
 	var keys := weapon_keys()
 	for i in range(keys.size()):
-		if Input.is_action_just_pressed("weapon_%d" % (i + 1)) and String(keys[i]) != "":
+		if Input.is_action_just_pressed("weapon_%d" % (i + 1)) and String(keys[i]) != "" and String(keys[i]) in allowed_weapons():
 			_switch(String(keys[i]))
+	# лёжа раненым и таща раненого — только пистолет (нет — руки пусты, гранаты можно)
+	if not weapon_id in allowed_weapons() and weapon_id != "":
+		var pistol := String(allowed_weapons()[0]) if not allowed_weapons().is_empty() else ""
+		if pistol != "":
+			_switch(pistol)
+		else:
+			ammo_by[weapon_id] = ammo
+			weapon_id = ""
 	if Input.is_action_just_pressed("grenade") and grenade_count() > 0 and fire_timer <= 0.0:
 		_throw_grenade()
 	if weapon_id == "":
@@ -387,6 +445,14 @@ func grenade_count() -> int:
 	return inventory.count("grenade") if loadout_mode else grenades
 
 
+## Что можно держать сейчас: раненым и таща раненого — только пистолет.
+func allowed_weapons() -> Array:
+	var keys := weapon_keys()
+	if is_downed() or is_dragging():
+		return [keys[0]] if String(keys[0]) != "" else []
+	return keys.filter(func(k: Variant) -> bool: return String(k) != "")
+
+
 ## Остаток патронов к текущему оружию в рюкзаке (для HUD); -1 — без счёта.
 func ammo_reserve() -> int:
 	if not loadout_mode or weapon_id == "":
@@ -413,6 +479,9 @@ func _loadout_tick() -> void:
 				Raid.current.request_consume(String(ammo_item), int(used[ammo_item]))
 		weapon_id = ""
 	var keys := weapon_keys()
+	if is_downed() or is_dragging():
+		# раненым / таща раненого — только пистолет (выбирает _combat)
+		return
 	if not weapon_id in keys or weapon_id == "":
 		# оружие пропало из рук (сменил/не было) — берём основное, иначе пистолет
 		var pick := String(keys[1]) if String(keys[1]) != "" else String(keys[0])
@@ -471,6 +540,8 @@ func _fire(spec: Dictionary) -> void:
 	var mult := lerpf(hip, float(spec.ads_spread), aim_progress()) if ads and aiming else hip
 	var braced := stance != Stance.STAND
 	var spread: float = float(spec.spread_deg) * mult * (float(spec.braced_spread) if braced else 1.0)
+	if is_downed():
+		spread *= Balance.DOWN_SPREAD
 	# очередь раскачивает: от бедра сильно, в прицеле — меньше (ствол ведут глазами)
 	spread *= 1.0 + minf(_bloom, Balance.RECOIL_BLOOM_MAX) * (Balance.RECOIL_BLOOM_ADS if ads and aiming else 1.0)
 	var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DEBRIS
@@ -560,6 +631,8 @@ func _stance_key() -> String:
 
 
 func _stance_speed() -> float:
+	if is_downed():
+		return Balance.DOWN_CRAWL_SPEED
 	var s: float
 	match stance:
 		Stance.CROUCH:
@@ -572,6 +645,8 @@ func _stance_speed() -> float:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
 	if absf(lean) > 0.3:
 		s *= Balance.LEAN_MOVE_SCALE
+	if is_dragging():
+		s = minf(s, Balance.DRAG_SPEED)
 	return s
 
 

@@ -54,8 +54,12 @@ func _run() -> void:
 	Raid.current.kill_credited.connect(func() -> void: credited[0] = true)
 	var marauders := _level.get_node("Marauders")
 	var victim := marauders.get_child(marauders.get_child_count() - 1) as Marauder
-	(victim.get_node("Health") as Health).apply_or_request_damage(10000.0, my_player.global_position + Vector3.UP * 1.3)
-	await get_tree().create_timer(0.8).timeout
+	# первый — лёг раненым, второй — добил
+	for i in range(2):
+		(victim.get_node("Health") as Health).apply_or_request_damage(10000.0, my_player.global_position + Vector3.UP * 1.3)
+		await get_tree().create_timer(0.5).timeout
+	print("[client] мародёр лёг, потом умер: %s" % ("OK" if not (victim.get_node("Health") as Health).alive else "НЕТ"))
+	await get_tree().create_timer(0.3).timeout
 	print("[client] убийство засчитано мне: %s" % ("OK" if credited[0] else "НЕТ"))
 	await get_tree().create_timer(1.5).timeout
 	_report("после движения хоста")

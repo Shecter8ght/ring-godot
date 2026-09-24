@@ -20,6 +20,7 @@ const KINDS := {
 	"step_snow": {"db": -16.0, "unit": 3.0, "max": 24.0, "occlude": true},
 	"step_snow_run": {"db": -13.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
+	"heartbeat": {"db": -4.0, "unit": 3.0, "max": 6.0},
 	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
 	"hit": {"db": -4.0, "unit": 5.0, "max": 30.0},
 	"reload": {"db": -8.0, "unit": 3.0, "max": 15.0},
@@ -104,6 +105,7 @@ func _ready() -> void:
 	for k in ["step_stone", "step_stone_run", "step_dirt", "step_dirt_run", "step_snow", "step_snow_run"]:
 		_streams[k] = _streams["step"]
 	_streams["step_metal"] = _make(_step_metal())
+	_streams["heartbeat"] = _make(_heartbeat())
 	_streams["death"] = _streams["hit"]
 	_streams["fall"] = _streams["hit"]
 	for k in ["reload_pistol", "reload_rifle", "reload_shotgun", "bolt", "pin"]:
@@ -327,6 +329,22 @@ func _step_metal() -> PackedFloat32Array:
 		var ring := sin(TAU * 690.0 * t) * 0.5 + sin(TAU * 1130.0 * t) * 0.35 + sin(TAU * 1870.0 * t) * 0.2
 		var click := _noise() * exp(-t * 180.0)
 		out[i] = (ring * exp(-t * 26.0) * 0.55 + click * 0.5) * minf(1.0, t * 900.0)
+	return out
+
+
+## Стук сердца: «тук-тук» — два низких глухих удара.
+func _heartbeat() -> PackedFloat32Array:
+	var n := int(0.5 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		var v := 0.0
+		for pair in [[0.0, 1.0], [0.19, 0.7]]:
+			var tt: float = t - float(pair[0])
+			if tt >= 0.0:
+				v += sin(TAU * 52.0 * tt) * exp(-tt * 22.0) * float(pair[1]) * minf(1.0, tt * 300.0)
+		out[i] = v * 0.9
 	return out
 
 

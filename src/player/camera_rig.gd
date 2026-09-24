@@ -22,6 +22,12 @@ var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
 var _hitmarker: Control
+## Ранен: кровь по краям, блёклые цвета, стук сердца, звук глуше; лёжа — надпись с таймером.
+var _hurt_fx: ColorRect
+var _hurt_amount: float = 0.0
+var _beat_t: float = 0.0
+var _down_label: Label
+var _muffle: AudioEffectLowPassFilter
 var _hitmarker_t: float = 0.0
 var _rng := RandomNumberGenerator.new()
 var _mmb: bool = false
@@ -129,6 +135,83 @@ func _ui_blocking() -> bool:
 	return false
 
 
+const HURT_SHADER := """
+shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+uniform float amount = 0.0;
+uniform float pulse = 0.0;
+void fragment() {
+	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
+	float g = dot(c, vec3(0.299, 0.587, 0.114));
+	c = mix(c, vec3(g), amount * 0.75);
+	vec2 d = SCREEN_UV - 0.5;
+	d.x *= SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
+	float r = length(d);
+	float v = smoothstep(0.22 - pulse * 0.06, 0.72, r) * amount;
+	c = mix(c, vec3(0.32, 0.0, 0.0), clamp(v * 1.4, 0.0, 0.88));
+	c *= 1.0 - amount * (0.22 + pulse * 0.1);
+	COLOR = vec4(c, 1.0);
+}
+"""
+
+
+## Ранения на экране: лёжа — сильно (кровь, серость, пульс, стук сердца, глухой звук, таймер);
+## мало здоровья — слегка.
+func _update_hurt(pl: Player, delta: float) -> void:
+	if pl == null or not pl.is_local():
+		return
+	var down := pl.is_downed()
+	var want := 0.0
+	if down:
+		want = 1.0
+	elif pl.is_alive():
+		var frac := pl.health.hp / maxf(pl.health.max_hp, 1.0)
+		want = clampf((0.35 - frac) / 0.35, 0.0, 1.0) * 0.45
+	_hurt_amount = move_toward(_hurt_amount, want, delta * 1.5)
+	_hurt_fx.visible = _hurt_amount > 0.01
+	var bpm := 64.0 if down else 90.0
+	_beat_t += delta * bpm / 60.0
+	if _beat_t >= 1.0:
+		_beat_t -= 1.0
+		if down:
+			Audio.play("heartbeat", pl.global_position + Vector3.UP)
+	var pulse := pow(absf(sin(_beat_t * PI)), 8.0)
+	if _hurt_fx.visible:
+		var sm := _hurt_fx.material as ShaderMaterial
+		sm.set_shader_parameter("amount", _hurt_amount)
+		sm.set_shader_parameter("pulse", pulse)
+	_set_muffle(down)
+	_down_label.visible = down
+	if down:
+		var h := pl.health
+		var lines := "ТЯЖЁЛОЕ РАНЕНИЕ — истекаешь кровью: %d с   ·   ранение %d из %d" % [int(ceil(h.bleed_t)), h.downs, Balance.DOWN_MAX]
+		var dragger: Player = Raid.current.dragger_of(pl.peer_id) if Raid.current else null
+		if dragger:
+			lines += "\nТЕБЯ ТАЩАТ — стреляй из пистолета, прикрывай"
+		lines += "\nH — аптечка (подняться) / бинт   ·   X (держать) — сдаться"
+		_down_label.text = lines
+
+
+## Лёжа раненым звук глуше (на общей шине — срез верхов).
+func _set_muffle(on: bool) -> void:
+	if on == (_muffle != null):
+		return
+	if on:
+		_muffle = AudioEffectLowPassFilter.new()
+		_muffle.cutoff_hz = 900.0
+		AudioServer.add_bus_effect(0, _muffle)
+	else:
+		for i in range(AudioServer.get_bus_effect_count(0)):
+			if AudioServer.get_bus_effect(0, i) == _muffle:
+				AudioServer.remove_bus_effect(0, i)
+				break
+		_muffle = null
+
+
+func _exit_tree() -> void:
+	_set_muffle(false)
+
+
 ## Дистанция изометрии (зум): в тесном убежище ближе, чем в рейде.
 func set_distance(d: float) -> void:
 	_distance = clampf(d, Balance.CAMERA_ZOOM_MIN, Balance.CAMERA_ZOOM_MAX)
@@ -186,6 +269,7 @@ func _process(delta: float) -> void:
 		if _hitmarker.visible:
 			_hitmarker.position = get_viewport().get_mouse_position()
 	_update_hud(pl)
+	_update_hurt(pl, delta)
 	var cam := get_viewport().get_camera_3d()
 	if cam:
 		_compass.set_heading(cam.global_basis)
@@ -276,6 +360,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
 	if pl.stance != Player.Stance.STAND:
 		amp *= float(spec.get("braced_spread", 1.0))
+	if pl.is_downed():
+		amp *= Balance.DOWN_SWAY
 	var sway := Vector2(sin(_sway_t * 1.13) * 0.7 + sin(_sway_t * 2.71 + 1.3) * 0.3, sin(_sway_t * 0.87 + 0.5) * 0.6 + sin(_sway_t * 2.05) * 0.4) * amp
 	# отдача подкидывает взгляд, дальше игрок сам возвращает прицел
 	var pitch := _look_pitch + pl.recoil() + sway.y
@@ -557,6 +643,29 @@ func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
+	# ранен — поверх мира, под остальным HUD
+	_hurt_fx = ColorRect.new()
+	_hurt_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_hurt_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sh := Shader.new()
+	sh.code = HURT_SHADER
+	var sm := ShaderMaterial.new()
+	sm.shader = sh
+	_hurt_fx.material = sm
+	_hurt_fx.visible = false
+	layer.add_child(_hurt_fx)
+	_down_label = Label.new()
+	_down_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_down_label.position = Vector2(-460, 96)
+	_down_label.size = Vector2(920, 80)
+	_down_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_down_label.add_theme_font_size_override("font_size", 20)
+	_down_label.add_theme_color_override("font_color", Color(1.0, 0.72, 0.66))
+	_down_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_down_label.add_theme_constant_override("outline_size", 6)
+	_down_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_down_label.visible = false
+	layer.add_child(_down_label)
 	# прицельной метки на экране нет ни в прицеле, ни от бедра: целятся по мушке, метке
 	# коллиматора или сетке оптики, от бедра — по стволу
 	_hitmarker = Control.new()

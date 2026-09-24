@@ -23,7 +23,9 @@ static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float,
 	if body is Node:
 		var h := (body as Node).get_node_or_null("Health") as Health
 		if h:
-			h.apply_or_request_damage(damage, from)
+			# куда попали: голова / корпус (игрок, мародёр знают свою высоту головы по стойке)
+			var zone := String(body.call("hit_zone", hit.position)) if body.has_method("hit_zone") else ""
+			h.apply_or_request_damage(damage, from, zone)
 		if body is Target:
 			(body as Target).on_hit(hit.position, d, damage)
 		if body is RagdollPart:

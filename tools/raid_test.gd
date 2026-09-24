@@ -19,7 +19,9 @@ func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("players") as Player
 	_raid = Raid.current
 	_player.health.hp = 1e9
-	# мародёры не мешают проверке
+	# мародёры не мешают проверке (появляются после навмеша — дождаться и убрать)
+	while inst.get_node("Marauders").get_child_count() == 0:
+		await get_tree().physics_frame
 	for m in get_tree().get_nodes_in_group("marauders"):
 		(m as Node).queue_free()
 	var dock := inst.get_node("Extractions/Dock") as ExtractionPoint
@@ -91,6 +93,8 @@ func _ready() -> void:
 	_player.health.hp = 50.0
 	_raid.ui.close_all()
 	await _press("use_med")
+	# H открывает меню «чем лечиться» — 1: бинт
+	await _press("weapon_1")
 	await _wait(float(ItemDb.item("bandage").use.time) + 0.3)
 	_check("бинт лечит", _player.health.hp > 50.0 and not _player.inventory.has("bandage"), "hp=%d" % int(_player.health.hp))
 	_player.health.hp = 1e9
