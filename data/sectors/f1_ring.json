@@ -9,6 +9,7 @@
  "ring": {
   "outer_r": 125,
   "atrium_r": 30,
+  "floors": 4,
   "zones": {
    "atr": [
     0.5,

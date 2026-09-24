@@ -63,6 +63,8 @@ func _ready() -> void:
 	_camera.fov = Balance.CAMERA_FOV
 	if target_path != NodePath():
 		_target = get_node(target_path)
+	# потолки и купол — только от первого лица: изометрия смотрит сверху сквозь них
+	_camera.cull_mask &= ~SectorBuilder.CEILING_LAYER
 	_ads_cam = Camera3D.new()
 	_ads_cam.name = "AdsCamera"
 	_ads_cam.top_level = true

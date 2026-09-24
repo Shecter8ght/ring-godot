@@ -232,7 +232,7 @@ d = {
     "name": "1F · открытая половина кольца",
     "floor": 1,
     "angle": [A0, A1],
-    "ring": {"outer_r": OUTER, "atrium_r": R["atr"][1], "zones": R, "sectors_deg": 60, "site_r": SITE},
+    "ring": {"outer_r": OUTER, "atrium_r": R["atr"][1], "floors": 4, "zones": R, "sectors_deg": 60, "site_r": SITE},
     "alley": {"axis": AX, "half_width": HW},
     "sectors": [{"id": "nw", "name": "Паркинг", "a": [-180, -120]},
                 {"id": "n", "name": "Главный вход", "a": [-120, -60]},

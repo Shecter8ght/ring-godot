@@ -20,6 +20,9 @@ extends RefCounted
 
 ## Длина сегмента дуги, м: чем меньше, тем круглее стены и полы.
 const SEG_LEN := 1.0
+## Слой отрисовки потолков, купола и светильников: видны только от первого лица (камера
+## изометрии его не рисует). Тени они отбрасывают в обоих видах — свет одинаковый.
+const CEILING_LAYER := 1 << 19
 ## Сдвиг от линии стены при поиске помещений по сторонам, м / град.
 const EPS_R := 0.05
 const EPS_A := 0.05
@@ -50,6 +53,10 @@ var _barrier_h: float = 2.6
 ## SurfaceTool на материал — весь сектор одного материала рисуется одним мешем.
 var _walls: Dictionary = {}
 var _floors: Dictionary = {}
+## Перекрытия над помещениями (материал -> SurfaceTool), на высоте стен.
+var _ceilings: Dictionary = {}
+## Светильники на потолке: [точка, помещение] — корпуса ставит _emit_ceilings.
+var _lamps: Array = []
 ## Стекло — отдельным мешем: без теней и с прозрачностью.
 var _glass: Dictionary = {}
 ## Где уже стоит пилястра/колонна — чтобы на стыках стен не было двойных.
@@ -195,6 +202,7 @@ func build(path: String) -> Node3D:
 	_emit_meshes(root)
 	_build_floor_collider(root)
 	_build_lights(root)
+	_emit_ceilings(root)
 	_build_markers(root)
 	if not _preview:
 		_build_props(root)
@@ -220,8 +228,9 @@ func _st(store: Dictionary, mat_id: String) -> SurfaceTool:
 func _build_floors() -> void:
 	for room in _rooms:
 		var st := _st(_floors, _floor_mat(String(room.get("floor", "concrete_floor_worn_001"))))
+		var ceil: SurfaceTool = _st(_ceilings, _gb("painted_plaster_wall", "gb_slab")) if _has_ceiling(room) else null
 		if is_strip(room):
-			_strip_floor(st, room)
+			_strip_floor(st, room, ceil)
 			continue
 		var a0 := float(room.a[0])
 		var a1 := float(room.a[1])
@@ -241,10 +250,33 @@ func _build_floors() -> void:
 				pieces = _cut_strip(pieces, s)
 			for poly in pieces:
 				_poly(st, poly)
+				if ceil:
+					_ceiling_poly(ceil, poly)
+
+
+## Потолок — над всем, что под крышей: не двор, не парковка, не атриум (над ним купол).
+func _has_ceiling(room: Dictionary) -> bool:
+	return not bool(room.get("outdoor", false)) and String(room.get("type", "")) != "atrium"
+
+
+## Потолок: тот же многоугольник пола на высоте стен, лицом вниз.
+func _ceiling_poly(st: SurfaceTool, poly: PackedVector3Array) -> void:
+	for i in range(1, poly.size() - 1):
+		var a := poly[0]
+		var b := poly[i]
+		var c := poly[i + 1]
+		if (c - a).cross(b - a).y < 0.0:
+			var tmp := b
+			b = c
+			c = tmp
+		for p in [a, c, b]:
+			st.set_normal(Vector3.DOWN)
+			st.set_uv(_uv_xz(p))
+			st.add_vertex(p + Vector3.UP * _wall_h)
 
 
 ## Пол полосы: столбцы по 1 м поперёк оси, концы — по дугам r0 и r1.
-func _strip_floor(st: SurfaceTool, room: Dictionary) -> void:
+func _strip_floor(st: SurfaceTool, room: Dictionary, ceil: SurfaceTool = null) -> void:
 	var ax := float(room.axis)
 	var t0 := float(room.t[0])
 	var t1 := float(room.t[1])
@@ -258,7 +290,10 @@ func _strip_floor(st: SurfaceTool, room: Dictionary) -> void:
 		var sb0 := sqrt(maxf(r0 * r0 - tb * tb, 0.0))
 		var sa1 := sqrt(maxf(r1 * r1 - ta * ta, 0.0))
 		var sb1 := sqrt(maxf(r1 * r1 - tb * tb, 0.0))
-		_poly(st, PackedVector3Array([strip_point(ax, sa0, ta), strip_point(ax, sb0, tb), strip_point(ax, sb1, tb), strip_point(ax, sa1, ta)]))
+		var quad := PackedVector3Array([strip_point(ax, sa0, ta), strip_point(ax, sb0, tb), strip_point(ax, sb1, tb), strip_point(ax, sa1, ta)])
+		_poly(st, quad)
+		if ceil:
+			_ceiling_poly(ceil, quad)
 
 
 ## Вычитает из выпуклых кусков пола полосу (её поперечный пояс t0..t1 по эту сторону центра).
@@ -918,6 +953,196 @@ func _annulus(st: SurfaceTool, a0: float, a1: float, r0: float, r1: float, y: fl
 		_quad(st, p00, p10, p11, p01, Vector3.UP, _uv_xz(p00), _uv_xz(p10), _uv_xz(p11), _uv_xz(p01))
 
 
+# ---------------------------------------------------------------- потолки, купол, светильники
+
+## Узел «Ceilings»: перекрытия (с коллизией — ловят пули и солнце), стеклянный купол над
+## атриумом с рёбрами, корпуса светильников. Всё — на CEILING_LAYER (только от первого лица).
+## SectorLevel выносит узел из источников навмеша: крыша не должна стать «проходимой».
+func _emit_ceilings(root: Node3D) -> void:
+	if _ceilings.is_empty() and _ring.is_empty():
+		return
+	var body := StaticBody3D.new()
+	body.name = "Ceilings"
+	root.add_child(body)
+	for mat_id in _ceilings:
+		var mi := _mesh_node(_ceilings[mat_id], String(mat_id), true)
+		mi.name = "Ceiling_" + String(mat_id)
+		mi.layers = CEILING_LAYER
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		body.add_child(mi)
+		_shadow_twin(body, mi)
+		var cs := CollisionShape3D.new()
+		cs.name = String(mat_id) + "_col"
+		cs.shape = (mi.mesh as ArrayMesh).create_trimesh_shape()
+		body.add_child(cs)
+	if not _ring.is_empty():
+		var floors := int(_ring.get("floors", 4))
+		_build_atrium_shaft(body, float(_ring.get("atrium_r", 30.0)), floors)
+		_build_dome(body, float(_ring.get("atrium_r", 30.0)), _wall_h * floors)
+	# корпуса светильников — белые панели на потолке над каждым огнём
+	var lamp_mesh := BoxMesh.new()
+	lamp_mesh.size = Vector3(1.4, 0.08, 0.36)
+	var lamp_mat := StandardMaterial3D.new()
+	lamp_mat.albedo_color = Color(0.95, 0.97, 0.95)
+	lamp_mat.emission_enabled = true
+	lamp_mat.emission = Color(0.85, 0.95, 0.9)
+	lamp_mat.emission_energy_multiplier = 2.5
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = lamp_mesh
+	mm.instance_count = _lamps.size()
+	for i in range(_lamps.size()):
+		var p: Vector3 = _lamps[i]
+		var yaw := atan2(p.x, p.z) + PI * 0.5
+		mm.set_instance_transform(i, Transform3D(Basis(Vector3.UP, yaw), p + Vector3.UP * (_wall_h - 0.05)))
+	var lamps := MultiMeshInstance3D.new()
+	lamps.name = "Lamps"
+	lamps.multimesh = mm
+	lamps.material_override = lamp_mat
+	lamps.layers = CEILING_LAYER
+	lamps.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	lamps.add_to_group("mall_lamps")
+	body.add_child(lamps)
+
+
+## Атриум — общий на все этажи ТЦ: шахта от 1F до крыши над последним этажом. Над 1F видно
+## галереи верхних этажей (перекрытия с краем и стеклянным ограждением), фасады их магазинов по
+## кругу галереи, кольцо крыши у купола. Декорация (туда не попасть — этажи отдельными картами);
+## тень от неё — как от настоящих перекрытий.
+func _build_atrium_shaft(parent: Node3D, atrium_r: float, floors: int) -> void:
+	var zones: Dictionary = _ring.get("zones", {})
+	var gal_r := float((zones.get("gal", [atrium_r, atrium_r + 10.0]) as Array)[1])
+	var store := {}
+	var slab := _gb("concrete_panels", "gb_slab")
+	var facade := _gb("painted_plaster_wall", "gb_partition")
+	var steel := _gb("steel_dark", "gb_structural")
+	for k in range(1, floors + 1):
+		var y := _wall_h * float(k)
+		var t := 0.45
+		# перекрытие галереи: верх, низ, торец у атриума (на крыше — просто кольцо)
+		_annulus(_st(store, slab), -180.0, 180.0, atrium_r, gal_r + 0.2, y)
+		_annulus_down(_st(store, slab), atrium_r, gal_r + 0.2, y - t)
+		_wall_strip(_st(store, slab), _arc_points(atrium_r, -180.0, 180.0), 0.3, t, y - t)
+		if k < floors:
+			# ограждение: стекло и поручень
+			_wall_strip(_st(store, "glass"), _arc_points(atrium_r + 0.2, -180.0, 180.0), 0.03, 1.0, y)
+			_wall_strip(_st(store, steel), _arc_points(atrium_r + 0.2, -180.0, 180.0), 0.08, 0.06, y + 1.0)
+			# витрины верхнего этажа по кругу галереи
+			_wall_strip(_st(store, "glass"), _arc_points(gal_r - 0.05, -180.0, 180.0), 0.04, _wall_h * 0.5, y + 0.4)
+	# стена-фасад верхних этажей по краю галереи (от потолка 1F до крыши)
+	_wall_strip(_st(store, facade), _arc_points(gal_r + 0.2, -180.0, 180.0), 0.3, _wall_h * float(floors - 1), _wall_h)
+	for mat_id in store:
+		var mi := _mesh_node(store[mat_id], String(mat_id), false)
+		mi.name = "Shaft_" + String(mat_id)
+		mi.layers = CEILING_LAYER
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		parent.add_child(mi)
+		if String(mat_id) != "glass":
+			_shadow_twin(parent, mi)
+
+
+## Кольцо лицом вниз (низ перекрытия).
+func _annulus_down(st: SurfaceTool, r0: float, r1: float, y: float) -> void:
+	var n := maxi(1, int(ceil(TAU * r1 / (SEG_LEN * 2.0))))
+	var lift := Vector3.UP * y
+	for i in range(n):
+		var aa := lerpf(-180.0, 180.0, float(i) / n)
+		var ab := lerpf(-180.0, 180.0, float(i + 1) / n)
+		var p00 := polar(aa, r0) + lift
+		var p01 := polar(aa, r1) + lift
+		var p10 := polar(ab, r0) + lift
+		var p11 := polar(ab, r1) + lift
+		_quad(st, p00, p01, p11, p10, Vector3.DOWN, _uv_xz(p00), _uv_xz(p01), _uv_xz(p11), _uv_xz(p10))
+
+
+## Стеклянный купол атриума: сферический сегмент от стен (высота стен) к зениту, стальные
+## рёбра-меридианы и кольца. Стекло тень не отбрасывает (солнце проходит), рёбра — да.
+func _build_dome(parent: Node3D, radius: float, base_y: float) -> void:
+	var rise := radius * 0.32
+	var glass_st := SurfaceTool.new()
+	glass_st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var rings := 10
+	var segs := 64
+	for i in range(rings):
+		for j in range(segs):
+			var t0 := float(i) / rings
+			var t1 := float(i + 1) / rings
+			var a0 := TAU * float(j) / segs
+			var a1 := TAU * float(j + 1) / segs
+			var q := [_dome_pt(radius, rise, base_y, t0, a0), _dome_pt(radius, rise, base_y, t0, a1), _dome_pt(radius, rise, base_y, t1, a1), _dome_pt(radius, rise, base_y, t1, a0)]
+			for k in [0, 2, 1, 0, 3, 2]:
+				var p: Vector3 = q[k]
+				glass_st.set_normal(Vector3(-p.x, radius, -p.z).normalized())
+				glass_st.add_vertex(p)
+	var glass := MeshInstance3D.new()
+	glass.name = "DomeGlass"
+	glass.mesh = glass_st.commit()
+	var gm := StandardMaterial3D.new()
+	gm.albedo_color = Color(0.75, 0.86, 0.92, 0.14)
+	gm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	gm.roughness = 0.05
+	gm.metallic = 0.4
+	gm.cull_mode = BaseMaterial3D.CULL_DISABLED
+	glass.material_override = gm
+	glass.layers = CEILING_LAYER
+	glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(glass)
+	var steel := SectorMaterials.get_material(_gb("steel_dark", "gb_structural"), true)
+	var ribs := SurfaceTool.new()
+	ribs.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# меридианы
+	for j in range(16):
+		var a := TAU * float(j) / 16.0
+		for i in range(rings):
+			_beam(ribs, _dome_pt(radius, rise, base_y, float(i) / rings, a), _dome_pt(radius, rise, base_y, float(i + 1) / rings, a), 0.22)
+	# кольца
+	for i in [0, 3, 6, 9]:
+		for j in range(segs):
+			_beam(ribs, _dome_pt(radius, rise, base_y, float(i) / rings, TAU * float(j) / segs), _dome_pt(radius, rise, base_y, float(i) / rings, TAU * float(j + 1) / segs), 0.2)
+	var rib := MeshInstance3D.new()
+	rib.name = "DomeRibs"
+	rib.mesh = ribs.commit()
+	rib.material_override = steel
+	rib.layers = CEILING_LAYER
+	rib.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(rib)
+	_shadow_twin(parent, rib)
+
+
+## Тень потолка в обоих видах: Godot не строит тень от того, что камера не рисует (слой
+## CEILING_LAYER изометрия не видит) — рядом двойник «только тень» на обычном слое.
+func _shadow_twin(parent: Node3D, mi: MeshInstance3D) -> void:
+	var twin := MeshInstance3D.new()
+	twin.name = mi.name + "_shadow"
+	twin.mesh = mi.mesh
+	twin.transform = mi.transform
+	twin.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	parent.add_child(twin)
+
+
+## Точка купола: t — от края (0) к зениту (1), a — азимут; base_y — высота опоры.
+func _dome_pt(radius: float, rise: float, base_y: float, t: float, a: float) -> Vector3:
+	var r := radius * cos(t * PI * 0.5)
+	var y := base_y + rise * sin(t * PI * 0.5)
+	return Vector3(cos(a) * r, y, sin(a) * r)
+
+
+## Балка квадратного сечения w между точками (для рёбер купола).
+func _beam(st: SurfaceTool, p0: Vector3, p1: Vector3, w: float) -> void:
+	var d := (p1 - p0).normalized()
+	var side := d.cross(Vector3.UP).normalized() if absf(d.y) < 0.99 else Vector3.RIGHT
+	var up := side.cross(d).normalized()
+	var h := w * 0.5
+	var corners := [side * h + up * h, -side * h + up * h, -side * h - up * h, side * h - up * h]
+	for k in range(4):
+		var c0: Vector3 = corners[k]
+		var c1: Vector3 = corners[(k + 1) % 4]
+		var n := (c0 + c1).normalized()
+		for p in [p0 + c0, p1 + c0, p1 + c1, p0 + c0, p1 + c1, p0 + c1]:
+			st.set_normal(n)
+			st.add_vertex(p)
+
+
 # ---------------------------------------------------------------- узлы
 
 func _emit_meshes(root: Node3D) -> void:
@@ -1048,7 +1273,9 @@ func _build_lights(root: Node3D) -> void:
 					omni.light_energy = 3.5
 					omni.omni_range = 13.0
 					omni.omni_attenuation = 1.4
+					omni.add_to_group("mall_lights")
 					lights.add_child(omni)
+					_lamps.append(pos)
 
 
 ## Свет полосы — сеткой по её прямоугольнику (шаг как у помещений кольца).
@@ -1071,7 +1298,9 @@ func _strip_lights(lights: Node3D, room: Dictionary) -> void:
 			omni.light_energy = 3.5
 			omni.omni_range = 13.0
 			omni.omni_attenuation = 1.4
+			omni.add_to_group("mall_lights")
 			lights.add_child(omni)
+			_lamps.append(pos)
 
 
 ## Пропсы по правилам помещений (см. PropPlacement). Сид — из id сектора: расстановка воспроизводима.

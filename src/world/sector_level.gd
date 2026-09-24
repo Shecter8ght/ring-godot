@@ -65,6 +65,10 @@ func _ready() -> void:
 	sector.add_to_group("nav_source")
 	add_child(sector)
 	move_child(sector, 0)
+	# потолки и купол — не источник навмеша (иначе крыша станет «полом» для мародёров)
+	var ceil := sector.get_node_or_null("Ceilings")
+	if ceil:
+		ceil.reparent(self)
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})
