@@ -1720,12 +1720,27 @@ func _shoot(suppress: bool) -> void:
 			mask, float(_spec.damage), exclude, _rng, 0, {"pen": float(_spec.pen), "armor_dmg": float(_spec.armor_dmg)})
 		if i == 0 or i % 3 == 0:
 			Tracer.spawn(get_tree().current_scene, from, hit.get("position", hit.get("end", from)), Color(1.0, 0.6, 0.35))
+		_near_miss(from, hit)
 	if float(_spec.get("flash", 1.0)) > 0.05:
 		_muzzle.visible = true
 		get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
 	# свои выстрелы товарищи слышат как «бой» — не как свист пуль у себя
 	NoiseBus.emit(global_position, float(_spec.noise_m), "shot_ai")
 	Audio.play(String(_spec.sound), from)
+
+
+## Пуля прошла рядом с игроком (не в него) — ему страшно (Player.near_miss, стресс).
+func _near_miss(from: Vector3, hit: Dictionary) -> void:
+	var end: Vector3 = hit.get("position", hit.get("end", from))
+	var near := float(Balance.STRESS.near_m)
+	for n in get_tree().get_nodes_in_group("players"):
+		var pl := n as Player
+		if pl == null or hit.get("collider") == pl:
+			continue
+		var chest := pl.global_position + Vector3.UP * 1.2
+		var q := Geometry3D.get_closest_point_to_segment(chest, from, end)
+		if q.distance_to(chest) < near:
+			pl.near_miss()
 
 
 # ---------------------------------------------------------------- реплики

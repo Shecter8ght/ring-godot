@@ -172,4 +172,11 @@ func _explode() -> void:
 	if rig:
 		var cam_d := pos.distance_to(rig.focus_point())
 		rig.add_shake(clampf(1.0 - cam_d / float(spec.shake_radius), 0.0, 1.0) * 0.9)
+	# рвануло рядом — страшно (у себя: взрыв виден у всех peer)
+	for n in get_tree().get_nodes_in_group("players"):
+		var pl := n as Player
+		if pl and pl.is_local():
+			var k := clampf(1.0 - pl.global_position.distance_to(pos) / float(spec.shake_radius), 0.0, 1.0)
+			if k > 0.0:
+				pl.add_stress(float(Balance.STRESS.blast) * k)
 	queue_free()

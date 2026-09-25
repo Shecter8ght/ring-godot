@@ -78,6 +78,7 @@ tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 tools/godot.cmd --headless res://tools/coop_hideout_host.tscn # + coop_hideout_client.tscn через 3 с: собрание в убежище —
                                                               # видят друг друга, телевизор общий, «Рейд всем» — оба в рейде
+tools/godot.cmd --headless res://tools/stress_test.tscn    # стресс: пули рядом, спад в тишине, пороги, адреналин, обезболивающее
 tools/godot.cmd res://tools/vault_test.tscn                # перелезание (игрок и мародёр по связке навигации), бросок на землю; снимки vault_*
 tools/godot.cmd res://tools/bunker_test.tscn               # спуски в убежище: появился внизу, вырез в асфальте, подъём наверх; снимки bunker_*
 tools/godot.cmd res://tools/info_shots.tscn                # снимки окна описания предмета (info_*) и прицела гранаты (nade_aim)

@@ -480,13 +480,17 @@ func _pick_med(me: Player, id: String) -> void:
 
 func _try_heal_with(me: Player, id: String) -> void:
 	var down := me.is_downed()
-	if _heal_t > 0.0 or (not down and me.health.hp >= me.health.max_hp):
+	# обезболивающее и при полном здоровье — унять дрожь (стресс)
+	var calm := id == "painkillers" and me.stress > 20.0
+	if _heal_t > 0.0 or (not down and me.health.hp >= me.health.max_hp and not calm):
 		return
 	if down and id != "medkit" and id != "bandage":
 		Raid.current.notify("Лёжа поможет только аптечка (подняться) или бинт")
 		return
 	var use: Dictionary = ItemDb.item(id).use
 	Raid.current.request_use_med(id)
+	if id == "painkillers":
+		me.add_stress(-float(Balance.STRESS.painkillers))
 	_heal_total = Balance.REVIVE_SELF_SEC if down and id == "medkit" else float(use.time)
 	_heal_t = _heal_total
 	_bar_label.text = "Лечение: " + ItemDb.item_name(id)

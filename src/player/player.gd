@@ -93,6 +93,15 @@ var nvg_charge: float = Balance.NVG_BATTERY_SEC
 var _vault: Dictionary = {}
 var _vault_t: float = -1.0
 var _vault_sec: float = 0.75
+## Стресс 0–100 (Balance.STRESS): считает владелец; события от хоста (пули рядом) — по RPC.
+var stress: float = 0.0
+var _stress_quiet: float = 0.0
+var _near_t: float = 0.0
+var _stumble_cd: float = 0.0
+var _fumble_cd: float = 0.0
+var _vault_stumble: bool = false
+## Напарники, которых я видел лежащими раненными (peer → true) — упал новый рядом: стресс.
+var _allies_down: Dictionary = {}
 ## Бросок на землю (Alt): сколько уже летит (-1 — нет), куда, когда можно снова.
 var _dive_t: float = -1.0
 var _dive_dir: Vector3 = Vector3.ZERO
@@ -125,7 +134,9 @@ func _ready() -> void:
 		_last_hit_from = from
 		_last_damage = amount
 		if is_local() and _camera_rig is CameraRig:
-			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE))
+			# на адреналине попадание почти не сбивает
+			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE * (1.0 - float(Balance.STRESS.adr_shake) * stress_k()))
+		add_stress(float(Balance.STRESS.hit) + amount * float(Balance.STRESS.hit_per_dmg)))
 	_muzzle.visible = false
 	# рюкзак — авторитет хоста (узел создан после выдачи авторитета Player — умалчиваемый 1)
 	inventory = Inventory.new()
@@ -245,6 +256,8 @@ func _tick_stamina(delta: float) -> void:
 		var k := 1.0
 		if String(RaidConditions.current.get("weather", "")) == "heat" and RaidAtmosphere.current and not RaidAtmosphere.current.is_indoor(global_position):
 			k = Balance.STAMINA_HEAT
+		# адреналин: дыхания хватает дольше
+		k *= 1.0 - float(Balance.STRESS.adr_stamina) * stress_k()
 		stamina = maxf(0.0, stamina - Balance.STAMINA_DRAIN * k * carry_stamina_k() * delta)
 		_rest_t = Balance.STAMINA_REGEN_DELAY
 		if stamina <= 0.0:
@@ -503,6 +516,14 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		if _vault_t >= 1.0:
 			_vault_t = -1.0
+			if _vault_stumble:
+				# запнулся: перевалился и растянулся за преградой
+				_vault_stumble = false
+				stance = Stance.PRONE
+				_apply_stance()
+				fire_timer = maxf(fire_timer, 0.8)
+				NoiseBus.emit(global_position, float(Balance.VAULT.noise_m) * 1.5, "step")
+				Audio.play("impact_hard", global_position, -6.0)
 		return
 	_dive_cd = maxf(0.0, _dive_cd - delta)
 	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
@@ -587,6 +608,7 @@ func _physics_process(delta: float) -> void:
 		_face_cursor(delta)
 	_footsteps(delta)
 	_tick_stamina(delta)
+	_tick_stress(delta)
 	_recoil = move_toward(_recoil, 0.0, Balance.RECOIL_RETURN * _recoil * delta + 0.02 * delta)
 	_recoil_h = move_toward(_recoil_h, 0.0, Balance.RECOIL_RETURN * absf(_recoil_h) * delta + 0.01 * delta)
 	_bloom = move_toward(_bloom, 0.0, Balance.RECOIL_BLOOM_DECAY * delta)
@@ -756,12 +778,22 @@ func _start_reload(spec: Dictionary) -> void:
 		_reload_kind = kind
 		_reload_rev = int(e.get("rev", 0))
 		_reload_wait = 1.5
-		Raid.current.request_reload(weapon_slot, _ws_state(weapon_slot))
+		var st := _ws_state(weapon_slot)
+		# под сильным стрессом старый магазин выскальзывает на землю (редко)
+		var sc: Dictionary = Balance.STRESS
+		var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+		if kind == "swap" and String(mag.get("id", "")) != "" and _fumble_cd <= 0.0 and stress >= float(sc.fumble_from) 				and _rng.randf() < float(sc.fumble_chance) * _stress_over(float(sc.fumble_from)):
+			st["fumble"] = true
+			_fumble_cd = float(sc.fumble_cd)
+			t += float(sc.fumble_sec)
+			Raid.current.notify("Магазин выскользнул из рук — лежит под ногами")
+		Raid.current.request_reload(weapon_slot, st)
 		_ws_dirty = false
 		# досыпать россыпью в отстёгиваемый магазин — дольше, чем сменить
 		if kind == "topup" and not WeaponDb.weapon(weapon_id).has("internal_mag"):
 			t *= Balance.RELOAD_TOPUP_K
-	reload_timer = t
+	# руки дрожат — дольше
+	reload_timer = t * (1.0 + float(Balance.STRESS.reload_k) * stress_k())
 	Audio.play(String(spec.reload_sound), global_position)
 
 
@@ -1145,6 +1177,14 @@ func _try_vault() -> void:
 	_vault = path
 	_vault_t = 0.0
 	_vault_sec = float(v.sec) * (1.0 + _over() * float(v.weight_k))
+	# под сильным стрессом можно запнуться (редко, не чаще раза в stumble_cd)
+	var sc: Dictionary = Balance.STRESS
+	if _stumble_cd <= 0.0 and stress >= float(sc.stumble_from) and _rng.randf() < float(sc.stumble_chance) * _stress_over(float(sc.stumble_from)):
+		_vault_stumble = true
+		_vault_sec *= 1.6
+		_stumble_cd = float(sc.stumble_cd)
+		if Raid.current:
+			Raid.current.notify("Запнулся — руки не слушаются")
 	stamina = maxf(0.0, stamina - float(v.stamina) * carry_stamina_k())
 	_rest_t = Balance.STAMINA_REGEN_DELAY
 	_cancel_nade_aim()
@@ -1174,6 +1214,96 @@ func _try_dive() -> void:
 	get_tree().create_timer(float(dv.sec)).timeout.connect(func() -> void:
 		if is_inside_tree():
 			Audio.play("impact_hard", global_position, -8.0))
+
+
+## Стресс: прибавить (минус — успокоить). Вызвать можно где угодно (хост — про любого игрока):
+## считает владелец, чужому — по RPC.
+func add_stress(amount: float) -> void:
+	if is_local():
+		_add_stress_local(amount)
+	elif Net.is_networked() and multiplayer.is_server():
+		_rpc_stress.rpc_id(peer_id, amount)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_stress(amount: float) -> void:
+	if multiplayer.get_remote_sender_id() == 1:
+		_add_stress_local(amount)
+
+
+func _add_stress_local(amount: float) -> void:
+	stress = clampf(stress + amount, 0.0, 100.0)
+	if amount > 0.0:
+		_stress_quiet = 0.0
+
+
+## Пуля прошла рядом (хост, по выстрелам мародёров): не чаще раза в near_gap с.
+func near_miss() -> void:
+	if is_local():
+		if _near_t > 0.0:
+			return
+		_near_t = float(Balance.STRESS.near_gap)
+		_add_stress_local(float(Balance.STRESS.near_miss))
+	elif Net.is_networked() and multiplayer.is_server():
+		_rpc_near.rpc_id(peer_id)
+
+
+@rpc("any_peer", "call_remote", "unreliable")
+func _rpc_near() -> void:
+	if multiplayer.get_remote_sender_id() == 1:
+		near_miss()
+
+
+## Насколько стресс уже мешает (0 — ниже effects_from, 1 — на пределе).
+func stress_k() -> float:
+	return _stress_over(float(Balance.STRESS.effects_from))
+
+
+func _stress_over(from: float) -> float:
+	return smoothstep(from, 100.0, stress)
+
+
+## Стресс сам по себе: нижняя граница (ранен, мало здоровья, выдохся), напарник упал рядом,
+## успокоение в тишине (сидя/лёжа на месте и рядом со своими — быстрее).
+func _tick_stress(delta: float) -> void:
+	var sc: Dictionary = Balance.STRESS
+	_near_t = maxf(0.0, _near_t - delta)
+	_stumble_cd = maxf(0.0, _stumble_cd - delta)
+	_fumble_cd = maxf(0.0, _fumble_cd - delta)
+	if not combat_enabled:
+		stress = move_toward(stress, 0.0, delta * 20.0)
+		return
+	var floor_v := 0.0
+	if is_downed():
+		floor_v = float(sc.downed)
+	elif health.hp < health.max_hp * 0.35:
+		floor_v = float(sc.low_hp)
+	if _winded:
+		floor_v = maxf(floor_v, float(sc.winded))
+	var ally_near := false
+	for n in get_tree().get_nodes_in_group("players"):
+		var o := n as Player
+		if o == null or o == self:
+			continue
+		var d := o.global_position.distance_to(global_position)
+		if d < float(sc.ally_m) and not o.is_downed():
+			ally_near = true
+		var down := o.is_downed()
+		if down and not _allies_down.has(o.peer_id) and d < float(sc.ally_down_m):
+			_add_stress_local(float(sc.ally_down))
+		if down:
+			_allies_down[o.peer_id] = true
+		else:
+			_allies_down.erase(o.peer_id)
+	_stress_quiet += delta
+	if _stress_quiet > float(sc.calm_delay):
+		var rate := float(sc.calm)
+		if stance != Stance.STAND and Vector2(velocity.x, velocity.z).length() < 0.5:
+			rate *= float(sc.calm_cover_k)
+		if ally_near:
+			rate *= float(sc.calm_ally_k)
+		stress = maxf(0.0, stress - rate * delta)
+	stress = maxf(stress, floor_v)
 
 
 func is_vaulting() -> bool:
@@ -1210,6 +1340,9 @@ func _stance_speed() -> float:
 			s = Balance.PLAYER_PRONE_SPEED
 		_:
 			s = Balance.PLAYER_SPRINT_SPEED if _can_sprint() and Input.is_action_pressed("sprint") and not aiming else Balance.PLAYER_WALK_SPEED
+			# адреналин: бежит быстрее
+			if s == Balance.PLAYER_SPRINT_SPEED:
+				s *= 1.0 + float(Balance.STRESS.adr_speed) * stress_k()
 	if aiming:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
 	# перегруз: тяжелее free_kg — медленнее

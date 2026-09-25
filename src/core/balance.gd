@@ -321,6 +321,26 @@ const VAULT_LINKS := {"step": 1.5, "detour_m": 7.0, "spacing_m": 2.5, "travel_co
 ## летит, с; сколько приходит в себя (не стреляет), с; шум, м; выносливость; повтор не чаще, с.
 const DIVE := {"speed": 5.0, "hop": 1.6, "sec": 0.42, "recover": 0.55, "noise_m": 20.0, "stamina": 15.0, "cooldown": 1.0}
 
+# --- Стресс ---
+## Стресс 0–100 (свой у каждого игрока). Растёт от того, что пугает: пули рядом (near_miss за пулю,
+## не чаще раза в near_gap с, ближе near_m), попадание (hit + hit_per_dmg за единицу урона), взрыв
+## рядом (blast у самой гранаты, к краю тряски — ноль), тяжёлое ранение (сразу не ниже downed),
+## напарник упал рядом (ally_down, в ally_down_m). Не ниже: low_hp — мало здоровья (< 35%),
+## winded — выдохся. Спадает через calm_delay с тишины на calm в секунду; сидя/лёжа на месте —
+## ×calm_cover_k, напарник в ally_m — ×calm_ally_k. Обезболивающее — минус painkillers.
+## Последствия — только выше effects_from и плавно до 100: перезарядка дольше (×1+reload_k),
+## прицел гуляет сильнее (×1+sway_k); редко, с перерывом — запнулся на перелезании (от
+## stumble_from, шанс до stumble_chance, не чаще stumble_cd), выронил отстёгнутый магазин при
+## смене (от fumble_from, шанс до fumble_chance, не чаще fumble_cd, +fumble_sec к перезарядке).
+## Сердце слышно от heart_from. Адреналин (та же шкала stress_k): бег быстрее на ×1+adr_speed,
+## выносливость тратится медленнее (×1−adr_stamina), попадание трясёт слабее (×1−adr_shake).
+const STRESS := {"adr_speed": 0.1, "adr_stamina": 0.35, "adr_shake": 0.5, "near_miss": 6.0, "near_gap": 0.25, "near_m": 2.0, "hit": 10.0, "hit_per_dmg": 0.35, "blast": 25.0,
+	"downed": 85.0, "ally_down": 22.0, "ally_down_m": 25.0, "low_hp": 35.0, "winded": 20.0,
+	"calm_delay": 3.0, "calm": 5.0, "calm_cover_k": 2.0, "calm_ally_k": 1.5, "ally_m": 8.0, "painkillers": 35.0,
+	"effects_from": 50.0, "reload_k": 0.4, "sway_k": 1.2,
+	"stumble_from": 65.0, "stumble_chance": 0.3, "stumble_cd": 40.0,
+	"fumble_from": 70.0, "fumble_chance": 0.25, "fumble_cd": 45.0, "fumble_sec": 0.8, "heart_from": 70.0}
+
 # --- Общение в коопе ---
 ## Чат (Enter): сколько строк видно и сколько секунд строка висит после последнего сообщения;
 ## реплика над головой, с.

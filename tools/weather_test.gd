@@ -58,6 +58,10 @@ func _ready() -> void:
 		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/weather_heat_glasses.png"))
 	# выносливость: бег тратит, в жару быстрее
 	me.stamina = Balance.STAMINA_MAX
+	# бежать по площади наружу (камера после появления смотрит по-разному — от спуска)
+	var out := SectorBuilder.polar(-96.0, 1.0)
+	var rig := get_tree().get_first_node_in_group("camera_rig") as Node3D
+	rig.rotation.y = atan2(-out.x, -out.z)
 	Input.action_press("sprint")
 	Input.action_press("move_forward")
 	await get_tree().create_timer(1.0).timeout

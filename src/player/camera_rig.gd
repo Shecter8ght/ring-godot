@@ -25,6 +25,8 @@ var _hitmarker: Control
 ## Ранен: кровь по краям, блёклые цвета, стук сердца, звук глуше; лёжа — надпись с таймером.
 var _hurt_fx: ColorRect
 var _hurt_amount: float = 0.0
+## Стресс на экране (плавно за Player.stress_k).
+var _stress_fx: float = 0.0
 var _beat_t: float = 0.0
 var _down_label: Label
 var _muffle: AudioEffectLowPassFilter
@@ -191,13 +193,16 @@ shader_type canvas_item;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
 uniform float amount = 0.0;
 uniform float pulse = 0.0;
+// стресс: сужается поле зрения (тёмные края в такт сердцу), краски тускнеют — без крови
+uniform float stress = 0.0;
 void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
 	float g = dot(c, vec3(0.299, 0.587, 0.114));
-	c = mix(c, vec3(g), amount * 0.75);
+	c = mix(c, vec3(g), amount * 0.75 + stress * 0.3);
 	vec2 d = SCREEN_UV - 0.5;
 	d.x *= SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
 	float r = length(d);
+	c *= 1.0 - smoothstep(0.34 - pulse * 0.03, 0.85, r) * stress * 0.75;
 	float v = smoothstep(0.22 - pulse * 0.06, 0.72, r) * amount;
 	c = mix(c, vec3(0.32, 0.0, 0.0), clamp(v * 1.4, 0.0, 0.88));
 	c *= 1.0 - amount * (0.22 + pulse * 0.1);
@@ -265,18 +270,25 @@ func _update_hurt(pl: Player, delta: float) -> void:
 		var frac := pl.health.hp / maxf(pl.health.max_hp, 1.0)
 		want = clampf((0.35 - frac) / 0.35, 0.0, 1.0) * 0.45
 	_hurt_amount = move_toward(_hurt_amount, want, delta * 1.5)
-	_hurt_fx.visible = _hurt_amount > 0.01
-	var bpm := 64.0 if down else 90.0
+	# стресс: тёмные края и тусклые краски, сердце колотится (от heart_from)
+	var sk := pl.stress_k() if not down else 0.0
+	_stress_fx = move_toward(_stress_fx, sk, delta * 0.8)
+	_hurt_fx.visible = _hurt_amount > 0.01 or _stress_fx > 0.01
+	var loud := not down and pl.stress >= float(Balance.STRESS.heart_from)
+	var bpm := 64.0 if down else lerpf(90.0, 140.0, sk)
 	_beat_t += delta * bpm / 60.0
 	if _beat_t >= 1.0:
 		_beat_t -= 1.0
 		if down:
 			Audio.play("heartbeat", pl.global_position + Vector3.UP)
+		elif loud:
+			Audio.play("heartbeat", pl.global_position + Vector3.UP, -10.0 + 6.0 * sk)
 	var pulse := pow(absf(sin(_beat_t * PI)), 8.0)
 	if _hurt_fx.visible:
 		var sm := _hurt_fx.material as ShaderMaterial
 		sm.set_shader_parameter("amount", _hurt_amount)
 		sm.set_shader_parameter("pulse", pulse)
+		sm.set_shader_parameter("stress", _stress_fx)
 	_set_muffle(down)
 	_down_label.visible = down
 	if down:
@@ -475,6 +487,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
 	_sway_t += delta
 	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
+	# стресс — руки ходят сильнее
+	amp *= 1.0 + float(Balance.STRESS.sway_k) * pl.stress_k()
 	if pl.stance != Player.Stance.STAND:
 		amp *= float(spec.get("braced_spread", 1.0))
 	if pl.is_downed():
