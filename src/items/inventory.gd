@@ -304,6 +304,48 @@ func equip_from_items(idx: int) -> Dictionary:
 	return spill
 
 
+## Снять из слота в рюкзак: в клетку x, y (перетащили в сетку) или куда влезет. Не влезло — false.
+func unequip(slot: String, x: int = -1, y: int = -1, r: bool = false) -> bool:
+	if not equipment.has(slot):
+		return false
+	var list := items.duplicate(true)
+	var e: Dictionary = (equipment[slot] as Dictionary).duplicate(true)
+	var k := ItemDb.put_at(list, e, Balance.BACKPACK_GRID, x, y, r) if x >= 0 else ItemDb.add_to(list, e, Balance.BACKPACK_GRID)
+	if k <= 0:
+		return false
+	var eq := equipment.duplicate(true)
+	eq.erase(slot)
+	items = list
+	equipment = eq
+	return true
+
+
+## Вынуть запись целиком, со всем состоянием (выбросить): "backpack" / "pocket" — по индексу,
+## "equip:<слот>" — из слота. Нет — пусто.
+func take_entry(where: String, idx: int) -> Dictionary:
+	if where.begins_with("equip:"):
+		var slot := where.trim_prefix("equip:")
+		if not equipment.has(slot):
+			return {}
+		var eq := equipment.duplicate(true)
+		var e: Dictionary = eq[slot]
+		eq.erase(slot)
+		equipment = eq
+		return e
+	var list: Array = (pocket if where == "pocket" else items).duplicate(true)
+	if idx < 0 or idx >= list.size():
+		return {}
+	var out: Dictionary = list[idx]
+	list.remove_at(idx)
+	for k in ["x", "y", "r"]:
+		out.erase(k)
+	if where == "pocket":
+		pocket = list
+	else:
+		items = list
+	return out
+
+
 func slot_item(slot: String) -> String:
 	return String((equipment.get(slot, {}) as Dictionary).get("id", ""))
 

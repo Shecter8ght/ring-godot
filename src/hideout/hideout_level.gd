@@ -4,12 +4,43 @@ extends Node3D
 ## тайник со снаряжением, верстак, торговец, выход в рейд. Геометрия — CSG-узлы сцены (двигать
 ## и менять руками), материал — по meta "mat" (id из SectorMaterials, серые "gb_*" тоже можно)
 ## или "color" (плоский цвет); meta "cut" = false — не растворять у камеры (пол).
-## Игрок ходит тем же персонажем, но не стреляет. Всё про деньги и вещи — Profile (оффлайн).
+## Игрок ходит тем же персонажем, но не стреляет. Всё про деньги и вещи — Profile (у каждого свой).
+## Кооп: собираемся здесь. Каждый peer говорит, что он в убежище (Net.enter_scene); у всех, кто
+## здесь, — одноимённые узлы игроков (Player_<peer>): свой ведёт владелец, чужие приходят
+## синхронизатором (только тем, кто в убежище). Рейд всем начинает хост (окно выхода).
+
+const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
+const LOUNGE_SCENE := "res://scenes/world/hideout_lounge.tscn"
+## Бутылка пива выветривается за столько секунд.
+const TIPSY_SEC := 75.0
+const TIPSY_SHADER := """
+shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+uniform float k = 0.0;
+void fragment() {
+	vec2 uv = SCREEN_UV;
+	float t = TIME;
+	vec2 wob = vec2(sin(t * 1.3 + uv.y * 3.0), cos(t * 1.1 + uv.x * 2.5)) * 0.004 * k;
+	vec2 dbl = vec2(0.006 + 0.004 * sin(t * 0.7), 0.001 * cos(t * 0.9)) * k;
+	vec3 a = textureLod(screen_tex, uv + wob, 0.0).rgb;
+	vec3 b = textureLod(screen_tex, uv + wob + dbl, 0.0).rgb;
+	vec3 c = mix(a, b, 0.4 * clamp(k, 0.0, 1.0));
+	float vig = smoothstep(0.95, 0.3, length(uv - 0.5));
+	c *= mix(1.0, vig, 0.35 * k);
+	c = mix(c, c * vec3(1.06, 1.0, 0.88), 0.3 * k);
+	COLOR = vec4(c, 1.0);
+}
+"""
 
 @onready var _camera_rig: CameraRig = $CameraRig
 @onready var _spawn: Marker3D = $Spawn
 
 var _player: Player
+## Чужие игроки в убежище: peer → узел.
+var _others: Dictionary = {}
+## Выпито (досуг): качает в глазах, проходит само.
+var _tipsy: float = 0.0
+var _tipsy_fx: ColorRect
 var _ui: HideoutUI
 var _prompt: Label
 var _money: Label
@@ -22,10 +53,16 @@ func _ready() -> void:
 	add_to_group("hideout_level")
 	Profile.ensure()
 	Profile.pending_raid = false
-	Profile.from_hideout = false
-	_player = (load("res://scenes/player/player.tscn") as PackedScene).instantiate() as Player
-	_player.name = "Player_1"
+	# в рейд — отсюда: со снаряжением профиля (и когда рейд начнёт хост)
+	Profile.from_hideout = true
+	get_tree().node_added.connect(_on_node_added)
+	var me := multiplayer.get_unique_id() if Net.is_networked() else 1
+	_player = PLAYER_SCENE.instantiate() as Player
+	_player.name = "Player_%d" % me
+	_player.peer_id = me
 	_player.combat_enabled = false
+	if Net.is_networked():
+		_player.set_multiplayer_authority(me)
 	add_child(_player)
 	_player.global_position = _spawn.global_position
 	# в руках — основное из снаряжения (как выглядит, с обвесом)
@@ -42,6 +79,83 @@ func _ready() -> void:
 	var qw := QuestWorld.new()
 	qw.name = "QuestWorld"
 	add_child(qw)
+	# досуг: телевизор, магнитола, пиво, диван (своя сцена — правится в редакторе отдельно)
+	if ResourceLoader.exists(LOUNGE_SCENE):
+		add_child((load(LOUNGE_SCENE) as PackedScene).instantiate())
+	_build_tipsy()
+	Net.scenes_changed.connect(_sync_others)
+	Net.enter_scene("hideout")
+
+
+## Пиво: чем больше выпито, тем сильнее качает (до 5 бутылок), проходит за TIPSY_SEC на бутылку.
+func drink() -> void:
+	_tipsy = minf(_tipsy + 1.0, 5.0)
+
+
+func _build_tipsy() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 4
+	add_child(layer)
+	_tipsy_fx = ColorRect.new()
+	_tipsy_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_tipsy_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sh := Shader.new()
+	sh.code = TIPSY_SHADER
+	var m := ShaderMaterial.new()
+	m.shader = sh
+	_tipsy_fx.material = m
+	_tipsy_fx.visible = false
+	layer.add_child(_tipsy_fx)
+
+
+func _exit_tree() -> void:
+	if Engine.is_editor_hint():
+		return
+	if get_tree().node_added.is_connected(_on_node_added):
+		get_tree().node_added.disconnect(_on_node_added)
+
+
+## Синхронизаторы убежища — только тем, кто тоже в убежище.
+func _on_node_added(n: Node) -> void:
+	if n is MultiplayerSynchronizer and is_ancestor_of(n):
+		Net.filter_sync(n as MultiplayerSynchronizer, "hideout")
+
+
+## Кто из своих в убежище — тот и стоит здесь; ушёл (в рейд, в меню, отключился) — пропал.
+func _sync_others() -> void:
+	var me := multiplayer.get_unique_id()
+	var want: Array[int] = []
+	if Net.is_networked():
+		for id in Net.peer_scene:
+			if int(id) != me and Net.visible_in(int(id), "hideout"):
+				want.append(int(id))
+	for id in _others.keys():
+		if not int(id) in want:
+			if is_instance_valid(_others[id]):
+				(_others[id] as Node).queue_free()
+			_others.erase(id)
+	for id in want:
+		if _others.has(id):
+			continue
+		var p := PLAYER_SCENE.instantiate() as Player
+		p.name = "Player_%d" % id
+		p.peer_id = id
+		p.combat_enabled = false
+		p.set_multiplayer_authority(id)
+		add_child(p)
+		p.global_position = _spawn.global_position + Vector3(cos(id * 1.7), 0.0, sin(id * 1.7)) * 1.4
+		# над головой — ник
+		var tag := Label3D.new()
+		tag.text = String(Net.player_names.get(id, "Игрок %d" % id))
+		tag.position = Vector3(0, 2.15, 0)
+		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		tag.font_size = 40
+		tag.pixel_size = 0.004
+		tag.modulate = Color(1.0, 0.9, 0.7)
+		tag.outline_size = 8
+		tag.no_depth_test = true
+		p.add_child(tag)
+		_others[id] = p
 
 
 ## CSG и меши сцены: материал из meta — чтобы сцену можно было собирать и править руками.
@@ -75,9 +189,13 @@ func open_station(st: HideoutStation) -> void:
 	_ui.open(st.kind)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or _player == null:
 		return
+	if _tipsy_fx:
+		_tipsy = maxf(0.0, _tipsy - delta / TIPSY_SEC)
+		_tipsy_fx.visible = _tipsy > 0.01
+		(_tipsy_fx.material as ShaderMaterial).set_shader_parameter("k", minf(_tipsy / 3.0, 1.2))
 	_money.text = "%s ₽" % InventoryUI.money(Profile.money)
 	_prompt.visible = false
 	if _ui.is_open():

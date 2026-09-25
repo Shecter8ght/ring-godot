@@ -16,6 +16,8 @@ static var from_hideout: bool = false
 ## Путь к файлу (тесты подменяют, чтобы не портить настоящий профиль).
 static var path: String = PATH
 
+## Имя сохранения (главное меню).
+static var profile_name: String = ""
 static var money: int = 0
 static var stash: Array = []
 static var equipment: Dictionary = {}
@@ -53,6 +55,7 @@ static func ensure() -> void:
 	var d: Variant = JSON.parse_string(text) if text != "" else null
 	if d is Dictionary:
 		money = int(d.get("money", 0))
+		profile_name = String(d.get("name", ""))
 		stash = d.get("stash", [])
 		equipment = d.get("equipment", {})
 		backpack = d.get("backpack", [])
@@ -88,6 +91,7 @@ static func ensure() -> void:
 
 ## Первый запуск: немного денег и базовый набор в тайнике.
 static func _starter() -> void:
+	profile_name = ""
 	money = Balance.START_MONEY
 	stash = []
 	equipment = {}
@@ -136,7 +140,7 @@ static func save() -> void:
 	if f == null:
 		push_error("Profile: не удалось записать " + path)
 		return
-	f.store_string(JSON.stringify({"money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
+	f.store_string(JSON.stringify({"name": profile_name, "money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
 		"modules": modules, "missions_active": missions_active, "missions_done": missions_done,
 		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "next_conditions": next_conditions}, "  "))
@@ -213,20 +217,21 @@ static func backpack_cells() -> int:
 
 
 ## Сколько штук id в тайнике (все стопки).
-static func stash_count(id: String) -> int:
+## Сколько id в тайнике; fir_only — только найденного в рейде (задания Михалыча).
+static func stash_count(id: String, fir_only: bool = false) -> int:
 	var c := 0
 	for e in stash:
-		if String(e.id) == id:
+		if String(e.id) == id and (not fir_only or bool(e.get("fir", false))):
 			c += int(e.n)
 	return c
 
 
 ## Забрать из тайника n штук id (детали на модули, сдача заданий); сколько забрал.
-static func take_from_stash(id: String, n: int) -> int:
+static func take_from_stash(id: String, n: int, fir_only: bool = false) -> int:
 	var left := n
 	var i := stash.size() - 1
 	while i >= 0 and left > 0:
-		if String(stash[i].id) == id:
+		if String(stash[i].id) == id and (not fir_only or bool(stash[i].get("fir", false))):
 			left -= int(ItemDb.remove_at(stash, i, left).n)
 		i -= 1
 	save()
@@ -314,6 +319,20 @@ static func equip_from(from: String, idx: int) -> bool:
 		if ItemDb.add_to(src, old, grid) == 0:
 			ItemDb.add_to(stash, old, stash_grid())
 	equipment[slot] = entry
+	save()
+	return true
+
+
+## Выбросить насовсем: запись idx списка (тайник, рюкзак, карман) или из слота ("equip:<слот>").
+static func discard(where: String, idx: int) -> bool:
+	if where.begins_with("equip:"):
+		if not equipment.erase(where.trim_prefix("equip:")):
+			return false
+	else:
+		var list := list_of(where)
+		if idx < 0 or idx >= list.size():
+			return false
+		list.remove_at(idx)
 	save()
 	return true
 
@@ -506,12 +525,15 @@ static func sell_price(entry: Dictionary) -> int:
 	return int(floor(float(ItemDb.entry_value(entry)) * Balance.TRADER_SELL_MULT))
 
 
-static func buy(id: String, n: int) -> bool:
+## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack").
+static func buy(id: String, n: int, to: String = "stash") -> bool:
 	var cost := buy_price(id) * n
-	if cost > money or ItemDb.room_in(stash, ItemDb.make(id, n), stash_grid()) < n:
+	var dst := list_of(to)
+	var grid := grid_of(to)
+	if cost > money or ItemDb.room_in(dst, ItemDb.make(id, n), grid) < n:
 		return false
 	money -= cost
-	ItemDb.add_to(stash, ItemDb.make(id, n), stash_grid())
+	ItemDb.add_to(dst, ItemDb.make(id, n), grid)
 	save()
 	return true
 

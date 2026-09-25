@@ -57,6 +57,10 @@ func _ready() -> void:
 		_build_editor_preview()
 		return
 	_rng.randomize()
+	# сеть: всё, что синхронизируется в рейде, — только тем, кто в рейде (ушедший в убежище не
+	# получает поток; спавн игрока придёт клиенту, когда его рейд загрузится)
+	get_tree().node_added.connect(_on_node_added)
+	Net.enter_scene("raid")
 	# условия рейда — до всего остального (от них зависит свет и зрение мародёров)
 	RaidConditions.current = RaidConditions.for_new_raid()
 	RaidConditions.from_host = {}
@@ -132,6 +136,16 @@ func _ready() -> void:
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 		_find_local_player_when_ready()
 	_bake_navmesh()
+
+
+func _exit_tree() -> void:
+	if get_tree().node_added.is_connected(_on_node_added):
+		get_tree().node_added.disconnect(_on_node_added)
+
+
+func _on_node_added(n: Node) -> void:
+	if n is MultiplayerSynchronizer and is_ancestor_of(n):
+		Net.filter_sync(n as MultiplayerSynchronizer, "raid")
 
 
 ## Без сети — один игрок на месте спавна, как раньше (для tools/*.tscn и запуска из редактора).

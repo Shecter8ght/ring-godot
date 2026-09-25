@@ -423,6 +423,56 @@ func request_drop(id: String, n: int) -> void:
 		_rpc_drop.rpc_id(1, id, n)
 
 
+## Снять из слота в рюкзак (x, y — клетка, если перетащили в сетку).
+func request_unequip(slot: String, x: int = -1, y: int = -1, r: bool = false) -> void:
+	if _is_host():
+		_unequip(multiplayer.get_unique_id(), slot, x, y, r)
+	else:
+		_rpc_unequip.rpc_id(1, slot, x, y, r)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_unequip(slot: String, x: int, y: int, r: bool) -> void:
+	if multiplayer.is_server():
+		_unequip(multiplayer.get_remote_sender_id(), slot, x, y, r)
+
+
+func _unequip(peer_id: int, slot: String, x: int, y: int, r: bool) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	if pl.inventory.unequip(slot, x, y, r):
+		Audio.play("pin", pl.global_position, -10.0)
+	elif peer_id == multiplayer.get_unique_id():
+		notify("В рюкзаке нет места — выброси что-нибудь или брось это на землю (ПКМ)")
+
+
+## Выбросить предмет целиком (с обвесом, магазином, износом) — мешком на землю перед собой;
+## where — "backpack" / "pocket" (индекс) или "equip:<слот>".
+func request_drop_entry(where: String, idx: int) -> void:
+	if _is_host():
+		_drop_entry(multiplayer.get_unique_id(), where, idx)
+	else:
+		_rpc_drop_entry.rpc_id(1, where, idx)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_drop_entry(where: String, idx: int) -> void:
+	if multiplayer.is_server():
+		_drop_entry(multiplayer.get_remote_sender_id(), where, idx)
+
+
+func _drop_entry(peer_id: int, where: String, idx: int) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	var e := pl.inventory.take_entry(where, idx)
+	if e.is_empty():
+		return
+	var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
+	spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [e], LootContainer.Look.BAG)
+
+
 ## Владелец: отдать хосту снаряжение из профиля (вызывает уровень при появлении игрока).
 func submit_loadout(lo: Dictionary) -> void:
 	if _is_host():
@@ -1152,10 +1202,22 @@ func _spawn_quest_guards(pos: Vector3, n: int, radius: float) -> void:
 
 
 ## В убежище: из сети выходим, рейд забыт.
+## В убежище. В сети связь не рвётся — встречаемся в убежище; хост уходит — рейд кончается и
+## у остальных (кто не вышел — теряет взятое, как при смерти).
 func go_hideout() -> void:
-	Net.disconnect_all()
+	if Net.is_host():
+		_host_left.rpc()
 	Profile.pending_raid = false
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _host_left() -> void:
+	notify("Хост ушёл из рейда — все в убежище")
+	await get_tree().create_timer(2.5).timeout
+	if is_inside_tree():
+		Profile.pending_raid = false
+		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 
 
 ## Новый рейд: хост переводит всех заново в сектор; без сети — перезагрузка сцены.

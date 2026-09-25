@@ -17,6 +17,9 @@ var hp: float
 var alive: bool = true
 ## Может лечь раненым вместо смерти (игрок, мародёр; мишени — нет).
 var can_down: bool = false
+## Смертельное попадание — сначала тоже ранение (игрок): мгновенной смерти нет, пока есть
+## ранения в запасе (DOWN_MAX); уже лежащего — добивает.
+var always_down_first: bool = false
 var downed: bool = false
 var down_hp: float = 0.0
 var bleed_t: float = 0.0
@@ -71,6 +74,12 @@ func take_damage(amount: float, from: Vector3, zone: String = "", at: Vector3 = 
 		lethal = lethal or bool(r[1])
 	if lethal and zone == "head" and head_protected.is_valid() and bool(head_protected.call()):
 		lethal = false
+	# игрок: смертельное — тяжёлое ранение с быстрым кровотечением
+	if lethal and always_down_first and can_down and not downed and downs < Balance.DOWN_MAX:
+		damaged.emit(amount, from)
+		_go_down()
+		bleed_t *= Balance.DOWN_LETHAL_BLEED_K
+		return
 	# в голову без шлема, подорвался на гранате — смерть сразу, сколько бы ни было здоровья
 	if lethal:
 		hp = 0.0

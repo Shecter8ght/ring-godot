@@ -76,7 +76,17 @@ tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика пр
 tools/build_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.5.1 + RING.pck, шаблоны не нужны)
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
                                                               # реальный ENet по 127.0.0.1, проверка репликации
+tools/godot.cmd --headless res://tools/coop_hideout_host.tscn # + coop_hideout_client.tscn через 3 с: собрание в убежище —
+                                                              # видят друг друга, телевизор общий, «Рейд всем» — оба в рейде
+tools/godot.cmd res://tools/hideout_move_probe.tscn          # скорость в убежище: шаг / бег (с оружием, от первого лица)
 ```
+
+Перед сетевыми тестами — убить висящие процессы Godot: старый хост держит порт 7777, и клиент
+подключается к нему. Сетевые пары не запускать одновременно.
+
+Стартовая сцена — `scenes/ui/main_menu.tscn` (Продолжить / Новая игра / Загрузить / Собрание /
+Настройки). Сохранения — `Saves` (`user://saves/*.json`, последнее — `[profile] last` в настройках);
+тесты по-прежнему берут свои профили через `Profile.use_file(...)`.
 
 Godot: `D:\ПРОГРАММЫ\Godot_v4.5.1-stable_win64.exe\Godot_v4.5.1-stable_win64_console.exe`
 (путь — в `tools/godot.cmd`, править только там). Тестов нет: проверка — запустить и посмотреть.

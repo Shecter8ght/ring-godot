@@ -60,7 +60,8 @@ static func goal(m: Dictionary) -> int:
 static func progress(id: String) -> int:
 	var m := find(id)
 	if String(m.get("type", "")) == "hand_in":
-		return mini(Profile.stash_count(String(m.item)), goal(m))
+		# только найденное в рейде — купленное у Михалыча ему же не сдать
+		return mini(Profile.stash_count(String(m.item), true), goal(m))
 	return int(Profile.missions_active.get(id, 0))
 
 
@@ -74,7 +75,7 @@ static func turn_in(id: String) -> bool:
 		return false
 	var m := find(id)
 	if String(m.type) == "hand_in":
-		Profile.take_from_stash(String(m.item), goal(m))
+		Profile.take_from_stash(String(m.item), goal(m), true)
 	Profile.missions_active.erase(id)
 	Profile.missions_done.append(id)
 	Profile.money += int(m.reward.get("money", 0))

@@ -241,8 +241,9 @@ func _refresh_lists(me: Player) -> void:
 							Raid.current.notify("Не поставить: " + why)
 							return
 					Raid.current.request_fit("equip:" + ws, -1, idx, ""))
-				sv.context.connect(func(at: Vector2) -> void: _parts_menu(me.inventory.equipment.get(ws, {}), at,
-					func(part: String) -> void: Raid.current.request_strip("equip:" + ws, -1, part)))
+				# двойной клик — снять в рюкзак; ПКМ — снять, выбросить, снять обвес / магазин / плиту
+				sv.unequip_requested.connect(func() -> void: Raid.current.request_unequip(ws))
+				sv.context.connect(func(at: Vector2) -> void: _slot_menu(me, ws, at))
 				slots.add_child(sv)
 			_bp_grid = GridView.new(Balance.BACKPACK_GRID, "backpack")
 			_bp_grid.set_items(me.inventory.items)
@@ -261,6 +262,8 @@ func _refresh_lists(me: Player) -> void:
 				pk.set_items(me.inventory.pocket)
 				_bp_list.add_child(pk)
 				grids.append(pk)
+			# из слота — в клетку рюкзака
+			_bp_grid.slot_dropped.connect(func(slot: String, x: int, y: int, r: bool) -> void: Raid.current.request_unequip(slot, x, y, r))
 			for g in grids:
 				var dst := g.role
 				g.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
@@ -350,7 +353,21 @@ func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
 		var c := _looting
 		acts.append(func() -> void: Raid.current.request_put(c, idx))
 	names.append("Выбросить")
-	acts.append(func() -> void: Raid.current.request_drop(id, int(it.n)))
+	acts.append(func() -> void: Raid.current.request_drop_entry("backpack", idx))
+	_popup(at, names, acts)
+
+
+## Правая кнопка по слоту: снять в рюкзак, выбросить, снять обвес / магазин / плиты.
+func _slot_menu(me: Player, slot: String, at: Vector2) -> void:
+	var e: Dictionary = me.inventory.equipment.get(slot, {})
+	if e.is_empty():
+		return
+	var names: Array = ["Снять в рюкзак", "Выбросить"]
+	var acts: Array = [func() -> void: Raid.current.request_unequip(slot), func() -> void: Raid.current.request_drop_entry("equip:" + slot, -1)]
+	for p in Gear.parts(e):
+		var part := String(p[1])
+		names.append(String(p[0]))
+		acts.append(func() -> void: Raid.current.request_strip("equip:" + slot, -1, part))
 	_popup(at, names, acts)
 
 

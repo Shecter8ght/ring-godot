@@ -41,6 +41,16 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	return c
 
 
+## Отметка: 1 — подходит (золотая рамка), -1 — не к месту (приглушить), 0 — как есть.
+func mark(k: int) -> void:
+	var sb := (get_theme_stylebox("panel") as StyleBoxFlat).duplicate() as StyleBoxFlat
+	if k > 0:
+		sb.border_color = Color(1.0, 0.8, 0.35, 0.95)
+		sb.set_border_width_all(2)
+	add_theme_stylebox_override("panel", sb)
+	modulate = Color(1, 1, 1, 0.35) if k < 0 else Color(1, 1, 1, 1)
+
+
 static func _label(t: String, size: int, color: Color) -> Label:
 	var l := Label.new()
 	l.text = t

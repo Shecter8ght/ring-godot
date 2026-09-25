@@ -173,6 +173,9 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 					else:
 						_merge(out, WeaponDb.canonical(id), n)
 				break
+	# найдено в рейде: сдать Михалычу по заданию можно только такое (купленное — нет)
+	for e in out:
+		e["fir"] = true
 	return out
 
 
@@ -235,7 +238,8 @@ static func make(id: String, n: int) -> Dictionary:
 
 ## Предмет с состоянием (прочность, обвес, магазин, патроны в магазине, плиты) не складывается.
 static func can_merge(a: Dictionary, b: Dictionary) -> bool:
-	return String(a.id) == String(b.id) and not _stateful(a) and not _stateful(b)
+	# найденное в рейде с купленным в одну стопку не ложится
+	return String(a.id) == String(b.id) and not _stateful(a) and not _stateful(b) and bool(a.get("fir", false)) == bool(b.get("fir", false))
 
 
 ## Экземпляр со своим состоянием — всегда поштучно.
@@ -494,6 +498,10 @@ static func max_dur(id: String) -> float:
 ## Название с состоянием: «Автомат 5.45×39 · 91% · 17/30 5.45», «Магазин … · 17/30 5.45»,
 ## «Плитоносец … · перед 21/72 · зад 70/72», «Шлем … · 32/50».
 static func label(entry: Dictionary) -> String:
+	return _label(entry) + ("  · из рейда" if bool(entry.get("fir", false)) else "")
+
+
+static func _label(entry: Dictionary) -> String:
 	var id := String(entry.id)
 	var t := item_name(id)
 	if WeaponDb.is_weapon(id):

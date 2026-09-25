@@ -86,6 +86,7 @@ const MISSION_SLOTS := [1, 3]
 const TRUST_BONUS := 1
 const TRUST_BONUS_VALUE := 60000
 ## Сцены: убежище (старт игры, между рейдами) и рейд.
+const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 const HIDEOUT_SCENE := "res://scenes/levels/hideout.tscn"
 const RAID_SCENE := "res://scenes/levels/f1_ring.tscn"
 ## Камера в убежище ближе — комната тесная.
@@ -194,6 +195,9 @@ const DOWN_HP := 30.0
 ## До смерти от кровотечения, с: первое ранение, второе.
 const DOWN_BLEED_SEC := [60.0, 35.0]
 const DOWN_MAX := 2
+## Игрок не умирает сразу: смертельное попадание (голова без шлема, граната в упор) — тоже
+## тяжёлое ранение, но кровь уходит быстрее (время × DOWN_LETHAL_BLEED_K).
+const DOWN_LETHAL_BLEED_K := 0.5
 const DOWN_CRAWL_SPEED := 0.3
 ## Раскачка прицела лёжа раненым ×, разброс ×.
 const DOWN_SWAY := 3.0

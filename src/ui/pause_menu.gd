@@ -49,6 +49,7 @@ var _main: VBoxContainer
 var _controls: VBoxContainer
 var _settings: VBoxContainer
 var _leave: Button
+var _to_menu: Button
 var _view_btn: Button
 var _admin_btn: Button
 var _admin: VBoxContainer
@@ -103,6 +104,13 @@ func _ready() -> void:
 	_main.add_child(_admin_btn)
 	_leave = _button("Покинуть рейд", _on_leave)
 	_main.add_child(_leave)
+	# из убежища — в главное меню (собрание распускается)
+	_to_menu = _button("В главное меню", func() -> void:
+		close_menu()
+		Net.disconnect_all()
+		Profile.pending_raid = false
+		get_tree().change_scene_to_file(Balance.MAIN_MENU_SCENE))
+	_main.add_child(_to_menu)
 	_main.add_child(_button("Выйти из игры", func() -> void: get_tree().quit()))
 	_controls = VBoxContainer.new()
 	_controls.add_theme_constant_override("separation", 4)
@@ -216,7 +224,9 @@ func open_menu() -> void:
 	var scene := get_tree().current_scene
 	var in_raid := Raid.current != null
 	var in_hideout := scene != null and scene.scene_file_path == Balance.HIDEOUT_SCENE
-	_leave.visible = in_raid or not in_hideout
+	var in_menu := scene != null and scene.scene_file_path == Balance.MAIN_MENU_SCENE
+	_leave.visible = (in_raid or not in_hideout) and not in_menu
+	_to_menu.visible = in_hideout
 	# со снаряжением из профиля уход = потеря всего, что взял с собой (как смерть)
 	_leave.text = "Покинуть рейд (снаряжение останется там)" if Profile.pending_raid else "В убежище"
 	if not Net.is_networked():
@@ -379,6 +389,15 @@ func _grant(peer: int, amount: int, btn: Button) -> void:
 
 
 ## Открыть меню сразу на панели денег (кнопка в лобби).
+## Главное меню: сразу настройки.
+func open_settings() -> void:
+	if not shown:
+		open_menu()
+	_controls.visible = false
+	_admin.visible = false
+	_settings.visible = true
+
+
 func open_admin() -> void:
 	if not shown:
 		open_menu()

@@ -52,11 +52,12 @@ func _player_rules(me: Player) -> void:
 	var two := h.alive
 	h.take_damage(11.0, Vector3.ZERO, "body")
 	_check("лежащего добивают за 3 попадания автомата", two and not h.alive, "")
-	# в голову без шлема — сразу
+	# в голову без шлема — не сразу: ранение с быстрым кровотечением; второе такое — добивает
 	_fresh(h)
 	h.take_damage(30.0, Vector3.ZERO, "head")
+	var fast := h.downed and h.alive and h.bleed_t <= float(Balance.DOWN_BLEED_SEC[0]) * Balance.DOWN_LETHAL_BLEED_K + 0.01
 	h.take_damage(80.0, Vector3.ZERO, "head")
-	_check("в голову без шлема — смерть", not h.alive and not h.downed, "")
+	_check("в голову без шлема — тяжёлое ранение (кровь быстрее), лежащего — добивает", fast and not h.alive, "")
 	# в шлеме: пуля остановлена — контузия, лёг (шлем закрывает не всю голову — несколько попыток)
 	var saved := false
 	for i in range(12):
@@ -71,7 +72,7 @@ func _player_rules(me: Player) -> void:
 	# граната под ногами
 	_fresh(h)
 	h.take_damage(150.0, Vector3.ZERO, "blast_close")
-	_check("граната под ногами — смерть", not h.alive, "")
+	_check("граната под ногами — тяжёлое ранение, не смерть", h.alive and h.downed, "")
 	# третье ранение за рейд — смерть
 	_fresh(h)
 	h.take_damage(150.0, Vector3.ZERO, "body")

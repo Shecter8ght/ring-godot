@@ -1852,6 +1852,9 @@ func _on_died() -> void:
 		var lt := String(WeaponDb.loadout(loadout_id).get("loot_table", ""))
 		if lt != "":
 			drop.append_array(ItemDb.roll(lt, rng))
+		# всё с тела — найдено в рейде (награбленное помечено ещё в ящике)
+		for e in drop:
+			(e as Dictionary)["fir"] = true
 		# награбленное — тоже здесь
 		drop.append_array(pack)
 		pack = []

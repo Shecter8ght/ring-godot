@@ -24,6 +24,12 @@ var _trader: Dictionary = {}
 var _wb_slot: String = "primary"
 ## Торговец: вкладка, количество расходников к покупке, оружие на схеме обвеса (где и uid).
 var _trader_tab: String = "buy"
+## Куда класть купленное: тайник (стеллаж) или рюкзак.
+var _buy_to: String = "stash"
+## Торговец: к какому стволу подсвечивать патроны, магазины, обвес ("" — ни к какому) и
+## показывать ли только подходящее.
+var _focus: String = ""
+var _focus_only: bool = false
 var _qty: Dictionary = {}
 var _tb_where: String = "equip:primary"
 var _tb_uid: String = ""
@@ -107,7 +113,9 @@ func _process(_delta: float) -> void:
 		return
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
-	sig += "|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid]
+	sig += "|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only]
+	# собрание: кто в сети и где — окно выхода обновляется
+	sig += "|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene)]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -244,19 +252,27 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 	if int(list[idx].n) > 1:
 		menu.add_item("Разделить стопку пополам")
 		acts.append(func() -> void: _split(name, idx))
+	menu.add_item("Выбросить…")
+	acts.append(func() -> void: _confirm_discard(name, idx, list[idx]))
 	menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
 	menu.popup_hide.connect(menu.queue_free)
 	_root.add_child(menu)
 	menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
 
 
-## Правая кнопка по слоту снаряжения: что снять (обвес, магазин, плиты) — в тайник.
+## Правая кнопка по слоту снаряжения: снять в тайник, выбросить, снять обвес / магазин / плиты.
 func _parts_menu(where: String, idx: int, e: Dictionary, at: Vector2) -> void:
-	var parts := Gear.parts(e)
-	if parts.is_empty():
+	if e.is_empty():
 		return
+	var parts := Gear.parts(e)
 	var menu := PopupMenu.new()
 	var acts: Array[Callable] = []
+	if where.begins_with("equip:"):
+		var slot := where.trim_prefix("equip:")
+		menu.add_item("Снять в тайник")
+		acts.append(func() -> void: Profile.unequip(slot))
+		menu.add_item("Выбросить…")
+		acts.append(func() -> void: _confirm_discard(where, -1, e))
 	for p in parts:
 		var part := String(p[1])
 		menu.add_item(String(p[0]))
@@ -265,6 +281,21 @@ func _parts_menu(where: String, idx: int, e: Dictionary, at: Vector2) -> void:
 	menu.popup_hide.connect(menu.queue_free)
 	_root.add_child(menu)
 	menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
+
+
+## Выбросить насовсем — только после «Да».
+func _confirm_discard(where: String, idx: int, e: Dictionary) -> void:
+	var d := ConfirmationDialog.new()
+	d.title = "Выбросить"
+	d.dialog_text = "Выбросить насовсем: %s?" % ItemDb.label(e)
+	d.ok_button_text = "Выбросить"
+	d.cancel_button_text = "Отмена"
+	d.confirmed.connect(func() -> void: Profile.discard(where, idx))
+	d.visibility_changed.connect(func() -> void:
+		if not d.visible:
+			d.queue_free())
+	_root.add_child(d)
+	d.popup_centered()
 
 
 ## Половину стопки — отдельной стопкой в свободное место той же сетки.
@@ -320,6 +351,30 @@ func _build_trader() -> void:
 ## Купить: карточки по разделам; у расходников — количество (− / +).
 func _trader_buy() -> void:
 	var shop := _column("Купить", 1.0)
+	# куда класть купленное
+	var dest := HBoxContainer.new()
+	dest.add_theme_constant_override("separation", 6)
+	dest.add_child(_text("Куда класть:", Color(0.75, 0.75, 0.72)))
+	for d in [["stash", "В тайник (стеллаж)"], ["backpack", "В рюкзак"]]:
+		var key := String(d[0])
+		var b := _button(String(d[1]), func() -> void: _buy_to = key)
+		b.toggle_mode = true
+		b.button_pressed = _buy_to == key
+		dest.add_child(b)
+	dest.add_child(_text("рюкзак: %d / %d ячеек" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], Color(0.6, 0.62, 0.6)))
+	shop.add_child(dest)
+	if _focus != "":
+		var fr := HBoxContainer.new()
+		fr.add_theme_constant_override("separation", 6)
+		fr.add_child(_text("Подходит к: %s" % ItemDb.item_name(_focus), Color(1.0, 0.82, 0.45)))
+		var only := _button("Только подходящее", func() -> void: _focus_only = not _focus_only)
+		only.toggle_mode = true
+		only.button_pressed = _focus_only
+		fr.add_child(only)
+		fr.add_child(_button("Сбросить", func() -> void:
+			_focus = ""
+			_focus_only = false))
+		shop.add_child(fr)
 	if Profile.needs_rescue():
 		# без ствола и без денег — Михалыч выручает, иначе из этой ямы не выбраться
 		var kit: Array[String] = []
@@ -341,6 +396,10 @@ func _trader_buy() -> void:
 			flow.add_theme_constant_override("h_separation", 8)
 			flow.add_theme_constant_override("v_separation", 8)
 			shop.add_child(flow)
+		# к выбранному стволу: подходит / не к месту (только патроны, магазины, обвес)
+		var fit := _fits_focus(sid)
+		if _focus_only and fit < 0:
+			continue
 		var stackable := ItemDb.stack(sid) > 1
 		var n := _qty_of(sid) if stackable else 1
 		var price := Profile.buy_price(sid) * n
@@ -354,11 +413,36 @@ func _trader_buy() -> void:
 			if stackable:
 				card.controls.add_child(_button("−", func() -> void: _step_qty(sid, -1)))
 				card.controls.add_child(_button("+", func() -> void: _step_qty(sid, 1)))
-			var b := _button("Купить", func() -> void: Profile.buy(sid, n))
+			var b := _button("Купить", func() -> void:
+				if not Profile.buy(sid, n, _buy_to):
+					_title.text = "Не влезает в %s" % ("рюкзак" if _buy_to == "backpack" else "тайник")
+				elif WeaponDb.is_weapon(sid):
+					# купил ствол — сразу видно, что к нему подходит
+					_focus = sid)
 			b.disabled = price > Profile.money
 			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			card.controls.add_child(b)
+		if WeaponDb.is_weapon(sid):
+			card.controls.add_child(_button("Что подходит", func() -> void: _focus = "" if _focus == sid else sid))
+			if sid == _focus:
+				card.mark(1)
+		elif fit != 0:
+			card.mark(fit)
 		flow.add_child(card)
+
+
+## Подходит ли предмет к выбранному стволу: 1 — да, -1 — нет (патроны, магазины, обвес), 0 — не про то.
+func _fits_focus(sid: String) -> int:
+	if _focus == "":
+		return 0
+	if not WeaponDb.ammo(sid).is_empty():
+		return 1 if WeaponDb.ammo_fits(_focus, sid) else -1
+	if not WeaponDb.magazine(sid).is_empty():
+		return 1 if WeaponDb.mag_fits(_focus, sid) else -1
+	if not WeaponDb.attachment(sid).is_empty():
+		var probe := {"id": _focus, "n": 1, "mods": {}}
+		return 1 if not WeaponDb.mounts_for(probe, sid).is_empty() else -1
+	return 0
 
 
 ## Сколько брать расходника: патроны — шагом 10 (от 10 до 5 стопок), остальное — поштучно.
@@ -568,7 +652,7 @@ func _missions_column() -> void:
 		b.disabled = not Missions.done(mid)
 		head.add_child(b)
 		col.add_child(head)
-		var d := _text("   %s  ·  %s ₽, доверие +%d" % [String(m.text), InventoryUI.money(int(m.reward.get("money", 0))), int(m.reward.get("trust", 0))], Color(0.66, 0.68, 0.66))
+		var d := _text("   %s%s  ·  %s ₽, доверие +%d" % [String(m.text), "  (только найденное в рейде)" if String(m.type) == "hand_in" else "", InventoryUI.money(int(m.reward.get("money", 0))), int(m.reward.get("trust", 0))], Color(0.66, 0.68, 0.66))
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		col.add_child(d)
 	col.add_child(HSeparator.new())
@@ -583,7 +667,7 @@ func _missions_column() -> void:
 		b.disabled = free <= 0
 		head.add_child(b)
 		col.add_child(head)
-		var d := _text("   %s  ·  %s ₽, доверие +%d" % [String(m.text), InventoryUI.money(int(m.reward.get("money", 0))), int(m.reward.get("trust", 0))], Color(0.6, 0.62, 0.6))
+		var d := _text("   %s%s  ·  %s ₽, доверие +%d" % [String(m.text), "  (только найденное в рейде)" if String(m.type) == "hand_in" else "", InventoryUI.money(int(m.reward.get("money", 0))), int(m.reward.get("trust", 0))], Color(0.6, 0.62, 0.6))
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		col.add_child(d)
 	if free <= 0:
@@ -657,20 +741,73 @@ func _build_exit() -> void:
 	if fee > 0:
 		go.add_child(_text("Вылет — %s ₽" % InventoryUI.money(fee), Color(0.9, 0.75, 0.5)))
 	var block := Floors.start_block(Profile.floor)
-	var solo := _button("Соло-рейд", func() -> void:
-		Floors.pay_fee(Profile.floor)
-		Profile.pending_raid = true
-		get_tree().change_scene_to_file(Floors.scene(Profile.floor)))
-	solo.disabled = block != ""
-	go.add_child(solo)
-	var coop := _button("Кооп — лобби (хост / по IP)", func() -> void:
-		Profile.from_hideout = true
-		get_tree().change_scene_to_file("res://scenes/net/lobby.tscn"))
-	coop.disabled = block != ""
-	go.add_child(coop)
+	if not Net.is_networked():
+		var solo := _button("Соло-рейд", func() -> void:
+			Floors.pay_fee(Profile.floor)
+			Profile.pending_raid = true
+			get_tree().change_scene_to_file(Floors.scene(Profile.floor)))
+		solo.disabled = block != ""
+		go.add_child(solo)
+	elif Net.is_host():
+		# все, кто в сети, идут за хостом на его этаж (плата — с хоста)
+		var all := _button("Рейд всем (%d в сети)" % (Net.player_names.size()), func() -> void:
+			Floors.pay_fee(Profile.floor)
+			Net.start_level.rpc(Floors.scene(Profile.floor), Profile.next_conditions))
+		all.disabled = block != ""
+		go.add_child(all)
+	else:
+		go.add_child(_text("Рейд начинает хост — ждём его. Идёте на его этаж и в его условия.", Color(0.9, 0.8, 0.6)))
 	if block != "":
 		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
+	_coop_block(go)
 	go.add_child(_text("Доверие Михалыча: %d   ·   выходов из рейда: %d" % [Profile.trust, Profile.extractions], Color(0.7, 0.72, 0.7)))
+
+
+## Собрание: кто в сети и где; созвать своих (хост) или подключиться по IP; покинуть.
+func _coop_block(col: VBoxContainer) -> void:
+	col.add_child(_text("Собрание (кооп)", Color(0.95, 0.82, 0.6)))
+	if Net.is_networked():
+		var where := {"hideout": "в убежище", "raid": "в рейде", "menu": "в меню"}
+		for id in Net.player_names:
+			var tag := " (хост)" if int(id) == 1 else ""
+			col.add_child(_text("· %s%s — %s" % [String(Net.player_names[id]), tag, String(where.get(String(Net.peer_scene.get(int(id), "")), "подключается"))], Color(0.85, 0.85, 0.8)))
+		col.add_child(_button("Покинуть собрание", func() -> void:
+			Net.disconnect_all()
+			get_tree().reload_current_scene()))
+		return
+	var cfg := ConfigFile.new()
+	cfg.load(CameraRig.SETTINGS_PATH)
+	var nick := LineEdit.new()
+	nick.placeholder_text = "Ник"
+	nick.text = String(cfg.get_value("net", "name", "Игрок%d" % (randi() % 900 + 100)))
+	col.add_child(nick)
+	var ip := LineEdit.new()
+	ip.placeholder_text = "IP хоста"
+	ip.text = String(cfg.get_value("net", "address", "127.0.0.1"))
+	col.add_child(ip)
+	var status := _text("", Color(1.0, 0.6, 0.45))
+	var remember := func() -> void:
+		cfg.set_value("net", "name", nick.text)
+		cfg.set_value("net", "address", ip.text)
+		cfg.save(CameraRig.SETTINGS_PATH)
+	col.add_child(_button("Созвать своих (я хост, порт %d)" % Net.PORT, func() -> void:
+		remember.call()
+		var err := Net.host(nick.text)
+		if err != "":
+			status.text = err
+		else:
+			# убежище заново — уже в сети (свой игрок с синхронизацией)
+			get_tree().reload_current_scene()))
+	col.add_child(_button("Подключиться по IP", func() -> void:
+		remember.call()
+		var err := Net.join(ip.text, nick.text)
+		if err != "":
+			status.text = err
+			return
+		status.text = "Подключаюсь…"
+		Net.joined.connect(func() -> void: get_tree().reload_current_scene(), CONNECT_ONE_SHOT)
+		Net.join_failed.connect(func() -> void: status.text = "Не удалось подключиться", CONNECT_ONE_SHOT)))
+	col.add_child(status)
 
 
 ## Условия рейда: время, погода, электричество — выбор; риск, награда за него и что взять с собой.

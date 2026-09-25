@@ -80,6 +80,8 @@ var _last_damage: float = 0.0
 var _give_up_t: float = 0.0
 ## Несёт раненого NPC (сюжет, QuestWorld): медленно, только пистолет.
 var carrying: bool = false
+## Сидит (диван в убежище): не ходит, пока не шагнёт или не нажмёт C.
+var seated: bool = false
 ## Выносливость: бег тратит, отдых восстанавливает; выдохся — не бежит до порога.
 var stamina: float = Balance.STAMINA_MAX
 var _winded: bool = false
@@ -129,6 +131,7 @@ func _ready() -> void:
 		return inventory.absorb(amount, zone, from, p, Vector3(sin(body_yaw()), 0.0, cos(body_yaw())), bullet, _rng)
 	# тяжело ранен вместо смерти
 	health.can_down = true
+	health.always_down_first = true
 	# рука с оружием — не внутри Body: Body сжимается по стойке, оружие сжиматься не должно
 	_hand = Node3D.new()
 	_hand.name = "Hand"
@@ -209,6 +212,16 @@ func carry_stamina_k() -> float:
 	return lerpf(1.0, float(Balance.CARRY.stamina_max), _over())
 
 
+## Открыто окно (рюкзак, лут, убежище, меню) — мышь и клавиши у окна, не у персонажа.
+func ui_blocked() -> bool:
+	if PauseMenu.shown or (Raid.current and Raid.current.ui_open()):
+		return true
+	for n in get_tree().get_nodes_in_group("esc_windows"):
+		if n.has_method("is_open") and bool(n.call("is_open")):
+			return true
+	return false
+
+
 func _can_sprint() -> bool:
 	return not _winded and stamina > 0.0
 
@@ -269,6 +282,16 @@ func is_local() -> bool:
 
 func body_yaw() -> float:
 	return _body.rotation.y
+
+
+## Сесть (убежище): встать на место, повернуться, присесть; шаг или C — встать.
+func sit(at: Vector3, yaw: float) -> void:
+	seated = true
+	global_position = at
+	velocity = Vector3.ZERO
+	_body.rotation.y = yaw
+	stance = Stance.CROUCH
+	_apply_stance()
 
 
 func recoil() -> float:
@@ -453,6 +476,15 @@ func _process(_delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_local() or not is_alive():
 		return
+	if seated:
+		var mv := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+		if (mv.length() > 0.2 or Input.is_action_just_pressed("crouch")) and not ui_blocked():
+			seated = false
+			stance = Stance.STAND
+			_apply_stance()
+		else:
+			velocity = Vector3.ZERO
+			return
 	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
 	if weapon_slot != "":
 		var we := weapon_entry()
@@ -478,7 +510,7 @@ func _physics_process(delta: float) -> void:
 		if stance != Stance.PRONE:
 			stance = Stance.PRONE
 			_apply_stance()
-		aiming = Input.is_action_pressed("aim") and not (Raid.current and Raid.current.ui_open())
+		aiming = Input.is_action_pressed("aim") and not ui_blocked()
 		_give_up_t = _give_up_t + delta if Input.is_action_pressed("drag") and not PauseMenu.shown else 0.0
 		if _give_up_t >= Balance.GIVE_UP_SEC and Raid.current:
 			_give_up_t = -INF
@@ -600,7 +632,7 @@ func _combat(delta: float) -> void:
 		return
 	fire_timer -= delta
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
-	if not combat_enabled or (Raid.current and Raid.current.ui_open()):
+	if not combat_enabled or ui_blocked():
 		return
 	if loadout_mode:
 		_loadout_tick()
@@ -1024,7 +1056,7 @@ func _read_stance() -> void:
 	if Input.is_action_just_pressed("prone"):
 		stance = Stance.STAND if stance == Stance.PRONE else Stance.PRONE
 		_apply_stance()
-	aiming = Input.is_action_pressed("aim") and not (Raid.current and Raid.current.ui_open())
+	aiming = Input.is_action_pressed("aim") and not ui_blocked()
 
 
 func _stance_key() -> String:
