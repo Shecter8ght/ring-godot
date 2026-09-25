@@ -89,6 +89,14 @@ var _rest_t: float = 0.0
 ## ПНВ включён (N; нужен ПНВ в слоте «глаза») и сколько заряда осталось, с.
 var nvg_on: bool = false
 var nvg_charge: float = Balance.NVG_BATTERY_SEC
+## Перелезает (Пробел у преграды): путь (Vault.find), доля пройденного (-1 — нет), длительность.
+var _vault: Dictionary = {}
+var _vault_t: float = -1.0
+var _vault_sec: float = 0.75
+## Бросок на землю (Alt): сколько уже летит (-1 — нет), куда, когда можно снова.
+var _dive_t: float = -1.0
+var _dive_dir: Vector3 = Vector3.ZERO
+var _dive_cd: float = 0.0
 ## G зажата — прицел гранаты (дуга и круг поражения), отпустил — бросок.
 var _nade_aiming: bool = false
 var _nade_aim: GrenadeAim
@@ -488,6 +496,15 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity = Vector3.ZERO
 			return
+	# перелезает: тело идёт по дуге через преграду, ни стрельбы, ни шагов
+	if _vault_t >= 0.0:
+		_vault_t += delta / _vault_sec
+		global_position = Vault.pos_at(_vault, minf(_vault_t, 1.0))
+		velocity = Vector3.ZERO
+		if _vault_t >= 1.0:
+			_vault_t = -1.0
+		return
+	_dive_cd = maxf(0.0, _dive_cd - delta)
 	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
 	if weapon_slot != "":
 		var we := weapon_entry()
@@ -521,6 +538,13 @@ func _physics_process(delta: float) -> void:
 	else:
 		_give_up_t = 0.0
 		_read_stance()
+		if not ui_blocked() and not PauseMenu.shown:
+			if Input.is_action_just_pressed("vault"):
+				_try_vault()
+				if _vault_t >= 0.0:
+					return
+			if Input.is_action_just_pressed("dive"):
+				_try_dive()
 	_combat(delta)
 	var dragger: Player = Raid.current.dragger_of(peer_id) if down and Raid.current else null
 	if dragger:
@@ -533,6 +557,15 @@ func _physics_process(delta: float) -> void:
 		var pull := (goal - global_position) / maxf(delta, 0.001)
 		velocity.x = clampf(pull.x, -6.0, 6.0)
 		velocity.z = clampf(pull.z, -6.0, 6.0)
+	elif _dive_t >= 0.0:
+		# бросок: рывок в сторону, к концу гаснет
+		var dv: Dictionary = Balance.DIVE
+		_dive_t += delta
+		var k := 1.0 - 0.6 * clampf(_dive_t / float(dv.sec), 0.0, 1.0)
+		velocity.x = _dive_dir.x * float(dv.speed) * k
+		velocity.z = _dive_dir.z * float(dv.speed) * k
+		if _dive_t >= float(dv.sec):
+			_dive_t = -1.0
 	else:
 		var wish := _wish_direction()
 		var speed := _stance_speed()
@@ -542,11 +575,14 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, target.z, rate * delta)
 	if not is_on_floor():
 		velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
-	else:
+	elif not (_dive_t >= 0.0 and _dive_t < 0.1):
+		# в начале броска — подскок (иначе пол тут же гасит его)
 		velocity.y = 0.0
 	move_and_slide()
 	if ads:
 		_body.rotation.y = look_yaw
+	elif _dive_t >= 0.0:
+		_body.rotation.y = atan2(_dive_dir.x, _dive_dir.z)
 	else:
 		_face_cursor(delta)
 	_footsteps(delta)
@@ -1082,6 +1118,66 @@ func _throw_grenade() -> void:
 	fire_timer = 0.6
 	var l := _grenade_launch()
 	Grenade.throw(get_tree().current_scene, l[0], l[1], get_rid())
+
+
+## Куда: по нажатым WASD, иначе — куда смотрит корпус.
+func _action_dir() -> Vector3:
+	var w := _wish_direction()
+	if w.length_squared() > 0.01:
+		return w
+	if ads:
+		return Vector3(sin(look_yaw), 0.0, cos(look_yaw))
+	return Vector3(sin(body_yaw()), 0.0, cos(body_yaw()))
+
+
+## Пробел: перелезть через преграду по пояс впереди (стоя или сидя; не лёжа, не с раненым на руках).
+func _try_vault() -> void:
+	var v: Dictionary = Balance.VAULT
+	if stance == Stance.PRONE or is_burdened() or is_downed() or _winded or stamina < float(v.stamina) * 0.5 or not is_on_floor():
+		return
+	var space := get_world_3d().direct_space_state
+	var path := Vault.find(space, global_position, _action_dir(), [get_rid()])
+	if path.is_empty() and _wish_direction().length_squared() > 0.01:
+		# жмёт вбок, а преграда прямо перед ним
+		path = Vault.find(space, global_position, Vector3(sin(body_yaw()), 0.0, cos(body_yaw())), [get_rid()])
+	if path.is_empty():
+		return
+	_vault = path
+	_vault_t = 0.0
+	_vault_sec = float(v.sec) * (1.0 + _over() * float(v.weight_k))
+	stamina = maxf(0.0, stamina - float(v.stamina) * carry_stamina_k())
+	_rest_t = Balance.STAMINA_REGEN_DELAY
+	_cancel_nade_aim()
+	var d: Vector3 = (path.land as Vector3) - global_position
+	if not ads:
+		_body.rotation.y = atan2(d.x, d.z)
+	NoiseBus.emit(global_position, float(v.noise_m), "step")
+	Audio.play("impact_hard", global_position + Vector3.UP * 0.8, -14.0)
+
+
+## Alt: бросок на землю в сторону движения (любую), дальше — лёжа. Шумно, пару мгновений не стреляет.
+func _try_dive() -> void:
+	var dv: Dictionary = Balance.DIVE
+	if stance == Stance.PRONE or is_burdened() or is_downed() or _dive_cd > 0.0 or _dive_t >= 0.0 or stamina < float(dv.stamina) * 0.5:
+		return
+	_dive_dir = _action_dir()
+	_dive_t = 0.0
+	_dive_cd = float(dv.cooldown)
+	velocity = _dive_dir * float(dv.speed) + Vector3.UP * float(dv.hop)
+	stance = Stance.PRONE
+	_apply_stance()
+	stamina = maxf(0.0, stamina - float(dv.stamina) * carry_stamina_k())
+	_rest_t = Balance.STAMINA_REGEN_DELAY
+	fire_timer = maxf(fire_timer, float(dv.sec) + float(dv.recover))
+	_cancel_nade_aim()
+	NoiseBus.emit(global_position, float(dv.noise_m), "step")
+	get_tree().create_timer(float(dv.sec)).timeout.connect(func() -> void:
+		if is_inside_tree():
+			Audio.play("impact_hard", global_position, -8.0))
+
+
+func is_vaulting() -> bool:
+	return _vault_t >= 0.0
 
 
 func _read_stance() -> void:

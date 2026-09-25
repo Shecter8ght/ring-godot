@@ -4,7 +4,7 @@ extends Node
 
 func _ready() -> void:
 	RaidEvents.enabled = false
-	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
+	RaidConditions.from_host = {"time": OS.get_environment("SHOT_TIME") if OS.get_environment("SHOT_TIME") != "" else "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame
 	var layer := CanvasLayer.new()
 	layer.layer = 40
@@ -43,7 +43,15 @@ func _ready() -> void:
 		Input.warp_mouse(cam.unproject_position(target))
 		await get_tree().physics_frame
 	_save("nade_aim")
+	# отпустил — летит; огонёк мигает на земле
 	Input.action_release("grenade")
+	await get_tree().create_timer(1.1).timeout
+	var cam2 := get_viewport().get_camera_3d()
+	var g := get_tree().current_scene.find_child("Grenade", true, false) as Node3D
+	if g and g.get_node_or_null("Led"):
+		(g.get_node("Led") as Node3D).visible = true
+		g.set_process(false)
+	_save("nade_led")
 	get_tree().quit()
 
 

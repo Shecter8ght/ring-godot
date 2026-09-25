@@ -186,9 +186,12 @@ func _bubble(peer: int, text: String) -> void:
 	b.width = 600.0
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pl.add_child(b)
+	# слабая ссылка: игрок мог уйти со сцены раньше таймера
+	var wb: WeakRef = weakref(b)
 	get_tree().create_timer(Balance.CHAT_BUBBLE_SEC).timeout.connect(func() -> void:
-		if is_instance_valid(b):
-			b.queue_free())
+		var node := wb.get_ref() as Node
+		if node:
+			node.queue_free())
 
 
 func _refresh_log() -> void:

@@ -12,6 +12,10 @@ var _bounced: float = 0.0
 var _damage: bool = true
 ## Кто бросил: -1 — игрок этого peer (убийство — ему), 0 — ИИ (никому).
 var _attacker: int = -1
+## Огонёк: светодиод, ореол вокруг (виден из изометрии) и красный свет — мигают всё чаще к взрыву.
+var _led: Node3D
+var _led_light: OmniLight3D
+var _blink: float = 0.0
 
 
 static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, deal_damage: bool = true, attacker: int = -1) -> Grenade:
@@ -43,6 +47,7 @@ static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, 
 	g.linear_velocity = velocity
 	g.angular_velocity = Vector3(randf_range(-8, 8), randf_range(-4, 4), randf_range(-8, 8))
 	g._fuse = float(Balance.GRENADE.fuse)
+	g._build_led()
 	g.body_entered.connect(g._on_bounce)
 	Audio.play("pin", from)
 	return g
@@ -53,6 +58,67 @@ func _on_bounce(_b: Node) -> void:
 	if _bounced <= 0.0 and linear_velocity.length() > 1.5:
 		Audio.play("impact_metal", global_position, -10.0)
 		_bounced = 0.15
+
+
+## Светодиод на запале: красная точка, ореол-билборд и свет (Balance.GRENADE_LED).
+func _build_led() -> void:
+	var cfg: Dictionary = Balance.GRENADE_LED
+	_led = Node3D.new()
+	_led.name = "Led"
+	# не крутится с гранатой: огонёк сверху, ореол смотрит в камеру
+	_led.top_level = true
+	add_child(_led)
+	var dot := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.015
+	sm.height = 0.03
+	dot.mesh = sm
+	var dm := StandardMaterial3D.new()
+	dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	dm.albedo_color = Color(1.0, 0.15, 0.1)
+	dot.material_override = dm
+	dot.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_led.add_child(dot)
+	var halo := MeshInstance3D.new()
+	var qm := QuadMesh.new()
+	qm.size = Vector2.ONE * float(cfg.halo_m)
+	halo.mesh = qm
+	var hm := StandardMaterial3D.new()
+	hm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	hm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	hm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	hm.albedo_color = Color(1.0, 0.2, 0.12, 0.9)
+	var grad := Gradient.new()
+	grad.set_color(0, Color(1, 1, 1, 1))
+	grad.set_color(1, Color(1, 1, 1, 0))
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	hm.albedo_texture = tex
+	halo.material_override = hm
+	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_led.add_child(halo)
+	_led_light = OmniLight3D.new()
+	_led_light.light_color = Color(1.0, 0.15, 0.08)
+	_led_light.light_energy = float(cfg.light_energy)
+	_led_light.omni_range = float(cfg.light_range)
+	_led_light.shadow_enabled = false
+	_led.add_child(_led_light)
+
+
+func _process(delta: float) -> void:
+	if _led == null:
+		return
+	var cfg: Dictionary = Balance.GRENADE_LED
+	_led.global_position = global_position + Vector3.UP * 0.07
+	# период мигания — от медленного к частому по мере запала
+	var left := clampf(_fuse / float(Balance.GRENADE.fuse), 0.0, 1.0)
+	var period := lerpf(float(cfg.fast), float(cfg.slow), left)
+	_blink += delta / period
+	_led.visible = fmod(_blink, 1.0) < 0.5
 
 
 func _physics_process(delta: float) -> void:

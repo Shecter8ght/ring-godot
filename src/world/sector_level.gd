@@ -390,8 +390,18 @@ func _on_nav_baked() -> void:
 	await get_tree().physics_frame
 	_nav_baked = true
 	print("sector: навмеш готов, регионов %d" % NavigationServer3D.map_get_regions(get_world_3d().navigation_map).size())
-	# Мародёров спавнит только хост (или синглплеер) — клиенты получат их репликацией.
+	# Мародёров спавнит только хост (или синглплеер) — клиенты получат их репликацией. Связки
+	# «перелезть» нужны только там, где думает ИИ.
 	if not Net.is_networked() or multiplayer.is_server():
+		# связки строятся понемногу за кадр (без заминки) и до мародёров: карта навигации, сменившаяся
+		# посреди боя, сбивает им пути
+		var region := get_node_or_null("NavRegion") as NavigationRegion3D
+		if region:
+			var t0 := Time.get_ticks_msec()
+			var n: int = await Vault.build_links(region, region)
+			if n > 0:
+				await NavigationServer3D.map_changed
+			print("sector: связок «перелезть» %d за %d мс" % [n, Time.get_ticks_msec() - t0])
 		_spawn_marauders()
 
 

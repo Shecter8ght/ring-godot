@@ -53,6 +53,11 @@ func _run() -> void:
 	var credited := [false]
 	Raid.current.kill_credited.connect(func() -> void: credited[0] = true)
 	var marauders := _level.get_node("Marauders")
+	# мародёры появляются после навмеша и связок «перелезть» — подождать
+	for i in range(80):
+		if marauders.get_child_count() > 0:
+			break
+		await get_tree().create_timer(0.25).timeout
 	var victim := marauders.get_child(marauders.get_child_count() - 1) as Marauder
 	# первый — лёг раненым, второй — добил
 	for i in range(2):

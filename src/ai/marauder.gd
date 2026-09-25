@@ -68,6 +68,10 @@ var faction: String = "marauder"
 var hostile_to_players: bool = true
 var _facing: float = 0.0
 var _nav_ready: bool = false
+## Перелезает через преграду (связка навигации Vault): путь и доля пройденного (-1 — нет).
+var _vault: Dictionary = {}
+var _vault_t: float = -1.0
+var _vault_done_ms: int = -10000
 var _ragdoll: Ragdoll
 var _last_hit_from: Vector3 = Vector3.ZERO
 var _last_damage: float = 0.0
@@ -181,6 +185,8 @@ func _ready() -> void:
 	_agent.path_desired_distance = 0.6
 	_agent.target_desired_distance = 0.8
 	_agent.radius = 0.4
+	# дошёл до связки «перелезть» — перелезает (выбитая витрина — просто проходит)
+	_agent.link_reached.connect(_on_link_reached)
 	_muzzle.visible = false
 	# своя форма коллизии — присев, мародёр ниже (форма в сцене общая для всех)
 	var cs := $Capsule as CollisionShape3D
@@ -1758,9 +1764,46 @@ func _show_say(text: String) -> void:
 
 # ---------------------------------------------------------------- движение
 
+## Связка навигации: «перелезть» — найти путь через преграду и перелезть (шумно).
+func _on_link_reached(details: Dictionary) -> void:
+	var owner_node: Object = details.get("owner")
+	if _vault_t >= 0.0 or not (owner_node is Node and (owner_node as Node).is_in_group(Vault.GROUP)):
+		return
+	var from: Vector3 = details.get("link_entry_position", global_position)
+	var to: Vector3 = details.get("link_exit_position", global_position)
+	# сигнал приходит и на выходе связки (уже перелез) — лезть, только если стоим у входа
+	if _flat(global_position - from) > _flat(global_position - to) or Time.get_ticks_msec() < _vault_done_ms + 600:
+		return
+	var dir := to - from
+	dir.y = 0.0
+	var path := Vault.find(get_world_3d().direct_space_state, global_position, dir, [get_rid()], 1.4)
+	# приземлиться надо у конца связки, а не где-то ещё
+	if path.is_empty() or _flat((path.land as Vector3) - to) > 1.2:
+		return
+	_vault = path
+	_vault_t = 0.0
+	_facing = atan2(dir.x, dir.z)
+	# слышно — звуком (как шаги мародёров); в NoiseBus не пишем: услышал бы сам себя и полез обратно
+	Audio.play("impact_hard", global_position + Vector3.UP * 0.8, -14.0)
+
+
+static func _flat(v: Vector3) -> float:
+	return Vector2(v.x, v.z).length()
+
+
 func _move(delta: float) -> void:
 	if state == State.DOWNED:
+		_vault_t = -1.0
 		_move_downed(delta)
+		return
+	if _vault_t >= 0.0:
+		_vault_t += delta / float(Balance.VAULT.sec)
+		global_position = Vault.pos_at(_vault, minf(_vault_t, 1.0))
+		velocity = Vector3.ZERO
+		_body.rotation.y = _facing
+		if _vault_t >= 1.0:
+			_vault_t = -1.0
+			_vault_done_ms = Time.get_ticks_msec()
 		return
 	var speed := Balance.MARAUDER_WALK if state == State.PATROL else Balance.MARAUDER_RUN
 	if state == State.RESCUE:
