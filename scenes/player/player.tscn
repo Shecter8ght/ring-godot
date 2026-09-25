@@ -1,54 +1,64 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://c4xyqpopax26x"]
 
-[ext_resource type="Script" path="res://src/player/player.gd" id="1_player"]
-[ext_resource type="Script" path="res://src/combat/health.gd" id="2_health"]
+[ext_resource type="Script" uid="uid://ubykrvtjogr5" path="res://src/player/player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://ddxunpup7v3ia" path="res://src/combat/health.gd" id="2_health"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/persona_animated.glb" id="3_gmlin"]
+[ext_resource type="Script" path="res://src/player/character_animator.gd" id="4_animator"]
 
 [sub_resource type="CapsuleShape3D" id="capsule"]
 radius = 0.35
 height = 1.8
 
+[sub_resource type="CapsuleMesh" id="mesh_body"]
+radius = 0.3
+height = 1.7
+
 [sub_resource type="StandardMaterial3D" id="mat_body"]
 albedo_color = Color(0.32, 0.34, 0.3, 1)
 roughness = 0.85
+
+[sub_resource type="BoxMesh" id="mesh_nose"]
+size = Vector3(0.2, 0.2, 0.35)
 
 [sub_resource type="StandardMaterial3D" id="mat_face"]
 albedo_color = Color(0.78, 0.62, 0.15, 1)
 roughness = 0.6
 
-[sub_resource type="CapsuleMesh" id="mesh_body"]
-radius = 0.3
-height = 1.7
-
-[sub_resource type="BoxMesh" id="mesh_nose"]
-size = Vector3(0.2, 0.2, 0.35)
-
-[node name="Player" type="CharacterBody3D" groups=["players"]]
+[node name="Player" type="CharacterBody3D" unique_id=543529474 groups=["players"]]
 collision_layer = 2
 collision_mask = 45
 script = ExtResource("1_player")
 
-[node name="Health" type="Node" parent="."]
+[node name="Health" type="Node" parent="." unique_id=699032233]
 script = ExtResource("2_health")
-max_hp = 100.0
 
-[node name="Capsule" type="CollisionShape3D" parent="."]
+[node name="Capsule" type="CollisionShape3D" parent="." unique_id=1772864398]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("capsule")
 
-[node name="Body" type="Node3D" parent="."]
+[node name="Body" type="Node3D" parent="." unique_id=1616914567]
 
-[node name="Torso" type="MeshInstance3D" parent="Body"]
+[node name="Torso" type="MeshInstance3D" parent="Body" unique_id=801476783]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+visible = false
 mesh = SubResource("mesh_body")
 surface_material_override/0 = SubResource("mat_body")
 
-[node name="Nose" type="MeshInstance3D" parent="Body"]
+[node name="Nose" type="MeshInstance3D" parent="Body" unique_id=678304915]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.35)
+visible = false
 mesh = SubResource("mesh_nose")
 surface_material_override/0 = SubResource("mat_face")
 
-[node name="Muzzle" type="OmniLight3D" parent="Body"]
+[node name="Muzzle" type="OmniLight3D" parent="Body" unique_id=988470660]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0.6)
 light_color = Color(1, 0.8, 0.5, 1)
 light_energy = 6.0
 omni_range = 6.0
+
+[node name="Persona" parent="Body" instance=ExtResource("3_gmlin")]
+
+[node name="CharacterAnimator" type="Node" parent="."]
+script = ExtResource("4_animator")
+
+[editable path="Body/Persona"]

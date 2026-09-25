@@ -32,6 +32,11 @@
 | Пистолет и автомат (одиночный) | Shecter8ght — сгенерировано в ElevenLabs | права автора проекта; ElevenLabs — https://elevenlabs.io | guns/pistol, guns/carbine |
 | Шаги и бег по камню, грунту, снегу; попадания в стекло, металл, дерево; предсмертные хрипы | Shecter8ght — сгенерировано в ElevenLabs | права автора проекта; ElevenLabs — https://elevenlabs.io | steps/*, hits/glass|metal|wood, voice/rattle_* |
 
+## Персонаж и анимации
+
+- `assets/models/characters/persona_animated.glb` и связанные текстуры — экспорт из `Persona.blend`, предоставленного владельцем проекта. Исходник остаётся у владельца в `D:\ПРОГРАММЫ\Blender 5\Projects`.
+- `assets/models/characters/persona_clips.res` — запечённые анимации из предоставленных владельцем файлов Mixamo. Файлы FBX остаются локальными в `assets/animations/`; перечень использованных клипов — `tools/character_clips.json`.
+
 ## Транспорт RING
 
 - `assets/models/ring_vehicles/` — модели седана, грузовика и автобуса, созданные для RING; текстуры на основе CC0 Poly Haven.

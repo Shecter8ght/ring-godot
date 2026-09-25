@@ -35,6 +35,9 @@ var loadout_mode: bool = false
 var combat_enabled: bool = true
 ## Оружие в руках: id предмета ("" — руки пусты) и откуда оно (слот снаряжения / ключ песочницы).
 var weapon_id: String = ""
+## Счётчик одноразовых анимаций синхронизируется вместе с персонажем.
+var animation_event: String = ""
+var animation_event_seq: int = 0
 var weapon_slot: String = ""
 ## Обвес в руках с состоянием фонарей/ЛЦУ (точка → {id, light, laser}): модель на теле у всех.
 var weapon_mods: Dictionary = {}
@@ -131,6 +134,7 @@ func _ready() -> void:
 		if Raid.current:
 			Raid.current.mark_dead(peer_id))
 	health.damaged.connect(func(amount: float, from: Vector3) -> void:
+		_animation_event("hit")
 		_last_hit_from = from
 		_last_damage = amount
 		if is_local() and _camera_rig is CameraRig:
@@ -181,7 +185,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -797,6 +801,8 @@ func _start_reload(spec: Dictionary) -> void:
 			t *= Balance.RELOAD_TOPUP_K
 	# руки дрожат — дольше
 	reload_timer = t * (1.0 + float(Balance.STRESS.reload_k) * stress_k())
+	if String(WeaponDb.weapon(weapon_id).get("class", "")) != "PISTOL":
+		_animation_event("rifle_reload")
 	Audio.play(String(spec.reload_sound), global_position)
 
 
@@ -944,9 +950,12 @@ func _switch(key: String, sound: bool = true) -> void:
 	fire_timer = 0.35
 	if sound and weapon_id != "":
 		Audio.play("bolt", global_position, -6.0)
+		_animation_event("pistol_draw" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_draw")
 
 
 func _fire(spec: Dictionary) -> void:
+	if String(WeaponDb.weapon(weapon_id).get("class", "")) != "PISTOL":
+		_animation_event("rifle_fire")
 	var st: Dictionary = _ws[weapon_slot]
 	st.rounds = int(st.rounds) - 1
 	ammo = int(st.rounds)
@@ -1146,6 +1155,7 @@ func _cancel_nade_aim() -> void:
 
 
 func _throw_grenade() -> void:
+	_animation_event("grenade_throw")
 	if loadout_mode:
 		Raid.current.request_consume("grenade", 1)
 	else:
@@ -1451,3 +1461,8 @@ func _die() -> void:
 	Audio.play("fall", global_position)
 	if is_local() and _camera_rig is CameraRig:
 		(_camera_rig as CameraRig).set_target(_ragdoll.chest())
+
+
+func _animation_event(clip: String) -> void:
+	animation_event = clip
+	animation_event_seq += 1

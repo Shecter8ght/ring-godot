@@ -14,6 +14,9 @@ const PLAYER_DECEL := 24.0
 ## Поворот корпуса к курсору, рад/с.
 const PLAYER_TURN_SPEED := 12.0
 
+## Визуальный выбор клипа по реальному перемещению; физику персонажа не меняет.
+const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "blend_sec": 0.16}
+
 # --- Капсула по стойкам: высота, м ---
 const STANCE_HEIGHT := {"stand": 1.8, "crouch": 1.2, "prone": 0.5}
 const CAPSULE_RADIUS := 0.35

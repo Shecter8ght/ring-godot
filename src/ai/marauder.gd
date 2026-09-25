@@ -25,6 +25,8 @@ const EYE_HEIGHT := 1.6
 const CROUCH_EYE := 1.05
 
 var state: State = State.PATROL
+var animation_event: String = ""
+var animation_event_seq: int = 0
 var tactic: Tactic = Tactic.ENGAGE
 ## Снаряжение (id в data/loadouts.json): ставит спавнер до добавления в дерево; пусто — по типу.
 var loadout_id: String = ""
@@ -425,7 +427,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched"]:
+	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:animation_event", ".:animation_event_seq"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -760,6 +762,7 @@ func _spread_point(center: Vector3) -> Vector3:
 
 
 func _on_damaged(amount: float, from: Vector3) -> void:
+	_animation_event("hit")
 	_last_hit_from = from
 	_last_damage = amount
 	if state == State.DEAD:
@@ -1172,6 +1175,7 @@ func _try_grenade(delta: float) -> void:
 			return
 	_grenades -= 1
 	_grenade_t = float(g.cooldown)
+	_animation_event("grenade_throw")
 	var from := global_position + Vector3.UP * 1.6
 	var t := clampf(d / 13.0, 0.5, 1.3)
 	var v := (last_known - from) / t + Vector3.UP * 0.5 * 9.8 * t
@@ -1591,6 +1595,8 @@ func _start_reload() -> void:
 		return
 	_reload_t = float(_spec.reload)
 	_burst_left = 0
+	if String(_spec.get("class", "")) != "PISTOL":
+		_animation_event("rifle_reload")
 	Audio.play(String(_spec.get("reload_sound", "reload_rifle")), global_position)
 	if state == State.COMBAT:
 		say("Перезаряжаюсь!")
@@ -1665,6 +1671,8 @@ func _try_fire(suppress: bool = false) -> void:
 	if _shot_t > 0.0:
 		return
 	_shoot(suppress)
+	if String(_spec.get("class", "")) != "PISTOL":
+		_animation_event("rifle_fire")
 	_mag -= 1
 	if equipment.has(_active):
 		(equipment[_active].mag as Dictionary)["rounds"] = _mag
@@ -1969,3 +1977,8 @@ func _spawn_ragdoll() -> void:
 		_say_label.visible = false
 	Audio.play("death", global_position + Vector3.UP * 1.5)
 	Audio.play("fall", global_position, -4.0)
+
+
+func _animation_event(clip: String) -> void:
+	animation_event = clip
+	animation_event_seq += 1
