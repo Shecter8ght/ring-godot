@@ -277,6 +277,13 @@ func _build_settings(h: HBoxContainer) -> void:
 		grid.add_child(_label("Громкость: " + String(Settings.BUSES[b]).to_lower()))
 		grid.add_child(_slider(0.0, 1.0, 0.05, float(Settings.volume[bus]), "%.0f%%",
 			func(v: float) -> void: Settings.set_volume(bus, v), 100.0))
+	grid.add_child(_label("Чит: бессмертие"))
+	var god := CheckButton.new()
+	god.focus_mode = Control.FOCUS_NONE
+	god.button_pressed = Settings.god
+	god.tooltip_text = "Попадания видно, но здоровье не убывает; лёжа — сразу встаёшь. В коопе остальным пишется в чат."
+	god.toggled.connect(func(on: bool) -> void: Settings.set_god(on))
+	grid.add_child(god)
 	var hint := Label.new()
 	hint.text = "«Низко» — если тормозит: без глобального освещения, тумана и SSAO, рендер в 77 %."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

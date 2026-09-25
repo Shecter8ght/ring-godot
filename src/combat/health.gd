@@ -33,6 +33,8 @@ var damage_filter: Callable
 ## Хост: чей был последний урон (peer id стрелявшего игрока; 1 — хост или соло) — кому
 ## засчитать убийство.
 var last_attacker: int = 0
+## Чит «бессмертие» (хост): попадания видно и слышно, но здоровье не убывает; лежащего — поднимает.
+var invulnerable: bool = false
 
 
 func _ready() -> void:
@@ -66,6 +68,9 @@ func _setup_sync() -> void:
 ## прошло и насмерть ли голова.
 func take_damage(amount: float, from: Vector3, zone: String = "", at: Vector3 = Vector3.INF, bullet: Dictionary = {}) -> void:
 	if not alive:
+		return
+	if invulnerable:
+		damaged.emit(amount, from)
 		return
 	var lethal := zone == "blast_close" or (zone == "head" and not damage_filter.is_valid())
 	if damage_filter.is_valid():
@@ -123,6 +128,9 @@ func _process(delta: float) -> void:
 	if not downed or not alive:
 		return
 	if Net.is_networked() and not is_multiplayer_authority():
+		return
+	if invulnerable:
+		revive(1.0)
 		return
 	bleed_t -= delta
 	if bleed_t <= 0.0:

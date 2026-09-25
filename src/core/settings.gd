@@ -29,6 +29,9 @@ var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.
 var headset: Dictionary = {}
 const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_db"}
 
+## Чит «бессмертие» (меню Esc → Настройки, консоль: god) — раздел cheats; в коопе решает хост.
+var god: bool = false
+
 var _tool_run: bool = false
 var _defaults: Dictionary = {}
 
@@ -60,6 +63,7 @@ func _load() -> void:
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
 	for b in BUSES:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
+	god = bool(cfg.get_value("cheats", "god", false))
 
 
 func save() -> void:
@@ -72,6 +76,7 @@ func save() -> void:
 	cfg.set_value("mouse", "iso", sens_iso)
 	for b in BUSES:
 		cfg.set_value("audio", String(b), float(volume[b]))
+	cfg.set_value("cheats", "god", god)
 	cfg.save(PATH)
 
 
@@ -88,6 +93,17 @@ func set_sens(fps: float, iso: float) -> void:
 	sens_fps = clampf(fps, SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(iso, SENS_RANGE[0], SENS_RANGE[1])
 	save()
+	changed.emit()
+
+
+## Бессмертие вкл/выкл: сохраняется и сразу действует на своего игрока (и в следующих рейдах).
+func set_god(on: bool) -> void:
+	god = on
+	save()
+	for n in get_tree().get_nodes_in_group("all_players"):
+		var pl := n as Player
+		if pl and pl.is_local():
+			pl.set_god(on)
 	changed.emit()
 
 

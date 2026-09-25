@@ -167,6 +167,9 @@ func _ready() -> void:
 		listener.make_current()
 	if Net.is_networked():
 		_setup_sync()
+	# чит «бессмертие» из настроек — на каждый рейд (хосту — когда узел у него уже есть)
+	if is_local() and Settings.god:
+		set_god.call_deferred(true)
 
 
 ## Позицию и позу владелец шлёт всем остальным сам (авторитет = peer_id, см. sector_level.gd —
@@ -1304,6 +1307,31 @@ func _tick_stress(delta: float) -> void:
 			rate *= float(sc.calm_ally_k)
 		stress = maxf(0.0, stress - rate * delta)
 	stress = maxf(stress, floor_v)
+
+
+## Чит «бессмертие» (Settings.god): здоровье — у хоста, поэтому клиент просит хост. В коопе
+## остальным — строчка в чат, чтобы было честно.
+func set_god(on: bool) -> void:
+	if not is_local():
+		return
+	if Net.is_networked() and not multiplayer.is_server():
+		_rpc_god.rpc_id(1, on)
+	else:
+		_apply_god(on)
+	if Net.is_networked() and combat_enabled:
+		Chat.send("[чит] бессмертие " + ("включено" if on else "выключено"))
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_god(on: bool) -> void:
+	if multiplayer.is_server() and multiplayer.get_remote_sender_id() == peer_id:
+		_apply_god(on)
+
+
+func _apply_god(on: bool) -> void:
+	health.invulnerable = on
+	if on and health.alive and not health.downed:
+		health.hp = health.max_hp
 
 
 func is_vaulting() -> bool:

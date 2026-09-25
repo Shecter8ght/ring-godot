@@ -249,8 +249,12 @@ func _run(cmd: String) -> void:
 	elif a.size() >= 1 and a[0] in ["give", "mount", "unmount", "sight", "light", "laser", "spawn", "plate", "dur", "stats", "list", "arsenal"]:
 		# арсенал: выдать, обвес, прицел / фонарь / ЛЦУ, ИИ с выкладкой, плиты, износ
 		out = ArsenalDev.run(get_tree(), a.slice(1) if a[0] == "arsenal" else a)
+	elif a.size() >= 1 and a[0] == "god":
+		# чит: бессмертие вкл/выкл (как в меню Esc → Настройки)
+		Settings.set_god(not Settings.god if a.size() < 2 else a[1] in ["1", "on", "вкл"])
+		out = "бессмертие: " + ("включено" if Settings.god else "выключено")
 	elif a.size() >= 1 and a[0] == "help":
-		out = "quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+		out = "god — бессмертие вкл/выкл · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
 " + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"
