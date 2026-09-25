@@ -147,7 +147,8 @@ func _process(delta: float) -> void:
 		if not _backpack_open:
 			_looting = null
 		_refresh_visibility()
-	if Input.is_action_just_pressed("ui_cancel") and is_open():
+	# Esc закрыл окно описания — рюкзак остаётся
+	if Input.is_action_just_pressed("ui_cancel") and is_open() and not ItemInfo.blocking():
 		close_all()
 	if Input.is_action_just_pressed("use_med"):
 		if _med_menu and _med_menu.visible:
@@ -245,6 +246,10 @@ func _refresh_lists(me: Player) -> void:
 				sv.unequip_requested.connect(func() -> void: Raid.current.request_unequip(ws))
 				sv.context.connect(func(at: Vector2) -> void: _slot_menu(me, ws, at))
 				slots.add_child(sv)
+			# разложить по порядку — освободить место
+			var sort := _button("Сортировать", func() -> void: Raid.current.request_sort("backpack"))
+			sort.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			_bp_list.add_child(sort)
 			_bp_grid = GridView.new(Balance.BACKPACK_GRID, "backpack")
 			_bp_grid.set_items(me.inventory.items)
 			_bp_list.add_child(_bp_grid)
@@ -332,8 +337,9 @@ func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
 		return
 	var it: Dictionary = me.inventory.items[idx]
 	var id := String(it.id)
-	var names: Array[String] = []
-	var acts: Array[Callable] = []
+	var names: Array[String] = ["Описание"]
+	var e := it.duplicate(true)
+	var acts: Array[Callable] = [func() -> void: ItemInfo.open(self, e)]
 	if ItemDb.item(id).has("use"):
 		names.append("Лечиться")
 		acts.append(func() -> void: _try_heal_with(me, id))
@@ -362,8 +368,9 @@ func _slot_menu(me: Player, slot: String, at: Vector2) -> void:
 	var e: Dictionary = me.inventory.equipment.get(slot, {})
 	if e.is_empty():
 		return
-	var names: Array = ["Снять в рюкзак", "Выбросить"]
-	var acts: Array = [func() -> void: Raid.current.request_unequip(slot), func() -> void: Raid.current.request_drop_entry("equip:" + slot, -1)]
+	var names: Array = ["Описание", "Снять в рюкзак", "Выбросить"]
+	var info := e.duplicate(true)
+	var acts: Array = [func() -> void: ItemInfo.open(self, info), func() -> void: Raid.current.request_unequip(slot), func() -> void: Raid.current.request_drop_entry("equip:" + slot, -1)]
 	for p in Gear.parts(e):
 		var part := String(p[1])
 		names.append(String(p[0]))

@@ -240,6 +240,18 @@ static func take_from_stash(id: String, n: int, fir_only: bool = false) -> int:
 
 # ---------------------------------------------------------------- убежище
 
+## Разложить сетку name по порядку (крупное в начало, стопки добраны). false — не вышло.
+static func sort_grid(name: String) -> bool:
+	var out := ItemDb.arranged(list_of(name), grid_of(name))
+	if out.is_empty() and not list_of(name).is_empty():
+		return false
+	var list := list_of(name)
+	list.clear()
+	list.append_array(out)
+	save()
+	return true
+
+
 ## Передвинуть запись внутри сетки name ("stash" / "backpack" / "pocket").
 static func move_in(name: String, idx: int, x: int, y: int, r: bool) -> bool:
 	var ok := ItemDb.move_in(list_of(name), grid_of(name), idx, x, y, r)
@@ -538,10 +550,12 @@ static func buy(id: String, n: int, to: String = "stash") -> bool:
 	return true
 
 
-static func sell(idx: int, n: int) -> bool:
-	if idx < 0 or idx >= stash.size():
+## Продать n штук записи idx из тайника, рюкзака или кармана (from — "stash" / "backpack" / "pocket").
+static func sell(idx: int, n: int, from: String = "stash") -> bool:
+	var list := list_of(from)
+	if idx < 0 or idx >= list.size():
 		return false
-	var out := ItemDb.remove_at(stash, idx, n)
+	var out := ItemDb.remove_at(list, idx, n)
 	if out.is_empty():
 		return false
 	money += sell_price(out)

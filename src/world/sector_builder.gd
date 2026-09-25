@@ -105,6 +105,9 @@ var _preview: bool = false
 var _cur_key: String = ""
 ## Прямоугольники мировых XZ, где пропсов не ставить (узлы сцены группы "prop_keepout").
 var keepouts: Array[Rect2] = []
+## Вырезы в земле (спуски в убежище, HideoutEntrance.hole_rect): {center: Vector2 (мир XZ),
+## half: Vector2 (половины вдоль осей X и Z узла), yaw} — асфальт участка там не кладётся.
+var holes: Array = []
 
 const DOOR_SCENE := preload("res://scenes/props/door.tscn")
 const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
@@ -984,7 +987,80 @@ func _annulus(st: SurfaceTool, a0: float, a1: float, r0: float, r1: float, y: fl
 		var p01 := polar(aa, r1) + lift
 		var p10 := polar(ab, r0) + lift
 		var p11 := polar(ab, r1) + lift
+		var quad := PackedVector2Array([Vector2(p00.x, p00.z), Vector2(p10.x, p10.z), Vector2(p11.x, p11.z), Vector2(p01.x, p01.z)])
+		if _touches_hole(quad):
+			_holed_floor(st, quad, y)
+			continue
 		_quad(st, p00, p10, p11, p01, Vector3.UP, _uv_xz(p00), _uv_xz(p10), _uv_xz(p11), _uv_xz(p01))
+
+
+## Контур выреза в мире (XZ): прямоугольник half, повёрнутый на yaw вокруг center.
+static func hole_poly(h: Dictionary) -> PackedVector2Array:
+	var c: Vector2 = h.center
+	var hf: Vector2 = h.half
+	var yaw := float(h.yaw)
+	var ax := Vector2(cos(yaw), -sin(yaw))
+	var az := Vector2(sin(yaw), cos(yaw))
+	return PackedVector2Array([c - ax * hf.x - az * hf.y, c + ax * hf.x - az * hf.y, c + ax * hf.x + az * hf.y, c - ax * hf.x + az * hf.y])
+
+
+func _touches_hole(poly: PackedVector2Array) -> bool:
+	if holes.is_empty():
+		return false
+	var box := Rect2(poly[0], Vector2.ZERO)
+	for p in poly:
+		box = box.expand(p)
+	for h in holes:
+		var hp := hole_poly(h)
+		var hb := Rect2(hp[0], Vector2.ZERO)
+		for p in hp:
+			hb = hb.expand(p)
+		if box.intersects(hb) and not Geometry2D.intersect_polygons(poly, hp).is_empty():
+			return true
+	return false
+
+
+## Кусок пола poly (выпуклый, мир XZ) без вырезов: вычитание контуров и триангуляция. Вырез целиком
+## внутри куска — кусок сперва режется пополам через центр выреза (иначе вышел бы «бублик»).
+func _holed_floor(st: SurfaceTool, poly: PackedVector2Array, y: float) -> void:
+	var parts: Array = [poly]
+	for h in holes:
+		var hp := hole_poly(h)
+		var next: Array = []
+		for part in parts:
+			var pp: PackedVector2Array = part
+			var res := Geometry2D.clip_polygons(pp, hp)
+			var outer_cw := Geometry2D.is_polygon_clockwise(pp)
+			var ring := false
+			for r in res:
+				if Geometry2D.is_polygon_clockwise(r) != outer_cw:
+					ring = true
+			if not ring:
+				next.append_array(res)
+				continue
+			var c: Vector2 = h.center
+			var big := 1e5
+			for half in [PackedVector2Array([Vector2(c.x, -big), Vector2(big, -big), Vector2(big, big), Vector2(c.x, big)]),
+					PackedVector2Array([Vector2(-big, -big), Vector2(c.x, -big), Vector2(c.x, big), Vector2(-big, big)])]:
+				for piece in Geometry2D.intersect_polygons(pp, half):
+					next.append_array(Geometry2D.clip_polygons(piece, hp))
+		parts = next
+	for part in parts:
+		var pp: PackedVector2Array = part
+		var tris := Geometry2D.triangulate_polygon(pp)
+		for i in range(0, tris.size(), 3):
+			var a := Vector3(pp[tris[i]].x, y, pp[tris[i]].y)
+			var b := Vector3(pp[tris[i + 1]].x, y, pp[tris[i + 1]].y)
+			var d := Vector3(pp[tris[i + 2]].x, y, pp[tris[i + 2]].y)
+			# лицом вверх — как у _quad: по часовой, если смотреть сверху
+			if (b - a).cross(d - a).y > 0.0:
+				var t := b
+				b = d
+				d = t
+			for v in [a, b, d]:
+				st.set_normal(Vector3.UP)
+				st.set_uv(_uv_xz(v))
+				st.add_vertex(v)
 
 
 # ---------------------------------------------------------------- потолки, купол, светильники
@@ -1309,6 +1385,8 @@ func _mesh_node(st: SurfaceTool, mat_id: String, shadows: bool) -> MeshInstance3
 func _build_floor_collider(root: Node3D) -> void:
 	var body := StaticBody3D.new()
 	body.name = "Ground"
+	# спуски в убежище (HideoutEntrance) снимают с неё столкновение того, кто внутри приямка
+	body.add_to_group("ground_plane")
 	var cs := CollisionShape3D.new()
 	cs.shape = WorldBoundaryShape3D.new()
 	body.add_child(cs)

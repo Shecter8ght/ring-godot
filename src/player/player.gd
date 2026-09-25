@@ -89,6 +89,9 @@ var _rest_t: float = 0.0
 ## ПНВ включён (N; нужен ПНВ в слоте «глаза») и сколько заряда осталось, с.
 var nvg_on: bool = false
 var nvg_charge: float = Balance.NVG_BATTERY_SEC
+## G зажата — прицел гранаты (дуга и круг поражения), отпустил — бросок.
+var _nade_aiming: bool = false
+var _nade_aim: GrenadeAim
 
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
@@ -633,6 +636,7 @@ func _combat(delta: float) -> void:
 	fire_timer -= delta
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
 	if not combat_enabled or ui_blocked():
+		_cancel_nade_aim()
 		return
 	if loadout_mode:
 		_loadout_tick()
@@ -648,8 +652,19 @@ func _combat(delta: float) -> void:
 	if not weapon_slot in allowed_weapons() and weapon_slot != "":
 		var pistol := String(allowed_weapons()[0]) if not allowed_weapons().is_empty() else ""
 		_switch(pistol, pistol != "")
-	if Input.is_action_just_pressed("grenade") and grenade_count() > 0 and fire_timer <= 0.0:
-		_throw_grenade()
+	# граната: держишь G — видно, куда упадёт и где достанет; отпустил — бросок
+	if Input.is_action_just_pressed("grenade"):
+		if grenade_count() > 0:
+			_nade_aiming = true
+		elif loadout_mode and Raid.current:
+			Raid.current.notify("Гранат нет")
+	if _nade_aiming:
+		if Input.is_action_pressed("grenade"):
+			_show_nade_aim()
+		else:
+			_cancel_nade_aim()
+			if grenade_count() > 0 and fire_timer <= 0.0:
+				_throw_grenade()
 	for pair in [["throw_flare", "flare"], ["throw_chem", "chemlight"]]:
 		if Input.is_action_just_pressed(String(pair[0])) and fire_timer <= 0.0:
 			_throw_light(String(pair[1]))
@@ -1025,12 +1040,8 @@ func _rpc_throw_light(k: String, from: Vector3, v: Vector3) -> void:
 	ThrownLight.throw(get_tree().current_scene, k, from, v)
 
 
-func _throw_grenade() -> void:
-	if loadout_mode:
-		Raid.current.request_consume("grenade", 1)
-	else:
-		grenades -= 1
-	fire_timer = 0.6
+## Откуда и с какой скоростью полетит граната: [from, v] — из глаз в прицеле, к курсору в изометрии.
+func _grenade_launch() -> Array:
 	var g: Dictionary = Balance.GRENADE
 	var from := eye_position() + Vector3.UP * 0.1
 	var v: Vector3
@@ -1046,7 +1057,31 @@ func _throw_grenade() -> void:
 		from += to.normalized() * 0.4 if to.length() > 0.1 else Vector3.ZERO
 		var t := clampf(to.length() / float(g.throw_speed), 0.45, 1.3)
 		v = (target - from) / t + Vector3.UP * 0.5 * 9.8 * t
-	Grenade.throw(get_tree().current_scene, from, v, get_rid())
+	return [from, v]
+
+
+func _show_nade_aim() -> void:
+	if _nade_aim == null:
+		_nade_aim = GrenadeAim.new()
+		add_child(_nade_aim)
+	var l := _grenade_launch()
+	_nade_aim.show_arc(l[0], l[1], Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS, [get_rid()])
+
+
+func _cancel_nade_aim() -> void:
+	_nade_aiming = false
+	if _nade_aim:
+		_nade_aim.hide_arc()
+
+
+func _throw_grenade() -> void:
+	if loadout_mode:
+		Raid.current.request_consume("grenade", 1)
+	else:
+		grenades -= 1
+	fire_timer = 0.6
+	var l := _grenade_launch()
+	Grenade.throw(get_tree().current_scene, l[0], l[1], get_rid())
 
 
 func _read_stance() -> void:

@@ -31,8 +31,19 @@ var _buy_to: String = "stash"
 var _focus: String = ""
 var _focus_only: bool = false
 var _qty: Dictionary = {}
+## Торговец: раздел ассортимента ("all" — всё, иначе ключ CAT_TABS).
+var _cat_tab: String = "all"
+## Кадр открытия: Tab, открывший окно, его же не закрывает.
+var _opened_frame: int = -1
+var _toast: Label
+var _toast_t: float = 0.0
 var _tb_where: String = "equip:primary"
 var _tb_uid: String = ""
+
+## Разделы ассортимента торговца: ключ, название, категории предметов ("misc" — всё прочее).
+const CAT_TABS := [["all", "Всё", []], ["weapon", "Оружие", ["weapon"]], ["ammo", "Патроны", ["ammo"]], ["mag", "Магазины", ["mag"]],
+	["mod", "Обвес", ["mod"]], ["armor", "Броня", ["armor", "plate"]], ["med", "Медицина", ["med", "food"]],
+	["throw", "Гранаты и свет", ["throw"]], ["misc", "Разное", []]]
 
 const MOD_SLOT_NAMES := {"optic": "Прицел", "muzzle": "Дульное устройство", "grip": "Рукоятка",
 	"stock": "Приклад", "mag": "Магазин", "tac": "Фонарь / ЛЦУ", "bipod": "Сошки"}
@@ -86,6 +97,29 @@ func _ready() -> void:
 	_cols.add_theme_constant_override("separation", 16)
 	_cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(_cols)
+	# сообщение внизу окна: не влезло, не хватает денег…
+	_toast = Label.new()
+	_toast.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_toast.offset_left = -500
+	_toast.offset_right = 500
+	_toast.offset_top = -120
+	_toast.offset_bottom = -80
+	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast.add_theme_font_size_override("font_size", 22)
+	_toast.add_theme_color_override("font_color", Color(1.0, 0.55, 0.42))
+	_toast.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_toast.add_theme_constant_override("outline_size", 8)
+	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast.visible = false
+	_root.add_child(_toast)
+
+
+## Сообщение внизу окна на пару секунд.
+func toast(text: String) -> void:
+	_toast.text = text
+	_toast_t = 3.0
+	_toast.visible = true
+	_toast.modulate.a = 1.0
 
 
 func is_open() -> bool:
@@ -96,6 +130,7 @@ func open(kind: int) -> void:
 	_kind = kind
 	_sig = ""
 	_root.visible = true
+	_opened_frame = Engine.get_process_frames()
 	# Сергею есть что сказать — сразу на задания
 	if kind == HideoutStation.Kind.TRADER and not Quests.talk_options("trader").is_empty():
 		_trader_tab = "tasks"
@@ -105,15 +140,21 @@ func close_ui() -> void:
 	_root.visible = false
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not _root.visible:
 		return
-	if Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory"):
+	if _toast_t > 0.0:
+		_toast_t -= delta
+		_toast.modulate.a = clampf(_toast_t / 0.6, 0.0, 1.0)
+		_toast.visible = _toast_t > 0.0
+	# Esc закрыл описание предмета — окно остаётся; Tab, открывший окно, его не закрывает
+	var just_opened := Engine.get_process_frames() == _opened_frame
+	if (Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory")) and not ItemInfo.blocking() and not just_opened:
 		close_ui()
 		return
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
-	sig += "|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only]
+	sig += "|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab]
 	# собрание: кто в сети и где — окно выхода обновляется
 	sig += "|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene)]
 	if sig == _sig:
@@ -173,6 +214,7 @@ func _build_stash() -> void:
 	_title.text = "Тайник и снаряжение   ·   %s ₽" % InventoryUI.money(Profile.money)
 	var sg := Profile.stash_grid()
 	var stash_col := _column("Тайник   %d / %d ячеек" % [Profile.stash_cells(), sg.x * sg.y], 1.25)
+	stash_col.add_child(_sort_button("stash"))
 	var stash := GridView.new(sg, "stash")
 	stash.set_items(Profile.stash)
 	stash_col.add_child(stash)
@@ -196,6 +238,7 @@ func _build_stash() -> void:
 		gear.add_child(sv)
 	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
 	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)
+	bp_col.add_child(_sort_button("backpack"))
 	var bp := GridView.new(Balance.BACKPACK_GRID, "backpack")
 	bp.set_items(Profile.backpack)
 	bp_col.add_child(bp)
@@ -215,17 +258,32 @@ func _build_stash() -> void:
 		v.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
 			if src == v:
 				Profile.move_in(name, idx, x, y, r)
-			else:
-				Profile.transfer(src.role, idx, name, x, y, r))
+			elif not Profile.transfer(src.role, idx, name, x, y, r):
+				toast("Сюда не влезает"))
 		v.slot_dropped.connect(func(slot: String, x: int, y: int, r: bool) -> void: Profile.unequip_to(slot, name, x, y, r))
-		v.quick_move.connect(func(idx: int) -> void: Profile.quick_move(name, idx))
+		v.quick_move.connect(func(idx: int) -> void: _quick(name, idx))
 		v.activated.connect(func(idx: int) -> void:
 			var list := Profile.list_of(name)
 			if idx < list.size() and not ItemDb.equip(String(list[idx].id)).is_empty():
 				Profile.equip_from(name, idx)
 			else:
-				Profile.quick_move(name, idx))
+				_quick(name, idx))
 		v.context.connect(func(idx: int, at: Vector2) -> void: _stash_menu(name, idx, at))
+
+
+## «Сортировать» над сеткой: крупное в начало, стопки добраны — место освобождается.
+func _sort_button(name: String) -> Button:
+	var b := _button("Сортировать", func() -> void:
+		if not Profile.sort_grid(name):
+			toast("Не разложить — места впритык"))
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	return b
+
+
+## Тайник ↔ рюкзак (Ctrl+клик, двойной клик); не влезло — сказать.
+func _quick(name: String, idx: int) -> void:
+	if not Profile.quick_move(name, idx):
+		toast("Не влезает в %s" % ("тайник" if name != "stash" else "рюкзак"))
 
 
 ## Правая кнопка по предмету: что с ним можно сделать.
@@ -236,11 +294,14 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 	var id := String(list[idx].id)
 	var menu := PopupMenu.new()
 	var acts: Array[Callable] = []
+	var entry: Dictionary = (list[idx] as Dictionary).duplicate(true)
+	menu.add_item("Описание")
+	acts.append(func() -> void: ItemInfo.open(self, entry))
 	if not ItemDb.equip(id).is_empty():
 		menu.add_item("Надеть" if not ItemDb.equip(id).has("weapon") else "Взять (слот оружия)")
 		acts.append(func() -> void: Profile.equip_from(name, idx))
 	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
-	acts.append(func() -> void: Profile.quick_move(name, idx))
+	acts.append(func() -> void: _quick(name, idx))
 	# оружие, жилет: снять обвес, магазин, плиту — в тайник
 	for p in Gear.parts(list[idx]):
 		var part := String(p[1])
@@ -382,12 +443,33 @@ func _trader_buy() -> void:
 			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
 		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55)))
 		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
+	# разделы: всё, оружие, патроны, магазины, обвес… — только те, где что-то есть
+	var stock: Array = _trader.get("stock", [])
+	var cats := HFlowContainer.new()
+	cats.add_theme_constant_override("h_separation", 6)
+	cats.add_theme_constant_override("v_separation", 6)
+	for t in CAT_TABS:
+		var key := String(t[0])
+		var cnt := 0
+		for id in stock:
+			if key == "all" or _cat_of(String(id)) == key:
+				cnt += 1
+		if cnt == 0:
+			continue
+		var tb := _button("%s  %d" % [String(t[1]), cnt], func() -> void: _cat_tab = key)
+		tb.toggle_mode = true
+		tb.button_pressed = _cat_tab == key
+		cats.add_child(tb)
+	shop.add_child(cats)
 	var need_trust: Dictionary = _trader.get("trust", {})
-	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение"}
+	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение",
+		"med": "Медицина", "food": "Медицина", "throw": "Гранаты и свет"}
 	var last_head := ""
 	var flow: HFlowContainer = null
-	for id in _trader.get("stock", []):
+	for id in stock:
 		var sid := String(id)
+		if _cat_tab != "all" and _cat_of(sid) != _cat_tab:
+			continue
 		var head := String(heads.get(String(ItemDb.item(sid).cat), "Разное"))
 		if head != last_head:
 			last_head = head
@@ -415,7 +497,11 @@ func _trader_buy() -> void:
 				card.controls.add_child(_button("+", func() -> void: _step_qty(sid, 1)))
 			var b := _button("Купить", func() -> void:
 				if not Profile.buy(sid, n, _buy_to):
-					_title.text = "Не влезает в %s" % ("рюкзак" if _buy_to == "backpack" else "тайник")
+					if Profile.buy_price(sid) * n > Profile.money:
+						toast("Не хватает денег")
+					else:
+						toast("Не купил: не влезает в %s — освободи место или выбери «%s»" % ["рюкзак" if _buy_to == "backpack" else "тайник",
+							"В тайник" if _buy_to == "backpack" else "В рюкзак"])
 				elif WeaponDb.is_weapon(sid):
 					# купил ствол — сразу видно, что к нему подходит
 					_focus = sid)
@@ -429,6 +515,15 @@ func _trader_buy() -> void:
 		elif fit != 0:
 			card.mark(fit)
 		flow.add_child(card)
+
+
+## Раздел ассортимента предмета (ключ CAT_TABS).
+func _cat_of(id: String) -> String:
+	var cat := String(ItemDb.item(id).get("cat", "misc"))
+	for t in CAT_TABS:
+		if cat in (t[2] as Array):
+			return String(t[0])
+	return "misc"
 
 
 ## Подходит ли предмет к выбранному стволу: 1 — да, -1 — нет (патроны, магазины, обвес), 0 — не про то.
@@ -480,7 +575,8 @@ func _sub_of(id: String) -> String:
 	var v := WeaponDb.vest(id)
 	if not v.is_empty():
 		return "плиты: " + ("спереди и сзади" if not (v.get("plates", []) as Array).is_empty() else "нет")
-	return String(ItemDb.item(id).get("desc", ""))
+	# остальное — вид предмета; подробно — по «i»
+	return String(ItemInfo.CAT_NAMES.get(String(ItemDb.item(id).get("cat", "misc")), ""))
 
 
 ## Обвес оружия: выбрать своё оружие (надетое, в тайнике, в рюкзаке) и собрать его на схеме —
@@ -593,6 +689,7 @@ func _trader_candidates(mount: String) -> Array:
 ## Купить обвес и сразу поставить на выбранное оружие (вытесненное — в тайник).
 func _buy_fit(sid: String, mount: String) -> void:
 	if not Profile.buy(sid, 1):
+		toast("Не купил: " + ("не хватает денег" if Profile.buy_price(sid) > Profile.money else "тайник полон"))
 		return
 	var si := -1
 	for i in range(Profile.stash.size() - 1, -1, -1):
@@ -604,26 +701,36 @@ func _buy_fit(sid: String, mount: String) -> void:
 		Profile.fit_part(String(ref[0]), int(ref[1]), "stash", si, mount)
 
 
-## Продать: карточки тайника с ценой (стопку — целиком или по одной).
+## Продать: карточки тайника, рюкзака и кармана с ценой (стопку — целиком или по одной).
 func _trader_sell() -> void:
-	var sell := _column("Продать из тайника", 1.0)
-	if Profile.stash.is_empty():
-		sell.add_child(_text("тайник пуст", Color(0.6, 0.6, 0.6)))
-		return
-	var flow := HFlowContainer.new()
-	flow.add_theme_constant_override("h_separation", 8)
-	flow.add_theme_constant_override("v_separation", 8)
-	sell.add_child(flow)
-	for i in range(Profile.stash.size()):
-		var e: Dictionary = Profile.stash[i]
-		var idx := i
-		var card := ItemCard.make(e, "", "%s ₽" % InventoryUI.money(Profile.sell_price(e)))
-		if int(e.n) > 1:
-			card.controls.add_child(_button("1 шт.", func() -> void: Profile.sell(idx, 1)))
-		var b := _button("Продать", func() -> void: Profile.sell(idx, int(e.n)))
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.controls.add_child(b)
-		flow.add_child(card)
+	var sell := _column("Продать", 1.0)
+	var any := false
+	for src in [["stash", "Из тайника"], ["backpack", "Из рюкзака"], ["pocket", "Из защищённого кармана"]]:
+		var from := String(src[0])
+		var list := Profile.list_of(from)
+		if list.is_empty():
+			continue
+		any = true
+		var total := 0
+		for e in list:
+			total += Profile.sell_price(e)
+		sell.add_child(_text("%s   ·   всё вместе %s ₽" % [String(src[1]), InventoryUI.money(total)], Color(0.95, 0.82, 0.6)))
+		var flow := HFlowContainer.new()
+		flow.add_theme_constant_override("h_separation", 8)
+		flow.add_theme_constant_override("v_separation", 8)
+		sell.add_child(flow)
+		for i in range(list.size()):
+			var e: Dictionary = list[i]
+			var idx := i
+			var card := ItemCard.make(e, "", "%s ₽" % InventoryUI.money(Profile.sell_price(e)))
+			if int(e.n) > 1:
+				card.controls.add_child(_button("1 шт.", func() -> void: Profile.sell(idx, 1, from)))
+			var b := _button("Продать", func() -> void: Profile.sell(idx, int(e.n), from))
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			card.controls.add_child(b)
+			flow.add_child(card)
+	if not any:
+		sell.add_child(_text("Продавать нечего: тайник и рюкзак пусты.", Color(0.6, 0.6, 0.6)))
 
 
 ## Задания Михалыча: взятые (прогресс, «Сдать»), предложенные («Взять» — пока есть свободные слоты).

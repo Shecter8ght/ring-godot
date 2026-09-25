@@ -345,13 +345,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	# цель ушла со сцены (смена уровня, хост вышел) — искать новую
+	if _target != null and (not is_instance_valid(_target) or not _target.is_inside_tree()):
+		_target = null
 	if _target == null:
 		_target = get_tree().get_first_node_in_group("players") as Node3D
 		if _target == null:
 			return
 	var pl := _target as Player
 	load_settings()
-	var want_ads := pl != null and pl.is_local() and pl.is_alive() and (pl.aiming or (first_person_mode and pl.combat_enabled))
+	# режим от первого лица (V) — и в рейде, и в убежище (в том числе сидя на диване)
+	var want_ads := pl != null and pl.is_local() and pl.is_alive() and (pl.aiming or first_person_mode)
 	if want_ads != ads_active:
 		_set_ads(want_ads, pl)
 	_shake = maxf(0.0, _shake - Balance.SHAKE_DECAY * _shake * delta - 0.01 * delta)

@@ -31,6 +31,14 @@ static func _ensure() -> void:
 		var it: Dictionary = _items[id]
 		if not it.has("equip"):
 			it["equip"] = {"slot": String((it.weapon as Dictionary).slot), "weapon": String(id)}
+	# мелочь 1×1 складывается стопками (Balance.STACK_*): расходники и ценное — побольше
+	for id in _items:
+		var it: Dictionary = _items[id]
+		var sz: Array = it.get("size", [1, 1])
+		var cat := String(it.get("cat", "misc"))
+		if int(sz[0]) != 1 or int(sz[1]) != 1 or it.has("equip") or cat in ["weapon", "mag", "armor", "plate"]:
+			continue
+		it["stack"] = maxi(int(it.get("stack", 1)), Balance.STACK_BIG if cat in Balance.STACK_BIG_CATS else Balance.STACK_SMALL)
 	_loot = JSON.parse_string(FileAccess.get_file_as_string(LOOT_PATH)) as Dictionary
 
 
@@ -451,6 +459,37 @@ static func pack(list: Array, grid: Vector2i) -> Array:
 		if add_to(list, it, grid) < int(it.n):
 			over.append(it)
 	return over
+
+
+## Сортировка сетки: стопки одного добираются до полных, крупное — в начало, дальше по категории
+## и названию. Новая раскладка или [] — не влезла бы (тогда оставить как есть).
+static func arranged(list: Array, grid: Vector2i) -> Array:
+	var order := ["weapon", "armor", "plate", "mag", "ammo", "mod", "med", "food", "throw", "tools", "tech", "value", "barter", "intel", "key", "misc"]
+	var flat: Array = []
+	for it in list:
+		var e: Dictionary = (it as Dictionary).duplicate(true)
+		for key in ["x", "y", "r"]:
+			e.erase(key)
+		flat.append(e)
+	flat.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var sa := size(String(a.id))
+		var sb := size(String(b.id))
+		if sa.x * sa.y != sb.x * sb.y:
+			return sa.x * sa.y > sb.x * sb.y
+		if maxi(sa.x, sa.y) != maxi(sb.x, sb.y):
+			return maxi(sa.x, sa.y) > maxi(sb.x, sb.y)
+		var ca := order.find(String(item(String(a.id)).get("cat", "misc")))
+		var cb := order.find(String(item(String(b.id)).get("cat", "misc")))
+		if ca != cb:
+			return ca < cb
+		if String(a.id) != String(b.id):
+			return item_name(String(a.id)) < item_name(String(b.id))
+		return int(a.n) > int(b.n))
+	var out: Array = []
+	for e in flat:
+		if add_to(out, e, grid) < int(e.n):
+			return []
+	return out
 
 
 ## Все ли записи сетки стоят на местах без наложений (для проверок и миграции).

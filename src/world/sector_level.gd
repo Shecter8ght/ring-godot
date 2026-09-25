@@ -64,8 +64,16 @@ func _ready() -> void:
 	# условия рейда — до всего остального (от них зависит свет и зрение мародёров)
 	RaidConditions.current = RaidConditions.for_new_raid()
 	RaidConditions.from_host = {}
+	# доп. сцены из данных сектора ("extras"): улица — фонари, подстанция, спуски в убежище (правятся
+	# в редакторе отдельно от сцены уровня). До сборки: спуски вырезают землю, точки появления — их
+	for path in SectorBuilder.load_def(sector_path).get("extras", []):
+		if ResourceLoader.exists(String(path)):
+			add_child((load(String(path)) as PackedScene).instantiate())
 	var t0 := Time.get_ticks_msec()
 	var builder := SectorBuilder.new()
+	for h in get_tree().get_nodes_in_group("ground_holes"):
+		if h.has_method("hole_rect"):
+			builder.holes.append(h.call("hole_rect"))
 	# узлы сцены, под которыми пропсов быть не должно (эскалаторы) — уже в дереве: дети готовы раньше
 	for k in get_tree().get_nodes_in_group("prop_keepout"):
 		if k.has_method("keepout_rect"):
@@ -75,12 +83,6 @@ func _ready() -> void:
 	sector.add_to_group("nav_source")
 	add_child(sector)
 	move_child(sector, 0)
-	# доп. сцены из данных сектора ("extras"): улица — фонари, подстанция (правятся в редакторе
-	# отдельно от сцены уровня)
-	for path in SectorBuilder.load_def(sector_path).get("extras", []):
-		if ResourceLoader.exists(String(path)):
-			var extra := (load(String(path)) as PackedScene).instantiate()
-			add_child(extra)
 	# потолки и купол — не источник навмеша (иначе крыша станет «полом» для мародёров)
 	var ceil := sector.get_node_or_null("Ceilings")
 	if ceil:
@@ -107,6 +109,10 @@ func _ready() -> void:
 		add_child(map)
 	# точка появления из сцены уровня (узлы SpawnPoint) — одна случайная на рейд
 	var points := get_tree().get_nodes_in_group("spawn_points")
+	# у спусков в убежище — укрыты от улицы: есть такие — только они
+	var bunkers := points.filter(func(p: Node) -> bool: return p is SpawnPoint and (p as SpawnPoint).bunker)
+	if not bunkers.is_empty():
+		points = bunkers
 	if not points.is_empty():
 		_spawn = (points[_rng.randi_range(0, points.size() - 1)] as Node3D).global_position
 	if _camera_rig and _ring.is_empty() and sector.has_meta("camera_yaw"):

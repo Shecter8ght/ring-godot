@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/street_lamp.tscn" id="1_lamp"]
 [ext_resource type="PackedScene" path="res://scenes/world/blockout_building.tscn" id="2_bld"]
 [ext_resource type="PackedScene" path="res://scenes/world/blockout_opening.tscn" id="3_open"]
 [ext_resource type="PackedScene" path="res://scenes/world/power_switch.tscn" id="4_sw"]
+[ext_resource type="PackedScene" path="res://scenes/world/hideout_entrance.tscn" id="5_bunker"]
 
 [node name="F1Street" type="Node3D"]
 
@@ -78,3 +79,17 @@ switch_id = "street_lights"
 display_name = "Уличное освещение"
 toggle = true
 default_on = true
+
+[node name="Bunkers" type="Node3D" parent="."]
+
+[node name="BunkerWest" parent="Bunkers" instance=ExtResource("5_bunker")]
+transform = Transform3D(0.86603, 0, 0.50000, 0, 1, 0, -0.50000, 0, 0.86603, -84.000, 0, -145.492)
+display_name = "Спуск в убежище у паркинга"
+
+[node name="BunkerEast" parent="Bunkers" instance=ExtResource("5_bunker")]
+transform = Transform3D(0.88295, 0, -0.46947, 0, 1, 0, 0.46947, 0, 0.88295, 79.810, 0, -150.101)
+display_name = "Спуск в убежище у двора"
+
+[node name="BunkerTech" parent="Bunkers" instance=ExtResource("5_bunker")]
+transform = Transform3D(0.20791, 0, -0.97815, 0, 1, 0, 0.97815, 0, 0.20791, 154.547, 0, -32.850)
+display_name = "Спуск в убежище у техкомплекса"

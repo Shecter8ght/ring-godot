@@ -36,6 +36,16 @@ func _run() -> void:
 	var tv := get_tree().current_scene.get_node_or_null("Activities/Tv") as HideoutActivity
 	tv.request_use()
 	await get_tree().create_timer(1.5).timeout
+	# общение: сообщение в чат и полсекунды «голоса» (тон вместо микрофона)
+	Chat.send("привет из убежища")
+	Chat.debug_say(_tone(0.5))
+	t = 0.0
+	while not _heard("принял") and t < 15.0:
+		await get_tree().create_timer(0.2).timeout
+		t += 0.2
+	_check("чат: ответ друга пришёл", _heard("принял"), str(Chat.messages))
+	var fid := friend.peer_id if friend else 0
+	_check("голос друга пришёл", int(Chat.voice_bytes.get(fid, 0)) > 4000, str(Chat.voice_bytes))
 	Net.start_level.rpc(Floors.scene(Profile.floor), Profile.next_conditions)
 	t = 0.0
 	while not (Raid.current and Raid.current.local_player()):
@@ -58,6 +68,20 @@ func _run() -> void:
 	await get_tree().create_timer(6.0).timeout
 	print("coop_host: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
+
+
+func _heard(t: String) -> bool:
+	for m in Chat.messages:
+		if t in m:
+			return true
+	return false
+
+
+func _tone(sec: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	for i in range(int(sec * float(Balance.VOICE.rate))):
+		out.append(0.3 * sin(TAU * 220.0 * float(i) / float(Balance.VOICE.rate)))
+	return out
 
 
 func _both_here() -> bool:

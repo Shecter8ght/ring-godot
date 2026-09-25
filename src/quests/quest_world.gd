@@ -218,7 +218,7 @@ func _process(_delta: float) -> void:
 			_carry_vis = Node3D.new()
 			QuestProps.build_person(_carry_vis, "carried", Color(0.28, 0.3, 0.24))
 			_root.add_child(_carry_vis)
-		_carry_vis.visible = not CameraRig.first_person_mode or not me.combat_enabled
+		_carry_vis.visible = not me.ads
 		_carry_vis.global_transform = Transform3D(Basis(Vector3.UP, me.body_yaw() + PI * 0.5), me.global_position + Vector3.UP * 1.45)
 		Quests.hud.carry_hint("Несёшь раненого — X: положить")
 	elif _carry_vis:

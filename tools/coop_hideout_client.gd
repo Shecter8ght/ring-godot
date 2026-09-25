@@ -45,6 +45,23 @@ func _run() -> void:
 		await get_tree().create_timer(0.2).timeout
 		t += 0.2
 	_check("телевизор включил хост — включён и у меня", tv != null and tv.state == 1, str(tv.state if tv else -1))
+	# общение: хост написал и сказал — ответить тем же
+	t = 0.0
+	while not (_heard("привет из убежища") and int(Chat.voice_bytes.get(1, 0)) > 4000) and t < 12.0:
+		await get_tree().create_timer(0.2).timeout
+		t += 0.2
+	_check("чат: сообщение хоста пришло", _heard("привет из убежища"), str(Chat.messages))
+	_check("голос хоста пришёл", int(Chat.voice_bytes.get(1, 0)) > 4000, str(Chat.voice_bytes))
+	var host_pl: Player = null
+	for p in get_tree().get_nodes_in_group("players"):
+		if (p as Player).peer_id == 1:
+			host_pl = p
+	_check("реплика хоста над головой", host_pl != null and host_pl.get_node_or_null("ChatBubble") != null, "")
+	Chat.send("принял")
+	var tone := PackedFloat32Array()
+	for i in range(int(0.5 * float(Balance.VOICE.rate))):
+		tone.append(0.3 * sin(TAU * 330.0 * float(i) / float(Balance.VOICE.rate)))
+	Chat.debug_say(tone)
 	t = 0.0
 	while not (Raid.current and Raid.current.local_player()):
 		await get_tree().process_frame
@@ -57,6 +74,13 @@ func _run() -> void:
 	await get_tree().create_timer(12.0).timeout
 	print("coop_client: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
+
+
+func _heard(t: String) -> bool:
+	for m in Chat.messages:
+		if t in m:
+			return true
+	return false
 
 
 func _check(what: String, ok: bool, info: String) -> void:

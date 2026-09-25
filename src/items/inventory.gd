@@ -304,6 +304,23 @@ func equip_from_items(idx: int) -> Dictionary:
 	return spill
 
 
+## Разложить рюкзак или карман по порядку (хост). false — не вышло.
+func sort_grid(where: String = "backpack") -> bool:
+	var pk := where == "pocket"
+	var grid := pocket_grid if pk else Balance.BACKPACK_GRID
+	var src: Array = pocket if pk else items
+	if grid == Vector2i.ZERO or src.is_empty():
+		return false
+	var out := ItemDb.arranged(src, grid)
+	if out.is_empty():
+		return false
+	if pk:
+		pocket = out
+	else:
+		items = out
+	return true
+
+
 ## Снять из слота в рюкзак: в клетку x, y (перетащили в сетку) или куда влезет. Не влезло — false.
 func unequip(slot: String, x: int = -1, y: int = -1, r: bool = false) -> bool:
 	if not equipment.has(slot):

@@ -2,6 +2,7 @@ class_name ItemCard
 extends PanelContainer
 ## Плашка предмета для окон (торговец, схема оружия): иконка на подложке цвета категории, имя,
 ## строка подробностей, цена; снизу — ряд кнопок (controls). Без иконки — плашка цвета категории.
+## В правом верхнем углу иконки — «i»: описание предмета простыми словами (ItemInfo).
 
 const W := 200.0
 
@@ -27,6 +28,19 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	icon.id = String(entry.get("id", ""))
 	icon.custom_minimum_size = Vector2(0, 78)
 	v.add_child(icon)
+	var info := Button.new()
+	info.text = "i"
+	info.tooltip_text = "Описание"
+	info.focus_mode = Control.FOCUS_NONE
+	info.add_theme_font_size_override("font_size", 15)
+	info.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	info.offset_left = -28
+	info.offset_right = -3
+	info.offset_top = 3
+	info.offset_bottom = 28
+	var e := entry.duplicate()
+	info.pressed.connect(func() -> void: ItemInfo.open(c.popup_host(), e))
+	icon.add_child(info)
 	var n := int(entry.get("n", 1))
 	var title := ItemDb.item_name(String(entry.get("id", ""))) if plain else ItemDb.label(entry)
 	var name := _label(title + ("  ×%d" % n if n > 1 else ""), 14, Color(0.93, 0.91, 0.86))
@@ -39,6 +53,14 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	c.controls.add_theme_constant_override("separation", 4)
 	v.add_child(c.controls)
 	return c
+
+
+## Куда класть окно описания: ближайший CanvasLayer сверху (окна убежища, рюкзак) — поверх них.
+func popup_host() -> Node:
+	var n: Node = self
+	while n and not n is CanvasLayer:
+		n = n.get_parent()
+	return n if n else get_tree().root
 
 
 ## Отметка: 1 — подходит (золотая рамка), -1 — не к месту (приглушить), 0 — как есть.

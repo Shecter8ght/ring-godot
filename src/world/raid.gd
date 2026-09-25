@@ -447,6 +447,28 @@ func _unequip(peer_id: int, slot: String, x: int, y: int, r: bool) -> void:
 		notify("В рюкзаке нет места — выброси что-нибудь или брось это на землю (ПКМ)")
 
 
+## Разложить рюкзак (или карман) по порядку — освободить место.
+func request_sort(where: String = "backpack") -> void:
+	if _is_host():
+		_sort(multiplayer.get_unique_id(), where)
+	else:
+		_rpc_sort.rpc_id(1, where)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_sort(where: String) -> void:
+	if multiplayer.is_server():
+		_sort(multiplayer.get_remote_sender_id(), where)
+
+
+func _sort(peer_id: int, where: String) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	if not pl.inventory.sort_grid(where) and peer_id == multiplayer.get_unique_id():
+		notify("Не разложить — сначала освободи место")
+
+
 ## Выбросить предмет целиком (с обвесом, магазином, износом) — мешком на землю перед собой;
 ## where — "backpack" / "pocket" (индекс) или "equip:<слот>".
 func request_drop_entry(where: String, idx: int) -> void:
@@ -999,7 +1021,9 @@ func _process(delta: float) -> void:
 	_quest_hooks(me)
 	if Profile.pending_raid:
 		# рейд из убежища: закончил (ушёл или погиб) — Enter возвращает в убежище
-		if me != null and (not me.is_alive() or is_extracted(me.peer_id)) and Input.is_action_just_pressed("ui_accept"):
+		# в коопе Enter — чат, в убежище — пробелом
+		var go := Input.is_action_just_pressed("ui_accept") and not (Net.is_networked() and (Input.is_key_pressed(KEY_ENTER) or Input.is_key_pressed(KEY_KP_ENTER)))
+		if me != null and (not me.is_alive() or is_extracted(me.peer_id)) and go:
 			go_hideout()
 	elif over and Input.is_action_just_pressed("reload"):
 		_restart()
@@ -1128,7 +1152,7 @@ func _update_summary(me: Player) -> void:
 			lines.append("%s — ещё в рейде" % who)
 	lines.append("")
 	if Profile.pending_raid:
-		lines.append("Enter — в убежище")
+		lines.append("Пробел — в убежище   ·   Enter — чат" if Net.is_networked() else "Enter — в убежище")
 	elif over:
 		lines.append("R — новый рейд" if _is_host() else "ждём хоста")
 	else:
