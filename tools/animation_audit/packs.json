@@ -1,0 +1,553 @@
+[
+  {
+    "name": "Pro Rifle Pack",
+    "fbxCount": 50,
+    "uniqueHashCount": 50,
+    "targetStatesCovered": 22,
+    "targetStates": [
+      "optional/turn_in_place",
+      "reactions/death_backward",
+      "reactions/death_forward",
+      "reactions/death_right",
+      "rifle/aim_idle",
+      "rifle/crouch_idle",
+      "rifle/crouch_walk_backward",
+      "rifle/crouch_walk_forward",
+      "rifle/crouch_walk_left",
+      "rifle/crouch_walk_right",
+      "rifle/idle",
+      "rifle/jump",
+      "rifle/land",
+      "rifle/run_backward",
+      "rifle/run_forward",
+      "rifle/run_left",
+      "rifle/run_right",
+      "rifle/sprint",
+      "rifle/walk_hip_backward",
+      "rifle/walk_hip_forward",
+      "rifle/walk_hip_left",
+      "rifle/walk_hip_right"
+    ],
+    "weapons": {
+      "rifle": 50
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": true,
+    "crouch": true,
+    "prone": false,
+    "reload": false,
+    "death": true
+  },
+  {
+    "name": "Rifle 8-Way Locomotion Pack",
+    "fbxCount": 50,
+    "uniqueHashCount": 50,
+    "targetStatesCovered": 22,
+    "targetStates": [
+      "optional/turn_in_place",
+      "reactions/death_backward",
+      "reactions/death_forward",
+      "reactions/death_right",
+      "rifle/aim_idle",
+      "rifle/crouch_idle",
+      "rifle/crouch_walk_backward",
+      "rifle/crouch_walk_forward",
+      "rifle/crouch_walk_left",
+      "rifle/crouch_walk_right",
+      "rifle/idle",
+      "rifle/jump",
+      "rifle/land",
+      "rifle/run_backward",
+      "rifle/run_forward",
+      "rifle/run_left",
+      "rifle/run_right",
+      "rifle/sprint",
+      "rifle/walk_hip_backward",
+      "rifle/walk_hip_forward",
+      "rifle/walk_hip_left",
+      "rifle/walk_hip_right"
+    ],
+    "weapons": {
+      "rifle": 50
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": true,
+    "crouch": true,
+    "prone": false,
+    "reload": false,
+    "death": true
+  },
+  {
+    "name": "Crouch weapons",
+    "fbxCount": 27,
+    "uniqueHashCount": 27,
+    "targetStatesCovered": 4,
+    "targetStates": [
+      "optional/turn_in_place",
+      "reactions/death_forward",
+      "reactions/death_secondary",
+      "rifle/crouch_walk_forward"
+    ],
+    "weapons": {
+      "generic weapon": 25,
+      "rifle": 2
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": true,
+    "prone": true,
+    "reload": false,
+    "death": true
+  },
+  {
+    "name": "Pistol_Handgun Locomotion Pack",
+    "fbxCount": 20,
+    "uniqueHashCount": 20,
+    "targetStatesCovered": 7,
+    "targetStates": [
+      "pistol/crouch_idle",
+      "pistol/idle",
+      "pistol/jump",
+      "pistol/run_backward",
+      "pistol/run_forward",
+      "pistol/walk_hip_backward",
+      "pistol/walk_hip_forward"
+    ],
+    "weapons": {
+      "pistol": 20
+    },
+    "pistol": true,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": true,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "Rifle",
+    "fbxCount": 19,
+    "uniqueHashCount": 19,
+    "targetStatesCovered": 8,
+    "targetStates": [
+      "optional/dodge",
+      "reactions/death_backward",
+      "reactions/death_forward",
+      "reactions/death_right",
+      "reactions/hit_forward",
+      "reactions/hit_secondary",
+      "rifle/draw",
+      "rifle/holster"
+    ],
+    "weapons": {
+      "rifle": 19
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": true,
+    "prone": true,
+    "reload": false,
+    "death": true
+  },
+  {
+    "name": "Movements",
+    "fbxCount": 17,
+    "uniqueHashCount": 17,
+    "targetStatesCovered": 9,
+    "targetStates": [
+      "optional/turn_in_place",
+      "unarmed/crouch_idle",
+      "unarmed/idle",
+      "unarmed/run_backward",
+      "unarmed/run_forward",
+      "unarmed/walk_backward",
+      "unarmed/walk_forward",
+      "unarmed/walk_left",
+      "unarmed/walk_right"
+    ],
+    "weapons": {
+      "unarmed": 17
+    },
+    "pistol": false,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": true,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "Basic Shooter Pack",
+    "fbxCount": 16,
+    "uniqueHashCount": 16,
+    "targetStatesCovered": 8,
+    "targetStates": [
+      "grenade/throw",
+      "optional/turn_in_place",
+      "reactions/hit_forward",
+      "reactions/hit_secondary",
+      "rifle/aim_idle",
+      "rifle/fire",
+      "rifle/jump",
+      "rifle/run_forward"
+    ],
+    "weapons": {
+      "rifle": 4,
+      "generic weapon": 11,
+      "grenade": 1
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": true,
+    "death": false
+  },
+  {
+    "name": "death",
+    "fbxCount": 15,
+    "uniqueHashCount": 15,
+    "targetStatesCovered": 4,
+    "targetStates": [
+      "reactions/death_backward",
+      "reactions/death_forward",
+      "reactions/death_right",
+      "reactions/death_secondary"
+    ],
+    "weapons": {
+      "unknown": 13,
+      "rifle": 2
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": true,
+    "prone": true,
+    "reload": false,
+    "death": true
+  },
+  {
+    "name": "Shooter Pack",
+    "fbxCount": 15,
+    "uniqueHashCount": 15,
+    "targetStatesCovered": 4,
+    "targetStates": [
+      "reactions/death_forward",
+      "rifle/aim_idle",
+      "rifle/fire",
+      "rifle/run_forward"
+    ],
+    "weapons": {
+      "rifle": 3,
+      "generic weapon": 12
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": true
+  },
+  {
+    "name": "pistol",
+    "fbxCount": 13,
+    "uniqueHashCount": 13,
+    "targetStatesCovered": 9,
+    "targetStates": [
+      "pistol/crouch_idle",
+      "pistol/idle",
+      "pistol/run_backward",
+      "pistol/run_forward",
+      "pistol/walk_hip_backward",
+      "pistol/walk_hip_forward",
+      "pistol/walk_hip_right",
+      "reactions/hit_forward",
+      "reactions/hit_secondary"
+    ],
+    "weapons": {
+      "pistol": 13
+    },
+    "pistol": true,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": true,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "Run rifles",
+    "fbxCount": 7,
+    "uniqueHashCount": 7,
+    "targetStatesCovered": 2,
+    "targetStates": [
+      "reactions/death_forward",
+      "rifle/run_forward"
+    ],
+    "weapons": {
+      "rifle": 2,
+      "unknown": 5
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": true
+  },
+  {
+    "name": "prone",
+    "fbxCount": 5,
+    "uniqueHashCount": 5,
+    "targetStatesCovered": 2,
+    "targetStates": [
+      "grenade/throw",
+      "optional/turn_in_place"
+    ],
+    "weapons": {
+      "unknown": 4,
+      "grenade": 1
+    },
+    "pistol": false,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": true,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "Gunplay",
+    "fbxCount": 4,
+    "uniqueHashCount": 4,
+    "targetStatesCovered": 0,
+    "targetStates": [],
+    "weapons": {
+      "unknown": 4
+    },
+    "pistol": false,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "jump away",
+    "fbxCount": 3,
+    "uniqueHashCount": 3,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "optional/dodge"
+    ],
+    "weapons": {
+      "unknown": 2,
+      "rifle": 1
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "reload rifle",
+    "fbxCount": 3,
+    "uniqueHashCount": 3,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "rifle/reload"
+    ],
+    "weapons": {
+      "rifle": 3
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": true,
+    "reload": true,
+    "death": false
+  },
+  {
+    "name": "hit",
+    "fbxCount": 2,
+    "uniqueHashCount": 2,
+    "targetStatesCovered": 2,
+    "targetStates": [
+      "reactions/hit_forward",
+      "reactions/hit_secondary"
+    ],
+    "weapons": {
+      "unknown": 2
+    },
+    "pistol": false,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "Run Pistols",
+    "fbxCount": 2,
+    "uniqueHashCount": 2,
+    "targetStatesCovered": 2,
+    "targetStates": [
+      "pistol/run_backward",
+      "pistol/run_forward"
+    ],
+    "weapons": {
+      "pistol": 2
+    },
+    "pistol": true,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "Drawing pistol",
+    "fbxCount": 1,
+    "uniqueHashCount": 1,
+    "targetStatesCovered": 0,
+    "targetStates": [],
+    "weapons": {
+      "pistol": 1
+    },
+    "pistol": true,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "grenade",
+    "fbxCount": 1,
+    "uniqueHashCount": 1,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "grenade/throw"
+    ],
+    "weapons": {
+      "grenade": 1
+    },
+    "pistol": false,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "jump low with pistol",
+    "fbxCount": 1,
+    "uniqueHashCount": 1,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "pistol/jump"
+    ],
+    "weapons": {
+      "pistol": 1
+    },
+    "pistol": true,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "pick up",
+    "fbxCount": 1,
+    "uniqueHashCount": 1,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "interaction/pickup"
+    ],
+    "weapons": {
+      "unknown": 1
+    },
+    "pistol": false,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "Rifle idle",
+    "fbxCount": 1,
+    "uniqueHashCount": 1,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "rifle/idle"
+    ],
+    "weapons": {
+      "rifle": 1
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "run grenades",
+    "fbxCount": 1,
+    "uniqueHashCount": 1,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "grenade/throw"
+    ],
+    "weapons": {
+      "grenade": 1
+    },
+    "pistol": false,
+    "rifle": false,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  },
+  {
+    "name": "shooting rifle",
+    "fbxCount": 1,
+    "uniqueHashCount": 1,
+    "targetStatesCovered": 1,
+    "targetStates": [
+      "rifle/fire"
+    ],
+    "weapons": {
+      "rifle": 1
+    },
+    "pistol": false,
+    "rifle": true,
+    "eightWayLocomotion": false,
+    "crouch": false,
+    "prone": false,
+    "reload": false,
+    "death": false
+  }
+]

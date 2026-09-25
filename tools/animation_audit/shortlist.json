@@ -1,0 +1,3614 @@
+{
+  "unarmed": {
+    "idle": {
+      "label": "Unarmed / Idle",
+      "target": {
+        "family": "unarmed",
+        "key": "idle",
+        "label": "Unarmed / Idle",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Idle.fbx",
+          "filename": "Idle.fbx",
+          "sourcePack": "Movements",
+          "bytes": 791376,
+          "sha256": "34a2fbc1cb83979157c7cae9c23219dd8b952576fd6e90ea00fb7bf8cc395ede",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Idle.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches idle",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 64
+        }
+      ]
+    },
+    "walk_forward": {
+      "label": "Unarmed / Walk Forward",
+      "target": {
+        "family": "unarmed",
+        "key": "walk_forward",
+        "label": "Unarmed / Walk Forward",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Walking.fbx",
+          "filename": "Walking.fbx",
+          "sourcePack": "Movements",
+          "bytes": 363328,
+          "sha256": "48803a10cd532e4d96e5ae1e8493e41a09b800a493809c325756569e2e14a59f",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Walking.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 64
+        }
+      ]
+    },
+    "walk_backward": {
+      "label": "Unarmed / Walk Backward",
+      "target": {
+        "family": "unarmed",
+        "key": "walk_backward",
+        "label": "Unarmed / Walk Backward",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Walking Backwards.fbx",
+          "filename": "Walking Backwards.fbx",
+          "sourcePack": "Movements",
+          "bytes": 395968,
+          "sha256": "4608fd9d4ca5b0e02a80ded50a32ffc548faaaab804b32e07cb8d40635595225",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Walking Backwards.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 79
+        }
+      ]
+    },
+    "walk_left": {
+      "label": "Unarmed / Walk Left",
+      "target": {
+        "family": "unarmed",
+        "key": "walk_left",
+        "label": "Unarmed / Walk Left",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Left Strafe Walking.fbx",
+          "filename": "Left Strafe Walking.fbx",
+          "sourcePack": "Movements",
+          "bytes": 375136,
+          "sha256": "899fde19c5ad592abeae1c0046cb1a66584036e2000481bfba0cc89b343fbd45",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Left Strafe Walking.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 79
+        }
+      ]
+    },
+    "walk_right": {
+      "label": "Unarmed / Walk Right",
+      "target": {
+        "family": "unarmed",
+        "key": "walk_right",
+        "label": "Unarmed / Walk Right",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Right Strafe Walking.fbx",
+          "filename": "Right Strafe Walking.fbx",
+          "sourcePack": "Movements",
+          "bytes": 374912,
+          "sha256": "6d93595bde48faa3078a1fa2768d0fb52c95bf4fca8cfea54a40937865d0eb16",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Right Strafe Walking.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 79
+        }
+      ]
+    },
+    "run_forward": {
+      "label": "Unarmed / Run Forward",
+      "target": {
+        "family": "unarmed",
+        "key": "run_forward",
+        "label": "Unarmed / Run Forward",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Running.fbx",
+          "filename": "Running.fbx",
+          "sourcePack": "Movements",
+          "bytes": 428592,
+          "sha256": "9fdc5df1190289a4b279c72576f0aca5cb06e38e69fe143642c3c244323c9553",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Running.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 64
+        },
+        {
+          "path": "assets/animations/Movements/Standard Run.fbx",
+          "filename": "Standard Run.fbx",
+          "sourcePack": "Movements",
+          "bytes": 342304,
+          "sha256": "ec9bc090790b25f22fbfc9cf5f441206ccff13e1b35b795740d2892b930337f4",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Standard Run.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 64
+        }
+      ]
+    },
+    "run_backward": {
+      "label": "Unarmed / Run Backward",
+      "target": {
+        "family": "unarmed",
+        "key": "run_backward",
+        "label": "Unarmed / Run Backward",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Run Backward.fbx",
+          "filename": "Run Backward.fbx",
+          "sourcePack": "Movements",
+          "bytes": 330640,
+          "sha256": "34ffb7737229ff214dd8c4cdd4810ded40ee0d8600c0a993540fd301932389e2",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Run Backward.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 79
+        }
+      ]
+    },
+    "run_left": {
+      "label": "Unarmed / Run Left",
+      "target": {
+        "family": "unarmed",
+        "key": "run_left",
+        "label": "Unarmed / Run Left",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "run_right": {
+      "label": "Unarmed / Run Right",
+      "target": {
+        "family": "unarmed",
+        "key": "run_right",
+        "label": "Unarmed / Run Right",
+        "weapon": "unarmed",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_idle": {
+      "label": "Unarmed / Crouch Idle",
+      "target": {
+        "family": "unarmed",
+        "key": "crouch_idle",
+        "label": "Unarmed / Crouch Idle",
+        "weapon": "unarmed",
+        "stance": "crouch",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Movements/Crouching Idle.fbx",
+          "filename": "Crouching Idle.fbx",
+          "sourcePack": "Movements",
+          "bytes": 514768,
+          "sha256": "f5fd969622e575aaaf0ca348746bd86e62937f8cdeeccf1312276948290e0ef1",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Movements/Crouching Idle.fbx"
+          ],
+          "reason": [
+            "classified as unarmed",
+            "matches idle",
+            "crouch named explicitly",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 69
+        }
+      ]
+    },
+    "crouch_walk_forward": {
+      "label": "Unarmed / Crouch Walk Forward",
+      "target": {
+        "family": "unarmed",
+        "key": "crouch_walk_forward",
+        "label": "Unarmed / Crouch Walk Forward",
+        "weapon": "unarmed",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_walk_backward": {
+      "label": "Unarmed / Crouch Walk Backward",
+      "target": {
+        "family": "unarmed",
+        "key": "crouch_walk_backward",
+        "label": "Unarmed / Crouch Walk Backward",
+        "weapon": "unarmed",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_walk_left": {
+      "label": "Unarmed / Crouch Walk Left",
+      "target": {
+        "family": "unarmed",
+        "key": "crouch_walk_left",
+        "label": "Unarmed / Crouch Walk Left",
+        "weapon": "unarmed",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_walk_right": {
+      "label": "Unarmed / Crouch Walk Right",
+      "target": {
+        "family": "unarmed",
+        "key": "crouch_walk_right",
+        "label": "Unarmed / Crouch Walk Right",
+        "weapon": "unarmed",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    }
+  },
+  "pistol": {
+    "idle": {
+      "label": "Pistol / Idle",
+      "target": {
+        "family": "pistol",
+        "key": "idle",
+        "label": "Pistol / Idle",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Pistol Idle.fbx",
+          "filename": "Pistol Idle.fbx",
+          "sourcePack": "pistol",
+          "bytes": 364832,
+          "sha256": "88a49143edefba839b91c5a4f9998402113ab392a9efe420ac2fe4e57155a999",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Pistol Idle.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches idle",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 64
+        },
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol idle.fbx",
+          "filename": "pistol idle.fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 364833,
+          "sha256": "6ed3ab2543e913691480220f25d56fdb118c52ceee16c3ab0842882fc8eb3784",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol idle.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches idle",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 62
+        }
+      ]
+    },
+    "aim_idle": {
+      "label": "Pistol / Aim Idle",
+      "target": {
+        "family": "pistol",
+        "key": "aim_idle",
+        "label": "Pistol / Aim Idle",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "idle",
+        "direction": "none",
+        "action": "aim",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "walk_hip_forward": {
+      "label": "Pistol / Walk HIP Forward",
+      "target": {
+        "family": "pistol",
+        "key": "walk_hip_forward",
+        "label": "Pistol / Walk HIP Forward",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Pistol Walk.fbx",
+          "filename": "Pistol Walk.fbx",
+          "sourcePack": "pistol",
+          "bytes": 324944,
+          "sha256": "66c0ea2e6b9e7f241e7d87a8bca52ddd459b73462c3466a63964f965e0abf543",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Pistol Walk.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 64
+        },
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk.fbx",
+          "filename": "pistol walk.fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 324945,
+          "sha256": "7f4cc95f852dfabf150ab9700e8e388779ae9dce6162f66b78293ff41872e3ea",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 62
+        }
+      ]
+    },
+    "walk_hip_backward": {
+      "label": "Pistol / Walk HIP Backward",
+      "target": {
+        "family": "pistol",
+        "key": "walk_hip_backward",
+        "label": "Pistol / Walk HIP Backward",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Pistol Walk Backward.fbx",
+          "filename": "Pistol Walk Backward.fbx",
+          "sourcePack": "pistol",
+          "bytes": 343200,
+          "sha256": "5b10d085bc4df62a23143f49bef5c08735818adab20955637da93b8874e8c909",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Pistol Walk Backward.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 79
+        },
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk backward.fbx",
+          "filename": "pistol walk backward.fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 343201,
+          "sha256": "6d60209c00f5c21c5f10c6f3f1c57ea0751a83fda2778d7a7837b8d804e135c9",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk backward.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 77
+        }
+      ]
+    },
+    "walk_hip_left": {
+      "label": "Pistol / Walk HIP Left",
+      "target": {
+        "family": "pistol",
+        "key": "walk_hip_left",
+        "label": "Pistol / Walk HIP Left",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": []
+    },
+    "walk_hip_right": {
+      "label": "Pistol / Walk HIP Right",
+      "target": {
+        "family": "pistol",
+        "key": "walk_hip_right",
+        "label": "Pistol / Walk HIP Right",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Pistol Strafe (in right).fbx",
+          "filename": "Pistol Strafe (in right).fbx",
+          "sourcePack": "pistol",
+          "bytes": 308416,
+          "sha256": "807635340de828d1dc3bb8bb5e73a004e0a2a9e2b6f407a0566d5f8a272a9ebc",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Pistol Strafe (in right).fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 79
+        }
+      ]
+    },
+    "walk_ads_forward": {
+      "label": "Pistol / Walk ADS Forward",
+      "target": {
+        "family": "pistol",
+        "key": "walk_ads_forward",
+        "label": "Pistol / Walk ADS Forward",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "walk_ads_backward": {
+      "label": "Pistol / Walk ADS Backward",
+      "target": {
+        "family": "pistol",
+        "key": "walk_ads_backward",
+        "label": "Pistol / Walk ADS Backward",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "walk_ads_left": {
+      "label": "Pistol / Walk ADS Left",
+      "target": {
+        "family": "pistol",
+        "key": "walk_ads_left",
+        "label": "Pistol / Walk ADS Left",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "walk_ads_right": {
+      "label": "Pistol / Walk ADS Right",
+      "target": {
+        "family": "pistol",
+        "key": "walk_ads_right",
+        "label": "Pistol / Walk ADS Right",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "run_forward": {
+      "label": "Pistol / Run Forward",
+      "target": {
+        "family": "pistol",
+        "key": "run_forward",
+        "label": "Pistol / Run Forward",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Pistol Run.fbx",
+          "filename": "Pistol Run.fbx",
+          "sourcePack": "pistol",
+          "bytes": 328768,
+          "sha256": "64822af5dc9be6ea4395b04425aa83fa40f4c07520d8ae797dc25a1b2f7d2812",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Pistol Run.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 64
+        },
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol run.fbx",
+          "filename": "pistol run.fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 379585,
+          "sha256": "e0bcf3a1d524e7a70b7474e1fe70b822effa16db1c81d3110ebde8989a41958c",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol run.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 62
+        },
+        {
+          "path": "assets/animations/Run Pistols/Pistol Run.fbx",
+          "filename": "Pistol Run.fbx",
+          "sourcePack": "Run Pistols",
+          "bytes": 328768,
+          "sha256": "4d14ba28588ffac44bd2ed2ebdf715e5fecba85942318208125c15b70a49e957",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Run Pistols/Pistol Run.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 2 target states"
+          ],
+          "preselectionScore": 57
+        }
+      ]
+    },
+    "run_backward": {
+      "label": "Pistol / Run Backward",
+      "target": {
+        "family": "pistol",
+        "key": "run_backward",
+        "label": "Pistol / Run Backward",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Pistol Run Backward.fbx",
+          "filename": "Pistol Run Backward.fbx",
+          "sourcePack": "pistol",
+          "bytes": 303344,
+          "sha256": "91f15770695665635402805126931257fc251a0d1de5e5ded034e3494a0c4267",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Pistol Run Backward.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 79
+        },
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol run backward.fbx",
+          "filename": "pistol run backward.fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 303345,
+          "sha256": "856f5bcf185ab244c4a281aaa2f195371f379f83ccde17bf3d577d86943f015b",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol run backward.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Run Pistols/Pistol Run Backward.fbx",
+          "filename": "Pistol Run Backward.fbx",
+          "sourcePack": "Run Pistols",
+          "bytes": 303344,
+          "sha256": "368d2c26ad8adbbf8f5cfcaa2db78c233889b2474751992c9694fca8e7c778b5",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Run Pistols/Pistol Run Backward.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 2 target states"
+          ],
+          "preselectionScore": 72
+        }
+      ]
+    },
+    "run_left": {
+      "label": "Pistol / Run Left",
+      "target": {
+        "family": "pistol",
+        "key": "run_left",
+        "label": "Pistol / Run Left",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "run_right": {
+      "label": "Pistol / Run Right",
+      "target": {
+        "family": "pistol",
+        "key": "run_right",
+        "label": "Pistol / Run Right",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_idle": {
+      "label": "Pistol / Crouch Idle",
+      "target": {
+        "family": "pistol",
+        "key": "crouch_idle",
+        "label": "Pistol / Crouch Idle",
+        "weapon": "pistol",
+        "stance": "crouch",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Pistol Kneeling Idle.fbx",
+          "filename": "Pistol Kneeling Idle.fbx",
+          "sourcePack": "pistol",
+          "bytes": 566064,
+          "sha256": "d679ce91e5b261732ac2c4a5231d4ea62aef1c538824a1f8ddd2d1e8990da1a5",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Pistol Kneeling Idle.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches idle",
+            "crouch named explicitly",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 69
+        },
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol kneeling idle.fbx",
+          "filename": "pistol kneeling idle.fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 566065,
+          "sha256": "57bf35796d81d2ab1b8da110d2849cc4fc0f727a2c44ddef16609bc19046dbf4",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol kneeling idle.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches idle",
+            "crouch named explicitly",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 67
+        }
+      ]
+    },
+    "crouch_walk_forward": {
+      "label": "Pistol / Crouch Walk Forward",
+      "target": {
+        "family": "pistol",
+        "key": "crouch_walk_forward",
+        "label": "Pistol / Crouch Walk Forward",
+        "weapon": "pistol",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_walk_backward": {
+      "label": "Pistol / Crouch Walk Backward",
+      "target": {
+        "family": "pistol",
+        "key": "crouch_walk_backward",
+        "label": "Pistol / Crouch Walk Backward",
+        "weapon": "pistol",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_walk_left": {
+      "label": "Pistol / Crouch Walk Left",
+      "target": {
+        "family": "pistol",
+        "key": "crouch_walk_left",
+        "label": "Pistol / Crouch Walk Left",
+        "weapon": "pistol",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "crouch_walk_right": {
+      "label": "Pistol / Crouch Walk Right",
+      "target": {
+        "family": "pistol",
+        "key": "crouch_walk_right",
+        "label": "Pistol / Crouch Walk Right",
+        "weapon": "pistol",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "fire": {
+      "label": "Pistol / Fire",
+      "target": {
+        "family": "pistol",
+        "key": "fire",
+        "label": "Pistol / Fire",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "fire",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "aim_fire": {
+      "label": "Pistol / Aim Fire",
+      "target": {
+        "family": "pistol",
+        "key": "aim_fire",
+        "label": "Pistol / Aim Fire",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "fire",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "reload": {
+      "label": "Pistol / Reload",
+      "target": {
+        "family": "pistol",
+        "key": "reload",
+        "label": "Pistol / Reload",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "reload",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "empty_reload": {
+      "label": "Pistol / Empty Reload",
+      "target": {
+        "family": "pistol",
+        "key": "empty_reload",
+        "label": "Pistol / Empty Reload",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "empty reload",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "draw": {
+      "label": "Pistol / Draw",
+      "target": {
+        "family": "pistol",
+        "key": "draw",
+        "label": "Pistol / Draw",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "draw",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "holster": {
+      "label": "Pistol / Holster",
+      "target": {
+        "family": "pistol",
+        "key": "holster",
+        "label": "Pistol / Holster",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "holster",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "jump": {
+      "label": "Pistol / Jump",
+      "target": {
+        "family": "pistol",
+        "key": "jump",
+        "label": "Pistol / Jump",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "jump",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol jump (2).fbx",
+          "filename": "pistol jump (2).fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 326209,
+          "sha256": "7e1d0bf95d54e318dc4aad6159f3255b6f30c0b03c8ba57ec8672d0e83d35e29",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol jump (2).fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches jump",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 62
+        },
+        {
+          "path": "assets/animations/Pistol_Handgun Locomotion Pack/pistol jump.fbx",
+          "filename": "pistol jump.fbx",
+          "sourcePack": "Pistol_Handgun Locomotion Pack",
+          "bytes": 422865,
+          "sha256": "1f855b979c58f1bf9f4f4745e3adfec8fc2a25a77b00224b38f0a4b112b9d84a",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pistol_Handgun Locomotion Pack/pistol jump.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches jump",
+            "same pack covers 7 target states"
+          ],
+          "preselectionScore": 62
+        },
+        {
+          "path": "assets/animations/jump low with pistol/Pistol Jump.fbx",
+          "filename": "Pistol Jump.fbx",
+          "sourcePack": "jump low with pistol",
+          "bytes": 326208,
+          "sha256": "757b7998df80b93e71b66a5dd844bc455209d33a2c4f9eddbef15abaa117f0b4",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/jump low with pistol/Pistol Jump.fbx"
+          ],
+          "reason": [
+            "classified as pistol",
+            "matches jump",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 56
+        }
+      ]
+    },
+    "land": {
+      "label": "Pistol / Land",
+      "target": {
+        "family": "pistol",
+        "key": "land",
+        "label": "Pistol / Land",
+        "weapon": "pistol",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "land",
+        "mode": ""
+      },
+      "candidates": []
+    }
+  },
+  "rifle": {
+    "idle": {
+      "label": "Rifle / SMG / Idle",
+      "target": {
+        "family": "rifle",
+        "key": "idle",
+        "label": "Rifle / SMG / Idle",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/idle.fbx",
+          "filename": "idle.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 406657,
+          "sha256": "dced40e7e978075ba7dedc26c5368c01e12c6037232a0b22d66b9d160f1d68c3",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/idle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches idle",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/idle.fbx",
+          "filename": "idle.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 406657,
+          "sha256": "5350433752fccd3db2bda0ec4af34bd67ffe43131c17b166614d27ed7e5a99a6",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/idle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches idle",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle idle/Rifle Idle.fbx",
+          "filename": "Rifle Idle.fbx",
+          "sourcePack": "Rifle idle",
+          "bytes": 745536,
+          "sha256": "48e899f33d69c14f3f319520b9820e770cde0c331b2a67dc000bacd542e32d51",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle idle/Rifle Idle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches idle",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 56
+        }
+      ]
+    },
+    "aim_idle": {
+      "label": "Rifle / SMG / Aim Idle",
+      "target": {
+        "family": "rifle",
+        "key": "aim_idle",
+        "label": "Rifle / SMG / Aim Idle",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "idle",
+        "direction": "none",
+        "action": "aim",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/idle aiming.fbx",
+          "filename": "idle aiming.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 407169,
+          "sha256": "503f4aaafa76d78dc4088b335b2fb245b07803317bb064d2fa541915ea5ca7f6",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/idle aiming.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches aim",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/idle aiming.fbx",
+          "filename": "idle aiming.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 407169,
+          "sha256": "d280e1f898e48a44a65bee22b89447182d9c48246a6699acc857ff2ac935f9ed",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/idle aiming.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches aim",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Basic Shooter Pack/rifle aiming idle.fbx",
+          "filename": "rifle aiming idle.fbx",
+          "sourcePack": "Basic Shooter Pack",
+          "bytes": 596417,
+          "sha256": "43ce3240ef4de251c0196a392647d04f1b12554871a29a3070c755e323856ca7",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Basic Shooter Pack/rifle aiming idle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches aim",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        },
+        {
+          "path": "assets/animations/Shooter Pack/rifle aiming idle.fbx",
+          "filename": "rifle aiming idle.fbx",
+          "sourcePack": "Shooter Pack",
+          "bytes": 596417,
+          "sha256": "da10527140642ce1c23dc0691ac647eaeaf36faf845a4f20543a457c3fb13156",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Shooter Pack/rifle aiming idle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches aim",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 59
+        }
+      ]
+    },
+    "walk_hip_forward": {
+      "label": "Rifle / SMG / Walk HIP Forward",
+      "target": {
+        "family": "rifle",
+        "key": "walk_hip_forward",
+        "label": "Rifle / SMG / Walk HIP Forward",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk forward.fbx",
+          "filename": "walk forward.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 344561,
+          "sha256": "faab925924204f57aaa86665f3614a438886280b79222084ebc7153edcd2da5e",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk forward.fbx",
+          "filename": "walk forward.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 344561,
+          "sha256": "40658b44bc10caa9a43be656e18758d63725b9fa4f68d7e541bbf22ed2ff11f9",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "walk_hip_backward": {
+      "label": "Rifle / SMG / Walk HIP Backward",
+      "target": {
+        "family": "rifle",
+        "key": "walk_hip_backward",
+        "label": "Rifle / SMG / Walk HIP Backward",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk backward.fbx",
+          "filename": "walk backward.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 344129,
+          "sha256": "ed10a5f302492ee49185b70b3e96abff7764287be20eb6c2a99bb69e87c1ef55",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk backward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk backward.fbx",
+          "filename": "walk backward.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 344129,
+          "sha256": "cdf2cbb9bced33364dfdd4583768a53fe9db79601b19998496a654e8293e9db4",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk backward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "walk_hip_left": {
+      "label": "Rifle / SMG / Walk HIP Left",
+      "target": {
+        "family": "rifle",
+        "key": "walk_hip_left",
+        "label": "Rifle / SMG / Walk HIP Left",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk left.fbx",
+          "filename": "walk left.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 342001,
+          "sha256": "94fb45087c5efa44bf5898fa1e7f13a3e2a8aa97f4a1ccb384b78c04db587dfc",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk left.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk left.fbx",
+          "filename": "walk left.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 342001,
+          "sha256": "077a780f2b474f3997ece88ef0681687afd713c91c89bcfb4fc854472651d117",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk left.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "walk_hip_right": {
+      "label": "Rifle / SMG / Walk HIP Right",
+      "target": {
+        "family": "rifle",
+        "key": "walk_hip_right",
+        "label": "Rifle / SMG / Walk HIP Right",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": "hip"
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk right.fbx",
+          "filename": "walk right.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 343041,
+          "sha256": "890f43ad431d6e62488505a3457253f6b926f1b2439a1696a6f2398d81e25468",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk right.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk right.fbx",
+          "filename": "walk right.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 343057,
+          "sha256": "2c55d51ef14026cf67136f802d3c61c58164ac9592b42ac0668f2f5ee147517b",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk right.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "ADS not named; hip carry requires visual confirmation",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "walk_ads_forward": {
+      "label": "Rifle / SMG / Walk ADS Forward",
+      "target": {
+        "family": "rifle",
+        "key": "walk_ads_forward",
+        "label": "Rifle / SMG / Walk ADS Forward",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "walk_ads_backward": {
+      "label": "Rifle / SMG / Walk ADS Backward",
+      "target": {
+        "family": "rifle",
+        "key": "walk_ads_backward",
+        "label": "Rifle / SMG / Walk ADS Backward",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "walk_ads_left": {
+      "label": "Rifle / SMG / Walk ADS Left",
+      "target": {
+        "family": "rifle",
+        "key": "walk_ads_left",
+        "label": "Rifle / SMG / Walk ADS Left",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "walk_ads_right": {
+      "label": "Rifle / SMG / Walk ADS Right",
+      "target": {
+        "family": "rifle",
+        "key": "walk_ads_right",
+        "label": "Rifle / SMG / Walk ADS Right",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "run_forward": {
+      "label": "Rifle / SMG / Run Forward",
+      "target": {
+        "family": "rifle",
+        "key": "run_forward",
+        "label": "Rifle / SMG / Run Forward",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/run forward.fbx",
+          "filename": "run forward.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 385377,
+          "sha256": "b0a70e7a2d9c68e551089cbe5a6e76b42d2d15e1efb9648d6d02f2da92cbbfb9",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/run forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/run forward.fbx",
+          "filename": "run forward.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 385393,
+          "sha256": "a1bfec1eceef8e80b89f751d3afacc0929ddc8e56e8932bce92aba2b96b54042",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/run forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Basic Shooter Pack/rifle run.fbx",
+          "filename": "rifle run.fbx",
+          "sourcePack": "Basic Shooter Pack",
+          "bytes": 340289,
+          "sha256": "17dc8381e51c5e80a4c4901ad6a5c0edb17e2707f17676cb42008282532ef24d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Basic Shooter Pack/rifle run.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        },
+        {
+          "path": "assets/animations/Shooter Pack/rifle run.fbx",
+          "filename": "rifle run.fbx",
+          "sourcePack": "Shooter Pack",
+          "bytes": 340273,
+          "sha256": "65b9575839ba8037a58e856485ed5f323d51ea23a0b4f365d205a3dd32130c10",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Shooter Pack/rifle run.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 59
+        },
+        {
+          "path": "assets/animations/Run rifles/Rifle Run.fbx",
+          "filename": "Rifle Run.fbx",
+          "sourcePack": "Run rifles",
+          "bytes": 313920,
+          "sha256": "802a2e72f039d7025739b03044b475559a0eae7fc021c9aa0f01fe5820c292bd",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Run rifles/Rifle Run.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "same pack covers 2 target states"
+          ],
+          "preselectionScore": 57
+        }
+      ]
+    },
+    "run_backward": {
+      "label": "Rifle / SMG / Run Backward",
+      "target": {
+        "family": "rifle",
+        "key": "run_backward",
+        "label": "Rifle / SMG / Run Backward",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/run backward.fbx",
+          "filename": "run backward.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 383297,
+          "sha256": "ae45340d30706ef517e5ea879f4b51f85715aaf9b8726ada8a87d279c202c886",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/run backward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/run backward.fbx",
+          "filename": "run backward.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 383297,
+          "sha256": "61e47ae757c19a2e4169f5f73bf630a88bd6d129445ae7e04282ee53c02bb81c",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/run backward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "run_left": {
+      "label": "Rifle / SMG / Run Left",
+      "target": {
+        "family": "rifle",
+        "key": "run_left",
+        "label": "Rifle / SMG / Run Left",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/run left.fbx",
+          "filename": "run left.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 383329,
+          "sha256": "c066a9fa96fd03d028eb776f8ba94a583718106ecfcd7710b4f252e108aef2e1",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/run left.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/run left.fbx",
+          "filename": "run left.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 383329,
+          "sha256": "42836843b440c79b602c29d3116be1972f766541ba4001298bdce5cbeee59479",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/run left.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "run_right": {
+      "label": "Rifle / SMG / Run Right",
+      "target": {
+        "family": "rifle",
+        "key": "run_right",
+        "label": "Rifle / SMG / Run Right",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/run right.fbx",
+          "filename": "run right.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 383905,
+          "sha256": "e80eac4278da491a1a84c6e91efb53f3515fb39f00ba577b352be257fbf1d7fc",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/run right.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/run right.fbx",
+          "filename": "run right.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 383905,
+          "sha256": "367ea0c893e385013ad479672414999289b6fb02f1a1a82b1bce6cdfb3e23358",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/run right.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "sprint": {
+      "label": "Rifle / SMG / Sprint",
+      "target": {
+        "family": "rifle",
+        "key": "sprint",
+        "label": "Rifle / SMG / Sprint",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "sprint",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/sprint forward.fbx",
+          "filename": "sprint forward.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 386209,
+          "sha256": "d1740981d284458d6c99b53cbe1b679d72fee514fc48baa3e2cef16f0a2b7cb5",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/sprint forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/sprint forward.fbx",
+          "filename": "sprint forward.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 386209,
+          "sha256": "f04fc84957cba1f5fab70c17703987846a79a0f95b2f1c5177b4d87016b7a9b3",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/sprint forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 92
+        }
+      ]
+    },
+    "crouch_idle": {
+      "label": "Rifle / SMG / Crouch Idle",
+      "target": {
+        "family": "rifle",
+        "key": "crouch_idle",
+        "label": "Rifle / SMG / Crouch Idle",
+        "weapon": "rifle",
+        "stance": "crouch",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/idle crouching.fbx",
+          "filename": "idle crouching.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 403633,
+          "sha256": "020dde8fffe2d9c7852ab7c9b227eb52091bac68015f9b41ef0a5a2a96ebf68d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/idle crouching.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches idle",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 82
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/idle crouching.fbx",
+          "filename": "idle crouching.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 403633,
+          "sha256": "0aa309da5f315da713dc7434b1a38bb8332feb04cc03f83d7ebb2fa6813bfcb4",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/idle crouching.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches idle",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 82
+        }
+      ]
+    },
+    "crouch_walk_forward": {
+      "label": "Rifle / SMG / Crouch Walk Forward",
+      "target": {
+        "family": "rifle",
+        "key": "crouch_walk_forward",
+        "label": "Rifle / SMG / Crouch Walk Forward",
+        "weapon": "rifle",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk crouching forward.fbx",
+          "filename": "walk crouching forward.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 343585,
+          "sha256": "d472849d18f95bf93612997de8874be4bf4430589d4025c7c33253f8294c89ee",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk crouching forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching forward.fbx",
+          "filename": "walk crouching forward.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 343585,
+          "sha256": "f50e4d004dbd50df4d9cbb2204dc185b596384323326e755cf49c26f5906e6b8",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching forward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        },
+        {
+          "path": "assets/animations/Crouch weapons/Rifle Crouch Idle To Walk.fbx",
+          "filename": "Rifle Crouch Idle To Walk.fbx",
+          "sourcePack": "Crouch weapons",
+          "bytes": 530608,
+          "sha256": "702fa0a2306fb7dfb6cd6d2cff3ad97db6fd9de38ba5f22c08e64e5542d46b5d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Crouch weapons/Rifle Crouch Idle To Walk.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "forward inferred from unlabeled straight movement; verify visually",
+            "crouch named explicitly",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 64
+        }
+      ]
+    },
+    "crouch_walk_backward": {
+      "label": "Rifle / SMG / Crouch Walk Backward",
+      "target": {
+        "family": "rifle",
+        "key": "crouch_walk_backward",
+        "label": "Rifle / SMG / Crouch Walk Backward",
+        "weapon": "rifle",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk crouching backward.fbx",
+          "filename": "walk crouching backward.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 342753,
+          "sha256": "2da4506f96ead587d69212f04508b3a90af042e9b7e6b5e6363b5b3967830a7f",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk crouching backward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching backward.fbx",
+          "filename": "walk crouching backward.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 342769,
+          "sha256": "a8d6510284818e22aa48f2f50b4272e349a7a25721b0a856debfccea2f774c02",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching backward.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        }
+      ]
+    },
+    "crouch_walk_left": {
+      "label": "Rifle / SMG / Crouch Walk Left",
+      "target": {
+        "family": "rifle",
+        "key": "crouch_walk_left",
+        "label": "Rifle / SMG / Crouch Walk Left",
+        "weapon": "rifle",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk crouching left.fbx",
+          "filename": "walk crouching left.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 343617,
+          "sha256": "926f9333e35e7d69d56d891fac9cfcdddc886a26bbbecd9ff61f10e38c9fe2a2",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk crouching left.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching left.fbx",
+          "filename": "walk crouching left.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 343633,
+          "sha256": "dca4a4c77ea1241f25c6957fd424f3bd64629a8fec17354768adb604d52c5e13",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching left.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        }
+      ]
+    },
+    "crouch_walk_right": {
+      "label": "Rifle / SMG / Crouch Walk Right",
+      "target": {
+        "family": "rifle",
+        "key": "crouch_walk_right",
+        "label": "Rifle / SMG / Crouch Walk Right",
+        "weapon": "rifle",
+        "stance": "crouch",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/walk crouching right.fbx",
+          "filename": "walk crouching right.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 345457,
+          "sha256": "cf8bc962e1921fb6a1421fc9ff51017f12b7d15575c1e1d3595e50d31e32e905",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/walk crouching right.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching right.fbx",
+          "filename": "walk crouching right.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 345457,
+          "sha256": "dd2eab6e9fcbcaf4098ed0682ee4d112f600c695167dda7b23df3f089e4656ce",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching right.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches locomotion",
+            "direction named explicitly",
+            "crouch named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 97
+        }
+      ]
+    },
+    "prone_idle": {
+      "label": "Rifle / SMG / Prone Idle",
+      "target": {
+        "family": "rifle",
+        "key": "prone_idle",
+        "label": "Rifle / SMG / Prone Idle",
+        "weapon": "rifle",
+        "stance": "prone",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "prone_move_forward": {
+      "label": "Rifle / SMG / Prone Move Forward",
+      "target": {
+        "family": "rifle",
+        "key": "prone_move_forward",
+        "label": "Rifle / SMG / Prone Move Forward",
+        "weapon": "rifle",
+        "stance": "prone",
+        "movement": "walk",
+        "direction": "forward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "prone_move_backward": {
+      "label": "Rifle / SMG / Prone Move Backward",
+      "target": {
+        "family": "rifle",
+        "key": "prone_move_backward",
+        "label": "Rifle / SMG / Prone Move Backward",
+        "weapon": "rifle",
+        "stance": "prone",
+        "movement": "walk",
+        "direction": "backward",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "prone_move_left": {
+      "label": "Rifle / SMG / Prone Move Left",
+      "target": {
+        "family": "rifle",
+        "key": "prone_move_left",
+        "label": "Rifle / SMG / Prone Move Left",
+        "weapon": "rifle",
+        "stance": "prone",
+        "movement": "walk",
+        "direction": "left",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "prone_move_right": {
+      "label": "Rifle / SMG / Prone Move Right",
+      "target": {
+        "family": "rifle",
+        "key": "prone_move_right",
+        "label": "Rifle / SMG / Prone Move Right",
+        "weapon": "rifle",
+        "stance": "prone",
+        "movement": "walk",
+        "direction": "right",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "fire": {
+      "label": "Rifle / SMG / Fire",
+      "target": {
+        "family": "rifle",
+        "key": "fire",
+        "label": "Rifle / SMG / Fire",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "fire",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Basic Shooter Pack/firing rifle.fbx",
+          "filename": "firing rifle.fbx",
+          "sourcePack": "Basic Shooter Pack",
+          "bytes": 336897,
+          "sha256": "326c31e6bd6e137bfb7d24991aed5f465bae53c6e005220e08fe2fcd6b3a3f93",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Basic Shooter Pack/firing rifle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches fire",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        },
+        {
+          "path": "assets/animations/Shooter Pack/firing rifle.fbx",
+          "filename": "firing rifle.fbx",
+          "sourcePack": "Shooter Pack",
+          "bytes": 384273,
+          "sha256": "2b8a3bb85852a5deff3849d745ff5e99e2c165888574e7c8a74867d4113d24a9",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Shooter Pack/firing rifle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches fire",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 59
+        },
+        {
+          "path": "assets/animations/shooting rifle/Shoot Rifle.fbx",
+          "filename": "Shoot Rifle.fbx",
+          "sourcePack": "shooting rifle",
+          "bytes": 364176,
+          "sha256": "6598f8706eedacd8126b1746e6d624e97f3e8f862dbee17c2628911dc6640dc4",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/shooting rifle/Shoot Rifle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches fire",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 56
+        }
+      ]
+    },
+    "aim_fire": {
+      "label": "Rifle / SMG / Aim Fire",
+      "target": {
+        "family": "rifle",
+        "key": "aim_fire",
+        "label": "Rifle / SMG / Aim Fire",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "fire",
+        "mode": "ads"
+      },
+      "candidates": []
+    },
+    "reload": {
+      "label": "Rifle / SMG / Reload",
+      "target": {
+        "family": "rifle",
+        "key": "reload",
+        "label": "Rifle / SMG / Reload",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "reload",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/reload rifle/Reload run rifle.fbx",
+          "filename": "Reload run rifle.fbx",
+          "sourcePack": "reload rifle",
+          "bytes": 684768,
+          "sha256": "d8d20edaa370b6de1be93bf5cf395a24f9477705df7b9647ed329906ff35ffe8",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/reload rifle/Reload run rifle.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches reload",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 56
+        },
+        {
+          "path": "assets/animations/reload rifle/Reload.fbx",
+          "filename": "Reload.fbx",
+          "sourcePack": "reload rifle",
+          "bytes": 879600,
+          "sha256": "dcf6a7d2df0347757f24d7f5516422a2a22484329e440f79310ba59c5778f185",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/reload rifle/Reload.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches reload",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 56
+        }
+      ]
+    },
+    "empty_reload": {
+      "label": "Rifle / SMG / Empty Reload",
+      "target": {
+        "family": "rifle",
+        "key": "empty_reload",
+        "label": "Rifle / SMG / Empty Reload",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "empty reload",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "draw": {
+      "label": "Rifle / SMG / Draw",
+      "target": {
+        "family": "rifle",
+        "key": "draw",
+        "label": "Rifle / SMG / Draw",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "draw",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Rifle/Grab Rifle From Back.fbx",
+          "filename": "Grab Rifle From Back.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 591168,
+          "sha256": "a785d695669a102cfefcbe90aa06824e7d03ccd1d0970442aa2c646663423b1d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/Grab Rifle From Back.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches draw",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        }
+      ]
+    },
+    "holster": {
+      "label": "Rifle / SMG / Holster",
+      "target": {
+        "family": "rifle",
+        "key": "holster",
+        "label": "Rifle / SMG / Holster",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "holster",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Rifle/put away/Rifle Put Away.fbx",
+          "filename": "Rifle Put Away.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 520272,
+          "sha256": "e3b6396db370aabe259e111db13a1a08ecad202cebda35b97ca6f46135c5c530",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/put away/Rifle Put Away.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches holster",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        }
+      ]
+    },
+    "jump": {
+      "label": "Rifle / SMG / Jump",
+      "target": {
+        "family": "rifle",
+        "key": "jump",
+        "label": "Rifle / SMG / Jump",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "jump",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/jump loop.fbx",
+          "filename": "jump loop.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 337041,
+          "sha256": "1055a65cb23eae495f4175d71e7c02b726a0f688e25a81ce8c03a2090cb11e0f",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/jump loop.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches jump",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Pro Rifle Pack/jump up.fbx",
+          "filename": "jump up.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 315681,
+          "sha256": "ecb1801a33a258d28fb34403ada29843c4e439cef70dd0a84e91f93bf522e997",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/jump up.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches jump",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/jump loop.fbx",
+          "filename": "jump loop.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 337041,
+          "sha256": "328cae60cddf57fadb79537c0352cc1553a33f815b50de28009caef7f481117e",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/jump loop.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches jump",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/jump up.fbx",
+          "filename": "jump up.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 315697,
+          "sha256": "bf4d98165ffc7d85c0c1ec6e67b742c6c36e4b6af1d1ffa9840f4a048b048570",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/jump up.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches jump",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Basic Shooter Pack/rifle jump.fbx",
+          "filename": "rifle jump.fbx",
+          "sourcePack": "Basic Shooter Pack",
+          "bytes": 322673,
+          "sha256": "3e249e2153fb82e4ed23ca93ca8d404de74d3ed180447ab04f84c0914c2e3a2c",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Basic Shooter Pack/rifle jump.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches jump",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        }
+      ]
+    },
+    "land": {
+      "label": "Rifle / SMG / Land",
+      "target": {
+        "family": "rifle",
+        "key": "land",
+        "label": "Rifle / SMG / Land",
+        "weapon": "rifle",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "land",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/jump down.fbx",
+          "filename": "jump down.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 319713,
+          "sha256": "1c098ed734a5a56da2e83850925d967726a85e3a9eebd246525fb3d29debaab8",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/jump down.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches land",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/jump down.fbx",
+          "filename": "jump down.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 319729,
+          "sha256": "1c3985a6720f2d56a9774fb25739a6b47f4454dcac6cf77cda253a9ac9ccef5e",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/jump down.fbx"
+          ],
+          "reason": [
+            "classified as rifle",
+            "matches land",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        }
+      ]
+    }
+  },
+  "grenade": {
+    "idle": {
+      "label": "Grenade / Idle / Hold",
+      "target": {
+        "family": "grenade",
+        "key": "idle",
+        "label": "Grenade / Idle / Hold",
+        "weapon": "grenade",
+        "stance": "standing",
+        "movement": "idle",
+        "direction": "none",
+        "action": "idle",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "throw": {
+      "label": "Grenade / Throw",
+      "target": {
+        "family": "grenade",
+        "key": "throw",
+        "label": "Grenade / Throw",
+        "weapon": "grenade",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "grenade throw",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Basic Shooter Pack/toss grenade.fbx",
+          "filename": "toss grenade.fbx",
+          "sourcePack": "Basic Shooter Pack",
+          "bytes": 624017,
+          "sha256": "6b10f0e3aa1fc9e6cdce52ca2bd5d4c1faa9120f383ab9c4b157ce2352b4c05a",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Basic Shooter Pack/toss grenade.fbx"
+          ],
+          "reason": [
+            "filename/folder identifies grenade action",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 53
+        },
+        {
+          "path": "assets/animations/prone/Throw Grenade.fbx",
+          "filename": "Throw Grenade.fbx",
+          "sourcePack": "prone",
+          "bytes": 628864,
+          "sha256": "262b5e92b616d098c565b1049521fdffcba02e36b0ff6411515ef3f8e6333153",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/prone/Throw Grenade.fbx"
+          ],
+          "reason": [
+            "filename/folder identifies grenade action",
+            "same pack covers 2 target states"
+          ],
+          "preselectionScore": 47
+        },
+        {
+          "path": "assets/animations/grenade/Throw Grenade (1).fbx",
+          "filename": "Throw Grenade (1).fbx",
+          "sourcePack": "grenade",
+          "bytes": 655168,
+          "sha256": "8191a0e015cdb6e551507a2a27a00ba35d3706c885a10a3e4cc06bf1922cb81a",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/grenade/Throw Grenade (1).fbx"
+          ],
+          "reason": [
+            "filename/folder identifies grenade action",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 46
+        },
+        {
+          "path": "assets/animations/run grenades/Run And Throw Grenade.fbx",
+          "filename": "Run And Throw Grenade.fbx",
+          "sourcePack": "run grenades",
+          "bytes": 590656,
+          "sha256": "6819c17464243541a55ba39b00f62a5e0f0c0b86d850c90ce0d806e9fd1d1f96",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/run grenades/Run And Throw Grenade.fbx"
+          ],
+          "reason": [
+            "filename/folder identifies grenade action",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 46
+        }
+      ]
+    },
+    "movement": {
+      "label": "Grenade / Movement",
+      "target": {
+        "family": "grenade",
+        "key": "movement",
+        "label": "Grenade / Movement",
+        "weapon": "grenade",
+        "stance": "standing",
+        "movement": "walk",
+        "direction": "none",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "run": {
+      "label": "Grenade / Run",
+      "target": {
+        "family": "grenade",
+        "key": "run",
+        "label": "Grenade / Run",
+        "weapon": "grenade",
+        "stance": "standing",
+        "movement": "run",
+        "direction": "none",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": []
+    }
+  },
+  "reactions": {
+    "hit_forward": {
+      "label": "Hit / Forward",
+      "target": {
+        "family": "reactions",
+        "key": "hit_forward",
+        "label": "Hit / Forward",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "forward",
+        "action": "hit",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Hit Reaction (1).fbx",
+          "filename": "Hit Reaction (1).fbx",
+          "sourcePack": "pistol",
+          "bytes": 472000,
+          "sha256": "0715684685d0312f5639421bc5c876d73f6891f2f7cc477e8d5bf21e4c143ec8",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Hit Reaction (1).fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "direction unspecified; front reaction must be checked visually",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 54
+        },
+        {
+          "path": "assets/animations/pistol/Hit Reaction.fbx",
+          "filename": "Hit Reaction.fbx",
+          "sourcePack": "pistol",
+          "bytes": 523952,
+          "sha256": "5802f6ec66d08679f64eae32aaeb85a9a488b16191acd4fda522607fd0f9344d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Hit Reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "direction unspecified; front reaction must be checked visually",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 54
+        },
+        {
+          "path": "assets/animations/Basic Shooter Pack/hit reaction.fbx",
+          "filename": "hit reaction.fbx",
+          "sourcePack": "Basic Shooter Pack",
+          "bytes": 382945,
+          "sha256": "e90a04983079f4a7dfd61672804d4f4f3a4284f9598434c647352c4d91d757ff",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Basic Shooter Pack/hit reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "direction unspecified; front reaction must be checked visually",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 53
+        },
+        {
+          "path": "assets/animations/Rifle/Hit Reaction.fbx",
+          "filename": "Hit Reaction.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 448432,
+          "sha256": "a1edab905acbe57b87006516cc86d1682cbae7070a429dab4675278680d37c32",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/Hit Reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "direction unspecified; front reaction must be checked visually",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 53
+        },
+        {
+          "path": "assets/animations/Rifle/Rifle Prone Hit Reaction.fbx",
+          "filename": "Rifle Prone Hit Reaction.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 398272,
+          "sha256": "1798fb264f54aeb2d231dee1a730541b3c564b7d4a8903d270243f20e758927c",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/Rifle Prone Hit Reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "direction unspecified; front reaction must be checked visually",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 53
+        }
+      ]
+    },
+    "hit_backward": {
+      "label": "Hit / Backward",
+      "target": {
+        "family": "reactions",
+        "key": "hit_backward",
+        "label": "Hit / Backward",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "backward",
+        "action": "hit",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "hit_left": {
+      "label": "Hit / Left",
+      "target": {
+        "family": "reactions",
+        "key": "hit_left",
+        "label": "Hit / Left",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "left",
+        "action": "hit",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "hit_right": {
+      "label": "Hit / Right",
+      "target": {
+        "family": "reactions",
+        "key": "hit_right",
+        "label": "Hit / Right",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "right",
+        "action": "hit",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "hit_secondary": {
+      "label": "Hit / Secondary",
+      "target": {
+        "family": "reactions",
+        "key": "hit_secondary",
+        "label": "Hit / Secondary",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "unknown",
+        "action": "hit",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pistol/Hit Reaction (1).fbx",
+          "filename": "Hit Reaction (1).fbx",
+          "sourcePack": "pistol",
+          "bytes": 472000,
+          "sha256": "0715684685d0312f5639421bc5c876d73f6891f2f7cc477e8d5bf21e4c143ec8",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Hit Reaction (1).fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 54
+        },
+        {
+          "path": "assets/animations/pistol/Hit Reaction.fbx",
+          "filename": "Hit Reaction.fbx",
+          "sourcePack": "pistol",
+          "bytes": 523952,
+          "sha256": "5802f6ec66d08679f64eae32aaeb85a9a488b16191acd4fda522607fd0f9344d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pistol/Hit Reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "same pack covers 9 target states"
+          ],
+          "preselectionScore": 54
+        },
+        {
+          "path": "assets/animations/Basic Shooter Pack/hit reaction.fbx",
+          "filename": "hit reaction.fbx",
+          "sourcePack": "Basic Shooter Pack",
+          "bytes": 382945,
+          "sha256": "e90a04983079f4a7dfd61672804d4f4f3a4284f9598434c647352c4d91d757ff",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Basic Shooter Pack/hit reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 53
+        },
+        {
+          "path": "assets/animations/Rifle/Hit Reaction.fbx",
+          "filename": "Hit Reaction.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 448432,
+          "sha256": "a1edab905acbe57b87006516cc86d1682cbae7070a429dab4675278680d37c32",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/Hit Reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 53
+        },
+        {
+          "path": "assets/animations/Rifle/Rifle Prone Hit Reaction.fbx",
+          "filename": "Rifle Prone Hit Reaction.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 398272,
+          "sha256": "1798fb264f54aeb2d231dee1a730541b3c564b7d4a8903d270243f20e758927c",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/Rifle Prone Hit Reaction.fbx"
+          ],
+          "reason": [
+            "filename names hit",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 53
+        }
+      ]
+    },
+    "death_forward": {
+      "label": "Death / Forward",
+      "target": {
+        "family": "reactions",
+        "key": "death_forward",
+        "label": "Death / Forward",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "forward",
+        "action": "death",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/death crouching headshot front.fbx",
+          "filename": "death crouching headshot front.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 441681,
+          "sha256": "ed667065070faf6fe42677a4730c44b051d2bb0e80fbc0c47ddba8a9724c10e1",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/death crouching headshot front.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Pro Rifle Pack/death from front headshot.fbx",
+          "filename": "death from front headshot.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 519265,
+          "sha256": "a42f5c46fbec8872902b3a3d48b7da2b762625afe50f54683811ce06851c0842",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/death from front headshot.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Pro Rifle Pack/death from the front.fbx",
+          "filename": "death from the front.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 545153,
+          "sha256": "1beab6f58ef8a81d5324cd3b150aad7769f9046e208f42b6657323cc33394c5b",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/death from the front.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/death crouching headshot front.fbx",
+          "filename": "death crouching headshot front.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 441697,
+          "sha256": "310bf9caf06bb59a90f3b72dcbc110ad88b56f74b5c9daec7f291e255bf74a3f",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/death crouching headshot front.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/death from front headshot.fbx",
+          "filename": "death from front headshot.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 519265,
+          "sha256": "929787a1dca53b471c683400946193606251e7526e1920eb54e17e982207e0f5",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/death from front headshot.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        }
+      ]
+    },
+    "death_backward": {
+      "label": "Death / Backward",
+      "target": {
+        "family": "reactions",
+        "key": "death_backward",
+        "label": "Death / Backward",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "backward",
+        "action": "death",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/death from back headshot.fbx",
+          "filename": "death from back headshot.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 583217,
+          "sha256": "3bfc7fbc8c5c065fe01abdf9563a3db10b2aeb35509c935f14feb1d6bea37b40",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/death from back headshot.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Pro Rifle Pack/death from the back.fbx",
+          "filename": "death from the back.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 522177,
+          "sha256": "35683e7e230d67296bd72438c3b0ff7736f2adcc25c44deec08f3686aed8ee9d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/death from the back.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/death from back headshot.fbx",
+          "filename": "death from back headshot.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 583217,
+          "sha256": "90cadf97ce776e76c443611f27abd24889e44aa9fdb5dd65699dcf07f6595d3f",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/death from back headshot.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/death from the back.fbx",
+          "filename": "death from the back.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 522177,
+          "sha256": "8dab1b12a9efdc198311ce9a4ca184ef514530b0df91cbba173b5c3479166d51",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/death from the back.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle/Death From Back Headshot.fbx",
+          "filename": "Death From Back Headshot.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 623152,
+          "sha256": "78fa186b7df1455790827427fb44198a7894c0819e679f7cfedacce6878061df",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/Death From Back Headshot.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        }
+      ]
+    },
+    "death_left": {
+      "label": "Death / Left",
+      "target": {
+        "family": "reactions",
+        "key": "death_left",
+        "label": "Death / Left",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "left",
+        "action": "death",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "death_right": {
+      "label": "Death / Right",
+      "target": {
+        "family": "reactions",
+        "key": "death_right",
+        "label": "Death / Right",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "right",
+        "action": "death",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/death from right.fbx",
+          "filename": "death from right.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 540657,
+          "sha256": "c8312446b8bbb86110647d24e0c270bf94979c70f27fa339e5e12ed2f2d77185",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/death from right.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/death from right.fbx",
+          "filename": "death from right.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 540657,
+          "sha256": "36efd01105598c82dec97d590e3ce8ac1845e89d88de2cc29adf47330504128c",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/death from right.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 77
+        },
+        {
+          "path": "assets/animations/Rifle/Death From Right.fbx",
+          "filename": "Death From Right.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 582816,
+          "sha256": "5bc74cb4486367bfa4100e9b8b8b7182e2ba1013079f80d0a0c71dc64b8f6198",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/Death From Right.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 63
+        },
+        {
+          "path": "assets/animations/death/Death From Right.fbx",
+          "filename": "Death From Right.fbx",
+          "sourcePack": "death",
+          "bytes": 582816,
+          "sha256": "60f1017610eb21228fa0aae4e1432e5687f5388dc5b0945adfba0bbdbe062998",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/death/Death From Right.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "direction named explicitly",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 59
+        }
+      ]
+    },
+    "death_secondary": {
+      "label": "Death / Secondary",
+      "target": {
+        "family": "reactions",
+        "key": "death_secondary",
+        "label": "Death / Secondary",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "unknown",
+        "action": "death",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Crouch weapons/Crouch Death.fbx",
+          "filename": "Crouch Death.fbx",
+          "sourcePack": "Crouch weapons",
+          "bytes": 531200,
+          "sha256": "62e8f76dbd5dc0e0c136407e1b31d91a5cbf1486f09506f875fa8f25b3e9da2b",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Crouch weapons/Crouch Death.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 49
+        },
+        {
+          "path": "assets/animations/death/Crouch Death.fbx",
+          "filename": "Crouch Death.fbx",
+          "sourcePack": "death",
+          "bytes": 531200,
+          "sha256": "1ba6106d7807bbea15a46a515c9cbbf9d512cec9daa20156bfbbb2ac2ba452b8",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/death/Crouch Death.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 49
+        },
+        {
+          "path": "assets/animations/death/Death.fbx",
+          "filename": "Death.fbx",
+          "sourcePack": "death",
+          "bytes": 604336,
+          "sha256": "1ff38e783c3484b5fcff7edef6728442f9e2de46696ced26a4a5a4ab2ff970a1",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/death/Death.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 49
+        },
+        {
+          "path": "assets/animations/death/Fall Flat.fbx",
+          "filename": "Fall Flat.fbx",
+          "sourcePack": "death",
+          "bytes": 553264,
+          "sha256": "ea5fa53e7a4f15620e123fec4a578b1416f573c0a1bbdffb5dc4a3172213d46d",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/death/Fall Flat.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 49
+        },
+        {
+          "path": "assets/animations/death/Fall Over.fbx",
+          "filename": "Fall Over.fbx",
+          "sourcePack": "death",
+          "bytes": 468720,
+          "sha256": "fa8b1748aeeb93e8649950321a9b80d555892d9d8a6dfc5273321339c7d01c5f",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/death/Fall Over.fbx"
+          ],
+          "reason": [
+            "filename names death",
+            "same pack covers 4 target states"
+          ],
+          "preselectionScore": 49
+        }
+      ]
+    }
+  },
+  "interaction": {
+    "pickup": {
+      "label": "Interaction / Pickup",
+      "target": {
+        "family": "interaction",
+        "key": "pickup",
+        "label": "Interaction / Pickup",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "pickup",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/pick up/Pick Up Item.fbx",
+          "filename": "Pick Up Item.fbx",
+          "sourcePack": "pick up",
+          "bytes": 390784,
+          "sha256": "bee383185a076004ab9e46f2c52b38a232c38521d86fb3ceb768278ac4acc2cd",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/pick up/Pick Up Item.fbx"
+          ],
+          "reason": [
+            "filename names the interaction action",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 51
+        }
+      ]
+    },
+    "interact": {
+      "label": "Interaction / Generic",
+      "target": {
+        "family": "interaction",
+        "key": "interact",
+        "label": "Interaction / Generic",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "none",
+        "action": "interact",
+        "mode": ""
+      },
+      "candidates": []
+    }
+  },
+  "optional": {
+    "turn_in_place": {
+      "label": "Optional / Turn in Place",
+      "target": {
+        "family": "optional",
+        "key": "turn_in_place",
+        "label": "Optional / Turn in Place",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "turn",
+        "direction": "unknown",
+        "action": "locomotion",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Pro Rifle Pack/crouching turn 90 left.fbx",
+          "filename": "crouching turn 90 left.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 364177,
+          "sha256": "778975adaa95e037f801067d64060180bf9bfb3acb693211fa20b7e9a44b780a",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/crouching turn 90 left.fbx"
+          ],
+          "reason": [
+            "filename names the optional action",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 47
+        },
+        {
+          "path": "assets/animations/Pro Rifle Pack/crouching turn 90 right.fbx",
+          "filename": "crouching turn 90 right.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 364145,
+          "sha256": "d18e817e53cefb1861e5acb24b902a3a7c1bb2ac8a5b91e7fe2ad1d8e2424019",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/crouching turn 90 right.fbx"
+          ],
+          "reason": [
+            "filename names the optional action",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 47
+        },
+        {
+          "path": "assets/animations/Pro Rifle Pack/turn 90 left.fbx",
+          "filename": "turn 90 left.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 337281,
+          "sha256": "8192701786f7ff3856955b459d4134e09df7febb4ceba11ae5f654cd871a669e",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/turn 90 left.fbx"
+          ],
+          "reason": [
+            "filename names the optional action",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 47
+        },
+        {
+          "path": "assets/animations/Pro Rifle Pack/turn 90 right.fbx",
+          "filename": "turn 90 right.fbx",
+          "sourcePack": "Pro Rifle Pack",
+          "bytes": 339777,
+          "sha256": "7c1f8426941c674dfafe7f616c5edd2e970066fd0f015a007e530d5f9565b391",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Pro Rifle Pack/turn 90 right.fbx"
+          ],
+          "reason": [
+            "filename names the optional action",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 47
+        },
+        {
+          "path": "assets/animations/Rifle 8-Way Locomotion Pack/crouching turn 90 left.fbx",
+          "filename": "crouching turn 90 left.fbx",
+          "sourcePack": "Rifle 8-Way Locomotion Pack",
+          "bytes": 364177,
+          "sha256": "452499f8df9c459acc55d9ace7b458ccd696a8827dc1fe16b098608a744edea6",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle 8-Way Locomotion Pack/crouching turn 90 left.fbx"
+          ],
+          "reason": [
+            "filename names the optional action",
+            "same pack covers 22 target states"
+          ],
+          "preselectionScore": 47
+        }
+      ]
+    },
+    "dodge": {
+      "label": "Optional / Dodge / Evade",
+      "target": {
+        "family": "optional",
+        "key": "dodge",
+        "label": "Optional / Dodge / Evade",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "unknown",
+        "action": "dodge",
+        "mode": ""
+      },
+      "candidates": [
+        {
+          "path": "assets/animations/Rifle/put away/Rifle Put Away.fbx",
+          "filename": "Rifle Put Away.fbx",
+          "sourcePack": "Rifle",
+          "bytes": 520272,
+          "sha256": "e3b6396db370aabe259e111db13a1a08ecad202cebda35b97ca6f46135c5c530",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/Rifle/put away/Rifle Put Away.fbx"
+          ],
+          "reason": [
+            "filename names the optional action",
+            "same pack covers 8 target states"
+          ],
+          "preselectionScore": 33
+        },
+        {
+          "path": "assets/animations/jump away/Jump Away.fbx",
+          "filename": "Jump Away.fbx",
+          "sourcePack": "jump away",
+          "bytes": 562656,
+          "sha256": "83e61a7f25bfbfb217461627f6c5d77d5f30bcb06dc5c5656638cd280555de10",
+          "duplicateGroup": null,
+          "duplicatePaths": [
+            "assets/animations/jump away/Jump Away.fbx"
+          ],
+          "reason": [
+            "filename names the optional action",
+            "same pack covers 1 target states"
+          ],
+          "preselectionScore": 26
+        }
+      ]
+    },
+    "melee": {
+      "label": "Optional / Melee",
+      "target": {
+        "family": "optional",
+        "key": "melee",
+        "label": "Optional / Melee",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "unknown",
+        "action": "melee",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "inspect": {
+      "label": "Optional / Weapon Inspect",
+      "target": {
+        "family": "optional",
+        "key": "inspect",
+        "label": "Optional / Weapon Inspect",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "unknown",
+        "action": "unknown",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "low_ready": {
+      "label": "Optional / Low Ready",
+      "target": {
+        "family": "optional",
+        "key": "low_ready",
+        "label": "Optional / Low Ready",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "unknown",
+        "action": "unknown",
+        "mode": ""
+      },
+      "candidates": []
+    },
+    "high_ready": {
+      "label": "Optional / High Ready",
+      "target": {
+        "family": "optional",
+        "key": "high_ready",
+        "label": "Optional / High Ready",
+        "weapon": "unknown",
+        "stance": "standing",
+        "movement": "stationary",
+        "direction": "unknown",
+        "action": "unknown",
+        "mode": ""
+      },
+      "candidates": []
+    }
+  }
+}

@@ -1,0 +1,654 @@
+{
+  "note": "Potential matches by normalized names; not confirmed duplicates.",
+  "groups": [
+    {
+      "key": "generic weapon|crouch|stand to crouch",
+      "paths": [
+        "assets/animations/Crouch weapons/Stand To Crouch (1).fbx",
+        "assets/animations/Crouch weapons/Stand To Crouch.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "generic weapon|unknown|run backward",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/run backwards.fbx",
+        "assets/animations/Shooter Pack/run backwards.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "generic weapon|unknown|strafe",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/strafe (2).fbx",
+        "assets/animations/Basic Shooter Pack/strafe.fbx",
+        "assets/animations/Shooter Pack/strafe (2).fbx",
+        "assets/animations/Shooter Pack/strafe.fbx"
+      ],
+      "exactHashCount": 4
+    },
+    {
+      "key": "generic weapon|unknown|walk",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/walking.fbx",
+        "assets/animations/Shooter Pack/walking.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "generic weapon|unknown|walk backward",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/walking backwards.fbx",
+        "assets/animations/Shooter Pack/walking backwards.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "grenade|unknown|throw grenade",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/toss grenade.fbx",
+        "assets/animations/grenade/Throw Grenade (1).fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|crouch|pistol crouch idle",
+      "paths": [
+        "assets/animations/pistol/Pistol Kneeling Idle.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol kneeling idle.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|crouch|pistol crouch to stand",
+      "paths": [
+        "assets/animations/pistol/Pistol Kneel To Stand.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol kneel to stand.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|crouch|pistol stand to crouch",
+      "paths": [
+        "assets/animations/pistol/Pistol Stand To Kneel.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol stand to kneel.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|standing|hit react",
+      "paths": [
+        "assets/animations/pistol/Hit Reaction (1).fbx",
+        "assets/animations/pistol/Hit Reaction.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|standing|pistol idle",
+      "paths": [
+        "assets/animations/pistol/Pistol Idle.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol idle.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|standing|pistol jump",
+      "paths": [
+        "assets/animations/jump low with pistol/Pistol Jump.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol jump (2).fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol jump.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "pistol|standing|pistol run",
+      "paths": [
+        "assets/animations/pistol/Pistol Run.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol run.fbx",
+        "assets/animations/Run Pistols/Pistol Run.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "pistol|standing|pistol run arc",
+      "paths": [
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol run arc (2).fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol run arc.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|standing|pistol run backward",
+      "paths": [
+        "assets/animations/pistol/Pistol Run Backward.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol run backward.fbx",
+        "assets/animations/Run Pistols/Pistol Run Backward.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "pistol|standing|pistol run backward arc",
+      "paths": [
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol run backward arc (2).fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol run backward arc.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|standing|pistol strafe",
+      "paths": [
+        "assets/animations/pistol/Pistol Strafe.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol strafe (2).fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol strafe.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "pistol|standing|pistol walk",
+      "paths": [
+        "assets/animations/pistol/Pistol Walk.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|standing|pistol walk arc",
+      "paths": [
+        "assets/animations/pistol/Pistol Walk Arc.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk arc (2).fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk arc.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "pistol|standing|pistol walk backward",
+      "paths": [
+        "assets/animations/pistol/Pistol Walk Backward.fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk backward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "pistol|standing|pistol walk backward arc",
+      "paths": [
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk backward arc (2).fbx",
+        "assets/animations/Pistol_Handgun Locomotion Pack/pistol walk backward arc.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|crouch turn left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/crouching turn 90 left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/crouching turn 90 left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|crouch turn right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/crouching turn 90 right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/crouching turn 90 right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|death crouch headshot forward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/death crouching headshot front.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/death crouching headshot front.fbx",
+        "assets/animations/Rifle/Death Crouching Headshot Front.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|crouch|idle crouch",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/idle crouching.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/idle crouching.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|idle crouch aim",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/idle crouching aiming.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/idle crouching aiming.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch backward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching backward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching backward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch backward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching backward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching backward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch backward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching backward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching backward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch forward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching forward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching forward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch forward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching forward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching forward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch forward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching forward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching forward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|crouch|walk crouch right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk crouching right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk crouching right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|prone|prone fire rifle",
+      "paths": [
+        "assets/animations/Rifle/Prone Firing Rifle (1).fbx",
+        "assets/animations/Rifle/Prone Firing Rifle.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|death from backward headshot",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/death from back headshot.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/death from back headshot.fbx",
+        "assets/animations/Rifle/Death From Back Headshot.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|standing|death from forward headshot",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/death from front headshot.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/death from front headshot.fbx",
+        "assets/animations/Rifle/Death From Front Headshot.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|standing|death from right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/death from right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/death from right.fbx",
+        "assets/animations/Rifle/Death From Right.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|standing|death from the backward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/death from the back.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/death from the back.fbx",
+        "assets/animations/Rifle/Death From The Back.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|standing|death from the forward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/death from the front.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/death from the front.fbx",
+        "assets/animations/Rifle/Death From The Front.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|standing|fire rifle",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/firing rifle.fbx",
+        "assets/animations/Shooter Pack/firing rifle.fbx",
+        "assets/animations/shooting rifle/Shoot Rifle.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|standing|idle",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/idle.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/idle.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|idle aim",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/idle aiming.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/idle aiming.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|jump down",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/jump down.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/jump down.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|jump loop",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/jump loop.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/jump loop.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|jump up",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/jump up.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/jump up.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|persona",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/Persona.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/Persona.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|rifle aim idle",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/rifle aiming idle.fbx",
+        "assets/animations/Shooter Pack/rifle aiming idle.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|rifle run",
+      "paths": [
+        "assets/animations/Basic Shooter Pack/rifle run.fbx",
+        "assets/animations/Run rifles/Rifle Run.fbx",
+        "assets/animations/Shooter Pack/rifle run.fbx"
+      ],
+      "exactHashCount": 3
+    },
+    {
+      "key": "rifle|standing|rifle run to death",
+      "paths": [
+        "assets/animations/Rifle/Rifle Run To Dying.fbx",
+        "assets/animations/Run rifles/Rifle Run To Dying.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run backward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run backward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run backward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run backward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run backward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run backward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run backward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run backward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run backward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run forward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run forward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run forward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run forward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run forward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run forward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run forward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run forward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run forward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|run right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/run right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/run right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint backward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint backward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint backward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint backward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint backward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint backward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint backward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint backward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint backward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint forward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint forward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint forward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint forward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint forward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint forward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint forward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint forward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint forward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|sprint right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/sprint right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/sprint right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|turn left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/turn 90 left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/turn 90 left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|turn right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/turn 90 right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/turn 90 right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk backward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk backward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk backward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk backward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk backward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk backward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk backward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk backward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk backward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk forward",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk forward.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk forward.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk forward left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk forward left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk forward left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk forward right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk forward right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk forward right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk left",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk left.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk left.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "rifle|standing|walk right",
+      "paths": [
+        "assets/animations/Pro Rifle Pack/walk right.fbx",
+        "assets/animations/Rifle 8-Way Locomotion Pack/walk right.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "unknown|unknown|gunplay",
+      "paths": [
+        "assets/animations/Gunplay/Gunplay (1).fbx",
+        "assets/animations/Gunplay/Gunplay (2).fbx",
+        "assets/animations/Gunplay/Gunplay (3).fbx",
+        "assets/animations/Gunplay/Gunplay.fbx"
+      ],
+      "exactHashCount": 4
+    },
+    {
+      "key": "unknown|unknown|hit react",
+      "paths": [
+        "assets/animations/hit/Hit Reaction 2.fbx",
+        "assets/animations/hit/Hit Reaction.fbx"
+      ],
+      "exactHashCount": 2
+    },
+    {
+      "key": "unknown|unknown|run backward",
+      "paths": [
+        "assets/animations/Run rifles/Run Backward.fbx",
+        "assets/animations/Run rifles/Run Backwards.fbx"
+      ],
+      "exactHashCount": 2
+    }
+  ]
+}

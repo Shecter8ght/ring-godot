@@ -1,0 +1,674 @@
+[
+  {
+    "family": "unarmed",
+    "state": "idle",
+    "label": "Unarmed / Idle",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "unarmed",
+    "state": "walk_forward",
+    "label": "Unarmed / Walk Forward",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "unarmed",
+    "state": "walk_backward",
+    "label": "Unarmed / Walk Backward",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "unarmed",
+    "state": "walk_left",
+    "label": "Unarmed / Walk Left",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "unarmed",
+    "state": "walk_right",
+    "label": "Unarmed / Walk Right",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "unarmed",
+    "state": "run_forward",
+    "label": "Unarmed / Run Forward",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "unarmed",
+    "state": "run_backward",
+    "label": "Unarmed / Run Backward",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "unarmed",
+    "state": "run_left",
+    "label": "Unarmed / Run Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "unarmed",
+    "state": "run_right",
+    "label": "Unarmed / Run Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "unarmed",
+    "state": "crouch_idle",
+    "label": "Unarmed / Crouch Idle",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "unarmed",
+    "state": "crouch_walk_forward",
+    "label": "Unarmed / Crouch Walk Forward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "unarmed",
+    "state": "crouch_walk_backward",
+    "label": "Unarmed / Crouch Walk Backward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "unarmed",
+    "state": "crouch_walk_left",
+    "label": "Unarmed / Crouch Walk Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "unarmed",
+    "state": "crouch_walk_right",
+    "label": "Unarmed / Crouch Walk Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "idle",
+    "label": "Pistol / Idle",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "pistol",
+    "state": "aim_idle",
+    "label": "Pistol / Aim Idle",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "walk_hip_forward",
+    "label": "Pistol / Walk HIP Forward",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "pistol",
+    "state": "walk_hip_backward",
+    "label": "Pistol / Walk HIP Backward",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "pistol",
+    "state": "walk_hip_left",
+    "label": "Pistol / Walk HIP Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "walk_hip_right",
+    "label": "Pistol / Walk HIP Right",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "pistol",
+    "state": "walk_ads_forward",
+    "label": "Pistol / Walk ADS Forward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "walk_ads_backward",
+    "label": "Pistol / Walk ADS Backward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "walk_ads_left",
+    "label": "Pistol / Walk ADS Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "walk_ads_right",
+    "label": "Pistol / Walk ADS Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "run_forward",
+    "label": "Pistol / Run Forward",
+    "found": true,
+    "candidates": 3
+  },
+  {
+    "family": "pistol",
+    "state": "run_backward",
+    "label": "Pistol / Run Backward",
+    "found": true,
+    "candidates": 3
+  },
+  {
+    "family": "pistol",
+    "state": "run_left",
+    "label": "Pistol / Run Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "run_right",
+    "label": "Pistol / Run Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "crouch_idle",
+    "label": "Pistol / Crouch Idle",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "pistol",
+    "state": "crouch_walk_forward",
+    "label": "Pistol / Crouch Walk Forward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "crouch_walk_backward",
+    "label": "Pistol / Crouch Walk Backward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "crouch_walk_left",
+    "label": "Pistol / Crouch Walk Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "crouch_walk_right",
+    "label": "Pistol / Crouch Walk Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "fire",
+    "label": "Pistol / Fire",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "aim_fire",
+    "label": "Pistol / Aim Fire",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "reload",
+    "label": "Pistol / Reload",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "empty_reload",
+    "label": "Pistol / Empty Reload",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "draw",
+    "label": "Pistol / Draw",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "holster",
+    "label": "Pistol / Holster",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "pistol",
+    "state": "jump",
+    "label": "Pistol / Jump",
+    "found": true,
+    "candidates": 3
+  },
+  {
+    "family": "pistol",
+    "state": "land",
+    "label": "Pistol / Land",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "idle",
+    "label": "Rifle / SMG / Idle",
+    "found": true,
+    "candidates": 3
+  },
+  {
+    "family": "rifle",
+    "state": "aim_idle",
+    "label": "Rifle / SMG / Aim Idle",
+    "found": true,
+    "candidates": 4
+  },
+  {
+    "family": "rifle",
+    "state": "walk_hip_forward",
+    "label": "Rifle / SMG / Walk HIP Forward",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "walk_hip_backward",
+    "label": "Rifle / SMG / Walk HIP Backward",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "walk_hip_left",
+    "label": "Rifle / SMG / Walk HIP Left",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "walk_hip_right",
+    "label": "Rifle / SMG / Walk HIP Right",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "walk_ads_forward",
+    "label": "Rifle / SMG / Walk ADS Forward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "walk_ads_backward",
+    "label": "Rifle / SMG / Walk ADS Backward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "walk_ads_left",
+    "label": "Rifle / SMG / Walk ADS Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "walk_ads_right",
+    "label": "Rifle / SMG / Walk ADS Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "run_forward",
+    "label": "Rifle / SMG / Run Forward",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "rifle",
+    "state": "run_backward",
+    "label": "Rifle / SMG / Run Backward",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "run_left",
+    "label": "Rifle / SMG / Run Left",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "run_right",
+    "label": "Rifle / SMG / Run Right",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "sprint",
+    "label": "Rifle / SMG / Sprint",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "crouch_idle",
+    "label": "Rifle / SMG / Crouch Idle",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "crouch_walk_forward",
+    "label": "Rifle / SMG / Crouch Walk Forward",
+    "found": true,
+    "candidates": 3
+  },
+  {
+    "family": "rifle",
+    "state": "crouch_walk_backward",
+    "label": "Rifle / SMG / Crouch Walk Backward",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "crouch_walk_left",
+    "label": "Rifle / SMG / Crouch Walk Left",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "crouch_walk_right",
+    "label": "Rifle / SMG / Crouch Walk Right",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "prone_idle",
+    "label": "Rifle / SMG / Prone Idle",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "prone_move_forward",
+    "label": "Rifle / SMG / Prone Move Forward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "prone_move_backward",
+    "label": "Rifle / SMG / Prone Move Backward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "prone_move_left",
+    "label": "Rifle / SMG / Prone Move Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "prone_move_right",
+    "label": "Rifle / SMG / Prone Move Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "fire",
+    "label": "Rifle / SMG / Fire",
+    "found": true,
+    "candidates": 3
+  },
+  {
+    "family": "rifle",
+    "state": "aim_fire",
+    "label": "Rifle / SMG / Aim Fire",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "reload",
+    "label": "Rifle / SMG / Reload",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "rifle",
+    "state": "empty_reload",
+    "label": "Rifle / SMG / Empty Reload",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "rifle",
+    "state": "draw",
+    "label": "Rifle / SMG / Draw",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "rifle",
+    "state": "holster",
+    "label": "Rifle / SMG / Holster",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "rifle",
+    "state": "jump",
+    "label": "Rifle / SMG / Jump",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "rifle",
+    "state": "land",
+    "label": "Rifle / SMG / Land",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "grenade",
+    "state": "idle",
+    "label": "Grenade / Idle / Hold",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "grenade",
+    "state": "throw",
+    "label": "Grenade / Throw",
+    "found": true,
+    "candidates": 4
+  },
+  {
+    "family": "grenade",
+    "state": "movement",
+    "label": "Grenade / Movement",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "grenade",
+    "state": "run",
+    "label": "Grenade / Run",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "reactions",
+    "state": "hit_forward",
+    "label": "Hit / Forward",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "reactions",
+    "state": "hit_backward",
+    "label": "Hit / Backward",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "reactions",
+    "state": "hit_left",
+    "label": "Hit / Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "reactions",
+    "state": "hit_right",
+    "label": "Hit / Right",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "reactions",
+    "state": "hit_secondary",
+    "label": "Hit / Secondary",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "reactions",
+    "state": "death_forward",
+    "label": "Death / Forward",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "reactions",
+    "state": "death_backward",
+    "label": "Death / Backward",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "reactions",
+    "state": "death_left",
+    "label": "Death / Left",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "reactions",
+    "state": "death_right",
+    "label": "Death / Right",
+    "found": true,
+    "candidates": 4
+  },
+  {
+    "family": "reactions",
+    "state": "death_secondary",
+    "label": "Death / Secondary",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "interaction",
+    "state": "pickup",
+    "label": "Interaction / Pickup",
+    "found": true,
+    "candidates": 1
+  },
+  {
+    "family": "interaction",
+    "state": "interact",
+    "label": "Interaction / Generic",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "optional",
+    "state": "turn_in_place",
+    "label": "Optional / Turn in Place",
+    "found": true,
+    "candidates": 5
+  },
+  {
+    "family": "optional",
+    "state": "dodge",
+    "label": "Optional / Dodge / Evade",
+    "found": true,
+    "candidates": 2
+  },
+  {
+    "family": "optional",
+    "state": "melee",
+    "label": "Optional / Melee",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "optional",
+    "state": "inspect",
+    "label": "Optional / Weapon Inspect",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "optional",
+    "state": "low_ready",
+    "label": "Optional / Low Ready",
+    "found": false,
+    "candidates": 0
+  },
+  {
+    "family": "optional",
+    "state": "high_ready",
+    "label": "Optional / High Ready",
+    "found": false,
+    "candidates": 0
+  }
+]
