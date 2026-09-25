@@ -18,6 +18,10 @@ var _schedule: Array = []
 var _rng := RandomNumberGenerator.new()
 var _alarms: Array = []
 var _generator: Node3D
+## Свет в ТЦ: положение главного рубильника (электрощитовая, MallBreaker) — "on" / "emergency" /
+## "off", и стоит ли генератор (тогда даже «on» — только аварийный). Решает хост, знают все.
+var breaker: String = "on"
+var generator_down: bool = false
 var _drop_pos: Vector3 = Vector3.INF
 var _pmc_spawned: bool = false
 var _radio: Dictionary = {}
@@ -36,6 +40,14 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	_rng.randomize()
 	level = get_parent()
+	# с чем пришли: «света нет» — рубильник внизу и генератор стоит (поднять можно только
+	# аварийный), «аварийный» — генератор стоит
+	match String(RaidConditions.current.get("power", "on")):
+		"off":
+			breaker = "off"
+			generator_down = true
+		"emergency":
+			generator_down = true
 	if not enabled:
 		return
 	if not Net.is_networked() or multiplayer.is_server():
@@ -117,13 +129,15 @@ func _process(delta: float) -> void:
 func _rpc_event(kind: String) -> void:
 	match kind:
 		"outage":
-			_set_power("off")
+			breaker = "off"
+			_set_power(effective_power())
 			Audio.play("breaker", _listener() + Vector3(0, 3, 6))
-			_notify("Где-то щёлкнуло в щитовой — свет погас")
+			_notify("Где-то щёлкнуло в щитовой — свет погас. Главный рубильник — в электрощитовой")
 		"generator":
 			_generator_fail()
 		"generator_fixed":
-			_set_power("on")
+			generator_down = false
+			_set_power(effective_power())
 			if _generator:
 				_generator.queue_free()
 				_generator = null
@@ -156,8 +170,45 @@ func _set_power(p: String) -> void:
 		RaidAtmosphere.current.apply_power(p)
 
 
+## Что горит на самом деле: рубильник внизу — ничего; генератор стоит — только аварийный.
+func effective_power() -> String:
+	if breaker == "off":
+		return "off"
+	if generator_down or breaker == "emergency":
+		return "emergency"
+	return "on"
+
+
+## Главный рубильник: следующее положение — выкл → аварийный → весь → выкл. Генератор стоит —
+## выкл ↔ вкл (горит аварийный; починят — сразу весь).
+func next_breaker() -> String:
+	match breaker:
+		"off":
+			return "on" if generator_down else "emergency"
+		"emergency":
+			return "off" if generator_down else "on"
+	return "off"
+
+
+func set_breaker(pos: String) -> void:
+	if not _is_host():
+		return
+	if Net.is_networked():
+		_rpc_breaker.rpc(pos, generator_down)
+	else:
+		_rpc_breaker(pos, generator_down)
+
+
+@rpc("authority", "call_local", "reliable")
+func _rpc_breaker(pos: String, gen_down: bool) -> void:
+	breaker = pos
+	generator_down = gen_down
+	_set_power(effective_power())
+
+
 func _generator_fail() -> void:
-	_set_power("emergency")
+	generator_down = true
+	_set_power(effective_power())
 	var tech := level.get_node_or_null("Buildings/TechComplex") as Node3D
 	var pos := tech.global_position if tech else SectorBuilder.polar(-10.0, 170.0)
 	_generator = GeneratorPanel.new()

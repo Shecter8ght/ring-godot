@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/world/mall_breaker.gd" id="1_br"]
+
+[node name="F1MallPower" type="Node3D"]
+
+[node name="MainBreaker" type="Node3D" parent="."]
+transform = Transform3D(-0.35837, 0, 0.93358, 0, 1, 0, -0.93358, 0, -0.35837, 112.310, 0, -43.112)
+script = ExtResource("1_br")

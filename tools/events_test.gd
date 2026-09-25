@@ -43,8 +43,17 @@ func _ready() -> void:
 	var dock := _level.get_node("Extractions/Dock") as ExtractionPoint
 	Raid.current.set_switch("dock_gate", true)
 	_check("свет погас — ворота на электричестве закрыты", lit == 0 and Raid.current.extraction_block_reason(dock).contains("электричества"), Raid.current.extraction_block_reason(dock))
+	# главный рубильник в электрощитовой — поднять, свет вернулся
+	var br := _level.find_child("MainBreaker", true, false) as MallBreaker
+	br._use(1)
+	br._use(1)
+	await get_tree().process_frame
+	lit = 0
+	for l in get_tree().get_nodes_in_group("mall_lights"):
+		if (l as Light3D).visible:
+			lit += 1
+	_check("рубильник в щитовой поднят — свет вернулся", String(RaidConditions.current.power) == "on" and lit > 0, "огней %d" % lit)
 	# генератор: авария → аварийный свет → починили → свет
-	RaidConditions.current["power"] = "on"
 	ev.trigger("generator")
 	await get_tree().process_frame
 	var gen := ev._generator as GeneratorPanel
