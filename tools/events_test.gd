@@ -140,6 +140,16 @@ func _ready() -> void:
 	me.global_position = az.global_position + Vector3(0, 0.1, 0)
 	await get_tree().create_timer(1.0).timeout
 	_check("зашёл в магазин на сигнализации — сирена, слышно округе", az.triggered and heard[0], "")
+	# пульт: подойти, F — через alarm_off_sec сирена молчит, шума больше нет
+	var panel := az.get_node("Panel") as AlarmPanel
+	me.global_position = panel.global_position + Vector3(0.6, 0.1, 0.0)
+	await get_tree().physics_frame
+	var can := panel.can_use()
+	panel._use(1)
+	await get_tree().create_timer(float(Balance.RAID_EVENTS.alarm_off_sec) + 0.5).timeout
+	heard[0] = false
+	await get_tree().create_timer(6.0).timeout
+	_check("пульт: отключил сигнализацию — сирена молчит, шума нет", can and not az.sounding() and not heard[0] and not panel.can_use(), "")
 	# задание по рации
 	ev._radio = {"id": "laptop", "at": 0.0, "shown": false, "reward": 54000}
 	for i in range(3):

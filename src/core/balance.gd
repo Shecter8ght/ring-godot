@@ -492,14 +492,14 @@ const AI_HOSTILE := {"marauder": ["pmc", "resident"], "pmc": ["marauder", "resid
 ## магазину — «полез к ним»; враждебные стреляют с такого расстояния.
 const RESIDENTS := {"groups": [1, 2], "size": [2, 3], "hostile_share": 0.3, "trespass_m": 7.0, "hostile_m": 22.0}
 ## События рейда (RaidEvents): шансы и когда (от и до, с). Отключение / авария генератора — только
-## если свет был; сирена: сколько воет, докуда слышно; задание по рации: какие вещи, во сколько
+## если свет был; сирена: сколько воет, докуда слышно, сколько отключать у пульта, с; задание по рации: какие вещи, во сколько
 ## раз дороже цены платит Михалыч; починка генератора, с.
 const RAID_EVENTS := {
 	"outage_chance": 0.25, "outage_at": [180.0, 720.0],
 	"generator_chance": 0.25, "generator_at": [180.0, 720.0], "repair_sec": 8.0,
 	"drop_chance": 0.35, "drop_at": [240.0, 780.0], "drop_noise_m": 160.0, "drop_smoke_sec": 90.0,
 	"pmc_chance": 0.35, "pmc_at": [300.0, 900.0],
-	"alarm_shops": 2, "alarm_sec": 120.0, "alarm_noise_m": 70.0,
+	"alarm_shops": 2, "alarm_sec": 120.0, "alarm_noise_m": 70.0, "alarm_off_sec": 3.0,
 	"radio_items": ["laptop", "gpu", "server_drive", "camera", "documents", "diamond_ring"], "radio_at": [120.0, 360.0], "radio_mult": 3,
 }
 ## Генератор ТЦ (MallGenerator): гул работающего (громкость, дБ; 1:1 до, слышно до, м), лязг

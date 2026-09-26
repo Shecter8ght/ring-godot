@@ -2,8 +2,9 @@ class_name AlarmZone
 extends Node3D
 ## Магазин на сигнализации: датчик мигает красным (видно, что охраняется); кто-то из игроков
 ## зашёл в радиус — воет сирена ALARM_SEC секунд и каждые несколько секунд «шумит» на всю округу
-## (мародёры идут смотреть). Лут в таком магазине богаче. Срабатывает один раз. Ставит
-## RaidEvents (или руками в сцене — radius в инспекторе). Проверку «зашёл» ведёт хост.
+## (мародёры идут смотреть). Лут в таком магазине богаче. Срабатывает один раз. Воет — у пульта
+## (AlarmPanel, ребёнок «Panel», ближе к центру магазина) можно отключить. Ставит RaidEvents (или
+## руками в сцене — radius в инспекторе). Проверку «зашёл» и отключение ведёт хост.
 
 @export var radius: float = 6.0
 
@@ -14,6 +15,7 @@ var _blink: float = 0.0
 var _siren: AudioStreamPlayer3D
 var _left: float = 0.0
 var _noise_t: float = 0.0
+var _panel: AlarmPanel
 
 
 func _ready() -> void:
@@ -46,6 +48,32 @@ func _ready() -> void:
 	_led_light.omni_range = 1.5
 	_led_light.position = _led.position
 	add_child(_led_light)
+	_panel = AlarmPanel.new()
+	_panel.name = "Panel"
+	_panel.zone = self
+	add_child(_panel)
+
+
+## Сирена воет (сработала и её ещё не отключили).
+func sounding() -> bool:
+	return _left > 0.0
+
+
+## Хост: пульт отключил — всем.
+func disarm() -> void:
+	if Net.is_networked():
+		_rpc_disarm.rpc()
+	else:
+		_rpc_disarm()
+
+
+@rpc("authority", "call_local", "reliable")
+func _rpc_disarm() -> void:
+	_left = 0.0
+	if _siren:
+		_siren.stop()
+	if Raid.current:
+		Raid.current.notify("Сигнализация отключена")
 
 
 ## Лут внутри богаче (LootContainer спрашивает при броске).
@@ -101,5 +129,9 @@ func _rpc_trigger() -> void:
 	_siren.position = Vector3(0, 2.6, 0)
 	add_child(_siren)
 	_siren.play()
+	# пульт — на проходе у центра магазина (центр мог прийтись на стеллаж)
+	var nav := NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, global_position)
+	if nav != Vector3.ZERO:
+		_panel.global_position = nav
 	if Raid.current:
-		Raid.current.notify("Сработала сигнализация!")
+		Raid.current.notify("Сработала сигнализация! Пульт — в магазине, F — отключить")
