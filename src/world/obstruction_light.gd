@@ -13,7 +13,11 @@ var _lamp: MeshInstance3D
 var _halo: MeshInstance3D
 var _light: OmniLight3D
 var _t: float = 0.0
-var _on: bool = false
+## Плавный уровень 0..1 и решение общей системы (RaidWeather.beacons_wanted), проверяется дважды в секунду.
+var _k: float = 0.0
+var _want: bool = false
+var _check_t: float = 0.0
+var _shown: float = -1.0
 
 const HALO_SHADER := """
 shader_type spatial;
@@ -75,39 +79,57 @@ func _ready() -> void:
 	_light.light_specular = 0.2
 	_light.light_volumetric_fog_energy = 5.0
 	_light.shadow_enabled = false
+	# вдали источник света гаснет — остаются лампа и ореол (дёшево); вблизи он светит на кровлю и фасад
+	var ol: Dictionary = Balance.OUTDOOR_LIGHTS
+	_light.distance_fade_enabled = true
+	_light.distance_fade_begin = float(ol.beacon_light_m)
+	_light.distance_fade_length = float(ol.beacon_fade_m)
 	_light.position = Vector3(0, 0.1, 0)
 	add_child(_light)
 	_t = randf() * 3.0
-	_refresh()
-	if RaidWeather.current:
-		RaidWeather.current.changed.connect(_refresh)
-
-
-## Темно или туман — горит.
-func _refresh() -> void:
-	var c: Dictionary = RaidConditions.current
-	_on = String(c.get("time", "day")) != "day" or String(c.get("weather", "clear")) == "fog"
-	visible = _on
-	set_process(_on)
-	if _on:
-		_apply(1.0)
+	# при появлении — сразу как есть, дальше включается и гаснет плавно
+	_want = RaidWeather.beacons_wanted()
+	_k = 1.0 if _want else 0.0
+	visible = _want
+	if _want:
+		_apply(_flash())
 
 
 func _process(delta: float) -> void:
-	if not flashing:
+	_check_t -= delta
+	if _check_t <= 0.0:
+		_check_t = 0.5
+		_want = RaidWeather.beacons_wanted()
+		_shown = -1.0
+	var goal := 1.0 if _want else 0.0
+	if goal == 0.0 and _k == 0.0:
+		visible = false
 		return
-	# вспышка раз в 1.5 с, плавно (лампа, не стробоскоп)
+	_k = move_toward(_k, goal, delta / float(Balance.OUTDOOR_LIGHTS.fade_sec))
+	visible = true
 	_t += delta
+	var k := _k * _flash()
+	if absf(k - _shown) > 0.002:
+		_shown = k
+		_apply(k)
+
+
+## Мигающий — вспышка раз в 1.5 с (лампа, не стробоскоп); обычный — ровно.
+func _flash() -> float:
+	if not flashing:
+		return 1.0
 	var ph := fmod(_t, 1.5) / 1.5
-	_apply(clampf(sin(ph * PI) * 1.6, 0.0, 1.0) if ph < 0.5 else 0.0)
+	return clampf(sin(ph * PI) * 1.6, 0.0, 1.0) if ph < 0.5 else 0.0
 
 
 func _apply(k: float) -> void:
-	var fog := String(RaidConditions.current.get("weather", "clear")) == "fog"
+	var fog := RaidWeather.current.low_visibility if RaidWeather.current else String(RaidConditions.current.get("weather", "clear")) == "fog"
 	(_lamp.material_override as StandardMaterial3D).emission_energy_multiplier = 6.0 * k
 	# в тумане ореол шире и ярче — свет рассеивается
 	var hm := _halo.material_override as ShaderMaterial
 	hm.set_shader_parameter("power", k * (1.6 if fog else 1.0))
 	_halo.scale = Vector3.ONE * (1.8 if fog else 1.0)
 	_light.light_energy = 3.0 * k
+	# на мокрой кровле, фасаде и асфальте — заметный красный блик
+	_light.light_specular = lerpf(0.2, 1.0, RaidWeather.wetness())
 	_light.visible = k > 0.01

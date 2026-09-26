@@ -27,6 +27,12 @@ var _indoor_t: float = 0.0
 var _outdoor: bool = true
 ## Сырость земли: плёнка и лужи (0..1) — копятся в дождь, сохнут после (Balance.WET_GROUND).
 var wet: float = 0.0
+## Видимость ниже порога (туман) — зажигает заградительные огни днём; с гистерезисом.
+var low_visibility: bool = false
+var _e: Environment
+var _fog_target: float = 0.0
+var _fog_sky_target: float = 0.4
+var _fog_ready: bool = false
 var puddles: float = 0.0
 
 
@@ -81,19 +87,86 @@ func is_raining() -> bool:
 ## Всё, что зависит от погоды на старте (и после смены).
 func _apply_static() -> void:
 	var w := String(RaidConditions.current.weather)
-	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
-	if we and we.environment:
-		var e := we.environment
-		e.fog_enabled = w == "fog" or w == "rain"
+	_fog_target = 0.03 if w == "fog" else (0.006 if w == "rain" else 0.0)
+	_fog_sky_target = 0.9 if w == "fog" else 0.4
+	# ночью небо не серит (RaidAtmosphere: звёзды на чёрном)
+	if String(RaidConditions.current.time) == "night":
+		_fog_sky_target = minf(_fog_sky_target, float(Balance.NIGHT_ENV.fog_sky))
+	var e := _env()
+	if e:
 		e.fog_light_color = Color(0.62, 0.64, 0.66) if String(RaidConditions.current.time) != "night" else Color(0.05, 0.06, 0.08)
-		e.fog_density = 0.03 if w == "fog" else (0.006 if w == "rain" else 0.0)
-		e.fog_sky_affect = 0.9 if w == "fog" else 0.4
-		# ночью небо не серит (RaidAtmosphere: звёзды на чёрном)
-		if String(RaidConditions.current.time) == "night":
-			e.fog_sky_affect = minf(e.fog_sky_affect, float(Balance.NIGHT_ENV.fog_sky))
+		# в начале рейда — сразу как есть; дальше туман сгущается и рассеивается плавно (_tick_fog)
+		if not _fog_ready:
+			_fog_ready = true
+			e.fog_density = _fog_target
+			e.fog_sky_affect = _fog_sky_target
+			e.fog_enabled = _fog_target > 0.0
+	_update_visibility()
 	_set_overcast(w == "rain")
 	_set_rain(w == "rain")
 	changed.emit()
+
+
+func _env() -> Environment:
+	if _e == null:
+		var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
+		if we:
+			_e = we.environment
+	return _e
+
+
+## Туман меняется за Balance.OUTDOOR_LIGHTS.fog_change_sec, а не скачком («рассеялся» — постепенно).
+func _tick_fog(delta: float) -> void:
+	var e := _env()
+	if e == null or not _fog_ready:
+		return
+	var sec := float(Balance.OUTDOOR_LIGHTS.fog_change_sec)
+	e.fog_density = move_toward(e.fog_density, _fog_target, 0.03 * delta / sec)
+	e.fog_sky_affect = move_toward(e.fog_sky_affect, _fog_sky_target, 0.5 * delta / sec)
+	e.fog_enabled = e.fog_density > 0.00001
+	_update_visibility()
+
+
+## Видимость в тумане, м (Кошмидер: контраст падает до 2 % на расстоянии 3.912 / плотность).
+func visibility_m() -> float:
+	var e := _env()
+	if e == null:
+		return INF
+	var d := (e.fog_density if e.fog_enabled else 0.0) + (e.volumetric_fog_density if e.volumetric_fog_enabled else 0.0)
+	return 3.912 / d if d > 0.00001 else INF
+
+
+## Низкая видимость — с гистерезисом: зажглось ниже fog_on_m, гаснет только выше fog_off_m.
+func _update_visibility() -> void:
+	var v := visibility_m()
+	if low_visibility and v > float(Balance.OUTDOOR_LIGHTS.fog_off_m):
+		low_visibility = false
+	elif not low_visibility and v < float(Balance.OUTDOOR_LIGHTS.fog_on_m):
+		low_visibility = true
+
+
+## Общая система наружного света (одна на все светильники). Темно — не день.
+static func is_dark() -> bool:
+	return String(RaidConditions.current.get("time", "day")) != "day"
+
+
+## Заградительные огни: в темноте и при низкой видимости.
+static func beacons_wanted() -> bool:
+	if is_dark():
+		return true
+	if current:
+		return current.low_visibility
+	return String(RaidConditions.current.get("weather", "clear")) == "fog"
+
+
+## Уличные фонари: только в темноте (фотореле), туман их не зажигает.
+static func street_lights_wanted() -> bool:
+	return is_dark()
+
+
+## Насколько мокро (0..1): мокрые кровля, фасад и асфальт отражают фонари сильнее.
+static func wetness() -> float:
+	return current.wet if current else 0.0
 
 
 var _overcast: Array = []
@@ -143,6 +216,7 @@ func _process(delta: float) -> void:
 	if is_raining() and _rng.randf() < delta / 40.0:
 		_thunder()
 	_tick_wet(delta)
+	_tick_fog(delta)
 	_tick_local(delta)
 
 

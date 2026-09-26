@@ -22,12 +22,17 @@ var _light: SpotLight3D
 var _lens: StandardMaterial3D
 var _gen: Node3D
 var _t: float = 0.0
-var _on: bool = false
+## Плавный уровень 0..1 и решение (общая система RaidWeather + ток подстанции), проверяется дважды в секунду.
+var _k: float = 0.0
+var _want: bool = false
 
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		add_to_group("nav_source")
+		# при появлении — сразу как есть, дальше включается и гаснет плавно
+		_want = is_lit()
+		_k = 1.0 if _want else 0.0
 	_rebuild()
 
 
@@ -122,30 +127,36 @@ func _rebuild() -> void:
 	_light.distance_fade_shadow = float(ls.shadow_m)
 	_light.visible = Engine.is_editor_hint()
 	_gen.add_child(_light)
-	_on = not _light.visible
-	_apply(_light.visible)
+	if Engine.is_editor_hint():
+		_lens.emission_energy_multiplier = float(ls.lens)
+	else:
+		_apply_k()
 
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	_t -= delta
-	if _t > 0.0:
-		return
-	_t = 1.0
-	_apply(is_lit())
+	if _t <= 0.0:
+		_t = 0.5
+		_want = is_lit()
+		if _light and _k > 0.0:
+			_light.light_specular = lerpf(0.5, 1.0, RaidWeather.wetness())
+	var goal := 1.0 if _want else 0.0
+	if _k != goal:
+		_k = move_toward(_k, goal, delta / float(Balance.OUTDOOR_LIGHTS.fade_sec))
+		_apply_k()
 
 
-## Горит: не день и подстанция даёт ток.
+## Горит: темно (общая система наружного света) и подстанция даёт ток.
 func is_lit() -> bool:
-	var dark := String(RaidConditions.current.get("time", "day")) != "day"
 	var powered := Raid.current == null or bool(Raid.current.switches.get(switch_id, true))
-	return dark and powered
+	return RaidWeather.street_lights_wanted() and powered
 
 
-func _apply(on: bool) -> void:
-	if on == _on or _light == null:
+func _apply_k() -> void:
+	if _light == null:
 		return
-	_on = on
-	_light.visible = on
-	_lens.emission_energy_multiplier = float(Balance.STREET_LAMP.lens) if on else 0.0
+	_light.visible = _k > 0.001
+	_light.light_energy = float(Balance.STREET_LAMP.energy) * _k
+	_lens.emission_energy_multiplier = float(Balance.STREET_LAMP.lens) * _k
