@@ -44,6 +44,14 @@ func _ready() -> void:
 		pl.aiming = false
 		_check("не целится — множитель прицела не действует", is_equal_approx(rig.ads_sens(), aim1), "%.5f" % rig.ads_sens())
 		Settings.set_sens_ads(1.0)
+	# клавиши: F → E у «взаимодействия»; E уже у поворота камеры — видно; сброс — снова F
+	var e := InputEventKey.new()
+	e.physical_keycode = KEY_E
+	Settings.set_key("interact", e)
+	_check("клавиша сменилась", PauseMenu.key_name("interact") == "E", PauseMenu.key_name("interact"))
+	_check("занятая клавиша — конфликт виден", "camera_right" in Settings.key_conflicts("interact"), str(Settings.key_conflicts("interact")))
+	Settings.reset_keys()
+	_check("по умолчанию — снова F", PauseMenu.key_name("interact") == "F" and Settings.keys.is_empty(), PauseMenu.key_name("interact"))
 	Settings.set_invert_y(true)
 	_check("инверсия по вертикали", Settings.invert_y, "")
 	Settings.set_invert_y(false)

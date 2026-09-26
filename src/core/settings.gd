@@ -37,6 +37,9 @@ const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_d
 
 ## Чит «бессмертие» (меню Esc → Настройки, консоль: god) — раздел cheats; в коопе решает хост.
 var god: bool = false
+## Свои клавиши поверх project.godot: действие → {"t": "k", "c": физ. код} или {"t": "m", "b": кнопка
+## мыши}. Раздел keys; меняются в меню Esc → «Управление».
+var keys: Dictionary = {}
 
 var _tool_run: bool = false
 var _defaults: Dictionary = {}
@@ -72,6 +75,12 @@ func _load() -> void:
 	for b in BUSES:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
+	if cfg.has_section("keys"):
+		for a in cfg.get_section_keys("keys"):
+			var d: Variant = cfg.get_value("keys", a)
+			if d is Dictionary and InputMap.has_action(a) and _event_from(d as Dictionary) != null:
+				keys[a] = d
+	_apply_keys()
 
 
 func save() -> void:
@@ -87,6 +96,10 @@ func save() -> void:
 	for b in BUSES:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
+	if cfg.has_section("keys"):
+		cfg.erase_section("keys")
+	for a in keys:
+		cfg.set_value("keys", String(a), keys[a])
 	cfg.save(PATH)
 
 
@@ -116,6 +129,79 @@ func set_invert_y(on: bool) -> void:
 	invert_y = on
 	save()
 	changed.emit()
+
+
+# ---------------------------------------------------------------- клавиши
+
+## Назначить действию клавишу / кнопку мыши (одна на действие, как в project.godot).
+func set_key(action: String, ev: InputEvent) -> void:
+	var d := _event_to(ev)
+	if d.is_empty() or not InputMap.has_action(action):
+		return
+	keys[action] = d
+	_apply_keys()
+	save()
+	changed.emit()
+
+
+## Все клавиши — как в проекте.
+func reset_keys() -> void:
+	keys.clear()
+	InputMap.load_from_project_settings()
+	save()
+	changed.emit()
+
+
+## Какие ещё действия висят на том же, что у action (пусто — ни одно).
+func key_conflicts(action: String) -> Array[String]:
+	var out: Array[String] = []
+	var mine := _event_to(_first_event(action))
+	if mine.is_empty():
+		return out
+	for a in InputMap.get_actions():
+		var s := String(a)
+		if s == action or s.begins_with("ui_"):
+			continue
+		if _event_to(_first_event(s)) == mine:
+			out.append(s)
+	return out
+
+
+func _apply_keys() -> void:
+	for a in keys:
+		var ev := _event_from(keys[a] as Dictionary)
+		if ev and InputMap.has_action(a):
+			InputMap.action_erase_events(a)
+			InputMap.action_add_event(a, ev)
+
+
+func _first_event(action: String) -> InputEvent:
+	if not InputMap.has_action(action):
+		return null
+	var evs := InputMap.action_get_events(action)
+	return evs[0] if not evs.is_empty() else null
+
+
+static func _event_to(ev: InputEvent) -> Dictionary:
+	if ev is InputEventKey:
+		var k := ev as InputEventKey
+		return {"t": "k", "c": int(k.physical_keycode if k.physical_keycode != 0 else k.keycode)}
+	if ev is InputEventMouseButton:
+		return {"t": "m", "b": int((ev as InputEventMouseButton).button_index)}
+	return {}
+
+
+static func _event_from(d: Dictionary) -> InputEvent:
+	match String(d.get("t", "")):
+		"k":
+			var k := InputEventKey.new()
+			k.physical_keycode = int(d.get("c", 0)) as Key
+			return k
+		"m":
+			var m := InputEventMouseButton.new()
+			m.button_index = int(d.get("b", 0)) as MouseButton
+			return m
+	return null
 
 
 ## Бессмертие вкл/выкл: сохраняется и сразу действует на своего игрока (и в следующих рейдах).

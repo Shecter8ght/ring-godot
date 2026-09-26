@@ -1080,7 +1080,7 @@ func _update_prompt(me: Player) -> void:
 	if mate:
 		_prompt.visible = true
 		var dragging := drag_target_of(me.peer_id) == mate.peer_id
-		_prompt.text = "F (держать) — поднять (аптечка)   ·   X — %s" % ("отпустить" if dragging else "тащить")
+		_prompt.text = "%s (держать) — поднять (аптечка)   ·   %s — %s" % [PauseMenu.key_name("interact"), PauseMenu.key_name("drag"), "отпустить" if dragging else "тащить"]
 		if Input.is_action_just_pressed("drag") and not PauseMenu.shown:
 			request_drag(mate.peer_id, not dragging)
 		if Input.is_action_pressed("interact") and not PauseMenu.shown:
@@ -1104,7 +1104,7 @@ func _update_prompt(me: Player) -> void:
 	if drag_target_of(me.peer_id) != 0:
 		# раненый отстал (проверит хост) — отпустить можно и так
 		_prompt.visible = true
-		_prompt.text = "X — отпустить"
+		_prompt.text = "%s — отпустить" % PauseMenu.key_name("drag")
 		if Input.is_action_just_pressed("drag"):
 			request_drag(drag_target_of(me.peer_id), false)
 		return
@@ -1121,7 +1121,7 @@ func _update_prompt(me: Player) -> void:
 	if best == null:
 		return
 	_prompt.visible = true
-	_prompt.text = "F — " + best.prompt()
+	_prompt.text = PauseMenu.key_name("interact") + " — " + best.prompt()
 	if Input.is_action_just_pressed("interact"):
 		if best is LootContainer:
 			ui.start_search(best as LootContainer)

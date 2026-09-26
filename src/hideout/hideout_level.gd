@@ -222,7 +222,7 @@ func _process(delta: float) -> void:
 	if best == null:
 		return
 	_prompt.visible = true
-	_prompt.text = "F — " + best.prompt()
+	_prompt.text = PauseMenu.key_name("interact") + " — " + best.prompt()
 	if Input.is_action_just_pressed("interact"):
 		best.request_use()
 

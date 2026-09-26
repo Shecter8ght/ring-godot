@@ -134,4 +134,4 @@ func _rpc_trigger() -> void:
 	if nav != Vector3.ZERO:
 		_panel.global_position = nav
 	if Raid.current:
-		Raid.current.notify("Сработала сигнализация! Пульт — в магазине, F — отключить")
+		Raid.current.notify("Сработала сигнализация! Пульт — в магазине, %s — отключить" % PauseMenu.key_name("interact"))

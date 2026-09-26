@@ -297,7 +297,7 @@ func _update_hurt(pl: Player, delta: float) -> void:
 		var dragger: Player = Raid.current.dragger_of(pl.peer_id) if Raid.current else null
 		if dragger:
 			lines += "\nТЕБЯ ТАЩАТ — стреляй из пистолета, прикрывай"
-		lines += "\nH — аптечка (подняться) / бинт   ·   X (держать) — сдаться"
+		lines += "\n%s — аптечка (подняться) / бинт   ·   %s (держать) — сдаться" % [PauseMenu.key_name("use_med"), PauseMenu.key_name("drag")]
 		_down_label.text = lines
 
 
@@ -1005,7 +1005,7 @@ func _update_hud(pl: Player) -> void:
 	if pl.laser_on:
 		t += "   ЛЦУ"
 	if pl.is_jammed():
-		t += "   ЗАДЕРЖКА (R)"
+		t += "   ЗАДЕРЖКА (%s)" % PauseMenu.key_name("reload")
 	if pl.reload_timer > 0.0:
 		t = "%s   перезарядка…" % String(spec.name)
 	_weapon_label.text = t + "      гранаты × %d" % pl.grenade_count()

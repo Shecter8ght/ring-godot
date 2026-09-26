@@ -3,8 +3,9 @@ extends CanvasLayer
 ## Меню на Esc (autoload `Pause`): продолжить, управление, покинуть рейд / в убежище, выйти из игры.
 ## Соло — игра на паузе; в коопе мир идёт дальше (меню только закрывает экран и глушит ввод игрока).
 ## Esc открывает меню, только если не открыто другое окно (рюкзак, окно убежища, карта) — те
-## закрываются своим Esc. Список клавиш собирается из InputMap: переназначат клавишу — список
-## покажет новую.
+## закрываются своим Esc. «Управление» — список из InputMap, у каждого действия кнопка с клавишей:
+## нажал — нажми новую клавишу или кнопку мыши (Esc — отмена); занятую другим действием — видно
+## сразу. Сохраняется в Settings (раздел keys), «Вернуть по умолчанию» — как в проекте.
 
 ## Открыто ли меню — игрок в коопе не стреляет и не ходит, пока оно открыто.
 static var shown: bool = false
@@ -38,6 +39,7 @@ const ACTIONS := [
 	["view_toggle", "Вид: изометрия / от первого лица"],
 	["voice", "Голос своим (держать; кооп)"],
 	["map", "Карта"],
+	["journal", "Журнал улик"],
 	["pause", "Меню"],
 ]
 ## То, что не действие InputMap.
@@ -59,6 +61,10 @@ var _admin_btn: Button
 var _admin: VBoxContainer
 var _admin_rows: GridContainer
 var _mouse_before: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
+## Ждём новую клавишу для этого действия (кнопка — чтобы показать «нажмите…»).
+var _capture: String = ""
+var _capture_btn: Button
+var _keys_note: Label
 
 
 func _ready() -> void:
@@ -139,37 +145,105 @@ func _button(text: String, cb: Callable) -> Button:
 
 
 func _fill_controls() -> void:
+	for c in _controls.get_children():
+		c.queue_free()
 	var head := Label.new()
-	head.text = "Управление"
+	head.text = "Управление — нажми на клавишу, чтобы сменить"
 	head.add_theme_font_size_override("font_size", 22)
 	head.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
 	_controls.add_child(head)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(760, 520)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_controls.add_child(scroll)
 	var grid := GridContainer.new()
 	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 22)
-	grid.add_theme_constant_override("v_separation", 5)
-	_controls.add_child(grid)
-	var rows: Array = []
+	grid.add_theme_constant_override("h_separation", 18)
+	grid.add_theme_constant_override("v_separation", 4)
+	scroll.add_child(grid)
 	for a in ACTIONS:
-		var keys: Array[String] = []
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
 		for act in String(a[0]).split("|"):
-			var k := key_name(act)
-			if k != "":
-				keys.append(k)
-		if not keys.is_empty():
-			rows.append([" ".join(keys), String(a[1])])
-	rows.append_array(EXTRA)
-	for r in rows:
+			if InputMap.has_action(act):
+				row.add_child(_key_button(act))
+		if row.get_child_count() == 0:
+			row.queue_free()
+			continue
+		grid.add_child(row)
+		grid.add_child(_desc(String(a[1])))
+	for r in EXTRA:
 		var k := Label.new()
 		k.text = String(r[0])
-		k.add_theme_color_override("font_color", Color(1.0, 0.9, 0.7))
-		k.add_theme_font_size_override("font_size", 16)
+		k.add_theme_color_override("font_color", Color(0.75, 0.72, 0.62))
+		k.add_theme_font_size_override("font_size", 15)
 		grid.add_child(k)
-		var d := Label.new()
-		d.text = String(r[1])
-		d.add_theme_color_override("font_color", Color(0.86, 0.86, 0.84))
-		d.add_theme_font_size_override("font_size", 16)
-		grid.add_child(d)
+		grid.add_child(_desc(String(r[1])))
+	_keys_note = Label.new()
+	_keys_note.add_theme_font_size_override("font_size", 15)
+	_keys_note.add_theme_color_override("font_color", Color(1.0, 0.55, 0.4))
+	_keys_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_keys_note.custom_minimum_size.x = 720
+	_controls.add_child(_keys_note)
+	var reset := Button.new()
+	reset.text = "Вернуть все клавиши по умолчанию"
+	reset.focus_mode = Control.FOCUS_NONE
+	reset.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	reset.pressed.connect(func() -> void:
+		Settings.reset_keys()
+		_fill_controls.call_deferred())
+	_controls.add_child(reset)
+	_show_conflicts()
+
+
+func _desc(text: String) -> Label:
+	var d := Label.new()
+	d.text = text
+	d.add_theme_color_override("font_color", Color(0.86, 0.86, 0.84))
+	d.add_theme_font_size_override("font_size", 15)
+	d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	d.custom_minimum_size.x = 520
+	return d
+
+
+func _key_button(action: String) -> Button:
+	var b := Button.new()
+	b.text = key_name(action)
+	b.custom_minimum_size = Vector2(54, 28)
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", 15)
+	b.tooltip_text = "Нажми и затем нужную клавишу или кнопку мыши (Esc — отмена)"
+	b.set_meta("action", action)
+	b.pressed.connect(func() -> void:
+		if _capture_btn and is_instance_valid(_capture_btn):
+			_capture_btn.text = key_name(_capture)
+		_capture = action
+		_capture_btn = b
+		b.text = "…")
+	return b
+
+
+## Занятые двумя действиями клавиши — красным и строкой под списком.
+func _show_conflicts() -> void:
+	var lines: Array[String] = []
+	var seen: Dictionary = {}
+	for n in _controls.find_children("*", "Button", true, false):
+		if not n.has_meta("action"):
+			continue
+		var act := String(n.get_meta("action"))
+		var others := Settings.key_conflicts(act)
+		(n as Button).add_theme_color_override("font_color", Color(1.0, 0.45, 0.35) if not others.is_empty() else Color(1.0, 0.9, 0.7))
+		if not others.is_empty() and not seen.has(key_name(act)):
+			seen[key_name(act)] = true
+			lines.append("%s — сразу у нескольких действий: %s" % [key_name(act), ", ".join(PackedStringArray([_action_title(act)] + others.map(func(o: String) -> String: return _action_title(o))))])
+	_keys_note.text = "\n".join(lines)
+
+
+static func _action_title(action: String) -> String:
+	for a in ACTIONS:
+		if action in String(a[0]).split("|"):
+			return "«%s»" % String(a[1]).get_slice(" (", 0).get_slice(" —", 0)
+	return action
 
 
 ## Клавиша действия по-человечески: «W», «Shift», «ПКМ».
@@ -189,10 +263,44 @@ static func key_name(action: String) -> String:
 					return "ПКМ"
 				MOUSE_BUTTON_MIDDLE:
 					return "СКМ"
+				MOUSE_BUTTON_XBUTTON1:
+					return "Мышь 4"
+				MOUSE_BUTTON_XBUTTON2:
+					return "Мышь 5"
 	return ""
 
 
+## Ждём новую клавишу: клавиша или кнопка мыши (не колесо) — назначить; Esc — отмена.
+func _capture_input(event: InputEvent) -> bool:
+	if _capture == "":
+		return false
+	var assign: InputEvent = null
+	if event is InputEventKey and event.pressed and not event.is_echo():
+		var k := event as InputEventKey
+		if k.keycode == KEY_ESCAPE or k.physical_keycode == KEY_ESCAPE:
+			if is_instance_valid(_capture_btn):
+				_capture_btn.text = key_name(_capture)
+			_capture = ""
+			return true
+		assign = k
+	elif event is InputEventMouseButton and event.pressed:
+		var mb := event as InputEventMouseButton
+		if mb.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_XBUTTON1, MOUSE_BUTTON_XBUTTON2]:
+			assign = mb
+	if assign == null:
+		return false
+	Settings.set_key(_capture, assign)
+	if is_instance_valid(_capture_btn):
+		_capture_btn.text = key_name(_capture)
+	_capture = ""
+	_show_conflicts()
+	return true
+
+
 func _input(event: InputEvent) -> void:
+	if shown and _capture_input(event):
+		get_viewport().set_input_as_handled()
+		return
 	if not event.is_action_pressed("pause") or event.is_echo():
 		return
 	if shown:
@@ -239,6 +347,9 @@ func open_menu() -> void:
 
 ## Справа от кнопок — одна панель за раз (управление, настройки, админ); повторное нажатие — закрыть.
 func _show_side(panel: Control) -> void:
+	_capture = ""
+	if panel == _controls:
+		_fill_controls()
 	var was := panel.visible
 	for p in [_controls, _settings, _admin]:
 		(p as Control).visible = false
@@ -266,6 +377,13 @@ func _build_settings(h: HBoxContainer) -> void:
 	q.selected = Settings.QUALITY.find(Settings.quality)
 	q.item_selected.connect(func(i: int) -> void: Settings.set_quality(String(Settings.QUALITY[i])))
 	grid.add_child(q)
+	grid.add_child(_label("Клавиши"))
+	var keys_btn := Button.new()
+	keys_btn.text = "Сменить клавиши…"
+	keys_btn.focus_mode = Control.FOCUS_NONE
+	keys_btn.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	keys_btn.pressed.connect(func() -> void: _show_side(_controls))
+	grid.add_child(keys_btn)
 	grid.add_child(_label("Мышь от первого лица"))
 	grid.add_child(_sens_row(Settings.sens_fps, func(v: float) -> void: Settings.set_sens(v, Settings.sens_iso)))
 	grid.add_child(_label("Мышь в прицеле (ПКМ)"))
@@ -465,7 +583,7 @@ func open_admin() -> void:
 
 
 func _view_text() -> String:
-	return "Вид: от первого лица (V)" if CameraRig.first_person_mode else "Вид: изометрия (V)"
+	return ("Вид: от первого лица (%s)" if CameraRig.first_person_mode else "Вид: изометрия (%s)") % key_name("view_toggle")
 
 
 func close_menu() -> void:
