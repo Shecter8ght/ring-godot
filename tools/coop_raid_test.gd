@@ -232,23 +232,40 @@ func _open_door() -> void:
 	_check("c1: дверь открылась у меня", door.is_open, _door_path)
 
 
-## c2: разрядить магазин из рюкзака в буфер (просьба хосту), потом буфер — обратно в рюкзак.
+## c2: разрядить магазин в рюкзаке — поштучно, считает хост (круг видно по пометке «op»); прервать.
 func _unload_to_buffer() -> void:
 	var inv := Raid.current.local_player().inventory
 	var idx := -1
 	for i in range(inv.items.size()):
-		if (inv.items[i] as Dictionary).has("rounds") and int(inv.items[i].rounds) > 0:
+		if (inv.items[i] as Dictionary).has("rounds") and int(inv.items[i].rounds) > 5:
 			idx = i
 			break
 	if idx < 0:
 		_check("c2: есть снаряжённый магазин", false, str(inv.items))
 		return
-	Raid.current.request_unload("backpack", idx, "buffer")
-	await get_tree().create_timer(1.0).timeout
-	_check("c2: разрядил магазин в буфер через хост", not inv.buffer.is_empty() and not WeaponDb.ammo(String(inv.buffer[0].id)).is_empty(), str(inv.buffer))
-	Raid.current.request_flush_buffer()
-	await get_tree().create_timer(1.0).timeout
-	_check("c2: буфер — обратно в рюкзак", inv.buffer.is_empty(), str(inv.buffer))
+	var loose0 := _loose(inv.items)
+	Raid.current.request_item_op("unload", "backpack", idx)
+	await get_tree().create_timer(float(Balance.MAG_OPS.unload_sec) * 4.0 + 0.6).timeout
+	var marked := false
+	for it in inv.items:
+		if (it as Dictionary).get("op") is Dictionary:
+			marked = true
+	_check("c2: разряжает поштучно через хост (пометка видна)", marked and _loose(inv.items) > loose0, "россыпью %d → %d" % [loose0, _loose(inv.items)])
+	Raid.current.request_cancel_op()
+	await get_tree().create_timer(0.6).timeout
+	var still := false
+	for it in inv.items:
+		if (it as Dictionary).get("op") is Dictionary:
+			still = true
+	_check("c2: прервал — пометка снята", not still, "")
+
+
+func _loose(list: Array) -> int:
+	var n := 0
+	for it in list:
+		if not (it as Dictionary).has("rounds") and not WeaponDb.ammo(String(it.id)).is_empty():
+			n += int(it.n)
+	return n
 
 
 ## c2 идёт к щитку генератора в мастерской и чинит (просьба хосту, как по F); ждёт ремонт.

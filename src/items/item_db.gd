@@ -358,7 +358,8 @@ static func add_to(list: Array, entry: Dictionary, grid: Vector2i) -> int:
 				it.n = int(it.n) + k0
 				return k0
 		var e0 := entry.duplicate(true)
-		for key in ["x", "y", "r"]:
+		# пометка поштучной операции (MagOps) не переезжает с предметом
+		for key in ["x", "y", "r", "op"]:
 			e0.erase(key)
 		list.append(e0)
 		return k0
@@ -378,6 +379,7 @@ static func add_to(list: Array, entry: Dictionary, grid: Vector2i) -> int:
 		if spot.x < 0:
 			break
 		var e := entry.duplicate(true)
+		e.erase("op")
 		e.n = mini(left, st)
 		e.x = spot.x
 		e.y = spot.y
@@ -401,6 +403,7 @@ static func put_at(list: Array, entry: Dictionary, grid: Vector2i, x: int, y: in
 				it.n = int(it.n) + k
 			return maxi(k, 0)
 	var e := entry.duplicate(true)
+	e.erase("op")
 	e.r = r
 	e.x = x
 	e.y = y
@@ -555,7 +558,11 @@ static func _label(entry: Dictionary) -> String:
 	if entry.has("rounds"):
 		var cap := int(WeaponDb.magazine(id).get("capacity", 0))
 		# вместимость — в названии («… на 30»); нет — дописать
-		return t if t.contains("на %d" % cap) else t + " · на %d патр." % cap
+		if not t.contains("на %d" % cap):
+			t += " · на %d патр." % cap
+		# сколько внутри — не видно: только «полный» / «пустой», после проверки — оценка
+		var st := Gear.mag_state(entry)
+		return t + (" · " + st if st != "" else "")
 	if entry.has("plates"):
 		var pl: Dictionary = entry.plates
 		for s in ["front", "back"]:

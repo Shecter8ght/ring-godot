@@ -22,9 +22,13 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 		look = v
 		_rebuild()
 
-## Содержимое: [{"id", "n"}]; rolled — брошено ли уже (иначе бросит хост при первом обыске).
+## Содержимое: [{"id", "n", "x", "y", "r"}] — стоит в клетках сетки grid (как рюкзак); rolled —
+## брошено ли уже (иначе бросит хост при первом обыске).
 var items: Array = []
 var rolled: bool = false
+## Сетка ящика: Balance.LOOT_GRID_W × рядов по виду (бросок не влез — рядов больше). Задаётся, когда
+## появляется содержимое (place_all); у всех peer одинаково.
+var grid: Vector2i = Vector2i.ZERO
 ## Откуда «вываливается» при появлении (смещение от места покоя; ноль — просто стоит): ящик из
 ## трупа летит с высоты груди и падает на пол, кувыркнувшись. Анимация у каждого peer своя.
 var toss_from: Vector3 = Vector3.ZERO
@@ -38,7 +42,7 @@ func _ready() -> void:
 			var sync := MultiplayerSynchronizer.new()
 			sync.name = "Sync"
 			var config := SceneReplicationConfig.new()
-			for prop in [".:items", ".:rolled"]:
+			for prop in [".:items", ".:rolled", ".:grid"]:
 				var path := NodePath(prop)
 				config.add_property(path)
 				config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -87,7 +91,29 @@ func roll() -> void:
 	# магазин на сигнализации — там ещё не грабили
 	if is_inside_tree() and AlarmZone.boosts(global_position, get_tree()):
 		items.append_array(ItemDb.roll(table, rng))
+	place_all()
 	rolled = true
+
+
+## Сетки ещё нет (ящик с содержимым из кода, старое) — разложить (хост).
+func ensure_grid() -> void:
+	if grid == Vector2i.ZERO:
+		place_all()
+
+
+## Разложить содержимое по клеткам: крупное — первым; не влезает в ряды по виду — рядом больше
+## (ничего не теряется). Одинаково у всех peer (тела и выброшенное раскладываются из данных спавна).
+func place_all() -> void:
+	var rows := int(Balance.LOOT_ROWS.get(String(Look.keys()[look]), 3))
+	var list := items.duplicate(true)
+	while true:
+		var g := Vector2i(Balance.LOOT_GRID_W, rows)
+		var probe := list.duplicate(true)
+		if ItemDb.pack(probe, g).is_empty() or rows >= 60:
+			grid = g
+			items = probe
+			return
+		rows += 1
 
 
 ## Хост: забрать до n штук из записи idx; возвращает, сколько забрал.

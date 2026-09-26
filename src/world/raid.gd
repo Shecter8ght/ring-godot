@@ -41,6 +41,8 @@ var stranded: Dictionary = {}
 var _all_in_t: float = 0.0
 ## Погибшие: peer_id -> true (хост — по сигналу Health).
 var dead: Dictionary = {}
+## Поштучные операции с предметами (хост): peer -> [MagOps, путь ящика или пусто].
+var _ops: Dictionary = {}
 ## Кто кого тащит: peer тащащего -> peer раненого (хост проверяет, видят все).
 var drags: Dictionary = {}
 var over: bool = false
@@ -208,6 +210,7 @@ func _physics_process(delta: float) -> void:
 	if not _is_host() or over:
 		return
 	_check_drags()
+	_tick_ops(delta)
 	_update_evac(delta)
 
 
@@ -507,6 +510,7 @@ func _rpc_take_idx(path: NodePath, idx: int) -> void:
 
 
 func _take_idx(peer_id: int, path: NodePath, idx: int) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	var c := _near_container(pl, path) if pl else null
 	if c == null or not pl.is_alive() or idx < 0 or idx >= c.items.size():
@@ -517,101 +521,372 @@ func _take_idx(peer_id: int, path: NodePath, idx: int) -> void:
 		Audio.play("pin", c.global_position, -8.0)
 
 
-## Снарядить магазины в рюкзаке россыпью из рюкзака.
-func request_load_mags() -> void:
+# ---------------------------------------------------------------- предметы поштучно (MagOps)
+
+## Снарядить один магазин, разрядить магазин, вынуть плиты из жилета — поштучно, не мгновенно (MagOps
+## на хосте; у игрока одна операция — новая прерывает старую). role — где предмет: "backpack",
+## "pocket", "buffer" или "loot" (ящик container). load: ammo и src — с перетаскивания (этот патрон из
+## этой сетки), иначе — любые подходящие патроны игрока; plates: side — только эту сторону.
+func request_item_op(kind: String, role: String, idx: int, container: LootContainer = null, ammo: String = "", src: String = "", side: String = "") -> void:
+	var path := container.get_path() if container else NodePath()
 	if _is_host():
-		_load_mags(multiplayer.get_unique_id())
+		_item_op(multiplayer.get_unique_id(), kind, role, idx, path, ammo, src, side)
 	else:
-		_rpc_load_mags.rpc_id(1)
+		_rpc_item_op.rpc_id(1, kind, role, idx, path, ammo, src, side)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_load_mags() -> void:
+func _rpc_item_op(kind: String, role: String, idx: int, path: NodePath, ammo: String, src: String, side: String) -> void:
 	if multiplayer.is_server():
-		_load_mags(multiplayer.get_remote_sender_id())
+		_item_op(multiplayer.get_remote_sender_id(), kind, role, idx, path, ammo, src, side)
 
 
-func _load_mags(peer_id: int) -> void:
+## Прервать свою операцию (закрыл окно, взялся за другое): что сделано — остаётся.
+func request_cancel_op() -> void:
+	if _is_host():
+		_cancel_op(multiplayer.get_unique_id())
+	else:
+		_rpc_cancel_op.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_cancel_op() -> void:
+	if multiplayer.is_server():
+		_cancel_op(multiplayer.get_remote_sender_id())
+
+
+func _cancel_op(peer_id: int) -> void:
+	if _ops.has(peer_id):
+		((_ops[peer_id] as Array)[0] as MagOps).cancel()
+		_ops.erase(peer_id)
+
+
+func _item_op(peer_id: int, kind: String, role: String, idx: int, path: NodePath, ammo: String, src: String, side: String) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive() or has_left(peer_id):
+		return
+	_cancel_op(peer_id)
+	var c := _near_container(pl, path) if not path.is_empty() else null
+	if (role == "loot" or src == "loot") and c == null:
+		return
+	if c:
+		c.ensure_grid()
+	var op := _make_op(pl, c, kind, role)
+	op.ammo = ammo
+	op.only_side = side
+	var pocket := ["pocket"] if pl.inventory.pocket_grid != Vector2i.ZERO else []
+	if kind == "load":
+		if src != "":
+			op.sources.assign([src])
+		else:
+			# любые подходящие патроны игрока: сначала из буфера (он временный), потом рюкзак, карман
+			op.sources.assign(["buffer", "backpack"] + pocket)
+	else:
+		# вынутое — в ту же сетку; из ящика — в ящик, потом в буфер (прямо в рюкзак — нет)
+		match role:
+			"loot":
+				op.dests.assign(["loot", "buffer"])
+			"buffer":
+				op.dests.assign(["buffer", "loot"] if c else ["buffer", "backpack"])
+			"pocket":
+				op.dests.assign(["pocket", "backpack"])
+			_:
+				op.dests.assign(["backpack", "buffer"] if c else ["backpack"])
+	op.active_ids.assign(_ops.keys())
+	if not op.start(idx):
+		var why := {"full": "Магазин и так полный", "empty": "Нечего вынимать",
+			"no_ammo": "Нет подходящих патронов", "no_room": "Некуда класть — нет места ни в ящике, ни в буфере",
+			"busy": "С этим уже что-то делают"}
+		if why.has(op.reason):
+			_tell(peer_id, String(why[op.reason]))
+		return
+	_ops[peer_id] = [op, path]
+
+
+## Операция над сетками игрока pl и ящика c (на хосте): рабочие копии, запись — переприсвоением
+## (синхронизатор сравнивает значения).
+func _make_op(pl: Player, c: LootContainer, kind: String, role: String) -> MagOps:
+	var inv := pl.inventory
+	var get_list := func(r: String) -> Array:
+		if r == "loot":
+			return c.items.duplicate(true) if is_instance_valid(c) else []
+		return inv.list_of(r).duplicate(true)
+	var commit := func(r: String, list: Array) -> void:
+		if r == "loot":
+			if is_instance_valid(c):
+				c.items = list
+		else:
+			inv._set_list(r, list)
+	var grid_of := func(r: String) -> Vector2i:
+		if r == "loot":
+			return c.grid if is_instance_valid(c) else Vector2i(1, 1)
+		# нет кармана — ничего не влезает (ZERO у ItemDb — «без предела»)
+		var g := inv.grid_of(r)
+		return g if g != Vector2i.ZERO else Vector2i(1, 1)
+	var op := MagOps.make(kind, role, pl.peer_id, get_list, commit, grid_of)
+	op.all_roles.assign(["backpack", "pocket", "buffer"] + (["loot"] if c else []))
+	return op
+
+
+## Хост: операции идут — шаг за шагом; игрок погиб, ушёл, отошёл от ящика — прервать.
+func _tick_ops(delta: float) -> void:
+	for peer in _ops.keys():
+		var rec: Array = _ops[peer]
+		var op: MagOps = rec[0]
+		var pl := player_of(int(peer))
+		var ok := pl != null and pl.is_alive() and not has_left(int(peer))
+		if ok and not (rec[1] as NodePath).is_empty():
+			ok = _near_container(pl, rec[1]) != null
+		if not ok:
+			op.cancel()
+			_ops.erase(peer)
+			continue
+		var before := op.steps
+		var more := op.tick(delta)
+		if op.steps > before:
+			Audio.play("pin", pl.global_position, -16.0, 1.3 if op.kind == "load" else 1.1)
+		if not more:
+			var t := MagOps.reason_text(op.reason)
+			if t != "":
+				_tell(int(peer), t)
+			_ops.erase(peer)
+
+
+## Проверить магазин (правая кнопка → «Проверить патроны»): сетка запомнит, сколько было при проверке
+## (пока не изменилось — видна оценка словами).
+func request_check_mag(role: String, idx: int, container: LootContainer = null) -> void:
+	var path := container.get_path() if container else NodePath()
+	if _is_host():
+		_check_mag(multiplayer.get_unique_id(), role, idx, path)
+	else:
+		_rpc_check_mag.rpc_id(1, role, idx, path)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_check_mag(role: String, idx: int, path: NodePath) -> void:
+	if multiplayer.is_server():
+		_check_mag(multiplayer.get_remote_sender_id(), role, idx, path)
+
+
+func _check_mag(peer_id: int, role: String, idx: int, path: NodePath) -> void:
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
-	if pl.inventory.load_all_mags() > 0:
-		Audio.play("reload_rifle", pl.global_position, -8.0)
-	elif peer_id == multiplayer.get_unique_id():
-		notify("Нечем снаряжать — нет подходящих патронов")
-
-
-## Разрядить магазин (сетка role, запись idx): патроны — в сетку into (открыт буфер — туда).
-func request_unload(role: String, idx: int, into: String) -> void:
-	if _is_host():
-		_unload(multiplayer.get_unique_id(), role, idx, into)
+	var c := _near_container(pl, path) if role == "loot" else null
+	if role == "loot" and c == null:
+		return
+	var list: Array = c.items.duplicate(true) if c else pl.inventory.list_of(role).duplicate(true)
+	if idx < 0 or idx >= list.size() or not (list[idx] as Dictionary).has("rounds"):
+		return
+	list[idx]["checked"] = int(list[idx].rounds)
+	if c:
+		c.items = list
 	else:
-		_rpc_unload.rpc_id(1, role, idx, into)
+		pl.inventory._set_list(role, list)
+
+
+## Разрядить магазин (сетка role, запись idx) — поштучно; into — старый вызов, вынутое идёт в ту же
+## сетку, из ящика — в ящик и буфер (см. _item_op).
+func request_unload(role: String, idx: int, _into: String = "", container: LootContainer = null) -> void:
+	request_item_op("unload", role, idx, container)
+
+
+## Патроны (ammo_role, ammo_idx) перетащили на магазин (mag_role, mag_idx) — снарядить его этими
+## патронами, поштучно, сколько влезет (остаток остаётся в своей клетке).
+func request_fill(ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int, container: LootContainer = null) -> void:
+	var src_list: Array = container.items if ammo_role == "loot" and container else (local_player().inventory.list_of(ammo_role) if local_player() else [])
+	if ammo_idx < 0 or ammo_idx >= src_list.size():
+		return
+	request_item_op("load", mag_role, mag_idx, container, String(src_list[ammo_idx].id), ammo_role)
+
+
+## Окно ящика закрыто — что осталось в буфере, пропадает (буфер живёт только пока открыт ящик).
+func request_clear_buffer() -> void:
+	if _is_host():
+		_clear_buffer(multiplayer.get_unique_id())
+	else:
+		_rpc_clear_buffer.rpc_id(1)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_unload(role: String, idx: int, into: String) -> void:
+func _rpc_clear_buffer() -> void:
 	if multiplayer.is_server():
-		_unload(multiplayer.get_remote_sender_id(), role, idx, into)
+		_clear_buffer(multiplayer.get_remote_sender_id())
 
 
-func _unload(peer_id: int, role: String, idx: int, into: String) -> void:
+func _clear_buffer(peer_id: int) -> void:
+	_cancel_op(peer_id)
+	var pl := player_of(peer_id)
+	if pl:
+		pl.inventory.buffer = []
+
+
+## Сказать игроку peer_id (хост — себе на экран или клиенту).
+func _tell(peer_id: int, text: String) -> void:
+	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
+		notify(text)
+	elif peer_id in multiplayer.get_peers():
+		_rpc_tell.rpc_id(peer_id, text)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_tell(text: String) -> void:
+	notify(text)
+
+
+## Надеть / взять в руки прямо из сетки src ("backpack", "pocket", "buffer", "loot" — ящик): что было в
+## слоте — в рюкзак; не влезло — туда, откуда взято новое; иначе — под ноги.
+func request_equip_from(src: String, idx: int, container: LootContainer = null) -> void:
+	var path := container.get_path() if container else NodePath()
+	if _is_host():
+		_equip_from(multiplayer.get_unique_id(), src, idx, path)
+	else:
+		_rpc_equip_from.rpc_id(1, src, idx, path)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_equip_from(src: String, idx: int, path: NodePath) -> void:
+	if multiplayer.is_server():
+		_equip_from(multiplayer.get_remote_sender_id(), src, idx, path)
+
+
+func _equip_from(peer_id: int, src: String, idx: int, path: NodePath) -> void:
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
-	if pl.inventory.unload_mag(role, idx, into) > 0:
-		Audio.play("pin", pl.global_position, -6.0)
-	elif peer_id == multiplayer.get_unique_id():
-		notify("Разрядить некуда или магазин пуст")
+	_cancel_op(peer_id)
+	var inv := pl.inventory
+	var c := _near_container(pl, path) if src == "loot" else null
+	if src == "loot" and c == null:
+		return
+	var list: Array = c.items.duplicate(true) if c else inv.list_of(src).duplicate(true)
+	if idx < 0 or idx >= list.size():
+		return
+	var id := String(list[idx].id)
+	var slot := String(ItemDb.equip(id).get("slot", ""))
+	if slot == "":
+		return
+	var one := ItemDb.remove_at(list, idx, 1)
+	for k in ["x", "y", "r", "op"]:
+		one.erase(k)
+	if not one.has("dur") and ItemDb.equip(id).has("durability"):
+		one.dur = float(ItemDb.equip(id).durability)
+	var eq := inv.equipment.duplicate(true)
+	var old: Dictionary = eq.get(slot, {})
+	eq[slot] = one
+	var bp: Array = list if src == "backpack" else inv.items.duplicate(true)
+	if not old.is_empty() and ItemDb.add_to(bp, old, Balance.BACKPACK_GRID) == 0:
+		var g := c.grid if c else inv.grid_of(src)
+		if src == "backpack" or g == Vector2i.ZERO or ItemDb.add_to(list, old, g) == 0:
+			spawn_drop(pl.global_position, "Выброшено", [old], LootContainer.Look.BAG)
+	if c:
+		c.items = list
+	elif src != "backpack":
+		inv._set_list(src, list)
+	inv.items = bp
+	inv.equipment = eq
+	Audio.play("reload_pistol", pl.global_position, -8.0)
 
 
-## Патроны (ammo_role, ammo_idx) перетащили на магазин (mag_role, mag_idx) — снарядить его.
-func request_fill(ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int) -> void:
+## Поставить предмет из сетки src (запись si) в предмет из сетки dst (запись di; "equip:<слот>" —
+## надетое): плиту в плитоносец, магазин в оружие, обвес. Вытесненное — туда, откуда взят новый.
+func request_fit_grid(src: String, si: int, dst: String, di: int, container: LootContainer = null) -> void:
+	var path := container.get_path() if container else NodePath()
 	if _is_host():
-		_fill(multiplayer.get_unique_id(), ammo_role, ammo_idx, mag_role, mag_idx)
+		_fit_grid(multiplayer.get_unique_id(), src, si, dst, di, path)
 	else:
-		_rpc_fill.rpc_id(1, ammo_role, ammo_idx, mag_role, mag_idx)
+		_rpc_fit_grid.rpc_id(1, src, si, dst, di, path)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_fill(ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int) -> void:
+func _rpc_fit_grid(src: String, si: int, dst: String, di: int, path: NodePath) -> void:
 	if multiplayer.is_server():
-		_fill(multiplayer.get_remote_sender_id(), ammo_role, ammo_idx, mag_role, mag_idx)
+		_fit_grid(multiplayer.get_remote_sender_id(), src, si, dst, di, path)
 
 
-func _fill(peer_id: int, ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int) -> void:
+func _fit_grid(peer_id: int, src: String, si: int, dst: String, di: int, path: NodePath) -> void:
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
-	if pl.inventory.fill_mag(ammo_role, ammo_idx, mag_role, mag_idx) > 0:
-		Audio.play("reload_rifle", pl.global_position, -8.0)
-	elif peer_id == multiplayer.get_unique_id():
-		notify("Не снарядить: другой калибр, другие патроны или магазин полон")
-
-
-## Закрыл окно лута — буфер в рюкзак; что не влезло — мешком под ноги.
-func request_flush_buffer() -> void:
-	if _is_host():
-		_flush_buffer(multiplayer.get_unique_id())
+	_cancel_op(peer_id)
+	var inv := pl.inventory
+	var c := _near_container(pl, path) if (src == "loot" or dst == "loot") else null
+	if (src == "loot" or dst == "loot") and c == null:
+		return
+	var lists := {}
+	var get := func(r: String) -> Array:
+		if not lists.has(r):
+			lists[r] = c.items.duplicate(true) if r == "loot" else inv.list_of(r).duplicate(true)
+		return lists[r]
+	var grid := func(r: String) -> Vector2i:
+		return c.grid if r == "loot" else inv.grid_of(r)
+	var from: Array = get.call(src)
+	if si < 0 or si >= from.size():
+		return
+	var target: Dictionary = {}
+	var slot := dst.trim_prefix("equip:") if dst.begins_with("equip:") else ""
+	if slot != "":
+		target = inv.equipment.get(slot, {})
 	else:
-		_rpc_flush_buffer.rpc_id(1)
+		var to: Array = get.call(dst)
+		if di >= 0 and di < to.size() and not (src == dst and si == di):
+			target = to[di]
+	if target.is_empty():
+		return
+	var r := Gear.fit(target, from[si], "")
+	if String(r[2]) != "":
+		_tell(peer_id, "Не встаёт: " + String(r[2]))
+		return
+	ItemDb.remove_at(from, si, 1)
+	if not (r[1] as Dictionary).is_empty() and ItemDb.add_to(from, r[1], grid.call(src)) == 0:
+		_tell(peer_id, "Некуда положить снятое")
+		return
+	var fitted: Dictionary = r[0]
+	fitted.erase("op")
+	if slot != "":
+		var eq := inv.equipment.duplicate(true)
+		eq[slot] = fitted
+		inv.equipment = eq
+	else:
+		var to: Array = get.call(dst)
+		# источник мог стоять раньше цели в той же сетке — ищем цель по самой записи
+		for i in range(to.size()):
+			if is_same(to[i], target):
+				for k in ["x", "y", "r"]:
+					if target.has(k):
+						fitted[k] = target[k]
+				to[i] = fitted
+				break
+	for rr in lists:
+		if String(rr) == "loot":
+			c.items = lists[rr]
+		else:
+			inv._set_list(String(rr), lists[rr])
+	Audio.play("reload_pistol", pl.global_position, -6.0)
+
+
+## Внутри ящика — передвинуть запись в клетку (x, y).
+func request_loot_move(container: LootContainer, idx: int, x: int, y: int, r: bool) -> void:
+	if _is_host():
+		_loot_move(multiplayer.get_unique_id(), container.get_path(), idx, x, y, r)
+	else:
+		_rpc_loot_move.rpc_id(1, container.get_path(), idx, x, y, r)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_flush_buffer() -> void:
+func _rpc_loot_move(path: NodePath, idx: int, x: int, y: int, r: bool) -> void:
 	if multiplayer.is_server():
-		_flush_buffer(multiplayer.get_remote_sender_id())
+		_loot_move(multiplayer.get_remote_sender_id(), path, idx, x, y, r)
 
 
-func _flush_buffer(peer_id: int) -> void:
-	var pl := player_of(peer_id)
-	if pl == null:
+func _loot_move(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool) -> void:
+	var c := _near_container(player_of(peer_id), path)
+	if c == null:
 		return
-	var left := pl.inventory.flush_buffer()
-	if not left.is_empty():
-		spawn_drop(pl.global_position + Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw())) * 0.8, "Выложено", left, LootContainer.Look.BAG)
-		if peer_id == multiplayer.get_unique_id():
-			notify("Не всё влезло в рюкзак — остальное положено рядом")
+	c.ensure_grid()
+	var list := c.items.duplicate(true)
+	if ItemDb.move_in(list, c.grid, idx, x, y, r):
+		c.items = list
 
 
 func request_take_all(container: LootContainer) -> void:
@@ -641,6 +916,7 @@ func _rpc_unequip(slot: String, x: int, y: int, r: bool) -> void:
 
 
 func _unequip(peer_id: int, slot: String, x: int, y: int, r: bool) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
@@ -665,6 +941,7 @@ func _rpc_sort(where: String) -> void:
 
 
 func _sort(peer_id: int, where: String) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
@@ -688,6 +965,7 @@ func _rpc_drop_entry(where: String, idx: int) -> void:
 
 
 func _drop_entry(peer_id: int, where: String, idx: int) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
@@ -745,17 +1023,19 @@ func _rpc_grid_move(src: String, idx: int, dst: String, x: int, y: int, r: bool)
 
 
 func _grid_move(peer_id: int, src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl and pl.is_alive():
 		pl.inventory.move_between(src, idx, dst, x, y, r)
 
 
-## Из рюкзака (или буфера, кармана — from) — запись idx в контейнер (перетащили в окно лута).
-func request_put(container: LootContainer, idx: int, from: String = "backpack") -> void:
+## Из рюкзака (или буфера, кармана — from) — запись idx в контейнер (перетащили в окно лута): в клетку
+## (x, y), x < 0 — в первую свободную. Места нет — не кладётся.
+func request_put(container: LootContainer, idx: int, from: String = "backpack", x: int = -1, y: int = -1, r: bool = false) -> void:
 	if _is_host():
-		_put(multiplayer.get_unique_id(), container.get_path(), idx, from)
+		_put(multiplayer.get_unique_id(), container.get_path(), idx, from, x, y, r)
 	else:
-		_rpc_put.rpc_id(1, container.get_path(), idx, from)
+		_rpc_put.rpc_id(1, container.get_path(), idx, from, x, y, r)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -771,12 +1051,13 @@ func _rpc_take_to(path: NodePath, idx: int, x: int, y: int, r: bool, into: Strin
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_put(path: NodePath, idx: int, from: String) -> void:
+func _rpc_put(path: NodePath, idx: int, from: String, x: int, y: int, r: bool) -> void:
 	if multiplayer.is_server():
-		_put(multiplayer.get_remote_sender_id(), path, idx, from)
+		_put(multiplayer.get_remote_sender_id(), path, idx, from, x, y, r)
 
 
 func _move_item(peer_id: int, idx: int, x: int, y: int, r: bool) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl and pl.is_alive():
 		pl.inventory.move(idx, x, y, r)
@@ -797,22 +1078,31 @@ func _take_to(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool, i
 	var c := _near_container(pl, path)
 	if c == null or idx < 0 or idx >= c.items.size():
 		return
-	var k := pl.inventory.put_at((c.items[idx] as Dictionary).duplicate(true), x, y, r, into)
+	_cancel_op(peer_id)
+	# клетка не задана — куда влезет
+	var entry := (c.items[idx] as Dictionary).duplicate(true)
+	var k := pl.inventory.put_at(entry, x, y, r, into) if x >= 0 else pl.inventory.add_entry_in(into, entry)
 	if k > 0:
 		c.take_at(idx, k)
 		Audio.play("pin", c.global_position, -8.0)
 
 
-func _put(peer_id: int, path: NodePath, idx: int, from: String = "backpack") -> void:
+func _put(peer_id: int, path: NodePath, idx: int, from: String = "backpack", x: int = -1, y: int = -1, r: bool = false) -> void:
 	var pl := player_of(peer_id)
 	var c := _near_container(pl, path)
 	if c == null or idx < 0 or idx >= pl.inventory.list_of(from).size():
 		return
-	var out := pl.inventory.take_entry(from, idx)
-	if out.is_empty():
-		return
+	_cancel_op(peer_id)
+	c.ensure_grid()
+	var src := pl.inventory.list_of(from).duplicate(true)
+	var entry: Dictionary = (src[idx] as Dictionary).duplicate(true)
 	var list := c.items.duplicate(true)
-	ItemDb.add_to(list, out, Vector2i.ZERO)
+	var k := ItemDb.put_at(list, entry, c.grid, x, y, r) if x >= 0 else ItemDb.add_to(list, entry, c.grid)
+	if k <= 0:
+		_tell(peer_id, "Сюда не встаёт" if x >= 0 else "В «%s» нет места" % c.display_name)
+		return
+	ItemDb.remove_at(src, idx, k)
+	pl.inventory._set_list(from, src)
 	c.items = list
 	c.rolled = true
 
@@ -894,23 +1184,36 @@ func _rpc_fit(where: String, idx: int, src_idx: int, hint: String, path: NodePat
 
 
 func _strip(peer_id: int, where: String, idx: int, part: String, path: NodePath) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
 	var ok := false
 	if where.begins_with("equip:"):
 		ok = pl.inventory.strip_equipped(where.trim_prefix("equip:"), part)
-	elif where == "backpack":
-		ok = pl.inventory.strip_item(idx, part)
+	elif where in ["backpack", "pocket", "buffer"]:
+		ok = pl.inventory.strip_in(where, idx, part)
 	elif where == "loot":
+		# с предмета в ящике — в тот же ящик, нет места — в буфер (прямо в рюкзак — нет)
 		var c := _near_container(pl, path)
 		if c and idx >= 0 and idx < c.items.size():
+			c.ensure_grid()
 			var list := c.items.duplicate(true)
 			var r := Gear.strip(list[idx], part)
-			if not (r[1] as Dictionary).is_empty() and pl.inventory.add_entry(r[1]) >= int((r[1] as Dictionary).n):
+			var got: Dictionary = r[1]
+			if not got.is_empty():
 				list[idx] = r[0]
-				c.items = list
-				ok = true
+				if ItemDb.add_to(list, got, c.grid) >= int(got.n):
+					c.items = list
+					ok = true
+				else:
+					var list2 := c.items.duplicate(true)
+					list2[idx] = r[0]
+					var buf := pl.inventory.buffer.duplicate(true)
+					if ItemDb.add_to(buf, got, Balance.BUFFER_GRID) >= int(got.n):
+						c.items = list2
+						pl.inventory.buffer = buf
+						ok = true
 	if ok:
 		Audio.play("reload_pistol", pl.global_position, -6.0)
 	elif peer_id == multiplayer.get_unique_id():
@@ -1072,6 +1375,7 @@ func _rpc_use_med(id: String) -> void:
 
 
 func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	var c := get_node_or_null(path) as LootContainer
 	if pl == null or c == null or not pl.is_alive() or has_left(peer_id):
@@ -1112,6 +1416,7 @@ func _consume(peer_id: int, id: String, n: int) -> void:
 
 
 func _equip(peer_id: int, idx: int) -> void:
+	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
@@ -1280,6 +1585,7 @@ func _make_drop(data: Dictionary) -> Node:
 	c.display_name = String(data.display)
 	c.look = int(data.look) as LootContainer.Look
 	c.items = (data.items as Array).duplicate(true)
+	c.place_all()
 	c.rolled = true
 	c.toss_from = data.get("toss", Vector3.ZERO)
 	c.search_s = Balance.SEARCH_BODY_SEC

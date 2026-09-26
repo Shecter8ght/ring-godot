@@ -61,6 +61,9 @@ static func ensure() -> void:
 		money = int(d.get("money", 0))
 		profile_name = String(d.get("name", ""))
 		stash = d.get("stash", [])
+		# пометки поштучных операций (MagOps) — не из сохранения: вышли посреди снаряжения
+		for l in [stash, d.get("backpack", []), d.get("pocket", [])]:
+			MagOps.clean(l)
 		equipment = d.get("equipment", {})
 		backpack = d.get("backpack", [])
 		pocket = d.get("pocket", [])
@@ -525,26 +528,14 @@ static func fit_part(where: String, idx: int, src: String, src_idx: int, hint: S
 	return true
 
 
-## Разрядить магазин (тайник / рюкзак / карман, запись idx): патроны — туда же. false — пуст или
-## некуда.
-static func unload_mag(name: String, idx: int) -> bool:
-	if Gear.unload_mag(list_of(name), idx, grid_of(name)) <= 0:
-		return false
+## Проверили магазин (тайник / рюкзак / карман, запись idx): сетка запомнит, сколько было, —
+## пока столько же, видна оценка (Gear.mag_state).
+static func check_mag(name: String, idx: int) -> void:
+	var list := list_of(name)
+	if idx < 0 or idx >= list.size() or not (list[idx] as Dictionary).has("rounds"):
+		return
+	list[idx]["checked"] = int(list[idx].rounds)
 	save()
-	return true
-
-
-## Снарядить магазины и оружие россыпью: сначала из рюкзака, потом из тайника.
-static func load_all_mags() -> int:
-	var extra: Array = []
-	for slot in ["primary", "secondary"]:
-		if equipment.has(slot):
-			extra.append(equipment[slot])
-	var used := Gear.load_mags(backpack, extra)
-	used += Gear.load_mags(stash, extra)
-	if used > 0:
-		save()
-	return used
 
 
 ## Старые сохранения (до арсенала): id по алиасам, обвес по точкам, магазины, прочность. Что не

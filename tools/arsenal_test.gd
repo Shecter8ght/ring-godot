@@ -178,10 +178,11 @@ func _ready() -> void:
 		pl.global_position = crate.global_position + Vector3(0.8, 0.1, 0)
 		await _frames(4)
 		var opt := WeaponDb.mod_id(crate.items[wi].mods.optic_primary) if wi >= 0 else ""
-		var had := pl.inventory.count(opt)
+		var had := _count_in(crate.items, opt) + _count_in(pl.inventory.buffer, opt)
 		Raid.current.request_strip("loot", wi, "mod:optic_primary", crate)
 		await _frames(4)
-		_check("CASE 18: прицел снят с оружия в ящике — в рюкзак", opt != "" and pl.inventory.count(opt) == had + 1 and not (crate.items[wi].mods as Dictionary).has("optic_primary"),
+		# снятое с вещи в ящике — в свободные клетки того же ящика, нет места — в буфер окна; не в рюкзак
+		_check("CASE 18: прицел снят с оружия в ящике — в ящике или буфере", opt != "" and _count_in(crate.items, opt) + _count_in(pl.inventory.buffer, opt) == had + 1 and not (crate.items[wi].mods as Dictionary).has("optic_primary"),
 			opt)
 		# CASE 20 (часть 1): трофей — оружие целиком, как есть
 		var trophy: Dictionary = (crate.items[wi] as Dictionary).duplicate(true)
@@ -376,3 +377,11 @@ func _check(what: String, ok: bool, info: String) -> void:
 	if not ok:
 		_fails += 1
 	print("  [%s] %s  %s" % ["ok" if ok else "FAIL", what, info])
+
+
+func _count_in(list: Array, id: String) -> int:
+	var n := 0
+	for e in list:
+		if String((e as Dictionary).get("id", "")) == id:
+			n += int((e as Dictionary).get("count", 1))
+	return n

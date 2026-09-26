@@ -31,6 +31,8 @@ var _buy_to: String = "backpack"
 var _focus: String = ""
 var _focus_only: bool = false
 var _qty: Dictionary = {}
+## Поштучная операция в тайнике (снарядить магазин, разрядить, вынуть плиты) — MagOps над профилем.
+var _op: MagOps
 ## Торговец: раздел ассортимента ("all" — всё, иначе ключ CAT_TABS).
 var _cat_tab: String = "all"
 ## Кадр открытия: Tab, открывший окно, его же не закрывает.
@@ -138,6 +140,7 @@ func open(kind: int) -> void:
 
 func close_ui() -> void:
 	_root.visible = false
+	_cancel_op()
 	# меню правой кнопки, описание, вопросы — отдельные окошки: сами с окном не прячутся
 	for n in find_children("*", "", true, false):
 		if n is Window:
@@ -149,6 +152,7 @@ func close_ui() -> void:
 func _process(delta: float) -> void:
 	if not _root.visible:
 		return
+	_tick_op(delta)
 	if _toast_t > 0.0:
 		_toast_t -= delta
 		_toast.modulate.a = clampf(_toast_t / 0.6, 0.0, 1.0)
@@ -275,6 +279,17 @@ func _build_stash() -> void:
 			else:
 				_quick(name, idx))
 		v.context.connect(func(idx: int, at: Vector2) -> void: _stash_menu(name, idx, at))
+		# патроны на магазин — снарядить им (поштучно), плиту на жилет — вставить
+		v.dropped_on.connect(func(src: GridView, si: int, di: int) -> void:
+			if not src.role in ["stash", "backpack", "pocket"]:
+				return
+			var from := Profile.list_of(src.role)
+			if si >= from.size():
+				return
+			if not WeaponDb.ammo(String(from[si].id)).is_empty():
+				_start_op("load", name, di, String(from[si].id), src.role)
+			elif not Profile.fit_part(name, di, src.role, si):
+				toast("Не встаёт"))
 
 
 ## «Сортировать» над сеткой: крупное в начало, стопки добраны — место освобождается.
@@ -306,22 +321,28 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 		acts.append(func() -> void: Profile.equip_from(name, idx))
 	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
 	acts.append(func() -> void: _quick(name, idx))
-	# оружие, жилет: снять обвес, магазин, плиту — в тайник
+	# оружие, жилет: снять обвес, магазин — в тайник; плиты — по одной
 	for p in Gear.parts(list[idx]):
 		var part := String(p[1])
-		menu.add_item(String(p[0]))
-		acts.append(func() -> void: Profile.strip_part(name, idx, part))
+		if part.begins_with("plate:"):
+			menu.add_item(String(p[0]).replace("Снять", "Вынуть"))
+			acts.append(func() -> void: _start_op("plates", name, idx, "", "", part.trim_prefix("plate:")))
+		else:
+			menu.add_item(String(p[0]))
+			acts.append(func() -> void: Profile.strip_part(name, idx, part))
 	if list[idx].has("rounds"):
 		menu.add_item("Проверить патроны")
 		var cap := int(WeaponDb.magazine(id).get("capacity", 0))
-		acts.append(func() -> void: toast("%s: %s" % [ItemDb.item_name(id), Gear.ammo_estimate(int(entry.get("rounds", 0)), cap, Gear.mag_exact(id))]))
-		menu.add_item("Разрядить магазин")
 		acts.append(func() -> void:
-			if not Profile.unload_mag(name, idx):
-				toast("Пусто или некуда высыпать"))
-	if list[idx].has("rounds") or not WeaponDb.ammo(id).is_empty():
-		menu.add_item("Снарядить магазины")
-		acts.append(func() -> void: Profile.load_all_mags())
+			toast("%s: %s" % [ItemDb.item_name(id), Gear.ammo_estimate(int(entry.get("rounds", 0)), cap, Gear.mag_exact(id))])
+			Profile.check_mag(name, idx))
+		menu.add_item("Снарядить")
+		acts.append(func() -> void: _load_mag(name, idx))
+		menu.add_item("Разрядить")
+		acts.append(func() -> void: _start_op("unload", name, idx))
+	if list[idx].has("plates") and (list[idx].plates as Dictionary).size() > 1:
+		menu.add_item("Вынуть все плиты")
+		acts.append(func() -> void: _start_op("plates", name, idx))
 	if int(list[idx].n) > 1:
 		menu.add_item("Разделить стопку пополам")
 		acts.append(func() -> void: _split(name, idx))
@@ -331,6 +352,74 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 	menu.popup_hide.connect(menu.queue_free)
 	_root.add_child(menu)
 	menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
+
+
+# ---------------------------------------------------------------- поштучно (MagOps)
+
+## Снарядить один магазин (любыми подходящими патронами: сначала из той же сетки, потом рюкзак,
+## карман, тайник), разрядить (в ту же сетку, потом в тайник), вынуть плиты — по шагу, с кругом на
+## предмете. Новая операция прерывает старую.
+func _start_op(kind: String, role: String, idx: int, ammo: String = "", src: String = "", side: String = "") -> void:
+	_cancel_op()
+	var op := MagOps.make(kind, role, 1,
+		func(r: String) -> Array: return Profile.list_of(r),
+		func(_r: String, _list: Array) -> void: pass,
+		func(r: String) -> Vector2i: return Profile.grid_of(r))
+	var have: Array[String] = []
+	for r in [role, "backpack", "pocket", "stash"]:
+		if not String(r) in have and Profile.grid_of(String(r)) != Vector2i.ZERO:
+			have.append(String(r))
+	op.all_roles.assign(have)
+	if kind == "load":
+		op.sources.assign([src] if src != "" else have)
+	else:
+		op.dests.assign([role, "stash"] if role != "stash" else ["stash", "backpack"])
+	op.ammo = ammo
+	op.only_side = side
+	if not op.start(idx):
+		var why := {"full": "Магазин и так полный", "empty": "Нечего вынимать", "no_ammo": "Нет подходящих патронов",
+			"no_room": "Некуда класть — освободи место"}
+		if why.has(op.reason):
+			toast(String(why[op.reason]))
+		return
+	_op = op
+
+
+func _tick_op(delta: float) -> void:
+	if _op == null:
+		return
+	if not _op.tick(delta):
+		var t := MagOps.reason_text(_op.reason)
+		if t != "" and _op.reason != "no_room":
+			toast(t)
+		elif _op.reason == "no_room":
+			toast("Некуда класть — освободи место")
+		_op = null
+		Profile.save()
+
+
+func _cancel_op() -> void:
+	if _op:
+		_op.cancel()
+		_op = null
+		Profile.save()
+
+
+## «Снарядить»: нет подходящих патронов — сказать, каких нужно и какие есть.
+func _load_mag(name: String, idx: int) -> void:
+	var list := Profile.list_of(name)
+	if idx < 0 or idx >= list.size():
+		return
+	var mag: Dictionary = list[idx]
+	var mine: Array = Profile.backpack + Profile.pocket + Profile.stash
+	if int(mag.rounds) >= MagOps.capacity(mag):
+		toast("Магазин и так полный")
+		return
+	var ammo := MagOps.pick_ammo(mag, mine)
+	if ammo == "" or MagOps.count_of(mine, ammo) <= 0:
+		toast(MagOps.no_ammo_text(mag, mine))
+		return
+	_start_op("load", name, idx)
 
 
 ## Правая кнопка по слоту снаряжения: снять в тайник, выбросить, снять обвес / магазин / плиты.
@@ -1083,14 +1172,15 @@ func _build_workbench() -> void:
 	left.add_child(_text("%s · %s · %s · износ %d%% · %.1f кг" % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber)),
 		"встроенный магазин" if w.has("internal_mag") else ItemDb.item_name(String(mag.get("id", ""))) if String(mag.get("id", "")) != "" else "без магазина",
 		int(weapon.get("dur", 100)), float(spec.weight)], Color(0.85, 0.85, 0.8)))
-	left.add_child(_text("Заряжено: %d / %d  %s — урон %d, пробитие %d" % [int(mag.get("rounds", 0)), int(spec.mag), ItemDb.item_name(String(spec.ammo)), int(spec.damage), int(spec.pen)], Color(0.8, 0.85, 0.75)))
+	# сколько внутри — не видно: полный / пустой (проверка — в рейде, держать R)
+	var loaded := "пустой" if int(mag.get("rounds", 0)) <= 0 else ("полный" if int(mag.get("rounds", 0)) >= int(spec.mag) else "не пустой")
+	left.add_child(_text("Магазин на %d — %s · %s — урон %d, пробитие %d" % [int(spec.mag), loaded, ItemDb.item_name(String(spec.ammo)), int(spec.damage), int(spec.pen)], Color(0.8, 0.85, 0.75)))
 	left.add_child(_text("Клик по квадратику у точки крепления — поставить или снять.", Color(0.6, 0.62, 0.6)))
 	# справа: характеристики (сравнение с «голым») и магазин
 	var right := _column("Характеристики", 1.0)
 	var bare := weapon.duplicate(true)
 	bare["mods"] = {}
 	_stats(right, spec, WeaponStats.compute(bare))
-	right.add_child(_button("Снарядить магазины из тайника и рюкзака", func() -> void: Profile.load_all_mags()))
 	# магазин — сменить на подходящий из тайника / рюкзака
 	if not w.has("internal_mag"):
 		right.add_child(_text("Магазин  [%s]" % String(w.get("mag_if", "")), Color(0.95, 0.82, 0.6)))

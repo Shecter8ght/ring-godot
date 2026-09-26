@@ -1,9 +1,11 @@
 class_name GridView
 extends Control
 ## Ячеистая сетка предметов (рюкзак, тайник, лут): предмет — прямоугольник своего размера
-## (ItemDb.size), стопка — число в углу, у брони — полоска прочности. Мышью: тащить (R — повернуть
-## на лету), двойной клик — действие по умолчанию, правая кнопка — меню действий, наведение —
-## подсказка с ценой. Сама ничего не меняет: сообщает сигналами, решает окно (профиль или хост).
+## (ItemDb.size), стопка — число в углу, у брони — полоска прочности, у магазина — ПОЛН / ПУСТ (после
+## проверки — оценка). Идёт поштучная операция (MagOps: пометка "op") — круг заполненности и счёт.
+## Мышью: тащить (R — повернуть на лету), двойной клик — действие по умолчанию, правая кнопка — меню
+## действий, наведение — подсказка с ценой. Патроны на подходящий магазин, плиту на жилет со
+## свободным гнездом — dropped_on. Сама ничего не меняет: сообщает сигналами, решает окно.
 ##
 ## auto_layout — список без мест (лут): предметы раскладываются для показа по порядку.
 
@@ -12,7 +14,7 @@ signal slot_dropped(slot: String, x: int, y: int, r: bool)
 signal activated(idx: int)
 signal context(idx: int, screen_pos: Vector2)
 signal quick_move(idx: int)
-## Патроны бросили на магазин в этой сетке — снарядить его (решает окно).
+## Патроны бросили на подходящий магазин, плиту — на жилет со свободным гнездом (решает окно).
 signal dropped_on(src: GridView, src_idx: int, dst_idx: int)
 
 const CELL := 46.0
@@ -49,7 +51,9 @@ func _init(p_grid: Vector2i = Vector2i(6, 5), p_role: String = "") -> void:
 
 
 func set_items(list: Array) -> void:
-	items = list
+	# своя копия списка (записи — те же): в убежище список профиля меняется на месте, а раскладка
+	# считается здесь — до перестройки окна сетка рисует то, что ей дали
+	items = list.duplicate()
 	_relayout()
 	queue_redraw()
 
@@ -136,9 +140,45 @@ func _draw() -> void:
 			draw_rect(Rect2(r.position + Vector2(3, r.size.y - 6), Vector2((r.size.x - 6) * k, 3)), Color(0.4, 0.85, 0.4).lerp(Color(0.9, 0.3, 0.2), 1.0 - k))
 		if it.has("mods") and not (it.mods as Dictionary).is_empty():
 			draw_string(_font, r.position + Vector2(4, r.size.y - 5), "+%d" % (it.mods as Dictionary).size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.6, 0.85, 1.0))
+		if it.get("op") is Dictionary:
+			_draw_op(r, it, it.op as Dictionary)
+		elif it.has("rounds"):
+			# сколько внутри — не видно: полный / пустой, после проверки — оценка
+			var tag := Gear.mag_tag(it)
+			if tag != "":
+				var tc := Color(0.55, 0.9, 0.55) if tag == "ПОЛН" else (Color(0.62, 0.62, 0.6) if tag == "ПУСТ" else Color(1.0, 0.82, 0.45))
+				draw_string_outline(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, 3, Color(0, 0, 0, 0.8))
+				draw_string(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, tc)
 	if _hover.x >= 0:
 		var hr := Rect2(Vector2(_hover) * CELL, Vector2(_hover_size) * CELL)
 		draw_rect(hr, Color(0.3, 0.9, 0.4, 0.28) if _hover_ok else Color(0.95, 0.3, 0.25, 0.28))
+
+
+## Идёт поштучная операция: круг — заполненность магазина (или сколько плит осталось), в центре —
+## счёт: снаряжают заведомо пустой — сколько уже внутри; иначе — сколько добавили / вынули.
+func _draw_op(r: Rect2, it: Dictionary, op: Dictionary) -> void:
+	var c := r.get_center()
+	var rad := minf(r.size.x, r.size.y) * 0.36
+	draw_circle(c, rad + 4.0, Color(0, 0, 0, 0.6))
+	var frac := 0.0
+	var label := ""
+	if it.has("rounds"):
+		var n := int(it.rounds)
+		frac = float(n) / float(maxi(1, MagOps.capacity(it)))
+		var s := int(op.get("s", 0))
+		if String(op.get("k", "")) == "load":
+			label = str(n) if bool(op.get("known", false)) else "+%d" % (n - s)
+		else:
+			label = "−%d" % (s - n)
+	else:
+		var left := (it.get("plates", {}) as Dictionary).size()
+		frac = float(left) / float(maxi(1, int(op.get("s", 1))))
+		label = str(left)
+	draw_arc(c, rad, 0.0, TAU, 48, Color(1, 1, 1, 0.16), 3.0, true)
+	if frac > 0.0:
+		draw_arc(c, rad, -PI * 0.5, -PI * 0.5 + TAU * frac, 48, Color(1.0, 0.8, 0.38), 3.5, true)
+	var w := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	draw_string(_font, c + Vector2(-w * 0.5, 5.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1.0, 0.95, 0.8))
 
 
 func _get_tooltip(at: Vector2) -> String:
@@ -242,7 +282,7 @@ func _can_drop_data(at: Vector2, data: Variant) -> bool:
 		# на такую же неполную стопку — тоже можно; патроны — на магазин (снарядить)
 		if not _hover_ok:
 			var j := index_at(at)
-			_hover_ok = j >= 0 and j != skip and (String(items[j].id) == String(d.id) or _ammo_on_mag(d, j))
+			_hover_ok = j >= 0 and j != skip and (String(items[j].id) == String(d.id) or _fits_into(d, j))
 	queue_redraw()
 	return true
 
@@ -256,7 +296,7 @@ func _drop_data(at: Vector2, data: Variant) -> void:
 		c = Vector2i(int(_layout[j][0]), int(_layout[j][1]))
 	_hover = Vector2i(-1, -1)
 	queue_redraw()
-	if j >= 0 and not d.has("slot") and _ammo_on_mag(d, j) and not (d.get("view") == self and j == int(d.idx)):
+	if j >= 0 and not d.has("slot") and _fits_into(d, j) and not (d.get("view") == self and j == int(d.idx)):
 		dropped_on.emit(d.view, int(d.idx), j)
 		return
 	if d.has("slot"):
@@ -265,9 +305,19 @@ func _drop_data(at: Vector2, data: Variant) -> void:
 		dropped.emit(d.view, int(d.idx), c.x, c.y, drag_rot)
 
 
-## Тащат патроны, а под курсором — магазин.
-func _ammo_on_mag(d: Dictionary, j: int) -> bool:
-	return d.get("view") is GridView and not WeaponDb.ammo(String(d.id)).is_empty() and (items[j] as Dictionary).has("rounds")
+## Тащат патроны, а под курсором — подходящий неполный магазин; плиту — жилет со свободным гнездом.
+func _fits_into(d: Dictionary, j: int) -> bool:
+	if not (d.get("view") is GridView):
+		return false
+	var t: Dictionary = items[j]
+	var id := String(d.id)
+	if not WeaponDb.ammo(id).is_empty() and t.has("rounds"):
+		return MagOps.ammo_fits(t, id) and int(t.rounds) < MagOps.capacity(t)
+	if not WeaponDb.plate(id).is_empty() and t.has("plates"):
+		for s in WeaponDb.vest(String(t.id)).get("plates", []):
+			if not (t.plates as Dictionary).has(s):
+				return true
+	return false
 
 
 func _notification(what: int) -> void:
