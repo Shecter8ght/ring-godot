@@ -33,6 +33,12 @@ var _e: Environment
 var _fog_target: float = 0.0
 var _fog_sky_target: float = 0.4
 var _fog_ready: bool = false
+## Туман погоды (на улице) и поправка на крышу над головой своего игрока (1 — улица).
+var _fog_base: float = 0.0
+## 0 — на улице, 1 — под крышей ТЦ; плавно (Balance.INDOOR.sec).
+var _roof: float = 0.0
+## Исходная доля неба в окружающем свете — до поправки на крышу (берётся при первом шаге).
+var _sky0: float = -1.0
 var puddles: float = 0.0
 
 
@@ -98,7 +104,8 @@ func _apply_static() -> void:
 		# в начале рейда — сразу как есть; дальше туман сгущается и рассеивается плавно (_tick_fog)
 		if not _fog_ready:
 			_fog_ready = true
-			e.fog_density = _fog_target
+			_fog_base = _fog_target
+			e.fog_density = _fog_base
 			e.fog_sky_affect = _fog_sky_target
 			e.fog_enabled = _fog_target > 0.0
 	_update_visibility()
@@ -121,18 +128,27 @@ func _tick_fog(delta: float) -> void:
 	if e == null or not _fog_ready:
 		return
 	var sec := float(Balance.OUTDOOR_LIGHTS.fog_change_sec)
-	e.fog_density = move_toward(e.fog_density, _fog_target, 0.03 * delta / sec)
+	_fog_base = move_toward(_fog_base, _fog_target, 0.03 * delta / sec)
+	# под крышей ТЦ (у каждого peer — по своему игроку, это только картинка): туман реже, свет неба
+	# приглушён
+	var ind: Dictionary = Balance.INDOOR
+	_roof = move_toward(_roof, 0.0 if _outdoor else 1.0, delta / float(ind.sec))
+	e.fog_density = _fog_base * lerpf(1.0, float(ind.fog_k), _roof)
+	if _sky0 < 0.0:
+		_sky0 = e.ambient_light_sky_contribution
+	e.ambient_light_sky_contribution = _sky0 * lerpf(1.0, float(ind.sky_k), _roof)
 	e.fog_sky_affect = move_toward(e.fog_sky_affect, _fog_sky_target, 0.5 * delta / sec)
 	e.fog_enabled = e.fog_density > 0.00001
 	_update_visibility()
 
 
-## Видимость в тумане, м (Кошмидер: контраст падает до 2 % на расстоянии 3.912 / плотность).
+## Видимость на улице, м (Кошмидер: контраст падает до 2 % на расстоянии 3.912 / плотность).
+## Считается по туману погоды — не по тому, что видит игрок под крышей.
 func visibility_m() -> float:
 	var e := _env()
 	if e == null:
 		return INF
-	var d := (e.fog_density if e.fog_enabled else 0.0) + (e.volumetric_fog_density if e.volumetric_fog_enabled else 0.0)
+	var d := (_fog_base if _fog_ready else 0.0) + (e.volumetric_fog_density if e.volumetric_fog_enabled else 0.0)
 	return 3.912 / d if d > 0.00001 else INF
 
 
