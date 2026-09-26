@@ -267,11 +267,17 @@ func _build_settings(h: HBoxContainer) -> void:
 	q.item_selected.connect(func(i: int) -> void: Settings.set_quality(String(Settings.QUALITY[i])))
 	grid.add_child(q)
 	grid.add_child(_label("Мышь от первого лица"))
-	grid.add_child(_slider(Settings.SENS_RANGE[0], Settings.SENS_RANGE[1], 0.05, Settings.sens_fps, "×%.2f",
-		func(v: float) -> void: Settings.set_sens(v, Settings.sens_iso)))
+	grid.add_child(_sens_row(Settings.sens_fps, func(v: float) -> void: Settings.set_sens(v, Settings.sens_iso)))
+	grid.add_child(_label("Мышь в прицеле (ПКМ)"))
+	grid.add_child(_sens_row(Settings.sens_ads, func(v: float) -> void: Settings.set_sens_ads(v)))
 	grid.add_child(_label("Поворот камеры (СКМ)"))
-	grid.add_child(_slider(Settings.SENS_RANGE[0], Settings.SENS_RANGE[1], 0.05, Settings.sens_iso, "×%.2f",
-		func(v: float) -> void: Settings.set_sens(Settings.sens_fps, v)))
+	grid.add_child(_sens_row(Settings.sens_iso, func(v: float) -> void: Settings.set_sens(Settings.sens_fps, v)))
+	grid.add_child(_label("Инвертировать мышь по вертикали"))
+	var inv := CheckButton.new()
+	inv.focus_mode = Control.FOCUS_NONE
+	inv.button_pressed = Settings.invert_y
+	inv.toggled.connect(func(on: bool) -> void: Settings.set_invert_y(on))
+	grid.add_child(inv)
 	for b in Settings.BUSES:
 		var bus := String(b)
 		grid.add_child(_label("Громкость: " + String(Settings.BUSES[b]).to_lower()))
@@ -310,6 +316,46 @@ func _label(text: String) -> Label:
 
 
 ## Ползунок с подписью значения справа; show_mult — множитель для подписи (доли → проценты).
+## Чувствительность: ползунок по экспоненте (тонко внизу, быстро вверху) + поле для точного числа;
+## друг за другом следят.
+func _sens_row(value: float, cb: Callable) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	var s := HSlider.new()
+	s.min_value = Settings.SENS_RANGE[0]
+	s.max_value = Settings.SENS_RANGE[1]
+	s.step = 0.01
+	s.exp_edit = true
+	s.value = value
+	s.custom_minimum_size = Vector2(190, 24)
+	s.focus_mode = Control.FOCUS_NONE
+	var box := SpinBox.new()
+	box.min_value = Settings.SENS_RANGE[0]
+	box.max_value = Settings.SENS_RANGE[1]
+	box.step = 0.01
+	box.prefix = "×"
+	box.value = value
+	box.custom_minimum_size.x = 96
+	s.value_changed.connect(func(x: float) -> void:
+		box.set_value_no_signal(x)
+		cb.call(x))
+	box.value_changed.connect(func(x: float) -> void:
+		s.set_value_no_signal(x)
+		cb.call(x))
+	row.add_child(s)
+	row.add_child(box)
+	var reset := Button.new()
+	reset.text = "×1"
+	reset.tooltip_text = "Сбросить на обычную"
+	reset.focus_mode = Control.FOCUS_NONE
+	reset.pressed.connect(func() -> void:
+		s.set_value_no_signal(1.0)
+		box.set_value_no_signal(1.0)
+		cb.call(1.0))
+	row.add_child(reset)
+	return row
+
+
 func _slider(lo: float, hi: float, step: float, value: float, fmt: String, cb: Callable, show_mult: float = 1.0) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)

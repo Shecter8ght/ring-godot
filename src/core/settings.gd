@@ -16,12 +16,18 @@ const QUALITY := ["low", "medium", "high"]
 const QUALITY_NAMES := {"low": "Низко", "medium": "Средне", "high": "Высоко"}
 ## Шина → подпись в меню. Master — общая.
 const BUSES := {"Master": "Общая", "Shots": "Выстрелы", "Steps": "Шаги", "World": "Эффекты", "Ambient": "Окружение"}
-const SENS_RANGE := [0.3, 3.0]
+## Множители чувствительности мыши: от очень медленной до очень быстрой (ползунок — по экспоненте,
+## точное число — в поле рядом).
+const SENS_RANGE := [0.05, 10.0]
 
 var quality: String = "high"
 ## Множитель чувствительности мыши: от первого лица (взгляд) и в изометрии (поворот камеры СКМ).
 var sens_fps: float = 1.0
 var sens_iso: float = 1.0
+## Отдельно — пока целишься (ПКМ, оптика: поверх её поправки на кратность).
+var sens_ads: float = 1.0
+## Мышь вверх — взгляд вниз (как у лётчиков).
+var invert_y: bool = false
 ## Громкость по шине, 0–1.
 var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.0, "Ambient": 1.0}
 ## Гарнитура на ушах своего игрока (data/armor.json → headsets[…].headset): поправки шин, дБ, и
@@ -61,6 +67,8 @@ func _load() -> void:
 	quality = q if q in QUALITY else "high"
 	sens_fps = clampf(float(cfg.get_value("mouse", "fps", sens_fps)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
+	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
+	invert_y = bool(cfg.get_value("mouse", "invert_y", invert_y))
 	for b in BUSES:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
@@ -74,6 +82,8 @@ func save() -> void:
 	cfg.set_value("graphics", "quality", quality)
 	cfg.set_value("mouse", "fps", sens_fps)
 	cfg.set_value("mouse", "iso", sens_iso)
+	cfg.set_value("mouse", "ads", sens_ads)
+	cfg.set_value("mouse", "invert_y", invert_y)
 	for b in BUSES:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
@@ -92,6 +102,18 @@ func set_quality(q: String) -> void:
 func set_sens(fps: float, iso: float) -> void:
 	sens_fps = clampf(fps, SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(iso, SENS_RANGE[0], SENS_RANGE[1])
+	save()
+	changed.emit()
+
+
+func set_sens_ads(v: float) -> void:
+	sens_ads = clampf(v, SENS_RANGE[0], SENS_RANGE[1])
+	save()
+	changed.emit()
+
+
+func set_invert_y(on: bool) -> void:
+	invert_y = on
 	save()
 	changed.emit()
 

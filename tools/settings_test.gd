@@ -32,6 +32,21 @@ func _ready() -> void:
 	Settings.set_sens(2.0, 0.5)
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	_check("чувствительность мыши — множитель", is_equal_approx(Settings.sens_fps, 2.0) and rig != null, "")
+	Settings.set_sens(0.05, 10.0)
+	_check("чувствительность: от ×0.05 до ×10", is_equal_approx(Settings.sens_fps, 0.05) and is_equal_approx(Settings.sens_iso, 10.0), "%.2f / %.2f" % [Settings.sens_fps, Settings.sens_iso])
+	var pl := get_tree().get_first_node_in_group("players") as Player
+	if pl and rig:
+		Settings.set_sens(1.0, 1.0)
+		pl.aiming = true
+		var aim1 := rig.ads_sens()
+		Settings.set_sens_ads(2.5)
+		_check("в прицеле — свой множитель", is_equal_approx(rig.ads_sens(), aim1 * 2.5), "%.5f → %.5f" % [aim1, rig.ads_sens()])
+		pl.aiming = false
+		_check("не целится — множитель прицела не действует", is_equal_approx(rig.ads_sens(), aim1), "%.5f" % rig.ads_sens())
+		Settings.set_sens_ads(1.0)
+	Settings.set_invert_y(true)
+	_check("инверсия по вертикали", Settings.invert_y, "")
+	Settings.set_invert_y(false)
 	Settings.set_sens(1.0, 1.0)
 	_check("в инструментах настройки не сохраняются", Settings._tool_run, "")
 	print("settings_test: провалено %d" % _fails)

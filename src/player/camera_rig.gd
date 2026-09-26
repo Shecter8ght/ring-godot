@@ -350,8 +350,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if ads_active and not _ui_blocking():
 			# вправо — поворот вправо; у оптики чувствительность меньше пропорционально полю зрения
 			var sens := ads_sens()
+			var dy := -mm.relative.y if Settings.invert_y else mm.relative.y
 			_look_yaw -= mm.relative.x * sens
-			_look_pitch = clampf(_look_pitch - mm.relative.y * sens, -Balance.ADS_PITCH_LIMIT, Balance.ADS_PITCH_LIMIT)
+			_look_pitch = clampf(_look_pitch - dy * sens, -Balance.ADS_PITCH_LIMIT, Balance.ADS_PITCH_LIMIT)
 		elif _mmb:
 			rotation.y -= mm.relative.x * Balance.CAMERA_MMB_SENS * Settings.sens_iso
 
@@ -608,9 +609,12 @@ func _build_scope() -> void:
 	layer.add_child(_scope_view)
 
 
-## Чувствительность мыши в прицеле: по полю зрения, в оптике — ещё и на кратность.
+## Чувствительность мыши от первого лица: по полю зрения, в оптике — ещё и на кратность; пока
+## целишься (ПКМ) — свой множитель из настроек.
 func ads_sens() -> float:
-	var s := Balance.ADS_SENS * Settings.sens_fps * (_ads_cam.fov / 62.0)
+	var pl := _target as Player
+	var aim_k := Settings.sens_ads if pl != null and pl.aiming else 1.0
+	var s := Balance.ADS_SENS * Settings.sens_fps * aim_k * (_ads_cam.fov / 62.0)
 	return s / maxf(1.0, _scope_zoom) if scope_active else s
 
 
