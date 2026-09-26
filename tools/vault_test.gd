@@ -72,6 +72,12 @@ func _ready() -> void:
 	await _press("vault", 3)
 	await get_tree().create_timer(1.2).timeout
 	_check("через стену выше роста — нет", pl.global_position.z < 11.8, str(pl.global_position))
+	# Alt на месте — не бросается (бросок только в сторону движения)
+	pl.global_position = Vector3(-6, 0.05, 5.0)
+	await _frames(5)
+	await _press("dive", 2)
+	await get_tree().create_timer(0.3).timeout
+	_check("Alt на месте — броска нет", pl.stance == Player.Stance.STAND, "стойка %d" % pl.stance)
 	# бросок вбок: Alt + вправо
 	pl.global_position = Vector3(-6, 0.05, 5.0)
 	await _frames(5)

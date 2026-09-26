@@ -1233,7 +1233,11 @@ func _try_dive() -> void:
 	var dv: Dictionary = Balance.DIVE
 	if stance == Stance.PRONE or is_burdened() or is_downed() or _dive_cd > 0.0 or _dive_t >= 0.0 or stamina < float(dv.stamina) * 0.5:
 		return
-	_dive_dir = _action_dir()
+	# только в сторону движения: Alt на месте — ничего (раньше бросал вперёд и сбивал с толку)
+	var wish := _wish_direction()
+	if wish.length_squared() < 0.01:
+		return
+	_dive_dir = wish.normalized()
 	_dive_t = 0.0
 	_dive_cd = float(dv.cooldown)
 	velocity = _dive_dir * float(dv.speed) + Vector3.UP * float(dv.hop)
