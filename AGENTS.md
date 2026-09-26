@@ -83,6 +83,7 @@ tools/godot.cmd --headless res://tools/coop_raid_test.tscn -- host   # кооп 
                                                               # в убежище и рейде все видят всех и как ходят, выстрелы
                                                               # напарников видно, дверь ТЦ, открытая клиентом, открыта у всех,
                                                               # генератор встал у хоста — c2 чинит, у всех снова весь свет
+tools/godot.cmd --headless res://tools/anim_test.tscn      # анимации Persona при 144 к/с: клип ходьбы не скачет, спринт, присед и ходьба вприсядку — ступни на полу, лёжа
 tools/godot.cmd --headless res://tools/god_test.tscn       # чит «бессмертие»: голова, граната, очередь — жив; лёжа — встал; выключил — урон проходит
 tools/godot.cmd --headless res://tools/stress_test.tscn    # стресс: пули рядом, спад в тишине, пороги, адреналин, обезболивающее
 tools/godot.cmd res://tools/breaker_test.tscn              # главный рубильник света ТЦ: щитовая, свет погас → поднять, генератор; снимок breaker.png

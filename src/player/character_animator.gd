@@ -7,6 +7,12 @@ var _body: Node3D
 var _model: Node3D
 var _player: AnimationPlayer
 var _last_position: Vector3
+## Скорость движения, сглаженная по времени: тело двигает физика (60 раз в с), а _process идёт
+## с частотой кадров — на мониторе 144+ сдвиг между кадрами то ноль, то двойной, и клип
+## прыгал «стоит» ↔ «спринт» каждый кадр. Работает и для чужих тел (позиция приходит по сети).
+var _vel: Vector3 = Vector3.ZERO
+## Насколько модель опущена под стойку (сейчас, м) — к нужной высоте идёт плавно.
+var _drop: float = 0.0
 var _last_event_seq: int = 0
 var _one_shot: String = ""
 var _current: String = ""
@@ -48,7 +54,8 @@ func _process(delta: float) -> void:
 	var travel: Vector3 = _actor.global_position - _last_position
 	_last_position = _actor.global_position
 	travel.y = 0.0
-	var speed: float = travel.length() / delta
+	_vel = _vel.lerp(travel / delta, 1.0 - exp(-delta / float(Balance.CHARACTER_ANIM.speed_smooth_sec)))
+	var speed: float = _vel.length()
 	var family: String = "unarmed"
 	var crouched: bool = false
 	var prone: bool = false
@@ -83,23 +90,30 @@ func _process(delta: float) -> void:
 	elif _actor is Marauder:
 		var enemy_scale: float = (_actor as Marauder)._base_scale.y
 		_model.scale.y = enemy_scale / maxf(_body.scale.y, 0.1)
-	var stance_drop: float = float(Balance.CHARACTER_ANIM.prone_drop) if prone else (float(Balance.CHARACTER_ANIM.crouch_drop) if crouched else 0.0)
-	_model.position.y = -stance_drop / maxf(_body.scale.y, 0.1)
-	if _one_shot != "":
-		return
 	var move_min: float = float(Balance.CHARACTER_ANIM.move_min)
 	var moving: bool = speed > move_min
+	# ходьба вприсядку ниже не опускается: у клипа таз выше, чем в приседе на месте (ноги уходили в пол)
+	var crouch_drop: float = float(Balance.CHARACTER_ANIM.crouch_walk_drop if moving else Balance.CHARACTER_ANIM.crouch_drop)
+	var stance_drop: float = float(Balance.CHARACTER_ANIM.prone_drop) if prone else (crouch_drop if crouched else 0.0)
+	_drop = lerpf(_drop, stance_drop, 1.0 - exp(-delta / float(Balance.CHARACTER_ANIM.blend_sec)))
+	_model.position.y = -_drop / maxf(_body.scale.y, 0.1)
+	if _one_shot != "":
+		return
 	var clip: String
 	if prone:
 		clip = "prone_move_b"
 	elif crouched:
-		clip = family + "_crouch_walk_" + _direction(travel) if moving else "unarmed_crouch_idle"
+		clip = family + "_crouch_walk_" + _direction(_vel) if moving else "unarmed_crouch_idle"
+		# своей ходьбы вприсядку у пистолета и без оружия нет — ноги от автоматной (стоячая
+		# ходьба, опущенная на присед, уходила ногами в пол)
+		if moving and not _player.has_animation(clip):
+			clip = "rifle_crouch_walk_" + _direction(_vel)
 	elif not moving:
 		clip = "rifle_aim" if family == "rifle" and aiming else family + "_idle"
 	else:
 		var gait: String = "run" if speed >= float(Balance.CHARACTER_ANIM.run_from) else "walk"
-		clip = family + "_" + gait + "_" + _direction(travel)
-		if family == "rifle" and gait == "run" and speed >= Balance.PLAYER_SPRINT_SPEED:
+		clip = family + "_" + gait + "_" + _direction(_vel)
+		if family == "rifle" and gait == "run" and speed >= float(Balance.CHARACTER_ANIM.sprint_from):
 			clip = "rifle_sprint"
 	if not _player.has_animation(clip):
 		clip = family + ("_crouch_idle" if crouched and not moving else "_walk_f" if moving else "_idle")

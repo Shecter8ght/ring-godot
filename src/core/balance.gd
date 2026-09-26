@@ -14,8 +14,11 @@ const PLAYER_DECEL := 24.0
 ## Поворот корпуса к курсору, рад/с.
 const PLAYER_TURN_SPEED := 12.0
 
-## Визуальный выбор клипа по реальному перемещению; физику персонажа не меняет.
-const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "blend_sec": 0.16, "prone_hold_sec": 1.0, "crouch_drop": 0.57, "prone_drop": 0.63}
+## Визуальный выбор клипа по реальному перемещению; физику персонажа не меняет. Скорость для
+## выбора сглажена за speed_smooth_sec, с (иначе на мониторе 144+ клип скачет каждый кадр);
+## с автоматом от sprint_from, м/с, — спринт (бег игрока 5.2, сглаженная скорость к ней снизу).
+## Модель опущена под стойку, м: присед на месте, ходьба вприсядку (у клипа таз выше), лёжа.
+const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "sprint_from": 4.8, "blend_sec": 0.16, "prone_hold_sec": 1.0, "crouch_drop": 0.57, "crouch_walk_drop": 0.29, "prone_drop": 0.63, "speed_smooth_sec": 0.1}
 
 # --- Капсула по стойкам: высота, м ---
 const STANCE_HEIGHT := {"stand": 1.8, "crouch": 1.2, "prone": 0.5}
