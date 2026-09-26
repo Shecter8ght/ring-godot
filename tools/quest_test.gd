@@ -96,6 +96,9 @@ func _ready() -> void:
 	me.global_position = _site("red_gate").global_position + Vector3(0, 0.3, -2.0)
 	for i in range(5):
 		await get_tree().physics_frame
+	# вход в зону засчитывает QuestSite._process: под нагрузкой 5 шагов физики проходят за один кадр
+	await get_tree().process_frame
+	await get_tree().process_frame
 	_site("anton").request_use()
 	await get_tree().process_frame
 	_check("нашёл Антона — надо вынести", String(Quests.objective(Q).type) == "extract_with_npc" and _site("anton").can_carry, _obj())
@@ -110,6 +113,9 @@ func _ready() -> void:
 	me.global_position = _site("red_gate").global_position + Vector3(0, 0.3, -2.0)
 	for i in range(5):
 		await get_tree().physics_frame
+	# вход в зону засчитывает QuestSite._process: под нагрузкой 5 шагов физики проходят за один кадр
+	await get_tree().process_frame
+	await get_tree().process_frame
 	_site("anton").request_use()
 	await get_tree().process_frame
 	# без Антона эвакуация не спасает
