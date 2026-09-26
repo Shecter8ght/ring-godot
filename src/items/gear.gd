@@ -242,6 +242,52 @@ static func load_mags(list: Array, extra: Array = []) -> int:
 	return used
 
 
+## Разрядить магазин list[idx] в ту же сетку grid: патроны — стопками в свободные клетки, что не
+## влезло — остаётся в магазине. Сколько патронов вынуто.
+static func unload_mag(list: Array, idx: int, grid: Vector2i) -> int:
+	if idx < 0 or idx >= list.size():
+		return 0
+	var mag: Dictionary = list[idx]
+	if not mag.has("rounds") or int(mag.rounds) <= 0 or String(mag.get("ammo", "")) == "":
+		return 0
+	var ammo := {"id": String(mag.ammo), "n": int(mag.rounds)}
+	if bool(mag.get("fir", false)):
+		ammo["fir"] = true
+	var placed := ItemDb.add_to(list, ammo, grid)
+	mag.rounds = int(mag.rounds) - placed
+	return placed
+
+
+## Точно считает патроны только у пистолетов и болтовок (мало патронов, видно в окно) — у
+## остальных при проверке — словами.
+static func exact_count(weapon_id: String) -> bool:
+	var w := WeaponDb.weapon(weapon_id)
+	return String(w.get("class", "")) == "PISTOL" or String(w.get("cycle_sound", "")) == "bolt"
+
+
+## Магазин от пистолета или болтовки — его проверка тоже точная.
+static func mag_exact(mag_id: String) -> bool:
+	for wid in WeaponDb.ids("weapons"):
+		if WeaponDb.mag_fits(String(wid), mag_id) and exact_count(String(wid)):
+			return true
+	return false
+
+
+## Сколько патронов «на глаз»: точно (exact) или словами (Balance.AMMO_CHECK.words).
+static func ammo_estimate(rounds: int, capacity: int, exact: bool) -> String:
+	if exact:
+		return "%d из %d" % [rounds, capacity]
+	if rounds <= 0:
+		return "пустой"
+	if rounds >= capacity:
+		return "полный"
+	var f := float(rounds) / float(maxi(capacity, 1))
+	for w in Balance.AMMO_CHECK.words:
+		if f >= float(w[0]):
+			return String(w[1])
+	return "почти пустой"
+
+
 static func _count(list: Array, id: String) -> int:
 	var c := 0
 	for it in list:

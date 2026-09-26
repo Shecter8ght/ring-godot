@@ -15,6 +15,9 @@ var pocket: Array = []
 var pocket_grid: Vector2i = Vector2i.ZERO
 ## Хост выдал снаряжение из профиля (рейд из убежища) — владелец может заряжать магазины.
 var loadout_ready: bool = false
+## Буфер — сетка Balance.BUFFER_GRID посередине окна лута: переложить, разрядить магазин, снарядить
+## отсюда. Виртуальный: окно закрыли — всё в рюкзак, что не влезло — мешком под ноги (Raid).
+var buffer: Array = []
 
 
 func _ready() -> void:
@@ -24,7 +27,7 @@ func _ready() -> void:
 		var sync := MultiplayerSynchronizer.new()
 		sync.name = "Sync"
 		var config := SceneReplicationConfig.new()
-		for prop in [".:items", ".:equipment", ".:loadout_ready", ".:pocket", ".:pocket_grid"]:
+		for prop in [".:items", ".:equipment", ".:loadout_ready", ".:pocket", ".:pocket_grid", ".:buffer"]:
 			var path := NodePath(prop)
 			config.add_property(path)
 			config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -77,19 +80,118 @@ func add_entry(entry: Dictionary) -> int:
 	return k
 
 
-## Кладёт экземпляр в конкретное место сетки into ("backpack" / "pocket"); сколько положил (хост).
+## Сетки по имени: "backpack" (items), "pocket", "buffer".
+func list_of(role: String) -> Array:
+	match role:
+		"pocket":
+			return pocket
+		"buffer":
+			return buffer
+	return items
+
+
+func grid_of(role: String) -> Vector2i:
+	match role:
+		"pocket":
+			return pocket_grid
+		"buffer":
+			return Balance.BUFFER_GRID
+	return Balance.BACKPACK_GRID
+
+
+## Переприсвоить сетку (копией — синхронизатор сравнивает значения).
+func _set_list(role: String, list: Array) -> void:
+	match role:
+		"pocket":
+			pocket = list
+		"buffer":
+			buffer = list
+		_:
+			items = list
+
+
+## Кладёт экземпляр в конкретное место сетки into ("backpack" / "pocket" / "buffer"); сколько
+## положил (хост).
 func put_at(entry: Dictionary, x: int, y: int, r: bool, into: String = "backpack") -> int:
-	var grid := pocket_grid if into == "pocket" else Balance.BACKPACK_GRID
+	var grid := grid_of(into)
 	if grid == Vector2i.ZERO:
 		return 0
-	var list := (pocket if into == "pocket" else items).duplicate(true)
+	var list := list_of(into).duplicate(true)
 	var k := ItemDb.put_at(list, entry, grid, x, y, r)
 	if k > 0:
-		if into == "pocket":
-			pocket = list
-		else:
-			items = list
+		_set_list(into, list)
 	return k
+
+
+## Разрядить магазин (сетка role, запись idx): патроны — в сетку into (буфер, рюкзак); что не
+## влезло — остаётся в магазине. Сколько вынуто (хост).
+func unload_mag(role: String, idx: int, into: String) -> int:
+	var src := list_of(role).duplicate(true)
+	if idx < 0 or idx >= src.size():
+		return 0
+	var mag: Dictionary = src[idx]
+	if not mag.has("rounds") or int(mag.rounds) <= 0 or String(mag.get("ammo", "")) == "":
+		return 0
+	var ammo := {"id": String(mag.ammo), "n": int(mag.rounds)}
+	if bool(mag.get("fir", false)):
+		ammo["fir"] = true
+	var dst: Array = src if into == role else list_of(into).duplicate(true)
+	var k := ItemDb.add_to(dst, ammo, grid_of(into))
+	if k <= 0:
+		return 0
+	mag.rounds = int(mag.rounds) - k
+	_set_list(role, src)
+	if into != role:
+		_set_list(into, dst)
+	return k
+
+
+## Снарядить магазин (сетка mag_role, запись mag_idx) стопкой патронов (ammo_role, ammo_idx) —
+## перетащили патроны на магазин. Сколько зарядил; 0 — не тот калибр / в магазине другие патроны
+## / полный (хост).
+func fill_mag(ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int) -> int:
+	var alist := list_of(ammo_role).duplicate(true)
+	var mlist: Array = alist if mag_role == ammo_role else list_of(mag_role).duplicate(true)
+	if ammo_idx < 0 or ammo_idx >= alist.size() or mag_idx < 0 or mag_idx >= mlist.size():
+		return 0
+	var ammo: Dictionary = alist[ammo_idx]
+	var mag: Dictionary = mlist[mag_idx]
+	var aid := String(ammo.id)
+	if not mag.has("rounds") or WeaponDb.ammo(aid).is_empty():
+		return 0
+	if String(WeaponDb.ammo(aid).get("caliber", "")) != WeaponDb.mag_caliber(String(mag.id)):
+		return 0
+	if int(mag.rounds) > 0 and String(mag.get("ammo", "")) != aid:
+		return 0
+	var take := mini(int(WeaponDb.magazine(String(mag.id)).get("capacity", 0)) - int(mag.rounds), int(ammo.n))
+	if take <= 0:
+		return 0
+	ItemDb.remove_at(alist, ammo_idx, take)
+	mag["ammo"] = aid
+	mag.rounds = int(mag.rounds) + take
+	_set_list(ammo_role, alist)
+	if mag_role != ammo_role:
+		_set_list(mag_role, mlist)
+	return take
+
+
+## Буфер — в рюкзак; что не влезло — вернуть (вызывающий бросает мешком) (хост).
+func flush_buffer() -> Array:
+	if buffer.is_empty():
+		return []
+	var list := items.duplicate(true)
+	var left: Array = []
+	for e in buffer:
+		var one: Dictionary = (e as Dictionary).duplicate(true)
+		for key in ["x", "y", "r"]:
+			one.erase(key)
+		var k := ItemDb.add_to(list, one, Balance.BACKPACK_GRID)
+		if k < int(one.n):
+			one.n = int(one.n) - k
+			left.append(one)
+	items = list
+	buffer = []
+	return left
 
 
 ## Обвес из рюкзака / кармана (src, запись idx) — на оружие в слоте weapon_slot, в точку mount
@@ -216,28 +318,37 @@ func prepare_mags() -> void:
 		equipment = eq
 
 
-## Перенос между рюкзаком и карманом (или внутри одного) в клетку (x, y) (хост).
+## Перенос между рюкзаком, карманом и буфером (или внутри одного) в клетку (x, y) (хост).
 func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> bool:
 	if src == dst:
-		if src == "pocket":
-			var pl := pocket.duplicate(true)
-			if not ItemDb.move_in(pl, pocket_grid, idx, x, y, r):
-				return false
-			pocket = pl
-			return true
-		return move(idx, x, y, r)
-	var from: Array = pocket if src == "pocket" else items
+		var same := list_of(src).duplicate(true)
+		if not ItemDb.move_in(same, grid_of(src), idx, x, y, r):
+			return false
+		_set_list(src, same)
+		return true
+	var from: Array = list_of(src)
 	if idx < 0 or idx >= from.size():
 		return false
+	# клетка не задана (x < 0) — куда влезет
+	if x < 0:
+		var one: Dictionary = (from[idx] as Dictionary).duplicate(true)
+		for key in ["x", "y", "r"]:
+			one.erase(key)
+		var dl := list_of(dst).duplicate(true)
+		var k2 := ItemDb.add_to(dl, one, grid_of(dst))
+		if k2 <= 0:
+			return false
+		_set_list(dst, dl)
+		var rest2 := list_of(src).duplicate(true)
+		ItemDb.remove_at(rest2, idx, k2)
+		_set_list(src, rest2)
+		return true
 	var k := put_at((from[idx] as Dictionary).duplicate(true), x, y, r, dst)
 	if k <= 0:
 		return false
-	var rest := from.duplicate(true)
+	var rest := list_of(src).duplicate(true)
 	ItemDb.remove_at(rest, idx, k)
-	if src == "pocket":
-		pocket = rest
-	else:
-		items = rest
+	_set_list(src, rest)
 	return true
 
 
@@ -275,7 +386,8 @@ func remove_at(idx: int, n: int) -> Dictionary:
 
 ## Всё содержимое наружу (смерть — рюкзак и снаряжение в тело), пусто (хост).
 func take_all() -> Array:
-	var all := items.duplicate(true)
+	var all := items.duplicate(true) + buffer.duplicate(true)
+	buffer = []
 	for slot in equipment:
 		all.append((equipment[slot] as Dictionary).duplicate(true))
 	items = []
@@ -309,19 +421,39 @@ func equip_from_items(idx: int) -> Dictionary:
 
 ## Разложить рюкзак или карман по порядку (хост). false — не вышло.
 func sort_grid(where: String = "backpack") -> bool:
-	var pk := where == "pocket"
-	var grid := pocket_grid if pk else Balance.BACKPACK_GRID
-	var src: Array = pocket if pk else items
+	var grid := grid_of(where)
+	var src: Array = list_of(where)
 	if grid == Vector2i.ZERO or src.is_empty():
 		return false
 	var out := ItemDb.arranged(src, grid)
 	if out.is_empty():
 		return false
-	if pk:
-		pocket = out
-	else:
-		items = out
+	_set_list(where, out)
 	return true
+
+
+## «Снарядить магазины»: магазины в рюкзаке и буфере — россыпью оттуда же (сначала из буфера).
+## Сколько патронов ушло (хост).
+func load_all_mags() -> int:
+	var combined: Array = items.duplicate(true)
+	for e in buffer:
+		var b: Dictionary = (e as Dictionary).duplicate(true)
+		b["_buf"] = true
+		combined.append(b)
+	var used := Gear.load_mags(combined)
+	if used <= 0:
+		return 0
+	var a: Array = []
+	var b2: Array = []
+	for e in combined:
+		if (e as Dictionary).has("_buf"):
+			(e as Dictionary).erase("_buf")
+			b2.append(e)
+		else:
+			a.append(e)
+	items = a
+	buffer = b2
+	return used
 
 
 ## Снять из слота в рюкзак: в клетку x, y (перетащили в сетку) или куда влезет. Не влезло — false.
@@ -352,17 +484,14 @@ func take_entry(where: String, idx: int) -> Dictionary:
 		eq.erase(slot)
 		equipment = eq
 		return e
-	var list: Array = (pocket if where == "pocket" else items).duplicate(true)
+	var list: Array = list_of(where).duplicate(true)
 	if idx < 0 or idx >= list.size():
 		return {}
 	var out: Dictionary = list[idx]
 	list.remove_at(idx)
 	for k in ["x", "y", "r"]:
 		out.erase(k)
-	if where == "pocket":
-		pocket = list
-	else:
-		items = list
+	_set_list(where, list)
 	return out
 
 

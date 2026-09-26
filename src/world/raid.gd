@@ -198,6 +198,10 @@ func _physics_process(delta: float) -> void:
 
 
 func _extract(pl: Player, ext: ExtractionPoint) -> void:
+	# буфер окна лута — в рюкзак (что не влезло — остаётся лежать)
+	var left := pl.inventory.flush_buffer()
+	if not left.is_empty():
+		spawn_drop(pl.global_position, "Выложено", left, LootContainer.Look.BAG)
 	var e := extracted.duplicate()
 	e[pl.peer_id] = ext.display_name
 	var v := loot_value.duplicate()
@@ -404,12 +408,83 @@ func _load_mags(peer_id: int) -> void:
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
-	var list := pl.inventory.items.duplicate(true)
-	if Gear.load_mags(list) > 0:
-		pl.inventory.items = list
+	if pl.inventory.load_all_mags() > 0:
 		Audio.play("reload_rifle", pl.global_position, -8.0)
 	elif peer_id == multiplayer.get_unique_id():
 		notify("Нечем снаряжать — нет подходящих патронов")
+
+
+## Разрядить магазин (сетка role, запись idx): патроны — в сетку into (открыт буфер — туда).
+func request_unload(role: String, idx: int, into: String) -> void:
+	if _is_host():
+		_unload(multiplayer.get_unique_id(), role, idx, into)
+	else:
+		_rpc_unload.rpc_id(1, role, idx, into)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_unload(role: String, idx: int, into: String) -> void:
+	if multiplayer.is_server():
+		_unload(multiplayer.get_remote_sender_id(), role, idx, into)
+
+
+func _unload(peer_id: int, role: String, idx: int, into: String) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	if pl.inventory.unload_mag(role, idx, into) > 0:
+		Audio.play("pin", pl.global_position, -6.0)
+	elif peer_id == multiplayer.get_unique_id():
+		notify("Разрядить некуда или магазин пуст")
+
+
+## Патроны (ammo_role, ammo_idx) перетащили на магазин (mag_role, mag_idx) — снарядить его.
+func request_fill(ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int) -> void:
+	if _is_host():
+		_fill(multiplayer.get_unique_id(), ammo_role, ammo_idx, mag_role, mag_idx)
+	else:
+		_rpc_fill.rpc_id(1, ammo_role, ammo_idx, mag_role, mag_idx)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_fill(ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int) -> void:
+	if multiplayer.is_server():
+		_fill(multiplayer.get_remote_sender_id(), ammo_role, ammo_idx, mag_role, mag_idx)
+
+
+func _fill(peer_id: int, ammo_role: String, ammo_idx: int, mag_role: String, mag_idx: int) -> void:
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	if pl.inventory.fill_mag(ammo_role, ammo_idx, mag_role, mag_idx) > 0:
+		Audio.play("reload_rifle", pl.global_position, -8.0)
+	elif peer_id == multiplayer.get_unique_id():
+		notify("Не снарядить: другой калибр, другие патроны или магазин полон")
+
+
+## Закрыл окно лута — буфер в рюкзак; что не влезло — мешком под ноги.
+func request_flush_buffer() -> void:
+	if _is_host():
+		_flush_buffer(multiplayer.get_unique_id())
+	else:
+		_rpc_flush_buffer.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_flush_buffer() -> void:
+	if multiplayer.is_server():
+		_flush_buffer(multiplayer.get_remote_sender_id())
+
+
+func _flush_buffer(peer_id: int) -> void:
+	var pl := player_of(peer_id)
+	if pl == null:
+		return
+	var left := pl.inventory.flush_buffer()
+	if not left.is_empty():
+		spawn_drop(pl.global_position + Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw())) * 0.8, "Выложено", left, LootContainer.Look.BAG)
+		if peer_id == multiplayer.get_unique_id():
+			notify("Не всё влезло в рюкзак — остальное положено рядом")
 
 
 func request_take_all(container: LootContainer) -> void:
@@ -548,12 +623,12 @@ func _grid_move(peer_id: int, src: String, idx: int, dst: String, x: int, y: int
 		pl.inventory.move_between(src, idx, dst, x, y, r)
 
 
-## Из рюкзака — запись idx в контейнер (перетащили в окно лута).
-func request_put(container: LootContainer, idx: int) -> void:
+## Из рюкзака (или буфера, кармана — from) — запись idx в контейнер (перетащили в окно лута).
+func request_put(container: LootContainer, idx: int, from: String = "backpack") -> void:
 	if _is_host():
-		_put(multiplayer.get_unique_id(), container.get_path(), idx)
+		_put(multiplayer.get_unique_id(), container.get_path(), idx, from)
 	else:
-		_rpc_put.rpc_id(1, container.get_path(), idx)
+		_rpc_put.rpc_id(1, container.get_path(), idx, from)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -569,9 +644,9 @@ func _rpc_take_to(path: NodePath, idx: int, x: int, y: int, r: bool, into: Strin
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_put(path: NodePath, idx: int) -> void:
+func _rpc_put(path: NodePath, idx: int, from: String) -> void:
 	if multiplayer.is_server():
-		_put(multiplayer.get_remote_sender_id(), path, idx)
+		_put(multiplayer.get_remote_sender_id(), path, idx, from)
 
 
 func _move_item(peer_id: int, idx: int, x: int, y: int, r: bool) -> void:
@@ -601,12 +676,12 @@ func _take_to(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool, i
 		Audio.play("pin", c.global_position, -8.0)
 
 
-func _put(peer_id: int, path: NodePath, idx: int) -> void:
+func _put(peer_id: int, path: NodePath, idx: int, from: String = "backpack") -> void:
 	var pl := player_of(peer_id)
 	var c := _near_container(pl, path)
-	if c == null or idx < 0 or idx >= pl.inventory.items.size():
+	if c == null or idx < 0 or idx >= pl.inventory.list_of(from).size():
 		return
-	var out := pl.inventory.remove_at(idx, int(pl.inventory.items[idx].n))
+	var out := pl.inventory.take_entry(from, idx)
 	if out.is_empty():
 		return
 	var list := c.items.duplicate(true)

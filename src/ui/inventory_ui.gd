@@ -31,6 +31,10 @@ var _med_menu: PanelContainer
 var _med_ids: Array[String] = []
 var _bp_grid: GridView
 var _loot_sig: String = ""
+## Буфер посередине (рюкзак + ящик / труп): сетка Inventory.buffer.
+var _buf_panel: PanelContainer
+var _buf_list: VBoxContainer
+var _buf_sig: String = ""
 
 
 ## 34500 -> «34 500».
@@ -91,7 +95,13 @@ func _ready() -> void:
 	_bp_panel = bp[0]
 	_bp_title = bp[1]
 	_bp_list = bp[2]
-	var lp := _panel(root, -PANEL_W * 2.0 - 40.0, -PANEL_W - 40.0)
+	# буфер — между ящиком и рюкзаком
+	var buf_w := float(Balance.BUFFER_GRID.x) * GridView.CELL + 26.0
+	var bf := _panel(root, -PANEL_W - 40.0 - buf_w, -PANEL_W - 40.0)
+	_buf_panel = bf[0]
+	(bf[1] as Label).text = "Буфер"
+	_buf_list = bf[2]
+	var lp := _panel(root, -PANEL_W * 2.0 - 56.0 - buf_w, -PANEL_W - 56.0 - buf_w)
 	_loot_panel = lp[0]
 	_loot_title = lp[1]
 	_loot_list = lp[2]
@@ -240,8 +250,14 @@ func _tick_heal(delta: float) -> void:
 func _refresh_visibility() -> void:
 	_bp_panel.visible = _backpack_open
 	_loot_panel.visible = _looting != null
+	_buf_panel.visible = _looting != null
 	_bp_sig = ""
 	_loot_sig = ""
+	_buf_sig = ""
+	# окно ящика закрыто — буфер в рюкзак (что не влезло — рядом мешком)
+	var me := Raid.current.local_player() if Raid.current else null
+	if _looting == null and me and not me.inventory.buffer.is_empty():
+		Raid.current.request_flush_buffer()
 
 
 ## Сетки перестраиваются, только когда содержимое изменилось.
@@ -306,12 +322,7 @@ func _refresh_lists(me: Player) -> void:
 			# из слота — в клетку рюкзака
 			_bp_grid.slot_dropped.connect(func(slot: String, x: int, y: int, r: bool) -> void: Raid.current.request_unequip(slot, x, y, r))
 			for g in grids:
-				var dst := g.role
-				g.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
-					if src.role == "loot" and _looting:
-						Raid.current.request_take_to(_looting, idx, x, y, r, dst)
-					elif src.role in ["backpack", "pocket"]:
-						Raid.current.request_grid_move(src.role, idx, dst, x, y, r))
+				_wire_grid(g)
 			_bp_grid.activated.connect(func(idx: int) -> void: _use_item(me, idx))
 			_bp_grid.quick_move.connect(func(idx: int) -> void:
 				if _looting:
@@ -345,11 +356,84 @@ func _refresh_lists(me: Player) -> void:
 					names.append(String(p[0]))
 					acts.append(func() -> void: Raid.current.request_strip("loot", idx, part, c))
 				_popup(at, names, acts))
-			# из рюкзака — в контейнер (спрятать, оставить напарнику)
+			# из рюкзака и буфера — в контейнер (спрятать, оставить напарнику)
 			lg.dropped.connect(func(src: GridView, idx: int, _x: int, _y: int, _r: bool) -> void:
-				if src.role == "backpack":
-					Raid.current.request_put(c, idx))
+				if src.role in ["backpack", "buffer"]:
+					Raid.current.request_put(c, idx, src.role))
 			_take_all.disabled = _looting.items.is_empty()
+		_refresh_buffer(me)
+
+
+## Буфер 3×3 посередине: переложить сюда из ящика и рюкзака, разрядить магазин (патроны падают
+## сюда), патроны отсюда — на магазин. Закрыл окно ящика — всё уходит в рюкзак.
+func _refresh_buffer(me: Player) -> void:
+	var sig := str(me.inventory.buffer)
+	if sig == _buf_sig:
+		return
+	_buf_sig = sig
+	_clear(_buf_list)
+	var g := GridView.new(Balance.BUFFER_GRID, "buffer")
+	g.set_items(me.inventory.buffer)
+	_buf_list.add_child(g)
+	var hint := _row_label("Сюда — из ящика и рюкзака. Разрядить магазин: ПКМ. Патроны на магазин — снарядить. Закрыл ящик — всё в рюкзак.", Color(0.6, 0.62, 0.6))
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.custom_minimum_size.x = float(Balance.BUFFER_GRID.x) * GridView.CELL
+	_buf_list.add_child(hint)
+	_wire_grid(g)
+	g.activated.connect(func(idx: int) -> void: Raid.current.request_grid_move("buffer", idx, "backpack", -1, -1, false))
+	g.quick_move.connect(func(idx: int) -> void: Raid.current.request_grid_move("buffer", idx, "backpack", -1, -1, false))
+	g.context.connect(func(idx: int, at: Vector2) -> void: _buffer_menu(me, idx, at))
+
+
+## Сетка рюкзака / кармана / буфера: принять из ящика и из соседних сеток; патроны на магазин —
+## снарядить.
+func _wire_grid(g: GridView) -> void:
+	var dst := g.role
+	g.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
+		if src.role == "loot" and _looting:
+			Raid.current.request_take_to(_looting, idx, x, y, r, dst)
+		elif src.role in ["backpack", "pocket", "buffer"]:
+			Raid.current.request_grid_move(src.role, idx, dst, x, y, r))
+	g.dropped_on.connect(func(src: GridView, si: int, di: int) -> void:
+		if src.role in ["backpack", "pocket", "buffer"]:
+			Raid.current.request_fill(src.role, si, dst, di))
+
+
+## Куда высыпать патроны при разрядке: открыт буфер — туда, иначе в ту же сетку.
+func _unload_into(role: String) -> String:
+	return "buffer" if _looting else role
+
+
+func _buffer_menu(me: Player, idx: int, at: Vector2) -> void:
+	if idx >= me.inventory.buffer.size():
+		return
+	var it: Dictionary = me.inventory.buffer[idx]
+	var e := it.duplicate(true)
+	var names: Array = ["Описание", "В рюкзак"]
+	var acts: Array = [func() -> void: ItemInfo.open(self, e), func() -> void: Raid.current.request_grid_move("buffer", idx, "backpack", -1, -1, false)]
+	if it.has("rounds"):
+		names.append("Проверить патроны")
+		acts.append(func() -> void: _check_mag(it))
+		names.append("Разрядить магазин")
+		acts.append(func() -> void: Raid.current.request_unload("buffer", idx, "buffer"))
+	if it.has("rounds") or not WeaponDb.ammo(String(it.id)).is_empty():
+		names.append("Снарядить магазины")
+		acts.append(func() -> void: Raid.current.request_load_mags())
+	if _looting:
+		names.append("Положить в «%s»" % _looting.display_name)
+		var c := _looting
+		acts.append(func() -> void: Raid.current.request_put(c, idx, "buffer"))
+	names.append("Выбросить")
+	acts.append(func() -> void: Raid.current.request_drop_entry("buffer", idx))
+	_popup(at, names, acts)
+
+
+## Проверить магазин в сетке: у пистолетных и болтовочных — точно, у остальных — словами.
+func _check_mag(it: Dictionary) -> void:
+	var cap := int(WeaponDb.magazine(String(it.id)).get("capacity", 0))
+	var est := Gear.ammo_estimate(int(it.get("rounds", 0)), cap, Gear.mag_exact(String(it.id)))
+	Raid.current.notify("%s: %s" % [ItemDb.item_name(String(it.id)), est])
 
 
 func _take_one(c: LootContainer, idx: int) -> void:
@@ -387,6 +471,12 @@ func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
 		var part := String(p[1])
 		names.append(String(p[0]))
 		acts.append(func() -> void: Raid.current.request_strip("backpack", idx, part))
+	if it.has("rounds"):
+		names.append("Проверить патроны")
+		acts.append(func() -> void: _check_mag(it))
+		names.append("Разрядить магазин" + (" в буфер" if _looting else ""))
+		var into := _unload_into("backpack")
+		acts.append(func() -> void: Raid.current.request_unload("backpack", idx, into))
 	if it.has("rounds") or not WeaponDb.ammo(id).is_empty():
 		names.append("Снарядить магазины")
 		acts.append(func() -> void: Raid.current.request_load_mags())
@@ -394,6 +484,8 @@ func _backpack_menu(me: Player, idx: int, at: Vector2) -> void:
 		names.append("Положить в «%s»" % _looting.display_name)
 		var c := _looting
 		acts.append(func() -> void: Raid.current.request_put(c, idx))
+		names.append("В буфер")
+		acts.append(func() -> void: Raid.current.request_grid_move("backpack", idx, "buffer", -1, -1, false))
 	names.append("Выбросить")
 	acts.append(func() -> void: Raid.current.request_drop_entry("backpack", idx))
 	_popup(at, names, acts)

@@ -12,6 +12,8 @@ signal slot_dropped(slot: String, x: int, y: int, r: bool)
 signal activated(idx: int)
 signal context(idx: int, screen_pos: Vector2)
 signal quick_move(idx: int)
+## Патроны бросили на магазин в этой сетке — снарядить его (решает окно).
+signal dropped_on(src: GridView, src_idx: int, dst_idx: int)
 
 const CELL := 46.0
 const CAT_COLOR := {
@@ -237,10 +239,10 @@ func _can_drop_data(at: Vector2, data: Variant) -> bool:
 		var skip: int = int(d.idx) if d.get("view") == self else -1
 		var occ := ItemDb.occupancy(items, grid, skip)
 		_hover_ok = ItemDb.fits_at(occ, grid, c.x, c.y, s)
-		# на такую же неполную стопку — тоже можно
+		# на такую же неполную стопку — тоже можно; патроны — на магазин (снарядить)
 		if not _hover_ok:
 			var j := index_at(at)
-			_hover_ok = j >= 0 and j != skip and String(items[j].id) == String(d.id)
+			_hover_ok = j >= 0 and j != skip and (String(items[j].id) == String(d.id) or _ammo_on_mag(d, j))
 	queue_redraw()
 	return true
 
@@ -254,10 +256,18 @@ func _drop_data(at: Vector2, data: Variant) -> void:
 		c = Vector2i(int(_layout[j][0]), int(_layout[j][1]))
 	_hover = Vector2i(-1, -1)
 	queue_redraw()
+	if j >= 0 and not d.has("slot") and _ammo_on_mag(d, j) and not (d.get("view") == self and j == int(d.idx)):
+		dropped_on.emit(d.view, int(d.idx), j)
+		return
 	if d.has("slot"):
 		slot_dropped.emit(String(d.slot), c.x, c.y, drag_rot)
 	else:
 		dropped.emit(d.view, int(d.idx), c.x, c.y, drag_rot)
+
+
+## Тащат патроны, а под курсором — магазин.
+func _ammo_on_mag(d: Dictionary, j: int) -> bool:
+	return d.get("view") is GridView and not WeaponDb.ammo(String(d.id)).is_empty() and (items[j] as Dictionary).has("rounds")
 
 
 func _notification(what: int) -> void:

@@ -473,6 +473,15 @@ static func fit_part(where: String, idx: int, src: String, src_idx: int, hint: S
 	return true
 
 
+## Разрядить магазин (тайник / рюкзак / карман, запись idx): патроны — туда же. false — пуст или
+## некуда.
+static func unload_mag(name: String, idx: int) -> bool:
+	if Gear.unload_mag(list_of(name), idx, grid_of(name)) <= 0:
+		return false
+	save()
+	return true
+
+
 ## Снарядить магазины и оружие россыпью: сначала из рюкзака, потом из тайника.
 static func load_all_mags() -> int:
 	var extra: Array = []

@@ -534,7 +534,8 @@ static func max_dur(id: String) -> float:
 	return 0.0
 
 
-## Название с состоянием: «Автомат 5.45×39 · 91% · 17/30 5.45», «Магазин … · 17/30 5.45»,
+## Название с состоянием: «Автомат 5.45×39 · 91% · маг. 30», «Магазин … · на 30 патр.» — сколько
+## патронов внутри, не видно (проверить: зажать R с оружием, у магазина — «Проверить патроны»),
 ## «Плитоносец … · перед 21/72 · зад 70/72», «Шлем … · 32/50».
 static func label(entry: Dictionary) -> String:
 	return _label(entry) + ("  · из рейда" if bool(entry.get("fir", false)) else "")
@@ -547,12 +548,14 @@ static func _label(entry: Dictionary) -> String:
 		t += " · %d%%" % int(entry.get("dur", 100))
 		var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
 		if not mag.is_empty():
-			t += " · %d/%d %s" % [int(mag.get("rounds", 0)), WeaponDb.capacity(entry), String(item(String(mag.get("ammo", ""))).get("short", ""))]
+			t += " · маг. %d" % WeaponDb.capacity(entry)
 		if not (entry.get("mods", {}) as Dictionary).is_empty():
 			t += " · обвес: %d" % (entry.mods as Dictionary).size()
 		return t
 	if entry.has("rounds"):
-		return t + " · %d/%d %s" % [int(entry.rounds), int(WeaponDb.magazine(id).get("capacity", 0)), String(item(String(entry.get("ammo", ""))).get("short", ""))]
+		var cap := int(WeaponDb.magazine(id).get("capacity", 0))
+		# вместимость — в названии («… на 30»); нет — дописать
+		return t if t.contains("на %d" % cap) else t + " · на %d патр." % cap
 	if entry.has("plates"):
 		var pl: Dictionary = entry.plates
 		for s in ["front", "back"]:

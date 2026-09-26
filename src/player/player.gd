@@ -65,6 +65,12 @@ var _aim_t: float = 0.0
 var grenades: int = Balance.GRENADES_START
 var fire_timer: float = 0.0
 var reload_timer: float = 0.0
+## Сколько держат R (≥ 0 — держат): коротко — перезарядка, дольше Balance.AMMO_CHECK.hold_sec —
+## проверка патронов в магазине.
+var _reload_hold: float = -1.0
+## Итог последней проверки («почти полный», «7 из 17») и сколько ещё его показывать, с.
+var ammo_check_text: String = ""
+var ammo_check_t: float = 0.0
 var _step_timer: float = 0.0
 ## Текущий подброс ствола от отдачи, рад — гаснет к нулю.
 var _recoil: float = 0.0
@@ -752,7 +758,18 @@ func _combat(delta: float) -> void:
 		if reload_timer <= 0.0:
 			_finish_reload(spec)
 		return
+	ammo_check_t = maxf(0.0, ammo_check_t - delta)
+	# R: коротко — перезарядка (или устранить задержку), держать — проверить патроны
 	if Input.is_action_just_pressed("reload"):
+		_reload_hold = 0.0
+	if _reload_hold >= 0.0:
+		if Input.is_action_pressed("reload"):
+			_reload_hold += delta
+			if _reload_hold >= float(Balance.AMMO_CHECK.hold_sec):
+				_reload_hold = -1.0
+				_check_ammo(spec)
+			return
+		_reload_hold = -1.0
 		if is_jammed():
 			_start_clear(spec)
 		elif ammo < int(spec.mag):
@@ -908,6 +925,34 @@ func allowed_weapons() -> Array:
 
 
 ## Россыпь патронов к оружию в руках в рюкзаке + патроны в снаряжённых магазинах (HUD); -1 — без счёта.
+## Проверка патронов (держать R): у пистолетов и болтовок — точно, у остальных — словами.
+func _check_ammo(spec: Dictionary) -> void:
+	ammo_check_text = Gear.ammo_estimate(ammo, int(spec.mag), Gear.exact_count(weapon_id))
+	ammo_check_t = float(Balance.AMMO_CHECK.show_sec)
+	Audio.play("pin", global_position, -12.0)
+	if Raid.current and is_local():
+		Raid.current.notify("Магазин: " + ammo_check_text)
+
+
+## Запасных магазинов к оружию в руках в рюкзаке (сколько в них патронов — не видно).
+func spare_mags() -> int:
+	var n := 0
+	for it in inventory.items:
+		if it.has("rounds") and WeaponDb.mag_fits(weapon_id, String(it.id)):
+			n += 1
+	return n
+
+
+## Россыпью в рюкзаке патронов этого калибра.
+func loose_rounds() -> int:
+	var cal := String(WeaponDb.weapon(weapon_id).get("caliber", ""))
+	var n := 0
+	for it in inventory.items:
+		if not it.has("rounds") and String(WeaponDb.ammo(String(it.id)).get("caliber", "")) == cal:
+			n += int(it.n)
+	return n
+
+
 func ammo_reserve() -> int:
 	if not loadout_mode or weapon_id == "":
 		return -1

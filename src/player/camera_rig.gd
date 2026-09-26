@@ -1012,10 +1012,12 @@ func _update_hud(pl: Player) -> void:
 		_weapon_label.text = "без оружия      гранаты × %d" % pl.grenade_count()
 		return
 	var spec := pl.spec()
-	var t := "%s   %d / %d %s" % [String(spec.name), pl.ammo, int(spec.mag), String(ItemDb.item(String(spec.ammo)).get("short", ""))]
-	var reserve := pl.ammo_reserve()
-	if reserve >= 0:
-		t += "   · %d" % reserve
+	# сколько в магазине — не видно: держать R — проверить (итог — несколько секунд)
+	var t := "%s   маг. %d %s" % [String(spec.name), int(spec.mag), String(ItemDb.item(String(spec.ammo)).get("short", ""))]
+	if pl.ammo_check_t > 0.0:
+		t += "   [%s]" % pl.ammo_check_text
+	if pl.loadout_mode:
+		t += "   · запасных маг. %d, россыпью %d" % [pl.spare_mags(), pl.loose_rounds()]
 	if (spec.sights as Array).size() > 1:
 		t += "   [%s]" % ("угловой" if String(spec.sight) == "offset" else "основной")
 	if pl.light_on:

@@ -14,7 +14,7 @@ const ROLES := ["host", "c1", "c2"]
 const RAID_PLAN := {
 	"host": {"move": 3.0, "fire": 6.0, "gen_fail": 24.0},
 	"c1": {"move": 9.0, "fire": 12.0, "door": 15.0},
-	"c2": {"move": 18.0, "fire": 21.0, "gen_fix": 27.0},
+	"c2": {"move": 18.0, "fire": 21.0, "unload": 24.0, "gen_fix": 27.0},
 }
 const RAID_CHECK_AT := 42.0
 const HIDEOUT_MOVE_AT := {"host": 5.0, "c1": 3.0, "c2": 3.0}
@@ -129,6 +129,8 @@ func _raid() -> void:
 						RaidEvents.current.trigger("generator")
 					"gen_fix":
 						await _fix_generator()
+					"unload":
+						await _unload_to_buffer()
 		if RaidEvents.current and RaidEvents.current.generator_down:
 			_saw_gen_down = true
 		await get_tree().process_frame
@@ -199,6 +201,25 @@ func _open_door() -> void:
 	Input.action_release("interact")
 	await get_tree().create_timer(1.5).timeout
 	_check("c1: дверь открылась у меня", door.is_open, _door_path)
+
+
+## c2: разрядить магазин из рюкзака в буфер (просьба хосту), потом буфер — обратно в рюкзак.
+func _unload_to_buffer() -> void:
+	var inv := Raid.current.local_player().inventory
+	var idx := -1
+	for i in range(inv.items.size()):
+		if (inv.items[i] as Dictionary).has("rounds") and int(inv.items[i].rounds) > 0:
+			idx = i
+			break
+	if idx < 0:
+		_check("c2: есть снаряжённый магазин", false, str(inv.items))
+		return
+	Raid.current.request_unload("backpack", idx, "buffer")
+	await get_tree().create_timer(1.0).timeout
+	_check("c2: разрядил магазин в буфер через хост", not inv.buffer.is_empty() and not WeaponDb.ammo(String(inv.buffer[0].id)).is_empty(), str(inv.buffer))
+	Raid.current.request_flush_buffer()
+	await get_tree().create_timer(1.0).timeout
+	_check("c2: буфер — обратно в рюкзак", inv.buffer.is_empty(), str(inv.buffer))
 
 
 ## c2 идёт к щитку генератора в мастерской и чинит (просьба хосту, как по F); ждёт ремонт.

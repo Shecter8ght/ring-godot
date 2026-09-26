@@ -305,6 +305,14 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 		var part := String(p[1])
 		menu.add_item(String(p[0]))
 		acts.append(func() -> void: Profile.strip_part(name, idx, part))
+	if list[idx].has("rounds"):
+		menu.add_item("Проверить патроны")
+		var cap := int(WeaponDb.magazine(id).get("capacity", 0))
+		acts.append(func() -> void: toast("%s: %s" % [ItemDb.item_name(id), Gear.ammo_estimate(int(entry.get("rounds", 0)), cap, Gear.mag_exact(id))]))
+		menu.add_item("Разрядить магазин")
+		acts.append(func() -> void:
+			if not Profile.unload_mag(name, idx):
+				toast("Пусто или некуда высыпать"))
 	if list[idx].has("rounds") or not WeaponDb.ammo(id).is_empty():
 		menu.add_item("Снарядить магазины")
 		acts.append(func() -> void: Profile.load_all_mags())
