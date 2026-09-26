@@ -1,0 +1,11 @@
+# Рендеры и исходная запись остаются локально; сценарий и монтаж хранятся в git.
+*.mp4
+*.jpg
+*.png
+composition/assets/
+composition/.hyperframes/
+composition/node_modules/
+composition/.cache/
+composition/.thumbnails/
+composition/.waveform-cache/
+composition/snapshots/

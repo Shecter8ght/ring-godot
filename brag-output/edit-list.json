@@ -1,0 +1,56 @@
+[
+  {
+    "name": "hook",
+    "start": 0,
+    "duration": 2.5,
+    "source_start": 23.3
+  },
+  {
+    "name": "ring",
+    "start": 2.5,
+    "duration": 5,
+    "source_start": 11.933333333333334
+  },
+  {
+    "name": "approach",
+    "start": 7.5,
+    "duration": 3,
+    "source_start": 18.133333333333333
+  },
+  {
+    "name": "combat",
+    "start": 10.5,
+    "duration": 6,
+    "source_start": 22.7
+  },
+  {
+    "name": "search",
+    "start": 16.5,
+    "duration": 2,
+    "source_start": 34.166666666666664
+  },
+  {
+    "name": "loot",
+    "start": 18.5,
+    "duration": 3,
+    "source_start": 36.266666666666666
+  },
+  {
+    "name": "run",
+    "start": 21.5,
+    "duration": 1.5,
+    "source_start": 40.46666666666667
+  },
+  {
+    "name": "evac",
+    "start": 23,
+    "duration": 6,
+    "source_start": 41.96666666666667
+  },
+  {
+    "name": "result",
+    "start": 29,
+    "duration": 2.5,
+    "source_start": 49.0
+  }
+]

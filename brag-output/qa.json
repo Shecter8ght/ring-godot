@@ -1,0 +1,17 @@
+{
+  "duration_seconds": 36,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "video_frames": 1080,
+  "video_codec": "H.264",
+  "audio_codec": "AAC",
+  "bytes": 17842298,
+  "sha256": "026FA23331075FD9711178CF77866A734E11220FF0A580A633271372EEF48C7F",
+  "integrated_loudness_lufs": -18.9,
+  "true_peak_dbfs": -0.9,
+  "black_gaps": 0,
+  "gameplay": "Godot Forward+ scripted recording; loot opened and taken; extracted=true",
+  "hyperframes_check": "0 errors; 7 structural recommendations; contrast 30/30",
+  "review": "All 36 one-second encoded samples inspected, plus full-resolution title frames"
+}
