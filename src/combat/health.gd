@@ -33,6 +33,12 @@ var damage_filter: Callable
 ## Хост: чей был последний урон (peer id стрелявшего игрока; 1 — хост или соло) — кому
 ## засчитать убийство.
 var last_attacker: int = 0
+## Хост: чем был последний урон (bullet.src: {kind: "ai"/"grenade", faction, arch, weapon, by}) и
+## куда (zone) — для хроники рейда: кто и чем убил.
+var last_src: Dictionary = {}
+var last_zone: String = ""
+## От чего умер: "damage" (добили), "bleed" (истёк кровью), "give_up" (сдался).
+var died_of: String = ""
 ## Чит «бессмертие» (хост): попадания видно и слышно, но здоровье не убывает; лежащего — поднимает.
 var invulnerable: bool = false
 
@@ -70,6 +76,9 @@ func _setup_sync() -> void:
 func take_damage(amount: float, from: Vector3, zone: String = "", at: Vector3 = Vector3.INF, bullet: Dictionary = {}) -> void:
 	if not alive:
 		return
+	last_src = bullet.get("src", {}) if bullet.get("src") is Dictionary else {}
+	last_zone = zone
+	died_of = "damage"
 	if invulnerable:
 		damaged.emit(amount, from)
 		return
@@ -135,6 +144,7 @@ func _process(delta: float) -> void:
 		return
 	bleed_t -= delta
 	if bleed_t <= 0.0:
+		died_of = "bleed"
 		_die()
 
 
@@ -156,6 +166,7 @@ func add_bleed(sec: float) -> void:
 ## Сдаться лёжа (хост): смерть сразу.
 func give_up() -> void:
 	if downed and alive:
+		died_of = "give_up"
 		_die()
 
 

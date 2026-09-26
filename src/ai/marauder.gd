@@ -768,6 +768,9 @@ func _on_damaged(amount: float, from: Vector3) -> void:
 	_last_damage = amount
 	if state == State.DEAD:
 		return
+	# хроника рейда: урон от игрока — стрелявшему
+	if Raid.current and _health.last_attacker > 0:
+		Raid.current.story_dealt(_health.last_attacker, amount)
 	_hurt_t = 2.5
 	# в жильца попал игрок — вся группа враждебна
 	if faction == "resident" and _health.last_attacker > 0:
@@ -1190,7 +1193,8 @@ func _try_grenade(delta: float) -> void:
 @rpc("authority", "call_local", "reliable")
 func _rpc_grenade(from: Vector3, v: Vector3) -> void:
 	# у всех — видно и слышно; урон — только у хоста (он и бросал)
-	Grenade.throw(get_tree().current_scene, from, v, get_rid(), multiplayer.is_server() or not Net.is_networked(), 0)
+	var g := Grenade.throw(get_tree().current_scene, from, v, get_rid(), multiplayer.is_server() or not Net.is_networked(), 0)
+	g.src = {"kind": "grenade", "by": "ai", "faction": faction, "arch": archetype, "name": String(name)}
 
 
 ## Перебежка: точка на AI_ADVANCE_STEP ближе к цели, лучше — закрытая от неё стеной; дошёл —
@@ -1727,7 +1731,7 @@ func _shoot(suppress: bool) -> void:
 		# по ИИ другой фракции — пули бьют и ИИ; урон от ИИ никому из игроков не засчитывается
 		var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER | (Hitscan.LAYER_MARAUDER if at_ai else 0)
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(_spec.range) * 1.5,
-			mask, float(_spec.damage), exclude, _rng, 0, {"pen": float(_spec.pen), "armor_dmg": float(_spec.armor_dmg)})
+			mask, float(_spec.damage), exclude, _rng, 0, {"pen": float(_spec.pen), "armor_dmg": float(_spec.armor_dmg), "src": _story_src()})
 		if i == 0 or i % 3 == 0:
 			ends.append(hit.get("position", hit.get("end", from)))
 		_near_miss(from, hit)
@@ -1753,6 +1757,11 @@ func _shot_fx(from: Vector3, ends: PackedVector3Array, sound: String, flash: flo
 @rpc("authority", "call_remote", "unreliable_ordered")
 func _rpc_shot_fx(from: Vector3, ends: PackedVector3Array, sound: String, flash: float) -> void:
 	_shot_fx(from, ends, sound, flash)
+
+
+## Чем стреляет — для хроники рейда игрока, в которого попали (Health.last_src).
+func _story_src() -> Dictionary:
+	return {"kind": "ai", "faction": faction, "arch": archetype, "weapon": String((equipment.get(_active, {}) as Dictionary).get("id", ""))}
 
 
 ## Пуля прошла рядом с игроком (не в него) — ему страшно (Player.near_miss, стресс).
@@ -1908,9 +1917,13 @@ func _on_died() -> void:
 	_set_crouch(false)
 	# падение тела слышат соседи — придут смотреть
 	NoiseBus.emit(global_position, Balance.AI_DEATH_NOISE, "death")
-	# задание «убить N» — тому, чья пуля добила
+	# задание «убить N» — тому, чья пуля добила; хронике — кого и чем
 	if Raid.current:
-		Raid.current.credit_kill(_health.last_attacker, archetype)
+		var by_nade := String(_health.last_src.get("kind", "")) == "grenade"
+		Raid.current.credit_kill(_health.last_attacker, archetype, {"faction": faction, "grenade": by_nade, "leader": loadout_id == "scav_leader"})
+		# своя граната мародёров — себя или товарища (для хроники всех игроков)
+		if by_nade and String(_health.last_src.get("by", "")) == "ai" and String(_health.last_src.get("faction", "")) == faction:
+			Raid.current.story_world("enemy_self_grenade", {"self": String(_health.last_src.get("name", "")) == String(name), "arch": archetype})
 	# хост: тело можно обыскать (содержимое — по таблице «marauder»)
 	if Raid.current:
 		var rng := RandomNumberGenerator.new()

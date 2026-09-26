@@ -140,6 +140,9 @@ func _ready() -> void:
 		if Raid.current:
 			Raid.current.mark_dead(peer_id))
 	health.damaged.connect(func(amount: float, from: Vector3) -> void:
+		# хост: кто и чем попал — в хронику того, в кого попали
+		if Raid.current and (not Net.is_networked() or multiplayer.is_server()):
+			Raid.current.story_hit(peer_id, amount, health.last_attacker, health.last_src)
 		_animation_event("hit")
 		_last_hit_from = from
 		_last_damage = amount
@@ -1061,13 +1064,15 @@ func _fire(spec: Dictionary) -> void:
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig
 	var marked := false
-	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg)}
+	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg), "src": {"kind": "player", "peer": peer_id}}
 	var ends := PackedVector3Array()
+	var hit_person := false
 	for i in range(int(spec.pellets)):
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(spec.range_m), mask, float(spec.damage), exclude, _rng, -1, bullet)
 		if i < 3:
 			ends.append(hit.get("position", hit.get("end", from)))
 		var c: Object = hit.get("collider")
+		hit_person = hit_person or c is Marauder
 		if rig and not marked:
 			if c is Target:
 				rig.show_hitmarker(hit.position.y - (c as Target).global_position.y >= (c as Target).head_height - 0.25)
@@ -1076,6 +1081,9 @@ func _fire(spec: Dictionary) -> void:
 				var killed := not ((c as Marauder).get_node("Health") as Health).alive
 				rig.show_hitmarker(killed)
 				marked = true
+	# хроника рейда: выстрел и попал ли (дробь — один выстрел)
+	if Raid.current and is_local():
+		Raid.current.analytics.on_shot(hit_person)
 	_apply_recoil(spec, braced, rig)
 	if rig:
 		rig.add_shake(float(spec.shake))
@@ -1227,7 +1235,8 @@ func _throw_grenade() -> void:
 		grenades -= 1
 	fire_timer = 0.6
 	var l := _grenade_launch()
-	Grenade.throw(get_tree().current_scene, l[0], l[1], get_rid())
+	var g := Grenade.throw(get_tree().current_scene, l[0], l[1], get_rid())
+	g.src = {"kind": "grenade", "by": "player", "peer": peer_id}
 
 
 ## Куда: по нажатым WASD, иначе — куда смотрит корпус.

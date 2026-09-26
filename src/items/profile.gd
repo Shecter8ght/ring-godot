@@ -42,6 +42,10 @@ static var quests: Dictionary = {}
 static var flags: Dictionary = {}
 ## Товары торговца, открытые сюжетом (без проверки доверия).
 static var unlocked_stock: Array = []
+## Хроника рейдов: последние рейды (новее первым) — для повторов и серий (RaidHistory); и фразы,
+## что уже звучали, — чтобы не повторяться.
+static var raid_history: Array = []
+static var story_recent: Array = []
 ## Условия следующего рейда (RaidConditions), выбранные у лестницы.
 static var next_conditions: Dictionary = {"time": "dusk", "weather": "clear", "power": "on"}
 static var _loaded: bool = false
@@ -78,6 +82,9 @@ static func ensure() -> void:
 		quests = d.get("quests", {})
 		flags = d.get("flags", {})
 		unlocked_stock = d.get("unlocked_stock", [])
+		raid_history = d.get("raid_history", [])
+		# хэши фраз: из JSON приходят дробными, а Array.has сравнивает по типу
+		story_recent = (d.get("story_recent", []) as Array).map(func(h: Variant) -> int: return int(h))
 		next_conditions = d.get("next_conditions", next_conditions)
 		for i in range(unlocked_stock.size()):
 			unlocked_stock[i] = WeaponDb.canonical(String(unlocked_stock[i]))
@@ -107,6 +114,8 @@ static func _starter() -> void:
 	quests = {}
 	flags = {}
 	unlocked_stock = []
+	raid_history = []
+	story_recent = []
 	for pair in Balance.START_STASH:
 		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), stash_grid())
 
@@ -143,7 +152,8 @@ static func save() -> void:
 	f.store_string(JSON.stringify({"name": profile_name, "money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
 		"modules": modules, "missions_active": missions_active, "missions_done": missions_done,
-		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "next_conditions": next_conditions}, "  "))
+		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "next_conditions": next_conditions,
+		"raid_history": raid_history, "story_recent": story_recent}, "  "))
 
 
 ## Тесты: свой файл и чистый старт.

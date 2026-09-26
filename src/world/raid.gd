@@ -17,6 +17,8 @@ signal kill_credited
 static var current: Raid
 
 const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
+## Приписка к точке у того, кого дотащили раненым (итог рейда, хроника).
+const CARRIED_SUFFIX := " (вынесли раненым)"
 
 ## Кто в рейде: peer_id -> имя. Заполняет хост при появлении игроков.
 var participants: Dictionary = {}
@@ -50,10 +52,21 @@ var _toast: Label
 var _toast_t: float = 0.0
 var _summary: Label
 var _summary_bg: ColorRect
+## Экран итога с хроникой: рассказ, вердикт, статистика, кто как ушёл, подсказка.
+var _story_panel: PanelContainer
+var _story_text: Label
+var _story_verdict: Label
+var _story_stats: GridContainer
+var _story_footer: Label
+var _story_box: VBoxContainer
 ## Держим F над раненым напарником — сколько секунд (поднять за REVIVE_SEC).
 var _revive_t: float = 0.0
 ## Сюжет в этом рейде (места квестов, раненый NPC) — у каждого игрока свой.
 var quest_world: QuestWorld
+## Хроника рейда своего игрока: факты (RaidAnalytics) и готовый рассказ (строится в конце).
+var analytics: RaidAnalytics
+var chronicle: RaidStory
+var _chronicle_wait: float = 0.0
 var _delta: float = 0.0
 
 
@@ -69,6 +82,9 @@ func _ready() -> void:
 	quest_world.name = "QuestWorld"
 	quest_world.raid = true
 	add_child(quest_world)
+	analytics = RaidAnalytics.new()
+	analytics.name = "Analytics"
+	add_child(analytics)
 	ui = InventoryUI.new()
 	ui.name = "InventoryUI"
 	add_child(ui)
@@ -149,6 +165,8 @@ func mark_dead(peer_id: int) -> void:
 	d[peer_id] = true
 	dead = d
 	var pl := player_of(peer_id)
+	if pl:
+		_story_death(pl)
 	if pl and not pl.inventory.items.is_empty():
 		var who := String(Net.player_names.get(peer_id, participants.get(peer_id, "Игрок")))
 		spawn_drop(pl.global_position, "Тело: " + who, pl.inventory.take_all(), LootContainer.Look.BAG)
@@ -209,7 +227,7 @@ func _extract(pl: Player, ext: ExtractionPoint) -> void:
 	# дотащил раненого до точки — уходят оба
 	var carried := player_of(drag_target_of(pl.peer_id))
 	if carried and carried.is_downed():
-		e[carried.peer_id] = ext.display_name + " (вынесли раненым)"
+		e[carried.peer_id] = ext.display_name + CARRIED_SUFFIX
 		v[carried.peer_id] = carried.inventory.value()
 	extracted = e
 	loot_value = v
@@ -916,6 +934,10 @@ func _rpc_equip(idx: int) -> void:
 
 
 func request_use_med(id: String) -> void:
+	# хроника: лечился (сколько раз — «аптечка без выходных»)
+	var me := local_player()
+	if me and me.is_alive() and me.inventory.has(id) and (me.is_downed() or me.health.hp < me.health.max_hp):
+		analytics.on_heal(id)
 	if _is_host():
 		_use_med(multiplayer.get_unique_id(), id)
 	else:
@@ -1035,29 +1057,102 @@ func _use_med(peer_id: int, id: String) -> void:
 ## toss — откуда предмет «вываливается» к месту pos (смещение; ноль — появляется на месте).
 ## Хост: мародёр убит — «убить N» засчитывается тому, чья пуля добила (задания — в его профиле,
 ## на его компьютере), ему же метка убийства.
-func credit_kill(peer_id: int, arch: String = "") -> void:
+## info — для хроники рейда: {faction, grenade}.
+func credit_kill(peer_id: int, arch: String = "", info: Dictionary = {}) -> void:
 	# убил ИИ (ЧВК, жильцы, мародёры друг друга) — никому
 	if peer_id <= 0:
 		return
 	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
-		_kill_credited(arch)
+		_kill_credited(arch, info)
 	elif peer_id in multiplayer.get_peers():
-		_rpc_kill_credit.rpc_id(peer_id, arch)
+		_rpc_kill_credit.rpc_id(peer_id, arch, info)
 
 
 @rpc("authority", "call_remote", "reliable")
-func _rpc_kill_credit(arch: String) -> void:
-	_kill_credited(arch)
+func _rpc_kill_credit(arch: String, info: Dictionary) -> void:
+	_kill_credited(arch, info)
 
 
-func _kill_credited(arch: String = "") -> void:
+func _kill_credited(arch: String = "", info: Dictionary = {}) -> void:
 	kill_credited.emit()
+	analytics.on_kill(arch, info)
 	Quests.event("kill", {"arch": arch})
 	if Profile.pending_raid:
 		Missions.on_kill()
 	var me := local_player()
 	if me and Net.is_networked() and not multiplayer.is_server():
 		me.show_kill_marker()
+
+
+# ---------------------------------------------------------------- хроника рейда: факты от хоста
+
+## Хост: по игроку peer_id попали (сколько, кто, чем) — в его хронику.
+func story_hit(peer_id: int, amount: float, attacker: int, src: Dictionary) -> void:
+	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
+		analytics.on_hit(amount, attacker, src)
+	elif peer_id in multiplayer.get_peers():
+		_rpc_story_hit.rpc_id(peer_id, amount, attacker, src)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_story_hit(amount: float, attacker: int, src: Dictionary) -> void:
+	analytics.on_hit(amount, attacker, src)
+
+
+## Хост: игрок peer_id ранил мародёра — урон в его хронику.
+func story_dealt(peer_id: int, amount: float) -> void:
+	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
+		analytics.on_dealt(amount)
+	elif peer_id in multiplayer.get_peers():
+		_rpc_story_dealt.rpc_id(peer_id, amount)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_story_dealt(amount: float) -> void:
+	analytics.on_dealt(amount)
+
+
+## Хост: то, что было у всех на виду (мародёр подорвался на своей гранате), — в хронику каждого.
+func story_world(kind: String, data: Dictionary) -> void:
+	if not _is_host():
+		return
+	analytics.on_world(kind, data)
+	if Net.is_networked():
+		for peer in participants:
+			if int(peer) != multiplayer.get_unique_id() and int(peer) in multiplayer.get_peers():
+				_rpc_story_world.rpc_id(int(peer), kind, data)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_story_world(kind: String, data: Dictionary) -> void:
+	analytics.on_world(kind, data)
+
+
+## Хост: игрок погиб — отчего (последнее попадание, кровопотеря, сдался) — в его хронику.
+func _story_death(pl: Player) -> void:
+	var h := pl.health
+	var src := h.last_src
+	var kind := String(src.get("kind", ""))
+	var cause := {"cause": "ai", "attacker": h.last_attacker, "zone": h.last_zone,
+		"arch": String(src.get("arch", "")), "faction": String(src.get("faction", "")), "weapon": String(src.get("weapon", ""))}
+	var by_player := kind == "player" or (kind == "grenade" and String(src.get("by", "")) == "player")
+	if h.died_of == "bleed" or h.died_of == "give_up":
+		cause.cause = h.died_of
+	elif kind == "grenade" and by_player and h.last_attacker == pl.peer_id:
+		cause.cause = "self_grenade"
+	elif by_player and h.last_attacker > 0 and h.last_attacker != pl.peer_id:
+		cause.cause = "friendly"
+	elif kind == "grenade":
+		cause.cause = "grenade"
+	if not Net.is_networked() or pl.peer_id == multiplayer.get_unique_id():
+		analytics.on_death(cause)
+	elif pl.peer_id in multiplayer.get_peers():
+		_rpc_story_death.rpc_id(pl.peer_id, cause)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_story_death(cause: Dictionary) -> void:
+	analytics.on_death(cause)
 
 
 func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look, toss: Vector3 = Vector3.ZERO) -> void:
@@ -1094,6 +1189,7 @@ func _process(delta: float) -> void:
 	_update_summary(me)
 	_save_profile(me)
 	_save_death(me)
+	_story_end(me)
 	_quest_hooks(me)
 	if Profile.pending_raid:
 		# рейд из убежища: закончил (ушёл или погиб) — Enter возвращает в убежище
@@ -1205,8 +1301,12 @@ func _update_prompt(me: Player) -> void:
 
 func _update_summary(me: Player) -> void:
 	var show := over or (me != null and (not me.is_alive() or is_extracted(me.peer_id)))
-	_summary.visible = show
-	_summary_bg.visible = show
+	var story := show and chronicle != null
+	_summary.visible = show and not story
+	_summary_bg.visible = show and not story
+	_story_panel.visible = story
+	if story:
+		_fit_story_panel()
 	if not show:
 		return
 	var lines: Array[String] = []
@@ -1233,7 +1333,32 @@ func _update_summary(me: Player) -> void:
 		lines.append("R — новый рейд" if _is_host() else "ждём хоста")
 	else:
 		lines.append("ждём остальных")
-	_summary.text = "\n".join(lines)
+	if story:
+		_story_footer.text = "\n".join(lines)
+	else:
+		_summary.text = "\n".join(lines)
+
+
+## Свой рейд окончен — собрать хронику, один раз (задания и профиль к этому времени уже
+## записаны). Причину смерти присылает хост; не пришла за полторы секунды — без неё.
+func _story_end(me: Player) -> void:
+	if chronicle != null or me == null:
+		return
+	if analytics.outcome == "":
+		if is_extracted(me.peer_id):
+			analytics.on_extracted(String(extracted[me.peer_id]))
+		elif not me.is_alive():
+			_chronicle_wait += _delta
+			if _chronicle_wait < 1.5:
+				return
+			analytics.on_death({})
+		else:
+			return
+	# в историю — только настоящие рейды (из убежища); песочница профиль не трогает
+	chronicle = RaidStory.make(analytics, Profile.pending_raid)
+	if Profile.pending_raid:
+		Profile.save()
+	_fill_story_panel()
 
 
 ## Эвакуировался (владелец): снаряжение, рюкзак и патроны из магазинов — обратно в профиль.
@@ -1382,6 +1507,100 @@ func _build_hud() -> void:
 	_summary.add_theme_constant_override("outline_size", 8)
 	_summary.visible = false
 	root.add_child(_summary)
+	_build_story_panel(root)
+
+
+## Экран итога рейда: «ХРОНИКА РЕЙДА» (2–5 абзацев), «ВЕРДИКТ» (одна фраза), статистика.
+func _build_story_panel(root: Control) -> void:
+	var amber := Color(1.0, 0.78, 0.4)
+	var paper := Color(0.93, 0.9, 0.84)
+	# по центру, высота — по тексту (_fit_story_panel), длинный — прокрутка
+	_story_panel = PanelContainer.new()
+	_story_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_story_panel.offset_left = -470
+	_story_panel.offset_right = 470
+	_story_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.05, 0.055, 0.06, 0.93)
+	sb.border_color = Color(amber, 0.45)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(4)
+	sb.set_content_margin_all(26)
+	_story_panel.add_theme_stylebox_override("panel", sb)
+	_story_panel.visible = false
+	root.add_child(_story_panel)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	_story_panel.add_child(scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 10)
+	scroll.add_child(box)
+	_story_box = box
+	box.add_child(_story_heading("ХРОНИКА РЕЙДА", amber))
+	_story_text = Label.new()
+	_story_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_story_text.add_theme_font_size_override("font_size", 17)
+	_story_text.add_theme_color_override("font_color", paper)
+	_story_text.add_theme_constant_override("line_spacing", 3)
+	box.add_child(_story_text)
+	var gap := Control.new()
+	gap.custom_minimum_size.y = 6
+	box.add_child(gap)
+	box.add_child(_story_heading("ВЕРДИКТ", amber))
+	_story_verdict = Label.new()
+	_story_verdict.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_story_verdict.add_theme_font_size_override("font_size", 21)
+	_story_verdict.add_theme_color_override("font_color", Color(1.0, 0.9, 0.7))
+	box.add_child(_story_verdict)
+	box.add_child(HSeparator.new())
+	_story_stats = GridContainer.new()
+	_story_stats.columns = 2
+	_story_stats.add_theme_constant_override("h_separation", 24)
+	_story_stats.add_theme_constant_override("v_separation", 3)
+	box.add_child(_story_stats)
+	box.add_child(HSeparator.new())
+	_story_footer = Label.new()
+	_story_footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_story_footer.add_theme_font_size_override("font_size", 15)
+	_story_footer.add_theme_color_override("font_color", Color(paper, 0.75))
+	box.add_child(_story_footer)
+
+
+func _story_heading(text: String, color: Color) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 15)
+	l.add_theme_color_override("font_color", color)
+	return l
+
+
+## Высота окна итога — по содержимому, не выше экрана без полей.
+func _fit_story_panel() -> void:
+	var margin := 52.0
+	var h := minf(_story_box.get_combined_minimum_size().y + margin, _story_panel.get_viewport_rect().size.y - 72.0)
+	_story_panel.offset_top = -h * 0.5
+	_story_panel.offset_bottom = h * 0.5
+
+
+## Хроника готова — заполнить экран итога.
+func _fill_story_panel() -> void:
+	_story_text.text = "\n\n".join(chronicle.paragraphs)
+	_story_verdict.text = chronicle.verdict
+	for c in _story_stats.get_children():
+		c.queue_free()
+	for row in chronicle.stats:
+		var k := Label.new()
+		k.text = String(row[0])
+		k.add_theme_font_size_override("font_size", 15)
+		k.add_theme_color_override("font_color", Color(0.7, 0.68, 0.62))
+		var v := Label.new()
+		v.text = String(row[1])
+		v.add_theme_font_size_override("font_size", 15)
+		v.add_theme_color_override("font_color", Color(0.95, 0.93, 0.88))
+		_story_stats.add_child(k)
+		_story_stats.add_child(v)
 
 
 ## Строка внизу по центру на высоте y от низа экрана.

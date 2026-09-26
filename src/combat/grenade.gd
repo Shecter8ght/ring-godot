@@ -12,6 +12,8 @@ var _bounced: float = 0.0
 var _damage: bool = true
 ## Кто бросил: -1 — игрок этого peer (убийство — ему), 0 — ИИ (никому).
 var _attacker: int = -1
+## Кто бросил — для хроники рейда (Health.last_src): {kind: "grenade", by: "player"/"ai", …}.
+var src: Dictionary = {"kind": "grenade"}
 ## Огонёк: светодиод, ореол вокруг (виден из изометрии) и красный свет — мигают всё чаще к взрыву.
 var _led: Node3D
 var _led_light: OmniLight3D
@@ -153,7 +155,7 @@ func _explode() -> void:
 			if h and _damage:
 				# подорвался на ней — насмерть; дальше — ранит (осколки, броня помогает)
 				var feet := pos.distance_to(body.global_position + Vector3.UP * 0.5)
-				h.apply_or_request_damage(dmg, pos, "blast_close" if feet < Balance.GRENADE_LETHAL_M else "blast", _attacker)
+				h.apply_or_request_damage(dmg, pos, "blast_close" if feet < Balance.GRENADE_LETHAL_M else "blast", _attacker, Vector3.INF, {"src": src})
 	for rd in get_tree().get_nodes_in_group("ragdolls"):
 		var r := rd as Ragdoll
 		var c := r.chest()

@@ -367,6 +367,27 @@ const AI_VIEW_FLASHLIGHT := 70.0
 const AI_VIEW_LASER := 35.0
 ## В ПНВ точка коллиматора и голографа в руках — во столько раз крупнее (тонкая теряется в трубке).
 const NVG_RETICLE_SCALE := 2.5
+## Хроника рейда (src/story): когда событие считается событием. Здоровье ниже доли low_hp —
+## критический момент; комплект дороже expensive_kit ₽ — дорогой, дешевле cheap_kit — дешёвый;
+## убийств от high_kills — «много»; streak_n убийств за streak_sec с — серия; weak_kills убийств
+## пистолетом — «слабым оружием»; точность — от accuracy_min_shots выстрелов (accurate / inaccurate);
+## без урона — если рейд дольше no_damage_min_sec; находка от big_find ₽; вынес от valuable_loot ₽
+## (меньше empty_handed — пустой); долгий рейд — от long_raid_sec; у выхода дольше camped_exit_sec;
+## смерть быстрая — до fast_death_sec, у выхода — ближе near_exit_m; серия рейдов — от streak_raids.
+## В рассказе events_min…events_max событий; история — history_n рейдов, recent_lines фраз не
+## повторять. Ранг класса оружия — «лучше / хуже» (нашёл получше, убил слабым). Отбор: к интересности
+## события — случайная прибавка до pick_jitter (похожие рейды звучат по-разному); событий в рассказе —
+## сколько интереснее interesting, +0…1, в пределах events_min…events_max; связка между абзацами —
+## с шансом transition_chance.
+const RAID_STORY := {
+	"low_hp": 0.25, "cheap_kit": 25000, "expensive_kit": 150000, "high_kills": 8, "streak_sec": 30.0, "streak_n": 3,
+	"weak_kills": 2, "many_switches": 4, "accuracy_min_shots": 20, "accurate": 0.55, "inaccurate": 0.2,
+	"trigger_happy": 250, "many_heals": 3, "no_damage_min_sec": 240.0, "big_find": 30000, "valuable_loot": 80000,
+	"empty_handed": 5000, "long_raid_sec": 1500.0, "camped_exit_sec": 90.0, "fast_death_sec": 90.0, "near_exit_m": 25.0,
+	"streak_raids": 3, "events_min": 3, "events_max": 6, "history_n": 10, "recent_lines": 80,
+	"pick_jitter": 0.25, "interesting": 0.6, "transition_chance": 0.6,
+	"class_rank": {"PISTOL": 1, "SMG": 2, "SHOTGUN": 2, "CARBINE": 3, "ASSAULT_RIFLE": 3, "DMR": 4, "SNIPER": 4, "SPECIAL": 4},
+}
 ## Буфер посередине окна лута (рейд), клеток: ширина × высота.
 const BUFFER_GRID := Vector2i(3, 3)
 ## Проверка патронов (держать R): сколько держать, с; сколько виден ответ, с; «на глаз» — от какой
