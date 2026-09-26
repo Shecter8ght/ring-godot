@@ -650,6 +650,17 @@ static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, n: Vector3
 
 # ---------------------------------------------------------------- материалы
 
+## ПНВ у своего игрока: точка коллиматоров и голографа — почти белая (как «NV»-режим яркости у
+## настоящих): красная в трубке по яркости не отличалась от стекла и фона. Материал общий на все
+## стволы в сцене — у чужих прицелов точку не разглядеть, это неважно.
+## Лазер в ПНВ — тоже почти белый (точка и луч в трубке ярче всего), луч ЛЦУ виден только в ПНВ.
+static func set_night_vision(on: bool) -> void:
+	_mat("reticle").albedo_color = Color(1.0, 0.92, 0.88) if on else Color(1.0, 0.1, 0.08)
+	_mat("laser_dot").albedo_color = Color(1.0, 0.95, 0.92) if on else Color(1.0, 0.22, 0.16)
+	_mat("laser_beam").albedo_color = Color(0.85, 1.0, 0.88, 0.55) if on else Color(1.0, 0.1, 0.08, 0.35)
+	LaserSight.viewer_nvg = on
+
+
 static func _mat(id: String) -> StandardMaterial3D:
 	if _mats.has(id):
 		return _mats[id]
@@ -755,6 +766,9 @@ static func _mat(id: String) -> StandardMaterial3D:
 			m.emission = Color(1.0, 0.97, 0.9)
 			m.emission_energy_multiplier = 0.4
 			m.roughness = 0.05
+		"laser_dot":
+			m.albedo_color = Color(1.0, 0.22, 0.16)
+			m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		"laser_beam":
 			m.albedo_color = Color(1.0, 0.1, 0.08, 0.35)
 			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA

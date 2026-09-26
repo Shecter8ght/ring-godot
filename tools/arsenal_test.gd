@@ -47,7 +47,7 @@ func _ready() -> void:
 
 	# CASE 4: фонарь слева и ЛЦУ справа — оба на модели одновременно
 	var lights := pl.find_children("Flashlight_side_left", "SpotLight3D", true, false)
-	var beams := pl.find_children("LaserBeam_side_right", "MeshInstance3D", true, false)
+	var beams := pl.find_children("LaserBeam_side_right", "Node3D", true, false)
 	_check("CASE 4: фонарь (слева) и ЛЦУ (справа) стоят одновременно", not lights.is_empty() and not beams.is_empty(), "фонарей %d, лучей %d" % [lights.size(), beams.size()])
 	# CASE 5: только фонарь
 	await _tac("light")

@@ -60,8 +60,8 @@ func _bake(id: String) -> void:
 	# фонарь и лазер обвесов в иконке не светят
 	for l in model.find_children("*", "Light3D", true, false):
 		(l as Light3D).visible = false
-	for b in model.find_children("LaserBeam", "MeshInstance3D", true, false):
-		(b as MeshInstance3D).visible = false
+	for b in model.find_children("LaserBeam*", "Node3D", true, false):
+		(b as Node3D).visible = false
 	await get_tree().process_frame
 	var cat := String(ItemDb.item(id).get("cat", ""))
 	var side := cat in ["weapon", "mod"]

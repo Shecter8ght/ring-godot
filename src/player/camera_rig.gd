@@ -179,12 +179,16 @@ void fragment() {
 	v += max(glow - 0.9, 0.0) * 0.25;
 	// потолок яркости — экран трубки не бьёт в глаза; пол — фосфор светится и в «чёрном»
 	v = 0.035 + 0.8 * (1.0 - exp(-v * 1.6));
+	// точечные яркие источники (точка коллиматора, ЛЦУ, лампочка) — выше потолка, почти белые:
+	// иначе сжатие ровняло их с фоном и точка прицела «становилась цветом стекла»
+	float hot = smoothstep(0.8, 0.97, lum(texture(screen_tex, SCREEN_UV).rgb));
+	v += hot * 0.45;
 	float n = hash(floor(SCREEN_UV / px / 1.5) + fract(TIME * 13.0) * 97.0) - 0.5;
 	v += n * mix(0.07, 0.025, v);
 	vec2 d = SCREEN_UV - 0.5;
 	d.x *= px.y / px.x;
 	float vig = smoothstep(0.68, 0.40, length(d));
-	COLOR = vec4(phosphor * clamp(v, 0.0, 1.0) * vig, 1.0);
+	COLOR = vec4(mix(phosphor * clamp(v, 0.0, 1.0), vec3(0.9, 1.0, 0.92), hot * 0.6) * vig, 1.0);
 }
 """
 
@@ -317,8 +321,19 @@ func _set_muffle(on: bool) -> void:
 		_muffle = null
 
 
+## Точка коллиматора / голографа в руках: в ПНВ крупнее (в трубке тонкая точка теряется).
+func _reticle_nv(on: bool) -> void:
+	if _viewmodel == null:
+		return
+	for mi in _viewmodel.find_children("*", "MeshInstance3D", true, false):
+		if mi.has_meta("reticle_dot"):
+			(mi as MeshInstance3D).scale = Vector3.ONE * (Balance.NVG_RETICLE_SCALE if on else 1.0)
+
+
 func _exit_tree() -> void:
 	_set_muffle(false)
+	# ушли со сцены в ПНВ — точка прицелов снова красная (материал общий, переживает сцену)
+	WeaponModels.set_night_vision(false)
 
 
 ## Дистанция изометрии (зум): в тесном убежище ближе, чем в рейде.
@@ -396,6 +411,8 @@ func _process(delta: float) -> void:
 		var on := pl != null and pl.is_local() and pl.nvg_on
 		if on != _nvg_fx.visible:
 			_nvg_env(on)
+			WeaponModels.set_night_vision(on)
+			_reticle_nv(on)
 		_nvg_fx.visible = on
 		_tick_nvg_ir(on)
 	var cam := get_viewport().get_camera_3d()
@@ -527,9 +544,10 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_ads_cam.add_child(_viewmodel)
 		_viewmodel_id = vm_key
+		_reticle_nv(pl.nvg_on)
 	_viewmodel.visible = true
-	for n in _viewmodel.find_children("LaserBeam*", "MeshInstance3D", true, false):
-		(n as MeshInstance3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
+	for n in _viewmodel.find_children("LaserBeam*", "Node3D", true, false):
+		(n as Node3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
 	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
 		(n as SpotLight3D).visible = Player.tac_on(pl.weapon_mods, n, "light")
 	var sh: float = _viewmodel.get_meta("sight_h", 0.08)

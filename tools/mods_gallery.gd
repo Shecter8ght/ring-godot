@@ -60,8 +60,8 @@ func _ready() -> void:
 		add_child(w)
 		for n in w.find_children("Flashlight*", "SpotLight3D", true, false):
 			(n as SpotLight3D).visible = true
-		for n in w.find_children("LaserBeam*", "MeshInstance3D", true, false):
-			(n as MeshInstance3D).visible = true
+		for n in w.find_children("LaserBeam*", "Node3D", true, false):
+			(n as Node3D).visible = true
 		# вид справа (+X), целиком
 		var len := 1.25 if weapon == "bolt" else (0.4 if weapon == "pistol" else 1.1)
 		var mid := Vector3(0, 0.03, 0.05 if weapon == "pistol" else 0.22)

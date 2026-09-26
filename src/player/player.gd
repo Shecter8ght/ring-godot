@@ -659,8 +659,8 @@ func _update_hand() -> void:
 	# (CameraRig) — там, куда смотрит ствол
 	for n in _weapon_model.find_children("Flashlight*", "SpotLight3D", true, false):
 		(n as SpotLight3D).visible = tac_on(weapon_mods, n, "light") and not (ads and is_local())
-	for n in _weapon_model.find_children("LaserBeam*", "MeshInstance3D", true, false):
-		(n as MeshInstance3D).visible = tac_on(weapon_mods, n, "laser") and not (ads and is_local())
+	for n in _weapon_model.find_children("LaserBeam*", "Node3D", true, false):
+		(n as Node3D).visible = tac_on(weapon_mods, n, "laser") and not (ads and is_local())
 	_hand.position = Basis(Vector3.UP, yaw) * Vector3(-0.17, 1.24 * h, 0.24)
 	# ствол (и фонарь на нём) — туда, куда смотрит игрок, и вверх-вниз (look_pitch синхронизируется)
 	_hand.rotation = Vector3(-_recoil - look_pitch, yaw, 0.0)

@@ -75,7 +75,7 @@ func show_weapon(weapon_id: String, mods: Dictionary) -> void:
 	var first := true
 	for mi in _model.find_children("*", "MeshInstance3D", true, false):
 		var m := mi as MeshInstance3D
-		if not m.visible or m.name == "LaserBeam":
+		if not m.visible or m.get_parent() is LaserSight:
 			continue
 		var b := _relative(m) * m.get_aabb()
 		box = b if first else box.merge(b)

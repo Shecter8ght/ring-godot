@@ -204,7 +204,7 @@ static func _red_dot(root: Node3D, m: Dictionary) -> void:
 	WeaponModels._cyl_x(root, Vector3(-0.019, cy, zc + 0.004), 0.0065, 0.008, al)
 	WeaponModels._cyl_x(root, Vector3(0.0195, cy, zc - 0.008), 0.0075, 0.01, al)
 	# точка — на передней линзе, по оси
-	WeaponModels._sphere(root, Vector3(0, cy, zc + 0.0385), 0.0007, _mat("reticle"))
+	WeaponModels._sphere(root, Vector3(0, cy, zc + 0.0385), 0.0007, _mat("reticle")).set_meta("reticle_dot", true)
 	root.set_meta("sight_h", cy)
 
 
@@ -232,7 +232,7 @@ static func _holo(root: Node3D, m: Dictionary) -> void:
 	# сетка: кольцо и точка на переднем стекле
 	var ring := WeaponModels._torus(root, Vector3(0, wy, zc + 0.0385), 0.0038, 0.0043, _mat("reticle"))
 	ring.rotation.x = PI * 0.5
-	WeaponModels._sphere(root, Vector3(0, wy, zc + 0.0385), 0.0006, _mat("reticle"))
+	WeaponModels._sphere(root, Vector3(0, wy, zc + 0.0385), 0.0006, _mat("reticle")).set_meta("reticle_dot", true)
 	root.set_meta("sight_h", wy)
 
 
@@ -249,7 +249,7 @@ static func _rmr(root: Node3D, m: Dictionary) -> void:
 	WeaponModels._cbox(root, Vector3(0, p.y + 0.006, p.z - 0.011), Vector3(0.0235, 0.004, 0.01), al, 0.001)
 	var lens := WeaponModels._box(root, Vector3(0, wy, p.z + 0.012), Vector3(0.018, 0.013, 0.001), _mat("glass"))
 	lens.rotation.x = deg_to_rad(-12.0)
-	WeaponModels._sphere(root, Vector3(0, wy, p.z + 0.0115), 0.0005, _mat("reticle"))
+	WeaponModels._sphere(root, Vector3(0, wy, p.z + 0.0115), 0.0005, _mat("reticle")).set_meta("reticle_dot", true)
 	root.set_meta("sight_h", wy)
 
 
@@ -461,20 +461,13 @@ static func _laser(root: Node3D, m: Dictionary) -> void:
 	_beam_node(t, m, Vector3(0, 0.003, 0.0245))
 
 
+## ЛЦУ: узел LaserSight у излучателя, по оси +Z (луч до преграды, точка на ней). Включает его
+## состояние обвеса (Player.tac_on), по умолчанию выключен.
 static func _beam_node(t: Node3D, m: Dictionary, at: Vector3) -> void:
-	var beam := MeshInstance3D.new()
+	var beam := LaserSight.new()
 	beam.name = "LaserBeam_" + String(m.get("mount", ""))
 	beam.set_meta("mount", String(m.get("mount", "")))
-	var cm := CylinderMesh.new()
-	cm.top_radius = 0.0012
-	cm.bottom_radius = 0.0012
-	cm.height = 40.0
-	cm.radial_segments = 6
-	beam.mesh = cm
-	beam.material_override = _mat("laser_beam")
-	beam.rotation.x = PI * 0.5
-	beam.position = at + Vector3(0, 0, 20.0)
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	beam.position = at
 	beam.visible = false
 	t.add_child(beam)
 
