@@ -899,8 +899,11 @@ func _build_hud() -> void:
 	_weapon_label.anchor_right = 1.0
 	_weapon_label.anchor_top = 1.0
 	_weapon_label.anchor_bottom = 1.0
-	_weapon_label.offset_left = -620.0
+	_weapon_label.offset_left = -900.0
 	_weapon_label.offset_right = -28.0
+	# длинная строка растёт влево — не за край экрана
+	_weapon_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_weapon_label.clip_text = true
 	_weapon_label.offset_top = -64.0
 	_weapon_label.offset_bottom = -24.0
 	_weapon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -1019,6 +1022,9 @@ func _update_hud(pl: Player) -> void:
 		_weapon_label.text = "без оружия      гранаты × %d" % pl.grenade_count()
 		return
 	var spec := pl.spec()
+	if spec.is_empty():
+		_weapon_label.text = ""
+		return
 	# сколько в магазине — не видно: держать R — проверить (итог — несколько секунд)
 	var t := "%s   маг. %d %s" % [String(spec.name), int(spec.mag), String(ItemDb.item(String(spec.ammo)).get("short", ""))]
 	if pl.ammo_check_t > 0.0:

@@ -4,7 +4,10 @@ extends Node3D
 ## тайник со снаряжением, верстак, торговец, выход в рейд. Геометрия — CSG-узлы сцены (двигать
 ## и менять руками), материал — по meta "mat" (id из SectorMaterials, серые "gb_*" тоже можно)
 ## или "color" (плоский цвет); meta "cut" = false — не растворять у камеры (пол).
-## Игрок ходит тем же персонажем, но не стреляет. Всё про деньги и вещи — Profile (у каждого свой).
+## Игрок ходит тем же персонажем и с оружием обращается так же, как в рейде: стрельба, прицел, фонарь
+## и ЛЦУ, перезарядка из рюкзака, проверка магазина, гранаты — со своим снаряжением из профиля
+## (Inventory игрока — копия профиля: что изменилось в руках — сразу в профиль, что поменяли в окнах
+## тайника — сразу в руки). Здесь не ранят. Всё про деньги и вещи — Profile (у каждого свой).
 ## Кооп: собираемся здесь. Каждый peer говорит, что он в убежище (Net.enter_scene); у всех, кто
 ## здесь, — одноимённые узлы игроков (Player_<peer>): свой ведёт владелец, чужие приходят
 ## синхронизатором (только тем, кто в убежище). Рейд всем начинает хост (окно выхода).
@@ -44,6 +47,10 @@ var _tipsy_fx: ColorRect
 var _ui: HideoutUI
 var _prompt: Label
 var _money: Label
+var _toast: Label
+var _toast_t: float = 0.0
+## Каким профиль был, когда его в последний раз переписали в руки игроку (или из рук в профиль).
+var _inv_sig: String = ""
 
 
 func _ready() -> void:
@@ -60,15 +67,15 @@ func _ready() -> void:
 	_player = PLAYER_SCENE.instantiate() as Player
 	_player.name = "Player_%d" % me
 	_player.peer_id = me
-	_player.combat_enabled = false
+	# оружие — как в рейде, со снаряжением профиля
+	_player.loadout_mode = true
 	if Net.is_networked():
 		_player.set_multiplayer_authority(me)
 	add_child(_player)
 	_player.global_position = _spawn.global_position
-	# в руках — основное из снаряжения (как выглядит, с обвесом)
-	var we := Profile.equipped_entry()
-	_player.weapon_id = String(we.get("id", ""))
-	_player.weapon_mods = we.get("mods", {})
+	# в убежище не ранят (граната в тесноте, выстрел в напарника)
+	_player.health.invulnerable = true
+	_from_profile()
 	_camera_rig.set_target(_player)
 	_camera_rig.rotation.y = _spawn.rotation.y
 	_camera_rig.set_distance(Balance.HIDEOUT_CAMERA_DISTANCE)
@@ -150,6 +157,7 @@ func _sync_others() -> void:
 		p.combat_enabled = false
 		p.set_multiplayer_authority(id)
 		add_child(p)
+		p.health.invulnerable = true
 		p.global_position = _spawn.global_position + Vector3(cos(id * 1.7), 0.0, sin(id * 1.7)) * 1.4
 		# над головой — ник
 		var tag := Label3D.new()
@@ -193,7 +201,68 @@ func _apply_materials(n: Node) -> void:
 
 
 func open_station(st: HideoutStation) -> void:
+	# в окне видно то, что в руках сейчас (патроны, фонари)
+	_player.flush_weapon_state()
 	_ui.open(st.kind)
+
+
+# ---------------------------------------------------------------- оружие в руках (как в рейде)
+
+## Сообщение внизу экрана (как у рейда).
+func notify(text: String) -> void:
+	_toast.text = text
+	_toast_t = 2.5
+
+
+func ui_open() -> bool:
+	return _ui != null and _ui.is_open()
+
+
+## Перезарядка: смена магазина из рюкзака или досыпка россыпью (Inventory.reload_slot); выпавший
+## магазин, которому нет места в рюкзаке, — в тайник.
+func request_reload(slot: String, state: Dictionary) -> void:
+	var r := _player.inventory.reload_slot(slot, state)
+	var out: Dictionary = r[1]
+	if not out.is_empty():
+		ItemDb.add_to(Profile.stash, out, Profile.stash_grid())
+	_to_profile()
+
+
+## Патроны в магазине, износ, прицел, фонари — в профиль.
+func request_weapon_state(slot: String, state: Dictionary) -> void:
+	_player.inventory.apply_weapon_state(slot, state)
+	_to_profile()
+
+
+## Граната, ракета, химсвет — из рюкзака.
+func request_consume(id: String, n: int) -> void:
+	_player.inventory.remove(id, n)
+	_to_profile()
+
+
+func _profile_sig() -> String:
+	return str(Profile.equipment) + str(Profile.backpack) + str(Profile.pocket)
+
+
+## Профиль — в руки: снаряжение, рюкзак, карман.
+func _from_profile() -> void:
+	var inv := _player.inventory
+	inv.equipment = Profile.equipment.duplicate(true)
+	inv.items = Profile.backpack.duplicate(true)
+	inv.pocket_grid = Profile.pocket_grid()
+	inv.pocket = Profile.pocket.duplicate(true)
+	inv.loadout_ready = true
+	_inv_sig = _profile_sig()
+
+
+## Из рук — в профиль (и сохранить).
+func _to_profile() -> void:
+	var inv := _player.inventory
+	Profile.equipment = inv.equipment.duplicate(true)
+	Profile.backpack = inv.items.duplicate(true)
+	Profile.pocket = inv.pocket.duplicate(true)
+	Profile.save()
+	_inv_sig = _profile_sig()
 
 
 func _process(delta: float) -> void:
@@ -204,11 +273,17 @@ func _process(delta: float) -> void:
 		_tipsy_fx.visible = _tipsy > 0.01
 		(_tipsy_fx.material as ShaderMaterial).set_shader_parameter("k", minf(_tipsy / 3.0, 1.2))
 	_money.text = "%s ₽" % InventoryUI.money(Profile.money)
+	_toast_t -= delta
+	_toast.visible = _toast_t > 0.0
+	# в окне тайника поменяли снаряжение, рюкзак — в руки
+	if _profile_sig() != _inv_sig:
+		_from_profile()
 	_prompt.visible = false
 	if _ui.is_open():
 		return
 	# Tab — рюкзак и снаряжение (окно тайника) где угодно в убежище
 	if Input.is_action_just_pressed("inventory") and not _player.ui_blocked():
+		_player.flush_weapon_state()
 		_ui.open(HideoutStation.Kind.STASH)
 		return
 	var best: Interactable = null
@@ -255,6 +330,22 @@ func _build_hud() -> void:
 	_money.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	_money.add_theme_constant_override("outline_size", 6)
 	layer.add_child(_money)
+	_toast = Label.new()
+	_toast.anchor_left = 0.5
+	_toast.anchor_right = 0.5
+	_toast.anchor_top = 1.0
+	_toast.anchor_bottom = 1.0
+	_toast.offset_left = -500
+	_toast.offset_right = 500
+	_toast.offset_top = -160
+	_toast.offset_bottom = -126
+	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast.add_theme_font_size_override("font_size", 20)
+	_toast.add_theme_color_override("font_color", Color(1.0, 0.75, 0.55))
+	_toast.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_toast.add_theme_constant_override("outline_size", 6)
+	_toast.visible = false
+	layer.add_child(_toast)
 	var hint := Label.new()
 	hint.text = "УБЕЖИЩЕ"
 	hint.offset_left = 24

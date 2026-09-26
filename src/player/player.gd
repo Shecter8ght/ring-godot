@@ -31,7 +31,7 @@ var cursor_body: Vector3 = Vector3.ZERO
 ## гранаты — из рюкзака. false — «песочница» (тесты, запуск уровня напрямую): стволы из
 ## WeaponDb.sandbox(), патроны без счёта.
 var loadout_mode: bool = false
-## В убежище не стреляют.
+## false — оружие в руках не работает (чужие игроки у себя; раньше — и убежище).
 var combat_enabled: bool = true
 ## Оружие в руках: id предмета ("" — руки пусты) и откуда оно (слот снаряжения / ключ песочницы).
 var weapon_id: String = ""
@@ -441,8 +441,30 @@ func _ws_state(key: String) -> Dictionary:
 
 func _send_ws(key: String) -> void:
 	_ws_dirty = false
-	if loadout_mode and Raid.current and _ws.has(key):
-		Raid.current.request_weapon_state(key, _ws_state(key))
+	var h := items_host()
+	if loadout_mode and h and _ws.has(key):
+		h.call("request_weapon_state", key, _ws_state(key))
+
+
+## Состояние оружия в руках — сразу тому, кто ведёт вещи (убежище: перед окном тайника).
+func flush_weapon_state() -> void:
+	if weapon_slot != "" and _ws.has(weapon_slot):
+		_send_ws(weapon_slot)
+
+
+## Кто ведёт вещи игрока: рейд (хост) или убежище (профиль) — одни и те же просьбы: перезарядка,
+## состояние оружия, расход, сообщение (notify, request_reload, request_weapon_state, request_consume).
+func items_host() -> Node:
+	if Raid.current:
+		return Raid.current
+	return get_tree().get_first_node_in_group("hideout_level") if is_inside_tree() else null
+
+
+## Сообщение внизу экрана — в рейде и в убежище.
+func _say(text: String) -> void:
+	var h := items_host()
+	if h and h.has_method("notify"):
+		h.call("notify", text)
 
 
 ## Снаряжение с состоянием оружия владельца — для профиля при эвакуации.
@@ -734,8 +756,8 @@ func _combat(delta: float) -> void:
 	if Input.is_action_just_pressed("grenade"):
 		if grenade_count() > 0:
 			_nade_aiming = true
-		elif loadout_mode and Raid.current:
-			Raid.current.notify("Гранат нет")
+		elif loadout_mode:
+			_say("Гранат нет")
 	if _nade_aiming:
 		if Input.is_action_pressed("grenade"):
 			_show_nade_aim()
@@ -803,8 +825,7 @@ func _start_reload(spec: Dictionary) -> void:
 		var e := weapon_entry()
 		var kind := Gear.reload_kind(e, inventory.items)
 		if kind == "":
-			if Raid.current:
-				Raid.current.notify("Нечем зарядить: " + WeaponDb.caliber_name(String(spec.caliber)))
+			_say("Нечем зарядить: " + WeaponDb.caliber_name(String(spec.caliber)))
 			return
 		_reload_kind = kind
 		_reload_rev = int(e.get("rev", 0))
@@ -817,8 +838,10 @@ func _start_reload(spec: Dictionary) -> void:
 			st["fumble"] = true
 			_fumble_cd = float(sc.fumble_cd)
 			t += float(sc.fumble_sec)
-			Raid.current.notify("Магазин выскользнул из рук — лежит под ногами")
-		Raid.current.request_reload(weapon_slot, st)
+			_say("Магазин выскользнул из рук — лежит под ногами")
+		var h := items_host()
+		if h:
+			h.call("request_reload", weapon_slot, st)
 		_ws_dirty = false
 		# досыпать россыпью в отстёгиваемый магазин — дольше, чем сменить
 		if kind == "topup" and not WeaponDb.weapon(weapon_id).has("internal_mag"):
@@ -874,8 +897,7 @@ func _toggle_tac(kind: String) -> void:
 			mounts.append(m)
 			any_on = any_on or bool((mods[m] as Dictionary).get(kind, false))
 	if mounts.is_empty():
-		if Raid.current:
-			Raid.current.notify("Нет фонаря на оружии" if kind == "light" else "Нет ЛЦУ на оружии")
+		_say("Нет фонаря на оружии" if kind == "light" else "Нет ЛЦУ на оружии")
 		return
 	var st: Dictionary = _ws[weapon_slot]
 	for m in mounts:
@@ -883,8 +905,7 @@ func _toggle_tac(kind: String) -> void:
 		t[kind] = not any_on
 		st.tac[m] = t
 	Audio.play("pin", global_position, -14.0)
-	if Raid.current:
-		Raid.current.notify(("Фонарь: " if kind == "light" else "ЛЦУ: ") + ("выкл" if any_on else "вкл"))
+	_say(("Фонарь: " if kind == "light" else "ЛЦУ: ") + ("выкл" if any_on else "вкл"))
 	_send_ws(weapon_slot)
 
 
@@ -904,8 +925,7 @@ func _toggle_sight() -> void:
 	_ws[weapon_slot].sight = nxt
 	var mount := "optic_" + nxt
 	var name := ItemDb.item_name(WeaponDb.mod_id((e.mods as Dictionary).get(mount, ""))) if (e.mods as Dictionary).has(mount) else "штатный"
-	if Raid.current:
-		Raid.current.notify(("Основной: " if nxt == "primary" else "Угловой: ") + name)
+	_say(("Основной: " if nxt == "primary" else "Угловой: ") + name)
 	Audio.play("pin", global_position, -16.0)
 	_send_ws(weapon_slot)
 
@@ -936,8 +956,8 @@ func _check_ammo(spec: Dictionary) -> void:
 	ammo_check_text = Gear.ammo_estimate(ammo, int(spec.mag), Gear.exact_count(weapon_id))
 	ammo_check_t = float(Balance.AMMO_CHECK.show_sec)
 	Audio.play("pin", global_position, -12.0)
-	if Raid.current and is_local():
-		Raid.current.notify("Магазин: " + ammo_check_text)
+	if is_local():
+		_say("Магазин: " + ammo_check_text)
 
 
 ## Запасных магазинов к оружию в руках в рюкзаке (сколько в них патронов — не видно).
@@ -976,6 +996,11 @@ func ammo_reserve() -> int:
 func _loadout_tick() -> void:
 	if not inventory.loadout_ready:
 		return
+	# в слоте теперь другое оружие (сменили в окне) — взять его в руки
+	if weapon_slot != "" and weapon_id != String(_base_entry(weapon_slot).get("id", "")) and not _base_entry(weapon_slot).is_empty():
+		var k := weapon_slot
+		weapon_slot = ""
+		_switch(k, false)
 	var keys := weapon_keys()
 	if is_downed() or is_burdened():
 		# раненым / таща раненого — только пистолет (выбирает _combat)
@@ -1018,8 +1043,7 @@ func _fire(spec: Dictionary) -> void:
 	# задержка — редко; на изношенном чаще
 	if _rng.randf() < float(spec.jam):
 		st.jam = true
-		if Raid.current:
-			Raid.current.notify("Задержка! R — устранить")
+		_say("Задержка! R — устранить")
 	var from: Vector3
 	var dir: Vector3
 	if ads:
@@ -1148,10 +1172,9 @@ func _tick_nvg(delta: float) -> void:
 	var has := bool(ItemDb.equip(eyes_item()).get("nvg", false))
 	if Input.is_action_just_pressed("nvg") and not PauseMenu.shown:
 		if not has:
-			if Raid.current:
-				Raid.current.notify("ПНВ нет — надень его в слот «Глаза»")
+			_say("ПНВ нет — надень его в слот «Глаза»")
 		elif nvg_charge <= 0.0:
-			Raid.current.notify("ПНВ: батарея села")
+			_say("ПНВ: батарея села")
 		else:
 			nvg_on = not nvg_on
 			Audio.play("pin", global_position, -14.0)
@@ -1161,18 +1184,16 @@ func _tick_nvg(delta: float) -> void:
 		nvg_charge -= delta
 		if nvg_charge <= 0.0:
 			nvg_on = false
-			if Raid.current:
-				Raid.current.notify("ПНВ: батарея села")
+			_say("ПНВ: батарея села")
 
 
 ## Ракета / химсвет: из рюкзака (в песочнице — без счёта); бросок видят все peer.
 func _throw_light(k: String) -> void:
 	if loadout_mode:
 		if inventory.count(k) <= 0:
-			if Raid.current:
-				Raid.current.notify("Нет: " + ItemDb.item_name(k))
+			_say("Нет: " + ItemDb.item_name(k))
 			return
-		Raid.current.request_consume(k, 1)
+		items_host().call("request_consume", k, 1)
 	fire_timer = 0.5
 	var from := eye_position() + Vector3.UP * 0.1
 	var v: Vector3
@@ -1233,7 +1254,7 @@ func _cancel_nade_aim() -> void:
 func _throw_grenade() -> void:
 	_animation_event("grenade_throw")
 	if loadout_mode:
-		Raid.current.request_consume("grenade", 1)
+		items_host().call("request_consume", "grenade", 1)
 	else:
 		grenades -= 1
 	fire_timer = 0.6
@@ -1273,8 +1294,7 @@ func _try_vault() -> void:
 		_vault_stumble = true
 		_vault_sec *= 1.6
 		_stumble_cd = float(sc.stumble_cd)
-		if Raid.current:
-			Raid.current.notify("Запнулся — руки не слушаются")
+		_say("Запнулся — руки не слушаются")
 	stamina = maxf(0.0, stamina - float(v.stamina) * carry_stamina_k())
 	_rest_t = Balance.STAMINA_REGEN_DELAY
 	_cancel_nade_aim()
