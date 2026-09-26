@@ -1,8 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=15 format=3 uid="uid://862q4mcfmnuv"]
 
-[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
-[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="2_rig"]
-[ext_resource type="Script" path="res://src/world/sector_level.gd" id="3_level"]
+[ext_resource type="PackedScene" uid="uid://4n4o4n5y1vtv" path="res://scenes/player/camera_rig.tscn" id="2_rig"]
+[ext_resource type="Script" uid="uid://bui2urvf4v4xu" path="res://src/world/sector_level.gd" id="3_level"]
 [ext_resource type="PackedScene" path="res://scenes/world/blockout_building.tscn" id="4_bld"]
 [ext_resource type="PackedScene" path="res://scenes/world/blockout_opening.tscn" id="5_open"]
 [ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="6_spawn"]
@@ -11,10 +10,10 @@
 [ext_resource type="PackedScene" path="res://scenes/world/power_switch.tscn" id="9_sw"]
 [ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="10_loot"]
 [ext_resource type="PackedScene" path="res://scenes/world/escalator.tscn" id="11_esc"]
+[ext_resource type="PackedScene" uid="uid://umahihmbl82e" path="res://assets/models/ring_vehicles/RING_bus_damaged_Door_1_A_Hinge.gltf" id="12_mfiio"]
 
 [sub_resource type="PhysicalSkyMaterial" id="sky_mat"]
 rayleigh_coefficient = 2.2
-mie_coefficient = 0.005
 mie_eccentricity = 0.86
 mie_color = Color(0.93, 0.76, 0.58, 1)
 turbidity = 6.0
@@ -29,24 +28,20 @@ sky_material = SubResource("sky_mat")
 background_mode = 2
 sky = SubResource("sky")
 ambient_light_source = 3
-ambient_light_sky_contribution = 1.0
 ambient_light_energy = 0.8
 reflected_light_source = 2
 tonemap_mode = 4
 tonemap_exposure = 1.15
 ssao_enabled = true
 ssao_radius = 1.4
-ssao_intensity = 2.0
 ssil_enabled = true
 sdfgi_enabled = true
 sdfgi_use_occlusion = true
 sdfgi_cascades = 6
-sdfgi_min_cell_size = 0.2
 sdfgi_energy = 1.3
 glow_enabled = true
 glow_intensity = 0.55
 glow_bloom = 0.12
-glow_hdr_threshold = 1.0
 fog_enabled = true
 fog_light_color = Color(0.78, 0.62, 0.5, 1)
 fog_light_energy = 0.7
@@ -72,15 +67,14 @@ sector_path = "res://data/sectors/f1_ring.json"
 environment = SubResource("env")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.3420, 0.1954, -0.9192, 0.0000, 0.9781, 0.2079, 0.9397, 0.0711, -0.3345, 0, 30, 0)
+transform = Transform3D(-0.342, 0.1954, -0.9192, 0, 0.9781, 0.2079, 0.9397, 0.0711, -0.3345, 0, 30, 0)
 light_color = Color(1, 0.74, 0.5, 1)
 light_energy = 2.6
-light_angular_distance = 0.9
 light_volumetric_fog_energy = 1.6
+light_angular_distance = 0.9
 shadow_enabled = true
 shadow_blur = 1.1
 directional_shadow_split_1 = 0.08
-directional_shadow_split_2 = 0.2
 directional_shadow_split_3 = 0.45
 directional_shadow_max_distance = 220.0
 
@@ -89,12 +83,16 @@ directional_shadow_max_distance = 220.0
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="Root" type="Control" parent="HUD"]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
 [node name="Status" type="Label" parent="HUD/Root"]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 20.0
 offset_right = 600.0
@@ -105,7 +103,7 @@ text = "HP 100   Патроны 8/8"
 
 [node name="Dead" type="Label" parent="HUD/Root"]
 visible = false
-anchors_preset = 8
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -123,127 +121,120 @@ vertical_alignment = 1
 [node name="Buildings" type="Node3D" parent="."]
 
 [node name="TechComplex" parent="Buildings" instance=ExtResource("4_bld")]
-transform = Transform3D(-0.15643, 0, -0.98769, 0, 1, 0, 0.98769, 0, -0.15643, 175.809, 0.000, -27.845)
-kind = 0
+transform = Transform3D(-0.15643, 0, -0.98769, 0, 1, 0, 0.98769, 0, -0.15643, 175.809, 0, -27.845)
 display_name = "Технический комплекс"
 size = Vector2(40, 30)
-height = 6.0
 wall_thickness = 0.4
 
 [node name="DoorFront" parent="Buildings/TechComplex" instance=ExtResource("5_open")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.000, 0.000, -15.000)
-width = 1.6
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -15)
 
 [node name="GateFront" parent="Buildings/TechComplex" instance=ExtResource("5_open")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.000, 0.000, -15.000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -15)
 kind = 1
 width = 5.0
 
 [node name="DoorSide" parent="Buildings/TechComplex" instance=ExtResource("5_open")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.000, 0.000, 0.000)
-width = 1.6
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 0)
 
 [node name="RadioMast" parent="Buildings" instance=ExtResource("4_bld")]
-transform = Transform3D(-0.05234, 0, -0.99863, 0, 1, 0, 0.99863, 0, -0.05234, 198.727, 0.000, -10.415)
+transform = Transform3D(-0.05234, 0, -0.99863, 0, 1, 0, 0.99863, 0, -0.05234, 198.727, 0, -10.415)
 kind = 2
 display_name = "Радиомачта"
 size = Vector2(6, 6)
 height = 42.0
 
 [node name="GarageA" parent="Buildings" instance=ExtResource("4_bld")]
-transform = Transform3D(-0.55919, 0, 0.82904, 0, 1, 0, -0.82904, 0, -0.55919, -142.594, 0.000, -96.181)
+transform = Transform3D(-0.55919, 0, 0.82904, 0, 1, 0, -0.82904, 0, -0.55919, -142.594, 0, -96.181)
 kind = 1
 display_name = "Паркинг A"
 size = Vector2(56, 48)
-levels = 3
-level_height = 3.2
 
 [node name="CoveredWalk" parent="Buildings" instance=ExtResource("4_bld")]
-transform = Transform3D(-0.50000, 0, 0.86603, 0, 1, 0, -0.86603, 0, -0.50000, -117.779, 0.000, -68.000)
+transform = Transform3D(-0.5, 0, 0.86603, 0, 1, 0, -0.86603, 0, -0.5, -117.779, 0, -68)
 kind = 3
-display_name = ""
 size = Vector2(8, 20)
 height = 4.0
 
 [node name="BusStop" parent="Buildings" instance=ExtResource("4_bld")]
-transform = Transform3D(-1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, -1.00000, 0.000, 0.000, -198.000)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -198)
 kind = 4
-display_name = ""
 size = Vector2(22, 6)
 height = 2.6
 
 [node name="Escalators" type="Node3D" parent="."]
 
 [node name="MainAlley" parent="Escalators" instance=ExtResource("11_esc")]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0.000, 0.000, -97.000)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -97)
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 
 [node name="Plaza" parent="SpawnPoints" instance=ExtResource("6_spawn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.562, 0.050, -173.326)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.562, 0.05, -173.326)
 display_name = "Площадь, у клумб"
 
 [node name="GarageL2" parent="SpawnPoints" instance=ExtResource("6_spawn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.135, 3.250, -94.601)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.135, 3.25, -94.601)
 display_name = "Паркинг, 2-й уровень"
 
 [node name="Extractions" type="Node3D" parent="."]
 
 [node name="Bus" parent="Extractions" instance=ExtResource("7_ext")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000, 0.000, -190.000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -190)
 display_name = "Автобусная остановка"
 radius = 5.0
-channel_s = 8.0
 rule = "Всегда открыта. Далеко от здания, подход через открытую площадь."
 
 [node name="Dock" parent="Extractions" instance=ExtResource("7_ext")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142.894, 0.000, -82.500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142.894, 0, -82.5)
 display_name = "Выезд грузового двора"
 radius = 5.0
-channel_s = 10.0
 rule = "Ворота запитаны: сначала включить рубильник в электрощитовой."
+channel_s = 10.0
 required_switch = "dock_gate"
 
 [node name="GarageExit" parent="Extractions" instance=ExtResource("7_ext")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.507, 0.000, -130.486)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.507, 0, -130.486)
 display_name = "Съезд паркинга (EXIT ONLY)"
-radius = 4.0
-channel_s = 6.0
 rule = "Нужна карта-ключ охраны: лежит в серверной, ключ от серверной — в ЦПУ охраны."
+channel_s = 6.0
 required_key = "keycard_security"
 
 [node name="Interactables" type="Node3D" parent="."]
 
 [node name="DockGateSwitch" parent="Interactables" instance=ExtResource("9_sw")]
-transform = Transform3D(-0.39875, 0, -0.91706, 0, 1, 0, 0.91706, 0, -0.39875, 109.680, 0.000, -47.690)
+transform = Transform3D(-0.39875, 0, -0.91706, 0, 1, 0, 0.91706, 0, -0.39875, 109.68, 0, -47.69)
 switch_id = "dock_gate"
 display_name = "Рубильник ворот двора"
 
 [node name="KeyServer" parent="Interactables" instance=ExtResource("8_key")]
-transform = Transform3D(-0.10453, 0, -0.99452, 0, 1, 0, 0.99452, 0, -0.10453, 114.370, 0.000, -12.021)
+transform = Transform3D(-0.10453, 0, -0.99452, 0, 1, 0, 0.99452, 0, -0.10453, 114.37, 0, -12.021)
 key_id = "key_server"
 display_name = "Ключ от серверной"
 
 [node name="KeycardSecurity" parent="Interactables" instance=ExtResource("8_key")]
-transform = Transform3D(-0.28402, 0, -0.95882, 0, 1, 0, 0.95882, 0, -0.28402, 109.305, 0.000, -32.378)
+transform = Transform3D(-0.28402, 0, -0.95882, 0, 1, 0, 0.95882, 0, -0.28402, 109.305, 0, -32.378)
 key_id = "keycard_security"
 display_name = "Карта-ключ охраны"
 
 [node name="KeyJewelry" parent="Interactables" instance=ExtResource("8_key")]
-transform = Transform3D(-0.95106, 0, -0.30902, 0, 1, 0, 0.30902, 0, -0.95106, 14.524, 0.000, -44.700)
+transform = Transform3D(-0.95106, 0, -0.30902, 0, 1, 0, 0.30902, 0, -0.95106, 14.524, 0, -44.7)
 key_id = "key_jewelry"
 display_name = "Ключ от сейфовой"
 
 [node name="JewelrySafe" parent="Interactables" instance=ExtResource("10_loot")]
-transform = Transform3D(-0.93358, 0, 0.35837, 0, 1, 0, -0.35837, 0, -0.93358, -42.717, 0.000, -111.283)
+transform = Transform3D(-0.93358, 0, 0.35837, 0, 1, 0, -0.35837, 0, -0.93358, -42.717, 0, -111.283)
 display_name = "Сейф ювелирного"
 table = "jewelry_safe"
 search_s = 5.0
 look = 1
 
 [node name="ServerRack" parent="Interactables" instance=ExtResource("10_loot")]
-transform = Transform3D(-0.23345, 0, -0.97237, 0, 1, 0, 0.97237, 0, -0.23345, 115.906, 0.000, -27.827)
+transform = Transform3D(-0.23345, 0, -0.97237, 0, 1, 0, 0.97237, 0, -0.23345, 115.906, 0, -27.827)
 display_name = "Серверная стойка"
 table = "server_rack"
 search_s = 3.5
 look = 2
+
+[node name="RING_bus_damaged_Door_1_A_Hinge" parent="." instance=ExtResource("12_mfiio")]
+transform = Transform3D(0.026856156, 0.99959016, 0.009911688, -0.9994218, 0.027055843, -0.020593725, -0.02085349, -0.009352884, 0.9997387, -9.053862, 0.014983237, -178.61545)

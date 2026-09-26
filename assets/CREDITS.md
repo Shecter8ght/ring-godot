@@ -35,6 +35,7 @@
 ## Персонаж и анимации
 
 - `assets/models/characters/persona_animated.glb` и связанные текстуры — экспорт из `Persona.blend`, предоставленного владельцем проекта. Исходник остаётся у владельца в `D:\ПРОГРАММЫ\Blender 5\Projects`.
+- `assets/models/characters/persona_arms.glb` и текстуры `persona_arms_*` — кисти и рукава того же Persona для первого лица; экспорт `tools/export_persona_arms.py`. Сохранены UV и материалы, восстановлены веса пясти из исходных групп MakeHuman, применён render-уровень сглаживания. Исходный `.blend` не изменяется.
 - `assets/models/characters/persona_clips.res` — запечённые анимации из предоставленных владельцем файлов Mixamo. Файлы FBX остаются локальными в `assets/animations/`; перечень использованных клипов — `tools/character_clips.json`.
 
 ## Транспорт RING

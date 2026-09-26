@@ -22,5 +22,8 @@ func _walk(path: String) -> int:
 				print("  НЕ СОБРАЛСЯ: ", path + "/" + f)
 				bad += 1
 	for sub in d.get_directories():
+		# скрипты импорта (EditorScenePostImport) есть только в редакторе
+		if path + "/" + sub == "res://tools/editor":
+			continue
 		bad += _walk(path + "/" + sub)
 	return bad

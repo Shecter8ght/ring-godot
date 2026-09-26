@@ -60,6 +60,9 @@ const GREYBOX_FLOOR := {
 }
 ## Полы, которые и в блокауте остаются с текстурой (улица — ради погоды).
 const OUTDOOR_TEXTURED := ["asphalt_02"]
+## Уличные помещения (площадь, дворы, парковка, проезд) — пол с текстурой и в блокауте: на них
+## стоят модели (машины), серая сетка под ними выглядит чужой.
+const OUTDOOR_ROOMS := ["yard", "parking"]
 ## Пол закрытой части кольца по поясам (ключи ring.zones).
 const ZONE_FLOOR := {
 	"atr": "large_floor_tiles_02", "gal": "large_floor_tiles_02", "inn": "worn_tile_floor", "st": "large_floor_tiles_02",
@@ -258,7 +261,7 @@ func _st(store: Dictionary, mat_id: String) -> SurfaceTool:
 
 func _build_floors() -> void:
 	for room in _rooms:
-		var st := _st(_floors, _floor_mat(String(room.get("floor", "concrete_floor_worn_001"))))
+		var st := _st(_floors, _floor_mat(String(room.get("floor", "concrete_floor_worn_001")), String(room.get("type", "")) in OUTDOOR_ROOMS))
 		var ceil: SurfaceTool = _st(_ceilings, _gb("painted_plaster_wall", "gb_slab")) if _has_ceiling(room) else null
 		if is_strip(room):
 			_strip_floor(st, room, ceil)
@@ -720,8 +723,8 @@ func _wall_class(line: Dictionary, side_a: Dictionary, side_b: Dictionary, facad
 
 ## Пол: в блокауте — серый по типу покрытия (плитка / бетон — тоном различимы). Асфальт улицы
 ## и в блокауте настоящий: на нём мокрый шейдер (лужи, отражения в дождь).
-func _floor_mat(textured: String) -> String:
-	if not _greybox or textured in OUTDOOR_TEXTURED:
+func _floor_mat(textured: String, outdoor: bool = false) -> String:
+	if not _greybox or outdoor or textured in OUTDOOR_TEXTURED:
 		return textured
 	return String(GREYBOX_FLOOR.get(textured, "gbf_concrete"))
 

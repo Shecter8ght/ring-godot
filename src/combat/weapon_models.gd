@@ -50,6 +50,7 @@ static func build(id: String, mods: Dictionary = {}) -> Node3D:
 		if not ms.is_empty():
 			WeaponMods._suppressor(root, ms, 0.021, 0.2)
 	WeaponMods.fit(root, key, mods)
+	WeaponGrips.fit(root, key, w, mods)
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if is_equal_approx(scale, 1.0):
@@ -289,8 +290,11 @@ static func _shotgun(r: Node3D) -> void:
 	for i in range(7):
 		_cyl(r, Vector3(0, 0.036, 0.265 + i * 0.022), 0.02205, 0.0022, _mat("wood_dark"))
 	# шейка ложи опускается под руку и плавно переходит в приклад
-	_part(_cheek(_sweep(r, [Vector3(0, 0.04, -0.025), Vector3(0, 0.022, -0.075), Vector3(0, 0.006, -0.125), Vector3(0, -0.012, -0.2), Vector3(0, -0.024, -0.3)] as Array[Vector3],
-		[Vector2(0.034, 0.05), Vector2(0.031, 0.046), Vector2(0.034, 0.058), Vector2(0.039, 0.09), Vector2(0.042, 0.112)] as Array[Vector2], wood, 0.3)), "stock")
+	# Шейка остаётся под ладонью при смене приклада и при скрытии затыльника в прицеле.
+	_sweep(r, [Vector3(0, 0.04, -0.025), Vector3(0, 0.022, -0.075), Vector3(0, 0.006, -0.125)] as Array[Vector3],
+		[Vector2(0.034, 0.05), Vector2(0.031, 0.046), Vector2(0.034, 0.058)] as Array[Vector2], wood, 0.3)
+	_part(_cheek(_sweep(r, [Vector3(0, 0.006, -0.125), Vector3(0, -0.012, -0.2), Vector3(0, -0.024, -0.3)] as Array[Vector3],
+		[Vector2(0.034, 0.058), Vector2(0.039, 0.09), Vector2(0.042, 0.112)] as Array[Vector2], wood, 0.3)), "stock")
 	_part(_cheek(_sweep(r, [Vector3(0, -0.0245, -0.3), Vector3(0, -0.025, -0.318)] as Array[Vector3],
 		[Vector2(0.044, 0.114), Vector2(0.044, 0.114)] as Array[Vector2], _mat("rubber"), 0.3)), "stock")
 	# спусковая скоба и крючок

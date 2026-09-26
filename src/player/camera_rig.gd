@@ -41,6 +41,7 @@ var _look_yaw: float = 0.0
 var _look_pitch: float = 0.0
 var _ads_cam: Camera3D
 var _viewmodel: Node3D
+var _arms: FirstPersonArms
 var _viewmodel_id: String = ""
 ## Приклад и затыльник модели в руках: у бедра видны, в прицеле (под щекой) — прячутся.
 var _cheek_parts: Array[GeometryInstance3D] = []
@@ -82,7 +83,10 @@ func _ready() -> void:
 	_ads_cam.near = 0.05
 	_ads_cam.far = 900.0
 	_ads_cam.cull_mask &= ~RainOcclusion.LAYER
+	_ads_cam.cull_mask &= ~Player.OWN_BODY_LAYER
 	add_child(_ads_cam)
+	_arms = (load("res://scenes/player/first_person_arms.tscn") as PackedScene).instantiate() as FirstPersonArms
+	_ads_cam.add_child(_arms)
 	_build_hud()
 	_glare = LightGlare.new()
 	_glare.name = "Glare"
@@ -483,6 +487,7 @@ func _set_ads(on: bool, pl: Player) -> void:
 		_camera.current = true
 		if _viewmodel:
 			_viewmodel.visible = false
+		_arms.visible = false
 		# курсор — туда, куда смотрели: выход из прицела не сбивает направление
 		if pl:
 			var ahead := pl.global_position + Vector3(sin(_look_yaw), 0.0, cos(_look_yaw)) * 6.0
@@ -543,6 +548,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			n.set_meta("own", true)
 			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_ads_cam.add_child(_viewmodel)
+		_arms.bind_weapon(_viewmodel)
 		_viewmodel_id = vm_key
 		_reticle_nv(pl.nvg_on)
 	_viewmodel.visible = true
@@ -581,6 +587,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var kv := pl.kick_vis
 	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
 	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + bob + Vector3(0.0, kv * 0.004, kv * 0.028))
+	_arms.update_pose()
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05)
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)

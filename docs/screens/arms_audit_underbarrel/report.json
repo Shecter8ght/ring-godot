@@ -1,0 +1,2432 @@
+{
+	"cases": [
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000686909586988804,
+			"id": "wpn_hg_02",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000581908956576171,
+			"id": "wpn_hg_02",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000636577865975596,
+			"id": "wpn_hg_02",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000472686352281926,
+			"id": "wpn_hg_02",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000603278564881293,
+			"id": "wpn_hg_03",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000597209464103798,
+			"id": "wpn_hg_03",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000477069939108787,
+			"id": "wpn_hg_03",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000600685012841495,
+			"id": "wpn_hg_03",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000632202699080153,
+			"id": "wpn_hg_04",
+			"length_error_m": 0.00000019371509552002,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000581908956576171,
+			"id": "wpn_hg_04",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000600685012841495,
+			"id": "wpn_hg_04",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000653785789950234,
+			"id": "wpn_hg_04",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_smg_02",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000636577865975596,
+			"id": "wpn_smg_02",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.000000102428550974309,
+			"id": "wpn_smg_02",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000682857006495396,
+			"id": "wpn_smg_02",
+			"length_error_m": 0.00000019371509552002,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000682857006495396,
+			"id": "wpn_smg_02",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_smg_02",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_9_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_smg_03",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_smg_03",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000842936955791629,
+			"id": "wpn_smg_03",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000682857006495396,
+			"id": "wpn_smg_03",
+			"length_error_m": 0.000000268220901489258,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_smg_03",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.00000007068241103525,
+			"id": "wpn_smg_03",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_9_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_sg_02",
+			"length_error_m": 0.000000268220901489258,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000833000228794845,
+			"id": "wpn_sg_02",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000682857006495396,
+			"id": "wpn_sg_02",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000745058059692383,
+			"id": "wpn_sg_02",
+			"length_error_m": 0.000000268220901489258,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_sg_02",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000745058059692383,
+			"id": "wpn_sg_02",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_12_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_light_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000792007597283373,
+			"id": "wpn_sg_04",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_sg_04",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000846223286998793,
+			"id": "wpn_sg_04",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_sg_04",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000730004856563937,
+			"id": "wpn_sg_04",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000670552253723145,
+			"id": "wpn_sg_04",
+			"length_error_m": 0.000000268220901489258,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_12_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_light_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000842936955791629,
+			"id": "wpn_ar_03",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.000000133488128994941,
+			"id": "wpn_ar_03",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_ar_03",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000979970877779124,
+			"id": "wpn_ar_03",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_ar_03",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_ar_03",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_heavy_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.000000066640019724673,
+			"id": "wpn_ar_04",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000682857006495396,
+			"id": "wpn_ar_04",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000999600260342959,
+			"id": "wpn_ar_04",
+			"length_error_m": 0.000000342726707458496,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000636577865975596,
+			"id": "wpn_ar_04",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000842936955791629,
+			"id": "wpn_ar_04",
+			"length_error_m": 0.000000178813934326172,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000856006536764653,
+			"id": "wpn_ar_04",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000846223286998793,
+			"id": "wpn_ar_05",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_ar_05",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000777863462531059,
+			"id": "wpn_ar_05",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000670552253723145,
+			"id": "wpn_ar_05",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_ar_05",
+			"length_error_m": 0.00000019371509552002,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000702886353565191,
+			"id": "wpn_ar_05",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_comp_556_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_ar_06",
+			"length_error_m": 0.000000298023223876953,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.000000082294349112999,
+			"id": "wpn_ar_06",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000802452078119131,
+			"id": "wpn_ar_06",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_ar_06",
+			"length_error_m": 0.000000268220901489258,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_ar_06",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.000000066640019724673,
+			"id": "wpn_ar_06",
+			"length_error_m": 0.000000283122062683105,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000632202699080153,
+			"id": "wpn_ar_07",
+			"length_error_m": 0.000000283122062683105,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000802452078119131,
+			"id": "wpn_ar_07",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000856006536764653,
+			"id": "wpn_ar_07",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.000000127533397176194,
+			"id": "wpn_ar_07",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000745058059692383,
+			"id": "wpn_ar_07",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000730004856563937,
+			"id": "wpn_ar_07",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_comp_556_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_ar_08",
+			"length_error_m": 0.000000327825546264648,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000802452078119131,
+			"id": "wpn_ar_08",
+			"length_error_m": 0.000000342726707458496,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000718507990882244,
+			"id": "wpn_ar_08",
+			"length_error_m": 0.000000327825546264648,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000872068071089416,
+			"id": "wpn_ar_08",
+			"length_error_m": 0.000000342726707458496,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000702886353565191,
+			"id": "wpn_ar_08",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.000000144520143408045,
+			"id": "wpn_ar_08",
+			"length_error_m": 0.000000283122062683105,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_brake_762_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000900257077773858,
+			"id": "wpn_dmr_02",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.00000007068241103525,
+			"id": "wpn_dmr_02",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000702886353565191,
+			"id": "wpn_dmr_02",
+			"length_error_m": 0.000000342726707458496,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.0000000842936955791629,
+			"id": "wpn_dmr_02",
+			"length_error_m": 0.000000268220901489258,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000999600260342959,
+			"id": "wpn_dmr_02",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000856006536764653,
+			"id": "wpn_dmr_02",
+			"length_error_m": 0.00000025331974029541,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_brake_762_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000682857006495396,
+			"id": "wpn_dmr_03",
+			"length_error_m": 0.000000178813934326172,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_dmr_03",
+			"length_error_m": 0.00000019371509552002,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_tac_flashlight_hp_01",
+			"grip_error_m": 0.0000000748774056091861,
+			"id": "wpn_dmr_03",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_flashlight_hp_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_tac_laser_01",
+			"grip_error_m": 0.00000010133885552932,
+			"id": "wpn_dmr_03",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_laser_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_tac_combo_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_dmr_03",
+			"length_error_m": 0.00000019371509552002,
+			"mods": {
+				"underbarrel": {
+					"id": "tac_combo_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000856006536764653,
+			"id": "wpn_dmr_03",
+			"length_error_m": 0.00000019371509552002,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_brake_762_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000759813119088903,
+			"id": "wpn_sr_01",
+			"length_error_m": 0.000000208616256713867,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000872068071089416,
+			"id": "wpn_sr_01",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_brake_762_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_bipod_01",
+			"grip_error_m": 0.0000000737569862963028,
+			"id": "wpn_sr_02",
+			"length_error_m": 0.000000223517417907715,
+			"mods": {
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000632202699080153,
+			"id": "wpn_sr_02",
+			"length_error_m": 0.000000238418579101563,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_brake_762_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		}
+	],
+	"failures": 0,
+	"frames": [
+		{
+			"label": "wpn_hg_02_underbarrel_tac_flashlight_01_hip",
+			"page": 0,
+			"tile": 0
+		},
+		{
+			"label": "wpn_hg_02_underbarrel_tac_flashlight_01_ads",
+			"page": 0,
+			"tile": 1
+		},
+		{
+			"label": "wpn_hg_02_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 0,
+			"tile": 2
+		},
+		{
+			"label": "wpn_hg_02_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 0,
+			"tile": 3
+		},
+		{
+			"label": "wpn_hg_02_underbarrel_tac_laser_01_hip",
+			"page": 0,
+			"tile": 4
+		},
+		{
+			"label": "wpn_hg_02_underbarrel_tac_laser_01_ads",
+			"page": 0,
+			"tile": 5
+		},
+		{
+			"label": "wpn_hg_02_underbarrel_tac_combo_01_hip",
+			"page": 0,
+			"tile": 6
+		},
+		{
+			"label": "wpn_hg_02_underbarrel_tac_combo_01_ads",
+			"page": 0,
+			"tile": 7
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_flashlight_01_hip",
+			"page": 0,
+			"tile": 8
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_flashlight_01_ads",
+			"page": 0,
+			"tile": 9
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 0,
+			"tile": 10
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 0,
+			"tile": 11
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_laser_01_hip",
+			"page": 0,
+			"tile": 12
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_laser_01_ads",
+			"page": 0,
+			"tile": 13
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_combo_01_hip",
+			"page": 0,
+			"tile": 14
+		},
+		{
+			"label": "wpn_hg_03_underbarrel_tac_combo_01_ads",
+			"page": 0,
+			"tile": 15
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_flashlight_01_hip",
+			"page": 0,
+			"tile": 16
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_flashlight_01_ads",
+			"page": 0,
+			"tile": 17
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 0,
+			"tile": 18
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 0,
+			"tile": 19
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_laser_01_hip",
+			"page": 0,
+			"tile": 20
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_laser_01_ads",
+			"page": 0,
+			"tile": 21
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_combo_01_hip",
+			"page": 0,
+			"tile": 22
+		},
+		{
+			"label": "wpn_hg_04_underbarrel_tac_combo_01_ads",
+			"page": 0,
+			"tile": 23
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_bipod_01_hip",
+			"page": 0,
+			"tile": 24
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_bipod_01_ads",
+			"page": 0,
+			"tile": 25
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_flashlight_01_hip",
+			"page": 0,
+			"tile": 26
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_flashlight_01_ads",
+			"page": 0,
+			"tile": 27
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 0,
+			"tile": 28
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 0,
+			"tile": 29
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_laser_01_hip",
+			"page": 1,
+			"tile": 0
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_laser_01_ads",
+			"page": 1,
+			"tile": 1
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_combo_01_hip",
+			"page": 1,
+			"tile": 2
+		},
+		{
+			"label": "wpn_smg_02_underbarrel_tac_combo_01_ads",
+			"page": 1,
+			"tile": 3
+		},
+		{
+			"label": "wpn_smg_02_full_bipod_01_hip",
+			"page": 1,
+			"tile": 4
+		},
+		{
+			"label": "wpn_smg_02_full_bipod_01_ads",
+			"page": 1,
+			"tile": 5
+		},
+		{
+			"label": "wpn_smg_02_full_bipod_01_offset",
+			"page": 1,
+			"tile": 6
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_bipod_01_hip",
+			"page": 1,
+			"tile": 7
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_bipod_01_ads",
+			"page": 1,
+			"tile": 8
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_flashlight_01_hip",
+			"page": 1,
+			"tile": 9
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_flashlight_01_ads",
+			"page": 1,
+			"tile": 10
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 1,
+			"tile": 11
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 1,
+			"tile": 12
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_laser_01_hip",
+			"page": 1,
+			"tile": 13
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_laser_01_ads",
+			"page": 1,
+			"tile": 14
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_combo_01_hip",
+			"page": 1,
+			"tile": 15
+		},
+		{
+			"label": "wpn_smg_03_underbarrel_tac_combo_01_ads",
+			"page": 1,
+			"tile": 16
+		},
+		{
+			"label": "wpn_smg_03_full_bipod_01_hip",
+			"page": 1,
+			"tile": 17
+		},
+		{
+			"label": "wpn_smg_03_full_bipod_01_ads",
+			"page": 1,
+			"tile": 18
+		},
+		{
+			"label": "wpn_smg_03_full_bipod_01_offset",
+			"page": 1,
+			"tile": 19
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_bipod_01_hip",
+			"page": 1,
+			"tile": 20
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_bipod_01_ads",
+			"page": 1,
+			"tile": 21
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_flashlight_01_hip",
+			"page": 1,
+			"tile": 22
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_flashlight_01_ads",
+			"page": 1,
+			"tile": 23
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 1,
+			"tile": 24
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 1,
+			"tile": 25
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_laser_01_hip",
+			"page": 1,
+			"tile": 26
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_laser_01_ads",
+			"page": 1,
+			"tile": 27
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_combo_01_hip",
+			"page": 1,
+			"tile": 28
+		},
+		{
+			"label": "wpn_sg_02_underbarrel_tac_combo_01_ads",
+			"page": 1,
+			"tile": 29
+		},
+		{
+			"label": "wpn_sg_02_full_bipod_01_hip",
+			"page": 2,
+			"tile": 0
+		},
+		{
+			"label": "wpn_sg_02_full_bipod_01_ads",
+			"page": 2,
+			"tile": 1
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_bipod_01_hip",
+			"page": 2,
+			"tile": 2
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_bipod_01_ads",
+			"page": 2,
+			"tile": 3
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_flashlight_01_hip",
+			"page": 2,
+			"tile": 4
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_flashlight_01_ads",
+			"page": 2,
+			"tile": 5
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 2,
+			"tile": 6
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 2,
+			"tile": 7
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_laser_01_hip",
+			"page": 2,
+			"tile": 8
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_laser_01_ads",
+			"page": 2,
+			"tile": 9
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_combo_01_hip",
+			"page": 2,
+			"tile": 10
+		},
+		{
+			"label": "wpn_sg_04_underbarrel_tac_combo_01_ads",
+			"page": 2,
+			"tile": 11
+		},
+		{
+			"label": "wpn_sg_04_full_bipod_01_hip",
+			"page": 2,
+			"tile": 12
+		},
+		{
+			"label": "wpn_sg_04_full_bipod_01_ads",
+			"page": 2,
+			"tile": 13
+		},
+		{
+			"label": "wpn_sg_04_full_bipod_01_offset",
+			"page": 2,
+			"tile": 14
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_bipod_01_hip",
+			"page": 2,
+			"tile": 15
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_bipod_01_ads",
+			"page": 2,
+			"tile": 16
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_flashlight_01_hip",
+			"page": 2,
+			"tile": 17
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_flashlight_01_ads",
+			"page": 2,
+			"tile": 18
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 2,
+			"tile": 19
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 2,
+			"tile": 20
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_laser_01_hip",
+			"page": 2,
+			"tile": 21
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_laser_01_ads",
+			"page": 2,
+			"tile": 22
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_combo_01_hip",
+			"page": 2,
+			"tile": 23
+		},
+		{
+			"label": "wpn_ar_03_underbarrel_tac_combo_01_ads",
+			"page": 2,
+			"tile": 24
+		},
+		{
+			"label": "wpn_ar_03_full_bipod_01_hip",
+			"page": 2,
+			"tile": 25
+		},
+		{
+			"label": "wpn_ar_03_full_bipod_01_ads",
+			"page": 2,
+			"tile": 26
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_bipod_01_hip",
+			"page": 2,
+			"tile": 27
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_bipod_01_ads",
+			"page": 2,
+			"tile": 28
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_flashlight_01_hip",
+			"page": 2,
+			"tile": 29
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_flashlight_01_ads",
+			"page": 3,
+			"tile": 0
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 3,
+			"tile": 1
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 3,
+			"tile": 2
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_laser_01_hip",
+			"page": 3,
+			"tile": 3
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_laser_01_ads",
+			"page": 3,
+			"tile": 4
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_combo_01_hip",
+			"page": 3,
+			"tile": 5
+		},
+		{
+			"label": "wpn_ar_04_underbarrel_tac_combo_01_ads",
+			"page": 3,
+			"tile": 6
+		},
+		{
+			"label": "wpn_ar_04_full_bipod_01_hip",
+			"page": 3,
+			"tile": 7
+		},
+		{
+			"label": "wpn_ar_04_full_bipod_01_ads",
+			"page": 3,
+			"tile": 8
+		},
+		{
+			"label": "wpn_ar_04_full_bipod_01_offset",
+			"page": 3,
+			"tile": 9
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_bipod_01_hip",
+			"page": 3,
+			"tile": 10
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_bipod_01_ads",
+			"page": 3,
+			"tile": 11
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_flashlight_01_hip",
+			"page": 3,
+			"tile": 12
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_flashlight_01_ads",
+			"page": 3,
+			"tile": 13
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 3,
+			"tile": 14
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 3,
+			"tile": 15
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_laser_01_hip",
+			"page": 3,
+			"tile": 16
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_laser_01_ads",
+			"page": 3,
+			"tile": 17
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_combo_01_hip",
+			"page": 3,
+			"tile": 18
+		},
+		{
+			"label": "wpn_ar_05_underbarrel_tac_combo_01_ads",
+			"page": 3,
+			"tile": 19
+		},
+		{
+			"label": "wpn_ar_05_full_bipod_01_hip",
+			"page": 3,
+			"tile": 20
+		},
+		{
+			"label": "wpn_ar_05_full_bipod_01_ads",
+			"page": 3,
+			"tile": 21
+		},
+		{
+			"label": "wpn_ar_05_full_bipod_01_offset",
+			"page": 3,
+			"tile": 22
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_bipod_01_hip",
+			"page": 3,
+			"tile": 23
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_bipod_01_ads",
+			"page": 3,
+			"tile": 24
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_flashlight_01_hip",
+			"page": 3,
+			"tile": 25
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_flashlight_01_ads",
+			"page": 3,
+			"tile": 26
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 3,
+			"tile": 27
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 3,
+			"tile": 28
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_laser_01_hip",
+			"page": 3,
+			"tile": 29
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_laser_01_ads",
+			"page": 4,
+			"tile": 0
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_combo_01_hip",
+			"page": 4,
+			"tile": 1
+		},
+		{
+			"label": "wpn_ar_06_underbarrel_tac_combo_01_ads",
+			"page": 4,
+			"tile": 2
+		},
+		{
+			"label": "wpn_ar_06_full_bipod_01_hip",
+			"page": 4,
+			"tile": 3
+		},
+		{
+			"label": "wpn_ar_06_full_bipod_01_ads",
+			"page": 4,
+			"tile": 4
+		},
+		{
+			"label": "wpn_ar_06_full_bipod_01_offset",
+			"page": 4,
+			"tile": 5
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_bipod_01_hip",
+			"page": 4,
+			"tile": 6
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_bipod_01_ads",
+			"page": 4,
+			"tile": 7
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_flashlight_01_hip",
+			"page": 4,
+			"tile": 8
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_flashlight_01_ads",
+			"page": 4,
+			"tile": 9
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 4,
+			"tile": 10
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 4,
+			"tile": 11
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_laser_01_hip",
+			"page": 4,
+			"tile": 12
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_laser_01_ads",
+			"page": 4,
+			"tile": 13
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_combo_01_hip",
+			"page": 4,
+			"tile": 14
+		},
+		{
+			"label": "wpn_ar_07_underbarrel_tac_combo_01_ads",
+			"page": 4,
+			"tile": 15
+		},
+		{
+			"label": "wpn_ar_07_full_bipod_01_hip",
+			"page": 4,
+			"tile": 16
+		},
+		{
+			"label": "wpn_ar_07_full_bipod_01_ads",
+			"page": 4,
+			"tile": 17
+		},
+		{
+			"label": "wpn_ar_07_full_bipod_01_offset",
+			"page": 4,
+			"tile": 18
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_bipod_01_hip",
+			"page": 4,
+			"tile": 19
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_bipod_01_ads",
+			"page": 4,
+			"tile": 20
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_flashlight_01_hip",
+			"page": 4,
+			"tile": 21
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_flashlight_01_ads",
+			"page": 4,
+			"tile": 22
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 4,
+			"tile": 23
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 4,
+			"tile": 24
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_laser_01_hip",
+			"page": 4,
+			"tile": 25
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_laser_01_ads",
+			"page": 4,
+			"tile": 26
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_combo_01_hip",
+			"page": 4,
+			"tile": 27
+		},
+		{
+			"label": "wpn_ar_08_underbarrel_tac_combo_01_ads",
+			"page": 4,
+			"tile": 28
+		},
+		{
+			"label": "wpn_ar_08_full_bipod_01_hip",
+			"page": 4,
+			"tile": 29
+		},
+		{
+			"label": "wpn_ar_08_full_bipod_01_ads",
+			"page": 5,
+			"tile": 0
+		},
+		{
+			"label": "wpn_ar_08_full_bipod_01_offset",
+			"page": 5,
+			"tile": 1
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_bipod_01_hip",
+			"page": 5,
+			"tile": 2
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_bipod_01_ads",
+			"page": 5,
+			"tile": 3
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_flashlight_01_hip",
+			"page": 5,
+			"tile": 4
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_flashlight_01_ads",
+			"page": 5,
+			"tile": 5
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 5,
+			"tile": 6
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 5,
+			"tile": 7
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_laser_01_hip",
+			"page": 5,
+			"tile": 8
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_laser_01_ads",
+			"page": 5,
+			"tile": 9
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_combo_01_hip",
+			"page": 5,
+			"tile": 10
+		},
+		{
+			"label": "wpn_dmr_02_underbarrel_tac_combo_01_ads",
+			"page": 5,
+			"tile": 11
+		},
+		{
+			"label": "wpn_dmr_02_full_bipod_01_hip",
+			"page": 5,
+			"tile": 12
+		},
+		{
+			"label": "wpn_dmr_02_full_bipod_01_ads",
+			"page": 5,
+			"tile": 13
+		},
+		{
+			"label": "wpn_dmr_02_full_bipod_01_offset",
+			"page": 5,
+			"tile": 14
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_bipod_01_hip",
+			"page": 5,
+			"tile": 15
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_bipod_01_ads",
+			"page": 5,
+			"tile": 16
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_flashlight_01_hip",
+			"page": 5,
+			"tile": 17
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_flashlight_01_ads",
+			"page": 5,
+			"tile": 18
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_flashlight_hp_01_hip",
+			"page": 5,
+			"tile": 19
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_flashlight_hp_01_ads",
+			"page": 5,
+			"tile": 20
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_laser_01_hip",
+			"page": 5,
+			"tile": 21
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_laser_01_ads",
+			"page": 5,
+			"tile": 22
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_combo_01_hip",
+			"page": 5,
+			"tile": 23
+		},
+		{
+			"label": "wpn_dmr_03_underbarrel_tac_combo_01_ads",
+			"page": 5,
+			"tile": 24
+		},
+		{
+			"label": "wpn_dmr_03_full_bipod_01_hip",
+			"page": 5,
+			"tile": 25
+		},
+		{
+			"label": "wpn_dmr_03_full_bipod_01_ads",
+			"page": 5,
+			"tile": 26
+		},
+		{
+			"label": "wpn_dmr_03_full_bipod_01_offset",
+			"page": 5,
+			"tile": 27
+		},
+		{
+			"label": "wpn_sr_01_underbarrel_bipod_01_hip",
+			"page": 5,
+			"tile": 28
+		},
+		{
+			"label": "wpn_sr_01_underbarrel_bipod_01_ads",
+			"page": 5,
+			"tile": 29
+		},
+		{
+			"label": "wpn_sr_01_full_bipod_01_hip",
+			"page": 6,
+			"tile": 0
+		},
+		{
+			"label": "wpn_sr_01_full_bipod_01_ads",
+			"page": 6,
+			"tile": 1
+		},
+		{
+			"label": "wpn_sr_02_underbarrel_bipod_01_hip",
+			"page": 6,
+			"tile": 2
+		},
+		{
+			"label": "wpn_sr_02_underbarrel_bipod_01_ads",
+			"page": 6,
+			"tile": 3
+		},
+		{
+			"label": "wpn_sr_02_full_bipod_01_hip",
+			"page": 6,
+			"tile": 4
+		},
+		{
+			"label": "wpn_sr_02_full_bipod_01_ads",
+			"page": 6,
+			"tile": 5
+		}
+	],
+	"seconds": 62.473
+}

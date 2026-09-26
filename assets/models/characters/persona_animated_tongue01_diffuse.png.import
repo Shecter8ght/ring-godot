@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhwv5jaojuky6"
-path="res://.godot/imported/persona_animated_tongue01_diffuse.png-1c85b517fbaea871c3b3ea4614b1a619.ctex"
+path.s3tc="res://.godot/imported/persona_animated_tongue01_diffuse.png-1c85b517fbaea871c3b3ea4614b1a619.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "03f3c7040385e3ed039d14478b4cedb3"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/characters/persona_animated_tongue01_diffuse.png"
-dest_files=["res://.godot/imported/persona_animated_tongue01_diffuse.png-1c85b517fbaea871c3b3ea4614b1a619.ctex"]
+dest_files=["res://.godot/imported/persona_animated_tongue01_diffuse.png-1c85b517fbaea871c3b3ea4614b1a619.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
