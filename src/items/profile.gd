@@ -179,6 +179,48 @@ static func equipped_entry() -> Dictionary:
 	return {}
 
 
+## Перед рейдом: чего из основного нет с собой — оружия, патронов к нему (россыпью, в магазинах,
+## в самом оружии), магазина (у оружия со съёмным), медицины. С собой — надетое, рюкзак и карман.
+## Строки для предупреждения; пусто — всё есть.
+static func raid_kit_gaps() -> Array[String]:
+	ensure()
+	var out: Array[String] = []
+	var carried: Array = backpack + pocket
+	var weapons: Array = []
+	for slot in ["primary", "secondary"]:
+		var e: Dictionary = equipment.get(slot, {})
+		if WeaponDb.is_weapon(String(e.get("id", ""))):
+			weapons.append(e)
+	if weapons.is_empty():
+		out.append("оружие — надень его в тайнике")
+	for e in weapons:
+		var wid := String(e.id)
+		var w := WeaponDb.weapon(wid)
+		var name := ItemDb.item_name(wid)
+		var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+		var rounds := int(mag.get("rounds", 0))
+		var mags := 1 if String(mag.get("id", "")) != "" else 0
+		for it in carried:
+			var iid := String(it.id)
+			if (it as Dictionary).has("rounds"):
+				if WeaponDb.mag_fits(wid, iid):
+					mags += 1
+					rounds += int(it.rounds)
+			elif not WeaponDb.ammo(iid).is_empty() and WeaponDb.ammo_fits(wid, iid):
+				rounds += int(it.n)
+		if rounds <= 0:
+			out.append("патроны к «%s» (%s)" % [name, WeaponDb.caliber_name(String(w.get("caliber", "")))])
+		if not w.has("internal_mag") and mags == 0:
+			out.append("магазин к «%s»" % name)
+	var med := false
+	for it in carried:
+		if String(ItemDb.item(String(it.id)).get("cat", "")) == "med":
+			med = true
+	if not med:
+		out.append("медицина — бинт или аптечка")
+	return out
+
+
 ## Уровень доверия Михалыча (1–4) по очкам (Balance.TRUST_LEVELS).
 static func trust_level() -> int:
 	var lv := 0

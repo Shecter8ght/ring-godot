@@ -24,8 +24,8 @@ var _trader: Dictionary = {}
 var _wb_slot: String = "primary"
 ## Торговец: вкладка, количество расходников к покупке, оружие на схеме обвеса (где и uid).
 var _trader_tab: String = "buy"
-## Куда класть купленное: тайник (стеллаж) или рюкзак.
-var _buy_to: String = "stash"
+## Куда класть купленное: рюкзак (по умолчанию — собираешься в рейд) или тайник (стеллаж).
+var _buy_to: String = "backpack"
 ## Торговец: к какому стволу подсвечивать патроны, магазины, обвес ("" — ни к какому) и
 ## показывать ли только подходящее.
 var _focus: String = ""
@@ -422,11 +422,15 @@ func _trader_buy() -> void:
 	var dest := HBoxContainer.new()
 	dest.add_theme_constant_override("separation", 6)
 	dest.add_child(_text("Куда класть:", Color(0.75, 0.75, 0.72)))
-	for d in [["stash", "В тайник (стеллаж)"], ["backpack", "В рюкзак"]]:
+	for d in [["backpack", "В рюкзак"], ["stash", "В тайник (стеллаж)"]]:
 		var key := String(d[0])
-		var b := _button(String(d[1]), func() -> void: _buy_to = key)
+		var chosen := _buy_to == key
+		var b := _button(("▶ " if chosen else "") + String(d[1]), func() -> void: _buy_to = key)
 		b.toggle_mode = true
-		b.button_pressed = _buy_to == key
+		b.button_pressed = chosen
+		if chosen:
+			b.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
+			b.add_theme_color_override("font_pressed_color", Color(1.0, 0.86, 0.6))
 		dest.add_child(b)
 	dest.add_child(_text("рюкзак: %d / %d ячеек" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], Color(0.6, 0.62, 0.6)))
 	shop.add_child(dest)
@@ -491,7 +495,8 @@ func _trader_buy() -> void:
 		var stackable := ItemDb.stack(sid) > 1
 		var n := _qty_of(sid) if stackable else 1
 		var price := Profile.buy_price(sid) * n
-		var card := ItemCard.make({"id": sid, "n": n}, _sub_of(sid), "%s ₽" % InventoryUI.money(price), ItemCard.W, true)
+		# сколько выбрано — счётчиком между «−» и «+», цена — за всё выбранное
+		var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(price), ItemCard.W, true)
 		var tl := int(need_trust.get(sid, 1))
 		if Profile.trust_level() < tl and not sid in Profile.unlocked_stock:
 			# сильное Михалыч продаёт только тем, кому доверяет
@@ -500,6 +505,7 @@ func _trader_buy() -> void:
 		else:
 			if stackable:
 				card.controls.add_child(_button("−", func() -> void: _step_qty(sid, -1)))
+				card.controls.add_child(_qty_label(n))
 				card.controls.add_child(_button("+", func() -> void: _step_qty(sid, 1)))
 			var b := _button("Купить", func() -> void:
 				if not Profile.buy(sid, n, _buy_to):
@@ -508,7 +514,10 @@ func _trader_buy() -> void:
 					else:
 						toast("Не купил: не влезает в %s — освободи место или выбери «%s»" % ["рюкзак" if _buy_to == "backpack" else "тайник",
 							"В тайник" if _buy_to == "backpack" else "В рюкзак"])
-				elif WeaponDb.is_weapon(sid):
+					return
+				# купил — количество снова по умолчанию
+				_qty.erase(sid)
+				if WeaponDb.is_weapon(sid):
 					# купил ствол — сразу видно, что к нему подходит
 					_focus = sid)
 			b.disabled = price > Profile.money
@@ -559,6 +568,17 @@ func _qty_of(sid: String) -> int:
 func _step_qty(sid: String, dir: int) -> void:
 	var step := _qty_step(sid)
 	_qty[sid] = clampi(_qty_of(sid) + dir * step, step, ItemDb.stack(sid) * 5)
+
+
+## Выбранное количество между «−» и «+».
+func _qty_label(n: int) -> Label:
+	var l := Label.new()
+	l.text = "%d шт" % n
+	l.custom_minimum_size.x = 46
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", 14)
+	l.add_theme_color_override("font_color", Color(1.0, 0.9, 0.6))
+	return l
 
 
 ## Короткая строка под именем: чем предмет важен (класс и калибр, урон и пробитие, эффект, класс брони).
@@ -842,8 +862,10 @@ func _build_exit() -> void:
 		var e: Dictionary = Profile.equipment.get(slot, {})
 		col.add_child(_text("%s:  %s" % [Inventory.SLOT_NAMES[slot], ItemDb.label(e) if not e.is_empty() else "—"], Color(0.85, 0.85, 0.82)))
 	col.add_child(_text("Рюкзак: %d / %d ячеек, на %s ₽" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS, InventoryUI.money(ItemDb.value_of(Profile.backpack))], Color(0.85, 0.85, 0.82)))
-	if Profile.equipped_weapon() == "":
-		col.add_child(_text("Без оружия — надень его в тайнике.", Color(1.0, 0.55, 0.4)))
+	# чего из основного не хватает — видно заранее (выйти всё равно можно, спросим)
+	var gaps := Profile.raid_kit_gaps()
+	if not gaps.is_empty():
+		col.add_child(_text("Не хватает: " + "; ".join(gaps), Color(1.0, 0.55, 0.4)))
 	col.add_child(_text("Всё, что с собой, в рейде можно потерять.", Color(0.9, 0.75, 0.5)))
 	_floors_column()
 	_conditions_column()
@@ -856,16 +878,18 @@ func _build_exit() -> void:
 	var block := Floors.start_block(Profile.floor)
 	if not Net.is_networked():
 		var solo := _button("Соло-рейд", func() -> void:
-			Floors.pay_fee(Profile.floor)
-			Profile.pending_raid = true
-			get_tree().change_scene_to_file(Floors.scene(Profile.floor)))
+			_confirm_raid(func() -> void:
+				Floors.pay_fee(Profile.floor)
+				Profile.pending_raid = true
+				get_tree().change_scene_to_file(Floors.scene(Profile.floor))))
 		solo.disabled = block != ""
 		go.add_child(solo)
 	elif Net.is_host():
 		# все, кто в сети, идут за хостом на его этаж (плата — с хоста)
 		var all := _button("Рейд всем (%d в сети)" % (Net.player_names.size()), func() -> void:
-			Floors.pay_fee(Profile.floor)
-			Net.start_level.rpc(Floors.scene(Profile.floor), Profile.next_conditions))
+			_confirm_raid(func() -> void:
+				Floors.pay_fee(Profile.floor)
+				Net.start_level.rpc(Floors.scene(Profile.floor), Profile.next_conditions)))
 		all.disabled = block != ""
 		go.add_child(all)
 	else:
@@ -874,6 +898,27 @@ func _build_exit() -> void:
 		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
 	_coop_block(go)
 	go.add_child(_text("Доверие Михалыча: %d   ·   выходов из рейда: %d" % [Profile.trust, Profile.extractions], Color(0.7, 0.72, 0.7)))
+
+
+## Выход в рейд: чего из основного нет (Profile.raid_kit_gaps) — перечислить и спросить; не
+## запрещаем — можно идти осознанно. Всё есть — сразу.
+func _confirm_raid(go: Callable) -> void:
+	var gaps := Profile.raid_kit_gaps()
+	if gaps.is_empty():
+		go.call()
+		return
+	var d := ConfirmationDialog.new()
+	d.name = "RaidKitCheck"
+	d.title = "Проверка снаряжения"
+	d.dialog_text = "С собой нет:\n\n· " + "\n· ".join(gaps) + "\n\nВсё равно выйти в рейд?"
+	d.ok_button_text = "Выйти в рейд"
+	d.cancel_button_text = "Остаться"
+	d.confirmed.connect(go)
+	d.visibility_changed.connect(func() -> void:
+		if not d.visible:
+			d.queue_free())
+	_root.add_child(d)
+	d.popup_centered()
 
 
 ## Собрание: кто в сети и где; созвать своих (хост) или подключиться по IP; покинуть.

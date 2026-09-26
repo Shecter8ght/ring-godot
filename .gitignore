@@ -17,3 +17,6 @@ desktop.ini
 
 # Кэш Python от tools/*.py
 __pycache__/
+
+# Разовые пробы агентов (tools/_probe/*.tscn) — не в репозиторий
+tools/_probe/
