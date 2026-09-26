@@ -34,6 +34,44 @@ var _loot_sig: String = ""
 
 
 ## 34500 -> «34 500».
+## «Сортировать» — заметная кнопка над сеткой (тайник в убежище, рюкзак в рейде): янтарная, с
+## иконкой. Раскладывает по ячейкам: крупное — в начало, стопки добираются, место освобождается.
+static func sort_button(cb: Callable) -> Button:
+	var b := Button.new()
+	b.text = "Сортировать"
+	b.icon = _sort_icon()
+	b.tooltip_text = "Разложить по ячейкам: крупное — в начало, стопки добираются, свободное место — одним куском"
+	b.focus_mode = Control.FOCUS_NONE
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	b.custom_minimum_size = Vector2(170, 34)
+	b.add_theme_font_size_override("font_size", 16)
+	for st in [["normal", Color(0.86, 0.62, 0.2)], ["hover", Color(0.98, 0.74, 0.3)], ["pressed", Color(0.7, 0.48, 0.14)]]:
+		var box := StyleBoxFlat.new()
+		box.bg_color = st[1]
+		box.set_corner_radius_all(5)
+		box.content_margin_left = 10
+		box.content_margin_right = 12
+		box.content_margin_top = 4
+		box.content_margin_bottom = 4
+		b.add_theme_stylebox_override(String(st[0]), box)
+	for c in ["font_color", "font_hover_color", "font_pressed_color"]:
+		b.add_theme_color_override(c, Color(0.1, 0.08, 0.05))
+	b.pressed.connect(cb)
+	return b
+
+
+## Иконка сортировки — рисуется кодом (без файлов): полоски по убыванию и стрелка вниз.
+static func _sort_icon() -> Texture2D:
+	var img := Image.create(22, 22, false, Image.FORMAT_RGBA8)
+	var ink := Color(0.1, 0.08, 0.05)
+	for bar in [[4, 15], [10, 11], [16, 7]]:
+		img.fill_rect(Rect2i(1, int(bar[0]), int(bar[1]), 3), ink)
+	img.fill_rect(Rect2i(18, 3, 2, 14), ink)
+	for i in range(4):
+		img.fill_rect(Rect2i(15 + i, 14 + i, 8 - i * 2, 1), ink)
+	return ImageTexture.create_from_image(img)
+
+
 static func money(v: int) -> String:
 	var s := str(absi(v))
 	var out := ""
@@ -247,9 +285,7 @@ func _refresh_lists(me: Player) -> void:
 				sv.context.connect(func(at: Vector2) -> void: _slot_menu(me, ws, at))
 				slots.add_child(sv)
 			# разложить по порядку — освободить место
-			var sort := _button("Сортировать", func() -> void: Raid.current.request_sort("backpack"))
-			sort.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-			_bp_list.add_child(sort)
+			_bp_list.add_child(InventoryUI.sort_button(func() -> void: Raid.current.request_sort("backpack")))
 			_bp_grid = GridView.new(Balance.BACKPACK_GRID, "backpack")
 			_bp_grid.set_items(me.inventory.items)
 			_bp_list.add_child(_bp_grid)

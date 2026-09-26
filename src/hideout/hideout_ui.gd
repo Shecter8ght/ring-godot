@@ -273,11 +273,9 @@ func _build_stash() -> void:
 
 ## «Сортировать» над сеткой: крупное в начало, стопки добраны — место освобождается.
 func _sort_button(name: String) -> Button:
-	var b := _button("Сортировать", func() -> void:
+	return InventoryUI.sort_button(func() -> void:
 		if not Profile.sort_grid(name):
 			toast("Не разложить — места впритык"))
-	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	return b
 
 
 ## Тайник ↔ рюкзак (Ctrl+клик, двойной клик); не влезло — сказать.
