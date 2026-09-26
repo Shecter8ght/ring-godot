@@ -37,8 +37,6 @@ var _fog_ready: bool = false
 var _fog_base: float = 0.0
 ## 0 — на улице, 1 — под крышей ТЦ; плавно (Balance.INDOOR.sec).
 var _roof: float = 0.0
-## Исходная доля неба в окружающем свете — до поправки на крышу (берётся при первом шаге).
-var _sky0: float = -1.0
 var puddles: float = 0.0
 
 
@@ -129,14 +127,10 @@ func _tick_fog(delta: float) -> void:
 		return
 	var sec := float(Balance.OUTDOOR_LIGHTS.fog_change_sec)
 	_fog_base = move_toward(_fog_base, _fog_target, 0.03 * delta / sec)
-	# под крышей ТЦ (у каждого peer — по своему игроку, это только картинка): туман реже, свет неба
-	# приглушён
+	# под крышей ТЦ туман реже (у каждого peer — по своему игроку, это только картинка)
 	var ind: Dictionary = Balance.INDOOR
 	_roof = move_toward(_roof, 0.0 if _outdoor else 1.0, delta / float(ind.sec))
 	e.fog_density = _fog_base * lerpf(1.0, float(ind.fog_k), _roof)
-	if _sky0 < 0.0:
-		_sky0 = e.ambient_light_sky_contribution
-	e.ambient_light_sky_contribution = _sky0 * lerpf(1.0, float(ind.sky_k), _roof)
 	e.fog_sky_affect = move_toward(e.fog_sky_affect, _fog_sky_target, 0.5 * delta / sec)
 	e.fog_enabled = e.fog_density > 0.00001
 	_update_visibility()
