@@ -128,19 +128,13 @@ func _ready() -> void:
 	_streams["debris"] = _streams["impact_hard"]
 	_streams["explosion"] = _make(_explosion())
 	_load_samples()
+	# фон — только ветер в пустом здании (капли владелец убрал: запись «ветер + капли» не делится)
 	_ambient = AudioStreamPlayer.new()
-	var amb_path := "res://assets/audio/ambient/building_wind_drips.ogg"
-	if ResourceLoader.exists(amb_path):
-		var ogg: AudioStreamOggVorbis = load(amb_path)
-		ogg.loop = true
-		_ambient.stream = ogg
-		_ambient.volume_db = -16.0
-	else:
-		var amb := _make(_ambient_loop(6.0))
-		amb.loop_mode = AudioStreamWAV.LOOP_FORWARD
-		amb.loop_end = amb.data.size() / 2
-		_ambient.stream = amb
-		_ambient.volume_db = -22.0
+	var amb := _make(_ambient_loop(6.0))
+	amb.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	amb.loop_end = amb.data.size() / 2
+	_ambient.stream = amb
+	_ambient.volume_db = -22.0
 	_ambient.autoplay = true
 	_ambient.bus = &"Ambient"
 	add_child(_ambient)

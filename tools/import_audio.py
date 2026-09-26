@@ -28,7 +28,6 @@ GROUPS: dict[str, list[str]] = {
     "body": ["hit_", "fall_"],
     "voice": ["rattle_groan_", "rattle_gurgle_"],
     "world": ["door_", "debris_"],
-    "ambient": ["building_wind_drips"],
 }
 
 AUDIO_CREDITS = """
@@ -39,7 +38,6 @@ AUDIO_CREDITS = """
 | The Free Firearm Sound Library | Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney | CC0 | guns/shotgun, guns/marksman, *_far |
 | 100 CC0 SFX #2 | rubberduck (OpenGameArt) | CC0 | world/door, world/debris, hits/hard, body/hit |
 | Gun reload sounds | zer0_sol, SpringySpringo | CC0 | guns/reload_* |
-| Loopable Dungeon Ambience / Wind whoosh loop / Dripping water | JaggedStone, SketchMan3, qubodup | CC0 | ambient/building_wind_drips |
 | Пистолет и автомат (одиночный) | Shecter8ght — сгенерировано в ElevenLabs | права автора проекта; ElevenLabs — https://elevenlabs.io | guns/pistol, guns/carbine |
 | Шаги и бег по камню, грунту, снегу; попадания в стекло, металл, дерево; предсмертные хрипы | Shecter8ght — сгенерировано в ElevenLabs | права автора проекта; ElevenLabs — https://elevenlabs.io | steps/*, hits/glass|metal|wood, voice/rattle_* |
 """
