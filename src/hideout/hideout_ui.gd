@@ -138,6 +138,12 @@ func open(kind: int) -> void:
 
 func close_ui() -> void:
 	_root.visible = false
+	# меню правой кнопки, описание, вопросы — отдельные окошки: сами с окном не прячутся
+	for n in find_children("*", "", true, false):
+		if n is Window:
+			(n as Window).hide()
+		elif n is ItemInfo:
+			(n as ItemInfo)._close()
 
 
 func _process(delta: float) -> void:

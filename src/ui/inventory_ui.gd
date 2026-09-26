@@ -258,6 +258,18 @@ func _refresh_visibility() -> void:
 	var me := Raid.current.local_player() if Raid.current else null
 	if _looting == null and me and not me.inventory.buffer.is_empty():
 		Raid.current.request_flush_buffer()
+	if not _backpack_open and _looting == null:
+		close_popups()
+
+
+## Окно закрыли — закрыть и то, что открыто поверх: меню правой кнопки, описание предмета
+## (меню — отдельное окошко, само с рюкзаком не прячется).
+func close_popups() -> void:
+	for c in get_children():
+		if c is PopupMenu:
+			(c as PopupMenu).hide()
+		elif c is ItemInfo:
+			(c as ItemInfo)._close()
 
 
 ## Сетки перестраиваются, только когда содержимое изменилось.
