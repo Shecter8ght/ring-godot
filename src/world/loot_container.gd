@@ -44,6 +44,7 @@ func _ready() -> void:
 				config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
 			sync.replication_config = config
 			sync.set_multiplayer_authority(get_multiplayer_authority())
+			Net.scope_sync(self, sync)
 			add_child(sync)
 		if toss_from != Vector3.ZERO:
 			_toss()

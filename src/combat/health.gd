@@ -60,6 +60,7 @@ func _setup_sync() -> void:
 	# У свежего узла своё умалчиваемое authority (1) — не наследуется от родителя автоматически.
 	# Ставить его нужно ДО add_child: иначе спавнер путает pending-спавн с уже вошедшим в дерево узлом.
 	sync.set_multiplayer_authority(get_multiplayer_authority())
+	Net.scope_sync(self, sync)
 	add_child(sync)
 
 

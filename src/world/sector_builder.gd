@@ -1335,6 +1335,8 @@ func _emit_meshes(root: Node3D) -> void:
 	_add_occluder(root, walls)
 	if not _panes.is_empty():
 		var gp := GlassPanes.new()
+		# имя одно у всех peer — по нему RPC попаданий и состояния стёкол
+		gp.name = "GlassPanes"
 		gp.setup(_panes)
 		root.add_child(gp)
 	for mat_id in _glass:
@@ -1347,8 +1349,11 @@ func _emit_meshes(root: Node3D) -> void:
 	var doors := Node3D.new()
 	doors.name = "Doors"
 	root.add_child(doors)
-	for d in _doors:
-		doors.add_child(d)
+	# одинаковые имена у всех peer (порядок сборки один): по пути к двери идут просьба клиента
+	# открыть и её синхронизатор — с автоименем (@Node3D@N, у каждого процесса своё) не доходили
+	for i in range(_doors.size()):
+		_doors[i].name = "Door_%d" % i
+		doors.add_child(_doors[i])
 	var signs := Node3D.new()
 	signs.name = "Signs"
 	root.add_child(signs)

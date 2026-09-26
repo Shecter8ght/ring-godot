@@ -435,6 +435,7 @@ func _setup_sync() -> void:
 	# У свежего узла своё умалчиваемое authority (1) — не наследуется от родителя автоматически.
 	# Ставить его нужно ДО add_child: иначе спавнер путает pending-спавн с уже вошедшим в дерево узлом.
 	sync.set_multiplayer_authority(get_multiplayer_authority())
+	Net.scope_sync(self, sync)
 	add_child(sync)
 
 
@@ -1721,20 +1722,37 @@ func _shoot(suppress: bool) -> void:
 		spread *= Balance.DOWN_SPREAD
 	var exclude: Array[RID] = [get_rid()]
 	var dir := (target - from).normalized()
+	var ends := PackedVector3Array()
 	for i in range(int(_spec.pellets)):
 		# по ИИ другой фракции — пули бьют и ИИ; урон от ИИ никому из игроков не засчитывается
 		var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER | (Hitscan.LAYER_MARAUDER if at_ai else 0)
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(_spec.range) * 1.5,
 			mask, float(_spec.damage), exclude, _rng, 0, {"pen": float(_spec.pen), "armor_dmg": float(_spec.armor_dmg)})
 		if i == 0 or i % 3 == 0:
-			Tracer.spawn(get_tree().current_scene, from, hit.get("position", hit.get("end", from)), Color(1.0, 0.6, 0.35))
+			ends.append(hit.get("position", hit.get("end", from)))
 		_near_miss(from, hit)
-	if float(_spec.get("flash", 1.0)) > 0.05:
-		_muzzle.visible = true
-		get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
 	# свои выстрелы товарищи слышат как «бой» — не как свист пуль у себя
 	NoiseBus.emit(global_position, float(_spec.noise_m), "shot_ai")
-	Audio.play(String(_spec.sound), from)
+	var flash := float(_spec.get("flash", 1.0))
+	_shot_fx(from, ends, String(_spec.sound), flash)
+	# стреляет хост — клиентам видно и слышно то же (раньше мародёр у них стрелял беззвучно)
+	if Net.is_networked():
+		_rpc_shot_fx.rpc(from, ends, String(_spec.sound), flash)
+
+
+## Трассеры, вспышка, звук выстрела — у хоста из _shoot, у клиентов — по сети.
+func _shot_fx(from: Vector3, ends: PackedVector3Array, sound: String, flash: float) -> void:
+	for end in ends:
+		Tracer.spawn(get_tree().current_scene, from, end, Color(1.0, 0.6, 0.35))
+	if flash > 0.05:
+		_muzzle.visible = true
+		get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
+	Audio.play(sound, from)
+
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _rpc_shot_fx(from: Vector3, ends: PackedVector3Array, sound: String, flash: float) -> void:
+	_shot_fx(from, ends, sound, flash)
 
 
 ## Пуля прошла рядом с игроком (не в него) — ему страшно (Player.near_miss, стресс).

@@ -8,6 +8,9 @@ extends Node
 const PORT := 7777
 const MAX_PLAYERS := 3
 const LEVEL_SCENE := "res://scenes/levels/f1_ring.tscn"
+## Meta корня сцены-уровня: какая это сцена для синхронизаторов ("hideout", "raid"). Ставит сам
+## уровень в _enter_tree — раньше, чем его дети создадут свои синхронизаторы.
+const SCENE_META := "net_scene"
 
 signal player_list_changed
 ## Кто в какой сцене поменялся (peer_scene).
@@ -25,7 +28,8 @@ var player_names: Dictionary = {}
 var _active: bool = false
 ## Где сейчас каждый peer (свой — тоже): "menu", "hideout", "raid". Синхронизаторы сцены шлют
 ## только тем, кто в той же сцене (visible_in) — ушедший в убежище не получает поток рейда, а
-## спавн игрока приходит клиенту, когда его сцена уже загрузилась.
+## спавн игрока приходит клиенту, когда его сцена уже загрузилась. Узнаём друг о друге при
+## подключении (каждый — каждому, клиенты — и между собой) и при каждой смене сцены.
 var peer_scene: Dictionary = {}
 
 
@@ -51,7 +55,7 @@ func host(display_name: String) -> String:
 	var err := peer.create_server(PORT, MAX_PLAYERS)
 	if err != OK:
 		return "не удалось поднять сервер (%s)" % error_string(err)
-	multiplayer.multiplayer_peer = peer
+	_keep_own_scene(peer)
 	_active = true
 	player_names.clear()
 	player_names[1] = display_name
@@ -64,11 +68,21 @@ func join(address: String, display_name: String) -> String:
 	var err := peer.create_client(address.strip_edges(), PORT)
 	if err != OK:
 		return "не удалось подключиться (%s)" % error_string(err)
-	multiplayer.multiplayer_peer = peer
+	_keep_own_scene(peer)
 	_active = true
 	player_names.clear()
 	player_names[multiplayer.get_unique_id()] = display_name
 	return ""
+
+
+## Сменился пир — сменился и свой id (оффлайн был 1): где я — переносится под новый id, чужие
+## записи прежней сессии выбрасываются (иначе своё «hideout» под id 1 читалось бы как хост).
+func _keep_own_scene(peer: MultiplayerPeer) -> void:
+	var mine := String(peer_scene.get(multiplayer.get_unique_id(), ""))
+	multiplayer.multiplayer_peer = peer
+	peer_scene.clear()
+	if mine != "":
+		peer_scene[multiplayer.get_unique_id()] = mine
 
 
 ## Разрывает соединение и возвращает в состояние «не в сети» (для «Выйти в меню»).
@@ -76,8 +90,7 @@ func join(address: String, display_name: String) -> String:
 func disconnect_all() -> void:
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close()
-	peer_scene.clear()
-	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	_keep_own_scene(OfflineMultiplayerPeer.new())
 	_active = false
 	player_names.clear()
 
@@ -131,21 +144,44 @@ func visible_in(peer: int, key: String) -> bool:
 
 @rpc("any_peer", "call_remote", "reliable")
 func _scene_is(key: String) -> void:
-	var id := multiplayer.get_remote_sender_id()
-	var was := String(peer_scene.get(id, ""))
-	peer_scene[id] = key
+	peer_scene[multiplayer.get_remote_sender_id()] = key
 	scenes_changed.emit()
-	# новенький не знает, где я — ответить ему
-	if was == "" and peer_scene.has(multiplayer.get_unique_id()):
-		_scene_is.rpc_id(id, String(peer_scene[multiplayer.get_unique_id()]))
 
 
-## Для синхронизаторов сцены key: показывать данные только peer из той же сцены.
+## Синхронизатор узла node — только тем, кто в той же сцене, что и узел (уровень с meta
+## SCENE_META среди предков). Звать ДО add_child(sync): войдя в дерево без фильтра, он на кадр
+## виден всем — Godot успевает послать путь к нему тем, кто ещё в другой сцене; у них узла нет,
+## путь не подтверждается, и этому peer узел больше не шлётся никогда (хост «стоял» у клиентов).
+func scope_sync(node: Node, sync: MultiplayerSynchronizer) -> void:
+	var key := scene_of(node)
+	if key != "":
+		filter_sync(sync, key)
+
+
+## В какой сцене узел ("hideout", "raid"; вне уровня — "").
+func scene_of(node: Node) -> String:
+	var n := node
+	while n != null:
+		if n.has_meta(SCENE_META):
+			return String(n.get_meta(SCENE_META))
+		n = n.get_parent()
+	return ""
+
+
+## Для синхронизаторов сцены key: показывать данные только peer из той же сцены. Второй раз
+## (узел уже с фильтром) — ничего.
 func filter_sync(sync: MultiplayerSynchronizer, key: String) -> void:
+	if sync.has_meta(SCENE_META):
+		return
+	sync.set_meta(SCENE_META, key)
 	sync.add_visibility_filter(func(peer: int) -> bool: return visible_in(peer, key))
 
 
 func _on_peer_connected(id: int) -> void:
+	# новому — где я (клиент клиенту тоже: хост не пересказывает, а без этого двое клиентов в
+	# убежище друг друга не видели — каждый сообщал о себе, пока другого ещё не знал)
+	if peer_scene.has(multiplayer.get_unique_id()):
+		_scene_is.rpc_id(id, String(peer_scene[multiplayer.get_unique_id()]))
 	if is_host():
 		# Сообщаем новому peer имена уже подключённых, и всем — что появился новый (имя придёт RPC'ом от него).
 		_send_names.rpc_id(id, player_names)
@@ -160,23 +196,19 @@ func _on_peer_disconnected(id: int) -> void:
 
 func _on_connected_to_server() -> void:
 	_announce_name.rpc_id(1, player_names.get(multiplayer.get_unique_id(), "Игрок"))
-	# где я сейчас — всем (дальше каждая сцена говорит сама)
-	if peer_scene.has(multiplayer.get_unique_id()):
-		_scene_is.rpc(String(peer_scene[multiplayer.get_unique_id()]))
 	joined.emit()
 
 
 func _on_connection_failed() -> void:
-	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	_keep_own_scene(OfflineMultiplayerPeer.new())
 	_active = false
 	join_failed.emit()
 
 
 func _on_server_disconnected() -> void:
-	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	_keep_own_scene(OfflineMultiplayerPeer.new())
 	_active = false
 	player_names.clear()
-	peer_scene.clear()
 	player_list_changed.emit()
 	# хост ушёл: снаряжение, взятое в рейд, остаётся там (как при смерти); дальше — в своё убежище
 	Profile.pending_raid = false

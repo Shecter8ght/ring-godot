@@ -61,6 +61,7 @@ func _setup_sync() -> void:
 	# У свежего узла своё умалчиваемое authority (1) — не наследуется от родителя автоматически.
 	# Ставить его нужно ДО add_child: иначе спавнер путает pending-спавн с уже вошедшим в дерево узлом.
 	sync.set_multiplayer_authority(get_multiplayer_authority())
+	Net.scope_sync(self, sync)
 	add_child(sync)
 
 
@@ -80,9 +81,10 @@ func _on_body_exited(body: Node3D) -> void:
 
 func _process(delta: float) -> void:
 	if not _players_near.is_empty() and Input.is_action_just_pressed("interact"):
-		var who := _players_near[0]
-		if (who as Player).is_local():
-			if not _can_open(who as Player):
+		# F жмёт свой игрок — даже если напарник подошёл к двери первым
+		var who := _local_near()
+		if who:
+			if not _can_open(who):
 				Raid.current.notify("Заперто: нужен " + Raid.current.key_name(required_key))
 				return
 			toggle(who.global_position)
@@ -91,6 +93,13 @@ func _process(delta: float) -> void:
 	# каждый кадр тянул бы створку обратно, деря с прилетающим по сети углом.
 	if is_multiplayer_authority():
 		_leaf.rotation.y = lerp_angle(_leaf.rotation.y, _target_angle, minf(1.0, Balance.DOOR_SWING_SPEED * delta))
+
+
+func _local_near() -> Player:
+	for b in _players_near:
+		if is_instance_valid(b) and (b as Player).is_local():
+			return b as Player
+	return null
 
 
 ## Ключ — предмет в рюкзаке того, кто открывает (закрыть открытую можно всегда).

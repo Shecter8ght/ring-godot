@@ -144,11 +144,18 @@ func _ready() -> void:
 	_bake_navmesh()
 
 
+## Раньше детей: их синхронизаторы (Net.scope_sync) сразу знают, что они — в рейде.
+func _enter_tree() -> void:
+	if not Engine.is_editor_hint():
+		set_meta(Net.SCENE_META, "raid")
+
+
 func _exit_tree() -> void:
 	if get_tree().node_added.is_connected(_on_node_added):
 		get_tree().node_added.disconnect(_on_node_added)
 
 
+## Страховка для синхронизатора, созданного без Net.scope_sync (фильтр — с опозданием на кадр).
 func _on_node_added(n: Node) -> void:
 	if n is MultiplayerSynchronizer and is_ancestor_of(n):
 		Net.filter_sync(n as MultiplayerSynchronizer, "raid")

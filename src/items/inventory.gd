@@ -18,7 +18,9 @@ var loadout_ready: bool = false
 
 
 func _ready() -> void:
-	if Net.is_networked():
+	# в убежище вещи — в профиле у каждого свой, рюкзак игрока по сети не нужен (хост слал бы
+	# чужой пустой рюкзак новичку раньше, чем тот увидит его хозяина, — путь не находился)
+	if Net.is_networked() and Net.scene_of(self) != "hideout":
 		var sync := MultiplayerSynchronizer.new()
 		sync.name = "Sync"
 		var config := SceneReplicationConfig.new()
@@ -28,6 +30,7 @@ func _ready() -> void:
 			config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
 		sync.replication_config = config
 		sync.set_multiplayer_authority(get_multiplayer_authority())
+		Net.scope_sync(self, sync)
 		add_child(sync)
 
 

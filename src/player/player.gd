@@ -193,6 +193,7 @@ func _setup_sync() -> void:
 	# У свежего узла своё умалчиваемое authority (1) — не наследуется от родителя автоматически.
 	# Ставить его нужно ДО add_child: иначе спавнер путает pending-спавн с уже вошедшим в дерево узлом.
 	sync.set_multiplayer_authority(get_multiplayer_authority())
+	Net.scope_sync(self, sync)
 	add_child(sync)
 
 
@@ -1016,10 +1017,11 @@ func _fire(spec: Dictionary) -> void:
 	var rig := _camera_rig as CameraRig
 	var marked := false
 	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg)}
+	var ends := PackedVector3Array()
 	for i in range(int(spec.pellets)):
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(spec.range_m), mask, float(spec.damage), exclude, _rng, -1, bullet)
 		if i < 3:
-			Tracer.spawn(get_tree().current_scene, muzzle, hit.get("position", hit.get("end", from)), Color(1.0, 0.85, 0.5))
+			ends.append(hit.get("position", hit.get("end", from)))
 		var c: Object = hit.get("collider")
 		if rig and not marked:
 			if c is Target:
@@ -1032,18 +1034,36 @@ func _fire(spec: Dictionary) -> void:
 	_apply_recoil(spec, braced, rig)
 	if rig:
 		rig.add_shake(float(spec.shake))
+	NoiseBus.emit(global_position, float(spec.noise_m), "shot")
+	_shot_fx(muzzle, ends, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound))
+	# остальным — то же (пули и урон уже посчитаны здесь и у хоста)
+	if Net.is_networked():
+		_rpc_shot_fx.rpc(muzzle, ends, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound))
+
+
+## Что видно и слышно от выстрела: трассеры до точек попадания, вспышка у дула, звук, щелчок
+## помпы/затвора. У стрелявшего — из _fire, у остальных — по сети (_rpc_shot_fx).
+func _shot_fx(muzzle: Vector3, ends: PackedVector3Array, sound: String, db: float, flash: float, cycle_sound: String) -> void:
+	for end in ends:
+		Tracer.spawn(get_tree().current_scene, muzzle, end, Color(1.0, 0.85, 0.5))
 	# вспышка: пламегаситель гасит, глушитель — почти нет
-	if float(spec.flash) > 0.05:
+	if flash > 0.05:
 		_muzzle.global_position = muzzle
-		_muzzle.light_energy = 3.0 * float(spec.flash)
+		_muzzle.light_energy = 3.0 * flash
 		_muzzle.visible = true
 		get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
-	NoiseBus.emit(global_position, float(spec.noise_m), "shot")
-	Audio.play(String(spec.sound), muzzle, float(spec.db))
+	Audio.play(sound, muzzle, db)
 	# помпа/затвор — щелчок после выстрела
-	if String(spec.cycle_sound) != "":
+	if cycle_sound != "":
 		get_tree().create_timer(0.35).timeout.connect(func() -> void:
-			Audio.play(String(spec.cycle_sound), global_position))
+			if is_inside_tree():
+				Audio.play(cycle_sound, global_position))
+
+
+## Выстрел напарника: раньше его видел и слышал только он сам.
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _rpc_shot_fx(muzzle: Vector3, ends: PackedVector3Array, sound: String, db: float, flash: float, cycle_sound: String) -> void:
+	_shot_fx(muzzle, ends, sound, db, flash, cycle_sound)
 
 
 ## Дуло: в прицеле — у модели в руках перед камерой, иначе — у модели на теле.
