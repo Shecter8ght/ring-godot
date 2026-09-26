@@ -253,13 +253,27 @@ func _run(cmd: String) -> void:
 		# чит: бессмертие вкл/выкл (как в меню Esc → Настройки)
 		Settings.set_god(not Settings.god if a.size() < 2 else a[1] in ["1", "on", "вкл"])
 		out = "бессмертие: " + ("включено" if Settings.god else "выключено")
+	elif a.size() >= 1 and a[0] == "event":
+		# событие рейда сейчас: свет погас, генератор встал, сброс груза, ЧВК (решает хост)
+		out = _dev_event(a[1] if a.size() > 1 else "")
 	elif a.size() >= 1 and a[0] == "help":
-		out = "god — бессмертие вкл/выкл · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+		out = "god — бессмертие вкл/выкл · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
 " + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"
 	_console_out.text = out
 	_update_tracker()
+
+
+func _dev_event(kind: String) -> String:
+	if not kind in ["outage", "generator", "drop", "pmc"]:
+		return "event outage|generator|drop|pmc"
+	if RaidEvents.current == null:
+		return "не в рейде"
+	if Net.is_networked() and not multiplayer.is_server():
+		return "события рейда решает хост"
+	RaidEvents.current.trigger(kind)
+	return "событие: " + kind
 
 
 # ---------------------------------------------------------------- построение

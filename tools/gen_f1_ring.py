@@ -244,7 +244,7 @@ d = {
     "arch": {"storefront_h": 3.6, "door_h": 2.1, "shutter_h": 3.2, "gate_h": 4.5, "entrance_w": 3.2, "broken_pane_pct": 22},
     "camera_yaw": -45,
     "spawn": {"a": -100, "r": 176},
-    # доп. сцены: улица (фонари, подстанция, спуски в убежище), главный рубильник света ТЦ
+    # доп. сцены: улица (фонари, подстанция, спуски в убежище), главный рубильник и генератор ТЦ
     "extras": ["res://scenes/world/f1_street.tscn", "res://scenes/world/f1_mall_power.tscn"],
     "rooms": rooms,
     "openings": ops,

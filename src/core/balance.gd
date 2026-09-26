@@ -499,6 +499,10 @@ const RAID_EVENTS := {
 	"alarm_shops": 2, "alarm_sec": 120.0, "alarm_noise_m": 70.0,
 	"radio_items": ["laptop", "gpu", "server_drive", "camera", "documents", "diamond_ring"], "radio_at": [120.0, 360.0], "radio_mult": 3,
 }
+## Генератор ТЦ (MallGenerator): гул работающего (громкость, дБ; 1:1 до, слышно до, м), лязг
+## ремонта раз в clank_sec — мародёры слышат на clank_noise_m; мигание лампы сломанного, Гц;
+## проход вокруг корпуса без пропсов, м.
+const MALL_GENERATOR := {"hum_db": -6.0, "hum_unit_m": 5.0, "hum_max_m": 40.0, "clank_sec": 1.2, "clank_noise_m": 45.0, "blink_hz": 1.5, "keepout_m": 1.2}
 ## ЧВК: сколько в группе.
 const PMC_SQUAD := 4
 ## Раненый мародёр кричит — товарищи в радиусе, м, идут спасать: тащат за укрытие (до

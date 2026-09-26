@@ -17,6 +17,12 @@ var _lamps: Array[MeshInstance3D] = []
 var _lever: Node3D
 
 
+func _ready() -> void:
+	super._ready()
+	if not Engine.is_editor_hint():
+		add_to_group("power_points")
+
+
 func can_use() -> bool:
 	return RaidEvents.current != null
 
@@ -30,7 +36,7 @@ func prompt() -> String:
 	var res := "off" if nxt == "off" else ("emergency" if ev.generator_down or nxt == "emergency" else "on")
 	var t := String({"off": "выключить свет в ТЦ", "emergency": "включить аварийный свет", "on": "включить весь свет"}.get(res, ""))
 	if ev.generator_down and res == "emergency":
-		t += " (генератор стоит — весь свет после ремонта)"
+		t += " (генератор стоит — весь свет после ремонта %s)" % ev.generator().where
 	return "%s: %s" % [display_name, t]
 
 

@@ -5,17 +5,18 @@ extends Node
 ##   godot --headless res://tools/coop_raid_test.tscn -- c2      (ещё через 3 с)
 ## c1 приходит как из главного меню («Собрание»), c2 — из своего убежища («подключиться по IP»).
 ## Проверки у каждого: в убежище видны оба других и видно, как они ходят; в рейде — то же, плюс
-## выстрелы других видны (трассеры у стрелявшего), дверь, открытая клиентом, открыта у всех.
+## выстрелы других видны (трассеры у стрелявшего), дверь, открытая клиентом, открыта у всех;
+## генератор ТЦ встал (хост) — у всех стоит, c2 чинит в мастерской — у всех снова весь свет.
 ## Мародёров хост убирает — чтобы никого не подстрелили посреди проверок.
 
 const ROLES := ["host", "c1", "c2"]
 ## Во сколько секунд от готовности рейда (все трое на месте) кто что делает.
 const RAID_PLAN := {
-	"host": {"move": 3.0, "fire": 6.0},
+	"host": {"move": 3.0, "fire": 6.0, "gen_fail": 24.0},
 	"c1": {"move": 9.0, "fire": 12.0, "door": 15.0},
-	"c2": {"move": 18.0, "fire": 21.0},
+	"c2": {"move": 18.0, "fire": 21.0, "gen_fix": 27.0},
 }
-const RAID_CHECK_AT := 32.0
+const RAID_CHECK_AT := 42.0
 const HIDEOUT_MOVE_AT := {"host": 5.0, "c1": 3.0, "c2": 3.0}
 
 var _role: String = "host"
@@ -30,6 +31,8 @@ var _remote_tracers: Dictionary = {}
 ## Свои трассеры — что сам действительно выстрелил.
 var _own_tracers: int = 0
 var _door_path: String = ""
+## Видел ли генератор стоящим (авария хоста дошла).
+var _saw_gen_down: bool = false
 
 
 func _ready() -> void:
@@ -122,6 +125,12 @@ func _raid() -> void:
 						await _shoot(3)
 					"door":
 						await _open_door()
+					"gen_fail":
+						RaidEvents.current.trigger("generator")
+					"gen_fix":
+						await _fix_generator()
+		if RaidEvents.current and RaidEvents.current.generator_down:
+			_saw_gen_down = true
 		await get_tree().process_frame
 	_check_moved("raid")
 	_check("рейд: сам выстрелил", _own_tracers > 0, "своих трассеров %d" % _own_tracers)
@@ -133,6 +142,8 @@ func _raid() -> void:
 	# дверь открыл c1 — у всех открыта
 	var door := _door_by_path(_door_path) if _door_path != "" else _test_door()
 	_check("рейд: дверь, открытая c1, открыта", door != null and door.is_open, str(door.get_path()) if door else "двери нет")
+	_check("рейд: генератор встал — видно у меня", _saw_gen_down, "")
+	_check("рейд: c2 починил генератор — весь свет", RaidEvents.current != null and not RaidEvents.current.generator_down and String(RaidConditions.current.power) == "on", String(RaidConditions.current.power))
 	# хост уходит последним — иначе клиентов выкинет в убежище посреди проверок
 	await get_tree().create_timer(8.0 if _role == "host" else 2.0).timeout
 
@@ -188,6 +199,20 @@ func _open_door() -> void:
 	Input.action_release("interact")
 	await get_tree().create_timer(1.5).timeout
 	_check("c1: дверь открылась у меня", door.is_open, _door_path)
+
+
+## c2 идёт к щитку генератора в мастерской и чинит (просьба хосту, как по F); ждёт ремонт.
+func _fix_generator() -> void:
+	var gen := RaidEvents.current.generator() if RaidEvents.current else null
+	var me := Raid.current.local_player() if Raid.current else null
+	if gen == null or me == null:
+		_check("c2: генератор найден", false, "")
+		return
+	me.global_position = gen.to_global(Vector3(-0.85, 0.1, -1.3))
+	await get_tree().create_timer(0.5).timeout
+	_check("c2: генератор стоит — можно чинить", gen.can_use(), gen.prompt())
+	gen.request_use()
+	await get_tree().create_timer(float(Balance.RAID_EVENTS.repair_sec) + 1.5).timeout
 
 
 ## Первая незапертая дверь самого ТЦ (кольцо собирает SectorBuilder, у всех peer одинаково) —

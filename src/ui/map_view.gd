@@ -217,6 +217,14 @@ func _draw_map() -> void:
 		var s := _to_screen(Vector2(ep.global_position.x, ep.global_position.z))
 		_canvas.draw_colored_polygon(PackedVector2Array([s + Vector2(0, -11), s + Vector2(10, 7), s + Vector2(-10, 7)]), Color(0.2, 0.75, 0.35))
 		_label(s + Vector2(0, 20), ep.display_name, 13, Color(0.55, 1.0, 0.65))
+	# свет ТЦ: главный рубильник и генератор — ромб (генератор встал — красный)
+	for n in get_tree().get_nodes_in_group("power_points"):
+		var pp := n as Node3D
+		var down := n is MallGenerator and (n as MallGenerator).is_down()
+		var col := Color(1.0, 0.3, 0.2) if down else Color(1.0, 0.8, 0.25)
+		var s := _to_screen(Vector2(pp.global_position.x, pp.global_position.z))
+		_canvas.draw_colored_polygon(PackedVector2Array([s + Vector2(0, -8), s + Vector2(8, 0), s + Vector2(0, 8), s + Vector2(-8, 0)]), col)
+		_label(s + Vector2(0, 18), String(pp.get("display_name")), 12, col)
 	# напарники — точки, сам — стрелка по взгляду
 	for p in get_tree().get_nodes_in_group("players"):
 		var pl := p as Player

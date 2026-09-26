@@ -1,9 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://src/world/mall_breaker.gd" id="1_br"]
+[ext_resource type="Script" path="res://src/world/mall_generator.gd" id="2_gen"]
 
 [node name="F1MallPower" type="Node3D"]
 
 [node name="MainBreaker" type="Node3D" parent="."]
 transform = Transform3D(-0.35837, 0, 0.93358, 0, 1, 0, -0.93358, 0, -0.35837, 112.310, 0, -43.112)
 script = ExtResource("1_br")
+
+[node name="Generator" type="Node3D" parent="."]
+transform = Transform3D(-0.33381, 0, -0.94264, 0, 1, 0, 0.94264, 0, -0.33381, -107.461, 0, -38.054)
+script = ExtResource("2_gen")

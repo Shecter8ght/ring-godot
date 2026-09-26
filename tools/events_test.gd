@@ -53,12 +53,21 @@ func _ready() -> void:
 		if (l as Light3D).visible:
 			lit += 1
 	_check("рубильник в щитовой поднят — свет вернулся", String(RaidConditions.current.power) == "on" and lit > 0, "огней %d" % lit)
-	# генератор: авария → аварийный свет → починили → свет
+	# генератор ТЦ: стоит в мастерской и работает; авария → аварийный свет, дымит → починили → свет
+	var gen := get_tree().get_first_node_in_group("mall_generator") as MallGenerator
+	var gp := gen.global_position if gen else Vector3.ZERO
+	var ga := rad_to_deg(atan2(gp.z, gp.x))
+	var gr := Vector2(gp.x, gp.z).length()
+	_check("генератор ТЦ — в мастерской, работает", gen != null and not gen.can_use() and ga > -162.5 and ga < -152.5 and gr > 109.0 and gr < 121.0, "a %.1f r %.1f" % [ga, gr])
+	# к щитку можно подойти: перед ним навмеш (пропсов нет, корпус — препятствие)
+	var front := gen.to_global(Vector3(-0.85, 0.0, -1.3)) if gen else Vector3.ZERO
+	var nav := NavigationServer3D.map_get_closest_point(me.get_world_3d().navigation_map, front)
+	var off := Vector2(nav.x - front.x, nav.z - front.z).length()
+	_check("к генератору можно подойти", off < 0.3, "до навмеша %.2f м по полу" % off)
 	ev.trigger("generator")
 	await get_tree().process_frame
-	var gen := ev._generator as GeneratorPanel
-	_check("авария генератора — аварийный свет, генератор дымит", gen != null and String(RaidConditions.current.power) == "emergency", "")
-	me.global_position = gen.global_position + Vector3(1.0, 0.1, 0.0)
+	_check("авария генератора — аварийный свет, чинить тот же генератор", ev.generator() == gen and gen.can_use() and String(RaidConditions.current.power) == "emergency", String(RaidConditions.current.power))
+	me.global_position = front + Vector3(0, 0.1, 0)
 	await get_tree().physics_frame
 	gen._use(1)
 	await get_tree().create_timer(float(Balance.RAID_EVENTS.repair_sec) + 0.5).timeout
@@ -66,7 +75,7 @@ func _ready() -> void:
 	for l in get_tree().get_nodes_in_group("mall_lights"):
 		if (l as Light3D).visible:
 			lit += 1
-	_check("починил генератор — свет вернулся", String(RaidConditions.current.power) == "on" and lit > 0, "огней %d" % lit)
+	_check("починил генератор — свет вернулся, генератор на месте", String(RaidConditions.current.power) == "on" and lit > 0 and is_instance_valid(gen) and not gen.can_use(), "огней %d" % lit)
 	# сброс груза и ЧВК
 	ev.trigger("drop")
 	await get_tree().create_timer(5.0).timeout

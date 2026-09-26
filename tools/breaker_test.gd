@@ -1,6 +1,6 @@
 extends Node
 ## Главный рубильник света ТЦ: стоит в электрощитовой; «свет погас» — рубильник внизу, поднять:
-## аварийный → весь → выкл; генератор встал — только аварийный, починили — снова весь. С окном —
+## аварийный → весь → выкл; генератор (в мастерской) встал — только аварийный, починили — снова весь. С окном —
 ## снимок breaker.png (от первого лица у шкафа). godot --path . res://tools/breaker_test.tscn
 
 var _fails: int = 0
@@ -58,12 +58,14 @@ func _ready() -> void:
 	br._use(1)
 	ev._rpc_event("generator")
 	_check("генератор встал — только аварийный", String(RaidConditions.current.power) == "emergency" and ev.generator_down, String(RaidConditions.current.power))
+	var gen := ev.generator()
+	_check("генератор встал — чинить его в мастерской", gen != null and gen.can_use() and gen.where == "в мастерской", gen.prompt() if gen else "")
 	_check("при стоящем генераторе рубильник: аварийный ↔ выкл", ev.next_breaker() == "off", ev.next_breaker())
 	br._use(1)
 	br._use(1)
 	_check("…и снова аварийный, не весь", String(RaidConditions.current.power) == "emergency", String(RaidConditions.current.power))
 	ev._rpc_event("generator_fixed")
-	_check("починили генератор — весь свет", String(RaidConditions.current.power) == "on", String(RaidConditions.current.power))
+	_check("починили генератор — весь свет", String(RaidConditions.current.power) == "on" and not gen.can_use(), String(RaidConditions.current.power))
 	print("breaker_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
 

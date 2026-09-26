@@ -17,7 +17,8 @@ var _t: float = 0.0
 var _schedule: Array = []
 var _rng := RandomNumberGenerator.new()
 var _alarms: Array = []
-var _generator: Node3D
+## Генератор ТЦ — узел уровня (MallGenerator); нет его на уровне — ставится у техкомплекса.
+var _generator: MallGenerator
 ## Свет в ТЦ: положение главного рубильника (электрощитовая, MallBreaker) — "on" / "emergency" /
 ## "off", и стоит ли генератор (тогда даже «on» — только аварийный). Решает хост, знают все.
 var breaker: String = "on"
@@ -48,6 +49,9 @@ func _ready() -> void:
 			generator_down = true
 		"emergency":
 			generator_down = true
+	# стоит с начала рейда — должен быть где чинить (на уровне без своего генератора — поставить)
+	if generator_down:
+		generator.call_deferred()
 	if not enabled:
 		return
 	if not Net.is_networked() or multiplayer.is_server():
@@ -138,10 +142,7 @@ func _rpc_event(kind: String) -> void:
 		"generator_fixed":
 			generator_down = false
 			_set_power(effective_power())
-			if _generator:
-				_generator.queue_free()
-				_generator = null
-			_notify("Генератор запущен — свет вернулся")
+			_notify("Генератор запущен — свет вернулся" if breaker != "off" else "Генератор запущен — теперь поднять главный рубильник в электрощитовой")
 		"drop":
 			_supply_drop()
 		"pmc":
@@ -209,13 +210,23 @@ func _rpc_breaker(pos: String, gen_down: bool) -> void:
 func _generator_fail() -> void:
 	generator_down = true
 	_set_power(effective_power())
-	var tech := level.get_node_or_null("Buildings/TechComplex") as Node3D
-	var pos := tech.global_position if tech else SectorBuilder.polar(-10.0, 170.0)
-	_generator = GeneratorPanel.new()
-	_generator.name = "Generator"
-	level.add_child(_generator)
-	_generator.global_position = pos + Vector3(0, 0, 0)
-	_notify("Генератор встал — аварийный свет. Починить можно в техкомплексе (шумно)")
+	_notify("Генератор встал — аварийный свет. Починить — %s (шумно)" % generator().where)
+
+
+## Генератор ТЦ: стоит на уровне (мастерская). На уровне без него (старый сектор) — ставится у
+## техкомплекса, с тем же именем у всех peer.
+func generator() -> MallGenerator:
+	if _generator != null and is_instance_valid(_generator):
+		return _generator
+	_generator = get_tree().get_first_node_in_group("mall_generator") as MallGenerator
+	if _generator == null:
+		var tech := level.get_node_or_null("Buildings/TechComplex") as Node3D
+		_generator = MallGenerator.new()
+		_generator.name = "Generator"
+		_generator.where = "у технического комплекса"
+		level.add_child(_generator)
+		_generator.global_position = tech.global_position if tech else SectorBuilder.polar(-10.0, 170.0)
+	return _generator
 
 
 ## Хост: генератор починили — свет всем.
