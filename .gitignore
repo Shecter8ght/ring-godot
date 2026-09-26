@@ -14,3 +14,6 @@ _asset_src/
 Thumbs.db
 desktop.ini
 референсы/
+
+# Кэш Python от tools/*.py
+__pycache__/
