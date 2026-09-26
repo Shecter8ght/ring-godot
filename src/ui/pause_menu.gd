@@ -377,6 +377,18 @@ func _build_settings(h: HBoxContainer) -> void:
 	q.selected = Settings.QUALITY.find(Settings.quality)
 	q.item_selected.connect(func(i: int) -> void: Settings.set_quality(String(Settings.QUALITY[i])))
 	grid.add_child(q)
+	grid.add_child(_label("Экран (Alt+Enter)"))
+	var wm := OptionButton.new()
+	wm.focus_mode = Control.FOCUS_NONE
+	for k in Settings.WINDOW_MODES:
+		wm.add_item(String(Settings.WINDOW_NAMES[k]))
+	wm.selected = Settings.WINDOW_MODES.find(Settings.window_mode)
+	wm.item_selected.connect(func(i: int) -> void: Settings.set_window_mode(String(Settings.WINDOW_MODES[i])))
+	# Alt+Enter переключил — выпадающий список показывает то же
+	Settings.changed.connect(func() -> void:
+		if is_instance_valid(wm):
+			wm.selected = Settings.WINDOW_MODES.find(Settings.window_mode))
+	grid.add_child(wm)
 	grid.add_child(_label("Клавиши"))
 	var keys_btn := Button.new()
 	keys_btn.text = "Сменить клавиши…"

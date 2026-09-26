@@ -8,12 +8,16 @@ extends Node
 ## «средне» — без SDFGI и SSIL, тени 4К; «низко» — ещё без SSAO и тумана, тени 2К, рендер 3D в
 ## 77 % разрешения с FSR. Исходные значения окружения запоминаются на нём (meta), чтобы вернуть.
 ## Громкость — по шинам: выстрелы, шаги, эффекты (попадания, двери, голоса), окружение.
+## Экран: во весь экран (без рамки, поверх панели задач — умолчание, project.godot) или в окне;
+## Alt+Enter — переключить.
 
 signal changed
 
 const PATH := "user://settings.cfg"
 const QUALITY := ["low", "medium", "high"]
 const QUALITY_NAMES := {"low": "Низко", "medium": "Средне", "high": "Высоко"}
+const WINDOW_MODES := ["fullscreen", "windowed"]
+const WINDOW_NAMES := {"fullscreen": "Во весь экран", "windowed": "В окне"}
 ## Шина → подпись в меню. Master — общая.
 const BUSES := {"Master": "Общая", "Shots": "Выстрелы", "Steps": "Шаги", "World": "Эффекты", "Ambient": "Окружение"}
 ## Множители чувствительности мыши: от очень медленной до очень быстрой (ползунок — по экспоненте,
@@ -21,6 +25,8 @@ const BUSES := {"Master": "Общая", "Shots": "Выстрелы", "Steps": "�
 const SENS_RANGE := [0.05, 10.0]
 
 var quality: String = "high"
+## Во весь экран или в окне (WINDOW_MODES).
+var window_mode: String = "fullscreen"
 ## Множитель чувствительности мыши: от первого лица (взгляд) и в изометрии (поворот камеры СКМ).
 var sens_fps: float = 1.0
 var sens_iso: float = 1.0
@@ -57,6 +63,7 @@ func _ready() -> void:
 		"pos_shadow": vp.positional_shadow_atlas_size}
 	if not _tool_run:
 		_load()
+		apply_window()
 	_apply_audio()
 	get_tree().node_added.connect(_on_node_added)
 	apply_graphics.call_deferred()
@@ -68,6 +75,8 @@ func _load() -> void:
 		return
 	var q := String(cfg.get_value("graphics", "quality", quality))
 	quality = q if q in QUALITY else "high"
+	var wm := String(cfg.get_value("graphics", "window", window_mode))
+	window_mode = wm if wm in WINDOW_MODES else "fullscreen"
 	sens_fps = clampf(float(cfg.get_value("mouse", "fps", sens_fps)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
@@ -89,6 +98,7 @@ func save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.load(PATH)
 	cfg.set_value("graphics", "quality", quality)
+	cfg.set_value("graphics", "window", window_mode)
 	cfg.set_value("mouse", "fps", sens_fps)
 	cfg.set_value("mouse", "iso", sens_iso)
 	cfg.set_value("mouse", "ads", sens_ads)
@@ -110,6 +120,40 @@ func set_quality(q: String) -> void:
 	apply_graphics()
 	save()
 	changed.emit()
+
+
+func set_window_mode(m: String) -> void:
+	if not m in WINDOW_MODES:
+		return
+	window_mode = m
+	apply_window()
+	save()
+	changed.emit()
+
+
+## Во весь экран — окно без рамки на весь монитор, поверх панели задач; в окне — 80 % экрана
+## по центру.
+func apply_window() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	if window_mode == "windowed":
+		if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED:
+			return
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		var scr := DisplayServer.screen_get_usable_rect()
+		var sz := Vector2i(Vector2(scr.size) * 0.8)
+		DisplayServer.window_set_size(sz)
+		DisplayServer.window_set_position(scr.position + (scr.size - sz) / 2)
+	elif DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+
+## Alt+Enter — во весь экран / в окне.
+func _input(event: InputEvent) -> void:
+	var k := event as InputEventKey
+	if k and k.pressed and not k.echo and k.alt_pressed and (k.keycode == KEY_ENTER or k.keycode == KEY_KP_ENTER):
+		set_window_mode("windowed" if window_mode == "fullscreen" else "fullscreen")
+		get_viewport().set_input_as_handled()
 
 
 func set_sens(fps: float, iso: float) -> void:
