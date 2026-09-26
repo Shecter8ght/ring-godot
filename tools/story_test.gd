@@ -128,7 +128,9 @@ func _check_fuzz() -> void:
 	var bad: Array = []
 	for i in range(400):
 		Profile.raid_history = [] if r.randf() < 0.3 else Profile.raid_history
-		var died := r.randf() < 0.5
+		var roll := r.randf()
+		var died := roll < 0.45
+		var outcome := "death" if died else ("stranded" if roll < 0.6 else "extract")
 		var kills: Array = []
 		for k in range(r.randi_range(0, 14)):
 			kills.append({"t": r.randf_range(0, 900), "arch": ["scout", "gunner", "heavy", "sniper"][r.randi() % 4],
@@ -137,16 +139,16 @@ func _check_fuzz() -> void:
 		kills.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return float(x.t) < float(y.t))
 		var causes := ["ai", "grenade", "self_grenade", "friendly", "bleed", "give_up"]
 		var shots := r.randi_range(0, 300)
-		var a := _raid("death" if died else "extract", {
+		var a := _raid(outcome, {
 			"ended_ms": r.randi_range(20, 2400) * 1000, "start_weapons": [["wpn_hg_03"], ["wpn_ar_03"], [], ["wpn_sg_02", "wpn_hg_03"]][r.randi() % 4],
-			"weapons_used": ["wpn_sr_01"] if r.randf() < 0.3 else [], "start_kit_value": r.randi_range(0, 400000), "kills": kills,
+			"weapons_used": ["wpn_sr_01"] if r.randf() < 0.3 else [], "start_kit_value": 0 if r.randf() < 0.15 else r.randi_range(1000, 400000), "kills": kills,
 			"shots": shots, "hits": r.randi_range(0, shots), "damage_taken": r.randf_range(0, 300) if r.randf() < 0.8 else 0.0,
 			"friendly_hits": r.randi_range(0, 2), "downs": r.randi_range(0, 2), "low_hp_moments": r.randi_range(0, 3),
 			"heals": ["medkit", "bandage", "medkit"] if r.randf() < 0.3 else [], "enemy_self_grenades": int(r.randf() < 0.1),
 			"enemy_ally_grenades": int(r.randf() < 0.1), "near_extract_sec": r.randf_range(0, 200),
 			"end_value": r.randi_range(0, 500000), "found_value": r.randi_range(0, 90000), "found_items": r.randi_range(0, 20),
 			"best_find": {"id": "gold_chain", "value": 45000} if r.randf() < 0.3 else {},
-			"extract_name": "Парковка" + (Raid.CARRIED_SUFFIX if r.randf() < 0.2 else "") if not died else "",
+			"extract_name": "Парковка" + (Raid.CARRIED_SUFFIX if r.randf() < 0.2 and outcome == "extract" else "") if not died else "",
 			"death": {"cause": causes[r.randi() % causes.size()], "arch": ["scout", "sniper", "pmc", ""][r.randi() % 4],
 				"faction": ["marauder", "pmc", "resident"][r.randi() % 3], "weapon": ["wpn_ar_03", ""][r.randi() % 2]} if died else {},
 			"death_extract_dist": r.randf_range(0, 200) if died else INF})
@@ -154,7 +156,8 @@ func _check_fuzz() -> void:
 		var t := _text(st)
 		if st.paragraphs.size() < 2 or st.paragraphs.size() > 5:
 			bad.append("абзацев %d" % st.paragraphs.size())
-		if t.contains("{") or t.contains("}") or t.contains("  ") or st.verdict.strip_edges() == "":
+		# «0 ₽» — фраза о том, чего не было (песочница: комплект ничего не стоит)
+		if t.contains("{") or t.contains("}") or t.contains("  ") or t.contains(" 0 ₽") or st.verdict.strip_edges() == "":
 			bad.append(t)
 		for p in st.paragraphs:
 			if p.strip_edges() == "":
@@ -163,7 +166,7 @@ func _check_fuzz() -> void:
 			break
 		if i < 3:
 			print("    [%s] %s" % [st.style, t.replace("\n", "\n    ")])
-	_check("400 случайных рейдов: 2–5 абзацев, всё подставлено", bad.is_empty(), str(bad.slice(0, 3)))
+	_check("400 случайных рейдов (и «не успел»): 2–5 абзацев, всё подставлено, нет «0 ₽»", bad.is_empty(), str(bad.slice(0, 3)))
 
 
 ## В уровне: факты от хоста, причина смерти, экран итога.

@@ -59,7 +59,8 @@ static func stats_of(s: RaidSummary, gen: RaidStoryGenerator) -> Array:
 	if s.outcome == "extract":
 		out.append(["Стоимость добычи", T.money(s.loot_value)])
 	else:
-		out.append(["Стоимость добычи", "%s — осталось в рейде" % T.money(s.found_value) if s.found_value > 0 else "—"])
+		var gone := "осталось в рейде" if s.outcome == "death" else "пропало"
+		out.append(["Стоимость добычи", "%s — %s" % [T.money(s.found_value), gone] if s.found_value > 0 else "—"])
 		out.append(["Потеряно", T.money(s.lost_value)])
 	var names: Array[String] = []
 	for id in s.missions_done:
@@ -67,6 +68,8 @@ static func stats_of(s: RaidSummary, gen: RaidStoryGenerator) -> Array:
 	out.append(["Задания", ", ".join(names) if not names.is_empty() else "—"])
 	if s.outcome == "extract":
 		out.append(["Итог", "эвакуация: %s%s" % [s.exit_display, " (вынесли раненым)" if s.carried else ""]])
+	elif s.outcome == "stranded":
+		out.append(["Итог", "не успел к эвакуации (группа ушла через «%s»)" % s.exit_display])
 	else:
 		out.append(["Итог", "погиб: " + cause_text(s, gen)])
 	return out

@@ -12,6 +12,8 @@ var rng: RandomNumberGenerator
 var style: String = ""
 ## Подстановки для фраз — все сразу (каждое событие берёт свои).
 var vars: Dictionary = {}
+## Переменные без значения в этом рейде (комплект за 0 ₽, находки нет…) — фразы с ними не берём.
+var _missing: Array[String] = []
 var _said: Dictionary = {}
 
 
@@ -53,6 +55,9 @@ func line(pool: Dictionary, extra: Dictionary = {}) -> String:
 func pick(lines: Array, extra: Dictionary = {}) -> String:
 	if lines.is_empty():
 		return ""
+	var full := lines.filter(func(l: Variant) -> bool: return _fits(String(l), extra))
+	if not full.is_empty():
+		lines = full
 	var fresh := lines.filter(func(l: Variant) -> bool: return not _said.has(l) and not RaidHistory.used(String(l)))
 	if fresh.is_empty():
 		fresh = lines.filter(func(l: Variant) -> bool: return not _said.has(l))
@@ -67,6 +72,15 @@ func pick(lines: Array, extra: Dictionary = {}) -> String:
 
 
 ## 2–5 абзацев по отобранному (RaidStoryEventSelector.select).
+## Все {переменные} фразы есть в этом рейде.
+func _fits(line: String, extra: Dictionary) -> bool:
+	for k in _missing:
+		if line.contains("{%s}" % k) or line.contains("{%s_" % k):
+			if not extra.has(k):
+				return false
+	return true
+
+
 func paragraphs(sel: Dictionary) -> Array[String]:
 	var out: Array[String] = []
 	var intros: Dictionary = data.get("intro", {})
@@ -98,6 +112,8 @@ func event(t: Dictionary) -> String:
 ## Концовка: вышел (сам / вынесли раненым) или погиб — от чего.
 func ending() -> String:
 	var endings: Dictionary = data.get("endings", {})
+	if s.outcome == "stranded":
+		return line(endings.get("stranded", {}))
 	if s.outcome == "extract":
 		var ex: Dictionary = endings.get("extract", {})
 		return line(ex.get("carried" if s.carried else "*", ex.get("*", {})))
@@ -145,6 +161,22 @@ func _vars() -> Dictionary:
 	v.find_item_cap = T.cap(item)
 	v.find_value = T.money(int(s.best_find.get("value", 0)))
 	v.loot = T.money(s.loot_value)
+	v.lost = T.money(s.lost_value)
+	v.evac_time = T.duration(Balance.EXTRACT_GROUP_SEC)
+	# чего в этом рейде нет — фразы о нём не подходят
+	_missing.clear()
+	if s.start_kit_value <= 0:
+		_missing.append_array(["kit", "kit_k"])
+	if s.lost_value <= 0:
+		_missing.append("lost")
+	if s.loot_value <= 0:
+		_missing.append("loot")
+	if s.best_find.is_empty():
+		_missing.append("find_item")
+	if s.found_weapon == "":
+		_missing.append("found_w")
+	if String(s.death.get("weapon", "")) == "":
+		_missing.append("killer_w")
 	_count_vars(v, "missions", s.missions_done.size(), ["задание", "задания", "заданий"], "n")
 	v.missions_n = str(s.missions_done.size())
 	v.time = T.duration(s.duration)

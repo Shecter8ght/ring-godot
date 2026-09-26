@@ -12,6 +12,8 @@ static func key(s: RaidSummary, tags: Array, history: Array) -> String:
 	var has := {}
 	for t in tags:
 		has[String(t.tag)] = t
+	if s.outcome == "stranded":
+		return "stranded"
 	if s.outcome == "death":
 		for pair in [["repeated_death_reason", "repeated"], ["player_self_grenade", "self_grenade"],
 				["friendly_fire_death", "friendly"], ["expensive_loss_streak", "loss_streak"],

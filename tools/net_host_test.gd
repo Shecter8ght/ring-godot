@@ -62,7 +62,10 @@ func _run() -> void:
 	await get_tree().create_timer(1.0).timeout
 	_report("финал")
 	print("[host] мародёр HP после урона: %d" % int(h.hp))
-	# клиент подбирает карту-ключ (просьбой к хосту) и уходит через остановку — ждём эвакуацию
+	# клиент подбирает карту-ключ (просьбой к хосту) и уходит через остановку — ждём эвакуацию.
+	# Эвакуация группой: пока хост жив и не в зоне, клиента ждут 3 минуты — хост тоже на остановку
+	var bus := get_tree().current_scene.get_node("Extractions/Bus") as ExtractionPoint
+	my_player.global_position = bus.global_position + Vector3(1.5, 0.1, 0)
 	var client_id: int = multiplayer.get_peers()[0]
 	var waited := 0.0
 	while not Raid.current.is_extracted(client_id) and waited < 25.0:

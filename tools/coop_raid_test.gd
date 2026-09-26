@@ -6,7 +6,9 @@ extends Node
 ## c1 приходит как из главного меню («Собрание»), c2 — из своего убежища («подключиться по IP»).
 ## Проверки у каждого: в убежище видны оба других и видно, как они ходят; в рейде — то же, плюс
 ## выстрелы других видны (трассеры у стрелявшего), дверь, открытая клиентом, открыта у всех;
-## генератор ТЦ встал (хост) — у всех стоит, c2 чинит в мастерской — у всех снова весь свет.
+## генератор ТЦ встал (хост) — у всех стоит, c2 чинит в мастерской — у всех снова весь свет;
+## эвакуация группой: хост и c1 в зоне, c2 нет — у всех общий отсчёт и «ждём c2», отсчёт кончился —
+## хост и c1 ушли, c2 не успел (у каждого своя хроника: «вышел» / «не успел»).
 ## Мародёров хост убирает — чтобы никого не подстрелили посреди проверок.
 
 const ROLES := ["host", "c1", "c2"]
@@ -146,8 +148,35 @@ func _raid() -> void:
 	_check("рейд: дверь, открытая c1, открыта", door != null and door.is_open, str(door.get_path()) if door else "двери нет")
 	_check("рейд: генератор встал — видно у меня", _saw_gen_down, "")
 	_check("рейд: c2 починил генератор — весь свет", RaidEvents.current != null and not RaidEvents.current.generator_down and String(RaidConditions.current.power) == "on", String(RaidConditions.current.power))
+	await _evac()
 	# хост уходит последним — иначе клиентов выкинет в убежище посреди проверок
 	await get_tree().create_timer(8.0 if _role == "host" else 2.0).timeout
+
+
+## Эвакуация группой: хост и c1 встают в зону «Автобусная остановка», c2 остаётся где был.
+func _evac() -> void:
+	var ext := get_tree().current_scene.get_node_or_null("Extractions/Bus") as ExtractionPoint
+	var me := Raid.current.local_player()
+	if ext == null or me == null:
+		_check("эвакуация: точка Bus", false, "")
+		return
+	var c2 := _peer_of_role("c2")
+	if _role != "c2":
+		me.global_position = ext.global_position + Vector3(1.0 if _role == "host" else -1.0, 0.3, 0.0)
+	await get_tree().create_timer(4.0).timeout
+	var r := Raid.current
+	_check("эвакуация: общий отсчёт идёт, ждём c2", r.evac_left > 0.0 and r.evac_left < Balance.EXTRACT_GROUP_SEC and c2 in r.evac_wait,
+		"осталось %.1f, ждём %s" % [r.evac_left, str(r.evac_wait)])
+	# ждать 3 минуты тест не будет: хост укорачивает отсчёт (чуть позже — клиенты отстают на пару секунд)
+	if _role == "host":
+		await get_tree().create_timer(3.0).timeout
+		r.evac_left = 1.5
+	await _wait(func() -> bool: return r.over, 12.0)
+	_check("эвакуация: хост и c1 ушли, c2 не успел", r.is_extracted(_peer_of_role("host")) and r.is_extracted(_peer_of_role("c1")) and r.stranded.has(c2) and not r.is_extracted(c2),
+		"%s / %s" % [str(r.extracted), str(r.stranded)])
+	await get_tree().create_timer(2.0).timeout
+	var want := "stranded" if _role == "c2" else "extract"
+	_check("эвакуация: моя хроника — «%s»" % want, r.chronicle != null and r.analytics.outcome == want, "%s: %s" % [r.analytics.outcome, r.chronicle.verdict if r.chronicle else "нет"])
 
 
 ## Новый профиль держит всё в тайнике: стволы — в руки, патроны и магазины — в рюкзак.

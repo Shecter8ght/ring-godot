@@ -502,8 +502,11 @@ func set_first_person(on: bool) -> void:
 
 func _process(_delta: float) -> void:
 	# эвакуирован (решает хост, видят все) — уходит из мира
-	if Raid.current and Raid.current.is_extracted(peer_id) and is_in_group("players"):
-		_leave_raid()
+	# ушёл из рейда (эвакуирован / не успел) — уходит из мира; дальше его здесь нет (раненый, которого
+	# вынесли, не «умирает» у всех на виду, если у хоста его кровотечение ещё идёт)
+	if Raid.current and Raid.current.has_left(peer_id):
+		if is_in_group("players"):
+			_leave_raid()
 		return
 	# взгляд вверх-вниз есть только от первого лица; в изометрии ствол — по горизонту
 	if is_local() and not ads:

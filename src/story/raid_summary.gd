@@ -83,7 +83,7 @@ static func from(a: RaidAnalytics) -> RaidSummary:
 	s.missions_done = a.missions_done
 	s.missions_left = a.missions_left
 	s.loot_value = maxi(0, a.end_value - a.start_kit_value) if a.outcome == "extract" else 0
-	s.lost_value = a.start_kit_value if a.outcome == "death" else 0
+	s.lost_value = a.start_kit_value if a.outcome == "death" or a.outcome == "stranded" else 0
 	# убийства: подряд (окно streak_sec), гранатой, «слабым» оружием, по типам
 	for i in range(a.kills.size()):
 		var k: Dictionary = a.kills[i]
@@ -212,7 +212,7 @@ func tags(history: Array) -> Array:
 	# добыча и задания
 	if best_find.get("value", 0) >= int(cfg.big_find):
 		out.append(_t("big_find", 0.65, "mid", {"item": String(best_find.id), "value": int(best_find.value)}))
-	if not died:
+	if outcome == "extract":
 		if loot_value >= int(cfg.valuable_loot):
 			out.append(_t("valuable_loot", 0.75, "end", {"value": loot_value}))
 		elif loot_value < int(cfg.empty_handed):
@@ -243,7 +243,7 @@ func tags(history: Array) -> Array:
 				out.append(_t("gave_up", 0.6, "end"))
 		if kill_count >= int(cfg.high_kills) and death_cause == "ai" and death_killer in ["scout", "resident"]:
 			out.append(_t("killed_by_weak", 0.9, "end"))
-	else:
+	elif outcome == "extract":
 		out.append(_t("successful_extract", 0.2, "end"))
 	# история
 	if not history.is_empty():
@@ -254,9 +254,10 @@ func tags(history: Array) -> Array:
 			same_death = death_killer != "*" and String(prev.get("killer", "")) == death_killer
 		if same_death:
 			out.append(_t("repeated_death_reason", 0.9, "end", {"cause": death_cause}))
-		var lost := 1 if died and start_kit_value >= int(cfg.expensive_kit) else 0
+		# дорогой комплект потерян (погиб или не успел к эвакуации) — который раз подряд
+		var lost := 1 if outcome != "extract" and start_kit_value >= int(cfg.expensive_kit) else 0
 		for h in history:
-			if String(h.get("outcome", "")) == "death" and int(h.get("kit", 0)) >= int(cfg.expensive_kit) and lost > 0:
+			if String(h.get("outcome", "")) != "extract" and int(h.get("kit", 0)) >= int(cfg.expensive_kit) and lost > 0:
 				lost += 1
 			else:
 				break
@@ -268,7 +269,7 @@ func tags(history: Array) -> Array:
 				same += 1
 			else:
 				break
-		if same >= int(cfg.streak_raids):
+		if same >= int(cfg.streak_raids) and outcome != "stranded":
 			out.append(_t("extract_streak" if not died else "death_streak", 0.7, "end", {"n": same}))
 	return out
 

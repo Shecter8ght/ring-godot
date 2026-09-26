@@ -184,7 +184,7 @@ func _open_loot(c: LootContainer) -> void:
 func _process(delta: float) -> void:
 	var raid := Raid.current
 	var me := raid.local_player() if raid else null
-	if me == null or not me.is_alive() or raid.is_extracted(me.peer_id):
+	if me == null or not me.is_alive() or raid.has_left(me.peer_id):
 		if is_open() or _searching:
 			close_all()
 		_bar.visible = false

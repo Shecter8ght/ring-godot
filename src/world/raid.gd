@@ -3,9 +3,11 @@ extends Node
 ## Состояние рейда: рубильники, эвакуация, лут, итог. Считает хост, остальным реплицируется
 ## синхронизатором (узел создаёт SectorLevel с одинаковым именем у всех peer).
 ##
-## Эвакуация: живой игрок стоит в зоне ExtractionPoint, зона открыта (рубильник включён; нужный
-## ключ — в рюкзаке у кого-то из стоящих в зоне) — идёт отсчёт channel_s; вышел — сброс.
-## Досчитал — эвакуирован: пропадает из мира, выносит рюкзак. Рейд окончен, когда каждый
+## Эвакуация группой: живой игрок встал в открытую зону ExtractionPoint (рубильник включён; нужный
+## ключ — в рюкзаке у кого-то из стоящих в зоне) — пошёл общий отсчёт EXTRACT_GROUP_SEC; из всех зон
+## ушли — сброс. Все живые уже в зонах — ждать некого, короткий отсчёт точки (channel_s). Досчитал —
+## кто в зоне, эвакуирован: пропадает из мира, выносит рюкзак (раненого в той же зоне выносят с
+## собой); живые не в зоне — не успели: в убежище без добычи (stranded). Рейд окончен, когда каждый
 ## участник погиб или ушёл. Ключи — предметы в рюкзаке (data/items.json, категория key).
 ## Лут: игроки просят хост (RPC ниже) взять из контейнера, выбросить, полечиться — хост проверяет
 ## и меняет рюкзак (Inventory) и контейнер (LootContainer). Тела и выброшенное — динамические
@@ -28,8 +30,15 @@ var switches: Dictionary = {}
 var extracted: Dictionary = {}
 ## Сколько вынес (₽): peer_id -> ценность рюкзака в момент эвакуации.
 var loot_value: Dictionary = {}
-## Отсчёт эвакуации: peer_id -> [id точки, секунд].
+## Кто в зоне: peer_id -> [id точки, секунд короткого отсчёта] (идёт, когда все живые в зонах).
 var channel: Dictionary = {}
+## Общий отсчёт эвакуации группы: осталось, с (-1 — в открытых зонах никого).
+var evac_left: float = -1.0
+## Кого ждём: живые не в зоне (peer_id).
+var evac_wait: Array = []
+## Не успели к эвакуации: peer_id -> точка, через которую ушла группа (вернулись без добычи).
+var stranded: Dictionary = {}
+var _all_in_t: float = 0.0
 ## Погибшие: peer_id -> true (хост — по сигналу Health).
 var dead: Dictionary = {}
 ## Кто кого тащит: peer тащащего -> peer раненого (хост проверяет, видят все).
@@ -109,7 +118,7 @@ func _setup_sync() -> void:
 	sync.name = "Sync"
 	sync.replication_interval = 0.1
 	var config := SceneReplicationConfig.new()
-	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags"]:
+	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -151,6 +160,11 @@ func is_extracted(peer_id: int) -> bool:
 	return extracted.has(peer_id)
 
 
+## Ушёл из рейда живым: эвакуировался или не успел к эвакуации группы.
+func has_left(peer_id: int) -> bool:
+	return extracted.has(peer_id) or stranded.has(peer_id)
+
+
 func set_switch(switch_id: String, on: bool) -> void:
 	var s := switches.duplicate()
 	s[switch_id] = on
@@ -159,7 +173,8 @@ func set_switch(switch_id: String, on: bool) -> void:
 
 ## Хост: игрок погиб — рюкзак остаётся в теле, которое могут обыскать напарники.
 func mark_dead(peer_id: int) -> void:
-	if not _is_host():
+	# ушедший раненым (вынесли / не успел) истекает кровью уже не в рейде
+	if not _is_host() or has_left(peer_id):
 		return
 	var d := dead.duplicate()
 	d[peer_id] = true
@@ -193,26 +208,120 @@ func _physics_process(delta: float) -> void:
 	if not _is_host() or over:
 		return
 	_check_drags()
-	var ch := {}
+	_update_evac(delta)
+
+
+## Открытая зона эвакуации, в которой стоит точка p (null — ни в какой).
+func open_zone_at(p: Vector3) -> ExtractionPoint:
+	for e in get_tree().get_nodes_in_group("extractions"):
+		var ext := e as ExtractionPoint
+		if ext and ext.contains(p) and extraction_block_reason(ext) == "":
+			return ext
+	return null
+
+
+## Хост: эвакуация группой (правила — в шапке файла).
+func _update_evac(delta: float) -> void:
+	# кто цел и в открытой зоне; остальные живые
+	var inside := {}
+	var others: Array[Player] = []
 	for node in get_tree().get_nodes_in_group("players"):
 		var pl := node as Player
-		# раненый сам не эвакуируется — только если его дотащили
-		if pl == null or not pl.is_alive() or pl.is_downed() or is_extracted(pl.peer_id):
+		if pl == null or not pl.is_alive() or has_left(pl.peer_id):
 			continue
-		for e in get_tree().get_nodes_in_group("extractions"):
-			var ext := e as ExtractionPoint
-			if ext == null or not ext.contains(pl.global_position) or extraction_block_reason(ext) != "":
-				continue
-			var prev: Array = channel.get(pl.peer_id, [])
-			var t := delta
-			if prev.size() == 2 and String(prev[0]) == String(ext.name):
-				t += float(prev[1])
-			if t >= ext.channel_s:
-				_extract(pl, ext)
-			else:
-				ch[pl.peer_id] = [String(ext.name), t]
-			break
+		var ext := open_zone_at(pl.global_position)
+		# раненый сам не эвакуируется — только если его дотащили или он лежит в зоне рядом со своими
+		if ext and not pl.is_downed():
+			inside[pl.peer_id] = ext
+		else:
+			others.append(pl)
+	if inside.is_empty():
+		if evac_left >= 0.0 or not channel.is_empty():
+			evac_left = -1.0
+			evac_wait = []
+			channel = {}
+		_all_in_t = 0.0
+		return
+	var used := {}
+	for p in inside:
+		used[inside[p]] = true
+	# раненого в той же зоне или того, кого тащит стоящий в зоне, — выносят; остальных ждём
+	var carried := {}
+	var wait: Array = []
+	for pl in others:
+		var ext := open_zone_at(pl.global_position)
+		var dragger := dragger_of(pl.peer_id)
+		if pl.is_downed() and ext and used.has(ext):
+			carried[pl.peer_id] = ext
+		elif pl.is_downed() and dragger and inside.has(dragger.peer_id):
+			carried[pl.peer_id] = inside[dragger.peer_id]
+		else:
+			wait.append(pl.peer_id)
+	if evac_left < 0.0:
+		evac_left = Balance.EXTRACT_GROUP_SEC
+	evac_left = maxf(0.0, evac_left - delta)
+	# все здесь — короткий отсчёт (самой долгой из занятых точек); кто-то ушёл — заново
+	var need := 0.0
+	for ext in used:
+		need = maxf(need, (ext as ExtractionPoint).channel_s)
+	_all_in_t = _all_in_t + delta if wait.is_empty() else 0.0
+	var ch := {}
+	for p in inside:
+		ch[p] = [String((inside[p] as ExtractionPoint).name), _all_in_t]
+	if (wait.is_empty() and _all_in_t >= need) or evac_left <= 0.0:
+		_evacuate(inside, carried, wait)
+		return
 	channel = ch
+	if evac_wait != wait:
+		evac_wait = wait
+
+
+## Отсчёт кончился: кто в зоне — уходят (с ранеными), кого ждали — не успели.
+func _evacuate(inside: Dictionary, carried: Dictionary, wait: Array) -> void:
+	var exit_name := ""
+	for p in inside:
+		var pl := player_of(int(p))
+		if pl and not has_left(pl.peer_id):
+			if exit_name == "":
+				exit_name = (inside[p] as ExtractionPoint).display_name
+			_extract(pl, inside[p])
+	for p in carried:
+		var pl := player_of(int(p))
+		if pl and not has_left(pl.peer_id):
+			_extract_carried(pl, carried[p])
+	for p in wait:
+		var pl := player_of(int(p))
+		if pl and pl.is_alive() and not has_left(pl.peer_id):
+			_strand(pl, exit_name)
+	evac_left = -1.0
+	evac_wait = []
+	channel = {}
+	_all_in_t = 0.0
+	_check_over()
+
+
+## Раненый в зоне: выносят с собой — со всем, что при нём.
+func _extract_carried(pl: Player, ext: ExtractionPoint) -> void:
+	var e := extracted.duplicate()
+	e[pl.peer_id] = ext.display_name + CARRIED_SUFFIX
+	var v := loot_value.duplicate()
+	v[pl.peer_id] = pl.inventory.value()
+	extracted = e
+	loot_value = v
+	_clear_drag_of(pl.peer_id)
+
+
+## Живой не успел к эвакуации группы: уходит из рейда без добычи — всё, что нёс, пропало
+## (профиль не получает ничего, как при смерти; защищённый карман остаётся).
+func _strand(pl: Player, exit_name: String) -> void:
+	var s := stranded.duplicate()
+	s[pl.peer_id] = exit_name
+	stranded = s
+	pl.inventory.buffer = []
+	var d := drags.duplicate()
+	d.erase(pl.peer_id)
+	drags = d
+	_clear_drag_of(pl.peer_id)
 
 
 func _extract(pl: Player, ext: ExtractionPoint) -> void:
@@ -358,7 +467,7 @@ func _check_drags() -> void:
 		var r := player_of(int(k))
 		var t := player_of(int(drags[k]))
 		if r == null or t == null or not r.is_alive() or r.is_downed() or not t.is_downed() \
-				or is_extracted(r.peer_id) or r.global_position.distance_to(t.global_position) > 3.0:
+				or has_left(r.peer_id) or r.global_position.distance_to(t.global_position) > 3.0:
 			d.erase(k)
 	if d.size() != drags.size():
 		drags = d
@@ -368,7 +477,7 @@ func _check_over() -> void:
 	if participants.is_empty():
 		return
 	for peer in participants:
-		if not extracted.has(peer) and not dead.has(peer):
+		if not has_left(int(peer)) and not dead.has(peer):
 			return
 	over = true
 
@@ -676,7 +785,7 @@ func _move_item(peer_id: int, idx: int, x: int, y: int, r: bool) -> void:
 ## Контейнер рядом с игроком (обыскивать можно только в радиусе).
 func _near_container(pl: Player, path: NodePath) -> LootContainer:
 	var c := get_node_or_null(path) as LootContainer
-	if pl == null or c == null or not pl.is_alive() or is_extracted(pl.peer_id):
+	if pl == null or c == null or not pl.is_alive() or has_left(pl.peer_id):
 		return null
 	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
 		return null
@@ -965,7 +1074,7 @@ func _rpc_use_med(id: String) -> void:
 func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
 	var pl := player_of(peer_id)
 	var c := get_node_or_null(path) as LootContainer
-	if pl == null or c == null or not pl.is_alive() or is_extracted(peer_id):
+	if pl == null or c == null or not pl.is_alive() or has_left(peer_id):
 		return
 	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
 		return
@@ -1195,7 +1304,7 @@ func _process(delta: float) -> void:
 		# рейд из убежища: закончил (ушёл или погиб) — Enter возвращает в убежище
 		# в коопе Enter — чат, в убежище — пробелом
 		var go := Input.is_action_just_pressed("ui_accept") and not (Net.is_networked() and (Input.is_key_pressed(KEY_ENTER) or Input.is_key_pressed(KEY_KP_ENTER)))
-		if me != null and (not me.is_alive() or is_extracted(me.peer_id)) and go:
+		if me != null and (not me.is_alive() or has_left(me.peer_id)) and go:
 			go_hideout()
 	elif over and Input.is_action_just_pressed("reload"):
 		_restart()
@@ -1215,33 +1324,57 @@ func notify(text: String) -> void:
 func _update_channel_hud(me: Player) -> void:
 	_progress.visible = false
 	_progress_label.visible = false
-	if me == null or not me.is_alive() or is_extracted(me.peer_id) or over:
+	if me == null or not me.is_alive() or has_left(me.peer_id) or over:
 		return
 	var here: ExtractionPoint = null
 	for e in get_tree().get_nodes_in_group("extractions"):
 		if e is ExtractionPoint and (e as ExtractionPoint).contains(me.global_position):
 			here = e
 			break
+	var reason := extraction_block_reason(here) if here else ""
+	var cur: Array = channel.get(me.peer_id, [])
+	# я не в зоне (или она закрыта), а группа у выхода — успеть
+	if cur.is_empty() and evac_left >= 0.0:
+		_progress_label.visible = true
+		_progress.visible = true
+		_progress.max_value = Balance.EXTRACT_GROUP_SEC
+		_progress.value = Balance.EXTRACT_GROUP_SEC - evac_left
+		var where := ("%s закрыта: %s. " % [here.display_name, reason]) if here and reason != "" else ""
+		_progress_label.text = "%sГРУППА У ВЫХОДА · %s — успей в зону, иначе вернёшься без добычи" % [where, _clock(evac_left)]
+		return
 	if here == null:
 		return
 	_progress_label.visible = true
-	var reason := extraction_block_reason(here)
 	if reason != "":
 		_progress_label.text = "%s — закрыто: %s" % [here.display_name, reason]
 		return
-	var cur: Array = channel.get(me.peer_id, [])
-	var t := float(cur[1]) if cur.size() == 2 else 0.0
 	_progress.visible = true
+	# ждём своих — общий отсчёт; все здесь — короткий отсчёт точки
+	if not evac_wait.is_empty() and evac_left >= 0.0:
+		var names: Array[String] = []
+		for p in evac_wait:
+			names.append(String(Net.player_names.get(p, participants.get(p, "напарник"))))
+		_progress.max_value = Balance.EXTRACT_GROUP_SEC
+		_progress.value = Balance.EXTRACT_GROUP_SEC - evac_left
+		_progress_label.text = "ЭВАКУАЦИЯ · %s — через %s · ждём: %s" % [here.display_name, _clock(evac_left), ", ".join(names)]
+		return
+	var t := float(cur[1]) if cur.size() == 2 else 0.0
 	_progress.max_value = here.channel_s
 	_progress.value = t
 	_progress_label.text = "ЭВАКУАЦИЯ · %s — %.1f с" % [here.display_name, maxf(0.0, here.channel_s - t)]
+
+
+## «2:41».
+static func _clock(sec: float) -> String:
+	var s := int(ceil(sec))
+	return "%d:%02d" % [s / 60, s % 60]
 
 
 ## Подсказка «F — …» у ближайшего предмета, с которым можно что-то сделать. Рядом раненый
 ## напарник — «поднять» (держать F, аптечка) и «тащить» (X).
 func _update_prompt(me: Player) -> void:
 	_prompt.visible = false
-	if me == null or not me.is_alive() or is_extracted(me.peer_id) or ui.is_looting():
+	if me == null or not me.is_alive() or has_left(me.peer_id) or ui.is_looting():
 		_revive_t = 0.0
 		return
 	if me.is_downed():
@@ -1300,7 +1433,7 @@ func _update_prompt(me: Player) -> void:
 
 
 func _update_summary(me: Player) -> void:
-	var show := over or (me != null and (not me.is_alive() or is_extracted(me.peer_id)))
+	var show := over or (me != null and (not me.is_alive() or has_left(me.peer_id)))
 	var story := show and chronicle != null
 	_summary.visible = show and not story
 	_summary_bg.visible = show and not story
@@ -1310,18 +1443,28 @@ func _update_summary(me: Player) -> void:
 	if not show:
 		return
 	var lines: Array[String] = []
-	if over:
-		lines.append("РЕЙД ОКОНЧЕН")
+	# сначала — как кончилось у меня, потом — у группы
+	var mine := ""
+	if me == null:
+		mine = ""
 	elif is_extracted(me.peer_id):
-		lines.append("ЭВАКУИРОВАН · " + String(extracted[me.peer_id]))
+		mine = "ЭВАКУИРОВАН · " + String(extracted[me.peer_id])
+	elif stranded.has(me.peer_id):
+		mine = "НЕ УСПЕЛ К ЭВАКУАЦИИ · группа ушла через «%s», ты вернулся без добычи" % String(stranded[me.peer_id])
+	elif not me.is_alive():
+		mine = "УБИТ"
+	if over:
+		lines.append("РЕЙД ОКОНЧЕН" + (" · " + mine if mine != "" else ""))
 	else:
-		lines.append("УБИТ")
+		lines.append(mine)
 	lines.append("")
 	for peer in participants:
 		# имя из лобби может прийти позже появления игрока — берём самое свежее
 		var who := String(Net.player_names.get(peer, participants[peer]))
 		if extracted.has(peer):
 			lines.append("%s — эвакуировался (%s), вынес на %s ₽" % [who, String(extracted[peer]), InventoryUI.money(int(loot_value.get(peer, 0)))])
+		elif stranded.has(peer):
+			lines.append("%s — не успел к эвакуации, вернулся без добычи" % who)
 		elif dead.has(peer):
 			lines.append("%s — погиб, рюкзак остался в рейде" % who)
 		else:
@@ -1347,6 +1490,8 @@ func _story_end(me: Player) -> void:
 	if analytics.outcome == "":
 		if is_extracted(me.peer_id):
 			analytics.on_extracted(String(extracted[me.peer_id]))
+		elif stranded.has(me.peer_id):
+			analytics.on_stranded(String(stranded[me.peer_id]))
 		elif not me.is_alive():
 			_chronicle_wait += _delta
 			if _chronicle_wait < 1.5:
@@ -1387,9 +1532,10 @@ func _save_profile(me: Player) -> void:
 			break
 
 
-## Погиб (свой игрок, рейд из убежища): карман остаётся с тобой, «выжить подряд» — заново.
+## Погиб или не успел к эвакуации группы (свой игрок, рейд из убежища): взятое потеряно, карман
+## остаётся с тобой, «выжить подряд» — заново.
 func _save_death(me: Player) -> void:
-	if _death_saved or me == null or not me.loadout_mode or me.is_alive():
+	if _death_saved or me == null or not me.loadout_mode or (me.is_alive() and not stranded.has(me.peer_id)):
 		return
 	_death_saved = true
 	Profile.set_pocket(me.inventory.pocket)
@@ -1402,7 +1548,7 @@ func _quest_hooks(me: Player) -> void:
 		return
 	if is_extracted(me.peer_id):
 		quest_world.on_local_extracted()
-	elif not me.is_alive():
+	elif not me.is_alive() or stranded.has(me.peer_id):
 		quest_world.on_local_lost()
 
 

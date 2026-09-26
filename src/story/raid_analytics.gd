@@ -38,7 +38,7 @@ var enemy_self_grenades: int = 0
 var enemy_ally_grenades: int = 0
 ## У точки эвакуации провёл, с.
 var near_extract_sec: float = 0.0
-## Итог: "extract" / "death" / "" (ещё в рейде).
+## Итог: "extract" / "death" / "stranded" (не успел к эвакуации группы) / "" (ещё в рейде).
 var outcome: String = ""
 var extract_name: String = ""
 ## Смерть: {cause, arch, faction, weapon, attacker} от хоста; где умер; далеко ли выход.
@@ -185,6 +185,14 @@ func on_death(cause: Dictionary) -> void:
 		death_pos = me.global_position
 		death_extract_dist = maxf(0.0, _near_extract(death_pos))
 	_finish("death", me)
+
+
+## Не успел к эвакуации: группа ушла через точку name, взятое потеряно.
+func on_stranded(name: String) -> void:
+	if outcome != "":
+		return
+	extract_name = name
+	_finish("stranded", Raid.current.local_player() if Raid.current else null)
 
 
 func on_extracted(name: String) -> void:
