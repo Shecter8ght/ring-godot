@@ -24,6 +24,7 @@ func _initialize() -> void:
 	var skeleton: Skeleton3D = skeletons[0] as Skeleton3D
 	var target_path: String = String(root.get_path_to(skeleton))
 	var library := AnimationLibrary.new()
+	var previous: AnimationLibrary = load(OUTPUT) as AnimationLibrary
 	var failed: int = 0
 	for key in sources:
 		var name: String = String(key)
@@ -35,6 +36,7 @@ func _initialize() -> void:
 			continue
 		var source_root: Node = source_scene.instantiate()
 		var players: Array[Node] = source_root.find_children("*", "AnimationPlayer", true, false)
+		var source_skeletons: Array[Node] = source_root.find_children("*", "Skeleton3D", true, false)
 		if players.is_empty():
 			push_error("Нет анимации: " + source_path)
 			failed += 1
@@ -48,11 +50,20 @@ func _initialize() -> void:
 				break
 		var names: PackedStringArray = source_player.get_animation_list() if source_player != null else PackedStringArray()
 		if names.is_empty():
-			push_error("Пустой AnimationPlayer: " + source_path)
-			failed += 1
+			if previous != null and previous.has_animation(name):
+				var saved: Animation = previous.get_animation(name).duplicate(true) as Animation
+				for track in range(saved.get_track_count()):
+					if saved.track_get_type(track) == Animation.TYPE_POSITION_3D and String(saved.track_get_path(track)).ends_with(":mixamorig_Hips"):
+						_offset_hips(saved, track, skeleton.get_bone_rest(skeleton.find_bone("mixamorig_Hips")).origin)
+				library.add_animation(name, saved)
+				print("REUSED ", name)
+			else:
+				push_error("Пустой AnimationPlayer: " + source_path)
+				failed += 1
 			source_root.free()
 			continue
 		var clip: Animation = source_player.get_animation(names[0]).duplicate(true) as Animation
+		var source_skeleton: Skeleton3D = source_skeletons[0] as Skeleton3D if not source_skeletons.is_empty() else null
 		var retained: int = 0
 		for i in range(clip.get_track_count() - 1, -1, -1):
 			var track_path: NodePath = clip.track_get_path(i)
@@ -60,13 +71,16 @@ func _initialize() -> void:
 			if skeleton.find_bone(bone) < 0:
 				clip.remove_track(i)
 				continue
-			if bone == "mixamorig_Hips" and clip.track_get_type(i) == Animation.TYPE_ROTATION_3D:
-				clip.remove_track(i)
-				continue
+			if bone == "mixamorig_Hips" and clip.track_get_type(i) == Animation.TYPE_ROTATION_3D and source_skeleton != null:
+				var source_bone: int = source_skeleton.find_bone(bone)
+				if source_bone >= 0:
+					var from_rest: Quaternion = source_skeleton.get_bone_rest(source_bone).basis.get_rotation_quaternion()
+					var to_rest: Quaternion = skeleton.get_bone_rest(skeleton.find_bone(bone)).basis.get_rotation_quaternion()
+					_retarget_rotation(clip, i, from_rest, to_rest)
 			clip.track_set_path(i, NodePath(target_path + ":" + bone))
 			retained += 1
 			if clip.track_get_type(i) == Animation.TYPE_POSITION_3D and bone == "mixamorig_Hips":
-				_remove_root_drift(clip, i)
+				_remove_root_drift(clip, i, skeleton.get_bone_rest(skeleton.find_bone(bone)).origin)
 		if retained == 0:
 			push_error("Нет совместимых треков: " + source_path)
 			failed += 1
@@ -87,9 +101,12 @@ func _is_cycle(name: String) -> bool:
 	return "idle" in name or "walk" in name or "run" in name or "sprint" in name or "prone_move" in name
 
 
-func _remove_root_drift(clip: Animation, track: int) -> void:
+func _remove_root_drift(clip: Animation, track: int, rest: Vector3) -> void:
 	var count: int = clip.track_get_key_count(track)
-	if count < 2:
+	if count == 0:
+		return
+	if count == 1:
+		_offset_hips(clip, track, rest)
 		return
 	var start: float = clip.track_get_key_time(track, 0)
 	var finish: float = clip.track_get_key_time(track, count - 1)
@@ -100,4 +117,18 @@ func _remove_root_drift(clip: Animation, track: int) -> void:
 	for i in range(count):
 		var t: float = (clip.track_get_key_time(track, i) - start) / span
 		var value: Vector3 = clip.track_get_key_value(track, i) as Vector3
-		clip.track_set_key_value(track, i, value - drift * t)
+		clip.track_set_key_value(track, i, value - drift * t + rest)
+
+
+func _offset_hips(clip: Animation, track: int, rest: Vector3) -> void:
+	if clip.track_get_key_count(track) == 0 or (clip.track_get_key_value(track, 0) as Vector3).y > rest.y * 0.5:
+		return
+	for i in range(clip.track_get_key_count(track)):
+		var value: Vector3 = clip.track_get_key_value(track, i) as Vector3
+		clip.track_set_key_value(track, i, value + rest)
+
+
+func _retarget_rotation(clip: Animation, track: int, source_rest: Quaternion, target_rest: Quaternion) -> void:
+	for i in range(clip.track_get_key_count(track)):
+		var source_pose: Quaternion = clip.track_get_key_value(track, i) as Quaternion
+		clip.track_set_key_value(track, i, target_rest * source_rest.inverse() * source_pose)

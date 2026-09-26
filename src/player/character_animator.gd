@@ -10,6 +10,7 @@ var _last_position: Vector3
 var _last_event_seq: int = 0
 var _one_shot: String = ""
 var _current: String = ""
+var _held_prone: bool = false
 
 
 func _ready() -> void:
@@ -82,15 +83,17 @@ func _process(delta: float) -> void:
 	elif _actor is Marauder:
 		var enemy_scale: float = (_actor as Marauder)._base_scale.y
 		_model.scale.y = enemy_scale / maxf(_body.scale.y, 0.1)
+	var stance_drop: float = float(Balance.CHARACTER_ANIM.prone_drop) if prone else (float(Balance.CHARACTER_ANIM.crouch_drop) if crouched else 0.0)
+	_model.position.y = -stance_drop / maxf(_body.scale.y, 0.1)
 	if _one_shot != "":
 		return
 	var move_min: float = float(Balance.CHARACTER_ANIM.move_min)
 	var moving: bool = speed > move_min
 	var clip: String
 	if prone:
-		clip = family + "_idle" if _actor is Marauder else "prone_move_b"
+		clip = "prone_move_b"
 	elif crouched:
-		clip = family + "_crouch_walk_" + _direction(travel) if moving else family + "_crouch_idle"
+		clip = family + "_crouch_walk_" + _direction(travel) if moving else "unarmed_crouch_idle"
 	elif not moving:
 		clip = "rifle_aim" if family == "rifle" and aiming else family + "_idle"
 	else:
@@ -103,6 +106,15 @@ func _process(delta: float) -> void:
 	if not _player.has_animation(clip):
 		clip = "unarmed_idle"
 	_play(clip)
+	if prone and not moving:
+		if not _held_prone:
+			_player.speed_scale = 1.0
+			_player.play(clip, 0.0)
+			_player.seek(float(Balance.CHARACTER_ANIM.prone_hold_sec), true)
+			_player.advance(0.001)
+		_held_prone = true
+	else:
+		_held_prone = false
 	_player.speed_scale = 0.0 if prone and not moving else 1.0
 
 

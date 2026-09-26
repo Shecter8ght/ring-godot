@@ -1,6 +1,6 @@
-"""Export the owner's Persona mesh; keep the source .blend unchanged.
+"""Экспортирует Persona с детализацией исходного Blender Render, не меняя .blend.
 
-Run Blender headless with --python tools/export_persona_model.py, then run Godot import.
+Запуск: Blender -b --python tools/export_persona_model.py, затем переимпорт Godot.
 """
 
 import bmesh
@@ -17,8 +17,8 @@ skin = bpy.data.objects["Human"]
 skin.data = skin.data.copy()
 mesh = bmesh.new()
 mesh.from_mesh(skin.data)
-# У исходной сетки скрытая под брюками часть растягивается при импорте в Godot.
-bmesh.ops.delete(mesh, geom=[vertex for vertex in mesh.verts if vertex.co.z < 1.03], context="VERTS")
+# Убираем только скрытую под брюками центральную часть; кисти ниже этой высоты сохраняем.
+bmesh.ops.delete(mesh, geom=[vertex for vertex in mesh.verts if vertex.co.z < 1.03 and abs(vertex.co.x) < 0.45], context="VERTS")
 mesh.to_mesh(skin.data)
 mesh.free()
 
@@ -30,7 +30,18 @@ keep = {
 arm.animation_data_clear()
 for obj in bpy.data.objects:
     obj.select_set(obj == arm or obj.name in keep)
+    if obj.type == "MESH" and obj.name in keep:
+        for modifier in obj.modifiers:
+            if modifier.type == "SUBSURF":
+                modifier.levels = max(modifier.levels, modifier.render_levels)
+        if obj.name == "Human":
+            detail = obj.modifiers.new("Export face smoothing", "SUBSURF")
+            detail.levels = 1
+            detail.render_levels = 1
 bpy.context.view_layer.objects.active = arm
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-bpy.ops.export_scene.gltf(filepath=str(OUTPUT), export_format="GLB", use_selection=True, export_animations=False)
+bpy.ops.export_scene.gltf(
+    filepath=str(OUTPUT), export_format="GLB", use_selection=True,
+    export_animations=False, export_apply=True,
+)
 print("EXPORTED", OUTPUT, OUTPUT.stat().st_size)
