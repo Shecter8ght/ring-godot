@@ -67,11 +67,21 @@ const SAMPLES := {
 	"impact_hard": ["hits/concrete_", "hits/hard_"], "impact_metal": ["hits/metal_"],
 	"impact_glass": ["hits/glass_"], "impact_soft": ["hits/wood_"], "debris": ["world/debris_"],
 	"rummage": ["hits/wood_", "world/debris_"],
+	# у этих до сих пор только синтез: положи записи — зазвучат они (каталог data/sound_catalog.json)
+	"heartbeat": ["body/heart_"], "thunder": ["weather/thunder_"], "breaker": ["world/breaker_"],
+	"heli": ["vehicles/heli_"], "engine": ["vehicles/truck_"], "glass_break": ["glass/break_"],
+	"explosion": ["boom/explosion_"], "pin": ["gear/pin_"],
 }
+## Свой набор вместо общего из SAMPLES, если в нём есть хоть одна запись: затвор сейчас звучит
+## записями патрона в трубку, возня мародёра — деревом и обломками.
+const OWN := {"bolt": "guns/bolt_", "rummage": "loot/rummage_"}
+## Фоновые лупы из записей (первый файл «префикс + номер»), иначе синтез.
+const LOOPS := {"rain": "amb/rain_", "siren": "world/alarm_", "hum": "world/generator_", "ambient": "amb/wind_"}
 ## Выстрел дальше FAR_M от слушателя звучит «дальней» записью: хлопок с эхом, без щелчка.
 const FAR := {
 	"shot_pistol": "guns/pistol_far_", "shot_ai": "guns/pistol_far_", "shot_rifle": "guns/carbine_far_",
 	"shot_shotgun": "guns/shotgun_far_", "shot_bolt": "guns/marksman_far_",
+	"explosion": "boom/explosion_far_",
 }
 const FAR_M := 30.0
 ## Поверхность под ногами (Surfaces) → набор записей шагов. Металл — камень + звонкий слой
@@ -133,7 +143,8 @@ func _ready() -> void:
 	var amb := _make(_ambient_loop(6.0))
 	amb.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	amb.loop_end = amb.data.size() / 2
-	_ambient.stream = amb
+	var rec := _loop_sample("ambient")
+	_ambient.stream = rec if rec else amb
 	_ambient.volume_db = -22.0
 	_ambient.autoplay = true
 	_ambient.bus = &"Ambient"
@@ -261,6 +272,44 @@ func _load_samples() -> void:
 		var arr := _load_prefixes([FAR[kind]])
 		if not arr.is_empty():
 			_far[kind] = arr
+	for kind in OWN:
+		var own := _load_prefixes([OWN[kind]])
+		if not own.is_empty():
+			_samples[kind] = own
+
+
+## Луп из записи (LOOPS), иначе null — тогда синтез.
+func _loop_sample(name: String) -> AudioStream:
+	var arr := _load_prefixes([String(LOOPS[name])])
+	if arr.is_empty():
+		return null
+	var st: AudioStream = arr[0]
+	make_loop(st)
+	return st
+
+
+## Зациклить запись любого формата (ogg / mp3 / wav).
+func make_loop(st: AudioStream) -> void:
+	if st is AudioStreamOggVorbis:
+		(st as AudioStreamOggVorbis).loop = true
+	elif st is AudioStreamMP3:
+		(st as AudioStreamMP3).loop = true
+	elif st is AudioStreamWAV:
+		var w := st as AudioStreamWAV
+		var bytes := (1 if w.format == AudioStreamWAV.FORMAT_8_BITS else 2) * (2 if w.stereo else 1)
+		w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		w.loop_begin = 0
+		w.loop_end = w.data.size() / bytes
+
+
+## Фон, который сейчас играет (ветер) — для стенда звуков.
+func ambient_stream() -> AudioStream:
+	return _ambient.stream if _ambient else null
+
+
+## Есть синтетический запасной звук этого вида (стенд звуков: «как в игре»).
+func has_synth(kind: String) -> bool:
+	return _streams.has(kind)
 
 
 func _load_prefixes(prefixes: Array) -> Array:
@@ -345,13 +394,17 @@ func _step_metal() -> PackedFloat32Array:
 	return out
 
 
-var _rain_loop: AudioStreamWAV
+var _rain_loop: AudioStream
 
 
 ## Шум дождя — 4 с петлёй: «розовый» шум с каплями.
 func rain_loop() -> AudioStream:
 	if _rain_loop:
 		return _rain_loop
+	var rec := _loop_sample("rain")
+	if rec:
+		_rain_loop = rec
+		return rec
 	var n := int(4.0 * MIX_RATE)
 	var out := PackedFloat32Array()
 	out.resize(n)
@@ -363,20 +416,25 @@ func rain_loop() -> AudioStream:
 		b1 = 0.6 * b1 + w * 0.3
 		var drop := _noise() * 0.6 if _rng.randf() < 0.004 else 0.0
 		out[i] = (b0 + b1 * 0.5 + drop) * 0.5
-	_rain_loop = _make(out)
-	_rain_loop.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	_rain_loop.loop_end = n
-	return _rain_loop
+	var w := _make(out)
+	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	w.loop_end = n
+	_rain_loop = w
+	return w
 
 
-var _siren: AudioStreamWAV
-var _hum: AudioStreamWAV
+var _siren: AudioStream
+var _hum: AudioStream
 
 
 ## Сирена сигнализации: два тона по очереди, петлёй.
 func siren_loop() -> AudioStream:
 	if _siren:
 		return _siren
+	var rec := _loop_sample("siren")
+	if rec:
+		_siren = rec
+		return rec
 	var n := int(1.6 * MIX_RATE)
 	var out := PackedFloat32Array()
 	out.resize(n)
@@ -386,26 +444,32 @@ func siren_loop() -> AudioStream:
 		var f := 960.0 if fmod(t, 0.8) < 0.4 else 720.0
 		ph += TAU * f / MIX_RATE
 		out[i] = (sin(ph) * 0.5 + sin(ph * 2.0) * 0.15) * 0.8
-	_siren = _make(out)
-	_siren.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	_siren.loop_end = n
-	return _siren
+	var w := _make(out)
+	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	w.loop_end = n
+	_siren = w
+	return w
 
 
 ## Гул генератора: низкий тон с дребезгом, петлёй.
 func hum_loop() -> AudioStream:
 	if _hum:
 		return _hum
+	var rec := _loop_sample("hum")
+	if rec:
+		_hum = rec
+		return rec
 	var n := int(1.0 * MIX_RATE)
 	var out := PackedFloat32Array()
 	out.resize(n)
 	for i in range(n):
 		var t := float(i) / MIX_RATE
 		out[i] = (sin(TAU * 50.0 * t) * 0.5 + sin(TAU * 100.0 * t) * 0.25 + sin(TAU * 150.0 * t) * 0.1) * (0.8 + 0.2 * sin(TAU * 7.0 * t))
-	_hum = _make(out)
-	_hum.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	_hum.loop_end = n
-	return _hum
+	var w := _make(out)
+	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	w.loop_end = n
+	_hum = w
+	return w
 
 
 ## Вертолёт: хлопки лопастей по шуму, нарастает и уходит.

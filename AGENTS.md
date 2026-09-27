@@ -96,6 +96,10 @@ tools/godot.cmd res://tools/vault_test.tscn                # перелезан�
 tools/godot.cmd res://tools/bunker_test.tscn               # спуски в убежище: появился внизу, вырез в асфальте, подъём наверх; снимки bunker_*
 tools/godot.cmd res://tools/info_shots.tscn                # снимки окна описания предмета (info_*) и прицела гранаты (nade_aim)
 tools/godot.cmd res://tools/hideout_move_probe.tscn          # скорость в убежище: шаг / бег (с оружием, от первого лица)
+tools/godot.cmd res://tools/sound_bench.tscn               # стенд звуков: каталог всех звуков игры (data/sound_catalog.json), слушать в разных местах /
+                                                              # вдали / за стеной / очередью; новые файлы из _sound_try/ — назначить, галочка, перенести в assets/audio
+tools/godot.cmd --headless res://tools/sound_bench_test.tscn # стенд звуков: каталог покрывает всё, что зовёт игра; новые файлы, отбор, перенос, CREDITS, воспроизведение
+python tools/sound_catalog_md.py                               # список всех звуков для чтения: docs/sound_catalog.md
 ```
 
 Перед сетевыми тестами — убить висящие процессы Godot: старый хост держит порт 7777, и клиент
@@ -126,7 +130,8 @@ src/combat/    weapon_models.gd (процедурное оружие; в рук�
                weapon_stats.gd (характеристики с обвесами — одно место расчёта), grenade.gd, ragdoll.gd, target.gd (мишени),
                health.gd, hitscan.gd (выстрел лучом + разброс), tracer.gd, surfaces.gd (из чего
                поверхность в точке попадания), impact_fx.gd (частицы, декали, звук удара)
-src/audio/     audio_system.gd — синтез звуков при старте (запасной вариант без файлов)
+src/audio/     audio_system.gd — записи assets/audio по префиксам (SAMPLES/FAR/OWN/LOOPS), иначе синтез;
+               каталог всех звуков — data/sound_catalog.json (стенд tools/sound_bench)
 src/world/     сборка сектора из данных, коллизии, навигация, шум/зрение
 src/net/       network.gd (autoload `Net` — host/join, `Net.is_networked()`), lobby.gd
 src/ui/        HUD, инвентарь, убежище
@@ -215,5 +220,5 @@ docs/          STATUS.md (что сделано / что дальше), реше
 - После каждой законченной задачи — `git push`. Бинарники идут через LFS автоматически (`.gitattributes`).
 - Конфликт в `.tscn`/`.tres` решает тот, кто пришёл вторым: перечитать сцену, применить свои
   изменения заново, не сливать текстом вслепую.
-- Папка `референсы/` и `_asset_src/` никогда не коммитятся.
+- Папки `референсы/`, `_asset_src/` и `_sound_try/` (звуки на пробу для стенда) никогда не коммитятся.
 - Агент дописывает в `docs/STATUS.md`, что сделал и что осталось — это единственный общий журнал.

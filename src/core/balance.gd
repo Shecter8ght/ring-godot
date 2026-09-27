@@ -306,6 +306,21 @@ const STEP_STANCE_DB := {"stand": 0.0, "crouch": -8.0, "prone": -14.0}
 const AUDIO_OCCLUDED_DB := 8.0
 const AUDIO_OCCLUDED_CUTOFF := 700.0
 
+## Акустика мест — стенд звуков (tools/sound_bench), дальше — зоны реверберации в игре: параметры
+## AudioEffectReverb (размер, затухание верхов, доля эха, задержка первого отражения, мс, и её
+## повтор) и чей «хвост» выстрела из каталога (data/sound_catalog.json) звучит в этом месте.
+const AUDIO_SPACES := {
+	"dry": {"name": "сухо — без места"},
+	"outdoor": {"name": "улица", "room": 0.35, "damping": 0.7, "wet": 0.12, "predelay": 70.0, "feedback": 0.25, "tail": "tail_outdoor"},
+	"room": {"name": "магазин, подсобка", "room": 0.22, "damping": 0.5, "wet": 0.28, "predelay": 6.0, "feedback": 0.0, "tail": "tail_room"},
+	"hall": {"name": "кольцевая улица ТЦ", "room": 0.7, "damping": 0.35, "wet": 0.38, "predelay": 22.0, "feedback": 0.1, "tail": "tail_hall"},
+	"atrium": {"name": "атриум под куполом", "room": 0.92, "damping": 0.22, "wet": 0.5, "predelay": 45.0, "feedback": 0.15, "tail": "tail_hall"},
+}
+## Стенд звуков: «вдали» — срез верхов (Гц) и тише (дБ); очередь по умолчанию — выстрелов и темп
+## (выстр./мин); разброс тона и громкости у каждого выстрела; как часто искать новые файлы, с.
+const AUDIO_BENCH := {"far_cutoff": 2200.0, "far_db": -14.0, "burst": 5, "rpm": 650, "pitch_jitter": 0.03,
+	"db_jitter": 1.0, "rescan_sec": 2.0}
+
 # --- Мародёр ---
 ## Кольцо (3 сектора): 24 мародёра отрядами по 1–3 — встречи часто, но не на каждом углу.
 const MARAUDER_COUNT := 24

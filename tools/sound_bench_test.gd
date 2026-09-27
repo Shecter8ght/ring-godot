@@ -1,0 +1,184 @@
+extends Node
+## Стенд звуков (tools/sound_bench): каталог покрывает все звуки, которые зовёт игра, и все её
+## папки записей; новые файлы подхватываются, назначаются звуку, отмечаются, отбор сохраняется;
+## перенос — следующий номер у префикса, строка в CREDITS, отказ без источника и с NC; звук
+## играет (одиночный, «как в игре», луп, очередь с хвостом). Папки — свои в user://.
+
+const ALIASES := {"shot_ai": "shot_pistol", "step": "step_stone", "step_ai": "step_stone",
+	"step_run": "step_stone_run", "reload": "reload_pistol"}
+
+var _fails: int = 0
+var _root: String = ProjectSettings.globalize_path("user://sound_bench_test")
+
+
+func _ready() -> void:
+	_run.call_deferred()
+
+
+func _check(what: String, ok: bool, detail: String = "") -> void:
+	print("  [%s] %s  %s" % ["ok" if ok else "FAIL", what, detail])
+	if not ok:
+		_fails += 1
+
+
+func _wav(path: String) -> void:
+	var w := AudioStreamWAV.new()
+	w.format = AudioStreamWAV.FORMAT_16_BITS
+	w.mix_rate = 22050
+	var n := 4410
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	for i in n:
+		data.encode_s16(i * 2, int(sin(float(i) * 0.3) * 8000.0 * (1.0 - float(i) / n)))
+	w.data = data
+	w.save_to_wav(path)
+
+
+func _rm(dir: String) -> void:
+	if not DirAccess.dir_exists_absolute(dir):
+		return
+	for d in DirAccess.get_directories_at(dir):
+		_rm(dir.path_join(d))
+	for f in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir.path_join(f))
+	DirAccess.remove_absolute(dir)
+
+
+func _run() -> void:
+	_rm(_root)
+	DirAccess.make_dir_recursive_absolute(_root.path_join("assets/guns"))
+	_wav(_root.path_join("assets/guns/carbine_01.wav"))
+	_wav(_root.path_join("assets/guns/carbine_07.wav"))
+	FileAccess.open(_root.path_join("CREDITS.md"), FileAccess.WRITE).store_string("# Авторы\n\n## Модели\n\n| a | b |\n")
+	var bench := (load("res://tools/sound_bench.tscn") as PackedScene).instantiate()
+	bench.set("try_dir", _root.path_join("try"))
+	bench.set("assets_dir", _root.path_join("assets"))
+	bench.set("credits_path", _root.path_join("CREDITS.md"))
+	add_child(bench)
+	await get_tree().process_frame
+
+	# --- каталог
+	var sounds: Array[Dictionary] = bench.get("sounds")
+	var cats: Array[String] = bench.get("cats")
+	var ids := {}
+	var files := {}
+	var bad: Array[String] = []
+	var re := RegEx.create_from_string("^[a-z]+/[a-z0-9_]+_$")
+	for e in sounds:
+		if ids.has(e.id) or files.has(e.file) or re.search(String(e.file)) == null or not cats.has(String(e.cat)) \
+				or not ["one", "loop", "layer"].has(String(e.type)) or not [1, 2, 3].has(int(e.prio)) or int(e.variants) < 1:
+			bad.append(String(e.id))
+		ids[e.id] = true
+		files[e.file] = true
+	_check("каталог: %d звуков в %d разделах, id и файлы уникальны, поля в порядке" % [sounds.size(), cats.size()],
+		sounds.size() >= 150 and bad.is_empty(), str(bad))
+	var kinds := {}
+	for e in sounds:
+		kinds[String(e.kind)] = true
+	var miss: Array[String] = []
+	for k in Audio.KINDS:
+		var want := String(ALIASES.get(k, k))
+		if not kinds.has(want) and not kinds.has(want + "@far"):
+			miss.append(String(k))
+	_check("каталог: есть каждый вид звука, который зовёт игра (Audio.KINDS)", miss.is_empty(), str(miss))
+	var prefixes: Array[String] = []
+	for k in Audio.SAMPLES:
+		for p in Audio.SAMPLES[k]:
+			prefixes.append(String(p))
+	for d in [Audio.FAR, Audio.OWN, Audio.LOOPS]:
+		for k in d:
+			prefixes.append(String(d[k]))
+	var nofile: Array[String] = []
+	for p in prefixes:
+		if not files.has(p):
+			nofile.append(p)
+	_check("каталог: есть каждая папка записей игры (SAMPLES, FAR, OWN, LOOPS)", nofile.is_empty(), str(nofile))
+	var noloop: Array[String] = []
+	for k in Audio.LOOPS:
+		if not kinds.has("loop:" + String(k)):
+			noloop.append(String(k))
+	_check("каталог: фоновые лупы игры", noloop.is_empty(), str(noloop))
+
+	# --- новые файлы
+	var try_dir := _root.path_join("try")
+	_check("папка для проб создана, редактор её не импортирует", FileAccess.file_exists(try_dir.path_join(".gdignore")))
+	DirAccess.make_dir_recursive_absolute(try_dir.path_join("shot_rifle"))
+	for f in ["a.wav", "c.wav", "d.wav", "shot_rifle/b.wav"]:
+		_wav(try_dir.path_join(f))
+	bench.call("rescan", true)
+	var found: Array[String] = bench.get("files")
+	_check("новые файлы подхвачены: в корне и в папке звука", found.has("a.wav") and found.has("shot_rifle/b.wav"), str(found))
+	var st: Dictionary = bench.call("status_of", "shot_rifle")
+	_check("у звука — записи игры и новый непрослушанный файл", int(st.rec) == 2 and int(st.try) == 1 and int(st.new) == 1, str(st))
+	var a: String = bench.call("assign", "a.wav", "flyby")
+	bench.call("assign", "c.wav", "flyby")
+	bench.call("assign", "d.wav", "flyby")
+	_check("назначить звуку — файл переехал в его папку", a == "flyby/a.wav" and FileAccess.file_exists(try_dir.path_join(a))
+		and not FileAccess.file_exists(try_dir.path_join("a.wav")), a)
+	var sb: Dictionary = bench.call("sel", "shot_rifle/b.wav")
+	sb.use = true
+	sb.source = "freesound: тест, CC0"
+	var sa: Dictionary = bench.call("sel", "flyby/a.wav")
+	sa.use = true
+	sa.source = "OpenGameArt: автор, CC-BY 4.0"
+	var sc: Dictionary = bench.call("sel", "flyby/c.wav")
+	sc.use = true
+	var sd: Dictionary = bench.call("sel", "flyby/d.wav")
+	sd.use = true
+	sd.source = "freesound: кто-то, CC BY-NC 4.0"
+	bench.call("save_selection")
+	var streams: Array[AudioStream] = bench.call("streams_of", "shot_rifle")
+	_check("отмеченный новый файл слышен вместе с записями игры", streams.size() == 3, str(streams.size()))
+
+	# --- перенос
+	var journal: Array[String] = bench.call("transfer")
+	var credits := FileAccess.get_file_as_string(_root.path_join("CREDITS.md"))
+	_check("перенос: следующий номер у префикса (01, 07 → 08)", FileAccess.file_exists(_root.path_join("assets/guns/carbine_08.wav")), str(journal))
+	_check("перенос: новый префикс — с 01 в своей папке", FileAccess.file_exists(_root.path_join("assets/bullets/flyby_01.wav")))
+	_check("перенос: без источника — отказ", "\n".join(journal).contains("c.wav — укажи источник"), "")
+	_check("перенос: лицензия NC — отказ", "\n".join(journal).contains("d.wav — лицензии NC") and not FileAccess.file_exists(_root.path_join("assets/bullets/flyby_02.wav")), "")
+	_check("CREDITS: свой раздел, строки источников, прежние разделы целы",
+		credits.contains("## Звук — отобрано на стенде") and credits.contains("freesound: тест, CC0") and credits.contains("CC-BY 4.0")
+		and credits.contains("## Модели") and not credits.contains("BY-NC"), "")
+	bench.call("transfer")
+	_check("второй перенос не копирует то же ещё раз", not FileAccess.file_exists(_root.path_join("assets/guns/carbine_09.wav")))
+	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(try_dir.path_join("_selection.json")))
+	_check("отбор сохранён на диск: галочка, источник, куда перенесён", saved is Dictionary
+		and bool((saved as Dictionary)["shot_rifle/b.wav"].use) and String((saved as Dictionary)["shot_rifle/b.wav"].moved) == "guns/carbine_08.wav", "")
+	st = bench.call("status_of", "shot_rifle")
+	_check("после переноса у звука 3 записи", int(st.rec) == 3, str(st))
+
+	# --- прослушивание
+	var p: AudioStreamPlayer = bench.call("play_stream", bench.call("load_stream", try_dir.path_join("shot_rifle/b.wav")))
+	_check("новый файл играет через шину места", p != null and p.playing and String(p.bus).begins_with("Bench_"), str(p.bus) if p else "")
+	bench.call("set_mode", "wall")
+	p = bench.call("play_stream", bench.call("load_stream", try_dir.path_join("shot_rifle/b.wav")))
+	_check("«за стеной» — своя шина со срезом верхов", p != null and p.bus == &"Bench_wall", "")
+	bench.call("set_space", "hall")
+	_check("шина «за стеной» уходит в эхо выбранного места", AudioServer.get_bus_send(AudioServer.get_bus_index("Bench_wall")) == &"Bench_hall", "")
+	_check("«как в игре» — зовёт звуковую систему; незвучащий в игре — нет",
+		bool(bench.call("play_game", "shot_rifle")) and bool(bench.call("play_game", "shot_rifle_far"))
+		and not bool(bench.call("play_game", "flyby")), "")
+	_check("«как в игре» для лупа (дождь)", bool(bench.call("play_game", "rain_out")), "")
+	await bench.call("play_burst", streams, 3, 1200.0)
+	_check("очередь отыграла", true, "")
+	bench.call("stop_all")
+	await get_tree().process_frame
+	_check("«Стоп» глушит всё", (bench.get("_players") as Array).is_empty(), "")
+
+	# --- список слева
+	var tree: Tree = bench.get("_tree")
+	var top := tree.get_root().get_children()
+	_check("список: все разделы каталога", top.size() == cats.size(), "%d из %d" % [top.size(), cats.size()])
+	(bench.get("_filter") as OptionButton).select(3)
+	bench.call("_refresh_tree")
+	var wired := 0
+	for c in tree.get_root().get_children():
+		for it in c.get_children():
+			if String((bench.get("by_id") as Dictionary)[String(it.get_metadata(0))].kind) != "":
+				wired += 1
+	_check("фильтр «не подключены в коде» — только такие", wired == 0 and tree.get_root().get_child_count() > 0, "")
+
+	_rm(_root)
+	print("sound_bench_test: провалено %d" % _fails)
+	get_tree().quit()
