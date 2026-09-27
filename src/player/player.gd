@@ -448,6 +448,16 @@ func spec() -> Dictionary:
 	return WeaponStats.compute(weapon_entry())
 
 
+func _weapon_sound(specification: Dictionary, slot: String) -> String:
+	return String((specification.get("sounds", {}) as Dictionary).get(slot, ""))
+
+
+func _play_weapon_sound(specification: Dictionary, slot: String, extra_db: float = 0.0) -> void:
+	var kind := _weapon_sound(specification, slot)
+	if kind != "":
+		Audio.play(kind, global_position, extra_db)
+
+
 ## Состояние для хоста (Inventory.apply_weapon_state).
 func _ws_state(key: String) -> Dictionary:
 	var st: Dictionary = _ws.get(key, {})
@@ -678,19 +688,21 @@ func _physics_process(delta: float) -> void:
 ## (очередь ползёт вверх — тяни вниз), возвращаемая — временно; от бедра — раскачка разброса.
 func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 	var k := float(spec.braced_kick) if braced else 1.0
-	if ads and aiming:
+	var in_ads := ads and aiming
+	if in_ads:
 		k *= Balance.ADS_RECOIL_SCALE
 	var kv := float(spec.kick) * k * _rng.randf_range(0.85, 1.15)
+	var rise := kv * (Balance.ADS_RECOIL_RISE_SCALE if in_ads else 1.0)
 	var kh := float(spec.get("kick_h", 0.0)) * k * (_rng.randf_range(-1.0, 1.0) + float(spec.get("kick_bias", 0.0)))
 	var back := float(spec.get("recover", 0.5))
 	if ads and rig:
-		rig.add_recoil(kv * (1.0 - back), kh * (1.0 - back))
-		_recoil += kv * back
+		rig.add_recoil(rise * (1.0 - back), kh * (1.0 - back))
+		_recoil += rise * back
 		_recoil_h += kh * back
 	else:
-		_recoil += kv
+		_recoil += rise
 	_bloom += kv * Balance.RECOIL_BLOOM
-	kick_vis += clampf(kv / 0.05, 0.3, 1.8)
+	kick_vis += clampf(kv / 0.05, 0.3, 1.8) * (Balance.ADS_RECOIL_BACK_SCALE if in_ads else 1.0)
 
 
 ## Оружие в правой руке у груди, повёрнуто с корпусом; высота — по стойке.
@@ -825,11 +837,11 @@ func _combat(delta: float) -> void:
 	if trigger and fire_timer <= 0.0:
 		if is_jammed():
 			fire_timer = 0.3
-			Audio.play("jam", global_position, -8.0)
+			_play_weapon_sound(spec, "jam", -8.0)
 			return
 		if ammo <= 0:
 			fire_timer = float(spec.interval)
-			Audio.play("dry_fire", global_position, -8.0)
+			_play_weapon_sound(spec, "dry_fire", -8.0)
 			_start_reload(spec)
 			return
 		_fire(spec)
@@ -859,7 +871,7 @@ func _start_reload(spec: Dictionary) -> void:
 			_fumble_cd = float(sc.fumble_cd)
 			t += float(sc.fumble_sec)
 			_say("Магазин выскользнул из рук — лежит под ногами")
-			Audio.play("mag_drop", global_position)
+			_play_weapon_sound(spec, "mag_drop")
 		var h := items_host()
 		if h:
 			h.call("request_reload", weapon_slot, st)
@@ -872,15 +884,20 @@ func _start_reload(spec: Dictionary) -> void:
 	if String(WeaponDb.weapon(weapon_id).get("class", "")) != "PISTOL":
 		_animation_event("rifle_reload")
 	Audio.play(String(spec.reload_sound), global_position)
-	Audio.play("mag_out", global_position, -4.0)
+	if _weapon_sound(spec, "breech_open") != "":
+		_play_weapon_sound(spec, "breech_open", -4.0)
+	elif _weapon_sound(spec, "mag_out") != "":
+		_play_weapon_sound(spec, "mag_out", -4.0)
+	else:
+		_play_weapon_sound(spec, "round_insert", -4.0)
 
 
 ## Задержка: передёрнуть (R) — патроны не тратятся.
-func _start_clear(_spec: Dictionary) -> void:
+func _start_clear(spec: Dictionary) -> void:
 	_reload_kind = "clear"
 	_reload_slot = weapon_slot
 	reload_timer = float(Balance.WEAPON_WEAR.clear_sec)
-	Audio.play("bolt", global_position, -4.0)
+	_play_weapon_sound(spec, "clear_jam", -4.0)
 
 
 func _finish_reload(spec: Dictionary) -> void:
@@ -888,15 +905,13 @@ func _finish_reload(spec: Dictionary) -> void:
 		if _ws.has(_reload_slot):
 			_ws[_reload_slot].jam = false
 		_ws_dirty = true
-		Audio.play("charge", global_position)
 		return
 	if not loadout_mode:
 		if _ws.has(_reload_slot):
 			_ws[_reload_slot].rounds = int(spec.mag)
 			_ws[_reload_slot].jam = false
 		ammo = int(spec.mag)
-		Audio.play("mag_in", global_position, -4.0)
-		Audio.play("charge", global_position, -5.0)
+		_finish_reload_sounds(spec)
 		return
 	# хост поменял запись (ревизия выросла) — состояние перечитается; ответ ещё в пути — подождать
 	var base := _base_entry(_reload_slot)
@@ -909,8 +924,15 @@ func _finish_reload(spec: Dictionary) -> void:
 		_ws[_reload_slot].jam = false
 	if _reload_slot == weapon_slot:
 		ammo = int((_ws.get(weapon_slot, {}) as Dictionary).get("rounds", 0))
-	Audio.play("mag_in", global_position, -4.0)
-	Audio.play("charge", global_position, -5.0)
+	_finish_reload_sounds(spec)
+
+
+func _finish_reload_sounds(specification: Dictionary) -> void:
+	if _weapon_sound(specification, "breech_close") != "":
+		_play_weapon_sound(specification, "breech_close", -4.0)
+		return
+	_play_weapon_sound(specification, "mag_in", -4.0)
+	_play_weapon_sound(specification, "charge", -5.0)
 
 
 ## T / L: все фонари (kind light) или лазеры (laser) на оружии в руках — вкл/выкл разом.
@@ -982,7 +1004,7 @@ func allowed_weapons() -> Array:
 func _check_ammo(spec: Dictionary) -> void:
 	ammo_check_text = Gear.ammo_estimate(ammo, int(spec.mag), Gear.exact_count(weapon_id))
 	ammo_check_t = float(Balance.AMMO_CHECK.show_sec)
-	Audio.play("mag_check", global_position, -12.0)
+	_play_weapon_sound(spec, "mag_check", -12.0)
 	if is_local():
 		_say("Магазин: " + ammo_check_text)
 
@@ -1045,6 +1067,8 @@ func _switch(key: String, sound: bool = true) -> void:
 		return
 	if weapon_slot != "" and _ws.has(weapon_slot):
 		_send_ws(weapon_slot)
+	if sound and weapon_id != "":
+		_play_weapon_sound(spec(), "holster", -6.0)
 	weapon_slot = key
 	var e := entry_of(key)
 	weapon_id = String(e.get("id", ""))
@@ -1053,7 +1077,7 @@ func _switch(key: String, sound: bool = true) -> void:
 	_aim_t = 0.0
 	fire_timer = 0.35
 	if sound and weapon_id != "":
-		Audio.play("weapon_draw", global_position, -6.0)
+		_play_weapon_sound(spec(), "draw", -6.0)
 		_animation_event("pistol_draw" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_draw")
 
 
@@ -1139,18 +1163,18 @@ func _fire(spec: Dictionary) -> void:
 	if rig:
 		rig.add_shake(float(spec.shake))
 	NoiseBus.emit(global_position, float(spec.noise_m), "shot")
-	_shot_fx(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound))
+	_shot_fx(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"))
 	if ammo <= 0:
-		Audio.play("bolt_lock", global_position, -5.0)
+		_play_weapon_sound(spec, "bolt_lock", -5.0)
 	# остальным — то же (пули и урон уже посчитаны здесь и у хоста)
 	if Net.is_networked():
-		_rpc_shot_fx.rpc(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound))
+		_rpc_shot_fx.rpc(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"))
 
 
 ## Что видно и слышно от выстрела: вспышка у дула, звук, щелчок помпы/затвора. След пули
 ## обозначают только эффекты попадания, созданные Hitscan. У стрелявшего — из _fire, у остальных
 ## — по сети (_rpc_shot_fx).
-func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sound: String) -> void:
+func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sound: String, mechanism_sound: String) -> void:
 	# вспышка: пламегаситель гасит, глушитель — почти нет
 	if flash > 0.05:
 		_muzzle.global_position = muzzle
@@ -1158,6 +1182,8 @@ func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sou
 		_muzzle.visible = true
 		get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
 	Audio.play(sound, muzzle, db)
+	if mechanism_sound != "":
+		Audio.play(mechanism_sound, muzzle, db - 5.0)
 	# помпа/затвор — щелчок после выстрела
 	if cycle_sound != "":
 		get_tree().create_timer(0.35).timeout.connect(func() -> void:
@@ -1167,8 +1193,8 @@ func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sou
 
 ## Выстрел напарника: раньше его видел и слышал только он сам.
 @rpc("authority", "call_remote", "unreliable_ordered")
-func _rpc_shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sound: String) -> void:
-	_shot_fx(muzzle, sound, db, flash, cycle_sound)
+func _rpc_shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sound: String, mechanism_sound: String) -> void:
+	_shot_fx(muzzle, sound, db, flash, cycle_sound, mechanism_sound)
 
 
 ## Дуло: в прицеле — у модели в руках перед камерой, иначе — у модели на теле.
@@ -1485,7 +1511,9 @@ func _read_stance() -> void:
 	var was_aiming := aiming
 	aiming = Input.is_action_pressed("aim") and not ui_blocked()
 	if aiming and not was_aiming and weapon_id != "":
-		Audio.play("ads_raise", global_position, -8.0)
+		_play_weapon_sound(spec(), "ads_raise", -8.0)
+	elif was_aiming and not aiming and weapon_id != "":
+		_play_weapon_sound(spec(), "ads_lower", -8.0)
 
 
 func _stance_key() -> String:

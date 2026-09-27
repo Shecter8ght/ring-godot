@@ -31,6 +31,7 @@ var catalog_doc_script: String = ProjectSettings.globalize_path("res://tools/sou
 var sounds: Array[Dictionary] = []
 var by_id: Dictionary = {}
 var cats: Array[String] = []
+var weapon_sounds: Array[Dictionary] = []
 ## Отбор новых файлов: путь относительно try_dir → {assigned, use, source, seen, moved}.
 var selection: Dictionary = {}
 ## Уже импортированные записи, которые владелец исключил из случайного набора игры.
@@ -55,6 +56,9 @@ var _license_ok_re := RegEx.create_from_string("(?i)cc[ _-]?(0|by)\\b|собст
 var _tree: Tree
 var _filter: OptionButton
 var _search: LineEdit
+var _main_tabs: TabContainer
+var _weapon_grid: GridContainer
+var _weapon_search: LineEdit
 var _details: VBoxContainer
 var _new_list: VBoxContainer
 var _tabs: TabContainer
@@ -137,6 +141,9 @@ func _load_catalog() -> void:
 		cats.append(String(c))
 	for e in d.sounds:
 		sounds.append(e as Dictionary)
+		by_id[String(e.id)] = e
+	weapon_sounds = WeaponDb.weapon_sound_events()
+	for e in weapon_sounds:
 		by_id[String(e.id)] = e
 
 
@@ -321,13 +328,17 @@ func status_of(id: String) -> Dictionary:
 	var st := {"rec": active, "rec_total": installed.size(), "disabled": installed.size() - active,
 		"fallback_rec": 0, "fallback_name": "", "wired": kind != "", "synth": false,
 		"try": 0, "new": 0, "use": 0, "absent": false}
-	var fallback_id := String(e.get("fallback", ""))
-	if by_id.has(fallback_id):
-		var fallback: Dictionary = by_id[fallback_id]
+	var fallback := _event_for_ref(String(e.get("fallback", "")))
+	for _i in 8:
+		if fallback.is_empty() or String(fallback.id) == id:
+			break
 		for path in asset_files(String(fallback.file)):
 			if asset_enabled(String(path)):
 				st.fallback_rec = int(st.fallback_rec) + 1
 		st.fallback_name = String(fallback.name)
+		if int(st.fallback_rec) > 0:
+			break
+		fallback = _event_for_ref(String(fallback.get("fallback", "")))
 	if kind.begins_with("loop:"):
 		st.synth = true
 	elif kind != "":
@@ -362,10 +373,23 @@ func streams_of(id: String, with_fallback: bool = true) -> Array[AudioStream]:
 			if st:
 				out.append(st)
 	if out.is_empty() and with_fallback:
-		var fallback_id := String((by_id[id] as Dictionary).get("fallback", ""))
-		if by_id.has(fallback_id) and fallback_id != id:
-			return streams_of(fallback_id, false)
+		var fallback := _event_for_ref(String((by_id[id] as Dictionary).get("fallback", "")))
+		if not fallback.is_empty() and String(fallback.id) != id:
+			return streams_of(String(fallback.id), true)
 	return out
+
+
+## fallback в данных может ссылаться как на ID каталога, так и прямо на игровой kind. Второе
+## нужно оружию: у старой марксманской записи ID `shot_marksman`, а игровой kind — `shot_bolt`.
+func _event_for_ref(ref: String) -> Dictionary:
+	if ref == "":
+		return {}
+	if by_id.has(ref):
+		return by_id[ref]
+	for e in by_id.values():
+		if String((e as Dictionary).get("kind", "")) == ref:
+			return e as Dictionary
+	return {}
 
 
 ## Файл с диска как есть, без импорта (перечитывается, если файл заменили).
@@ -773,7 +797,9 @@ func _is_loop(id: String) -> bool:
 
 
 func _is_gun(id: String) -> bool:
-	return id.begins_with("shot_")
+	if id.begins_with("shot_"):
+		return true
+	return by_id.has(id) and String((by_id[id] as Dictionary).get("slot", "")) in ["shot", "shot_suppressed"]
 
 
 # ---------------------------------------------------------------- интерфейс
@@ -867,11 +893,46 @@ func _build_ui() -> void:
 	top.add_child(vol_value)
 	top.add_child(_button("■ Стоп (Esc)", stop_all))
 
+	_main_tabs = TabContainer.new()
+	_main_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root.add_child(_main_tabs)
+	var weapons_tab := VBoxContainer.new()
+	weapons_tab.name = "Оружие по моделям"
+	weapons_tab.add_theme_constant_override("separation", 7)
+	_main_tabs.add_child(weapons_tab)
+	var weapon_head := HBoxContainer.new()
+	weapon_head.add_theme_constant_override("separation", 10)
+	weapons_tab.add_child(weapon_head)
+	var weapon_hint := _label("Каждая карточка — отдельная модель и отдельные звуковые наборы. Кнопка открывает выбранный звук и делает его целью для входящих файлов.", 15, COL_DIM)
+	weapon_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	weapon_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	weapon_head.add_child(weapon_hint)
+	_weapon_search = LineEdit.new()
+	_weapon_search.placeholder_text = "найти оружие"
+	_weapon_search.custom_minimum_size.x = 300
+	_weapon_search.text_changed.connect(func(_query: String) -> void: _refresh_weapon_grid())
+	weapon_head.add_child(_weapon_search)
+	var weapon_scroll := ScrollContainer.new()
+	weapon_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	weapon_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	weapons_tab.add_child(weapon_scroll)
+	_weapon_grid = GridContainer.new()
+	_weapon_grid.columns = 5
+	_weapon_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_weapon_grid.add_theme_constant_override("h_separation", 10)
+	_weapon_grid.add_theme_constant_override("v_separation", 10)
+	weapon_scroll.add_child(_weapon_grid)
+
+	var catalog_tab := VBoxContainer.new()
+	catalog_tab.name = "Каталог и входящие"
+	catalog_tab.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_main_tabs.add_child(catalog_tab)
+
 	# Каталог остаётся виден при работе с входящими файлами: назначение идёт выбранному слева звуку.
 	var cols := HBoxContainer.new()
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	cols.add_theme_constant_override("separation", 12)
-	root.add_child(cols)
+	catalog_tab.add_child(cols)
 
 	var left := _column(cols, 1.3)
 	left.add_child(_label("2. Выбери игровой звук", 18, Color(1.0, 0.86, 0.6)))
@@ -1052,11 +1113,103 @@ func _spin(lo: int, hi: int, v: int) -> SpinBox:
 	return s
 
 
+func _refresh_weapon_grid() -> void:
+	if _weapon_grid == null:
+		return
+	for child in _weapon_grid.get_children():
+		child.queue_free()
+	var query := _weapon_search.text.strip_edges().to_lower() if _weapon_search else ""
+	for wid in WeaponDb.weapon_ids():
+		var item: Dictionary = WeaponDb.items().get(wid, {})
+		var w := WeaponDb.weapon(wid)
+		var haystack := "%s %s %s %s" % [wid, String(item.get("name", "")), String(w.get("class", "")), WeaponDb.caliber_name(String(w.get("caliber", "")))]
+		if query != "" and not haystack.to_lower().contains(query):
+			continue
+		_weapon_grid.add_child(_weapon_card(wid, item, w))
+
+
+func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContainer:
+	var card := PanelContainer.new()
+	card.custom_minimum_size.x = 330
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.075, 0.078, 0.086)
+	style.border_color = Color(0.32, 0.28, 0.19)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(9)
+	card.add_theme_stylebox_override("panel", style)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 5)
+	card.add_child(box)
+	var image_bg := PanelContainer.new()
+	var image_style := StyleBoxFlat.new()
+	image_style.bg_color = Color(0.29, 0.275, 0.25)
+	image_style.set_corner_radius_all(3)
+	image_bg.add_theme_stylebox_override("panel", image_style)
+	box.add_child(image_bg)
+	var icon := TextureRect.new()
+	icon.custom_minimum_size.y = 112
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var icon_path := "res://assets/icons/%s.png" % wid
+	if ResourceLoader.exists(icon_path):
+		icon.texture = load(icon_path) as Texture2D
+		icon.tooltip_text = icon_path
+	else:
+		icon.tooltip_text = "Нет иконки: запусти tools/godot.cmd res://tools/icon_bake.tscn -- %s" % wid
+	image_bg.add_child(icon)
+	var title := _label(String(item.get("name", wid)), 17, Color(0.94, 0.93, 0.9))
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.custom_minimum_size.y = 42
+	box.add_child(title)
+	var meta := "%s · %s · %s" % [String(item.get("code", wid)), String(WeaponDb.CLASS_NAMES.get(String(w.get("class", "")), String(w.get("class", "")))), WeaponDb.caliber_name(String(w.get("caliber", "")))]
+	box.add_child(_label(meta, 13, COL_DIM))
+	var last_group := ""
+	for e in WeaponDb.weapon_sound_events(wid):
+		var group := String(e.group)
+		if group != last_group:
+			last_group = group
+			var heading := _label(group.to_upper(), 12, Color(0.78, 0.67, 0.45))
+			heading.add_theme_constant_override("outline_size", 1)
+			box.add_child(heading)
+		var sound_id := String(e.id)
+		var st := status_of(sound_id)
+		var button := _button(_weapon_sound_button_text(String(e.get("name", "")).trim_prefix(String(item.get("name", wid)) + " — "), st),
+			func() -> void: _select_weapon_sound(sound_id))
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.custom_minimum_size.y = 31
+		button.add_theme_color_override("font_color", _status_color(st))
+		button.tooltip_text = "%s\n%s\nID: %s\nФайлы: assets/audio/%sNN" % [String(e.when), _status_text(st), sound_id, String(e.file)]
+		box.add_child(button)
+	return card
+
+
+func _weapon_sound_button_text(name: String, st: Dictionary) -> String:
+	if int(st.rec) > 0:
+		return "▶ %s  ·  %d зап." % [name, int(st.rec)]
+	if int(st.fallback_rec) > 0:
+		return "▷ %s  ·  общий набор" % name
+	if not bool(st.wired):
+		return "◇ %s  ·  ещё не в коде" % name
+	return "○ %s  ·  нужна запись" % name
+
+
+func _select_weapon_sound(id: String) -> void:
+	_current = id
+	_main_tabs.current_tab = 1
+	_tabs.current_tab = 0
+	_refresh_tree()
+	_refresh_details()
+	_refresh_new_list()
+
+
 func _refresh_all() -> void:
 	if _tree == null:
 		return
 	if _tabs != null and _tabs.get_tab_count() > 1:
 		_tabs.set_tab_title(1, "Входящие (%d)" % files.size())
+	_refresh_weapon_grid()
 	_refresh_tree()
 	_refresh_details()
 	_refresh_new_list()

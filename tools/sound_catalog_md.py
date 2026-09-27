@@ -11,6 +11,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CAT = ROOT / "data" / "sound_catalog.json"
+WEAPONS = ROOT / "data" / "weapons.json"
+WEAPON_SLOTS = ROOT / "data" / "weapon_sound_slots.json"
 OUT = ROOT / "docs" / "sound_catalog.md"
 AUDIO = ROOT / "assets" / "audio"
 ACTIVE = ROOT / "data" / "sound_active.json"
@@ -31,9 +33,34 @@ def recorded(prefix: str) -> int:
                and pat.match(f.stem) and f"{group}/{f.name}" not in DISABLED)
 
 
+def slot_applies(slot: dict, weapon: dict) -> bool:
+    condition = slot.get("condition", "all")
+    internal = "internal_mag" in weapon
+    action = weapon.get("action", "")
+    if condition == "suppressible":
+        return bool(weapon.get("integral", {}).get("suppressed")) or "muzzle" in weapon.get("mounts", {})
+    if condition == "detachable_mag":
+        return not internal
+    if condition == "internal_mag":
+        return internal
+    if condition == "manual_cycle":
+        return bool(weapon.get("cycle_sound"))
+    if condition == "break_action":
+        return action == "break"
+    if condition == "not_break_action":
+        return action != "break"
+    if condition == "automatic":
+        return bool(weapon.get("stats", {}).get("auto"))
+    return True
+
+
 def main() -> None:
     data = json.loads(CAT.read_text(encoding="utf-8"))
     sounds = data["sounds"]
+    weapons = json.loads(WEAPONS.read_text(encoding="utf-8"))["weapons"]
+    slots = json.loads(WEAPON_SLOTS.read_text(encoding="utf-8"))["slots"]
+    weapon_slot_count = sum(1 for item in weapons.values() for slot in slots
+                            if slot_applies(slot, item["weapon"]))
     lines = [
         "# Звуки игры — полный список",
         "",
@@ -66,6 +93,9 @@ def main() -> None:
     wired = sum(1 for s in sounds if s["kind"])
     lines.append(f"Всего **{total}** звуков: с записями {rec}, код зовёт {wired}, "
                  + ", ".join(f"{PRIO[p]} — {sum(1 for s in sounds if s['prio'] == p)}" for p in (1, 2, 3)) + ".")
+    lines.append(f"Отдельно автоматически собрано **{weapon_slot_count} помодельных слотов** для "
+                 f"{len(weapons)} единиц оружия; их источники — `data/weapons.json` и "
+                 "`data/weapon_sound_slots.json`. Своя запись заменяет общий запасной набор только у одной модели.")
     absent = [x for x in sounds if not x["kind"] and recorded(x["file"]) == 0]
     lines += [f"В игре нет — **{len(absent)}** (своей записи нет и код их не зовёт; где-то пока звучит замена —"
               " см. «Сейчас» в таблицах):", ""]
@@ -81,6 +111,23 @@ def main() -> None:
         for s in rows:
             lines.append(f"| {s['name']} | {s['when']} | `{s['file']}` | {s['kind'] or '—'} | {TYPES[s['type']]} "
                          f"| {s['variants']} | {PRIO[s['prio']]} | {recorded(s['file'])} | {s['now']} |")
+        lines.append("")
+    lines += ["## Оружие по моделям", "",
+              "Карточки с тем же составом находятся на первой вкладке стенда. Неприменимые действия",
+              "скрываются по конструкции оружия; `не подключён` означает заранее предусмотренный слот",
+              "для будущей механики.", ""]
+    for wid, item in weapons.items():
+        weapon = item["weapon"]
+        lines += [f"### {item['name']}", "",
+                  f"`{wid}` · {weapon['class']} · {weapon['caliber']}", "",
+                  "| Группа | Звук | Файл модели | В игре | Записей |", "|---|---|---|---|---|"]
+        stem = wid.removeprefix("wpn_")
+        for slot in slots:
+            if not slot_applies(slot, weapon):
+                continue
+            prefix = f"guns/{stem}_{slot['file']}_"
+            lines.append(f"| {slot['group']} | {slot['name']} | `{prefix}` | "
+                         f"{'да' if slot['wired'] else 'не подключён'} | {recorded(prefix)} |")
         lines.append("")
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"{OUT.relative_to(ROOT)}: {total} звуков")

@@ -26,12 +26,13 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	var w := WeaponDb.weapon(wid)
 	var b: Dictionary = w.stats
 	var s := {}
+	s.sounds = WeaponDb.weapon_sound_map(wid)
 	s.name = ItemDb.item_name(wid)
 	s["class"] = String(w["class"])
 	s.caliber = String(w.caliber)
-	s.sound = String(w.sound)
-	s.reload_sound = String(w.reload_sound)
-	s.cycle_sound = String(w.cycle_sound)
+	s.sound = String((s.sounds as Dictionary).get("shot", String(w.sound)))
+	s.reload_sound = String((s.sounds as Dictionary).get("reload", String(w.reload_sound)))
+	s.cycle_sound = String((s.sounds as Dictionary).get("cycle", String(w.cycle_sound)))
 	s.interval = 60.0 / float(b.rpm)
 	s.auto = bool(b.auto)
 	s.reload = float(b.reload)
@@ -137,12 +138,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	# Запись глушителя — не просто прежний выстрел тише. Пока своей записи нет, Audio возьмёт
 	# обычный набор как запасной; после одобрения стенд подхватит suppressed-префикс сам.
 	if bool(s.suppressed):
-		if String(s.caliber) == "9x39":
-			s.sound = "shot_sup939"
-		elif String(s["class"]) == "PISTOL":
-			s.sound = "shot_pistol_sup"
-		else:
-			s.sound = "shot_rifle_sup"
+		s.sound = String((s.sounds as Dictionary).get("shot_suppressed", s.sound))
 	# угловой — без кратности, даже если у ствола встроенная оптика
 	if active == "offset":
 		s.zoom = 0.0

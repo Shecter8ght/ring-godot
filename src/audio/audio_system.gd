@@ -41,6 +41,8 @@ const KINDS := {
 	"shot_rifle": {"db": 2.0, "unit": 9.0, "max": 110.0},
 	"shot_shotgun": {"db": 4.0, "unit": 9.0, "max": 110.0},
 	"shot_bolt": {"db": 5.0, "unit": 12.0, "max": 160.0},
+	"mech_pistol": {"db": -8.0, "unit": 3.0, "max": 16.0},
+	"mech_rifle": {"db": -7.0, "unit": 3.0, "max": 18.0},
 	"step_run": {"db": -12.0, "unit": 3.0, "max": 28.0},
 	"death": {"db": -2.0, "unit": 5.0, "max": 35.0},
 	"fall": {"db": -6.0, "unit": 4.0, "max": 25.0},
@@ -480,7 +482,8 @@ func _load_catalog() -> void:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(CATALOG))
 	if not parsed is Dictionary:
 		return
-	var entries: Array = (parsed as Dictionary).get("sounds", [])
+	var entries: Array = (parsed as Dictionary).get("sounds", []).duplicate()
+	entries.append_array(WeaponDb.weapon_sound_events())
 	var id_kinds: Dictionary = {}
 	for raw in entries:
 		if raw is Dictionary:

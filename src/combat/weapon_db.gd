@@ -13,6 +13,7 @@ extends RefCounted
 const WEAPONS_PATH := "res://data/weapons.json"
 const ARMOR_PATH := "res://data/armor.json"
 const LOADOUTS_PATH := "res://data/loadouts.json"
+const WEAPON_SOUND_SLOTS_PATH := "res://data/weapon_sound_slots.json"
 
 ## Точки крепления в порядке показа.
 const MOUNTS := ["optic_primary", "optic_offset", "muzzle", "underbarrel", "side_left", "side_right", "stock"]
@@ -24,6 +25,7 @@ const CLASS_NAMES := {"PISTOL": "Пистолет", "SMG": "Пистолет-п�
 static var _w: Dictionary = {}
 static var _a: Dictionary = {}
 static var _l: Dictionary = {}
+static var _sound_slots: Array[Dictionary] = []
 ## Все предметы арсенала (id → словарь предмета) — их подмешивает ItemDb.
 static var _items: Dictionary = {}
 ## id → вид предмета (weapon, ammo, mag, mod, vest, plate, helmet, headset) — для выборки лута.
@@ -38,6 +40,11 @@ static func _ensure() -> void:
 	_w = JSON.parse_string(FileAccess.get_file_as_string(WEAPONS_PATH)) as Dictionary
 	_a = JSON.parse_string(FileAccess.get_file_as_string(ARMOR_PATH)) as Dictionary
 	_l = JSON.parse_string(FileAccess.get_file_as_string(LOADOUTS_PATH)) as Dictionary
+	var sound_data: Variant = JSON.parse_string(FileAccess.get_file_as_string(WEAPON_SOUND_SLOTS_PATH))
+	if sound_data is Dictionary:
+		for raw in (sound_data as Dictionary).get("slots", []):
+			if raw is Dictionary:
+				_sound_slots.append(raw as Dictionary)
 	for sec in ["weapons", "ammo", "magazines", "attachments"]:
 		_items.merge(_w.get(sec, {}))
 		for id in _w.get(sec, {}):
@@ -73,6 +80,119 @@ static func weapon(id: String) -> Dictionary:
 
 static func is_weapon(id: String) -> bool:
 	return not weapon(id).is_empty()
+
+
+## Все модели оружия в порядке данных. Стенд строит по этому списку карточки и автоматически
+## подхватывает новые модели, когда у них появляется запись в weapons.json и иконка.
+static func weapon_ids() -> Array[String]:
+	_ensure()
+	var out: Array[String] = []
+	for id in _w.weapons:
+		out.append(String(id))
+	return out
+
+
+## Собственные события одной модели. Пока у события нет своих записей, Audio идёт по fallback к
+## прежнему общему набору — поэтому переход на помодельный звук не ломает существующее звучание.
+static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
+	_ensure()
+	var ids: Array[String] = weapon_ids()
+	if id != "":
+		ids.clear()
+		ids.append(canonical(id))
+	var out: Array[Dictionary] = []
+	for wid in ids:
+		var item: Dictionary = (_w.weapons as Dictionary).get(wid, {})
+		var w: Dictionary = item.get("weapon", {})
+		if w.is_empty():
+			continue
+		for raw in _sound_slots:
+			if not _sound_slot_applies(raw, w):
+				continue
+			var slot := String(raw.id)
+			var base_kind := "%s_%s" % [wid, "shot" if slot == "shot_far" else slot]
+			var event := raw.duplicate(true)
+			event.id = "%s_%s" % [wid, slot]
+			event.kind = (base_kind + "@far") if slot == "shot_far" and bool(raw.wired) else (base_kind if bool(raw.wired) else "")
+			event.file = "guns/%s_%s_" % [wid.trim_prefix("wpn_"), String(raw.file)]
+			event.fallback = _weapon_sound_fallback(w, String(raw.fallback))
+			event.weapon = wid
+			event.slot = slot
+			event.cat = "Оружие по моделям"
+			event.name = "%s — %s" % [String(item.get("name", wid)), String(raw.name)]
+			event.now = "свой набор модели; пока общий запасной"
+			out.append(event)
+	return out
+
+
+## Вид Audio для слота; пусто означает, что у этой конструкции такого действия нет или оно пока
+## только предусмотрено в стенде, но не вызывается механикой.
+static func weapon_sound_kind(id: String, slot: String) -> String:
+	for event in weapon_sound_events(id):
+		if String(event.slot) == slot:
+			return String(event.kind).trim_suffix("@far")
+	return ""
+
+
+static func weapon_sound_map(id: String) -> Dictionary:
+	var out: Dictionary = {}
+	for event in weapon_sound_events(id):
+		var kind := String(event.kind)
+		if kind != "" and not kind.ends_with("@far"):
+			out[String(event.slot)] = kind
+	return out
+
+
+static func _sound_slot_applies(slot: Dictionary, w: Dictionary) -> bool:
+	var condition := String(slot.get("condition", "all"))
+	var internal := w.has("internal_mag")
+	var action := String(w.get("action", ""))
+	match condition:
+		"suppressible":
+			return bool((w.get("integral", {}) as Dictionary).get("suppressed", false)) or (w.get("mounts", {}) as Dictionary).has("muzzle")
+		"detachable_mag":
+			return not internal
+		"internal_mag":
+			return internal
+		"manual_cycle":
+			return String(w.get("cycle_sound", "")) != ""
+		"break_action":
+			return action == "break"
+		"not_break_action":
+			return action != "break"
+		"automatic":
+			return bool((w.get("stats", {}) as Dictionary).get("auto", false))
+	return true
+
+
+static func _weapon_sound_fallback(w: Dictionary, fallback: String) -> String:
+	match fallback:
+		"$shot":
+			return String(w.get("sound", ""))
+		"$shot_far":
+			var shot := String(w.get("sound", ""))
+			if shot.begins_with("shot_hg_") or shot == "shot_pistol":
+				return "shot_pistol@far"
+			if shot == "shot_smg":
+				return "shot_smg@far"
+			if shot == "shot_ak762":
+				return "shot_ak762@far"
+			if shot == "shot_shotgun":
+				return "shot_shotgun@far"
+			if shot == "shot_bolt":
+				return "shot_bolt@far"
+			return "shot_rifle@far"
+		"$suppressed":
+			if String(w.get("caliber", "")) == "9x39":
+				return "shot_sup939"
+			return "shot_pistol_sup" if String(w.get("class", "")) == "PISTOL" else "shot_rifle_sup"
+		"$mechanism":
+			return "mech_pistol" if String(w.get("class", "")) == "PISTOL" else "mech_rifle"
+		"$reload":
+			return String(w.get("reload_sound", "reload_rifle"))
+		"$cycle":
+			return String(w.get("cycle_sound", "bolt"))
+	return fallback
 
 
 static func ammo(id: String) -> Dictionary:

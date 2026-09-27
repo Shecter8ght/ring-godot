@@ -107,6 +107,31 @@ func _run() -> void:
 			noloop.append(String(k))
 	_check("каталог: фоновые лупы игры", noloop.is_empty(), str(noloop))
 	var weapons: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/weapons.json"))
+	var weapon_ids := WeaponDb.weapon_ids()
+	var weapon_events: Array[Dictionary] = bench.get("weapon_sounds")
+	var event_ids: Dictionary = {}
+	var event_files: Dictionary = {}
+	var duplicate_events: Array[String] = []
+	for event in weapon_events:
+		if event_ids.has(String(event.id)) or event_files.has(String(event.file)):
+			duplicate_events.append(String(event.id))
+		event_ids[String(event.id)] = true
+		event_files[String(event.file)] = true
+	_check("оружие: карточка для каждой модели, помодельные ID и папки звуков уникальны",
+		(bench.get("_weapon_grid") as GridContainer).get_child_count() == weapon_ids.size()
+		and weapon_events.size() > weapon_ids.size() * 15 and duplicate_events.is_empty(),
+		"карточек %d, моделей %d, событий %d, дубли %s" % [(bench.get("_weapon_grid") as GridContainer).get_child_count(), weapon_ids.size(), weapon_events.size(), str(duplicate_events)])
+	_check("оружие: два автомата с прежним общим набором получили разные собственные события",
+		WeaponDb.weapon_sound_kind("wpn_ar_03", "shot") == "wpn_ar_03_shot"
+		and WeaponDb.weapon_sound_kind("wpn_ar_04", "shot") == "wpn_ar_04_shot"
+		and String((Audio.get("_catalog_fallbacks") as Dictionary).get("wpn_ar_03_shot", "")) == "shot_rifle", "")
+	var break_slots: Dictionary = WeaponDb.weapon_sound_map("wpn_sg_01")
+	var pump_slots: Dictionary = WeaponDb.weapon_sound_map("wpn_sg_02")
+	_check("оружие: список действий зависит от конструкции",
+		break_slots.has("breech_open") and break_slots.has("breech_close") and break_slots.has("round_insert")
+		and not break_slots.has("mag_out") and not break_slots.has("charge")
+		and pump_slots.has("round_insert") and pump_slots.has("cycle") and not pump_slots.has("mag_out"),
+		"двустволка %s; помпа %s" % [str(break_slots.keys()), str(pump_slots.keys())])
 	var pistol_sounds: Array[String] = []
 	for id in ["wpn_hg_01", "wpn_hg_02", "wpn_hg_03", "wpn_hg_04"]:
 		pistol_sounds.append(String(weapons.weapons[id].weapon.sound))

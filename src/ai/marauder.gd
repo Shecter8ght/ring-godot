@@ -349,8 +349,19 @@ func _ai_spec(e: Dictionary) -> Dictionary:
 		"interval": maxf(float(ws.interval), float(c.interval_min)), "burst": int(c.burst) if bool(ws.auto) else 1,
 		"burst_pause": float(c.burst_pause), "damage": float(ws.damage) * Balance.AI_DAMAGE_K, "pellets": int(ws.pellets),
 		"spread": float(c.spread) / maxf(skill, 0.3), "range": float(c.range), "noise_m": float(ws.noise_m),
-		"sound": String(ws.sound), "reload_sound": String(ws.reload_sound), "pen": float(ws.pen), "armor_dmg": float(ws.armor_dmg),
+		"sound": String(ws.sound), "reload_sound": String(ws.reload_sound), "cycle_sound": String(ws.cycle_sound),
+		"sounds": (ws.sounds as Dictionary).duplicate(), "pen": float(ws.pen), "armor_dmg": float(ws.armor_dmg),
 		"flash": float(ws.flash)}
+
+
+func _weapon_sound(slot: String) -> String:
+	return String((_spec.get("sounds", {}) as Dictionary).get(slot, ""))
+
+
+func _play_weapon_sound(slot: String, extra_db: float = 0.0) -> void:
+	var kind := _weapon_sound(slot)
+	if kind != "":
+		Audio.play(kind, global_position, extra_db)
 
 
 ## Модель оружия в руке — по тому, что в руках.
@@ -1599,7 +1610,7 @@ func _start_reload() -> void:
 		if _mag <= 0:
 			_dry = true
 			say("Пустой!")
-			Audio.play("dry_fire", global_position, -8.0)
+			_play_weapon_sound("dry_fire", -8.0)
 			if state == State.COMBAT:
 				_start_retreat()
 		return
@@ -1608,7 +1619,12 @@ func _start_reload() -> void:
 	if String(_spec.get("class", "")) != "PISTOL":
 		_animation_event("rifle_reload")
 	Audio.play(String(_spec.get("reload_sound", "reload_rifle")), global_position)
-	Audio.play("mag_out", global_position, -4.0)
+	if _weapon_sound("breech_open") != "":
+		_play_weapon_sound("breech_open", -4.0)
+	elif _weapon_sound("mag_out") != "":
+		_play_weapon_sound("mag_out", -4.0)
+	else:
+		_play_weapon_sound("round_insert", -4.0)
 	if state == State.COMBAT:
 		say("Перезаряжаюсь!")
 
@@ -1664,8 +1680,11 @@ func _finish_reload() -> void:
 	mag["rounds"] = _mag
 	# патрон мог смениться — характеристики тоже
 	_spec = _ai_spec(e)
-	Audio.play("mag_in", global_position, -4.0)
-	Audio.play("charge", global_position, -5.0)
+	if _weapon_sound("breech_close") != "":
+		_play_weapon_sound("breech_close", -4.0)
+	else:
+		_play_weapon_sound("mag_in", -4.0)
+		_play_weapon_sound("charge", -5.0)
 
 
 ## Выстрел, если готов: очередь, пауза между очередями, магазин. suppress — по памяти, реже и хуже.
@@ -1743,24 +1762,30 @@ func _shoot(suppress: bool) -> void:
 	# свои выстрелы товарищи слышат как «бой» — не как свист пуль у себя
 	NoiseBus.emit(global_position, float(_spec.noise_m), "shot_ai")
 	var flash := float(_spec.get("flash", 1.0))
-	_shot_fx(from, String(_spec.sound), flash)
+	_shot_fx(from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound))
 	# стреляет хост — клиентам видно и слышно то же (раньше мародёр у них стрелял беззвучно)
 	if Net.is_networked():
-		_rpc_shot_fx.rpc(from, String(_spec.sound), flash)
+		_rpc_shot_fx.rpc(from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound))
 
 
 ## Вспышка и звук выстрела — у хоста из _shoot, у клиентов — по сети. След пули виден только
 ## по эффекту попадания, который создаёт Hitscan.
-func _shot_fx(from: Vector3, sound: String, flash: float) -> void:
+func _shot_fx(from: Vector3, sound: String, flash: float, mechanism_sound: String, cycle_sound: String) -> void:
 	if flash > 0.05:
 		_muzzle.visible = true
 		get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
 	Audio.play(sound, from)
+	if mechanism_sound != "":
+		Audio.play(mechanism_sound, from, -5.0)
+	if cycle_sound != "":
+		get_tree().create_timer(0.35).timeout.connect(func() -> void:
+			if is_inside_tree():
+				Audio.play(cycle_sound, global_position))
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
-func _rpc_shot_fx(from: Vector3, sound: String, flash: float) -> void:
-	_shot_fx(from, sound, flash)
+func _rpc_shot_fx(from: Vector3, sound: String, flash: float, mechanism_sound: String, cycle_sound: String) -> void:
+	_shot_fx(from, sound, flash, mechanism_sound, cycle_sound)
 
 
 ## Чем стреляет — для хроники рейда игрока, в которого попали (Health.last_src).

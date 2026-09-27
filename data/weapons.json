@@ -625,6 +625,7 @@
     "class": "SHOTGUN",
     "caliber": "12x70",
     "model": "shotgun",
+    "action": "break",
     "scale": 0.96,
     "length": 1.1,
     "stats": {
