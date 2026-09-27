@@ -327,7 +327,7 @@ func status_of(id: String) -> Dictionary:
 			active += 1
 	var st := {"rec": active, "rec_total": installed.size(), "disabled": installed.size() - active,
 		"fallback_rec": 0, "fallback_name": "", "wired": kind != "", "synth": false,
-		"try": 0, "new": 0, "use": 0, "absent": false}
+		"try": 0, "new": 0, "use": 0, "pending": 0, "absent": false}
 	var fallback := _event_for_ref(String(e.get("fallback", "")))
 	for _i in 8:
 		if fallback.is_empty() or String(fallback.id) == id:
@@ -354,6 +354,8 @@ func status_of(id: String) -> Dictionary:
 			st.new += 1
 		if bool(s.use):
 			st.use += 1
+			if String(s.get("moved", "")) == "":
+				st.pending += 1
 	return st
 
 
@@ -474,6 +476,21 @@ func next_number(prefix: String) -> int:
 
 ## Отмеченные файлы — в assets/audio под следующим номером, источник — строкой в CREDITS.md.
 ## Без источника, без назначенного звука или с лицензией NC/ND — отказ. Возвращает журнал.
+func transfer_block_reason(rel: String) -> String:
+	var s := sel(rel)
+	var id := assigned_id(rel)
+	if not by_id.has(id):
+		return "не назначен звук"
+	var src := String(s.source).strip_edges()
+	if src == "":
+		return "укажи источник и лицензию"
+	if _license_re.search(src) != null:
+		return "лицензии NC / ND / SA не подходят (AGENTS.md, п. 6)"
+	if _license_ok_re.search(src) == null:
+		return "укажи CC0, CC-BY или что звук собственный"
+	return ""
+
+
 func transfer() -> Array[String]:
 	var journal: Array[String] = []
 	var rows: Array[String] = []
@@ -481,20 +498,12 @@ func transfer() -> Array[String]:
 		var s := sel(rel)
 		if not bool(s.use) or String(s.moved) != "":
 			continue
+		var issue := transfer_block_reason(rel)
+		if issue != "":
+			journal.append("%s — %s" % [rel, issue])
+			continue
 		var id := assigned_id(rel)
-		if not by_id.has(id):
-			journal.append("%s — не назначен звук" % rel)
-			continue
 		var src := String(s.source).strip_edges()
-		if src == "":
-			journal.append("%s — укажи источник и лицензию" % rel)
-			continue
-		if _license_re.search(src) != null:
-			journal.append("%s — лицензии NC / ND / SA не подходят (AGENTS.md, п. 6)" % rel)
-			continue
-		if _license_ok_re.search(src) == null:
-			journal.append("%s — укажи CC0, CC-BY или что звук собственный" % rel)
-			continue
 		var e: Dictionary = by_id[id]
 		var parts := String(e.file).split("/")
 		var dir := assets_dir.path_join(parts[0])
@@ -792,6 +801,17 @@ func play_game(id: String) -> bool:
 	return true
 
 
+func _preview_game(id: String) -> void:
+	if not play_game(id):
+		_status.text = "Этот звук ещё не подключён к событию в коде. Кандидаты ниже всё равно можно подготовить."
+		return
+	var st := status_of(id)
+	if int(st.pending) > 0:
+		_status.text = "«Как в игре» использует только записи из assets/audio. Одобренных, но ещё не добавленных: %d; сейчас слышен прежний набор или синтез. Заполни источник/лицензию и нажми шаг 4." % int(st.pending)
+	else:
+		_status.text = "Проигран текущий игровой звук из assets/audio%s." % (" (запасной набор или синтез)" if int(st.rec) == 0 else "")
+
+
 func _is_loop(id: String) -> bool:
 	return by_id.has(id) and String(by_id[id].type) == "loop"
 
@@ -838,7 +858,7 @@ func _build_ui() -> void:
 	head.add_child(inbox)
 	head.add_child(_button("1. Открыть папку", func() -> void: OS.shell_open(try_dir)))
 	head.add_child(_button("Обновить", func() -> void: rescan(true)))
-	head.add_child(_button("4. Добавить одобренные в проект", _on_transfer))
+	head.add_child(_button("4. Добавить одобренные в игру", _on_transfer))
 
 	var listen_panel := PanelContainer.new()
 	var listen_style := StyleBoxFlat.new()
@@ -1054,8 +1074,16 @@ func _on_transfer() -> void:
 	if journal.is_empty():
 		_status.text = "Нечего добавлять: назначь файл звуку, прослушай и поставь галочку «Одобрен»."
 	else:
-		_status.text = "Добавление в проект:\n" + "\n".join(journal) \
-			+ "\nВ стенде запись уже доступна через игровой Audio. Перед следующим запуском проекта выполни импорт или открой редактор."
+		var added := 0
+		for line in journal:
+			if line.contains("→ assets/audio/"):
+				added += 1
+		if added == 0:
+			_status.text = "НЕ ДОБАВЛЕНО:\n" + "\n".join(journal) \
+				+ "\nИсправь причину в карточке и снова нажми шаг 4. «Как в игре» пока проигрывает старый набор или синтез."
+		else:
+			_status.text = "Добавление в проект:\n" + "\n".join(journal) \
+				+ "\nДобавлено: %d. В стенде запись уже доступна через игровой Audio. Перед следующим запуском проекта выполни импорт или открой редактор." % added
 
 
 func _apply_bulk_source() -> void:
@@ -1225,13 +1253,15 @@ func _status_text(st: Dictionary) -> String:
 		t += " · не подключён"
 	if int(st.disabled) > 0:
 		t += " · выкл. %d" % int(st.disabled)
+	if int(st.pending) > 0:
+		t += " · одобрено, НЕ добавлено: %d" % int(st.pending)
 	if int(st.try) > 0:
 		t += " · +%d" % int(st.try)
 	return t
 
 
 func _status_color(st: Dictionary) -> Color:
-	if int(st.new) > 0:
+	if int(st.new) > 0 or int(st.pending) > 0:
 		return COL_NEW
 	if int(st.rec) > 0:
 		return COL_REC
@@ -1331,10 +1361,10 @@ func _refresh_details() -> void:
 			game_text = "✓ Подключён к игре: при событии «%s» Audio выбирает одну из %d записей." % [String(e.kind), int(st.rec)]
 		elif int(st.fallback_rec) > 0:
 			game_text = ("Подключён к игре как «%s». Своих записей пока нет, поэтому временно звучит общий набор «%s» (%d записей). "
-				+ "Первая своя одобренная запись автоматически заменит общий набор только для этой модели.") % [
+				+ "Первая своя добавленная в проект запись автоматически заменит общий набор только для этой модели.") % [
 				String(e.kind), String(st.fallback_name), int(st.fallback_rec)]
 		elif bool(st.synth):
-			game_text = "Подключён к игре как «%s», но пока звучит синтез. Первая одобренная запись заменит его." % String(e.kind)
+			game_text = "Подключён к игре как «%s», но пока звучит синтез. Первая добавленная в проект запись заменит его." % String(e.kind)
 		else:
 			game_text = "Подключён к игре как «%s», но сейчас запись отсутствует." % String(e.kind)
 	else:
@@ -1353,9 +1383,7 @@ func _refresh_details() -> void:
 	bar.add_theme_constant_override("separation", 8)
 	_details.add_child(bar)
 	var id := _current
-	bar.add_child(_button("▶ как в игре", func() -> void:
-		if not play_game(id):
-			_status.text = "Этот звук ещё не подключён к событию в коде. Кандидаты ниже всё равно можно подготовить."))
+	bar.add_child(_button("▶ как в игре", func() -> void: _preview_game(id)))
 	bar.add_child(_button("▶ случайный вариант", func() -> void:
 		var all := streams_of(id)
 		if all.is_empty():
@@ -1369,7 +1397,10 @@ func _refresh_details() -> void:
 	var records_text := "Записи в проекте: используется %d" % int(st.rec)
 	if int(st.disabled) > 0:
 		records_text += " · исключено %d" % int(st.disabled)
-	_details.add_child(_label(records_text, 16, COL_REC if int(st.rec) > 0 else COL_DIM))
+	if int(st.pending) > 0:
+		records_text += " · одобрено во входящих, но НЕ добавлено %d" % int(st.pending)
+	var records_color := COL_NEW if int(st.pending) > 0 else (COL_REC if int(st.rec) > 0 else COL_DIM)
+	_details.add_child(_label(records_text, 16, records_color))
 	for path in asset_files(String(e.file)):
 		var row := HBoxContainer.new()
 		var p := path
@@ -1573,17 +1604,23 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 	delete_button.tooltip_text = "Безвозвратно удалить этот кандидат и все его служебные записи"
 	row.add_child(delete_button)
 	var use := CheckBox.new()
-	use.text = "Одобрен"
+	use.text = "Добавлен" if moved else "Одобрен к добавлению"
 	use.button_pressed = bool(s.use)
 	use.disabled = id == "" or moved
 	use.tooltip_text = "Сначала назначь файл игровому звуку" if id == "" else \
-		("Уже добавлен в проект" if moved else "Этот вариант подходит и может использоваться игрой")
+		("Уже добавлен в проект" if moved else "Только отбор для шага 4; до копирования в assets/audio игра этот файл не использует")
 	use.toggled.connect(func(v: bool) -> void:
 		s.use = v
 		s.seen = true
 		dot.text = "  "
 		save_selection()
-		_refresh_tree())
+		_refresh_tree()
+		if v:
+			var issue := transfer_block_reason(rel)
+			_status.text = ("Одобрено к добавлению, но ещё НЕ в игре: %s. Заполни карточку и нажми шаг 4." % issue) if issue != "" else \
+				"Одобрено к добавлению, но ещё НЕ в игре. Нажми шаг 4 — «Добавить одобренные в игру»."
+		else:
+			_status.text = "Кандидат снят с добавления.")
 	row.add_child(use)
 	var shown_path := rel if id == "" else rel.get_file()
 	var fname := _label("Файл: %s" % shown_path, 15, Color(0.85, 0.86, 0.88))
@@ -1646,11 +1683,15 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 			result_text = "✓ В проекте: assets/audio/%s · игровой вызов для этого события ещё не сделан." % String(s.moved)
 			result_color = COL_SYNTH
 	elif bool(s.use):
-		if by_id.has(id) and String(by_id[id].kind) != "":
-			result_text = "Одобрен: после шага 4 будет сразу доступен игровому виду «%s»." % String(by_id[id].kind)
-			result_color = COL_REC
+		var issue := transfer_block_reason(rel)
+		if issue != "":
+			result_text = "⚠ Одобрен к добавлению, но ещё НЕ в проекте: %s. После исправления нажми шаг 4." % issue
+			result_color = COL_SYNTH
+		elif by_id.has(id) and String(by_id[id].kind) != "":
+			result_text = "Одобрен к добавлению, но ещё НЕ в проекте. Нажми шаг 4; затем игровой вид «%s» сразу начнёт использовать запись." % String(by_id[id].kind)
+			result_color = COL_NEW
 		else:
-			result_text = "Одобрен для библиотеки, но выбранный звук ещё не вызывается игровым кодом."
+			result_text = "Одобрен к добавлению, но ещё НЕ в проекте; выбранный звук пока не вызывается игровым кодом."
 			result_color = COL_SYNTH
 	elif id == "":
 		result_text = "Сначала назначь кандидата выбранному слева звуку."

@@ -213,6 +213,11 @@ func _run() -> void:
 	se.use = true
 	se.source = "неизвестный сайт"
 	bench.call("save_selection")
+	var pending_flyby: Dictionary = bench.call("status_of", "flyby")
+	_check("одобрение ещё не выдаётся за добавление в игру",
+		int(pending_flyby.pending) == 4
+		and String(bench.call("transfer_block_reason", "c.wav")).contains("источник и лицензию")
+		and String((bench.call("sel", "c.wav") as Dictionary).moved) == "", str(pending_flyby))
 	var streams: Array[AudioStream] = bench.call("streams_of", "shot_rifle")
 	_check("отмеченный новый файл слышен вместе с записями игры", streams.size() == 3, str(streams.size()))
 
