@@ -58,6 +58,7 @@ func _run() -> void:
 	bench.set("assets_dir", _root.path_join("assets"))
 	bench.set("credits_path", _root.path_join("CREDITS.md"))
 	bench.set("active_selection_path", _root.path_join("sound_active.json"))
+	bench.set("catalog_doc_script", "")
 	add_child(bench)
 	await get_tree().process_frame
 
@@ -232,6 +233,33 @@ func _run() -> void:
 	bench.call("stop_all")
 	await get_tree().process_frame
 	_check("«Стоп» глушит всё", (bench.get("_players") as Array).is_empty(), "")
+
+	# --- окончательное удаление: файл, импорт, отбор, CREDITS и исключение
+	var imported := _root.path_join("assets/guns/carbine_08.wav")
+	FileAccess.open(imported + ".import", FileAccess.WRITE).store_string("тестовый импорт")
+	bench.call("set_asset_enabled", imported, false)
+	_check("удалить запись проекта — операция выполнена", bool(bench.call("delete_asset_permanently", "guns/carbine_08.wav")), "")
+	var after_delete_credits := FileAccess.get_file_as_string(_root.path_join("CREDITS.md"))
+	var after_delete_active: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_root.path_join("sound_active.json")))
+	_check("удалить запись проекта — нет аудио, .import, входящего исходника и строки CREDITS",
+		not FileAccess.file_exists(imported) and not FileAccess.file_exists(imported + ".import")
+		and not FileAccess.file_exists(try_dir.path_join("shot_rifle/b.wav"))
+		and not (bench.get("selection") as Dictionary).has("shot_rifle/b.wav")
+		and not after_delete_credits.contains("guns/carbine_08.wav"), "")
+	_check("удалить запись проекта — очищено исключение из sound_active.json",
+		not (after_delete_active.get("disabled", []) as Array).has("guns/carbine_08.wav"), str(after_delete_active))
+	_check("удалить входящий навсегда — нет файла и данных отбора",
+		bool(bench.call("delete_incoming_permanently", "c.wav"))
+		and not FileAccess.file_exists(try_dir.path_join("c.wav"))
+		and not (bench.get("selection") as Dictionary).has("c.wav"), "")
+	_check("удалить уже перенесённый входящий — удалена и готовая копия",
+		bool(bench.call("delete_incoming_permanently", "a.wav"))
+		and not FileAccess.file_exists(try_dir.path_join("a.wav"))
+		and not FileAccess.file_exists(_root.path_join("assets/bullets/flyby_01.wav"))
+		and not FileAccess.get_file_as_string(_root.path_join("CREDITS.md")).contains("bullets/flyby_01.wav"), "")
+	_check("удаление не принимает путь за пределами звуковых папок",
+		not bool(bench.call("delete_asset_permanently", "../CREDITS.md"))
+		and FileAccess.file_exists(_root.path_join("CREDITS.md")), "")
 
 	# --- совместимость: старое назначение возвращается в исходную папку без потери цели
 	DirAccess.make_dir_recursive_absolute(try_dir.path_join("flyby"))

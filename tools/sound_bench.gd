@@ -26,6 +26,7 @@ var try_dir: String = ProjectSettings.globalize_path("res://_sound_try")
 var assets_dir: String = ProjectSettings.globalize_path("res://assets/audio")
 var credits_path: String = ProjectSettings.globalize_path("res://assets/CREDITS.md")
 var active_selection_path: String = ProjectSettings.globalize_path(ACTIVE_SELECTION)
+var catalog_doc_script: String = ProjectSettings.globalize_path("res://tools/sound_catalog_md.py")
 
 var sounds: Array[Dictionary] = []
 var by_id: Dictionary = {}
@@ -65,6 +66,9 @@ var _inbox_tree: Tree
 var _inbox_pick: String = "dir:"
 var _building_inbox_tree: bool = false
 var _catalog_collapsed: Dictionary = {}
+var _delete_dialog: ConfirmationDialog
+var _delete_scope: String = ""
+var _delete_path: String = ""
 
 
 func _ready() -> void:
@@ -504,6 +508,110 @@ func _append_credits(rows: Array[String]) -> void:
 	FileAccess.open(credits_path, FileAccess.WRITE).store_string(text)
 
 
+## Удалить отвергнутый входящий файл. Если он уже был добавлен в проект, удаляется и копия
+## в assets/audio со служебными записями. Публичный метод нужен автотесту; интерфейс зовёт его
+## только после явного подтверждения.
+func delete_incoming_permanently(rel: String) -> bool:
+	rel = rel.replace("\\", "/")
+	if not _safe_audio_rel(rel):
+		return false
+	stop_all()
+	var picked: Dictionary = selection.get(rel, {})
+	var moved := String(picked.get("moved", ""))
+	var removed := _remove_file(try_dir.path_join(rel))
+	if moved != "":
+		removed = _remove_project_asset(moved) or removed
+	selection.erase(rel)
+	_remove_empty_try_dirs(try_dir.path_join(rel).get_base_dir())
+	_finish_permanent_delete()
+	return removed
+
+
+## Удалить уже импортированную запись и, если она пришла через стенд, её исходный кандидат.
+## Каталоговое событие и игровой вызов остаются: удаляется именно плохая запись, а не механика.
+func delete_asset_permanently(rel: String) -> bool:
+	rel = rel.replace("\\", "/")
+	if not _safe_audio_rel(rel):
+		return false
+	stop_all()
+	var removed := _remove_project_asset(rel)
+	for key in selection.keys().duplicate():
+		var incoming_rel := String(key)
+		var picked: Dictionary = selection[key]
+		if String(picked.get("moved", "")) != rel:
+			continue
+		removed = _remove_file(try_dir.path_join(incoming_rel)) or removed
+		selection.erase(key)
+		_remove_empty_try_dirs(try_dir.path_join(incoming_rel).get_base_dir())
+	_finish_permanent_delete()
+	return removed
+
+
+func _remove_project_asset(rel: String) -> bool:
+	rel = rel.replace("\\", "/")
+	if not _safe_audio_rel(rel):
+		return false
+	var path := assets_dir.path_join(rel)
+	var removed := _remove_file(path)
+	# Godot хранит рядом описание импорта. Кэш в .godot не является исходником и будет очищен движком.
+	_remove_file(path + ".import")
+	disabled_assets.erase(rel)
+	_remove_credit_for_asset(rel)
+	return removed
+
+
+func _safe_audio_rel(rel: String) -> bool:
+	return rel != "" and not rel.contains("..") and not rel.is_absolute_path() \
+		and EXTS.has(rel.get_extension().to_lower())
+
+
+func _remove_file(path: String) -> bool:
+	if not FileAccess.file_exists(path):
+		return false
+	return DirAccess.remove_absolute(path) == OK
+
+
+func _remove_empty_try_dirs(start: String) -> void:
+	var root := try_dir.replace("\\", "/").trim_suffix("/")
+	var dir := start.replace("\\", "/").trim_suffix("/")
+	while dir != root and dir.begins_with(root + "/"):
+		var opened := DirAccess.open(dir)
+		if opened == null or not opened.get_files().is_empty() or not opened.get_directories().is_empty():
+			return
+		if DirAccess.remove_absolute(dir) != OK:
+			return
+		dir = dir.get_base_dir()
+
+
+func _remove_credit_for_asset(rel: String) -> void:
+	if not FileAccess.file_exists(credits_path):
+		return
+	var needle := "| %s — " % rel
+	var kept := PackedStringArray()
+	for line in FileAccess.get_file_as_string(credits_path).split("\n", true):
+		if line.begins_with("|") and line.contains(needle):
+			continue
+		kept.append(line)
+	FileAccess.open(credits_path, FileAccess.WRITE).store_string("\n".join(kept))
+
+
+func _finish_permanent_delete() -> void:
+	save_selection()
+	save_active_selection()
+	_asset_cache.clear()
+	_cache.clear()
+	Audio.reload_samples()
+	_regenerate_catalog_doc()
+	rescan(true)
+
+
+func _regenerate_catalog_doc() -> void:
+	if catalog_doc_script == "" or not FileAccess.file_exists(catalog_doc_script):
+		return
+	var output: Array = []
+	OS.execute("python", PackedStringArray([catalog_doc_script]), output, true)
+
+
 # ---------------------------------------------------------------- звук
 
 func _make_buses() -> void:
@@ -673,6 +781,11 @@ func _is_gun(id: String) -> bool:
 func _build_ui() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
+	_delete_dialog = ConfirmationDialog.new()
+	_delete_dialog.title = "Удалить звук безвозвратно?"
+	_delete_dialog.get_ok_button().text = "Удалить навсегда"
+	_delete_dialog.confirmed.connect(_confirm_permanent_delete)
+	layer.add_child(_delete_dialog)
 	var bg := Panel.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	var sb := StyleBoxFlat.new()
@@ -1122,6 +1235,10 @@ func _refresh_details() -> void:
 			else "Исключён из игры, но файл сохранён. Включи галочку, чтобы вернуть.")
 		use_in_game.toggled.connect(func(on: bool) -> void: set_asset_enabled(p, on))
 		row.add_child(use_in_game)
+		var delete_button := _button("Удалить навсегда", func() -> void: _ask_delete_asset(_asset_rel(p)))
+		delete_button.modulate = Color(1.0, 0.68, 0.68)
+		delete_button.tooltip_text = "Удалить файл, .import, запись отбора и строку CREDITS"
+		row.add_child(delete_button)
 		_details.add_child(row)
 	var mine: Array[String] = []
 	for rel in files:
@@ -1298,6 +1415,10 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 			save_selection()
 			var one: Array[AudioStream] = [load_stream(path)]
 			play_burst(one, int(_burst_n.value), _rpm.value)))
+	var delete_button := _button("Удалить навсегда", func() -> void: _ask_delete_incoming(rel))
+	delete_button.modulate = Color(1.0, 0.68, 0.68)
+	delete_button.tooltip_text = "Безвозвратно удалить этот кандидат и все его служебные записи"
+	row.add_child(delete_button)
 	var use := CheckBox.new()
 	use.text = "Одобрен"
 	use.button_pressed = bool(s.use)
@@ -1399,3 +1520,34 @@ func _incoming_state(rel: String) -> Dictionary:
 	if bool(picked.use):
 		return {"short": "одобрен", "text": "Одобрен для неподключённого события: %s" % String(e.name), "color": COL_SYNTH}
 	return {"short": "→ назначен", "text": "Назначен: %s" % String(e.name), "color": COL_NEW}
+
+
+func _ask_delete_incoming(rel: String) -> void:
+	_delete_scope = "incoming"
+	_delete_path = rel
+	var picked: Dictionary = selection.get(rel, {})
+	var moved := String(picked.get("moved", ""))
+	var extra := ""
+	if moved != "":
+		extra = "\nТакже будет удалена добавленная в проект копия:\nassets/audio/%s" % moved
+	_delete_dialog.dialog_text = ("Файл будет удалён без возможности восстановления:\n%s%s\n\n"
+		+ "Исчезнут назначение, одобрение и связанные строки документации.") % [rel, extra]
+	_delete_dialog.popup_centered(Vector2i(680, 260))
+
+
+func _ask_delete_asset(rel: String) -> void:
+	_delete_scope = "asset"
+	_delete_path = rel
+	_delete_dialog.dialog_text = ("Запись будет удалена без возможности восстановления:\nassets/audio/%s\n\n"
+		+ "Будут удалены .import, строка CREDITS, запись исключения и связанный входящий исходник. "
+		+ "Игровое событие останется и возьмёт другой вариант, запасной звук или синтез.") % rel
+	_delete_dialog.popup_centered(Vector2i(680, 280))
+
+
+func _confirm_permanent_delete() -> void:
+	var scope := _delete_scope
+	var path := _delete_path
+	_delete_scope = ""
+	_delete_path = ""
+	var removed := delete_incoming_permanently(path) if scope == "incoming" else delete_asset_permanently(path)
+	_status.text = ("Удалено безвозвратно: %s" % path) if removed else ("Файл уже отсутствует: %s" % path)
