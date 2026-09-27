@@ -873,7 +873,7 @@
      "stock": "STOCK_AK"
     },
     "mag_if": "MAG_AK762",
-    "sound": "shot_rifle",
+    "sound": "shot_ak762",
     "reload_sound": "reload_rifle",
     "cycle_sound": ""
    }
@@ -927,7 +927,7 @@
      "stock": "STOCK_AK"
     },
     "mag_if": "MAG_AK762",
-    "sound": "shot_rifle",
+    "sound": "shot_ak762",
     "reload_sound": "reload_rifle",
     "cycle_sound": ""
    }
@@ -1272,7 +1272,7 @@
      "stock": "STOCK_AR"
     },
     "mag_if": "MAG_SR25",
-    "sound": "shot_rifle",
+    "sound": "shot_battle",
     "reload_sound": "reload_rifle",
     "cycle_sound": ""
    }

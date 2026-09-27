@@ -68,4 +68,5 @@ static func build(id: String) -> bool:
 		Profile.take_from_stash(String(pair[0]), int(pair[1]))
 	Profile.modules[id] = level(id) + 1
 	Profile.save()
+	Audio.play_ui("upgrade")
 	return true

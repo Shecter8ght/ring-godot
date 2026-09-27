@@ -61,6 +61,7 @@ var _progress_label: Label
 var _prompt: Label
 var _toast: Label
 var _toast_t: float = 0.0
+var _evac_sound_second: int = -1
 var _summary: Label
 var _summary_bg: ColorRect
 ## Экран итога с хроникой: рассказ, вердикт, статистика, кто как ушёл, подсказка.
@@ -311,6 +312,7 @@ func _extract_carried(pl: Player, ext: ExtractionPoint) -> void:
 	v[pl.peer_id] = pl.inventory.value()
 	extracted = e
 	loot_value = v
+	Audio.play("raid_leave", pl.global_position)
 	_clear_drag_of(pl.peer_id)
 
 
@@ -343,6 +345,7 @@ func _extract(pl: Player, ext: ExtractionPoint) -> void:
 		v[carried.peer_id] = carried.inventory.value()
 	extracted = e
 	loot_value = v
+	Audio.play("raid_leave", pl.global_position)
 	var d := drags.duplicate()
 	d.erase(pl.peer_id)
 	drags = d
@@ -428,6 +431,7 @@ func _revive(rescuer_peer: int, target_peer: int) -> void:
 	if r.inventory.remove("medkit", 1) == 0:
 		return
 	t.health.revive(Balance.REVIVE_HP)
+	Audio.play("revive", t.global_position + Vector3.UP)
 	_clear_drag_of(target_peer)
 
 
@@ -445,6 +449,7 @@ func _drag(dragger_peer: int, target_peer: int, on: bool) -> void:
 		return
 	d[dragger_peer] = target_peer
 	drags = d
+	Audio.play("drag", t.global_position)
 
 
 func _give_up(peer_id: int) -> void:
@@ -515,10 +520,11 @@ func _take_idx(peer_id: int, path: NodePath, idx: int) -> void:
 	var c := _near_container(pl, path) if pl else null
 	if c == null or not pl.is_alive() or idx < 0 or idx >= c.items.size():
 		return
+	var id := String(c.items[idx].id)
 	var k := pl.inventory.add_entry((c.items[idx] as Dictionary).duplicate(true))
 	if k > 0:
 		c.take_at(idx, k)
-		Audio.play("pin", c.global_position, -8.0)
+		Audio.play(_pickup_sound(id), c.global_position, -8.0)
 
 
 # ---------------------------------------------------------------- предметы поштучно (MagOps)
@@ -644,7 +650,8 @@ func _tick_ops(delta: float) -> void:
 		var before := op.steps
 		var more := op.tick(delta)
 		if op.steps > before:
-			Audio.play("pin", pl.global_position, -16.0, 1.3 if op.kind == "load" else 1.1)
+			var event := "round_in" if op.kind == "load" else ("round_out" if op.kind == "unload" else "plate_out")
+			Audio.play(event, pl.global_position, -16.0, 1.3 if op.kind == "load" else 1.1)
 		if not more:
 			var t := MagOps.reason_text(op.reason)
 			if t != "":
@@ -785,7 +792,7 @@ func _equip_from(peer_id: int, src: String, idx: int, path: NodePath) -> void:
 		inv._set_list(src, list)
 	inv.items = bp
 	inv.equipment = eq
-	Audio.play("reload_pistol", pl.global_position, -8.0)
+	Audio.play(_equip_sound(id), pl.global_position, -8.0)
 
 
 ## Поставить предмет из сетки src (запись si) в предмет из сетки dst (запись di; "equip:<слот>" —
@@ -833,6 +840,7 @@ func _fit_grid(peer_id: int, src: String, si: int, dst: String, di: int, path: N
 			target = to[di]
 	if target.is_empty():
 		return
+	var fitted_id := String((from[si] as Dictionary).id)
 	var r := Gear.fit(target, from[si], "")
 	if String(r[2]) != "":
 		_tell(peer_id, "Не встаёт: " + String(r[2]))
@@ -862,7 +870,7 @@ func _fit_grid(peer_id: int, src: String, si: int, dst: String, di: int, path: N
 			c.items = lists[rr]
 		else:
 			inv._set_list(String(rr), lists[rr])
-	Audio.play("reload_pistol", pl.global_position, -6.0)
+	Audio.play(_fit_sound(fitted_id), pl.global_position, -6.0)
 
 
 ## Внутри ящика — передвинуть запись в клетку (x, y).
@@ -887,6 +895,7 @@ func _loot_move(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool)
 	var list := c.items.duplicate(true)
 	if ItemDb.move_in(list, c.grid, idx, x, y, r):
 		c.items = list
+		Audio.play("item_move", c.global_position, -10.0)
 
 
 func request_take_all(container: LootContainer) -> void:
@@ -921,7 +930,7 @@ func _unequip(peer_id: int, slot: String, x: int, y: int, r: bool) -> void:
 	if pl == null or not pl.is_alive():
 		return
 	if pl.inventory.unequip(slot, x, y, r):
-		Audio.play("pin", pl.global_position, -10.0)
+		Audio.play("item_drop", pl.global_position, -10.0)
 	elif peer_id == multiplayer.get_unique_id():
 		notify("В рюкзаке нет места — выброси что-нибудь или брось это на землю (ПКМ)")
 
@@ -974,6 +983,7 @@ func _drop_entry(peer_id: int, where: String, idx: int) -> void:
 		return
 	var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
 	spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [e], LootContainer.Look.BAG)
+	Audio.play("item_drop", pl.global_position)
 
 
 ## Владелец: отдать хосту снаряжение из профиля (вызывает уровень при появлении игрока).
@@ -1026,7 +1036,8 @@ func _grid_move(peer_id: int, src: String, idx: int, dst: String, x: int, y: int
 	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl and pl.is_alive():
-		pl.inventory.move_between(src, idx, dst, x, y, r)
+		if pl.inventory.move_between(src, idx, dst, x, y, r):
+			Audio.play("item_move", pl.global_position, -10.0)
 
 
 ## Из рюкзака (или буфера, кармана — from) — запись idx в контейнер (перетащили в окно лута): в клетку
@@ -1060,7 +1071,8 @@ func _move_item(peer_id: int, idx: int, x: int, y: int, r: bool) -> void:
 	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl and pl.is_alive():
-		pl.inventory.move(idx, x, y, r)
+		if pl.inventory.move(idx, x, y, r):
+			Audio.play("item_move", pl.global_position, -10.0)
 
 
 ## Контейнер рядом с игроком (обыскивать можно только в радиусе).
@@ -1071,6 +1083,31 @@ func _near_container(pl: Player, path: NodePath) -> LootContainer:
 	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
 		return null
 	return c
+
+
+func _pickup_sound(id: String) -> String:
+	var cat := String(ItemDb.item(id).get("cat", ""))
+	if cat == "ammo" or cat == "mag":
+		return "pick_ammo"
+	if cat == "med":
+		return "pick_med"
+	if cat == "weapon":
+		return "pick_weapon"
+	if cat == "armor" or cat == "plate" or cat == "rig":
+		return "pick_cloth"
+	return "item_pick"
+
+
+func _equip_sound(id: String) -> String:
+	return "equip_gun" if String(ItemDb.item(id).get("cat", "")) == "weapon" else "equip_gear"
+
+
+func _fit_sound(id: String) -> String:
+	if not WeaponDb.plate(id).is_empty():
+		return "plate_in"
+	if not WeaponDb.magazine(id).is_empty():
+		return "mag_in"
+	return "mod_fit"
 
 
 func _take_to(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool, into: String = "backpack") -> void:
@@ -1084,7 +1121,7 @@ func _take_to(peer_id: int, path: NodePath, idx: int, x: int, y: int, r: bool, i
 	var k := pl.inventory.put_at(entry, x, y, r, into) if x >= 0 else pl.inventory.add_entry_in(into, entry)
 	if k > 0:
 		c.take_at(idx, k)
-		Audio.play("pin", c.global_position, -8.0)
+		Audio.play(_pickup_sound(String(entry.id)), c.global_position, -8.0)
 
 
 func _put(peer_id: int, path: NodePath, idx: int, from: String = "backpack", x: int = -1, y: int = -1, r: bool = false) -> void:
@@ -1105,6 +1142,7 @@ func _put(peer_id: int, path: NodePath, idx: int, from: String = "backpack", x: 
 	pl.inventory._set_list(from, src)
 	c.items = list
 	c.rolled = true
+	Audio.play("item_move", c.global_position, -10.0)
 
 
 ## Перезарядка оружия в слоте (владелец шлёт своё состояние): хост меняет магазин из рюкзака или
@@ -1215,7 +1253,8 @@ func _strip(peer_id: int, where: String, idx: int, part: String, path: NodePath)
 						pl.inventory.buffer = buf
 						ok = true
 	if ok:
-		Audio.play("reload_pistol", pl.global_position, -6.0)
+		Audio.play("plate_out" if part.begins_with("plate:") else ("mag_out" if part == "mag" else "mod_fit"),
+			pl.global_position, -6.0)
 	elif peer_id == multiplayer.get_unique_id():
 		notify("Некуда положить — освободи место в рюкзаке")
 
@@ -1269,7 +1308,7 @@ func _fit(peer_id: int, where: String, idx: int, src_idx: int, hint: String, pat
 		list[idx] = fitted
 		c.items = list
 		pl.inventory.items = items
-	Audio.play("reload_pistol", pl.global_position, -6.0)
+	Audio.play(_fit_sound(String(src.id)), pl.global_position, -6.0)
 
 
 ## Обвес на оружие прямо в рейде: из рюкзака/кармана (src, idx) — на оружие в слоте weapon_slot.
@@ -1305,7 +1344,7 @@ func _install_mod(peer_id: int, weapon_slot: String, src: String, idx: int) -> v
 		return
 	var why := pl.inventory.install_mod(weapon_slot, src, idx)
 	if why == "":
-		Audio.play("reload_pistol", pl.global_position, -6.0)
+		Audio.play("mod_fit", pl.global_position, -6.0)
 	elif peer_id == multiplayer.get_unique_id():
 		notify(why)
 
@@ -1314,7 +1353,7 @@ func _remove_mod(peer_id: int, weapon_slot: String, mod_slot: String) -> void:
 	var pl := player_of(peer_id)
 	if pl and pl.is_alive():
 		if pl.inventory.remove_mod(weapon_slot, mod_slot):
-			Audio.play("reload_pistol", pl.global_position, -6.0)
+			Audio.play("mod_fit", pl.global_position, -6.0)
 		elif peer_id == multiplayer.get_unique_id():
 			notify("Некуда положить — освободи место в рюкзаке")
 
@@ -1391,7 +1430,7 @@ func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
 		var k := pl.inventory.add_entry(entry)
 		if k > 0:
 			c.take_at(i, k)
-			Audio.play("pin", c.global_position, -8.0)
+			Audio.play(_pickup_sound(id), c.global_position, -8.0)
 		return
 
 
@@ -1420,7 +1459,10 @@ func _equip(peer_id: int, idx: int) -> void:
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
+	var id := String(pl.inventory.items[idx].id) if idx >= 0 and idx < pl.inventory.items.size() else ""
 	var spill := pl.inventory.equip_from_items(idx)
+	if id != "":
+		Audio.play(_equip_sound(id), pl.global_position, -8.0)
 	if not spill.is_empty():
 		spawn_drop(pl.global_position, "Выброшено", [spill], LootContainer.Look.BAG)
 
@@ -1433,6 +1475,7 @@ func _drop(peer_id: int, id: String, n: int) -> void:
 	if k > 0:
 		var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
 		spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [{"id": id, "n": k}], LootContainer.Look.BAG)
+		Audio.play("item_drop", pl.global_position)
 
 
 ## Лечение: предмет уходит сразу, здоровье прибавляется через use.time (если игрок ещё жив).
@@ -1442,11 +1485,13 @@ func _use_med(peer_id: int, id: String) -> void:
 	var use: Dictionary = ItemDb.item(id).get("use", {})
 	if pl == null or use.is_empty() or not pl.is_alive():
 		return
+	var med_sound := "bandage" if id == "bandage" else ("pills" if id == "painkillers" else "inject")
 	if pl.is_downed():
 		if id != "medkit" and id != "bandage":
 			return
 		if pl.inventory.remove(id, 1) == 0:
 			return
+		Audio.play(med_sound, pl.global_position + Vector3.UP)
 		var wait := Balance.REVIVE_SELF_SEC if id == "medkit" else float(use.time)
 		get_tree().create_timer(wait).timeout.connect(func() -> void:
 			if not is_instance_valid(pl) or not pl.is_downed():
@@ -1461,6 +1506,7 @@ func _use_med(peer_id: int, id: String) -> void:
 		return
 	if pl.inventory.remove(id, 1) == 0:
 		return
+	Audio.play(med_sound, pl.global_position + Vector3.UP)
 	get_tree().create_timer(float(use.time)).timeout.connect(func() -> void:
 		if is_instance_valid(pl) and pl.is_alive():
 			pl.health.heal(float(use.heal)))
@@ -1625,12 +1671,14 @@ func ui_open() -> bool:
 func notify(text: String) -> void:
 	_toast.text = text
 	_toast_t = 2.5
+	Audio.play_ui("ui_notify", -5.0)
 
 
 func _update_channel_hud(me: Player) -> void:
 	_progress.visible = false
 	_progress_label.visible = false
 	if me == null or not me.is_alive() or has_left(me.peer_id) or over:
+		_evac_sound_second = -1
 		return
 	var here: ExtractionPoint = null
 	for e in get_tree().get_nodes_in_group("extractions"):
@@ -1645,6 +1693,7 @@ func _update_channel_hud(me: Player) -> void:
 		_progress.visible = true
 		_progress.max_value = Balance.EXTRACT_GROUP_SEC
 		_progress.value = Balance.EXTRACT_GROUP_SEC - evac_left
+		_play_evac_tick(evac_left)
 		var where := ("%s закрыта: %s. " % [here.display_name, reason]) if here and reason != "" else ""
 		_progress_label.text = "%sГРУППА У ВЫХОДА · %s — успей в зону, иначе вернёшься без добычи" % [where, _clock(evac_left)]
 		return
@@ -1662,12 +1711,22 @@ func _update_channel_hud(me: Player) -> void:
 			names.append(String(Net.player_names.get(p, participants.get(p, "напарник"))))
 		_progress.max_value = Balance.EXTRACT_GROUP_SEC
 		_progress.value = Balance.EXTRACT_GROUP_SEC - evac_left
+		_play_evac_tick(evac_left)
 		_progress_label.text = "ЭВАКУАЦИЯ · %s — через %s · ждём: %s" % [here.display_name, _clock(evac_left), ", ".join(names)]
 		return
 	var t := float(cur[1]) if cur.size() == 2 else 0.0
 	_progress.max_value = here.channel_s
 	_progress.value = t
-	_progress_label.text = "ЭВАКУАЦИЯ · %s — %.1f с" % [here.display_name, maxf(0.0, here.channel_s - t)]
+	var left := maxf(0.0, here.channel_s - t)
+	_play_evac_tick(left)
+	_progress_label.text = "ЭВАКУАЦИЯ · %s — %.1f с" % [here.display_name, left]
+
+
+func _play_evac_tick(left: float) -> void:
+	var second := int(ceil(left))
+	if second != _evac_sound_second:
+		_evac_sound_second = second
+		Audio.play_ui("evac_tick", -5.0)
 
 
 ## «2:41».

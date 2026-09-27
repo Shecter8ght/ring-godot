@@ -13,6 +13,7 @@ var _roll_t: float = 0.0
 var _slow_t: float = 0.0
 var _light: OmniLight3D
 var _base_energy: float = 1.0
+var _burn_sound: AudioStreamPlayer3D
 
 
 static func throw(parent: Node, k: String, from: Vector3, velocity: Vector3) -> ThrownLight:
@@ -76,7 +77,9 @@ static func throw(parent: Node, k: String, from: Vector3, velocity: Vector3) -> 
 	g.contact_monitor = true
 	g.max_contacts_reported = 2
 	g._light.global_position = from + Vector3.UP * 0.15
-	Audio.play("pin", from, -6.0)
+	Audio.play("flare_ignite", from, -6.0)
+	if k == "flare":
+		g._burn_sound = Audio.start_loop("flare_burn", g, -8.0)
 	return g
 
 

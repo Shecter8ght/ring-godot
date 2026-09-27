@@ -94,6 +94,7 @@ var seated: bool = false
 ## Выносливость: бег тратит, отдых восстанавливает; выдохся — не бежит до порога.
 var stamina: float = Balance.STAMINA_MAX
 var _winded: bool = false
+var _breath_sound: AudioStreamPlayer3D
 var _rest_t: float = 0.0
 ## ПНВ включён (N; нужен ПНВ в слоте «глаза») и сколько заряда осталось, с.
 var nvg_on: bool = false
@@ -146,10 +147,13 @@ func _ready() -> void:
 		_animation_event("hit")
 		_last_hit_from = from
 		_last_damage = amount
+		Audio.play("pain_player", global_position + Vector3.UP * 1.2)
 		if is_local() and _camera_rig is CameraRig:
 			# на адреналине попадание почти не сбивает
 			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE * (1.0 - float(Balance.STRESS.adr_shake) * stress_k()))
 		add_stress(float(Balance.STRESS.hit) + amount * float(Balance.STRESS.hit_per_dmg)))
+	health.downed_changed.connect(func(on: bool) -> void:
+		Audio.play("downed" if on else "revive", global_position + Vector3.UP))
 	_muzzle.visible = false
 	# рюкзак — авторитет хоста (узел создан после выдачи авторитета Player — умалчиваемый 1)
 	inventory = Inventory.new()
@@ -159,11 +163,18 @@ func _ready() -> void:
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
 	steps.loud_db = func() -> float: return float(Balance.STEP_STANCE_DB.get(_stance_key(), 0.0))
+	steps.movement_kind = func() -> String:
+		if stance == Stance.PRONE or is_downed():
+			return "crawl"
+		return "step_crouch" if stance == Stance.CROUCH else ""
 	add_child(steps)
 	# броня, плиты, шлем — Armor (считается там же, где урон, — на хосте)
 	health.damage_filter = func(amount: float, zone: String, from: Vector3, at: Vector3, bullet: Dictionary) -> Array:
 		var p := at if at != Vector3.INF else global_position + Vector3.UP * 1.3
-		return inventory.absorb(amount, zone, from, p, Vector3(sin(body_yaw()), 0.0, cos(body_yaw())), bullet, _rng)
+		var result := inventory.absorb(amount, zone, from, p, Vector3(sin(body_yaw()), 0.0, cos(body_yaw())), bullet, _rng)
+		if inventory.last_armor_layer != "":
+			Audio.play("impact_helmet" if inventory.last_armor_layer == "helmet" else "impact_plate", p)
+		return result
 	# тяжело ранен вместо смерти
 	health.can_down = true
 	health.always_down_first = true
@@ -279,12 +290,17 @@ func _tick_stamina(delta: float) -> void:
 		_rest_t = Balance.STAMINA_REGEN_DELAY
 		if stamina <= 0.0:
 			_winded = true
+			if _breath_sound == null:
+				_breath_sound = Audio.start_loop("breath", self, -5.0)
 	else:
 		_rest_t -= delta
 		if _rest_t <= 0.0:
 			stamina = minf(Balance.STAMINA_MAX, stamina + Balance.STAMINA_REGEN * delta)
 		if _winded and stamina >= Balance.STAMINA_RESUME:
 			_winded = false
+			if _breath_sound != null:
+				_breath_sound.queue_free()
+				_breath_sound = null
 
 
 ## Светит фонарём (фонарь на оружии в руках включён) — выдаёт издалека.
@@ -565,7 +581,7 @@ func _physics_process(delta: float) -> void:
 				_apply_stance()
 				fire_timer = maxf(fire_timer, 0.8)
 				NoiseBus.emit(global_position, float(Balance.VAULT.noise_m) * 1.5, "step")
-				Audio.play("impact_hard", global_position, -6.0)
+				Audio.play("land", global_position, -6.0)
 		return
 	_dive_cd = maxf(0.0, _dive_cd - delta)
 	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
@@ -807,9 +823,11 @@ func _combat(delta: float) -> void:
 	if trigger and fire_timer <= 0.0:
 		if is_jammed():
 			fire_timer = 0.3
-			Audio.play("pin", global_position, -8.0)
+			Audio.play("jam", global_position, -8.0)
 			return
 		if ammo <= 0:
+			fire_timer = float(spec.interval)
+			Audio.play("dry_fire", global_position, -8.0)
 			_start_reload(spec)
 			return
 		_fire(spec)
@@ -839,6 +857,7 @@ func _start_reload(spec: Dictionary) -> void:
 			_fumble_cd = float(sc.fumble_cd)
 			t += float(sc.fumble_sec)
 			_say("Магазин выскользнул из рук — лежит под ногами")
+			Audio.play("mag_drop", global_position)
 		var h := items_host()
 		if h:
 			h.call("request_reload", weapon_slot, st)
@@ -851,6 +870,7 @@ func _start_reload(spec: Dictionary) -> void:
 	if String(WeaponDb.weapon(weapon_id).get("class", "")) != "PISTOL":
 		_animation_event("rifle_reload")
 	Audio.play(String(spec.reload_sound), global_position)
+	Audio.play("mag_out", global_position, -4.0)
 
 
 ## Задержка: передёрнуть (R) — патроны не тратятся.
@@ -866,12 +886,15 @@ func _finish_reload(spec: Dictionary) -> void:
 		if _ws.has(_reload_slot):
 			_ws[_reload_slot].jam = false
 		_ws_dirty = true
+		Audio.play("charge", global_position)
 		return
 	if not loadout_mode:
 		if _ws.has(_reload_slot):
 			_ws[_reload_slot].rounds = int(spec.mag)
 			_ws[_reload_slot].jam = false
 		ammo = int(spec.mag)
+		Audio.play("mag_in", global_position, -4.0)
+		Audio.play("charge", global_position, -5.0)
 		return
 	# хост поменял запись (ревизия выросла) — состояние перечитается; ответ ещё в пути — подождать
 	var base := _base_entry(_reload_slot)
@@ -884,6 +907,8 @@ func _finish_reload(spec: Dictionary) -> void:
 		_ws[_reload_slot].jam = false
 	if _reload_slot == weapon_slot:
 		ammo = int((_ws.get(weapon_slot, {}) as Dictionary).get("rounds", 0))
+	Audio.play("mag_in", global_position, -4.0)
+	Audio.play("charge", global_position, -5.0)
 
 
 ## T / L: все фонари (kind light) или лазеры (laser) на оружии в руках — вкл/выкл разом.
@@ -904,7 +929,7 @@ func _toggle_tac(kind: String) -> void:
 		var t: Dictionary = (st.tac as Dictionary).get(m, {})
 		t[kind] = not any_on
 		st.tac[m] = t
-	Audio.play("pin", global_position, -14.0)
+	Audio.play("tac_click", global_position, -14.0)
 	_say(("Фонарь: " if kind == "light" else "ЛЦУ: ") + ("выкл" if any_on else "вкл"))
 	_send_ws(weapon_slot)
 
@@ -926,7 +951,7 @@ func _toggle_sight() -> void:
 	var mount := "optic_" + nxt
 	var name := ItemDb.item_name(WeaponDb.mod_id((e.mods as Dictionary).get(mount, ""))) if (e.mods as Dictionary).has(mount) else "штатный"
 	_say(("Основной: " if nxt == "primary" else "Угловой: ") + name)
-	Audio.play("pin", global_position, -16.0)
+	Audio.play("sight_switch", global_position, -16.0)
 	_send_ws(weapon_slot)
 
 
@@ -955,7 +980,7 @@ func allowed_weapons() -> Array:
 func _check_ammo(spec: Dictionary) -> void:
 	ammo_check_text = Gear.ammo_estimate(ammo, int(spec.mag), Gear.exact_count(weapon_id))
 	ammo_check_t = float(Balance.AMMO_CHECK.show_sec)
-	Audio.play("pin", global_position, -12.0)
+	Audio.play("mag_check", global_position, -12.0)
 	if is_local():
 		_say("Магазин: " + ammo_check_text)
 
@@ -1026,7 +1051,7 @@ func _switch(key: String, sound: bool = true) -> void:
 	_aim_t = 0.0
 	fire_timer = 0.35
 	if sound and weapon_id != "":
-		Audio.play("bolt", global_position, -6.0)
+		Audio.play("weapon_draw", global_position, -6.0)
 		_animation_event("pistol_draw" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_draw")
 
 
@@ -1116,6 +1141,8 @@ func _fire(spec: Dictionary) -> void:
 		rig.add_shake(float(spec.shake))
 	NoiseBus.emit(global_position, float(spec.noise_m), "shot")
 	_shot_fx(muzzle, ends, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound))
+	if ammo <= 0:
+		Audio.play("bolt_lock", global_position, -5.0)
 	# остальным — то же (пули и урон уже посчитаны здесь и у хоста)
 	if Net.is_networked():
 		_rpc_shot_fx.rpc(muzzle, ends, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound))
@@ -1177,7 +1204,7 @@ func _tick_nvg(delta: float) -> void:
 			_say("ПНВ: батарея села")
 		else:
 			nvg_on = not nvg_on
-			Audio.play("pin", global_position, -14.0)
+			Audio.play("nvg_on" if nvg_on else "nvg_off", global_position, -14.0)
 	if not has:
 		nvg_on = false
 	if nvg_on:
@@ -1302,7 +1329,7 @@ func _try_vault() -> void:
 	if not ads:
 		_body.rotation.y = atan2(d.x, d.z)
 	NoiseBus.emit(global_position, float(v.noise_m), "step")
-	Audio.play("impact_hard", global_position + Vector3.UP * 0.8, -14.0)
+	Audio.play("vault", global_position + Vector3.UP * 0.8, -14.0)
 
 
 ## Alt: бросок на землю в сторону движения (любую), дальше — лёжа. Шумно, пару мгновений не стреляет.
@@ -1327,7 +1354,7 @@ func _try_dive() -> void:
 	NoiseBus.emit(global_position, float(dv.noise_m), "step")
 	get_tree().create_timer(float(dv.sec)).timeout.connect(func() -> void:
 		if is_inside_tree():
-			Audio.play("impact_hard", global_position, -8.0))
+			Audio.play("dive", global_position, -8.0))
 
 
 ## Стресс: прибавить (минус — успокоить). Вызвать можно где угодно (хост — про любого игрока):
@@ -1358,6 +1385,7 @@ func near_miss() -> void:
 			return
 		_near_t = float(Balance.STRESS.near_gap)
 		_add_stress_local(float(Balance.STRESS.near_miss))
+		Audio.play("flyby", global_position + Vector3.UP * 1.2)
 	elif Net.is_networked() and multiplayer.is_server():
 		_rpc_near.rpc_id(peer_id)
 
@@ -1456,7 +1484,10 @@ func _read_stance() -> void:
 	if Input.is_action_just_pressed("prone"):
 		stance = Stance.STAND if stance == Stance.PRONE else Stance.PRONE
 		_apply_stance()
+	var was_aiming := aiming
 	aiming = Input.is_action_pressed("aim") and not ui_blocked()
+	if aiming and not was_aiming and weapon_id != "":
+		Audio.play("ads_raise", global_position, -8.0)
 
 
 func _stance_key() -> String:

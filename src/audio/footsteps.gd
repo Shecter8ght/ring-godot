@@ -8,6 +8,8 @@ extends Node
 
 ## () -> float: насколько тише/громче шаг сейчас (присел, лёг), дБ. Пусто — 0.
 var loud_db: Callable
+## () -> String: особое движение игрока (ползком / вприсядку); пусто — обычный шаг по поверхности.
+var movement_kind: Callable
 ## Мародёр: тяжёлые ботинки — ниже и чуть громче.
 var ai: bool = false
 
@@ -42,4 +44,8 @@ func _process(delta: float) -> void:
 	_t = clampf(Balance.STEP_STRIDE / _speed, float(Balance.STEP_INTERVAL[0]), float(Balance.STEP_INTERVAL[1]))
 	_left = not _left
 	var extra := float(loud_db.call()) if loud_db.is_valid() else 0.0
+	var special := String(movement_kind.call()) if movement_kind.is_valid() else ""
+	if special != "":
+		Audio.play(special, pos, extra)
+		return
 	Audio.step(pos, _speed > Balance.STEP_RUN_SPEED, ai, extra, _left)

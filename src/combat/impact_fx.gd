@@ -21,7 +21,7 @@ const FX := {
 
 ## Звук удара по виду поверхности.
 const SOUND := {
-	"concrete": "impact_hard", "tile": "impact_hard", "asphalt": "impact_hard", "metal": "impact_metal",
+	"concrete": "impact_hard", "tile": "impact_ceramic", "asphalt": "impact_dirt", "metal": "impact_metal",
 	"glass": "impact_glass", "wood": "impact_soft", "cardboard": "impact_soft", "fabric": "impact_soft",
 	"plastic": "impact_soft", "flesh": "hit",
 }

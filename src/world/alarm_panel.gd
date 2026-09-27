@@ -20,7 +20,7 @@ func prompt() -> String:
 func _use(peer_id: int) -> void:
 	_off_t = 0.0
 	_who = peer_id
-	Audio.play("pin", global_position + Vector3.UP * 1.3, -4.0)
+	Audio.play("alarm_panel", global_position + Vector3.UP * 1.3, -4.0)
 
 
 func _process(delta: float) -> void:

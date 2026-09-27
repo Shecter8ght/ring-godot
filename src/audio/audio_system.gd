@@ -6,6 +6,7 @@ extends Node
 
 const MIX_RATE := 22050
 const ACTIVE_SELECTION := "res://data/sound_active.json"
+const CATALOG := "res://data/sound_catalog.json"
 
 ## Громкость и дальность по виду звука: дБ, единица дистанции (м, где громкость номинальная), предел слышимости.
 const KINDS := {
@@ -100,8 +101,9 @@ const FAR_M := 30.0
 ## Поверхность под ногами (Surfaces) → набор записей шагов. Металл — камень + звонкий слой
 ## step_metal (запись steps/metal_*, если есть, иначе синтез).
 const STEP_SET := {
-	"tile": "stone", "concrete": "stone", "plastic": "stone", "wood": "stone", "glass": "stone",
-	"metal": "stone", "asphalt": "dirt", "cardboard": "dirt", "fabric": "dirt", "snow": "snow",
+	"tile": "stone", "concrete": "stone", "plastic": "stone", "wood": "wood", "glass": "glass",
+	"metal": "stone", "asphalt": "dirt", "cardboard": "cardboard", "fabric": "carpet", "snow": "snow",
+	"water": "water", "trash": "trash", "rubble": "rubble", "gravel": "gravel", "grass": "grass",
 }
 
 ## Сыгран шаг: вид звука и поверхность (для тестов и отладки).
@@ -110,6 +112,10 @@ signal stepped(kind: String, surface: String, pos: Vector3)
 var _samples: Dictionary = {}
 var _far: Dictionary = {}
 var _disabled: Dictionary = {}
+## Каталог даёт новым событиям папку записей и запасной вид без правок этого файла.
+var _catalog_prefixes: Dictionary = {}
+var _catalog_fallbacks: Dictionary = {}
+var _catalog_far: Dictionary = {}
 
 var _streams: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
@@ -152,6 +158,7 @@ func _ready() -> void:
 	_streams["debris"] = _streams["impact_hard"]
 	_streams["explosion"] = _make(_explosion())
 	_load_active_selection()
+	_load_catalog()
 	_load_samples()
 	# фон — только ветер в пустом здании (капли владелец убрал: запись «ветер + капли» не делится)
 	_ambient = AudioStreamPlayer.new()
@@ -164,6 +171,7 @@ func _ready() -> void:
 	_ambient.autoplay = true
 	_ambient.bus = &"Ambient"
 	add_child(_ambient)
+	get_tree().node_added.connect(_on_audio_node_added)
 
 
 ## Звук в точке мира. Игрок слушает из своей позиции (AudioListener3D на игроке).
@@ -172,7 +180,7 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0)
 	var stream: AudioStream = _pick(kind, pos)
 	if stream == null:
 		return
-	var spec: Dictionary = KINDS.get(kind, KINDS.get(_fallback_kind(kind), {"db": 0.0, "unit": 5.0, "max": 40.0}))
+	var spec := _kind_spec(kind)
 	var listener := _listener_pos()
 	var ears := _has_ears()
 	if ears and listener.distance_to(pos) > float(spec["max"]):
@@ -199,6 +207,56 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0)
 	p.play()
 
 
+## Непространственный звук интерфейса. Запись и запасной вариант берутся из того же каталога.
+func play_ui(kind: String, extra_db: float = 0.0) -> void:
+	var stream: AudioStream = _pick(kind, _listener_pos())
+	if stream == null:
+		return
+	var p := AudioStreamPlayer.new()
+	p.stream = stream
+	p.volume_db = extra_db
+	p.bus = &"World"
+	p.finished.connect(p.queue_free)
+	add_child(p)
+	p.play()
+
+
+## Зацикленный пространственный звук, привязанный к объекту (ракета, прибор, источник фона).
+## Если своей или запасной записи пока нет, возвращает null: игровой объект продолжает работать.
+func start_loop(kind: String, parent: Node3D, extra_db: float = 0.0) -> AudioStreamPlayer3D:
+	var stream: AudioStream = _pick(kind, parent.global_position)
+	if stream == null:
+		return null
+	make_loop(stream)
+	var spec := _kind_spec(kind)
+	var p := AudioStreamPlayer3D.new()
+	p.stream = stream
+	p.volume_db = float(spec.db) + extra_db
+	p.unit_size = float(spec.unit)
+	p.max_distance = float(spec["max"])
+	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+	p.bus = Settings.bus_for(kind)
+	parent.add_child(p)
+	p.play()
+	return p
+
+
+func _kind_spec(kind: String) -> Dictionary:
+	return KINDS.get(kind, KINDS.get(_fallback_kind(kind), KINDS.pin))
+
+
+## Все обычные кнопки получают единый клик и наведение, включая созданные кодом позднее.
+func _on_audio_node_added(node: Node) -> void:
+	var button := node as BaseButton
+	if button == null or button.has_meta("sound_wired"):
+		return
+	button.set_meta("sound_wired", true)
+	button.pressed.connect(func() -> void: play_ui("ui_click", -5.0))
+	button.mouse_entered.connect(func() -> void:
+		if not button.disabled:
+			play_ui("ui_hover", -11.0))
+
+
 ## Шаг в точке pos: поверхность под ногами, бег/шаг, мародёр (ботинки ниже и громче), левая/правая.
 func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool) -> void:
 	# дальше, чем слышно бег, — не считаем (24 мародёра шагают всё время)
@@ -208,8 +266,11 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool) -> voi
 	var sset := String(STEP_SET.get(surf, "stone"))
 	var pitch := (0.97 if left else 1.02) * (0.93 if ai else 1.0) * _rng.randf_range(0.97, 1.03)
 	var db := extra_db + (1.5 if ai else 0.0)
-	var kind := "step_%s%s" % [sset, "_run" if run else ""]
+	var has_run_set := sset in ["stone", "dirt", "snow"]
+	var kind := "step_%s%s" % [sset, "_run" if run and has_run_set else ""]
 	play(kind, pos, db, pitch)
+	if run:
+		play("gear_rattle", pos, db - 5.0, pitch)
 	stepped.emit(kind, surf, pos)
 	if surf == "metal":
 		play("step_metal", pos, db + (2.0 if run else 0.0), pitch)
@@ -273,7 +334,15 @@ func _pick(kind: String, pos: Vector3) -> AudioStream:
 
 
 func _fallback_kind(kind: String) -> String:
-	return String(FALLBACKS.get(kind, kind))
+	var current := kind
+	# Некоторые подробные события наследуют другой каталоговый звук, а тот — базовый синтез.
+	# Идём по цепочке с пределом, чтобы ошибочный цикл в данных не повесил игру.
+	for _i in 8:
+		var next := String(FALLBACKS.get(current, _catalog_fallbacks.get(current, current)))
+		if next == current:
+			return current
+		current = next
+	return current
 
 
 func _listener_pos() -> Vector3:
@@ -294,10 +363,23 @@ func _load_samples() -> void:
 		var arr := _load_prefixes([FAR[kind]])
 		if not arr.is_empty():
 			_far[kind] = arr
+	for kind in _catalog_far:
+		var arr := _load_prefixes([String(_catalog_far[kind])])
+		if not arr.is_empty():
+			_far[kind] = arr
 	for kind in OWN:
 		var own := _load_prefixes([OWN[kind]])
 		if not own.is_empty():
 			_samples[kind] = own
+	# Новое событие достаточно описать в каталоге и вызвать Audio.play(id): одобренные записи
+	# начнут работать без очередного изменения таблицы SAMPLES.
+	for kind in _catalog_prefixes:
+		var prefixes: Array[String] = []
+		for prefix in _catalog_prefixes[kind]:
+			prefixes.append(String(prefix))
+		var arr := _load_prefixes(prefixes)
+		if not arr.is_empty():
+			_samples[kind] = arr
 
 
 ## Перечитать записи с диска. Стенд вызывает это после принятия нового файла: запись начинает
@@ -310,6 +392,7 @@ func reload_samples() -> void:
 	_siren = null
 	_hum = null
 	_load_active_selection()
+	_load_catalog()
 	_load_samples()
 	var ambient := _loop_sample("ambient")
 	if _ambient != null and ambient != null:
@@ -386,6 +469,44 @@ func _load_active_selection() -> void:
 		return
 	for rel in (parsed as Dictionary).get("disabled", []):
 		_disabled[String(rel).replace("\\", "/")] = true
+
+
+func _load_catalog() -> void:
+	_catalog_prefixes.clear()
+	_catalog_fallbacks.clear()
+	_catalog_far.clear()
+	if not FileAccess.file_exists(CATALOG):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(CATALOG))
+	if not parsed is Dictionary:
+		return
+	var entries: Array = (parsed as Dictionary).get("sounds", [])
+	var id_kinds: Dictionary = {}
+	for raw in entries:
+		if raw is Dictionary:
+			var e := raw as Dictionary
+			id_kinds[String(e.get("id", ""))] = String(e.get("kind", "")).trim_suffix("@far")
+	for raw in entries:
+		if not raw is Dictionary:
+			continue
+		var e := raw as Dictionary
+		var kind := String(e.get("kind", ""))
+		if kind == "" or kind.begins_with("loop:"):
+			continue
+		var base_kind := kind.trim_suffix("@far")
+		if kind.ends_with("@far"):
+			_catalog_far[base_kind] = String(e.get("file", ""))
+			continue
+		var prefix := String(e.get("file", ""))
+		if prefix != "":
+			if not _catalog_prefixes.has(base_kind):
+				_catalog_prefixes[base_kind] = []
+			var prefixes := _catalog_prefixes[base_kind] as Array
+			if prefix not in prefixes:
+				prefixes.append(prefix)
+		var fallback := String(e.get("fallback", ""))
+		if fallback != "":
+			_catalog_fallbacks[base_kind] = String(id_kinds.get(fallback, fallback))
 
 
 func _load_audio_file(path: String) -> AudioStream:

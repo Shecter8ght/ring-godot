@@ -10,6 +10,8 @@ const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистоле
 
 var items: Array = []
 var equipment: Dictionary = {}
+## Последний слой, который принял пулю; нужен только для соответствующего звука попадания.
+var last_armor_layer: String = ""
 ## Защищённый карман (модуль убежища): при смерти не выпадает — возвращается в профиль.
 var pocket: Array = []
 var pocket_grid: Vector2i = Vector2i.ZERO
@@ -456,6 +458,7 @@ func slot_weapon(slot: String) -> String:
 ## корпус. Возвращает [урон, насмерть?]; износ брони записывается в снаряжение.
 func absorb(amount: float, zone: String, from: Vector3, at: Vector3, forward: Vector3, bullet: Dictionary, rng: RandomNumberGenerator) -> Array:
 	var r := Armor.hit(equipment, amount, zone, from, at, forward, bullet, rng)
+	last_armor_layer = String(r.layer)
 	if String(r.layer) != "":
 		equipment = r.equipment
 	return [float(r.damage), bool(r.lethal)]

@@ -47,7 +47,7 @@ func _use(peer_id: int) -> void:
 	if pl == null or pl.inventory.add(key_id, 1) == 0:
 		return
 	taken = true
-	Audio.play("pin", global_position)
+	Audio.play("key_pickup", global_position)
 
 
 func _process(_delta: float) -> void:

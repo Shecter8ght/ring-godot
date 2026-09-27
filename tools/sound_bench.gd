@@ -30,7 +30,7 @@ var active_selection_path: String = ProjectSettings.globalize_path(ACTIVE_SELECT
 var sounds: Array[Dictionary] = []
 var by_id: Dictionary = {}
 var cats: Array[String] = []
-## Отбор новых файлов: путь относительно try_dir → {use, source, seen, moved}.
+## Отбор новых файлов: путь относительно try_dir → {assigned, use, source, seen, moved}.
 var selection: Dictionary = {}
 ## Уже импортированные записи, которые владелец исключил из случайного набора игры.
 var disabled_assets: Dictionary = {}
@@ -64,6 +64,7 @@ var _rpm: SpinBox
 var _inbox_tree: Tree
 var _inbox_pick: String = "dir:"
 var _building_inbox_tree: bool = false
+var _catalog_collapsed: Dictionary = {}
 
 
 func _ready() -> void:
@@ -71,6 +72,7 @@ func _ready() -> void:
 	_load_catalog()
 	_ensure_try_dir()
 	_load_selection()
+	_restore_legacy_paths()
 	_load_active_selection()
 	_make_buses()
 	# слушатель для «как в игре» (Audio.play — объёмный звук в точке мира)
@@ -141,9 +143,9 @@ func _ensure_try_dir() -> void:
 	if not FileAccess.file_exists(try_dir.path_join(".gdignore")):
 		FileAccess.open(try_dir.path_join(".gdignore"), FileAccess.WRITE).store_string("")
 	var readme := ("Кидай сюда звуки на пробу (ogg, wav, mp3) — стенд tools/sound_bench подхватит их сам.\n"
-		+ "Можно копировать целые папки любой вложенности: до назначения стенд покажет исходный путь.\n"
-		+ "Только файл прямо в подпапке с id каталога (например shot_rifle/file.wav) считается назначенным.\n"
-		+ "Назначить можно и на стенде. В git эта папка не попадает.\n")
+		+ "Можно копировать целые папки любой вложенности: стенд всегда сохраняет и показывает исходное дерево.\n"
+		+ "Назначение игровому событию хранится в _selection.json и не перемещает исходный файл.\n"
+		+ "Старые папки с id каталога (например shot_rifle/file.wav) по-прежнему распознаются. В git эта папка не попадает.\n")
 	var readme_path := try_dir.path_join("ПРОЧТИ.txt")
 	if not FileAccess.file_exists(readme_path) or FileAccess.get_file_as_string(readme_path) != readme:
 		FileAccess.open(readme_path, FileAccess.WRITE).store_string(readme)
@@ -164,6 +166,33 @@ func save_selection() -> void:
 	var f := FileAccess.open(_sel_path(), FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(selection, "\t"))
+
+
+## Старый стенд переносил назначенный файл в папку <id>. Возвращаем такие файлы в сохранённый
+## исходный путь, а назначение оставляем отдельным полем — пользовательское дерево больше не ломается.
+func _restore_legacy_paths() -> void:
+	var restored := false
+	for key in selection.keys().duplicate():
+		var rel := String(key)
+		var picked: Dictionary = selection[key]
+		var origin := String(picked.get("origin", rel)).replace("\\", "/")
+		if origin == rel or origin == "":
+			continue
+		var src := try_dir.path_join(rel)
+		var dst := try_dir.path_join(origin)
+		if not FileAccess.file_exists(src) or FileAccess.file_exists(dst):
+			continue
+		var legacy_id := rel.get_base_dir() if rel.contains("/") else ""
+		if by_id.has(legacy_id) and not picked.has("assigned"):
+			picked.assigned = legacy_id
+		DirAccess.make_dir_recursive_absolute(dst.get_base_dir())
+		if DirAccess.rename_absolute(src, dst) != OK:
+			continue
+		selection[origin] = picked
+		selection.erase(key)
+		restored = true
+	if restored:
+		save_selection()
 
 
 func _load_active_selection() -> void:
@@ -247,6 +276,11 @@ func _is_audio(f: String) -> bool:
 
 
 func assigned_id(rel: String) -> String:
+	var picked: Dictionary = selection.get(rel, {})
+	if picked.has("assigned"):
+		var explicit := String(picked.assigned)
+		return explicit if by_id.has(explicit) else ""
+	# Совместимость с прежним стендом: папка <id>/file означала назначение.
 	var base := rel.get_base_dir() if rel.contains("/") else ""
 	return base if by_id.has(base) else ""
 
@@ -370,34 +404,24 @@ func rescan(force: bool = false) -> bool:
 	return true
 
 
-## Назначить файл звуку (перенос в подпапку с его id; "" — обратно в корень). Новый путь.
+## Назначить файл звуку, не меняя пользовательское дерево папок. Новый путь равен исходному.
 func assign(rel: String, id: String, refresh: bool = true) -> String:
 	var picked := sel(rel)
-	# После переноса назначение — часть истории авторства: его нельзя молча переписать.
+	# После добавления в проект назначение — часть истории авторства: его нельзя молча переписать.
 	if String(picked.moved) != "":
 		return rel
-	var fname := rel.get_file()
-	var to_dir := try_dir if id == "" else try_dir.path_join(id)
-	if (try_dir.path_join(rel)).get_base_dir() == to_dir:
+	if id != "" and not by_id.has(id):
 		return rel
-	DirAccess.make_dir_recursive_absolute(to_dir)
-	var dst := to_dir.path_join(fname)
-	var n := 2
-	while FileAccess.file_exists(dst):
-		dst = to_dir.path_join("%s_%d.%s" % [fname.get_basename(), n, fname.get_extension()])
-		n += 1
-	DirAccess.rename_absolute(try_dir.path_join(rel), dst)
-	var new_rel := dst.trim_prefix(try_dir + "/")
-	if selection.has(rel):
-		# Одобрение относится к конкретному игровому событию. После переназначения нужно
-		# прослушать выбор в новом контексте и одобрить его снова.
-		picked.use = false
-		selection[new_rel] = picked
-		selection.erase(rel)
+	if assigned_id(rel) == id and picked.has("assigned"):
+		return rel
+	# Одобрение относится к конкретному игровому событию. После переназначения нужно
+	# прослушать выбор в новом контексте и одобрить его снова.
+	picked.assigned = id
+	picked.use = false
 	if refresh:
 		save_selection()
-		rescan(true)
-	return new_rel
+		_refresh_all()
+	return rel
 
 
 ## Папка генератора обычно содержит несколько вариантов одного звука: назначаем её целиком,
@@ -408,7 +432,7 @@ func assign_many(rels: Array[String], id: String) -> void:
 	for rel in rels:
 		assign(rel, id, false)
 	save_selection()
-	rescan(true)
+	_refresh_all()
 
 
 ## Следующий свободный номер у префикса в assets/audio.
@@ -763,6 +787,9 @@ func _build_ui() -> void:
 	_tree.set_column_custom_minimum_width(1, 145)
 	_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_tree.item_selected.connect(_on_tree_selected)
+	_tree.item_collapsed.connect(func(item: TreeItem) -> void:
+		if item.get_metadata(0) != null and String(item.get_metadata(0)).begins_with("cat:"):
+			_catalog_collapsed[String(item.get_metadata(0)).trim_prefix("cat:")] = item.collapsed)
 	left.add_child(_tree)
 
 	var work := _column(cols, 1.7)
@@ -818,12 +845,19 @@ func _build_ui() -> void:
 	inbox_box.add_child(inbox_hint)
 	var inbox_split := HSplitContainer.new()
 	inbox_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	inbox_split.split_offset = 330
+	inbox_split.split_offset = 480
 	inbox_box.add_child(inbox_split)
 	_inbox_tree = Tree.new()
-	_inbox_tree.custom_minimum_size.x = 280
+	_inbox_tree.custom_minimum_size.x = 430
 	_inbox_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_inbox_tree.hide_root = false
+	_inbox_tree.columns = 2
+	_inbox_tree.column_titles_visible = true
+	_inbox_tree.set_column_title(0, "Папка / файл")
+	_inbox_tree.set_column_title(1, "Назначение")
+	_inbox_tree.set_column_expand(0, true)
+	_inbox_tree.set_column_expand(1, false)
+	_inbox_tree.set_column_custom_minimum_width(1, 125)
 	_inbox_tree.add_theme_font_size_override("font_size", 14)
 	_inbox_tree.item_selected.connect(_on_inbox_tree_selected)
 	inbox_split.add_child(_inbox_tree)
@@ -978,9 +1012,11 @@ func _refresh_tree() -> void:
 				continue
 			if ci == null:
 				ci = _tree.create_item(root)
+				ci.set_metadata(0, "cat:" + c)
 				for col in 2:
 					ci.set_selectable(col, false)
 				ci.set_custom_color(0, Color(1.0, 0.86, 0.6))
+				ci.collapsed = bool(_catalog_collapsed.get(c, true))
 			var it := _tree.create_item(ci)
 			it.set_text(0, String(e.name))
 			it.set_metadata(0, String(e.id))
@@ -988,6 +1024,7 @@ func _refresh_tree() -> void:
 			it.set_text(1, _status_text(st))
 			it.set_custom_color(1, _status_color(st))
 			if String(e.id) == _current:
+				ci.collapsed = false
 				it.select(0)
 		if ci:
 			var cat_text := "%s — с записями %d из %d" % [c, rec, total]
@@ -1133,10 +1170,14 @@ func _refresh_inbox_tree() -> void:
 		var file_item := _inbox_tree.create_item(parent)
 		file_item.set_metadata(0, "file:" + String(rel))
 		var picked := sel(String(rel))
+		var id := assigned_id(String(rel))
+		var state := _incoming_state(String(rel))
 		file_item.set_text(0, ("● " if not bool(picked.seen) else "") + String(rel).get_file())
 		file_item.set_custom_color(0, COL_NEW if not bool(picked.seen) else Color(0.82, 0.83, 0.85))
-		var id := assigned_id(String(rel))
+		file_item.set_text(1, String(state.short))
+		file_item.set_custom_color(1, state.color)
 		file_item.set_tooltip_text(0, "%s%s" % [String(rel), "\nНазначен: " + String(by_id[id].name) if by_id.has(id) else "\nНе назначен"])
+		file_item.set_tooltip_text(1, String(state.text))
 		if _inbox_pick == "file:" + String(rel):
 			file_item.select(0)
 	root.set_text(0, "Все входящие (%d)" % files.size())
@@ -1238,6 +1279,10 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 	var dot := _label("●" if not bool(s.seen) else "  ", 16, COL_NEW)
 	dot.tooltip_text = "новый — ещё не слушал"
 	row.add_child(dot)
+	var incoming_state := _incoming_state(rel)
+	var state_label := _label(String(incoming_state.text), 14, incoming_state.color)
+	state_label.tooltip_text = String(incoming_state.text)
+	row.add_child(state_label)
 	var path := try_dir.path_join(rel)
 	row.add_child(_button("▶", func() -> void:
 		s.seen = true
@@ -1341,3 +1386,16 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(result)
 	return card
+
+
+func _incoming_state(rel: String) -> Dictionary:
+	var id := assigned_id(rel)
+	if id == "" or not by_id.has(id):
+		return {"short": "не назначен", "text": "Не назначен игровому событию", "color": COL_DIM}
+	var e: Dictionary = by_id[id]
+	var picked := sel(rel)
+	if bool(picked.use) and String(e.kind) != "":
+		return {"short": "✓ одобрен", "text": "✓ Одобрен для: %s" % String(e.name), "color": COL_REC}
+	if bool(picked.use):
+		return {"short": "одобрен", "text": "Одобрен для неподключённого события: %s" % String(e.name), "color": COL_SYNTH}
+	return {"short": "→ назначен", "text": "Назначен: %s" % String(e.name), "color": COL_NEW}

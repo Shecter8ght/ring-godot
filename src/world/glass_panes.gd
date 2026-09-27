@@ -245,6 +245,7 @@ func _rpc_state(idx: int, hp: float, uv: Vector2 = Vector2(-1, -1)) -> void:
 	p["hp"] = hp
 	if uv.x >= 0.0:
 		_glass_mm.set_instance_color(idx, Color(uv.x, uv.y, 0.0))
+		Audio.play("glass_crack", Vector3(p.xf.origin))
 	var c := _glass_mm.get_instance_custom_data(idx)
 	c.r = clampf(1.0 - hp / HP, 0.0, 1.0) * 0.85 + (0.15 if hp < HP else 0.0)
 	_glass_mm.set_instance_custom_data(idx, c)
@@ -262,6 +263,7 @@ func _shatter(idx: int) -> void:
 	_shards(xf, p.size)
 	_pile(xf, p.size, float(p.floor_y))
 	Audio.play("glass_break", xf.origin)
+	Audio.play("glass_shards", xf.origin, -5.0)
 	NoiseBus.emit(xf.origin, float(Balance.GLASS.noise_m), "glass")
 	# проём — ИИ проходит: связка навигации с одной стороны на другую
 	var link := NavigationLink3D.new()

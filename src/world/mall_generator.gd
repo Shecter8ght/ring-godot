@@ -111,7 +111,7 @@ func _process(delta: float) -> void:
 ## Лязг ремонта слышат все, не только хост (чинить может и клиент).
 @rpc("authority", "call_local", "unreliable")
 func _rpc_clank() -> void:
-	Audio.play("impact_metal", global_position + Vector3.UP, 2.0)
+	Audio.play("repair", global_position + Vector3.UP, 2.0)
 
 
 ## Дым, гул и лампа — по RaidEvents.generator_down у каждого peer.

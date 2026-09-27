@@ -169,6 +169,7 @@ func _ready() -> void:
 		var r := Armor.hit(equipment, a, zone, from, p, Vector3(sin(_facing), 0.0, cos(_facing)), bullet, _rng)
 		if String(r.layer) != "":
 			equipment = r.equipment
+			Audio.play("impact_helmet" if String(r.layer) == "helmet" else "impact_plate", p)
 		return [float(r.damage), bool(r.lethal)]
 	# тяжело ранен вместо смерти
 	_health.can_down = true
@@ -764,6 +765,7 @@ func _spread_point(center: Vector3) -> Vector3:
 
 func _on_damaged(amount: float, from: Vector3) -> void:
 	_animation_event("hit")
+	Audio.play("pain_ai", global_position + Vector3.UP * 1.2)
 	_last_hit_from = from
 	_last_damage = amount
 	if state == State.DEAD:
@@ -1329,6 +1331,7 @@ func _retreat(delta: float) -> void:
 ## Лёг раненым (хост): пистолет вместо основного, зовёт; поднялся — обратно в бой.
 func _on_downed_changed(on: bool) -> void:
 	if on:
+		Audio.play("downed", global_position + Vector3.UP)
 		_release_rescue()
 		state = State.DOWNED
 		crouched = false
@@ -1345,6 +1348,7 @@ func _on_downed_changed(on: bool) -> void:
 		_help_t = 0.0
 		_call_for_help()
 	else:
+		Audio.play("revive", global_position + Vector3.UP)
 		rescuer = null
 		dragged_by = null
 		if _main_slot != "" and _main_slot != _active:
@@ -1595,6 +1599,7 @@ func _start_reload() -> void:
 		if _mag <= 0:
 			_dry = true
 			say("Пустой!")
+			Audio.play("dry_fire", global_position, -8.0)
 			if state == State.COMBAT:
 				_start_retreat()
 		return
@@ -1603,6 +1608,7 @@ func _start_reload() -> void:
 	if String(_spec.get("class", "")) != "PISTOL":
 		_animation_event("rifle_reload")
 	Audio.play(String(_spec.get("reload_sound", "reload_rifle")), global_position)
+	Audio.play("mag_out", global_position, -4.0)
 	if state == State.COMBAT:
 		say("Перезаряжаюсь!")
 
@@ -1658,6 +1664,8 @@ func _finish_reload() -> void:
 	mag["rounds"] = _mag
 	# патрон мог смениться — характеристики тоже
 	_spec = _ai_spec(e)
+	Audio.play("mag_in", global_position, -4.0)
+	Audio.play("charge", global_position, -5.0)
 
 
 ## Выстрел, если готов: очередь, пауза между очередями, магазин. suppress — по памяти, реже и хуже.
@@ -1794,6 +1802,23 @@ func _say_rpc(text: String) -> void:
 
 
 func _show_say(text: String) -> void:
+	var voice := ""
+	if faction == "pmc":
+		voice = "pmc_radio"
+	elif faction == "resident":
+		voice = "resident"
+	elif "Граната" in text:
+		voice = "ai_nade"
+	elif "Перезаряжаюсь" in text or "Пустой" in text:
+		voice = "ai_reload"
+	elif "Контакт" in text or "стреляют" in text or "вон" in text.to_lower():
+		voice = "ai_spot"
+	elif "зацепило" in text:
+		voice = "ai_hurt"
+	elif "Проверю" in text or "Ушёл" in text or "Обхожу" in text or "Двигаюсь" in text:
+		voice = "ai_search"
+	if voice != "":
+		Audio.play(voice, global_position + Vector3.UP * 1.5)
 	if _say_label == null:
 		_say_label = Label3D.new()
 		_say_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -1834,7 +1859,7 @@ func _on_link_reached(details: Dictionary) -> void:
 	_vault_t = 0.0
 	_facing = atan2(dir.x, dir.z)
 	# слышно — звуком (как шаги мародёров); в NoiseBus не пишем: услышал бы сам себя и полез обратно
-	Audio.play("impact_hard", global_position + Vector3.UP * 0.8, -14.0)
+	Audio.play("vault", global_position + Vector3.UP * 0.8, -14.0)
 
 
 static func _flat(v: Vector3) -> float:

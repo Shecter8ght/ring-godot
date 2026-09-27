@@ -194,6 +194,7 @@ func start_search(c: LootContainer) -> void:
 		return
 	_searching = c
 	_search_t = 0.0
+	Audio.play(_loot_sound(c), c.global_position)
 
 
 ## Закрыть всё — уже решено (игрок согласился, погиб, отошёл): идущая операция прерывается, буфер
@@ -216,6 +217,8 @@ func close_all() -> void:
 		raid.request_cancel_op()
 	if raid and had_loot and me and not me.inventory.buffer.is_empty():
 		raid.request_clear_buffer()
+	if was_open:
+		Audio.play_ui("bag_close")
 
 
 ## Игрок закрывает окно (Tab, Esc): в буфере что-то осталось — спросить.
@@ -275,6 +278,7 @@ func _process(delta: float) -> void:
 		else:
 			_backpack_open = true
 			_refresh_visibility()
+			Audio.play_ui("bag_open")
 	# Esc закрыл окно описания — рюкзак остаётся
 	if Input.is_action_just_pressed("ui_cancel") and is_open() and not ItemInfo.blocking() and not asking:
 		request_close()
@@ -339,6 +343,26 @@ func _refresh_visibility() -> void:
 	_buf_sig = ""
 	if not open:
 		close_popups()
+
+
+func _loot_sound(c: LootContainer) -> String:
+	match c.look:
+		LootContainer.Look.SAFE:
+			return "loot_safe"
+		LootContainer.Look.RACK:
+			return "loot_shelf"
+		LootContainer.Look.BODY:
+			return "loot_body"
+		LootContainer.Look.BAG:
+			return "loot_bag"
+		LootContainer.Look.CRATE:
+			return "loot_box"
+	var n := c.display_name.to_lower()
+	if "шкаф" in n:
+		return "loot_locker"
+	if "ящик" in n:
+		return "loot_drawer"
+	return "loot_box"
 
 
 ## Окно закрыли — закрыть и то, что открыто поверх: меню правой кнопки, описание предмета

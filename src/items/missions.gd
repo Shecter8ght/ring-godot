@@ -46,6 +46,7 @@ static func take(id: String) -> bool:
 		return false
 	Profile.missions_active[id] = 0
 	Profile.save()
+	Audio.play_ui("quest")
 	return true
 
 
@@ -81,6 +82,7 @@ static func turn_in(id: String) -> bool:
 	Profile.money += int(m.reward.get("money", 0))
 	Profile.trust += int(m.reward.get("trust", 0))
 	Profile.save()
+	Audio.play_ui("quest")
 	return true
 
 

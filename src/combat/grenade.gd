@@ -52,13 +52,14 @@ static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, 
 	g._build_led()
 	g.body_entered.connect(g._on_bounce)
 	Audio.play("pin", from)
+	Audio.play("nade_throw", from, -4.0)
 	return g
 
 
 func _on_bounce(_b: Node) -> void:
 	# стук о пол — не чаще раза в 0.15 с и только если летела заметно быстро
 	if _bounced <= 0.0 and linear_velocity.length() > 1.5:
-		Audio.play("impact_metal", global_position, -10.0)
+		Audio.play("nade_bounce", global_position, -10.0)
 		_bounced = 0.15
 
 
@@ -181,4 +182,5 @@ func _explode() -> void:
 			var k := clampf(1.0 - pl.global_position.distance_to(pos) / float(spec.shake_radius), 0.0, 1.0)
 			if k > 0.0:
 				pl.add_stress(float(Balance.STRESS.blast) * k)
+				Audio.play("tinnitus", pl.global_position + Vector3.UP * 1.2, linear_to_db(k))
 	queue_free()

@@ -84,6 +84,7 @@ func _update_tracker() -> void:
 
 
 func toast(text: String) -> void:
+	Audio.play_ui("quest", -3.0)
 	var l := _label(text, 20, Color(1.0, 0.86, 0.55))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toasts.add_child(l)
@@ -124,6 +125,8 @@ func start_dialogue(lines: Array, done: Callable) -> void:
 func _show_line() -> void:
 	var l: Array = _dlg_lines[_dlg_i]
 	var me := String(l[0]) == "player"
+	if not me:
+		Audio.play_ui("anton" if "Антон" in String(l[0]) else "trader")
 	_dlg_who.text = PLAYER_WHO if me else String(l[0])
 	_dlg_text.text = String(l[1]) if l.size() > 1 else ""
 	_dlg_who.add_theme_color_override("font_color", PLAYER_COLOR if me else NPC_COLOR)
@@ -151,6 +154,8 @@ func _next_sub() -> void:
 	var color := DESC_COLOR
 	if e is Array and (e as Array).size() >= 2:
 		var me := String(e[0]) == "player"
+		if not me:
+			Audio.play_ui("anton" if "Антон" in String(e[0]) else "trader")
 		_subs.text = "%s: %s" % [PLAYER_WHO if me else String(e[0]), String(e[1])]
 		color = PLAYER_COLOR if me else NPC_COLOR
 	else:

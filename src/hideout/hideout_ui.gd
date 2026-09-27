@@ -118,6 +118,7 @@ func _ready() -> void:
 
 ## Сообщение внизу окна на пару секунд.
 func toast(text: String) -> void:
+	Audio.play_ui("ui_deny")
 	_toast.text = text
 	_toast_t = 3.0
 	_toast.visible = true
@@ -132,6 +133,13 @@ func open(kind: int) -> void:
 	_kind = kind
 	_sig = ""
 	_root.visible = true
+	match kind:
+		HideoutStation.Kind.STASH:
+			Audio.play_ui("stash")
+		HideoutStation.Kind.WORKBENCH:
+			Audio.play_ui("workbench")
+		HideoutStation.Kind.EXIT:
+			Audio.play_ui("hatch")
 	_opened_frame = Engine.get_process_frames()
 	# Сергею есть что сказать — сразу на задания
 	if kind == HideoutStation.Kind.TRADER and not Quests.talk_options("trader").is_empty():
@@ -140,6 +148,7 @@ func open(kind: int) -> void:
 
 func close_ui() -> void:
 	_root.visible = false
+	Audio.play_ui("bag_close")
 	_cancel_op()
 	# меню правой кнопки, описание, вопросы — отдельные окошки: сами с окном не прячутся
 	for n in find_children("*", "", true, false):

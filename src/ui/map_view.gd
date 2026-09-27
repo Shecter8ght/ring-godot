@@ -107,10 +107,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not _root.visible and Raid.current and Raid.current.ui_open():
 			return
 		_root.visible = not _root.visible
+		Audio.play_ui("map" if _root.visible else "bag_close")
 		_zoom = 1.0
 		get_viewport().set_input_as_handled()
 	elif _root.visible and event.is_action_pressed("ui_cancel"):
 		_root.visible = false
+		Audio.play_ui("bag_close")
 		get_viewport().set_input_as_handled()
 
 

@@ -134,6 +134,15 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		if att.has("laser") and bool(st.get("laser", false)):
 			s.laser = true
 			s.hip_spread = float(s.hip_spread) * float((att.laser as Dictionary).get("hip_spread", 1.0))
+	# Запись глушителя — не просто прежний выстрел тише. Пока своей записи нет, Audio возьмёт
+	# обычный набор как запасной; после одобрения стенд подхватит suppressed-префикс сам.
+	if bool(s.suppressed):
+		if String(s.caliber) == "9x39":
+			s.sound = "shot_sup939"
+		elif String(s["class"]) == "PISTOL":
+			s.sound = "shot_pistol_sup"
+		else:
+			s.sound = "shot_rifle_sup"
 	# угловой — без кратности, даже если у ствола встроенная оптика
 	if active == "offset":
 		s.zoom = 0.0

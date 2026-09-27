@@ -135,13 +135,16 @@ func _rpc_event(kind: String) -> void:
 		"outage":
 			breaker = "off"
 			_set_power(effective_power())
-			Audio.play("breaker", _listener() + Vector3(0, 3, 6))
+			Audio.play("power_down", _listener() + Vector3(0, 3, 6))
 			_notify("Где-то щёлкнуло в щитовой — свет погас. Главный рубильник — в электрощитовой")
 		"generator":
 			_generator_fail()
 		"generator_fixed":
 			generator_down = false
 			_set_power(effective_power())
+			Audio.play("gen_start", generator().global_position + Vector3.UP)
+			if breaker != "off":
+				Audio.play("power_up", _listener())
 			_notify("Генератор запущен — свет вернулся" if breaker != "off" else "Генератор запущен — теперь поднять главный рубильник в электрощитовой")
 		"drop":
 			_supply_drop()
@@ -210,6 +213,7 @@ func _rpc_breaker(pos: String, gen_down: bool) -> void:
 func _generator_fail() -> void:
 	generator_down = true
 	_set_power(effective_power())
+	Audio.play("gen_stop", generator().global_position + Vector3.UP)
 	_notify("Генератор встал — аварийный свет. Починить — %s (шумно)" % generator().where)
 
 
@@ -258,6 +262,7 @@ func _supply_drop() -> void:
 			var rng := RandomNumberGenerator.new()
 			rng.randomize()
 			Raid.current.spawn_drop(_drop_pos, "Сброшенный груз", ItemDb.roll("supply_drop", rng), LootContainer.Look.CRATE, Vector3(0, 30, 0))
+			Audio.play("drop_land", _drop_pos)
 			# слышно далеко — туда пойдут все
 			NoiseBus.emit(_drop_pos, float(Balance.RAID_EVENTS.drop_noise_m), "drop"))
 		# за своим грузом едут ЧВК
@@ -273,6 +278,7 @@ func _pmc_arrive() -> void:
 	_pmc_spawned = true
 	var at := SectorBuilder.polar(-169.0, 160.0)
 	Audio.play("engine", at, 4.0)
+	Audio.play("truck_doors", at)
 	_notify("На парковке заглушили мотор. Хлопнули двери.")
 	if _is_host() and level.has_method("spawn_squad"):
 		var n := int(Balance.PMC_SQUAD)
@@ -335,7 +341,7 @@ func _tick_radio() -> void:
 	if _radio.is_empty() or bool(_radio.shown) or _t < float(_radio.at):
 		return
 	_radio.shown = true
-	Audio.play("pin", _listener(), -4.0)
+	Audio.play("radio", _listener(), -4.0)
 	_notify("Рация, Михалыч: «%s — вынеси, заплачу %s ₽»" % [ItemDb.item_name(String(_radio.id)), InventoryUI.money(int(_radio.reward))])
 	var layer := CanvasLayer.new()
 	layer.layer = 11

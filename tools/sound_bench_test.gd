@@ -97,6 +97,9 @@ func _run() -> void:
 		if not files.has(p):
 			nofile.append(p)
 	_check("каталог: есть каждая папка записей игры (SAMPLES, FAR, OWN, LOOPS)", nofile.is_empty(), str(nofile))
+	var death_prefixes: Array = (Audio.get("_catalog_prefixes") as Dictionary).get("death", [])
+	_check("один игровой вызов собирает записи из нескольких папок каталога",
+		death_prefixes.has("voice/rattle_groan_") and death_prefixes.has("voice/rattle_gurgle_"), str(death_prefixes))
 	var noloop: Array[String] = []
 	for k in Audio.LOOPS:
 		if not kinds.has("loop:" + String(k)):
@@ -163,24 +166,24 @@ func _run() -> void:
 	bench.call("assign", "d.wav", "flyby")
 	var batch: Array[String] = ["batch/from_oleg/e.wav", "batch/from_oleg/f.wav"]
 	bench.call("assign_many", batch, "flyby")
-	_check("назначить звуку — файл переехал в его папку", a == "flyby/a.wav" and FileAccess.file_exists(try_dir.path_join(a))
-		and not FileAccess.file_exists(try_dir.path_join("a.wav")), a)
+	_check("назначить звуку — исходная папка и имя не меняются", a == "a.wav" and FileAccess.file_exists(try_dir.path_join(a))
+		and String(bench.call("assigned_id", a)) == "flyby", a)
 	_check("после назначения нужно одобрить файл именно для нового события", not bool((bench.call("sel", a) as Dictionary).use), "")
-	_check("целая папка вариантов назначается разом, исходный путь сохраняется",
-		FileAccess.file_exists(try_dir.path_join("flyby/e.wav")) and FileAccess.file_exists(try_dir.path_join("flyby/f.wav"))
-		and String((bench.call("sel", "flyby/e.wav") as Dictionary).origin) == "batch/from_oleg/e.wav", "")
+	_check("целая папка вариантов назначается разом без разрушения дерева",
+		FileAccess.file_exists(try_dir.path_join("batch/from_oleg/e.wav")) and FileAccess.file_exists(try_dir.path_join("batch/from_oleg/f.wav"))
+		and String(bench.call("assigned_id", "batch/from_oleg/e.wav")) == "flyby", "")
 	var sb: Dictionary = bench.call("sel", "shot_rifle/b.wav")
 	sb.use = true
 	sb.source = "freesound: тест, CC0"
-	var sa: Dictionary = bench.call("sel", "flyby/a.wav")
+	var sa: Dictionary = bench.call("sel", "a.wav")
 	sa.use = true
 	sa.source = "OpenGameArt: автор, CC-BY 4.0"
-	var sc: Dictionary = bench.call("sel", "flyby/c.wav")
+	var sc: Dictionary = bench.call("sel", "c.wav")
 	sc.use = true
-	var sd: Dictionary = bench.call("sel", "flyby/d.wav")
+	var sd: Dictionary = bench.call("sel", "d.wav")
 	sd.use = true
 	sd.source = "freesound: кто-то, CC BY-NC 4.0"
-	var se: Dictionary = bench.call("sel", "flyby/e.wav")
+	var se: Dictionary = bench.call("sel", "batch/from_oleg/e.wav")
 	se.use = true
 	se.source = "неизвестный сайт"
 	bench.call("save_selection")
@@ -207,7 +210,7 @@ func _run() -> void:
 	(bench.get("_bulk_source") as LineEdit).text = "сгенерировано Олегом · собственный звук"
 	bench.call("_apply_bulk_source")
 	_check("общий источник заполняет только пустые поля у всей партии",
-		String((bench.call("sel", "flyby/f.wav") as Dictionary).source).contains("собственный")
+		String((bench.call("sel", "batch/from_oleg/f.wav") as Dictionary).source).contains("собственный")
 		and String((bench.call("sel", "shot_rifle/b.wav") as Dictionary).source) == "freesound: тест, CC0", "")
 	st = bench.call("status_of", "shot_rifle")
 	_check("после переноса у звука 3 записи", int(st.rec) == 3, str(st))
@@ -222,13 +225,24 @@ func _run() -> void:
 	_check("шина «за стеной» уходит в эхо выбранного места", AudioServer.get_bus_send(AudioServer.get_bus_index("Bench_wall")) == &"Bench_hall", "")
 	_check("«как в игре» — зовёт звуковую систему; незвучащий в игре — нет",
 		bool(bench.call("play_game", "shot_rifle")) and bool(bench.call("play_game", "shot_rifle_far"))
-		and not bool(bench.call("play_game", "flyby")), "")
+		and bool(bench.call("play_game", "flyby")) and not bool(bench.call("play_game", "ricochet")), "")
 	_check("«как в игре» для лупа (дождь)", bool(bench.call("play_game", "rain_out")), "")
 	await bench.call("play_burst", streams, 3, 1200.0)
 	_check("очередь отыграла", true, "")
 	bench.call("stop_all")
 	await get_tree().process_frame
 	_check("«Стоп» глушит всё", (bench.get("_players") as Array).is_empty(), "")
+
+	# --- совместимость: старое назначение возвращается в исходную папку без потери цели
+	DirAccess.make_dir_recursive_absolute(try_dir.path_join("flyby"))
+	_wav(try_dir.path_join("flyby/legacy.wav"))
+	(bench.get("selection") as Dictionary)["flyby/legacy.wav"] = {
+		"use": false, "source": "", "seen": true, "moved": "", "origin": "old_batch/legacy.wav"}
+	bench.call("_restore_legacy_paths")
+	_check("старое назначение восстановило исходное дерево, а цель сохранилась отдельно",
+		FileAccess.file_exists(try_dir.path_join("old_batch/legacy.wav"))
+		and not FileAccess.file_exists(try_dir.path_join("flyby/legacy.wav"))
+		and String(bench.call("assigned_id", "old_batch/legacy.wav")) == "flyby", "")
 
 	# --- список слева
 	var tree: Tree = bench.get("_tree")
@@ -252,8 +266,8 @@ func _run() -> void:
 				absent += 1
 			else:
 				other += 1
-	_check("фильтр «в игре нет»: шаги по стеклу, гильзы, мусор, далёкие звуки…", absent >= 100 and other == 0
-		and bool((bench.call("status_of", "step_glass") as Dictionary).absent) and bool((bench.call("status_of", "trash_wind") as Dictionary).absent)
+	_check("фильтр «в игре нет»: гильзы, мусор, далёкие звуки…", absent >= 80 and other == 0
+		and bool((bench.call("status_of", "ricochet") as Dictionary).absent) and bool((bench.call("status_of", "trash_wind") as Dictionary).absent)
 		and not bool((bench.call("status_of", "shot_rifle") as Dictionary).absent), "%d звуков" % absent)
 
 	_rm(_root)

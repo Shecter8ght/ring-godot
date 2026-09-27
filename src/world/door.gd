@@ -85,8 +85,11 @@ func _process(delta: float) -> void:
 		var who := _local_near()
 		if who:
 			if not _can_open(who):
+				Audio.play("door_locked", global_position)
 				Raid.current.notify("Заперто: нужен " + Raid.current.key_name(required_key))
 				return
+			if required_key != "" and not is_open:
+				Audio.play("door_unlock", global_position)
 			toggle(who.global_position)
 			NoiseBus.emit(global_position, 8.0, "door")
 	# Анимацию ведёт только авторитет (хост) — иначе локальный лерп к _target_angle=0 у клиента
@@ -116,7 +119,7 @@ func toggle(from_world: Vector3) -> void:
 		_request_toggle.rpc_id(1, from_world)
 		return
 	is_open = not is_open
-	Audio.play("door", global_position)
+	Audio.play("door_metal", global_position)
 	if is_open:
 		var local := to_local(from_world)
 		_target_angle = (PI * 0.5) if local.z > 0.0 else (-PI * 0.5)

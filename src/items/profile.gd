@@ -599,6 +599,7 @@ static func buy(id: String, n: int, to: String = "stash") -> bool:
 	money -= cost
 	ItemDb.add_to(dst, ItemDb.make(id, n), grid)
 	save()
+	Audio.play_ui("cash")
 	return true
 
 
@@ -612,6 +613,7 @@ static func sell(idx: int, n: int, from: String = "stash") -> bool:
 		return false
 	money += sell_price(out)
 	save()
+	Audio.play_ui("cash")
 	return true
 
 

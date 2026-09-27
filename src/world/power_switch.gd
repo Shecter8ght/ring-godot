@@ -33,7 +33,7 @@ func prompt() -> String:
 
 func _use(_peer_id: int) -> void:
 	Raid.current.set_switch(switch_id, not is_on() if toggle else true)
-	Audio.play("door", global_position)
+	Audio.play("power_switch", global_position)
 	NoiseBus.emit(global_position, Balance.NOISE_SWITCH, "switch")
 
 
