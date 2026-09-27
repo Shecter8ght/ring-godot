@@ -206,6 +206,14 @@ func _run() -> void:
 	sa.source = "OpenGameArt: автор, CC-BY 4.0"
 	var sc: Dictionary = bench.call("sel", "c.wav")
 	sc.use = true
+	sc.license = "own_recorded"
+	_check("собственная запись выбирается списком без заучивания формулировки",
+		String(bench.call("transfer_block_reason", "c.wav")) == ""
+		and String(bench.call("_credit_source", sc)).contains("собственный звук"), str(sc))
+	sc.license = "cc0_1"
+	_check("CC0 и CC-BY требуют указать происхождение записи",
+		String(bench.call("transfer_block_reason", "c.wav")).contains("источник"), str(sc))
+	sc.license = ""
 	var sd: Dictionary = bench.call("sel", "d.wav")
 	sd.use = true
 	sd.source = "freesound: кто-то, CC BY-NC 4.0"
@@ -216,7 +224,7 @@ func _run() -> void:
 	var pending_flyby: Dictionary = bench.call("status_of", "flyby")
 	_check("одобрение ещё не выдаётся за добавление в игру",
 		int(pending_flyby.pending) == 4
-		and String(bench.call("transfer_block_reason", "c.wav")).contains("источник и лицензию")
+		and String(bench.call("transfer_block_reason", "c.wav")).contains("источник")
 		and String((bench.call("sel", "c.wav") as Dictionary).moved) == "", str(pending_flyby))
 	var streams: Array[AudioStream] = bench.call("streams_of", "shot_rifle")
 	_check("отмеченный новый файл слышен вместе с записями игры", streams.size() == 3, str(streams.size()))
@@ -228,7 +236,7 @@ func _run() -> void:
 	_check("перенос: новый префикс — с 01 в своей папке", FileAccess.file_exists(_root.path_join("assets/bullets/flyby_01.wav")))
 	_check("перенос: без источника — отказ", "\n".join(journal).contains("c.wav — укажи источник"), "")
 	_check("перенос: лицензия NC — отказ", "\n".join(journal).contains("d.wav — лицензии NC") and not FileAccess.file_exists(_root.path_join("assets/bullets/flyby_02.wav")), "")
-	_check("перенос: неизвестная лицензия — отказ", "\n".join(journal).contains("e.wav — укажи CC0")
+	_check("перенос: неизвестная лицензия — отказ", "\n".join(journal).contains("e.wav — выбери право")
 		and not FileAccess.file_exists(_root.path_join("assets/bullets/flyby_02.wav")), "")
 	_check("CREDITS: свой раздел, строки источников, прежние разделы целы",
 		credits.contains("## Звук — отобрано на стенде") and credits.contains("freesound: тест, CC0") and credits.contains("CC-BY 4.0")
@@ -238,10 +246,12 @@ func _run() -> void:
 	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(try_dir.path_join("_selection.json")))
 	_check("отбор сохранён на диск: галочка, источник, куда перенесён", saved is Dictionary
 		and bool((saved as Dictionary)["shot_rifle/b.wav"].use) and String((saved as Dictionary)["shot_rifle/b.wav"].moved) == "guns/carbine_08.wav", "")
-	(bench.get("_bulk_source") as LineEdit).text = "сгенерировано Олегом · собственный звук"
+	(bench.get("_bulk_source") as LineEdit).text = "сгенерировано Олегом"
+	(bench.get("_bulk_license") as OptionButton).select(int(bench.call("_license_index", "own_generated")))
 	bench.call("_apply_bulk_source")
 	_check("общий источник заполняет только пустые поля у всей партии",
-		String((bench.call("sel", "batch/from_oleg/f.wav") as Dictionary).source).contains("собственный")
+		String((bench.call("sel", "batch/from_oleg/f.wav") as Dictionary).source).contains("Олегом")
+		and String((bench.call("sel", "batch/from_oleg/f.wav") as Dictionary).license) == "own_generated"
 		and String((bench.call("sel", "shot_rifle/b.wav") as Dictionary).source) == "freesound: тест, CC0", "")
 	st = bench.call("status_of", "shot_rifle")
 	_check("после переноса у звука 3 записи", int(st.rec) == 3, str(st))
