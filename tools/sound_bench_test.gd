@@ -1,8 +1,8 @@
 extends Node
 ## Стенд звуков (tools/sound_bench): каталог покрывает все звуки, которые зовёт игра, и все её
 ## папки записей; новые файлы подхватываются, назначаются звуку, отмечаются, отбор сохраняется;
-## перенос — следующий номер у префикса, строка в CREDITS, отказ без источника и с NC; звук
-## играет (одиночный, «как в игре», луп, очередь с хвостом). Папки — свои в user://.
+## перенос — следующий номер у префикса, строка в CREDITS, отказ без источника, без разрешённой
+## лицензии и с NC; звук играет (одиночный, «как в игре», луп, очередь с хвостом). Папки — свои в user://.
 
 const ALIASES := {"shot_ai": "shot_pistol", "step": "step_stone", "step_ai": "step_stone",
 	"step_run": "step_stone_run", "reload": "reload_pistol"}
@@ -103,18 +103,29 @@ func _run() -> void:
 	var try_dir := _root.path_join("try")
 	_check("папка для проб создана, редактор её не импортирует", FileAccess.file_exists(try_dir.path_join(".gdignore")))
 	DirAccess.make_dir_recursive_absolute(try_dir.path_join("shot_rifle"))
-	for f in ["a.wav", "c.wav", "d.wav", "shot_rifle/b.wav"]:
+	DirAccess.make_dir_recursive_absolute(try_dir.path_join("batch/from_oleg"))
+	for f in ["a.wav", "c.wav", "d.wav", "batch/from_oleg/e.wav", "batch/from_oleg/f.wav", "shot_rifle/b.wav"]:
 		_wav(try_dir.path_join(f))
 	bench.call("rescan", true)
 	var found: Array[String] = bench.get("files")
-	_check("новые файлы подхвачены: в корне и в папке звука", found.has("a.wav") and found.has("shot_rifle/b.wav"), str(found))
+	_check("новые файлы подхвачены: в корне, папке звука и произвольном дереве генератора",
+		found.has("a.wav") and found.has("shot_rifle/b.wav") and found.has("batch/from_oleg/e.wav")
+		and String(bench.call("assigned_id", "batch/from_oleg/e.wav")) == "", str(found))
 	var st: Dictionary = bench.call("status_of", "shot_rifle")
 	_check("у звука — записи игры и новый непрослушанный файл", int(st.rec) == 2 and int(st.try) == 1 and int(st.new) == 1, str(st))
+	var loose_a: Dictionary = bench.call("sel", "a.wav")
+	loose_a.use = true
 	var a: String = bench.call("assign", "a.wav", "flyby")
 	bench.call("assign", "c.wav", "flyby")
 	bench.call("assign", "d.wav", "flyby")
+	var batch: Array[String] = ["batch/from_oleg/e.wav", "batch/from_oleg/f.wav"]
+	bench.call("assign_many", batch, "flyby")
 	_check("назначить звуку — файл переехал в его папку", a == "flyby/a.wav" and FileAccess.file_exists(try_dir.path_join(a))
 		and not FileAccess.file_exists(try_dir.path_join("a.wav")), a)
+	_check("после назначения нужно одобрить файл именно для нового события", not bool((bench.call("sel", a) as Dictionary).use), "")
+	_check("целая папка вариантов назначается разом, исходный путь сохраняется",
+		FileAccess.file_exists(try_dir.path_join("flyby/e.wav")) and FileAccess.file_exists(try_dir.path_join("flyby/f.wav"))
+		and String((bench.call("sel", "flyby/e.wav") as Dictionary).origin) == "batch/from_oleg/e.wav", "")
 	var sb: Dictionary = bench.call("sel", "shot_rifle/b.wav")
 	sb.use = true
 	sb.source = "freesound: тест, CC0"
@@ -126,6 +137,9 @@ func _run() -> void:
 	var sd: Dictionary = bench.call("sel", "flyby/d.wav")
 	sd.use = true
 	sd.source = "freesound: кто-то, CC BY-NC 4.0"
+	var se: Dictionary = bench.call("sel", "flyby/e.wav")
+	se.use = true
+	se.source = "неизвестный сайт"
 	bench.call("save_selection")
 	var streams: Array[AudioStream] = bench.call("streams_of", "shot_rifle")
 	_check("отмеченный новый файл слышен вместе с записями игры", streams.size() == 3, str(streams.size()))
@@ -137,6 +151,8 @@ func _run() -> void:
 	_check("перенос: новый префикс — с 01 в своей папке", FileAccess.file_exists(_root.path_join("assets/bullets/flyby_01.wav")))
 	_check("перенос: без источника — отказ", "\n".join(journal).contains("c.wav — укажи источник"), "")
 	_check("перенос: лицензия NC — отказ", "\n".join(journal).contains("d.wav — лицензии NC") and not FileAccess.file_exists(_root.path_join("assets/bullets/flyby_02.wav")), "")
+	_check("перенос: неизвестная лицензия — отказ", "\n".join(journal).contains("e.wav — укажи CC0")
+		and not FileAccess.file_exists(_root.path_join("assets/bullets/flyby_02.wav")), "")
 	_check("CREDITS: свой раздел, строки источников, прежние разделы целы",
 		credits.contains("## Звук — отобрано на стенде") and credits.contains("freesound: тест, CC0") and credits.contains("CC-BY 4.0")
 		and credits.contains("## Модели") and not credits.contains("BY-NC"), "")
@@ -145,6 +161,11 @@ func _run() -> void:
 	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(try_dir.path_join("_selection.json")))
 	_check("отбор сохранён на диск: галочка, источник, куда перенесён", saved is Dictionary
 		and bool((saved as Dictionary)["shot_rifle/b.wav"].use) and String((saved as Dictionary)["shot_rifle/b.wav"].moved) == "guns/carbine_08.wav", "")
+	(bench.get("_bulk_source") as LineEdit).text = "сгенерировано Олегом · собственный звук"
+	bench.call("_apply_bulk_source")
+	_check("общий источник заполняет только пустые поля у всей партии",
+		String((bench.call("sel", "flyby/f.wav") as Dictionary).source).contains("собственный")
+		and String((bench.call("sel", "shot_rifle/b.wav") as Dictionary).source) == "freesound: тест, CC0", "")
 	st = bench.call("status_of", "shot_rifle")
 	_check("после переноса у звука 3 записи", int(st.rec) == 3, str(st))
 

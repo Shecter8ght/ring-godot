@@ -278,6 +278,22 @@ func _load_samples() -> void:
 			_samples[kind] = own
 
 
+## Перечитать записи с диска. Стенд вызывает это после принятия нового файла: запись начинает
+## звучать через настоящий Audio.play уже в текущем запуске, даже до переимпорта редактором.
+func reload_samples() -> void:
+	_samples.clear()
+	_far.clear()
+	_last_pick.clear()
+	_rain_loop = null
+	_siren = null
+	_hum = null
+	_load_samples()
+	var ambient := _loop_sample("ambient")
+	if _ambient != null and ambient != null:
+		_ambient.stream = ambient
+		_ambient.play()
+
+
 ## Луп из записи (LOOPS), иначе null — тогда синтез.
 func _loop_sample(name: String) -> AudioStream:
 	var arr := _load_prefixes([String(LOOPS[name])])
@@ -319,16 +335,32 @@ func _load_prefixes(prefixes: Array) -> Array:
 		var dir := "res://assets/audio/%s/" % parts[0]
 		if not DirAccess.dir_exists_absolute(dir):
 			continue
-		for f in ResourceLoader.list_directory(dir):
+		for f in DirAccess.get_files_at(dir):
 			var stem := String(f).get_basename()
 			if not stem.begins_with(parts[1]):
 				continue
 			if not stem.trim_prefix(parts[1]).is_valid_int():
 				continue
-			var st: AudioStream = load(dir + f)
+			var resource_path := dir + f
+			var st: AudioStream = load(resource_path) as AudioStream if ResourceLoader.exists(resource_path) else null
+			# Сразу после копирования из _sound_try импорт ещё не успел создать ресурс. Декодеры
+			# форматов умеют читать исходник напрямую; при следующем запуске пойдёт обычный ресурс.
+			if st == null:
+				st = _load_audio_file(ProjectSettings.globalize_path(resource_path))
 			if st:
 				out.append(st)
 	return out
+
+
+func _load_audio_file(path: String) -> AudioStream:
+	match path.get_extension().to_lower():
+		"ogg":
+			return AudioStreamOggVorbis.load_from_file(path)
+		"wav":
+			return AudioStreamWAV.load_from_file(path)
+		"mp3":
+			return AudioStreamMP3.load_from_file(path)
+	return null
 
 
 # ---------------------------------------------------------------- синтез
