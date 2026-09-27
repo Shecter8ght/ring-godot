@@ -149,6 +149,11 @@ func _run() -> void:
 	_check("новые файлы подхвачены: в корне, папке звука и произвольном дереве генератора",
 		found.has("a.wav") and found.has("shot_rifle/b.wav") and found.has("batch/from_oleg/e.wav")
 		and String(bench.call("assigned_id", "batch/from_oleg/e.wav")) == "", str(found))
+	var nested: Array[String] = bench.call("inbox_files", "dir:batch/from_oleg")
+	var one_file: Array[String] = bench.call("inbox_files", "file:batch/from_oleg/e.wav")
+	_check("входящие показываются деревом: папка даёт только своё поддерево, файл — одну карточку",
+		nested == ["batch/from_oleg/e.wav", "batch/from_oleg/f.wav"] and one_file == ["batch/from_oleg/e.wav"],
+		str(nested))
 	var st: Dictionary = bench.call("status_of", "shot_rifle")
 	_check("у звука — записи игры и новый непрослушанный файл", int(st.rec) == 2 and int(st.try) == 1 and int(st.new) == 1, str(st))
 	var loose_a: Dictionary = bench.call("sel", "a.wav")

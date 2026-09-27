@@ -61,6 +61,9 @@ var _bulk_source: LineEdit
 var _status: Label
 var _burst_n: SpinBox
 var _rpm: SpinBox
+var _inbox_tree: Tree
+var _inbox_pick: String = "dir:"
+var _building_inbox_tree: bool = false
 
 
 func _ready() -> void:
@@ -810,10 +813,24 @@ func _build_ui() -> void:
 	_bulk_source.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	source_tools.add_child(_bulk_source)
 	source_tools.add_child(_button("Заполнить", _apply_bulk_source))
+	var inbox_hint := _label("Слева — точное дерево папок из res://_sound_try. Выбери папку или файл; справа появятся только они.", 14, COL_DIM)
+	inbox_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	inbox_box.add_child(inbox_hint)
+	var inbox_split := HSplitContainer.new()
+	inbox_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	inbox_split.split_offset = 330
+	inbox_box.add_child(inbox_split)
+	_inbox_tree = Tree.new()
+	_inbox_tree.custom_minimum_size.x = 280
+	_inbox_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_inbox_tree.hide_root = false
+	_inbox_tree.add_theme_font_size_override("font_size", 14)
+	_inbox_tree.item_selected.connect(_on_inbox_tree_selected)
+	inbox_split.add_child(_inbox_tree)
 	var rs := ScrollContainer.new()
 	rs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	rs.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	inbox_box.add_child(rs)
+	inbox_split.add_child(rs)
 	_new_list = VBoxContainer.new()
 	_new_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_new_list.add_theme_constant_override("separation", 8)
@@ -1083,10 +1100,96 @@ func _refresh_details() -> void:
 
 
 func _refresh_new_list() -> void:
+	_refresh_inbox_tree()
+	_refresh_inbox_cards()
+
+
+func _refresh_inbox_tree() -> void:
+	if _inbox_tree == null:
+		return
+	_building_inbox_tree = true
+	_inbox_tree.clear()
+	var root := _inbox_tree.create_item()
+	root.set_metadata(0, "dir:")
+	var folders: Dictionary = {"": root}
+	var counts: Dictionary = {"": files.size()}
+	for rel in files:
+		var dir := ""
+		var parts := String(rel).split("/")
+		for i in range(parts.size() - 1):
+			dir = String(parts[i]) if dir == "" else dir.path_join(String(parts[i]))
+			counts[dir] = int(counts.get(dir, 0)) + 1
+	for rel in files:
+		var parent: TreeItem = root
+		var dir := ""
+		var parts := String(rel).split("/")
+		for i in range(parts.size() - 1):
+			dir = String(parts[i]) if dir == "" else dir.path_join(String(parts[i]))
+			if not folders.has(dir):
+				var folder := _inbox_tree.create_item(parent)
+				folder.set_metadata(0, "dir:" + dir)
+				folders[dir] = folder
+			parent = folders[dir]
+		var file_item := _inbox_tree.create_item(parent)
+		file_item.set_metadata(0, "file:" + String(rel))
+		var picked := sel(String(rel))
+		file_item.set_text(0, ("● " if not bool(picked.seen) else "") + String(rel).get_file())
+		file_item.set_custom_color(0, COL_NEW if not bool(picked.seen) else Color(0.82, 0.83, 0.85))
+		var id := assigned_id(String(rel))
+		file_item.set_tooltip_text(0, "%s%s" % [String(rel), "\nНазначен: " + String(by_id[id].name) if by_id.has(id) else "\nНе назначен"])
+		if _inbox_pick == "file:" + String(rel):
+			file_item.select(0)
+	root.set_text(0, "Все входящие (%d)" % files.size())
+	for path in folders:
+		if String(path) == "":
+			continue
+		var folder: TreeItem = folders[path]
+		var short_name := String(path).get_file()
+		if by_id.has(String(path)):
+			short_name += " — " + String(by_id[String(path)].name)
+		folder.set_text(0, "%s (%d)" % [short_name, int(counts.get(path, 0))])
+		folder.set_tooltip_text(0, String(path))
+		if _inbox_pick == "dir:" + String(path):
+			folder.select(0)
+	if _inbox_tree.get_selected() == null:
+		_inbox_pick = "dir:"
+		root.select(0)
+	root.collapsed = false
+	_building_inbox_tree = false
+
+
+func _on_inbox_tree_selected() -> void:
+	if _building_inbox_tree:
+		return
+	var item := _inbox_tree.get_selected()
+	if item == null or item.get_metadata(0) == null:
+		return
+	_inbox_pick = String(item.get_metadata(0))
+	_refresh_inbox_cards()
+
+
+## Файлы выбранного узла дерева: один файл либо всё поддерево папки.
+func inbox_files(pick: String = _inbox_pick) -> Array[String]:
+	var out: Array[String] = []
+	if pick.begins_with("file:"):
+		var exact := pick.trim_prefix("file:")
+		if files.has(exact):
+			out.append(exact)
+		return out
+	var dir := pick.trim_prefix("dir:")
+	for rel in files:
+		if dir == "" or String(rel).begins_with(dir + "/"):
+			out.append(String(rel))
+	return out
+
+
+func _refresh_inbox_cards() -> void:
 	for c in _new_list.get_children():
 		c.queue_free()
-	var intro := _label("Папка res://_sound_try проверяется автоматически; можно копировать в неё целые папки генератора. "
-		+ "Неназначенные файлы сохраняют исходный путь: выбери цель в каталоге слева и нажми «Назначить выбранному».", 15, COL_DIM)
+	var shown := inbox_files()
+	var selected_path := _inbox_pick.trim_prefix("dir:").trim_prefix("file:")
+	var selected_name := "все входящие" if selected_path == "" else selected_path
+	var intro := _label("Выбрано: %s · %d файлов. Неназначенные сохраняют исходный путь; цель назначения выбирается в каталоге слева." % [selected_name, shown.size()], 15, COL_DIM)
 	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_new_list.add_child(intro)
 	if files.is_empty():
@@ -1094,51 +1197,19 @@ func _refresh_new_list() -> void:
 		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_new_list.add_child(empty)
 		return
-	var loose: Array[String] = []
-	var groups: Dictionary = {}
-	for rel in files:
-		var id := assigned_id(rel)
-		if id == "":
-			loose.append(rel)
-		else:
-			if not groups.has(id):
-				groups[id] = []
-			(groups[id] as Array).append(rel)
-	if not loose.is_empty():
-		_new_list.add_child(_label("НЕ НАЗНАЧЕНЫ (%d)" % loose.size(), 16, COL_SYNTH))
-		var loose_groups: Dictionary = {}
-		for rel in loose:
-			var source_dir := rel.get_base_dir() if rel.contains("/") else ""
-			if not loose_groups.has(source_dir):
-				loose_groups[source_dir] = []
-			(loose_groups[source_dir] as Array).append(rel)
-		for source_dir in loose_groups:
-			var source_files: Array[String] = []
-			for rel in loose_groups[source_dir]:
-				source_files.append(String(rel))
-			var source_head := HBoxContainer.new()
-			source_head.add_theme_constant_override("separation", 8)
-			_new_list.add_child(source_head)
-			var source_name := "корень входящих" if String(source_dir) == "" else String(source_dir)
-			var source_label := _label("ПАПКА: %s · %d файлов" % [source_name, source_files.size()], 14, COL_DIM)
-			source_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			source_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			source_head.add_child(source_label)
-			if String(source_dir) != "" and by_id.has(_current):
-				var batch: Array[String] = source_files.duplicate()
-				var target := _current
-				var batch_button := _button("Назначить всю папку выбранному", func() -> void: assign_many(batch, target))
-				batch_button.tooltip_text = String(by_id[target].name)
-				source_head.add_child(batch_button)
-			for rel in source_files:
-				_new_list.add_child(_file_row(rel, true))
-	for id in groups:
-		var nm := String(by_id[id].name) if by_id.has(id) else "%s — нет такого звука в каталоге" % String(id)
-		var group_name := _label("НАЗНАЧЕНЫ: %s" % nm, 16, Color(1.0, 0.86, 0.6))
-		group_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_new_list.add_child(group_name)
-		for rel in groups[id]:
-			_new_list.add_child(_file_row(String(rel), true))
+	var unassigned: Array[String] = []
+	for rel in shown:
+		if assigned_id(rel) == "":
+			unassigned.append(rel)
+	if _inbox_pick.begins_with("dir:") and _inbox_pick != "dir:" and not unassigned.is_empty() and by_id.has(_current):
+		var batch: Array[String] = unassigned.duplicate()
+		var target := _current
+		var batch_button := _button("Назначить все неназначенные из этой папки → %s" % String(by_id[target].name),
+			func() -> void: assign_many(batch, target))
+		batch_button.tooltip_text = "%d файлов" % batch.size()
+		_new_list.add_child(batch_button)
+	for rel in shown:
+		_new_list.add_child(_file_row(rel, true))
 
 
 ## Карточка кандидата: прослушивание, одобрение, назначение выбранному слева звуку, источник и
