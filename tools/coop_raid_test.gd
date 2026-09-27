@@ -5,7 +5,7 @@ extends Node
 ##   godot --headless res://tools/coop_raid_test.tscn -- c2      (ещё через 3 с)
 ## c1 приходит как из главного меню («Собрание»), c2 — из своего убежища («подключиться по IP»).
 ## Проверки у каждого: в убежище видны оба других и видно, как они ходят; в рейде — то же, плюс
-## выстрелы других видны (трассеры у стрелявшего), дверь, открытая клиентом, открыта у всех;
+## выстрелы других видны (вспышки у стрелявшего), дверь, открытая клиентом, открыта у всех;
 ## генератор ТЦ встал (хост) — у всех стоит, c2 чинит в мастерской — у всех снова весь свет;
 ## эвакуация группой: хост и c1 в зоне, c2 нет — у всех общий отсчёт и «ждём c2», отсчёт кончился —
 ## хост и c1 ушли, c2 не успел (у каждого своя хроника: «вышел» / «не успел»).
@@ -28,10 +28,9 @@ var _phase: String = ""
 ## peer → [первая позиция, наибольший сдвиг от неё] в текущей фазе.
 var _track: Dictionary = {}
 var _moved: Dictionary = {"hideout": {}, "raid": {}}
-## Сколько трассеров чужих выстрелов видно: peer стрелявшего → число.
-var _remote_tracers: Dictionary = {}
-## Свои трассеры — что сам действительно выстрелил.
-var _own_tracers: int = 0
+## Сколько отдельных вспышек выстрела видно: peer стрелявшего → число.
+var _shot_flashes: Dictionary = {}
+var _muzzle_active: Dictionary = {}
 var _door_path: String = ""
 ## Видел ли генератор стоящим (авария хоста дошла).
 var _saw_gen_down: bool = false
@@ -54,7 +53,6 @@ func _run() -> void:
 	Profile.use_file("user://profile_coop3_%s.json" % _role, true)
 	Profile.ensure()
 	_gear_up()
-	get_tree().node_added.connect(_on_node_added)
 	match _role:
 		"host":
 			await _host()
@@ -137,12 +135,13 @@ func _raid() -> void:
 			_saw_gen_down = true
 		await get_tree().process_frame
 	_check_moved("raid")
-	_check("рейд: сам выстрелил", _own_tracers > 0, "своих трассеров %d" % _own_tracers)
+	var own := multiplayer.get_unique_id()
+	_check("рейд: сам выстрелил", int(_shot_flashes.get(own, 0)) > 0, "своих вспышек %d" % int(_shot_flashes.get(own, 0)))
 	for r in ROLES:
 		if r == _role:
 			continue
 		var peer := _peer_of_role(r)
-		_check("рейд: выстрелы %s видно" % r, int(_remote_tracers.get(peer, 0)) > 0, "трассеров %d" % int(_remote_tracers.get(peer, 0)))
+		_check("рейд: выстрелы %s видно" % r, int(_shot_flashes.get(peer, 0)) > 0, "вспышек %d" % int(_shot_flashes.get(peer, 0)))
 	# дверь открыл c1 — у всех открыта
 	var door := _door_by_path(_door_path) if _door_path != "" else _test_door()
 	_check("рейд: дверь, открытая c1, открыта", door != null and door.is_open, str(door.get_path()) if door else "двери нет")
@@ -317,6 +316,11 @@ func _process(_delta: float) -> void:
 		return
 	for peer in _players():
 		var pl: Player = _players()[peer]
+		var muzzle := pl.get_node_or_null("Body/Muzzle") as OmniLight3D
+		var lit := muzzle != null and muzzle.visible
+		if lit and not bool(_muzzle_active.get(peer, false)):
+			_shot_flashes[peer] = int(_shot_flashes.get(peer, 0)) + 1
+		_muzzle_active[peer] = lit
 		if pl.is_local():
 			continue
 		if not _track.has(peer):
@@ -334,37 +338,6 @@ func _check_moved(phase: String) -> void:
 		var peer := _peer_of_role(r)
 		var d := float((_moved[phase] as Dictionary).get(peer, 0.0))
 		_check("%s: вижу, как %s ходит" % [phase, r], d > 0.5, "сдвиг %.2f м" % d)
-
-
-## Трассер чужого выстрела: начало — у дула стрелявшего (ближайший игрок в 3 м).
-func _on_node_added(n: Node) -> void:
-	if not n is Tracer:
-		return
-	_attribute_tracer.call_deferred(n)
-
-
-func _attribute_tracer(n: Node) -> void:
-	if not is_instance_valid(n):
-		return
-	var im := (n as Tracer).mesh as ImmediateMesh
-	if im == null or im.get_surface_count() == 0:
-		return
-	var verts: PackedVector3Array = im.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-	if verts.is_empty():
-		return
-	var best := 0
-	var best_d := 3.0
-	for peer in _players():
-		var pl: Player = _players()[peer]
-		var d := (pl.global_position + Vector3.UP * 1.3).distance_to(verts[0])
-		if d < best_d:
-			best_d = d
-			best = int(peer)
-	if best == multiplayer.get_unique_id():
-		_own_tracers += 1
-	elif best != 0:
-		_remote_tracers[best] = int(_remote_tracers.get(best, 0)) + 1
-
 
 ## peer_id по роли: хост — 1, клиенты — по имени, которое они назвали.
 func _peer_of_role(r: String) -> int:

@@ -510,6 +510,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
 	_sway_t += delta
 	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
+	if pl.aiming:
+		amp *= Balance.ADS_SWAY_SCALE
 	# стресс — руки ходят сильнее
 	amp *= 1.0 + float(Balance.STRESS.sway_k) * pl.stress_k()
 	if pl.stance != Player.Stance.STAND:
@@ -807,7 +809,7 @@ void fragment() {
 	return m
 
 
-## Дуло модели в руках (в прицеле) — отсюда трассер и вспышка.
+## Дуло модели в руках (в прицеле) — отсюда появляется вспышка.
 ## Луч ствола модели в руках: [дуло, направление] (дуло у модели по +Z); нет модели — [].
 func barrel_ray() -> Array:
 	if _viewmodel == null or not _viewmodel.visible or not ads_active:
