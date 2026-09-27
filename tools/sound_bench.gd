@@ -17,7 +17,7 @@ const COL_NEW := Color(0.45, 0.8, 1.0)
 const TYPE_NAMES := {"one": "разовый", "loop": "луп", "layer": "слой поверх другого звука"}
 const PRIO_NAMES := {1: "база", 2: "важно", 3: "детали"}
 const FILTERS := ["все звуки", "без записей", "только синтез", "не подключены в коде", "с новыми файлами",
-	"база (важность 1)", "есть записи"]
+	"база (важность 1)", "есть записи", "в игре нет"]
 const MODES := {"near": "вблизи", "far": "вдали", "wall": "за стеной"}
 
 ## Папки (тест подменяет своими): новые файлы, записи игры, файл авторов.
@@ -180,11 +180,13 @@ func status_of(id: String) -> Dictionary:
 	var e: Dictionary = by_id[id]
 	var kind := String(e.kind)
 	var st := {"rec": asset_files(String(e.file)).size(), "wired": kind != "", "synth": false,
-		"try": 0, "new": 0, "use": 0}
+		"try": 0, "new": 0, "use": 0, "absent": false}
 	if kind.begins_with("loop:"):
 		st.synth = true
 	elif kind != "":
 		st.synth = Audio.has_synth(kind.trim_suffix("@far"))
+	# в игре такого звука нет: своей записи нет и код его не зовёт (где-то пока звучит замена — «now»)
+	st.absent = kind == "" and int(st.rec) == 0
 	for rel in files:
 		if assigned_id(rel) != id:
 			continue
@@ -678,7 +680,9 @@ func _refresh_all() -> void:
 
 func _status_text(st: Dictionary) -> String:
 	var t := "записей: %d" % int(st.rec) if int(st.rec) > 0 else ("синтез" if bool(st.synth) else "нет своего")
-	if not bool(st.wired):
+	if bool(st.absent):
+		t = "в игре нет"
+	elif not bool(st.wired):
 		t += " · не в коде"
 	if int(st.try) > 0:
 		t += " · новых %d" % int(st.try)
@@ -709,6 +713,8 @@ func _passes(e: Dictionary, st: Dictionary, q: String) -> bool:
 			return int(e.prio) == 1
 		6:
 			return int(st.rec) > 0
+		7:
+			return bool(st.absent)
 	return true
 
 

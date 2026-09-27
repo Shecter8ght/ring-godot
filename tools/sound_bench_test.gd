@@ -178,6 +178,19 @@ func _run() -> void:
 			if String((bench.get("by_id") as Dictionary)[String(it.get_metadata(0))].kind) != "":
 				wired += 1
 	_check("фильтр «не подключены в коде» — только такие", wired == 0 and tree.get_root().get_child_count() > 0, "")
+	(bench.get("_filter") as OptionButton).select(7)
+	bench.call("_refresh_tree")
+	var absent := 0
+	var other := 0
+	for c in tree.get_root().get_children():
+		for it in c.get_children():
+			if bool((bench.call("status_of", String(it.get_metadata(0))) as Dictionary).absent):
+				absent += 1
+			else:
+				other += 1
+	_check("фильтр «в игре нет»: шаги по стеклу, гильзы, мусор, далёкие звуки…", absent >= 100 and other == 0
+		and bool((bench.call("status_of", "step_glass") as Dictionary).absent) and bool((bench.call("status_of", "trash_wind") as Dictionary).absent)
+		and not bool((bench.call("status_of", "shot_rifle") as Dictionary).absent), "%d звуков" % absent)
 
 	_rm(_root)
 	print("sound_bench_test: провалено %d" % _fails)

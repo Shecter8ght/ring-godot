@@ -46,6 +46,13 @@ def main() -> None:
     wired = sum(1 for s in sounds if s["kind"])
     lines.append(f"Всего **{total}** звуков: с записями {rec}, код зовёт {wired}, "
                  + ", ".join(f"{PRIO[p]} — {sum(1 for s in sounds if s['prio'] == p)}" for p in (1, 2, 3)) + ".")
+    absent = [x for x in sounds if not x["kind"] and recorded(x["file"]) == 0]
+    lines += [f"В игре нет — **{len(absent)}** (своей записи нет и код их не зовёт; где-то пока звучит замена —"
+              " см. «Сейчас» в таблицах):", ""]
+    for cat in data["cats"]:
+        names = [x["name"] for x in absent if x["cat"] == cat]
+        if names:
+            lines.append(f"- **{cat}** ({len(names)}): " + "; ".join(names) + ".")
     lines.append("")
     for cat in data["cats"]:
         rows = [s for s in sounds if s["cat"] == cat]
