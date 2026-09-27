@@ -13,8 +13,12 @@ ROOT = Path(__file__).resolve().parent.parent
 CAT = ROOT / "data" / "sound_catalog.json"
 OUT = ROOT / "docs" / "sound_catalog.md"
 AUDIO = ROOT / "assets" / "audio"
+ACTIVE = ROOT / "data" / "sound_active.json"
 TYPES = {"one": "разовый", "loop": "луп", "layer": "слой"}
 PRIO = {1: "база", 2: "важно", 3: "детали"}
+
+active_data = json.loads(ACTIVE.read_text(encoding="utf-8")) if ACTIVE.exists() else {"disabled": []}
+DISABLED = {str(path).replace("\\", "/") for path in active_data.get("disabled", [])}
 
 
 def recorded(prefix: str) -> int:
@@ -23,7 +27,8 @@ def recorded(prefix: str) -> int:
     if not d.is_dir():
         return 0
     pat = re.compile(re.escape(head) + r"\d+$")
-    return sum(1 for f in d.iterdir() if f.suffix.lower() in (".ogg", ".wav", ".mp3") and pat.match(f.stem))
+    return sum(1 for f in d.iterdir() if f.suffix.lower() in (".ogg", ".wav", ".mp3")
+               and pat.match(f.stem) and f"{group}/{f.name}" not in DISABLED)
 
 
 def main() -> None:
@@ -41,6 +46,10 @@ def main() -> None:
         "вызова сохранится в библиотеке, но сама по себе в геймплее не появится.",
         "Варианты сгруппированы по исходным подпапкам: всю папку можно назначить выбранному звуку разом, а",
         "одинаковый источник и лицензию — заполнить сразу у всех ещё пустых карточек.",
+        "У каждой уже добавленной записи есть переключатель «Использовать в игре»: снятая галочка исключает",
+        "её из случайного выбора без удаления файла; решение хранится в `data/sound_active.json`.",
+        "У моделей оружия могут быть отдельные наборы с общим запасным: первая своя запись заменяет общий",
+        "набор только у выбранной модели.",
         "",
         "Файл — префикс в `assets/audio`: записи «префикс + номер» (`guns/carbine_04.ogg`), игра берёт",
         "случайную, подряд одна не повторяется. «Вид» — каким звуком игра это играет сейчас (`Audio.play`);",

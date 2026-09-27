@@ -266,7 +266,7 @@
     },
     "mounts": {},
     "mag_if": "MAG_PM",
-    "sound": "shot_pistol",
+    "sound": "shot_hg_01",
     "reload_sound": "reload_pistol",
     "cycle_sound": ""
    }
@@ -319,7 +319,7 @@
      "muzzle": "THREAD_9"
     },
     "mag_if": "MAG_P9",
-    "sound": "shot_pistol",
+    "sound": "shot_hg_02",
     "reload_sound": "reload_pistol",
     "cycle_sound": ""
    }
@@ -373,7 +373,7 @@
      "muzzle": "THREAD_9"
     },
     "mag_if": "MAG_P9",
-    "sound": "shot_pistol",
+    "sound": "shot_hg_03",
     "reload_sound": "reload_pistol",
     "cycle_sound": ""
    }
@@ -427,7 +427,7 @@
      "muzzle": "THREAD_9"
     },
     "mag_if": "MAG_P9",
-    "sound": "shot_pistol",
+    "sound": "shot_hg_04",
     "reload_sound": "reload_pistol",
     "cycle_sound": ""
    }
@@ -481,7 +481,7 @@
      "muzzle": "THREAD_9"
     },
     "mag_if": "MAG_SMG9",
-    "sound": "shot_pistol",
+    "sound": "shot_smg",
     "reload_sound": "reload_rifle",
     "cycle_sound": ""
    }
@@ -539,7 +539,7 @@
      "stock": "STOCK_AR"
     },
     "mag_if": "MAG_SMG9",
-    "sound": "shot_pistol",
+    "sound": "shot_smg",
     "reload_sound": "reload_rifle",
     "cycle_sound": ""
    }
@@ -597,7 +597,7 @@
      "stock": "STOCK_AR"
     },
     "mag_if": "MAG_SMG9",
-    "sound": "shot_pistol",
+    "sound": "shot_smg",
     "reload_sound": "reload_rifle",
     "cycle_sound": ""
    }
@@ -1608,7 +1608,7 @@
      "side_right": "RAIL_SIDE"
     },
     "mag_if": "MAG_VSS",
-    "sound": "shot_pistol",
+    "sound": "shot_sup939",
     "reload_sound": "reload_rifle",
     "cycle_sound": "",
     "integral": {

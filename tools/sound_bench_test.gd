@@ -2,7 +2,8 @@ extends Node
 ## Стенд звуков (tools/sound_bench): каталог покрывает все звуки, которые зовёт игра, и все её
 ## папки записей; новые файлы подхватываются, назначаются звуку, отмечаются, отбор сохраняется;
 ## перенос — следующий номер у префикса, строка в CREDITS, отказ без источника, без разрешённой
-## лицензии и с NC; звук играет (одиночный, «как в игре», луп, очередь с хвостом). Папки — свои в user://.
+## лицензии и с NC; импортированную запись можно обратимо исключить; модели пистолетов имеют свои
+## наборы с общим запасным; звук играет (одиночный, «как в игре», луп, очередь с хвостом). Папки — свои в user://.
 
 const ALIASES := {"shot_ai": "shot_pistol", "step": "step_stone", "step_ai": "step_stone",
 	"step_run": "step_stone_run", "reload": "reload_pistol"}
@@ -49,11 +50,14 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(_root.path_join("assets/guns"))
 	_wav(_root.path_join("assets/guns/carbine_01.wav"))
 	_wav(_root.path_join("assets/guns/carbine_07.wav"))
+	_wav(_root.path_join("assets/guns/pistol_01.wav"))
+	_wav(_root.path_join("assets/guns/pistol_02.wav"))
 	FileAccess.open(_root.path_join("CREDITS.md"), FileAccess.WRITE).store_string("# Авторы\n\n## Модели\n\n| a | b |\n")
 	var bench := (load("res://tools/sound_bench.tscn") as PackedScene).instantiate()
 	bench.set("try_dir", _root.path_join("try"))
 	bench.set("assets_dir", _root.path_join("assets"))
 	bench.set("credits_path", _root.path_join("CREDITS.md"))
+	bench.set("active_selection_path", _root.path_join("sound_active.json"))
 	add_child(bench)
 	await get_tree().process_frame
 
@@ -98,6 +102,40 @@ func _run() -> void:
 		if not kinds.has("loop:" + String(k)):
 			noloop.append(String(k))
 	_check("каталог: фоновые лупы игры", noloop.is_empty(), str(noloop))
+	var weapons: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/weapons.json"))
+	var pistol_sounds: Array[String] = []
+	for id in ["wpn_hg_01", "wpn_hg_02", "wpn_hg_03", "wpn_hg_04"]:
+		pistol_sounds.append(String(weapons.weapons[id].weapon.sound))
+	_check("четыре пистолета назначены четырём отдельным звуковым наборам",
+		pistol_sounds == ["shot_hg_01", "shot_hg_02", "shot_hg_03", "shot_hg_04"], str(pistol_sounds))
+	var pistol_model: Dictionary = bench.call("status_of", "shot_hg_01")
+	var pistol_streams: Array[AudioStream] = bench.call("streams_of", "shot_hg_01")
+	_check("пока своих записей нет, модель пистолета использует общий запасной набор",
+		int(pistol_model.rec) == 0 and int(pistol_model.fallback_rec) == 2 and pistol_streams.size() == 2,
+		str(pistol_model))
+	_wav(_root.path_join("assets/guns/hg01_01.wav"))
+	(bench.get("_asset_cache") as Dictionary).clear()
+	pistol_model = bench.call("status_of", "shot_hg_01")
+	pistol_streams = bench.call("streams_of", "shot_hg_01")
+	_check("первая своя запись заменяет общий набор только у выбранной модели",
+		int(pistol_model.rec) == 1 and pistol_streams.size() == 1
+		and (bench.call("streams_of", "shot_hg_02") as Array).size() == 2, str(pistol_model))
+
+	# --- действующие записи можно убрать из игры без удаления файла
+	var carbine_01 := _root.path_join("assets/guns/carbine_01.wav")
+	bench.call("set_asset_enabled", carbine_01, false)
+	var active_state: Dictionary = bench.call("status_of", "shot_rifle")
+	var active_file: Variant = JSON.parse_string(FileAccess.get_file_as_string(_root.path_join("sound_active.json")))
+	_check("запись исключается из случайного выбора, но файл остаётся на месте",
+		int(active_state.rec) == 1 and int(active_state.disabled) == 1
+		and (bench.call("streams_of", "shot_rifle") as Array).size() == 1
+		and FileAccess.file_exists(carbine_01), str(active_state))
+	_check("исключение сохраняется в явном файле проекта", active_file is Dictionary
+		and (active_file as Dictionary).disabled.has("guns/carbine_01.wav"), str(active_file))
+	bench.call("set_asset_enabled", carbine_01, true)
+	active_state = bench.call("status_of", "shot_rifle")
+	_check("галочка возвращает запись в игру", int(active_state.rec) == 2 and int(active_state.disabled) == 0,
+		str(active_state))
 
 	# --- новые файлы
 	var try_dir := _root.path_join("try")

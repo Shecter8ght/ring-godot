@@ -7,6 +7,7 @@ extends Node3D
 ## Запуск: tools/godot.cmd res://tools/sound_bench.tscn. После переноса — tools/godot.cmd --headless --import.
 
 const CATALOG := "res://data/sound_catalog.json"
+const ACTIVE_SELECTION := "res://data/sound_active.json"
 const EXTS := ["ogg", "wav", "mp3"]
 const CREDITS_HEAD := "## Звук — отобрано на стенде (tools/sound_bench)"
 const COL_REC := Color(0.55, 0.85, 0.5)
@@ -24,12 +25,15 @@ const MODES := {"near": "вблизи", "far": "вдали", "wall": "за ст�
 var try_dir: String = ProjectSettings.globalize_path("res://_sound_try")
 var assets_dir: String = ProjectSettings.globalize_path("res://assets/audio")
 var credits_path: String = ProjectSettings.globalize_path("res://assets/CREDITS.md")
+var active_selection_path: String = ProjectSettings.globalize_path(ACTIVE_SELECTION)
 
 var sounds: Array[Dictionary] = []
 var by_id: Dictionary = {}
 var cats: Array[String] = []
 ## Отбор новых файлов: путь относительно try_dir → {use, source, seen, moved}.
 var selection: Dictionary = {}
+## Уже импортированные записи, которые владелец исключил из случайного набора игры.
+var disabled_assets: Dictionary = {}
 ## Новые файлы на последнем поиске (пути относительно try_dir).
 var files: Array[String] = []
 
@@ -64,6 +68,7 @@ func _ready() -> void:
 	_load_catalog()
 	_ensure_try_dir()
 	_load_selection()
+	_load_active_selection()
 	_make_buses()
 	# слушатель для «как в игре» (Audio.play — объёмный звук в точке мира)
 	var cam := Camera3D.new()
@@ -158,6 +163,50 @@ func save_selection() -> void:
 		f.store_string(JSON.stringify(selection, "\t"))
 
 
+func _load_active_selection() -> void:
+	disabled_assets.clear()
+	if not FileAccess.file_exists(active_selection_path):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(active_selection_path))
+	if not parsed is Dictionary:
+		return
+	for rel in (parsed as Dictionary).get("disabled", []):
+		disabled_assets[String(rel).replace("\\", "/")] = true
+
+
+func save_active_selection() -> void:
+	var disabled: Array[String] = []
+	for rel in disabled_assets:
+		disabled.append(String(rel))
+	disabled.sort()
+	var data := {
+		"_comment": "Какие уже импортированные записи исключены из игры на стенде звуков. Пути относительно assets/audio. Файл остаётся в проекте и его можно включить обратно; Audio не загружает записи из disabled.",
+		"disabled": disabled,
+	}
+	var f := FileAccess.open(active_selection_path, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(data, "\t") + "\n")
+
+
+func _asset_rel(path: String) -> String:
+	return path.trim_prefix(assets_dir + "/").replace("\\", "/")
+
+
+func asset_enabled(path: String) -> bool:
+	return not disabled_assets.has(_asset_rel(path))
+
+
+func set_asset_enabled(path: String, enabled: bool) -> void:
+	var rel := _asset_rel(path)
+	if enabled:
+		disabled_assets.erase(rel)
+	else:
+		disabled_assets[rel] = true
+	save_active_selection()
+	Audio.reload_samples()
+	_refresh_all()
+
+
 ## Отбор файла (заводится при первой встрече: ещё не слушали, не отмечен).
 func sel(rel: String) -> Dictionary:
 	if not selection.has(rel):
@@ -223,8 +272,21 @@ func asset_files(prefix: String) -> Array[String]:
 func status_of(id: String) -> Dictionary:
 	var e: Dictionary = by_id[id]
 	var kind := String(e.kind)
-	var st := {"rec": asset_files(String(e.file)).size(), "wired": kind != "", "synth": false,
+	var installed := asset_files(String(e.file))
+	var active := 0
+	for path in installed:
+		if asset_enabled(String(path)):
+			active += 1
+	var st := {"rec": active, "rec_total": installed.size(), "disabled": installed.size() - active,
+		"fallback_rec": 0, "fallback_name": "", "wired": kind != "", "synth": false,
 		"try": 0, "new": 0, "use": 0, "absent": false}
+	var fallback_id := String(e.get("fallback", ""))
+	if by_id.has(fallback_id):
+		var fallback: Dictionary = by_id[fallback_id]
+		for path in asset_files(String(fallback.file)):
+			if asset_enabled(String(path)):
+				st.fallback_rec = int(st.fallback_rec) + 1
+		st.fallback_name = String(fallback.name)
 	if kind.begins_with("loop:"):
 		st.synth = true
 	elif kind != "":
@@ -243,10 +305,13 @@ func status_of(id: String) -> Dictionary:
 	return st
 
 
-## Все варианты звука для прослушивания: записи игры + отмеченные новые файлы.
-func streams_of(id: String) -> Array[AudioStream]:
+## Все варианты звука для прослушивания: сначала свои записи и отмеченные кандидаты. Если своих
+## ещё нет, модель временно пользуется указанным в каталоге общим запасным набором.
+func streams_of(id: String, with_fallback: bool = true) -> Array[AudioStream]:
 	var out: Array[AudioStream] = []
 	for path in asset_files(String(by_id[id].file)):
+		if not asset_enabled(path):
+			continue
 		var st := load_stream(path)
 		if st:
 			out.append(st)
@@ -255,6 +320,10 @@ func streams_of(id: String) -> Array[AudioStream]:
 			var st := load_stream(try_dir.path_join(rel))
 			if st:
 				out.append(st)
+	if out.is_empty() and with_fallback:
+		var fallback_id := String((by_id[id] as Dictionary).get("fallback", ""))
+		if by_id.has(fallback_id) and fallback_id != id:
+			return streams_of(fallback_id, false)
 	return out
 
 
@@ -831,10 +900,14 @@ func _refresh_all() -> void:
 
 func _status_text(st: Dictionary) -> String:
 	var t := "%d зап." % int(st.rec) if int(st.rec) > 0 else ("синтез" if bool(st.synth) else "нет записи")
+	if int(st.rec) == 0 and int(st.fallback_rec) > 0:
+		t = "общий набор: %d" % int(st.fallback_rec)
 	if bool(st.absent):
 		t = "в игре нет"
 	elif not bool(st.wired):
 		t += " · не подключён"
+	if int(st.disabled) > 0:
+		t += " · выкл. %d" % int(st.disabled)
 	if int(st.try) > 0:
 		t += " · +%d" % int(st.try)
 	return t
@@ -936,6 +1009,10 @@ func _refresh_details() -> void:
 		game_color = COL_REC if int(st.rec) > 0 else COL_SYNTH
 		if int(st.rec) > 0:
 			game_text = "✓ Подключён к игре: при событии «%s» Audio выбирает одну из %d записей." % [String(e.kind), int(st.rec)]
+		elif int(st.fallback_rec) > 0:
+			game_text = ("Подключён к игре как «%s». Своих записей пока нет, поэтому временно звучит общий набор «%s» (%d записей). "
+				+ "Первая своя одобренная запись автоматически заменит общий набор только для этой модели.") % [
+				String(e.kind), String(st.fallback_name), int(st.fallback_rec)]
 		elif bool(st.synth):
 			game_text = "Подключён к игре как «%s», но пока звучит синтез. Первая одобренная запись заменит его." % String(e.kind)
 		else:
@@ -969,7 +1046,10 @@ func _refresh_details() -> void:
 				play_tail()))
 	if _is_gun(id):
 		bar.add_child(_button("▶▶ очередь", func() -> void: play_burst(streams_of(id), int(_burst_n.value), _rpm.value)))
-	_details.add_child(_label("Записи в проекте (%d)" % int(st.rec), 16, COL_REC))
+	var records_text := "Записи в проекте: используется %d" % int(st.rec)
+	if int(st.disabled) > 0:
+		records_text += " · исключено %d" % int(st.disabled)
+	_details.add_child(_label(records_text, 16, COL_REC if int(st.rec) > 0 else COL_DIM))
 	for path in asset_files(String(e.file)):
 		var row := HBoxContainer.new()
 		var p := path
@@ -977,9 +1057,17 @@ func _refresh_details() -> void:
 			play_stream(load_stream(p), true, _is_loop(id))
 			if _is_gun(id):
 				play_tail()))
-		var existing_name := _label(path.get_file(), 15, Color(0.85, 0.86, 0.88))
+		var enabled := asset_enabled(path)
+		var existing_name := _label(path.get_file(), 15, Color(0.85, 0.86, 0.88) if enabled else COL_DIM)
 		existing_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(existing_name)
+		var use_in_game := CheckButton.new()
+		use_in_game.text = "Использовать в игре"
+		use_in_game.button_pressed = enabled
+		use_in_game.tooltip_text = ("Участвует в случайном выборе Audio" if enabled
+			else "Исключён из игры, но файл сохранён. Включи галочку, чтобы вернуть.")
+		use_in_game.toggled.connect(func(on: bool) -> void: set_asset_enabled(p, on))
+		row.add_child(use_in_game)
 		_details.add_child(row)
 	var mine: Array[String] = []
 	for rel in files:

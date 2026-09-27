@@ -5,6 +5,7 @@ extends Node
 ## (шум + огибающие + простые фильтры) — игра обязана звучать и так. Autoload `Audio`.
 
 const MIX_RATE := 22050
+const ACTIVE_SELECTION := "res://data/sound_active.json"
 
 ## Громкость и дальность по виду звука: дБ, единица дистанции (м, где громкость номинальная), предел слышимости.
 const KINDS := {
@@ -51,10 +52,21 @@ const KINDS := {
 	"explosion": {"db": 8.0, "unit": 14.0, "max": 220.0},
 }
 
+## Свой набор оружия заменяет общий, как только в нём появляется хотя бы одна активная запись.
+## До этого игра продолжает звучать: модель берёт записи, дальний хвост и синтез запасного вида.
+const FALLBACKS := {
+	"shot_hg_01": "shot_pistol", "shot_hg_02": "shot_pistol",
+	"shot_hg_03": "shot_pistol", "shot_hg_04": "shot_pistol",
+	"shot_smg": "shot_pistol", "shot_sup939": "shot_pistol",
+}
+
 ## Записанные звуки: вид -> ["группа/префикс", ...] в assets/audio. Префикс ловит только
 ## файлы «префикс + номер»: "guns/pistol_" не цепляет "pistol_far_01".
 const SAMPLES := {
 	"shot_pistol": ["guns/pistol_"], "shot_ai": ["guns/pistol_"], "shot_rifle": ["guns/carbine_"],
+	"shot_hg_01": ["guns/hg01_"], "shot_hg_02": ["guns/hg02_"],
+	"shot_hg_03": ["guns/hg03_"], "shot_hg_04": ["guns/hg04_"],
+	"shot_smg": ["guns/smg_"], "shot_sup939": ["guns/sup939_"],
 	"shot_shotgun": ["guns/shotgun_"], "shot_bolt": ["guns/marksman_"],
 	"step": ["steps/stone_"], "step_run": ["steps/stone_run_"], "step_ai": ["steps/stone_"],
 	"step_stone": ["steps/stone_"], "step_stone_run": ["steps/stone_run_"],
@@ -80,6 +92,7 @@ const LOOPS := {"rain": "amb/rain_", "siren": "world/alarm_", "hum": "world/gene
 ## Выстрел дальше FAR_M от слушателя звучит «дальней» записью: хлопок с эхом, без щелчка.
 const FAR := {
 	"shot_pistol": "guns/pistol_far_", "shot_ai": "guns/pistol_far_", "shot_rifle": "guns/carbine_far_",
+	"shot_smg": "guns/smg_far_",
 	"shot_shotgun": "guns/shotgun_far_", "shot_bolt": "guns/marksman_far_",
 	"explosion": "boom/explosion_far_",
 }
@@ -96,6 +109,7 @@ signal stepped(kind: String, surface: String, pos: Vector3)
 
 var _samples: Dictionary = {}
 var _far: Dictionary = {}
+var _disabled: Dictionary = {}
 
 var _streams: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
@@ -137,6 +151,7 @@ func _ready() -> void:
 		_streams[k] = _streams["reload"]
 	_streams["debris"] = _streams["impact_hard"]
 	_streams["explosion"] = _make(_explosion())
+	_load_active_selection()
 	_load_samples()
 	# фон — только ветер в пустом здании (капли владелец убрал: запись «ветер + капли» не делится)
 	_ambient = AudioStreamPlayer.new()
@@ -157,7 +172,7 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0)
 	var stream: AudioStream = _pick(kind, pos)
 	if stream == null:
 		return
-	var spec: Dictionary = KINDS.get(kind, {"db": 0.0, "unit": 5.0, "max": 40.0})
+	var spec: Dictionary = KINDS.get(kind, KINDS.get(_fallback_kind(kind), {"db": 0.0, "unit": 5.0, "max": 40.0}))
 	var listener := _listener_pos()
 	var ears := _has_ears()
 	if ears and listener.distance_to(pos) > float(spec["max"]):
@@ -239,19 +254,26 @@ func _occluded(listener: Vector3, pos: Vector3) -> bool:
 
 ## Запись (или дальняя запись), иначе синтетика.
 func _pick(kind: String, pos: Vector3) -> AudioStream:
-	if _far.has(kind):
+	var fallback := _fallback_kind(kind)
+	var far_kind := kind if _far.has(kind) else fallback
+	if _far.has(far_kind):
 		var listener := _listener_pos()
 		if listener.distance_to(pos) > FAR_M:
-			var far: Array = _far[kind]
+			var far: Array = _far[far_kind]
 			return far[_rng.randi_range(0, far.size() - 1)]
-	if _samples.has(kind):
-		var arr: Array = _samples[kind]
+	var sample_kind := kind if _samples.has(kind) else fallback
+	if _samples.has(sample_kind):
+		var arr: Array = _samples[sample_kind]
 		var i := _rng.randi_range(0, arr.size() - 1)
-		if arr.size() > 1 and i == int(_last_pick.get(kind, -1)):
+		if arr.size() > 1 and i == int(_last_pick.get(sample_kind, -1)):
 			i = (i + 1 + _rng.randi_range(0, arr.size() - 2)) % arr.size()
-		_last_pick[kind] = i
+		_last_pick[sample_kind] = i
 		return arr[i]
-	return _streams.get(kind)
+	return _streams.get(kind, _streams.get(fallback))
+
+
+func _fallback_kind(kind: String) -> String:
+	return String(FALLBACKS.get(kind, kind))
 
 
 func _listener_pos() -> Vector3:
@@ -287,6 +309,7 @@ func reload_samples() -> void:
 	_rain_loop = null
 	_siren = null
 	_hum = null
+	_load_active_selection()
 	_load_samples()
 	var ambient := _loop_sample("ambient")
 	if _ambient != null and ambient != null:
@@ -325,7 +348,7 @@ func ambient_stream() -> AudioStream:
 
 ## Есть синтетический запасной звук этого вида (стенд звуков: «как в игре»).
 func has_synth(kind: String) -> bool:
-	return _streams.has(kind)
+	return _streams.has(kind) or _streams.has(_fallback_kind(kind))
 
 
 func _load_prefixes(prefixes: Array) -> Array:
@@ -342,6 +365,8 @@ func _load_prefixes(prefixes: Array) -> Array:
 			if not stem.trim_prefix(parts[1]).is_valid_int():
 				continue
 			var resource_path := dir + f
+			if _disabled.has(resource_path.trim_prefix("res://assets/audio/")):
+				continue
 			var st: AudioStream = load(resource_path) as AudioStream if ResourceLoader.exists(resource_path) else null
 			# Сразу после копирования из _sound_try импорт ещё не успел создать ресурс. Декодеры
 			# форматов умеют читать исходник напрямую; при следующем запуске пойдёт обычный ресурс.
@@ -350,6 +375,17 @@ func _load_prefixes(prefixes: Array) -> Array:
 			if st:
 				out.append(st)
 	return out
+
+
+func _load_active_selection() -> void:
+	_disabled.clear()
+	if not FileAccess.file_exists(ACTIVE_SELECTION):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ACTIVE_SELECTION))
+	if not parsed is Dictionary:
+		return
+	for rel in (parsed as Dictionary).get("disabled", []):
+		_disabled[String(rel).replace("\\", "/")] = true
 
 
 func _load_audio_file(path: String) -> AudioStream:
