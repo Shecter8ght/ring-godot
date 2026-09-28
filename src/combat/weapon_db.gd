@@ -109,6 +109,10 @@ static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
 		for raw in _sound_slots:
 			if not _sound_slot_applies(raw, w):
 				continue
+			# Общие действия назначаются один раз всему классу оружия и не раздувают каталог
+			# одинаковыми событиями для каждой модели.
+			if bool(raw.get("shared", false)):
+				continue
 			var slot := String(raw.id)
 			var base_kind := "%s_%s" % [wid, "shot" if slot == "shot_far" else slot]
 			var event := raw.duplicate(true)
@@ -135,11 +139,47 @@ static func weapon_sound_kind(id: String, slot: String) -> String:
 
 
 static func weapon_sound_map(id: String) -> Dictionary:
+	_ensure()
 	var out: Dictionary = {}
 	for event in weapon_sound_events(id):
 		var kind := String(event.kind)
 		if kind != "" and not kind.ends_with("@far"):
 			out[String(event.slot)] = kind
+	var w := weapon(id)
+	for raw in _sound_slots:
+		if not bool(raw.get("shared", false)) or not _sound_slot_applies(raw, w):
+			continue
+		var shared_kind := _weapon_sound_fallback(w, String(raw.get("fallback", "")))
+		if shared_kind != "":
+			out[String(raw.id)] = shared_kind
+	return out
+
+
+## Полный одинаковый шаблон карточки стенда. Недоступные строки не исчезают, поэтому владелец
+## всегда видит один порядок и причину, почему действие для конкретной конструкции невозможно.
+static func weapon_sound_layout(id: String) -> Array[Dictionary]:
+	_ensure()
+	var wid := canonical(id)
+	var item: Dictionary = (_w.weapons as Dictionary).get(wid, {})
+	var w: Dictionary = item.get("weapon", {})
+	var available_events: Dictionary = {}
+	for event in weapon_sound_events(wid):
+		available_events[String(event.slot)] = event
+	var out: Array[Dictionary] = []
+	for raw in _sound_slots:
+		var row := raw.duplicate(true)
+		row.slot = String(raw.id)
+		row.available = _sound_slot_applies(raw, w)
+		row.shared = bool(raw.get("shared", false))
+		if bool(row.shared):
+			row.kind = _weapon_sound_fallback(w, String(raw.get("fallback", "")))
+			row.id = String(row.kind)
+		elif available_events.has(String(raw.id)):
+			row.merge(available_events[String(raw.id)] as Dictionary, true)
+		else:
+			row.id = "%s_%s" % [wid, String(raw.id)]
+			row.kind = ""
+		out.append(row)
 	return out
 
 

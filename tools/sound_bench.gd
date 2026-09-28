@@ -75,6 +75,7 @@ var _search: LineEdit
 var _main_tabs: TabContainer
 var _weapon_grid: GridContainer
 var _weapon_search: LineEdit
+var _shared_weapon_sounds: HFlowContainer
 var _details: VBoxContainer
 var _new_list: VBoxContainer
 var _tabs: TabContainer
@@ -1230,7 +1231,7 @@ func _build_ui() -> void:
 	var weapon_head := HBoxContainer.new()
 	weapon_head.add_theme_constant_override("separation", 10)
 	weapons_tab.add_child(weapon_head)
-	var weapon_hint := _label("Каждая карточка — отдельная модель и отдельные звуковые наборы. Кнопка открывает выбранный звук и делает его целью для входящих файлов.", 15, COL_DIM)
+	var weapon_hint := _label("В карточке — только отличающиеся звуки модели. Повторяемые действия назначаются один раз в блоке общих звуков.", 15, COL_DIM)
 	weapon_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	weapon_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	weapon_head.add_child(weapon_hint)
@@ -1239,6 +1240,19 @@ func _build_ui() -> void:
 	_weapon_search.custom_minimum_size.x = 300
 	_weapon_search.text_changed.connect(func(_query: String) -> void: _refresh_weapon_grid())
 	weapon_head.add_child(_weapon_search)
+	var shared_toggle := Button.new()
+	shared_toggle.text = "▸ Общие звуки оружия — назначаются один раз для всех стволов"
+	shared_toggle.toggle_mode = true
+	shared_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	weapons_tab.add_child(shared_toggle)
+	_shared_weapon_sounds = HFlowContainer.new()
+	_shared_weapon_sounds.visible = false
+	_shared_weapon_sounds.add_theme_constant_override("h_separation", 6)
+	_shared_weapon_sounds.add_theme_constant_override("v_separation", 6)
+	weapons_tab.add_child(_shared_weapon_sounds)
+	shared_toggle.toggled.connect(func(open: bool) -> void:
+		_shared_weapon_sounds.visible = open
+		shared_toggle.text = ("▾" if open else "▸") + " Общие звуки оружия — назначаются один раз для всех стволов")
 	var weapon_scroll := ScrollContainer.new()
 	weapon_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	weapon_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -1467,6 +1481,7 @@ func _spin(lo: int, hi: int, v: int) -> SpinBox:
 func _refresh_weapon_grid() -> void:
 	if _weapon_grid == null:
 		return
+	_refresh_shared_weapon_sounds()
 	for child in _weapon_grid.get_children():
 		child.queue_free()
 	var query := _weapon_search.text.strip_edges().to_lower() if _weapon_search else ""
@@ -1477,6 +1492,37 @@ func _refresh_weapon_grid() -> void:
 		if query != "" and not haystack.to_lower().contains(query):
 			continue
 		_weapon_grid.add_child(_weapon_card(wid, item, w))
+
+
+func _refresh_shared_weapon_sounds() -> void:
+	if _shared_weapon_sounds == null:
+		return
+	for child in _shared_weapon_sounds.get_children():
+		child.queue_free()
+	var names_by_id: Dictionary = {}
+	var order: Array[String] = []
+	for wid in WeaponDb.weapon_ids():
+		for row in WeaponDb.weapon_sound_layout(wid):
+			if not bool(row.get("shared", false)) or not bool(row.get("available", false)):
+				continue
+			var sound_id := String(row.id)
+			if sound_id == "":
+				continue
+			if not names_by_id.has(sound_id):
+				names_by_id[sound_id] = []
+				order.append(sound_id)
+			var names: Array = names_by_id[sound_id]
+			var row_name := String(row.name)
+			if not names.has(row_name):
+				names.append(row_name)
+	for sound_id in order:
+		var st := status_of(sound_id)
+		var labels := PackedStringArray(names_by_id[sound_id] as Array)
+		var label := " / ".join(labels)
+		var button := _button(_weapon_sound_button_text(label, st), func() -> void: _select_weapon_sound(sound_id))
+		button.add_theme_color_override("font_color", _status_color(st))
+		button.tooltip_text = "Одна запись используется всеми подходящими моделями оружия. ID: %s" % sound_id
+		_shared_weapon_sounds.add_child(button)
 
 
 func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContainer:
@@ -1517,23 +1563,44 @@ func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContaine
 	var meta := "%s · %s · %s" % [String(item.get("code", wid)), String(WeaponDb.CLASS_NAMES.get(String(w.get("class", "")), String(w.get("class", "")))), WeaponDb.caliber_name(String(w.get("caliber", "")))]
 	box.add_child(_label(meta, 13, COL_DIM))
 	var last_group := ""
-	for e in WeaponDb.weapon_sound_events(wid):
+	for e in WeaponDb.weapon_sound_layout(wid):
+		if bool(e.get("shared", false)):
+			continue
 		var group := String(e.group)
 		if group != last_group:
 			last_group = group
 			var heading := _label(group.to_upper(), 12, Color(0.78, 0.67, 0.45))
 			heading.add_theme_constant_override("outline_size", 1)
 			box.add_child(heading)
+		if not bool(e.get("available", true)):
+			var unavailable := "— %s" % _unavailable_weapon_sound_text(String(e.slot), String(e.name))
+			var unavailable_label := _label(unavailable, 14, COL_DIM)
+			unavailable_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			unavailable_label.custom_minimum_size.y = 31
+			box.add_child(unavailable_label)
+			continue
 		var sound_id := String(e.id)
+		if sound_id == "":
+			continue
 		var st := status_of(sound_id)
-		var button := _button(_weapon_sound_button_text(String(e.get("name", "")).trim_prefix(String(item.get("name", wid)) + " — "), st),
+		var row_name := String(e.get("name", "")).trim_prefix(String(item.get("name", wid)) + " — ")
+		var button := _button(_weapon_sound_button_text(row_name, st),
 			func() -> void: _select_weapon_sound(sound_id))
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.custom_minimum_size.y = 31
 		button.add_theme_color_override("font_color", _status_color(st))
 		button.tooltip_text = "%s\n%s\nID: %s\nФайлы: assets/audio/%sNN" % [String(e.when), _status_text(st), sound_id, String(e.file)]
 		box.add_child(button)
+	var common_note := _label("Общие действия: назначаются один раз в блоке над карточками.", 12, COL_DIM)
+	common_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(common_note)
 	return card
+
+
+func _unavailable_weapon_sound_text(slot: String, event_name: String) -> String:
+	if slot == "shot_suppressed":
+		return "Выстрел с глушителем не предусмотрен"
+	return "%s · для этой конструкции не предусмотрено" % event_name
 
 
 func _weapon_sound_button_text(name: String, st: Dictionary) -> String:

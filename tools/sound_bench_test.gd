@@ -137,8 +137,29 @@ func _run() -> void:
 		event_files[String(event.file)] = true
 	_check("оружие: карточка для каждой модели, помодельные ID и папки звуков уникальны",
 		(bench.get("_weapon_grid") as GridContainer).get_child_count() == weapon_ids.size()
-		and weapon_events.size() > weapon_ids.size() * 15 and duplicate_events.is_empty(),
+		and weapon_events.size() >= weapon_ids.size() * 4 and duplicate_events.is_empty(),
 		"карточек %d, моделей %d, событий %d, дубли %s" % [(bench.get("_weapon_grid") as GridContainer).get_child_count(), weapon_ids.size(), weapon_events.size(), str(duplicate_events)])
+	var pm_layout := WeaponDb.weapon_sound_layout("wpn_hg_01")
+	var glock_layout := WeaponDb.weapon_sound_layout("wpn_hg_02")
+	var pm_order: Array[String] = []
+	var glock_order: Array[String] = []
+	for row in pm_layout:
+		pm_order.append(String(row.slot))
+	for row in glock_layout:
+		glock_order.append(String(row.slot))
+	_check("оружие: у всех карточек одинаковый порядок строк", pm_order == glock_order, str(pm_order))
+	_check("оружие: общие действия собраны один раз над карточками",
+		(bench.get("_shared_weapon_sounds") as HFlowContainer).get_child_count() >= 10, "")
+	var pm_suppressed: Dictionary = pm_layout[2]
+	var glock_suppressed: Dictionary = glock_layout[2]
+	_check("оружие: глушитель остаётся на своём месте и явно недоступен для ПМ",
+		String(pm_suppressed.slot) == "shot_suppressed" and not bool(pm_suppressed.available)
+		and bool(glock_suppressed.available), "%s / %s" % [str(pm_suppressed), str(glock_suppressed)])
+	var shared_dry: Dictionary = pm_layout[4]
+	_check("оружие: сухой спуск назначается один раз общим событием",
+		String(shared_dry.slot) == "dry_fire" and bool(shared_dry.shared)
+		and String(shared_dry.id) == "dry_fire"
+		and String(WeaponDb.weapon_sound_map("wpn_hg_01").dry_fire) == "dry_fire", str(shared_dry))
 	_check("оружие: два автомата с прежним общим набором получили разные собственные события",
 		WeaponDb.weapon_sound_kind("wpn_ar_03", "shot") == "wpn_ar_03_shot"
 		and WeaponDb.weapon_sound_kind("wpn_ar_04", "shot") == "wpn_ar_04_shot"
