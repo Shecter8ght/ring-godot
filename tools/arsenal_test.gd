@@ -238,9 +238,18 @@ func _data_cases(rng: RandomNumberGenerator) -> void:
 			catalog_count += 1
 			if String(ItemDb.item(id).get("flavor", "")).strip_edges() == "":
 				missing_flavor.append(id)
-	_check("каталог: у всех 137 элементов есть отдельная игровая фраза", catalog_count == 137 and missing_flavor.is_empty(),
+	_check("каталог: у всех 138 элементов есть отдельная игровая фраза", catalog_count == 138 and missing_flavor.is_empty(),
 		"элементов %d, без фразы: %s" % [catalog_count, ", ".join(missing_flavor)])
-	var weapon_info := ItemInfo.describe("wpn_ar_01")
+	var vss_item: Dictionary = ItemDb.item("wpn_sp_02")
+	var vss_spec: Dictionary = WeaponDb.weapon("wpn_sp_02")
+	var vss_integral: Dictionary = vss_spec.get("integral", {})
+	_check("ВСС: отдельный редкий ствол, встроенный глушитель, родные магазины 10 / 20 и иконка",
+		String(vss_item.get("name", "")) == "VSS Vintorez" and int(vss_item.get("tier", 0)) == 4
+		and bool(vss_integral.get("suppressed", false))
+		and String(vss_spec.get("default_mag", "")) == "mag_939_10"
+		and WeaponDb.mag_fits("wpn_sp_02", "mag_939_10") and WeaponDb.mag_fits("wpn_sp_02", "mag_939_20")
+		and ResourceLoader.exists("res://assets/icons/wpn_sp_02.png"), str(vss_item))
+	var weapon_info := ItemInfo.describe("wpn_sp_02")
 	var ammo_info := ItemInfo.describe("ammo_545_std")
 	var mag_info := ItemInfo.describe("mag_545_60")
 	var mod_info := ItemInfo.describe("optic_4x_01")
