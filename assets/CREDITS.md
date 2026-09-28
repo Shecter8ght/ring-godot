@@ -21,6 +21,10 @@
 - `assets/textures/sapele_veneer/` — Sapele Veneer, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/sapele_veneer — дерево автомата (красноватый лак)
 - `assets/textures/worn_tile_floor/` — Worn Tile Floor, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_tile_floor — пол торгового зала
 
+## Иконки оружия
+
+- `assets/icons/wpn_*.png` — 23 изображения из `docs/RING_weapon_design_doc_v9_final_cut.html`, предоставленного владельцем проекта; собственные материалы проекта RING.
+
 ## Звук (assets/audio — `tools/import_audio.py`, обработка — `tools/build_audio.py` прежнего RING)
 
 | Источник | Автор | Лицензия | Где |

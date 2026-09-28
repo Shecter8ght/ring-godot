@@ -46,16 +46,51 @@
   `fit`), перезарядка, снарядить магазины. `Armor` — пробитие. `WeaponStats` — характеристики.
 
 ### ID
-Новые предметы: `wpn_hg_01…`, `ammo_545_std`, `mag_545_30`, `optic_lpvo_01`, `tac_flashlight_01`,
-`muzzle_supp_545_01`, `grip_vertical_01`, `stock_tele_ak_01`, `carrier_perimeter_std`,
-`plate_perimeter`, `helmet_perimeter_combat`, `headset_perimeter`. Код из ТЗ (HG_01, AR_06…) —
-поле `code`. Старые id (`w_rifle`, `ammo_545`, `mod_red_dot`…) — в `aliases`: профиль при загрузке
-переводится на новые, старые сохранения не ломаются. Новые id больше не меняются.
+Оружейная линейка взята из `docs/RING_weapon_design_doc_v9_final_cut.html`; его 23 встроенные PNG
+извлекает `node tools/import_weapon_catalog.mjs`. Коды и ID:
+
+| Класс | Оружие |
+|---|---|
+| Пистолеты | `wpn_hg_01` ПМ; `wpn_hg_02` Glock 17 Gen5; `wpn_hg_03` HK USP .45 |
+| SMG / PDW | `wpn_smg_01` HK UMP45; `wpn_smg_02` FN P90; `wpn_smg_03` KRISS Vector; `wpn_smg_04` PP-19-01 Vityaz; `wpn_smg_05` SR-2M Veresk |
+| Автоматы | `wpn_ar_01` AK-12; `wpn_ar_02` M4A1; `wpn_ar_03` SIG MCX Virtus; `wpn_ar_04` FN SCAR-L; `wpn_ar_05` SIG MCX Spear; `wpn_sp_01` AS VAL |
+| Точные | `wpn_dmr_01` HK MR762; `wpn_dmr_02` BCM MK12; `wpn_sr_01` Accuracy International AWM; `wpn_sr_02` Barrett M82A1 |
+| Дробовики | `wpn_sg_01` Benelli M4; `wpn_sg_02` Saiga-12K; `wpn_sg_03` Mossberg 590A1 |
+| Пулемёты | `wpn_lmg_01` PKM; `wpn_lmg_02` M249 SAW |
+
+У предмета есть короткий `code` (`AK12`, `G17`, `M249`…). Старые id (`w_rifle`, `wpn_ar_06`,
+`ammo_76239_std`, `mod_red_dot`…) сохранены в `aliases`: профиль при загрузке переводит их в
+ближайшие новые аналоги. Это мягкая совместимость, а не обещание сохранить прежнюю платформу и калибр.
+
+### Ёмкости и платформы: источники
+
+Игровые характеристики не пытаются быть баллистическим симулятором, но штатные магазины,
+калибры, темп и ограничения платформ сверены прежде всего с первичными источниками:
+
+- Glock G17 Gen5 — 17 штатно, варианты 19/24/31/33: https://us.glock.com/en/products/law-enforcement/pistols/g17-gen5
+- HK USP .45 — 12: https://www.heckler-koch.com/Downloads/Bedienungsanleitungen%20Jagd%20und%20Sport/Pistolen/DE/USP%20%20OM%20%28DE-EN-ES-FR%29%20986451%20001.0320.pdf
+- FN P90 — 50: https://fnherstal.com/en/defence/portable-weapons/fn-p90/
+- KRISS Vector .45 — Glock 21 на 13 и увеличенные MagEx: https://store.kriss-usa.com/images/dealer-resources/kriss/KRISS-MANUAL/Gen-Two/KRISS-MANUAL_2017_VECTOR-Gen-2_CRB-SBR-SDP-12.pdf
+- Vityaz — 30: https://rostec.ru/media/news/zaversheny-gosispytaniya-pistoleta-pulemeta-kalashnikova/
+- SR-2M — 20/30 и темп 900: https://rosguard.gov.ru/page/index/pistoletpulemt-sr2m-veresk
+- AK-12 — 30 и основные ТТХ: https://www.rostec.ru/en/directions/weapons/products-projects/ak-12-ak-15-ak-19-assault-rifles/
+- M4 — 30 и диапазон темпа: https://www.colt.com/wp-content/uploads/2023/02/m16a2carbinecommando9mmsmgm4carbine.pdf
+- MCX Virtus — 5.56/.300 BLK и интерфейсы: https://www.sigsauer.com/pub/media/sigsauer/resources/OPERATORS-MANUAL-SIGMCX-VIRTUS-ENGLISH-2402117-01-REV-00-LR.pdf
+- FN SCAR-L — 30 и 550–650 выстр./мин: https://fnherstal.com/app/uploads/sites/2/technical-data-fn-scar-l-mk2-2.pdf
+- MCX Spear — два магазина на 20 и 6.8×51: https://www.sigsauer.com/blog/now-shipping-the-incredible-new-mcx-spear-rifle
+- Barrett M82A1 — 10; глушитель не допускается производителем: https://barrett.net/support/faq/
+- Benelli M4 — 5+1: https://www.benelliusa.com/resources/ballistic-magazine-names-benelli-m4-h2o-tactical-as-2019-best-semi-auto-shotgun
+- Mossberg 590A1 — конфигурация 7-shot и патронник 3″ (12/76): https://resources.mossberg.com/hubfs/press_releases/Mossberg-Introduces-7-Shot-Versions-of-590A1-and-590-PR-1-4-2016-FINAL.pdf
+- PKM — короба 100/200 и темп 600–800: https://roe.ru/pdfs/pdf_7081.pdf
+- M249 / FN MINIMI — ленточное питание, короб/мягкий короб и около 800 выстр./мин: https://fnherstal.com/app/uploads/sites/2/technical-data-fn-minimi-556-mk3.pdf
+
+Для редких ёмкостей без однозначного актуального первичного листа (ПМ, UMP45, AS VAL, Saiga-12,
+AWM) зафиксированы распространённые штатные значения как осознанные игровые допущения.
 
 ## 4. Экземпляр оружия
 
 ```
-{"id": "wpn_ar_06", "n": 1, "dur": 91.0, "rev": 3,
+{"id": "wpn_ar_01", "n": 1, "dur": 91.0, "rev": 3,
  "mods": {"optic_primary": {"id": "optic_lpvo_01"},
           "optic_offset":  {"id": "optic_offset_rd_01"},
           "side_left":     {"id": "tac_flashlight_01", "light": false},
@@ -83,7 +118,9 @@
   `optic_primary, optic_offset, muzzle, underbarrel, side_left, side_right, stock`.
   Магазин — отдельно: `mag_if` (интерфейс горловины), у магазина `mag.if`; `internal_mag` — встроенный.
 - У обвеса — `fits`: список интерфейсов (`RAIL_TOP`, `RAIL_SIDE`, `RAIL_BOTTOM`, `SLIDE_RMR`,
-  `PISTOL_RAIL`, `DOVETAIL`, `OFFSET_45`, `THREAD_9/545/556/762/12`, `STOCK_AK/AR/SG`, `BIPOD_CLAMP`).
+  `PISTOL_RAIL`, `DOVETAIL`, `OFFSET_45`, калиберные `THREAD_*`, платформенные `STOCK_*`,
+  `BIPOD_CLAMP`). Интерфейсы магазинов разделены по платформе и калибру: физически похожие STANAG
+  5.56 и .300 BLK намеренно разные, чтобы игра не позволяла зарядить неподходящий патрон.
   Новое оружие с тем же интерфейсом сразу принимает весь подходящий обвес (arsenal_test CASE 12:
   прицел и ствол добавлены только данными).
 - Конфликты: `blocks` у обвеса (оптика 8× и 12× закрывает `optic_offset`) — `WeaponDb.attach_block`.
@@ -159,19 +196,21 @@
   `pick:kind=…;tags=…;tier=…;min_tier=…` — случайный предмет арсенала по виду, тегам и тиру
   (вес — по редкости, `Balance.LOOT_RARITY_W`). Опции: износ, доля патронов.
 - Торговец: T1 — сразу, T2 — доверие 2, T3 и редкое (глушители, бронебойные) — доверие 3, T4
-  («Периметр») не продаёт — только с тел и из сбросов. Список разбит на разделы.
+  не продаёт — только с тел и из сбросов. Список разбит на разделы. На панели Esc → «Админ» чит
+  «Любое оружие у Михалыча» добавляет все 23 ствола и снимает только их проверку доверия; цена и
+  свободное место по-прежнему проверяются.
 
 ## 12. Отладка
 
-Консоль разработчика (` в сборке из редактора), `ArsenalDev`: `give weapon AR_06`,
+Консоль разработчика (` в сборке из редактора), `ArsenalDev`: `give weapon AK12`,
 `give ammo 545_AP 120`, `give optic LPVO_01`, `equip primaryOptic LPVO_01`,
 `equip offsetOptic OFFSET_RED_DOT_01`, `equip sideLeft FLASHLIGHT_01`, `toggle sight|flashlight|laser`,
 `spawn loadout perimeter_marksman`, `damage plate front 50`, `set weapon durability 25`, а также
-`give preset:AR_06_PATROL`, `unmount <точка>`, `stats`, `list …`. Проверки: `tools/arsenal_test`
+`give preset:AK12_BASE`, `unmount <точка>`, `stats`, `list …`. Проверки: `tools/arsenal_test`
 (CASE 1–20 ТЗ), `tools/compile_check` (все скрипты собираются).
 
 ## 13. Что дальше (не сделано)
 
-- Модели оружия — 4 процедурные основы, масштабируются; своих моделей у 25 стволов нет.
+- Модели оружия — 4 процедурные основы, масштабируются; своих 3D-моделей у 23 стволов пока нет.
 - Физический адаптер углового прицела, подствольники, сменные цевья, магнифер, тепловизор, ИК-ЛЦУ.
 - Боковые плиты, разгрузки, рюкзаки с ёмкостью.
