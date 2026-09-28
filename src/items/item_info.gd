@@ -1,9 +1,9 @@
 class_name ItemInfo
 extends Control
 ## Описание предмета простыми словами — отдельным окошком (кнопка «i» на плашке, «Описание» в меню
-## правой кнопки). Текст: что это и зачем (desc из данных, у обвеса — attach.desc, иначе по типу),
-## плюс характеристики человеческим языком — калибр и к чему подходит, против какой брони
-## работает патрон, от чего защищает броня. Закрыть — кнопкой, кликом мимо или Esc.
+## правой кнопки). Текст разделён на смысл, технические характеристики и короткую фразу «В деле»;
+## числа берутся из живых данных, поэтому карточка не расходится с балансом. Закрыть — кнопкой,
+## кликом мимо или Esc.
 
 ## Сколько окон описания открыто и когда закрылось последнее (кадр): окна-хозяева не закрываются
 ## тем же Esc, что закрыл описание.
@@ -159,25 +159,36 @@ static func describe(id: String) -> String:
 	var it := ItemDb.item(id)
 	var out: Array[String] = []
 	var desc := String(it.get("desc", ""))
+	var flavor := _flavor_text(it)
 	var w := WeaponDb.weapon(id)
 	if not w.is_empty():
 		out.append(desc if desc != "" else "Оружие.")
-		out.append(_weapon_text(id, w))
+		out.append("[b]Технические характеристики[/b]\n" + _weapon_text(id, w))
+		if flavor != "":
+			out.append(flavor)
 		return "\n\n".join(out)
 	var a := WeaponDb.ammo(id)
 	if not a.is_empty():
-		out.append(_ammo_text(id, a))
+		if desc != "":
+			out.append(desc)
+		out.append("[b]Технические характеристики[/b]\n" + _ammo_text(id, a))
+		if flavor != "":
+			out.append(flavor)
 		return "\n\n".join(out)
 	var mg := WeaponDb.magazine(id)
 	if not mg.is_empty():
-		out.append(_mag_text(id, mg))
+		out.append("[b]Технические характеристики[/b]\n" + _mag_text(id, mg))
+		if flavor != "":
+			out.append(flavor)
 		return "\n\n".join(out)
 	var at := WeaponDb.attachment(id)
 	if not at.is_empty():
 		var t := String(at.get("desc", ""))
 		var blurb := String(TYPE_TEXT.get(String(at.get("type", "")), ""))
 		out.append(blurb if t == "" else (blurb + " " + t if blurb != "" else t))
-		out.append(_mod_text(id))
+		out.append("[b]Технические характеристики[/b]\n" + _mod_text(id, at))
+		if flavor != "":
+			out.append(flavor)
 		return "\n\n".join(out)
 	var pl := WeaponDb.plate(id)
 	if not pl.is_empty():
@@ -213,6 +224,13 @@ static func describe(id: String) -> String:
 	return "\n\n".join(out)
 
 
+static func _flavor_text(item: Dictionary) -> String:
+	var phrase := String(item.get("flavor", "")).strip_edges()
+	if phrase == "":
+		return ""
+	return "[color=#d7bd91][i]В деле: %s[/i][/color]" % phrase
+
+
 static func _weapon_text(id: String, w: Dictionary) -> String:
 	var spec := WeaponStats.compute(ItemDb.make(id, 1))
 	var lines: Array[String] = []
@@ -229,6 +247,7 @@ static func _weapon_text(id: String, w: Dictionary) -> String:
 	var st: Dictionary = w.get("stats", {})
 	lines.append("Огонь: %s, %d выстрелов в минуту. Бьёт прицельно примерно до %d м." % ["очередями" if bool(st.get("auto", false)) else "одиночными", int(st.get("rpm", 0)), int(spec.get("range_m", st.get("range", 0)))])
 	var ergo := float(spec.get("ergo", 50))
+	lines.append("Перезарядка %.1f с. Надёжность %.1f%%. Эргономика %d/100." % [float(spec.get("reload", st.get("reload", 0.0))), float(spec.get("reliability", st.get("reliability", 1.0))) * 100.0, int(ergo)])
 	lines.append("В руке: %s. Выстрел слышно на %d м." % ["лёгкое и быстрое" if ergo >= 70 else ("среднее по удобству" if ergo >= 45 else "тяжёлое, в прицел вскидывается медленно"), int(spec.get("noise_m", 0))])
 	var mounts: Dictionary = w.get("mounts", {})
 	if not mounts.is_empty():
@@ -258,6 +277,7 @@ static func _ammo_text(id: String, a: Dictionary) -> String:
 		kind = "Дешёвые патроны: слабо против брони."
 	lines.append(kind)
 	lines.append("Калибр [b]%s[/b]. Урон %d%s, пробитие %d." % [WeaponDb.caliber_name(String(a.caliber)), int(a.damage), (" × %d" % int(a.pellets)) if int(a.get("pellets", 1)) > 1 else "", int(a.pen)])
+	lines.append("Скорость %d м/с. Урон броне %d. Множитель дальности %.2f, точности %.2f." % [int(a.get("velocity", 0)), int(a.get("armor_dmg", 0)), float(a.get("range_k", 1.0)), float(a.get("accuracy", 1.0))])
 	var guns: Array[String] = []
 	for wid in WeaponDb.ids("weapons"):
 		if WeaponDb.ammo_fits(String(wid), id):
@@ -317,6 +337,16 @@ static func _protects(cls: int) -> String:
 static func _mag_text(id: String, mg: Dictionary) -> String:
 	var lines: Array[String] = []
 	lines.append("Магазин на [b]%d[/b] патронов калибра %s. Продаётся пустым." % [int(mg.capacity), WeaponDb.caliber_name(WeaponDb.mag_caliber(id))])
+	var reload_delta := int(round((float(mg.get("reload_k", 1.0)) - 1.0) * 100.0))
+	var reliability_delta := int(round((float(mg.get("reliability", 1.0)) - 1.0) * 100.0))
+	var effects: Array[String] = []
+	if reload_delta != 0:
+		effects.append("перезарядка %s" % _signed_percent(reload_delta))
+	if int(mg.get("ergo", 0)) != 0:
+		effects.append("эргономика %+d" % int(mg.ergo))
+	if reliability_delta != 0:
+		effects.append("надёжность %s" % _signed_percent(reliability_delta))
+	lines.append("Влияние: %s." % ", ".join(effects) if not effects.is_empty() else "Штатная геометрия: без штрафов к перезарядке, эргономике и надёжности.")
 	var guns: Array[String] = []
 	for wid in WeaponDb.ids("weapons"):
 		if WeaponDb.mag_fits(String(wid), id):
@@ -328,12 +358,54 @@ static func _mag_text(id: String, mg: Dictionary) -> String:
 	return "\n".join(lines)
 
 
-static func _mod_text(id: String) -> String:
+static func _mod_text(id: String, attachment: Dictionary) -> String:
+	var lines: Array[String] = []
+	var effects := _mod_effects(attachment)
+	lines.append("Эффекты: %s." % ", ".join(effects) if not effects.is_empty() else "Числовых модификаторов нет.")
 	var fits: Array[String] = []
 	for wid in WeaponDb.ids("weapons"):
 		if not WeaponDb.mounts_for({"id": String(wid), "n": 1, "mods": {}}, id).is_empty():
 			fits.append(ItemDb.item_name(String(wid)))
 	var t := "Ставится на верстаке в убежище или у Михалыча («Обвес оружия»), в рейде — перетащить на оружие."
 	if fits.is_empty():
-		return t
-	return "Подходит к: %s.\n%s" % [", ".join(fits), t]
+		lines.append(t)
+	else:
+		lines.append("Подходит к: %s." % ", ".join(fits))
+		lines.append(t)
+	return "\n".join(lines)
+
+
+static func _mod_effects(attachment: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	var fx: Dictionary = attachment.get("fx", {})
+	var multipliers := {
+		"kick": "вертикальная отдача", "kick_h": "горизонтальная отдача", "shake": "раскачка",
+		"spread": "разброс", "ads_spread": "разброс в прицеле", "noise": "дальность звука",
+		"damage": "урон", "flash": "вспышка", "aim": "скорость прицеливания",
+		"braced_kick": "отдача с упора", "braced_spread": "разброс с упора",
+	}
+	for key: String in multipliers:
+		if fx.has(key):
+			var delta := int(round((float(fx[key]) - 1.0) * 100.0))
+			out.append("%s %s" % [String(multipliers[key]), _signed_percent(delta)])
+	if fx.has("ergo"):
+		out.append("эргономика %+d" % int(fx.ergo))
+	if fx.has("db"):
+		out.append("громкость %+d дБ" % int(fx.db))
+	var zoom := float(attachment.get("zoom", 0.0))
+	if zoom > 0.0:
+		out.append("увеличение %.0f×" % zoom)
+	var aim_k := float(attachment.get("aim_k", 1.0))
+	if not is_equal_approx(aim_k, 1.0):
+		out.append("скорость прицеливания %s" % _signed_percent(int(round((aim_k - 1.0) * 100.0))))
+	var light: Dictionary = attachment.get("light", {})
+	if not light.is_empty():
+		out.append("дальность света %d м" % int(light.get("range", 0)))
+	var laser: Dictionary = attachment.get("laser", {})
+	if not laser.is_empty():
+		out.append("разброс от бедра %s" % _signed_percent(int(round((float(laser.get("hip_spread", 1.0)) - 1.0) * 100.0))))
+	return out
+
+
+static func _signed_percent(value: int) -> String:
+	return "%+d%%" % value if value != 0 else "без изменения"

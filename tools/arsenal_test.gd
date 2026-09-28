@@ -230,6 +230,25 @@ func _ready() -> void:
 
 ## Кейсы без сцены: только коллиматор, новый обвес из данных, пробитие, плиты спереди / сзади.
 func _data_cases(rng: RandomNumberGenerator) -> void:
+	var missing_flavor: Array[String] = []
+	var catalog_count := 0
+	for section in ["weapons", "ammo", "magazines", "attachments"]:
+		for raw_id in WeaponDb.ids(section):
+			var id := String(raw_id)
+			catalog_count += 1
+			if String(ItemDb.item(id).get("flavor", "")).strip_edges() == "":
+				missing_flavor.append(id)
+	_check("каталог: у всех 137 элементов есть отдельная игровая фраза", catalog_count == 137 and missing_flavor.is_empty(),
+		"элементов %d, без фразы: %s" % [catalog_count, ", ".join(missing_flavor)])
+	var weapon_info := ItemInfo.describe("wpn_ar_01")
+	var ammo_info := ItemInfo.describe("ammo_545_std")
+	var mag_info := ItemInfo.describe("mag_545_60")
+	var mod_info := ItemInfo.describe("optic_4x_01")
+	_check("карточки: характеристики и фраза видны у оружия, патрона, магазина и обвеса",
+		"Технические характеристики" in weapon_info and "Надёжность" in weapon_info and "В деле:" in weapon_info
+		and "Скорость" in ammo_info and "В деле:" in ammo_info
+		and "Влияние:" in mag_info and "В деле:" in mag_info
+		and "Эффекты:" in mod_info and "В деле:" in mod_info, "")
 	# CASE 1: только коллиматор — один прицел, без оптики, в прицеле точнее, чем без него
 	var rd := WeaponDb.make_weapon("AR_03_RD", rng, [100, 100])
 	var st := WeaponStats.compute(rd)
