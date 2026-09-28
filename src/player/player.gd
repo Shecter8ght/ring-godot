@@ -694,6 +694,8 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 	var kv := float(spec.kick) * k * _rng.randf_range(0.85, 1.15)
 	var rise := kv * (Balance.ADS_RECOIL_RISE_SCALE if in_ads else 1.0)
 	var kh := float(spec.get("kick_h", 0.0)) * k * (_rng.randf_range(-1.0, 1.0) + float(spec.get("kick_bias", 0.0)))
+	if in_ads:
+		kh *= Balance.ADS_RECOIL_HORIZONTAL_SCALE
 	var back := float(spec.get("recover", 0.5))
 	if ads and rig:
 		rig.add_recoil(rise * (1.0 - back), kh * (1.0 - back))
