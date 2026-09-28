@@ -5,7 +5,7 @@ extends RefCounted
 ## повредить плиту, выставить износ, показать характеристики. Только хост или соло: состояние
 ## оружия и снаряжения ведёт хост (Gear._bump — владелец перечитает).
 
-const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|headsets|loadouts. Как в ТЗ: give weapon AR_06 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
+const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|headsets|loadouts. Пример: give weapon AK12 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
 ## Точки в записи ТЗ (camelCase) → точки арсенала.
 const MOUNT_ALIAS := {"primaryOptic": "optic_primary", "offsetOptic": "optic_offset", "sideLeft": "side_left", "sideRight": "side_right",
 	"underbarrel": "underbarrel", "muzzle": "muzzle", "stock": "stock"}
@@ -77,8 +77,8 @@ static func _normalize(a: PackedStringArray) -> PackedStringArray:
 	return a
 
 
-## Код из ТЗ (AR_06, 545_AP, LPVO_01, OFFSET_RED_DOT_01, CAR_03, PLATE_06…) или id → id предмета;
-## сборка (AR_06_PATROL) → "preset:…". Не нашлось — как есть.
+## Код из данных (AK12, 545_AP, LPVO_01, OFFSET_RED_DOT_01, CAR_03, PLATE_06…) или id → id предмета;
+## сборка (AK12_BASE) → "preset:…". Не нашлось — как есть.
 static func resolve(code: String) -> String:
 	if code.begins_with("preset:") or ItemDb.exists(code):
 		return code

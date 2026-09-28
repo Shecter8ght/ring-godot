@@ -20,7 +20,7 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	_data_cases(rng)
-	# снаряжение: автомат «Периметра» (LPVO + угловой коллиматор + ЛЦУ справа) + фонарь слева,
+	# снаряжение: AK-12 (LPVO + угловой коллиматор + ЛЦУ справа) + фонарь слева,
 	# плитоносец с плитами спереди и сзади
 	var w := WeaponDb.make_weapon("AR_06_MARKSMAN", rng, [100, 100])
 	w = Gear.fit(w, ItemDb.make("tac_flashlight_01", 1), "side_left")[0]
@@ -43,7 +43,7 @@ func _ready() -> void:
 	pl.global_position = SectorBuilder.polar(-100.0, 72.0) + Vector3(0, 0.1, 0)
 	await _frames(5)
 	await _tap("weapon_2")
-	_check("в руках автомат «Периметра» из снаряжения", pl.weapon_id == "wpn_ar_06" and pl.weapon_slot == "primary", pl.weapon_id)
+	_check("в руках AK-12 из снаряжения", pl.weapon_id == "wpn_ar_01" and pl.weapon_slot == "primary", pl.weapon_id)
 
 	# CASE 4: фонарь слева и ЛЦУ справа — оба на модели одновременно
 	var lights := pl.find_children("Flashlight_side_left", "SpotLight3D", true, false)
@@ -111,7 +111,7 @@ func _ready() -> void:
 		str((pl.inventory.equipment.armor.plates as Dictionary).keys()))
 
 	# консоль разработчика — команды буквально как в ТЗ
-	var codes := {"AR_06": "wpn_ar_06", "545_AP": "ammo_545_ap", "LPVO_01": "optic_lpvo_01", "OFFSET_RED_DOT_01": "optic_offset_rd_01",
+	var codes := {"AK12": "wpn_ar_01", "545_AP": "ammo_545_ap", "LPVO_01": "optic_lpvo_01", "OFFSET_RED_DOT_01": "optic_offset_rd_01",
 		"FLASHLIGHT_01": "tac_flashlight_01", "LASER_01": "tac_laser_01", "AR_06_PATROL": "preset:AR_06_PATROL"}
 	var bad := []
 	for c in codes:

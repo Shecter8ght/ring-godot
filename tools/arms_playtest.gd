@@ -78,7 +78,7 @@ func _cases() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var quick: bool = OS.get_environment("ARMS_QUICK") == "1"
 	for id: String in data.weapons:
-		if quick and not id in ["wpn_hg_01", "wpn_ar_06", "wpn_smg_01", "wpn_sg_01", "wpn_sr_01"]:
+		if quick and not id in ["wpn_hg_01", "wpn_ar_01", "wpn_smg_01", "wpn_sg_01", "wpn_sr_01"]:
 			continue
 		result.append({"id": id, "label": "base", "mods": {}})
 		var entry: Dictionary = {"id": id, "mods": {}}

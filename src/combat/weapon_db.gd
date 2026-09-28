@@ -19,8 +19,8 @@ const WEAPON_SOUND_SLOTS_PATH := "res://data/weapon_sound_slots.json"
 const MOUNTS := ["optic_primary", "optic_offset", "muzzle", "underbarrel", "side_left", "side_right", "stock"]
 const MOUNT_NAMES := {"optic_primary": "Прицел основной", "optic_offset": "Прицел угловой", "muzzle": "Дульное", "underbarrel": "Под цевьё",
 	"side_left": "Сбоку слева", "side_right": "Сбоку справа", "stock": "Приклад"}
-const CLASS_NAMES := {"PISTOL": "Пистолет", "SMG": "Пистолет-пулемёт", "SHOTGUN": "Ружьё", "ASSAULT_RIFLE": "Автомат", "CARBINE": "Карабин",
-	"DMR": "Марксманская", "SNIPER": "Снайперская", "SPECIAL": "Специальное", "LMG": "Пулемёт", "PDW": "PDW"}
+const CLASS_NAMES := {"PISTOL": "Пистолет", "SMG": "Пистолет-пулемёт", "PDW": "PDW", "SHOTGUN": "Ружьё", "ASSAULT_RIFLE": "Автомат", "CARBINE": "Карабин",
+	"BATTLE_RIFLE": "Боевая винтовка", "DMR": "Марксманская", "SNIPER": "Снайперская", "SPECIAL": "Специальное", "LMG": "Пулемёт"}
 
 static var _w: Dictionary = {}
 static var _a: Dictionary = {}
@@ -414,11 +414,14 @@ static func mag_caliber(mag_id: String) -> String:
 	return ""
 
 
-## Штатный магазин оружия (первый в данных с его интерфейсом); "" — магазин встроенный.
+## Штатный магазин оружия; явный default_mag нужен платформам с общим интерфейсом и разной базовой ёмкостью.
 static func default_mag(weapon_id: String) -> String:
 	var w := weapon(weapon_id)
 	if not w.has("mag_if"):
 		return ""
+	var preferred := canonical(String(w.get("default_mag", "")))
+	if preferred != "" and mag_fits(weapon_id, preferred):
+		return preferred
 	for mid in ids("magazines"):
 		if String(magazine(String(mid)).get("if", "")) == String(w.mag_if):
 			return String(mid)

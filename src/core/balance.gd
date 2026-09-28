@@ -76,7 +76,7 @@ const STASH_CELLS := 300
 const STASH_GRID := Vector2i(10, 30)
 ## Новый профиль: деньги и что лежит в тайнике ([id, штук]).
 const START_MONEY := 60000
-const START_STASH := [["wpn_hg_03", 1], ["wpn_ar_03", 1], ["ammo_919_fmj", 100], ["ammo_545_std", 120],
+const START_STASH := [["wpn_hg_02", 1], ["wpn_ar_01", 1], ["ammo_919_fmj", 100], ["ammo_545_std", 120],
 	["mag_545_30", 1], ["mag_919_17", 1], ["bandage", 4], ["painkillers", 2], ["vest_police", 1], ["helmet_military_old", 1], ["grenade", 2]]
 ## Выручка Михалыча: остался без огнестрела и без денег на самый дешёвый ствол — бесплатный
 ## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
@@ -410,7 +410,7 @@ const RAID_STORY := {
 	"empty_handed": 5000, "long_raid_sec": 1500.0, "camped_exit_sec": 90.0, "fast_death_sec": 90.0, "near_exit_m": 25.0,
 	"streak_raids": 3, "events_min": 3, "events_max": 6, "history_n": 10, "recent_lines": 80,
 	"pick_jitter": 0.25, "interesting": 0.6, "transition_chance": 0.6,
-	"class_rank": {"PISTOL": 1, "SMG": 2, "SHOTGUN": 2, "CARBINE": 3, "ASSAULT_RIFLE": 3, "DMR": 4, "SNIPER": 4, "SPECIAL": 4},
+	"class_rank": {"PISTOL": 1, "SMG": 2, "PDW": 2, "SHOTGUN": 2, "CARBINE": 3, "ASSAULT_RIFLE": 3, "BATTLE_RIFLE": 4, "DMR": 4, "SNIPER": 4, "SPECIAL": 4, "LMG": 4},
 }
 ## Буфер посередине окна лута (рейд), клеток: ширина × высота.
 const BUFFER_GRID := Vector2i(3, 3)
@@ -530,12 +530,15 @@ const AI_DAMAGE := 9.0
 const AI_CLASS := {
 	"PISTOL": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.42, "spread": 5.5, "range": 28.0},
 	"SMG": {"burst": 4, "burst_pause": 0.6, "interval_min": 0.08, "spread": 5.0, "range": 32.0},
+	"PDW": {"burst": 4, "burst_pause": 0.6, "interval_min": 0.07, "spread": 4.8, "range": 38.0},
 	"SHOTGUN": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.6, "spread": 4.0, "range": 18.0},
 	"ASSAULT_RIFLE": {"burst": 3, "burst_pause": 0.75, "interval_min": 0.11, "spread": 4.5, "range": 45.0},
 	"CARBINE": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.1, "spread": 4.2, "range": 45.0},
+	"BATTLE_RIFLE": {"burst": 2, "burst_pause": 0.85, "interval_min": 0.12, "spread": 4.0, "range": 55.0},
 	"DMR": {"burst": 1, "burst_pause": 0.5, "interval_min": 0.9, "spread": 1.4, "range": 70.0},
 	"SNIPER": {"burst": 1, "burst_pause": 0.0, "interval_min": 1.7, "spread": 0.9, "range": 80.0},
 	"SPECIAL": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.11, "spread": 4.5, "range": 40.0},
+	"LMG": {"burst": 6, "burst_pause": 1.0, "interval_min": 0.075, "spread": 5.0, "range": 55.0},
 }
 ## Урон пуль ИИ по игроку — доля урона патрона (ИИ стреляет часто и много).
 const AI_DAMAGE_K := 0.36

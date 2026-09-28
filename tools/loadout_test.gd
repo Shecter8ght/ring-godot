@@ -99,7 +99,7 @@ func _ready() -> void:
 	pl.health.hp = 100.0
 	await _wait(0.5)
 	_check("в рейде — снаряжение, профиль пуст (на кону)", pl.loadout_mode and pl.inventory.loadout_ready and Profile.equipment.is_empty(), str(pl.inventory.equipment.keys()))
-	_check("в руках автомат с обвесом, магазин на 45 снаряжён из рюкзака", pl.weapon_id == "wpn_ar_03" and pl.ammo == 45 and pl.weapon_mods.size() == 2, "%s %d %s" % [pl.weapon_id, pl.ammo, pl.weapon_mods])
+	_check("в руках AK-12 с обвесом, магазин на 45 снаряжён из рюкзака", pl.weapon_id == "wpn_ar_01" and pl.ammo == 45 and pl.weapon_mods.size() == 2, "%s %d %s" % [pl.weapon_id, pl.ammo, pl.weapon_mods])
 	_check("патроны в рюкзаке ушли в магазин", pl.inventory.count("ammo_545_std") == 75, "%d" % pl.inventory.count("ammo_545_std"))
 	# расстрелял до 5 — перезарядка: снаряжённых магазинов в рюкзаке нет — досыпка россыпью
 	pl._ws[pl.weapon_slot].rounds = 5
@@ -117,11 +117,12 @@ func _ready() -> void:
 			fi = i
 	Raid.current.request_install_mod("primary", "backpack", fi)
 	await _frames(3)
-	_check("в рейде: фонарь поставлен на автомат (сбоку справа), модель в руках с ним", WeaponDb.mod_id(pl.inventory.equipment.primary.mods.get("side_right", "")) == "tac_flashlight_01" and pl.weapon_mods.has("side_right") and not pl.inventory.has("tac_flashlight_01"),
+	var light_mount := "side_left" if WeaponDb.mod_id(pl.inventory.equipment.primary.mods.get("side_left", "")) == "tac_flashlight_01" else "side_right"
+	_check("в рейде: фонарь поставлен на боковую планку, модель в руках с ним", WeaponDb.mod_id(pl.inventory.equipment.primary.mods.get(light_mount, "")) == "tac_flashlight_01" and pl.weapon_mods.has(light_mount) and not pl.inventory.has("tac_flashlight_01"),
 		str(pl.weapon_mods))
-	Raid.current.request_remove_mod("primary", "side_right")
+	Raid.current.request_remove_mod("primary", light_mount)
 	await _frames(3)
-	_check("в рейде: фонарь снят в рюкзак", not pl.inventory.equipment.primary.mods.has("side_right") and pl.inventory.has("tac_flashlight_01"), str(pl.inventory.equipment.primary.mods))
+	_check("в рейде: фонарь снят в рюкзак", not pl.inventory.equipment.primary.mods.has(light_mount) and pl.inventory.has("tac_flashlight_01"), str(pl.inventory.equipment.primary.mods))
 	pl.inventory.remove("tac_flashlight_01", 1)
 	# броня: слабые пули в грудь спереди — жилет держит (травма меньше), изнашивается
 	var dur0 := float(pl.inventory.equipment.armor.dur)
@@ -134,7 +135,7 @@ func _ready() -> void:
 	await _frames(3)
 	Input.action_release("weapon_1")
 	await _frames(2)
-	_check("1 — пистолет (магазин снаряжён)", pl.weapon_id == "wpn_hg_03" and pl.ammo == 17, "%s %d" % [pl.weapon_id, pl.ammo])
+	_check("1 — Glock 17 (магазин снаряжён)", pl.weapon_id == "wpn_hg_02" and pl.ammo == 17, "%s %d" % [pl.weapon_id, pl.ammo])
 	# эвакуация через остановку
 	for m in get_tree().get_nodes_in_group("marauders"):
 		(m as Node).queue_free()
@@ -175,7 +176,7 @@ func _ready() -> void:
 	Profile.stash = Profile.stash.filter(func(e: Dictionary) -> bool: return String(ItemDb.equip(String(e.id)).get("weapon", "")) == "")
 	Profile.money = 1000
 	_check("без ствола и денег — выручка", Profile.needs_rescue() and Profile.take_rescue() and _idx("wpn_hg_01") >= 0 and not Profile.needs_rescue(),
-		"пистолет в тайнике: %s" % (_idx("w_pistol") >= 0))
+		"ПМ в тайнике: %s" % (_idx("wpn_hg_01") >= 0))
 	print("loadout_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 

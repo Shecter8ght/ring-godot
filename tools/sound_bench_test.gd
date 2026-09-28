@@ -125,18 +125,19 @@ func _run() -> void:
 		WeaponDb.weapon_sound_kind("wpn_ar_03", "shot") == "wpn_ar_03_shot"
 		and WeaponDb.weapon_sound_kind("wpn_ar_04", "shot") == "wpn_ar_04_shot"
 		and String((Audio.get("_catalog_fallbacks") as Dictionary).get("wpn_ar_03_shot", "")) == "shot_rifle", "")
-	var break_slots: Dictionary = WeaponDb.weapon_sound_map("wpn_sg_01")
-	var pump_slots: Dictionary = WeaponDb.weapon_sound_map("wpn_sg_02")
+	var tube_slots: Dictionary = WeaponDb.weapon_sound_map("wpn_sg_01")
+	var box_slots: Dictionary = WeaponDb.weapon_sound_map("wpn_sg_02")
+	var pump_slots: Dictionary = WeaponDb.weapon_sound_map("wpn_sg_03")
 	_check("оружие: список действий зависит от конструкции",
-		break_slots.has("breech_open") and break_slots.has("breech_close") and break_slots.has("round_insert")
-		and not break_slots.has("mag_out") and not break_slots.has("charge")
+		tube_slots.has("round_insert") and not tube_slots.has("mag_out") and not tube_slots.has("cycle")
+		and box_slots.has("mag_out") and not box_slots.has("round_insert")
 		and pump_slots.has("round_insert") and pump_slots.has("cycle") and not pump_slots.has("mag_out"),
-		"двустволка %s; помпа %s" % [str(break_slots.keys()), str(pump_slots.keys())])
+		"Benelli %s; Saiga %s; Mossberg %s" % [str(tube_slots.keys()), str(box_slots.keys()), str(pump_slots.keys())])
 	var pistol_sounds: Array[String] = []
-	for id in ["wpn_hg_01", "wpn_hg_02", "wpn_hg_03", "wpn_hg_04"]:
+	for id in ["wpn_hg_01", "wpn_hg_02", "wpn_hg_03"]:
 		pistol_sounds.append(String(weapons.weapons[id].weapon.sound))
-	_check("четыре пистолета назначены четырём отдельным звуковым наборам",
-		pistol_sounds == ["shot_hg_01", "shot_hg_02", "shot_hg_03", "shot_hg_04"], str(pistol_sounds))
+	_check("три пистолета назначены трём отдельным звуковым наборам",
+		pistol_sounds == ["shot_hg_01", "shot_hg_02", "shot_hg_03"], str(pistol_sounds))
 	var pistol_model: Dictionary = bench.call("status_of", "shot_hg_01")
 	var pistol_streams: Array[AudioStream] = bench.call("streams_of", "shot_hg_01")
 	_check("пока своих записей нет, модель пистолета использует общий запасной набор",
