@@ -659,9 +659,18 @@ func _physics_process(delta: float) -> void:
 		var wish := _wish_direction()
 		var speed := _stance_speed()
 		var target := wish * speed
-		var rate := Balance.PLAYER_ACCEL if wish.length() > 0.0 else Balance.PLAYER_DECEL
-		velocity.x = move_toward(velocity.x, target.x, rate * delta)
-		velocity.z = move_toward(velocity.z, target.z, rate * delta)
+		var horizontal := Vector2(velocity.x, velocity.z)
+		var target_horizontal := Vector2(target.x, target.z)
+		# Тормозим отдельным темпом не только без ввода, но и при сбросе спринта или развороте.
+		# Векторное приближение даёт одинаковый разгон по прямой и диагонали.
+		var has_input := target_horizontal.length_squared() > 0.0001
+		var reversing := has_input and horizontal.length_squared() > 0.0001 \
+			and horizontal.dot(target_horizontal) < 0.0
+		var slowing := has_input and horizontal.length() > target_horizontal.length() + 0.01
+		var rate := Balance.PLAYER_DECEL if not has_input or reversing or slowing else Balance.PLAYER_ACCEL
+		horizontal = horizontal.move_toward(target_horizontal, rate * delta)
+		velocity.x = horizontal.x
+		velocity.z = horizontal.y
 	if not is_on_floor():
 		velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
 	elif not (_dive_t >= 0.0 and _dive_t < 0.1):

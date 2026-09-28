@@ -580,10 +580,19 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var cant := Basis(Vector3(0, 0, 1), -sroll)
 	var ads_pos := -(Basis(Vector3.UP, PI) * cant * Vector3(sx, sh, 0.0)) + Vector3(0.0, 0.0, -az)
 	var hip_pos := Balance.FPS_HIP_POSE
-	# на ходу у бедра оружие покачивается
-	var moving := Vector2(pl.velocity.x, pl.velocity.z).length() > 0.5
-	_bob_t += delta * (8.0 if moving else 1.5)
-	var bob := Vector3(sin(_bob_t * 0.5) * 0.006, absf(sin(_bob_t)) * (0.01 if moving else 0.002), 0.0) * (1.0 - k)
+	# На ходу у бедра оружие покачивается. Частота и амплитуда следуют реальной скорости,
+	# поэтому при разгоне и инерционной остановке движение модели не включается рывком.
+	var planar_speed := Vector2(pl.velocity.x, pl.velocity.z).length()
+	var walk_k := clampf(planar_speed / Balance.PLAYER_WALK_SPEED, 0.0, 1.0)
+	var sprint_k := clampf((planar_speed - Balance.PLAYER_WALK_SPEED) \
+		/ (Balance.PLAYER_SPRINT_SPEED - Balance.PLAYER_WALK_SPEED), 0.0, 1.0)
+	var bob_rate := lerpf(float(Balance.WEAPON_BOB.idle_rate), float(Balance.WEAPON_BOB.walk_rate), walk_k)
+	bob_rate = lerpf(bob_rate, float(Balance.WEAPON_BOB.sprint_rate), sprint_k)
+	_bob_t += delta * bob_rate
+	var vertical_bob := lerpf(float(Balance.WEAPON_BOB.idle_vertical),
+		float(Balance.WEAPON_BOB.walk_vertical), walk_k)
+	var bob := Vector3(sin(_bob_t * 0.5) * float(Balance.WEAPON_BOB.horizontal),
+		absf(sin(_bob_t)) * vertical_bob, 0.0) * (1.0 - k)
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
 	# толчок в плечо: модель откатывается назад, дуло подскакивает, чуть заваливается; пружиной обратно
 	var kv := pl.kick_vis
