@@ -491,7 +491,8 @@ func _split(name: String, idx: int) -> void:
 # ---------------------------------------------------------------- торговец
 
 func _build_trader() -> void:
-	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d (уровень %d)" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust, Profile.trust_level()]
+	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d (уровень %d)%s" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust, Profile.trust_level(),
+		"   ·   АДМИН: всё оружие" if Settings.all_weapons else ""]
 	# вкладки слева: купить, обвес оружия, продать, задания (разговор — отметка)
 	var tabs := VBoxContainer.new()
 	tabs.custom_minimum_size.x = 170
@@ -558,7 +559,7 @@ func _trader_buy() -> void:
 		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55)))
 		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
 	# разделы: всё, оружие, патроны, магазины, обвес… — только те, где что-то есть
-	var stock: Array = _trader.get("stock", [])
+	var stock := _trader_stock()
 	var cats := HFlowContainer.new()
 	cats.add_theme_constant_override("h_separation", 6)
 	cats.add_theme_constant_override("v_separation", 6)
@@ -602,7 +603,7 @@ func _trader_buy() -> void:
 		# сколько выбрано — счётчиком между «−» и «+», цена — за всё выбранное
 		var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(price), ItemCard.W, true)
 		var tl := int(need_trust.get(sid, 1))
-		if Profile.trust_level() < tl and not sid in Profile.unlocked_stock:
+		if _trust_blocked(sid, tl):
 			# сильное Михалыч продаёт только тем, кому доверяет
 			card.controls.add_child(_text("доверие %d" % tl, Color(0.8, 0.5, 0.4)))
 			card.modulate = Color(1, 1, 1, 0.6)
@@ -643,6 +644,22 @@ func _cat_of(id: String) -> String:
 		if cat in (t[2] as Array):
 			return String(t[0])
 	return "misc"
+
+
+## Админ видит все зарегистрированные стволы; расходники и обвес остаются в обычном ассортименте.
+func _trader_stock() -> Array:
+	var stock: Array = (_trader.get("stock", []) as Array).duplicate()
+	if Settings.all_weapons:
+		for id in WeaponDb.ids("weapons"):
+			if not id in stock:
+				stock.append(id)
+	return stock
+
+
+func _trust_blocked(id: String, level: int) -> bool:
+	if Settings.all_weapons and WeaponDb.is_weapon(id):
+		return false
+	return Profile.trust_level() < level and not id in Profile.unlocked_stock
 
 
 ## Подходит ли предмет к выбранному стволу: 1 — да, -1 — нет (патроны, магазины, обвес), 0 — не про то.
@@ -806,7 +823,7 @@ func _trader_candidates(mount: String) -> Array:
 		var price := Profile.buy_price(sid)
 		var why := WeaponDb.attach_block(probe, mount, sid)
 		var tl := int(need_trust.get(sid, 1))
-		if Profile.trust_level() < tl and not sid in Profile.unlocked_stock:
+		if _trust_blocked(sid, tl):
 			why = "доверие %d" % tl
 		elif price > Profile.money and why == "":
 			why = "не хватает денег"

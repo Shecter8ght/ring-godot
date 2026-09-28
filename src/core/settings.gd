@@ -44,6 +44,8 @@ const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_d
 
 ## Чит «бессмертие» (меню Esc → Настройки, консоль: god) — раздел cheats; в коопе решает хост.
 var god: bool = false
+## Админский ассортимент Михалыча: показывает все стволы и не проверяет доверие для оружия.
+var all_weapons: bool = false
 ## Свои клавиши поверх project.godot: действие → {"t": "k", "c": физ. код} или {"t": "m", "b": кнопка
 ## мыши}. Раздел keys; меняются в меню Esc → «Управление».
 var keys: Dictionary = {}
@@ -85,6 +87,7 @@ func _load() -> void:
 	for b in BUSES:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
+	all_weapons = bool(cfg.get_value("cheats", "all_weapons", false))
 	if cfg.has_section("keys"):
 		for a in cfg.get_section_keys("keys"):
 			var d: Variant = cfg.get_value("keys", a)
@@ -107,6 +110,7 @@ func save() -> void:
 	for b in BUSES:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
+	cfg.set_value("cheats", "all_weapons", all_weapons)
 	if cfg.has_section("keys"):
 		cfg.erase_section("keys")
 	for a in keys:
@@ -257,6 +261,13 @@ func set_god(on: bool) -> void:
 		var pl := n as Player
 		if pl and pl.is_local():
 			pl.set_god(on)
+	changed.emit()
+
+
+## Полный оружейный ассортимент у Михалыча; деньги и место в инвентаре по-прежнему нужны.
+func set_all_weapons(on: bool) -> void:
+	all_weapons = on
+	save()
 	changed.emit()
 
 

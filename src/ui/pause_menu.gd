@@ -507,17 +507,29 @@ func _slider(lo: float, hi: float, step: float, value: float, fmt: String, cb: C
 	return row
 
 
-## Панель админа (только хост в сети): игроки из лобби, сумма, «Начислить».
+## Панель админа (только хост в сети): читы магазина и деньги игроков.
 func _build_admin(h: HBoxContainer) -> void:
 	_admin = VBoxContainer.new()
 	_admin.add_theme_constant_override("separation", 8)
 	_admin.visible = false
 	h.add_child(_admin)
 	var head := Label.new()
-	head.text = "Деньги игрокам"
+	head.text = "Админ"
 	head.add_theme_font_size_override("font_size", 22)
 	head.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
 	_admin.add_child(head)
+	var all_weapons := CheckButton.new()
+	all_weapons.text = "Любое оружие у Михалыча"
+	all_weapons.focus_mode = Control.FOCUS_NONE
+	all_weapons.button_pressed = Settings.all_weapons
+	all_weapons.tooltip_text = "В магазин добавляются все стволы, доверие для оружия не требуется. Деньги и свободное место всё ещё нужны."
+	all_weapons.toggled.connect(func(on: bool) -> void: Settings.set_all_weapons(on))
+	_admin.add_child(all_weapons)
+	var money_head := Label.new()
+	money_head.text = "Деньги игрокам"
+	money_head.add_theme_font_size_override("font_size", 18)
+	money_head.add_theme_color_override("font_color", Color(0.95, 0.82, 0.6))
+	_admin.add_child(money_head)
 	var hint := Label.new()
 	hint.text = "Сумма уходит на счёт игрока сразу (минус — списать)."
 	hint.add_theme_font_size_override("font_size", 14)
