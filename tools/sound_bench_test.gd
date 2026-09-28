@@ -2,7 +2,7 @@ extends Node
 ## Стенд звуков (tools/sound_bench): каталог покрывает все звуки, которые зовёт игра, и все её
 ## папки записей; новые файлы подхватываются, назначаются звуку, отмечаются, отбор сохраняется;
 ## перенос — следующий номер у префикса, строка в CREDITS, отказ без источника, без разрешённой
-## лицензии и с NC; импортированную запись можно обратимо исключить; модели пистолетов имеют свои
+## лицензии и с NC; многозвучный файл режется на варианты по паузам; импортированную запись можно обратимо исключить; модели пистолетов имеют свои
 ## наборы с общим запасным; звук играет (одиночный, «как в игре», луп, очередь с хвостом). Папки — свои в user://.
 
 const ALIASES := {"shot_ai": "shot_pistol", "step": "step_stone", "step_ai": "step_stone",
@@ -31,6 +31,24 @@ func _wav(path: String) -> void:
 	data.resize(n * 2)
 	for i in n:
 		data.encode_s16(i * 2, int(sin(float(i) * 0.3) * 8000.0 * (1.0 - float(i) / n)))
+	w.data = data
+	w.save_to_wav(path)
+
+
+func _multi_wav(path: String) -> void:
+	var w := AudioStreamWAV.new()
+	w.format = AudioStreamWAV.FORMAT_16_BITS
+	w.mix_rate = 22050
+	var n := 26460
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	for i in n:
+		var value: int = 0
+		for start in [2205, 9922, 17640]:
+			var local: int = i - int(start)
+			if local >= 0 and local < 1764:
+				value = int(sin(float(local) * 0.31) * 12000.0 * (1.0 - float(local) / 1764.0))
+		data.encode_s16(i * 2, value)
 	w.data = data
 	w.save_to_wav(path)
 
@@ -174,6 +192,7 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(try_dir.path_join("batch/from_oleg"))
 	for f in ["a.wav", "c.wav", "d.wav", "batch/from_oleg/e.wav", "batch/from_oleg/f.wav", "shot_rifle/b.wav"]:
 		_wav(try_dir.path_join(f))
+	_multi_wav(try_dir.path_join("multi.wav"))
 	bench.call("rescan", true)
 	var found: Array[String] = bench.get("files")
 	_check("новые файлы подхвачены: в корне, папке звука и произвольном дереве генератора",
@@ -199,6 +218,29 @@ func _run() -> void:
 	_check("целая папка вариантов назначается разом без разрушения дерева",
 		FileAccess.file_exists(try_dir.path_join("batch/from_oleg/e.wav")) and FileAccess.file_exists(try_dir.path_join("batch/from_oleg/f.wav"))
 		and String(bench.call("assigned_id", "batch/from_oleg/e.wav")) == "flyby", "")
+	bench.call("assign", "multi.wav", "flyby")
+	var multi_pick: Dictionary = bench.call("sel", "multi.wav")
+	multi_pick.source = "Stable Audio SFX"
+	multi_pick.license = "own_generated"
+	multi_pick.use = true
+	multi_pick.moved = "bullets/multi_existing.wav"
+	var analysis: Dictionary = bench.call("analyze_incoming", "multi.wav", -36.0, 180.0, 35.0, 60.0)
+	_check("нарезка: в одном WAV найдены три отдельных звука",
+		bool(analysis.get("ok", false)) and (analysis.get("segments", []) as Array).size() == 3, str(analysis))
+	var split_result: Dictionary = bench.call("split_incoming", "multi.wav", -36.0, 180.0, 35.0, 60.0, false, false)
+	var split_files: Array = split_result.get("rel_files", [])
+	var split_ok := split_files.size() == 3 and FileAccess.file_exists(try_dir.path_join(String(split_files[0])))
+	for split_rel in split_files:
+		var split_pick: Dictionary = bench.call("sel", String(split_rel))
+		split_ok = split_ok and String(bench.call("assigned_id", String(split_rel))) == "flyby" \
+			and String(split_pick.source) == "Stable Audio SFX" and String(split_pick.license) == "own_generated" \
+			and not bool(split_pick.use)
+	_check("нарезка: части созданы отдельно и наследуют назначение, источник и право", split_ok, str(split_result))
+	_check("нарезка: исходник сохранён, но снят с добавления",
+		FileAccess.file_exists(try_dir.path_join("multi.wav")) and not bool((bench.call("sel", "multi.wav") as Dictionary).use), "")
+	var split_active: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_root.path_join("sound_active.json")))
+	_check("нарезка: уже добавленный многозвучный исходник исключён из игры",
+		(split_active.get("disabled", []) as Array).has("bullets/multi_existing.wav"), str(split_active))
 	var sb: Dictionary = bench.call("sel", "shot_rifle/b.wav")
 	sb.use = true
 	sb.source = "freesound: тест, CC0"

@@ -42,6 +42,7 @@ var assets_dir: String = ProjectSettings.globalize_path("res://assets/audio")
 var credits_path: String = ProjectSettings.globalize_path("res://assets/CREDITS.md")
 var active_selection_path: String = ProjectSettings.globalize_path(ACTIVE_SELECTION)
 var catalog_doc_script: String = ProjectSettings.globalize_path("res://tools/sound_catalog_md.py")
+var split_tool_path: String = ProjectSettings.globalize_path("res://tools/split_audio.py")
 
 var sounds: Array[Dictionary] = []
 var by_id: Dictionary = {}
@@ -89,6 +90,18 @@ var _catalog_collapsed: Dictionary = {}
 var _delete_dialog: ConfirmationDialog
 var _delete_scope: String = ""
 var _delete_path: String = ""
+var _split_popup: PopupPanel
+var _split_path_label: Label
+var _split_result_label: Label
+var _split_threshold: SpinBox
+var _split_silence: SpinBox
+var _split_padding: SpinBox
+var _split_min_clip: SpinBox
+var _split_approve: CheckBox
+var _split_remove_source: CheckBox
+var _split_create_button: Button
+var _split_rel: String = ""
+var _split_analysis: Dictionary = {}
 
 
 func _ready() -> void:
@@ -107,6 +120,7 @@ func _ready() -> void:
 	rescan(true)
 	var capture_path := OS.get_environment("SOUND_BENCH_CAPTURE")
 	var capture_pick := OS.get_environment("SOUND_BENCH_SELECT")
+	var capture_split := OS.get_environment("SOUND_BENCH_SPLIT")
 	var capture_tab := int(OS.get_environment("SOUND_BENCH_TAB")) if OS.get_environment("SOUND_BENCH_TAB").is_valid_int() else -1
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("capture:"):
@@ -116,7 +130,7 @@ func _ready() -> void:
 		elif arg.begins_with("tab:") and arg.trim_prefix("tab:").is_valid_int():
 			capture_tab = int(arg.trim_prefix("tab:"))
 	if capture_path != "":
-		call_deferred("_capture_ui", capture_path, capture_pick, capture_tab)
+		call_deferred("_capture_ui", capture_path, capture_pick, capture_tab, capture_split)
 
 
 func _process(delta: float) -> void:
@@ -132,8 +146,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 ## Снимок для проверки вёрстки: `-- capture:res://_sound_try/bench.png select:thunder tab:1`
-## (или те же SOUND_BENCH_CAPTURE / SOUND_BENCH_SELECT / SOUND_BENCH_TAB). Обычный запуск ветку не затрагивает.
-func _capture_ui(path: String, pick: String, tab: int) -> void:
+## (или те же SOUND_BENCH_CAPTURE / SOUND_BENCH_SELECT / SOUND_BENCH_TAB; SOUND_BENCH_SPLIT открывает нарезку).
+## Обычный запуск ветку не затрагивает.
+func _capture_ui(path: String, pick: String, tab: int, split_rel: String = "") -> void:
 	if by_id.has(pick):
 		_current = pick
 		if _main_tabs != null and _main_tabs.get_tab_count() > 1:
@@ -143,7 +158,10 @@ func _capture_ui(path: String, pick: String, tab: int) -> void:
 		_refresh_new_list()
 	if tab >= 0 and tab < _tabs.get_tab_count():
 		_tabs.current_tab = tab
-	for _i in 3:
+	if split_rel != "" and files.has(split_rel):
+		_tabs.current_tab = 1
+		_open_split_popup(split_rel)
+	for _i in 5:
 		await get_tree().process_frame
 	var out := ProjectSettings.globalize_path(path) if path.begins_with("res://") or path.begins_with("user://") else path
 	var err := get_viewport().get_texture().get_image().save_png(out)
@@ -174,6 +192,7 @@ func _ensure_try_dir() -> void:
 	var readme := ("Кидай сюда звуки на пробу (ogg, wav, mp3) — стенд tools/sound_bench подхватит их сам.\n"
 		+ "Можно копировать целые папки любой вложенности: стенд всегда сохраняет и показывает исходное дерево.\n"
 		+ "Назначение игровому событию хранится в _selection.json и не перемещает исходный файл.\n"
+		+ "Если один файл содержит несколько вариантов, кнопка «Разрезать по паузам» создаст отдельные WAV.\n"
 		+ "Старые папки с id каталога (например shot_rifle/file.wav) по-прежнему распознаются. В git эта папка не попадает.\n")
 	var readme_path := try_dir.path_join("ПРОЧТИ.txt")
 	if not FileAccess.file_exists(readme_path) or FileAccess.get_file_as_string(readme_path) != readme:
@@ -748,6 +767,120 @@ func _regenerate_catalog_doc() -> void:
 	OS.execute("python", PackedStringArray([catalog_doc_script]), output, true)
 
 
+## Найти отдельные звуки во входящем файле. Параметры те же, что видит пользователь в окне нарезки.
+func analyze_incoming(rel: String, threshold_db: float = -36.0, min_silence_ms: float = 180.0,
+		padding_ms: float = 35.0, min_clip_ms: float = 60.0) -> Dictionary:
+	rel = rel.replace("\\", "/")
+	if not _safe_audio_rel(rel) or not FileAccess.file_exists(try_dir.path_join(rel)):
+		return {"ok": false, "error": "входящий файл не найден"}
+	return _run_split_tool("analyze", try_dir.path_join(rel), threshold_db, min_silence_ms,
+		padding_ms, min_clip_ms)
+
+
+## Создать рядом с исходником отдельные WAV. Назначение, источник и лицензия наследуются;
+## одобрение исходного многозвучного файла всегда снимается, чтобы он не попал в игру случайно.
+func split_incoming(rel: String, threshold_db: float = -36.0, min_silence_ms: float = 180.0,
+		padding_ms: float = 35.0, min_clip_ms: float = 60.0, approve_parts: bool = false,
+		remove_source: bool = false) -> Dictionary:
+	rel = rel.replace("\\", "/")
+	if not _safe_audio_rel(rel) or not FileAccess.file_exists(try_dir.path_join(rel)):
+		return {"ok": false, "error": "входящий файл не найден"}
+	var prefix := _next_split_prefix(rel)
+	var result := _run_split_tool("split", try_dir.path_join(rel), threshold_db, min_silence_ms,
+		padding_ms, min_clip_ms, prefix)
+	if not bool(result.get("ok", false)):
+		return result
+	var original: Dictionary = sel(rel).duplicate(true)
+	var id := assigned_id(rel)
+	var original_live := sel(rel)
+	original_live.use = false
+	var original_moved := String(original.get("moved", ""))
+	# Если длинный исходник уже успели добавить в assets/audio, одной снятой галочки входящего
+	# недостаточно: исключаем готовую копию из случайного выбора до решения пользователя.
+	if original_moved != "" and not remove_source:
+		disabled_assets[original_moved] = true
+		save_active_selection()
+		Audio.reload_samples()
+	var made: Array[String] = []
+	for raw_path in result.get("files", []):
+		var new_rel := _try_relative(String(raw_path))
+		if new_rel == "":
+			continue
+		var picked: Dictionary = original.duplicate(true)
+		picked.assigned = id
+		picked.use = approve_parts
+		picked.seen = false
+		picked.moved = ""
+		picked.origin = new_rel
+		picked.split_from = rel
+		selection[new_rel] = picked
+		made.append(new_rel)
+	result["rel_files"] = made
+	if remove_source:
+		delete_incoming_permanently(rel)
+	else:
+		save_selection()
+		rescan(true)
+	return result
+
+
+func _run_split_tool(mode: String, input: String, threshold_db: float, min_silence_ms: float,
+		padding_ms: float, min_clip_ms: float, output_prefix: String = "") -> Dictionary:
+	if not FileAccess.file_exists(split_tool_path):
+		return {"ok": false, "error": "не найден tools/split_audio.py"}
+	var args := PackedStringArray([
+		split_tool_path, mode, input,
+		"--threshold-db", str(threshold_db),
+		"--min-silence-ms", str(min_silence_ms),
+		"--padding-ms", str(padding_ms),
+		"--min-clip-ms", str(min_clip_ms),
+	])
+	if output_prefix != "":
+		args.append("--output-prefix")
+		args.append(output_prefix)
+	var output: Array = []
+	var exit_code := OS.execute("python", args, output, true)
+	var text := "\n".join(output)
+	var lines := text.split("\n", false)
+	for index in range(lines.size() - 1, -1, -1):
+		var parsed: Variant = JSON.parse_string(String(lines[index]).strip_edges())
+		if parsed is Dictionary:
+			var result := parsed as Dictionary
+			if exit_code != 0 and bool(result.get("ok", false)):
+				result.ok = false
+				result.error = "инструмент нарезки завершился с кодом %d" % exit_code
+			return result
+	return {"ok": false, "error": text.strip_edges() if text.strip_edges() != "" else "инструмент нарезки не вернул результат"}
+
+
+func _next_split_prefix(rel: String) -> String:
+	var input := try_dir.path_join(rel)
+	var dir := input.get_base_dir()
+	var base := rel.get_file().get_basename() + "_part"
+	var batch := 1
+	while true:
+		var suffix := "" if batch == 1 else "_%d" % batch
+		var prefix := dir.path_join(base + suffix)
+		var head := prefix.get_file() + "_"
+		var occupied := false
+		for file in DirAccess.get_files_at(dir):
+			if file.begins_with(head) and file.get_extension().to_lower() == "wav":
+				occupied = true
+				break
+		if not occupied:
+			return prefix
+		batch += 1
+	return dir.path_join(base)
+
+
+func _try_relative(path: String) -> String:
+	var root := try_dir.replace("\\", "/").trim_suffix("/")
+	var normalized := path.replace("\\", "/")
+	if not normalized.begins_with(root + "/"):
+		return ""
+	return normalized.trim_prefix(root + "/")
+
+
 # ---------------------------------------------------------------- звук
 
 func _make_buses() -> void:
@@ -925,6 +1058,76 @@ func _is_gun(id: String) -> bool:
 	return by_id.has(id) and String((by_id[id] as Dictionary).get("slot", "")) in ["shot", "shot_suppressed"]
 
 
+func _build_split_popup(layer: CanvasLayer) -> void:
+	_split_popup = PopupPanel.new()
+	layer.add_child(_split_popup)
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 16)
+	_split_popup.add_child(margin)
+	var box := VBoxContainer.new()
+	box.custom_minimum_size.x = 700
+	box.add_theme_constant_override("separation", 10)
+	margin.add_child(box)
+	box.add_child(_label("Разрезать один файл на отдельные варианты", 20, Color(1.0, 0.86, 0.6)))
+	_split_path_label = _label("", 14, Color(0.85, 0.86, 0.88))
+	_split_path_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_split_path_label)
+	var help := _label("Стенд ищет громкие участки, разделённые тишиной. Если частей слишком мало — подними порог; "
+		+ "если один выстрел распался на несколько — опусти порог или увеличь минимальную паузу.", 13, COL_DIM)
+	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(help)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 6)
+	box.add_child(grid)
+	_split_threshold = _split_setting(grid, "Порог тишины", -60.0, -6.0, 1.0, -36.0, " dB")
+	_split_silence = _split_setting(grid, "Минимальная пауза", 40.0, 2000.0, 10.0, 180.0, " мс")
+	_split_padding = _split_setting(grid, "Запас до/после звука", 0.0, 300.0, 5.0, 35.0, " мс")
+	_split_min_clip = _split_setting(grid, "Минимальная длина части", 20.0, 2000.0, 10.0, 60.0, " мс")
+	for spin in [_split_threshold, _split_silence, _split_padding, _split_min_clip]:
+		spin.value_changed.connect(func(_value: float) -> void: _split_settings_changed())
+	_split_approve = CheckBox.new()
+	_split_approve.text = "Сразу одобрить все созданные части к добавлению"
+	_split_approve.button_pressed = false
+	box.add_child(_split_approve)
+	_split_remove_source = CheckBox.new()
+	_split_remove_source.text = "После успешной нарезки удалить исходный длинный файл"
+	_split_remove_source.button_pressed = false
+	_split_remove_source.tooltip_text = "По умолчанию исходник остаётся, но его одобрение всё равно снимается"
+	box.add_child(_split_remove_source)
+	_split_result_label = _label("", 14, COL_DIM)
+	_split_result_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_split_result_label.custom_minimum_size.y = 80
+	box.add_child(_split_result_label)
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 8)
+	box.add_child(actions)
+	actions.add_child(_button("Найти части", _analyze_split_popup))
+	_split_create_button = _button("Создать отдельные варианты", _create_split_popup)
+	_split_create_button.disabled = true
+	actions.add_child(_split_create_button)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions.add_child(spacer)
+	actions.add_child(_button("Отмена", func() -> void: _split_popup.hide()))
+
+
+func _split_setting(grid: GridContainer, title: String, min_value: float, max_value: float,
+		step: float, value: float, suffix: String) -> SpinBox:
+	grid.add_child(_label(title, 14, COL_DIM))
+	var spin := SpinBox.new()
+	spin.min_value = min_value
+	spin.max_value = max_value
+	spin.step = step
+	spin.value = value
+	spin.suffix = suffix
+	spin.custom_minimum_size.x = 180
+	grid.add_child(spin)
+	return spin
+
+
 # ---------------------------------------------------------------- интерфейс
 
 func _build_ui() -> void:
@@ -935,6 +1138,7 @@ func _build_ui() -> void:
 	_delete_dialog.get_ok_button().text = "Удалить навсегда"
 	_delete_dialog.confirmed.connect(_confirm_permanent_delete)
 	layer.add_child(_delete_dialog)
+	_build_split_popup(layer)
 	var bg := Panel.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	var sb := StyleBoxFlat.new()
@@ -1751,6 +1955,15 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 	fname.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fname.tooltip_text = rel
 	box.add_child(fname)
+	var split_row := HBoxContainer.new()
+	split_row.add_theme_constant_override("separation", 8)
+	box.add_child(split_row)
+	var split_hint := _label("В файле несколько вариантов?", 14, COL_DIM)
+	split_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	split_row.add_child(split_hint)
+	var split_button := _button("✂ Разрезать по паузам", func() -> void: _open_split_popup(rel))
+	split_button.tooltip_text = "Найти паузы и создать отдельный WAV для каждого варианта"
+	split_row.add_child(split_button)
 	var origin := String(s.get("origin", rel))
 	if origin != rel:
 		var origin_label := _label("Исходник: %s" % origin, 13, COL_DIM)
@@ -1848,6 +2061,75 @@ func _incoming_state(rel: String) -> Dictionary:
 	if bool(picked.use):
 		return {"short": "одобрен", "text": "Одобрен для неподключённого события: %s" % String(e.name), "color": COL_SYNTH}
 	return {"short": "→ назначен", "text": "Назначен: %s" % String(e.name), "color": COL_NEW}
+
+
+func _open_split_popup(rel: String) -> void:
+	_split_rel = rel
+	_split_analysis.clear()
+	_split_path_label.text = "Файл: %s" % rel
+	_split_result_label.text = "Ищу отдельные части…"
+	_split_result_label.add_theme_color_override("font_color", COL_DIM)
+	_split_create_button.disabled = true
+	_split_popup.popup_centered(Vector2i(760, 510))
+	_analyze_split_popup.call_deferred()
+
+
+func _split_settings_changed() -> void:
+	if _split_popup == null or not _split_popup.visible:
+		return
+	_split_analysis.clear()
+	_split_create_button.disabled = true
+	_split_result_label.text = "Параметры изменены. Нажми «Найти части»."
+	_split_result_label.add_theme_color_override("font_color", COL_DIM)
+
+
+func _analyze_split_popup() -> void:
+	if _split_rel == "":
+		return
+	_split_result_label.text = "Анализирую файл…"
+	_split_create_button.disabled = true
+	_split_analysis = analyze_incoming(_split_rel, _split_threshold.value, _split_silence.value,
+		_split_padding.value, _split_min_clip.value)
+	if not bool(_split_analysis.get("ok", false)):
+		_split_result_label.text = "Не удалось проанализировать: %s" % String(_split_analysis.get("error", "неизвестная ошибка"))
+		_split_result_label.add_theme_color_override("font_color", COL_NONE)
+		return
+	var segments: Array = _split_analysis.get("segments", [])
+	var lines: Array[String] = []
+	for index in mini(segments.size(), 12):
+		var segment := segments[index] as Dictionary
+		lines.append("%d. %.2f–%.2f с · %.2f с" % [index + 1, float(segment.start), float(segment.end), float(segment.duration)])
+	if segments.size() > 12:
+		lines.append("…и ещё %d" % (segments.size() - 12))
+	var header := "Найдено частей: %d из файла %.2f с." % [segments.size(), float(_split_analysis.get("duration", 0.0))]
+	if segments.size() < 2:
+		header += " Нужно минимум две: подними порог тишины или уменьши минимальную паузу."
+	_split_result_label.text = header + ("\n" + "\n".join(lines) if not lines.is_empty() else "")
+	_split_result_label.add_theme_color_override("font_color", COL_REC if segments.size() >= 2 else COL_SYNTH)
+	_split_create_button.disabled = segments.size() < 2
+
+
+func _create_split_popup() -> void:
+	if _split_rel == "":
+		return
+	_split_create_button.disabled = true
+	_split_result_label.text = "Создаю отдельные WAV…"
+	var source_rel := _split_rel
+	var source_was_added := String(sel(source_rel).get("moved", "")) != ""
+	var result := split_incoming(source_rel, _split_threshold.value, _split_silence.value,
+		_split_padding.value, _split_min_clip.value, _split_approve.button_pressed,
+		_split_remove_source.button_pressed)
+	if not bool(result.get("ok", false)):
+		_split_result_label.text = "Не удалось разрезать: %s" % String(result.get("error", "неизвестная ошибка"))
+		_split_result_label.add_theme_color_override("font_color", COL_NONE)
+		_split_create_button.disabled = false
+		return
+	var made: Array = result.get("rel_files", [])
+	_split_popup.hide()
+	var added_note := " Готовая многозвучная копия исключена из игры." if source_was_added and not _split_remove_source.button_pressed else ""
+	_status.text = ("%s: создано %d отдельных вариантов%s. Исходный файл %s; его одобрение снято.%s" % [
+		source_rel, made.size(), " и они одобрены к добавлению" if _split_approve.button_pressed else "",
+		"удалён" if _split_remove_source.button_pressed else "оставлен", added_note])
 
 
 func _ask_delete_incoming(rel: String) -> void:
