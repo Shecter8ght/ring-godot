@@ -24,6 +24,7 @@
 ## Иконки оружия
 
 - `assets/icons/wpn_*.png` — 23 изображения из `docs/RING_weapon_design_doc_v9_final_cut.html`, предоставленного владельцем проекта; собственные материалы проекта RING.
+- `assets/icons/wpn_sp_02.png` — VSS Vintorez, собственная генерация для проекта RING по решению владельца; OpenAI ImageGen, 2026-09-28.
 
 ## Звук (assets/audio — `tools/import_audio.py`, обработка — `tools/build_audio.py` прежнего RING)
 

@@ -46,15 +46,16 @@
   `fit`), перезарядка, снарядить магазины. `Armor` — пробитие. `WeaponStats` — характеристики.
 
 ### ID
-Оружейная линейка взята из `docs/RING_weapon_design_doc_v9_final_cut.html`; его 23 встроенные PNG
-извлекает `node tools/import_weapon_catalog.mjs`. Коды и ID:
+Основные 23 позиции оружейной линейки взяты из `docs/RING_weapon_design_doc_v9_final_cut.html`; их
+встроенные PNG извлекает `node tools/import_weapon_catalog.mjs`. По отдельному решению владельца к ним
+добавлен VSS Vintorez из полного дизайн-документа; его собственная иконка хранится в проекте. Коды и ID:
 
 | Класс | Оружие |
 |---|---|
 | Пистолеты | `wpn_hg_01` ПМ; `wpn_hg_02` Glock 17 Gen5; `wpn_hg_03` HK USP .45 |
 | SMG / PDW | `wpn_smg_01` HK UMP45; `wpn_smg_02` FN P90; `wpn_smg_03` KRISS Vector; `wpn_smg_04` PP-19-01 Vityaz; `wpn_smg_05` SR-2M Veresk |
 | Автоматы | `wpn_ar_01` AK-12; `wpn_ar_02` M4A1; `wpn_ar_03` SIG MCX Virtus; `wpn_ar_04` FN SCAR-L; `wpn_ar_05` SIG MCX Spear; `wpn_sp_01` AS VAL |
-| Точные | `wpn_dmr_01` HK MR762; `wpn_dmr_02` BCM MK12; `wpn_sr_01` Accuracy International AWM; `wpn_sr_02` Barrett M82A1 |
+| Точные | `wpn_sp_02` VSS Vintorez; `wpn_dmr_01` HK MR762; `wpn_dmr_02` BCM MK12; `wpn_sr_01` Accuracy International AWM; `wpn_sr_02` Barrett M82A1 |
 | Дробовики | `wpn_sg_01` Benelli M4; `wpn_sg_02` Saiga-12K; `wpn_sg_03` Mossberg 590A1 |
 | Пулемёты | `wpn_lmg_01` PKM; `wpn_lmg_02` M249 SAW |
 
@@ -65,7 +66,7 @@
 Кнопка `i` на карточке разделяет текст на назначение, **технические характеристики** и выделенную
 фразу **«В деле»**. ТТХ не переписаны вручную: окно берёт актуальные калибр, темп, дальность,
 перезарядку, надёжность, ёмкости, баллистику и числовые эффекты обвеса прямо из данных. Поле `flavor`
-есть у всех 137 элементов оружейного каталога: 23 стволов, 37 боеприпасов, 32 магазинов и 45 обвесов.
+есть у всех 138 элементов оружейного каталога: 24 стволов, 37 боеприпасов, 32 магазинов и 45 обвесов.
 Генератор прекращает работу, если у нового элемента нет такой фразы; `arsenal_test` проверяет покрытие.
 
 ### Ёмкости и платформы: источники
@@ -79,6 +80,8 @@
 - KRISS Vector .45 — Glock 21 на 13 и увеличенные MagEx: https://store.kriss-usa.com/images/dealer-resources/kriss/KRISS-MANUAL/Gen-Two/KRISS-MANUAL_2017_VECTOR-Gen-2_CRB-SBR-SDP-12.pdf
 - Vityaz — 30: https://rostec.ru/media/news/zaversheny-gosispytaniya-pistoleta-pulemeta-kalashnikova/
 - SR-2M — 20/30 и темп 900: https://rosguard.gov.ru/page/index/pistoletpulemt-sr2m-veresk
+- VSS Vintorez — принадлежность к специальному оружию ЦНИИТОЧМАШ и актуальная модернизированная
+  версия подтверждены Ростехом: https://rostec.ru/media/news/andrey-belousov-posetil-tsentralnyy-nii-tochnogo-mashinostroeniya/
 - AK-12 — 30 и основные ТТХ: https://www.rostec.ru/en/directions/weapons/products-projects/ak-12-ak-15-ak-19-assault-rifles/
 - M4 — 30 и диапазон темпа: https://www.colt.com/wp-content/uploads/2023/02/m16a2carbinecommando9mmsmgm4carbine.pdf
 - MCX Virtus — 5.56/.300 BLK и интерфейсы: https://www.sigsauer.com/pub/media/sigsauer/resources/OPERATORS-MANUAL-SIGMCX-VIRTUS-ENGLISH-2402117-01-REV-00-LR.pdf
@@ -90,8 +93,8 @@
 - PKM — короба 100/200 и темп 600–800: https://roe.ru/pdfs/pdf_7081.pdf
 - M249 / FN MINIMI — ленточное питание, короб/мягкий короб и около 800 выстр./мин: https://fnherstal.com/app/uploads/sites/2/technical-data-fn-minimi-556-mk3.pdf
 
-Для редких ёмкостей без однозначного актуального первичного листа (ПМ, UMP45, AS VAL, Saiga-12,
-AWM) зафиксированы распространённые штатные значения как осознанные игровые допущения.
+Для редких ёмкостей без однозначного актуального первичного листа (ПМ, UMP45, AS VAL, VSS Vintorez,
+Saiga-12, AWM) зафиксированы распространённые штатные значения как осознанные игровые допущения.
 
 ## 4. Экземпляр оружия
 
