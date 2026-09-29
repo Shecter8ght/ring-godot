@@ -243,7 +243,32 @@ func _get_drag_data(at: Vector2) -> Variant:
 	p.position = -Vector2(grab) * CELL - Vector2(CELL, CELL) * 0.5
 	_drag_preview = p
 	set_drag_preview(holder)
-	return {"view": self, "idx": i, "id": String(items[i].id), "base_r": bool(_layout[i][2]), "grab": grab}
+	return {"view": self, "idx": i, "id": String(items[i].id), "origin": Vector2i(_layout[i][0], _layout[i][1]), "base_r": bool(_layout[i][2]), "grab": grab}
+
+
+## Сетка могла исчезнуть при закрытии окна. Освобождённый Object нельзя приводить к GridView.
+static func drag_source(data: Dictionary) -> GridView:
+	var source: Variant = data.get("view")
+	if not is_instance_valid(source):
+		return null
+	if not (source is GridView):
+		return null
+	if source.is_queued_for_deletion():
+		return null
+	return source as GridView
+
+
+## Поштучная зарядка убирает пустые стопки и сдвигает индексы. Ищем взятый предмет по ячейке.
+func drag_index(data: Dictionary) -> int:
+	var id: String = String(data.get("id", ""))
+	if data.has("origin"):
+		var origin: Vector2i = data.origin
+		for index: int in range(items.size()):
+			if String(items[index].id) == id and Vector2i(_layout[index][0], _layout[index][1]) == origin:
+				return index
+		return -1
+	var index: int = int(data.get("idx", -1))
+	return index if index >= 0 and index < items.size() and String(items[index].id) == id else -1
 
 
 ## R во время перетаскивания — повернуть.
@@ -266,7 +291,14 @@ func _cell_for(at: Vector2, data: Dictionary) -> Vector2i:
 func _can_drop_data(at: Vector2, data: Variant) -> bool:
 	if not (data is Dictionary) or not (data as Dictionary).has("id"):
 		return false
-	var d: Dictionary = data
+	var d: Dictionary = data.duplicate()
+	var source: GridView = drag_source(d)
+	if not d.has("slot"):
+		if source == null or source.drag_index(d) < 0:
+			_hover = Vector2i(-1, -1)
+			queue_redraw()
+			return false
+		d.idx = source.drag_index(d)
 	var s := ItemDb.size(String(d.id))
 	if drag_rot:
 		s = Vector2i(s.y, s.x)
@@ -276,7 +308,7 @@ func _can_drop_data(at: Vector2, data: Variant) -> bool:
 	if auto_layout:
 		_hover_ok = true
 	else:
-		var skip: int = int(d.idx) if d.get("view") == self else -1
+		var skip: int = int(d.idx) if source == self else -1
 		var occ := ItemDb.occupancy(items, grid, skip)
 		_hover_ok = ItemDb.fits_at(occ, grid, c.x, c.y, s)
 		# на такую же неполную стопку — тоже можно; патроны — на магазин (снарядить)
@@ -288,26 +320,33 @@ func _can_drop_data(at: Vector2, data: Variant) -> bool:
 
 
 func _drop_data(at: Vector2, data: Variant) -> void:
-	var d: Dictionary = data
+	if not (data is Dictionary) or not data.has("id"):
+		return
+	var d: Dictionary = data.duplicate()
+	var source: GridView = drag_source(d)
+	if not d.has("slot"):
+		if source == null or source.drag_index(d) < 0:
+			return
+		d.idx = source.drag_index(d)
 	var c := _cell_for(at, d)
 	var j := index_at(at)
 	# бросили на такую же стопку — целимся в её угол (слияние)
-	if j >= 0 and String(items[j].id) == String(d.id) and not (d.get("view") == self and j == int(d.idx)):
+	if j >= 0 and String(items[j].id) == String(d.id) and not (source == self and j == int(d.idx)):
 		c = Vector2i(int(_layout[j][0]), int(_layout[j][1]))
 	_hover = Vector2i(-1, -1)
 	queue_redraw()
-	if j >= 0 and not d.has("slot") and _fits_into(d, j) and not (d.get("view") == self and j == int(d.idx)):
-		dropped_on.emit(d.view, int(d.idx), j)
+	if j >= 0 and not d.has("slot") and _fits_into(d, j) and not (source == self and j == int(d.idx)):
+		dropped_on.emit(source, int(d.idx), j)
 		return
 	if d.has("slot"):
 		slot_dropped.emit(String(d.slot), c.x, c.y, drag_rot)
 	else:
-		dropped.emit(d.view, int(d.idx), c.x, c.y, drag_rot)
+		dropped.emit(source, int(d.idx), c.x, c.y, drag_rot)
 
 
 ## Тащат патроны, а под курсором — подходящий неполный магазин; плиту — жилет со свободным гнездом.
 func _fits_into(d: Dictionary, j: int) -> bool:
-	if not (d.get("view") is GridView):
+	if drag_source(d) == null or j < 0 or j >= items.size():
 		return false
 	var t: Dictionary = items[j]
 	var id := String(d.id)

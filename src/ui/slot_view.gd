@@ -100,6 +100,11 @@ func _get_drag_data(_at: Vector2) -> Variant:
 func _can_drop_data(_at: Vector2, data: Variant) -> bool:
 	if not (data is Dictionary) or not (data as Dictionary).has("view"):
 		return false
+	var source: GridView = GridView.drag_source(data)
+	if source == null or source.drag_index(data) < 0:
+		_hover = 0
+		queue_redraw()
+		return false
 	var id := String((data as Dictionary).id)
 	var ok := _fits(id) or _mod_fits(id)
 	_hover = 1 if ok else -1
@@ -110,11 +115,19 @@ func _can_drop_data(_at: Vector2, data: Variant) -> bool:
 func _drop_data(_at: Vector2, data: Variant) -> void:
 	_hover = 0
 	queue_redraw()
+	if not (data is Dictionary):
+		return
 	var d: Dictionary = data
+	var source: GridView = GridView.drag_source(d)
+	if source == null:
+		return
+	var index: int = source.drag_index(d)
+	if index < 0 or not (_fits(String(d.id)) or _mod_fits(String(d.id))):
+		return
 	if _mod_fits(String(d.id)):
-		mod_from.emit(d.view, int(d.idx))
+		mod_from.emit(source, index)
 	else:
-		equip_from.emit(d.view, int(d.idx))
+		equip_from.emit(source, index)
 
 
 func _notification(what: int) -> void:

@@ -41,6 +41,7 @@ var _med_menu: PanelContainer
 var _med_ids: Array[String] = []
 var _bp_grid: GridView
 var _loot_sig: String = ""
+var _loot_state: Label
 ## Буфер посередине (рюкзак + ящик / труп): сетка Inventory.buffer.
 var _buf_panel: PanelContainer
 var _buf_list: VBoxContainer
@@ -394,6 +395,13 @@ func _refresh_lists(me: Player) -> void:
 ## Слоты: в слот тащат из любой сетки (рюкзак, карман, буфер, ящик) — надеть / взять в руки; на
 ## оружие — обвес или магазин, в плитоносец — плиту.
 func _build_equipment(me: Player) -> void:
+	# Изменение патронов не должно уничтожать источник/приёмник текущего перетаскивания.
+	for child: Node in _eq_list.get_children():
+		if child is GridContainer and not child.is_queued_for_deletion():
+			for slot_view: Node in child.get_children():
+				if slot_view is SlotView:
+					slot_view.set_entry(me.inventory.equipment.get(slot_view.slot, {}))
+			return
 	_clear(_eq_list)
 	var slots := GridContainer.new()
 	slots.columns = 2
@@ -434,6 +442,14 @@ func _build_equipment(me: Player) -> void:
 
 
 func _build_backpack(me: Player) -> void:
+	var existing: GridView = _existing_grid(_bp_list, "backpack")
+	var pocket: GridView = _existing_grid(_bp_list, "pocket")
+	var pocket_matches: bool = (pocket == null and me.inventory.pocket_grid == Vector2i.ZERO) or (pocket != null and pocket.grid == me.inventory.pocket_grid)
+	if existing != null and pocket_matches:
+		existing.set_items(me.inventory.items)
+		if pocket != null:
+			pocket.set_items(me.inventory.pocket)
+		return
 	_clear(_bp_list)
 	# разложить по порядку — освободить место
 	_bp_list.add_child(InventoryUI.sort_button(func() -> void: Raid.current.request_sort("backpack")))
@@ -472,12 +488,19 @@ func _build_loot(me: Player) -> void:
 	var g := c.grid if c.grid != Vector2i.ZERO else Vector2i(Balance.LOOT_GRID_W, int(Balance.LOOT_ROWS.get("NONE", 3)))
 	var used := ItemDb.cells_of(c.items)
 	_loot_title.text = "%s   %d / %d ячеек" % [c.display_name, used, g.x * g.y]
+	var existing: GridView = _existing_grid(_loot_list, "loot")
+	if existing != null and existing.grid == g and int(existing.get_meta("container_id", 0)) == c.get_instance_id():
+		existing.set_items(c.items)
+		_loot_state.text = "…" if not c.rolled else "пусто — сюда можно положить из рюкзака"
+		_loot_state.visible = not c.rolled or c.items.is_empty()
+		_take_all.disabled = c.items.is_empty()
+		return
 	_clear(_loot_list)
-	if not c.rolled:
-		_loot_list.add_child(_row_label("…", Color(0.6, 0.6, 0.6)))
-	elif c.items.is_empty():
-		_loot_list.add_child(_row_label("пусто — сюда можно положить из рюкзака", Color(0.6, 0.6, 0.6)))
+	_loot_state = _row_label("…" if not c.rolled else "пусто — сюда можно положить из рюкзака", Color(0.6, 0.6, 0.6))
+	_loot_state.visible = not c.rolled or c.items.is_empty()
+	_loot_list.add_child(_loot_state)
 	var lg := GridView.new(g, "loot")
+	lg.set_meta("container_id", c.get_instance_id())
 	lg.set_items(c.items)
 	_loot_list.add_child(lg)
 	var hint := _row_label("Двойной клик — в рюкзак · правая кнопка — разрядить, вынуть плиты, снять часть (в этот ящик или в буфер) · тащи прямо в слот, в рюкзак, на магазин", Color(0.6, 0.62, 0.6))
@@ -504,6 +527,10 @@ func _refresh_buffer(me: Player) -> void:
 	if sig == _buf_sig:
 		return
 	_buf_sig = sig
+	var existing: GridView = _existing_grid(_buf_list, "buffer")
+	if existing != null:
+		existing.set_items(me.inventory.buffer)
+		return
 	_clear(_buf_list)
 	var g := GridView.new(Balance.BUFFER_GRID, "buffer")
 	g.set_items(me.inventory.buffer)
@@ -818,6 +845,14 @@ func _row_label(text: String, color: Color) -> Label:
 	l.add_theme_font_size_override("font_size", 16)
 	l.add_theme_color_override("font_color", color)
 	return l
+
+
+## При изменении содержимого обновляем данные, а не удаляем узел, на который ссылается drag.
+func _existing_grid(box: Container, role: String) -> GridView:
+	for child: Node in box.get_children():
+		if child is GridView and not child.is_queued_for_deletion() and child.role == role:
+			return child
+	return null
 
 
 func _clear(box: Container) -> void:

@@ -33,6 +33,10 @@ var _focus_only: bool = false
 var _qty: Dictionary = {}
 ## Поштучная операция в тайнике (снарядить магазин, разрядить, вынуть плиты) — MagOps над профилем.
 var _op: MagOps
+var _stash_views: Array[GridView] = []
+var _stash_slots: Array[SlotView] = []
+var _stash_heading: Label
+var _backpack_heading: Label
 ## Торговец: раздел ассортимента ("all" — всё, иначе ключ CAT_TABS).
 var _cat_tab: String = "all"
 ## Кадр открытия: Tab, открывший окно, его же не закрывает.
@@ -179,11 +183,15 @@ func _process(delta: float) -> void:
 	if sig == _sig:
 		return
 	_sig = sig
+	if _kind == HideoutStation.Kind.STASH and _refresh_stash_content():
+		return
 	# прокрутка колонок — вернуть после перестройки (купил с конца списка — список не прыгает)
 	var scrolls := {}
 	for c in _cols.get_children():
 		for sc in c.find_children("*", "ScrollContainer", true, false):
 			scrolls[_scroll_key(sc as ScrollContainer)] = (sc as ScrollContainer).scroll_vertical
+	_stash_views.clear()
+	_stash_slots.clear()
 	for c in _cols.get_children():
 		c.queue_free()
 	match _kind:
@@ -229,10 +237,36 @@ func _restore_scroll(scrolls: Dictionary) -> void:
 
 # ---------------------------------------------------------------- тайник
 
+## Снаряжение магазина меняет числа, но не дерево окна: мышь продолжает держать живую сетку.
+func _refresh_stash_content() -> bool:
+	var expected: int = 2 if Profile.pocket_grid() == Vector2i.ZERO else 3
+	if _stash_views.size() != expected or _stash_slots.size() != Inventory.SLOTS.size():
+		return false
+	for index: int in range(_stash_views.size()):
+		if not is_instance_valid(_stash_views[index]):
+			return false
+		var view: GridView = _stash_views[index]
+		if view.is_queued_for_deletion() or view.grid != Profile.grid_of(view.role):
+			return false
+	for index: int in range(_stash_slots.size()):
+		if not is_instance_valid(_stash_slots[index]):
+			return false
+	for view: GridView in _stash_views:
+		view.set_items(Profile.list_of(view.role))
+	for view: SlotView in _stash_slots:
+		view.set_entry(Profile.equipment.get(view.slot, {}))
+	var sg: Vector2i = Profile.stash_grid()
+	_title.text = "Тайник и снаряжение   ·   %s ₽" % InventoryUI.money(Profile.money)
+	_stash_heading.text = "Тайник   %d / %d ячеек" % [Profile.stash_cells(), sg.x * sg.y]
+	_backpack_heading.text = "Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS]
+	return true
+
+
 func _build_stash() -> void:
 	_title.text = "Тайник и снаряжение   ·   %s ₽" % InventoryUI.money(Profile.money)
 	var sg := Profile.stash_grid()
 	var stash_col := _column("Тайник   %d / %d ячеек" % [Profile.stash_cells(), sg.x * sg.y], 1.25)
+	_stash_heading = stash_col.get_parent().get_parent().get_child(0) as Label
 	stash_col.add_child(_sort_button("stash"))
 	var stash := GridView.new(sg, "stash")
 	stash.set_items(Profile.stash)
@@ -241,6 +275,7 @@ func _build_stash() -> void:
 	for slot in Inventory.SLOTS:
 		var s := String(slot)
 		var sv := SlotView.new(s)
+		_stash_slots.append(sv)
 		sv.set_entry(Profile.equipment.get(s, {}))
 		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role, idx))
 		sv.unequip_requested.connect(func() -> void: Profile.unequip(s))
@@ -257,6 +292,7 @@ func _build_stash() -> void:
 		gear.add_child(sv)
 	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
 	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)
+	_backpack_heading = bp_col.get_parent().get_parent().get_child(0) as Label
 	bp_col.add_child(_sort_button("backpack"))
 	var bp := GridView.new(Balance.BACKPACK_GRID, "backpack")
 	bp.set_items(Profile.backpack)
@@ -272,6 +308,7 @@ func _build_stash() -> void:
 		views.append(pk)
 	else:
 		bp_col.add_child(_text("Защищённого кармана нет — строится в «Модулях убежища».", Color(0.55, 0.57, 0.55)))
+	_stash_views.assign(views)
 	for v in views:
 		var name := v.role
 		v.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
