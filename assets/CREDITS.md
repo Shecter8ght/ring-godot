@@ -21,6 +21,11 @@
 - `assets/textures/sapele_veneer/` — Sapele Veneer, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/sapele_veneer — дерево автомата (красноватый лак)
 - `assets/textures/worn_tile_floor/` — Worn Tile Floor, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_tile_floor — пол торгового зала
 
+## Декали попаданий (tools/import_impact_decals.py)
+
+- `assets/textures/impacts/concrete_*.png` — Bullet Decal, musdasch, CC0 1.0, https://opengameart.org/content/bullet-decal — бетонный скол и производная normal-карта
+- `assets/textures/impacts/metal_*.png`, `wood_*.png`, `glass_cracks.png` — Bullet holes sprites, mitaywalle, CC0 1.0, https://realtimevfx.com/t/share-bullet-holes-sprites/21203 — атласы металла, дерева и стекла, прозрачность и normal-карты собраны импортёром
+
 ## Иконки оружия
 
 - `assets/icons/wpn_*.png` — 23 изображения из `docs/RING_weapon_design_doc_v9_final_cut.html`, предоставленного владельцем проекта; собственные материалы проекта RING.
