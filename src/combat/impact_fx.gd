@@ -1,29 +1,19 @@
 extends Node
 ## Эффекты попаданий: частицы по виду поверхности, декали (отверстия, трещины, кровь),
-## вспышка искр, звук удара. Autoload `ImpactFx`. Текстуры декалей и частиц рисуются кодом.
+## вспышка искр, звук удара. Autoload `ImpactFx`. Для твёрдых поверхностей используются CC0-декали
+## из assets/textures/impacts; если ассетов нет, остаётся процедурный запасной вариант.
 
 ## Сколько декалей держим в мире — старые убираются.
-const MAX_DECALS := 320
-
-## Частицы по виду поверхности: цвета, число, скорость, гравитация, размер, время жизни, свечение.
-const FX := {
-	"concrete": {"colors": [Color(0.72, 0.7, 0.66), Color(0.55, 0.53, 0.5)], "count": 18, "speed": [2.0, 5.0], "gravity": -9.0, "size": 0.077, "life": 0.55, "dust": true},
-	"tile": {"colors": [Color(0.8, 0.78, 0.74), Color(0.6, 0.6, 0.58)], "count": 14, "speed": [2.5, 6.0], "gravity": -9.0, "size": 0.066, "life": 0.5, "dust": true},
-	"asphalt": {"colors": [Color(0.3, 0.29, 0.28), Color(0.45, 0.43, 0.4)], "count": 16, "speed": [2.0, 5.0], "gravity": -9.0, "size": 0.066, "life": 0.5, "dust": true},
-	"metal": {"colors": [Color(1.0, 0.85, 0.45), Color(1.0, 0.6, 0.2)], "count": 22, "speed": [5.0, 12.0], "gravity": -12.0, "size": 0.040, "life": 0.35, "spark": true},
-	"glass": {"colors": [Color(0.8, 0.9, 0.95), Color(0.6, 0.75, 0.85)], "count": 26, "speed": [2.0, 6.0], "gravity": -9.0, "size": 0.066, "life": 0.7, "spark": true},
-	"wood": {"colors": [Color(0.55, 0.4, 0.22), Color(0.4, 0.28, 0.14)], "count": 16, "speed": [2.0, 6.0], "gravity": -9.0, "size": 0.088, "life": 0.6},
-	"cardboard": {"colors": [Color(0.62, 0.5, 0.32), Color(0.5, 0.4, 0.26)], "count": 14, "speed": [1.5, 4.0], "gravity": -4.0, "size": 0.110, "life": 0.8},
-	"fabric": {"colors": [Color(0.25, 0.22, 0.35), Color(0.4, 0.15, 0.2)], "count": 10, "speed": [1.0, 3.0], "gravity": -2.0, "size": 0.088, "life": 0.9},
-	"plastic": {"colors": [Color(0.15, 0.15, 0.16), Color(0.3, 0.3, 0.3)], "count": 12, "speed": [2.0, 5.0], "gravity": -8.0, "size": 0.066, "life": 0.5},
-	"flesh": {"colors": [Color(0.45, 0.03, 0.03), Color(0.3, 0.02, 0.02)], "count": 24, "speed": [2.0, 6.0], "gravity": -9.0, "size": 0.077, "life": 0.6},
-}
+const MAX_DECALS: int = Balance.IMPACT_MAX_DECALS
+const BURST_SCENE: PackedScene = preload("res://scenes/combat/impact_burst.tscn")
+const DECAL_DIR := "res://assets/textures/impacts"
+const DECAL_COUNTS := {"concrete": 1, "metal": 8, "wood": 8}
 
 ## Звук удара по виду поверхности.
 const SOUND := {
 	"concrete": "impact_hard", "tile": "impact_ceramic", "asphalt": "impact_dirt", "metal": "impact_metal",
 	"glass": "impact_glass", "wood": "impact_soft", "cardboard": "impact_soft", "fabric": "impact_soft",
-	"plastic": "impact_soft", "flesh": "hit",
+	"plastic": "impact_soft", "flesh": "hit", "snow": "impact_dirt",
 }
 
 var _rng := RandomNumberGenerator.new()
@@ -33,9 +23,10 @@ var _tex_hole: Texture2D
 var _tex_crack: Texture2D
 var _tex_splat: Texture2D
 var _tex_dust: Texture2D
-var _process_mats: Dictionary = {}
+var _decal_textures: Dictionary = {}
+var _decal_normals: Dictionary = {}
+var _bursts: Array[Node3D] = []
 var _chip_mesh: BoxMesh
-var _spark_mesh: BoxMesh
 var _dust_mesh: QuadMesh
 
 
@@ -45,145 +36,102 @@ func _ready() -> void:
 	_tex_crack = _make_crack_texture(96)
 	_tex_splat = _make_splat_texture(128)
 	_tex_dust = _make_soft_texture(48)
+	_load_decal_textures()
 	_chip_mesh = BoxMesh.new()
 	_chip_mesh.size = Vector3(1, 1, 1)
-	_spark_mesh = BoxMesh.new()
-	_spark_mesh.size = Vector3(0.6, 0.6, 3.0)
 	_dust_mesh = QuadMesh.new()
 	_dust_mesh.size = Vector2(1, 1)
+
+
+## Внешние ассеты необязательны: без них игра продолжает использовать процедурные следы.
+func _load_decal_textures() -> void:
+	for kind: String in DECAL_COUNTS:
+		var albedo: Array[Texture2D] = []
+		var normals: Array[Texture2D] = []
+		for index: int in range(int(DECAL_COUNTS[kind])):
+			var path := "%s/%s_%d.png" % [DECAL_DIR, kind, index]
+			var normal_path := "%s/%s_%d_normal.png" % [DECAL_DIR, kind, index]
+			if not ResourceLoader.exists(path):
+				continue
+			var texture := load(path) as Texture2D
+			var normal := load(normal_path) as Texture2D if ResourceLoader.exists(normal_path) else null
+			albedo.append(texture)
+			normals.append(normal)
+		_decal_textures[kind] = albedo
+		_decal_normals[kind] = normals
 
 
 ## Точка входа: результат intersect_ray и направление пули.
 func spawn_hit(hit: Dictionary, dir: Vector3) -> void:
 	if hit.is_empty() or not hit.has("position"):
 		return
-	var kind := Surfaces.kind_at(hit)
+	var kind: String = Surfaces.kind_at(hit)
+	if not Balance.IMPACT_SURFACES.has(kind):
+		kind = "concrete"
 	var pos: Vector3 = hit.position
 	var n: Vector3 = hit.get("normal", -dir)
 	if n.length_squared() < 0.01:
 		n = -dir
+	n = n.normalized()
+	if n.is_zero_approx():
+		n = Vector3.UP
 	var parent := get_tree().current_scene
 	if parent == null:
 		return
+	_show_hit(parent, kind, pos, n, dir, hit.get("collider"))
+	# По сети передаём только косметическое событие, без коллайдеров и повторного урона.
+	if Net.is_networked():
+		var scene_key: String = Net.scene_of(parent)
+		if scene_key != "":
+			for peer: int in multiplayer.get_peers():
+				if Net.visible_in(peer, scene_key):
+					_rpc_hit_fx.rpc_id(peer, scene_key, kind, pos, n, dir)
+
+
+@rpc("any_peer", "call_remote", "unreliable")
+func _rpc_hit_fx(scene_key: String, kind: String, pos: Vector3, n: Vector3, dir: Vector3) -> void:
+	var parent: Node = get_tree().current_scene
+	var sender: int = multiplayer.get_remote_sender_id()
+	if parent == null or not Net.visible_in(sender, scene_key) or Net.scene_of(parent) != scene_key:
+		return
+	if not Balance.IMPACT_SURFACES.has(kind) or not pos.is_finite() or not n.is_finite() or not dir.is_finite():
+		return
+	if n.is_zero_approx() or dir.is_zero_approx():
+		return
+	_show_hit(parent, kind, pos, n.normalized(), dir.normalized(), null)
+
+
+func _show_hit(parent: Node, kind: String, pos: Vector3, n: Vector3, dir: Vector3, body: Object) -> void:
 	if kind == "flesh":
-		_blood(parent, pos, dir, hit.collider)
+		_blood(parent, pos, dir, body)
 	else:
 		_particles(parent, kind, pos, n, dir)
 		# на витрине след рисуют трещины самой панели (GlassPanes), а выбитая — без висящих в воздухе дыр
 		if kind != "glass":
 			_decal(parent, kind, pos, n)
-		if bool(FX[kind].get("spark", false)):
-			_flash(parent, pos + n * 0.1, Color(1.0, 0.8, 0.5) if kind == "metal" else Color(0.8, 0.9, 1.0))
+
 	Audio.play(String(SOUND.get(kind, "impact_hard")), pos)
 
 
 # ---------------------------------------------------------------- частицы
 
 func _particles(parent: Node, kind: String, pos: Vector3, n: Vector3, dir: Vector3) -> void:
-	var spec: Dictionary = FX[kind]
-	var p := GPUParticles3D.new()
-	p.one_shot = true
-	p.explosiveness = 1.0
-	p.amount = int(spec.count)
-	p.lifetime = float(spec.life)
-	p.process_material = _process_for(kind, n, dir)
-	p.draw_pass_1 = _spark_mesh if bool(spec.get("spark", false)) else _chip_mesh
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 0.8
-	if bool(spec.get("spark", false)):
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.emission_enabled = true
-		mat.emission = (spec.colors[0] as Color)
-		mat.emission_energy_multiplier = 3.0
-	p.material_override = mat
-	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(p)
-	p.global_position = pos + n * 0.03
-	p.emitting = true
-	get_tree().create_timer(float(spec.life) + 0.3).timeout.connect(p.queue_free)
-	if bool(spec.get("dust", false)):
-		_dust(parent, pos, n, spec.colors[0])
-
-
-## Облачко пыли: несколько мягких квадов-билбордов, растут и тают.
-func _dust(parent: Node, pos: Vector3, n: Vector3, color: Color) -> void:
-	var p := GPUParticles3D.new()
-	p.one_shot = true
-	p.explosiveness = 1.0
-	p.amount = 8
-	p.lifetime = 1.1
-	var pm := ParticleProcessMaterial.new()
-	pm.direction = n
-	pm.spread = 45.0
-	pm.initial_velocity_min = 0.6
-	pm.initial_velocity_max = 1.6
-	pm.gravity = Vector3(0, 0.3, 0)
-	pm.damping_min = 2.0
-	pm.damping_max = 3.0
-	pm.scale_min = 0.6
-	pm.scale_max = 1.1
-	var scale_curve := CurveTexture.new()
-	var c := Curve.new()
-	c.add_point(Vector2(0, 0.4))
-	c.add_point(Vector2(1, 1.0))
-	scale_curve.curve = c
-	pm.scale_curve = scale_curve
-	var grad := Gradient.new()
-	grad.set_color(0, Color(color, 0.55))
-	grad.set_color(1, Color(color, 0.0))
-	var gt := GradientTexture1D.new()
-	gt.gradient = grad
-	pm.color_ramp = gt
-	p.process_material = pm
-	p.draw_pass_1 = _dust_mesh
-	var mat := StandardMaterial3D.new()
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_texture = _tex_dust
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	p.material_override = mat
-	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(p)
-	p.global_position = pos + n * 0.05
-	p.emitting = true
-	get_tree().create_timer(1.3).timeout.connect(p.queue_free)
-
-
-func _process_for(kind: String, n: Vector3, dir: Vector3) -> ParticleProcessMaterial:
-	var spec: Dictionary = FX[kind]
-	var pm := ParticleProcessMaterial.new()
-	# осколки летят от поверхности, чуть в сторону рикошета
-	pm.direction = (n * 1.0 + dir.bounce(n) * 0.5).normalized()
-	pm.spread = 55.0
-	pm.initial_velocity_min = float(spec.speed[0])
-	pm.initial_velocity_max = float(spec.speed[1])
-	pm.gravity = Vector3(0, float(spec.gravity), 0)
-	pm.scale_min = float(spec.size) * 0.6
-	pm.scale_max = float(spec.size) * 1.4
-	pm.angular_velocity_min = -360.0
-	pm.angular_velocity_max = 360.0
-	pm.damping_min = 0.5
-	pm.damping_max = 1.5
-	var grad := Gradient.new()
-	grad.set_color(0, spec.colors[0])
-	grad.set_color(1, spec.colors[1])
-	var gt := GradientTexture1D.new()
-	gt.gradient = grad
-	pm.color_initial_ramp = gt
-	return pm
-
-
-func _flash(parent: Node, pos: Vector3, color: Color) -> void:
-	var l := OmniLight3D.new()
-	l.light_color = color
-	l.light_energy = 3.0
-	l.omni_range = 2.5
-	parent.add_child(l)
-	l.global_position = pos
-	get_tree().create_timer(0.05).timeout.connect(l.queue_free)
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera != null and camera.global_position.distance_to(pos) > Balance.IMPACT_MAX_DISTANCE:
+		return
+	# Освободившиеся эффекты не удерживаем между рейдами; очередь ограничена при дроби/автомате.
+	for index: int in range(_bursts.size() - 1, -1, -1):
+		if not is_instance_valid(_bursts[index]):
+			_bursts.remove_at(index)
+	while _bursts.size() >= Balance.IMPACT_MAX_BURSTS:
+		var oldest: Node3D = _bursts.pop_front()
+		if is_instance_valid(oldest):
+			oldest.free()
+	var burst: ImpactBurst = BURST_SCENE.instantiate() as ImpactBurst
+	parent.add_child(burst)
+	burst.global_position = pos + n * Balance.IMPACT_OFFSET
+	burst.setup(kind, n, dir.normalized(), _rng.randi())
+	_bursts.append(burst)
 
 
 # ---------------------------------------------------------------- взрыв
@@ -313,27 +261,37 @@ func _blood(parent: Node, pos: Vector3, dir: Vector3, body: Object) -> void:
 # ---------------------------------------------------------------- декали
 
 func _decal(parent: Node, kind: String, pos: Vector3, n: Vector3) -> void:
-	match kind:
-		"glass":
-			# Декали не ложатся на прозрачное — трещина на стекле как наклейка-квад.
-			_place_sticker(parent, _tex_crack, pos, n, _rng.randf_range(0.55, 0.75), Color(0.92, 0.96, 1.0, 0.85))
-		"fabric", "cardboard":
-			_place_decal(parent, _tex_hole, pos, n, _rng.randf_range(0.12, 0.16), Color(0.1, 0.08, 0.06, 0.9))
-		"metal":
-			_place_decal(parent, _tex_hole, pos, n, _rng.randf_range(0.14, 0.18), Color(0.15, 0.13, 0.1, 0.95))
-		_:
-			_place_decal(parent, _tex_hole, pos, n, _rng.randf_range(0.2, 0.28), Color(0.2, 0.18, 0.16, 0.95))
+	if kind in ["snow", "glass"]:
+		return
+	var spec: Dictionary = Balance.IMPACT_DECALS.get(kind, Balance.IMPACT_DECALS.concrete)
+	var asset_kind: String = String(spec.asset)
+	var size_range: Vector2 = spec.size
+	var tint: Color = spec.tint
+	var textures: Array = _decal_textures.get(asset_kind, [])
+	var normals: Array = _decal_normals.get(asset_kind, [])
+	if not textures.is_empty():
+		var index: int = _rng.randi_range(0, textures.size() - 1)
+		var normal_texture: Texture2D = normals[index] as Texture2D if index < normals.size() else null
+		_place_decal(parent, textures[index] as Texture2D, pos, n, _rng.randf_range(size_range.x, size_range.y), tint, normal_texture)
+	else:
+		_place_decal(parent, _tex_hole, pos, n, _rng.randf_range(size_range.x, size_range.y), tint)
 
 
 ## Декаль проецируется вдоль своей -Y: ставим Y по нормали, случайный поворот вокруг неё.
-func _place_decal(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: float, tint: Color) -> void:
+func _place_decal(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: float, tint: Color, normal_tex: Texture2D = null) -> void:
+	# Autoload переживает уровень, а его декали — нет. Проверяем ссылку ДО типизированного присваивания.
+	for index: int in range(_decals.size() - 1, -1, -1):
+		if not is_instance_valid(_decals[index]):
+			_decals.remove_at(index)
 	var d := Decal.new()
 	d.texture_albedo = tex
+	if normal_tex != null:
+		d.texture_normal = normal_tex
 	d.modulate = tint
 	d.albedo_mix = 1.0
-	d.size = Vector3(size, 0.35, size)
+	d.size = Vector3(size, maxf(0.12, size * 0.6), size)
 	d.cull_mask = 1
-	d.normal_fade = 0.3
+	d.normal_fade = 0.45
 	var up := n.normalized()
 	var x := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
 	var z := x.cross(up).normalized()
@@ -349,6 +307,9 @@ func _place_decal(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: 
 
 ## Наклейка на прозрачной поверхности: квад с текстурой чуть перед точкой попадания, с обеих сторон.
 func _place_sticker(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: float, tint: Color) -> void:
+	for index: int in range(_stickers.size() - 1, -1, -1):
+		if not is_instance_valid(_stickers[index]):
+			_stickers.remove_at(index)
 	var mi := MeshInstance3D.new()
 	var quad := QuadMesh.new()
 	quad.size = Vector2(size, size)

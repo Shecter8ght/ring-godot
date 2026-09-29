@@ -11,6 +11,7 @@ extends Node3D
 
 ## Прочность, когда осыпается сама, урон пули по стеклу — Balance.GLASS.
 const HP := 100.0
+const CRACK_ATLAS_PATH := "res://assets/textures/impacts/glass_cracks.png"
 
 ## Панели: {xf: Transform3D (центр, X — вдоль, Z — нормаль), size: Vector2 (ширина, высота),
 ## floor_y, sill: Vector3 (размер подоконника, центр — под панелью), hp, broken}.
@@ -27,6 +28,8 @@ var _rng := RandomNumberGenerator.new()
 const GLASS_SHADER := """
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_disabled, specular_schlick_ggx;
+uniform sampler2D crack_atlas : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform bool has_crack_atlas = false;
 varying vec2 lp;
 varying vec4 cd;
 varying vec2 hitp;
@@ -70,11 +73,23 @@ float cracks(vec2 p, vec2 c, float amount, float seed) {
 	float outer = 1.0 - smoothstep(reach * 0.8, reach, r);
 	return clamp(max(rays * outer, max(rings * inner * 0.8, vor * inner * step(0.35, amount))), 0.0, 1.0);
 }
+// CC0-атлас даёт естественную форму трещин; размер повреждения растёт вместе с накопленным уроном.
+float atlas_cracks(vec2 p, vec2 c, float amount, float seed) {
+	float diameter = mix(0.34, 1.05, clamp(amount, 0.0, 1.0));
+	vec2 uv = (p - c) / diameter + vec2(0.5);
+	if (uv.x <= 0.0 || uv.y <= 0.0 || uv.x >= 1.0 || uv.y >= 1.0) { return 0.0; }
+	float cell = floor(seed * 15.999);
+	vec2 tile = vec2(mod(cell, 4.0), floor(cell / 4.0));
+	float mask = texture(crack_atlas, (tile + uv) / 4.0).a;
+	return mask * smoothstep(0.06, 0.28, amount);
+}
 void fragment() {
 	float amount = cd.r;
 	float seed = cd.g;
 	vec2 c = (hitp - 0.5) * cd.ba;
-	float k = amount > 0.001 ? cracks(lp, c, amount, seed) : 0.0;
+	float generated = amount > 0.001 ? cracks(lp, c, amount, seed) : 0.0;
+	float sampled = has_crack_atlas && amount > 0.001 ? atlas_cracks(lp, c, amount, seed) : 0.0;
+	float k = max(generated * (has_crack_atlas ? 0.22 : 1.0), sampled);
 	ALBEDO = mix(vec3(0.62, 0.72, 0.78), vec3(0.9, 0.93, 0.95), k);
 	ROUGHNESS = mix(0.08, 0.55, k);
 	METALLIC = 0.1;
@@ -95,6 +110,9 @@ func setup(specs: Array) -> void:
 	sh.code = GLASS_SHADER
 	var gm := ShaderMaterial.new()
 	gm.shader = sh
+	if ResourceLoader.exists(CRACK_ATLAS_PATH):
+		gm.set_shader_parameter("crack_atlas", load(CRACK_ATLAS_PATH) as Texture2D)
+		gm.set_shader_parameter("has_crack_atlas", true)
 	_glass_mm = MultiMesh.new()
 	_glass_mm.transform_format = MultiMesh.TRANSFORM_3D
 	_glass_mm.use_custom_data = true

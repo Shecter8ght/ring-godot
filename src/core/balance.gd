@@ -2,6 +2,42 @@ extends Node
 ## Весь баланс игры — только здесь. Autoload `Balance`.
 ## Другие скрипты читают значения отсюда и не держат своих чисел.
 
+# --- Попадания: визуальный масштаб в метрах, скорость м/с, время с ---
+## Художественные профили для читаемости, не расчёт разрушения или пробития.
+const IMPACT_MAX_BURSTS: int = 72
+const IMPACT_MAX_DECALS: int = 320
+const IMPACT_MAX_DISTANCE: float = 85.0
+const IMPACT_GRAVITY: float = 9.81
+const IMPACT_OFFSET: float = 0.012
+const IMPACT_CLEANUP_MARGIN: float = 0.15
+const IMPACT_SPIN: float = 420.0
+const IMPACT_SPARKS := {"count": Vector2i(3, 7), "speed": Vector2(3.5, 9.0), "size": Vector2(0.015, 0.038), "life": 0.2, "spread": 28.0, "emission": 2.8}
+const IMPACT_DUST := {"speed": Vector2(0.25, 0.85), "drag": Vector2(1.3, 2.4), "gravity": -0.15, "spread": 50.0}
+const IMPACT_DECALS: Dictionary = {
+	"concrete": {"asset": "concrete", "size": Vector2(0.10, 0.16), "tint": Color(0.82, 0.78, 0.7, 0.92)},
+	"tile": {"asset": "concrete", "size": Vector2(0.14, 0.22), "tint": Color(0.95, 0.93, 0.88, 0.9)},
+	"asphalt": {"asset": "concrete", "size": Vector2(0.09, 0.14), "tint": Color(0.55, 0.52, 0.48, 0.9)},
+	"metal": {"asset": "metal", "size": Vector2(0.07, 0.11), "tint": Color(0.34, 0.3, 0.25, 0.95)},
+	"wood": {"asset": "wood", "size": Vector2(0.10, 0.16), "tint": Color(0.86, 0.74, 0.64, 0.95)},
+	"cardboard": {"asset": "wood", "size": Vector2(0.08, 0.12), "tint": Color(0.78, 0.62, 0.4, 0.9)},
+	"plastic": {"asset": "metal", "size": Vector2(0.07, 0.11), "tint": Color(0.28, 0.28, 0.3, 0.92)},
+	"fabric": {"asset": "", "size": Vector2(0.07, 0.10), "tint": Color(0.08, 0.07, 0.06, 0.85)},
+}
+## Меш определяет форму; size — длина наибольшей стороны, dust_size — диаметр облачка.
+const IMPACT_SURFACES: Dictionary = {
+	"concrete": {"mesh": "chip", "count": Vector2i(7, 12), "size": Vector2(0.008, 0.035), "speed": Vector2(1.2, 4.2), "life": 0.55, "spread": 48.0, "drag": 0.4, "color": Color(0.59, 0.56, 0.5), "dust": 5, "dust_size": Vector2(0.13, 0.36), "dust_life": 0.8, "opacity": 0.3},
+	"tile": {"mesh": "flake", "count": Vector2i(5, 9), "size": Vector2(0.012, 0.044), "speed": Vector2(1.5, 4.5), "life": 0.5, "spread": 55.0, "drag": 0.3, "color": Color(0.8, 0.78, 0.71), "dust": 3, "dust_size": Vector2(0.08, 0.22), "dust_life": 0.55, "opacity": 0.2},
+	"asphalt": {"mesh": "chip", "count": Vector2i(5, 9), "size": Vector2(0.006, 0.027), "speed": Vector2(1.0, 3.2), "life": 0.48, "spread": 52.0, "drag": 0.5, "color": Color(0.25, 0.24, 0.22), "dust": 3, "dust_size": Vector2(0.1, 0.26), "dust_life": 0.6, "opacity": 0.2},
+	"metal": {"mesh": "flake", "count": Vector2i(2, 4), "size": Vector2(0.003, 0.012), "speed": Vector2(1.5, 4.0), "life": 0.3, "spread": 40.0, "drag": 0.2, "color": Color(0.29, 0.3, 0.31), "dust": 0},
+	"glass": {"mesh": "shard", "count": Vector2i(5, 9), "size": Vector2(0.01, 0.04), "speed": Vector2(1.2, 4.0), "life": 0.6, "spread": 38.0, "drag": 0.2, "color": Color(0.68, 0.79, 0.81, 0.6), "dust": 0},
+	"wood": {"mesh": "splinter", "count": Vector2i(5, 9), "size": Vector2(0.016, 0.065), "speed": Vector2(1.0, 3.8), "life": 0.6, "spread": 42.0, "drag": 0.7, "color": Color(0.54, 0.37, 0.19), "dust": 2, "dust_size": Vector2(0.07, 0.17), "dust_life": 0.45, "opacity": 0.15},
+	"cardboard": {"mesh": "paper", "count": Vector2i(3, 5), "size": Vector2(0.015, 0.045), "speed": Vector2(0.5, 1.8), "life": 0.75, "spread": 50.0, "drag": 2.2, "color": Color(0.58, 0.44, 0.27), "dust": 1, "dust_size": Vector2(0.06, 0.12), "dust_life": 0.4, "opacity": 0.1},
+	"fabric": {"mesh": "fiber", "count": Vector2i(2, 4), "size": Vector2(0.005, 0.018), "speed": Vector2(0.3, 1.0), "life": 0.4, "spread": 55.0, "drag": 3.0, "color": Color(0.28, 0.25, 0.22), "dust": 1, "dust_size": Vector2(0.04, 0.09), "dust_life": 0.3, "opacity": 0.08},
+	"plastic": {"mesh": "flake", "count": Vector2i(3, 6), "size": Vector2(0.008, 0.032), "speed": Vector2(1.0, 3.0), "life": 0.5, "spread": 48.0, "drag": 0.8, "color": Color(0.24, 0.25, 0.27), "dust": 0},
+	"flesh": {"mesh": "drop", "count": Vector2i(5, 9), "size": Vector2(0.004, 0.014), "speed": Vector2(0.8, 2.6), "life": 0.45, "spread": 30.0, "drag": 0.9, "color": Color(0.22, 0.018, 0.012), "dust": 0},
+	"snow": {"mesh": "chip", "count": Vector2i(5, 9), "size": Vector2(0.01, 0.032), "speed": Vector2(0.6, 2.3), "life": 0.6, "spread": 55.0, "drag": 1.4, "color": Color(0.82, 0.87, 0.9), "dust": 4, "dust_size": Vector2(0.12, 0.3), "dust_life": 0.7, "opacity": 0.24},
+}
+
 # --- Игрок: движение по стойкам, м/с ---
 const PLAYER_WALK_SPEED := 2.6
 const PLAYER_SPRINT_SPEED := 5.2
