@@ -80,6 +80,8 @@ var _bloom: float = 0.0
 var kick_vis: float = 0.0
 var _rng := RandomNumberGenerator.new()
 var _hand: Node3D
+## Фонари и лазеры модели оружия — их светит по прицельной оси (_update_hand).
+var _aimed: Array[Node3D] = []
 var _weapon_model: Node3D
 var _weapon_model_id: String = ""
 var _ragdoll: Ragdoll
@@ -123,6 +125,7 @@ var _nade_aim: GrenadeAim
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
 @onready var _muzzle: OmniLight3D = $Body/Muzzle
+@onready var _animator: CharacterAnimator = get_node_or_null("CharacterAnimator") as CharacterAnimator
 @onready var health: Health = $Health
 ## Рюкзак: меняет хост, видят все (см. Inventory). Создаётся в _ready.
 var inventory: Inventory
@@ -716,20 +719,31 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 	kick_vis += clampf(kv / 0.05, 0.3, 1.8) * (Balance.ADS_RECOIL_BACK_SCALE if in_ads else 1.0)
 
 
-## Оружие в правой руке у груди, повёрнуто с корпусом; высота — по стойке.
+## Оружие — в правой руке модели (кость руки, CharacterAnimator.weapon_grip): идёт за руками
+## в любой позе — ходьба, бег, присед, лёжа, перезарядка. Без модели Persona — у груди, как раньше.
 func _update_hand() -> void:
 	var key := weapon_id + str(weapon_mods)
+	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
+	var yaw := _body.rotation.y
 	if _weapon_model_id != key:
 		if _weapon_model:
 			_weapon_model.queue_free()
 		_weapon_model = WeaponModels.build(weapon_id, weapon_mods) if weapon_id != "" else Node3D.new()
-		_hand.add_child(_weapon_model)
+		var family := String(WeaponDb.weapon(weapon_id).get("model", "rifle")) if weapon_id != "" else "rifle"
+		var grip: Node3D = _animator.weapon_grip(family) if _animator else null
+		(grip if grip else _hand).add_child(_weapon_model)
 		_weapon_model_id = key
+		# фонари и лазеры смотрят туда, куда целится игрок, а не куда анимация повернула ствол:
+		# запоминаем их поворот внутри модели оружия
+		_aimed.clear()
+		for n in _weapon_model.find_children("*", "Node3D", true, false):
+			if n is SpotLight3D or String(n.name).begins_with("LaserBeam"):
+				n.set_meta("aim_rel", _weapon_model.global_basis.orthonormalized().inverse() * (n as Node3D).global_basis)
+				_aimed.append(n as Node3D)
 		if ads:
 			set_first_person(true)
-	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
-	var yaw := _body.rotation.y
 	_hand.visible = health.alive
+	_weapon_model.visible = health.alive
 	# фонари и лазеры — каждый по своему состоянию; от первого лица у себя светит модель в руках
 	# (CameraRig) — там, куда смотрит ствол
 	for n in _weapon_model.find_children("Flashlight*", "SpotLight3D", true, false):
@@ -737,8 +751,12 @@ func _update_hand() -> void:
 	for n in _weapon_model.find_children("LaserBeam*", "Node3D", true, false):
 		(n as Node3D).visible = tac_on(weapon_mods, n, "laser") and not (ads and is_local())
 	_hand.position = Basis(Vector3.UP, yaw) * Vector3(-0.17, 1.24 * h, 0.24)
-	# ствол (и фонарь на нём) — туда, куда смотрит игрок, и вверх-вниз (look_pitch синхронизируется)
+	# прицельная ось: куда смотрит игрок, и вверх-вниз (look_pitch синхронизируется)
 	_hand.rotation = Vector3(-_recoil - look_pitch, yaw, 0.0)
+	var aim := _hand.global_basis.orthonormalized()
+	for n in _aimed:
+		if is_instance_valid(n):
+			n.global_basis = aim * (n.get_meta("aim_rel") as Basis)
 
 
 ## Включён ли фонарь / лазер (kind: light / laser) того узла модели (meta "mount") по обвесу mods.

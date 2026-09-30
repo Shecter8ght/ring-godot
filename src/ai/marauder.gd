@@ -375,9 +375,15 @@ func _show_gun() -> void:
 	var gun := WeaponModels.build(String(e.id), e.get("mods", {}))
 	for l in gun.find_children("Flashlight_*", "SpotLight3D", true, false):
 		_fade(l as Light3D)
-	var pistol := String(WeaponDb.weapon(String(e.id)).get("class", "")) == "PISTOL"
-	gun.position = Vector3(-0.17, 1.24, 0.3 if pistol else 0.22) / _base_scale
-	_body.add_child(gun)
+	# в правой руке модели (кость руки): идёт за руками в любой позе; без Persona — у груди
+	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
+	var grip: Node3D = anim.weapon_grip(String(WeaponDb.weapon(String(e.id)).get("model", "rifle"))) if anim else null
+	if grip:
+		grip.add_child(gun)
+	else:
+		var pistol := String(WeaponDb.weapon(String(e.id)).get("class", "")) == "PISTOL"
+		gun.position = Vector3(-0.17, 1.24, 0.3 if pistol else 0.22) / _base_scale
+		_body.add_child(gun)
 	_main_gun = gun
 
 

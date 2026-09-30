@@ -17,6 +17,13 @@ var _last_event_seq: int = 0
 var _one_shot: String = ""
 var _current: String = ""
 var _held_prone: bool = false
+## Оружие в правой руке: кость mixamorig_RightHand → узел Grip со смещением семейства рукояток
+## (data/weapon_sockets.json, tools/bake_weapon_sockets.gd). Модель вешают Player / Marauder.
+const SOCKETS := "res://data/weapon_sockets.json"
+## На время этих клипов оружие прячется: рука занята (бросок, подобрать с пола).
+const HIDE_WEAPON := ["grenade_throw", "pickup"]
+static var _sockets: Dictionary = {}
+var _grip: Node3D
 
 
 func _ready() -> void:
@@ -79,6 +86,8 @@ func _process(delta: float) -> void:
 		aiming = enemy.state == Marauder.State.COMBAT
 		event_seq = enemy.animation_event_seq
 		event_name = enemy.animation_event
+	if _grip:
+		_grip.visible = not HIDE_WEAPON.has(_one_shot)
 	if event_seq != _last_event_seq:
 		_last_event_seq = event_seq
 		if _player.has_animation(event_name):
@@ -130,6 +139,44 @@ func _process(delta: float) -> void:
 	else:
 		_held_prone = false
 	_player.speed_scale = 0.0 if prone and not moving else 1.0
+
+
+## Узел в правой руке для модели оружия (семейство рукояток: pistol / rifle / shotgun / bolt —
+## поле model оружия). Заводится при первом вызове; null — модели Persona нет.
+func weapon_grip(family: String) -> Node3D:
+	if _grip == null:
+		if _model == null:
+			return null
+		var skeletons: Array[Node] = _model.find_children("*", "Skeleton3D", true, false)
+		if skeletons.is_empty():
+			return null
+		var socket := BoneAttachment3D.new()
+		socket.name = "WeaponSocket"
+		socket.bone_name = "mixamorig_RightHand"
+		(skeletons[0] as Skeleton3D).add_child(socket)
+		_grip = Node3D.new()
+		_grip.name = "Grip"
+		socket.add_child(_grip)
+	_grip.transform = socket_transform(family)
+	return _grip
+
+
+## Как оружие семейства лежит в ладони (в осях кости правой руки).
+static func socket_transform(family: String) -> Transform3D:
+	if _sockets.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SOCKETS))
+		if parsed is Dictionary:
+			_sockets = parsed
+	var s: Dictionary = _sockets.get(family, _sockets.get("rifle", {}))
+	if s.is_empty():
+		return Transform3D.IDENTITY
+	var b: Array = s.basis
+	return Transform3D(Basis(_vec(b[0]), _vec(b[1]), _vec(b[2])), _vec(s.origin))
+
+
+static func _vec(a: Variant) -> Vector3:
+	var v: Array = a
+	return Vector3(float(v[0]), float(v[1]), float(v[2]))
 
 
 func _direction(travel: Vector3) -> String:
