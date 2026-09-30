@@ -1,5 +1,5 @@
 {
- "_comment": "Каталог всех звуков игры (стенд tools/sound_bench, список — docs/sound_catalog.md: python tools/sound_catalog_md.py). file — префикс в assets/audio: файлы «префикс + номер» (guns/carbine_04.ogg); kind — вид звука, которым игра его играет сейчас (Audio.play; «@far» — дальняя запись того же вида; «loop:…» — фоновые лупы); пусто — в коде ещё не зовётся. type: one — разовый, loop — луп, layer — слой поверх другого звука. variants — сколько вариантов нужно, prio: 1 база, 2 важно, 3 детали; now — как звучит сейчас («нет» — в игре такого звука нет совсем).",
+ "_comment": "Каталог всех звуков игры (стенд tools/sound_bench, список — docs/sound_catalog.md: python tools/sound_catalog_md.py). file — префикс в assets/audio: файлы «префикс + номер» (guns/carbine_04.ogg); kind — вид звука, которым игра его играет сейчас (Audio.play; «@far» — дальняя запись того же вида; «loop:…» — фоновые лупы); пусто — в коде ещё не зовётся. group — подгруппа внутри раздела (порядок в файле = порядок на стенде). type: one — разовый, loop — луп, layer — слой поверх другого звука. variants — сколько вариантов нужно, prio: 1 база, 2 важно, 3 детали; now — как звучит сейчас («нет» — в игре такого звука нет совсем).",
  "cats": [
   "Оружие — выстрел",
   "Оружие — обращение",
@@ -29,7 +29,21 @@
    "type": "one",
    "variants": 5,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Пистолеты"
+  },
+  {
+   "id": "shot_pistol_far",
+   "cat": "Оружие — выстрел",
+   "name": "Пистолет — выстрел вдали",
+   "when": "пистолет дальше 30 м: хлопок с эхом, без щелчка",
+   "file": "guns/pistol_far_",
+   "kind": "shot_pistol@far",
+   "type": "one",
+   "variants": 3,
+   "prio": 1,
+   "now": "записи",
+   "group": "Пистолеты"
   },
   {
    "id": "shot_hg_01",
@@ -42,7 +56,8 @@
    "type": "one",
    "variants": 5,
    "prio": 1,
-   "now": "общий запасной набор пистолетов"
+   "now": "общий запасной набор пистолетов",
+   "group": "Пистолеты"
   },
   {
    "id": "shot_hg_02",
@@ -55,7 +70,8 @@
    "type": "one",
    "variants": 5,
    "prio": 1,
-   "now": "общий запасной набор пистолетов"
+   "now": "общий запасной набор пистолетов",
+   "group": "Пистолеты"
   },
   {
    "id": "shot_hg_03",
@@ -68,7 +84,8 @@
    "type": "one",
    "variants": 5,
    "prio": 1,
-   "now": "общий запасной набор пистолетов"
+   "now": "общий запасной набор пистолетов",
+   "group": "Пистолеты"
   },
   {
    "id": "shot_hg_04",
@@ -81,19 +98,8 @@
    "type": "one",
    "variants": 5,
    "prio": 1,
-   "now": "общий запасной набор пистолетов"
-  },
-  {
-   "id": "shot_pistol_far",
-   "cat": "Оружие — выстрел",
-   "name": "Пистолет — выстрел вдали",
-   "when": "пистолет дальше 30 м: хлопок с эхом, без щелчка",
-   "file": "guns/pistol_far_",
-   "kind": "shot_pistol@far",
-   "type": "one",
-   "variants": 3,
-   "prio": 1,
-   "now": "записи"
+   "now": "общий запасной набор пистолетов",
+   "group": "Пистолеты"
   },
   {
    "id": "shot_smg",
@@ -106,7 +112,8 @@
    "type": "one",
    "variants": 5,
    "prio": 2,
-   "now": "общий запасной набор пистолетов"
+   "now": "общий запасной набор пистолетов",
+   "group": "Пистолеты-пулемёты"
   },
   {
    "id": "shot_smg_far",
@@ -118,7 +125,9 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "звучит как пистолет"
+   "now": "звучит как пистолет",
+   "group": "Пистолеты-пулемёты",
+   "fallback": "shot_pistol_far"
   },
   {
    "id": "shot_rifle",
@@ -130,7 +139,8 @@
    "type": "one",
    "variants": 5,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Автоматы, карабины, винтовки"
   },
   {
    "id": "shot_rifle_far",
@@ -142,7 +152,8 @@
    "type": "one",
    "variants": 3,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Автоматы, карабины, винтовки"
   },
   {
    "id": "shot_ak762",
@@ -155,7 +166,8 @@
    "type": "one",
    "variants": 5,
    "prio": 2,
-   "now": "звучит как карабин"
+   "now": "звучит как карабин",
+   "group": "Автоматы, карабины, винтовки"
   },
   {
    "id": "shot_ak762_far",
@@ -168,7 +180,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "звучит как карабин"
+   "now": "звучит как карабин",
+   "group": "Автоматы, карабины, винтовки"
   },
   {
    "id": "shot_battle",
@@ -181,7 +194,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "звучит как карабин"
+   "now": "звучит как карабин",
+   "group": "Автоматы, карабины, винтовки"
   },
   {
    "id": "shot_shotgun",
@@ -193,7 +207,8 @@
    "type": "one",
    "variants": 4,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Ружья"
   },
   {
    "id": "shot_shotgun_far",
@@ -205,7 +220,8 @@
    "type": "one",
    "variants": 3,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Ружья"
   },
   {
    "id": "shot_marksman",
@@ -217,7 +233,8 @@
    "type": "one",
    "variants": 4,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Марксманские и снайперские"
   },
   {
    "id": "shot_marksman_far",
@@ -229,7 +246,8 @@
    "type": "one",
    "variants": 3,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Марксманские и снайперские"
   },
   {
    "id": "shot_pistol_sup",
@@ -242,7 +260,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "обычный выстрел, только тише"
+   "now": "обычный выстрел, только тише",
+   "group": "С глушителем"
   },
   {
    "id": "shot_rifle_sup",
@@ -255,7 +274,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "обычный выстрел, только тише"
+   "now": "обычный выстрел, только тише",
+   "group": "С глушителем"
   },
   {
    "id": "shot_sup939",
@@ -268,7 +288,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "обычный выстрел, только тише"
+   "now": "обычный выстрел, только тише",
+   "group": "С глушителем"
   },
   {
    "id": "tail_outdoor",
@@ -280,7 +301,8 @@
    "type": "layer",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Эхо места — хвост выстрела"
   },
   {
    "id": "tail_room",
@@ -292,7 +314,8 @@
    "type": "layer",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Эхо места — хвост выстрела"
   },
   {
    "id": "tail_hall",
@@ -304,19 +327,8 @@
    "type": "layer",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "mech_rifle",
-   "cat": "Оружие — выстрел",
-   "name": "Механика автомата — слой вблизи",
-   "when": "лязг затворной рамы у своего ствола",
-   "file": "guns/mech_rifle_",
-   "kind": "mech_rifle",
-   "type": "layer",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Эхо места — хвост выстрела"
   },
   {
    "id": "mech_pistol",
@@ -328,20 +340,21 @@
    "type": "layer",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Механика у стрелка"
   },
   {
-   "id": "dry_fire",
+   "id": "mech_rifle",
    "cat": "Оружие — выстрел",
-   "name": "Сухой щелчок — патронов нет",
-   "when": "спуск на пустом",
-   "file": "guns/dry_",
-   "kind": "dry_fire",
-   "fallback": "nade_pin",
-   "type": "one",
+   "name": "Механика автомата — слой вблизи",
+   "when": "лязг затворной рамы у своего ствола",
+   "file": "guns/mech_rifle_",
+   "kind": "mech_rifle",
+   "type": "layer",
    "variants": 3,
-   "prio": 1,
-   "now": "общий щелчок «pin»"
+   "prio": 3,
+   "now": "нет",
+   "group": "Механика у стрелка"
   },
   {
    "id": "shell_hard",
@@ -353,19 +366,8 @@
    "type": "one",
    "variants": 6,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "shell_shotgun",
-   "cat": "Оружие — выстрел",
-   "name": "Гильза ружья падает на пол",
-   "when": "после выстрела из ружья",
-   "file": "guns/shell_sg_",
-   "kind": "",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Гильзы"
   },
   {
    "id": "shell_metal",
@@ -377,7 +379,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Гильзы"
   },
   {
    "id": "shell_soft",
@@ -389,7 +392,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Гильзы"
   },
   {
    "id": "shell_roll",
@@ -401,7 +405,21 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Гильзы"
+  },
+  {
+   "id": "shell_shotgun",
+   "cat": "Оружие — выстрел",
+   "name": "Гильза ружья падает на пол",
+   "when": "после выстрела из ружья",
+   "file": "guns/shell_sg_",
+   "kind": "",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "нет",
+   "group": "Гильзы"
   },
   {
    "id": "reload_pistol",
@@ -413,7 +431,8 @@
    "type": "one",
    "variants": 3,
    "prio": 1,
-   "now": "записи; ещё — обвесы и надеть из ящика"
+   "now": "записи; ещё — обвесы и надеть из ящика",
+   "group": "Перезарядка"
   },
   {
    "id": "reload_rifle",
@@ -425,7 +444,8 @@
    "type": "one",
    "variants": 3,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Перезарядка"
   },
   {
    "id": "reload_shotgun",
@@ -437,19 +457,8 @@
    "type": "one",
    "variants": 4,
    "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "bolt_cycle",
-   "cat": "Оружие — обращение",
-   "name": "Помпа / затвор после выстрела",
-   "when": "помповое ружьё, болтовая винтовка; смена оружия",
-   "file": "guns/bolt_",
-   "kind": "bolt",
-   "type": "one",
-   "variants": 3,
-   "prio": 1,
-   "now": "записи патрона в трубку"
+   "now": "записи",
+   "group": "Перезарядка"
   },
   {
    "id": "mag_out",
@@ -462,7 +471,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "внутри записи перезарядки"
+   "now": "внутри записи перезарядки",
+   "group": "Перезарядка"
   },
   {
    "id": "mag_in",
@@ -475,188 +485,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "внутри записи перезарядки"
-  },
-  {
-   "id": "charge",
-   "cat": "Оружие — обращение",
-   "name": "Затвор на себя — досыл",
-   "when": "конец перезарядки, устранение задержки",
-   "file": "guns/charge_",
-   "kind": "charge",
-   "fallback": "bolt_cycle",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "затвор (bolt)"
-  },
-  {
-   "id": "weapon_draw",
-   "cat": "Оружие — обращение",
-   "name": "Достать / убрать оружие",
-   "when": "смена оружия",
-   "file": "gear/draw_",
-   "kind": "weapon_draw",
-   "fallback": "bolt_cycle",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "затвор (bolt)"
-  },
-  {
-   "id": "ads_raise",
-   "cat": "Оружие — обращение",
-   "name": "Вскинуть к плечу — шорох снаряжения",
-   "when": "начало прицеливания",
-   "file": "gear/ads_",
-   "kind": "ads_raise",
-   "fallback": "reload_pistol",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "tac_click",
-   "cat": "Оружие — обращение",
-   "name": "Фонарь / ЛЦУ — кнопка",
-   "when": "включить фонарь или ЛЦУ",
-   "file": "gear/tac_click_",
-   "kind": "tac_click",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "sight_switch",
-   "cat": "Оружие — обращение",
-   "name": "Переключение на угловой прицел",
-   "when": "основной ↔ угловой",
-   "file": "gear/sight_",
-   "kind": "sight_switch",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "mag_check",
-   "cat": "Оружие — обращение",
-   "name": "Проверка магазина",
-   "when": "держать R — проверить патроны",
-   "file": "gear/mag_check_",
-   "kind": "mag_check",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "nvg_on",
-   "cat": "Оружие — обращение",
-   "name": "ПНВ включён — писк разгона",
-   "when": "надеть / включить ПНВ",
-   "file": "gear/nvg_on_",
-   "kind": "nvg_on",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 2,
-   "prio": 2,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "nvg_off",
-   "cat": "Оружие — обращение",
-   "name": "ПНВ выключен",
-   "when": "выключить ПНВ",
-   "file": "gear/nvg_off_",
-   "kind": "nvg_off",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "fire_mode",
-   "cat": "Оружие — обращение",
-   "name": "Переводчик режимов огня",
-   "when": "одиночный ↔ очередь",
-   "file": "gear/selector_",
-   "kind": "",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "в игре нет такого действия"
-  },
-  {
-   "id": "round_in",
-   "cat": "Оружие — обращение",
-   "name": "Патрон в магазин",
-   "when": "снаряжение по одному патрону (MagOps)",
-   "file": "gear/round_in_",
-   "kind": "round_in",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 6,
-   "prio": 2,
-   "now": "общий щелчок «pin» на каждый шаг"
-  },
-  {
-   "id": "round_out",
-   "cat": "Оружие — обращение",
-   "name": "Патрон из магазина",
-   "when": "разрядка по одному патрону (MagOps)",
-   "file": "gear/round_out_",
-   "kind": "round_out",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 6,
-   "prio": 2,
-   "now": "общий щелчок «pin» на каждый шаг"
-  },
-  {
-   "id": "plate_in",
-   "cat": "Оружие — обращение",
-   "name": "Плита в плитоносец",
-   "when": "вставить бронеплиту",
-   "file": "gear/plate_in_",
-   "kind": "plate_in",
-   "fallback": "reload_pistol",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "перезарядка пистолета"
-  },
-  {
-   "id": "plate_out",
-   "cat": "Оружие — обращение",
-   "name": "Плита из плитоносца",
-   "when": "вынуть бронеплиту",
-   "file": "gear/plate_out_",
-   "kind": "plate_out",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "mod_fit",
-   "cat": "Оружие — обращение",
-   "name": "Обвес: поставить / снять",
-   "when": "прицел, фонарь, глушитель, рукоятка",
-   "file": "gear/mod_",
-   "kind": "mod_fit",
-   "fallback": "reload_pistol",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "перезарядка пистолета"
+   "now": "внутри записи перезарядки",
+   "group": "Перезарядка"
   },
   {
    "id": "mag_drop",
@@ -669,20 +499,22 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Перезарядка"
   },
   {
-   "id": "jam",
+   "id": "charge",
    "cat": "Оружие — обращение",
-   "name": "Задержка — глухой щелчок вместо выстрела",
-   "when": "осечка, перекос патрона",
-   "file": "guns/jam_",
-   "kind": "jam",
-   "fallback": "nade_pin",
+   "name": "Затвор на себя — досыл",
+   "when": "конец перезарядки, устранение задержки",
+   "file": "guns/charge_",
+   "kind": "charge",
+   "fallback": "bolt_cycle",
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "затвор (bolt)",
+   "group": "Перезарядка"
   },
   {
    "id": "bolt_lock",
@@ -695,7 +527,105 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Перезарядка"
+  },
+  {
+   "id": "bolt_cycle",
+   "cat": "Оружие — обращение",
+   "name": "Помпа / затвор после выстрела",
+   "when": "помповое ружьё, болтовая винтовка; смена оружия",
+   "file": "guns/bolt_",
+   "kind": "bolt",
+   "type": "one",
+   "variants": 3,
+   "prio": 1,
+   "now": "записи патрона в трубку",
+   "group": "Затвор, помпа",
+   "fallback": "reload_shotgun"
+  },
+  {
+   "id": "dry_fire",
+   "cat": "Оружие — обращение",
+   "name": "Сухой щелчок — патронов нет",
+   "when": "спуск на пустом",
+   "file": "guns/dry_",
+   "kind": "dry_fire",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 3,
+   "prio": 1,
+   "now": "общий щелчок «pin»",
+   "group": "Спуск и неисправности"
+  },
+  {
+   "id": "jam",
+   "cat": "Оружие — обращение",
+   "name": "Задержка — глухой щелчок вместо выстрела",
+   "when": "осечка, перекос патрона",
+   "file": "guns/jam_",
+   "kind": "jam",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "нет",
+   "group": "Спуск и неисправности"
+  },
+  {
+   "id": "weapon_draw",
+   "cat": "Оружие — обращение",
+   "name": "Достать / убрать оружие",
+   "when": "смена оружия",
+   "file": "gear/draw_",
+   "kind": "weapon_draw",
+   "fallback": "bolt_cycle",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "затвор (bolt)",
+   "group": "Обращение с оружием"
+  },
+  {
+   "id": "ads_raise",
+   "cat": "Оружие — обращение",
+   "name": "Вскинуть к плечу — шорох снаряжения",
+   "when": "начало прицеливания",
+   "file": "gear/ads_",
+   "kind": "ads_raise",
+   "fallback": "reload_pistol",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "нет",
+   "group": "Обращение с оружием"
+  },
+  {
+   "id": "mag_check",
+   "cat": "Оружие — обращение",
+   "name": "Проверка магазина",
+   "when": "держать R — проверить патроны",
+   "file": "gear/mag_check_",
+   "kind": "mag_check",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "общий щелчок «pin»",
+   "group": "Обращение с оружием"
+  },
+  {
+   "id": "fire_mode",
+   "cat": "Оружие — обращение",
+   "name": "Переводчик режимов огня",
+   "when": "одиночный ↔ очередь",
+   "file": "gear/selector_",
+   "kind": "",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "в игре нет такого действия",
+   "group": "Обращение с оружием"
   },
   {
    "id": "weapon_bump",
@@ -707,7 +637,134 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Обращение с оружием"
+  },
+  {
+   "id": "tac_click",
+   "cat": "Оружие — обращение",
+   "name": "Фонарь / ЛЦУ — кнопка",
+   "when": "включить фонарь или ЛЦУ",
+   "file": "gear/tac_click_",
+   "kind": "tac_click",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "общий щелчок «pin»",
+   "group": "Приборы и обвес"
+  },
+  {
+   "id": "sight_switch",
+   "cat": "Оружие — обращение",
+   "name": "Переключение на угловой прицел",
+   "when": "основной ↔ угловой",
+   "file": "gear/sight_",
+   "kind": "sight_switch",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "общий щелчок «pin»",
+   "group": "Приборы и обвес"
+  },
+  {
+   "id": "nvg_on",
+   "cat": "Оружие — обращение",
+   "name": "ПНВ включён — писк разгона",
+   "when": "надеть / включить ПНВ",
+   "file": "gear/nvg_on_",
+   "kind": "nvg_on",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 2,
+   "prio": 2,
+   "now": "общий щелчок «pin»",
+   "group": "Приборы и обвес"
+  },
+  {
+   "id": "nvg_off",
+   "cat": "Оружие — обращение",
+   "name": "ПНВ выключен",
+   "when": "выключить ПНВ",
+   "file": "gear/nvg_off_",
+   "kind": "nvg_off",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "общий щелчок «pin»",
+   "group": "Приборы и обвес"
+  },
+  {
+   "id": "mod_fit",
+   "cat": "Оружие — обращение",
+   "name": "Обвес: поставить / снять",
+   "when": "прицел, фонарь, глушитель, рукоятка",
+   "file": "gear/mod_",
+   "kind": "mod_fit",
+   "fallback": "reload_pistol",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "перезарядка пистолета",
+   "group": "Приборы и обвес"
+  },
+  {
+   "id": "round_in",
+   "cat": "Оружие — обращение",
+   "name": "Патрон в магазин",
+   "when": "снаряжение по одному патрону (MagOps)",
+   "file": "gear/round_in_",
+   "kind": "round_in",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 6,
+   "prio": 2,
+   "now": "общий щелчок «pin» на каждый шаг",
+   "group": "Снаряжение магазинов и плит"
+  },
+  {
+   "id": "round_out",
+   "cat": "Оружие — обращение",
+   "name": "Патрон из магазина",
+   "when": "разрядка по одному патрону (MagOps)",
+   "file": "gear/round_out_",
+   "kind": "round_out",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 6,
+   "prio": 2,
+   "now": "общий щелчок «pin» на каждый шаг",
+   "group": "Снаряжение магазинов и плит"
+  },
+  {
+   "id": "plate_in",
+   "cat": "Оружие — обращение",
+   "name": "Плита в плитоносец",
+   "when": "вставить бронеплиту",
+   "file": "gear/plate_in_",
+   "kind": "plate_in",
+   "fallback": "reload_pistol",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "перезарядка пистолета",
+   "group": "Снаряжение магазинов и плит"
+  },
+  {
+   "id": "plate_out",
+   "cat": "Оружие — обращение",
+   "name": "Плита из плитоносца",
+   "when": "вынуть бронеплиту",
+   "file": "gear/plate_out_",
+   "kind": "plate_out",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "общий щелчок «pin»",
+   "group": "Снаряжение магазинов и плит"
   },
   {
    "id": "nade_pin",
@@ -719,7 +776,8 @@
    "type": "one",
    "variants": 2,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Граната"
   },
   {
    "id": "nade_throw",
@@ -732,7 +790,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Граната"
   },
   {
    "id": "nade_bounce",
@@ -745,7 +804,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "попадание в металл"
+   "now": "попадание в металл",
+   "group": "Граната"
   },
   {
    "id": "explosion",
@@ -757,7 +817,8 @@
    "type": "one",
    "variants": 3,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Взрыв"
   },
   {
    "id": "explosion_far",
@@ -769,7 +830,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Взрыв"
   },
   {
    "id": "debris",
@@ -781,7 +843,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "записи"
+   "now": "записи",
+   "group": "Взрыв"
   },
   {
    "id": "tinnitus",
@@ -793,7 +856,8 @@
    "type": "one",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Взрыв"
   },
   {
    "id": "flare_ignite",
@@ -806,7 +870,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Ракеты и химсвет"
   },
   {
    "id": "flare_burn",
@@ -818,130 +883,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "impact_concrete",
-   "cat": "Пули и попадания",
-   "name": "Попадание в бетон",
-   "when": "пуля в стену, пол, асфальт",
-   "file": "hits/concrete_",
-   "kind": "impact_hard",
-   "type": "one",
-   "variants": 6,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "impact_hard",
-   "cat": "Пули и попадания",
-   "name": "Попадание в твёрдое (плитка, камень)",
-   "when": "пуля в плитку, камень",
-   "file": "hits/hard_",
-   "kind": "impact_hard",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "impact_metal",
-   "cat": "Пули и попадания",
-   "name": "Попадание в металл",
-   "when": "пуля в металл; ремонт генератора",
-   "file": "hits/metal_",
-   "kind": "impact_metal",
-   "type": "one",
-   "variants": 6,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "impact_glass",
-   "cat": "Пули и попадания",
-   "name": "Попадание в стекло",
-   "when": "пуля в витрину",
-   "file": "hits/glass_",
-   "kind": "impact_glass",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "impact_wood",
-   "cat": "Пули и попадания",
-   "name": "Попадание в дерево",
-   "when": "пуля в дерево, картон, ткань, пластик",
-   "file": "hits/wood_",
-   "kind": "impact_soft",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "impact_soft",
-   "cat": "Пули и попадания",
-   "name": "Попадание в мягкое (ткань, картон, пластик)",
-   "when": "отдельно от дерева",
-   "file": "hits/soft_",
-   "kind": "impact_soft",
-   "fallback": "impact_wood",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "попадание в дерево"
-  },
-  {
-   "id": "impact_flesh",
-   "cat": "Пули и попадания",
-   "name": "Попадание в тело",
-   "when": "пуля в человека",
-   "file": "body/hit_",
-   "kind": "hit",
-   "type": "one",
-   "variants": 5,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "impact_plate",
-   "cat": "Пули и попадания",
-   "name": "Пуля в бронеплиту",
-   "when": "плита остановила пулю",
-   "file": "hits/plate_",
-   "kind": "impact_plate",
-   "fallback": "impact_metal",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "now": "попадание в тело"
-  },
-  {
-   "id": "impact_helmet",
-   "cat": "Пули и попадания",
-   "name": "Пуля в шлем — звон",
-   "when": "попадание в шлем",
-   "file": "hits/helmet_",
-   "kind": "impact_helmet",
-   "fallback": "impact_metal",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "попадание в тело"
-  },
-  {
-   "id": "ricochet",
-   "cat": "Пули и попадания",
-   "name": "Рикошет — визг",
-   "when": "пуля ушла от металла / бетона",
-   "file": "hits/ricochet_",
-   "kind": "",
-   "type": "one",
-   "variants": 5,
-   "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ракеты и химсвет"
   },
   {
    "id": "flyby",
@@ -953,7 +896,8 @@
    "type": "one",
    "variants": 6,
    "prio": 1,
-   "now": "нет"
+   "now": "нет",
+   "group": "Пуля рядом"
   },
   {
    "id": "crack",
@@ -965,82 +909,47 @@
    "type": "one",
    "variants": 5,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Пуля рядом"
   },
   {
-   "id": "glass_crack",
+   "id": "ricochet",
    "cat": "Пули и попадания",
-   "name": "Витрина трескается",
-   "when": "пуля в витрину, стекло держится",
-   "file": "glass/crack_",
-   "kind": "glass_crack",
-   "fallback": "impact_glass",
+   "name": "Рикошет — визг",
+   "when": "пуля ушла от металла / бетона",
+   "file": "hits/ricochet_",
+   "kind": "",
    "type": "one",
-   "variants": 4,
+   "variants": 5,
    "prio": 2,
-   "now": "попадание в стекло"
+   "now": "нет",
+   "group": "Пуля рядом"
   },
   {
-   "id": "glass_break",
+   "id": "impact_concrete",
    "cat": "Пули и попадания",
-   "name": "Витрина осыпается",
-   "when": "стекло рухнуло: звон и шорох",
-   "file": "glass/break_",
-   "kind": "glass_break",
+   "name": "Попадание в бетон",
+   "when": "пуля в стену, пол, асфальт",
+   "file": "hits/concrete_",
+   "kind": "impact_hard",
    "type": "one",
-   "variants": 3,
+   "variants": 6,
    "prio": 1,
-   "now": "синтез"
+   "now": "записи",
+   "group": "Камень, бетон, земля"
   },
   {
-   "id": "glass_shards",
+   "id": "impact_hard",
    "cat": "Пули и попадания",
-   "name": "Осколки досыпаются — хвост",
-   "when": "после обрушения витрины",
-   "file": "glass/shards_",
-   "kind": "glass_shards",
-   "fallback": "glass_break",
-   "type": "layer",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "impact_dirt",
-   "cat": "Пули и попадания",
-   "name": "Пуля в землю, газон — фонтанчик",
-   "when": "стрельба во дворах",
-   "file": "hits/dirt_",
-   "kind": "impact_dirt",
-   "fallback": "impact_concrete",
+   "name": "Попадание в твёрдое (плитка, камень)",
+   "when": "пуля в плитку, камень",
+   "file": "hits/hard_",
+   "kind": "impact_hard",
    "type": "one",
    "variants": 4,
-   "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "impact_water",
-   "cat": "Пули и попадания",
-   "name": "Пуля в лужу",
-   "when": "мокрый асфальт, лужи",
-   "file": "hits/water_",
-   "kind": "",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "impact_drywall",
-   "cat": "Пули и попадания",
-   "name": "Пуля в гипсокартон — перегородку",
-   "when": "перегородки магазинов (их много)",
-   "file": "hits/drywall_",
-   "kind": "",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "now": "нет"
+   "prio": 1,
+   "now": "записи",
+   "group": "Камень, бетон, земля"
   },
   {
    "id": "impact_ceramic",
@@ -1053,7 +962,61 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Камень, бетон, земля"
+  },
+  {
+   "id": "impact_drywall",
+   "cat": "Пули и попадания",
+   "name": "Пуля в гипсокартон — перегородку",
+   "when": "перегородки магазинов (их много)",
+   "file": "hits/drywall_",
+   "kind": "",
+   "type": "one",
+   "variants": 4,
+   "prio": 2,
+   "now": "нет",
+   "group": "Камень, бетон, земля"
+  },
+  {
+   "id": "impact_dirt",
+   "cat": "Пули и попадания",
+   "name": "Пуля в землю, газон — фонтанчик",
+   "when": "стрельба во дворах",
+   "file": "hits/dirt_",
+   "kind": "impact_dirt",
+   "fallback": "impact_concrete",
+   "type": "one",
+   "variants": 4,
+   "prio": 2,
+   "now": "нет",
+   "group": "Камень, бетон, земля"
+  },
+  {
+   "id": "impact_water",
+   "cat": "Пули и попадания",
+   "name": "Пуля в лужу",
+   "when": "мокрый асфальт, лужи",
+   "file": "hits/water_",
+   "kind": "",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Камень, бетон, земля"
+  },
+  {
+   "id": "impact_metal",
+   "cat": "Пули и попадания",
+   "name": "Попадание в металл",
+   "when": "пуля в металл; ремонт генератора",
+   "file": "hits/metal_",
+   "kind": "impact_metal",
+   "type": "one",
+   "variants": 6,
+   "prio": 1,
+   "now": "записи",
+   "group": "Металл"
   },
   {
    "id": "impact_car",
@@ -1065,7 +1028,130 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Металл"
+  },
+  {
+   "id": "impact_wood",
+   "cat": "Пули и попадания",
+   "name": "Попадание в дерево",
+   "when": "пуля в дерево, картон, ткань, пластик",
+   "file": "hits/wood_",
+   "kind": "impact_soft",
+   "type": "one",
+   "variants": 4,
+   "prio": 1,
+   "now": "записи",
+   "group": "Дерево и мягкое"
+  },
+  {
+   "id": "impact_soft",
+   "cat": "Пули и попадания",
+   "name": "Попадание в мягкое (ткань, картон, пластик)",
+   "when": "отдельно от дерева",
+   "file": "hits/soft_",
+   "kind": "impact_soft",
+   "fallback": "impact_wood",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "попадание в дерево",
+   "group": "Дерево и мягкое"
+  },
+  {
+   "id": "impact_flesh",
+   "cat": "Пули и попадания",
+   "name": "Попадание в тело",
+   "when": "пуля в человека",
+   "file": "body/hit_",
+   "kind": "hit",
+   "type": "one",
+   "variants": 5,
+   "prio": 1,
+   "now": "записи",
+   "group": "Люди и броня"
+  },
+  {
+   "id": "impact_plate",
+   "cat": "Пули и попадания",
+   "name": "Пуля в бронеплиту",
+   "when": "плита остановила пулю",
+   "file": "hits/plate_",
+   "kind": "impact_plate",
+   "fallback": "impact_metal",
+   "type": "one",
+   "variants": 4,
+   "prio": 2,
+   "now": "попадание в тело",
+   "group": "Люди и броня"
+  },
+  {
+   "id": "impact_helmet",
+   "cat": "Пули и попадания",
+   "name": "Пуля в шлем — звон",
+   "when": "попадание в шлем",
+   "file": "hits/helmet_",
+   "kind": "impact_helmet",
+   "fallback": "impact_metal",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "попадание в тело",
+   "group": "Люди и броня"
+  },
+  {
+   "id": "impact_glass",
+   "cat": "Пули и попадания",
+   "name": "Попадание в стекло",
+   "when": "пуля в витрину",
+   "file": "hits/glass_",
+   "kind": "impact_glass",
+   "type": "one",
+   "variants": 4,
+   "prio": 1,
+   "now": "записи",
+   "group": "Стекло"
+  },
+  {
+   "id": "glass_crack",
+   "cat": "Пули и попадания",
+   "name": "Витрина трескается",
+   "when": "пуля в витрину, стекло держится",
+   "file": "glass/crack_",
+   "kind": "glass_crack",
+   "fallback": "impact_glass",
+   "type": "one",
+   "variants": 4,
+   "prio": 2,
+   "now": "попадание в стекло",
+   "group": "Стекло"
+  },
+  {
+   "id": "glass_break",
+   "cat": "Пули и попадания",
+   "name": "Витрина осыпается",
+   "when": "стекло рухнуло: звон и шорох",
+   "file": "glass/break_",
+   "kind": "glass_break",
+   "type": "one",
+   "variants": 3,
+   "prio": 1,
+   "now": "синтез",
+   "group": "Стекло"
+  },
+  {
+   "id": "glass_shards",
+   "cat": "Пули и попадания",
+   "name": "Осколки досыпаются — хвост",
+   "when": "после обрушения витрины",
+   "file": "glass/shards_",
+   "kind": "glass_shards",
+   "fallback": "glass_break",
+   "type": "layer",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Стекло"
   },
   {
    "id": "penetration",
@@ -1077,7 +1163,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Пробитие"
   },
   {
    "id": "step_tile",
@@ -1089,7 +1176,8 @@
    "type": "one",
    "variants": 8,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Шаги внутри ТЦ"
   },
   {
    "id": "step_tile_run",
@@ -1101,235 +1189,8 @@
    "type": "one",
    "variants": 8,
    "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "step_asphalt",
-   "cat": "Шаги и движение",
-   "name": "Шаг: асфальт, земля, картон",
-   "when": "ходьба снаружи",
-   "file": "steps/dirt_",
-   "kind": "step_dirt",
-   "type": "one",
-   "variants": 8,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "step_asphalt_run",
-   "cat": "Шаги и движение",
-   "name": "Бег: асфальт, земля",
-   "when": "бег снаружи",
-   "file": "steps/dirt_run_",
-   "kind": "step_dirt_run",
-   "type": "one",
-   "variants": 8,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "step_metal",
-   "cat": "Шаги и движение",
-   "name": "Шаг: металл — звонкий слой",
-   "when": "эскалатор, люки, решётки",
-   "file": "steps/metal_",
-   "kind": "step_metal",
-   "type": "layer",
-   "variants": 6,
-   "prio": 2,
-   "now": "синтез"
-  },
-  {
-   "id": "step_wood",
-   "cat": "Шаги и движение",
-   "name": "Шаг: дерево",
-   "when": "помосты, паллеты",
-   "file": "steps/wood_",
-   "kind": "step_wood",
-   "fallback": "step_stone",
-   "type": "one",
-   "variants": 6,
-   "prio": 3,
-   "now": "как плитка"
-  },
-  {
-   "id": "step_glass",
-   "cat": "Шаги и движение",
-   "name": "Шаг по битому стеклу",
-   "when": "у разбитых витрин",
-   "file": "steps/glass_",
-   "kind": "step_glass",
-   "fallback": "step_stone",
-   "type": "one",
-   "variants": 6,
-   "prio": 2,
-   "now": "как плитка"
-  },
-  {
-   "id": "step_water",
-   "cat": "Шаги и движение",
-   "name": "Шаг по луже",
-   "when": "мокрый асфальт, лужи после дождя",
-   "file": "steps/water_",
-   "kind": "step_water",
-   "fallback": "step_dirt",
-   "type": "one",
-   "variants": 6,
-   "prio": 2,
-   "now": "как асфальт"
-  },
-  {
-   "id": "step_snow",
-   "cat": "Шаги и движение",
-   "name": "Шаг: снег",
-   "when": "зимний модификатор",
-   "file": "steps/snow_",
-   "kind": "step_snow",
-   "type": "one",
-   "variants": 6,
-   "prio": 3,
-   "now": "записи"
-  },
-  {
-   "id": "step_snow_run",
-   "cat": "Шаги и движение",
-   "name": "Бег: снег",
-   "when": "зимний модификатор",
-   "file": "steps/snow_run_",
-   "kind": "step_snow_run",
-   "type": "one",
-   "variants": 6,
-   "prio": 3,
-   "now": "записи"
-  },
-  {
-   "id": "step_crouch",
-   "cat": "Шаги и движение",
-   "name": "Шаг вприсядку — мягко, шорох одежды",
-   "when": "ходьба вприсядку",
-   "file": "steps/crouch_",
-   "kind": "step_crouch",
-   "fallback": "step_stone",
-   "type": "one",
-   "variants": 6,
-   "prio": 3,
-   "now": "обычный шаг тише"
-  },
-  {
-   "id": "crawl",
-   "cat": "Шаги и движение",
-   "name": "Ползком — шорох по полу",
-   "when": "движение лёжа",
-   "file": "steps/crawl_",
-   "kind": "crawl",
-   "fallback": "step_dirt",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "land",
-   "cat": "Шаги и движение",
-   "name": "Приземление",
-   "when": "после прыжка / перелезания",
-   "file": "body/land_",
-   "kind": "land",
-   "fallback": "impact_concrete",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "попадание в бетон"
-  },
-  {
-   "id": "vault",
-   "cat": "Шаги и движение",
-   "name": "Перелезание — руки, снаряжение",
-   "when": "перелезть через препятствие",
-   "file": "body/vault_",
-   "kind": "vault",
-   "fallback": "impact_concrete",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "попадание в бетон"
-  },
-  {
-   "id": "dive",
-   "cat": "Шаги и движение",
-   "name": "Бросок на землю",
-   "when": "упасть на бегу",
-   "file": "body/dive_",
-   "kind": "dive",
-   "fallback": "impact_concrete",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "попадание в бетон"
-  },
-  {
-   "id": "gear_rattle",
-   "cat": "Шаги и движение",
-   "name": "Снаряжение побрякивает на бегу — слой",
-   "when": "бег с полным снаряжением",
-   "file": "gear/rattle_",
-   "kind": "gear_rattle",
-   "fallback": "step_stone",
-   "type": "layer",
-   "variants": 6,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "ladder",
-   "cat": "Шаги и движение",
-   "name": "Лестница убежища — металл, руки",
-   "when": "спуск / подъём в убежище",
-   "file": "steps/ladder_",
-   "kind": "",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "step_trash",
-   "cat": "Шаги и движение",
-   "name": "Шаг по мусору — бумага, пакеты, пластик",
-   "when": "мусор на полу ТЦ и на улице",
-   "file": "steps/trash_",
-   "kind": "step_trash",
-   "fallback": "step_dirt",
-   "type": "one",
-   "variants": 8,
-   "prio": 1,
-   "now": "нет"
-  },
-  {
-   "id": "step_rubble",
-   "cat": "Шаги и движение",
-   "name": "Шаг по обломкам, штукатурке",
-   "when": "осыпь у разрушенных мест",
-   "file": "steps/rubble_",
-   "kind": "step_rubble",
-   "fallback": "step_dirt",
-   "type": "one",
-   "variants": 6,
-   "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "step_cardboard",
-   "cat": "Шаги и движение",
-   "name": "Шаг по картону",
-   "when": "склады, подсобки — картон на полу",
-   "file": "steps/cardboard_",
-   "kind": "step_cardboard",
-   "fallback": "step_dirt",
-   "type": "one",
-   "variants": 6,
-   "prio": 2,
-   "now": "нет"
+   "now": "записи",
+   "group": "Шаги внутри ТЦ"
   },
   {
    "id": "step_carpet",
@@ -1342,7 +1203,61 @@
    "type": "one",
    "variants": 6,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Шаги внутри ТЦ"
+  },
+  {
+   "id": "step_wood",
+   "cat": "Шаги и движение",
+   "name": "Шаг: дерево",
+   "when": "помосты, паллеты",
+   "file": "steps/wood_",
+   "kind": "step_wood",
+   "fallback": "step_stone",
+   "type": "one",
+   "variants": 6,
+   "prio": 3,
+   "now": "как плитка",
+   "group": "Шаги внутри ТЦ"
+  },
+  {
+   "id": "step_metal",
+   "cat": "Шаги и движение",
+   "name": "Шаг: металл — звонкий слой",
+   "when": "эскалатор, люки, решётки",
+   "file": "steps/metal_",
+   "kind": "step_metal",
+   "type": "layer",
+   "variants": 6,
+   "prio": 2,
+   "now": "синтез",
+   "group": "Шаги внутри ТЦ"
+  },
+  {
+   "id": "step_asphalt",
+   "cat": "Шаги и движение",
+   "name": "Шаг: асфальт, земля, картон",
+   "when": "ходьба снаружи",
+   "file": "steps/dirt_",
+   "kind": "step_dirt",
+   "type": "one",
+   "variants": 8,
+   "prio": 1,
+   "now": "записи",
+   "group": "Шаги снаружи"
+  },
+  {
+   "id": "step_asphalt_run",
+   "cat": "Шаги и движение",
+   "name": "Бег: асфальт, земля",
+   "when": "бег снаружи",
+   "file": "steps/dirt_run_",
+   "kind": "step_dirt_run",
+   "type": "one",
+   "variants": 8,
+   "prio": 1,
+   "now": "записи",
+   "group": "Шаги снаружи"
   },
   {
    "id": "step_gravel",
@@ -1355,7 +1270,8 @@
    "type": "one",
    "variants": 6,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Шаги снаружи"
   },
   {
    "id": "step_grass",
@@ -1368,7 +1284,104 @@
    "type": "one",
    "variants": 6,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Шаги снаружи"
+  },
+  {
+   "id": "step_water",
+   "cat": "Шаги и движение",
+   "name": "Шаг по луже",
+   "when": "мокрый асфальт, лужи после дождя",
+   "file": "steps/water_",
+   "kind": "step_water",
+   "fallback": "step_dirt",
+   "type": "one",
+   "variants": 6,
+   "prio": 2,
+   "now": "как асфальт",
+   "group": "Шаги снаружи"
+  },
+  {
+   "id": "step_snow",
+   "cat": "Шаги и движение",
+   "name": "Шаг: снег",
+   "when": "зимний модификатор",
+   "file": "steps/snow_",
+   "kind": "step_snow",
+   "type": "one",
+   "variants": 6,
+   "prio": 3,
+   "now": "записи",
+   "group": "Шаги снаружи"
+  },
+  {
+   "id": "step_snow_run",
+   "cat": "Шаги и движение",
+   "name": "Бег: снег",
+   "when": "зимний модификатор",
+   "file": "steps/snow_run_",
+   "kind": "step_snow_run",
+   "type": "one",
+   "variants": 6,
+   "prio": 3,
+   "now": "записи",
+   "group": "Шаги снаружи"
+  },
+  {
+   "id": "step_glass",
+   "cat": "Шаги и движение",
+   "name": "Шаг по битому стеклу",
+   "when": "у разбитых витрин",
+   "file": "steps/glass_",
+   "kind": "step_glass",
+   "fallback": "step_stone",
+   "type": "one",
+   "variants": 6,
+   "prio": 2,
+   "now": "как плитка",
+   "group": "Мусор и обломки под ногами"
+  },
+  {
+   "id": "step_trash",
+   "cat": "Шаги и движение",
+   "name": "Шаг по мусору — бумага, пакеты, пластик",
+   "when": "мусор на полу ТЦ и на улице",
+   "file": "steps/trash_",
+   "kind": "step_trash",
+   "fallback": "step_dirt",
+   "type": "one",
+   "variants": 8,
+   "prio": 1,
+   "now": "нет",
+   "group": "Мусор и обломки под ногами"
+  },
+  {
+   "id": "step_rubble",
+   "cat": "Шаги и движение",
+   "name": "Шаг по обломкам, штукатурке",
+   "when": "осыпь у разрушенных мест",
+   "file": "steps/rubble_",
+   "kind": "step_rubble",
+   "fallback": "step_dirt",
+   "type": "one",
+   "variants": 6,
+   "prio": 2,
+   "now": "нет",
+   "group": "Мусор и обломки под ногами"
+  },
+  {
+   "id": "step_cardboard",
+   "cat": "Шаги и движение",
+   "name": "Шаг по картону",
+   "when": "склады, подсобки — картон на полу",
+   "file": "steps/cardboard_",
+   "kind": "step_cardboard",
+   "fallback": "step_dirt",
+   "type": "one",
+   "variants": 6,
+   "prio": 2,
+   "now": "нет",
+   "group": "Мусор и обломки под ногами"
   },
   {
    "id": "kick_can",
@@ -1380,7 +1393,105 @@
    "type": "one",
    "variants": 5,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мусор и обломки под ногами"
+  },
+  {
+   "id": "step_crouch",
+   "cat": "Шаги и движение",
+   "name": "Шаг вприсядку — мягко, шорох одежды",
+   "when": "ходьба вприсядку",
+   "file": "steps/crouch_",
+   "kind": "step_crouch",
+   "fallback": "step_stone",
+   "type": "one",
+   "variants": 6,
+   "prio": 3,
+   "now": "обычный шаг тише",
+   "group": "Стойки и движения"
+  },
+  {
+   "id": "crawl",
+   "cat": "Шаги и движение",
+   "name": "Ползком — шорох по полу",
+   "when": "движение лёжа",
+   "file": "steps/crawl_",
+   "kind": "crawl",
+   "fallback": "step_dirt",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "нет",
+   "group": "Стойки и движения"
+  },
+  {
+   "id": "land",
+   "cat": "Шаги и движение",
+   "name": "Приземление",
+   "when": "после прыжка / перелезания",
+   "file": "body/land_",
+   "kind": "land",
+   "fallback": "impact_concrete",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "попадание в бетон",
+   "group": "Стойки и движения"
+  },
+  {
+   "id": "vault",
+   "cat": "Шаги и движение",
+   "name": "Перелезание — руки, снаряжение",
+   "when": "перелезть через препятствие",
+   "file": "body/vault_",
+   "kind": "vault",
+   "fallback": "impact_concrete",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "попадание в бетон",
+   "group": "Стойки и движения"
+  },
+  {
+   "id": "dive",
+   "cat": "Шаги и движение",
+   "name": "Бросок на землю",
+   "when": "упасть на бегу",
+   "file": "body/dive_",
+   "kind": "dive",
+   "fallback": "impact_concrete",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "попадание в бетон",
+   "group": "Стойки и движения"
+  },
+  {
+   "id": "ladder",
+   "cat": "Шаги и движение",
+   "name": "Лестница убежища — металл, руки",
+   "when": "спуск / подъём в убежище",
+   "file": "steps/ladder_",
+   "kind": "",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "нет",
+   "group": "Стойки и движения"
+  },
+  {
+   "id": "gear_rattle",
+   "cat": "Шаги и движение",
+   "name": "Снаряжение побрякивает на бегу — слой",
+   "when": "бег с полным снаряжением",
+   "file": "gear/rattle_",
+   "kind": "gear_rattle",
+   "fallback": "step_stone",
+   "type": "layer",
+   "variants": 6,
+   "prio": 3,
+   "now": "нет",
+   "group": "Слои поверх шагов"
   },
   {
    "id": "cloth_move",
@@ -1392,43 +1503,8 @@
    "type": "layer",
    "variants": 6,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "body_fall",
-   "cat": "Тело, голос, здоровье",
-   "name": "Тело падает",
-   "when": "смерть, тяжёлое ранение",
-   "file": "body/fall_",
-   "kind": "fall",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "death_groan",
-   "cat": "Тело, голос, здоровье",
-   "name": "Предсмертный хрип — стон",
-   "when": "смерть мародёра",
-   "file": "voice/rattle_groan_",
-   "kind": "death",
-   "type": "one",
-   "variants": 3,
-   "prio": 1,
-   "now": "записи"
-  },
-  {
-   "id": "death_gurgle",
-   "cat": "Тело, голос, здоровье",
-   "name": "Предсмертный хрип — бульканье",
-   "when": "смерть мародёра",
-   "file": "voice/rattle_gurgle_",
-   "kind": "death",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "записи"
+   "now": "нет",
+   "group": "Слои поверх шагов"
   },
   {
    "id": "pain_player",
@@ -1441,7 +1517,8 @@
    "type": "one",
    "variants": 6,
    "prio": 1,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ранение и смерть"
   },
   {
    "id": "pain_ai",
@@ -1454,7 +1531,8 @@
    "type": "one",
    "variants": 6,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ранение и смерть"
   },
   {
    "id": "downed",
@@ -1467,7 +1545,47 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ранение и смерть"
+  },
+  {
+   "id": "body_fall",
+   "cat": "Тело, голос, здоровье",
+   "name": "Тело падает",
+   "when": "смерть, тяжёлое ранение",
+   "file": "body/fall_",
+   "kind": "fall",
+   "type": "one",
+   "variants": 4,
+   "prio": 1,
+   "now": "записи",
+   "group": "Ранение и смерть"
+  },
+  {
+   "id": "death_groan",
+   "cat": "Тело, голос, здоровье",
+   "name": "Предсмертный хрип — стон",
+   "when": "смерть мародёра",
+   "file": "voice/rattle_groan_",
+   "kind": "death",
+   "type": "one",
+   "variants": 3,
+   "prio": 1,
+   "now": "записи",
+   "group": "Ранение и смерть"
+  },
+  {
+   "id": "death_gurgle",
+   "cat": "Тело, голос, здоровье",
+   "name": "Предсмертный хрип — бульканье",
+   "when": "смерть мародёра",
+   "file": "voice/rattle_gurgle_",
+   "kind": "death",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "записи",
+   "group": "Ранение и смерть"
   },
   {
    "id": "revive",
@@ -1480,7 +1598,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Помощь раненому"
   },
   {
    "id": "drag",
@@ -1493,7 +1612,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Помощь раненому"
   },
   {
    "id": "breath",
@@ -1505,7 +1625,8 @@
    "type": "loop",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Состояние"
   },
   {
    "id": "heartbeat",
@@ -1517,7 +1638,34 @@
    "type": "one",
    "variants": 2,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Состояние"
+  },
+  {
+   "id": "cough",
+   "cat": "Тело, голос, здоровье",
+   "name": "Кашель — пыль, дым",
+   "when": "дым гранаты, пыль после взрыва",
+   "file": "voice/cough_",
+   "kind": "",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "нет",
+   "group": "Состояние"
+  },
+  {
+   "id": "jump",
+   "cat": "Тело, голос, здоровье",
+   "name": "Прыжок — выдох",
+   "when": "оттолкнулся",
+   "file": "voice/jump_",
+   "kind": "",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Состояние"
   },
   {
    "id": "bandage",
@@ -1530,7 +1678,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Лечение"
   },
   {
    "id": "inject",
@@ -1543,7 +1692,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Лечение"
   },
   {
    "id": "pills",
@@ -1556,7 +1706,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Лечение"
   },
   {
    "id": "drink",
@@ -1568,31 +1719,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "cough",
-   "cat": "Тело, голос, здоровье",
-   "name": "Кашель — пыль, дым",
-   "when": "дым гранаты, пыль после взрыва",
-   "file": "voice/cough_",
-   "kind": "",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "jump",
-   "cat": "Тело, голос, здоровье",
-   "name": "Прыжок — выдох",
-   "when": "оттолкнулся",
-   "file": "voice/jump_",
-   "kind": "",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Лечение"
   },
   {
    "id": "ai_spot",
@@ -1604,31 +1732,8 @@
    "type": "one",
    "variants": 6,
    "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "ai_reload",
-   "cat": "Голоса ИИ и персонажей",
-   "name": "Мародёр — «перезаряжаюсь!»",
-   "when": "перезарядка в бою",
-   "file": "voice/ai_reload_",
-   "kind": "ai_reload",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "ai_nade",
-   "cat": "Голоса ИИ и персонажей",
-   "name": "Мародёр — «граната!»",
-   "when": "увидел гранату",
-   "file": "voice/ai_nade_",
-   "kind": "ai_nade",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мародёры в бою"
   },
   {
    "id": "ai_search",
@@ -1640,7 +1745,34 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мародёры в бою"
+  },
+  {
+   "id": "ai_reload",
+   "cat": "Голоса ИИ и персонажей",
+   "name": "Мародёр — «перезаряжаюсь!»",
+   "when": "перезарядка в бою",
+   "file": "voice/ai_reload_",
+   "kind": "ai_reload",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "нет",
+   "group": "Мародёры в бою"
+  },
+  {
+   "id": "ai_nade",
+   "cat": "Голоса ИИ и персонажей",
+   "name": "Мародёр — «граната!»",
+   "when": "увидел гранату",
+   "file": "voice/ai_nade_",
+   "kind": "ai_nade",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "нет",
+   "group": "Мародёры в бою"
   },
   {
    "id": "ai_hurt",
@@ -1652,7 +1784,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мародёры в бою"
   },
   {
    "id": "pmc_radio",
@@ -1664,7 +1797,8 @@
    "type": "one",
    "variants": 6,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фракции и персонажи"
   },
   {
    "id": "resident",
@@ -1676,7 +1810,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фракции и персонажи"
   },
   {
    "id": "anton",
@@ -1688,7 +1823,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фракции и персонажи"
   },
   {
    "id": "trader",
@@ -1700,7 +1836,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фракции и персонажи"
   },
   {
    "id": "door",
@@ -1712,7 +1849,8 @@
    "type": "one",
    "variants": 4,
    "prio": 1,
-   "now": "записи"
+   "now": "записи",
+   "group": "Двери и проходы"
   },
   {
    "id": "door_locked",
@@ -1725,7 +1863,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Двери и проходы"
   },
   {
    "id": "door_unlock",
@@ -1738,7 +1877,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Двери и проходы"
   },
   {
    "id": "door_metal",
@@ -1751,7 +1891,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "обычная дверь"
+   "now": "обычная дверь",
+   "group": "Двери и проходы"
   },
   {
    "id": "door_glass",
@@ -1763,7 +1904,21 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "обычная дверь"
+   "now": "обычная дверь",
+   "group": "Двери и проходы"
+  },
+  {
+   "id": "door_creak",
+   "cat": "Мир: двери, механизмы, свет",
+   "name": "Дверь скрипит, качается на сквозняке",
+   "when": "незапертые двери у выходов",
+   "file": "world/door_creak_",
+   "kind": "",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Двери и проходы"
   },
   {
    "id": "shutter",
@@ -1775,7 +1930,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Двери и проходы"
   },
   {
    "id": "gate_power",
@@ -1787,7 +1943,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Двери и проходы"
   },
   {
    "id": "breaker",
@@ -1799,7 +1956,8 @@
    "type": "one",
    "variants": 2,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Электричество"
   },
   {
    "id": "power_switch",
@@ -1812,7 +1970,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "обычная дверь"
+   "now": "обычная дверь",
+   "group": "Электричество"
   },
   {
    "id": "power_down",
@@ -1825,7 +1984,8 @@
    "type": "one",
    "variants": 1,
    "prio": 2,
-   "now": "лязг рубильника"
+   "now": "лязг рубильника",
+   "group": "Электричество"
   },
   {
    "id": "power_up",
@@ -1838,7 +1998,8 @@
    "type": "one",
    "variants": 1,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Электричество"
   },
   {
    "id": "fluoro_hum",
@@ -1850,7 +2011,34 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Электричество"
+  },
+  {
+   "id": "sparks",
+   "cat": "Мир: двери, механизмы, свет",
+   "name": "Искрит проводка — треск",
+   "when": "повреждённые щиты, оборванные провода",
+   "file": "world/sparks_",
+   "kind": "",
+   "type": "loop",
+   "variants": 2,
+   "prio": 3,
+   "now": "нет",
+   "group": "Электричество"
+  },
+  {
+   "id": "fridge_hum",
+   "cat": "Мир: двери, механизмы, свет",
+   "name": "Холодильники и витрины гудят",
+   "when": "продуктовый, фуд-корт — при питании",
+   "file": "world/fridge_",
+   "kind": "",
+   "type": "loop",
+   "variants": 1,
+   "prio": 3,
+   "now": "нет",
+   "group": "Электричество"
   },
   {
    "id": "generator",
@@ -1862,7 +2050,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Генератор"
   },
   {
    "id": "gen_start",
@@ -1875,7 +2064,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Генератор"
   },
   {
    "id": "gen_stop",
@@ -1888,7 +2078,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Генератор"
   },
   {
    "id": "repair",
@@ -1901,7 +2092,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "попадание в металл"
+   "now": "попадание в металл",
+   "group": "Генератор"
   },
   {
    "id": "alarm",
@@ -1913,7 +2105,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Сигнализация и связь"
   },
   {
    "id": "alarm_panel",
@@ -1926,7 +2119,47 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Сигнализация и связь"
+  },
+  {
+   "id": "fire_bell",
+   "cat": "Мир: двери, механизмы, свет",
+   "name": "Пожарный звонок",
+   "when": "пожарная сигнализация",
+   "file": "world/fire_bell_",
+   "kind": "",
+   "type": "loop",
+   "variants": 1,
+   "prio": 3,
+   "now": "нет",
+   "group": "Сигнализация и связь"
+  },
+  {
+   "id": "pa_system",
+   "cat": "Мир: двери, механизмы, свет",
+   "name": "Громкая связь — треск, обрывок объявления",
+   "when": "динамики ТЦ при питании",
+   "file": "world/pa_",
+   "kind": "",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Сигнализация и связь"
+  },
+  {
+   "id": "phone_ring",
+   "cat": "Мир: двери, механизмы, свет",
+   "name": "Звонит телефон в пустом магазине",
+   "when": "редкое событие, атмосфера",
+   "file": "world/phone_",
+   "kind": "",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "нет",
+   "group": "Сигнализация и связь"
   },
   {
    "id": "key_pickup",
@@ -1939,7 +2172,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Мелочи"
   },
   {
    "id": "clatter",
@@ -1951,79 +2185,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "door_creak",
-   "cat": "Мир: двери, механизмы, свет",
-   "name": "Дверь скрипит, качается на сквозняке",
-   "when": "незапертые двери у выходов",
-   "file": "world/door_creak_",
-   "kind": "",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "fridge_hum",
-   "cat": "Мир: двери, механизмы, свет",
-   "name": "Холодильники и витрины гудят",
-   "when": "продуктовый, фуд-корт — при питании",
-   "file": "world/fridge_",
-   "kind": "",
-   "type": "loop",
-   "variants": 1,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "sparks",
-   "cat": "Мир: двери, механизмы, свет",
-   "name": "Искрит проводка — треск",
-   "when": "повреждённые щиты, оборванные провода",
-   "file": "world/sparks_",
-   "kind": "",
-   "type": "loop",
-   "variants": 2,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "pipe_leak",
-   "cat": "Мир: двери, механизмы, свет",
-   "name": "Шипение, течь в трубе",
-   "when": "подсобки, служебный коридор",
-   "file": "world/pipe_",
-   "kind": "",
-   "type": "loop",
-   "variants": 1,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "pa_system",
-   "cat": "Мир: двери, механизмы, свет",
-   "name": "Громкая связь — треск, обрывок объявления",
-   "when": "динамики ТЦ при питании",
-   "file": "world/pa_",
-   "kind": "",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "phone_ring",
-   "cat": "Мир: двери, механизмы, свет",
-   "name": "Звонит телефон в пустом магазине",
-   "when": "редкое событие, атмосфера",
-   "file": "world/phone_",
-   "kind": "",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мелочи"
   },
   {
    "id": "toy",
@@ -2035,19 +2198,21 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мелочи"
   },
   {
-   "id": "fire_bell",
+   "id": "pipe_leak",
    "cat": "Мир: двери, механизмы, свет",
-   "name": "Пожарный звонок",
-   "when": "пожарная сигнализация",
-   "file": "world/fire_bell_",
+   "name": "Шипение, течь в трубе",
+   "when": "подсобки, служебный коридор",
+   "file": "world/pipe_",
    "kind": "",
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мелочи"
   },
   {
    "id": "rummage",
@@ -2059,7 +2224,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "записи дерева и обломков"
+   "now": "записи дерева и обломков",
+   "group": "Мародёр роется"
   },
   {
    "id": "loot_drawer",
@@ -2072,7 +2238,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Обыск игроком"
   },
   {
    "id": "loot_locker",
@@ -2085,7 +2252,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Обыск игроком"
   },
   {
    "id": "loot_box",
@@ -2098,7 +2266,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Обыск игроком"
   },
   {
    "id": "loot_bag",
@@ -2111,33 +2280,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "loot_body",
-   "cat": "Лут и контейнеры",
-   "name": "Обыск тела",
-   "when": "обыскать мародёра",
-   "file": "loot/body_",
-   "kind": "loot_body",
-   "fallback": "rummage",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "loot_safe",
-   "cat": "Лут и контейнеры",
-   "name": "Сейф — кодовый замок, дверца",
-   "when": "сейф",
-   "file": "loot/safe_",
-   "kind": "loot_safe",
-   "fallback": "rummage",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Обыск игроком"
   },
   {
    "id": "loot_shelf",
@@ -2150,7 +2294,36 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Обыск игроком"
+  },
+  {
+   "id": "loot_safe",
+   "cat": "Лут и контейнеры",
+   "name": "Сейф — кодовый замок, дверца",
+   "when": "сейф",
+   "file": "loot/safe_",
+   "kind": "loot_safe",
+   "fallback": "rummage",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "общий щелчок «pin»",
+   "group": "Обыск игроком"
+  },
+  {
+   "id": "loot_body",
+   "cat": "Лут и контейнеры",
+   "name": "Обыск тела",
+   "when": "обыскать мародёра",
+   "file": "loot/body_",
+   "kind": "loot_body",
+   "fallback": "rummage",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "общий щелчок «pin»",
+   "group": "Обыск игроком"
   },
   {
    "id": "amb_wind",
@@ -2162,7 +2335,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Фон"
   },
   {
    "id": "amb_mall",
@@ -2174,7 +2348,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 1,
-   "now": "нет (снаружи и внутри — один ветер)"
+   "now": "нет (снаружи и внутри — один ветер)",
+   "group": "Фон"
   },
   {
    "id": "amb_atrium",
@@ -2186,7 +2361,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фон"
   },
   {
    "id": "amb_evening",
@@ -2198,7 +2374,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фон"
   },
   {
    "id": "amb_night",
@@ -2210,7 +2387,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фон"
   },
   {
    "id": "amb_city",
@@ -2222,7 +2400,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фон"
   },
   {
    "id": "amb_fight",
@@ -2234,55 +2413,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "rain_out",
-   "cat": "Погода и фон",
-   "name": "Дождь снаружи",
-   "when": "дождь",
-   "file": "amb/rain_",
-   "kind": "loop:rain",
-   "type": "loop",
-   "variants": 1,
-   "prio": 1,
-   "now": "синтез"
-  },
-  {
-   "id": "rain_roof",
-   "cat": "Погода и фон",
-   "name": "Дождь по крыше и куполу — изнутри",
-   "when": "дождь, игрок в здании",
-   "file": "amb/rain_roof_",
-   "kind": "",
-   "type": "loop",
-   "variants": 1,
-   "prio": 2,
-   "now": "нет (внутри — тот же уличный дождь, тише)"
-  },
-  {
-   "id": "thunder",
-   "cat": "Погода и фон",
-   "name": "Гром",
-   "when": "гроза перед дождём и в дождь",
-   "file": "weather/thunder_",
-   "kind": "thunder",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "now": "синтез"
-  },
-  {
-   "id": "thunder_far",
-   "cat": "Погода и фон",
-   "name": "Гром вдали — рокот",
-   "when": "дальняя гроза",
-   "file": "weather/thunder_far_",
-   "kind": "",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Фон"
   },
   {
    "id": "gust",
@@ -2294,7 +2426,8 @@
    "type": "one",
    "variants": 4,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ветер"
   },
   {
    "id": "wind_whistle",
@@ -2306,7 +2439,8 @@
    "type": "loop",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ветер"
   },
   {
    "id": "wind_draft",
@@ -2318,7 +2452,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ветер"
   },
   {
    "id": "wind_high",
@@ -2330,7 +2465,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ветер"
   },
   {
    "id": "wind_trees",
@@ -2342,43 +2478,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "rain_metal",
-   "cat": "Погода и фон",
-   "name": "Дождь по жести — навесы, машины",
-   "when": "дождь, рядом навес или машина",
-   "file": "amb/rain_metal_",
-   "kind": "",
-   "type": "loop",
-   "variants": 1,
-   "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "rain_puddles",
-   "cat": "Погода и фон",
-   "name": "Дождь по лужам",
-   "when": "дождь, асфальт",
-   "file": "amb/rain_puddles_",
-   "kind": "",
-   "type": "loop",
-   "variants": 1,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "rain_gutter",
-   "cat": "Погода и фон",
-   "name": "Вода из водостока",
-   "when": "дождь, углы здания",
-   "file": "amb/gutter_",
-   "kind": "",
-   "type": "loop",
-   "variants": 1,
-   "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ветер"
   },
   {
    "id": "blizzard",
@@ -2390,7 +2491,99 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Ветер"
+  },
+  {
+   "id": "rain_out",
+   "cat": "Погода и фон",
+   "name": "Дождь снаружи",
+   "when": "дождь",
+   "file": "amb/rain_",
+   "kind": "loop:rain",
+   "type": "loop",
+   "variants": 1,
+   "prio": 1,
+   "now": "синтез",
+   "group": "Дождь и гроза"
+  },
+  {
+   "id": "rain_roof",
+   "cat": "Погода и фон",
+   "name": "Дождь по крыше и куполу — изнутри",
+   "when": "дождь, игрок в здании",
+   "file": "amb/rain_roof_",
+   "kind": "",
+   "type": "loop",
+   "variants": 1,
+   "prio": 2,
+   "now": "нет (внутри — тот же уличный дождь, тише)",
+   "group": "Дождь и гроза"
+  },
+  {
+   "id": "rain_metal",
+   "cat": "Погода и фон",
+   "name": "Дождь по жести — навесы, машины",
+   "when": "дождь, рядом навес или машина",
+   "file": "amb/rain_metal_",
+   "kind": "",
+   "type": "loop",
+   "variants": 1,
+   "prio": 2,
+   "now": "нет",
+   "group": "Дождь и гроза"
+  },
+  {
+   "id": "rain_puddles",
+   "cat": "Погода и фон",
+   "name": "Дождь по лужам",
+   "when": "дождь, асфальт",
+   "file": "amb/rain_puddles_",
+   "kind": "",
+   "type": "loop",
+   "variants": 1,
+   "prio": 3,
+   "now": "нет",
+   "group": "Дождь и гроза"
+  },
+  {
+   "id": "rain_gutter",
+   "cat": "Погода и фон",
+   "name": "Вода из водостока",
+   "when": "дождь, углы здания",
+   "file": "amb/gutter_",
+   "kind": "",
+   "type": "loop",
+   "variants": 1,
+   "prio": 3,
+   "now": "нет",
+   "group": "Дождь и гроза"
+  },
+  {
+   "id": "thunder",
+   "cat": "Погода и фон",
+   "name": "Гром",
+   "when": "гроза перед дождём и в дождь",
+   "file": "weather/thunder_",
+   "kind": "thunder",
+   "type": "one",
+   "variants": 4,
+   "prio": 1,
+   "now": "синтез",
+   "group": "Дождь и гроза"
+  },
+  {
+   "id": "thunder_far",
+   "cat": "Погода и фон",
+   "name": "Гром вдали — рокот",
+   "when": "дальняя гроза",
+   "file": "weather/thunder_far_",
+   "kind": "",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "нет",
+   "group": "Дождь и гроза"
   },
   {
    "id": "far_siren",
@@ -2402,7 +2595,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Город и дорога"
   },
   {
    "id": "far_car_alarm",
@@ -2414,19 +2608,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "far_dogs",
-   "cat": "Далёкие звуки (снаружи)",
-   "name": "Собаки лают вдали",
-   "when": "снаружи, чаще ночью",
-   "file": "far/dogs_",
-   "kind": "",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Город и дорога"
   },
   {
    "id": "far_train",
@@ -2438,7 +2621,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Город и дорога"
   },
   {
    "id": "far_plane",
@@ -2450,7 +2634,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Город и дорога"
   },
   {
    "id": "far_heli",
@@ -2462,43 +2647,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "far_boom",
-   "cat": "Далёкие звуки (снаружи)",
-   "name": "Далёкий взрыв, раскат",
-   "when": "снаружи, фон войны",
-   "file": "far/boom_",
-   "kind": "",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "far_bells",
-   "cat": "Далёкие звуки (снаружи)",
-   "name": "Колокол вдали",
-   "when": "вечер, случайно",
-   "file": "far/bells_",
-   "kind": "",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "far_voices",
-   "cat": "Далёкие звуки (снаружи)",
-   "name": "Далёкие крики, голоса",
-   "when": "снаружи, редко",
-   "file": "far/voices_",
-   "kind": "",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Город и дорога"
   },
   {
    "id": "far_music",
@@ -2510,7 +2660,60 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Город и дорога"
+  },
+  {
+   "id": "far_bells",
+   "cat": "Далёкие звуки (снаружи)",
+   "name": "Колокол вдали",
+   "when": "вечер, случайно",
+   "file": "far/bells_",
+   "kind": "",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "нет",
+   "group": "Город и дорога"
+  },
+  {
+   "id": "far_dogs",
+   "cat": "Далёкие звуки (снаружи)",
+   "name": "Собаки лают вдали",
+   "when": "снаружи, чаще ночью",
+   "file": "far/dogs_",
+   "kind": "",
+   "type": "one",
+   "variants": 4,
+   "prio": 2,
+   "now": "нет",
+   "group": "Люди, звери, война"
+  },
+  {
+   "id": "far_voices",
+   "cat": "Далёкие звуки (снаружи)",
+   "name": "Далёкие крики, голоса",
+   "when": "снаружи, редко",
+   "file": "far/voices_",
+   "kind": "",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Люди, звери, война"
+  },
+  {
+   "id": "far_boom",
+   "cat": "Далёкие звуки (снаружи)",
+   "name": "Далёкий взрыв, раскат",
+   "when": "снаружи, фон войны",
+   "file": "far/boom_",
+   "kind": "",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "нет",
+   "group": "Люди, звери, война"
   },
   {
    "id": "trash_wind",
@@ -2522,7 +2725,8 @@
    "type": "one",
    "variants": 4,
    "prio": 1,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мусор и обломки"
   },
   {
    "id": "paper_fly",
@@ -2534,7 +2738,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мусор и обломки"
   },
   {
    "id": "bottle_break",
@@ -2546,7 +2751,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мусор и обломки"
   },
   {
    "id": "plaster_fall",
@@ -2558,7 +2764,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мусор и обломки"
   },
   {
    "id": "ceiling_tile",
@@ -2570,7 +2777,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Мусор и обломки"
   },
   {
    "id": "metal_creak",
@@ -2582,7 +2790,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Здание на ветру"
   },
   {
    "id": "shutter_rattle",
@@ -2594,7 +2803,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Здание на ветру"
   },
   {
    "id": "sign_creak",
@@ -2606,7 +2816,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Здание на ветру"
   },
   {
    "id": "sheet_bang",
@@ -2618,7 +2829,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Здание на ветру"
   },
   {
    "id": "banner_flap",
@@ -2630,7 +2842,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Здание на ветру"
   },
   {
    "id": "rats",
@@ -2642,7 +2855,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Живность"
   },
   {
    "id": "pigeons",
@@ -2654,7 +2868,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Живность"
   },
   {
    "id": "crows",
@@ -2666,7 +2881,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Живность"
   },
   {
    "id": "heli",
@@ -2678,7 +2894,8 @@
    "type": "one",
    "variants": 2,
    "prio": 1,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Сброс и ЧВК"
   },
   {
    "id": "drop_land",
@@ -2691,7 +2908,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Сброс и ЧВК"
   },
   {
    "id": "truck",
@@ -2703,7 +2921,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Сброс и ЧВК"
   },
   {
    "id": "truck_doors",
@@ -2716,7 +2935,8 @@
    "type": "one",
    "variants": 3,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Сброс и ЧВК"
   },
   {
    "id": "radio",
@@ -2729,7 +2949,8 @@
    "type": "one",
    "variants": 4,
    "prio": 2,
-   "now": "общий щелчок «pin»"
+   "now": "общий щелчок «pin»",
+   "group": "Сброс и ЧВК"
   },
   {
    "id": "evac_tick",
@@ -2742,7 +2963,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Эвакуация"
   },
   {
    "id": "evac_flare",
@@ -2754,7 +2976,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Эвакуация"
   },
   {
    "id": "raid_leave",
@@ -2767,7 +2990,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "обычная дверь"
+   "now": "обычная дверь",
+   "group": "Эвакуация"
   },
   {
    "id": "ui_click",
@@ -2780,7 +3004,8 @@
    "type": "one",
    "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Меню и сообщения"
   },
   {
    "id": "ui_hover",
@@ -2793,7 +3018,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Меню и сообщения"
   },
   {
    "id": "ui_deny",
@@ -2806,7 +3032,8 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Меню и сообщения"
   },
   {
    "id": "ui_notify",
@@ -2819,176 +3046,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "bag_open",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Открыть рюкзак — молния",
-   "when": "открыть инвентарь",
-   "file": "ui/bag_open_",
-   "kind": "bag_open",
-   "fallback": "equip_gear",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "bag_close",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Закрыть рюкзак",
-   "when": "закрыть инвентарь",
-   "file": "ui/bag_close_",
-   "kind": "bag_close",
-   "fallback": "equip_gear",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "item_pick",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Взять предмет",
-   "when": "из ящика, с пола",
-   "file": "ui/item_pick_",
-   "kind": "item_pick",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "item_drop",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Положить / выбросить предмет",
-   "when": "выбросить, снять",
-   "file": "ui/item_drop_",
-   "kind": "item_drop",
-   "fallback": "body_fall",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "now": "общий щелчок «pin»"
-  },
-  {
-   "id": "item_move",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Переложить в сетке",
-   "when": "перетащить мышью",
-   "file": "ui/item_move_",
-   "kind": "item_move",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "equip_gear",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Надеть снаряжение",
-   "when": "жилет, шлем, рюкзак",
-   "file": "gear/equip_",
-   "kind": "equip_gear",
-   "fallback": "reload_pistol",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "перезарядка пистолета"
-  },
-  {
-   "id": "equip_gun",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Взять оружие в слот",
-   "when": "оружие в слот персонажа",
-   "file": "gear/equip_gun_",
-   "kind": "equip_gun",
-   "fallback": "weapon_draw",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "перезарядка пистолета"
-  },
-  {
-   "id": "cash",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Торговец — деньги",
-   "when": "купить / продать",
-   "file": "ui/cash_",
-   "kind": "cash",
-   "fallback": "item_move",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "now": "нет"
-  },
-  {
-   "id": "map",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Карта — бумага",
-   "when": "открыть карту",
-   "file": "ui/map_",
-   "kind": "map",
-   "fallback": "bag_open",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "pick_ammo",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Взять патроны — коробка, россыпь",
-   "when": "подобрать патроны",
-   "file": "ui/pick_ammo_",
-   "kind": "pick_ammo",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "pick_med",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Взять медицину — упаковка",
-   "when": "подобрать аптечку",
-   "file": "ui/pick_med_",
-   "kind": "pick_med",
-   "fallback": "nade_pin",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "pick_cloth",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Взять одежду, броню — тяжёлое, ткань",
-   "when": "подобрать снаряжение",
-   "file": "ui/pick_cloth_",
-   "kind": "pick_cloth",
-   "fallback": "reload_pistol",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "pick_weapon",
-   "cat": "Инвентарь и интерфейс",
-   "name": "Взять оружие — металл",
-   "when": "подобрать оружие",
-   "file": "ui/pick_gun_",
-   "kind": "pick_weapon",
-   "fallback": "weapon_draw",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Меню и сообщения"
   },
   {
    "id": "quest",
@@ -3001,7 +3060,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Меню и сообщения"
   },
   {
    "id": "upgrade",
@@ -3014,19 +3074,190 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Меню и сообщения"
   },
   {
-   "id": "hideout_amb",
-   "cat": "Убежище",
-   "name": "Убежище — вентиляция, гул",
-   "when": "фон убежища",
-   "file": "hideout/amb_",
-   "kind": "",
-   "type": "loop",
-   "variants": 1,
+   "id": "map",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Карта — бумага",
+   "when": "открыть карту",
+   "file": "ui/map_",
+   "kind": "map",
+   "fallback": "bag_open",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "нет",
+   "group": "Меню и сообщения"
+  },
+  {
+   "id": "bag_open",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Открыть рюкзак — молния",
+   "when": "открыть инвентарь",
+   "file": "ui/bag_open_",
+   "kind": "bag_open",
+   "fallback": "equip_gear",
+   "type": "one",
+   "variants": 3,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "bag_close",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Закрыть рюкзак",
+   "when": "закрыть инвентарь",
+   "file": "ui/bag_close_",
+   "kind": "bag_close",
+   "fallback": "equip_gear",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "item_pick",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Взять предмет",
+   "when": "из ящика, с пола",
+   "file": "ui/item_pick_",
+   "kind": "item_pick",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 4,
+   "prio": 1,
+   "now": "общий щелчок «pin»",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "item_drop",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Положить / выбросить предмет",
+   "when": "выбросить, снять",
+   "file": "ui/item_drop_",
+   "kind": "item_drop",
+   "fallback": "body_fall",
+   "type": "one",
+   "variants": 4,
+   "prio": 2,
+   "now": "общий щелчок «pin»",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "item_move",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Переложить в сетке",
+   "when": "перетащить мышью",
+   "file": "ui/item_move_",
+   "kind": "item_move",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 4,
+   "prio": 3,
+   "now": "нет",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "pick_ammo",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Взять патроны — коробка, россыпь",
+   "when": "подобрать патроны",
+   "file": "ui/pick_ammo_",
+   "kind": "pick_ammo",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "pick_med",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Взять медицину — упаковка",
+   "when": "подобрать аптечку",
+   "file": "ui/pick_med_",
+   "kind": "pick_med",
+   "fallback": "nade_pin",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "pick_cloth",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Взять одежду, броню — тяжёлое, ткань",
+   "when": "подобрать снаряжение",
+   "file": "ui/pick_cloth_",
+   "kind": "pick_cloth",
+   "fallback": "reload_pistol",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "pick_weapon",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Взять оружие — металл",
+   "when": "подобрать оружие",
+   "file": "ui/pick_gun_",
+   "kind": "pick_weapon",
+   "fallback": "weapon_draw",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Рюкзак и предметы"
+  },
+  {
+   "id": "equip_gear",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Надеть снаряжение",
+   "when": "жилет, шлем, рюкзак",
+   "file": "gear/equip_",
+   "kind": "equip_gear",
+   "fallback": "reload_pistol",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "перезарядка пистолета",
+   "group": "Снаряжение и торговец"
+  },
+  {
+   "id": "equip_gun",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Взять оружие в слот",
+   "when": "оружие в слот персонажа",
+   "file": "gear/equip_gun_",
+   "kind": "equip_gun",
+   "fallback": "weapon_draw",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "перезарядка пистолета",
+   "group": "Снаряжение и торговец"
+  },
+  {
+   "id": "cash",
+   "cat": "Инвентарь и интерфейс",
+   "name": "Торговец — деньги",
+   "when": "купить / продать",
+   "file": "ui/cash_",
+   "kind": "cash",
+   "fallback": "item_move",
+   "type": "one",
+   "variants": 3,
+   "prio": 2,
+   "now": "нет",
+   "group": "Снаряжение и торговец"
   },
   {
    "id": "tv_static",
@@ -3038,7 +3269,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Телевизор и радио"
   },
   {
    "id": "tv_news",
@@ -3050,7 +3282,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Телевизор и радио"
   },
   {
    "id": "tv_football",
@@ -3062,7 +3295,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Телевизор и радио"
   },
   {
    "id": "radio_music",
@@ -3074,57 +3308,21 @@
    "type": "loop",
    "variants": 3,
    "prio": 3,
-   "now": "синтез"
+   "now": "синтез",
+   "group": "Телевизор и радио"
   },
   {
-   "id": "beer",
+   "id": "hideout_amb",
    "cat": "Убежище",
-   "name": "Банка пива — открыть, шипение",
-   "when": "взять пиво",
-   "file": "hideout/beer_",
+   "name": "Убежище — вентиляция, гул",
+   "when": "фон убежища",
+   "file": "hideout/amb_",
    "kind": "",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "синтез"
-  },
-  {
-   "id": "seat",
-   "cat": "Убежище",
-   "name": "Сесть на диван",
-   "when": "сесть",
-   "file": "hideout/seat_",
-   "kind": "",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "workbench",
-   "cat": "Убежище",
-   "name": "Верстак — инструменты",
-   "when": "обвесы на верстаке",
-   "file": "hideout/workbench_",
-   "kind": "workbench",
-   "fallback": "repair",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "now": "нет"
-  },
-  {
-   "id": "stash",
-   "cat": "Убежище",
-   "name": "Тайник — металлический шкаф",
-   "when": "открыть тайник",
-   "file": "hideout/stash_",
-   "kind": "stash",
-   "fallback": "door_metal",
-   "type": "one",
-   "variants": 2,
-   "prio": 3,
-   "now": "нет"
+   "type": "loop",
+   "variants": 1,
+   "prio": 2,
+   "now": "нет",
+   "group": "Убежище"
   },
   {
    "id": "hatch",
@@ -3137,7 +3335,62 @@
    "type": "one",
    "variants": 2,
    "prio": 2,
-   "now": "нет"
+   "now": "нет",
+   "group": "Убежище"
+  },
+  {
+   "id": "stash",
+   "cat": "Убежище",
+   "name": "Тайник — металлический шкаф",
+   "when": "открыть тайник",
+   "file": "hideout/stash_",
+   "kind": "stash",
+   "fallback": "door_metal",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "нет",
+   "group": "Убежище"
+  },
+  {
+   "id": "workbench",
+   "cat": "Убежище",
+   "name": "Верстак — инструменты",
+   "when": "обвесы на верстаке",
+   "file": "hideout/workbench_",
+   "kind": "workbench",
+   "fallback": "repair",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "нет",
+   "group": "Убежище"
+  },
+  {
+   "id": "seat",
+   "cat": "Убежище",
+   "name": "Сесть на диван",
+   "when": "сесть",
+   "file": "hideout/seat_",
+   "kind": "",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "нет",
+   "group": "Убежище"
+  },
+  {
+   "id": "beer",
+   "cat": "Убежище",
+   "name": "Банка пива — открыть, шипение",
+   "when": "взять пиво",
+   "file": "hideout/beer_",
+   "kind": "",
+   "type": "one",
+   "variants": 2,
+   "prio": 3,
+   "now": "синтез",
+   "group": "Убежище"
   },
   {
    "id": "music_menu",
@@ -3149,7 +3402,8 @@
    "type": "loop",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Музыка"
   },
   {
    "id": "raid_start",
@@ -3161,7 +3415,8 @@
    "type": "one",
    "variants": 1,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Музыка"
   },
   {
    "id": "raid_end",
@@ -3173,7 +3428,8 @@
    "type": "one",
    "variants": 2,
    "prio": 3,
-   "now": "нет"
+   "now": "нет",
+   "group": "Музыка"
   }
  ]
 }

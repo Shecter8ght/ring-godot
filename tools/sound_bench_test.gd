@@ -136,9 +136,9 @@ func _run() -> void:
 		event_ids[String(event.id)] = true
 		event_files[String(event.file)] = true
 	_check("оружие: карточка для каждой модели, помодельные ID и папки звуков уникальны",
-		(bench.get("_weapon_grid") as GridContainer).get_child_count() == weapon_ids.size()
+		(bench.call("weapon_cards") as Array).size() == weapon_ids.size()
 		and weapon_events.size() >= weapon_ids.size() * 4 and duplicate_events.is_empty(),
-		"карточек %d, моделей %d, событий %d, дубли %s" % [(bench.get("_weapon_grid") as GridContainer).get_child_count(), weapon_ids.size(), weapon_events.size(), str(duplicate_events)])
+		"карточек %d, моделей %d, событий %d, дубли %s" % [(bench.call("weapon_cards") as Array).size(), weapon_ids.size(), weapon_events.size(), str(duplicate_events)])
 	var pm_layout := WeaponDb.weapon_sound_layout("wpn_hg_01")
 	var glock_layout := WeaponDb.weapon_sound_layout("wpn_hg_02")
 	var pm_order: Array[String] = []
@@ -380,24 +380,29 @@ func _run() -> void:
 	var tree: Tree = bench.get("_tree")
 	var top := tree.get_root().get_children()
 	_check("список: все разделы каталога", top.size() == cats.size(), "%d из %d" % [top.size(), cats.size()])
+	var grouped := 0
+	for c in top:
+		for g in c.get_children():
+			if String(g.get_metadata(0)).begins_with("grp:"):
+				grouped += 1
+	_check("список: внутри разделов — подгруппы (каталог: поле group)", grouped >= 40 and _leaves(tree.get_root()).size() == sounds.size(),
+		"подгрупп %d, звуков %d из %d" % [grouped, _leaves(tree.get_root()).size(), sounds.size()])
 	(bench.get("_filter") as OptionButton).select(3)
 	bench.call("_refresh_tree")
 	var wired := 0
-	for c in tree.get_root().get_children():
-		for it in c.get_children():
-			if String((bench.get("by_id") as Dictionary)[String(it.get_metadata(0))].kind) != "":
-				wired += 1
+	for it in _leaves(tree.get_root()):
+		if String((bench.get("by_id") as Dictionary)[String(it.get_metadata(0))].kind) != "":
+			wired += 1
 	_check("фильтр «не подключены в коде» — только такие", wired == 0 and tree.get_root().get_child_count() > 0, "")
 	(bench.get("_filter") as OptionButton).select(7)
 	bench.call("_refresh_tree")
 	var absent := 0
 	var other := 0
-	for c in tree.get_root().get_children():
-		for it in c.get_children():
-			if bool((bench.call("status_of", String(it.get_metadata(0))) as Dictionary).absent):
-				absent += 1
-			else:
-				other += 1
+	for it in _leaves(tree.get_root()):
+		if bool((bench.call("status_of", String(it.get_metadata(0))) as Dictionary).absent):
+			absent += 1
+		else:
+			other += 1
 	_check("фильтр «в игре нет»: гильзы, мусор, далёкие звуки…", absent >= 80 and other == 0
 		and bool((bench.call("status_of", "ricochet") as Dictionary).absent) and bool((bench.call("status_of", "trash_wind") as Dictionary).absent)
 		and not bool((bench.call("status_of", "shot_rifle") as Dictionary).absent), "%d звуков" % absent)
@@ -405,3 +410,15 @@ func _run() -> void:
 	_rm(_root)
 	print("sound_bench_test: провалено %d" % _fails)
 	get_tree().quit()
+
+
+## Звуки в дереве каталога — листья под разделами и подгруппами (у них в метаданных id звука).
+func _leaves(item: TreeItem) -> Array[TreeItem]:
+	var out: Array[TreeItem] = []
+	for ch in item.get_children():
+		var meta := String(ch.get_metadata(0)) if ch.get_metadata(0) != null else ""
+		if meta.begins_with("cat:") or meta.begins_with("grp:") or meta == "":
+			out.append_array(_leaves(ch))
+		else:
+			out.append(ch)
+	return out

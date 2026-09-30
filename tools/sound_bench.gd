@@ -15,6 +15,8 @@ const COL_SYNTH := Color(0.95, 0.75, 0.35)
 const COL_NONE := Color(0.92, 0.45, 0.4)
 const COL_DIM := Color(0.62, 0.63, 0.66)
 const COL_NEW := Color(0.45, 0.8, 1.0)
+## Порядок классов на вкладке оружия.
+const CLASS_ORDER := ["PISTOL", "SMG", "PDW", "ASSAULT_RIFLE", "CARBINE", "BATTLE_RIFLE", "DMR", "SNIPER", "SPECIAL", "LMG", "SHOTGUN"]
 const TYPE_NAMES := {"one": "разовый", "loop": "луп", "layer": "слой поверх другого звука"}
 const PRIO_NAMES := {1: "база", 2: "важно", 3: "детали"}
 const FILTERS := ["все звуки", "без записей", "только синтез", "не подключены в коде", "с новыми файлами",
@@ -73,7 +75,9 @@ var _tree: Tree
 var _filter: OptionButton
 var _search: LineEdit
 var _main_tabs: TabContainer
-var _weapon_grid: GridContainer
+## Карточки стволов по классам: заголовок класса + сетка карточек (см. weapon_cards()).
+var _weapon_grid: VBoxContainer
+var _weapon_summary: Label
 var _weapon_search: LineEdit
 var _shared_weapon_sounds: HFlowContainer
 var _details: VBoxContainer
@@ -1231,10 +1235,16 @@ func _build_ui() -> void:
 	var weapon_head := HBoxContainer.new()
 	weapon_head.add_theme_constant_override("separation", 10)
 	weapons_tab.add_child(weapon_head)
-	var weapon_hint := _label("В карточке — только отличающиеся звуки модели. Повторяемые действия назначаются один раз в блоке общих звуков.", 15, COL_DIM)
-	weapon_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var weapon_hint := VBoxContainer.new()
 	weapon_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	weapon_head.add_child(weapon_hint)
+	var hint_text := _label("В карточке — только звуки, которые у этой модели свои. Общие для всех стволов действия — в блоке ниже. "
+		+ "▶ — свои записи, ▷ — пока звучит чужим набором (какой — написано), ○ — в игре тишина.", 14, COL_DIM)
+	hint_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	weapon_hint.add_child(hint_text)
+	_weapon_summary = _label("", 15, Color(0.94, 0.86, 0.62))
+	_weapon_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	weapon_hint.add_child(_weapon_summary)
 	_weapon_search = LineEdit.new()
 	_weapon_search.placeholder_text = "найти оружие"
 	_weapon_search.custom_minimum_size.x = 300
@@ -1257,11 +1267,9 @@ func _build_ui() -> void:
 	weapon_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	weapon_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	weapons_tab.add_child(weapon_scroll)
-	_weapon_grid = GridContainer.new()
-	_weapon_grid.columns = 5
+	_weapon_grid = VBoxContainer.new()
 	_weapon_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_weapon_grid.add_theme_constant_override("h_separation", 10)
-	_weapon_grid.add_theme_constant_override("v_separation", 10)
+	_weapon_grid.add_theme_constant_override("separation", 8)
 	weapon_scroll.add_child(_weapon_grid)
 
 	var catalog_tab := VBoxContainer.new()
@@ -1303,8 +1311,12 @@ func _build_ui() -> void:
 	_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_tree.item_selected.connect(_on_tree_selected)
 	_tree.item_collapsed.connect(func(item: TreeItem) -> void:
-		if item.get_metadata(0) != null and String(item.get_metadata(0)).begins_with("cat:"):
-			_catalog_collapsed[String(item.get_metadata(0)).trim_prefix("cat:")] = item.collapsed)
+		if item.get_metadata(0) == null:
+			return
+		var meta := String(item.get_metadata(0))
+		# раздел и подгруппа помнят, свёрнуты ли они, между перестройками дерева
+		if meta.begins_with("cat:") or meta.begins_with("grp:"):
+			_catalog_collapsed[meta.trim_prefix("cat:").trim_prefix("grp:")] = item.collapsed)
 	left.add_child(_tree)
 
 	var work := _column(cols, 1.7)
@@ -1485,13 +1497,84 @@ func _refresh_weapon_grid() -> void:
 	for child in _weapon_grid.get_children():
 		child.queue_free()
 	var query := _weapon_search.text.strip_edges().to_lower() if _weapon_search else ""
+	# стволы — по классам в порядке CLASS_ORDER, внутри класса — как в data/weapons.json
+	var by_class: Dictionary = {}
 	for wid in WeaponDb.weapon_ids():
-		var item: Dictionary = WeaponDb.items().get(wid, {})
-		var w := WeaponDb.weapon(wid)
-		var haystack := "%s %s %s %s" % [wid, String(item.get("name", "")), String(w.get("class", "")), WeaponDb.caliber_name(String(w.get("caliber", "")))]
-		if query != "" and not haystack.to_lower().contains(query):
+		var cls := String(WeaponDb.weapon(wid).get("class", ""))
+		if not by_class.has(cls):
+			by_class[cls] = []
+		(by_class[cls] as Array).append(wid)
+	var order: Array[String] = []
+	for cls in CLASS_ORDER:
+		if by_class.has(cls):
+			order.append(String(cls))
+	for cls in by_class:
+		if not order.has(String(cls)):
+			order.append(String(cls))
+	var totals := {"own": 0, "borrowed": 0, "silent": 0, "guns_own_shot": 0, "guns": 0}
+	for cls in order:
+		var grid: GridContainer = null
+		var shown := 0
+		for wid in by_class[cls]:
+			var item: Dictionary = WeaponDb.items().get(wid, {})
+			var w := WeaponDb.weapon(String(wid))
+			var haystack := "%s %s %s %s" % [wid, String(item.get("name", "")), String(w.get("class", "")), WeaponDb.caliber_name(String(w.get("caliber", "")))]
+			var tally := _weapon_tally(String(wid))
+			totals.guns += 1
+			for k in ["own", "borrowed", "silent"]:
+				totals[k] = int(totals[k]) + int(tally[k])
+			if bool(tally.own_shot):
+				totals.guns_own_shot += 1
+			if query != "" and not haystack.to_lower().contains(query):
+				continue
+			if grid == null:
+				var heading := _label("%s · %d" % [String(WeaponDb.CLASS_NAMES.get(cls, cls)), (by_class[cls] as Array).size()], 18, Color(1.0, 0.86, 0.6))
+				_weapon_grid.add_child(heading)
+				grid = GridContainer.new()
+				grid.columns = 5
+				grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				grid.add_theme_constant_override("h_separation", 10)
+				grid.add_theme_constant_override("v_separation", 10)
+				_weapon_grid.add_child(grid)
+			grid.add_child(_weapon_card(String(wid), item, w))
+			shown += 1
+	if _weapon_summary:
+		_weapon_summary.text = "Свои выстрелы у %d из %d стволов. Звуков моделей: своих записей %d, звучат чужим набором %d, тишина %d." % [
+			int(totals.guns_own_shot), int(totals.guns), int(totals.own), int(totals.borrowed), int(totals.silent)]
+
+
+## Карточки стволов во всех классах (для теста и подсчётов).
+func weapon_cards() -> Array[Control]:
+	var out: Array[Control] = []
+	if _weapon_grid == null:
+		return out
+	for block in _weapon_grid.get_children():
+		if block is GridContainer and not block.is_queued_for_deletion():
+			for card in block.get_children():
+				out.append(card as Control)
+	return out
+
+
+## Свои звуки модели по состоянию: свои записи / звучит чужим набором / тишина (слоты, которые
+## игра зовёт и которые у этой конструкции есть).
+func _weapon_tally(wid: String) -> Dictionary:
+	var out := {"own": 0, "borrowed": 0, "silent": 0, "own_shot": false}
+	for e in WeaponDb.weapon_sound_layout(wid):
+		if bool(e.get("shared", false)) or not bool(e.get("available", true)) or String(e.get("kind", "")) == "":
 			continue
-		_weapon_grid.add_child(_weapon_card(wid, item, w))
+		var sid := String(e.id)
+		if not by_id.has(sid):
+			continue
+		var st := status_of(sid)
+		if int(st.rec) > 0:
+			out.own += 1
+			if String(e.slot) == "shot":
+				out.own_shot = true
+		elif int(st.fallback_rec) > 0 or bool(st.synth):
+			out.borrowed += 1
+		else:
+			out.silent += 1
+	return out
 
 
 func _refresh_shared_weapon_sounds() -> void:
@@ -1562,6 +1645,11 @@ func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContaine
 	box.add_child(title)
 	var meta := "%s · %s · %s" % [String(item.get("code", wid)), String(WeaponDb.CLASS_NAMES.get(String(w.get("class", "")), String(w.get("class", "")))), WeaponDb.caliber_name(String(w.get("caliber", "")))]
 	box.add_child(_label(meta, 13, COL_DIM))
+	var tally := _weapon_tally(wid)
+	var total := int(tally.own) + int(tally.borrowed) + int(tally.silent)
+	var progress := _label("своих записей: %d из %d%s" % [int(tally.own), total, "" if int(tally.silent) == 0 else " · тишина: %d" % int(tally.silent)],
+		13, COL_REC if int(tally.own) == total else (COL_NONE if int(tally.silent) > 0 else COL_SYNTH))
+	box.add_child(progress)
 	var last_group := ""
 	for e in WeaponDb.weapon_sound_layout(wid):
 		if bool(e.get("shared", false)):
@@ -1572,12 +1660,8 @@ func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContaine
 			var heading := _label(group.to_upper(), 12, Color(0.78, 0.67, 0.45))
 			heading.add_theme_constant_override("outline_size", 1)
 			box.add_child(heading)
+		# чего у этой конструкции нет (глушитель, ручной цикл…) — не показываем, это шум
 		if not bool(e.get("available", true)):
-			var unavailable := "— %s" % _unavailable_weapon_sound_text(String(e.slot), String(e.name))
-			var unavailable_label := _label(unavailable, 14, COL_DIM)
-			unavailable_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			unavailable_label.custom_minimum_size.y = 31
-			box.add_child(unavailable_label)
 			continue
 		var sound_id := String(e.id)
 		if sound_id == "":
@@ -1587,27 +1671,21 @@ func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContaine
 		var button := _button(_weapon_sound_button_text(row_name, st),
 			func() -> void: _select_weapon_sound(sound_id))
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.custom_minimum_size.y = 31
 		button.add_theme_color_override("font_color", _status_color(st))
 		button.tooltip_text = "%s\n%s\nID: %s\nФайлы: assets/audio/%sNN" % [String(e.when), _status_text(st), sound_id, String(e.file)]
 		box.add_child(button)
-	var common_note := _label("Общие действия: назначаются один раз в блоке над карточками.", 12, COL_DIM)
-	common_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(common_note)
 	return card
-
-
-func _unavailable_weapon_sound_text(slot: String, event_name: String) -> String:
-	if slot == "shot_suppressed":
-		return "Выстрел с глушителем не предусмотрен"
-	return "%s · для этой конструкции не предусмотрено" % event_name
 
 
 func _weapon_sound_button_text(name: String, st: Dictionary) -> String:
 	if int(st.rec) > 0:
 		return "▶ %s  ·  %d зап." % [name, int(st.rec)]
 	if int(st.fallback_rec) > 0:
-		return "▷ %s  ·  общий набор" % name
+		# чем звучит сейчас: короткое имя набора-замены («Пистолет 9×18 / 9×19»)
+		var like := String(st.fallback_name).get_slice(" — ", 0)
+		return "▷ %s  ·  как «%s»" % [name, like] if like != "" else "▷ %s  ·  общий набор" % name
 	if not bool(st.wired):
 		return "◇ %s  ·  ещё не в коде" % name
 	return "○ %s  ·  нужна запись" % name
@@ -1683,6 +1761,7 @@ func _refresh_tree() -> void:
 	_tree.clear()
 	var root := _tree.create_item()
 	var q := _search.text.strip_edges().to_lower()
+	var groups: Dictionary = {}
 	for c in cats:
 		var ci: TreeItem = null
 		var total := 0
@@ -1703,7 +1782,22 @@ func _refresh_tree() -> void:
 					ci.set_selectable(col, false)
 				ci.set_custom_color(0, Color(1.0, 0.86, 0.6))
 				ci.collapsed = bool(_catalog_collapsed.get(c, true))
-			var it := _tree.create_item(ci)
+				groups.clear()
+			# подгруппа раздела (каталог: поле group, порядок — как в файле)
+			var gname := String(e.get("group", ""))
+			var parent := ci
+			if gname != "":
+				if not groups.has(gname):
+					var gi := _tree.create_item(ci)
+					gi.set_text(0, gname)
+					gi.set_metadata(0, "grp:%s/%s" % [c, gname])
+					for col in 2:
+						gi.set_selectable(col, false)
+					gi.set_custom_color(0, Color(0.78, 0.67, 0.45))
+					gi.collapsed = bool(_catalog_collapsed.get("%s/%s" % [c, gname], false))
+					groups[gname] = gi
+				parent = groups[gname]
+			var it := _tree.create_item(parent)
 			it.set_text(0, String(e.name))
 			it.set_metadata(0, String(e.id))
 			it.set_tooltip_text(0, "%s\n%s" % [String(e.when), String(e.id)])
@@ -1711,6 +1805,7 @@ func _refresh_tree() -> void:
 			it.set_custom_color(1, _status_color(st))
 			if String(e.id) == _current:
 				ci.collapsed = false
+				parent.collapsed = false
 				it.select(0)
 		if ci:
 			var cat_text := "%s — с записями %d из %d" % [c, rec, total]
@@ -1993,10 +2088,6 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 			save_selection()
 			var one: Array[AudioStream] = [load_stream(path)]
 			play_burst(one, int(_burst_n.value), _rpm.value)))
-	var delete_button := _button("Удалить навсегда", func() -> void: _ask_delete_incoming(rel))
-	delete_button.modulate = Color(1.0, 0.68, 0.68)
-	delete_button.tooltip_text = "Безвозвратно удалить этот кандидат и все его служебные записи"
-	row.add_child(delete_button)
 	var use := CheckBox.new()
 	use.text = "Добавлен" if moved else "Одобрен к добавлению"
 	use.button_pressed = bool(s.use)
@@ -2016,21 +2107,27 @@ func _file_row(rel: String, show_assign: bool) -> PanelContainer:
 		else:
 			_status.text = "Кандидат снят с добавления.")
 	row.add_child(use)
+	# удаление — на другом краю строки, подальше от ▶ (мимо не нажмёшь)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(gap)
+	var delete_button := _button("Удалить навсегда", func() -> void: _ask_delete_incoming(rel))
+	delete_button.modulate = Color(1.0, 0.68, 0.68)
+	delete_button.tooltip_text = "Безвозвратно удалить этот кандидат и все его служебные записи"
+	row.add_child(delete_button)
 	var shown_path := rel if id == "" else rel.get_file()
-	var fname := _label("Файл: %s" % shown_path, 15, Color(0.85, 0.86, 0.88))
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 8)
+	box.add_child(name_row)
+	var length := load_stream(path).get_length() if load_stream(path) else 0.0
+	var fname := _label("Файл: %s%s" % [shown_path, "" if length <= 0.0 else "  ·  %.2f с" % length], 15, Color(0.85, 0.86, 0.88))
 	fname.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fname.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fname.tooltip_text = rel
-	box.add_child(fname)
-	var split_row := HBoxContainer.new()
-	split_row.add_theme_constant_override("separation", 8)
-	box.add_child(split_row)
-	var split_hint := _label("В файле несколько вариантов?", 14, COL_DIM)
-	split_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	split_row.add_child(split_hint)
+	name_row.add_child(fname)
 	var split_button := _button("✂ Разрезать по паузам", func() -> void: _open_split_popup(rel))
-	split_button.tooltip_text = "Найти паузы и создать отдельный WAV для каждого варианта"
-	split_row.add_child(split_button)
+	split_button.tooltip_text = "В файле несколько вариантов подряд? Найти паузы и создать отдельный WAV для каждого"
+	name_row.add_child(split_button)
 	var origin := String(s.get("origin", rel))
 	if origin != rel:
 		var origin_label := _label("Исходник: %s" % origin, 13, COL_DIM)

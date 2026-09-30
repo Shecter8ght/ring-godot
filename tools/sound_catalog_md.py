@@ -54,6 +54,114 @@ def slot_applies(slot: dict, weapon: dict) -> bool:
     return True
 
 
+CLASS_ORDER = ["PISTOL", "SMG", "PDW", "ASSAULT_RIFLE", "CARBINE", "BATTLE_RIFLE", "DMR", "SNIPER", "SPECIAL", "LMG", "SHOTGUN"]
+CLASS_NAMES = {"PISTOL": "Пистолеты", "SMG": "Пистолеты-пулемёты", "PDW": "PDW", "SHOTGUN": "Ружья",
+               "ASSAULT_RIFLE": "Автоматы", "CARBINE": "Карабины", "BATTLE_RIFLE": "Боевые винтовки",
+               "DMR": "Марксманские", "SNIPER": "Снайперские", "SPECIAL": "Специальные", "LMG": "Пулемёты"}
+
+
+def weapon_fallback(weapon: dict, fallback: str) -> str:
+    """Тот же запасной набор, что WeaponDb._weapon_sound_fallback."""
+    shot = weapon.get("sound", "")
+    if fallback == "$shot":
+        return shot
+    if fallback == "$shot_far":
+        if shot.startswith("shot_hg_") or shot == "shot_pistol":
+            return "shot_pistol@far"
+        for k in ("shot_smg", "shot_ak762", "shot_shotgun", "shot_bolt"):
+            if shot == k:
+                return k + "@far"
+        return "shot_rifle@far"
+    if fallback == "$suppressed":
+        if weapon.get("caliber") == "9x39":
+            return "shot_sup939"
+        if weapon.get("class") in ("PISTOL", "SMG", "PDW"):
+            return "shot_pistol_sup"
+        if weapon.get("class") == "SHOTGUN":
+            return weapon.get("sound", "shot_shotgun")
+        return "shot_rifle_sup"
+    if fallback == "$mechanism":
+        return "mech_pistol" if weapon.get("class") == "PISTOL" else "mech_rifle"
+    if fallback == "$reload":
+        return weapon.get("reload_sound", "reload_rifle")
+    if fallback == "$cycle":
+        return weapon.get("cycle_sound", "bolt")
+    return fallback
+
+
+def borrowed(sounds: list[dict], ref: str) -> tuple[str, int]:
+    """Чем звучит слот без своих записей: идём по цепочке fallback каталога до набора с записями."""
+    by_id = {s["id"]: s for s in sounds}
+    by_kind: dict[str, dict] = {}
+    for s in sounds:
+        by_kind.setdefault(s["kind"], s)
+    cur = by_id.get(ref) or by_kind.get(ref)
+    for _ in range(8):
+        if not cur:
+            return ("", 0)
+        n = recorded(cur["file"])
+        if n:
+            return (cur["name"].split(" — ")[0], n)
+        nxt = cur.get("fallback", "")
+        cur = by_id.get(nxt) or by_kind.get(nxt)
+    return ("", 0)
+
+
+def weapon_matrix(sounds: list[dict], weapons: dict, slots: list[dict]) -> list[str]:
+    own_slots = [s for s in slots if not s.get("shared") and s.get("wired")]
+    shared = [s for s in slots if s.get("shared")]
+    out = ["## Оружие по моделям — чего нет", "",
+           "Своя запись модели лежит в `assets/audio/guns/<модель>_<слот>_NN` (модель — id без `wpn_`) и заменяет",
+           "общий набор только у неё. В клетке: **N** — своих записей; «как …» — пока звучит чужим набором",
+           "(сколько в нём записей); **тишина** — игра зовёт, а звучать нечему; «—» — у конструкции такого нет.", ""]
+    head = "| Ствол | Калибр | " + " | ".join(s["name"] for s in own_slots) + " |"
+    out += [head, "|" + "---|" * (len(own_slots) + 2)]
+    silent: dict[str, list[str]] = {}
+    wrong: dict[str, list[str]] = {}
+    by_class: dict[str, list[str]] = {}
+    for wid, item in weapons.items():
+        by_class.setdefault(item["weapon"].get("class", ""), []).append(wid)
+    order = [c for c in CLASS_ORDER if c in by_class] + [c for c in by_class if c not in CLASS_ORDER]
+    for cls in order:
+        out.append(f"| **{CLASS_NAMES.get(cls, cls)}** |" + " |" * (len(own_slots) + 1))
+        for wid in by_class[cls]:
+            item = weapons[wid]
+            w = item["weapon"]
+            stem = wid.removeprefix("wpn_")
+            cells = []
+            for slot in own_slots:
+                if not slot_applies(slot, w):
+                    cells.append("—")
+                    continue
+                n = recorded(f"guns/{stem}_{slot['file']}_")
+                if n:
+                    cells.append(f"**{n}**")
+                    continue
+                name, m = borrowed(sounds, weapon_fallback(w, slot.get("fallback", "")))
+                if m:
+                    cells.append(f"как {name} ({m})")
+                    if slot["id"] == "shot":
+                        wrong.setdefault(name, []).append(item["name"])
+                else:
+                    cells.append("**тишина**")
+                    silent.setdefault(slot["name"], []).append(item["name"])
+            out.append(f"| {item['name']} | {w.get('caliber', '')} | " + " | ".join(cells) + " |")
+    out += ["", "### Общие для всех стволов действия", "",
+            "Назначаются один раз на весь класс (блок «Общие звуки оружия» на стенде).", "",
+            "| Действие | Когда | Сейчас звучит | В игре |", "|---|---|---|---|"]
+    for slot in shared:
+        name, m = borrowed(sounds, slot.get("fallback", ""))
+        now = f"как {name} ({m})" if m else ("синтез" if slot.get("fallback") else "тишина")
+        out.append(f"| {slot['name']} | {slot['when']} | {now} | {'да' if slot.get('wired') else 'механики ещё нет'} |")
+    out += ["", "### Что записывать в первую очередь", ""]
+    for name, guns in sorted(wrong.items(), key=lambda kv: -len(kv[1])):
+        out.append(f"- Выстрел «как {name}» у {len(guns)}: " + ", ".join(guns) + ".")
+    for name, guns in silent.items():
+        out.append(f"- **Тишина** — «{name}» у {len(guns)} стволов.")
+    out.append("")
+    return out
+
+
 def main() -> None:
     data = json.loads(CAT.read_text(encoding="utf-8"))
     sounds = data["sounds"]
@@ -108,29 +216,18 @@ def main() -> None:
     lines.append("")
     for cat in data["cats"]:
         rows = [s for s in sounds if s["cat"] == cat]
-        lines += [f"## {cat}", "", "| Звук | Когда | Файл | Вид | Тип | Вар. | Важн. | Записей | Сейчас |",
-                  "|---|---|---|---|---|---|---|---|---|"]
+        lines += [f"## {cat}", ""]
+        group = None
         for s in rows:
+            # подгруппы раздела — в порядке каталога (поле group)
+            if s.get("group", "") != group:
+                group = s.get("group", "")
+                lines += ["", f"### {group}", "", "| Звук | Когда | Файл | Вид | Тип | Вар. | Важн. | Записей | Сейчас |",
+                          "|---|---|---|---|---|---|---|---|---|"]
             lines.append(f"| {s['name']} | {s['when']} | `{s['file']}` | {s['kind'] or '—'} | {TYPES[s['type']]} "
                          f"| {s['variants']} | {PRIO[s['prio']]} | {recorded(s['file'])} | {s['now']} |")
         lines.append("")
-    lines += ["## Оружие по моделям", "",
-              "Карточки с тем же составом находятся на первой вкладке стенда. Неприменимые действия",
-              "скрываются по конструкции оружия; `не подключён` означает заранее предусмотренный слот",
-              "для будущей механики.", ""]
-    for wid, item in weapons.items():
-        weapon = item["weapon"]
-        lines += [f"### {item['name']}", "",
-                  f"`{wid}` · {weapon['class']} · {weapon['caliber']}", "",
-                  "| Группа | Звук | Файл модели | В игре | Записей |", "|---|---|---|---|---|"]
-        stem = wid.removeprefix("wpn_")
-        for slot in slots:
-            if not slot_applies(slot, weapon):
-                continue
-            prefix = f"guns/{stem}_{slot['file']}_"
-            lines.append(f"| {slot['group']} | {slot['name']} | `{prefix}` | "
-                         f"{'да' if slot['wired'] else 'не подключён'} | {recorded(prefix)} |")
-        lines.append("")
+    lines += weapon_matrix(sounds, weapons, slots)
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"{OUT.relative_to(ROOT)}: {total} звуков")
 

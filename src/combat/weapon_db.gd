@@ -225,7 +225,14 @@ static func _weapon_sound_fallback(w: Dictionary, fallback: String) -> String:
 		"$suppressed":
 			if String(w.get("caliber", "")) == "9x39":
 				return "shot_sup939"
-			return "shot_pistol_sup" if String(w.get("class", "")) == "PISTOL" else "shot_rifle_sup"
+			# пистолетный патрон (пистолеты, ПП, PDW) — пистолетный набор с глушителем; ружьё — свой
+			# выстрел (тише), а не карабинный; остальное — автоматный набор с глушителем
+			var cls := String(w.get("class", ""))
+			if cls in ["PISTOL", "SMG", "PDW"]:
+				return "shot_pistol_sup"
+			if cls == "SHOTGUN":
+				return String(w.get("sound", "shot_shotgun"))
+			return "shot_rifle_sup"
 		"$mechanism":
 			return "mech_pistol" if String(w.get("class", "")) == "PISTOL" else "mech_rifle"
 		"$reload":
