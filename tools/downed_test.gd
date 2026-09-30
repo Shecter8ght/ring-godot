@@ -168,6 +168,13 @@ func _marauder_rules() -> void:
 	await get_tree().physics_frame
 	_check("мародёр лёг раненым — пистолет", a.state == Marauder.State.DOWNED and String(a._spec["class"]) == "PISTOL", Marauder.State.keys()[a.state])
 	_check("товарищ идёт спасать", b.state == Marauder.State.RESCUE and a.rescuer == b, Marauder.State.keys()[b.state])
+	# лежит клипом падения, не «ногами вверх» (наклон корпуса поверх клипа переворачивал тело)
+	await _wait(2.6)
+	var sk := a.get_node("Body/Persona").find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var high := 0.0
+	for bone in ["mixamorig_LeftToeBase", "mixamorig_RightToeBase", "mixamorig_Head", "mixamorig_Hips"]:
+		high = maxf(high, (sk.global_transform * sk.get_bone_global_pose(sk.find_bone(bone))).origin.y - a.global_position.y)
+	_check("раненый мародёр лежит (ноги и голова у пола)", not (a.get_node("Health") as Health).downed or high < 0.6, "выше всего %.2f м, лежит %s" % [high, (a.get_node("Health") as Health).downed])
 	var up := false
 	for i in range(50):
 		await _wait(0.5)

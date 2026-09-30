@@ -1453,8 +1453,10 @@ func _move_downed(delta: float) -> void:
 		velocity.y -= 9.8
 	move_and_slide()
 	_body.rotation.y = _facing
-	# лежит лицом вниз (Body:rotation синхронизируется)
-	_body.rotation.x = 1.35
+	# лежит: модель Persona кладёт клип падения (наклон корпуса сверху ставил её ногами вверх),
+	# запасной манекен — наклоном лицом вниз (Body:rotation синхронизируется)
+	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
+	_body.rotation.x = 0.0 if anim and anim.has_model() else 1.35
 
 
 ## Спасатель: добежать, лежит на виду — утащить за укрытие, поднять.
@@ -2053,6 +2055,8 @@ func _spawn_ragdoll() -> void:
 	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
 	if anim and anim.has_model():
 		_died_shown = true
+		# корпус ровно: лежит клип смерти (наклон раненого / откид от попадания перевернул бы тело)
+		_body.rotation.x = 0.0
 		anim.die(anim.death_clip(_last_hit_from, _health.last_zone, crouched, false))
 		# оружие ушло в ящик с телом — в мёртвой руке его не рисуем
 		if _main_gun:
