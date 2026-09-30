@@ -58,7 +58,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:hp", ".:alive", ".:downed", ".:down_hp", ".:bleed_t", ".:downs"]:
+	for prop in [".:hp", ".:alive", ".:downed", ".:down_hp", ".:bleed_t", ".:downs", ".:last_zone"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)

@@ -113,6 +113,8 @@ var dragged_by: Marauder = null
 var _main_gun: Node3D
 var _help_t: float = 0.0
 var _shown_down: bool = false
+## Смерть уже показана клипом (регдолла нет — CharacterAnimator.die).
+var _died_shown: bool = false
 var _torch: SpotLight3D
 var _torch_t: float = 0.0
 var _blind_t: float = 0.0
@@ -2042,9 +2044,24 @@ func _process(delta: float) -> void:
 		_spawn_ragdoll()
 
 
-## Капсула прячется, падает регдолл, толкнутый от стрелявшего — сильнее от мощного попадания.
+## Смерть: капсула прячется, модель падает клипом смерти по обстоятельствам (откуда стреляли,
+## в голову, в приседе, раненым, взрыв) и остаётся лежать — тот же персонаж, не манекен. Без модели
+## Persona — прежний регдолл, толкнутый от стрелявшего.
 func _spawn_ragdoll() -> void:
-	if _ragdoll != null:
+	if _ragdoll != null or _died_shown:
+		return
+	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
+	if anim and anim.has_model():
+		_died_shown = true
+		anim.die(anim.death_clip(_last_hit_from, _health.last_zone, crouched, false))
+		# оружие ушло в ящик с телом — в мёртвой руке его не рисуем
+		if _main_gun:
+			_main_gun.visible = false
+		velocity = Vector3.ZERO
+		if _say_label:
+			_say_label.visible = false
+		Audio.play("death", global_position + Vector3.UP * 1.5)
+		Audio.play("fall", global_position, -4.0)
 		return
 	var mat := (_body.get_node("Torso") as MeshInstance3D).get_surface_override_material(0)
 	var away := global_position - _last_hit_from

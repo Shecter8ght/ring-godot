@@ -1,6 +1,6 @@
 extends Node
 ## Прогон новой механики без рук в тире: смена оружия, прицел от первого лица (камера, мышь,
-## WASD по взгляду), оптика, граната, регдолл мародёра, вращение камеры средней кнопкой.
+## WASD по взгляду), оптика, граната, смерть мародёра (клип на модели), вращение камеры средней кнопкой.
 ## Печатает проверки и сохраняет снимки docs/screens/wt_*.png.
 ## godot --path . res://tools/weapons_test.tscn
 
@@ -31,7 +31,8 @@ func _ready() -> void:
 	# 2. смена оружия клавишами
 	_tap("weapon_2")
 	await _frames(4)
-	_check("клавиша 2 — автомат", _player.weapon_id == "wpn_ar_03", _player.weapon_id)
+	# после новой оружейной линейки на двойке — автомат или карабин (id менялся, класс — нет)
+	_check("клавиша 2 — автомат", String(WeaponDb.weapon(_player.weapon_id).get("class", "")) in ["ASSAULT_RIFLE", "CARBINE"], _player.weapon_id)
 
 	# 3. прицел: камера от первого лица, мышь захвачена
 	Input.action_press("aim")
@@ -111,13 +112,20 @@ func _ready() -> void:
 			break
 	Input.action_release("aim")
 	await get_tree().create_timer(0.8).timeout
-	var rd := get_tree().get_first_node_in_group("ragdolls") as Ragdoll
+	# смерть — клипом на той же модели Persona (не манекен-регдолл): грудь у пола
 	var mh := m.get_node("Health") as Health
-	_check("мародёр умер — регдолл", rd != null, "жив %s, лёг %s, hp %.0f, патронов %d, оружие %s" % [mh.alive, mh.downed, mh.hp, _player.ammo, _player.weapon_id])
-	if rd:
-		var chest := rd.chest()
-		_check("регдолл лёг", chest.global_position.y < 0.7, "грудь на высоте %.2f" % chest.global_position.y)
-	_save("wt_ragdoll")
+	var sk := m.get_node("Body/Persona").find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	# клип падения длиннее регдолла — ждём, пока тело ляжет (до 4 с)
+	var chest_y := 9.0
+	for _i in 40:
+		chest_y = (sk.global_transform * sk.get_bone_global_pose(sk.find_bone("mixamorig_Spine2"))).origin.y - m.global_position.y
+		if chest_y < 0.7:
+			break
+		await get_tree().create_timer(0.1).timeout
+	_check("мародёр умер — лежит своя модель, без манекена", not mh.alive and (m.get_node("Body") as Node3D).visible
+		and get_tree().get_first_node_in_group("ragdolls") == null, "жив %s, лёг %s, hp %.0f, патронов %d, оружие %s" % [mh.alive, mh.downed, mh.hp, _player.ammo, _player.weapon_id])
+	_check("мёртвый лёг", chest_y < 0.7, "грудь на высоте %.2f" % chest_y)
+	_save("wt_death")
 
 	# 6. граната навесом в точку под курсором
 	var cam_iso := get_viewport().get_camera_3d()

@@ -9,10 +9,6 @@ func _ready() -> void:
 	for i in range(poses.size()):
 		var model: Node3D = scene.instantiate() as Node3D
 		model.position.x = (i - 1.0) * 1.7
-		if i == 1:
-			model.position.y = -float(Balance.CHARACTER_ANIM.crouch_drop)
-		elif i == 2:
-			model.position.y = -float(Balance.CHARACTER_ANIM.prone_drop)
 		add_child(model)
 		var anim := AnimationPlayer.new()
 		anim.name = "AnimationPlayer"

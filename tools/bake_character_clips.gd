@@ -80,7 +80,11 @@ func _initialize() -> void:
 			clip.track_set_path(i, NodePath(target_path + ":" + bone))
 			retained += 1
 			if clip.track_get_type(i) == Animation.TYPE_POSITION_3D and bone == "mixamorig_Hips":
-				_remove_root_drift(clip, i, skeleton.get_bone_rest(skeleton.find_bone(bone)).origin)
+				if source_skeleton != null and source_skeleton.find_bone(bone) >= 0:
+					_retarget_hips(clip, i, source_skeleton, _to_root(source_skeleton, source_root),
+						skeleton.get_bone_rest(skeleton.find_bone(bone)).origin, _to_root(skeleton, root))
+				else:
+					_remove_root_drift(clip, i, skeleton.get_bone_rest(skeleton.find_bone(bone)).origin)
 		if retained == 0:
 			push_error("Нет совместимых треков: " + source_path)
 			failed += 1
@@ -113,11 +117,50 @@ func _remove_root_drift(clip: Animation, track: int, rest: Vector3) -> void:
 	var span: float = maxf(finish - start, 0.001)
 	var first: Vector3 = clip.track_get_key_value(track, 0) as Vector3
 	var last: Vector3 = clip.track_get_key_value(track, count - 1) as Vector3
+	# снос убираем только по горизонтали: клип не уводит тело от коллизии, но падение (смерть,
+	# нокаут) опускает таз к полу — вертикаль оставляем
 	var drift: Vector3 = last - first
+	drift.y = 0.0
 	for i in range(count):
 		var t: float = (clip.track_get_key_time(track, i) - start) / span
 		var value: Vector3 = clip.track_get_key_value(track, i) as Vector3
 		clip.track_set_key_value(track, i, value - drift * t + rest)
+
+
+## Скелет → корень сцены: у FBX Mixamo скелет лежит под узлом с масштабом 100 и осью Z вверх,
+## ключи таза — в осях скелета. Без этого перевода вертикаль таза терялась: падение, присед и лёжа
+## оставляли таз на высоте стоя (мёртвый «висел» над полом).
+func _to_root(node: Node3D, root: Node) -> Transform3D:
+	var xf := Transform3D.IDENTITY
+	var n: Node = node
+	while n != null and n != root:
+		if n is Node3D:
+			xf = (n as Node3D).transform * xf
+		n = n.get_parent()
+	return xf
+
+
+## Путь таза из исходника — на Persona: смещение от позы покоя в осях сцены, масштаб по росту
+## (высоте таза), горизонтальный снос за клип убран (тело не уходит от капсулы), вертикаль —
+## как в клипе: присел, лёг, упал — таз у пола.
+func _retarget_hips(clip: Animation, track: int, source: Skeleton3D, source_xf: Transform3D, rest: Vector3, target_xf: Transform3D) -> void:
+	var count: int = clip.track_get_key_count(track)
+	if count == 0:
+		return
+	var source_rest: Vector3 = source_xf * source.get_bone_rest(source.find_bone("mixamorig_Hips")).origin
+	var target_rest: Vector3 = target_xf * rest
+	var k: float = target_rest.y / source_rest.y if absf(source_rest.y) > 0.001 else 1.0
+	var start: float = clip.track_get_key_time(track, 0)
+	var span: float = maxf(clip.track_get_key_time(track, count - 1) - start, 0.001)
+	var first: Vector3 = source_xf * (clip.track_get_key_value(track, 0) as Vector3)
+	var drift: Vector3 = source_xf * (clip.track_get_key_value(track, count - 1) as Vector3) - first
+	drift.y = 0.0
+	var inv: Transform3D = target_xf.affine_inverse()
+	for i in range(count):
+		var t: float = (clip.track_get_key_time(track, i) - start) / span
+		var value: Vector3 = source_xf * (clip.track_get_key_value(track, i) as Vector3)
+		var delta: Vector3 = (value - source_rest - drift * t) * k
+		clip.track_set_key_value(track, i, inv * (target_rest + delta))
 
 
 func _offset_hips(clip: Animation, track: int, rest: Vector3) -> void:

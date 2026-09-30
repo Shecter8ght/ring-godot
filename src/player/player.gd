@@ -85,6 +85,8 @@ var _aimed: Array[Node3D] = []
 var _weapon_model: Node3D
 var _weapon_model_id: String = ""
 var _ragdoll: Ragdoll
+## Смерть показана клипом (CharacterAnimator.die), регдолла нет.
+var _died_shown: bool = false
 var _last_hit_from: Vector3 = Vector3.ZERO
 var _last_damage: float = 0.0
 ## Лёжа держит X — сколько секунд (сдаться).
@@ -564,7 +566,7 @@ func _process(_delta: float) -> void:
 		look_pitch = 0.0
 	_update_hand()
 	# смерть видна у всех peer: у хоста — по сигналу, у клиентов — по синхронизированному alive
-	if not health.alive and _ragdoll == null:
+	if not health.alive and _ragdoll == null and not _died_shown:
 		_die()
 
 
@@ -1633,6 +1635,20 @@ func _leave_raid() -> void:
 
 
 func _die() -> void:
+	if _died_shown:
+		return
+	# модель падает клипом смерти и остаётся лежать (не манекен); без модели — прежний регдолл
+	if _animator and _animator.has_model():
+		_died_shown = true
+		_animator.die(_animator.death_clip(_last_hit_from, health.last_zone, stance == Stance.CROUCH, stance == Stance.PRONE))
+		_hand.visible = false
+		if _weapon_model:
+			_weapon_model.visible = false
+		collision_layer = 0
+		Audio.play("fall", global_position)
+		if is_local() and _camera_rig is CameraRig:
+			(_camera_rig as CameraRig).set_target(_animator.bone_node("mixamorig_Spine2"))
+		return
 	var torso := _body.get_node("Torso") as MeshInstance3D
 	var mat := torso.get_surface_override_material(0)
 	var away := global_position - _last_hit_from
