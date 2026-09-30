@@ -31,6 +31,13 @@ func _ready() -> void:
 	var m0 := Profile.money
 	Profile.buy("ammo_12", 20)
 	_check("покупка у торговца", Profile.money < m0 and _idx("ammo_12") >= 0, "%d ₽" % Profile.money)
+	# ствол у Михалыча — со снаряжённым штатным магазином; продали обратно, чтобы не мешал дальше
+	Profile.money += 100000
+	Profile.buy("wpn_sg_02", 1)
+	var gun: Dictionary = Profile.stash[_idx("wpn_sg_02")] if _idx("wpn_sg_02") >= 0 else {}
+	_check("купленный ствол — магазин полный", not gun.is_empty() and int(gun.mag.rounds) > 0 and int(gun.mag.rounds) == WeaponDb.capacity(gun), str(gun.get("mag", {})))
+	if _idx("wpn_sg_02") >= 0:
+		Profile.sell(_idx("wpn_sg_02"), 1)
 	var m1 := Profile.money
 	Profile.sell(_idx("painkillers"), 2)
 	_check("продажа торговцу", Profile.money > m1 and _idx("painkillers") < 0, "%d ₽" % Profile.money)
@@ -131,11 +138,11 @@ func _ready() -> void:
 	for i in range(4):
 		pl.health.take_damage(20.0, pl.global_position + fwd * 5.0 + Vector3.UP, "thorax", pl.global_position + Vector3.UP * 1.2, {"pen": 8.0, "armor_dmg": 10.0})
 	_check("броня держит слабую пулю и изнашивается", hp0 - pl.health.hp < 60.0 and float(pl.inventory.equipment.armor.dur) < dur0, "урон %d из 80, броня %.0f→%.0f" % [int(hp0 - pl.health.hp), dur0, float(pl.inventory.equipment.armor.dur)])
-	Input.action_press("weapon_1")
+	Input.action_press("weapon_2")
 	await _frames(3)
-	Input.action_release("weapon_1")
+	Input.action_release("weapon_2")
 	await _frames(2)
-	_check("1 — Glock 17 (магазин снаряжён)", pl.weapon_id == "wpn_hg_02" and pl.ammo == 17, "%s %d" % [pl.weapon_id, pl.ammo])
+	_check("2 — Glock 17 (магазин снаряжён)", pl.weapon_id == "wpn_hg_02" and pl.ammo == 17, "%s %d" % [pl.weapon_id, pl.ammo])
 	# эвакуация через остановку
 	for m in get_tree().get_nodes_in_group("marauders"):
 		(m as Node).queue_free()

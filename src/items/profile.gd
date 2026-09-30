@@ -594,10 +594,14 @@ static func buy(id: String, n: int, to: String = "stash") -> bool:
 	var cost := buy_price(id) * n
 	var dst := list_of(to)
 	var grid := grid_of(to)
-	if cost > money or ItemDb.room_in(dst, ItemDb.make(id, n), grid) < n:
+	var bought := ItemDb.make(id, n)
+	# оружие у Михалыча — со снаряжённым штатным магазином (отдельные магазины — пустые)
+	if WeaponDb.is_weapon(String(bought.id)) and bought.get("mag") is Dictionary:
+		(bought.mag as Dictionary)["rounds"] = WeaponDb.capacity(bought)
+	if cost > money or ItemDb.room_in(dst, bought, grid) < n:
 		return false
 	money -= cost
-	ItemDb.add_to(dst, ItemDb.make(id, n), grid)
+	ItemDb.add_to(dst, bought, grid)
 	save()
 	Audio.play_ui("cash")
 	return true

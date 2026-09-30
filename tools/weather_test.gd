@@ -64,12 +64,13 @@ func _ready() -> void:
 	rig.rotation.y = atan2(-out.x, -out.z)
 	Input.action_press("sprint")
 	Input.action_press("move_forward")
-	await get_tree().create_timer(1.0).timeout
+	# три секунды: расход вдвое меньше прежнего, за одну секунду жару не отличить от разгона
+	await get_tree().create_timer(3.0).timeout
 	var hot_left := me.stamina
 	Input.action_release("sprint")
 	Input.action_release("move_forward")
-	# за секунду бега в жару уходит больше обычного расхода
-	_check("бег тратит выносливость, в жару быстрее", hot_left < Balance.STAMINA_MAX - Balance.STAMINA_DRAIN * 1.3, "осталось %.0f" % hot_left)
+	# за три секунды бега в жару уходит больше обычного расхода
+	_check("бег тратит выносливость, в жару быстрее", hot_left < Balance.STAMINA_MAX - Balance.STAMINA_DRAIN * 3.0 * 1.3, "осталось %.0f" % hot_left)
 	await get_tree().create_timer(3.0).timeout
 	_check("отдых восстанавливает", me.stamina > hot_left + 10.0, "%.0f" % me.stamina)
 	print("weather_test: провалено %d" % _fails)

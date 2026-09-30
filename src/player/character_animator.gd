@@ -22,8 +22,12 @@ var _held_prone: bool = false
 const SOCKETS := "res://data/weapon_sockets.json"
 ## На время этих клипов оружие прячется: рука занята (бросок, подобрать с пола).
 const HIDE_WEAPON := ["grenade_throw", "pickup"]
+## В этих клипах левая рука уходит с цевья (магазин, граната, достать / убрать) — ИК отпускает её.
+const FREE_LEFT_HAND := ["rifle_reload", "prone_reload", "reload_move", "grenade_throw", "prone_throw", "pickup", "rifle_draw", "pistol_draw", "rifle_holster"]
 static var _sockets: Dictionary = {}
 var _grip: Node3D
+## Левая кисть на цевье (SupportHandIK — модификатор скелета после клипа).
+var _support: SupportHandIK
 ## Клип падения раненым, пока лежит («» — не ранен); после смерти аниматор не управляет моделью.
 var _downed_clip: String = ""
 var _dead: bool = false
@@ -99,6 +103,11 @@ func _process(delta: float) -> void:
 		event_name = enemy.animation_event
 	if _grip:
 		_grip.visible = not HIDE_WEAPON.has(_one_shot)
+	if _support:
+		# с пистолетом — вторая рука на рукоятке только в прицеле (на ходу клипы держат одной)
+		var hold := _grip != null and _grip.visible and family != "unarmed" and not downed \
+			and not FREE_LEFT_HAND.has(_one_shot) and (family != "pistol" or aiming)
+		_support.influence = move_toward(_support.influence, 1.0 if hold else 0.0, delta / float(Balance.CHARACTER_ANIM.support_blend_sec))
 	var move_min: float = float(Balance.CHARACTER_ANIM.move_min)
 	var moving: bool = speed > move_min
 	if event_seq != _last_event_seq:
@@ -222,6 +231,9 @@ func die(clip: String) -> void:
 	_play(clip, false)
 	if _grip:
 		_grip.visible = true
+	# мёртвая рука цевьё не держит
+	if _support:
+		_support.influence = 0.0
 	set_process(false)
 
 
@@ -283,6 +295,11 @@ func weapon_grip(family: String) -> Node3D:
 		_grip = Node3D.new()
 		_grip.name = "Grip"
 		socket.add_child(_grip)
+		_support = SupportHandIK.new()
+		_support.name = "SupportHandIK"
+		_support.grip = _grip
+		_support.influence = 0.0
+		(skeletons[0] as Skeleton3D).add_child(_support)
 	_grip.transform = socket_transform(family)
 	return _grip
 

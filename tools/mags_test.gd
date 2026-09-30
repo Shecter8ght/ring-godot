@@ -189,7 +189,7 @@ func _ready() -> void:
 
 	# --- держать R — проверка (без перезарядки), коротко — перезарядка
 	inv.items = []
-	_me._switch(String(_me.weapon_keys()[1]), false)
+	_me._switch(String(_me.weapon_keys()[0]), false)
 	await get_tree().physics_frame
 	_me.ammo = 17
 	var spec := _me.spec()
@@ -198,7 +198,7 @@ func _ready() -> void:
 	await _hold_reload(0.05)
 	_check("коротко R — перезарядка", _me.reload_timer > 0.0, "%.2f" % _me.reload_timer)
 	await get_tree().create_timer(4.0).timeout
-	_me._switch(String(_me.weapon_keys()[0]), false)
+	_me._switch(String(_me.weapon_keys()[1]), false)
 	await get_tree().physics_frame
 	_me.ammo = 7
 	await _hold_reload(0.7)

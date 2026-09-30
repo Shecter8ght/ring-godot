@@ -595,9 +595,12 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		absf(sin(_bob_t)) * vertical_bob, 0.0) * (1.0 - k)
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
 	# толчок в плечо: модель откатывается назад, дуло подскакивает, чуть заваливается; пружиной обратно
+	# в прицеле дуло подскакивает меньше, а оружие сильнее уходит назад, в плечо и камеру
 	var kv := pl.kick_vis
-	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, kv * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
-	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + bob + Vector3(0.0, kv * 0.004, kv * 0.028))
+	var flip := kv * lerpf(1.0, Balance.ADS_RECOIL_FLIP_SCALE, k)
+	var kick_back := kv * lerpf(1.0, Balance.ADS_RECOIL_BACK_SCALE, k)
+	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, flip * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
+	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + bob + Vector3(0.0, flip * 0.004, kick_back * 0.028))
 	_arms.update_pose()
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05)
 	if scope_active:

@@ -60,7 +60,7 @@ func _ready() -> void:
 	# от первого лица: у бедра, в наклоне вправо, в прицеле
 	me.global_position = SectorBuilder.polar(-90.0, 100.0) + Vector3(0, 0.1, 0)
 	CameraRig.first_person_mode = true
-	_press("weapon_2")
+	_press("weapon_1")
 	await _frames(20)
 	_save("ui_fps_hip")
 	Input.action_press("camera_right")

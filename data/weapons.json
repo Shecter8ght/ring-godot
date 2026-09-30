@@ -6375,8 +6375,8 @@
   }
  },
  "sandbox": [
-  "GLOCK17_BASE",
   "AK12_BASE",
+  "GLOCK17_BASE",
   "SAIGA12_BASE",
   "AWM_BASE"
  ],

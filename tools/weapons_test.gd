@@ -29,10 +29,10 @@ func _ready() -> void:
 	_check("СКМ вращает камеру", absf(_rig.rotation.y - yaw0) > 0.3, "Δ=%.2f рад" % (_rig.rotation.y - yaw0))
 
 	# 2. смена оружия клавишами
-	_tap("weapon_2")
+	_tap("weapon_1")
 	await _frames(4)
 	# после новой оружейной линейки на двойке — автомат или карабин (id менялся, класс — нет)
-	_check("клавиша 2 — автомат", String(WeaponDb.weapon(_player.weapon_id).get("class", "")) in ["ASSAULT_RIFLE", "CARBINE"], _player.weapon_id)
+	_check("клавиша 1 — автомат", String(WeaponDb.weapon(_player.weapon_id).get("class", "")) in ["ASSAULT_RIFLE", "CARBINE"], _player.weapon_id)
 
 	# 3. прицел: камера от первого лица, мышь захвачена
 	Input.action_press("aim")

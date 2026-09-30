@@ -32,7 +32,7 @@ func _ready() -> void:
 		enemy.queue_free()
 	await _wait(0.5)
 	await _teleport(Vector3(-5.0, 0.1, -145.0))
-	await _press("weapon_2")
+	await _press("weapon_1")
 	_player.inventory.equipment["primary"] = _player._base_entry(_player.weapon_slot).duplicate(true)
 	_cinema = Camera3D.new()
 	_cinema.fov = 55.0

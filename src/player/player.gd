@@ -27,7 +27,7 @@ var cursor_ground: Vector3 = Vector3.ZERO
 ## Точка на теле противника под курсором (Vector3.ZERO — под курсором никого): выстрел идёт в неё.
 var cursor_body: Vector3 = Vector3.ZERO
 
-## Рейд из убежища: оружие только из снаряжения (1 — пистолет, 2 — основное), магазины, патроны и
+## Рейд из убежища: оружие только из снаряжения (1 — основное, 2 — пистолет), магазины, патроны и
 ## гранаты — из рюкзака. false — «песочница» (тесты, запуск уровня напрямую): стволы из
 ## WeaponDb.sandbox(), патроны без счёта.
 var loadout_mode: bool = false
@@ -718,7 +718,8 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 	else:
 		_recoil += rise
 	_bloom += kv * Balance.RECOIL_BLOOM
-	kick_vis += clampf(kv / 0.05, 0.3, 1.8) * (Balance.ADS_RECOIL_BACK_SCALE if in_ads else 1.0)
+	# толчок модели в руках; в прицеле подскок и откат масштабирует CameraRig (ADS_RECOIL_FLIP / BACK)
+	kick_vis += clampf(kv / 0.05, 0.3, 1.8)
 
 
 ## Оружие — в правой руке модели (кость руки, CharacterAnimator.weapon_grip): идёт за руками
@@ -807,9 +808,9 @@ func _combat(delta: float) -> void:
 			_switch(String(keys[i]))
 	# лёжа раненым и таща раненого — только пистолет (нет — руки пусты, гранаты можно)
 	if not loadout_mode and weapon_slot == "" and not _sandbox_picked:
-		# песочница: сразу в руках первый ствол (пистолет)
+		# песочница: сразу в руках пистолет (клавиша 2), как было всегда
 		_sandbox_picked = true
-		_switch(String(keys[0]), false)
+		_switch(sidearm_key() if sidearm_key() != "" else String(keys[0]), false)
 	if not weapon_slot in allowed_weapons() and weapon_slot != "":
 		var pistol := String(allowed_weapons()[0]) if not allowed_weapons().is_empty() else ""
 		_switch(pistol, pistol != "")
@@ -1010,12 +1011,22 @@ func _toggle_sight() -> void:
 	_send_ws(weapon_slot)
 
 
-## Клавиши 1…: в песочнице — стволы песочницы, со снаряжением — [пистолет, основное] (слоты;
-## "" — пусто).
+## Клавиши 1…: в песочнице — стволы песочницы (автомат, пистолет, дробовик, винтовка), со
+## снаряжением — [основное, пистолет] (слоты; "" — пусто).
 func weapon_keys() -> Array:
 	if not loadout_mode:
 		return WeaponDb.sandbox()
-	return ["secondary" if inventory.slot_weapon("secondary") != "" else "", "primary" if inventory.slot_weapon("primary") != "" else ""]
+	return ["primary" if inventory.slot_weapon("primary") != "" else "", "secondary" if inventory.slot_weapon("secondary") != "" else ""]
+
+
+## Ключ пистолета (клавиша 2): раненым и таща раненого — только он; "" — пистолета нет.
+func sidearm_key() -> String:
+	if loadout_mode:
+		return "secondary" if inventory.slot_weapon("secondary") != "" else ""
+	for k in WeaponDb.sandbox():
+		if String(WeaponDb.weapon(String(k)).get("class", "")) == "PISTOL":
+			return String(k)
+	return ""
 
 
 func grenade_count() -> int:
@@ -1026,7 +1037,7 @@ func grenade_count() -> int:
 func allowed_weapons() -> Array:
 	var keys := weapon_keys()
 	if is_downed() or is_burdened():
-		return [keys[0]] if String(keys[0]) != "" else []
+		return [sidearm_key()] if sidearm_key() != "" else []
 	return keys.filter(func(k: Variant) -> bool: return String(k) != "")
 
 
@@ -1087,7 +1098,7 @@ func _loadout_tick() -> void:
 		return
 	if weapon_slot == "" or not weapon_slot in keys or _base_entry(weapon_slot).is_empty():
 		# оружие пропало из рук (сменил/не было) — берём основное, иначе пистолет
-		var pick := String(keys[1]) if String(keys[1]) != "" else String(keys[0])
+		var pick := String(keys[0]) if String(keys[0]) != "" else String(keys[1])
 		if pick != weapon_slot or _base_entry(weapon_slot).is_empty():
 			_switch(pick, false)
 

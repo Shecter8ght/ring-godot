@@ -117,7 +117,7 @@ func _run_case(config: Dictionary, index: int) -> void:
 	_case_error = 0.0
 	_length_error = 0.0
 	Input.action_release("aim")
-	var slot: String = String(WeaponDb.sandbox()[1])
+	var slot: String = String(WeaponDb.sandbox()[0])
 	var id: String = config.id
 	var weapon: Dictionary = WeaponDb.weapon(id)
 	var magazine: String = WeaponDb.default_mag(id)

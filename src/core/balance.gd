@@ -55,7 +55,7 @@ const PLAYER_TURN_SPEED := 12.0
 ## выбора сглажена за speed_smooth_sec, с (иначе на мониторе 144+ клип скачет каждый кадр);
 ## с автоматом от sprint_from, м/с, — спринт (бег игрока 5.2, сглаженная скорость к ней снизу).
 ## Модель опущена под стойку, м: присед на месте, ходьба вприсядку (у клипа таз выше), лёжа.
-const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "sprint_from": 4.8, "blend_sec": 0.16, "prone_hold_sec": 1.0, "prone_aim_hold_sec": 0.3, "hurt_below": 0.35, "speed_smooth_sec": 0.1}
+const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "sprint_from": 4.8, "blend_sec": 0.16, "prone_hold_sec": 1.0, "prone_aim_hold_sec": 0.3, "hurt_below": 0.35, "support_blend_sec": 0.15, "speed_smooth_sec": 0.1}
 
 # --- Капсула по стойкам: высота, м ---
 const STANCE_HEIGHT := {"stand": 1.8, "crouch": 1.2, "prone": 0.5}
@@ -163,21 +163,23 @@ const SHAKE_DECAY := 9.0
 const RECOIL_KICK := 0.12
 const RECOIL_RETURN := 6.0
 ## При удержании ADS отдача вдвое слабее, раскачка прицела — на 90 % слабее. Внутри этой
-## отдачи вертикальный подброс линии прицела дополнительно мягче, горизонтальный увод камеры
-## заметнее, а откат модели оружия в камеру сильнее.
+## отдачи вертикальный подброс линии прицела (RISE) и подскок дула модели (FLIP) мягче,
+## горизонтальный увод камеры заметнее, а откат модели оружия в камеру (BACK) сильнее.
 const ADS_RECOIL_SCALE := 0.5
 const ADS_SWAY_SCALE := 0.1
-const ADS_RECOIL_RISE_SCALE := 0.425
+const ADS_RECOIL_RISE_SCALE := 0.1275
+const ADS_RECOIL_FLIP_SCALE := 0.45
 const ADS_RECOIL_HORIZONTAL_SCALE := 1.5
-const ADS_RECOIL_BACK_SCALE := 1.5
+const ADS_RECOIL_BACK_SCALE := 2.25
 ## Вид от первого лица (режим, V): поле зрения без прицела, град; оружие у бедра — смещение модели
-## от глаза (вправо, вниз, вперёд), м.
+## от глаза (вправо, вниз, вперёд), м. Близко к камере, как в Road to Vostok: коробка крупно справа
+## внизу, правое предплечье уходит за край кадра (дальше — был виден срез рукава).
 const FPS_FOV := 74.0
-const FPS_HIP_POSE := Vector3(0.13, -0.19, -0.42)
+const FPS_HIP_POSE := Vector3(0.17, -0.17, -0.27)
 ## Покачивание оружия от бедра: частота входит и затухает вместе с реальной скоростью.
-## На обычном шаге цикл на 35 % реже прежнего; спринт остаётся заметно быстрее шага.
+## На ходу цикл вдвое реже прежнего (шаг 5.2 → 2.6); спринт остаётся быстрее шага.
 const WEAPON_BOB := {
-	"idle_rate": 1.5, "walk_rate": 5.2, "sprint_rate": 7.0,
+	"idle_rate": 1.5, "walk_rate": 2.6, "sprint_rate": 3.5,
 	"horizontal": 0.006, "idle_vertical": 0.002, "walk_vertical": 0.01,
 }
 ## Наклон из-за угла (Q/E, от первого лица и в прицеле): сдвиг глаза вбок, м; крен, град;
@@ -241,7 +243,8 @@ const WET_GROUND := {"film_up_sec": 45.0, "puddle_up_sec": 200.0, "film_dry_sec"
 ## Выносливость: запас, расход на бег в секунду, восстановление в секунду (после паузы, с);
 ## выдохся — бег снова с порога. В жару на улице расход × STAMINA_HEAT.
 const STAMINA_MAX := 100.0
-const STAMINA_DRAIN := 11.0
+## Бега хватает вдвое дольше прежнего (было 11 в секунду).
+const STAMINA_DRAIN := 5.5
 const STAMINA_REGEN := 16.0
 const STAMINA_REGEN_DELAY := 1.0
 const STAMINA_RESUME := 25.0
