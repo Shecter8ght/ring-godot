@@ -59,3 +59,19 @@
 
 - `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
 - `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба
+
+## Звук — отобрано на стенде (tools/sound_bench)
+
+| Источник, лицензия | Исходный файл | Куда — звук |
+|---|---|---|
+| Stable Audio 3 · Сгенерировано владельцем проекта · собственный звук | Glock_part_01.wav | guns/hg_02_shot_01.wav — Glock 17 Gen5 — Выстрел вблизи |
+| Stable Audio 3 · Сгенерировано владельцем проекта · собственный звук | Glock_part_02.wav | guns/hg_02_shot_02.wav — Glock 17 Gen5 — Выстрел вблизи |
+| Stable Audio 3 · Сгенерировано владельцем проекта · собственный звук | Glock_part_03.wav | guns/hg_02_shot_03.wav — Glock 17 Gen5 — Выстрел вблизи |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | Glock silent.wav | guns/hg_02_shot_sup_01.wav — Glock 17 Gen5 — Выстрел с глушителем |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | Glock silent_part_01.wav | guns/hg_02_shot_sup_02.wav — Glock 17 Gen5 — Выстрел с глушителем |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | Glock silent_part_02.wav | guns/hg_02_shot_sup_03.wav — Glock 17 Gen5 — Выстрел с глушителем |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | Glock silent_part_03.wav | guns/hg_02_shot_sup_04.wav — Glock 17 Gen5 — Выстрел с глушителем |
+| Stable audio · Сгенерировано владельцем проекта · собственный звук | сухой спуск 2_part_01.wav | guns/hg_02_dry_01.wav — Glock 17 Gen5 — Сухой спуск |
+| Stable audio · Сгенерировано владельцем проекта · собственный звук | сухой спуск 2_part_02.wav | guns/hg_02_dry_02.wav — Glock 17 Gen5 — Сухой спуск |
+| stable audio · Сгенерировано владельцем проекта · собственный звук | asphalt after rain.wav | steps/water_01.wav — Шаг по луже |
+| Stable audio · Сгенерировано владельцем проекта · собственный звук | выстрел.wav | guns/hg_01_shot_01.wav — ПМ — Выстрел вблизи |
