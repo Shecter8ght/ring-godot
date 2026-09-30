@@ -327,6 +327,11 @@ func _on_node_added(n: Node) -> void:
 		_apply_env.call_deferred(n as WorldEnvironment)
 	elif n is OmniLight3D or n is SpotLight3D:
 		soften(n as Light3D)
+	elif n is DirectionalLight3D:
+		# солнце без PCSS (угловой размер): при низком солнце (закат, 12°) мягкая тень в каскадах
+		# не находит перекрытие над головой — прямое солнце ложилось на пол коридоров ТЦ под
+		# потолком ярким пятном (проба: пол 0.49 → 0.13 без PCSS); мягкость края — shadow_blur
+		(n as DirectionalLight3D).light_angular_distance = 0.0
 
 
 ## Мягкий свет от любого источника: спад по расстоянию плавнее (яркость пересчитана так, чтобы

@@ -62,7 +62,6 @@ environment = SubResource("env")
 transform = Transform3D(-0.3420, -0.2273, 0.9118, 0.0000, 0.9703, 0.2419, -0.9397, 0.0827, -0.3319, 0, 30, 0)
 light_color = Color(1, 0.8, 0.58, 1)
 light_energy = 3.0
-light_angular_distance = 1.2
 shadow_enabled = true
 shadow_blur = 1.2
 directional_shadow_split_1 = 0.08
