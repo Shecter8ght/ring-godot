@@ -24,8 +24,8 @@ static var _meshes: Dictionary = {}
 ## id — предмет-оружие (data/weapons.json: основа model, масштаб scale, встроенный глушитель) или
 ## сама основа ("pistol", "rifle", "shotgun", "bolt", "grenade"). mods — точка → {id, …}: обвес
 ## по сокетам основы (WeaponMods). Масштаб — внешним узлом: meta (дуло, линии прицела) пересчитаны.
-static func build(id: String, mods: Dictionary = {}) -> Node3D:
-	var root := Node3D.new()
+static func build(id: String, mods: Dictionary = {}, lod: int = 0) -> Node3D:
+	var root: Node3D = Node3D.new()
 	root.name = "Weapon_" + id
 	var key := id
 	var scale := 1.0
@@ -33,17 +33,33 @@ static func build(id: String, mods: Dictionary = {}) -> Node3D:
 	if not w.is_empty():
 		key = String(w.model)
 		scale = float(w.get("scale", 1.0))
-	match key:
-		"pistol":
-			_pistol(root)
-		"rifle":
-			_rifle(root)
-		"shotgun":
-			_shotgun(root)
-		"bolt":
-			_bolt(root)
-		"grenade":
-			_grenade(root)
+	var imported: Node3D = _asset(w, lod)
+	if imported:
+		root.free()
+		var rig: WeaponRig = WeaponRig.new()
+		rig.name = "Weapon_" + id
+		rig.configure(id, w, imported, lod)
+		if rig.has_parts():
+			root = rig
+		else:
+			# Повреждённый экспорт не оставляет оружие без геометрии и обязательных сокетов.
+			rig.free()
+			root = Node3D.new()
+			root.name = "Weapon_" + id
+			imported = null
+	if imported == null:
+		root.set_meta("asset_loaded", false)
+		match key:
+			"pistol":
+				_pistol(root)
+			"rifle":
+				_rifle(root)
+			"shotgun":
+				_shotgun(root)
+			"bolt":
+				_bolt(root)
+			"grenade":
+				_grenade(root)
 	# встроенный глушитель (бесшумный карабин) — на резьбу, как съёмный
 	if bool((w.get("integral", {}) as Dictionary).get("suppressed", false)):
 		var ms := WeaponMods.socket(key, "muzzle")
@@ -77,6 +93,68 @@ static func build(id: String, mods: Dictionary = {}) -> Node3D:
 	if root.has_meta("ads_z"):
 		outer.set_meta("ads_z", root.get_meta("ads_z"))
 	return outer
+
+
+## Только импортированный PackedScene считается готовым ассетом. Отсутствующий файл,
+## незавершённый импорт и неверный тип ресурса оставляют прежнюю процедурную основу.
+static func _asset(weapon: Dictionary, lod: int) -> Node3D:
+	var path: String = String(weapon.get("asset", ""))
+	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
+		return null
+	var scene: PackedScene = ResourceLoader.load(path, "PackedScene") as PackedScene
+	if scene == null:
+		return null
+	var instance: Node = scene.instantiate()
+	if not instance is Node3D:
+		instance.free()
+		return null
+	var root: Node3D = instance as Node3D
+	_select_lod(root, lod)
+	return root
+
+
+## Ветка LOD остаётся иерархией деталей: целик и предохранитель следуют за своим затвором.
+## Общие Empty переносятся на соответствующую деталь, сохраняя положение относительно PM.
+static func _select_lod(root: Node3D, lod: int) -> void:
+	var low: Node3D = root.find_child("PM_LOD1", true, false) as Node3D
+	if low == null:
+		return
+	if lod <= 0:
+		low.get_parent().remove_child(low)
+		low.free()
+		return
+	low.visible = true
+	var markers: Array[Dictionary] = []
+	for marker_name: String in WeaponRig.MARKER_NAMES:
+		var marker: Node3D = root.find_child(marker_name, true, false) as Node3D
+		if marker == null:
+			continue
+		var owner_name: String = ""
+		var ancestor: Node = marker.get_parent()
+		while ancestor != null and ancestor != root:
+			if String(ancestor.name) in WeaponRig.PART_NAMES:
+				owner_name = String(ancestor.name)
+				break
+			ancestor = ancestor.get_parent()
+		markers.append({"name": marker_name, "owner": owner_name, "transform": WeaponRig._relative_transform(marker, root)})
+		marker.get_parent().remove_child(marker)
+		marker.free()
+	for part_name: String in WeaponRig.PART_NAMES:
+		var high: Node3D = root.find_child(part_name, true, false) as Node3D
+		if high:
+			high.get_parent().remove_child(high)
+			high.free()
+	for part_node: Node in low.find_children("*", "Node3D", true, false):
+		var part_name: String = String(part_node.name)
+		if part_name.ends_with("_LOD1"):
+			part_node.name = part_name.trim_suffix("_LOD1")
+	for data: Dictionary in markers:
+		var owner: Node3D = low.find_child(String(data.owner), true, false) as Node3D if String(data.owner) != "" else null
+		var parent: Node3D = owner if owner else root
+		var marker: Marker3D = Marker3D.new()
+		marker.name = String(data.name)
+		marker.transform = WeaponRig._relative_transform(parent, root).affine_inverse() * (data.transform as Transform3D)
+		parent.add_child(marker)
 
 
 # ---------------------------------------------------------------- пистолет

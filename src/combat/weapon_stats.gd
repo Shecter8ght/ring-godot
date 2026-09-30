@@ -18,6 +18,8 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		return {}
 	var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
 	var aid := ammo_id if ammo_id != "" else String(mag.get("ammo", ""))
+	if ammo_id == "" and int(entry.get("chamber", 0)) > 0:
+		aid = String(entry.get("chamber_ammo", aid))
 	var dur := float(entry.get("dur", 100.0))
 	var key := "%s|%s|%s|%s|%d|%s|%s" % [entry.id, str(entry.get("mods", {})), String(mag.get("id", "")), aid, int(dur / 5.0), active_sight(entry), laser_on(entry)]
 	if _cache.has(key):
@@ -36,6 +38,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	s.interval = 60.0 / float(b.rpm)
 	s.auto = bool(b.auto)
 	s.reload = float(b.reload)
+	s.reload_empty = float(b.get("reload_empty", b.reload))
 	s.range_m = float(b.range)
 	s.noise_m = float(b.noise)
 	s.spread_deg = float(b.spread)
@@ -75,6 +78,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	var md := WeaponDb.magazine(String(mag.get("id", "")))
 	if not md.is_empty():
 		s.reload = float(s.reload) * float(md.get("reload_k", 1.0))
+		s.reload_empty = float(s.reload_empty) * float(md.get("reload_k", 1.0))
 		s.ergo = float(s.ergo) + float(md.get("ergo", 0.0))
 		jam_k *= 1.0 + (1.0 - float(md.get("reliability", 1.0))) * 10.0
 	# встроенное: прицел (болтовки), глушитель

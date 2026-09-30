@@ -3430,6 +3430,34 @@
    "prio": 3,
    "now": "нет",
    "group": "Музыка"
+  },
+  {
+   "id": "suppressor_on",
+   "cat": "Оружие — обращение",
+   "name": "Глушитель накручен",
+   "when": "завершение установки глушителя ПМ",
+   "file": "guns/suppressor_on_",
+   "kind": "suppressor_on",
+   "fallback": "charge",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "ПМ; пока запасной звук механики",
+   "group": "Обвес"
+  },
+  {
+   "id": "suppressor_off",
+   "cat": "Оружие — обращение",
+   "name": "Глушитель снят",
+   "when": "завершение снятия глушителя ПМ",
+   "file": "guns/suppressor_off_",
+   "kind": "suppressor_off",
+   "fallback": "charge",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "now": "ПМ; пока запасной звук механики",
+   "group": "Обвес"
   }
  ]
 }

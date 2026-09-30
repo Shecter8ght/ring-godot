@@ -6,6 +6,39 @@ extends RefCounted
 ## на хосте, Profile — в убежище). Часть: "mod:<точка>", "plate:<front|back>", "mag".
 
 ## Вынуть часть из записи: [новая запись, вынутое] (вынутое пустое — нечего).
+## Старые записи ПМ считали весь боезапас в магазине. При миграции переносим один патрон,
+## сохраняя общее число; остальные семейства продолжают прежнюю схему.
+static func normalize_chamber(entry: Dictionary) -> Dictionary:
+	var e: Dictionary = entry.duplicate(true)
+	if int(WeaponDb.weapon(String(e.get("id", ""))).get("chamber_capacity", 0)) <= 0:
+		return e
+	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	if not e.has("chamber"):
+		e["chamber"] = 1 if int(mag.get("rounds", 0)) > 0 else 0
+		mag["rounds"] = maxi(0, int(mag.get("rounds", 0)) - int(e.chamber))
+		e["chamber_ammo"] = String(mag.get("ammo", "")) if int(e.chamber) > 0 else ""
+		e["mag"] = mag
+	return e
+
+
+static func total_rounds(entry: Dictionary) -> int:
+	var e: Dictionary = normalize_chamber(entry)
+	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	return int(mag.get("rounds", 0)) + int(e.get("chamber", 0))
+
+
+## Досыл после полной перезарядки переносит патрон из магазина, а не создаёт девятый.
+static func chamber_round(entry: Dictionary) -> void:
+	if int(WeaponDb.weapon(String(entry.get("id", ""))).get("chamber_capacity", 0)) <= 0:
+		return
+	var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
+	if int(entry.get("chamber", 0)) <= 0 and int(mag.get("rounds", 0)) > 0:
+		mag["rounds"] = int(mag.rounds) - 1
+		entry["mag"] = mag
+		entry["chamber"] = 1
+		entry["chamber_ammo"] = String(mag.get("ammo", ""))
+
+
 static func strip(entry: Dictionary, part: String) -> Array:
 	var e := entry.duplicate(true)
 	if part.begins_with("mod:"):
@@ -135,7 +168,7 @@ static func _bump(e: Dictionary) -> void:
 ## в рюкзак с остатком; снаряжённых нет — досыпать россыпь в текущий. Встроенный — россыпью.
 ## Возвращает [оружие, выпавшее (старый магазин без места), вид: "swap" / "topup" / ""].
 static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Array:
-	var e := weapon.duplicate(true)
+	var e: Dictionary = normalize_chamber(weapon)
 	var wid := String(e.id)
 	var w := WeaponDb.weapon(wid)
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
@@ -156,6 +189,7 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Ar
 			if String(mag.get("id", "")) != "":
 				old = WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), int(mag.get("rounds", 0)))
 			e["mag"] = {"id": String(fresh.id), "ammo": String(fresh.get("ammo", "")), "rounds": int(fresh.get("rounds", 0))}
+			chamber_round(e)
 			_bump(e)
 			var spill := {}
 			if not old.is_empty() and ItemDb.add_to(list, old, grid) == 0:
@@ -183,6 +217,7 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Ar
 	mag.ammo = ammo_id
 	mag.rounds = int(mag.get("rounds", 0)) + take
 	e["mag"] = mag
+	chamber_round(e)
 	_bump(e)
 	return [e, {}, "topup"]
 

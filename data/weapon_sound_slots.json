@@ -358,6 +358,32 @@
    "prio": 3,
    "condition": "all",
    "wired": false
+  },
+  {
+   "id": "suppressor_on",
+   "group": "Обвес",
+   "name": "Глушитель накручен",
+   "when": "последний оборот при установке глушителя ПМ",
+   "file": "suppressor_on",
+   "fallback": "suppressor_on",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "condition": "rig_suppressor",
+   "wired": true
+  },
+  {
+   "id": "suppressor_off",
+   "group": "Обвес",
+   "name": "Глушитель снят",
+   "when": "глушитель сошёл с резьбы ПМ",
+   "file": "suppressor_off",
+   "fallback": "suppressor_off",
+   "type": "one",
+   "variants": 3,
+   "prio": 3,
+   "condition": "rig_suppressor",
+   "wired": true
   }
  ]
 }

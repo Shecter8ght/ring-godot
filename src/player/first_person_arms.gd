@@ -117,7 +117,7 @@ func _solve(side: String, marker: Node3D) -> void:
 	skeleton.set_bone_global_pose(hand, Transform3D(hand_basis, target.origin))
 	if contact_pose.is_empty():
 		_curl_fingers(side, marker.get_meta("curl") as Array)
-		_pose_thumb(side, target.basis, absf(marker.basis.y.x) > 0.5)
+		_pose_thumb(side, target.basis, absf(marker.basis.y.x) > 0.5, marker.get_meta("thumb_directions", []) as Array)
 	else:
 		for joint: String in contact_pose.joints:
 			var q: Array = contact_pose.joints[joint]
@@ -154,13 +154,16 @@ func _curl_fingers(side: String, curl: Array) -> void:
 			skeleton.set_bone_pose_rotation(bone, rest_local.basis.get_rotation_quaternion() * Quaternion(axis.normalized(), deg_to_rad(angle)))
 
 
-func _pose_thumb(side: String, frame: Basis, support: bool) -> void:
+func _pose_thumb(side: String, frame: Basis, support: bool, directions: Array = []) -> void:
 	for joint: int in range(1, 4):
 		var bone: int = _bone(side + "HandThumb" + str(joint))
 		var pose: Transform3D = skeleton.get_bone_global_pose(bone)
 		var direction: Vector3 = Vector3(0.5, 0.866, 0.0) if joint == 1 else Vector3(0.05, 1.0, 0.0)
 		if support:
 			direction = Vector3(0.6, 0.1, -0.8) if joint == 1 else Vector3(1.0, 0.0, 0.0)
+		# Индивидуальный хват задаёт направления большого пальца в осях ладони.
+		if directions.size() >= joint:
+			direction = WeaponGrips.vector(directions[joint - 1] as Array)
 		var swing: Basis = Basis(Quaternion(pose.basis.y.normalized(), (frame * direction).normalized()))
 		pose.basis = swing * pose.basis
 		pose.basis = pose.basis.orthonormalized()

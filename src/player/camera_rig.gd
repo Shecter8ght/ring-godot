@@ -41,6 +41,7 @@ var _look_yaw: float = 0.0
 var _look_pitch: float = 0.0
 var _ads_cam: Camera3D
 var _viewmodel: Node3D
+var _viewmodel_rig: WeaponRig
 var _arms: FirstPersonArms
 var _viewmodel_id: String = ""
 ## Приклад и затыльник модели в руках: у бедра видны, в прицеле (под щекой) — прячутся.
@@ -551,6 +552,9 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_ads_cam.add_child(_viewmodel)
 		_arms.bind_weapon(_viewmodel)
+		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
+		if _viewmodel_rig:
+			_viewmodel_rig.set_ammo_state(pl.ammo)
 		_viewmodel_id = vm_key
 		_reticle_nv(pl.nvg_on)
 	_viewmodel.visible = true
@@ -600,12 +604,43 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var flip := kv * lerpf(1.0, Balance.ADS_RECOIL_FLIP_SCALE, k)
 	var kick_back := kv * lerpf(1.0, Balance.ADS_RECOIL_BACK_SCALE, k)
 	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, flip * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
-	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + bob + Vector3(0.0, flip * 0.004, kick_back * 0.028))
+	var action_offset: Vector3 = pl._weapon_rig.view_offset() * (1.0 - k) if is_instance_valid(pl._weapon_rig) else Vector3.ZERO
+	if is_instance_valid(pl._weapon_rig):
+		vm_basis *= Basis.from_euler(pl._weapon_rig.view_rotation_degrees() * (PI / 180.0) * (1.0 - k))
+	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + action_offset + bob + Vector3(0.0, flip * 0.004, kick_back * 0.028))
+	if _viewmodel_rig:
+		if is_instance_valid(pl._weapon_rig):
+			_viewmodel_rig.synchronize_from(pl._weapon_rig)
+		elif not _viewmodel_rig.is_busy():
+			_viewmodel_rig.set_ammo_state(pl.ammo)
+		_arms.set_hand_target("Left", _viewmodel_rig.get_hand_target(), _viewmodel_rig.get_hand_weight())
+	else:
+		_arms.set_hand_target("Left", null, 0.0)
 	_arms.update_pose()
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05)
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
+
+
+## Действия деталей одинаковы у модели перед глазами и у модели в руке персонажа.
+func weapon_action(action: String, flag: bool = false, duration: float = 0.0, rounds: int = -1) -> void:
+	if not is_instance_valid(_viewmodel_rig):
+		return
+	match action:
+		"shot":
+			_viewmodel_rig.play_shot(rounds)
+		"reload":
+			_viewmodel_rig.play_reload(flag, duration)
+		"finish_reload":
+			_viewmodel_rig.finish_reload(rounds)
+		"suppressor":
+			_viewmodel_rig.play_suppressor(flag, duration)
+		"suppressed":
+			_viewmodel_rig.set_suppressed(flag)
+		"cancel":
+			_viewmodel_rig.cancel_action()
+			_arms.set_hand_target("Left", null, 0.0)
 
 
 ## Поле зрения глаз в прицеле: с оптикой — обычное (увеличение — в окуляре), иначе — по стволу.
@@ -1055,6 +1090,8 @@ func _update_hud(pl: Player) -> void:
 		t += "   ЗАДЕРЖКА (%s)" % PauseMenu.key_name("reload")
 	if pl.reload_timer > 0.0:
 		t = "%s   перезарядка…" % String(spec.name)
+	elif not pl._pm_action.is_empty() and String(pl._pm_action.kind) == "suppressor":
+		t = "%s   %s глушителя…" % [String(spec.name), "установка" if bool(pl._pm_action.install) else "снятие"]
 	_weapon_label.text = t + "      гранаты × %d" % pl.grenade_count()
 
 

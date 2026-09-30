@@ -23,7 +23,7 @@ const SOCKETS := "res://data/weapon_sockets.json"
 ## На время этих клипов оружие прячется: рука занята (бросок, подобрать с пола).
 const HIDE_WEAPON := ["grenade_throw", "pickup"]
 ## В этих клипах левая рука уходит с цевья (магазин, граната, достать / убрать) — ИК отпускает её.
-const FREE_LEFT_HAND := ["rifle_reload", "prone_reload", "reload_move", "grenade_throw", "prone_throw", "pickup", "rifle_draw", "pistol_draw", "rifle_holster"]
+const FREE_LEFT_HAND := ["pistol_reload", "rifle_reload", "prone_reload", "reload_move", "grenade_throw", "prone_throw", "pickup", "rifle_draw", "pistol_draw", "rifle_holster"]
 static var _sockets: Dictionary = {}
 var _grip: Node3D
 ## Левая кисть на цевье (SupportHandIK — модификатор скелета после клипа).
@@ -107,6 +107,11 @@ func _process(delta: float) -> void:
 		# с пистолетом — вторая рука на рукоятке только в прицеле (на ходу клипы держат одной)
 		var hold := _grip != null and _grip.visible and family != "unarmed" and not downed \
 			and not FREE_LEFT_HAND.has(_one_shot) and (family != "pistol" or aiming)
+		var weapon_rig: WeaponRig = WeaponRig.find_on(_grip.get_child(0) as Node3D) if _grip and _grip.get_child_count() > 0 else null
+		var action_weight: float = weapon_rig.get_hand_weight() if weapon_rig and not downed else 0.0
+		_support.action_target = weapon_rig.get_hand_target() if action_weight > 0.0 else null
+		_support.action_weight = action_weight
+		hold = hold or action_weight > 0.0
 		_support.influence = move_toward(_support.influence, 1.0 if hold else 0.0, delta / float(Balance.CHARACTER_ANIM.support_blend_sec))
 	var move_min: float = float(Balance.CHARACTER_ANIM.move_min)
 	var moving: bool = speed > move_min
@@ -185,6 +190,12 @@ func _process(delta: float) -> void:
 ## Одиночный клип события с учётом стойки и оружия; "" — в этой стойке не играть.
 func _event_clip(ev: String, family: String, crouched: bool, prone: bool, moving: bool) -> String:
 	match ev:
+		"pistol_reload":
+			# Штатного Mixamo-клипа пистолета нет: позу сохраняем, левую кисть ведёт риг ПМ.
+			# Чужим игрокам приходит само событие, а детали и цель ИК — отдельным событием рига.
+			if _player and _player.has_animation("pistol_reload"):
+				return "pistol_reload"
+			return ""
 		"rifle_fire":
 			# у пистолета поза и так «в прицеле»; автоматная отдача дёргала бы его руки
 			if family == "pistol":
@@ -281,7 +292,7 @@ func bone_node(bone: String) -> Node3D:
 	return att
 
 
-func weapon_grip(family: String) -> Node3D:
+func weapon_grip(family: String, weapon_id: String = "") -> Node3D:
 	if _grip == null:
 		if _model == null:
 			return null
@@ -301,6 +312,8 @@ func weapon_grip(family: String) -> Node3D:
 		_support.influence = 0.0
 		(skeletons[0] as Skeleton3D).add_child(_support)
 	_grip.transform = socket_transform(family)
+	# У собственного ассета запястье может отличаться от семейства; кость остаётся той же.
+	_grip.position += _grip.basis * WeaponGrips.socket_offset(family, WeaponDb.weapon(weapon_id))
 	return _grip
 
 

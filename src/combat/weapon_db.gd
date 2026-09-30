@@ -188,6 +188,8 @@ static func _sound_slot_applies(slot: Dictionary, w: Dictionary) -> bool:
 	var internal := w.has("internal_mag")
 	var action := String(w.get("action", ""))
 	match condition:
+		"rig_suppressor":
+			return (w.get("rig", {}) as Dictionary).has("suppressor") and (w.get("mounts", {}) as Dictionary).has("muzzle")
 		"suppressible":
 			return bool((w.get("integral", {}) as Dictionary).get("suppressed", false)) or (w.get("mounts", {}) as Dictionary).has("muzzle")
 		"detachable_mag":
@@ -519,6 +521,8 @@ static func make_weapon(preset_id: String, rng: RandomNumberGenerator, dur_range
 		cap = int(magazine(mid).get("capacity", 0))
 		e["mag"] = {"id": mid, "ammo": ammo_id, "rounds": cap}
 	e["sight"] = String(p.get("sight", "primary"))
+	if int(weapon(wid).get("chamber_capacity", 0)) > 0:
+		e = Gear.normalize_chamber(e)
 	return e
 
 

@@ -78,6 +78,7 @@ var _ragdoll: Ragdoll
 var _last_hit_from: Vector3 = Vector3.ZERO
 var _last_damage: float = 0.0
 var _spec: Dictionary = {}
+## Доступный боезапас: у ПМ магазин плюс патронник, у остальных — прежний счёт магазина.
 var _mag: int = 0
 var _reload_t: float = 0.0
 var _shot_t: float = 0.0
@@ -331,15 +332,25 @@ func _use(slot: String) -> void:
 	if not equipment.has(slot):
 		return
 	if equipment.has(_active) and _active != slot and not _spec.is_empty():
-		(equipment[_active].mag as Dictionary)["rounds"] = _mag
+		_store_mag_rounds()
 	_active = slot
-	var e: Dictionary = equipment[slot]
+	var e: Dictionary = Gear.normalize_chamber(equipment[slot])
+	Gear.chamber_round(e)
+	equipment[slot] = e
 	_spec = _ai_spec(e)
-	_mag = int((e.mag as Dictionary).get("rounds", 0))
+	_mag = Gear.total_rounds(e)
 	_reload_t = 0.0
 	_burst_left = 0
 	if _body and is_inside_tree():
 		_show_gun()
+
+
+## _mag включает патронник: его нельзя записать целиком в магазин при смене оружия или смерти.
+func _store_mag_rounds() -> void:
+	if not equipment.has(_active):
+		return
+	var entry: Dictionary = equipment[_active]
+	(entry.mag as Dictionary)["rounds"] = maxi(0, _mag - int(entry.get("chamber", 0)))
 
 
 ## Характеристики для ИИ: оружие и патрон (WeaponStats) + как ИИ стреляет этим классом (AI_CLASS).
@@ -347,7 +358,7 @@ func _ai_spec(e: Dictionary) -> Dictionary:
 	var ws := WeaponStats.compute(e)
 	var c: Dictionary = Balance.AI_CLASS.get(String(ws["class"]), Balance.AI_CLASS.ASSAULT_RIFLE)
 	var skill := float(WeaponDb.loadout(loadout_id).get("skill", 1.0))
-	return {"class": String(ws["class"]), "mag": int(ws.mag), "reload": float(ws.reload) * Balance.AI_RELOAD_K,
+	return {"class": String(ws["class"]), "mag": int(ws.mag) + int(WeaponDb.weapon(String(e.id)).get("chamber_capacity", 0)), "reload": float(ws.reload) * Balance.AI_RELOAD_K,
 		"interval": maxf(float(ws.interval), float(c.interval_min)), "burst": int(c.burst) if bool(ws.auto) else 1,
 		"burst_pause": float(c.burst_pause), "damage": float(ws.damage) * Balance.AI_DAMAGE_K, "pellets": int(ws.pellets),
 		"spread": float(c.spread) / maxf(skill, 0.3), "range": float(c.range), "noise_m": float(ws.noise_m),
@@ -379,7 +390,7 @@ func _show_gun() -> void:
 		_fade(l as Light3D)
 	# в правой руке модели (кость руки): идёт за руками в любой позе; без Persona — у груди
 	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
-	var grip: Node3D = anim.weapon_grip(String(WeaponDb.weapon(String(e.id)).get("model", "rifle"))) if anim else null
+	var grip: Node3D = anim.weapon_grip(String(WeaponDb.weapon(String(e.id)).get("model", "rifle")), String(e.id)) if anim else null
 	if grip:
 		grip.add_child(gun)
 	else:
@@ -1613,7 +1624,7 @@ func _start_reload() -> void:
 		return
 	if not _can_reload(_active):
 		var other := "secondary" if _active == "primary" else "primary"
-		if equipment.has(other) and (int((equipment[other].mag as Dictionary).get("rounds", 0)) > 0 or _can_reload(other)):
+		if equipment.has(other) and (Gear.total_rounds(equipment[other]) > 0 or _can_reload(other)):
 			_use(other)
 			say("Перехожу на запасное!" if other == "secondary" else "Основное!")
 			return
@@ -1659,17 +1670,18 @@ func _finish_reload() -> void:
 	if e.is_empty():
 		return
 	var mag: Dictionary = e.mag
-	mag["rounds"] = _mag
+	var magazine_rounds: int = maxi(0, _mag - int(e.get("chamber", 0)))
+	mag["rounds"] = magazine_rounds
 	if String(mag.get("id", "")) == "":
 		# россыпью в ружьё / болтовку
 		var cap := WeaponDb.capacity(e)
 		for it in spare:
-			if _mag >= cap:
+			if magazine_rounds >= cap:
 				break
-			if WeaponDb.ammo_fits(String(e.id), String(it.id)) and not it.has("rounds") and int(it.n) > 0 and (_mag == 0 or String(it.id) == String(mag.ammo)):
-				var k := mini(cap - _mag, int(it.n))
+			if WeaponDb.ammo_fits(String(e.id), String(it.id)) and not it.has("rounds") and int(it.n) > 0 and (magazine_rounds == 0 or String(it.id) == String(mag.ammo)):
+				var k := mini(cap - magazine_rounds, int(it.n))
 				it.n = int(it.n) - k
-				_mag += k
+				magazine_rounds += k
 				mag["ammo"] = String(it.id)
 		spare = spare.filter(func(it: Dictionary) -> bool: return it.has("rounds") or int(it.n) > 0)
 	else:
@@ -1683,11 +1695,13 @@ func _finish_reload() -> void:
 			return
 		var fresh: Dictionary = spare[best]
 		spare.remove_at(best)
-		spare.append(WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), _mag))
+		spare.append(WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), magazine_rounds))
 		mag["id"] = String(fresh.id)
 		mag["ammo"] = String(fresh.get("ammo", ""))
-		_mag = int(fresh.rounds)
-	mag["rounds"] = _mag
+		magazine_rounds = int(fresh.rounds)
+	mag["rounds"] = magazine_rounds
+	Gear.chamber_round(e)
+	_mag = Gear.total_rounds(e)
 	# патрон мог смениться — характеристики тоже
 	_spec = _ai_spec(e)
 	if _weapon_sound("breech_close") != "":
@@ -1715,9 +1729,20 @@ func _try_fire(suppress: bool = false) -> void:
 	_shoot(suppress)
 	if String(_spec.get("class", "")) != "PISTOL":
 		_animation_event("rifle_fire")
-	_mag -= 1
 	if equipment.has(_active):
-		(equipment[_active].mag as Dictionary)["rounds"] = _mag
+		var entry: Dictionary = equipment[_active]
+		if int(WeaponDb.weapon(String(entry.id)).get("chamber_capacity", 0)) > 0:
+			entry["chamber"] = 0
+			entry["chamber_ammo"] = ""
+			Gear.chamber_round(entry)
+			_mag = Gear.total_rounds(entry)
+			# Следующий патрон после смены магазина может иметь другой тип.
+			_spec = _ai_spec(entry)
+		else:
+			_mag -= 1
+			(entry.mag as Dictionary)["rounds"] = _mag
+	else:
+		_mag -= 1
 	if _burst_left <= 0:
 		_burst_left = int(_spec.burst)
 	_burst_left -= 1
@@ -1992,7 +2017,7 @@ func _on_died() -> void:
 		# что было на нём — как есть: оружие с обвесом, износом и остатком в магазине, запасные
 		# магазины (сколько не расстрелял), броня с плитами (как её побили), шлем, аптечки
 		if equipment.has(_active):
-			(equipment[_active].mag as Dictionary)["rounds"] = _mag
+			_store_mag_rounds()
 		var drop: Array = []
 		for slot in ["primary", "secondary", "armor", "helmet", "ears"]:
 			if equipment.has(slot):

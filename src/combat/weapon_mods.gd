@@ -28,10 +28,26 @@ static func socket(model_key: String, mount: String) -> Dictionary:
 
 ## mods — точка → {id[, light, laser]} (или просто id у старых записей).
 static func fit(root: Node3D, model_key: String, mods: Dictionary) -> void:
+	var rig: WeaponRig = WeaponRig.find_on(root)
+	if rig:
+		rig.set_suppressed(false)
 	for mount in mods:
 		var id := WeaponDb.mod_id(mods[mount])
 		var a := WeaponDb.attachment(id)
 		if a.is_empty():
+			continue
+		if String(a.get("look", "")) == "asset":
+			if rig and rig.part("Suppressor"):
+				rig.set_suppressed(true)
+			else:
+				# Ассет может отсутствовать; обвес сохраняет читаемость на запасном пистолете.
+				var fallback: Dictionary = socket(model_key, String(mount))
+				fallback["pos"] = root.get_meta("muzzle", Vector3.ZERO)
+				fallback["mount"] = String(mount)
+				fallback["bore_r"] = float(fallback.get("bore_r", a.get("bore_r_m", 0.0045)))
+				var size: Array = a.get("size_m", [0.019, 0.175])
+				_suppressor(root, fallback, float(size[0]), float(size[1]))
+				root.set_meta("suppressor_installed", true)
 			continue
 		var m := socket(model_key, String(mount))
 		if m.is_empty():

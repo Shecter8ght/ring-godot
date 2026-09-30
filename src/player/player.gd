@@ -51,14 +51,25 @@ var sandbox_weapons: Dictionary = {}
 var _ws: Dictionary = {}
 var _ws_dirty: bool = false
 var _ws_sync_t: float = 0.0
-## Патронов в магазине оружия в руках (HUD).
+## Боезапас оружия в руках (HUD): магазин и, если поддерживается, патронник.
 var ammo: int = 0
+## Боезапас для позы затвора у напарников; у ПМ включает отдельно учтённый патрон в патроннике.
+var weapon_rounds: int = 0
 ## Перезарядка: что делаем ("swap", "topup", "clear" — устранить задержку), для какого слота, какую
 ## ревизию записи ждём от хоста.
 var _reload_kind: String = ""
 var _reload_slot: String = ""
 var _reload_rev: int = -1
 var _reload_wait: float = 0.0
+var _reload_empty: bool = false
+## ПМ меняет предметы только после окончания действия. До этого прерывание отменяет лишь позу.
+var _pm_action: Dictionary = {}
+var _pm_action_seq: int = 0
+var _pm_host_seq: int = 0
+var _weapon_rig: WeaponRig
+## Ответ хоста может прийти раньше снимка Inventory; до его ревизии читаем подтверждённую запись.
+var _pm_entries: Dictionary = {}
+var _was_downed: bool = false
 var _sandbox_picked: bool = false
 ## Сколько секунд держим прицел — «довод» по эргономике (WeaponStats.aim_time).
 var _aim_t: float = 0.0
@@ -158,7 +169,9 @@ func _ready() -> void:
 			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE * (1.0 - float(Balance.STRESS.adr_shake) * stress_k()))
 		add_stress(float(Balance.STRESS.hit) + amount * float(Balance.STRESS.hit_per_dmg)))
 	health.downed_changed.connect(func(on: bool) -> void:
-		Audio.play("downed" if on else "revive", global_position + Vector3.UP))
+		Audio.play("downed" if on else "revive", global_position + Vector3.UP)
+		if on:
+			cancel_weapon_action())
 	_muzzle.visible = false
 	# рюкзак — авторитет хоста (узел создан после выдачи авторитета Player — умалчиваемый 1)
 	inventory = Inventory.new()
@@ -210,7 +223,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -374,6 +387,11 @@ func _base_entry(key: String) -> Dictionary:
 		return {}
 	if loadout_mode:
 		var e: Dictionary = inventory.equipment.get(key, {})
+		if _pm_entries.has(key):
+			var confirmed: Dictionary = _pm_entries[key]
+			if String(e.get("id", "")) == String(confirmed.get("id", "")) and int(e.get("rev", 0)) < int(confirmed.get("rev", 0)):
+				return confirmed
+			_pm_entries.erase(key)
 		return e if WeaponDb.is_weapon(String(e.get("id", ""))) else {}
 	_ensure_sandbox()
 	return sandbox_weapons.get(key, {})
@@ -413,6 +431,9 @@ func entry_of(key: String) -> Dictionary:
 	mag["rounds"] = int(st.rounds)
 	mag["ammo"] = String(st.ammo)
 	e["mag"] = mag
+	if _has_chamber(String(e.id)):
+		e["chamber"] = int(st.get("chamber", 0))
+		e["chamber_ammo"] = String(st.get("chamber_ammo", ""))
 	e["dur"] = float(st.dur)
 	e["sight"] = String(st.sight)
 	var mods: Dictionary = e.get("mods", {})
@@ -432,7 +453,8 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 	var rev := int(base.get("rev", 0))
 	if _ws.has(key) and int(_ws[key].rev) == rev and String(_ws[key].id) == String(base.id):
 		return
-	var mag: Dictionary = base.get("mag", {}) if base.get("mag") is Dictionary else {}
+	var normalized: Dictionary = Gear.normalize_chamber(base)
+	var mag: Dictionary = normalized.get("mag", {}) if normalized.get("mag") is Dictionary else {}
 	var tac := {}
 	var mods: Dictionary = base.get("mods", {})
 	for m in mods:
@@ -440,7 +462,17 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 			tac[m] = {"light": bool((mods[m] as Dictionary).get("light", false)), "laser": bool((mods[m] as Dictionary).get("laser", false))}
 	var jam := bool(_ws[key].get("jam", false)) if _ws.has(key) and String(_ws[key].id) == String(base.id) else false
 	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": String(mag.get("ammo", "")),
-		"dur": float(base.get("dur", 100.0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam}
+		"dur": float(base.get("dur", 100.0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
+		"chamber": int(normalized.get("chamber", 0)), "chamber_ammo": String(normalized.get("chamber_ammo", ""))}
+
+
+static func _has_chamber(id: String) -> bool:
+	return int(WeaponDb.weapon(id).get("chamber_capacity", 0)) > 0
+
+
+func _state_rounds(key: String) -> int:
+	var state: Dictionary = _ws.get(key, {})
+	return int(state.get("rounds", 0)) + int(state.get("chamber", 0))
 
 
 ## Оружие в руках со своим состоянием.
@@ -450,7 +482,8 @@ func weapon_entry() -> Dictionary:
 
 ## Характеристики оружия в руках (WeaponStats от экземпляра).
 func spec() -> Dictionary:
-	return WeaponStats.compute(weapon_entry())
+	var entry: Dictionary = weapon_entry()
+	return WeaponStats.compute(entry, String(entry.get("chamber_ammo", "")) if int(entry.get("chamber", 0)) > 0 else "")
 
 
 func _weapon_sound(specification: Dictionary, slot: String) -> String:
@@ -466,15 +499,18 @@ func _play_weapon_sound(specification: Dictionary, slot: String, extra_db: float
 ## Состояние для хоста (Inventory.apply_weapon_state).
 func _ws_state(key: String) -> Dictionary:
 	var st: Dictionary = _ws.get(key, {})
-	return {"rev": int(st.get("rev", 0)), "rounds": int(st.get("rounds", 0)), "dur": float(st.get("dur", 100.0)),
-		"sight": String(st.get("sight", "primary")), "tac": (st.get("tac", {}) as Dictionary).duplicate(true)}
+	return {"id": String(st.get("id", "")), "rev": int(st.get("rev", 0)), "rounds": int(st.get("rounds", 0)), "dur": float(st.get("dur", 100.0)),
+		"sight": String(st.get("sight", "primary")), "tac": (st.get("tac", {}) as Dictionary).duplicate(true),
+		"chamber": int(st.get("chamber", 0)), "chamber_ammo": String(st.get("chamber_ammo", ""))}
 
 
 func _send_ws(key: String) -> void:
-	_ws_dirty = false
 	var h := items_host()
 	if loadout_mode and h and _ws.has(key):
 		h.call("request_weapon_state", key, _ws_state(key))
+		_ws_dirty = false
+	elif not loadout_mode:
+		_ws_dirty = false
 
 
 ## Состояние оружия в руках — сразу тому, кто ведёт вещи (убежище: перед окном тайника).
@@ -564,6 +600,9 @@ func _process(_delta: float) -> void:
 	# взгляд вверх-вниз есть только от первого лица; в изометрии ствол — по горизонту
 	if is_local() and not ads:
 		look_pitch = 0.0
+	if health.downed and not _was_downed:
+		cancel_weapon_action()
+	_was_downed = health.downed
 	_update_hand()
 	# смерть видна у всех peer: у хоста — по сигналу, у клиентов — по синхронизированному alive
 	if not health.alive and _ragdoll == null and not _died_shown:
@@ -602,6 +641,9 @@ func _physics_process(delta: float) -> void:
 	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
 	if weapon_slot != "":
 		var we := weapon_entry()
+		if _pm_action.is_empty():
+			ammo = _state_rounds(weapon_slot)
+			weapon_rounds = ammo
 		var mods: Dictionary = we.get("mods", {})
 		if mods != weapon_mods:
 			weapon_mods = mods
@@ -731,10 +773,14 @@ func _update_hand() -> void:
 	if _weapon_model_id != key:
 		if _weapon_model:
 			_weapon_model.queue_free()
-		_weapon_model = WeaponModels.build(weapon_id, weapon_mods) if weapon_id != "" else Node3D.new()
+		_weapon_model = WeaponModels.build(weapon_id, weapon_mods, 1) if weapon_id != "" else Node3D.new()
 		var family := String(WeaponDb.weapon(weapon_id).get("model", "rifle")) if weapon_id != "" else "rifle"
-		var grip: Node3D = _animator.weapon_grip(family) if _animator else null
+		var grip: Node3D = _animator.weapon_grip(family, weapon_id) if _animator else null
 		(grip if grip else _hand).add_child(_weapon_model)
+		_weapon_rig = WeaponRig.find_on(_weapon_model)
+		if _weapon_rig:
+			_weapon_rig.set_ammo_state(weapon_rounds)
+			_weapon_rig.sound_event.connect(_rig_sound)
 		_weapon_model_id = key
 		# фонари и лазеры смотрят туда, куда целится игрок, а не куда анимация повернула ствол:
 		# запоминаем их поворот внутри модели оружия
@@ -747,6 +793,8 @@ func _update_hand() -> void:
 			set_first_person(true)
 	_hand.visible = health.alive
 	_weapon_model.visible = health.alive
+	if _weapon_rig and not _weapon_rig.is_busy():
+		_weapon_rig.set_ammo_state(weapon_rounds)
 	# фонари и лазеры — каждый по своему состоянию; от первого лица у себя светит модель в руках
 	# (CameraRig) — там, куда смотрит ствол
 	for n in _weapon_model.find_children("Flashlight*", "SpotLight3D", true, false):
@@ -840,6 +888,11 @@ func _combat(delta: float) -> void:
 	if Input.is_action_just_pressed("toggle_sight"):
 		_toggle_sight()
 	var spec := spec()
+	if InputMap.has_action("toggle_suppressor") and Input.is_action_just_pressed("toggle_suppressor"):
+		toggle_suppressor()
+	if not _pm_action.is_empty() and String(_pm_action.kind) == "suppressor":
+		_tick_suppressor(delta)
+		return
 	_ws_sync_t -= delta
 	if _ws_dirty and _ws_sync_t <= 0.0:
 		_send_ws(weapon_slot)
@@ -862,7 +915,7 @@ func _combat(delta: float) -> void:
 		_reload_hold = -1.0
 		if is_jammed():
 			_start_clear(spec)
-		elif ammo < int(spec.mag):
+		elif ammo < int(spec.mag) + (1 if _has_chamber(weapon_id) else 0):
 			_start_reload(spec)
 		return
 	var trigger := Input.is_action_pressed("fire") if bool(spec.auto) else Input.is_action_just_pressed("fire")
@@ -882,9 +935,16 @@ func _combat(delta: float) -> void:
 ## Перезарядка: в снаряжении — смена магазина из рюкзака или досыпка россыпью (делает хост,
 ## Inventory.reload_slot); в песочнице — полный магазин.
 func _start_reload(spec: Dictionary) -> void:
+	if not _pm_action.is_empty() or reload_timer > 0.0 or weapon_id == "":
+		return
 	_reload_kind = "full"
 	_reload_slot = weapon_slot
-	var t := float(spec.reload)
+	_reload_empty = ammo <= 0
+	var t: float = float(spec.get("reload_empty", spec.reload)) if _reload_empty else float(spec.reload)
+	var chambered: bool = _has_chamber(weapon_id)
+	# Потраченные выстрелами патроны сохраняем до анимации: её отмена не возвращает боезапас.
+	if chambered and _ws_dirty:
+		_send_ws(weapon_slot)
 	if loadout_mode:
 		var e := weapon_entry()
 		var kind := Gear.reload_kind(e, inventory.items)
@@ -898,23 +958,29 @@ func _start_reload(spec: Dictionary) -> void:
 		# под сильным стрессом старый магазин выскальзывает на землю (редко)
 		var sc: Dictionary = Balance.STRESS
 		var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
-		if kind == "swap" and String(mag.get("id", "")) != "" and _fumble_cd <= 0.0 and stress >= float(sc.fumble_from) 				and _rng.randf() < float(sc.fumble_chance) * _stress_over(float(sc.fumble_from)):
+		if not chambered and kind == "swap" and String(mag.get("id", "")) != "" and _fumble_cd <= 0.0 and stress >= float(sc.fumble_from) 				and _rng.randf() < float(sc.fumble_chance) * _stress_over(float(sc.fumble_from)):
 			st["fumble"] = true
 			_fumble_cd = float(sc.fumble_cd)
 			t += float(sc.fumble_sec)
 			_say("Магазин выскользнул из рук — лежит под ногами")
 			_play_weapon_sound(spec, "mag_drop")
 		var h := items_host()
-		if h:
+		if h and not chambered:
 			h.call("request_reload", weapon_slot, st)
-		_ws_dirty = false
+			_ws_dirty = false
 		# досыпать россыпью в отстёгиваемый магазин — дольше, чем сменить
 		if kind == "topup" and not WeaponDb.weapon(weapon_id).has("internal_mag"):
 			t *= Balance.RELOAD_TOPUP_K
 	# руки дрожат — дольше
 	reload_timer = t * (1.0 + float(Balance.STRESS.reload_k) * stress_k())
-	if String(WeaponDb.weapon(weapon_id).get("class", "")) != "PISTOL":
-		_animation_event("rifle_reload")
+	_animation_event("pistol_reload" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_reload")
+	if chambered:
+		_pm_action_seq += 1
+		_pm_action = {"kind": "reload", "seq": _pm_action_seq, "slot": weapon_slot, "id": weapon_id,
+			"state": _ws_state(weapon_slot), "empty": _reload_empty, "sent": false}
+		_weapon_action("reload", _reload_empty, reload_timer)
+	if _weapon_rig:
+		return
 	Audio.play(String(spec.reload_sound), global_position)
 	if _weapon_sound(spec, "breech_open") != "":
 		_play_weapon_sound(spec, "breech_open", -4.0)
@@ -933,6 +999,9 @@ func _start_clear(spec: Dictionary) -> void:
 
 
 func _finish_reload(spec: Dictionary) -> void:
+	if _has_chamber(weapon_id) and _reload_kind != "clear":
+		_commit_pm_action()
+		return
 	if _reload_kind == "clear":
 		if _ws.has(_reload_slot):
 			_ws[_reload_slot].jam = false
@@ -955,7 +1024,7 @@ func _finish_reload(spec: Dictionary) -> void:
 	if _ws.has(_reload_slot):
 		_ws[_reload_slot].jam = false
 	if _reload_slot == weapon_slot:
-		ammo = int((_ws.get(weapon_slot, {}) as Dictionary).get("rounds", 0))
+		ammo = _state_rounds(weapon_slot)
 	_finish_reload_sounds(spec)
 
 
@@ -965,6 +1034,249 @@ func _finish_reload_sounds(specification: Dictionary) -> void:
 		return
 	_play_weapon_sound(specification, "mag_in", -4.0)
 	_play_weapon_sound(specification, "charge", -5.0)
+
+
+## Только единственный риг модели на теле озвучивает действие — модель перед камерой молчит.
+func _rig_sound(slot: String) -> void:
+	if not health.alive or weapon_id == "":
+		return
+	_play_weapon_sound(spec() if is_local() else WeaponStats.compute({"id": weapon_id, "mods": weapon_mods}), slot, float(Balance.PM_ACTION.sound_db))
+
+
+## Одно событие приводит обе модели к одинаковой фазе; у чужого игрока работает тот же WeaponRig.
+func _weapon_action(action: String, flag: bool = false, duration: float = 0.0, rounds: int = -1, replicate: bool = true) -> void:
+	if _weapon_rig:
+		match action:
+			"shot":
+				_weapon_rig.play_shot(rounds)
+			"reload":
+				_weapon_rig.play_reload(flag, duration)
+			"finish_reload":
+				_weapon_rig.finish_reload(rounds)
+			"suppressor":
+				_weapon_rig.play_suppressor(flag, duration)
+			"suppressed":
+				_weapon_rig.set_suppressed(flag)
+			"cancel":
+				_weapon_rig.cancel_action()
+	if is_local() and _camera_rig is CameraRig:
+		(_camera_rig as CameraRig).weapon_action(action, flag, duration, rounds)
+	if replicate and Net.is_networked() and is_multiplayer_authority():
+		_rpc_weapon_action.rpc(action, flag, duration, rounds)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_weapon_action(action: String, flag: bool, duration: float, rounds: int) -> void:
+	_update_hand()
+	if rounds >= 0:
+		weapon_rounds = rounds
+	_weapon_action(action, flag, duration, rounds, false)
+
+
+## Клавиша K (переназначается): в ходе действия оружие занято, предметы пока остаются на месте.
+func toggle_suppressor() -> bool:
+	if weapon_id == "" or not health.alive or is_downed() or reload_timer > 0.0 or not _pm_action.is_empty():
+		return false
+	var entry: Dictionary = weapon_entry()
+	if not WeaponDb.mounts_of(weapon_id).has("muzzle"):
+		_say("На оружии нет крепления глушителя")
+		return false
+	var mods: Dictionary = entry.get("mods", {})
+	var mounted: String = WeaponDb.mod_id(mods.get("muzzle", {}))
+	var remove: bool = bool((WeaponDb.attachment(mounted).get("fx", {}) as Dictionary).get("suppressed", false))
+	if mounted != "" and not remove:
+		_say("Сначала снимите дульную насадку")
+		return false
+	if not remove:
+		var found: bool = false
+		for rec: Dictionary in inventory.items:
+			var iid: String = String(rec.id)
+			if bool((WeaponDb.attachment(iid).get("fx", {}) as Dictionary).get("suppressed", false)) and WeaponDb.attach_block(entry, "muzzle", iid) == "":
+				found = true
+				break
+		if not found:
+			_say("В рюкзаке нет подходящего глушителя")
+			return false
+	if _ws_dirty:
+		_send_ws(weapon_slot)
+	_pm_action_seq += 1
+	var duration: float = float(Balance.PM_ACTION.suppressor_sec)
+	_pm_action = {"kind": "suppressor", "seq": _pm_action_seq, "slot": weapon_slot, "id": weapon_id,
+		"state": _ws_state(weapon_slot), "install": not remove, "remaining": duration, "sent": false}
+	_weapon_action("suppressor", not remove, duration)
+	return true
+
+
+func _tick_suppressor(delta: float) -> void:
+	_pm_action.remaining = float(_pm_action.remaining) - delta
+	if float(_pm_action.remaining) <= 0.0:
+		_commit_pm_action()
+
+
+## Прерывание до подтверждения не трогает инвентарь; уже подтверждённый перенос остаётся целым.
+func cancel_weapon_action() -> void:
+	var had_action: bool = not _pm_action.is_empty() or reload_timer > 0.0 or (_weapon_rig and _weapon_rig.is_busy())
+	_pm_action.clear()
+	reload_timer = 0.0
+	_reload_hold = -1.0
+	_reload_kind = ""
+	_reload_slot = ""
+	if _weapon_rig:
+		_weapon_rig.set_ammo_state(weapon_rounds)
+	if had_action:
+		_weapon_action("cancel", false, 0.0, weapon_rounds)
+
+
+func _commit_pm_action() -> void:
+	if _pm_action.is_empty():
+		return
+	if bool(_pm_action.get("sent", false)):
+		reload_timer = float(Balance.PM_ACTION.host_poll_sec) if String(_pm_action.kind) == "reload" else 0.0
+		return
+	_pm_action.sent = true
+	var request: Dictionary = _pm_action.duplicate(true)
+	if Net.is_networked() and not multiplayer.is_server() and Net.scene_of(self) != "hideout":
+		_rpc_pm_commit.rpc_id(1, request)
+		# Остальные игроки продолжают видеть последний кадр действия до атомарного ответа хоста.
+		if String(request.kind) == "reload":
+			reload_timer = float(Balance.PM_ACTION.host_poll_sec)
+	else:
+		var result: Dictionary = _host_pm_commit(request)
+		_accept_pm_result(int(request.seq), result)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_pm_commit(request: Dictionary) -> void:
+	if not multiplayer.is_server() or multiplayer.get_remote_sender_id() != peer_id:
+		return
+	var result: Dictionary = _host_pm_commit(request)
+	_rpc_pm_result.rpc_id(peer_id, int(request.get("seq", -1)), result)
+
+
+## Проверяем намерение и ревизию на хосте: повторное или устаревшее действие ничего не расходует.
+func _host_pm_commit(request: Dictionary) -> Dictionary:
+	if Net.is_networked() and not multiplayer.is_server() and Net.scene_of(self) != "hideout":
+		return {"error": "Операция доступна только хосту"}
+	var sequence: int = int(request.get("seq", -1))
+	if sequence <= _pm_host_seq:
+		return {"error": "Действие уже обработано"}
+	_pm_host_seq = sequence
+	if not health.alive or is_downed():
+		return {"error": "Действие прервано ранением"}
+	var slot: String = String(request.get("slot", ""))
+	var wid: String = String(request.get("id", ""))
+	var state: Dictionary = request.get("state", {})
+	var base: Dictionary = _base_entry(slot)
+	if String(base.get("id", "")) != wid or int(base.get("rev", 0)) != int(state.get("rev", -1)):
+		return {"error": "Оружие уже изменилось"}
+	var kind: String = String(request.get("kind", ""))
+	if kind == "reload":
+		if not _has_chamber(wid):
+			return {"error": "У оружия другая схема перезарядки"}
+		if loadout_mode:
+			var h: Node = items_host()
+			if Net.scene_of(self) == "hideout" and h and h.has_method("request_reload"):
+				h.call("request_reload", slot, state)
+			else:
+				var result: Array = inventory.reload_slot(slot, state)
+				if String(result[0]) == "":
+					return {"error": "Нечем перезарядить"}
+				var spill: Dictionary = result[1]
+				if not spill.is_empty():
+					if Raid.current:
+						Raid.current.spawn_drop(global_position, "Выброшено", [spill], LootContainer.Look.BAG)
+					else:
+						# Стенд без мира рейда сохраняет вынутый магазин в буфере.
+						inventory.buffer = inventory.buffer + [spill]
+		else:
+			var fresh: Dictionary = Gear.normalize_chamber(base)
+			var mag: Dictionary = fresh.get("mag", {})
+			mag["rounds"] = WeaponDb.capacity(fresh)
+			fresh["mag"] = mag
+			fresh["chamber"] = int(state.get("chamber", 0))
+			fresh["chamber_ammo"] = String(state.get("chamber_ammo", ""))
+			Gear.chamber_round(fresh)
+			Gear._bump(fresh)
+			sandbox_weapons[slot] = fresh
+	elif kind == "suppressor":
+		var error: String
+		if loadout_mode:
+			error = inventory.toggle_suppressor(slot, state, bool(request.get("install", false)), wid)
+		else:
+			error = _sandbox_suppressor(slot, bool(request.get("install", false)))
+		if error != "":
+			return {"error": error}
+	else:
+		return {"error": "Неизвестное действие"}
+	return {"error": "", "entry": _base_entry(slot).duplicate(true), "slot": slot, "kind": kind}
+
+
+func _sandbox_suppressor(slot: String, install: bool) -> String:
+	var entry: Dictionary = sandbox_weapons[slot]
+	var list: Array = inventory.items.duplicate(true)
+	var updated: Dictionary
+	if not install:
+		var removed: Array = Gear.strip(entry, "mod:muzzle")
+		if (removed[1] as Dictionary).is_empty() or ItemDb.add_to(list, removed[1], Balance.BACKPACK_GRID) == 0:
+			return "В рюкзаке нет места для глушителя"
+		updated = removed[0]
+	else:
+		var chosen: int = -1
+		for idx: int in range(list.size()):
+			var iid: String = String((list[idx] as Dictionary).id)
+			if bool((WeaponDb.attachment(iid).get("fx", {}) as Dictionary).get("suppressed", false)) and WeaponDb.attach_block(entry, "muzzle", iid) == "":
+				chosen = idx
+				break
+		if chosen < 0:
+			return "В рюкзаке нет подходящего глушителя"
+		var fitted: Array = Gear.fit(entry, list[chosen], "muzzle")
+		if String(fitted[2]) != "" or not (fitted[1] as Dictionary).is_empty():
+			return "Дульная насадка уже установлена"
+		ItemDb.remove_at(list, chosen, 1)
+		updated = fitted[0]
+	sandbox_weapons[slot] = updated
+	inventory.items = list
+	return ""
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_pm_result(sequence: int, result: Dictionary) -> void:
+	if multiplayer.get_remote_sender_id() == 1:
+		_accept_pm_result(sequence, result)
+
+
+func _accept_pm_result(sequence: int, result: Dictionary) -> void:
+	# Даже если владелец уже сменил оружие, подтверждённая запись нужна при следующем выборе.
+	var entry: Dictionary = result.get("entry", {})
+	var slot: String = String(result.get("slot", ""))
+	if not entry.is_empty():
+		if loadout_mode:
+			_pm_entries[slot] = entry
+		else:
+			sandbox_weapons[slot] = entry
+		_ws.erase(slot)
+		entry_of(slot)
+	if _pm_action.is_empty() or int(_pm_action.seq) != sequence:
+		return
+	var action: String = String(_pm_action.kind)
+	_pm_action.clear()
+	reload_timer = 0.0
+	var error: String = String(result.get("error", ""))
+	if error != "":
+		_say(error)
+		_weapon_action("cancel", false, 0.0, weapon_rounds)
+		return
+	ammo = _state_rounds(weapon_slot)
+	weapon_rounds = ammo
+	weapon_mods = (weapon_entry().get("mods", {}) as Dictionary).duplicate(true)
+	if _ws.has(weapon_slot):
+		_ws[weapon_slot].jam = false
+	if action == "reload":
+		_weapon_action("finish_reload", false, 0.0, ammo)
+	else:
+		_weapon_action("suppressed", bool(spec().get("suppressed", false)))
+		_weapon_action("cancel", false, 0.0, ammo)
+	_send_ws(weapon_slot)
 
 
 ## T / L: все фонари (kind light) или лазеры (laser) на оружии в руках — вкл/выкл разом.
@@ -1107,6 +1419,7 @@ func _loadout_tick() -> void:
 func _switch(key: String, sound: bool = true) -> void:
 	if key == weapon_slot and weapon_id != "" and not _base_entry(key).is_empty():
 		return
+	cancel_weapon_action()
 	if weapon_slot != "" and _ws.has(weapon_slot):
 		_send_ws(weapon_slot)
 	if sound and weapon_id != "":
@@ -1114,7 +1427,8 @@ func _switch(key: String, sound: bool = true) -> void:
 	weapon_slot = key
 	var e := entry_of(key)
 	weapon_id = String(e.get("id", ""))
-	ammo = int((e.get("mag", {}) as Dictionary).get("rounds", 0)) if e.get("mag") is Dictionary else 0
+	ammo = Gear.total_rounds(e)
+	weapon_rounds = ammo
 	reload_timer = 0.0
 	_aim_t = 0.0
 	fire_timer = 0.35
@@ -1127,8 +1441,26 @@ func _fire(spec: Dictionary) -> void:
 	if String(WeaponDb.weapon(weapon_id).get("class", "")) != "PISTOL":
 		_animation_event("rifle_fire")
 	var st: Dictionary = _ws[weapon_slot]
-	st.rounds = int(st.rounds) - 1
-	ammo = int(st.rounds)
+	if _has_chamber(weapon_id):
+		# После вставки или снаряжения магазина патронник может ещё быть пустым.
+		# Перед выстрелом переносим патрон из магазина, сохраняя общий боезапас.
+		if int(st.get("chamber", 0)) <= 0:
+			if int(st.rounds) <= 0:
+				return
+			st.rounds = int(st.rounds) - 1
+			st["chamber"] = 1
+			st["chamber_ammo"] = String(st.ammo)
+		st["chamber"] = 0
+		st["chamber_ammo"] = ""
+		if int(st.rounds) > 0:
+			st.rounds = int(st.rounds) - 1
+			st["chamber"] = 1
+			st["chamber_ammo"] = String(st.ammo)
+	else:
+		st.rounds = int(st.rounds) - 1
+	ammo = _state_rounds(weapon_slot)
+	weapon_rounds = ammo
+	_weapon_action("shot", ammo <= 0, 0.0, ammo, false)
 	st.dur = maxf(0.0, float(st.dur) - float(spec.wear))
 	_ws_dirty = true
 	_ws_sync_t = 0.6
@@ -1210,7 +1542,7 @@ func _fire(spec: Dictionary) -> void:
 		_play_weapon_sound(spec, "bolt_lock", -5.0)
 	# остальным — то же (пули и урон уже посчитаны здесь и у хоста)
 	if Net.is_networked():
-		_rpc_shot_fx.rpc(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"))
+		_rpc_shot_fx.rpc(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"), ammo)
 
 
 ## Что видно и слышно от выстрела: вспышка у дула, звук, щелчок помпы/затвора. След пули
@@ -1235,8 +1567,11 @@ func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sou
 
 ## Выстрел напарника: раньше его видел и слышал только он сам.
 @rpc("authority", "call_remote", "unreliable_ordered")
-func _rpc_shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sound: String, mechanism_sound: String) -> void:
+func _rpc_shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sound: String, mechanism_sound: String, rounds_left: int = -1) -> void:
 	_shot_fx(muzzle, sound, db, flash, cycle_sound, mechanism_sound)
+	if rounds_left >= 0:
+		weapon_rounds = rounds_left
+		_weapon_action("shot", rounds_left <= 0, 0.0, rounds_left, false)
 
 
 ## Дуло: в прицеле — у модели в руках перед камерой, иначе — у модели на теле.
@@ -1636,6 +1971,7 @@ func _apply_stance() -> void:
 ## Смерть: капсула прячется, падает регдолл, толкнутый от того, кто попал; камера — за телом.
 ## Эвакуация: тело пропадает, коллизий нет, мародёры больше не видят (не в группе "players").
 func _leave_raid() -> void:
+	cancel_weapon_action()
 	remove_from_group("players")
 	visible = false
 	collision_layer = 0
@@ -1646,6 +1982,7 @@ func _leave_raid() -> void:
 
 
 func _die() -> void:
+	cancel_weapon_action()
 	if _died_shown:
 		return
 	# модель падает клипом смерти и остаётся лежать (не манекен); без модели — прежний регдолл

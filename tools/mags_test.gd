@@ -191,7 +191,7 @@ func _ready() -> void:
 	inv.items = []
 	_me._switch(String(_me.weapon_keys()[0]), false)
 	await get_tree().physics_frame
-	_me.ammo = 17
+	_set_weapon_rounds(17)
 	var spec := _me.spec()
 	await _hold_reload(0.7)
 	_check("держать R — проверка словами, без перезарядки", _me.ammo_check_text == Gear.ammo_estimate(17, int(spec.mag), false) and _me.reload_timer <= 0.0, "«%s», перезарядка %.2f" % [_me.ammo_check_text, _me.reload_timer])
@@ -200,7 +200,7 @@ func _ready() -> void:
 	await get_tree().create_timer(4.0).timeout
 	_me._switch(String(_me.weapon_keys()[1]), false)
 	await get_tree().physics_frame
-	_me.ammo = 7
+	_set_weapon_rounds(7)
 	await _hold_reload(0.7)
 	_check("пистолет — точно", _me.ammo_check_text == "7 из %d" % int(_me.spec().mag), _me.ammo_check_text)
 	print("mags_test: провалено %d" % _fails)
@@ -222,6 +222,19 @@ func _check_words() -> void:
 
 func _wait(sec: float) -> void:
 	await get_tree().create_timer(sec).timeout
+
+
+## ammo — отображение, пересчитываемое Player. Сценарий задаёт реальный боезапас оружия.
+func _set_weapon_rounds(count: int) -> void:
+	_me.entry_of(_me.weapon_slot)
+	var state: Dictionary = _me._ws[_me.weapon_slot]
+	var chamber: int = mini(count, int(WeaponDb.weapon(_me.weapon_id).get("chamber_capacity", 0)))
+	state["rounds"] = maxi(0, count - chamber)
+	state["chamber"] = chamber
+	state["chamber_ammo"] = String(state.get("ammo", "")) if chamber > 0 else ""
+	_me.ammo = count
+	_me.weapon_rounds = count
+	_me._ws_dirty = true
 
 
 func _hold_reload(sec: float) -> void:

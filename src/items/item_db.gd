@@ -71,6 +71,8 @@ static func entry_weight(e: Dictionary) -> float:
 		w += weight(String(mag.get("ammo", ""))) * int(mag.get("rounds", 0))
 	if e.has("rounds"):
 		w += weight(String(e.get("ammo", ""))) * int(e.rounds)
+	if int(e.get("chamber", 0)) > 0:
+		w += weight(String(e.get("chamber_ammo", mag.get("ammo", "")))) * int(e.chamber)
 	for s in e.get("plates", {}):
 		w += weight(String(e.plates[s].id))
 	return w
@@ -590,6 +592,8 @@ static func entry_value(entry: Dictionary) -> int:
 		v += float(value(String(mag.get("ammo", "")))) * int(mag.get("rounds", 0))
 	if entry.has("rounds"):
 		v += float(value(String(entry.get("ammo", "")))) * int(entry.rounds)
+	if int(entry.get("chamber", 0)) > 0:
+		v += float(value(String(entry.get("chamber_ammo", mag.get("ammo", ""))))) * int(entry.chamber)
 	for s in entry.get("plates", {}):
 		var p: Dictionary = entry.plates[s]
 		v += float(value(String(p.id))) * clampf(float(p.dur) / maxf(1.0, max_dur(String(p.id))), 0.2, 1.0)

@@ -152,9 +152,14 @@ func _run() -> void:
 		(bench.get("_shared_weapon_sounds") as HFlowContainer).get_child_count() >= 10, "")
 	var pm_suppressed: Dictionary = pm_layout[2]
 	var glock_suppressed: Dictionary = glock_layout[2]
-	_check("оружие: глушитель остаётся на своём месте и явно недоступен для ПМ",
-		String(pm_suppressed.slot) == "shot_suppressed" and not bool(pm_suppressed.available)
+	_check("оружие: выстрел с глушителем доступен ПМ и Glock",
+		String(pm_suppressed.slot) == "shot_suppressed" and bool(pm_suppressed.available)
 		and bool(glock_suppressed.available), "%s / %s" % [str(pm_suppressed), str(glock_suppressed)])
+	var pm_actions: Dictionary = WeaponDb.weapon_sound_map("wpn_hg_01")
+	var glock_actions: Dictionary = WeaponDb.weapon_sound_map("wpn_hg_02")
+	_check("оружие: звуки установки и снятия доступны только ригу с таким действием",
+		pm_actions.has("suppressor_on") and pm_actions.has("suppressor_off")
+		and not glock_actions.has("suppressor_on") and not glock_actions.has("suppressor_off"), str(pm_actions))
 	var shared_dry: Dictionary = pm_layout[4]
 	_check("оружие: сухой спуск назначается один раз общим событием",
 		String(shared_dry.slot) == "dry_fire" and bool(shared_dry.shared)

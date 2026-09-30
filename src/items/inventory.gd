@@ -9,7 +9,12 @@ const SLOTS := ["primary", "secondary", "armor", "helmet", "ears", "eyes"]
 const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистолет", "armor": "Броня", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза"}
 
 var items: Array = []
-var equipment: Dictionary = {}
+## Ревизия слота не забывается, когда оружие вынуто: поздний пакет не попадёт в новый экземпляр.
+var _weapon_slot_revisions: Dictionary = {}
+var _weapon_generation_seq: int = 0
+var equipment: Dictionary = {}:
+	set(value):
+		equipment = _prepare_equipment(value)
 ## Последний слой, который принял пулю; нужен только для соответствующего звука попадания.
 var last_armor_layer: String = ""
 ## Защищённый карман (модуль убежища): при смерти не выпадает — возвращается в профиль.
@@ -21,6 +26,50 @@ var loadout_ready: bool = false
 ## отсюда. Живёт, только пока открыт ящик: закрыли окно — что осталось, пропадает (окно спросит);
 ## эвакуация — в рюкзак, смерть — в тело.
 var buffer: Array = []
+
+
+## Все пути экипировки, включая назначения из Raid/Profile, проходят через один барьер.
+## Маркер сохраняется в копиях записи, но при новом помещении в слот выдаётся заново.
+func _prepare_equipment(value: Dictionary) -> Dictionary:
+	var next: Dictionary = value.duplicate(true)
+	var can_author: bool = not Net.is_networked() or Net.scene_of(self) == "hideout" \
+		or (is_inside_tree() and multiplayer.is_server())
+	for raw_slot: Variant in equipment:
+		var slot: String = String(raw_slot)
+		var previous: Dictionary = equipment[raw_slot]
+		if WeaponDb.is_weapon(String(previous.get("id", ""))):
+			_weapon_slot_revisions[slot] = maxi(int(_weapon_slot_revisions.get(slot, -1)), int(previous.get("rev", 0)))
+	for raw_slot: Variant in next:
+		var slot: String = String(raw_slot)
+		var entry: Dictionary = next[raw_slot]
+		if not WeaponDb.is_weapon(String(entry.get("id", ""))):
+			continue
+		var revision: int = int(entry.get("rev", 0))
+		var high_water: int = int(_weapon_slot_revisions.get(slot, -1))
+		if can_author:
+			var previous: Dictionary = equipment.get(slot, {})
+			var generation: String = String(entry.get("_equip_generation", ""))
+			var continuing: bool = generation != "" and generation == String(previous.get("_equip_generation", "")) \
+				and String(entry.get("id", "")) == String(previous.get("id", "")) \
+				and revision >= int(previous.get("rev", 0))
+			if not continuing:
+				# Первый снимок нового Inventory сохраняет ревизию из профиля. Повторное
+				# помещение в использованный слот всегда старше всех его прежних запросов.
+				revision = maxi(revision, high_water + 1)
+				if high_water >= 0 or generation == "":
+					_weapon_generation_seq += 1
+					entry["_equip_generation"] = "%s:%s:%d" % [str(get_instance_id()), slot, _weapon_generation_seq]
+			else:
+				revision = maxi(revision, high_water)
+			entry["rev"] = revision
+		# Клиент принимает ревизию и маркер хоста без собственной перенумерации.
+		_weapon_slot_revisions[slot] = maxi(high_water, revision)
+	return next
+
+
+func _weapon_state_matches(entry: Dictionary, state: Dictionary) -> bool:
+	return int(state.get("rev", -1)) == int(entry.get("rev", 0)) \
+		and (not state.has("id") or String(state.id) == String(entry.get("id", "")))
 
 
 func _ready() -> void:
@@ -236,14 +285,17 @@ func strip_in(role: String, idx: int, part: String) -> bool:
 func apply_weapon_state(slot: String, st: Dictionary) -> void:
 	if not equipment.has(slot):
 		return
-	var e: Dictionary = (equipment[slot] as Dictionary).duplicate(true)
-	if int(st.get("rev", -1)) != int(e.get("rev", 0)):
+	var e: Dictionary = Gear.normalize_chamber(equipment[slot])
+	if not _weapon_state_matches(e, st):
 		# владелец ещё не видел последнюю перемену (сменили магазин / обвес) — его состояние устарело
 		return
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 	if not mag.is_empty():
 		mag.rounds = clampi(int(st.get("rounds", mag.get("rounds", 0))), 0, WeaponDb.capacity(e))
 		e["mag"] = mag
+	if int(WeaponDb.weapon(String(e.get("id", ""))).get("chamber_capacity", 0)) > 0:
+		e["chamber"] = clampi(int(st.get("chamber", e.get("chamber", 0))), 0, 1)
+		e["chamber_ammo"] = String(st.get("chamber_ammo", e.get("chamber_ammo", ""))) if int(e.chamber) > 0 else ""
 	e["dur"] = clampf(float(st.get("dur", e.get("dur", 100.0))), 0.0, 100.0)
 	e["sight"] = String(st.get("sight", e.get("sight", "primary")))
 	var mods: Dictionary = e.get("mods", {})
@@ -262,6 +314,9 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 ## Перезарядка оружия в слоте (хост): сначала — состояние владельца, потом смена магазина из
 ## рюкзака или досыпка россыпью (Gear.reload_weapon). Возвращает вид ("swap"/"topup") и выпавшее.
 func reload_slot(slot: String, st: Dictionary) -> Array:
+	# Устаревший пакет не должен перезарядить уже заменённое оружие.
+	if not equipment.has(slot) or not _weapon_state_matches(equipment[slot], st):
+		return ["", {}]
 	apply_weapon_state(slot, st)
 	if not equipment.has(slot):
 		return ["", {}]
@@ -274,6 +329,44 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 	eq[slot] = r[0]
 	equipment = eq
 	return [String(r[2]), r[1]]
+
+
+## Быстрое действие глушителя — атомарно: на ошибке ни обвес, ни рюкзак не меняются.
+## install задаёт намерение, поэтому повторный сетевой пакет не превратится в обратное действие.
+func toggle_suppressor(slot: String, st: Dictionary, install: bool, expected_id: String) -> String:
+	if not equipment.has(slot):
+		return "Оружия нет"
+	var before: Dictionary = equipment[slot]
+	if String(before.get("id", "")) != expected_id or not _weapon_state_matches(before, st):
+		return "Оружие уже изменилось"
+	var mods: Dictionary = before.get("mods", {})
+	var mounted: String = WeaponDb.mod_id(mods.get("muzzle", {}))
+	var mounted_fx: Dictionary = WeaponDb.attachment(mounted).get("fx", {})
+	if not install:
+		if not bool(mounted_fx.get("suppressed", false)):
+			return "Глушителя на оружии нет"
+		if not strip_equipped(slot, "mod:muzzle"):
+			return "В рюкзаке нет места для глушителя"
+	else:
+		if mounted != "":
+			return "Дульная насадка уже установлена"
+		var chosen: int = -1
+		for idx: int in range(items.size()):
+			var iid: String = String((items[idx] as Dictionary).get("id", ""))
+			var fx: Dictionary = WeaponDb.attachment(iid).get("fx", {})
+			if bool(fx.get("suppressed", false)) and WeaponDb.attach_block(before, "muzzle", iid) == "":
+				chosen = idx
+				break
+		if chosen < 0:
+			return "В рюкзаке нет подходящего глушителя"
+		var error: String = install_mod(slot, "backpack", chosen, "muzzle")
+		if error != "":
+			return error
+	# Перенос обвеса изменил ревизию; состояние патронов принимаем с исходной ревизии.
+	var state: Dictionary = st.duplicate(true)
+	state["rev"] = int((equipment[slot] as Dictionary).get("rev", 0))
+	apply_weapon_state(slot, state)
+	return ""
 
 
 ## Начало рейда (хост): пустые магазины в рюкзаке и оружие в слотах снарядить россыпью.

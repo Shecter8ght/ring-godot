@@ -6,6 +6,19 @@ static var _profiles: Dictionary = {}
 static var _contacts: Dictionary = {}
 
 
+## Оружие с личным хватом сохраняет контакт правой кисти в общем сокете Persona.
+static func socket_offset(model: String, weapon: Dictionary) -> Vector3:
+	if not weapon.has("hand_grips"):
+		return Vector3.ZERO
+	if _profiles.is_empty():
+		_profiles = JSON.parse_string(FileAccess.get_file_as_string("res://data/weapon_grips.json")) as Dictionary
+	var base: Dictionary = (_profiles.get(model, {}) as Dictionary).get("right", {}) as Dictionary
+	var custom: Dictionary = (weapon.hand_grips as Dictionary).get("right", {}) as Dictionary
+	if not base.has("pos") or not custom.has("pos"):
+		return Vector3.ZERO
+	return (vector(base.pos) - vector(custom.pos)) * float(weapon.get("scale", 1.0))
+
+
 static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionary) -> void:
 	if _profiles.is_empty():
 		_profiles = JSON.parse_string(FileAccess.get_file_as_string("res://data/weapon_grips.json")) as Dictionary
@@ -52,7 +65,13 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 		marker.transform = Transform3D(basis, contact + (data.get("offset", Vector3.ZERO) as Vector3))
 		marker.set_meta("palm_offset", palm_offset)
 		marker.set_meta("curl", data.get("curl", [55, 75, 45]))
-		if _contacts.has(contact_key) and not weapon.has("hand_grips"):
+		if data.has("thumb_directions"):
+			marker.set_meta("thumb_directions", data.thumb_directions)
+		var asset_marker: Node3D = root.find_child("GripR" if side == "right" else "GripL", true, false) as Node3D
+		if asset_marker:
+			# Empty задаёт контакт ладони; размер кисти и сгиб пальцев остаются из профиля.
+			marker.transform = WeaponRig._relative_transform(asset_marker, root)
+		elif _contacts.has(contact_key) and not weapon.has("hand_grips"):
 			marker.set_meta("contact_pose", _contacts[contact_key]["Right" if side == "right" else "Left"])
 		root.add_child(marker)
 
