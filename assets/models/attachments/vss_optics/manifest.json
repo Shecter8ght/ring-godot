@@ -1,0 +1,54 @@
+[
+  {
+    "id": "PSO_VSS_4x24",
+    "sha256": "f1643d93643b45f08dd65623f65778a45bc93d2c5458a8034064561327ac9d95",
+    "triangles": 13140,
+    "dimensions_source_mm": [
+      375.0,
+      70.3399982303381,
+      133.64000525325537
+    ],
+    "axes": "+Z forward, +Y up, -X right",
+    "root_origin": "Mount contact",
+    "markers": [
+      "MountOrigin",
+      "OpticalAxis",
+      "Ocular",
+      "EyePoint",
+      "Objective"
+    ],
+    "surfaces": 2,
+    "textures": "3 embedded 2048 PNG",
+    "on_vss_source_mm": [
+      361,
+      24.5,
+      -3
+    ]
+  },
+  {
+    "id": "Rail_4x32",
+    "sha256": "7538ba10f98ec43cacbc504e269a611bd9aeab1786667647fec87f0e8a42bf69",
+    "triangles": 11640,
+    "dimensions_source_mm": [
+      179.99999970197678,
+      61.080003157258034,
+      69.54000098630786
+    ],
+    "axes": "+Z forward, +Y up, -X right",
+    "root_origin": "Mount contact",
+    "markers": [
+      "MountOrigin",
+      "OpticalAxis",
+      "Ocular",
+      "EyePoint",
+      "Objective"
+    ],
+    "surfaces": 2,
+    "textures": "3 embedded 2048 PNG",
+    "on_vss_source_mm": [
+      383,
+      0,
+      58.1
+    ]
+  }
+]
