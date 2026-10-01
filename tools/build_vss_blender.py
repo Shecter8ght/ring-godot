@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from pathlib import Path
 import sys
 
@@ -28,6 +29,12 @@ MATERIALS: dict[str, bpy.types.Material] = {}
 
 def enum_set(owner, property_name: str, desired: str) -> None:
     valid = [i.identifier for i in owner.bl_rna.properties[property_name].enum_items]
+    # Динамические enum (Curve 2D, единицы, OCIO) могут показывать чужой список RNA.
+    if desired not in valid:
+        try:
+            setattr(owner, property_name, '__QUERY_ENUM_VALUES__')
+        except (TypeError, ValueError) as error:
+            valid = re.findall(r"'([^']+)'", str(error))
     if desired in valid:
         setattr(owner, property_name, desired)
 
@@ -247,7 +254,7 @@ def box(name: str, center: tuple, size: tuple, mat: str, group: str,
     obj.data.materials.append(MATERIALS[mat])
     PARTS[name] = obj
     if radius:
-        bevel(obj, radius)
+        bevel(obj, min(radius, min(size) * .2))
     return obj
 
 
@@ -561,6 +568,7 @@ def sling_loop(name: str, center: tuple, width: float, height: float, parent) ->
     curve.materials.append(MATERIALS['Blued steel'])
     obj.parent = parent
     obj.matrix_parent_inverse = parent.matrix_world.inverted()
+    bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
     bpy.ops.object.convert(target='MESH')
