@@ -1,0 +1,79 @@
+[
+  {
+    "id": "Magazine_939_10_Empty",
+    "sha256": "b557fd4f2735ac716298f8f2ef42dd32ab555145d3457e16637e05a0935744ec",
+    "triangles": 5312,
+    "game_item_id": "mag_939_10",
+    "rounds_loaded": 0,
+    "visible_round_props": 0,
+    "dimensions_source_mm": [
+      75.7962204515934,
+      30.99999949336052,
+      87.999003008008
+    ],
+    "axes": "+Z forward, +Y up, -X right",
+    "surfaces": 1,
+    "root_origin": "Original VSS magazine socket",
+    "on_vss_source_mm": [
+      455,
+      0,
+      -37
+    ],
+    "markers": [
+      "MountOrigin",
+      "FeedPoint",
+      "Floorplate"
+    ],
+    "textures": "3 embedded 2048 PNG"
+  },
+  {
+    "id": "Magazine_939_10_Loaded",
+    "sha256": "f193b966fdbf48860e276181ccca990831d4f84fbcf04b5eff1f5c21543d307f",
+    "triangles": 8112,
+    "game_item_id": "mag_939_10",
+    "rounds_loaded": 10,
+    "visible_round_props": 2,
+    "dimensions_source_mm": [
+      75.7962204515934,
+      30.99999949336052,
+      87.999003008008
+    ],
+    "axes": "+Z forward, +Y up, -X right",
+    "surfaces": 1,
+    "root_origin": "Original VSS magazine socket",
+    "on_vss_source_mm": [
+      455,
+      0,
+      -37
+    ],
+    "markers": [
+      "MountOrigin",
+      "FeedPoint",
+      "Floorplate"
+    ],
+    "textures": "3 embedded 2048 PNG"
+  },
+  {
+    "id": "Cartridge_939_SP5",
+    "sha256": "987a23818cfd04cc9ca227e07893078cf5243a8030601095aa626de5bbcb6e26",
+    "triangles": 1400,
+    "game_item_id": "ammo_939_sp5",
+    "rounds_loaded": null,
+    "visible_round_props": 0,
+    "dimensions_source_mm": [
+      56.0000017285347,
+      11.350000277161598,
+      11.350000277161598
+    ],
+    "axes": "+Z forward, +Y up, -X right",
+    "surfaces": 1,
+    "root_origin": "Case base center",
+    "on_vss_source_mm": null,
+    "markers": [
+      "Base",
+      "Tip",
+      "Center"
+    ],
+    "textures": "3 embedded 2048 PNG"
+  }
+]
