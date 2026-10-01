@@ -1,0 +1,111 @@
+[
+  {
+    "id": "VSS_Vintorez_Picatinny",
+    "sha256": "0f8fc1c6908fa5d98e14b6a2af6d09691022e43ca4963b26fd1ab4911cd5e892",
+    "triangles": 64416,
+    "game_axes": "+Z forward, +Y up, -X right",
+    "dimensions_blender_game_mm": [
+      62.755003571510315,
+      893.999993801117,
+      182.09999799728394
+    ],
+    "surfaces": 2,
+    "atlases": [
+      "Metal_Polymer",
+      "Wood"
+    ],
+    "resolution": 4096,
+    "orm": "R local cavity AO, G roughness, B metallic",
+    "authoring": "Blender UV/baking; Krita 5.3.4 layered KRA/compositing/PNG"
+  },
+  {
+    "id": "PSO_VSS_4x24",
+    "sha256": "76d8165cdc4697e60ac0f9577ad8cc63187a38df77729ea306b434879d666af3",
+    "triangles": 13140,
+    "game_axes": "+Z forward, +Y up, -X right",
+    "dimensions_blender_game_mm": [
+      70.33421471714973,
+      375.0,
+      133.63999780267477
+    ],
+    "surfaces": 2,
+    "atlases": [
+      "Body"
+    ],
+    "resolution": 2048,
+    "orm": "R local cavity AO, G roughness, B metallic",
+    "authoring": "Blender UV/baking; Krita 5.3.4 layered KRA/compositing/PNG"
+  },
+  {
+    "id": "Rail_4x32",
+    "sha256": "cf2ddf9700273d7b7819e3fc089479cc6b44646b66fbefd99ec82925d6ddea16",
+    "triangles": 11640,
+    "game_axes": "+Z forward, +Y up, -X right",
+    "dimensions_blender_game_mm": [
+      61.06953136622906,
+      180.00005930662155,
+      69.5143947377801
+    ],
+    "surfaces": 2,
+    "atlases": [
+      "Body"
+    ],
+    "resolution": 2048,
+    "orm": "R local cavity AO, G roughness, B metallic",
+    "authoring": "Blender UV/baking; Krita 5.3.4 layered KRA/compositing/PNG"
+  },
+  {
+    "id": "Magazine_939_10_Empty",
+    "sha256": "c9e9d668cd9bed4d88c8424374994a2167e8e7b7c98ebe18804d1e812a89554f",
+    "triangles": 5312,
+    "game_axes": "+Z forward, +Y up, -X right",
+    "dimensions_blender_game_mm": [
+      30.99999949336052,
+      75.7962204515934,
+      87.999003008008
+    ],
+    "surfaces": 1,
+    "atlases": [
+      "Body"
+    ],
+    "resolution": 2048,
+    "orm": "R local cavity AO, G roughness, B metallic",
+    "authoring": "Blender UV/baking; Krita 5.3.4 layered KRA/compositing/PNG"
+  },
+  {
+    "id": "Magazine_939_10_Loaded",
+    "sha256": "02f1f26410cae4c48417319ea7475a809153abaad2367303a94411b04ab609bd",
+    "triangles": 8112,
+    "game_axes": "+Z forward, +Y up, -X right",
+    "dimensions_blender_game_mm": [
+      30.99999949336052,
+      75.7962204515934,
+      87.999003008008
+    ],
+    "surfaces": 1,
+    "atlases": [
+      "Body"
+    ],
+    "resolution": 2048,
+    "orm": "R local cavity AO, G roughness, B metallic",
+    "authoring": "Blender UV/baking; Krita 5.3.4 layered KRA/compositing/PNG"
+  },
+  {
+    "id": "Cartridge_939_SP5",
+    "sha256": "b9123f3d8cd4420242db2ac5a08878090cc75e9ff95ab7d0dab7f096b5b66673",
+    "triangles": 1400,
+    "game_axes": "+Z forward, +Y up, -X right",
+    "dimensions_blender_game_mm": [
+      11.342051438987255,
+      56.00018027638498,
+      11.344253085553646
+    ],
+    "surfaces": 1,
+    "atlases": [
+      "Body"
+    ],
+    "resolution": 2048,
+    "orm": "R local cavity AO, G roughness, B metallic",
+    "authoring": "Blender UV/baking; Krita 5.3.4 layered KRA/compositing/PNG"
+  }
+]
