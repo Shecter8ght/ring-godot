@@ -1,8 +1,8 @@
 [
   {
     "id": "VSS_Vintorez_Picatinny",
-    "sha256": "0f8fc1c6908fa5d98e14b6a2af6d09691022e43ca4963b26fd1ab4911cd5e892",
-    "triangles": 64416,
+    "sha256": "c987ce1c130dd682256c22e8c7bbd86e2a7fd1e5a6c742e50795029c1cf66d42",
+    "triangles": 68956,
     "game_axes": "+Z forward, +Y up, -X right",
     "dimensions_blender_game_mm": [
       62.755003571510315,

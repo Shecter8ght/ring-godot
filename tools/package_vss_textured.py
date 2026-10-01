@@ -7,6 +7,10 @@ def main():
     files=[RAW/name for name in ('README.md','asset-state.md','license.txt','VSS_Textured_Kit.blend',
         'krita-progress.json','godot_check.json','godot_materials.png',
         'kit_all.png','kit_rifle.png','kit_optics.png','kit_mag_ammo.png')]
+    if (RAW/'other-assets-unchanged.json').exists():
+        unchanged=json.loads((RAW/'other-assets-unchanged.json').read_text(encoding='utf8'))
+        if unchanged['status']!='PASS':raise ValueError('Other assets changed')
+        files.append(RAW/'other-assets-unchanged.json')
     for identifier in IDS:
         folder=RAW/identifier
         report=json.loads((folder/'texturing-report.json').read_text(encoding='utf8'))
@@ -25,6 +29,19 @@ def main():
     rifle=RAW/'VSS_Vintorez_Picatinny'
     files.extend(rifle/name for name in ('VSS_Vintorez_Picatinny_Textured_Editable.blend',
         'parts-transfer.json','editable-reopen-check.json','editable_reopened_beauty.png','editable_reopened_receiver.png'))
+    if (rifle/'shoulder-audit.json').exists():
+        audit=json.loads((rifle/'shoulder-audit.json').read_text(encoding='utf8'))
+        native=json.loads((rifle/'texturing-report.json').read_text(encoding='utf8'))
+        if audit['status']!='PASS' or audit['source_sha256']!=native['source_sha256']:raise ValueError('Stale shoulder audit')
+        files.extend(rifle/name for name in ('shoulder-audit.json','geometry-change.json',
+            'editable_reopened_shoulder_profile.png','editable_reopened_shoulder_rear.png','editable_reopened_shoulder_fit.png'))
+    if (rifle/'current-export-map-check.json').exists():
+        maps=json.loads((rifle/'current-export-map-check.json').read_text(encoding='utf8'))
+        if maps['status']!='PASS' or maps['glb_sha256']!=hashlib.sha256((rifle/'VSS_Vintorez_Picatinny.glb').read_bytes()).hexdigest():raise ValueError('Stale map verification')
+        for item in maps['maps']:
+            path=rifle/item['atlas']/(item['map']+'.png')
+            if hashlib.sha256(path.read_bytes()).hexdigest()!=item['current_png_sha256']:raise ValueError('Changed Krita map')
+        files.append(rifle/'current-export-map-check.json')
     paths=sorted(set(files))
     for path in paths:
         if not path.is_file() or not path.resolve().is_relative_to(RAW.resolve()):raise ValueError('Invalid source: '+str(path))

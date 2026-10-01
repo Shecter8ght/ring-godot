@@ -13,7 +13,7 @@ import export_vss_optic as E
 ROOT=Path(__file__).resolve().parents[1]
 RAW=ROOT/'_asset_src'/'vss_textured'
 ITEMS={
- 'VSS_Vintorez_Picatinny': ('vss_picatinny/VSS_Vintorez_Picatinny_v2.blend',None),
+ 'VSS_Vintorez_Picatinny': ('vss_picatinny/VSS_Vintorez_Picatinny_v3.blend',None),
  'PSO_VSS_4x24': ('vss_optics/PSO_VSS_4x24.blend','vss_optics/export/PSO_VSS_4x24/PSO_VSS_4x24_Game.blend'),
  'Rail_4x32': ('vss_optics/Rail_4x32.blend','vss_optics/export/Rail_4x32/Rail_4x32_Game.blend'),
  'Magazine_939_10_Empty': ('vss_mag_ammo/Magazine_939_10_Empty.blend','vss_mag_ammo/export/Magazine_939_10_Empty/Magazine_939_10_Empty_Game.blend'),
@@ -92,8 +92,9 @@ def rifle_atlas(root,folder):
 
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument('--id',required=True,choices=ITEMS)
+    parser.add_argument('--native',type=Path,help='Именованная новая версия исходника')
     args=parser.parse_args(sys.argv[sys.argv.index('--')+1:]); folder=RAW/args.id; folder.mkdir(parents=True,exist_ok=True)
-    native_path,game_path=ITEMS[args.id]; native=ROOT/'_asset_src'/native_path
+    native_path,game_path=ITEMS[args.id]; native=args.native.resolve() if args.native else ROOT/'_asset_src'/native_path
     bpy.ops.wm.open_mainfile(filepath=str(native)); bpy.context.view_layer.update()
     tree,surfaces,info=source_lookup(bpy.data.objects[args.id])
     if game_path:

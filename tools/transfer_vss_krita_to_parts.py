@@ -4,6 +4,7 @@ import json,sys
 import bpy
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
+from mathutils.kdtree import KDTree
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import build_vss_blender as B
 import export_vss_optic as E
@@ -14,7 +15,19 @@ def build_lookup(obj):
     mesh=obj.data;mesh.calc_loop_triangles();vertices=[obj.matrix_world @ v.co for v in mesh.vertices]
     faces=[t.vertices[:] for t in mesh.loop_triangles];uv=mesh.uv_layers.active.data
     data=[([vertices[i] for i in t.vertices],[Vector(uv[i].uv) for i in t.loops]) for t in mesh.loop_triangles]
-    return BVHTree.FromPolygons(vertices,faces,all_triangles=True),data
+    kd=KDTree(len(vertices))
+    for i,point in enumerate(vertices):kd.insert(point,i)
+    kd.balance()
+    return vertices,faces,data,kd
+
+def part_lookup(lookup,positions):
+    # Совпадающие поверхности слота и шляпки нельзя смешивать поиском по всему атласу.
+    # Ограничиваем перенос вершинами именно исходной детали, с допуском float32.
+    vertices,faces,data,kd=lookup
+    matching={index for point in positions for _,index,_ in kd.find_range(point,1e-7)}
+    selected=[i for i,face in enumerate(faces) if all(index in matching for index in face)]
+    if not selected:raise RuntimeError('No corresponding source part')
+    return BVHTree.FromPolygons(vertices,[faces[i] for i in selected],all_triangles=True),[data[i] for i in selected]
 
 def projected_uv(point,points,uvs):
     a,b,c=points;v0,v1,v2=b-a,c-a,point-a
@@ -27,7 +40,8 @@ def main():
     candidate=FOLDER/'VSS_Vintorez_Picatinny_Textured.blend'
     bpy.ops.wm.open_mainfile(filepath=str(candidate))
     lookups={name:build_lookup(bpy.data.objects[name]) for name in ('Metal_Polymer','Wood')}
-    bpy.ops.wm.open_mainfile(filepath=str(ROOT/'_asset_src/vss_picatinny/VSS_Vintorez_Picatinny_v2.blend'))
+    meta=json.loads((FOLDER/'prepare.json').read_text())
+    bpy.ops.wm.open_mainfile(filepath=meta['native'])
     with bpy.data.libraries.load(str(candidate),link=False) as (source,target):
         target.materials=['VSS_Krita_Metal_Polymer','VSS_Krita_Wood']
     mats={name:mat for name,mat in zip(('Metal_Polymer','Wood'),target.materials)}
@@ -35,8 +49,9 @@ def main():
     deps=bpy.context.evaluated_depsgraph_get();max_distance=0.; uv_outside=0;worst=[]
     for obj in parts:
         atlas='Wood' if any(m and 'walnut' in m.name for m in obj.data.materials) else 'Metal_Polymer'
-        tree,data=lookups[atlas];mesh=bpy.data.meshes.new_from_object(obj.evaluated_get(deps),preserve_all_data_layers=True,depsgraph=deps)
+        mesh=bpy.data.meshes.new_from_object(obj.evaluated_get(deps),preserve_all_data_layers=True,depsgraph=deps)
         positions=[E.MAP @ obj.matrix_world @ v.co for v in mesh.vertices]
+        tree,data=part_lookup(lookups[atlas],positions)
         if obj.type!='MESH':
             old=obj;obj=bpy.data.objects.new(old.name+'_Textured',mesh)
             for collection in old.users_collection:collection.objects.link(obj)
@@ -62,7 +77,11 @@ def main():
     bpy.context.view_layer.update();B.COLLECTIONS.update({c.name:c for c in bpy.data.collections})
     bpy.context.scene['texture_source']='Krita 5.3.4; native part tree retained'
     B.save_scene(FOLDER/'VSS_Vintorez_Picatinny_Textured_Editable.blend')
-    B.render_views(FOLDER,'editable',[('beauty','Camera_Beauty_Right',1800,800),('receiver','Camera_Receiver_Detail',1300,850)])
+    views=[('beauty','Camera_Beauty_Right',1800,800),('receiver','Camera_Receiver_Detail',1300,850)]
+    if bpy.data.objects.get('Camera_Shoulder_Fit'):
+        views.extend([('shoulder_profile','Camera_Shoulder_Profile',1150,1000),
+            ('shoulder_rear','Camera_Shoulder_Rear',1150,1000),('shoulder_fit','Camera_Shoulder_Fit',1300,1000)])
+    B.render_views(FOLDER,'editable',views)
     (FOLDER/'parts-transfer.json').write_text(json.dumps({'status':'PASS','parts':len(parts),'max_surface_distance_m':max_distance,'UV_outside':uv_outside,
         'worst_projections':sorted(worst,key=lambda x:x['distance_mm'],reverse=True)[:8],
         'preserved':'original parent tree/transforms; evaluated geometry; modifiers evaluated in texture copy; original retained'},indent=2),encoding='utf-8')

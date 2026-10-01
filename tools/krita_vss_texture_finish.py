@@ -56,13 +56,21 @@ def finish(folder,app):
 
 def main(args=None):
     root=Path(args[0]) if args else Path('E:/Games/RING-godot/_asset_src/vss_textured')
+    identifier=args[1] if args and len(args)>1 else None
     marker=root/'krita-progress.json'
     marker.write_text(json.dumps({'phase':'started'}),encoding='utf-8')
     try:
-        app=Krita.instance();reports=[]
+        app=Krita.instance();reports=[];processed=0
         for manifest in sorted(root.glob('*/**/layers.json')):
+            if identifier and manifest.relative_to(root).parts[0]!=identifier:
+                cached=json.loads((manifest.parent/'krita-report.json').read_text(encoding='utf8'))
+                if cached['status']!='PASS':raise RuntimeError('Other atlas not verified')
+                reports.append(cached)
+                continue
             marker.write_text(json.dumps({'phase':'processing','file':str(manifest)}),encoding='utf-8')
             reports.append(finish(manifest.parent,app))
+            processed+=1
+        if not processed:raise RuntimeError('No atlas matches requested asset')
         marker.write_text(json.dumps({'status':'PASS','reports':reports},ensure_ascii=False,indent=2),encoding='utf-8')
     except Exception:
         marker.write_text(json.dumps({'status':'FAIL','traceback':traceback.format_exc()},ensure_ascii=False,indent=2),encoding='utf-8')
