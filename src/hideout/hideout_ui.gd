@@ -178,6 +178,7 @@ func _process(delta: float) -> void:
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
 	sig += "|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab]
+	sig += "|" + str(Profile.loadout_templates)
 	# собрание: кто в сети и где — окно выхода обновляется
 	sig += "|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene)]
 	if sig == _sig:
@@ -291,6 +292,7 @@ func _build_stash() -> void:
 		sv.context.connect(func(at: Vector2) -> void: _parts_menu("equip:" + s, -1, Profile.equipment.get(s, {}), at))
 		gear.add_child(sv)
 	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
+	_templates_block(gear, true)
 	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)
 	_backpack_heading = bp_col.get_parent().get_parent().get_child(0) as Label
 	bp_col.add_child(_sort_button("backpack"))
@@ -336,6 +338,74 @@ func _build_stash() -> void:
 				_start_op("load", name, di, String(from[si].id), src.role)
 			elif not Profile.fit_part(name, di, src.role, si):
 				toast("Не встаёт"))
+
+
+## Шаблоны снаряжения: собрать (план — что из тайника, что купить и за сколько), удалить; в тайнике —
+## ещё «сохранить надетое и рюкзак как шаблон».
+func _templates_block(parent: Control, can_save: bool) -> void:
+	parent.add_child(_text("Шаблоны снаряжения", Color(0.95, 0.82, 0.6)))
+	for i in range(LoadoutTemplates.all().size()):
+		var t: Dictionary = LoadoutTemplates.all()[i]
+		var idx := i
+		var p := LoadoutTemplates.plan(t)
+		var row := HFlowContainer.new()
+		row.add_theme_constant_override("h_separation", 6)
+		var cost := int(p.cost)
+		var label := String(t.name) + ("   ·   всё есть" if cost == 0 and int(p.missing) == 0 else "")
+		row.add_child(_text(label, Color(0.9, 0.9, 0.86)))
+		var go := _button("Собрать" + ("  (%s ₽)" % InventoryUI.money(cost) if cost > 0 else ""), func() -> void: _confirm_template(t))
+		go.disabled = cost > Profile.money
+		row.add_child(go)
+		if can_save:
+			row.add_child(_button("Удалить", func() -> void: LoadoutTemplates.remove(idx)))
+		parent.add_child(row)
+		if int(p.missing) > 0:
+			parent.add_child(_text("   не собрать полностью: %d поз. (нет у Михалыча, доверие, верстак)" % int(p.missing), Color(0.85, 0.55, 0.45)))
+	if can_save:
+		var save_row := HBoxContainer.new()
+		save_row.add_theme_constant_override("separation", 6)
+		var name_edit := LineEdit.new()
+		name_edit.placeholder_text = "Имя шаблона"
+		name_edit.custom_minimum_size.x = 150
+		save_row.add_child(name_edit)
+		save_row.add_child(_button("Сохранить надетое и рюкзак", func() -> void:
+			var t := LoadoutTemplates.capture(name_edit.text)
+			toast("Шаблон «%s» сохранён" % String(t.name))))
+		parent.add_child(save_row)
+
+
+## План шаблона — окно: по строкам что откуда, итог; «Собрать» — выполнить.
+func _confirm_template(t: Dictionary) -> void:
+	var p := LoadoutTemplates.plan(t)
+	var lines: Array[String] = []
+	for r in p.rows:
+		var how := String(r.how)
+		var tail := ""
+		match how:
+			"есть":
+				tail = "уже надето"
+			"тайник":
+				tail = "из тайника"
+			"купить":
+				tail = "купить — %s ₽" % InventoryUI.money(int(r.price))
+			"нет":
+				tail = "нет: " + String(r.why)
+		lines.append("%s — %s" % [String(r.what), tail])
+	lines.append("")
+	lines.append("Докупить на %s ₽ (у тебя %s ₽)" % [InventoryUI.money(int(p.cost)), InventoryUI.money(Profile.money)])
+	var d := ConfirmationDialog.new()
+	d.title = "Собрать: " + String(t.name)
+	d.dialog_text = "\n".join(lines)
+	d.ok_button_text = "Собрать"
+	d.cancel_button_text = "Отмена"
+	d.confirmed.connect(func() -> void:
+		var fails := LoadoutTemplates.apply(t)
+		toast("Собрано" if fails.is_empty() else "Собрано не всё: " + ", ".join(fails)))
+	d.visibility_changed.connect(func() -> void:
+		if not d.visible:
+			d.queue_free())
+	_root.add_child(d)
+	d.popup_centered()
 
 
 ## «Сортировать» над сеткой: крупное в начало, стопки добраны — место освобождается.
@@ -595,6 +665,9 @@ func _trader_buy() -> void:
 			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
 		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55)))
 		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
+	# свои шаблоны — собрать комплект одной кнопкой (докупить недостающее)
+	if not LoadoutTemplates.all().is_empty():
+		_templates_block(shop, false)
 	# каталоги: что открыто и когда следующий
 	var open_n := Profile.trust_level()
 	var cat_line := "Открыто каталогов: %d из %d — %s" % [open_n, TraderStock.catalogs().size(), TraderStock.catalog_name(open_n)]
