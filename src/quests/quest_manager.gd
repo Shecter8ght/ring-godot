@@ -23,6 +23,15 @@ extends Node
 ## Реплики: в диалогах [кто, текст], кто = "player" — герой (подпись «Я», свой цвет); в lines
 ## мест и say / say_start целей — строка (описание) или [кто, текст]. say — цель выполнена,
 ## say_start — цель стала текущей: герой говорит сам, без этого квест «немой».
+##
+## Группа (кооп на 1–3, docs/design/new_game_intro.md §11): одно состояние сюжета на группу — у
+## хоста; соло — группа из одного. Клиент ничего не засчитывает сам: просит хост (осмотр места,
+## разговор, поднять/положить раненого), хост проверяет (кто, где, текущая ли цель) и рассылает
+## снимок состояния всем (и подключившимся позже). Убийства, «предмет в рюкзаке» и эвакуацию хост
+## считает сам за любого участника. Сделанное в рейде засчитывается всем, если хоть один из группы
+## эвакуировался (_delivered); не вынес никто — попытка не в счёт. Награда за квест — один раз на
+## профиль (отметка rewarded). Группа идёт по кампании хоста: у гостя она хранится отдельно от
+## своей (Profile.guest_campaigns) и не смешивается с ней.
 
 signal changed
 ## Короткое сообщение на экране («Найдена улика», «Задание обновлено»).
@@ -34,8 +43,19 @@ const INDEX := "res://data/quests/index.json"
 
 var _defs: Dictionary = {}
 var _order: Array[String] = []
-## В рейде: копия состояния {quests, flags, rewards}; вне рейда пусто.
+## В рейде (хост и соло): копия состояния {quests, flags}; вне рейда пусто.
 var _live: Dictionary = {}
+## Рейд: кто-то из группы эвакуировался — сделанное засчитано всем (хост).
+var _delivered: bool = false
+## Раненые NPC мест (хост решает, все знают): site -> peer, кто несёт (0 — никто); где положили:
+## site -> [x, y, z].
+var _carry: Dictionary = {}
+var _npc_pos: Dictionary = {}
+## Клиент: последний снимок от хоста {campaign, quests, flags, raid, delivered, carry, npc_pos,
+## trust_level}; не в сети — пусто.
+var _remote: Dictionary = {}
+## Мир уровня (места, раненые) — регистрируется сам; хост сверяет по нему, рядом ли просящий.
+var world: QuestWorld
 ## Интерфейс: цель, сообщения, разговоры, журнал, консоль разработчика.
 var hud: QuestHud
 
@@ -45,6 +65,10 @@ func _ready() -> void:
 	hud = QuestHud.new()
 	hud.name = "QuestHud"
 	add_child(hud)
+	# кто-то пришёл / ушёл в другую сцену — хост рассылает снимок (и новенькому)
+	Net.scenes_changed.connect(func() -> void:
+		if _is_host_net():
+			_broadcast())
 
 
 func _load_defs() -> void:
@@ -72,17 +96,36 @@ func def(qid: String) -> Dictionary:
 
 
 func in_raid() -> bool:
+	if is_client():
+		return bool(_remote.get("raid", false))
 	return not _live.is_empty()
 
 
+## Клиент в сети: состояние — снимок хоста, засчитывает хост.
+func is_client() -> bool:
+	return Net.is_networked() and not multiplayer.is_server()
+
+
+func _is_host_net() -> bool:
+	return Net.is_networked() and multiplayer.is_server()
+
+
 func _quests() -> Dictionary:
+	if is_client():
+		if not _remote.has("quests"):
+			_remote["quests"] = {}
+		return _remote.quests
 	Profile.ensure()
-	return _live.quests if in_raid() else Profile.quests
+	return _live.quests if not _live.is_empty() else Profile.quests
 
 
 func _flags() -> Dictionary:
+	if is_client():
+		if not _remote.has("flags"):
+			_remote["flags"] = {}
+		return _remote.flags
 	Profile.ensure()
-	return _live.flags if in_raid() else Profile.flags
+	return _live.flags if not _live.is_empty() else Profile.flags
 
 
 func flag(name: String) -> Variant:
@@ -103,7 +146,9 @@ func state(qid: String) -> String:
 
 func _requirements_met(qid: String) -> bool:
 	var req: Dictionary = def(qid).get("requires", {})
-	if Profile.trust_level() < int(req.get("trust_level", 1)):
+	# в группе — доверие хоста (группа идёт по его кампании)
+	var tl := int(_remote.get("trust_level", Profile.trust_level())) if is_client() else Profile.trust_level()
+	if tl < int(req.get("trust_level", 1)):
 		return false
 	var fl: Dictionary = req.get("flags", {})
 	for k in fl:
@@ -178,26 +223,40 @@ func dialogue(qid: String, did: String) -> Array:
 	return (def(qid).get("dialogues", {}) as Dictionary).get(did, [])
 
 
-## Разговор дочитан: доступный квест начинается, цель «поговорить» засчитывается.
+## Разговор дочитан: доступный квест начинается, цель «поговорить» засчитывается (клиент — просит хост).
 func finish_talk(qid: String, npc: String, did: String) -> void:
+	if is_client():
+		_rpc_talk.rpc_id(1, qid, npc, did)
+		return
 	if state(qid) == "AVAILABLE":
 		start(qid)
 	event("talk", {"npc": npc, "dialogue": did})
 
 
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_talk(qid: String, npc: String, did: String) -> void:
+	if multiplayer.is_server():
+		finish_talk(qid, npc, did)
+
+
 # ---------------------------------------------------------------- ход квеста
 
 func start(qid: String) -> bool:
-	if def(qid).is_empty() or state(qid) != "AVAILABLE":
+	if is_client() or def(qid).is_empty() or state(qid) != "AVAILABLE":
 		return false
 	_quests()[qid] = {"state": "ACTIVE", "stage": 0, "obj": 0, "clues": [], "count": 0}
-	notice.emit("Новое задание: " + String(def(qid).title))
+	_tell("Новое задание: " + String(def(qid).title))
 	_commit_if_home()
+	_broadcast()
+	changed.emit()
 	return true
 
 
-## Событие мира: засчитать совпавшие цели активных квестов. true — хоть одна засчитана.
+## Событие мира: засчитать совпавшие цели активных квестов. true — хоть одна засчитана. Считает
+## хост (соло — сам); клиент события не шлёт — просит через request_site / finish_talk / carry.
 func event(type: String, params: Dictionary = {}) -> bool:
+	if is_client():
+		return false
 	var any := false
 	for qid in _order:
 		if state(qid) != "ACTIVE":
@@ -212,8 +271,30 @@ func event(type: String, params: Dictionary = {}) -> bool:
 				break
 	if any:
 		_commit_if_home()
+		if _delivered:
+			_commit_host()
+		_broadcast()
 		changed.emit()
 	return any
+
+
+## Осмотр / обыск / зона места sid своим игроком: соло и хост — сразу, клиент — просит хост.
+func request_site(sid: String) -> void:
+	if is_client():
+		_rpc_site.rpc_id(1, sid)
+	else:
+		event("site", {"site": sid})
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_site(sid: String) -> void:
+	if not multiplayer.is_server():
+		return
+	# хост сверяет: место есть, просящий рядом с ним (текущая ли цель — проверит event)
+	var peer := multiplayer.get_remote_sender_id()
+	if world == null or not world.near_site(peer, sid):
+		return
+	event("site", {"site": sid})
 
 
 func _matches(qid: String, o: Dictionary, type: String, p: Dictionary) -> bool:
@@ -247,15 +328,15 @@ func _complete_objective(qid: String) -> void:
 		var cl: Array = s.get("clues", [])
 		cl.append(o.clue)
 		s["clues"] = cl
-		notice.emit("Найдена улика: " + String(o.clue.get("title", "")))
+		_tell("Найдена улика: " + String(o.clue.get("title", "")))
 	var fl: Dictionary = o.get("set_flags", {})
 	for k in fl:
 		_flags()[String(k)] = fl[k]
 	if o.has("toast"):
-		notice.emit(String(o.toast))
+		_tell(String(o.toast))
 	# что говорит / думает игрок, когда цель выполнена
 	if not (o.get("say", []) as Array).is_empty():
-		subtitles.emit(o.say)
+		_say(o.say)
 	s["count"] = 0
 	s["obj"] = int(s.get("obj", 0)) + 1
 	var objs: Array = stage(qid).get("objectives", [])
@@ -268,12 +349,12 @@ func _complete_objective(qid: String) -> void:
 	var nxt := objective(qid)
 	# и когда новая цель стала текущей
 	if not (nxt.get("say_start", []) as Array).is_empty():
-		subtitles.emit(nxt.say_start)
+		_say(nxt.say_start)
 	var t := String(nxt.get("type", ""))
 	if t in ["reach_extraction", "extract_with_item", "extract_with_npc", "survive"]:
-		notice.emit("Нужно эвакуироваться")
+		_tell("Нужно эвакуироваться")
 	else:
-		notice.emit("Задание обновлено")
+		_tell("Задание обновлено")
 
 
 func _complete_quest(qid: String) -> void:
@@ -283,12 +364,20 @@ func _complete_quest(qid: String) -> void:
 	var fl: Dictionary = d.get("flags_on_complete", {})
 	for k in fl:
 		_flags()[String(k)] = fl[k]
-	var reward: Dictionary = d.get("reward", {})
-	if in_raid():
-		(_live.rewards as Array).append(reward)
-	else:
-		_give_reward(reward)
-	notice.emit("Задание выполнено: " + String(d.title))
+	# награда — при фиксации (вне рейда — сразу; в рейде — когда группа что-то вынесла)
+	if _live.is_empty():
+		_reward_completed(Profile.quests)
+	_tell("Задание выполнено: " + String(d.title))
+
+
+## Выдать награды за выполненные квесты списка, ещё не выданные этому профилю (отметка rewarded
+## в записи квеста): повторная фиксация, переподключение и снимки награду не удваивают.
+func _reward_completed(qs: Dictionary) -> void:
+	for qid in qs:
+		var s: Dictionary = qs[qid]
+		if String(s.get("state", "")) == "COMPLETED" and not bool(s.get("rewarded", false)):
+			s["rewarded"] = true
+			_give_reward(def(String(qid)).get("reward", {}))
 
 
 func _give_reward(r: Dictionary) -> void:
@@ -302,40 +391,194 @@ func _give_reward(r: Dictionary) -> void:
 
 
 func _commit_if_home() -> void:
-	if not in_raid():
+	if _live.is_empty() and not is_client():
 		Profile.save()
 
 
 # ---------------------------------------------------------------- рейд
 
-## Начало рейда: дальше всё — в копии, до эвакуации.
+## Начало рейда (хост и соло): дальше всё — в копии, пока кто-то из группы не эвакуируется.
 func begin_raid() -> void:
+	if is_client():
+		changed.emit()
+		return
 	Profile.ensure()
-	_live = {"quests": Profile.quests.duplicate(true), "flags": Profile.flags.duplicate(true), "rewards": []}
+	_live = {"quests": Profile.quests.duplicate(true), "flags": Profile.flags.duplicate(true)}
+	_delivered = false
+	_carry = {}
+	_npc_pos = {}
+	_broadcast()
 	changed.emit()
 
 
-## Конец рейда. Эвакуировался — событие «эвакуация» и всё сделанное — в профиль; иначе забыто.
-func end_raid(extracted: bool, params: Dictionary = {}) -> void:
-	if not in_raid():
+## Хост: участник эвакуировался с тем, что вынес (items — id предметов, npcs — раненые). Событие
+## «эвакуация» — общей цели, и с этого момента сделанное в рейде засчитано всем.
+func on_extracted(params: Dictionary) -> void:
+	if is_client() or _live.is_empty():
 		return
-	if extracted:
-		event("extracted", params)
-		Profile.quests = _live.quests
-		Profile.flags = _live.flags
-		for r in _live.rewards:
-			_give_reward(r)
-		_live = {}
-		Profile.save()
+	event("extracted", params)
+	_delivered = true
+	_commit_host()
+	_broadcast()
+	changed.emit()
+
+
+## Конец рейда (хост — когда сам уходит из рейда; соло — так же). Кто-то вынес — всё в профиль,
+## не вынес никто — попытка не в счёт.
+func end_raid() -> void:
+	if is_client():
+		changed.emit()
+		return
+	if _live.is_empty():
+		return
+	if _delivered:
+		_commit_host()
 	else:
 		var lost := false
 		for qid in _order:
 			if JSON.stringify(_live.quests.get(qid, {})) != JSON.stringify(Profile.quests.get(qid, {})):
 				lost = true
-		_live = {}
 		if lost:
-			notice.emit("Не эвакуировался — найденное в этом рейде не засчитано")
+			_tell("Никто не эвакуировался — найденное в этом рейде не засчитано")
+	_live = {}
+	_delivered = false
+	_carry = {}
+	_npc_pos = {}
+	_broadcast()
 	changed.emit()
+
+
+## Хост / соло: копия рейда — в свой профиль, награды за выполненное.
+func _commit_host() -> void:
+	if _live.is_empty():
+		return
+	Profile.quests = _live.quests.duplicate(true)
+	Profile.flags = _live.flags.duplicate(true)
+	_reward_completed(Profile.quests)
+	# отметки наград — и в копию, чтобы следующая фиксация их не повторяла
+	_live.quests = Profile.quests.duplicate(true)
+	Profile.save()
+
+
+# ---------------------------------------------------------------- группа: снимок и сообщения
+
+func _snapshot() -> Dictionary:
+	return {"campaign": Profile.own_campaign(), "quests": _quests(), "flags": _flags(), "raid": not _live.is_empty(),
+		"delivered": _delivered, "carry": _carry, "npc_pos": _npc_pos, "trust_level": Profile.trust_level()}
+
+
+func _broadcast() -> void:
+	if _is_host_net():
+		_rpc_state.rpc(_snapshot())
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_state(snap: Dictionary) -> void:
+	_remote = snap.duplicate(true)
+	# вне рейда хоста или группа уже что-то вынесла — это засчитано: в свой профиль
+	if not bool(snap.get("raid", false)) or bool(snap.get("delivered", false)):
+		_commit_guest(snap)
+	changed.emit()
+
+
+## Гость: состояние кампании хоста — в своё сохранение (отдельно от своей кампании), награды —
+## себе, по одному разу.
+func _commit_guest(snap: Dictionary) -> void:
+	var cid := String(snap.get("campaign", ""))
+	if cid == "":
+		return
+	Profile.ensure()
+	var store: Dictionary = Profile.guest_campaigns.get(cid, {"quests": {}, "flags": {}, "rewarded": []})
+	var rewarded: Array = store.get("rewarded", [])
+	var qs: Dictionary = (snap.get("quests", {}) as Dictionary).duplicate(true)
+	var changed_any := JSON.stringify(qs) != JSON.stringify(store.get("quests", {}))
+	for qid in qs:
+		if String((qs[qid] as Dictionary).get("state", "")) == "COMPLETED" and not String(qid) in rewarded:
+			rewarded.append(String(qid))
+			_give_reward(def(String(qid)).get("reward", {}))
+			changed_any = true
+	if not changed_any:
+		return
+	Profile.guest_campaigns[cid] = {"quests": qs, "flags": (snap.get("flags", {}) as Dictionary).duplicate(true), "rewarded": rewarded}
+	Profile.save()
+
+
+## Сообщение («Задание обновлено», «Найдена улика») — себе и всей группе.
+func _tell(text: String) -> void:
+	notice.emit(text)
+	if _is_host_net():
+		_rpc_tell.rpc(text)
+
+
+func _say(lines: Array) -> void:
+	subtitles.emit(lines)
+	if _is_host_net():
+		_rpc_say.rpc(lines)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_tell(text: String) -> void:
+	notice.emit(text)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_say(lines: Array) -> void:
+	subtitles.emit(lines)
+
+
+# ---------------------------------------------------------------- раненые NPC (несут игроки)
+
+## Кто несёт раненого места sid (0 — никто).
+func carrier_of(sid: String) -> int:
+	var c: Dictionary = _remote.get("carry", {}) if is_client() else _carry
+	return int(c.get(sid, 0))
+
+
+## Где положили (Vector3.INF — на своём месте).
+func npc_pos(sid: String) -> Vector3:
+	var p: Dictionary = _remote.get("npc_pos", {}) if is_client() else _npc_pos
+	var a: Array = p.get(sid, [])
+	return Vector3(float(a[0]), float(a[1]), float(a[2])) if a.size() == 3 else Vector3.INF
+
+
+## Свой игрок поднимает (on) / кладёт раненого места sid; at — куда положил.
+func request_carry(sid: String, on: bool, at: Vector3 = Vector3.ZERO) -> void:
+	if is_client():
+		_rpc_carry.rpc_id(1, sid, on, at)
+	else:
+		_set_carry(multiplayer.get_unique_id() if Net.is_networked() else 1, sid, on, at)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_carry(sid: String, on: bool, at: Vector3) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer := multiplayer.get_remote_sender_id()
+	if on and (world == null or not world.near_site(peer, sid)):
+		return
+	_set_carry(peer, sid, on, at)
+
+
+## Хост: поднять — если никто не несёт; положить — только тот, кто несёт (peer -1 — хост за упавшего).
+func _set_carry(peer: int, sid: String, on: bool, at: Vector3) -> void:
+	var cur := int(_carry.get(sid, 0))
+	if on:
+		if cur != 0 and cur != peer:
+			return
+		_carry[sid] = peer
+	else:
+		if cur == 0 or (cur != peer and peer != -1):
+			return
+		_carry[sid] = 0
+		_npc_pos[sid] = [at.x, at.y, at.z]
+	_broadcast()
+	changed.emit()
+
+
+## Хост: несущий упал или ушёл — раненый остаётся там, где он был.
+func drop_carried(sid: String, at: Vector3) -> void:
+	if not is_client():
+		_set_carry(-1, sid, false, at)
 
 
 # ---------------------------------------------------------------- места в мире
@@ -395,10 +638,11 @@ func guards_for(level: String) -> Array:
 ## Команды разработчика меняют сразу профиль (и копию рейда, если идёт рейд) — не теряются.
 
 func _dev_sync() -> void:
-	if in_raid():
+	if not _live.is_empty():
 		Profile.quests = _live.quests.duplicate(true)
 		Profile.flags = _live.flags.duplicate(true)
 	Profile.save()
+	_broadcast()
 	changed.emit()
 
 

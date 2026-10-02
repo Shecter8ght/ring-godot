@@ -314,6 +314,7 @@ func _extract_carried(pl: Player, ext: ExtractionPoint) -> void:
 	loot_value = v
 	Audio.play("raid_leave", pl.global_position)
 	_clear_drag_of(pl.peer_id)
+	_quest_extracted(pl)
 
 
 ## Живой не успел к эвакуации группы: уходит из рейда без добычи — всё, что нёс, пропало
@@ -346,6 +347,9 @@ func _extract(pl: Player, ext: ExtractionPoint) -> void:
 	extracted = e
 	loot_value = v
 	Audio.play("raid_leave", pl.global_position)
+	_quest_extracted(pl)
+	if carried and carried.is_downed():
+		_quest_extracted(carried)
 	var d := drags.duplicate()
 	d.erase(pl.peer_id)
 	drags = d
@@ -1522,6 +1526,8 @@ func credit_kill(peer_id: int, arch: String = "", info: Dictionary = {}) -> void
 	# убил ИИ (ЧВК, жильцы, мародёры друг друга) — никому
 	if peer_id <= 0:
 		return
+	# сюжет общий: «убить N» — за любого участника, считает хост
+	Quests.event("kill", {"arch": arch})
 	if not Net.is_networked() or peer_id == multiplayer.get_unique_id():
 		_kill_credited(arch, info)
 	elif peer_id in multiplayer.get_peers():
@@ -1536,7 +1542,6 @@ func _rpc_kill_credit(arch: String, info: Dictionary) -> void:
 func _kill_credited(arch: String = "", info: Dictionary = {}) -> void:
 	kill_credited.emit()
 	analytics.on_kill(arch, info)
-	Quests.event("kill", {"arch": arch})
 	if Profile.pending_raid:
 		Missions.on_kill()
 	var me := local_player()
@@ -1907,14 +1912,15 @@ func _save_death(me: Player) -> void:
 	Missions.on_death()
 
 
-## Сюжет: эвакуировался (с тем, что вынес) или погиб — сообщить квестам один раз.
-func _quest_hooks(me: Player) -> void:
-	if quest_world == null or me == null:
-		return
-	if is_extracted(me.peer_id):
-		quest_world.on_local_extracted()
-	elif not me.is_alive() or stranded.has(me.peer_id):
-		quest_world.on_local_lost()
+## Сюжет (хост): участник эвакуировался — с тем, что вынес; сделанное группой засчитано всем.
+func _quest_extracted(pl: Player) -> void:
+	if quest_world:
+		Quests.on_extracted(quest_world.extraction_payload(pl.peer_id))
+
+
+## Сюжет считает хост (см. _quest_extracted); у себя ничего не нужно.
+func _quest_hooks(_me: Player) -> void:
+	pass
 
 
 ## Охрана сюжетного места: ставит хост (клиент просит).

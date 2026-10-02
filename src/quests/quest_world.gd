@@ -1,9 +1,14 @@
 class_name QuestWorld
 extends Node
 ## Сюжет в мире уровня (рейд или убежище): ставит места квестов (QuestSite) по состоянию Quests,
-## охрану этапа (просьба к хосту), ведёт раненого NPC, которого несёт игрок, и сообщает Quests
-## о конце рейда (эвакуация — с тем, что вынес: предметы и NPC; смерть / уход — без).
-## Создают Raid (рейд) и HideoutLevel (убежище). Места — личные: у каждого игрока свои.
+## охрану этапа (хост), раненых NPC, которых несут игроки. Создают Raid (рейд) и HideoutLevel
+## (убежище).
+##
+## Группа (кооп): места общие — у всех одни и те же (состояние сюжета одно, у хоста; см. Quests).
+## Свой игрок осматривает / обыскивает / входит в зону — просьба хосту (Quests.request_site); хост
+## сверяет здесь, рядом ли просящий (near_site). Раненого поднимает и кладёт любой — тоже через
+## хост (Quests.request_carry); несут его на плече у того, кто поднял, — видно всем. Убийства,
+## «предмет в рюкзаке» и эвакуацию считает хост за любого участника (extraction_payload).
 
 ## Уровень: имя файла сцены без расширения (f1_ring, hideout) — sites.level в данных.
 var level: String = ""
@@ -13,8 +18,8 @@ var _sites: Dictionary = {}
 ## Декорации мест с NPC (ящики, кровь) — отдельно: раненого уносят, сцена остаётся на месте.
 var _decor: Dictionary = {}
 var _guarded: Dictionary = {}
-var _carried: QuestSite = null
-var _ended: bool = false
+## Раненые на плече: site -> узел картинки (у всех peer).
+var _carry_vis: Dictionary = {}
 ## Корень уровня (сцена .tscn, в которой живём) — места ставятся в него.
 var _root: Node
 
@@ -24,6 +29,7 @@ func _ready() -> void:
 	while _root and _root.scene_file_path == "" and _root.get_parent() != get_tree().root:
 		_root = _root.get_parent()
 	level = _root.scene_file_path.get_file().get_basename() if _root else ""
+	Quests.world = self
 	if raid:
 		Quests.begin_raid()
 	Quests.changed.connect(_refresh)
@@ -34,11 +40,15 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	# ушёл из рейда не эвакуацией (меню, закрыл игру) — найденное не засчитано
-	if raid and not _ended:
-		_ended = true
-		Quests.end_raid(false)
-	_set_carrying(false)
+	if Quests.world == self:
+		Quests.world = null
+	# хост (соло) уходит из рейда — итог сюжета за рейд: вынес кто-то — засчитано, нет — нет
+	if raid:
+		Quests.end_raid()
+	var me := _me()
+	if me:
+		me.carrying = false
+	Quests.hud.carry_hint("")
 
 
 func _refresh() -> void:
@@ -56,18 +66,22 @@ func _refresh() -> void:
 			_sites[sid] = s
 		s.active = bool(w.active)
 	for sid in _sites.keys():
-		if not want.has(sid) and _sites[sid] != _carried:
+		if not want.has(sid) and Quests.carrier_of(String(sid)) == 0:
 			(_sites[sid] as Node).queue_free()
 			_sites.erase(sid)
 			if _decor.has(sid):
 				(_decor[sid] as Node).queue_free()
 				_decor.erase(sid)
-	# цель «вынести NPC» — его можно поднять
+	# раненый: несут ли его, где положили; цель «вынести NPC» — его можно поднять
 	for sid in _sites:
 		var s: QuestSite = _sites[sid]
+		s.carried = Quests.carrier_of(String(sid)) != 0
+		var at := Quests.npc_pos(String(sid))
+		if not s.carried and at != Vector3.INF:
+			s.global_position = at
 		var o := Quests.objective(s.quest_id)
 		s.can_carry = String(o.get("type", "")) == "extract_with_npc" and String(o.get("npc", "")) == s.npc_id() and not s.carried
-	if raid:
+	if raid and not Quests.is_client():
 		_spawn_guards()
 
 
@@ -149,7 +163,7 @@ func _floor_under(p: Vector3) -> Vector3:
 	return hit.position if not hit.is_empty() else p
 
 
-## Охрана этапа (мародёры у места) — один раз за рейд; ставит хост (у клиента — просьба).
+## Охрана этапа (мародёры у места) — один раз за рейд; ставит хост.
 func _spawn_guards() -> void:
 	for g in Quests.guards_for(level):
 		var key := String(g.quest) + ":" + String(g.site)
@@ -162,35 +176,68 @@ func _spawn_guards() -> void:
 		Raid.current.request_quest_guards(s.global_position, int(g.n), float(g.radius))
 
 
+# ---------------------------------------------------------------- хост: проверки и эвакуация
+
+## Хост: игрок peer рядом с местом sid (осмотр, обыск, зона, поднять раненого).
+func near_site(peer: int, sid: String) -> bool:
+	var s: QuestSite = _sites.get(sid)
+	var pl := _player(peer)
+	if s == null or pl == null or not pl.is_alive():
+		return false
+	var reach := maxf(Balance.INTERACT_RADIUS, maxf(float(s.spec.get("radius", 2.0)), float(s.spec.get("zone", 0.0))))
+	return pl.global_position.distance_to(s.global_position) <= reach + 2.5
+
+
+## Хост: с чем эвакуировался игрок peer — предметы рюкзака и раненые (несёт или рядом, ≤ 5 м).
+func extraction_payload(peer: int) -> Dictionary:
+	var pl := _player(peer)
+	var items: Array = []
+	var npcs: Array = []
+	if pl:
+		for e in pl.inventory.items:
+			items.append(String(e.id))
+		for sid in _sites:
+			var s: QuestSite = _sites[sid]
+			if s.npc_id() == "":
+				continue
+			if Quests.carrier_of(String(sid)) == peer or (not s.carried and s.global_position.distance_to(pl.global_position) <= 5.0):
+				npcs.append(s.npc_id())
+	return {"items": items, "npcs": npcs, "peer": peer}
+
+
 # ---------------------------------------------------------------- раненого несут
 
 func pick_up(s: QuestSite) -> void:
-	_carried = s
-	s.carried = true
-	s.can_carry = false
-	_set_carrying(true)
+	Quests.request_carry(s.site_id, true)
 
 
 func put_down() -> void:
 	var me := _me()
-	if _carried == null or me == null:
+	var sid := _my_carried()
+	if sid == "" or me == null:
 		return
 	# кладём рядом, на пол (сидит, привалившись)
-	_carried.global_position = _floor_under(me.global_position + Vector3(sin(me.body_yaw()), 0, cos(me.body_yaw())) * 0.9)
-	_carried.carried = false
-	_carried = null
-	_set_carrying(false)
-	_refresh()
+	var at := _floor_under(me.global_position + Vector3(sin(me.body_yaw()), 0, cos(me.body_yaw())) * 0.9)
+	Quests.request_carry(sid, false, at)
 
 
+## Место раненого, которого несёт свой игрок ("" — никого).
+func _my_carried() -> String:
+	var mine := _my_id()
+	for sid in _sites:
+		if Quests.carrier_of(String(sid)) == mine:
+			return String(sid)
+	return ""
+
+
+## Совместимость: место, которое несёт свой игрок (null — никого).
 func carrying() -> QuestSite:
-	return _carried
+	var sid := _my_carried()
+	return _sites.get(sid) if sid != "" else null
 
 
-func _set_carrying(on: bool) -> void:
-	var me := _me()
-	if me:
-		me.carrying = on
+func _my_id() -> int:
+	return multiplayer.get_unique_id() if Net.is_networked() else 1
 
 
 func _me() -> Player:
@@ -199,63 +246,66 @@ func _me() -> Player:
 	return get_tree().get_first_node_in_group("players") as Player
 
 
-var _carry_vis: Node3D
+func _player(peer: int) -> Player:
+	if not Net.is_networked():
+		peer = 1
+	for n in get_tree().get_nodes_in_group("all_players"):
+		var p := n as Player
+		if p and p.peer_id == peer and p.is_inside_tree():
+			return p
+	return null
 
 
 func _process(_delta: float) -> void:
 	var me := _me()
-	if _carried and me:
-		if not me.is_alive() or me.is_downed():
-			# упал — раненого уронил рядом
-			put_down()
-		elif Input.is_action_just_pressed("drag") and not PauseMenu.shown and not me.is_downed():
-			put_down()
-		else:
-			_carried.global_position = me.global_position
-	# на плече — видно в изометрии; от первого лица не мешает обзору
-	if _carried and me:
-		if _carry_vis == null:
-			_carry_vis = Node3D.new()
-			QuestProps.build_person(_carry_vis, "carried", Color(0.28, 0.3, 0.24))
-			_root.add_child(_carry_vis)
-		_carry_vis.visible = not me.ads
-		_carry_vis.global_transform = Transform3D(Basis(Vector3.UP, me.body_yaw() + PI * 0.5), me.global_position + Vector3.UP * 1.45)
-		Quests.hud.carry_hint("Несёшь раненого — X: положить")
-	elif _carry_vis:
-		_carry_vis.queue_free()
-		_carry_vis = null
-		Quests.hud.carry_hint("")
-	# «предмет в рюкзаке» — если такая цель есть
-	if raid and me and me.inventory:
+	var mine := _my_carried()
+	if me:
+		me.carrying = mine != ""
+		if mine != "":
+			if not me.is_alive() or me.is_downed():
+				# упал — раненого уронил рядом
+				put_down()
+			elif Input.is_action_just_pressed("drag") and not PauseMenu.shown:
+				put_down()
+	# раненые на плече — у того, кто несёт (видно всем); от первого лица свой не мешает обзору
+	for sid in _sites.keys():
+		var carrier := Quests.carrier_of(String(sid))
+		var pl := _player(carrier) if carrier != 0 else null
+		if pl == null:
+			if _carry_vis.has(sid):
+				(_carry_vis[sid] as Node).queue_free()
+				_carry_vis.erase(sid)
+			continue
+		var s: QuestSite = _sites[sid]
+		s.global_position = pl.global_position
+		if not _carry_vis.has(sid):
+			var vis := Node3D.new()
+			QuestProps.build_person(vis, "carried", Color(0.28, 0.3, 0.24))
+			_root.add_child(vis)
+			_carry_vis[sid] = vis
+		var v := _carry_vis[sid] as Node3D
+		v.visible = not (pl == me and me.ads)
+		v.global_transform = Transform3D(Basis(Vector3.UP, pl.body_yaw() + PI * 0.5), pl.global_position + Vector3.UP * 1.45)
+	Quests.hud.carry_hint("Несёшь раненого — X: положить" if mine != "" else "")
+	if Quests.is_client():
+		return
+	# хост: несущий упал, погиб или ушёл — раненый остаётся там, где он был
+	for sid in _sites.keys():
+		var carrier := Quests.carrier_of(String(sid))
+		if carrier == 0 or carrier == _my_id():
+			continue
+		var pl := _player(carrier)
+		if pl == null or not pl.is_alive() or pl.is_downed() or not pl.is_in_group("players"):
+			var at := (_sites[sid] as Node3D).global_position
+			Quests.drop_carried(String(sid), _floor_under(at))
+	# хост: «предмет в рюкзаке» — у любого участника
+	if raid:
 		for qid in Quests.ids():
 			var o := Quests.objective(qid)
-			if Quests.state(qid) == "ACTIVE" and String(o.get("type", "")) == "pickup_item" and me.inventory.has(String(o.item)):
-				Quests.event("have_item", {"item": String(o.item)})
-
-
-# ---------------------------------------------------------------- конец рейда (свой игрок)
-
-## Эвакуировался: что вынес — предметы из рюкзака и NPC (несёт или рядом, ≤ 5 м).
-func on_local_extracted() -> void:
-	if _ended:
-		return
-	_ended = true
-	var me := _me()
-	var items: Array = []
-	var npcs: Array = []
-	if me:
-		for e in me.inventory.items:
-			items.append(String(e.id))
-		for sid in _sites:
-			var s: QuestSite = _sites[sid]
-			if s.npc_id() != "" and (s == _carried or s.global_position.distance_to(me.global_position) <= 5.0):
-				npcs.append(s.npc_id())
-	Quests.end_raid(true, {"items": items, "npcs": npcs})
-
-
-## Погиб: всё найденное в этом рейде — не в счёт (раненый NPC остался ждать).
-func on_local_lost() -> void:
-	if _ended:
-		return
-	_ended = true
-	Quests.end_raid(false)
+			if Quests.state(qid) != "ACTIVE" or String(o.get("type", "")) != "pickup_item":
+				continue
+			for n in get_tree().get_nodes_in_group("players"):
+				var p := n as Player
+				if p and p.inventory and p.inventory.has(String(o.item)):
+					Quests.event("have_item", {"item": String(o.item)})
+					break

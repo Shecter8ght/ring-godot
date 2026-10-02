@@ -42,6 +42,10 @@ static var quests: Dictionary = {}
 static var flags: Dictionary = {}
 ## Товары торговца, открытые сюжетом (без проверки доверия).
 static var unlocked_stock: Array = []
+## Сюжетная кампания этого сохранения (id): в группе все идут по кампании хоста. Чужие кампании,
+## в которых участвовал гостем, — отдельно (campaign id -> {quests, flags}): не смешиваются со своей.
+static var campaign_id: String = ""
+static var guest_campaigns: Dictionary = {}
 ## Хроника рейдов: последние рейды (новее первым) — для повторов и серий (RaidHistory); и фразы,
 ## что уже звучали, — чтобы не повторяться.
 static var raid_history: Array = []
@@ -49,6 +53,15 @@ static var story_recent: Array = []
 ## Условия следующего рейда (RaidConditions), выбранные у лестницы.
 static var next_conditions: Dictionary = {"time": "dusk", "weather": "clear", "power": "on"}
 static var _loaded: bool = false
+
+
+## Id своей сюжетной кампании (создаётся при первом обращении и сохраняется).
+static func own_campaign() -> String:
+	ensure()
+	if campaign_id == "":
+		campaign_id = "%08x%08x" % [randi(), Time.get_ticks_usec() & 0x7fffffff]
+		save()
+	return campaign_id
 
 
 static func ensure() -> void:
@@ -85,6 +98,8 @@ static func ensure() -> void:
 		quests = d.get("quests", {})
 		flags = d.get("flags", {})
 		unlocked_stock = d.get("unlocked_stock", [])
+		campaign_id = String(d.get("campaign_id", ""))
+		guest_campaigns = d.get("guest_campaigns", {})
 		raid_history = d.get("raid_history", [])
 		# хэши фраз: из JSON приходят дробными, а Array.has сравнивает по типу
 		story_recent = (d.get("story_recent", []) as Array).map(func(h: Variant) -> int: return int(h))
@@ -117,6 +132,8 @@ static func _starter() -> void:
 	quests = {}
 	flags = {}
 	unlocked_stock = []
+	campaign_id = ""
+	guest_campaigns = {}
 	raid_history = []
 	story_recent = []
 	for pair in Balance.START_STASH:
@@ -155,7 +172,7 @@ static func save() -> void:
 	f.store_string(JSON.stringify({"name": profile_name, "money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
 		"modules": modules, "missions_active": missions_active, "missions_done": missions_done,
-		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "next_conditions": next_conditions,
+		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "campaign_id": campaign_id, "guest_campaigns": guest_campaigns, "next_conditions": next_conditions,
 		"raid_history": raid_history, "story_recent": story_recent}, "  "))
 
 

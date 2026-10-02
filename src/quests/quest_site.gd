@@ -1,9 +1,9 @@
 class_name QuestSite
 extends Interactable
 ## Место сюжетного квеста в мире (data/quests → sites): сцена-заглушка (QuestProps) и то, что
-## с ней делает игрок. Ставит QuestWorld — у каждого игрока свои места (по его квестам), без сети:
-## осмотр — сразу у себя, без просьбы к хосту. Осмотреть можно, только если место — текущая цель
-## (active); иначе это просто декорация этапа.
+## с ней делает игрок. Ставит QuestWorld — у всей группы места одни и те же (сюжет общий, у хоста).
+## Осмотреть можно, только если место — текущая цель (active); иначе это декорация этапа. Осмотр,
+## обыск, зона — у себя (реплики видит тот, кто осматривает), засчитывает хост (Quests.request_site).
 ##   prompt + lines  — F: осмотреть (lines — реплики на экране)
 ##   search_s        — обыск: держаться рядом столько секунд
 ##   zone            — войти в радиус — цель засчитана (место встречи, ворота)
@@ -56,7 +56,7 @@ func prompt() -> String:
 	return String(spec.prompt) + (" (%.0f с)" % s if s > 0.0 else "")
 
 
-## Только у себя: квест — личный.
+## F своим игроком: поднять раненого / начать обыск / осмотреть — засчитывает хост.
 func request_use() -> void:
 	if can_carry and world:
 		world.pick_up(self)
@@ -74,7 +74,7 @@ func _done() -> void:
 		Quests.subtitles.emit(lines)
 	if active:
 		active = false
-		Quests.event("site", {"site": site_id})
+		Quests.request_site(site_id)
 
 
 func _process(delta: float) -> void:

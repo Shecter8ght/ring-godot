@@ -35,7 +35,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_check("улика найдена — надо эвакуироваться", Quests.status(Q) == "WAITING_FOR_EXTRACTION" and int(Profile.quests[Q].obj) == 1, "%s, в профиле цель %d" % [Quests.status(Q), int(Profile.quests[Q].obj)])
 	# погиб — не засчитано
-	_raid_node().quest_world.on_local_lost()
+	# погиб и никто из группы не вынес — рейд кончился без зачёта
+	Quests.end_raid()
 	_check("погиб — улика не засчитана, повторить", String(Quests.objective(Q).id) == "backpack" and not Quests.in_raid(), _obj())
 	await _raid()
 	_check("новый рейд — рюкзак снова на месте", _site("anton_backpack") != null, _sites())
@@ -106,7 +107,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_check("несёт Антона — медленно, только пистолет", me.carrying and me.allowed_weapons().size() <= 1 and me._stance_speed() <= Balance.CARRY_SPEED + 0.01, "")
 	# погиб с Антоном — финал заново
-	_raid_node().quest_world.on_local_lost()
+	# погиб и никто из группы не вынес — рейд кончился без зачёта
+	Quests.end_raid()
 	_check("погиб по дороге — Антон не спасён, этап заново", String(Quests.objective(Q).id) == "gate" and Quests.flag("anton_rescued") == null, _obj())
 	await _raid()
 	me = _raid_node().local_player()
@@ -167,9 +169,20 @@ func _ready() -> void:
 	Quests.event("kill", {"arch": "heavy"})
 	Quests.event("kill", {"arch": "heavy"})
 	Quests.event("have_item", {"item": "gold_chain"})
+	var money_h := Profile.money
 	Quests.begin_raid()
-	Quests.end_raid(true, {"items": ["gold_chain"], "npcs": []})
+	Quests.on_extracted({"items": ["gold_chain"], "npcs": []})
+	Quests.end_raid()
 	_check("второй квест из данных: убить, найти, вынести", Quests.state("test_hunt") == "COMPLETED", Quests.dev_describe())
+	# награда — один раз: повторная фиксация и повторный снимок гостю её не удваивают
+	Quests._reward_completed(Profile.quests)
+	_check("награда хосту — один раз", Profile.money == money_h + 1, "%d" % (Profile.money - money_h))
+	var snap := {"campaign": "test_other", "quests": {"test_hunt": {"state": "COMPLETED"}}, "flags": {}, "raid": false}
+	var m1 := Profile.money
+	Quests._commit_guest(snap)
+	Quests._commit_guest(snap)
+	_check("награда гостю за чужую кампанию — один раз, кампания отдельно", Profile.money == m1 + 1 and Profile.guest_campaigns.has("test_other"), "%d" % (Profile.money - m1))
+	Profile.guest_campaigns.erase("test_other")
 	Quests._defs.erase("test_hunt")
 	Quests._order.erase("test_hunt")
 	print("quest_test: провалено %d" % _fails)
