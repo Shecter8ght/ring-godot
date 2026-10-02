@@ -224,13 +224,19 @@ static func raid_kit_gaps() -> Array[String]:
 	return out
 
 
-## Уровень доверия Михалыча (1–4) по очкам (Balance.TRUST_LEVELS).
+## Ступень доверия Михалыча: очки + 1, до Balance.TRUST_STEPS.max.
+static func trust_step() -> int:
+	return clampi(trust + 1, 1, int(Balance.TRUST_STEPS.max))
+
+
+## Уровень доверия = сколько каталогов открыто (1–5): каталог n — со ступени TraderStock.step_of(n).
+## Им же проверяются задания, модули убежища и сюжет.
 static func trust_level() -> int:
-	var lv := 0
-	for t in Balance.TRUST_LEVELS:
-		if trust >= int(t):
-			lv += 1
-	return maxi(lv, 1)
+	var lv := 1
+	for c in TraderStock.catalogs():
+		if trust_step() >= int(c.step):
+			lv = maxi(lv, int(c.n))
+	return lv
 
 
 ## Сетка тайника — растёт с модулем «тайник».
@@ -558,9 +564,16 @@ static func _migrate() -> void:
 
 # ---------------------------------------------------------------- торговец
 
+## Цена у Михалыча: стоимость × наценка каталога (Balance.TRADER_CATALOG_MULT); расходникам —
+## доля наценки, обвесу — ещё сверху.
 static func buy_price(id: String) -> int:
-	var mult := Balance.TRADER_BUY_MULT
-	if String(ItemDb.item(id).get("cat", "")) == "mod":
+	var table: Array = Balance.TRADER_CATALOG_MULT
+	var n := clampi(TraderStock.catalog_of(id), 1, table.size())
+	var mult := float(table[n - 1])
+	var cat := String(ItemDb.item(id).get("cat", ""))
+	if cat in ["ammo", "mag", "med", "food", "throw"]:
+		mult = 1.0 + (mult - 1.0) * Balance.TRADER_CONSUMABLE_K
+	elif cat == "mod":
 		mult *= Balance.TRADER_MOD_BUY_MULT
 	return int(ceil(float(ItemDb.value(id)) * mult))
 

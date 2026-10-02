@@ -12,7 +12,7 @@ func _ready() -> void:
 	Profile.stash_to_backpack(_idx("ammo_545_std"), 90)
 	Profile.stash_to_backpack(_idx("bandage"), 4)
 	Profile.money = 400000
-	Profile.trust = 3
+	Profile.trust = 9  # ступень 10 — второй каталог, верстак 2, маршрут на 2F
 	# верстак 2 — ставятся и прицелы, и фонари сбоку
 	for pair in [["battery", 2], ["wires", 5], ["toolset", 1], ["cigarettes", 5], ["lighter", 2]]:
 		ItemDb.add_to(Profile.stash, ItemDb.make(String(pair[0]), int(pair[1])), Profile.stash_grid())

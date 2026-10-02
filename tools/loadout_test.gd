@@ -42,7 +42,7 @@ func _ready() -> void:
 	Profile.sell(_idx("painkillers"), 2)
 	_check("продажа торговцу", Profile.money > m1 and _idx("painkillers") < 0, "%d ₽" % Profile.money)
 	# верстак: обвесы на автомат (обвесы у Михалыча дорогие)
-	_check("обвесы дороже обычной наценки", Profile.buy_price("mod_grip") > int(ItemDb.value("mod_grip") * Balance.TRADER_BUY_MULT),
+	_check("обвесы дороже обычной наценки", Profile.buy_price("mod_grip") > int(ItemDb.value("mod_grip") * float(Balance.TRADER_CATALOG_MULT[TraderStock.catalog_of("mod_grip") - 1])),
 		"рукоятка %d ₽" % Profile.buy_price("mod_grip"))
 	Profile.money += 150000
 	var st0 := WeaponStats.compute(Profile.equipment.primary)
@@ -67,7 +67,7 @@ func _ready() -> void:
 	_check("генератор без деталей не строится", Upgrades.block("generator") != "", Upgrades.block("generator"))
 	for pair in [["battery", 2], ["wires", 5], ["toolset", 1], ["cigarettes", 5], ["lighter", 2]]:
 		ItemDb.add_to(Profile.stash, ItemDb.make(String(pair[0]), int(pair[1])), Profile.stash_grid())
-	Profile.trust = 3
+	Profile.trust = 9  # ступень 10 — второй каталог, верстак 2, маршрут на 2F
 	var built := Upgrades.build("generator") and Upgrades.build("workbench") and Upgrades.build("pocket")
 	_check("модули построены: генератор, верстак 2, карман 2×2 — детали ушли", built and Upgrades.level("workbench") == 2 and Profile.pocket_grid() == Vector2i(2, 2)
 		and Profile.stash_count("battery") == 0 and Profile.mod_block("mod_rmr", "optic_primary") == "", str(Profile.modules))
@@ -162,7 +162,7 @@ func _ready() -> void:
 	_check("карман: вернулся после рейда", Profile.pocket.size() == 1 and String(Profile.pocket[0].id) == "bandage", str(Profile.pocket))
 	_check("эвакуация добавила доверия Михалыча", Profile.extractions == 1 and Profile.trust >= Balance.TRUST_PER_EXTRACTION, "доверие %d, выходов %d" % [Profile.trust, Profile.extractions])
 	# доверие набрано — маршрут на 2F открывается за деньги, но этаж ещё не собран
-	Profile.trust = 3
+	Profile.trust = 9  # ступень 10 — второй каталог, верстак 2, маршрут на 2F
 	Profile.money += 50000
 	var m2 := Profile.money
 	_check("маршрут на 2F открыт за доверие и деньги", Floors.unlock("f2") and Floors.is_open("f2") and Profile.money == m2 - int(Floors.find("f2").price),

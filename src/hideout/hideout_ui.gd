@@ -528,7 +528,7 @@ func _split(name: String, idx: int) -> void:
 # ---------------------------------------------------------------- торговец
 
 func _build_trader() -> void:
-	_title.text = "%s   ·   у тебя %s ₽   ·   доверие %d (уровень %d)%s" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust, Profile.trust_level(),
+	_title.text = "%s   ·   у тебя %s ₽   ·   доверие: ступень %d / %d%s" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust_step(), int(Balance.TRUST_STEPS.max),
 		"   ·   АДМИН: всё оружие" if Settings.all_weapons else ""]
 	# вкладки слева: купить, обвес оружия, продать, задания (разговор — отметка)
 	var tabs := VBoxContainer.new()
@@ -595,6 +595,12 @@ func _trader_buy() -> void:
 			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
 		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55)))
 		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
+	# каталоги: что открыто и когда следующий
+	var open_n := Profile.trust_level()
+	var cat_line := "Открыто каталогов: %d из %d — %s" % [open_n, TraderStock.catalogs().size(), TraderStock.catalog_name(open_n)]
+	if open_n < TraderStock.catalogs().size():
+		cat_line += "   ·   следующий «%s» — со ступени %d" % [TraderStock.catalog_name(open_n + 1), TraderStock.step_of(open_n + 1)]
+	shop.add_child(_text(cat_line, Color(0.95, 0.82, 0.6)))
 	# разделы: всё, оружие, патроны, магазины, обвес… — только те, где что-то есть
 	var stock := _trader_stock()
 	var cats := HFlowContainer.new()
@@ -613,7 +619,6 @@ func _trader_buy() -> void:
 		tb.button_pressed = _cat_tab == key
 		cats.add_child(tb)
 	shop.add_child(cats)
-	var need_trust: Dictionary = _trader.get("trust", {})
 	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение",
 		"med": "Медицина", "food": "Медицина", "throw": "Гранаты и свет"}
 	var last_head := ""
@@ -639,10 +644,10 @@ func _trader_buy() -> void:
 		var price := Profile.buy_price(sid) * n
 		# сколько выбрано — счётчиком между «−» и «+», цена — за всё выбранное
 		var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(price), ItemCard.W, true)
-		var tl := int(need_trust.get(sid, 1))
+		var tl := maxi(TraderStock.catalog_of(sid), 1)
 		if _trust_blocked(sid, tl):
-			# сильное Михалыч продаёт только тем, кому доверяет
-			card.controls.add_child(_text("доверие %d" % tl, Color(0.8, 0.5, 0.4)))
+			# сильное Михалыч продаёт только тем, кому доверяет: каталог — со своей ступени
+			card.controls.add_child(_text("ступень %d" % TraderStock.step_of(tl), Color(0.8, 0.5, 0.4)))
 			card.modulate = Color(1, 1, 1, 0.6)
 		else:
 			if stackable:
@@ -685,7 +690,7 @@ func _cat_of(id: String) -> String:
 
 ## Админ видит все зарегистрированные стволы; расходники и обвес остаются в обычном ассортименте.
 func _trader_stock() -> Array:
-	var stock: Array = (_trader.get("stock", []) as Array).duplicate()
+	var stock: Array = TraderStock.stock().duplicate()
 	if Settings.all_weapons:
 		for id in WeaponDb.ids("weapons"):
 			if not id in stock:
@@ -852,16 +857,15 @@ func _trader_candidates(mount: String) -> Array:
 		return out
 	var probe := weapon.duplicate(true)
 	(probe.mods as Dictionary).erase(mount)
-	var need_trust: Dictionary = _trader.get("trust", {})
-	for id in _trader.get("stock", []):
+	for id in TraderStock.stock():
 		var sid := String(id)
 		if WeaponDb.attachment(sid).is_empty() or not mount in WeaponDb.mounts_for(probe, sid):
 			continue
 		var price := Profile.buy_price(sid)
 		var why := WeaponDb.attach_block(probe, mount, sid)
-		var tl := int(need_trust.get(sid, 1))
+		var tl := maxi(TraderStock.catalog_of(sid), 1)
 		if _trust_blocked(sid, tl):
-			why = "доверие %d" % tl
+			why = "ступень доверия %d" % TraderStock.step_of(tl)
 		elif price > Profile.money and why == "":
 			why = "не хватает денег"
 		out.append({"id": sid, "sub": "%s ₽ · %s" % [InventoryUI.money(price), _fx_text(WeaponDb.attachment(sid))],
@@ -974,7 +978,7 @@ func _talk(qid: String, did: String) -> void:
 # ---------------------------------------------------------------- модули убежища
 
 func _build_upgrades() -> void:
-	_title.text = "Модули убежища   ·   %s ₽   ·   доверие Михалыча: уровень %d" % [InventoryUI.money(Profile.money), Profile.trust_level()]
+	_title.text = "Модули убежища   ·   %s ₽   ·   доверие Михалыча: ступень %d (каталог %d)" % [InventoryUI.money(Profile.money), Profile.trust_step(), Profile.trust_level()]
 	var col := _column("Что построено и что дальше", 1.0)
 	for m in Upgrades.all():
 		var id := String(m.id)
@@ -1055,7 +1059,7 @@ func _build_exit() -> void:
 	if block != "":
 		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
 	_coop_block(go)
-	go.add_child(_text("Доверие Михалыча: %d   ·   выходов из рейда: %d" % [Profile.trust, Profile.extractions], Color(0.7, 0.72, 0.7)))
+	go.add_child(_text("Доверие Михалыча: ступень %d   ·   выходов из рейда: %d" % [Profile.trust_step(), Profile.extractions], Color(0.7, 0.72, 0.7)))
 
 
 ## Выход в рейд: чего из основного нет (Profile.raid_kit_gaps) — перечислить и спросить; не

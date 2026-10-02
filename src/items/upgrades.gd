@@ -46,7 +46,7 @@ static func block(id: String) -> String:
 	if c.is_empty():
 		return "максимальный уровень"
 	if Profile.trust_level() < int(c.get("trust", 1)):
-		return "нужно доверие Михалыча %d" % int(c.get("trust", 1))
+		return "нужна ступень доверия Михалыча %d" % TraderStock.step_of(int(c.get("trust", 1)))
 	for need in c.get("needs", {}):
 		if level(String(need)) < int(c.needs[need]):
 			return "сначала: %s %d" % [String(find(String(need)).get("name", need)), int(c.needs[need])]

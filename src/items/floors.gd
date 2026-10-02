@@ -44,8 +44,8 @@ static func unlock_block(id: String) -> String:
 	var f := find(id)
 	if f.is_empty() or is_open(id):
 		return ""
-	if Profile.trust < int(f.trust):
-		return "доверие Михалыча %d из %d" % [Profile.trust, int(f.trust)]
+	if Profile.trust_step() < int(f.trust):
+		return "доверие Михалыча: ступень %d из %d" % [Profile.trust_step(), int(f.trust)]
 	if Profile.money < int(f.price):
 		return "не хватает денег"
 	return ""
