@@ -361,6 +361,16 @@ func _run() -> void:
 	sc.license = "cc0_1"
 	_check("CC0 и CC-BY требуют указать происхождение записи",
 		String(bench.call("transfer_block_reason", "c.wav")).contains("источник"), str(sc))
+	sc.license = "royalty_free"
+	sc.source = "Sonniss GDC 2024 — https://sonniss.com/gameaudiogdc"
+	bench.set("licenses_dir", _root.path_join("licenses"))
+	var rf_without := String(bench.call("transfer_block_reason", "c.wav"))
+	DirAccess.make_dir_recursive_absolute(_root.path_join("licenses"))
+	FileAccess.open(_root.path_join("licenses/sonniss_gdc_2024.txt"), FileAccess.WRITE).store_string("лицензия")
+	_check("royalty-free: без текста лицензии библиотеки — отказ, с файлом по названию — можно",
+		rf_without.contains("LICENSES") and String(bench.call("transfer_block_reason", "c.wav")) == ""
+		and String(bench.call("_credit_source", sc)).contains("Royalty-free"), rf_without)
+	sc.source = ""
 	sc.license = ""
 	var sd: Dictionary = bench.call("sel", "d.wav")
 	sd.use = true

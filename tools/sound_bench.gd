@@ -48,16 +48,21 @@ const LICENSE_OPTIONS := [
 	{"key": "cc_by_25", "name": "CC-BY 2.5", "credit": "CC-BY 2.5", "needs_source": true},
 	{"key": "cc_by_2", "name": "CC-BY 2.0", "credit": "CC-BY 2.0", "needs_source": true},
 	{"key": "cc_by_1", "name": "CC-BY 1.0", "credit": "CC-BY 1.0", "needs_source": true},
+	{"key": "royalty_free", "name": "Royalty-free (лицензия библиотеки)", "credit": "Royalty-free по лицензии библиотеки", "needs_source": true},
 ]
 const LICENSE_HELP := ("Собственная запись — записал сам, без чужих фрагментов. Собственная генерация — "
 	+ "сгенерировал сам в сервисе, который разрешает использование; название сервиса можно указать в источнике. "
 	+ "CC0 — можно использовать без указания автора, но источник сохраняем для истории. CC-BY — можно использовать "
-	+ "с обязательным указанием автора, ссылки и версии лицензии. NC, ND и SA проект не принимает.")
+	+ "с обязательным указанием автора, ссылки и версии лицензии. Royalty-free — коммерческая библиотека или бесплатный "
+	+ "набор (Sonniss GDC, Boom Library, Soundsnap): в источнике — название библиотеки и ссылка, текст её лицензии — "
+	+ "файлом в assets/audio/LICENSES/ с тем же названием (например sonniss_gdc_2024.txt). NC, ND и SA проект не принимает.")
 
 ## Папки (тест подменяет своими): новые файлы, записи игры, файл авторов.
 var try_dir: String = ProjectSettings.globalize_path("res://_sound_try")
 var assets_dir: String = ProjectSettings.globalize_path("res://assets/audio")
 var credits_path: String = ProjectSettings.globalize_path("res://assets/CREDITS.md")
+## Тексты лицензий royalty-free библиотек (файл на библиотеку; имя упоминается в источнике записи).
+var licenses_dir: String = ProjectSettings.globalize_path("res://assets/audio/LICENSES")
 var active_selection_path: String = ProjectSettings.globalize_path(ACTIVE_SELECTION)
 var catalog_doc_script: String = ProjectSettings.globalize_path("res://tools/sound_catalog_md.py")
 var split_tool_path: String = ProjectSettings.globalize_path("res://tools/split_audio.py")
@@ -780,11 +785,32 @@ func transfer_block_reason(rel: String) -> String:
 		var source_key := _legacy_license_key(src)
 		if source_key != "" and source_key != key:
 			return "в источнике указано другое право; исправь текст или выбор в списке"
+		if key == "royalty_free" and library_license(src) == "":
+			return "royalty-free: положи текст лицензии библиотеки в assets/audio/LICENSES/<название>.txt и укажи это название в источнике"
 		return ""
 	if src == "":
 		return "укажи источник и выбери право использования"
 	if _license_ok_re.search(src) == null:
 		return "выбери право использования из списка"
+	return ""
+
+
+## Файл лицензии библиотеки, чьё название есть в источнике («Sonniss GDC 2024 …» ↔
+## sonniss_gdc_2024.txt; сравнение без регистра, пробелов и знаков). Пусто — не найден.
+func library_license(source: String) -> String:
+	if not DirAccess.dir_exists_absolute(licenses_dir):
+		return ""
+	var norm := func(t: String) -> String:
+		var out := ""
+		for ch in t.to_lower():
+			if (ch >= "a" and ch <= "z") or (ch >= "0" and ch <= "9") or (ch >= "а" and ch <= "я") or ch == "ё":
+				out += ch
+		return out
+	var src: String = norm.call(source)
+	for f in DirAccess.get_files_at(licenses_dir):
+		var stem: String = norm.call(String(f).get_basename())
+		if stem.length() >= 4 and src.contains(stem):
+			return String(f)
 	return ""
 
 

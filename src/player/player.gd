@@ -926,9 +926,10 @@ func _combat(delta: float) -> void:
 			_play_weapon_sound(spec, "jam", -8.0)
 			return
 		if ammo <= 0:
+			# пусто — только сухой щелчок (по нажатию, не очередью); перезарядка — только по R
 			fire_timer = float(spec.interval)
-			_play_weapon_sound(spec, "dry_fire", -8.0)
-			_start_reload(spec)
+			if Input.is_action_just_pressed("fire"):
+				_play_weapon_sound(spec, "dry_fire", -8.0)
 			return
 		_fire(spec)
 
