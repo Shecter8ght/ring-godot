@@ -113,9 +113,13 @@ tools/godot.cmd res://tools/vault_test.tscn                # перелезан�
 tools/godot.cmd res://tools/bunker_test.tscn               # спуски в убежище: появился внизу, вырез в асфальте, подъём наверх; снимки bunker_*
 tools/godot.cmd res://tools/info_shots.tscn                # снимки окна описания предмета (info_*) и прицела гранаты (nade_aim)
 tools/godot.cmd res://tools/hideout_move_probe.tscn          # скорость в убежище: шаг / бег (с оружием, от первого лица)
-tools/godot.cmd res://tools/sound_bench.tscn               # стенд звуков: каталог всех звуков игры (data/sound_catalog.json), слушать в разных местах /
-                                                              # вдали / за стеной / очередью; новые файлы из _sound_try/ — назначить, галочка, перенести в assets/audio
-tools/godot.cmd --headless res://tools/sound_bench_test.tscn # стенд звуков: каталог покрывает всё, что зовёт игра; новые файлы, отбор, перенос, CREDITS, воспроизведение
+tools/godot.cmd res://tools/sound_bench.tscn               # стенд звуков: одна страница — сворачиваемые разделы (оружие → классы → стволы, общие наборы;
+                                                              # разделы каталога → подгруппы → карточки событий); справа событие: слушать в разных местах /
+                                                              # вдали / за стеной / очередью, назначить запись проекта нескольким событиям, снять запасной
+                                                              # набор или синтез (data/sound_active.json); «Входящие» — файлы из _sound_try/ → assets/audio.
+                                                              # Снимок: -- capture:res://_sound_try/b.png select:<id> open:all
+tools/godot.cmd --headless res://tools/sound_bench_test.tscn # стенд звуков: каталог покрывает всё, что зовёт игра; страница и карточки; назначения и снятие
+                                                              # (и в Audio); новые файлы, отбор, перенос, CREDITS, воспроизведение
 python tools/sound_catalog_md.py                               # список всех звуков для чтения: docs/sound_catalog.md
 ```
 

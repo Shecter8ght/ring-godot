@@ -77,8 +77,11 @@ func _run() -> void:
 	bench.set("credits_path", _root.path_join("CREDITS.md"))
 	bench.set("active_selection_path", _root.path_join("sound_active.json"))
 	bench.set("catalog_doc_script", "")
+	bench.set("ui_state_path", _root.path_join("bench_ui.json"))
 	add_child(bench)
 	await get_tree().process_frame
+	# все разделы страницы открыты — карточки построены
+	bench.call("expand_all", true)
 
 	# --- каталог
 	var sounds: Array[Dictionary] = bench.get("sounds")
@@ -148,8 +151,11 @@ func _run() -> void:
 	for row in glock_layout:
 		glock_order.append(String(row.slot))
 	_check("оружие: у всех карточек одинаковый порядок строк", pm_order == glock_order, str(pm_order))
-	_check("оружие: общие действия собраны один раз над карточками",
-		(bench.get("_shared_weapon_sounds") as HFlowContainer).get_child_count() >= 10, "")
+	var handling := 0
+	for card in bench.call("event_cards"):
+		if String(((bench.get("by_id") as Dictionary)[String((card as Control).get_meta("event"))] as Dictionary).cat) == "Оружие — обращение":
+			handling += 1
+	_check("оружие: общие действия — один раз, отдельным разделом карточек", handling >= 10, "%d" % handling)
 	var pm_suppressed: Dictionary = pm_layout[2]
 	var glock_suppressed: Dictionary = glock_layout[2]
 	_check("оружие: выстрел с глушителем доступен ПМ и Glock",
@@ -210,6 +216,57 @@ func _run() -> void:
 	active_state = bench.call("status_of", "shot_rifle")
 	_check("галочка возвращает запись в игру", int(active_state.rec) == 2 and int(active_state.disabled) == 0,
 		str(active_state))
+
+	# --- одна запись — нескольким событиям; снять назначенную или системный звук
+	var pistol_rel := "guns/pistol_01.wav"
+	_check("запись знает свой набор", String(bench.call("owner_of_asset", pistol_rel)) == "shot_pistol", "")
+	_check("своему событию запись не назначается второй раз", not bool(bench.call("link_asset", pistol_rel, "shot_pistol")), "")
+	var linked_ok := bool(bench.call("link_asset", pistol_rel, "shot_rifle")) and bool(bench.call("link_asset", pistol_rel, "flyby"))
+	var rifle_st: Dictionary = bench.call("status_of", "shot_rifle")
+	var flyby_st: Dictionary = bench.call("status_of", "flyby")
+	_check("одна запись назначена двум событиям — звучит в обоих",
+		linked_ok and int(rifle_st.linked) == 1 and int(flyby_st.linked) == 1
+		and (bench.call("streams_of", "shot_rifle") as Array).size() == int(rifle_st.rec) + 1
+		and (bench.call("linked_events", pistol_rel) as Array) == ["flyby", "shot_rifle"], "%s / %s" % [str(rifle_st), str(flyby_st)])
+	var saved_links: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_root.path_join("sound_active.json")))
+	_check("назначения сохранены в sound_active.json", ((saved_links.get("links", {}) as Dictionary).get("flyby", []) as Array) == [pistol_rel], str(saved_links))
+	bench.call("unlink_asset", pistol_rel, "shot_rifle")
+	_check("снять назначенную запись с события — другие события её сохраняют",
+		int((bench.call("status_of", "shot_rifle") as Dictionary).linked) == 0 and int((bench.call("status_of", "flyby") as Dictionary).linked) == 1, "")
+	bench.call("apply_event_links", pistol_rel, {"shot_rifle": true, "shot_pistol": true})
+	_check("окно «Ещё событиям»: звучит ровно в отмеченных (свой набор — всегда)",
+		(bench.call("linked_events", pistol_rel) as Array) == ["shot_rifle"], str(bench.call("linked_events", pistol_rel)))
+	bench.call("apply_event_links", pistol_rel, {})
+	bench.call("set_removed", "shot_hg_02", "fallback", true)
+	var hg2: Dictionary = bench.call("status_of", "shot_hg_02")
+	_check("снять запасной набор: модель им больше не звучит",
+		int(hg2.fallback_rec) == 0 and bool(hg2.no_fallback) and (bench.call("streams_of", "shot_hg_02") as Array).is_empty(), str(hg2))
+	bench.call("set_removed", "shot_hg_02", "synth", true)
+	hg2 = bench.call("status_of", "shot_hg_02")
+	_check("снять и синтез: событие молчит", not bool(hg2.synth) and bool(bench.call("_is_silent", hg2)), str(hg2))
+	var saved_removed: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_root.path_join("sound_active.json")))
+	_check("снятое сохранено в sound_active.json",
+		((saved_removed.get("removed", {}) as Dictionary).get("shot_hg_02", []) as Array) == ["fallback", "synth"], str(saved_removed))
+	bench.call("set_removed", "shot_hg_02", "fallback", false)
+	bench.call("set_removed", "shot_hg_02", "synth", false)
+	_check("«Вернуть»: запасной набор снова звучит", int((bench.call("status_of", "shot_hg_02") as Dictionary).fallback_rec) == 2, "")
+	# игра: та же логика в Audio (назначения переводятся из id каталога в виды)
+	var real_rel := ""
+	for f in DirAccess.get_files_at("res://assets/audio/guns"):
+		if String(f).begins_with("carbine_") and String(f).get_extension() in ["ogg", "wav", "mp3"]:
+			real_rel = "guns/" + String(f)
+			break
+	Audio.set("_links_by_id", {})
+	Audio.set("_removed_by_id", {"shot_hg_03": ["fallback", "synth"]})
+	Audio.call("_load_catalog")
+	var silent_pick: Variant = Audio.call("_pick", "shot_hg_03", Vector3.ZERO)
+	Audio.set("_links_by_id", {"shot_hg_03": [real_rel]})
+	Audio.call("_load_catalog")
+	Audio.call("_load_samples")
+	var linked_pick: Variant = Audio.call("_pick", "shot_hg_03", Vector3.ZERO)
+	_check("игра: снятый системный звук — тишина, назначенная запись — звучит",
+		silent_pick == null and linked_pick != null and real_rel != "", "%s → %s" % [real_rel, str(linked_pick)])
+	Audio.reload_samples()
 
 	# --- новые файлы
 	var try_dir := _root.path_join("try")
@@ -347,6 +404,7 @@ func _run() -> void:
 	var imported := _root.path_join("assets/guns/carbine_08.wav")
 	FileAccess.open(imported + ".import", FileAccess.WRITE).store_string("тестовый импорт")
 	bench.call("set_asset_enabled", imported, false)
+	bench.call("link_asset", "guns/carbine_08.wav", "flyby")
 	_check("удалить запись проекта — операция выполнена", bool(bench.call("delete_asset_permanently", "guns/carbine_08.wav")), "")
 	var after_delete_credits := FileAccess.get_file_as_string(_root.path_join("CREDITS.md"))
 	var after_delete_active: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_root.path_join("sound_active.json")))
@@ -355,8 +413,9 @@ func _run() -> void:
 		and not FileAccess.file_exists(try_dir.path_join("shot_rifle/b.wav"))
 		and not (bench.get("selection") as Dictionary).has("shot_rifle/b.wav")
 		and not after_delete_credits.contains("guns/carbine_08.wav"), "")
-	_check("удалить запись проекта — очищено исключение из sound_active.json",
-		not (after_delete_active.get("disabled", []) as Array).has("guns/carbine_08.wav"), str(after_delete_active))
+	_check("удалить запись проекта — очищены исключение и назначения в sound_active.json",
+		not (after_delete_active.get("disabled", []) as Array).has("guns/carbine_08.wav")
+		and not str(after_delete_active.get("links", {})).contains("carbine_08"), str(after_delete_active))
 	_check("удалить входящий навсегда — нет файла и данных отбора",
 		bool(bench.call("delete_incoming_permanently", "c.wav"))
 		and not FileAccess.file_exists(try_dir.path_join("c.wav"))
@@ -381,49 +440,73 @@ func _run() -> void:
 		and not FileAccess.file_exists(try_dir.path_join("flyby/legacy.wav"))
 		and String(bench.call("assigned_id", "old_batch/legacy.wav")) == "flyby", "")
 
-	# --- список слева
-	var tree: Tree = bench.get("_tree")
-	var top := tree.get_root().get_children()
-	_check("список: все разделы каталога", top.size() == cats.size(), "%d из %d" % [top.size(), cats.size()])
-	var grouped := 0
-	for c in top:
-		for g in c.get_children():
-			if String(g.get_metadata(0)).begins_with("grp:"):
-				grouped += 1
-	_check("список: внутри разделов — подгруппы (каталог: поле group)", grouped >= 40 and _leaves(tree.get_root()).size() == sounds.size(),
-		"подгрупп %d, звуков %d из %d" % [grouped, _leaves(tree.get_root()).size(), sounds.size()])
+	# --- страница слева: разделы, подгруппы, карточки
+	bench.call("expand_all", true)
+	var heads: Array[String] = []
+	_sections(bench.get("_page"), heads)
+	var cat_heads := 0
+	var grp_heads := 0
+	for k in heads:
+		if k.begins_with("cat:"):
+			cat_heads += 1
+		elif k.begins_with("grp:"):
+			grp_heads += 1
+	_check("страница: раздел на каждый раздел каталога (оружейные — внутри «Оружия»)",
+		cat_heads == cats.size() and heads.has("weapons"), "%d из %d" % [cat_heads, cats.size()])
+	var cards: Array = bench.call("event_cards")
+	_check("страница: подгруппы и карточка на каждое событие каталога", grp_heads >= 40 and cards.size() == sounds.size(),
+		"подгрупп %d, карточек %d из %d" % [grp_heads, cards.size(), sounds.size()])
+	bench.call("select_event", "thunder")
+	var title := (bench.get("_details") as VBoxContainer).get_child(0) as Label
+	_check("щелчок по карточке — событие справа", title != null and title.text == String((bench.get("by_id") as Dictionary).thunder.name), "")
+	bench.call("_open_asset_picker", "shot_rifle")
+	var picker_tree: Tree = bench.get("_picker_tree")
+	var asset_rows := 0
+	for h in picker_tree.get_root().get_children():
+		asset_rows += h.get_child_count()
+	bench.call("_open_event_picker", "guns/pistol_02.wav")
+	var event_rows := 0
+	var owner_locked := false
+	for h in picker_tree.get_root().get_children():
+		for it in h.get_children():
+			event_rows += 1
+			if String(it.get_metadata(0)) == "shot_pistol":
+				owner_locked = it.is_checked(0) and not it.is_editable(0)
+	(bench.get("_picker") as PopupPanel).hide()
+	_check("окна выбора: записи проекта без своих записей события; все события, свой набор отмечен и закреплён",
+		asset_rows >= 2 and event_rows >= sounds.size() and owner_locked, "записей %d, событий %d" % [asset_rows, event_rows])
 	(bench.get("_filter") as OptionButton).select(3)
-	bench.call("_refresh_tree")
+	bench.call("_refresh_page")
 	var wired := 0
-	for it in _leaves(tree.get_root()):
-		if String((bench.get("by_id") as Dictionary)[String(it.get_metadata(0))].kind) != "":
+	cards = bench.call("event_cards")
+	for card in cards:
+		if String((bench.get("by_id") as Dictionary)[String((card as Control).get_meta("event"))].kind) != "":
 			wired += 1
-	_check("фильтр «не подключены в коде» — только такие", wired == 0 and tree.get_root().get_child_count() > 0, "")
+	_check("фильтр «не подключены в коде» — только такие", wired == 0 and not cards.is_empty(), "")
 	(bench.get("_filter") as OptionButton).select(7)
-	bench.call("_refresh_tree")
+	bench.call("_refresh_page")
 	var absent := 0
 	var other := 0
-	for it in _leaves(tree.get_root()):
-		if bool((bench.call("status_of", String(it.get_metadata(0))) as Dictionary).absent):
+	for card in bench.call("event_cards"):
+		if bool((bench.call("status_of", String((card as Control).get_meta("event"))) as Dictionary).absent):
 			absent += 1
 		else:
 			other += 1
 	_check("фильтр «в игре нет»: гильзы, мусор, далёкие звуки…", absent >= 80 and other == 0
 		and bool((bench.call("status_of", "ricochet") as Dictionary).absent) and bool((bench.call("status_of", "trash_wind") as Dictionary).absent)
 		and not bool((bench.call("status_of", "shot_rifle") as Dictionary).absent), "%d звуков" % absent)
+	(bench.get("_filter") as OptionButton).select(0)
+	bench.call("expand_all", false)
+	_check("«Свернуть всё» — карточки не строятся", (bench.call("event_cards") as Array).is_empty(), "")
 
 	_rm(_root)
 	print("sound_bench_test: провалено %d" % _fails)
 	get_tree().quit()
 
 
-## Звуки в дереве каталога — листья под разделами и подгруппами (у них в метаданных id звука).
-func _leaves(item: TreeItem) -> Array[TreeItem]:
-	var out: Array[TreeItem] = []
-	for ch in item.get_children():
-		var meta := String(ch.get_metadata(0)) if ch.get_metadata(0) != null else ""
-		if meta.begins_with("cat:") or meta.begins_with("grp:") or meta == "":
-			out.append_array(_leaves(ch))
-		else:
-			out.append(ch)
-	return out
+## Ключи разделов страницы (заголовки-кнопки с метой section), в порядке обхода.
+func _sections(node: Node, out: Array[String]) -> void:
+	for ch in node.get_children():
+		if ch.has_meta("section"):
+			out.append(String(ch.get_meta("section")))
+		_sections(ch, out)

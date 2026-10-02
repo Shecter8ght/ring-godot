@@ -118,6 +118,15 @@ var _disabled: Dictionary = {}
 var _catalog_prefixes: Dictionary = {}
 var _catalog_fallbacks: Dictionary = {}
 var _catalog_far: Dictionary = {}
+## Стенд звуков (data/sound_active.json): событие → ещё записи из других наборов (links) и что у
+## события снято (removed: "synth" — синтез, "fallback" — запасной набор). Ключи — id каталога;
+## при загрузке переводятся в виды Audio.
+var _links_by_id: Dictionary = {}
+var _removed_by_id: Dictionary = {}
+var _kind_links: Dictionary = {}
+var _far_links: Dictionary = {}
+var _no_synth: Dictionary = {}
+var _no_fallback: Dictionary = {}
 
 var _streams: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
@@ -317,7 +326,8 @@ func _occluded(listener: Vector3, pos: Vector3) -> bool:
 
 ## Запись (или дальняя запись), иначе синтетика.
 func _pick(kind: String, pos: Vector3) -> AudioStream:
-	var fallback := _fallback_kind(kind)
+	# запасной набор снят на стенде — событие звучит только своим (или молчит)
+	var fallback := kind if _no_fallback.has(kind) else _fallback_kind(kind)
 	var far_kind := kind if _far.has(kind) else fallback
 	if _far.has(far_kind):
 		var listener := _listener_pos()
@@ -332,6 +342,8 @@ func _pick(kind: String, pos: Vector3) -> AudioStream:
 			i = (i + 1 + _rng.randi_range(0, arr.size() - 2)) % arr.size()
 		_last_pick[sample_kind] = i
 		return arr[i]
+	if _no_synth.has(kind):
+		return null
 	return _streams.get(kind, _streams.get(fallback))
 
 
@@ -382,6 +394,18 @@ func _load_samples() -> void:
 		var arr := _load_prefixes(prefixes)
 		if not arr.is_empty():
 			_samples[kind] = arr
+	# записи, назначенные событию из чужих наборов: добавляются к своим (и, как свои, заменяют
+	# запасной набор)
+	for kind in _kind_links:
+		var arr := _load_files(_kind_links[kind])
+		if not arr.is_empty():
+			var own: Array = _samples.get(kind, [])
+			_samples[kind] = own + arr
+	for kind in _far_links:
+		var arr := _load_files(_far_links[kind])
+		if not arr.is_empty():
+			var own: Array = _far.get(kind, [])
+			_far[kind] = own + arr
 
 
 ## Перечитать записи с диска. Стенд вызывает это после принятия нового файла: запись начинает
@@ -436,6 +460,34 @@ func has_synth(kind: String) -> bool:
 	return _streams.has(kind) or _streams.has(_fallback_kind(kind))
 
 
+## Синтез у самого вида, без запасной цепочки (стенд: снят запасной набор — остаётся ли синтез).
+func has_own_synth(kind: String) -> bool:
+	return _streams.has(kind)
+
+
+## Синтез, которым звучит вид без записей (стенд: прослушать); own_only — без запасной цепочки.
+func synth_stream(kind: String, own_only: bool = false) -> AudioStream:
+	if own_only:
+		return _streams.get(kind)
+	return _streams.get(kind, _streams.get(_fallback_kind(kind)))
+
+
+## Отдельные записи по путям относительно assets/audio (назначенные на стенде).
+func _load_files(rels: Array) -> Array:
+	var out: Array = []
+	for rel in rels:
+		var r := String(rel)
+		if _disabled.has(r):
+			continue
+		var resource_path := "res://assets/audio/" + r
+		var st: AudioStream = load(resource_path) as AudioStream if ResourceLoader.exists(resource_path) else null
+		if st == null and FileAccess.file_exists(resource_path):
+			st = _load_audio_file(ProjectSettings.globalize_path(resource_path))
+		if st:
+			out.append(st)
+	return out
+
+
 func _load_prefixes(prefixes: Array) -> Array:
 	var out: Array = []
 	for pr in prefixes:
@@ -464,6 +516,8 @@ func _load_prefixes(prefixes: Array) -> Array:
 
 func _load_active_selection() -> void:
 	_disabled.clear()
+	_links_by_id.clear()
+	_removed_by_id.clear()
 	if not FileAccess.file_exists(ACTIVE_SELECTION):
 		return
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ACTIVE_SELECTION))
@@ -471,6 +525,12 @@ func _load_active_selection() -> void:
 		return
 	for rel in (parsed as Dictionary).get("disabled", []):
 		_disabled[String(rel).replace("\\", "/")] = true
+	var links: Variant = (parsed as Dictionary).get("links", {})
+	if links is Dictionary:
+		_links_by_id = (links as Dictionary).duplicate(true)
+	var removed: Variant = (parsed as Dictionary).get("removed", {})
+	if removed is Dictionary:
+		_removed_by_id = (removed as Dictionary).duplicate(true)
 
 
 func _load_catalog() -> void:
@@ -485,10 +545,13 @@ func _load_catalog() -> void:
 	var entries: Array = (parsed as Dictionary).get("sounds", []).duplicate()
 	entries.append_array(WeaponDb.weapon_sound_events())
 	var id_kinds: Dictionary = {}
+	var raw_kinds: Dictionary = {}
 	for raw in entries:
 		if raw is Dictionary:
 			var e := raw as Dictionary
 			id_kinds[String(e.get("id", ""))] = String(e.get("kind", "")).trim_suffix("@far")
+			raw_kinds[String(e.get("id", ""))] = String(e.get("kind", ""))
+	_resolve_bench(raw_kinds)
 	for raw in entries:
 		if not raw is Dictionary:
 			continue
@@ -510,6 +573,33 @@ func _load_catalog() -> void:
 		var fallback := String(e.get("fallback", ""))
 		if fallback != "":
 			_catalog_fallbacks[base_kind] = String(id_kinds.get(fallback, fallback))
+
+
+## Назначения стенда — из id каталога в виды Audio (событие без вида в коде пока не звучит).
+func _resolve_bench(raw_kinds: Dictionary) -> void:
+	_kind_links.clear()
+	_far_links.clear()
+	_no_synth.clear()
+	_no_fallback.clear()
+	for id in _links_by_id:
+		var kind := String(raw_kinds.get(String(id), ""))
+		if kind == "" or kind.begins_with("loop:") or not _links_by_id[id] is Array:
+			continue
+		var into := _far_links if kind.ends_with("@far") else _kind_links
+		var base := kind.trim_suffix("@far")
+		var arr: Array = into.get(base, [])
+		for rel in _links_by_id[id]:
+			if not String(rel) in arr:
+				arr.append(String(rel))
+		into[base] = arr
+	for id in _removed_by_id:
+		var kind := String(raw_kinds.get(String(id), ""))
+		if kind == "" or kind.begins_with("loop:") or kind.ends_with("@far") or not _removed_by_id[id] is Array:
+			continue
+		if "synth" in _removed_by_id[id]:
+			_no_synth[kind] = true
+		if "fallback" in _removed_by_id[id]:
+			_no_fallback[kind] = true
 
 
 func _load_audio_file(path: String) -> AudioStream:
