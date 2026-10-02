@@ -244,6 +244,8 @@ func _put_strip(id: String, ax: float, s: float, t: float, yaw_extra: float) -> 
 		if tk.grow(0.5).intersects(foot):
 			return false
 	var node := _props.build(id, "")
+	if id == "cart":
+		node.name = "Cart_%d" % count
 	node.position = pos
 	node.rotation.y = -deg_to_rad(ax) + yaw_extra
 	_root.add_child(node)
@@ -308,6 +310,8 @@ func _put(id: String, a: float, r: float, orient: String, variant: String = "", 
 	if not force and not _inside_own_room(rect):
 		return false
 	var node := _props.build(id, variant)
+	if id == "cart":
+		node.name = "Cart_%d" % count
 	node.position = SectorBuilder.polar(a, r)
 	var yaw := -deg_to_rad(a)
 	match orient:

@@ -113,6 +113,9 @@ static func _unit(key: String) -> Mesh:
 
 
 static func _collect(n: Node, out: Array[MeshInstance3D]) -> void:
+	# Подвижные меши остаются при своём теле: иначе изображение останется на месте спавна.
+	if n is RigidBody3D:
+		return
 	for c in n.get_children():
 		if c is MeshInstance3D:
 			out.append(c)

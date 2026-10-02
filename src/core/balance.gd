@@ -552,6 +552,24 @@ const CARRY := {"free_kg": 22.0, "max_kg": 50.0, "speed_min": 0.72, "stamina_max
 ## ниже collapse_below — осыпается само через collapse_sec; пуля за стеклом — урон × pass_k;
 ## звон осколков слышно на noise_m.
 const GLASS := {"bullet_k": 1.4, "collapse_below": 0.45, "collapse_sec": [1.2, 3.5], "pass_k": 0.85, "noise_m": 35.0}
+## Пустая магазинная тележка: масса, сопротивление колёс и контакт с человеком (СИ).
+## Стекло и травма зависят от энергии по нормали; прижатие — от силы и стены за человеком.
+const CART: Dictionary = {
+	"mass_kg": 22.0, "person_kg": 80.0, "center_y": 0.40,
+	"friction": 0.012, "tipped_friction": 0.55, "bounce": 0.16,
+	"linear_damp": 0.025, "angular_damp": 0.65, "rolling_decel": 0.18,
+	"wheel_ground_dot": 0.65, "upright_dot": 0.55, "contacts": 24,
+	"caster_response": 9.0,
+	"push_restitution": 0.05, "push_min_speed": 0.04, "push_reach_m": 1.6,
+	"push_net_sec": 0.05, "push_speed_margin": 1.2, "attribution_sec": 8.0,
+	"glass_break_j": 18.0, "glass_min_j": 2.0,
+	"wheel_vault_min_mps": 4.2,
+	"injury_min_j": 38.0, "injury_hp_per_j": 0.12, "injury_max_hp": 55.0,
+	"injury_cooldown_sec": 0.65, "shove_max_mps": 3.5, "shove_decel": 6.0,
+	"crush_probe_m": 0.18, "crush_min_n": 260.0, "crush_hp_per_ns": 0.012,
+	"sound_min_speed": 0.7, "sound_cooldown_sec": 0.3, "noise_m": 14.0,
+	"net_sec": 0.05, "net_smooth": 18.0, "net_snap_m": 3.0,
+}
 ## ПНВ: заряда на столько секунд работы за рейд.
 const NVG_BATTERY_SEC := 1200.0
 ## Фонарь мародёра в темноте: сила и дальность луча.

@@ -1,0 +1,75 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/world/shopping_cart.gd" id="1_cart"]
+[ext_resource type="Script" path="res://src/world/shopping_cart_visuals.gd" id="2_visuals"]
+
+[sub_resource type="BoxShape3D" id="basket"]
+size = Vector3(0.6, 0.45, 0.855)
+
+[sub_resource type="BoxShape3D" id="chassis"]
+size = Vector3(0.54, 0.05, 0.8)
+
+[sub_resource type="SphereShape3D" id="wheel"]
+radius = 0.065
+
+[sub_resource type="BoxShape3D" id="handle"]
+size = Vector3(0.6, 0.04, 0.04)
+
+[sub_resource type="BoxMesh" id="handle_mesh"]
+size = Vector3(0.6, 0.04, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="handle_material"]
+albedo_color = Color(0.72, 0.065, 0.035, 1)
+roughness = 0.65
+
+[node name="ShoppingCart" type="RigidBody3D" groups=["shopping_carts"]]
+collision_layer = 1
+collision_mask = 63
+script = ExtResource("1_cart")
+metadata/surface = "metal"
+
+[node name="BasketCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.6225, 0)
+shape = SubResource("basket")
+
+[node name="ChassisCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.18, 0)
+shape = SubResource("chassis")
+
+[node name="HandleCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.98, -0.4275)
+shape = SubResource("handle")
+
+[node name="WheelRearLeft" type="CollisionShape3D" parent="."]
+position = Vector3(-0.245, 0.065, -0.375)
+shape = SubResource("wheel")
+
+[node name="WheelRearRight" type="CollisionShape3D" parent="."]
+position = Vector3(0.245, 0.065, -0.375)
+shape = SubResource("wheel")
+
+[node name="WheelFrontLeft" type="CollisionShape3D" parent="."]
+position = Vector3(-0.245, 0.065, 0.375)
+shape = SubResource("wheel")
+
+[node name="WheelFrontRight" type="CollisionShape3D" parent="."]
+position = Vector3(0.245, 0.065, 0.375)
+shape = SubResource("wheel")
+
+[node name="Visuals" type="Node3D" parent="."]
+script = ExtResource("2_visuals")
+
+[node name="Wire" type="MultiMeshInstance3D" parent="Visuals"]
+visibility_range_end = 110.0
+visibility_range_end_margin = 8.0
+
+[node name="Wheels" type="MultiMeshInstance3D" parent="Visuals"]
+visibility_range_end = 110.0
+visibility_range_end_margin = 8.0
+
+[node name="Handle" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.98, -0.4275)
+mesh = SubResource("handle_mesh")
+material_override = SubResource("handle_material")
+visibility_range_end = 110.0
+visibility_range_end_margin = 8.0

@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://src/ai/marauder.gd" id="1_marauder"]
 [ext_resource type="Script" path="res://src/combat/health.gd" id="2_health"]
 [ext_resource type="PackedScene" path="res://assets/models/characters/persona_animated.glb" id="3_persona"]
 [ext_resource type="Script" path="res://src/player/character_animator.gd" id="4_animator"]
+[ext_resource type="Script" path="res://src/world/cart_contact.gd" id="5_cart_contact"]
 
 [sub_resource type="CapsuleShape3D" id="capsule"]
 radius = 0.35
@@ -63,3 +64,6 @@ omni_range = 6.0
 
 [node name="CharacterAnimator" type="Node" parent="."]
 script = ExtResource("4_animator")
+
+[node name="CartContact" type="Node" parent="."]
+script = ExtResource("5_cart_contact")

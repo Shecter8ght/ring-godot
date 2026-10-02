@@ -166,6 +166,7 @@ func setup(specs: Array) -> void:
 		ss.shape = sb
 		ss.transform = sill_xf
 		ss.set_meta("surface", "metal")
+		ss.set_meta("sill_pane", i)
 		_sill_body.add_child(ss)
 		_sill_shapes.append(ss)
 	var gi := MultiMeshInstance3D.new()
@@ -204,6 +205,21 @@ func bullet(idx: int, damage: float, at: Vector3 = Vector3.INF) -> void:
 		_rpc_hit.rpc_id(1, idx, dmg, uv)
 	else:
 		_apply(idx, dmg, uv)
+
+
+## Удар твёрдым предметом: энергия по нормали, а не скорость скольжения вдоль витрины.
+func impact(idx: int, energy_j: float, at: Vector3) -> void:
+	if Net.is_networked() and not multiplayer.is_server():
+		return
+	if idx < 0 or idx >= panes.size() or energy_j < float(Balance.CART.glass_min_j):
+		return
+	var p: Dictionary = panes[idx]
+	if bool(p.broken):
+		return
+	var local: Vector3 = (p.xf as Transform3D).affine_inverse() * at
+	var sz: Vector2 = p.size
+	var uv: Vector2 = Vector2(clampf(local.x / sz.x + 0.5, 0.05, 0.95), clampf(local.y / sz.y + 0.5, 0.05, 0.95))
+	_apply(idx, HP * energy_j / float(Balance.CART.glass_break_j), uv)
 
 
 ## Взрыв рядом (у хоста): чем ближе, тем сильнее; в радиусе удара — выбивает.

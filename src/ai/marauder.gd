@@ -1462,7 +1462,7 @@ func _move_downed(delta: float) -> void:
 		velocity.z = clampf(pull.z, -6.0, 6.0)
 	if not is_on_floor():
 		velocity.y -= 9.8
-	move_and_slide()
+	($CartContact as CartContact).move_character(delta)
 	_body.rotation.y = _facing
 	# лежит: модель Persona кладёт клип падения (наклон корпуса сверху ставил её ногами вверх),
 	# запасной манекен — наклоном лицом вниз (Body:rotation синхронизируется)
@@ -1962,7 +1962,7 @@ func _move(delta: float) -> void:
 		velocity.y -= 9.8 * delta
 	else:
 		velocity.y = 0.0
-	move_and_slide()
+	($CartContact as CartContact).move_character(delta)
 	_body.rotation.y = _facing
 	# попадание откидывает корпус назад (Body:rotation синхронизируется — видно всем)
 	_body.rotation.x = -0.35 * _flinch

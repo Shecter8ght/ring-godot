@@ -140,6 +140,7 @@ var _nade_aim: GrenadeAim
 @onready var _muzzle: OmniLight3D = $Body/Muzzle
 @onready var _animator: CharacterAnimator = get_node_or_null("CharacterAnimator") as CharacterAnimator
 @onready var health: Health = $Health
+@onready var _cart_contact: CartContact = $CartContact
 ## Рюкзак: меняет хост, видят все (см. Inventory). Создаётся в _ready.
 var inventory: Inventory
 @onready var _camera_rig: Node3D = get_tree().get_first_node_in_group("camera_rig")
@@ -723,7 +724,7 @@ func _physics_process(delta: float) -> void:
 	elif not (_dive_t >= 0.0 and _dive_t < 0.1):
 		# в начале броска — подскок (иначе пол тут же гасит его)
 		velocity.y = 0.0
-	move_and_slide()
+	_cart_contact.move_character(delta)
 	if ads:
 		_body.rotation.y = look_yaw
 	elif _dive_t >= 0.0:

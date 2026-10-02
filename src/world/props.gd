@@ -1,7 +1,7 @@
 class_name Props
 extends RefCounted
 ## Библиотека процедурных пропсов: коробки из примитивов, узнаваемые с высоты изометрии.
-## Каждый проп — StaticBody3D с одним коллайдером-боксом по габаритам и мешами внутри.
+## Неподвижный проп — StaticBody3D; тележка — отдельная сцена с физикой колёс.
 ## Габариты в метрах: x — ширина (вдоль ряда), z — глубина, y — высота. Пивот — центр по XZ, пол по Y.
 ## Это запасной вариант по правилу проекта: модели из assets/ встанут на те же точки, когда появятся.
 
@@ -45,7 +45,9 @@ static func size(id: String) -> Vector3:
 
 
 ## Собирает проп; variant — подсказка (например, "wrecked" для машины).
-func build(id: String, variant: String = "") -> StaticBody3D:
+func build(id: String, variant: String = "") -> PhysicsBody3D:
+	if id == "cart":
+		return (load("res://scenes/props/shopping_cart.tscn") as PackedScene).instantiate() as RigidBody3D
 	var body := StaticBody3D.new()
 	body.name = id
 	var sz := size(id)
@@ -58,8 +60,6 @@ func build(id: String, variant: String = "") -> StaticBody3D:
 			_pallet_boxes(body, sz)
 		"box_stack":
 			_box_stack(body, sz)
-		"cart":
-			_cart(body, sz)
 		"car":
 			_car(body, sz, variant == "wrecked")
 		"truck":
@@ -145,13 +145,6 @@ func _box_stack(body: StaticBody3D, sz: Vector3) -> void:
 		var h := _rng.randf_range(0.3, 0.5)
 		_box(body, Vector3(_rng.randf_range(-0.15, 0.15), y + h * 0.5, _rng.randf_range(-0.15, 0.15)), Vector3(w, h, d), _flat(_cardboard(), 0.9, 0.0))
 		y += h
-
-
-func _cart(body: StaticBody3D, sz: Vector3) -> void:
-	var wire := _flat(Color(0.7, 0.7, 0.72), 0.35, 0.8)
-	_box(body, Vector3(0, 0.62, 0), Vector3(sz.x, 0.45, sz.z * 0.9), wire)
-	_box(body, Vector3(0, 0.2, 0), Vector3(sz.x * 0.9, 0.05, sz.z * 0.8), wire)
-	_box(body, Vector3(0, 0.98, -sz.z * 0.45), Vector3(sz.x, 0.04, 0.04), _flat(Color(0.8, 0.1, 0.1), 0.6, 0.0))
 
 
 func _car(body: StaticBody3D, sz: Vector3, wrecked: bool) -> void:

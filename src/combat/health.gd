@@ -70,7 +70,7 @@ func _setup_sync() -> void:
 	add_child(sync)
 
 
-## zone: "" (неизвестно), "head", "thorax", "arms", "legs", "blast", "blast_close"; at — куда
+## zone: "" (неизвестно), "head", "thorax", "arms", "legs", "blast", "blast_close", "impact"; at — куда
 ## попали; bullet — {pen, armor_dmg} пули (пусто — осколки). Броня (damage_filter) решает, сколько
 ## прошло и насмерть ли голова.
 func take_damage(amount: float, from: Vector3, zone: String = "", at: Vector3 = Vector3.INF, bullet: Dictionary = {}) -> void:

@@ -18,6 +18,9 @@ const BLAST_BULLET := {"pen": 16.0, "armor_dmg": 12.0}
 static func hit(equipment: Dictionary, amount: float, zone: String, from: Vector3, at: Vector3, forward: Vector3, bullet: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 	var eq := equipment.duplicate(true)
 	var out := {"damage": amount, "lethal": false, "equipment": eq, "layer": "", "stopped": false}
+	# Прижатие и удар тележкой — тупая травма тела, без пробития и износа пулевых плит.
+	if zone == "impact":
+		return out
 	var b: Dictionary = bullet if not bullet.is_empty() else BLAST_BULLET
 	match zone:
 		"head":
