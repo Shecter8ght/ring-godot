@@ -31,6 +31,8 @@ const LEGEND := ("▶ звучат свои или назначенные зап
 const CLASS_TITLES := {"PISTOL": "Пистолеты", "SMG": "Пистолеты-пулемёты", "PDW": "PDW", "ASSAULT_RIFLE": "Автоматы",
 	"CARBINE": "Карабины", "BATTLE_RIFLE": "Боевые винтовки", "DMR": "Марксманские винтовки", "SNIPER": "Снайперские винтовки",
 	"SPECIAL": "Специальное", "LMG": "Пулемёты", "SHOTGUN": "Ружья"}
+## Раздел событий семейств (WeaponDb.family_sound_events).
+const FAMILY_CAT := "Оружие — семейства"
 ## Разделы каталога, которые показываются внутри «Оружия».
 const WEAPON_CATS := ["Оружие — выстрел", "Оружие — обращение"]
 ## Какие разделы свёрнуты — между запусками стенда.
@@ -64,6 +66,8 @@ var sounds: Array[Dictionary] = []
 var by_id: Dictionary = {}
 var cats: Array[String] = []
 var weapon_sounds: Array[Dictionary] = []
+## Действия семейств механики (магазин, затвор, спуск у АК, AR, пистолетов…).
+var family_sounds: Array[Dictionary] = []
 ## Отбор новых файлов: путь относительно try_dir → {assigned, use, source, license, seen, moved}.
 var selection: Dictionary = {}
 ## Уже импортированные записи, которые владелец исключил из случайного набора игры.
@@ -222,6 +226,9 @@ func _load_catalog() -> void:
 		by_id[String(e.id)] = e
 	weapon_sounds = WeaponDb.weapon_sound_events()
 	for e in weapon_sounds:
+		by_id[String(e.id)] = e
+	family_sounds = WeaponDb.family_sound_events()
+	for e in family_sounds:
 		by_id[String(e.id)] = e
 
 
@@ -1625,6 +1632,9 @@ func _refresh_page() -> void:
 	for c in WEAPON_CATS:
 		shared[c] = _cat_events(c, q)
 		shared_count += (shared[c] as Array).size()
+	var fam_ids := _family_events(q)
+	shared[FAMILY_CAT] = fam_ids
+	shared_count += fam_ids.size()
 	if not narrowing or gun_count + shared_count > 0:
 		_section(_page, "weapons", "Оружие", "стволов %d · общих событий %d" % [gun_count, shared_count], 0, true,
 			func(body: VBoxContainer) -> void: _fill_weapons(body, q, guns, shared), narrowing)
@@ -1931,6 +1941,11 @@ func _fill_weapons(body: VBoxContainer, q: String, guns: Dictionary, shared: Dic
 		var c := String(cls)
 		_section(body, "class:" + c, String(CLASS_TITLES.get(c, WeaponDb.CLASS_NAMES.get(c, c))), "моделей %d" % list.size(), 1, true,
 			func(b: VBoxContainer) -> void: _fill_weapon_class(b, list), q != "")
+	# действия по семействам механики: магазин, затвор, спуск у АК — свои, у AR — свои
+	var fam_ids: Array = shared[FAMILY_CAT]
+	if not narrowing or not fam_ids.is_empty():
+		_section(body, "families", "Магазин, затвор, спуск — по семействам механики", _ids_info(fam_ids), 1, true,
+			func(b: VBoxContainer) -> void: _fill_families(b, fam_ids, narrowing), narrowing)
 	for c in WEAPON_CATS:
 		var ids: Array = shared[c]
 		if narrowing and ids.is_empty():
@@ -1939,6 +1954,43 @@ func _fill_weapons(body: VBoxContainer, q: String, guns: Dictionary, shared: Dic
 		var title := "Выстрел — общие и запасные наборы" if cat == WEAPON_CATS[0] else "Обращение с оружием — общее для всех стволов"
 		_section(body, "cat:" + cat, title, _ids_info(ids), 1, true,
 			func(b: VBoxContainer) -> void: _fill_cat(b, cat, ids, 2, narrowing), narrowing)
+
+
+## События семейств, прошедшие поиск и фильтр.
+func _family_events(q: String) -> Array[String]:
+	var out: Array[String] = []
+	for e in family_sounds:
+		var st := status_of(String(e.id))
+		# поиск по семейству («АК») показывает все его действия
+		if _passes(e, st, "") and (q == "" or String(e.group).to_lower().contains(q) or _passes(e, st, q)):
+			out.append(String(e.id))
+	return out
+
+
+## Семейство — подраздел: какие стволы в нём и карточки его действий. Своя запись ствола
+## перекрывает семейство (в карточке ствола — «Магазин, затвор, спуск»).
+func _fill_families(body: VBoxContainer, ids: Array, force_open: bool) -> void:
+	body.add_child(_wrap_label("Без своих записей ствол звучит своим семейством, семейство без записей — общим звуком "
+		+ "(раздел «Обращение с оружием — общее»). Ствол, который звучит иначе, получает свою запись в своей карточке.", 13, COL_DIM))
+	var by_fam: Dictionary = {}
+	for id in ids:
+		var fid := String((by_id[id] as Dictionary).family)
+		if not by_fam.has(fid):
+			by_fam[fid] = []
+		(by_fam[fid] as Array).append(String(id))
+	var fams := WeaponDb.sound_families()
+	for fid in fams:
+		if not by_fam.has(fid):
+			continue
+		var list: Array = by_fam[fid]
+		var guns: Array[String] = []
+		for wid in (fams[fid] as Dictionary).get("weapons", []):
+			guns.append(String((WeaponDb.items().get(wid, {}) as Dictionary).get("name", wid)))
+		var who := ", ".join(guns)
+		_section(body, "fam:" + String(fid), WeaponDb.sound_family_name(String(fid)), _ids_info(list), 2, true,
+			func(b: VBoxContainer) -> void:
+				b.add_child(_wrap_label("Стволы: " + who, 13, COL_DIM))
+				b.add_child(_card_flow(list)), force_open)
 
 
 func _fill_weapon_class(body: VBoxContainer, list: Array) -> void:
@@ -1995,7 +2047,7 @@ func _collect_meta(node: Node, key: String, out: Array[Control]) -> void:
 func _weapon_tally(wid: String) -> Dictionary:
 	var out := {"own": 0, "borrowed": 0, "silent": 0, "own_shot": false}
 	for e in WeaponDb.weapon_sound_layout(wid):
-		if bool(e.get("shared", false)) or not bool(e.get("available", true)) or String(e.get("kind", "")) == "":
+		if bool(e.get("shared", false)) or bool(e.get("via_family", false)) or not bool(e.get("available", true)) or String(e.get("kind", "")) == "":
 			continue
 		var sid := String(e.id)
 		if not by_id.has(sid):
@@ -2055,6 +2107,7 @@ func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContaine
 		13, COL_REC if int(tally.own) == total else (COL_NONE if int(tally.silent) > 0 else COL_SYNTH))
 	box.add_child(progress)
 	var last_group := ""
+	var fam_rows: Array[Dictionary] = []
 	for e in WeaponDb.weapon_sound_layout(wid):
 		if bool(e.get("shared", false)):
 			continue
@@ -2064,21 +2117,63 @@ func _weapon_card(wid: String, item: Dictionary, w: Dictionary) -> PanelContaine
 		var sound_id := String(e.id)
 		if sound_id == "" or not by_id.has(sound_id):
 			continue
+		if bool(e.get("via_family", false)):
+			fam_rows.append(e)
+			continue
 		var group := String(e.group)
 		if group != last_group:
 			last_group = group
 			box.add_child(_label(group.to_upper(), 12, Color(0.78, 0.67, 0.45)))
-		var st := status_of(sound_id)
-		var row_name := String(e.get("name", "")).trim_prefix(String(item.get("name", wid)) + " — ")
-		var button := _button(_weapon_sound_button_text(row_name, st),
-			func() -> void: _select_weapon_sound(sound_id))
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.custom_minimum_size.y = 31
-		button.add_theme_color_override("font_color", _status_color(st))
-		button.tooltip_text = "%s\n%s\nID: %s\nФайлы: assets/audio/%sNN" % [String(e.when), _status_text(st), sound_id, String(e.file)]
-		box.add_child(button)
+		box.add_child(_weapon_row(wid, item, e))
+	if not fam_rows.is_empty():
+		_weapon_family_rows(box, wid, item, fam_rows)
 	return card
+
+
+## Магазин, затвор, спуск модели — свёрнуто: по умолчанию звучат семейством.
+func _weapon_family_rows(box: VBoxContainer, wid: String, item: Dictionary, rows: Array[Dictionary]) -> void:
+	var own := 0
+	for e in rows:
+		var st := status_of(String(e.id))
+		if int(st.rec) + int(st.linked) > 0:
+			own += 1
+	var fid := WeaponDb.sound_family(wid)
+	var fam := ("как «%s»" % WeaponDb.sound_family_name(fid)) if fid != "" else "общий звук"
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 5)
+	list.visible = bool(_collapsed.get("wfam:" + wid, true)) == false
+	var caption := func(o: bool) -> String:
+		return "%s МАГАЗИН, ЗАТВОР, СПУСК · %s · своих %d из %d" % ["▾" if o else "▸", fam, own, rows.size()]
+	var toggle := Button.new()
+	toggle.flat = true
+	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	toggle.add_theme_font_size_override("font_size", 12)
+	toggle.add_theme_color_override("font_color", Color(0.78, 0.67, 0.45))
+	toggle.text = caption.call(list.visible)
+	toggle.tooltip_text = "Без своей записи модель звучит семейством; своя запись перекрывает семейство только у этой модели."
+	toggle.pressed.connect(func() -> void:
+		list.visible = not list.visible
+		_collapsed["wfam:" + wid] = not list.visible
+		toggle.text = caption.call(list.visible)
+		_save_ui_state())
+	box.add_child(toggle)
+	box.add_child(list)
+	for e in rows:
+		list.add_child(_weapon_row(wid, item, e))
+
+
+func _weapon_row(wid: String, item: Dictionary, e: Dictionary) -> Button:
+	var sound_id := String(e.id)
+	var st := status_of(sound_id)
+	var row_name := String(e.get("name", "")).trim_prefix(String(item.get("name", wid)) + " — ")
+	var button := _button(_weapon_sound_button_text(row_name, st),
+		func() -> void: _select_weapon_sound(sound_id))
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.custom_minimum_size.y = 31
+	button.add_theme_color_override("font_color", _status_color(st))
+	button.tooltip_text = "%s\n%s\nID: %s\nФайлы: assets/audio/%sNN" % [String(e.when), _status_text(st), sound_id, String(e.file)]
+	return button
 
 
 func _weapon_sound_button_text(name: String, st: Dictionary) -> String:
@@ -2160,6 +2255,8 @@ func _passes(e: Dictionary, st: Dictionary, q: String) -> bool:
 
 ## Путь события на странице: «Оружие › Пистолеты › ПМ» или «Раздел › подгруппа».
 func _event_path(e: Dictionary) -> String:
+	if e.has("family") and not e.has("weapon"):
+		return "Оружие › семейство «%s»" % WeaponDb.sound_family_name(String(e.family))
 	if e.has("weapon"):
 		var w := WeaponDb.weapon(String(e.weapon))
 		var item: Dictionary = WeaponDb.items().get(String(e.weapon), {})
@@ -2492,6 +2589,8 @@ func _fill_picker() -> void:
 		var owner := owner_of_asset(_picker_key)
 		var order: Array[String] = []
 		for e in sounds:
+			order.append(String(e.id))
+		for e in family_sounds:
 			order.append(String(e.id))
 		for e in weapon_sounds:
 			order.append(String(e.id))

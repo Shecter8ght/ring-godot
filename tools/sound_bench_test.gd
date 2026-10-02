@@ -166,11 +166,33 @@ func _run() -> void:
 	_check("оружие: звуки установки и снятия доступны только ригу с таким действием",
 		pm_actions.has("suppressor_on") and pm_actions.has("suppressor_off")
 		and not glock_actions.has("suppressor_on") and not glock_actions.has("suppressor_off"), str(pm_actions))
-	var shared_dry: Dictionary = pm_layout[4]
-	_check("оружие: сухой спуск назначается один раз общим событием",
-		String(shared_dry.slot) == "dry_fire" and bool(shared_dry.shared)
-		and String(shared_dry.id) == "dry_fire"
-		and String(WeaponDb.weapon_sound_map("wpn_hg_01").dry_fire) == "dry_fire", str(shared_dry))
+	var pm_dry: Dictionary = pm_layout[4]
+	_check("оружие: сухой спуск — своё событие модели, без записей звучит семейством, оно — общим",
+		String(pm_dry.slot) == "dry_fire" and bool(pm_dry.get("via_family", false)) and not bool(pm_dry.shared)
+		and String(pm_dry.id) == "wpn_hg_01_dry_fire" and String(pm_dry.fallback) == "fam_pistol_dry_fire"
+		and String(WeaponDb.weapon_sound_map("wpn_hg_01").dry_fire) == "wpn_hg_01_dry_fire"
+		and String((Audio.get("_catalog_fallbacks") as Dictionary).get("wpn_hg_01_dry_fire", "")) == "fam_pistol_dry_fire"
+		and String((Audio.get("_catalog_fallbacks") as Dictionary).get("fam_pistol_dry_fire", "")) == "dry_fire", str(pm_dry))
+	var ads_row: Dictionary = pm_layout[22]
+	_check("оружие: общие действия без семейства (вскинуть в ADS) — один звук на всё оружие",
+		String(ads_row.slot) == "ads_raise" and bool(ads_row.shared) and String(WeaponDb.weapon_sound_map("wpn_hg_01").ads_raise) == "ads_raise", str(ads_row))
+	var family_events: Array[Dictionary] = bench.get("family_sounds")
+	var ak_mag := (bench.get("by_id") as Dictionary).get("fam_ak_mag_out", {}) as Dictionary
+	_check("семейства: действия есть у каждого семейства, магазин АК — своё событие с общим запасным",
+		family_events.size() >= 8 * 8 and String(ak_mag.get("fallback", "")) == "mag_out"
+		and not (bench.get("by_id") as Dictionary).has("fam_tube_mag_out"), "событий %d" % family_events.size())
+	_wav(_root.path_join("assets/guns/fam_ak_mag_out_01.wav"))
+	(bench.get("_asset_cache") as Dictionary).clear()
+	var ak12_mag: Dictionary = bench.call("status_of", "wpn_ar_01_mag_out")
+	var m4_mag: Dictionary = bench.call("status_of", "wpn_ar_02_mag_out")
+	_check("запись семейства АК звучит у АК-12, но не у M4",
+		int(ak12_mag.rec) == 0 and int(ak12_mag.fallback_rec) == 1 and String(ak12_mag.fallback_name).begins_with("Система АК")
+		and int(m4_mag.fallback_rec) == 0, "%s / %s" % [str(ak12_mag), str(m4_mag)])
+	_wav(_root.path_join("assets/guns/ar_01_mag_out_01.wav"))
+	(bench.get("_asset_cache") as Dictionary).clear()
+	_check("своя запись АК-12 перекрывает семейство только у него (Витязь — по-прежнему семейством)",
+		int((bench.call("status_of", "wpn_ar_01_mag_out") as Dictionary).rec) == 1
+		and int((bench.call("status_of", "wpn_smg_04_mag_out") as Dictionary).fallback_rec) == 1, "")
 	_check("оружие: два автомата с прежним общим набором получили разные собственные события",
 		WeaponDb.weapon_sound_kind("wpn_ar_03", "shot") == "wpn_ar_03_shot"
 		and WeaponDb.weapon_sound_kind("wpn_ar_04", "shot") == "wpn_ar_04_shot"
@@ -454,8 +476,10 @@ func _run() -> void:
 	_check("страница: раздел на каждый раздел каталога (оружейные — внутри «Оружия»)",
 		cat_heads == cats.size() and heads.has("weapons"), "%d из %d" % [cat_heads, cats.size()])
 	var cards: Array = bench.call("event_cards")
-	_check("страница: подгруппы и карточка на каждое событие каталога", grp_heads >= 40 and cards.size() == sounds.size(),
-		"подгрупп %d, карточек %d из %d" % [grp_heads, cards.size(), sounds.size()])
+	var fam_count := (bench.get("family_sounds") as Array).size()
+	_check("страница: подгруппы, карточка на каждое событие каталога и каждое действие семейства",
+		grp_heads >= 40 and cards.size() == sounds.size() + fam_count and heads.has("fam:ak"),
+		"подгрупп %d, карточек %d из %d" % [grp_heads, cards.size(), sounds.size() + fam_count])
 	bench.call("select_event", "thunder")
 	var title := (bench.get("_details") as VBoxContainer).get_child(0) as Label
 	_check("щелчок по карточке — событие справа", title != null and title.text == String((bench.get("by_id") as Dictionary).thunder.name), "")

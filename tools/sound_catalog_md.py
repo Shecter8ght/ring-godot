@@ -107,9 +107,10 @@ def borrowed(sounds: list[dict], ref: str) -> tuple[str, int]:
     return ("", 0)
 
 
-def weapon_matrix(sounds: list[dict], weapons: dict, slots: list[dict]) -> list[str]:
+def weapon_matrix(sounds: list[dict], weapons: dict, slots: list[dict], families: dict) -> list[str]:
     own_slots = [s for s in slots if not s.get("shared") and s.get("wired")]
-    shared = [s for s in slots if s.get("shared")]
+    shared = [s for s in slots if s.get("shared") and not s.get("family")]
+    fam_slots = [s for s in slots if s.get("family")]
     out = ["## Оружие по моделям — чего нет", "",
            "Своя запись модели лежит в `assets/audio/guns/<модель>_<слот>_NN` (модель — id без `wpn_`) и заменяет",
            "общий набор только у неё. В клетке: **N** — своих записей; «как …» — пока звучит чужим набором",
@@ -146,8 +147,25 @@ def weapon_matrix(sounds: list[dict], weapons: dict, slots: list[dict]) -> list[
                     cells.append("**тишина**")
                     silent.setdefault(slot["name"], []).append(item["name"])
             out.append(f"| {item['name']} | {w.get('caliber', '')} | " + " | ".join(cells) + " |")
+    out += ["", "### Магазин, затвор, спуск — по семействам механики", "",
+            "Запись семейства — `assets/audio/guns/fam_<семейство>_<действие>_NN`; звучит у каждого ствола семейства,",
+            "пока у ствола нет своей (`guns/<модель>_<действие>_NN`). Без записей семейства — общий звук действия.",
+            "В клетке: **N** — записей семейства; «общий» — пока звучит общим; «—» — в семействе такого действия нет.", ""]
+    fam_ids = list(families)
+    out += ["| Действие | " + " | ".join(families[f]["name"] for f in fam_ids) + " |", "|" + "---|" * (len(fam_ids) + 1)]
+    for slot in fam_slots:
+        cells = []
+        for f in fam_ids:
+            members = [weapons[w]["weapon"] for w in families[f]["weapons"] if w in weapons]
+            if not any(slot_applies(slot, w) for w in members):
+                cells.append("—")
+                continue
+            n = recorded(f"guns/fam_{f}_{slot['file']}_")
+            cells.append(f"**{n}**" if n else "общий")
+        out.append(f"| {slot['name']} | " + " | ".join(cells) + " |")
+    out += ["", "Состав: " + "; ".join(f"{families[f]['name']} — " + ", ".join(weapons[w]["name"] for w in families[f]["weapons"] if w in weapons) for f in fam_ids) + "."]
     out += ["", "### Общие для всех стволов действия", "",
-            "Назначаются один раз на весь класс (блок «Общие звуки оружия» на стенде).", "",
+            "Один звук на всё оружие (и запасной для семейств) — раздел «Обращение с оружием — общее» на стенде.", "",
             "| Действие | Когда | Сейчас звучит | В игре |", "|---|---|---|---|"]
     for slot in shared:
         name, m = borrowed(sounds, slot.get("fallback", ""))
@@ -166,7 +184,9 @@ def main() -> None:
     data = json.loads(CAT.read_text(encoding="utf-8"))
     sounds = data["sounds"]
     weapons = json.loads(WEAPONS.read_text(encoding="utf-8"))["weapons"]
-    slots = json.loads(WEAPON_SLOTS.read_text(encoding="utf-8"))["slots"]
+    slot_data = json.loads(WEAPON_SLOTS.read_text(encoding="utf-8"))
+    slots = slot_data["slots"]
+    families = slot_data.get("families", {})
     weapon_slot_count = sum(1 for item in weapons.values() for slot in slots
                             if slot_applies(slot, item["weapon"]))
     lines = [
@@ -227,7 +247,7 @@ def main() -> None:
             lines.append(f"| {s['name']} | {s['when']} | `{s['file']}` | {s['kind'] or '—'} | {TYPES[s['type']]} "
                          f"| {s['variants']} | {PRIO[s['prio']]} | {recorded(s['file'])} | {s['now']} |")
         lines.append("")
-    lines += weapon_matrix(sounds, weapons, slots)
+    lines += weapon_matrix(sounds, weapons, slots, families)
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"{OUT.relative_to(ROOT)}: {total} звуков")
 

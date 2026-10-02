@@ -544,6 +544,7 @@ func _load_catalog() -> void:
 		return
 	var entries: Array = (parsed as Dictionary).get("sounds", []).duplicate()
 	entries.append_array(WeaponDb.weapon_sound_events())
+	entries.append_array(WeaponDb.family_sound_events())
 	var id_kinds: Dictionary = {}
 	var raw_kinds: Dictionary = {}
 	for raw in entries:

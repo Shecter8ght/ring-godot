@@ -26,6 +26,9 @@ static var _w: Dictionary = {}
 static var _a: Dictionary = {}
 static var _l: Dictionary = {}
 static var _sound_slots: Array[Dictionary] = []
+## Семейства механики (weapon_sound_slots.json → families): id → {name, weapons}; ствол → семейство.
+static var _sound_families: Dictionary = {}
+static var _weapon_family: Dictionary = {}
 ## Все предметы арсенала (id → словарь предмета) — их подмешивает ItemDb.
 static var _items: Dictionary = {}
 ## id → вид предмета (weapon, ammo, mag, mod, vest, plate, helmet, headset) — для выборки лута.
@@ -45,6 +48,12 @@ static func _ensure() -> void:
 		for raw in (sound_data as Dictionary).get("slots", []):
 			if raw is Dictionary:
 				_sound_slots.append(raw as Dictionary)
+		var fams: Variant = (sound_data as Dictionary).get("families", {})
+		if fams is Dictionary:
+			_sound_families = fams as Dictionary
+			for fid in _sound_families:
+				for wid in (_sound_families[fid] as Dictionary).get("weapons", []):
+					_weapon_family[String(wid)] = String(fid)
 	for sec in ["weapons", "ammo", "magazines", "attachments"]:
 		_items.merge(_w.get(sec, {}))
 		for id in _w.get(sec, {}):
@@ -106,12 +115,13 @@ static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
 		var w: Dictionary = item.get("weapon", {})
 		if w.is_empty():
 			continue
+		var fid := sound_family(wid)
 		for raw in _sound_slots:
 			if not _sound_slot_applies(raw, w):
 				continue
-			# Общие действия назначаются один раз всему классу оружия и не раздувают каталог
-			# одинаковыми событиями для каждой модели.
-			if bool(raw.get("shared", false)):
+			# Общие действия (поправить ADS, задеть стену) — один раз на всё оружие. Действия
+			# семейства (магазин, затвор, спуск) у модели свои, но без записей звучат семейством.
+			if bool(raw.get("shared", false)) and not bool(raw.get("family", false)):
 				continue
 			var slot := String(raw.id)
 			var base_kind := "%s_%s" % [wid, "shot" if slot == "shot_far" else slot]
@@ -125,6 +135,65 @@ static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
 			event.cat = "Оружие по моделям"
 			event.name = "%s — %s" % [String(item.get("name", wid)), String(raw.name)]
 			event.now = "свой набор модели; пока общий запасной"
+			if bool(raw.get("family", false)):
+				event.erase("shared")
+				event.via_family = true
+				event.family = fid
+				if fid != "":
+					event.fallback = "fam_%s_%s" % [fid, slot]
+					event.now = "свой звук модели; пока звучит семейство «%s»" % sound_family_name(fid)
+			out.append(event)
+	return out
+
+
+## Семейство механики ствола ("" — не входит ни в одно: общие действия звучат общим звуком).
+static func sound_family(id: String) -> String:
+	_ensure()
+	return String(_weapon_family.get(canonical(id), ""))
+
+
+static func sound_family_name(fid: String) -> String:
+	_ensure()
+	return String((_sound_families.get(fid, {}) as Dictionary).get("name", fid))
+
+
+## Семейства: id → {name, weapons}.
+static func sound_families() -> Dictionary:
+	_ensure()
+	return _sound_families
+
+
+## События семейств: действие (магазин, затвор…) одно на семейство. Звучит у каждого ствола
+## семейства без своей записи; само без записей — общим звуком действия.
+static func family_sound_events() -> Array[Dictionary]:
+	_ensure()
+	var out: Array[Dictionary] = []
+	for fid in _sound_families:
+		var fam: Dictionary = _sound_families[fid]
+		for raw in _sound_slots:
+			if not bool(raw.get("family", false)):
+				continue
+			var member: Dictionary = {}
+			for wid in fam.get("weapons", []):
+				var w := weapon(String(wid))
+				if not w.is_empty() and _sound_slot_applies(raw, w):
+					member = w
+					break
+			if member.is_empty():
+				continue
+			var slot := String(raw.id)
+			var event := raw.duplicate(true)
+			event.erase("shared")
+			event.id = "fam_%s_%s" % [fid, slot]
+			event.kind = String(event.id) if bool(raw.wired) else ""
+			event.file = "guns/fam_%s_%s_" % [fid, String(raw.file)]
+			event.fallback = _weapon_sound_fallback(member, String(raw.fallback))
+			event.family = String(fid)
+			event.slot = slot
+			event.cat = "Оружие — семейства"
+			event.group = String(fam.get("name", fid))
+			event.name = "%s — %s" % [String(fam.get("name", fid)), String(raw.name)]
+			event.now = "звук семейства; пока общий"
 			out.append(event)
 	return out
 
@@ -147,7 +216,7 @@ static func weapon_sound_map(id: String) -> Dictionary:
 			out[String(event.slot)] = kind
 	var w := weapon(id)
 	for raw in _sound_slots:
-		if not bool(raw.get("shared", false)) or not _sound_slot_applies(raw, w):
+		if not bool(raw.get("shared", false)) or not _sound_slot_applies(raw, w) or out.has(String(raw.id)):
 			continue
 		var shared_kind := _weapon_sound_fallback(w, String(raw.get("fallback", "")))
 		if shared_kind != "":
@@ -170,8 +239,13 @@ static func weapon_sound_layout(id: String) -> Array[Dictionary]:
 		var row := raw.duplicate(true)
 		row.slot = String(raw.id)
 		row.available = _sound_slot_applies(raw, w)
-		row.shared = bool(raw.get("shared", false))
-		if bool(row.shared):
+		row.shared = bool(raw.get("shared", false)) and not bool(raw.get("family", false))
+		if bool(raw.get("family", false)) and available_events.has(String(raw.id)):
+			row.merge(available_events[String(raw.id)] as Dictionary, true)
+		elif bool(raw.get("family", false)):
+			row.id = "%s_%s" % [wid, String(raw.id)]
+			row.kind = ""
+		elif bool(row.shared):
 			row.kind = _weapon_sound_fallback(w, String(raw.get("fallback", "")))
 			row.id = String(row.kind)
 		elif available_events.has(String(raw.id)):

@@ -1,5 +1,5 @@
 {
- "_comment": "Звуковые слоты одной модели оружия. Стенд строит из них карточки для каждого оружия из data/weapons.json; Audio использует те же события в игре. Свой файл модели заменяет fallback только у неё. condition: all / suppressible / detachable_mag / internal_mag / manual_cycle / break_action / not_break_action / automatic. wired=false — слот предусмотрен заранее, но механика ещё не вызывает его.",
+ "_comment": "Звуковые слоты одной модели оружия. Стенд строит из них карточки для каждого оружия из data/weapons.json; Audio использует те же события в игре. Свой файл модели заменяет fallback только у неё. condition: all / suppressible / detachable_mag / internal_mag / manual_cycle / break_action / not_break_action / automatic. wired=false — слот предусмотрен заранее, но механика ещё не вызывает его. family=true — общее действие звучит по семейству механики (families: магазин и затвор АК звучат иначе, чем у AR): своя запись модели → запись семейства → общий звук. Ствол без семейства берёт общий сразу.",
  "slots": [
   {
    "id": "shot",
@@ -65,7 +65,8 @@
    "variants": 3,
    "prio": 1,
    "condition": "all",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "jam",
@@ -79,7 +80,8 @@
    "variants": 3,
    "prio": 2,
    "condition": "all",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "clear_jam",
@@ -93,7 +95,8 @@
    "variants": 3,
    "prio": 2,
    "condition": "all",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "reload",
@@ -120,7 +123,8 @@
    "variants": 4,
    "prio": 1,
    "condition": "detachable_mag",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "mag_in",
@@ -134,7 +138,8 @@
    "variants": 4,
    "prio": 1,
    "condition": "detachable_mag",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "mag_drop",
@@ -148,7 +153,8 @@
    "variants": 4,
    "prio": 3,
    "condition": "detachable_mag",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "bolt_lock",
@@ -162,7 +168,8 @@
    "variants": 3,
    "prio": 2,
    "condition": "detachable_mag",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "round_insert",
@@ -176,7 +183,8 @@
    "variants": 5,
    "prio": 1,
    "condition": "internal_mag",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "charge",
@@ -190,7 +198,8 @@
    "variants": 4,
    "prio": 1,
    "condition": "not_break_action",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "cycle",
@@ -217,7 +226,8 @@
    "variants": 3,
    "prio": 1,
    "condition": "break_action",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "breech_close",
@@ -231,7 +241,8 @@
    "variants": 3,
    "prio": 1,
    "condition": "break_action",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "mag_check",
@@ -245,7 +256,8 @@
    "variants": 4,
    "prio": 2,
    "condition": "all",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "fire_mode",
@@ -259,7 +271,8 @@
    "variants": 3,
    "prio": 2,
    "condition": "automatic",
-   "wired": false
+   "wired": false,
+   "family": true
   },
   {
    "id": "safety",
@@ -273,7 +286,8 @@
    "variants": 3,
    "prio": 2,
    "condition": "all",
-   "wired": false
+   "wired": false,
+   "family": true
   },
   {
    "id": "draw",
@@ -287,7 +301,8 @@
    "variants": 4,
    "prio": 2,
    "condition": "all",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "holster",
@@ -301,7 +316,8 @@
    "variants": 4,
    "prio": 2,
    "condition": "all",
-   "wired": true
+   "wired": true,
+   "family": true
   },
   {
    "id": "ads_raise",
@@ -343,7 +359,8 @@
    "variants": 4,
    "prio": 3,
    "condition": "all",
-   "wired": false
+   "wired": false,
+   "family": true
   },
   {
    "id": "weapon_bump",
@@ -385,5 +402,71 @@
    "condition": "rig_suppressor",
    "wired": true
   }
- ]
+ ],
+ "families": {
+  "pistol": {
+   "name": "Пистолеты",
+   "weapons": [
+    "wpn_hg_01",
+    "wpn_hg_02",
+    "wpn_hg_03"
+   ]
+  },
+  "ak": {
+   "name": "Система АК",
+   "weapons": [
+    "wpn_ar_01",
+    "wpn_smg_04",
+    "wpn_sg_02"
+   ]
+  },
+  "ar": {
+   "name": "Система AR / STANAG",
+   "weapons": [
+    "wpn_ar_02",
+    "wpn_ar_03",
+    "wpn_ar_04",
+    "wpn_ar_05",
+    "wpn_dmr_01",
+    "wpn_dmr_02"
+   ]
+  },
+  "smg": {
+   "name": "Пистолеты-пулемёты",
+   "weapons": [
+    "wpn_smg_01",
+    "wpn_smg_02",
+    "wpn_smg_03",
+    "wpn_smg_05"
+   ]
+  },
+  "val": {
+   "name": "АС «Вал» / ВСС",
+   "weapons": [
+    "wpn_sp_01",
+    "wpn_sp_02"
+   ]
+  },
+  "sniper": {
+   "name": "Крупные винтовки",
+   "weapons": [
+    "wpn_sr_01",
+    "wpn_sr_02"
+   ]
+  },
+  "tube": {
+   "name": "Ружья с трубчатым магазином",
+   "weapons": [
+    "wpn_sg_01",
+    "wpn_sg_03"
+   ]
+  },
+  "lmg": {
+   "name": "Пулемёты",
+   "weapons": [
+    "wpn_lmg_01",
+    "wpn_lmg_02"
+   ]
+  }
+ }
 }
