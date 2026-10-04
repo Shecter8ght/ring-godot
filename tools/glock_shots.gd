@@ -11,6 +11,8 @@ var _camera: Camera3D
 var _weapon: Node3D
 var _rig: WeaponRig
 var _arms: FirstPersonArms
+## Как ViewmodelSpace у CameraRig: оружие и руки — со своим полем зрения (масштаб k, k, 1 у камеры).
+var _vm_space: Node3D
 var _player: Player
 var _ground: MeshInstance3D
 var _captures: Array[Dictionary] = []
@@ -38,15 +40,18 @@ func _ready() -> void:
 		if argument.begins_with("only="):
 			_only = argument.trim_prefix("only=").split(",", false)
 	_build_stage()
+	_vm_space = Node3D.new()
+	_vm_space.name = "ViewmodelSpace"
+	add_child(_vm_space)
 	_weapon = WeaponModels.build(WEAPON_ID)
-	add_child(_weapon)
+	_vm_space.add_child(_weapon)
 	_rig = WeaponRig.find_on(_weapon)
 	if _rig == null or not bool(_weapon.get_meta("asset_loaded", false)) or not _rig.has_parts():
 		push_error("glock_shots: нужен импортированный Glock со всеми деталями; запасная модель не является свидетельством проверки ассета")
 		get_tree().quit(1)
 		return
 	_arms = (load("res://scenes/player/first_person_arms.tscn") as PackedScene).instantiate() as FirstPersonArms
-	add_child(_arms)
+	_vm_space.add_child(_arms)
 	_arms.bind_weapon(_weapon)
 	_rig.attach_arms(_arms)
 	await _frames(8)
@@ -138,7 +143,7 @@ func _build_stage() -> void:
 	_camera = Camera3D.new()
 	_camera.near = 0.005
 	_camera.far = 100.0
-	_camera.fov = Balance.FPS_FOV
+	_camera.fov = Settings.fps_fov_v()
 	add_child(_camera)
 	_camera.current = true
 
@@ -157,13 +162,16 @@ func _fp(stage: String, ads: bool, action_name: String = "", progress: float = 0
 	_weapon.basis *= Basis.from_euler(_rig.view_rotation_degrees() * (PI / 180.0))
 	_camera.transform = Transform3D.IDENTITY
 	_camera.near = 0.05
-	_camera.fov = Balance.FPS_FOV
+	_camera.fov = Settings.fps_fov_v()
 	if ads:
 		var height: float = float(_weapon.get_meta("sight_h", 0.0))
 		var distance: float = float(_weapon.get_meta("ads_z", 0.36))
 		_weapon.position = Vector3(0.0, -height, -distance)
 		var stats: Dictionary = WeaponDb.weapon(WEAPON_ID).get("stats", {}) as Dictionary
-		_camera.fov = float(stats.get("ads_fov", 62.0))
+		_camera.fov = CameraRig.relative_fov(float(stats.get("ads_fov", 62.0)), Settings.fps_fov_v())
+	# камера в начале координат без поворота — оси камеры совпадают с осями сцены
+	var vk: float = CameraRig.viewmodel_scale(_camera.fov)
+	_vm_space.transform = Transform3D(Basis.from_scale(Vector3(vk, vk, 1.0)), Vector3.ZERO)
 	_arms.set_hand_target("Left", _rig.get_hand_target(), _rig.get_hand_weight())
 	_arms.update_pose()
 	await _settle()
@@ -270,6 +278,7 @@ func _third() -> void:
 
 
 func _reset() -> void:
+	_vm_space.transform = Transform3D.IDENTITY
 	_weapon.visible = true
 	_weapon.transform = Transform3D.IDENTITY
 	_rig.cancel_action()

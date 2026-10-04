@@ -40,6 +40,12 @@ var _mmb: bool = false
 var _look_yaw: float = 0.0
 var _look_pitch: float = 0.0
 var _ads_cam: Camera3D
+## Пространство рук и оружия перед глазами (дочернее камеры): масштаб (k, k, 1) в осях камеры даёт
+## им своё поле зрения Balance.FPS_VIEWMODEL_FOV при любом поле зрения мира (см. viewmodel_scale).
+## Линия на оси взгляда остаётся на оси — совмещение прицела не сбивается. Всё, что берётся у
+## модели в руках в мировых координатах (дуло, луч ствола, ЛЦУ), — в этом же «видимом» пространстве:
+## пуля от бедра идёт туда, куда ствол виден на экране.
+var _vm_space: Node3D
 var _viewmodel: Node3D
 var _viewmodel_rig: WeaponRig
 var _arms: FirstPersonArms
@@ -86,8 +92,11 @@ func _ready() -> void:
 	_ads_cam.cull_mask &= ~RainOcclusion.LAYER
 	_ads_cam.cull_mask &= ~Player.OWN_BODY_LAYER
 	add_child(_ads_cam)
+	_vm_space = Node3D.new()
+	_vm_space.name = "ViewmodelSpace"
+	_ads_cam.add_child(_vm_space)
 	_arms = (load("res://scenes/player/first_person_arms.tscn") as PackedScene).instantiate() as FirstPersonArms
-	_ads_cam.add_child(_arms)
+	_vm_space.add_child(_arms)
 	_build_hud()
 	_glare = LightGlare.new()
 	_glare.name = "Glare"
@@ -478,7 +487,8 @@ func _set_ads(on: bool, pl: Player) -> void:
 		# взгляд — туда, куда уже смотрит корпус; по вертикали — горизонт
 		_look_yaw = pl.body_yaw()
 		_look_pitch = 0.0
-		_ads_cam.fov = _ads_fov(pl) + 8.0
+		# старт чуть шире прицельного — «довод»; тоже относительно поля зрения у бедра
+		_ads_cam.fov = relative_fov(_ads_fov_tuned(pl) + 8.0, Settings.fps_fov_v())
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_ads_cam.current = true
 		# без выреза стен: из глаз игрока стены вокруг должны быть целыми
@@ -506,8 +516,11 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var scoped := bool(spec.get("scoped", false))
 	# без ПКМ (режим от первого лица) — широкий вид, оружие у бедра
 	var aim_t := pl.aim_progress()
-	var fov_to := _ads_fov(pl) if pl.aiming else Balance.FPS_FOV
+	var fov_to := _ads_fov(pl) if pl.aiming else Settings.fps_fov_v()
 	_ads_cam.fov = lerpf(_ads_cam.fov, fov_to, minf(1.0, 12.0 * delta))
+	# руки и оружие — со своим полем зрения, сколько бы ни было у мира
+	var vk := viewmodel_scale(_ads_cam.fov)
+	_vm_space.transform = Transform3D(Basis.from_scale(Vector3(vk, vk, 1.0)), Vector3.ZERO)
 	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
 	_sway_t += delta
 	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
@@ -549,8 +562,9 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		# фонарь у себя светит от модели в руках: луч идёт за стволом (у модели на теле он погашен)
 		for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
 			n.set_meta("own", true)
+			n.set_meta("vm_local", (n as Node3D).transform)
 			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
-		_ads_cam.add_child(_viewmodel)
+		_vm_space.add_child(_viewmodel)
 		_arms.bind_weapon(_viewmodel)
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
 		if _viewmodel_rig:
@@ -617,6 +631,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	else:
 		_arms.set_hand_target("Left", null, 0.0)
 	_arms.update_pose()
+	_straighten_lights()
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05)
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
@@ -643,13 +658,44 @@ func weapon_action(action: String, flag: bool = false, duration: float = 0.0, ro
 			_arms.set_hand_target("Left", null, 0.0)
 
 
-## Поле зрения глаз в прицеле: с оптикой — обычное (увеличение — в окуляре), иначе — по стволу.
+## Фонарь на модели в руках: под масштабом ViewmodelSpace его базис скошен (свет и тень от
+## скошенного прожектора считаются неверно) — ставим ровный базис в той же точке, луч — туда, куда
+## на экране смотрит фонарь (как ствол и ЛЦУ). Исходное положение у модели — meta "vm_local".
+func _straighten_lights() -> void:
+	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
+		var l := n as SpotLight3D
+		if not l.visible or not l.has_meta("vm_local"):
+			continue
+		var g: Transform3D = (l.get_parent() as Node3D).global_transform * (l.get_meta("vm_local") as Transform3D)
+		l.global_transform = Transform3D(Basis.looking_at(-g.basis.z, g.basis.y), g.origin)
+
+
+## Поле зрения глаз в прицеле: с оптикой — обычное (увеличение — в окуляре), иначе — по стволу;
+## увеличение — относительно поля зрения у бедра из настроек.
 func _ads_fov(pl: Player) -> float:
+	return relative_fov(_ads_fov_tuned(pl), Settings.fps_fov_v())
+
+
+## То же, как подобрано в данных — при опорном Balance.FPS_FOV у бедра.
+func _ads_fov_tuned(pl: Player) -> float:
 	if pl.weapon_id == "":
 		return 60.0
 	var spec := pl.spec()
 	# в убежище оружие в руках — для вида, характеристик нет
 	return Balance.SCOPE_MAIN_FOV if bool(spec.get("scoped", false)) else float(spec.get("ads_fov", 60.0))
+
+
+## Поле зрения, подобранное при опорном Balance.FPS_FOV у бедра (ads_fov ствола, оптика), — для
+## текущего поля зрения у бедра hip_v: то же увеличение относительно вида от бедра. Всё вертикальное, град.
+static func relative_fov(tuned_v: float, hip_v: float) -> float:
+	var t := tan(deg_to_rad(hip_v) * 0.5) * tan(deg_to_rad(tuned_v) * 0.5) / tan(deg_to_rad(Balance.FPS_FOV) * 0.5)
+	return rad_to_deg(2.0 * atan(t))
+
+
+## Масштаб ViewmodelSpace по X и Y (в осях камеры) при поле зрения камеры cam_v: модель
+## рисуется так, будто у камеры Balance.FPS_VIEWMODEL_FOV.
+static func viewmodel_scale(cam_v: float) -> float:
+	return tan(deg_to_rad(cam_v) * 0.5) / tan(deg_to_rad(Balance.FPS_VIEWMODEL_FOV) * 0.5)
 
 
 # ---------------------------------------------------------------- оптика отдельным рендером
@@ -688,7 +734,9 @@ func _build_scope() -> void:
 func ads_sens() -> float:
 	var pl := _target as Player
 	var aim_k := Settings.sens_ads if pl != null and pl.aiming else 1.0
-	var s := Balance.ADS_SENS * Settings.sens_fps * aim_k * (_ads_cam.fov / 62.0)
+	# у бедра — как было при опорных 74° (градусов на отсчёт мыши столько же при любом поле
+	# зрения из настроек), в прицеле — медленнее во столько, во сколько уже поле зрения
+	var s := Balance.ADS_SENS * Settings.sens_fps * aim_k * (Balance.FPS_FOV / 62.0) * (_ads_cam.fov / Settings.fps_fov_v())
 	return s / maxf(1.0, _scope_zoom) if scope_active else s
 
 
@@ -711,7 +759,8 @@ func _update_scope(zoom: float, illum: bool = false) -> void:
 	_scope_zoom = zoom
 	(_scope_view.material as ShaderMaterial).set_shader_parameter("illum", 1.0 if illum else 0.0)
 	var ocular: Vector3 = _viewmodel.to_global(_viewmodel.get_meta("ocular"))
-	var r := float(_viewmodel.get_meta("ocular_r"))
+	# окуляр рисуется в ViewmodelSpace — на экране он больше (меньше) в масштаб пространства
+	var r := float(_viewmodel.get_meta("ocular_r")) * _vm_space.scale.x
 	_scope_cam.global_transform = _ads_cam.global_transform
 	var dist := maxf(0.02, _ads_cam.global_position.distance_to(ocular))
 	# угол окуляра в основном виде и во сколько раз его «растянуть»

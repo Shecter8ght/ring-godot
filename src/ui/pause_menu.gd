@@ -409,6 +409,11 @@ func _build_settings(h: HBoxContainer) -> void:
 	inv.button_pressed = Settings.invert_y
 	inv.toggled.connect(func(on: bool) -> void: Settings.set_invert_y(on))
 	grid.add_child(inv)
+	grid.add_child(_label("Поле зрения (по горизонтали)"))
+	var fov := _slider(Settings.FOV_H_RANGE[0], Settings.FOV_H_RANGE[1], 1.0, Settings.fov_h, "%.0f°",
+		func(v: float) -> void: Settings.set_fov_h(v))
+	fov.tooltip_text = "От первого лица, как на экране 16:9. Руки и оружие — со своим полем зрения, прицелы увеличивают так же."
+	grid.add_child(fov)
 	for b in Settings.BUSES:
 		var bus := String(b)
 		grid.add_child(_label("Громкость: " + String(Settings.BUSES[b]).to_lower()))

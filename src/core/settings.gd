@@ -24,6 +24,9 @@ const BUSES := {"Master": "Общая", "Shots": "Выстрелы", "Steps": "�
 ## Множители чувствительности мыши: от очень медленной до очень быстрой (ползунок — по экспоненте,
 ## точное число — в поле рядом).
 const SENS_RANGE := [0.05, 10.0]
+## Поле зрения от первого лица — по горизонтали, как на экране 16:9, град (раздел view).
+const FOV_H_RANGE := [50.0, 120.0]
+const FOV_H_DEFAULT := 90.0
 
 var quality: String = "high"
 ## Во весь экран или в окне (WINDOW_MODES).
@@ -35,6 +38,8 @@ var sens_iso: float = 1.0
 var sens_ads: float = 1.0
 ## Мышь вверх — взгляд вниз (как у лётчиков).
 var invert_y: bool = false
+## Поле зрения от первого лица по горизонтали (на 16:9), град; камере — fps_fov_v().
+var fov_h: float = FOV_H_DEFAULT
 ## Громкость по шине, 0–1.
 var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.0, "Ambient": 1.0}
 ## Гарнитура на ушах своего игрока (data/armor.json → headsets[…].headset): поправки шин, дБ, и
@@ -84,6 +89,7 @@ func _load() -> void:
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
 	invert_y = bool(cfg.get_value("mouse", "invert_y", invert_y))
+	fov_h = clampf(float(cfg.get_value("view", "fov_h", fov_h)), FOV_H_RANGE[0], FOV_H_RANGE[1])
 	for b in BUSES:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
@@ -107,6 +113,7 @@ func save() -> void:
 	cfg.set_value("mouse", "iso", sens_iso)
 	cfg.set_value("mouse", "ads", sens_ads)
 	cfg.set_value("mouse", "invert_y", invert_y)
+	cfg.set_value("view", "fov_h", fov_h)
 	for b in BUSES:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
@@ -178,6 +185,23 @@ func set_invert_y(on: bool) -> void:
 	invert_y = on
 	save()
 	changed.emit()
+
+
+func set_fov_h(v: float) -> void:
+	fov_h = clampf(v, FOV_H_RANGE[0], FOV_H_RANGE[1])
+	save()
+	changed.emit()
+
+
+## Вертикальное поле зрения камеры (Camera3D держит высоту, keep_aspect = KEEP_HEIGHT) для
+## горизонтального h на экране с соотношением сторон aspect, град.
+static func fov_v_from_h(h_deg: float, aspect: float = 16.0 / 9.0) -> float:
+	return rad_to_deg(2.0 * atan(tan(deg_to_rad(h_deg) * 0.5) / aspect))
+
+
+## Поле зрения от первого лица без прицела — вертикальное, для Camera3D.fov.
+func fps_fov_v() -> float:
+	return fov_v_from_h(fov_h)
 
 
 # ---------------------------------------------------------------- клавиши
