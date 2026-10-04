@@ -114,9 +114,11 @@ static func _asset(weapon: Dictionary, lod: int) -> Node3D:
 
 
 ## Ветка LOD остаётся иерархией деталей: целик и предохранитель следуют за своим затвором.
-## Общие Empty переносятся на соответствующую деталь, сохраняя положение относительно PM.
+## Ветка — узел «<Модель>_LOD1» рядом с основной (PM_LOD1, Glock_LOD1), но не сама деталь
+## («Slide_LOD1» внутри ветки). Общие Empty переносятся на соответствующую деталь, сохраняя
+## положение относительно корня модели.
 static func _select_lod(root: Node3D, lod: int) -> void:
-	var low: Node3D = root.find_child("PM_LOD1", true, false) as Node3D
+	var low: Node3D = _lod_branch(root)
 	if low == null:
 		return
 	if lod <= 0:
@@ -155,6 +157,25 @@ static func _select_lod(root: Node3D, lod: int) -> void:
 		marker.name = String(data.name)
 		marker.transform = WeaponRig._relative_transform(parent, root).affine_inverse() * (data.transform as Transform3D)
 		parent.add_child(marker)
+
+
+## Ветка LOD1 — внешний узел «*_LOD1»: всё, что лежит внутри другого «*_LOD1», и переименованные
+## детали (Slide_LOD1, Rounds_LOD1) — уже её содержимое.
+static func _lod_branch(root: Node3D) -> Node3D:
+	for node: Node in root.find_children("*_LOD1", "Node3D", true, false):
+		var base_name: String = String(node.name).trim_suffix("_LOD1")
+		if base_name in WeaponRig.PART_NAMES or base_name == "Rounds" or base_name.begins_with("Round_"):
+			continue
+		var nested: bool = false
+		var ancestor: Node = node.get_parent()
+		while ancestor != null and ancestor != root:
+			if String(ancestor.name).ends_with("_LOD1"):
+				nested = true
+				break
+			ancestor = ancestor.get_parent()
+		if not nested:
+			return node as Node3D
+	return null
 
 
 # ---------------------------------------------------------------- пистолет

@@ -30,15 +30,19 @@ static func socket(model_key: String, mount: String) -> Dictionary:
 static func fit(root: Node3D, model_key: String, mods: Dictionary) -> void:
 	var rig: WeaponRig = WeaponRig.find_on(root)
 	if rig:
+		rig.set_external_muzzle(false)
 		rig.set_suppressed(false)
+	var bare_muzzle: Variant = root.get_meta("muzzle", Vector3.ZERO)
 	for mount in mods:
 		var id := WeaponDb.mod_id(mods[mount])
 		var a := WeaponDb.attachment(id)
 		if a.is_empty():
 			continue
 		if String(a.get("look", "")) == "asset":
-			if rig and rig.part("Suppressor"):
+			if rig and rig.has_suppressor_part():
 				rig.set_suppressed(true)
+				# Срез на собственном глушителе ведёт сам риг — это не внешняя насадка.
+				bare_muzzle = root.get_meta("muzzle", Vector3.ZERO)
 			else:
 				# Ассет может отсутствовать; обвес сохраняет читаемость на запасном пистолете.
 				var fallback: Dictionary = socket(model_key, String(mount))
@@ -54,6 +58,9 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary) -> void:
 			continue
 		m["mount"] = String(mount)
 		m["att"] = a
+		if rig and String(mount) == "muzzle" and bare_muzzle is Vector3:
+			# Сокеты основы сняты с процедурной модели; на импортированной насадка встаёт на её срез.
+			m.pos = bare_muzzle
 		if String(mount) == "optic_primary":
 			# прицел на планке — целик сложен: иначе торчит в нижней части окна прицела
 			_hide_part(root, "rear_sight")
@@ -61,6 +68,10 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary) -> void:
 			_offset_optic(root, m, a)
 			continue
 		_build_look(root, m, a)
+	if rig and root.get_meta("muzzle", Vector3.ZERO) != bare_muzzle:
+		# Процедурный глушитель или тормоз на модели без своей детали: дульный срез — от насадки,
+		# риг не возвращает его на голый ствол при каждой позе.
+		rig.set_external_muzzle(true)
 	# основная линия прицеливания и угловая — для камеры (CameraRig выбирает по прицелу)
 	root.set_meta("sight_primary", {"x": 0.0, "h": float(root.get_meta("sight_h", 0.0)), "roll": 0.0})
 

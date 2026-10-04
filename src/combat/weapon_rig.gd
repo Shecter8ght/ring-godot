@@ -7,8 +7,12 @@ signal sound_event(slot: String)
 signal action_finished(action: String)
 
 const PART_NAMES: Array[String] = ["Frame", "Slide", "Barrel", "Trigger", "Hammer", "SlideStop", "Safety", "MagCatch", "Magazine", "Suppressor"]
-const REQUIRED_PARTS: Array[String] = ["Frame", "Slide", "Trigger", "Hammer", "SlideStop", "Safety", "MagCatch", "Magazine", "Suppressor"]
+## Курок, предохранитель и глушитель есть не у каждого пистолета (у Glock их нет) — они необязательны:
+## без них риг просто не двигает эти детали, а глушитель ставится процедурным обвесом.
+const REQUIRED_PARTS: Array[String] = ["Frame", "Slide", "Trigger", "SlideStop", "MagCatch", "Magazine"]
 const MARKER_NAMES: Array[String] = ["Muzzle", "MuzzleSuppressed", "SightFront", "SightRear", "GripR", "GripL"]
+## MuzzleSuppressed необязателен: без собственного глушителя дульный срез берётся с Muzzle.
+const REQUIRED_MARKERS: Array[String] = ["Muzzle", "SightFront", "SightRear"]
 
 var weapon_id: String = ""
 var action: String = ""
@@ -28,6 +32,7 @@ var _cocked: bool = false
 var _suppressed: bool = false
 var _install: bool = false
 var _empty_reload: bool = false
+var _external_muzzle: bool = false
 var _running: bool = false
 var _elapsed: float = 0.0
 var _duration: float = 0.0
@@ -112,10 +117,21 @@ func has_parts() -> bool:
 	for part_name: String in REQUIRED_PARTS:
 		if part(part_name) == null:
 			return false
-	for marker_name: String in ["Muzzle", "MuzzleSuppressed", "SightFront", "SightRear"]:
+	for marker_name: String in REQUIRED_MARKERS:
 		if marker(marker_name) == null:
 			return false
 	return true
+
+
+## Глушитель модели — своя деталь с анимацией накручивания; без неё глушитель только процедурный.
+func has_suppressor_part() -> bool:
+	return part("Suppressor") != null
+
+
+## Процедурная дульная насадка (WeaponMods) сама задала дульный срез: риг его больше не перезаписывает.
+func set_external_muzzle(external: bool) -> void:
+	_external_muzzle = external
+	_update_muzzle()
 
 
 func attach_arms(arms: Node3D) -> void:
@@ -415,7 +431,11 @@ func _update_hand_binding() -> void:
 
 
 func _update_muzzle() -> void:
-	var muzzle: Node3D = marker("MuzzleSuppressed" if _suppressed else "Muzzle")
+	if _external_muzzle:
+		return
+	var muzzle: Node3D = marker("MuzzleSuppressed") if _suppressed and has_suppressor_part() else null
+	if muzzle == null:
+		muzzle = marker("Muzzle")
 	if muzzle:
 		set_meta("muzzle", _relative_transform(muzzle, self).origin)
 
