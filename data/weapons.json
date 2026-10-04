@@ -496,7 +496,8 @@
      "range": 60,
      "noise": 60,
      "reliability": 0.985,
-     "wear": 0.02
+     "wear": 0.02,
+     "reload_empty": 2.13
     },
     "mounts": {
      "optic_primary": "SLIDE_RMR",
@@ -507,7 +508,141 @@
     "default_mag": "mag_919_17",
     "sound": "shot_hg_02",
     "reload_sound": "reload_pistol",
-    "cycle_sound": ""
+    "cycle_sound": "",
+    "asset": "res://assets/models/weapons/glock17/glock17.glb",
+    "chamber_capacity": 1,
+    "rig": {
+     "ads_z": 0.36,
+     "shot_duration": 0.065,
+     "slide_travel_m": 0.044,
+     "shot_peak": 0.42,
+     "trigger_angle_deg": 12.0,
+     "trigger_axis": [
+      1,
+      0,
+      0
+     ],
+     "slide_stop_angle_deg": -4.0,
+     "mag_catch_angle_deg": 0.0,
+     "magazine_out_m": [
+      0,
+      -0.115,
+      -0.035
+     ],
+     "reload": {
+      "catch": 0.08,
+      "mag_out": 0.22,
+      "mag_hidden": 0.34,
+      "mag_new": 0.48,
+      "mag_in": 0.65,
+      "charge": 0.82,
+      "charge_end": 0.94
+     },
+     "viewmodel_offsets": {
+      "reload": {
+       "rotation_deg": [0, 35, -8],
+       "offset_m": [
+        -0.22,
+        0.22,
+        -0.13
+       ],
+       "in_end": 0.14,
+       "out_start": 0.91
+      }
+     },
+     "hand_offsets": {
+      "magazine": [
+       0.021,
+       -0.075,
+       -0.005
+      ],
+      "slide": [
+       0.035,
+       0.015,
+       0.03
+      ]
+     }
+    },
+    "hand_grips": {
+     "right": {
+      "pos": [
+       -0.028,
+       -0.023,
+       -0.079
+      ],
+      "fingers": [
+       0,
+       0,
+       1
+      ],
+      "thumb": [
+       0,
+       1,
+       0
+      ],
+      "curl": [
+       10,
+       90,
+       60
+      ],
+      "thumb_directions": [
+       [
+        -0.15,
+        0.97,
+        -0.18
+       ],
+       [
+        0,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        0
+       ]
+      ]
+     },
+     "left": {
+      "pos": [
+       0.036,
+       -0.028,
+       -0.083
+      ],
+      "fingers": [
+       0,
+       0,
+       1
+      ],
+      "thumb": [
+       0,
+       1,
+       0
+      ],
+      "curl": [
+       10,
+       90,
+       60
+      ],
+      "thumb_directions": [
+       [
+        -0.15,
+        0.97,
+        0.18
+       ],
+       [
+        0,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        0
+       ]
+      ]
+     }
+    }
    },
    "flavor": "Не самый редкий трофей, зато тот, который почти никогда не подводит в дверном проёме."
   },

@@ -107,3 +107,11 @@
 - Винтовка: два атласа basecolor/ORM/OpenGL normal 4096². Остальные предметы: по одному атласу 2048²; стекло прицелов отдельно. ORM: R — локальный AO, G — roughness, B — metallic. Исходники `.kra`/`.blend` и отчёты — `_asset_src/vss_textured/`; `tools/prepare_vss_texturing.py`, `paint_vss_texture_layers.py`, `bake_vss_texture_ao.py`, `merge_vss_texture_ao.py`, `finish_vss_in_krita.ps1`, `apply_vss_krita_textures.py`, `import_vss_textured.py`.
 - Приклад v3 уточнён по замечанию владельца: вогнутый плечевой торец, дерево подогнано к фактической поверхности резинового затыльника. `tools/refine_vss_shoulder_stock.py` / `check_vss_shoulder_stock.py`; прежние модели сохранены, UV/карты обновлены в Krita.
 <!-- VSS_TEXTURES_END -->
+
+<!-- GLOCK17_MODEL_START -->
+## Пистолет Glock 17 Gen5
+
+- `assets/models/weapons/glock17/glock17.glb` — собственная модель владельца проекта, сделана для RING; лицензия — собственная работа. Glock 17 Gen5: рамка, затвор, ствол, спуск, затворная задержка, защёлка, магазин на 17 патронов; покраска владельца (PBR металл/полимер 2048², встроена в glb); два уровня детализации.
+- Источник — `_asset_src/glock17_gen5/` (glb, неизменённая копия .blend, `license.txt`, `export_manifest.json`); проверка и импорт — `tools/import_weapon_model.py glock17_gen5`.
+- Маркировка GLOCK — товарный знак Glock Ges.m.b.H.; оставлена по решению владельца, до выпуска игры решить отдельно (см. `license.txt`).
+<!-- GLOCK17_MODEL_END -->
