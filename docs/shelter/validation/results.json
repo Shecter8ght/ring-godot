@@ -1,5 +1,6 @@
 {
   "solo_acceptance": {
+    "completed": true,
     "checks_passed": 53,
     "checks_failed": 0,
     "evidence": [
@@ -60,19 +61,29 @@
     ],
     "warnings": [
       "WARNING: ObjectDB instances leaked at exit (run with --verbose for details)."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "acceptance-final.log",
+      "acceptance-final.errors.log"
     ]
   },
   "compile": {
+    "completed": true,
     "checks_passed": 0,
     "checks_failed": 0,
     "evidence": [
       "compile_check: не собралось 0"
     ],
-    "warnings": [
-      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details)."
+    "warnings": [],
+    "engine_errors": [],
+    "source_logs": [
+      "compile_check-final.log",
+      "compile_check-final.errors.log"
     ]
   },
   "cart_regression": {
+    "completed": true,
     "checks_passed": 20,
     "checks_failed": 0,
     "evidence": [
@@ -98,9 +109,14 @@
       "  [ok] прижатие не проталкивает человека через стену  z=1.81",
       "cart_test: провалено 0"
     ],
-    "warnings": []
+    "warnings": [],
+    "engine_errors": [],
+    "source_logs": [
+      "cart-regression.log"
+    ]
   },
-  "raid_evac_return": {
+  "loadout_raid_return": {
+    "completed": true,
     "checks_passed": 36,
     "checks_failed": 0,
     "evidence": [
@@ -143,13 +159,18 @@
       "loadout_test: провалено 0"
     ],
     "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
       "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
-      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.",
-      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details)."
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "loadout.log"
     ]
   },
   "coop_host": {
-    "checks_passed": 60,
+    "completed": true,
+    "checks_passed": 73,
     "checks_failed": 0,
     "evidence": [
       "[ok] host host",
@@ -163,61 +184,83 @@
       "[ok] host late_join light state",
       "[ok] host late_join profile",
       "[ok] host late_join guest reports",
-      "[ok] host late_join peer 1993868077",
-      "[ok] host late_join peer 1551018099",
+      "[ok] host late_join peer 1140486828",
+      "[ok] host late_join peer 1056721458",
       "[ok] host guest_switch_result TV",
       "[ok] host guest_switch_result radio",
       "[ok] host guest_switch_result generator",
       "[ok] host guest_switch_result light state",
       "[ok] host guest_switch_result profile",
       "[ok] host guest_switch_result guest reports",
-      "[ok] host guest_switch_result peer 1551018099",
-      "[ok] host guest_switch_result peer 1993868077",
+      "[ok] host guest_switch_result peer 1140486828",
+      "[ok] host guest_switch_result peer 1056721458",
       "[ok] host channels_0 TV",
       "[ok] host channels_0 radio",
       "[ok] host channels_0 generator",
       "[ok] host channels_0 light state",
       "[ok] host channels_0 profile",
       "[ok] host channels_0 guest reports",
-      "[ok] host channels_0 peer 1551018099",
-      "[ok] host channels_0 peer 1993868077",
+      "[ok] host channels_0 peer 1140486828",
+      "[ok] host channels_0 peer 1056721458",
       "[ok] host channels_1 TV",
       "[ok] host channels_1 radio",
       "[ok] host channels_1 generator",
       "[ok] host channels_1 light state",
       "[ok] host channels_1 profile",
       "[ok] host channels_1 guest reports",
-      "[ok] host channels_1 peer 1993868077",
-      "[ok] host channels_1 peer 1551018099",
+      "[ok] host channels_1 peer 1056721458",
+      "[ok] host channels_1 peer 1140486828",
       "[ok] host channels_2 TV",
       "[ok] host channels_2 radio",
       "[ok] host channels_2 generator",
       "[ok] host channels_2 light state",
       "[ok] host channels_2 profile",
       "[ok] host channels_2 guest reports",
-      "[ok] host channels_2 peer 1993868077",
-      "[ok] host channels_2 peer 1551018099",
+      "[ok] host channels_2 peer 1140486828",
+      "[ok] host channels_2 peer 1056721458",
       "[ok] host channels_3 TV",
       "[ok] host channels_3 radio",
       "[ok] host channels_3 generator",
       "[ok] host channels_3 light state",
       "[ok] host channels_3 profile",
       "[ok] host channels_3 guest reports",
-      "[ok] host channels_3 peer 1993868077",
-      "[ok] host channels_3 peer 1551018099",
+      "[ok] host channels_3 peer 1140486828",
+      "[ok] host channels_3 peer 1056721458",
       "[ok] host movement replicated peer 1",
-      "[ok] host movement replicated peer 1551018099",
-      "[ok] host movement replicated peer 1993868077",
+      "[ok] host movement replicated peer 1056721458",
+      "[ok] host movement replicated peer 1140486828",
+      "[ok] host without_host guest reports",
+      "[ok] host without_host peer 1056721458",
+      "[ok] host without_host peer 1140486828",
+      "[ok] host host_return TV",
+      "[ok] host host_return radio",
+      "[ok] host host_return generator",
+      "[ok] host host_return light state",
+      "[ok] host host_return profile",
+      "[ok] host host_return guest reports",
+      "[ok] host host_return peer 1140486828",
+      "[ok] host host_return peer 1056721458",
       "[ok] host raid with own equipment",
+      "[ok] host raid future weather schedule received",
+      "[ok] host raid event setup received",
       "[ok] host raid guest reports",
-      "[ok] host raid peer 1993868077",
-      "[ok] host raid peer 1551018099",
+      "[ok] host raid peer 1140486828",
+      "[ok] host raid peer 1056721458",
       "SHELTER_NET host failures=0"
     ],
-    "warnings": []
+    "warnings": [
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "net-host.log",
+      "net-host.errors.log"
+    ]
   },
   "coop_c1": {
-    "checks_passed": 32,
+    "completed": true,
+    "checks_passed": 42,
     "checks_failed": 0,
     "evidence": [
       "[ok] c1 connect",
@@ -251,13 +294,33 @@
       "[ok] c1 channels_3 generator",
       "[ok] c1 channels_3 light state",
       "[ok] c1 channels_3 profile",
+      "[ok] c1 without host TV/radio shared",
+      "[ok] c1 power request waits for authority",
+      "[ok] c1 host_return TV",
+      "[ok] c1 host_return radio",
+      "[ok] c1 host_return generator",
+      "[ok] c1 host_return light state",
+      "[ok] c1 host_return profile",
+      "[ok] c1 host return does not teleport guests",
       "[ok] c1 raid with own equipment",
+      "[ok] c1 raid future weather schedule received",
+      "[ok] c1 raid event setup received",
       "SHELTER_NET c1 failures=0 host_failures=0"
     ],
-    "warnings": []
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "net-c1.log",
+      "net-c1.errors.log"
+    ]
   },
   "coop_c2": {
-    "checks_passed": 32,
+    "completed": true,
+    "checks_passed": 42,
     "checks_failed": 0,
     "evidence": [
       "[ok] c2 connect",
@@ -291,9 +354,324 @@
       "[ok] c2 channels_3 generator",
       "[ok] c2 channels_3 light state",
       "[ok] c2 channels_3 profile",
+      "[ok] c2 without host TV/radio shared",
+      "[ok] c2 power request waits for authority",
+      "[ok] c2 host_return TV",
+      "[ok] c2 host_return radio",
+      "[ok] c2 host_return generator",
+      "[ok] c2 host_return light state",
+      "[ok] c2 host_return profile",
+      "[ok] c2 host return does not teleport guests",
       "[ok] c2 raid with own equipment",
+      "[ok] c2 raid future weather schedule received",
+      "[ok] c2 raid event setup received",
       "SHELTER_NET c2 failures=0 host_failures=0"
     ],
-    "warnings": []
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "net-c2.log",
+      "net-c2.errors.log"
+    ]
+  },
+  "raid_regression_host": {
+    "completed": true,
+    "checks_passed": 17,
+    "checks_failed": 0,
+    "evidence": [
+      "  [ok] снаряжение: стволы надеты  [\"secondary\", \"primary\"]",
+      "  [ok] сервер поднят  ",
+      "  [ok] убежище: вижу обоих  { 1: \"hideout\", 1310262340: \"hideout\", 1720214900: \"hideout\" }",
+      "  [ok] hideout: вижу, как c1 ходит  сдвиг 3.09 м",
+      "  [ok] hideout: вижу, как c2 ходит  сдвиг 3.09 м",
+      "  [ok] рейд: все трое на месте  игроков 3, сцены { 1: \"raid\", 1310262340: \"loading\", 1720214900: \"loading\" }",
+      "  [ok] raid: вижу, как c1 ходит  сдвиг 130.52 м",
+      "  [ok] raid: вижу, как c2 ходит  сдвиг 104.16 м",
+      "  [ok] рейд: сам выстрелил  своих вспышек 3",
+      "  [ok] рейд: выстрелы c1 видно  вспышек 3",
+      "  [ok] рейд: выстрелы c2 видно  вспышек 3",
+      "  [ok] рейд: дверь, открытая c1, открыта  /root/F1Ring/f1_ring/Doors/Door_0",
+      "  [ok] рейд: генератор встал — видно у меня  ",
+      "  [ok] рейд: c2 починил генератор — весь свет  on",
+      "  [ok] эвакуация: общий отсчёт идёт, ждём c2  осталось 176.0, ждём [1720214900]",
+      "  [ok] эвакуация: хост и c1 ушли, c2 не успел  { 1: \"Автобусная остановка\", 1310262340: \"Автобусная остановка\" } / { 1720214900: \"Автобусная остановка\" }",
+      "  [ok] эвакуация: моя хроника — «extract»  extract: Живой — уже хорошо. Остальное — в следующий раз.",
+      "coop_raid[host]: провалено 0"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [
+      "ERROR: Parameter \"material\" is null."
+    ],
+    "source_logs": [
+      "coop-raid-host.log",
+      "coop-raid-host.errors.log"
+    ]
+  },
+  "raid_regression_c1": {
+    "completed": true,
+    "checks_passed": 18,
+    "checks_failed": 0,
+    "evidence": [
+      "  [ok] снаряжение: стволы надеты  [\"secondary\", \"primary\"]",
+      "  [ok] подключение  ",
+      "  [ok] убежище: вижу хоста и второго друга  игроков 3, сцены { 1310262340: \"hideout\", 1: \"hideout\", 1720214900: \"hideout\" }",
+      "  [ok] hideout: вижу, как host ходит  сдвиг 3.09 м",
+      "  [ok] hideout: вижу, как c2 ходит  сдвиг 3.09 м",
+      "  [ok] рейд: все трое на месте  игроков 3, сцены { 1310262340: \"raid\", 1: \"raid\", 1720214900: \"raid\" }",
+      "  [ok] c1: дверь открылась у меня  /root/F1Ring/f1_ring/Doors/Door_0",
+      "  [ok] raid: вижу, как host ходит  сдвиг 94.96 м",
+      "  [ok] raid: вижу, как c2 ходит  сдвиг 104.16 м",
+      "  [ok] рейд: сам выстрелил  своих вспышек 3",
+      "  [ok] рейд: выстрелы host видно  вспышек 3",
+      "  [ok] рейд: выстрелы c2 видно  вспышек 3",
+      "  [ok] рейд: дверь, открытая c1, открыта  /root/F1Ring/f1_ring/Doors/Door_0",
+      "  [ok] рейд: генератор встал — видно у меня  ",
+      "  [ok] рейд: c2 починил генератор — весь свет  on",
+      "  [ok] эвакуация: общий отсчёт идёт, ждём c2  осталось 173.9, ждём [1720214900]",
+      "  [ok] эвакуация: хост и c1 ушли, c2 не успел  { 1: \"Автобусная остановка\", 1310262340: \"Автобусная остановка\" } / { 1720214900: \"Автобусная остановка\" }",
+      "  [ok] эвакуация: моя хроника — «extract»  extract: Живой — уже хорошо. Остальное — в следующий раз.",
+      "coop_raid[c1]: провалено 0"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "coop-raid-c1.log",
+      "coop-raid-c1.errors.log"
+    ]
+  },
+  "raid_regression_c2": {
+    "completed": true,
+    "checks_passed": 20,
+    "checks_failed": 0,
+    "evidence": [
+      "  [ok] снаряжение: стволы надеты  [\"secondary\", \"primary\"]",
+      "  [ok] подключение  ",
+      "  [ok] убежище: вижу хоста и второго друга  игроков 3, сцены { 1720214900: \"hideout\", 1: \"hideout\", 1310262340: \"hideout\" }",
+      "  [ok] hideout: вижу, как host ходит  сдвиг 3.09 м",
+      "  [ok] hideout: вижу, как c1 ходит  сдвиг 3.09 м",
+      "  [ok] рейд: все трое на месте  игроков 3, сцены { 1720214900: \"raid\", 1: \"raid\", 1310262340: \"raid\" }",
+      "  [ok] c2: разряжает поштучно через хост (пометка видна)  россыпью 126 → 134",
+      "  [ok] c2: прервал — пометка снята  ",
+      "  [ok] c2: генератор стоит — можно чинить  Генератор ТЦ: чинить (8 с, громко)",
+      "  [ok] raid: вижу, как host ходит  сдвиг 94.96 м",
+      "  [ok] raid: вижу, как c1 ходит  сдвиг 130.52 м",
+      "  [ok] рейд: сам выстрелил  своих вспышек 3",
+      "  [ok] рейд: выстрелы host видно  вспышек 3",
+      "  [ok] рейд: выстрелы c1 видно  вспышек 3",
+      "  [ok] рейд: дверь, открытая c1, открыта  /root/F1Ring/f1_ring/Doors/Door_0",
+      "  [ok] рейд: генератор встал — видно у меня  ",
+      "  [ok] рейд: c2 починил генератор — весь свет  on",
+      "  [ok] эвакуация: общий отсчёт идёт, ждём c2  осталось 173.9, ждём [1720214900]",
+      "  [ok] эвакуация: хост и c1 ушли, c2 не успел  { 1: \"Автобусная остановка\", 1310262340: \"Автобусная остановка\" } / { 1720214900: \"Автобусная остановка\" }",
+      "  [ok] эвакуация: моя хроника — «stranded»  stranded: Группа ждала 3 минуты. Вы — нет.",
+      "coop_raid[c2]: провалено 0"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "coop-raid-c2.log",
+      "coop-raid-c2.errors.log"
+    ]
+  },
+  "events_regression": {
+    "completed": true,
+    "checks_passed": 15,
+    "checks_failed": 0,
+    "evidence": [
+      "  [ok] жильцы в магазинах и магазины на сигнализации  жильцов 5, сигнализаций 2",
+      "  [ok] свет погас — ворота на электричестве закрыты  в ТЦ нет электричества — ворота не открыть",
+      "  [ok] рубильник в щитовой поднят — свет вернулся  огней 149",
+      "  [ok] генератор ТЦ — в мастерской, работает  a -160.5 r 114.0",
+      "  [ok] к генератору можно подойти  до навмеша 0.02 м по полу",
+      "  [ok] авария генератора — аварийный свет, чинить тот же генератор  emergency",
+      "  [ok] починил генератор — свет вернулся, генератор на месте  огней 149",
+      "  [ok] сброс: груз в атриуме  ",
+      "  [ok] ЧВК приехали группой  4",
+      "  [ok] ЧВК и мародёр воюют между собой  ",
+      "  [ok] убийства ИИ — не игроку  0",
+      "  [ok] жильцы: не трогают, пока не полез; полез — враждебны  ",
+      "  [ok] зашёл в магазин на сигнализации — сирена, слышно округе  ",
+      "  [ok] пульт: отключил сигнализацию — сирена молчит, шума нет  ",
+      "  [ok] рация: вынес вещь — Михалыч заплатил  +54000",
+      "events_test: провалено 0"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "events_test-final.log",
+      "events_test-final.errors.log"
+    ]
+  },
+  "weather_regression": {
+    "completed": true,
+    "checks_passed": 8,
+    "checks_failed": 0,
+    "evidence": [
+      "  [ok] дождь: шум слышно ближе  30 м вместо 50",
+      "  [ok] дождь: на улице видно хуже  ",
+      "  [ok] дождь: капли и шум  ",
+      "  [ok] дождь начался в рейде  { \"time\": \"day\", \"weather\": \"rain\", \"power\": \"on\" }",
+      "  [ok] туман: снайпер с пистолетом, рассеялся — своё основное оружие  ASSAULT_RIFLE",
+      "  [ok] жара: на улице пересвет, в очках — нет  ",
+      "  [ok] бег тратит выносливость, в жару быстрее  осталось 75",
+      "  [ok] отдых восстанавливает  100",
+      "weather_test: провалено 0"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "weather_test-final.log",
+      "weather_test-final.errors.log"
+    ]
+  },
+  "events_baseline": {
+    "completed": true,
+    "checks_passed": 15,
+    "checks_failed": 0,
+    "evidence": [
+      "  [ok] жильцы в магазинах и магазины на сигнализации  жильцов 5, сигнализаций 2",
+      "  [ok] свет погас — ворота на электричестве закрыты  в ТЦ нет электричества — ворота не открыть",
+      "  [ok] рубильник в щитовой поднят — свет вернулся  огней 149",
+      "  [ok] генератор ТЦ — в мастерской, работает  a -160.5 r 114.0",
+      "  [ok] к генератору можно подойти  до навмеша 0.02 м по полу",
+      "  [ok] авария генератора — аварийный свет, чинить тот же генератор  emergency",
+      "  [ok] починил генератор — свет вернулся, генератор на месте  огней 149",
+      "  [ok] сброс: груз в атриуме  ",
+      "  [ok] ЧВК приехали группой  4",
+      "  [ok] ЧВК и мародёр воюют между собой  ",
+      "  [ok] убийства ИИ — не игроку  0",
+      "  [ok] жильцы: не трогают, пока не полез; полез — враждебны  ",
+      "  [ok] зашёл в магазин на сигнализации — сирена, слышно округе  ",
+      "  [ok] пульт: отключил сигнализацию — сирена молчит, шума нет  ",
+      "  [ok] рация: вынес вещь — Михалыч заплатил  +54000",
+      "events_test: провалено 0"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [
+      "ERROR: 4 resources still in use at exit (run with --verbose for details)."
+    ],
+    "source_logs": [
+      "events_test-baseline.log",
+      "events_test-baseline.errors.log"
+    ]
+  },
+  "weather_baseline": {
+    "completed": true,
+    "checks_passed": 7,
+    "checks_failed": 1,
+    "evidence": [
+      "  [ok] дождь: шум слышно ближе  30 м вместо 50",
+      "  [ok] дождь: на улице видно хуже  ",
+      "  [ok] дождь: капли и шум  ",
+      "  [ok] дождь начался в рейде  { \"time\": \"day\", \"weather\": \"rain\", \"power\": \"on\" }",
+      "  [FAIL] туман: снайпер с пистолетом, рассеялся — снова винтовка  ASSAULT_RIFLE",
+      "  [ok] жара: на улице пересвет, в очках — нет  ",
+      "  [ok] бег тратит выносливость, в жару быстрее  осталось 75",
+      "  [ok] отдых восстанавливает  100",
+      "weather_test: провалено 1"
+    ],
+    "warnings": [
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "weather_test-baseline.log",
+      "weather_test-baseline.errors.log"
+    ]
+  },
+  "events_initial": {
+    "completed": true,
+    "checks_passed": 14,
+    "checks_failed": 1,
+    "evidence": [
+      "  [ok] жильцы в магазинах и магазины на сигнализации  жильцов 5, сигнализаций 2",
+      "  [ok] свет погас — ворота на электричестве закрыты  в ТЦ нет электричества — ворота не открыть",
+      "  [ok] рубильник в щитовой поднят — свет вернулся  огней 149",
+      "  [ok] генератор ТЦ — в мастерской, работает  a -160.5 r 114.0",
+      "  [ok] к генератору можно подойти  до навмеша 0.02 м по полу",
+      "  [ok] авария генератора — аварийный свет, чинить тот же генератор  emergency",
+      "  [ok] починил генератор — свет вернулся, генератор на месте  огней 149",
+      "  [ok] сброс: груз в атриуме  ",
+      "  [ok] ЧВК приехали группой  4",
+      "  [ok] ЧВК и мародёр воюют между собой  ",
+      "  [ok] убийства ИИ — не игроку  0",
+      "  [FAIL] жильцы: не трогают, пока не полез; полез — враждебны  ",
+      "  [ok] зашёл в магазин на сигнализации — сирена, слышно округе  ",
+      "  [ok] пульт: отключил сигнализацию — сирена молчит, шума нет  ",
+      "  [ok] рация: вынес вещь — Михалыч заплатил  +54000",
+      "events_test: провалено 1"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "events_test-initial.log",
+      "events_test-initial.errors.log"
+    ]
+  },
+  "weather_initial": {
+    "completed": true,
+    "checks_passed": 7,
+    "checks_failed": 1,
+    "evidence": [
+      "  [ok] дождь: шум слышно ближе  30 м вместо 50",
+      "  [ok] дождь: на улице видно хуже  ",
+      "  [ok] дождь: капли и шум  ",
+      "  [ok] дождь начался в рейде  { \"time\": \"day\", \"weather\": \"rain\", \"power\": \"on\" }",
+      "  [FAIL] туман: снайпер с пистолетом, рассеялся — снова винтовка  ASSAULT_RIFLE",
+      "  [ok] жара: на улице пересвет, в очках — нет  ",
+      "  [ok] бег тратит выносливость, в жару быстрее  осталось 76",
+      "  [ok] отдых восстанавливает  100",
+      "weather_test: провалено 1"
+    ],
+    "warnings": [
+      "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+      "WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.",
+      "WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision."
+    ],
+    "engine_errors": [],
+    "source_logs": [
+      "weather_test-initial.log",
+      "weather_test-initial.errors.log"
+    ]
+  },
+  "baseline_control": {
+    "baseline_commit": "67ab2f9",
+    "method": "13 runtime files temporarily replaced from HEAD; user changes excluded; original bytes restored",
+    "events_test": 0,
+    "weather_test": 1,
+    "source_restored_byte_for_byte": true
   }
 }

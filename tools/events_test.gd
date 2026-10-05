@@ -119,7 +119,16 @@ func _ready() -> void:
 	await get_tree().create_timer(4.0).timeout
 	_check("убийства ИИ — не игроку", credited[0] == 0, str(credited[0]))
 	# жильцы: рядом — не трогают; полез к ним — враждебны
-	var r0 := residents[0] as Marauder
+	# Прежний жилец мог погибнуть от ЧВК в предыдущей проверке. Новый мирный
+	# отряд вдали от места перестрелки проверяет реакцию живых, а не ragdoll.
+	for actor: Node in get_tree().get_nodes_in_group("marauders"):
+		actor.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var resident_home: Vector3 = SectorBuilder.polar(-160.0, 72.0)
+	me.global_position = resident_home + Vector3(20.0, 0.1, 0)
+	ev._spawn_residents(resident_home, 4.0, false)
+	var r0: Marauder = get_tree().get_nodes_in_group("marauders")[0] as Marauder
 	if is_instance_valid(r0):
 		r0.hostile_to_players = false
 		for m in (r0.squad.alive() if r0.squad else [r0]):
