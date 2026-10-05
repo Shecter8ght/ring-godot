@@ -1,0 +1,8 @@
+hideout/
+arms_regression_frames/
+*.png
+!wpn_hg_01_wall.png
+!wpn_hg_01_reload_magazine.png
+!rifle_corner.png
+!rifle_prone_wall.png
+!rifle_third_wall.png

@@ -154,7 +154,7 @@ func _set_segment(bone: int, child: int, start: Vector3, finish: Vector3, wrist_
 	var rotation: Basis = Basis(Quaternion(old_direction, new_direction))
 	var pose: Transform3D = Transform3D(rotation * wrist_rotation * _rest[bone].basis, start)
 	if move_shoulder:
-		# Край рукава частично взвешен на ключицу: оставленная в rest она растягивала ткань через экран.
+		# Плечевой пояс следует за перенесённым плечом, чтобы цепь сохраняла согласованную позу.
 		var parent: int = skeleton.get_bone_parent(bone)
 		skeleton.set_bone_global_pose(parent, pose * _rest[bone].affine_inverse() * _rest[parent])
 	skeleton.set_bone_global_pose(bone, pose)

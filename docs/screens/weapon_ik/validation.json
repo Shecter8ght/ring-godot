@@ -1,0 +1,41 @@
+{
+  "collision": {
+    "checks": 369,
+    "failures": 0
+  },
+  "enet": {
+    "host": {
+      "checks": 57,
+      "failures": 0,
+      "errors": 0
+    },
+    "c1": {
+      "checks": 45,
+      "failures": 0,
+      "errors": 0
+    },
+    "c2": {
+      "checks": 45,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "animation": {
+    "checks": 11,
+    "failures": 0,
+    "earlier_parallel_run": "One sprint check selected rifle_run_f; the final separate run passed. Clip selection and movement speeds were not changed."
+  },
+  "grips": {
+    "cases": 26,
+    "failures": 0
+  },
+  "compile": {
+    "failures": 0
+  },
+  "hideout_demo": {
+    "frames": 90,
+    "near_wall_obstruction": 0.94270833333333,
+    "visible": true,
+    "return_obstruction": 0
+  }
+}
