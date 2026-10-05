@@ -1,9 +1,10 @@
 class_name Floors
 extends RefCounted
-## Этажи ТЦ и маршруты заброски (data/floors.json). Этаж = отдельная карта; внутри здания этажи
+## Этажи ТЦ, зоны и маршруты заброски (data/floors.json). Этаж = отдельная карта; внутри здания этажи
 ## отрезаны друг от друга, поэтому у каждого — свой путь снаружи, и выбор этажа в убежище — это
 ## выбор маршрута. Маршрут открывает торговец: нужно его доверие (Profile.trust, растёт за удачные
-## эвакуации) и разовая плата за наводку. Что открыто и что выбрано — в профиле.
+## эвакуации) и разовая плата за наводку. Что открыто и что выбрано — в профиле; общедоступные
+## маршруты помечены available_by_default в данных, поэтому не требуют миграции сохранений.
 
 const PATH := "res://data/floors.json"
 
@@ -35,8 +36,31 @@ static func built(id: String) -> bool:
 	return String(find(id).get("scene", "")) != ""
 
 
+## Маршрут сцены, которую передал хост; тестовые сцены могут не быть в списке.
+static func id_for_scene(scene_path: String) -> String:
+	if scene_path == "":
+		return ""
+	for f: Dictionary in all():
+		if String(f.get("scene", "")) == scene_path:
+			return String(f.id)
+	return ""
+
+
 static func is_open(id: String) -> bool:
-	return id in Profile.floors_open
+	var f: Dictionary = find(id)
+	return not f.is_empty() and (bool(f.get("available_by_default", false)) or id in Profile.floors_open)
+
+
+## Явный выбор игрока сохраняем в существующем формате: Profile при загрузке проверяет floors_open.
+static func select(id: String) -> bool:
+	Profile.ensure()
+	if not is_open(id):
+		return false
+	Profile.floor = id
+	if not id in Profile.floors_open:
+		Profile.floors_open.append(id)
+	Profile.save()
+	return true
 
 
 ## Почему маршрут пока нельзя открыть ("" — можно).

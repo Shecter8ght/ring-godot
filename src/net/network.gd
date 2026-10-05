@@ -88,22 +88,29 @@ func _keep_own_scene(peer: MultiplayerPeer) -> void:
 ## Разрывает соединение и возвращает в состояние «не в сети» (для «Выйти в меню»).
 ## Пир — «оффлайн», а не null: с null get_unique_id() и RPC падают (убежище, соло-рейд).
 func disconnect_all() -> void:
-	if multiplayer.multiplayer_peer:
-		multiplayer.multiplayer_peer.close()
-	_keep_own_scene(OfflineMultiplayerPeer.new())
+	var previous_peer: MultiplayerPeer = multiplayer.multiplayer_peer
 	_active = false
+	# Сохраняем свой id и сцену до close(): закрытый ENet уже не возвращает unique_id.
+	_keep_own_scene(OfflineMultiplayerPeer.new())
+	if previous_peer:
+		previous_peer.close()
 	player_names.clear()
 
 
-## Только хост может позвать: переводит всех (включая себя) на этаж scene — выбранный хостом
+## Только хост может позвать: переводит всех (включая себя) на карту scene — выбранный хостом
 ## в убежище маршрут (у клиентов маршрут может быть и не открыт: идут за хостом).
 ## conditions — условия рейда хоста (RaidConditions), у всех одинаковые.
 @rpc("authority", "call_local", "reliable")
 func start_level(scene: String, conditions: Dictionary) -> void:
+	var target_scene: String = scene if scene != "" else LEVEL_SCENE
+	var route_id: String = Floors.id_for_scene(target_scene)
+	# Клиент следует выбору хоста: карта и её название должны относиться к одному маршруту.
+	if route_id != "":
+		Profile.floor = route_id
 	# со снаряжением профиля — только если игрок пришёл в лобби из убежища (не тесты)
 	Profile.pending_raid = Profile.from_hideout
 	RaidConditions.from_host = conditions
-	get_tree().change_scene_to_file(scene if scene != "" else LEVEL_SCENE)
+	get_tree().change_scene_to_file(target_scene)
 
 
 ## Панель админа (хост в сети; в соло — себе): начислить amount ₽ игроку peer_id (себе — тоже). Деньги лежат в профиле
@@ -190,7 +197,8 @@ func _on_peer_connected(id: int) -> void:
 func _on_peer_disconnected(id: int) -> void:
 	player_names.erase(id)
 	peer_scene.erase(id)
-	scenes_changed.emit()
+	# Два клиента могут уйти за один poll ENet. RPC — после обработки обоих отключений.
+	scenes_changed.emit.call_deferred()
 	player_list_changed.emit()
 
 

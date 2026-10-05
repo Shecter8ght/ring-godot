@@ -1106,7 +1106,9 @@ func _build_exit() -> void:
 	_conditions_column()
 	var go := _column("Выход", 0.6)
 	var sel := Floors.find(Profile.floor)
-	go.add_child(_text("%s — %s" % [String(sel.get("name", "")), String(sel.get("route", ""))], Color(0.95, 0.82, 0.6)))
+	var route := _text("%s — %s" % [String(sel.get("name", "")), String(sel.get("route", ""))], Color(0.95, 0.82, 0.6))
+	route.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	go.add_child(route)
 	var fee := int(sel.get("fee", 0))
 	if fee > 0:
 		go.add_child(_text("Вылет — %s ₽" % InventoryUI.money(fee), Color(0.9, 0.75, 0.5)))
@@ -1120,7 +1122,7 @@ func _build_exit() -> void:
 		solo.disabled = block != ""
 		go.add_child(solo)
 	elif Net.is_host():
-		# все, кто в сети, идут за хостом на его этаж (плата — с хоста)
+		# все, кто в сети, идут по маршруту хоста (плата — с хоста)
 		var all := _button("Рейд всем (%d в сети)" % (Net.player_names.size()), func() -> void:
 			_confirm_raid(func() -> void:
 				Floors.pay_fee(Profile.floor)
@@ -1128,7 +1130,7 @@ func _build_exit() -> void:
 		all.disabled = block != ""
 		go.add_child(all)
 	else:
-		go.add_child(_text("Рейд начинает хост — ждём его. Идёте на его этаж и в его условия.", Color(0.9, 0.8, 0.6)))
+		go.add_child(_text("Рейд начинает хост — ждём его. Идёте по его маршруту и в его условия.", Color(0.9, 0.8, 0.6)))
 	if block != "":
 		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
 	_coop_block(go)
@@ -1207,7 +1209,7 @@ func _coop_block(col: VBoxContainer) -> void:
 func _conditions_column() -> void:
 	var col := _column("Условия рейда", 1.0)
 	var c := RaidConditions.normalized(Profile.next_conditions)
-	for axis in [["time", "Время", Balance.RAID_TIME], ["weather", "Погода", Balance.RAID_WEATHER], ["power", "Электричество в ТЦ", Balance.RAID_POWER]]:
+	for axis in [["time", "Время", Balance.RAID_TIME], ["weather", "Погода", Balance.RAID_WEATHER], ["power", "Электричество", Balance.RAID_POWER]]:
 		col.add_child(_text(String(axis[1]), Color(0.75, 0.75, 0.72)))
 		var row := HFlowContainer.new()
 		row.add_theme_constant_override("h_separation", 6)
@@ -1238,10 +1240,10 @@ func _conditions_column() -> void:
 		Profile.save()))
 
 
-## Этажи: внутри здания они отрезаны, у каждого свой путь снаружи. Открытый маршрут выбирается,
+## Карты: этажи внутри здания отрезаны, у каждого свой путь снаружи. Открытый маршрут выбирается,
 ## закрытый — открывается у Михалыча (доверие + плата за наводку).
 func _floors_column() -> void:
-	var col := _column("Этаж и маршрут", 1.1)
+	var col := _column("Маршрут", 1.1)
 	for f in Floors.all():
 		var id := String(f.id)
 		var box := VBoxContainer.new()
@@ -1250,12 +1252,11 @@ func _floors_column() -> void:
 		var chosen := id == Profile.floor
 		var title := _text(("▶ " if chosen else "   ") + String(f.name), Color(1.0, 0.86, 0.6) if chosen else Color(0.9, 0.9, 0.86))
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		head.add_child(title)
 		if Floors.is_open(id):
 			if not chosen:
-				head.add_child(_button("Выбрать", func() -> void:
-					Profile.floor = id
-					Profile.save()))
+				head.add_child(_button("Выбрать", func() -> void: Floors.select(id)))
 		else:
 			var b := _button("Открыть за %s ₽" % InventoryUI.money(int(f.price)), func() -> void: Floors.unlock(id))
 			b.disabled = Floors.unlock_block(id) != ""

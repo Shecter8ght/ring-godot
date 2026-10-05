@@ -65,9 +65,15 @@ func _on_join_pressed() -> void:
 
 
 func _on_start_pressed() -> void:
-	# из убежища — на выбранный этаж (плата за вылет — с хоста); иначе — первый этаж
+	if not Net.is_host():
+		return
+	# из убежища — по выбранному маршруту (плата за вылет — с хоста); иначе — первый этаж
 	var scene := Net.LEVEL_SCENE
 	if Profile.from_hideout:
+		var block: String = Floors.start_block(Profile.floor)
+		if block != "":
+			_status.text = block
+			return
 		scene = Floors.scene(Profile.floor)
 		Floors.pay_fee(Profile.floor)
 	Net.start_level.rpc(scene, Profile.next_conditions if Profile.from_hideout else RaidConditions.DEFAULT)
@@ -84,6 +90,9 @@ func _refresh() -> void:
 	_pre_connect.visible = not networked
 	_leave_button.visible = networked
 	_start_button.visible = Net.is_host()
+	var block: String = Floors.start_block(Profile.floor) if Profile.from_hideout else ""
+	_start_button.disabled = block != ""
+	_start_button.tooltip_text = block if block != "" else String(Floors.find(Profile.floor if Profile.from_hideout else "f1").get("name", ""))
 	_admin_button.visible = Net.is_host()
 	if networked:
 		var lines: Array[String] = []
