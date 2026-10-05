@@ -31,6 +31,8 @@ static var floors_open: Array = ["f1"]
 static var floor: String = "f1"
 ## Модули убежища: id -> уровень (см. Upgrades, data/hideout.json).
 static var modules: Dictionary = {}
+## Сохранённые каналы досуга; старые профили без ключа остаются совместимыми.
+static var hideout_media: Dictionary = {}
 ## Задания: взятые (id -> счётчик) и сданные (см. Missions).
 static var missions_active: Dictionary = {}
 static var missions_done: Array = []
@@ -91,6 +93,7 @@ static func ensure() -> void:
 		if not floor in floors_open:
 			floor = "f1"
 		modules = d.get("modules", {})
+		hideout_media = d.get("hideout_media", {})
 		for k in modules:
 			modules[k] = int(modules[k])
 		missions_active = d.get("missions_active", {})
@@ -130,6 +133,7 @@ static func _starter() -> void:
 	floors_open = ["f1"]
 	floor = "f1"
 	modules = {}
+	hideout_media = {}
 	missions_active = {}
 	missions_done = []
 	quests = {}
@@ -175,7 +179,7 @@ static func save() -> void:
 		return
 	f.store_string(JSON.stringify({"name": profile_name, "money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
-		"modules": modules, "missions_active": missions_active, "missions_done": missions_done,
+		"modules": modules, "hideout_media": hideout_media, "missions_active": missions_active, "missions_done": missions_done,
 		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "campaign_id": campaign_id, "guest_campaigns": guest_campaigns, "loadout_templates": loadout_templates, "next_conditions": next_conditions,
 		"raid_history": raid_history, "story_recent": story_recent}, "  "))
 

@@ -25,6 +25,9 @@ const MIX := 22050.0
 @export var seat_yaw: float = 180.0
 ## ТВ: размер экрана (м) — квад перед корпусом.
 @export var screen_size: Vector2 = Vector2(1.8, 0.95)
+## Готовый меш вместо блокаутного корпуса; экран получает прежний shader и каналы.
+@export var authored_visual: bool = false
+@export var screen_path: NodePath
 
 var state: int = 0
 var _screen_mat: ShaderMaterial
@@ -32,14 +35,34 @@ var _sound: AudioStreamPlayer3D
 var _known: Array[int] = []
 ## Какой луп должен играть (строится в фоне — вдруг уже переключили).
 var _want: String = ""
+var _audio_tasks: Array[int] = []
 static var _cache: Dictionary = {}
+
+
+func _exit_tree() -> void:
+	# Worker использует методы activity: не освобождаем её посреди синтеза при смене сцены.
+	for task: int in _audio_tasks:
+		WorkerThreadPool.wait_for_task_completion(task)
+	_audio_tasks.clear()
+	if is_instance_valid(_sound):
+		_sound.stop()
 
 
 func _ready() -> void:
 	super._ready()
 	if Engine.is_editor_hint():
 		return
+	Profile.ensure()
 	if kind in [Kind.TV, Kind.RADIO]:
+		# Пришедший в уже занятую комнату получает общий канал от прежнего участника.
+		var occupied: bool = false
+		if Net.is_networked():
+			for id: int in Net.peer_scene:
+				if id != multiplayer.get_unique_id() and Net.visible_in(id, "hideout"):
+					occupied = true
+					_known.append(id)
+		if not occupied:
+			state = clampi(int(Profile.hideout_media.get("tv" if kind == Kind.TV else "radio", 0)), 0, 3)
 		_sound = AudioStreamPlayer3D.new()
 		_sound.bus = &"Ambient"
 		_sound.unit_size = 3.0
@@ -96,7 +119,9 @@ func _switch(v: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func _set_state(v: int) -> void:
-	state = v
+	state = clampi(v, 0, 3)
+	Profile.hideout_media["tv" if kind == Kind.TV else "radio"] = state
+	Profile.save()
 	_apply()
 
 
@@ -116,12 +141,17 @@ func _share_state() -> void:
 	for id in Net.peer_scene:
 		if Net.visible_in(int(id), "hideout"):
 			here.append(int(id))
+	# При общем убежище хост уже хранит текущий канал. Новичок ещё может не
+	# получить roster к _ready; он не должен пересылать хосту свой старый профиль.
+	if 1 in here and me != 1:
+		_known = here
+		return
 	for id in here:
 		if id == me or id in _known:
 			continue
 		var senders := here.filter(func(x: int) -> bool: return x != id and (x in _known or x == me))
 		senders.sort()
-		if state != 0 and not senders.is_empty() and int(senders[0]) == me:
+		if not senders.is_empty() and int(senders[0]) == me:
 			_set_state.rpc_id(id, state)
 	_known = here
 
@@ -146,6 +176,17 @@ func _apply() -> void:
 # ---------------------------------------------------------------- вид
 
 func _build_visual(parent: Node3D) -> void:
+	if authored_visual:
+		if kind == Kind.TV:
+			var screen: MeshInstance3D = get_node_or_null(screen_path) as MeshInstance3D
+			if screen:
+				var shader: Shader = Shader.new()
+				shader.code = TV_SHADER
+				_screen_mat = ShaderMaterial.new()
+				_screen_mat.shader = shader
+				_screen_mat.set_shader_parameter("channel", state)
+				screen.material_override = _screen_mat
+		return
 	match kind:
 		Kind.TV:
 			var q := MeshInstance3D.new()
@@ -213,9 +254,10 @@ func _loop(key: String) -> void:
 		_play_loop(key)
 		return
 	# луп строится в фоне (синтез — секунды) и играет, как готов
-	WorkerThreadPool.add_task(func() -> void:
+	var task: int = WorkerThreadPool.add_task(func() -> void:
 		var w := _clip(key)
 		_built.call_deferred(key, w))
+	_audio_tasks.append(task)
 
 
 func _built(key: String, w: AudioStreamWAV) -> void:

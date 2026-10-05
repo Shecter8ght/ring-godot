@@ -187,3 +187,10 @@ static func set_cutaway_distance(near: float, far: float) -> void:
 	for m in _cutaway:
 		m.distance_fade_min_distance = near
 		m.distance_fade_max_distance = far
+
+
+## Материалы готового убежища пользуются тем же вырезом стен, что и кольцо ТЦ.
+static func register_cutaway(material: BaseMaterial3D) -> void:
+	if not material in _cutaway:
+		material.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+		_cutaway.append(material)

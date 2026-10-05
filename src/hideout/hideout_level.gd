@@ -41,6 +41,8 @@ void fragment() {
 var _player: Player
 ## Чужие игроки в убежище: peer → узел.
 var _others: Dictionary = {}
+## Хост закрепляет место при входе; случайный ENet id и задержка roster его не меняют.
+var _spawn_slots: Dictionary = {1:0}
 ## Выпито (досуг): качает в глазах, проходит само.
 var _tipsy: float = 0.0
 var _tipsy_fx: ColorRect
@@ -72,7 +74,7 @@ func _ready() -> void:
 	if Net.is_networked():
 		_player.set_multiplayer_authority(me)
 	add_child(_player)
-	_player.global_position = _spawn.global_position
+	_player.global_position = _spawn_for(me)
 	# в убежище не ранят (граната в тесноте, выстрел в напарника)
 	_player.health.invulnerable = true
 	_from_profile()
@@ -87,7 +89,7 @@ func _ready() -> void:
 	qw.name = "QuestWorld"
 	add_child(qw)
 	# досуг: телевизор, магнитола, пиво, диван (своя сцена — правится в редакторе отдельно)
-	if ResourceLoader.exists(LOUNGE_SCENE):
+	if not has_node("Activities") and ResourceLoader.exists(LOUNGE_SCENE):
 		add_child((load(LOUNGE_SCENE) as PackedScene).instantiate())
 	_build_tipsy()
 	Net.scenes_changed.connect(_sync_others)
@@ -148,6 +150,7 @@ func _sync_others() -> void:
 			if is_instance_valid(_others[id]):
 				(_others[id] as Node).queue_free()
 			_others.erase(id)
+			_spawn_slots.erase(id)
 	for id in want:
 		if _others.has(id):
 			continue
@@ -158,7 +161,9 @@ func _sync_others() -> void:
 		p.set_multiplayer_authority(id)
 		add_child(p)
 		p.health.invulnerable = true
-		p.global_position = _spawn.global_position + Vector3(cos(id * 1.7), 0.0, sin(id * 1.7)) * 1.4
+		p.global_position = _spawn_for(id)
+		if Net.is_host() and has_node("Gameplay/SpawnPoints"):
+			_assign_spawn.rpc_id(id,int(_spawn_slots[id]))
 		# над головой — ник
 		var tag := Label3D.new()
 		tag.text = String(Net.player_names.get(id, "Игрок %d" % id))
@@ -173,9 +178,47 @@ func _sync_others() -> void:
 		_others[id] = p
 
 
+## Три сохранённых в сцене спавна; распределение peer одинаково у всех участников.
+func _spawn_for(peer: int) -> Vector3:
+	if not has_node("Gameplay/SpawnPoints"):
+		return _spawn.global_position
+	if Net.is_host():
+		if not _spawn_slots.has(peer):
+			for slot: int in range(3):
+				if not slot in _spawn_slots.values():
+					_spawn_slots[peer] = slot
+					break
+		return (get_node("Gameplay/SpawnPoints/PlayerSpawn_%02d" % (int(_spawn_slots.get(peer,0))+1)) as Marker3D).global_position
+	var ids: Array[int] = [1]
+	if Net.is_networked():
+		for id: int in Net.player_names:
+			if not id in ids:
+				ids.append(id)
+		if not peer in ids:
+			ids.append(peer)
+	# Имена приходят в порядке подключения из roster хоста. Сортировка случайных
+	# ENet id меняла место первого гостя при подключении второго.
+	var index: int = clampi(ids.find(peer), 0, 2)
+	var marker: Marker3D = get_node("Gameplay/SpawnPoints/PlayerSpawn_%02d" % (index + 1)) as Marker3D
+	return marker.global_position
+
+
+@rpc("authority", "call_remote", "reliable")
+func _assign_spawn(slot: int) -> void:
+	if _player and has_node("Gameplay/SpawnPoints"):
+		var marker: Marker3D = get_node("Gameplay/SpawnPoints/PlayerSpawn_%02d" % (clampi(slot,0,2)+1)) as Marker3D
+		_player.global_position = marker.global_position
+
+
 ## CSG и меши сцены: материал из meta — чтобы сцену можно было собирать и править руками.
 func _apply_materials(n: Node) -> void:
 	for c in n.get_children():
+		if c is MeshInstance3D and c.has_meta("shelter_cut"):
+			var mesh: Mesh = (c as MeshInstance3D).mesh
+			for surface: int in range(mesh.get_surface_count()):
+				var material: BaseMaterial3D = mesh.surface_get_material(surface) as BaseMaterial3D
+				if material:
+					SectorMaterials.register_cutaway(material)
 		if c is GeometryInstance3D and (c.has_meta("mat") or c.has_meta("color") or c.has_meta("emit")):
 			var cut := bool(c.get_meta("cut", true))
 			var m: Material
