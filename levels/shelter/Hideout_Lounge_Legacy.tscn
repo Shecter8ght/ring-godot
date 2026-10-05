@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/hideout_activity.tscn" id="1_act"]
+
+[node name="Activities" type="Node3D"]
+
+[node name="Tv" parent="." instance=ExtResource("1_act")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1.25, -8.805)
+glow_light = NodePath("../../Lights/TvGlow")
+
+[node name="Radio" parent="." instance=ExtResource("1_act")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35, 0.7, -8.6)
+kind = 1
+
+[node name="Beer" parent="." instance=ExtResource("1_act")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9, 0, -5.3)
+kind = 2
+
+[node name="SeatL" parent="." instance=ExtResource("1_act")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.3, -5.35)
+kind = 3
+
+[node name="SeatM" parent="." instance=ExtResource("1_act")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.3, -5.35)
+kind = 3
+
+[node name="SeatR" parent="." instance=ExtResource("1_act")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 0.3, -5.35)
+kind = 3

@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Ceiling_Armory_00.res" id="1_k6t0u"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2t8dk"]
+size = Vector3(10, 0.2, 6)
+
+[node name="Ceiling_Armory" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+layers = 524288
+mesh = ExtResource("1_k6t0u")
+
+[node name="CeilingShadow" type="MeshInstance3D" parent="."]
+cast_shadow = 3
+mesh = ExtResource("1_k6t0u")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 3.35, 4)
+shape = SubResource("BoxShape3D_2t8dk")

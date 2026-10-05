@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/BareSteel_base.jpg" id="1_mh4bo"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/BareSteel_orm.jpg" id="2_ff58u"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/BareSteel_normal.jpg" id="3_o3ts8"]
+
+[resource]
+resource_name = "BareSteel"
+albedo_texture = ExtResource("1_mh4bo")
+metallic = 1.0
+metallic_texture = ExtResource("2_ff58u")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_ff58u")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("3_o3ts8")
+ao_enabled = true
+ao_texture = ExtResource("2_ff58u")
+texture_filter = 5

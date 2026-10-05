@@ -1,0 +1,21 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/WetConcrete_base.jpg" id="1_s2k8y"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/WetConcrete_orm.jpg" id="2_2bn5l"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/WetConcrete_normal.jpg" id="3_jpu7r"]
+
+[resource]
+resource_name = "WetConcrete"
+albedo_texture = ExtResource("1_s2k8y")
+metallic = 1.0
+metallic_specular = 0.55
+metallic_texture = ExtResource("2_2bn5l")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_2bn5l")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("3_jpu7r")
+ao_enabled = true
+ao_texture = ExtResource("2_2bn5l")
+texture_filter = 5

@@ -1,0 +1,2762 @@
+[
+	{
+		"asset": "Floor_MainHub",
+		"name": "SH_Int_Floor_MainHub",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_MainHub",
+		"name": "SH_Int_Ceiling_MainHub",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Living",
+		"name": "SH_Int_Floor_Living",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_Living",
+		"name": "SH_Int_Ceiling_Living",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Trader",
+		"name": "SH_Int_Floor_Trader",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_Trader",
+		"name": "SH_Int_Ceiling_Trader",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Armory",
+		"name": "SH_Int_Floor_Armory",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_Armory",
+		"name": "SH_Int_Ceiling_Armory",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Generator",
+		"name": "SH_Int_Floor_Generator",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_Generator",
+		"name": "SH_Int_Ceiling_Generator",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Workshop",
+		"name": "SH_Int_Floor_Workshop",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_Workshop",
+		"name": "SH_Int_Ceiling_Workshop",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Storage",
+		"name": "SH_Int_Floor_Storage",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_Storage",
+		"name": "SH_Int_Ceiling_Storage",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_NorthGallery",
+		"name": "SH_Int_Floor_NorthGallery",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_NorthGallery",
+		"name": "SH_Int_Ceiling_NorthGallery",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Entry",
+		"name": "SH_Int_Floor_Entry",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_Entry",
+		"name": "SH_Int_Ceiling_Entry",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_Sleeping",
+		"name": "SH_Int_Floor_Sleeping",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_North",
+		"name": "SH_Int_Wall_North",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_West",
+		"name": "SH_Int_Wall_West",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_East",
+		"name": "SH_Int_Wall_East",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_WestLiving",
+		"name": "SH_Int_Wall_WestLiving",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_WestTrader",
+		"name": "SH_Int_Wall_WestTrader",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_WestArmory",
+		"name": "SH_Int_Wall_WestArmory",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EastLiving",
+		"name": "SH_Int_Wall_EastLiving",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EastTrader",
+		"name": "SH_Int_Wall_EastTrader",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EastArmory",
+		"name": "SH_Int_Wall_EastArmory",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_WestNorthDivide",
+		"name": "SH_Int_Wall_WestNorthDivide",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_WestMidDivide",
+		"name": "SH_Int_Wall_WestMidDivide",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_WestSouth",
+		"name": "SH_Int_Wall_WestSouth",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EastNorthDivide",
+		"name": "SH_Int_Wall_EastNorthDivide",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EastMidDivide",
+		"name": "SH_Int_Wall_EastMidDivide",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EastSouth",
+		"name": "SH_Int_Wall_EastSouth",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EntryWest",
+		"name": "SH_Int_Wall_EntryWest",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EntryEast",
+		"name": "SH_Int_Wall_EntryEast",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_EntrySouth",
+		"name": "SH_Int_Wall_EntrySouth",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_BaySouthWest",
+		"name": "SH_Int_Wall_BaySouthWest",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_BaySouthEast",
+		"name": "SH_Int_Wall_BaySouthEast",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_HubWestReturn",
+		"name": "SH_Int_Wall_HubWestReturn",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_HubEastReturn",
+		"name": "SH_Int_Wall_HubEastReturn",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "TechnicalStructure",
+		"name": "SH_Int_TechnicalStructure",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "StairsAndRailing",
+		"name": "SH_Int_StairsAndRailing",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ventilation",
+		"name": "SH_Int_Ventilation",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PipesAndElectrical",
+		"name": "SH_Int_PipesAndElectrical",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "DrainsAndThresholds",
+		"name": "SH_Int_DrainsAndThresholds",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Rug",
+		"name": "PlanningRug",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PlanningTable",
+		"name": "PlanningTable",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PlanningMap",
+		"name": "PlanningMap",
+		"position": [
+			0.0,
+			0.754999995231628,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Chair",
+		"name": "PlanningChair_03",
+		"position": [
+			-2.34999990463257,
+			0.0,
+			0.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Chair",
+		"name": "PlanningChair_04",
+		"position": [
+			2.34999990463257,
+			0.0,
+			0.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "Chair",
+		"name": "PlanningChair_05",
+		"position": [
+			-1.04999995231628,
+			0.0,
+			1.70000004768372
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Chair",
+		"name": "PlanningChair_06",
+		"position": [
+			1.04999995231628,
+			0.0,
+			-1.70000004768372
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Chair",
+		"name": "PlanningChair_07",
+		"position": [
+			-1.04999995231628,
+			0.0,
+			-1.70000004768372
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Chair",
+		"name": "PlanningChair_08",
+		"position": [
+			1.04999995231628,
+			0.0,
+			1.70000004768372
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Mug",
+		"name": "PlanningMug",
+		"position": [
+			0.910000026226044,
+			0.790000021457672,
+			0.319999992847443
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Notebook",
+		"name": "RouteNotebook",
+		"position": [
+			-0.850000023841858,
+			0.790000021457672,
+			0.280000001192093
+		],
+		"yaw": 14.0
+	},
+	{
+		"asset": "Radio",
+		"name": "FieldRadio",
+		"position": [
+			-0.75,
+			0.790000021457672,
+			-0.259999990463257
+		],
+		"yaw": 8.0
+	},
+	{
+		"asset": "Case",
+		"name": "UnderTableCase",
+		"position": [
+			0.379999995231628,
+			0.0,
+			0.0299999993294477
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Rug",
+		"name": "LivingRug",
+		"position": [
+			-13.1999998092651,
+			0.0,
+			-8.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Sofa",
+		"name": "Couch",
+		"position": [
+			-13.3000001907349,
+			0.0,
+			-7.55000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "PH_Armchair",
+		"name": "LivingArmchair",
+		"position": [
+			-15.6499996185303,
+			0.0,
+			-8.64999961853027
+		],
+		"yaw": 100.0
+	},
+	{
+		"asset": "CoffeeTable",
+		"name": "CoffeeTable",
+		"position": [
+			-13.3000001907349,
+			0.0,
+			-8.75
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Counter",
+		"name": "TVStand",
+		"position": [
+			-13.3000001907349,
+			0.0,
+			-10.1000003814697
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Mug",
+		"name": "TeaMug",
+		"position": [
+			-13.6000003814697,
+			0.490000009536743,
+			-8.80000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Notebook",
+		"name": "LivingMagazine",
+		"position": [
+			-13.0,
+			0.490000009536743,
+			-8.89999961853027
+		],
+		"yaw": 18.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "LivingPersonalShelf",
+		"position": [
+			-17.3999996185303,
+			0.0,
+			-8.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Backpack",
+		"name": "PersonalBag",
+		"position": [
+			-17.2000007629395,
+			0.689999997615814,
+			-8.30000019073486
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Counter",
+		"name": "TraderCounter",
+		"position": [
+			-12.3999996185303,
+			0.0,
+			-2.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Chair",
+		"name": "TraderChair",
+		"position": [
+			-12.3999996185303,
+			0.0,
+			-3.34999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "TraderGoods_02",
+		"position": [
+			-16.6000003814697,
+			0.0,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "TradeCarton_03",
+		"position": [
+			-16.6000003814697,
+			0.660000026226044,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "MedicalCase",
+		"name": "TradeMedical_04",
+		"position": [
+			-16.3500003814697,
+			1.12999999523163,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "TraderGoods_05",
+		"position": [
+			-14.8000001907349,
+			0.0,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "TradeCarton_06",
+		"position": [
+			-14.8000001907349,
+			0.660000026226044,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "MedicalCase",
+		"name": "TradeMedical_07",
+		"position": [
+			-14.5500001907349,
+			1.12999999523163,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "TraderGoods_08",
+		"position": [
+			-13.0,
+			0.0,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "TradeCarton_09",
+		"position": [
+			-13.0,
+			0.660000026226044,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "MedicalCase",
+		"name": "TradeMedical_10",
+		"position": [
+			-12.75,
+			1.12999999523163,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Notebook",
+		"name": "TraderLedger",
+		"position": [
+			-11.6499996185303,
+			0.970000028610229,
+			-2.09999990463257
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "Mug",
+		"name": "TraderMug",
+		"position": [
+			-13.1499996185303,
+			0.970000028610229,
+			-2.11999988555908
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "TradeCase",
+		"position": [
+			-16.8999996185303,
+			0.0,
+			-1.29999995231628
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Workbench",
+		"name": "Workbench",
+		"position": [
+			13.6999998092651,
+			0.0,
+			-4.25
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "WorkshopPartsShelf",
+		"position": [
+			17.3999996185303,
+			0.0,
+			-2.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "Case",
+		"name": "ToolCase",
+		"position": [
+			17.3999996185303,
+			0.660000026226044,
+			-2.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "JerryCan",
+		"name": "WorkshopOilCan",
+		"position": [
+			14.3999996185303,
+			0.0,
+			-3.79999995231628
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Notebook",
+		"name": "WorkshopManual",
+		"position": [
+			13.8999996185303,
+			0.949999988079071,
+			-4.09999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bench",
+		"name": "WorkshopBench",
+		"position": [
+			11.0,
+			0.0,
+			-4.34999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WeaponRack",
+		"name": "WeaponRack_01",
+		"position": [
+			-13.8000001907349,
+			0.0,
+			1.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WeaponRack",
+		"name": "WeaponRack_02",
+		"position": [
+			-16.5,
+			0.0,
+			1.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PlanningTable",
+		"name": "MaintenanceTable",
+		"position": [
+			-12.1999998092651,
+			0.0,
+			4.09999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Locker",
+		"name": "ArmoryLocker_03",
+		"position": [
+			-16.5,
+			0.0,
+			6.34999990463257
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Locker",
+		"name": "ArmoryLocker_04",
+		"position": [
+			-15.6999998092651,
+			0.0,
+			6.34999990463257
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Case",
+		"name": "AmmoCase",
+		"position": [
+			-11.6000003814697,
+			0.759999990463257,
+			4.09999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Backpack",
+		"name": "ArmoryGear",
+		"position": [
+			-16.1000003814697,
+			0.0,
+			5.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "StorageShelf_00",
+		"position": [
+			10.1999998092651,
+			0.0,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Case",
+		"name": "StorageCase_01",
+		"position": [
+			10.1999998092651,
+			0.180000007152557,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "StorageCarton_02",
+		"position": [
+			10.1999998092651,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "StorageShelf_03",
+		"position": [
+			12.0,
+			0.0,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Case",
+		"name": "StorageCase_04",
+		"position": [
+			12.0,
+			0.180000007152557,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "StorageCarton_05",
+		"position": [
+			12.0,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "StorageShelf_06",
+		"position": [
+			13.8000001907349,
+			0.0,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Case",
+		"name": "StorageCase_07",
+		"position": [
+			13.8000001907349,
+			0.180000007152557,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "StorageCarton_08",
+		"position": [
+			13.8000001907349,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "StorageShelf_09",
+		"position": [
+			15.6000003814697,
+			0.0,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Case",
+		"name": "StorageCase_10",
+		"position": [
+			15.6000003814697,
+			0.180000007152557,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "StorageCarton_11",
+		"position": [
+			15.6000003814697,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "WaterSupply_12",
+		"position": [
+			10.0500001907349,
+			0.689999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "FoodSupply_13",
+		"position": [
+			11.8500003814697,
+			0.689999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "WaterSupply_14",
+		"position": [
+			10.3999996185303,
+			0.689999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "FoodSupply_15",
+		"position": [
+			12.1999998092651,
+			0.689999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "WaterSupply_16",
+		"position": [
+			10.75,
+			0.689999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "FoodSupply_17",
+		"position": [
+			12.5500001907349,
+			0.689999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "MedicalCase",
+		"name": "MedicalSupplies",
+		"position": [
+			13.6999998092651,
+			1.62999999523163,
+			6.30000019073486
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Bench",
+		"name": "StorageSortBench",
+		"position": [
+			17.2000007629395,
+			0.0,
+			4.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "Generator",
+		"name": "Generator",
+		"position": [
+			13.8000001907349,
+			0.0,
+			-8.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "ElectricalCabinet",
+		"name": "Switchboard",
+		"position": [
+			17.3999996185303,
+			0.0,
+			-7.90000009536743
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "ElectricalCabinet",
+		"name": "DistributionPanel",
+		"position": [
+			17.3999996185303,
+			0.0,
+			-6.5
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "JerryCan",
+		"name": "FuelReserve_03",
+		"position": [
+			15.8999996185303,
+			0.0,
+			-10.3000001907349
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "JerryCan",
+		"name": "FuelReserve_04",
+		"position": [
+			16.3999996185303,
+			0.0,
+			-10.3000001907349
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "JerryCan",
+		"name": "FuelReserve_05",
+		"position": [
+			16.8999996185303,
+			0.0,
+			-10.3000001907349
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "IndustrialFan",
+		"name": "GeneratorVent",
+		"position": [
+			13.5,
+			1.89999997615814,
+			-10.75
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bed",
+		"name": "SleepingPosition_00",
+		"position": [
+			-2.15000009536743,
+			2.59999990463257,
+			-9.35000038146973
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Boots",
+		"name": "SleepingBoots_01",
+		"position": [
+			-1.60000002384186,
+			2.59999990463257,
+			-8.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "PersonalCase_02",
+		"position": [
+			-2.15000009536743,
+			2.59999990463257,
+			-10.6499996185303
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bed",
+		"name": "SleepingPosition_03",
+		"position": [
+			0.0,
+			2.59999990463257,
+			-9.35000038146973
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Boots",
+		"name": "SleepingBoots_04",
+		"position": [
+			0.550000011920929,
+			2.59999990463257,
+			-8.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "PersonalCase_05",
+		"position": [
+			0.0,
+			2.59999990463257,
+			-10.6499996185303
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bed",
+		"name": "SleepingPosition_06",
+		"position": [
+			2.15000009536743,
+			2.59999990463257,
+			-9.35000038146973
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Boots",
+		"name": "SleepingBoots_07",
+		"position": [
+			2.70000004768372,
+			2.59999990463257,
+			-8.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "PersonalCase_08",
+		"position": [
+			2.15000009536743,
+			2.59999990463257,
+			-10.6499996185303
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Locker",
+		"name": "Bay_01_Locker",
+		"position": [
+			-5.09999990463257,
+			0.0,
+			7.65000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Backpack",
+		"name": "Bay_01_Pack",
+		"position": [
+			-5.67999982833862,
+			0.649999976158142,
+			7.59999990463257
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Boots",
+		"name": "Bay_01_Boots",
+		"position": [
+			-5.09999990463257,
+			0.0,
+			6.90000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Locker",
+		"name": "Bay_02_Locker",
+		"position": [
+			5.09999990463257,
+			0.0,
+			7.65000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Backpack",
+		"name": "Bay_02_Pack",
+		"position": [
+			4.51999998092651,
+			0.649999976158142,
+			7.59999990463257
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Boots",
+		"name": "Bay_02_Boots",
+		"position": [
+			5.09999990463257,
+			0.0,
+			6.90000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Locker",
+		"name": "Bay_03_Locker",
+		"position": [
+			7.40000009536743,
+			0.0,
+			7.65000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Backpack",
+		"name": "Bay_03_Pack",
+		"position": [
+			6.82000017166138,
+			0.649999976158142,
+			7.59999990463257
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Boots",
+		"name": "Bay_03_Boots",
+		"position": [
+			7.40000009536743,
+			0.0,
+			6.90000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "BlastDoor",
+		"name": "EntryBlastDoor",
+		"position": [
+			0.0,
+			0.0,
+			11.7200002670288
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bench",
+		"name": "UnloadingBench",
+		"position": [
+			-3.5,
+			0.0,
+			9.89999961853027
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Locker",
+		"name": "ReturnLocker",
+		"position": [
+			3.5,
+			0.0,
+			10.75
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "Case",
+		"name": "UnloadingCase",
+		"position": [
+			-2.5,
+			0.0,
+			11.3500003814697
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "ElectricalCabinet",
+		"name": "EntryFusebox",
+		"position": [
+			3.5,
+			0.25,
+			8.85000038146973
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "BlastDoor",
+		"name": "ServiceDoor_10",
+		"position": [
+			-15.1000003814697,
+			0.0,
+			-10.7399997711182
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BlastDoor",
+		"name": "ServiceDoor_11",
+		"position": [
+			-4.94999980926514,
+			0.0,
+			-10.7399997711182
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BlastDoor",
+		"name": "ServiceDoor_12",
+		"position": [
+			4.94999980926514,
+			0.0,
+			-10.7399997711182
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Display_wpn_ar_03",
+		"name": "RackRifle_00",
+		"position": [
+			-14.5,
+			0.589999973773956,
+			1.64999997615814
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Display_wpn_ar_03",
+		"name": "RackRifle_01",
+		"position": [
+			-13.8000001907349,
+			0.589999973773956,
+			1.64999997615814
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Display_wpn_ar_03",
+		"name": "RackRifle_02",
+		"position": [
+			-13.1000003814697,
+			0.589999973773956,
+			1.64999997615814
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Display_wpn_hg_01",
+		"name": "MaintenancePistol",
+		"position": [
+			-12.1999998092651,
+			0.769999980926514,
+			4.25
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "HubRouteCrate",
+		"position": [
+			-3.70000004768372,
+			0.0,
+			-2.90000009536743
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "HubRouteCrate2",
+		"position": [
+			-3.70000004768372,
+			0.340000003576279,
+			-2.90000009536743
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "HubAmmo",
+		"position": [
+			-3.25,
+			0.0,
+			-2.54999995231628
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "ArmoryReserve",
+		"position": [
+			-16.3999996185303,
+			0.0,
+			4.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "StorageReserve1",
+		"position": [
+			16.3999996185303,
+			0.0,
+			3.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "StorageReserve2",
+		"position": [
+			16.3999996185303,
+			0.340000003576279,
+			3.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "StorageReserve3",
+		"position": [
+			16.3999996185303,
+			0.0,
+			4.09999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Barrel",
+		"name": "GeneratorDrum",
+		"position": [
+			10.6999998092651,
+			0.0,
+			-10.25
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Barrel",
+		"name": "WorkshopDrum",
+		"position": [
+			16.7000007629395,
+			0.0,
+			-4.34999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Barrel",
+		"name": "StorageWaterDrum",
+		"position": [
+			17.0,
+			0.0,
+			5.94999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "ArmoryAmmo1",
+		"position": [
+			-11.6999998092651,
+			0.759999990463257,
+			3.90000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "ArmoryAmmo2",
+		"position": [
+			-16.5,
+			0.259999990463257,
+			6.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "TraderAmmo",
+		"position": [
+			-15.9499998092651,
+			1.13999998569489,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "TraderDelivery",
+		"position": [
+			-17.2000007629395,
+			0.0,
+			-3.59999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "EntryShipment",
+		"position": [
+			2.65000009536743,
+			0.0,
+			11.1999998092651
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Rug",
+		"name": "UnloadingMat",
+		"position": [
+			0.0,
+			0.0,
+			8.60000038146973
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bench",
+		"name": "HubRestBench",
+		"position": [
+			-6.5,
+			0.0,
+			-0.100000001490116
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Bench",
+		"name": "BayBench1",
+		"position": [
+			-5.09999990463257,
+			0.0,
+			6.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bench",
+		"name": "BayBench2",
+		"position": [
+			5.09999990463257,
+			0.0,
+			6.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Bench",
+		"name": "BayBench3",
+		"position": [
+			7.25,
+			0.0,
+			6.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "WorkshopReserveShelf",
+		"position": [
+			10.5,
+			0.0,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "ArmoryReserveShelf",
+		"position": [
+			-17.3999996185303,
+			0.0,
+			3.40000009536743
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "LivingFoodShelf",
+		"position": [
+			-10.1999998092651,
+			0.0,
+			-10.4499998092651
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Counter",
+		"name": "StorageSortingDesk",
+		"position": [
+			13.6999998092651,
+			0.0,
+			1.54999995231628
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "MedicalCase",
+		"name": "SortingFirstAid",
+		"position": [
+			13.3000001907349,
+			0.970000028610229,
+			1.54999995231628
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Notebook",
+		"name": "SortingLedger",
+		"position": [
+			14.3000001907349,
+			0.970000028610229,
+			1.54999995231628
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Crate",
+		"name": "UnderSortingDesk",
+		"position": [
+			13.5,
+			0.0,
+			1.54999995231628
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "HubMedicReserve",
+		"position": [
+			-6.5,
+			0.0,
+			-5.65000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_032",
+		"position": [
+			-10.1999998092651,
+			0.680000007152557,
+			-10.4499998092651
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_033",
+		"position": [
+			-10.1999998092651,
+			1.1599999666214,
+			-10.4499998092651
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_034",
+		"position": [
+			-10.1999998092651,
+			1.63999998569489,
+			-10.4499998092651
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_035",
+		"position": [
+			-17.3999996185303,
+			0.680000007152557,
+			3.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_036",
+		"position": [
+			-17.3999996185303,
+			1.1599999666214,
+			3.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_037",
+		"position": [
+			-17.3999996185303,
+			1.63999998569489,
+			3.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_038",
+		"position": [
+			10.5,
+			0.680000007152557,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_039",
+		"position": [
+			10.5,
+			1.1599999666214,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "StockBox_040",
+		"position": [
+			10.5,
+			1.63999998569489,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "SupplyTop_041",
+		"position": [
+			10.1999998092651,
+			1.64999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "SupplyTray_042",
+		"position": [
+			10.1999998092651,
+			0.200000002980232,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "SupplyTop_043",
+		"position": [
+			12.0,
+			1.64999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "SupplyTray_044",
+		"position": [
+			12.0,
+			0.200000002980232,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "SupplyTop_045",
+		"position": [
+			13.8000001907349,
+			1.64999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "SupplyTray_046",
+		"position": [
+			13.8000001907349,
+			0.200000002980232,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "SupplyTop_047",
+		"position": [
+			15.6000003814697,
+			1.64999997615814,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "SupplyTray_048",
+		"position": [
+			15.6000003814697,
+			0.200000002980232,
+			6.30000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "SupplyTop_049",
+		"position": [
+			-16.6000003814697,
+			1.64999997615814,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "SupplyTray_050",
+		"position": [
+			-16.6000003814697,
+			0.200000002980232,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "SupplyTop_051",
+		"position": [
+			-14.8000001907349,
+			1.64999997615814,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "SupplyTray_052",
+		"position": [
+			-14.8000001907349,
+			0.200000002980232,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "SupplyTop_053",
+		"position": [
+			-13.0,
+			1.64999997615814,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_AmmoBox",
+		"name": "SupplyTray_054",
+		"position": [
+			-13.0,
+			0.200000002980232,
+			-4.44999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "LivingTin_00",
+		"position": [
+			-10.5,
+			0.670000016689301,
+			-10.4200000762939
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "LivingTin_01",
+		"position": [
+			-10.2600002288818,
+			0.670000016689301,
+			-10.4200000762939
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "LivingTin_02",
+		"position": [
+			-10.0200004577637,
+			0.670000016689301,
+			-10.4200000762939
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "LivingTin_03",
+		"position": [
+			-10.5,
+			1.1599999666214,
+			-10.4200000762939
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "LivingTin_04",
+		"position": [
+			-10.2600002288818,
+			1.1599999666214,
+			-10.4200000762939
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "LivingTin_05",
+		"position": [
+			-10.0200004577637,
+			1.1599999666214,
+			-10.4200000762939
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "LivingWater_00",
+		"position": [
+			-10.5,
+			1.1599999666214,
+			-10.3999996185303
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "LivingWater_01",
+		"position": [
+			-10.3100004196167,
+			1.1599999666214,
+			-10.3999996185303
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "LivingWater_02",
+		"position": [
+			-10.1199998855591,
+			1.1599999666214,
+			-10.3999996185303
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "LivingWater_03",
+		"position": [
+			-9.93000030517578,
+			1.1599999666214,
+			-10.3999996185303
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "DeskLamp",
+		"name": "PlanningLamp",
+		"position": [
+			1.01999998092651,
+			0.790000021457672,
+			-0.360000014305115
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Binoculars",
+		"name": "PlanningOptics",
+		"position": [
+			0.319999992847443,
+			0.779999971389771,
+			0.319999992847443
+		],
+		"yaw": 14.0
+	},
+	{
+		"asset": "Pencil",
+		"name": "PlanningPencil",
+		"position": [
+			-0.629999995231628,
+			0.790000021457672,
+			0.379999995231628
+		],
+		"yaw": -23.0
+	},
+	{
+		"asset": "DeskLamp",
+		"name": "LivingLamp",
+		"position": [
+			-12.2200002670288,
+			0.970000028610229,
+			-10.1000003814697
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "DeskLamp",
+		"name": "TraderTaskLamp",
+		"position": [
+			-13.3000001907349,
+			0.970000028610229,
+			-1.87000000476837
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "DeskLamp",
+		"name": "WorkbenchTaskLamp",
+		"position": [
+			14.6000003814697,
+			0.949999988079071,
+			-4.19999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WallMap",
+		"name": "HubRouteBoard",
+		"position": [
+			-7.73000001907349,
+			1.85000002384186,
+			0.949999988079071
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Shelf",
+		"name": "HubSuppliesShelf",
+		"position": [
+			-7.34999990463257,
+			0.0,
+			-3.5
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "ElectricalCabinet",
+		"name": "HubCommunicationsPanel",
+		"position": [
+			7.48000001907349,
+			0.0,
+			1.75
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "Counter",
+		"name": "CommunicationsDesk",
+		"position": [
+			-5.30000019073486,
+			0.0,
+			-9.10000038146973
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Radio",
+		"name": "CommunicationsReceiver",
+		"position": [
+			-5.80000019073486,
+			0.970000028610229,
+			-9.10000038146973
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Notebook",
+		"name": "CommunicationsLog",
+		"position": [
+			-4.69999980926514,
+			0.970000028610229,
+			-9.10000038146973
+		],
+		"yaw": 16.0
+	},
+	{
+		"asset": "Bench",
+		"name": "NorthWaitingBench",
+		"position": [
+			0.0,
+			0.0,
+			-10.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Locker",
+		"name": "PersonalLocker",
+		"position": [
+			-3.79999995231628,
+			0.0,
+			-10.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CableReel",
+		"name": "MaintenanceReel",
+		"position": [
+			7.19999980926514,
+			0.0,
+			-4.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Case",
+		"name": "MaintenanceCase",
+		"position": [
+			-7.09999990463257,
+			0.0,
+			1.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Case",
+		"name": "HubSuppliesCase",
+		"position": [
+			-7.30000019073486,
+			0.660000026226044,
+			-3.5
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "Backpack",
+		"name": "HubSparePack",
+		"position": [
+			-7.30000019073486,
+			1.12999999523163,
+			-3.09999990463257
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "HookRail",
+		"name": "EntryHooks",
+		"position": [
+			-3.71000003814697,
+			1.63999998569489,
+			9.39999961853027
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "HookRail",
+		"name": "BayHooks1",
+		"position": [
+			-5.09999990463257,
+			1.62000000476837,
+			7.80999994277954
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "HookRail",
+		"name": "BayHooks2",
+		"position": [
+			5.09999990463257,
+			1.62000000476837,
+			7.80999994277954
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "HookRail",
+		"name": "BayHooks3",
+		"position": [
+			7.40000009536743,
+			1.62000000476837,
+			7.80999994277954
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "TacticalVest",
+		"name": "BayVest1",
+		"position": [
+			-4.69999980926514,
+			1.04999995231628,
+			7.65000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "TacticalVest",
+		"name": "BayVest2",
+		"position": [
+			5.5,
+			1.04999995231628,
+			7.65000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "TacticalVest",
+		"name": "BayVest3",
+		"position": [
+			7.65000009536743,
+			1.04999995231628,
+			7.65000009536743
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Helmet",
+		"name": "ArmoryHelmet",
+		"position": [
+			-12.5,
+			0.779999971389771,
+			4.09999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Helmet",
+		"name": "BayHelmet",
+		"position": [
+			5.09999990463257,
+			2.03999996185303,
+			7.59999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Helmet",
+		"name": "TraderHelmet",
+		"position": [
+			-14.8000001907349,
+			1.64999997615814,
+			-4.40000009536743
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "TacticalVest",
+		"name": "ArmoryVest",
+		"position": [
+			-16.7999992370605,
+			1.20000004768372,
+			6.34999990463257
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "JerryCan",
+		"name": "EntryWaterCan",
+		"position": [
+			2.90000009536743,
+			0.0,
+			11.3000001907349
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "MedicalCase",
+		"name": "HubFirstAid",
+		"position": [
+			-7.40000009536743,
+			1.62999999523163,
+			-3.5
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "CardboardBox",
+		"name": "LivingPersonalCarton",
+		"position": [
+			-17.3999996185303,
+			0.180000007152557,
+			-8.30000019073486
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "FoodCan",
+		"name": "LivingFood",
+		"position": [
+			-17.3999996185303,
+			1.12999999523163,
+			-8.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterBottle",
+		"name": "LivingWater",
+		"position": [
+			-17.3999996185303,
+			0.689999997615814,
+			-7.69999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Mug",
+		"name": "SleepingCup",
+		"position": [
+			-2.14000010490417,
+			3.14000010490417,
+			-10.6000003814697
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubPractical_04",
+		"position": [
+			-4.09999990463257,
+			3.76999998092651,
+			4.80000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubPractical_05",
+		"position": [
+			4.09999990463257,
+			3.76999998092651,
+			4.80000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubPractical_06",
+		"position": [
+			-4.09999990463257,
+			3.76999998092651,
+			-4.80000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubPractical_07",
+		"position": [
+			4.09999990463257,
+			3.76999998092651,
+			-4.80000019073486
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Television",
+		"name": "TV_Visual",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Radio",
+		"name": "Radio_Visual",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Beer",
+		"name": "Beer_Visual",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubWest",
+		"position": [
+			-3.90000009536743,
+			3.69999980926514,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubEast",
+		"position": [
+			3.90000009536743,
+			3.69999980926514,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_NorthGallery",
+		"position": [
+			0.0,
+			2.09999990463257,
+			-6.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Entry",
+		"position": [
+			0.0,
+			2.79999995231628,
+			9.69999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Living",
+		"position": [
+			-13.0,
+			2.75,
+			-8.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Trader",
+		"position": [
+			-12.8000001907349,
+			2.75,
+			-2.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Armory",
+		"position": [
+			-12.8000001907349,
+			2.75,
+			4.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Workshop",
+		"position": [
+			13.0,
+			2.75,
+			-2.5
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Storage",
+		"position": [
+			13.0,
+			2.75,
+			4.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Generator",
+		"position": [
+			13.0,
+			2.75,
+			-8.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Sleeping",
+		"position": [
+			0.0,
+			4.75,
+			-9.19999980926514
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Bays",
+		"position": [
+			5.30000019073486,
+			3.0,
+			6.59999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_BaysWest",
+		"position": [
+			-5.30000019073486,
+			3.0,
+			6.59999990463257
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_LivingWall",
+		"position": [
+			-17.6499996185303,
+			2.04999995231628,
+			-8.19999980926514
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_TraderWall",
+		"position": [
+			-17.6499996185303,
+			2.04999995231628,
+			-3.40000009536743
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_ArmoryWall",
+		"position": [
+			-17.6499996185303,
+			2.04999995231628,
+			3.40000009536743
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_StorageWall",
+		"position": [
+			17.6499996185303,
+			2.04999995231628,
+			4.59999990463257
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_WorkshopWall",
+		"position": [
+			17.6499996185303,
+			2.04999995231628,
+			-1.70000004768372
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_GeneratorWall",
+		"position": [
+			10.8000001907349,
+			2.04999995231628,
+			-10.6999998092651
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HubWallLeft",
+		"position": [
+			-7.65000009536743,
+			2.04999995231628,
+			1.14999997615814
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HubWallRight",
+		"position": [
+			7.65000009536743,
+			2.04999995231628,
+			1.14999997615814
+		],
+		"yaw": -90.0
+	}
+]

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Generator_00.res" id="1_mq5e3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6ibu5"]
+size = Vector3(2.8, 1.7, 1.35)
+
+[node name="Generator" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_mq5e3")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("BoxShape3D_6ibu5")

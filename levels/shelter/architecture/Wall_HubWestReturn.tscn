@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Wall_HubWestReturn_00.res" id="1_7vpoy"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0tlau"]
+size = Vector3(0.4, 3.25, 1)
+
+[node name="Wall_HubWestReturn" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_7vpoy")
+metadata/shelter_cut = true
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.625, 7.5)
+shape = SubResource("BoxShape3D_0tlau")

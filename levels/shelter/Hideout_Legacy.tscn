@@ -1,0 +1,1081 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/hideout/hideout_level.gd" id="lvl"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="rig"]
+[ext_resource type="PackedScene" path="res://scenes/world/hideout_station.tscn" id="st"]
+
+[sub_resource type="CapsuleMesh" id="trader_body"]
+radius = 0.3
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="trader_mat"]
+albedo_color = Color(0.3, 0.22, 0.14, 1)
+roughness = 0.8
+
+[sub_resource type="SphereMesh" id="bulb"]
+radius = 0.07
+height = 0.14
+
+[sub_resource type="Environment" id="env"]
+background_mode = 1
+background_color = Color(0.015, 0.016, 0.02, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.28, 0.3, 0.36, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 3
+tonemap_exposure = 1.4
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_intensity = 2.4
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_cascades = 3
+sdfgi_min_cell_size = 0.1
+sdfgi_energy = 1.3
+glow_enabled = true
+glow_intensity = 0.7
+glow_strength = 1.1
+glow_bloom = 0.12
+glow_hdr_threshold = 0.9
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.028
+volumetric_fog_albedo = Color(0.95, 0.9, 0.82, 1)
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_anisotropy = 0.55
+volumetric_fog_length = 40.0
+adjustment_enabled = true
+adjustment_contrast = 1.08
+adjustment_saturation = 1.06
+
+[node name="Hideout" type="Node3D"]
+script = ExtResource("lvl")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Geometry" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, -0.100, 0.000)
+size = Vector3(27.200, 0.200, 19.200)
+use_collision = true
+metadata/mat = "concrete_floor_worn_001"
+metadata/cut = false
+
+[node name="WallN" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 2.100, -9.300)
+size = Vector3(27.200, 4.200, 0.400)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="WallW" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -13.400, 2.100, 0.000)
+size = Vector3(0.400, 4.200, 19.000)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="WallE" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 13.400, 2.100, 0.000)
+size = Vector3(0.400, 4.200, 19.000)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="WallS_L" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -7.200, 2.100, 9.300)
+size = Vector3(12.000, 4.200, 0.400)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="WallS_R" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 7.200, 2.100, 9.300)
+size = Vector3(12.000, 4.200, 0.400)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="DoorLintel" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 3.600, 9.300)
+size = Vector3(2.400, 1.200, 0.400)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="Pillar0" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -5.000, 2.100, -3.500)
+size = Vector3(0.600, 4.200, 0.600)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="Pillar1" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 5.000, 2.100, -3.500)
+size = Vector3(0.600, 4.200, 0.600)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="Pillar2" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -5.000, 2.100, 3.500)
+size = Vector3(0.600, 4.200, 0.600)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="Pillar3" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 5.000, 2.100, 3.500)
+size = Vector3(0.600, 4.200, 0.600)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="Stairs" type="Node3D" parent="Geometry"]
+
+[node name="Step0" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 0.150, 10.000)
+size = Vector3(2.400, 0.300, 0.550)
+use_collision = true
+metadata/mat = "concrete_panels"
+
+[node name="Step1" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 0.450, 10.550)
+size = Vector3(2.400, 0.900, 0.550)
+use_collision = true
+metadata/mat = "concrete_panels"
+
+[node name="Step2" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 0.750, 11.100)
+size = Vector3(2.400, 1.500, 0.550)
+use_collision = true
+metadata/mat = "concrete_panels"
+
+[node name="Step3" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 1.050, 11.650)
+size = Vector3(2.400, 2.100, 0.550)
+use_collision = true
+metadata/mat = "concrete_panels"
+
+[node name="Step4" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 1.350, 12.200)
+size = Vector3(2.400, 2.700, 0.550)
+use_collision = true
+metadata/mat = "concrete_panels"
+
+[node name="Step5" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 1.650, 12.750)
+size = Vector3(2.400, 3.300, 0.550)
+use_collision = true
+metadata/mat = "concrete_panels"
+
+[node name="Step6" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 1.950, 13.300)
+size = Vector3(2.400, 3.900, 0.550)
+use_collision = true
+metadata/mat = "concrete_panels"
+
+[node name="StairWallL" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -1.400, 2.100, 11.600)
+size = Vector3(0.400, 4.200, 4.200)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="StairWallR" type="CSGBox3D" parent="Geometry/Stairs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 1.400, 2.100, 11.600)
+size = Vector3(0.400, 4.200, 4.200)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="Stash" type="Node3D" parent="Geometry"]
+
+[node name="Rack0" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.750, 1.100, -6.500)
+size = Vector3(0.800, 2.200, 2.600)
+use_collision = true
+metadata/color = Color(0.220, 0.230, 0.250, 1)
+metadata/rough = 0.50
+metadata/metal = 0.60
+
+[node name="Box0_0" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 0.350, -7.200)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Box0_1" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 1.070, -6.500)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="Box0_2" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 1.790, -5.800)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Rack1" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.750, 1.100, -3.500)
+size = Vector3(0.800, 2.200, 2.600)
+use_collision = true
+metadata/color = Color(0.220, 0.230, 0.250, 1)
+metadata/rough = 0.50
+metadata/metal = 0.60
+
+[node name="Box1_0" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 0.350, -4.200)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Box1_1" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 1.070, -3.500)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="Box1_2" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 1.790, -2.800)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Rack2" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.750, 1.100, -0.500)
+size = Vector3(0.800, 2.200, 2.600)
+use_collision = true
+metadata/color = Color(0.220, 0.230, 0.250, 1)
+metadata/rough = 0.50
+metadata/metal = 0.60
+
+[node name="Box2_0" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 0.350, -1.200)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Box2_1" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 1.070, -0.500)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="Box2_2" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.600, 1.790, 0.200)
+size = Vector3(0.600, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Locker" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -12.800, 1.000, 2.500)
+size = Vector3(0.700, 2.000, 1.200)
+use_collision = true
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+metadata/rough = 0.60
+metadata/metal = 0.40
+
+[node name="AmmoCrate1" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -11.200, 0.250, -7.800)
+size = Vector3(1.200, 0.500, 0.700)
+use_collision = true
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="AmmoCrate2" type="CSGBox3D" parent="Geometry/Stash"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -11.100, 0.750, -7.800)
+size = Vector3(1.000, 0.500, 0.600)
+use_collision = true
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="Workbench" type="Node3D" parent="Geometry"]
+
+[node name="Table" type="CSGBox3D" parent="Geometry/Workbench"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 0.450, -8.400)
+size = Vector3(3.400, 0.900, 1.200)
+use_collision = true
+metadata/color = Color(0.420, 0.280, 0.160, 1)
+
+[node name="Top" type="CSGBox3D" parent="Geometry/Workbench"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 0.920, -8.400)
+size = Vector3(3.500, 0.050, 1.250)
+use_collision = true
+metadata/color = Color(0.250, 0.160, 0.100, 1)
+
+[node name="Pegboard" type="CSGBox3D" parent="Geometry/Workbench"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 2.200, -9.050)
+size = Vector3(3.800, 1.600, 0.060)
+use_collision = true
+metadata/color = Color(0.350, 0.300, 0.240, 1)
+
+[node name="GunA" type="CSGBox3D" parent="Geometry/Workbench"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.800, 2.500, -9.000)
+size = Vector3(1.200, 0.120, 0.050)
+metadata/color = Color(0.100, 0.100, 0.100, 1)
+
+[node name="GunB" type="CSGBox3D" parent="Geometry/Workbench"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -5.200, 2.200, -9.000)
+size = Vector3(0.900, 0.120, 0.050)
+metadata/color = Color(0.100, 0.100, 0.100, 1)
+
+[node name="GunC" type="CSGBox3D" parent="Geometry/Workbench"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 1.800, -9.000)
+size = Vector3(1.500, 0.100, 0.050)
+metadata/color = Color(0.120, 0.100, 0.080, 1)
+
+[node name="Vise" type="CSGBox3D" parent="Geometry/Workbench"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -7.300, 1.050, -8.300)
+size = Vector3(0.300, 0.200, 0.250)
+metadata/color = Color(0.300, 0.350, 0.400, 1)
+
+[node name="Lounge" type="Node3D" parent="Geometry"]
+
+[node name="Rug" type="CSGBox3D" parent="Geometry/Lounge"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.010, -6.900)
+size = Vector3(4.600, 0.020, 3.400)
+metadata/color = Color(0.420, 0.100, 0.080, 1)
+metadata/cut = false
+
+[node name="Sofa" type="CSGBox3D" parent="Geometry/Lounge"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.350, -5.400)
+size = Vector3(3.400, 0.700, 1.000)
+use_collision = true
+metadata/color = Color(0.240, 0.280, 0.200, 1)
+
+[node name="SofaBack" type="CSGBox3D" parent="Geometry/Lounge"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.850, -4.950)
+size = Vector3(3.400, 1.000, 0.250)
+use_collision = true
+metadata/color = Color(0.220, 0.260, 0.180, 1)
+
+[node name="ArmL" type="CSGBox3D" parent="Geometry/Lounge"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -1.300, 0.550, -5.400)
+size = Vector3(0.250, 0.600, 1.000)
+use_collision = true
+metadata/color = Color(0.220, 0.260, 0.180, 1)
+
+[node name="ArmR" type="CSGBox3D" parent="Geometry/Lounge"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 2.300, 0.550, -5.400)
+size = Vector3(0.250, 0.600, 1.000)
+use_collision = true
+metadata/color = Color(0.220, 0.260, 0.180, 1)
+
+[node name="TvStand" type="CSGBox3D" parent="Geometry/Lounge"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 0.350, -8.700)
+size = Vector3(2.200, 0.700, 0.600)
+use_collision = true
+metadata/color = Color(0.250, 0.160, 0.100, 1)
+
+[node name="Tv" type="CSGBox3D" parent="Geometry/Lounge"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 1.250, -8.850)
+size = Vector3(1.900, 1.050, 0.080)
+metadata/emit = Color(0.350, 0.550, 0.900, 1)
+metadata/emit_energy = 1.60
+
+[node name="MapTable" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 4.500, 0.450, 3.200)
+size = Vector3(2.600, 0.900, 1.500)
+use_collision = true
+metadata/color = Color(0.420, 0.280, 0.160, 1)
+
+[node name="MapSheet" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 4.500, 0.915, 3.200)
+size = Vector3(2.200, 0.010, 1.200)
+metadata/color = Color(0.500, 0.470, 0.380, 1)
+
+[node name="Trader" type="Node3D" parent="Geometry"]
+
+[node name="Counter" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 0.500, -3.600)
+size = Vector3(5.600, 1.000, 0.800)
+use_collision = true
+metadata/color = Color(0.420, 0.280, 0.160, 1)
+
+[node name="CounterTop" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 1.020, -3.600)
+size = Vector3(5.800, 0.060, 0.950)
+use_collision = true
+metadata/color = Color(0.250, 0.160, 0.100, 1)
+
+[node name="Partition" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 7.300, 2.100, -6.400)
+size = Vector3(0.300, 4.200, 5.600)
+use_collision = true
+metadata/mat = "concrete_wall_006"
+
+[node name="Bar0" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 7.700, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar1" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 8.060, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar2" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 8.420, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar3" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 8.780, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar4" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.140, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar5" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.500, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar6" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.860, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar7" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.220, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar8" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.580, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar9" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.940, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar10" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 11.300, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar11" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 11.660, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar12" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 12.020, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar13" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 12.380, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="Bar14" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 12.740, 1.850, -3.620)
+size = Vector3(0.040, 1.600, 0.040)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+metadata/rough = 0.40
+metadata/metal = 0.80
+
+[node name="BarTop" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 2.680, -3.620)
+size = Vector3(5.600, 0.060, 0.060)
+metadata/color = Color(0.150, 0.150, 0.160, 1)
+
+[node name="Shelf0" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 8.500, 1.200, -8.800)
+size = Vector3(1.500, 2.400, 0.600)
+use_collision = true
+metadata/color = Color(0.220, 0.230, 0.250, 1)
+metadata/rough = 0.50
+metadata/metal = 0.50
+
+[node name="Goods0_0" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 8.050, 0.550, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Goods0_1" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 8.500, 1.250, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="Goods0_2" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 8.950, 1.950, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.500, 0.200, 0.150, 1)
+
+[node name="Shelf1" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 1.200, -8.800)
+size = Vector3(1.500, 2.400, 0.600)
+use_collision = true
+metadata/color = Color(0.220, 0.230, 0.250, 1)
+metadata/rough = 0.50
+metadata/metal = 0.50
+
+[node name="Goods1_0" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.750, 0.550, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Goods1_1" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 1.250, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="Goods1_2" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.650, 1.950, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.500, 0.200, 0.150, 1)
+
+[node name="Shelf2" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 11.900, 1.200, -8.800)
+size = Vector3(1.500, 2.400, 0.600)
+use_collision = true
+metadata/color = Color(0.220, 0.230, 0.250, 1)
+metadata/rough = 0.50
+metadata/metal = 0.50
+
+[node name="Goods2_0" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 11.450, 0.550, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.450, 0.360, 0.220, 1)
+
+[node name="Goods2_1" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 11.900, 1.250, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.280, 0.300, 0.200, 1)
+
+[node name="Goods2_2" type="CSGBox3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 12.350, 1.950, -8.750)
+size = Vector3(0.350, 0.300, 0.400)
+metadata/color = Color(0.500, 0.200, 0.150, 1)
+
+[node name="Generator" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 11.300, 0.600, 7.200)
+size = Vector3(1.800, 1.200, 1.100)
+use_collision = true
+metadata/color = Color(0.450, 0.420, 0.150, 1)
+metadata/rough = 0.60
+metadata/metal = 0.30
+
+[node name="GenTank" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 11.300, 1.350, 7.200)
+size = Vector3(1.200, 0.300, 0.800)
+use_collision = true
+metadata/color = Color(0.400, 0.370, 0.130, 1)
+
+[node name="GenLamp" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.350, 1.000, 7.200)
+size = Vector3(0.050, 0.080, 0.080)
+metadata/emit = Color(1.000, 0.500, 0.100, 1)
+metadata/emit_energy = 4.00
+
+[node name="Grate" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -13.150, 3.500, 5.000)
+size = Vector3(0.050, 0.900, 1.600)
+metadata/emit = Color(0.450, 0.550, 0.700, 1)
+metadata/emit_energy = 0.80
+
+[node name="TraderNpc" type="MeshInstance3D" parent="Geometry/Trader"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 0.850, -5.200)
+mesh = SubResource("trader_body")
+surface_material_override/0 = SubResource("trader_mat")
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="Bulb0" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 3.000, -3.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade0" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 3.140, -3.000)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable0" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 3.750, -3.000)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight0" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 2.900, -3.000)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+shadow_enabled = true
+shadow_blur = 1.5
+
+[node name="Bulb1" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 3.000, -2.800)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade1" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 3.140, -2.800)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable1" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 3.750, -2.800)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight1" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 2.900, -2.800)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+shadow_enabled = true
+shadow_blur = 1.5
+
+[node name="Bulb2" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 6.000, 3.000, 1.500)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade2" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 6.000, 3.140, 1.500)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable2" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 6.000, 3.750, 1.500)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight2" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 6.000, 2.900, 1.500)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+
+[node name="Bulb3" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 3.000, 4.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade3" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 3.140, 4.000)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable3" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 3.750, 4.000)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight3" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 2.900, 4.000)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+
+[node name="Bulb4" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 3.000, 6.200)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade4" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 3.140, 6.200)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable4" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 3.750, 6.200)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight4" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 2.900, 6.200)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+shadow_enabled = true
+shadow_blur = 1.5
+
+[node name="Bulb5" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 4.500, 3.000, 3.200)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade5" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 4.500, 3.140, 3.200)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable5" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 4.500, 3.750, 3.200)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight5" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 4.500, 2.900, 3.200)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+
+[node name="Bulb6" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -10.800, 3.000, -3.500)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade6" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -10.800, 3.140, -3.500)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable6" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -10.800, 3.750, -3.500)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight6" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -10.800, 2.900, -3.500)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+shadow_enabled = true
+shadow_blur = 1.5
+
+[node name="Bulb7" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 3.000, -0.800)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade7" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 3.140, -0.800)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable7" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 3.750, -0.800)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight7" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 2.900, -0.800)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+
+[node name="Bulb8" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.500, 3.000, 5.500)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.720, 0.420, 1)
+metadata/emit_energy = 8.0
+
+[node name="Shade8" type="CSGCylinder3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.500, 3.140, 5.500)
+radius = 0.280
+height = 0.220
+sides = 16
+cone = true
+metadata/color = Color(0.180, 0.220, 0.160, 1)
+
+[node name="Cable8" type="CSGBox3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.500, 3.750, 5.500)
+size = Vector3(0.015, 1.200, 0.015)
+metadata/color = Color(0.050, 0.050, 0.050, 1)
+
+[node name="BulbLight8" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.500, 2.900, 5.500)
+light_color = Color(1.000, 0.740, 0.480, 1)
+light_energy = 4.20
+light_volumetric_fog_energy = 1.40
+omni_range = 11.00
+omni_attenuation = 1.20
+
+[node name="WorkbenchLamp" type="SpotLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0.00000, -0.00000, -0.00000, 0.21901, -0.97572, 0.00000, 0.97572, 0.21901, -6.000, 3.300, -7.800)
+light_color = Color(1.000, 0.860, 0.660, 1)
+light_energy = 7.00
+light_volumetric_fog_energy = 1.60
+spot_range = 6.00
+spot_angle = 42.00
+spot_attenuation = 1.0
+shadow_enabled = true
+shadow_blur = 1.2
+
+[node name="TraderLamp" type="SpotLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0.00000, -0.00000, -0.00000, 0.12050, -0.99271, 0.00000, 0.99271, 0.12050, 10.200, 3.400, -4.600)
+light_color = Color(1.000, 0.720, 0.420, 1)
+light_energy = 6.00
+light_volumetric_fog_energy = 1.60
+spot_range = 6.00
+spot_angle = 48.00
+spot_attenuation = 1.0
+shadow_enabled = true
+shadow_blur = 1.2
+
+[node name="MapLamp" type="SpotLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0.00000, -0.00000, -0.00000, 0.00010, -1.00000, 0.00000, 1.00000, 0.00010, 4.500, 2.600, 3.200)
+light_color = Color(1.000, 0.800, 0.550, 1)
+light_energy = 1.40
+light_volumetric_fog_energy = 1.00
+spot_range = 4.00
+spot_angle = 38.00
+spot_attenuation = 1.0
+
+[node name="GrateBeam" type="SpotLight3D" parent="Lights"]
+transform = Transform3D(0.00010, 0.00000, 1.00000, 0.52269, 0.85252, -0.00005, -0.85252, 0.52269, 0.00008, -12.900, 3.500, 5.000)
+light_color = Color(0.550, 0.700, 1.000, 1)
+light_energy = 10.00
+light_volumetric_fog_energy = 9.00
+spot_range = 18.00
+spot_angle = 18.00
+spot_attenuation = 1.0
+shadow_enabled = true
+shadow_blur = 1.2
+
+[node name="TvGlow" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.500, 1.300, -8.200)
+light_color = Color(0.400, 0.600, 1.000, 1)
+light_energy = 1.40
+light_volumetric_fog_energy = 0.80
+omni_range = 5.00
+omni_attenuation = 1.20
+
+[node name="TraderNeon" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 3.050, -3.300)
+light_color = Color(1.000, 0.180, 0.220, 1)
+light_energy = 1.60
+light_volumetric_fog_energy = 1.00
+omni_range = 5.00
+omni_attenuation = 1.20
+
+[node name="GenGlow" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 1.000, 7.200)
+light_color = Color(1.000, 0.500, 0.150, 1)
+light_energy = 0.80
+light_volumetric_fog_energy = 0.50
+omni_range = 2.50
+omni_attenuation = 1.20
+
+[node name="ExitGlow" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 3.200, 8.700)
+light_color = Color(0.300, 1.000, 0.450, 1)
+light_energy = 1.20
+light_volumetric_fog_energy = 1.00
+omni_range = 4.00
+omni_attenuation = 1.20
+
+[node name="Garland0" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -3.200, 3.350, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.800, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland1" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -2.650, 3.290, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.620, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland2" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -2.100, 3.234, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.800, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland3" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -1.550, 3.184, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.620, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland4" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -1.000, 3.144, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.800, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland5" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -0.450, 3.116, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.620, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland6" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.100, 3.102, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.800, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland7" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.650, 3.102, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.620, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland8" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 1.200, 3.116, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.800, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland9" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 1.750, 3.144, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.620, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland10" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 2.300, 3.184, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.800, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland11" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 2.850, 3.234, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.620, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland12" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 3.400, 3.290, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.800, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="Garland13" type="MeshInstance3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 3.950, 3.350, -9.000)
+mesh = SubResource("bulb")
+metadata/emit = Color(1.000, 0.620, 0.300, 1)
+metadata/emit_energy = 6.0
+
+[node name="GarlandGlow" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.400, 3.000, -8.600)
+light_color = Color(1.000, 0.700, 0.350, 1)
+light_energy = 1.00
+light_volumetric_fog_energy = 0.80
+omni_range = 6.00
+omni_attenuation = 1.20
+
+[node name="Signs" type="Node3D" parent="."]
+
+[node name="TraderSign" type="Label3D" parent="Signs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 3.050, -3.400)
+text = "ТОРГОВЕЦ"
+pixel_size = 0.0070
+font_size = 72
+modulate = Color(3.00, 0.45, 0.55, 1)
+outline_size = 12
+outline_modulate = Color(0.40, 0.00, 0.05, 1)
+billboard = 1
+shaded = false
+
+[node name="ExitSign" type="Label3D" parent="Signs"]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 3.550, 9.050)
+text = "ВЫХОД"
+pixel_size = 0.0050
+font_size = 64
+modulate = Color(0.60, 2.40, 0.90, 1)
+outline_size = 12
+outline_modulate = Color(0.00, 0.20, 0.05, 1)
+billboard = 1
+shaded = false
+
+[node name="Stations" type="Node3D" parent="."]
+
+[node name="StashStation" parent="Stations" instance=ExtResource("st")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -11.200, 0.900, -3.500)
+kind = 0
+display_name = "Тайник и снаряжение"
+
+[node name="WorkbenchStation" parent="Stations" instance=ExtResource("st")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -6.000, 0.900, -7.200)
+kind = 3
+display_name = "Верстак — обвесы"
+
+[node name="TraderStation" parent="Stations" instance=ExtResource("st")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 10.200, 0.900, -2.600)
+kind = 1
+display_name = "Торговец"
+
+[node name="ExitStation" parent="Stations" instance=ExtResource("st")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 0.900, 8.300)
+kind = 2
+display_name = "Выход в рейд"
+
+[node name="UpgradeStation" parent="Stations" instance=ExtResource("st")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 9.600, 0.900, 6.200)
+kind = 4
+display_name = "Модули убежища"
+
+[node name="Spawn" type="Marker3D" parent="."]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.000, 0.100, 4.500)
+
+[node name="CameraRig" parent="." instance=ExtResource("rig")]

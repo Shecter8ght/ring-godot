@@ -1,0 +1,21 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_base.jpg" id="1_b83fh"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_orm.jpg" id="2_ukauo"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_normal.jpg" id="3_0uyje"]
+
+[resource]
+resource_name = "PaintedConcrete_cut"
+albedo_texture = ExtResource("1_b83fh")
+metallic = 1.0
+metallic_texture = ExtResource("2_ukauo")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_ukauo")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.75
+normal_texture = ExtResource("3_0uyje")
+ao_enabled = true
+ao_texture = ExtResource("2_ukauo")
+texture_filter = 5
+distance_fade_mode = 2

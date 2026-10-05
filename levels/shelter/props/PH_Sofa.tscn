@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Sofa_00.res" id="1_hlomy"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Sofa_01.res" id="2_47ecu"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pmols"]
+size = Vector3(2.25, 0.88334376, 1.0181352)
+
+[node name="PH_Sofa" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_hlomy")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_47ecu")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44167188, 0)
+shape = SubResource("BoxShape3D_pmols")

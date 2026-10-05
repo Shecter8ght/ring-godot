@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/GalvanizedSteel_base.jpg" id="1_swbv8"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/GalvanizedSteel_orm.jpg" id="2_m0dmt"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/GalvanizedSteel_normal.jpg" id="3_eg4ee"]
+
+[resource]
+resource_name = "GalvanizedSteel"
+albedo_texture = ExtResource("1_swbv8")
+metallic = 1.0
+metallic_texture = ExtResource("2_m0dmt")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_m0dmt")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("3_eg4ee")
+ao_enabled = true
+ao_texture = ExtResource("2_m0dmt")
+texture_filter = 5
