@@ -1,0 +1,1217 @@
+[
+	{
+		"asset": "InventoryClipboard",
+		"name": "RouteClipboard",
+		"position": [
+			1.41999995708466,
+			0.790000021457672,
+			0.46000000834465
+		],
+		"rotation_degrees": [
+			0.0,
+			-7.99999952316284,
+			0.0
+		],
+		"yaw": -8.0
+	},
+	{
+		"asset": "BooksStack",
+		"name": "RouteFolders",
+		"position": [
+			-1.42999994754791,
+			0.790000021457672,
+			-0.620000004768372
+		],
+		"rotation_degrees": [
+			0.0,
+			3.99999976158142,
+			0.0
+		],
+		"yaw": 4.0
+	},
+	{
+		"asset": "NoticeBoard",
+		"name": "HubNoticeBoard",
+		"position": [
+			7.69999980926514,
+			1.64999997615814,
+			-0.100000001490116
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "CableJunction",
+		"name": "CommunicationsWiring",
+		"position": [
+			7.67000007629395,
+			0.879999995231628,
+			2.29999995231628
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "WorkGloves",
+		"name": "UnloadGloves",
+		"position": [
+			-3.48000001907349,
+			0.490000009536743,
+			9.64999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "HangingJacket",
+		"name": "ReturnJacket",
+		"position": [
+			-3.70000004768372,
+			0.519999980926514,
+			10.5
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "CleaningBucket",
+		"name": "ReturnCleaning",
+		"position": [
+			-3.38000011444092,
+			0.0,
+			11.2399997711182
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FireExtinguisher",
+		"name": "EntryFireSafety",
+		"position": [
+			3.6800000667572,
+			0.349999994039536,
+			9.69999980926514
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "DrapedBlanket",
+		"name": "SofaBlanket",
+		"position": [
+			-13.8999996185303,
+			0.46000000834465,
+			-7.51999998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "Cushion",
+		"name": "SofaCushion",
+		"position": [
+			-12.6499996185303,
+			0.430000007152557,
+			-7.51999998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BooksStack",
+		"name": "LivingBooks",
+		"position": [
+			-13.7799997329712,
+			0.495999991893768,
+			-8.89999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			-12.0,
+			0.0
+		],
+		"yaw": -12.0
+	},
+	{
+		"asset": "TeaStation",
+		"name": "TeaCorner",
+		"position": [
+			-16.3500003814697,
+			0.0,
+			-10.3500003814697
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "TeaSet",
+		"name": "KettleAndCups",
+		"position": [
+			-16.3500003814697,
+			0.944000005722046,
+			-10.3500003814697
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WallClock",
+		"name": "LivingClock",
+		"position": [
+			-17.7299995422363,
+			2.25,
+			-6.84999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "TeaTowel",
+		"position": [
+			-16.6599998474121,
+			0.224999994039536,
+			-10.3500003814697
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BooksStack",
+		"name": "PersonalBooks",
+		"position": [
+			-17.3999996185303,
+			1.62000000476837,
+			-8.0
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "CounterScales",
+		"name": "TraderScales",
+		"position": [
+			-12.8999996185303,
+			0.975000023841858,
+			-2.00999999046326
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Calculator",
+		"name": "TraderCalculator",
+		"position": [
+			-12.3599996566772,
+			0.975000023841858,
+			-2.03999996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			12.0,
+			0.0
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "InventoryClipboard",
+		"name": "TradeInventory",
+		"position": [
+			-12.0,
+			0.975000023841858,
+			-2.03999996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			-6.99999952316284,
+			0.0
+		],
+		"yaw": -7.0
+	},
+	{
+		"asset": "RepairTools",
+		"name": "WorkshopCurrentRepair",
+		"position": [
+			13.1499996185303,
+			0.944999992847443,
+			-4.15999984741211
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "OpenToolbox",
+		"name": "WorkshopToolbox",
+		"position": [
+			14.1199998855591,
+			0.944999992847443,
+			-4.42999982833862
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PartsOrganizer",
+		"name": "WorkshopDrawerBins",
+		"position": [
+			13.9499998092651,
+			1.12000000476837,
+			-4.55000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CleaningRag",
+		"name": "WorkshopRag",
+		"position": [
+			14.5,
+			0.950999975204468,
+			-4.0
+		],
+		"rotation_degrees": [
+			0.0,
+			19.9999980926514,
+			0.0
+		],
+		"yaw": 20.0
+	},
+	{
+		"asset": "WeaponCleaningSet",
+		"name": "WeaponService",
+		"position": [
+			-13.5500001907349,
+			0.764999985694885,
+			4.21000003814697
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "AmmoAndMagazines",
+		"name": "WeaponAmmo",
+		"position": [
+			-12.7799997329712,
+			0.76800000667572,
+			4.48000001907349
+		],
+		"rotation_degrees": [
+			0.0,
+			12.0,
+			0.0
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "HearingProtection",
+		"name": "ArmoryHeadset",
+		"position": [
+			-13.6199998855591,
+			0.764999985694885,
+			3.75
+		],
+		"rotation_degrees": [
+			0.0,
+			9.99999904632568,
+			0.0
+		],
+		"yaw": 10.0
+	},
+	{
+		"asset": "WorkGloves",
+		"name": "ArmoryGloves",
+		"position": [
+			-12.9099998474121,
+			0.764999985694885,
+			3.78999996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			-19.9999980926514,
+			0.0
+		],
+		"yaw": -20.0
+	},
+	{
+		"asset": "MeterPanel",
+		"name": "GeneratorMeters",
+		"position": [
+			15.4200000762939,
+			0.970000028610229,
+			-10.7399997711182
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CableJunction",
+		"name": "GeneratorCableDrop",
+		"position": [
+			15.9499998092651,
+			0.200000002980232,
+			-10.7299995422363
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "GeneratorServiceDetails",
+		"name": "GeneratorFittings",
+		"position": [
+			13.8000001907349,
+			0.0,
+			-8.32999992370605
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "ExhaustConnection",
+		"name": "GeneratorExhaustRoute",
+		"position": [
+			12.75,
+			2.59999990463257,
+			-8.81999969482422
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FireExtinguisher",
+		"name": "GeneratorFireSafety",
+		"position": [
+			10.039999961853,
+			0.400000005960464,
+			-10.7299995422363
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "InventoryClipboard",
+		"name": "GeneratorServiceLog",
+		"position": [
+			15.0299997329712,
+			0.879999995231628,
+			-10.7299995422363
+		],
+		"rotation_degrees": [
+			90.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "HandTruck",
+		"name": "StorageHandTruck",
+		"position": [
+			17.0799999237061,
+			0.0,
+			2.02999997138977
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "MixedCartons",
+		"name": "SortingDelivery",
+		"position": [
+			12.8599996566772,
+			0.975000023841858,
+			1.60000002384186
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "InventoryClipboard",
+		"name": "WarehouseInventory",
+		"position": [
+			13.8500003814697,
+			0.975000023841858,
+			1.58000004291534
+		],
+		"rotation_degrees": [
+			0.0,
+			12.0,
+			0.0
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "WorkGloves",
+		"name": "WarehouseGloves",
+		"position": [
+			14.5799999237061,
+			0.975000023841858,
+			1.52999997138977
+		],
+		"rotation_degrees": [
+			0.0,
+			-6.99999952316284,
+			0.0
+		],
+		"yaw": -7.0
+	},
+	{
+		"asset": "FoodStock",
+		"name": "Stock_37",
+		"position": [
+			-16.6000003814697,
+			1.14999997615814,
+			-4.3899998664856
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WaterStock",
+		"name": "Stock_38",
+		"position": [
+			-14.8000001907349,
+			0.665000021457672,
+			-4.42999982833862
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BatteryStock",
+		"name": "Stock_39",
+		"position": [
+			-13.0,
+			1.62000000476837,
+			-4.40000009536743
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "MedicalStock",
+		"name": "Stock_40",
+		"position": [
+			-16.7000007629395,
+			1.62000000476837,
+			-4.40000009536743
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "MixedCartons",
+		"name": "Stock_41",
+		"position": [
+			-14.8000001907349,
+			1.62000000476837,
+			-4.40000009536743
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodStock",
+		"name": "Stock_42",
+		"position": [
+			-13.0,
+			0.665000021457672,
+			-4.3899998664856
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoodStock",
+		"name": "Stock_43",
+		"position": [
+			10.1999998092651,
+			1.62000000476837,
+			6.25
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "WaterStock",
+		"name": "Stock_44",
+		"position": [
+			12.0,
+			1.62000000476837,
+			6.25
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "MixedCartons",
+		"name": "Stock_45",
+		"position": [
+			13.8000001907349,
+			1.62000000476837,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "BatteryStock",
+		"name": "Stock_46",
+		"position": [
+			15.6000003814697,
+			1.62000000476837,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "MedicalStock",
+		"name": "Stock_47",
+		"position": [
+			15.6000003814697,
+			0.665000021457672,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "FoodStock",
+		"name": "Stock_48",
+		"position": [
+			13.8000001907349,
+			0.665000021457672,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "MixedCartons",
+		"name": "Stock_49",
+		"position": [
+			12.0,
+			0.665000021457672,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "SupplySack",
+		"name": "Stock_50",
+		"position": [
+			15.6000003814697,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "SupplySack",
+		"name": "Stock_51",
+		"position": [
+			10.1999998092651,
+			0.665000021457672,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "MixedCartons",
+		"name": "Stock_52",
+		"position": [
+			10.1999998092651,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "MedicalStock",
+		"name": "Stock_53",
+		"position": [
+			12.0,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "FoodStock",
+		"name": "Stock_54",
+		"position": [
+			13.8000001907349,
+			1.13999998569489,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			0.0
+		],
+		"yaw": 180.0
+	},
+	{
+		"asset": "PartsOrganizer",
+		"name": "Stock_55",
+		"position": [
+			17.3999996185303,
+			1.14999997615814,
+			-2.0
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0
+	},
+	{
+		"asset": "MixedCartons",
+		"name": "Stock_56",
+		"position": [
+			10.5,
+			1.14999997615814,
+			-4.40000009536743
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BatteryStock",
+		"name": "Stock_57",
+		"position": [
+			10.5,
+			1.62000000476837,
+			-4.40000009536743
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "AmmoAndMagazines",
+		"name": "Stock_58",
+		"position": [
+			-17.3999996185303,
+			0.665000021457672,
+			3.25
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0
+	}0.6499996185303
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "SleepingTowel_2",
+		"position": [
+			2.27999997138977,
+			3.15599989891052,
+			-10.6700000762939
+		],
+		"yaw": 0.0
+	}
+]: 90.0
+	},
+	{
+		"asset": "MixedCartons",
+		"name": "Stock_60",
+		"position": [
+			-17.3999996185303,
+			1.62000000476837,
+			3.29999995231628
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0
+	},
+	{
+		"asset": "BooksStack",
+		"name": "Stock_61",
+		"position": [
+			-10.1999998092651,
+			1.62000000476837,
+			-10.4499998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "SupplySack",
+		"name": "Stock_62",
+		"position": [
+			-10.1999998092651,
+			0.180000007152557,
+			-10.4499998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WorkGloves",
+		"name": "BayGloves_0",
+		"position": [
+			-5.42000007629395,
+			0.49099999666214,
+			6.48999977111816
+		],
+		"rotation_degrees": [
+			0.0,
+			-12.0,
+			0.0
+		],
+		"yaw": -12.0
+	},
+	{
+		"asset": "HearingProtection",
+		"name": "BayHeadset_0",
+		"position": [
+			-5.0,
+			0.49099999666214,
+			6.51999998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "BayCloth_0",
+		"position": [
+			-4.51999998092651,
+			0.524999976158142,
+			6.46999979019165
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BedBlanket",
+		"name": "SleepingBlanket_0",
+		"position": [
+			-2.15000009536743,
+			3.28999996185303,
+			-9.02000045776367
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BooksStack",
+		"name": "BedsideBooks_0",
+		"position": [
+			-2.40000009536743,
+			3.13499999046326,
+			-10.6499996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "SleepingTowel_0",
+		"position": [
+			-2.01999998092651,
+			3.15599989891052,
+			-10.6700000762939
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WorkGloves",
+		"name": "BayGloves_1",
+		"position": [
+			4.78000020980835,
+			0.49099999666214,
+			6.48999977111816
+		],
+		"rotation_degrees": [
+			0.0,
+			0.999999940395355,
+			0.0
+		],
+		"yaw": 1.0
+	},
+	{
+		"asset": "HearingProtection",
+		"name": "BayHeadset_1",
+		"position": [
+			5.19999980926514,
+			0.49099999666214,
+			6.51999998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			9.99999904632568,
+			0.0
+		],
+		"yaw": 10.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "BayCloth_1",
+		"position": [
+			5.67999982833862,
+			0.524999976158142,
+			6.46999979019165
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BedBlanket",
+		"name": "SleepingBlanket_1",
+		"position": [
+			0.0,
+			3.28999996185303,
+			-9.02000045776367
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BooksStack",
+		"name": "BedsideBooks_1",
+		"position": [
+			-0.25,
+			3.13499999046326,
+			-10.6499996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			6.0,
+			0.0
+		],
+		"yaw": 6.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "SleepingTowel_1",
+		"position": [
+			0.129999995231628,
+			3.15599989891052,
+			-10.6700000762939
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "WorkGloves",
+		"name": "BayGloves_2",
+		"position": [
+			7.07999992370605,
+			0.49099999666214,
+			6.48999977111816
+		],
+		"rotation_degrees": [
+			0.0,
+			13.9999990463257,
+			0.0
+		],
+		"yaw": 14.0
+	},
+	{
+		"asset": "HearingProtection",
+		"name": "BayHeadset_2",
+		"position": [
+			7.5,
+			0.49099999666214,
+			6.51999998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			19.9999980926514,
+			0.0
+		],
+		"yaw": 20.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "BayCloth_2",
+		"position": [
+			7.98000001907349,
+			0.524999976158142,
+			6.46999979019165
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BedBlanket",
+		"name": "SleepingBlanket_2",
+		"position": [
+			2.15000009536743,
+			3.28999996185303,
+			-9.02000045776367
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "BooksStack",
+		"name": "BedsideBooks_2",
+		"position": [
+			1.89999997615814,
+			3.13499999046326,
+			-10.6499996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			12.0,
+			0.0
+		],
+		"yaw": 12.0
+	},
+	{
+		"asset": "FoldedTowel",
+		"name": "SleepingTowel_2",
+		"position": [
+			2.27999997138977,
+			3.15599989891052,
+			-10.6700000762939
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	}
+]

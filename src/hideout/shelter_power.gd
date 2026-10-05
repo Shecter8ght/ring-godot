@@ -77,6 +77,11 @@ func _apply() -> void:
 		light.light_energy = float(light.get_meta("normal_energy")) if enabled else 0.0
 	# Emissive diffusors отражают тот же рубильник; расстановка сохранена в сцене.
 	var level: Node = get_parent().get_parent()
+	var atmosphere: Node = level.get_node_or_null("Atmosphere")
+	if atmosphere:
+		for effect: Node in atmosphere.get_children():
+			if effect.has_method("set_power"):
+				effect.call("set_power", enabled)
 	for node: Node in level.find_children("Fixture_*", "Node3D", true, false):
 		for mesh: Node in node.find_children("*", "MeshInstance3D", true, false):
 			var mi: MeshInstance3D = mesh as MeshInstance3D

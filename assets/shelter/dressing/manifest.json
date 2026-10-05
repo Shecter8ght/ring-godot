@@ -1,0 +1,398 @@
+{
+  "TeaSet": {
+    "bounds_m": [
+      0.5979,
+      0.3814,
+      0.35
+    ],
+    "triangles": 5588,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "BooksStack": {
+    "bounds_m": [
+      0.261,
+      0.079,
+      0.19
+    ],
+    "triangles": 2256,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "WallClock": {
+    "bounds_m": [
+      0.4,
+      0.4,
+      0.065
+    ],
+    "triangles": 4644,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "Cushion": {
+    "bounds_m": [
+      0.46,
+      0.11,
+      0.33
+    ],
+    "triangles": 1148,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "WeaponCleaningSet": {
+    "bounds_m": [
+      0.62,
+      0.156,
+      0.35
+    ],
+    "triangles": 8056,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "AmmoAndMagazines": {
+    "bounds_m": [
+      0.35,
+      0.0835,
+      0.2054
+    ],
+    "triangles": 2747,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "RepairTools": {
+    "bounds_m": [
+      0.66,
+      0.044,
+      0.4
+    ],
+    "triangles": 7280,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "PartsOrganizer": {
+    "bounds_m": [
+      0.66,
+      0.5,
+      0.235
+    ],
+    "triangles": 6956,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "OpenToolbox": {
+    "bounds_m": [
+      0.481,
+      0.3687,
+      0.4155
+    ],
+    "triangles": 4132,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "MeterPanel": {
+    "bounds_m": [
+      0.62,
+      0.62,
+      0.1175
+    ],
+    "triangles": 12631,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "CableJunction": {
+    "bounds_m": [
+      0.24,
+      1.16,
+      0.115
+    ],
+    "triangles": 4736,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "GeneratorServiceDetails": {
+    "bounds_m": [
+      1.942,
+      0.619,
+      0.9407
+    ],
+    "triangles": 6468,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "FireExtinguisher": {
+    "bounds_m": [
+      0.2152,
+      0.4675,
+      0.1595
+    ],
+    "triangles": 1354,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "DrapedBlanket": {
+    "bounds_m": [
+      0.8619,
+      0.3564,
+      0.8809
+    ],
+    "triangles": 2496,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "FoldedTowel": {
+    "bounds_m": [
+      0.3817,
+      0.0528,
+      0.2819
+    ],
+    "triangles": 2872,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "BedBlanket": {
+    "bounds_m": [
+      0.8422,
+      0.0656,
+      1.1514
+    ],
+    "triangles": 2496,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "CleaningRag": {
+    "bounds_m": [
+      0.272,
+      0.0209,
+      0.222
+    ],
+    "triangles": 2496,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "MixedCartons": {
+    "bounds_m": [
+      0.655,
+      0.288,
+      0.3238
+    ],
+    "triangles": 1948,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "FoodStock": {
+    "bounds_m": [
+      0.488,
+      0.114,
+      0.238
+    ],
+    "triangles": 17808,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "WaterStock": {
+    "bounds_m": [
+      0.542,
+      0.306,
+      0.302
+    ],
+    "triangles": 6120,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "MedicalStock": {
+    "bounds_m": [
+      0.475,
+      0.168,
+      0.21
+    ],
+    "triangles": 3051,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "BatteryStock": {
+    "bounds_m": [
+      0.34,
+      0.3,
+      0.2238
+    ],
+    "triangles": 3027,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "SupplySack": {
+    "bounds_m": [
+      0.34,
+      0.364,
+      0.24
+    ],
+    "triangles": 1148,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "HandTruck": {
+    "bounds_m": [
+      0.52,
+      0.9724,
+      0.375
+    ],
+    "triangles": 7128,
+    "collision": {
+      "center": [
+        0,
+        0.5,
+        0.12
+      ],
+      "size": [
+        0.62,
+        1.0,
+        0.42
+      ]
+    },
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "InventoryClipboard": {
+    "bounds_m": [
+      0.22,
+      0.031,
+      0.3
+    ],
+    "triangles": 648,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "Calculator": {
+    "bounds_m": [
+      0.11,
+      0.044,
+      0.17
+    ],
+    "triangles": 2068,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "CounterScales": {
+    "bounds_m": [
+      0.34,
+      0.0995,
+      0.268
+    ],
+    "triangles": 994,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "HangingJacket": {
+    "bounds_m": [
+      0.6,
+      0.68,
+      0.1625
+    ],
+    "triangles": 3236,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "HearingProtection": {
+    "bounds_m": [
+      0.3701,
+      0.2444,
+      0.1565
+    ],
+    "triangles": 2056,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "WorkGloves": {
+    "bounds_m": [
+      0.267,
+      0.029,
+      0.187
+    ],
+    "triangles": 2632,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "CleaningBucket": {
+    "bounds_m": [
+      0.3153,
+      0.6524,
+      0.27
+    ],
+    "triangles": 1772,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "NoticeBoard": {
+    "bounds_m": [
+      1.0,
+      0.7,
+      0.0585
+    ],
+    "triangles": 3816,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "TeaStation": {
+    "bounds_m": [
+      1.1,
+      0.942,
+      0.58
+    ],
+    "triangles": 2860,
+    "collision": {
+      "center": [
+        0,
+        0.44,
+        0
+      ],
+      "size": [
+        1.1,
+        0.88,
+        0.58
+      ]
+    },
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  },
+  "ExhaustConnection": {
+    "bounds_m": [
+      0.23,
+      0.5702,
+      1.9875
+    ],
+    "triangles": 11136,
+    "collision": null,
+    "material": "DressingAtlas",
+    "ucupaint_layers": 4
+  }
+}
