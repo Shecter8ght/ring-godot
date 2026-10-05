@@ -115,3 +115,9 @@
 - Источник — `_asset_src/glock17_gen5/` (glb, неизменённая копия .blend, `license.txt`, `export_manifest.json`); проверка и импорт — `tools/import_weapon_model.py glock17_gen5`.
 - Маркировка GLOCK — товарный знак Glock Ges.m.b.H.; оставлена по решению владельца, до выпуска игры решить отдельно (см. `license.txt`).
 <!-- GLOCK17_MODEL_END -->
+
+<!-- SHELTER_REMAKE_START -->
+## Ремейк убежища — 2026-10-05
+
+- Полный реестр фототекстур, пяти моделей Poly Haven (CC0), собственных Blender-моделей и унаследованных ассетов: [ASSET_CREDITS.md](ASSET_CREDITS.md). Финальные ресурсы — `assets/shelter/` и `levels/shelter/`; сырьё/лицензии — `_asset_src/shelter/`.
+<!-- SHELTER_REMAKE_END -->

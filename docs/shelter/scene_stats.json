@@ -1,0 +1,9 @@
+{
+	"authored_assets": 91,
+	"gi": "SDFGI + SSIL (existing Forward+ pipeline)",
+	"lights": 32,
+	"navigation_polygons": 216,
+	"procedural_level_generation": false,
+	"prop_instances": 276,
+	"reflection_probes": 6
+}
