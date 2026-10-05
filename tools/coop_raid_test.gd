@@ -154,10 +154,10 @@ func _raid() -> void:
 
 ## Эвакуация группой: хост и c1 встают в зону «Автобусная остановка», c2 остаётся где был.
 func _evac() -> void:
-	var ext := get_tree().current_scene.get_node_or_null("Extractions/Bus") as ExtractionPoint
+	var ext := _test_extraction()
 	var me := Raid.current.local_player()
 	if ext == null or me == null:
-		_check("эвакуация: точка Bus", false, "")
+		_check("эвакуация: точка найдена", false, "")
 		return
 	var c2 := _peer_of_role("c2")
 	if _role != "c2":
@@ -176,6 +176,10 @@ func _evac() -> void:
 	await get_tree().create_timer(2.0).timeout
 	var want := "stranded" if _role == "c2" else "extract"
 	_check("эвакуация: моя хроника — «%s»" % want, r.chronicle != null and r.analytics.outcome == want, "%s: %s" % [r.analytics.outcome, r.chronicle.verdict if r.chronicle else "нет"])
+
+
+func _test_extraction() -> ExtractionPoint:
+	return get_tree().current_scene.get_node_or_null("Extractions/Bus") as ExtractionPoint
 
 
 ## Новый профиль держит всё в тайнике: стволы — в руки, патроны и магазины — в рюкзак.
