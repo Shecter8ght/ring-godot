@@ -47,6 +47,7 @@ var _decks_hidden: Dictionary = {}
 ## Где был свой игрок (задания «побывать в помещении»): проверка раз в полсекунды.
 var _visit_t: float = 0.0
 var _visited: Dictionary = {}
+var _sector_def: Dictionary = {}
 
 @onready var _camera_rig: CameraRig = $CameraRig
 @onready var _hud: Control = $HUD/Root
@@ -57,6 +58,7 @@ func _ready() -> void:
 		_build_editor_preview()
 		return
 	_rng.randomize()
+	_sector_def = SectorBuilder.load_def(sector_path)
 	# сеть: всё, что синхронизируется в рейде, — только тем, кто в рейде (ушедший в убежище не
 	# получает поток; спавн игрока придёт клиенту, когда его рейд загрузится)
 	get_tree().node_added.connect(_on_node_added)
@@ -100,6 +102,18 @@ func _ready() -> void:
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})
+	if String(_sector_def.get("layout", "")) == "cartesian_scene":
+		(_camera_rig.get_node("Pivot/Camera3D") as Camera3D).far = float(Balance.URBAN_WORLD.view_distance)
+		for extraction: Node in get_tree().get_nodes_in_group("extractions"):
+			if is_ancestor_of(extraction):
+				(extraction as ExtractionPoint).channel_s = float(Balance.URBAN_WORLD.extract_seconds)
+		for batch_root in get_tree().get_nodes_in_group("urban_prop_batches"):
+			if is_ancestor_of(batch_root):
+				PropBatcher.batch(batch_root as Node3D, float(Balance.URBAN_WORLD.batch_cell), float(Balance.URBAN_WORLD.prop_distance))
+		var urban_map := MapView.new()
+		urban_map.name = "Map"
+		urban_map.setup_urban(_sector_def)
+		add_child(urban_map)
 	# карта этажа на M (только у кольца — у старого сектора плана нет)
 	if not _ring.is_empty():
 		var map := MapView.new()
@@ -364,6 +378,13 @@ func _apply_loadout(p: Player) -> void:
 ## Навмеш печётся из коллайдеров и мешей сектора (двери не считаются — их AI открывает сам),
 ## в фоне; мародёры появляются, когда он готов.
 func _bake_navmesh() -> void:
+	if String(_sector_def.get("layout", "")) == "cartesian_scene":
+		var urban_nav := UrbanNavigation.new()
+		urban_nav.name = "NavRegion"
+		urban_nav.definition = _sector_def
+		urban_nav.ready_for_agents.connect(_on_nav_baked)
+		get_node("Navigation").add_child(urban_nav)
+		return
 	var region := NavigationRegion3D.new()
 	region.name = "NavRegion"
 	var nm := NavigationMesh.new()
@@ -393,7 +414,8 @@ func _bake_navmesh() -> void:
 func _on_nav_baked() -> void:
 	# Испечённый меш попадает в карту на следующей синхронизации сервера — ждём её, иначе
 	# map_get_closest_point вернёт мусор.
-	await NavigationServer3D.map_changed
+	if String(_sector_def.get("layout", "")) != "cartesian_scene":
+		await NavigationServer3D.map_changed
 	await get_tree().physics_frame
 	_nav_baked = true
 	print("sector: навмеш готов, регионов %d" % NavigationServer3D.map_get_regions(get_world_3d().navigation_map).size())
@@ -420,6 +442,9 @@ func _spawn_marauders() -> void:
 	while placed < Balance.MARAUDER_COUNT and tries < 200:
 		tries += 1
 		var p := _random_room_point()
+		var markers: Array[Node] = get_tree().get_nodes_in_group("ai_spawn_points")
+		if not markers.is_empty():
+			p = (markers[(tries - 1) % markers.size()] as Node3D).global_position
 		if p.distance_to(_spawn) < Balance.MARAUDER_SPAWN_MIN_DIST:
 			continue
 		var snapped := NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, p)
@@ -522,6 +547,11 @@ func _update_decks() -> void:
 	for d in get_tree().get_nodes_in_group("decks"):
 		var deck := d as Node3D
 		var hide := not ads and float(deck.get_meta("deck_y", 0.0)) > eye_y + Balance.DECK_HIDE_ABOVE
+		if deck.has_meta("urban_cover_size"):
+			var cover: Vector2 = deck.get_meta("urban_cover_size")
+			var local: Vector3 = deck.to_local(_local_player.global_position)
+			hide = not ads and float(deck.get_meta("deck_y", 0.0)) > eye_y + float(Balance.URBAN_WORLD.deck_margin)
+			hide = hide and absf(local.x) < cover.x * 0.5 and absf(local.z) < cover.y * 0.5
 		if bool(_decks_hidden.get(deck, false)) == hide:
 			continue
 		_decks_hidden[deck] = hide

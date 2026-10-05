@@ -1,0 +1,22 @@
+[gd_resource type="Environment" load_steps=3 format=3]
+
+[sub_resource type="PhysicalSkyMaterial" id="sky_material"]
+rayleigh_coefficient = 2.2
+mie_color = Color(0.93, 0.78, 0.61, 1)
+turbidity = 4.0
+ground_color = Color(0.24, 0.27, 0.24, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[resource]
+resource_local_to_scene = true
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.62, 0.7, 0.8, 1)
+ambient_light_energy = 0.75
+tonemap_mode = 4
+ssao_enabled = true
+ssao_radius = 1.2
+fog_enabled = false

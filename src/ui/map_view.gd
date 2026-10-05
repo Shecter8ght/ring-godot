@@ -29,12 +29,20 @@ var _label_at: Dictionary = {}
 var _width_of: Dictionary = {}
 ## Мировые XZ, в которые вписывается карта: открытая часть, постройки, точки эвакуации.
 var _bounds: Rect2 = Rect2()
+var _urban: Dictionary = {}
 
 
 func setup(rooms: Array, ring: Dictionary, open_angle: Vector2) -> void:
 	_rooms = rooms
 	_ring = ring
 	_open_angle = open_angle
+
+
+func setup_urban(definition: Dictionary) -> void:
+	_urban = definition
+	_rooms = definition.get("rooms", [])
+	var bounds: Array = definition.bounds
+	_bounds = Rect2(float(bounds[0]), float(bounds[1]), float(bounds[2]) - float(bounds[0]), float(bounds[3]) - float(bounds[1]))
 
 
 func _ready() -> void:
@@ -76,6 +84,8 @@ func _collect_scene() -> void:
 	# рамка карты — всё, что открыто: помещения, постройки, эвакуации
 	var pts: Array[Vector2] = []
 	for room in _rooms:
+		if room.has("rect"):
+			continue
 		if SectorBuilder.is_strip(room):
 			continue
 		for i in range(9):
@@ -87,7 +97,7 @@ func _collect_scene() -> void:
 			pts.append(p)
 	for x in get_tree().get_nodes_in_group("extractions"):
 		pts.append(Vector2((x as Node3D).global_position.x, (x as Node3D).global_position.z))
-	if not pts.is_empty():
+	if not pts.is_empty() and _urban.is_empty():
 		_bounds = Rect2(pts[0], Vector2.ZERO)
 		for p in pts:
 			_bounds = _bounds.expand(p)
@@ -153,20 +163,26 @@ func _draw_map() -> void:
 	_canvas.draw_rect(Rect2(Vector2.ZERO, size), BG)
 	var me := _me()
 	var fit := _bounds if _bounds.size != Vector2.ZERO else Rect2(-150, -150, 300, 300)
-	# снизу-сверху — место под заголовок
-	_scale = minf(size.x / fit.size.x, (size.y - 110.0) / fit.size.y) * _zoom
-	_origin = Vector2(size.x * 0.5, 100.0 + (size.y - 110.0) * 0.5)
+	# У южной границы города нужна также полоса для подписи КПП.
+	var vertical_margin: float = 150.0 if not _urban.is_empty() else 110.0
+	_scale = minf(size.x / fit.size.x, (size.y - vertical_margin) / fit.size.y) * _zoom
+	_origin = Vector2(size.x * 0.5, 100.0 + (size.y - vertical_margin) * 0.5)
 	_center = fit.get_center()
 	if _zoom > 1.0 and me:
 		_center = Vector2(me.global_position.x, me.global_position.z)
 	# закрытая часть кольца — бледный силуэт: видно, что здание продолжается
-	var outer := float(_ring.get("outer_r", 100.0))
-	_canvas.draw_colored_polygon(_arc_poly(_open_angle.y, _open_angle.x + 360.0, 0.0, outer), Color(0.16, 0.165, 0.17))
+	if _urban.is_empty():
+		var outer := float(_ring.get("outer_r", 100.0))
+		_canvas.draw_colored_polygon(_arc_poly(_open_angle.y, _open_angle.x + 360.0, 0.0, outer), Color(0.16, 0.165, 0.17))
+	else:
+		_draw_urban()
 	# сначала улица, потом здание, поверх — полосы аллеи
 	var order := _rooms.duplicate()
 	order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return _rank(a) < _rank(b))
 	for room in order:
+		if room.has("rect"):
+			continue
 		var poly := _room_poly(room)
 		if poly.size() < 3:
 			continue
@@ -183,7 +199,7 @@ func _draw_map() -> void:
 		var closed := poly.duplicate()
 		closed.append(poly[0])
 		_canvas.draw_polyline(closed, Color(0.6, 0.62, 0.6), 1.2)
-		if String(b[1]) != "":
+		if String(b[1]) != "" and (_urban.is_empty() or _zoom > 2.0):
 			_label(_poly_center(poly), String(b[1]), 13, Color(0.85, 0.87, 0.85))
 	for e in _escalators:
 		var poly := PackedVector2Array()
@@ -192,6 +208,8 @@ func _draw_map() -> void:
 		_canvas.draw_colored_polygon(poly, Color(0.45, 0.4, 0.6))
 	# подписи магазинов и крупных помещений
 	for room in _rooms:
+		if room.has("rect"):
+			continue
 		var t := String(room.get("type", ""))
 		if t in ["corridor", "yard", "parking"] and not bool(room.get("outdoor", false)):
 			continue
@@ -212,6 +230,11 @@ func _draw_map() -> void:
 			continue
 		_label(_to_screen(at), title, fs, Color(0.92, 0.9, 0.84, 0.9))
 	# точки эвакуации
+	if not _urban.is_empty() and _zoom <= 2.0:
+		for district in _urban.get("districts", []):
+			var rect: Array = district.rect
+			var center := Vector2((float(rect[0]) + float(rect[2])) * 0.5, (float(rect[1]) + float(rect[3])) * 0.5)
+			_label(_to_screen(center), String(district.name), 15, Color(0.93, 0.93, 0.88))
 	for x in get_tree().get_nodes_in_group("extractions"):
 		var ep := x as ExtractionPoint
 		if ep == null:
@@ -220,13 +243,24 @@ func _draw_map() -> void:
 		_canvas.draw_colored_polygon(PackedVector2Array([s + Vector2(0, -11), s + Vector2(10, 7), s + Vector2(-10, 7)]), Color(0.2, 0.75, 0.35))
 		_label(s + Vector2(0, 20), ep.display_name, 13, Color(0.55, 1.0, 0.65))
 	# свет ТЦ: главный рубильник и генератор — ромб (генератор встал — красный)
+	var power_labels: Array[Rect2] = []
 	for n in get_tree().get_nodes_in_group("power_points"):
 		var pp := n as Node3D
 		var down := n is MallGenerator and (n as MallGenerator).is_down()
 		var col := Color(1.0, 0.3, 0.2) if down else Color(1.0, 0.8, 0.25)
 		var s := _to_screen(Vector2(pp.global_position.x, pp.global_position.z))
 		_canvas.draw_colored_polygon(PackedVector2Array([s + Vector2(0, -8), s + Vector2(8, 0), s + Vector2(0, 8), s + Vector2(-8, 0)]), col)
-		_label(s + Vector2(0, 18), String(pp.get("display_name")), 12, col)
+		var title: String = String(pp.get("display_name"))
+		var label_at: Vector2 = s + Vector2(0, 18)
+		var text_size: Vector2 = _font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
+		var label_rect := Rect2(label_at - text_size * 0.5, text_size).grow(2.0)
+		if not _urban.is_empty():
+			for previous: Rect2 in power_labels:
+				if label_rect.intersects(previous):
+					label_at.y = previous.end.y + text_size.y * 0.5 + 4.0
+					label_rect.position = label_at - text_size * 0.5
+		power_labels.append(label_rect)
+		_label(label_at, title, 12, col)
 	# напарники — точки, сам — стрелка по взгляду
 	for p in get_tree().get_nodes_in_group("players"):
 		var pl := p as Player
@@ -245,8 +279,47 @@ func _draw_map() -> void:
 
 
 func _floor_title() -> String:
+	if not _urban.is_empty():
+		return "Карта · " + String(_urban.name)
 	var f := Floors.find(Profile.floor)
 	return "Карта · " + String(f.get("name", "1F"))
+
+
+func _draw_urban() -> void:
+	var boundary := PackedVector2Array()
+	for point in _urban.get("boundary", []):
+		boundary.append(_to_screen(Vector2(float(point[0]), float(point[1]))))
+	if boundary.size() >= 3:
+		_canvas.draw_colored_polygon(boundary, Color(0.22, 0.29, 0.22))
+		boundary.append(boundary[0])
+		_canvas.draw_polyline(boundary, Color(0.6, 0.7, 0.72), 2.0)
+	var river: Dictionary = _urban.get("river", {})
+	var water := PackedVector2Array()
+	for point in river.get("points", []):
+		water.append(_to_screen(Vector2(float(point[0]), float(point[1]))))
+	if water.size() > 1:
+		_canvas.draw_polyline(water, Color(0.18, 0.38, 0.52), float(river.get("width", 100)) * _scale)
+	for road in _urban.get("roads", []):
+		var points := PackedVector2Array()
+		for point in road.points:
+			points.append(_to_screen(Vector2(float(point[0]), float(point[1]))))
+		if points.size() > 1:
+			_canvas.draw_polyline(points, Color(0.54, 0.55, 0.55), (float(road.width) + float(road.get("sidewalk", 0)) * 2) * _scale)
+			_canvas.draw_polyline(points, Color(0.16, 0.17, 0.18), maxf(1.0, float(road.width) * _scale))
+	for district in _urban.get("districts", []):
+		if String(district.id) != "sports":
+			continue
+		var rect: Array = district.rect
+		var top_left: Vector2 = _to_screen(Vector2(float(rect[0]), float(rect[1])))
+		var bottom_right: Vector2 = _to_screen(Vector2(float(rect[2]), float(rect[3])))
+		var pitch := Rect2(top_left, bottom_right - top_left)
+		_canvas.draw_rect(pitch, Color(0.27, 0.4, 0.27))
+		_canvas.draw_rect(pitch.grow(-2.0), Color(0.65, 0.73, 0.65), false, 1.0)
+		_canvas.draw_line(Vector2(pitch.get_center().x, pitch.position.y), Vector2(pitch.get_center().x, pitch.end.y), Color(0.65, 0.73, 0.65), 1.0)
+	var scale_m: float = 100.0
+	var left := Vector2(32, _canvas.size.y - 35)
+	_canvas.draw_line(left, left + Vector2(scale_m * _scale, 0), Color.WHITE, 2)
+	_label(left + Vector2(scale_m * _scale * 0.5, -14), "100 м", 12, Color.WHITE)
 
 
 func _rank(room: Dictionary) -> int:

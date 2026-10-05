@@ -11,6 +11,7 @@ extends Interactable
 	set(v):
 		display_name = v
 		_rebuild()
+@export var power_area: String = "ТЦ"
 
 ## Лампы положений: выкл, аварийный, весь свет; рычаг.
 var _lamps: Array[MeshInstance3D] = []
@@ -34,7 +35,7 @@ func prompt() -> String:
 	var nxt := ev.next_breaker()
 	# что будет гореть после щелчка
 	var res := "off" if nxt == "off" else ("emergency" if ev.generator_down or nxt == "emergency" else "on")
-	var t := String({"off": "выключить свет в ТЦ", "emergency": "включить аварийный свет", "on": "включить весь свет"}.get(res, ""))
+	var t := String({"off": "выключить свет в " + power_area, "emergency": "включить аварийный свет", "on": "включить весь свет"}.get(res, ""))
 	if ev.generator_down and res == "emergency":
 		t += " (генератор стоит — весь свет после ремонта %s)" % ev.generator().where
 	return "%s: %s" % [display_name, t]

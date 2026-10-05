@@ -755,3 +755,14 @@ const AI_SQUAD_SIZE := [1, 3]
 const AI_PATROL_PAUSE := [1.5, 4.0]
 ## Расследование: сколько стоять на месте шума, прежде чем вернуться к патрулю, с.
 const AI_INVESTIGATE_LINGER := 5.0
+
+## Большая городская карта: бюджеты отрисовки и точность заранее выпеченной навигации.
+const URBAN_WORLD := {
+	"batch_cell": 64.0, "prop_distance": 650.0, "view_distance": 2400.0,
+	"deck_margin": 0.25,
+	"nav_tile": 250.0, "nav_cell": 0.5, "nav_height": 0.25, "nav_border": 2.0,
+	"nav_radius": 0.5, "nav_agent_height": 1.8, "nav_climb": 0.4, "nav_slope": 40.0,
+	"nav_merge_scale": 0.125,
+	"nav_detail_error": 2.0,
+	"extract_seconds": 8.0,
+}

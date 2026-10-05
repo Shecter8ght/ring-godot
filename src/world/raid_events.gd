@@ -374,10 +374,16 @@ func on_local_extracted(me: Player) -> void:
 # ---------------------------------------------------------------- помощники
 
 func _room_center(r: Dictionary) -> Vector3:
+	if r.has("rect"):
+		var rect: Array = r.rect
+		return Vector3((float(rect[0]) + float(rect[2])) * 0.5, float(r.get("y", 0.0)), (float(rect[1]) + float(rect[3])) * 0.5)
 	return SectorBuilder.polar((float(r.a[0]) + float(r.a[1])) * 0.5, (float(r.r[0]) + float(r.r[1])) * 0.5)
 
 
 func _room_half(r: Dictionary) -> float:
+	if r.has("rect"):
+		var rect: Array = r.rect
+		return minf(float(rect[2]) - float(rect[0]), float(rect[3]) - float(rect[1])) * 0.5
 	var depth := float(r.r[1]) - float(r.r[0])
 	var arc := deg_to_rad(float(r.a[1]) - float(r.a[0])) * (float(r.r[0]) + float(r.r[1])) * 0.5
 	return minf(depth, arc) * 0.5

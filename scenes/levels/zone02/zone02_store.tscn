@@ -1,0 +1,378 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_building.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_opening.tscn" id="2"]
+[ext_resource type="Script" path="res://src/world/urban_facade.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/urban_props.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="5"]
+
+[node name="Commercial" type="Node3D"]
+
+[node name="Buildings" parent="." type="Node3D"]
+
+
+[node name="Props" parent="." type="Node3D" groups=["urban_prop_batches"]]
+
+
+[node name="Gameplay" parent="." type="Node3D"]
+
+
+[node name="Supermarket" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(20, 0.82, -190)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(110, 70)
+height = 9.2
+simple_collision = true
+display_name = "МАГАЗИН"
+
+[node name="DoorFront" parent="Buildings/Supermarket" instance=ExtResource("2")]
+position = Vector3(0, 0, -35.0)
+width = 1.6
+
+[node name="DoorRear" parent="Buildings/Supermarket" instance=ExtResource("2")]
+position = Vector3(27.5, 0, 35.0)
+width = 1.6
+
+[node name="Facade" parent="Buildings/Supermarket" type="Node3D"]
+script = ExtResource("3")
+floors = 2
+style = "store"
+window_pitch = 4.5
+
+[node name="InteriorLight_0" parent="Buildings/Supermarket" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-36.6667, 2.8, 0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 1.4
+omni_range = 22
+distance_fade_enabled = true
+distance_fade_begin = 120
+distance_fade_length = 30
+
+[node name="InteriorLight_1" parent="Buildings/Supermarket" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0, 2.8, 0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 1.4
+omni_range = 22
+distance_fade_enabled = true
+distance_fade_begin = 120
+distance_fade_length = 30
+
+[node name="InteriorLight_2" parent="Buildings/Supermarket" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(36.6667, 2.8, 0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 1.4
+omni_range = 22
+distance_fade_enabled = true
+distance_fade_begin = 120
+distance_fade_length = 30
+
+[node name="EntranceLight_-1" parent="Buildings/Supermarket" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-27.5, 4.5, 38.0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 2.2
+omni_range = 26
+distance_fade_enabled = true
+distance_fade_begin = 180
+distance_fade_length = 30
+
+[node name="EntranceLight_1" parent="Buildings/Supermarket" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(27.5, 4.5, 38.0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 2.2
+omni_range = 26
+distance_fade_enabled = true
+distance_fade_begin = 180
+distance_fade_length = 30
+
+[node name="LoadingGate" parent="Buildings/Supermarket" instance=ExtResource("2")]
+position = Vector3(-25, 0, -35)
+width = 5
+
+[node name="ParkingApron" parent="Props" instance=ExtResource("4")]
+position = Vector3(20, 0.312, -98)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, -0.02, 0], "size": [140, 0.12, 90], "color": [0.25, 0.26, 0.27], "collision": true, "surface": "asphalt"}])
+
+[node name="CustomerParking" parent="Props" instance=ExtResource("4")]
+position = Vector3(20, 0.312, -98)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "asphalt"
+pieces = Array[Dictionary]([{"at": [0, -0.02, 0], "size": [74.0, 0.12, 58], "color": [0.24, 0.25, 0.26], "collision": true, "surface": "asphalt"}, {"at": [-30.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-27.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-25.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-22.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-20.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-17.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-15.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-12.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-10.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-7.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-5.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-2.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [2.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [5.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [7.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [10.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [12.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [15.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [17.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [20.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [22.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [25.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [27.5, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [30.0, 0.05, -18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0, 0.05, -15.5], "size": [60.0, 0.015, 0.08], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-30.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-27.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-25.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-22.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-20.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-17.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-15.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-12.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-10.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-7.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-5.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-2.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [2.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [5.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [7.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [10.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [12.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [15.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [17.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [20.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [22.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [25.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [27.5, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [30.0, 0.05, -6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0, 0.05, -3.5], "size": [60.0, 0.015, 0.08], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-30.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-27.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-25.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-22.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-20.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-17.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-15.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-12.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-10.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-7.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-5.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-2.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [2.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [5.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [7.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [10.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [12.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [15.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [17.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [20.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [22.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [25.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [27.5, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [30.0, 0.05, 6.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0, 0.05, 8.5], "size": [60.0, 0.015, 0.08], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-30.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-27.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-25.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-22.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-20.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-17.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-15.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-12.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-10.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-7.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-5.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [-2.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [2.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [5.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [7.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [10.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [12.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [15.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [17.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [20.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [22.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [25.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [27.5, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [30.0, 0.05, 18.0], "size": [0.08, 0.015, 5], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}, {"at": [0, 0.05, 20.5], "size": [60.0, 0.015, 0.08], "color": [0.8, 0.81, 0.78], "collision": false, "shadow": false}])
+
+[node name="CustomerCar_00" parent="Props" instance=ExtResource("4")]
+position = Vector3(-6, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.43, 0.5, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.43, 0.5, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_01" parent="Props" instance=ExtResource("4")]
+position = Vector3(-1, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.58, 0.59, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.58, 0.59, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_02" parent="Props" instance=ExtResource("4")]
+position = Vector3(4, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.6, 0.34, 0.31], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.6, 0.34, 0.31], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_03" parent="Props" instance=ExtResource("4")]
+position = Vector3(9, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.43, 0.5, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.43, 0.5, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_04" parent="Props" instance=ExtResource("4")]
+position = Vector3(14, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.58, 0.59, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.58, 0.59, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_05" parent="Props" instance=ExtResource("4")]
+position = Vector3(19, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.6, 0.34, 0.31], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.6, 0.34, 0.31], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_06" parent="Props" instance=ExtResource("4")]
+position = Vector3(24, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.43, 0.5, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.43, 0.5, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_07" parent="Props" instance=ExtResource("4")]
+position = Vector3(29, 0.312, -116)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.58, 0.59, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.58, 0.59, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_08" parent="Props" instance=ExtResource("4")]
+position = Vector3(-6, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.6, 0.34, 0.31], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.6, 0.34, 0.31], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_09" parent="Props" instance=ExtResource("4")]
+position = Vector3(-1, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.43, 0.5, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.43, 0.5, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_10" parent="Props" instance=ExtResource("4")]
+position = Vector3(4, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.58, 0.59, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.58, 0.59, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_11" parent="Props" instance=ExtResource("4")]
+position = Vector3(9, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.6, 0.34, 0.31], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.6, 0.34, 0.31], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_12" parent="Props" instance=ExtResource("4")]
+position = Vector3(14, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.43, 0.5, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.43, 0.5, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_13" parent="Props" instance=ExtResource("4")]
+position = Vector3(19, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.58, 0.59, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.58, 0.59, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_14" parent="Props" instance=ExtResource("4")]
+position = Vector3(24, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.6, 0.34, 0.31], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.6, 0.34, 0.31], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_15" parent="Props" instance=ExtResource("4")]
+position = Vector3(29, 0.312, -104)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.43, 0.5, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.43, 0.5, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_16" parent="Props" instance=ExtResource("4")]
+position = Vector3(-6, 0.312, -92)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.58, 0.59, 0.55], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.58, 0.59, 0.55], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="CustomerCar_17" parent="Props" instance=ExtResource("4")]
+position = Vector3(-1, 0.312, -92)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.6, 0.34, 0.31], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.6, 0.34, 0.31], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="ParkingTree_0" parent="Props" instance=ExtResource("4")]
+position = Vector3(-40, 0.312, -63)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "wood"
+pieces = Array[Dictionary]([{"at": [0, 2.24, 0], "size": [0.45, 4.48, 0.45], "color": [0.31, 0.33, 0.29], "collision": true, "shape": "cylinder", "surface": "wood"}, {"at": [0, 4.9, 0], "size": [4, 4.2, 4], "color": [0.25, 0.43, 0.26], "collision": false, "shape": "sphere"}])
+
+[node name="ParkingIsland_0" parent="Props" instance=ExtResource("4")]
+position = Vector3(-40, 0.312, -63)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 0.2, 0], "size": [5, 0.4, 8], "color": [0.48, 0.51, 0.47], "collision": true}])
+
+[node name="ParkingTree_1" parent="Props" instance=ExtResource("4")]
+position = Vector3(20, 0.312, -63)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "wood"
+pieces = Array[Dictionary]([{"at": [0, 2.24, 0], "size": [0.45, 4.48, 0.45], "color": [0.31, 0.33, 0.29], "collision": true, "shape": "cylinder", "surface": "wood"}, {"at": [0, 4.9, 0], "size": [4, 4.2, 4], "color": [0.25, 0.43, 0.26], "collision": false, "shape": "sphere"}])
+
+[node name="ParkingIsland_1" parent="Props" instance=ExtResource("4")]
+position = Vector3(20, 0.312, -63)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 0.2, 0], "size": [5, 0.4, 8], "color": [0.48, 0.51, 0.47], "collision": true}])
+
+[node name="ParkingTree_2" parent="Props" instance=ExtResource("4")]
+position = Vector3(80, 0.312, -63)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "wood"
+pieces = Array[Dictionary]([{"at": [0, 2.24, 0], "size": [0.45, 4.48, 0.45], "color": [0.31, 0.33, 0.29], "collision": true, "shape": "cylinder", "surface": "wood"}, {"at": [0, 4.9, 0], "size": [4, 4.2, 4], "color": [0.25, 0.43, 0.26], "collision": false, "shape": "sphere"}])
+
+[node name="ParkingIsland_2" parent="Props" instance=ExtResource("4")]
+position = Vector3(80, 0.312, -63)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 0.2, 0], "size": [5, 0.4, 8], "color": [0.48, 0.51, 0.47], "collision": true}])
+
+[node name="TrolleyCanopy" parent="Props" instance=ExtResource("4")]
+position = Vector3(-22, 0.3678, -145)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 2.2, 0], "size": [12, 0.18, 4], "color": [0.5, 0.53, 0.56], "collision": false}, {"at": [-5, 1.1, 0], "size": [0.2, 2.2, 0.2], "color": [0.57, 0.59, 0.61], "collision": true}, {"at": [5, 1.1, 0], "size": [0.2, 2.2, 0.2], "color": [0.57, 0.59, 0.61], "collision": true}])
+
+[node name="LoadingYard" parent="Props" instance=ExtResource("4")]
+position = Vector3(20, 0.928, -252)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, -0.03, 0], "size": [100, 0.14, 36], "color": [0.32, 0.33, 0.34], "collision": true}])
+
+[node name="LoadingRamp_0" parent="Props" instance=ExtResource("4")]
+position = Vector3(-12, 0.8758, -230)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 0.5, 0], "size": [9, 1, 6], "color": [0.57, 0.59, 0.61], "collision": true}])
+
+[node name="LoadingContainer_0" parent="Props" instance=ExtResource("4")]
+position = Vector3(-9, 0.928, -253)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="Loot_Store_0" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-9, 0.928, -261)
+display_name = "Разгрузочный ящик"
+table = "storage"
+look = 5
+
+[node name="LoadingRamp_1" parent="Props" instance=ExtResource("4")]
+position = Vector3(8, 0.8665, -230)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 0.5, 0], "size": [9, 1, 6], "color": [0.57, 0.59, 0.61], "collision": true}])
+
+[node name="LoadingContainer_1" parent="Props" instance=ExtResource("4")]
+position = Vector3(11, 0.928, -253)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="Loot_Store_1" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(11, 0.928, -261)
+display_name = "Разгрузочный ящик"
+table = "storage"
+look = 5
+
+[node name="LoadingRamp_2" parent="Props" instance=ExtResource("4")]
+position = Vector3(28, 0.8572, -230)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 0.5, 0], "size": [9, 1, 6], "color": [0.57, 0.59, 0.61], "collision": true}])
+
+[node name="LoadingContainer_2" parent="Props" instance=ExtResource("4")]
+position = Vector3(31, 0.928, -253)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="Loot_Store_2" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(31, 0.928, -261)
+display_name = "Разгрузочный ящик"
+table = "storage"
+look = 5
+
+[node name="StoreWorkshop" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(98, 0.752, -251)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(16, 12)
+height = 4.2
+simple_collision = true
+display_name = ""
+
+[node name="DoorFront" parent="Buildings/StoreWorkshop" instance=ExtResource("2")]
+position = Vector3(0, 0, -6.0)
+width = 1.6
+
+[node name="DoorRear" parent="Buildings/StoreWorkshop" instance=ExtResource("2")]
+position = Vector3(4.0, 0, 6.0)
+width = 1.6
+
+[node name="Facade" parent="Buildings/StoreWorkshop" type="Node3D"]
+script = ExtResource("3")
+floors = 1
+style = "service"
+window_pitch = 4.5
+
+[node name="InteriorLight_0" parent="Buildings/StoreWorkshop" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0, 2.8, 0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 1.4
+omni_range = 10.4
+distance_fade_enabled = true
+distance_fade_begin = 120
+distance_fade_length = 30
+
+[node name="WasteCollection" parent="Props" instance=ExtResource("4")]
+position = Vector3(-56, 1.192, -242)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="TradingShelf_0" parent="Props" instance=ExtResource("4")]
+position = Vector3(-35, 0.82, -188)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 1.15, 0], "size": [12, 2.3, 1], "color": [0.42, 0.46, 0.48], "collision": true, "surface": "metal"}])
+
+[node name="TradingShelf_1" parent="Props" instance=ExtResource("4")]
+position = Vector3(-10, 0.82, -188)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 1.15, 0], "size": [12, 2.3, 1], "color": [0.42, 0.46, 0.48], "collision": true, "surface": "metal"}])
+
+[node name="TradingShelf_2" parent="Props" instance=ExtResource("4")]
+position = Vector3(15, 0.82, -188)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 1.15, 0], "size": [12, 2.3, 1], "color": [0.42, 0.46, 0.48], "collision": true, "surface": "metal"}])
+
+[node name="TradingShelf_3" parent="Props" instance=ExtResource("4")]
+position = Vector3(40, 0.82, -188)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, 1.15, 0], "size": [12, 2.3, 1], "color": [0.42, 0.46, 0.48], "collision": true, "surface": "metal"}])
+
+[node name="Loot_Store_Safe" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(58, 0.82, -168)
+display_name = "Касса магазина"
+table = "safe"
+look = 5

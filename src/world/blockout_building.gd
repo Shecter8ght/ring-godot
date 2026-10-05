@@ -12,6 +12,8 @@ extends Node3D
 
 enum Kind { BUILDING, GARAGE, MAST, CANOPY, SHELTER }
 
+signal geometry_rebuilt
+
 const DOOR_SCENE := preload("res://scenes/props/door.tscn")
 ## Высоты проёмов, м: дверь (СП: не ниже 1.9, берём 2.1), ворота под грузовик.
 const DOOR_H := 2.1
@@ -41,6 +43,11 @@ const SLAB_T := 0.3
 @export var wall_thickness: float = 0.3:
 	set(v):
 		wall_thickness = clampf(v, 0.1, 1.0)
+		queue_build()
+## Для крупных городских карт: коробки стен вместо треугольной коллизии.
+@export var simple_collision: bool = false:
+	set(value):
+		simple_collision = value
 		queue_build()
 @export_group("Паркинг")
 ## Уровней, включая землю; верхний — открытая крыша.
@@ -114,6 +121,7 @@ func _build() -> void:
 		var top := height if kind != Kind.GARAGE else float(levels - 1) * level_height + PARAPET_H
 		label.position = Vector3(0, top + 2.0, 0)
 		_gen.add_child(label)
+	geometry_rebuilt.emit()
 
 
 # ---------------------------------------------------------------- здание
@@ -134,8 +142,10 @@ func _build_building() -> void:
 	]
 	for side in sides:
 		_wall_with_openings(walls, side[0], side[1], t, height)
-	var wb := walls.emit(_gen, "Walls", true, true)
-	slab.emit(_gen, "Floor", true, false)
+	var wb := walls.emit(_gen, "Walls", not simple_collision, true)
+	slab.emit(_gen, "Floor", not simple_collision, false)
+	if simple_collision:
+		_simple_box(Vector3(0, -0.1, 0), Vector3(w, 0.2, d))
 	# стены здания закрывают то, что за ними (в прицеле) — см. SectorBuilder._add_occluder
 	var meshes: Array[Mesh] = []
 	for c in wb.get_children():
@@ -199,6 +209,21 @@ func _wall_piece(m: BlockoutMesh, a: Vector3, dir: Vector3, s: float, e: float, 
 		lo = lo.min(p)
 		hi = hi.max(p)
 	m.box("gb_facade", (lo + hi) * 0.5, hi - lo)
+	if simple_collision:
+		_simple_box((lo + hi) * 0.5, hi - lo)
+
+
+func _simple_box(center: Vector3, extent: Vector3) -> void:
+	var body := StaticBody3D.new()
+	body.name = "WallBox_%d" % _gen.get_child_count()
+	body.set_meta("surface", "concrete")
+	body.position = center
+	var shape := BoxShape3D.new()
+	shape.size = extent
+	var collision := CollisionShape3D.new()
+	collision.shape = shape
+	body.add_child(collision)
+	_gen.add_child(body)
 
 
 ## Створка двери (та же сцена, что в кольце). Только в игре: в редакторе скрипт двери не работает.

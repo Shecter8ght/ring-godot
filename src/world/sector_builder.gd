@@ -145,6 +145,9 @@ static func angle_in(a: float, a0: float, a1: float, eps: float = 1e-6) -> bool:
 
 ## Точка внутри собственной формы помещения (без учёта того, что его режут полосы).
 static func in_shape(room: Dictionary, p: Vector3, eps: float = 1e-6) -> bool:
+	if room.has("rect"):
+		var rect: Array = room.rect
+		return p.x >= float(rect[0]) - eps and p.x <= float(rect[2]) + eps and p.z >= float(rect[1]) - eps and p.z <= float(rect[3]) + eps
 	var r := Vector2(p.x, p.z).length()
 	if r < float(room.r[0]) - eps or r > float(room.r[1]) + eps:
 		return false
@@ -171,6 +174,11 @@ static func owner_of(rooms: Array, p: Vector3) -> Dictionary:
 ## Vector3.INF — не нашлось (помещение почти целиком под полосой).
 static func random_point(room: Dictionary, rooms: Array, rng: RandomNumberGenerator, pad: float) -> Vector3:
 	var id := String(room.get("id", ""))
+	if room.has("rect"):
+		var rect: Array = room.rect
+		if float(rect[2]) - float(rect[0]) <= pad * 2.0 or float(rect[3]) - float(rect[1]) <= pad * 2.0:
+			return Vector3.INF
+		return Vector3(rng.randf_range(float(rect[0]) + pad, float(rect[2]) - pad), float(room.get("y", 0.0)), rng.randf_range(float(rect[1]) + pad, float(rect[3]) - pad))
 	for i in range(16):
 		var p: Vector3
 		var r := rng.randf_range(float(room.r[0]) + pad, float(room.r[1]) - pad)
@@ -207,6 +215,14 @@ func build(path: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = String(_def.get("id", "sector"))
 	if _def.is_empty():
+		return root
+	# Городская планировка хранится в районных сценах; данные нужны общим системам рейда.
+	if String(_def.get("layout", "")) == "cartesian_scene":
+		root.set_meta("rooms", _def.get("rooms", []))
+		root.set_meta("ring", {})
+		var xyz: Array = _def.get("spawn", [0, 0, 0])
+		root.set_meta("spawn", Vector3(float(xyz[0]), float(xyz[1]), float(xyz[2])))
+		root.set_meta("camera_yaw", float(_def.get("camera_yaw", 0.0)))
 		return root
 	_rooms = _def.get("rooms", [])
 	_openings = _def.get("openings", [])

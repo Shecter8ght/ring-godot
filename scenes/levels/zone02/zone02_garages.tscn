@@ -1,0 +1,475 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_building.tscn" id="1"]
+[ext_resource type="Script" path="res://src/world/urban_facade.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_opening.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/urban_props.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="5"]
+
+[node name="Garages" type="Node3D"]
+
+[node name="Buildings" parent="." type="Node3D"]
+
+
+[node name="Props" parent="." type="Node3D" groups=["urban_prop_batches"]]
+
+
+[node name="Gameplay" parent="." type="Node3D"]
+
+
+[node name="GarageRow_01" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(420, 0.0, -385)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(88, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_01" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_01" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_01" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_01_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(420, 0.0, -385)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-42.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-34.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-26.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-7.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [11.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [30.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_02" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(420, -0.064, -369)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(88, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_02" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_02" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_02" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_02_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(420, -0.064, -369)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-42.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-34.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-26.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-7.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [11.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [30.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_03" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(420, -0.128, -353)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(88, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_03" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_03" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_03" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_03_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(420, -0.128, -353)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-42.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-34.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-26.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-7.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [11.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [30.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_04" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(420, -0.192, -337)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(88, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_04" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_04" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_04" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_04_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(420, -0.192, -337)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-42.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-34.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-26.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-7.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [11.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [30.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_05" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(420, -0.256, -321)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(88, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_05" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_05" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_05" instance=ExtResource("3")]
+position = Vector3(-30.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_05_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(420, -0.256, -321)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-42.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-34.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-26.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-7.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [11.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [30.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_06" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(540, -0.48, -385)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(96, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_06" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_06" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_06" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_06_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(540, -0.48, -385)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-46.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-42.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-30.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-27.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-8.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [10.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [29.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [45.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_07" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(540, -0.544, -369)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(96, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_07" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_07" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_07" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_07_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(540, -0.544, -369)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-46.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-42.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-30.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-27.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-8.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [10.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [29.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [45.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_08" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(540, -0.608, -353)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(96, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_08" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_08" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_08" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_08_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(540, -0.608, -353)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-46.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-42.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-30.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-27.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-8.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [10.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [29.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [45.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_09" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(540, -0.672, -337)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(96, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_09" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_09" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_09" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_09_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(540, -0.672, -337)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-46.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-42.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-30.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-27.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-8.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [10.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [29.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [45.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageRow_10" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(540, -0.736, -321)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(96, 7)
+height = 3.6
+simple_collision = true
+display_name = ""
+
+[node name="Facade" parent="Buildings/GarageRow_10" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "garage"
+window_pitch = 4.5
+
+[node name="OpenBay_-1" parent="Buildings/GarageRow_10" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, -3.5)
+width = 3.5
+
+[node name="OpenBay_1" parent="Buildings/GarageRow_10" instance=ExtResource("3")]
+position = Vector3(-34.7, 0, 3.5)
+width = 3.5
+
+[node name="GarageRow_10_Doors" parent="Props" instance=ExtResource("4")]
+position = Vector3(540, -0.736, -321)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-46.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-42.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-38.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-30.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-27.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-23.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-19.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-15.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-11.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-8.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-4.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [-0.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [3.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [7.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [10.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [14.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [18.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [22.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [26.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [29.9, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [33.7, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [37.5, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [41.3, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}, {"at": [45.1, 1.35, -3.7], "size": [3.45, 2.7, 0.09], "color": [0.36, 0.41, 0.43], "collision": false}])
+
+[node name="GarageWorkshop" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(420, -0.56, -245)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(30, 22)
+height = 5.4
+simple_collision = true
+display_name = "ГАРАЖИ"
+
+[node name="DoorFront" parent="Buildings/GarageWorkshop" instance=ExtResource("3")]
+position = Vector3(0, 0, -11.0)
+width = 1.6
+
+[node name="DoorRear" parent="Buildings/GarageWorkshop" instance=ExtResource("3")]
+position = Vector3(7.5, 0, 11.0)
+width = 1.6
+
+[node name="Facade" parent="Buildings/GarageWorkshop" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "service"
+window_pitch = 4.5
+
+[node name="InteriorLight_0" parent="Buildings/GarageWorkshop" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0, 2.8, 0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 1.4
+omni_range = 19.5
+distance_fade_enabled = true
+distance_fade_begin = 120
+distance_fade_length = 30
+
+[node name="TyreWorkshop" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(538, -1.052, -240)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(20, 15)
+height = 4.2
+simple_collision = true
+display_name = ""
+
+[node name="DoorFront" parent="Buildings/TyreWorkshop" instance=ExtResource("3")]
+position = Vector3(0, 0, -7.5)
+width = 1.6
+
+[node name="DoorRear" parent="Buildings/TyreWorkshop" instance=ExtResource("3")]
+position = Vector3(5.0, 0, 7.5)
+width = 1.6
+
+[node name="Facade" parent="Buildings/TyreWorkshop" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "service"
+window_pitch = 4.5
+
+[node name="InteriorLight_0" parent="Buildings/TyreWorkshop" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0, 2.8, 0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 1.4
+omni_range = 13.0
+distance_fade_enabled = true
+distance_fade_begin = 120
+distance_fade_length = 30
+
+[node name="GarageStorage" parent="Buildings" instance=ExtResource("1")]
+position = Vector3(573, -1.308, -211)
+rotation_degrees = Vector3(0, 0, 0)
+size = Vector2(12, 18)
+height = 4
+simple_collision = true
+display_name = ""
+
+[node name="DoorFront" parent="Buildings/GarageStorage" instance=ExtResource("3")]
+position = Vector3(0, 0, -9.0)
+width = 1.6
+
+[node name="DoorRear" parent="Buildings/GarageStorage" instance=ExtResource("3")]
+position = Vector3(3.0, 0, 9.0)
+width = 1.6
+
+[node name="Facade" parent="Buildings/GarageStorage" type="Node3D"]
+script = ExtResource("2")
+floors = 1
+style = "service"
+window_pitch = 4.5
+
+[node name="InteriorLight_0" parent="Buildings/GarageStorage" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0, 2.8, 0)
+light_color = Color(1, 0.87, 0.72, 1)
+light_energy = 1.4
+omni_range = 11.7
+distance_fade_enabled = true
+distance_fade_begin = 120
+distance_fade_length = 30
+
+[node name="AbandonedCar_0" parent="Props" instance=ExtResource("4")]
+position = Vector3(390, -0.42, -285)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.44, 0.46, 0.43], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.44, 0.46, 0.43], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="WorkshopContainer_0" parent="Props" instance=ExtResource("4")]
+position = Vector3(380, -0.696, -206)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="AbandonedCar_1" parent="Props" instance=ExtResource("4")]
+position = Vector3(422, -0.548, -285)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.44, 0.46, 0.43], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.44, 0.46, 0.43], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="WorkshopContainer_1" parent="Props" instance=ExtResource("4")]
+position = Vector3(421, -0.86, -206)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="AbandonedCar_2" parent="Props" instance=ExtResource("4")]
+position = Vector3(454, -0.676, -285)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.44, 0.46, 0.43], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.44, 0.46, 0.43], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="WorkshopContainer_2" parent="Props" instance=ExtResource("4")]
+position = Vector3(462, -1.024, -206)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="AbandonedCar_3" parent="Props" instance=ExtResource("4")]
+position = Vector3(486, -0.804, -285)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.44, 0.46, 0.43], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.44, 0.46, 0.43], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="WorkshopContainer_3" parent="Props" instance=ExtResource("4")]
+position = Vector3(503, -1.188, -206)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="AbandonedCar_4" parent="Props" instance=ExtResource("4")]
+position = Vector3(518, -0.932, -285)
+rotation_degrees = Vector3(0, 90, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 0.65, 0], "size": [1.8, 0.85, 4.4], "color": [0.44, 0.46, 0.43], "collision": true, "surface": "metal"}, {"at": [0, 1.28, 0.15], "size": [1.5, 0.55, 2.2], "color": [0.44, 0.46, 0.43], "collision": false}, {"at": [0, 1.3, -0.98], "size": [1.42, 0.4, 0.08], "color": [0.16, 0.23, 0.27], "collision": false}, {"at": [-0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, -1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [-0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}, {"at": [0.95, 0.35, 1.25], "size": [0.22, 0.6, 0.6], "color": [0.17, 0.18, 0.18], "collision": false}])
+
+[node name="WorkshopContainer_4" parent="Props" instance=ExtResource("4")]
+position = Vector3(544, -1.352, -206)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "metal"
+pieces = Array[Dictionary]([{"at": [0, 1.3, 0], "size": [6.05, 2.6, 2.44], "color": [0.45, 0.49, 0.46], "collision": true, "surface": "metal"}, {"at": [0, 1.35, -1.24], "size": [5.8, 2.3, 0.08], "color": [0.27, 0.32, 0.3], "collision": false}])
+
+[node name="GarageFenceNorth" parent="Props" instance=ExtResource("4")]
+position = Vector3(482.5, -0.238, -423.0)
+rotation_degrees = Vector3(0, -0.0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-117.69231, 1.32075, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-117.69231, 1.1308, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-117.69231, 1.9008, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-117.69231, 2.6708, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-98.07692, 1.2423, 0], "size": [19.65538, 2.7784, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-98.07692, 1.0523, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-98.07692, 1.8223, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-98.07692, 2.5923, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-78.46154, 1.16385, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-78.46154, 0.9738, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-78.46154, 1.7438, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-78.46154, 2.5138, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-58.84615, 1.0854, 0], "size": [19.65538, 2.7784, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-58.84615, 0.8954, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-58.84615, 1.6654, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-58.84615, 2.4354, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-39.23077, 1.00695, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-39.23077, 0.8169, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-39.23077, 1.5869, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-39.23077, 2.3569, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-19.61538, 0.92845, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-19.61538, 0.7385, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-19.61538, 1.5085, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-19.61538, 2.2785, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [0.0, 0.85, 0], "size": [19.65538, 2.7784, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [0.0, 0.66, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [0.0, 1.43, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [0.0, 2.2, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [19.61538, 0.77155, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [19.61538, 0.5815, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [19.61538, 1.3515, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [19.61538, 2.1215, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [39.23077, 0.69305, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [39.23077, 0.5031, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [39.23077, 1.2731, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [39.23077, 2.0431, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [58.84615, 0.6146, 0], "size": [19.65538, 2.7784, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [58.84615, 0.4246, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [58.84615, 1.1946, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [58.84615, 1.9646, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [78.46154, 0.53615, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [78.46154, 0.3462, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [78.46154, 1.1162, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [78.46154, 1.8862, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [98.07692, 0.4577, 0], "size": [19.65538, 2.7784, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [98.07692, 0.2677, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [98.07692, 1.0377, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [98.07692, 1.8077, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [117.69231, 0.37925, 0], "size": [19.65538, 2.7785, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [117.69231, 0.1892, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [117.69231, 0.9592, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [117.69231, 1.7292, 0], "size": [19.61538, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-127.5, 1.61, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-124.5, 1.598, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-121.5, 1.586, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-118.5, 1.574, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-115.5, 1.562, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-112.5, 1.55, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-109.5, 1.538, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-106.5, 1.526, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-103.5, 1.514, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-100.5, 1.502, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-97.5, 1.49, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-94.5, 1.478, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-91.5, 1.466, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-88.5, 1.454, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-85.5, 1.442, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-82.5, 1.43, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-79.5, 1.418, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-76.5, 1.406, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-73.5, 1.394, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-70.5, 1.382, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-67.5, 1.37, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-64.5, 1.358, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-61.5, 1.346, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-58.5, 1.334, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-55.5, 1.322, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-52.5, 1.31, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-49.5, 1.298, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-46.5, 1.286, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-43.5, 1.274, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-40.5, 1.262, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-37.5, 1.25, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-34.5, 1.238, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-31.5, 1.226, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-28.5, 1.214, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-25.5, 1.202, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-22.5, 1.19, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-19.5, 1.178, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-16.5, 1.166, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-13.5, 1.154, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-10.5, 1.142, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-7.5, 1.13, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-4.5, 1.118, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-1.5, 1.106, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [1.5, 1.094, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [4.5, 1.082, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [7.5, 1.07, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [10.5, 1.058, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [13.5, 1.046, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [16.5, 1.034, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [19.5, 1.022, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [22.5, 1.01, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [25.5, 0.998, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [28.5, 0.986, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [31.5, 0.974, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [34.5, 0.962, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [37.5, 0.95, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [40.5, 0.938, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [43.5, 0.926, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [46.5, 0.914, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [49.5, 0.902, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [52.5, 0.89, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [55.5, 0.878, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [58.5, 0.866, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [61.5, 0.854, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [64.5, 0.842, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [67.5, 0.83, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [70.5, 0.818, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [73.5, 0.806, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [76.5, 0.794, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [79.5, 0.782, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [82.5, 0.77, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [85.5, 0.758, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [88.5, 0.746, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [91.5, 0.734, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [94.5, 0.722, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [97.5, 0.71, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [100.5, 0.698, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [103.5, 0.686, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [106.5, 0.674, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [109.5, 0.662, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [112.5, 0.65, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [115.5, 0.638, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [118.5, 0.626, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [121.5, 0.614, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [124.5, 0.602, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [127.5, 0.59, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}])
+
+[node name="GarageFenceEast" parent="Props" instance=ExtResource("4")]
+position = Vector3(625.0, -1.206, -323.5)
+rotation_degrees = Vector3(0, -90.0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [-82.35, 1.1794, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-82.35, 0.9894, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-82.35, 1.7594, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-82.35, 2.5294, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-64.05, 1.1062, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-64.05, 0.9162, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-64.05, 1.6862, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-64.05, 2.4562, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-45.75, 1.033, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-45.75, 0.843, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-45.75, 1.613, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-45.75, 2.383, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-27.45, 0.9598, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-27.45, 0.7698, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-27.45, 1.5398, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-27.45, 2.3098, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-9.15, 0.8866, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [-9.15, 0.6966, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-9.15, 1.4666, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-9.15, 2.2366, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [9.15, 0.8134, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [9.15, 0.6234, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [9.15, 1.3934, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [9.15, 2.1634, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [27.45, 0.7402, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [27.45, 0.5502, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [27.45, 1.3202, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [27.45, 2.0902, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [45.75, 0.667, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [45.75, 0.477, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [45.75, 1.247, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [45.75, 2.017, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [64.05, 0.5938, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [64.05, 0.4038, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [64.05, 1.1738, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [64.05, 1.9438, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [82.35, 0.5206, 0], "size": [18.34, 2.7732, 0.16], "color": [0.5, 0.52, 0.53], "collision": true, "render": false, "surface": "metal"}, {"at": [82.35, 0.3306, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [82.35, 1.1006, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [82.35, 1.8706, 0], "size": [18.3, 0.09, 0.1], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-91.5, 1.466, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-88.5, 1.454, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-85.5, 1.442, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-82.5, 1.43, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-79.5, 1.418, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-76.5, 1.406, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-73.5, 1.394, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-70.5, 1.382, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-67.5, 1.37, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-64.5, 1.358, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-61.5, 1.346, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-58.5, 1.334, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-55.5, 1.322, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-52.5, 1.31, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-49.5, 1.298, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-46.5, 1.286, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-43.5, 1.274, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-40.5, 1.262, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-37.5, 1.25, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-34.5, 1.238, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-31.5, 1.226, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-28.5, 1.214, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-25.5, 1.202, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-22.5, 1.19, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-19.5, 1.178, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-16.5, 1.166, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-13.5, 1.154, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-10.5, 1.142, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-7.5, 1.13, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-4.5, 1.118, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [-1.5, 1.106, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [1.5, 1.094, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [4.5, 1.082, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [7.5, 1.07, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [10.5, 1.058, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [13.5, 1.046, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [16.5, 1.034, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [19.5, 1.022, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [22.5, 1.01, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [25.5, 0.998, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [28.5, 0.986, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [31.5, 0.974, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [34.5, 0.962, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [37.5, 0.95, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [40.5, 0.938, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [43.5, 0.926, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [46.5, 0.914, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [49.5, 0.902, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [52.5, 0.89, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [55.5, 0.878, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [58.5, 0.866, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [61.5, 0.854, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [64.5, 0.842, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [67.5, 0.83, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [70.5, 0.818, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [73.5, 0.806, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [76.5, 0.794, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [79.5, 0.782, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [82.5, 0.77, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [85.5, 0.758, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [88.5, 0.746, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}, {"at": [91.5, 0.734, 0], "size": [0.12, 2.2, 0.12], "color": [0.36, 0.4, 0.4], "collision": false}])
+
+[node name="Loot_Garage_01" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(413, -0.6, -247)
+display_name = "Инструментальный ящик"
+table = "storage"
+look = 5
+
+[node name="Loot_Garage_02" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(587, -1.4647, -212)
+display_name = "Складской ящик"
+table = "storage"
+look = 5

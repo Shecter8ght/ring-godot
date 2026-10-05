@@ -1,0 +1,213 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/urban_props.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_building.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/blockout_opening.tscn" id="3"]
+[ext_resource type="Script" path="res://src/world/urban_facade.gd" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="5"]
+
+[node name="Checkpoints" type="Node3D"]
+
+[node name="Buildings" parent="." type="Node3D"]
+
+
+[node name="Props" parent="." type="Node3D" groups=["urban_prop_batches"]]
+
+
+[node name="Gameplay" parent="." type="Node3D"]
+
+
+[node name="WestCheckpoint" parent="." type="Node3D"]
+position = Vector3(-714, 2.856, 0)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Props" parent="WestCheckpoint" type="Node3D" groups=["urban_prop_batches"]]
+
+
+[node name="Buildings" parent="WestCheckpoint" type="Node3D"]
+
+
+[node name="CheckpointRoad" parent="WestCheckpoint/Props" instance=ExtResource("1")]
+position = Vector3(0, 0, 0)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, -0.1, 0], "size": [46, 0.25, 44], "color": [0.33, 0.34, 0.35], "collision": true, "surface": "asphalt"}, {"at": [-4.3, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [-7.7, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [-6, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [-0.3, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [-3.7, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [-2, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [3.7, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [0.3, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [2, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [7.7, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [4.3, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [6, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [-20, 5.5, -12], "size": [0.25, 11, 0.25], "color": [0.49, 0.51, 0.52], "collision": false}, {"at": [-20, 11, -12], "size": [1, 0.4, 0.7], "color": [0.83, 0.82, 0.69], "collision": false}, {"at": [20, 5.5, -12], "size": [0.25, 11, 0.25], "color": [0.49, 0.51, 0.52], "collision": false}, {"at": [20, 11, -12], "size": [1, 0.4, 0.7], "color": [0.83, 0.82, 0.69], "collision": false}])
+
+[node name="ControlBooth" parent="WestCheckpoint/Buildings" instance=ExtResource("2")]
+position = Vector3(-14, 0, -1)
+size = Vector2(4, 6)
+height = 3.6
+simple_collision = true
+
+[node name="Door" parent="WestCheckpoint/Buildings/ControlBooth" instance=ExtResource("3")]
+position = Vector3(0, 0, -3.0)
+
+[node name="Facade" parent="WestCheckpoint/Buildings/ControlBooth" type="Node3D"]
+script = ExtResource("4")
+floors = 1
+
+[node name="ControlOffice" parent="WestCheckpoint/Buildings" instance=ExtResource("2")]
+position = Vector3(16, 0, 7)
+size = Vector2(10, 15)
+height = 3.6
+simple_collision = true
+
+[node name="Door" parent="WestCheckpoint/Buildings/ControlOffice" instance=ExtResource("3")]
+position = Vector3(0, 0, -7.5)
+
+[node name="Facade" parent="WestCheckpoint/Buildings/ControlOffice" type="Node3D"]
+script = ExtResource("4")
+floors = 1
+
+[node name="Floodlight_0" parent="WestCheckpoint" type="SpotLight3D" groups=["mall_lights"]]
+position = Vector3(-14, 7, -10)
+rotation_degrees = Vector3(-60, 0, 0)
+light_color = Color(1, 0.87, 0.67, 1)
+light_energy = 2.0
+spot_range = 32.0
+spot_angle = 55.0
+shadow_enabled = false
+
+[node name="Floodlight_1" parent="WestCheckpoint" type="SpotLight3D" groups=["mall_lights"]]
+position = Vector3(16, 7, -10)
+rotation_degrees = Vector3(-60, 0, 0)
+light_color = Color(1, 0.87, 0.67, 1)
+light_energy = 2.0
+spot_range = 32.0
+spot_angle = 55.0
+shadow_enabled = false
+
+[node name="Extraction_West" parent="WestCheckpoint" instance=ExtResource("5")]
+position = Vector3(0, 0.08, -12)
+display_name = "Западный КПП"
+radius = 6.0
+
+[node name="EastCheckpoint" parent="." type="Node3D"]
+position = Vector3(714, -3.176, 80)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="Props" parent="EastCheckpoint" type="Node3D" groups=["urban_prop_batches"]]
+
+
+[node name="Buildings" parent="EastCheckpoint" type="Node3D"]
+
+
+[node name="CheckpointRoad" parent="EastCheckpoint/Props" instance=ExtResource("1")]
+position = Vector3(0, 0, 0)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, -0.1, 0], "size": [46, 0.25, 44], "color": [0.33, 0.34, 0.35], "collision": true, "surface": "asphalt"}, {"at": [-4.3, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [-7.7, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [-6, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [-0.3, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [-3.7, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [-2, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [3.7, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [0.3, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [2, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [7.7, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [4.3, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [6, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [-20, 5.5, -12], "size": [0.25, 11, 0.25], "color": [0.49, 0.51, 0.52], "collision": false}, {"at": [-20, 11, -12], "size": [1, 0.4, 0.7], "color": [0.83, 0.82, 0.69], "collision": false}, {"at": [20, 5.5, -12], "size": [0.25, 11, 0.25], "color": [0.49, 0.51, 0.52], "collision": false}, {"at": [20, 11, -12], "size": [1, 0.4, 0.7], "color": [0.83, 0.82, 0.69], "collision": false}])
+
+[node name="ControlBooth" parent="EastCheckpoint/Buildings" instance=ExtResource("2")]
+position = Vector3(-14, 0, -1)
+size = Vector2(4, 6)
+height = 3.6
+simple_collision = true
+
+[node name="Door" parent="EastCheckpoint/Buildings/ControlBooth" instance=ExtResource("3")]
+position = Vector3(0, 0, -3.0)
+
+[node name="Facade" parent="EastCheckpoint/Buildings/ControlBooth" type="Node3D"]
+script = ExtResource("4")
+floors = 1
+
+[node name="ControlOffice" parent="EastCheckpoint/Buildings" instance=ExtResource("2")]
+position = Vector3(16, 0, 7)
+size = Vector2(10, 15)
+height = 3.6
+simple_collision = true
+
+[node name="Door" parent="EastCheckpoint/Buildings/ControlOffice" instance=ExtResource("3")]
+position = Vector3(0, 0, -7.5)
+
+[node name="Facade" parent="EastCheckpoint/Buildings/ControlOffice" type="Node3D"]
+script = ExtResource("4")
+floors = 1
+
+[node name="Floodlight_0" parent="EastCheckpoint" type="SpotLight3D" groups=["mall_lights"]]
+position = Vector3(-14, 7, -10)
+rotation_degrees = Vector3(-60, 0, 0)
+light_color = Color(1, 0.87, 0.67, 1)
+light_energy = 2.0
+spot_range = 32.0
+spot_angle = 55.0
+shadow_enabled = false
+
+[node name="Floodlight_1" parent="EastCheckpoint" type="SpotLight3D" groups=["mall_lights"]]
+position = Vector3(16, 7, -10)
+rotation_degrees = Vector3(-60, 0, 0)
+light_color = Color(1, 0.87, 0.67, 1)
+light_energy = 2.0
+spot_range = 32.0
+spot_angle = 55.0
+shadow_enabled = false
+
+[node name="Extraction_East" parent="EastCheckpoint" instance=ExtResource("5")]
+position = Vector3(0, 0.08, -12)
+display_name = "Восточный КПП"
+radius = 6.0
+
+[node name="SouthCheckpoint" parent="." type="Node3D"]
+position = Vector3(-20, -2.336, 604)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Props" parent="SouthCheckpoint" type="Node3D" groups=["urban_prop_batches"]]
+
+
+[node name="Buildings" parent="SouthCheckpoint" type="Node3D"]
+
+
+[node name="CheckpointRoad" parent="SouthCheckpoint/Props" instance=ExtResource("1")]
+position = Vector3(0, 0, 0)
+rotation_degrees = Vector3(0, 0, 0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0, -0.1, 0], "size": [46, 0.25, 44], "color": [0.33, 0.34, 0.35], "collision": true, "surface": "asphalt"}, {"at": [0, -3.4, 0], "size": [46, 6.6, 44], "color": [0.48, 0.5, 0.5], "collision": true}, {"at": [-4.3, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [-7.7, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [-6, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [-0.3, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [-3.7, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [-2, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [3.7, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [0.3, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [2, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [7.7, 0.6, -8], "size": [0.5, 1.2, 4], "color": [0.65, 0.66, 0.64], "collision": true}, {"at": [4.3, 0.75, 0], "size": [0.6, 1.5, 0.6], "color": [0.64, 0.63, 0.61], "collision": true}, {"at": [6, 1.25, 0], "size": [3.2, 0.14, 0.14], "color": [0.7, 0.42, 0.37], "collision": true}, {"at": [-20, 5.5, -12], "size": [0.25, 11, 0.25], "color": [0.49, 0.51, 0.52], "collision": false}, {"at": [-20, 11, -12], "size": [1, 0.4, 0.7], "color": [0.83, 0.82, 0.69], "collision": false}, {"at": [20, 5.5, -12], "size": [0.25, 11, 0.25], "color": [0.49, 0.51, 0.52], "collision": false}, {"at": [20, 11, -12], "size": [1, 0.4, 0.7], "color": [0.83, 0.82, 0.69], "collision": false}])
+
+[node name="ControlBooth" parent="SouthCheckpoint/Buildings" instance=ExtResource("2")]
+position = Vector3(-14, 0, -1)
+size = Vector2(4, 6)
+height = 3.6
+simple_collision = true
+
+[node name="Door" parent="SouthCheckpoint/Buildings/ControlBooth" instance=ExtResource("3")]
+position = Vector3(0, 0, -3.0)
+
+[node name="Facade" parent="SouthCheckpoint/Buildings/ControlBooth" type="Node3D"]
+script = ExtResource("4")
+floors = 1
+
+[node name="ControlOffice" parent="SouthCheckpoint/Buildings" instance=ExtResource("2")]
+position = Vector3(16, 0, 7)
+size = Vector2(10, 15)
+height = 3.6
+simple_collision = true
+
+[node name="Door" parent="SouthCheckpoint/Buildings/ControlOffice" instance=ExtResource("3")]
+position = Vector3(0, 0, -7.5)
+
+[node name="Facade" parent="SouthCheckpoint/Buildings/ControlOffice" type="Node3D"]
+script = ExtResource("4")
+floors = 1
+
+[node name="Floodlight_0" parent="SouthCheckpoint" type="SpotLight3D" groups=["mall_lights"]]
+position = Vector3(-14, 7, -10)
+rotation_degrees = Vector3(-60, 0, 0)
+light_color = Color(1, 0.87, 0.67, 1)
+light_energy = 2.0
+spot_range = 32.0
+spot_angle = 55.0
+shadow_enabled = false
+
+[node name="Floodlight_1" parent="SouthCheckpoint" type="SpotLight3D" groups=["mall_lights"]]
+position = Vector3(16, 7, -10)
+rotation_degrees = Vector3(-60, 0, 0)
+light_color = Color(1, 0.87, 0.67, 1)
+light_energy = 2.0
+spot_range = 32.0
+spot_angle = 55.0
+shadow_enabled = false
+
+[node name="Extraction_South" parent="SouthCheckpoint" instance=ExtResource("5")]
+position = Vector3(0, 0.08, 12)
+display_name = "Южный КПП"
+radius = 6.0
