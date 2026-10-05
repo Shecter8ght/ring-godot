@@ -79,7 +79,9 @@ death_crouch / death_crouch_head; в голову — death_head_front / death_h
   `prone/Moving Backward In Crawl Position`.
 - **Бросок гранаты на бегу:** `run grenades/Run And Throw Grenade`.
 - **Реакция на попадание с пистолетом:** `pistol/Hit Reaction`, `Hit Reaction (1)`.
-- Прыжки (`Pro Rifle Pack/jump *`, `Shooter Pack/jump *`) — прыжка в игре нет.
+- В воздухе обычного прыжка используется `jump_loop` из `Pro Rifle Pack/jump loop`;
+  высоту задаёт CharacterBody3D, вертикальный root-подскок клипа убран при запекании.
+  Отдельные клипы отталкивания/приземления и варианты рук по оружию пока не подключены.
 
 ## Нет совсем (нужно скачать с Mixamo на Persona / любой скелет Mixamo)
 

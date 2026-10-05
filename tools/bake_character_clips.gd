@@ -25,9 +25,14 @@ func _initialize() -> void:
 	var target_path: String = String(root.get_path_to(skeleton))
 	var library := AnimationLibrary.new()
 	var previous: AnimationLibrary = load(OUTPUT) as AnimationLibrary
+	var selected: PackedStringArray = OS.get_cmdline_user_args()
+	if not selected.is_empty():
+		library = previous.duplicate() as AnimationLibrary
 	var failed: int = 0
 	for key in sources:
 		var name: String = String(key)
+		if not selected.is_empty() and not name in selected:
+			continue
 		var source_path: String = "res://assets/animations/" + String(sources[key])
 		var source_scene: PackedScene = load(source_path) as PackedScene
 		if source_scene == null:
@@ -85,11 +90,20 @@ func _initialize() -> void:
 						skeleton.get_bone_rest(skeleton.find_bone(bone)).origin, _to_root(skeleton, root))
 				else:
 					_remove_root_drift(clip, i, skeleton.get_bone_rest(skeleton.find_bone(bone)).origin)
+				if name == "jump_loop":
+					# Высоту прыжка задаёт физическое тело; клип сгибает ноги без второго root-подскока.
+					var rest_y: float = skeleton.get_bone_rest(skeleton.find_bone(bone)).origin.y
+					for key_index: int in range(clip.track_get_key_count(i)):
+						var value: Vector3 = clip.track_get_key_value(i, key_index) as Vector3
+						value.y = rest_y
+						clip.track_set_key_value(i, key_index, value)
 		if retained == 0:
 			push_error("Нет совместимых треков: " + source_path)
 			failed += 1
 		else:
 			clip.loop_mode = Animation.LOOP_LINEAR if _is_cycle(name) else Animation.LOOP_NONE
+			if library.has_animation(name):
+				library.remove_animation(name)
 			library.add_animation(name, clip)
 			print("BAKED ", name, " tracks=", retained)
 		source_root.free()
@@ -102,7 +116,7 @@ func _initialize() -> void:
 
 
 func _is_cycle(name: String) -> bool:
-	return "idle" in name or "walk" in name or "run" in name or "sprint" in name or "prone_move" in name
+	return "idle" in name or "walk" in name or "run" in name or "sprint" in name or "prone_move" in name or name == "jump_loop"
 
 
 func _remove_root_drift(clip: Animation, track: int, rest: Vector3) -> void:

@@ -38,6 +38,9 @@ var weapon_id: String = ""
 ## Счётчик одноразовых анимаций синхронизируется вместе с персонажем.
 var animation_event: String = ""
 var animation_event_seq: int = 0
+## Передаётся вместе с позицией: чужие персонажи сами не считают move_and_slide.
+var airborne: bool = false
+var _jump_cd: float = 0.0
 var weapon_slot: String = ""
 ## Обвес в руках с состоянием фонарей/ЛЦУ (точка → {id, light, laser}): модель на теле у всех.
 var weapon_mods: Dictionary = {}
@@ -181,6 +184,7 @@ func _ready() -> void:
 	# шаги слышно у всех: и свои, и напарника (по синхронизированной позиции и стойке)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
+	steps.grounded = func() -> bool: return not airborne and _vault_t < 0.0
 	steps.loud_db = func() -> float: return float(Balance.STEP_STANCE_DB.get(_stance_key(), 0.0))
 	steps.movement_kind = func() -> String:
 		if stance == Stance.PRONE or is_downed():
@@ -233,7 +237,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -624,7 +628,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if seated:
 		var mv := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-		if (mv.length() > 0.2 or Input.is_action_just_pressed("crouch")) and not ui_blocked():
+		if (mv.length() > 0.2 or Input.is_action_just_pressed("crouch") or Input.is_action_just_pressed("vault")) and not ui_blocked():
 			seated = false
 			stance = Stance.STAND
 			_apply_stance()
@@ -648,6 +652,7 @@ func _physics_process(delta: float) -> void:
 				Audio.play("land", global_position, -6.0)
 		return
 	_dive_cd = maxf(0.0, _dive_cd - delta)
+	_jump_cd = maxf(0.0, _jump_cd - delta)
 	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
 	if weapon_slot != "":
 		var we := weapon_entry()
@@ -689,6 +694,7 @@ func _physics_process(delta: float) -> void:
 				_try_vault()
 				if _vault_t >= 0.0:
 					return
+				_try_jump()
 			if Input.is_action_just_pressed("dive"):
 				_try_dive()
 	_combat(delta)
@@ -730,10 +736,15 @@ func _physics_process(delta: float) -> void:
 		velocity.z = horizontal.y
 	if not is_on_floor():
 		velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
-	elif not (_dive_t >= 0.0 and _dive_t < 0.1):
+	elif velocity.y <= 0.0 and not (_dive_t >= 0.0 and _dive_t < 0.1):
 		# в начале броска — подскок (иначе пол тут же гасит его)
 		velocity.y = 0.0
+	var was_airborne: bool = airborne
 	_cart_contact.move_character(delta)
+	airborne = not is_on_floor()
+	if was_airborne and not airborne:
+		_jump_cd = float(Balance.JUMP.cooldown)
+		NoiseBus.emit(global_position, float(Balance.JUMP.land_noise_m) * carry_stamina_k(), "step")
 	if ads:
 		_body.rotation.y = look_yaw
 	elif _dive_t >= 0.0:
@@ -828,6 +839,9 @@ static func tac_on(mods: Dictionary, node: Node, kind: String) -> bool:
 
 ## Шаги слышны AI: радиус по стойке и бегу, только пока реально движемся.
 func _footsteps(delta: float) -> void:
+	if airborne:
+		_step_timer = 0.0
+		return
 	var moving := Vector2(velocity.x, velocity.z).length() > 0.3
 	if not moving:
 		_step_timer = 0.0
@@ -1744,10 +1758,25 @@ func _try_vault() -> void:
 	Audio.play("vault", global_position + Vector3.UP * 0.8, -14.0)
 
 
+## Прыжок считает владелец тела. В воздухе повторный пробел не даёт второго импульса.
+func _try_jump() -> void:
+	var jump: Dictionary = Balance.JUMP
+	var cost: float = float(jump.stamina) * carry_stamina_k()
+	if not is_alive() or is_downed() or stance != Stance.STAND or seated or ui_blocked() or PauseMenu.shown \
+		or not is_on_floor() or airborne or is_burdened() or _winded or _jump_cd > 0.0 \
+		or _vault_t >= 0.0 or _dive_t >= 0.0 or carrying or is_dragging() or stamina < cost:
+		return
+	velocity.y = float(jump.speed)
+	airborne = true
+	stamina -= cost
+	_rest_t = Balance.STAMINA_REGEN_DELAY
+	NoiseBus.emit(global_position, float(jump.takeoff_noise_m), "step")
+
+
 ## Alt: бросок на землю в сторону движения (любую), дальше — лёжа. Шумно, пару мгновений не стреляет.
 func _try_dive() -> void:
 	var dv: Dictionary = Balance.DIVE
-	if stance == Stance.PRONE or is_burdened() or is_downed() or _dive_cd > 0.0 or _dive_t >= 0.0 or stamina < float(dv.stamina) * 0.5:
+	if stance == Stance.PRONE or is_burdened() or is_downed() or not is_on_floor() or airborne or _dive_cd > 0.0 or _dive_t >= 0.0 or stamina < float(dv.stamina) * 0.5:
 		return
 	# только в сторону движения: Alt на месте — ничего (раньше бросал вперёд и сбивал с толку)
 	var wish := _wish_direction()

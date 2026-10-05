@@ -146,7 +146,9 @@ func _process(delta: float) -> void:
 		return
 	var clip: String
 	var crawl: float = 1.0
-	if prone:
+	if _actor is Player and (_actor as Player).airborne and not prone and _player.has_animation("jump_loop"):
+		clip = "jump_loop"
+	elif prone:
 		# лёжа с оружием — поза «лёжа с автоматом»; ползком — клип «назад», вперёд — он же обратным ходом
 		clip = "prone_aim" if family != "unarmed" and not moving else "prone_move_b"
 		if moving and _direction(_vel) == "f":

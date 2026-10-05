@@ -40,6 +40,7 @@ func _run() -> void:
 		for j: int in range(i+1,actors.size()):
 			_check("spawns do not overlap", (actors[i] as Node3D).global_position.distance_to((actors[j] as Node3D).global_position)>1.1)
 	await _phase("late_join",2,3,false)
+	await _phase("jump_hideout",2,3,false)
 	_command.rpc("guest_switch",3,0,true)
 	await get_tree().create_timer(2.5).timeout
 	await _phase("guest_switch_result",3,0,true)
@@ -75,6 +76,7 @@ func _run() -> void:
 	RaidWeather.current._share_schedule()
 	await get_tree().create_timer(.35).timeout
 	await _phase("raid",0,0,true)
+	await _phase("jump_raid",0,0,true)
 	await get_tree().create_timer(3.0).timeout
 	print("SHELTER_NET host failures=%d" % _fails)
 	_finish.rpc(_fails)
@@ -113,6 +115,27 @@ func _wait_reports(label: String) -> void:
 @rpc("authority","call_remote","reliable")
 func _command(label: String,tv: int,radio: int,power: bool) -> void:
 	var previous: int = _fails
+	if label.begins_with("jump_"):
+		var player: Player = _level().get("_player") as Player if label == "jump_hideout" else Raid.current.local_player()
+		var base_y: float = player.global_position.y
+		player.stamina = Balance.STAMINA_MAX
+		player._winded = false
+		Input.action_press("vault")
+		await get_tree().create_timer(.1).timeout
+		Input.action_release("vault")
+		await get_tree().create_timer(.15).timeout
+		_check(label+" owner lifts body",player.airborne and player.global_position.y>base_y+.2)
+		for actor: Node in get_tree().get_nodes_in_group("players"):
+			var peer: Player = actor as Player
+			_check(label+" airborne replicated %d" % peer.peer_id,peer.airborne)
+			_check(label+" pose replicated %d" % peer.peer_id,peer._animator._current=="jump_loop")
+		await get_tree().create_timer(.8).timeout
+		_check(label+" owner landed",not player.airborne and player.is_on_floor())
+		for actor: Node in get_tree().get_nodes_in_group("players"):
+			_check(label+" landing replicated %d" % (actor as Player).peer_id,not (actor as Player).airborne)
+		if _mode != "host":
+			_report.rpc_id(1,_fails-previous)
+		return
 	if label == "without_host":
 		if _mode == "c1":
 			_tv().request_use()

@@ -10,6 +10,9 @@ extends Node
 var loud_db: Callable
 ## () -> String: особое движение игрока (ползком / вприсядку); пусто — обычный шаг по поверхности.
 var movement_kind: Callable
+## Игрок сообщает состояние пола, в том числе по сети: в воздухе шагов нет.
+var grounded: Callable
+var _was_airborne: bool = false
 ## Мародёр: тяжёлые ботинки — ниже и чуть громче.
 var ai: bool = false
 
@@ -29,6 +32,14 @@ func _process(delta: float) -> void:
 	var pos := (get_parent() as Node3D).global_position
 	var v := Vector2(pos.x - _last.x, pos.z - _last.z).length() / delta
 	_last = pos
+	if grounded.is_valid():
+		if not bool(grounded.call()):
+			_was_airborne = true
+			_t = 0.0
+			return
+		if _was_airborne:
+			_was_airborne = false
+			Audio.play("land", pos, float(Balance.JUMP.land_db))
 	# телепорт (спавн, тест) — не шаги
 	if v > 20.0:
 		return
