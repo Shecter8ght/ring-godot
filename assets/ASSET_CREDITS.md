@@ -39,3 +39,10 @@
 Сырые скачанные glTF/.bin/фотокарты и `license.txt` каждой модели хранятся в `_asset_src/shelter/external/<id>/`; текстуры — `_asset_src/shelter/textures/<id>/`. `integrated.blend` каждой внешней модели сохраняется отдельно. `_asset_src/` намеренно исключён из Git по правилам проекта.
 
 Ни Sketchfab, ни платные/Editorial/NC/ND ассеты в финальном убежище не используются.
+
+## Художественное наполнение и атмосфера — 2026-10-05
+
+- 34 дополнительных Blender-ассета: посуда и чайный уголок, книги, часы, ткань и одежда, чистка оружия, боеприпасы, инструменты, расходники, упаковки, ручная тележка, приборы и соединения генератора. Собственные модели для владельца RING; исходник `_asset_src/shelter/dressing/shelter_dressing.blend`, экспорт `assets/shelter/dressing/`, сцены `levels/shelter/dressing/`.
+- Атлас Dressing: собственные четыре image layers Ucupaint (цвет поверхности, контактный износ, шероховатость, открытый металл), запечённые в три карты 1024². В цвете повторно использованы уже перечисленные выше CC0 фотографии: Green Metal Rust, Metal Plate, Denim Fabric 06, Oak Wood Planks, Painted Plaster Wall. Поверхности Paper/Cardboard наследуют прежние карты Painted Plaster Wall/Oak Wood Planks с художественной обработкой. Новых сторонних источников нет.
+- DustMotes и KettleVapor: собственные нарисованные маски и заранее записанные Blender shape-key анимации. Исходник `_asset_src/shelter/atmosphere/shelter_atmosphere.blend`; GLB, маски и собственный шейдер `soft_density.gdshader` — `assets/shelter/atmosphere/`. Лицензия — собственная работа для RING.
+- Локальные `license.txt` лежат рядом с обоими исходниками. Сохранённые исходники повторно открыты и проверены; результаты с SHA256 — `docs/shelter/validation/dressing_source_audit.json` и `atmosphere_source_audit.json`. Сырьё по правилам проекта не публикуется в Git.

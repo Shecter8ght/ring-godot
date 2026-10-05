@@ -68,5 +68,27 @@
     ],
     "scene": "res://levels/shelter/Shelter_Interior.tscn",
     "notes": "RTX 5070 Ti; ten shadowed primary lights, PCSS 0.35 m, 13 mesh signs; final placements, 180 warmed frames per view; VSync off."
+  },
+  "dressing_pass": {
+    "quality": "high",
+    "resolution": "(1920.0, 1080.0)",
+    "results": [
+      {
+        "draw_calls": 309,
+        "fps": 647.367909972703,
+        "frame_ms": 1.54471666666667,
+        "mode": "iso",
+        "triangles": 682575
+      },
+      {
+        "draw_calls": 309,
+        "fps": 650.613383840209,
+        "frame_ms": 1.53701111111111,
+        "mode": "fps",
+        "triangles": 643814
+      }
+    ],
+    "scene": "res://levels/shelter/Shelter_Interior.tscn",
+    "notes": "Final authored dressing and baked FX; explicit high preset; 150 startup frames, 100 warmed frames and 180 measured frames per view; static hideout viewpoints, not minimum gameplay FPS."
   }
 }

@@ -1,0 +1,20 @@
+{
+  "source": "_asset_src/shelter/atmosphere/shelter_atmosphere.blend",
+  "sha256": "e9760377847b54d1bc3a60014a2a5c0e05a5f79ddbdd245ac72cfd2543945fde",
+  "assets": {
+    "DustMotes": {
+      "vertices": 96,
+      "shape_poses": 5,
+      "ucupaint_image_layers": 1,
+      "animation_action": "DustMotesAction"
+    },
+    "KettleVapor": {
+      "vertices": 12,
+      "shape_poses": 5,
+      "ucupaint_image_layers": 1,
+      "animation_action": "KettleVaporAction"
+    }
+  },
+  "verification": "fresh Blender process reopened saved candidate; editable painted layers and shape-key animation actions",
+  "runtime_simulation": false
+}

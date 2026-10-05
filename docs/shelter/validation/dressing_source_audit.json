@@ -1,0 +1,314 @@
+{
+  "source": "_asset_src/shelter/dressing/shelter_dressing.blend",
+  "sha256": "5608631c9c8351298b9c1c6e4b7dff5ca79d8cb7e4a5bf78248dfaddbde8f048",
+  "assets": {
+    "TeaSet": {
+      "evaluated_bounds_m": [
+        0.5979,
+        0.3814,
+        0.35
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "BooksStack": {
+      "evaluated_bounds_m": [
+        0.261,
+        0.079,
+        0.19
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "WallClock": {
+      "evaluated_bounds_m": [
+        0.4,
+        0.4,
+        0.065
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "Cushion": {
+      "evaluated_bounds_m": [
+        0.46,
+        0.11,
+        0.33
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "WeaponCleaningSet": {
+      "evaluated_bounds_m": [
+        0.62,
+        0.156,
+        0.35
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "AmmoAndMagazines": {
+      "evaluated_bounds_m": [
+        0.35,
+        0.0835,
+        0.2054
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "RepairTools": {
+      "evaluated_bounds_m": [
+        0.66,
+        0.044,
+        0.4
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "PartsOrganizer": {
+      "evaluated_bounds_m": [
+        0.66,
+        0.5,
+        0.235
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "OpenToolbox": {
+      "evaluated_bounds_m": [
+        0.481,
+        0.3687,
+        0.4155
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "MeterPanel": {
+      "evaluated_bounds_m": [
+        0.62,
+        0.62,
+        0.1175
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "CableJunction": {
+      "evaluated_bounds_m": [
+        0.24,
+        1.16,
+        0.115
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "GeneratorServiceDetails": {
+      "evaluated_bounds_m": [
+        1.942,
+        0.619,
+        0.9407
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "FireExtinguisher": {
+      "evaluated_bounds_m": [
+        0.2152,
+        0.4675,
+        0.1595
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "DrapedBlanket": {
+      "evaluated_bounds_m": [
+        0.8619,
+        0.3564,
+        0.8809
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "FoldedTowel": {
+      "evaluated_bounds_m": [
+        0.3817,
+        0.0528,
+        0.2819
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "BedBlanket": {
+      "evaluated_bounds_m": [
+        0.8422,
+        0.0656,
+        1.1514
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "CleaningRag": {
+      "evaluated_bounds_m": [
+        0.272,
+        0.0209,
+        0.222
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "MixedCartons": {
+      "evaluated_bounds_m": [
+        0.655,
+        0.288,
+        0.3238
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "FoodStock": {
+      "evaluated_bounds_m": [
+        0.488,
+        0.114,
+        0.238
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "WaterStock": {
+      "evaluated_bounds_m": [
+        0.542,
+        0.306,
+        0.302
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "MedicalStock": {
+      "evaluated_bounds_m": [
+        0.475,
+        0.168,
+        0.21
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "BatteryStock": {
+      "evaluated_bounds_m": [
+        0.34,
+        0.3,
+        0.2238
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "SupplySack": {
+      "evaluated_bounds_m": [
+        0.34,
+        0.364,
+        0.24
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "HandTruck": {
+      "evaluated_bounds_m": [
+        0.52,
+        0.9724,
+        0.375
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "InventoryClipboard": {
+      "evaluated_bounds_m": [
+        0.22,
+        0.031,
+        0.3
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "Calculator": {
+      "evaluated_bounds_m": [
+        0.11,
+        0.044,
+        0.17
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "CounterScales": {
+      "evaluated_bounds_m": [
+        0.34,
+        0.0995,
+        0.268
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "HangingJacket": {
+      "evaluated_bounds_m": [
+        0.6,
+        0.68,
+        0.1625
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "HearingProtection": {
+      "evaluated_bounds_m": [
+        0.3701,
+        0.2444,
+        0.1565
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "WorkGloves": {
+      "evaluated_bounds_m": [
+        0.267,
+        0.029,
+        0.187
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "CleaningBucket": {
+      "evaluated_bounds_m": [
+        0.3153,
+        0.6524,
+        0.27
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "NoticeBoard": {
+      "evaluated_bounds_m": [
+        1.0,
+        0.7,
+        0.0585
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "TeaStation": {
+      "evaluated_bounds_m": [
+        1.1,
+        0.942,
+        0.58
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    },
+    "ExhaustConnection": {
+      "evaluated_bounds_m": [
+        0.23,
+        0.5702,
+        1.9875
+      ],
+      "uv": 1,
+      "ucupaint_image_layers": 4
+    }
+  },
+  "verification": "fresh Blender process reopened saved candidate; evaluated world geometry including accessories",
+  "runtime_simulation": false
+}

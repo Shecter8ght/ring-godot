@@ -25,6 +25,10 @@ CASES = {
     "revision_settings": ("visual_revision_settings", "settings_test: провалено 0"),
     "revision_animation": ("visual_revision_anim", "anim_test: провалено 0"),
     **{f"revision_coop_{role}": (f"visual_revision_net_{role}", f"SHELTER_NET {role} failures=0") for role in ["host", "c1", "c2"]},
+    "dressing_compile": ("dressing_compile", "compile_check: не собралось 0"),
+    "dressing_acceptance": ("dressing_acceptance", "SHELTER_ACCEPTANCE failures=0"),
+    "dressing_effects": ("dressing_effects_test", "DRESSING_ACCEPTANCE checks=64 failures=0"),
+    **{f"dressing_coop_{role}": (f"dressing_net_{role}", f"SHELTER_NET {role} failures=0") for role in ["host", "c1", "c2"]},
 }
 
 
@@ -42,13 +46,13 @@ def read_case(stem: str, terminator: str) -> dict:
     errors = read_log(errors_path) if errors_path.exists() else ""
     # Некоторые прежние прогоны сохраняли stderr вместе с stdout.
     lines = (output + "\n" + errors).splitlines()
-    evidence = [line for line in lines if re.search(r"\[(ok|FAIL)\]", line) or terminator in line]
+    evidence = [line for line in lines if re.search(r"\[(ok|FAIL)\]", line) or line.startswith(("PASS ","FAIL ")) or terminator in line]
     warnings = sorted(set(line for line in lines if line.startswith("WARNING:")))
     engine_errors = sorted(set(line for line in lines if line.startswith(("ERROR:", "SCRIPT ERROR:"))))
     return {
         "completed": terminator in output,
-        "checks_passed": sum("[ok]" in line for line in lines),
-        "checks_failed": sum("[FAIL]" in line for line in lines),
+        "checks_passed": sum("[ok]" in line or line.startswith("PASS ") for line in lines),
+        "checks_failed": sum("[FAIL]" in line or line.startswith("FAIL ") for line in lines),
         "evidence": evidence,
         "warnings": warnings,
         "engine_errors": engine_errors,

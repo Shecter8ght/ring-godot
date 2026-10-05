@@ -7,10 +7,13 @@ func _ready() -> void:
 	Profile.use_file("user://shelter_bench_test.json", true)
 	var args: PackedStringArray = OS.get_cmdline_user_args()
 	var path: String = args[0] if not args.is_empty() else Balance.HIDEOUT_SCENE
+	if args.size()>1 and args[1]=="high":
+		Settings.quality = "high"
 	get_tree().change_scene_to_file(path)
 	for i: int in range(150):
 		await get_tree().process_frame
 	var level: Node = get_tree().current_scene
+	Settings.apply_graphics()
 	var rig: CameraRig = level.get_node("CameraRig") as CameraRig
 	var pl: Player = level.get("_player") as Player
 	var output: Array[Dictionary] = []
@@ -29,5 +32,5 @@ func _ready() -> void:
 			tris += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 		var seconds: float = float(Time.get_ticks_usec() - start) / 1e6
 		output.append({"mode": mode, "fps": 180.0 / seconds, "frame_ms": seconds * 1000.0 / 180.0, "draw_calls": calls / 180, "triangles": tris / 180})
-	print("SHELTER_BENCH " + JSON.stringify({"scene": path, "resolution": get_viewport().get_visible_rect().size, "results": output}))
+	print("SHELTER_BENCH " + JSON.stringify({"scene": path, "quality":Settings.quality,"resolution": get_viewport().get_visible_rect().size, "results": output}))
 	get_tree().quit()
