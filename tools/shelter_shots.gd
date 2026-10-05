@@ -28,6 +28,12 @@ func _ready() -> void:
 		cam.look_at(shot[2])
 		await _frames(50)
 		_save(String(shot[0]))
+	# Крупные планы показывают ориентацию печати, крепёж и разделение поверхностей.
+	for shot: Array in [["wall_plan",Vector3(-4.7,1.85,.95),Vector3(-7.73,1.85,.95)],["room_sign",Vector3(4.8,2.5,-2),Vector3(7.78,2.65,-2)],["tabletop",Vector3(-.85,1.35,1.4),Vector3(-.85,.79,.28)],["bay_sign",Vector3(5.1,2.25,5.6),Vector3(5.1,2.24,7.7)]]:
+		cam.position = shot[1]
+		cam.look_at(shot[2])
+		await _frames(50)
+		_save(String(shot[0]))
 	(_level_power(level) as ShelterPower).request_use()
 	cam.position = Vector3(0,1.67,10.4)
 	cam.look_at(Vector3(0,1.2,0))

@@ -71,18 +71,18 @@ func _group(label: String, parent: Node) -> Node3D:
 	return n
 
 func _make_materials() -> void:
-	var names: Array[String] = ["RawConcrete", "PaintedConcrete", "DampConcrete", "WetConcrete", "IndustrialConcreteFloor", "PaintedSteel", "OchreSteel", "BareSteel", "RustedSteel", "GalvanizedSteel", "DirtyAluminum", "OldWood", "RawWood", "Rubber", "OldPlastic", "Canvas", "MilitaryFabric", "Leatherette", "Glass", "Oil", "PuddleWater", "WornCarpet", "Paper", "Cardboard", "RedPaint", "IndustrialTrim", "Labels", "PlanningMap", "WarmEmitter", "CoolEmitter", "Screen"]
+	var names: Array[String] = ["RawConcrete", "PaintedConcrete", "DampConcrete", "WetConcrete", "IndustrialConcreteFloor", "PaintedSteel", "OchreSteel", "BareSteel", "RustedSteel", "GalvanizedSteel", "DirtyAluminum", "OldWood", "RawWood", "Rubber", "OldPlastic", "Canvas", "MilitaryFabric", "Leatherette", "Glass", "Oil", "PuddleWater", "WornCarpet", "Paper", "Cardboard", "RedPaint", "IndustrialTrim", "Labels", "PlanningMap", "RoomSigns", "WarmEmitter", "CoolEmitter", "Screen"]
 	for label: String in names:
 		var m: StandardMaterial3D = StandardMaterial3D.new()
 		m.resource_name = label
 		m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-		var extension: String = ".png" if label in ["IndustrialTrim", "Labels", "PlanningMap"] else ".jpg"
+		var extension: String = ".png" if label in ["IndustrialTrim", "Labels", "PlanningMap", "RoomSigns"] else ".jpg"
 		if ResourceLoader.exists(TEXTURES + label + "_base" + extension):
 			m.albedo_texture = load(TEXTURES + label + "_base" + extension)
 		if ResourceLoader.exists(TEXTURES + label + "_normal" + extension):
 			m.normal_enabled = true
 			m.normal_texture = load(TEXTURES + label + "_normal" + extension)
-			m.normal_scale = 0.75 if label in ["RawConcrete", "PaintedConcrete"] else 0.6
+			m.normal_scale = 0.4 if label in ["RawConcrete", "PaintedConcrete"] else 0.32
 		if ResourceLoader.exists(TEXTURES + label + "_orm" + extension):
 			var orm: Texture2D = load(TEXTURES + label + "_orm" + extension)
 			m.roughness_texture = orm
@@ -95,13 +95,15 @@ func _make_materials() -> void:
 			m.ao_texture = orm
 		if label.ends_with("Emitter"):
 			m.emission_enabled = true
-			m.emission = Color(1, 0.72, 0.39) if label == "WarmEmitter" else Color(0.87, 0.92, 1.0)
+			m.emission = Color(1, 0.9, 0.77) if label == "WarmEmitter" else Color(0.87, 0.92, 1.0)
 			m.emission_energy_multiplier = 2.4
 			m.albedo_color = m.emission
 		if label == "Screen":
 			m.albedo_color = Color(0.007, 0.009, 0.006)
 		if label in ["Oil", "PuddleWater", "WetConcrete", "Glass"]:
 			m.metallic_specular = 0.55
+		if label in ["IndustrialConcreteFloor", "RawConcrete", "PaintedConcrete", "DampConcrete"]:
+			m.metallic_specular = 0.35
 		# Материал cutaway отдельный от пола/декора с тем же физическим составом.
 		ResourceSaver.save(m, BASE + "materials/" + label + ".tres")
 		_materials[label] = load(BASE + "materials/" + label + ".tres")
@@ -137,7 +139,13 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 			assert(_materials.has(label), id + ": " + label)
 			mesh.surface_set_material(surface, _materials[label])
 		var mesh_path: String = BASE + "props/" + id + "_%02d.res" % index
-		ResourceSaver.save(mesh, mesh_path)
+		var saved: Error = ResourceSaver.save(mesh, mesh_path)
+		# Windows может кратко удерживать ресурс во время импорта/индексации.
+		for attempt: int in range(3):
+			if saved == OK: break
+			OS.delay_msec(100)
+			saved = ResourceSaver.save(mesh, mesh_path)
+		assert(saved == OK, "Не сохранён mesh: " + mesh_path)
 		mi.mesh = load(mesh_path)
 		var t: Transform3D = source.transform
 		var ancestor: Node3D = source.get_parent() as Node3D
@@ -150,6 +158,8 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 			mi.layers = SectorBuilder.CEILING_LAYER
 		if cut:
 			mi.set_meta("shelter_cut", true)
+		if id.begins_with("RoomSign_"):
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		if id in ["Mug", "FoodCan", "Notebook", "WaterBottle", "Beer", "Boots", "PlanningMap", "Rug"]:
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(mi)
@@ -441,7 +451,7 @@ func _detail_pass() -> void:
 		_put("FoodCan","LivingTin_%02d" % i,details,Vector3(-10.5+(i%3)*.24,.67+(i/3)*.49,-10.42))
 	for i: int in range(4):
 		_put("WaterBottle","LivingWater_%02d" % i,details,Vector3(-10.5+i*.19,1.16,-10.4))
-	for spec: Array in [["DeskLamp","PlanningLamp",Vector3(1.02,.79,-.36),0],["Binoculars","PlanningOptics",Vector3(.32,.78,.32),14],["Pencil","PlanningPencil",Vector3(-.63,.79,.38),-23],["DeskLamp","LivingLamp",Vector3(-12.22,.97,-10.1),0],["DeskLamp","TraderTaskLamp",Vector3(-13.3,.97,-1.87),0],["DeskLamp","WorkbenchTaskLamp",Vector3(14.6,.95,-4.2),0],["WallMap","HubRouteBoard",Vector3(-7.73,1.85,.95),90],["Shelf","HubSuppliesShelf",Vector3(-7.35,0,-3.5),90],["ElectricalCabinet","HubCommunicationsPanel",Vector3(7.48,0,1.75),-90],["Counter","CommunicationsDesk",Vector3(-5.3,0,-9.1),0],["Radio","CommunicationsReceiver",Vector3(-5.8,.97,-9.1),0],["Notebook","CommunicationsLog",Vector3(-4.7,.97,-9.1),16],["Bench","NorthWaitingBench",Vector3(0,0,-10.5),0],["Locker","PersonalLocker",Vector3(-3.8,0,-10.5),0],["CableReel","MaintenanceReel",Vector3(7.2,0,-4.0),0],["Case","MaintenanceCase",Vector3(-7.1,0,1.0),90],["Case","HubSuppliesCase",Vector3(-7.3,.66,-3.5),90],["Backpack","HubSparePack",Vector3(-7.3,1.13,-3.1),90],["HookRail","EntryHooks",Vector3(-3.71,1.64,9.4),90],["HookRail","BayHooks1",Vector3(-5.1,1.62,7.81),180],["HookRail","BayHooks2",Vector3(5.1,1.62,7.81),180],["HookRail","BayHooks3",Vector3(7.4,1.62,7.81),180],["TacticalVest","BayVest1",Vector3(-4.7,1.05,7.65),180],["TacticalVest","BayVest2",Vector3(5.5,1.05,7.65),180],["TacticalVest","BayVest3",Vector3(7.65,1.05,7.65),180],["Helmet","ArmoryHelmet",Vector3(-12.5,.78,4.1),0],["Helmet","BayHelmet",Vector3(5.1,2.04,7.6),0],["Helmet","TraderHelmet",Vector3(-14.8,1.65,-4.4),0],["TacticalVest","ArmoryVest",Vector3(-16.8,1.2,6.35),180],["JerryCan","EntryWaterCan",Vector3(2.9,0,11.3),0],["MedicalCase","HubFirstAid",Vector3(-7.4,1.63,-3.5),90],["CardboardBox","LivingPersonalCarton",Vector3(-17.4,.18,-8.3),90],["FoodCan","LivingFood",Vector3(-17.4,1.13,-8),0],["WaterBottle","LivingWater",Vector3(-17.4,.69,-7.7),0],["Mug","SleepingCup",Vector3(-2.14,3.14,-10.6),0]]:
+	for spec: Array in [["DeskLamp","PlanningLamp",Vector3(1.02,.79,-.36),0],["Binoculars","PlanningOptics",Vector3(.32,.78,.32),14],["Pencil","PlanningPencil",Vector3(-.63,.79,.38),-23],["DeskLamp","LivingLamp",Vector3(-12.22,.97,-10.1),0],["DeskLamp","TraderTaskLamp",Vector3(-13.3,.97,-1.87),0],["DeskLamp","WorkbenchTaskLamp",Vector3(14.6,.95,-4.2),0],["WallMap","HubRouteBoard",Vector3(-7.73,1.85,.95),90],["Shelf","HubSuppliesShelf",Vector3(-7.35,0,-3.5),90],["ElectricalCabinet","HubCommunicationsPanel",Vector3(7.48,0,1.75),-90],["Counter","CommunicationsDesk",Vector3(-5.3,0,-9.1),0],["Radio","CommunicationsReceiver",Vector3(-5.8,.97,-9.1),0],["Notebook","CommunicationsLog",Vector3(-4.7,.97,-9.1),16],["Bench","NorthWaitingBench",Vector3(0,0,-10.5),0],["Locker","PersonalLocker",Vector3(-3.8,0,-10.5),0],["CableReel","MaintenanceReel",Vector3(7.2,0,-4.0),0],["Case","MaintenanceCase",Vector3(-7.1,0,1.0),90],["Case","HubSuppliesCase",Vector3(-7.3,.66,-3.5),90],["Backpack","HubSparePack",Vector3(-7.3,1.13,-3.1),90],["HookRail","EntryHooks",Vector3(-3.71,1.64,9.4),90],["HookRail","BayHooks1",Vector3(-5.1,1.62,7.81),180],["HookRail","BayHooks2",Vector3(5.1,1.62,7.81),180],["HookRail","BayHooks3",Vector3(7.4,1.62,7.81),180],["TacticalVest","BayVest1",Vector3(-4.7,1.05,7.65),180],["TacticalVest","BayVest2",Vector3(5.5,1.05,7.65),180],["TacticalVest","BayVest3",Vector3(7.65,1.05,7.65),180],["Helmet","ArmoryHelmet",Vector3(-12.5,.78,4.1),0],["Helmet","BayHelmet",Vector3(5.45,.49,6.48),0],["Helmet","TraderHelmet",Vector3(-14.8,1.65,-4.4),0],["TacticalVest","ArmoryVest",Vector3(-16.8,1.2,6.35),180],["JerryCan","EntryWaterCan",Vector3(2.9,0,11.3),0],["MedicalCase","HubFirstAid",Vector3(-7.4,1.63,-3.5),90],["CardboardBox","LivingPersonalCarton",Vector3(-17.4,.18,-8.3),90],["FoodCan","LivingFood",Vector3(-17.4,1.13,-8),0],["WaterBottle","LivingWater",Vector3(-17.4,.69,-7.7),0],["Mug","SleepingCup",Vector3(-2.14,3.14,-10.6),0]]:
 		_put(String(spec[0]),String(spec[1]),details,spec[2],float(spec[3]))
 	for spec: Array in [["PlanningTask",Vector3(1.02,1.15,-.36),.38,2.0],["LivingTask",Vector3(-12.2,1.36,-10.1),.45,2.8],["WorkshopTask",Vector3(14.6,1.34,-4.2),.45,2.5],["GalleryTask",Vector3(-5.4,1.55,-9.1),.6,3.5]]:
 		var task: OmniLight3D = OmniLight3D.new()
@@ -450,6 +460,7 @@ func _detail_pass() -> void:
 		task.light_energy = float(spec[2])
 		task.omni_range = float(spec[3])
 		task.light_color = Color(1,.78,.48)
+		task.light_size = .06
 		task.light_bake_mode = Light3D.BAKE_DYNAMIC
 		_owned(_root.get_node("Lights"),task)
 	# Шесть practicals центрального хаба; только два основных источника дают realtime shadows.
@@ -457,7 +468,7 @@ func _detail_pass() -> void:
 		var lamp: OmniLight3D = OmniLight3D.new()
 		lamp.name = "HubPractical_%02d" % _root.get_node("Lights").get_child_count()
 		lamp.position = position
-		lamp.light_color = Color(1,.85,.67)
+		lamp.light_color = Color(1,.94,.85)
 		lamp.light_energy = 1.15
 		lamp.omni_range = 4.7
 		lamp.light_bake_mode = Light3D.BAKE_DYNAMIC
@@ -545,10 +556,18 @@ func _lighting() -> void:
 		light.name = String(spec[0])
 		light.position = spec[1]
 		light.light_color = spec[2]
+		if light.name in [&"HubWest",&"HubEast",&"Trader",&"Workshop",&"Armory",&"Storage"]:
+			light.light_color = Color(1,.94,.85)
+		elif light.name in [&"Entry",&"NorthGallery",&"Sleeping",&"Bays",&"BaysWest",&"Living"]:
+			light.light_color = Color(1,.86,.70)
 		light.light_energy = float(spec[3])
 		light.omni_range = float(spec[4])
 		light.omni_attenuation = 1.5
-		light.shadow_enabled = bool(spec[5])
+		light.shadow_enabled = bool(spec[5]) or light.name in [&"Trader",&"Armory",&"Storage",&"Sleeping"]
+		light.light_size = .35
+		light.shadow_blur = 1.0
+		light.shadow_bias = .025
+		light.shadow_normal_bias = .35
 		light.light_bake_mode = Light3D.BAKE_DYNAMIC
 		light.light_volumetric_fog_energy = .10
 		_owned(lights, light)
@@ -566,7 +585,9 @@ func _lighting() -> void:
 		var light: OmniLight3D = OmniLight3D.new()
 		light.name = String(spec[0])
 		light.position = spec[1]
-		light.light_color = Color(1,.85,.68)
+		if light.name == &"HubWallLeft":
+			light.position.z = 2.55
+		light.light_color = Color(1,.90,.76)
 		light.light_energy = 1.25
 		light.omni_range = 3.8
 		light.light_bake_mode = Light3D.BAKE_DYNAMIC
@@ -590,6 +611,7 @@ func _lighting() -> void:
 		probe.max_distance = 18
 		probe.mesh_lod_threshold = 2.0
 		probe.update_mode = ReflectionProbe.UPDATE_ONCE
+		probe.intensity = .65
 		_owned(_root.get_node("ReflectionProbes"),probe)
 
 
@@ -598,27 +620,30 @@ func _environment() -> void:
 	e.background_mode = Environment.BG_COLOR
 	e.background_color = Color(.01,.012,.013)
 	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	e.ambient_light_color = Color(.42,.46,.49)
-	e.ambient_light_energy = .45
-	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	e.tonemap_exposure = 1.40
+	e.ambient_light_color = Color(.55,.62,.70)
+	e.ambient_light_energy = .35
+	e.tonemap_mode = Environment.TONE_MAPPER_ACES
+	e.tonemap_exposure = 1.10
 	e.ssao_enabled = true
-	e.ssao_radius = .7
-	e.ssao_intensity = 1.5
+	e.ssao_radius = .45
+	e.ssao_intensity = .85
 	e.ssil_enabled = true
 	e.sdfgi_enabled = true
 	e.sdfgi_use_occlusion = true
 	e.sdfgi_cascades = 3
 	e.sdfgi_min_cell_size = .15
-	e.sdfgi_energy = 1.25
+	e.sdfgi_energy = 1.0
+	e.sdfgi_bounce_feedback = .55
 	e.sdfgi_read_sky_light = false
 	e.glow_enabled = true
-	e.glow_intensity = .30
-	e.glow_bloom = .04
+	e.glow_intensity = .18
+	e.glow_bloom = .015
 	e.volumetric_fog_enabled = true
-	e.volumetric_fog_density = .002
+	e.volumetric_fog_density = .0012
 	e.volumetric_fog_length = 40.0
 	e.volumetric_fog_albedo = Color(.76,.77,.72)
+	e.set_meta("ssr_allowed", false)
+	e.set_meta("authored_lighting", true)
 	var world: WorldEnvironment = WorldEnvironment.new()
 	world.name = "WorldEnvironment"
 	world.environment = e
@@ -645,29 +670,14 @@ func _environment() -> void:
 
 
 func _signage() -> void:
-	for spec: Array in [["Торговля",Vector3(-8.23,2.48,-2),90],["Оружейная",Vector3(-8.23,2.48,4),90],["Комната отдыха",Vector3(-8.23,2.48,-6.8),90],["Мастерская",Vector3(8.23,2.48,-2),-90],["Склад",Vector3(8.23,2.48,4),-90],["ДГУ / Электрощитовая",Vector3(8.23,2.48,-6.8),-90],["Тамбур / Возвращение",Vector3(0,2.7,11.49),180],["Спальные места",Vector3(0,3.25,-6.6),0],["Вентиляция / Доступ ограничен",Vector3(4.95,2.62,-10.5),0],["Резервный склад",Vector3(-4.95,2.62,-10.5),0]]:
-		var label: Label3D = Label3D.new()
-		label.name = "WallSign_%02d" % _root.get_node("Signs").get_child_count()
-		label.text = String(spec[0]).to_upper()
-		label.position = spec[1]
-		label.rotation_degrees.y = float(spec[2])
-		label.font_size = 40
-		label.pixel_size = .0045
-		label.modulate = Color(.82,.77,.61)
-		label.outline_size = 4
-		label.shaded = true
-		_owned(_root.get_node("Signs"),label)
+	# Физические таблички с эмалью и винтами, лицевая сторона обращена к хабу.
+	var index: int = 0
+	for spec: Array in [[Vector3(-7.78,2.65,-2),90],[Vector3(-7.78,2.65,4),90],[Vector3(-7.78,2.65,-6.8),90],[Vector3(7.78,2.65,-2),-90],[Vector3(7.78,2.65,4),-90],[Vector3(7.78,2.65,-6.8),-90],[Vector3(0,2.7,11.77),180],[Vector3(0,3.4,-6.46),0],[Vector3(4.95,2.68,-10.55),0],[Vector3(-4.95,2.68,-10.55),0]]:
+		_put("RoomSign_%02d" % index,"WallSign_%02d" % index,_root.get_node("Signs"),spec[0],float(spec[1]))
+		index += 1
 	for i: int in range(3):
-		var label: Label3D = Label3D.new()
-		label.name = "EquipmentBaySign_%02d" % (i+1)
-		label.text = "БОКС %d" % (i+1)
-		label.position = Vector3([-5.1,5.1,7.4][i],2.18,7.31)
-		label.rotation_degrees.y = 180
-		label.font_size = 32
-		label.pixel_size = .003
-		label.modulate = Color(.82,.77,.61)
-		label.shaded = true
-		_owned(_root.get_node("Signs"),label)
+		var sign: Node3D = _put("RoomSign_%02d" % (i+10),"EquipmentBaySign_%02d" % (i+1),_root.get_node("Signs"),Vector3([-5.1,5.1,7.4][i],2.24,7.79),180)
+		sign.scale = Vector3(.65,.85,1)
 
 
 func _navigation() -> void:

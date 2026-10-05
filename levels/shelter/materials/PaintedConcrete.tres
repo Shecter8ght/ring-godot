@@ -8,12 +8,13 @@
 resource_name = "PaintedConcrete"
 albedo_texture = ExtResource("1_jx8bx")
 metallic = 1.0
+metallic_specular = 0.35
 metallic_texture = ExtResource("2_k7pdh")
 metallic_texture_channel = 2
 roughness_texture = ExtResource("2_k7pdh")
 roughness_texture_channel = 1
 normal_enabled = true
-normal_scale = 0.75
+normal_scale = 0.4
 normal_texture = ExtResource("3_d1ft3")
 ao_enabled = true
 ao_texture = ExtResource("2_k7pdh")

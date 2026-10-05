@@ -47,5 +47,26 @@
   "engine": "Godot 4.5.1 Forward+",
   "window": "1280x720",
   "render_viewport": "1920x1080",
-  "vsync": false
+  "vsync": false,
+  "visual_revision": {
+    "resolution": "(1920.0, 1080.0)",
+    "results": [
+      {
+        "draw_calls": 574,
+        "fps": 507.370972742904,
+        "frame_ms": 1.97094444444444,
+        "mode": "iso",
+        "triangles": 1095817
+      },
+      {
+        "draw_calls": 573,
+        "fps": 515.884957654443,
+        "frame_ms": 1.93841666666667,
+        "mode": "fps",
+        "triangles": 1087295
+      }
+    ],
+    "scene": "res://levels/shelter/Shelter_Interior.tscn",
+    "notes": "RTX 5070 Ti; ten shadowed primary lights, PCSS 0.35 m, 13 mesh signs; final placements, 180 warmed frames per view; VSync off."
+  }
 }

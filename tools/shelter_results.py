@@ -18,6 +18,13 @@ CASES = {
     "weather_baseline": ("weather_test-baseline", "weather_test: провалено"),
     "events_initial": ("events_test-initial", "events_test: провалено"),
     "weather_initial": ("weather_test-initial", "weather_test: провалено"),
+    "revision_jump": ("jump_test", "JUMP_TEST checks=30 failures=0"),
+    "revision_compile": ("visual_revision_compile", "compile_check: не собралось 0"),
+    "revision_acceptance": ("visual_revision_acceptance", "SHELTER_ACCEPTANCE failures=0"),
+    "revision_cart": ("visual_revision_cart", "cart_test: провалено 0"),
+    "revision_settings": ("visual_revision_settings", "settings_test: провалено 0"),
+    "revision_animation": ("visual_revision_anim", "anim_test: провалено 0"),
+    **{f"revision_coop_{role}": (f"visual_revision_net_{role}", f"SHELTER_NET {role} failures=0") for role in ["host", "c1", "c2"]},
 }
 
 
@@ -30,6 +37,8 @@ def read_log(path: Path) -> str:
 def read_case(stem: str, terminator: str) -> dict:
     output = read_log(LOGS / f"{stem}.log")
     errors_path = LOGS / f"{stem}.errors.log"
+    if not errors_path.exists():
+        errors_path = LOGS / f"{stem}.err.log"
     errors = read_log(errors_path) if errors_path.exists() else ""
     # Некоторые прежние прогоны сохраняли stderr вместе с stdout.
     lines = (output + "\n" + errors).splitlines()
@@ -43,7 +52,7 @@ def read_case(stem: str, terminator: str) -> dict:
         "evidence": evidence,
         "warnings": warnings,
         "engine_errors": engine_errors,
-        "source_logs": [f"{stem}.log"] + ([f"{stem}.errors.log"] if errors_path.exists() else []),
+        "source_logs": [f"{stem}.log"] + ([errors_path.name] if errors_path.exists() else []),
     }
 
 

@@ -446,7 +446,7 @@ func _apply_env(we: WorldEnvironment) -> void:
 	e.sdfgi_enabled = bool(o.sdfgi) and hi
 	e.ssil_enabled = bool(o.ssil) and hi
 	# отражения в экранном пространстве — мокрый асфальт и лужи (средне и высоко)
-	e.ssr_enabled = hi or mid
+	e.ssr_enabled = (hi or mid) and bool(e.get_meta("ssr_allowed", true))
 	if e.ssr_enabled:
 		# длинный луч и слабое затухание — отражение в луже во всю высоту здания (подобрано ssr_probe)
 		e.ssr_max_steps = 256 if hi else 128
@@ -457,9 +457,9 @@ func _apply_env(we: WorldEnvironment) -> void:
 	e.volumetric_fog_enabled = bool(o.fog) and (hi or mid)
 	# свечение вокруг ярких мест — широкое и мягкое (дальние уровни), свет «обволакивает»
 	# свет заливает помещение: отражённый (SDFGI) — с повторными отскоками
-	if hi and e.sdfgi_enabled:
+	if hi and e.sdfgi_enabled and not bool(e.get_meta("authored_lighting", false)):
 		e.sdfgi_bounce_feedback = maxf(e.sdfgi_bounce_feedback, 0.8)
-	if e.glow_enabled and not e.has_meta("soft_glow"):
+	if e.glow_enabled and not e.has_meta("soft_glow") and not bool(e.get_meta("authored_lighting", false)):
 		e.set_meta("soft_glow", true)
 		# дальние уровни слабые: широкий ореол переползал через края стен у ярких мест
 		for lv in [[3, 1.0], [4, 0.75], [5, 0.55], [6, 0.18]]:

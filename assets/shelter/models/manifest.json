@@ -424,10 +424,10 @@
     "collisions": [],
     "bounds_m": [
       0.2,
-      0.022,
+      0.0235,
       0.27
     ],
-    "triangles": 216
+    "triangles": 432
   },
   "WaterBottle": {
     "collisions": [],
@@ -460,7 +460,7 @@
     "collisions": [],
     "bounds_m": [
       2.1,
-      0.0035,
+      0.0045,
       1.04
     ],
     "triangles": 14
@@ -2017,5 +2017,122 @@
         "yaw": 0
       }
     ]
+  },
+  "RoomSign_00": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_01": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_02": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_03": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_04": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_05": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_06": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_07": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_08": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_09": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_10": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_11": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
+  },
+  "RoomSign_12": {
+    "collisions": [],
+    "bounds_m": [
+      2.2,
+      0.38,
+      0.0283
+    ],
+    "triangles": 910
   }
 }

@@ -41,6 +41,13 @@ func _ready() -> void:
 	get_tree().change_scene_to_file("res://levels/shelter/Shelter_Interior.tscn")
 	await _frames(20)
 	_level = get_tree().current_scene
+	var environment: Environment = (_level.get_node("WorldEnvironment") as WorldEnvironment).environment
+	for quality: String in ["low","medium","high"]:
+		Settings.quality = quality
+		Settings.apply_graphics()
+		_check("shelter SSR stays disabled on " + quality,not environment.ssr_enabled)
+	_check("room signs are thirteen mesh assets",_level.get_node("Signs").get_child_count()==13 and _level.get_node("Signs").find_children("*","Label3D",true,false).is_empty())
+	_check("physical emitter size enables soft shadows",(_level.get_node("Lights/HubWest") as Light3D).light_size>.0)
 	var pl: Player = _level.get("_player") as Player
 	_check("solo inside return area", absf(pl.position.x)<=2.0 and pl.position.z>8.5 and pl.position.z<11)
 	_check("three distinct spawns", _spawns_valid())

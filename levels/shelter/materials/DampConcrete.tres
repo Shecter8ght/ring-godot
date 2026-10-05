@@ -8,12 +8,13 @@
 resource_name = "DampConcrete"
 albedo_texture = ExtResource("1_0mq6f")
 metallic = 1.0
+metallic_specular = 0.35
 metallic_texture = ExtResource("2_ssi1i")
 metallic_texture_channel = 2
 roughness_texture = ExtResource("2_ssi1i")
 roughness_texture_channel = 1
 normal_enabled = true
-normal_scale = 0.6
+normal_scale = 0.32
 normal_texture = ExtResource("3_xwg00")
 ao_enabled = true
 ao_texture = ExtResource("2_ssi1i")

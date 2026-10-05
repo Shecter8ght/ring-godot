@@ -30,8 +30,8 @@
 
 ## Собственные и существующие проектные ассеты
 
-- 86 authored моделей архитектуры, мебели, генератора, инженерии и личных предметов: собственная работа для владельца RING. `tools/build_shelter_assets.py`; редактируемый master `_asset_src/shelter/shelter.blend`. Финальные GLB — `assets/shelter/models/`, ArrayMesh и сцены — `levels/shelter/`.
-- PlanningMap, Labels, IndustrialTrim и маски декалей — собственная графика; схема кольца взята из существующего дизайна RING. Фотографии пользовательского референса не копировались в текстуры.
+- 99 authored моделей архитектуры, мебели, генератора, инженерии, личных предметов и 13 металлических табличек: собственная работа для владельца RING. `tools/build_shelter_assets.py`; редактируемый master `_asset_src/shelter/shelter.blend`. Финальные GLB — `assets/shelter/models/`, ArrayMesh и сцены — `levels/shelter/`.
+- PlanningMap, Labels, IndustrialTrim, RoomSigns (атлас эмалированной печати 2048²) и маски декалей — собственная графика; схема кольца взята из существующего дизайна RING. Фотографии пользовательского референса не копировались в текстуры.
 - Декоративное оружие — прежние WeaponModels (`wpn_ar_03`, `wpn_hg_01`), запечённые в static ArrayMesh. Происхождение ПМ/PBR — существующий `assets/CREDITS.md`; новые чужие модели оружия не скачивались.
 - Персонаж торговца — существующая Persona `assets/models/characters/persona_animated.glb`; его происхождение и анимации указаны в `assets/CREDITS.md`. Старые исходники и лицензии не заменены.
 - Аудио — прежние `Audio.hum_loop`, записи шагов и PCM-станции HideoutActivity. Новых сторонних записей нет; наследуем их существующие лицензии.

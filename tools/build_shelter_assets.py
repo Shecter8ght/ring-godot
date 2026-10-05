@@ -19,13 +19,15 @@ COLORS={'RawConcrete':(.42,.41,.38),'PaintedConcrete':(.26,.34,.29),'IndustrialC
 
 def mat(name):
     if name not in MATS:
-        m=bpy.data.materials.new(name); m.diffuse_color=(*COLORS[name],1); m.use_nodes=True
+        m=bpy.data.materials.get(name) or bpy.data.materials.new(name); m.diffuse_color=(*COLORS[name],1); m.use_nodes=True
         bs=m.node_tree.nodes.get('Principled BSDF'); bs.inputs['Base Color'].default_value=(*COLORS[name],1)
         bs.inputs['Roughness'].default_value=.65
         if 'Emitter' in name:
             bs.inputs['Emission Color'].default_value=(*COLORS[name],1); bs.inputs['Emission Strength'].default_value=2
         MATS[name]=m
     return MATS[name]
+
+COLORS['RoomSigns']=(.12,.15,.15)
 
 def xyz(v):return (v[0],-v[2],v[1])
 
@@ -138,7 +140,7 @@ def locker():
     for y in [1.62,1.69,1.76,.28,.35]:box('Louver slit',(0,y,.314),(.38,.019,.008),'Rubber',0)
     cyl('Pull',( .23,.92,.35),(.23,1.10,.35),.018)
     for y in [.48,1.55]:box('Hinge',(-.32,y,.316),(.025,.12,.024),'BareSteel')
-    face('Inventory label',[(-.13,1.44,.32),(.13,1.44,.32),(.13,1.51,.32),(-.13,1.51,.32)],'Labels',[(0,.88),(1,.88),(1,1),(0,1)])
+    face('Inventory label',[(-.13,1.44,.32),(.13,1.44,.32),(.13,1.51,.32),(-.13,1.51,.32)],'Labels',[(0,0),(1,0),(1,.125),(0,.125)])
     collision((0,1,0),(.74,2,.60));export('Locker')
 
 def crate(name='Case',cardboard=False):
@@ -191,7 +193,7 @@ def blast_door():
     pts=[(.62+.23*math.cos(i*math.tau/32),1.18+.23*math.sin(i*math.tau/32),.24) for i in range(33)]
     curve('Handwheel',pts,.025,'RedPaint')
     for a in [0,90,180,270]:cyl('Wheel spoke',(.62,1.18,.24),(.62+.21*math.cos(math.radians(a)),1.18+.21*math.sin(math.radians(a)),.24),.015)
-    face('Warning plaque',[(-.85,1.75,.158),(-.05,1.75,.158),(-.05,1.89,.158),(-.85,1.89,.158)],'Labels',[(0,.375),(1,.375),(1,.5),(0,.5)])
+    face('Warning plaque',[(-.85,1.75,.158),(-.05,1.75,.158),(-.05,1.89,.158),(-.85,1.89,.158)],'Labels',[(0,.5),(1,.5),(1,.625),(0,.625)])
     collision((0,1.18,0),(2.55,2.42,.35));export('BlastDoor')
 
 def generator():
@@ -211,7 +213,7 @@ def generator():
     cyl('Tank cap',(.73,1.64,-.08),(.73,1.70,-.08),.064)
     curve('Exhaust',[(-.8,1.4,-.32),(-.8,1.78,-.32),(-1.02,1.98,-.32),(-1.05,2.6,-.32)],.055,'RustedSteel')
     cyl('Silencer',(-1.05,1.98,-.32),(-1.05,2.40,-.32),.13,'BareSteel')
-    face('Diesel label',[(-.48,1.23,.58),(.26,1.23,.58),(.26,1.38,.58),(-.48,1.38,.58)],'Labels',[(0,.25),(1,.25),(1,.375),(0,.375)])
+    face('Diesel label',[(-.48,1.23,.58),(.26,1.23,.58),(.26,1.38,.58),(-.48,1.38,.58)],'Labels',[(0,.625),(1,.625),(1,.75),(0,.75)])
     collision((0,.85,0),(2.8,1.7,1.35));export('Generator')
 
 def workshop():
@@ -239,7 +241,7 @@ def electrical():
     box('Breakers window',(0,1.3,.225),(.58,.31,.02),'Rubber',.005)
     for x in [-.23,-.115,0,.115,.23]:box('Breaker',(x,1.31,.25),(.07,.2,.03),'OldPlastic',.004)
     cyl('Door handle',(.25,.67,.26),(.25,.82,.26),.019)
-    face('High voltage',[(-.17,.87,.229),(.17,.87,.229),(.17,1.04,.229),(-.17,1.04,.229)],'Labels',[(0,.125),(1,.125),(1,.25),(0,.25)])
+    face('High voltage',[(-.17,.87,.229),(.17,.87,.229),(.17,1.04,.229),(-.17,1.04,.229)],'Labels',[(0,.75),(1,.75),(1,.875),(0,.875)])
     collision((0,.9,0),(.85,1.8,.42));export('ElectricalCabinet')
 
 def radio():
@@ -293,8 +295,7 @@ def misc():
     export('Boots')
     begin();cyl('Mug',(0,.006,0),(0,.105,0),.042,'Paper',verts=24)
     curve('Handle',[(.039,.08,0),(.065,.089,0),(.076,.058,0),(.062,.025,0),(.039,.03,0)],.006,'Paper');export('Mug')
-    begin();box('Notebook',(0,.011,0),(.20,.022,.27),'MilitaryFabric',.004)
-    box('Page block',(0,.014,0),(.187,.016,.256),'Paper',.002);export('Notebook')
+    notebook()
     begin();cyl('Water bottle',(0,0,0),(0,.27,0),.042,'Glass',r2=.034,verts=24)
     cyl('Water cap',(0,.27,0),(0,.3,0),.022,'OldPlastic');export('WaterBottle')
     begin();cyl('Tinned food',(0,0,0),(0,.11,0),.055,'DirtyAluminum',verts=24)
@@ -303,7 +304,7 @@ def misc():
     box('Cross vertical',(0,.17,.148),(.036,.19,.008),'RedPaint',0)
     box('Cross horizontal',(0,.17,.152),(.19,.036,.008),'RedPaint',0);export('MedicalCase')
     begin();box('Planning map',(0,.001,0),(2.1,.003,1.04),'Paper',0)
-    face('Printed plan',[(-1.05,.003,.52),(1.05,.003,.52),(1.05,.003,-.52),(-1.05,.003,-.52)],'PlanningMap',[(0,1),(1,1),(1,0),(0,0)]);export('PlanningMap')
+    face('Printed plan',[(-1.05,.004,.52),(1.05,.004,.52),(1.05,.004,-.52),(-1.05,.004,-.52)],'PlanningMap',[(0,0),(1,0),(1,1),(0,1)]);export('PlanningMap')
     begin();box('Rug',(0,.008,0),(4.1,.016,3.0),'WornCarpet',.005);export('Rug')
     begin();box('Fixture housing',(0,0,0),(1.15,.13,.18),'PaintedSteel',.012)
     box('Frosted diffuser',(0,-.063,0),(1.05,.035,.14),'WarmEmitter',.01)
@@ -407,6 +408,8 @@ def architecture():
     begin()
     curve('Air duct trunk',[(7.1,4.05,6.8),(7.1,4.05,-9.8),(-15.8,4.05,-9.8)],.31,'GalvanizedSteel')
     for z in [-8,-2,4]:
+        # Входы в помещения и их таблички остаются свободными от торцов воздуховода.
+        z=z if z==-8 else z+1.5
         curve('East air branch',[(7.1,2.94,z),(16.4,2.94,z)],.17,'GalvanizedSteel')
         curve('West air branch',[(-7.1,2.94,z),(-16.4,2.94,z)],.17,'GalvanizedSteel')
         for x in [10,13,16,-10,-13,-16]:
@@ -468,7 +471,7 @@ def utility_props():
     finish(o,'Steel helmet','PaintedSteel',.001)
     curve('Chinstrap',[(-.11,.03,0),(0,-.015,.12),(.11,.03,0)],.009,'Canvas');export('Helmet')
     begin();box('Map board',(0,0,0),(2.2,1.3,.06),'OldWood',.015)
-    face('Wall plan',[(-1.02,-.57,.035),(1.02,-.57,.035),(1.02,.57,.035),(-1.02,.57,.035)],'PlanningMap',[(0,1),(1,1),(1,0),(0,0)]);export('WallMap')
+    face('Wall plan',[(-1.02,-.57,.035),(1.02,-.57,.035),(1.02,.57,.035),(-1.02,.57,.035)],'PlanningMap',[(0,0),(1,0),(1,1),(0,1)]);export('WallMap')
     begin()
     for z in [-.16,.16]:cyl('Reel flange',(0,.24,z-.025),(0,.24,z+.025),.25,'OldWood',verts=24)
     cyl('Cable reel',(0,.24,-.13),(0,.24,.13),.17,'Rubber',verts=24)
@@ -476,8 +479,54 @@ def utility_props():
         curve('Wound cable',[(.177*math.cos(i*math.tau/32),.24+.177*math.sin(i*math.tau/32),z) for i in range(33)],.012,'Rubber')
     export('CableReel')
 
-table('PlanningTable',2.4,1.2,.75);table('CoffeeTable',1.15,.65,.44);table('Bench',1.7,.43,.45);table('Counter',2.7,.80,.92)
-shelf('Shelf');locker();crate();crate('CardboardBox',True);couch();chair();bed();blast_door();generator();workshop();electrical();radio();television();bottles();canister();misc();utility_props();architecture()
+def notebook():
+    begin()
+    box('Lower cover',(0,.002,0),(.20,.004,.27),'MilitaryFabric',.001)
+    box('Page block',(0,.012,0),(.187,.014,.256),'Paper',.001)
+    box('Upper cover',(0,.0215,0),(.20,.004,.27),'MilitaryFabric',.001)
+    box('Binding',(-.096,.012,0),(.008,.02,.27),'MilitaryFabric',.001)
+    export('Notebook')
+
+def signs():
+    for i in range(13):
+        begin(); box('Rolled steel plaque',(0,0,0),(2.2,.38,.018),'BareSteel',.007)
+        # UV Blender: низ = V0; экспорт GLTF переводит их в верхний левый угол изображения.
+        u0=(i%2)*.5;u1=u0+.5;v1=1-(i//2)*.125;v0=v1-.125
+        face('Enamel print',[(-1.075,-.17,.011),(1.075,-.17,.011),(1.075,.17,.011),(-1.075,.17,.011)],'RoomSigns',[(u0,v0),(u1,v0),(u1,v1),(u0,v1)])
+        for x in [-1.035,1.035]:
+            for y in [-.125,.125]:
+                cyl('Fixing screw',(x,y,.0115),(x,y,.018),.012,'GalvanizedSteel',verts=16)
+                box('Screw slot',(x,y,.0188),(.014,.003,.001),'Rubber',0)
+        export('RoomSign_%02d'%i)
+
+if '--revise' in sys.argv:
+    # Точечная правка сохранённой editable сборки без пересоздания удачных моделей.
+    bpy.ops.wm.open_mainfile(filepath=str(SRC/'shelter_before_visual_revision.blend'))
+    ASSETS=json.loads((OUT/'manifest.json').read_text(encoding='utf-8'))
+    for name in ['WallMap','PlanningMap','Locker','BlastDoor','Generator','ElectricalCabinet','Ventilation']:
+        main=bpy.data.objects[name]
+        if name=='Ventilation':
+            for vertex in main.data.vertices:
+                if 2.5<vertex.co.z<3.3 and (abs(vertex.co.y-2)<.25 or abs(vertex.co.y+4)<.25):
+                    vertex.co.y-=1.5
+        for p in main.data.polygons:
+            label=main.data.materials[p.material_index].name
+            if label == 'PlanningMap':
+                for li in p.loop_indices:main.data.uv_layers.active.data[li].uv.y=1-main.data.uv_layers.active.data[li].uv.y
+                if name=='PlanningMap':
+                    for vi in p.vertices:main.data.vertices[vi].co.z+=.001
+            elif label == 'Labels':
+                row={'Locker':7,'BlastDoor':3,'Generator':2,'ElectricalCabinet':1}[name]
+                for li in p.loop_indices:
+                    uv=main.data.uv_layers.active.data[li].uv
+                    uv.y=1-(row+(1 if li in list(p.loop_indices)[:2] else 0))*.125
+        PARTS=[main];COLLISIONS=ASSETS[name]['collisions'];export(name)
+    old=bpy.data.objects.get('Notebook')
+    if old:bpy.data.objects.remove(old,do_unlink=True)
+    notebook();signs()
+else:
+    table('PlanningTable',2.4,1.2,.75);table('CoffeeTable',1.15,.65,.44);table('Bench',1.7,.43,.45);table('Counter',2.7,.80,.92)
+    shelf('Shelf');locker();crate();crate('CardboardBox',True);couch();chair();bed();blast_door();generator();workshop();electrical();radio();television();bottles();canister();misc();utility_props();architecture();signs()
 (OUT/'manifest.json').write_text(json.dumps(ASSETS,ensure_ascii=False,indent=2),encoding='utf-8')
 for o in bpy.context.scene.objects:o.hide_set(False)
 bpy.ops.wm.save_as_mainfile(filepath=str(SRC/'shelter.blend'))

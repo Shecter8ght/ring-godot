@@ -38,15 +38,15 @@ def fetch():
 SPECS = {
     'RawConcrete': ('concrete_wall_006', (0.84,0.82,0.76), .86, 0, 3),
     'PaintedConcrete': ('painted_plaster_wall', (.38,.46,.42), .70, 0, 3),
-    'DampConcrete': ('concrete_wall_006', (.55,.57,.51), .53, 0, 3),
-    'WetConcrete': ('concrete_floor_worn_001', (.68,.68,.63), .28, 0, 3),
-    'IndustrialConcreteFloor': ('concrete_floor_worn_001', (.88,.87,.8), .78, 0, 4),
-    'PaintedSteel': ('green_metal_rust', (.55,.62,.57), .44, .65, 1),
-    'OchreSteel': ('green_metal_rust', (1.15,.87,.40), .43, .55, 1),
-    'BareSteel': ('metal_plate', (.64,.69,.7), .32, .95, 1),
-    'RustedSteel': ('rusty_metal_sheet', (.85,.67,.49), .79, .62, 1),
-    'GalvanizedSteel': ('metal_plate', (.92,.99,1), .39, .90, 1),
-    'DirtyAluminum': ('metal_plate', (.74,.79,.8), .44, .88, 1),
+    'DampConcrete': ('concrete_wall_006', (.55,.57,.51), .78, 0, 3),
+    'WetConcrete': ('concrete_floor_worn_001', (.68,.68,.63), .52, 0, 3),
+    'IndustrialConcreteFloor': ('concrete_floor_worn_001', (.88,.87,.8), .91, 0, 4),
+    'PaintedSteel': ('green_metal_rust', (.55,.62,.57), .69, 0, 1),
+    'OchreSteel': ('green_metal_rust', (1.15,.87,.40), .67, 0, 1),
+    'BareSteel': ('metal_plate', (.64,.69,.7), .52, .95, 1),
+    'RustedSteel': ('rusty_metal_sheet', (.85,.67,.49), .87, 0, 1),
+    'GalvanizedSteel': ('metal_plate', (.92,.99,1), .53, .90, 1),
+    'DirtyAluminum': ('metal_plate', (.74,.79,.8), .59, .88, 1),
     'OldWood': ('oak_wood_planks', (.65,.54,.40), .68, 0, 2),
     'RawWood': ('oak_wood_planks', (.95,.84,.67), .80, 0, 2),
     'Rubber': ('rubber_tiles', (.35,.36,.35), .84, 0, .7),
@@ -60,11 +60,32 @@ SPECS = {
     'WornCarpet': ('dirty_carpet', (.88,.52,.35), .98, 0, 2),
     'Paper': ('painted_plaster_wall', (1,.98,.82), .91, 0, 1),
     'Cardboard': ('oak_wood_planks', (.8,.68,.45), .95, 0, 1),
-    'RedPaint': ('green_metal_rust', (1.25,.28,.13), .49, .50, 1),
+    'RedPaint': ('green_metal_rust', (1.25,.28,.13), .69, 0, 1),
 }
 
 def font(size):
     return ImageFont.truetype('C:/Windows/Fonts/arialbd.ttf', size)
+
+ROOM_SIGNS = ['ТОРГОВЛЯ', 'ОРУЖЕЙНАЯ', 'КОМНАТА ОТДЫХА', 'МАСТЕРСКАЯ', 'СКЛАД',
+              'ДГУ / ЭЛЕКТРОЩИТОВАЯ', 'ТАМБУР / ВОЗВРАЩЕНИЕ', 'СПАЛЬНЫЕ МЕСТА',
+              'ВЕНТИЛЯЦИЯ', 'РЕЗЕРВНЫЙ СКЛАД', 'БОКС 1', 'БОКС 2', 'БОКС 3']
+
+def room_signs():
+    # Печатная эмаль на стальной основе: один атлас на все реальные mesh-таблички.
+    rng = np.random.default_rng(842)
+    noise = rng.normal(0, 1.4, (2048,2048,1))
+    rgb = np.clip(np.array([29,38,39])[None,None,:]+noise,0,255).astype('uint8')
+    im = Image.fromarray(rgb); d = ImageDraw.Draw(im)
+    for i, text in enumerate(ROOM_SIGNS):
+        x,y = (i%2)*1024,(i//2)*256
+        d.rounded_rectangle((x+12,y+12,x+1011,y+243),radius=8,outline=(145,151,141),width=4)
+        size=94
+        while d.textbbox((0,0),text,font=font(size))[2]>920:size-=2
+        f=font(size); bounds=d.textbbox((0,0),text,font=f)
+        d.text((x+(1024-bounds[2])/2,y+(256-(bounds[3]-bounds[1]))/2-bounds[1]),text,font=f,fill=(224,224,210))
+    im.save(OUT/'RoomSigns_base.png')
+    Image.new('RGB',im.size,(255,195,0)).save(OUT/'RoomSigns_orm.png')
+    Image.new('RGB',im.size,(128,128,255)).save(OUT/'RoomSigns_normal.png')
 
 def prepare():
     OUT.mkdir(parents=True, exist_ok=True)
@@ -134,10 +155,11 @@ def prepare():
         im=im.filter(ImageFilter.GaussianBlur(6 if name not in ['shoe_marks','scratches'] else 1))
         im.save(OUT/(name+'.png'))
         if name in ['oil_stain','wet_patch']:
-            orm=Image.new('RGBA',im.size,(255,38 if name=='oil_stain' else 22,0,0))
+            orm=Image.new('RGBA',im.size,(255,100 if name=='oil_stain' else 74,0,0))
             orm.putalpha(im.getchannel('A'))
             orm.save(OUT/(name+'_orm.png'))
-    print('Prepared',len(SPECS),'PBR materials + trim/map/labels/decals')
+    room_signs()
+    print('Prepared',len(SPECS),'PBR materials + trim/map/labels/signs/decals')
 
 if __name__=='__main__':
     SRC.mkdir(parents=True,exist_ok=True)
