@@ -36,6 +36,7 @@ var _known: Array[int] = []
 ## Какой луп должен играть (строится в фоне — вдруг уже переключили).
 var _want: String = ""
 var _audio_tasks: Array[int] = []
+var _shared_ready: bool = false
 static var _cache: Dictionary = {}
 
 
@@ -69,6 +70,9 @@ func _ready() -> void:
 		_sound.max_distance = 24.0
 		add_child(_sound)
 		Net.scenes_changed.connect(_share_state)
+		_shared_ready = not Net.is_networked()
+		if Net.is_networked():
+			_initialize_shared.call_deferred()
 	_apply()
 
 
@@ -96,7 +100,9 @@ func request_use() -> void:
 				lvl.call("drink")
 			_sound_once(_fizz())
 			if Net.is_networked():
-				_said.rpc("%s открыл пиво" % String(Net.player_names.get(multiplayer.get_unique_id(), "Кто-то")))
+				for peer: int in Net.peer_scene:
+					if peer != multiplayer.get_unique_id() and Net.visible_in(peer,"hideout"):
+						_said.rpc_id(peer,"%s открыл пиво" % String(Net.player_names.get(multiplayer.get_unique_id(), "Кто-то")))
 		Kind.SEAT:
 			var me := _local_player()
 			if me:
@@ -112,13 +118,16 @@ func _local_player() -> Player:
 
 func _switch(v: int) -> void:
 	if Net.is_networked():
-		_set_state.rpc(v)
-	else:
-		_set_state(v)
+		for peer: int in Net.peer_scene:
+			if peer != multiplayer.get_unique_id() and Net.visible_in(peer,"hideout"):
+				_set_state.rpc_id(peer,v)
+	_set_state(v)
 
 
 @rpc("any_peer", "call_local", "reliable")
 func _set_state(v: int) -> void:
+	_shared_ready = true
+	_known = _here()
 	state = clampi(v, 0, 3)
 	Profile.hideout_media["tv" if kind == Kind.TV else "radio"] = state
 	Profile.save()
@@ -134,18 +143,10 @@ func _said(text: String) -> void:
 ## Пришёл кто-то новый в убежище — передать ему, что включено (передаёт тот из уже бывших тут,
 ## у кого наименьший id, — один раз).
 func _share_state() -> void:
-	if not Net.is_networked():
+	if not Net.is_networked() or not _shared_ready:
 		return
 	var me := multiplayer.get_unique_id()
-	var here: Array[int] = []
-	for id in Net.peer_scene:
-		if Net.visible_in(int(id), "hideout"):
-			here.append(int(id))
-	# При общем убежище хост уже хранит текущий канал. Новичок ещё может не
-	# получить roster к _ready; он не должен пересылать хосту свой старый профиль.
-	if 1 in here and me != 1:
-		_known = here
-		return
+	var here: Array[int] = _here()
 	for id in here:
 		if id == me or id in _known:
 			continue
@@ -154,6 +155,43 @@ func _share_state() -> void:
 		if not senders.is_empty() and int(senders[0]) == me:
 			_set_state.rpc_id(id, state)
 	_known = here
+
+
+func _here() -> Array[int]:
+	var result: Array[int] = []
+	for peer: int in Net.peer_scene:
+		if Net.visible_in(peer,"hideout"):
+			result.append(peer)
+	return result
+
+
+func _initialize_shared() -> void:
+	# Дать сценам/roster прийти: только уже бывший в комнате передаёт новичку канал.
+	# Так же работает, когда хост ещё в рейде или возвращается после двух клиентов.
+	await get_tree().create_timer(.15).timeout
+	if _shared_ready:
+		return
+	var here: Array[int] = _here()
+	var me: int = multiplayer.get_unique_id()
+	for peer: int in here:
+		if peer != me:
+			_request_media.rpc_id(peer)
+	await get_tree().create_timer(.35).timeout
+	if _shared_ready:
+		return
+	here = _here()
+	here.sort()
+	# Все вошли одновременно: один участник начинает с сохранённого канала.
+	if here.is_empty() or here[0] == me:
+		_shared_ready = true
+		_switch(clampi(int(Profile.hideout_media.get("tv" if kind==Kind.TV else "radio",0)),0,3))
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_media() -> void:
+	var peer: int = multiplayer.get_remote_sender_id()
+	if _shared_ready and Net.visible_in(peer,"hideout"):
+		_set_state.rpc_id(peer,state)
 
 
 func _apply() -> void:

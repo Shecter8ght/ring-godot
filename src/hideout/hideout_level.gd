@@ -43,6 +43,7 @@ var _player: Player
 var _others: Dictionary = {}
 ## Хост закрепляет место при входе; случайный ENet id и задержка roster его не меняют.
 var _spawn_slots: Dictionary = {1:0}
+var _already_here: Array[int] = []
 ## Выпито (досуг): качает в глазах, проходит само.
 var _tipsy: float = 0.0
 var _tipsy_fx: ColorRect
@@ -64,6 +65,10 @@ func _ready() -> void:
 	Profile.pending_raid = false
 	# в рейд — отсюда: со снаряжением профиля (и когда рейд начнёт хост)
 	Profile.from_hideout = true
+	if Net.is_networked():
+		for peer: int in Net.peer_scene:
+			if peer != multiplayer.get_unique_id() and Net.visible_in(peer,"hideout"):
+				_already_here.append(peer)
 	get_tree().node_added.connect(_on_node_added)
 	var me := multiplayer.get_unique_id() if Net.is_networked() else 1
 	_player = PLAYER_SCENE.instantiate() as Player
@@ -151,6 +156,7 @@ func _sync_others() -> void:
 				(_others[id] as Node).queue_free()
 			_others.erase(id)
 			_spawn_slots.erase(id)
+			_already_here.erase(int(id))
 	for id in want:
 		if _others.has(id):
 			continue
@@ -162,7 +168,7 @@ func _sync_others() -> void:
 		add_child(p)
 		p.health.invulnerable = true
 		p.global_position = _spawn_for(id)
-		if Net.is_host() and has_node("Gameplay/SpawnPoints"):
+		if Net.is_host() and has_node("Gameplay/SpawnPoints") and not id in _already_here:
 			_assign_spawn.rpc_id(id,int(_spawn_slots[id]))
 		# над головой — ник
 		var tag := Label3D.new()

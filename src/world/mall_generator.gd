@@ -99,7 +99,7 @@ func _process(delta: float) -> void:
 		_clank_t = float(Balance.MALL_GENERATOR.clank_sec)
 		NoiseBus.emit(global_position, float(Balance.MALL_GENERATOR.clank_noise_m), "repair")
 		if Net.is_networked():
-			_rpc_clank.rpc()
+			Net.broadcast_scene(self, &"_rpc_clank", [])
 		else:
 			_rpc_clank()
 	if _repair_t >= float(Balance.RAID_EVENTS.repair_sec):

@@ -20,13 +20,19 @@ func _ready() -> void:
 	_apply()
 
 func prompt() -> String:
+	if not can_use():
+		return "питание: хост вне убежища"
 	return "генератор: выключить питание" if enabled else "генератор: включить питание"
 
+func can_use() -> bool:
+	return not Net.is_networked() or Net.visible_in(1,"hideout")
+
+func request_use() -> void:
+	if can_use():
+		super.request_use()
+
 func _use(_peer_id: int) -> void:
-	if Net.is_networked():
-		_set_power.rpc(not enabled)
-	else:
-		_set_power(not enabled)
+	Net.broadcast_scene(self, &"_set_power", [not enabled])
 
 @rpc("any_peer", "call_remote", "reliable")
 func _request() -> void:

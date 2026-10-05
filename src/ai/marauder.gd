@@ -1217,7 +1217,7 @@ func _try_grenade(delta: float) -> void:
 	var v := (last_known - from) / t + Vector3.UP * 0.5 * 9.8 * t
 	say("Граната!")
 	if Net.is_networked():
-		_rpc_grenade.rpc(from, v)
+		Net.broadcast_scene(self, &"_rpc_grenade", [from, v])
 	else:
 		_rpc_grenade(from, v)
 
@@ -1800,7 +1800,7 @@ func _shoot(suppress: bool) -> void:
 	_shot_fx(from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound))
 	# стреляет хост — клиентам видно и слышно то же (раньше мародёр у них стрелял беззвучно)
 	if Net.is_networked():
-		_rpc_shot_fx.rpc(from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound))
+		Net.broadcast_scene(self, &"_rpc_shot_fx", [from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound)], false)
 
 
 ## Вспышка и звук выстрела — у хоста из _shoot, у клиентов — по сети. След пули виден только
@@ -1847,7 +1847,7 @@ func _near_miss(from: Vector3, hit: Dictionary) -> void:
 ## Реплика над головой («Контакт!», «Перезаряжаюсь!») — видна всем игрокам.
 func say(text: String) -> void:
 	if Net.is_networked():
-		_say_rpc.rpc(text)
+		Net.broadcast_scene(self, &"_say_rpc", [text])
 	else:
 		_show_say(text)
 

@@ -1948,9 +1948,11 @@ func _spawn_quest_guards(pos: Vector3, n: int, radius: float) -> void:
 ## у остальных (кто не вышел — теряет взятое, как при смерти).
 func go_hideout() -> void:
 	if Net.is_host():
-		_host_left.rpc()
+		for peer: int in multiplayer.get_peers():
+			if Net.visible_in(peer, "raid"):
+				_host_left.rpc_id(peer)
 	Profile.pending_raid = false
-	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+	Net.change_scene(Balance.HIDEOUT_SCENE)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -1959,7 +1961,7 @@ func _host_left() -> void:
 	await get_tree().create_timer(2.5).timeout
 	if is_inside_tree():
 		Profile.pending_raid = false
-		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+		Net.change_scene(Balance.HIDEOUT_SCENE)
 
 
 ## Новый рейд: хост переводит всех заново в сектор; без сети — перезагрузка сцены.

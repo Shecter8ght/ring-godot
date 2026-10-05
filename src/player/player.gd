@@ -219,6 +219,15 @@ func _ready() -> void:
 ## отзывчивое движение важнее для игрока, чем для мародёра/двери). Health синхронизируется
 ## отдельно, со своим (хостовым) авторитетом — урон всегда считает хост.
 func _setup_sync() -> void:
+	# Спавн гостей ведёт хост, а движение — владелец. Отдельный хостовый фильтр
+	# не даёт спавнеру послать гостя рейда тем, кто пока находится в убежище.
+	if Net.scene_of(self) == "raid" and get_multiplayer_authority() != 1:
+		var gate: MultiplayerSynchronizer = MultiplayerSynchronizer.new()
+		gate.name = "SpawnScope"
+		gate.replication_config = SceneReplicationConfig.new()
+		gate.set_multiplayer_authority(1)
+		Net.scope_sync(self, gate)
+		add_child(gate)
 	var sync := MultiplayerSynchronizer.new()
 	# постоянное имя: синхронизатор адресуется по пути, а автоимя (@MultiplayerSynchronizer@N)
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
@@ -1064,7 +1073,7 @@ func _weapon_action(action: String, flag: bool = false, duration: float = 0.0, r
 	if is_local() and _camera_rig is CameraRig:
 		(_camera_rig as CameraRig).weapon_action(action, flag, duration, rounds)
 	if replicate and Net.is_networked() and is_multiplayer_authority():
-		_rpc_weapon_action.rpc(action, flag, duration, rounds)
+		Net.broadcast_scene(self, &"_rpc_weapon_action", [action, flag, duration, rounds], false)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -1544,7 +1553,7 @@ func _fire(spec: Dictionary) -> void:
 		_play_weapon_sound(spec, "bolt_lock", -5.0)
 	# остальным — то же (пули и урон уже посчитаны здесь и у хоста)
 	if Net.is_networked():
-		_rpc_shot_fx.rpc(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"), ammo)
+		Net.broadcast_scene(self, &"_rpc_shot_fx", [muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"), ammo], false)
 
 
 ## Что видно и слышно от выстрела: вспышка у дула, звук, щелчок помпы/затвора. След пули
@@ -1637,7 +1646,7 @@ func _throw_light(k: String) -> void:
 		var t := clampf(to.length() / 11.0, 0.4, 1.2)
 		v = (global_position + to - from) / t + Vector3.UP * 0.5 * 9.8 * t
 	if Net.is_networked():
-		_rpc_throw_light.rpc(k, from, v)
+		Net.broadcast_scene(self, &"_rpc_throw_light", [k, from, v])
 	else:
 		_rpc_throw_light(k, from, v)
 

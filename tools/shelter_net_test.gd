@@ -56,14 +56,31 @@ func _run() -> void:
 	await get_tree().create_timer(1.5).timeout
 	for actor: Node in actors:
 		_check("movement replicated peer %d" % (actor as Player).peer_id,(actor as Node3D).global_position.distance_to(before[(actor as Player).peer_id])>.8)
+	# Частичный возврат из рейда: досуг двух клиентов работает без root убежища у хоста.
+	Net.change_scene(Floors.scene(Profile.floor))
+	await get_tree().create_timer(4.0).timeout
+	_reports.clear()
+	_command.rpc("without_host",0,0,true)
+	await _wait_reports("without_host")
+	Net.change_scene(Balance.HIDEOUT_SCENE)
+	await _players(3)
+	await get_tree().create_timer(2.0).timeout
+	await _phase("host_return",0,0,true)
 	Net.start_level.rpc(Floors.scene(Profile.floor),Profile.next_conditions)
 	await _players(3,true)
 	await get_tree().create_timer(2.0).timeout
+	# Детерминированное будущее расписание: обеим копиям Weather оно должно прийти.
+	RaidWeather.current._rpc_schedule(120.0,180.0)
+	RaidWeather.current._known.clear()
+	RaidWeather.current._share_schedule()
+	await get_tree().create_timer(.35).timeout
 	await _phase("raid",0,0,true)
 	await get_tree().create_timer(3.0).timeout
 	print("SHELTER_NET host failures=%d" % _fails)
 	_finish.rpc(_fails)
-	await get_tree().create_timer(1.0).timeout
+	await Net.change_scene("res://tools/shelter_net_end.tscn")
+	Net.enter_scene("menu")
+	await get_tree().create_timer(.4).timeout
 	Net.disconnect_all()
 	get_tree().current_scene.queue_free()
 	await get_tree().create_timer(.4).timeout
@@ -82,6 +99,9 @@ func _phase(label: String,tv: int,radio: int,power: bool) -> void:
 	_reports.clear()
 	_command.rpc(label,tv,radio,power)
 	await _command(label,tv,radio,power)
+	await _wait_reports(label)
+
+func _wait_reports(label: String) -> void:
 	var elapsed: float = 0
 	while _reports.size()<2 and elapsed<10:
 		await get_tree().create_timer(.1).timeout
@@ -93,6 +113,15 @@ func _phase(label: String,tv: int,radio: int,power: bool) -> void:
 @rpc("authority","call_remote","reliable")
 func _command(label: String,tv: int,radio: int,power: bool) -> void:
 	var previous: int = _fails
+	if label == "without_host":
+		if _mode == "c1":
+			_tv().request_use()
+			_radio().request_use()
+		await get_tree().create_timer(1.0).timeout
+		_check("without host TV/radio shared",_tv().state==0 and _radio().state==0)
+		_check("power request waits for authority",not _power().can_use())
+		_report.rpc_id(1,_fails-previous)
+		return
 	if label == "guest_switch":
 		if _mode == "c1":
 			_tv().request_use()
@@ -113,12 +142,16 @@ func _command(label: String,tv: int,radio: int,power: bool) -> void:
 		await _players(3,true)
 		await get_tree().create_timer(1.0).timeout
 		_check("raid with own equipment",Raid.current != null and Raid.current.local_player()!=null and Raid.current.local_player().loadout_mode)
+		_check("raid future weather schedule received",RaidWeather.current._rain_at != INF and RaidWeather.current._fog_lift_at != INF)
+		_check("raid event setup received",not RaidEvents.current._alarms.is_empty())
 	else:
 		_check(label+" TV",_tv().state==tv)
 		_check(label+" radio",_radio().state==radio)
 		_check(label+" generator",_power().enabled==power)
 		_check(label+" light state",((_level().get_node("Lights/HubWest") as Light3D).light_energy>0)==power)
 		_check(label+" profile",int(Profile.hideout_media.get("tv",-1))==tv and int(Profile.hideout_media.get("radio",-1))==radio and bool(Profile.hideout_media.get("power",true))==power)
+		if label == "host_return" and _mode != "host":
+			_check("host return does not teleport guests",(_level().get("_player") as Player).global_position.z<9.0)
 	if _mode != "host":
 		_report.rpc_id(1,_fails-previous)
 
@@ -130,6 +163,9 @@ func _report(failures: int) -> void:
 @rpc("authority","call_remote","reliable")
 func _finish(host_fails: int) -> void:
 	print("SHELTER_NET %s failures=%d host_failures=%d" % [_mode,_fails,host_fails])
+	await Net.change_scene("res://tools/shelter_net_end.tscn")
+	Net.enter_scene("menu")
+	await get_tree().create_timer(.4).timeout
 	Net.disconnect_all()
 	get_tree().current_scene.queue_free()
 	await get_tree().create_timer(.4).timeout
