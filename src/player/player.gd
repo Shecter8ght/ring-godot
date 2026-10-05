@@ -76,6 +76,9 @@ var _was_downed: bool = false
 var _sandbox_picked: bool = false
 ## Сколько секунд держим прицел — «довод» по эргономике (WeaponStats.aim_time).
 var _aim_t: float = 0.0
+## Владелец тела передаёт отведение оружия: напарник видит ту же готовую позу.
+var weapon_obstruction: float = 0.0
+var weapon_ready_up: bool = false
 var grenades: int = Balance.GRENADES_START
 var fire_timer: float = 0.0
 var reload_timer: float = 0.0
@@ -237,7 +240,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -1463,6 +1466,9 @@ func _switch(key: String, sound: bool = true) -> void:
 
 
 func _fire(spec: Dictionary) -> void:
+	# Ствол отведён от преграды: не расходовать патрон и не стрелять из камеры сквозь неё.
+	if weapon_obstruction > float(Balance.WEAPON_CLEARANCE.fire_threshold):
+		return
 	if String(WeaponDb.weapon(weapon_id).get("class", "")) != "PISTOL":
 		_animation_event("rifle_fire")
 	var st: Dictionary = _ws[weapon_slot]

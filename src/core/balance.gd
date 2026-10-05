@@ -186,6 +186,15 @@ const FPS_HIP_POSE := Vector3(0.17, -0.17, -0.27)
 ## Своё поле зрения у рук и оружия перед глазами (вертикальное, град): не зависит от настройки
 ## поля зрения мира — при 120° руки не съёживаются, при 50° не раздуваются (CameraRig, ViewmodelSpace).
 const FPS_VIEWMODEL_FOV := 54.0
+## Объём оружия и рукавов у препятствий: раннее отведение, складывание рук и возврат.
+const WEAPON_CLEARANCE := {"margin": 0.012, "lead": 0.12, "hand_radius": 0.05,
+	"sleeve_radius": 0.055, "retract": 0.24, "action_retract": 0.32, "ready_deg": 78.0, "lift": 0.025,
+	"upper_sleeve_radius": 0.10, "high_drop": 0.25, "high_retract": 0.12, "low_drop": 0.20,
+	"body_low_lift": 0.08, "view_clear": 0.025,
+	"prone_retract": 0.14, "prone_hip_lift": 0.045,
+	"enter_sec": 0.10, "return_sec": 0.24, "samples": 12, "refine": 4,
+	"fire_threshold": 0.12, "elbow_angles": [0.0, 35.0, -35.0, 70.0, -70.0, 110.0, -110.0, 180.0],
+	"shoulder_steps": 6, "shoulder_step": 0.035, "reach_margin": 0.002}
 ## Покачивание оружия от бедра: частота входит и затухает вместе с реальной скоростью.
 ## Шагом цикл вдвое реже прежнего (5.2 → 2.6); бегом — часто, в темп шагов бега (~2.5 раза в с).
 const WEAPON_BOB := {

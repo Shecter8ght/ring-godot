@@ -50,6 +50,7 @@ var _viewmodel: Node3D
 var _viewmodel_rig: WeaponRig
 var _arms: FirstPersonArms
 var _viewmodel_id: String = ""
+var weapon_clearance: WeaponClearance = WeaponClearance.new()
 ## Приклад и затыльник модели в руках: у бедра видны, в прицеле (под щекой) — прячутся.
 var _cheek_parts: Array[GeometryInstance3D] = []
 ## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
@@ -566,6 +567,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_vm_space.add_child(_viewmodel)
 		_arms.bind_weapon(_viewmodel)
+		weapon_clearance.bind(_viewmodel)
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
 		if _viewmodel_rig:
 			_viewmodel_rig.set_ammo_state(pl.ammo)
@@ -598,6 +600,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var cant := Basis(Vector3(0, 0, 1), -sroll)
 	var ads_pos := -(Basis(Vector3.UP, PI) * cant * Vector3(sx, sh, 0.0)) + Vector3(0.0, 0.0, -az)
 	var hip_pos := Balance.FPS_HIP_POSE
+	if pl.stance == Player.Stance.PRONE: hip_pos.y += float(Balance.WEAPON_CLEARANCE.prone_hip_lift)
 	# На ходу у бедра оружие покачивается. Частота и амплитуда следуют реальной скорости,
 	# поэтому при разгоне и инерционной остановке движение модели не включается рывком.
 	var planar_speed := Vector2(pl.velocity.x, pl.velocity.z).length()
@@ -627,12 +630,30 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			_viewmodel_rig.synchronize_from(pl._weapon_rig)
 		elif not _viewmodel_rig.is_busy():
 			_viewmodel_rig.set_ammo_state(pl.ammo)
+	weapon_clearance.refresh_action(_viewmodel, _viewmodel_rig)
+	if wid != "":
+		# Лёжа отводим ствол вбок: вертикальная поза упирала приклад в пол.
+		weapon_clearance.sideways = pl.stance == Player.Stance.PRONE
+		var requested: Transform3D = _vm_space.global_transform * _viewmodel.transform
+		var corrected: Transform3D = weapon_clearance.solve(get_world_3d(), requested, _ads_cam.global_transform, [pl.get_rid()], delta, 0.0, weapon_clearance.sideways)
+		_viewmodel.transform = _vm_space.global_transform.affine_inverse() * corrected
+		_viewmodel.visible = weapon_clearance.valid
+		pl.weapon_obstruction = weapon_clearance.weight if weapon_clearance.valid else 1.0
+		pl.weapon_ready_up = weapon_clearance.ready_up
+	else:
+		pl.weapon_obstruction = 0.0
+	if _viewmodel_rig:
 		_arms.set_hand_target("Left", _viewmodel_rig.get_hand_target(), _viewmodel_rig.get_hand_weight())
 	else:
 		_arms.set_hand_target("Left", null, 0.0)
+	_arms.collision_exclude = [pl.get_rid()]
 	_arms.update_pose()
+	if not _arms.arms_clear:
+		_viewmodel.visible = false
+		pl.weapon_obstruction = 1.0
+	_arms.visible = _arms.visible and _viewmodel.visible
 	_straighten_lights()
-	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05)
+	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05 and pl.weapon_obstruction <= float(Balance.WEAPON_CLEARANCE.fire_threshold))
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
