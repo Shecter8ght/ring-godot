@@ -84,7 +84,11 @@ tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки кот
 #   tools/build_shelter_boiler.py (стены, зал, котлы, тир), tools/build_shelter_gear.py, tools/integrate_shelter_boiler_external.py;
 #   --headless --import; res://tools/author_shelter_scene.tscn; res://tools/author_shelter_dressing.tscn;
 #   python tools/shelter_grime_textures.py → res://tools/author_shelter_grime.tscn (декали старения);
-#   res://tools/author_shelter_light.tscn (UV2, LightmapGI) → tools/bake_shelter_light.cmd (запекание в редакторе).
+#   res://tools/author_shelter_light.tscn (UV2, LightmapGI) → запекание в редакторе (12 вариантов погоды и питания):
+#   tools/bake_shelter_light_draft.cmd [варианты] — черновое, быстро, для проверки правок;
+#   tools/bake_shelter_light.cmd [варианты] — чистовое, перед сборкой игры (~10–15 мин на все).
+#   Варианты — day/dusk/night + _sun/_grey (+ _off без генератора), напр. «day_sun night_grey»; без них — все.
+#   Перепекать только после изменения геометрии/ламп убежища; при обычном открытии редактора плагин молчит.
 #   Только материалы (шейдер старения стен): SHELTER_MATERIALS_ONLY=1 … res://tools/author_shelter_scene.tscn
 tools/godot.cmd res://tools/look_shots.tscn                 # вид «как с камеры»: те же кадры с эффектами и без (убежище, рейд день/ночь, поворот головы)
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import

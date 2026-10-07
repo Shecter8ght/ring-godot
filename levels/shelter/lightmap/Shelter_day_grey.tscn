@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://levels/shelter/Shelter_Interior.tscn" id="1_base"]
 [ext_resource type="LightmapGIData" uid="uid://cq1ioigwnyqr5" path="res://levels/shelter/lightmap/Shelter_day_grey.lmbake" id="2_ayppi"]
 
-[sub_resource type="Shader" id="Shader_ehair"]
+[sub_resource type="Shader" id="Shader_ayppi"]
 code = "
 shader_type spatial;
 render_mode unshaded, cull_back, shadows_disabled;
@@ -51,9 +51,9 @@ void fragment() {
 }
 "
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_w0631"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ehair"]
 render_priority = 0
-shader = SubResource("Shader_ehair")
+shader = SubResource("Shader_ayppi")
 shader_parameter/channel = 0
 
 [node name="Shelter_Interior" unique_id=2020758984 instance=ExtResource("1_base")]
@@ -73,9 +73,15 @@ light_energy = 0.32962748
 light_energy = 0.32962748
 
 [node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(2123821538) index="0" unique_id=2057456523]
-material_override = SubResource("ShaderMaterial_w0631")
+material_override = SubResource("ShaderMaterial_ehair")
 
-[node name="LightmapGI" parent="." index="17" unique_id=1330623862]
+[node name="GeneratorHum" parent="Audio/ExistingAudioBridge" parent_id_path=PackedInt32Array(790355439) index="0" unique_id=618534773]
+bus = &"Master"
+
+[node name="VentilationHum" parent="Audio/ExistingAudioBridge" parent_id_path=PackedInt32Array(790355439) index="1" unique_id=127242075]
+bus = &"Master"
+
+[node name="LightmapGI" parent="." index="16" unique_id=1330623862]
 light_data = ExtResource("2_ayppi")
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]
