@@ -151,6 +151,9 @@ func _walk_stairs(pl: Player) -> void:
 	body.rotation.y = PI
 	var rig: CameraRig = _level.get_node("CameraRig") as CameraRig
 	rig.rotation.y = 0
+	# от первого лица ходьба — от взгляда: смотреть строго вверх по лестнице (−Z), «влево» — к антресоли
+	rig._look_yaw = PI
+	rig._look_pitch = 0.0
 	Input.action_press("move_forward")
 	for i: int in range(240):
 		await get_tree().physics_frame
