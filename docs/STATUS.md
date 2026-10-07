@@ -2199,3 +2199,6 @@ RING.cmd и AGENTS.md указывают на этот exe. Отдельного
 Осталось: tools/build_release.cmd ещё копирует 4.5.1 как RING.exe — пак 4.7 им не открыть;
 для сборки друзьям нужен отдельный официальный Godot 4.7.2 (не Steam).
 Диздоки по оружию (docs/RING_weapon_design_doc_*.html, 26–90 МБ) — вне git (.gitignore).
+Сборка друзьям переключена: tools/build_release.cmd кладёт официальный Godot 4.7.2
+(D:\ПРОГРАММЫ\Godot_v4.7.2-stable_win64.exe, sha256 с релиза GitHub совпал) как RING.exe.
+export\RING.zip собран (1,19 ГБ); RING.exe 4.7.2 открывает RING.pck и грузит главное меню без ошибок.
