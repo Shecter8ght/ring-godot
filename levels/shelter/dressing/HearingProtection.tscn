@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/HearingProtection_00.res" id="1_a3egt"]
 
-[node name="HearingProtection" type="Node3D" unique_id=2138938519]
+[node name="HearingProtection" type="Node3D" unique_id=1938709866]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1044811567]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=34360696]
 cast_shadow = 0
 mesh = ExtResource("1_a3egt")

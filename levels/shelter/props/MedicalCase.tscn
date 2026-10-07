@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/MedicalCase_00.res" id="1_4cxx1"]
 
-[node name="MedicalCase" type="Node3D" unique_id=969560179]
+[node name="MedicalCase" type="Node3D" unique_id=1696396265]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1402682578]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=9314212]
 mesh = ExtResource("1_4cxx1")

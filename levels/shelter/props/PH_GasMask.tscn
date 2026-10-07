@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_GasMask_00.res" id="1_3aqnt"]
 
-[node name="PH_GasMask" type="Node3D" unique_id=1771748845]
+[node name="PH_GasMask" type="Node3D" unique_id=1178550497]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1088241684]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=713375285]
 mesh = ExtResource("1_3aqnt")

@@ -82,7 +82,11 @@ tools/godot.cmd --headless res://tools/shooting_range_test.tscn # тир кот�
 tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки котельной и тира в docs/screens/boiler_*.png (BOILER_ONLY=имя,имя — выборочно)
 # Пересборка убежища: python tools/shelter_boiler_materials.py [--fetch]; blender --background --factory-startup --python
 #   tools/build_shelter_boiler.py (стены, зал, котлы, тир), tools/build_shelter_gear.py, tools/integrate_shelter_boiler_external.py;
-#   --headless --import; res://tools/author_shelter_scene.tscn; res://tools/author_shelter_dressing.tscn
+#   --headless --import; res://tools/author_shelter_scene.tscn; res://tools/author_shelter_dressing.tscn;
+#   python tools/shelter_grime_textures.py → res://tools/author_shelter_grime.tscn (декали старения);
+#   res://tools/author_shelter_light.tscn (UV2, LightmapGI) → tools/bake_shelter_light.cmd (запекание в редакторе).
+#   Только материалы (шейдер старения стен): SHELTER_MATERIALS_ONLY=1 … res://tools/author_shelter_scene.tscn
+tools/godot.cmd res://tools/look_shots.tscn                 # вид «как с камеры»: те же кадры с эффектами и без (убежище, рейд день/ночь, поворот головы)
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png

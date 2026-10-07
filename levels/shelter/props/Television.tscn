@@ -3,10 +3,10 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Television_00.res" id="1_hec62"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Television_01.res" id="2_q13i0"]
 
-[node name="Television" type="Node3D" unique_id=1452637770]
+[node name="Television" type="Node3D" unique_id=1857661139]
 
-[node name="Screen" type="MeshInstance3D" parent="." unique_id=2041770112]
+[node name="Screen" type="MeshInstance3D" parent="." unique_id=2109337210]
 mesh = ExtResource("1_hec62")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1386964035]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1343990852]
 mesh = ExtResource("2_q13i0")

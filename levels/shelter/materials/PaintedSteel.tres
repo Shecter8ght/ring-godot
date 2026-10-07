@@ -1,8 +1,8 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://3dy7tfsu6wnq"]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedSteel_base.jpg" id="1_r4ba4"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedSteel_orm.jpg" id="2_h02ag"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedSteel_normal.jpg" id="3_0dvrc"]
+[ext_resource type="Texture2D" uid="uid://mljmn5e8loih" path="res://assets/shelter/textures/PaintedSteel_base.jpg" id="1_r4ba4"]
+[ext_resource type="Texture2D" uid="uid://b5jht6wu0ushy" path="res://assets/shelter/textures/PaintedSteel_orm.jpg" id="2_h02ag"]
+[ext_resource type="Texture2D" uid="uid://c1sr3csjxqaqk" path="res://assets/shelter/textures/PaintedSteel_normal.jpg" id="3_0dvrc"]
 
 [resource]
 resource_name = "PaintedSteel"
@@ -18,3 +18,4 @@ normal_texture = ExtResource("3_0dvrc")
 ao_enabled = true
 ao_texture = ExtResource("2_h02ag")
 texture_filter = 5
+distance_fade_mode = 2

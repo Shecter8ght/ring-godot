@@ -382,6 +382,19 @@ func _build_settings(h: HBoxContainer) -> void:
 		if is_instance_valid(wm):
 			wm.selected = Settings.WINDOW_MODES.find(Settings.window_mode))
 	grid.add_child(wm)
+	grid.add_child(_label("Эффекты камеры"))
+	var lens := CheckButton.new()
+	lens.focus_mode = Control.FOCUS_NONE
+	lens.button_pressed = Settings.lens_fx
+	lens.tooltip_text = "Глаз привыкает к свету, объектив, зерно, цветокоррекция, оружие у лица в прицеле мягче."
+	lens.toggled.connect(func(on: bool) -> void: Settings.set_lens_fx(on))
+	grid.add_child(lens)
+	grid.add_child(_label("Размытие в движении"))
+	var blur := CheckButton.new()
+	blur.focus_mode = Control.FOCUS_NONE
+	blur.button_pressed = Settings.motion_blur
+	blur.toggled.connect(func(on: bool) -> void: Settings.set_motion_blur(on))
+	grid.add_child(blur)
 	grid.add_child(_label("Клавиши"))
 	var keys_btn := Button.new()
 	keys_btn.text = "Сменить клавиши…"

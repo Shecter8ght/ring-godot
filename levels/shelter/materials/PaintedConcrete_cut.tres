@@ -1,22 +1,38 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_base.jpg" id="1_b83fh"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_orm.jpg" id="2_ukauo"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_normal.jpg" id="3_0uyje"]
+[ext_resource type="Shader" path="res://assets/shelter/shaders/aged_surface.gdshader" id="1_7l1ii"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_base.jpg" id="2_jdtfp"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/macro.png" id="3_psgo5"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_normal.jpg" id="4_j8dcn"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_orm.jpg" id="5_1v66w"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/streaks.png" id="6_2fejc"]
 
 [resource]
 resource_name = "PaintedConcrete_cut"
-albedo_texture = ExtResource("1_b83fh")
-metallic = 1.0
-metallic_specular = 0.35
-metallic_texture = ExtResource("2_ukauo")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_ukauo")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_scale = 0.4
-normal_texture = ExtResource("3_0uyje")
-ao_enabled = true
-ao_texture = ExtResource("2_ukauo")
-texture_filter = 5
-distance_fade_mode = 2
+render_priority = 0
+shader = ExtResource("1_7l1ii")
+shader_parameter/albedo_tex = ExtResource("2_jdtfp")
+shader_parameter/normal_tex = ExtResource("4_j8dcn")
+shader_parameter/orm_tex = ExtResource("5_1v66w")
+shader_parameter/has_albedo = true
+shader_parameter/has_normal = true
+shader_parameter/has_orm = true
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/normal_scale = 0.4
+shader_parameter/specular = 0.35
+shader_parameter/roughness = 1.0
+shader_parameter/macro_tex = ExtResource("3_psgo5")
+shader_parameter/macro_scale = null
+shader_parameter/macro_amount = null
+shader_parameter/floor_y = null
+shader_parameter/base_height = null
+shader_parameter/base_grime = 0.6
+shader_parameter/grime_color = null
+shader_parameter/streak_tex = ExtResource("6_2fejc")
+shader_parameter/streaks = 0.45
+shader_parameter/soot_from = null
+shader_parameter/soot_range = null
+shader_parameter/soot = 0.45
+shader_parameter/soot_ceiling = 0.3
+shader_parameter/soot_color = null
+shader_parameter/floor_wear = null

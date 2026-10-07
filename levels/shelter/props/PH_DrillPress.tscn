@@ -17,50 +17,50 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_wek1s"]
 size = Vector3(0.36586288, 0.90156513, 0.5987853)
 
-[node name="PH_DrillPress" type="Node3D" unique_id=709768736]
+[node name="PH_DrillPress" type="Node3D" unique_id=1567759174]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=512484951]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=651404058]
 mesh = ExtResource("1_spkc2")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=475173236]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1335976673]
 mesh = ExtResource("2_g5mfu")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1254083633]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=247180499]
 mesh = ExtResource("3_8wnea")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1594612201]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=132340591]
 mesh = ExtResource("4_au23k")
 
-[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1218832940]
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=870253874]
 mesh = ExtResource("5_htld4")
 
-[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=1940028663]
+[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=202842748]
 mesh = ExtResource("6_pa6uc")
 
-[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=912319979]
+[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=788730295]
 mesh = ExtResource("7_ksipo")
 
-[node name="FinishedMesh_07" type="MeshInstance3D" parent="." unique_id=1005573486]
+[node name="FinishedMesh_07" type="MeshInstance3D" parent="." unique_id=1807945636]
 mesh = ExtResource("8_bwvt5")
 
-[node name="FinishedMesh_08" type="MeshInstance3D" parent="." unique_id=1478695346]
+[node name="FinishedMesh_08" type="MeshInstance3D" parent="." unique_id=626956785]
 mesh = ExtResource("9_uxx5i")
 
-[node name="FinishedMesh_09" type="MeshInstance3D" parent="." unique_id=1892667721]
+[node name="FinishedMesh_09" type="MeshInstance3D" parent="." unique_id=1702538826]
 mesh = ExtResource("10_7v776")
 
-[node name="FinishedMesh_10" type="MeshInstance3D" parent="." unique_id=1570030711]
+[node name="FinishedMesh_10" type="MeshInstance3D" parent="." unique_id=1145756580]
 mesh = ExtResource("11_fmf53")
 
-[node name="FinishedMesh_11" type="MeshInstance3D" parent="." unique_id=1635682246]
+[node name="FinishedMesh_11" type="MeshInstance3D" parent="." unique_id=216892819]
 mesh = ExtResource("12_oc6jd")
 
-[node name="FinishedMesh_12" type="MeshInstance3D" parent="." unique_id=223083741]
+[node name="FinishedMesh_12" type="MeshInstance3D" parent="." unique_id=1519948109]
 mesh = ExtResource("13_tmoeq")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1939596570]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1655986580]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=52533813]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=707685895]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45078257, 0)
 shape = SubResource("BoxShape3D_wek1s")

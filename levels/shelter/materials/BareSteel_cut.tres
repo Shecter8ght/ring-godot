@@ -1,8 +1,8 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://ckiol13dfny6n"]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/BareSteel_base.jpg" id="1_ph05y"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/BareSteel_orm.jpg" id="2_kkcos"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/BareSteel_normal.jpg" id="3_2caay"]
+[ext_resource type="Texture2D" uid="uid://dnr3tpx1nhwai" path="res://assets/shelter/textures/BareSteel_base.jpg" id="1_ph05y"]
+[ext_resource type="Texture2D" uid="uid://cutsegf73dmiu" path="res://assets/shelter/textures/BareSteel_orm.jpg" id="2_kkcos"]
+[ext_resource type="Texture2D" uid="uid://bmeywplcto0sk" path="res://assets/shelter/textures/BareSteel_normal.jpg" id="3_2caay"]
 
 [resource]
 resource_name = "BareSteel_cut"

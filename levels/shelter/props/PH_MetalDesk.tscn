@@ -13,38 +13,38 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_wo6lw"]
 size = Vector3(2.0000005, 0.7875, 0.94721353)
 
-[node name="PH_MetalDesk" type="Node3D" unique_id=1505128427]
+[node name="PH_MetalDesk" type="Node3D" unique_id=864600865]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=307914857]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1820283730]
 mesh = ExtResource("1_uhwya")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=924385569]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1450487753]
 mesh = ExtResource("2_2l7f7")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=141301800]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=752592240]
 mesh = ExtResource("3_6d4or")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1469382545]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=277168743]
 mesh = ExtResource("4_5hl08")
 
-[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=49814888]
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1382604524]
 mesh = ExtResource("5_i07cd")
 
-[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=228191249]
+[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=398875716]
 mesh = ExtResource("6_qi8w6")
 
-[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=885702821]
+[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=1601574725]
 mesh = ExtResource("7_0gu78")
 
-[node name="FinishedMesh_07" type="MeshInstance3D" parent="." unique_id=599462380]
+[node name="FinishedMesh_07" type="MeshInstance3D" parent="." unique_id=2007164584]
 mesh = ExtResource("8_s5ocp")
 
-[node name="FinishedMesh_08" type="MeshInstance3D" parent="." unique_id=741445766]
+[node name="FinishedMesh_08" type="MeshInstance3D" parent="." unique_id=1663408330]
 mesh = ExtResource("9_tnpqk")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=844647726]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1798629033]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2126244168]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1743951908]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.39375, 0)
 shape = SubResource("BoxShape3D_wo6lw")

@@ -41,63 +41,64 @@ size = Vector3(1.3, 1.6, 0.2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_cmf1p"]
 size = Vector3(1.4, 1.4, 0.2)
 
-[node name="Wall_North" type="Node3D" unique_id=1326080799]
+[node name="Wall_North" type="Node3D" unique_id=1739931151]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=725393657]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2060814597]
+cast_shadow = 2
 mesh = ExtResource("1_x7b8f")
 metadata/shelter_cut = true
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1008187588]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1818069492]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1220647338]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=232618172]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.775, 2.5, -11)
 shape = SubResource("BoxShape3D_p6e8u")
 
-[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=637743303]
+[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=550736415]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.9, 1.5, -11)
 shape = SubResource("BoxShape3D_pqu8o")
 
-[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2034988724]
+[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=876844960]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.9, 4.8, -11)
 shape = SubResource("BoxShape3D_uwyy7")
 
-[node name="Hull_03" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=231292105]
+[node name="Hull_03" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=353073549]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -11)
 shape = SubResource("BoxShape3D_4kxmm")
 
-[node name="Hull_04" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2907138]
+[node name="Hull_04" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1768572933]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9, 1.5, -11)
 shape = SubResource("BoxShape3D_1naqu")
 
-[node name="Hull_05" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=990750961]
+[node name="Hull_05" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=612660008]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9, 4.8, -11)
 shape = SubResource("BoxShape3D_0qf48")
 
-[node name="Hull_06" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=424566235]
+[node name="Hull_06" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=556650247]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.425, 2.5, -11)
 shape = SubResource("BoxShape3D_77eat")
 
-[node name="Hull_07" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2110905008]
+[node name="Hull_07" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2124302027]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.65, -11)
 shape = SubResource("BoxShape3D_i7c6e")
 
-[node name="Hull_08" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1649238534]
+[node name="Hull_08" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1324556947]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 3.85, -11)
 shape = SubResource("BoxShape3D_3320i")
 
-[node name="Hull_09" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1003168867]
+[node name="Hull_09" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1251281542]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.35, 2.5, -11)
 shape = SubResource("BoxShape3D_1abhv")
 
-[node name="Hull_10" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=267694420]
+[node name="Hull_10" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1212458602]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.9, 3.8, -11)
 shape = SubResource("BoxShape3D_4uprj")
 
-[node name="Hull_11" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=561640936]
+[node name="Hull_11" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=933564103]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9, 3.8, -11)
 shape = SubResource("BoxShape3D_5ijoq")
 
-[node name="Hull_12" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1763930043]
+[node name="Hull_12" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=730308013]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2, -11)
 shape = SubResource("BoxShape3D_cmf1p")

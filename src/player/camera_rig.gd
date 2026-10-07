@@ -58,6 +58,8 @@ var scope_active: bool = false
 ## 0 — основной прицел, 1 — угловой (плавно между ними при переключении).
 var _sight_k: float = 0.0
 var _scope_vp: SubViewport
+## Вид «как с камеры»: экспозиция глаза, объектив, зерно, размытие (CameraLook).
+var _look: CameraLook
 var _scope_cam: Camera3D
 var _scope_view: TextureRect
 var _sway_t: float = 0.0
@@ -103,6 +105,10 @@ func _ready() -> void:
 	_glare.name = "Glare"
 	add_child(_glare)
 	_build_scope()
+	_look = CameraLook.new()
+	_look.name = "Look"
+	add_child(_look)
+	_look.setup(_ads_cam, [_camera, _scope_cam])
 	# в изометрии отсечения за стенами нет (см. _set_ads)
 	get_viewport().use_occlusion_culling = false
 
@@ -473,6 +479,8 @@ func _process_iso(delta: float, s: float) -> void:
 
 func _set_ads(on: bool, pl: Player) -> void:
 	ads_active = on
+	if not on and _look:
+		_look.aim_k = 0.0
 	if pl:
 		pl.ads = on
 		pl.set_first_person(on)
@@ -509,6 +517,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var scoped := bool(spec.get("scoped", false))
 	# без ПКМ (режим от первого лица) — широкий вид, оружие у бедра
 	var aim_t := pl.aim_progress()
+	_look.aim_k = aim_t if pl.aiming else 0.0
+	_look.iron = not scoped
 	var fov_to := _ads_fov(pl) if pl.aiming else Settings.fps_fov_v()
 	_ads_cam.fov = lerpf(_ads_cam.fov, fov_to, minf(1.0, 12.0 * delta))
 	# руки и оружие — со своим полем зрения, сколько бы ни было у мира

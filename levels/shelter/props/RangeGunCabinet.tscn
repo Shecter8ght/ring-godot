@@ -5,14 +5,14 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_ceiuf"]
 size = Vector3(2.5, 2.4, 0.3)
 
-[node name="RangeGunCabinet" type="Node3D" unique_id=1657292493]
+[node name="RangeGunCabinet" type="Node3D" unique_id=677362953]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=397383627]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=492361639]
 mesh = ExtResource("1_lv62l")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=83877911]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=216430570]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1257981175]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1945830316]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.05)
 shape = SubResource("BoxShape3D_ceiuf")

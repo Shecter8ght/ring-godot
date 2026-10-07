@@ -3680,7 +3680,22 @@
 		"position": [
 			-3.90000009536743,
 			3.69999980926514,
+			-2.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
 			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubWest2",
+		"position": [
+			-3.90000009536743,
+			3.69999980926514,
+			2.0
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3695,7 +3710,22 @@
 		"position": [
 			3.90000009536743,
 			3.69999980926514,
+			-2.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
 			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_HubEast2",
+		"position": [
+			3.90000009536743,
+			3.69999980926514,
+			2.0
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3708,7 +3738,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_NorthGallery",
 		"position": [
+			-2.0,
+			2.09999990463257,
+			-6.0
+		],
+		"rotation_degrees": [
 			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_NorthGallery2",
+		"position": [
+			2.0,
 			2.09999990463257,
 			-6.0
 		],
@@ -3723,7 +3768,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Entry",
 		"position": [
+			-1.20000004768372,
+			2.79999995231628,
+			9.69999980926514
+		],
+		"rotation_degrees": [
 			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Entry2",
+		"position": [
+			1.20000004768372,
 			2.79999995231628,
 			9.69999980926514
 		],
@@ -3738,7 +3798,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Living",
 		"position": [
-			-13.0,
+			-14.8000001907349,
+			2.75,
+			-8.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Living2",
+		"position": [
+			-11.1999998092651,
 			2.75,
 			-8.0
 		],
@@ -3753,7 +3828,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Trader",
 		"position": [
-			-12.8000001907349,
+			-14.6000003814697,
+			2.75,
+			-2.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Trader2",
+		"position": [
+			-11.0,
 			2.75,
 			-2.0
 		],
@@ -3768,7 +3858,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Armory",
 		"position": [
-			-12.8000001907349,
+			-14.6000003814697,
+			2.75,
+			4.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Armory2",
+		"position": [
+			-11.0,
 			2.75,
 			4.0
 		],
@@ -3783,7 +3888,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Workshop",
 		"position": [
-			13.0,
+			11.1999998092651,
+			2.75,
+			-2.5
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Workshop2",
+		"position": [
+			14.8000001907349,
 			2.75,
 			-2.5
 		],
@@ -3798,7 +3918,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Storage",
 		"position": [
-			13.0,
+			11.1999998092651,
+			2.75,
+			4.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Storage2",
+		"position": [
+			14.8000001907349,
 			2.75,
 			4.0
 		],
@@ -3813,7 +3948,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Generator",
 		"position": [
-			13.0,
+			11.1999998092651,
+			2.75,
+			-8.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Generator2",
+		"position": [
+			14.8000001907349,
 			2.75,
 			-8.0
 		],
@@ -3828,7 +3978,22 @@
 		"asset": "PracticalLight",
 		"name": "Fixture_Sleeping",
 		"position": [
+			-2.0,
+			4.75,
+			-9.19999980926514
+		],
+		"rotation_degrees": [
 			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Sleeping2",
+		"position": [
+			2.0,
 			4.75,
 			-9.19999980926514
 		],
@@ -3845,7 +4010,22 @@
 		"position": [
 			5.30000019073486,
 			3.0,
-			6.59999990463257
+			5.79999971389771
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_Bays2",
+		"position": [
+			5.30000019073486,
+			3.0,
+			7.40000009536743
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3860,7 +4040,22 @@
 		"position": [
 			-5.30000019073486,
 			3.0,
-			6.59999990463257
+			5.79999971389771
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PracticalLight",
+		"name": "Fixture_BaysWest2",
+		"position": [
+			-5.30000019073486,
+			3.0,
+			7.40000009536743
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3875,7 +4070,22 @@
 		"position": [
 			-17.6499996185303,
 			2.04999995231628,
-			-8.19999980926514
+			-9.0
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_LivingWall2",
+		"position": [
+			-17.6499996185303,
+			2.04999995231628,
+			-7.39999961853027
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3890,7 +4100,22 @@
 		"position": [
 			-17.6499996185303,
 			2.04999995231628,
-			-3.40000009536743
+			-4.20000028610229
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_TraderWall2",
+		"position": [
+			-17.6499996185303,
+			2.04999995231628,
+			-2.60000014305115
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3905,7 +4130,22 @@
 		"position": [
 			-17.6499996185303,
 			2.04999995231628,
-			3.40000009536743
+			2.60000014305115
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_ArmoryWall2",
+		"position": [
+			-17.6499996185303,
+			2.04999995231628,
+			4.20000028610229
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3920,7 +4160,22 @@
 		"position": [
 			17.6499996185303,
 			2.04999995231628,
-			1.89999997615814
+			1.09999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_StorageWall2",
+		"position": [
+			17.6499996185303,
+			2.04999995231628,
+			2.70000004768372
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3935,7 +4190,22 @@
 		"position": [
 			17.6499996185303,
 			2.04999995231628,
-			-1.70000004768372
+			-2.5
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_WorkshopWall2",
+		"position": [
+			17.6499996185303,
+			2.04999995231628,
+			-0.900000035762787
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3948,7 +4218,22 @@
 		"asset": "CageLamp",
 		"name": "Fixture_GeneratorWall",
 		"position": [
-			10.8000001907349,
+			10.0,
+			2.04999995231628,
+			-10.6999998092651
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_GeneratorWall2",
+		"position": [
+			11.6000003814697,
 			2.04999995231628,
 			-10.6999998092651
 		],
@@ -3965,7 +4250,22 @@
 		"position": [
 			-7.65000009536743,
 			2.04999995231628,
-			2.54999995231628
+			1.75
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HubWallLeft2",
+		"position": [
+			-7.65000009536743,
+			2.04999995231628,
+			3.34999990463257
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3980,7 +4280,22 @@
 		"position": [
 			7.65000009536743,
 			2.04999995231628,
-			1.14999997615814
+			0.349999964237213
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HubWallRight2",
+		"position": [
+			7.65000009536743,
+			2.04999995231628,
+			1.95000004768372
 		],
 		"rotation_degrees": [
 			0.0,
@@ -4876,7 +5191,7 @@
 	},
 	{
 		"asset": "PH_HangingLamp",
-		"name": "Fixture_HallPendant_32",
+		"name": "Fixture_HallPendant_53",
 		"position": [
 			28.5,
 			5.46000003814697,
@@ -4891,7 +5206,22 @@
 	},
 	{
 		"asset": "PH_HangingLamp",
-		"name": "Fixture_HallPendant_33",
+		"name": "Fixture_HallPendant_54",
+		"position": [
+			32.25,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_55",
 		"position": [
 			36.0,
 			5.46000003814697,
@@ -4906,7 +5236,22 @@
 	},
 	{
 		"asset": "PH_HangingLamp",
-		"name": "Fixture_HallPendant_34",
+		"name": "Fixture_HallPendant_56",
+		"position": [
+			39.75,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_57",
 		"position": [
 			43.5,
 			5.46000003814697,
@@ -4921,7 +5266,22 @@
 	},
 	{
 		"asset": "PH_HangingLamp",
-		"name": "Fixture_HallPendant_35",
+		"name": "Fixture_HallPendant_58",
+		"position": [
+			47.25,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_59",
 		"position": [
 			51.0,
 			5.46000003814697,
@@ -4936,7 +5296,37 @@
 	},
 	{
 		"asset": "PH_HangingLamp",
-		"name": "Fixture_HallPendant_36",
+		"name": "Fixture_HallPendant_60",
+		"position": [
+			54.75,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_61",
+		"position": [
+			27.5,
+			5.46000003814697,
+			-8.39999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_62",
 		"position": [
 			34.0,
 			5.46000003814697,
@@ -4951,7 +5341,22 @@
 	},
 	{
 		"asset": "PH_HangingLamp",
-		"name": "Fixture_HallPendant_37",
+		"name": "Fixture_HallPendant_63",
+		"position": [
+			40.75,
+			5.46000003814697,
+			-8.39999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_64",
 		"position": [
 			47.5,
 			5.46000003814697,
@@ -4966,11 +5371,11 @@
 	},
 	{
 		"asset": "CageLamp",
-		"name": "Fixture_HallWestWall_40",
+		"name": "Fixture_HallWestWall_67",
 		"position": [
 			18.2999992370605,
 			2.59999990463257,
-			-1.79999995231628
+			-0.200000002980232
 		],
 		"rotation_degrees": [
 			0.0,
@@ -4981,11 +5386,41 @@
 	},
 	{
 		"asset": "CageLamp",
-		"name": "Fixture_HallWestWall_41",
+		"name": "Fixture_HallWestWall_68",
 		"position": [
 			18.2999992370605,
 			2.59999990463257,
-			-8.19999980926514
+			-3.40000009536743
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HallWestWall_69",
+		"position": [
+			18.2999992370605,
+			2.59999990463257,
+			-6.59999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HallWestWall_70",
+		"position": [
+			18.2999992370605,
+			2.59999990463257,
+			-9.80000019073486
 		],
 		"rotation_degrees": [
 			0.0,

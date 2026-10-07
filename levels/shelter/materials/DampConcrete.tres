@@ -1,21 +1,38 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_base.jpg" id="1_0mq6f"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_orm.jpg" id="2_ssi1i"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_normal.jpg" id="3_xwg00"]
+[ext_resource type="Shader" path="res://assets/shelter/shaders/aged_surface.gdshader" id="1_2p18b"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_base.jpg" id="2_48www"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/macro.png" id="3_h03wx"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_normal.jpg" id="4_colby"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_orm.jpg" id="5_ajs30"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/streaks.png" id="6_apui4"]
 
 [resource]
 resource_name = "DampConcrete"
-albedo_texture = ExtResource("1_0mq6f")
-metallic = 1.0
-metallic_specular = 0.35
-metallic_texture = ExtResource("2_ssi1i")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_ssi1i")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_scale = 0.32
-normal_texture = ExtResource("3_xwg00")
-ao_enabled = true
-ao_texture = ExtResource("2_ssi1i")
-texture_filter = 5
+render_priority = 0
+shader = ExtResource("1_2p18b")
+shader_parameter/albedo_tex = ExtResource("2_48www")
+shader_parameter/normal_tex = ExtResource("4_colby")
+shader_parameter/orm_tex = ExtResource("5_ajs30")
+shader_parameter/has_albedo = true
+shader_parameter/has_normal = true
+shader_parameter/has_orm = true
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/normal_scale = 0.32
+shader_parameter/specular = 0.35
+shader_parameter/roughness = 1.0
+shader_parameter/macro_tex = ExtResource("3_h03wx")
+shader_parameter/macro_scale = null
+shader_parameter/macro_amount = null
+shader_parameter/floor_y = null
+shader_parameter/base_height = null
+shader_parameter/base_grime = 0.65
+shader_parameter/grime_color = null
+shader_parameter/streak_tex = ExtResource("6_apui4")
+shader_parameter/streaks = 0.55
+shader_parameter/soot_from = null
+shader_parameter/soot_range = null
+shader_parameter/soot = 0.35
+shader_parameter/soot_ceiling = 0.35
+shader_parameter/soot_color = null
+shader_parameter/floor_wear = null

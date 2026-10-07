@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/Calculator_00.res" id="1_wseq5"]
 
-[node name="Calculator" type="Node3D" unique_id=1845994585]
+[node name="Calculator" type="Node3D" unique_id=658044038]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2074015847]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1064031360]
 cast_shadow = 0
 mesh = ExtResource("1_wseq5")

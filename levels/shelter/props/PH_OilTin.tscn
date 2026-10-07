@@ -3,12 +3,12 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_OilTin_00.res" id="1_hqgm1"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_OilTin_01.res" id="2_dmvik"]
 
-[node name="PH_OilTin" type="Node3D" unique_id=1931438695]
+[node name="PH_OilTin" type="Node3D" unique_id=397415004]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1029172987]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1111069359]
 cast_shadow = 0
 mesh = ExtResource("1_hqgm1")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=820961966]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=725538452]
 cast_shadow = 0
 mesh = ExtResource("2_dmvik")

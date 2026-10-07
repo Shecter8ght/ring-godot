@@ -1,21 +1,38 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/IndustrialConcreteFloor_base.jpg" id="1_c4lxn"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/IndustrialConcreteFloor_orm.jpg" id="2_45jfn"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/IndustrialConcreteFloor_normal.jpg" id="3_gtled"]
+[ext_resource type="Shader" path="res://assets/shelter/shaders/aged_surface.gdshader" id="1_owe0n"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/IndustrialConcreteFloor_base.jpg" id="2_bnamh"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/macro.png" id="3_1qex3"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/IndustrialConcreteFloor_normal.jpg" id="4_16qqw"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/IndustrialConcreteFloor_orm.jpg" id="5_5tuxm"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/streaks.png" id="6_lygsd"]
 
 [resource]
 resource_name = "IndustrialConcreteFloor"
-albedo_texture = ExtResource("1_c4lxn")
-metallic = 1.0
-metallic_specular = 0.35
-metallic_texture = ExtResource("2_45jfn")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_45jfn")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_scale = 0.32
-normal_texture = ExtResource("3_gtled")
-ao_enabled = true
-ao_texture = ExtResource("2_45jfn")
-texture_filter = 5
+render_priority = 0
+shader = ExtResource("1_owe0n")
+shader_parameter/albedo_tex = ExtResource("2_bnamh")
+shader_parameter/normal_tex = ExtResource("4_16qqw")
+shader_parameter/orm_tex = ExtResource("5_5tuxm")
+shader_parameter/has_albedo = true
+shader_parameter/has_normal = true
+shader_parameter/has_orm = true
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/normal_scale = 0.32
+shader_parameter/specular = 0.35
+shader_parameter/roughness = 1.0
+shader_parameter/macro_tex = ExtResource("3_1qex3")
+shader_parameter/macro_scale = null
+shader_parameter/macro_amount = 0.3
+shader_parameter/floor_y = null
+shader_parameter/base_height = null
+shader_parameter/base_grime = 0.0
+shader_parameter/grime_color = null
+shader_parameter/streak_tex = ExtResource("6_lygsd")
+shader_parameter/streaks = 0.0
+shader_parameter/soot_from = null
+shader_parameter/soot_range = null
+shader_parameter/soot = 0.0
+shader_parameter/soot_ceiling = 0.0
+shader_parameter/soot_color = null
+shader_parameter/floor_wear = 0.55

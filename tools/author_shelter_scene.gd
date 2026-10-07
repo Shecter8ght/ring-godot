@@ -15,6 +15,10 @@ func _ready() -> void:
 	await get_tree().process_frame
 	Profile.use_file("user://shelter_author_test.json", true)
 	_make_materials()
+	# только материалы (шейдер старения, настройки) — сцена и меши ссылаются на них по пути
+	if OS.get_environment("SHELTER_MATERIALS_ONLY") != "":
+		get_tree().quit()
+		return
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MODELS + "manifest.json")) as Dictionary
 	for id: String in manifest:
 		_convert_asset(id, manifest[id])
@@ -115,18 +119,23 @@ func _make_materials() -> void:
 			m.emission_texture = m.albedo_texture
 			m.emission = Color(0.80, 0.86, 0.92)
 			m.emission_energy_multiplier = 0.16
-			m.albedo_color = Color(0.62, 0.64, 0.64)
+			m.albedo_color = Color(0.62, 0.64, 0.64, 0.5)
 			m.metallic_specular = 0.6
+			# полупрозрачное — пропускает солнце (ShelterWeather): на полу пятна с тенью переплёта
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		if label == "RangePaper":
 			# лист тира: пробоины рисуются в копию этой текстуры, поэтому без сжатия на видеокарте
 			m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		# Стены, пол и потолок стареют в шейдере (AGED): пятна, грязь у пола, подтёки, копоть.
+		var final: Material = _aged(m, AGED[label]) if AGED.has(label) else m
 		# Материал cutaway отдельный от пола/декора с тем же физическим составом.
-		ShelterSave.save(m, BASE + "materials/" + label + ".tres")
+		ShelterSave.save(final, BASE + "materials/" + label + ".tres")
 		_materials[label] = load(BASE + "materials/" + label + ".tres")
 		if label in ["RawConcrete", "PaintedConcrete", "DampConcrete", "BareSteel", "Brick", "Whitewash", "PeelingPaint"]:
-			var cut: StandardMaterial3D = m.duplicate() as StandardMaterial3D
+			var cut: Material = final.duplicate()
 			cut.resource_name = label + "_cut"
-			cut.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+			if cut is BaseMaterial3D:
+				(cut as BaseMaterial3D).distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
 			ShelterSave.save(cut, BASE + "materials/" + label + "_cut.tres")
 			_materials[label + "_cut"] = load(BASE + "materials/" + label + "_cut.tres")
 	# Манекены тира — матовый литой пластик без лица (RangeTarget перекрывает им все поверхности).
@@ -138,6 +147,46 @@ func _make_materials() -> void:
 	plastic.rim_enabled = true
 	plastic.rim = 0.12
 	ShelterSave.save(plastic, BASE + "materials/MannequinPlastic.tres")
+
+
+## Старение по материалам (assets/shelter/shaders/aged_surface.gdshader): грязь у пола, подтёки,
+## копоть стен и потолка, вытертость пола, сила пятен. Побелка показывает подтёки сильнее всех.
+const AGED: Dictionary = {
+	"Brick": {"base_grime": 0.65, "streaks": 0.5, "soot": 0.5, "soot_ceiling": 0.0},
+	"Whitewash": {"base_grime": 0.75, "streaks": 0.75, "soot": 0.6, "soot_ceiling": 0.0, "macro_amount": 0.22},
+	"PeelingPaint": {"base_grime": 0.6, "streaks": 0.5, "soot": 0.45, "soot_ceiling": 0.0},
+	"PaintedConcrete": {"base_grime": 0.6, "streaks": 0.45, "soot": 0.45, "soot_ceiling": 0.3},
+	"RawConcrete": {"base_grime": 0.5, "streaks": 0.35, "soot": 0.4, "soot_ceiling": 0.4},
+	"DampConcrete": {"base_grime": 0.65, "streaks": 0.55, "soot": 0.35, "soot_ceiling": 0.35},
+	"IndustrialConcreteFloor": {"base_grime": 0.0, "streaks": 0.0, "soot": 0.0, "soot_ceiling": 0.0, "floor_wear": 0.55, "macro_amount": 0.3},
+}
+const AGED_SHADER: String = "res://assets/shelter/shaders/aged_surface.gdshader"
+const GRIME: String = "res://assets/shelter/textures/grime/"
+
+
+## ShaderMaterial старения с текстурами и настройками исходного StandardMaterial3D.
+func _aged(m: StandardMaterial3D, tune: Dictionary) -> ShaderMaterial:
+	var sm: ShaderMaterial = ShaderMaterial.new()
+	sm.resource_name = m.resource_name
+	sm.shader = load(AGED_SHADER)
+	sm.set_shader_parameter("has_albedo", m.albedo_texture != null)
+	if m.albedo_texture:
+		sm.set_shader_parameter("albedo_tex", m.albedo_texture)
+	sm.set_shader_parameter("albedo_color", m.albedo_color)
+	sm.set_shader_parameter("has_normal", m.normal_enabled and m.normal_texture != null)
+	if m.normal_texture:
+		sm.set_shader_parameter("normal_tex", m.normal_texture)
+	sm.set_shader_parameter("normal_scale", m.normal_scale)
+	sm.set_shader_parameter("has_orm", m.roughness_texture != null)
+	if m.roughness_texture:
+		sm.set_shader_parameter("orm_tex", m.roughness_texture)
+	sm.set_shader_parameter("roughness", m.roughness)
+	sm.set_shader_parameter("specular", m.metallic_specular)
+	sm.set_shader_parameter("macro_tex", load(GRIME + "macro.png"))
+	sm.set_shader_parameter("streak_tex", load(GRIME + "streaks.png"))
+	for key: String in tune:
+		sm.set_shader_parameter(key, tune[key])
+	return sm
 
 
 func _convert_asset(id: String, info: Dictionary) -> void:
@@ -183,6 +232,9 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 			mi.layers = SectorBuilder.CEILING_LAYER
 		if cut:
 			mi.set_meta("shelter_cut", true)
+		# стены — тень с обеих сторон: солнце снаружи видит их изнанку
+		if id.begins_with("Wall_"):
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 		if id.begins_with("RoomSign_"):
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		if id in ["Mug", "FoodCan", "Notebook", "WaterBottle", "Beer", "Boots", "PlanningMap", "Rug", "PH_Cans", "PH_Binoculars", "PH_Gloves", "PH_Clipboard", "PH_Multimeter", "PH_OilTin", "PH_PipeWrench", "PH_Thermos", "RangeConsole"]:
@@ -604,29 +656,41 @@ func _floor_joints() -> void:
 	_owned(_root.get_node("Architecture"),node)
 
 
+## Пара потолочных ламп вместо одной: на сколько разнести (м, вдоль длинной оси помещения) и сила
+## каждой от прежней одиночной (две по 0.7 — в помещении светлее в 1.4 раза).
+const LAMP_PAIR: Dictionary = {"HubWest": Vector3(0, 0, 4.0), "HubEast": Vector3(0, 0, 4.0), "NorthGallery": Vector3(4.0, 0, 0),
+	"Entry": Vector3(2.4, 0, 0), "Living": Vector3(3.6, 0, 0), "Trader": Vector3(3.6, 0, 0), "Armory": Vector3(3.6, 0, 0),
+	"Workshop": Vector3(3.6, 0, 0), "Storage": Vector3(3.6, 0, 0), "Generator": Vector3(3.6, 0, 0), "Sleeping": Vector3(4.0, 0, 0),
+	"Bays": Vector3(0, 0, 1.6), "BaysWest": Vector3(0, 0, 1.6)}
+const LAMP_PAIR_ENERGY: float = 0.7
+
 func _lighting() -> void:
 	var lights: Node = _root.get_node("Lights")
 	for spec: Array in [["HubWest",Vector3(-3.9,3.6,0),Color(1,.82,.58),3.8,8.0,true],["HubEast",Vector3(3.9,3.6,0),Color(1,.82,.58),3.8,8.0,true],["NorthGallery",Vector3(0,2.0,-6),Color(1,.78,.50),2.4,5.0,false],["Entry",Vector3(0,2.7,9.7),Color(1,.78,.48),2.8,5.0,true],["Living",Vector3(-13.0,2.65,-8.0),Color(1,.66,.34),2.9,5.5,true],["Trader",Vector3(-12.8,2.65,-2.0),Color(1,.78,.52),3.1,5.0,false],["Armory",Vector3(-12.8,2.65,4.0),Color(1,.86,.66),3.0,5.3,false],["Workshop",Vector3(13.0,2.65,-2.5),Color(1,.88,.73),3.8,5.5,true],["Storage",Vector3(13.0,2.65,4),Color(1,.83,.61),2.9,5.5,false],["Generator",Vector3(13.0,2.65,-8.0),Color(.90,.95,1),3.5,5.5,true],["Sleeping",Vector3(0,4.65,-9.2),Color(1,.73,.45),1.8,4.5,false],["Bays",Vector3(5.3,2.9,6.6),Color(1,.8,.54),1.9,3.8,false],["BaysWest",Vector3(-5.3,2.9,6.6),Color(1,.8,.54),1.9,3.8,false]]:
-		var light: OmniLight3D = OmniLight3D.new()
-		light.name = String(spec[0])
-		light.position = spec[1]
-		light.light_color = spec[2]
-		if light.name in [&"HubWest",&"HubEast",&"Trader",&"Workshop",&"Armory",&"Storage"]:
-			light.light_color = Color(1,.94,.85)
-		elif light.name in [&"Entry",&"NorthGallery",&"Sleeping",&"Bays",&"BaysWest",&"Living"]:
-			light.light_color = Color(1,.86,.70)
-		light.light_energy = float(spec[3])
-		light.omni_range = float(spec[4])
-		light.omni_attenuation = 1.5
-		light.shadow_enabled = bool(spec[5]) or light.name in [&"Trader",&"Armory",&"Storage",&"Sleeping"]
-		light.light_size = .35
-		light.shadow_blur = 1.0
-		light.shadow_bias = .025
-		light.shadow_normal_bias = .35
-		light.light_bake_mode = Light3D.BAKE_DYNAMIC
-		light.light_volumetric_fog_energy = .10
-		_owned(lights, light)
-		_put("PracticalLight", "Fixture_"+light.name, _root.get_node("Props"), light.position + Vector3(0,.10,0))
+		# по две лампы на помещение (решение владельца 2026-10-07): пара вдоль длинной оси комнаты,
+		# каждая — LAMP_PAIR_ENERGY от прежней одиночной
+		var pair: Vector3 = LAMP_PAIR[String(spec[0])]
+		for twin: int in range(2):
+			var light: OmniLight3D = OmniLight3D.new()
+			light.name = String(spec[0]) + ("2" if twin == 1 else "")
+			light.position = (spec[1] as Vector3) + pair * (0.5 if twin == 1 else -0.5)
+			light.light_color = spec[2]
+			if String(spec[0]) in ["HubWest","HubEast","Trader","Workshop","Armory","Storage"]:
+				light.light_color = Color(1,.94,.85)
+			elif String(spec[0]) in ["Entry","NorthGallery","Sleeping","Bays","BaysWest","Living"]:
+				light.light_color = Color(1,.86,.70)
+			light.light_energy = float(spec[3]) * LAMP_PAIR_ENERGY
+			light.omni_range = float(spec[4])
+			light.omni_attenuation = 1.5
+			light.shadow_enabled = bool(spec[5]) or String(spec[0]) in ["Trader","Armory","Storage","Sleeping"]
+			light.light_size = .35
+			light.shadow_blur = 1.0
+			light.shadow_bias = .025
+			light.shadow_normal_bias = .35
+			light.light_bake_mode = Light3D.BAKE_DYNAMIC
+			light.light_volumetric_fog_energy = .10
+			_owned(lights, light)
+			_put("PracticalLight", "Fixture_"+light.name, _root.get_node("Props"), light.position + Vector3(0,.10,0))
 	for spec: Array in [["EmergencyEntry",Vector3(0,2.0,8.45),.65,6.0],["EmergencyHub",Vector3(0,2.7,-6),.65,9.0]]:
 		var light: OmniLight3D = OmniLight3D.new()
 		light.name = String(spec[0])
@@ -637,17 +701,21 @@ func _lighting() -> void:
 		light.light_bake_mode = Light3D.BAKE_DYNAMIC
 		_owned(lights,light)
 	for spec: Array in [["LivingWall",Vector3(-17.65,2.05,-8.2),90],["TraderWall",Vector3(-17.65,2.05,-3.4),90],["ArmoryWall",Vector3(-17.65,2.05,3.4),90],["StorageWall",Vector3(17.65,2.05,1.9),-90],["WorkshopWall",Vector3(17.65,2.05,-1.7),-90],["GeneratorWall",Vector3(10.8,2.05,-10.7),0],["HubWallLeft",Vector3(-7.65,2.05,1.15),90],["HubWallRight",Vector3(7.65,2.05,1.15),-90]]:
-		var light: OmniLight3D = OmniLight3D.new()
-		light.name = String(spec[0])
-		light.position = spec[1]
-		if light.name == &"HubWallLeft":
-			light.position.z = 2.55
-		light.light_color = Color(1,.90,.76)
-		light.light_energy = 1.25
-		light.omni_range = 3.8
-		light.light_bake_mode = Light3D.BAKE_DYNAMIC
-		_owned(lights,light)
-		_put("CageLamp","Fixture_"+light.name,_root.get_node("Props"),light.position,float(spec[2]))
+		# настенные лампы — тоже парами вдоль стены
+		var along: Vector3 = Vector3(1.6, 0, 0) if is_zero_approx(float(spec[2])) else Vector3(0, 0, 1.6)
+		for twin: int in range(2):
+			var light: OmniLight3D = OmniLight3D.new()
+			light.name = String(spec[0]) + ("2" if twin == 1 else "")
+			light.position = spec[1]
+			if String(spec[0]) == "HubWallLeft":
+				light.position.z = 2.55
+			light.position += along * (0.5 if twin == 1 else -0.5)
+			light.light_color = Color(1,.90,.76)
+			light.light_energy = 1.25 * LAMP_PAIR_ENERGY
+			light.omni_range = 3.8
+			light.light_bake_mode = Light3D.BAKE_DYNAMIC
+			_owned(lights,light)
+			_put("CageLamp","Fixture_"+light.name,_root.get_node("Props"),light.position,float(spec[2]))
 	var tv: OmniLight3D = OmniLight3D.new()
 	tv.name = "TvGlow"
 	tv.position = Vector3(-13.3,1.35,-9.7)
@@ -926,14 +994,16 @@ func _boiler_hall() -> void:
 	_put("RoomSign_15", "HallSign_Caution", _root.get_node("Signs"), Vector3(18.22, 2.65, float(layout.storage_door_z)), 90)
 	# --- свет зала: подвесные цеховые светильники, прожектор вдоль дорожек, дневной свет окон ---
 	var lights: Node = _root.get_node("Lights")
-	for spec: Array in [[28.5, .6, true], [36.0, .6, false], [43.5, .6, true], [51.0, .6, false], [34.0, -8.4, false], [47.5, -8.4, false]]:
+	# подвесные — вдвое больше: между прежними (в ряду над дорожками и над котлами) ещё по одному
+	for spec: Array in [[28.5, .6, true], [32.25, .6, false], [36.0, .6, false], [39.75, .6, false], [43.5, .6, true], [47.25, .6, false], [51.0, .6, false], [54.75, .6, false],
+			[27.5, -8.4, false], [34.0, -8.4, false], [40.75, -8.4, false], [47.5, -8.4, false]]:
 		var at: Vector3 = Vector3(float(spec[0]), 5.46, float(spec[1]))
 		_put("PH_HangingLamp", "Fixture_HallPendant_%02d" % lights.get_child_count(), hall, at)
 		var lamp: OmniLight3D = OmniLight3D.new()
 		lamp.name = "HallPendant_%02d" % lights.get_child_count()
 		lamp.position = at + Vector3(0, .05, 0)
 		lamp.light_color = Color(1, .92, .8)
-		lamp.light_energy = 2.4 if float(spec[1]) > 0 else 1.3
+		lamp.light_energy = (2.4 if float(spec[1]) > 0 else 1.3) * LAMP_PAIR_ENERGY
 		lamp.omni_range = 13.0
 		lamp.omni_attenuation = 1.2
 		lamp.shadow_enabled = bool(spec[2])
@@ -959,16 +1029,30 @@ func _boiler_hall() -> void:
 	fill.light_color = Color(1, .9, .76)
 	fill.light_bake_mode = Light3D.BAKE_DYNAMIC
 	_owned(lights, fill)
-	for z: float in [-1.8, -8.2]:
+	for z: float in [-0.2, -3.4, -6.6, -9.8]:
 		var wall_lamp: OmniLight3D = OmniLight3D.new()
 		wall_lamp.name = "HallWestWall_%02d" % lights.get_child_count()
 		wall_lamp.position = Vector3(18.3, 2.6, z)
 		wall_lamp.light_color = Color(1, .9, .76)
-		wall_lamp.light_energy = 1.2
+		wall_lamp.light_energy = 1.2 * LAMP_PAIR_ENERGY
 		wall_lamp.omni_range = 4.5
 		wall_lamp.light_bake_mode = Light3D.BAKE_DYNAMIC
 		_owned(lights, wall_lamp)
 		_put("CageLamp", "Fixture_" + wall_lamp.name, hall, wall_lamp.position, 90)
+	# солнце снаружи: светит в южные окна; направление, сила и видимость — ShelterWeather по погоде
+	var sun: DirectionalLight3D = DirectionalLight3D.new()
+	sun.name = "Sun"
+	sun.visible = false
+	sun.shadow_enabled = true
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_max_distance = 70.0
+	sun.shadow_blur = 1.5
+	sun.light_bake_mode = Light3D.BAKE_DYNAMIC
+	sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
+	_owned(lights, sun)
+	var weather: ShelterWeather = ShelterWeather.new()
+	weather.name = "Weather"
+	_owned(_root, weather)
 	# рассеянный дневной свет через армированное стекло — холодный и слабый
 	for x: float in [27.0, 39.0, 51.0]:
 		var day: OmniLight3D = OmniLight3D.new()

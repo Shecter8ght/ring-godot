@@ -70,7 +70,7 @@ func _apply() -> void:
 		return
 	for node: Node in lights.get_children():
 		var light: Light3D = node as Light3D
-		if not light or light.name == &"TvGlow" or String(light.name).begins_with("Emergency"):
+		if not light or light.name == &"TvGlow" or String(light.name).begins_with("Emergency") or daylight(light):
 			continue
 		if not light.has_meta("normal_energy"):
 			light.set_meta("normal_energy", light.light_energy)
@@ -89,7 +89,15 @@ func _apply() -> void:
 				var material: StandardMaterial3D = mi.mesh.surface_get_material(index) as StandardMaterial3D
 				if material and material.resource_name == "WarmEmitter":
 					material.emission_energy_multiplier = 2.4 if enabled else 0.0
+	# запечённый рассеянный свет — свой вариант с лампами и без (ShelterWeather)
+	var weather: ShelterWeather = level.get_node_or_null("Weather") as ShelterWeather
+	if weather:
+		weather.refresh.call_deferred(true)
 	_refresh_reflections.call_deferred()
+
+## Свет снаружи (солнце, дневной свет из окон) — не от генератора.
+static func daylight(light: Light3D) -> bool:
+	return light is DirectionalLight3D or String(light.name).begins_with("HallDaylight")
 
 func _refresh_reflections() -> void:
 	if _refreshing or not is_inside_tree():

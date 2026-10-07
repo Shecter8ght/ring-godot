@@ -1,21 +1,38 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_base.jpg" id="1_lcmej"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_orm.jpg" id="2_nujgf"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_normal.jpg" id="3_v83a5"]
+[ext_resource type="Shader" path="res://assets/shelter/shaders/aged_surface.gdshader" id="1_hgmin"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_base.jpg" id="2_j1ge7"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/macro.png" id="3_5dtxc"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_normal.jpg" id="4_6o4na"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_orm.jpg" id="5_gjqy0"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/streaks.png" id="6_xlndq"]
 
 [resource]
 resource_name = "PeelingPaint"
-albedo_texture = ExtResource("1_lcmej")
-metallic = 1.0
-metallic_specular = 0.35
-metallic_texture = ExtResource("2_nujgf")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_nujgf")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_scale = 0.32
-normal_texture = ExtResource("3_v83a5")
-ao_enabled = true
-ao_texture = ExtResource("2_nujgf")
-texture_filter = 5
+render_priority = 0
+shader = ExtResource("1_hgmin")
+shader_parameter/albedo_tex = ExtResource("2_j1ge7")
+shader_parameter/normal_tex = ExtResource("4_6o4na")
+shader_parameter/orm_tex = ExtResource("5_gjqy0")
+shader_parameter/has_albedo = true
+shader_parameter/has_normal = true
+shader_parameter/has_orm = true
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/normal_scale = 0.32
+shader_parameter/specular = 0.35
+shader_parameter/roughness = 1.0
+shader_parameter/macro_tex = ExtResource("3_5dtxc")
+shader_parameter/macro_scale = null
+shader_parameter/macro_amount = null
+shader_parameter/floor_y = null
+shader_parameter/base_height = null
+shader_parameter/base_grime = 0.6
+shader_parameter/grime_color = null
+shader_parameter/streak_tex = ExtResource("6_xlndq")
+shader_parameter/streaks = 0.5
+shader_parameter/soot_from = null
+shader_parameter/soot_range = null
+shader_parameter/soot = 0.45
+shader_parameter/soot_ceiling = 0.0
+shader_parameter/soot_color = null
+shader_parameter/floor_wear = null

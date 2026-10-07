@@ -1,21 +1,38 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_base.jpg" id="1_fw460"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_orm.jpg" id="2_eht56"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_normal.jpg" id="3_qib56"]
+[ext_resource type="Shader" path="res://assets/shelter/shaders/aged_surface.gdshader" id="1_1vrge"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_base.jpg" id="2_urn7y"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/macro.png" id="3_ojjoo"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_normal.jpg" id="4_ba211"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_orm.jpg" id="5_gxkcc"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/streaks.png" id="6_i848t"]
 
 [resource]
 resource_name = "Whitewash"
-albedo_texture = ExtResource("1_fw460")
-metallic = 1.0
-metallic_specular = 0.35
-metallic_texture = ExtResource("2_eht56")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_eht56")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_scale = 0.32
-normal_texture = ExtResource("3_qib56")
-ao_enabled = true
-ao_texture = ExtResource("2_eht56")
-texture_filter = 5
+render_priority = 0
+shader = ExtResource("1_1vrge")
+shader_parameter/albedo_tex = ExtResource("2_urn7y")
+shader_parameter/normal_tex = ExtResource("4_ba211")
+shader_parameter/orm_tex = ExtResource("5_gxkcc")
+shader_parameter/has_albedo = true
+shader_parameter/has_normal = true
+shader_parameter/has_orm = true
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/normal_scale = 0.32
+shader_parameter/specular = 0.35
+shader_parameter/roughness = 1.0
+shader_parameter/macro_tex = ExtResource("3_ojjoo")
+shader_parameter/macro_scale = null
+shader_parameter/macro_amount = 0.22
+shader_parameter/floor_y = null
+shader_parameter/base_height = null
+shader_parameter/base_grime = 0.75
+shader_parameter/grime_color = null
+shader_parameter/streak_tex = ExtResource("6_i848t")
+shader_parameter/streaks = 0.75
+shader_parameter/soot_from = null
+shader_parameter/soot_range = null
+shader_parameter/soot = 0.6
+shader_parameter/soot_ceiling = 0.0
+shader_parameter/soot_color = null
+shader_parameter/floor_wear = null

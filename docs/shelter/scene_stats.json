@@ -9,9 +9,9 @@
 		"ucupaint_layers": 4
 	},
 	"gi": "SDFGI + SSIL (existing Forward+ pipeline)",
-	"lights": 45.0,
+	"lights": 75.0,
 	"navigation_polygons": 300,
 	"procedural_level_generation": false,
-	"prop_instances": 414,
+	"prop_instances": 443,
 	"reflection_probes": 7.0
 }

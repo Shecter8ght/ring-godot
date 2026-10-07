@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Sledgehammer_00.res" id="1_juueq"]
 
-[node name="PH_Sledgehammer" type="Node3D" unique_id=582673929]
+[node name="PH_Sledgehammer" type="Node3D" unique_id=897768765]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=216505504]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1248923769]
 mesh = ExtResource("1_juueq")

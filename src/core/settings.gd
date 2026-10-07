@@ -6,7 +6,7 @@ extends Node
 ##
 ## Графика: «высоко» — как задумано в сценах (SDFGI, SSIL, SSAO, объёмный туман, тени 8К, MSAA 4×);
 ## «средне» — без SDFGI и SSIL, тени 4К, MSAA 2×; «низко» — ещё без SSAO и тумана, тени 2К, рендер 3D в
-## 77 % разрешения с FSR. TAA выключен везде: при повороте камеры он оставлял за предметами
+## 77 % разрешения с FSR. Сглаживание — MSAA и SMAA (на «низко» — FXAA). TAA выключен везде: при повороте камеры он оставлял за предметами
 ## тающий шлейф (замер: кадр в движении против того же ракурса в покое — шлейф только от TAA). Исходные значения окружения запоминаются на нём (meta), чтобы вернуть.
 ## Громкость — по шинам: выстрелы, шаги, эффекты (попадания, двери, голоса), окружение.
 ## Экран: во весь экран (без рамки, поверх панели задач — умолчание, project.godot) или в окне;
@@ -29,6 +29,10 @@ const FOV_H_RANGE := [50.0, 120.0]
 const FOV_H_DEFAULT := 90.0
 
 var quality: String = "high"
+## «Как с камеры» (CameraLook): привыкание глаза к свету, объектив, зерно, грейд, размытое оружие в прицеле.
+var lens_fx: bool = true
+## Размытие в движении (поворот головы, бег).
+var motion_blur: bool = true
 ## Во весь экран или в окне (WINDOW_MODES).
 var window_mode: String = "fullscreen"
 ## Множитель чувствительности мыши: от первого лица (взгляд) и в изометрии (поворот камеры СКМ).
@@ -85,6 +89,8 @@ func _load() -> void:
 	quality = q if q in QUALITY else "high"
 	var wm := String(cfg.get_value("graphics", "window", window_mode))
 	window_mode = wm if wm in WINDOW_MODES else "fullscreen"
+	lens_fx = bool(cfg.get_value("graphics", "lens_fx", lens_fx))
+	motion_blur = bool(cfg.get_value("graphics", "motion_blur", motion_blur))
 	sens_fps = clampf(float(cfg.get_value("mouse", "fps", sens_fps)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
@@ -109,6 +115,8 @@ func save() -> void:
 	cfg.load(PATH)
 	cfg.set_value("graphics", "quality", quality)
 	cfg.set_value("graphics", "window", window_mode)
+	cfg.set_value("graphics", "lens_fx", lens_fx)
+	cfg.set_value("graphics", "motion_blur", motion_blur)
 	cfg.set_value("mouse", "fps", sens_fps)
 	cfg.set_value("mouse", "iso", sens_iso)
 	cfg.set_value("mouse", "ads", sens_ads)
@@ -130,6 +138,18 @@ func set_quality(q: String) -> void:
 		return
 	quality = q
 	apply_graphics()
+	save()
+	changed.emit()
+
+
+func set_lens_fx(on: bool) -> void:
+	lens_fx = on
+	save()
+	changed.emit()
+
+
+func set_motion_blur(on: bool) -> void:
+	motion_blur = on
 	save()
 	changed.emit()
 

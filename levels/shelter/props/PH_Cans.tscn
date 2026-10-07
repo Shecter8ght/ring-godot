@@ -4,16 +4,16 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Cans_01.res" id="2_o7a3n"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Cans_02.res" id="3_t4kgd"]
 
-[node name="PH_Cans" type="Node3D" unique_id=1975190122]
+[node name="PH_Cans" type="Node3D" unique_id=2025925168]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1575279517]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1707399016]
 cast_shadow = 0
 mesh = ExtResource("1_34bs7")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1016545034]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=762321839]
 cast_shadow = 0
 mesh = ExtResource("2_o7a3n")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=950680708]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=198306258]
 cast_shadow = 0
 mesh = ExtResource("3_t4kgd")

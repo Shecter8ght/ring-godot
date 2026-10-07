@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/GeneratorServiceDetails_00.res" id="1_xbyn8"]
 
-[node name="GeneratorServiceDetails" type="Node3D" unique_id=65700293]
+[node name="GeneratorServiceDetails" type="Node3D" unique_id=20349030]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=204026781]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=35656795]
 mesh = ExtResource("1_xbyn8")

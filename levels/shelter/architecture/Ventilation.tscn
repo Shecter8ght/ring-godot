@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Ventilation_00.res" id="1_wnlmt"]
 
-[node name="Ventilation" type="Node3D" unique_id=801702101]
+[node name="Ventilation" type="Node3D" unique_id=948267383]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=109290803]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=97410302]
 layers = 524288
 mesh = ExtResource("1_wnlmt")

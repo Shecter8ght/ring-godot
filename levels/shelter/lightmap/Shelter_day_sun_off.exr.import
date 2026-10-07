@@ -1,0 +1,29 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://cv6o1imdwk5vc"
+path.bptc="res://.godot/imported/Shelter_day_sun_off.exr-ef0a62ebf1ebb2f47e67b4f5a793bbee.bptc.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://levels/shelter/lightmap/Shelter_day_sun_off.exr"
+dest_files=["res://.godot/imported/Shelter_day_sun_off.exr-ef0a62ebf1ebb2f47e67b4f5a793bbee.bptc.ctexarray"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/channel_pack=1
+mipmaps/generate=false
+mipmaps/limit=-1
+slices/horizontal=1
+slices/vertical=4

@@ -104,3 +104,12 @@
 | PH_Sledgehammer | Sledgehammer 01 | Dylan Guzman | https://polyhaven.com/a/sledgehammer_01 |
 
 Собственные (для владельца RING): стены котельной с окнами из армированного стекла, котельный зал, котлы, насосы, щит КИП, магистрали, тир (рубеж, кабины, направляющие, улавливатель, пульты, тележки, шкаф стойки) — `tools/build_shelter_boiler.py`; шлем, бронежилет, рюкзак — `tools/build_shelter_gear.py` (временно, до замены готовыми моделями). Лист «мишень № 4», армированное стекло, пробоина, кнопки — собственная графика. Модели оружия в шкафу и на столе — существующие ВСС, ПМ, Glock игры (см. `assets/CREDITS.md`). Манекены тира — Persona игры в матовом пластике.
+
+### Старение убежища (2026-10-07) — `assets/shelter/textures/grime/`
+
+| Файл | Источник | Автор | Лицензия |
+|---|---|---|---|
+| leak_0…4, salt_0…4 (+ ORM, нормали) | ambientCG Leaking001, 003, 004, 005, 008 — https://ambientcg.com | Lennart Demes (ambientCG) | CC0 |
+| note_0…8, notes.png (надписи маркером и мелом) | шрифт Neucha — https://fonts.google.com/specimen/Neucha | Jovanny Lemonad | SIL OFL 1.1 (рисованный текст, шрифт в игру не входит) |
+
+Собственные (процедурный шум): macro.png, streaks.png (маски шейдера `aged_surface.gdshader`), soot.png, dust_strip.png, floor_grime_0…2.

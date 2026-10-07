@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/FoldedTowel_00.res" id="1_pp4u2"]
 
-[node name="FoldedTowel" type="Node3D" unique_id=1742731155]
+[node name="FoldedTowel" type="Node3D" unique_id=301717263]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1584336448]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1254826064]
 cast_shadow = 0
 mesh = ExtResource("1_pp4u2")

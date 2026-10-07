@@ -1,8 +1,8 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://b1txnts3ab7bl"]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/OldWood_base.jpg" id="1_g2qc6"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/OldWood_orm.jpg" id="2_52dl4"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/OldWood_normal.jpg" id="3_qfv53"]
+[ext_resource type="Texture2D" uid="uid://5xrd5xarduva" path="res://assets/shelter/textures/OldWood_base.jpg" id="1_g2qc6"]
+[ext_resource type="Texture2D" uid="uid://c6vfvwkvw7qvc" path="res://assets/shelter/textures/OldWood_orm.jpg" id="2_52dl4"]
+[ext_resource type="Texture2D" uid="uid://cgv64qbvoeutw" path="res://assets/shelter/textures/OldWood_normal.jpg" id="3_qfv53"]
 
 [resource]
 resource_name = "OldWood"
@@ -18,3 +18,4 @@ normal_texture = ExtResource("3_qfv53")
 ao_enabled = true
 ao_texture = ExtResource("2_52dl4")
 texture_filter = 5
+distance_fade_mode = 2

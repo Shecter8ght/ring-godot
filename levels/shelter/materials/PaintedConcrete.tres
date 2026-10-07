@@ -1,21 +1,38 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_base.jpg" id="1_jx8bx"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_orm.jpg" id="2_k7pdh"]
-[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_normal.jpg" id="3_d1ft3"]
+[ext_resource type="Shader" path="res://assets/shelter/shaders/aged_surface.gdshader" id="1_rrsb8"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_base.jpg" id="2_32670"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/macro.png" id="3_qq6rp"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_normal.jpg" id="4_ofqco"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PaintedConcrete_orm.jpg" id="5_57d81"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/streaks.png" id="6_jvvhn"]
 
 [resource]
 resource_name = "PaintedConcrete"
-albedo_texture = ExtResource("1_jx8bx")
-metallic = 1.0
-metallic_specular = 0.35
-metallic_texture = ExtResource("2_k7pdh")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_k7pdh")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_scale = 0.4
-normal_texture = ExtResource("3_d1ft3")
-ao_enabled = true
-ao_texture = ExtResource("2_k7pdh")
-texture_filter = 5
+render_priority = 0
+shader = ExtResource("1_rrsb8")
+shader_parameter/albedo_tex = ExtResource("2_32670")
+shader_parameter/normal_tex = ExtResource("4_ofqco")
+shader_parameter/orm_tex = ExtResource("5_57d81")
+shader_parameter/has_albedo = true
+shader_parameter/has_normal = true
+shader_parameter/has_orm = true
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/normal_scale = 0.4
+shader_parameter/specular = 0.35
+shader_parameter/roughness = 1.0
+shader_parameter/macro_tex = ExtResource("3_qq6rp")
+shader_parameter/macro_scale = null
+shader_parameter/macro_amount = null
+shader_parameter/floor_y = null
+shader_parameter/base_height = null
+shader_parameter/base_grime = 0.6
+shader_parameter/grime_color = null
+shader_parameter/streak_tex = ExtResource("6_jvvhn")
+shader_parameter/streaks = 0.45
+shader_parameter/soot_from = null
+shader_parameter/soot_range = null
+shader_parameter/soot = 0.45
+shader_parameter/soot_ceiling = 0.3
+shader_parameter/soot_color = null
+shader_parameter/floor_wear = null
