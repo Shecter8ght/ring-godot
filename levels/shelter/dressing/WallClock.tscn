@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/WallClock_00.res" id="1_7bgih"]
 
-[node name="WallClock" type="Node3D" unique_id=1565402571]
+[node name="WallClock" type="Node3D" unique_id=1256251266]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1449634920]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1853150920]
 mesh = ExtResource("1_7bgih")

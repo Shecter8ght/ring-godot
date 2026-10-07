@@ -9,26 +9,26 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_j53b0"]
 size = Vector3(0.92, 0.33954263, 0.60660213)
 
-[node name="PH_Crate" type="Node3D" unique_id=1043257206]
+[node name="PH_Crate" type="Node3D" unique_id=1119192621]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=642486901]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1395795048]
 mesh = ExtResource("1_2uiag")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1168670988]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=2092246800]
 mesh = ExtResource("2_nuc0i")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=179019678]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1481393481]
 mesh = ExtResource("3_ftedv")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=73435322]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1449267732]
 mesh = ExtResource("4_vetj8")
 
-[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=316461718]
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=773736112]
 mesh = ExtResource("5_6fncg")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=686219481]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=622107969]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1089939463]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1735990369]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16977131, 0)
 shape = SubResource("BoxShape3D_j53b0")

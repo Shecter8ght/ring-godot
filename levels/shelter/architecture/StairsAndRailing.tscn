@@ -8,18 +8,18 @@ size = Vector3(3.5, 0.2, 1.6)
 [sub_resource type="BoxShape3D" id="BoxShape3D_bl6sb"]
 size = Vector3(4, 0.2, 1.6)
 
-[node name="StairsAndRailing" type="Node3D" unique_id=533762942]
+[node name="StairsAndRailing" type="Node3D" unique_id=901458401]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1958238959]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1540132494]
 mesh = ExtResource("1_8je82")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1261898950]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1877828874]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1607969333]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1927335492]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.65, 2.5, -7.3)
 shape = SubResource("BoxShape3D_84hjj")
 
-[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1837274654]
+[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1494689265]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2.5, -7.3)
 shape = SubResource("BoxShape3D_bl6sb")

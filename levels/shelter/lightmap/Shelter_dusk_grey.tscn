@@ -56,26 +56,26 @@ render_priority = 0
 shader = SubResource("Shader_mufw6")
 shader_parameter/channel = 0
 
-[node name="Shelter_Interior" unique_id=1483015447 instance=ExtResource("1_base")]
+[node name="Shelter_Interior" unique_id=511705077 instance=ExtResource("1_base")]
 
-[node name="Sun" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="71" unique_id=780270760]
+[node name="Sun" parent="Lights" parent_id_path=PackedInt32Array(1434640452) index="71" unique_id=1197075603]
 transform = Transform3D(0.57357645, -0.17031127, 0.8012516, 0, 0.9781476, 0.20791169, -0.819152, -0.11925325, 0.5610424, 0, 0, 0)
 light_color = Color(1, 0.74, 0.5, 1)
 light_energy = 2.86
 
-[node name="HallDaylight_72" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="72" unique_id=1208046424]
+[node name="HallDaylight_72" parent="Lights" parent_id_path=PackedInt32Array(1434640452) index="72" unique_id=1541111020]
 light_energy = 0.16481374
 
-[node name="HallDaylight_73" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="73" unique_id=332133528]
+[node name="HallDaylight_73" parent="Lights" parent_id_path=PackedInt32Array(1434640452) index="73" unique_id=607975445]
 light_energy = 0.16481374
 
-[node name="HallDaylight_74" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="74" unique_id=372411029]
+[node name="HallDaylight_74" parent="Lights" parent_id_path=PackedInt32Array(1434640452) index="74" unique_id=543795343]
 light_energy = 0.16481374
 
-[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(1023472905) index="0" unique_id=979412553]
+[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(2123821538) index="0" unique_id=2057456523]
 material_override = SubResource("ShaderMaterial_ttie2")
 
-[node name="LightmapGI" parent="." index="17" unique_id=71893088]
+[node name="LightmapGI" parent="." index="17" unique_id=1330623862]
 light_data = ExtResource("2_gky0i")
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]
@@ -293,6 +293,7 @@ light_data = ExtResource("2_gky0i")
 [editable path="Props/SH_Int_PersonalAndTechnical/CommunicationsDesk"]
 [editable path="Props/SH_Int_PersonalAndTechnical/CommunicationsReceiver"]
 [editable path="Props/SH_Int_PersonalAndTechnical/CommunicationsLog"]
+[editable path="Props/SH_Int_PersonalAndTechnical/CommunicationsTerminal"]
 [editable path="Props/SH_Int_PersonalAndTechnical/NorthWaitingBench"]
 [editable path="Props/SH_Int_PersonalAndTechnical/PersonalLocker"]
 [editable path="Props/SH_Int_PersonalAndTechnical/MaintenanceReel"]

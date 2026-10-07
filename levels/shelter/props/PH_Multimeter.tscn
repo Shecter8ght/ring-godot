@@ -8,32 +8,32 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Multimeter_05.res" id="6_snyvr"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Multimeter_06.res" id="7_ageu5"]
 
-[node name="PH_Multimeter" type="Node3D" unique_id=418979333]
+[node name="PH_Multimeter" type="Node3D" unique_id=1813170396]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=28797752]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=634782850]
 cast_shadow = 0
 mesh = ExtResource("1_6bqwy")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1941914908]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1698602774]
 cast_shadow = 0
 mesh = ExtResource("2_v8q1s")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1321325832]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1421533784]
 cast_shadow = 0
 mesh = ExtResource("3_rcxm5")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1377019297]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1147789664]
 cast_shadow = 0
 mesh = ExtResource("4_du061")
 
-[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1645091011]
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1039932092]
 cast_shadow = 0
 mesh = ExtResource("5_mco7c")
 
-[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=141393024]
+[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=752930049]
 cast_shadow = 0
 mesh = ExtResource("6_snyvr")
 
-[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=1694893785]
+[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=568214816]
 cast_shadow = 0
 mesh = ExtResource("7_ageu5")

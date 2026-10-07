@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/CageLamp_00.res" id="1_dfy58"]
 
-[node name="CageLamp" type="Node3D" unique_id=1160613327]
+[node name="CageLamp" type="Node3D" unique_id=1405784366]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=500856385]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=917908125]
 mesh = ExtResource("1_dfy58")

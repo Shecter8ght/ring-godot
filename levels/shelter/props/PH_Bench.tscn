@@ -5,14 +5,14 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_wo1sq"]
 size = Vector3(1.1649436, 0.88929147, 0.4965431)
 
-[node name="PH_Bench" type="Node3D" unique_id=616751367]
+[node name="PH_Bench" type="Node3D" unique_id=2058876830]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1663985718]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1669535699]
 mesh = ExtResource("1_okork")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1945993315]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=648212676]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1700629021]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1990349576]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44464573, 0)
 shape = SubResource("BoxShape3D_wo1sq")

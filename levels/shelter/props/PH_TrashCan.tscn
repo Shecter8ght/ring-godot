@@ -5,16 +5,16 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_TrashCan_02.res" id="3_ttmhy"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_TrashCan_03.res" id="4_j4myh"]
 
-[node name="PH_TrashCan" type="Node3D" unique_id=962622627]
+[node name="PH_TrashCan" type="Node3D" unique_id=17942711]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1098985714]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1297578880]
 mesh = ExtResource("1_o83hq")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=158397662]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1203316993]
 mesh = ExtResource("2_ij2q8")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=985037820]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1161733688]
 mesh = ExtResource("3_ttmhy")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=2036515830]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=6990351]
 mesh = ExtResource("4_j4myh")

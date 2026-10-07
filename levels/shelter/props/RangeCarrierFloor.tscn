@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/RangeCarrierFloor_00.res" id="1_jt6vg"]
 
-[node name="RangeCarrierFloor" type="Node3D" unique_id=2128043258]
+[node name="RangeCarrierFloor" type="Node3D" unique_id=1797821613]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1889441082]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2042391034]
 mesh = ExtResource("1_jt6vg")

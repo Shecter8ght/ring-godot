@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/DrapedBlanket_00.res" id="1_styno"]
 
-[node name="DrapedBlanket" type="Node3D" unique_id=2109078661]
+[node name="DrapedBlanket" type="Node3D" unique_id=694199622]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1415083714]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=818829284]
 cast_shadow = 0
 mesh = ExtResource("1_styno")

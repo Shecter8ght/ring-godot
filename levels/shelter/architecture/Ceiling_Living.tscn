@@ -6,20 +6,20 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_t3uw2"]
 size = Vector3(10, 0.2, 6)
 
-[node name="Ceiling_Living" type="Node3D" unique_id=338368939]
+[node name="Ceiling_Living" type="Node3D" unique_id=1882577966]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1360839579]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=956727680]
 layers = 524288
 mesh = ExtResource("1_0pfoe")
 
-[node name="CeilingShadow" type="MeshInstance3D" parent="." unique_id=607310447]
+[node name="CeilingShadow" type="MeshInstance3D" parent="." unique_id=1473612144]
 material_override = ExtResource("2_a0dxi")
 cast_shadow = 3
 mesh = ExtResource("1_0pfoe")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=29846576]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1602743497]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2141403622]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=559122118]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 3.35, -8)
 shape = SubResource("BoxShape3D_t3uw2")

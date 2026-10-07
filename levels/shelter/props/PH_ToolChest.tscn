@@ -11,32 +11,32 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_yy22b"]
 size = Vector3(0.68538845, 0.65183556, 0.40715325)
 
-[node name="PH_ToolChest" type="Node3D" unique_id=1888405792]
+[node name="PH_ToolChest" type="Node3D" unique_id=1166794783]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1250749138]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1934395215]
 mesh = ExtResource("1_pcqiv")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1766829050]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=746537556]
 mesh = ExtResource("2_uudkh")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1263677275]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=232721644]
 mesh = ExtResource("3_f56nu")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=796075633]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=454198462]
 mesh = ExtResource("4_11rt7")
 
-[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1141600957]
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1054132629]
 mesh = ExtResource("5_nhlxg")
 
-[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=275685391]
+[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=245879836]
 mesh = ExtResource("6_70m7l")
 
-[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=917983131]
+[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=1953781788]
 mesh = ExtResource("7_y3iqd")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=726205440]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=212213364]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1100854234]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1984405253]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32591778, 0)
 shape = SubResource("BoxShape3D_yy22b")

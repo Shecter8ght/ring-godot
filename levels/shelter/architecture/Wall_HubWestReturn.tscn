@@ -5,16 +5,16 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_0tlau"]
 size = Vector3(0.4, 3.25, 1)
 
-[node name="Wall_HubWestReturn" type="Node3D" unique_id=1701989383]
+[node name="Wall_HubWestReturn" type="Node3D" unique_id=211041587]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=442705671]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=504080447]
 cast_shadow = 2
 mesh = ExtResource("1_7vpoy")
 metadata/shelter_cut = true
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=686919680]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1256019405]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=901598691]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1242219661]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.625, 7.5)
 shape = SubResource("BoxShape3D_0tlau")

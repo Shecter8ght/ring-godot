@@ -19,6 +19,7 @@ extends Node
 ##   have_item {item}        — предмет в рюкзаке (pickup_item)
 ##   extracted {items, npcs} — эвакуация (reach_extraction, extract_with_item, extract_with_npc, survive)
 ##   kill {arch}             — добил мародёра (kill_targets, n штук, arch — тип или пусто)
+##   hand_in {item}          — сдал предметы через терминал (контракт «Под заказ», hand_in)
 ##
 ## Реплики: в диалогах [кто, текст], кто = "player" — герой (подпись «Я», свой цвет); в lines
 ## мест и say / say_start целей — строка (описание) или [кто, текст]. say — цель выполнена,
@@ -43,6 +44,8 @@ const INDEX := "res://data/quests/index.json"
 
 var _defs: Dictionary = {}
 var _order: Array[String] = []
+## Квесты-экземпляры контрактов терминала (Contracts) — добавлены поверх сюжетных.
+var _extra_ids: Array[String] = []
 ## В рейде (хост и соло): копия состояния {quests, flags}; вне рейда пусто.
 var _live: Dictionary = {}
 ## Рейд: кто-то из группы эвакуировался — сделанное засчитано всем (хост).
@@ -83,6 +86,28 @@ func _load_defs() -> void:
 		if d is Dictionary:
 			_defs[String(qid)] = d
 			_order.append(String(qid))
+
+
+## Контракты терминала: заменить набор квестов-экземпляров (сюжетные не трогаются).
+func set_extra(defs: Dictionary) -> void:
+	for qid in _extra_ids:
+		_defs.erase(qid)
+		_order.erase(qid)
+	_extra_ids.clear()
+	for qid in defs:
+		_defs[String(qid)] = defs[qid]
+		_order.append(String(qid))
+		_extra_ids.append(String(qid))
+	_broadcast()
+	changed.emit()
+
+
+## Контракт снят (отказ): его состояние — прочь из профиля (или копии рейда).
+func drop_extra(qid: String) -> void:
+	if is_client() or not qid in _extra_ids:
+		return
+	_quests().erase(qid)
+	_commit_if_home()
 
 
 # ---------------------------------------------------------------- чтение
@@ -306,6 +331,9 @@ func _matches(qid: String, o: Dictionary, type: String, p: Dictionary) -> bool:
 			return type == "site" and String(p.get("site", "")) == String(o.get("site", ""))
 		"pickup_item":
 			return type == "have_item" and String(p.get("item", "")) == String(o.get("item", ""))
+		"hand_in":
+			# сдача предметов через терминал (контракт «Под заказ»): предметы уже сняты с тайника
+			return type == "hand_in" and String(p.get("item", "")) == String(o.get("item", ""))
 		"reach_extraction", "survive":
 			return type == "extracted"
 		"extract_with_item":
@@ -388,6 +416,13 @@ func _give_reward(r: Dictionary) -> void:
 	for id in r.get("unlock_stock", []):
 		if not String(id) in Profile.unlocked_stock:
 			Profile.unlocked_stock.append(String(id))
+	# репутация у заказчиков терминала
+	var rep: Dictionary = r.get("rep", {})
+	if not rep.is_empty():
+		if not Profile.contracts.has("rep"):
+			Profile.contracts["rep"] = {}
+		for gid in rep:
+			Profile.contracts.rep[String(gid)] = int(Profile.contracts.rep.get(String(gid), 0)) + int(rep[gid])
 
 
 func _commit_if_home() -> void:
@@ -444,6 +479,8 @@ func end_raid() -> void:
 	_delivered = false
 	_carry = {}
 	_npc_pos = {}
+	# доска контрактов стареет и пополняется (рассылает снимок сама)
+	Contracts.on_raid_end()
 	_broadcast()
 	changed.emit()
 
@@ -464,7 +501,8 @@ func _commit_host() -> void:
 
 func _snapshot() -> Dictionary:
 	return {"campaign": Profile.own_campaign(), "quests": _quests(), "flags": _flags(), "raid": not _live.is_empty(),
-		"delivered": _delivered, "carry": _carry, "npc_pos": _npc_pos, "trust_level": Profile.trust_level()}
+		"delivered": _delivered, "carry": _carry, "npc_pos": _npc_pos, "trust_level": Profile.trust_level(),
+		"contracts": Contracts.board()}
 
 
 func _broadcast() -> void:
@@ -475,6 +513,8 @@ func _broadcast() -> void:
 @rpc("authority", "call_remote", "reliable")
 func _rpc_state(snap: Dictionary) -> void:
 	_remote = snap.duplicate(true)
+	# заказы хоста — квесты-экземпляры и у гостя (награда за них — по их описанию)
+	Contracts.on_snapshot(snap.get("contracts", []))
 	# вне рейда хоста или группа уже что-то вынесла — это засчитано: в свой профиль
 	if not bool(snap.get("raid", false)) or bool(snap.get("delivered", false)):
 		_commit_guest(snap)
@@ -630,7 +670,10 @@ func guards_for(level: String) -> Array:
 			continue
 		var sd: Dictionary = (def(qid).get("sites", {}) as Dictionary).get(String(g.site), {})
 		if String(sd.get("level", "")) == level:
-			out.append({"quest": qid, "site": String(g.site), "n": int(g.get("n", 3)), "radius": float(g.get("radius", 8.0))})
+			# охраны больше с группой: соло ×1, двое ×1.4, трое ×1.8 (docs/design/contracts_and_map.md §3)
+			var group := clampi(Net.player_names.size() if Net.is_networked() else 1, 1, 3)
+			var n := ceili(int(g.get("n", 3)) * [1.0, 1.4, 1.8][group - 1])
+			out.append({"quest": qid, "site": String(g.site), "n": n, "radius": float(g.get("radius", 8.0))})
 	return out
 
 

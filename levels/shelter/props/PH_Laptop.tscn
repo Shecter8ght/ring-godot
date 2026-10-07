@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Laptop_00.res" id="1_5sokh"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Laptop_01.res" id="2_qb4xd"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Laptop_02.res" id="3_matda"]
+
+[node name="PH_Laptop" type="Node3D" unique_id=223927957]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1707315733]
+mesh = ExtResource("1_5sokh")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=184501823]
+mesh = ExtResource("2_qb4xd")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1005673611]
+mesh = ExtResource("3_matda")

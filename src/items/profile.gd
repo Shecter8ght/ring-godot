@@ -50,6 +50,9 @@ static var campaign_id: String = ""
 ## Шаблоны снаряжения (LoadoutTemplates): что надето и что в рюкзаке — собрать одной кнопкой.
 static var loadout_templates: Array = []
 static var guest_campaigns: Dictionary = {}
+## Контракты терминала (Contracts): доска {board: [{id, tpl, giver, seed, born}], seq, raids} и
+## репутация у заказчиков (rep: giver -> очки).
+static var contracts: Dictionary = {}
 ## Хроника рейдов: последние рейды (новее первым) — для повторов и серий (RaidHistory); и фразы,
 ## что уже звучали, — чтобы не повторяться.
 static var raid_history: Array = []
@@ -106,6 +109,7 @@ static func ensure() -> void:
 		campaign_id = String(d.get("campaign_id", ""))
 		loadout_templates = d.get("loadout_templates", [])
 		guest_campaigns = d.get("guest_campaigns", {})
+		contracts = d.get("contracts", {})
 		raid_history = d.get("raid_history", [])
 		# хэши фраз: из JSON приходят дробными, а Array.has сравнивает по типу
 		story_recent = (d.get("story_recent", []) as Array).map(func(h: Variant) -> int: return int(h))
@@ -141,6 +145,7 @@ static func _starter() -> void:
 	unlocked_stock = []
 	campaign_id = ""
 	guest_campaigns = {}
+	contracts = {}
 	loadout_templates = []
 	raid_history = []
 	story_recent = []
@@ -180,7 +185,7 @@ static func save() -> void:
 	f.store_string(JSON.stringify({"name": profile_name, "money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
 		"modules": modules, "hideout_media": hideout_media, "missions_active": missions_active, "missions_done": missions_done,
-		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "campaign_id": campaign_id, "guest_campaigns": guest_campaigns, "loadout_templates": loadout_templates, "next_conditions": next_conditions,
+		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "campaign_id": campaign_id, "guest_campaigns": guest_campaigns, "contracts": contracts, "loadout_templates": loadout_templates, "next_conditions": next_conditions,
 		"raid_history": raid_history, "story_recent": story_recent}, "  "))
 
 

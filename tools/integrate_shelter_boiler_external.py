@@ -19,6 +19,7 @@ SPEC = {
     'PH_TrashCan': {'include': ['rust']},
     'PH_CoffeeTable': {'height': .46, 'collide': True},
     'PH_DeskLamp': {'height': .6},
+    'PH_Laptop': {'height': .26},
     'PH_Chair': {'collide': True}, 'PH_Bench': {'collide': True}, 'PH_MilitaryCrate': {'collide': True},
     'PH_Carton': {'collide': True}, 'PH_ToolCart': {'collide': True}, 'PH_ToolChest': {'collide': True},
     'PH_DrillPress': {'collide': True}, 'PH_Compressor': {'collide': True}, 'PH_PropaneTank': {'collide': True},

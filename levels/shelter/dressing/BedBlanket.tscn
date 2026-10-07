@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/BedBlanket_00.res" id="1_f7ltx"]
 
-[node name="BedBlanket" type="Node3D" unique_id=403821801]
+[node name="BedBlanket" type="Node3D" unique_id=334363468]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1011170075]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1556905462]
 cast_shadow = 0
 mesh = ExtResource("1_f7ltx")

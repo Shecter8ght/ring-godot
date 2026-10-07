@@ -11,24 +11,24 @@ size = Vector3(0.4, 0.95, 2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_s015o"]
 size = Vector3(0.4, 3.25, 2)
 
-[node name="Wall_WestArmory" type="Node3D" unique_id=1557199002]
+[node name="Wall_WestArmory" type="Node3D" unique_id=166204904]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=701799020]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=835754870]
 cast_shadow = 2
 mesh = ExtResource("1_jk6xj")
 metadata/shelter_cut = true
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1236022638]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=324777050]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1741980305]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1232240186]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.625, 2)
 shape = SubResource("BoxShape3D_ntihd")
 
-[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1461128738]
+[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2063963135]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.775, 4)
 shape = SubResource("BoxShape3D_m86i8")
 
-[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1241868027]
+[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1468299242]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.625, 6)
 shape = SubResource("BoxShape3D_s015o")

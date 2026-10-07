@@ -3,10 +3,10 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Boots_00.res" id="1_rxfn3"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Boots_01.res" id="2_bwo27"]
 
-[node name="PH_Boots" type="Node3D" unique_id=727057306]
+[node name="PH_Boots" type="Node3D" unique_id=177500334]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=448762778]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=497796862]
 mesh = ExtResource("1_rxfn3")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=667559007]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=281596464]
 mesh = ExtResource("2_bwo27")

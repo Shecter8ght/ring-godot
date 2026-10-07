@@ -3213,9 +3213,9 @@
 		"asset": "Notebook",
 		"name": "CommunicationsLog",
 		"position": [
-			-4.69999980926514,
+			-4.34999990463257,
 			0.970000028610229,
-			-9.10000038146973
+			-9.05000019073486
 		],
 		"rotation_degrees": [
 			0.0,
@@ -3223,6 +3223,21 @@
 			0.0
 		],
 		"yaw": 15.9999998760581
+	},
+	{
+		"asset": "PH_Laptop",
+		"name": "CommunicationsTerminal",
+		"position": [
+			-5.05000019073486,
+			0.970000028610229,
+			-9.18000030517578
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
 	},
 	{
 		"asset": "PH_Bench",

@@ -34,6 +34,7 @@ ImpactFx="*res://src/combat/impact_fx.gd"
 Net="*res://src/net/network.gd"
 Pause="*res://src/ui/pause_menu.gd"
 Quests="*res://src/quests/quest_manager.gd"
+Contracts="*res://src/quests/contracts.gd"
 Chat="*res://src/net/chat.gd"
 
 [display]

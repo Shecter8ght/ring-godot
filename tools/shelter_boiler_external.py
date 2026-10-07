@@ -33,6 +33,8 @@ MODELS = {
     'PH_WallClock': ('wall_clock', '1k'), 'PH_Stool': ('metal_stool_02', '1k'),
     'PH_LpgTank': ('small_lpg_tank', '1k'), 'PH_PipeWrench': ('pipe_wrench', '1k'),
     'PH_Sledgehammer': ('sledgehammer_01', '1k'),
+    # терминал контрактов на столе связи в хабе
+    'PH_Laptop': ('classic_laptop', '1k'),
 }
 
 

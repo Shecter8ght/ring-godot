@@ -4244,5 +4244,15 @@
       0.0905
     ],
     "collisions": []
+  },
+  "PH_Laptop": {
+    "external": true,
+    "triangles": 11291,
+    "bounds_m": [
+      0.3123,
+      0.26,
+      0.2328
+    ],
+    "collisions": []
   }
 }

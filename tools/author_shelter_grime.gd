@@ -120,6 +120,9 @@ func _find_walls(points: Array[Vector3]) -> Array[Dictionary]:
 			if absf(n.y) > 0.2:
 				continue
 			n = Vector3(n.x, 0.0, n.z).normalized()
+			# луч из-под геометрии возвращает нулевую нормаль — такую стену не брать
+			if n.length() < 0.5:
+				continue
 			var at: Vector3 = hit.position
 			var key: Vector3i = Vector3i(roundi(at.x / 0.8), roundi(at.z / 0.8), roundi(atan2(n.x, n.z) * 2.0))
 			if seen.has(key):
@@ -245,7 +248,9 @@ func _soot() -> void:
 	var i: int = 0
 	for node: Node in _level.get_node("Lights").get_children():
 		var light: Light3D = node as Light3D
-		if not light or light.name == &"TvGlow" or String(light.name).begins_with("Emergency"):
+		# солнце и дневной свет — не лампы (солнце стоит в начале координат, внутри стены: луч из
+		# него давал нулевую нормаль и вырожденную декаль — ошибка basis.cpp каждый кадр)
+		if not light or light.name == &"TvGlow" or String(light.name).begins_with("Emergency") or ShelterPower.daylight(light):
 			continue
 		var p: Vector3 = light.global_position
 		for k: int in range(4):
@@ -254,6 +259,8 @@ func _soot() -> void:
 			if hit.is_empty() or absf((hit.normal as Vector3).y) > 0.2:
 				continue
 			var n: Vector3 = Vector3((hit.normal as Vector3).x, 0.0, (hit.normal as Vector3).z).normalized()
+			if n.length() < 0.5:
+				continue
 			var h: float = _rng.randf_range(0.9, 1.4)
 			var at: Vector3 = (hit.position as Vector3) + Vector3.UP * (h * 0.5 - 0.05)
 			i += 1

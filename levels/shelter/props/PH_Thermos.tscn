@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Thermos_00.res" id="1_72jrl"]
 
-[node name="PH_Thermos" type="Node3D" unique_id=464871896]
+[node name="PH_Thermos" type="Node3D" unique_id=1924862386]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=566947697]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=56802956]
 cast_shadow = 0
 mesh = ExtResource("1_72jrl")

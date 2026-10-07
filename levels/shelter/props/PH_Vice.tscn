@@ -5,16 +5,16 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Vice_02.res" id="3_seixg"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Vice_03.res" id="4_3etvt"]
 
-[node name="PH_Vice" type="Node3D" unique_id=1598760605]
+[node name="PH_Vice" type="Node3D" unique_id=1245852407]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1966012259]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2064425260]
 mesh = ExtResource("1_lle6w")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=2057919039]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=193049503]
 mesh = ExtResource("2_5q6vu")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1745971408]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=346351256]
 mesh = ExtResource("3_seixg")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1938777715]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=2133129286]
 mesh = ExtResource("4_3etvt")

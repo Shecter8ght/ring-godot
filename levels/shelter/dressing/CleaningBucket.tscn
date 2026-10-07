@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/CleaningBucket_00.res" id="1_dhwst"]
 
-[node name="CleaningBucket" type="Node3D" unique_id=854943604]
+[node name="CleaningBucket" type="Node3D" unique_id=793763928]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=736551291]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1588572417]
 mesh = ExtResource("1_dhwst")
