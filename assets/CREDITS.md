@@ -77,6 +77,18 @@
 | Stable audio · Сгенерировано владельцем проекта · собственный звук | выстрел.wav | guns/hg_01_shot_01.wav — ПМ — Выстрел вблизи |
 
 <!-- PM_MODEL_START -->
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | A_5_01.wav | guns/mag_out_01.wav — Магазин отстёгнут |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | A_19_01.wav | guns/dry_01.wav — Сухой щелчок — патронов нет |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | X_18_01.wav | guns/jam_01.wav — Задержка — глухой щелчок вместо выстрела |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | X_41_03.wav | guns/hg_01_shot_far_01.wav — ПМ — Выстрел вдали |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | X_43_01.wav | guns/hg_01_shot_sup_01.wav — ПМ — Выстрел с глушителем |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | X_19_04.wav | guns/hg_01_mechanism_01.wav — ПМ — Механика выстрела |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | A_26_01.wav | guns/hg_01_reload_01.wav — ПМ — Перезарядка целиком |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | F_4_01.wav | guns/hg_01_reload_02.wav — ПМ — Перезарядка целиком |
+| Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | X_5_02.wav | guns/hg_01_reload_03.wav — ПМ — Перезарядка целиком |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | глущитель откручивается.wav | guns/hg_01_suppressor_off_01.wav — ПМ — Глушитель снят |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | глущитель накручивается.wav | guns/hg_01_suppressor_on_01.wav — ПМ — Глушитель накручен |
+
 ## Пистолет ПМ
 
 - `assets/models/weapons/pm/pm.glb` — собственная модель, сделана для RING; владелец — автор проекта. Предоставленный владельцем `PM_Highpoly_v5.blend` сохранён отдельной неизменённой копией в `_asset_src/pm_highpoly_v5/`.
