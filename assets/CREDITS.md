@@ -7,18 +7,37 @@
 ## Текстуры (assets/textures, материалы в assets/materials)
 
 - `assets/textures/asphalt_02/` — Asphalt 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/asphalt_02 — асфальт парковки и доков
+- `assets/textures/bark_brown_02/` — Bark Brown 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/bark_brown_02
 - `assets/textures/concrete_block_wall_02/` — Concrete Block Wall 02, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_block_wall_02 — стены доков и ограждения
+- `assets/textures/concrete_floor_02/` — Concrete Floor 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/concrete_floor_02 — ступени, бордюры, плиты дорожек
 - `assets/textures/concrete_floor_worn_001/` — Concrete Floor Worn 001, Dimitrios Savva, Rico Cilliers, CC0 1.0, https://polyhaven.com/a/concrete_floor_worn_001 — пол склада и служебных помещений
 - `assets/textures/concrete_panels/` — Concrete Panels, Amal Kumar, CC0 1.0, https://polyhaven.com/a/concrete_panels — внешняя стена здания
 - `assets/textures/concrete_wall_006/` — Concrete Wall 006, Dario Barresi, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_wall_006 — стены служебных коридоров
+- `assets/textures/concrete_wall_007/` — Concrete Wall 007, Dario Barresi, Rico Cilliers, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_wall_007 — хрущёвка: цоколь, торцы, бетонные плиты
+- `assets/textures/concrete_wall_008/` — Concrete Wall 008, Dario Barresi, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_wall_008 — хрущёвка: шифер, козырьки
 - `assets/textures/corrugated_iron_02/` — Corrugated Iron 02, Jenelle van Heerden, Sergej Majboroda, CC0 1.0, https://polyhaven.com/a/corrugated_iron_02 — профлист, крыши доков
+- `assets/textures/forest_floor/` — Forest Floor, eye-candy.xyz, CC0 1.0, https://polyhaven.com/a/forest_floor — рельеф: опавшая листва (лесополоса, под деревьями)
+- `assets/textures/gravel_stones/` — Gravel Stones, Amal Kumar, CC0 1.0, https://polyhaven.com/a/gravel_stones — рельеф: щебень насыпи, стройплощадки
 - `assets/textures/green_metal_rust/` — Green Metal Rust, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/green_metal_rust — крашеный корпус гранаты
 - `assets/textures/large_floor_tiles_02/` — Large Floor Tiles 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/large_floor_tiles_02 — пол галереи ТЦ
+- `assets/textures/leafy_grass/` — Leafy Grass, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/leafy_grass — рельеф: осенний газон с листвой (основа)
 - `assets/textures/metal_plate/` — Metal Plate, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/metal_plate — рампы и металлические полы
+- `assets/textures/mud_forest/` — Mud Forest, eye-candy.xyz, CC0 1.0, https://polyhaven.com/a/mud_forest — рельеф: грязь, тропы, колеи
 - `assets/textures/natural_walnut_veneer/` — Natural Walnut Veneer, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/natural_walnut_veneer — ореховое ложе дробовика и винтовки
 - `assets/textures/painted_metal_shutter/` — Painted Metal Shutter, Dario Barresi, Rico Cilliers, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/painted_metal_shutter — роллеты магазинов
 - `assets/textures/painted_plaster_wall/` — Painted Plaster Wall, Amal Kumar, CC0 1.0, https://polyhaven.com/a/painted_plaster_wall — стены магазинов
+- `assets/textures/plywood/` — Plywood, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/plywood — заколоченные окна
+- `assets/textures/red_bricks_04/` — Red Bricks 04, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/red_bricks_04 — кирпичный цоколь, вентшахты на крыше
+- `assets/textures/rocks_ground_02/` — Rocks Ground 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/rocks_ground_02 — рельеф: каменистые склоны оврага, холма
+- `assets/textures/rough_concrete/` — Rough Concrete, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/rough_concrete — хрущёвка 1-464: панели с каменной крошкой
+- `assets/textures/rusty_metal_sheet/` — Rusty Metal Sheet, Amal Kumar, CC0 1.0, https://polyhaven.com/a/rusty_metal_sheet — отливы, двери, гаражи
 - `assets/textures/sapele_veneer/` — Sapele Veneer, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/sapele_veneer — дерево автомата (красноватый лак)
+- `assets/textures/sparse_grass/` — Sparse Grass, Amal Kumar, CC0 1.0, https://polyhaven.com/a/sparse_grass — рельеф: редкая трава, пятна на газоне
+- `assets/textures/tarred_gravel/` — Tarred Gravel, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/tarred_gravel — плоская кровля (рубероид)
+- `assets/textures/whitewashed_brick/` — Whitewashed Brick, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/whitewashed_brick — хрущёвка 1-447: силикатный кирпич
+- `assets/textures/wood_planks_grey/` — Wood Planks Grey, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/wood_planks_grey — деревянная обшивка балконов, сараи
+- `assets/textures/worn_asphalt/` — Worn Asphalt, Amal Kumar, CC0 1.0, https://polyhaven.com/a/worn_asphalt — асфальт двора
+- `assets/textures/worn_corrugated_iron/` — Worn Corrugated Iron, Jenelle van Heerden, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_corrugated_iron — обшивка балконов, навесы
 - `assets/textures/worn_tile_floor/` — Worn Tile Floor, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_tile_floor — пол торгового зала
 
 ## Декали попаданий (tools/import_impact_decals.py)
@@ -54,11 +73,6 @@
 - `assets/textures/ring_vehicles/` — Rusty Metal Sheet, Amal Kumar, CC0 1.0, https://polyhaven.com/a/rusty_metal_sheet
 - `assets/textures/ring_vehicles/` — Rubber Tiles, Amal Kumar, CC0 1.0, https://polyhaven.com/a/rubber_tiles
 - `assets/textures/ring_vehicles/` — Denim Fabric 06, Greg Zaal (фото), Rico Cilliers (обработка), CC0 1.0, https://polyhaven.com/a/denim_fabric_06
-
-## Небо (assets/sky)
-
-- `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
-- `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба
 
 ## Звук — отобрано на стенде (tools/sound_bench)
 
@@ -133,3 +147,19 @@
 
 - Полный реестр фототекстур, пяти моделей Poly Haven (CC0), собственных Blender-моделей и унаследованных ассетов: [ASSET_CREDITS.md](ASSET_CREDITS.md). Финальные ресурсы — `assets/shelter/` и `levels/shelter/`; сырьё/лицензии — `_asset_src/shelter/`.
 <!-- SHELTER_REMAKE_END -->
+
+## Небо (assets/sky)
+
+- `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
+- `assets/sky/nqweba_dawn.hdr` — Nqweba Dawn, Dario Barresi, CC0 1.0, https://polyhaven.com/a/nqweba_dawn — небо рассвета и заката зоны 1 (HdriSky)
+- `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба
+
+## Зона 1 · Район ТЦ (assets/zone01, assets/terrain)
+
+- Хрущёвки (панельная 1-464, кирпичная 1-447), лавки, баки, контейнерная площадка, гаражи и «ракушки»,
+  сараи, сушилки, газонные ограждения, фонари, детская площадка, деревья (берёза, тополь, клён) —
+  собственные модели проекта (tools/build_khrushchevka.py, tools/build_zone01_props.py) по фото-референсам
+  Wikimedia Commons (только для просмотра, в игру не входят).
+- Кора берёзы, листва, пучки травы, шум рельефа — собственные процедурные текстуры
+  (tools/build_zone01_foliage_textures.py, tools/build_zone01.py).
+- Фототекстуры поверхностей и фасадов — Poly Haven, CC0 (список выше, раздел текстур).

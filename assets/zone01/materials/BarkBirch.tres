@@ -1,0 +1,14 @@
+[gd_resource type="StandardMaterial3D" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/zone01/textures/bark_birch.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/bark_brown_02/normal.jpg" id="2"]
+
+[resource]
+resource_name = "BarkBirch"
+albedo_texture = ExtResource("1")
+roughness = 0.85
+normal_enabled = true
+normal_texture = ExtResource("2")
+normal_scale = 0.6
+uv1_scale = Vector3(0.7143, 0.7143, 1)
+texture_filter = 5

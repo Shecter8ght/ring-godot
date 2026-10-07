@@ -1,0 +1,567 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://src/world/district_terrain.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/urban_road.tscn" id="2"]
+[ext_resource type="Shader" path="res://src/world/district_water.gdshader" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/urban_props.tscn" id="4"]
+[ext_resource type="Script" path="res://src/world/district_scatter.gd" id="5"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1"]
+shader = ExtResource("3")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_2"]
+size = Vector2(3.2, 38.6742)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_3"]
+size = Vector2(3.2, 34.5576)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_4"]
+size = Vector2(3.2, 43.2311)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_5"]
+size = Vector2(3.2, 37.7351)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_6"]
+size = Vector2(3.2, 42.05)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_7"]
+size = Vector2(3.2, 36.1321)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_8"]
+size = Vector2(3.2, 33.305)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_9"]
+size = Vector2(3.2, 30.8444)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_10"]
+size = Vector2(3.2, 42.4969)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_11"]
+size = Vector2(3.2, 43.1825)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_12"]
+size = Vector2(3.2, 43.2311)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_13"]
+size = Vector2(3.2, 32.0)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_14"]
+size = Vector2(3.2, 34.5576)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_15"]
+size = Vector2(3.2, 42.2492)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_16"]
+size = Vector2(3.2, 36.9857)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_17"]
+size = Vector2(40.0, 24.0)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_18"]
+size = Vector2(40.0, 24.0)
+material = SubResource("ShaderMaterial_1")
+
+[node name="World" type="Node3D"]
+
+[node name="Terrain" parent="." type="Node3D"]
+script = ExtResource("1")
+data_path = "res://data/sectors/zone01_mall.json"
+
+[node name="Roads" parent="." type="Node3D"]
+
+[node name="NorthRoad" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(-272.0, 0.431, -164.0, -262.0, 0.436, -164.0, -252.0, 0.438, -164.0, -242.0, 0.439, -164.0, -232.0, 0.442, -164.0, -222.0, 0.436, -164.0, -212.0, 0.418, -164.0, -202.0, 0.396, -164.0, -192.0, 0.373, -164.0, -182.0, 0.351, -164.0, -172.0, 0.327, -164.0, -162.0, 0.284, -164.0, -152.0, 0.233, -164.0, -142.0, 0.188, -164.0, -132.0, 0.146, -164.0, -122.0, 0.107, -164.0, -112.0, 0.069, -164.0, -102.0, 0.035, -164.0, -92.0, 0.009, -164.0, -82.0, 0.0, -164.0, -72.0, 0.0, -164.0, -62.0, 0.0, -164.0, -52.0, 0.0, -164.0, -42.0, 0.0, -164.0, -32.0, 0.0, -164.0, -22.0, 0.003, -164.0, -12.0, 0.019, -164.0, -2.0, 0.044, -164.0, 8.0, 0.089, -163.92, 18.0, 0.139, -163.82, 28.0, 0.197, -163.72, 38.0, 0.248, -163.62, 48.0, 0.292, -163.52, 58.0, 0.335, -163.42, 68.0, 0.383, -163.32, 78.0, 0.432, -163.22, 88.0, 0.451, -163.12, 98.0, 0.444, -163.02, 108.0, 0.407, -162.92, 118.0, 0.362, -162.82, 128.0, 0.319, -162.72, 138.0, 0.276, -162.62, 148.0, 0.219, -162.52, 158.0, 0.148, -162.42, 168.0, 0.084, -162.32, 178.0, 0.037, -162.22, 188.0, 0.014, -162.12, 198.0, 0.004, -162.02, 208.05, 0.0, -161.91, 218.1, 0.001, -161.8, 228.16, 0.029, -161.68, 238.22, 0.139, -161.57, 248.27, 0.365, -161.45, 258.33, 0.73, -161.34, 268.39, 1.23, -161.23, 278.44, 1.849, -161.11, 288.5, 2.547, -161.0, 298.56, 3.273, -160.89, 308.61, 3.979, -160.77, 318.67, 4.609, -160.66, 328.73, 5.121, -160.55, 338.78, 5.502, -160.43, 348.84, 5.743, -160.32, 358.9, 5.863, -160.2, 368.95, 5.893, -160.09, 377, 5.888, -160)
+carriage_width = 9.0
+sidewalk_width = 2.5
+sidewalks = true
+markings = true
+
+[node name="Overpass" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(0.0, 0.2, -110.0, 0.0, 0.183, -120.0, 0.0, 0.158, -130.0, 0.0, 0.133, -140.0, 0.0, 0.109, -150.0, 0.0, 0.084, -160.0, 0.0, 0.06, -170.0, 0.0, 0.036, -180.0, 0.0, 0.011, -190.0, 0.0, -0.001, -200.0, 0.0, -0.0, -210.0, 0.0, 0.0, -220.0, 0, 0.0, -224)
+carriage_width = 9.0
+sidewalk_width = 2.5
+sidewalks = true
+markings = true
+
+[node name="WestLink" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(-100.0, -0.019, -164.0, -100.0, -0.015, -154.0, -100.0, -0.011, -144.0, -100.0, -0.008, -134.0, -100.0, -0.002, -124.0, -100.0, 0.016, -114.0, -100.0, 0.043, -104.0, -100.0, 0.076, -94.0, -100.0, 0.102, -84.0, -100.0, 0.126, -74.0, -100.0, 0.151, -64.0, -100.0, 0.175, -54.0, -100.0, 0.199, -44.0, -100.0, 0.211, -34.0, -100.0, 0.211, -24.0, -100, 0.203, -14)
+carriage_width = 8.0
+sidewalk_width = 2.0
+sidewalks = true
+markings = true
+
+[node name="EastRoad" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(377.0, 5.832, -160.0, 377.0, 5.835, -150.0, 377.0, 5.843, -140.0, 377.0, 5.854, -130.0, 377.0, 5.863, -120.0, 377.0, 5.873, -110.0, 377.0, 5.881, -100.0, 377.0, 5.895, -90.0, 377.0, 5.907, -80.0, 377.0, 5.93, -70.0, 377.0, 5.946, -60.0, 377.0, 5.956, -50.0, 377.0, 5.968, -40.0, 377.0, 5.982, -30.0, 377.0, 5.996, -20.0, 377.0, 6.01, -10.0, 377.0, 6.027, 0.0, 377.0, 6.034, 10.0, 377.0, 6.038, 20.0, 377, 6.043, 26)
+carriage_width = 8.0
+sidewalk_width = 0.0
+sidewalks = false
+markings = true
+
+[node name="EastEntry" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(450.0, 6.176, 26.0, 439.86, 6.224, 26.0, 429.72, 6.272, 26.0, 419.58, 6.279, 26.0, 409.44, 6.275, 26.0, 399.31, 6.271, 26.0, 389.17, 6.249, 26.0, 379.03, 6.227, 26.0, 368.89, 6.211, 26.63, 358.76, 6.157, 27.42, 348.63, 6.022, 28.21, 338.5, 5.797, 29.0, 328.37, 5.464, 29.79, 318.24, 4.995, 30.58, 308.11, 4.398, 31.37, 298.02, 3.71, 32.47, 288.14, 2.981, 34.79, 278.26, 2.278, 37.12, 268.37, 1.642, 39.44, 258.49, 1.113, 41.77, 248.6, 0.715, 44.09, 238.72, 0.447, 46.42, 228.84, 0.287, 48.74, 218.95, 0.214, 51.07, 208.94, 0.182, 51.87, 198.83, 0.155, 51.66, 188.72, 0.13, 51.45, 178.62, 0.11, 51.23, 168.51, 0.088, 51.02, 158.4, 0.067, 50.81, 148.3, 0.052, 50.6, 138.19, 0.058, 50.38, 128.09, 0.072, 50.17, 118.0, 0.086, 49.29, 108.0, 0.102, 45.71, 98.0, 0.12, 42.14, 92, 0.132, 40)
+carriage_width = 9.0
+sidewalk_width = 2.0
+sidewalks = true
+markings = true
+
+[node name="SiteRoad" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(70.0, 0.131, 72.0, 79.68, 0.107, 74.9, 89.35, 0.083, 77.81, 99.03, 0.058, 80.71, 108.71, 0.034, 83.61, 118.39, 0.009, 86.52, 128.06, 0.0, 89.42, 138.0, 0.0, 91.14, 148.0, 0.004, 92.57, 158.0, 0.021, 94.0, 168.0, 0.056, 95.43, 178.0, 0.09, 96.86, 188.0, 0.124, 98.29, 198.0, 0.158, 99.71, 200, 0.165, 100)
+carriage_width = 7.0
+sidewalk_width = 0.0
+sidewalks = false
+markings = false
+
+[node name="LoadingExit" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(-5.0, 0.239, 198.0, -5.0, 0.221, 208.0, -5, 0.211, 214)
+carriage_width = 8.0
+sidewalk_width = 0.0
+sidewalks = false
+markings = false
+
+[node name="RingRoad" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(100.0, 0.182, 0.0, 99.33, 0.174, 10.88, 97.54, 0.174, 21.62, 94.63, 0.169, 32.12, 90.63, 0.156, 42.26, 85.43, 0.156, 51.84, 79.26, 0.156, 60.82, 72.18, 0.157, 69.1, 64.28, 0.171, 76.6, 55.52, 0.182, 83.09, 46.13, 0.182, 88.62, 36.22, 0.185, 93.13, 25.88, 0.2, 96.59, 15.2, 0.2, 98.77, 4.36, 0.2, 99.81, -6.54, 0.2, 99.71, -17.36, 0.2, 98.48, -27.96, 0.2, 95.94, -38.23, 0.2, 92.3, -48.07, 0.2, 87.61, -57.36, 0.2, 81.92, -65.89, 0.2, 75.13, -73.66, 0.2, 67.49, -80.59, 0.2, 59.09, -86.6, 0.2, 50.0, -91.47, 0.2, 40.25, -95.28, 0.194, 30.04, -98.01, 0.188, 19.49, -99.62, 0.182, 8.72, -99.9, 0.179, -2.18, -99.05, 0.179, -13.04, -97.06, 0.179, -23.75, -93.97, 0.179, -34.2, -89.62, 0.179, -44.2, -84.26, 0.183, -53.68, -77.93, 0.19, -62.55, -70.71, 0.196, -70.71, -62.55, 0.2, -77.93, -53.68, 0.2, -84.26, -44.2, 0.199, -89.62, -34.2, 0.198, -93.97, -23.75, 0.198, -97.06, -13.04, 0.198, -99.05, -2.18, 0.198, -99.9, 8.72, 0.198, -99.62, 19.49, 0.198, -98.01, 30.04, 0.198, -95.28, 40.25, 0.199, -91.47, 50.0, 0.2, -86.6, 59.09, 0.2, -80.59, 67.49, 0.2, -73.66, 75.13, 0.2, -65.89, 81.92, 0.2, -57.36, 87.61, 0.2, -48.07, 92.3, 0.2, -38.23, 95.94, 0.2, -27.96, 98.48, 0.2, -17.36, 99.71, 0.194, -6.54, 100.0, 0.185, -0.0)
+carriage_width = 10.0
+sidewalk_width = 2.0
+sidewalks = true
+markings = true
+
+[node name="Water" parent="." type="Node3D"]
+
+[node name="Stream_0" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_2")
+position = Vector3(-308.5, -6.2223, -158.0)
+rotation_degrees = Vector3(0.0, -11.0035, 0.0)
+cast_shadow = 0
+
+[node name="Stream_1" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_3")
+position = Vector3(-315.0, -9.4316, -124.0)
+rotation_degrees = Vector3(0.0, -10.6197, 0.0)
+cast_shadow = 0
+
+[node name="Stream_2" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_4")
+position = Vector3(-326.0, -9.65, -89.0)
+rotation_degrees = Vector3(0.0, -22.8337, 0.0)
+cast_shadow = 0
+
+[node name="Stream_3" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_5")
+position = Vector3(-339.5, -9.65, -53.0)
+rotation_degrees = Vector3(0.0, -17.9279, 0.0)
+cast_shadow = 0
+
+[node name="Stream_4" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_6")
+position = Vector3(-344.0, -9.65, -16.0)
+rotation_degrees = Vector3(0.0, 2.8624, 0.0)
+cast_shadow = 0
+
+[node name="Stream_5" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_7")
+position = Vector3(-341.5, -9.65, 21.0)
+rotation_degrees = Vector3(0.0, 5.0425, 0.0)
+cast_shadow = 0
+
+[node name="Stream_6" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_8")
+position = Vector3(-333.0, -9.65, 52.0)
+rotation_degrees = Vector3(0.0, 26.5651, 0.0)
+cast_shadow = 0
+
+[node name="Stream_7" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_9")
+position = Vector3(-318.0, -9.65, 78.0)
+rotation_degrees = Vector3(0.0, 33.6901, 0.0)
+cast_shadow = 0
+
+[node name="Stream_8" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_10")
+position = Vector3(-293.0, -9.65, 101.0)
+rotation_degrees = Vector3(0.0, 57.0948, 0.0)
+cast_shadow = 0
+
+[node name="Stream_9" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_11")
+position = Vector3(-258.0, -9.65, 122.0)
+rotation_degrees = Vector3(0.0, 60.9454, 0.0)
+cast_shadow = 0
+
+[node name="Stream_10" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_12")
+position = Vector3(-224.0, -9.65, 145.0)
+rotation_degrees = Vector3(0.0, 50.9061, 0.0)
+cast_shadow = 0
+
+[node name="Stream_11" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_13")
+position = Vector3(-199.0, -9.65, 170.0)
+rotation_degrees = Vector3(0.0, 36.8699, 0.0)
+cast_shadow = 0
+
+[node name="Stream_12" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_14")
+position = Vector3(-193.0, -9.65, 198.0)
+rotation_degrees = Vector3(0.0, -10.6197, 0.0)
+cast_shadow = 0
+
+[node name="Stream_13" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_15")
+position = Vector3(-205.0, -9.65, 232.0)
+rotation_degrees = Vector3(0.0, -26.5651, 0.0)
+cast_shadow = 0
+
+[node name="Stream_14" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_16")
+position = Vector3(-223.0, -9.65, 265.0)
+rotation_degrees = Vector3(0.0, -30.9638, 0.0)
+cast_shadow = 0
+
+[node name="Pond_0" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_17")
+position = Vector3(82.0, 2.2, 190.0)
+cast_shadow = 0
+
+[node name="Pond_1" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_18")
+position = Vector3(128.0, 2.2, 190.0)
+cast_shadow = 0
+
+[node name="Railway" parent="." type="Node3D"]
+
+[node name="Track_0" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-409.5455, 6.2, -189.2045)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_1" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-368.6364, 6.2, -189.6136)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_2" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-327.7273, 6.2, -190.0227)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_3" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-286.8182, 6.2, -190.4318)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_4" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-245.9091, 6.2, -190.8409)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_5" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-205.0, 6.2, -191.25)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_6" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-164.0909, 6.2, -191.6591)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_7" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-123.1818, 6.2, -192.0682)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_8" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-82.2727, 6.2, -192.4773)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_9" parent="Railway" instance=ExtResource("4")]
+position = Vector3(-41.3636, 6.2, -192.8864)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_11" parent="Railway" instance=ExtResource("4")]
+position = Vector3(40.4545, 6.2, -193.7045)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_12" parent="Railway" instance=ExtResource("4")]
+position = Vector3(81.3636, 6.2, -194.1136)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_13" parent="Railway" instance=ExtResource("4")]
+position = Vector3(122.2727, 6.2, -194.5227)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_14" parent="Railway" instance=ExtResource("4")]
+position = Vector3(163.1818, 6.2, -194.9318)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_15" parent="Railway" instance=ExtResource("4")]
+position = Vector3(204.0909, 6.2, -195.3409)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_16" parent="Railway" instance=ExtResource("4")]
+position = Vector3(245.0, 6.2, -195.75)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_17" parent="Railway" instance=ExtResource("4")]
+position = Vector3(285.9091, 6.2, -196.1591)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_18" parent="Railway" instance=ExtResource("4")]
+position = Vector3(326.8182, 6.2, -196.5682)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_19" parent="Railway" instance=ExtResource("4")]
+position = Vector3(367.7273, 6.2, -196.9773)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_20" parent="Railway" instance=ExtResource("4")]
+position = Vector3(408.6364, 6.2, -197.3864)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="Track_21" parent="Railway" instance=ExtResource("4")]
+position = Vector3(449.5455, 6.2, -197.7955)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 0.12, -2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, -2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, -1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.12, 2.0], "size": [40.0, 0.24, 2.6], "color": [0.33, 0.3, 0.27], "collision": false}, {"at": [0.0, 0.32, 1.24], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}, {"at": [0.0, 0.32, 2.76], "size": [40.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false, "surface": "metal"}])
+
+[node name="OverpassBridge" parent="Railway" instance=ExtResource("4")]
+position = Vector3(0.0, 0.0, -193.3)
+rotation_degrees = Vector3(0.0, 0.5729, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 5.6, 0.0], "size": [22.0, 1.2, 12.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 6.8, -5.9], "size": [22.0, 1.2, 0.25], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 6.8, 5.9], "size": [22.0, 1.2, 0.25], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 6.52, -2.76], "size": [22.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false}, {"at": [0.0, 6.52, -1.24], "size": [22.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false}, {"at": [0.0, 6.52, 1.24], "size": [22.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false}, {"at": [0.0, 6.52, 2.76], "size": [22.0, 0.15, 0.07], "color": [0.38, 0.33, 0.29], "collision": false}, {"at": [-9.6, 2.5, 0.0], "size": [1.2, 7.4, 30.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [9.6, 2.5, 0.0], "size": [1.2, 7.4, 30.0], "color": [0.62, 0.61, 0.58], "collision": true}])
+
+[node name="Perimeter" parent="." type="Node3D"]
+
+[node name="Wall_0" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-186.0, 0.2349, -205.5)
+rotation_degrees = Vector3(0.0, 2.8292, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 1.765, 0.0], "size": [345.42, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_1" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(183.0, 0.0, -212.0)
+rotation_degrees = Vector3(0.0, -0.5817, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [395.02, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_2" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(395.0, 4.9109, -185.0)
+rotation_degrees = Vector3(0.0, -59.0362, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, -2.677, 0.0], "size": [59.31, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_3" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(417.5, 6.3155, -110.0)
+rotation_degrees = Vector3(0.0, -81.4692, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, -1.335, 0.0], "size": [102.119, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_4" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(432.5, 6.0443, -10.0)
+rotation_degrees = Vector3(0.0, -81.4692, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, -1.064, 0.0], "size": [102.119, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_5" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(438.0, 0.9011, 90.0)
+rotation_degrees = Vector3(0.0, -92.2906, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 1.549, 0.0], "size": [101.08, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_6" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(439.0, 4.347, 201.0)
+rotation_degrees = Vector3(0.0, -87.1844, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, -2.328, 0.0], "size": [123.147, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_7" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(371.0, 2.1252, 280.0)
+rotation_degrees = Vector3(0.0, -165.774, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, -0.106, 0.0], "size": [147.492, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_8" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(150.0, 0.0, 299.0)
+rotation_degrees = Vector3(0.0, -179.618, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [301.007, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_9" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-57.5, 0.0, 296.0)
+rotation_degrees = Vector3(0.0, 176.0206, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [116.278, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_10" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-177.5, 0.0, 271.0)
+rotation_degrees = Vector3(0.0, 161.4277, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 1.962, 0.0], "size": [132.867, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_11" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-266.0, 0.0, 228.5)
+rotation_degrees = Vector3(0.0, 140.4119, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 1.962, 0.0], "size": [68.476, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_12" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-327.0, 0.0, 171.0)
+rotation_degrees = Vector3(0.0, 134.1931, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [101.419, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_13" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-382.0, 0.0, 73.5)
+rotation_degrees = Vector3(0.0, 108.0147, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [130.341, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_14" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-397.0, 0.0, -54.0)
+rotation_degrees = Vector3(0.0, 85.6677, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [133.378, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_15" parent="Perimeter" instance=ExtResource("4")]
+position = Vector3(-375.0, 0.1076, -158.5)
+rotation_degrees = Vector3(0.0, 66.1757, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 1.907, 0.0], "size": [85.172, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Vegetation" parent="." type="Node3D"]
+
+[node name="TreeBirch0" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_birch_0"
+model = "res://assets/zone01/models/tree_birch_0.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreeBirch1" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_birch_1"
+model = "res://assets/zone01/models/tree_birch_1.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreeBirch2" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_birch_2"
+model = "res://assets/zone01/models/tree_birch_2.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreePoplar0" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_poplar_0"
+model = "res://assets/zone01/models/tree_poplar_0.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreePoplar1" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_poplar_1"
+model = "res://assets/zone01/models/tree_poplar_1.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreePoplar2" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_poplar_2"
+model = "res://assets/zone01/models/tree_poplar_2.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreeMaple0" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_maple_0"
+model = "res://assets/zone01/models/tree_maple_0.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreeMaple1" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_maple_1"
+model = "res://assets/zone01/models/tree_maple_1.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="TreeMaple2" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "tree_maple_2"
+model = "res://assets/zone01/models/tree_maple_2.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+
+[node name="Grass" parent="Vegetation" type="Node3D"]
+script = ExtResource("5")
+data_path = "res://data/zone01_vegetation.json"
+key = "grass"
+view_distance = 50.0
+cell = 16.0
+shadows = false

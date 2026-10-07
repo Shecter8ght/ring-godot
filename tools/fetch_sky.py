@@ -25,6 +25,12 @@ SKY = {
         "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/qwantani_night_puresky_4k.hdr",
         "file": "qwantani_night_puresky.hdr", "role": "ночное небо со звёздами (фон)",
     },
+    "nqweba_dawn": {
+        "title": "Nqweba Dawn", "author": "Dario Barresi", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/nqweba_dawn",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/nqweba_dawn_4k.hdr",
+        "file": "nqweba_dawn.hdr", "role": "небо рассвета и заката зоны 1 (HdriSky)",
+    },
     "moon_lroc_color": {
         "title": "CGI Moon Kit — Lunar Surface in Color (LRO LROC)", "author": "NASA's Scientific Visualization Studio",
         "license": "Public Domain (NASA)", "source": "https://svs.gsfc.nasa.gov/4720",

@@ -5,6 +5,12 @@ extends Node3D
 signal ready_for_agents
 
 const CACHE_DIR: String = "res://data/navigation/zone02"
+## Сцены и компоненты, от которых зависит выпечка, для каждой карты (кэш сверяется по хэшам).
+const SOURCES := {
+	"zone02_urban_belt": ["res://data/sectors/zone02_urban_belt.json", "res://scenes/levels/zone02_urban_belt.tscn", "res://scenes/levels/zone02"],
+	"zone01_mall": ["res://data/sectors/zone01_mall.json", "res://scenes/levels/zone01_mall.tscn", "res://scenes/levels/zone01",
+		"res://data/terrain/zone01_heights.r32", "res://src/world/district_terrain.gd"],
+}
 
 var definition: Dictionary = {}
 var save_cache: bool = false
@@ -52,7 +58,7 @@ func _prepare() -> void:
 			push_error("zone02: нет исходной геометрии для навигации")
 			return
 		if save_cache:
-			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CACHE_DIR))
+			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_cache_dir()))
 	var start_ms: int = Time.get_ticks_msec()
 	for x in range(columns):
 		for z in range(rows):
@@ -91,12 +97,16 @@ func _prepare() -> void:
 	ready_for_agents.emit()
 
 
+func _cache_dir() -> String:
+	return String(definition.get("nav_cache", CACHE_DIR))
+
+
 func _path(x: int, z: int) -> String:
-	return "%s/tile_%d_%d.res" % [CACHE_DIR, x, z]
+	return "%s/tile_%d_%d.res" % [_cache_dir(), x, z]
 
 
 func _cache_valid() -> bool:
-	var path: String = CACHE_DIR + "/manifest.json"
+	var path: String = _cache_dir() + "/manifest.json"
 	if not FileAccess.file_exists(path):
 		return false
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -118,10 +128,14 @@ func _cache_valid() -> bool:
 
 
 func _write_manifest() -> void:
-	var paths: Array[String] = ["res://data/sectors/zone02_urban_belt.json", "res://scenes/levels/zone02_urban_belt.tscn"]
-	for filename: String in DirAccess.get_files_at("res://scenes/levels/zone02"):
-		if filename.get_extension() == "tscn":
-			paths.append("res://scenes/levels/zone02/" + filename)
+	var paths: Array[String] = []
+	for source: String in SOURCES.get(String(definition.get("id", "zone02_urban_belt")), SOURCES["zone02_urban_belt"]):
+		if source.get_extension() == "":
+			for filename: String in DirAccess.get_files_at(source):
+				if filename.get_extension() == "tscn":
+					paths.append(source + "/" + filename)
+		else:
+			paths.append(source)
 	for component: String in ["blockout_building", "blockout_opening", "blockout_mesh", "urban_props", "urban_road", "urban_terrain", "urban_facade", "urban_navigation"]:
 		paths.append("res://src/world/" + component + ".gd")
 		var scene_path: String = "res://scenes/world/" + component + ".tscn"
@@ -130,7 +144,7 @@ func _write_manifest() -> void:
 	var hashes: Dictionary = {}
 	for path: String in paths:
 		hashes[path] = _source_hash(path)
-	var file: FileAccess = FileAccess.open(CACHE_DIR + "/manifest.json", FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(_cache_dir() + "/manifest.json", FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify({"settings": _settings_signature(), "files": hashes}, "\t") + "\n")
 	else:

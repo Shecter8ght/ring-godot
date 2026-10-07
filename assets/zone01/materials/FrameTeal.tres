@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "FrameTeal"
+albedo_color = Color(0.1, 0.36, 0.37, 1)
+roughness = 0.6
+metallic = 0.0
+metallic_specular = 0.5

@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://src/world/facade_aged.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/worn_corrugated_iron/albedo.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/textures/worn_corrugated_iron/normal.jpg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/textures/worn_corrugated_iron/arm.jpg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/macro.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/grime/streaks.png" id="6"]
+
+[resource]
+resource_name = "CorrBlue"
+shader = ExtResource("1")
+shader_parameter/albedo_tex = ExtResource("2")
+shader_parameter/normal_tex = ExtResource("3")
+shader_parameter/orm_tex = ExtResource("4")
+shader_parameter/macro_tex = ExtResource("5")
+shader_parameter/streak_tex = ExtResource("6")
+shader_parameter/contrast = 1.0
+shader_parameter/albedo_color = Color(0.55, 0.7, 0.9, 1)
+shader_parameter/uv_scale = 0.7143
+shader_parameter/use_metal = false
+shader_parameter/splash = 0.55
+shader_parameter/streaks = 0.4
+shader_parameter/moss = 0.25
+shader_parameter/roof_runoff = 0.35

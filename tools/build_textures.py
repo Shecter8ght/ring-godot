@@ -34,6 +34,27 @@ TILE_M: dict[str, float] = {
     "sapele_veneer": 0.35,
     "natural_walnut_veneer": 0.35,
     "green_metal_rust": 0.25,
+    # рельеф зоны 1: плитка в метрах (шейдер district_terrain берёт сами текстуры, не материалы)
+    "leafy_grass": 3.0,
+    "sparse_grass": 3.0,
+    "forest_floor": 2.5,
+    "mud_forest": 3.0,
+    "rocks_ground_02": 4.0,
+    "gravel_stones": 2.0,
+    # двор хрущёвок (5)
+    "rough_concrete": 2.0,
+    "concrete_wall_007": 3.0,
+    "concrete_wall_008": 3.0,
+    "whitewashed_brick": 2.0,
+    "red_bricks_04": 2.0,
+    "tarred_gravel": 3.0,
+    "rusty_metal_sheet": 2.0,
+    "worn_corrugated_iron": 2.0,
+    "plywood": 2.4,
+    "wood_planks_grey": 2.0,
+    "concrete_floor_02": 3.0,
+    "worn_asphalt": 4.0,
+    "bark_brown_02": 1.5,
 }
 
 

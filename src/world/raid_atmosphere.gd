@@ -51,7 +51,47 @@ func apply() -> void:
 			(e.sky.sky_material as PhysicalSkyMaterial).energy_multiplier = float(t.sky)
 		e.tonemap_exposure = float(t.get("exposure", 1.0))
 		_apply_night(e, sky_mat)
+		if not night:
+			_apply_hdri(e, sun)
 	_apply_power(String(c.power))
+
+
+## Небо из HDR-панорамы, если карта задала его на это время суток ("sky_hdri" в данных сектора):
+## панорама доворачивается так, чтобы её солнце (sun_u — доля ширины панорамы) стояло там же, где
+## игровое; погода смешивает её по Balance.HDRI_WEATHER. Нет панорамы или файла — небо сцены.
+func _apply_hdri(e: Environment, sun: DirectionalLight3D) -> void:
+	var path: Variant = get_parent().get("sector_path")
+	if path == null or String(path) == "":
+		return
+	var conf: Dictionary = (SectorBuilder.load_def(String(path)).get("sky_hdri", {}) as Dictionary).get(String(RaidConditions.current.time), {})
+	if conf.is_empty() or not ResourceLoader.exists(String(conf.get("a", ""))):
+		return
+	var w: Dictionary = Balance.HDRI_WEATHER.get(String(RaidConditions.current.weather), Balance.HDRI_WEATHER["clear"])
+	var m := ShaderMaterial.new()
+	m.shader = load("res://src/world/hdri_sky.gdshader")
+	m.set_shader_parameter("sky_a", load(String(conf.a)))
+	if ResourceLoader.exists(String(conf.get("b", ""))):
+		m.set_shader_parameter("sky_b", load(String(conf.b)))
+		m.set_shader_parameter("has_b", true)
+		m.set_shader_parameter("mix_b", float(conf.get("mix_b", 0.0)))
+	var rot: float = float(conf.get("rotation", 0.0))
+	if sun and conf.has("sun_u"):
+		# солнце сцены светит вдоль −Z узла, само стоит в стороне +Z
+		var to_sun: Vector3 = sun.global_basis.z
+		rot = (float(conf.sun_u) - 0.5) * 360.0 - rad_to_deg(atan2(to_sun.x, -to_sun.z))
+	m.set_shader_parameter("rotation", rot)
+	m.set_shader_parameter("horizon_cut", float(conf.get("horizon_cut", 0.0)))
+	m.set_shader_parameter("haze", float(conf.get("haze", 0.0)))
+	m.set_shader_parameter("exposure", float(conf.get("exposure", 1.0)) * float(w.exposure))
+	m.set_shader_parameter("overcast", float(w.overcast))
+	m.set_shader_parameter("tint", w.tint)
+	if sun:
+		sun.light_energy *= float(conf.get("sun_k", 1.0)) * float(w.sun_k)
+	var sky := Sky.new()
+	sky.sky_material = m
+	sky.radiance_size = Sky.RADIANCE_SIZE_256
+	e.sky = sky
+	e.background_energy_multiplier = 1.0
 
 
 ## Ночь: своё небо (звёзды, Луна), рассеянный свет ровным цветом, умеренное свечение; днём —
