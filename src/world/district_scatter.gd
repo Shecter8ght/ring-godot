@@ -25,6 +25,8 @@ extends Node3D
 @export var shadows: bool = true
 ## Деревьям — коллизия ствола (цилиндр), траве — нет.
 @export var trunk_radius: float = 0.0
+## Высота цилиндра коллизии, м (ствол — 4, пень — меньше: выше пули проходят свободно).
+@export var trunk_height: float = 4.0
 
 var _pending: bool = false
 
@@ -86,10 +88,10 @@ func _build() -> void:
 			if body:
 				var shape := CylinderShape3D.new()
 				shape.radius = trunk_radius * float(p[4])
-				shape.height = 4.0
+				shape.height = trunk_height * float(p[4])
 				var col := CollisionShape3D.new()
 				col.shape = shape
-				col.position = Vector3(float(p[0]), float(p[1]) + 2.0, float(p[2])) - global_position
+				col.position = Vector3(float(p[0]), float(p[1]) + trunk_height * float(p[4]) * 0.5, float(p[2])) - global_position
 				body.add_child(col)
 		var mmi := MultiMeshInstance3D.new()
 		mmi.name = "_Cell_%d_%d" % [c.x, c.y]

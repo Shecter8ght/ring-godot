@@ -73,6 +73,7 @@ TEXTURED = {
     "LeavesBirch": ("res://assets/zone01/textures/leaves_birch.png", "", 1.0, True),
     "LeavesMaple": ("res://assets/zone01/textures/leaves_maple.png", "", 1.0, True),
     "GrassTuft": ("res://assets/zone01/textures/grass_tufts.png", "", 1.0, True),
+    "FirBranchCards": ("res://assets/zone01/textures/fir_branch_atlas.png", "", 1.0, True),
 }
 
 
@@ -105,6 +106,10 @@ def flat(name: str, color, rough: float, metal: float) -> str:
     ]) + "\n"
 
 
+# оттенок альбедо листвы (рендер атласа ели светлее, чем крона в тени)
+FOLIAGE_TINT = {"FirBranchCards": (0.62, 0.68, 0.6)}
+
+
 def textured(name: str, albedo: str, normal: str, tile: float, foliage: bool) -> str:
     ext = [f'[ext_resource type="Texture2D" path="{albedo}" id="1"]']
     body = [f'resource_name = "{name}"', 'albedo_texture = ExtResource("1")', "roughness = 0.85"]
@@ -115,6 +120,9 @@ def textured(name: str, albedo: str, normal: str, tile: float, foliage: bool) ->
         # карточки листвы: отсечение по альфе, видны с обеих сторон, просвечивают на солнце
         body += ["transparency = 2", "alpha_scissor_threshold = 0.45", "cull_mode = 2", "backlight_enabled = true",
                  "backlight = Color(0.35, 0.3, 0.12, 1)", "texture_filter = 5", "vertex_color_use_as_albedo = true"]
+        if name in FOLIAGE_TINT:
+            t = FOLIAGE_TINT[name]
+            body += [f"albedo_color = Color({t[0]}, {t[1]}, {t[2]}, 1)", "backlight = Color(0.12, 0.14, 0.08, 1)"]
     else:
         body += [f"uv1_scale = Vector3({round(1 / tile, 4)}, {round(1 / tile, 4)}, 1)", "texture_filter = 5"]
     head = [f'[gd_resource type="StandardMaterial3D" load_steps={len(ext) + 1} format=3]', ""]

@@ -387,9 +387,11 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
     forest = forest_mask()
     mud, gravel = splat[..., 0] / 255.0, splat[..., 2] / 255.0
     trees: dict[str, list] = {f"tree_{k}_{v}": [] for k in ("birch", "poplar", "maple") for v in range(3)}
+    trees.update({f"forest_fir_{v}": [] for v in "abc"})
 
     def put(kind: str, x: float, z: float) -> None:
-        key = f"tree_{kind}_{int(rng.integers(0, 3))}"
+        # ель — из Poly Haven Pine Forest (tools/build_zone01_forest.py), лиственные — свои
+        key = f"forest_fir_{'abc'[int(rng.integers(0, 3))]}" if kind == "fir" else f"tree_{kind}_{int(rng.integers(0, 3))}"
         trees[key].append([round(x, 2), round(sample(h, x, z) - 0.1, 3), round(z, 2), round(float(rng.uniform(0, 360)), 1),
                            round(float(rng.uniform(0.8, 1.2)), 3)])
 
@@ -405,12 +407,12 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
             f = forest[iz, ix]
             r = d_rav[iz, ix]
             if f > 0.5 and rng.random() < 0.75 * f:
-                put(rng.choice(["birch", "birch", "maple", "poplar"]), x, z)
+                put(rng.choice(["fir", "fir", "fir", "birch", "birch", "maple", "poplar"]), x, z)
             elif 4.0 < r < 30.0 and rng.random() < 0.38:
-                put(rng.choice(["maple", "maple", "birch"]), x, z)
+                put(rng.choice(["maple", "maple", "birch", "fir"]), x, z)
             elif not inside[iz, ix] and rng.random() < 0.3:
-                # за границей — сплошной подлесок и деревья (декорация края карты)
-                put(rng.choice(["birch", "maple", "poplar"]), x, z)
+                # за границей — сплошной лес (декорация края карты)
+                put(rng.choice(["fir", "fir", "birch", "maple", "poplar"]), x, z)
             elif inside[iz, ix] and rng.random() < 0.012:
                 put(rng.choice(["birch", "maple"]), x, z)
     # тополя вдоль подножия насыпи
@@ -419,6 +421,34 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
             z = -176.0 + rng.uniform(-1.5, 1.5)
             if ok(int(x - X0), int(z - Z0)):
                 put("poplar", x + rng.uniform(-2, 2), z)
+    # подлесок: папоротник, валежник, пни, сухостой, корни — в лесу; камни со мхом — по склонам оврага
+    under: dict[str, list] = {k: [] for k in ("forest_fern", "forest_dry_branches", "forest_stump_01", "forest_stump_02",
+                                              "forest_dead_trunk", "forest_roots", "forest_rocks_01", "forest_rocks_02")}
+    for gz in np.arange(Z0 + 3, Z0 + NZ - 3, 4.0):
+        for gx in np.arange(X0 + 3, X0 + NX - 3, 4.0):
+            x, z = gx + rng.uniform(-1.8, 1.8), gz + rng.uniform(-1.8, 1.8)
+            ix, iz = int(x - X0), int(z - Z0)
+            if not ok(ix, iz):
+                continue
+            f, r = forest[iz, ix], d_rav[iz, ix]
+            roll = rng.random()
+            key = None
+            if f > 0.4:
+                for name, pr in (("forest_fern", 0.16), ("forest_dry_branches", 0.05), ("forest_stump_01", 0.015),
+                                 ("forest_stump_02", 0.015), ("forest_dead_trunk", 0.012), ("forest_roots", 0.012)):
+                    if roll < pr:
+                        key = name
+                        break
+                    roll -= pr
+            elif 3.5 < r < 22.0:
+                for name, pr in (("forest_rocks_01", 0.06), ("forest_rocks_02", 0.06), ("forest_fern", 0.06), ("forest_dry_branches", 0.03)):
+                    if roll < pr:
+                        key = name
+                        break
+                    roll -= pr
+            if key:
+                under[key].append([round(x, 2), round(sample(h, x, z) - 0.05, 3), round(z, 2), round(float(rng.uniform(0, 360)), 1),
+                                   round(float(rng.uniform(0.8, 1.2)), 3)])
     grass = []
     patch = fbm(9.0, 41)
     for _ in range(260000):
@@ -436,19 +466,25 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
         if len(grass) >= 90000:
             break
     data = dict(trees)
+    data.update(under)
     data["grass"] = grass
     (ROOT / "data/zone01_vegetation.json").write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
-    print(f"zone01: деревьев {sum(len(v) for v in trees.values())}, пучков травы {len(grass)}")
+    print(f"zone01: деревьев {sum(len(v) for v in trees.values())}, подлеска {sum(len(v) for v in under.values())}, пучков травы {len(grass)}")
 
 
 def vegetation_nodes(s: "Scene") -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
-    for kind in ("birch", "poplar", "maple"):
-        for v in range(3):
-            key = f"tree_{kind}_{v}"
-            s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
-                   key=key, model=f"res://assets/zone01/models/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25)
+    keys = [f"tree_{k}_{v}" for k in ("birch", "poplar", "maple") for v in range(3)] + [f"forest_fir_{v}" for v in "abc"]
+    for key in keys:
+        s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
+               key=key, model=f"res://assets/zone01/models/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25)
+    for key, radius, height in (("forest_fern", 0.0, 0.0), ("forest_dry_branches", 0.0, 0.0), ("forest_stump_01", 0.3, 0.6),
+                                ("forest_stump_02", 0.3, 0.6), ("forest_dead_trunk", 0.0, 0.0), ("forest_roots", 0.0, 0.0),
+                                ("forest_rocks_01", 0.5, 0.8), ("forest_rocks_02", 0.5, 0.8)):
+        s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
+               key=key, model=f"res://assets/zone01/models/{key}.glb", view_distance=110.0, cell=48.0, trunk_radius=radius,
+               trunk_height=height if height > 0 else 4.0)
     s.node("Grass", "Vegetation", script=script, data_path="res://data/zone01_vegetation.json", key="grass",
            view_distance=50.0, cell=16.0, shadows=False)
 
@@ -736,6 +772,7 @@ def world_scene() -> None:
     s.node("Water")
     water = s.resource("res://src/world/district_water.gdshader", "Shader")
     mat = s.sub("ShaderMaterial", shader=water)
+    s.subs[-1] += "\nshader_parameter/noise_tex = " + gvalue(s.resource("res://assets/terrain/zone01_noise.png", "Texture2D"))
     # ручей по дну оврага — полосы вдоль русла чуть выше дна
     for i, ((ax, az), (bx, bz)) in enumerate(zip(RAVINE, RAVINE[1:])):
         ya = min(ground(ax, az), ground((ax + bx) / 2, (az + bz) / 2)) + 0.35
