@@ -122,10 +122,10 @@ func _ready() -> void:
 		add_child(map)
 	# точка появления из сцены уровня (узлы SpawnPoint) — одна случайная на рейд
 	var points := get_tree().get_nodes_in_group("spawn_points")
-	# у спусков в убежище — укрыты от улицы: есть такие — только они
-	var bunkers := points.filter(func(p: Node) -> bool: return p is SpawnPoint and (p as SpawnPoint).bunker)
-	if not bunkers.is_empty():
-		points = bunkers
+	# точки захода с периметра: есть такие — только они
+	var entries := points.filter(func(p: Node) -> bool: return p is SpawnPoint and (p as SpawnPoint).entry)
+	if not entries.is_empty():
+		points = entries
 	if not points.is_empty():
 		_spawn = (points[_rng.randi_range(0, points.size() - 1)] as Node3D).global_position
 	if _camera_rig and _ring.is_empty() and sector.has_meta("camera_yaw"):

@@ -108,7 +108,7 @@ var _preview: bool = false
 var _cur_key: String = ""
 ## Прямоугольники мировых XZ, где пропсов не ставить (узлы сцены группы "prop_keepout").
 var keepouts: Array[Rect2] = []
-## Вырезы в земле (спуски в убежище, HideoutEntrance.hole_rect): {center: Vector2 (мир XZ),
+## Вырезы в земле (узлы группы "ground_holes", их hole_rect): {center: Vector2 (мир XZ),
 ## half: Vector2 (половины вдоль осей X и Z узла), yaw} — асфальт участка там не кладётся.
 var holes: Array = []
 
@@ -1409,7 +1409,7 @@ func _mesh_node(st: SurfaceTool, mat_id: String, shadows: bool) -> MeshInstance3
 func _build_floor_collider(root: Node3D) -> void:
 	var body := StaticBody3D.new()
 	body.name = "Ground"
-	# спуски в убежище (HideoutEntrance) снимают с неё столкновение того, кто внутри приямка
+	# узлы с вырезом в земле могут снимать с неё столкновение того, кто внутри выреза
 	body.add_to_group("ground_plane")
 	var cs := CollisionShape3D.new()
 	cs.shape = WorldBoundaryShape3D.new()

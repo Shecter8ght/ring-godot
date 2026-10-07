@@ -1,6 +1,6 @@
 # RING — правила проекта для любого агента (Claude, Codex, локальные модели)
 
-Изометрический тактический extraction-шутер. Godot 4.5, GDScript, Forward+.
+Изометрический тактический extraction-шутер. Godot 4.7, GDScript, Forward+.
 Кооп на 3 игроков (один хостит). Реализм в графике: PBR, фототекстуры (CC0), реальные пропорции.
 
 ## Мир
@@ -89,7 +89,7 @@ tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # 
 tools/godot.cmd --headless res://tools/export_weapon_refs.tscn -- "out=<папка>" # все стволы игры (и M4A1 с обвесами под левую руку) в GLB — образцы для хватов в Blender
 tools/godot.cmd res://tools/mods_gallery.tscn                # витрина обвесов: сбоку, 3/4, крупные планы, вид из глаза
 tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика против солнца (блики, аберрация) и открытые прицельные из глаза
-tools/build_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.5.1 + RING.pck, шаблоны не нужны)
+tools/build_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.7.2 + RING.pck, шаблоны не нужны)
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 tools/godot.cmd --headless res://tools/coop_hideout_host.tscn # + coop_hideout_client.tscn через 3 с: собрание в убежище —
@@ -114,7 +114,6 @@ tools/godot.cmd --headless res://tools/god_test.tscn       # чит «бессм
 tools/godot.cmd --headless res://tools/stress_test.tscn    # стресс: пули рядом, спад в тишине, пороги, адреналин, обезболивающее
 tools/godot.cmd res://tools/breaker_test.tscn              # главный рубильник света ТЦ: щитовая, свет погас → поднять, генератор; снимок breaker.png
 tools/godot.cmd res://tools/vault_test.tscn                # перелезание (игрок и мародёр по связке навигации), бросок на землю; снимки vault_*
-tools/godot.cmd res://tools/bunker_test.tscn               # спуски в убежище: появился внизу, вырез в асфальте, подъём наверх; снимки bunker_*
 tools/godot.cmd res://tools/info_shots.tscn                # снимки окна описания предмета (info_*) и прицела гранаты (nade_aim)
 tools/godot.cmd res://tools/hideout_move_probe.tscn          # скорость в убежище: шаг / бег (с оружием, от первого лица)
 tools/godot.cmd res://tools/sound_bench.tscn               # стенд звуков: одна страница — сворачиваемые разделы (оружие → классы → стволы, общие наборы;
