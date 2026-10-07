@@ -616,8 +616,9 @@ src/items/profile.gd, src/world/raid.gd, src/ai/marauder.gd, src/world/raid_even
   data/hideout.json, src/items/profile.gd, src/world/raid.gd.
 - Условия и стороны: [raid_conditions.md](raid_conditions.md), src/world/raid_events.gd,
   src/ai/perception.gd, src/ai/marauder.gd, data/loadouts.json.
-- Старый замысел: E:/Games/RING/docs/GDD.md, docs/GAME_OVERVIEW.md,
-  src/core/Contracts.ts. Исторические источники, не текущие ограничения.
+- Старый замысел (Three.js-прототип удалён 2026-10-07, копии): [GDD.md](../legacy/GDD.md),
+  [GAME_OVERVIEW.md](../legacy/GAME_OVERVIEW.md), [Contracts.ts](../legacy/Contracts.ts).
+  Исторические источники, не текущие ограничения.
 - Чат «Сводка проекта RING»: 6ab4f168-06bc-83ed-bd19-90f317ced906.
 - Чат «Вопросы по карте магазина»: 6ab1644f-a0a0-83eb-85b5-90dd0d2e32b9.
 
