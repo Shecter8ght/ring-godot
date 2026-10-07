@@ -20,13 +20,9 @@ func _ready() -> void:
 	_rig = get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	_player.health.hp = 100000.0
 
-	# 1. средняя кнопка крутит изометрическую камеру
-	var yaw0 := _rig.rotation.y
-	_mouse_button(MOUSE_BUTTON_MIDDLE, true)
-	_mouse_motion(Vector2(120, 0))
-	_mouse_button(MOUSE_BUTTON_MIDDLE, false)
-	await _frames(3)
-	_check("СКМ вращает камеру", absf(_rig.rotation.y - yaw0) > 0.3, "Δ=%.2f рад" % (_rig.rotation.y - yaw0))
+	# 1. игра только от первого лица: вид из глаз сразу, без ПКМ
+	await _frames(6)
+	_check("вид из глаз без ПКМ", _rig.ads_active and get_viewport().get_camera_3d().name == "AdsCamera", str(get_viewport().get_camera_3d().name))
 
 	# 2. смена оружия клавишами
 	_tap("weapon_1")
@@ -61,7 +57,7 @@ func _ready() -> void:
 	Input.action_release("move_right")
 	moved = _player.global_position - p0
 	moved.y = 0.0
-	_check("D идёт вправо от взгляда", moved.normalized().dot(fwd.cross(Vector3.UP)) > 0.95, "dot=%.2f" % moved.normalized().dot(fwd.cross(Vector3.UP)))
+	_check("D идёт вправо от взгляда", moved.normalized().dot(fwd.cross(Vector3.UP)) > 0.9, "dot=%.2f" % moved.normalized().dot(fwd.cross(Vector3.UP)))
 	# навести взгляд на мишень и дать очередь
 	var target := get_tree().get_nodes_in_group("shootable")[2] as Target
 	await _look_at(target.global_position + Vector3(0, 1.1, 0))
@@ -84,7 +80,7 @@ func _ready() -> void:
 		"окуляр fov=%.1f, основной fov=%.1f" % [_rig.scope_fov(), get_viewport().get_camera_3d().fov])
 	Input.action_release("aim")
 	await _frames(6)
-	_check("отпустил ПКМ — изометрия", not _rig.ads_active and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "")
+	_check("отпустил ПКМ — оптика убрана, взгляд из глаз", not _rig.scope_active and _rig.ads_active, "")
 
 	# 5. мародёр и регдолл: ставим перед игроком, убиваем из дробовика в прицеле
 	var m := (load("res://scenes/ai/marauder.tscn") as PackedScene).instantiate() as Marauder

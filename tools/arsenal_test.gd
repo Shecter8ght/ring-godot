@@ -60,7 +60,8 @@ func _ready() -> void:
 	await _tac("light")
 	_check("CASE 7: включены оба", _on(pl, "side_left", "light") and _on(pl, "side_right", "laser") and pl.light_on and pl.laser_on, "")
 	var lit := 0
-	for n in pl.find_children("Flashlight_side_left", "SpotLight3D", true, false):
+	# от первого лица фонарь светит с модели в руках у камеры, на теле — у напарников
+	for n in get_tree().root.find_children("Flashlight_side_left", "SpotLight3D", true, false):
 		lit += 1 if (n as SpotLight3D).visible else 0
 	_check("…фонарь на модели светит", lit > 0, "")
 

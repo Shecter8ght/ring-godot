@@ -34,10 +34,9 @@ const ACTIONS := [
 	["inventory", "Рюкзак"],
 	["use_med", "Лечиться: выбрать чем (лёжа раненым — аптечка: подняться, бинт: +время)"],
 	["drag", "Тащить раненого напарника / отпустить; лёжа раненым — держать: сдаться"],
-	["camera_left|camera_right", "Изометрия — повернуть камеру; от первого лица — наклон"],
+	["camera_left|camera_right", "Наклон влево / вправо"],
 	["vault", "Прыжок / перелезть через преграду впереди (стоя)"],
 	["dive", "Бросок на землю в сторону движения (только на ходу, с WASD), дальше — лёжа"],
-	["view_toggle", "Вид: изометрия / от первого лица"],
 	["voice", "Голос своим (держать; кооп)"],
 	["map", "Карта"],
 	["journal", "Журнал улик"],
@@ -57,7 +56,6 @@ var _controls: VBoxContainer
 var _settings: VBoxContainer
 var _leave: Button
 var _to_menu: Button
-var _view_btn: Button
 var _admin_btn: Button
 var _admin: VBoxContainer
 var _admin_rows: GridContainer
@@ -105,10 +103,6 @@ func _ready() -> void:
 	_main.add_child(_button("Продолжить", close_menu))
 	_main.add_child(_button("Управление", func() -> void: _show_side(_controls)))
 	_main.add_child(_button("Настройки", func() -> void: _show_side(_settings)))
-	_view_btn = _button("", func() -> void:
-		CameraRig.set_first_person_mode(not CameraRig.first_person_mode)
-		_view_btn.text = _view_text())
-	_main.add_child(_view_btn)
 	_admin_btn = _button("Админ: деньги", func() -> void:
 		_show_side(_admin)
 		_fill_admin())
@@ -330,8 +324,6 @@ func open_menu() -> void:
 	_settings.visible = false
 	# в сети — только хосту; в соло и в убежище — себе
 	_admin_btn.visible = Net.is_host() or not Net.is_networked()
-	CameraRig.load_settings()
-	_view_btn.text = _view_text()
 	_mouse_before = Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var scene := get_tree().current_scene
@@ -610,10 +602,6 @@ func open_admin() -> void:
 	_settings.visible = false
 	_admin.visible = true
 	_fill_admin()
-
-
-func _view_text() -> String:
-	return ("Вид: от первого лица (%s)" if CameraRig.first_person_mode else "Вид: изометрия (%s)") % key_name("view_toggle")
 
 
 func close_menu() -> void:

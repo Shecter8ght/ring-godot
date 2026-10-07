@@ -12,9 +12,9 @@ extends Node3D
 @export var target_path: NodePath
 
 var ads_active: bool = false
-## Режим «от первого лица» (V или меню): камера всегда в глазах, ПКМ — прицел. Сохраняется в
-## user://settings.cfg.
-static var first_person_mode: bool = false
+## Игра только от первого лица (решение владельца 2026-10-07): камера всегда в глазах, ПКМ — прицел.
+## Вид сверху остаётся только у инструментов съёмки и будущего разведдрона (docs/design/drone.md).
+static var first_person_mode: bool = true
 static var _settings_loaded: bool = false
 const SETTINGS_PATH := "user://settings.cfg"
 var _bob_t: float = 0.0
@@ -144,17 +144,13 @@ static func load_settings() -> void:
 	for a in OS.get_cmdline_args():
 		if String(a).begins_with("res://tools/"):
 			return
-	var cfg := ConfigFile.new()
-	if cfg.load(SETTINGS_PATH) == OK:
-		first_person_mode = bool(cfg.get_value("view", "first_person", false))
+	# прежняя настройка вида (изометрия) больше не читается: вид всегда из глаз
+	first_person_mode = true
 
 
+## Только для инструментов съёмки и тестов: игроку вид не переключается.
 static func set_first_person_mode(on: bool) -> void:
 	first_person_mode = on
-	var cfg := ConfigFile.new()
-	cfg.load(SETTINGS_PATH)
-	cfg.set_value("view", "first_person", on)
-	cfg.save(SETTINGS_PATH)
 
 
 ## Открыто окно (рюкзак, карта, убежище, меню) — мышь нужна курсором, взгляд стоит.
@@ -357,10 +353,6 @@ func set_distance(d: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("view_toggle") and not event.is_echo():
-		set_first_person_mode(not first_person_mode)
-		get_viewport().set_input_as_handled()
-		return
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_MIDDLE:
