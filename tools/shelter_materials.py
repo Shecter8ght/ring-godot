@@ -68,7 +68,8 @@ def font(size):
 
 ROOM_SIGNS = ['ТОРГОВЛЯ', 'ОРУЖЕЙНАЯ', 'КОМНАТА ОТДЫХА', 'МАСТЕРСКАЯ', 'СКЛАД',
               'ДГУ / ЭЛЕКТРОЩИТОВАЯ', 'ТАМБУР / ВОЗВРАЩЕНИЕ', 'СПАЛЬНЫЕ МЕСТА',
-              'ВЕНТИЛЯЦИЯ', 'РЕЗЕРВНЫЙ СКЛАД', 'БОКС 1', 'БОКС 2', 'БОКС 3']
+              'ВЕНТИЛЯЦИЯ', 'РЕЗЕРВНЫЙ СКЛАД', 'БОКС 1', 'БОКС 2', 'БОКС 3',
+              'КОТЕЛЬНЫЙ ЗАЛ / ТИР', 'ОГНЕВОЙ РУБЕЖ', 'ОСТОРОЖНО: СТРЕЛЬБА']
 
 def room_signs():
     # Печатная эмаль на стальной основе: один атлас на все реальные mesh-таблички.
@@ -87,25 +88,31 @@ def room_signs():
     Image.new('RGB',im.size,(255,195,0)).save(OUT/'RoomSigns_orm.png')
     Image.new('RGB',im.size,(128,128,255)).save(OUT/'RoomSigns_normal.png')
 
+# Цельные материалы с фотографическим микрорельефом: цвет по маске яркости фото, а не тинт.
+SOLID = {'OchreSteel': [151,116,48], 'RedPaint': [117,42,27]}
+
+def make_material(name):
+    key,tint,rough,metal,tile = SPECS[name]
+    source = SRC/'textures'/key if key in NEW else ROOT/'assets/textures'/key
+    rgb = np.asarray(Image.open(source/'albedo.jpg').convert('RGB').resize((1024,1024)), dtype=np.float32)
+    # Лёгкое изменение roughness сохраняет фотографический рисунок.
+    if name in SOLID:
+        lum = rgb.mean(axis=2)/255
+        rgb = np.array(SOLID[name])[None,None,:] * (.7 + lum[:,:,None]*.6)
+    else:
+        rgb *= np.array(tint)[None,None,:]
+    Image.fromarray(np.clip(rgb,0,255).astype('uint8')).save(OUT/(name+'_base.jpg'), quality=91)
+    Image.open(source/'normal.jpg').resize((1024,1024)).save(OUT/(name+'_normal.jpg'), quality=93)
+    arm = np.asarray(Image.open(source/'arm.jpg').convert('RGB').resize((1024,1024))).copy()
+    original_rough = arm[:,:,1].astype(float)/255
+    arm[:,:,1] = np.clip((rough + (original_rough-.5)*.15)*255,0,255).astype('uint8')
+    arm[:,:,2] = int(metal*255)
+    Image.fromarray(arm).save(OUT/(name+'_orm.jpg'), quality=94)
+
 def prepare():
     OUT.mkdir(parents=True, exist_ok=True)
-    for name,(key,tint,rough,metal,tile) in SPECS.items():
-        source = SRC/'textures'/key if key in NEW else ROOT/'assets/textures'/key
-        rgb = np.asarray(Image.open(source/'albedo.jpg').convert('RGB').resize((1024,1024)), dtype=np.float32)
-        # Цельные материалы с фотографическим микрорельефом, лёгким изменением roughness.
-        if name in ['OchreSteel', 'RedPaint']:
-            lum = rgb.mean(axis=2)/255
-            color = np.array([151,116,48] if name=='OchreSteel' else [117,42,27])
-            rgb = color[None,None,:] * (.7 + lum[:,:,None]*.6)
-        else:
-            rgb *= np.array(tint)[None,None,:]
-        Image.fromarray(np.clip(rgb,0,255).astype('uint8')).save(OUT/(name+'_base.jpg'), quality=91)
-        Image.open(source/'normal.jpg').resize((1024,1024)).save(OUT/(name+'_normal.jpg'), quality=93)
-        arm = np.asarray(Image.open(source/'arm.jpg').convert('RGB').resize((1024,1024))).copy()
-        original_rough = arm[:,:,1].astype(float)/255
-        arm[:,:,1] = np.clip((rough + (original_rough-.5)*.15)*255,0,255).astype('uint8')
-        arm[:,:,2] = int(metal*255)
-        Image.fromarray(arm).save(OUT/(name+'_orm.jpg'), quality=94)
+    for name in SPECS:
+        make_material(name)
     # Собственный промышленный trim: 8 горизонтальных полос, единый атлас 1024.
     im = Image.new('RGB',(1024,1024),(45,49,46)); draw=ImageDraw.Draw(im)
     for i in range(8):

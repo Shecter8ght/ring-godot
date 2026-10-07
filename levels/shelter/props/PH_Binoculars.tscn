@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Binoculars_00.res" id="1_gchra"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Binoculars_01.res" id="2_eqmvo"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Binoculars_02.res" id="3_pvp01"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Binoculars_03.res" id="4_v5046"]
+
+[node name="PH_Binoculars" type="Node3D" unique_id=1768125176]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1057510748]
+cast_shadow = 0
+mesh = ExtResource("1_gchra")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=129333607]
+cast_shadow = 0
+mesh = ExtResource("2_eqmvo")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1137952011]
+cast_shadow = 0
+mesh = ExtResource("3_pvp01")
+
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1693270148]
+cast_shadow = 0
+mesh = ExtResource("4_v5046")

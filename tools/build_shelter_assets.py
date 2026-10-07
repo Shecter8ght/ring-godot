@@ -28,6 +28,8 @@ def mat(name):
     return MATS[name]
 
 COLORS['RoomSigns']=(.12,.15,.15)
+# Размер плитки фототекстуры по материалу, м (метрические UV); другие скрипты kit дополняют.
+TILE={'RawConcrete':3,'PaintedConcrete':3,'IndustrialConcreteFloor':4,'WetConcrete':3,'OldWood':2,'WornCarpet':2}
 
 def xyz(v):return (v[0],-v[2],v[1])
 
@@ -42,7 +44,7 @@ def finish(o,name,material,bevel=0):
     o.data.materials.append(mat(material))
     # UV в метрах по основной оси поверхности: нет растяжения у стен, полов и фасок.
     uv=o.data.uv_layers.active or o.data.uv_layers.new(name='UVMap')
-    tile={'RawConcrete':3,'PaintedConcrete':3,'IndustrialConcreteFloor':4,'WetConcrete':3,'OldWood':2,'WornCarpet':2}.get(material,1)
+    tile=TILE.get(material,1)
     for p in o.data.polygons:
         axis=max(range(3),key=lambda i:abs(p.normal[i])); axes=[i for i in range(3) if i!=axis]
         for li in p.loop_indices:
@@ -487,8 +489,8 @@ def notebook():
     box('Binding',(-.096,.012,0),(.008,.02,.27),'MilitaryFabric',.001)
     export('Notebook')
 
-def signs():
-    for i in range(13):
+def signs(indices=range(13)):
+    for i in indices:
         begin(); box('Rolled steel plaque',(0,0,0),(2.2,.38,.018),'BareSteel',.007)
         # UV Blender: низ = V0; экспорт GLTF переводит их в верхний левый угол изображения.
         u0=(i%2)*.5;u1=u0+.5;v1=1-(i//2)*.125;v0=v1-.125
@@ -499,7 +501,10 @@ def signs():
                 box('Screw slot',(x,y,.0188),(.014,.003,.001),'Rubber',0)
         export('RoomSign_%02d'%i)
 
-if '--revise' in sys.argv:
+# Как библиотека (import из build_shelter_boiler.py) — только функции kit, без сборки всего набора.
+if __name__ != '__main__':
+    pass
+elif '--revise' in sys.argv:
     # Точечная правка сохранённой editable сборки без пересоздания удачных моделей.
     bpy.ops.wm.open_mainfile(filepath=str(SRC/'shelter_before_visual_revision.blend'))
     ASSETS=json.loads((OUT/'manifest.json').read_text(encoding='utf-8'))
@@ -527,8 +532,9 @@ if '--revise' in sys.argv:
 else:
     table('PlanningTable',2.4,1.2,.75);table('CoffeeTable',1.15,.65,.44);table('Bench',1.7,.43,.45);table('Counter',2.7,.80,.92)
     shelf('Shelf');locker();crate();crate('CardboardBox',True);couch();chair();bed();blast_door();generator();workshop();electrical();radio();television();bottles();canister();misc();utility_props();architecture();signs()
-(OUT/'manifest.json').write_text(json.dumps(ASSETS,ensure_ascii=False,indent=2),encoding='utf-8')
-for o in bpy.context.scene.objects:o.hide_set(False)
-bpy.ops.wm.save_as_mainfile(filepath=str(SRC/'shelter.blend'))
-(SRC/'license.txt').write_text('Собственные модели RING, авторинг OpenAI Codex для владельца проекта, 2026-10-05. Фотографические текстуры отдельно: Poly Haven CC0. Исходные авторы перечислены в assets/ASSET_CREDITS.md.',encoding='utf-8')
-print('SHELTER_DONE',len(ASSETS),sum(v['triangles'] for v in ASSETS.values()))
+if __name__ == '__main__':
+    (OUT/'manifest.json').write_text(json.dumps(ASSETS,ensure_ascii=False,indent=2),encoding='utf-8')
+    for o in bpy.context.scene.objects:o.hide_set(False)
+    bpy.ops.wm.save_as_mainfile(filepath=str(SRC/'shelter.blend'))
+    (SRC/'license.txt').write_text('Собственные модели RING, авторинг OpenAI Codex для владельца проекта, 2026-10-05. Фотографические текстуры отдельно: Poly Haven CC0. Исходные авторы перечислены в assets/ASSET_CREDITS.md.',encoding='utf-8')
+    print('SHELTER_DONE',len(ASSETS),sum(v['triangles'] for v in ASSETS.values()))

@@ -1,18 +1,18 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/BlastDoor_00.res" id="1_363b5"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6ctm8"]
 size = Vector3(2.55, 2.42, 0.35)
 
-[node name="BlastDoor" type="Node3D"]
+[node name="BlastDoor" type="Node3D" unique_id=1799940081]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1542328155]
 mesh = ExtResource("1_363b5")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=2065547288]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2111235837]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18, 0)
 shape = SubResource("BoxShape3D_6ctm8")

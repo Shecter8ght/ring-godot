@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_UtilityBox_00.res" id="1_5dfk6"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pefv6"]
+size = Vector3(0.5200002, 1.1203334, 0.43199998)
+
+[node name="PH_UtilityBox" type="Node3D" unique_id=1007988970]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=15244223]
+mesh = ExtResource("1_5dfk6")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=541916378]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=804956154]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5601667, 0)
+shape = SubResource("BoxShape3D_pefv6")

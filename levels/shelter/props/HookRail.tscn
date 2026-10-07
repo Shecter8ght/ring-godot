@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/HookRail_00.res" id="1_02m35"]
 
-[node name="HookRail" type="Node3D"]
+[node name="HookRail" type="Node3D" unique_id=689446238]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1027620612]
 mesh = ExtResource("1_02m35")

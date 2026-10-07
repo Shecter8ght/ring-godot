@@ -32,12 +32,13 @@ func _ready() -> void:
 	_lighting()
 	_environment()
 	_signage()
+	_boiler_hall()
 	_navigation()
 	await get_tree().physics_frame
 	var region: NavigationRegion3D = _root.get_node("Navigation/Interior") as NavigationRegion3D
 	region.bake_navigation_mesh(false)
 	await get_tree().process_frame
-	ResourceSaver.save(region.navigation_mesh, BASE + "architecture/interior_nav.tres")
+	ShelterSave.save(region.navigation_mesh, BASE + "architecture/interior_nav.tres")
 	var rig: Node = (load("res://scenes/player/camera_rig.tscn") as PackedScene).instantiate()
 	_root.add_child(rig)
 	rig.owner = _root
@@ -49,7 +50,7 @@ func _ready() -> void:
 	var packed: PackedScene = PackedScene.new()
 	var result: Error = packed.pack(_root)
 	assert(result == OK)
-	assert(ResourceSaver.save(packed, BASE + "Shelter_Interior.tscn") == OK)
+	assert(ShelterSave.save(packed, BASE + "Shelter_Interior.tscn") == OK)
 	var f: FileAccess = FileAccess.open(BASE + "placements.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(_placements, "\t"))
 	var stats: Dictionary = {"authored_assets": manifest.size(), "prop_instances": _props, "lights": _root.get_node("Lights").get_child_count(), "reflection_probes": _root.get_node("ReflectionProbes").get_child_count(), "navigation_polygons": region.navigation_mesh.get_polygon_count(), "gi": "SDFGI + SSIL (existing Forward+ pipeline)", "procedural_level_generation": false}
@@ -71,12 +72,14 @@ func _group(label: String, parent: Node) -> Node3D:
 	return n
 
 func _make_materials() -> void:
-	var names: Array[String] = ["RawConcrete", "PaintedConcrete", "DampConcrete", "WetConcrete", "IndustrialConcreteFloor", "PaintedSteel", "OchreSteel", "BareSteel", "RustedSteel", "GalvanizedSteel", "DirtyAluminum", "OldWood", "RawWood", "Rubber", "OldPlastic", "Canvas", "MilitaryFabric", "Leatherette", "Glass", "Oil", "PuddleWater", "WornCarpet", "Paper", "Cardboard", "RedPaint", "IndustrialTrim", "Labels", "PlanningMap", "RoomSigns", "WarmEmitter", "CoolEmitter", "Screen"]
+	var names: Array[String] = ["RawConcrete", "PaintedConcrete", "DampConcrete", "WetConcrete", "IndustrialConcreteFloor", "PaintedSteel", "OchreSteel", "BareSteel", "RustedSteel", "GalvanizedSteel", "DirtyAluminum", "OldWood", "RawWood", "Rubber", "OldPlastic", "Canvas", "MilitaryFabric", "Leatherette", "Glass", "Oil", "PuddleWater", "WornCarpet", "Paper", "Cardboard", "RedPaint", "IndustrialTrim", "Labels", "PlanningMap", "RoomSigns", "WarmEmitter", "CoolEmitter", "Screen",
+		# котельная зоны 5 и тир (tools/shelter_boiler_materials.py)
+		"Brick", "Whitewash", "PeelingPaint", "BoilerSteel", "FlueRust", "WiredGlass", "ButtonGreen", "ButtonRed", "ButtonYellow", "RangePaper"]
 	for label: String in names:
 		var m: StandardMaterial3D = StandardMaterial3D.new()
 		m.resource_name = label
 		m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-		var extension: String = ".png" if label in ["IndustrialTrim", "Labels", "PlanningMap", "RoomSigns"] else ".jpg"
+		var extension: String = ".png" if label in ["IndustrialTrim", "Labels", "PlanningMap", "RoomSigns", "RangePaper"] else ".jpg"
 		if ResourceLoader.exists(TEXTURES + label + "_base" + extension):
 			m.albedo_texture = load(TEXTURES + label + "_base" + extension)
 		if ResourceLoader.exists(TEXTURES + label + "_normal" + extension):
@@ -102,17 +105,39 @@ func _make_materials() -> void:
 			m.albedo_color = Color(0.007, 0.009, 0.006)
 		if label in ["Oil", "PuddleWater", "WetConcrete", "Glass"]:
 			m.metallic_specular = 0.55
-		if label in ["IndustrialConcreteFloor", "RawConcrete", "PaintedConcrete", "DampConcrete"]:
+		if label in ["IndustrialConcreteFloor", "RawConcrete", "PaintedConcrete", "DampConcrete", "Brick", "Whitewash", "PeelingPaint"]:
 			m.metallic_specular = 0.35
+		if label == "Brick":
+			m.normal_scale = 0.7
+		if label == "WiredGlass":
+			# матовое армированное стекло светится рассеянным дневным светом снаружи котельной
+			m.emission_enabled = true
+			m.emission_texture = m.albedo_texture
+			m.emission = Color(0.80, 0.86, 0.92)
+			m.emission_energy_multiplier = 0.16
+			m.albedo_color = Color(0.62, 0.64, 0.64)
+			m.metallic_specular = 0.6
+		if label == "RangePaper":
+			# лист тира: пробоины рисуются в копию этой текстуры, поэтому без сжатия на видеокарте
+			m.cull_mode = BaseMaterial3D.CULL_DISABLED
 		# Материал cutaway отдельный от пола/декора с тем же физическим составом.
-		ResourceSaver.save(m, BASE + "materials/" + label + ".tres")
+		ShelterSave.save(m, BASE + "materials/" + label + ".tres")
 		_materials[label] = load(BASE + "materials/" + label + ".tres")
-		if label in ["RawConcrete", "PaintedConcrete", "DampConcrete", "BareSteel"]:
+		if label in ["RawConcrete", "PaintedConcrete", "DampConcrete", "BareSteel", "Brick", "Whitewash", "PeelingPaint"]:
 			var cut: StandardMaterial3D = m.duplicate() as StandardMaterial3D
 			cut.resource_name = label + "_cut"
 			cut.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
-			ResourceSaver.save(cut, BASE + "materials/" + label + "_cut.tres")
+			ShelterSave.save(cut, BASE + "materials/" + label + "_cut.tres")
 			_materials[label + "_cut"] = load(BASE + "materials/" + label + "_cut.tres")
+	# Манекены тира — матовый литой пластик без лица (RangeTarget перекрывает им все поверхности).
+	var plastic: StandardMaterial3D = StandardMaterial3D.new()
+	plastic.resource_name = "MannequinPlastic"
+	plastic.albedo_color = Color(0.74, 0.70, 0.64)
+	plastic.roughness = 0.58
+	plastic.metallic_specular = 0.45
+	plastic.rim_enabled = true
+	plastic.rim = 0.12
+	ShelterSave.save(plastic, BASE + "materials/MannequinPlastic.tres")
 
 
 func _convert_asset(id: String, info: Dictionary) -> void:
@@ -139,12 +164,12 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 			assert(_materials.has(label), id + ": " + label)
 			mesh.surface_set_material(surface, _materials[label])
 		var mesh_path: String = BASE + "props/" + id + "_%02d.res" % index
-		var saved: Error = ResourceSaver.save(mesh, mesh_path)
+		var saved: Error = ShelterSave.save(mesh, mesh_path)
 		# Windows может кратко удерживать ресурс во время импорта/индексации.
 		for attempt: int in range(3):
 			if saved == OK: break
 			OS.delay_msec(100)
-			saved = ResourceSaver.save(mesh, mesh_path)
+			saved = ShelterSave.save(mesh, mesh_path)
 		assert(saved == OK, "Не сохранён mesh: " + mesh_path)
 		mi.mesh = load(mesh_path)
 		var t: Transform3D = source.transform
@@ -154,13 +179,13 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 			ancestor = ancestor.get_parent() as Node3D
 		mi.transform = t
 		mi.gi_mode = GeometryInstance3D.GI_MODE_STATIC
-		if id.begins_with("Ceiling_") or id in ["Ventilation", "PipesAndElectrical", "PracticalLight"]:
+		if id.begins_with("Ceiling_") or id in ["Ventilation", "PipesAndElectrical", "PracticalLight", "PH_HangingLamp", "PH_Crane"]:
 			mi.layers = SectorBuilder.CEILING_LAYER
 		if cut:
 			mi.set_meta("shelter_cut", true)
 		if id.begins_with("RoomSign_"):
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if id in ["Mug", "FoodCan", "Notebook", "WaterBottle", "Beer", "Boots", "PlanningMap", "Rug"]:
+		if id in ["Mug", "FoodCan", "Notebook", "WaterBottle", "Beer", "Boots", "PlanningMap", "Rug", "PH_Cans", "PH_Binoculars", "PH_Gloves", "PH_Clipboard", "PH_Multimeter", "PH_OilTin", "PH_PipeWrench", "PH_Thermos", "RangeConsole"]:
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(mi)
 		mi.owner = root
@@ -193,8 +218,8 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 			cs.owner = root
 	var packed: PackedScene = PackedScene.new()
 	assert(packed.pack(root) == OK)
-	var path: String = BASE + ("architecture/" if id.begins_with("Floor_") or id.begins_with("Wall_") or id.begins_with("Ceiling_") or id in ["Ventilation", "PipesAndElectrical", "StairsAndRailing", "TechnicalStructure", "DrainsAndThresholds"] else "props/") + id + ".tscn"
-	assert(ResourceSaver.save(packed, path) == OK)
+	var path: String = BASE + ("architecture/" if _is_architecture(id) else "props/") + id + ".tscn"
+	assert(ShelterSave.save(packed, path) == OK)
 	_kit[id] = load(path)
 	root.free()
 	original.free()
@@ -203,7 +228,18 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 func _v(a: Array) -> Vector3:
 	return Vector3(float(a[0]), float(a[1]), float(a[2]))
 
+## Сборки, которые стоят в нуле уровня как часть здания (стены, перекрытия, инженерия, зал).
+func _is_architecture(id: String) -> bool:
+	return id.begins_with("Floor_") or id.begins_with("Wall_") or id.begins_with("Ceiling_") or id in ["Ventilation", "PipesAndElectrical", "StairsAndRailing", "TechnicalStructure", "DrainsAndThresholds", "HallStructure"]
+
+## Самодельные предметы, вместо которых теперь стоят модели Poly Haven (CC0) того же назначения.
+const REPLACE: Dictionary = {"Chair": "PH_Chair", "Boots": "PH_Boots", "FoodCan": "PH_Cans", "JerryCan": "PH_JerryCan",
+	"MedicalCase": "PH_MedicalBox", "Radio": "PH_Radio", "DeskLamp": "PH_DeskLamp", "Case": "PH_MilitaryCrate",
+	"CardboardBox": "PH_Carton", "Bench": "PH_Bench", "CoffeeTable": "PH_CoffeeTable", "Binoculars": "PH_Binoculars"}
+
 func _put(id: String, label: String, parent: Node, at: Vector3, yaw: float = 0.0) -> Node3D:
+	if REPLACE.has(id) and _kit.has(String(REPLACE[id])):
+		id = String(REPLACE[id])
 	var n: Node3D = (_kit[id] as PackedScene).instantiate() as Node3D
 	n.name = label
 	n.position = at
@@ -219,7 +255,7 @@ func _put(id: String, label: String, parent: Node, at: Vector3, yaw: float = 0.0
 func _layout(manifest: Dictionary) -> void:
 	var arch: Node = _root.get_node("Architecture")
 	for id: String in manifest:
-		if id.begins_with("Floor_") or id.begins_with("Wall_") or id.begins_with("Ceiling_") or id in ["Ventilation", "PipesAndElectrical", "StairsAndRailing", "TechnicalStructure", "DrainsAndThresholds"]:
+		if _is_architecture(id):
 			var n: Node3D = _put(id, "SH_Int_" + id, arch, Vector3.ZERO)
 	var p: Node = _root.get_node("Props")
 	var hub: Node3D = _group("SH_Int_MainHub", p)
@@ -279,7 +315,7 @@ func _layout(manifest: Dictionary) -> void:
 		_put("WaterBottle", "WaterSupply_%02d" % storage.get_child_count(), storage, Vector3(x, .69, 6.3))
 		_put("FoodCan", "FoodSupply_%02d" % storage.get_child_count(), storage, Vector3(x+1.8, .69, 6.3))
 	_put("MedicalCase", "MedicalSupplies", storage, Vector3(13.7, 1.63, 6.3), 180)
-	_put("Bench", "StorageSortBench", storage, Vector3(17.2, 0, 4.0), -90)
+	_put("Bench", "StorageSortBench", storage, Vector3(10.6, 0, 2.4), 0)
 	var generator: Node3D = _group("SH_Int_Generator", p)
 	_put("Generator", "Generator", generator, Vector3(13.8, 0, -8.5))
 	_put("ElectricalCabinet", "Switchboard", generator, Vector3(17.4, 0, -7.9), -90)
@@ -413,7 +449,7 @@ func _gameplay() -> void:
 		reverb.damping = float(spec[2])
 		reverb.wet = float(spec[3])
 		reverb.dry = 1.0
-		ResourceSaver.save(reverb,BASE+"materials/audio_"+String(spec[0])+".tres")
+		ShelterSave.save(reverb,BASE+"materials/audio_"+String(spec[0])+".tres")
 	for spec: Array in [["GeneratorHum",Vector3(13.8,1.1,-8.5),-16.0,2.0,14.0,1.0],["VentilationHum",Vector3(7.1,3.8,-1),-33.0,3.0,20.0,.76]]:
 		var source: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 		source.name = String(spec[0])
@@ -434,11 +470,11 @@ func _detail_pass() -> void:
 	var props: Node = _root.get_node("Props")
 	var details: Node3D = _group("SH_Int_PersonalAndTechnical",props)
 	for x: float in [-14.5,-13.8,-13.1]:
-		var rifle: Node3D = _put("Display_wpn_ar_03","RackRifle_%02d" % details.get_child_count(),details,Vector3(x,.59,1.65))
-		rifle.rotation_degrees.x = -90
-	_put("Display_wpn_hg_01","MaintenancePistol",details,Vector3(-12.2,.77,4.25),90)
+		# стволы в стойке стоят дулом вверх, боком к проходу (настоящие модели игры, не запечённые заглушки)
+		_weapon(VSS_GLB, "RackRifle_%02d" % details.get_child_count(), details, Vector3(x, .2, 1.62), RIFLE_STANDING)
+	_weapon(PM_GLB, "MaintenancePistol", details, Vector3(-12.2, .77, 4.25), PISTOL_LYING)
 	# Резерв у стен, рабочие полки заполнены по назначению; основные проходы остаются свободны.
-	for spec: Array in [["PH_Crate","HubRouteCrate",Vector3(-3.7,0,-2.9),12],["PH_Crate","HubRouteCrate2",Vector3(-3.7,.34,-2.9),12],["PH_AmmoBox","HubAmmo",Vector3(-3.25,0,-2.55),0],["PH_Crate","ArmoryReserve",Vector3(-16.4,0,4.0),90],["PH_Crate","StorageReserve1",Vector3(16.4,0,3.0),0],["PH_Crate","StorageReserve2",Vector3(16.4,.34,3.0),0],["PH_Crate","StorageReserve3",Vector3(16.4,0,4.1),0],["PH_Barrel","GeneratorDrum",Vector3(10.7,0,-10.25),0],["PH_Barrel","WorkshopDrum",Vector3(16.7,0,-4.35),0],["PH_Barrel","StorageWaterDrum",Vector3(17.0,0,5.95),0],["PH_AmmoBox","ArmoryAmmo1",Vector3(-11.7,.76,3.9),0],["PH_AmmoBox","ArmoryAmmo2",Vector3(-16.5,.26,6.0),90],["PH_AmmoBox","TraderAmmo",Vector3(-15.95,1.14,-4.4),0],["PH_Crate","TraderDelivery",Vector3(-17.2,0,-3.6),0],["PH_Crate","EntryShipment",Vector3(2.65,0,11.2),0],["Rug","UnloadingMat",Vector3(0,0,8.6),0],["Bench","HubRestBench",Vector3(-6.5,0,-.1),90],["Bench","BayBench1",Vector3(-5.1,0,6.5),0],["Bench","BayBench2",Vector3(5.1,0,6.5),0],["Bench","BayBench3",Vector3(7.25,0,6.5),0],["Shelf","WorkshopReserveShelf",Vector3(10.5,0,-4.4),0],["Shelf","ArmoryReserveShelf",Vector3(-17.4,0,3.4),90],["Shelf","LivingFoodShelf",Vector3(-10.2,0,-10.45),0],["Counter","StorageSortingDesk",Vector3(13.7,0,1.55),180],["MedicalCase","SortingFirstAid",Vector3(13.3,.97,1.55),180],["Notebook","SortingLedger",Vector3(14.3,.97,1.55),0],["PH_Crate","UnderSortingDesk",Vector3(13.5,0,1.55),0],["Case","HubMedicReserve",Vector3(-6.5,0,-5.65),0]]:
+	for spec: Array in [["PH_Crate","HubRouteCrate",Vector3(-3.7,0,-2.9),12],["PH_Crate","HubRouteCrate2",Vector3(-3.7,.34,-2.9),12],["PH_AmmoBox","HubAmmo",Vector3(-3.25,0,-2.55),0],["PH_Crate","ArmoryReserve",Vector3(-16.4,0,4.0),90],["PH_Crate","StorageReserve1",Vector3(16.5,0,1.6),0],["PH_Crate","StorageReserve2",Vector3(16.5,.34,1.6),0],["PH_Crate","StorageReserve3",Vector3(15.55,0,1.6),0],["PH_Barrel","GeneratorDrum",Vector3(10.7,0,-10.25),0],["PH_Barrel","WorkshopDrum",Vector3(16.7,0,-4.35),0],["PH_Barrel","StorageWaterDrum",Vector3(17.0,0,5.95),0],["PH_AmmoBox","ArmoryAmmo1",Vector3(-11.7,.76,3.9),0],["PH_AmmoBox","ArmoryAmmo2",Vector3(-16.5,.26,6.0),90],["PH_AmmoBox","TraderAmmo",Vector3(-15.95,1.14,-4.4),0],["PH_Crate","TraderDelivery",Vector3(-17.2,0,-3.6),0],["PH_Crate","EntryShipment",Vector3(2.65,0,11.2),0],["Rug","UnloadingMat",Vector3(0,0,8.6),0],["Bench","HubRestBench",Vector3(-6.5,0,-.1),90],["Bench","BayBench1",Vector3(-5.1,0,6.5),0],["Bench","BayBench2",Vector3(5.1,0,6.5),0],["Bench","BayBench3",Vector3(7.25,0,6.5),0],["Shelf","WorkshopReserveShelf",Vector3(10.5,0,-4.4),0],["Shelf","ArmoryReserveShelf",Vector3(-17.4,0,3.4),90],["Shelf","LivingFoodShelf",Vector3(-10.2,0,-10.45),0],["Counter","StorageSortingDesk",Vector3(13.7,0,1.55),180],["MedicalCase","SortingFirstAid",Vector3(13.3,.97,1.55),180],["Notebook","SortingLedger",Vector3(14.3,.97,1.55),0],["PH_Crate","UnderSortingDesk",Vector3(13.5,0,1.55),0],["Case","HubMedicReserve",Vector3(-6.5,0,-5.65),0]]:
 		_put(String(spec[0]),String(spec[1]),details,spec[2],float(spec[3]))
 	for spec: Array in [[-10.2,-10.45],[-17.4,3.4],[10.5,-4.4]]:
 		for i: int in range(3):
@@ -476,6 +512,25 @@ func _detail_pass() -> void:
 		_put("PracticalLight","Fixture_"+lamp.name,details,position+Vector3(0,.12,0))
 
 
+const VSS_GLB: String = "res://assets/models/weapons/vss_textured/VSS_Vintorez_Picatinny.glb"
+const PM_GLB: String = "res://assets/models/weapons/pm/pm.glb"
+const GLOCK_GLB: String = "res://assets/models/weapons/glock17/glock17.glb"
+## Модели оружия: +Z — дуло, +Y — верх, -X — правый бок. Стоя в стойке: дуло вверх, левый бок к зрителю (+Z).
+const RIFLE_STANDING: Basis = Basis(Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0))
+## Лёжа на столе на правом боку: дуло вдоль +X, левый бок вверх.
+const PISTOL_LYING: Basis = Basis(Vector3(0, 1, 0), Vector3(0, 0, 1), Vector3(1, 0, 0))
+
+## Декоративный экземпляр готовой модели оружия игры (тот же GLB, что в руках).
+func _weapon(path: String, label: String, parent: Node, at: Vector3, basis: Basis) -> Node3D:
+	var n: Node3D = (load(path) as PackedScene).instantiate() as Node3D
+	n.name = label
+	n.transform = Transform3D(basis, at)
+	# экземпляр GLB-сцены: в .tscn остаётся ссылкой на модель, внутренности не копируются
+	_owned(parent, n)
+	_placements.append({"name": label, "asset": path.get_file().get_basename(), "position": [at.x, at.y, at.z], "yaw": 0.0})
+	return n
+
+
 func _bake_display_weapon(id: String) -> void:
 	# Прежние модели игры, запечённые как static decoration; функциональный тайник прежний.
 	var original: Node3D = WeaponModels.build(id,{},1)
@@ -495,7 +550,7 @@ func _bake_display_weapon(id: String) -> void:
 				material = _materials["OldWood"] if color.r>color.b*1.5 and color.r>.18 else _materials["BareSteel"]
 			mesh.surface_set_material(surface,material)
 		var path: String = BASE+"props/Display_"+id+"_%02d.res" % index
-		ResourceSaver.save(mesh,path)
+		ShelterSave.save(mesh,path)
 		var mi: MeshInstance3D = MeshInstance3D.new()
 		mi.name = "FinishedWeaponPart_%02d" % index
 		mi.mesh = load(path)
@@ -512,7 +567,7 @@ func _bake_display_weapon(id: String) -> void:
 	var packed: PackedScene = PackedScene.new()
 	packed.pack(root)
 	var target: String = BASE+"props/Display_"+id+".tscn"
-	ResourceSaver.save(packed,target)
+	ShelterSave.save(packed,target)
 	_kit["Display_"+id] = load(target)
 	root.free()
 	original.free()
@@ -541,7 +596,7 @@ func _floor_joints() -> void:
 			surface.set_uv(Vector2(vertex.x,vertex.z))
 			surface.add_vertex(vertex)
 	var mesh: ArrayMesh = surface.commit()
-	ResourceSaver.save(mesh,BASE+"architecture/floor_joints.res")
+	ShelterSave.save(mesh,BASE+"architecture/floor_joints.res")
 	var node: MeshInstance3D = MeshInstance3D.new()
 	node.name = "SH_Int_ConcreteConstructionJoints"
 	node.mesh = load(BASE+"architecture/floor_joints.res")
@@ -581,7 +636,7 @@ func _lighting() -> void:
 		light.light_color = Color(.78,.74,.65)
 		light.light_bake_mode = Light3D.BAKE_DYNAMIC
 		_owned(lights,light)
-	for spec: Array in [["LivingWall",Vector3(-17.65,2.05,-8.2),90],["TraderWall",Vector3(-17.65,2.05,-3.4),90],["ArmoryWall",Vector3(-17.65,2.05,3.4),90],["StorageWall",Vector3(17.65,2.05,4.6),-90],["WorkshopWall",Vector3(17.65,2.05,-1.7),-90],["GeneratorWall",Vector3(10.8,2.05,-10.7),0],["HubWallLeft",Vector3(-7.65,2.05,1.15),90],["HubWallRight",Vector3(7.65,2.05,1.15),-90]]:
+	for spec: Array in [["LivingWall",Vector3(-17.65,2.05,-8.2),90],["TraderWall",Vector3(-17.65,2.05,-3.4),90],["ArmoryWall",Vector3(-17.65,2.05,3.4),90],["StorageWall",Vector3(17.65,2.05,1.9),-90],["WorkshopWall",Vector3(17.65,2.05,-1.7),-90],["GeneratorWall",Vector3(10.8,2.05,-10.7),0],["HubWallLeft",Vector3(-7.65,2.05,1.15),90],["HubWallRight",Vector3(7.65,2.05,1.15),-90]]:
 		var light: OmniLight3D = OmniLight3D.new()
 		light.name = String(spec[0])
 		light.position = spec[1]
@@ -691,8 +746,256 @@ func _navigation() -> void:
 	mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
 	mesh.geometry_source_geometry_mode = NavigationMesh.SOURCE_GEOMETRY_GROUPS_WITH_CHILDREN
 	mesh.geometry_source_group_name = &"shelter_navigation_geometry"
-	mesh.filter_baking_aabb = AABB(Vector3(-19,-.25,-12),Vector3(38,3.3,25))
+	# котельный зал с тиром — восточнее основного здания, до x 62.4
+	mesh.filter_baking_aabb = AABB(Vector3(-19,-.25,-12),Vector3(82,3.3,25))
 	var region: NavigationRegion3D = NavigationRegion3D.new()
 	region.name = "Interior"
 	region.navigation_mesh = mesh
 	_owned(_root.get_node("Navigation"),region)
+
+
+## Нижняя точка мешей узла по Y в его собственной системе — чтобы поставить модель на опору.
+func _lowest(n: Node3D) -> float:
+	var lowest: float = INF
+	for child: Node in n.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = child as MeshInstance3D
+		var t: Transform3D = mi.transform
+		var p: Node = mi.get_parent()
+		while p and p != n:
+			t = (p as Node3D).transform * t
+			p = p.get_parent()
+		lowest = minf(lowest, (n.transform * t * mi.get_aabb()).position.y)
+	return lowest
+
+
+## Модель оружия стоит или лежит на опоре на высоте floor_y.
+func _weapon_on(path: String, label: String, parent: Node, at: Vector3, basis: Basis, floor_y: float) -> Node3D:
+	var n: Node3D = _weapon(path, label, parent, at, basis)
+	n.position.y += floor_y - _lowest(n)
+	return n
+
+
+## Лист мишени: квадрат 0.6 × 1.0 м с UV на всю картинку «мишени № 4», низ листа — y 0.
+func _paper_sheet() -> ArrayMesh:
+	var path: String = BASE + "range/paper_sheet.res"
+	DirAccess.make_dir_recursive_absolute(BASE + "range")
+	var st: SurfaceTool = SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_material(_materials["RangePaper"])
+	var corners: Array[Vector3] = [Vector3(-.3, 0, 0), Vector3(.3, 0, 0), Vector3(.3, 1, 0), Vector3(-.3, 1, 0)]
+	var uvs: Array[Vector2] = [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+	for i: int in [0, 1, 2, 0, 2, 3]:
+		st.set_normal(Vector3(0, 0, 1))
+		st.set_uv(uvs[i])
+		st.add_vertex(corners[i])
+	st.generate_tangents()
+	ShelterSave.save(st.commit(), path)
+	return load(path) as ArrayMesh
+
+
+func _boiler_hall() -> void:
+	# Бывший котельный зал (раскладка — boiler_layout.json от tools/build_shelter_boiler.py):
+	# два остановленных котла, насосы, щит КИП и кран-балка вдоль северной стены, тир на пять дорожек.
+	var layout: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MODELS + "boiler_layout.json")) as Dictionary
+	var fx: float = float(layout.firing_x)
+	var hall: Node3D = _group("SH_Int_BoilerHall", _root.get_node("Props"))
+	var index: int = 1
+	for b: Dictionary in layout.boilers:
+		_put("Boiler", "Boiler_%d" % index, hall, Vector3(float(b.x), 0, float(b.z)))
+		index += 1
+	index = 1
+	for pump: Dictionary in layout.pumps:
+		_put("CirculationPump", "CirculationPump_%d" % index, hall, Vector3(float(pump.x), 0, float(pump.z)))
+		index += 1
+	_put("KipPanel", "KipPanel", hall, Vector3(18.47, 0, -7.2), 90)
+	var crane: Node3D = _put("PH_Crane", "BridgeCrane", hall, Vector3(41.0, .69, -8.4))
+	crane.scale = Vector3.ONE * 1.2
+	var cabinet: Vector3 = _v(layout.gun_cabinet)
+	_put("RangeGunCabinet", "RangeGunCabinet", hall, cabinet, 90)
+	# В шкафу стойки — настоящие модели игры: три ВСС в ложементах и пистолеты на полке.
+	var facing_hall: Basis = Basis(Vector3(1, 0, 0), Vector3(0, 0, -1), Vector3(0, 1, 0))
+	for k: int in range(3):
+		_weapon_on(VSS_GLB, "CabinetVss_%d" % (k + 1), hall, Vector3(cabinet.x + .1, 0, cabinet.z + [.85, .45, .05][k]), facing_hall, .37)
+	var along_shelf: Basis = Basis(Vector3(0, 1, 0), Vector3(1, 0, 0), Vector3(0, 0, -1))
+	_weapon_on(PM_GLB, "CabinetPm", hall, Vector3(cabinet.x + .12, 0, cabinet.z - .3), along_shelf, 1.965)
+	_weapon_on(GLOCK_GLB, "CabinetGlock", hall, Vector3(cabinet.x + .12, 0, cabinet.z - .72), along_shelf, 1.965)
+	for spec: Array in [
+		["PH_Bench", "WaitingBench_1", Vector3(20.6, 0, -3.6), 90], ["PH_Bench", "WaitingBench_2", Vector3(20.6, 0, 5.6), 90],
+		["PH_FoldingStool", "LaneStool_1", Vector3(22.6, 0, -1.2), 0], ["PH_FoldingStool", "LaneStool_2", Vector3(22.6, 0, 3.6), 0],
+		["PH_TrashCan", "HallTrash", Vector3(19.0, 0, 6.3), 0], ["PH_UtilityBox", "PumpStarter", Vector3(24.6, 0, -10.5), 0],
+		["PH_PowerBox", "HallBreakers", Vector3(18.24, 1.25, -4.6), 90], ["PH_PropaneTank", "BurnerGas_1", Vector3(28.4, 0, -10.35), 0],
+		["PH_PropaneTank", "BurnerGas_2", Vector3(28.9, 0, -10.4), 30], ["PH_ToolCart", "BoilerToolCart", Vector3(42.0, 0, -7.0), 90],
+		["PH_Compressor", "HallCompressor", Vector3(55.6, 0, -9.9), 0], ["PH_PlasticCrate", "HallCrate_1", Vector3(57.6, 0, -10.4), 0],
+		["PH_PlasticCrate", "HallCrate_2", Vector3(57.6, .264, -10.4), 8], ["PH_LpgTank", "HallLpg", Vector3(56.6, 0, -6.6), 0],
+		["PH_PipeWrench", "PumpWrench", Vector3(21.0, .205, -9.6), 70], ["PH_OilTin", "PumpOil", Vector3(23.75, 0, -9.3), 0],
+		["PH_GasMask", "HallGasMask_1", Vector3(18.24, .95, -2.2), 90], ["PH_GasMask", "HallGasMask_2", Vector3(18.24, .95, -2.7), 90],
+		["PH_Stool", "KipStool", Vector3(19.4, 0, -7.2), 0], ["PH_Clipboard", "KipLog", Vector3(18.62, 1.0, -6.7), 0],
+	]:
+		_put(String(spec[0]), String(spec[1]), hall, spec[2], float(spec[3]))
+	# --- тир: дорожки, мишени на тележках, пульты, стойка оружия ---
+	var gameplay: Node = _root.get_node("Gameplay")
+	var range_node: ShootingRange = ShootingRange.new()
+	range_node.name = "ShootingRange"
+	range_node.position = Vector3(fx, 0, 0)
+	var hx: Dictionary = layout.hall
+	range_node.zone = AABB(Vector3(float(hx.x0) + .2 - fx, -.5, float(hx.z0) + .2), Vector3(float(hx.x1) - float(hx.x0) - .4, 9.0, float(hx.z1) - float(hx.z0) - .4))
+	_owned(gameplay, range_node)
+	var sheet: ArrayMesh = _paper_sheet()
+	index = 1
+	for lane_spec: Dictionary in layout.lanes:
+		var paper: bool = String(lane_spec.kind) == "paper"
+		var lane: RangeLane = RangeLane.new()
+		lane.name = "Lane_%d" % index
+		lane.display_name = "Дорожка %d" % index
+		lane.max_distance_m = float(layout.rail_x1) - fx - .6
+		lane.position = Vector3(0, 0, float(lane_spec.z))
+		# -Z дорожки — к мишени (на восток, +X мира), +Z — к стрелку
+		lane.rotation_degrees.y = -90
+		_owned(range_node, lane)
+		var carriage: Node3D = Node3D.new()
+		carriage.name = "Carriage"
+		_owned(lane, carriage)
+		_put("RangeCarrierPaper" if paper else "RangeCarrierFloor", "CarrierModel", carriage, Vector3.ZERO)
+		var target: RangeTarget = RangeTarget.new()
+		target.name = "Target"
+		target.kind = RangeTarget.Kind.PAPER if paper else RangeTarget.Kind.MANNEQUIN
+		_owned(lane, target)
+		var shape: CollisionShape3D = CollisionShape3D.new()
+		shape.name = "Hitbox"
+		var box: BoxShape3D = BoxShape3D.new()
+		if paper:
+			box.size = Vector3(.62, 1.02, .05)
+			shape.position = Vector3(0, 1.47, 0)
+			var sway: Node3D = Node3D.new()
+			sway.name = "Sway"
+			sway.position = Vector3(0, 1.97, 0)
+			_owned(target, sway)
+			var sheet_node: MeshInstance3D = MeshInstance3D.new()
+			sheet_node.name = "Paper"
+			sheet_node.mesh = sheet
+			sheet_node.position = Vector3(0, -1.0, .012)
+			_owned(sway, sheet_node)
+		else:
+			box.size = Vector3(.52, 1.8, .34)
+			shape.position = Vector3(0, 1.07, 0)
+			var persona: Node3D = (load("res://assets/models/characters/persona_animated.glb") as PackedScene).instantiate() as Node3D
+			persona.name = "Persona"
+			persona.position = Vector3(0, .175, 0)
+			_owned(target, persona)
+		shape.shape = box
+		_owned(target, shape)
+		# пульт на стойке рубежа: за линией огня, лицом к стрелку
+		_put("RangeConsole", "Console", lane, Vector3(0, float(layout.counter_top), fx - float(layout.counter_x)))
+		var display: Label3D = Label3D.new()
+		display.name = "Display"
+		# табло между кнопками пульта, на наклонной панели, читается стрелку
+		display.position = Vector3(0, float(layout.counter_top) + .168, fx - float(layout.counter_x) - .07)
+		display.rotation_degrees.x = -62
+		display.pixel_size = .0006
+		display.font_size = 64
+		display.outline_size = 4
+		display.modulate = Color(.55, 1.0, .55)
+		display.shaded = false
+		_owned(lane, display)
+		for spec: Array in [["ButtonCloser", "closer", -.36], ["ButtonReset", "reset", 0.0], ["ButtonFarther", "farther", .36]]:
+			var button: RangeButton = RangeButton.new()
+			button.name = String(spec[0])
+			button.action = String(spec[1])
+			button.lane_path = NodePath("..")
+			button.position = Vector3(float(spec[2]), float(layout.counter_top) + .21, fx - float(layout.counter_x) + .05)
+			_owned(lane, button)
+		index += 1
+	var rack: RangeWeaponRack = RangeWeaponRack.new()
+	rack.name = "RangeWeaponRack"
+	rack.position = Vector3(cabinet.x + .45, 1.1, cabinet.z)
+	_owned(gameplay, rack)
+	# дистанции трафаретом на южной стене зала
+	for d: int in [5, 10, 15, 20, 25, 30]:
+		var mark: Label3D = Label3D.new()
+		mark.name = "DistanceMark_%02d" % d
+		mark.text = "%d м" % d
+		mark.position = Vector3(fx + d, 2.25, float(hx.z1) - .22)
+		mark.rotation_degrees.y = 180
+		mark.pixel_size = .006
+		mark.font_size = 96
+		mark.modulate = Color(.86, .82, .68)
+		# трафарет на кирпиче, не металлическая табличка — живёт с залом, а не в Signs
+		_owned(hall, mark)
+	_put("RoomSign_13", "HallSign_Storage", _root.get_node("Signs"), Vector3(17.78, 2.65, float(layout.storage_door_z)), -90)
+	_put("RoomSign_14", "HallSign_FiringLine", _root.get_node("Signs"), Vector3(float(layout.counter_x), 3.35, .6), -90)
+	_put("RoomSign_15", "HallSign_Caution", _root.get_node("Signs"), Vector3(18.22, 2.65, float(layout.storage_door_z)), 90)
+	# --- свет зала: подвесные цеховые светильники, прожектор вдоль дорожек, дневной свет окон ---
+	var lights: Node = _root.get_node("Lights")
+	for spec: Array in [[28.5, .6, true], [36.0, .6, false], [43.5, .6, true], [51.0, .6, false], [34.0, -8.4, false], [47.5, -8.4, false]]:
+		var at: Vector3 = Vector3(float(spec[0]), 5.46, float(spec[1]))
+		_put("PH_HangingLamp", "Fixture_HallPendant_%02d" % lights.get_child_count(), hall, at)
+		var lamp: OmniLight3D = OmniLight3D.new()
+		lamp.name = "HallPendant_%02d" % lights.get_child_count()
+		lamp.position = at + Vector3(0, .05, 0)
+		lamp.light_color = Color(1, .92, .8)
+		lamp.light_energy = 2.4 if float(spec[1]) > 0 else 1.3
+		lamp.omni_range = 13.0
+		lamp.omni_attenuation = 1.2
+		lamp.shadow_enabled = bool(spec[2])
+		lamp.light_size = .3
+		lamp.light_bake_mode = Light3D.BAKE_DYNAMIC
+		_owned(lights, lamp)
+	var flood: SpotLight3D = SpotLight3D.new()
+	flood.name = "RangeFloodlight"
+	flood.position = Vector3(fx - 1.0, 4.8, .6)
+	flood.basis = Basis.looking_at(Vector3(fx + 32.0, 1.4, .6) - flood.position, Vector3.UP)
+	flood.spot_range = 42.0
+	flood.spot_angle = 21.0
+	flood.light_energy = 8.0
+	flood.light_color = Color(1, .95, .86)
+	flood.shadow_enabled = true
+	flood.light_bake_mode = Light3D.BAKE_DYNAMIC
+	_owned(lights, flood)
+	var fill: OmniLight3D = OmniLight3D.new()
+	fill.name = "HallFiringArea"
+	fill.position = Vector3(21.0, 3.2, .6)
+	fill.light_energy = 1.6
+	fill.omni_range = 8.0
+	fill.light_color = Color(1, .9, .76)
+	fill.light_bake_mode = Light3D.BAKE_DYNAMIC
+	_owned(lights, fill)
+	for z: float in [-1.8, -8.2]:
+		var wall_lamp: OmniLight3D = OmniLight3D.new()
+		wall_lamp.name = "HallWestWall_%02d" % lights.get_child_count()
+		wall_lamp.position = Vector3(18.3, 2.6, z)
+		wall_lamp.light_color = Color(1, .9, .76)
+		wall_lamp.light_energy = 1.2
+		wall_lamp.omni_range = 4.5
+		wall_lamp.light_bake_mode = Light3D.BAKE_DYNAMIC
+		_owned(lights, wall_lamp)
+		_put("CageLamp", "Fixture_" + wall_lamp.name, hall, wall_lamp.position, 90)
+	# рассеянный дневной свет через армированное стекло — холодный и слабый
+	for x: float in [27.0, 39.0, 51.0]:
+		var day: OmniLight3D = OmniLight3D.new()
+		day.name = "HallDaylight_%02d" % lights.get_child_count()
+		day.position = Vector3(x, 4.6, float(hx.z1) - 1.0)
+		day.light_color = Color(.78, .85, .95)
+		day.light_energy = .45
+		day.omni_range = 8.0
+		day.light_bake_mode = Light3D.BAKE_DYNAMIC
+		_owned(lights, day)
+	var probe: ReflectionProbe = ReflectionProbe.new()
+	probe.name = "Probe_BoilerHall"
+	probe.position = Vector3((float(hx.x0) + float(hx.x1)) * .5, 4.0, (float(hx.z0) + float(hx.z1)) * .5)
+	probe.size = Vector3(float(hx.x1) - float(hx.x0), 8.0, float(hx.z1) - float(hx.z0))
+	probe.interior = true
+	probe.box_projection = true
+	probe.max_distance = 50
+	probe.update_mode = ReflectionProbe.UPDATE_ONCE
+	probe.intensity = .6
+	_owned(_root.get_node("ReflectionProbes"), probe)
+	for spec: Array in [["BoilerOil_1", Vector3(29.4, .025, -8.4)], ["BoilerOil_2", Vector3(42.9, .025, -8.4)], ["PumpOil", Vector3(21.7, .025, -9.6)]]:
+		var decal: Decal = Decal.new()
+		decal.name = String(spec[0])
+		decal.position = spec[1]
+		decal.size = Vector3(2.6, .1, 1.8)
+		decal.texture_albedo = load(TEXTURES + "oil_stain.png")
+		decal.texture_orm = load(TEXTURES + "oil_stain_orm.png")
+		decal.upper_fade = .02
+		decal.lower_fade = .02
+		_owned(hall, decal)

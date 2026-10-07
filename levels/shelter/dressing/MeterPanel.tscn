@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/MeterPanel_00.res" id="1_8bxge"]
 
-[node name="MeterPanel" type="Node3D"]
+[node name="MeterPanel" type="Node3D" unique_id=1716774348]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=914911132]
 mesh = ExtResource("1_8bxge")

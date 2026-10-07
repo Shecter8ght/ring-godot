@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_ToolChest_00.res" id="1_pcqiv"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_ToolChest_01.res" id="2_uudkh"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_ToolChest_02.res" id="3_f56nu"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_ToolChest_03.res" id="4_11rt7"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_ToolChest_04.res" id="5_nhlxg"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_ToolChest_05.res" id="6_70m7l"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_ToolChest_06.res" id="7_y3iqd"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yy22b"]
+size = Vector3(0.68538845, 0.65183556, 0.40715325)
+
+[node name="PH_ToolChest" type="Node3D" unique_id=709021736]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1091366002]
+mesh = ExtResource("1_pcqiv")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=475795698]
+mesh = ExtResource("2_uudkh")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=2052605922]
+mesh = ExtResource("3_f56nu")
+
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=386867644]
+mesh = ExtResource("4_11rt7")
+
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=540327080]
+mesh = ExtResource("5_nhlxg")
+
+[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=1061758366]
+mesh = ExtResource("6_70m7l")
+
+[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=1450055126]
+mesh = ExtResource("7_y3iqd")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1798607162]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=12594147]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32591778, 0)
+shape = SubResource("BoxShape3D_yy22b")

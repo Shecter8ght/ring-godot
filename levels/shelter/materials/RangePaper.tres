@@ -1,0 +1,17 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/RangePaper_base.png" id="1_ghtrf"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/RangePaper_orm.png" id="2_o2rwv"]
+
+[resource]
+resource_name = "RangePaper"
+cull_mode = 2
+albedo_texture = ExtResource("1_ghtrf")
+metallic = 1.0
+metallic_texture = ExtResource("2_o2rwv")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_o2rwv")
+roughness_texture_channel = 1
+ao_enabled = true
+ao_texture = ExtResource("2_o2rwv")
+texture_filter = 5

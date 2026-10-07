@@ -1,18 +1,18 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Floor_Trader_00.res" id="1_egdo7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4sd7i"]
 size = Vector3(10, 0.2, 6)
 
-[node name="Floor_Trader" type="Node3D"]
+[node name="Floor_Trader" type="Node3D" unique_id=510666080]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=587057357]
 mesh = ExtResource("1_egdo7")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1802005464]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1214277940]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, -0.1, -2)
 shape = SubResource("BoxShape3D_4sd7i")

@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/RoomSign_02_00.res" id="1_wh8vt"]
 
-[node name="RoomSign_02" type="Node3D"]
+[node name="RoomSign_02" type="Node3D" unique_id=978919508]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=986415540]
 cast_shadow = 0
 mesh = ExtResource("1_wh8vt")

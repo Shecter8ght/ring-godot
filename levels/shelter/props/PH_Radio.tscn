@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_00.res" id="1_lgbbf"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_01.res" id="2_cabt7"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_02.res" id="3_injtj"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_03.res" id="4_hum1w"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_04.res" id="5_eoayk"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_05.res" id="6_emah6"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_06.res" id="7_8xcmf"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_07.res" id="8_oretc"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_08.res" id="9_w7v10"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_09.res" id="10_5txgt"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_10.res" id="11_jn1yd"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_11.res" id="12_8518x"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_12.res" id="13_tlnpq"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_13.res" id="14_0qbcw"]
+
+[node name="PH_Radio" type="Node3D" unique_id=11737555]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1407924526]
+mesh = ExtResource("1_lgbbf")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=612660154]
+mesh = ExtResource("2_cabt7")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1093554491]
+mesh = ExtResource("3_injtj")
+
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=659134062]
+mesh = ExtResource("4_hum1w")
+
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1405798773]
+mesh = ExtResource("5_eoayk")
+
+[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=1471904124]
+mesh = ExtResource("6_emah6")
+
+[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=1830102514]
+mesh = ExtResource("7_8xcmf")
+
+[node name="FinishedMesh_07" type="MeshInstance3D" parent="." unique_id=1945904254]
+mesh = ExtResource("8_oretc")
+
+[node name="FinishedMesh_08" type="MeshInstance3D" parent="." unique_id=169241980]
+mesh = ExtResource("9_w7v10")
+
+[node name="FinishedMesh_09" type="MeshInstance3D" parent="." unique_id=1799840165]
+mesh = ExtResource("10_5txgt")
+
+[node name="FinishedMesh_10" type="MeshInstance3D" parent="." unique_id=201517419]
+mesh = ExtResource("11_jn1yd")
+
+[node name="FinishedMesh_11" type="MeshInstance3D" parent="." unique_id=1839362060]
+mesh = ExtResource("12_8518x")
+
+[node name="FinishedMesh_12" type="MeshInstance3D" parent="." unique_id=947619573]
+mesh = ExtResource("13_tlnpq")
+
+[node name="FinishedMesh_13" type="MeshInstance3D" parent="." unique_id=450158587]
+mesh = ExtResource("14_0qbcw")

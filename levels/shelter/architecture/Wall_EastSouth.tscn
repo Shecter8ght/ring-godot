@@ -1,19 +1,47 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Wall_EastSouth_00.res" id="1_lk1ny"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_xcb7k"]
-size = Vector3(10, 3.25, 0.4)
+size = Vector3(8.4, 3.25, 0.4)
 
-[node name="Wall_EastSouth" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_srdml"]
+size = Vector3(1.2, 1.3, 0.4)
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[sub_resource type="BoxShape3D" id="BoxShape3D_nuvi4"]
+size = Vector3(1.2, 0.55, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tjuuv"]
+size = Vector3(0.4, 3.25, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_awwkp"]
+size = Vector3(1.2, 1.4, 0.2)
+
+[node name="Wall_EastSouth" type="Node3D" unique_id=851970953]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1894989867]
 mesh = ExtResource("1_lk1ny")
 metadata/shelter_cut = true
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1589343330]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 1.625, 7)
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1871137250]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.2, 1.625, 7)
 shape = SubResource("BoxShape3D_xcb7k")
+
+[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=322838747]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0.65, 7)
+shape = SubResource("BoxShape3D_srdml")
+
+[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=523609384]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 2.975, 7)
+shape = SubResource("BoxShape3D_nuvi4")
+
+[node name="Hull_03" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1514211802]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.8, 1.625, 7)
+shape = SubResource("BoxShape3D_tjuuv")
+
+[node name="Hull_04" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=790733477]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 2, 7)
+shape = SubResource("BoxShape3D_awwkp")

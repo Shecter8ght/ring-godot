@@ -1,0 +1,22 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Brick_base.jpg" id="1_tfb6v"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Brick_orm.jpg" id="2_fs0kb"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Brick_normal.jpg" id="3_jxipy"]
+
+[resource]
+resource_name = "Brick_cut"
+albedo_texture = ExtResource("1_tfb6v")
+metallic = 1.0
+metallic_specular = 0.35
+metallic_texture = ExtResource("2_fs0kb")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_fs0kb")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.7
+normal_texture = ExtResource("3_jxipy")
+ao_enabled = true
+ao_texture = ExtResource("2_fs0kb")
+texture_filter = 5
+distance_fade_mode = 2

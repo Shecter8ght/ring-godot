@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PracticalLight_00.res" id="1_05dyp"]
 
-[node name="PracticalLight" type="Node3D"]
+[node name="PracticalLight" type="Node3D" unique_id=1459181639]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=901502965]
 layers = 524288
 mesh = ExtResource("1_05dyp")

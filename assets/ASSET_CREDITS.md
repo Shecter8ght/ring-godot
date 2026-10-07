@@ -46,3 +46,61 @@
 - Атлас Dressing: собственные четыре image layers Ucupaint (цвет поверхности, контактный износ, шероховатость, открытый металл), запечённые в три карты 1024². В цвете повторно использованы уже перечисленные выше CC0 фотографии: Green Metal Rust, Metal Plate, Denim Fabric 06, Oak Wood Planks, Painted Plaster Wall. Поверхности Paper/Cardboard наследуют прежние карты Painted Plaster Wall/Oak Wood Planks с художественной обработкой. Новых сторонних источников нет.
 - DustMotes и KettleVapor: собственные нарисованные маски и заранее записанные Blender shape-key анимации. Исходник `_asset_src/shelter/atmosphere/shelter_atmosphere.blend`; GLB, маски и собственный шейдер `soft_density.gdshader` — `assets/shelter/atmosphere/`. Лицензия — собственная работа для RING.
 - Локальные `license.txt` лежат рядом с обоими исходниками. Сохранённые исходники повторно открыты и проверены; результаты с SHA256 — `docs/shelter/validation/dressing_source_audit.json` и `atmosphere_source_audit.json`. Сырьё по правилам проекта не публикуется в Git.
+
+## Котельная зоны 5 и тир (2026-10-07)
+
+Фототекстуры Poly Haven (CC0 1.0), 1K, tint/ORM — `tools/shelter_boiler_materials.py`:
+
+| Набор | Автор | Источник | Материал |
+|---|---|---|---|
+| Factory Brick | Rob Tuytel | https://polyhaven.com/a/factory_brick | Brick |
+| Whitewashed Brick | Charlotte Baglioni | https://polyhaven.com/a/whitewashed_brick | Whitewash |
+| Peeling Painted Wall | Dimitrios Savva | https://polyhaven.com/a/peeling_painted_wall | PeelingPaint |
+| Blue Metal Plate | Rob Tuytel | https://polyhaven.com/a/blue_metal_plate | BoilerSteel |
+| Rusty Metal 02 | Rob Tuytel | https://polyhaven.com/a/rusty_metal_02 | FlueRust |
+
+Модели Poly Haven (CC0 1.0), реальный масштаб, опора на пол, лишние варианты отброшены, мелочь с картами 512 px — `tools/shelter_boiler_external.py`, `tools/integrate_shelter_boiler_external.py`:
+
+| Ассет | Модель | Автор | Источник |
+|---|---|---|---|
+| PH_Chair | Painted Wooden Chair 02 | Kirill Sannikov | https://polyhaven.com/a/painted_wooden_chair_02 |
+| PH_Boots | Rubber Boots | L | https://polyhaven.com/a/rubber_boots |
+| PH_Cans | Russian Food Cans 01 | Kosan Aziz | https://polyhaven.com/a/russian_food_cans_01 |
+| PH_JerryCan | Metal Jerrycan Green | Ulan Cabanilla | https://polyhaven.com/a/metal_jerrycan_green |
+| PH_MedicalBox | Medical Box | Ulan Cabanilla | https://polyhaven.com/a/medical_box |
+| PH_Radio | Vintage Radio Transceiver | Mateusz Sadek | https://polyhaven.com/a/vintage_radio_transceiver |
+| PH_DeskLamp | Desk Lamp Arm 01 | Yann Kervran, Kuutti Siitonen | https://polyhaven.com/a/desk_lamp_arm_01 |
+| PH_MilitaryCrate | Wooden Military Crate | Prabhjinder Singh | https://polyhaven.com/a/wooden_military_crate |
+| PH_Carton | Cardboard Box 01 | Rahul Chaudhary | https://polyhaven.com/a/cardboard_box_01 |
+| PH_Bench | Painted Wooden Bench | Kirill Sannikov | https://polyhaven.com/a/painted_wooden_bench |
+| PH_CoffeeTable | Industrial Coffee Table | Ulan Cabanilla | https://polyhaven.com/a/industrial_coffee_table |
+| PH_Binoculars | Binoculars | Derek Wight | https://polyhaven.com/a/binoculars |
+| PH_GasMask | Old Gas Mask | Michał Wiśniewski | https://polyhaven.com/a/old_gas_mask |
+| PH_Gloves | Garden Gloves 01 | Satyaki Mandal | https://polyhaven.com/a/garden_gloves_01 |
+| PH_Kettle | Vintage Electric Kettle | SV Garip | https://polyhaven.com/a/vintage_electric_kettle |
+| PH_Clipboard | Clipboard | ProgrammerOnCoffee | https://polyhaven.com/a/clipboard |
+| PH_Toolbox | Metal Toolbox | Mateusz Sadek | https://polyhaven.com/a/metal_toolbox |
+| PH_ToolChest | Metal Tool Chest | Yann Kervran, John Hutcheson | https://polyhaven.com/a/metal_tool_chest |
+| PH_ToolCart | Tool Cart | Savva Zakharov | https://polyhaven.com/a/tool_cart |
+| PH_Vice | Bench Vice 01 | Yann Kervran, Antanas Kep | https://polyhaven.com/a/bench_vice_01 |
+| PH_DrillPress | Drill Press 01 | Viktor | https://polyhaven.com/a/drill_press_01 |
+| PH_Compressor | Old Military Compressor | Brian Speight | https://polyhaven.com/a/old_military_compressor |
+| PH_PropaneTank | Propane Tank | Slinc | https://polyhaven.com/a/propane_tank |
+| PH_PowerBox | Power Box 01 | Rico Cilliers, Yann Kervran | https://polyhaven.com/a/power_box_01 |
+| PH_UtilityBox | Utility Box 01 | James Ray Cock | https://polyhaven.com/a/utility_box_01 |
+| PH_HangingLamp | Hanging Industrial Lamp | Kuutti Siitonen | https://polyhaven.com/a/hanging_industrial_lamp |
+| PH_Thermos | Modified Thermos | Alex Weber | https://polyhaven.com/a/modified_thermos |
+| PH_TrashCan | Metal Trash Can | GurJas Studios | https://polyhaven.com/a/metal_trash_can |
+| PH_FoldingStool | Folding Wooden Stool | Ulan Cabanilla | https://polyhaven.com/a/folding_wooden_stool |
+| PH_PlasticCrate | Plastic Crate 01 | PierreB3D | https://polyhaven.com/a/plastic_crate_01 |
+| PH_Multimeter | Retro Multimeter | elli moeller | https://polyhaven.com/a/retro_multimeter |
+| PH_OilTin | Oil Tin | Niklas | https://polyhaven.com/a/oil_tin |
+| PH_Crane | Overhead Crane | Timothy3D | https://polyhaven.com/a/overhead_crane |
+| PH_MetalDesk | Metal Office Desk | Ulan Cabanilla | https://polyhaven.com/a/metal_office_desk |
+| PH_WallClock | Wall Clock | PierreB3D | https://polyhaven.com/a/wall_clock |
+| PH_Stool | Metal Stool 02 | Ulan Cabanilla | https://polyhaven.com/a/metal_stool_02 |
+| PH_LpgTank | Small Lpg Tank | Ulan Cabanilla | https://polyhaven.com/a/small_lpg_tank |
+| PH_PipeWrench | Pipe Wrench | Will Evarts | https://polyhaven.com/a/pipe_wrench |
+| PH_Sledgehammer | Sledgehammer 01 | Dylan Guzman | https://polyhaven.com/a/sledgehammer_01 |
+
+Собственные (для владельца RING): стены котельной с окнами из армированного стекла, котельный зал, котлы, насосы, щит КИП, магистрали, тир (рубеж, кабины, направляющие, улавливатель, пульты, тележки, шкаф стойки) — `tools/build_shelter_boiler.py`; шлем, бронежилет, рюкзак — `tools/build_shelter_gear.py` (временно, до замены готовыми моделями). Лист «мишень № 4», армированное стекло, пробоина, кнопки — собственная графика. Модели оружия в шкафу и на столе — существующие ВСС, ПМ, Glock игры (см. `assets/CREDITS.md`). Манекены тира — Persona игры в матовом пластике.

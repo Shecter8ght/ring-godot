@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Thermos_00.res" id="1_72jrl"]
+
+[node name="PH_Thermos" type="Node3D" unique_id=2079977286]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=182946008]
+cast_shadow = 0
+mesh = ExtResource("1_72jrl")

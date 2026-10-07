@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Clipboard_00.res" id="1_it5re"]
+
+[node name="PH_Clipboard" type="Node3D" unique_id=1494155937]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=555381339]
+cast_shadow = 0
+mesh = ExtResource("1_it5re")

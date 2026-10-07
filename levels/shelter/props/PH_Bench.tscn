@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Bench_00.res" id="1_okork"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wo1sq"]
+size = Vector3(1.1649436, 0.88929147, 0.4965431)
+
+[node name="PH_Bench" type="Node3D" unique_id=363908093]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=666512635]
+mesh = ExtResource("1_okork")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=111739514]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1470967904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44464573, 0)
+shape = SubResource("BoxShape3D_wo1sq")

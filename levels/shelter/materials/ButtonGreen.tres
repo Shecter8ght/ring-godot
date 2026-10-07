@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/ButtonGreen_base.jpg" id="1_a5ply"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/ButtonGreen_orm.jpg" id="2_owdki"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/ButtonGreen_normal.jpg" id="3_opaf8"]
+
+[resource]
+resource_name = "ButtonGreen"
+albedo_texture = ExtResource("1_a5ply")
+metallic = 1.0
+metallic_texture = ExtResource("2_owdki")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_owdki")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = ExtResource("3_opaf8")
+ao_enabled = true
+ao_texture = ExtResource("2_owdki")
+texture_filter = 5

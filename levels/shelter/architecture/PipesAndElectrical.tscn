@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PipesAndElectrical_00.res" id="1_2ml4x"]
 
-[node name="PipesAndElectrical" type="Node3D"]
+[node name="PipesAndElectrical" type="Node3D" unique_id=1735357475]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1813900061]
 layers = 524288
 mesh = ExtResource("1_2ml4x")

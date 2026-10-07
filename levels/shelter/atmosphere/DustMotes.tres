@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+[gd_resource type="ShaderMaterial" format=3]
 
 [ext_resource type="Shader" path="res://assets/shelter/atmosphere/soft_density.gdshader" id="1_pabot"]
 [ext_resource type="Texture2D" path="res://assets/shelter/atmosphere/DustSoft.png" id="2_0w5ix"]

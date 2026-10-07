@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_AmmoBox_00.res" id="1_7k8dh"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_AmmoBox_01.res" id="2_g1ofu"]
@@ -9,26 +9,26 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_xtim7"]
 size = Vector3(0.16112421, 0.33034563, 0.48)
 
-[node name="PH_AmmoBox" type="Node3D"]
+[node name="PH_AmmoBox" type="Node3D" unique_id=2039305744]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2116918968]
 mesh = ExtResource("1_7k8dh")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=553964856]
 mesh = ExtResource("2_g1ofu")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=349196327]
 mesh = ExtResource("3_1ic1u")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=751644818]
 mesh = ExtResource("4_j8pyp")
 
-[node name="FinishedMesh_04" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=1276865114]
 mesh = ExtResource("5_kscu4")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1807428315]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1115981219]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16517282, 0)
 shape = SubResource("BoxShape3D_xtim7")

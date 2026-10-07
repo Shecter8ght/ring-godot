@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_WallClock_00.res" id="1_ceeco"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_WallClock_01.res" id="2_1dw6p"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_WallClock_02.res" id="3_qwcid"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_WallClock_03.res" id="4_hknni"]
+
+[node name="PH_WallClock" type="Node3D" unique_id=523443377]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=425661346]
+mesh = ExtResource("1_ceeco")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=763288924]
+mesh = ExtResource("2_1dw6p")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=918200384]
+mesh = ExtResource("3_qwcid")
+
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=582449128]
+mesh = ExtResource("4_hknni")

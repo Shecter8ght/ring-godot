@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Stool_00.res" id="1_a3lrc"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jmwjh"]
+size = Vector3(0.44809994, 0.45812273, 0.4730904)
+
+[node name="PH_Stool" type="Node3D" unique_id=1554172355]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1456524567]
+mesh = ExtResource("1_a3lrc")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1460510130]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1757415506]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22906137, 0)
+shape = SubResource("BoxShape3D_jmwjh")

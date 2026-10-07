@@ -1,0 +1,22 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_base.jpg" id="1_ffeca"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_orm.jpg" id="2_1s01s"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/PeelingPaint_normal.jpg" id="3_610js"]
+
+[resource]
+resource_name = "PeelingPaint_cut"
+albedo_texture = ExtResource("1_ffeca")
+metallic = 1.0
+metallic_specular = 0.35
+metallic_texture = ExtResource("2_1s01s")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_1s01s")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = ExtResource("3_610js")
+ao_enabled = true
+ao_texture = ExtResource("2_1s01s")
+texture_filter = 5
+distance_fade_mode = 2

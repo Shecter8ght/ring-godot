@@ -690,6 +690,96 @@
 		"yaw": 0.0
 	},
 	{
+		"asset": "Wall_HallNorth",
+		"name": "SH_Int_Wall_HallNorth",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_HallSouth",
+		"name": "SH_Int_Wall_HallSouth",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Wall_HallEast",
+		"name": "SH_Int_Wall_HallEast",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Floor_BoilerHall",
+		"name": "SH_Int_Floor_BoilerHall",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Ceiling_BoilerHall",
+		"name": "SH_Int_Ceiling_BoilerHall",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "HallStructure",
+		"name": "SH_Int_HallStructure",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
 		"asset": "Rug",
 		"name": "PlanningRug",
 		"position": [
@@ -735,7 +825,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Chair",
+		"asset": "PH_Chair",
 		"name": "PlanningChair_03",
 		"position": [
 			-2.34999990463257,
@@ -750,7 +840,7 @@
 		"yaw": 90.0000025044782
 	},
 	{
-		"asset": "Chair",
+		"asset": "PH_Chair",
 		"name": "PlanningChair_04",
 		"position": [
 			2.34999990463257,
@@ -765,7 +855,7 @@
 		"yaw": -90.0000025044782
 	},
 	{
-		"asset": "Chair",
+		"asset": "PH_Chair",
 		"name": "PlanningChair_05",
 		"position": [
 			-1.04999995231628,
@@ -780,7 +870,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Chair",
+		"asset": "PH_Chair",
 		"name": "PlanningChair_06",
 		"position": [
 			1.04999995231628,
@@ -795,7 +885,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Chair",
+		"asset": "PH_Chair",
 		"name": "PlanningChair_07",
 		"position": [
 			-1.04999995231628,
@@ -810,7 +900,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Chair",
+		"asset": "PH_Chair",
 		"name": "PlanningChair_08",
 		"position": [
 			1.04999995231628,
@@ -855,7 +945,7 @@
 		"yaw": 14.0000001049943
 	},
 	{
-		"asset": "Radio",
+		"asset": "PH_Radio",
 		"name": "FieldRadio",
 		"position": [
 			-0.75,
@@ -870,7 +960,7 @@
 		"yaw": 8.00000079180271
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "UnderTableCase",
 		"position": [
 			0.379999995231628,
@@ -930,7 +1020,7 @@
 		"yaw": 100.000000506024
 	},
 	{
-		"asset": "CoffeeTable",
+		"asset": "PH_CoffeeTable",
 		"name": "CoffeeTable",
 		"position": [
 			-13.3000001907349,
@@ -1035,7 +1125,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Chair",
+		"asset": "PH_Chair",
 		"name": "TraderChair",
 		"position": [
 			-12.3999996185303,
@@ -1065,7 +1155,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "CardboardBox",
+		"asset": "PH_Carton",
 		"name": "TradeCarton_03",
 		"position": [
 			-16.6000003814697,
@@ -1110,7 +1200,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "MedicalCase",
+		"asset": "PH_MedicalBox",
 		"name": "TradeMedical_10",
 		"position": [
 			-12.75,
@@ -1155,7 +1245,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "TradeCase",
 		"position": [
 			-16.8999996185303,
@@ -1200,7 +1290,7 @@
 		"yaw": -90.0000025044782
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "ToolCase",
 		"position": [
 			17.3999996185303,
@@ -1215,7 +1305,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "JerryCan",
+		"asset": "PH_JerryCan",
 		"name": "WorkshopOilCan",
 		"position": [
 			14.3999996185303,
@@ -1245,7 +1335,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "WorkshopBench",
 		"position": [
 			11.0,
@@ -1335,7 +1425,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "AmmoCase",
 		"position": [
 			-16.5,
@@ -1380,7 +1470,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "StorageCase_01",
 		"position": [
 			10.1999998092651,
@@ -1410,7 +1500,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "StorageCase_04",
 		"position": [
 			12.0,
@@ -1440,7 +1530,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "StorageCase_07",
 		"position": [
 			13.8000001907349,
@@ -1470,7 +1560,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "StorageCase_10",
 		"position": [
 			15.6000003814697,
@@ -1500,7 +1590,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "FoodSupply_13",
 		"position": [
 			11.8500003814697,
@@ -1530,7 +1620,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "FoodSupply_15",
 		"position": [
 			12.1999998092651,
@@ -1560,7 +1650,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "FoodSupply_17",
 		"position": [
 			12.5500001907349,
@@ -1575,19 +1665,19 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "StorageSortBench",
 		"position": [
-			17.2000007629395,
+			10.6000003814697,
 			0.0,
-			4.0
+			2.40000009536743
 		],
 		"rotation_degrees": [
 			0.0,
-			-90.0,
+			0.0,
 			0.0
 		],
-		"yaw": -90.0000025044782
+		"yaw": 0.0
 	},
 	{
 		"asset": "Generator",
@@ -1635,7 +1725,7 @@
 		"yaw": -90.0000025044782
 	},
 	{
-		"asset": "JerryCan",
+		"asset": "PH_JerryCan",
 		"name": "FuelReserve_03",
 		"position": [
 			15.8999996185303,
@@ -1650,7 +1740,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "JerryCan",
+		"asset": "PH_JerryCan",
 		"name": "FuelReserve_04",
 		"position": [
 			16.3999996185303,
@@ -1665,7 +1755,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "JerryCan",
+		"asset": "PH_JerryCan",
 		"name": "FuelReserve_05",
 		"position": [
 			16.8999996185303,
@@ -1710,7 +1800,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Boots",
+		"asset": "PH_Boots",
 		"name": "SleepingBoots_01",
 		"position": [
 			-1.60000002384186,
@@ -1725,7 +1815,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "PersonalCase_02",
 		"position": [
 			-2.15000009536743,
@@ -1755,7 +1845,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Boots",
+		"asset": "PH_Boots",
 		"name": "SleepingBoots_04",
 		"position": [
 			0.550000011920929,
@@ -1770,7 +1860,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "PersonalCase_05",
 		"position": [
 			0.0,
@@ -1800,7 +1890,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Boots",
+		"asset": "PH_Boots",
 		"name": "SleepingBoots_07",
 		"position": [
 			2.70000004768372,
@@ -1815,7 +1905,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "PersonalCase_08",
 		"position": [
 			2.15000009536743,
@@ -1860,7 +1950,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Boots",
+		"asset": "PH_Boots",
 		"name": "Bay_01_Boots",
 		"position": [
 			-5.09999990463257,
@@ -1905,7 +1995,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Boots",
+		"asset": "PH_Boots",
 		"name": "Bay_02_Boots",
 		"position": [
 			5.09999990463257,
@@ -1950,7 +2040,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "Boots",
+		"asset": "PH_Boots",
 		"name": "Bay_03_Boots",
 		"position": [
 			7.40000009536743,
@@ -1980,7 +2070,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "UnloadingBench",
 		"position": [
 			-3.5,
@@ -2010,7 +2100,7 @@
 		"yaw": -90.0000025044782
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "UnloadingCase",
 		"position": [
 			-2.5,
@@ -2085,56 +2175,56 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Display_wpn_ar_03",
+		"asset": "VSS_Vintorez_Picatinny",
 		"name": "RackRifle_00",
 		"position": [
 			-14.5,
-			0.589999973773956,
-			1.64999997615814
+			0.200000002980232,
+			1.62000000476837
 		],
 		"rotation_degrees": [
 			-90.0,
-			0.0,
+			-90.0,
 			0.0
 		],
-		"yaw": 0.0
+		"yaw": -90.0000025044782
 	},
 	{
-		"asset": "Display_wpn_ar_03",
+		"asset": "VSS_Vintorez_Picatinny",
 		"name": "RackRifle_01",
 		"position": [
 			-13.8000001907349,
-			0.589999973773956,
-			1.64999997615814
+			0.200000002980232,
+			1.62000000476837
 		],
 		"rotation_degrees": [
 			-90.0,
-			0.0,
+			-90.0,
 			0.0
 		],
-		"yaw": 0.0
+		"yaw": -90.0000025044782
 	},
 	{
-		"asset": "Display_wpn_ar_03",
+		"asset": "VSS_Vintorez_Picatinny",
 		"name": "RackRifle_02",
 		"position": [
 			-13.1000003814697,
-			0.589999973773956,
-			1.64999997615814
+			0.200000002980232,
+			1.62000000476837
 		],
 		"rotation_degrees": [
 			-90.0,
-			0.0,
+			-90.0,
 			0.0
 		],
-		"yaw": 0.0
+		"yaw": -90.0000025044782
 	},
 	{
-		"asset": "Display_wpn_hg_01",
+		"asset": "pm",
 		"name": "MaintenancePistol",
 		"position": [
 			-13.0,
-			0.785320460796356,
+			0.785320401191711,
 			4.25
 		],
 		"rotation_degrees": [
@@ -2208,9 +2298,9 @@
 		"asset": "PH_Crate",
 		"name": "StorageReserve1",
 		"position": [
-			16.3999996185303,
+			16.5,
 			0.0,
-			3.0
+			1.60000002384186
 		],
 		"rotation_degrees": [
 			0.0,
@@ -2223,9 +2313,9 @@
 		"asset": "PH_Crate",
 		"name": "StorageReserve2",
 		"position": [
-			16.3999996185303,
+			16.5,
 			0.340000003576279,
-			3.0
+			1.60000002384186
 		],
 		"rotation_degrees": [
 			0.0,
@@ -2238,9 +2328,9 @@
 		"asset": "PH_Crate",
 		"name": "StorageReserve3",
 		"position": [
-			16.3999996185303,
+			15.5500001907349,
 			0.0,
-			4.09999990463257
+			1.60000002384186
 		],
 		"rotation_degrees": [
 			0.0,
@@ -2385,7 +2475,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "HubRestBench",
 		"position": [
 			-6.5,
@@ -2400,7 +2490,7 @@
 		"yaw": 90.0000025044782
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "BayBench1",
 		"position": [
 			-5.09999990463257,
@@ -2415,7 +2505,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "BayBench2",
 		"position": [
 			5.09999990463257,
@@ -2430,7 +2520,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "BayBench3",
 		"position": [
 			7.25,
@@ -2505,7 +2595,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "MedicalCase",
+		"asset": "PH_MedicalBox",
 		"name": "SortingFirstAid",
 		"position": [
 			13.3000001907349,
@@ -2550,7 +2640,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "HubMedicReserve",
 		"position": [
 			-6.5,
@@ -2805,7 +2895,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "LivingTin_00",
 		"position": [
 			-10.5,
@@ -2820,7 +2910,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "LivingTin_01",
 		"position": [
 			-10.2600002288818,
@@ -2835,7 +2925,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "LivingTin_02",
 		"position": [
 			-10.0200004577637,
@@ -2850,7 +2940,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "LivingTin_03",
 		"position": [
 			-10.5,
@@ -2865,7 +2955,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "LivingTin_04",
 		"position": [
 			-10.2600002288818,
@@ -2880,7 +2970,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "LivingTin_05",
 		"position": [
 			-10.0200004577637,
@@ -2955,7 +3045,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "DeskLamp",
+		"asset": "PH_DeskLamp",
 		"name": "PlanningLamp",
 		"position": [
 			1.01999998092651,
@@ -2970,7 +3060,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Binoculars",
+		"asset": "PH_Binoculars",
 		"name": "PlanningOptics",
 		"position": [
 			0.319999992847443,
@@ -3000,7 +3090,7 @@
 		"yaw": -22.9999995016684
 	},
 	{
-		"asset": "DeskLamp",
+		"asset": "PH_DeskLamp",
 		"name": "LivingLamp",
 		"position": [
 			-12.2200002670288,
@@ -3015,7 +3105,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "DeskLamp",
+		"asset": "PH_DeskLamp",
 		"name": "TraderTaskLamp",
 		"position": [
 			-13.3000001907349,
@@ -3030,7 +3120,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "DeskLamp",
+		"asset": "PH_DeskLamp",
 		"name": "WorkbenchTaskLamp",
 		"position": [
 			14.6000003814697,
@@ -3105,7 +3195,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Radio",
+		"asset": "PH_Radio",
 		"name": "CommunicationsReceiver",
 		"position": [
 			-5.80000019073486,
@@ -3135,7 +3225,7 @@
 		"yaw": 15.9999998760581
 	},
 	{
-		"asset": "Bench",
+		"asset": "PH_Bench",
 		"name": "NorthWaitingBench",
 		"position": [
 			0.0,
@@ -3180,7 +3270,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "MaintenanceCase",
 		"position": [
 			-7.09999990463257,
@@ -3195,7 +3285,7 @@
 		"yaw": 90.0000025044782
 	},
 	{
-		"asset": "Case",
+		"asset": "PH_MilitaryCrate",
 		"name": "HubSuppliesCase",
 		"position": [
 			-7.30000019073486,
@@ -3390,7 +3480,7 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "JerryCan",
+		"asset": "PH_JerryCan",
 		"name": "EntryWaterCan",
 		"position": [
 			2.90000009536743,
@@ -3405,7 +3495,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "MedicalCase",
+		"asset": "PH_MedicalBox",
 		"name": "HubFirstAid",
 		"position": [
 			-7.40000009536743,
@@ -3420,7 +3510,7 @@
 		"yaw": 90.0000025044782
 	},
 	{
-		"asset": "CardboardBox",
+		"asset": "PH_Carton",
 		"name": "LivingPersonalCarton",
 		"position": [
 			-17.3999996185303,
@@ -3435,7 +3525,7 @@
 		"yaw": 90.0000025044782
 	},
 	{
-		"asset": "FoodCan",
+		"asset": "PH_Cans",
 		"name": "LivingFood",
 		"position": [
 			-17.3999996185303,
@@ -3555,7 +3645,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "Radio",
+		"asset": "PH_Radio",
 		"name": "Radio_Visual",
 		"position": [
 			0.0,
@@ -3830,7 +3920,7 @@
 		"position": [
 			17.6499996185303,
 			2.04999995231628,
-			4.59999990463257
+			1.89999997615814
 		],
 		"rotation_degrees": [
 			0.0,
@@ -4095,7 +4185,817 @@
 		"yaw": -179.999991348578
 	},
 	{
-		"asset": "InventoryClipboard",
+		"asset": "Boiler",
+		"name": "Boiler_1",
+		"position": [
+			34.0,
+			0.0,
+			-8.39999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "Boiler",
+		"name": "Boiler_2",
+		"position": [
+			47.5,
+			0.0,
+			-8.39999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CirculationPump",
+		"name": "CirculationPump_1",
+		"position": [
+			20.2999992370605,
+			0.0,
+			-9.85000038146973
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CirculationPump",
+		"name": "CirculationPump_2",
+		"position": [
+			21.75,
+			0.0,
+			-9.85000038146973
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CirculationPump",
+		"name": "CirculationPump_3",
+		"position": [
+			23.2000007629395,
+			0.0,
+			-9.85000038146973
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "KipPanel",
+		"name": "KipPanel",
+		"position": [
+			18.4699993133545,
+			0.0,
+			-7.19999980926514
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_Crane",
+		"name": "BridgeCrane",
+		"position": [
+			41.0,
+			0.689999997615814,
+			-8.39999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeGunCabinet",
+		"name": "RangeGunCabinet",
+		"position": [
+			18.2399997711182,
+			0.0,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "VSS_Vintorez_Picatinny",
+		"name": "CabinetVss_1",
+		"position": [
+			18.3400001525879,
+			0.370000004768372,
+			1.45000004768372
+		],
+		"rotation_degrees": [
+			-90.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "VSS_Vintorez_Picatinny",
+		"name": "CabinetVss_2",
+		"position": [
+			18.3400001525879,
+			0.370000004768372,
+			1.05000007152557
+		],
+		"rotation_degrees": [
+			-90.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "VSS_Vintorez_Picatinny",
+		"name": "CabinetVss_3",
+		"position": [
+			18.3400001525879,
+			0.370000004768372,
+			0.650000035762787
+		],
+		"rotation_degrees": [
+			-90.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "pm",
+		"name": "CabinetPm",
+		"position": [
+			18.3600006103516,
+			1.98332047462463,
+			0.300000011920929
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			90.0
+		],
+		"yaw": 180.000005008956
+	},
+	{
+		"asset": "glock17",
+		"name": "CabinetGlock",
+		"position": [
+			18.3600006103516,
+			1.98140001296997,
+			-0.119999974966049
+		],
+		"rotation_degrees": [
+			0.0,
+			180.0,
+			90.0
+		],
+		"yaw": 180.000005008956
+	},
+	{
+		"asset": "PH_Bench",
+		"name": "WaitingBench_1",
+		"position": [
+			20.6000003814697,
+			0.0,
+			-3.59999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_Bench",
+		"name": "WaitingBench_2",
+		"position": [
+			20.6000003814697,
+			0.0,
+			5.59999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_FoldingStool",
+		"name": "LaneStool_1",
+		"position": [
+			22.6000003814697,
+			0.0,
+			-1.20000004768372
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_FoldingStool",
+		"name": "LaneStool_2",
+		"position": [
+			22.6000003814697,
+			0.0,
+			3.59999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_TrashCan",
+		"name": "HallTrash",
+		"position": [
+			19.0,
+			0.0,
+			6.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_UtilityBox",
+		"name": "PumpStarter",
+		"position": [
+			24.6000003814697,
+			0.0,
+			-10.5
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_PowerBox",
+		"name": "HallBreakers",
+		"position": [
+			18.2399997711182,
+			1.25,
+			-4.59999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_PropaneTank",
+		"name": "BurnerGas_1",
+		"position": [
+			28.3999996185303,
+			0.0,
+			-10.3500003814697
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_PropaneTank",
+		"name": "BurnerGas_2",
+		"position": [
+			28.8999996185303,
+			0.0,
+			-10.3999996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			30.0,
+			0.0
+		],
+		"yaw": 30.0000008348261
+	},
+	{
+		"asset": "PH_ToolCart",
+		"name": "BoilerToolCart",
+		"position": [
+			42.0,
+			0.0,
+			-7.0
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_Compressor",
+		"name": "HallCompressor",
+		"position": [
+			55.5999984741211,
+			0.0,
+			-9.89999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_PlasticCrate",
+		"name": "HallCrate_1",
+		"position": [
+			57.5999984741211,
+			0.0,
+			-10.3999996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_PlasticCrate",
+		"name": "HallCrate_2",
+		"position": [
+			57.5999984741211,
+			0.263999998569489,
+			-10.3999996185303
+		],
+		"rotation_degrees": [
+			0.0,
+			8.0,
+			0.0
+		],
+		"yaw": 8.00000079180271
+	},
+	{
+		"asset": "PH_LpgTank",
+		"name": "HallLpg",
+		"position": [
+			56.5999984741211,
+			0.0,
+			-6.59999990463257
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_PipeWrench",
+		"name": "PumpWrench",
+		"position": [
+			21.0,
+			0.204999998211861,
+			-9.60000038146973
+		],
+		"rotation_degrees": [
+			0.0,
+			69.9999923706055,
+			0.0
+		],
+		"yaw": 69.9999996711977
+	},
+	{
+		"asset": "PH_OilTin",
+		"name": "PumpOil",
+		"position": [
+			23.75,
+			0.0,
+			-9.30000019073486
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_GasMask",
+		"name": "HallGasMask_1",
+		"position": [
+			18.2399997711182,
+			0.949999988079071,
+			-2.20000004768372
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_GasMask",
+		"name": "HallGasMask_2",
+		"position": [
+			18.2399997711182,
+			0.949999988079071,
+			-2.70000004768372
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_Stool",
+		"name": "KipStool",
+		"position": [
+			19.3999996185303,
+			0.0,
+			-7.19999980926514
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_Clipboard",
+		"name": "KipLog",
+		"position": [
+			18.6200008392334,
+			1.0,
+			-6.69999980926514
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeCarrierPaper",
+		"name": "CarrierModel",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeConsole",
+		"name": "Console",
+		"position": [
+			0.0,
+			0.949999988079071,
+			0.449999988079071
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeCarrierPaper",
+		"name": "CarrierModel",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeConsole",
+		"name": "Console",
+		"position": [
+			0.0,
+			0.949999988079071,
+			0.449999988079071
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeCarrierPaper",
+		"name": "CarrierModel",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeConsole",
+		"name": "Console",
+		"position": [
+			0.0,
+			0.949999988079071,
+			0.449999988079071
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeCarrierFloor",
+		"name": "CarrierModel",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeConsole",
+		"name": "Console",
+		"position": [
+			0.0,
+			0.949999988079071,
+			0.449999988079071
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeCarrierFloor",
+		"name": "CarrierModel",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RangeConsole",
+		"name": "Console",
+		"position": [
+			0.0,
+			0.949999988079071,
+			0.449999988079071
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "RoomSign_13",
+		"name": "HallSign_Storage",
+		"position": [
+			17.7800006866455,
+			2.65000009536743,
+			4.0
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0000025044782
+	},
+	{
+		"asset": "RoomSign_14",
+		"name": "HallSign_FiringLine",
+		"position": [
+			24.5499992370605,
+			3.34999990463257,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			-90.0,
+			0.0
+		],
+		"yaw": -90.0000025044782
+	},
+	{
+		"asset": "RoomSign_15",
+		"name": "HallSign_Caution",
+		"position": [
+			18.2199993133545,
+			2.65000009536743,
+			4.0
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_32",
+		"position": [
+			28.5,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_33",
+		"position": [
+			36.0,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_34",
+		"position": [
+			43.5,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_35",
+		"position": [
+			51.0,
+			5.46000003814697,
+			0.600000023841858
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_36",
+		"position": [
+			34.0,
+			5.46000003814697,
+			-8.39999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "PH_HangingLamp",
+		"name": "Fixture_HallPendant_37",
+		"position": [
+			47.5,
+			5.46000003814697,
+			-8.39999961853027
+		],
+		"rotation_degrees": [
+			0.0,
+			0.0,
+			0.0
+		],
+		"yaw": 0.0
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HallWestWall_40",
+		"position": [
+			18.2999992370605,
+			2.59999990463257,
+			-1.79999995231628
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "CageLamp",
+		"name": "Fixture_HallWestWall_41",
+		"position": [
+			18.2999992370605,
+			2.59999990463257,
+			-8.19999980926514
+		],
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0000025044782
+	},
+	{
+		"asset": "PH_Clipboard",
 		"name": "RouteClipboard",
 		"position": [
 			1.41999995708466,
@@ -4155,7 +5055,7 @@
 		"yaw": -90.0
 	},
 	{
-		"asset": "WorkGloves",
+		"asset": "PH_Gloves",
 		"name": "UnloadGloves",
 		"position": [
 			-3.48000001907349,
@@ -4275,7 +5175,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "TeaSet",
+		"asset": "PH_Kettle",
 		"name": "KettleAndCups",
 		"position": [
 			-16.3500003814697,
@@ -4290,7 +5190,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "WallClock",
+		"asset": "PH_WallClock",
 		"name": "LivingClock",
 		"position": [
 			-17.7299995422363,
@@ -4365,7 +5265,7 @@
 		"yaw": 12.0
 	},
 	{
-		"asset": "InventoryClipboard",
+		"asset": "PH_Clipboard",
 		"name": "TradeInventory",
 		"position": [
 			-12.0,
@@ -4395,7 +5295,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "OpenToolbox",
+		"asset": "PH_Toolbox",
 		"name": "WorkshopToolbox",
 		"position": [
 			14.1199998855591,
@@ -4485,7 +5385,7 @@
 		"yaw": 10.0
 	},
 	{
-		"asset": "WorkGloves",
+		"asset": "PH_Gloves",
 		"name": "ArmoryGloves",
 		"position": [
 			-12.9099998474121,
@@ -4575,7 +5475,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "InventoryClipboard",
+		"asset": "PH_Clipboard",
 		"name": "GeneratorServiceLog",
 		"position": [
 			15.0299997329712,
@@ -4593,16 +5493,16 @@
 		"asset": "HandTruck",
 		"name": "StorageHandTruck",
 		"position": [
-			17.0799999237061,
+			19.6000003814697,
 			0.0,
-			2.02999997138977
+			6.19999980926514
 		],
 		"rotation_degrees": [
 			0.0,
-			-90.0,
+			180.0,
 			0.0
 		],
-		"yaw": -90.0
+		"yaw": 180.0
 	},
 	{
 		"asset": "MixedCartons",
@@ -4620,7 +5520,7 @@
 		"yaw": 180.0
 	},
 	{
-		"asset": "InventoryClipboard",
+		"asset": "PH_Clipboard",
 		"name": "WarehouseInventory",
 		"position": [
 			13.8500003814697,
@@ -4635,7 +5535,7 @@
 		"yaw": 12.0
 	},
 	{
-		"asset": "WorkGloves",
+		"asset": "PH_Gloves",
 		"name": "WarehouseGloves",
 		"position": [
 			14.5799999237061,
@@ -5040,7 +5940,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "WorkGloves",
+		"asset": "PH_Gloves",
 		"name": "BayGloves_0",
 		"position": [
 			-5.42000007629395,
@@ -5130,7 +6030,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "WorkGloves",
+		"asset": "PH_Gloves",
 		"name": "BayGloves_1",
 		"position": [
 			4.78000020980835,
@@ -5220,7 +6120,7 @@
 		"yaw": 0.0
 	},
 	{
-		"asset": "WorkGloves",
+		"asset": "PH_Gloves",
 		"name": "BayGloves_2",
 		"position": [
 			7.07999992370605,

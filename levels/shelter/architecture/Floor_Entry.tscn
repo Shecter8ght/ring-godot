@@ -1,18 +1,18 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Floor_Entry_00.res" id="1_uuhu8"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cbr73"]
 size = Vector3(8, 0.2, 4)
 
-[node name="Floor_Entry" type="Node3D"]
+[node name="Floor_Entry" type="Node3D" unique_id=1734136816]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=304495266]
 mesh = ExtResource("1_uuhu8")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=313750814]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=212169540]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 10)
 shape = SubResource("BoxShape3D_cbr73")

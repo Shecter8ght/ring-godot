@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Crane_00.res" id="1_wbrgl"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Crane_01.res" id="2_a55do"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Crane_02.res" id="3_rnogv"]
+
+[node name="PH_Crane" type="Node3D" unique_id=1495609564]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1370745449]
+layers = 524288
+mesh = ExtResource("1_wbrgl")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=863873781]
+layers = 524288
+mesh = ExtResource("2_a55do")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=956754448]
+layers = 524288
+mesh = ExtResource("3_rnogv")

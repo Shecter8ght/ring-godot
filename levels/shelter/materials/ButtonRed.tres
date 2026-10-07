@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/ButtonRed_base.jpg" id="1_m4i7g"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/ButtonRed_orm.jpg" id="2_sh1cl"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/ButtonRed_normal.jpg" id="3_x045p"]
+
+[resource]
+resource_name = "ButtonRed"
+albedo_texture = ExtResource("1_m4i7g")
+metallic = 1.0
+metallic_texture = ExtResource("2_sh1cl")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_sh1cl")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = ExtResource("3_x045p")
+ao_enabled = true
+ao_texture = ExtResource("2_sh1cl")
+texture_filter = 5

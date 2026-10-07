@@ -78,6 +78,11 @@ tools/godot.cmd res://tools/loadout_test.tscn                # убежище �
 tools/godot.cmd --headless res://tools/arsenal_test.tscn     # арсенал, CASE 1–20 ТЗ: прицелы (FPS/изометрия), фонарь+ЛЦУ, пробитие, плиты, ИИ-патроны, снятие с трупа, сохранение
 tools/godot.cmd --headless res://tools/compile_check.tscn    # все скрипты собираются (с автозагрузками) — после больших правок
 tools/godot.cmd res://tools/hideout_shots.tscn               # снимки убежища и его окон в docs/screens/hideout_*.png
+tools/godot.cmd --headless res://tools/shooting_range_test.tscn # тир котельной: ствол стойки без расхода вещей, пробоина, кнопки ближе/дальше/лист, выход из зала
+tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки котельной и тира в docs/screens/boiler_*.png (BOILER_ONLY=имя,имя — выборочно)
+# Пересборка убежища: python tools/shelter_boiler_materials.py [--fetch]; blender --background --factory-startup --python
+#   tools/build_shelter_boiler.py (стены, зал, котлы, тир), tools/build_shelter_gear.py, tools/integrate_shelter_boiler_external.py;
+#   --headless --import; res://tools/author_shelter_scene.tscn; res://tools/author_shelter_dressing.tscn
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
@@ -192,7 +197,10 @@ docs/          STATUS.md (что сделано / что дальше), реше
    `Missions`), модули убежища (`data/hideout.json`, `Upgrades`: верстак, генератор, защищённый
    карман, тайник, рация). Контейнеры на пропсах строит SectorBuilder (Loot/Loot_N),
    особые (сейф, стойка) — `loot_container.tscn` руками в сцене. Ключи — предметы в рюкзаке.
-   Убежище — `scenes/levels/hideout.tscn` (главная сцена игры): CSG-узлы (двигать руками; материал —
+   Убежище — старая котельная в зоне 5, отдельная от ТЦ карта (люков из ТЦ нет): `scenes/levels/hideout.tscn`
+   → `levels/shelter/Shelter_Interior.tscn`, собирается инструментами (см. «Пересборка убежища»); в котельном
+   зале тир (`ShootingRange`, `RangeLane`, `RangeTarget`, стойка `RangeWeaponRack` — любой ствол игры на зал).
+   Прежнее описание: CSG-узлы (двигать руками; материал —
    meta "mat"/"color"/"emit", см. hideout_level.gd), станции `hideout_station.tscn` (тайник, торговец,
    выход). Профиль игрока — `Profile` (src/items/profile.gd, user://profile.json): деньги, тайник,
    снаряжение, рюкзак; уходя в рейд — всё на кону (take_loadout), эвакуация возвращает. Рейд со

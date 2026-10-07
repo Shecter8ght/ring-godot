@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Boots_00.res" id="1_rxfn3"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Boots_01.res" id="2_bwo27"]
+
+[node name="PH_Boots" type="Node3D" unique_id=176361345]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=262877360]
+mesh = ExtResource("1_rxfn3")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1607436947]
+mesh = ExtResource("2_bwo27")

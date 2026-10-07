@@ -1,18 +1,18 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Floor_Sleeping_00.res" id="1_rooao"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_d34nm"]
 size = Vector3(6, 0.2, 4)
 
-[node name="Floor_Sleeping" type="Node3D"]
+[node name="Floor_Sleeping" type="Node3D" unique_id=103203625]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=851739466]
 mesh = ExtResource("1_rooao")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=142401222]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1018511971]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -9)
 shape = SubResource("BoxShape3D_d34nm")

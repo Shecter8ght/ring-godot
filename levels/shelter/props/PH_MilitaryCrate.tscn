@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_MilitaryCrate_00.res" id="1_ypeep"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_MilitaryCrate_01.res" id="2_wqefb"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_MilitaryCrate_02.res" id="3_fqu8m"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4qvg2"]
+size = Vector3(1.2420655, 0.4648152, 0.5197786)
+
+[node name="PH_MilitaryCrate" type="Node3D" unique_id=807594774]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=325791821]
+mesh = ExtResource("1_ypeep")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1992689276]
+mesh = ExtResource("2_wqefb")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1526973313]
+mesh = ExtResource("3_fqu8m")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1279936342]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=940660770]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2324076, 0)
+shape = SubResource("BoxShape3D_4qvg2")

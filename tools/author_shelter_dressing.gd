@@ -46,11 +46,11 @@ func _ready() -> void:
 	region.navigation_mesh.cell_height = .25
 	region.navigation_mesh.agent_max_climb = .5
 	region.bake_navigation_mesh(false)
-	assert(ResourceSaver.save(region.navigation_mesh, BASE + "architecture/interior_nav.tres") == OK)
+	assert(ShelterSave.save(region.navigation_mesh, BASE + "architecture/interior_nav.tres") == OK)
 	_level.set_script(original_script)
 	var packed: PackedScene = PackedScene.new()
 	assert(packed.pack(_level) == OK)
-	assert(ResourceSaver.save(packed, BASE + "Shelter_Interior.tscn") == OK)
+	assert(ShelterSave.save(packed, BASE + "Shelter_Interior.tscn") == OK)
 	var file: FileAccess = FileAccess.open(BASE + "dressing/placements.json", FileAccess.WRITE)
 	file.store_string(JSON.stringify(_placements, "\t"))
 	_sync_metadata(manifest, region.navigation_mesh.get_polygon_count())
@@ -98,7 +98,7 @@ func _make_material() -> void:
 	_material.roughness = 1.0
 	_material.metallic_specular = .35
 	_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	assert(ResourceSaver.save(_material, BASE + "dressing/DressingAtlas.tres") == OK)
+	assert(ShelterSave.save(_material, BASE + "dressing/DressingAtlas.tres") == OK)
 	_material = load(BASE + "dressing/DressingAtlas.tres") as StandardMaterial3D
 
 func _convert(id: String, info: Dictionary) -> void:
@@ -111,7 +111,7 @@ func _convert(id: String, info: Dictionary) -> void:
 		var mesh: ArrayMesh = original.mesh.duplicate() as ArrayMesh
 		for surface: int in range(mesh.get_surface_count()): mesh.surface_set_material(surface, _material)
 		var path: String = BASE + "dressing/" + id + "_%02d.res" % index
-		assert(ResourceSaver.save(mesh, path) == OK)
+		assert(ShelterSave.save(mesh, path) == OK)
 		var instance: MeshInstance3D = MeshInstance3D.new()
 		instance.name = "FinishedMesh_%02d" % index
 		instance.mesh = load(path) as ArrayMesh
@@ -141,7 +141,7 @@ func _convert(id: String, info: Dictionary) -> void:
 		collider.owner = root
 	var packed: PackedScene = PackedScene.new()
 	assert(packed.pack(root) == OK)
-	assert(ResourceSaver.save(packed, BASE + "dressing/" + id + ".tscn") == OK)
+	assert(ShelterSave.save(packed, BASE + "dressing/" + id + ".tscn") == OK)
 	root.free()
 	source.free()
 
@@ -158,10 +158,10 @@ func _effect(id: String, mask: String, tint: Color, opacity: float) -> void:
 	material.set_shader_parameter("density_texture", load(FX + mask + ".png"))
 	material.set_shader_parameter("tint", tint)
 	material.set_shader_parameter("opacity", opacity)
-	assert(ResourceSaver.save(material, BASE + "atmosphere/" + id + ".tres") == OK)
+	assert(ShelterSave.save(material, BASE + "atmosphere/" + id + ".tres") == OK)
 	for node: Node in visual.find_children("*", "MeshInstance3D", true, false):
 		var mesh: MeshInstance3D = node as MeshInstance3D
-		assert(ResourceSaver.save(mesh.mesh, BASE + "atmosphere/" + id + "_mesh.res") == OK)
+		assert(ShelterSave.save(mesh.mesh, BASE + "atmosphere/" + id + "_mesh.res") == OK)
 		mesh.mesh = load(BASE + "atmosphere/" + id + "_mesh.res") as ArrayMesh
 		mesh.material_override = load(BASE + "atmosphere/" + id + ".tres") as ShaderMaterial
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -180,7 +180,7 @@ func _effect(id: String, mask: String, tint: Color, opacity: float) -> void:
 	print("BAKED_EFFECT ", id, " ", player.get_animation_list())
 	var packed: PackedScene = PackedScene.new()
 	assert(packed.pack(root) == OK)
-	assert(ResourceSaver.save(packed, BASE + "atmosphere/" + id + ".tscn") == OK)
+	assert(ShelterSave.save(packed, BASE + "atmosphere/" + id + ".tscn") == OK)
 	root.free()
 
 func _own_subtree(node: Node, owner_root: Node) -> void:
@@ -191,8 +191,16 @@ func _own_subtree(node: Node, owner_root: Node) -> void:
 func _v(values: Array) -> Vector3:
 	return Vector3(float(values[0]),float(values[1]),float(values[2]))
 
+## Самодельная мелочь, вместо которой стоят модели Poly Haven (CC0) из основного набора убежища.
+const REPLACE: Dictionary = {"WorkGloves": "PH_Gloves", "InventoryClipboard": "PH_Clipboard", "OpenToolbox": "PH_Toolbox",
+	"WallClock": "PH_WallClock", "TeaSet": "PH_Kettle"}
+
 func _put(id: String, label: String, position: Vector3, yaw: float = 0.0) -> Node3D:
-	var node: Node3D = (load(BASE + "dressing/" + id + ".tscn") as PackedScene).instantiate() as Node3D
+	var path: String = BASE + "dressing/" + id + ".tscn"
+	if REPLACE.has(id) and ResourceLoader.exists(BASE + "props/" + String(REPLACE[id]) + ".tscn"):
+		id = String(REPLACE[id])
+		path = BASE + "props/" + id + ".tscn"
+	var node: Node3D = (load(path) as PackedScene).instantiate() as Node3D
 	node.name = label
 	_group.add_child(node)
 	node.owner = _level
@@ -238,7 +246,7 @@ func _layout() -> void:
 		["ExhaustConnection","GeneratorExhaustRoute",Vector3(12.75,2.60,-8.82),0],
 		["FireExtinguisher","GeneratorFireSafety",Vector3(10.04,.40,-10.73),0],
 		["InventoryClipboard","GeneratorServiceLog",Vector3(15.03,.88,-10.73),0],
-		["HandTruck","StorageHandTruck",Vector3(17.08,0,2.03),-90],
+		["HandTruck","StorageHandTruck",Vector3(19.6,0,6.2),180],
 		["MixedCartons","SortingDelivery",Vector3(12.86,.975,1.60),180],
 		["InventoryClipboard","WarehouseInventory",Vector3(13.85,.975,1.58),12],
 		["WorkGloves","WarehouseGloves",Vector3(14.58,.975,1.53),-7]
@@ -264,15 +272,18 @@ func _layout() -> void:
 	for spec: Array in [["MaintenanceTable",Vector3(-13.0,0,4.1)],["MaintenancePistol",Vector3(-13.0,.77,4.25)],["AmmoCase",Vector3(-16.5,0,5.3)],["ArmoryAmmo1",Vector3(-16.6,0,4.8)],["ArmoryHelmet",Vector3(-12.22,.78,4.1)],["TraderHelmet",Vector3(-13.47,1.65,-4.38)],["BayHelmet",Vector3(-5.75,.49,6.50)]]:
 		var nodes: Array[Node] = _level.find_children(String(spec[0]),"Node3D",true,false)
 		for node: Node in nodes: (node as Node3D).position = spec[1]
-	# Пистолет лежит боком; высота учитывает фактическую толщину сохранённого меша.
+	# Пистолет (модель ПМ игры) уже лежит на боку; высота — по фактическому низу всех его мешей.
 	var pistol: Node3D = _level.find_children("MaintenancePistol", "Node3D", true, false)[0] as Node3D
-	pistol.rotation.z = PI / 2.0
 	pistol.position.y = 0.0
 	var lowest: float = INF
 	for node: Node in pistol.find_children("*", "MeshInstance3D", true, false):
 		var mesh: MeshInstance3D = node as MeshInstance3D
-		var bounds: AABB = pistol.transform * mesh.transform * mesh.get_aabb()
-		lowest = minf(lowest, bounds.position.y)
+		var chain: Transform3D = mesh.transform
+		var up: Node = mesh.get_parent()
+		while up and up != pistol:
+			chain = (up as Node3D).transform * chain
+			up = up.get_parent()
+		lowest = minf(lowest, (pistol.transform * chain * mesh.get_aabb()).position.y)
 	pistol.position.y = .767 - lowest
 	# Боксы и антресоль: предметы на существующих лавках и тумбах.
 	for i: int in range(3):
@@ -290,7 +301,7 @@ func _atmosphere() -> void:
 	group.name = "Atmosphere"
 	_level.add_child(group)
 	group.owner = _level
-	for spec: Array in [["DustMotes","HubDustWest",Vector3(-3.9,1.6,0),0],["DustMotes","HubDustEast",Vector3(3.9,1.6,0),180],["DustMotes","LivingDust",Vector3(-13.3,1.2,-8.0),0],["DustMotes","ArmoryDust",Vector3(-12.8,1.3,4.0),180],["KettleVapor","TeaVapor",Vector3(-16.35,1.16,-10.35),0]]:
+	for spec: Array in [["DustMotes","HubDustWest",Vector3(-3.9,1.6,0),0],["DustMotes","HubDustEast",Vector3(3.9,1.6,0),180],["DustMotes","LivingDust",Vector3(-13.3,1.2,-8.0),0],["DustMotes","ArmoryDust",Vector3(-12.8,1.3,4.0),180],["KettleVapor","TeaVapor",Vector3(-16.35,1.27,-10.35),0]]:
 		var node: Node3D = (load(BASE + "atmosphere/" + String(spec[0]) + ".tscn") as PackedScene).instantiate() as Node3D
 		node.name = String(spec[1])
 		node.position = spec[2]

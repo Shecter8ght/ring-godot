@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/WaterStock_00.res" id="1_tdhla"]
 
-[node name="WaterStock" type="Node3D"]
+[node name="WaterStock" type="Node3D" unique_id=1091434532]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1738533049]
 cast_shadow = 0
 mesh = ExtResource("1_tdhla")

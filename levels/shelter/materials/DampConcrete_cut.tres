@@ -1,4 +1,4 @@
-[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+[gd_resource type="StandardMaterial3D" format=3]
 
 [ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_base.jpg" id="1_ei300"]
 [ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_orm.jpg" id="2_y4nwl"]

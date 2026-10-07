@@ -1,0 +1,22 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_base.jpg" id="1_1ppn6"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_orm.jpg" id="2_oi0k7"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/Whitewash_normal.jpg" id="3_dvc1p"]
+
+[resource]
+resource_name = "Whitewash_cut"
+albedo_texture = ExtResource("1_1ppn6")
+metallic = 1.0
+metallic_specular = 0.35
+metallic_texture = ExtResource("2_oi0k7")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_oi0k7")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = ExtResource("3_dvc1p")
+ao_enabled = true
+ao_texture = ExtResource("2_oi0k7")
+texture_filter = 5
+distance_fade_mode = 2

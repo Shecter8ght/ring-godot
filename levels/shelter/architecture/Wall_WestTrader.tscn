@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Wall_WestTrader_00.res" id="1_y0dnj"]
 
@@ -6,28 +6,28 @@
 size = Vector3(0.4, 3.25, 2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6d2xl"]
-size = Vector3(0.4, 3.25, 2)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_2hqws"]
 size = Vector3(0.4, 0.95, 2)
 
-[node name="Wall_WestTrader" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_2hqws"]
+size = Vector3(0.4, 3.25, 2)
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="Wall_WestTrader" type="Node3D" unique_id=85946921]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2122988653]
 mesh = ExtResource("1_y0dnj")
 metadata/shelter_cut = true
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1459612748]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=2047422599]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.625, -4)
 shape = SubResource("BoxShape3D_es0fy")
 
-[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.625, 0)
+[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=47065287]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.775, -2)
 shape = SubResource("BoxShape3D_6d2xl")
 
-[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.775, -2)
+[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=713565017]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.625, 0)
 shape = SubResource("BoxShape3D_2hqws")

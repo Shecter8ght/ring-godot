@@ -1,5 +1,5 @@
 {
-	"authored_assets": 138,
+	"authored_assets": 193,
 	"dressing": {
 		"assets": 34,
 		"baked_effect_assets": 2,
@@ -9,9 +9,9 @@
 		"ucupaint_layers": 4
 	},
 	"gi": "SDFGI + SSIL (existing Forward+ pipeline)",
-	"lights": 32.0,
-	"navigation_polygons": 217,
+	"lights": 45.0,
+	"navigation_polygons": 300,
 	"procedural_level_generation": false,
-	"prop_instances": 354,
-	"reflection_probes": 6.0
+	"prop_instances": 414,
+	"reflection_probes": 7.0
 }

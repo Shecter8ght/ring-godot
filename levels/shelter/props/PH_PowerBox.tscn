@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_PowerBox_00.res" id="1_b23ok"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_PowerBox_01.res" id="2_c1xq0"]
+
+[node name="PH_PowerBox" type="Node3D" unique_id=591089867]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=329831094]
+mesh = ExtResource("1_b23ok")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=813012704]
+mesh = ExtResource("2_c1xq0")

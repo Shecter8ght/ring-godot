@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PlanningMap_00.res" id="1_4s4m8"]
 
-[node name="PlanningMap" type="Node3D"]
+[node name="PlanningMap" type="Node3D" unique_id=1863332685]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1226297875]
 cast_shadow = 0
 mesh = ExtResource("1_4s4m8")

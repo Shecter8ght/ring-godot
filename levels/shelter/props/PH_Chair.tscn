@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Chair_00.res" id="1_wg70t"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cfkny"]
+size = Vector3(0.63938963, 1.263771, 0.6620978)
+
+[node name="PH_Chair" type="Node3D" unique_id=871088807]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2089182257]
+mesh = ExtResource("1_wg70t")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1877007902]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=372557408]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6318855, 0)
+shape = SubResource("BoxShape3D_cfkny")

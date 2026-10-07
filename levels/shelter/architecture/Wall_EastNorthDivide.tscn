@@ -1,19 +1,19 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Wall_EastNorthDivide_00.res" id="1_syl54"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_nwvr7"]
 size = Vector3(10, 3.25, 0.4)
 
-[node name="Wall_EastNorthDivide" type="Node3D"]
+[node name="Wall_EastNorthDivide" type="Node3D" unique_id=401769904]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1312963011]
 mesh = ExtResource("1_syl54")
 metadata/shelter_cut = true
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=2108031000]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=588580423]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 1.625, -5)
 shape = SubResource("BoxShape3D_nwvr7")

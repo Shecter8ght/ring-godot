@@ -46,7 +46,7 @@ func _ready() -> void:
 		Settings.quality = quality
 		Settings.apply_graphics()
 		_check("shelter SSR stays disabled on " + quality,not environment.ssr_enabled)
-	_check("room signs are thirteen mesh assets",_level.get_node("Signs").get_child_count()==13 and _level.get_node("Signs").find_children("*","Label3D",true,false).is_empty())
+	_check("room signs are sixteen mesh assets",_level.get_node("Signs").get_child_count()==16 and _level.get_node("Signs").find_children("*","Label3D",true,false).is_empty())
 	_check("physical emitter size enables soft shadows",(_level.get_node("Lights/HubWest") as Light3D).light_size>.0)
 	var pl: Player = _level.get("_player") as Player
 	_check("solo inside return area", absf(pl.position.x)<=2.0 and pl.position.z>8.5 and pl.position.z<11)

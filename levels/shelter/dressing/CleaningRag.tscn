@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/CleaningRag_00.res" id="1_8es6o"]
 
-[node name="CleaningRag" type="Node3D"]
+[node name="CleaningRag" type="Node3D" unique_id=679843333]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=27147001]
 cast_shadow = 0
 mesh = ExtResource("1_8es6o")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://src/hideout/shelter_effect.gd" id="1_vtrh7"]
 [ext_resource type="Material" path="res://levels/shelter/atmosphere/KettleVapor.tres" id="2_15tx4"]
@@ -49,12 +49,12 @@ _data = {
 &"KettleVaporAction": SubResource("Animation_bkung")
 }
 
-[node name="KettleVapor" type="Node3D"]
+[node name="KettleVapor" type="Node3D" unique_id=557370794]
 script = ExtResource("1_vtrh7")
 
-[node name="Visual" type="Node3D" parent="."]
+[node name="Visual" type="Node3D" parent="." unique_id=196510139]
 
-[node name="KettleVapor" type="MeshInstance3D" parent="Visual"]
+[node name="KettleVapor" type="MeshInstance3D" parent="Visual" unique_id=479891643]
 material_override = ExtResource("2_15tx4")
 cast_shadow = 0
 gi_mode = 0
@@ -66,8 +66,6 @@ blend_shapes/AuthoredPose_3 = 0.0
 blend_shapes/AuthoredPose_4 = 0.0
 blend_shapes/AuthoredPose_5 = 0.0
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual"]
-libraries = {
-&"": SubResource("AnimationLibrary_jsh3y")
-}
-autoplay = "KettleVaporAction"
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual" unique_id=1031357694]
+libraries/ = SubResource("AnimationLibrary_jsh3y")
+autoplay = &"KettleVaporAction"

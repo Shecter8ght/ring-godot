@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Vice_00.res" id="1_lle6w"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Vice_01.res" id="2_5q6vu"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Vice_02.res" id="3_seixg"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Vice_03.res" id="4_3etvt"]
+
+[node name="PH_Vice" type="Node3D" unique_id=1028740130]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=19562904]
+mesh = ExtResource("1_lle6w")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=192358792]
+mesh = ExtResource("2_5q6vu")
+
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=2022885623]
+mesh = ExtResource("3_seixg")
+
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=836181339]
+mesh = ExtResource("4_3etvt")
