@@ -35,13 +35,16 @@ func _ready() -> void:
 	sn.archetype = "sniper"
 	_level.get_node("Marauders").add_child(sn)
 	sn.global_position = SectorBuilder.polar(-120.0, 150.0) + Vector3(0, 0.1, 0)
+	# В scav_sniper есть и автомат с ПСО: вернуть надо своё основное оружие,
+	# а не обязательно класс SNIPER/DMR из прежней версии таблицы.
+	var primary_class: String = String(WeaponStats.compute(sn.equipment.primary).get("class", ""))
 	await get_tree().create_timer(0.3).timeout
 	var fogged: bool = sn._active == "secondary" and String(sn._spec["class"]) == "PISTOL" and not sn._holds()
 	if shots:
 		await _shot("weather_fog", SectorBuilder.polar(-96.0, 150.0))
 	RaidWeather.current._rpc_schedule(-1.0, RaidWeather.current._t + 0.3)
 	await get_tree().create_timer(0.8).timeout
-	_check("туман: снайпер с пистолетом, рассеялся — снова винтовка", fogged and sn._active == "primary" and String(sn._spec["class"]) in ["SNIPER", "DMR"] and sn._holds(), str(sn._spec.get("class")))
+	_check("туман: снайпер с пистолетом, рассеялся — своё основное оружие", fogged and sn._active == "primary" and String(sn._spec["class"]) == primary_class and sn._holds(), str(sn._spec.get("class")))
 	# жара
 	await _load({"time": "day", "weather": "heat", "power": "on"})
 	var me := Raid.current.local_player()

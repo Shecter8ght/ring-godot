@@ -27,6 +27,10 @@ var _drop_pos: Vector3 = Vector3.INF
 var _pmc_spawned: bool = false
 var _radio: Dictionary = {}
 var _radio_label: Label
+var _setup_ready: bool = false
+var _initial_homes: Array = []
+var _initial_alarms: Array = []
+var _known: Array[int] = []
 
 
 func _enter_tree() -> void:
@@ -41,6 +45,7 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	_rng.randomize()
 	level = get_parent()
+	Net.scenes_changed.connect(_share_setup)
 	# с чем пришли: «света нет» — рубильник внизу и генератор стоит (поднять можно только
 	# аварийный), «аварийный» — генератор стоит
 	match String(RaidConditions.current.get("power", "on")):
@@ -90,7 +95,11 @@ func _setup_host() -> void:
 		sched.append(["pmc", _rng.randf_range(float(ev.pmc_at[0]), float(ev.pmc_at[1]))])
 	if Net.is_networked():
 		await get_tree().create_timer(2.0).timeout
-		_rpc_setup.rpc(homes, alarms, sched)
+		_rpc_setup(homes, alarms, sched)
+		_initial_homes = homes
+		_initial_alarms = alarms
+		_setup_ready = true
+		_share_setup()
 	else:
 		_rpc_setup(homes, alarms, sched)
 	# жильцы — людей ставит хост
@@ -112,10 +121,30 @@ func _rpc_setup(homes: Array, alarms: Array, sched: Array) -> void:
 		_alarms.append(z)
 
 
+## Настройка приходит только после готовности Events у гостя, включая поздний вход.
+func _share_setup() -> void:
+	if not Net.is_host() or not _setup_ready:
+		return
+	var here: Array[int] = []
+	for peer: int in multiplayer.get_peers():
+		if Net.visible_in(peer, "raid"):
+			here.append(peer)
+			if not peer in _known:
+				_receive_setup.rpc_id(peer, _initial_homes, _initial_alarms, _schedule, _t, breaker, generator_down)
+	_known = here
+
+
+@rpc("authority", "call_remote", "reliable")
+func _receive_setup(homes: Array, alarms: Array, sched: Array, elapsed: float, pos: String, gen_down: bool) -> void:
+	_t = elapsed
+	_rpc_setup(homes, alarms, sched)
+	_rpc_breaker(pos, gen_down)
+
+
 ## Для отладки и тестов: событие сейчас (хост рассылает).
 func trigger(kind: String) -> void:
 	if Net.is_networked():
-		_rpc_event.rpc(kind)
+		Net.broadcast_scene(self, &"_rpc_event", [kind])
 	else:
 		_rpc_event(kind)
 
@@ -198,7 +227,7 @@ func set_breaker(pos: String) -> void:
 	if not _is_host():
 		return
 	if Net.is_networked():
-		_rpc_breaker.rpc(pos, generator_down)
+		Net.broadcast_scene(self, &"_rpc_breaker", [pos, generator_down])
 	else:
 		_rpc_breaker(pos, generator_down)
 
@@ -237,7 +266,7 @@ func generator() -> MallGenerator:
 func generator_fixed() -> void:
 	if _is_host():
 		if Net.is_networked():
-			_rpc_event.rpc("generator_fixed")
+			Net.broadcast_scene(self, &"_rpc_event", ["generator_fixed"])
 		else:
 			_rpc_event("generator_fixed")
 

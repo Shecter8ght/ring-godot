@@ -38,6 +38,8 @@ var _fog_base: float = 0.0
 ## 0 — на улице, 1 — под крышей ТЦ; плавно (Balance.INDOOR.sec).
 var _roof: float = 0.0
 var puddles: float = 0.0
+var _schedule_ready: bool = false
+var _known: Array[int] = []
 
 
 func _enter_tree() -> void:
@@ -55,6 +57,7 @@ func _exit_tree() -> void:
 
 func _ready() -> void:
 	_rng.randomize()
+	Net.scenes_changed.connect(_share_schedule)
 	_apply_static()
 	# рейд начался в дождь — льёт давно: мокро, лужи налиты
 	if is_raining():
@@ -73,7 +76,9 @@ func _ready() -> void:
 		if Net.is_networked():
 			# у клиентов узел погоды появляется вместе с уровнем — подождать
 			await get_tree().create_timer(2.0).timeout
-			_rpc_schedule.rpc(rain_at if rain_at != INF else -1.0, fog_at if fog_at != INF else -1.0)
+			_rpc_schedule(rain_at if rain_at != INF else -1.0, fog_at if fog_at != INF else -1.0)
+			_schedule_ready = true
+			_share_schedule()
 		else:
 			_rpc_schedule(rain_at if rain_at != INF else -1.0, fog_at if fog_at != INF else -1.0)
 
@@ -82,6 +87,28 @@ func _ready() -> void:
 func _rpc_schedule(rain_at: float, fog_at: float) -> void:
 	_rain_at = rain_at if rain_at >= 0.0 else INF
 	_fog_lift_at = fog_at if fog_at >= 0.0 else INF
+
+
+## Готовый Weather получает расписание после загрузки, а не по фиксированной задержке.
+func _share_schedule() -> void:
+	if not Net.is_host() or not _schedule_ready:
+		return
+	var here: Array[int] = []
+	for peer: int in multiplayer.get_peers():
+		if Net.visible_in(peer, "raid"):
+			here.append(peer)
+			if not peer in _known:
+				_receive_schedule.rpc_id(peer, maxf(0.0, _rain_at - _t) if _rain_at != INF else -1.0,
+					maxf(0.0, _fog_lift_at - _t) if _fog_lift_at != INF else -1.0,
+					String(RaidConditions.current.weather))
+	_known = here
+
+
+@rpc("authority", "call_remote", "reliable")
+func _receive_schedule(rain_left: float, fog_left: float, weather: String) -> void:
+	_rpc_schedule(_t + rain_left if rain_left >= 0.0 else -1.0, _t + fog_left if fog_left >= 0.0 else -1.0)
+	RaidConditions.current["weather"] = weather
+	_apply_static()
 
 
 func is_raining() -> bool:

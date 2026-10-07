@@ -13,6 +13,8 @@ var _weapon: Node3D
 var _actions: Dictionary = {}
 var max_grip_error: float = 0.0
 var max_length_error: float = 0.0
+var arms_clear: bool = true
+var collision_exclude: Array[RID] = []
 
 
 func _ready() -> void:
@@ -63,6 +65,7 @@ func update_pose() -> void:
 		return
 	max_grip_error = 0.0
 	max_length_error = 0.0
+	arms_clear = true
 	# Каждый кадр считаем от rest: декомпозиция глобальной позы иначе накапливает scale.
 	skeleton.reset_bone_poses()
 	for side: String in ["Right", "Left"]:
@@ -97,24 +100,27 @@ func _solve(side: String, marker: Node3D) -> void:
 	var lower_length: float = _rest[forearm].origin.distance_to(_rest[hand].origin)
 	var reach: float = (upper_length + lower_length) * 0.98
 	var delta: Vector3 = target.origin - shoulder
-	# Плечевой пояс подаётся вперёд при далёком цевье; кости не растягиваются.
+	# Плечевой пояс следует за поднятым или далёким цевьём; кости не растягиваются.
 	if delta.length() > reach:
-		var transverse: float = Vector2(delta.x, delta.y).length_squared()
-		shoulder.z = target.origin.z + sqrt(maxf(0.01, reach * reach - transverse))
-	delta = target.origin - shoulder
-	var distance: float = maxf(delta.length(), 0.001)
-	var direction: Vector3 = delta / distance
+		shoulder = _reachable_shoulder(shoulder, target.origin, reach)
+	var world: World3D = get_world_3d()
+	var sleeve_radius: float = float(Balance.WEAPON_CLEARANCE.upper_sleeve_radius) * maxf(skeleton.global_basis.x.length(), maxf(skeleton.global_basis.y.length(), skeleton.global_basis.z.length()))
+	# ViewmodelSpace меняет видимую ширину плеч: ограничиваем именно мировую геометрию.
+	shoulder = skeleton.global_transform.affine_inverse() * WeaponClearance.safe_shoulder(world, skeleton.to_global(shoulder), sleeve_radius, collision_exclude, global_position)
+	if shoulder.distance_to(target.origin) > reach:
+		# Пол меняет высоту плеча лёжа; повторно сохраняем досягаемость длинного цевья.
+		shoulder = _reachable_shoulder(shoulder, target.origin, reach)
+		shoulder = skeleton.global_transform.affine_inverse() * WeaponClearance.safe_shoulder(world, skeleton.to_global(shoulder), sleeve_radius, collision_exclude, global_position)
 	var pole: Vector3 = Vector3(sign_x * 0.65, -1.0, 0.15)
-	pole = (pole - direction * pole.dot(direction)).normalized()
-	var along: float = (upper_length * upper_length - lower_length * lower_length + distance * distance) / (2.0 * distance)
-	var height: float = sqrt(maxf(0.0, upper_length * upper_length - along * along))
-	var elbow: Vector3 = shoulder + direction * along + pole * height
+	var solved: Dictionary = ArmIKSolver.solve(shoulder, target.origin, upper_length, lower_length, pole, skeleton.global_transform, world, collision_exclude, global_position)
+	var elbow: Vector3 = solved.elbow
+	arms_clear = arms_clear and bool(solved.clear)
 	var frame: Basis = _frames[side]
 	var hand_basis: Basis = target.basis * frame.inverse() * _rest[hand].basis
 	var wrist_rotation: Basis = hand_basis * _rest[hand].basis.inverse()
-	_set_segment(arm, forearm, shoulder, elbow, wrist_rotation)
-	_set_segment(forearm, hand, elbow, target.origin, wrist_rotation)
-	skeleton.set_bone_global_pose(hand, Transform3D(hand_basis, target.origin))
+	_set_segment(arm, forearm, shoulder, elbow, wrist_rotation, true)
+	_set_segment(forearm, hand, elbow, solved.wrist as Vector3, wrist_rotation)
+	skeleton.set_bone_global_pose(hand, Transform3D(hand_basis, solved.wrist as Vector3))
 	if contact_pose.is_empty():
 		_curl_fingers(side, marker.get_meta("curl") as Array)
 		_pose_thumb(side, target.basis, absf(marker.basis.y.x) > 0.5, marker.get_meta("thumb_directions", []) as Array)
@@ -129,11 +135,29 @@ func _solve(side: String, marker: Node3D) -> void:
 	max_length_error = maxf(max_length_error, maxf(absf(actual_arm.distance_to(actual_elbow) - upper_length), absf(actual_elbow.distance_to(actual_wrist) - lower_length)))
 
 
-func _set_segment(bone: int, child: int, start: Vector3, finish: Vector3, wrist_rotation: Basis) -> void:
+## Сохраняем низкое плечо, подавая его вбок только при недосягаемом поперечном хвате.
+func _reachable_shoulder(shoulder: Vector3, target: Vector3, reach: float) -> Vector3:
+	var delta: Vector3 = target - shoulder
+	var margin: float = float(Balance.WEAPON_CLEARANCE.reach_margin)
+	shoulder.y = target.y - clampf(delta.y, -reach + margin, reach - margin)
+	delta = target - shoulder
+	var allowed_x: float = sqrt(maxf(margin * margin, reach * reach - delta.y * delta.y)) - margin
+	shoulder.x = target.x - clampf(delta.x, -allowed_x, allowed_x)
+	delta = target - shoulder
+	shoulder.z = target.z + sqrt(maxf(margin * margin, reach * reach - delta.x * delta.x - delta.y * delta.y))
+	return shoulder
+
+
+func _set_segment(bone: int, child: int, start: Vector3, finish: Vector3, wrist_rotation: Basis, move_shoulder: bool = false) -> void:
 	var old_direction: Vector3 = wrist_rotation * (_rest[child].origin - _rest[bone].origin).normalized()
 	var new_direction: Vector3 = (finish - start).normalized()
 	var rotation: Basis = Basis(Quaternion(old_direction, new_direction))
-	skeleton.set_bone_global_pose(bone, Transform3D(rotation * wrist_rotation * _rest[bone].basis, start))
+	var pose: Transform3D = Transform3D(rotation * wrist_rotation * _rest[bone].basis, start)
+	if move_shoulder:
+		# Плечевой пояс следует за перенесённым плечом, чтобы цепь сохраняла согласованную позу.
+		var parent: int = skeleton.get_bone_parent(bone)
+		skeleton.set_bone_global_pose(parent, pose * _rest[bone].affine_inverse() * _rest[parent])
+	skeleton.set_bone_global_pose(bone, pose)
 
 
 func _curl_fingers(side: String, curl: Array) -> void:

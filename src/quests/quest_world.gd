@@ -29,6 +29,9 @@ func _ready() -> void:
 	while _root and _root.scene_file_path == "" and _root.get_parent() != get_tree().root:
 		_root = _root.get_parent()
 	level = _root.scene_file_path.get_file().get_basename() if _root else ""
+	# Ремейк открывается и напрямую, а квесты по-прежнему относятся к логическому hideout.
+	if _root and _root.is_in_group("hideout_level"):
+		level = "hideout"
 	Quests.world = self
 	if raid:
 		Quests.begin_raid()

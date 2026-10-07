@@ -1,0 +1,1031 @@
+{
+	"cases": [
+		{
+			"config": "base",
+			"grip_error_m": 0.0000000792007597283373,
+			"id": "wpn_hg_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "base",
+			"grip_error_m": 0.000000076345735067207,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "optic_offset_optic_offset_rd_01",
+			"grip_error_m": 0.0000000667440644974704,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.000000149011611938477,
+			"mods": {
+				"optic_offset": {
+					"id": "optic_offset_rd_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_grip_vertical_01",
+			"grip_error_m": 0.0000000682857006495396,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+				"underbarrel": {
+					"id": "grip_vertical_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_grip_angled_01",
+			"grip_error_m": 0.0000000846223286998793,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+				"underbarrel": {
+					"id": "grip_angled_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_grip_compact_01",
+			"grip_error_m": 0.0000000640923190076137,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+				"underbarrel": {
+					"id": "grip_compact_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "full_grip_vertical_01",
+			"grip_error_m": 0.0000000562506485835002,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.0000000745058059692383,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_45_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_vertical_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "full_grip_angled_01",
+			"grip_error_m": 0.0000000745988799621955,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_45_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_angled_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_grip_compact_01",
+			"grip_error_m": 0.0000000674678801715345,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.000000104308128356934,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_45_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_compact_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "full_grip_heavy_01",
+			"grip_error_m": 0.0000000679035707662479,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_45_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_heavy_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "full_grip_handstop_01",
+			"grip_error_m": 0.0000000777863462531059,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.000000104308128356934,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_45_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_handstop_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000605288050792296,
+			"id": "wpn_smg_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_supp_45_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_tele_ar_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "base",
+			"grip_error_m": 0.0000000868879510562692,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "optic_offset_optic_offset_rd_01",
+			"grip_error_m": 0.0000000730004856563937,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.000000104308128356934,
+			"mods": {
+				"optic_offset": {
+					"id": "optic_offset_rd_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "underbarrel_grip_vertical_01",
+			"grip_error_m": 0.0000000730004856563937,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+				"underbarrel": {
+					"id": "grip_vertical_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "underbarrel_grip_angled_01",
+			"grip_error_m": 0.0000000802452078119131,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+				"underbarrel": {
+					"id": "grip_angled_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "underbarrel_grip_compact_01",
+			"grip_error_m": 0.0000000749005693023719,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+				"underbarrel": {
+					"id": "grip_compact_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_grip_vertical_01",
+			"grip_error_m": 0.0000000830497484116677,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_heavy_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_vertical_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "full_grip_angled_01",
+			"grip_error_m": 0.0000000846223286998793,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_heavy_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_angled_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "full_grip_compact_01",
+			"grip_error_m": 0.000000079288319909665,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.0000000894069671630859,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_heavy_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_compact_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "full_grip_heavy_01",
+			"grip_error_m": 0.0000000842936955791629,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.000000104308128356934,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_heavy_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_heavy_01"
+				}
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "full_grip_handstop_01",
+			"grip_error_m": 0.0000000843759764279639,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_heavy_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "grip_handstop_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000702886353565191,
+			"id": "wpn_ar_01",
+			"length_error_m": 0.000000104308128356934,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_fh_545_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_offset": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"optic_primary": {
+					"id": "optic_rmr_01",
+					"laser": true,
+					"light": true
+				},
+				"side_left": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"side_right": {
+					"id": "grip_handstop_01",
+					"laser": true,
+					"light": true
+				},
+				"stock": {
+					"id": "stock_fixed_heavy_ak",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "crouch"
+		},
+		{
+			"config": "base",
+			"grip_error_m": 0.0000000856006536764653,
+			"id": "wpn_sr_01",
+			"length_error_m": 0.00000019371509552002,
+			"mods": {
+
+			},
+			"ok": true,
+			"stance": "prone"
+		},
+		{
+			"config": "full_bipod_01",
+			"grip_error_m": 0.0000000833000228794845,
+			"id": "wpn_sr_01",
+			"length_error_m": 0.000000149011611938477,
+			"mods": {
+				"muzzle": {
+					"id": "muzzle_brake_338_01",
+					"laser": true,
+					"light": true
+				},
+				"underbarrel": {
+					"id": "bipod_01"
+				}
+			},
+			"ok": true,
+			"stance": "stand"
+		},
+		{
+			"config": "base",
+			"grip_error_m": 0.0000000795504320194595,
+			"id": "wpn_sg_01",
+			"length_error_m": 0.000000119209289550781,
+			"mods": {
+
+			},
+			"ok": true,
+			"stance": "crouch"
+		}
+	],
+	"failures": 0,
+	"frames": [
+		{
+			"label": "wpn_hg_01_base_hip",
+			"page": 0,
+			"tile": 0
+		},
+		{
+			"label": "wpn_hg_01_base_ads",
+			"page": 0,
+			"tile": 1
+		},
+		{
+			"label": "wpn_smg_01_base_hip",
+			"page": 0,
+			"tile": 2
+		},
+		{
+			"label": "wpn_smg_01_base_ads",
+			"page": 0,
+			"tile": 3
+		},
+		{
+			"label": "wpn_smg_01_optic_offset_optic_offset_rd_01_hip",
+			"page": 0,
+			"tile": 4
+		},
+		{
+			"label": "wpn_smg_01_optic_offset_optic_offset_rd_01_ads",
+			"page": 0,
+			"tile": 5
+		},
+		{
+			"label": "wpn_smg_01_optic_offset_optic_offset_rd_01_offset",
+			"page": 0,
+			"tile": 6
+		},
+		{
+			"label": "wpn_smg_01_underbarrel_grip_vertical_01_hip",
+			"page": 0,
+			"tile": 7
+		},
+		{
+			"label": "wpn_smg_01_underbarrel_grip_vertical_01_ads",
+			"page": 0,
+			"tile": 8
+		},
+		{
+			"label": "wpn_smg_01_underbarrel_grip_angled_01_hip",
+			"page": 0,
+			"tile": 9
+		},
+		{
+			"label": "wpn_smg_01_underbarrel_grip_angled_01_ads",
+			"page": 0,
+			"tile": 10
+		},
+		{
+			"label": "wpn_smg_01_underbarrel_grip_compact_01_hip",
+			"page": 0,
+			"tile": 11
+		},
+		{
+			"label": "wpn_smg_01_underbarrel_grip_compact_01_ads",
+			"page": 0,
+			"tile": 12
+		},
+		{
+			"label": "wpn_smg_01_full_grip_vertical_01_hip",
+			"page": 0,
+			"tile": 13
+		},
+		{
+			"label": "wpn_smg_01_full_grip_vertical_01_ads",
+			"page": 0,
+			"tile": 14
+		},
+		{
+			"label": "wpn_smg_01_full_grip_vertical_01_offset",
+			"page": 0,
+			"tile": 15
+		},
+		{
+			"label": "wpn_smg_01_full_grip_angled_01_hip",
+			"page": 0,
+			"tile": 16
+		},
+		{
+			"label": "wpn_smg_01_full_grip_angled_01_ads",
+			"page": 0,
+			"tile": 17
+		},
+		{
+			"label": "wpn_smg_01_full_grip_angled_01_offset",
+			"page": 0,
+			"tile": 18
+		},
+		{
+			"label": "wpn_smg_01_full_grip_compact_01_hip",
+			"page": 0,
+			"tile": 19
+		},
+		{
+			"label": "wpn_smg_01_full_grip_compact_01_ads",
+			"page": 0,
+			"tile": 20
+		},
+		{
+			"label": "wpn_smg_01_full_grip_compact_01_offset",
+			"page": 0,
+			"tile": 21
+		},
+		{
+			"label": "wpn_smg_01_full_grip_heavy_01_hip",
+			"page": 0,
+			"tile": 22
+		},
+		{
+			"label": "wpn_smg_01_full_grip_heavy_01_ads",
+			"page": 0,
+			"tile": 23
+		},
+		{
+			"label": "wpn_smg_01_full_grip_heavy_01_offset",
+			"page": 0,
+			"tile": 24
+		},
+		{
+			"label": "wpn_smg_01_full_grip_handstop_01_hip",
+			"page": 0,
+			"tile": 25
+		},
+		{
+			"label": "wpn_smg_01_full_grip_handstop_01_ads",
+			"page": 0,
+			"tile": 26
+		},
+		{
+			"label": "wpn_smg_01_full_grip_handstop_01_offset",
+			"page": 0,
+			"tile": 27
+		},
+		{
+			"label": "wpn_smg_01_full_bipod_01_hip",
+			"page": 0,
+			"tile": 28
+		},
+		{
+			"label": "wpn_smg_01_full_bipod_01_ads",
+			"page": 0,
+			"tile": 29
+		},
+		{
+			"label": "wpn_smg_01_full_bipod_01_offset",
+			"page": 1,
+			"tile": 0
+		},
+		{
+			"label": "wpn_ar_01_base_hip",
+			"page": 1,
+			"tile": 1
+		},
+		{
+			"label": "wpn_ar_01_base_ads",
+			"page": 1,
+			"tile": 2
+		},
+		{
+			"label": "wpn_ar_01_optic_offset_optic_offset_rd_01_hip",
+			"page": 1,
+			"tile": 3
+		},
+		{
+			"label": "wpn_ar_01_optic_offset_optic_offset_rd_01_ads",
+			"page": 1,
+			"tile": 4
+		},
+		{
+			"label": "wpn_ar_01_optic_offset_optic_offset_rd_01_offset",
+			"page": 1,
+			"tile": 5
+		},
+		{
+			"label": "wpn_ar_01_underbarrel_grip_vertical_01_hip",
+			"page": 1,
+			"tile": 6
+		},
+		{
+			"label": "wpn_ar_01_underbarrel_grip_vertical_01_ads",
+			"page": 1,
+			"tile": 7
+		},
+		{
+			"label": "wpn_ar_01_underbarrel_grip_angled_01_hip",
+			"page": 1,
+			"tile": 8
+		},
+		{
+			"label": "wpn_ar_01_underbarrel_grip_angled_01_ads",
+			"page": 1,
+			"tile": 9
+		},
+		{
+			"label": "wpn_ar_01_underbarrel_grip_compact_01_hip",
+			"page": 1,
+			"tile": 10
+		},
+		{
+			"label": "wpn_ar_01_underbarrel_grip_compact_01_ads",
+			"page": 1,
+			"tile": 11
+		},
+		{
+			"label": "wpn_ar_01_full_grip_vertical_01_hip",
+			"page": 1,
+			"tile": 12
+		},
+		{
+			"label": "wpn_ar_01_full_grip_vertical_01_ads",
+			"page": 1,
+			"tile": 13
+		},
+		{
+			"label": "wpn_ar_01_full_grip_vertical_01_offset",
+			"page": 1,
+			"tile": 14
+		},
+		{
+			"label": "wpn_ar_01_full_grip_angled_01_hip",
+			"page": 1,
+			"tile": 15
+		},
+		{
+			"label": "wpn_ar_01_full_grip_angled_01_ads",
+			"page": 1,
+			"tile": 16
+		},
+		{
+			"label": "wpn_ar_01_full_grip_angled_01_offset",
+			"page": 1,
+			"tile": 17
+		},
+		{
+			"label": "wpn_ar_01_full_grip_compact_01_hip",
+			"page": 1,
+			"tile": 18
+		},
+		{
+			"label": "wpn_ar_01_full_grip_compact_01_ads",
+			"page": 1,
+			"tile": 19
+		},
+		{
+			"label": "wpn_ar_01_full_grip_compact_01_offset",
+			"page": 1,
+			"tile": 20
+		},
+		{
+			"label": "wpn_ar_01_full_grip_heavy_01_hip",
+			"page": 1,
+			"tile": 21
+		},
+		{
+			"label": "wpn_ar_01_full_grip_heavy_01_ads",
+			"page": 1,
+			"tile": 22
+		},
+		{
+			"label": "wpn_ar_01_full_grip_heavy_01_offset",
+			"page": 1,
+			"tile": 23
+		},
+		{
+			"label": "wpn_ar_01_full_grip_handstop_01_hip",
+			"page": 1,
+			"tile": 24
+		},
+		{
+			"label": "wpn_ar_01_full_grip_handstop_01_ads",
+			"page": 1,
+			"tile": 25
+		},
+		{
+			"label": "wpn_ar_01_full_grip_handstop_01_offset",
+			"page": 1,
+			"tile": 26
+		},
+		{
+			"label": "wpn_ar_01_full_bipod_01_hip",
+			"page": 1,
+			"tile": 27
+		},
+		{
+			"label": "wpn_ar_01_full_bipod_01_ads",
+			"page": 1,
+			"tile": 28
+		},
+		{
+			"label": "wpn_ar_01_full_bipod_01_offset",
+			"page": 1,
+			"tile": 29
+		},
+		{
+			"label": "wpn_sr_01_base_hip",
+			"page": 2,
+			"tile": 0
+		},
+		{
+			"label": "wpn_sr_01_base_ads",
+			"page": 2,
+			"tile": 1
+		},
+		{
+			"label": "wpn_sr_01_full_bipod_01_hip",
+			"page": 2,
+			"tile": 2
+		},
+		{
+			"label": "wpn_sr_01_full_bipod_01_ads",
+			"page": 2,
+			"tile": 3
+		},
+		{
+			"label": "wpn_sg_01_base_hip",
+			"page": 2,
+			"tile": 4
+		},
+		{
+			"label": "wpn_sg_01_base_ads",
+			"page": 2,
+			"tile": 5
+		}
+	],
+	"seconds": 51.662
+}

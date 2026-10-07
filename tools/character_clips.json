@@ -59,5 +59,6 @@
   "death_crouch_head": "death/Death Crouching Headshot Front.fbx",
   "death_prone": "death/Prone Death.fbx",
   "death_blast": "death/Flying Back Death from shotgun.fbx",
-  "prone_throw": "prone/Throw Grenade.fbx"
+  "prone_throw": "prone/Throw Grenade.fbx",
+  "jump_loop": "Pro Rifle Pack/jump loop.fbx"
 }

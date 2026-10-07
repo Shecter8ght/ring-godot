@@ -8,6 +8,8 @@ extends Interactable
 enum Kind { STASH, TRADER, EXIT, WORKBENCH, UPGRADES }
 
 @export var kind: Kind = Kind.STASH
+## Авторская сцена использует настенные таблички и обычную подсказку F.
+@export var authored_visual: bool = false
 @export var display_name: String = "Тайник":
 	set(v):
 		display_name = v
@@ -26,5 +28,5 @@ func request_use() -> void:
 
 
 func _build_visual(parent: Node3D) -> void:
-	if display_name != "":
+	if display_name != "" and not authored_visual:
 		_label(parent, display_name, 2.4, Color(1.0, 0.86, 0.6))

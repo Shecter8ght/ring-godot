@@ -1,0 +1,2072 @@
+[gd_scene load_steps=174 format=4]
+
+[ext_resource type="Script" path="res://src/hideout/hideout_level.gd" id="1_gl8uf"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_MainHub.tscn" id="2_mr1fr"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_MainHub.tscn" id="3_41nh7"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Living.tscn" id="4_djbdt"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_Living.tscn" id="5_gjldk"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Trader.tscn" id="6_fcb4t"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_Trader.tscn" id="7_687qo"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Armory.tscn" id="8_1eum6"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_Armory.tscn" id="9_0otjg"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Generator.tscn" id="10_r5yoy"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_Generator.tscn" id="11_5pyx5"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Workshop.tscn" id="12_s0cvv"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_Workshop.tscn" id="13_cutkf"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Storage.tscn" id="14_184rr"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_Storage.tscn" id="15_o0sr1"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_NorthGallery.tscn" id="16_uh6na"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_NorthGallery.tscn" id="17_txvac"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Entry.tscn" id="18_lqpr7"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ceiling_Entry.tscn" id="19_lejm1"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Floor_Sleeping.tscn" id="20_aton0"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_North.tscn" id="21_473sv"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_West.tscn" id="22_vyxh1"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_East.tscn" id="23_hso14"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_WestLiving.tscn" id="24_puowp"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_WestTrader.tscn" id="25_wiab7"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_WestArmory.tscn" id="26_sacvw"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EastLiving.tscn" id="27_w6hm7"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EastTrader.tscn" id="28_gh4a2"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EastArmory.tscn" id="29_227eo"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_WestNorthDivide.tscn" id="30_t3bhw"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_WestMidDivide.tscn" id="31_wvjhv"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_WestSouth.tscn" id="32_c8riw"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EastNorthDivide.tscn" id="33_sg7xt"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EastMidDivide.tscn" id="34_d7fb4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EastSouth.tscn" id="35_74kd4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EntryWest.tscn" id="36_m3egd"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EntryEast.tscn" id="37_ibvwc"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_EntrySouth.tscn" id="38_hiynu"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_BaySouthWest.tscn" id="39_3oeu7"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_BaySouthEast.tscn" id="40_f2ej0"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_HubWestReturn.tscn" id="41_8gdi1"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Wall_HubEastReturn.tscn" id="42_ntmj0"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/TechnicalStructure.tscn" id="43_nte6w"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/StairsAndRailing.tscn" id="44_1wwvl"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/Ventilation.tscn" id="45_ixuam"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/PipesAndElectrical.tscn" id="46_76coa"]
+[ext_resource type="PackedScene" path="res://levels/shelter/architecture/DrainsAndThresholds.tscn" id="47_nj0nw"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/architecture/floor_joints.res" id="48_atnhc"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Rug.tscn" id="49_joikx"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PlanningTable.tscn" id="50_4q5od"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PlanningMap.tscn" id="51_prn7s"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Chair.tscn" id="52_08b0t"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Mug.tscn" id="53_50yt4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Notebook.tscn" id="54_jwfbf"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Radio.tscn" id="55_4mwis"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Case.tscn" id="56_2ll0m"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Sofa.tscn" id="57_m8e2d"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Armchair.tscn" id="58_cfkt5"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/CoffeeTable.tscn" id="59_miu6p"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Counter.tscn" id="60_xot3d"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Shelf.tscn" id="61_nkm6a"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Backpack.tscn" id="62_6nlmt"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/CardboardBox.tscn" id="63_uqr51"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/MedicalCase.tscn" id="64_vhlg6"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Workbench.tscn" id="65_t0343"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/JerryCan.tscn" id="66_ikaho"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Bench.tscn" id="67_btsbx"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/WeaponRack.tscn" id="68_og5iu"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Locker.tscn" id="69_qeqhf"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/WaterBottle.tscn" id="70_utmbm"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/FoodCan.tscn" id="71_ri1xg"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Generator.tscn" id="72_trdx1"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/ElectricalCabinet.tscn" id="73_jvtro"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/IndustrialFan.tscn" id="74_6hm0i"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Bed.tscn" id="75_ucdnw"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Boots.tscn" id="76_tuc6p"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/BlastDoor.tscn" id="77_oo1xc"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Display_wpn_ar_03.tscn" id="78_o4m14"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Display_wpn_hg_01.tscn" id="79_go5hx"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Crate.tscn" id="80_44gk4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_AmmoBox.tscn" id="81_mfi22"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Barrel.tscn" id="82_kobk8"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/DeskLamp.tscn" id="83_eiuoo"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Binoculars.tscn" id="84_a23si"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Pencil.tscn" id="85_hojtp"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/WallMap.tscn" id="86_xex74"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/CableReel.tscn" id="87_vqyrg"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/HookRail.tscn" id="88_byhrr"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/TacticalVest.tscn" id="89_6efid"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Helmet.tscn" id="90_xexa3"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PracticalLight.tscn" id="91_1xd1h"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/CageLamp.tscn" id="92_r4iix"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/wet_patch.png" id="93_wt8tp"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/wet_patch_orm.png" id="94_680lf"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/shoe_marks.png" id="95_utfdn"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/oil_stain.png" id="96_c2kj6"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/oil_stain_orm.png" id="97_d6j6p"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/dirt.png" id="98_q8gdq"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/water_streak.png" id="99_6qnus"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/rust_streak.png" id="100_xuxcy"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/paint_damage.png" id="101_qymsk"]
+[ext_resource type="Script" path="res://src/hideout/hideout_activity.gd" id="102_m547t"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Television.tscn" id="103_17fox"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Beer.tscn" id="104_jgg53"]
+[ext_resource type="Script" path="res://src/hideout/hideout_station.gd" id="105_xyjrm"]
+[ext_resource type="Script" path="res://src/hideout/shelter_power.gd" id="106_jviw6"]
+[ext_resource type="Script" path="res://src/quests/quest_anchor.gd" id="107_baynr"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/persona_animated.glb" id="108_0oryr"]
+[ext_resource type="Script" path="res://src/player/character_animator.gd" id="109_wlgdn"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_00.tscn" id="110_gpb0e"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_01.tscn" id="111_a4qnk"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_02.tscn" id="112_pnb57"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_03.tscn" id="113_xlm1x"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_04.tscn" id="114_dlad0"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_05.tscn" id="115_33p46"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_06.tscn" id="116_ocp8e"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_07.tscn" id="117_wdcd2"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_08.tscn" id="118_cuc32"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_09.tscn" id="119_6c6lo"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_10.tscn" id="120_iqvqm"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_11.tscn" id="121_lmyp7"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/RoomSign_12.tscn" id="122_yqdwf"]
+[ext_resource type="Script" path="res://src/hideout/shelter_audio.gd" id="123_0vxkf"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="124_yg8t1"]
+[ext_resource type="Script" path="res://src/player/camera_rig.gd" id="125_jgkv4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/InventoryClipboard.tscn" id="126_hiynu"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/BooksStack.tscn" id="127_3oeu7"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/NoticeBoard.tscn" id="128_f2ej0"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/CableJunction.tscn" id="129_8gdi1"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/WorkGloves.tscn" id="130_ntmj0"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/HangingJacket.tscn" id="131_nte6w"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/CleaningBucket.tscn" id="132_1wwvl"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/FireExtinguisher.tscn" id="133_ixuam"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/DrapedBlanket.tscn" id="134_76coa"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/Cushion.tscn" id="135_nj0nw"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/TeaStation.tscn" id="136_atnhc"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/TeaSet.tscn" id="137_joikx"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/WallClock.tscn" id="138_4q5od"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/FoldedTowel.tscn" id="139_prn7s"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/CounterScales.tscn" id="140_08b0t"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/Calculator.tscn" id="141_50yt4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/RepairTools.tscn" id="142_jwfbf"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/OpenToolbox.tscn" id="143_4mwis"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/PartsOrganizer.tscn" id="144_2ll0m"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/CleaningRag.tscn" id="145_m8e2d"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/WeaponCleaningSet.tscn" id="146_cfkt5"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/AmmoAndMagazines.tscn" id="147_miu6p"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/HearingProtection.tscn" id="148_xot3d"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/MeterPanel.tscn" id="149_nkm6a"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/GeneratorServiceDetails.tscn" id="150_6nlmt"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/ExhaustConnection.tscn" id="151_uqr51"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/HandTruck.tscn" id="152_vhlg6"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/MixedCartons.tscn" id="153_t0343"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/FoodStock.tscn" id="154_ikaho"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/WaterStock.tscn" id="155_btsbx"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/BatteryStock.tscn" id="156_og5iu"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/MedicalStock.tscn" id="157_qeqhf"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/SupplySack.tscn" id="158_utmbm"]
+[ext_resource type="PackedScene" path="res://levels/shelter/dressing/BedBlanket.tscn" id="159_ri1xg"]
+[ext_resource type="PackedScene" path="res://levels/shelter/atmosphere/DustMotes.tscn" id="160_trdx1"]
+[ext_resource type="Script" path="res://src/hideout/shelter_effect.gd" id="161_jvtro"]
+[ext_resource type="PackedScene" path="res://levels/shelter/atmosphere/KettleVapor.tscn" id="162_6hm0i"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_npttq"]
+points = PackedVector3Array(4.4, 0, -2.15, 6.2, 0, -2.15, 4.4, 2.6, -6.2, 6.2, 2.6, -6.2, 4.4, 2.6, -6.7, 6.2, 2.6, -6.7, 4.4, 0, -6.7, 6.2, 0, -6.7)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_31y1p"]
+points = PackedVector3Array(4.3, 0, -2.15, 4.3, 1.1, -2.15, 4.3, 2.6, -6.7, 4.3, 3.6999998, -6.7, 4.4, 0, -2.15, 4.4, 1.1, -2.15, 4.4, 2.6, -6.7, 4.4, 3.6999998, -6.7)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fklhd"]
+points = PackedVector3Array(6.2, 0, -2.15, 6.2, 1.1, -2.15, 6.2, 2.6, -6.7, 6.2, 3.6999998, -6.7, 6.3, 0, -2.15, 6.3, 1.1, -2.15, 6.3, 2.6, -6.7, 6.3, 3.6999998, -6.7)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v8xmu"]
+size = Vector3(2, 1.1, 0.07)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_indws"]
+size = Vector3(4, 1.1, 0.07)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_h1klo"]
+size = Vector3(6, 1.1, 0.07)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ivv7g"]
+size = Vector3(1.3, 1.1, 0.07)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kqpml"]
+size = Vector3(3.4, 1.1, 0.07)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_hiynu"]
+vertices = PackedVector3Array(2.5, 0.5, -1.25, 2.5, 0.5, -0.75, 3.25, 0.5, -0.5, 4, 0.5, -1.5, 3.75, 0.5, -2, 6.75, 0.5, 4.25, 7.75, 0.5, 4, 7.75, 0.5, 3.75, 6.75, 0.5, 2.5, 3.25, 0.5, 0.5, 2.5, 0.5, 0.75, 2.5, 0.5, 1.5, 2.5, 3.5, -10.5, -2.5, 3.5, -10.5, -2.5, 3, -7.5, 2.75, 3, -7.75, 1.25, 3, -10.5, 0, 3.5, -10.5, -1.25, 3, -10.5, -2.5, 3, -9.5, -2.5, 3.5, -8.5, 4.5, 0.5, 5, 7.25, 0.5, -1.25, 5.5, 0.5, -1.75, 5, 0.5, -1.75, 5.5, 0.5, 5.25, 6.75, 0.5, 5.25, 4.75, 0.75, 6.75, 5.5, 0.75, 6.75, 4.75, 3, -6.75, 5.5, 3, -6.25, 6, 3, -7.75, 7, 0.5, -1.75, 1.8500004, 3, -7.05, 3.2999992, 3.5, -6.9, 1.5, 0.5, 2.5, 3.25, 0.5, 5.25, -7.25, 0.5, -10.25, -7.25, 0.5, -9.75, -6.5, 0.5, -10, -0.5, 0.5, -2.5, -0.25, 0.5, -1.75, 0.25, 0.5, -1.75, 0.5, 0.5, -2.5, 2.5, 0.5, -6.5, 2.5, 0.5, -7.75, 1.25, 0.5, -9.75, -1.25, 0.5, -9.75, -1.5, 0.5, -10.25, -2.75, 0.5, -10.25, -3.5, 0.5, -8, -2.5, 0.5, -7.75, 1.75, 0.5, -2.5, 3.75, 0.5, -6.25, 3.5, 0.5, -10, 1.5, 0.5, -10.25, 3.5, 0.5, -8, -2.5, 0.5, -6.5, -1.5, 0.5, -2.5, 6.5, 0.5, -7.25, 7, 0.5, -5.75, 7.5, 0.5, -6.5, 10, 0.5, -9.25, 9.75, 0.5, -10.25, 8.75, 0.5, -10.25, 8.5, 0.5, -7.25, 12.25, 0.5, -5.75, 12.25, 0.5, -7.25, 11.75, 0.5, -7.5, 8.5, 0.5, -6.5, 8.75, 0.5, -5.75, 4, 0.5, -8, 7.25, 0.5, -7.5, 12, 0.5, -9.75, 15.5, 0.5, -9.75, 15.5, 0.5, -10.25, 11.5, 0.5, -10.25, 4.25, 0.5, -7.25, 7.25, 0.5, -10.25, 11.25, 0.5, -9.25, 16.5, 0.5, -8.75, 17.25, 0.5, -9, 17.25, 0.5, -10.25, 15.5, 0.5, -7.25, 16.5, 0.5, -5.75, -16.75, 0.5, -6.75, -17.25, 0.5, -6.75, -17.25, 0.5, -5.75, -6.5, 0.5, -2.5, -7.5, 0.5, -2.25, -7.5, 0.5, -1.5, -7.25, 0.5, -0.25, -3.25, 0.5, 0, -13.75, 0.75, -8.75, -14, 1.25, -7.5, -12.5, 1.25, -7.5, -12.75, 0.75, -8.75, -4.25, 0.5, -6.5, -7.5, 0.5, -7.25, -8.5, 0.5, -7.25, -7.5, 0.5, -6.5, -14.5, 0.5, -9, -11.5, 0.5, -9, -8.75, 0.5, -5.75, -8.5, 0.5, -6.5, -11.75, 0.5, -8.75, -15, 0.5, -7.5, -16.5, 0.5, -7.5, -14.75, 0.5, -6.5, -6.5, 0.5, -4.5, -7, 1, -5.5, -11.75, 0.5, -6.5, -4.0049753, 1, -3.003025, -4.0249996, 0.5, -4.525, -8.75, 0.5, -9.75, -11.25, 0.5, -9.5, -4, 0.5, -8, -7.25, 0.5, -8.25, 12.75, 2, -8.75, 12.75, 2, -8.25, 14.75, 2, -8.25, 14.75, 2, -8.75, -14.25, 0.5, -2.75, -13.25, 0.5, -3, -13.25, 0.5, -3.5, -17.25, 0.75, -3.5, -8.75, 0.5, -1.25, -8.75, 0.5, -2.5, -10.5, 0.5, -2.75, -10.5, 0.5, -1.25, -14, 0.5, -1, -17.25, 0.5, 0.25, -8.75, 0.5, 0.25, -11.75, 0.5, -4.25, -11.5, 0.5, -3, -8.75, 0.5, -4.25, 16.5, 0.5, -3, 17.25, 0.5, -3.5, 16, 0.5, -3.5, 15.25, 0.5, -3.25, 7.5, 0.5, -2.25, 7, 0.5, -4, 15.5, 0.5, -4.25, 12.25, 0.5, -3.25, 12, 0.75, -4.25, 11.5, 0.5, -3.5, 8.5, 0.5, -1.5, 8.75, 0.5, -2.5, 9.5, 0.5, -3.5, 9.25, 0.5, -4.25, 8.75, 0.5, -4.25, 16.5, 0.5, -1, 8.75, 0.5, 0.25, 17.25, 0.5, 0.25, 17.25, 0.5, -0.75, -1.25, 1.25, 1, 1.5, 1.25, 0.75, 1.25, 1.25, -1, -1.5, 1.25, -0.75, -7, 0.5, 4, -6.75, 0.5, 5.25, -5.75, 0.5, 5, -5.5, 0.75, 6.75, -4.75, 0.75, 6.75, -4.5, 0.5, 5, -7.5, 0.5, 3.75, -8.75, 0.5, 3.5, -8.25, 0.5, 4, -11, 0.5, 6.25, -8.75, 0.5, 6.25, -8.75, 0.5, 4.75, -11.25, 0.5, 4.75, -3.5, 0.5, 5, -1.5, 0.5, 2.5, -7.333333, 1, 1.083333, -11.25, 0.5, 3.25, -8.75, 0.5, 1.75, -11.25, 0.5, 1.75, -11.5, 0.5, 5.25, -12, 0.5, 1.75, -12.25, 0.5, 2.25, -16.5, 0.75, 4.5, -17.25, 0.5, 4.75, -17.25, 0.5, 5.5, -15, 0.5, 5.5, -16.125, 1, 5.5, -14.75, 0.5, 5, -14.5, 0.5, 3, -16.5, 0.5, 2.25, -14.75, 0.5, 6.25, 0.5, 0.5, 2.5, 0.25, 0.5, 1.75, -0.25, 0.5, 1.75, -0.5, 0.5, 2.5, -3.25, 0.5, 11.25, 2.5, 0.75, 11.25, 2.75, 0.5, 8, 3.5, 0.5, 7.75, 8.75, 0.5, 4.75, 8.75, 0.5, 6.25, 9.25, 0.5, 5.5, 16.25, 0.5, 1.75, 15.75, 0.5, 1.75, 15.5, 0.5, 2.5, 16.25, 1, 2.75, 16.25, 0.5, 5, 8.75, 0.5, 3.5, 16, 0.5, 5.5, 12, 0.5, 2.5, 17.25, 0.75, 5, 17.25, 0.75, 3, 11.75, 0.5, 1.75, 8.75, 0.5, 1.75, -7.25, 0.5, 5.75, -7.25, 0.5, 7.25, -6.75, 0.5, 7.25, -6.75, 0.5, 5.5, 6.75, 0.75, 6.75, 7.25, 0.75, 6.75, 7.25, 0.5, 5.75, 6.75, 0.5, 5.5)
+polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Array(3, 0, 4), PackedInt32Array(6, 5, 7), PackedInt32Array(7, 5, 8), PackedInt32Array(11, 10, 9), PackedInt32Array(13, 18, 19), PackedInt32Array(19, 18, 20), PackedInt32Array(20, 18, 14), PackedInt32Array(14, 18, 17), PackedInt32Array(14, 17, 16), PackedInt32Array(14, 16, 12), PackedInt32Array(14, 12, 15), PackedInt32Array(23, 22, 24), PackedInt32Array(24, 22, 8), PackedInt32Array(24, 8, 11), PackedInt32Array(11, 8, 21), PackedInt32Array(5, 26, 25), PackedInt32Array(28, 27, 25), PackedInt32Array(25, 27, 21), PackedInt32Array(31, 30, 29), PackedInt32Array(11, 9, 24), PackedInt32Array(23, 32, 22), PackedInt32Array(2, 3, 9), PackedInt32Array(9, 3, 24), PackedInt32Array(25, 21, 5), PackedInt32Array(5, 21, 8), PackedInt32Array(29, 34, 31), PackedInt32Array(31, 34, 15), PackedInt32Array(15, 34, 33), PackedInt32Array(15, 33, 14), PackedInt32Array(23, 24, 30), PackedInt32Array(30, 24, 29), PackedInt32Array(36, 35, 21), PackedInt32Array(21, 35, 11), PackedInt32Array(39, 38, 37), PackedInt32Array(41, 40, 42), PackedInt32Array(42, 40, 43), PackedInt32Array(46, 45, 44), PackedInt32Array(48, 47, 49), PackedInt32Array(49, 47, 51), PackedInt32Array(49, 51, 50), PackedInt32Array(0, 52, 4), PackedInt32Array(4, 52, 53), PackedInt32Array(53, 52, 44), PackedInt32Array(55, 54, 46), PackedInt32Array(46, 54, 45), PackedInt32Array(45, 54, 56), PackedInt32Array(43, 40, 44), PackedInt32Array(44, 40, 57), PackedInt32Array(44, 57, 47), PackedInt32Array(44, 47, 46), PackedInt32Array(40, 58, 57), PackedInt32Array(57, 51, 47), PackedInt32Array(44, 52, 43), PackedInt32Array(61, 60, 59), PackedInt32Array(63, 62, 64), PackedInt32Array(64, 62, 65), PackedInt32Array(69, 65, 70), PackedInt32Array(70, 65, 68), PackedInt32Array(70, 68, 67), PackedInt32Array(70, 67, 66), PackedInt32Array(71, 56, 54), PackedInt32Array(69, 61, 65), PackedInt32Array(65, 61, 72), PackedInt32Array(72, 61, 59), PackedInt32Array(74, 73, 75), PackedInt32Array(75, 73, 76), PackedInt32Array(77, 71, 59), PackedInt32Array(59, 71, 72), PackedInt32Array(72, 71, 54), PackedInt32Array(72, 54, 78), PackedInt32Array(79, 68, 62), PackedInt32Array(62, 68, 65), PackedInt32Array(76, 73, 79), PackedInt32Array(79, 73, 68), PackedInt32Array(74, 75, 80), PackedInt32Array(80, 75, 81), PackedInt32Array(81, 75, 82), PackedInt32Array(74, 80, 83), PackedInt32Array(83, 80, 84), PackedInt32Array(67, 83, 66), PackedInt32Array(66, 83, 84), PackedInt32Array(87, 86, 85), PackedInt32Array(89, 88, 90), PackedInt32Array(90, 88, 91), PackedInt32Array(91, 88, 92), PackedInt32Array(96, 95, 93), PackedInt32Array(93, 95, 94), PackedInt32Array(99, 98, 100), PackedInt32Array(100, 98, 97), PackedInt32Array(93, 101, 96), PackedInt32Array(96, 101, 102), PackedInt32Array(99, 104, 103), PackedInt32Array(105, 96, 102), PackedInt32Array(107, 106, 85), PackedInt32Array(106, 108, 85), PackedInt32Array(85, 108, 87), PackedInt32Array(109, 110, 97), PackedInt32Array(97, 110, 100), PackedInt32Array(111, 105, 102), PackedInt32Array(97, 113, 109), PackedInt32Array(109, 112, 88), PackedInt32Array(88, 112, 92), PackedInt32Array(92, 112, 58), PackedInt32Array(58, 113, 57), PackedInt32Array(57, 113, 97), PackedInt32Array(113, 112, 109), PackedInt32Array(112, 113, 58), PackedInt32Array(115, 114, 102), PackedInt32Array(102, 114, 99), PackedInt32Array(102, 99, 103), PackedInt32Array(102, 103, 111), PackedInt32Array(98, 117, 97), PackedInt32Array(97, 117, 116), PackedInt32Array(99, 100, 104), PackedInt32Array(108, 111, 87), PackedInt32Array(87, 111, 103), PackedInt32Array(121, 120, 118), PackedInt32Array(118, 120, 119), PackedInt32Array(123, 122, 124), PackedInt32Array(124, 122, 125), PackedInt32Array(90, 126, 89), PackedInt32Array(89, 126, 127), PackedInt32Array(127, 126, 129), PackedInt32Array(127, 129, 128), PackedInt32Array(126, 132, 129), PackedInt32Array(129, 132, 130), PackedInt32Array(130, 132, 131), PackedInt32Array(134, 133, 128), PackedInt32Array(128, 133, 127), PackedInt32Array(127, 133, 135), PackedInt32Array(122, 130, 125), PackedInt32Array(125, 130, 131), PackedInt32Array(139, 138, 136), PackedInt32Array(136, 138, 137), PackedInt32Array(140, 32, 141), PackedInt32Array(139, 142, 138), PackedInt32Array(145, 144, 143), PackedInt32Array(32, 140, 22), PackedInt32Array(22, 140, 146), PackedInt32Array(146, 140, 147), PackedInt32Array(149, 148, 150), PackedInt32Array(150, 148, 147), PackedInt32Array(148, 145, 143), PackedInt32Array(136, 151, 139), PackedInt32Array(139, 151, 143), PackedInt32Array(146, 148, 152), PackedInt32Array(152, 148, 143), PackedInt32Array(152, 143, 151), PackedInt32Array(152, 151, 153), PackedInt32Array(146, 147, 148), PackedInt32Array(151, 154, 153), PackedInt32Array(158, 157, 155), PackedInt32Array(155, 157, 156), PackedInt32Array(161, 160, 159), PackedInt32Array(162, 161, 163), PackedInt32Array(163, 161, 164), PackedInt32Array(159, 167, 165), PackedInt32Array(165, 167, 166), PackedInt32Array(164, 161, 159), PackedInt32Array(169, 168, 170), PackedInt32Array(170, 168, 171), PackedInt32Array(172, 164, 173), PackedInt32Array(173, 164, 92), PackedInt32Array(92, 164, 165), PackedInt32Array(92, 165, 174), PackedInt32Array(92, 174, 91), PackedInt32Array(167, 170, 166), PackedInt32Array(166, 170, 171), PackedInt32Array(166, 171, 175), PackedInt32Array(177, 176, 175), PackedInt32Array(175, 176, 166), PackedInt32Array(164, 159, 165), PackedInt32Array(171, 168, 178), PackedInt32Array(179, 177, 180), PackedInt32Array(180, 177, 175), PackedInt32Array(182, 181, 183), PackedInt32Array(183, 181, 185), PackedInt32Array(185, 181, 184), PackedInt32Array(184, 181, 186), PackedInt32Array(186, 181, 187), PackedInt32Array(187, 181, 188), PackedInt32Array(184, 186, 189), PackedInt32Array(189, 186, 178), PackedInt32Array(189, 178, 168), PackedInt32Array(175, 187, 180), PackedInt32Array(180, 187, 188), PackedInt32Array(191, 190, 192), PackedInt32Array(192, 190, 193), PackedInt32Array(173, 193, 172), PackedInt32Array(172, 193, 196), PackedInt32Array(172, 196, 195), PackedInt32Array(172, 195, 194), PackedInt32Array(197, 196, 36), PackedInt32Array(36, 196, 190), PackedInt32Array(190, 196, 193), PackedInt32Array(190, 35, 36), PackedInt32Array(198, 200, 199), PackedInt32Array(202, 201, 203), PackedInt32Array(203, 201, 204), PackedInt32Array(203, 204, 205), PackedInt32Array(7, 206, 6), PackedInt32Array(6, 206, 198), PackedInt32Array(205, 207, 203), PackedInt32Array(203, 207, 208), PackedInt32Array(208, 207, 200), PackedInt32Array(208, 200, 206), PackedInt32Array(198, 206, 200), PackedInt32Array(209, 205, 210), PackedInt32Array(210, 205, 204), PackedInt32Array(211, 208, 212), PackedInt32Array(212, 208, 206), PackedInt32Array(214, 213, 215), PackedInt32Array(215, 213, 216), PackedInt32Array(218, 217, 219), PackedInt32Array(219, 217, 220)]
+geometry_parsed_geometry_type = 1
+geometry_source_geometry_mode = 1
+geometry_source_group_name = &"shelter_navigation_geometry"
+agent_height = 2.0
+agent_max_climb = 0.5
+agent_max_slope = 40.0
+filter_baking_aabb = AABB(-19, -0.25, -12, 38, 3.3, 25)
+
+[sub_resource type="AudioStreamWAV" id="AudioStreamWAV_3oeu7"]
+data = PackedByteArray("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")
+format = 1
+loop_mode = 1
+loop_end = 22050
+mix_rate = 22050
+
+[sub_resource type="Environment" id="Environment_0vq8l"]
+background_mode = 1
+background_color = Color(0.01, 0.012, 0.013, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.55, 0.62, 0.7, 1)
+ambient_light_energy = 0.35
+tonemap_mode = 3
+tonemap_exposure = 1.1
+ssao_enabled = true
+ssao_radius = 0.45
+ssao_intensity = 0.85
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_read_sky_light = false
+sdfgi_bounce_feedback = 0.55
+sdfgi_cascades = 3
+sdfgi_min_cell_size = 0.15
+glow_enabled = true
+glow_intensity = 0.18
+glow_bloom = 0.015
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0012
+volumetric_fog_albedo = Color(0.76, 0.77, 0.72, 1)
+volumetric_fog_length = 40.0
+metadata/ssr_allowed = false
+metadata/authored_lighting = true
+metadata/orig = {
+"fog": true,
+"sdfgi": true,
+"ssao": true,
+"ssil": true,
+"ssr": false
+}
+
+[node name="Shelter_Interior" type="Node3D"]
+script = ExtResource("1_gl8uf")
+
+[node name="Architecture" type="Node3D" parent="."]
+
+[node name="SH_Int_Floor_MainHub" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("2_mr1fr")]
+
+[node name="SH_Int_Ceiling_MainHub" type="Node3D" parent="Architecture" instance=ExtResource("3_41nh7")]
+
+[node name="SH_Int_Floor_Living" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("4_djbdt")]
+
+[node name="SH_Int_Ceiling_Living" type="Node3D" parent="Architecture" instance=ExtResource("5_gjldk")]
+
+[node name="SH_Int_Floor_Trader" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("6_fcb4t")]
+
+[node name="SH_Int_Ceiling_Trader" type="Node3D" parent="Architecture" instance=ExtResource("7_687qo")]
+
+[node name="SH_Int_Floor_Armory" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("8_1eum6")]
+
+[node name="SH_Int_Ceiling_Armory" type="Node3D" parent="Architecture" instance=ExtResource("9_0otjg")]
+
+[node name="SH_Int_Floor_Generator" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("10_r5yoy")]
+
+[node name="SH_Int_Ceiling_Generator" type="Node3D" parent="Architecture" instance=ExtResource("11_5pyx5")]
+
+[node name="SH_Int_Floor_Workshop" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("12_s0cvv")]
+
+[node name="SH_Int_Ceiling_Workshop" type="Node3D" parent="Architecture" instance=ExtResource("13_cutkf")]
+
+[node name="SH_Int_Floor_Storage" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("14_184rr")]
+
+[node name="SH_Int_Ceiling_Storage" type="Node3D" parent="Architecture" instance=ExtResource("15_o0sr1")]
+
+[node name="SH_Int_Floor_NorthGallery" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("16_uh6na")]
+
+[node name="SH_Int_Ceiling_NorthGallery" type="Node3D" parent="Architecture" instance=ExtResource("17_txvac")]
+
+[node name="SH_Int_Floor_Entry" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("18_lqpr7")]
+
+[node name="SH_Int_Ceiling_Entry" type="Node3D" parent="Architecture" instance=ExtResource("19_lejm1")]
+
+[node name="SH_Int_Floor_Sleeping" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("20_aton0")]
+
+[node name="SH_Int_Wall_North" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("21_473sv")]
+
+[node name="SH_Int_Wall_West" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("22_vyxh1")]
+
+[node name="SH_Int_Wall_East" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("23_hso14")]
+
+[node name="SH_Int_Wall_WestLiving" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("24_puowp")]
+
+[node name="SH_Int_Wall_WestTrader" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("25_wiab7")]
+
+[node name="SH_Int_Wall_WestArmory" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("26_sacvw")]
+
+[node name="SH_Int_Wall_EastLiving" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("27_w6hm7")]
+
+[node name="SH_Int_Wall_EastTrader" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("28_gh4a2")]
+
+[node name="SH_Int_Wall_EastArmory" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("29_227eo")]
+
+[node name="SH_Int_Wall_WestNorthDivide" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("30_t3bhw")]
+
+[node name="SH_Int_Wall_WestMidDivide" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("31_wvjhv")]
+
+[node name="SH_Int_Wall_WestSouth" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("32_c8riw")]
+
+[node name="SH_Int_Wall_EastNorthDivide" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("33_sg7xt")]
+
+[node name="SH_Int_Wall_EastMidDivide" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("34_d7fb4")]
+
+[node name="SH_Int_Wall_EastSouth" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("35_74kd4")]
+
+[node name="SH_Int_Wall_EntryWest" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("36_m3egd")]
+
+[node name="SH_Int_Wall_EntryEast" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("37_ibvwc")]
+
+[node name="SH_Int_Wall_EntrySouth" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("38_hiynu")]
+
+[node name="SH_Int_Wall_BaySouthWest" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("39_3oeu7")]
+
+[node name="SH_Int_Wall_BaySouthEast" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("40_f2ej0")]
+
+[node name="SH_Int_Wall_HubWestReturn" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("41_8gdi1")]
+
+[node name="SH_Int_Wall_HubEastReturn" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("42_ntmj0")]
+
+[node name="SH_Int_TechnicalStructure" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("43_nte6w")]
+
+[node name="SH_Int_StairsAndRailing" type="Node3D" parent="Architecture" groups=["shelter_navigation_geometry"] instance=ExtResource("44_1wwvl")]
+
+[node name="SH_Int_Ventilation" type="Node3D" parent="Architecture" instance=ExtResource("45_ixuam")]
+
+[node name="SH_Int_PipesAndElectrical" type="Node3D" parent="Architecture" instance=ExtResource("46_76coa")]
+
+[node name="SH_Int_DrainsAndThresholds" type="Node3D" parent="Architecture" instance=ExtResource("47_nj0nw")]
+
+[node name="StairRampCollision" type="StaticBody3D" parent="Architecture" groups=["shelter_navigation_geometry"]]
+
+[node name="Ramp" type="CollisionShape3D" parent="Architecture/StairRampCollision"]
+shape = SubResource("ConvexPolygonShape3D_npttq")
+
+[node name="StairAndMezzanineGuardrails" type="StaticBody3D" parent="Architecture" groups=["shelter_navigation_geometry"]]
+
+[node name="StairSide_00" type="CollisionShape3D" parent="Architecture/StairAndMezzanineGuardrails"]
+shape = SubResource("ConvexPolygonShape3D_31y1p")
+
+[node name="StairSide_01" type="CollisionShape3D" parent="Architecture/StairAndMezzanineGuardrails"]
+shape = SubResource("ConvexPolygonShape3D_fklhd")
+
+[node name="UpperEdge_02" type="CollisionShape3D" parent="Architecture/StairAndMezzanineGuardrails"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 3.15, -7)
+shape = SubResource("BoxShape3D_v8xmu")
+
+[node name="UpperEdge_03" type="CollisionShape3D" parent="Architecture/StairAndMezzanineGuardrails"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3.15, -6.5)
+shape = SubResource("BoxShape3D_indws")
+
+[node name="UpperEdge_04" type="CollisionShape3D" parent="Architecture/StairAndMezzanineGuardrails"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.15, -10.8)
+shape = SubResource("BoxShape3D_h1klo")
+
+[node name="UpperEdge_05" type="CollisionShape3D" parent="Architecture/StairAndMezzanineGuardrails"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7, 3.15, -6.5)
+shape = SubResource("BoxShape3D_ivv7g")
+
+[node name="UpperEdge_06" type="CollisionShape3D" parent="Architecture/StairAndMezzanineGuardrails"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.7, 3.15, -8.1)
+shape = SubResource("BoxShape3D_kqpml")
+
+[node name="SH_Int_ConcreteConstructionJoints" type="MeshInstance3D" parent="Architecture"]
+cast_shadow = 0
+mesh = ExtResource("48_atnhc")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="SH_Int_MainHub" type="Node3D" parent="Props"]
+
+[node name="PlanningRug" type="Node3D" parent="Props/SH_Int_MainHub" instance=ExtResource("49_joikx")]
+transform = Transform3D(1.35, 0, 0, 0, 1, 0, 0, 0, 1.35, 0, 0, 0)
+
+[node name="PlanningTable" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("50_4q5od")]
+transform = Transform3D(1.5, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="PlanningMap" type="Node3D" parent="Props/SH_Int_MainHub" instance=ExtResource("51_prn7s")]
+transform = Transform3D(1.5, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0.755, 0)
+
+[node name="PlanningChair_03" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("52_08b0t")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.35, 0, 0)
+
+[node name="PlanningChair_04" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("52_08b0t")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.35, 0, 0)
+
+[node name="PlanningChair_05" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("52_08b0t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.05, 0, 1.7)
+
+[node name="PlanningChair_06" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("52_08b0t")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.05, 0, -1.7)
+
+[node name="PlanningChair_07" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("52_08b0t")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -1.05, 0, -1.7)
+
+[node name="PlanningChair_08" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("52_08b0t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.05, 0, 1.7)
+
+[node name="PlanningMug" type="Node3D" parent="Props/SH_Int_MainHub" instance=ExtResource("53_50yt4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.91, 0.79, 0.32)
+
+[node name="RouteNotebook" type="Node3D" parent="Props/SH_Int_MainHub" instance=ExtResource("54_jwfbf")]
+transform = Transform3D(0.9702957, 0, 0.2419219, 0, 1, 0, -0.2419219, 0, 0.9702957, -0.85, 0.79, 0.28)
+
+[node name="FieldRadio" type="Node3D" parent="Props/SH_Int_MainHub" instance=ExtResource("55_4mwis")]
+transform = Transform3D(0.99026805, 0, 0.1391731, 0, 1, 0, -0.1391731, 0, 0.99026805, -0.75, 0.79, -0.26)
+
+[node name="UnderTableCase" type="Node3D" parent="Props/SH_Int_MainHub" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38, 0, 0.03)
+
+[node name="SH_Int_Living" type="Node3D" parent="Props"]
+
+[node name="LivingRug" type="Node3D" parent="Props/SH_Int_Living" instance=ExtResource("49_joikx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.2, 0, -8)
+
+[node name="Couch" type="Node3D" parent="Props/SH_Int_Living" groups=["shelter_navigation_geometry"] instance=ExtResource("57_m8e2d")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -13.3, 0, -7.55)
+
+[node name="LivingArmchair" type="Node3D" parent="Props/SH_Int_Living" groups=["shelter_navigation_geometry"] instance=ExtResource("58_cfkt5")]
+transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.1736482, -15.65, 0, -8.65)
+
+[node name="CoffeeTable" type="Node3D" parent="Props/SH_Int_Living" groups=["shelter_navigation_geometry"] instance=ExtResource("59_miu6p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.3, 0, -8.75)
+
+[node name="TVStand" type="Node3D" parent="Props/SH_Int_Living" groups=["shelter_navigation_geometry"] instance=ExtResource("60_xot3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.3, 0, -10.1)
+
+[node name="TeaMug" type="Node3D" parent="Props/SH_Int_Living" instance=ExtResource("53_50yt4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.6, 0.49, -8.8)
+
+[node name="LivingMagazine" type="Node3D" parent="Props/SH_Int_Living" instance=ExtResource("54_jwfbf")]
+transform = Transform3D(0.95105654, 0, 0.309017, 0, 1, 0, -0.309017, 0, 0.95105654, -13, 0.49, -8.9)
+
+[node name="LivingPersonalShelf" type="Node3D" parent="Props/SH_Int_Living" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.4, 0, -8)
+
+[node name="PersonalBag" type="Node3D" parent="Props/SH_Int_Living" instance=ExtResource("62_6nlmt")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.2, 0.69, -8.3)
+
+[node name="SH_Int_Trader" type="Node3D" parent="Props"]
+
+[node name="TraderCounter" type="Node3D" parent="Props/SH_Int_Trader" groups=["shelter_navigation_geometry"] instance=ExtResource("60_xot3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.4, 0, -2)
+
+[node name="TraderChair" type="Node3D" parent="Props/SH_Int_Trader" groups=["shelter_navigation_geometry"] instance=ExtResource("52_08b0t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.4, 0, -3.35)
+
+[node name="TraderGoods_02" type="Node3D" parent="Props/SH_Int_Trader" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.6, 0, -4.45)
+
+[node name="TradeCarton_03" type="Node3D" parent="Props/SH_Int_Trader" groups=["shelter_navigation_geometry"] instance=ExtResource("63_uqr51")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.6, 0.66, -4.45)
+
+[node name="TraderGoods_05" type="Node3D" parent="Props/SH_Int_Trader" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8, 0, -4.45)
+
+[node name="TraderGoods_08" type="Node3D" parent="Props/SH_Int_Trader" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -4.45)
+
+[node name="TradeMedical_10" type="Node3D" parent="Props/SH_Int_Trader" instance=ExtResource("64_vhlg6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.75, 1.13, -4.4)
+
+[node name="TraderLedger" type="Node3D" parent="Props/SH_Int_Trader" instance=ExtResource("54_jwfbf")]
+transform = Transform3D(0.9781476, 0, 0.2079117, 0, 1, 0, -0.2079117, 0, 0.9781476, -11.65, 0.97, -2.1)
+
+[node name="TraderMug" type="Node3D" parent="Props/SH_Int_Trader" instance=ExtResource("53_50yt4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.15, 0.97, -2.12)
+
+[node name="TradeCase" type="Node3D" parent="Props/SH_Int_Trader" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.9, 0, -1.3)
+
+[node name="SH_Int_Workshop" type="Node3D" parent="Props"]
+
+[node name="Workbench" type="Node3D" parent="Props/SH_Int_Workshop" groups=["shelter_navigation_geometry"] instance=ExtResource("65_t0343")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7, 0, -4.25)
+
+[node name="WorkshopPartsShelf" type="Node3D" parent="Props/SH_Int_Workshop" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.4, 0, -2)
+
+[node name="ToolCase" type="Node3D" parent="Props/SH_Int_Workshop" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.4, 0.66, -2)
+
+[node name="WorkshopOilCan" type="Node3D" parent="Props/SH_Int_Workshop" instance=ExtResource("66_ikaho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.4, 0, -3.8)
+
+[node name="WorkshopManual" type="Node3D" parent="Props/SH_Int_Workshop" instance=ExtResource("54_jwfbf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.9, 0.95, -4.1)
+
+[node name="WorkshopBench" type="Node3D" parent="Props/SH_Int_Workshop" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -4.35)
+
+[node name="SH_Int_Armory" type="Node3D" parent="Props"]
+
+[node name="WeaponRack_01" type="Node3D" parent="Props/SH_Int_Armory" groups=["shelter_navigation_geometry"] instance=ExtResource("68_og5iu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.8, 0, 1.5)
+
+[node name="WeaponRack_02" type="Node3D" parent="Props/SH_Int_Armory" groups=["shelter_navigation_geometry"] instance=ExtResource("68_og5iu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0, 1.5)
+
+[node name="MaintenanceTable" type="Node3D" parent="Props/SH_Int_Armory" groups=["shelter_navigation_geometry"] instance=ExtResource("50_4q5od")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, 4.1)
+
+[node name="ArmoryLocker_03" type="Node3D" parent="Props/SH_Int_Armory" groups=["shelter_navigation_geometry"] instance=ExtResource("69_qeqhf")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.5, 0, 6.35)
+
+[node name="ArmoryLocker_04" type="Node3D" parent="Props/SH_Int_Armory" groups=["shelter_navigation_geometry"] instance=ExtResource("69_qeqhf")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -15.7, 0, 6.35)
+
+[node name="AmmoCase" type="Node3D" parent="Props/SH_Int_Armory" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0, 5.3)
+
+[node name="ArmoryGear" type="Node3D" parent="Props/SH_Int_Armory" instance=ExtResource("62_6nlmt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.1, 0, 5.5)
+
+[node name="SH_Int_Storage" type="Node3D" parent="Props"]
+
+[node name="StorageShelf_00" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10.2, 0, 6.3)
+
+[node name="StorageCase_01" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10.2, 0.18, 6.3)
+
+[node name="StorageShelf_03" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12, 0, 6.3)
+
+[node name="StorageCase_04" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12, 0.18, 6.3)
+
+[node name="StorageShelf_06" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.8, 0, 6.3)
+
+[node name="StorageCase_07" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.8, 0.18, 6.3)
+
+[node name="StorageShelf_09" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15.6, 0, 6.3)
+
+[node name="StorageCase_10" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15.6, 0.18, 6.3)
+
+[node name="WaterSupply_12" type="Node3D" parent="Props/SH_Int_Storage" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.05, 0.69, 6.3)
+
+[node name="FoodSupply_13" type="Node3D" parent="Props/SH_Int_Storage" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.85, 0.69, 6.3)
+
+[node name="WaterSupply_14" type="Node3D" parent="Props/SH_Int_Storage" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.4, 0.69, 6.3)
+
+[node name="FoodSupply_15" type="Node3D" parent="Props/SH_Int_Storage" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.2, 0.69, 6.3)
+
+[node name="WaterSupply_16" type="Node3D" parent="Props/SH_Int_Storage" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.75, 0.69, 6.3)
+
+[node name="FoodSupply_17" type="Node3D" parent="Props/SH_Int_Storage" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.55, 0.69, 6.3)
+
+[node name="StorageSortBench" type="Node3D" parent="Props/SH_Int_Storage" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.2, 0, 4)
+
+[node name="SH_Int_Generator" type="Node3D" parent="Props"]
+
+[node name="Generator" type="Node3D" parent="Props/SH_Int_Generator" groups=["shelter_navigation_geometry"] instance=ExtResource("72_trdx1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.8, 0, -8.5)
+
+[node name="Switchboard" type="Node3D" parent="Props/SH_Int_Generator" groups=["shelter_navigation_geometry"] instance=ExtResource("73_jvtro")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.4, 0, -7.9)
+
+[node name="DistributionPanel" type="Node3D" parent="Props/SH_Int_Generator" groups=["shelter_navigation_geometry"] instance=ExtResource("73_jvtro")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.4, 0, -6.5)
+
+[node name="FuelReserve_03" type="Node3D" parent="Props/SH_Int_Generator" instance=ExtResource("66_ikaho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.9, 0, -10.3)
+
+[node name="FuelReserve_04" type="Node3D" parent="Props/SH_Int_Generator" instance=ExtResource("66_ikaho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.4, 0, -10.3)
+
+[node name="FuelReserve_05" type="Node3D" parent="Props/SH_Int_Generator" instance=ExtResource("66_ikaho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.9, 0, -10.3)
+
+[node name="GeneratorVent" type="Node3D" parent="Props/SH_Int_Generator" instance=ExtResource("74_6hm0i")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 1.9, -10.75)
+
+[node name="SH_Int_Sleeping" type="Node3D" parent="Props"]
+
+[node name="SleepingPosition_00" type="Node3D" parent="Props/SH_Int_Sleeping" groups=["shelter_navigation_geometry"] instance=ExtResource("75_ucdnw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.15, 2.6, -9.35)
+
+[node name="SleepingBoots_01" type="Node3D" parent="Props/SH_Int_Sleeping" instance=ExtResource("76_tuc6p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 2.6, -8.5)
+
+[node name="PersonalCase_02" type="Node3D" parent="Props/SH_Int_Sleeping" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.15, 2.6, -10.65)
+
+[node name="SleepingPosition_03" type="Node3D" parent="Props/SH_Int_Sleeping" groups=["shelter_navigation_geometry"] instance=ExtResource("75_ucdnw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, -9.35)
+
+[node name="SleepingBoots_04" type="Node3D" parent="Props/SH_Int_Sleeping" instance=ExtResource("76_tuc6p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 2.6, -8.5)
+
+[node name="PersonalCase_05" type="Node3D" parent="Props/SH_Int_Sleeping" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, -10.65)
+
+[node name="SleepingPosition_06" type="Node3D" parent="Props/SH_Int_Sleeping" groups=["shelter_navigation_geometry"] instance=ExtResource("75_ucdnw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.15, 2.6, -9.35)
+
+[node name="SleepingBoots_07" type="Node3D" parent="Props/SH_Int_Sleeping" instance=ExtResource("76_tuc6p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7, 2.6, -8.5)
+
+[node name="PersonalCase_08" type="Node3D" parent="Props/SH_Int_Sleeping" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.15, 2.6, -10.65)
+
+[node name="SH_Int_EquipmentBays" type="Node3D" parent="Props"]
+
+[node name="Bay_01_Locker" type="Node3D" parent="Props/SH_Int_EquipmentBays" groups=["shelter_navigation_geometry"] instance=ExtResource("69_qeqhf")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -5.1, 0, 7.65)
+
+[node name="Bay_01_Pack" type="Node3D" parent="Props/SH_Int_EquipmentBays" instance=ExtResource("62_6nlmt")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -5.68, 0.65, 7.6)
+
+[node name="Bay_01_Boots" type="Node3D" parent="Props/SH_Int_EquipmentBays" instance=ExtResource("76_tuc6p")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -5.1, 0, 6.9)
+
+[node name="Bay_02_Locker" type="Node3D" parent="Props/SH_Int_EquipmentBays" groups=["shelter_navigation_geometry"] instance=ExtResource("69_qeqhf")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5.1, 0, 7.65)
+
+[node name="Bay_02_Pack" type="Node3D" parent="Props/SH_Int_EquipmentBays" instance=ExtResource("62_6nlmt")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.52, 0.65, 7.6)
+
+[node name="Bay_02_Boots" type="Node3D" parent="Props/SH_Int_EquipmentBays" instance=ExtResource("76_tuc6p")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5.1, 0, 6.9)
+
+[node name="Bay_03_Locker" type="Node3D" parent="Props/SH_Int_EquipmentBays" groups=["shelter_navigation_geometry"] instance=ExtResource("69_qeqhf")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7.4, 0, 7.65)
+
+[node name="Bay_03_Pack" type="Node3D" parent="Props/SH_Int_EquipmentBays" instance=ExtResource("62_6nlmt")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6.82, 0.65, 7.6)
+
+[node name="Bay_03_Boots" type="Node3D" parent="Props/SH_Int_EquipmentBays" instance=ExtResource("76_tuc6p")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7.4, 0, 6.9)
+
+[node name="SH_Int_Entry" type="Node3D" parent="Props"]
+
+[node name="EntryBlastDoor" type="Node3D" parent="Props/SH_Int_Entry" groups=["shelter_navigation_geometry"] instance=ExtResource("77_oo1xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11.72)
+
+[node name="UnloadingBench" type="Node3D" parent="Props/SH_Int_Entry" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.5, 0, 9.9)
+
+[node name="ReturnLocker" type="Node3D" parent="Props/SH_Int_Entry" groups=["shelter_navigation_geometry"] instance=ExtResource("69_qeqhf")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.5, 0, 10.75)
+
+[node name="UnloadingCase" type="Node3D" parent="Props/SH_Int_Entry" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 11.35)
+
+[node name="EntryFusebox" type="Node3D" parent="Props/SH_Int_Entry" groups=["shelter_navigation_geometry"] instance=ExtResource("73_jvtro")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.5, 0.25, 8.85)
+
+[node name="ServiceDoor_10" type="Node3D" parent="Props" groups=["shelter_navigation_geometry"] instance=ExtResource("77_oo1xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.1, 0, -10.74)
+
+[node name="ServiceDoor_11" type="Node3D" parent="Props" groups=["shelter_navigation_geometry"] instance=ExtResource("77_oo1xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.95, 0, -10.74)
+
+[node name="ServiceDoor_12" type="Node3D" parent="Props" groups=["shelter_navigation_geometry"] instance=ExtResource("77_oo1xc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.95, 0, -10.74)
+
+[node name="SH_Int_PersonalAndTechnical" type="Node3D" parent="Props"]
+
+[node name="RackRifle_00" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("78_o4m14")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, -14.5, 0.59, 1.65)
+
+[node name="RackRifle_01" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("78_o4m14")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, -13.8, 0.59, 1.65)
+
+[node name="RackRifle_02" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("78_o4m14")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, -13.1, 0.59, 1.65)
+
+[node name="MaintenancePistol" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("79_go5hx")]
+transform = Transform3D(1.9106855e-15, 4.371139e-08, 1, 1, -4.371139e-08, 0, 4.371139e-08, 1, -4.371139e-08, -13, 0.78532046, 4.25)
+
+[node name="HubRouteCrate" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(0.9781476, 0, 0.2079117, 0, 1, 0, -0.2079117, 0, 0.9781476, -3.7, 0, -2.9)
+
+[node name="HubRouteCrate2" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(0.9781476, 0, 0.2079117, 0, 1, 0, -0.2079117, 0, 0.9781476, -3.7, 0.34, -2.9)
+
+[node name="HubAmmo" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.25, 0, -2.55)
+
+[node name="ArmoryReserve" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -16.4, 0, 4)
+
+[node name="StorageReserve1" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.4, 0, 3)
+
+[node name="StorageReserve2" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.4, 0.34, 3)
+
+[node name="StorageReserve3" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.4, 0, 4.1)
+
+[node name="GeneratorDrum" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("82_kobk8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.7, 0, -10.25)
+
+[node name="WorkshopDrum" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("82_kobk8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.7, 0, -4.35)
+
+[node name="StorageWaterDrum" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("82_kobk8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, 5.95)
+
+[node name="ArmoryAmmo1" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.6, 0, 4.8)
+
+[node name="ArmoryAmmo2" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -16.5, 0.26, 6)
+
+[node name="TraderAmmo" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.95, 1.14, -4.4)
+
+[node name="TraderDelivery" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.2, 0, -3.6)
+
+[node name="EntryShipment" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.65, 0, 11.2)
+
+[node name="UnloadingMat" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("49_joikx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.6)
+
+[node name="HubRestBench" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.5, 0, -0.1)
+
+[node name="BayBench1" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.1, 0, 6.5)
+
+[node name="BayBench2" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.1, 0, 6.5)
+
+[node name="BayBench3" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 0, 6.5)
+
+[node name="WorkshopReserveShelf" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0, -4.4)
+
+[node name="ArmoryReserveShelf" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.4, 0, 3.4)
+
+[node name="LivingFoodShelf" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.2, 0, -10.45)
+
+[node name="StorageSortingDesk" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("60_xot3d")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.7, 0, 1.55)
+
+[node name="SortingFirstAid" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("64_vhlg6")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.3, 0.97, 1.55)
+
+[node name="SortingLedger" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("54_jwfbf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.3, 0.97, 1.55)
+
+[node name="UnderSortingDesk" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("80_44gk4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0, 1.55)
+
+[node name="HubMedicReserve" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0, -5.65)
+
+[node name="StockBox_032" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.2, 0.68, -10.45)
+
+[node name="StockBox_033" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.2, 1.16, -10.45)
+
+[node name="StockBox_034" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.2, 1.64, -10.45)
+
+[node name="StockBox_035" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 0.68, 3.4)
+
+[node name="StockBox_036" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 1.16, 3.4)
+
+[node name="StockBox_037" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 1.64, 3.4)
+
+[node name="StockBox_038" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0.68, -4.4)
+
+[node name="StockBox_039" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 1.16, -4.4)
+
+[node name="StockBox_040" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 1.64, -4.4)
+
+[node name="SupplyTray_042" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.2, 0.2, 6.3)
+
+[node name="SupplyTray_044" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.2, 6.3)
+
+[node name="SupplyTray_046" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.8, 0.2, 6.3)
+
+[node name="SupplyTray_048" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.6, 0.2, 6.3)
+
+[node name="SupplyTray_050" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.6, 0.2, -4.45)
+
+[node name="SupplyTray_052" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8, 0.2, -4.45)
+
+[node name="SupplyTray_054" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("81_mfi22")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0.2, -4.45)
+
+[node name="LivingTin_00" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 0.67, -10.42)
+
+[node name="LivingTin_01" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.26, 0.67, -10.42)
+
+[node name="LivingTin_02" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.02, 0.67, -10.42)
+
+[node name="LivingTin_03" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 1.16, -10.42)
+
+[node name="LivingTin_04" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.26, 1.16, -10.42)
+
+[node name="LivingTin_05" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.02, 1.16, -10.42)
+
+[node name="LivingWater_00" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 1.16, -10.4)
+
+[node name="LivingWater_01" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.31, 1.16, -10.4)
+
+[node name="LivingWater_02" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.12, 1.16, -10.4)
+
+[node name="LivingWater_03" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.93, 1.16, -10.4)
+
+[node name="PlanningLamp" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("83_eiuoo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.02, 0.79, -0.36)
+
+[node name="PlanningOptics" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("84_a23si")]
+transform = Transform3D(0.9702957, 0, 0.2419219, 0, 1, 0, -0.2419219, 0, 0.9702957, 0.32, 0.78, 0.32)
+
+[node name="PlanningPencil" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("85_hojtp")]
+transform = Transform3D(0.92050487, 0, -0.39073113, 0, 1, 0, 0.39073113, 0, 0.92050487, -0.63, 0.79, 0.38)
+
+[node name="LivingLamp" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("83_eiuoo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.22, 0.97, -10.1)
+
+[node name="TraderTaskLamp" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("83_eiuoo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.3, 0.97, -1.87)
+
+[node name="WorkbenchTaskLamp" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("83_eiuoo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.6, 0.95, -4.2)
+
+[node name="HubRouteBoard" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("86_xex74")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.73, 1.85, 0.95)
+
+[node name="HubSuppliesShelf" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("61_nkm6a")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.35, 0, -3.5)
+
+[node name="HubCommunicationsPanel" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("73_jvtro")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.48, 0, 1.75)
+
+[node name="CommunicationsDesk" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("60_xot3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.3, 0, -9.1)
+
+[node name="CommunicationsReceiver" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("55_4mwis")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.8, 0.97, -9.1)
+
+[node name="CommunicationsLog" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("54_jwfbf")]
+transform = Transform3D(0.9612617, 0, 0.27563736, 0, 1, 0, -0.27563736, 0, 0.9612617, -4.7, 0.97, -9.1)
+
+[node name="NorthWaitingBench" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("67_btsbx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10.5)
+
+[node name="PersonalLocker" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("69_qeqhf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 0, -10.5)
+
+[node name="MaintenanceReel" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("87_vqyrg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.2, 0, -4)
+
+[node name="MaintenanceCase" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.1, 0, 1)
+
+[node name="HubSuppliesCase" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("56_2ll0m")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.3, 0.66, -3.5)
+
+[node name="HubSparePack" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("62_6nlmt")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.3, 1.13, -3.1)
+
+[node name="EntryHooks" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("88_byhrr")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.71, 1.64, 9.4)
+
+[node name="BayHooks1" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("88_byhrr")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -5.1, 1.62, 7.81)
+
+[node name="BayHooks2" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("88_byhrr")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5.1, 1.62, 7.81)
+
+[node name="BayHooks3" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("88_byhrr")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7.4, 1.62, 7.81)
+
+[node name="BayVest1" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("89_6efid")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -4.7, 1.05, 7.65)
+
+[node name="BayVest2" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("89_6efid")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5.5, 1.05, 7.65)
+
+[node name="BayVest3" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("89_6efid")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7.65, 1.05, 7.65)
+
+[node name="ArmoryHelmet" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("90_xexa3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.22, 0.78, 4.1)
+
+[node name="BayHelmet" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("90_xexa3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.75, 0.49, 6.5)
+
+[node name="TraderHelmet" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("90_xexa3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.47, 1.65, -4.38)
+
+[node name="ArmoryVest" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("89_6efid")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.8, 1.2, 6.35)
+
+[node name="EntryWaterCan" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("66_ikaho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9, 0, 11.3)
+
+[node name="HubFirstAid" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("64_vhlg6")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.4, 1.63, -3.5)
+
+[node name="LivingPersonalCarton" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" groups=["shelter_navigation_geometry"] instance=ExtResource("63_uqr51")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.4, 0.18, -8.3)
+
+[node name="LivingFood" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("71_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 1.13, -8)
+
+[node name="LivingWater" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("70_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.4, 0.69, -7.7)
+
+[node name="SleepingCup" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("53_50yt4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.14, 3.14, -10.6)
+
+[node name="Fixture_HubPractical_04" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.1, 3.77, 4.8)
+
+[node name="Fixture_HubPractical_05" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.1, 3.77, 4.8)
+
+[node name="Fixture_HubPractical_06" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.1, 3.77, -4.8)
+
+[node name="Fixture_HubPractical_07" type="Node3D" parent="Props/SH_Int_PersonalAndTechnical" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.1, 3.77, -4.8)
+
+[node name="Fixture_HubWest" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9, 3.6999998, 0)
+
+[node name="Fixture_HubEast" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9, 3.6999998, 0)
+
+[node name="Fixture_NorthGallery" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, -6)
+
+[node name="Fixture_Entry" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 9.7)
+
+[node name="Fixture_Living" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 2.75, -8)
+
+[node name="Fixture_Trader" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8, 2.75, -2)
+
+[node name="Fixture_Armory" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8, 2.75, 4)
+
+[node name="Fixture_Workshop" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.75, -2.5)
+
+[node name="Fixture_Storage" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.75, 4)
+
+[node name="Fixture_Generator" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.75, -8)
+
+[node name="Fixture_Sleeping" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.75, -9.2)
+
+[node name="Fixture_Bays" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3, 3, 6.6)
+
+[node name="Fixture_BaysWest" type="Node3D" parent="Props" instance=ExtResource("91_1xd1h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.3, 3, 6.6)
+
+[node name="Fixture_LivingWall" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.65, 2.05, -8.2)
+
+[node name="Fixture_TraderWall" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.65, 2.05, -3.4)
+
+[node name="Fixture_ArmoryWall" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.65, 2.05, 3.4)
+
+[node name="Fixture_StorageWall" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.65, 2.05, 4.6)
+
+[node name="Fixture_WorkshopWall" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.65, 2.05, -1.7)
+
+[node name="Fixture_GeneratorWall" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 2.05, -10.7)
+
+[node name="Fixture_HubWallLeft" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.65, 2.05, 2.55)
+
+[node name="Fixture_HubWallRight" type="Node3D" parent="Props" instance=ExtResource("92_r4iix")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.65, 2.05, 1.15)
+
+[node name="EntryWet" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 10)
+size = Vector3(3, 0.1, 2)
+texture_albedo = ExtResource("93_wt8tp")
+texture_orm = ExtResource("94_680lf")
+upper_fade = 0.02
+lower_fade = 0.02
+
+[node name="ReturnBootMarks" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.025, 8.8)
+size = Vector3(1.8, 0.1, 2)
+texture_albedo = ExtResource("95_utfdn")
+upper_fade = 0.02
+lower_fade = 0.02
+
+[node name="GeneratorOil" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.8, 0.025, -8.1)
+size = Vector3(3.7, 0.1, 2)
+texture_albedo = ExtResource("96_c2kj6")
+texture_orm = ExtResource("97_d6j6p")
+upper_fade = 0.02
+lower_fade = 0.02
+
+[node name="WorkshopOil" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7, 0.025, -3.7)
+size = Vector3(2.6, 0.1, 1.4)
+texture_albedo = ExtResource("96_c2kj6")
+texture_orm = ExtResource("97_d6j6p")
+upper_fade = 0.02
+lower_fade = 0.02
+
+[node name="EntryDirt" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.025, 9.2)
+size = Vector3(1.3, 0.1, 1.4)
+texture_albedo = ExtResource("98_q8gdq")
+upper_fade = 0.02
+lower_fade = 0.02
+
+[node name="LivingDamp" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -16.5, 1.5, -10.76)
+size = Vector3(2.4, 0.12, 2)
+texture_albedo = ExtResource("99_6qnus")
+
+[node name="GeneratorRust" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 16.8, 1.6, -10.76)
+size = Vector3(1.7, 0.12, 2.2)
+texture_albedo = ExtResource("100_xuxcy")
+
+[node name="WorkshopScratches" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 14, 1.25, -4.76)
+size = Vector3(3, 0.12, 1.8)
+texture_albedo = ExtResource("101_qymsk")
+
+[node name="HubDamp" type="Decal" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -6, 1.7, -10.76)
+size = Vector3(2.4, 0.12, 2.4)
+texture_albedo = ExtResource("99_6qnus")
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="PlanningTask" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.02, 1.15, -0.36)
+light_color = Color(1, 0.78, 0.48, 1)
+light_energy = 0.38
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_size = 0.06
+light_specular = 0.45
+omni_range = 2.0
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 0.38
+
+[node name="LivingTask" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2, 1.36, -10.1)
+light_color = Color(1, 0.78, 0.48, 1)
+light_energy = 0.45
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_size = 0.06
+light_specular = 0.45
+omni_range = 2.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 0.45
+
+[node name="WorkshopTask" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.6, 1.34, -4.2)
+light_color = Color(1, 0.78, 0.48, 1)
+light_energy = 0.45
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_size = 0.06
+light_specular = 0.45
+omni_range = 2.5
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 0.45
+
+[node name="GalleryTask" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4, 1.55, -9.1)
+light_color = Color(1, 0.78, 0.48, 1)
+light_energy = 0.57613474
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_size = 0.06
+light_specular = 0.45
+omni_range = 3.5
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 0.57613474
+
+[node name="HubPractical_04" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.1, 3.65, 4.8)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.0410334
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 4.7
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.0410334
+
+[node name="HubPractical_05" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.1, 3.65, 4.8)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.0410334
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 4.7
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.0410334
+
+[node name="HubPractical_06" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.1, 3.65, -4.8)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.0410334
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 4.7
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.0410334
+
+[node name="HubPractical_07" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.1, 3.65, -4.8)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.0410334
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 4.7
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.0410334
+
+[node name="HubWest" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9, 3.6, 0)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.8483021
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 8.0
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.8483021
+
+[node name="HubEast" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9, 3.6, 0)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.8483021
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 8.0
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.8483021
+
+[node name="NorthGallery" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -6)
+light_color = Color(1, 0.86, 0.7, 1)
+light_energy = 1.6221261
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.1
+light_size = 0.35
+light_specular = 0.45
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.6221261
+
+[node name="Entry" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 9.7)
+light_color = Color(1, 0.86, 0.7, 1)
+light_energy = 1.8924804
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.8924804
+
+[node name="Living" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 2.65, -8)
+light_color = Color(1, 0.86, 0.7, 1)
+light_energy = 1.8335658
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 5.5
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.8335658
+
+[node name="Trader" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8, 2.65, -2)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 2.095246
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 2.095246
+
+[node name="Armory" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8, 2.65, 4)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.946617
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 5.3
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.946617
+
+[node name="Workshop" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.65, -2.5)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 2.4026034
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 5.5
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 2.4026034
+
+[node name="Storage" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.65, 4)
+light_color = Color(1, 0.94, 0.85, 1)
+light_energy = 1.8335658
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 5.5
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.8335658
+
+[node name="Generator" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.65, -8)
+light_color = Color(0.9, 0.95, 1, 1)
+light_energy = 2.2129242
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 5.5
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 2.2129242
+
+[node name="Sleeping" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.65, -9.2)
+light_color = Color(1, 0.86, 0.7, 1)
+light_energy = 1.3097129
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 1.4
+light_size = 0.35
+light_specular = 0.45
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+shadow_blur = 1.2
+omni_range = 4.5
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.3097129
+
+[node name="Bays" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3, 2.9, 6.6)
+light_color = Color(1, 0.86, 0.7, 1)
+light_energy = 1.5561714
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.1
+light_size = 0.35
+light_specular = 0.45
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.5561714
+
+[node name="BaysWest" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.3, 2.9, 6.6)
+light_color = Color(1, 0.86, 0.7, 1)
+light_energy = 1.5561714
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.1
+light_size = 0.35
+light_specular = 0.45
+shadow_bias = 0.025
+shadow_normal_bias = 0.35
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.5561714
+
+[node name="EmergencyEntry" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8.45)
+light_color = Color(0.78, 0.74, 0.65, 1)
+light_energy = 0.56036305
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 6.0
+omni_attenuation = 0.8
+metadata/soft = true
+
+[node name="EmergencyHub" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, -6)
+light_color = Color(0.78, 0.74, 0.65, 1)
+light_energy = 0.51671517
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 9.0
+omni_attenuation = 0.8
+metadata/soft = true
+
+[node name="LivingWall" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.65, 2.05, -8.2)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="TraderWall" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.65, 2.05, -3.4)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="ArmoryWall" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.65, 2.05, 3.4)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="StorageWall" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.65, 2.05, 4.6)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="WorkshopWall" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.65, 2.05, -1.7)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="GeneratorWall" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 2.05, -10.7)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="HubWallLeft" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.65, 2.05, 2.55)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="HubWallRight" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.65, 2.05, 1.15)
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 1.1807003
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 3.8
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/normal_energy = 1.1807003
+
+[node name="TvGlow" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.3, 1.35, -9.7)
+visible = false
+light_color = Color(0, 0, 0, 1)
+light_energy = 0.28
+light_indirect_energy = 1.3
+light_volumetric_fog_energy = 0.35
+light_specular = 0.45
+omni_range = 2.6
+omni_attenuation = 0.8
+metadata/soft = true
+metadata/energy = 0.28
+
+[node name="Activities" type="Node3D" parent="."]
+
+[node name="Tv" type="Node3D" parent="Activities"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.3, 1.41, -10.1)
+script = ExtResource("102_m547t")
+glow_light = NodePath("../../Lights/TvGlow")
+authored_visual = true
+screen_path = NodePath("TV_Visual/Screen")
+
+[node name="TV_Visual" type="Node3D" parent="Activities/Tv" instance=ExtResource("103_17fox")]
+
+[node name="Radio" type="Node3D" parent="Activities"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.33, 0.97, -10.1)
+script = ExtResource("102_m547t")
+kind = 1
+glow_light = NodePath("../../Lights/TvGlow")
+authored_visual = true
+
+[node name="Radio_Visual" type="Node3D" parent="Activities/Radio" instance=ExtResource("55_4mwis")]
+
+[node name="Beer" type="Node3D" parent="Activities"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.25, 0.485, -8.7)
+script = ExtResource("102_m547t")
+kind = 2
+glow_light = NodePath("../../Lights/TvGlow")
+authored_visual = true
+
+[node name="Beer_Visual" type="Node3D" parent="Activities/Beer" instance=ExtResource("104_jgg53")]
+
+[node name="SeatL" type="Node3D" parent="Activities"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.93, 0.3, -7.55)
+script = ExtResource("102_m547t")
+kind = 3
+glow_light = NodePath("../../Lights/TvGlow")
+authored_visual = true
+
+[node name="SeatM" type="Node3D" parent="Activities"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.3, 0.3, -7.55)
+script = ExtResource("102_m547t")
+kind = 3
+glow_light = NodePath("../../Lights/TvGlow")
+authored_visual = true
+
+[node name="SeatR" type="Node3D" parent="Activities"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.67, 0.3, -7.55)
+script = ExtResource("102_m547t")
+kind = 3
+glow_light = NodePath("../../Lights/TvGlow")
+authored_visual = true
+
+[node name="Stations" type="Node3D" parent="."]
+
+[node name="StashStation" type="Node3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.75, 5.35)
+script = ExtResource("105_xyjrm")
+authored_visual = true
+display_name = "Тайник и снаряжение"
+
+[node name="WorkbenchStation" type="Node3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7, 0.85, -3.7)
+script = ExtResource("105_xyjrm")
+kind = 3
+authored_visual = true
+display_name = "Верстак — обвесы"
+
+[node name="TraderStation" type="Node3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.4, 0.8, -1.2)
+script = ExtResource("105_xyjrm")
+kind = 1
+authored_visual = true
+display_name = "Михалыч — торговля и задания"
+
+[node name="ExitStation" type="Node3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 1.3)
+script = ExtResource("105_xyjrm")
+kind = 2
+authored_visual = true
+display_name = "Планирование рейда"
+
+[node name="UpgradeStation" type="Node3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.1, 0.8, -6.5)
+script = ExtResource("105_xyjrm")
+kind = 4
+authored_visual = true
+display_name = "Модули убежища"
+
+[node name="WeaponStorage" type="Node3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.8, 0.8, 2.4)
+script = ExtResource("105_xyjrm")
+authored_visual = true
+display_name = "Оружейная — тайник"
+
+[node name="EntryLoadout" type="Node3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0.5, 9.8)
+script = ExtResource("105_xyjrm")
+authored_visual = true
+display_name = "Разгрузка и снаряжение"
+
+[node name="ReflectionProbes" type="Node3D" parent="."]
+
+[node name="Probe_Entry" type="ReflectionProbe" parent="ReflectionProbes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 10)
+intensity = 0.65
+max_distance = 18.0
+size = Vector3(7.7, 3.1, 4)
+box_projection = true
+interior = true
+enable_shadows = true
+mesh_lod_threshold = 2.0
+
+[node name="Probe_MainHub" type="ReflectionProbe" parent="ReflectionProbes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+intensity = 0.65
+max_distance = 18.0
+size = Vector3(15.5, 4, 15.5)
+box_projection = true
+interior = true
+enable_shadows = true
+mesh_lod_threshold = 2.0
+
+[node name="Probe_Living" type="ReflectionProbe" parent="ReflectionProbes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.6, -8)
+intensity = 0.65
+max_distance = 18.0
+size = Vector3(9.6, 3.1, 5.6)
+box_projection = true
+interior = true
+enable_shadows = true
+mesh_lod_threshold = 2.0
+
+[node name="Probe_Workshop" type="ReflectionProbe" parent="ReflectionProbes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 1.6, -2)
+intensity = 0.65
+max_distance = 18.0
+size = Vector3(9.6, 3.1, 5.6)
+box_projection = true
+interior = true
+enable_shadows = true
+mesh_lod_threshold = 2.0
+
+[node name="Probe_Storage" type="ReflectionProbe" parent="ReflectionProbes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 1.6, 4)
+intensity = 0.65
+max_distance = 18.0
+size = Vector3(9.6, 3.1, 5.6)
+box_projection = true
+interior = true
+enable_shadows = true
+mesh_lod_threshold = 2.0
+
+[node name="Probe_Generator" type="ReflectionProbe" parent="ReflectionProbes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 1.6, -8)
+intensity = 0.65
+max_distance = 18.0
+size = Vector3(9.6, 3.1, 5.6)
+box_projection = true
+interior = true
+enable_shadows = true
+mesh_lod_threshold = 2.0
+
+[node name="Navigation" type="Node3D" parent="."]
+
+[node name="Interior" type="NavigationRegion3D" parent="Navigation"]
+navigation_mesh = SubResource("NavigationMesh_hiynu")
+
+[node name="Gameplay" type="Node3D" parent="."]
+
+[node name="GeneratorPower" type="Node3D" parent="Gameplay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.95, -8.5)
+script = ExtResource("106_jviw6")
+
+[node name="SpawnPoints" type="Node3D" parent="Gameplay"]
+
+[node name="PlayerSpawn_01" type="Marker3D" parent="Gameplay/SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0.08, 9.55)
+
+[node name="PlayerSpawn_02" type="Marker3D" parent="Gameplay/SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 9.55)
+
+[node name="PlayerSpawn_03" type="Marker3D" parent="Gameplay/SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 0.08, 9.55)
+
+[node name="AntonExistingQuestAnchor" type="Marker3D" parent="Gameplay"]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4.5, 0, -9.2)
+script = ExtResource("107_baynr")
+site_id = "anton_hideout"
+
+[node name="TraderNpc" type="CharacterBody3D" parent="Gameplay"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.4, 0, -3.15)
+
+[node name="Body" type="Node3D" parent="Gameplay/TraderNpc"]
+
+[node name="Persona" type="Node3D" parent="Gameplay/TraderNpc/Body" instance=ExtResource("108_0oryr")]
+
+[node name="CharacterAnimator" type="Node" parent="Gameplay/TraderNpc"]
+script = ExtResource("109_wlgdn")
+
+[node name="Signs" type="Node3D" parent="."]
+
+[node name="WallSign_00" type="Node3D" parent="Signs" instance=ExtResource("110_gpb0e")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.78, 2.65, -2)
+
+[node name="WallSign_01" type="Node3D" parent="Signs" instance=ExtResource("111_a4qnk")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.78, 2.65, 4)
+
+[node name="WallSign_02" type="Node3D" parent="Signs" instance=ExtResource("112_pnb57")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.78, 2.65, -6.8)
+
+[node name="WallSign_03" type="Node3D" parent="Signs" instance=ExtResource("113_xlm1x")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.78, 2.65, -2)
+
+[node name="WallSign_04" type="Node3D" parent="Signs" instance=ExtResource("114_dlad0")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.78, 2.65, 4)
+
+[node name="WallSign_05" type="Node3D" parent="Signs" instance=ExtResource("115_33p46")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.78, 2.65, -6.8)
+
+[node name="WallSign_06" type="Node3D" parent="Signs" instance=ExtResource("116_ocp8e")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 2.7, 11.77)
+
+[node name="WallSign_07" type="Node3D" parent="Signs" instance=ExtResource("117_wdcd2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, -6.46)
+
+[node name="WallSign_08" type="Node3D" parent="Signs" instance=ExtResource("118_cuc32")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.95, 2.68, -10.55)
+
+[node name="WallSign_09" type="Node3D" parent="Signs" instance=ExtResource("119_6c6lo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.95, 2.68, -10.55)
+
+[node name="EquipmentBaySign_01" type="Node3D" parent="Signs" instance=ExtResource("120_iqvqm")]
+transform = Transform3D(-0.65, 0, -8.742278e-08, 0, 0.85, 0, 5.6824803e-08, 0, -1, -5.1, 2.24, 7.79)
+
+[node name="EquipmentBaySign_02" type="Node3D" parent="Signs" instance=ExtResource("121_lmyp7")]
+transform = Transform3D(-0.65, 0, -8.742278e-08, 0, 0.85, 0, 5.6824803e-08, 0, -1, 5.1, 2.24, 7.79)
+
+[node name="EquipmentBaySign_03" type="Node3D" parent="Signs" instance=ExtResource("122_yqdwf")]
+transform = Transform3D(-0.65, 0, -8.742278e-08, 0, 0.85, 0, 5.6824803e-08, 0, -1, 7.4, 2.24, 7.79)
+
+[node name="Audio" type="Node3D" parent="."]
+
+[node name="ExistingAudioBridge" type="Node" parent="Audio"]
+script = ExtResource("123_0vxkf")
+
+[node name="GeneratorHum" type="AudioStreamPlayer3D" parent="Audio/ExistingAudioBridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.8, 1.1, -8.5)
+stream = SubResource("AudioStreamWAV_3oeu7")
+volume_db = -16.0
+unit_size = 2.0
+max_distance = 14.0
+bus = &"ShelterUtility"
+
+[node name="VentilationHum" type="AudioStreamPlayer3D" parent="Audio/ExistingAudioBridge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.1, 3.8, -1)
+stream = SubResource("AudioStreamWAV_3oeu7")
+volume_db = -33.0
+unit_size = 3.0
+pitch_scale = 0.76
+max_distance = 20.0
+bus = &"ShelterUtility"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_0vq8l")
+
+[node name="CameraRig" type="Node3D" parent="." groups=["camera_rig"] instance=ExtResource("124_yg8t1")]
+transform = Transform3D(0.7071067, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, 0.7071067, 0, 0, 0)
+script = ExtResource("125_jgkv4")
+
+[node name="Spawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 9.55)
+
+[node name="Dressing" type="Node3D" parent="."]
+
+[node name="RouteClipboard" type="Node3D" parent="Dressing" instance=ExtResource("126_hiynu")]
+transform = Transform3D(0.99026805, 0, -0.1391731, 0, 1, 0, 0.1391731, 0, 0.99026805, 1.42, 0.79, 0.46)
+
+[node name="RouteFolders" type="Node3D" parent="Dressing" instance=ExtResource("127_3oeu7")]
+transform = Transform3D(0.9975641, 0, 0.06975647, 0, 1, 0, -0.06975647, 0, 0.9975641, -1.43, 0.79, -0.62)
+
+[node name="HubNoticeBoard" type="Node3D" parent="Dressing" instance=ExtResource("128_f2ej0")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.7, 1.65, -0.1)
+
+[node name="CommunicationsWiring" type="Node3D" parent="Dressing" instance=ExtResource("129_8gdi1")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.67, 0.88, 2.3)
+
+[node name="UnloadGloves" type="Node3D" parent="Dressing" instance=ExtResource("130_ntmj0")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.48, 0.49, 9.65)
+
+[node name="ReturnJacket" type="Node3D" parent="Dressing" instance=ExtResource("131_nte6w")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.7, 0.52, 10.5)
+
+[node name="ReturnCleaning" type="Node3D" parent="Dressing" instance=ExtResource("132_1wwvl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.38, 0, 11.24)
+
+[node name="EntryFireSafety" type="Node3D" parent="Dressing" instance=ExtResource("133_ixuam")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 3.68, 0.35, 9.7)
+
+[node name="SofaBlanket" type="Node3D" parent="Dressing" instance=ExtResource("134_76coa")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -13.9, 0.46, -7.52)
+
+[node name="SofaCushion" type="Node3D" parent="Dressing" instance=ExtResource("135_nj0nw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.65, 0.43, -7.52)
+
+[node name="LivingBooks" type="Node3D" parent="Dressing" instance=ExtResource("127_3oeu7")]
+transform = Transform3D(0.9781476, 0, -0.2079117, 0, 1, 0, 0.2079117, 0, 0.9781476, -13.78, 0.496, -8.9)
+
+[node name="TeaCorner" type="Node3D" parent="Dressing" groups=["shelter_navigation_geometry"] instance=ExtResource("136_atnhc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.35, 0, -10.35)
+
+[node name="KettleAndCups" type="Node3D" parent="Dressing" instance=ExtResource("137_joikx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.35, 0.944, -10.35)
+
+[node name="LivingClock" type="Node3D" parent="Dressing" instance=ExtResource("138_4q5od")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.73, 2.25, -6.85)
+
+[node name="TeaTowel" type="Node3D" parent="Dressing" instance=ExtResource("139_prn7s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.66, 0.225, -10.35)
+
+[node name="PersonalBooks" type="Node3D" parent="Dressing" instance=ExtResource("127_3oeu7")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.4, 1.62, -8)
+
+[node name="TraderScales" type="Node3D" parent="Dressing" instance=ExtResource("140_08b0t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.9, 0.975, -2.01)
+
+[node name="TraderCalculator" type="Node3D" parent="Dressing" instance=ExtResource("141_50yt4")]
+transform = Transform3D(0.9781476, 0, 0.2079117, 0, 1, 0, -0.2079117, 0, 0.9781476, -12.36, 0.975, -2.04)
+
+[node name="TradeInventory" type="Node3D" parent="Dressing" instance=ExtResource("126_hiynu")]
+transform = Transform3D(0.99254614, 0, -0.12186935, 0, 1, 0, 0.12186935, 0, 0.99254614, -12, 0.975, -2.04)
+
+[node name="WorkshopCurrentRepair" type="Node3D" parent="Dressing" instance=ExtResource("142_jwfbf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.15, 0.945, -4.16)
+
+[node name="WorkshopToolbox" type="Node3D" parent="Dressing" instance=ExtResource("143_4mwis")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.12, 0.945, -4.43)
+
+[node name="WorkshopDrawerBins" type="Node3D" parent="Dressing" instance=ExtResource("144_2ll0m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.95, 1.12, -4.55)
+
+[node name="WorkshopRag" type="Node3D" parent="Dressing" instance=ExtResource("145_m8e2d")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, 14.5, 0.951, -4)
+
+[node name="WeaponService" type="Node3D" parent="Dressing" instance=ExtResource("146_cfkt5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.55, 0.765, 4.21)
+
+[node name="WeaponAmmo" type="Node3D" parent="Dressing" instance=ExtResource("147_miu6p")]
+transform = Transform3D(0.9781476, 0, 0.2079117, 0, 1, 0, -0.2079117, 0, 0.9781476, -12.78, 0.768, 4.48)
+
+[node name="ArmoryHeadset" type="Node3D" parent="Dressing" instance=ExtResource("148_xot3d")]
+transform = Transform3D(0.9848077, 0, 0.17364818, 0, 1, 0, -0.17364818, 0, 0.9848077, -13.62, 0.765, 3.75)
+
+[node name="ArmoryGloves" type="Node3D" parent="Dressing" instance=ExtResource("130_ntmj0")]
+transform = Transform3D(0.9396926, 0, -0.34202012, 0, 1, 0, 0.34202012, 0, 0.9396926, -12.91, 0.765, 3.79)
+
+[node name="GeneratorMeters" type="Node3D" parent="Dressing" instance=ExtResource("149_nkm6a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.42, 0.97, -10.74)
+
+[node name="GeneratorCableDrop" type="Node3D" parent="Dressing" instance=ExtResource("129_8gdi1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.95, 0.2, -10.73)
+
+[node name="GeneratorFittings" type="Node3D" parent="Dressing" instance=ExtResource("150_6nlmt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.8, 0, -8.33)
+
+[node name="GeneratorExhaustRoute" type="Node3D" parent="Dressing" instance=ExtResource("151_uqr51")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.75, 2.6, -8.82)
+
+[node name="GeneratorFireSafety" type="Node3D" parent="Dressing" instance=ExtResource("133_ixuam")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.04, 0.4, -10.73)
+
+[node name="GeneratorServiceLog" type="Node3D" parent="Dressing" instance=ExtResource("126_hiynu")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 15.03, 0.88, -10.73)
+
+[node name="StorageHandTruck" type="Node3D" parent="Dressing" groups=["shelter_navigation_geometry"] instance=ExtResource("152_vhlg6")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.08, 0, 2.03)
+
+[node name="SortingDelivery" type="Node3D" parent="Dressing" instance=ExtResource("153_t0343")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12.86, 0.975, 1.6)
+
+[node name="WarehouseInventory" type="Node3D" parent="Dressing" instance=ExtResource("126_hiynu")]
+transform = Transform3D(0.9781476, 0, 0.2079117, 0, 1, 0, -0.2079117, 0, 0.9781476, 13.85, 0.975, 1.58)
+
+[node name="WarehouseGloves" type="Node3D" parent="Dressing" instance=ExtResource("130_ntmj0")]
+transform = Transform3D(0.99254614, 0, -0.12186935, 0, 1, 0, 0.12186935, 0, 0.99254614, 14.58, 0.975, 1.53)
+
+[node name="Stock_37" type="Node3D" parent="Dressing" instance=ExtResource("154_ikaho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.6, 1.15, -4.39)
+
+[node name="Stock_38" type="Node3D" parent="Dressing" instance=ExtResource("155_btsbx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8, 0.665, -4.43)
+
+[node name="Stock_39" type="Node3D" parent="Dressing" instance=ExtResource("156_og5iu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.62, -4.4)
+
+[node name="Stock_40" type="Node3D" parent="Dressing" instance=ExtResource("157_qeqhf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.7, 1.62, -4.4)
+
+[node name="Stock_41" type="Node3D" parent="Dressing" instance=ExtResource("153_t0343")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8, 1.62, -4.4)
+
+[node name="Stock_42" type="Node3D" parent="Dressing" instance=ExtResource("154_ikaho")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0.665, -4.39)
+
+[node name="Stock_43" type="Node3D" parent="Dressing" instance=ExtResource("154_ikaho")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10.2, 1.62, 6.25)
+
+[node name="Stock_44" type="Node3D" parent="Dressing" instance=ExtResource("155_btsbx")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12, 1.62, 6.25)
+
+[node name="Stock_45" type="Node3D" parent="Dressing" instance=ExtResource("153_t0343")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.8, 1.62, 6.3)
+
+[node name="Stock_46" type="Node3D" parent="Dressing" instance=ExtResource("156_og5iu")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15.6, 1.62, 6.3)
+
+[node name="Stock_47" type="Node3D" parent="Dressing" instance=ExtResource("157_qeqhf")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15.6, 0.665, 6.3)
+
+[node name="Stock_48" type="Node3D" parent="Dressing" instance=ExtResource("154_ikaho")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.8, 0.665, 6.3)
+
+[node name="Stock_49" type="Node3D" parent="Dressing" instance=ExtResource("153_t0343")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12, 0.665, 6.3)
+
+[node name="Stock_50" type="Node3D" parent="Dressing" instance=ExtResource("158_utmbm")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15.6, 1.14, 6.3)
+
+[node name="Stock_51" type="Node3D" parent="Dressing" instance=ExtResource("158_utmbm")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10.2, 0.665, 6.3)
+
+[node name="Stock_52" type="Node3D" parent="Dressing" instance=ExtResource("153_t0343")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10.2, 1.14, 6.3)
+
+[node name="Stock_53" type="Node3D" parent="Dressing" instance=ExtResource("157_qeqhf")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12, 1.14, 6.3)
+
+[node name="Stock_54" type="Node3D" parent="Dressing" instance=ExtResource("154_ikaho")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.8, 1.14, 6.3)
+
+[node name="Stock_55" type="Node3D" parent="Dressing" instance=ExtResource("144_2ll0m")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 17.4, 1.15, -2)
+
+[node name="Stock_56" type="Node3D" parent="Dressing" instance=ExtResource("153_t0343")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 1.15, -4.4)
+
+[node name="Stock_57" type="Node3D" parent="Dressing" instance=ExtResource("156_og5iu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 1.62, -4.4)
+
+[node name="Stock_58" type="Node3D" parent="Dressing" instance=ExtResource("147_miu6p")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.4, 0.665, 3.25)
+
+[node name="Stock_59" type="Node3D" parent="Dressing" instance=ExtResource("157_qeqhf")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.4, 1.15, 3.3)
+
+[node name="Stock_60" type="Node3D" parent="Dressing" instance=ExtResource("153_t0343")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17.4, 1.62, 3.3)
+
+[node name="Stock_61" type="Node3D" parent="Dressing" instance=ExtResource("127_3oeu7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.2, 1.62, -10.45)
+
+[node name="Stock_62" type="Node3D" parent="Dressing" instance=ExtResource("158_utmbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.2, 0.18, -10.45)
+
+[node name="BayGloves_0" type="Node3D" parent="Dressing" instance=ExtResource("130_ntmj0")]
+transform = Transform3D(0.9781476, 0, -0.2079117, 0, 1, 0, 0.2079117, 0, 0.9781476, -5.42, 0.491, 6.49)
+
+[node name="BayHeadset_0" type="Node3D" parent="Dressing" instance=ExtResource("148_xot3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.491, 6.52)
+
+[node name="BayCloth_0" type="Node3D" parent="Dressing" instance=ExtResource("139_prn7s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.52, 0.525, 6.47)
+
+[node name="SleepingBlanket_0" type="Node3D" parent="Dressing" instance=ExtResource("159_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.15, 3.29, -9.02)
+
+[node name="BedsideBooks_0" type="Node3D" parent="Dressing" instance=ExtResource("127_3oeu7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 3.135, -10.65)
+
+[node name="SleepingTowel_0" type="Node3D" parent="Dressing" instance=ExtResource("139_prn7s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.02, 3.156, -10.67)
+
+[node name="BayGloves_1" type="Node3D" parent="Dressing" instance=ExtResource("130_ntmj0")]
+transform = Transform3D(0.9998477, 0, 0.017452406, 0, 1, 0, -0.017452406, 0, 0.9998477, 4.78, 0.491, 6.49)
+
+[node name="BayHeadset_1" type="Node3D" parent="Dressing" instance=ExtResource("148_xot3d")]
+transform = Transform3D(0.9848077, 0, 0.17364818, 0, 1, 0, -0.17364818, 0, 0.9848077, 5.2, 0.491, 6.52)
+
+[node name="BayCloth_1" type="Node3D" parent="Dressing" instance=ExtResource("139_prn7s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.68, 0.525, 6.47)
+
+[node name="SleepingBlanket_1" type="Node3D" parent="Dressing" instance=ExtResource("159_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.29, -9.02)
+
+[node name="BedsideBooks_1" type="Node3D" parent="Dressing" instance=ExtResource("127_3oeu7")]
+transform = Transform3D(0.9945219, 0, 0.104528464, 0, 1, 0, -0.104528464, 0, 0.9945219, -0.25, 3.135, -10.65)
+
+[node name="SleepingTowel_1" type="Node3D" parent="Dressing" instance=ExtResource("139_prn7s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, 3.156, -10.67)
+
+[node name="BayGloves_2" type="Node3D" parent="Dressing" instance=ExtResource("130_ntmj0")]
+transform = Transform3D(0.9702957, 0, 0.2419219, 0, 1, 0, -0.2419219, 0, 0.9702957, 7.08, 0.491, 6.49)
+
+[node name="BayHeadset_2" type="Node3D" parent="Dressing" instance=ExtResource("148_xot3d")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, 7.5, 0.491, 6.52)
+
+[node name="BayCloth_2" type="Node3D" parent="Dressing" instance=ExtResource("139_prn7s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.98, 0.525, 6.47)
+
+[node name="SleepingBlanket_2" type="Node3D" parent="Dressing" instance=ExtResource("159_ri1xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.15, 3.29, -9.02)
+
+[node name="BedsideBooks_2" type="Node3D" parent="Dressing" instance=ExtResource("127_3oeu7")]
+transform = Transform3D(0.9781476, 0, 0.2079117, 0, 1, 0, -0.2079117, 0, 0.9781476, 1.9, 3.135, -10.65)
+
+[node name="SleepingTowel_2" type="Node3D" parent="Dressing" instance=ExtResource("139_prn7s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.28, 3.156, -10.67)
+
+[node name="Atmosphere" type="Node3D" parent="."]
+
+[node name="HubDustWest" type="Node3D" parent="Atmosphere" instance=ExtResource("160_trdx1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9, 1.6, 0)
+script = ExtResource("161_jvtro")
+
+[node name="HubDustEast" type="Node3D" parent="Atmosphere" instance=ExtResource("160_trdx1")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.9, 1.6, 0)
+script = ExtResource("161_jvtro")
+
+[node name="LivingDust" type="Node3D" parent="Atmosphere" instance=ExtResource("160_trdx1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.3, 1.2, -8)
+script = ExtResource("161_jvtro")
+
+[node name="ArmoryDust" type="Node3D" parent="Atmosphere" instance=ExtResource("160_trdx1")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -12.8, 1.3, 4)
+script = ExtResource("161_jvtro")
+
+[node name="TeaVapor" type="Node3D" parent="Atmosphere" instance=ExtResource("162_6hm0i")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.35, 1.16, -10.35)
+script = ExtResource("161_jvtro")

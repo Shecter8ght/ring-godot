@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/RustedSteel_base.jpg" id="1_cvr82"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/RustedSteel_orm.jpg" id="2_ahpr8"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/RustedSteel_normal.jpg" id="3_ow115"]
+
+[resource]
+resource_name = "RustedSteel"
+albedo_texture = ExtResource("1_cvr82")
+metallic = 1.0
+metallic_texture = ExtResource("2_ahpr8")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_ahpr8")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.32
+normal_texture = ExtResource("3_ow115")
+ao_enabled = true
+ao_texture = ExtResource("2_ahpr8")
+texture_filter = 5

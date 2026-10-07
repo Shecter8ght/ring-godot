@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://dw35x5sr88w1t"]
 
-[ext_resource type="Script" path="res://src/player/first_person_arms.gd" id="1"]
+[ext_resource type="Script" uid="uid://e0j1yj246r8r" path="res://src/player/first_person_arms.gd" id="1"]
 
 [node name="FirstPersonArms" type="Node3D"]
 script = ExtResource("1")

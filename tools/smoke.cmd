@@ -4,4 +4,4 @@ rem Дымовая проверка: запускает сцену, делает
 rem tools\smoke.cmd [res://scenes/levels/xxx.tscn] [кадров] [overview]
 set SCENE=%1
 if "%SCENE%"=="" set SCENE=res://scenes/levels/f1_ring.tscn
-"D:\ПРОГРАММЫ\Godot_v4.5.1-stable_win64.exe\Godot_v4.5.1-stable_win64_console.exe" --path "%~dp0.." res://tools/smoke.tscn -- %SCENE% %2 %3
+"D:\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe" --path "%~dp0.." res://tools/smoke.tscn -- %SCENE% %2 %3

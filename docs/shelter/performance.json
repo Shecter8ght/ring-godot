@@ -1,0 +1,94 @@
+{
+  "baseline_initial": {
+    "iso_fps": 375.64,
+    "fps_view_fps": 374.17
+  },
+  "legacy_confirm": {
+    "resolution": "(1920.0, 1080.0)",
+    "results": [
+      {
+        "draw_calls": 295,
+        "fps": 409.057440754847,
+        "frame_ms": 2.44464444444444,
+        "mode": "iso",
+        "triangles": 1240399
+      },
+      {
+        "draw_calls": 302,
+        "fps": 419.625414380097,
+        "frame_ms": 2.38307777777778,
+        "mode": "fps",
+        "triangles": 1252621
+      }
+    ],
+    "scene": "res://levels/shelter/Hideout_Legacy.tscn"
+  },
+  "final": {
+    "resolution": "(1920.0, 1080.0)",
+    "results": [
+      {
+        "draw_calls": 324,
+        "fps": 548.103713402658,
+        "frame_ms": 1.82447222222222,
+        "mode": "iso",
+        "triangles": 694327
+      },
+      {
+        "draw_calls": 315,
+        "fps": 554.649969648321,
+        "frame_ms": 1.80293888888889,
+        "mode": "fps",
+        "triangles": 645336
+      }
+    ],
+    "scene": "res://levels/shelter/Shelter_Interior.tscn"
+  },
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "engine": "Godot 4.5.1 Forward+",
+  "window": "1280x720",
+  "render_viewport": "1920x1080",
+  "vsync": false,
+  "visual_revision": {
+    "resolution": "(1920.0, 1080.0)",
+    "results": [
+      {
+        "draw_calls": 574,
+        "fps": 507.370972742904,
+        "frame_ms": 1.97094444444444,
+        "mode": "iso",
+        "triangles": 1095817
+      },
+      {
+        "draw_calls": 573,
+        "fps": 515.884957654443,
+        "frame_ms": 1.93841666666667,
+        "mode": "fps",
+        "triangles": 1087295
+      }
+    ],
+    "scene": "res://levels/shelter/Shelter_Interior.tscn",
+    "notes": "RTX 5070 Ti; ten shadowed primary lights, PCSS 0.35 m, 13 mesh signs; final placements, 180 warmed frames per view; VSync off."
+  },
+  "dressing_pass": {
+    "quality": "high",
+    "resolution": "(1920.0, 1080.0)",
+    "results": [
+      {
+        "draw_calls": 309,
+        "fps": 647.367909972703,
+        "frame_ms": 1.54471666666667,
+        "mode": "iso",
+        "triangles": 682575
+      },
+      {
+        "draw_calls": 309,
+        "fps": 650.613383840209,
+        "frame_ms": 1.53701111111111,
+        "mode": "fps",
+        "triangles": 643814
+      }
+    ],
+    "scene": "res://levels/shelter/Shelter_Interior.tscn",
+    "notes": "Final authored dressing and baked FX; explicit high preset; 150 startup frames, 100 warmed frames and 180 measured frames per view; static hideout viewpoints, not minimum gameplay FPS."
+  }
+}

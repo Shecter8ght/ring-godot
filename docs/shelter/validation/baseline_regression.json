@@ -1,0 +1,7 @@
+{
+  "baseline_commit": "67ab2f9",
+  "method": "13 runtime files temporarily replaced from HEAD; user changes excluded; original bytes restored",
+  "events_test": 0,
+  "weather_test": 1,
+  "source_restored_byte_for_byte": true
+}

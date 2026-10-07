@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Ceiling_NorthGallery_00.res" id="1_oquho"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ef21n"]
+size = Vector3(16, 0.2, 3)
+
+[node name="Ceiling_NorthGallery" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+layers = 524288
+mesh = ExtResource("1_oquho")
+
+[node name="CeilingShadow" type="MeshInstance3D" parent="."]
+cast_shadow = 3
+mesh = ExtResource("1_oquho")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, -9.5)
+shape = SubResource("BoxShape3D_ef21n")

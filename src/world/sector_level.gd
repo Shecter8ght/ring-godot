@@ -62,7 +62,6 @@ func _ready() -> void:
 	# сеть: всё, что синхронизируется в рейде, — только тем, кто в рейде (ушедший в убежище не
 	# получает поток; спавн игрока придёт клиенту, когда его рейд загрузится)
 	get_tree().node_added.connect(_on_node_added)
-	Net.enter_scene("raid")
 	# условия рейда — до всего остального (от них зависит свет и зрение мародёров)
 	RaidConditions.current = RaidConditions.for_new_raid()
 	RaidConditions.from_host = {}
@@ -156,6 +155,8 @@ func _ready() -> void:
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 		_find_local_player_when_ready()
 	_bake_navmesh()
+	# Только после создания спавнеров, Weather и Events можно получать пакеты рейда.
+	Net.enter_scene("raid")
 
 
 ## Раньше детей: их синхронизаторы (Net.scope_sync) сразу знают, что они — в рейде.
@@ -573,7 +574,7 @@ func _track_visit(delta: float) -> void:
 
 
 func _process(_delta: float) -> void:
-	if Engine.is_editor_hint() or _local_player == null:
+	if Engine.is_editor_hint() or not is_instance_valid(_local_player) or not _local_player.is_inside_tree():
 		return
 	_update_decks()
 	_track_visit(_delta)

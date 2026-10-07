@@ -25,6 +25,9 @@ const MIX := 22050.0
 @export var seat_yaw: float = 180.0
 ## ТВ: размер экрана (м) — квад перед корпусом.
 @export var screen_size: Vector2 = Vector2(1.8, 0.95)
+## Готовый меш вместо блокаутного корпуса; экран получает прежний shader и каналы.
+@export var authored_visual: bool = false
+@export var screen_path: NodePath
 
 var state: int = 0
 var _screen_mat: ShaderMaterial
@@ -32,20 +35,44 @@ var _sound: AudioStreamPlayer3D
 var _known: Array[int] = []
 ## Какой луп должен играть (строится в фоне — вдруг уже переключили).
 var _want: String = ""
+var _audio_tasks: Array[int] = []
+var _shared_ready: bool = false
 static var _cache: Dictionary = {}
+
+
+func _exit_tree() -> void:
+	# Worker использует методы activity: не освобождаем её посреди синтеза при смене сцены.
+	for task: int in _audio_tasks:
+		WorkerThreadPool.wait_for_task_completion(task)
+	_audio_tasks.clear()
+	if is_instance_valid(_sound):
+		_sound.stop()
 
 
 func _ready() -> void:
 	super._ready()
 	if Engine.is_editor_hint():
 		return
+	Profile.ensure()
 	if kind in [Kind.TV, Kind.RADIO]:
+		# Пришедший в уже занятую комнату получает общий канал от прежнего участника.
+		var occupied: bool = false
+		if Net.is_networked():
+			for id: int in Net.peer_scene:
+				if id != multiplayer.get_unique_id() and Net.visible_in(id, "hideout"):
+					occupied = true
+					_known.append(id)
+		if not occupied:
+			state = clampi(int(Profile.hideout_media.get("tv" if kind == Kind.TV else "radio", 0)), 0, 3)
 		_sound = AudioStreamPlayer3D.new()
 		_sound.bus = &"Ambient"
 		_sound.unit_size = 3.0
 		_sound.max_distance = 24.0
 		add_child(_sound)
 		Net.scenes_changed.connect(_share_state)
+		_shared_ready = not Net.is_networked()
+		if Net.is_networked():
+			_initialize_shared.call_deferred()
 	_apply()
 
 
@@ -73,7 +100,9 @@ func request_use() -> void:
 				lvl.call("drink")
 			_sound_once(_fizz())
 			if Net.is_networked():
-				_said.rpc("%s открыл пиво" % String(Net.player_names.get(multiplayer.get_unique_id(), "Кто-то")))
+				for peer: int in Net.peer_scene:
+					if peer != multiplayer.get_unique_id() and Net.visible_in(peer,"hideout"):
+						_said.rpc_id(peer,"%s открыл пиво" % String(Net.player_names.get(multiplayer.get_unique_id(), "Кто-то")))
 		Kind.SEAT:
 			var me := _local_player()
 			if me:
@@ -89,14 +118,19 @@ func _local_player() -> Player:
 
 func _switch(v: int) -> void:
 	if Net.is_networked():
-		_set_state.rpc(v)
-	else:
-		_set_state(v)
+		for peer: int in Net.peer_scene:
+			if peer != multiplayer.get_unique_id() and Net.visible_in(peer,"hideout"):
+				_set_state.rpc_id(peer,v)
+	_set_state(v)
 
 
 @rpc("any_peer", "call_local", "reliable")
 func _set_state(v: int) -> void:
-	state = v
+	_shared_ready = true
+	_known = _here()
+	state = clampi(v, 0, 3)
+	Profile.hideout_media["tv" if kind == Kind.TV else "radio"] = state
+	Profile.save()
 	_apply()
 
 
@@ -109,21 +143,55 @@ func _said(text: String) -> void:
 ## Пришёл кто-то новый в убежище — передать ему, что включено (передаёт тот из уже бывших тут,
 ## у кого наименьший id, — один раз).
 func _share_state() -> void:
-	if not Net.is_networked():
+	if not Net.is_networked() or not _shared_ready:
 		return
 	var me := multiplayer.get_unique_id()
-	var here: Array[int] = []
-	for id in Net.peer_scene:
-		if Net.visible_in(int(id), "hideout"):
-			here.append(int(id))
+	var here: Array[int] = _here()
 	for id in here:
 		if id == me or id in _known:
 			continue
 		var senders := here.filter(func(x: int) -> bool: return x != id and (x in _known or x == me))
 		senders.sort()
-		if state != 0 and not senders.is_empty() and int(senders[0]) == me:
+		if not senders.is_empty() and int(senders[0]) == me:
 			_set_state.rpc_id(id, state)
 	_known = here
+
+
+func _here() -> Array[int]:
+	var result: Array[int] = []
+	for peer: int in Net.peer_scene:
+		if Net.visible_in(peer,"hideout"):
+			result.append(peer)
+	return result
+
+
+func _initialize_shared() -> void:
+	# Дать сценам/roster прийти: только уже бывший в комнате передаёт новичку канал.
+	# Так же работает, когда хост ещё в рейде или возвращается после двух клиентов.
+	await get_tree().create_timer(.15).timeout
+	if _shared_ready:
+		return
+	var here: Array[int] = _here()
+	var me: int = multiplayer.get_unique_id()
+	for peer: int in here:
+		if peer != me:
+			_request_media.rpc_id(peer)
+	await get_tree().create_timer(.35).timeout
+	if _shared_ready:
+		return
+	here = _here()
+	here.sort()
+	# Все вошли одновременно: один участник начинает с сохранённого канала.
+	if here.is_empty() or here[0] == me:
+		_shared_ready = true
+		_switch(clampi(int(Profile.hideout_media.get("tv" if kind==Kind.TV else "radio",0)),0,3))
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_media() -> void:
+	var peer: int = multiplayer.get_remote_sender_id()
+	if _shared_ready and Net.visible_in(peer,"hideout"):
+		_set_state.rpc_id(peer,state)
 
 
 func _apply() -> void:
@@ -146,6 +214,17 @@ func _apply() -> void:
 # ---------------------------------------------------------------- вид
 
 func _build_visual(parent: Node3D) -> void:
+	if authored_visual:
+		if kind == Kind.TV:
+			var screen: MeshInstance3D = get_node_or_null(screen_path) as MeshInstance3D
+			if screen:
+				var shader: Shader = Shader.new()
+				shader.code = TV_SHADER
+				_screen_mat = ShaderMaterial.new()
+				_screen_mat.shader = shader
+				_screen_mat.set_shader_parameter("channel", state)
+				screen.material_override = _screen_mat
+		return
 	match kind:
 		Kind.TV:
 			var q := MeshInstance3D.new()
@@ -213,9 +292,10 @@ func _loop(key: String) -> void:
 		_play_loop(key)
 		return
 	# луп строится в фоне (синтез — секунды) и играет, как готов
-	WorkerThreadPool.add_task(func() -> void:
+	var task: int = WorkerThreadPool.add_task(func() -> void:
 		var w := _clip(key)
 		_built.call_deferred(key, w))
+	_audio_tasks.append(task)
 
 
 func _built(key: String, w: AudioStreamWAV) -> void:

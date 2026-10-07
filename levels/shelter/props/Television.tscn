@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Television_00.res" id="1_hec62"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Television_01.res" id="2_q13i0"]
+
+[node name="Television" type="Node3D"]
+
+[node name="Screen" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_hec62")
+
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_q13i0")

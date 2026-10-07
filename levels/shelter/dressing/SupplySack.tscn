@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/SupplySack_00.res" id="1_kcdkl"]
+
+[node name="SupplySack" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+mesh = ExtResource("1_kcdkl")

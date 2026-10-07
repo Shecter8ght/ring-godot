@@ -33,7 +33,10 @@ func move_character(delta: float) -> void:
 	for i: int in range(_character.get_slide_collision_count()):
 		var hit: KinematicCollision3D = _character.get_slide_collision(i)
 		var normal: Vector3 = hit.get_normal()
-		_character.velocity = _character.velocity.slide(normal)
+		# Пол уже обработан move_and_slide. Повторная проекция ввода на склон
+		# гасила горизонтальную скорость каждый кадр и мешала подниматься по лестнице.
+		if normal.dot(_character.up_direction) < cos(_character.floor_max_angle):
+			_character.velocity = _character.velocity.slide(normal)
 		var cart: ShoppingCart = hit.get_collider() as ShoppingCart
 		if cart != null and not pushed.has(cart.get_instance_id()):
 			pushed[cart.get_instance_id()] = true

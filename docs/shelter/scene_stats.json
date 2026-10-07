@@ -1,0 +1,17 @@
+{
+	"authored_assets": 138,
+	"dressing": {
+		"assets": 34,
+		"baked_effect_assets": 2,
+		"effect_instances": 5,
+		"placements": 81,
+		"runtime_particle_simulation": false,
+		"ucupaint_layers": 4
+	},
+	"gi": "SDFGI + SSIL (existing Forward+ pipeline)",
+	"lights": 32.0,
+	"navigation_polygons": 217,
+	"procedural_level_generation": false,
+	"prop_instances": 354,
+	"reflection_probes": 6.0
+}

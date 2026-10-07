@@ -134,7 +134,7 @@ python tools/sound_catalog_md.py                               # список в
 Настройки). Сохранения — `Saves` (`user://saves/*.json`, последнее — `[profile] last` в настройках);
 тесты по-прежнему берут свои профили через `Profile.use_file(...)`.
 
-Godot: `D:\ПРОГРАММЫ\Godot_v4.5.1-stable_win64.exe\Godot_v4.5.1-stable_win64_console.exe`
+Godot 4.7.2 (Steam): `D:\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe`
 (путь — в `tools/godot.cmd`, править только там). Тестов нет: проверка — запустить и посмотреть.
 
 ## Структура

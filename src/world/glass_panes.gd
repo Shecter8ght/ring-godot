@@ -254,7 +254,7 @@ func _apply(idx: int, dmg: float, uv: Vector2 = Vector2(-1, -1)) -> void:
 
 func _send(idx: int, hp: float, uv: Vector2 = Vector2(-1, -1)) -> void:
 	if Net.is_networked():
-		_rpc_state.rpc(idx, hp, uv)
+		Net.broadcast_scene(self, &"_rpc_state", [idx, hp, uv])
 	else:
 		_rpc_state(idx, hp, uv)
 

@@ -28,6 +28,7 @@ static var _sockets: Dictionary = {}
 var _grip: Node3D
 ## Левая кисть на цевье (SupportHandIK — модификатор скелета после клипа).
 var _support: SupportHandIK
+var _collision_ik: WeaponCollisionIK
 ## Клип падения раненым, пока лежит («» — не ранен); после смерти аниматор не управляет моделью.
 var _downed_clip: String = ""
 var _dead: bool = false
@@ -103,6 +104,8 @@ func _process(delta: float) -> void:
 		event_name = enemy.animation_event
 	if _grip:
 		_grip.visible = not HIDE_WEAPON.has(_one_shot)
+	if _collision_ik:
+		_collision_ik.enabled_for_pose = not downed and not _dead and family != "unarmed"
 	if _support:
 		# с пистолетом — вторая рука на рукоятке только в прицеле (на ходу клипы держат одной)
 		var hold := _grip != null and _grip.visible and family != "unarmed" and not downed \
@@ -146,7 +149,9 @@ func _process(delta: float) -> void:
 		return
 	var clip: String
 	var crawl: float = 1.0
-	if prone:
+	if _actor is Player and (_actor as Player).airborne and not prone and _player.has_animation("jump_loop"):
+		clip = "jump_loop"
+	elif prone:
 		# лёжа с оружием — поза «лёжа с автоматом»; ползком — клип «назад», вперёд — он же обратным ходом
 		clip = "prone_aim" if family != "unarmed" and not moving else "prone_move_b"
 		if moving and _direction(_vel) == "f":
@@ -306,6 +311,11 @@ func weapon_grip(family: String, weapon_id: String = "") -> Node3D:
 		_grip = Node3D.new()
 		_grip.name = "Grip"
 		socket.add_child(_grip)
+		_collision_ik = WeaponCollisionIK.new()
+		_collision_ik.name = "WeaponCollisionIK"
+		_collision_ik.grip = _grip
+		_collision_ik.actor = _actor
+		(skeletons[0] as Skeleton3D).add_child(_collision_ik)
 		_support = SupportHandIK.new()
 		_support.name = "SupportHandIK"
 		_support.grip = _grip

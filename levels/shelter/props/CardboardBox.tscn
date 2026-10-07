@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/CardboardBox_00.res" id="1_4iyx1"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pncnd"]
+size = Vector3(0.79, 0.52, 0.5)
+
+[node name="CardboardBox" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_4iyx1")
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.26, 0)
+shape = SubResource("BoxShape3D_pncnd")

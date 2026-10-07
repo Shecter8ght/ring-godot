@@ -56,7 +56,7 @@ func _target_in_grip() -> Variant:
 		return null
 	if not is_instance_valid(_model) or model != _model:
 		_model = model
-		_marker = model.find_child("LeftGrip", false, false) as Marker3D if model else null
+		_marker = model.find_child("LeftGrip", true, false) as Marker3D if model else null
 		_weapon_rig = WeaponRig.find_on(model)
 	if not is_instance_valid(_marker) or not _marker.is_inside_tree() or _marker.is_queued_for_deletion():
 		return null
@@ -88,18 +88,10 @@ func _process_modification() -> void:
 	var c := hand_pose.origin
 	var upper := a.distance_to(b)
 	var lower := b.distance_to(c)
-	var to_t := wrist - a
-	var dist := clampf(to_t.length(), 0.01, (upper + lower) * 0.999)
-	var dir := to_t.normalized()
 	# локоть гнётся туда же, куда в клипе (иначе — вниз)
-	var pole := (b - a) - dir * (b - a).dot(dir)
-	if pole.length() < 0.001:
-		pole = Vector3.DOWN - dir * dir.y
-	pole = pole.normalized()
-	var along := (upper * upper - lower * lower + dist * dist) / (2.0 * dist)
-	var height := sqrt(maxf(0.0, upper * upper - along * along))
-	var elbow := a + dir * along + pole * height
-	var reach := a + dir * dist
+	var solution: Dictionary = ArmIKSolver.solve(a, wrist, upper, lower, b - a, sk.global_transform, get_world_3d())
+	var elbow: Vector3 = solution.elbow
+	var reach: Vector3 = solution.wrist
 	var q_arm := Basis(Quaternion((b - a).normalized(), (elbow - a).normalized()))
 	var arm_basis := q_arm * arm_pose.basis.orthonormalized()
 	var q_fore := Basis(Quaternion((q_arm * (c - b)).normalized(), (reach - elbow).normalized()))

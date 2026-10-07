@@ -62,7 +62,7 @@ func sounding() -> bool:
 ## Хост: пульт отключил — всем.
 func disarm() -> void:
 	if Net.is_networked():
-		_rpc_disarm.rpc()
+		Net.broadcast_scene(self, &"_rpc_disarm", [])
 	else:
 		_rpc_disarm()
 
@@ -108,7 +108,7 @@ func _process(delta: float) -> void:
 		var pl := n as Player
 		if pl and pl.is_alive() and pl.global_position.distance_to(global_position) <= radius:
 			if Net.is_networked():
-				_rpc_trigger.rpc()
+				Net.broadcast_scene(self, &"_rpc_trigger", [])
 			else:
 				_rpc_trigger()
 			return

@@ -26,11 +26,17 @@ var player_names: Dictionary = {}
 ## MultiplayerPeer (умалчиваемая «оффлайн» сессия сама себе сервер, unique_id=1, is_server()=true) —
 ## по нему нельзя отличить одиночную игру от настоящей сети. Ставим true только сами, в host()/join().
 var _active: bool = false
+## После server_disconnected ENet уже закрыт: старый id нельзя запрашивать у него.
+var _own_id: int = 1
 ## Где сейчас каждый peer (свой — тоже): "menu", "hideout", "raid". Синхронизаторы сцены шлют
 ## только тем, кто в той же сцене (visible_in) — ушедший в убежище не получает поток рейда, а
 ## спавн игрока приходит клиенту, когда его сцена уже загрузилась. Узнаём друг о друге при
 ## подключении (каждый — каждому, клиенты — и между собой) и при каждой смене сцены.
 var peer_scene: Dictionary = {}
+## Перед удалением уровня дождаться, пока остальные закроют его сетевые потоки.
+var _changing_scene: bool = false
+var _transition_serial: int = 0
+var _transition_pending: Dictionary = {}
 
 
 func _ready() -> void:
@@ -78,11 +84,12 @@ func join(address: String, display_name: String) -> String:
 ## Сменился пир — сменился и свой id (оффлайн был 1): где я — переносится под новый id, чужие
 ## записи прежней сессии выбрасываются (иначе своё «hideout» под id 1 читалось бы как хост).
 func _keep_own_scene(peer: MultiplayerPeer) -> void:
-	var mine := String(peer_scene.get(multiplayer.get_unique_id(), ""))
+	var mine := String(peer_scene.get(_own_id, ""))
 	multiplayer.multiplayer_peer = peer
+	_own_id = multiplayer.get_unique_id()
 	peer_scene.clear()
 	if mine != "":
-		peer_scene[multiplayer.get_unique_id()] = mine
+		peer_scene[_own_id] = mine
 
 
 ## Разрывает соединение и возвращает в состояние «не в сети» (для «Выйти в меню»).
@@ -110,7 +117,7 @@ func start_level(scene: String, conditions: Dictionary) -> void:
 	# со снаряжением профиля — только если игрок пришёл в лобби из убежища (не тесты)
 	Profile.pending_raid = Profile.from_hideout
 	RaidConditions.from_host = conditions
-	get_tree().change_scene_to_file(target_scene)
+	change_scene(target_scene)
 
 
 ## Панель админа (хост в сети; в соло — себе): начислить amount ₽ игроку peer_id (себе — тоже). Деньги лежат в профиле
@@ -139,9 +146,51 @@ func _receive_money(amount: int) -> void:
 ## Сцена загружена: сказать всем, где я (и запомнить у себя).
 func enter_scene(key: String) -> void:
 	peer_scene[multiplayer.get_unique_id()] = key
+	_refresh_scoped_syncs()
 	scenes_changed.emit()
 	if is_networked():
 		_scene_is.rpc(key)
+
+
+## Сначала закрыть старую сцену у всех, затем удалить её. Иначе пакеты движения
+## продолжают приходить по старому пути во время тяжёлой загрузки следующего уровня.
+func change_scene(path: String) -> void:
+	if not is_networked():
+		get_tree().change_scene_to_file(path)
+		return
+	if _changing_scene:
+		return
+	_changing_scene = true
+	_transition_serial += 1
+	_transition_pending.clear()
+	for peer: int in multiplayer.get_peers():
+		_transition_pending[peer] = true
+	peer_scene[multiplayer.get_unique_id()] = "loading"
+	_refresh_scoped_syncs()
+	scenes_changed.emit()
+	_scene_is.rpc("loading", _transition_serial)
+	while is_networked() and not _transition_pending.is_empty():
+		for peer: int in _transition_pending.keys():
+			if not peer in multiplayer.get_peers():
+				_transition_pending.erase(peer)
+		await get_tree().process_frame
+	await get_tree().process_frame
+	var result: Error = get_tree().change_scene_to_file(path)
+	if result == OK:
+		await get_tree().scene_changed
+	_changing_scene = false
+
+
+## RPC уровня отправляется только тем, у кого уже есть эта сцена и её узлы.
+func broadcast_scene(node: Node, method: StringName, arguments: Array, include_local: bool = true) -> void:
+	if is_networked():
+		var key: String = scene_of(node)
+		if key == "" or visible_in(multiplayer.get_unique_id(), key):
+			for peer: int in multiplayer.get_peers():
+				if key == "" or visible_in(peer, key):
+					node.rpc_id.callv([peer, method] + arguments)
+	if include_local:
+		node.callv(method, arguments)
 
 
 ## Виден ли peer синхронизаторам сцены key (он в ней же). Не отозвался ещё — нет.
@@ -150,9 +199,34 @@ func visible_in(peer: int, key: String) -> bool:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _scene_is(key: String) -> void:
-	peer_scene[multiplayer.get_remote_sender_id()] = key
+func _scene_is(key: String, serial: int = 0) -> void:
+	var peer: int = multiplayer.get_remote_sender_id()
+	peer_scene[peer] = key
+	_refresh_scoped_syncs()
 	scenes_changed.emit()
+	if key == "loading":
+		_ack_loading.call_deferred(peer, serial)
+
+
+func _ack_loading(peer: int, serial: int) -> void:
+	# Спавнеры и queue_free завершают закрытие потока в конце кадра.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_networked() and peer in multiplayer.get_peers():
+		_scene_closed.rpc_id(peer, serial)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _scene_closed(serial: int) -> void:
+	if serial == _transition_serial:
+		_transition_pending.erase(multiplayer.get_remote_sender_id())
+
+
+func _refresh_scoped_syncs() -> void:
+	for node: Node in get_tree().get_nodes_in_group("net_scoped_syncs"):
+		var sync: MultiplayerSynchronizer = node as MultiplayerSynchronizer
+		if sync.is_inside_tree() and sync.is_multiplayer_authority():
+			sync.update_visibility()
 
 
 ## Синхронизатор узла node — только тем, кто в той же сцене, что и узел (уровень с meta
@@ -181,7 +255,9 @@ func filter_sync(sync: MultiplayerSynchronizer, key: String) -> void:
 	if sync.has_meta(SCENE_META):
 		return
 	sync.set_meta(SCENE_META, key)
-	sync.add_visibility_filter(func(peer: int) -> bool: return visible_in(peer, key))
+	sync.add_to_group("net_scoped_syncs")
+	sync.add_visibility_filter(func(peer: int) -> bool:
+		return visible_in(multiplayer.get_unique_id(), key) and visible_in(peer, key))
 
 
 func _on_peer_connected(id: int) -> void:

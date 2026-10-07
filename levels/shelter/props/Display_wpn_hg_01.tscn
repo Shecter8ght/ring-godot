@@ -1,0 +1,45 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_00.res" id="1_2ajvx"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_01.res" id="2_ekjcb"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_02.res" id="3_5ek6l"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_03.res" id="4_mbfc1"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_04.res" id="5_k6uuv"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_05.res" id="6_53vaa"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_06.res" id="7_g5h73"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_07.res" id="8_t35xx"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_08.res" id="9_txi1k"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_09.res" id="10_nxlrw"]
+
+[node name="Display_wpn_hg_01" type="Node3D"]
+
+[node name="FinishedWeaponPart_00" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_2ajvx")
+
+[node name="FinishedWeaponPart_01" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_ekjcb")
+
+[node name="FinishedWeaponPart_02" type="MeshInstance3D" parent="."]
+mesh = ExtResource("3_5ek6l")
+
+[node name="FinishedWeaponPart_03" type="MeshInstance3D" parent="."]
+mesh = ExtResource("4_mbfc1")
+
+[node name="FinishedWeaponPart_04" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.042999998, -0.017445821)
+mesh = ExtResource("5_k6uuv")
+
+[node name="FinishedWeaponPart_05" type="MeshInstance3D" parent="."]
+mesh = ExtResource("6_53vaa")
+
+[node name="FinishedWeaponPart_06" type="MeshInstance3D" parent="."]
+mesh = ExtResource("7_g5h73")
+
+[node name="FinishedWeaponPart_07" type="MeshInstance3D" parent="."]
+mesh = ExtResource("8_t35xx")
+
+[node name="FinishedWeaponPart_08" type="MeshInstance3D" parent="."]
+mesh = ExtResource("9_txi1k")
+
+[node name="FinishedWeaponPart_09" type="MeshInstance3D" parent="."]
+mesh = ExtResource("10_nxlrw")

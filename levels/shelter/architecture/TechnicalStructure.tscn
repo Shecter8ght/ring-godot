@@ -1,0 +1,82 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/TechnicalStructure_00.res" id="1_agokw"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tep02"]
+size = Vector3(0.08, 2.1, 1.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_m8w8w"]
+size = Vector3(0.08, 2.1, 1.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4nnut"]
+size = Vector3(0.08, 2.1, 1.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mum6q"]
+size = Vector3(0.08, 2.1, 1.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2d7vd"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b0j1o"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ufho2"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d3pi7"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1n6aw"]
+size = Vector3(0.5, 5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_etybo"]
+size = Vector3(0.5, 5, 0.5)
+
+[node name="TechnicalStructure" type="Node3D"]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_agokw")
+metadata/shelter_cut = true
+
+[node name="SimplifiedCollision" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2, 1.05, 6.45)
+shape = SubResource("BoxShape3D_tep02")
+
+[node name="Hull_01" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.05, 6.45)
+shape = SubResource("BoxShape3D_m8w8w")
+
+[node name="Hull_02" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.05, 6.45)
+shape = SubResource("BoxShape3D_4nnut")
+
+[node name="Hull_03" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.2, 1.05, 6.45)
+shape = SubResource("BoxShape3D_mum6q")
+
+[node name="Hull_04" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.6, 2.25, -4.8)
+shape = SubResource("BoxShape3D_2d7vd")
+
+[node name="Hull_05" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.6, 2.25, -4.8)
+shape = SubResource("BoxShape3D_b0j1o")
+
+[node name="Hull_06" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.6, 2.25, 4.8)
+shape = SubResource("BoxShape3D_ufho2")
+
+[node name="Hull_07" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.6, 2.25, 4.8)
+shape = SubResource("BoxShape3D_d3pi7")
+
+[node name="Hull_08" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3, 2.5, -7.1)
+shape = SubResource("BoxShape3D_1n6aw")
+
+[node name="Hull_09" type="CollisionShape3D" parent="SimplifiedCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3, 2.5, -7.1)
+shape = SubResource("BoxShape3D_etybo")

@@ -23,3 +23,6 @@ tools/_probe/
 
 # Звуки на пробу для стенда tools/sound_bench — сырьё, не в git
 _sound_try/
+
+# Дизайн-документы по оружию (HTML по 26–90 МБ) — лежат локально, не в git
+docs/RING_weapon_design_doc_*.html
