@@ -1,5 +1,5 @@
 {
-	"authored_assets": 193,
+	"authored_assets": 194,
 	"dressing": {
 		"assets": 34,
 		"baked_effect_assets": 2,
@@ -12,6 +12,6 @@
 	"lights": 75.0,
 	"navigation_polygons": 300,
 	"procedural_level_generation": false,
-	"prop_instances": 443,
+	"prop_instances": 444,
 	"reflection_probes": 7.0
 }
