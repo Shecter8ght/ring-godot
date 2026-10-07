@@ -1,23 +1,23 @@
 {
   "_comment": "Метры в осях WeaponModels. pos — запястье; fingers — от запястья к костяшкам; thumb — от мизинца к указательному. Профиль можно переопределить через weapon.hand_grips. Руки не масштабируются вместе с оружием.",
   "pistol": {
-    "right": {"pos": [-0.032, -0.024, -0.088], "fingers": [0, 0, 1], "thumb": [0, 1, 0], "curl": [5, 85, 55]},
-    "left": {"pos": [0.046, -0.033, -0.086], "fingers": [0, 0, 1], "thumb": [0, 1, 0], "curl": [5, 85, 55]}
+	"right": {"pos": [-0.032, -0.024, -0.088], "fingers": [0, 0, 1], "thumb": [0, 1, 0], "curl": [0, 85, 55]},
+	"left": {"pos": [0.046, -0.033, -0.086], "fingers": [0, 0, 1], "thumb": [0, 1, 0], "curl": [0, 85, 55]}
   },
   "rifle": {
-    "underbarrel_clearance": 0.105,
-    "right": {"pos": [-0.032, -0.026, -0.085], "fingers": [0, 0, 1], "thumb": [0, 1, 0], "curl": [5, 85, 55]},
-    "left": {"pos": [0.105, 0.000, 0.285], "fingers": [-1, 0, 0], "thumb": [0, 0, 1], "curl": [5, 85, 55]}
+	"underbarrel_clearance": 0.105,
+	"right": {"pos": [-0.032, -0.026, -0.085], "fingers": [0, 0, 1], "thumb": [0, 1, 0], "curl": [5, 85, 55]},
+	"left": {"pos": [0.105, 0.000, 0.285], "fingers": [-1, 0, 0], "thumb": [0, 0, 1], "curl": [5, 85, 55]}
   },
   "shotgun": {
-    "underbarrel_clearance": 0.105,
-    "right": {"pos": [-0.032, 0.000, -0.111], "fingers": [0, 0.23, 1], "thumb": [0, 1, -0.23], "curl": [5, 85, 55]},
-    "left": {"pos": [0.105, 0.000, 0.330], "fingers": [-1, 0, 0], "thumb": [0, 0, 1], "curl": [5, 85, 55]}
+	"underbarrel_clearance": 0.105,
+	"right": {"pos": [-0.032, 0.000, -0.111], "fingers": [0, 0.23, 1], "thumb": [0, 1, -0.23], "curl": [5, 85, 55]},
+	"left": {"pos": [0.105, 0.000, 0.330], "fingers": [-1, 0, 0], "thumb": [0, 0, 1], "curl": [5, 85, 55]}
   },
   "bolt": {
-    "underbarrel_clearance": 0.105,
-    "right": {"pos": [-0.032, -0.012, -0.100], "fingers": [0, 0.23, 1], "thumb": [0, 1, -0.23], "curl": [5, 85, 55]},
-    "left": {"pos": [0.105, -0.006, 0.300], "fingers": [-1, 0, 0], "thumb": [0, 0, 1], "curl": [5, 85, 55]}
+	"underbarrel_clearance": 0.105,
+	"right": {"pos": [-0.032, -0.012, -0.100], "fingers": [0, 0.23, 1], "thumb": [0, 1, -0.23], "curl": [5, 85, 55]},
+	"left": {"pos": [0.105, -0.006, 0.300], "fingers": [-1, 0, 0], "thumb": [0, 0, 1], "curl": [5, 85, 55]}
   },
   "grip_vertical": {"pos": [0.033, -0.055, -0.078], "fingers": [0, 0, 1], "thumb": [0, 1, 0], "curl": [5, 85, 55]},
   "grip_angled": {"pos": [0.100, -0.038, 0.000], "fingers": [-1, 0, 0], "thumb": [0, 0.25, 1], "curl": [5, 85, 55]}
