@@ -2189,3 +2189,13 @@ C:\Users\Schecter_8ght\.codex\skills. Закреплена обязательн�
 13 внутренних ссылок проверены, UI metadata валидны. Исходная версия,
 изменения и отчёты сохранены в _asset_src/ak12_2018/skill_update_20261006/.
 Модели и файлы игры этой задачей не менялись.
+
+## 2026-10-07 — Переход на Godot 4.7.2
+
+Владелец работает в Godot 4.7.2 (Steam: D:\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe).
+project.godot переведён на 4.7, запускалки tools/godot.cmd, tools/smoke.cmd, EDITOR.cmd, RANGE.cmd,
+RING.cmd и AGENTS.md указывают на этот exe. Отдельного консольного exe у Steam-сборки нет — вывод
+перенаправляется обычным exe. Дымовая f1_ring на 4.7.2 — OK, ошибок скриптов нет.
+Осталось: tools/build_release.cmd ещё копирует 4.5.1 как RING.exe — пак 4.7 им не открыть;
+для сборки друзьям нужен отдельный официальный Godot 4.7.2 (не Steam).
+Диздоки по оружию (docs/RING_weapon_design_doc_*.html, 26–90 МБ) — вне git (.gitignore).
