@@ -579,9 +579,9 @@ const GLASS := {"bullet_k": 1.4, "collapse_below": 0.45, "collapse_sec": [1.2, 3
 ## Пустая магазинная тележка: масса, сопротивление колёс и контакт с человеком (СИ).
 ## Стекло и травма зависят от энергии по нормали; прижатие — от силы и стены за человеком.
 const CART: Dictionary = {
-	"mass_kg": 22.0, "person_kg": 80.0, "center_y": 0.40,
+	"mass_kg": 15.0, "person_kg": 80.0, "center_y": 0.40,
 	"friction": 0.012, "tipped_friction": 0.55, "bounce": 0.16,
-	"linear_damp": 0.025, "angular_damp": 0.65, "rolling_decel": 0.18,
+	"linear_damp": 0.025, "angular_damp": 0.65, "rolling_decel": 0.13,
 	"wheel_ground_dot": 0.65, "upright_dot": 0.55, "contacts": 24,
 	"caster_response": 9.0,
 	"push_restitution": 0.05, "push_min_speed": 0.04, "push_reach_m": 1.6,
