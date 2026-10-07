@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://bj7cycje105v5"]
 
-[ext_resource type="Script" path="res://tools/sound_bench.gd" id="1"]
+[ext_resource type="Script" uid="uid://bv7a7c7g1ki6a" path="res://tools/sound_bench.gd" id="1"]
 
 [node name="SoundBench" type="Node3D"]
 script = ExtResource("1")
