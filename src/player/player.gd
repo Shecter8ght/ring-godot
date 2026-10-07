@@ -49,6 +49,9 @@ var light_on: bool = false
 var laser_on: bool = false
 ## Песочница: стволы по ключам (пресеты WeaponDb.sandbox()) — записи оружия.
 var sandbox_weapons: Dictionary = {}
+## Тир убежища: ствол стойки тира (запись оружия; пусто — тира нет). Ключ его слота — RANGE_KEY.
+var range_weapon: Dictionary = {}
+const RANGE_KEY := "range"
 ## Состояние оружия у владельца (патроны, износ, прицел, фонари/ЛЦУ, задержка) — слот → словарь;
 ## хосту уходит при перезарядке, смене оружия, переключениях и паузе в стрельбе.
 var _ws: Dictionary = {}
@@ -1240,6 +1243,9 @@ func _host_pm_commit(request: Dictionary) -> Dictionary:
 
 
 func _sandbox_suppressor(slot: String, install: bool) -> String:
+	# в тире рюкзак — копия профиля: глушитель из него не ставим, иначе вещь задвоится или пропадёт
+	if in_range_mode():
+		return "В тире насадки не меняют"
 	var entry: Dictionary = sandbox_weapons[slot]
 	var list: Array = inventory.items.duplicate(true)
 	var updated: Dictionary
@@ -1355,7 +1361,7 @@ func _toggle_sight() -> void:
 ## снаряжением — [основное, пистолет] (слоты; "" — пусто).
 func weapon_keys() -> Array:
 	if not loadout_mode:
-		return WeaponDb.sandbox()
+		return [RANGE_KEY] if in_range_mode() else WeaponDb.sandbox()
 	return ["primary" if inventory.slot_weapon("primary") != "" else "", "secondary" if inventory.slot_weapon("secondary") != "" else ""]
 
 
@@ -1363,6 +1369,8 @@ func weapon_keys() -> Array:
 func sidearm_key() -> String:
 	if loadout_mode:
 		return "secondary" if inventory.slot_weapon("secondary") != "" else ""
+	if in_range_mode():
+		return RANGE_KEY if String(WeaponDb.weapon(String(range_weapon.get("id", ""))).get("class", "")) == "PISTOL" else ""
 	for k in WeaponDb.sandbox():
 		if String(WeaponDb.weapon(String(k)).get("class", "")) == "PISTOL":
 			return String(k)
@@ -1370,7 +1378,49 @@ func sidearm_key() -> String:
 
 
 func grenade_count() -> int:
+	if in_range_mode():
+		return 0
 	return inventory.count("grenade") if loadout_mode else grenades
+
+
+## Тир убежища: выдан ли ствол стойки тира (в руках только он, патроны без счёта).
+func in_range_mode() -> bool:
+	return not range_weapon.is_empty()
+
+
+## Тир: взять ствол стойки (запись оружия из пресета). Своё снаряжение остаётся в профиле нетронутым:
+## состояние оружия в руках сначала уходит в профиль, затем игрок переходит на «песочницу» с одним
+## этим стволом — вещи и патроны рюкзака тир не расходует.
+func set_range_weapon(entry: Dictionary) -> void:
+	if entry.is_empty():
+		return
+	cancel_weapon_action()
+	if loadout_mode:
+		flush_weapon_state()
+	range_weapon = entry.duplicate(true)
+	loadout_mode = false
+	sandbox_weapons = {RANGE_KEY: range_weapon.duplicate(true)}
+	_ws.erase(RANGE_KEY)
+	_pm_entries.erase(RANGE_KEY)
+	weapon_slot = ""
+	_switch(RANGE_KEY)
+
+
+## Тир: сдать ствол стойки — в руки возвращается своё снаряжение из профиля.
+func clear_range_weapon() -> void:
+	if not in_range_mode():
+		return
+	cancel_weapon_action()
+	_cancel_nade_aim()
+	range_weapon = {}
+	sandbox_weapons = {}
+	_ws.erase(RANGE_KEY)
+	_pm_entries.erase(RANGE_KEY)
+	loadout_mode = true
+	if weapon_id != "":
+		_play_weapon_sound(spec(), "holster", -6.0)
+	weapon_slot = ""
+	weapon_id = ""
 
 
 ## Что можно держать сейчас: раненым и таща раненого — только пистолет.
@@ -1648,6 +1698,9 @@ func _tick_nvg(delta: float) -> void:
 
 ## Ракета / химсвет: из рюкзака (в песочнице — без счёта); бросок видят все peer.
 func _throw_light(k: String) -> void:
+	if in_range_mode():
+		_say("В тире — только стрельба")
+		return
 	if loadout_mode:
 		if inventory.count(k) <= 0:
 			_say("Нет: " + ItemDb.item_name(k))

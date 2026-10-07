@@ -1,7 +1,7 @@
 @tool
 extends Node3D
-## Убежище — отдельный уровень между рейдами (старт игры). Подвал под торговым центром:
-## тайник со снаряжением, верстак, торговец, выход в рейд. Геометрия — CSG-узлы сцены (двигать
+## Убежище — отдельный уровень между рейдами (старт игры). Старая котельная в зоне 5, отдельная
+## от карты ТЦ локация: тайник со снаряжением, верстак, торговец, выход в рейд, тир в котельном зале. Геометрия — CSG-узлы сцены (двигать
 ## и менять руками), материал — по meta "mat" (id из SectorMaterials, серые "gb_*" тоже можно)
 ## или "color" (плоский цвет); meta "cut" = false — не растворять у камеры (пол).
 ## Игрок ходит тем же персонажем и с оружием обращается так же, как в рейде: стрельба, прицел, фонарь
@@ -335,16 +335,36 @@ func _process(delta: float) -> void:
 		_player.flush_weapon_state()
 		_ui.open(HideoutStation.Kind.STASH)
 		return
+	if _player.ui_blocked():
+		return
 	var best: Interactable = null
 	var best_d := INF
+	var reach: Array[Interactable] = []
 	for n in get_tree().get_nodes_in_group("interactables"):
 		var it := n as Interactable
 		var d := it.global_position.distance_to(_player.global_position)
-		if d < Balance.INTERACT_RADIUS + 0.6 and d < best_d:
-			best = it
-			best_d = d
+		if d < Balance.INTERACT_RADIUS + 0.6:
+			reach.append(it)
+			if d < best_d:
+				best = it
+				best_d = d
 	if best == null:
 		return
+	# несколько рядом (кнопки пульта тира) — та, что под курсором, если курсор на одной из них
+	var cam := get_viewport().get_camera_3d()
+	if reach.size() > 1 and cam:
+		# от первого лица мышь захвачена — «курсор» в центре экрана
+		var mouse := get_viewport().get_mouse_position()
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			mouse = get_viewport().get_visible_rect().size * 0.5
+		var aim_d: float = Balance.INTERACT_CURSOR_PICK_PX
+		for it: Interactable in reach:
+			if cam.is_position_behind(it.global_position):
+				continue
+			var px: float = cam.unproject_position(it.global_position).distance_to(mouse)
+			if px < aim_d:
+				aim_d = px
+				best = it
 	_prompt.visible = true
 	_prompt.text = PauseMenu.key_name("interact") + " — " + best.prompt()
 	if Input.is_action_just_pressed("interact"):

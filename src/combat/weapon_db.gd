@@ -577,6 +577,17 @@ static func make_weapon(preset_id: String, rng: RandomNumberGenerator, dur_range
 	var p := preset(preset_id)
 	if p.is_empty():
 		return {}
+	return _from_preset(p, rng, dur_range)
+
+
+## Ствол без обвеса со штатным магазином — для оружия, у которого нет своего пресета (тир).
+static func bare_weapon(weapon_id: String, rng: RandomNumberGenerator, dur_range: Array = []) -> Dictionary:
+	if not is_weapon(weapon_id):
+		return {}
+	return _from_preset({"weapon": weapon_id}, rng, dur_range)
+
+
+static func _from_preset(p: Dictionary, rng: RandomNumberGenerator, dur_range: Array) -> Dictionary:
 	var wid := String(p.weapon)
 	var e := {"id": wid, "n": 1}
 	var dr: Array = dur_range if not dur_range.is_empty() else p.get("dur", [80, 100])

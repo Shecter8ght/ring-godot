@@ -31,7 +31,8 @@ static func kind_at(hit: Dictionary) -> String:
 	if body == null:
 		return "concrete"
 	if body is Target:
-		return "metal"
+		# поппер — сталь; бумажная мишень и манекен тира говорят о себе сами (meta "surface")
+		return String((body as Node).get_meta("surface", "metal"))
 	if body is Marauder or body is Player or body is RagdollPart:
 		return "flesh"
 	var node := body as Node
