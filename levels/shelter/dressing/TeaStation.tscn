@@ -5,13 +5,13 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_nncc1"]
 size = Vector3(1.1, 0.88, 0.58)
 
-[node name="TeaStation" type="Node3D" unique_id=969713299]
+[node name="TeaStation" type="Node3D" unique_id=139131923]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=763660464]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=649501957]
 mesh = ExtResource("1_nkicu")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=2112014059]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1374409410]
 
-[node name="Shape" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1299354837]
+[node name="Shape" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=124910618]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44, 0)
 shape = SubResource("BoxShape3D_nncc1")

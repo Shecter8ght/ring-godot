@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PlanningMap_00.res" id="1_4s4m8"]
 
-[node name="PlanningMap" type="Node3D" unique_id=1337846353]
+[node name="PlanningMap" type="Node3D" unique_id=900975856]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=167091675]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1272163696]
 cast_shadow = 0
 mesh = ExtResource("1_4s4m8")

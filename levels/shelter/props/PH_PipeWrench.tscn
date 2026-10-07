@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_PipeWrench_00.res" id="1_n1d7q"]
 
-[node name="PH_PipeWrench" type="Node3D" unique_id=1742997520]
+[node name="PH_PipeWrench" type="Node3D" unique_id=2031391882]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=267602919]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2133208801]
 cast_shadow = 0
 mesh = ExtResource("1_n1d7q")

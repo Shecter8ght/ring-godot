@@ -15,46 +15,46 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_12.res" id="13_tlnpq"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Radio_13.res" id="14_0qbcw"]
 
-[node name="PH_Radio" type="Node3D" unique_id=1452598200]
+[node name="PH_Radio" type="Node3D" unique_id=1146941982]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2029837994]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=641273237]
 mesh = ExtResource("1_lgbbf")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=377075246]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1414894591]
 mesh = ExtResource("2_cabt7")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1163096854]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1909105415]
 mesh = ExtResource("3_injtj")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=345400578]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=199249362]
 mesh = ExtResource("4_hum1w")
 
-[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=151813352]
+[node name="FinishedMesh_04" type="MeshInstance3D" parent="." unique_id=117122503]
 mesh = ExtResource("5_eoayk")
 
-[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=585887433]
+[node name="FinishedMesh_05" type="MeshInstance3D" parent="." unique_id=311347393]
 mesh = ExtResource("6_emah6")
 
-[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=867319673]
+[node name="FinishedMesh_06" type="MeshInstance3D" parent="." unique_id=522855724]
 mesh = ExtResource("7_8xcmf")
 
-[node name="FinishedMesh_07" type="MeshInstance3D" parent="." unique_id=1701240149]
+[node name="FinishedMesh_07" type="MeshInstance3D" parent="." unique_id=1171435675]
 mesh = ExtResource("8_oretc")
 
-[node name="FinishedMesh_08" type="MeshInstance3D" parent="." unique_id=1525008580]
+[node name="FinishedMesh_08" type="MeshInstance3D" parent="." unique_id=1452385326]
 mesh = ExtResource("9_w7v10")
 
-[node name="FinishedMesh_09" type="MeshInstance3D" parent="." unique_id=1604460759]
+[node name="FinishedMesh_09" type="MeshInstance3D" parent="." unique_id=1024812776]
 mesh = ExtResource("10_5txgt")
 
-[node name="FinishedMesh_10" type="MeshInstance3D" parent="." unique_id=1412998231]
+[node name="FinishedMesh_10" type="MeshInstance3D" parent="." unique_id=1727260270]
 mesh = ExtResource("11_jn1yd")
 
-[node name="FinishedMesh_11" type="MeshInstance3D" parent="." unique_id=377871591]
+[node name="FinishedMesh_11" type="MeshInstance3D" parent="." unique_id=173547667]
 mesh = ExtResource("12_8518x")
 
-[node name="FinishedMesh_12" type="MeshInstance3D" parent="." unique_id=374672040]
+[node name="FinishedMesh_12" type="MeshInstance3D" parent="." unique_id=1093121955]
 mesh = ExtResource("13_tlnpq")
 
-[node name="FinishedMesh_13" type="MeshInstance3D" parent="." unique_id=382398402]
+[node name="FinishedMesh_13" type="MeshInstance3D" parent="." unique_id=1883827530]
 mesh = ExtResource("14_0qbcw")

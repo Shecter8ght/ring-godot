@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/InventoryClipboard_00.res" id="1_3rx8u"]
 
-[node name="InventoryClipboard" type="Node3D" unique_id=442671123]
+[node name="InventoryClipboard" type="Node3D" unique_id=435096047]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=102978315]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=196093011]
 cast_shadow = 0
 mesh = ExtResource("1_3rx8u")

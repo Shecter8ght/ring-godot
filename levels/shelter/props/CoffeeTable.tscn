@@ -5,14 +5,14 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_grrah"]
 size = Vector3(1.15, 0.44, 0.65)
 
-[node name="CoffeeTable" type="Node3D" unique_id=85500050]
+[node name="CoffeeTable" type="Node3D" unique_id=1716759776]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=806523416]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=51419041]
 mesh = ExtResource("1_d23l8")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=69640807]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=194014236]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1278422462]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1443178274]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
 shape = SubResource("BoxShape3D_grrah")

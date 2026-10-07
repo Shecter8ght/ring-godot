@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/FireExtinguisher_00.res" id="1_cowey"]
 
-[node name="FireExtinguisher" type="Node3D" unique_id=1741706703]
+[node name="FireExtinguisher" type="Node3D" unique_id=620337689]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=773594158]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=122436299]
 mesh = ExtResource("1_cowey")

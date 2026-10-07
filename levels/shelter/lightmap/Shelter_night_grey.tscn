@@ -56,12 +56,12 @@ render_priority = 0
 shader = SubResource("Shader_1lj2s")
 shader_parameter/channel = 0
 
-[node name="Shelter_Interior" unique_id=217323722 instance=ExtResource("1_base")]
+[node name="Shelter_Interior" unique_id=1950068743 instance=ExtResource("1_base")]
 
-[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(1857661139) index="0" unique_id=2109337210]
+[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(1023472905) index="0" unique_id=979412553]
 material_override = SubResource("ShaderMaterial_0aoix")
 
-[node name="LightmapGI" parent="." index="17" unique_id=88407451]
+[node name="LightmapGI" parent="." index="17" unique_id=71893088]
 light_data = ExtResource("2_bb1pp")
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]

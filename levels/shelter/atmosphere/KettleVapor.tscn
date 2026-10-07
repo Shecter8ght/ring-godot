@@ -49,12 +49,12 @@ _data = {
 &"KettleVaporAction": SubResource("Animation_bkung")
 }
 
-[node name="KettleVapor" type="Node3D" unique_id=14665457]
+[node name="KettleVapor" type="Node3D" unique_id=571451117]
 script = ExtResource("1_vtrh7")
 
-[node name="Visual" type="Node3D" parent="." unique_id=824354093]
+[node name="Visual" type="Node3D" parent="." unique_id=163958467]
 
-[node name="KettleVapor" type="MeshInstance3D" parent="Visual" unique_id=1041226460]
+[node name="KettleVapor" type="MeshInstance3D" parent="Visual" unique_id=2053665883]
 material_override = ExtResource("2_15tx4")
 cast_shadow = 0
 gi_mode = 0
@@ -66,6 +66,6 @@ blend_shapes/AuthoredPose_3 = 0.0
 blend_shapes/AuthoredPose_4 = 0.0
 blend_shapes/AuthoredPose_5 = 0.0
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual" unique_id=526074329]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual" unique_id=465438435]
 libraries/ = SubResource("AnimationLibrary_jsh3y")
 autoplay = &"KettleVaporAction"

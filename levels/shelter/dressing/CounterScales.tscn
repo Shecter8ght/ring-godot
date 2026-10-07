@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/CounterScales_00.res" id="1_7ttjl"]
 
-[node name="CounterScales" type="Node3D" unique_id=1736755844]
+[node name="CounterScales" type="Node3D" unique_id=1179008117]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2065170512]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2097711521]
 cast_shadow = 0
 mesh = ExtResource("1_7ttjl")

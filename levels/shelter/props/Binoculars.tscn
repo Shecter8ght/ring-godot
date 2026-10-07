@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Binoculars_00.res" id="1_sl17n"]
 
-[node name="Binoculars" type="Node3D" unique_id=2043166266]
+[node name="Binoculars" type="Node3D" unique_id=1314416541]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1718838340]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1945524986]
 mesh = ExtResource("1_sl17n")

@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/RangeConsole_00.res" id="1_u4r7g"]
 
-[node name="RangeConsole" type="Node3D" unique_id=221793717]
+[node name="RangeConsole" type="Node3D" unique_id=697148277]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=611657604]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1943871051]
 cast_shadow = 0
 mesh = ExtResource("1_u4r7g")

@@ -11,35 +11,35 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_08.res" id="9_txi1k"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_hg_01_09.res" id="10_nxlrw"]
 
-[node name="Display_wpn_hg_01" type="Node3D" unique_id=1731134061]
+[node name="Display_wpn_hg_01" type="Node3D" unique_id=44636325]
 
-[node name="FinishedWeaponPart_00" type="MeshInstance3D" parent="." unique_id=921580047]
+[node name="FinishedWeaponPart_00" type="MeshInstance3D" parent="." unique_id=752020490]
 mesh = ExtResource("1_2ajvx")
 
-[node name="FinishedWeaponPart_01" type="MeshInstance3D" parent="." unique_id=160401547]
+[node name="FinishedWeaponPart_01" type="MeshInstance3D" parent="." unique_id=592209286]
 mesh = ExtResource("2_ekjcb")
 
-[node name="FinishedWeaponPart_02" type="MeshInstance3D" parent="." unique_id=1382696960]
+[node name="FinishedWeaponPart_02" type="MeshInstance3D" parent="." unique_id=1503981087]
 mesh = ExtResource("3_5ek6l")
 
-[node name="FinishedWeaponPart_03" type="MeshInstance3D" parent="." unique_id=1533599434]
+[node name="FinishedWeaponPart_03" type="MeshInstance3D" parent="." unique_id=326557998]
 mesh = ExtResource("4_mbfc1")
 
-[node name="FinishedWeaponPart_04" type="MeshInstance3D" parent="." unique_id=1942090297]
+[node name="FinishedWeaponPart_04" type="MeshInstance3D" parent="." unique_id=615988545]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.042999998, -0.017445821)
 mesh = ExtResource("5_k6uuv")
 
-[node name="FinishedWeaponPart_05" type="MeshInstance3D" parent="." unique_id=1615568377]
+[node name="FinishedWeaponPart_05" type="MeshInstance3D" parent="." unique_id=847893569]
 mesh = ExtResource("6_53vaa")
 
-[node name="FinishedWeaponPart_06" type="MeshInstance3D" parent="." unique_id=734237274]
+[node name="FinishedWeaponPart_06" type="MeshInstance3D" parent="." unique_id=798967768]
 mesh = ExtResource("7_g5h73")
 
-[node name="FinishedWeaponPart_07" type="MeshInstance3D" parent="." unique_id=1911142473]
+[node name="FinishedWeaponPart_07" type="MeshInstance3D" parent="." unique_id=411378063]
 mesh = ExtResource("8_t35xx")
 
-[node name="FinishedWeaponPart_08" type="MeshInstance3D" parent="." unique_id=1504329787]
+[node name="FinishedWeaponPart_08" type="MeshInstance3D" parent="." unique_id=1298201663]
 mesh = ExtResource("9_txi1k")
 
-[node name="FinishedWeaponPart_09" type="MeshInstance3D" parent="." unique_id=1628495932]
+[node name="FinishedWeaponPart_09" type="MeshInstance3D" parent="." unique_id=1942767321]
 mesh = ExtResource("10_nxlrw")

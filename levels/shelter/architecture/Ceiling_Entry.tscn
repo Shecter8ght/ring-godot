@@ -1,23 +1,25 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Ceiling_Entry_00.res" id="1_wo1bc"]
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/Ceiling_Entry_00.res" id="1_ulde5"]
+[ext_resource type="Material" path="res://levels/shelter/materials/TwoSidedShadow.tres" id="2_21wmg"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ulde5"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_oh1y4"]
 size = Vector3(8, 0.2, 4)
 
-[node name="Ceiling_Entry" type="Node3D" unique_id=1278906324]
+[node name="Ceiling_Entry" type="Node3D" unique_id=1686259795]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1672700348]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1295974522]
 layers = 524288
-mesh = ExtResource("1_wo1bc")
+mesh = ExtResource("1_ulde5")
 
-[node name="CeilingShadow" type="MeshInstance3D" parent="." unique_id=409460413]
+[node name="CeilingShadow" type="MeshInstance3D" parent="." unique_id=1593990272]
+material_override = ExtResource("2_21wmg")
 cast_shadow = 3
-mesh = ExtResource("1_wo1bc")
+mesh = ExtResource("1_ulde5")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=2058197665]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1669093870]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=439545275]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1495133895]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.35, 10)
-shape = SubResource("BoxShape3D_ulde5")
+shape = SubResource("BoxShape3D_oh1y4")

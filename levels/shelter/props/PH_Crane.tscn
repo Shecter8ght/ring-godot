@@ -4,16 +4,16 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Crane_01.res" id="2_a55do"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Crane_02.res" id="3_rnogv"]
 
-[node name="PH_Crane" type="Node3D" unique_id=1791591974]
+[node name="PH_Crane" type="Node3D" unique_id=1774760086]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=296478946]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1161024744]
 layers = 524288
 mesh = ExtResource("1_wbrgl")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=657499439]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1824855332]
 layers = 524288
 mesh = ExtResource("2_a55do")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1367561913]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1167098467]
 layers = 524288
 mesh = ExtResource("3_rnogv")

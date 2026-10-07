@@ -2,8 +2,8 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_HangingLamp_00.res" id="1_832fc"]
 
-[node name="PH_HangingLamp" type="Node3D" unique_id=2058633779]
+[node name="PH_HangingLamp" type="Node3D" unique_id=1574904614]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=2141619178]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=778531476]
 layers = 524288
 mesh = ExtResource("1_832fc")

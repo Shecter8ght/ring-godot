@@ -56,24 +56,24 @@ render_priority = 0
 shader = SubResource("Shader_glom3")
 shader_parameter/channel = 0
 
-[node name="Shelter_Interior" unique_id=1953110234 instance=ExtResource("1_base")]
+[node name="Shelter_Interior" unique_id=1610785242 instance=ExtResource("1_base")]
 
-[node name="Sun" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="71" unique_id=640204056]
+[node name="Sun" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="71" unique_id=780270760]
 visible = true
 
-[node name="HallDaylight_72" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="72" unique_id=1179717296]
+[node name="HallDaylight_72" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="72" unique_id=1208046424]
 light_energy = 0.018312637
 
-[node name="HallDaylight_73" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="73" unique_id=1506587500]
+[node name="HallDaylight_73" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="73" unique_id=332133528]
 light_energy = 0.018312637
 
-[node name="HallDaylight_74" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="74" unique_id=1012070822]
+[node name="HallDaylight_74" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="74" unique_id=372411029]
 light_energy = 0.018312637
 
-[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(1857661139) index="0" unique_id=2109337210]
+[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(1023472905) index="0" unique_id=979412553]
 material_override = SubResource("ShaderMaterial_36s8u")
 
-[node name="LightmapGI" parent="." index="17" unique_id=88407451]
+[node name="LightmapGI" parent="." index="17" unique_id=71893088]
 light_data = ExtResource("2_6cqso")
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]

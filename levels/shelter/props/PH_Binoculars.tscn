@@ -5,20 +5,20 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Binoculars_02.res" id="3_pvp01"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Binoculars_03.res" id="4_v5046"]
 
-[node name="PH_Binoculars" type="Node3D" unique_id=1175886966]
+[node name="PH_Binoculars" type="Node3D" unique_id=199168123]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=489753978]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1913909295]
 cast_shadow = 0
 mesh = ExtResource("1_gchra")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=922992545]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1827090016]
 cast_shadow = 0
 mesh = ExtResource("2_eqmvo")
 
-[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=98811452]
+[node name="FinishedMesh_02" type="MeshInstance3D" parent="." unique_id=1008197806]
 cast_shadow = 0
 mesh = ExtResource("3_pvp01")
 
-[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1436464166]
+[node name="FinishedMesh_03" type="MeshInstance3D" parent="." unique_id=1845073560]
 cast_shadow = 0
 mesh = ExtResource("4_v5046")

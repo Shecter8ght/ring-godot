@@ -56,234 +56,234 @@ render_priority = 0
 shader = SubResource("Shader_65j6o")
 shader_parameter/channel = 0
 
-[node name="Shelter_Interior" unique_id=1269887444 instance=ExtResource("1_base")]
+[node name="Shelter_Interior" unique_id=308795043 instance=ExtResource("1_base")]
 
-[node name="PlanningTask" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="0" unique_id=1277639393]
+[node name="PlanningTask" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="0" unique_id=202458771]
 light_energy = 0.0
 
-[node name="LivingTask" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="1" unique_id=487333634]
+[node name="LivingTask" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="1" unique_id=1267683706]
 light_energy = 0.0
 
-[node name="WorkshopTask" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="2" unique_id=1132624883]
+[node name="WorkshopTask" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="2" unique_id=376185629]
 light_energy = 0.0
 
-[node name="GalleryTask" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="3" unique_id=702169690]
+[node name="GalleryTask" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="3" unique_id=1927530171]
 light_energy = 0.0
 
-[node name="HubPractical_04" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="4" unique_id=1606609783]
+[node name="HubPractical_04" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="4" unique_id=505906814]
 light_energy = 0.0
 
-[node name="HubPractical_05" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="5" unique_id=473678812]
+[node name="HubPractical_05" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="5" unique_id=1726998922]
 light_energy = 0.0
 
-[node name="HubPractical_06" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="6" unique_id=591449824]
+[node name="HubPractical_06" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="6" unique_id=834453844]
 light_energy = 0.0
 
-[node name="HubPractical_07" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="7" unique_id=1157220272]
+[node name="HubPractical_07" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="7" unique_id=130282605]
 light_energy = 0.0
 
-[node name="HubWest" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="8" unique_id=478913300]
+[node name="HubWest" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="8" unique_id=1423494727]
 light_energy = 0.0
 
-[node name="HubWest2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="9" unique_id=1464521401]
+[node name="HubWest2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="9" unique_id=291669319]
 light_energy = 0.0
 
-[node name="HubEast" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="10" unique_id=1938237981]
+[node name="HubEast" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="10" unique_id=249651094]
 light_energy = 0.0
 
-[node name="HubEast2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="11" unique_id=1366252454]
+[node name="HubEast2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="11" unique_id=295012948]
 light_energy = 0.0
 
-[node name="NorthGallery" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="12" unique_id=1742391174]
+[node name="NorthGallery" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="12" unique_id=160371756]
 light_energy = 0.0
 
-[node name="NorthGallery2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="13" unique_id=499632304]
+[node name="NorthGallery2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="13" unique_id=756114187]
 light_energy = 0.0
 
-[node name="Entry" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="14" unique_id=1984375104]
+[node name="Entry" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="14" unique_id=114924757]
 light_energy = 0.0
 
-[node name="Entry2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="15" unique_id=134937454]
+[node name="Entry2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="15" unique_id=1970178310]
 light_energy = 0.0
 
-[node name="Living" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="16" unique_id=307894155]
+[node name="Living" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="16" unique_id=917688565]
 light_energy = 0.0
 
-[node name="Living2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="17" unique_id=610168734]
+[node name="Living2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="17" unique_id=1088014853]
 light_energy = 0.0
 
-[node name="Trader" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="18" unique_id=2105408954]
+[node name="Trader" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="18" unique_id=590767448]
 light_energy = 0.0
 
-[node name="Trader2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="19" unique_id=1300522426]
+[node name="Trader2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="19" unique_id=1453923774]
 light_energy = 0.0
 
-[node name="Armory" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="20" unique_id=1700642410]
+[node name="Armory" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="20" unique_id=1706839692]
 light_energy = 0.0
 
-[node name="Armory2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="21" unique_id=769630026]
+[node name="Armory2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="21" unique_id=1939452854]
 light_energy = 0.0
 
-[node name="Workshop" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="22" unique_id=1644206297]
+[node name="Workshop" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="22" unique_id=1874437185]
 light_energy = 0.0
 
-[node name="Workshop2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="23" unique_id=576740967]
+[node name="Workshop2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="23" unique_id=495499448]
 light_energy = 0.0
 
-[node name="Storage" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="24" unique_id=938031187]
+[node name="Storage" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="24" unique_id=204838809]
 light_energy = 0.0
 
-[node name="Storage2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="25" unique_id=265273695]
+[node name="Storage2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="25" unique_id=1905631769]
 light_energy = 0.0
 
-[node name="Generator" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="26" unique_id=26629408]
+[node name="Generator" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="26" unique_id=239680704]
 light_energy = 0.0
 
-[node name="Generator2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="27" unique_id=413157998]
+[node name="Generator2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="27" unique_id=2017022668]
 light_energy = 0.0
 
-[node name="Sleeping" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="28" unique_id=1946744997]
+[node name="Sleeping" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="28" unique_id=655096084]
 light_energy = 0.0
 
-[node name="Sleeping2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="29" unique_id=1932804594]
+[node name="Sleeping2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="29" unique_id=904208473]
 light_energy = 0.0
 
-[node name="Bays" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="30" unique_id=1880752942]
+[node name="Bays" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="30" unique_id=421889384]
 light_energy = 0.0
 
-[node name="Bays2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="31" unique_id=1073642878]
+[node name="Bays2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="31" unique_id=1114637598]
 light_energy = 0.0
 
-[node name="BaysWest" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="32" unique_id=1629743868]
+[node name="BaysWest" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="32" unique_id=1326562515]
 light_energy = 0.0
 
-[node name="BaysWest2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="33" unique_id=1749804664]
+[node name="BaysWest2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="33" unique_id=2029152891]
 light_energy = 0.0
 
-[node name="LivingWall" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="36" unique_id=421969215]
+[node name="LivingWall" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="36" unique_id=830484123]
 light_energy = 0.0
 
-[node name="LivingWall2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="37" unique_id=1450172133]
+[node name="LivingWall2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="37" unique_id=1678548369]
 light_energy = 0.0
 
-[node name="TraderWall" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="38" unique_id=773709809]
+[node name="TraderWall" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="38" unique_id=1108296171]
 light_energy = 0.0
 
-[node name="TraderWall2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="39" unique_id=431204079]
+[node name="TraderWall2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="39" unique_id=630724929]
 light_energy = 0.0
 
-[node name="ArmoryWall" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="40" unique_id=2098287174]
+[node name="ArmoryWall" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="40" unique_id=1608682981]
 light_energy = 0.0
 
-[node name="ArmoryWall2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="41" unique_id=650248331]
+[node name="ArmoryWall2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="41" unique_id=1767680236]
 light_energy = 0.0
 
-[node name="StorageWall" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="42" unique_id=905802900]
+[node name="StorageWall" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="42" unique_id=1552979082]
 light_energy = 0.0
 
-[node name="StorageWall2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="43" unique_id=1436313315]
+[node name="StorageWall2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="43" unique_id=598192681]
 light_energy = 0.0
 
-[node name="WorkshopWall" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="44" unique_id=1840641440]
+[node name="WorkshopWall" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="44" unique_id=1767756175]
 light_energy = 0.0
 
-[node name="WorkshopWall2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="45" unique_id=925635381]
+[node name="WorkshopWall2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="45" unique_id=212673564]
 light_energy = 0.0
 
-[node name="GeneratorWall" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="46" unique_id=2118342083]
+[node name="GeneratorWall" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="46" unique_id=653190164]
 light_energy = 0.0
 
-[node name="GeneratorWall2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="47" unique_id=1942539141]
+[node name="GeneratorWall2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="47" unique_id=1004587012]
 light_energy = 0.0
 
-[node name="HubWallLeft" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="48" unique_id=212623644]
+[node name="HubWallLeft" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="48" unique_id=1680620084]
 light_energy = 0.0
 
-[node name="HubWallLeft2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="49" unique_id=1501745344]
+[node name="HubWallLeft2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="49" unique_id=1093885422]
 light_energy = 0.0
 
-[node name="HubWallRight" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="50" unique_id=1458374362]
+[node name="HubWallRight" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="50" unique_id=849547536]
 light_energy = 0.0
 
-[node name="HubWallRight2" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="51" unique_id=90081756]
+[node name="HubWallRight2" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="51" unique_id=1437683198]
 light_energy = 0.0
 
-[node name="TvGlow" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="52" unique_id=1108222907]
+[node name="TvGlow" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="52" unique_id=462679905]
 light_energy = 0.0
 
-[node name="HallPendant_53" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="53" unique_id=557971725]
+[node name="HallPendant_53" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="53" unique_id=870411654]
 light_energy = 0.0
 
-[node name="HallPendant_54" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="54" unique_id=926672436]
+[node name="HallPendant_54" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="54" unique_id=1405932030]
 light_energy = 0.0
 
-[node name="HallPendant_55" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="55" unique_id=1353777734]
+[node name="HallPendant_55" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="55" unique_id=112846503]
 light_energy = 0.0
 
-[node name="HallPendant_56" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="56" unique_id=483542756]
+[node name="HallPendant_56" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="56" unique_id=529106421]
 light_energy = 0.0
 
-[node name="HallPendant_57" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="57" unique_id=1557721065]
+[node name="HallPendant_57" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="57" unique_id=859064640]
 light_energy = 0.0
 
-[node name="HallPendant_58" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="58" unique_id=1544856692]
+[node name="HallPendant_58" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="58" unique_id=1340829658]
 light_energy = 0.0
 
-[node name="HallPendant_59" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="59" unique_id=2003874749]
+[node name="HallPendant_59" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="59" unique_id=1300252572]
 light_energy = 0.0
 
-[node name="HallPendant_60" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="60" unique_id=1559552361]
+[node name="HallPendant_60" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="60" unique_id=1820636012]
 light_energy = 0.0
 
-[node name="HallPendant_61" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="61" unique_id=1994414032]
+[node name="HallPendant_61" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="61" unique_id=1413500231]
 light_energy = 0.0
 
-[node name="HallPendant_62" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="62" unique_id=647026694]
+[node name="HallPendant_62" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="62" unique_id=240591845]
 light_energy = 0.0
 
-[node name="HallPendant_63" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="63" unique_id=1265020789]
+[node name="HallPendant_63" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="63" unique_id=1860174140]
 light_energy = 0.0
 
-[node name="HallPendant_64" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="64" unique_id=1224946761]
+[node name="HallPendant_64" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="64" unique_id=1602908110]
 light_energy = 0.0
 
-[node name="RangeFloodlight" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="65" unique_id=1587577854]
+[node name="RangeFloodlight" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="65" unique_id=1502580686]
 light_energy = 0.0
 
-[node name="HallFiringArea" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="66" unique_id=602177076]
+[node name="HallFiringArea" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="66" unique_id=319030423]
 light_energy = 0.0
 
-[node name="HallWestWall_67" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="67" unique_id=550758742]
+[node name="HallWestWall_67" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="67" unique_id=420645654]
 light_energy = 0.0
 
-[node name="HallWestWall_68" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="68" unique_id=2027643079]
+[node name="HallWestWall_68" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="68" unique_id=1669056325]
 light_energy = 0.0
 
-[node name="HallWestWall_69" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="69" unique_id=259239198]
+[node name="HallWestWall_69" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="69" unique_id=1394633621]
 light_energy = 0.0
 
-[node name="HallWestWall_70" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="70" unique_id=1365239256]
+[node name="HallWestWall_70" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="70" unique_id=217128721]
 light_energy = 0.0
 
-[node name="Sun" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="71" unique_id=640204056]
+[node name="Sun" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="71" unique_id=780270760]
 transform = Transform3D(0.9396926, -0.25417048, 0.22885615, 0, 0.6691306, 0.7431448, -0.34202012, -0.6983277, 0.6287771, 0, 0, 0)
 visible = true
 light_color = Color(1, 0.95, 0.88, 1)
 light_energy = 2.42
 
-[node name="HallDaylight_72" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="72" unique_id=1179717296]
+[node name="HallDaylight_72" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="72" unique_id=1208046424]
 light_energy = 0.5860044
 
-[node name="HallDaylight_73" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="73" unique_id=1506587500]
+[node name="HallDaylight_73" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="73" unique_id=332133528]
 light_energy = 0.5860044
 
-[node name="HallDaylight_74" parent="Lights" parent_id_path=PackedInt32Array(397041354) index="74" unique_id=1012070822]
+[node name="HallDaylight_74" parent="Lights" parent_id_path=PackedInt32Array(2056356658) index="74" unique_id=372411029]
 light_energy = 0.5860044
 
-[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(1857661139) index="0" unique_id=2109337210]
+[node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(1023472905) index="0" unique_id=979412553]
 material_override = SubResource("ShaderMaterial_d05g8")
 
-[node name="LightmapGI" parent="." index="17" unique_id=88407451]
+[node name="LightmapGI" parent="." index="17" unique_id=71893088]
 light_data = ExtResource("2_lykto")
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]

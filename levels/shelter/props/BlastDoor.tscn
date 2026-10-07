@@ -5,14 +5,14 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_6ctm8"]
 size = Vector3(2.55, 2.42, 0.35)
 
-[node name="BlastDoor" type="Node3D" unique_id=627506139]
+[node name="BlastDoor" type="Node3D" unique_id=1062129203]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=354345370]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=994480662]
 mesh = ExtResource("1_363b5")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=162768348]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=733416135]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=478652121]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=315734759]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18, 0)
 shape = SubResource("BoxShape3D_6ctm8")

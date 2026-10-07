@@ -103,6 +103,8 @@ func _raid(time: String) -> void:
 		Input.action_press("aim")
 		await _pair(pl, "raid_day_ads", out, out + Vector3(0, 1.4, -10))
 		Input.action_release("aim")
+		# поворот с оружием в руках: за руками и стволом не должно тянуться хвоста
+		await _turn(pl, "raid_day_turn", out, out + Vector3(0, 1.0, -10))
 	level.queue_free()
 	get_tree().current_scene = null
 	await _frames(5)

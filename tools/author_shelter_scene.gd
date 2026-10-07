@@ -149,6 +149,20 @@ func _make_materials() -> void:
 	ShelterSave.save(plastic, BASE + "materials/MannequinPlastic.tres")
 
 
+var _two_sided: StandardMaterial3D
+
+## Материал «тень с обеих сторон» для тени потолков (видимой поверхности у него нет).
+func _two_sided_shadow() -> StandardMaterial3D:
+	if _two_sided == null:
+		_two_sided = StandardMaterial3D.new()
+		_two_sided.resource_name = "TwoSidedShadow"
+		_two_sided.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_two_sided.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		ShelterSave.save(_two_sided, BASE + "materials/TwoSidedShadow.tres")
+		_two_sided = load(BASE + "materials/TwoSidedShadow.tres")
+	return _two_sided
+
+
 ## Старение по материалам (assets/shelter/shaders/aged_surface.gdshader): грязь у пола, подтёки,
 ## копоть стен и потолка, вытертость пола, сила пятен. Побелка показывает подтёки сильнее всех.
 const AGED: Dictionary = {
@@ -247,6 +261,9 @@ func _convert_asset(id: String, info: Dictionary) -> void:
 			shadow.mesh = mi.mesh
 			shadow.transform = mi.transform
 			shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+			# потолок — плоскость лицом вниз; солнце сверху видит изнанку, а она без этого в тень не
+			# попадает: свет шёл сквозь потолки во все комнаты (замечание владельца 2026-10-07)
+			shadow.material_override = _two_sided_shadow()
 			shadow.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 			root.add_child(shadow)
 			shadow.owner = root

@@ -49,12 +49,12 @@ _data = {
 &"DustMotesAction": SubResource("Animation_kl1ss")
 }
 
-[node name="DustMotes" type="Node3D" unique_id=914117063]
+[node name="DustMotes" type="Node3D" unique_id=715692676]
 script = ExtResource("1_alu1x")
 
-[node name="Visual" type="Node3D" parent="." unique_id=30458583]
+[node name="Visual" type="Node3D" parent="." unique_id=187787351]
 
-[node name="DustMotes" type="MeshInstance3D" parent="Visual" unique_id=84779094]
+[node name="DustMotes" type="MeshInstance3D" parent="Visual" unique_id=1975541307]
 material_override = ExtResource("2_vfivq")
 cast_shadow = 0
 gi_mode = 0
@@ -66,6 +66,6 @@ blend_shapes/AuthoredPose_3 = 0.0
 blend_shapes/AuthoredPose_4 = 0.0
 blend_shapes/AuthoredPose_5 = 0.0
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual" unique_id=91321991]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual" unique_id=1237834718]
 libraries/ = SubResource("AnimationLibrary_nyfsb")
 autoplay = &"DustMotesAction"

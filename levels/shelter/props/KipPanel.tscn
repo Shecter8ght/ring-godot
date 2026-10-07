@@ -5,14 +5,14 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_mvss8"]
 size = Vector3(1.6, 2.1, 0.46)
 
-[node name="KipPanel" type="Node3D" unique_id=1622568435]
+[node name="KipPanel" type="Node3D" unique_id=124727431]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=903713407]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1780222558]
 mesh = ExtResource("1_sxjy3")
 
-[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=1397570050]
+[node name="SimplifiedCollision" type="StaticBody3D" parent="." unique_id=92149827]
 collision_mask = 0
 
-[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=1450394729]
+[node name="Hull_00" type="CollisionShape3D" parent="SimplifiedCollision" unique_id=276153760]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
 shape = SubResource("BoxShape3D_mvss8")

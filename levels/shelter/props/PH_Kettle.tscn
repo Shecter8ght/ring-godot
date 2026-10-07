@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Kettle_00.res" id="1_jkn7d"]
 
-[node name="PH_Kettle" type="Node3D" unique_id=167085433]
+[node name="PH_Kettle" type="Node3D" unique_id=86557239]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1575353765]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1285182284]
 mesh = ExtResource("1_jkn7d")

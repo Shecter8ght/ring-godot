@@ -39,156 +39,156 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_ar_03_36.res" id="37_75w8k"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/Display_wpn_ar_03_37.res" id="38_u62lg"]
 
-[node name="Display_wpn_ar_03" type="Node3D" unique_id=726418647]
+[node name="Display_wpn_ar_03" type="Node3D" unique_id=641913112]
 
-[node name="FinishedWeaponPart_00" type="MeshInstance3D" parent="." unique_id=325044521]
+[node name="FinishedWeaponPart_00" type="MeshInstance3D" parent="." unique_id=38765487]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.038733333, 0.06916667)
 mesh = ExtResource("1_48bmi")
 
-[node name="FinishedWeaponPart_01" type="MeshInstance3D" parent="." unique_id=654886784]
+[node name="FinishedWeaponPart_01" type="MeshInstance3D" parent="." unique_id=1080133022]
 transform = Transform3D(0.9222222, 0, 0, 0, -1.8140225e-08, -0.9222222, 0, 0.415, -4.0311612e-08, 0, 0.064555556, 0.05994444)
 mesh = ExtResource("2_mk47s")
 
-[node name="FinishedWeaponPart_02" type="MeshInstance3D" parent="." unique_id=918823937]
+[node name="FinishedWeaponPart_02" type="MeshInstance3D" parent="." unique_id=1821259188]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.07377777, -0.018444443)
 mesh = ExtResource("3_prvjk")
 
-[node name="FinishedWeaponPart_03" type="MeshInstance3D" parent="." unique_id=1613150633]
+[node name="FinishedWeaponPart_03" type="MeshInstance3D" parent="." unique_id=43259389]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.07377777, 0.04611111)
 mesh = ExtResource("4_48tag")
 
-[node name="FinishedWeaponPart_04" type="MeshInstance3D" parent="." unique_id=1419902169]
+[node name="FinishedWeaponPart_04" type="MeshInstance3D" parent="." unique_id=945061235]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.07377777, 0.11066666)
 mesh = ExtResource("5_4pegr")
 
-[node name="FinishedWeaponPart_05" type="MeshInstance3D" parent="." unique_id=1128005485]
+[node name="FinishedWeaponPart_05" type="MeshInstance3D" parent="." unique_id=2121628909]
 transform = Transform3D(-4.0311612e-08, -0.9222222, 0, 0.9222222, -4.0311612e-08, 0, 0, 0, 0.9222222, -0.02951111, 0.053488884, 0.15677777)
 mesh = ExtResource("6_8xxl3")
 
-[node name="FinishedWeaponPart_06" type="MeshInstance3D" parent="." unique_id=470798107]
+[node name="FinishedWeaponPart_06" type="MeshInstance3D" parent="." unique_id=515892651]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, -0.040577777, 0.053488884, 0.15677777)
 mesh = ExtResource("7_0eyaq")
 
-[node name="FinishedWeaponPart_07" type="MeshInstance3D" parent="." unique_id=1698811983]
+[node name="FinishedWeaponPart_07" type="MeshInstance3D" parent="." unique_id=1635984769]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, -0.020750001, 0.04611111, 0.041500002)
 mesh = ExtResource("8_tbqhu")
 
-[node name="FinishedWeaponPart_08" type="MeshInstance3D" parent="." unique_id=2003618835]
+[node name="FinishedWeaponPart_08" type="MeshInstance3D" parent="." unique_id=649383955]
 transform = Transform3D(0.9222222, 0, 0, 0, -4.0311612e-08, -0.9222222, 0, 0.9222222, -4.0311612e-08, 0, 0.047955554, 0.3781111)
 mesh = ExtResource("9_vtic3")
 
-[node name="FinishedWeaponPart_09" type="MeshInstance3D" parent="." unique_id=2137540600]
+[node name="FinishedWeaponPart_09" type="MeshInstance3D" parent="." unique_id=508077791]
 transform = Transform3D(0.9222222, 0, 0, 0, -4.0311612e-08, -0.9222222, 0, 0.9222222, -4.0311612e-08, 0, 0.07101111, 0.31816664)
 mesh = ExtResource("10_q7ch5")
 
-[node name="FinishedWeaponPart_10" type="MeshInstance3D" parent="." unique_id=945553641]
+[node name="FinishedWeaponPart_10" type="MeshInstance3D" parent="." unique_id=1158754137]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.060866665, 0.42883334)
 mesh = ExtResource("11_2bgu1")
 
-[node name="FinishedWeaponPart_11" type="MeshInstance3D" parent="." unique_id=2033143403]
+[node name="FinishedWeaponPart_11" type="MeshInstance3D" parent="." unique_id=1837745472]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0)
 mesh = ExtResource("12_o1o3s")
 
-[node name="FinishedWeaponPart_12" type="MeshInstance3D" parent="." unique_id=51767702]
+[node name="FinishedWeaponPart_12" type="MeshInstance3D" parent="." unique_id=1447411315]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0)
 mesh = ExtResource("13_3ohn4")
 
-[node name="FinishedWeaponPart_13" type="MeshInstance3D" parent="." unique_id=183063855]
+[node name="FinishedWeaponPart_13" type="MeshInstance3D" parent="." unique_id=24081081]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.057177775, 0.50906664)
 mesh = ExtResource("14_cp63q")
 
-[node name="FinishedWeaponPart_14" type="MeshInstance3D" parent="." unique_id=1485374342]
+[node name="FinishedWeaponPart_14" type="MeshInstance3D" parent="." unique_id=527865513]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.07562222, 0.50906664)
 mesh = ExtResource("15_o6chl")
 
-[node name="FinishedWeaponPart_15" type="MeshInstance3D" parent="." unique_id=1121580515]
+[node name="FinishedWeaponPart_15" type="MeshInstance3D" parent="." unique_id=173807047]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.08668888, 0.50906664)
 mesh = ExtResource("16_iq3ay")
 
-[node name="FinishedWeaponPart_16" type="MeshInstance3D" parent="." unique_id=1647151112]
+[node name="FinishedWeaponPart_16" type="MeshInstance3D" parent="." unique_id=1972728405]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, -0.007193333, 0.08438333, 0.50906664)
 mesh = ExtResource("17_22ugh")
 
-[node name="FinishedWeaponPart_17" type="MeshInstance3D" parent="." unique_id=188237138]
+[node name="FinishedWeaponPart_17" type="MeshInstance3D" parent="." unique_id=845440196]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0.007193333, 0.08438333, 0.50906664)
 mesh = ExtResource("18_r2iml")
 
-[node name="FinishedWeaponPart_18" type="MeshInstance3D" parent="." unique_id=512088834]
+[node name="FinishedWeaponPart_18" type="MeshInstance3D" parent="." unique_id=239437173]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.072394446, 0.50906664)
 mesh = ExtResource("19_t8xcs")
 
-[node name="FinishedWeaponPart_19" type="MeshInstance3D" parent="." unique_id=16675543]
+[node name="FinishedWeaponPart_19" type="MeshInstance3D" parent="." unique_id=834980681]
 transform = Transform3D(0.9222222, 0, 0, 0, -4.0311612e-08, -0.9222222, 0, 0.9222222, -4.0311612e-08, 0, 0.047955554, 0.5579445)
 mesh = ExtResource("20_p6xp8")
 
-[node name="FinishedWeaponPart_20" type="MeshInstance3D" parent="." unique_id=619971261]
+[node name="FinishedWeaponPart_20" type="MeshInstance3D" parent="." unique_id=669044799]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.047955554, 0.5487222)
 mesh = ExtResource("21_ullnp")
 
-[node name="FinishedWeaponPart_21" type="MeshInstance3D" parent="." unique_id=711121921]
+[node name="FinishedWeaponPart_21" type="MeshInstance3D" parent="." unique_id=839739556]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.047955554, 0.5671667)
 mesh = ExtResource("22_27m8r")
 
-[node name="FinishedWeaponPart_22" type="MeshInstance3D" parent="." unique_id=1282895592]
+[node name="FinishedWeaponPart_22" type="MeshInstance3D" parent="." unique_id=2135773204]
 transform = Transform3D(0.9222222, 0, 0, 0, -4.0311612e-08, -0.9222222, 0, 0.9222222, -4.0311612e-08, 0, 0.047955554, 0.5860722)
 mesh = ExtResource("23_jh2ha")
 
-[node name="FinishedWeaponPart_23" type="MeshInstance3D" parent="." unique_id=513820995]
+[node name="FinishedWeaponPart_23" type="MeshInstance3D" parent="." unique_id=1411558473]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.077927776, 0.1955111)
 mesh = ExtResource("24_nyoi3")
 
-[node name="FinishedWeaponPart_24" type="MeshInstance3D" parent="." unique_id=2130721845]
+[node name="FinishedWeaponPart_24" type="MeshInstance3D" parent="." unique_id=206874050]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9216604, 0.03218509, 0, -0.03218509, 0.9216604, 0, 0.08807222, 0.19366665)
 mesh = ExtResource("25_duq8o")
 
-[node name="FinishedWeaponPart_25" type="MeshInstance3D" parent="." unique_id=648767966]
+[node name="FinishedWeaponPart_25" type="MeshInstance3D" parent="." unique_id=811682143]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.089271106, 0.20842221)
 mesh = ExtResource("26_gy8jc")
 
-[node name="FinishedWeaponPart_26" type="MeshInstance3D" parent="." unique_id=1291417210]
+[node name="FinishedWeaponPart_26" type="MeshInstance3D" parent="." unique_id=820426497]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.087979995, 0.16876666)
 mesh = ExtResource("27_p0cw6")
 
-[node name="FinishedWeaponPart_27" type="MeshInstance3D" parent="." unique_id=1786604585]
+[node name="FinishedWeaponPart_27" type="MeshInstance3D" parent="." unique_id=826739310]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, -0.006225, 0.08991666, 0.16876666)
 mesh = ExtResource("28_rr768")
 
-[node name="FinishedWeaponPart_28" type="MeshInstance3D" parent="." unique_id=1584027074]
+[node name="FinishedWeaponPart_28" type="MeshInstance3D" parent="." unique_id=1738252407]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0.006225, 0.08991666, 0.16876666)
 mesh = ExtResource("29_f8qx1")
 
-[node name="FinishedWeaponPart_29" type="MeshInstance3D" parent="." unique_id=618536462]
+[node name="FinishedWeaponPart_29" type="MeshInstance3D" parent="." unique_id=1262085484]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0)
 mesh = ExtResource("30_flxf3")
 
-[node name="FinishedWeaponPart_30" type="MeshInstance3D" parent="." unique_id=408032416]
+[node name="FinishedWeaponPart_30" type="MeshInstance3D" parent="." unique_id=1350736167]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0)
 mesh = ExtResource("31_y0l3y")
 
-[node name="FinishedWeaponPart_31" type="MeshInstance3D" parent="." unique_id=451699271]
+[node name="FinishedWeaponPart_31" type="MeshInstance3D" parent="." unique_id=1429132329]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.88649684, 0.25419888, 0, -0.25419888, 0.88649684, 0, -0.018444443, -0.0073777777)
 mesh = ExtResource("32_cnpoo")
 
-[node name="FinishedWeaponPart_32" type="MeshInstance3D" parent="." unique_id=1314903360]
+[node name="FinishedWeaponPart_32" type="MeshInstance3D" parent="." unique_id=1978136496]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, -0.0036888889, 0.044266667)
 mesh = ExtResource("33_pvo2b")
 
-[node name="FinishedWeaponPart_33" type="MeshInstance3D" parent="." unique_id=1674454526]
+[node name="FinishedWeaponPart_33" type="MeshInstance3D" parent="." unique_id=1137237213]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0.004611111, 0.0747)
 mesh = ExtResource("34_k0ccp")
 
-[node name="FinishedWeaponPart_34" type="MeshInstance3D" parent="." unique_id=1658689547]
+[node name="FinishedWeaponPart_34" type="MeshInstance3D" parent="." unique_id=1981366690]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9082115, -0.1601422, 0, 0.1601422, 0.9082115, 0, 0.0073777777, 0.04334444)
 mesh = ExtResource("35_rpmyy")
 
-[node name="FinishedWeaponPart_35" type="MeshInstance3D" parent="." unique_id=1493712654]
+[node name="FinishedWeaponPart_35" type="MeshInstance3D" parent="." unique_id=443496494]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0)
 mesh = ExtResource("36_nbbsa")
 
-[node name="FinishedWeaponPart_36" type="MeshInstance3D" parent="." unique_id=602286840]
+[node name="FinishedWeaponPart_36" type="MeshInstance3D" parent="." unique_id=725905340]
 transform = Transform3D(0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0, 0.9222222, 0, 0, 0)
 mesh = ExtResource("37_75w8k")
 
-[node name="FinishedWeaponPart_37" type="MeshInstance3D" parent="." unique_id=1077598054]
+[node name="FinishedWeaponPart_37" type="MeshInstance3D" parent="." unique_id=2122341052]
 transform = Transform3D(-4.0311612e-08, -0.9222222, 0, 0.9222222, -4.0311612e-08, 0, 0, 0, 0.9222222, 0, -0.032277778, -0.18444444)
 mesh = ExtResource("38_u62lg")

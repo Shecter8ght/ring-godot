@@ -3,10 +3,10 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_PowerBox_00.res" id="1_b23ok"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_PowerBox_01.res" id="2_c1xq0"]
 
-[node name="PH_PowerBox" type="Node3D" unique_id=472823519]
+[node name="PH_PowerBox" type="Node3D" unique_id=1538959481]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=56724892]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=158106333]
 mesh = ExtResource("1_b23ok")
 
-[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1153713735]
+[node name="FinishedMesh_01" type="MeshInstance3D" parent="." unique_id=1603441931]
 mesh = ExtResource("2_c1xq0")

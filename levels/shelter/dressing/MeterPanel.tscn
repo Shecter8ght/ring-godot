@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/MeterPanel_00.res" id="1_8bxge"]
 
-[node name="MeterPanel" type="Node3D" unique_id=861152379]
+[node name="MeterPanel" type="Node3D" unique_id=863048537]
 
-[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=826642873]
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=1971175370]
 mesh = ExtResource("1_8bxge")

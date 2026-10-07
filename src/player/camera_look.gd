@@ -110,6 +110,7 @@ func apply_settings() -> void:
 	mat.set_shader_parameter("shadow_tint", L.shadow_tint)
 	mat.set_shader_parameter("high_tint", L.high_tint)
 	_blur.max_len = float(L.blur_max)
+	_blur.near_k = _cams[0].near / float(L.blur_keep_m)
 	_blur.samples = int(L.blur_samples)
 	_has_prev = false
 

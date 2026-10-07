@@ -3,7 +3,8 @@ class_name MotionBlurEffect
 extends CompositorEffect
 ## Размытие в движении на камере игрока (Compositor камеры, CameraLook): после прозрачного, до
 ## тонмаппинга, по векторам движения кадра. Поворот головы смазывает мир, оружие в руках (оно
-## движется вместе с камерой) остаётся чётким. strength = 0 — шаг пропускается целиком.
+## движется вместе с камерой) остаётся чётким и не тянет за собой хвост (отсечка по глубине).
+## strength = 0 — шаг пропускается целиком.
 
 const CONTEXT := &"ring_motion_blur"
 const TEMP := &"color_copy"
@@ -12,6 +13,8 @@ const TEMP := &"color_copy"
 var strength: float = 0.0
 var max_len: float = 0.03
 var samples: int = 12
+## Обратная глубина, ближе которой — руки и оружие (не размываются): near камеры / near_m.
+var near_k: float = 0.05
 
 var _rd: RenderingDevice
 var _copy_shader: RID
@@ -26,6 +29,7 @@ func _init() -> void:
 	effect_callback_type = EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
 	needs_motion_vectors = true
 	access_resolved_color = true
+	access_resolved_depth = true
 	RenderingServer.call_on_render_thread(_init_compute)
 
 
@@ -71,15 +75,16 @@ func _render_callback(callback_type: int, render_data: RenderData) -> void:
 	_frame = (_frame + 1) % 4096
 	var groups: Vector3i = Vector3i(ceili(size.x / 8.0), ceili(size.y / 8.0), 1)
 	var copy_push: PackedByteArray = PackedFloat32Array([size.x, size.y, 0.0, 0.0]).to_byte_array()
-	var blur_push: PackedByteArray = PackedFloat32Array([size.x, size.y, strength, max_len, float(_frame), float(samples), 0.0, 0.0]).to_byte_array()
+	var blur_push: PackedByteArray = PackedFloat32Array([size.x, size.y, strength, max_len, float(_frame), float(samples), near_k, 0.0]).to_byte_array()
 	for view: int in range(buffers.get_view_count()):
 		var color: RID = buffers.get_color_layer(view)
 		var velocity: RID = buffers.get_velocity_layer(view)
+		var depth: RID = buffers.get_depth_layer(view)
 		var temp: RID = buffers.get_texture_slice(CONTEXT, TEMP, view, 0, 1, 1)
-		if not color.is_valid() or not velocity.is_valid():
+		if not color.is_valid() or not velocity.is_valid() or not depth.is_valid():
 			continue
 		var copy_set: RID = UniformSetCacheRD.get_cache(_copy_shader, 0, [_image(0, color), _image(1, temp)])
-		var blur_set: RID = UniformSetCacheRD.get_cache(_blur_shader, 0, [_sampled(0, temp), _sampled(1, velocity), _image(2, color)])
+		var blur_set: RID = UniformSetCacheRD.get_cache(_blur_shader, 0, [_sampled(0, temp), _sampled(1, velocity), _image(2, color), _sampled(3, depth)])
 		var list: int = _rd.compute_list_begin()
 		_rd.compute_list_bind_compute_pipeline(list, _copy_pipeline)
 		_rd.compute_list_bind_uniform_set(list, copy_set, 0)

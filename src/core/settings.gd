@@ -31,8 +31,8 @@ const FOV_H_DEFAULT := 90.0
 var quality: String = "high"
 ## «Как с камеры» (CameraLook): привыкание глаза к свету, объектив, зерно, грейд, размытое оружие в прицеле.
 var lens_fx: bool = true
-## Размытие в движении (поворот головы, бег).
-var motion_blur: bool = true
+## Размытие в движении (поворот головы, бег). По умолчанию выключено: владелец — «хвост» и «мыло».
+var motion_blur: bool = false
 ## Во весь экран или в окне (WINDOW_MODES).
 var window_mode: String = "fullscreen"
 ## Множитель чувствительности мыши: от первого лица (взгляд) и в изометрии (поворот камеры СКМ).
@@ -90,7 +90,8 @@ func _load() -> void:
 	var wm := String(cfg.get_value("graphics", "window", window_mode))
 	window_mode = wm if wm in WINDOW_MODES else "fullscreen"
 	lens_fx = bool(cfg.get_value("graphics", "lens_fx", lens_fx))
-	motion_blur = bool(cfg.get_value("graphics", "motion_blur", motion_blur))
+	# ключ сменён: прежнее «включено по умолчанию» уже записано у игроков — с 2026-10-07 выключено
+	motion_blur = bool(cfg.get_value("graphics", "motion_blur_v2", motion_blur))
 	sens_fps = clampf(float(cfg.get_value("mouse", "fps", sens_fps)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
@@ -116,7 +117,9 @@ func save() -> void:
 	cfg.set_value("graphics", "quality", quality)
 	cfg.set_value("graphics", "window", window_mode)
 	cfg.set_value("graphics", "lens_fx", lens_fx)
-	cfg.set_value("graphics", "motion_blur", motion_blur)
+	cfg.set_value("graphics", "motion_blur_v2", motion_blur)
+	if cfg.has_section_key("graphics", "motion_blur"):
+		cfg.erase_section_key("graphics", "motion_blur")
 	cfg.set_value("mouse", "fps", sens_fps)
 	cfg.set_value("mouse", "iso", sens_iso)
 	cfg.set_value("mouse", "ads", sens_ads)
