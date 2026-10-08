@@ -216,6 +216,7 @@ func _ready() -> void:
 	_fade(_torch)
 	_torch.visible = false
 	_torch.add_to_group("glare_lights")
+	LampGlow.attach(_torch)
 	_body.add_child(_torch)
 	if RaidWeather.current:
 		RaidWeather.current.changed.connect(_on_weather)

@@ -236,6 +236,7 @@ rotation_degrees = Vector3(0.0, 45.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_1" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -244,6 +245,7 @@ rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_2" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -252,6 +254,7 @@ rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_3" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -260,6 +263,7 @@ rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_4" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -268,6 +272,7 @@ rotation_degrees = Vector3(0.0, -135.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_5" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -276,6 +281,7 @@ rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_6" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -284,6 +290,7 @@ rotation_degrees = Vector3(0.0, 135.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_7" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -292,6 +299,7 @@ rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Lamp_8" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")
@@ -300,6 +308,7 @@ rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "concrete"
+lamp_head = Vector3(0, 8.99, 2.05)
 
 [node name="Sandbox" parent="Props" type="StaticBody3D"]
 script = ExtResource("1")

@@ -606,11 +606,12 @@ func set_first_person(on: bool) -> void:
 	# (ИК-подсветка ПНВ, фонарь в руках) его в тенях не видит — иначе перед камерой тень-прямоугольник
 	var layer := OWN_BODY_LAYER if on and is_local() else 1
 	for mi in _body.find_children("*", "MeshInstance3D", true, false):
-		(mi as MeshInstance3D).cast_shadow = mode
+		# свечение фонаря (LampGlow) тени не отбрасывает
+		(mi as MeshInstance3D).cast_shadow = mode if not mi.has_meta("no_shadow") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		(mi as MeshInstance3D).layers = layer
 	if _weapon_model:
 		for mi in _weapon_model.find_children("*", "MeshInstance3D", true, false):
-			(mi as MeshInstance3D).cast_shadow = mode
+			(mi as MeshInstance3D).cast_shadow = mode if not mi.has_meta("no_shadow") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			(mi as MeshInstance3D).layers = layer
 
 

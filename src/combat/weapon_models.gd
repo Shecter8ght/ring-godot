@@ -68,7 +68,8 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0) -> Node3D:
 	WeaponMods.fit(root, key, mods)
 	WeaponGrips.fit(root, key, w, mods)
 	for child in root.find_children("*", "MeshInstance3D", true, false):
-		(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		if not child.has_meta("no_shadow"):
+			(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if is_equal_approx(scale, 1.0):
 		return root
 	# масштаб основы: геометрия — во внутреннем узле, meta — в осях внешнего

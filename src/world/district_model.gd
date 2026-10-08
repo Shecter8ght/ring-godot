@@ -24,6 +24,12 @@ extends StaticBody3D
 	set(value):
 		shadow_proxy = value
 		_queue()
+## Фонарный столб: где светильник (локально, низ стекла), Vector3.ZERO — не фонарь. Горит в
+## сумерки и ночью (LampHead, как StreetLamp).
+@export var lamp_head: Vector3 = Vector3.ZERO:
+	set(value):
+		lamp_head = value
+		_queue()
 @export var surface: String = "concrete":
 	set(value):
 		surface = value
@@ -87,6 +93,11 @@ func _build() -> void:
 			_apply_materials(inst)
 		else:
 			_lit_scans(inst)
+		if lamp_head != Vector3.ZERO:
+			var lh := LampHead.new()
+			lh.name = "_LampHead"
+			lh.position = lamp_head
+			inst.add_child(lh)
 		return
 	# запасной вид — коробки коллизий
 	var fallback := MeshInstance3D.new()
