@@ -2016,9 +2016,10 @@ func _read_stance() -> void:
 	var was_aiming := aiming
 	aiming = Input.is_action_pressed("aim") and not ui_blocked()
 	if aiming and not was_aiming and weapon_id != "":
-		_play_weapon_sound(spec(), "ads_raise", -8.0)
+		# вскинул — синтетический шорох (записи «ads_raise» отвлекали; Audio «ads_in»)
+		Audio.play("ads_in", global_position + Vector3.UP * 1.4)
 	elif was_aiming and not aiming and weapon_id != "":
-		_play_weapon_sound(spec(), "ads_lower", -8.0)
+		Audio.play("ads_out", global_position + Vector3.UP * 1.4)
 
 
 func _stance_key() -> String:

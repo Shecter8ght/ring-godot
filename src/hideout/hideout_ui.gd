@@ -504,7 +504,12 @@ func _start_op(kind: String, role: String, idx: int, ammo: String = "", src: Str
 func _tick_op(delta: float) -> void:
 	if _op == null:
 		return
-	if not _op.tick(delta):
+	var before := _op.steps
+	var more := _op.tick(delta)
+	# в убежище тоже слышно, как патроны встают в магазин
+	if _op.steps > before and _op.kind == "load":
+		Audio.play_ui("mag_round", -12.0)
+	if not more:
 		var t := MagOps.reason_text(_op.reason)
 		if t != "" and _op.reason != "no_room":
 			toast(t)

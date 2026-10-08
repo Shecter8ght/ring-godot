@@ -10,8 +10,14 @@ const CATALOG := "res://data/sound_catalog.json"
 
 ## Громкость и дальность по виду звука: дБ, единица дистанции (м, где громкость номинальная), предел слышимости.
 const KINDS := {
-	"shot_pistol": {"db": 2.0, "unit": 8.0, "max": 90.0},
-	"shot_ai": {"db": 1.0, "unit": 8.0, "max": 90.0},
+	# выстрелы слышно далеко (бой на сотни метров): дальше — тише, глуше (фильтр) и позже (звук
+	# идёт 343 м/с — Audio.play задерживает); дальше FAR_M — «дальняя» запись, если есть
+	"shot_pistol": {"db": 2.0, "unit": 10.0, "max": 450.0, "far": true},
+	"shot_ai": {"db": 1.0, "unit": 10.0, "max": 600.0, "far": true},
+	# прицеливание и патрон в магазин — синтез (записи отвлекали)
+	"ads_in": {"db": -21.0, "unit": 2.0, "max": 8.0},
+	"ads_out": {"db": -23.0, "unit": 2.0, "max": 8.0},
+	"mag_round": {"db": -12.0, "unit": 2.0, "max": 10.0},
 	"step": {"db": -16.0, "unit": 3.0, "max": 22.0},
 	"step_ai": {"db": -14.0, "unit": 3.0, "max": 26.0},
 	# шаги по поверхностям (Audio.step): occlude — за стеной глуше
@@ -38,9 +44,9 @@ const KINDS := {
 	# витрина осыпалась: звон и шорох осколков
 	"glass_break": {"db": 1.0, "unit": 8.0, "max": 70.0},
 	"impact_soft": {"db": -10.0, "unit": 4.0, "max": 30.0},
-	"shot_rifle": {"db": 2.0, "unit": 9.0, "max": 110.0},
-	"shot_shotgun": {"db": 4.0, "unit": 9.0, "max": 110.0},
-	"shot_bolt": {"db": 5.0, "unit": 12.0, "max": 160.0},
+	"shot_rifle": {"db": 2.0, "unit": 12.0, "max": 900.0, "far": true},
+	"shot_shotgun": {"db": 4.0, "unit": 12.0, "max": 450.0, "far": true},
+	"shot_bolt": {"db": 5.0, "unit": 16.0, "max": 1300.0, "far": true},
 	"mech_pistol": {"db": -8.0, "unit": 3.0, "max": 16.0},
 	"mech_rifle": {"db": -7.0, "unit": 3.0, "max": 18.0},
 	"step_run": {"db": -12.0, "unit": 3.0, "max": 28.0},
@@ -52,7 +58,7 @@ const KINDS := {
 	"bolt": {"db": -6.0, "unit": 3.0, "max": 18.0},
 	"pin": {"db": -10.0, "unit": 2.0, "max": 10.0},
 	"debris": {"db": -4.0, "unit": 6.0, "max": 40.0},
-	"explosion": {"db": 8.0, "unit": 14.0, "max": 220.0},
+	"explosion": {"db": 8.0, "unit": 20.0, "max": 1200.0, "far": true},
 }
 
 ## Свой набор оружия заменяет общий, как только в нём появляется хотя бы одна активная запись.
@@ -168,6 +174,9 @@ func _ready() -> void:
 		_streams[k] = _streams["reload"]
 	_streams["debris"] = _streams["impact_hard"]
 	_streams["explosion"] = _make(_explosion())
+	_streams["ads_in"] = _make(_ads_cloth(0.2, 1.0))
+	_streams["ads_out"] = _make(_ads_cloth(0.16, 0.7))
+	_streams["mag_round"] = _make(_mag_round())
 	_load_active_selection()
 	_load_catalog()
 	_load_samples()
@@ -188,14 +197,27 @@ func _ready() -> void:
 ## Звук в точке мира. Игрок слушает из своей позиции (AudioListener3D на игроке).
 ## pitch 0 — случайный тон ±8 %.
 func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0) -> void:
-	var stream: AudioStream = _pick(kind, pos)
-	if stream == null:
-		return
 	var spec := _kind_spec(kind)
 	var listener := _listener_pos()
 	var ears := _has_ears()
-	if ears and listener.distance_to(pos) > float(spec["max"]):
+	var dist := listener.distance_to(pos)
+	if ears and dist > float(spec["max"]):
 		return
+	# дальний выстрел / взрыв: звук идёт со скоростью звука — вспышку видно раньше, чем слышно
+	if ears and bool(spec.get("far", false)) and dist > Balance.AUDIO_FAR.delay_from_m:
+		get_tree().create_timer(dist / float(Balance.AUDIO_FAR.sound_mps)).timeout.connect(
+			func() -> void: _play_now(kind, pos, extra_db, pitch, spec, true))
+		return
+	_play_now(kind, pos, extra_db, pitch, spec, ears)
+
+
+func _play_now(kind: String, pos: Vector3, extra_db: float, pitch: float, spec: Dictionary, ears: bool) -> void:
+	if get_tree().current_scene == null:
+		return
+	var stream: AudioStream = _pick(kind, pos)
+	if stream == null:
+		return
+	var listener := _listener_pos()
 	var p := AudioStreamPlayer3D.new()
 	p.stream = stream
 	p.volume_db = float(spec.db) + extra_db
@@ -204,6 +226,15 @@ func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0)
 	p.max_distance = float(spec["max"])
 	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
 	p.pitch_scale = pitch if pitch > 0.0 else _rng.randf_range(0.92, 1.08)
+	if bool(spec.get("far", false)):
+		# воздух глушит верхи: чем дальше, тем сильнее (фильтр 3D-звука растёт с расстоянием)
+		var af: Dictionary = Balance.AUDIO_FAR
+		p.attenuation_filter_cutoff_hz = float(af.cutoff_hz)
+		p.attenuation_filter_db = float(af.filter_db)
+		# дальний — чуть ниже тоном (эхо, земля)
+		var d := listener.distance_to(pos)
+		if pitch <= 0.0:
+			p.pitch_scale *= lerpf(1.0, float(af.far_pitch), smoothstep(40.0, float(spec["max"]), d))
 	# дождь перекрывает шаги и отчасти выстрелы
 	if String(RaidConditions.current.get("weather", "")) == "rain" and Raid.current != null:
 		p.volume_db -= 6.0 if kind.begins_with("step") else (3.0 if kind.begins_with("shot") else 0.0)
@@ -862,6 +893,53 @@ func _reload() -> PackedFloat32Array:
 			if dt >= 0.0:
 				v += _noise() * exp(-dt * 220.0) * 0.8 + sin(TAU * 1800.0 * dt) * exp(-dt * 90.0) * 0.3
 		out[i] = v
+	return out
+
+
+## Вскинул оружие к плечу / опустил: мягкий шорох ткани (шум через фильтр, колокол огибающей) и
+## еле слышное касание снаряжения. soft — сколько «касания».
+func _ads_cloth(dur: float, soft: float) -> PackedFloat32Array:
+	var n := int(dur * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var lp2 := 0.0
+	var tick_at := dur * _rng.randf_range(0.45, 0.7)
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		var x := t / dur
+		# шорох: шум, сглаженный дважды (ткань — глухая), огибающая — быстрый подъём, плавный спад
+		lp += (_noise() - lp) * 0.18
+		lp2 += (lp - lp2) * 0.3
+		var env := sin(PI * clampf(x * 1.15, 0.0, 1.0)) * (1.0 - x * 0.4)
+		var v := lp2 * env * 1.4
+		# касание: короткий тихий тык (ремень, антабка)
+		var dt := t - tick_at
+		if dt >= 0.0:
+			v += (sin(TAU * 900.0 * dt) * 0.4 + _noise() * 0.3) * exp(-dt * 160.0) * 0.18 * soft
+		out[i] = v
+	return out
+
+
+## Патрон в магазин: щелчок металла о губы магазина (узкий звонкий удар) + короткий шорох пружины
+## и мягкий «досыл» следом.
+func _mag_round() -> PackedFloat32Array:
+	var n := int(0.12 * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var prev := 0.0
+	for i in range(n):
+		var t := float(i) / MIX_RATE
+		var w := _noise()
+		var hp := w - prev * 0.85
+		prev = w
+		var click := (hp * 0.7 + sin(TAU * 3400.0 * t) * 0.5 + sin(TAU * 5200.0 * t) * 0.25) * exp(-t * 240.0)
+		var spring := hp * exp(-t * 55.0) * 0.18
+		var dt := t - 0.045
+		var seat := 0.0
+		if dt >= 0.0:
+			seat = (sin(TAU * 2100.0 * dt) * 0.35 + hp * 0.2) * exp(-dt * 300.0)
+		out[i] = tanh((click + spring + seat) * 1.3)
 	return out
 
 

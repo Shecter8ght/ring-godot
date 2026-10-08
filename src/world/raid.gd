@@ -654,8 +654,12 @@ func _tick_ops(delta: float) -> void:
 		var before := op.steps
 		var more := op.tick(delta)
 		if op.steps > before:
-			var event := "round_in" if op.kind == "load" else ("round_out" if op.kind == "unload" else "plate_out")
-			Audio.play(event, pl.global_position, -16.0, 1.3 if op.kind == "load" else 1.1)
+			if op.kind == "load":
+				# патрон в магазин — синтетический щелчок (Audio «mag_round»)
+				Audio.play("mag_round", pl.global_position + Vector3.UP)
+			else:
+				var event := "round_out" if op.kind == "unload" else "plate_out"
+				Audio.play(event, pl.global_position, -16.0, 1.1)
 		if not more:
 			var t := MagOps.reason_text(op.reason)
 			if t != "":
