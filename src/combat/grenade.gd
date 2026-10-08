@@ -158,8 +158,9 @@ func _explode() -> void:
 				var feet := pos.distance_to(body.global_position + Vector3.UP * 0.5)
 				h.apply_or_request_damage(dmg, pos, "blast_close" if feet < Balance.GRENADE_LETHAL_M else "blast", _attacker, Vector3.INF, {"src": src})
 	for rd in get_tree().get_nodes_in_group("ragdolls"):
-		var r := rd as Ragdoll
-		var c := r.chest()
+		# манекен (Ragdoll) и регдолл модели (SkinRagdoll): у обоих chest() и push()
+		var r: Variant = rd
+		var c: Node3D = r.chest()
 		if c and c.global_position.distance_to(pos) < radius:
 			var k := 1.0 - c.global_position.distance_to(pos) / radius
 			r.push(((c.global_position - pos).normalized() + Vector3.UP * 0.6) * float(spec.push) * k, c.global_position)

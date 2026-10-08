@@ -182,6 +182,7 @@ func _ready() -> void:
 		if is_local() and _camera_rig is CameraRig:
 			# на адреналине попадание почти не сбивает
 			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE * (1.0 - float(Balance.STRESS.adr_shake) * stress_k()))
+			(_camera_rig as CameraRig).hurt(amount)
 		add_stress(float(Balance.STRESS.hit) + amount * float(Balance.STRESS.hit_per_dmg)))
 	health.downed_changed.connect(func(on: bool) -> void:
 		Audio.play("downed" if on else "revive", global_position + Vector3.UP)
@@ -1619,7 +1620,8 @@ func _fire(spec: Dictionary) -> void:
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig
 	var marked := false
-	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg), "src": {"kind": "player", "peer": peer_id}}
+	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg), "src": {"kind": "player", "peer": peer_id},
+		"falloff": spec.get("falloff", []), "point_blank": spec.get("point_blank", [])}
 	var hit_person := false
 	for i in range(int(spec.pellets)):
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(spec.range_m), mask, float(spec.damage), exclude, _rng, -1, bullet)

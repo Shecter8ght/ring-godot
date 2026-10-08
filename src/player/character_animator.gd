@@ -31,6 +31,10 @@ var _support: SupportHandIK
 var _collision_ik: WeaponCollisionIK
 ## Клип падения раненым, пока лежит («» — не ранен); после смерти аниматор не управляет моделью.
 var _downed_clip: String = ""
+## Раненый мародёр: упал (клип падения доигран) — дальше лежит на животе с оружием в сторону врага
+## и отстреливается (prone_aim / prone_fire); выстрел пришёл событием — отдача лёжа.
+var _downed_lay: bool = false
+var _downed_fire: bool = false
 var _dead: bool = false
 
 
@@ -123,6 +127,8 @@ func _process(delta: float) -> void:
 		# одиночный клип — по стойке (стоячий клип в приседе / лёжа поднимал тело: ноги в полу,
 		# у раненого — «вверх ногами»); раненому и лежащему реакция на попадание не играется
 		var ev := "" if downed else _event_clip(event_name, family, crouched, prone, moving)
+		if downed and event_name.ends_with("fire"):
+			_downed_fire = true
 		if ev != "" and _player.has_animation(ev):
 			_one_shot = ev
 			_play(ev, false)
@@ -137,13 +143,31 @@ func _process(delta: float) -> void:
 	if downed:
 		if _downed_clip == "":
 			_one_shot = ""
+			_downed_lay = false
+			_downed_fire = false
 			_downed_clip = "downed_fall" if speed >= float(Balance.CHARACTER_ANIM.run_from) * 0.6 else "downed_fall_still"
 			_player.speed_scale = 1.0
 			_play(_downed_clip, false)
+			return
+		# мародёр с оружием, не тащат: лёжа, ствол на врага (тело уже повёрнуто к нему), отстреливается
+		var enemy := _actor as Marauder
+		if enemy and _downed_lay and family != "unarmed" and enemy.dragged_by == null:
+			if _downed_fire:
+				_downed_fire = false
+				_current = ""
+				_play("prone_fire", false)
+			elif _current != "prone_fire" or not _player.is_playing():
+				_play("prone_aim")
+		elif enemy and _downed_lay and enemy.dragged_by != null and _current != _downed_clip:
+			# тащат — снова как упал
+			_current = ""
+			_play(_downed_clip, false)
+			_player.seek(_player.current_animation_length, true)
 		return
 	if _downed_clip != "":
 		# подняли — обратно к обычным клипам
 		_downed_clip = ""
+		_downed_lay = false
 		_current = ""
 	if _one_shot != "":
 		return
@@ -362,7 +386,31 @@ func _play(clip: String, loop: bool = true) -> void:
 	_current = clip
 
 
+## Смерть регдоллом на этой модели (SkinRagdoll): анимация и ИК стоят, поза — текущая. false — не вышло.
+func ragdoll(velocity: Vector3, impulse: Vector3, at: Vector3) -> bool:
+	if _model == null:
+		return false
+	var skel := _model.find_children("*", "Skeleton3D", true, false)
+	if skel.is_empty():
+		return false
+	_dead = true
+	_model.scale = Vector3.ONE
+	if _player:
+		_player.pause()
+	if _support:
+		_support.influence = 0.0
+		_support.active = false
+	if _collision_ik:
+		_collision_ik.active = false
+	if _grip:
+		_grip.visible = false
+	set_process(false)
+	return SkinRagdoll.start(skel[0] as Skeleton3D, velocity, impulse, at) != null
+
+
 func _on_animation_finished(name: StringName) -> void:
+	if String(name) == _downed_clip:
+		_downed_lay = true
 	if String(name) == _one_shot:
 		_one_shot = ""
 		_current = ""

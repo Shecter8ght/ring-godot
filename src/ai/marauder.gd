@@ -365,7 +365,7 @@ func _ai_spec(e: Dictionary) -> Dictionary:
 		"spread": float(c.spread) / maxf(skill, 0.3), "range": float(c.range), "noise_m": float(ws.noise_m),
 		"sound": String(ws.sound), "reload_sound": String(ws.reload_sound), "cycle_sound": String(ws.cycle_sound),
 		"sounds": (ws.sounds as Dictionary).duplicate(), "pen": float(ws.pen), "armor_dmg": float(ws.armor_dmg),
-		"flash": float(ws.flash)}
+		"flash": float(ws.flash), "falloff": ws.get("falloff", []), "point_blank": ws.get("point_blank", []), "range_m": float(ws.range_m)}
 
 
 func _weapon_sound(slot: String) -> String:
@@ -1793,7 +1793,8 @@ func _shoot(suppress: bool) -> void:
 		# по ИИ другой фракции — пули бьют и ИИ; урон от ИИ никому из игроков не засчитывается
 		var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER | (Hitscan.LAYER_MARAUDER if at_ai else 0)
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(_spec.range) * 1.5,
-			mask, float(_spec.damage), exclude, _rng, 0, {"pen": float(_spec.pen), "armor_dmg": float(_spec.armor_dmg), "src": _story_src()})
+			mask, float(_spec.damage), exclude, _rng, 0, {"pen": float(_spec.pen), "armor_dmg": float(_spec.armor_dmg), "src": _story_src(),
+				"falloff": _spec.get("falloff", []), "point_blank": _spec.get("point_blank", []), "range": float(_spec.get("range_m", 0.0))})
 		_near_miss(from, hit)
 	# свои выстрелы товарищи слышат как «бой» — не как свист пуль у себя
 	NoiseBus.emit(global_position, float(_spec.noise_m), "shot_ai")
@@ -2081,9 +2082,17 @@ func _spawn_ragdoll() -> void:
 	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
 	if anim and anim.has_model():
 		_died_shown = true
-		# корпус ровно: лежит клип смерти (наклон раненого / откид от попадания перевернул бы тело)
+		# корпус ровно; масштаб — как у типа (присед сжимал тело по высоте — физике нужен ровный)
 		_body.rotation.x = 0.0
-		anim.die(anim.death_clip(_last_hit_from, _health.last_zone, crouched, false))
+		_body.scale = _base_scale
+		# умер — умер: тело падает регдоллом той же модели (поза — с последнего кадра), толчок — от
+		# стрелявшего (у клиента направления нет — падает само); нет физкостей — клип смерти
+		var away := global_position - _last_hit_from if _last_hit_from != Vector3.ZERO else Vector3.ZERO
+		away.y = 0.0
+		var push: Dictionary = Balance.RAGDOLL_DEATH_PUSH
+		var imp := away.normalized() * (float(push.base) + float(push.per_damage) * _last_damage) if away.length() > 0.01 else Vector3.ZERO
+		if not anim.ragdoll(velocity, imp * 4.0, global_position + Vector3.UP * 1.2):
+			anim.die(anim.death_clip(_last_hit_from, _health.last_zone, crouched, false))
 		# оружие ушло в ящик с телом — в мёртвой руке его не рисуем
 		if _main_gun:
 			_main_gun.visible = false

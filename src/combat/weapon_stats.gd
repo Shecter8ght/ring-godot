@@ -69,6 +69,15 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	s.pen = float(a.get("pen", 10.0))
 	s.armor_dmg = float(a.get("armor_dmg", 10.0))
 	s.pellets = int(a.get("pellets", 1))
+	# дальность и спад урона/пробития — по классу оружия (Balance.BALLISTICS), пуля ружья — своя
+	var bal: Dictionary = Balance.BALLISTICS.get(String(w["class"]), {})
+	if not bal.is_empty():
+		s.range_m = float(bal.range)
+		var fo: Dictionary = Balance.SHOTGUN_SLUG if String(w["class"]) == "SHOTGUN" and int(s.pellets) == 1 else bal
+		s.falloff = [float(fo.eff), float(fo.dmg_min), float(fo.pen_min)]
+	else:
+		s.falloff = []
+	s.point_blank = [float(Balance.SHOTGUN_POINT_BLANK.pb_m), float(Balance.SHOTGUN_POINT_BLANK.pb_k)] if String(w["class"]) == "SHOTGUN" and int(s.pellets) > 1 else []
 	s.range_m = float(s.range_m) * float(a.get("range_k", 1.0))
 	if int(s.pellets) == 1:
 		s.spread_deg = float(s.spread_deg) * float(a.get("accuracy", 1.0))

@@ -21,6 +21,10 @@ var _bob_t: float = 0.0
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
+var _hurt: HurtFx
+## толчок взгляда от попадания: (кивок, крен), рад; _punch_t — 1 → 0
+var _punch: Vector2 = Vector2.ZERO
+var _punch_t: float = 0.0
 var _hitmarker: Control
 ## Ранен: кровь по краям, блёклые цвета, стук сердца, звук глуше; лёжа — надпись с таймером.
 var _hurt_fx: ColorRect
@@ -104,6 +108,9 @@ func _ready() -> void:
 	_glare = LightGlare.new()
 	_glare.name = "Glare"
 	add_child(_glare)
+	_hurt = HurtFx.new()
+	_hurt.name = "Hurt"
+	add_child(_hurt)
 	_build_scope()
 	_look = CameraLook.new()
 	_look.name = "Look"
@@ -120,6 +127,17 @@ func add_recoil(pitch: float, h: float) -> void:
 
 
 ## Толчок камеры (выстрел, попадание по тебе, взрыв); складывается и затухает сам.
+## Своё попадание: виньетка по краям и резкий толчок взгляда (кивок и крен в случайную сторону),
+## без направления — откуда стреляли, слышно.
+func hurt(amount: float) -> void:
+	var f: Dictionary = Balance.HURT_FX
+	if _hurt:
+		_hurt.hit(amount)
+	var deg := minf(float(f.punch_deg) + amount * float(f.per_dmg_deg), float(f.punch_max_deg))
+	_punch = Vector2(deg_to_rad(deg) * _rng.randf_range(0.6, 1.0), deg_to_rad(deg) * _rng.randf_range(-1.0, 1.0))
+	_punch_t = 1.0
+
+
 func add_shake(amount: float) -> void:
 	_shake = minf(_shake + amount, 1.0)
 
@@ -541,6 +559,12 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var yaw := _look_yaw + sway.x - pl.recoil_h()
 	# наклон — крен камеры (глаз уже сдвинут в eye_position)
 	var roll := -pl.lean * deg_to_rad(Balance.LEAN_ROLL_DEG)
+	# попадание: взгляд дёрнулся и вернулся
+	if _punch_t > 0.0:
+		_punch_t = maxf(0.0, _punch_t - delta / float(Balance.HURT_FX.punch_sec))
+		var pk := _punch_t * _punch_t
+		pitch += _punch.x * pk
+		roll += _punch.y * pk
 	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, yaw + PI, roll)), pl.eye_position())
 	_ads_cam.global_position += _ads_cam.global_basis * Vector3(_rng.randf_range(-s, s), _rng.randf_range(-s, s), 0.0) * 0.15
 	# пули летят туда, куда смотрит прицел, — с раскачкой

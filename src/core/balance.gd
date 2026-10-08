@@ -168,6 +168,11 @@ const FOG_DENSITY := 0.005
 ## Тряска камеры от своего выстрела и от попадания по тебе (м смещения), затухание 1/с.
 const SHOT_SHAKE := 0.12
 const HURT_SHAKE := 0.35
+## Попадание по себе (HurtFx и толчок взгляда в CameraRig): виньетка — не меньше min, + per_dmg за
+## единицу урона, до max; гаснет за fade_sec, с. Взгляд дёргается на punch_deg (+ per_dmg_deg за
+## урон, до punch_max_deg), возвращается за punch_sec, с. Направления нет — только звук.
+const HURT_FX := {"min": 0.35, "per_dmg": 0.02, "max": 1.0, "fade_sec": 0.7,
+	"punch_deg": 1.6, "per_dmg_deg": 0.06, "punch_max_deg": 4.5, "punch_sec": 0.22}
 const SHAKE_DECAY := 9.0
 ## Отдача: подброс ствола (корпуса) вверх, рад, и возврат, 1/с.
 const RECOIL_KICK := 0.12
@@ -251,9 +256,9 @@ const PLAYER_HP := 100.0
 ## Время: риск (очки), солнце/луна (высота°, сила, цвет), небо и окружение (×), выдержка,
 ## дальность зрения мародёров на улице, м.
 const RAID_TIME := {
-	"day": {"name": "День", "risk": 0, "sun_elev": 48.0, "sun_energy": 2.2, "sun_color": Color(1.0, 0.95, 0.88), "sky": 1.0, "ambient": 1.0, "exposure": 0.9, "view": 60.0},
-	"dusk": {"name": "Закат", "risk": 1, "sun_elev": 12.0, "sun_energy": 2.6, "sun_color": Color(1.0, 0.74, 0.5), "sky": 1.0, "ambient": 1.0, "exposure": 1.0, "view": 45.0},
-	"night": {"name": "Ночь", "risk": 2, "sun_elev": 35.0, "sun_energy": 0.2, "sun_color": Color(0.70, 0.78, 1.0), "sky": 0.03, "ambient": 0.12, "exposure": 1.25, "view": 25.0},
+	"day": {"name": "День", "risk": 0, "sun_elev": 48.0, "sun_energy": 2.2, "sun_color": Color(1.0, 0.95, 0.88), "sky": 1.0, "ambient": 1.0, "exposure": 0.9, "view": 100.0},
+	"dusk": {"name": "Закат", "risk": 1, "sun_elev": 12.0, "sun_energy": 2.6, "sun_color": Color(1.0, 0.74, 0.5), "sky": 1.0, "ambient": 1.0, "exposure": 1.0, "view": 75.0},
+	"night": {"name": "Ночь", "risk": 2, "sun_elev": 35.0, "sun_energy": 0.2, "sun_color": Color(0.70, 0.78, 1.0), "sky": 0.03, "ambient": 0.12, "exposure": 1.25, "view": 40.0},
 }
 ## Погода: риск, во сколько раз хуже видно на улице (view), слышно (hear — радиус шума).
 const RAID_WEATHER := {
@@ -700,20 +705,39 @@ const AI_DAMAGE := 9.0
 ## data/loadouts.json): очередь, пауза между очередями, не чаще interval_min, разброс, дальность
 ## боя. Урон — от патрона × AI_DAMAGE_K (пробитие брони — как у патрона).
 const AI_CLASS := {
-	"PISTOL": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.42, "spread": 5.5, "range": 28.0},
-	"SMG": {"burst": 4, "burst_pause": 0.6, "interval_min": 0.08, "spread": 5.0, "range": 32.0},
-	"PDW": {"burst": 4, "burst_pause": 0.6, "interval_min": 0.07, "spread": 4.8, "range": 38.0},
-	"SHOTGUN": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.6, "spread": 4.0, "range": 18.0},
-	"ASSAULT_RIFLE": {"burst": 3, "burst_pause": 0.75, "interval_min": 0.11, "spread": 4.5, "range": 45.0},
-	"CARBINE": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.1, "spread": 4.2, "range": 45.0},
-	"BATTLE_RIFLE": {"burst": 2, "burst_pause": 0.85, "interval_min": 0.12, "spread": 4.0, "range": 55.0},
-	"DMR": {"burst": 1, "burst_pause": 0.5, "interval_min": 0.9, "spread": 1.4, "range": 70.0},
-	"SNIPER": {"burst": 1, "burst_pause": 0.0, "interval_min": 1.7, "spread": 0.9, "range": 80.0},
-	"SPECIAL": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.11, "spread": 4.5, "range": 40.0},
-	"LMG": {"burst": 6, "burst_pause": 1.0, "interval_min": 0.075, "spread": 5.0, "range": 55.0},
+	"PISTOL": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.42, "spread": 3.5, "range": 60.0},
+	"SMG": {"burst": 4, "burst_pause": 0.6, "interval_min": 0.08, "spread": 3.2, "range": 70.0},
+	"PDW": {"burst": 4, "burst_pause": 0.6, "interval_min": 0.07, "spread": 3.0, "range": 80.0},
+	"SHOTGUN": {"burst": 1, "burst_pause": 0.0, "interval_min": 0.6, "spread": 3.5, "range": 40.0},
+	"ASSAULT_RIFLE": {"burst": 3, "burst_pause": 0.75, "interval_min": 0.11, "spread": 2.2, "range": 120.0},
+	"CARBINE": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.1, "spread": 2.0, "range": 120.0},
+	"BATTLE_RIFLE": {"burst": 2, "burst_pause": 0.85, "interval_min": 0.12, "spread": 1.8, "range": 150.0},
+	"DMR": {"burst": 1, "burst_pause": 0.5, "interval_min": 0.9, "spread": 0.7, "range": 250.0},
+	"SNIPER": {"burst": 1, "burst_pause": 0.0, "interval_min": 1.7, "spread": 0.4, "range": 400.0},
+	"SPECIAL": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.11, "spread": 2.4, "range": 100.0},
+	"LMG": {"burst": 6, "burst_pause": 1.0, "interval_min": 0.075, "spread": 2.8, "range": 150.0},
 }
-## Урон пуль ИИ по игроку — доля урона патрона (ИИ стреляет часто и много).
-const AI_DAMAGE_K := 0.36
+## Урон пуль ИИ по игроку — доля урона патрона (ИИ стреляет часто и много, но бьёт ощутимо).
+const AI_DAMAGE_K := 0.6
+## Баллистика по классу оружия (у всех — игрок и ИИ, Hitscan): range — куда долетает пуля, м
+## (× range_k патрона); с eff, м, урон и пробитие падают к концу дальности до dmg_min / pen_min.
+## Дробь слабеет быстро; пуля из ружья — SHOTGUN_SLUG.
+const BALLISTICS := {
+	"PISTOL": {"range": 100.0, "eff": 25.0, "dmg_min": 0.5, "pen_min": 0.6},
+	"SMG": {"range": 150.0, "eff": 40.0, "dmg_min": 0.5, "pen_min": 0.6},
+	"PDW": {"range": 150.0, "eff": 50.0, "dmg_min": 0.55, "pen_min": 0.7},
+	"SPECIAL": {"range": 250.0, "eff": 80.0, "dmg_min": 0.55, "pen_min": 0.7},
+	"ASSAULT_RIFLE": {"range": 300.0, "eff": 100.0, "dmg_min": 0.6, "pen_min": 0.7},
+	"CARBINE": {"range": 300.0, "eff": 100.0, "dmg_min": 0.6, "pen_min": 0.7},
+	"BATTLE_RIFLE": {"range": 500.0, "eff": 150.0, "dmg_min": 0.65, "pen_min": 0.75},
+	"LMG": {"range": 500.0, "eff": 150.0, "dmg_min": 0.65, "pen_min": 0.75},
+	"DMR": {"range": 800.0, "eff": 250.0, "dmg_min": 0.7, "pen_min": 0.8},
+	"SNIPER": {"range": 1000.0, "eff": 300.0, "dmg_min": 0.75, "pen_min": 0.85},
+	"SHOTGUN": {"range": 100.0, "eff": 8.0, "dmg_min": 0.12, "pen_min": 0.15},
+}
+const SHOTGUN_SLUG := {"eff": 30.0, "dmg_min": 0.45, "pen_min": 0.55}
+## Дробь в упор: ближе pb_m, м, урон дробины × pb_k — в упор дробовик валит с одного выстрела.
+const SHOTGUN_POINT_BLANK := {"pb_m": 4.0, "pb_k": 2.2}
 ## Сколько ИИ перезаряжается, с: время оружия × это.
 const AI_RELOAD_K := 1.1
 ## Типы мародёров: доля среди всех (weight), снаряжение (loadout — data/loadouts.json: оружие,
@@ -721,13 +745,13 @@ const AI_RELOAD_K := 1.1
 ## здоровье ×, память ×, дальность зрения ×, цвет куртки, фигура (масштаб), holds — держит
 ## позицию: не сближается, патруль у своего поста, ищет глазами, а не ногами (снайпер ходит один).
 const AI_ARCHETYPES := {
-	"scout": {"name": "Разведчик", "weight": 0.3, "loadout": "scav_poor", "speed": 1.3, "hp": 0.85,
+	"scout": {"name": "Разведчик", "weight": 0.4, "loadout": "scav_poor", "speed": 1.3, "hp": 0.85,
 		"memory": 0.5, "view": 1.1, "color": Color(0.46, 0.4, 0.28), "scale": Vector3(0.9, 1.0, 0.9), "holds": false},
-	"gunner": {"name": "Штурмовик", "weight": 0.45, "loadout": "scav_standard", "leader": {"chance": 0.1, "loadout": "scav_leader"}, "speed": 1.0, "hp": 1.0,
+	"gunner": {"name": "Штурмовик", "weight": 0.42, "loadout": "scav_standard", "leader": {"chance": 0.1, "loadout": "scav_leader"}, "speed": 1.0, "hp": 1.0,
 		"memory": 1.0, "view": 1.0, "color": Color(0.36, 0.2, 0.16), "scale": Vector3(1.0, 1.0, 1.0), "holds": false},
-	"heavy": {"name": "Бывалый", "weight": 0.15, "loadout": "scav_veteran", "speed": 0.85, "hp": 1.2,
+	"heavy": {"name": "Бывалый", "weight": 0.1, "loadout": "scav_veteran", "speed": 0.85, "hp": 1.2,
 		"memory": 1.3, "view": 0.95, "color": Color(0.18, 0.22, 0.2), "scale": Vector3(1.18, 1.03, 1.18), "holds": false},
-	"sniper": {"name": "Снайпер", "weight": 0.1, "loadout": "scav_sniper", "speed": 0.9, "hp": 0.9,
+	"sniper": {"name": "Снайпер", "weight": 0.08, "loadout": "scav_sniper", "speed": 0.9, "hp": 0.9,
 		"memory": 1.5, "view": 2.2, "color": Color(0.3, 0.33, 0.24), "scale": Vector3(0.95, 1.0, 0.95), "holds": true},
 	# третья сторона — не выпадают случайно (weight 0): ставят события и уровень
 	# «Периметр» — не толще людей: опасны снаряжением (броня, патроны), меткостью и слаженностью
