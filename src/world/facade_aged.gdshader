@@ -14,6 +14,8 @@ uniform float contrast = 1.0;
 uniform float normal_scale = 0.8;
 uniform float roughness = 1.0;
 uniform bool use_metal = false;
+// матовость сухой поверхности: бетон, кирпич, дерево не дают глянцевого отблеска против солнца
+uniform float rough_min = 0.72;
 // сырость в дождь (RainFx): темнее, глаже, блестит
 global uniform float rain_wet;
 
@@ -74,7 +76,7 @@ void fragment() {
 	col *= 1.0 - 0.42 * wk;
 	rough = mix(rough, 0.22, wk);
 	ALBEDO = col;
-	ROUGHNESS = clamp(rough, 0.05, 1.0);
+	ROUGHNESS = clamp(mix(max(rough, use_metal ? 0.35 : rough_min), rough, rain_wet), 0.05, 1.0);
 	METALLIC = use_metal ? orm.b : 0.0;
 	AO = orm.r;
 	NORMAL_MAP = texture(normal_tex, uv).rgb;

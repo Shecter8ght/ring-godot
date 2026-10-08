@@ -18,6 +18,12 @@ extends StaticBody3D
 	set(value):
 		materials_dir = value
 		_queue()
+## Здание полое внутри: сплошной невидимый объём (по коробкам коллизий, чуть внутри стен) только
+## отбрасывает тень — низкое солнце не пробивает дом насквозь через окна, подъезды и швы.
+@export var shadow_proxy: bool = false:
+	set(value):
+		shadow_proxy = value
+		_queue()
 @export var surface: String = "concrete":
 	set(value):
 		surface = value
@@ -56,6 +62,22 @@ func _build() -> void:
 		col.position = Vector3(float(pos[0]), float(pos[1]), float(pos[2]))
 		col.rotation_degrees.y = float(info.get("yaw", 0.0))
 		add_child(col)
+	if shadow_proxy:
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for info: Dictionary in boxes:
+			var size: Array = info.get("size", [1, 1, 1])
+			var pos: Array = info.get("pos", [0, 0, 0])
+			var bm := BoxMesh.new()
+			# внутри фасада на 0.4 м — не затеняет собственную стену на солнечной стороне
+			bm.size = Vector3(maxf(0.1, float(size[0]) - 0.8), float(size[1]), maxf(0.1, float(size[2]) - 0.8))
+			st.append_from(bm, 0, Transform3D(Basis.from_euler(Vector3(0, deg_to_rad(float(info.get("yaw", 0.0))), 0)), Vector3(float(pos[0]), float(pos[1]), float(pos[2]))))
+		var proxy := MeshInstance3D.new()
+		proxy.name = "_ShadowProxy"
+		proxy.mesh = st.commit()
+		proxy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		proxy.gi_mode = GeometryInstance3D.GI_MODE_STATIC
+		add_child(proxy)
 	if model != "" and ResourceLoader.exists(model):
 		var inst: Node3D = (load(model) as PackedScene).instantiate() as Node3D
 		inst.name = "_Model"

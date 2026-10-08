@@ -106,6 +106,7 @@ def main() -> None:
         meta = info[model]
         by = footprint_y(x, z, meta["length"], meta["depth"], yaw)
         y.model("Buildings", name, model, x, z, yaw, by, MANIFEST_K, "concrete")
+        s.nodes[-1] += "\nshadow_proxy = true"
 
     # покрытие: проезды асфальт, тротуары — тоже асфальт, но светлее и с бордюром
     s.node("Paving", groups=["nav_source"])

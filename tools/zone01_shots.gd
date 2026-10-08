@@ -25,6 +25,7 @@ const SHOTS := {
 	"shadow_k2b": [Vector3(-132, 1.7, -120), Vector3(-150, 2.0, -104), 70.0],
 	"shadow_close": [Vector3(-146.6, 1.7, -104), Vector3(-148.5, 0.0, -98), 75.0],
 	"sun_shadow": [Vector3(-141, 1.7, -112), Vector3(0, 0, 0), 75.0],
+	"porch_k3": [Vector3(-219, 1.7, -64), Vector3(-230, 1.0, -74.5), 75.0],
 	"yard_garages": [Vector3(-232, 1.7, -128), Vector3(-270, 3, -150), 70.0],
 	"ravine": [Vector3(-330, 1.8, 38), Vector3(-300, -6, 100), 70.0],
 	"ravine_bottom": [Vector3(-341, 1.7, 0), Vector3(-344, -3, -50), 70.0],
