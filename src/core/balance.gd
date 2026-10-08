@@ -260,10 +260,20 @@ const PLAYER_HP := 100.0
 ## Время: риск (очки), солнце/луна (высота°, сила, цвет), небо и окружение (×), выдержка,
 ## дальность зрения мародёров на улице, м.
 const RAID_TIME := {
-	"day": {"name": "День", "risk": 0, "sun_elev": 48.0, "sun_energy": 2.2, "sun_color": Color(1.0, 0.95, 0.88), "sky": 1.0, "ambient": 1.0, "exposure": 0.9, "view": 100.0},
-	"dusk": {"name": "Закат", "risk": 1, "sun_elev": 12.0, "sun_energy": 2.6, "sun_color": Color(1.0, 0.74, 0.5), "sky": 1.0, "ambient": 1.0, "exposure": 1.0, "view": 75.0},
-	"night": {"name": "Ночь", "risk": 2, "sun_elev": 35.0, "sun_energy": 0.2, "sun_color": Color(0.70, 0.78, 1.0), "sky": 0.03, "ambient": 0.12, "exposure": 1.25, "view": 40.0},
+	"day": {"name": "День", "risk": 0, "sun_elev": 48.0, "sun_energy": 2.2, "sun_color": Color(1.0, 0.95, 0.88), "sky": 1.0, "ambient": 1.0, "exposure": 0.9, "view": 100.0, "start_hour": 11.0},
+	"dusk": {"name": "Закат", "risk": 1, "sun_elev": 12.0, "sun_energy": 2.6, "sun_color": Color(1.0, 0.74, 0.5), "sky": 1.0, "ambient": 1.0, "exposure": 1.0, "view": 75.0, "start_hour": 18.0},
+	"night": {"name": "Ночь", "risk": 2, "sun_elev": 35.0, "sun_energy": 0.2, "sun_color": Color(0.70, 0.78, 1.0), "sky": 0.03, "ambient": 0.12, "exposure": 1.25, "view": 40.0, "start_hour": 23.0},
 }
+## Смена суток (DayCycle): секунд на игровой час; широта, °, и день года (солнце — как в средней
+## полосе в конце августа: восход ~4:50, закат ~19:10 по солнцу); Луна близка к полной, отстаёт от
+## «напротив солнца» на moon_lag часов. Доли «день / закат / ночь» по высоте солнца, °: день — выше
+## day_from (с dusk_to начинается), ночь — ниже night_to (с dusk_from начинается). Солнце светит
+## выше sun_off (полностью с sun_on); панорамы неба гаснут от sky_on до sky_off и тускнеют до
+## twilight_dim к высоте twilight_end (сумерки — не дневное небо). Обновление: свет —
+## раз в light_sec, небо — раз в sky_sec (перерисовка отражений неба дорогая), сеть — sync_sec.
+const DAY_CYCLE := {"hour_sec": 300.0, "latitude": 55.75, "day_of_year": 235, "moon_lag": 1.5,
+	"day_from": 22.0, "dusk_to": 6.0, "dusk_from": -3.0, "night_to": -12.0, "sun_on": 2.0, "sun_off": -3.0,
+	"sky_on": 2.0, "sky_off": -10.0, "twilight_dim": 0.18, "twilight_end": -6.0, "light_sec": 0.1, "sky_sec": 2.0, "sync_sec": 10.0}
 ## Погода: риск, во сколько раз хуже видно на улице (view), слышно (hear — радиус шума).
 const RAID_WEATHER := {
 	"clear": {"name": "Ясно", "risk": 0, "view": 1.0, "hear": 1.0},

@@ -38,9 +38,9 @@ func _ready() -> void:
 			"помещение" if atmo.is_indoor(out) else "улица", "помещение" if atmo.is_indoor(inn) else "улица"])
 		match tag:
 			"day/on":
-				_check("день: снаружи 60 м, свет горит", is_equal_approx(atmo.view_distance(out, false), 60.0) and lit == total and total > 0, "")
+				_check("день: снаружи — дальность дня, свет горит", is_equal_approx(atmo.view_distance(out, false), float(Balance.RAID_TIME.day.view)) and lit == total and total > 0, "")
 			"night/off":
-				_check("ночь без света: снаружи 25 м, в магазине 12, с фонарём 70; огни погашены", is_equal_approx(atmo.view_distance(out, false), 25.0)
+				_check("ночь без света: снаружи — дальность ночи, в магазине 12, с фонарём 70; огни погашены", is_equal_approx(atmo.view_distance(out, false), float(Balance.RAID_TIME.night.view))
 					and is_equal_approx(atmo.view_distance(inn, false), 12.0) and is_equal_approx(atmo.view_distance(inn, true), 70.0) and lit == 0, "")
 				_check("в темноте у мародёров фонари", atmo.is_dark(inn) and atmo.is_dark(out), "")
 			"night/emergency":
@@ -53,14 +53,15 @@ func _ready() -> void:
 				await get_tree().create_timer(1.5).timeout
 				get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/cond_%s_%s_%s.png" % [c.time, c.power, place[0]]))
 			CameraRig.first_person_mode = false
-	# мародёр видит днём, не видит ночью (та же дистанция 35 м, улица)
+	# мародёр видит днём, не видит ночью (та же дистанция — между дальностью ночи и дня, улица)
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	await _load()
-	var day_seen := _sees_at(35.0)
+	var gap := (float(Balance.RAID_TIME.night.view) + float(Balance.RAID_TIME.day.view)) * 0.5
+	var day_seen := _sees_at(gap)
 	RaidConditions.from_host = {"time": "night", "weather": "clear", "power": "on"}
 	await _load()
-	var night_seen := _sees_at(35.0)
-	_check("35 м на улице: днём видит, ночью нет", day_seen and not night_seen, "днём %s, ночью %s" % [day_seen, night_seen])
+	var night_seen := _sees_at(gap)
+	_check("%.0f м на улице: днём видит, ночью нет" % gap, day_seen and not night_seen, "днём %s, ночью %s" % [day_seen, night_seen])
 	# снаряжение под темноту: ПНВ в слоте «глаза», ракета освещает место
 	RaidConditions.from_host = {"time": "night", "weather": "clear", "power": "off"}
 	await _load()

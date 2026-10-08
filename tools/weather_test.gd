@@ -19,7 +19,8 @@ func _ready() -> void:
 	NoiseBus.noise.connect(func(_p: Vector3, r: float, _k: String) -> void: heard[0] = r)
 	NoiseBus.emit(Vector3.ZERO, 50.0, "shot")
 	_check("дождь: шум слышно ближе", is_equal_approx(heard[0], 50.0 * 0.6), "%.0f м вместо 50" % heard[0])
-	_check("дождь: на улице видно хуже", is_equal_approx(RaidAtmosphere.current.view_distance(SectorBuilder.polar(-100.0, 150.0), false), 45.0), "")
+	_check("дождь: на улице видно хуже", is_equal_approx(RaidAtmosphere.current.view_distance(SectorBuilder.polar(-100.0, 150.0), false),
+		float(Balance.RAID_TIME.day.view) * float(Balance.RAID_WEATHER.rain.view)), "")
 	_check("дождь: капли и шум", _level.find_child("Rain", true, false) != null, "")
 	if shots:
 		await _shot("weather_rain", SectorBuilder.polar(-96.0, 150.0))
@@ -56,7 +57,8 @@ func _ready() -> void:
 		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/weather_heat.png"))
 	me.inventory.equipment = {"eyes": ItemDb.make("sunglasses", 1)}
 	await get_tree().create_timer(2.5).timeout
-	_check("жара: на улице пересвет, в очках — нет", glare and not env.adjustment_enabled, "")
+	# цветокоррекция карты остаётся — в очках нет только пересвета
+	_check("жара: на улице пересвет, в очках — нет", glare and env.adjustment_brightness <= 1.2, "")
 	if shots:
 		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/weather_heat_glasses.png"))
 	# выносливость: бег тратит, в жару быстрее

@@ -76,6 +76,33 @@ func apply() -> void:
 	if sun:
 		sun.visible = String(c.weather) != "rain"
 	_apply_power(String(c.power))
+	_day_cycle(String(c.time))
+
+
+## Смена суток: на карте с панорамами дня и заката (данные "sky_hdri") часы идут — DayCycle
+## ведёт солнце, Луну, свет и небо. Время суток сменили вручную (настройки) — часы с его начала;
+## сменилась погода — то же время, новые панорамы.
+var _cycle_key: String = ""
+
+
+func _day_cycle(time_key: String) -> void:
+	var dc := get_parent().get_node_or_null("DayCycle") as DayCycle
+	if dc == null:
+		dc = DayCycle.new()
+		dc.name = "DayCycle"
+		dc._atm = self
+		if dc.hdri_conf("day").is_empty() or dc.hdri_conf("dusk").is_empty():
+			dc.free()
+			return
+		get_parent().add_child(dc)
+		_cycle_key = time_key
+		dc.start(self, time_key)
+		return
+	if time_key != _cycle_key and time_key != String(dc._phase):
+		_cycle_key = time_key
+		dc.start(self, time_key)
+	else:
+		dc.rebuild()
 
 
 ## Небо из HDR-панорамы, если карта задала его на это время суток ("sky_hdri" в данных сектора):
@@ -312,7 +339,8 @@ func is_dark(p: Vector3) -> bool:
 ## включён фонарь (выдаёт издалека).
 func view_distance(p: Vector3, own_light: bool, light_k: float = 1.0, laser: bool = false) -> float:
 	var c := RaidConditions.current
-	var d := float(RaidConditions.spec("time").view)
+	# смена суток — дальность плавно по высоте солнца, иначе — по фазе
+	var d := DayCycle.current.view if DayCycle.current else float(RaidConditions.spec("time").view)
 	if is_indoor(p):
 		var ind: Dictionary = Balance.AI_VIEW_INDOOR
 		match String(c.power):
