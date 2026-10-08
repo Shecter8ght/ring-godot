@@ -40,6 +40,7 @@ const SHOTS := {
 	"rain_up": [Vector3(-196, 1.7, -96), Vector3(-196, 30, -80), 75.0],
 	"rain_street": [Vector3(-205, 1.7, -122), Vector3(-185, 1.0, -120), 70.0],
 	"sun_forest": [Vector3(-60, 1.7, 240), Vector3(0, 0, 0), 70.0],
+	"forest_floor": [Vector3(-60, 1.7, 240), Vector3(-56, 0, 247), 75.0],
 	"sun_yard": [Vector3(-200, 1.7, -100), Vector3(0, 0, 0), 70.0],
 	"garages": [Vector3(250, 1.7, -110), Vector3(300, 4, -20), 70.0],
 }

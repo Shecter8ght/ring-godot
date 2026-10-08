@@ -76,7 +76,10 @@ func _load_mesh(path: String) -> Mesh:
 				m.albedo_color = tint
 				m.backlight_enabled = true
 				m.backlight = Color(0.2, 0.2, 0.1)
-				m.roughness = 0.95
+				# листва и трава почти не блестят: с бликом (0.5 по умолчанию) в пасмурно и в тумане ровное
+				# светлое небо отражается в нормалях «вверх» — трава седеет, листья серебрятся
+				m.metallic_specular = 0.12
+				m.roughness = 1.0
 				m.normal_enabled = false
 				mesh.surface_set_material(i, m)
 	inst.free()

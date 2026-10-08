@@ -175,7 +175,10 @@ func _foliage_material(src: BaseMaterial3D) -> BaseMaterial3D:
 	m.albedo_color = foliage_tint
 	m.backlight_enabled = true
 	m.backlight = Color(0.18, 0.2, 0.1)
-	m.roughness = 0.9
+	# листва и трава почти не блестят: с бликом (0.5 по умолчанию) в пасмурно и в тумане ровное
+	# светлое небо отражается в нормалях «вверх» — трава седеет, листья серебрятся
+	m.metallic_specular = 0.12
+	m.roughness = 1.0
 	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	return m
 

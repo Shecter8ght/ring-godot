@@ -52,7 +52,7 @@ void fragment() {
 	NORMAL_MAP_DEPTH = far ? 0.6 : 1.0;
 	// мокрая хвоя и листья — темнее и с бликом
 	ALBEDO *= 1.0 - 0.2 * rain_wet;
-	ROUGHNESS = mix(0.82, 0.4, rain_wet);
-	SPECULAR = mix(0.25, 0.5, rain_wet);
+	ROUGHNESS = mix(0.9, 0.4, rain_wet);
+	SPECULAR = mix(0.12, 0.5, rain_wet);
 	BACKLIGHT = translucency * (0.4 + 0.6 * v_ao);
 }
