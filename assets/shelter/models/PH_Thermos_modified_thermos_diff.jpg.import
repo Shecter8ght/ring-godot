@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cy08bibcefq30"
-path="res://.godot/imported/PH_Thermos_modified_thermos_diff.jpg-4bffe1fd84f7d1d8707d4a693ee15926.ctex"
+path.s3tc="res://.godot/imported/PH_Thermos_modified_thermos_diff.jpg-4bffe1fd84f7d1d8707d4a693ee15926.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0ba3249b7861160d03b5ea23fc9a8741"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/shelter/models/PH_Thermos_modified_thermos_diff.jpg"
-dest_files=["res://.godot/imported/PH_Thermos_modified_thermos_diff.jpg-4bffe1fd84f7d1d8707d4a693ee15926.ctex"]
+dest_files=["res://.godot/imported/PH_Thermos_modified_thermos_diff.jpg-4bffe1fd84f7d1d8707d4a693ee15926.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

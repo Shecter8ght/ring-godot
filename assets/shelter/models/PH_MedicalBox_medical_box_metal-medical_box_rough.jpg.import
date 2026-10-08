@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bojdg0jds6e6u"
-path="res://.godot/imported/PH_MedicalBox_medical_box_metal-medical_box_rough.jpg-3562c70ffdeca21ec17bbccc716e0d0a.ctex"
+path.s3tc="res://.godot/imported/PH_MedicalBox_medical_box_metal-medical_box_rough.jpg-3562c70ffdeca21ec17bbccc716e0d0a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0dc661d789aa9480f8235afc24fdc8d5"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/shelter/models/PH_MedicalBox_medical_box_metal-medical_box_rough.jpg"
-dest_files=["res://.godot/imported/PH_MedicalBox_medical_box_metal-medical_box_rough.jpg-3562c70ffdeca21ec17bbccc716e0d0a.ctex"]
+dest_files=["res://.godot/imported/PH_MedicalBox_medical_box_metal-medical_box_rough.jpg-3562c70ffdeca21ec17bbccc716e0d0a.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

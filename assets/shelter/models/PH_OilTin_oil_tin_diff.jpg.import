@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://go7yihic5fke"
-path="res://.godot/imported/PH_OilTin_oil_tin_diff.jpg-978aee3870b2837c890d4d4d1571e97d.ctex"
+path.s3tc="res://.godot/imported/PH_OilTin_oil_tin_diff.jpg-978aee3870b2837c890d4d4d1571e97d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9c9aed83c110d899ff2f6b8dac33d956"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/shelter/models/PH_OilTin_oil_tin_diff.jpg"
-dest_files=["res://.godot/imported/PH_OilTin_oil_tin_diff.jpg-978aee3870b2837c890d4d4d1571e97d.ctex"]
+dest_files=["res://.godot/imported/PH_OilTin_oil_tin_diff.jpg-978aee3870b2837c890d4d4d1571e97d.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

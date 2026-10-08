@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://casncbyfavt4m"
-path="res://.godot/imported/VSS_Vintorez_Picatinny_basecolor.png-1890dc3b9151b8774e8a0a8020fd3eed.ctex"
+path.s3tc="res://.godot/imported/VSS_Vintorez_Picatinny_basecolor.png-1890dc3b9151b8774e8a0a8020fd3eed.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "b8f91c8bf3a065e99711340d2b395fa6"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/weapons/vss_textured/VSS_Vintorez_Picatinny_basecolor.png"
-dest_files=["res://.godot/imported/VSS_Vintorez_Picatinny_basecolor.png-1890dc3b9151b8774e8a0a8020fd3eed.ctex"]
+dest_files=["res://.godot/imported/VSS_Vintorez_Picatinny_basecolor.png-1890dc3b9151b8774e8a0a8020fd3eed.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

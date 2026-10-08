@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddbgdt0n1l0mr"
-path="res://.godot/imported/PH_Kettle_vintage_electric_kettle_metal-vintage_electric_kettle_rough.jpg-54ba5e64e7087d5917c41000819cec13.ctex"
+path.s3tc="res://.godot/imported/PH_Kettle_vintage_electric_kettle_metal-vintage_electric_kettle_rough.jpg-54ba5e64e7087d5917c41000819cec13.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4cad558d4f3973cf2d2141bd6b0446ef"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/shelter/models/PH_Kettle_vintage_electric_kettle_metal-vintage_electric_kettle_rough.jpg"
-dest_files=["res://.godot/imported/PH_Kettle_vintage_electric_kettle_metal-vintage_electric_kettle_rough.jpg-54ba5e64e7087d5917c41000819cec13.ctex"]
+dest_files=["res://.godot/imported/PH_Kettle_vintage_electric_kettle_metal-vintage_electric_kettle_rough.jpg-54ba5e64e7087d5917c41000819cec13.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

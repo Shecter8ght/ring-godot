@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://nvya4t56o27c"
-path="res://.godot/imported/PH_CoffeeTable_industrial_coffee_table_metal-industrial_coffee_table_rough.jpg-827b0e768f22c10d488625ca340cbfc4.ctex"
+path.s3tc="res://.godot/imported/PH_CoffeeTable_industrial_coffee_table_metal-industrial_coffee_table_rough.jpg-827b0e768f22c10d488625ca340cbfc4.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cac4b7ea71c26eec5258d6e96458b9bd"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/shelter/models/PH_CoffeeTable_industrial_coffee_table_metal-industrial_coffee_table_rough.jpg"
-dest_files=["res://.godot/imported/PH_CoffeeTable_industrial_coffee_table_metal-industrial_coffee_table_rough.jpg-827b0e768f22c10d488625ca340cbfc4.ctex"]
+dest_files=["res://.godot/imported/PH_CoffeeTable_industrial_coffee_table_metal-industrial_coffee_table_rough.jpg-827b0e768f22c10d488625ca340cbfc4.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

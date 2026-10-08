@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bukphgv6qvk5t"
-path="res://.godot/imported/PH_Clipboard_clipboard_metal-clipboard_rough.jpg-29ab32878fc398b4150052d7c0d8347d.ctex"
+path.s3tc="res://.godot/imported/PH_Clipboard_clipboard_metal-clipboard_rough.jpg-29ab32878fc398b4150052d7c0d8347d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9ad58ad1299387edcffd8b33117c4a38"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/shelter/models/PH_Clipboard_clipboard_metal-clipboard_rough.jpg"
-dest_files=["res://.godot/imported/PH_Clipboard_clipboard_metal-clipboard_rough.jpg-29ab32878fc398b4150052d7c0d8347d.ctex"]
+dest_files=["res://.godot/imported/PH_Clipboard_clipboard_metal-clipboard_rough.jpg-29ab32878fc398b4150052d7c0d8347d.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
