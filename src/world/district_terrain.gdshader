@@ -23,6 +23,8 @@ uniform float rock_slope_start = 0.82;
 uniform float rock_slope_end = 0.62;
 // отладка: 1 — вес редкой травы, 2 — крупные пятна, 3 — смешение выборок
 uniform int debug_view = 0;
+// сырость в дождь (RainFx): темнее, глаже, блестит
+global uniform float rain_wet;
 
 varying vec3 world_pos;
 varying vec3 world_nrm;
@@ -94,6 +96,10 @@ void fragment() {
 	}
 	// крупные пятна: сырые низины темнее, выгоревшие бугры светлее — не «ковёр»
 	out_a *= mix(0.82, 1.08, macro);
+	// мокрая земля темнее и с бликом; крутые склоны (камень) — меньше
+	float wk = rain_wet * (0.65 + 0.35 * up);
+	out_a *= 1.0 - 0.38 * wk;
+	out_r.g = mix(out_r.g, 0.38, wk);
 	ALBEDO = out_a;
 	if (debug_view == 1) { ALBEDO = vec3(w[1]); }
 	if (debug_view == 2) { ALBEDO = vec3(macro); }

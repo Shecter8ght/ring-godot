@@ -62,6 +62,10 @@ uniform float drop_len = 0.6;
 uniform float drop_w = 0.011;
 uniform vec4 tint : source_color = vec4(0.72, 0.76, 0.82, 0.38);
 uniform float cover_cut = 100000.0;
+// капля — линза: показывает то, что за ней, чуть сдвинутым и светлее; на тёмном фоне и против
+// света заметна, на ровном сером небе почти пропадает (как в жизни)
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap, repeat_disable;
+uniform float visibility = 1.0;
 varying vec3 wpos;
 varying float fade;
 void vertex() {
@@ -79,17 +83,17 @@ void vertex() {
 	vec3 to_cam = CAMERA_POSITION_WORLD - p;
 	float dist = length(to_cam);
 	vec3 side = normalize(cross(dir, to_cam));
-	float w = drop_w * clamp(dist * 0.09, 1.0, 7.0);
-	float l = drop_len * clamp(dist * 0.03, 1.0, 2.2);
+	// толщина не растёт с расстоянием — дальние капли тонут, а не превращаются в полосы
+	float w = drop_w * clamp(dist * 0.05, 1.0, 2.0);
+	float l = drop_len;
 	// UV.x — поперёк, UV.y — вдоль (0 — низ капли)
 	VERTEX = p - dir * l * UV.y + side * (UV.x - 0.5) * w;
 	wpos = VERTEX;
 	vec3 q = abs(p - box_center) / (box_size * 0.5);
-	fade = (1.0 - smoothstep(0.75, 1.0, max(q.x, q.z))) * (1.0 - smoothstep(0.8, 1.0, q.y));
-	// часть капель — по силе дождя
+	fade = (1.0 - smoothstep(0.6, 1.0, max(q.x, q.z))) * (1.0 - smoothstep(0.8, 1.0, q.y));
 	fade *= step(ph, amount);
-	// совсем близко к камере — не штрих во весь экран
-	fade *= smoothstep(0.3, 1.2, dist);
+	// вблизи (< 1.5 м) и вдали (> 14 м) не видно: там дождь — это дымка и брызги
+	fade *= smoothstep(0.8, 1.6, dist) * (1.0 - smoothstep(7.0, 14.0, dist));
 }
 void fragment() {
 	float h = occ_h(wpos.xz);
@@ -97,9 +101,11 @@ void fragment() {
 		discard;
 	}
 	float across = 1.0 - abs(UV.x * 2.0 - 1.0);
-	float along = smoothstep(0.0, 0.25, UV.y) * (1.0 - smoothstep(0.55, 1.0, UV.y));
-	ALBEDO = tint.rgb;
-	ALPHA = tint.a * fade * across * (0.35 + 0.65 * along);
+	float along = smoothstep(0.0, 0.3, UV.y) * (1.0 - smoothstep(0.5, 1.0, UV.y));
+	vec2 suv = SCREEN_UV + vec2((UV.x - 0.5) * 0.004, 0.0);
+	vec3 behind = textureLod(screen_tex, suv, 1.5).rgb;
+	ALBEDO = behind * 1.12 + tint.rgb * 0.05;
+	ALPHA = clamp(tint.a * visibility * fade * across * across * along, 0.0, 1.0);
 }
 """
 
@@ -110,12 +116,14 @@ render_mode unshaded, world_vertex_coords, blend_mix, depth_draw_never, cull_dis
 uniform vec3 box_center = vec3(0.0);
 uniform vec2 box_size = vec2(24.0, 24.0);
 uniform float amount : hint_range(0.0, 1.0) = 1.0;
-uniform float rate = 1.7;
+uniform float rate = 2.4;
 uniform vec4 tint : source_color = vec4(0.8, 0.84, 0.9, 0.5);
 uniform float cover_cut = 100000.0;
 uniform float scale = 1.0;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap, repeat_disable;
 varying float age;
 varying float vis;
+varying float seed;
 void vertex() {
 	vec3 rnd = COLOR.rgb;
 	float ph = COLOR.a;
@@ -123,26 +131,44 @@ void vertex() {
 	float idx = floor(cyc);
 	age = fract(cyc);
 	vec2 jitter = hash22(vec2(idx, ph * 97.0));
+	seed = hash12(vec2(idx, ph * 31.0));
 	vec2 bmin = box_center.xz - box_size * 0.5;
 	vec2 xz = bmin + mod(rnd.xy * box_size + jitter * box_size - bmin, box_size);
+	// высота — по карте «что сверху» в самой точке и по соседям: на изломе (бордюр, склон, край
+	// крыши) соседи расходятся — брызги там не ставим, иначе висят в воздухе или тонут
 	float h = occ_h(xz);
-	// брызги живут первую треть цикла, остальное — пауза (новая точка в следующем цикле)
-	vis = step(age, 0.3) * step(ph, amount) * step(-1e4, h) * step(h, cover_cut);
-	age = age / 0.3;
-	float s = mix(0.04, 0.2, age) * vis * scale;
-	VERTEX = vec3(xz.x, h + 0.025, xz.y) + vec3(UV.x - 0.5, 0.0, UV.y - 0.5) * s * 2.0;
+	float d = 0.2;
+	float hx0 = occ_h(xz - vec2(d, 0.0));
+	float hx1 = occ_h(xz + vec2(d, 0.0));
+	float hz0 = occ_h(xz - vec2(0.0, d));
+	float hz1 = occ_h(xz + vec2(0.0, d));
+	float spread = max(max(hx0, hx1), max(hz0, hz1)) - min(min(hx0, hx1), min(hz0, hz1));
+	// брызги живут 12 % цикла (~50 мс), остальное — пауза
+	vis = step(age, 0.12) * step(ph, amount) * step(-1e4, h) * step(h, cover_cut) * step(spread, 0.12);
+	age = age / 0.12;
+	// стоячий квад к камере (ось — вверх): корона из капель над точкой удара
+	vec3 right = normalize(vec3(INV_VIEW_MATRIX[0].x, 0.0, INV_VIEW_MATRIX[0].z));
+	float s = mix(0.035, 0.07, seed) * scale * vis;
+	VERTEX = vec3(xz.x, h + 0.003, xz.y) + right * (UV.x - 0.5) * s * 2.0 + vec3(0.0, (1.0 - UV.y) * s * 1.4, 0.0);
 	vec2 q = abs(xz - box_center.xz) / (box_size * 0.5);
-	vis *= 1.0 - smoothstep(0.7, 1.0, max(q.x, q.y));
+	vis *= 1.0 - smoothstep(0.5, 1.0, max(q.x, q.y));
 }
 void fragment() {
 	if (vis <= 0.001) {
 		discard;
 	}
-	float r = length(UV * 2.0 - 1.0);
-	float ring = smoothstep(0.55, 0.8, r) * (1.0 - smoothstep(0.8, 1.0, r));
-	float core = (1.0 - smoothstep(0.0, 0.35, r)) * (1.0 - age);
-	ALBEDO = tint.rgb;
-	ALPHA = tint.a * vis * (ring * (1.0 - age) + core * 0.8);
+	// капли короны: 5 брызг по дугам от центра основания, разлетаются и падают
+	vec2 p = vec2(UV.x * 2.0 - 1.0, (1.0 - UV.y) * 1.4);
+	float a = 0.0;
+	for (int i = 0; i < 5; i++) {
+		float k = float(i) / 4.0 * 2.0 - 1.0 + (hash12(vec2(seed * 91.0, float(i))) - 0.5) * 0.4;
+		float sp = 0.55 + 0.45 * hash12(vec2(float(i), seed * 17.0));
+		vec2 c = vec2(k * age * 0.9, (sp * age - 0.9 * age * age) * 1.6 + 0.05);
+		a = max(a, 1.0 - smoothstep(0.03, 0.09, length(p - c)));
+	}
+	vec3 behind = textureLod(screen_tex, SCREEN_UV, 1.0).rgb;
+	ALBEDO = behind * 1.25 + tint.rgb * 0.15;
+	ALPHA = a * vis * tint.a * 0.7 * (1.0 - age * 0.6);
 }
 """
 
@@ -260,7 +286,76 @@ void fragment() {
 """
 
 
+## Капли на «объективе»: копятся, когда под открытым небом смотришь вверх от 45°; потом медленно
+## сползают и высыхают. Линзы — преломление кадра (перевёрнуто и размыто), без рисованных бликов.
+const LENS_SHADER := """
+shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap, repeat_disable;
+uniform float wet = 0.0;
+uniform float aspect = 1.777;
+float h12(vec2 p) {
+	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.x + p3.y) * p3.z);
+}
+void fragment() {
+	vec2 uv = SCREEN_UV;
+	vec2 g = vec2(uv.x * aspect, uv.y) * 9.0;
+	vec2 off = vec2(0.0);
+	float cover = 0.0;
+	float rim = 0.0;
+	float spec = 0.0;
+	for (int j = -1; j <= 1; j++) {
+		for (int i = -1; i <= 1; i++) {
+			vec2 c = floor(g) + vec2(float(i), float(j));
+			float r0 = h12(c);
+			// занята не больше трети клеток даже на полностью мокром объективе
+			if (r0 > wet * 0.35) {
+				continue;
+			}
+			vec2 o = vec2(h12(c + 3.7), h12(c + 9.1));
+			float slide = fract(TIME * 0.03 * h12(c + 5.5) + r0) * 0.8 * step(0.7, h12(c + 2.2));
+			vec2 ctr = c + o + vec2(0.0, slide);
+			float rad = mix(0.05, 0.16, h12(c + 7.3) * h12(c + 1.9)) * smoothstep(r0, r0 + 0.1, wet * 0.35);
+			vec2 d = (g - ctr) * vec2(1.0, 1.2);
+			float r = length(d) / max(rad, 0.001);
+			float m = 1.0 - smoothstep(0.9, 1.0, r);
+			// линза: картинка внутри перевёрнута и сжата — сильный сдвиг к краю капли
+			off += -d * 0.9 / 9.0 * m;
+			cover = max(cover, m);
+			rim = max(rim, smoothstep(0.6, 0.95, r) * m);
+			spec = max(spec, (1.0 - smoothstep(0.0, 0.18, length(d / max(rad, 0.001) - vec2(-0.35, -0.4)))) * m);
+		}
+	}
+	vec3 sharp = textureLod(screen_tex, uv, 0.0).rgb;
+	vec3 lens = textureLod(screen_tex, clamp(uv + vec2(off.x / aspect, off.y), 0.0, 1.0), 0.6).rgb;
+	// край капли темнее (преломление уводит свет), маленький блик сверху
+	lens *= 1.0 - rim * 0.45;
+	lens += spec * 0.25;
+	COLOR = vec4(mix(sharp, lens, cover), 1.0);
+}
+"""
+
+var _lens: CanvasLayer
+var _lens_mat: ShaderMaterial
+var _lens_wet: float = 0.0
+
+
 func _ready() -> void:
+	_lens = CanvasLayer.new()
+	_lens.name = "RainLens"
+	_lens.layer = 1
+	var rect := ColorRect.new()
+	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lens_mat = ShaderMaterial.new()
+	var lsh := Shader.new()
+	lsh.code = LENS_SHADER
+	_lens_mat.shader = lsh
+	rect.material = _lens_mat
+	_lens.add_child(rect)
+	_lens.visible = false
+	add_child(_lens)
 	occlusion = RainOcclusion.new()
 	occlusion.name = "RainOcclusion"
 	add_child(occlusion)
@@ -281,7 +376,31 @@ func _ready() -> void:
 			if m and m.next_pass == null and not _wet_on.has(m):
 				m.next_pass = _wet_mat
 				_wet_on.append(m)
+	# рельеф и покрытия районов (DistrictTerrain, DistrictPaving): лужи во впадинах, на земле реже
+	_wet_ground = _wet_mat.duplicate() as ShaderMaterial
+	_wet_ground.set_shader_parameter("puddles", 0.14)
+	occlusion.bind(_wet_ground)
+	_wet_ground_on.clear()
+	for root: Node in get_tree().get_nodes_in_group("district_terrain"):
+		for mi: Node in root.find_children("*", "MeshInstance3D", true, false):
+			_add_wet((mi as MeshInstance3D).mesh.surface_get_material(0) if (mi as MeshInstance3D).mesh else null, _wet_ground)
+	for n: Node in get_tree().current_scene.find_children("*", "StaticBody3D", true, false) if get_tree().current_scene else []:
+		if n is DistrictPaving:
+			var surf := n.get_node_or_null("_Surface") as MeshInstance3D
+			if surf:
+				_add_wet(surf.material_override, _wet_mat)
 	set_amount(0.0)
+
+
+var _wet_ground: ShaderMaterial
+var _wet_ground_on: Array[Material] = []
+
+
+func _add_wet(m: Material, wet: ShaderMaterial) -> void:
+	if m == null or m.next_pass != null or _wet_ground_on.has(m):
+		return
+	m.next_pass = wet
+	_wet_ground_on.append(m)
 
 
 func _exit_tree() -> void:
@@ -295,6 +414,11 @@ func _exit_tree() -> void:
 		if is_instance_valid(m) and m.next_pass == _wet_mat:
 			m.next_pass = null
 	_wet_on.clear()
+	for m in _wet_ground_on:
+		if is_instance_valid(m):
+			m.next_pass = null
+	_wet_ground_on.clear()
+	RenderingServer.global_shader_parameter_set("rain_wet", 0.0)
 
 
 func _shader_mat(code: String) -> ShaderMaterial:
@@ -354,27 +478,40 @@ func _quads(nm: String, n: int, mat: ShaderMaterial) -> MeshInstance3D:
 ## Сила дождя 0..1 (плавно начинается и кончается).
 func set_amount(k: float) -> void:
 	_k = k
-	for m in [_drop_mat, _splash_mat, _wet_mat]:
-		m.set_shader_parameter("amount", k)
+	for m in [_drop_mat, _splash_mat, _wet_mat, _wet_ground]:
+		if m:
+			m.set_shader_parameter("amount", k)
+	# сырость поверхностей (фасады, кора, хвоя, рельеф — шейдеры карты читают глобальный rain_wet)
+	RenderingServer.global_shader_parameter_set("rain_wet", k)
 	_drops.visible = k > 0.001
 	_splash.visible = k > 0.001
 
 
 ## Каждый кадр: где камера и игрок, какой вид, какой свет (капли ночью темнее).
-func track(me: Node3D, cam: Camera3D, first_person: bool, brightness: float) -> void:
+func track(me: Node3D, cam: Camera3D, first_person: bool, brightness: float, outdoor: bool = true) -> void:
 	if cam == null or me == null:
 		return
+	# капли на объективе: под открытым небом, дождь, взгляд вверх от 45°
+	var look_up: float = (-cam.global_basis.z).y
+	var dt: float = get_process_delta_time()
+	var collect: bool = outdoor and _k > 0.3 and look_up >= 0.707
+	_lens_wet = move_toward(_lens_wet, _k if collect else 0.0, dt * (0.3 if collect else 0.25))
+	_lens.visible = _lens_wet > 0.002
+	if _lens.visible:
+		_lens_mat.set_shader_parameter("wet", _lens_wet)
+		var vs := get_viewport().get_visible_rect().size
+		_lens_mat.set_shader_parameter("aspect", vs.x / maxf(vs.y, 1.0))
 	var focus := me.global_position
 	occlusion.follow(focus)
 	var cut := 100000.0 if first_person else focus.y + 2.6
 	# от первого лица верх крыши выше глаз не виден — брызги там не рисуем (просвечивали бы)
 	var splash_cut := minf(cut, cam.global_position.y - 0.3)
 	if first_person:
-		_drop_mat.set_shader_parameter("drop_w", 0.011)
-		_drop_mat.set_shader_parameter("drop_len", 0.6)
+		_drop_mat.set_shader_parameter("drop_w", 0.006)
+		_drop_mat.set_shader_parameter("drop_len", 0.32)
 		_splash_mat.set_shader_parameter("scale", 1.0)
 		_drop_mat.set_shader_parameter("box_center", cam.global_position + Vector3(0, 2.0, 0))
-		_drop_mat.set_shader_parameter("box_size", Vector3(34.0, 16.0, 34.0))
+		_drop_mat.set_shader_parameter("box_size", Vector3(26.0, 14.0, 26.0))
 		_splash_mat.set_shader_parameter("box_center", cam.global_position)
 		_splash_mat.set_shader_parameter("box_size", Vector2(18.0, 18.0))
 	else:
@@ -389,6 +526,6 @@ func track(me: Node3D, cam: Camera3D, first_person: bool, brightness: float) -> 
 	_drop_mat.set_shader_parameter("cover_cut", cut)
 	_splash_mat.set_shader_parameter("cover_cut", splash_cut)
 	var b := clampf(brightness, 0.08, 1.0)
-	_drop_mat.set_shader_parameter("tint", Color(0.72 * b, 0.76 * b, 0.82 * b, 0.22 + 0.2 * b))
-	_splash_mat.set_shader_parameter("tint", Color(0.8 * b, 0.84 * b, 0.9 * b, 0.3 + 0.25 * b))
+	_drop_mat.set_shader_parameter("tint", Color(0.72 * b, 0.76 * b, 0.82 * b, 0.2 + 0.15 * b))
+	_splash_mat.set_shader_parameter("tint", Color(0.8 * b, 0.84 * b, 0.9 * b, 0.35 + 0.25 * b))
 	_wet_mat.set_shader_parameter("sky_tint", Color(0.5 * b, 0.53 * b, 0.58 * b))

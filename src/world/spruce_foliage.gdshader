@@ -15,6 +15,8 @@ uniform float ao_strength = 1.0;
 uniform vec3 translucency : source_color = vec3(0.13, 0.16, 0.05);
 uniform float variation = 0.14;
 uniform bool far = false;
+// сырость в дождь (RainFx): темнее, глаже, блестит
+global uniform float rain_wet;
 
 varying float v_ao;
 varying vec3 v_var;
@@ -48,7 +50,9 @@ void fragment() {
 	}
 	NORMAL_MAP = texture(normal_tex, UV).rgb;
 	NORMAL_MAP_DEPTH = far ? 0.6 : 1.0;
-	ROUGHNESS = 0.82;
-	SPECULAR = 0.25;
+	// мокрая хвоя и листья — темнее и с бликом
+	ALBEDO *= 1.0 - 0.2 * rain_wet;
+	ROUGHNESS = mix(0.82, 0.4, rain_wet);
+	SPECULAR = mix(0.25, 0.5, rain_wet);
 	BACKLIGHT = translucency * (0.4 + 0.6 * v_ao);
 }

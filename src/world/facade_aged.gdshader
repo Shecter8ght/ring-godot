@@ -14,6 +14,8 @@ uniform float contrast = 1.0;
 uniform float normal_scale = 0.8;
 uniform float roughness = 1.0;
 uniform bool use_metal = false;
+// сырость в дождь (RainFx): темнее, глаже, блестит
+global uniform float rain_wet;
 
 uniform sampler2D macro_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform sampler2D streak_tex : hint_default_black, filter_linear_mipmap, repeat_enable;
@@ -67,6 +69,10 @@ void fragment() {
 	float runoff = smoothstep(roof_height - 3.5, roof_height - 0.2, h) * roof_runoff * wall * (0.5 + 0.7 * st);
 	col *= 1.0 - clamp(sk * 0.55 + runoff * 0.6, 0.0, 0.8);
 	rough = mix(rough, 0.55, sk * 0.4);
+	// стены мокнут пятнами и сверху вниз, низ — сильнее; горизонтальное — ровно
+	float wk = rain_wet * mix(0.55 + 0.45 * (st * 0.7 + mac.x * 0.5), 1.0, 1.0 - wall);
+	col *= 1.0 - 0.42 * wk;
+	rough = mix(rough, 0.22, wk);
 	ALBEDO = col;
 	ROUGHNESS = clamp(rough, 0.05, 1.0);
 	METALLIC = use_metal ? orm.b : 0.0;

@@ -304,12 +304,15 @@ func _tick_local(delta: float) -> void:
 		_rain_sound.volume_db = move_toward(_rain_sound.volume_db, want, delta * 12.0)
 	if _rain:
 		# начинается и кончается плавно
+		# рейд начался в дождь — сразу льёт; начался в пути — плавно
+		if _t < 1.0 and is_raining():
+			_rain_k = 1.0
 		_rain_k = move_toward(_rain_k, 1.0 if is_raining() else 0.0, delta / 12.0)
 		_rain.set_amount(_rain_k)
 		var rig := get_tree().get_first_node_in_group("camera_rig")
-		var fp := rig != null and bool(rig.get("ads_active"))
+		var fp := CameraRig.first_person_mode or (rig != null and bool(rig.get("ads_active")))
 		var bright := {"day": 1.0, "dusk": 0.55, "night": 0.22}.get(String(RaidConditions.current.time), 1.0) as float
-		_rain.track(me, get_viewport().get_camera_3d(), fp, bright)
+		_rain.track(me, get_viewport().get_camera_3d(), fp, bright, _outdoor)
 	# жара: на улице без очков — пересвет и марево
 	var hot := String(RaidConditions.current.weather) == "heat" and _outdoor and not bool(ItemDb.equip(me.eyes_item()).get("uv", false))
 	_haze_k = move_toward(_haze_k, 1.0 if hot else 0.0, delta * 0.8)

@@ -18,6 +18,8 @@ uniform vec3 moss_color : source_color = vec3(0.19, 0.23, 0.1);
 uniform float moss = 0.5;
 uniform bool branch = false;
 uniform vec3 branch_tint : source_color = vec3(0.34, 0.29, 0.27);
+// сырость в дождь (RainFx): темнее, глаже, блестит
+global uniform float rain_wet;
 
 varying float v_h;
 varying float v_ao;
@@ -55,6 +57,8 @@ void fragment() {
 	if (branch) {
 		col = wc * branch_tint;
 	}
+	col *= 1.0 - 0.3 * rain_wet;
+	arm.g = mix(arm.g, 0.3, rain_wet);
 	ALBEDO = col * mix(1.0, v_ao, 0.55);
 	NORMAL_MAP = nrm;
 	NORMAL_MAP_DEPTH = mix(0.8, 1.3, dark);

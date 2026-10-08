@@ -29,6 +29,8 @@ const SHOTS := {
 	"forest_road": [Vector3(-3, 1.7, 225), Vector3(-2, 1, 295), 70.0],
 	"spruce_close": [Vector3(30, 1.7, 236), Vector3(40, 6, 252), 70.0],
 	"birch_close": [Vector3(-212, 1.7, -96), Vector3(-214, 5, -82), 70.0],
+	"rain_up": [Vector3(-196, 1.7, -96), Vector3(-196, 30, -80), 75.0],
+	"rain_street": [Vector3(-205, 1.7, -122), Vector3(-185, 1.0, -120), 70.0],
 	"sun_forest": [Vector3(-60, 1.7, 240), Vector3(0, 0, 0), 70.0],
 	"sun_yard": [Vector3(-200, 1.7, -100), Vector3(0, 0, 0), 70.0],
 	"garages": [Vector3(250, 1.7, -110), Vector3(300, 4, -20), 70.0],
@@ -103,6 +105,8 @@ func _ready() -> void:
 			rig._look_yaw = atan2(d.x, d.z)
 			rig._look_pitch = atan2(d.y, Vector2(d.x, d.z).length())
 		else:
+			if me and from.y < 60.0:
+				me.global_position = from - Vector3(0, 1.7, 0)
 			cam.fov = float(shot[2])
 			cam.global_position = from
 			var target: Vector3 = shot[1]
@@ -116,6 +120,8 @@ func _ready() -> void:
 			cam.current = true
 		for i in range(90):
 			await get_tree().process_frame
+		if shot_name.ends_with("_up"):
+			await get_tree().create_timer(4.0).timeout
 		if ground_shot:
 			print("  игрок ", me.global_position, " камера ", get_viewport().get_camera_3d().global_position, " взгляд ", -get_viewport().get_camera_3d().global_basis.z)
 		var img := get_viewport().get_texture().get_image()

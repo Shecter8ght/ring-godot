@@ -17,6 +17,8 @@ uniform vec3 young_tint : source_color = vec3(0.82, 0.8, 0.78);
 uniform vec3 moss_color : source_color = vec3(0.2, 0.25, 0.1);
 uniform float moss = 0.55;
 uniform float uv_scale = 1.0;
+// сырость в дождь (RainFx): темнее, глаже, блестит
+global uniform float rain_wet;
 
 varying float v_h;
 varying float v_ao;
@@ -40,6 +42,8 @@ void fragment() {
 	vec3 arm = mix(texture(old_arm, uv).rgb, texture(young_arm, uv).rgb, k);
 	float mk = moss * (1.0 - smoothstep(0.3, 1.6, v_h)) * smoothstep(-0.1, -0.7, v_wn.z) * smoothstep(0.35, 0.6, ol);
 	col = mix(col, moss_color, clamp(mk, 0.0, 0.85));
+	col *= 1.0 - 0.45 * rain_wet;
+	arm.g = mix(arm.g, 0.3, rain_wet);
 	ALBEDO = col * mix(1.0, v_ao, 0.55);
 	NORMAL_MAP = mix(texture(old_normal, uv).rgb, texture(young_normal, uv).rgb, k);
 	ROUGHNESS = arm.g;
