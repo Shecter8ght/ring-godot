@@ -11,6 +11,9 @@ static var current: RaidAtmosphere
 ## ассетов нет, тот же шейдер без текстур (процедурные звёзды, серый диск).
 const NIGHT_SKY := "res://assets/materials/night_sky.tres"
 const NIGHT_SHADER := "res://src/world/night_sky.gdshader"
+const SKY_INFO := "res://assets/sky/sky_info.json"
+## Подмена панорамы для сравнения вариантов (снимки, отладка): путь к .hdr, пусто — как задано картой.
+static var hdri_override: String = ""
 
 var _indoor_cache: Dictionary = {}
 
@@ -57,7 +60,9 @@ func apply() -> void:
 		var path: Variant = get_parent().get("sector_path")
 		if path != null and String(path) != "":
 			var lc: Dictionary = SectorBuilder.load_def(String(path)).get("light", {})
-			e.ambient_light_energy *= float(lc.get("ambient_k_" + String(c.time), lc.get("ambient_k", 1.0)))
+			# ambient_k_<время>_<погода> → ambient_k_<время> → ambient_k
+			var ak: float = float(lc.get("ambient_k_%s_%s" % [c.time, c.weather], lc.get("ambient_k_" + String(c.time), lc.get("ambient_k", 1.0))))
+			e.ambient_light_energy *= ak
 			if sun:
 				sun.light_energy *= float(lc.get("sun_k", 1.0))
 		var vt: Dictionary = Balance.VOLUMETRIC_TIME.get(String(c.time), {})
@@ -75,12 +80,26 @@ func _apply_hdri(e: Environment, sun: DirectionalLight3D) -> void:
 	var path: Variant = get_parent().get("sector_path")
 	if path == null or String(path) == "":
 		return
-	var conf: Dictionary = (SectorBuilder.load_def(String(path)).get("sky_hdri", {}) as Dictionary).get(String(RaidConditions.current.time), {})
+	# своё небо на «время_погода» (закат в дождь — пасмурное), иначе на время суток
+	var all: Dictionary = SectorBuilder.load_def(String(path)).get("sky_hdri", {})
+	var tk := String(RaidConditions.current.time)
+	var conf: Dictionary = (all.get(tk + "_" + String(RaidConditions.current.weather), all.get(tk, {})) as Dictionary).duplicate()
+	if hdri_override != "" and not conf.is_empty():
+		conf["a"] = hdri_override
+		conf.erase("sun_u")
 	if conf.is_empty() or not ResourceLoader.exists(String(conf.get("a", ""))):
 		return
+	# где солнце на панораме — tools/sky_info.py
+	if not conf.has("sun_u") and FileAccess.file_exists(SKY_INFO):
+		var info: Variant = JSON.parse_string(FileAccess.get_file_as_string(SKY_INFO))
+		if info is Dictionary:
+			var si: Dictionary = (info as Dictionary).get(String(conf.a).get_file().get_basename(), {})
+			if si.has("sun_u"):
+				conf["sun_u"] = si.sun_u
 	var w: Dictionary = Balance.HDRI_WEATHER.get(String(RaidConditions.current.weather), Balance.HDRI_WEATHER["clear"])
 	var m := ShaderMaterial.new()
 	m.shader = load("res://src/world/hdri_sky.gdshader")
+	m.set_meta("hdri", true)
 	m.set_shader_parameter("sky_a", load(String(conf.a)))
 	if ResourceLoader.exists(String(conf.get("b", ""))):
 		m.set_shader_parameter("sky_b", load(String(conf.b)))
@@ -94,11 +113,14 @@ func _apply_hdri(e: Environment, sun: DirectionalLight3D) -> void:
 	m.set_shader_parameter("rotation", rot)
 	m.set_shader_parameter("horizon_cut", float(conf.get("horizon_cut", 0.0)))
 	m.set_shader_parameter("haze", float(conf.get("haze", 0.0)))
-	m.set_shader_parameter("exposure", float(conf.get("exposure", 1.0)) * float(w.exposure))
-	m.set_shader_parameter("overcast", float(w.overcast))
+	var veil: float = float(conf.get("veil", 1.0))
+	m.set_shader_parameter("exposure", float(conf.get("exposure", 1.0)) * lerpf(1.0, float(w.exposure), veil))
+	# небо и так пасмурное (панорама под дождь) — пелену погоды почти не добавлять
+	m.set_shader_parameter("overcast", float(w.overcast) * float(conf.get("veil", 1.0)))
+	m.set_shader_parameter("clamp_max", float(conf.get("clamp_max", 40.0)))
 	m.set_shader_parameter("tint", w.tint)
 	if sun:
-		sun.light_energy *= float(conf.get("sun_k", 1.0)) * float(w.sun_k)
+		sun.light_energy *= float(conf.get("sun_k", 1.0)) * lerpf(1.0, float(w.sun_k), float(conf.get("veil", 1.0)))
 	var sky := Sky.new()
 	sky.sky_material = m
 	sky.radiance_size = Sky.RADIANCE_SIZE_256

@@ -150,12 +150,6 @@
 - Полный реестр фототекстур, пяти моделей Poly Haven (CC0), собственных Blender-моделей и унаследованных ассетов: [ASSET_CREDITS.md](ASSET_CREDITS.md). Финальные ресурсы — `assets/shelter/` и `levels/shelter/`; сырьё/лицензии — `_asset_src/shelter/`.
 <!-- SHELTER_REMAKE_END -->
 
-## Небо (assets/sky)
-
-- `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
-- `assets/sky/nqweba_dawn.hdr` — Nqweba Dawn, Dario Barresi, CC0 1.0, https://polyhaven.com/a/nqweba_dawn — небо рассвета и заката зоны 1 (HdriSky)
-- `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба
-
 ## Зона 1 · Район ТЦ (assets/zone01, assets/terrain)
 
 - Хрущёвки (панельная 1-464, кирпичная 1-447), лавки, баки, контейнерная площадка, гаражи и «ракушки»,
@@ -192,3 +186,15 @@
 - Лист — скан ambientCG LeafSet024 (CC0, https://ambientcg.com/view?id=LeafSet024), переформован в
   берёзовый лист (tools/build_birch_textures.py); береста — собственная процедурная текстура.
 - Тёмный низ ствола — ambientCG Bark001 (CC0, https://ambientcg.com/view?id=Bark001), assets/textures/bark001.
+
+## Небо (assets/sky)
+
+- `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
+- `assets/sky/nqweba_dawn.hdr` — Nqweba Dawn, Dario Barresi, CC0 1.0, https://polyhaven.com/a/nqweba_dawn — небо рассвета и заката зоны 1 (HdriSky)
+- `assets/sky/kloppenheim_06_puresky.hdr` — Kloppenheim 06 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/kloppenheim_06_puresky — закат: кандидат — мягкий, облачный
+- `assets/sky/belfast_sunset_puresky.hdr` — Belfast Sunset (Pure Sky), Greg Zaal, Dimitrios Savva, Jarod Guest, CC0 1.0, https://polyhaven.com/a/belfast_sunset_puresky — закат: кандидат — солнце у горизонта
+- `assets/sky/qwantani_dusk_2_puresky.hdr` — Qwantani Dusk 2 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_dusk_2_puresky — закат: кандидат — тёплый, чистый
+- `assets/sky/kloppenheim_01_puresky.hdr` — Kloppenheim 01 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/kloppenheim_01_puresky — закат в дождь и туман
+- `assets/sky/kloppenheim_03_puresky.hdr` — Kloppenheim 03 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/kloppenheim_03_puresky — день ясный, переменная облачность
+- `assets/sky/kloofendal_overcast_puresky.hdr` — Kloofendal Overcast (Pure Sky), Greg Zaal, CC0 1.0, https://polyhaven.com/a/kloofendal_overcast_puresky — день в дождь и туман
+- `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба

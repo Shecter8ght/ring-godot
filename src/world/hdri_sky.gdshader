@@ -11,6 +11,9 @@ uniform float mix_b : hint_range(0.0, 1.0) = 0.0;
 // поворот панорамы вокруг вертикали, градусы
 uniform float rotation = 0.0;
 uniform float exposure = 1.0;
+// диск солнца на панораме ограничивается: само солнце светит лампой сцены, а пересвет неба
+// в отражениях и окружающем свете даёт «выжженную» картинку
+uniform float clamp_max = 40.0;
 uniform float overcast : hint_range(0.0, 1.0) = 0.0;
 uniform vec3 tint : source_color = vec3(1.0);
 // цвет «пелены» в пасмурную погоду
@@ -35,7 +38,7 @@ vec3 sample_sky(vec3 d) {
 	if (has_b) {
 		c = mix(c, texture(sky_b, uv).rgb, mix_b);
 	}
-	return c;
+	return min(c, vec3(clamp_max));
 }
 
 void sky() {

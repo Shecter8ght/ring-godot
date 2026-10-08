@@ -40,6 +40,9 @@ func _ready() -> void:
 	# условия рейда для снимков: ZONE01_TIME=day|dusk|night, ZONE01_WEATHER=clear|rain|fog|heat
 	RaidConditions.from_host = {"time": OS.get_environment("ZONE01_TIME") if OS.has_environment("ZONE01_TIME") else "day",
 		"weather": OS.get_environment("ZONE01_WEATHER") if OS.has_environment("ZONE01_WEATHER") else "clear", "power": "on"}
+	# ZONE01_SKY=имя — подменить панораму неба (сравнение вариантов): assets/sky/<имя>.hdr
+	if OS.get_environment("ZONE01_SKY") != "":
+		RaidAtmosphere.hdri_override = "res://assets/sky/%s.hdr" % OS.get_environment("ZONE01_SKY")
 	var level: Node = (load(SCENE) as PackedScene).instantiate()
 	get_tree().root.add_child.call_deferred(level)
 	await get_tree().process_frame
@@ -75,6 +78,8 @@ func _ready() -> void:
 			(l as DirectionalLight3D).shadow_enabled = false
 	var cam := Camera3D.new()
 	cam.far = 3000.0
+	# служебный слой карты дождя (RainOcclusion) — не для глаз, как у камеры игрока
+	cam.cull_mask &= ~RainOcclusion.LAYER
 	level.add_child(cam)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))
 	for shot_name: String in SHOTS:

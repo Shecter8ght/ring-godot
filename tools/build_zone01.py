@@ -1425,13 +1425,20 @@ def write_definition(h: np.ndarray) -> None:
         units="metres", north="-Z", spawn=[x, round(ground(x, z) + .2, 3), z], camera_yaw=180,
         nav_cache="res://data/navigation/zone01",
         # свет: больше рассеянного неба, солнце мягче — тени читаются, свет не «выжигает»
-        light=dict(ambient_k=1.9, sun_k=0.8, ambient_k_dusk=2.6),
+        light=dict(ambient_k=1.9, sun_k=0.8, ambient_k_dusk=1.9, ambient_k_day_rain=2.1, ambient_k_dusk_rain=2.1),
         # небо: пасмурное утро Nqweba Dawn (Poly Haven, CC0) на дневные рейды — его размытое солнце
         # на высоте ~48°, как у дневного солнца рейда; sun_u — где оно на панораме (доля ширины)
         # horizon_cut — ниже 18° на панораме склоны и горы: их заменяет небо над ними и дымка
-        sky_hdri=dict(day=dict(a="res://assets/sky/nqweba_dawn.hdr", sun_u=0.613, exposure=1.0, sun_k=0.75, horizon_cut=18.0, haze=0.55),
-                      # закат — та же рассветная панорама, темнее и теплее: рассеянный свет неба в тенях
-                      dusk=dict(a="res://assets/sky/nqweba_dawn.hdr", sun_u=0.613, exposure=0.7, sun_k=1.0, horizon_cut=18.0, haze=0.6)),
+        # небо (Poly Haven, CC0, только небо): по времени суток и «время_погода»; солнце панорамы
+        # совмещается с игровым по assets/sky/sky_info.json; veil — сколько пелены погоды добавить
+        sky_hdri=dict(
+            day=dict(a="res://assets/sky/kloppenheim_03_puresky.hdr", exposure=1.0, sun_k=0.9, haze=0.35),
+            day_rain=dict(a="res://assets/sky/kloofendal_overcast_puresky.hdr", exposure=1.0, sun_k=0.12, veil=0.3, haze=0.5),
+            day_fog=dict(a="res://assets/sky/kloofendal_overcast_puresky.hdr", exposure=1.05, sun_k=0.2, veil=0.4, haze=0.6),
+            dusk=dict(a="res://assets/sky/kloppenheim_06_puresky.hdr", exposure=1.0, sun_k=1.0, haze=0.4),
+            dusk_rain=dict(a="res://assets/sky/kloppenheim_01_puresky.hdr", exposure=1.0, sun_k=0.15, veil=0.3, haze=0.5),
+            dusk_fog=dict(a="res://assets/sky/kloppenheim_01_puresky.hdr", exposure=1.05, sun_k=0.22, veil=0.4, haze=0.6),
+        ),
         terrain=dict(heights="res://data/terrain/zone01_heights.r32", origin=[X0, Z0], grid=[NX, NZ], step=STEP,
                      layer_tiles=LAYER_TILES, layers=LAYERS,
                      textures=dict(albedo_array="res://assets/terrain/zone01_albedo.jpg",

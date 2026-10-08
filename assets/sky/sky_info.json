@@ -1,0 +1,50 @@
+{
+ "belfast_sunset_puresky": {
+  "sun_u": 0.6006,
+  "sun_elev": 2.5,
+  "sky_mean": 1.226,
+  "peak": 24.19
+ },
+ "kloofendal_overcast_puresky": {
+  "sun_u": 0.5811,
+  "sun_elev": 22.9,
+  "sky_mean": 1.202,
+  "peak": 5.7
+ },
+ "kloppenheim_01_puresky": {
+  "sun_u": 0.5986,
+  "sun_elev": 3.2,
+  "sky_mean": 0.914,
+  "peak": 32.32
+ },
+ "kloppenheim_03_puresky": {
+  "sun_u": 0.6006,
+  "sun_elev": 58.7,
+  "sky_mean": 1.059,
+  "peak": 15000.59
+ },
+ "kloppenheim_06_puresky": {
+  "sun_u": 0.6064,
+  "sun_elev": 8.1,
+  "sky_mean": 0.781,
+  "peak": 13.92
+ },
+ "nqweba_dawn": {
+  "sun_u": 0.7041,
+  "sun_elev": 2.5,
+  "sky_mean": 1.043,
+  "peak": 3.81
+ },
+ "qwantani_dusk_2_puresky": {
+  "sun_u": 0.5908,
+  "sun_elev": 12.3,
+  "sky_mean": 1.094,
+  "peak": 5.41
+ },
+ "qwantani_night_puresky": {
+  "sun_u": 0.624,
+  "sun_elev": 0.4,
+  "sky_mean": 0.747,
+  "peak": 24.62
+ }
+}

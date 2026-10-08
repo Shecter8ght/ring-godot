@@ -31,6 +31,42 @@ SKY = {
         "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/nqweba_dawn_4k.hdr",
         "file": "nqweba_dawn.hdr", "role": "небо рассвета и заката зоны 1 (HdriSky)",
     },
+    "kloppenheim_06_puresky": {
+        "title": "Kloppenheim 06 (Pure Sky)", "author": "Greg Zaal, Jarod Guest", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/kloppenheim_06_puresky",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/kloppenheim_06_puresky_4k.hdr",
+        "file": "kloppenheim_06_puresky.hdr", "role": "закат: кандидат — мягкий, облачный",
+    },
+    "belfast_sunset_puresky": {
+        "title": "Belfast Sunset (Pure Sky)", "author": "Greg Zaal, Dimitrios Savva, Jarod Guest", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/belfast_sunset_puresky",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/belfast_sunset_puresky_4k.hdr",
+        "file": "belfast_sunset_puresky.hdr", "role": "закат: кандидат — солнце у горизонта",
+    },
+    "qwantani_dusk_2_puresky": {
+        "title": "Qwantani Dusk 2 (Pure Sky)", "author": "Greg Zaal, Jarod Guest", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/qwantani_dusk_2_puresky",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/qwantani_dusk_2_puresky_4k.hdr",
+        "file": "qwantani_dusk_2_puresky.hdr", "role": "закат: кандидат — тёплый, чистый",
+    },
+    "kloppenheim_01_puresky": {
+        "title": "Kloppenheim 01 (Pure Sky)", "author": "Greg Zaal, Jarod Guest", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/kloppenheim_01_puresky",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/kloppenheim_01_puresky_4k.hdr",
+        "file": "kloppenheim_01_puresky.hdr", "role": "закат в дождь и туман",
+    },
+    "kloppenheim_03_puresky": {
+        "title": "Kloppenheim 03 (Pure Sky)", "author": "Greg Zaal, Jarod Guest", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/kloppenheim_03_puresky",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/kloppenheim_03_puresky_4k.hdr",
+        "file": "kloppenheim_03_puresky.hdr", "role": "день ясный, переменная облачность",
+    },
+    "kloofendal_overcast_puresky": {
+        "title": "Kloofendal Overcast (Pure Sky)", "author": "Greg Zaal", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/kloofendal_overcast_puresky",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/kloofendal_overcast_puresky_4k.hdr",
+        "file": "kloofendal_overcast_puresky.hdr", "role": "день в дождь и туман",
+    },
     "moon_lroc_color": {
         "title": "CGI Moon Kit — Lunar Surface in Color (LRO LROC)", "author": "NASA's Scientific Visualization Studio",
         "license": "Public Domain (NASA)", "source": "https://svs.gsfc.nasa.gov/4720",

@@ -221,6 +221,9 @@ var _overcast: Array = []
 func _set_overcast(on: bool) -> void:
 	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D
 	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
+	# небо из панорамы (RaidAtmosphere._apply_hdri) погоду уже учло: пасмурная панорама, пелена, солнце
+	if we and we.environment and we.environment.sky and we.environment.sky.sky_material and we.environment.sky.sky_material.has_meta("hdri"):
+		return
 	# ночное небо: облака закрывают звёзды и Луну
 	if we and we.environment and we.environment.sky and we.environment.sky.sky_material is ShaderMaterial:
 		(we.environment.sky.sky_material as ShaderMaterial).set_shader_parameter("overcast", 1.0 if on else 0.0)
