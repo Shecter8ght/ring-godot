@@ -32,6 +32,9 @@ extends Node3D
 @export var trunk_radius: float = 0.0
 ## Высота цилиндра коллизии, м (ствол — 4, пень — меньше: выше пули проходят свободно).
 @export var trunk_height: float = 4.0
+## Дальний вид (два скрещённых силуэта, tools/build_spruce.py): дальше near_distance — он вместо модели.
+@export_file("*.glb") var far_model: String = ""
+@export var near_distance: float = 90.0
 
 var _pending: bool = false
 
@@ -63,6 +66,7 @@ func _build() -> void:
 	var mesh: Mesh = _mesh()
 	if mesh == null:
 		return
+	var far_mesh: Mesh = _load_model(far_model) if far_model != "" else null
 	var cells: Dictionary = {}
 	for p: Array in points:
 		var c := Vector2i(int(floor(float(p[0]) / cell)), int(floor(float(p[2]) / cell)))
@@ -106,18 +110,42 @@ func _build() -> void:
 		var mmi := MultiMeshInstance3D.new()
 		mmi.name = "_Cell_%d_%d" % [c.x, c.y]
 		mmi.multimesh = mm
-		mmi.visibility_range_end = view_distance
-		mmi.visibility_range_end_margin = view_distance * 0.1
+		mmi.visibility_range_end = near_distance if far_mesh else view_distance
+		mmi.visibility_range_end_margin = 8.0 if far_mesh else view_distance * 0.1
 		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mmi)
+		if far_mesh:
+			var fm := MultiMesh.new()
+			fm.transform_format = MultiMesh.TRANSFORM_3D
+			fm.mesh = far_mesh
+			fm.instance_count = mm.instance_count
+			for i in range(mm.instance_count):
+				fm.set_instance_transform(i, mm.get_instance_transform(i))
+			var fmi := MultiMeshInstance3D.new()
+			fmi.name = "_Far_%d_%d" % [c.x, c.y]
+			fmi.multimesh = fm
+			fmi.visibility_range_begin = near_distance
+			fmi.visibility_range_begin_margin = 8.0
+			fmi.visibility_range_end = view_distance
+			fmi.visibility_range_end_margin = view_distance * 0.1
+			fmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			fmi.cast_shadow = mmi.cast_shadow
+			add_child(fmi)
 
 
 func _mesh() -> Mesh:
 	if model != "":
-		if not ResourceLoader.exists(model):
+		return _load_model(model)
+	return _tuft()
+
+
+## Первый меш модели; материалы — по именам слотов из materials_dir (или листва, если foliage).
+func _load_model(path: String) -> Mesh:
+	if path != "":
+		if not ResourceLoader.exists(path):
 			return null
-		var inst: Node = (load(model) as PackedScene).instantiate()
+		var inst: Node = (load(path) as PackedScene).instantiate()
 		var found: Array[Node] = inst.find_children("*", "MeshInstance3D", true, false)
 		if found.is_empty():
 			inst.free()
@@ -130,12 +158,12 @@ func _mesh() -> Mesh:
 				mesh.surface_set_material(i, _foliage_material(mat as BaseMaterial3D))
 				continue
 			if mat:
-				var path: String = "%s/%s.tres" % [materials_dir, mat.resource_name]
-				if ResourceLoader.exists(path):
-					mesh.surface_set_material(i, load(path))
+				var mat_path: String = "%s/%s.tres" % [materials_dir, mat.resource_name]
+				if ResourceLoader.exists(mat_path):
+					mesh.surface_set_material(i, load(mat_path))
 		inst.free()
 		return mesh
-	return _tuft()
+	return null
 
 
 func _foliage_material(src: BaseMaterial3D) -> BaseMaterial3D:

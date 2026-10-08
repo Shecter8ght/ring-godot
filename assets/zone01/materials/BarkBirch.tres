@@ -10,5 +10,4 @@ roughness = 0.85
 normal_enabled = true
 normal_texture = ExtResource("2")
 normal_scale = 0.6
-uv1_scale = Vector3(0.7143, 0.7143, 1)
-texture_filter = 5
+albedo_color = Color(0.72, 0.72, 0.7, 1)

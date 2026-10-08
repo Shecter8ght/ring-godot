@@ -53,6 +53,11 @@ func apply() -> void:
 		_apply_night(e, sky_mat)
 		if not night:
 			_apply_hdri(e, sun)
+		var vt: Dictionary = Balance.VOLUMETRIC_TIME.get(String(c.time), {})
+		if e.volumetric_fog_enabled and not vt.is_empty():
+			e.volumetric_fog_density *= float(vt.density)
+			if sun and not night:
+				sun.light_volumetric_fog_energy = float(vt.sun)
 	_apply_power(String(c.power))
 
 

@@ -70,10 +70,10 @@ FLAT = {
 # свои текстуры (tools/build_zone01_foliage_textures.py): кора берёзы, листва с альфой
 TEXTURED = {
     "BarkBirch": ("res://assets/zone01/textures/bark_birch.png", "res://assets/textures/bark_brown_02/normal.jpg", 1.4, False),
+    # (оттенок берёзы — в FOLIAGE_TINT: белая кора не должна светиться)
     "LeavesBirch": ("res://assets/zone01/textures/leaves_birch.png", "", 1.0, True),
     "LeavesMaple": ("res://assets/zone01/textures/leaves_maple.png", "", 1.0, True),
     "GrassTuft": ("res://assets/zone01/textures/grass_tufts.png", "", 1.0, True),
-    "FirBranchCards": ("res://assets/zone01/textures/fir_branch_atlas.png", "", 1.0, True),
 }
 
 
@@ -107,7 +107,7 @@ def flat(name: str, color, rough: float, metal: float) -> str:
 
 
 # оттенок альбедо листвы (рендер атласа ели светлее, чем крона в тени)
-FOLIAGE_TINT = {"FirBranchCards": (0.62, 0.68, 0.6), "LeavesMaple": (0.8, 0.74, 0.58), "LeavesBirch": (0.86, 0.84, 0.68),
+FOLIAGE_TINT = {"BarkBirch": (0.72, 0.72, 0.7), "FirBranchCards": (0.62, 0.68, 0.6), "LeavesMaple": (0.6, 0.56, 0.44), "LeavesBirch": (0.86, 0.84, 0.68),
                 "GrassTuft": (0.85, 0.82, 0.7)}
 
 
@@ -124,10 +124,53 @@ def textured(name: str, albedo: str, normal: str, tile: float, foliage: bool) ->
         if name in FOLIAGE_TINT:
             t = FOLIAGE_TINT[name]
             body += [f"albedo_color = Color({t[0]}, {t[1]}, {t[2]}, 1)", "backlight = Color(0.12, 0.14, 0.08, 1)"]
+    elif name in FOLIAGE_TINT:
+        t = FOLIAGE_TINT[name]
+        body += [f"albedo_color = Color({t[0]}, {t[1]}, {t[2]}, 1)"]
     else:
         body += [f"uv1_scale = Vector3({round(1 / tile, 4)}, {round(1 / tile, 4)}, 1)", "texture_filter = 5"]
     head = [f'[gd_resource type="StandardMaterial3D" load_steps={len(ext) + 1} format=3]', ""]
     return "\n".join(head + ext + ["", "[resource]"] + body) + "\n"
+
+
+SPRUCE_TREES = ["spruce_forest_a", "spruce_forest_b", "spruce_open", "spruce_young_a", "spruce_young_b"]
+
+
+def shader_mat(name: str, shader: str, textures: dict, params: dict) -> str:
+    ext = [f'[ext_resource type="Shader" path="{shader}" id="1"]']
+    lines = []
+    for i, (key, path) in enumerate(textures.items(), start=2):
+        ext.append(f'[ext_resource type="Texture2D" path="{path}" id="{i}"]')
+        lines.append(f'shader_parameter/{key} = ExtResource("{i}")')
+    lines += [f"shader_parameter/{k} = {v}" for k, v in params.items()]
+    return "\n".join([f'[gd_resource type="ShaderMaterial" load_steps={len(ext) + 1} format=3]', ""] + ext +
+                     ["", "[resource]", f'resource_name = "{name}"', 'shader = ExtResource("1")'] + lines) + "\n"
+
+
+def spruce_materials() -> None:
+    """Ель (tools/build_spruce.py): хвоя, дальние силуэты, кора ствола (старая/молодая), ветки, шишки."""
+    t = "res://assets/zone01/textures/"
+    fol = "res://src/world/spruce_foliage.gdshader"
+    bark = "res://src/world/spruce_bark.gdshader"
+    pine, knot = "res://assets/textures/pine_bark/", "res://assets/textures/knotted_pine_bark/"
+    files = {"SpruceNeedles": shader_mat("SpruceNeedles", fol, {"albedo_tex": t + "spruce_atlas_albedo.png",
+                                                                 "normal_tex": t + "spruce_atlas_normal.png"}, {})}
+    for tree in SPRUCE_TREES:
+        files[f"SpruceFar_{tree}"] = shader_mat(f"SpruceFar_{tree}", fol, {"albedo_tex": t + f"{tree}_far_albedo.png",
+                                                                          "normal_tex": t + f"{tree}_far_normal.png"},
+                                                {"far": "true", "alpha_cut": 0.5})
+    both = {"old_albedo": pine + "albedo.jpg", "old_normal": pine + "normal.jpg", "old_arm": pine + "arm.jpg",
+            "young_albedo": knot + "albedo.jpg", "young_normal": knot + "normal.jpg", "young_arm": knot + "arm.jpg"}
+    files["SpruceTrunk"] = shader_mat("SpruceTrunk", bark, both, {"old_height": 7.0})
+    files["SpruceTrunkYoung"] = shader_mat("SpruceTrunkYoung", bark, both, {"old_height": 0.0, "moss": 0.25})
+    files["SpruceBranch"] = shader_mat("SpruceBranch", bark, both, {"old_height": 0.0, "moss": 0.0,
+                                                                    "young_tint": "Color(0.62, 0.56, 0.5, 1)"})
+    files["SpruceDeadBranch"] = shader_mat("SpruceDeadBranch", bark, both, {"old_height": 0.0, "moss": 0.0,
+                                                                            "young_tint": "Color(0.72, 0.7, 0.68, 1)"})
+    files["SpruceCone"] = shader_mat("SpruceCone", bark, both, {"old_height": 100.0, "moss": 0.0, "old_saturation": 1.0,
+                                                                "old_tint": "Color(0.75, 0.55, 0.4, 1)", "uv_scale": 3.0})
+    for name, text in files.items():
+        (OUT / f"{name}.tres").write_text(text, encoding="utf-8")
 
 
 def main() -> None:
@@ -138,6 +181,7 @@ def main() -> None:
         (OUT / f"{name}.tres").write_text(flat(name, color, rough, metal), encoding="utf-8")
     for name, (albedo, normal, tile, foliage) in TEXTURED.items():
         (OUT / f"{name}.tres").write_text(textured(name, albedo, normal, tile, foliage), encoding="utf-8")
+    spruce_materials()
     print(f"zone01 materials: {len(AGED) + len(FLAT) + len(TEXTURED)}")
 
 

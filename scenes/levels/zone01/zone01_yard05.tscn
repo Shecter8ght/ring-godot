@@ -943,6 +943,39 @@ view_distance = 550.0
 cell = 96.0
 trunk_radius = 0.25
 
+[node name="SpruceOpen" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "spruce_open"
+model = "res://assets/zone01/models/spruce_open.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/spruce_open_far.glb"
+near_distance = 95.0
+
+[node name="SpruceYoungA" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "spruce_young_a"
+model = "res://assets/zone01/models/spruce_young_a.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/spruce_young_a_far.glb"
+near_distance = 95.0
+
+[node name="SpruceYoungB" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "spruce_young_b"
+model = "res://assets/zone01/models/spruce_young_b.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/spruce_young_b_far.glb"
+near_distance = 95.0
+
 [node name="UgBushA" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"

@@ -27,6 +27,9 @@ const SHOTS := {
 	"hill_top": [Vector3(360, 1.7, 175), Vector3(150, 0, 60), 70.0],
 	"loading": [Vector3(42, 1.7, 182), Vector3(-5, -3, 130), 70.0],
 	"forest_road": [Vector3(-3, 1.7, 225), Vector3(-2, 1, 295), 70.0],
+	"spruce_close": [Vector3(30, 1.7, 236), Vector3(40, 6, 252), 70.0],
+	"sun_forest": [Vector3(-60, 1.7, 240), Vector3(0, 0, 0), 70.0],
+	"sun_yard": [Vector3(-200, 1.7, -100), Vector3(0, 0, 0), 70.0],
 	"garages": [Vector3(250, 1.7, -110), Vector3(300, 4, -20), 70.0],
 }
 
@@ -96,7 +99,14 @@ func _ready() -> void:
 		else:
 			cam.fov = float(shot[2])
 			cam.global_position = from
-			cam.look_at(shot[1], Vector3.UP)
+			var target: Vector3 = shot[1]
+			if shot_name.begins_with("sun_"):
+				# против солнца: направление на солнце (свет идёт вдоль −Z узла), чуть вверх
+				var sun := level.find_child("Sun", true, false) as DirectionalLight3D
+				var to_sun: Vector3 = sun.global_basis.z
+				to_sun.y = clampf(to_sun.y, 0.08, 0.3)
+				target = from + to_sun.normalized() * 50.0
+			cam.look_at(target, Vector3.UP)
 			cam.current = true
 		for i in range(90):
 			await get_tree().process_frame

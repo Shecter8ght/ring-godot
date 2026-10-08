@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" load_steps=8 format=3]
+
+[ext_resource type="Shader" path="res://src/world/spruce_bark.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/pine_bark/albedo.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/textures/pine_bark/normal.jpg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/textures/pine_bark/arm.jpg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/textures/knotted_pine_bark/albedo.jpg" id="5"]
+[ext_resource type="Texture2D" path="res://assets/textures/knotted_pine_bark/normal.jpg" id="6"]
+[ext_resource type="Texture2D" path="res://assets/textures/knotted_pine_bark/arm.jpg" id="7"]
+
+[resource]
+resource_name = "SpruceCone"
+shader = ExtResource("1")
+shader_parameter/old_albedo = ExtResource("2")
+shader_parameter/old_normal = ExtResource("3")
+shader_parameter/old_arm = ExtResource("4")
+shader_parameter/young_albedo = ExtResource("5")
+shader_parameter/young_normal = ExtResource("6")
+shader_parameter/young_arm = ExtResource("7")
+shader_parameter/old_height = 100.0
+shader_parameter/moss = 0.0
+shader_parameter/old_saturation = 1.0
+shader_parameter/old_tint = Color(0.75, 0.55, 0.4, 1)
+shader_parameter/uv_scale = 3.0

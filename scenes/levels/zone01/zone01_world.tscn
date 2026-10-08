@@ -561,32 +561,60 @@ view_distance = 550.0
 cell = 96.0
 trunk_radius = 0.25
 
-[node name="ForestFirA" parent="Vegetation" type="Node3D"]
+[node name="SpruceForestA" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 data_path = "res://data/zone01_vegetation.json"
-key = "forest_fir_a"
-model = "res://assets/zone01/models/forest_fir_a.glb"
-view_distance = 550.0
-cell = 96.0
-trunk_radius = 0.25
+key = "spruce_forest_a"
+model = "res://assets/zone01/models/spruce_forest_a.glb"
+far_model = "res://assets/zone01/models/spruce_forest_a_far.glb"
+near_distance = 95.0
+view_distance = 650.0
+cell = 64.0
+trunk_radius = 0.3
 
-[node name="ForestFirB" parent="Vegetation" type="Node3D"]
+[node name="SpruceForestB" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 data_path = "res://data/zone01_vegetation.json"
-key = "forest_fir_b"
-model = "res://assets/zone01/models/forest_fir_b.glb"
-view_distance = 550.0
-cell = 96.0
-trunk_radius = 0.25
+key = "spruce_forest_b"
+model = "res://assets/zone01/models/spruce_forest_b.glb"
+far_model = "res://assets/zone01/models/spruce_forest_b_far.glb"
+near_distance = 95.0
+view_distance = 650.0
+cell = 64.0
+trunk_radius = 0.3
 
-[node name="ForestFirC" parent="Vegetation" type="Node3D"]
+[node name="SpruceOpen" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 data_path = "res://data/zone01_vegetation.json"
-key = "forest_fir_c"
-model = "res://assets/zone01/models/forest_fir_c.glb"
-view_distance = 550.0
-cell = 96.0
-trunk_radius = 0.25
+key = "spruce_open"
+model = "res://assets/zone01/models/spruce_open.glb"
+far_model = "res://assets/zone01/models/spruce_open_far.glb"
+near_distance = 95.0
+view_distance = 650.0
+cell = 64.0
+trunk_radius = 0.3
+
+[node name="SpruceYoungA" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "spruce_young_a"
+model = "res://assets/zone01/models/spruce_young_a.glb"
+far_model = "res://assets/zone01/models/spruce_young_a_far.glb"
+near_distance = 95.0
+view_distance = 650.0
+cell = 64.0
+trunk_radius = 0.08
+
+[node name="SpruceYoungB" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "spruce_young_b"
+model = "res://assets/zone01/models/spruce_young_b.glb"
+far_model = "res://assets/zone01/models/spruce_young_b_far.glb"
+near_distance = 95.0
+view_distance = 650.0
+cell = 64.0
+trunk_radius = 0.08
 
 [node name="ForestFern" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")

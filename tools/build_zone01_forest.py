@@ -344,10 +344,8 @@ def solid(asset: str, name: str, target: int, pick: str | None = None) -> dict:
 
 def main() -> None:
     TEX.mkdir(parents=True, exist_ok=True)
-    render_atlas()
+    # ели — tools/build_spruce.py (своя ель по референсам владельца); отсюда — только лесной мусор
     manifest = {}
-    for v in ("a", "b", "c"):
-        manifest[f"forest_fir_{v}"] = fir(v, f"forest_fir_{v}")
     for asset, name, target, pick in [("tree_stump_01", "forest_stump_01", 1500, None), ("tree_stump_02", "forest_stump_02", 1500, None),
                                       ("pine_roots", "forest_roots", 2500, None), ("dead_tree_trunk", "forest_dead_trunk", 2500, None),
                                       ("dry_branches_medium_01", "forest_dry_branches", 1500, None),

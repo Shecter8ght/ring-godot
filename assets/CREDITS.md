@@ -19,6 +19,7 @@
 - `assets/textures/forest_floor/` — Forest Floor, eye-candy.xyz, CC0 1.0, https://polyhaven.com/a/forest_floor — рельеф: опавшая листва (лесополоса, под деревьями)
 - `assets/textures/gravel_stones/` — Gravel Stones, Amal Kumar, CC0 1.0, https://polyhaven.com/a/gravel_stones — рельеф: щебень насыпи, стройплощадки
 - `assets/textures/green_metal_rust/` — Green Metal Rust, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/green_metal_rust — крашеный корпус гранаты
+- `assets/textures/knotted_pine_bark/` — Knotted Pine Bark, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/knotted_pine_bark — ель: гладкая серая кора верха ствола и молодых елей
 - `assets/textures/large_floor_tiles_02/` — Large Floor Tiles 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/large_floor_tiles_02 — пол галереи ТЦ
 - `assets/textures/leafy_grass/` — Leafy Grass, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/leafy_grass — рельеф: осенний газон с листвой (основа)
 - `assets/textures/metal_plate/` — Metal Plate, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/metal_plate — рампы и металлические полы
@@ -26,6 +27,7 @@
 - `assets/textures/natural_walnut_veneer/` — Natural Walnut Veneer, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/natural_walnut_veneer — ореховое ложе дробовика и винтовки
 - `assets/textures/painted_metal_shutter/` — Painted Metal Shutter, Dario Barresi, Rico Cilliers, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/painted_metal_shutter — роллеты магазинов
 - `assets/textures/painted_plaster_wall/` — Painted Plaster Wall, Amal Kumar, CC0 1.0, https://polyhaven.com/a/painted_plaster_wall — стены магазинов
+- `assets/textures/pine_bark/` — Pine Bark, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/pine_bark — ель: старая чешуйчатая кора низа ствола
 - `assets/textures/plywood/` — Plywood, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/plywood — заколоченные окна
 - `assets/textures/red_bricks_04/` — Red Bricks 04, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/red_bricks_04 — кирпичный цоколь, вентшахты на крыше
 - `assets/textures/rocks_ground_02/` — Rocks Ground 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/rocks_ground_02 — рельеф: каменистые склоны оврага, холма
@@ -176,3 +178,10 @@
 - «Trash can» — bazz4r, CC Attribution, https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac → sf_dumpster_a, sf_dumpster_b, sf_dumpster_tipped
 - «Tree» — Epic_Tree_Store, CC Attribution, https://sketchfab.com/3d-models/tree-c25e5fc2bfa54d24a165a8a207c0a6d7 → sf_dead_tree
 - «VAZ 2104 - RAW scan» — Dmytro Nikonov, CC Attribution, https://sketchfab.com/3d-models/vaz-2104-raw-scan-cedba0fb26e34497910044f11a23e686 → sf_vaz2104
+
+## Зона 1 · ель (assets/zone01/models/spruce_*.glb, textures/spruce_*)
+
+- Ель — собственная модель проекта (tools/build_spruce.py) по фото-референсам владельца.
+- Веточки атласа лап — скан «Fir Tree 01» (Poly Haven, CC0; фото Rob Tuytel, модель Rico Cilliers),
+  https://polyhaven.com/a/fir_tree_01 — карты twig_* 4K; кора ветвей сучьев атласа — оттуда же.
+- Кора ствола — Poly Haven «Pine Bark», «Knotted Pine Bark» (CC0).

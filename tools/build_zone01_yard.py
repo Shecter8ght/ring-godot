@@ -196,6 +196,10 @@ def main() -> None:
 def scatter(s: z1.Scene) -> None:
     """Деревья и трава: точки в JSON, MultiMesh-клетки в сцене (DistrictScatter)."""
     trees: dict[str, list] = {f"tree_{k}_{v}": [] for k in ("birch", "poplar", "maple") for v in range(3)}
+    # ели у домов — их сажали во дворах; одна взрослая и подрост
+    trees["spruce_open"] = [(-158.5, -96.0)]
+    trees["spruce_young_a"] = [(-246.5, -66.0), (-187.0, -131.0)]
+    trees["spruce_young_b"] = [(-159.0, -128.0)]
     # ряд тополей между северной дорогой и корпусом 1
     for i, x in enumerate(range(-238, -180, 9)):
         trees[f"tree_poplar_{i % 3}"].append((x + RNG.uniform(-1, 1), -151.5 + RNG.uniform(-0.6, 0.6)))
@@ -243,8 +247,9 @@ def scatter(s: z1.Scene) -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
     for key in trees:
+        extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=95.0) if key.startswith("spruce") else {}
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",
-               key=key, model=f"{MODELS}/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25)
+               key=key, model=f"{MODELS}/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25, **extra)
     z1.undergrowth_nodes(s, "Vegetation", "res://data/zone01_yard_scatter.json")
     print("trees", sum(len(v) for v in trees.values()), "кустов", sum(len(data[k]) for k in z1.UG_VIEW))
 

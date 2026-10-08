@@ -1,0 +1,117 @@
+{
+ "spruce_forest_a": {
+  "triangles": 21252,
+  "height": 24.0,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.594,
+     4.0,
+     0.594
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 24.48,
+   "base": 0.3
+  }
+ },
+ "spruce_open": {
+  "triangles": 24584,
+  "height": 16.5,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.66,
+     4.0,
+     0.66
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 20.736,
+   "base": 0.3
+  }
+ },
+ "spruce_forest_b": {
+  "triangles": 18608,
+  "height": 20.0,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.484,
+     4.0,
+     0.484
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 20.4,
+   "base": 0.3
+  }
+ },
+ "spruce_young_a": {
+  "triangles": 8068,
+  "height": 7.5,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.198,
+     4.0,
+     0.198
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 10.053,
+   "base": 0.3
+  }
+ },
+ "spruce_young_b": {
+  "triangles": 4266,
+  "height": 4.2,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.121,
+     4.0,
+     0.121
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 6.387,
+   "base": 0.3
+  }
+ }
+}

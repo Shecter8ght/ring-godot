@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bbfe8n8lnpfp0"
-path="res://.godot/imported/forest_fir_b.glb-f85814b9e8403d85a16f890edc0fb6d4.scn"
+uid="uid://bs4m4uiv5jqqf"
+path="res://.godot/imported/spruce_forest_b_far.glb-eb20ff37e994932ef9f2528eef42178a.scn"
 
 [deps]
 
-source_file="res://assets/zone01/models/forest_fir_b.glb"
-dest_files=["res://.godot/imported/forest_fir_b.glb-f85814b9e8403d85a16f890edc0fb6d4.scn"]
+source_file="res://assets/zone01/models/spruce_forest_b_far.glb"
+dest_files=["res://.godot/imported/spruce_forest_b_far.glb-eb20ff37e994932ef9f2528eef42178a.scn"]
 
 [params]
 
