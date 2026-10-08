@@ -125,9 +125,9 @@ environment = ExtResource("7")
 rotation_degrees = Vector3(-21.0, -128.0, 0.0)
 light_color = Color(1, 0.88, 0.76, 1)
 light_energy = 2.2
-light_angular_distance = 1.2
+light_angular_distance = 2.5
 shadow_enabled = true
-shadow_blur = 1.5
+shadow_blur = 2.5
 directional_shadow_max_distance = 260.0
 light_volumetric_fog_energy = 1.6
 
