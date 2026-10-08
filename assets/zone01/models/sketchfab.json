@@ -1,0 +1,282 @@
+{
+ "sf_vaz2104": {
+  "triangles": 59999,
+  "size": [
+   4.21,
+   1.42,
+   1.83
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.711,
+     0
+    ],
+    "size": [
+     3.87,
+     1.423,
+     1.684
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "VAZ 2104 - RAW scan",
+  "author": "Dmytro Nikonov",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/vaz-2104-raw-scan-cedba0fb26e34497910044f11a23e686",
+  "library": "ВАЗ 2104 скан"
+ },
+ "sf_car_burned": {
+  "triangles": 80000,
+  "size": [
+   4.3,
+   1.33,
+   2.3
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.665,
+     0
+    ],
+    "size": [
+     3.955,
+     1.331,
+     2.117
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Lviv Missile Attack. Burned And Destroyed Car",
+  "author": "Serhii Revenko",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/lviv-missile-attack-burned-and-destroyed-car-5cdf33c5d3754f658e740f5360e3eeca",
+  "library": "Сгоревшая машина"
+ },
+ "sf_dumpster_a": {
+  "triangles": 2010,
+  "size": [
+   1.5,
+   1.3,
+   1.31
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.65,
+     0
+    ],
+    "size": [
+     1.378,
+     1.3,
+     1.204
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Trash can",
+  "author": "bazz4r",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac",
+  "library": "Мусорный бак зелёный"
+ },
+ "sf_dead_tree": {
+  "triangles": 20000,
+  "size": [
+   5.56,
+   7.5,
+   7.0
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     3.75,
+     0
+    ],
+    "size": [
+     5.116,
+     7.5,
+     6.436
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Tree",
+  "author": "Epic_Tree_Store",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/tree-c25e5fc2bfa54d24a165a8a207c0a6d7",
+  "library": "Сухое дерево"
+ },
+ "sf_wood_block": {
+  "triangles": 416,
+  "size": [
+   0.17,
+   0.48,
+   0.11
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.242,
+     0
+    ],
+    "size": [
+     0.16,
+     0.484,
+     0.1
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Low Poly Weathered Wood Block Scan - Game Ready",
+  "author": "-Arthur-",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/low-poly-weathered-wood-block-scan-game-ready-d6e22786fbfd4b239c54eced37de7a84",
+  "library": "Деревянный брусок"
+ },
+ "sf_garage_row": {
+  "triangles": 636,
+  "size": [
+   6.71,
+   3.52,
+   20.55
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     1.76,
+     0
+    ],
+    "size": [
+     6.171,
+     3.52,
+     18.906
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Garage_1",
+  "author": "ganic30",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/garage-1-4ca6068160cc43feb305f5547eb9f87e",
+  "library": "Гаражи кирпичные"
+ },
+ "sf_panel12": {
+  "triangles": 2861,
+  "size": [
+   53.93,
+   40.09,
+   11.31
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     20.043,
+     0
+    ],
+    "size": [
+     49.619,
+     40.086,
+     10.403
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Detailed 12 storey panel apartment building",
+  "author": "bean(alwayshasbean)",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/detailed-12-storey-panel-apartment-building-cb7064bec48845fea62a830b2c692fb1",
+  "library": "Панельная 12 этажей"
+ },
+ "sf_panel5_brutal": {
+  "triangles": 10144,
+  "size": [
+   30.74,
+   16.0,
+   13.16
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     8.0,
+     0
+    ],
+    "size": [
+     28.28,
+     16.0,
+     12.108
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Soviet Panel Brutal building (Baked)",
+  "author": "Blenderust",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/soviet-panel-brutal-building-baked-deb2133873534b8ebec4c97e5c7f6c3b",
+  "library": "Панельная 5 этажей"
+ },
+ "sf_dumpster_b": {
+  "triangles": 2010,
+  "size": [
+   1.94,
+   1.3,
+   1.88
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.65,
+     0
+    ],
+    "size": [
+     1.782,
+     1.3,
+     1.729
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Trash can",
+  "author": "bazz4r",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac",
+  "library": "Мусорный бак зелёный"
+ },
+ "sf_dumpster_tipped": {
+  "triangles": 2010,
+  "size": [
+   2.36,
+   1.26,
+   2.59
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.63,
+     0
+    ],
+    "size": [
+     2.173,
+     1.26,
+     2.387
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Trash can",
+  "author": "bazz4r",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac",
+  "library": "Мусорный бак зелёный"
+ }
+}

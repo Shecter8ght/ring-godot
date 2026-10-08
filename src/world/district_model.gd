@@ -60,7 +60,9 @@ func _build() -> void:
 		var inst: Node3D = (load(model) as PackedScene).instantiate() as Node3D
 		inst.name = "_Model"
 		add_child(inst)
-		_apply_materials(inst)
+		# пустая папка материалов — у модели свои (Sketchfab): ничего не подменять
+		if materials_dir != "":
+			_apply_materials(inst)
 		return
 	# запасной вид — коробки коллизий
 	var fallback := MeshInstance3D.new()

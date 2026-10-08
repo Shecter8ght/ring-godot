@@ -1,11 +1,11 @@
 {
 	"files": {
-		"res://data/sectors/zone01_mall.json": "22b055365c044db26e9f1654f59aea6062eda7ce8d2010f6a2bd8fd2f3b58a1e",
+		"res://data/sectors/zone01_mall.json": "e86e3f070490b9b5600c49451de29cc211e1fcd47457b85d129ca65fd4ceb8de",
 		"res://data/terrain/zone01_heights.r32": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-		"res://scenes/levels/zone01/zone01_blockout.tscn": "37c35b11672194c0e80027cc681dd74a5b3aeae21abfea488032e23a78aa7b4a",
-		"res://scenes/levels/zone01/zone01_world.tscn": "76b4a4c9d08560f04de9b9e49814523ecd92e282c3ed49042fae2cc905b41675",
-		"res://scenes/levels/zone01/zone01_yard05.tscn": "60648658feb41223cfe17fd837c38419d09b972c72224f2749ca999fbeca3219",
-		"res://scenes/levels/zone01_mall.tscn": "206d83177b94b6fcaa54f93ce08d8882f729c481c25b49f8e9f525fc13543192",
+		"res://scenes/levels/zone01/zone01_blockout.tscn": "64f6d91944ac0eeaf3a2bbeae284278c3320459f29edecdf47b54a440859e056",
+		"res://scenes/levels/zone01/zone01_world.tscn": "be42cd6d70fc6efb2531b3fb13b4766910886f25fcfb850b7d7d88934d33ed2d",
+		"res://scenes/levels/zone01/zone01_yard05.tscn": "ad58b4faef580c22b7e6ab73dc71e791fcac63383401b13914e96e9f8726b6ea",
+		"res://scenes/levels/zone01_mall.tscn": "5fc1a1816067b43e8c1abf15483528157e232bab1f6ca1dbdc94d06fac00de15",
 		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
 		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
 		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",

@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 ## Снимки зоны 1 (район ТЦ) в docs/screens/zone01_*.png: обзор с воздуха и виды с высоты глаз.
 ## tools/godot.cmd res://tools/zone01_shots.tscn       (ZONE01_ONLY=yard,plaza — выборочно)
 
@@ -16,6 +16,8 @@ const SHOTS := {
 	"yard_entrance": [Vector3(-200, 1.7, -118), Vector3(-212, 4, -132), 70.0],
 	"yard_brick": [Vector3(-212, 1.7, -88), Vector3(-232, 5, -80), 70.0],
 	"yard_k2": [Vector3(-186, 1.7, -100), Vector3(-160, 6, -112), 70.0],
+	"yard_bins": [Vector3(-171, 1.7, -76), Vector3(-181, 0.6, -66), 70.0],
+	"yard_cars": [Vector3(-200, 1.7, -112), Vector3(-190, 0.5, -118), 70.0],
 	"yard_garages": [Vector3(-232, 1.7, -128), Vector3(-270, 3, -150), 70.0],
 	"ravine": [Vector3(-330, 1.8, 38), Vector3(-300, -6, 100), 70.0],
 	"ravine_bottom": [Vector3(-341, 1.7, 0), Vector3(-344, -3, -50), 70.0],

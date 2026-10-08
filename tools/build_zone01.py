@@ -31,7 +31,8 @@ OUT = ROOT / "scenes/levels/zone01"
 SECTOR = "res://data/sectors/zone01_mall.json"
 
 # ------------------------------------------------------------------ сетка рельефа
-X0, Z0, NX, NZ = -410.0, -222.0, 861, 528
+# сетка шире игровой области: за границей — фон (панельки за насыпью и оврагом, лес)
+X0, Z0, NX, NZ = -480.0, -300.0, 1011, 640
 STEP = 1.0
 xs = X0 + np.arange(NX) * STEP
 zs = Z0 + np.arange(NZ) * STEP
@@ -192,6 +193,10 @@ def build_heights() -> np.ndarray:
         if height is None:
             height = float(h[int((z0 + z1) / 2 - Z0), int((x0 + x1) / 2 - X0)])
         h = flatten(h, rect_distance(x0, z0, x1, z1), height, fall, keep, detail)
+    # фон за границей: ровные площадки под панельки
+    for x0, z0, x1, z1 in PADS_BG:
+        cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+        h = flatten(h, rect_distance(x0 - 3, z0 - 3, x1 + 3, z1 + 3), float(h[int(cz - Z0), int(cx - X0)]), 10.0)
     # частные дома у оврага (12)
     for hx, hz in [(-270, 3), (-297, 25), (-272, 50)]:
         h = flatten(h, rect_distance(hx - 10, hz - 9, hx + 10, hz + 9), float(h[int(hz - Z0), int(hx - X0)]), 6.0)
@@ -363,7 +368,11 @@ def build_splat(h: np.ndarray) -> np.ndarray:
 
 # ------------------------------------------------------------------ растительность всей карты
 
-PADS_PAVED = [(-82, -154, 92, -104), (118, -74, 202, 48), (178, -146, 282, -104), (200, 72, 280, 128),
+PADS_BG = [(x - 30, z - 12, x + 30, z + 12) if abs(yaw) < 45 else (x - 12, z - 30, x + 12, z + 30)
+           for _, x, z, yaw in [("", -290, -262, 0), ("", -170, -270, 8), ("", 110, -268, -5), ("", 250, -262, 3), ("", -40, -250, 0),
+                                ("", 360, -250, 0), ("", -450, -110, 90), ("", -452, -40, 92), ("", -450, 60, 88), ("", 500, -60, -90),
+                                ("", 495, 60, -90)]]
+PADS_PAVED = PADS_BG + [(-82, -154, 92, -104), (118, -74, 202, 48), (178, -146, 282, -104), (200, 72, 280, 128),
               (60, 104, 156, 170), (-238, -58, -104, 112), (-282, -160, -132, -44), PIT, PONDS_PAD, (390, 10, 432, 44)]
 
 
@@ -806,15 +815,22 @@ def building(scene: Scene, name, x, z, w, d, h, parent, yaw=0.0, title="", floor
     return path
 
 
+SF_MANIFEST = "res://assets/zone01/models/sketchfab.json"
+
+
+def sf_model(scene: "Scene", name: str, model: str, x: float, z: float, yaw: float = 0.0, parent: str = "Props",
+             y: float | None = None, surface: str = "metal", rotation=None) -> str:
+    """Модель Sketchfab (tools/import_sketchfab.py) узлом DistrictModel: материалы свои, коллизия из манифеста."""
+    rot = rotation if rotation is not None else (0, yaw, 0)
+    return scene.node(name, parent, kind="StaticBody3D", script=scene.resource("res://src/world/district_model.gd", "Script"),
+                      position=v3(x, ground(x, z) if y is None else y, z), rotation_degrees=v3(*rot),
+                      model=f"res://assets/zone01/models/{model}.glb", manifest=SF_MANIFEST, surface=surface, materials_dir="")
+
+
 def car(scene, name, x, z, yaw=0.0, color=(.45, .51, .57), parent="Props"):
-    props(scene, name, x, z, [box((0, .65, 0), (1.75, .8, 4.3), color, surface="metal"),
-                              box((0, 1.25, .2), (1.5, .5, 2.2), color, False),
-                              box((0, 1.27, -.95), (1.42, .42, .06), (.16, .2, .23), False),
-                              box((-.9, .33, -1.3), (.2, .62, .62), (.12, .12, .12), False),
-                              box((.9, .33, -1.3), (.2, .62, .62), (.12, .12, .12), False),
-                              box((-.9, .33, 1.3), (.2, .62, .62), (.12, .12, .12), False),
-                              box((.9, .33, 1.3), (.2, .62, .62), (.12, .12, .12), False)],
-          parent, yaw, surface="metal")
+    """Брошенная машина: ВАЗ-2104 (скан), изредка — сгоревшая. Выбор по координатам — стабильный."""
+    burned = (int(abs(x) * 7 + abs(z) * 13) % 5) == 0
+    sf_model(scene, name, "sf_car_burned" if burned else "sf_vaz2104", x, z, yaw + 90.0, parent)
 
 
 def truck(scene, name, x, z, yaw=0.0, parent="Props", trailer=True, y=None):
@@ -943,8 +959,22 @@ def perimeter(s: Scene) -> None:
 
 # ------------------------------------------------------------------ блокаут зон
 
+BACKGROUND = [("sf_panel12", -290, -262, 0), ("sf_panel12", -170, -270, 8), ("sf_panel12", 110, -268, -5),
+              ("sf_panel12", 250, -262, 3), ("sf_panel5_brutal", -40, -250, 0), ("sf_panel5_brutal", 360, -250, 0),
+              ("sf_panel5_brutal", -450, -110, 90), ("sf_panel5_brutal", -452, -40, 92), ("sf_panel12", -450, 60, 88),
+              ("sf_panel12", 500, -60, -90), ("sf_panel5_brutal", 495, 60, -90)]
+
+
+def background(s: "Scene") -> None:
+    """Город за границей карты — декорация без входа (за насыпью, оврагом, блокпостом)."""
+    s.node("Background")
+    for i, (model, x, z, yaw) in enumerate(BACKGROUND):
+        sf_model(s, f"Building_{i}", model, x, z, yaw, "Background", y=ground(x, z) - 0.3, surface="concrete")
+
+
 def blockout_scene() -> None:
     s = Scene("Blockout")
+    background(s)
     zone_mall(s)
     zone_parking(s)
     zone_loading(s)
@@ -1122,8 +1152,8 @@ def zone_garages(s: Scene) -> None:
     for row, x in enumerate([268, 290, 312]):
         for seg in range(5):
             zz = -92 + seg * 22 + 11
-            building(s, f"Row{row}_Block{seg}", x, zz, 6.0, 20.0, 2.7, z + "/Buildings", floors=0,
-                     doors=((0, -1),) if False else (), y=ground(x, zz) + .05)
+            sf_model(s, f"Row{row}_Block{seg}", "sf_garage_row", x, zz, 180.0 if row % 2 else 0.0, z + "/Buildings",
+                     y=ground(x, zz) - .05, surface="concrete")
     props(s, "GarageGateL", 262, -98, [box((0, 1, 0), (.2, 2, 8), METAL, surface="metal")], z + "/Props")
     fence(s, "Fence_E", (325, -100), (325, 20), parent=z + "/Props", solid=True)
 

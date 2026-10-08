@@ -163,3 +163,16 @@
 - Кора берёзы, листва, пучки травы, шум рельефа — собственные процедурные текстуры
   (tools/build_zone01_foliage_textures.py, tools/build_zone01.py).
 - Фототекстуры поверхностей и фасадов — Poly Haven, CC0 (список выше, раздел текстур).
+
+## Зона 1 · модели Sketchfab (CC-BY 4.0, assets/zone01/models/sf_*.glb)
+
+Скачаны владельцем, перевод в игру — tools/import_sketchfab.py (масштаб, упрощение, срез земли). Полный список библиотеки — docs/assets_sketchfab.md.
+
+- «Detailed 12 storey panel apartment building» — bean(alwayshasbean), CC Attribution, https://sketchfab.com/3d-models/detailed-12-storey-panel-apartment-building-cb7064bec48845fea62a830b2c692fb1 → sf_panel12
+- «Garage_1» — ganic30, CC Attribution, https://sketchfab.com/3d-models/garage-1-4ca6068160cc43feb305f5547eb9f87e → sf_garage_row
+- «Low Poly Weathered Wood Block Scan - Game Ready» — -Arthur-, CC Attribution, https://sketchfab.com/3d-models/low-poly-weathered-wood-block-scan-game-ready-d6e22786fbfd4b239c54eced37de7a84 → sf_wood_block
+- «Lviv Missile Attack. Burned And Destroyed Car» — Serhii Revenko, CC Attribution, https://sketchfab.com/3d-models/lviv-missile-attack-burned-and-destroyed-car-5cdf33c5d3754f658e740f5360e3eeca → sf_car_burned
+- «Soviet Panel Brutal building (Baked)» — Blenderust, CC Attribution, https://sketchfab.com/3d-models/soviet-panel-brutal-building-baked-deb2133873534b8ebec4c97e5c7f6c3b → sf_panel5_brutal
+- «Trash can» — bazz4r, CC Attribution, https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac → sf_dumpster_a, sf_dumpster_b, sf_dumpster_tipped
+- «Tree» — Epic_Tree_Store, CC Attribution, https://sketchfab.com/3d-models/tree-c25e5fc2bfa54d24a165a8a207c0a6d7 → sf_dead_tree
+- «VAZ 2104 - RAW scan» — Dmytro Nikonov, CC Attribution, https://sketchfab.com/3d-models/vaz-2104-raw-scan-cedba0fb26e34497910044f11a23e686 → sf_vaz2104

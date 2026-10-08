@@ -146,9 +146,16 @@ def main() -> None:
         y.model("Props", f"PlayBench_{i}", "bench_plain", px + dx, pz + dz, yaw, surface="wood")
     # контейнерная площадка с баками (открытой стороной к проезду)
     y.model("Props", "ContainerSite", "container_site", -181.0, -68.0, 90.0, surface="concrete")
-    for i, dz in enumerate([-1.6, 0.0, 1.6]):
-        y.model("Props", f"Dumpster_{i}", "dumpster_open" if i == 1 else "dumpster", -181.6, -68.0 + dz, 90.0 + RNG.uniform(-8, 8))
-    y.model("Props", "DumpsterTipped", "dumpster", -177.0, -64.0, 30.0)
+    # баки — скан Sketchfab (зелёные 0.75 м³, CC-BY), один опрокинут у площадки
+    for i, (dz, model) in enumerate([(-1.6, "sf_dumpster_a"), (0.0, "sf_dumpster_b"), (1.6, "sf_dumpster_a")]):
+        z1.sf_model(s, f"Dumpster_{i}", model, -181.6, -68.0 + dz, 90.0 + RNG.uniform(-8, 8), "Props")
+    z1.sf_model(s, "DumpsterTipped", "sf_dumpster_tipped", -176.0, -63.5, 30.0, "Props")
+    # сухие деревья у гаражей и брошенные бруски
+    z1.sf_model(s, "DeadTree_0", "sf_dead_tree", -278.0, -96.0, 40.0, "Props", surface="wood")
+    z1.sf_model(s, "DeadTree_1", "sf_dead_tree", -150.0, -150.0, 160.0, "Props", surface="wood")
+    for i, (x, zz, yaw) in enumerate([(-258, -112, 20), (-257, -110.5, 75), (-180, -61, 130), (-230, -63, 10), (-246, -50, 95)]):
+        z1.sf_model(s, f"WoodBlock_{i}", "sf_wood_block", x, zz, 0, "Props", y=z1.ground(x, zz) + 0.06, surface="wood",
+                    rotation=(90, yaw, 0))
     # сушилки белья на газоне между корпусом 3 и площадкой
     y.model("Props", "Laundry_0", "laundry_pair", -214.0, -70.0, 0.0)
     y.model("Props", "Laundry_1", "laundry_pair", -214.0, -104.0, 0.0)
