@@ -47,7 +47,7 @@ var _tb_where: String = "equip:primary"
 var _tb_uid: String = ""
 
 ## Разделы ассортимента торговца: ключ, название, категории предметов ("misc" — всё прочее).
-const CAT_TABS := [["all", "Всё", []], ["weapon", "Оружие", ["weapon"]], ["ammo", "Патроны", ["ammo"]], ["mag", "Магазины", ["mag"]],
+const CAT_TABS := [["all", "Всё", []], ["weapon", "Оружие", ["weapon"]], ["mag", "Магазины", ["mag"]], ["ammo", "Патроны", ["ammo"]],
 	["mod", "Обвес", ["mod"]], ["armor", "Броня", ["armor", "plate"]], ["med", "Медицина", ["med", "food"]],
 	["throw", "Гранаты и свет", ["throw"]], ["misc", "Разное", []]]
 
@@ -278,7 +278,7 @@ func _build_stash() -> void:
 		var sv := SlotView.new(s)
 		_stash_slots.append(sv)
 		sv.set_entry(Profile.equipment.get(s, {}))
-		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role, idx))
+		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role, idx, s))
 		sv.unequip_requested.connect(func() -> void: Profile.unequip(s))
 		# на оружие — обвес или магазин, в плитоносец — плиту
 		sv.mod_from.connect(func(src: GridView, idx: int) -> void:
@@ -437,7 +437,7 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 		acts.append(func() -> void: Profile.equip_from(name, idx))
 	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
 	acts.append(func() -> void: _quick(name, idx))
-	# оружие, жилет: снять обвес, магазин — в тайник; плиты — по одной
+	# оружие, жилет: снять обвес, магазин — в рюкзак (из тайника — в тайник); плиты — по одной
 	for p in Gear.parts(list[idx]):
 		var part := String(p[1])
 		if part.begins_with("plate:"):
@@ -599,7 +599,7 @@ func _split(name: String, idx: int) -> void:
 
 func _build_trader() -> void:
 	_title.text = "%s   ·   у тебя %s ₽   ·   доверие: ступень %d / %d%s" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust_step(), int(Balance.TRUST_STEPS.max),
-		"   ·   АДМИН: всё оружие" if Settings.all_weapons else ""]
+		"   ·   АДМИН: всё у Михалыча" if Settings.all_weapons else ""]
 	# вкладки слева: купить, обвес оружия, продать, задания (разговор — отметка)
 	var tabs := VBoxContainer.new()
 	tabs.custom_minimum_size.x = 170
@@ -761,18 +761,34 @@ func _cat_of(id: String) -> String:
 	return "misc"
 
 
-## Админ видит все зарегистрированные стволы; расходники и обвес остаются в обычном ассортименте.
+## Порядок разделов в магазине: оружие, магазины, патроны, обвес, броня, медицина, гранаты, прочее.
+const STOCK_ORDER := ["weapon", "mag", "ammo", "mod", "armor", "plate", "med", "food", "throw"]
+
+
+## Ассортимент по разделам (STOCK_ORDER), внутри раздела — как в каталоге. Админ («всё у
+## Михалыча» в настройках) видит вообще всё: каждый предмет игры, кроме ключей и сведений
+## (квестовые), без ступеней доверия.
 func _trader_stock() -> Array:
 	var stock: Array = TraderStock.stock().duplicate()
 	if Settings.all_weapons:
-		for id in WeaponDb.ids("weapons"):
-			if not id in stock:
+		for id in ItemDb.all_ids():
+			var cat := String(ItemDb.item(String(id)).get("cat", "misc"))
+			if not id in stock and not cat in ["key", "intel"] and ItemDb.value(String(id)) > 0:
 				stock.append(id)
-	return stock
+	var keyed: Array = []
+	for i in stock.size():
+		var cat := String(ItemDb.item(String(stock[i])).get("cat", "misc"))
+		var rank := STOCK_ORDER.find(cat)
+		keyed.append([rank if rank >= 0 else STOCK_ORDER.size(), i, stock[i]])
+	keyed.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+	var out: Array = []
+	for k in keyed:
+		out.append(k[2])
+	return out
 
 
 func _trust_blocked(id: String, level: int) -> bool:
-	if Settings.all_weapons and WeaponDb.is_weapon(id):
+	if Settings.all_weapons:
 		return false
 	return Profile.trust_level() < level and not id in Profile.unlocked_stock
 

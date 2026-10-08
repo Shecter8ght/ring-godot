@@ -59,7 +59,7 @@ func _get_tooltip(_at: Vector2) -> String:
 
 
 func _fits(id: String) -> bool:
-	return String(ItemDb.equip(id).get("slot", "")) == slot
+	return ItemDb.slot_ok(id, slot)
 
 
 func _gui_input(event: InputEvent) -> void:

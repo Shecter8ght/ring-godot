@@ -48,6 +48,12 @@ static func item(id: String) -> Dictionary:
 
 
 ## Есть ли такой предмет (item() на незнакомый id отдаёт заглушку, не пустоту).
+## Все id предметов (данные предметов и арсенала).
+static func all_ids() -> Array:
+	_ensure()
+	return _items.keys()
+
+
 static func exists(id: String) -> bool:
 	_ensure()
 	return _items.has(WeaponDb.canonical(id))
@@ -217,6 +223,33 @@ static func _merge(list: Array, id: String, n: int) -> void:
 
 static func equip(id: String) -> Dictionary:
 	return item(id).get("equip", {})
+
+
+## Слоты оружия: любое оружие встаёт в любой из них (два пистолета, винтовка и дробовик — как угодно).
+const WEAPON_SLOTS := ["primary", "secondary"]
+
+
+## Подходит ли предмет в слот снаряжения.
+static func slot_ok(id: String, slot: String) -> bool:
+	var s := String(equip(id).get("slot", ""))
+	if s == "":
+		return false
+	if equip(id).has("weapon"):
+		return slot in WEAPON_SLOTS
+	return s == slot
+
+
+## Куда надеть предмет: want — слот, на который бросили (если подходит); оружие без указания —
+## в свой слот по данным, если он занят, а другой свободен — в другой.
+static func pick_slot(id: String, eq: Dictionary, want: String = "") -> String:
+	if want != "" and slot_ok(id, want):
+		return want
+	var s := String(equip(id).get("slot", ""))
+	if s != "" and equip(id).has("weapon") and eq.has(s):
+		for o in WEAPON_SLOTS:
+			if not eq.has(o):
+				return String(o)
+	return s
 
 
 ## Новый экземпляр предмета (id по алиасам): оружие — новое, с пустым штатным магазином;

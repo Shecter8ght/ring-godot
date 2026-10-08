@@ -416,7 +416,7 @@ func _build_equipment(me: Player) -> void:
 		sv.set_entry(me.inventory.equipment.get(slot, {}))
 		var ws := String(slot)
 		sv.equip_from.connect(func(src: GridView, idx: int) -> void:
-			Raid.current.request_equip_from(src.role, idx, _looting if src.role == "loot" else null))
+			Raid.current.request_equip_from(src.role, idx, _looting if src.role == "loot" else null, ws))
 		# прямо в рейде: бросил на оружие обвес или магазин, в плитоносец — плиту; обвес — что умеет
 		# твой верстак
 		sv.mod_from.connect(func(src: GridView, idx: int) -> void:

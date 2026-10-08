@@ -20,8 +20,8 @@ const ACTIONS := [
 	["fire", "Огонь"],
 	["reload", "Перезарядка"],
 	["toggle_suppressor", "Глушитель — снять в рюкзак / установить из рюкзака"],
-	["weapon_1", "Основное оружие"],
-	["weapon_2", "Пистолет"],
+	["weapon_1", "Оружие 1"],
+	["weapon_2", "Оружие 2"],
 	["weapon_3|weapon_4", "Дробовик / винтовка — только на полигоне"],
 	["grenade", "Граната (держать — прицел броска)"],
 	["throw_flare", "Осветительная ракета (светит минуту, слепит, выдаёт всех рядом)"],
@@ -547,10 +547,10 @@ func _build_admin(h: HBoxContainer) -> void:
 	head.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
 	_admin.add_child(head)
 	var all_weapons := CheckButton.new()
-	all_weapons.text = "Любое оружие у Михалыча"
+	all_weapons.text = "Всё у Михалыча"
 	all_weapons.focus_mode = Control.FOCUS_NONE
 	all_weapons.button_pressed = Settings.all_weapons
-	all_weapons.tooltip_text = "В магазин добавляются все стволы, доверие для оружия не требуется. Деньги и свободное место всё ещё нужны."
+	all_weapons.tooltip_text = "В магазине — вообще всё: оружие, магазины, патроны, обвес, броня, снаряжение, медицина; доверие не требуется. Деньги и свободное место всё ещё нужны."
 	all_weapons.toggled.connect(func(on: bool) -> void: Settings.set_all_weapons(on))
 	_admin.add_child(all_weapons)
 	var money_head := Label.new()

@@ -6,7 +6,7 @@ extends Node
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
 const SLOTS := ["primary", "secondary", "armor", "helmet", "ears", "eyes"]
-const SLOT_NAMES := {"primary": "Основное", "secondary": "Пистолет", "armor": "Броня", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза"}
+const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "armor": "Броня", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза"}
 
 var items: Array = []
 ## Ревизия слота не забывается, когда оружие вынуто: поздний пакет не попадёт в новый экземпляр.
@@ -467,7 +467,7 @@ func equip_from_items(idx: int) -> Dictionary:
 	if idx < 0 or idx >= items.size():
 		return {}
 	var id := String(items[idx].id)
-	var slot := String(ItemDb.equip(id).get("slot", ""))
+	var slot := ItemDb.pick_slot(id, equipment)
 	if slot == "":
 		return {}
 	var list := items.duplicate(true)

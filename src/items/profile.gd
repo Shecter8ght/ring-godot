@@ -403,13 +403,13 @@ static func equip_from_stash(idx: int) -> bool:
 
 
 ## Надеть предмет из тайника или рюкзака; то, что было в слоте, — туда же (не влезло — в тайник).
-static func equip_from(from: String, idx: int) -> bool:
+static func equip_from(from: String, idx: int, want: String = "") -> bool:
 	var src := list_of(from)
 	var grid := grid_of(from)
 	if idx < 0 or idx >= src.size():
 		return false
 	var id := String(src[idx].id)
-	var slot := String(ItemDb.equip(id).get("slot", ""))
+	var slot := ItemDb.pick_slot(id, equipment, want)
 	if slot == "":
 		return false
 	var entry := ItemDb.remove_at(src, idx, 1)
@@ -524,17 +524,23 @@ static func _set_entry(where: String, idx: int, e: Dictionary) -> void:
 	list[idx] = e
 
 
-## Снять часть с предмета (обвес "mod:<точка>", плиту "plate:<сторона>", магазин "mag") — в тайник.
+## Снять часть с предмета (обвес "mod:<точка>", плиту "plate:<сторона>", магазин "mag"): с надетого
+## и из рюкзака — в рюкзак (не влезло — в тайник), из тайника — в тайник.
 static func strip_part(where: String, idx: int, part: String) -> bool:
 	var e := _entry_at(where, idx)
 	if e.is_empty():
 		return false
 	var r := Gear.strip(e, part)
 	var got: Dictionary = r[1]
-	if got.is_empty() or ItemDb.room_in(stash, got, stash_grid()) < int(got.n):
+	if got.is_empty():
+		return false
+	var to := "stash"
+	if where != "stash" and ItemDb.room_in(backpack, got, grid_of("backpack")) >= int(got.n):
+		to = "backpack"
+	if ItemDb.room_in(list_of(to), got, grid_of(to)) < int(got.n):
 		return false
 	_set_entry(where, idx, r[0])
-	ItemDb.add_to(stash, got, stash_grid())
+	ItemDb.add_to(list_of(to), got, grid_of(to))
 	save()
 	return true
 
@@ -641,6 +647,20 @@ static func buy(id: String, n: int, to: String = "stash") -> bool:
 	# оружие у Михалыча — со снаряжённым штатным магазином (отдельные магазины — пустые)
 	if WeaponDb.is_weapon(String(bought.id)) and bought.get("mag") is Dictionary:
 		(bought.mag as Dictionary)["rounds"] = WeaponDb.capacity(bought)
+	# снаряжение (броня, шлем, очки, наушники, рюкзак) — сразу на себя, если этот слот свободен
+	var slot := String(ItemDb.equip(id).get("slot", ""))
+	if n == 1 and slot != "" and not ItemDb.equip(id).has("weapon") and not equipment.has(slot):
+		if cost > money:
+			return false
+		money -= cost
+		if not bought.has("dur") and ItemDb.equip(id).has("durability"):
+			bought.dur = float(ItemDb.equip(id).durability)
+		for key in ["x", "y", "r"]:
+			bought.erase(key)
+		equipment[slot] = bought
+		save()
+		Audio.play_ui("cash")
+		return true
 	if cost > money or ItemDb.room_in(dst, bought, grid) < n:
 		return false
 	money -= cost

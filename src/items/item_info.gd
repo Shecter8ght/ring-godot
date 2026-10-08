@@ -234,8 +234,7 @@ static func _flavor_text(item: Dictionary) -> String:
 static func _weapon_text(id: String, w: Dictionary) -> String:
 	var spec := WeaponStats.compute(ItemDb.make(id, 1))
 	var lines: Array[String] = []
-	lines.append("[b]%s[/b], калибр [b]%s[/b], слот «%s»." % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber)),
-		"Пистолет" if String(w.slot) == "secondary" else "Основное"])
+	lines.append("[b]%s[/b], калибр [b]%s[/b]; встаёт в любой слот оружия." % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber))])
 	if w.has("internal_mag"):
 		lines.append("Магазин встроенный на %d — заряжается патронами прямо из рюкзака (R)." % int(w.internal_mag))
 	else:

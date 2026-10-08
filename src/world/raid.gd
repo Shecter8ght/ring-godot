@@ -747,21 +747,22 @@ func _rpc_tell(text: String) -> void:
 
 ## Надеть / взять в руки прямо из сетки src ("backpack", "pocket", "buffer", "loot" — ящик): что было в
 ## слоте — в рюкзак; не влезло — туда, откуда взято новое; иначе — под ноги.
-func request_equip_from(src: String, idx: int, container: LootContainer = null) -> void:
+## want — слот, на который бросили (оружие встаёт в любой слот оружия); пусто — по данным.
+func request_equip_from(src: String, idx: int, container: LootContainer = null, want: String = "") -> void:
 	var path := container.get_path() if container else NodePath()
 	if _is_host():
-		_equip_from(multiplayer.get_unique_id(), src, idx, path)
+		_equip_from(multiplayer.get_unique_id(), src, idx, path, want)
 	else:
-		_rpc_equip_from.rpc_id(1, src, idx, path)
+		_rpc_equip_from.rpc_id(1, src, idx, path, want)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_equip_from(src: String, idx: int, path: NodePath) -> void:
+func _rpc_equip_from(src: String, idx: int, path: NodePath, want: String) -> void:
 	if multiplayer.is_server():
-		_equip_from(multiplayer.get_remote_sender_id(), src, idx, path)
+		_equip_from(multiplayer.get_remote_sender_id(), src, idx, path, want)
 
 
-func _equip_from(peer_id: int, src: String, idx: int, path: NodePath) -> void:
+func _equip_from(peer_id: int, src: String, idx: int, path: NodePath, want: String = "") -> void:
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
@@ -774,7 +775,7 @@ func _equip_from(peer_id: int, src: String, idx: int, path: NodePath) -> void:
 	if idx < 0 or idx >= list.size():
 		return
 	var id := String(list[idx].id)
-	var slot := String(ItemDb.equip(id).get("slot", ""))
+	var slot := ItemDb.pick_slot(id, inv.equipment, want)
 	if slot == "":
 		return
 	var one := ItemDb.remove_at(list, idx, 1)
