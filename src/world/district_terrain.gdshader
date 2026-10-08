@@ -13,7 +13,9 @@ uniform vec2 splat_origin = vec2(0.0);
 uniform vec2 splat_size = vec2(1.0);
 uniform float layer_tile[6];
 // поздняя осень: газон темнее и оливковее фототекстуры
-uniform vec3 grass_tint : source_color = vec3(0.6, 0.66, 0.46);
+uniform vec3 grass_tint : source_color = vec3(0.5, 0.56, 0.38);
+// опавшая листва и грязь — темнее и тусклее фототекстур (сырая поздняя осень)
+uniform vec3 litter_tint : source_color = vec3(0.52, 0.5, 0.46);
 // Камень выходит сам, когда склон круче этого (косинус угла с вертикалью).
 uniform float rock_slope_start = 0.82;
 uniform float rock_slope_end = 0.62;
@@ -75,6 +77,8 @@ void fragment() {
 		layer(i, wp, mixr, a, n, r);
 		if (i == 1) {
 			a *= grass_tint;
+		} else if (i == 2 || i == 3) {
+			a *= litter_tint;
 		}
 		float k = w[i];
 		if (i > 1) {

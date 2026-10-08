@@ -1,0 +1,236 @@
+{
+ "ug_bush_a": {
+  "triangles": 6000,
+  "size": [
+   1.31,
+   1.69,
+   1.64
+  ],
+  "source": "https://polyhaven.com/a/shrub_02"
+ },
+ "ug_bush_b": {
+  "triangles": 5242,
+  "size": [
+   1.11,
+   1.51,
+   1.28
+  ],
+  "source": "https://polyhaven.com/a/shrub_02"
+ },
+ "ug_bush_c": {
+  "triangles": 6000,
+  "size": [
+   1.77,
+   1.31,
+   2.29
+  ],
+  "source": "https://polyhaven.com/a/shrub_02"
+ },
+ "ug_bush_d": {
+  "triangles": 5188,
+  "size": [
+   1.08,
+   1.23,
+   1.1
+  ],
+  "source": "https://polyhaven.com/a/shrub_02"
+ },
+ "ug_nettle_tall_a": {
+  "triangles": 3999,
+  "size": [
+   0.1,
+   0.22,
+   0.09
+  ],
+  "source": "https://polyhaven.com/a/nettle_plant"
+ },
+ "ug_nettle_tall_b": {
+  "triangles": 4000,
+  "size": [
+   0.08,
+   0.19,
+   0.09
+  ],
+  "source": "https://polyhaven.com/a/nettle_plant"
+ },
+ "ug_nettle_mid_a": {
+  "triangles": 3998,
+  "size": [
+   0.08,
+   0.13,
+   0.09
+  ],
+  "source": "https://polyhaven.com/a/nettle_plant"
+ },
+ "ug_nettle_mid_b": {
+  "triangles": 3999,
+  "size": [
+   0.07,
+   0.1,
+   0.07
+  ],
+  "source": "https://polyhaven.com/a/nettle_plant"
+ },
+ "ug_weed_a": {
+  "triangles": 2499,
+  "size": [
+   0.22,
+   0.07,
+   0.29
+  ],
+  "source": "https://polyhaven.com/a/weed_plant_02"
+ },
+ "ug_weed_b": {
+  "triangles": 2273,
+  "size": [
+   0.19,
+   0.07,
+   0.2
+  ],
+  "source": "https://polyhaven.com/a/weed_plant_02"
+ },
+ "ug_weed_c": {
+  "triangles": 1766,
+  "size": [
+   0.14,
+   0.05,
+   0.14
+  ],
+  "source": "https://polyhaven.com/a/weed_plant_02"
+ },
+ "ug_dandelion_c": {
+  "triangles": 2499,
+  "size": [
+   0.17,
+   0.1,
+   0.17
+  ],
+  "source": "https://polyhaven.com/a/dandelion_01"
+ },
+ "ug_dandelion_d": {
+  "triangles": 2499,
+  "size": [
+   0.12,
+   0.06,
+   0.14
+  ],
+  "source": "https://polyhaven.com/a/dandelion_01"
+ },
+ "ug_dandelion_e": {
+  "triangles": 2080,
+  "size": [
+   0.21,
+   0.05,
+   0.21
+  ],
+  "source": "https://polyhaven.com/a/dandelion_01"
+ },
+ "ug_grass_large": {
+  "triangles": 3000,
+  "size": [
+   0.28,
+   0.17,
+   0.28
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_01"
+ },
+ "ug_grass_mid_b": {
+  "triangles": 1257,
+  "size": [
+   0.19,
+   0.18,
+   0.2
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_01"
+ },
+ "ug_grass_mid_c": {
+  "triangles": 1466,
+  "size": [
+   0.19,
+   0.14,
+   0.2
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_01"
+ },
+ "ug_grass_tall_a": {
+  "triangles": 290,
+  "size": [
+   0.16,
+   0.32,
+   0.16
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_01"
+ },
+ "ug_grass_tall_b": {
+  "triangles": 310,
+  "size": [
+   0.15,
+   0.29,
+   0.13
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_01"
+ },
+ "ug_grass_small": {
+  "triangles": 833,
+  "size": [
+   0.18,
+   0.14,
+   0.16
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_01"
+ },
+ "ug_grass2_c": {
+  "triangles": 1215,
+  "size": [
+   0.26,
+   0.23,
+   0.25
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_02"
+ },
+ "ug_grass2_d": {
+  "triangles": 2489,
+  "size": [
+   0.32,
+   0.26,
+   0.36
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_02"
+ },
+ "ug_grass2_e": {
+  "triangles": 1664,
+  "size": [
+   0.36,
+   0.4,
+   0.43
+  ],
+  "source": "https://polyhaven.com/a/grass_medium_02"
+ },
+ "ug_sapling_a": {
+  "triangles": 9000,
+  "size": [
+   0.86,
+   1.3,
+   0.82
+  ],
+  "source": "https://polyhaven.com/a/fir_sapling"
+ },
+ "ug_sapling_b": {
+  "triangles": 9000,
+  "size": [
+   0.64,
+   0.95,
+   0.82
+  ],
+  "source": "https://polyhaven.com/a/fir_sapling"
+ },
+ "ug_sapling_c": {
+  "triangles": 9000,
+  "size": [
+   0.62,
+   0.74,
+   0.63
+  ],
+  "source": "https://polyhaven.com/a/fir_sapling"
+ }
+}

@@ -449,9 +449,69 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
             if key:
                 under[key].append([round(x, 2), round(sample(h, x, z) - 0.05, 3), round(z, 2), round(float(rng.uniform(0, 360)), 1),
                                    round(float(rng.uniform(0.8, 1.2)), 3)])
-    grass = []
     patch = fbm(9.0, 41)
-    for _ in range(260000):
+    clump = fbm(4.0, 43)
+    near_edge = np.zeros(GX.shape, np.float32)
+    # «края» — у дорог, площадок, насыпи: там бурьян гуще (не косят, не ходят)
+    for rect in PADS_PAVED:
+        d = rect_distance(*rect)
+        near_edge = np.maximum(near_edge, (1.0 - smooth((d - 2.0) / 6.0)) * (d > 1.5))
+    near_edge = np.maximum(near_edge, (1.0 - smooth((d_rail - RAIL_HALF - RAIL_SLOPE) / 6.0)))
+
+    def accept(x: float, z: float) -> bool:
+        ix, iz = int(x - X0), int(z - Z0)
+        if not (0 <= ix < NX and 0 <= iz < NZ) or paved[iz, ix] or (-285 < x < -135 and -165 < z < -42):
+            return False
+        return mud[iz, ix] < 0.4 and gravel[iz, ix] < 0.45 and d_rav[iz, ix] > 2.5
+
+    def kind_at(x: float, z: float, roll: float):
+        ix, iz = int(x - X0), int(z - Z0)
+        f, e, pc, cl = forest[iz, ix], near_edge[iz, ix], patch[iz, ix], clump[iz, ix]
+        rav = 3.0 < d_rav[iz, ix] < 26.0
+        bush_p = 0.05 * smooth((f - 0.15) / 0.3) + 0.012 * e + (0.014 if rav else 0.0)
+        if roll < bush_p * (0.4 + 0.6 * smooth((cl - 0.35) / 0.3)):
+            return "bush"
+        roll -= bush_p
+        sap_p = 0.012 * f + (0.004 if rav else 0.0)
+        if roll < sap_p:
+            return "sapling"
+        roll -= sap_p
+        dens = 0.08 + 0.55 * smooth((pc - 0.4) / 0.3) + 0.45 * e + (0.25 if rav else 0.0) - 0.4 * f
+        if not inside[iz, ix]:
+            dens *= 0.4
+        if roll < max(0.0, dens) * smooth((cl - 0.25) / 0.35):
+            return "grass" if roll > 0.06 else "weed"
+        return None
+
+    under.update(scatter_undergrowth(rng, X0 + 2, Z0 + 2, X0 + NX - 3, Z0 + NZ - 3, accept, kind_at))
+    # карта плотности травы для DistrictGrass: R — трава, G — сорняки; 1 пиксель = 1 м
+    import build_zone01_yard as yard
+    dens = np.clip(0.18 + 0.55 * smooth((patch - 0.35) / 0.35) + 0.4 * near_edge, 0.0, 1.0) * smooth((clump - 0.15) / 0.4)
+    dens = (dens * (1.0 - 0.6 * forest) + 0.12 * forest) * np.where(inside, 1.0, 0.35)
+    dens = np.where((mud > 0.4) | (gravel > 0.45) | (d_rav < 2.5) | paved, 0.0, dens)
+    dens = dens * (1.0 - smooth((mud - 0.15) / 0.25) * 0.8)
+    weeds = np.clip(0.3 + 0.7 * near_edge, 0.0, 1.0) * (dens > 0.05)
+    # двор: тротуары, проезды, дома, гаражи — без травы; у стен гуще; на площадке почти нет
+    in_yard = (GX > -285) & (GX < -135) & (GZ > -165) & (GZ < -42)
+    yard_dens = np.full(GX.shape, 0.55, np.float32)
+    for _, pts, width, _, _ in yard.PAVING:
+        dd, _ = polyline_distance(pts)
+        yard_dens = np.where(dd < width * 0.5 + 0.35, 0.0, yard_dens)
+    for x0, z0, x1, z1 in [(-240.8, -143.8, -183.2, -132.2), (-165.8, -136.8, -142.2, -79.2), (-244.0, -107.2, -232.0, -52.8)]:
+        dd = rect_distance(x0, z0, x1, z1)
+        yard_dens = np.where(dd < 0.5, 0.0, np.maximum(yard_dens, (1.0 - smooth((dd - 0.5) / 4.0)) * 0.95 * (yard_dens > 0)))
+    yard_dens = np.where(rect_distance(-272.5, -162, -266.5, -104) < 0.3, 0.0, yard_dens)
+    play = np.hypot(GX - yard.PLAYGROUND[0], GZ - yard.PLAYGROUND[1])
+    yard_dens = yard_dens * (0.08 + 0.92 * smooth((play - 10.0) / 4.0)) * (0.6 + 0.6 * smooth((patch - 0.3) / 0.4))
+    yard_dens = np.where(mud > 0.4, yard_dens * 0.2, yard_dens)
+    dens = np.where(in_yard, np.clip(yard_dens, 0, 1), dens)
+    img = np.stack([dens, weeds, np.zeros_like(dens)], -1)
+    Image.fromarray((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8), mode="RGB").save(ROOT / "assets/terrain/zone01_grass.png")
+    imp = ROOT / "assets/terrain/zone01_grass.png.import"
+    if not imp.exists():
+        imp.write_text(IMPORT_SPLAT.format(name="zone01_grass.png"), encoding="utf-8")
+    grass = []
+    for _ in range(0):
         x = float(rng.uniform(X0 + 2, X0 + NX - 3))
         z = float(rng.uniform(Z0 + 2, Z0 + NZ - 3))
         ix, iz = int(x - X0), int(z - Z0)
@@ -469,7 +529,47 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
     data.update(under)
     data["grass"] = grass
     (ROOT / "data/zone01_vegetation.json").write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
-    print(f"zone01: деревьев {sum(len(v) for v in trees.values())}, подлеска {sum(len(v) for v in under.values())}, пучков травы {len(grass)}")
+    print(f"zone01: деревьев {sum(len(v) for v in trees.values())}, подлеска {sum(len(v) for v in under.values())}")
+
+
+# подлесок из Poly Haven Nature (tools/build_zone01_undergrowth.py): ключ → (варианты, вид растения)
+# лёгкие варианты — их у камеры десятки тысяч
+UG_GRASS = ["ug_grass_tall_a", "ug_grass_tall_b", "ug_grass_tall_a", "ug_grass_small", "ug_grass_mid_b", "ug_grass2_c"]
+UG_WEEDS = ["ug_weed_a", "ug_weed_b", "ug_dandelion_c", "ug_dandelion_e"]
+UG_BUSH = ["ug_bush_a", "ug_bush_b", "ug_bush_c", "ug_bush_d"]
+UG_SAPLING = ["ug_sapling_a", "ug_sapling_b", "ug_sapling_c"]
+# ключ: (дальность, клетка, тень, оттенок, коллизия ствола)
+UG_VIEW = {**{k: (260.0, 48.0, True, (0.82, 0.8, 0.62)) for k in UG_BUSH},
+           **{k: (200.0, 48.0, True, (0.78, 0.82, 0.72)) for k in UG_SAPLING}}
+
+
+def scatter_undergrowth(rng, x0: float, z0: float, x1: float, z1: float, accept, kind_at) -> dict:
+    """Подлесок в прямоугольнике: шаг 0.9 м с дрожанием; accept(x, z) — можно ли здесь расти,
+    kind_at(x, z, roll) — что растёт (ключ-группа или None). Возвращает ключ модели → точки."""
+    out: dict[str, list] = {k: [] for k in UG_GRASS + UG_WEEDS + UG_BUSH + UG_SAPLING}
+    groups = {"grass": UG_GRASS, "weed": UG_WEEDS, "bush": UG_BUSH, "sapling": UG_SAPLING}
+    scale = {"grass": (1.2, 2.2), "weed": (1.4, 2.6), "bush": (0.8, 1.3), "sapling": (1.0, 2.4)}
+    for gz in np.arange(z0, z1, 0.9):
+        for gx in np.arange(x0, x1, 0.9):
+            x, z = float(gx + rng.uniform(-0.45, 0.45)), float(gz + rng.uniform(-0.45, 0.45))
+            if not accept(x, z):
+                continue
+            kind = kind_at(x, z, float(rng.random()))
+            if kind is None or kind in ("grass", "weed"):
+                continue
+            key = groups[kind][int(rng.integers(0, len(groups[kind])))]
+            lo, hi = scale[kind]
+            out[key].append([round(x, 2), round(sample(H, x, z) - 0.04, 3), round(z, 2), round(float(rng.uniform(0, 360)), 1),
+                             round(float(rng.uniform(lo, hi)), 2)])
+    return out
+
+
+def undergrowth_nodes(s: "Scene", parent: str, data_path: str) -> None:
+    script = s.resource("res://src/world/district_scatter.gd", "Script")
+    for key, (view, cell, shadow, tint) in UG_VIEW.items():
+        s.node(key.title().replace("_", ""), parent, script=script, data_path=data_path, key=key,
+               model=f"res://assets/zone01/models/{key}.glb", view_distance=view, cell=cell, shadows=shadow, foliage=True,
+               foliage_tint=Raw(f"Color({tint[0]}, {tint[1]}, {tint[2]}, 1)"))
 
 
 def vegetation_nodes(s: "Scene") -> None:
@@ -485,8 +585,11 @@ def vegetation_nodes(s: "Scene") -> None:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
                key=key, model=f"res://assets/zone01/models/{key}.glb", view_distance=110.0, cell=48.0, trunk_radius=radius,
                trunk_height=height if height > 0 else 4.0)
-    s.node("Grass", "Vegetation", script=script, data_path="res://data/zone01_vegetation.json", key="grass",
-           view_distance=50.0, cell=16.0, shadows=False)
+    undergrowth_nodes(s, "Vegetation", "res://data/zone01_vegetation.json")
+    s.node("Grass", "Vegetation", script=s.resource("res://src/world/district_grass.gd", "Script"),
+           density_map="res://assets/terrain/zone01_grass.png", origin=v2(X0, Z0),
+           models=Raw("PackedStringArray(" + ", ".join(f'"res://assets/zone01/models/{k}.glb"' for k in UG_GRASS) + ")"),
+           weed_models=Raw("PackedStringArray(" + ", ".join(f'"res://assets/zone01/models/{k}.glb"' for k in UG_WEEDS) + ")"))
 
 
 def forest_mask() -> np.ndarray:
@@ -1182,9 +1285,10 @@ def main_scene() -> None:
     s.node("Lighting")
     s.node("WorldEnvironment", kind="WorldEnvironment",
            environment=s.resource("res://scenes/levels/zone01/zone01_environment.tres", "Environment"))
+    # мягкая полутень (солнце за облачностью — угловой размер больше настоящего)
     s.node("Sun", kind="DirectionalLight3D", rotation_degrees=v3(-21, -128, 0),
-           light_color=Raw("Color(1, 0.84, 0.68, 1)"), light_energy=2.2, shadow_enabled=True,
-           directional_shadow_max_distance=260.0)
+           light_color=Raw("Color(1, 0.88, 0.76, 1)"), light_energy=2.2, light_angular_distance=1.2, shadow_enabled=True,
+           shadow_blur=1.5, directional_shadow_max_distance=260.0, light_volumetric_fog_energy=1.6)
     s.node("CameraRig", scene="res://scenes/player/camera_rig.tscn")
     s.node("HUD", kind="CanvasLayer")
     s.node("Root", "HUD", kind="Control", layout_mode=3, anchors_preset=15, anchor_right=1.0, anchor_bottom=1.0,
@@ -1192,9 +1296,9 @@ def main_scene() -> None:
     s.node("Status", "HUD/Root", kind="Label", offset_left=24.0, offset_top=20.0, offset_right=700.0, offset_bottom=48.0, text="HP 100")
     s.node("Dead", "HUD/Root", kind="Label", visible=False)
     s.save(ROOT / "scenes/levels/zone01_mall.tscn")
-    env = OUT / "zone01_environment.tres"
-    if not env.exists():
-        env.write_text("""[gd_resource type="Environment" load_steps=3 format=3]
+    # «картинка» карты: приглушённые цвета, мягкий контраст, воздушная дымка вдаль (объёмный туман
+    # с рассеянием солнца), мягкие тени и затенение в углах (SSAO/SSIL), лёгкое свечение светлого
+    (OUT / "zone01_environment.tres").write_text("""[gd_resource type="Environment" load_steps=3 format=3]
 
 [sub_resource type="PhysicalSkyMaterial" id="sky_material"]
 rayleigh_coefficient = 2.6
@@ -1212,16 +1316,39 @@ background_mode = 2
 sky = SubResource("sky")
 ambient_light_source = 3
 ambient_light_color = Color(0.6, 0.64, 0.7, 1)
-ambient_light_energy = 0.8
+ambient_light_sky_contribution = 1.0
+ambient_light_energy = 1.0
 tonemap_mode = 4
+tonemap_exposure = 0.92
 ssao_enabled = true
-ssao_radius = 1.4
+ssao_radius = 1.6
+ssao_intensity = 2.2
+ssao_power = 1.4
+ssao_detail = 0.6
+ssao_light_affect = 0.15
 ssil_enabled = true
-fog_enabled = true
+ssil_radius = 6.0
+ssil_intensity = 0.8
+glow_enabled = true
+glow_intensity = 0.35
+glow_bloom = 0.04
+glow_hdr_threshold = 1.1
+glow_blend_mode = 1
+fog_enabled = false
 fog_light_color = Color(0.62, 0.64, 0.66, 1)
-fog_density = 0.0016
-fog_aerial_perspective = 0.6
-fog_sky_affect = 0.25
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0022
+volumetric_fog_albedo = Color(0.72, 0.75, 0.78, 1)
+volumetric_fog_anisotropy = 0.55
+volumetric_fog_length = 260.0
+volumetric_fog_detail_spread = 2.5
+volumetric_fog_gi_inject = 0.3
+volumetric_fog_ambient_inject = 0.2
+volumetric_fog_sky_affect = 0.15
+adjustment_enabled = true
+adjustment_brightness = 0.96
+adjustment_contrast = 1.07
+adjustment_saturation = 0.76
 """, encoding="utf-8")
 
 

@@ -23,6 +23,11 @@ extends Node3D
 @export var cell: float = 32.0
 @export var view_distance: float = 120.0
 @export var shadows: bool = true
+## Скан растительности (Poly Haven): материал GLB переводится в листву — отсечение по альфе,
+## видно с обеих сторон, просвет на солнце, оттенок экземпляра (приглушённый, разный у кустов).
+@export var foliage: bool = false
+## Общий оттенок листвы (поздняя осень — желтее и тусклее скана).
+@export var foliage_tint: Color = Color(1, 1, 1)
 ## Деревьям — коллизия ствола (цилиндр), траве — нет.
 @export var trunk_radius: float = 0.0
 ## Высота цилиндра коллизии, м (ствол — 4, пень — меньше: выше пули проходят свободно).
@@ -74,7 +79,7 @@ func _build() -> void:
 		var list: Array = cells[c]
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_colors = model == ""
+		mm.use_colors = model == "" or foliage
 		mm.mesh = mesh
 		mm.instance_count = list.size()
 		for i in range(list.size()):
@@ -84,7 +89,12 @@ func _build() -> void:
 			if mm.use_colors:
 				# оттенок пучка: от выгоревшего до оливкового (из угла поворота — без лишних данных)
 				var t: float = fposmod(float(p[3]) * 0.137, 1.0)
-				mm.set_instance_color(i, Color(0.62, 0.6, 0.48).lerp(Color(0.5, 0.56, 0.36), t) * (0.85 + 0.3 * fposmod(float(p[3]) * 0.071, 1.0)))
+				var k: float = 0.85 + 0.3 * fposmod(float(p[3]) * 0.071, 1.0)
+				if foliage:
+					# скан: от своего цвета к пожухлому
+					mm.set_instance_color(i, Color(1, 1, 1).lerp(Color(0.95, 0.82, 0.55), t) * k)
+				else:
+					mm.set_instance_color(i, Color(0.62, 0.6, 0.48).lerp(Color(0.5, 0.56, 0.36), t) * k)
 			if body:
 				var shape := CylinderShape3D.new()
 				shape.radius = trunk_radius * float(p[4])
@@ -116,6 +126,9 @@ func _mesh() -> Mesh:
 		var mesh: Mesh = src.duplicate()
 		for i in range(mesh.get_surface_count()):
 			var mat: Material = mesh.surface_get_material(i)
+			if foliage and mat is BaseMaterial3D:
+				mesh.surface_set_material(i, _foliage_material(mat as BaseMaterial3D))
+				continue
 			if mat:
 				var path: String = "%s/%s.tres" % [materials_dir, mat.resource_name]
 				if ResourceLoader.exists(path):
@@ -123,6 +136,20 @@ func _mesh() -> Mesh:
 		inst.free()
 		return mesh
 	return _tuft()
+
+
+func _foliage_material(src: BaseMaterial3D) -> BaseMaterial3D:
+	var m := src.duplicate() as BaseMaterial3D
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	m.alpha_scissor_threshold = 0.4
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.vertex_color_use_as_albedo = true
+	m.albedo_color = foliage_tint
+	m.backlight_enabled = true
+	m.backlight = Color(0.18, 0.2, 0.1)
+	m.roughness = 0.9
+	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	return m
 
 
 ## Пучок сухой травы: три карточки звездой, половина атласа по случаю (сухая / с зеленью).

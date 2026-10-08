@@ -107,7 +107,8 @@ def flat(name: str, color, rough: float, metal: float) -> str:
 
 
 # оттенок альбедо листвы (рендер атласа ели светлее, чем крона в тени)
-FOLIAGE_TINT = {"FirBranchCards": (0.62, 0.68, 0.6)}
+FOLIAGE_TINT = {"FirBranchCards": (0.62, 0.68, 0.6), "LeavesMaple": (0.8, 0.74, 0.58), "LeavesBirch": (0.86, 0.84, 0.68),
+                "GrassTuft": (0.85, 0.82, 0.7)}
 
 
 def textured(name: str, albedo: str, normal: str, tile: float, foliage: bool) -> str:

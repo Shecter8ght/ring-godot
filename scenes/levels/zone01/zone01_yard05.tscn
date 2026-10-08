@@ -856,10 +856,79 @@ view_distance = 550.0
 cell = 96.0
 trunk_radius = 0.25
 
-[node name="Grass" parent="Vegetation" type="Node3D"]
+[node name="UgBushA" parent="Vegetation" type="Node3D"]
 script = ExtResource("7")
 data_path = "res://data/zone01_yard_scatter.json"
-key = "grass"
-view_distance = 50.0
-cell = 16.0
-shadows = false
+key = "ug_bush_a"
+model = "res://assets/zone01/models/ug_bush_a.glb"
+view_distance = 260.0
+cell = 48.0
+shadows = true
+foliage = true
+foliage_tint = Color(0.82, 0.8, 0.62, 1)
+
+[node name="UgBushB" parent="Vegetation" type="Node3D"]
+script = ExtResource("7")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "ug_bush_b"
+model = "res://assets/zone01/models/ug_bush_b.glb"
+view_distance = 260.0
+cell = 48.0
+shadows = true
+foliage = true
+foliage_tint = Color(0.82, 0.8, 0.62, 1)
+
+[node name="UgBushC" parent="Vegetation" type="Node3D"]
+script = ExtResource("7")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "ug_bush_c"
+model = "res://assets/zone01/models/ug_bush_c.glb"
+view_distance = 260.0
+cell = 48.0
+shadows = true
+foliage = true
+foliage_tint = Color(0.82, 0.8, 0.62, 1)
+
+[node name="UgBushD" parent="Vegetation" type="Node3D"]
+script = ExtResource("7")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "ug_bush_d"
+model = "res://assets/zone01/models/ug_bush_d.glb"
+view_distance = 260.0
+cell = 48.0
+shadows = true
+foliage = true
+foliage_tint = Color(0.82, 0.8, 0.62, 1)
+
+[node name="UgSaplingA" parent="Vegetation" type="Node3D"]
+script = ExtResource("7")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "ug_sapling_a"
+model = "res://assets/zone01/models/ug_sapling_a.glb"
+view_distance = 200.0
+cell = 48.0
+shadows = true
+foliage = true
+foliage_tint = Color(0.78, 0.82, 0.72, 1)
+
+[node name="UgSaplingB" parent="Vegetation" type="Node3D"]
+script = ExtResource("7")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "ug_sapling_b"
+model = "res://assets/zone01/models/ug_sapling_b.glb"
+view_distance = 200.0
+cell = 48.0
+shadows = true
+foliage = true
+foliage_tint = Color(0.78, 0.82, 0.72, 1)
+
+[node name="UgSaplingC" parent="Vegetation" type="Node3D"]
+script = ExtResource("7")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "ug_sapling_c"
+model = "res://assets/zone01/models/ug_sapling_c.glb"
+view_distance = 200.0
+cell = 48.0
+shadows = true
+foliage = true
+foliage_tint = Color(0.78, 0.82, 0.72, 1)

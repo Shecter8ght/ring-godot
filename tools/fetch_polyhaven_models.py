@@ -38,6 +38,19 @@ def fetch(folder: str, asset_id: str, res: str, info: dict) -> None:
     total = download(gltf["url"], out / f"{asset_id}.gltf")
     for rel, inc in gltf.get("include", {}).items():
         total += download(inc["url"], out / rel)
+    # карточки растений: в glTF цвет — JPEG без альфы; альфа и «сухой» цвет — отдельными картами.
+    # Склеиваем в <id>_rgba.png (сухой цвет, если есть, — для осени)
+    if "Alpha" in files:
+        from PIL import Image
+        tex = out / "textures"
+        alpha = tex / f"{asset_id}_alpha_{res}.jpg"
+        total += download(files["Alpha"][res]["jpg"]["url"], alpha)
+        diff_key = "dry_diff" if "dry_diff" in files else "Diffuse"
+        diff = tex / f"{asset_id}_{diff_key.lower()}_{res}.jpg"
+        total += download(files[diff_key][res]["jpg"]["url"], diff)
+        rgba = Image.open(diff).convert("RGB")
+        rgba.putalpha(Image.open(alpha).convert("L").resize(rgba.size))
+        rgba.save(tex / f"{asset_id}_rgba.png")
     authors = ", ".join(info.get("authors", {}).keys()) or "Poly Haven"
     (out / "license.txt").write_text(
         f"title: {info.get('name', asset_id)}\nauthor: {authors}\nlicense: CC0 1.0\n"

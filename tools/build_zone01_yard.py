@@ -207,29 +207,39 @@ def scatter(s: z1.Scene) -> None:
     for key, pts in trees.items():
         data[key] = [[round(x, 2), round(z1.ground(x, z) - 0.05, 3), round(z, 2), round(RNG.uniform(0, 360), 1),
                       round(RNG.uniform(0.85, 1.15), 3)] for x, z in pts]
-    # сухая трава: газоны двора, края гаражей, обочины — мимо покрытия и домов
-    grass = []
-    for _ in range(26000):
-        x = RNG.uniform(-285.0, -140.0)
-        z = RNG.uniform(-162.0, -44.0)
-        if near_paving(x, z, 0.4) or in_building(x, z, 1.2):
-            continue
-        if math.hypot(x - PLAYGROUND[0], z - PLAYGROUND[1]) < 13.0 and RNG.random() < 0.85:
-            continue
-        # гуще у стен, заборов и в углах; на открытом газоне — пятнами
-        if RNG.random() < 0.2:
-            continue
-        grass.append([round(x, 2), round(z1.ground(x, z) - 0.03, 3), round(z, 2), round(RNG.uniform(0, 360), 1), round(RNG.uniform(0.45, 1.05), 2)])
-    data["grass"] = grass
+    # подлесок (сканы Poly Haven): бурьян гуще у стен домов, гаражей и заборов, на газонах — пятнами,
+    # кусты вдоль цоколей и у гаражей, на площадке почти ничего (вытоптано)
+    rects = [(-240.8, -143.8, -183.2, -132.2), (-165.8, -136.8, -142.2, -79.2), (-244.0, -107.2, -232.0, -52.8),
+             (-272.0, -162.0, -267.0, -104.0), (-258.0, -48.0, -246.0, -44.0)]
+    nrng = np.random.default_rng(55)
+
+    def wall_dist(x: float, z: float) -> float:
+        return min(max(x0 - x, x - x1, z0 - z, z - z1, 0.0) for x0, z0, x1, z1 in rects)
+
+    def accept(x: float, z: float) -> bool:
+        return not near_paving(x, z, 0.3) and not in_building(x, z, 0.4) and not (-272.5 < x < -266.5 and -162 < z < -104)
+
+    def kind_at(x: float, z: float, roll: float):
+        w = wall_dist(x, z)
+        play = math.hypot(x - PLAYGROUND[0], z - PLAYGROUND[1])
+        if play < 12.0:
+            return "grass" if roll < 0.04 else None
+        bush = 0.05 * (1.0 if 0.6 < w < 2.5 else 0.0) + 0.004
+        if roll < bush:
+            return "bush"
+        roll -= bush
+        dens = 0.35 + 0.6 * max(0.0, 1.0 - w / 4.0) + 0.3 * (1.0 if x < -248 else 0.0)
+        return ("grass" if roll > 0.05 else "weed") if roll < dens else None
+
+    data.update(z1.scatter_undergrowth(nrng, -285.0, -162.0, -140.0, -44.0, accept, kind_at))
     SCATTER.write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
     for key in trees:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",
                key=key, model=f"{MODELS}/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25)
-    s.node("Grass", "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json", key="grass",
-           view_distance=50.0, cell=16.0, shadows=False)
-    print("trees", sum(len(v) for v in trees.values()), "grass", len(grass))
+    z1.undergrowth_nodes(s, "Vegetation", "res://data/zone01_yard_scatter.json")
+    print("trees", sum(len(v) for v in trees.values()), "кустов", sum(len(data[k]) for k in z1.UG_VIEW))
 
 
 if __name__ == "__main__":
