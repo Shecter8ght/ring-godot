@@ -603,7 +603,7 @@ def vegetation_nodes(s: "Scene") -> None:
     for key in SPRUCES + BIRCHES:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
                key=key, model=f"res://assets/zone01/models/{key}.glb", far_model=f"res://assets/zone01/models/{key}_far.glb",
-               near_distance=95.0, view_distance=650.0, cell=64.0, trunk_radius=(0.3 if "young" not in key else 0.08) * (0.7 if key.startswith("birch") else 1.0))
+               near_distance=320.0, view_distance=900.0, cell=64.0, trunk_radius=(0.3 if "young" not in key else 0.08) * (0.7 if key.startswith("birch") else 1.0))
     for key, radius, height in (("forest_fern", 0.0, 0.0), ("forest_dry_branches", 0.0, 0.0), ("forest_stump_01", 0.3, 0.6),
                                 ("forest_stump_02", 0.3, 0.6), ("forest_dead_trunk", 0.0, 0.0), ("forest_roots", 0.0, 0.0),
                                 ("forest_rocks_01", 0.5, 0.8), ("forest_rocks_02", 0.5, 0.8)):
@@ -1333,8 +1333,8 @@ def main_scene() -> None:
            environment=s.resource("res://scenes/levels/zone01/zone01_environment.tres", "Environment"))
     # мягкая полутень (солнце за облачностью — угловой размер больше настоящего)
     s.node("Sun", kind="DirectionalLight3D", rotation_degrees=v3(-21, -128, 0),
-           light_color=Raw("Color(1, 0.88, 0.76, 1)"), light_energy=2.2, light_angular_distance=1.2, shadow_enabled=True,
-           shadow_blur=1.5, directional_shadow_max_distance=260.0, light_volumetric_fog_energy=1.6)
+           light_color=Raw("Color(1, 0.88, 0.76, 1)"), light_energy=2.2, light_angular_distance=2.5, shadow_enabled=True,
+           shadow_blur=2.5, directional_shadow_max_distance=260.0, light_volumetric_fog_energy=1.6)
     s.node("CameraRig", scene="res://scenes/player/camera_rig.tscn")
     s.node("HUD", kind="CanvasLayer")
     s.node("Root", "HUD", kind="Control", layout_mode=3, anchors_preset=15, anchor_right=1.0, anchor_bottom=1.0,
@@ -1365,36 +1365,50 @@ ambient_light_color = Color(0.6, 0.64, 0.7, 1)
 ambient_light_sky_contribution = 1.0
 ambient_light_energy = 1.0
 tonemap_mode = 4
-tonemap_exposure = 0.92
+tonemap_exposure = 0.95
 ssao_enabled = true
-ssao_radius = 1.6
-ssao_intensity = 2.2
-ssao_power = 1.4
-ssao_detail = 0.6
-ssao_light_affect = 0.15
+ssao_radius = 1.2
+ssao_intensity = 1.6
+ssao_power = 1.2
+ssao_detail = 0.5
+ssao_light_affect = 0.0
 ssil_enabled = true
-ssil_radius = 6.0
-ssil_intensity = 0.8
+ssil_radius = 8.0
+ssil_intensity = 1.2
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_cascades = 4
+sdfgi_min_cell_size = 0.4
+sdfgi_energy = 1.2
+sdfgi_normal_bias = 1.4
+sdfgi_probe_bias = 1.4
 glow_enabled = true
-glow_intensity = 0.35
-glow_bloom = 0.04
+glow_intensity = 0.3
+glow_bloom = 0.03
 glow_hdr_threshold = 1.1
 glow_blend_mode = 1
-fog_enabled = false
-fog_light_color = Color(0.62, 0.64, 0.66, 1)
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.66, 0.69, 0.72, 1)
+fog_density = 0.55
+fog_depth_begin = 25.0
+fog_depth_end = 900.0
+fog_depth_curve = 1.35
+fog_aerial_perspective = 0.85
+fog_sky_affect = 0.35
 volumetric_fog_enabled = true
-volumetric_fog_density = 0.0022
-volumetric_fog_albedo = Color(0.72, 0.75, 0.78, 1)
-volumetric_fog_anisotropy = 0.55
-volumetric_fog_length = 260.0
-volumetric_fog_detail_spread = 2.5
-volumetric_fog_gi_inject = 0.3
-volumetric_fog_ambient_inject = 0.2
-volumetric_fog_sky_affect = 0.15
+volumetric_fog_density = 0.0007
+volumetric_fog_albedo = Color(0.8, 0.82, 0.85, 1)
+volumetric_fog_anisotropy = 0.6
+volumetric_fog_length = 140.0
+volumetric_fog_detail_spread = 2.0
+volumetric_fog_gi_inject = 0.0
+volumetric_fog_ambient_inject = 0.0
+volumetric_fog_sky_affect = 0.0
 adjustment_enabled = true
-adjustment_brightness = 0.96
-adjustment_contrast = 1.07
-adjustment_saturation = 0.76
+adjustment_brightness = 1.0
+adjustment_contrast = 0.94
+adjustment_saturation = 0.82
 """, encoding="utf-8")
 
 
@@ -1410,10 +1424,14 @@ def write_definition(h: np.ndarray) -> None:
         bounds=[X0, Z0, X0 + (NX - 1) * STEP, Z0 + (NZ - 1) * STEP], boundary=BOUNDARY, area_m2=area,
         units="metres", north="-Z", spawn=[x, round(ground(x, z) + .2, 3), z], camera_yaw=180,
         nav_cache="res://data/navigation/zone01",
+        # свет: больше рассеянного неба, солнце мягче — тени читаются, свет не «выжигает»
+        light=dict(ambient_k=1.9, sun_k=0.8, ambient_k_dusk=2.6),
         # небо: пасмурное утро Nqweba Dawn (Poly Haven, CC0) на дневные рейды — его размытое солнце
         # на высоте ~48°, как у дневного солнца рейда; sun_u — где оно на панораме (доля ширины)
         # horizon_cut — ниже 18° на панораме склоны и горы: их заменяет небо над ними и дымка
-        sky_hdri=dict(day=dict(a="res://assets/sky/nqweba_dawn.hdr", sun_u=0.613, exposure=1.0, sun_k=0.75, horizon_cut=18.0, haze=0.55)),
+        sky_hdri=dict(day=dict(a="res://assets/sky/nqweba_dawn.hdr", sun_u=0.613, exposure=1.0, sun_k=0.75, horizon_cut=18.0, haze=0.55),
+                      # закат — та же рассветная панорама, темнее и теплее: рассеянный свет неба в тенях
+                      dusk=dict(a="res://assets/sky/nqweba_dawn.hdr", sun_u=0.613, exposure=0.7, sun_k=1.0, horizon_cut=18.0, haze=0.6)),
         terrain=dict(heights="res://data/terrain/zone01_heights.r32", origin=[X0, Z0], grid=[NX, NZ], step=STEP,
                      layer_tiles=LAYER_TILES, layers=LAYERS,
                      textures=dict(albedo_array="res://assets/terrain/zone01_albedo.jpg",

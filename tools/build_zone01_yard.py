@@ -248,9 +248,9 @@ def scatter(s: z1.Scene) -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
     for key in trees:
-        extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=95.0) if key.startswith(("spruce", "birch")) else {}
+        extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=320.0) if key.startswith(("spruce", "birch")) else {}
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",
-               key=key, model=f"{MODELS}/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25, **extra)
+               key=key, model=f"{MODELS}/{key}.glb", view_distance=900.0, cell=96.0, trunk_radius=0.25, **extra)
     z1.undergrowth_nodes(s, "Vegetation", "res://data/zone01_yard_scatter.json")
     print("trees", sum(len(v) for v in trees.values()), "кустов", sum(len(data[k]) for k in z1.UG_VIEW))
 

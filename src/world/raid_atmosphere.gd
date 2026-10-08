@@ -53,6 +53,13 @@ func apply() -> void:
 		_apply_night(e, sky_mat)
 		if not night:
 			_apply_hdri(e, sun)
+		# свет карты: больше рассеянного (тени не чёрные), солнце мягче — данные сектора "light"
+		var path: Variant = get_parent().get("sector_path")
+		if path != null and String(path) != "":
+			var lc: Dictionary = SectorBuilder.load_def(String(path)).get("light", {})
+			e.ambient_light_energy *= float(lc.get("ambient_k_" + String(c.time), lc.get("ambient_k", 1.0)))
+			if sun:
+				sun.light_energy *= float(lc.get("sun_k", 1.0))
 		var vt: Dictionary = Balance.VOLUMETRIC_TIME.get(String(c.time), {})
 		if e.volumetric_fog_enabled and not vt.is_empty():
 			e.volumetric_fog_density *= float(vt.density)

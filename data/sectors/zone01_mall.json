@@ -85,6 +85,11 @@
  ],
  "camera_yaw": 180,
  "nav_cache": "res://data/navigation/zone01",
+ "light": {
+  "ambient_k": 1.9,
+  "sun_k": 0.8,
+  "ambient_k_dusk": 2.6
+ },
  "sky_hdri": {
   "day": {
    "a": "res://assets/sky/nqweba_dawn.hdr",
@@ -93,6 +98,14 @@
    "sun_k": 0.75,
    "horizon_cut": 18.0,
    "haze": 0.55
+  },
+  "dusk": {
+   "a": "res://assets/sky/nqweba_dawn.hdr",
+   "sun_u": 0.613,
+   "exposure": 0.7,
+   "sun_k": 1.0,
+   "horizon_cut": 18.0,
+   "haze": 0.6
   }
  },
  "terrain": {

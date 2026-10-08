@@ -124,6 +124,13 @@ func _apply_static() -> void:
 	if String(RaidConditions.current.time) == "night":
 		_fog_sky_target = minf(_fog_sky_target, float(Balance.NIGHT_ENV.fog_sky))
 	var e := _env()
+	if e and e.fog_mode == Environment.FOG_MODE_DEPTH:
+		# туман по расстоянию: плотность — доля дымки на дальней границе, а не «дым» по всему объёму
+		var df: Dictionary = Balance.DEPTH_FOG.get(w, Balance.DEPTH_FOG["clear"])
+		_fog_target = float(df.density)
+		e.fog_depth_begin = float(df.begin)
+		e.fog_depth_end = float(df.end)
+		e.fog_depth_curve = float(df.curve)
 	if e:
 		e.fog_light_color = Color(0.62, 0.64, 0.66) if String(RaidConditions.current.time) != "night" else Color(0.05, 0.06, 0.08)
 		# в начале рейда — сразу как есть; дальше туман сгущается и рассеивается плавно (_tick_fog)
@@ -153,11 +160,12 @@ func _tick_fog(delta: float) -> void:
 	if e == null or not _fog_ready:
 		return
 	var sec := float(Balance.OUTDOOR_LIGHTS.fog_change_sec)
-	_fog_base = move_toward(_fog_base, _fog_target, 0.03 * delta / sec)
+	var depth: bool = e.fog_mode == Environment.FOG_MODE_DEPTH
+	_fog_base = move_toward(_fog_base, _fog_target, (1.0 if depth else 0.03) * delta / sec)
 	# под крышей ТЦ туман реже (у каждого peer — по своему игроку, это только картинка)
 	var ind: Dictionary = Balance.INDOOR
 	_roof = move_toward(_roof, 0.0 if _outdoor else 1.0, delta / float(ind.sec))
-	e.fog_density = _fog_base * lerpf(1.0, float(ind.fog_k), _roof)
+	e.fog_density = _fog_base * (1.0 if depth else lerpf(1.0, float(ind.fog_k), _roof))
 	e.fog_sky_affect = move_toward(e.fog_sky_affect, _fog_sky_target, 0.5 * delta / sec)
 	e.fog_enabled = e.fog_density > 0.00001
 	_update_visibility()
