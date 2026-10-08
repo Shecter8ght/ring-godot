@@ -25,12 +25,6 @@ SKY = {
         "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/qwantani_night_puresky_4k.hdr",
         "file": "qwantani_night_puresky.hdr", "role": "ночное небо со звёздами (фон)",
     },
-    "nqweba_dawn": {
-        "title": "Nqweba Dawn", "author": "Dario Barresi", "license": "CC0 1.0",
-        "source": "https://polyhaven.com/a/nqweba_dawn",
-        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/nqweba_dawn_4k.hdr",
-        "file": "nqweba_dawn.hdr", "role": "небо рассвета и заката зоны 1 (HdriSky)",
-    },
     "kloppenheim_06_puresky": {
         "title": "Kloppenheim 06 (Pure Sky)", "author": "Greg Zaal, Jarod Guest", "license": "CC0 1.0",
         "source": "https://polyhaven.com/a/kloppenheim_06_puresky",

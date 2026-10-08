@@ -190,7 +190,6 @@
 ## Небо (assets/sky)
 
 - `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
-- `assets/sky/nqweba_dawn.hdr` — Nqweba Dawn, Dario Barresi, CC0 1.0, https://polyhaven.com/a/nqweba_dawn — небо рассвета и заката зоны 1 (HdriSky)
 - `assets/sky/kloppenheim_06_puresky.hdr` — Kloppenheim 06 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/kloppenheim_06_puresky — закат: кандидат — мягкий, облачный
 - `assets/sky/belfast_sunset_puresky.hdr` — Belfast Sunset (Pure Sky), Greg Zaal, Dimitrios Savva, Jarod Guest, CC0 1.0, https://polyhaven.com/a/belfast_sunset_puresky — закат: кандидат — солнце у горизонта
 - `assets/sky/qwantani_dusk_2_puresky.hdr` — Qwantani Dusk 2 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_dusk_2_puresky — закат: кандидат — тёплый, чистый

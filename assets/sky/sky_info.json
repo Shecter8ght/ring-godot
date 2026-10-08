@@ -29,12 +29,6 @@
   "sky_mean": 0.781,
   "peak": 13.92
  },
- "nqweba_dawn": {
-  "sun_u": 0.7041,
-  "sun_elev": 2.5,
-  "sky_mean": 1.043,
-  "peak": 3.81
- },
  "qwantani_dusk_2_puresky": {
   "sun_u": 0.5908,
   "sun_elev": 12.3,
