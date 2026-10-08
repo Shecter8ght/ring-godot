@@ -691,6 +691,17 @@ const AI_VIEW_HALF_ANGLE_DEG := 60.0
 const AI_VIEW_STANCE_SCALE := {"stand": 1.0, "crouch": 0.7, "prone": 0.4}
 ## Сколько секунд непрерывной видимости нужно, чтобы заметить (ближе — быстрее).
 const AI_NOTICE_SEC := 0.35
+## Заметить игрока (в поле зрения, не за стеной): сколько секунд смотреть — от near_sec (ближе near_m)
+## до far_sec (дальше far_m); × stance (лёжа, присев — дольше), × sprint (бежит), × shot (стрелял
+## последние shot_sec с) — быстрее. Отвёл взгляд — «забывает» вдвое медленнее, чем замечал.
+const AI_NOTICE := {"near_m": 8.0, "far_m": 100.0, "near_sec": 0.25, "far_sec": 2.6,
+	"stance": {"stand": 1.0, "crouch": 1.25, "prone": 1.7}, "sprint": 0.55, "shot": 0.45, "shot_sec": 2.0}
+## Очередь на огонь: по одной цели прицельно стреляют не больше tokens мародёров (остальные — на
+## подавление: разброс × untoken_spread, реже); право держат hold_sec, с, потом отдают и ждут
+## cooldown_sec, с, — по игроку стреляют по очереди, а не все разом.
+const AI_FIRE_TOKENS := {"tokens": 2, "hold_sec": 3.0, "cooldown_sec": 1.6, "untoken_spread": 3.0, "untoken_pause": 0.5}
+## Состав отрядов: веса для 1, 2, 3 человек.
+const AI_SQUAD_WEIGHTS := [0.3, 0.4, 0.3]
 ## Память о цели после потери из виду, с.
 const AI_MEMORY_SEC := 12.0
 ## Бой: дистанция открытия огня, интервал выстрелов, разброс, урон (старые — для ai_test/сектора).
@@ -827,6 +838,8 @@ const AI_HIT_FLINCH_DELAY := 0.3
 ## Цель бежит — × AI_TARGET_MOVING; сам на ходу — × AI_SELF_MOVING.
 const AI_AIM_COLD := 2.4
 const AI_AIM_SETTLE_SEC := 1.4
+## Прицел садится дольше на дальней цели: AI_AIM_SETTLE_SEC вблизи (до near_m) → far_sec (с far_m).
+const AI_AIM_SETTLE_FAR := {"near_m": 10.0, "far_m": 120.0, "far_sec": 4.0}
 const AI_TARGET_MOVING := 1.5
 const AI_SELF_MOVING := 1.7
 ## Окрик «контакт»: докуда слышно, м, и как часто повторять, пока видит цель, с.

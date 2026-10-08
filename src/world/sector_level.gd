@@ -451,7 +451,18 @@ func _spawn_marauders() -> void:
 		var snapped := NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, p)
 		if snapped.distance_to(p) > 3.0 or _sees_spawn(snapped):
 			continue
-		var size := mini(_rng.randi_range(int(Balance.AI_SQUAD_SIZE[0]), int(Balance.AI_SQUAD_SIZE[1])), Balance.MARAUDER_COUNT - placed)
+		# состав: один, двое или трое — по весам Balance.AI_SQUAD_WEIGHTS
+		var wsum := 0.0
+		for w in Balance.AI_SQUAD_WEIGHTS:
+			wsum += float(w)
+		var roll := _rng.randf() * wsum
+		var size := 1
+		for i in Balance.AI_SQUAD_WEIGHTS.size():
+			roll -= float(Balance.AI_SQUAD_WEIGHTS[i])
+			if roll <= 0.0:
+				size = i + 1
+				break
+		size = mini(size, Balance.MARAUDER_COUNT - placed)
 		# тип ведущего; снайпер ходит один, в отрядах снайперов нет
 		var lead_arch := Marauder.pick_archetype(_rng)
 		if bool(Balance.AI_ARCHETYPES[lead_arch].holds):

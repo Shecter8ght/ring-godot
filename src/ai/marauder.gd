@@ -556,10 +556,11 @@ func _perceive(delta: float) -> void:
 			_shout()
 	elif seen:
 		_foe = null
-		# Заметить — не мгновенно: чем ближе, тем быстрее.
+		# Заметить — не мгновенно: вблизи — за доли секунды, на сотне метров — секунды; лёжа и
+		# присев — дольше, бегущего и стреляющего — быстрее (Balance.AI_NOTICE)
 		var dist := global_position.distance_to(seen.global_position)
-		notice_timer += delta * clampf(30.0 / maxf(dist, 1.0), 1.0, 6.0)
-		if notice_timer >= Balance.AI_NOTICE_SEC or state == State.COMBAT:
+		notice_timer += delta / _notice_sec(seen, dist)
+		if notice_timer >= 1.0 or state == State.COMBAT:
 			_seen_now = true
 			_unseen_t = 0.0
 			_target_player = seen
@@ -576,7 +577,7 @@ func _perceive(delta: float) -> void:
 			if _callout_t <= 0.0:
 				_shout()
 	else:
-		notice_timer = maxf(0.0, notice_timer - delta)
+		notice_timer = maxf(0.0, notice_timer - delta * 0.5 / float(Balance.AI_NOTICE.far_sec))
 		_unseen_t += delta
 		if state == State.COMBAT:
 			memory_timer -= delta
@@ -594,9 +595,11 @@ func _perceive(delta: float) -> void:
 		# фонарь светит в глаза (видно сам фонарь, луч на мне, смотрю на него) — слепит так же
 		if _flashlight_glare():
 			_aim = maxf(_aim, Balance.AI_AIM_COLD)
-	# прицел садится, пока цель на виду
+	# прицел садится, пока цель на виду; на дальней — дольше
 	if _seen_now:
-		_aim = move_toward(_aim, 1.0, delta * (Balance.AI_AIM_COLD - 1.0) / Balance.AI_AIM_SETTLE_SEC)
+		var sf: Dictionary = Balance.AI_AIM_SETTLE_FAR
+		var settle := lerpf(Balance.AI_AIM_SETTLE_SEC, float(sf.far_sec), smoothstep(float(sf.near_m), float(sf.far_m), global_position.distance_to(last_known)))
+		_aim = move_toward(_aim, 1.0, delta * (Balance.AI_AIM_COLD - 1.0) / settle)
 
 
 ## Фонарь на оружии светит мне в лицо: близко (FLASHLIGHT_BLIND_M), я в луче, смотрю в его
@@ -1715,6 +1718,7 @@ func _finish_reload() -> void:
 ## Выстрел, если готов: очередь, пауза между очередями, магазин. suppress — по памяти, реже и хуже.
 func _try_fire(suppress: bool = false) -> void:
 	if _reload_t > 0.0:
+		_drop_fire_token()
 		return
 	if _mag <= 0:
 		_start_reload()
@@ -1727,7 +1731,9 @@ func _try_fire(suppress: bool = false) -> void:
 		return
 	if _shot_t > 0.0:
 		return
-	_shoot(suppress)
+	# по игроку — по очереди: без права на прицельный огонь — на подавление (мимо, но рядом)
+	_untoken = _target_player != null and _foe == null and not _fire_token()
+	_shoot(suppress or _untoken)
 	if String(_spec.get("class", "")) != "PISTOL":
 		_animation_event("rifle_fire")
 	if equipment.has(_active):
@@ -1750,7 +1756,57 @@ func _try_fire(suppress: bool = false) -> void:
 	if _burst_left > 0:
 		_shot_t = float(_spec.interval)
 	else:
-		_shot_t = float(_spec.interval) + float(_spec.burst_pause) + (0.6 if suppress else 0.0)
+		_shot_t = float(_spec.interval) + float(_spec.burst_pause) + (0.6 if suppress else 0.0) \
+			+ (float(Balance.AI_FIRE_TOKENS.untoken_pause) if _untoken else 0.0)
+
+
+## Сколько секунд смотреть, чтобы заметить игрока p на расстоянии dist (Balance.AI_NOTICE).
+func _notice_sec(p: Player, dist: float) -> float:
+	var n: Dictionary = Balance.AI_NOTICE
+	var sec := lerpf(float(n.near_sec), float(n.far_sec), smoothstep(float(n.near_m), float(n.far_m), dist))
+	sec *= float((n.stance as Dictionary).get(p.stance_key(), 1.0))
+	if Vector2(p.velocity.x, p.velocity.z).length() > Balance.PLAYER_WALK_SPEED * 1.6:
+		sec *= float(n.sprint)
+	if Time.get_ticks_msec() - p.last_shot_ms < int(float(n.shot_sec) * 1000.0):
+		sec *= float(n.shot)
+	return maxf(sec, 0.05)
+
+
+## Право на прицельный огонь по своей цели (Balance.AI_FIRE_TOKENS): держит hold_sec, отдаёт и ждёт
+## cooldown_sec; занято — false. Общие на всех мародёров (по цели).
+static var _tokens: Dictionary = {}
+var _token_until: int = 0
+var _token_wait: int = 0
+var _untoken: bool = false
+
+
+func _fire_token() -> bool:
+	if _target_player == null or not is_instance_valid(_target_player):
+		return true
+	var t: Dictionary = Balance.AI_FIRE_TOKENS
+	var now := Time.get_ticks_msec()
+	var key := _target_player.get_instance_id()
+	var holders: Array = _tokens.get(key, [])
+	# живые держатели, у которых срок не вышел
+	var keep: Array = []
+	for h in holders:
+		var m := h as Marauder
+		if is_instance_valid(m) and m.state != State.DEAD and m._token_until > now and m._target_player == _target_player:
+			keep.append(m)
+	_tokens[key] = keep
+	if self in keep:
+		return true
+	if now < _token_wait or keep.size() >= int(t.tokens):
+		return false
+	keep.append(self)
+	_token_until = now + int(float(t.hold_sec) * 1000.0)
+	_token_wait = _token_until + int(float(t.cooldown_sec) * 1000.0)
+	return true
+
+
+func _drop_fire_token() -> void:
+	if _token_until > Time.get_ticks_msec():
+		_token_until = 0
 
 
 ## Ствол → точка цели (по памяти) не упирается в стену / дверь раньше, чем за метр до неё.
@@ -1787,6 +1843,8 @@ func _shoot(suppress: bool) -> void:
 		spread *= Balance.AI_HIT_STAGGER_SPREAD
 	if _health.downed:
 		spread *= Balance.DOWN_SPREAD
+	if _untoken:
+		spread *= float(Balance.AI_FIRE_TOKENS.untoken_spread)
 	var exclude: Array[RID] = [get_rid()]
 	var dir := (target - from).normalized()
 	for i in range(int(_spec.pellets)):

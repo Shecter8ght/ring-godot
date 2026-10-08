@@ -84,6 +84,8 @@ var weapon_obstruction: float = 0.0
 var weapon_ready_up: bool = false
 var grenades: int = Balance.GRENADES_START
 var fire_timer: float = 0.0
+## Когда стрелял (мс) — ИИ замечает стреляющего быстрее (Balance.AI_NOTICE.shot).
+var last_shot_ms: int = -100000
 var reload_timer: float = 0.0
 ## Сколько держат R (≥ 0 — держат): коротко — перезарядка, дольше Balance.AMMO_CHECK.hold_sec —
 ## проверка патронов в магазине.
@@ -1620,6 +1622,7 @@ func _fire(spec: Dictionary) -> void:
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig
 	var marked := false
+	last_shot_ms = Time.get_ticks_msec()
 	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg), "src": {"kind": "player", "peer": peer_id},
 		"falloff": spec.get("falloff", []), "point_blank": spec.get("point_blank", [])}
 	var hit_person := false
