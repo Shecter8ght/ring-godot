@@ -1,4 +1,4 @@
-﻿class_name LampHead
+class_name LampHead
 extends Node3D
 ## Светильник готового фонарного столба (DistrictModel.lamp_head): свет вниз и светящееся стекло.
 ## Горит как StreetLamp — в сумерки и ночью, если подстанция даёт ток (Raid.switches[switch_id]),
