@@ -308,6 +308,10 @@ func _equip_loadout() -> void:
 	var ear := _pick(lo.get("headset", []))
 	if ear != "":
 		equipment["ears"] = ItemDb.make(ear, 1)
+	# рюкзак — у части мародёров (data/loadouts.json "backpack"), выпадает в ящик с тела
+	var bpk := _pick(lo.get("backpack", []))
+	if bpk != "":
+		equipment["backpack"] = ItemDb.make(bpk, 1)
 	for m in lo.get("meds", []):
 		if _rng.randf() < float(m[1]):
 			meds.append({"id": String(m[0]), "n": _rng.randi_range(int(m[2][0]), int(m[2][1]))})
@@ -2079,7 +2083,7 @@ func _on_died() -> void:
 		if equipment.has(_active):
 			_store_mag_rounds()
 		var drop: Array = []
-		for slot in ["primary", "secondary", "armor", "helmet", "ears"]:
+		for slot in ["primary", "secondary", "armor", "helmet", "ears", "backpack"]:
 			if equipment.has(slot):
 				drop.append((equipment[slot] as Dictionary).duplicate(true))
 		for it in spare:

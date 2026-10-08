@@ -1,5 +1,5 @@
 {
- "_comment": "Снаряжение ИИ (см. docs/design/weapons.md, п.9): списки [пресет/предмет, вес]; \"\" — ничего. primary/secondary — пресеты оружия (data/weapons.json → presets), spare_mags — запасных магазинов к основному [мин, макс] (снаряжены тем же патроном), armor/plates/helmet/headset — предметы, meds — [id, шанс, [мин, макс]], dur — износ оружия и брони (перекрывает пресет), loot_table — прочий лут на теле, skill — меткость ×. Тип ИИ → снаряжение: Balance.AI_ARCHETYPES.loadout.",
+ "_comment": "Снаряжение ИИ (см. docs/design/weapons.md, п.9): списки [пресет/предмет, вес]; \"\" — ничего. primary/secondary — пресеты оружия (data/weapons.json → presets), spare_mags — запасных магазинов к основному [мин, макс] (снаряжены тем же патроном), armor/plates/helmet/headset — предметы, meds — [id, шанс, [мин, макс]], dur — износ оружия и брони (перекрывает пресет), loot_table — прочий лут на теле, skill — меткость ×. Тип ИИ → снаряжение: Balance.AI_ARCHETYPES.loadout. backpack — рюкзак (bp_*), выпадает с тела.",
  "loadouts": {
   "civilian": {
    "name": "Мирный",
@@ -152,7 +152,17 @@
     25,
     65
    ],
-   "skill": 0.85
+   "skill": 0.85,
+   "backpack": [
+    [
+     "",
+     0.75
+    ],
+    [
+     "bp_daypack",
+     0.25
+    ]
+   ]
   },
   "scav_standard": {
    "name": "Мародёр",
@@ -279,7 +289,21 @@
     30,
     75
    ],
-   "skill": 1.0
+   "skill": 1.0,
+   "backpack": [
+    [
+     "",
+     0.6
+    ],
+    [
+     "bp_daypack",
+     0.3
+    ],
+    [
+     "bp_tourist",
+     0.1
+    ]
+   ]
   },
   "scav_veteran": {
    "name": "Мародёр бывалый",
@@ -410,7 +434,25 @@
     40,
     85
    ],
-   "skill": 1.1
+   "skill": 1.1,
+   "backpack": [
+    [
+     "",
+     0.5
+    ],
+    [
+     "bp_daypack",
+     0.2
+    ],
+    [
+     "bp_tourist",
+     0.2
+    ],
+    [
+     "bp_raid",
+     0.1
+    ]
+   ]
   },
   "scav_sniper": {
    "name": "Мародёр-стрелок",
@@ -493,7 +535,21 @@
     40,
     85
    ],
-   "skill": 1.0
+   "skill": 1.0,
+   "backpack": [
+    [
+     "",
+     0.6
+    ],
+    [
+     "bp_tourist",
+     0.3
+    ],
+    [
+     "bp_raid",
+     0.1
+    ]
+   ]
   },
   "scav_leader": {
    "name": "Главарь мародёров",
@@ -596,7 +652,21 @@
     55,
     92
    ],
-   "skill": 1.2
+   "skill": 1.2,
+   "backpack": [
+    [
+     "",
+     0.4
+    ],
+    [
+     "bp_tourist",
+     0.3
+    ],
+    [
+     "bp_raid",
+     0.3
+    ]
+   ]
   },
   "perimeter_rifleman": {
    "name": "«Периметр» стрелок",

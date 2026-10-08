@@ -200,3 +200,11 @@
 - `assets/sky/kloppenheim_03_puresky.hdr` — Kloppenheim 03 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/kloppenheim_03_puresky — день ясный, переменная облачность
 - `assets/sky/kloofendal_overcast_puresky.hdr` — Kloofendal Overcast (Pure Sky), Greg Zaal, CC0 1.0, https://polyhaven.com/a/kloofendal_overcast_puresky — день в дождь и туман
 - `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба
+
+## Рюкзаки (assets/items/models/bp_*.glb, иконки assets/icons/bp_*.png)
+
+- Модели — собственные (tools/build_backpacks.py) по фото-референсам (Wikimedia Commons: MOLLE
+  40 l patrol pack, Molle Rucksack NG0805, рюкзак с трекинговыми палками, рюкзак Stuban) и размерам
+  реальных рюкзаков (Ferrino Rocker 25, 5.11 RUSH100, Brandit MOLLE 66L).
+- Ткань — Poly Haven, CC0: «Terlenka», «Stretch Poplin», «Book Pattern» (перекрашены).
+

@@ -2503,3 +2503,7 @@ C:\Users\Schecter_8ght\.codex\skills\weapon-asset-texturing\SKILL.md.
 - Фонари во дворе и StreetLamp: мягкий свет без круглого пятна с резкой границей.
 - Тесты conditions_test / weather_test — ожидания под нынешний баланс (зрение, пересвет поверх
   цветокоррекции).
+- Рюкзаки — свои модели (tools/build_backpacks.py, Blender по фото-референсам, ткань Poly Haven CC0):
+  городской 47×30×20, туристический с клапаном и поясным ремнём, рейдовый MOLLE с подсумками;
+  assets/items/models/bp_*.glb, иконки перепечены. У части мародёров рюкзак (loadouts "backpack"),
+  выпадает в ящик с тела. Бэклог: интернет-магазин с доставкой.

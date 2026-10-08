@@ -31,6 +31,9 @@ static func build(id: String) -> Node3D:
 		return r
 	var root := Node3D.new()
 	root.name = "Item_" + id
+	# рюкзаки — модели проекта (tools/build_backpacks.py)
+	if String(it.get("cat", "")) == "backpack" and _scan_path(root, "res://assets/items/models/%s.glb" % id):
+		return root
 	if _arsenal(root, id):
 		return root
 	match id:
@@ -284,7 +287,11 @@ static func _magazine(root: Node3D, id: String, mag: Dictionary) -> void:
 ## Готовая модель снаряжения (tools/import_sketchfab.py → assets/zone01/models/sf_<имя>.glb) по
 ## центру узла, как формы; нет файла — false (тогда строится из форм).
 static func _scan(root: Node3D, name: String) -> bool:
-	var path := "res://assets/zone01/models/sf_%s.glb" % name
+	return _scan_path(root, "res://assets/zone01/models/sf_%s.glb" % name)
+
+
+## Готовая модель по пути — по центру узла; нет файла — false.
+static func _scan_path(root: Node3D, path: String) -> bool:
 	if not ResourceLoader.exists(path):
 		return false
 	var inst := (load(path) as PackedScene).instantiate() as Node3D
