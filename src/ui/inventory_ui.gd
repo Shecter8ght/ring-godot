@@ -381,7 +381,7 @@ func _refresh_lists(me: Player) -> void:
 	var sig := str(me.inventory.items) + str(me.inventory.equipment) + str(me.inventory.pocket)
 	if sig != _bp_sig:
 		_bp_sig = sig
-		_bp_title.text = "Рюкзак   %d / %d ячеек   ·   %s ₽" % [me.inventory.cells_used(), Balance.BACKPACK_CELLS, money(me.inventory.value())]
+		_bp_title.text = ("Рюкзак" if me.inventory.equipment.has("backpack") else "Карманы (рюкзака нет)") + "   %d / %d ячеек   ·   %s ₽" % [me.inventory.cells_used(), me.inventory.capacity(), money(me.inventory.value())]
 		_build_equipment(me)
 		_build_backpack(me)
 	if _looting:
@@ -453,7 +453,7 @@ func _build_backpack(me: Player) -> void:
 	_clear(_bp_list)
 	# разложить по порядку — освободить место
 	_bp_list.add_child(InventoryUI.sort_button(func() -> void: Raid.current.request_sort("backpack")))
-	_bp_grid = GridView.new(Balance.BACKPACK_GRID, "backpack")
+	_bp_grid = GridView.new(me.inventory.backpack_grid(), "backpack")
 	_bp_grid.set_items(me.inventory.items)
 	_bp_list.add_child(_bp_grid)
 	var hint := _row_label("Тащи мышью · R — повернуть · двойной клик — надеть / лечиться · правая кнопка — действия · патроны на магазин — снарядить", Color(0.6, 0.62, 0.6))

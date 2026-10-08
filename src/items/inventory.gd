@@ -1,12 +1,12 @@
 class_name Inventory
 extends Node
 ## Рюкзак и снаряжение игрока в рейде. items — список {"id", "n"[, "dur"], "x", "y", "r"} в сетке
-## Balance.BACKPACK_GRID (см. ItemDb: запись — стопка на своём месте); equipment — слот ("primary", "secondary", "armor", "helmet") ->
+## backpack_grid() — рюкзака или карманов (см. ItemDb: запись — стопка на своём месте); equipment — слот ("primary", "secondary", "armor", "helmet") ->
 ## экземпляр предмета. Меняет только хост (авторитет узла — 1, как у Health); у всех peer
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
-const SLOTS := ["primary", "secondary", "armor", "helmet", "ears", "eyes"]
-const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "armor": "Броня", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза"}
+const SLOTS := ["primary", "secondary", "armor", "helmet", "ears", "eyes", "backpack"]
+const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "armor": "Броня", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
 
 var items: Array = []
 ## Ревизия слота не забывается, когда оружие вынуто: поздний пакет не попадёт в новый экземпляр.
@@ -15,6 +15,8 @@ var _weapon_generation_seq: int = 0
 var equipment: Dictionary = {}:
 	set(value):
 		equipment = _prepare_equipment(value)
+## Что не влезло в карманы, когда бросил рюкзак (выпадает вместе с ним; забирает Raid).
+var spilled: Array = []
 ## Последний слой, который принял пулю; нужен только для соответствующего звука попадания.
 var last_armor_layer: String = ""
 ## Защищённый карман (модуль убежища): при смерти не выпадает — возвращается в профиль.
@@ -115,7 +117,7 @@ func count(id: String) -> int:
 
 ## Сколько штук id влезет (с учётом неполной стопки).
 func room_for(id: String) -> int:
-	return ItemDb.room_in(items, ItemDb.make(id, 1 << 20), Balance.BACKPACK_GRID)
+	return ItemDb.room_in(items, ItemDb.make(id, 1 << 20), backpack_grid())
 
 
 ## Кладёт до n штук id; возвращает, сколько положил (хост).
@@ -126,7 +128,7 @@ func add(id: String, n: int) -> int:
 ## Кладёт экземпляр (с прочностью и т.п.); возвращает, сколько штук влезло (хост).
 func add_entry(entry: Dictionary) -> int:
 	var list := items.duplicate(true)
-	var k := ItemDb.add_to(list, entry, Balance.BACKPACK_GRID)
+	var k := ItemDb.add_to(list, entry, backpack_grid())
 	if k > 0:
 		items = list
 	return k
@@ -148,7 +150,18 @@ func grid_of(role: String) -> Vector2i:
 			return pocket_grid
 		"buffer":
 			return Balance.BUFFER_GRID
-	return Balance.BACKPACK_GRID
+	return backpack_grid()
+
+
+## Сетка рюкзака по надетому (без рюкзака — карманы).
+func backpack_grid() -> Vector2i:
+	return ItemDb.bag_grid(equipment)
+
+
+## Ячеек в рюкзаке (без рюкзака — в карманах).
+func capacity() -> int:
+	var g := backpack_grid()
+	return g.x * g.y
 
 
 ## Переприсвоить сетку (копией — синхронизатор сравнивает значения).
@@ -197,7 +210,7 @@ func flush_buffer() -> Array:
 		var one: Dictionary = (e as Dictionary).duplicate(true)
 		for key in ["x", "y", "r"]:
 			one.erase(key)
-		var k := ItemDb.add_to(list, one, Balance.BACKPACK_GRID)
+		var k := ItemDb.add_to(list, one, backpack_grid())
 		if k < int(one.n):
 			one.n = int(one.n) - k
 			left.append(one)
@@ -216,7 +229,7 @@ func install_mod(weapon_slot: String, src: String, idx: int, mount: String = "")
 	if String(r[2]) != "":
 		return String(r[2])
 	ItemDb.remove_at(from, idx, 1)
-	if not (r[1] as Dictionary).is_empty() and ItemDb.add_to(from, r[1], pocket_grid if src == "pocket" else Balance.BACKPACK_GRID) == 0:
+	if not (r[1] as Dictionary).is_empty() and ItemDb.add_to(from, r[1], pocket_grid if src == "pocket" else backpack_grid()) == 0:
 		return "некуда положить снятое"
 	var eq := equipment.duplicate(true)
 	eq[weapon_slot] = r[0]
@@ -237,7 +250,7 @@ func strip_equipped(slot: String, part: String) -> bool:
 	if (r[1] as Dictionary).is_empty():
 		return false
 	var list := items.duplicate(true)
-	if ItemDb.add_to(list, r[1], Balance.BACKPACK_GRID) < int((r[1] as Dictionary).n):
+	if ItemDb.add_to(list, r[1], backpack_grid()) < int((r[1] as Dictionary).n):
 		return false
 	var eq := equipment.duplicate(true)
 	eq[slot] = r[0]
@@ -273,7 +286,7 @@ func strip_in(role: String, idx: int, part: String) -> bool:
 	if role == "backpack":
 		return false
 	var bp := items.duplicate(true)
-	if ItemDb.add_to(bp, got, Balance.BACKPACK_GRID) < int(got.n):
+	if ItemDb.add_to(bp, got, backpack_grid()) < int(got.n):
 		return false
 	_set_list(role, list)
 	items = bp
@@ -321,7 +334,7 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 	if not equipment.has(slot):
 		return ["", {}]
 	var list := items.duplicate(true)
-	var r := Gear.reload_weapon(equipment[slot], list, Balance.BACKPACK_GRID)
+	var r := Gear.reload_weapon(equipment[slot], list, backpack_grid())
 	if String(r[2]) == "":
 		return ["", {}]
 	items = list
@@ -421,7 +434,7 @@ func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -
 ## Передвинуть запись idx внутри рюкзака (хост).
 func move(idx: int, x: int, y: int, r: bool) -> bool:
 	var list := items.duplicate(true)
-	if not ItemDb.move_in(list, Balance.BACKPACK_GRID, idx, x, y, r):
+	if not ItemDb.move_in(list, backpack_grid(), idx, x, y, r):
 		return false
 	items = list
 	return true
@@ -478,7 +491,7 @@ func equip_from_items(idx: int) -> Dictionary:
 	var old: Dictionary = eq.get(slot, {})
 	eq[slot] = entry
 	var spill := {}
-	if not old.is_empty() and ItemDb.add_to(list, old, Balance.BACKPACK_GRID) == 0:
+	if not old.is_empty() and ItemDb.add_to(list, old, backpack_grid()) == 0:
 		spill = old
 	items = list
 	equipment = eq
@@ -502,9 +515,12 @@ func sort_grid(where: String = "backpack") -> bool:
 func unequip(slot: String, x: int = -1, y: int = -1, r: bool = false) -> bool:
 	if not equipment.has(slot):
 		return false
+	# рюкзак в рейде не снять «внутрь себя» — только бросить (выбросить из слота)
+	if slot == "backpack":
+		return false
 	var list := items.duplicate(true)
 	var e: Dictionary = (equipment[slot] as Dictionary).duplicate(true)
-	var k := ItemDb.put_at(list, e, Balance.BACKPACK_GRID, x, y, r) if x >= 0 else ItemDb.add_to(list, e, Balance.BACKPACK_GRID)
+	var k := ItemDb.put_at(list, e, backpack_grid(), x, y, r) if x >= 0 else ItemDb.add_to(list, e, backpack_grid())
 	if k <= 0:
 		return false
 	var eq := equipment.duplicate(true)
@@ -525,6 +541,11 @@ func take_entry(where: String, idx: int) -> Dictionary:
 		var e: Dictionary = eq[slot]
 		eq.erase(slot)
 		equipment = eq
+		if slot == "backpack":
+			# бросил рюкзак: в карманы — что влезло, остальное выпадает вместе с ним
+			var rf := ItemDb.refit(items, backpack_grid())
+			items = rf[0]
+			spilled = rf[1]
 		return e
 	var list: Array = list_of(where).duplicate(true)
 	if idx < 0 or idx >= list.size():

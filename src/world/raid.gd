@@ -787,7 +787,15 @@ func _equip_from(peer_id: int, src: String, idx: int, path: NodePath, want: Stri
 	var old: Dictionary = eq.get(slot, {})
 	eq[slot] = one
 	var bp: Array = list if src == "backpack" else inv.items.duplicate(true)
-	if not old.is_empty() and ItemDb.add_to(bp, old, Balance.BACKPACK_GRID) == 0:
+	if slot == "backpack":
+		# новый рюкзак: вещи — в его сетку; не влезло — под ноги
+		var rf := ItemDb.refit(bp, ItemDb.bag_grid(eq))
+		bp = rf[0]
+		if src == "backpack":
+			list = bp
+		if not (rf[1] as Array).is_empty():
+			spawn_drop(pl.global_position, "Выброшено", rf[1], LootContainer.Look.BAG)
+	if not old.is_empty() and ItemDb.add_to(bp, old, ItemDb.bag_grid(eq)) == 0:
 		var g := c.grid if c else inv.grid_of(src)
 		if src == "backpack" or g == Vector2i.ZERO or ItemDb.add_to(list, old, g) == 0:
 			spawn_drop(pl.global_position, "Выброшено", [old], LootContainer.Look.BAG)
@@ -983,11 +991,14 @@ func _drop_entry(peer_id: int, where: String, idx: int) -> void:
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
 		return
+	pl.inventory.spilled = []
 	var e := pl.inventory.take_entry(where, idx)
 	if e.is_empty():
 		return
 	var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
-	spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [e], LootContainer.Look.BAG)
+	# бросил рюкзак — с ним и то, что не влезло в карманы
+	spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [e] + pl.inventory.spilled, LootContainer.Look.BAG)
+	pl.inventory.spilled = []
 	Audio.play("item_drop", pl.global_position)
 
 
@@ -1290,7 +1301,7 @@ func _fit(peer_id: int, where: String, idx: int, src_idx: int, hint: String, pat
 	var one := ItemDb.remove_at(items, src_idx, 1)
 	if one.is_empty():
 		return
-	if not (r[1] as Dictionary).is_empty() and ItemDb.add_to(items, r[1], Balance.BACKPACK_GRID) == 0:
+	if not (r[1] as Dictionary).is_empty() and ItemDb.add_to(items, r[1], pl.inventory.backpack_grid()) == 0:
 		if peer_id == multiplayer.get_unique_id():
 			notify("Некуда положить снятое")
 		return

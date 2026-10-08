@@ -329,7 +329,8 @@ func _tick_stamina(delta: float) -> void:
 			k = Balance.STAMINA_HEAT
 		# адреналин: дыхания хватает дольше
 		k *= 1.0 - float(Balance.STRESS.adr_stamina) * stress_k()
-		stamina = maxf(0.0, stamina - Balance.STAMINA_DRAIN * k * carry_stamina_k() * delta)
+		# рюкзак: чем больше, тем быстрее садится выносливость в спринте (data/items.json sprint_k)
+		stamina = maxf(0.0, stamina - Balance.STAMINA_DRAIN * k * carry_stamina_k() * ItemDb.bag_sprint_k(inventory.equipment) * delta)
 		_rest_t = Balance.STAMINA_REGEN_DELAY
 		if stamina <= 0.0:
 			_winded = true
@@ -1272,7 +1273,7 @@ func _sandbox_suppressor(slot: String, install: bool) -> String:
 	var updated: Dictionary
 	if not install:
 		var removed: Array = Gear.strip(entry, "mod:muzzle")
-		if (removed[1] as Dictionary).is_empty() or ItemDb.add_to(list, removed[1], Balance.BACKPACK_GRID) == 0:
+		if (removed[1] as Dictionary).is_empty() or ItemDb.add_to(list, removed[1], inventory.backpack_grid()) == 0:
 			return "В рюкзаке нет места для глушителя"
 		updated = removed[0]
 	else:

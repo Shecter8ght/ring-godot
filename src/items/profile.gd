@@ -117,6 +117,11 @@ static func ensure() -> void:
 		for i in range(unlocked_stock.size()):
 			unlocked_stock[i] = WeaponDb.canonical(String(unlocked_stock[i]))
 		_migrate()
+		# до слота «Рюкзак» у всех был рюкзак на 30 ячеек — выдать его надетым, вещи на местах
+		if not flags.get("bp_slot", false):
+			flags["bp_slot"] = true
+			if not equipment.has("backpack"):
+				equipment["backpack"] = ItemDb.make(Balance.BACKPACK_START, 1)
 		_fix_numbers()
 		_fit_grids()
 	else:
@@ -151,6 +156,8 @@ static func _starter() -> void:
 	story_recent = []
 	for pair in Balance.START_STASH:
 		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), stash_grid())
+	equipment["backpack"] = ItemDb.make(Balance.BACKPACK_START, 1)
+	flags["bp_slot"] = true
 
 
 ## JSON отдаёт числа как float — количества делаем целыми.
@@ -293,7 +300,7 @@ static func list_of(name: String) -> Array:
 static func grid_of(name: String) -> Vector2i:
 	match name:
 		"backpack":
-			return Balance.BACKPACK_GRID
+			return ItemDb.bag_grid(equipment)
 		"pocket":
 			return pocket_grid()
 	return stash_grid()
@@ -305,6 +312,12 @@ static func stash_cells() -> int:
 
 static func backpack_cells() -> int:
 	return ItemDb.cells_of(backpack)
+
+
+## Ячеек в рюкзаке (без рюкзака — в карманах).
+static func backpack_capacity() -> int:
+	var g := grid_of("backpack")
+	return g.x * g.y
 
 
 ## Сколько штук id в тайнике (все стопки).
@@ -376,7 +389,7 @@ static func quick_move(from: String, idx: int) -> bool:
 
 ## Из тайника в рюкзак (n штук записи idx); false — не влезло.
 static func stash_to_backpack(idx: int, n: int) -> bool:
-	return _move(stash, backpack, idx, n, Balance.BACKPACK_GRID)
+	return _move(stash, backpack, idx, n, ItemDb.bag_grid(equipment))
 
 
 static func backpack_to_stash(idx: int, n: int) -> bool:
@@ -417,13 +430,23 @@ static func equip_from(from: String, idx: int, want: String = "") -> bool:
 		entry.erase(key)
 	if not entry.has("dur") and ItemDb.equip(id).has("durability"):
 		entry.dur = float(ItemDb.equip(id).durability)
-	if equipment.has(slot):
-		var old: Dictionary = equipment[slot]
-		if ItemDb.add_to(src, old, grid) == 0:
-			ItemDb.add_to(stash, old, stash_grid())
+	var old: Dictionary = equipment.get(slot, {})
 	equipment[slot] = entry
+	if slot == "backpack":
+		_refit_backpack()
+		grid = grid_of(from)
+	if not old.is_empty() and ItemDb.add_to(src, old, grid) == 0:
+		ItemDb.add_to(stash, old, stash_grid())
 	save()
 	return true
+
+
+## Сменили рюкзак (или сняли): вещи — в его сетку (без рюкзака — по карманам), что не влезло — в тайник.
+static func _refit_backpack() -> void:
+	var r := ItemDb.refit(backpack, grid_of("backpack"))
+	backpack = r[0]
+	for e in r[1]:
+		ItemDb.add_to(stash, e, stash_grid())
 
 
 ## Выбросить насовсем: запись idx списка (тайник, рюкзак, карман) или из слота ("equip:<слот>").
@@ -431,6 +454,8 @@ static func discard(where: String, idx: int) -> bool:
 	if where.begins_with("equip:"):
 		if not equipment.erase(where.trim_prefix("equip:")):
 			return false
+		if where == "equip:backpack":
+			_refit_backpack()
 	else:
 		var list := list_of(where)
 		if idx < 0 or idx >= list.size():
@@ -448,6 +473,8 @@ static func unequip(slot: String) -> bool:
 		return false
 	ItemDb.add_to(stash, probe, stash_grid())
 	equipment.erase(slot)
+	if slot == "backpack":
+		_refit_backpack()
 	save()
 	return true
 
@@ -456,11 +483,16 @@ static func unequip(slot: String) -> bool:
 static func unequip_to(slot: String, to_name: String, x: int, y: int, r: bool) -> bool:
 	if not equipment.has(slot) or grid_of(to_name) == Vector2i.ZERO:
 		return false
+	# рюкзак сам в себя не кладётся
+	if slot == "backpack" and to_name == "backpack":
+		return false
 	var to := list_of(to_name)
 	var grid := grid_of(to_name)
 	if ItemDb.put_at(to, equipment[slot], grid, x, y, r) <= 0:
 		return false
 	equipment.erase(slot)
+	if slot == "backpack":
+		_refit_backpack()
 	save()
 	return true
 

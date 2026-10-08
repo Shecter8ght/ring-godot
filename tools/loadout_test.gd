@@ -22,7 +22,8 @@ func _ready() -> void:
 	_check("новый профиль: деньги и стартовый набор", Profile.money == Balance.START_MONEY and _idx("w_rifle") >= 0, "%d ₽, %d записей" % [Profile.money, Profile.stash.size()])
 	for id in ["w_rifle", "w_pistol", "vest_light", "helmet"]:
 		Profile.equip_from_stash(_idx(id))
-	_check("надето снаряжение", Profile.equipment.size() == 4, str(Profile.equipment.keys()))
+	# + обычный рюкзак, надетый у нового профиля
+	_check("надето снаряжение", Profile.equipment.size() == 5 and Profile.equipment.has("backpack"), str(Profile.equipment.keys()))
 	for id in ["ammo_545", "ammo_9x19", "bandage", "grenade"]:
 		# все стопки предмета (патроны лежат в тайнике несколькими стопками)
 		while _idx(id) >= 0 and Profile.stash_to_backpack(_idx(id), int(Profile.stash[_idx(id)].n)):

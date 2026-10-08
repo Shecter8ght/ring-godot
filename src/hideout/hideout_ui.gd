@@ -48,7 +48,7 @@ var _tb_uid: String = ""
 
 ## Разделы ассортимента торговца: ключ, название, категории предметов ("misc" — всё прочее).
 const CAT_TABS := [["all", "Всё", []], ["weapon", "Оружие", ["weapon"]], ["mag", "Магазины", ["mag"]], ["ammo", "Патроны", ["ammo"]],
-	["mod", "Обвес", ["mod"]], ["armor", "Броня", ["armor", "plate"]], ["med", "Медицина", ["med", "food"]],
+	["mod", "Обвес", ["mod"]], ["armor", "Броня и рюкзаки", ["armor", "plate", "backpack"]], ["med", "Медицина", ["med", "food"]],
 	["throw", "Гранаты и свет", ["throw"]], ["misc", "Разное", []]]
 
 const MOD_SLOT_NAMES := {"optic": "Прицел", "muzzle": "Дульное устройство", "grip": "Рукоятка",
@@ -259,7 +259,7 @@ func _refresh_stash_content() -> bool:
 	var sg: Vector2i = Profile.stash_grid()
 	_title.text = "Тайник и снаряжение   ·   %s ₽" % InventoryUI.money(Profile.money)
 	_stash_heading.text = "Тайник   %d / %d ячеек" % [Profile.stash_cells(), sg.x * sg.y]
-	_backpack_heading.text = "Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS]
+	_backpack_heading.text = ("Рюкзак" if Profile.equipment.has("backpack") else "Карманы (рюкзака нет)") + "   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Profile.backpack_capacity()]
 	return true
 
 
@@ -293,10 +293,10 @@ func _build_stash() -> void:
 		gear.add_child(sv)
 	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
 	_templates_block(gear, true)
-	var bp_col := _column("Рюкзак   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], 0.95)
+	var bp_col := _column(("Рюкзак" if Profile.equipment.has("backpack") else "Карманы (рюкзака нет)") + "   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Profile.backpack_capacity()], 0.95)
 	_backpack_heading = bp_col.get_parent().get_parent().get_child(0) as Label
 	bp_col.add_child(_sort_button("backpack"))
-	var bp := GridView.new(Balance.BACKPACK_GRID, "backpack")
+	var bp := GridView.new(Profile.grid_of("backpack"), "backpack")
 	bp.set_items(Profile.backpack)
 	bp_col.add_child(bp)
 	var views: Array[GridView] = [stash, bp]
@@ -644,7 +644,7 @@ func _trader_buy() -> void:
 			b.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
 			b.add_theme_color_override("font_pressed_color", Color(1.0, 0.86, 0.6))
 		dest.add_child(b)
-	dest.add_child(_text("рюкзак: %d / %d ячеек" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS], Color(0.6, 0.62, 0.6)))
+	dest.add_child(_text("рюкзак: %d / %d ячеек" % [Profile.backpack_cells(), Profile.backpack_capacity()], Color(0.6, 0.62, 0.6)))
 	shop.add_child(dest)
 	if _focus != "":
 		var fr := HBoxContainer.new()
@@ -692,7 +692,7 @@ func _trader_buy() -> void:
 		tb.button_pressed = _cat_tab == key
 		cats.add_child(tb)
 	shop.add_child(cats)
-	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение",
+	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение", "backpack": "Рюкзаки",
 		"med": "Медицина", "food": "Медицина", "throw": "Гранаты и свет"}
 	var last_head := ""
 	var flow: HFlowContainer = null
@@ -762,7 +762,7 @@ func _cat_of(id: String) -> String:
 
 
 ## Порядок разделов в магазине: оружие, магазины, патроны, обвес, броня, медицина, гранаты, прочее.
-const STOCK_ORDER := ["weapon", "mag", "ammo", "mod", "armor", "plate", "med", "food", "throw"]
+const STOCK_ORDER := ["weapon", "mag", "ammo", "mod", "armor", "plate", "backpack", "med", "food", "throw"]
 
 
 ## Ассортимент по разделам (STOCK_ORDER), внутри раздела — как в каталоге. Админ («всё у
@@ -1112,7 +1112,7 @@ func _build_exit() -> void:
 	for slot in Inventory.SLOTS:
 		var e: Dictionary = Profile.equipment.get(slot, {})
 		col.add_child(_text("%s:  %s" % [Inventory.SLOT_NAMES[slot], ItemDb.label(e) if not e.is_empty() else "—"], Color(0.85, 0.85, 0.82)))
-	col.add_child(_text("Рюкзак: %d / %d ячеек, на %s ₽" % [Profile.backpack_cells(), Balance.BACKPACK_CELLS, InventoryUI.money(ItemDb.value_of(Profile.backpack))], Color(0.85, 0.85, 0.82)))
+	col.add_child(_text("Рюкзак: %d / %d ячеек, на %s ₽" % [Profile.backpack_cells(), Profile.backpack_capacity(), InventoryUI.money(ItemDb.value_of(Profile.backpack))], Color(0.85, 0.85, 0.82)))
 	# чего из основного не хватает — видно заранее (выйти всё равно можно, спросим)
 	var gaps := Profile.raid_kit_gaps()
 	if not gaps.is_empty():

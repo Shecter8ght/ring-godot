@@ -337,6 +337,21 @@ static func fits_at(occ: PackedByteArray, grid: Vector2i, x: int, y: int, s: Vec
 	return true
 
 
+## Сетка того, что несёшь, по надетому: рюкзак — его equip.grid, без рюкзака — карманы.
+static func bag_grid(eq: Dictionary) -> Vector2i:
+	var bp: Dictionary = eq.get("backpack", {})
+	if bp.is_empty():
+		return Balance.CARRY_GRID
+	var g: Array = equip(String(bp.id)).get("grid", [Balance.CARRY_GRID.x, Balance.CARRY_GRID.y])
+	return Vector2i(int(g[0]), int(g[1]))
+
+
+## Во сколько раз быстрее тратится выносливость в спринте с надетым рюкзаком.
+static func bag_sprint_k(eq: Dictionary) -> float:
+	var bp: Dictionary = eq.get("backpack", {})
+	return 1.0 if bp.is_empty() else float(equip(String(bp.id)).get("sprint_k", 1.0))
+
+
 static func _mark(occ: PackedByteArray, grid: Vector2i, x: int, y: int, s: Vector2i) -> void:
 	for yy in range(y, y + s.y):
 		for xx in range(x, x + s.x):
@@ -528,6 +543,29 @@ static func arranged(list: Array, grid: Vector2i) -> Array:
 		if add_to(out, e, grid) < int(e.n):
 			return []
 	return out
+
+
+## Переложить список в сетку grid (сменили рюкзак): [что встало, что не влезло]. Уже стоящее
+## без наложений — как есть, иначе — как arranged (крупное раньше), не вышло — по одному.
+static func refit(list: Array, grid: Vector2i) -> Array:
+	if grid_ok(list, grid):
+		return [list.duplicate(true), []]
+	var out := arranged(list, grid)
+	if not out.is_empty() or list.is_empty():
+		return [out, []]
+	var fitted: Array = []
+	var spill: Array = []
+	for e in list:
+		var one: Dictionary = (e as Dictionary).duplicate(true)
+		for k in ["x", "y", "r"]:
+			one.erase(k)
+		var n := int(one.n)
+		var got := add_to(fitted, one.duplicate(true), grid)
+		if got < n:
+			var rest := one.duplicate(true)
+			rest.n = n - got
+			spill.append(rest)
+	return [fitted, spill]
 
 
 ## Все ли записи сетки стоят на местах без наложений (для проверок и миграции).

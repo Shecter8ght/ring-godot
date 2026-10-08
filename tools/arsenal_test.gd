@@ -25,7 +25,8 @@ func _ready() -> void:
 	var w := WeaponDb.make_weapon("AR_06_MARKSMAN", rng, [100, 100])
 	w = Gear.fit(w, ItemDb.make("tac_flashlight_01", 1), "side_left")[0]
 	Profile.equipment = {"primary": w, "armor": WeaponDb.make_vest("carrier_tactical", {"front": "plate_ceramic", "back": "plate_steel"}),
-		"helmet": ItemDb.make("helmet_army", 1), "ears": ItemDb.make("headset_active", 1)}
+		"helmet": ItemDb.make("helmet_army", 1), "ears": ItemDb.make("headset_active", 1),
+		"backpack": ItemDb.make(Balance.BACKPACK_START, 1)}
 	Profile.backpack = []
 	ItemDb.add_to(Profile.backpack, ItemDb.make("ammo_545_std", 60), Balance.BACKPACK_GRID)
 	Profile.save()

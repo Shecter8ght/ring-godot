@@ -19,7 +19,7 @@ signal dropped_on(src: GridView, src_idx: int, dst_idx: int)
 
 const CELL := 46.0
 const CAT_COLOR := {
-	"weapon": Color(0.36, 0.3, 0.24), "ammo": Color(0.42, 0.36, 0.18), "armor": Color(0.26, 0.33, 0.27),
+	"weapon": Color(0.36, 0.3, 0.24), "ammo": Color(0.42, 0.36, 0.18), "armor": Color(0.26, 0.33, 0.27), "backpack": Color(0.3, 0.3, 0.22),
 	"med": Color(0.45, 0.22, 0.22), "food": Color(0.33, 0.35, 0.22), "tech": Color(0.22, 0.3, 0.38),
 	"value": Color(0.45, 0.38, 0.14), "barter": Color(0.34, 0.3, 0.3), "tools": Color(0.3, 0.3, 0.33),
 	"intel": Color(0.3, 0.3, 0.4), "key": Color(0.5, 0.42, 0.12), "mod": Color(0.25, 0.28, 0.33),
