@@ -415,7 +415,8 @@ def main() -> None:
         "play_swing": swing(), "play_slide": slide(), "play_carousel": carousel(), "play_arch": climbing_arch(),
         "play_sandbox": sandbox(),
     }
-    for kind in ("birch", "poplar", "maple"):
+    # берёза — tools/build_birch.py
+    for kind in ("poplar", "maple"):
         for v in range(3):
             items[f"tree_{kind}_{v}"] = tree(kind, 100 + v * 17 + len(kind))
     manifest = {}

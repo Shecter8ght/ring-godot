@@ -173,6 +173,30 @@ def spruce_materials() -> None:
         (OUT / f"{name}.tres").write_text(text, encoding="utf-8")
 
 
+BIRCH_TREES = ["birch_a", "birch_b", "birch_c", "birch_bare", "birch_young"]
+
+
+def birch_materials() -> None:
+    """Берёза (tools/build_birch.py): листья, дальние силуэты, береста ствола, тонкие ветви."""
+    t = "res://assets/zone01/textures/"
+    fol = "res://src/world/spruce_foliage.gdshader"
+    bark = "res://src/world/birch_bark.gdshader"
+    leaf_params = {"translucency": "Color(0.32, 0.27, 0.07, 1)", "alpha_cut": 0.4, "variation": 0.2}
+    files = {"BirchLeaves": shader_mat("BirchLeaves", fol, {"albedo_tex": t + "birch_atlas_albedo.png",
+                                                             "normal_tex": t + "birch_atlas_normal.png"}, leaf_params)}
+    for tree in BIRCH_TREES:
+        files[f"BirchFar_{tree}"] = shader_mat(f"BirchFar_{tree}", fol, {"albedo_tex": t + f"{tree}_far_albedo.png",
+                                                                        "normal_tex": t + f"{tree}_far_normal.png"},
+                                               dict(leaf_params, far="true", alpha_cut=0.45))
+    tex = {"birch_albedo": t + "birch_bark_albedo.png", "birch_normal": t + "birch_bark_normal.png",
+           "birch_arm": t + "birch_bark_arm.png", "dark_albedo": "res://assets/textures/bark001/albedo.jpg",
+           "dark_normal": "res://assets/textures/bark001/normal.jpg", "noise_tex": "res://assets/terrain/zone01_noise.png"}
+    files["BirchTrunk"] = shader_mat("BirchTrunk", bark, tex, {"dark_height": 1.6})
+    files["BirchBranch"] = shader_mat("BirchBranch", bark, tex, {"branch": "true", "dark_height": 0.0})
+    for name, text in files.items():
+        (OUT / f"{name}.tres").write_text(text, encoding="utf-8")
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for name, (tex, tile, tint, metal, extra) in AGED.items():
@@ -182,6 +206,7 @@ def main() -> None:
     for name, (albedo, normal, tile, foliage) in TEXTURED.items():
         (OUT / f"{name}.tres").write_text(textured(name, albedo, normal, tile, foliage), encoding="utf-8")
     spruce_materials()
+    birch_materials()
     print(f"zone01 materials: {len(AGED) + len(FLAT) + len(TEXTURED)}")
 
 

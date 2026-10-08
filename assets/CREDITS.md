@@ -185,3 +185,10 @@
 - Веточки атласа лап — скан «Fir Tree 01» (Poly Haven, CC0; фото Rob Tuytel, модель Rico Cilliers),
   https://polyhaven.com/a/fir_tree_01 — карты twig_* 4K; кора ветвей сучьев атласа — оттуда же.
 - Кора ствола — Poly Haven «Pine Bark», «Knotted Pine Bark» (CC0).
+
+## Зона 1 · берёза (assets/zone01/models/birch_*.glb, textures/birch_*)
+
+- Берёза — собственная модель проекта (tools/build_birch.py) по фото-референсам владельца.
+- Лист — скан ambientCG LeafSet024 (CC0, https://ambientcg.com/view?id=LeafSet024), переформован в
+  берёзовый лист (tools/build_birch_textures.py); береста — собственная процедурная текстура.
+- Тёмный низ ствола — ambientCG Bark001 (CC0, https://ambientcg.com/view?id=Bark001), assets/textures/bark001.

@@ -862,33 +862,6 @@ materials_dir = ""
 
 [node name="Vegetation" parent="." type="Node3D"]
 
-[node name="TreeBirch0" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
-data_path = "res://data/zone01_yard_scatter.json"
-key = "tree_birch_0"
-model = "res://assets/zone01/models/tree_birch_0.glb"
-view_distance = 550.0
-cell = 96.0
-trunk_radius = 0.25
-
-[node name="TreeBirch1" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
-data_path = "res://data/zone01_yard_scatter.json"
-key = "tree_birch_1"
-model = "res://assets/zone01/models/tree_birch_1.glb"
-view_distance = 550.0
-cell = 96.0
-trunk_radius = 0.25
-
-[node name="TreeBirch2" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
-data_path = "res://data/zone01_yard_scatter.json"
-key = "tree_birch_2"
-model = "res://assets/zone01/models/tree_birch_2.glb"
-view_distance = 550.0
-cell = 96.0
-trunk_radius = 0.25
-
 [node name="TreePoplar0" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
@@ -942,6 +915,61 @@ model = "res://assets/zone01/models/tree_maple_2.glb"
 view_distance = 550.0
 cell = 96.0
 trunk_radius = 0.25
+
+[node name="BirchA" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "birch_a"
+model = "res://assets/zone01/models/birch_a.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/birch_a_far.glb"
+near_distance = 95.0
+
+[node name="BirchB" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "birch_b"
+model = "res://assets/zone01/models/birch_b.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/birch_b_far.glb"
+near_distance = 95.0
+
+[node name="BirchC" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "birch_c"
+model = "res://assets/zone01/models/birch_c.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/birch_c_far.glb"
+near_distance = 95.0
+
+[node name="BirchBare" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "birch_bare"
+model = "res://assets/zone01/models/birch_bare.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/birch_bare_far.glb"
+near_distance = 95.0
+
+[node name="BirchYoung" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_yard_scatter.json"
+key = "birch_young"
+model = "res://assets/zone01/models/birch_young.glb"
+view_distance = 550.0
+cell = 96.0
+trunk_radius = 0.25
+far_model = "res://assets/zone01/models/birch_young_far.glb"
+near_distance = 95.0
 
 [node name="SpruceOpen" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")

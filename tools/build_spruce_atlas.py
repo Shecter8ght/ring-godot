@@ -15,7 +15,11 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
-R = ROOT / "_asset_src/spruce/render"
+import sys
+BIRCH = "--birch" in sys.argv
+# --birch — атлас и силуэты берёзы (tools/build_birch.py), иначе — ели
+R = ROOT / ("_asset_src/birch/render" if BIRCH else "_asset_src/spruce/render")
+PREFIX = "birch_atlas" if BIRCH else "spruce_atlas"
 OUT = ROOT / "assets/zone01/textures"
 SIZE, CW, CH = 4096, 2048, 1365
 
@@ -81,7 +85,7 @@ def main() -> None:
         nor = load(f"{name}_normal.png")
         a = col[..., 3]
         rgb = col[..., :3]
-        if name != "dead":
+        if name != "dead" and not BIRCH:
             # скан — свежие желтоватые побеги; хвоя ели в целом синее и чуть темнее (фото владельца)
             rgb = rgb * np.array([0.84, 0.98, 1.08])
         rgb = rgb * (0.68 + 0.32 * ao[..., None])
@@ -94,21 +98,21 @@ def main() -> None:
         meta[name] = dict(uv=[x0 / SIZE, y0 / SIZE, CW / SIZE, h / SIZE], width=c["width"], height=c["height"],
                           anchor=c["anchor"], view=c["view"], axis_len=c["axis_len"])
     OUT.mkdir(parents=True, exist_ok=True)
-    Image.fromarray((np.clip(albedo, 0, 1) * 255 + 0.5).astype(np.uint8), "RGBA").save(OUT / "spruce_atlas_albedo.png")
-    Image.fromarray((np.clip(normal, 0, 1) * 255 + 0.5).astype(np.uint8), "RGB").save(OUT / "spruce_atlas_normal.png")
-    for name, nm in (("spruce_atlas_albedo.png", 0), ("spruce_atlas_normal.png", 1)):
+    Image.fromarray((np.clip(albedo, 0, 1) * 255 + 0.5).astype(np.uint8), "RGBA").save(OUT / f"{PREFIX}_albedo.png")
+    Image.fromarray((np.clip(normal, 0, 1) * 255 + 0.5).astype(np.uint8), "RGB").save(OUT / f"{PREFIX}_normal.png")
+    for name, nm in ((f"{PREFIX}_albedo.png", 0), (f"{PREFIX}_normal.png", 1)):
         (OUT / (name + ".import")).write_text(IMPORT_COLOR.format(name=name, nm=nm), encoding="utf-8")
-    (OUT / "spruce_atlas.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    (OUT / f"{PREFIX}.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
     print("атлас ели:", ", ".join(meta))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--far" not in sys.argv:
     main()
 
 
 def impostors() -> None:
     """Силуэты дальних елей: два вида рядом (1024×1024), цвет+маска и нормаль, заливка краёв."""
-    meta = json.loads((ROOT / "assets/zone01/models/spruce.json").read_text(encoding="utf-8"))
+    meta = json.loads((ROOT / f"assets/zone01/models/{'birch' if BIRCH else 'spruce'}.json").read_text(encoding="utf-8"))
     for name in meta:
         cols, nors = [], []
         for vi in (0, 1):

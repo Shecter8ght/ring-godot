@@ -793,6 +793,7 @@ def preview_render(name: str, ob, H: float) -> None:
     sc.render.engine = "CYCLES"
     gpu()
     sc.cycles.samples = 64
+    sc.cycles.transparent_max_bounces = 256
     sc.cycles.use_denoising = True
     sc.view_settings.view_transform = "AgX"
     sc.render.resolution_x, sc.render.resolution_y = 900, 1200
@@ -803,11 +804,12 @@ def preview_render(name: str, ob, H: float) -> None:
 
 # ------------------------------------------------------------------ дальний вид: два скрещённых силуэта
 
-def impostor_materials(ob, mode: str) -> None:
+def impostor_materials(ob, mode: str, atlas: str = "spruce_atlas", bark_path: Path | None = None,
+                       foliage_prefix: str = "SpruceNeedles", bark_uv: float = 1.0) -> None:
     """Материалы дерева в режим «цвет» или «нормаль камеры» (как в атласе) для рендера силуэта."""
-    alb = image("alb", TEX / "spruce_atlas_albedo.png", False)
-    nor = image("nor", TEX / "spruce_atlas_normal.png", True)
-    bark = image("smooth", ROOT / "assets/textures/knotted_pine_bark/albedo.jpg", False)
+    alb = image(atlas + "_a", TEX / f"{atlas}_albedo.png", False)
+    nor = image(atlas + "_n", TEX / f"{atlas}_normal.png", True)
+    bark = image("bark_imp", bark_path or ROOT / "assets/textures/knotted_pine_bark/albedo.jpg", False)
     for mt in ob.data.materials:
         mt.use_nodes = True
         nt = mt.node_tree
@@ -817,7 +819,13 @@ def impostor_materials(ob, mode: str) -> None:
         uv.uv_map = "UVMap"
         t = nt.nodes.new("ShaderNodeTexImage")
         nt.links.new(uv.outputs[0], t.inputs[0])
-        needles = mt.name.startswith("SpruceNeedles")
+        needles = mt.name.startswith(foliage_prefix)
+        if not needles and bark_uv != 1.0:
+            sc_uv = nt.nodes.new("ShaderNodeVectorMath")
+            sc_uv.operation = "MULTIPLY"
+            sc_uv.inputs[1].default_value = (bark_uv, bark_uv, 1.0)
+            nt.links.new(uv.outputs[0], sc_uv.inputs[0])
+            nt.links.new(sc_uv.outputs[0], t.inputs[0])
         t.image = alb if needles else bark
         attr = nt.nodes.new("ShaderNodeAttribute")
         attr.attribute_name = "Col"
@@ -878,7 +886,7 @@ def impostor_materials(ob, mode: str) -> None:
             nt.links.new(em.outputs[0], out.inputs["Surface"])
 
 
-def render_impostor(name: str, ob, H: float, width: float) -> dict:
+def render_impostor(name: str, ob, H: float, width: float, **mat_kw) -> dict:
     """Два вида (спереди и сбоку) — две полосы 512×1024, склейку делает build_spruce_atlas.py."""
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
@@ -902,7 +910,7 @@ def render_impostor(name: str, ob, H: float, width: float) -> dict:
     cam.data.ortho_scale = size
     cam.data.clip_start, cam.data.clip_end = 0.1, 200
     for mode in ("albedo", "normal"):
-        impostor_materials(ob, mode)
+        impostor_materials(ob, mode, **mat_kw)
         for vi, yaw in enumerate((0.0, 90.0)):
             a = math.radians(yaw)
             cam.location = (-math.sin(a) * 60, -math.cos(a) * 60, size * 0.5 - 0.3)
@@ -913,7 +921,7 @@ def render_impostor(name: str, ob, H: float, width: float) -> dict:
     return dict(size=round(size, 3), base=0.3)
 
 
-def far_mesh(name: str, info: dict) -> None:
+def far_mesh(name: str, info: dict, mat_prefix: str = "SpruceFar") -> None:
     """Два скрещённых квада с половинами текстуры силуэта."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     s, b = info["size"], info["base"]
@@ -925,7 +933,7 @@ def far_mesh(name: str, info: dict) -> None:
         u0 = 0.5 * vi
         pts = [right * (-s / 4) + Z * (-b), right * (s / 4) + Z * (-b), right * (s / 4) + Z * (s - b), right * (-s / 4) + Z * (s - b)]
         m.quad("needles", pts, [(u0, 0), (u0 + 0.5, 0), (u0 + 0.5, 1), (u0, 1)], (1, 0.0, 0.5, 1), [out] * 4)
-    mt = bpy.data.materials.new(f"SpruceFar_{name}")
+    mt = bpy.data.materials.new(f"{mat_prefix}_{name}")
     ob = m.build(f"{name}_far", {"needles": mt})
     bpy.ops.object.select_all(action="DESELECT")
     ob.select_set(True)

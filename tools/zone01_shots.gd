@@ -28,6 +28,7 @@ const SHOTS := {
 	"loading": [Vector3(42, 1.7, 182), Vector3(-5, -3, 130), 70.0],
 	"forest_road": [Vector3(-3, 1.7, 225), Vector3(-2, 1, 295), 70.0],
 	"spruce_close": [Vector3(30, 1.7, 236), Vector3(40, 6, 252), 70.0],
+	"birch_close": [Vector3(-212, 1.7, -96), Vector3(-214, 5, -82), 70.0],
 	"sun_forest": [Vector3(-60, 1.7, 240), Vector3(0, 0, 0), 70.0],
 	"sun_yard": [Vector3(-200, 1.7, -100), Vector3(0, 0, 0), 70.0],
 	"garages": [Vector3(250, 1.7, -110), Vector3(300, 4, -20), 70.0],

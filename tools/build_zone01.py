@@ -396,7 +396,7 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
     forest = forest_mask()
     mud, gravel = splat[..., 0] / 255.0, splat[..., 2] / 255.0
     trees: dict[str, list] = {f"tree_{k}_{v}": [] for k in ("birch", "poplar", "maple") for v in range(3)}
-    trees.update({k: [] for k in SPRUCES})
+    trees.update({k: [] for k in SPRUCES + BIRCHES})
 
     def put(kind: str, x: float, z: float) -> None:
         # ель — своя (tools/build_spruce.py): в лесу высокие с сухими сучьями и подрост, на открытом —
@@ -405,6 +405,9 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
             key = rng.choice(["spruce_forest_a", "spruce_forest_a", "spruce_forest_b", "spruce_forest_b", "spruce_young_a", "spruce_young_b"])
         elif kind == "spruce_open":
             key = "spruce_open"
+        elif kind == "birch":
+            # берёза — своя (tools/build_birch.py): одиночные, двойные, кусты по три, почти голые, молодые
+            key = rng.choice(["birch_a", "birch_a", "birch_b", "birch_c", "birch_bare", "birch_bare", "birch_young"])
         else:
             key = f"tree_{kind}_{int(rng.integers(0, 3))}"
         trees[key].append([round(x, 2), round(sample(h, x, z) - 0.1, 3), round(z, 2), round(float(rng.uniform(0, 360)), 1),
@@ -548,6 +551,7 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
 
 
 SPRUCES = ["spruce_forest_a", "spruce_forest_b", "spruce_open", "spruce_young_a", "spruce_young_b"]
+BIRCHES = ["birch_a", "birch_b", "birch_c", "birch_bare", "birch_young"]
 
 # подлесок из Poly Haven Nature (tools/build_zone01_undergrowth.py): ключ → (варианты, вид растения)
 # лёгкие варианты — их у камеры десятки тысяч
@@ -592,14 +596,14 @@ def undergrowth_nodes(s: "Scene", parent: str, data_path: str) -> None:
 def vegetation_nodes(s: "Scene") -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
-    keys = [f"tree_{k}_{v}" for k in ("birch", "poplar", "maple") for v in range(3)]
+    keys = [f"tree_{k}_{v}" for k in ("poplar", "maple") for v in range(3)]
     for key in keys:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
                key=key, model=f"res://assets/zone01/models/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25)
-    for key in SPRUCES:
+    for key in SPRUCES + BIRCHES:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
                key=key, model=f"res://assets/zone01/models/{key}.glb", far_model=f"res://assets/zone01/models/{key}_far.glb",
-               near_distance=95.0, view_distance=650.0, cell=64.0, trunk_radius=0.3 if "young" not in key else 0.08)
+               near_distance=95.0, view_distance=650.0, cell=64.0, trunk_radius=(0.3 if "young" not in key else 0.08) * (0.7 if key.startswith("birch") else 1.0))
     for key, radius, height in (("forest_fern", 0.0, 0.0), ("forest_dry_branches", 0.0, 0.0), ("forest_stump_01", 0.3, 0.6),
                                 ("forest_stump_02", 0.3, 0.6), ("forest_dead_trunk", 0.0, 0.0), ("forest_roots", 0.0, 0.0),
                                 ("forest_rocks_01", 0.5, 0.8), ("forest_rocks_02", 0.5, 0.8)):

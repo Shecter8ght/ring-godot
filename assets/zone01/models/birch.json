@@ -1,0 +1,117 @@
+{
+ "birch_a": {
+  "triangles": 18976,
+  "height": 17.0,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.44,
+     4.0,
+     0.44
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 18.834,
+   "base": 0.3
+  }
+ },
+ "birch_c": {
+  "triangles": 29150,
+  "height": 14.0,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.264,
+     4.0,
+     0.264
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 21.482,
+   "base": 0.3
+  }
+ },
+ "birch_b": {
+  "triangles": 23012,
+  "height": 16.0,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.33,
+     4.0,
+     0.33
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 20.307,
+   "base": 0.3
+  }
+ },
+ "birch_bare": {
+  "triangles": 19146,
+  "height": 15.0,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.374,
+     4.0,
+     0.374
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 16.573,
+   "base": 0.3
+  }
+ },
+ "birch_young": {
+  "triangles": 9860,
+  "height": 7.5,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.132,
+     4.0,
+     0.132
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 9.919,
+   "base": 0.3
+  }
+ }
+}

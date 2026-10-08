@@ -195,7 +195,8 @@ def main() -> None:
 
 def scatter(s: z1.Scene) -> None:
     """Деревья и трава: точки в JSON, MultiMesh-клетки в сцене (DistrictScatter)."""
-    trees: dict[str, list] = {f"tree_{k}_{v}": [] for k in ("birch", "poplar", "maple") for v in range(3)}
+    trees: dict[str, list] = {f"tree_{k}_{v}": [] for k in ("poplar", "maple") for v in range(3)}
+    trees.update({k: [] for k in ("birch_a", "birch_b", "birch_c", "birch_bare", "birch_young")})
     # ели у домов — их сажали во дворах; одна взрослая и подрост
     trees["spruce_open"] = [(-158.5, -96.0)]
     trees["spruce_young_a"] = [(-246.5, -66.0), (-187.0, -131.0)]
@@ -208,8 +209,8 @@ def scatter(s: z1.Scene) -> None:
                   (-182, -76), (-205, -66), (-188, -66), (-218, -96), (-181, -93), (-236, -114), (-246, -60),
                   (-158, -70), (-150, -142), (-232, -148), (-244, -128), (-248, -92), (-250, -74)]
     for i, (x, z) in enumerate(yard_spots):
-        kind = "birch" if i % 3 != 2 else "maple"
-        trees[f"tree_{kind}_{i % 3}"].append((x + RNG.uniform(-1.5, 1.5), z + RNG.uniform(-1.5, 1.5)))
+        key = ["birch_a", "birch_b", "birch_young", "birch_c", "birch_bare"][i % 5] if i % 3 != 2 else f"tree_maple_{i % 3}"
+        trees[key].append((x + RNG.uniform(-1.5, 1.5), z + RNG.uniform(-1.5, 1.5)))
     # клёны-самосев у гаражей и сараев
     for i in range(8):
         x, z = -276 + RNG.uniform(-3, 3), -160 + i * 8 + RNG.uniform(-2, 2)
@@ -247,7 +248,7 @@ def scatter(s: z1.Scene) -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
     for key in trees:
-        extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=95.0) if key.startswith("spruce") else {}
+        extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=95.0) if key.startswith(("spruce", "birch")) else {}
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",
                key=key, model=f"{MODELS}/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25, **extra)
     z1.undergrowth_nodes(s, "Vegetation", "res://data/zone01_yard_scatter.json")
