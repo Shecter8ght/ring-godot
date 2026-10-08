@@ -72,6 +72,9 @@ func apply() -> void:
 			e.volumetric_fog_density = float(e.get_meta("vol_base")) * float(vt.density)
 			if sun and not night:
 				sun.light_volumetric_fog_energy = float(vt.sun)
+	# дождь: сплошные тучи — ни солнца, ни Луны: ни прямого света, ни бликов в лужах и на мокром
+	if sun:
+		sun.visible = String(c.weather) != "rain"
 	_apply_power(String(c.power))
 
 

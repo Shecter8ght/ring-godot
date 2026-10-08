@@ -258,11 +258,18 @@ func _run(cmd: String) -> void:
 		# чит: бессмертие вкл/выкл (как в меню Esc → Настройки)
 		Settings.set_god(not Settings.god if a.size() < 2 else a[1] in ["1", "on", "вкл"])
 		out = "бессмертие: " + ("включено" if Settings.god else "выключено")
+	elif a.size() >= 1 and a[0] == "fly":
+		# отладка: полёт сквозь всё (как в меню Esc → Настройки)
+		Settings.cheat_fly = not Settings.cheat_fly if a.size() < 2 else a[1] in ["1", "on", "вкл"]
+		out = "полёт: " + ("включён" if Settings.cheat_fly else "выключен")
+	elif a.size() >= 1 and a[0] == "speed":
+		Settings.cheat_speed = clampf(float(a[1]) if a.size() > 1 else 1.0, 0.1, 20.0)
+		out = "скорость ×%.2f" % Settings.cheat_speed
 	elif a.size() >= 1 and a[0] == "event":
 		# событие рейда сейчас: свет погас, генератор встал, сброс груза, ЧВК (решает хост)
 		out = _dev_event(a[1] if a.size() > 1 else "")
 	elif a.size() >= 1 and a[0] == "help":
-		out = "god — бессмертие вкл/выкл · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
 " + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"

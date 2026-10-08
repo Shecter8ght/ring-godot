@@ -13,6 +13,8 @@ uniform bool has_stars_tex = false;
 uniform float stars_energy : hint_range(0.0, 4.0) = 0.25;
 // ниже порога яркость HDRI гасится — чёрное небо между звёзд (фон этого HDRI ~0.5, звёзды 1…16+)
 uniform float stars_floor : hint_range(0.0, 2.0) = 0.6;
+// самая яркая звезда (до умножения на stars_energy) — без «солнц» из панорамы
+uniform float stars_max : hint_range(0.5, 40.0) = 8.0;
 group_uniforms;
 
 group_uniforms sky;
@@ -67,8 +69,15 @@ void sky() {
 		col = ground_color;
 	} else {
 		col = mix(horizon_color, zenith_color, smoothstep(0.0, horizon_height, up));
-		vec3 st = has_stars_tex ? texture(stars_tex, SKY_COORDS).rgb : proc_stars(d);
-		st = max(st - vec3(stars_floor), vec3(0.0));
+		vec3 st = proc_stars(d);
+		if (has_stars_tex) {
+			// из панорамы берём только точки звёзд: широкое свечение (заря у горизонта, засветка,
+			// Млечный Путь) вычитаем — его средний фон по крупному мипу; яркие точки ограничены
+			vec3 raw = texture(stars_tex, SKY_COORDS).rgb;
+			vec3 bg = textureLod(stars_tex, SKY_COORDS, 6.0).rgb;
+			st = min(max(raw - bg * 1.6 - vec3(stars_floor), vec3(0.0)), vec3(stars_max));
+		}
+		st = max(st, vec3(0.0));
 		// у горизонта звёзды тонут в дымке
 		col += st * stars_energy * smoothstep(0.0, 0.18, up) * (1.0 - overcast * 0.95);
 	}
@@ -79,7 +88,7 @@ void sky() {
 	float cosa = dot(d, md);
 	float ang = acos(clamp(cosa, -1.0, 1.0));
 	float rad = radians(moon_size) * 0.5;
-	float veil = 1.0 - overcast * 0.85;
+	float veil = 1.0 - overcast;
 	if (ang < rad && md.y > -0.05) {
 		vec3 upv = normalize(vec3(0.0, 1.0, 0.0) - md * md.y + vec3(0.0, 0.0, 1e-4));
 		vec3 rt = normalize(cross(upv, md));
@@ -96,6 +105,8 @@ void sky() {
 	// ореол: мягкий, без огромного ореола — узкое ядро и слабое широкое
 	float hs = radians(halo_size);
 	float halo = exp(-(ang * ang) / (hs * hs)) * 0.8 + exp(-(ang * ang) / (hs * hs * 9.0)) * 0.2;
-	col += moon_tint * halo * halo_strength * mix(1.0, 0.6, overcast) * step(-0.05, md.y);
+	col += moon_tint * halo * halo_strength * mix(1.0, 0.0, overcast) * step(-0.05, md.y);
+	// пасмурно: низкие облака чуть подсвечены снизу (город, небо) — небо не провал, а тяжёлый свод
+	col = mix(col, mix(vec3(0.012, 0.013, 0.016), vec3(0.03, 0.031, 0.034), smoothstep(0.25, 0.0, abs(up))), overcast * step(0.0, up) * 0.9);
 	COLOR = col;
 }

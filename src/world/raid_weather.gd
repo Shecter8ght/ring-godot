@@ -243,7 +243,8 @@ func _set_overcast(on: bool) -> void:
 		_overcast = [sun.light_energy, e.background_energy_multiplier, e.ambient_light_energy]
 		sun.light_energy *= 0.3
 		e.background_energy_multiplier *= 0.45
-		e.ambient_light_energy *= 0.85
+		# ночью рассеянный от туч не гаснет (данные карты ambient_k_night_rain его и поднимают)
+		e.ambient_light_energy *= 0.85 if String(RaidConditions.current.time) != "night" else 1.0
 	elif not on and not _overcast.is_empty() and sun and we and we.environment:
 		sun.light_energy = float(_overcast[0])
 		we.environment.background_energy_multiplier = float(_overcast[1])
@@ -326,7 +327,8 @@ func _tick_local(delta: float) -> void:
 		_rain.track(me, get_viewport().get_camera_3d(), fp, bright, _outdoor)
 	# жара: на улице без очков — пересвет и марево
 	var hot := String(RaidConditions.current.weather) == "heat" and _outdoor and not bool(ItemDb.equip(me.eyes_item()).get("uv", false))
-	_haze_k = move_toward(_haze_k, 1.0 if hot else 0.0, delta * 0.8)
+	var heat_max := float(Balance.HEAT_TIME.get(String(RaidConditions.current.time), 1.0))
+	_haze_k = move_toward(_haze_k, heat_max if hot else 0.0, delta * 0.8)
 	_apply_heat(_haze_k)
 
 
@@ -360,10 +362,13 @@ func _thunder() -> void:
 		var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D
 		if sun:
 			var e := sun.light_energy
+			var vis := sun.visible
 			sun.light_energy = 3.0
+			sun.visible = true
 			get_tree().create_timer(0.09).timeout.connect(func() -> void:
 				if is_instance_valid(sun):
-					sun.light_energy = e)
+					sun.light_energy = e
+					sun.visible = vis)
 
 
 # ---------------------------------------------------------------- жара
@@ -372,10 +377,15 @@ func _apply_heat(k: float) -> void:
 	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
 	if we and we.environment:
 		var e := we.environment
-		e.adjustment_enabled = k > 0.001
-		e.adjustment_brightness = 1.0 + 0.4 * k
-		e.adjustment_contrast = 1.0 - 0.12 * k
-		e.adjustment_saturation = 1.0 - 0.2 * k
+		# пересвет — поверх цветокоррекции карты (её контраст и насыщенность не сбрасывать)
+		if not e.has_meta("adj_base"):
+			e.set_meta("adj_base", [e.adjustment_enabled, e.adjustment_brightness, e.adjustment_contrast, e.adjustment_saturation])
+		var b: Array = e.get_meta("adj_base")
+		e.adjustment_enabled = bool(b[0]) or k > 0.001
+		var on := bool(b[0])
+		e.adjustment_brightness = (float(b[1]) if on else 1.0) * (1.0 + 0.4 * k)
+		e.adjustment_contrast = (float(b[2]) if on else 1.0) * (1.0 - 0.12 * k)
+		e.adjustment_saturation = (float(b[3]) if on else 1.0) * (1.0 - 0.2 * k)
 	if k > 0.001 and _haze == null:
 		var layer := CanvasLayer.new()
 		layer.layer = 9

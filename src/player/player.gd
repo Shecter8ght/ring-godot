@@ -126,6 +126,11 @@ var nvg_charge: float = Balance.NVG_BATTERY_SEC
 ## Перелезает (Пробел у преграды): путь (Vault.find), доля пройденного (-1 — нет), длительность.
 var _vault: Dictionary = {}
 var _vault_t: float = -1.0
+## Ступеньки и кочки для глаза: тело поднимается/опускается рывком (шаг на ступень, снап к полу),
+## камера догоняет плавно — смещение глаза по высоте, гаснет за доли секунды.
+var _eye_dy: float = 0.0
+## Сколько секунд не на полу (шаг на ступень — и в первые мгновения после отрыва: висит на ребре).
+var _ground_t: float = 0.0
 var _vault_sec: float = 0.75
 ## Стресс 0–100 (Balance.STRESS): считает владелец; события от хоста (пули рядом) — по RPC.
 var stress: float = 0.0
@@ -575,7 +580,7 @@ func aim_progress() -> float:
 
 
 func eye_position() -> Vector3:
-	return global_position + Vector3.UP * float(Balance.ADS_EYE[_stance_key()]) + lean_vector()
+	return global_position + Vector3.UP * (float(Balance.ADS_EYE[_stance_key()]) + _eye_dy) + lean_vector()
 
 
 ## Куда сдвинут глаз наклоном (вбок от взгляда, чуть ниже).
@@ -631,6 +636,11 @@ func _process(_delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not is_local() or not is_alive():
+		return
+	_eye_dy *= exp(-float(Balance.STEP_UP.eye_rate) * delta)
+	# отладка (аудит уровня): полёт сквозь всё
+	if Settings.cheat_fly:
+		_fly(delta)
 		return
 	if seated:
 		var mv := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
@@ -746,8 +756,18 @@ func _physics_process(delta: float) -> void:
 		# в начале броска — подскок (иначе пол тут же гасит его)
 		velocity.y = 0.0
 	var was_airborne: bool = airborne
+	var pre_pos := global_position
+	var pre_floor := is_on_floor()
+	var pre_vel := velocity
 	_cart_contact.move_character(delta)
+	# низкая ступень, бордюр, порожек — шагнуть без прыжка (и если капсула уже повисла на ребре)
+	_ground_t = 0.0 if pre_floor else _ground_t + delta
+	if _ground_t < 0.2 and velocity.y <= 0.3 and _dive_t < 0.0:
+		_step_up(delta, pre_pos, pre_vel)
 	airborne = not is_on_floor()
+	# по земле: подъём и спуск тела глаз проходит плавно (ступенька не дёргает камеру)
+	if _ground_t < 0.25 and not airborne:
+		_eye_dy = clampf(_eye_dy - (global_position.y - pre_pos.y), -float(Balance.STEP_UP.eye_max), float(Balance.STEP_UP.eye_max))
 	if was_airborne and not airborne:
 		_jump_cd = float(Balance.JUMP.cooldown)
 		NoiseBus.emit(global_position, float(Balance.JUMP.land_noise_m) * carry_stamina_k(), "step")
@@ -2021,6 +2041,8 @@ func _stance_speed() -> float:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
 	# перегруз: тяжелее free_kg — медленнее
 	s *= carry_speed_k()
+	# отладка: множитель скорости (меню Esc → Настройки, консоль speed)
+	s *= Settings.cheat_speed
 	if absf(lean) > 0.3:
 		s *= Balance.LEAN_MOVE_SCALE
 	if is_dragging():
@@ -2118,3 +2140,72 @@ func _die() -> void:
 func _animation_event(clip: String) -> void:
 	animation_event = clip
 	animation_event_seq += 1
+
+
+## Шаг на ступень: упёрлись в низкий уступ (ниже Balance.STEP_UP.max_h) — пробуем «вверх, вперёд,
+## вниз»; встаём, если внизу пол (не ребро и не склон круче floor_max_angle). Вперёд — сколько
+## хотели пройти, иначе чуть больше: скруглённый низ капсулы должен встать на ступень, а не на ребро.
+func _step_up(delta: float, from: Vector3, vel: Vector3) -> void:
+	var su: Dictionary = Balance.STEP_UP
+	# скорость до столкновения (после него у стены её поперечная часть уже погашена)
+	var want := Vector3(vel.x, 0.0, vel.z) * delta
+	if want.length_squared() < 0.000001:
+		return
+	var dir := want.normalized()
+	# упёрся: прошёл заметно меньше, чем хотел
+	var moved := global_position - from
+	moved.y = 0.0
+	if moved.dot(dir) > want.length() * 0.6:
+		return
+	var max_h := float(su.max_h)
+	var t := global_transform
+	var r := KinematicCollision3D.new()
+	var up := Vector3.UP * max_h
+	if test_move(t, up, r):
+		up = r.get_travel()
+	if up.y < 0.05:
+		return
+	for fwd_len in [want.length(), float(su.reach) * 0.5, float(su.reach)]:
+		var t1 := t.translated(up)
+		var fwd := dir * maxf(float(fwd_len), 0.02)
+		if test_move(t1, fwd, r):
+			continue
+		var t2 := t1.translated(fwd)
+		var down := Vector3.DOWN * (up.y + 0.05)
+		if not test_move(t2, down, r):
+			continue
+		var rise := t2.origin.y + r.get_travel().y - from.y
+		if rise < 0.01 or rise > max_h or r.get_normal().y < cos(floor_max_angle):
+			continue
+		global_position = t2.origin + r.get_travel()
+		apply_floor_snap()
+		return
+
+
+## Полёт (отладка, аудит уровня): WASD — куда смотрит камера, пробел — вверх, присесть — вниз,
+## спринт — быстрее; сквозь стены и землю, без тяжести. Скорость × Settings.cheat_speed.
+func _fly(delta: float) -> void:
+	var f: Dictionary = Balance.DEBUG_FLY
+	var dir := Vector3.ZERO
+	if not PauseMenu.shown and not ui_blocked():
+		var mv := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+		var cam := get_viewport().get_camera_3d()
+		var fwd := -cam.global_basis.z if cam else look_dir()
+		if not ads:
+			fwd.y = 0.0
+		fwd = fwd.normalized()
+		var right := fwd.cross(Vector3.UP).normalized()
+		dir = fwd * -mv.y + right * mv.x
+		if Input.is_action_pressed("vault"):
+			dir.y += 1.0
+		if Input.is_action_pressed("crouch"):
+			dir.y -= 1.0
+	var sp := float(f.speed) * Settings.cheat_speed * (float(f.boost) if Input.is_action_pressed("sprint") else 1.0)
+	velocity = dir.limit_length(1.0) * sp
+	global_position += velocity * delta
+	airborne = false
+	_vault_t = -1.0
+	if ads:
+		_body.rotation.y = look_yaw
+	else:
+		_face_cursor(delta)

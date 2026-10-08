@@ -85,6 +85,8 @@ func _build() -> void:
 		# пустая папка материалов — у модели свои (Sketchfab): ничего не подменять
 		if materials_dir != "":
 			_apply_materials(inst)
+		else:
+			_lit_scans(inst)
 		return
 	# запасной вид — коробки коллизий
 	var fallback := MeshInstance3D.new()
@@ -123,3 +125,21 @@ func _apply_materials(root: Node) -> void:
 			var path: String = "%s/%s.tres" % [materials_dir, src.resource_name]
 			if ResourceLoader.exists(path):
 				mi.set_surface_override_material(i, load(path))
+
+
+## Фотосканы со Sketchfab часто без освещения (KHR_materials_unlit — свет запечён в текстуру):
+## в игре такой предмет светится сам по себе, ночью — как фонарь. Делаем обычным, освещаемым.
+func _lit_scans(root: Node) -> void:
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var m := mi.mesh.surface_get_material(i) as BaseMaterial3D
+			if m == null or m.shading_mode != BaseMaterial3D.SHADING_MODE_UNSHADED:
+				continue
+			var lit := m.duplicate() as BaseMaterial3D
+			lit.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+			lit.roughness = maxf(lit.roughness, 0.85)
+			lit.metallic = 0.0
+			mi.set_surface_override_material(i, lit)

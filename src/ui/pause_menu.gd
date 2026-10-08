@@ -435,6 +435,19 @@ func _build_settings(h: HBoxContainer) -> void:
 	god.tooltip_text = "Попадания видно, но здоровье не убывает; лёжа — сразу встаёшь. В коопе остальным пишется в чат."
 	god.toggled.connect(func(on: bool) -> void: Settings.set_god(on))
 	grid.add_child(god)
+	# отладка для аудита уровня: полёт, скорость, переместиться к точке карты
+	grid.add_child(_label("Отладка: полёт"))
+	var fly := CheckButton.new()
+	fly.focus_mode = Control.FOCUS_NONE
+	fly.button_pressed = Settings.cheat_fly
+	fly.tooltip_text = "Сквозь стены и землю: WASD — куда смотришь, пробел — вверх, присесть — вниз, спринт — ×4. Выключить — упадёшь вниз."
+	fly.toggled.connect(func(on: bool) -> void: Settings.cheat_fly = on)
+	grid.add_child(fly)
+	grid.add_child(_label("Отладка: скорость"))
+	grid.add_child(_slider(0.25, 10.0, 0.25, Settings.cheat_speed, "×%.2f",
+		func(v: float) -> void: Settings.cheat_speed = v))
+	grid.add_child(_label("Отладка: переместиться"))
+	grid.add_child(_teleport_option())
 	var hint := Label.new()
 	hint.text = "«Низко» — если тормозит: без глобального освещения, тумана и SSAO, рендер в 77 %."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -656,3 +669,55 @@ func _cond_option(table: Dictionary, is_time: bool) -> OptionButton:
 		else:
 			Settings.set_raid_conditions(Settings.raid_time, String(keys[i])))
 	return ob
+
+
+## Точки карты для аудита: старт, точки входа (группа spawn_points), центры районов из данных
+## сектора. Выбор — сразу переносит своего игрока (на землю под точкой).
+func _teleport_option() -> OptionButton:
+	var ob := OptionButton.new()
+	ob.focus_mode = Control.FOCUS_NONE
+	ob.tooltip_text = "Перенести себя к точке карты (для осмотра уровня)."
+	ob.add_item("— выбрать точку —")
+	var pts: Array = [null]
+	var level := get_tree().current_scene
+	var path: Variant = level.get("sector_path") if level else null
+	var def: Dictionary = SectorBuilder.load_def(String(path)) if path != null and String(path) != "" else {}
+	if def.has("spawn"):
+		var sp: Array = def.spawn
+		ob.add_item("Старт карты")
+		pts.append(Vector3(float(sp[0]), float(sp[1]), float(sp[2])))
+	var i := 0
+	for n in get_tree().get_nodes_in_group("spawn_points"):
+		i += 1
+		ob.add_item("Вход %d (%s)" % [i, String(n.name)])
+		pts.append((n as Node3D).global_position)
+	for d in def.get("districts", []):
+		var r: Array = (d as Dictionary).get("rect", [])
+		if r.size() < 4:
+			continue
+		ob.add_item(String(d.get("name", d.get("id", "?"))))
+		pts.append(Vector3((float(r[0]) + float(r[2])) * 0.5, NAN, (float(r[1]) + float(r[3])) * 0.5))
+	ob.item_selected.connect(func(idx: int) -> void:
+		if idx <= 0 or idx >= pts.size():
+			return
+		_teleport_to(pts[idx] as Vector3)
+		ob.select(0))
+	return ob
+
+
+func _teleport_to(p: Vector3) -> void:
+	var me: Player = Raid.current.local_player() if Raid.current else null
+	if me == null:
+		return
+	var y := p.y
+	var t := get_tree().get_first_node_in_group("district_terrain")
+	if is_nan(y) and t and t.has_method("height_at"):
+		y = float(t.call("height_at", p.x, p.z))
+	# сверху вниз: на крышу, крыльцо, а не внутрь
+	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, (0.0 if is_nan(y) else y) + 120.0, p.z), Vector3(p.x, (0.0 if is_nan(y) else y) - 50.0, p.z))
+	q.exclude = [me.get_rid()]
+	var hit := me.get_world_3d().direct_space_state.intersect_ray(q)
+	if not hit.is_empty():
+		y = (hit.position as Vector3).y
+	me.global_position = Vector3(p.x, (0.0 if is_nan(y) else y) + 0.1, p.z)
+	me.velocity = Vector3.ZERO
