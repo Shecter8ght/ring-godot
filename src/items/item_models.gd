@@ -225,17 +225,26 @@ static func _arsenal(root: Node3D, id: String) -> bool:
 	var v := WeaponDb.vest(id)
 	if not v.is_empty():
 		var carrier := (v.get("plates", []) as Array).size() > 0
+		# плитоносец — модель Sketchfab (CC-BY, assets/CREDITS.md); мягкий жилет — пока из форм
+		if carrier and _scan(root, "plate_carrier"):
+			return true
 		var tier := int(ItemDb.item(id).get("tier", 1))
 		var cloth := [Color(0.3, 0.28, 0.22), Color(0.22, 0.25, 0.18), Color(0.2, 0.22, 0.16), Color(0.14, 0.15, 0.13), Color(0.1, 0.11, 0.12)][clampi(tier, 0, 4)] as Color
 		_vest(root, carrier, cloth)
 		return true
 	var h := WeaponDb.helmet(id)
 	if not h.is_empty():
+		# армейский шлем — модель Sketchfab; строительная каска — из форм
+		if id != "helmet_hardhat" and _scan(root, "helmet"):
+			return true
 		var tier := int(ItemDb.item(id).get("tier", 1))
 		var col := Color(0.85, 0.72, 0.2) if id == "helmet_hardhat" else ([Color(0.3, 0.32, 0.24), Color(0.25, 0.28, 0.2), Color(0.18, 0.2, 0.22), Color(0.14, 0.15, 0.16), Color(0.1, 0.11, 0.12)][clampi(tier, 0, 4)] as Color)
 		_helmet(root, col, "VISOR" in (h.get("mounts", []) as Array))
 		return true
 	if not WeaponDb.headset(id).is_empty():
+		# активные (тактические) — модель Sketchfab; пассивные «строительные» красные — из форм
+		if id != "headset_passive" and _scan(root, "headset"):
+			return true
 		var shell := _m(Color(0.16, 0.17, 0.15) if id != "headset_passive" else Color(0.55, 0.12, 0.1), 0.6)
 		for sx in [-1.0, 1.0]:
 			_cyl(root, Vector3(sx * 0.08, 0, 0), 0.042, 0.035, shell).rotation.z = PI * 0.5
@@ -270,6 +279,40 @@ static func _magazine(root: Node3D, id: String, mag: Dictionary) -> void:
 	# верхний патрон
 	var brass := _m(Color(0.8, 0.62, 0.3), 0.3, 0.9)
 	_cyl(root, Vector3(0, h * 0.5 + r, 0), r, l * 0.9, brass).rotation.z = PI * 0.5
+
+
+## Готовая модель снаряжения (tools/import_sketchfab.py → assets/zone01/models/sf_<имя>.glb) по
+## центру узла, как формы; нет файла — false (тогда строится из форм).
+static func _scan(root: Node3D, name: String) -> bool:
+	var path := "res://assets/zone01/models/sf_%s.glb" % name
+	if not ResourceLoader.exists(path):
+		return false
+	var inst := (load(path) as PackedScene).instantiate() as Node3D
+	root.add_child(inst)
+	var box := AABB()
+	var first := true
+	# корень GLB из одного меша — сам MeshInstance3D (find_children его не включает)
+	var meshes: Array = inst.find_children("*", "MeshInstance3D", true, false)
+	if inst is MeshInstance3D:
+		meshes.append(inst)
+	for n in meshes:
+		var mi := n as MeshInstance3D
+		var b: AABB = inst.transform.affine_inverse() * (_xf_to(inst, mi) * mi.get_aabb())
+		box = b if first else box.merge(b)
+		first = false
+	inst.position = -box.get_center()
+	return true
+
+
+## Преобразование узла в систему предка (без дерева сцены: global_transform ещё не готов).
+static func _xf_to(top: Node3D, n: Node3D) -> Transform3D:
+	var t := Transform3D.IDENTITY
+	var cur: Node = n
+	while cur != null and cur != top.get_parent():
+		if cur is Node3D:
+			t = (cur as Node3D).transform * t
+		cur = cur.get_parent()
+	return t
 
 
 static func _vest(root: Node3D, heavy: bool, color: Color) -> void:

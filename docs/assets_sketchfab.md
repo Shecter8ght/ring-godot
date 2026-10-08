@@ -6,6 +6,9 @@
 
 | Статус | Папка | Модель | Автор | Лицензия | Треугольников | Заметка |
 |---|---|---|---|---|---|---|
+| 1_в_игре | Armory/Headset/01 | [Активные наушники](https://sketchfab.com/3d-models/tactical-headset-game-ready-c1cee56e73ed47438015a646ad82dfa5) | Exactly | CC Attribution | 9231 | в игре: `sf_headset.glb` |
+| 1_в_игре | Armory/Helmet/Helmet_01 | [Шлем с наушниками](https://sketchfab.com/3d-models/tactical-helmet-with-headset-game-ready-82adf376164f4d99a4e0b2949930e2ad) | Exactly | CC Attribution | 19147 | в игре: `sf_helmet.glb` |
+| 1_в_игре | Armory/Vest_plate_Carier/01 | [Плитник](https://sketchfab.com/3d-models/modern-tactical-vest-plate-carrier-abe8e567ae72431384ee7535845b6f45) | Exactly | CC Attribution | 29415 | в игре: `sf_plate_carrier.glb` |
 | 1_в_игре | Nature/Tree/Old dead tree | [Сухое дерево](https://sketchfab.com/3d-models/tree-c25e5fc2bfa54d24a165a8a207c0a6d7) | Epic_Tree_Store | CC Attribution | 149384 | в игре: `sf_dead_tree.glb` |
 | 1_в_игре | Nature/Wood Block | [Деревянный брусок](https://sketchfab.com/3d-models/low-poly-weathered-wood-block-scan-game-ready-d6e22786fbfd4b239c54eced37de7a84) | -Arthur- | CC Attribution | 416 | в игре: `sf_wood_block.glb` |
 | 1_в_игре | Trash can/green | [Мусорный бак зелёный](https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac) | bazz4r | CC Attribution | 6030 | в игре: `sf_dumpster_a.glb`, `sf_dumpster_b.glb`, `sf_dumpster_tipped.glb` |
@@ -14,10 +17,7 @@
 | 1_в_игре | buildings/Panelka_3_SUmmer_Winter | [Панельная 5 этажей](https://sketchfab.com/3d-models/soviet-panel-brutal-building-baked-deb2133873534b8ebec4c97e5c7f6c3b) | Blenderust | CC Attribution | 37024 | в игре: `sf_panel5_brutal.glb` |
 | 1_в_игре | cars/other/01 | [Сгоревшая машина](https://sketchfab.com/3d-models/lviv-missile-attack-burned-and-destroyed-car-5cdf33c5d3754f658e740f5360e3eeca) | Serhii Revenko | CC Attribution | 1000004 | в игре: `sf_car_burned.glb` |
 | 1_в_игре | cars/vaz/01 | [ВАЗ 2104 скан](https://sketchfab.com/3d-models/vaz-2104-raw-scan-cedba0fb26e34497910044f11a23e686) | Dmytro Nikonov | CC Attribution | 300127 | в игре: `sf_vaz2104.glb` |
-| 2_можно_не_использовано | Armory/Headset/01 | [Активные наушники](https://sketchfab.com/3d-models/tactical-headset-game-ready-c1cee56e73ed47438015a646ad82dfa5) | Exactly | CC Attribution | 9231 | снаряжение — не для карты; пойдёт в убежище/персонажей |
-| 2_можно_не_использовано | Armory/Helmet/Helmet_01 | [Шлем с наушниками](https://sketchfab.com/3d-models/tactical-helmet-with-headset-game-ready-82adf376164f4d99a4e0b2949930e2ad) | Exactly | CC Attribution | 19147 | снаряжение — не для карты; пойдёт в убежище/персонажей |
 | 2_можно_не_использовано | Armory/Pouch set/01 | [Подсумки](https://sketchfab.com/3d-models/military-ammo-pouch-set-844f276a2b464389bf3bbd75a6a7bbc4) | Neslihan Çakmak | CC Attribution | 269068 | снаряжение — не для карты; 269 тыс. треугольников, нужен ретопо |
-| 2_можно_не_использовано | Armory/Vest_plate_Carier/01 | [Плитник](https://sketchfab.com/3d-models/modern-tactical-vest-plate-carrier-abe8e567ae72431384ee7535845b6f45) | Exactly | CC Attribution | 29415 | снаряжение — не для карты; пойдёт в убежище/персонажей |
 | 2_можно_не_использовано | Nature/Stone/01 | [Камень](https://sketchfab.com/3d-models/ancient-stone-menhir-photogrammetry-free-4ae7a186ccb54b9abdd535ff564a57b9) | ScanForgeFAB | CC Attribution | 92467 | глыба склеена с куском земли в один объект — отдельно не вырезать |
 | 2_можно_не_использовано | Nature/Tree/Pine | [Сосновый лес (сцена)](https://sketchfab.com/3d-models/pine-forest-ece69535f7584e099488f65f2072264e) | fangzhangmnm | CC Attribution | 45304 | это сфера неба с пятачком, отдельных деревьев нет |
 | 2_можно_не_использовано | Nature/Tree/forest | [Лес с дорогой (сцена)](https://sketchfab.com/3d-models/a-forest-3-with-a-road-at-night-for-game-61f8c7817fe6457fb26e4814cfc48a3f) | dasy444 | CC Attribution | 151954 | деревья — вырезанные фотографии на плоскостях, слабое качество |

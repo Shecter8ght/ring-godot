@@ -2442,3 +2442,7 @@ C:\Users\Schecter_8ght\.codex\skills\weapon-asset-texturing\SKILL.md.
   луч смотрит на тебя, сзади не видно, вдали крупнее) — видно издали и в оптике, не только луч.
 - Фонарные столбы двора хрущёвок горят в сумерки и ночью (DistrictModel.lamp_head → LampHead: свет
   вниз и светящееся стекло, как StreetLamp, Balance.STREET_LAMP, рубильник street_lights).
+- Снаряжение: армейские шлемы, плитоносцы, активные наушники — модели Sketchfab (CC-BY, Exactly;
+  tools/import_sketchfab.py → sf_helmet, sf_plate_carrier, sf_headset; ItemModels._scan), иконки
+  перепечены. Строительная каска, мягкий жилет, пассивные наушники — пока из форм.
+- Контракты: заказчиков пятеро, «тёмные» заказы отношений не портят (решения владельца, §9).

@@ -278,5 +278,89 @@
   "license": "CC Attribution",
   "source": "https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac",
   "library": "Мусорный бак зелёный"
+ },
+ "sf_helmet": {
+  "triangles": 19147,
+  "size": [
+   0.3,
+   0.3,
+   0.26
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.149,
+     0
+    ],
+    "size": [
+     0.276,
+     0.299,
+     0.235
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Tactical Helmet with Headset (Game-Ready)",
+  "author": "Exactly",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/tactical-helmet-with-headset-game-ready-82adf376164f4d99a4e0b2949930e2ad",
+  "library": "Шлем с наушниками"
+ },
+ "sf_headset": {
+  "triangles": 9231,
+  "size": [
+   0.2,
+   0.2,
+   0.18
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.098,
+     0
+    ],
+    "size": [
+     0.184,
+     0.197,
+     0.162
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Tactical Headset - Game Ready",
+  "author": "Exactly",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/tactical-headset-game-ready-c1cee56e73ed47438015a646ad82dfa5",
+  "library": "Активные наушники"
+ },
+ "sf_plate_carrier": {
+  "triangles": 19999,
+  "size": [
+   0.43,
+   0.52,
+   0.48
+  ],
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.26,
+     0
+    ],
+    "size": [
+     0.397,
+     0.52,
+     0.439
+    ],
+    "yaw": 0
+   }
+  ],
+  "title": "Modern Tactical Vest / Plate Carrier",
+  "author": "Exactly",
+  "license": "CC Attribution",
+  "source": "https://sketchfab.com/3d-models/modern-tactical-vest-plate-carrier-abe8e567ae72431384ee7535845b6f45",
+  "library": "Плитник"
  }
 }
