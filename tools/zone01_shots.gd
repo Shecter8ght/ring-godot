@@ -121,7 +121,7 @@ func _ready() -> void:
 		for i in range(90):
 			await get_tree().process_frame
 		if shot_name.ends_with("_up"):
-			await get_tree().create_timer(4.0).timeout
+			await get_tree().create_timer(float(OS.get_environment("ZONE01_UP_SEC")) if OS.has_environment("ZONE01_UP_SEC") else 4.0).timeout
 		if ground_shot:
 			print("  игрок ", me.global_position, " камера ", get_viewport().get_camera_3d().global_position, " взгляд ", -get_viewport().get_camera_3d().global_basis.z)
 		var img := get_viewport().get_texture().get_image()

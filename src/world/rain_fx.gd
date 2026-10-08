@@ -286,75 +286,13 @@ void fragment() {
 """
 
 
-## Капли на «объективе»: копятся, когда под открытым небом смотришь вверх от 45°; потом медленно
-## сползают и высыхают. Линзы — преломление кадра (перевёрнуто и размыто), без рисованных бликов.
-const LENS_SHADER := """
-shader_type canvas_item;
-uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap, repeat_disable;
-uniform float wet = 0.0;
-uniform float aspect = 1.777;
-float h12(vec2 p) {
-	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
-	p3 += dot(p3, p3.yzx + 33.33);
-	return fract((p3.x + p3.y) * p3.z);
-}
-void fragment() {
-	vec2 uv = SCREEN_UV;
-	vec2 g = vec2(uv.x * aspect, uv.y) * 9.0;
-	vec2 off = vec2(0.0);
-	float cover = 0.0;
-	float rim = 0.0;
-	float spec = 0.0;
-	for (int j = -1; j <= 1; j++) {
-		for (int i = -1; i <= 1; i++) {
-			vec2 c = floor(g) + vec2(float(i), float(j));
-			float r0 = h12(c);
-			// занята не больше трети клеток даже на полностью мокром объективе
-			if (r0 > wet * 0.35) {
-				continue;
-			}
-			vec2 o = vec2(h12(c + 3.7), h12(c + 9.1));
-			float slide = fract(TIME * 0.03 * h12(c + 5.5) + r0) * 0.8 * step(0.7, h12(c + 2.2));
-			vec2 ctr = c + o + vec2(0.0, slide);
-			float rad = mix(0.05, 0.16, h12(c + 7.3) * h12(c + 1.9)) * smoothstep(r0, r0 + 0.1, wet * 0.35);
-			vec2 d = (g - ctr) * vec2(1.0, 1.2);
-			float r = length(d) / max(rad, 0.001);
-			float m = 1.0 - smoothstep(0.9, 1.0, r);
-			// линза: картинка внутри перевёрнута и сжата — сильный сдвиг к краю капли
-			off += -d * 0.9 / 9.0 * m;
-			cover = max(cover, m);
-			rim = max(rim, smoothstep(0.6, 0.95, r) * m);
-			spec = max(spec, (1.0 - smoothstep(0.0, 0.18, length(d / max(rad, 0.001) - vec2(-0.35, -0.4)))) * m);
-		}
-	}
-	vec3 sharp = textureLod(screen_tex, uv, 0.0).rgb;
-	vec3 lens = textureLod(screen_tex, clamp(uv + vec2(off.x / aspect, off.y), 0.0, 1.0), 0.6).rgb;
-	// край капли темнее (преломление уводит свет), маленький блик сверху
-	lens *= 1.0 - rim * 0.45;
-	lens += spec * 0.25;
-	COLOR = vec4(mix(sharp, lens, cover), 1.0);
-}
-"""
-
-var _lens: CanvasLayer
-var _lens_mat: ShaderMaterial
-var _lens_wet: float = 0.0
+## Капли на объективе — модуль RainLens (симуляция и «жидкое стекло»).
+var _lens: RainLens
 
 
 func _ready() -> void:
-	_lens = CanvasLayer.new()
+	_lens = RainLens.new()
 	_lens.name = "RainLens"
-	_lens.layer = 1
-	var rect := ColorRect.new()
-	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_lens_mat = ShaderMaterial.new()
-	var lsh := Shader.new()
-	lsh.code = LENS_SHADER
-	_lens_mat.shader = lsh
-	rect.material = _lens_mat
-	_lens.add_child(rect)
-	_lens.visible = false
 	add_child(_lens)
 	occlusion = RainOcclusion.new()
 	occlusion.name = "RainOcclusion"
@@ -492,15 +430,7 @@ func track(me: Node3D, cam: Camera3D, first_person: bool, brightness: float, out
 	if cam == null or me == null:
 		return
 	# капли на объективе: под открытым небом, дождь, взгляд вверх от 45°
-	var look_up: float = (-cam.global_basis.z).y
-	var dt: float = get_process_delta_time()
-	var collect: bool = outdoor and _k > 0.3 and look_up >= 0.707
-	_lens_wet = move_toward(_lens_wet, _k if collect else 0.0, dt * (0.3 if collect else 0.25))
-	_lens.visible = _lens_wet > 0.002
-	if _lens.visible:
-		_lens_mat.set_shader_parameter("wet", _lens_wet)
-		var vs := get_viewport().get_visible_rect().size
-		_lens_mat.set_shader_parameter("aspect", vs.x / maxf(vs.y, 1.0))
+	_lens.step(get_process_delta_time(), _k, (-cam.global_basis.z).y, outdoor)
 	var focus := me.global_position
 	occlusion.follow(focus)
 	var cut := 100000.0 if first_person else focus.y + 2.6
