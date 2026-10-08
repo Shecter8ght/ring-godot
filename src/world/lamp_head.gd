@@ -1,4 +1,4 @@
-class_name LampHead
+﻿class_name LampHead
 extends Node3D
 ## Светильник готового фонарного столба (DistrictModel.lamp_head): свет вниз и светящееся стекло.
 ## Горит как StreetLamp — в сумерки и ночью, если подстанция даёт ток (Raid.switches[switch_id]),
@@ -36,7 +36,8 @@ func _ready() -> void:
 	_light.light_color = ls.color
 	_light.spot_range = float(ls.range)
 	_light.spot_angle = float(ls.angle)
-	_light.spot_angle_attenuation = 0.6
+	_light.spot_angle_attenuation = float(ls.get("edge", 0.6))
+	_light.spot_attenuation = float(ls.get("falloff", 1.0))
 	_light.light_indirect_energy = float(ls.indirect)
 	_light.light_volumetric_fog_energy = float(ls.fog)
 	_light.shadow_enabled = true

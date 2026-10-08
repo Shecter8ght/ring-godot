@@ -117,7 +117,8 @@ func _rebuild() -> void:
 	_light.light_energy = float(ls.energy)
 	_light.spot_range = float(ls.range)
 	_light.spot_angle = float(ls.angle)
-	_light.spot_angle_attenuation = 0.6
+	_light.spot_angle_attenuation = float(ls.get("edge", 0.6))
+	_light.spot_attenuation = float(ls.get("falloff", 1.0))
 	_light.light_indirect_energy = float(ls.indirect)
 	_light.light_volumetric_fog_energy = float(ls.fog)
 	_light.shadow_enabled = true
