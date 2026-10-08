@@ -1800,6 +1800,8 @@ func _try_vault() -> void:
 	_vault = path
 	_vault_t = 0.0
 	_vault_sec = float(v.sec) * (1.0 + _over() * float(v.weight_k))
+	# высокая преграда (по грудь) — дольше: подтянуться и перекинуть ноги
+	_vault_sec *= lerpf(1.0, 1.4, clampf((float(path.get("top", 1.0)) - 1.0) / 0.7, 0.0, 1.0))
 	# под сильным стрессом можно запнуться (редко, не чаще раза в stumble_cd)
 	var sc: Dictionary = Balance.STRESS
 	if _stumble_cd <= 0.0 and stress >= float(sc.stumble_from) and _rng.randf() < float(sc.stumble_chance) * _stress_over(float(sc.stumble_from)):

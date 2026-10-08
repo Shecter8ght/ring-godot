@@ -75,19 +75,39 @@ static func find(space: PhysicsDirectSpaceState3D, p: Vector3, dir: Vector3, exc
 		"land": land, "top": top}
 
 
-## Точка пути перелезания в доле t: подъём (35%), через верх (35%), спуск (30%).
+## Точка пути перелезания в доле t: плавная дуга (Катмулл — Ром через начало, край, дальний край
+## и приземление), без «ступенек»: подъём плавно нарастает, спуск плавно гаснет. Время по длине
+## участков, с мягким разгоном и торможением.
 static func pos_at(path: Dictionary, t: float) -> Vector3:
 	var p: Vector3 = path.p
 	var up: Vector3 = path.up
 	var over: Vector3 = path.over
 	var land: Vector3 = path.land
-	if t < 0.35:
-		var k := smoothstep(0.0, 1.0, t / 0.35)
-		return Vector3(lerpf(p.x, up.x, k), lerpf(p.y, up.y, sqrt(k)), lerpf(p.z, up.z, k))
-	if t < 0.7:
-		return up.lerp(over, (t - 0.35) / 0.35)
-	var k2 := smoothstep(0.0, 1.0, (t - 0.7) / 0.3)
-	return Vector3(lerpf(over.x, land.x, k2), lerpf(over.y, land.y, k2 * k2), lerpf(over.z, land.z, k2))
+	# начало подъёма — чуть дальше от преграды по ходу: тело идёт вперёд и вверх, а не в лифте
+	var dir: Vector3 = Vector3(land.x - p.x, 0.0, land.z - p.z).normalized()
+	var a: Vector3 = up - dir * 0.05
+	var pts: Array[Vector3] = [p - dir * 0.6, p, a, over, land, land + dir * 0.6]
+	var lens: Array[float] = [p.distance_to(a), a.distance_to(over), over.distance_to(land)]
+	var total: float = lens[0] + lens[1] + lens[2]
+	var e: float = clampf(t, 0.0, 1.0)
+	e = lerpf(e, smoothstep(0.0, 1.0, e), 0.5)
+	var d: float = e * total
+	var seg: int = 0
+	while seg < 2 and d > lens[seg]:
+		d -= lens[seg]
+		seg += 1
+	var u: float = clampf(d / maxf(lens[seg], 0.001), 0.0, 1.0)
+	var q: Vector3 = _catmull(pts[seg], pts[seg + 1], pts[seg + 2], pts[seg + 3], u)
+	# дуга не проходит ниже верха преграды над ней
+	if seg == 1:
+		q.y = maxf(q.y, minf(up.y, over.y))
+	return q
+
+
+static func _catmull(p0: Vector3, p1: Vector3, p2: Vector3, p3: Vector3, u: float) -> Vector3:
+	var u2: float = u * u
+	var u3: float = u2 * u
+	return 0.5 * ((2.0 * p1) + (-p0 + p2) * u + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * u2 + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * u3)
 
 
 static func _ray(space: PhysicsDirectSpaceState3D, a: Vector3, b: Vector3, exclude: Array[RID]) -> Dictionary:

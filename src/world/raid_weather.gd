@@ -115,6 +115,17 @@ func is_raining() -> bool:
 	return String(RaidConditions.current.weather) == "rain"
 
 
+## Условия сменили из настроек посреди рейда: погода — сразу, туман — без плавного перехода,
+## дождь начинается/кончается сразу; гостям — расписание как обычно.
+func conditions_changed() -> void:
+	_rain_at = INF
+	_fog_lift_at = INF
+	_fog_ready = false
+	_overcast.clear()
+	_rain_k = 1.0 if is_raining() else 0.0
+	_apply_static()
+
+
 ## Всё, что зависит от погоды на старте (и после смены).
 func _apply_static() -> void:
 	var w := String(RaidConditions.current.weather)

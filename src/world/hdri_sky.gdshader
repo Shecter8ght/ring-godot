@@ -14,6 +14,7 @@ uniform float exposure = 1.0;
 // диск солнца на панораме ограничивается: само солнце светит лампой сцены, а пересвет неба
 // в отражениях и окружающем свете даёт «выжженную» картинку
 uniform float clamp_max = 40.0;
+uniform float radiance_clamp = 2.5;
 uniform float overcast : hint_range(0.0, 1.0) = 0.0;
 uniform vec3 tint : source_color = vec3(1.0);
 // цвет «пелены» в пасмурную погоду
@@ -71,5 +72,10 @@ void sky() {
 	float flat_lum = mix(lum, 1.0 - exp(-lum * 1.4), overcast);
 	vec3 veiled = overcast_color * flat_lum * 1.6;
 	c = mix(c, veiled, overcast * 0.85);
+	// отражения и окружающий свет (кубическая карта) — без диска солнца: солнце светит лампой
+	// сцены, которую закрывают тени; иначе в тени дома земля и стены «бликуют» солнцем
+	if (AT_CUBEMAP_PASS) {
+		c = min(c, vec3(radiance_clamp));
+	}
 	COLOR = c * tint * exposure;
 }

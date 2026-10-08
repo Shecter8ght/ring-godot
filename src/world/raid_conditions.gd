@@ -18,9 +18,36 @@ static var from_host: Dictionary = {}
 static func for_new_raid() -> Dictionary:
 	if not from_host.is_empty():
 		return normalized(from_host)
-	if Profile.pending_raid:
-		return normalized(Profile.next_conditions)
-	return DEFAULT.duplicate()
+	var c: Dictionary = normalized(Profile.next_conditions) if Profile.pending_raid else DEFAULT.duplicate()
+	return with_override(c)
+
+
+## Время и погода из настроек (Settings.raid_time / raid_weather), если заданы.
+static func with_override(c: Dictionary) -> Dictionary:
+	var out := c.duplicate()
+	if Settings.raid_time != "" and Balance.RAID_TIME.has(Settings.raid_time):
+		out["time"] = Settings.raid_time
+	if Settings.raid_weather != "" and Balance.RAID_WEATHER.has(Settings.raid_weather):
+		out["weather"] = Settings.raid_weather
+	return out
+
+
+## Настройку сменили посреди рейда: у хоста (или в одиночной игре) условия меняются сразу —
+## свет, небо, туман, дождь; гостям приходит от хоста вместе с погодой.
+static func apply_override_live() -> void:
+	if RaidAtmosphere.current == null or not RaidAtmosphere.current.is_inside_tree():
+		return
+	if Net.is_networked() and not RaidAtmosphere.current.multiplayer.is_server():
+		return
+	var c := with_override(current)
+	if c.time == current.time and c.weather == current.weather:
+		return
+	current["time"] = c.time
+	current["weather"] = c.weather
+	RaidAtmosphere.current.apply()
+	var weather: Node = RaidAtmosphere.current.get_parent().get_node_or_null("Weather")
+	if weather and weather.has_method("conditions_changed"):
+		weather.call("conditions_changed")
 
 
 static func normalized(c: Dictionary) -> Dictionary:

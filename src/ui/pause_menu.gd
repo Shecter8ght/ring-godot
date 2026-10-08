@@ -382,6 +382,10 @@ func _build_settings(h: HBoxContainer) -> void:
 		if is_instance_valid(wm):
 			wm.selected = Settings.WINDOW_MODES.find(Settings.window_mode))
 	grid.add_child(wm)
+	grid.add_child(_label("Время суток"))
+	grid.add_child(_cond_option(Balance.RAID_TIME, true))
+	grid.add_child(_label("Погода"))
+	grid.add_child(_cond_option(Balance.RAID_WEATHER, false))
 	grid.add_child(_label("Эффекты камеры"))
 	var lens := CheckButton.new()
 	lens.focus_mode = Control.FOCUS_NONE
@@ -632,3 +636,23 @@ func _on_leave() -> void:
 		Net.disconnect_all()
 		Profile.pending_raid = false
 		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+
+
+## Время суток / погода рейда: «как в убежище» или любой вариант; в рейде меняется сразу.
+func _cond_option(table: Dictionary, is_time: bool) -> OptionButton:
+	var ob := OptionButton.new()
+	ob.focus_mode = Control.FOCUS_NONE
+	ob.tooltip_text = "Сразу в текущем рейде (в одиночной игре и у хоста) и в следующих; в коопе гости получат со следующего рейда. «Как в убежище» — по выбору у лестницы."
+	var keys: Array = [""]
+	ob.add_item("Как в убежище")
+	for k in table:
+		keys.append(String(k))
+		ob.add_item(String((table[k] as Dictionary).name))
+	var cur: String = Settings.raid_time if is_time else Settings.raid_weather
+	ob.selected = maxi(0, keys.find(cur))
+	ob.item_selected.connect(func(i: int) -> void:
+		if is_time:
+			Settings.set_raid_conditions(String(keys[i]), Settings.raid_weather)
+		else:
+			Settings.set_raid_conditions(Settings.raid_time, String(keys[i])))
+	return ob

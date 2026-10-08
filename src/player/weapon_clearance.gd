@@ -79,15 +79,32 @@ func _prepare(pose: Transform3D, exclude: Array[RID]) -> void:
 	_query.motion = Vector3.ZERO
 
 
+## Опора под стволом (земля, пол, ступень — контакт снизу) не преграда: на неё оружие ложится,
+## а не «складывается». Преграда — то, во что ствол упирается сбоку или спереди (стена, столб, дерево).
+const GROUND_NORMAL_Y: float = 0.6
+
+
 func overlaps(world: World3D, pose: Transform3D, exclude: Array[RID] = []) -> bool:
-	_prepare(pose, exclude)
-	return not world.direct_space_state.intersect_shape(_query, 1).is_empty()
+	var ex: Array[RID] = exclude.duplicate()
+	for i in range(6):
+		_prepare(pose, ex)
+		var rest: Dictionary = world.direct_space_state.get_rest_info(_query)
+		if rest.is_empty():
+			return false
+		if (rest.normal as Vector3).y < GROUND_NORMAL_Y:
+			return true
+		ex.append(rest.rid as RID)
+	return true
 
 
 func _clear(world: World3D, pose: Transform3D, reference: Transform3D, exclude: Array[RID], anticipate: bool) -> bool:
 	if overlaps(world, pose, exclude): return false
 	if not anticipate: return true
-	_query.motion = -reference.basis.z.normalized() * float(Balance.WEAPON_CLEARANCE.lead)
+	# упреждение — только по горизонтали взгляда: шаг к стене, а не к земле под ногами
+	var ahead: Vector3 = -reference.basis.z
+	ahead.y = 0.0
+	if ahead.length() < 0.2: return true
+	_query.motion = ahead.normalized() * float(Balance.WEAPON_CLEARANCE.lead)
 	var fractions: PackedFloat32Array = world.direct_space_state.cast_motion(_query)
 	return fractions.is_empty() or fractions[0] >= 0.999
 

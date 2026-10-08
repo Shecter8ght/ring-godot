@@ -66,8 +66,10 @@ func apply() -> void:
 			if sun:
 				sun.light_energy *= float(lc.get("sun_k", 1.0))
 		var vt: Dictionary = Balance.VOLUMETRIC_TIME.get(String(c.time), {})
+		if not e.has_meta("vol_base"):
+			e.set_meta("vol_base", e.volumetric_fog_density)
 		if e.volumetric_fog_enabled and not vt.is_empty():
-			e.volumetric_fog_density *= float(vt.density)
+			e.volumetric_fog_density = float(e.get_meta("vol_base")) * float(vt.density)
 			if sun and not night:
 				sun.light_volumetric_fog_energy = float(vt.sun)
 	_apply_power(String(c.power))

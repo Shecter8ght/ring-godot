@@ -99,7 +99,6 @@ void fragment() {
 	// мокрая земля темнее и с бликом; крутые склоны (камень) — меньше
 	float wk = rain_wet * (0.65 + 0.35 * up);
 	out_a *= 1.0 - 0.38 * wk;
-	out_r.g = mix(out_r.g, 0.38, wk);
 	ALBEDO = out_a;
 	if (debug_view == 1) { ALBEDO = vec3(w[1]); }
 	if (debug_view == 2) { ALBEDO = vec3(macro); }
@@ -107,6 +106,8 @@ void fragment() {
 	NORMAL_MAP = out_n;
 	AO = out_r.r;
 	AO_LIGHT_AFFECT = 0.4;
-	ROUGHNESS = clamp(out_r.g, 0.35, 1.0);
+	// сухая земля и трава матовые (без отлива неба в тени); мокрая — глаже
+	ROUGHNESS = mix(max(out_r.g, 0.8), 0.4, wk);
+	SPECULAR = mix(0.25, 0.5, wk);
 	METALLIC = 0.0;
 }

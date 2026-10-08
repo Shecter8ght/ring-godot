@@ -18,6 +18,13 @@ const SHOTS := {
 	"yard_k2": [Vector3(-186, 1.7, -100), Vector3(-160, 6, -112), 70.0],
 	"yard_bins": [Vector3(-171, 1.7, -76), Vector3(-181, 0.6, -66), 70.0],
 	"yard_cars": [Vector3(-200, 1.7, -112), Vector3(-190, 0.5, -118), 70.0],
+	"wall_n": [Vector3(-206, 1.7, -147), Vector3(-212, 1.5, -144.5), 70.0],
+	"wall_s": [Vector3(-206, 1.7, -129), Vector3(-218, 1.0, -131), 70.0],
+	"wall_e": [Vector3(-180, 1.7, -136), Vector3(-184, 1.0, -142), 70.0],
+	"shadow_k2": [Vector3(-139, 1.7, -96), Vector3(-148, 0.0, -108), 70.0],
+	"shadow_k2b": [Vector3(-132, 1.7, -120), Vector3(-150, 2.0, -104), 70.0],
+	"shadow_close": [Vector3(-146.6, 1.7, -104), Vector3(-148.5, 0.0, -98), 75.0],
+	"sun_shadow": [Vector3(-141, 1.7, -112), Vector3(0, 0, 0), 75.0],
 	"yard_garages": [Vector3(-232, 1.7, -128), Vector3(-270, 3, -150), 70.0],
 	"ravine": [Vector3(-330, 1.8, 38), Vector3(-300, -6, 100), 70.0],
 	"ravine_bottom": [Vector3(-341, 1.7, 0), Vector3(-344, -3, -50), 70.0],
@@ -75,6 +82,13 @@ func _ready() -> void:
 			var is_grass: bool = (scat as DistrictScatter).key == "grass"
 			if (is_grass and "nograss" in perf) or (not is_grass and "notrees" in perf):
 				(scat as Node3D).visible = false
+	var we := level.find_child("WorldEnvironment", true, false) as WorldEnvironment
+	if we and "nosdfgi" in perf:
+		we.environment.sdfgi_enabled = false
+	if we and "nossil" in perf:
+		we.environment.ssil_enabled = false
+	if we and "novol" in perf:
+		we.environment.volumetric_fog_enabled = false
 	if "noshadow" in perf:
 		for l: Node in level.find_children("*", "DirectionalLight3D", true, false):
 			(l as DirectionalLight3D).shadow_enabled = false
@@ -110,7 +124,12 @@ func _ready() -> void:
 			cam.fov = float(shot[2])
 			cam.global_position = from
 			var target: Vector3 = shot[1]
-			if shot_name.begins_with("sun_"):
+			if shot_name == "sun_shadow":
+				# из тени дома — к солнцу, взгляд на землю
+				var sun0 := level.find_child("Sun", true, false) as DirectionalLight3D
+				var ts: Vector3 = sun0.global_basis.z
+				target = from + Vector3(ts.x, 0.0, ts.z).normalized() * 8.0 + Vector3(0, -1.7, 0)
+			elif shot_name.begins_with("sun_"):
 				# против солнца: направление на солнце (свет идёт вдоль −Z узла), чуть вверх
 				var sun := level.find_child("Sun", true, false) as DirectionalLight3D
 				var to_sun: Vector3 = sun.global_basis.z

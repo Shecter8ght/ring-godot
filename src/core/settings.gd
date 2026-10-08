@@ -55,6 +55,10 @@ const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_d
 var god: bool = false
 ## Админский ассортимент Михалыча: показывает все стволы и не проверяет доверие для оружия.
 var all_weapons: bool = false
+## Условия рейда вручную: время суток и погода; "" — как выбрано в убежище. В рейде меняются сразу
+## (у хоста и в одиночной игре), следующий рейд начнётся с ними.
+var raid_time: String = ""
+var raid_weather: String = ""
 ## Свои клавиши поверх project.godot: действие → {"t": "k", "c": физ. код} или {"t": "m", "b": кнопка
 ## мыши}. Раздел keys; меняются в меню Esc → «Управление».
 var keys: Dictionary = {}
@@ -101,6 +105,8 @@ func _load() -> void:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
 	all_weapons = bool(cfg.get_value("cheats", "all_weapons", false))
+	raid_time = String(cfg.get_value("raid", "time", ""))
+	raid_weather = String(cfg.get_value("raid", "weather", ""))
 	if cfg.has_section("keys"):
 		for a in cfg.get_section_keys("keys"):
 			var d: Variant = cfg.get_value("keys", a)
@@ -129,6 +135,8 @@ func save() -> void:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
 	cfg.set_value("cheats", "all_weapons", all_weapons)
+	cfg.set_value("raid", "time", raid_time)
+	cfg.set_value("raid", "weather", raid_weather)
 	if cfg.has_section("keys"):
 		cfg.erase_section("keys")
 	for a in keys:
@@ -143,6 +151,14 @@ func set_quality(q: String) -> void:
 	apply_graphics()
 	save()
 	changed.emit()
+
+
+func set_raid_conditions(time_key: String, weather_key: String) -> void:
+	raid_time = time_key
+	raid_weather = weather_key
+	save()
+	changed.emit()
+	RaidConditions.apply_override_live()
 
 
 func set_lens_fx(on: bool) -> void:

@@ -39,7 +39,8 @@ const IMPACT_SURFACES: Dictionary = {
 }
 
 # --- Игрок: движение по стойкам, м/с ---
-const PLAYER_WALK_SPEED := 2.6
+## Шаг медленнее на 30 % (2.6 → 1.82), бег прежний — решение владельца 2026-10-08.
+const PLAYER_WALK_SPEED := 1.82
 const PLAYER_SPRINT_SPEED := 5.2
 const PLAYER_CROUCH_SPEED := 1.4
 const PLAYER_PRONE_SPEED := 0.6
@@ -200,7 +201,7 @@ const WEAPON_CLEARANCE := {"margin": 0.012, "lead": 0.12, "hand_radius": 0.05,
 ## Покачивание оружия от бедра: частота входит и затухает вместе с реальной скоростью.
 ## Шагом цикл вдвое реже прежнего (5.2 → 2.6); бегом — часто, в темп шагов бега (~2.5 раза в с).
 const WEAPON_BOB := {
-	"idle_rate": 1.5, "walk_rate": 2.6, "sprint_rate": 8.0,
+	"idle_rate": 1.5, "walk_rate": 1.82, "sprint_rate": 8.0,
 	"horizontal": 0.006, "idle_vertical": 0.002, "walk_vertical": 0.01,
 }
 ## Наклон из-за угла (Q/E, от первого лица и в прицеле): сдвиг глаза вбок, м; крен, град;
@@ -314,7 +315,8 @@ const WET_GROUND := {"film_up_sec": 45.0, "puddle_up_sec": 200.0, "film_dry_sec"
 ## выдохся — бег снова с порога. В жару на улице расход × STAMINA_HEAT.
 const STAMINA_MAX := 100.0
 ## Бега хватает вдвое дольше прежнего (было 11 в секунду).
-const STAMINA_DRAIN := 5.5
+## Спринта хватает вдвое дольше (5.5 → 2.75) — решение владельца 2026-10-08.
+const STAMINA_DRAIN := 2.75
 const STAMINA_REGEN := 16.0
 const STAMINA_REGEN_DELAY := 1.0
 const STAMINA_RESUME := 25.0
@@ -476,7 +478,8 @@ const SPAWN_SAFE := {"radius": 40.0, "sec": 150.0, "los_m": 90.0}
 ## Перелезание (Пробел у преграды; мародёры — по связкам навигации): высота преграды от min_h до
 ## max_h, м; дотянуться — reach от ног; толщина до max_thick; время, с (с перегрузом — дольше на
 ## weight_k); шум, м; выносливость.
-const VAULT := {"min_h": 0.35, "max_h": 1.3, "reach": 1.0, "max_thick": 1.6, "sec": 0.75, "weight_k": 0.6,
+## max_h поднят на 30 % (1.3 → 1.7) — решение владельца 2026-10-08.
+const VAULT := {"min_h": 0.35, "max_h": 1.7, "reach": 1.0, "max_thick": 1.6, "sec": 0.75, "weight_k": 0.6,
 	"noise_m": 16.0, "stamina": 12.0}
 ## Связки навигации «перелезть» для ИИ: образцы вдоль края навмеша через step м; не ставить, если
 ## обойти не дольше detour_m; связки не ближе spacing_m друг к другу; цена пути по связке.
