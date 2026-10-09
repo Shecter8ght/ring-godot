@@ -265,16 +265,45 @@ func _run(cmd: String) -> void:
 	elif a.size() >= 1 and a[0] == "speed":
 		Settings.cheat_speed = clampf(float(a[1]) if a.size() > 1 else 1.0, 0.1, 20.0)
 		out = "скорость ×%.2f" % Settings.cheat_speed
+	elif a.size() >= 1 and a[0] == "upgrade":
+		out = _dev_upgrade(a)
 	elif a.size() >= 1 and a[0] == "event":
 		# событие рейда сейчас: свет погас, генератор встал, сброс груза, ЧВК (решает хост)
 		out = _dev_event(a[1] if a.size() > 1 else "")
 	elif a.size() >= 1 and a[0] == "help":
-		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
 " + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"
 	_console_out.text = out
 	_update_tracker()
+
+
+## Для плейтеста: поднять модуль своего профиля без денег, деталей и доверия.
+## Понижать уровень нельзя: уменьшение тайника или кармана может вытеснить предметы.
+func _dev_upgrade(a: PackedStringArray) -> String:
+	var usage: String = "upgrade <workbench|generator|pocket|stash|radio> <уровень>; пример: upgrade workbench 2"
+	if a.size() != 3 or not a[2].is_valid_int():
+		return usage
+	var id: String = a[1]
+	var module: Dictionary = Upgrades.find(id)
+	if module.is_empty():
+		return "нет такого модуля: " + id + " · " + usage
+	var level: int = int(a[2])
+	var maximum: int = Upgrades.max_level(id)
+	if level < 1 or level > maximum:
+		return "уровень %s: 1–%d" % [String(module.name), maximum]
+	if Net.is_networked() and not multiplayer.is_server():
+		return "только на хосте"
+	if Raid.current != null or get_tree().get_first_node_in_group("hideout_level") == null:
+		return "модули повышаются в убежище"
+	Profile.ensure()
+	var current: int = Upgrades.level(id)
+	if level < current:
+		return "%s уже уровня %d; понижение отключено" % [String(module.name), current]
+	Profile.modules[id] = level
+	Profile.save()
+	return "%s: уровень %d, сохранено. Переоткрой окно модуля или конструктор." % [String(module.name), level]
 
 
 func _dev_event(kind: String) -> String:
