@@ -579,7 +579,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# пули летят туда, куда сейчас смотрит ствол: с отдачей и раскачкой
 	pl.look_pitch = pitch
 	# модель в руках с обвесами: линия прицеливания на оси взгляда, рукоять — на ads_z перед глазом
-	var vm_key := WeaponCondition.model_key(wid, pl.weapon_mods, pl.weapon_condition)
+	var vm_key := WeaponCondition.model_key(wid, pl.weapon_mods, pl.weapon_condition, pl.weapon_mag)
 	if _viewmodel_id != vm_key:
 		if _viewmodel:
 			_viewmodel.queue_free()
@@ -587,7 +587,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		if ViewmodelClips.available(wid):
 			_viewmodel = ViewmodelClips.create(wid, pl.weapon_mods)
 		else:
-			_viewmodel = WeaponModels.build(wid, pl.weapon_mods, 0, pl.weapon_condition) if wid != "" else Node3D.new()
+			_viewmodel = WeaponModels.build(wid, pl.weapon_mods, 0, pl.weapon_condition, pl.weapon_mag) if wid != "" else Node3D.new()
 		WeaponCondition.apply_visual(_viewmodel, {"dur": pl.weapon_condition})
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			var gi := mi as GeometryInstance3D

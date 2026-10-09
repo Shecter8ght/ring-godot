@@ -17,6 +17,18 @@ static func get_icon(id: String) -> Texture2D:
 	return tex
 
 
+## Иконка конкретного экземпляра: снимок фактической сборки (ItemThumbs — обвес, магазин), пока его
+## нет или он не нужен — обычная иконка предмета. canvas перерисуется, когда снимок будет готов.
+static func entry_icon(entry: Dictionary, canvas: CanvasItem = null) -> Texture2D:
+	var thumb: Texture2D = ItemThumbs.texture(entry, canvas)
+	return thumb if thumb else get_icon(String(entry.get("id", "")))
+
+
+## Как draw, но для записи предмета: у оружия — его сборка.
+static func draw_entry(canvas: CanvasItem, entry: Dictionary, rect: Rect2, rotated: bool) -> bool:
+	return _draw_tex(canvas, entry_icon(entry, canvas), rect, rotated)
+
+
 ## Подложка под иконку: цвет категории, разбавленный серым — воронёный металл на ней читается.
 static func backdrop(cat_color: Color) -> Color:
 	return cat_color.lerp(Color(0.52, 0.53, 0.55), 0.35)
@@ -25,7 +37,10 @@ static func backdrop(cat_color: Color) -> Color:
 ## Нарисовать иконку в прямоугольник rect элемента canvas, сохранив пропорции; rotated — предмет
 ## лежит повёрнутым (иконка снята в неповёрнутом виде — поворачиваем на 90°).
 static func draw(canvas: CanvasItem, id: String, rect: Rect2, rotated: bool) -> bool:
-	var tex := get_icon(id)
+	return _draw_tex(canvas, get_icon(id), rect, rotated)
+
+
+static func _draw_tex(canvas: CanvasItem, tex: Texture2D, rect: Rect2, rotated: bool) -> bool:
 	if tex == null:
 		return false
 	var box := Vector2(rect.size.y, rect.size.x) if rotated else rect.size

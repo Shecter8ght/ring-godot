@@ -120,7 +120,7 @@ func _draw() -> void:
 		# с иконкой — тёмная подложка цвета категории, без неё — плашка ярче
 		var has_icon := ItemIcons.get_icon(String(it.id)) != null
 		draw_rect(r, ItemIcons.backdrop(col) if has_icon else col)
-		ItemIcons.draw(self, String(it.id), r.grow(-3.0), bool(_layout[i][2]))
+		ItemIcons.draw_entry(self, it, r.grow(-3.0), bool(_layout[i][2]))
 		draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
 		# в маленькой клетке — короткая подпись (калибр, «Бинт»), полное имя — в подсказке
 		var name := ItemDb.item_name(String(it.id))
@@ -224,7 +224,7 @@ func _get_drag_data(at: Vector2) -> Variant:
 	p.color = Color(0.9, 0.8, 0.5, 0.35)
 	p.size = Vector2(s) * CELL
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tex := ItemIcons.get_icon(String(items[i].id))
+	var tex := ItemIcons.entry_icon(items[i])
 	if tex:
 		var tr := TextureRect.new()
 		tr.texture = tex

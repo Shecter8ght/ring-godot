@@ -24,7 +24,9 @@ static var _meshes: Dictionary = {}
 ## id — предмет-оружие (data/weapons.json: основа model, масштаб scale, встроенный глушитель) или
 ## сама основа ("pistol", "rifle", "shotgun", "bolt", "grenade"). mods — точка → {id, …}: обвес
 ## по сокетам основы (WeaponMods). Масштаб — внешним узлом: meta (дуло, линии прицела) пересчитаны.
-static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 100.0) -> Node3D:
+## mag — магазин в оружии: "*" — штатный вид (как в модели), "" — магазина нет, id — его вид
+## (WeaponMods.mag_state по записи).
+static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 100.0, mag: String = "*") -> Node3D:
 	var root: Node3D = Node3D.new()
 	root.name = "Weapon_" + id
 	var key := id
@@ -70,6 +72,8 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 		if not ms.is_empty():
 			WeaponMods._suppressor(root, ms, 0.021, 0.2)
 	WeaponMods.fit(root, key, mods, lod)
+	if mag != "*":
+		WeaponMods.set_magazine(root, id, mag)
 	WeaponGrips.fit(root, key, w, mods)
 	WeaponCondition.apply_visual(root, {"id": id, "dur": dur})
 	for child in root.find_children("*", "MeshInstance3D", true, false):
@@ -88,10 +92,16 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 		if v is Vector3 or v is float:
 			outer.set_meta(k, v * scale)
 		elif v is Dictionary:
-			var d := (v as Dictionary).duplicate()
+			var d := (v as Dictionary).duplicate(true)
 			for dk in ["x", "h"]:
 				if d.has(dk):
 					d[dk] = float(d[dk]) * scale
+			# линии всех прицелов (sights) — словарь словарей
+			for line: Variant in d.values():
+				if line is Dictionary:
+					for dk in ["x", "h"]:
+						if (line as Dictionary).has(dk):
+							line[dk] = float(line[dk]) * scale
 			outer.set_meta(k, d)
 		else:
 			outer.set_meta(k, v)
@@ -114,6 +124,9 @@ static func _static_asset(weapon: Dictionary, root: Node3D) -> bool:
 	model.name = "Model"
 	root.add_child(model)
 	apply_markers(root, model, float((weapon.get("viewmodel", {}) as Dictionary).get("ads_z", 0.3)))
+	# магазин с патронами — отдельная деталь экспорта: вынут — прячется, другой — заменяется
+	for node: Node in model.find_children("Magazine*", "MeshInstance3D", true, false):
+		node.set_meta("part", "mag")
 	return true
 
 

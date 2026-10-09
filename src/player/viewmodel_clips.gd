@@ -35,6 +35,9 @@ var _last_check: float = 0.0
 var _last_ammo: int = -1
 var _kick: float = 0.0
 var _sight_cache: Array = []
+## Корпус магазина в сцене рук: вынут (Player.weapon_mag == "") — не виден, кроме перезарядки, где
+## клип вставляет новый.
+var _mag_parts: Array[Node3D] = []
 
 
 static func available(id: String) -> bool:
@@ -72,6 +75,8 @@ func _setup(id: String, mods: Dictionary) -> void:
 		if r == null:
 			break
 		_rounds.append(r)
+	for raw_part: Node in model.find_children("Part_Magazine*", "Node3D", true, false):
+		_mag_parts.append(raw_part as Node3D)
 	frame = model.find_child("WeaponFrame", true, false) as Node3D
 	if frame == null:
 		frame = Node3D.new()
@@ -139,6 +144,9 @@ func update(pl: Player, delta: float) -> void:
 		shown = _rounds_after if _swap_frame >= 0 and f >= _swap_frame else _rounds_before
 	for i in range(_rounds.size()):
 		_rounds[i].visible = i < shown
+	var mag_in: bool = pl.weapon_mag != "" or reloading
+	for part: Node3D in _mag_parts:
+		part.visible = mag_in
 	_pose_overrides(shown, delta)
 
 

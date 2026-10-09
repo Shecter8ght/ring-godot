@@ -694,14 +694,59 @@ static func _stock_tele(root: Node3D, m: Dictionary) -> void:
 	WeaponModels._cbox(s, Vector3(0, -0.02, 0.03), Vector3(0.008, 0.01, 0.028), al, 0.001)
 
 
-## Магазин на 45: та же дуга, что у штатного, на треть длиннее.
+## Магазин в оружии для вида модели: "*" — штатный (модель как есть), "" — магазина нет (у оружия
+## без встроенного магазина), иначе id вставленного. Отсутствие патронов вид не меняет.
+static func mag_state(entry: Dictionary) -> String:
+	var wid: String = String(entry.get("id", ""))
+	var w: Dictionary = WeaponDb.weapon(wid)
+	if w.is_empty() or w.has("internal_mag") or not w.has("mag_if"):
+		return "*"
+	var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
+	var mid: String = WeaponDb.canonical(String(mag.get("id", "")))
+	if mid == "":
+		return ""
+	return "*" if mid == WeaponDb.default_mag(wid) else mid
+
+
+## Магазин на модели: штатная деталь (meta part = "mag") видна, если вставлен магазин без своего
+## вида; у магазина с видом (attach look в данных магазина) — свой корпус на сокете "mag";
+## mag == "" — магазина нет вовсе (пустой вставленный магазин при этом остаётся на месте).
+static func set_magazine(root: Node3D, weapon_id: String, mag: String) -> void:
+	var old: Node = root.find_child("MagLook", false, false)
+	if old:
+		old.free()
+	var spec: Dictionary = WeaponDb.magazine(mag) if mag != "" else {}
+	var look: String = String(spec.get("look", ""))
+	var sk: Dictionary = socket(String(WeaponDb.weapon(weapon_id).get("model", "")), "mag")
+	if look != "" and sk.is_empty():
+		look = ""
+	for node: Node in root.find_children("*", "Node3D", true, false):
+		if String(node.get_meta("part", "")) == "mag":
+			(node as Node3D).visible = mag != "" and look == ""
+	if look == "":
+		return
+	var holder: Node3D = Node3D.new()
+	holder.name = "MagLook"
+	root.add_child(holder)
+	var m: Dictionary = sk.duplicate(true)
+	m["mount"] = "mag"
+	m["capacity"] = int(spec.get("capacity", 30))
+	match look:
+		"mag_ak45":
+			_mag_ak45(holder, m)
+		"mag_pistol_ext":
+			_mag_pistol_ext(holder, m)
+
+
+## Удлинённый коробчатый магазин: та же дуга, что у штатного, длина — по ёмкости (45 — на треть
+## длиннее штатного на 30).
 static func _mag_ak45(root: Node3D, m: Dictionary) -> void:
 	_hide_part(root, "mag")
 	var mp: Array[Vector3] = []
 	var ms: Array[Vector2] = []
 	var q: Vector3 = m.pos
 	var ang := 0.0
-	for i in range(12):
+	for i in range(clampi(roundi(12.0 * float(m.get("capacity", 45)) / 45.0), 8, 18)):
 		mp.append(q)
 		ms.append(Vector2(0.024, 0.056 - i * 0.001))
 		q += Vector3(0, -cos(ang), sin(ang)) * 0.024

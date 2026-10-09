@@ -77,8 +77,8 @@ static func repair_price(entry: Dictionary) -> int:
 
 
 ## Ресурс не входит в ключ целиком: выстрел не должен заново создавать модель/анимацию.
-static func model_key(id: String, mods: Dictionary, dur: float = 100.0) -> String:
-	var parts: Array[String] = [id, str(stage({"dur": dur}))]
+static func model_key(id: String, mods: Dictionary, dur: float = 100.0, mag: String = "*") -> String:
+	var parts: Array[String] = [id, str(stage({"dur": dur})), "mag:" + mag]
 	for mount: Variant in mods:
 		var rec: Dictionary = mod_entry(mods[mount])
 		parts.append("%s:%s:%d" % [mount, rec.id, stage(rec)])

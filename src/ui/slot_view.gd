@@ -47,7 +47,7 @@ func _draw() -> void:
 	var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
 	var has_icon := ItemIcons.get_icon(String(entry.id)) != null
 	draw_rect(inner, ItemIcons.backdrop(col) if has_icon else col)
-	ItemIcons.draw(self, String(entry.id), inner.grow(-4.0), false)
+	ItemIcons.draw_entry(self, entry, inner.grow(-4.0), false)
 	draw_string_outline(_font, inner.position + Vector2(5, 16), ItemDb.label(entry), HORIZONTAL_ALIGNMENT_LEFT, inner.size.x - 8, 13, 3, Color(0, 0, 0, 0.7))
 	draw_string(_font, inner.position + Vector2(5, 16), ItemDb.label(entry), HORIZONTAL_ALIGNMENT_LEFT, inner.size.x - 8, 13, Color(0.95, 0.93, 0.88))
 

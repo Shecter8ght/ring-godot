@@ -348,11 +348,15 @@ def world() -> None:
     meshes = objs("MESH")
     # дульное устройство — отдельной деталью (обвес «на резьбу» его прячет: meta part = muzzle_device)
     brake = [o for o in meshes if o.name.startswith(("Muzzle brake", "Brake"))]
-    rest = [o for o in meshes if o not in brake]
+    # магазин с патронами — отдельной деталью: игра прячет его (магазин вынут) или меняет на другой
+    # (meta part = mag); защёлка ("Magazine catch") остаётся на корпусе
+    mag = [o for o in meshes if o.name.startswith(("Magazine_", "Magazine •"))]
+    rest = [o for o in meshes if o not in brake and o not in mag]
     body = join(rest, "Body")
     md = join(brake, "MuzzleDevice")
+    mg = join(mag, "Magazine")
     # начало — пистолетная рукоятка; оси игры совпадают с осями glTF после экспорта Y-up
-    for ob in (body, md):
+    for ob in (body, md, mg):
         if ob is None:
             continue
         ob.matrix_world = Matrix.Translation(-GRIP) @ ob.matrix_world
@@ -361,11 +365,15 @@ def world() -> None:
     t0 = tri_count()
     ratio = min(1.0, WORLD_TRIS / max(t0, 1))
     if ratio < 1.0:
-        dec = body.modifiers.new("dec", "DECIMATE")
-        dec.ratio = ratio
-        dec.use_collapse_triangulate = True
-        with bpy.context.temp_override(object=body, active_object=body, selected_objects=[body], selected_editable_objects=[body]):
-            bpy.ops.object.modifier_apply(modifier="dec")
+        # корпус и магазин — с одним коэффициентом: бюджет мировой модели общий
+        for ob in (body, mg):
+            if ob is None:
+                continue
+            dec = ob.modifiers.new("dec", "DECIMATE")
+            dec.ratio = ratio
+            dec.use_collapse_triangulate = True
+            with bpy.context.temp_override(object=ob, active_object=ob, selected_objects=[ob], selected_editable_objects=[ob]):
+                bpy.ops.object.modifier_apply(modifier="dec")
     for name, p in MARKS.items():
         add_mark(name, p - GRIP, None)
     scale_images(TEX_WORLD)

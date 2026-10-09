@@ -44,6 +44,8 @@ var _jump_cd: float = 0.0
 var weapon_slot: String = ""
 ## Обвес в руках с состоянием фонарей/ЛЦУ (точка → {id, light, laser}): модель на теле у всех.
 var weapon_mods: Dictionary = {}
+## Магазин в оружии в руках для вида модели (WeaponMods.mag_state): "*" штатный, "" вынут, id — другой.
+var weapon_mag: String = "*"
 var weapon_condition: float = 100.0
 ## Горит фонарь / ЛЦУ на оружии в руках (выдаёт, слепит) — видят все.
 var light_on: bool = false
@@ -252,7 +254,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_condition", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -697,6 +699,9 @@ func _physics_process(delta: float) -> void:
 		var mods: Dictionary = we.get("mods", {})
 		if mods != weapon_mods:
 			weapon_mods = mods
+		var mag_look: String = WeaponMods.mag_state(we)
+		if mag_look != weapon_mag:
+			weapon_mag = mag_look
 		var lit := false
 		var las := false
 		for m in mods:
@@ -833,13 +838,13 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 ## Оружие — в правой руке модели (кость руки, CharacterAnimator.weapon_grip): идёт за руками
 ## в любой позе — ходьба, бег, присед, лёжа, перезарядка. Без модели Persona — у груди, как раньше.
 func _update_hand() -> void:
-	var key := WeaponCondition.model_key(weapon_id, weapon_mods, weapon_condition)
+	var key := WeaponCondition.model_key(weapon_id, weapon_mods, weapon_condition, weapon_mag)
 	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
 	var yaw := _body.rotation.y
 	if _weapon_model_id != key:
 		if _weapon_model:
 			_weapon_model.queue_free()
-		_weapon_model = WeaponModels.build(weapon_id, weapon_mods, 1, weapon_condition) if weapon_id != "" else Node3D.new()
+		_weapon_model = WeaponModels.build(weapon_id, weapon_mods, 1, weapon_condition, weapon_mag) if weapon_id != "" else Node3D.new()
 		var family := String(WeaponDb.weapon(weapon_id).get("model", "rifle")) if weapon_id != "" else "rifle"
 		var grip: Node3D = _animator.weapon_grip(family, weapon_id) if _animator else null
 		(grip if grip else _hand).add_child(_weapon_model)

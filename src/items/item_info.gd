@@ -106,6 +106,7 @@ func _build(entry: Dictionary) -> void:
 	v.add_child(head)
 	var icon := ItemCard.IconBox.new()
 	icon.id = id
+	icon.entry = entry
 	icon.custom_minimum_size = Vector2(150, 96)
 	head.add_child(icon)
 	var hv := VBoxContainer.new()

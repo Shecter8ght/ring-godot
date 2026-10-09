@@ -138,6 +138,26 @@ func _model() -> void:
 	_check("LPVO вперёд на 4 паза — глаз ближе к окуляру не становится: прицел дальше на 80 мм", is_equal_approx(ads0 - ads1, 0.08), "%.3f → %.3f" % [ads0, ads1])
 	m0.queue_free()
 	m1.queue_free()
+	# магазин: вынут — не виден, другой — свой вид, пустой штатный — на месте
+	var veras: Dictionary = _veras({})
+	veras["mag"] = {"id": "mag_545_30", "ammo": "ammo_545_std", "rounds": 0}
+	_check("пустой штатный магазин — вид штатный", WeaponMods.mag_state(veras) == "*")
+	veras.mag.id = ""
+	_check("вынутый магазин — «нет»", WeaponMods.mag_state(veras) == "")
+	veras.mag.id = "mag_545_60"
+	_check("магазин на 60 — свой вид", WeaponMods.mag_state(veras) == "mag_545_60")
+	for state: String in ["", "mag_545_60", "*"]:
+		var mm: Node3D = WeaponModels.build("wpn_ar_01", {}, 0, 100.0, state)
+		add_child(mm)
+		var shown := 0
+		for n: Node in mm.find_children("*", "MeshInstance3D", true, false):
+			if String(n.get_meta("part", "")) == "mag" and (n as MeshInstance3D).visible:
+				shown += 1
+		var look: bool = mm.find_child("MagLook", false, false) != null
+		var ok: bool = (state == "" and shown == 0 and not look) or (state == "mag_545_60" and shown == 0 and look) or (state == "*" and shown > 0 and not look)
+		_check("модель с магазином «%s»" % state, ok, "штатных видно %d, свой вид %s" % [shown, look])
+		mm.queue_free()
+	_check("ключ вида различает магазин", WeaponCondition.model_key("wpn_ar_01", {}, 100.0, "") != WeaponCondition.model_key("wpn_ar_01", {}, 100.0, "*"))
 
 
 ## Характеристики: прицел на кронштейне работает только выбранным, вес переходника считается.

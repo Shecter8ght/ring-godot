@@ -26,6 +26,7 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	c.add_child(v)
 	var icon := IconBox.new()
 	icon.id = String(entry.get("id", ""))
+	icon.entry = entry
 	icon.custom_minimum_size = Vector2(0, 78)
 	v.add_child(icon)
 	var info := Button.new()
@@ -86,6 +87,8 @@ static func _label(t: String, size: int, color: Color) -> Label:
 class IconBox:
 	extends Control
 	var id: String = ""
+	## Запись экземпляра (необязательно): у оружия рисуется его сборка.
+	var entry: Dictionary = {}
 
 	func _draw() -> void:
 		var cat := String(ItemDb.item(id).get("cat", "misc"))
@@ -93,5 +96,8 @@ class IconBox:
 		var r := Rect2(Vector2.ZERO, size)
 		var has := ItemIcons.get_icon(id) != null
 		draw_rect(r, ItemIcons.backdrop(col) if has else col)
-		ItemIcons.draw(self, id, r.grow(-4.0), false)
+		if entry.is_empty():
+			ItemIcons.draw(self, id, r.grow(-4.0), false)
+		else:
+			ItemIcons.draw_entry(self, entry, r.grow(-4.0), false)
 		draw_rect(r, Color(1, 1, 1, 0.12), false, 1.0)
