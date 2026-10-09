@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import math
+import subprocess
 import sys
 from pathlib import Path
 
@@ -41,6 +42,15 @@ TEX_WORLD = 1024
 WORLD_TRIS = 30000
 
 report: dict = {}
+
+
+def finish_materials(path: Path) -> None:
+    """Отделка оружия в готовом GLB; карты рук и клипы не изменяются.
+
+    Системный Python проекта содержит Pillow/numpy (как остальные инструменты
+    ассетов); Python Blender для этой операции не используется.
+    """
+    subprocess.run(["python", str(ROOT / "tools/veras54_game_materials.py"), str(path)], check=True)
 
 
 def objs(kind=None):
@@ -289,6 +299,7 @@ def viewmodel() -> None:
                               export_animations=True, export_animation_mode="NLA_TRACKS", export_skins=True,
                               export_def_bones=False, export_force_sampling=True, export_materials="EXPORT",
                               export_image_format="AUTO", export_apply=False, export_cameras=False, export_lights=False)
+    finish_materials(OUT / "veras54_viewmodel.glb")
     print("VERAS viewmodel saved", flush=True)
 
 
@@ -366,6 +377,7 @@ def world() -> None:
     bpy.ops.export_scene.gltf(filepath=str(OUT / "veras54.glb"), export_format="GLB", export_yup=True,
                               export_animations=False, export_materials="EXPORT", export_image_format="AUTO",
                               export_apply=True, export_cameras=False, export_lights=False)
+    finish_materials(OUT / "veras54.glb")
     print("VERAS world saved", flush=True)
 
 
