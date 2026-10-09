@@ -354,6 +354,8 @@ func _on_peer_disconnected(id: int) -> void:
 func _find_local_player_when_ready() -> void:
 	var my_id := multiplayer.get_unique_id()
 	while _local_player == null:
+		if not is_inside_tree():
+			return
 		for p in get_tree().get_nodes_in_group("players"):
 			if (p as Player).peer_id == my_id:
 				_local_player = p

@@ -89,6 +89,9 @@ func _ready() -> void:
 	_ui = HideoutUI.new()
 	add_child(_ui)
 	_build_hud()
+	if Net.disconnect_message != "":
+		notify(Net.disconnect_message)
+		Net.disconnect_message = ""
 	# сюжет в убежище: кто вернулся, что изменилось (по флагам)
 	var qw := QuestWorld.new()
 	qw.name = "QuestWorld"
@@ -144,6 +147,8 @@ func _on_node_added(n: Node) -> void:
 
 ## Кто из своих в убежище — тот и стоит здесь; ушёл (в рейд, в меню, отключился) — пропал.
 func _sync_others() -> void:
+	if not is_inside_tree():
+		return
 	var me := multiplayer.get_unique_id()
 	var want: Array[int] = []
 	if Net.is_networked():

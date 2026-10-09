@@ -150,6 +150,8 @@ const TRUST_BONUS_VALUE := 60000
 ## Сцены: убежище (старт игры, между рейдами) и рейд.
 const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 const HIDEOUT_SCENE := "res://scenes/levels/hideout.tscn"
+## ENet: обычный обрыв определяется быстро; на загрузку тяжёлой карты даём до трёх минут.
+const NET_TIMEOUT := {"factor": 32, "min_ms": 5000, "max_ms": 30000, "loading_ms": 180000}
 const RAID_SCENE := "res://scenes/levels/f1_ring.tscn"
 ## Камера в убежище ближе — комната тесная.
 const HIDEOUT_CAMERA_DISTANCE := 20.0

@@ -37,6 +37,10 @@ var peer_scene: Dictionary = {}
 var _changing_scene: bool = false
 var _transition_serial: int = 0
 var _transition_pending: Dictionary = {}
+## _ready уровня ещё не означает, что пережили создание GPU-ресурсов первого кадра.
+var _ready_scene: String = ""
+## После потери хоста убежище показывает причину возврата.
+var disconnect_message: String = ""
 
 
 func _ready() -> void:
@@ -56,9 +60,10 @@ func is_host() -> bool:
 
 
 ## Возвращает "" при успехе, иначе текст ошибки для UI.
-func host(display_name: String) -> String:
+func host(display_name: String, port: int = PORT) -> String:
+	disconnect_message = ""
 	var peer := ENetMultiplayerPeer.new()
-	var err := peer.create_server(PORT, MAX_PLAYERS)
+	var err := peer.create_server(port, MAX_PLAYERS)
 	if err != OK:
 		return "не удалось поднять сервер (%s)" % error_string(err)
 	_keep_own_scene(peer)
@@ -69,9 +74,10 @@ func host(display_name: String) -> String:
 	return ""
 
 
-func join(address: String, display_name: String) -> String:
+func join(address: String, display_name: String, port: int = PORT) -> String:
+	disconnect_message = ""
 	var peer := ENetMultiplayerPeer.new()
-	var err := peer.create_client(address.strip_edges(), PORT)
+	var err := peer.create_client(address.strip_edges(), port)
 	if err != OK:
 		return "не удалось подключиться (%s)" % error_string(err)
 	_keep_own_scene(peer)
@@ -97,6 +103,7 @@ func _keep_own_scene(peer: MultiplayerPeer) -> void:
 func disconnect_all() -> void:
 	var previous_peer: MultiplayerPeer = multiplayer.multiplayer_peer
 	_active = false
+	_transition_pending.clear()
 	# Сохраняем свой id и сцену до close(): закрытый ENet уже не возвращает unique_id.
 	_keep_own_scene(OfflineMultiplayerPeer.new())
 	if previous_peer:
@@ -145,7 +152,12 @@ func _receive_money(amount: int) -> void:
 
 ## Сцена загружена: сказать всем, где я (и запомнить у себя).
 func enter_scene(key: String) -> void:
+	if _changing_scene:
+		_ready_scene = key
+		return
 	peer_scene[multiplayer.get_unique_id()] = key
+	_refresh_timeouts()
+	print("net: сцена готова ", key, " peer=", _own_id)
 	_refresh_scoped_syncs()
 	scenes_changed.emit()
 	if is_networked():
@@ -161,11 +173,16 @@ func change_scene(path: String) -> void:
 	if _changing_scene:
 		return
 	_changing_scene = true
+	_ready_scene = ""
+	var session: MultiplayerPeer = multiplayer.multiplayer_peer
+	var began: int = Time.get_ticks_msec()
+	print("net: загрузка ", path, " peer=", _own_id)
 	_transition_serial += 1
 	_transition_pending.clear()
 	for peer: int in multiplayer.get_peers():
 		_transition_pending[peer] = true
 	peer_scene[multiplayer.get_unique_id()] = "loading"
+	_refresh_timeouts()
 	_refresh_scoped_syncs()
 	scenes_changed.emit()
 	_scene_is.rpc("loading", _transition_serial)
@@ -174,11 +191,74 @@ func change_scene(path: String) -> void:
 			if not peer in multiplayer.get_peers():
 				_transition_pending.erase(peer)
 		await get_tree().process_frame
+	# Чтение большой карты в главном потоке останавливает ENet: медленный компьютер
+	# исчезал у хоста, а после загрузки получал server_disconnected и возвращался в убежище.
+	var result: Error = ResourceLoader.load_threaded_request(path, "PackedScene")
+	if result != OK:
+		_finish_scene_error(path, result)
+		return
+	while ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		await get_tree().process_frame
+		if not is_networked() or multiplayer.multiplayer_peer != session:
+			_changing_scene = false
+			return
+	if not is_networked() or multiplayer.multiplayer_peer != session:
+		_changing_scene = false
+		return
+	if ResourceLoader.load_threaded_get_status(path) != ResourceLoader.THREAD_LOAD_LOADED:
+		_finish_scene_error(path, ERR_CANT_OPEN)
+		return
+	var scene: PackedScene = ResourceLoader.load_threaded_get(path) as PackedScene
+	if scene == null:
+		_finish_scene_error(path, ERR_INVALID_DATA)
+		return
 	await get_tree().process_frame
-	var result: Error = get_tree().change_scene_to_file(path)
+	if not is_networked() or multiplayer.multiplayer_peer != session:
+		_changing_scene = false
+		return
+	result = get_tree().change_scene_to_packed(scene)
 	if result == OK:
 		await get_tree().scene_changed
+		# До первого отрисованного кадра компиляция шейдеров ещё может остановить поток.
+		# Пока этого не прошли, остальные видят loading и сохраняют увеличенный таймаут.
+		await get_tree().process_frame
+		await get_tree().process_frame
+	else:
+		_finish_scene_error(path, result)
+		return
+	if not is_networked() or multiplayer.multiplayer_peer != session:
+		_changing_scene = false
+		return
 	_changing_scene = false
+	var key: String = _ready_scene
+	_ready_scene = ""
+	if key != "":
+		enter_scene(key)
+	else:
+		_refresh_timeouts()
+	print("net: переход завершён за ", Time.get_ticks_msec() - began, " мс peer=", _own_id)
+
+
+func _finish_scene_error(path: String, error: Error) -> void:
+	_changing_scene = false
+	push_error("Net: не удалось загрузить %s (%s)" % [path, error_string(error)])
+	if is_networked():
+		enter_scene(scene_of(get_tree().current_scene))
+
+
+## Таймаут увеличен у обеих сторон, пока хотя бы один участник загружает сцену.
+## Потоки ресурсов идут в фоне, но создание коллизий и первый кадр шейдеров ещё могут задержаться.
+func _refresh_timeouts() -> void:
+	if not is_networked():
+		return
+	var enet: ENetMultiplayerPeer = multiplayer.multiplayer_peer as ENetMultiplayerPeer
+	if enet == null or enet.host == null:
+		return
+	var loading: bool = _changing_scene or "loading" in peer_scene.values()
+	var settings: Dictionary = Balance.NET_TIMEOUT
+	for peer: ENetPacketPeer in enet.host.get_peers():
+		peer.set_timeout(int(settings.factor), int(settings.loading_ms if loading else settings.min_ms),
+			int(settings.loading_ms if loading else settings.max_ms))
 
 
 ## RPC уровня отправляется только тем, у кого уже есть эта сцена и её узлы.
@@ -202,6 +282,8 @@ func visible_in(peer: int, key: String) -> bool:
 func _scene_is(key: String, serial: int = 0) -> void:
 	var peer: int = multiplayer.get_remote_sender_id()
 	peer_scene[peer] = key
+	_refresh_timeouts()
+	print("net: peer=", peer, " сцена=", key)
 	_refresh_scoped_syncs()
 	scenes_changed.emit()
 	if key == "loading":
@@ -261,6 +343,8 @@ func filter_sync(sync: MultiplayerSynchronizer, key: String) -> void:
 
 
 func _on_peer_connected(id: int) -> void:
+	_refresh_timeouts()
+	print("net: подключён peer=", id)
 	# новому — где я (клиент клиенту тоже: хост не пересказывает, а без этого двое клиентов в
 	# убежище друг друга не видели — каждый сообщал о себе, пока другого ещё не знал)
 	if peer_scene.has(multiplayer.get_unique_id()):
@@ -271,8 +355,10 @@ func _on_peer_connected(id: int) -> void:
 
 
 func _on_peer_disconnected(id: int) -> void:
+	print("net: отключён peer=", id, " сцена=", peer_scene.get(id, ""))
 	player_names.erase(id)
 	peer_scene.erase(id)
+	_refresh_timeouts()
 	# Два клиента могут уйти за один poll ENet. RPC — после обработки обоих отключений.
 	scenes_changed.emit.call_deferred()
 	player_list_changed.emit()
@@ -290,6 +376,11 @@ func _on_connection_failed() -> void:
 
 
 func _on_server_disconnected() -> void:
+	print("net: потеряно соединение с хостом; сцена=", peer_scene.get(_own_id, ""), " переход=", _changing_scene)
+	disconnect_message = "Потеряно соединение с хостом — возвращение в убежище"
+	_changing_scene = false
+	_ready_scene = ""
+	_transition_pending.clear()
 	_keep_own_scene(OfflineMultiplayerPeer.new())
 	_active = false
 	player_names.clear()

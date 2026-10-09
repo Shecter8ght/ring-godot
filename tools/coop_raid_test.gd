@@ -22,6 +22,7 @@ const RAID_CHECK_AT := 42.0
 const HIDEOUT_MOVE_AT := {"host": 5.0, "c1": 3.0, "c2": 3.0}
 
 var _role: String = "host"
+var _port: int = Net.PORT
 var _fails: int = 0
 ## Сцена сейчас: "menu" / "hideout" / "raid" — трекинг движения по фазам.
 var _phase: String = ""
@@ -50,7 +51,9 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	if not args.is_empty() and String(args[0]) in ROLES:
 		_role = String(args[0])
-	Profile.use_file("user://profile_coop3_%s.json" % _role, true)
+	if args.size() > 1:
+		_port = int(args[1])
+	Profile.use_file("user://profile_coop3_%s_test.json" % _role, true)
 	Profile.next_conditions = RaidConditions.DEFAULT.duplicate(true)
 	# План прогона сам ломает генератор: случайное отключение рубильника не должно мешать ремонту.
 	RaidEvents.enabled = false
@@ -66,7 +69,7 @@ func _run() -> void:
 
 
 func _host() -> void:
-	_check("сервер поднят", Net.host("Хост") == "", "")
+	_check("сервер поднят", Net.host("Хост", _port) == "", "")
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	await _wait(func() -> bool: return _in_hideout() and _players().size() == 3, 40.0)
 	_check("убежище: вижу обоих", _players().size() == 3, str(Net.peer_scene))
@@ -80,7 +83,7 @@ func _client() -> void:
 	if _role == "c1":
 		# как из главного меню: «Собрание» → подключился → в убежище
 		Net.enter_scene("menu")
-		_check("подключение", Net.join("127.0.0.1", "Друг 1") == "", "")
+		_check("подключение", Net.join("127.0.0.1", "Друг 1", _port) == "", "")
 		await Net.joined
 		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	else:
@@ -88,7 +91,7 @@ func _client() -> void:
 		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 		await _wait(_in_hideout, 20.0)
 		await get_tree().create_timer(1.0).timeout
-		_check("подключение", Net.join("127.0.0.1", "Друг 2") == "", "")
+		_check("подключение", Net.join("127.0.0.1", "Друг 2", _port) == "", "")
 		await Net.joined
 		get_tree().reload_current_scene()
 	await get_tree().create_timer(0.5).timeout

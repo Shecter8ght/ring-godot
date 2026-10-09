@@ -117,6 +117,9 @@ tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 tools/godot.cmd --headless res://tools/coop_hideout_host.tscn # + coop_hideout_client.tscn через 3 с: собрание в убежище —
                                                               # видят друг друга, телевизор общий, «Рейд всем» — оба в рейде
+tools/godot.cmd --headless res://tools/coop_loading_test.tscn -- host client 17780 # + «-- client client 17780» через 3 с:
+                                                              # зона 1, загрузка клиента остановлена на 35 с, связь и движение сохранены;
+                                                              # второй аргумент host — медленный хост; порт отдельный от живой игры
 tools/godot.cmd --headless res://tools/coop_raid_test.tscn -- host   # кооп на троих: + «-- c1» через 3 с, + «-- c2» ещё
                                                               # через 3 с (c1 — из главного меню, c2 — из своего убежища):
                                                               # в убежище и рейде все видят всех и как ходят, выстрелы
