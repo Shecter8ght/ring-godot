@@ -606,6 +606,9 @@ func _item_menu(me: Player, role: String, idx: int, at: Vector2) -> void:
 	if not ItemDb.equip(id).is_empty():
 		names.append("В руки" if ItemDb.equip(id).has("weapon") else "Надеть")
 		acts.append(func() -> void: Raid.current.request_equip_from(role, idx, box))
+	if role == "backpack" and WeaponDb.is_weapon(id):
+		names.append("Собрать…")
+		acts.append(func() -> void: WeaponBuilder.open_raid(self, me, "backpack", idx))
 	# оружие, жилет: снять обвес, магазин — сразу; плиты — по одной (в ту же сетку, из ящика — в
 	# ящик или буфер)
 	for p in Gear.parts(it):
@@ -693,6 +696,9 @@ func _slot_menu(me: Player, slot: String, at: Vector2) -> void:
 	var names: Array = ["Описание", "Снять в рюкзак", "Выбросить"]
 	var info := e.duplicate(true)
 	var acts: Array = [func() -> void: ItemInfo.open(self, info), func() -> void: Raid.current.request_unequip(slot), func() -> void: Raid.current.request_drop_entry("equip:" + slot, -1)]
+	if WeaponDb.is_weapon(String(e.id)):
+		names.append("Собрать…")
+		acts.append(func() -> void: WeaponBuilder.open_raid(self, me, "equip:" + slot, -1))
 	for p in Gear.parts(e):
 		var part := String(p[1])
 		names.append(String(p[0]))

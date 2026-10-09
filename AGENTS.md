@@ -109,6 +109,7 @@ tools/godot.cmd res://tools/mods_gallery.tscn                # витрина о
 tools/godot.cmd --headless res://tools/build_test.tscn       # сборка деревом (WeaponBuild): старый угловой → кронштейн, пазы 20 мм, «занято»/«закроет прицел», кронштейн снимается с прицелом, линии прицелов
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/build_shots.tscn # снимки сборок: кронштейн 45° справа/слева, проставка, поворотный; docs/screens/build_*.png
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/thumb_shots.tscn # миниатюры экземпляров в сетке рюкзака (сборка, вынутый магазин, магазин на 60); docs/screens/thumb_*.png
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/builder_shots.tscn # конструктор оружия: обзор, точка, кронштейн по пазам (можно/занято), прицел на нём, из глаза, торговец, применено; docs/screens/builder_*.png
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_adapters.py -- [id …] # переходники (кронштейн 45°, проставка, удлинитель, поворотный) → assets/models/attachments/adapters
 tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика против солнца (блики, аберрация) и открытые прицельные из глаза
 tools/build_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.7.2 + RING.pck, шаблоны не нужны)

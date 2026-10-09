@@ -437,6 +437,9 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 		acts.append(func() -> void: Profile.equip_from(name, idx))
 	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
 	acts.append(func() -> void: _quick(name, idx))
+	if WeaponDb.is_weapon(id):
+		menu.add_item("Собрать…")
+		acts.append(func() -> void: open_builder(name, idx))
 	# оружие, жилет: снять обвес, магазин — в рюкзак (из тайника — в тайник); плиты — по одной
 	for p in Gear.parts(list[idx]):
 		var part := String(p[1])
@@ -550,6 +553,9 @@ func _parts_menu(where: String, idx: int, e: Dictionary, at: Vector2) -> void:
 	var parts := Gear.parts(e)
 	var menu := PopupMenu.new()
 	var acts: Array[Callable] = []
+	if WeaponDb.is_weapon(String(e.get("id", ""))):
+		menu.add_item("Собрать…")
+		acts.append(func() -> void: open_builder(where, idx))
 	if where.begins_with("equip:"):
 		var slot := where.trim_prefix("equip:")
 		menu.add_item("Снять в тайник")
@@ -902,17 +908,31 @@ func _trader_mods() -> void:
 	if weapon.is_empty():
 		col.add_child(_text("Выбери оружие слева.", Color(0.7, 0.7, 0.66)))
 		return
-	var board := MountBoard.new()
-	board.candidates = func(m: String) -> Array: return _trader_candidates(m)
-	board.remove = func(m: String) -> void:
-		var r := _weapon_ref()
-		Profile.strip_part(String(r[0]), int(r[1]), "mod:" + m)
-	col.add_child(board)
-	board.setup(weapon)
+	_builder_card(col, weapon, String(ref[0]), int(ref[1]), "shop")
 	var spec := WeaponStats.compute(weapon)
 	col.add_child(_text("Точность в прицеле %s · отдача %.3f · эргономика %d · шум %d м · %.1f кг" % [
 		"%.2f°" % float(spec.ads_spread), float(spec.kick), int(spec.ergo), int(spec.noise_m), float(spec.weight)], Color(0.8, 0.82, 0.78)))
 	col.add_child(_text("Клик по квадратику у точки крепления: купить у Михалыча и сразу поставить или поставить своё. Снятое — в тайник.", Color(0.6, 0.62, 0.6)))
+
+
+## Сборка оружия крупно (миниатюра экземпляра) и вход в конструктор.
+func _builder_card(parent: Control, weapon: Dictionary, where: String, idx: int, source: String) -> void:
+	var icon := ItemCard.IconBox.new()
+	icon.id = String(weapon.get("id", ""))
+	icon.entry = weapon
+	icon.custom_minimum_size = Vector2(0, 220)
+	parent.add_child(icon)
+	var open := _button("Открыть конструктор оружия", func() -> void: open_builder(where, idx, source))
+	open.custom_minimum_size.y = 44
+	open.add_theme_font_size_override("font_size", 18)
+	parent.add_child(open)
+
+
+## Конструктор поверх окна убежища; source — "mine" (свои вещи) или "shop" (у Михалыча).
+func open_builder(where: String, idx: int, source: String = "mine") -> void:
+	var b := WeaponBuilder.open_hideout(_root, where, idx)
+	b._source = source
+	b._refresh()
 
 
 func _weapon_pick_card(parent: Control, e: Dictionary, where: String, chosen: bool, pick: Callable) -> void:
@@ -1323,11 +1343,7 @@ func _build_workbench() -> void:
 		return
 	var wid := String(weapon.id)
 	# схема: от точек крепления — квадратики; клик — что подходит из тайника и рюкзака
-	var board := MountBoard.new()
-	board.candidates = func(m: String) -> Array: return _owned_candidates(weapon, m, "equip:" + _wb_slot, true)
-	board.remove = func(m: String) -> void: Profile.remove_mod(_wb_slot, m)
-	left.add_child(board)
-	board.setup(weapon)
+	_builder_card(left, weapon, "equip:" + _wb_slot, -1, "mine")
 	# карточка: калибр, состояние, магазин и патрон, вес
 	var spec := WeaponStats.compute(weapon)
 	var mag: Dictionary = weapon.get("mag", {}) if weapon.get("mag") is Dictionary else {}

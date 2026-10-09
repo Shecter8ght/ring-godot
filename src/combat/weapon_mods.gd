@@ -173,6 +173,46 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 	root.set_meta("sight_primary", primary_line)
 	sights["primary"] = primary_line
 	root.set_meta("sights", sights)
+	# рамки переходников — от них конструктор считает точки, которые они дают (point_frame)
+	root.set_meta("frames", frames)
+
+
+## Рамка точки key в осях модели root (после fit): начало — середина точки на поверхности планки
+## (у планки — её середина, если устройство не стоит), +Y — от оружия, +Z — к дулу. Для занятой
+## точки — там, где стоит устройство.
+static func point_frame(root: Node3D, model_key: String, mods: Dictionary, key: String) -> Transform3D:
+	var parent: String = WeaponBuild.parent_key(key)
+	var base: String = WeaponBuild.base_of(key)
+	var g: Dictionary = WeaponBuild.geo(model_key, mods, key)
+	var z: float = WeaponBuild.placed_z(model_key, mods, key) if mods.has(key) else (float(g.rail[0]) + float(g.rail[1])) * 0.5 if WeaponBuild.is_rail(g) else float(g.get("z", 0.0))
+	if parent == "":
+		var sk: Dictionary = socket(model_key, base)
+		if sk.is_empty():
+			return Transform3D.IDENTITY
+		var p: Vector3 = sk.pos
+		p.y += float(sk.get("riser", 0.0)) + (RAIL_H if bool(sk.get("rail", false)) else 0.0)
+		p.z = z
+		return _mount_frame(model_key, base, {"pos": p}, Transform3D.IDENTITY, true)
+	var frames: Dictionary = root.get_meta("frames", {})
+	if not frames.has(parent) or g.is_empty():
+		return Transform3D.IDENTITY
+	var roll: float = deg_to_rad(WeaponBuild.point_roll(model_key, mods, key))
+	return (frames[parent] as Transform3D) * Transform3D(Basis(Vector3(0, 0, 1), roll), Vector3.ZERO) * Transform3D(Basis.IDENTITY, g.pos) * Transform3D(Basis.IDENTITY, Vector3(0, 0, z))
+
+
+## Концы планки точки key в осях модели ([] — точка без планки).
+static func rail_ends(root: Node3D, model_key: String, mods: Dictionary, key: String) -> Array[Vector3]:
+	var g: Dictionary = WeaponBuild.geo(model_key, mods, key)
+	var out: Array[Vector3] = []
+	if not WeaponBuild.is_rail(g):
+		return out
+	var probe: Dictionary = mods.duplicate()
+	probe.erase(key)
+	var xf: Transform3D = point_frame(root, model_key, probe, key)
+	var mid: float = (float(g.rail[0]) + float(g.rail[1])) * 0.5
+	out.append(xf * Vector3(0, 0, float(g.rail[0]) - mid))
+	out.append(xf * Vector3(0, 0, float(g.rail[1]) - mid))
+	return out
 
 
 ## Рамка устройства: у точки оружия — сокет (на боковой планке +Y смотрит наружу, под цевьём —

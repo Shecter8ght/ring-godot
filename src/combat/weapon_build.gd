@@ -285,7 +285,14 @@ static func view_block(id: String, mods: Dictionary, key: String) -> String:
 		return ""
 	var me: String = WeaponDb.mod_id(mods[key])
 	var mine: Vector2 = span(model_of(id), mods, key)
-	for other: String in siblings(mods, key):
+	var others: Array[String] = siblings(mods, key)
+	if depth(key) == 0:
+		# соседняя верхняя планка оружия (коробка ↔ цевьё): оси общие, высота почти та же
+		for k: Variant in mods:
+			var ok: String = String(k)
+			if depth(ok) == 0 and point_key(ok) != point_key(key) and String(point(id, mods, ok).get("iface", "")) == "RAIL_TOP":
+				others.append(ok)
+	for other: String in others:
 		var oid: String = WeaponDb.mod_id(mods[other])
 		var o: Vector2 = span(model_of(id), mods, other)
 		if WeaponDb.is_optic(me) and o.x >= mine.y - 0.0001 and not bool(WeaponDb.attachment(oid).get("low", false)):
