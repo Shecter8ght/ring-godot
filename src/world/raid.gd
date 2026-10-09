@@ -1229,6 +1229,77 @@ func request_fit(where: String, idx: int, src_idx: int, hint: String, container:
 		_rpc_fit.rpc_id(1, where, idx, src_idx, hint, path)
 
 
+## Сборка из конструктора (BuildPlan): детали — из рюкзака и с самого оружия, торговца нет,
+## приклад в рейде не меняют. where — "equip:<слот>" или "backpack" (idx). Снятое — в рюкзак.
+func request_build(where: String, idx: int, draft: Dictionary, draft_mag: Dictionary) -> void:
+	if _is_host():
+		_build(multiplayer.get_unique_id(), where, idx, draft, draft_mag)
+	else:
+		_rpc_build.rpc_id(1, where, idx, draft, draft_mag)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_build(where: String, idx: int, draft: Dictionary, draft_mag: Dictionary) -> void:
+	if multiplayer.is_server():
+		_build(multiplayer.get_remote_sender_id(), where, idx, draft, draft_mag)
+
+
+func _build(peer_id: int, where: String, idx: int, draft: Dictionary, draft_mag: Dictionary) -> void:
+	_cancel_op(peer_id)
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive():
+		return
+	var inv: Inventory = pl.inventory
+	var weapon: Dictionary = {}
+	if where.begins_with("equip:"):
+		weapon = inv.equipment.get(where.trim_prefix("equip:"), {})
+	elif where == "backpack" and idx >= 0 and idx < inv.items.size():
+		weapon = inv.items[idx]
+	var r: Dictionary = BuildPlan.resolve(weapon, draft, draft_mag, {"backpack": inv.items},
+		{"shop": false, "lists": BuildPlan.RAID_LISTS, "locked": ["stock"]}) if not weapon.is_empty() else {"why": "оружия нет"}
+	var why: String = String(r.why)
+	if why == "":
+		var items: Array = inv.items.duplicate(true)
+		var taken: Array = []
+		for t: Variant in r.take:
+			taken.append(int(t[1]))
+		taken.sort()
+		taken.reverse()
+		var target := idx
+		for i: Variant in taken:
+			ItemDb.remove_at(items, int(i), 1)
+			if where == "backpack" and int(i) < idx:
+				target -= 1
+		for item: Variant in r.returned:
+			if ItemDb.add_to(items, item, inv.backpack_grid()) < int((item as Dictionary).get("n", 1)):
+				why = "в рюкзаке нет места для снятого"
+				break
+		if why == "":
+			if where.begins_with("equip:"):
+				var eq := inv.equipment.duplicate(true)
+				eq[where.trim_prefix("equip:")] = r.entry
+				inv.items = items
+				inv.equipment = eq
+			else:
+				var entry: Dictionary = r.entry
+				for k: String in ["x", "y", "r"]:
+					if (items[target] as Dictionary).has(k):
+						entry[k] = items[target][k]
+				items[target] = entry
+				inv.items = items
+			Audio.play("mod_fit", pl.global_position, -6.0)
+	if why != "":
+		if peer_id == multiplayer.get_unique_id():
+			notify("Не собрать: " + why)
+		else:
+			_rpc_build_failed.rpc_id(peer_id, why)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_build_failed(why: String) -> void:
+	notify("Не собрать: " + why)
+
+
 @rpc("any_peer", "call_remote", "reliable")
 func _rpc_strip(where: String, idx: int, part: String, path: NodePath) -> void:
 	if multiplayer.is_server():

@@ -558,6 +558,57 @@ static func mod_block(_mod: String, mount: String = "") -> String:
 	return ""
 
 
+## Сборка из конструктора (BuildPlan — черновик с пометкой, откуда каждая деталь): взять детали из
+## тайника и рюкзака, купить недостающее у Михалыча, снятое — в тайник. Всё или ничего; точки,
+## которым нужен верстак выше, — по Balance.WORKBENCH_SLOT_LEVEL. "" — готово, иначе причина.
+static func apply_build(where: String, idx: int, draft: Dictionary, draft_mag: Dictionary = {}) -> String:
+	ensure()
+	var weapon := _entry_at(where, idx)
+	if weapon.is_empty():
+		return "оружия нет"
+	var r: Dictionary = BuildPlan.resolve(weapon, draft, draft_mag, {"stash": stash, "backpack": backpack},
+		{"shop": true, "lists": BuildPlan.HIDEOUT_LISTS})
+	if String(r.why) != "":
+		return String(r.why)
+	for mount: Variant in WeaponDb.mounts_of(String(weapon.id)):
+		if BuildPlan._branch(weapon.get("mods", {}), String(mount)) != BuildPlan._branch((r.entry as Dictionary).mods, String(mount)):
+			var why := mod_block("", String(mount))
+			if why != "":
+				return "%s: %s" % [String(WeaponDb.MOUNT_NAMES.get(String(mount), mount)), why]
+	var cost: int = BuildPlan.cost(r.buy)
+	if cost > money:
+		return "не хватает денег"
+	var lists: Dictionary = {"stash": stash.duplicate(true), "backpack": backpack.duplicate(true)}
+	# взятое — по убыванию индекса (индексы впереди не сдвигаются); оружие в том же списке — сдвинется
+	var by_list: Dictionary = {}
+	for t: Variant in r.take:
+		var taken: Array = by_list.get(String(t[0]), [])
+		taken.append(int(t[1]))
+		by_list[String(t[0])] = taken
+	var target := idx
+	for list_name: Variant in by_list:
+		var taken2: Array = by_list[list_name]
+		taken2.sort()
+		taken2.reverse()
+		for i: Variant in taken2:
+			ItemDb.remove_at(lists[list_name], int(i), 1)
+			if String(list_name) == where and int(i) < idx:
+				target -= 1
+	for item: Variant in r.returned:
+		var got: Dictionary = item
+		if ItemDb.add_to(lists.stash, got, stash_grid()) < int(got.get("n", 1)):
+			return "в тайнике нет места для снятого"
+	stash.clear()
+	stash.append_array(lists.stash)
+	backpack.clear()
+	backpack.append_array(lists.backpack)
+	money -= cost
+	_set_entry(where, target, r.entry)
+	_refit_backpack()
+	save()
+	return ""
+
+
 static func remove_mod(weapon_slot: String, mount: String) -> bool:
 	return strip_part("equip:" + weapon_slot, -1, "mod:" + mount)
 

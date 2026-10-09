@@ -20,6 +20,7 @@ func _ready() -> void:
 	_adapters()
 	_model()
 	_stats()
+	_plan()
 	print("build_test: проверок %d, провалено %d" % [_checks, _fails])
 	get_tree().quit(1 if _fails > 0 else 0)
 
@@ -171,3 +172,66 @@ func _stats() -> void:
 	_check("основной — оптика, угловой — без кратности", bool(main.scoped) and not bool(side.scoped) and String(side.sight) == "optic_primary#2/rail")
 	var bare: Dictionary = WeaponStats.compute(_veras({"optic_primary": {"id": "optic_lpvo_01", "dur": 100.0}}))
 	_check("кронштейн и коллиматор утяжеляют", float(main.weight) > float(bare.weight) + 0.08, "%.2f / %.2f" % [main.weight, bare.weight])
+
+
+## Черновик конструктора → одна операция: взять из тайника (кронштейн с прицелом на нём), купить,
+## снятое — в тайник; повтор детали и приклад в рейде — отказ.
+func _plan() -> void:
+	Profile.use_file("user://build_test_profile.json", true)
+	Profile.money = 100000
+	# верстак 2 — точки прицелов (Balance.WORKBENCH_SLOT_LEVEL)
+	Profile.modules["workbench"] = 2
+	Profile.stash.clear()
+	Profile.backpack.clear()
+	var bracket: Dictionary = {"id": "mount_offset45_01", "n": 1, "dur": 77.0, "mods": {"rail": {"id": "optic_rmr_01", "dur": 66.0}}}
+	ItemDb.add_to(Profile.stash, bracket, Profile.stash_grid())
+	Profile.equipment["primary"] = {"id": "wpn_ar_01", "n": 1, "dur": 100.0, "sight": "primary",
+		"mods": {"optic_primary": {"id": "optic_lpvo_01", "dur": 90.0, "slot": 0}, "stock": {"id": "stock_tele_ak_01", "dur": 100.0}},
+		"mag": {"id": "mag_545_30", "ammo": "ammo_545_std", "rounds": 30}}
+	var weapon: Dictionary = Profile.equipment.primary
+	var draft: Dictionary = BuildPlan.draft_of(weapon)
+	var bi: int = -1
+	for i in range(Profile.stash.size()):
+		if String(Profile.stash[i].id) == "mount_offset45_01":
+			bi = i
+	draft["optic_primary#2"] = {"id": "mount_offset45_01", "slot": 6, "src": {"from": "stash", "idx": bi, "sub": ""}}
+	draft["optic_primary#2/rail"] = {"id": "optic_rmr_01", "src": {"from": "stash", "idx": bi, "sub": "rail"}}
+	draft["underbarrel"] = {"id": "grip_vertical_01", "slot": 2, "src": {"from": "shop"}}
+	var money_before: int = Profile.money
+	var r: Dictionary = BuildPlan.resolve(weapon, draft, {}, {"stash": Profile.stash, "backpack": Profile.backpack}, {"shop": true})
+	_check("план: можно, покупка — рукоятка", String(r.why) == "" and r.buy == ["grip_vertical_01"], String(r.why))
+	var why: String = Profile.apply_build("equip:primary", -1, draft, {})
+	var mods: Dictionary = Profile.equipment.primary.mods
+	_check("сборка применена: кронштейн, прицел на нём, рукоятка", why == "" and mods.has("optic_primary#2/rail") and mods.has("underbarrel"), why)
+	_check("ресурс деталей из тайника сохранён", float(mods["optic_primary#2"].dur) == 77.0 and float(mods["optic_primary#2/rail"].dur) == 66.0)
+	_check("деньги списаны по цене торговца", Profile.money == money_before - Profile.buy_price("grip_vertical_01"))
+	_check("кронштейна в тайнике больше нет", Profile.stash.filter(func(e: Dictionary) -> bool: return String(e.id) == "mount_offset45_01").is_empty())
+	# снять LPVO черновиком — он в тайнике
+	var d2: Dictionary = BuildPlan.draft_of(Profile.equipment.primary)
+	d2.erase("optic_primary")
+	why = Profile.apply_build("equip:primary", -1, d2, {})
+	_check("снятая LPVO — в тайнике с ресурсом", why == "" and not (Profile.equipment.primary.mods as Dictionary).has("optic_primary")
+		and Profile.stash.any(func(e: Dictionary) -> bool: return String(e.id) == "optic_lpvo_01" and float(e.dur) == 90.0), why)
+	# снять кронштейн — прицел уезжает вместе с ним одним предметом
+	var d3: Dictionary = BuildPlan.draft_of(Profile.equipment.primary)
+	d3.erase("optic_primary#2")
+	d3.erase("optic_primary#2/rail")
+	why = Profile.apply_build("equip:primary", -1, d3, {})
+	_check("кронштейн вернулся в тайник с прицелом на нём", why == "" and Profile.stash.any(func(e: Dictionary) -> bool:
+		return String(e.id) == "mount_offset45_01" and (e.get("mods", {}) as Dictionary).has("rail")), why)
+	# одна деталь дважды
+	var w2: Dictionary = Profile.equipment.primary
+	var d4: Dictionary = BuildPlan.draft_of(w2)
+	d4["side_left"] = {"id": "grip_vertical_01", "src": {"from": "weapon", "key": "underbarrel"}}
+	_check("одна деталь в двух местах — отказ", String(BuildPlan.resolve(w2, d4, {}, {"stash": Profile.stash}, {"shop": true}).why) != "")
+	# рейд: приклад не менять, торговца нет
+	var d5: Dictionary = BuildPlan.draft_of(w2)
+	d5.erase("stock")
+	_check("в рейде приклад не снять", String(BuildPlan.resolve(w2, d5, {}, {"backpack": []}, {"shop": false, "lists": BuildPlan.RAID_LISTS, "locked": ["stock"]}).why) != "")
+	var d6: Dictionary = BuildPlan.draft_of(w2)
+	d6["side_left"] = {"id": "tac_flashlight_01", "src": {"from": "shop"}}
+	_check("в рейде торговца нет", String(BuildPlan.resolve(w2, d6, {}, {"backpack": []}, {"shop": false, "lists": BuildPlan.RAID_LISTS}).why) != "")
+	# магазин: вынуть — в тайник
+	why = Profile.apply_build("equip:primary", -1, BuildPlan.draft_of(Profile.equipment.primary), {"from": "none"})
+	_check("магазин вынут в тайник", why == "" and String(Profile.equipment.primary.mag.id) == ""
+		and Profile.stash.any(func(e: Dictionary) -> bool: return String(e.id) == "mag_545_30" and int(e.get("rounds", 0)) == 30), why)
