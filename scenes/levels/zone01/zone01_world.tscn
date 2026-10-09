@@ -644,6 +644,94 @@ view_distance = 900.0
 cell = 64.0
 trunk_radius = 0.056
 
+[node name="PineYoung" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_young"
+model = "res://assets/zone01/models/pine_young.glb"
+far_model = "res://assets/zone01/models/pine_young_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.077
+
+[node name="PineSlimA" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_slim_a"
+model = "res://assets/zone01/models/pine_slim_a.glb"
+far_model = "res://assets/zone01/models/pine_slim_a_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.118
+
+[node name="PineSlimB" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_slim_b"
+model = "res://assets/zone01/models/pine_slim_b.glb"
+far_model = "res://assets/zone01/models/pine_slim_b_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.157
+
+[node name="PineForest" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_forest"
+model = "res://assets/zone01/models/pine_forest.glb"
+far_model = "res://assets/zone01/models/pine_forest_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.254
+
+[node name="PineThick" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_thick"
+model = "res://assets/zone01/models/pine_thick.glb"
+far_model = "res://assets/zone01/models/pine_thick_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.371
+
+[node name="PineOld" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_old"
+model = "res://assets/zone01/models/pine_old.glb"
+far_model = "res://assets/zone01/models/pine_old_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.473
+
+[node name="PineTwin" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_twin"
+model = "res://assets/zone01/models/pine_twin.glb"
+far_model = "res://assets/zone01/models/pine_twin_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.282
+
+[node name="PineYard" parent="Vegetation" type="Node3D"]
+script = ExtResource("6")
+data_path = "res://data/zone01_vegetation.json"
+key = "pine_yard"
+model = "res://assets/zone01/models/pine_yard.glb"
+far_model = "res://assets/zone01/models/pine_yard_far.glb"
+near_distance = 320.0
+view_distance = 900.0
+cell = 64.0
+trunk_radius = 0.298
+
 [node name="ForestFern" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 data_path = "res://data/zone01_vegetation.json"

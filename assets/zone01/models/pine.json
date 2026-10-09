@@ -1,0 +1,194 @@
+{
+ "pine_forest": {
+  "triangles": 13780,
+  "height": 26.0,
+  "trunk_radius": 0.254,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.508,
+     4.0,
+     0.508
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 26.52,
+   "base": 0.3
+  }
+ },
+ "pine_young": {
+  "triangles": 2524,
+  "height": 6.5,
+  "trunk_radius": 0.077,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.155,
+     4.0,
+     0.155
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 11.481,
+   "base": 0.3
+  }
+ },
+ "pine_slim_a": {
+  "triangles": 5616,
+  "height": 20.0,
+  "trunk_radius": 0.118,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.235,
+     4.0,
+     0.235
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 20.4,
+   "base": 0.3
+  }
+ },
+ "pine_slim_b": {
+  "triangles": 8564,
+  "height": 23.5,
+  "trunk_radius": 0.157,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.314,
+     4.0,
+     0.314
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 23.97,
+   "base": 0.3
+  }
+ },
+ "pine_thick": {
+  "triangles": 16846,
+  "height": 28.0,
+  "trunk_radius": 0.371,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.743,
+     4.0,
+     0.743
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 32.647,
+   "base": 0.3
+  }
+ },
+ "pine_old": {
+  "triangles": 27144,
+  "height": 21.0,
+  "trunk_radius": 0.473,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.947,
+     4.0,
+     0.947
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 35.491,
+   "base": 0.3
+  }
+ },
+ "pine_twin": {
+  "triangles": 19988,
+  "height": 21.0,
+  "trunk_radius": 0.282,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.564,
+     4.0,
+     0.564
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 25.765,
+   "base": 0.3
+  }
+ },
+ "pine_yard": {
+  "triangles": 18920,
+  "height": 17.0,
+  "trunk_radius": 0.298,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     2.0,
+     0
+    ],
+    "size": [
+     0.595,
+     4.0,
+     0.595
+    ],
+    "yaw": 0
+   }
+  ],
+  "far": {
+   "size": 26.451,
+   "base": 0.3
+  }
+ }
+}

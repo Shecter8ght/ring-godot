@@ -183,6 +183,13 @@
   https://polyhaven.com/a/fir_tree_01 — карты twig_* 4K; кора ветвей сучьев атласа — оттуда же.
 - Кора ствола — Poly Haven «Pine Bark», «Knotted Pine Bark» (CC0).
 
+## Зона 1 · сосна (assets/zone01/models/pine_*.glb, textures/pine_*)
+
+- Сосна — собственная модель проекта (tools/build_pine.py) по фото-референсам владельца.
+- Веточки атласа хвои — скан «Pine Tree 01» (Poly Haven, CC0; Rob Tuytel, Rico Cilliers),
+  https://polyhaven.com/a/pine_tree_01 — карты twig_* 2K (маска построена по фону скана), кора прутьев — оттуда же.
+- Кора ствола — Poly Haven «Pine Bark» (CC0); тонкая оранжевая кора верха — она же, перекрашенная шейдером.
+
 ## Зона 1 · берёза (assets/zone01/models/birch_*.glb, textures/birch_*)
 
 - Берёза — собственная модель проекта (tools/build_birch.py) по фото-референсам владельца.

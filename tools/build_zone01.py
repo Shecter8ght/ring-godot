@@ -439,6 +439,7 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
             z = -176.0 + rng.uniform(-1.5, 1.5)
             if ok(int(x - X0), int(z - Z0)):
                 put("poplar", x + rng.uniform(-2, 2), z)
+    add_pines(trees, h, forest, inside, d_rav)
     # подлесок: папоротник, валежник, пни, сухостой, корни — в лесу; камни со мхом — по склонам оврага
     under: dict[str, list] = {k: [] for k in ("forest_fern", "forest_dry_branches", "forest_stump_01", "forest_stump_02",
                                               "forest_dead_trunk", "forest_roots", "forest_rocks_01", "forest_rocks_02")}
@@ -551,6 +552,56 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
 
 
 SPRUCES = ["spruce_forest_a", "spruce_forest_b", "spruce_open", "spruce_young_a", "spruce_young_b"]
+# сосна (tools/build_pine.py): тонкие высокие лесные, средние, толстые (укрытие), старая раскидистая, двойная, молодая
+PINES = ["pine_young", "pine_slim_a", "pine_slim_b", "pine_forest", "pine_thick", "pine_old", "pine_twin", "pine_yard"]
+
+
+def pine_radius(key: str) -> float:
+    """Радиус ствола на высоте груди — из манифеста build_pine.py (коллизия ствола)."""
+    path = ROOT / "assets/zone01/models/pine.json"
+    if path.exists():
+        return float(json.loads(path.read_text(encoding="utf-8")).get(key, {}).get("trunk_radius", 0.25))
+    return 0.25
+
+
+def add_pines(trees: dict, h: np.ndarray, forest: np.ndarray, inside: np.ndarray, d_rav: np.ndarray) -> None:
+    """Сосны поверх готовой раскладки (свой генератор случайных чисел — остальные деревья не сдвигаются):
+    в лесу — сосновые рощи пятнами (сухие места), там почти все деревья — сосны, тонкие и высокие с
+    толстыми вперемешку; вне рощ — редкие сосны среди елей; на открытом и по бровке оврага —
+    раскидистые старые и двойные."""
+    rng = np.random.default_rng(97)
+    grove = fbm(70.0, 97)
+    for key in PINES:
+        trees.setdefault(key, [])
+    in_forest = ["pine_slim_a"] * 3 + ["pine_slim_b"] * 3 + ["pine_forest"] * 3 + ["pine_thick"] * 2 + ["pine_twin", "pine_young"]
+    open_kind = ["pine_old", "pine_old", "pine_yard", "pine_yard", "pine_twin", "pine_thick"]
+    for key in list(trees):
+        # тополя у насыпи — ряд посадки, их не трогать
+        if key in PINES or key.startswith("tree_poplar"):
+            continue
+        keep = []
+        for p in trees[key]:
+            x, z = p[0], p[2]
+            ix, iz = min(max(int(x - X0), 0), NX - 1), min(max(int(z - Z0), 0), NZ - 1)
+            f, g, r = forest[iz, ix], grove[iz, ix], d_rav[iz, ix]
+            roll = rng.random()
+            new = None
+            if f > 0.5 and g > 0.56 and roll < 0.85:
+                new = in_forest[int(rng.integers(0, len(in_forest)))]
+            elif f > 0.5 and key.startswith("spruce_forest") and roll < 0.12:
+                new = in_forest[int(rng.integers(0, len(in_forest)))]
+            elif f <= 0.5 and inside[iz, ix] and 4.0 < r < 30.0 and roll < 0.2:
+                new = open_kind[int(rng.integers(0, len(open_kind)))]
+            elif f <= 0.5 and inside[iz, ix] and r >= 30.0 and roll < 0.35:
+                new = open_kind[int(rng.integers(0, len(open_kind)))]
+            elif f <= 0.5 and not inside[iz, ix] and g > 0.56 and roll < 0.6:
+                new = in_forest[int(rng.integers(0, len(in_forest)))]
+            if new:
+                trees[new].append(p)
+            else:
+                keep.append(p)
+        trees[key] = keep
+    print("zone01: сосен", sum(len(trees[k]) for k in PINES))
 BIRCHES = ["birch_a", "birch_b", "birch_c", "birch_bare", "birch_young"]
 
 # подлесок из Poly Haven Nature (tools/build_zone01_undergrowth.py): ключ → (варианты, вид растения)
@@ -604,6 +655,10 @@ def vegetation_nodes(s: "Scene") -> None:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
                key=key, model=f"res://assets/zone01/models/{key}.glb", far_model=f"res://assets/zone01/models/{key}_far.glb",
                near_distance=320.0, view_distance=900.0, cell=64.0, trunk_radius=(0.3 if "young" not in key else 0.08) * (0.7 if key.startswith("birch") else 1.0))
+    for key in PINES:
+        s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
+               key=key, model=f"res://assets/zone01/models/{key}.glb", far_model=f"res://assets/zone01/models/{key}_far.glb",
+               near_distance=320.0, view_distance=900.0, cell=64.0, trunk_radius=round(pine_radius(key), 3))
     for key, radius, height in (("forest_fern", 0.0, 0.0), ("forest_dry_branches", 0.0, 0.0), ("forest_stump_01", 0.3, 0.6),
                                 ("forest_stump_02", 0.3, 0.6), ("forest_dead_trunk", 0.0, 0.0), ("forest_roots", 0.0, 0.0),
                                 ("forest_rocks_01", 0.5, 0.8), ("forest_rocks_02", 0.5, 0.8)):

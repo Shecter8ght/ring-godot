@@ -218,6 +218,12 @@ def scatter(s: z1.Scene) -> None:
     for i in range(8):
         x, z = -276 + RNG.uniform(-3, 3), -160 + i * 8 + RNG.uniform(-2, 2)
         trees[f"tree_maple_{i % 3}"].append((x, z))
+    # сосны: во дворах их тоже сажали — по одной-две у домов, старая раскидистая у дальнего проезда
+    for key, x, z in (("pine_yard", -208.0, -72.0), ("pine_twin", -252.5, -84.0), ("pine_old", -160.0, -151.0),
+                      ("pine_yard", -146.0, -66.0)):
+        if near_paving(x, z, 1.0) or in_building(x, z, 1.5):
+            raise SystemExit(f"сосна {key} ({x}, {z}) — на дорожке или в доме")
+        trees.setdefault(key, []).append((x, z))
     data: dict[str, list] = {}
     for key, pts in trees.items():
         data[key] = [[round(x, 2), round(z1.ground(x, z) - 0.05, 3), round(z, 2), round(RNG.uniform(0, 360), 1),
@@ -251,9 +257,10 @@ def scatter(s: z1.Scene) -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
     for key in trees:
-        extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=320.0) if key.startswith(("spruce", "birch")) else {}
+        extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=320.0) if key.startswith(("spruce", "birch", "pine")) else {}
+        radius = round(z1.pine_radius(key), 3) if key.startswith("pine") else 0.25
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",
-               key=key, model=f"{MODELS}/{key}.glb", view_distance=900.0, cell=96.0, trunk_radius=0.25, **extra)
+               key=key, model=f"{MODELS}/{key}.glb", view_distance=900.0, cell=96.0, trunk_radius=radius, **extra)
     z1.undergrowth_nodes(s, "Vegetation", "res://data/zone01_yard_scatter.json")
     print("trees", sum(len(v) for v in trees.values()), "кустов", sum(len(data[k]) for k in z1.UG_VIEW))
 
