@@ -59,8 +59,12 @@ var weapon_clearance: WeaponClearance = WeaponClearance.new()
 var _cheek_parts: Array[GeometryInstance3D] = []
 ## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
 var scope_active: bool = false
-## 0 — основной прицел, 1 — угловой (плавно между ними при переключении).
-var _sight_k: float = 0.0
+## Плавный переход между линиями основного, углового и боковых прицелов.
+var _sight_k: float = 1.0
+var _sight_mode: String = ""
+var _sight_pose: Vector3 = Vector3.ZERO
+var _sight_from: Vector3 = Vector3.ZERO
+var _sight_to: Vector3 = Vector3.ZERO
 var _scope_vp: SubViewport
 ## Вид «как с камеры»: экспозиция глаза, объектив, зерно, размытие (CameraLook).
 var _look: CameraLook
@@ -602,6 +606,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		if _viewmodel_rig:
 			_viewmodel_rig.set_ammo_state(pl.ammo)
 		_viewmodel_id = vm_key
+		_sight_mode = ""
 		_reticle_nv(pl.nvg_on)
 	_viewmodel.visible = true
 	WeaponMods.update_condition(_viewmodel, pl.weapon_mods)
@@ -609,20 +614,11 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		(n as Node3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
 	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
 		(n as SpotLight3D).visible = Player.tac_on(pl.weapon_mods, n, "light")
-	var sh: float = _viewmodel.get_meta("sight_h", 0.08)
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
-	# выбранный прицел: угловой — ствол заваливается по крену кронштейна, его линия — на оси взгляда
-	# переход между прицелами — прямо, не опуская оружия: линия и крен плавно к выбранному
-	var want_off := 1.0 if String(spec.get("sight", "primary")) == "offset" and _viewmodel.has_meta("sight_offset") else 0.0
-	_sight_k = move_toward(_sight_k, want_off, delta / Balance.SIGHT_SWITCH_SEC)
-	var sx := 0.0
-	var sroll := 0.0
-	if _viewmodel.has_meta("sight_offset") and _sight_k > 0.0:
-		var so: Dictionary = _viewmodel.get_meta("sight_offset")
-		var e := smoothstep(0.0, 1.0, _sight_k)
-		sx = float(so.x) * e
-		sh = lerpf(sh, float(so.h), e)
-		sroll = float(so.roll) * e
+	var line: Vector3 = _aim_line(_viewmodel, String(spec.get("sight", "primary")), delta)
+	var sx: float = line.x
+	var sh: float = line.y
+	var sroll: float = line.z
 	# у бедра (без ПКМ) → в прицел: «довод» по эргономике (aim_progress), плавно
 	var k := smoothstep(0.0, 1.0, aim_t)
 	# приклад у бедра виден; вскинул к щеке — он под щекой и заслонял бы низ прицельной линии
@@ -656,6 +652,15 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if is_instance_valid(pl._weapon_rig):
 		vm_basis *= Basis.from_euler(pl._weapon_rig.view_rotation_degrees() * (PI / 180.0) * (1.0 - k))
 	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + action_offset + bob + Vector3(0.0, flip * 0.004, kick_back * 0.028))
+	# Импортированная поза может иметь свои оси: поворачиваем её линию, сохраняя готовые клипы.
+	if _viewmodel.has_method("ads_transform") and _viewmodel.has_method("hip_transform"):
+		var primary_ads: Transform3D = _viewmodel.call("ads_transform")
+		var hip: Transform3D = _viewmodel.call("hip_transform")
+		var selected_ads: Transform3D = cant_ads(primary_ads, float(_viewmodel.get_meta("sight_h", 0.08)), line)
+		var vt: Transform3D = hip.interpolate_with(selected_ads, k)
+		vt.basis = Basis(Vector3.RIGHT, flip * 0.05) * Basis(Vector3.FORWARD, pl.recoil_h() * 1.5) * vt.basis
+		vt.origin += bob + Vector3(0.0, flip * 0.004, kick_back * 0.028)
+		_viewmodel.transform = vt
 	if _viewmodel_rig:
 		if is_instance_valid(pl._weapon_rig):
 			_viewmodel_rig.synchronize_from(pl._weapon_rig)
@@ -684,10 +689,39 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		pl.weapon_obstruction = 1.0
 	_arms.visible = _arms.visible and _viewmodel.visible
 	_straighten_lights()
-	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and _sight_k < 0.05 and pl.weapon_obstruction <= float(Balance.WEAPON_CLEARANCE.fire_threshold))
+	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and absf(sroll) < 0.05 and pl.weapon_obstruction <= float(Balance.WEAPON_CLEARANCE.fire_threshold))
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
+
+
+## Линия выбранного прицела в осях оружия: x, высота, крен. Между любыми двумя — один переход.
+func _aim_line(model: Node3D, sight: String, delta: float) -> Vector3:
+	var primary: Vector3 = Vector3(0.0, float(model.get_meta("sight_h", 0.08)), 0.0)
+	var data: Dictionary = model.get_meta("sight_" + sight, {})
+	var target: Vector3 = Vector3(float(data.get("x", primary.x)), float(data.get("h", primary.y)), float(data.get("roll", 0.0)))
+	if _sight_mode == "":
+		_sight_pose = primary
+		_sight_from = primary
+		_sight_to = primary
+		_sight_k = 1.0
+		_sight_mode = "primary"
+	if sight != _sight_mode or not target.is_equal_approx(_sight_to):
+		_sight_mode = sight
+		_sight_from = _sight_pose
+		_sight_to = target
+		_sight_k = 0.0
+	_sight_k = move_toward(_sight_k, 1.0, delta / Balance.SIGHT_SWITCH_SEC)
+	_sight_pose = _sight_from.lerp(_sight_to, smoothstep(0.0, 1.0, _sight_k))
+	return _sight_pose
+
+
+## Готовая поза основного прицела → поза дополнительного, независимо от осей исходной сцены.
+## Высота и боковой сдвиг компенсируются до крена: окно остаётся на оси взгляда.
+static func cant_ads(primary: Transform3D, primary_h: float, line: Vector3) -> Transform3D:
+	var turn: Basis = Basis(Vector3.BACK, line.z)
+	var offset: Vector3 = Basis(Vector3.UP, PI) * Vector3(line.x, line.y - primary_h, 0.0)
+	return Transform3D(turn * primary.basis, turn * (primary.origin - offset))
 
 
 ## Действия деталей одинаковы у модели перед глазами и у модели в руке персонажа.
@@ -1182,7 +1216,7 @@ func _update_hud(pl: Player) -> void:
 	if pl.loadout_mode:
 		t += "   · запасных маг. %d, россыпью %d" % [pl.spare_mags(), pl.loose_rounds()]
 	if (spec.sights as Array).size() > 1:
-		t += "   [%s]" % ("угловой" if String(spec.sight) == "offset" else "основной")
+		t += "   [%s]" % WeaponStats.sight_name(String(spec.sight)).to_lower()
 	if pl.light_on:
 		t += "   СВЕТ"
 	if pl.laser_on:

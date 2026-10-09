@@ -517,6 +517,12 @@ static func mod_id(v: Variant) -> String:
 	return canonical(String(v))
 
 
+## Тип прицела определяется самим обвесом: боковая точка может держать и фонарь, и коллиматор.
+static func is_optic(id: String) -> bool:
+	var kind: String = String(attachment(id).get("type", ""))
+	return kind.begins_with("OPTIC_") or kind == "OFFSET_RED_DOT"
+
+
 ## Магазин подходит к оружию (интерфейс горловины).
 static func mag_fits(weapon_id: String, mag_id: String) -> bool:
 	var w := weapon(weapon_id)

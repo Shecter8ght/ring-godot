@@ -120,9 +120,9 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		fx["db"] = float(fx.get("db", 0.0)) * effectiveness
 		if float(fx.get("ergo", 0.0)) > 0.0:
 			fx["ergo"] = float(fx.ergo) * effectiveness
-		var is_optic := String(mount).begins_with("optic_")
+		var is_optic: bool = WeaponDb.is_optic(WeaponDb.mod_id(mods[mount]))
 		# прицел действует, только когда через него смотрят; эргономика (вес) — всегда
-		if is_optic and String(mount) != "optic_" + active:
+		if is_optic and String(mount) != sight_mount(active):
 			s.ergo = float(s.ergo) + float(fx.get("ergo", 0.0))
 			continue
 		s.kick = float(s.kick) * float(fx.get("kick", 1.0))
@@ -146,7 +146,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 			if float(att.get("zoom", 0.0)) > 0.0:
 				s.zoom = float(att.zoom)
 				s.scoped = true
-			elif String(mount) == "optic_offset":
+			elif active != "primary":
 				# угловой коллиматор: основной (оптика) не работает, пока смотришь в угловой
 				s.zoom = 0.0
 				s.scoped = false
@@ -160,7 +160,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	if bool(s.suppressed):
 		s.sound = String((s.sounds as Dictionary).get("shot_suppressed", s.sound))
 	# угловой — без кратности, даже если у ствола встроенная оптика
-	if active == "offset":
+	if active != "primary":
 		s.zoom = 0.0
 		s.scoped = false
 	# износ: разброс растёт, задержки чаще (на хорошем стволе — редкость)
@@ -185,18 +185,28 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	return s
 
 
-## Какие прицелы есть: "primary" (основной, встроенный или открытый), "offset" (угловой). Основного
-## нет, а угловой есть — только угловой.
+## Основной, угловой и коллиматоры на боковых планках. Фонарь/ЛЦУ в боковом слоте не прицел.
+## Если установлен только дополнительный прицел, выбирается он.
 static func sights_of(entry: Dictionary) -> Array:
 	var mods: Dictionary = entry.get("mods", {})
 	var w := WeaponDb.weapon(String(entry.id))
 	var out: Array = []
 	var integral := (w.get("integral", {}) as Dictionary).has("zoom")
-	if mods.has("optic_primary") or integral or not mods.has("optic_offset"):
-		out.append("primary")
-	if mods.has("optic_offset"):
-		out.append("offset")
+	for mount: String in ["optic_offset", "side_left", "side_right"]:
+		if mods.has(mount) and WeaponDb.is_optic(WeaponDb.mod_id(mods[mount])):
+			out.append("offset" if mount == "optic_offset" else mount)
+	if mods.has("optic_primary") or integral or out.is_empty():
+		out.push_front("primary")
 	return out
+
+
+## Имя режима на экземпляре → физическая точка крепления.
+static func sight_mount(sight: String) -> String:
+	return "optic_" + sight if sight in ["primary", "offset"] else sight
+
+
+static func sight_name(sight: String) -> String:
+	return String({"primary": "Основной", "offset": "Угловой", "side_left": "Слева", "side_right": "Справа"}.get(sight, "Основной"))
 
 
 ## Выбранный прицел (сохраняется на экземпляре); нет такого — первый из доступных.

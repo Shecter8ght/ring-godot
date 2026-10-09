@@ -4122,15 +4122,18 @@
    "attach": {
     "type": "OPTIC_HOLOGRAPHIC",
     "fits": [
-     "RAIL_TOP"
+     "RAIL_TOP",
+     "OFFSET_45",
+     "RAIL_SIDE"
     ],
     "look": "holo",
     "asset": "res://assets/models/attachments/lumar_h1/lumar_h1.tscn",
+    "offset_raise_m": 0.05,
     "fx": {
      "ads_spread": 0.58,
      "ergo": -4
     },
-    "role": "PRIMARY",
+    "role": "BOTH",
     "zoom": 0,
     "aim_k": 1.1
    },

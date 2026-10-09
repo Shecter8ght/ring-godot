@@ -320,6 +320,7 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 		e["chamber"] = clampi(int(st.get("chamber", e.get("chamber", 0))), 0, 1)
 		e["chamber_ammo"] = String(st.get("chamber_ammo", e.get("chamber_ammo", ""))) if int(e.chamber) > 0 else ""
 	e["sight"] = String(st.get("sight", e.get("sight", "primary")))
+	e["sight"] = WeaponStats.active_sight(e)
 	var mods: Dictionary = e.get("mods", {})
 	var tac: Dictionary = st.get("tac", {})
 	for m in mods:

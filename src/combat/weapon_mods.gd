@@ -77,6 +77,8 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 		root.add_child(part)
 		if String(mount) == "optic_offset":
 			_offset_optic(part, m, a)
+		elif String(mount) in ["side_left", "side_right"] and WeaponDb.is_optic(id):
+			_side_optic(part, m, a)
 		else:
 			_build_look(part, m, a)
 		for meta: StringName in part.get_meta_list():
@@ -87,7 +89,7 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 		for node: Node in part.find_children("*", "MeshInstance3D", true, false):
 			var mesh: MeshInstance3D = node as MeshInstance3D
 			var material: Material = mesh.get_active_material(0) if mesh.mesh and mesh.mesh.get_surface_count() > 0 else null
-			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and String(mount).begins_with("optic_"):
+			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and WeaponDb.is_optic(id):
 				mesh.set_meta("reticle_dot", true)
 				mesh.set_meta("mount", String(mount))
 	update_condition(root, mods)
@@ -238,19 +240,41 @@ static func _offset_optic(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 	pivot.rotation.z = roll
 	root.add_child(pivot)
 	var al := _mat("anodized")
-	# кронштейн: клин от планки к площадке
-	WeaponModels._cbox(pivot, Vector3(0, 0.004, 0), Vector3(0.022, 0.008, 0.032), al, 0.0012)
-	var sub := {"pos": Vector3(0, 0.008, 0), "rail": false}
-	match String(a.get("look", "rmr")):
-		"red_dot":
-			_red_dot(pivot, sub)
-		"holo":
-			_holo(pivot, sub)
-		_:
-			_rmr(pivot, sub)
+	# Крупный коллиматор отнесён дальше от основной оптики; миниатюрному хватит короткого плеча.
+	var height: float = 0.008 + float(a.get("offset_raise_m", 0.0))
+	WeaponModels._cbox(pivot, Vector3(0, height * 0.5, 0), Vector3(0.022, height, 0.032), al, 0.0012)
+	var sub: Dictionary = m.duplicate(true)
+	sub["pos"] = Vector3(0, height, 0)
+	sub["rail"] = false
+	sub["riser"] = 0.0
+	_build_look(pivot, sub, a)
+	if pivot.get_meta("asset_loaded", false):
+		root.set_meta("asset_loaded", true)
 	var h := float(pivot.get_meta("sight_h", 0.02))
 	var pt := pivot.transform * Vector3(0, h, 0)
 	root.set_meta("sight_offset", {"x": pt.x, "h": pt.y, "roll": roll})
+
+
+## Запасное крепление на боковой планке цевья: основание касается планки, окно смотрит к дулу.
+## Прицел лежит на боку; камера компенсирует этот крен при выборе по СКМ.
+static func _side_optic(root: Node3D, m: Dictionary, a: Dictionary) -> void:
+	var p: Vector3 = m.pos
+	var outer: float = _rail_side(root, p.x, p.y, p.z, 0.09)
+	var roll: float = -signf(p.x) * PI * 0.5
+	var pivot: Node3D = Node3D.new()
+	pivot.name = "SideOpticMount"
+	pivot.position = Vector3(outer, p.y, p.z)
+	pivot.rotation.z = roll
+	root.add_child(pivot)
+	var sub: Dictionary = m.duplicate(true)
+	sub["pos"] = Vector3.ZERO
+	sub["rail"] = false
+	sub["riser"] = 0.0
+	_build_look(pivot, sub, a)
+	if pivot.get_meta("asset_loaded", false):
+		root.set_meta("asset_loaded", true)
+	var pt: Vector3 = pivot.transform * Vector3(0, float(pivot.get_meta("sight_h", 0.02)), 0)
+	root.set_meta("sight_" + String(m.mount), {"x": pt.x, "h": pt.y, "roll": roll})
 
 
 # ---------------------------------------------------------------- общее
