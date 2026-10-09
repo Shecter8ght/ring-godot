@@ -63,6 +63,9 @@ var cheat_speed: float = 1.0
 ## (у хоста и в одиночной игре), следующий рейд начнётся с ними.
 var raid_time: String = ""
 var raid_weather: String = ""
+## Точное время рейда, часы (0..24); < 0 — по времени суток (начало дня / заката / ночи).
+## В рейде меняется сразу (одиночная игра, хост), следующий рейд начнётся с него.
+var raid_hour: float = -1.0
 ## Свои клавиши поверх project.godot: действие → {"t": "k", "c": физ. код} или {"t": "m", "b": кнопка
 ## мыши}. Раздел keys; меняются в меню Esc → «Управление».
 var keys: Dictionary = {}
@@ -111,6 +114,7 @@ func _load() -> void:
 	all_weapons = bool(cfg.get_value("cheats", "all_weapons", false))
 	raid_time = String(cfg.get_value("raid", "time", ""))
 	raid_weather = String(cfg.get_value("raid", "weather", ""))
+	raid_hour = float(cfg.get_value("raid", "hour", -1.0))
 	if cfg.has_section("keys"):
 		for a in cfg.get_section_keys("keys"):
 			var d: Variant = cfg.get_value("keys", a)
@@ -141,6 +145,7 @@ func save() -> void:
 	cfg.set_value("cheats", "all_weapons", all_weapons)
 	cfg.set_value("raid", "time", raid_time)
 	cfg.set_value("raid", "weather", raid_weather)
+	cfg.set_value("raid", "hour", raid_hour)
 	if cfg.has_section("keys"):
 		cfg.erase_section("keys")
 	for a in keys:
@@ -155,6 +160,15 @@ func set_quality(q: String) -> void:
 	apply_graphics()
 	save()
 	changed.emit()
+
+
+## Точное время рейда (h < 0 — по времени суток): сразу в рейде и в следующих.
+func set_raid_hour(h: float) -> void:
+	raid_hour = h
+	save()
+	changed.emit()
+	if h >= 0.0 and DayCycle.current:
+		DayCycle.current.set_hour(h)
 
 
 func set_raid_conditions(time_key: String, weather_key: String) -> void:

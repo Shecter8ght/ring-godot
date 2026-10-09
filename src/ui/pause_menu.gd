@@ -384,6 +384,8 @@ func _build_settings(h: HBoxContainer) -> void:
 	grid.add_child(wm)
 	grid.add_child(_label("Время суток"))
 	grid.add_child(_cond_option(Balance.RAID_TIME, true))
+	grid.add_child(_label("Точное время"))
+	grid.add_child(_hour_row())
 	grid.add_child(_label("Погода"))
 	grid.add_child(_cond_option(Balance.RAID_WEATHER, false))
 	grid.add_child(_label("Эффекты камеры"))
@@ -721,3 +723,38 @@ func _teleport_to(p: Vector3) -> void:
 		y = (hit.position as Vector3).y
 	me.global_position = Vector3(p.x, (0.0 if is_nan(y) else y) + 0.1, p.z)
 	me.velocity = Vector3.ZERO
+
+
+## Точное время рейда: галочка «задать» и ползунок по 15 минут; без галочки — по времени суток.
+func _hour_row() -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var on := CheckBox.new()
+	on.focus_mode = Control.FOCUS_NONE
+	on.button_pressed = Settings.raid_hour >= 0.0
+	on.tooltip_text = "Задать час: в рейде — сразу (у хоста — у всех), следующие рейды начнутся с него. Без галочки — начало выбранного времени суток."
+	var s := HSlider.new()
+	s.min_value = 0.0
+	s.max_value = 23.75
+	s.step = 0.25
+	s.value = Settings.raid_hour if Settings.raid_hour >= 0.0 else (DayCycle.current.hour if DayCycle.current else 12.0)
+	s.custom_minimum_size = Vector2(170, 24)
+	s.focus_mode = Control.FOCUS_NONE
+	s.editable = on.button_pressed
+	var v := Label.new()
+	v.custom_minimum_size.x = 52
+	var show := func(h: float) -> void:
+		var m := int(round(h * 60.0)) % (24 * 60)
+		v.text = "%02d:%02d" % [m / 60, m % 60]
+	show.call(s.value)
+	s.value_changed.connect(func(x: float) -> void:
+		show.call(x)
+		if on.button_pressed:
+			Settings.set_raid_hour(x))
+	on.toggled.connect(func(p: bool) -> void:
+		s.editable = p
+		Settings.set_raid_hour(s.value if p else -1.0))
+	row.add_child(on)
+	row.add_child(s)
+	row.add_child(v)
+	return row

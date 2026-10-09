@@ -40,7 +40,20 @@ func _exit_tree() -> void:
 func start(atm: RaidAtmosphere, time_key: String) -> void:
 	_atm = atm
 	hour = float((Balance.RAID_TIME.get(time_key, Balance.RAID_TIME.day) as Dictionary).get("start_hour", 12.0))
+	# точное время из настроек — у того, кто ведёт время (одиночная игра, хост)
+	if Settings.raid_hour >= 0.0 and (not Net.is_networked() or multiplayer.is_server()):
+		hour = Settings.raid_hour
 	rebuild()
+
+
+## Перевести часы (настройки, хост): свет и небо — сразу, гостям — сразу же.
+func set_hour(h: float) -> void:
+	if Net.is_networked() and not multiplayer.is_server():
+		return
+	hour = fposmod(h, 24.0)
+	_tick(0.0, true)
+	if Net.is_networked():
+		Net.broadcast_scene(self, &"_rpc_hour", [hour], false)
 
 
 ## Погода или карта сменились: собрать заново профили времени суток и небо.
@@ -63,9 +76,19 @@ func _process(delta: float) -> void:
 			Net.broadcast_scene(self, &"_rpc_hour", [hour], false)
 
 
+## Часы для HUD: «18:46».
+func clock_text() -> String:
+	var total := int(floor(hour * 60.0)) % (24 * 60)
+	return "%02d:%02d" % [total / 60, total % 60]
+
+
 @rpc("authority", "call_remote", "unreliable")
 func _rpc_hour(h: float) -> void:
+	# большой скачок (хост перевёл часы) — свет и небо сразу
+	var jump := absf(h - hour) > 0.1
 	hour = h
+	if jump:
+		_tick(0.0, true)
 
 
 # ---------------------------------------------------------------- астрономия

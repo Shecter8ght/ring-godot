@@ -591,6 +591,9 @@ func _process(_delta: float) -> void:
 	_track_visit(_delta)
 	# оружие, патроны и гранаты — в HUD камеры (CameraRig), здесь — здоровье
 	var status := "HP %d" % int(_local_player.health.hp)
+	# игровое время (смена суток): «18:46»
+	if DayCycle.current:
+		status += "     " + DayCycle.current.clock_text()
 	if not _nav_baked:
 		status += "   (навмеш печётся)"
 	(_hud.get_node("Status") as Label).text = status

@@ -1662,6 +1662,8 @@ func _start_reload() -> void:
 func _can_reload(slot: String) -> bool:
 	if not equipment.has(slot):
 		return false
+	if Balance.AI_INFINITE_AMMO:
+		return true
 	var e: Dictionary = equipment[slot]
 	var mag: Dictionary = e.mag
 	for it in spare:
@@ -1680,7 +1682,10 @@ func _finish_reload() -> void:
 	var mag: Dictionary = e.mag
 	var magazine_rounds: int = maxi(0, _mag - int(e.get("chamber", 0)))
 	mag["rounds"] = magazine_rounds
-	if String(mag.get("id", "")) == "":
+	if Balance.AI_INFINITE_AMMO:
+		# патроны не кончаются: тот же магазин (та же пачка) — снова полный
+		magazine_rounds = WeaponDb.capacity(e)
+	elif String(mag.get("id", "")) == "":
 		# россыпью в ружьё / болтовку
 		var cap := WeaponDb.capacity(e)
 		for it in spare:
