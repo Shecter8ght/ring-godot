@@ -54,13 +54,13 @@ func _ready() -> void:
 	Input.action_release("aim")
 	await get_tree().create_timer(0.6).timeout
 	# тактическая: в магазине остались патроны
-	_player.ammo = 12
+	await _set_rounds(12)
 	await _reload([0.12, 0.3, 0.55, 0.75, 0.95], "veras_reload")
 	# полная: пусто
-	_player.ammo = 0
+	await _set_rounds(0)
 	await _reload([0.2, 0.5, 0.72, 0.78, 0.84], "veras_reload_empty")
 	# проверка магазина — держать R
-	_player.ammo = 17
+	await _set_rounds(17)
 	Input.action_press("reload")
 	await get_tree().create_timer(float(Balance.AMMO_CHECK.hold_sec) + 0.15).timeout
 	Input.action_release("reload")
@@ -102,12 +102,25 @@ func _equip(mods: Dictionary) -> void:
 	await get_tree().create_timer(0.4).timeout
 
 
+## Патроны в магазине: и у игрока, и в состоянии ствола (игра сверяет их каждый кадр).
+func _set_rounds(n: int) -> void:
+	_player.ammo = n
+	if _player._ws.has(_player.weapon_slot):
+		_player._ws[_player.weapon_slot]["rounds"] = n
+	await get_tree().physics_frame
+
+
 ## Перезарядка по R и кадры на долях её времени.
 func _reload(fractions: Array, prefix: String) -> void:
 	Input.action_press("reload")
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	Input.action_release("reload")
+	# перезарядка начинается по отпусканию R (удержание — проверка магазина): дождаться старта
+	for i in range(30):
+		if _player.reload_timer > 0.0:
+			break
+		await get_tree().physics_frame
 	var total: float = _player.reload_timer
 	var elapsed: float = 0.0
 	for f: float in fractions:
