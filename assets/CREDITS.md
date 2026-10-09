@@ -215,3 +215,15 @@
   реальных рюкзаков (Ferrino Rocker 25, 5.11 RUSH100, Brandit MOLLE 66L).
 - Ткань — Poly Haven, CC0: «Terlenka», «Stretch Poplin», «Book Pattern» (перекрашены).
 
+## ЛУМАР H1 (assets/models/attachments/lumar_h1)
+
+- Собственная модель проекта из библиотеки владельца: утверждённая геометрия и три состояния
+  UCUPaint v9, `ЛУМАР H1/Актуальное/LUMAR_H1_State*_v9.blend`.
+- Игровая сетка, UV, LOD и проекция PBR/нормалей — `tools/prepare_lumar_game.py`.
+  Карта трещин перенесена из исходного набора `V9_Glass_Crack.png`; исходники не перезаписаны.
+- В исходном материале использованы карты Poly Haven: Blue Metal Plate (Rob Tuytel,
+  CC0 1.0, https://polyhaven.com/a/blue_metal_plate) и Rubber Tiles (Amal Kumar,
+  CC0 1.0, https://polyhaven.com/a/rubber_tiles); они входят в проекцию шероховатости.
+- Готовая сцена сохраняет ID предмета `optic_holo_01`. Новые сторонние ассеты при переносе не
+  использовались; авторство и права исходной модели сохраняются у проекта и владельца.
+

@@ -1300,7 +1300,7 @@ func _floors_column() -> void:
 # ---------------------------------------------------------------- верстак
 
 func _build_workbench() -> void:
-	_title.text = "Верстак — обвесы"
+	_title.text = "Верстак — обвесы и ремонт"
 	if not Profile.equipment.has(_wb_slot):
 		_wb_slot = "secondary" if Profile.equipment.has("secondary") else "primary"
 	var left := VBoxContainer.new()
@@ -1317,6 +1317,7 @@ func _build_workbench() -> void:
 		b.button_pressed = ws == _wb_slot
 		tabs.add_child(b)
 	var weapon: Dictionary = Profile.equipment.get(_wb_slot, {})
+	_build_repairs(left)
 	if weapon.is_empty():
 		left.add_child(_text("Надень оружие в тайнике — обвесы ставятся на надетое.", Color(1.0, 0.7, 0.5)))
 		return
@@ -1331,7 +1332,7 @@ func _build_workbench() -> void:
 	var spec := WeaponStats.compute(weapon)
 	var mag: Dictionary = weapon.get("mag", {}) if weapon.get("mag") is Dictionary else {}
 	var w := WeaponDb.weapon(wid)
-	left.add_child(_text("%s · %s · %s · износ %d%% · %.1f кг" % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber)),
+	left.add_child(_text("%s · %s · %s · состояние %d%% · %.1f кг" % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber)),
 		"встроенный магазин" if w.has("internal_mag") else ItemDb.item_name(String(mag.get("id", ""))) if String(mag.get("id", "")) != "" else "без магазина",
 		int(weapon.get("dur", 100)), float(spec.weight)], Color(0.85, 0.85, 0.8)))
 	# сколько внутри — не видно: полный / пустой (проверка — в рейде, держать R)
@@ -1361,8 +1362,51 @@ func _build_workbench() -> void:
 				right.add_child(row)
 
 
-## Что из своего (тайник и рюкзак) встаёт в точку mount оружия weapon (запись where / idx в профиле):
-## [{id, sub, act, action, why}] для схемы оружия. bench — ставит верстак (его уровень решает).
+## Изношенные предметы из снаряжения, тайника и рюкзака ремонтируются по отдельности.
+func _build_repairs(parent: Container) -> void:
+	parent.add_child(_text("Ремонт до 100%% · деньги: %d ₽" % Profile.money, Color(0.95, 0.82, 0.6)))
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.custom_minimum_size.y = 100.0
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	parent.add_child(scroll)
+	var rows: VBoxContainer = VBoxContainer.new()
+	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(rows)
+	for slot: String in ["primary", "secondary"]:
+		var entry: Dictionary = Profile.equipment.get(slot, {})
+		if entry.is_empty():
+			continue
+		_repair_row(rows, "equip:" + slot, -1, entry)
+		for raw_mount: Variant in entry.get("mods", {}):
+			var mount: String = String(raw_mount)
+			_repair_row(rows, "equip:" + slot, -1, WeaponCondition.mod_entry(entry.mods[mount]), mount)
+	for where: String in ["stash", "backpack"]:
+		var items: Array = Profile.list_of(where)
+		for idx: int in range(items.size()):
+			var entry: Dictionary = items[idx]
+			if not WeaponCondition.supported(String(entry.id)):
+				continue
+			_repair_row(rows, where, idx, entry)
+			for raw_mount: Variant in entry.get("mods", {}):
+				var mount: String = String(raw_mount)
+				_repair_row(rows, where, idx, WeaponCondition.mod_entry(entry.mods[mount]), mount)
+
+
+func _repair_row(parent: Container, where: String, idx: int, entry: Dictionary, mount: String = "") -> void:
+	var cost: int = WeaponCondition.repair_price(entry)
+	if cost <= 0:
+		return
+	var row: HBoxContainer = HBoxContainer.new()
+	var label: Label = _text(ItemDb.label(entry), Color(0.85, 0.85, 0.8))
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+	var button: Button = _button("Починить · %d ₽" % cost, func() -> void: Profile.repair_part(where, idx, mount))
+	button.disabled = Profile.money < cost
+	button.tooltip_text = "Восстановить состояние до 100%" if not button.disabled else "Не хватает денег"
+	row.add_child(button)
+	parent.add_child(row)
+
+
 func _owned_candidates(weapon: Dictionary, mount: String, where: String, bench: bool, idx: int = -1) -> Array:
 	var out: Array = []
 	var probe := weapon.duplicate(true)
@@ -1378,7 +1422,7 @@ func _owned_candidates(weapon: Dictionary, mount: String, where: String, bench: 
 			var why := Profile.mod_block(id, mount) if bench else ""
 			if why == "":
 				why = WeaponDb.attach_block(probe, mount, id)
-			out.append({"id": id, "sub": "%s · %s" % ["тайник" if sn == "stash" else "рюкзак", _fx_text(WeaponDb.attachment(id))],
+			out.append({"id": id, "sub": "%s · %d%% · %s" % ["тайник" if sn == "stash" else "рюкзак", int(WeaponCondition.percent(src[i])), _fx_text(WeaponDb.attachment(id))],
 				"act": "Поставить", "why": why,
 				"action": func() -> void: Profile.fit_part(where, idx, sn, si, mount)})
 	return out

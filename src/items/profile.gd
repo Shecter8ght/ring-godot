@@ -499,6 +499,32 @@ static func unequip_to(slot: String, to_name: String, x: int, y: int, r: bool) -
 
 # ---------------------------------------------------------------- верстак
 
+## Ремонт тела оружия или конкретного обвеса; деньги и изменение сохраняются вместе.
+static func repair_part(where: String, idx: int, mount: String = "") -> bool:
+	ensure()
+	var entry: Dictionary = _entry_at(where, idx).duplicate(true)
+	if entry.is_empty():
+		return false
+	var part: Dictionary = entry
+	if mount != "":
+		var mods: Dictionary = entry.get("mods", {})
+		if not mods.has(mount):
+			return false
+		part = WeaponCondition.mod_entry(mods[mount])
+	var cost: int = WeaponCondition.repair_price(part)
+	if cost <= 0 or money < cost:
+		return false
+	part["dur"] = float(Balance.CONDITION.full)
+	if mount != "":
+		(entry.mods as Dictionary)[mount] = part
+	else:
+		entry = part
+	entry["rev"] = int(entry.get("rev", 0)) + 1
+	_set_entry(where, idx, entry)
+	money -= cost
+	save()
+	return true
+
 ## Обвес на оружии в слоте снаряжения (primary/secondary): точка → {id, …}.
 static func weapon_mods(weapon_slot: String) -> Dictionary:
 	if not equipment.has(weapon_slot):

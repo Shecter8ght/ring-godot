@@ -363,10 +363,12 @@ func _ai_spec(e: Dictionary) -> Dictionary:
 	var ws := WeaponStats.compute(e)
 	var c: Dictionary = Balance.AI_CLASS.get(String(ws["class"]), Balance.AI_CLASS.ASSAULT_RIFLE)
 	var skill := float(WeaponDb.loadout(loadout_id).get("skill", 1.0))
+	var worn: float = 1.0 - WeaponCondition.effectiveness(e)
+	var wear_spread: float = 1.0 + worn * worn * float(Balance.WEAPON_WEAR.spread)
 	return {"class": String(ws["class"]), "mag": int(ws.mag) + int(WeaponDb.weapon(String(e.id)).get("chamber_capacity", 0)), "reload": float(ws.reload) * Balance.AI_RELOAD_K,
 		"interval": maxf(float(ws.interval), float(c.interval_min)), "burst": int(c.burst) if bool(ws.auto) else 1,
 		"burst_pause": float(c.burst_pause), "damage": float(ws.damage) * Balance.AI_DAMAGE_K, "pellets": int(ws.pellets),
-		"spread": float(c.spread) / maxf(skill, 0.3), "range": float(c.range), "noise_m": float(ws.noise_m),
+		"spread": float(c.spread) * wear_spread / maxf(skill, 0.3), "range": float(c.range), "noise_m": float(ws.noise_m),
 		"sound": String(ws.sound), "reload_sound": String(ws.reload_sound), "cycle_sound": String(ws.cycle_sound),
 		"sounds": (ws.sounds as Dictionary).duplicate(), "pen": float(ws.pen), "armor_dmg": float(ws.armor_dmg),
 		"flash": float(ws.flash), "falloff": ws.get("falloff", []), "point_blank": ws.get("point_blank", []), "range_m": float(ws.range_m)}
@@ -390,7 +392,7 @@ func _show_gun() -> void:
 	if not equipment.has(_active):
 		return
 	var e: Dictionary = equipment[_active]
-	var gun := WeaponModels.build(String(e.id), e.get("mods", {}))
+	var gun := WeaponModels.build(String(e.id), e.get("mods", {}), 1, WeaponCondition.percent(e))
 	for l in gun.find_children("Flashlight_*", "SpotLight3D", true, false):
 		_fade(l as Light3D)
 	# в правой руке модели (кость руки): идёт за руками в любой позе; без Persona — у груди
@@ -1726,6 +1728,9 @@ func _finish_reload() -> void:
 
 ## Выстрел, если готов: очередь, пауза между очередями, магазин. suppress — по памяти, реже и хуже.
 func _try_fire(suppress: bool = false) -> void:
+	if equipment.has(_active) and WeaponCondition.broken(equipment[_active]):
+		_drop_fire_token()
+		return
 	if _reload_t > 0.0:
 		_drop_fire_token()
 		return
@@ -1833,6 +1838,15 @@ func _gun_pos() -> Vector3:
 
 
 func _shoot(suppress: bool) -> void:
+	if equipment.has(_active):
+		var entry: Dictionary = equipment[_active]
+		var previous_look: String = WeaponCondition.model_key(String(entry.id), entry.get("mods", {}), WeaponCondition.percent(entry))
+		WeaponCondition.wear_shots(equipment[_active], 1)
+		_spec = _ai_spec(equipment[_active])
+		if previous_look != WeaponCondition.model_key(String(entry.id), entry.get("mods", {}), WeaponCondition.percent(entry)):
+			_show_gun()
+		if _main_gun:
+			WeaponMods.update_condition(_main_gun, entry.get("mods", {}))
 	var from := _gun_pos()
 	var h := 1.1
 	var at_ai := _foe != null and is_instance_valid(_foe) and _target_player == null

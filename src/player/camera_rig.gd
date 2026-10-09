@@ -363,6 +363,9 @@ func _reticle_nv(on: bool) -> void:
 	for mi in _viewmodel.find_children("*", "MeshInstance3D", true, false):
 		if mi.has_meta("reticle_dot"):
 			(mi as MeshInstance3D).scale = Vector3.ONE * (Balance.NVG_RETICLE_SCALE if on else 1.0)
+			if mi.has_meta("condition_reticle_material"):
+				var material: StandardMaterial3D = mi.get_meta("condition_reticle_material") as StandardMaterial3D
+				material.emission = Color(0.88, 1.0, 0.9) if on else Color(1.0, 0.04, 0.005)
 
 
 func _exit_tree() -> void:
@@ -572,11 +575,12 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# пули летят туда, куда сейчас смотрит ствол: с отдачей и раскачкой
 	pl.look_pitch = pitch
 	# модель в руках с обвесами: линия прицеливания на оси взгляда, рукоять — на ads_z перед глазом
-	var vm_key := wid + str(pl.weapon_mods)
+	var vm_key := WeaponCondition.model_key(wid, pl.weapon_mods, pl.weapon_condition)
 	if _viewmodel_id != vm_key:
 		if _viewmodel:
 			_viewmodel.queue_free()
-		_viewmodel = WeaponModels.build(wid, pl.weapon_mods) if wid != "" else Node3D.new()
+		_viewmodel = WeaponModels.build(wid, pl.weapon_mods, 0, pl.weapon_condition) if wid != "" else Node3D.new()
+		WeaponCondition.apply_visual(_viewmodel, {"dur": pl.weapon_condition})
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			var gi := mi as GeometryInstance3D
 			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -600,6 +604,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_viewmodel_id = vm_key
 		_reticle_nv(pl.nvg_on)
 	_viewmodel.visible = true
+	WeaponMods.update_condition(_viewmodel, pl.weapon_mods)
 	for n in _viewmodel.find_children("LaserBeam*", "Node3D", true, false):
 		(n as Node3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
 	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):

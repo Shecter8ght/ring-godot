@@ -58,8 +58,8 @@ func _ready() -> void:
 	_vp.add_child(_cam)
 
 
-func show_weapon(weapon_id: String, mods: Dictionary) -> void:
-	var key := weapon_id + str(mods)
+func show_weapon(weapon_id: String, mods: Dictionary, dur: float = 100.0) -> void:
+	var key := WeaponCondition.model_key(weapon_id, mods, dur)
 	if key == _key:
 		return
 	_key = key
@@ -68,7 +68,7 @@ func show_weapon(weapon_id: String, mods: Dictionary) -> void:
 		_model = null
 	if weapon_id == "":
 		return
-	_model = WeaponModels.build(weapon_id, mods)
+	_model = WeaponModels.build(weapon_id, mods, 0, dur)
 	_pivot.add_child(_model)
 	# центр модели — в центр вращения; камера — по размеру
 	var box := AABB()

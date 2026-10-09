@@ -46,7 +46,7 @@ static func strip(entry: Dictionary, part: String) -> Array:
 		var mods: Dictionary = e.get("mods", {})
 		if not mods.has(mount):
 			return [entry, {}]
-		var got := {"id": WeaponDb.mod_id(mods[mount]), "n": 1}
+		var got: Dictionary = WeaponCondition.mod_entry(mods[mount])
 		mods.erase(mount)
 		e["mods"] = mods
 		_bump(e)
@@ -98,13 +98,16 @@ static func fit(entry: Dictionary, item: Dictionary, hint: String = "") -> Array
 		var mods: Dictionary = probe.get("mods", {})
 		var old := {}
 		if mods.has(mount):
-			old = {"id": WeaponDb.mod_id(mods[mount]), "n": 1}
+			old = WeaponCondition.mod_entry(mods[mount])
 			mods.erase(mount)
 		probe["mods"] = mods
 		var why := WeaponDb.attach_block(probe, mount, iid)
 		if why != "":
 			return [entry, {}, why]
-		mods[mount] = {"id": iid}
+		var installed: Dictionary = WeaponCondition.mod_entry(item)
+		for position: String in ["x", "y", "r"]:
+			installed.erase(position)
+		mods[mount] = installed
 		probe["mods"] = mods
 		_bump(probe)
 		return [probe, old, ""]

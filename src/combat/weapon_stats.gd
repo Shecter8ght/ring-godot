@@ -21,7 +21,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	if ammo_id == "" and int(entry.get("chamber", 0)) > 0:
 		aid = String(entry.get("chamber_ammo", aid))
 	var dur := float(entry.get("dur", 100.0))
-	var key := "%s|%s|%s|%s|%d|%s|%s" % [entry.id, str(entry.get("mods", {})), String(mag.get("id", "")), aid, int(dur / 5.0), active_sight(entry), laser_on(entry)]
+	var key := "%s|%s|%s|%s|%.4f|%s|%s" % [entry.id, str(entry.get("mods", {})), String(mag.get("id", "")), aid, dur, active_sight(entry), laser_on(entry)]
 	if _cache.has(key):
 		return _cache[key]
 	var wid := WeaponDb.canonical(String(entry.id))
@@ -111,7 +111,15 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		var att := WeaponDb.attachment(WeaponDb.mod_id(mods[mount]))
 		if att.is_empty():
 			continue
-		var fx: Dictionary = att.get("fx", {})
+		var st: Dictionary = WeaponCondition.mod_entry(mods[mount])
+		var effectiveness: float = WeaponCondition.effectiveness(st)
+		var fx: Dictionary = (att.get("fx", {}) as Dictionary).duplicate(true)
+		for effect: String in ["kick", "kick_h", "shake", "spread", "ads_spread", "hip_spread", "noise", "damage", "flash", "aim", "braced_kick", "braced_spread"]:
+			if fx.has(effect):
+				fx[effect] = lerpf(1.0, float(fx[effect]), effectiveness)
+		fx["db"] = float(fx.get("db", 0.0)) * effectiveness
+		if float(fx.get("ergo", 0.0)) > 0.0:
+			fx["ergo"] = float(fx.ergo) * effectiveness
 		var is_optic := String(mount).begins_with("optic_")
 		# прицел действует, только когда через него смотрят; эргономика (вес) — всегда
 		if is_optic and String(mount) != "optic_" + active:
@@ -131,10 +139,10 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		s.aim_k = float(s.aim_k) * float(fx.get("aim", 1.0))
 		s.braced_kick = float(s.braced_kick) * float(fx.get("braced_kick", 1.0))
 		s.braced_spread = float(s.braced_spread) * float(fx.get("braced_spread", 1.0))
-		if bool(fx.get("suppressed", false)):
+		if bool(fx.get("suppressed", false)) and effectiveness > 0.0:
 			s.suppressed = true
-		if is_optic:
-			s.aim_k = float(s.aim_k) * float(att.get("aim_k", 1.0))
+		if is_optic and effectiveness > 0.0:
+			s.aim_k = float(s.aim_k) * lerpf(1.0, float(att.get("aim_k", 1.0)), effectiveness)
 			if float(att.get("zoom", 0.0)) > 0.0:
 				s.zoom = float(att.zoom)
 				s.scoped = true
@@ -142,12 +150,11 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 				# угловой коллиматор: основной (оптика) не работает, пока смотришь в угловой
 				s.zoom = 0.0
 				s.scoped = false
-		if att.has("light"):
+		if att.has("light") and effectiveness > 0.0:
 			s.light = true
-		var st: Dictionary = mods[mount] if mods[mount] is Dictionary else {}
-		if att.has("laser") and bool(st.get("laser", false)):
+		if att.has("laser") and bool(st.get("laser", false)) and effectiveness > 0.0:
 			s.laser = true
-			s.hip_spread = float(s.hip_spread) * float((att.laser as Dictionary).get("hip_spread", 1.0))
+			s.hip_spread = float(s.hip_spread) * lerpf(1.0, float((att.laser as Dictionary).get("hip_spread", 1.0)), effectiveness)
 	# Запись глушителя — не просто прежний выстрел тише. Пока своей записи нет, Audio возьмёт
 	# обычный набор как запасной; после одобрения стенд подхватит suppressed-префикс сам.
 	if bool(s.suppressed):
@@ -162,6 +169,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	s.jam = (1.0 - float(b.reliability)) * float(Balance.WEAPON_WEAR.jam_base) * (1.0 + worn * float(Balance.WEAPON_WEAR.jam_worn)) * jam_k
 	s.wear = float(b.get("wear", 0.02))
 	s.dur = dur
+	s.broken = WeaponCondition.broken(entry)
 	s.weight = ItemDb.entry_weight(entry)
 	s.ergo = clampf(float(s.ergo), 5.0, 100.0)
 	var e := float(s.ergo) / 100.0
@@ -171,6 +179,8 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		s.ads_fov = Balance.SCOPE_MAIN_FOV
 	# изометрия: оптика — приближение камеры в прицеле, коллиматор — без
 	s.iso_zoom = 1.0 + (minf(float(s.zoom), 8.0) * float(Balance.ISO_AIM.zoom_per_x) if bool(s.scoped) else 0.0)
+	if _cache.size() >= int(Balance.CONDITION.cache_entries):
+		_cache.clear()
 	_cache[key] = s
 	return s
 
@@ -200,7 +210,7 @@ static func active_sight(entry: Dictionary) -> String:
 static func laser_on(entry: Dictionary) -> bool:
 	var mods: Dictionary = entry.get("mods", {})
 	for m in mods:
-		if mods[m] is Dictionary and bool((mods[m] as Dictionary).get("laser", false)) and WeaponDb.attachment(WeaponDb.mod_id(mods[m])).has("laser"):
+		if mods[m] is Dictionary and not WeaponCondition.broken(mods[m]) and bool((mods[m] as Dictionary).get("laser", false)) and WeaponDb.attachment(WeaponDb.mod_id(mods[m])).has("laser"):
 			return true
 	return false
 

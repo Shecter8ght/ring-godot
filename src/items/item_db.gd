@@ -214,6 +214,10 @@ static func _partial_mag(w: Dictionary, rng: RandomNumberGenerator, opts: Dictio
 
 
 static func _merge(list: Array, id: String, n: int) -> void:
+	if WeaponCondition.supported(id):
+		for i: int in range(n):
+			list.append(make(id, 1))
+		return
 	for it in list:
 		if String(it.id) == id and not it.has("dur"):
 			it.n = int(it.n) + n
@@ -264,6 +268,9 @@ static func make(id: String, n: int) -> Dictionary:
 		e["mods"] = {}
 		e["mag"] = {"id": "" if w.has("internal_mag") else WeaponDb.default_mag(id), "ammo": WeaponDb.default_ammo(String(w.caliber)), "rounds": 0}
 		e["sight"] = "primary"
+	elif not WeaponDb.attachment(id).is_empty():
+		e.n = 1
+		e["dur"] = float(Balance.CONDITION.full)
 	elif not WeaponDb.magazine(id).is_empty():
 		e.n = 1
 		e["ammo"] = WeaponDb.default_ammo(WeaponDb.mag_caliber(id))
@@ -598,7 +605,7 @@ static func remove_at(list: Array, idx: int, n: int) -> Dictionary:
 
 ## Наибольшая прочность предмета (оружие — 100; броня, шлем, плита — из данных; 0 — без износа).
 static func max_dur(id: String) -> float:
-	if WeaponDb.is_weapon(id):
+	if WeaponCondition.supported(id):
 		return 100.0
 	var v := WeaponDb.vest(id)
 	if not v.is_empty():
@@ -620,6 +627,8 @@ static func label(entry: Dictionary) -> String:
 static func _label(entry: Dictionary) -> String:
 	var id := String(entry.id)
 	var t := item_name(id)
+	if WeaponCondition.supported(id) and WeaponCondition.broken(entry):
+		t += " · СЛОМАНО"
 	if WeaponDb.is_weapon(id):
 		t += " · %d%%" % int(entry.get("dur", 100))
 		var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
@@ -628,6 +637,8 @@ static func _label(entry: Dictionary) -> String:
 		if not (entry.get("mods", {}) as Dictionary).is_empty():
 			t += " · обвес: %d" % (entry.mods as Dictionary).size()
 		return t
+	if not WeaponDb.attachment(id).is_empty():
+		return t + " · %d%%" % int(WeaponCondition.percent(entry))
 	if entry.has("rounds"):
 		var cap := int(WeaponDb.magazine(id).get("capacity", 0))
 		# вместимость — в названии («… на 30»); нет — дописать
@@ -655,7 +666,7 @@ static func entry_value(entry: Dictionary) -> int:
 	if entry.has("dur") and mx > 0.0:
 		v *= clampf(float(entry.dur) / mx, 0.2, 1.0)
 	for slot in entry.get("mods", {}):
-		v += float(value(WeaponDb.mod_id(entry.mods[slot])))
+		v += entry_value(WeaponCondition.mod_entry(entry.mods[slot]))
 	var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
 	if not mag.is_empty():
 		if String(mag.get("id", "")) != "":

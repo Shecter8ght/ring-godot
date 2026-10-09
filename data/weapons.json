@@ -4103,7 +4103,7 @@
    "flavor": "Точка экономит доли секунды вблизи — обычно именно их и не хватает в дверях."
   },
   "optic_holo_01": {
-   "name": "Голографический прицел",
+   "name": "ЛУМАР H1",
    "cat": "mod",
    "size": [
     1,
@@ -4125,6 +4125,7 @@
      "RAIL_TOP"
     ],
     "look": "holo",
+    "asset": "res://assets/models/attachments/lumar_h1/lumar_h1.tscn",
     "fx": {
      "ads_spread": 0.58,
      "ergo": -4

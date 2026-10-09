@@ -45,7 +45,7 @@ func setup(entry: Dictionary) -> void:
 	for b in _slots.values():
 		(b as Node).queue_free()
 	_slots.clear()
-	_preview.show_weapon(String(entry.get("id", "")), entry.get("mods", {}))
+	_preview.show_weapon(String(entry.get("id", "")), entry.get("mods", {}), WeaponCondition.percent(entry))
 	var mods: Dictionary = entry.get("mods", {})
 	var mounts := WeaponDb.mounts_of(String(entry.get("id", "")))
 	for m in WeaponDb.MOUNTS:
@@ -64,7 +64,7 @@ func setup(entry: Dictionary) -> void:
 		var id := WeaponDb.mod_id(mods.get(mount, ""))
 		if id != "":
 			b.icon = ItemIcons.get_icon(id)
-			b.tooltip_text = "%s [%s]\n%s" % [String(WeaponDb.MOUNT_NAMES.get(mount, mount)), String(mounts[mount]), ItemDb.item_name(id)]
+			b.tooltip_text = "%s [%s]\n%s" % [String(WeaponDb.MOUNT_NAMES.get(mount, mount)), String(mounts[mount]), ItemDb.label(WeaponCondition.mod_entry(mods[mount]))]
 		else:
 			b.tooltip_text = "%s [%s]\nпусто" % [String(WeaponDb.MOUNT_NAMES.get(mount, mount)), String(mounts[mount])]
 		b.modulate = Color(1, 1, 1) if id != "" else Color(0.75, 0.75, 0.72)

@@ -361,6 +361,7 @@ static func _mod_text(id: String, attachment: Dictionary) -> String:
 	var lines: Array[String] = []
 	var effects := _mod_effects(attachment)
 	lines.append("Эффекты: %s." % ", ".join(effects) if not effects.is_empty() else "Числовых модификаторов нет.")
+	lines.append("Собственное состояние 100–0%. Износ ослабляет действие обвеса; на нуле устройство не работает. Ремонт — на верстаке в убежище.")
 	var fits: Array[String] = []
 	for wid in WeaponDb.ids("weapons"):
 		if not WeaponDb.mounts_for({"id": String(wid), "n": 1, "mods": {}}, id).is_empty():

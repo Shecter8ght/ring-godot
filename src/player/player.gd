@@ -44,6 +44,7 @@ var _jump_cd: float = 0.0
 var weapon_slot: String = ""
 ## Обвес в руках с состоянием фонарей/ЛЦУ (точка → {id, light, laser}): модель на теле у всех.
 var weapon_mods: Dictionary = {}
+var weapon_condition: float = 100.0
 ## Горит фонарь / ЛЦУ на оружии в руках (выдаёт, слепит) — видят все.
 var light_on: bool = false
 var laser_on: bool = false
@@ -251,7 +252,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_condition", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -464,6 +465,7 @@ func entry_of(key: String) -> Dictionary:
 		e["chamber"] = int(st.get("chamber", 0))
 		e["chamber_ammo"] = String(st.get("chamber_ammo", ""))
 	e["dur"] = float(st.dur)
+	e["_condition_shots"] = int(st.get("shots", 0))
 	e["sight"] = String(st.sight)
 	var mods: Dictionary = e.get("mods", {})
 	for m in mods:
@@ -471,6 +473,7 @@ func entry_of(key: String) -> Dictionary:
 		var t: Dictionary = (st.tac as Dictionary).get(m, {})
 		md["light"] = bool(t.get("light", false))
 		md["laser"] = bool(t.get("laser", false))
+		md["dur"] = float((st.get("mod_dur", {}) as Dictionary).get(m, WeaponCondition.percent(md)))
 		mods[m] = md
 	e["mods"] = mods
 	return e
@@ -486,12 +489,14 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 	var mag: Dictionary = normalized.get("mag", {}) if normalized.get("mag") is Dictionary else {}
 	var tac := {}
 	var mods: Dictionary = base.get("mods", {})
+	var mod_dur: Dictionary = {}
 	for m in mods:
+		mod_dur[m] = WeaponCondition.percent(WeaponCondition.mod_entry(mods[m]))
 		if mods[m] is Dictionary:
 			tac[m] = {"light": bool((mods[m] as Dictionary).get("light", false)), "laser": bool((mods[m] as Dictionary).get("laser", false))}
 	var jam := bool(_ws[key].get("jam", false)) if _ws.has(key) and String(_ws[key].id) == String(base.id) else false
 	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": String(mag.get("ammo", "")),
-		"dur": float(base.get("dur", 100.0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
+		"dur": WeaponCondition.percent(base), "mod_dur": mod_dur, "shots": int(base.get("_condition_shots", 0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
 		"chamber": int(normalized.get("chamber", 0)), "chamber_ammo": String(normalized.get("chamber_ammo", ""))}
 
 
@@ -529,6 +534,7 @@ func _play_weapon_sound(specification: Dictionary, slot: String, extra_db: float
 func _ws_state(key: String) -> Dictionary:
 	var st: Dictionary = _ws.get(key, {})
 	return {"id": String(st.get("id", "")), "rev": int(st.get("rev", 0)), "rounds": int(st.get("rounds", 0)), "dur": float(st.get("dur", 100.0)),
+		"shots": int(st.get("shots", 0)),
 		"sight": String(st.get("sight", "primary")), "tac": (st.get("tac", {}) as Dictionary).duplicate(true),
 		"chamber": int(st.get("chamber", 0)), "chamber_ammo": String(st.get("chamber_ammo", ""))}
 
@@ -677,6 +683,7 @@ func _physics_process(delta: float) -> void:
 	# обвес в руках с фонарями/лазерами — модель у всех; горит ли — выдаёт
 	if weapon_slot != "":
 		var we := weapon_entry()
+		weapon_condition = WeaponCondition.percent(we)
 		if _pm_action.is_empty():
 			ammo = _state_rounds(weapon_slot)
 			weapon_rounds = ammo
@@ -686,8 +693,8 @@ func _physics_process(delta: float) -> void:
 		var lit := false
 		var las := false
 		for m in mods:
-			lit = lit or bool((mods[m] as Dictionary).get("light", false))
-			las = las or bool((mods[m] as Dictionary).get("laser", false))
+			lit = lit or (not WeaponCondition.broken(mods[m]) and bool((mods[m] as Dictionary).get("light", false)))
+			las = las or (not WeaponCondition.broken(mods[m]) and bool((mods[m] as Dictionary).get("laser", false)))
 		if lit != light_on:
 			light_on = lit
 		if las != laser_on:
@@ -819,13 +826,13 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 ## Оружие — в правой руке модели (кость руки, CharacterAnimator.weapon_grip): идёт за руками
 ## в любой позе — ходьба, бег, присед, лёжа, перезарядка. Без модели Persona — у груди, как раньше.
 func _update_hand() -> void:
-	var key := weapon_id + str(weapon_mods)
+	var key := WeaponCondition.model_key(weapon_id, weapon_mods, weapon_condition)
 	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
 	var yaw := _body.rotation.y
 	if _weapon_model_id != key:
 		if _weapon_model:
 			_weapon_model.queue_free()
-		_weapon_model = WeaponModels.build(weapon_id, weapon_mods, 1) if weapon_id != "" else Node3D.new()
+		_weapon_model = WeaponModels.build(weapon_id, weapon_mods, 1, weapon_condition) if weapon_id != "" else Node3D.new()
 		var family := String(WeaponDb.weapon(weapon_id).get("model", "rifle")) if weapon_id != "" else "rifle"
 		var grip: Node3D = _animator.weapon_grip(family, weapon_id) if _animator else null
 		(grip if grip else _hand).add_child(_weapon_model)
@@ -844,6 +851,8 @@ func _update_hand() -> void:
 		if ads:
 			set_first_person(true)
 	_hand.visible = health.alive
+	if _weapon_model:
+		WeaponMods.update_condition(_weapon_model, weapon_mods)
 	_weapon_model.visible = health.alive
 	if _weapon_rig and not _weapon_rig.is_busy():
 		_weapon_rig.set_ammo_state(weapon_rounds)
@@ -865,7 +874,7 @@ func _update_hand() -> void:
 ## Включён ли фонарь / лазер (kind: light / laser) того узла модели (meta "mount") по обвесу mods.
 static func tac_on(mods: Dictionary, node: Node, kind: String) -> bool:
 	var m := String(node.get_meta("mount", ""))
-	return mods.has(m) and mods[m] is Dictionary and bool((mods[m] as Dictionary).get(kind, false))
+	return mods.has(m) and mods[m] is Dictionary and not WeaponCondition.broken(mods[m]) and bool((mods[m] as Dictionary).get(kind, false))
 
 
 ## Шаги слышны AI: радиус по стойке и бегу, только пока реально движемся.
@@ -1541,6 +1550,10 @@ func _switch(key: String, sound: bool = true) -> void:
 
 
 func _fire(spec: Dictionary) -> void:
+	if bool(spec.get("broken", false)):
+		fire_timer = float(spec.interval)
+		_say("Оружие сломано — нужен ремонт на верстаке")
+		return
 	# Ствол отведён от преграды: не расходовать патрон и не стрелять из камеры сквозь неё.
 	if weapon_obstruction > float(Balance.WEAPON_CLEARANCE.fire_threshold):
 		return
@@ -1567,7 +1580,12 @@ func _fire(spec: Dictionary) -> void:
 	ammo = _state_rounds(weapon_slot)
 	weapon_rounds = ammo
 	_weapon_action("shot", ammo <= 0, 0.0, ammo, false)
-	st.dur = maxf(0.0, float(st.dur) - float(spec.wear))
+	var worn_entry: Dictionary = entry_of(weapon_slot)
+	WeaponCondition.wear_shots(worn_entry, 1)
+	st.dur = WeaponCondition.percent(worn_entry)
+	st["shots"] = int(st.get("shots", 0)) + 1
+	for mount: Variant in worn_entry.get("mods", {}):
+		(st.mod_dur as Dictionary)[mount] = WeaponCondition.percent(worn_entry.mods[mount])
 	_ws_dirty = true
 	_ws_sync_t = 0.6
 	fire_timer = float(spec.interval)

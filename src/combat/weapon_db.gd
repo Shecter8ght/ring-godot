@@ -594,7 +594,7 @@ static func _from_preset(p: Dictionary, rng: RandomNumberGenerator, dur_range: A
 	e["dur"] = roundf(rng.randf_range(float(dr[0]), float(dr[1])))
 	var mods := {}
 	for mount in p.get("mods", {}):
-		mods[String(mount)] = {"id": String(p.mods[mount])}
+		mods[String(mount)] = {"id": String(p.mods[mount]), "dur": roundf(rng.randf_range(float(dr[0]), float(dr[1])))}
 	e["mods"] = mods
 	var ammo_id := pick_ammo(p.get("ammo", []), rng, String(weapon(wid).caliber))
 	var cap := 0
@@ -708,4 +708,4 @@ static func migrate(e: Dictionary) -> Array:
 	elif not plate(id).is_empty():
 		if not out.has("dur"):
 			out["dur"] = float(plate(id).durability)
-	return [out, spill]
+	return [WeaponCondition.normalize(out), spill]

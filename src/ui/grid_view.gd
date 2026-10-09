@@ -135,7 +135,7 @@ func _draw() -> void:
 			draw_string_outline(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 3, Color(0, 0, 0, 0.8))
 			draw_string(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1.0, 0.92, 0.6))
 		if it.has("dur"):
-			var mx := float(ItemDb.equip(String(it.id)).get("durability", 1))
+			var mx := ItemDb.max_dur(String(it.id))
 			var k := clampf(float(it.dur) / maxf(1.0, mx), 0.0, 1.0)
 			draw_rect(Rect2(r.position + Vector2(3, r.size.y - 6), Vector2((r.size.x - 6) * k, 3)), Color(0.4, 0.85, 0.4).lerp(Color(0.9, 0.3, 0.2), 1.0 - k))
 		if it.has("mods") and not (it.mods as Dictionary).is_empty():

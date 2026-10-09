@@ -159,6 +159,8 @@ func _host() -> void:
 				_check(case_name + ": отмена дошла до чужого рига", rig == null or (rig.action == "" and not rig.is_busy()))
 			"last_shot":
 				_check("последний выстрел: расход подтверждён хостом", Gear.total_rounds(equipped) == 0)
+				_check("хост считает износ оружия", is_equal_approx(float(equipped.dur), 100.0 - float(WeaponDb.weapon(PM_ID).stats.wear)))
+				_check("хост считает отдельный износ глушителя", is_equal_approx(float(equipped.mods.muzzle.dur), 20.0 - float(Balance.CONDITION.shot_wear.SUPPRESSOR)))
 				_check("последний выстрел: чужой затвор на задержке", rig != null and rig.is_slide_locked() and person.weapon_rounds == 0)
 	_case = ""
 	_finish.rpc_id(_client_id, _abort)
@@ -233,12 +235,12 @@ func _seed_case(case_name: String) -> void:
 	person.health.invulnerable = false
 	var previous: Dictionary = person.inventory.equipment.get("secondary", {}) as Dictionary
 	var entry: Dictionary = _entry(0 if case_name in ["reload_empty", "last_shot"] else 3, 0 if case_name == "reload_empty" else 1, int(previous.get("rev", 0)) + 1)
-	if case_name == "suppressor_remove":
-		entry.mods = {"muzzle": {"id": SUP_ID}}
+	if case_name in ["suppressor_remove", "last_shot"]:
+		entry.mods = {"muzzle": {"id": SUP_ID, "dur": 20.0}}
 	var items: Array = []
 	ItemDb.add_to(items, WeaponDb.make_mag("mag_918_8", "ammo_918_pst", 8), Balance.BACKPACK_GRID)
 	ItemDb.add_to(items, WeaponDb.make_mag("mag_918_8", "ammo_918_pst", 8), Balance.BACKPACK_GRID)
-	if case_name != "suppressor_remove":
+	if case_name not in ["suppressor_remove", "last_shot"]:
 		ItemDb.add_to(items, ItemDb.make(SUP_ID, 1), Balance.BACKPACK_GRID)
 	person.inventory.equipment = {"secondary": entry}
 	person.inventory.items = items
@@ -308,6 +310,8 @@ func _run_case(case_name: String, revision: int) -> void:
 			person.flush_weapon_state()
 			await get_tree().create_timer(0.5).timeout
 			_check("последний выстрел у клиента оставил затвор на задержке", person.ammo == 0 and person._weapon_rig != null and person._weapon_rig.is_slide_locked())
+			_check("износ оружия совпал с подтверждением хоста", is_equal_approx(float(person.inventory.equipment.secondary.dur), float(person.weapon_entry().dur)))
+			_check("износ глушителя дошёл обратно до клиента", is_equal_approx(float(person.inventory.equipment.secondary.mods.muzzle.dur), 20.0 - float(Balance.CONDITION.shot_wear.SUPPRESSOR)))
 	await get_tree().create_timer(0.25).timeout
 	_check(case_name + ": боезапас копии клиента сохранён", _total_rounds(person.inventory) == total - (1 if case_name == "last_shot" else 0))
 	_case_done.rpc_id(1, case_name)

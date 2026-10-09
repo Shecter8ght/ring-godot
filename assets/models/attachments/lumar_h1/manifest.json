@@ -1,0 +1,30 @@
+{
+  "source": {
+    "100": "LUMAR_H1_State100_New_v9.blend",
+    "60": "LUMAR_H1_State060_Used40_v9.blend",
+    "20": "LUMAR_H1_State020_Worn80_v9.blend"
+  },
+  "triangles": {
+    "Body": 32060,
+    "Body_LOD1": 7694,
+    "Lens": 498,
+    "Reticle": 224
+  },
+  "axis": "X left, Y up, Z forward",
+  "mount_origin_m": [
+    0,
+    0,
+    0
+  ],
+  "sight_axis_m": [
+    0,
+    0.056,
+    0.019
+  ],
+  "states": [
+    100,
+    60,
+    20
+  ],
+  "texture_size": 2048
+}

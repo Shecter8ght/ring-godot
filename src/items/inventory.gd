@@ -303,13 +303,22 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 		# владелец ещё не видел последнюю перемену (сменили магазин / обвес) — его состояние устарело
 		return
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	# Хост считает ресурс по подтверждённому расходу патронов, не принимает чужой процент.
+	var shot_count: int = int(e.get("_condition_shots", 0))
+	var requested_shots: int = int(st.get("shots", shot_count))
+	var spent: int = maxi(0, Gear.total_rounds(e) - (clampi(int(st.get("rounds", mag.get("rounds", 0))), 0, WeaponDb.capacity(e)) + int(st.get("chamber", e.get("chamber", 0)))))
+	var shots: int = requested_shots - shot_count
+	if shots < 0 or shots > spent or (shots > 0 and WeaponCondition.broken(e)):
+		return
+	WeaponCondition.wear_shots(e, shots)
+	if shots > 0 or e.has("_condition_shots"):
+		e["_condition_shots"] = requested_shots
 	if not mag.is_empty():
 		mag.rounds = clampi(int(st.get("rounds", mag.get("rounds", 0))), 0, WeaponDb.capacity(e))
 		e["mag"] = mag
 	if int(WeaponDb.weapon(String(e.get("id", ""))).get("chamber_capacity", 0)) > 0:
 		e["chamber"] = clampi(int(st.get("chamber", e.get("chamber", 0))), 0, 1)
 		e["chamber_ammo"] = String(st.get("chamber_ammo", e.get("chamber_ammo", ""))) if int(e.chamber) > 0 else ""
-	e["dur"] = clampf(float(st.get("dur", e.get("dur", 100.0))), 0.0, 100.0)
 	e["sight"] = String(st.get("sight", e.get("sight", "primary")))
 	var mods: Dictionary = e.get("mods", {})
 	var tac: Dictionary = st.get("tac", {})

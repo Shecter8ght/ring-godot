@@ -27,7 +27,7 @@ static func socket(model_key: String, mount: String) -> Dictionary:
 
 
 ## mods — точка → {id[, light, laser]} (или просто id у старых записей).
-static func fit(root: Node3D, model_key: String, mods: Dictionary) -> void:
+static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0) -> void:
 	var rig: WeaponRig = WeaponRig.find_on(root)
 	if rig:
 		rig.set_external_muzzle(false)
@@ -58,16 +58,39 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary) -> void:
 			continue
 		m["mount"] = String(mount)
 		m["att"] = a
+		m["state"] = WeaponCondition.mod_entry(mods[mount])
+		m["lod"] = lod
 		if rig and String(mount) == "muzzle" and bare_muzzle is Vector3:
 			# Сокеты основы сняты с процедурной модели; на импортированной насадка встаёт на её срез.
 			m.pos = bare_muzzle
 		if String(mount) == "optic_primary":
 			# прицел на планке — целик сложен: иначе торчит в нижней части окна прицела
 			_hide_part(root, "rear_sight")
+		if String(mount) == "muzzle":
+			_hide_part(root, "muzzle_device")
+		if String(mount) == "stock":
+			_hide_part(root, "stock")
+		var part: Node3D = Node3D.new()
+		part.name = "Attachment_" + String(mount)
+		part.set_meta("condition_part", true)
+		part.set_meta("mount", String(mount))
+		root.add_child(part)
 		if String(mount) == "optic_offset":
-			_offset_optic(root, m, a)
-			continue
-		_build_look(root, m, a)
+			_offset_optic(part, m, a)
+		else:
+			_build_look(part, m, a)
+		for meta: StringName in part.get_meta_list():
+			if meta not in [&"condition_part", &"mount"]:
+				root.set_meta(meta, part.get_meta(meta))
+		if not part.get_meta("asset_loaded", false):
+			WeaponCondition.apply_visual(part, m.state)
+		for node: Node in part.find_children("*", "MeshInstance3D", true, false):
+			var mesh: MeshInstance3D = node as MeshInstance3D
+			var material: Material = mesh.get_active_material(0) if mesh.mesh and mesh.mesh.get_surface_count() > 0 else null
+			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and String(mount).begins_with("optic_"):
+				mesh.set_meta("reticle_dot", true)
+				mesh.set_meta("mount", String(mount))
+	update_condition(root, mods)
 	if rig and root.get_meta("muzzle", Vector3.ZERO) != bare_muzzle:
 		# Процедурный глушитель или тормоз на модели без своей детали: дульный срез — от насадки,
 		# риг не возвращает его на голый ствол при каждой позе.
@@ -82,7 +105,8 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 		"red_dot":
 			_red_dot(root, m)
 		"holo":
-			_holo(root, m)
+			if not _lumar(root, m, a):
+				_holo(root, m)
 		"rmr":
 			_rmr(root, m)
 		"scope4x":
@@ -114,7 +138,83 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 			_bipod(root, m)
 
 
-## Деталь в масштабе k вокруг точки сокета (короткая / массивная рукоятка).
+## Игровая модель ЛУМАР: общий крепёж, карты состояния и отдельные стекло/марка.
+static func _lumar(root: Node3D, m: Dictionary, attachment: Dictionary) -> bool:
+	var path: String = String(attachment.get("asset", ""))
+	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
+		return false
+	var model: Node3D = (load(path) as PackedScene).instantiate() as Node3D
+	if model == null:
+		return false
+	model.name = "LUMAR_H1"
+	model.position = m.pos
+	model.position.y = _optic_base(root, m, 0.09)
+	root.add_child(model)
+	var visual: int = WeaponCondition.stage(m.get("state", {}))
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	var prefix: String = path.get_base_dir() + "/lumar_%d_" % visual
+	material.albedo_texture = load(prefix + "base_color.png") as Texture2D
+	material.metallic = 1.0
+	material.metallic_texture = load(prefix + "metallic.png") as Texture2D
+	material.metallic_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
+	material.roughness_texture = load(prefix + "roughness.png") as Texture2D
+	material.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
+	material.normal_enabled = true
+	material.normal_texture = load(prefix + "normal.png") as Texture2D
+	for raw: Node in model.find_children("Body*", "MeshInstance3D", true, false):
+		var body: MeshInstance3D = raw as MeshInstance3D
+		body.material_override = material
+		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
+	var lens: MeshInstance3D = model.find_child("Lens", true, false) as MeshInstance3D
+	if lens:
+		var glass: ShaderMaterial = ShaderMaterial.new()
+		glass.shader = load("res://src/combat/lumar_glass.gdshader") as Shader
+		var crack_path: String = path.get_base_dir() + "/glass_crack.png"
+		if ResourceLoader.exists(crack_path):
+			glass.set_shader_parameter("crack_map", load(crack_path))
+		glass.set_shader_parameter("cracked", visual == int(Balance.CONDITION.worn))
+		lens.material_override = glass
+	var reticle: MeshInstance3D = model.find_child("Reticle", true, false) as MeshInstance3D
+	if reticle:
+		reticle.set_meta("reticle_dot", true)
+		reticle.set_meta("lumar_reticle", true)
+		reticle.set_meta("mount", String(m.mount))
+	root.set_meta("asset_loaded", true)
+	var axis: Node3D = model.find_child("SightAxis", true, false) as Node3D
+	root.set_meta("sight_h", model.position.y + (axis.position.y if axis else 0.056))
+	return true
+
+
+## Ресурс устройств меняется без пересоздания геометрии и сброса анимаций.
+static func update_condition(root: Node3D, mods: Dictionary) -> void:
+	for raw: Node in root.find_children("*", "MeshInstance3D", true, false):
+		if not raw.has_meta("reticle_dot"):
+			continue
+		var mount: String = String(raw.get_meta("mount", ""))
+		if not mods.has(mount):
+			continue
+		var state: Dictionary = WeaponCondition.mod_entry(mods[mount])
+		(raw as MeshInstance3D).visible = not WeaponCondition.broken(state)
+		var mesh: MeshInstance3D = raw as MeshInstance3D
+		if not mesh.has_meta("condition_reticle_material"):
+			var source: Material = mesh.get_active_material(0) if mesh.mesh and mesh.mesh.get_surface_count() > 0 else null
+			if source is StandardMaterial3D:
+				var local: StandardMaterial3D = source.duplicate() as StandardMaterial3D
+				mesh.material_override = local
+				mesh.set_meta("condition_reticle_material", local)
+				mesh.set_meta("condition_reticle_energy", local.emission_energy_multiplier)
+		if mesh.has_meta("condition_reticle_material"):
+			var local: StandardMaterial3D = mesh.get_meta("condition_reticle_material") as StandardMaterial3D
+			local.emission_energy_multiplier = float(mesh.get_meta("condition_reticle_energy")) * lerpf(float(Balance.CONDITION.reticle_min), 1.0, WeaponCondition.effectiveness(state))
+	for raw: Node in root.find_children("Flashlight*", "SpotLight3D", true, false):
+		var light: SpotLight3D = raw as SpotLight3D
+		var mount: String = String(light.get_meta("mount", ""))
+		if not light.has_meta("condition_energy"):
+			light.set_meta("condition_energy", light.light_energy)
+		if mods.has(mount):
+			light.light_energy = float(light.get_meta("condition_energy")) * WeaponCondition.effectiveness(WeaponCondition.mod_entry(mods[mount]))
+
+
 static func _scaled(root: Node3D, m: Dictionary, k: float, build: Callable) -> void:
 	if is_equal_approx(k, 1.0):
 		build.call(root, m)
