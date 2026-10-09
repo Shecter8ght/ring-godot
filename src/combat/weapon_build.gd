@@ -387,7 +387,16 @@ static func candidate_keys(entry: Dictionary, att: String) -> Array[String]:
 ## Первая свободная точка с допустимым пазом: {key, slot} (slot -1 — без паза); {} — некуда.
 static func free_place(entry: Dictionary, att: String, prefer_z: float = INF) -> Dictionary:
 	var mods: Dictionary = entry.get("mods", {})
-	for key: String in candidate_keys(entry, att):
+	# сначала свободные точки, потом — ещё одно устройство на занятую планку
+	var keys: Array[String] = candidate_keys(entry, att)
+	var ordered: Array[String] = []
+	for k: String in keys:
+		if not leaf(k).contains(MULTI):
+			ordered.append(k)
+	for k2: String in keys:
+		if leaf(k2).contains(MULTI):
+			ordered.append(k2)
+	for key: String in ordered:
 		if mods.has(key):
 			continue
 		var slots: Array[int] = valid_slots(entry, key, att)
@@ -404,6 +413,26 @@ static func free_place(entry: Dictionary, att: String, prefer_z: float = INF) ->
 		# точка оружия без паза в записи — на прежнем месте, если оно допустимо
 		if parent_key(key) == "" and not key.contains(MULTI) and block(entry, key, att) == "":
 			return {"key": key, "slot": -1}
+		return {"key": key, "slot": best}
+	return {}
+
+
+## Место на планке rail_key (её ключ без номера): свободный номер устройства и паз ближе к prefer_z.
+## {} — места нет.
+static func rail_place(entry: Dictionary, rail_key: String, att: String, prefer_z: float) -> Dictionary:
+	var mods: Dictionary = entry.get("mods", {})
+	for n: int in range(1, 8):
+		var key: String = rail_key if n == 1 else rail_key + MULTI + str(n)
+		if mods.has(key):
+			continue
+		var slots: Array[int] = valid_slots(entry, key, att)
+		if slots.is_empty() or slots[0] < 0:
+			return {}
+		var pt: Dictionary = point(String(entry.id), mods.merged({key: {"id": att}}), key)
+		var best: int = slots[0]
+		for s: int in slots:
+			if absf(slot_z(pt.rail, clamp_of(att), s) - prefer_z) < absf(slot_z(pt.rail, clamp_of(att), best) - prefer_z):
+				best = s
 		return {"key": key, "slot": best}
 	return {}
 
@@ -558,7 +587,8 @@ static func upgrade(entry: Dictionary) -> Array:
 	var legacy: Dictionary = WeaponMods.socket(model_key, "optic_offset")
 	var bracket: Dictionary = {"id": LEGACY_BRACKET, "dur": float(optic.get("dur", 100.0)), "mods": {"rail": optic}}
 	var want_z: float = (legacy.pos as Vector3).z if not legacy.is_empty() else INF
-	var place: Dictionary = free_place(e, LEGACY_BRACKET, want_z)
+	# прежний угловой стоял у основного прицела — кронштейн туда же, на верхнюю планку коробки
+	var place: Dictionary = rail_place(e, "optic_primary", LEGACY_BRACKET, want_z) if is_finite(want_z) else {}
 	if place.is_empty() and mods.has("optic_primary"):
 		# короткая планка: основной прицел сдвигается по пазам, пока рядом не встанет кронштейн
 		var main_id: String = WeaponDb.mod_id(mods.optic_primary)
@@ -568,10 +598,12 @@ static func upgrade(entry: Dictionary) -> Array:
 			main_rec.erase("n")
 			main_rec["slot"] = s
 			moved.mods.optic_primary = main_rec
-			place = free_place(moved, LEGACY_BRACKET, want_z)
+			place = rail_place(moved, "optic_primary", LEGACY_BRACKET, want_z)
 			if not place.is_empty():
 				e = moved
 				break
+	if place.is_empty():
+		place = free_place(e, LEGACY_BRACKET, want_z)
 	if place.is_empty():
 		spill.append(bracket)
 		return [e, spill]

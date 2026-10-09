@@ -23,10 +23,21 @@ static func capture(name: String) -> Dictionary:
 		var e: Dictionary = Profile.equipment[slot]
 		var rec := {"id": String(e.id)}
 		var mods := {}
+		# место на планке (паз, сторона кронштейна, угол) — отдельно: старые шаблоны читают mods как id
+		var place := {}
 		for m in e.get("mods", {}):
 			mods[String(m)] = WeaponDb.mod_id(e.mods[m])
+			var md: Dictionary = e.mods[m] if e.mods[m] is Dictionary else {}
+			var p := {}
+			for k in ["slot", "flip", "angle"]:
+				if md.has(k):
+					p[k] = md[k]
+			if not p.is_empty():
+				place[String(m)] = p
 		if not mods.is_empty():
 			rec["mods"] = mods
+		if not place.is_empty():
+			rec["place"] = place
 		var plates := {}
 		for side in e.get("plates", {}):
 			plates[String(side)] = String((e.plates[side] as Dictionary).id)
@@ -138,6 +149,22 @@ static func plan(t: Dictionary) -> Dictionary:
 	return {"rows": rows, "cost": cost, "missing": missing}
 
 
+## Вернуть детали её место из шаблона (паз, сторона, угол), если оно сейчас допустимо.
+static func _place(slot: String, key: String, p: Dictionary) -> void:
+	if p.is_empty():
+		return
+	var e: Dictionary = Profile.equipment.get(slot, {})
+	var mods: Dictionary = e.get("mods", {})
+	if not mods.has(key) or not mods[key] is Dictionary:
+		return
+	if WeaponBuild.block(e, key, WeaponDb.mod_id(mods[key]), int(p.get("slot", -1))) != "":
+		return
+	for k in p:
+		(mods[key] as Dictionary)[k] = p[k]
+	e["rev"] = int(e.get("rev", 0)) + 1
+	Profile.save()
+
+
 ## Собрать: берёт из тайника, докупает, надевает, ставит обвес и плиты, кладёт в рюкзак.
 ## Возвращает, что не получилось (пусто — всё собрано).
 static func apply(t: Dictionary) -> Array[String]:
@@ -155,14 +182,19 @@ static func apply(t: Dictionary) -> Array[String]:
 				fails.append(ItemDb.item_name(id))
 				continue
 		var mods: Dictionary = rec.get("mods", {})
-		for m in mods:
+		var place: Dictionary = rec.get("place", {})
+		# от родителей к детям: прицел на кронштейне — после кронштейна
+		for m: String in WeaponBuild.sorted_keys(mods):
 			var mid := String(mods[m])
 			var cur: Dictionary = Profile.weapon_mods(String(slot))
 			if cur.has(m) and WeaponDb.mod_id(cur[m]) == mid:
+				_place(String(slot), m, place.get(m, {}))
 				continue
 			var i := _from_stash(mid)
-			if i < 0 or not Profile.install_mod(String(slot), i, false, String(m)):
+			if i < 0 or not Profile.install_mod(String(slot), i, false, m):
 				fails.append(ItemDb.item_name(mid))
+				continue
+			_place(String(slot), m, place.get(m, {}))
 		var plates: Dictionary = rec.get("plates", {})
 		for side in plates:
 			var pid := String(plates[side])

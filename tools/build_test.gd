@@ -70,7 +70,9 @@ func _rails() -> void:
 		WeaponBuild.block(e, "optic_primary#2", "optic_rd_01", 6))
 	_check("за край планки — нельзя", WeaponBuild.block(e, "optic_primary#2", "mount_offset45_01", 9) != "")
 	var place: Dictionary = WeaponBuild.free_place(e, "mount_offset45_01")
-	_check("кронштейн находит свободный паз", String(place.get("key", "")) == "optic_primary#2" and int(place.get("slot", -1)) >= 0, str(place))
+	_check("кронштейн сначала ищет свободную точку (цевьё сверху)", String(place.get("key", "")) == "top_front", str(place))
+	var near: Dictionary = WeaponBuild.rail_place(e, "optic_primary", "mount_offset45_01", 0.16)
+	_check("рядом с LPVO на той же планке — свободный паз", String(near.get("key", "")) == "optic_primary#2" and int(near.get("slot", -1)) >= 0, str(near))
 	var top_front: Dictionary = WeaponBuild.free_place(_veras({}), "optic_rd_01")
 	_check("коллиматор на голом ВЕРАСе — на верхнюю планку", String(top_front.get("key", "")) == "optic_primary", str(top_front))
 	var grip: Array[int] = WeaponBuild.valid_slots(_veras({}), "underbarrel", "grip_vertical_01")
@@ -235,3 +237,26 @@ func _plan() -> void:
 	why = Profile.apply_build("equip:primary", -1, BuildPlan.draft_of(Profile.equipment.primary), {"from": "none"})
 	_check("магазин вынут в тайник", why == "" and String(Profile.equipment.primary.mag.id) == ""
 		and Profile.stash.any(func(e: Dictionary) -> bool: return String(e.id) == "mag_545_30" and int(e.get("rounds", 0)) == 30), why)
+	_template()
+
+
+## Шаблон снаряжения помнит пазы и сторону кронштейна: снял всё в тайник — собрал по шаблону — как было.
+func _template() -> void:
+	Profile.stash.clear()
+	Profile.equipment["primary"] = {"id": "wpn_ar_01", "n": 1, "dur": 100.0, "sight": "primary",
+		"mods": {"optic_primary": {"id": "optic_rd_01", "dur": 100.0, "slot": 0},
+			"optic_primary#2": {"id": "mount_offset45_01", "dur": 100.0, "slot": 6, "flip": true},
+			"optic_primary#2/rail": {"id": "optic_rmr_01", "dur": 100.0},
+			"underbarrel": {"id": "grip_vertical_01", "dur": 100.0, "slot": 3}},
+		"mag": {"id": "mag_545_30", "ammo": "ammo_545_std", "rounds": 30}}
+	var t: Dictionary = LoadoutTemplates.capture("тест сборки")
+	var bare: Dictionary = BuildPlan.draft_of(Profile.equipment.primary)
+	for k: String in bare.keys():
+		bare.erase(k)
+	var why: String = Profile.apply_build("equip:primary", -1, bare, {})
+	_check("шаблон: всё снято в тайник", why == "" and (Profile.equipment.primary.mods as Dictionary).is_empty(), why)
+	var fails: Array[String] = LoadoutTemplates.apply(t)
+	var mods: Dictionary = Profile.equipment.primary.mods
+	_check("шаблон собран без отказов", fails.is_empty(), str(fails))
+	_check("шаблон вернул пазы и сторону кронштейна", int(mods.get("optic_primary#2", {}).get("slot", -1)) == 6 and bool(mods.get("optic_primary#2", {}).get("flip", false))
+		and int(mods.get("underbarrel", {}).get("slot", -1)) == 3 and mods.has("optic_primary#2/rail"), JSON.stringify(mods))
