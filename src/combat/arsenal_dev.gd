@@ -5,7 +5,7 @@ extends RefCounted
 ## повредить плиту, выставить износ, показать характеристики. Только хост или соло: состояние
 ## оружия и снаряжения ведёт хост (Gear._bump — владелец перечитает).
 
-const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|headsets|loadouts. Пример: give weapon AK12 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
+const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|headsets|loadouts. Пример: give weapon VERAS54 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
 ## Точки в записи ТЗ (camelCase) → точки арсенала.
 const MOUNT_ALIAS := {"primaryOptic": "optic_primary", "offsetOptic": "optic_offset", "sideLeft": "side_left", "sideRight": "side_right",
 	"underbarrel": "underbarrel", "muzzle": "muzzle", "stock": "stock"}
@@ -77,7 +77,7 @@ static func _normalize(a: PackedStringArray) -> PackedStringArray:
 	return a
 
 
-## Код из данных (AK12, 545_AP, LPVO_01, OFFSET_RED_DOT_01, CAR_03, PLATE_06…) или id → id предмета;
+## Код из данных (VERAS54, 545_AP, LPVO_01, OFFSET_RED_DOT_01, CAR_03, PLATE_06…) или id → id предмета;
 ## сборка (AK12_BASE) → "preset:…". Не нашлось — как есть.
 static func resolve(code: String) -> String:
 	if code.begins_with("preset:") or ItemDb.exists(code):
@@ -87,7 +87,8 @@ static func resolve(code: String) -> String:
 		return "preset:" + up
 	var items := WeaponDb.items()
 	for id in items:
-		if _code_of(items[id]) == up:
+		# прежний код (old_code) — синоним: АК-12 стал ВЕРАС-54, а AK12 в старых заметках и командах остался
+		if _code_of(items[id]) == up or String((items[id] as Dictionary).get("old_code", "")) == up:
 			return String(id)
 	var low := code.to_lower().replace("red_dot", "rd")
 	var best := ""

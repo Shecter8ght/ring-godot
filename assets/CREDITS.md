@@ -47,6 +47,12 @@
 - `assets/textures/impacts/concrete_*.png` — Bullet Decal, musdasch, CC0 1.0, https://opengameart.org/content/bullet-decal — бетонный скол и производная normal-карта
 - `assets/textures/impacts/metal_*.png`, `wood_*.png`, `glass_cracks.png` — Bullet holes sprites, mitaywalle, CC0 1.0, https://realtimevfx.com/t/share-bullet-holes-sprites/21203 — атласы металла, дерева и стекла, прозрачность и normal-карты собраны импортёром
 
+## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
+
+- Модель, риг, текстуры (состояние 100) и руки FPS — собственные ассеты владельца проекта
+  (E:/Models Blender/ВЕРАС-54 — модель и обвесы); клипы рук (перезарядки, проверка магазина) собраны
+  скриптами tools/veras54_anim по позам владельца; экспорт в игру — tools/export_veras54.py.
+
 ## Иконки оружия
 
 - `assets/icons/wpn_*.png` — 23 изображения из `docs/RING_weapon_design_doc_v9_final_cut.html`, предоставленного владельцем проекта; собственные материалы проекта RING.

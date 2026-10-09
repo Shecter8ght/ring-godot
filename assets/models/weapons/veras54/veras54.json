@@ -1,0 +1,12 @@
+{
+ "tris_world_before": 241576,
+ "tris_world": 32423,
+ "world_size_m": [
+  0.07,
+  0.854,
+  0.349
+ ],
+ "rounds": 30,
+ "parts_viewmodel": 13,
+ "tris_viewmodel": 246336
+}

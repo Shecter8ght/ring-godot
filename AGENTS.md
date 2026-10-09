@@ -98,6 +98,8 @@ tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки пр�
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] # ВЕРАС-54: руки+клипы и мировая модель в assets/models/weapons/veras54
+tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от первого лица: бедро, прицел, перезарядки, проверка магазина, мировая модель; снимки veras_*
 python tools/import_weapon_model.py pm_highpoly_v5          # проверенный ПМ из _asset_src: дерево, PBR, размеры, бюджеты, CREDITS
 python tools/import_weapon_model.py glock17_gen5            # Glock 17 Gen5 из _asset_src (--check — только проверка): дерево, PBR, размеры, бюджеты, CREDITS
 tools/godot.cmd --headless res://tools/glock_test.tscn        # Glock: детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом

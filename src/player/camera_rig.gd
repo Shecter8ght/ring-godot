@@ -583,7 +583,11 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if _viewmodel_id != vm_key:
 		if _viewmodel:
 			_viewmodel.queue_free()
-		_viewmodel = WeaponModels.build(wid, pl.weapon_mods, 0, pl.weapon_condition) if wid != "" else Node3D.new()
+		# ствол с заготовленными клипами (ВЕРАС-54) — свои руки и анимации из Blender
+		if ViewmodelClips.available(wid):
+			_viewmodel = ViewmodelClips.create(wid, pl.weapon_mods)
+		else:
+			_viewmodel = WeaponModels.build(wid, pl.weapon_mods, 0, pl.weapon_condition) if wid != "" else Node3D.new()
 		WeaponCondition.apply_visual(_viewmodel, {"dur": pl.weapon_condition})
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			var gi := mi as GeometryInstance3D
@@ -600,7 +604,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			n.set_meta("vm_local", (n as Node3D).transform)
 			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
 		_vm_space.add_child(_viewmodel)
-		_arms.bind_weapon(_viewmodel)
+		if not _viewmodel is ViewmodelClips:
+			_arms.bind_weapon(_viewmodel)
 		weapon_clearance.bind(_viewmodel)
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
 		if _viewmodel_rig:
@@ -652,6 +657,11 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if is_instance_valid(pl._weapon_rig):
 		vm_basis *= Basis.from_euler(pl._weapon_rig.view_rotation_degrees() * (PI / 180.0) * (1.0 - k))
 	_viewmodel.transform = Transform3D(vm_basis, hip_pos.lerp(ads_pos, k) + action_offset + bob + Vector3(0.0, flip * 0.004, kick_back * 0.028))
+	var clips: ViewmodelClips = _viewmodel as ViewmodelClips
+	if clips:
+		# сцена уже в осях камеры: у бедра — поза из Blender, в прицеле — линия прицеливания на оси взгляда;
+		# поверх — раскачка при ходьбе, подброс и откат при выстреле
+		clips.update(pl, delta)
 	# Импортированная поза может иметь свои оси: поворачиваем её линию, сохраняя готовые клипы.
 	if _viewmodel.has_method("ads_transform") and _viewmodel.has_method("hip_transform"):
 		var primary_ads: Transform3D = _viewmodel.call("ads_transform")
@@ -678,16 +688,20 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		pl.weapon_ready_up = weapon_clearance.ready_up
 	else:
 		pl.weapon_obstruction = 0.0
-	if _viewmodel_rig:
-		_arms.set_hand_target("Left", _viewmodel_rig.get_hand_target(), _viewmodel_rig.get_hand_weight())
+	if clips:
+		# свои руки уже в сцене клипов — процедурные руки Persona не нужны
+		_arms.visible = false
 	else:
-		_arms.set_hand_target("Left", null, 0.0)
-	_arms.collision_exclude = [pl.get_rid()]
-	_arms.update_pose()
-	if not _arms.arms_clear:
-		_viewmodel.visible = false
-		pl.weapon_obstruction = 1.0
-	_arms.visible = _arms.visible and _viewmodel.visible
+		if _viewmodel_rig:
+			_arms.set_hand_target("Left", _viewmodel_rig.get_hand_target(), _viewmodel_rig.get_hand_weight())
+		else:
+			_arms.set_hand_target("Left", null, 0.0)
+		_arms.collision_exclude = [pl.get_rid()]
+		_arms.update_pose()
+		if not _arms.arms_clear:
+			_viewmodel.visible = false
+			pl.weapon_obstruction = 1.0
+		_arms.visible = _arms.visible and _viewmodel.visible
 	_straighten_lights()
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and absf(sroll) < 0.05 and pl.weapon_obstruction <= float(Balance.WEAPON_CLEARANCE.fire_threshold))
 	if scope_active:
@@ -844,9 +858,9 @@ func _set_scope(on: bool) -> void:
 func _update_scope(zoom: float, illum: bool = false) -> void:
 	_scope_zoom = zoom
 	(_scope_view.material as ShaderMaterial).set_shader_parameter("illum", 1.0 if illum else 0.0)
-	var ocular: Vector3 = _viewmodel.to_global(_viewmodel.get_meta("ocular"))
+	var ocular: Vector3 = _vm_frame().to_global(_vm_frame().get_meta("ocular"))
 	# окуляр рисуется в ViewmodelSpace — на экране он больше (меньше) в масштаб пространства
-	var r := float(_viewmodel.get_meta("ocular_r")) * _vm_space.scale.x
+	var r := float(_vm_frame().get_meta("ocular_r")) * _vm_space.scale.x
 	_scope_cam.global_transform = _ads_cam.global_transform
 	var dist := maxf(0.02, _ads_cam.global_position.distance_to(ocular))
 	# угол окуляра в основном виде и во сколько раз его «растянуть»
@@ -996,12 +1010,21 @@ void fragment() {
 func barrel_ray() -> Array:
 	if _viewmodel == null or not _viewmodel.visible or not ads_active:
 		return []
-	return [_viewmodel.to_global(_viewmodel.get_meta("muzzle", Vector3.ZERO)), _viewmodel.global_basis.z.normalized()]
+	var f := _vm_frame()
+	return [f.to_global(f.get_meta("muzzle", Vector3.ZERO)), f.global_basis.z.normalized()]
+
+
+## Узел, в осях которого заданы метки ствола (дуло, окуляр; дуло по +Z): у вьюмодели с клипами — рама
+## обвесов (WeaponFrame у кости оружия), у остальных — сама модель.
+func _vm_frame() -> Node3D:
+	var clips := _viewmodel as ViewmodelClips
+	return clips.frame if clips and is_instance_valid(clips.frame) else _viewmodel
 
 
 func viewmodel_muzzle() -> Vector3:
 	if _viewmodel and _viewmodel.visible:
-		return _viewmodel.to_global(_viewmodel.get_meta("muzzle", Vector3.ZERO))
+		var f := _vm_frame()
+		return f.to_global(f.get_meta("muzzle", Vector3.ZERO))
 	return _ads_cam.global_position - _ads_cam.global_basis.z * 0.6 - _ads_cam.global_basis.y * 0.06
 
 

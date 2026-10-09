@@ -33,8 +33,11 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 	if not w.is_empty():
 		key = String(w.model)
 		scale = float(w.get("scale", 1.0))
-	var imported: Node3D = _asset(w, lod)
-	if imported:
+	var static_asset: bool = String(w.get("asset_kind", "")) == "static"
+	var imported: Node3D = null if static_asset else _asset(w, lod)
+	if static_asset and _static_asset(w, root):
+		root.set_meta("asset_loaded", true)
+	elif imported:
 		root.free()
 		var rig: WeaponRig = WeaponRig.new()
 		rig.name = "Weapon_" + id
@@ -47,12 +50,13 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 			root = Node3D.new()
 			root.name = "Weapon_" + id
 			imported = null
-	if imported == null:
+	if imported == null and not root.get_meta("asset_loaded", false):
 		root.set_meta("asset_loaded", false)
 		match key:
 			"pistol":
 				_pistol(root)
-			"rifle":
+			# основа из ассета без файла (ВЕРАС-54) — запасной процедурный автомат
+			"rifle", "veras54":
 				_rifle(root)
 			"shotgun":
 				_shotgun(root)
@@ -95,6 +99,61 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 	if root.has_meta("ads_z"):
 		outer.set_meta("ads_z", root.get_meta("ads_z"))
 	return outer
+
+
+## Статичный ассет оружия (автомат из Blender, tools/export_veras54.py): модель уже в осях игры, начало —
+## пистолетная рукоятка. Метки Muzzle / SightRear дают дульный срез и линию прицеливания; деталь
+## MuzzleDevice помечена "muzzle_device" (обвес на резьбу её прячет). Нет файла — false (процедурная основа).
+static func _static_asset(weapon: Dictionary, root: Node3D) -> bool:
+	var path: String = String(weapon.get("asset", ""))
+	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
+		return false
+	var model: Node3D = (ResourceLoader.load(path, "PackedScene") as PackedScene).instantiate() as Node3D
+	if model == null:
+		return false
+	model.name = "Model"
+	root.add_child(model)
+	apply_markers(root, model, float((weapon.get("viewmodel", {}) as Dictionary).get("ads_z", 0.3)))
+	return true
+
+
+## Метки модели (Muzzle, SightRear, MuzzleDevice) → meta основы в осях meta_root.
+static func apply_markers(meta_root: Node3D, model: Node3D, ads_z: float) -> void:
+	var muzzle: Node3D = model.find_child("Muzzle", true, false) as Node3D
+	if muzzle:
+		meta_root.set_meta("muzzle", between(meta_root, muzzle).origin)
+	var rear: Node3D = model.find_child("SightRear", true, false) as Node3D
+	if rear:
+		meta_root.set_meta("sight_h", between(meta_root, rear).origin.y)
+		meta_root.set_meta("sight_h_iron", meta_root.get_meta("sight_h"))
+	meta_root.set_meta("ads_z", ads_z)
+	for node: Node in model.find_children("*MuzzleDevice*", "MeshInstance3D", true, false):
+		node.set_meta("part", "muzzle_device")
+
+
+## Положение узла b в осях узла a через их общего предка (по локальным трансформам: работает и вне
+## дерева сцены; узлы костей между ними не учитываются — метки и рама сидят у одной кости).
+static func between(a: Node3D, b: Node3D) -> Transform3D:
+	var up_a: Array[Node] = []
+	var n: Node = a
+	while n != null:
+		up_a.append(n)
+		n = n.get_parent()
+	var common: Node = b
+	while common != null and not common in up_a:
+		common = common.get_parent()
+	return _relative(common as Node3D, a).affine_inverse() * _relative(common as Node3D, b)
+
+
+## Положение узла node в осях предка ancestor (без мирового пространства: узел может быть вне дерева).
+static func _relative(ancestor: Node3D, node: Node3D) -> Transform3D:
+	var t: Transform3D = Transform3D.IDENTITY
+	var n: Node = node
+	while n != null and n != ancestor:
+		if n is Node3D:
+			t = (n as Node3D).transform * t
+		n = n.get_parent()
+	return t
 
 
 ## Только импортированный PackedScene считается готовым ассетом. Отсутствующий файл,
