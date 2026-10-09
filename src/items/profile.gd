@@ -552,7 +552,7 @@ static func install_mod(weapon_slot: String, idx: int, from_backpack: bool = fal
 
 ## Почему обвес нельзя поставить на верстаке этого уровня в точку mount ("" — можно).
 static func mod_block(_mod: String, mount: String = "") -> String:
-	var need := int(Balance.WORKBENCH_SLOT_LEVEL.get(mount, 1))
+	var need := int(Balance.WORKBENCH_SLOT_LEVEL.get(WeaponBuild.top_mount(mount), 1))
 	if Upgrades.level("workbench") < need:
 		return "нужен верстак %d" % need
 	return ""

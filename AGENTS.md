@@ -106,6 +106,8 @@ tools/godot.cmd --headless res://tools/glock_test.tscn        # Glock: дета�
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # Glock: хват, ADS, перезарядка, третье лицо в docs/screens/glock_*.png
 tools/godot.cmd --headless res://tools/export_weapon_refs.tscn -- "out=<папка>" # все стволы игры (и M4A1 с обвесами под левую руку) в GLB — образцы для хватов в Blender
 tools/godot.cmd res://tools/mods_gallery.tscn                # витрина обвесов: сбоку, 3/4, крупные планы, вид из глаза
+tools/godot.cmd --headless res://tools/build_test.tscn       # сборка деревом (WeaponBuild): старый угловой → кронштейн, пазы 20 мм, «занято»/«закроет прицел», кронштейн снимается с прицелом, линии прицелов
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/build_shots.tscn # снимки сборок: кронштейн 45° справа/слева, проставка, поворотный; docs/screens/build_*.png
 tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика против солнца (блики, аберрация) и открытые прицельные из глаза
 tools/build_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.7.2 + RING.pck, шаблоны не нужны)
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —

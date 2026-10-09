@@ -3,7 +3,8 @@ class_name WeaponDb
 extends RefCounted
 ## Реестр арсенала (data/weapons.json, data/armor.json, data/loadouts.json; см.
 ## docs/design/weapons.md). Определения — здесь (шаблоны), состояние — в записи предмета:
-##   оружие  {id, n, dur, mods: {точка: {id[, light, laser]}}, mag: {id, ammo, rounds}, sight}
+##   оружие  {id, n, dur, mods: {путь точки: {id[, slot, flip, angle, light, laser]}}, mag: {id, ammo, rounds}, sight}
+##           (дерево обвеса и пазы планок — WeaponBuild)
 ##   магазин {id, n, ammo, rounds}
 ##   жилет   {id, n, dur (мягкая часть), plates: {front: {id, dur}, back: {...}}}
 ##   шлем / плита — {id, n, dur}
@@ -15,9 +16,10 @@ const ARMOR_PATH := "res://data/armor.json"
 const LOADOUTS_PATH := "res://data/loadouts.json"
 const WEAPON_SOUND_SLOTS_PATH := "res://data/weapon_sound_slots.json"
 
-## Точки крепления в порядке показа.
-const MOUNTS := ["optic_primary", "optic_offset", "muzzle", "underbarrel", "side_left", "side_right", "stock"]
-const MOUNT_NAMES := {"optic_primary": "Прицел основной", "optic_offset": "Прицел угловой", "muzzle": "Дульное", "underbarrel": "Под цевьё",
+## Точки крепления оружия в порядке показа. Угловой прицел больше не точка оружия, а кронштейн
+## на верхней планке (WeaponBuild); "optic_offset" остался только в старых сборках и пресетах.
+const MOUNTS := ["optic_primary", "top_front", "muzzle", "underbarrel", "side_left", "side_right", "stock"]
+const MOUNT_NAMES := {"optic_primary": "Верхняя планка", "top_front": "Цевьё сверху", "optic_offset": "Прицел угловой", "muzzle": "Дульное", "underbarrel": "Под цевьё",
 	"side_left": "Сбоку слева", "side_right": "Сбоку справа", "stock": "Приклад"}
 const CLASS_NAMES := {"PISTOL": "Пистолет", "SMG": "Пистолет-пулемёт", "PDW": "PDW", "SHOTGUN": "Ружьё", "ASSAULT_RIFLE": "Автомат", "CARBINE": "Карабин",
 	"BATTLE_RIFLE": "Боевая винтовка", "DMR": "Марксманская", "SNIPER": "Снайперская", "SPECIAL": "Специальное", "LMG": "Пулемёт"}
@@ -466,48 +468,19 @@ static func mounts_of(weapon_id: String) -> Dictionary:
 	return weapon(weapon_id).get("mounts", {})
 
 
-## Почему обвес att нельзя поставить в точку mount оружия entry ("" — можно). Проверки: точка
-## есть, интерфейс подходит, точка не занята (кроме замены того же), не закрыта другим обвесом,
-## и сам обвес не закрывает занятую точку.
+## Почему обвес att нельзя поставить в точку mount (путь WeaponBuild) оружия entry ("" — можно).
 static func attach_block(entry: Dictionary, mount: String, att: String) -> String:
-	var a := attachment(att)
-	if a.is_empty():
-		return "это не обвес"
-	var m := mounts_of(String(entry.id))
-	if not m.has(mount):
-		return "на этом оружии нет такой точки"
-	if not String(m[mount]) in a.get("fits", []):
-		return "не подходит крепление (%s)" % String(m[mount])
-	var mods: Dictionary = entry.get("mods", {})
-	for other in mods:
-		if String(other) == mount:
-			continue
-		var oa := attachment(mod_id(mods[other]))
-		if mount in oa.get("blocks", []):
-			return "мешает: " + ItemDb.item_name(mod_id(mods[other]))
-		if String(other) in a.get("blocks", []):
-			return "закроет: " + ItemDb.item_name(mod_id(mods[other]))
-	return ""
+	return WeaponBuild.block(entry, mount, att)
 
 
-## Первая свободная точка, куда встаёт обвес ("" — некуда).
+## Первая свободная точка, куда встаёт обвес ("" — некуда). Паз выбирает WeaponBuild.free_place.
 static func free_mount_for(entry: Dictionary, att: String) -> String:
-	var mods: Dictionary = entry.get("mods", {})
-	for mount in MOUNTS:
-		if not mods.has(mount) and attach_block(entry, mount, att) == "":
-			return mount
-	return ""
+	return String(WeaponBuild.free_place(entry, att).get("key", ""))
 
 
-## Все точки, куда обвес вообще встаёт (занятые тоже — для замены).
+## Все точки, куда обвес вообще встаёт (занятые тоже — для замены; на планке — и ещё одно место).
 static func mounts_for(entry: Dictionary, att: String) -> Array:
-	var out: Array = []
-	var a := attachment(att)
-	var m := mounts_of(String(entry.id))
-	for mount in MOUNTS:
-		if m.has(mount) and String(m[mount]) in a.get("fits", []):
-			out.append(mount)
-	return out
+	return WeaponBuild.candidate_keys(entry, att)
 
 
 ## id обвеса из значения точки (у старых записей — строка, у новых — словарь).
@@ -602,6 +575,8 @@ static func _from_preset(p: Dictionary, rng: RandomNumberGenerator, dur_range: A
 	for mount in p.get("mods", {}):
 		mods[String(mount)] = {"id": String(p.mods[mount]), "dur": roundf(rng.randf_range(float(dr[0]), float(dr[1])))}
 	e["mods"] = mods
+	# старые пресеты с угловым прицелом — кронштейн на планке
+	e = WeaponBuild.upgrade(e)[0]
 	var ammo_id := pick_ammo(p.get("ammo", []), rng, String(weapon(wid).caliber))
 	var cap := 0
 	if weapon(wid).has("internal_mag"):
@@ -670,7 +645,7 @@ static func migrate(e: Dictionary) -> Array:
 		var old_mag := ""
 		for k in old:
 			var mid := mod_id(old[k])
-			if String(k) in MOUNTS:
+			if String(k) in MOUNTS or String(k) == "optic_offset" or String(k).contains(WeaponBuild.SEP) or String(k).contains(WeaponBuild.MULTI):
 				mods[String(k)] = old[k] if old[k] is Dictionary else {"id": mid}
 				continue
 			# старые слоты: mag — магазин; остальное — в первую подходящую точку
@@ -685,6 +660,9 @@ static func migrate(e: Dictionary) -> Array:
 			else:
 				spill.append({"id": mid, "n": 1})
 		out["mods"] = mods
+		var upgraded: Array = WeaponBuild.upgrade(out)
+		out = upgraded[0]
+		spill.append_array(upgraded[1])
 		if not out.has("mag") or not (out.mag is Dictionary):
 			var w := weapon(id)
 			var mg := old_mag if old_mag != "" and mag_fits(id, old_mag) else default_mag(id)

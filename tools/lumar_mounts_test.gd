@@ -35,8 +35,9 @@ func _ready() -> void:
 	_check("VERAS смотрит через основной LPVO", _camera.scope_active and String(_player.spec().sight) == "primary")
 	await _capture("veras_lumar_primary")
 	await _middle()
-	_check("СКМ выбирает угловой и сохраняет ПКМ", String(_player.spec().sight) == "offset" and _player.aiming and not _camera.scope_active)
-	_check_line("offset")
+	var angled: String = String(_player.spec().sight)
+	_check("СКМ выбирает угловой на кронштейне и сохраняет ПКМ", WeaponBuild.depth(angled) > 0 and _player.aiming and not _camera.scope_active, angled)
+	_check_line(angled)
 	await _capture("veras_lumar_offset")
 	await _middle()
 	_check("повторная СКМ возвращает основной", String(_player.spec().sight) == "primary" and _camera.scope_active)
@@ -64,8 +65,10 @@ func _ready() -> void:
 
 func _data_checks() -> void:
 	var base: Dictionary = ItemDb.make("wpn_ar_01", 1)
-	for mount: String in ["optic_primary", "optic_offset", "side_left", "side_right"]:
-		_check("VERAS принимает ЛУМАР: " + mount, WeaponDb.attach_block(base, mount, "optic_holo_01") == "")
+	for mount: String in ["optic_primary", "side_left", "side_right"]:
+		_check("VERAS принимает ЛУМАР: " + mount, WeaponDb.attach_block(base, mount, "optic_holo_01") == "", WeaponDb.attach_block(base, mount, "optic_holo_01"))
+	var bracketed: Dictionary = Gear.fit(base, ItemDb.make("mount_offset45_01", 1), "")[0]
+	_check("VERAS принимает ЛУМАР на кронштейн 45°", WeaponDb.attach_block(bracketed, "optic_primary/rail", "optic_holo_01") == "")
 	var weapon: Dictionary = Gear.fit(base, ItemDb.make("optic_lpvo_01", 1), "optic_primary")[0]
 	weapon = Gear.fit(weapon, {"id": "optic_holo_01", "n": 1, "dur": 20.0}, "side_right")[0]
 	_check("боковая установка сохраняет износ", float(weapon.mods.side_right.dur) == 20.0)
@@ -92,23 +95,32 @@ func _data_checks() -> void:
 	Profile._loaded = false
 	Profile.ensure()
 	_check("выбор и ресурс проходят сохранение", String(Profile.equipment.primary.sight) == "side_right" and float(Profile.equipment.primary.mods.side_right.dur) == 20.0)
-	var pair: Node3D = WeaponModels.build("wpn_ar_01", {"optic_primary": {"id": "optic_lpvo_01"}, "optic_offset": {"id": "optic_holo_01"}})
+	var pair_entry: Dictionary = _legacy_pair("wpn_ar_01", {"optic_primary": {"id": "optic_lpvo_01"}})
+	var pair: Node3D = WeaponModels.build("wpn_ar_01", pair_entry.mods)
 	var lpvo: Node3D = pair.find_child("Attachment_optic_primary", true, false) as Node3D
-	var lumar: Node3D = pair.find_child("Attachment_optic_offset", true, false) as Node3D
+	var lumar: Node3D = pair.find_child("Attachment_" + WeaponBuild.node_name(_bracket_sight(pair_entry)), true, false) as Node3D
 	var optic: Node3D = lumar.find_child("LUMAR_H1", true, false) as Node3D
 	var primary_box: AABB = _bounds(lpvo, pair)
 	var lumar_box: AABB = _bounds(optic, pair)
 	_check("крупный ЛУМАР не пересекает основную оптику", not primary_box.intersects(lumar_box), str(primary_box) + " / " + str(lumar_box))
 	pair.free()
 	for wid: String in WeaponDb.weapon_ids():
-		for mount: String in ["optic_offset", "side_left", "side_right"]:
-			if WeaponDb.attach_block({"id": wid, "mods": {}}, mount, "optic_holo_01") != "":
+		for mount: String in ["offset", "side_left", "side_right"]:
+			var mods: Dictionary = {mount: {"id": "optic_holo_01", "dur": 20.0}}
+			if mount == "offset":
+				# угловой — теперь кронштейн на верхней планке с ЛУМАР на нём
+				var bracket_entry: Dictionary = _legacy_pair(wid, {})
+				if _bracket_sight(bracket_entry) == "":
+					continue
+				mods = bracket_entry.mods
+				(mods[_bracket_sight(bracket_entry)] as Dictionary).dur = 20.0
+			elif WeaponDb.attach_block({"id": wid, "mods": {}}, mount, "optic_holo_01") != "":
 				continue
-			var model: Node3D = WeaponModels.build(wid, {mount: {"id": "optic_holo_01", "dur": 20.0}}, 1)
-			var part: Node = model.find_child("Attachment_" + mount, true, false)
-			var mark: String = "sight_offset" if mount == "optic_offset" else "sight_" + mount
+			var key: String = _bracket_sight({"mods": mods}) if mount == "offset" else mount
+			var model: Node3D = WeaponModels.build(wid, mods, 1)
+			var part: Node = model.find_child("Attachment_" + WeaponBuild.node_name(key), true, false)
 			var lens: MeshInstance3D = part.find_child("Lens", true, false) as MeshInstance3D if part else null
-			_check("геометрия и износ " + wid + ":" + mount, model.has_meta(mark) and lens != null and bool((lens.material_override as ShaderMaterial).get_shader_parameter("cracked")))
+			_check("геометрия и износ " + wid + ":" + mount, (model.get_meta("sights", {}) as Dictionary).has(key) and lens != null and bool((lens.material_override as ShaderMaterial).get_shader_parameter("cracked")))
 			model.free()
 	var probe: CameraRig = CameraRig.new()
 	var model: Node3D = WeaponModels.build("wpn_ar_01", {"optic_primary": {"id": "optic_lpvo_01"}, "side_right": {"id": "optic_holo_01"}})
@@ -120,9 +132,25 @@ func _data_checks() -> void:
 	model.free()
 
 
+## Старая сборка «основной + угловой» → кронштейн на планке с ЛУМАР (как WeaponBuild.upgrade).
+func _legacy_pair(wid: String, mods: Dictionary) -> Dictionary:
+	var legacy: Dictionary = mods.duplicate(true)
+	legacy["optic_offset"] = {"id": "optic_holo_01", "dur": 100.0}
+	return WeaponBuild.upgrade({"id": wid, "n": 1, "mods": legacy, "sight": "primary"})[0]
+
+
+## Прицел на кронштейне в сборке ("" — нет).
+func _bracket_sight(entry: Dictionary) -> String:
+	for k: Variant in entry.get("mods", {}):
+		if WeaponBuild.depth(String(k)) > 0:
+			return String(k)
+	return ""
+
+
 func _equip(mods: Dictionary) -> void:
 	var slot: String = String(WeaponDb.sandbox()[0])
-	_player.sandbox_weapons[slot] = {"id": "wpn_ar_01", "n": 1, "dur": 100.0, "mods": mods,
+	var entry: Dictionary = WeaponBuild.upgrade({"id": "wpn_ar_01", "n": 1, "dur": 100.0, "mods": mods, "sight": "primary"})[0]
+	_player.sandbox_weapons[slot] = {"id": "wpn_ar_01", "n": 1, "dur": 100.0, "mods": entry.mods,
 		"mag": {"id": "mag_545_30", "ammo": "ammo_545_std", "rounds": 30}, "sight": "primary", "rev": randi()}
 	_player.weapon_slot = ""
 	_player._switch(slot, false)
@@ -142,7 +170,7 @@ func _middle() -> void:
 
 
 func _check_line(sight: String) -> void:
-	var part: Node = _camera._viewmodel.find_child("Attachment_" + WeaponStats.sight_mount(sight), true, false)
+	var part: Node = _camera._viewmodel.find_child("Attachment_" + WeaponBuild.node_name(WeaponStats.sight_mount(sight)), true, false)
 	var axis: Node3D = part.find_child("SightAxis", true, false) as Node3D
 	var point: Vector3 = _camera._vm_space.global_transform.affine_inverse() * axis.global_position
 	var direction: Vector3 = (_camera._vm_space.global_basis.inverse() * axis.global_basis.z).normalized()

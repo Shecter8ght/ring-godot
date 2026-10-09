@@ -91,8 +91,11 @@ func _ready() -> void:
 			await _frames(4)
 			_save("mods_%s_eye" % kit)
 		# угловой: ствол завален на крен кронштейна — глаз по линии углового прицела
-		if w.has_meta("sight_offset"):
-			var so: Dictionary = w.get_meta("sight_offset")
+		var so: Dictionary = {}
+		for line: Variant in (w.get_meta("sights", {}) as Dictionary).values():
+			if not is_zero_approx(float((line as Dictionary).get("roll", 0.0))):
+				so = line
+		if not so.is_empty():
 			# точка линии — уже в осях модели; «верх» прицела — повёрнут кронштейном
 			var cant := Basis(Vector3(0, 0, 1), float(so.roll))
 			var eye := Vector3(float(so.x), float(so.h), 0.0)

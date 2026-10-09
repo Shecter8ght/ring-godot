@@ -141,7 +141,7 @@ const TRUST_STEPS := {"max": 50, "catalog_every": 10}
 ## Модули убежища (data/hideout.json): с какого уровня верстака ставится обвес в слот;
 ## сетка защищённого кармана по уровню (0 — кармана нет); строк тайника по уровню;
 ## сколько заданий одновременно — без рации / с рацией.
-const WORKBENCH_SLOT_LEVEL := {"muzzle": 1, "underbarrel": 1, "stock": 1, "optic_primary": 2, "optic_offset": 2, "side_left": 2, "side_right": 2}
+const WORKBENCH_SLOT_LEVEL := {"muzzle": 1, "underbarrel": 1, "stock": 1, "optic_primary": 2, "top_front": 2, "side_left": 2, "side_right": 2}
 const POCKET_GRIDS := [Vector2i(0, 0), Vector2i(2, 2), Vector2i(3, 3)]
 const STASH_ROWS := [30, 40, 50]
 const MISSION_SLOTS := [1, 3]

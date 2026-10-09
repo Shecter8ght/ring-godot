@@ -712,7 +712,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 ## Линия выбранного прицела в осях оружия: x, высота, крен. Между любыми двумя — один переход.
 func _aim_line(model: Node3D, sight: String, delta: float) -> Vector3:
 	var primary: Vector3 = Vector3(0.0, float(model.get_meta("sight_h", 0.08)), 0.0)
-	var data: Dictionary = model.get_meta("sight_" + sight, {})
+	var data: Dictionary = (model.get_meta("sights", {}) as Dictionary).get(sight, {})
 	var target: Vector3 = Vector3(float(data.get("x", primary.x)), float(data.get("h", primary.y)), float(data.get("roll", 0.0)))
 	if _sight_mode == "":
 		_sight_pose = primary
@@ -1239,7 +1239,7 @@ func _update_hud(pl: Player) -> void:
 	if pl.loadout_mode:
 		t += "   · запасных маг. %d, россыпью %d" % [pl.spare_mags(), pl.loose_rounds()]
 	if (spec.sights as Array).size() > 1:
-		t += "   [%s]" % WeaponStats.sight_name(String(spec.sight)).to_lower()
+		t += "   [%s]" % WeaponStats.sight_name(String(spec.sight), pl.weapon_entry()).to_lower()
 	if pl.light_on:
 		t += "   СВЕТ"
 	if pl.laser_on:

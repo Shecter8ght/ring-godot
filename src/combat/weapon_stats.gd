@@ -122,7 +122,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 			fx["ergo"] = float(fx.ergo) * effectiveness
 		var is_optic: bool = WeaponDb.is_optic(WeaponDb.mod_id(mods[mount]))
 		# прицел действует, только когда через него смотрят; эргономика (вес) — всегда
-		if is_optic and String(mount) != sight_mount(active):
+		if is_optic and String(mount) != sight_mount(active, entry):
 			s.ergo = float(s.ergo) + float(fx.get("ergo", 0.0))
 			continue
 		s.kick = float(s.kick) * float(fx.get("kick", 1.0))
@@ -185,34 +185,46 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	return s
 
 
-## Основной, угловой и коллиматоры на боковых планках. Фонарь/ЛЦУ в боковом слоте не прицел.
-## Если установлен только дополнительный прицел, выбирается он.
+## Основной и все дополнительные прицелы сборки (на кронштейнах, боковых планках, второй на
+## планке) — порядок и правила в WeaponBuild.sights. Фонарь/ЛЦУ в боковом слоте не прицел.
 static func sights_of(entry: Dictionary) -> Array:
+	return WeaponBuild.sights(entry)
+
+
+## Имя режима на экземпляре → путь точки крепления (у основного — его ключ в сборке entry).
+static func sight_mount(sight: String, entry: Dictionary = {}) -> String:
+	if sight != "primary":
+		return sight
+	var main: String = WeaponBuild.primary_key(entry.get("mods", {}))
+	return main if main != "" else "optic_primary"
+
+
+## Подпись прицела для подсказок: основной, слева/справа на боковой планке, угловой на кронштейне.
+static func sight_name(sight: String, entry: Dictionary = {}) -> String:
+	if sight == "primary":
+		return "Основной"
+	var base: String = WeaponBuild.base_of(sight)
+	if WeaponBuild.depth(sight) == 0:
+		return String({"side_left": "Слева", "side_right": "Справа", "offset": "Угловой"}.get(base, "Дополнительный"))
 	var mods: Dictionary = entry.get("mods", {})
-	var w := WeaponDb.weapon(String(entry.id))
-	var out: Array = []
-	var integral := (w.get("integral", {}) as Dictionary).has("zoom")
-	for mount: String in ["optic_offset", "side_left", "side_right"]:
-		if mods.has(mount) and WeaponDb.is_optic(WeaponDb.mod_id(mods[mount])):
-			out.append("offset" if mount == "optic_offset" else mount)
-	if mods.has("optic_primary") or integral or out.is_empty():
-		out.push_front("primary")
-	return out
-
-
-## Имя режима на экземпляре → физическая точка крепления.
-static func sight_mount(sight: String) -> String:
-	return "optic_" + sight if sight in ["primary", "offset"] else sight
-
-
-static func sight_name(sight: String) -> String:
-	return String({"primary": "Основной", "offset": "Угловой", "side_left": "Слева", "side_right": "Справа"}.get(sight, "Основной"))
+	if mods.is_empty():
+		return "Угловой"
+	var roll: float = WeaponBuild.point_roll(WeaponBuild.model_of(String(entry.get("id", ""))), mods, sight)
+	if is_zero_approx(roll):
+		return "Дополнительный"
+	return "Угловой " + ("справа" if roll > 0.0 else "слева")
 
 
 ## Выбранный прицел (сохраняется на экземпляре); нет такого — первый из доступных.
 static func active_sight(entry: Dictionary) -> String:
 	var sights := sights_of(entry)
 	var s := String(entry.get("sight", "primary"))
+	if s == "offset":
+		# старое сохранение: «угловой» — первый прицел на кронштейне с креном
+		var model_key: String = WeaponBuild.model_of(String(entry.get("id", "")))
+		for k: Variant in sights:
+			if WeaponBuild.depth(String(k)) > 0 and not is_zero_approx(WeaponBuild.point_roll(model_key, entry.get("mods", {}), String(k))):
+				return String(k)
 	return s if s in sights else String(sights[0])
 
 

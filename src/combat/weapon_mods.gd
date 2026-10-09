@@ -1,13 +1,14 @@
 class_name WeaponMods
 extends RefCounted
-## Обвес на процедурные модели оружия. Точки крепления (сокеты) — в данных: data/weapons.json →
-## models.<основа>.sockets (метры, оси модели: +Z к дулу, +Y вверх, −X — правая сторона стрелка);
-## обвес — по своему виду (attach.look). Сокета нет — обвес не рисуется (характеристики работают).
-## Прицел — на планку (ставится, если её нет), линия прицеливания — через центр линзы;
-## угловой — на кронштейн 45° (поворотный узел по крену roll), его линия — отдельно (meta
-## sight_offset); глушитель/компенсатор — на резьбу, дульный срез переезжает на торец; рукоятка —
-## под цевьё; приклад, магазин — вместо штатных (помечены meta "part" и прячутся).
-## Меняет meta модели: sight_h (основная линия прицеливания), sight_offset {x, h, roll}, muzzle,
+## Обвес на модели оружия. Точки крепления (сокеты) — в данных: data/weapons.json →
+## models.<основа>.sockets (метры, оси модели: +Z к дулу, +Y вверх, −X — правая сторона стрелка;
+## у планки — rail_z [от, до]); обвес — по своему виду (attach.look). Сокета нет — обвес не
+## рисуется (характеристики работают). Сборка — дерево WeaponBuild: устройство встаёт в свой паз
+## планки, переходник (кронштейн 45°, проставка, удлинитель, поворотный) даёт новую точку, на
+## которую ставится следующее. Прицел — на планку (ставится, если её нет), линия прицеливания —
+## через центр линзы; глушитель/компенсатор — на резьбу, дульный срез переезжает на торец;
+## рукоятка — под цевьё; приклад, магазин — вместо штатных (помечены meta "part" и прячутся).
+## Меняет meta модели: sight_h (основная линия прицеливания), sights {путь: {x, h, roll}}, muzzle,
 ## scoped. Фонари и ЛЦУ — узлы "Flashlight_<точка>" (SpotLight3D) и "LaserBeam_<точка>" с meta
 ## "mount": включает игрок (T — фонари, L — лазеры) по состоянию обвеса.
 
@@ -26,61 +27,131 @@ static func socket(model_key: String, mount: String) -> Dictionary:
 	return m
 
 
-## mods — точка → {id[, light, laser]} (или просто id у старых записей).
+## mods — путь точки → {id[, slot, flip, angle, light, laser]} (или просто id у старых записей);
+## дерево и пазы — WeaponBuild. Ставится от родителя к детям: у точки оружия — от её сокета (на
+## планке — со сдвигом по пазу), у точки переходника — от рамки, которую он даёт. Линия каждого
+## прицела — в meta "sights" {ключ: {x, h, roll}}; основной (WeaponBuild.primary_key) — ещё и
+## прежними sight_h / ocular / ads_z модели.
 static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0) -> void:
 	var rig: WeaponRig = WeaponRig.find_on(root)
 	if rig:
 		rig.set_external_muzzle(false)
 		rig.set_suppressed(false)
 	var bare_muzzle: Variant = root.get_meta("muzzle", Vector3.ZERO)
-	for mount in mods:
-		var id := WeaponDb.mod_id(mods[mount])
+	var main: String = WeaponBuild.primary_key(mods)
+	# рамка установленного переходника в осях модели — от неё встают его дети
+	var frames: Dictionary = {}
+	var sights: Dictionary = {}
+	var rail_tops: Dictionary = {}
+	for key: String in WeaponBuild.sorted_keys(mods):
+		var id := WeaponDb.mod_id(mods[key])
 		var a := WeaponDb.attachment(id)
 		if a.is_empty():
 			continue
-		if String(a.get("look", "")) == "asset":
+		var base: String = WeaponBuild.base_of(key)
+		var top_level: bool = WeaponBuild.depth(key) == 0
+		if top_level and String(a.get("look", "")) == "asset":
 			if rig and rig.has_suppressor_part():
 				rig.set_suppressed(true)
 				# Срез на собственном глушителе ведёт сам риг — это не внешняя насадка.
 				bare_muzzle = root.get_meta("muzzle", Vector3.ZERO)
 			else:
 				# Ассет может отсутствовать; обвес сохраняет читаемость на запасном пистолете.
-				var fallback: Dictionary = socket(model_key, String(mount))
+				var fallback: Dictionary = socket(model_key, base)
 				fallback["pos"] = root.get_meta("muzzle", Vector3.ZERO)
-				fallback["mount"] = String(mount)
+				fallback["mount"] = key
 				fallback["bore_r"] = float(fallback.get("bore_r", a.get("bore_r_m", 0.0045)))
 				var size: Array = a.get("size_m", [0.019, 0.175])
 				_suppressor(root, fallback, float(size[0]), float(size[1]))
 				root.set_meta("suppressor_installed", true)
 			continue
-		var m := socket(model_key, String(mount))
-		if m.is_empty():
-			continue
-		m["mount"] = String(mount)
-		m["att"] = a
-		m["state"] = WeaponCondition.mod_entry(mods[mount])
-		m["lod"] = lod
-		if rig and String(mount) == "muzzle" and bare_muzzle is Vector3:
-			# Сокеты основы сняты с процедурной модели; на импортированной насадка встаёт на её срез.
-			m.pos = bare_muzzle
-		if String(mount) == "optic_primary":
-			# прицел на планке — целик сложен: иначе торчит в нижней части окна прицела
-			_hide_part(root, "rear_sight")
-		if String(mount) == "muzzle":
-			_hide_part(root, "muzzle_device")
-		if String(mount) == "stock":
-			_hide_part(root, "stock")
-		var part: Node3D = Node3D.new()
-		part.name = "Attachment_" + String(mount)
-		part.set_meta("condition_part", true)
-		part.set_meta("mount", String(mount))
-		root.add_child(part)
-		if String(mount) == "optic_offset":
-			_offset_optic(part, m, a)
-		elif String(mount) in ["side_left", "side_right"] and WeaponDb.is_optic(id):
-			_side_optic(part, m, a)
+		var m: Dictionary
+		var frame := Transform3D.IDENTITY
+		if top_level:
+			m = socket(model_key, base)
+			if m.is_empty():
+				continue
+			var p: Vector3 = m.pos
+			p.z = WeaponBuild.placed_z(model_key, mods, key)
+			# планка, которой у модели нет, рисуется один раз во всю длину — устройства встают на неё
+			if bool(m.get("rail", false)) or float(m.get("riser", 0.0)) > 0.0:
+				if not rail_tops.has(base):
+					rail_tops[base] = _socket_rail(root, model_key, base)
+				p.y = float(rail_tops[base])
+				m["rail"] = false
+				m["riser"] = 0.0
+			m.pos = p
 		else:
+			var parent: String = WeaponBuild.parent_key(key)
+			var g: Dictionary = WeaponBuild.geo(model_key, mods, key)
+			if not frames.has(parent) or g.is_empty():
+				continue
+			var roll: float = deg_to_rad(WeaponBuild.point_roll(model_key, mods, key))
+			frame = (frames[parent] as Transform3D) * Transform3D(Basis(Vector3(0, 0, 1), roll), Vector3.ZERO) * Transform3D(Basis.IDENTITY, g.pos)
+			m = {"pos": Vector3(0, 0, WeaponBuild.placed_z(model_key, mods, key)), "rail": false, "riser": 0.0}
+		m["mount"] = key
+		m["att"] = a
+		m["state"] = WeaponCondition.mod_entry(mods[key])
+		m["lod"] = lod
+		if top_level:
+			if rig and base == "muzzle" and bare_muzzle is Vector3:
+				# Сокеты основы сняты с процедурной модели; на импортированной насадка встаёт на её срез.
+				m.pos = bare_muzzle
+			if key == "optic_primary":
+				# прицел на планке — целик сложен: иначе торчит в нижней части окна прицела
+				_hide_part(root, "rear_sight")
+			if base == "muzzle":
+				_hide_part(root, "muzzle_device")
+			if base == "stock":
+				_hide_part(root, "stock")
+		var part: Node3D = Node3D.new()
+		part.name = "Attachment_" + WeaponBuild.node_name(key)
+		part.set_meta("condition_part", true)
+		part.set_meta("mount", key)
+		root.add_child(part)
+		var optic: bool = WeaponDb.is_optic(id)
+		var pivot: Node3D = null
+		if key == "optic_offset":
+			_offset_optic(part, m, a)
+			sights[key] = part.get_meta("sight_offset", {})
+		elif top_level and base in ["side_left", "side_right"] and optic:
+			_side_optic(part, m, a)
+			sights[key] = part.get_meta("sight_" + key, {})
+		elif not (a.get("provides", {}) as Dictionary).is_empty():
+			pivot = _pivot(part, _mount_frame(model_key, base, m, frame, top_level))
+			var rolls: Dictionary = {}
+			for point_name: Variant in a.provides:
+				rolls[String(point_name)] = WeaponBuild.point_roll(model_key, mods, key + WeaponBuild.SEP + String(point_name))
+			m["rolls"] = rolls
+			_adapter(pivot, m, a)
+			frames[key] = pivot.transform
+		elif top_level and (not optic or key == main):
+			# прежний путь: строитель в осях модели (основной прицел, дульное, рукоятка, фонарь…)
 			_build_look(part, m, a)
+		else:
+			# дополнительный прицел или устройство на переходнике — в рамке своей точки; у рамки +Y —
+			# от оружия наружу: прицел строится вверх, подвесное (рукоятка, фонарь) — вниз, поэтому разворот
+			var xf: Transform3D = _mount_frame(model_key, base, m, frame, top_level)
+			if not optic:
+				xf = xf * Transform3D(Basis(Vector3(0, 0, 1), PI), Vector3.ZERO)
+			pivot = _pivot(part, xf)
+			var sub: Dictionary = m.duplicate(true)
+			sub["pos"] = Vector3.ZERO
+			sub["side"] = false
+			# крупный прицел на угловом кронштейне — на своей проставке, дальше от основной оптики
+			var raise: float = float(a.get("offset_raise_m", 0.0))
+			if optic and not top_level and raise > 0.0 and not is_zero_approx(WeaponBuild.point_roll(model_key, mods, key)):
+				WeaponModels._cbox(pivot, Vector3(0, raise * 0.5, 0), Vector3(0.022, raise, 0.032), _mat("anodized"), 0.0012)
+				sub["pos"] = Vector3(0, raise, 0)
+			_build_look(pivot, sub, a)
+			if optic:
+				var pt: Vector3 = pivot.transform * Vector3(0, float(pivot.get_meta("sight_h", 0.02)), 0)
+				var up: Vector3 = pivot.transform.basis.y
+				sights[key] = {"x": pt.x, "h": pt.y, "roll": atan2(-up.x, up.y)}
+				if key == main:
+					_primary_from_pivot(root, pivot, pt)
+		if pivot and pivot.get_meta("asset_loaded", false):
+			part.set_meta("asset_loaded", true)
 		for meta: StringName in part.get_meta_list():
 			if meta not in [&"condition_part", &"mount"]:
 				root.set_meta(meta, part.get_meta(meta))
@@ -89,19 +160,115 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 		for node: Node in part.find_children("*", "MeshInstance3D", true, false):
 			var mesh: MeshInstance3D = node as MeshInstance3D
 			var material: Material = mesh.get_active_material(0) if mesh.mesh and mesh.mesh.get_surface_count() > 0 else null
-			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and WeaponDb.is_optic(id):
+			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and optic:
 				mesh.set_meta("reticle_dot", true)
-				mesh.set_meta("mount", String(mount))
+				mesh.set_meta("mount", key)
 	update_condition(root, mods)
 	if rig and root.get_meta("muzzle", Vector3.ZERO) != bare_muzzle:
 		# Процедурный глушитель или тормоз на модели без своей детали: дульный срез — от насадки,
 		# риг не возвращает его на голый ствол при каждой позе.
 		rig.set_external_muzzle(true)
-	# основная линия прицеливания и угловая — для камеры (CameraRig выбирает по прицелу)
-	root.set_meta("sight_primary", {"x": 0.0, "h": float(root.get_meta("sight_h", 0.0)), "roll": 0.0})
+	# основная линия прицеливания и остальные — для камеры (CameraRig выбирает по прицелу)
+	var primary_line: Dictionary = {"x": 0.0, "h": float(root.get_meta("sight_h", 0.0)), "roll": 0.0}
+	root.set_meta("sight_primary", primary_line)
+	sights["primary"] = primary_line
+	root.set_meta("sights", sights)
 
 
-## Деталь обвеса по виду look.
+## Рамка устройства: у точки оружия — сокет (на боковой планке +Y смотрит наружу, под цевьём —
+## вниз), у точки переходника — его рамка со сдвигом по пазу.
+static func _mount_frame(model_key: String, base: String, m: Dictionary, frame: Transform3D, top_level: bool) -> Transform3D:
+	if not top_level:
+		return frame * Transform3D(Basis.IDENTITY, m.pos)
+	var p: Vector3 = m.pos
+	var roll: float = 0.0
+	if bool(socket(model_key, base).get("side", false)):
+		roll = -signf(p.x) * PI * 0.5
+	elif base == "underbarrel":
+		roll = PI
+	return Transform3D(Basis(Vector3(0, 0, 1), roll), p)
+
+
+static func _pivot(part: Node3D, xf: Transform3D) -> Node3D:
+	var pivot: Node3D = Node3D.new()
+	pivot.name = "Mount"
+	pivot.transform = xf
+	part.add_child(pivot)
+	return pivot
+
+
+## Основной прицел над проставкой: его линия, окуляр и вынос глаза — в осях модели.
+static func _primary_from_pivot(root: Node3D, pivot: Node3D, line_point: Vector3) -> void:
+	root.set_meta("sight_h", line_point.y)
+	for flag: StringName in [&"scoped", &"ocular_r", &"lumar_reticle"]:
+		if pivot.has_meta(flag):
+			root.set_meta(flag, pivot.get_meta(flag))
+	if pivot.has_meta("ocular"):
+		var local: Vector3 = pivot.get_meta("ocular")
+		var placed: Vector3 = pivot.transform * local
+		root.set_meta("ocular", placed)
+		if pivot.has_meta("ads_z"):
+			root.set_meta("ads_z", float(pivot.get_meta("ads_z")) + local.z - placed.z)
+
+
+## Планка (и проставка), которой у модели нет: во всю длину точки. Возвращает высоту верха.
+static func _socket_rail(root: Node3D, model_key: String, base: String) -> float:
+	var sk: Dictionary = socket(model_key, base)
+	var g: Dictionary = WeaponBuild.geo(model_key, {}, base)
+	var p: Vector3 = sk.pos
+	var rail: Array = g.get("rail", [])
+	var z0: float = float(rail[0]) if not rail.is_empty() else p.z - 0.05
+	var z1: float = float(rail[1]) if not rail.is_empty() else p.z + 0.05
+	var y: float = p.y
+	var riser: float = float(sk.get("riser", 0.0))
+	if riser > 0.0:
+		# проставка повторяет крышку: ложится на рёбра, шире планки
+		WeaponModels._cbox(root, Vector3(0, y + riser * 0.5, (z0 + z1) * 0.5), Vector3(0.026, riser, z1 - z0), _mat("anodized"), 0.0012)
+		y += riser
+	if bool(sk.get("rail", false)):
+		y = _rail_z(root, y, (z0 + z1) * 0.5, z1 - z0)
+	return y
+
+
+# ---------------------------------------------------------------- переходники
+
+## Переходник по виду (attach.look) в своей рамке: +Y — от оружия, начало — середина зажима на
+## поверхности планки. Точки, которые он даёт, — по данным provides (WeaponBuild.geo), крен —
+## m.rolls (сторона и угол из записи). Пока процедурный; модель из Blender — attach.asset.
+static func _adapter(pivot: Node3D, m: Dictionary, a: Dictionary) -> void:
+	var al := _mat("anodized")
+	var clamp: float = float(a.get("clamp_m", WeaponBuild.DEFAULT_CLAMP))
+	var spec: Dictionary = (a.get("provides", {}) as Dictionary).get("rail", {})
+	var p: Array = spec.get("pos", [0, 0, 0])
+	var top := Vector3(float(p[0]), float(p[1]), float(p[2]))
+	var roll: float = deg_to_rad(float((m.get("rolls", {}) as Dictionary).get("rail", 0.0)))
+	# зажим Пикатинни: колодка с губками по бокам и винт
+	WeaponModels._cbox(pivot, Vector3(0, 0.004, 0), Vector3(0.024, 0.008, clamp), al, 0.0012)
+	for sx: float in [-1.0, 1.0]:
+		WeaponModels._cbox(pivot, Vector3(sx * 0.0115, -0.002, 0), Vector3(0.003, 0.008, clamp), al, 0.0006)
+	WeaponModels._cyl_x(pivot, Vector3(0.0145, 0.0, 0), 0.0035, 0.004, _mat("gunmetal"))
+	match String(a.get("look", "")):
+		"mount_offset45", "mount_adjustable":
+			var arm := Node3D.new()
+			arm.rotation.z = roll
+			pivot.add_child(arm)
+			if String(a.look) == "mount_adjustable":
+				# поворотная шайба
+				WeaponModels._cyl(arm, Vector3(0, 0.009, 0), 0.011, 0.004, _mat("gunmetal")).rotation = Vector3.ZERO
+			var h: float = top.y
+			WeaponModels._cbox(arm, Vector3(0, h * 0.5, 0), Vector3(0.016, h, 0.02), al, 0.0015)
+			# площадка под мини-коллиматор
+			WeaponModels._cbox(arm, Vector3(0, h - 0.002, 0), Vector3(0.024, 0.004, 0.034), al, 0.0008)
+		"mount_riser":
+			var body_h: float = top.y - RAIL_H
+			WeaponModels._cbox(pivot, Vector3(0, body_h * 0.5, 0), Vector3(0.022, body_h, clamp), al, 0.0015)
+			var rail: Array = spec.get("rail_z", [-clamp * 0.5, clamp * 0.5])
+			_rail_z(pivot, body_h, (float(rail[0]) + float(rail[1])) * 0.5, float(rail[1]) - float(rail[0]))
+		"mount_rail_ext":
+			var rail2: Array = spec.get("rail_z", [-0.02, 0.1])
+			_rail_z(pivot, top.y - RAIL_H, top.z + (float(rail2[0]) + float(rail2[1])) * 0.5, float(rail2[1]) - float(rail2[0]))
+
+
 static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 	match String(a.get("look", "")):
 		"red_dot":

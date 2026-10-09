@@ -42,15 +42,12 @@ static func chamber_round(entry: Dictionary) -> void:
 static func strip(entry: Dictionary, part: String) -> Array:
 	var e := entry.duplicate(true)
 	if part.begins_with("mod:"):
-		var mount := part.trim_prefix("mod:")
-		var mods: Dictionary = e.get("mods", {})
-		if not mods.has(mount):
+		# снимается со всем, что на нём стоит (кронштейн — вместе с прицелом)
+		var r: Array = WeaponBuild.extract(e, part.trim_prefix("mod:"))
+		if (r[1] as Dictionary).is_empty():
 			return [entry, {}]
-		var got: Dictionary = WeaponCondition.mod_entry(mods[mount])
-		mods.erase(mount)
-		e["mods"] = mods
-		_bump(e)
-		return [e, got]
+		_bump(r[0])
+		return r
 	if part.begins_with("plate:"):
 		var side := part.trim_prefix("plate:")
 		var plates: Dictionary = e.get("plates", {})
@@ -87,30 +84,28 @@ static func fit(entry: Dictionary, item: Dictionary, hint: String = "") -> Array
 	var iid := WeaponDb.canonical(String(item.id))
 	if not WeaponDb.attachment(iid).is_empty() and WeaponDb.is_weapon(String(e.id)):
 		var mount := hint
+		var slot := -1
 		if mount == "":
-			mount = WeaponDb.free_mount_for(e, iid)
-			if mount == "":
+			var place: Dictionary = WeaponBuild.free_place(e, iid)
+			if place.is_empty():
 				var all := WeaponDb.mounts_for(e, iid)
 				mount = String(all[0]) if not all.is_empty() else ""
+			else:
+				mount = String(place.key)
+				slot = int(place.slot)
+		elif not (e.get("mods", {}) as Dictionary).has(mount) and WeaponBuild.block(e, mount, iid) != "":
+			# новое место на планке: ближайший свободный паз
+			var slots: Array[int] = WeaponBuild.valid_slots(e, mount, iid)
+			if not slots.is_empty():
+				slot = slots[0]
 		if mount == "":
 			return [entry, {}, "на это оружие не встаёт"]
-		var probe := e.duplicate(true)
-		var mods: Dictionary = probe.get("mods", {})
-		var old := {}
-		if mods.has(mount):
-			old = WeaponCondition.mod_entry(mods[mount])
-			mods.erase(mount)
-		probe["mods"] = mods
-		var why := WeaponDb.attach_block(probe, mount, iid)
-		if why != "":
-			return [entry, {}, why]
-		var installed: Dictionary = WeaponCondition.mod_entry(item)
-		for position: String in ["x", "y", "r"]:
-			installed.erase(position)
-		mods[mount] = installed
-		probe["mods"] = mods
-		_bump(probe)
-		return [probe, old, ""]
+		var r: Array = WeaponBuild.insert(e, mount, item, slot)
+		if String(r[2]) != "":
+			return [entry, {}, String(r[2])]
+		if not (r[3] as Dictionary).is_empty():
+			return [entry, {}, "на переходнике не всё встанет"]
+		return [r[0], r[1], ""]
 	if not WeaponDb.plate(iid).is_empty() and e.has("plates"):
 		var slots: Array = WeaponDb.vest(String(e.id)).get("plates", [])
 		var side := hint
@@ -144,9 +139,8 @@ static func parts(e: Dictionary) -> Array:
 	var out: Array = []
 	var id := String(e.get("id", ""))
 	var mods: Dictionary = e.get("mods", {})
-	for m in WeaponDb.MOUNTS:
-		if mods.has(m):
-			out.append(["Снять: %s (%s)" % [ItemDb.item_name(WeaponDb.mod_id(mods[m])), String(WeaponDb.MOUNT_NAMES.get(m, m))], "mod:" + String(m)])
+	for m: String in WeaponBuild.sorted_keys(mods):
+		out.append(["Снять: %s (%s)" % [ItemDb.item_name(WeaponDb.mod_id(mods[m])), WeaponBuild.label(id, mods, m)], "mod:" + m])
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 	if WeaponDb.is_weapon(id) and not mag.is_empty():
 		if String(mag.get("id", "")) != "":

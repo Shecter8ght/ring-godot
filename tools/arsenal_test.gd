@@ -91,7 +91,7 @@ func _ready() -> void:
 	ep["sight"] = "primary"
 	var sp := WeaponStats.compute(ep)
 	_check("CASE 3: изометрия — основной (LPVO): дальше обзор; угловой: без приближения, от бедра точнее",
-		String(so.sight) == "offset" and String(sp.sight) == "primary" and float(sp.iso_zoom) > float(so.iso_zoom) and bool(sp.scoped) and not bool(so.scoped)
+		String(so.sight) == _angled(e) and String(sp.sight) == "primary" and float(sp.iso_zoom) > float(so.iso_zoom) and bool(sp.scoped) and not bool(so.scoped)
 		and float(Balance.ISO_AIM.offset_hip) < float(Balance.ISO_AIM.scope_hip),
 		"приближение %.2f / %.2f" % [float(sp.iso_zoom), float(so.iso_zoom)])
 
@@ -104,8 +104,8 @@ func _ready() -> void:
 	Raid.current.request_strip("equip:primary", -1, "mod:optic_primary")
 	await _frames(6)
 	var e11 := pl.weapon_entry()
-	_check("CASE 11: LPVO снят — угловой коллиматор на месте и выбран", pl.inventory.has("optic_lpvo_01") and (e11.mods as Dictionary).has("optic_offset")
-		and "offset" in WeaponStats.sights_of(e11) and String(WeaponStats.compute(e11).sight) == "offset", str(WeaponStats.sights_of(e11)))
+	_check("CASE 11: LPVO снят — угловой коллиматор на кронштейне на месте и выбран", pl.inventory.has("optic_lpvo_01") and _angled(e11) != ""
+		and String(WeaponStats.compute(e11).sight) == _angled(e11), str(WeaponStats.sights_of(e11)))
 	# CASE 19: снять заднюю плиту со своего плитоносца
 	Raid.current.request_strip("equip:armor", -1, "plate:back")
 	await _frames(4)
@@ -198,7 +198,7 @@ func _ready() -> void:
 	await _frames(4)
 	Raid.current.request_fit("equip:primary", -1, _bi(pl, "tac_flashlight_01"), "side_left")
 	await _frames(6)
-	if String(WeaponStats.compute(pl.weapon_entry()).sight) != "offset":
+	if String(WeaponStats.compute(pl.weapon_entry()).sight) != _angled(pl.weapon_entry()):
 		pl._toggle_sight()
 	if not _on(pl, "side_left", "light"):
 		await _tac("light")
@@ -216,7 +216,7 @@ func _ready() -> void:
 	await _frames(3)
 	# CASE 9: после эвакуации — основной, угловой, фонарь, ЛЦУ и их состояние
 	var pw: Dictionary = Profile.equipment.get("primary", {})
-	_check("CASE 9: после эвакуации обвес и состояния на месте", _mods_ok(pw, mods_before) and String(pw.get("sight", "")) == "offset"
+	_check("CASE 9: после эвакуации обвес и состояния на месте", _mods_ok(pw, mods_before) and String(pw.get("sight", "")) == _angled(pw)
 		and bool((pw.mods.side_left as Dictionary).get("light", false)) and bool((pw.mods.side_right as Dictionary).get("laser", false)),
 		"%s, прицел %s" % [str(pw.get("mods", {})), String(pw.get("sight", ""))])
 	# CASE 20: трофей в профиле — как был
@@ -224,7 +224,7 @@ func _ready() -> void:
 	# CASE 10: перезагрузка сохранения — выбранный прицел и обвес целы
 	Profile.use_file(TEST_PROFILE, false)
 	var rw: Dictionary = Profile.equipment.get("primary", {})
-	_check("CASE 10: после перезагрузки профиля прицел «угловой», обвес и фонарь / ЛЦУ целы", String(WeaponStats.compute(rw).sight) == "offset" and _mods_ok(rw, mods_before)
+	_check("CASE 10: после перезагрузки профиля прицел «угловой», обвес и фонарь / ЛЦУ целы", String(WeaponStats.compute(rw).sight) == _angled(rw) and _mods_ok(rw, mods_before)
 		and bool((rw.mods.side_left as Dictionary).get("light", false)) and bool((rw.mods.side_right as Dictionary).get("laser", false)), String(rw.get("sight", "")))
 	print("arsenal_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
@@ -240,7 +240,7 @@ func _data_cases(rng: RandomNumberGenerator) -> void:
 			catalog_count += 1
 			if String(ItemDb.item(id).get("flavor", "")).strip_edges() == "":
 				missing_flavor.append(id)
-	_check("каталог: у всех 139 элементов есть отдельная игровая фраза", catalog_count == 139 and missing_flavor.is_empty(),
+	_check("каталог: у всех 143 элементов есть отдельная игровая фраза", catalog_count == 143 and missing_flavor.is_empty(),
 		"элементов %d, без фразы: %s" % [catalog_count, ", ".join(missing_flavor)])
 	var vss_item: Dictionary = ItemDb.item("wpn_sp_02")
 	var vss_spec: Dictionary = WeaponDb.weapon("wpn_sp_02")
@@ -346,6 +346,15 @@ func _vm_roll(rig: CameraRig) -> float:
 		return 999.0
 	var up := rig._viewmodel.transform.basis.y
 	return rad_to_deg(atan2(-up.x, up.y))
+
+
+## Угловой прицел сборки (на кронштейне с креном), "" — нет. Старой точки «угловой» больше нет.
+func _angled(e: Dictionary) -> String:
+	var model_key: String = WeaponBuild.model_of(String(e.get("id", "")))
+	for k: Variant in WeaponStats.sights_of(e):
+		if WeaponBuild.depth(String(k)) > 0 and not is_zero_approx(WeaponBuild.point_roll(model_key, e.get("mods", {}), String(k))):
+			return String(k)
+	return ""
 
 
 func _mods_ok(e: Dictionary, want: Dictionary) -> bool:

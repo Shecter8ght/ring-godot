@@ -444,8 +444,15 @@ func set_sandbox_mods(key: String, mods: Dictionary) -> void:
 	var e: Dictionary = sandbox_weapons[key]
 	var m := {}
 	for mount in mods:
-		m[String(mount)] = {"id": WeaponDb.canonical(String(mods[mount]))}
+		# значение — id или готовая запись с пазом/стороной (путь точки — WeaponBuild)
+		var rec: Dictionary = (mods[mount] as Dictionary).duplicate(true) if mods[mount] is Dictionary else {"id": String(mods[mount])}
+		rec["id"] = WeaponDb.canonical(String(rec.get("id", "")))
+		m[String(mount)] = rec
 	e["mods"] = m
+	# старая точка «угловой прицел» — кронштейн на планке
+	var upgraded: Dictionary = WeaponBuild.upgrade(e)[0]
+	e["mods"] = upgraded.mods
+	e["sight"] = String(upgraded.get("sight", e.get("sight", "primary")))
 	Gear._bump(e)
 
 
@@ -1384,9 +1391,9 @@ func _toggle_sight() -> void:
 	var cur := WeaponStats.active_sight(e)
 	var nxt := String(sights[(sights.find(cur) + 1) % sights.size()])
 	_ws[weapon_slot].sight = nxt
-	var mount: String = WeaponStats.sight_mount(nxt)
+	var mount: String = WeaponStats.sight_mount(nxt, e)
 	var name := ItemDb.item_name(WeaponDb.mod_id((e.mods as Dictionary).get(mount, ""))) if (e.mods as Dictionary).has(mount) else "штатный"
-	_say(WeaponStats.sight_name(nxt) + ": " + name)
+	_say(WeaponStats.sight_name(nxt, e) + ": " + name)
 	Audio.play("sight_switch", global_position, -16.0)
 	_send_ws(weapon_slot)
 
@@ -1626,7 +1633,7 @@ func _fire(spec: Dictionary) -> void:
 		mult = lerpf(hip, float(spec.ads_spread), aim_progress())
 	elif not ads:
 		# изометрия, от бедра: угловой коллиматор — навскидку точнее, крупная оптика мешает
-		if String(spec.sight) == "offset":
+		if String(spec.sight) != "primary" and not bool(spec.scoped):
 			mult *= float(Balance.ISO_AIM.offset_hip)
 		elif bool(spec.scoped):
 			mult *= float(Balance.ISO_AIM.scope_hip)

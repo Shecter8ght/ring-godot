@@ -7,10 +7,10 @@ extends Control
 ## (из тайника и рюкзака). Точки — из данных (WeaponDb.mounts_of + sockets основы модели).
 
 const SLOT := Vector2(84, 70)
-const SHORT := {"optic_primary": "Прицел", "optic_offset": "Угловой", "muzzle": "Дуло", "underbarrel": "Под цевьё",
+const SHORT := {"optic_primary": "Сверху", "top_front": "Цевьё", "muzzle": "Дуло", "underbarrel": "Под цевьё",
 	"side_left": "Слева", "side_right": "Справа", "stock": "Приклад"}
 ## Какие точки — над стволом (остальные — под).
-const TOP := ["optic_primary", "optic_offset", "muzzle"]
+const TOP := ["optic_primary", "top_front", "muzzle"]
 
 var candidates: Callable
 var remove: Callable

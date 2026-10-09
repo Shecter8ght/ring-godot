@@ -27,28 +27,34 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 	var profile: Dictionary = (weapon.get("hand_grips", _profiles.get(model, {})) as Dictionary).duplicate(true)
 	if profile.is_empty():
 		return
-	var attachment: Dictionary = WeaponDb.attachment(WeaponDb.mod_id(mods.get("underbarrel", {})))
+	# под цевьём может стоять несколько устройств: ладонь — на рукоятке, если она есть
+	var under_key: String = _under_key(mods)
+	var attachment: Dictionary = WeaponDb.attachment(WeaponDb.mod_id(mods.get(under_key, {})))
 	var grip: String = String(attachment.get("look", ""))
-	var contact_attachment: String = WeaponDb.mod_id(mods.get("underbarrel", {}))
+	var contact_attachment: String = WeaponDb.mod_id(mods.get(under_key, {}))
+	var under_pos: Vector3 = Vector3.ZERO
+	var under_socket: Dictionary = WeaponMods.socket(model, "underbarrel")
+	if not under_socket.is_empty():
+		under_pos = under_socket.pos
+		if under_key != "":
+			under_pos.z = WeaponBuild.placed_z(model, mods, under_key)
 	if not attachment.is_empty() and not grip in ["grip_vertical", "grip_angled"]:
 		contact_attachment = "tac_flashlight_01"
 	if model == "pistol":
 		contact_attachment = ""
 	var contact_key: String = "%s_%.3f_%s" % [model, float(weapon.get("scale", 1.0)), contact_attachment]
 	if _profiles.has(grip):
-		var mount: Dictionary = WeaponMods.socket(model, "underbarrel")
-		if not mount.is_empty():
+		if not under_socket.is_empty():
 			profile.left = (_profiles[grip] as Dictionary).duplicate(true)
 			profile.left["scale"] = float(attachment.get("scale", 1.0))
-			profile.left["offset"] = mount.pos
+			profile.left["offset"] = under_pos
 			if contact_attachment == "grip_compact_01":
 				# Короткую рукоятку держим выше: указательный опирается у цевья.
 				profile.left.pos[1] = -0.030
 	elif not attachment.is_empty() and profile.has("underbarrel_clearance"):
-		var mount: Dictionary = WeaponMods.socket(model, "underbarrel")
-		if not mount.is_empty():
+		if not under_socket.is_empty():
 			# Фонарь и сошки занимают низ цевья: ладонь переносится за их крепление.
-			profile.left.pos[2] = minf(float(profile.left.pos[2]), (mount.pos as Vector3).z - float(profile.underbarrel_clearance))
+			profile.left.pos[2] = minf(float(profile.left.pos[2]), under_pos.z - float(profile.underbarrel_clearance))
 	for side: String in ["right", "left"]:
 		if not profile.has(side):
 			continue
@@ -78,3 +84,17 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 
 static func vector(value: Array) -> Vector3:
 	return Vector3(float(value[0]), float(value[1]), float(value[2]))
+
+
+## Устройство под цевьём, на котором лежит ладонь: рукоятка, иначе самое заднее ("" — пусто).
+static func _under_key(mods: Dictionary) -> String:
+	var best: String = ""
+	for k: Variant in mods:
+		var key: String = String(k)
+		if WeaponBuild.depth(key) != 0 or WeaponBuild.base_of(key) != "underbarrel":
+			continue
+		if String(WeaponDb.attachment(WeaponDb.mod_id(mods[k])).get("look", "")).begins_with("grip_"):
+			return key
+		if best == "" or key < best:
+			best = key
+	return best

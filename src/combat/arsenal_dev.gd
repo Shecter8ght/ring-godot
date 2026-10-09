@@ -177,6 +177,15 @@ static func _mount(pl: Player, mount: String, att: String) -> String:
 		return "в руках нет оружия"
 	if att == "" or WeaponDb.attachment(att).is_empty():
 		return "mount <точка> <обвес>; точки: " + ", ".join(WeaponDb.mounts_of(String(e.id)).keys())
+	if mount == "optic_offset":
+		# прежняя команда «угловой»: кронштейн 45° на верхнюю планку, прицел — на него
+		var probe := e.duplicate(true)
+		(probe.mods as Dictionary)["optic_offset"] = {"id": WeaponDb.canonical(att), "dur": 100.0}
+		var up: Array = WeaponBuild.upgrade(probe)
+		if not (up[1] as Array).is_empty():
+			return "не встаёт: на планке нет места под кронштейн"
+		_store(pl, up[0])
+		return "%s → кронштейн 45° на верхней планке" % ItemDb.item_name(att)
 	var r := Gear.fit(e, ItemDb.make(WeaponDb.canonical(att), 1), mount)
 	if String(r[2]) != "":
 		return "не встаёт: " + String(r[2])
