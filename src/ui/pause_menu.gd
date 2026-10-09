@@ -725,36 +725,54 @@ func _teleport_to(p: Vector3) -> void:
 	me.velocity = Vector3.ZERO
 
 
-## Точное время рейда: галочка «задать» и ползунок по 15 минут; без галочки — по времени суток.
+## Точное время рейда: ползунок по 15 минут (сдвинул — время задано: в рейде сразу, у хоста — у
+## всех, следующие рейды начнутся с него) и «Авто» — снова по времени суток из убежища. Пока
+## ползунок тащат — меняется только подпись, часы переводятся, когда его отпустили.
 func _hour_row() -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	var on := CheckBox.new()
-	on.focus_mode = Control.FOCUS_NONE
-	on.button_pressed = Settings.raid_hour >= 0.0
-	on.tooltip_text = "Задать час: в рейде — сразу (у хоста — у всех), следующие рейды начнутся с него. Без галочки — начало выбранного времени суток."
 	var s := HSlider.new()
 	s.min_value = 0.0
 	s.max_value = 23.75
 	s.step = 0.25
 	s.value = Settings.raid_hour if Settings.raid_hour >= 0.0 else (DayCycle.current.hour if DayCycle.current else 12.0)
-	s.custom_minimum_size = Vector2(170, 24)
+	s.custom_minimum_size = Vector2(200, 24)
+	s.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	s.focus_mode = Control.FOCUS_NONE
-	s.editable = on.button_pressed
 	var v := Label.new()
-	v.custom_minimum_size.x = 52
+	v.custom_minimum_size.x = 92
+	var auto := Button.new()
+	auto.text = "Авто"
+	auto.focus_mode = Control.FOCUS_NONE
+	auto.tooltip_text = "Время — как выбрано у стола в убежище (день 11:00, закат 18:00, ночь 23:00)."
 	var show := func(h: float) -> void:
 		var m := int(round(h * 60.0)) % (24 * 60)
-		v.text = "%02d:%02d" % [m / 60, m % 60]
+		v.text = "%02d:%02d" % [m / 60, m % 60] if Settings.raid_hour >= 0.0 or s.has_meta("touched") else "%02d:%02d авто" % [m / 60, m % 60]
 	show.call(s.value)
+	# меню строится до рейда — при каждом открытии ползунок встаёт на нынешнее время рейда
+	s.visibility_changed.connect(func() -> void:
+		if s.is_visible_in_tree() and DayCycle.current and Settings.raid_hour < 0.0:
+			s.set_value_no_signal(snappedf(DayCycle.current.hour, 0.25))
+			show.call(s.value))
+	var dragging := [false]
+	s.drag_started.connect(func() -> void: dragging[0] = true)
+	s.drag_ended.connect(func(_changed: bool) -> void:
+		dragging[0] = false
+		s.set_meta("touched", true)
+		Settings.set_raid_hour(s.value)
+		show.call(s.value))
 	s.value_changed.connect(func(x: float) -> void:
+		s.set_meta("touched", true)
 		show.call(x)
-		if on.button_pressed:
+		# щелчок по полосе / колесо — сразу; перетаскивание — когда отпустят
+		if not dragging[0]:
 			Settings.set_raid_hour(x))
-	on.toggled.connect(func(p: bool) -> void:
-		s.editable = p
-		Settings.set_raid_hour(s.value if p else -1.0))
-	row.add_child(on)
+	auto.pressed.connect(func() -> void:
+		s.remove_meta("touched")
+		Settings.set_raid_hour(-1.0)
+		show.call(s.value))
 	row.add_child(s)
 	row.add_child(v)
+	row.add_child(auto)
 	return row
+
