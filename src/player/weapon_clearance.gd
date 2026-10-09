@@ -12,6 +12,9 @@ var sideways: bool = false
 var bounds: AABB
 var _pivot: Vector3 = Vector3.ZERO
 var _animated: bool = false
+## Руки со скелетом (вьюмодель с клипами): кисти берутся по костям, а поза клипа появляется только
+## после первого шага анимации — габарит пересчитать тогда.
+var _pose_pending: bool = false
 var _box: BoxShape3D = BoxShape3D.new()
 var _query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
 static var _segment: CapsuleShape3D = CapsuleShape3D.new()
@@ -25,6 +28,7 @@ func bind(model: Node3D) -> void:
 	valid = true
 	_animated = false
 	_refresh_bounds(model)
+	_pose_pending = not _hand_bones(model).is_empty()
 	_query.shape = _box
 	_query.collision_mask = MASK
 	_query.margin = float(Balance.WEAPON_CLEARANCE.margin)
@@ -32,9 +36,10 @@ func bind(model: Node3D) -> void:
 
 ## Магазин и кисть покидают исходный объём во время перезарядки.
 func refresh_action(model: Node3D, rig: WeaponRig) -> void:
-	var busy: bool = rig != null and rig.is_busy()
-	if busy or _animated: _refresh_bounds(model)
+	var busy: bool = (rig != null and rig.is_busy()) or (model.has_method("is_busy") and bool(model.call("is_busy")))
+	if busy or _animated or _pose_pending: _refresh_bounds(model)
 	_animated = busy
+	_pose_pending = false
 	if busy:
 		var hand: Node3D = rig.get_hand_target()
 		if hand and rig.get_hand_weight() > 0.0:
@@ -54,7 +59,9 @@ func _refresh_bounds(model: Node3D) -> void:
 	var first: bool = true
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var mesh: MeshInstance3D = node as MeshInstance3D
-		if mesh.mesh == null or String(mesh.name).begins_with("Laser"):
+		# У меша со скелетом get_aabb — габарит позы покоя (у рук из Blender это T-поза шириной
+		# 1.6 м): ствол упирался бы во всё вокруг. Кисти таких рук — ниже, по костям.
+		if mesh.mesh == null or mesh.skin != null or String(mesh.name).begins_with("Laser"):
 			continue
 		var local: AABB = WeaponRig._relative_transform(mesh, model) * mesh.get_aabb()
 		bounds = local if first else bounds.merge(local)
@@ -67,6 +74,25 @@ func _refresh_bounds(model: Node3D) -> void:
 			var radius: Vector3 = Vector3.ONE * float(Balance.WEAPON_CLEARANCE.hand_radius)
 			bounds = bounds.merge(AABB(wrist - radius, radius * 2.0)).merge(AABB(local.origin - radius, radius * 2.0))
 			if side == "Right": _pivot = wrist
+	var radius: Vector3 = Vector3.ONE * float(Balance.WEAPON_CLEARANCE.hand_radius)
+	var inverse: Transform3D = model.global_transform.affine_inverse() if model.is_inside_tree() else Transform3D.IDENTITY
+	for hand: Array in _hand_bones(model):
+		var sk: Skeleton3D = hand[0] as Skeleton3D
+		var point: Vector3 = inverse * (sk.global_transform * sk.get_bone_global_pose(int(hand[1])).origin) if model.is_inside_tree() 			else WeaponRig._relative_transform(sk, model) * sk.get_bone_global_pose(int(hand[1])).origin
+		bounds = bounds.merge(AABB(point - radius, radius * 2.0))
+		if String(hand[2]) == "R": _pivot = point
+
+
+## Кисти рук со скелетом: [скелет, кость, сторона]. Только у скелетов, на которых есть кожа.
+func _hand_bones(model: Node3D) -> Array:
+	var out: Array = []
+	for node: Node in model.find_children("*", "Skeleton3D", true, false):
+		var sk: Skeleton3D = node as Skeleton3D
+		for side: String in ["L", "R"]:
+			var bone: int = sk.find_bone("hand." + side)
+			if bone >= 0:
+				out.append([sk, bone, side])
+	return out
 
 
 ## Transform3D может содержать масштаб ViewmodelSpace: переводим все восемь углов в OBB.

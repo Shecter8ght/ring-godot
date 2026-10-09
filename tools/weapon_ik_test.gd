@@ -207,7 +207,8 @@ func _case(label: String, position: Vector3, stance: int, aimed: bool, lean: flo
 func _weapon_outside(model: Node3D) -> bool:
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var mesh: MeshInstance3D = node as MeshInstance3D
-		if not mesh.is_visible_in_tree() or mesh.mesh == null or String(mesh.name).begins_with("Laser"): continue
+		# у меша со скелетом габарит — поза покоя; руки проверяет _skin_outside по вершинам
+		if not mesh.is_visible_in_tree() or mesh.mesh == null or mesh.skin != null or String(mesh.name).begins_with("Laser"): continue
 		var aabb: AABB = mesh.get_aabb()
 		var corners: Array[Vector3] = []
 		for i: int in range(8):
