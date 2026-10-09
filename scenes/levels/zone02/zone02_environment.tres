@@ -1,4 +1,4 @@
-[gd_resource type="Environment" load_steps=3 format=3]
+[gd_resource type="Environment" format=3 uid="uid://154elq1oitmu"]
 
 [sub_resource type="PhysicalSkyMaterial" id="sky_material"]
 rayleigh_coefficient = 2.2
@@ -19,4 +19,3 @@ ambient_light_energy = 0.75
 tonemap_mode = 4
 ssao_enabled = true
 ssao_radius = 1.2
-fog_enabled = false
