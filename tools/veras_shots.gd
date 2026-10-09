@@ -75,6 +75,11 @@ func _ready() -> void:
 	await get_tree().create_timer(float(_player.spec().aim_time) + 0.4).timeout
 	await _shot("veras_ads_reddot")
 	Input.action_release("aim")
+	# рукоятка по пазам нижней планки: левая кисть переезжает к ней (поправка поверх клипа)
+	for grip_slot: int in [0, 4]:
+		await _equip({"underbarrel": {"id": "grip_vertical_01", "slot": grip_slot}})
+		await get_tree().create_timer(0.5).timeout
+		await _shot("veras_grip_slot%d" % grip_slot)
 	# мировая модель (у напарников, мародёров, на земле): своя камера, модель боком на высоте 2 м
 	var world: Node3D = WeaponModels.build(ID, {}, 1)
 	add_child(world)

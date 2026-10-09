@@ -40,7 +40,8 @@ func refresh_action(model: Node3D, rig: WeaponRig) -> void:
 	if busy or _animated or _pose_pending: _refresh_bounds(model)
 	_animated = busy
 	_pose_pending = false
-	if busy:
+	# у сцены рук с клипами (ВЕРАС) рига нет: кисти уже в габарите по костям
+	if busy and rig != null:
 		var hand: Node3D = rig.get_hand_target()
 		if hand and rig.get_hand_weight() > 0.0:
 			var pose: Transform3D = WeaponRig._relative_transform(hand, model)

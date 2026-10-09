@@ -38,6 +38,13 @@ var _sight_cache: Array = []
 ## Корпус магазина в сцене рук: вынут (Player.weapon_mag == "") — не виден, кроме перезарядки, где
 ## клип вставляет новый.
 var _mag_parts: Array[Node3D] = []
+## Левая кисть клипа держит цевьё в одном месте; рукоятка (или фонарь, сошки) по пазу планки —
+## кисть переезжает вдоль цевья к своему месту хвата (IK плечо–предплечье поверх клипа). Куда — z
+## запястья в осях рамы (NAN — как в клипе); в перезарядке и проверке поправка плавно уходит.
+var _grip_z: float = NAN
+var _grip_w: float = 0.0
+var _arm_skel: Skeleton3D
+var _arm_bones: Array[int] = []
 
 
 static func available(id: String) -> bool:
@@ -75,6 +82,12 @@ func _setup(id: String, mods: Dictionary) -> void:
 		if r == null:
 			break
 		_rounds.append(r)
+	for s: Node in model.find_children("*", "Skeleton3D", true, false):
+		var arm: Skeleton3D = s as Skeleton3D
+		if arm.find_bone("hand.L") >= 0 and arm.find_bone("forearm.L") >= 0 and arm.find_bone("upper_arm.L") >= 0:
+			_arm_skel = arm
+			_arm_bones = [arm.find_bone("upper_arm.L"), arm.find_bone("forearm.L"), arm.find_bone("hand.L")]
+	_grip_z = _support_z(String(WeaponDb.weapon(id).get("model", "")), mods)
 	for raw_part: Node in model.find_children("Part_Magazine*", "Node3D", true, false):
 		_mag_parts.append(raw_part as Node3D)
 	frame = model.find_child("WeaponFrame", true, false) as Node3D
@@ -148,6 +161,8 @@ func update(pl: Player, delta: float) -> void:
 	for part: Node3D in _mag_parts:
 		part.visible = mag_in
 	_pose_overrides(shown, delta)
+	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
+	_support_hand(_grip_w)
 
 
 func _pose_overrides(shown: int, delta: float) -> void:
@@ -172,6 +187,51 @@ func _apply_sample(src: Animation, bone_name: String, bone: int, t: float) -> vo
 				_weapon_skel.set_bone_pose_position(bone, src.position_track_interpolate(i, t))
 			Animation.TYPE_ROTATION_3D:
 				_weapon_skel.set_bone_pose_rotation(bone, src.rotation_track_interpolate(i, t))
+
+
+## Где должно быть левое запястье вдоль цевья (z в осях рамы) при обвесе mods; NAN — как в клипе.
+## Рукоятка — ладонь сразу за ней; фонарь, сошки — кисть позади их зажима.
+static func _support_z(model_key: String, mods: Dictionary) -> float:
+	var key: String = WeaponGrips._under_key(mods)
+	if key == "":
+		return NAN
+	var id: String = WeaponDb.mod_id(mods[key])
+	var z: float = WeaponBuild.placed_z(model_key, mods, key)
+	if String(WeaponDb.attachment(id).get("look", "")).begins_with("grip_"):
+		return z - float(Balance.SUPPORT_GRIP.behind_grip)
+	return z - WeaponBuild.clamp_of(id) * 0.5 - float(Balance.SUPPORT_GRIP.behind_device)
+
+
+## Сдвинуть левую кисть клипа вдоль цевья к месту хвата: запястье переезжает, поворот кисти —
+## клиповый, плечо и предплечье — двухзвенным IK (длины костей сохраняются).
+func _support_hand(weight: float) -> void:
+	if _arm_skel == null or weight <= 0.001 or is_nan(_grip_z) or frame == null:
+		return
+	var sk: Skeleton3D = _arm_skel
+	var up: Transform3D = sk.get_bone_global_pose(_arm_bones[0])
+	var fore: Transform3D = sk.get_bone_global_pose(_arm_bones[1])
+	var hand: Transform3D = sk.get_bone_global_pose(_arm_bones[2])
+	# ось цевья (+Z рамы) в осях скелета; на сколько ехать — по текущему запястью клипа
+	var to_frame: Transform3D = frame.global_transform.affine_inverse() * sk.global_transform
+	var wrist_z: float = (to_frame * hand.origin).z
+	var dz: float = clampf(_grip_z - wrist_z, -float(Balance.SUPPORT_GRIP.max_shift), float(Balance.SUPPORT_GRIP.max_shift)) * weight
+	if absf(dz) < 0.0005:
+		return
+	var axis: Vector3 = (sk.global_transform.affine_inverse().basis * frame.global_basis * Vector3(0, 0, 1)).normalized()
+	var target: Vector3 = hand.origin + axis * dz
+	var upper_len: float = up.origin.distance_to(fore.origin)
+	var lower_len: float = fore.origin.distance_to(hand.origin)
+	var pole: Vector3 = fore.origin - (up.origin + hand.origin) * 0.5
+	var ik: Dictionary = ArmIKSolver.solve(up.origin, target, upper_len, lower_len, pole, sk.global_transform)
+	var elbow: Vector3 = ik.elbow
+	var wrist: Vector3 = ik.wrist
+	var up_rot := Basis(Quaternion((fore.origin - up.origin).normalized(), (elbow - up.origin).normalized()))
+	var new_up := Transform3D(up_rot * up.basis, up.origin)
+	sk.set_bone_global_pose(_arm_bones[0], new_up)
+	var fore_now: Transform3D = new_up * (up.affine_inverse() * fore)
+	var fore_rot := Basis(Quaternion((hand.origin - fore.origin).normalized(), (wrist - elbow).normalized()))
+	sk.set_bone_global_pose(_arm_bones[1], Transform3D(fore_rot * fore_now.basis, elbow))
+	sk.set_bone_global_pose(_arm_bones[2], Transform3D(hand.basis, wrist))
 
 
 func is_busy() -> bool:
