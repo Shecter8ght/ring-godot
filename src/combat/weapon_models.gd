@@ -25,7 +25,8 @@ static var _meshes: Dictionary = {}
 ## сама основа ("pistol", "rifle", "shotgun", "bolt", "grenade"). mods — точка → {id, …}: обвес
 ## по сокетам основы (WeaponMods). Масштаб — внешним узлом: meta (дуло, линии прицела) пересчитаны.
 ## mag — магазин в оружии: "*" — штатный вид (как в модели), "" — магазина нет, id — его вид
-## (WeaponMods.mag_state по записи).
+## (WeaponMods.mag_state по записи). lod −1 — подробная модель для разглядывания вблизи
+## (конструктор оружия: weapon.asset_detail), если она есть; иначе как lod 0.
 static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 100.0, mag: String = "*") -> Node3D:
 	var root: Node3D = Node3D.new()
 	root.name = "Weapon_" + id
@@ -36,8 +37,8 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 		key = String(w.model)
 		scale = float(w.get("scale", 1.0))
 	var static_asset: bool = String(w.get("asset_kind", "")) == "static"
-	var imported: Node3D = null if static_asset else _asset(w, lod)
-	if static_asset and _static_asset(w, root):
+	var imported: Node3D = null if static_asset else _asset(w, maxi(lod, 0))
+	if static_asset and _static_asset(w, root, lod < 0):
 		root.set_meta("asset_loaded", true)
 	elif imported:
 		root.free()
@@ -114,8 +115,11 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 ## Статичный ассет оружия (автомат из Blender, tools/export_veras54.py): модель уже в осях игры, начало —
 ## пистолетная рукоятка. Метки Muzzle / SightRear дают дульный срез и линию прицеливания; деталь
 ## MuzzleDevice помечена "muzzle_device" (обвес на резьбу её прячет). Нет файла — false (процедурная основа).
-static func _static_asset(weapon: Dictionary, root: Node3D) -> bool:
+static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false) -> bool:
 	var path: String = String(weapon.get("asset", ""))
+	var detail_path: String = String(weapon.get("asset_detail", ""))
+	if detail and detail_path != "" and ResourceLoader.exists(detail_path, "PackedScene"):
+		path = detail_path
 	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
 		return false
 	var model: Node3D = (ResourceLoader.load(path, "PackedScene") as PackedScene).instantiate() as Node3D
@@ -127,6 +131,9 @@ static func _static_asset(weapon: Dictionary, root: Node3D) -> bool:
 	# магазин с патронами — отдельная деталь экспорта: вынут — прячется, другой — заменяется
 	for node: Node in model.find_children("Magazine*", "MeshInstance3D", true, false):
 		node.set_meta("part", "mag")
+	# штатный приклад — тоже отдельная деталь: поставили другой — этот прячется
+	for node2: Node in model.find_children("Stock*", "MeshInstance3D", true, false):
+		node2.set_meta("part", "stock")
 	return true
 
 

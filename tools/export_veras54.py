@@ -11,9 +11,12 @@
               патроны — узлы Round_NN (1 — верхний), их показывает игра по счёту. Метки: SightRear,
               SightFront, Muzzle, WeaponFrame (оси игры у пистолетной рукоятки — сюда встают обвесы).
   world     — только оружие, без рига: одна сетка на материал, упрощена, начало — пистолетная рукоятка,
-              оси игры (+Z к дулу, +Y вверх, −X — правая сторона стрелка), метки как выше.
+              оси игры (+Z к дулу, +Y вверх, −X — правая сторона стрелка), метки как выше; магазин и
+              складной приклад — отдельные узлы Magazine, Stock (игра прячет / меняет их обвесом).
+  detail    — та же мировая без упрощения, текстуры 2048: veras54_detail.glb для конструктора оружия
+              (вблизи); пишется и вместе с world.
 
-"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world]
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] [detail]
 → assets/models/weapons/veras54/veras54_viewmodel.glb, veras54.glb, veras54.json (проверки)
 """
 from __future__ import annotations
@@ -316,7 +319,19 @@ def tri_count() -> int:
 
 # ---------------------------------------------------------------- мировая модель
 
-def world() -> None:
+def _under(ob, prefix: str) -> bool:
+    """Объект в иерархии узла, имя которого начинается с prefix (до снятия связей с ригом)."""
+    p = ob.parent
+    while p is not None:
+        if p.name.startswith(prefix):
+            return True
+        p = p.parent
+    return False
+
+
+def world(detail: bool = False) -> None:
+    """Мировая модель. detail — подробная (без упрощения, текстуры 2048) для конструктора оружия,
+    где ствол разглядывают вблизи; обычная — упрощённая для вида со стороны."""
     bpy.ops.wm.open_mainfile(filepath=str(SRC / "VERAS54_Reload_Tactical_v04.blend"))
     sc = bpy.context.scene
     for ob in objs():
@@ -332,6 +347,8 @@ def world() -> None:
             remove(ob)
     drop_extras()
     strip_drivers()
+    # складной приклад — отдельной деталью: обвес «приклад» прячет штатный (meta part = stock)
+    stock_names = {ob.name for ob in objs("MESH") if _under(ob, "StockFold")}
     # мировые матрицы зафиксировать, связи с ригом снять (статичная модель в боевой позе)
     keep = {}
     for ob in objs("MESH"):
@@ -351,22 +368,24 @@ def world() -> None:
     # магазин с патронами — отдельной деталью: игра прячет его (магазин вынут) или меняет на другой
     # (meta part = mag); защёлка ("Magazine catch") остаётся на корпусе
     mag = [o for o in meshes if o.name.startswith(("Magazine_", "Magazine •"))]
-    rest = [o for o in meshes if o not in brake and o not in mag]
+    stock = [o for o in meshes if o.name in stock_names]
+    rest = [o for o in meshes if o not in brake and o not in mag and o not in stock]
     body = join(rest, "Body")
     md = join(brake, "MuzzleDevice")
     mg = join(mag, "Magazine")
+    st = join(stock, "Stock")
     # начало — пистолетная рукоятка; оси игры совпадают с осями glTF после экспорта Y-up
-    for ob in (body, md, mg):
+    for ob in (body, md, mg, st):
         if ob is None:
             continue
         ob.matrix_world = Matrix.Translation(-GRIP) @ ob.matrix_world
         with bpy.context.temp_override(object=ob, active_object=ob, selected_objects=[ob], selected_editable_objects=[ob]):
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     t0 = tri_count()
-    ratio = min(1.0, WORLD_TRIS / max(t0, 1))
+    ratio = 1.0 if detail else min(1.0, WORLD_TRIS / max(t0, 1))
     if ratio < 1.0:
-        # корпус и магазин — с одним коэффициентом: бюджет мировой модели общий
-        for ob in (body, mg):
+        # корпус, магазин и приклад — с одним коэффициентом: бюджет мировой модели общий
+        for ob in (body, mg, st):
             if ob is None:
                 continue
             dec = ob.modifiers.new("dec", "DECIMATE")
@@ -376,17 +395,21 @@ def world() -> None:
                 bpy.ops.object.modifier_apply(modifier="dec")
     for name, p in MARKS.items():
         add_mark(name, p - GRIP, None)
-    scale_images(TEX_WORLD)
-    report["tris_world_before"] = t0
-    report["tris_world"] = tri_count()
+    scale_images(TEX_VIEW if detail else TEX_WORLD)
+    name = "veras54_detail.glb" if detail else "veras54.glb"
+    if detail:
+        report["tris_detail"] = tri_count()
+    else:
+        report["tris_world_before"] = t0
+        report["tris_world"] = tri_count()
     bb = [v.co for v in body.data.vertices]
     report["world_size_m"] = [round(max(c[i] for c in bb) - min(c[i] for c in bb), 3) for i in range(3)]
     OUT.mkdir(parents=True, exist_ok=True)
-    bpy.ops.export_scene.gltf(filepath=str(OUT / "veras54.glb"), export_format="GLB", export_yup=True,
+    bpy.ops.export_scene.gltf(filepath=str(OUT / name), export_format="GLB", export_yup=True,
                               export_animations=False, export_materials="EXPORT", export_image_format="AUTO",
                               export_apply=True, export_cameras=False, export_lights=False)
-    finish_materials(OUT / "veras54.glb")
-    print("VERAS world saved", flush=True)
+    finish_materials(OUT / name)
+    print("VERAS world saved", name, flush=True)
 
 
 if __name__ == "__main__":
@@ -395,6 +418,8 @@ if __name__ == "__main__":
         viewmodel()
     if "world" in args:
         world()
+    if "detail" in args or "world" in args:
+        world(detail=True)
     path = OUT / "veras54.json"
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     old.update(report)

@@ -12,7 +12,7 @@ extends Control
 
 signal closed
 
-const C_BG := Color(0.035, 0.036, 0.04, 0.985)
+const C_BG := Color(0.035, 0.036, 0.04, 1.0)
 const C_PANEL := Color(0.075, 0.077, 0.082, 0.96)
 const C_CARD := Color(0.11, 0.112, 0.12, 1.0)
 const C_CARD_HI := Color(0.16, 0.162, 0.172, 1.0)

@@ -65,5 +65,13 @@ func _ready() -> void:
 	var mods: Dictionary = Profile.equipment.primary.mods
 	print("APPLIED ", mods.has("optic_primary#2/rail"), " stash ", Profile.stash.size())
 	await _shot("8_applied")
+	# крупный план: подробная модель и поставленный приклад вместо штатного
+	_b._draft["stock"] = {"id": "stock_tele_ak_01", "src": {"from": "shop"}}
+	_b._refresh()
+	_b._view.set_view("q")
+	_b._view.focus(Vector3(0, 0.05, -0.05))
+	_b._view._want.z = 0.8
+	await get_tree().create_timer(1.5).timeout
+	await _shot("9_closeup")
 	_b._close()
 	get_tree().quit()

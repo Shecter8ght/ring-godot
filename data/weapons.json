@@ -242,6 +242,13 @@
       0.032,
       0.108
      ]
+    },
+    "stock": {
+     "pos": [
+      0,
+      0.055,
+      -0.075
+     ]
     }
    }
   },
@@ -1164,7 +1171,8 @@
     "default_mag": "mag_545_30",
     "sound": "shot_rifle",
     "reload_sound": "reload_rifle",
-    "cycle_sound": ""
+    "cycle_sound": "",
+    "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.glb"
    },
    "flavor": "Ствол на каждый день: не лучший ни в одной крайности, зато почти везде уместен."
   },

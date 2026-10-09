@@ -96,7 +96,8 @@ func show_build(weapon_id: String, mods: Dictionary, dur: float, mag: String, ke
 	_key = key
 	if _model:
 		_model.queue_free()
-	_model = WeaponModels.build(weapon_id, mods, 0, dur, mag)
+	# вблизи — подробная модель (у ВЕРАСа мировая упрощена в 7 раз и ломается на крупном плане)
+	_model = WeaponModels.build(weapon_id, mods, -1, dur, mag)
 	_pivot.add_child(_model)
 	for l: Node in _model.find_children("*", "Light3D", true, false):
 		(l as Light3D).visible = false
