@@ -88,7 +88,7 @@ func _process(delta: float) -> void:
 	var eye: Vector3 = cam.global_position
 	var found: Array = []
 	for l: Light3D in _lights:
-		if not is_instance_valid(l) or not l.is_visible_in_tree() or l.light_energy <= 0.01 or l.has_meta("own"):
+		if not is_instance_valid(l) or not l.is_inside_tree() or not l.is_visible_in_tree() or l.light_energy <= 0.01 or l.has_meta("own"):
 			continue
 		var p: Vector3
 		var score: float

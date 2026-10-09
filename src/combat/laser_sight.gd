@@ -19,6 +19,8 @@ var _glow: OmniLight3D
 func _init() -> void:
 	_beam = MeshInstance3D.new()
 	_beam.name = "Beam"
+	# Луч и пятно — световые эффекты, а не твёрдые части оружия для проверки препятствий.
+	_beam.set_meta("weapon_clearance_ignore", true)
 	var bm := BoxMesh.new()
 	bm.size = Vector3(0.0024, 0.0024, 1.0)
 	_beam.mesh = bm
@@ -28,6 +30,7 @@ func _init() -> void:
 	# и линией в пиксель: издалека (изометрия) тонкий брусок рвётся на пунктир, линия — нет
 	var line := MeshInstance3D.new()
 	line.name = "Line"
+	line.set_meta("weapon_clearance_ignore", true)
 	var lm := ArrayMesh.new()
 	var arr := []
 	arr.resize(Mesh.ARRAY_MAX)
@@ -39,6 +42,7 @@ func _init() -> void:
 	_beam.add_child(line)
 	_dot = MeshInstance3D.new()
 	_dot.name = "Dot"
+	_dot.set_meta("weapon_clearance_ignore", true)
 	var sm := SphereMesh.new()
 	sm.radius = 1.0
 	sm.height = 2.0

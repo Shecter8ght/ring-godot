@@ -62,7 +62,7 @@ func _refresh_bounds(model: Node3D) -> void:
 		var mesh: MeshInstance3D = node as MeshInstance3D
 		# У меша со скелетом get_aabb — габарит позы покоя (у рук из Blender это T-поза шириной
 		# 1.6 м): ствол упирался бы во всё вокруг. Кисти таких рук — ниже, по костям.
-		if mesh.mesh == null or mesh.skin != null or String(mesh.name).begins_with("Laser"):
+		if mesh.mesh == null or mesh.skin != null or bool(mesh.get_meta("weapon_clearance_ignore", false)) or String(mesh.name).begins_with("Laser"):
 			continue
 		var local: AABB = WeaponRig._relative_transform(mesh, model) * mesh.get_aabb()
 		bounds = local if first else bounds.merge(local)

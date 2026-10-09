@@ -51,6 +51,9 @@ func _run() -> void:
 	if not args.is_empty() and String(args[0]) in ROLES:
 		_role = String(args[0])
 	Profile.use_file("user://profile_coop3_%s.json" % _role, true)
+	Profile.next_conditions = RaidConditions.DEFAULT.duplicate(true)
+	# План прогона сам ломает генератор: случайное отключение рубильника не должно мешать ремонту.
+	RaidEvents.enabled = false
 	Profile.ensure()
 	_gear_up()
 	match _role:

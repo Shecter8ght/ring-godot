@@ -18,6 +18,8 @@ static func attach(light: Light3D, size: float = 0.22, energy: float = 5.0) -> M
 	mi.material_override = _mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.set_meta("no_shadow", true)
+	# Свечение фонаря не расширяет габарит его корпуса при складывании оружия у стены.
+	mi.set_meta("weapon_clearance_ignore", true)
 	if energy != 5.0:
 		var m := _mat.duplicate() as ShaderMaterial
 		m.set_shader_parameter("energy", energy)
