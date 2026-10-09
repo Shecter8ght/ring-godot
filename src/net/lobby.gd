@@ -76,7 +76,7 @@ func _on_start_pressed() -> void:
 			return
 		scene = Floors.scene(Profile.floor)
 		Floors.pay_fee(Profile.floor)
-	Net.start_level.rpc(scene, Profile.next_conditions if Profile.from_hideout else RaidConditions.DEFAULT)
+	Net.start_level.rpc(scene, RaidConditions.next_own() if Profile.from_hideout else RaidConditions.DEFAULT)
 
 
 func _on_leave_pressed() -> void:

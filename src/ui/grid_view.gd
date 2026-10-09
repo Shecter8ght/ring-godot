@@ -14,6 +14,8 @@ signal slot_dropped(slot: String, x: int, y: int, r: bool)
 signal activated(idx: int)
 signal context(idx: int, screen_pos: Vector2)
 signal quick_move(idx: int)
+## Одиночный клик левой (сетка без перетаскивания — витрина продажи: выбрать предмет).
+signal clicked(idx: int)
 ## Патроны бросили на подходящий магазин, плиту — на жилет со свободным гнездом (решает окно).
 signal dropped_on(src: GridView, src_idx: int, dst_idx: int)
 
@@ -34,6 +36,12 @@ var items: Array = []
 var auto_layout: bool = false
 ## Метка для окна: чья это сетка ("stash", "backpack", "loot").
 var role: String = ""
+## Можно ли тащить предметы из сетки и в неё (витрина продажи — нельзя, только выбрать).
+var drag_enabled: bool = true
+## Подсветка записей: индекс → цвет рамки; если не пусто — остальное приглушено.
+var marks: Dictionary = {}
+## Выбранная запись (-1 — нет): светлая рамка.
+var selected: int = -1
 
 var _layout: Array = []   # [x, y, r] на запись (при auto_layout — вычисленные)
 var _hover: Vector2i = Vector2i(-1, -1)
@@ -149,6 +157,12 @@ func _draw() -> void:
 				var tc := Color(0.55, 0.9, 0.55) if tag == "ПОЛН" else (Color(0.62, 0.62, 0.6) if tag == "ПУСТ" else Color(1.0, 0.82, 0.45))
 				draw_string_outline(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, 3, Color(0, 0, 0, 0.8))
 				draw_string(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, tc)
+		if not marks.is_empty() and not marks.has(i) and i != selected:
+			draw_rect(r, Color(0, 0, 0, 0.55))
+		if marks.has(i):
+			draw_rect(r.grow(0.5), marks[i] as Color, false, 2.5)
+		if i == selected:
+			draw_rect(r.grow(1.0), Color(1.0, 0.95, 0.8), false, 3.0)
 	if _hover.x >= 0:
 		var hr := Rect2(Vector2(_hover) * CELL, Vector2(_hover_size) * CELL)
 		draw_rect(hr, Color(0.3, 0.9, 0.4, 0.28) if _hover_ok else Color(0.95, 0.3, 0.25, 0.28))
@@ -201,7 +215,10 @@ func _gui_input(event: InputEvent) -> void:
 	var i := index_at(mb.position)
 	if i < 0:
 		return
-	if mb.button_index == MOUSE_BUTTON_LEFT and mb.double_click:
+	if mb.button_index == MOUSE_BUTTON_LEFT and not drag_enabled:
+		clicked.emit(i)
+		accept_event()
+	elif mb.button_index == MOUSE_BUTTON_LEFT and mb.double_click:
 		activated.emit(i)
 		accept_event()
 	elif mb.button_index == MOUSE_BUTTON_LEFT and mb.ctrl_pressed:
@@ -214,7 +231,7 @@ func _gui_input(event: InputEvent) -> void:
 
 func _get_drag_data(at: Vector2) -> Variant:
 	var i := index_at(at)
-	if i < 0:
+	if i < 0 or not drag_enabled:
 		return null
 	drag_rot = bool(_layout[i][2])
 	var s := _size_of(i)
@@ -289,7 +306,7 @@ func _cell_for(at: Vector2, data: Dictionary) -> Vector2i:
 
 
 func _can_drop_data(at: Vector2, data: Variant) -> bool:
-	if not (data is Dictionary) or not (data as Dictionary).has("id"):
+	if not drag_enabled or not (data is Dictionary) or not (data as Dictionary).has("id"):
 		return false
 	var d: Dictionary = data.duplicate()
 	var source: GridView = drag_source(d)

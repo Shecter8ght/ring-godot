@@ -36,7 +36,11 @@ func move_character(delta: float) -> void:
 		# Пол уже обработан move_and_slide. Повторная проекция ввода на склон
 		# гасила горизонтальную скорость каждый кадр и мешала подниматься по лестнице.
 		if normal.dot(_character.up_direction) < cos(_character.floor_max_angle):
+			# по ребру ступени (наклонная нормаль) скольжение не подбрасывает вверх: иначе тело
+			# повисало в воздухе у порожка и шаг на ступень не срабатывал
+			var vy: float = _character.velocity.y
 			_character.velocity = _character.velocity.slide(normal)
+			_character.velocity.y = minf(_character.velocity.y, maxf(vy, 0.0))
 		var cart: ShoppingCart = hit.get_collider() as ShoppingCart
 		if cart != null and not pushed.has(cart.get_instance_id()):
 			pushed[cart.get_instance_id()] = true

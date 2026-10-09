@@ -45,6 +45,8 @@ var _toast: Label
 var _toast_t: float = 0.0
 var _tb_where: String = "equip:primary"
 var _tb_uid: String = ""
+## Вкладка «Продать»: выбранный предмет [где, индекс] ("equip:<слот>", -1 — надетый ствол), [] — нет.
+var _sell_sel: Array = []
 
 ## Разделы ассортимента торговца: ключ, название, категории предметов ("misc" — всё прочее).
 const CAT_TABS := [["all", "Всё", []], ["weapon", "Оружие", ["weapon"]], ["mag", "Магазины", ["mag"]], ["ammo", "Патроны", ["ammo"]],
@@ -178,9 +180,9 @@ func _process(delta: float) -> void:
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
 	sig += "|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab]
-	sig += "|" + str(Profile.loadout_templates)
+	sig += "|" + str(Profile.loadout_templates) + "|" + str(_sell_sel)
 	# собрание: кто в сети и где — окно выхода обновляется
-	sig += "|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene)]
+	sig += "|%s|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene), str(Net.host_conditions)]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -1003,11 +1005,30 @@ func _buy_fit(sid: String, mount: String) -> void:
 		Profile.fit_part(String(ref[0]), int(ref[1]), "stash", si, mount)
 
 
-## Продать: карточки тайника, рюкзака и кармана с ценой (стопку — целиком или по одной).
+## Продать: тайник, рюкзак и карман — сетками, как они лежат. Клик — выбрать предмет (справа —
+## цена и «Продать»); у выбранного ствола подсвечены его магазины и патроны, у магазина — стволы
+## и патроны к нему, у патронов — стволы и магазины. Надетые стволы — кнопками сверху.
 func _trader_sell() -> void:
-	var sell := _column("Продать", 1.0)
+	var sell := _column("Продать", 1.6)
+	var focus := _sell_focus_entry()
+	# надетое оружие не продаётся отсюда, но к нему тоже можно подсветить припасы
+	var worn := HFlowContainer.new()
+	worn.add_theme_constant_override("h_separation", 6)
+	worn.add_theme_constant_override("v_separation", 6)
+	for slot in ["primary", "secondary"]:
+		var e: Dictionary = Profile.equipment.get(slot, {})
+		if e.is_empty():
+			continue
+		var key: String = "equip:" + String(slot)
+		var b := _button("%s: %s — его магазины и патроны" % [Inventory.SLOT_NAMES[slot], ItemDb.item_name(String(e.id))], func() -> void:
+			_sell_sel = [] if _sell_sel == [key, -1] else [key, -1])
+		b.toggle_mode = true
+		b.button_pressed = _sell_sel == [key, -1]
+		worn.add_child(b)
+	if worn.get_child_count() > 0:
+		sell.add_child(worn)
 	var any := false
-	for src in [["stash", "Из тайника"], ["backpack", "Из рюкзака"], ["pocket", "Из защищённого кармана"]]:
+	for src in [["stash", "Тайник"], ["backpack", "Рюкзак"], ["pocket", "Защищённый карман"]]:
 		var from := String(src[0])
 		var list := Profile.list_of(from)
 		if list.is_empty():
@@ -1017,22 +1038,100 @@ func _trader_sell() -> void:
 		for e in list:
 			total += Profile.sell_price(e)
 		sell.add_child(_text("%s   ·   всё вместе %s ₽" % [String(src[1]), InventoryUI.money(total)], Color(0.95, 0.82, 0.6)))
-		var flow := HFlowContainer.new()
-		flow.add_theme_constant_override("h_separation", 8)
-		flow.add_theme_constant_override("v_separation", 8)
-		sell.add_child(flow)
-		for i in range(list.size()):
-			var e: Dictionary = list[i]
-			var idx := i
-			var card := ItemCard.make(e, "", "%s ₽" % InventoryUI.money(Profile.sell_price(e)))
-			if int(e.n) > 1:
-				card.controls.add_child(_button("1 шт.", func() -> void: Profile.sell(idx, 1, from)))
-			var b := _button("Продать", func() -> void: Profile.sell(idx, int(e.n), from))
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			card.controls.add_child(b)
-			flow.add_child(card)
+		var view := GridView.new(Profile.grid_of(from), from)
+		view.drag_enabled = false
+		view.set_items(list)
+		if _sell_sel.size() == 2 and String(_sell_sel[0]) == from:
+			view.selected = int(_sell_sel[1])
+		if not focus.is_empty():
+			for i in range(list.size()):
+				var c := _sell_mark(focus, list[i])
+				if c.a > 0.0:
+					view.marks[i] = c
+		view.clicked.connect(func(idx: int) -> void:
+			_sell_sel = [] if _sell_sel == [from, idx] else [from, idx])
+		view.activated.connect(func(idx: int) -> void: _sell_sel = [from, idx])
+		view.context.connect(func(idx: int, _at: Vector2) -> void: ItemInfo.open(self, (Profile.list_of(from)[idx] as Dictionary).duplicate(true)))
+		sell.add_child(view)
 	if not any:
 		sell.add_child(_text("Продавать нечего: тайник и рюкзак пусты.", Color(0.6, 0.6, 0.6)))
+	# справа — выбранное: цена, продать штуку / всё
+	var side := _column("Выбрано", 0.6)
+	if focus.is_empty():
+		side.add_child(_text("Кликни предмет в сетке — здесь появятся цена и «Продать».
+У оружия подсветятся его магазины и патроны, у магазина и патронов — к чему они подходят.
+Правая кнопка — описание.", Color(0.6, 0.62, 0.6)))
+		return
+	var legend := []
+	if WeaponDb.is_weapon(String(focus.id)) or not WeaponDb.magazine(String(focus.id)).is_empty() or not WeaponDb.ammo(String(focus.id)).is_empty():
+		legend = [["оружие", SELL_MARK_WEAPON], ["магазины", SELL_MARK_MAG], ["патроны", SELL_MARK_AMMO]]
+	var from_sel := String(_sell_sel[0])
+	if from_sel.begins_with("equip:"):
+		side.add_child(ItemCard.make(focus, "надето — продать: сначала снять в тайник", ""))
+	else:
+		var idx := int(_sell_sel[1])
+		var card := ItemCard.make(focus, _sub_of(String(focus.id)), "%s ₽" % InventoryUI.money(Profile.sell_price(focus)), 260.0)
+		if int(focus.n) > 1:
+			card.controls.add_child(_button("1 шт.", func() -> void: Profile.sell(idx, 1, from_sel)))
+		var b := _button("Продать" + (" всё" if int(focus.n) > 1 else ""), func() -> void:
+			Profile.sell(idx, int(focus.n), from_sel)
+			_sell_sel = [])
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.controls.add_child(b)
+		side.add_child(card)
+	for l in legend:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		var sw := ColorRect.new()
+		sw.color = l[1] as Color
+		sw.custom_minimum_size = Vector2(14, 14)
+		sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(sw)
+		row.add_child(_text("подходит: " + String(l[0]), Color(0.75, 0.75, 0.72)))
+		side.add_child(row)
+
+
+const SELL_MARK_WEAPON := Color(1.0, 0.78, 0.3)
+const SELL_MARK_MAG := Color(0.4, 0.75, 1.0)
+const SELL_MARK_AMMO := Color(0.45, 0.95, 0.45)
+
+
+## Выбранное во вкладке «Продать» (запись) или {} — выбор пропал (продали, сдвинулось).
+func _sell_focus_entry() -> Dictionary:
+	if _sell_sel.size() != 2:
+		return {}
+	var where := String(_sell_sel[0])
+	if where.begins_with("equip:"):
+		return Profile.equipment.get(where.trim_prefix("equip:"), {})
+	var list := Profile.list_of(where)
+	var i := int(_sell_sel[1])
+	if i < 0 or i >= list.size():
+		_sell_sel = []
+		return {}
+	return list[i]
+
+
+## Цвет подсветки записи e к выбранному focus (прозрачный — не подходит): ствол ↔ магазин ↔ патрон.
+func _sell_mark(focus: Dictionary, e: Dictionary) -> Color:
+	var f := String(focus.id)
+	var id := String(e.id)
+	var none := Color(0, 0, 0, 0)
+	if WeaponDb.is_weapon(f):
+		if not WeaponDb.magazine(id).is_empty() and WeaponDb.mag_fits(f, id):
+			return SELL_MARK_MAG
+		if not WeaponDb.ammo(id).is_empty() and WeaponDb.ammo_fits(f, id):
+			return SELL_MARK_AMMO
+	elif not WeaponDb.magazine(f).is_empty():
+		if WeaponDb.is_weapon(id) and WeaponDb.mag_fits(id, f):
+			return SELL_MARK_WEAPON
+		if not WeaponDb.ammo(id).is_empty() and String(WeaponDb.ammo(id).get("caliber", "")) == WeaponDb.mag_caliber(f):
+			return SELL_MARK_AMMO
+	elif not WeaponDb.ammo(f).is_empty():
+		if WeaponDb.is_weapon(id) and WeaponDb.ammo_fits(id, f):
+			return SELL_MARK_WEAPON
+		if not WeaponDb.magazine(id).is_empty() and String(WeaponDb.ammo(f).get("caliber", "")) == WeaponDb.mag_caliber(id):
+			return SELL_MARK_MAG
+	return none
 
 
 ## Задания Михалыча: взятые (прогресс, «Сдать»), предложенные («Взять» — пока есть свободные слоты).
@@ -1167,7 +1266,7 @@ func _build_exit() -> void:
 		var all := _button("Рейд всем (%d в сети)" % (Net.player_names.size()), func() -> void:
 			_confirm_raid(func() -> void:
 				Floors.pay_fee(Profile.floor)
-				Net.start_level.rpc(Floors.scene(Profile.floor), Profile.next_conditions)))
+				Net.start_level.rpc(Floors.scene(Profile.floor), RaidConditions.next_own())))
 		all.disabled = block != ""
 		go.add_child(all)
 	else:
@@ -1250,6 +1349,9 @@ func _coop_block(col: VBoxContainer) -> void:
 func _conditions_column() -> void:
 	var col := _column("Условия рейда", 1.0)
 	var c := RaidConditions.normalized(Profile.next_conditions)
+	if Net.is_networked() and not Net.is_host() and not Net.host_conditions.is_empty():
+		# в коопе в рейд идут с условиями хоста — его выбор и за окнами
+		col.add_child(_text("В коопе условия выбирает хост: %s" % RaidConditions.title(RaidConditions.next_shared()), Color(1.0, 0.8, 0.5)))
 	for axis in [["time", "Время", Balance.RAID_TIME], ["weather", "Погода", Balance.RAID_WEATHER], ["power", "Электричество", Balance.RAID_POWER]]:
 		col.add_child(_text(String(axis[1]), Color(0.75, 0.75, 0.72)))
 		var row := HFlowContainer.new()

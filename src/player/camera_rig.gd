@@ -459,6 +459,22 @@ func _process(delta: float) -> void:
 	if cam:
 		_compass.set_heading(cam.global_basis)
 	_compass.set_marks(_extraction_marks(pl))
+	_compass.set_mates(_mate_marks(pl))
+
+
+## Напарники для компаса: [курс°, расстояние м, ник]. Ушедшие и погибшие — нет.
+func _mate_marks(pl: Player) -> Array:
+	var out: Array = []
+	if pl == null or not pl.is_local() or not Net.is_networked():
+		return out
+	for p in get_tree().get_nodes_in_group("players"):
+		var o := p as Player
+		if o == null or o == pl or not o.is_alive() or (Raid.current and Raid.current.has_left(o.peer_id)):
+			continue
+		var d := o.global_position - pl.global_position
+		var bearing := fposmod(rad_to_deg(atan2(d.x, -d.z)), 360.0)
+		out.append([bearing, Vector2(d.x, d.z).length(), String(Net.player_names.get(o.peer_id, "Напарник"))])
+	return out
 
 
 ## Точки эвакуации для компаса: [курс°, расстояние м, заперта ли для меня]. Заперта — нет питания
@@ -1139,6 +1155,19 @@ class Compass extends Control:
 	## Точки эвакуации: [курс°, расстояние, заперта].
 	var marks: Array = []
 	var _marks_sig: String = ""
+	## Напарники: [курс°, расстояние, ник].
+	var mates: Array = []
+	var _mates_sig: String = ""
+
+
+	func set_mates(m: Array) -> void:
+		var sig := ""
+		for k in m:
+			sig += "%d,%d,%s;" % [int(k[0]), int(float(k[1])), k[2]]
+		if sig != _mates_sig:
+			_mates_sig = sig
+			mates = m
+			queue_redraw()
 
 
 	func set_marks(m: Array) -> void:
@@ -1214,6 +1243,18 @@ class Compass extends Control:
 				var dw := font.get_string_size(ds, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 				draw_string_outline(font, Vector2(mx - dw * 0.5, base_y - 12), ds, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(0, 0, 0, 0.6))
 				draw_string(font, Vector2(mx - dw * 0.5, base_y - 12), ds, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, grey if locked else green)
+		# напарники: синий ромб, над ним ник и расстояние; за краем шкалы — прижат к краю
+		for m in mates:
+			var off := wrapf(float(m[0]) - heading, -180.0, 180.0)
+			var edge := absf(off) > span
+			var mx := cx + clampf(off, -span, span) * ppd
+			var blue := Color(0.45, 0.72, 1.0, 0.95)
+			draw_colored_polygon(PackedVector2Array([Vector2(mx, base_y - 7), Vector2(mx + 6, base_y), Vector2(mx, base_y + 7), Vector2(mx - 6, base_y)]), blue)
+			var ms := String(m[2]) if edge else "%s %d м" % [String(m[2]), int(round(float(m[1])))]
+			var mw := font.get_string_size(ms, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+			var lx := clampf(mx - mw * 0.5, 0.0, w - mw)
+			draw_string_outline(font, Vector2(lx, base_y + 40), ms, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(0, 0, 0, 0.6))
+			draw_string(font, Vector2(lx, base_y + 40), ms, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, blue)
 		# метка центра и курс в градусах
 		draw_colored_polygon(PackedVector2Array([Vector2(cx - 5, 0), Vector2(cx + 5, 0), Vector2(cx, 7)]), Color(1, 0.85, 0.5, 0.95))
 		var hs := "%03d" % (int(round(heading)) % 360)

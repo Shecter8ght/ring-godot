@@ -261,12 +261,17 @@ func _draw_map() -> void:
 					label_rect.position = label_at - text_size * 0.5
 		power_labels.append(label_rect)
 		_label(label_at, title, 12, col)
-	# напарники — точки, сам — стрелка по взгляду
+	# напарники — точки с ником, сам — стрелка по взгляду
 	for p in get_tree().get_nodes_in_group("players"):
 		var pl := p as Player
-		if pl == me or not pl.is_alive():
+		if pl == me or not pl.is_alive() or (Raid.current and Raid.current.has_left(pl.peer_id)):
 			continue
-		_canvas.draw_circle(_to_screen(Vector2(pl.global_position.x, pl.global_position.z)), 6.0, Color(0.35, 0.65, 1.0))
+		var at := _to_screen(Vector2(pl.global_position.x, pl.global_position.z))
+		_canvas.draw_circle(at, 8.0, Color(0, 0, 0, 0.7))
+		_canvas.draw_circle(at, 6.0, Color(0.35, 0.65, 1.0))
+		var nick := String(Net.player_names.get(pl.peer_id, "Напарник"))
+		_canvas.draw_string_outline(_font, at + Vector2(11, 5), nick, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, 4, Color(0, 0, 0, 0.8))
+		_canvas.draw_string(_font, at + Vector2(11, 5), nick, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.55, 0.78, 1.0))
 	if me:
 		var s := _to_screen(Vector2(me.global_position.x, me.global_position.z))
 		var yaw := me.body_yaw()

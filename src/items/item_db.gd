@@ -288,8 +288,17 @@ static func make(id: String, n: int) -> Dictionary:
 
 ## Предмет с состоянием (прочность, обвес, магазин, патроны в магазине, плиты) не складывается.
 static func can_merge(a: Dictionary, b: Dictionary) -> bool:
-	# найденное в рейде с купленным в одну стопку не ложится
-	return String(a.id) == String(b.id) and not _stateful(a) and not _stateful(b) and bool(a.get("fir", false)) == bool(b.get("fir", false))
+	if String(a.id) != String(b.id) or _stateful(a) or _stateful(b):
+		return false
+	# найденное в рейде с купленным в одну стопку не ложится (сдают «из рейда»); патроны — ложатся:
+	# их не сдают, а россыпь одного калибра по клеткам только съедает рюкзак
+	return String(item(String(a.id)).get("cat", "")) == "ammo" or bool(a.get("fir", false)) == bool(b.get("fir", false))
+
+
+## В стопку dst добавили из src: смешали «из рейда» с купленным — пометка снимается.
+static func _merged_fir(dst: Dictionary, src: Dictionary) -> void:
+	if bool(dst.get("fir", false)) != bool(src.get("fir", false)):
+		dst.erase("fir")
 
 
 ## Экземпляр со своим состоянием — всегда поштучно.
@@ -413,6 +422,7 @@ static func add_to(list: Array, entry: Dictionary, grid: Vector2i) -> int:
 		for it in list:
 			if can_merge(it, entry):
 				it.n = int(it.n) + k0
+				_merged_fir(it, entry)
 				return k0
 		var e0 := entry.duplicate(true)
 		# пометка поштучной операции (MagOps) не переезжает с предметом
@@ -429,6 +439,7 @@ static func add_to(list: Array, entry: Dictionary, grid: Vector2i) -> int:
 			if can_merge(it, entry) and int(it.n) < st:
 				var k := mini(left, st - int(it.n))
 				it.n = int(it.n) + k
+				_merged_fir(it, entry)
 				left -= k
 	var occ := occupancy(list, grid)
 	while left > 0:
@@ -458,6 +469,7 @@ static func put_at(list: Array, entry: Dictionary, grid: Vector2i, x: int, y: in
 			var k := mini(int(entry.n), st - int(it.n))
 			if k > 0:
 				it.n = int(it.n) + k
+				_merged_fir(it, entry)
 			return maxi(k, 0)
 	var e := entry.duplicate(true)
 	e.erase("op")
@@ -487,6 +499,7 @@ static func move_in(list: Array, grid: Vector2i, idx: int, x: int, y: int, r: bo
 				if k <= 0:
 					return false
 				it.n = int(it.n) + k
+				_merged_fir(it, e)
 				e.n = int(e.n) - k
 				if int(e.n) <= 0:
 					list.remove_at(idx)

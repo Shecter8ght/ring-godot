@@ -1261,7 +1261,7 @@ func _host_pm_commit(request: Dictionary) -> Dictionary:
 				var spill: Dictionary = result[1]
 				if not spill.is_empty():
 					if Raid.current:
-						Raid.current.spawn_drop(global_position, "Выброшено", [spill], LootContainer.Look.BAG)
+						Raid.current.spawn_drop(global_position, Raid.DROP_NAME, [spill], LootContainer.Look.BAG)
 					else:
 						# Стенд без мира рейда сохраняет вынутый магазин в буфере.
 						inventory.buffer = inventory.buffer + [spill]
@@ -2185,8 +2185,13 @@ func _animation_event(clip: String) -> void:
 ## хотели пройти, иначе чуть больше: скруглённый низ капсулы должен встать на ступень, а не на ребро.
 func _step_up(delta: float, from: Vector3, vel: Vector3) -> void:
 	var su: Dictionary = Balance.STEP_UP
-	# скорость до столкновения (после него у стены её поперечная часть уже погашена)
+	# куда идём — по клавишам: скорость в подступёнок гасится первым же упором, дальше разгон даёт
+	# в кадр доли миллиметра, и шаг не срабатывал (стоял у порожка, пока не прыгнешь); без ввода —
+	# скорость до столкновения
 	var want := Vector3(vel.x, 0.0, vel.z) * delta
+	var wish := _wish_direction()
+	if wish.length_squared() > 0.0001:
+		want = wish * maxf(_stance_speed(), want.length() / delta) * delta
 	if want.length_squared() < 0.000001:
 		return
 	var dir := want.normalized()

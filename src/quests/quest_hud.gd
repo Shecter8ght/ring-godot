@@ -3,8 +3,8 @@ extends CanvasLayer
 ## Интерфейс сюжета (создаёт Quests): компактная цель справа сверху (квест, этап, что делать,
 ## подсказка), всплывающие сообщения («Найдена улика», «Задание обновлено»), реплики на экране
 ## (осмотр места, раненый), разговор в убежище (Enter / клик — дальше), журнал улик (J), полоса
-## обыска, подсказка «несёшь раненого». Консоль разработчика (`) — только при запуске из
-## проекта (res://project.godot есть), в сборке для игроков её нет.
+## обыска, подсказка «несёшь раненого». Консоль разработчика (`) — и при запуске из
+## проекта, и в собранной игре.
 
 const TOAST_SEC := 3.2
 const SUB_SEC := 2.6
@@ -39,14 +39,12 @@ var _journal: PanelContainer
 var _journal_text: Label
 var _console: LineEdit
 var _console_out: Label
-var _dev: bool = false
 
 
 func _ready() -> void:
 	layer = 12
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("esc_windows")
-	_dev = FileAccess.file_exists("res://project.godot")
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -207,7 +205,8 @@ func _input(event: InputEvent) -> void:
 		_journal.visible = false
 		get_viewport().set_input_as_handled()
 		return
-	if _dev and event.is_action_pressed("dev_console") and not event.is_echo():
+	# консоль (`) — и в сборке для друзей (RING.zip), не только при запуске из проекта
+	if event.is_action_pressed("dev_console") and not event.is_echo():
 		_console.visible = not _console.visible
 		_console_out.visible = _console.visible
 		if _console.visible:

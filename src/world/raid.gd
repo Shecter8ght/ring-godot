@@ -52,6 +52,8 @@ var ui: InventoryUI
 var _profile_saved: bool = false
 var _death_saved: bool = false
 var _drops: Node3D
+## Подпись мешка с выброшенным из рюкзака (в него же складывается следующее выброшенное рядом).
+const DROP_NAME := "Выброшено"
 var _drop_spawner: MultiplayerSpawner
 var _drop_count: int = 0
 
@@ -798,11 +800,11 @@ func _equip_from(peer_id: int, src: String, idx: int, path: NodePath, want: Stri
 		if src == "backpack":
 			list = bp
 		if not (rf[1] as Array).is_empty():
-			spawn_drop(pl.global_position, "Выброшено", rf[1], LootContainer.Look.BAG)
+			spawn_drop(pl.global_position, DROP_NAME, rf[1], LootContainer.Look.BAG)
 	if not old.is_empty() and ItemDb.add_to(bp, old, ItemDb.bag_grid(eq)) == 0:
 		var g := c.grid if c else inv.grid_of(src)
 		if src == "backpack" or g == Vector2i.ZERO or ItemDb.add_to(list, old, g) == 0:
-			spawn_drop(pl.global_position, "Выброшено", [old], LootContainer.Look.BAG)
+			spawn_drop(pl.global_position, DROP_NAME, [old], LootContainer.Look.BAG)
 	if c:
 		c.items = list
 	elif src != "backpack":
@@ -1001,7 +1003,7 @@ func _drop_entry(peer_id: int, where: String, idx: int) -> void:
 		return
 	var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
 	# бросил рюкзак — с ним и то, что не влезло в карманы
-	spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [e] + pl.inventory.spilled, LootContainer.Look.BAG)
+	spawn_drop(pl.global_position + fwd * 0.8, DROP_NAME, [e] + pl.inventory.spilled, LootContainer.Look.BAG)
 	pl.inventory.spilled = []
 	Audio.play("item_drop", pl.global_position)
 
@@ -1200,7 +1202,7 @@ func _reload(peer_id: int, slot: String, state: Dictionary) -> void:
 		return
 	var r := pl.inventory.reload_slot(slot, state)
 	if not (r[1] as Dictionary).is_empty():
-		spawn_drop(pl.global_position, "Выброшено", [r[1]], LootContainer.Look.BAG)
+		spawn_drop(pl.global_position, DROP_NAME, [r[1]], LootContainer.Look.BAG)
 
 
 func _weapon_state(peer_id: int, slot: String, state: Dictionary) -> void:
@@ -1555,7 +1557,7 @@ func _equip(peer_id: int, idx: int) -> void:
 	if id != "":
 		Audio.play(_equip_sound(id), pl.global_position, -8.0)
 	if not spill.is_empty():
-		spawn_drop(pl.global_position, "Выброшено", [spill], LootContainer.Look.BAG)
+		spawn_drop(pl.global_position, DROP_NAME, [spill], LootContainer.Look.BAG)
 
 
 func _drop(peer_id: int, id: String, n: int) -> void:
@@ -1565,7 +1567,7 @@ func _drop(peer_id: int, id: String, n: int) -> void:
 	var k := pl.inventory.remove(id, n)
 	if k > 0:
 		var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
-		spawn_drop(pl.global_position + fwd * 0.8, "Выброшено", [{"id": id, "n": k}], LootContainer.Look.BAG)
+		spawn_drop(pl.global_position + fwd * 0.8, DROP_NAME, [{"id": id, "n": k}], LootContainer.Look.BAG)
 		Audio.play("item_drop", pl.global_position)
 
 
@@ -1708,12 +1710,38 @@ func _rpc_story_death(cause: Dictionary) -> void:
 
 
 func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look, toss: Vector3 = Vector3.ZERO) -> void:
+	# выброшенное из рюкзака — в тот же мешок, что уже лежит рядом (не россыпь мешков по полу)
+	if display == DROP_NAME and _merge_drop(pos, list):
+		return
 	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look), "toss": toss}
 	_drop_count += 1
 	if _drop_spawner:
 		_drop_spawner.spawn(data)
 	else:
 		_drops.add_child(_make_drop(data))
+
+
+## Хост: ближайший мешок «Выброшено» в Balance.DROP_MERGE_M от pos — добавить в него list
+## (сетка ящика растёт, ничего не теряется). Нет такого — false.
+func _merge_drop(pos: Vector3, list: Array) -> bool:
+	var best: LootContainer = null
+	var best_d := Balance.DROP_MERGE_M
+	for n in _drops.get_children():
+		var c := n as LootContainer
+		if c == null or c.is_queued_for_deletion() or c.display_name != DROP_NAME:
+			continue
+		var d := c.global_position.distance_to(pos)
+		if d < best_d:
+			best_d = d
+			best = c
+	if best == null:
+		return false
+	var merged := best.items.duplicate(true)
+	merged.append_array(list.duplicate(true))
+	best.items = merged
+	best.place_all()
+	best.rolled = true
+	return true
 
 
 func _make_drop(data: Dictionary) -> Node:

@@ -111,6 +111,22 @@ func _receive_schedule(rain_left: float, fog_left: float, weather: String) -> vo
 	_apply_static()
 
 
+## Хост сменил условия посреди рейда (настройки) — гостям в рейде то же самое.
+func share_conditions() -> void:
+	if not Net.is_host():
+		return
+	Net.broadcast_scene(self, &"_rpc_conditions", [String(RaidConditions.current.time), String(RaidConditions.current.weather)], false)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_conditions(time_key: String, weather_key: String) -> void:
+	RaidConditions.current["time"] = time_key
+	RaidConditions.current["weather"] = weather_key
+	if RaidAtmosphere.current and RaidAtmosphere.current.is_inside_tree():
+		RaidAtmosphere.current.apply()
+	conditions_changed()
+
+
 func is_raining() -> bool:
 	return String(RaidConditions.current.weather) == "rain"
 

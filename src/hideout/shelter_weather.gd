@@ -46,7 +46,7 @@ func _process(delta: float) -> void:
 
 ## Применить погоду и питание; force — даже если не менялись (рубильник генератора).
 func refresh(force: bool = false) -> void:
-	var c: Dictionary = RaidConditions.normalized(Profile.next_conditions)
+	var c: Dictionary = RaidConditions.next_shared()
 	var power: bool = _power_on()
 	var key: String = "%s|%s|%s" % [c.time, c.weather, power]
 	if key == _key and not force:

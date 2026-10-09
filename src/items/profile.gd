@@ -747,8 +747,9 @@ static func sell_price(entry: Dictionary) -> int:
 	return int(floor(float(ItemDb.entry_value(entry)) * Balance.TRADER_SELL_MULT))
 
 
-## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack").
-static func buy(id: String, n: int, to: String = "stash") -> bool:
+## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack"); wear — одну вещь со слотом
+## снаряжения (оружие, броня, рюкзак…) сразу надеть, если слот свободен.
+static func buy(id: String, n: int, to: String = "stash", wear: bool = true) -> bool:
 	var cost := buy_price(id) * n
 	var dst := list_of(to)
 	var grid := grid_of(to)
@@ -756,9 +757,10 @@ static func buy(id: String, n: int, to: String = "stash") -> bool:
 	# оружие у Михалыча — со снаряжённым штатным магазином (отдельные магазины — пустые)
 	if WeaponDb.is_weapon(String(bought.id)) and bought.get("mag") is Dictionary:
 		(bought.mag as Dictionary)["rounds"] = WeaponDb.capacity(bought)
-	# снаряжение (броня, шлем, очки, наушники, рюкзак) — сразу на себя, если этот слот свободен
-	var slot := String(ItemDb.equip(id).get("slot", ""))
-	if n == 1 and slot != "" and not ItemDb.equip(id).has("weapon") and not equipment.has(slot):
+	# снаряжение (оружие, броня, шлем, очки, наушники, рюкзак) — сразу на себя, если слот свободен
+	# (оружию — любой свободный из двух)
+	var slot := ItemDb.pick_slot(id, equipment)
+	if wear and n == 1 and slot != "" and not equipment.has(slot):
 		if cost > money:
 			return false
 		money -= cost
@@ -767,6 +769,8 @@ static func buy(id: String, n: int, to: String = "stash") -> bool:
 		for key in ["x", "y", "r"]:
 			bought.erase(key)
 		equipment[slot] = bought
+		if slot == "backpack":
+			_refit_backpack()
 		save()
 		Audio.play_ui("cash")
 		return true

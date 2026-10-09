@@ -47,6 +47,16 @@ func _ready() -> void:
 		ui._trader_tab = tab
 		await _frames(40)
 		_save("hideout_trader_%s" % tab)
+	# продажа: выбран ствол — подсвечены его магазины и патроны
+	for ln in ["stash", "backpack"]:
+		var list := Profile.list_of(ln)
+		for i in range(list.size()):
+			if WeaponDb.is_weapon(String(list[i].id)) and ui._sell_sel.is_empty():
+				ui._sell_sel = [ln, i]
+	ui._trader_tab = "sell"
+	await _frames(30)
+	_save("hideout_trader_sell_focus")
+	ui._sell_sel = []
 	# схема: клик по квадратику прицела — список (купить и поставить / своё)
 	ui._trader_tab = "mods"
 	await _frames(20)

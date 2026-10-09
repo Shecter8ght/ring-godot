@@ -223,7 +223,7 @@ static func apply(t: Dictionary) -> Array[String]:
 					break
 				need -= k
 				continue
-			if _buy_block(id) != "" or not Profile.buy(id, need, "backpack"):
+			if _buy_block(id) != "" or not Profile.buy(id, need, "backpack", false):
 				fails.append(ItemDb.item_name(id))
 			break
 	Profile.save()
@@ -241,7 +241,7 @@ static func _from_stash(id: String) -> int:
 	for i in range(Profile.stash.size()):
 		if String(Profile.stash[i].id) == id:
 			return i
-	if _buy_block(id) != "" or not Profile.buy(id, 1, "stash"):
+	if _buy_block(id) != "" or not Profile.buy(id, 1, "stash", false):
 		return -1
 	for i in range(Profile.stash.size() - 1, -1, -1):
 		if String(Profile.stash[i].id) == id:

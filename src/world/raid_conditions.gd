@@ -22,6 +22,18 @@ static func for_new_raid() -> Dictionary:
 	return with_override(c)
 
 
+## Условия следующего рейда этого игрока: выбор у лестницы и принудительные из настроек.
+static func next_own() -> Dictionary:
+	return with_override(normalized(Profile.next_conditions))
+
+
+## Что ждёт в следующем рейде (погода за окнами убежища): в коопе у гостя — условия хоста.
+static func next_shared() -> Dictionary:
+	if Net.is_networked() and not Net.is_host() and not Net.host_conditions.is_empty():
+		return normalized(Net.host_conditions)
+	return next_own()
+
+
 ## Время и погода из настроек (Settings.raid_time / raid_weather), если заданы.
 static func with_override(c: Dictionary) -> Dictionary:
 	var out := c.duplicate()
@@ -33,7 +45,7 @@ static func with_override(c: Dictionary) -> Dictionary:
 
 
 ## Настройку сменили посреди рейда: у хоста (или в одиночной игре) условия меняются сразу —
-## свет, небо, туман, дождь; гостям приходит от хоста вместе с погодой.
+## свет, небо, туман, дождь; гостям в рейде хост рассылает то же (RaidWeather.share_conditions).
 static func apply_override_live() -> void:
 	if RaidAtmosphere.current == null or not RaidAtmosphere.current.is_inside_tree():
 		return
@@ -48,6 +60,7 @@ static func apply_override_live() -> void:
 	var weather: Node = RaidAtmosphere.current.get_parent().get_node_or_null("Weather")
 	if weather and weather.has_method("conditions_changed"):
 		weather.call("conditions_changed")
+		weather.call("share_conditions")
 
 
 static func normalized(c: Dictionary) -> Dictionary:

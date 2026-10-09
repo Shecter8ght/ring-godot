@@ -34,7 +34,7 @@ func _ready() -> void:
 	_check("покупка у торговца", Profile.money < m0 and _idx("ammo_12") >= 0, "%d ₽" % Profile.money)
 	# ствол у Михалыча — со снаряжённым штатным магазином; продали обратно, чтобы не мешал дальше
 	Profile.money += 100000
-	Profile.buy("wpn_sg_02", 1)
+	Profile.buy("wpn_sg_02", 1, "stash", false)
 	var gun: Dictionary = Profile.stash[_idx("wpn_sg_02")] if _idx("wpn_sg_02") >= 0 else {}
 	_check("купленный ствол — магазин полный", not gun.is_empty() and int(gun.mag.rounds) > 0 and int(gun.mag.rounds) == WeaponDb.capacity(gun), str(gun.get("mag", {})))
 	if _idx("wpn_sg_02") >= 0:

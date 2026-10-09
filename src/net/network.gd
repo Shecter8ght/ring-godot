@@ -41,6 +41,11 @@ var _transition_pending: Dictionary = {}
 var _ready_scene: String = ""
 ## После потери хоста убежище показывает причину возврата.
 var disconnect_message: String = ""
+## Условия следующего рейда хоста (RaidConditions.next_own у хоста) — у гостей: погода за окнами
+## убежища та же, что у хоста. Хост рассылает при смене и каждому новому.
+var host_conditions: Dictionary = {}
+var _shared_conditions: String = ""
+var _conditions_poll: float = 0.0
 
 
 func _ready() -> void:
@@ -49,6 +54,23 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+
+
+func _process(delta: float) -> void:
+	_conditions_poll -= delta
+	if _conditions_poll > 0.0 or not is_host():
+		return
+	_conditions_poll = 0.5
+	var c := RaidConditions.next_own()
+	var key := str(c)
+	if key != _shared_conditions:
+		_shared_conditions = key
+		_receive_conditions.rpc(c)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _receive_conditions(c: Dictionary) -> void:
+	host_conditions = c
 
 
 func is_networked() -> bool:
@@ -109,6 +131,8 @@ func disconnect_all() -> void:
 	if previous_peer:
 		previous_peer.close()
 	player_names.clear()
+	host_conditions = {}
+	_shared_conditions = ""
 
 
 ## Только хост может позвать: переводит всех (включая себя) на карту scene — выбранный хостом
@@ -352,6 +376,7 @@ func _on_peer_connected(id: int) -> void:
 	if is_host():
 		# Сообщаем новому peer имена уже подключённых, и всем — что появился новый (имя придёт RPC'ом от него).
 		_send_names.rpc_id(id, player_names)
+		_receive_conditions.rpc_id(id, RaidConditions.next_own())
 
 
 func _on_peer_disconnected(id: int) -> void:
@@ -378,6 +403,7 @@ func _on_connection_failed() -> void:
 func _on_server_disconnected() -> void:
 	print("net: потеряно соединение с хостом; сцена=", peer_scene.get(_own_id, ""), " переход=", _changing_scene)
 	disconnect_message = "Потеряно соединение с хостом — возвращение в убежище"
+	host_conditions = {}
 	_changing_scene = false
 	_ready_scene = ""
 	_transition_pending.clear()
