@@ -101,8 +101,9 @@ func _adapters() -> void:
 	var back: Array = Gear.fit(out[0], item, "optic_primary#2")
 	_check("узел ставится обратно целиком", String(back[2]) == "" and ((back[0] as Dictionary).mods as Dictionary).has("optic_primary#2/rail"), String(back[2]))
 	var riser: Array = WeaponBuild.insert(_veras({}), "optic_primary", {"id": "mount_riser_01", "n": 1}, 1)
-	var on_riser: Array = WeaponBuild.insert(riser[0], "optic_primary/rail", {"id": "optic_lpvo_01", "n": 1})
-	_check("LPVO на проставке — основной прицел", String(on_riser[2]) == "" and WeaponBuild.primary_key((on_riser[0] as Dictionary).mods) == "optic_primary/rail"
+	_check("длинная LPVO на короткую проставку не встаёт", WeaponBuild.block(riser[0], "optic_primary/rail", "optic_lpvo_01") != "")
+	var on_riser: Array = WeaponBuild.insert(riser[0], "optic_primary/rail", {"id": "optic_4x_01", "n": 1})
+	_check("4× на проставке — основной прицел", String(on_riser[2]) == "" and WeaponBuild.primary_key((on_riser[0] as Dictionary).mods) == "optic_primary/rail"
 		and WeaponStats.sights_of(on_riser[0]) == ["primary"], String(on_riser[2]))
 	var adj: Array = WeaponBuild.insert(_veras({}), "optic_primary", {"id": "mount_adjustable_01", "n": 1}, 3, false, 30.0)
 	_check("поворотный кронштейн держит угол 30°", is_equal_approx(WeaponBuild.point_roll("veras54", (adj[0] as Dictionary).mods, "optic_primary/rail"), 30.0))

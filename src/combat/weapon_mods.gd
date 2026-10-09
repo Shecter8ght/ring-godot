@@ -242,7 +242,17 @@ static func _adapter(pivot: Node3D, m: Dictionary, a: Dictionary) -> void:
 	var p: Array = spec.get("pos", [0, 0, 0])
 	var top := Vector3(float(p[0]), float(p[1]), float(p[2]))
 	var roll: float = deg_to_rad(float((m.get("rolls", {}) as Dictionary).get("rail", 0.0)))
-	# зажим Пикатинни: колодка с губками по бокам и винт
+	var path: String = String(a.get("asset", ""))
+	if path != "" and ResourceLoader.exists(path, "PackedScene"):
+		# модель из Blender (tools/build_adapters.py): поворотная часть — узел Arm, вокруг оси планки
+		var model: Node3D = (load(path) as PackedScene).instantiate() as Node3D
+		model.name = "Adapter"
+		pivot.add_child(model)
+		var arm_node: Node3D = model.find_child("Arm", true, false) as Node3D
+		if arm_node:
+			arm_node.rotation.z = roll
+		return
+	# запасной вид без assets/: зажим Пикатинни — колодка с губками по бокам и винт
 	WeaponModels._cbox(pivot, Vector3(0, 0.004, 0), Vector3(0.024, 0.008, clamp), al, 0.0012)
 	for sx: float in [-1.0, 1.0]:
 		WeaponModels._cbox(pivot, Vector3(sx * 0.0115, -0.002, 0), Vector3(0.003, 0.008, clamp), al, 0.0006)

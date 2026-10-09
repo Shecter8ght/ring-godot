@@ -2665,3 +2665,11 @@ C:\Users\Schecter_8ght\.codex\skills\weapon-asset-texturing\SKILL.md.
   Снимки `build_*`.
 - Дальше: модели переходников в Blender по референсам, поправка левой руки ВЕРАСа под рукоятку,
   миниатюры экземпляра в инвентаре (магазин: нет / другой / пустой), 3D-конструктор, сеть.
+- Переходники — модели из Blender (`tools/build_adapters.py` → assets/models/attachments/adapters/*.glb,
+  исходник `_asset_src/adapters/adapters.blend`, состояние — `asset-state.md` рядом). Размеры по
+  реальным изделиям: Arisaka/Unity FAST Offset (основание 25.4 мм на 3 паза, 54 г), Vector Optics
+  SCRA-60 (проставка 1″: 40 мм, 3 паза, сквозное окно, 50 г), Vector Optics Extended Picatinny
+  (консоль вперёд, двойной зажим, 70 г), Strike Industries Rotatable (стальной зажим, шайба с
+  рисками 15°); профиль планки — MIL-STD-1913. Узел `Arm` игра поворачивает на крен точки; без
+  assets/ — прежний процедурный вид. Короткая проставка (40 мм) теперь не берёт длинную LPVO;
+  старые сборки с угловым на короткой планке сдвигают основной прицел по пазам, чтобы встал кронштейн.

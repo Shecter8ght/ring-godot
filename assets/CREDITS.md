@@ -233,3 +233,9 @@
 - Готовая сцена сохраняет ID предмета `optic_holo_01`. Новые сторонние ассеты при переносе не
   использовались; авторство и права исходной модели сохраняются у проекта и владельца.
 
+
+## Переходники конструктора оружия (assets/models/attachments/adapters)
+- Собственная работа, CC0. Кронштейн 45°, проставка 1″, планка-удлинитель 120 мм, поворотный 0–90°.
+  Строит `tools/build_adapters.py` в Blender; размеры — по описаниям Arisaka Defense Offset Mount,
+  Vector Optics SCRA-60 и Extended Picatinny, Strike Industries Rotatable Optic Mount, профиль —
+  MIL-STD-1913 (подробно — `_asset_src/adapters/license.txt`, `asset-state.md`).

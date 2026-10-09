@@ -550,7 +550,21 @@ static func upgrade(entry: Dictionary) -> Array:
 	var model_key: String = String(WeaponDb.weapon(String(e.id)).get("model", ""))
 	var legacy: Dictionary = WeaponMods.socket(model_key, "optic_offset")
 	var bracket: Dictionary = {"id": LEGACY_BRACKET, "dur": float(optic.get("dur", 100.0)), "mods": {"rail": optic}}
-	var place: Dictionary = free_place(e, LEGACY_BRACKET, (legacy.pos as Vector3).z if not legacy.is_empty() else INF)
+	var want_z: float = (legacy.pos as Vector3).z if not legacy.is_empty() else INF
+	var place: Dictionary = free_place(e, LEGACY_BRACKET, want_z)
+	if place.is_empty() and mods.has("optic_primary"):
+		# короткая планка: основной прицел сдвигается по пазам, пока рядом не встанет кронштейн
+		var main_id: String = WeaponDb.mod_id(mods.optic_primary)
+		for s: int in valid_slots(e, "optic_primary", main_id):
+			var moved: Dictionary = e.duplicate(true)
+			var main_rec: Dictionary = WeaponCondition.mod_entry(moved.mods.optic_primary)
+			main_rec.erase("n")
+			main_rec["slot"] = s
+			moved.mods.optic_primary = main_rec
+			place = free_place(moved, LEGACY_BRACKET, want_z)
+			if not place.is_empty():
+				e = moved
+				break
 	if place.is_empty():
 		spill.append(bracket)
 		return [e, spill]
