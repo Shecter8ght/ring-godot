@@ -56,6 +56,18 @@ static func item(id: String) -> Dictionary:
 
 
 ## Есть ли такой предмет (item() на незнакомый id отдаёт заглушку, не пустоту).
+## Только из рейда: Михалыч такое не продаёт (нет в его каталогах) и это не оружейное (стволы, магазины,
+## патроны, обвес, броня вне каталогов — снаряжение ЧВК, его показывает «всё у Михалыча»). Головка
+## станка, сигнал вызова самолёта, ценности, детали, пайки — купить можно только с читом «лут в продаже».
+const ARSENAL_CATS := ["weapon", "mag", "ammo", "mod", "armor", "plate"]
+
+static func loot_only(id: String) -> bool:
+	var it := item(id)
+	if bool(it.get("raid_only", false)):
+		return true
+	return TraderStock.catalog_of(id) <= 0 and not String(it.get("cat", "misc")) in ARSENAL_CATS
+
+
 ## Все id предметов (данные предметов и арсенала).
 static func all_ids() -> Array:
 	_ensure()

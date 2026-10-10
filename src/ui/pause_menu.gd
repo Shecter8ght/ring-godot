@@ -71,6 +71,9 @@ var _keys_note: Label
 func _ready() -> void:
 	layer = 50
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# общий вид кнопок и полей на всю игру; курсор-«рука» — каждой новой кнопке
+	UiTheme.apply()
+	get_tree().node_added.connect(UiTheme.on_node_added)
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.visible = false
@@ -450,6 +453,16 @@ func _build_settings(h: HBoxContainer) -> void:
 		if is_instance_valid(unlock):
 			unlock.set_pressed_no_signal(Settings.unlock_all))
 	grid.add_child(unlock)
+	grid.add_child(_label("Чит: лут в продаже"))
+	var loot := CheckButton.new()
+	loot.focus_mode = Control.FOCUS_NONE
+	loot.button_pressed = Settings.shop_loot
+	loot.tooltip_text = "Михалыч показывает и продаёт то, что обычно только находят в рейде: головку станка гравировки, сигнал вызова самолёта, ценности, детали. Тот же переключатель — в шапке окна Михалыча."
+	loot.toggled.connect(func(on: bool) -> void: Settings.set_shop_loot(on))
+	Settings.changed.connect(func() -> void:
+		if is_instance_valid(loot):
+			loot.set_pressed_no_signal(Settings.shop_loot))
+	grid.add_child(loot)
 	# отладка для аудита уровня: полёт, скорость, переместиться к точке карты
 	grid.add_child(_label("Отладка: полёт"))
 	var fly := CheckButton.new()

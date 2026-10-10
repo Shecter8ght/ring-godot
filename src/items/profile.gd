@@ -799,8 +799,9 @@ static func sell_price(entry: Dictionary) -> int:
 ## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack"); wear — одну вещь со слотом
 ## снаряжения (оружие, броня, рюкзак…) сразу надеть, если слот свободен.
 static func buy(id: String, n: int, to: String = "stash", wear: bool = true) -> bool:
-	# то, что бывает только в рейде (головка станка гравировки), продаётся лишь с читом «всё у Михалыча»
-	if bool(ItemDb.item(id).get("raid_only", false)) and not Settings.shop_all():
+	# то, что бывает только в рейде (головка станка гравировки, сигнал самолёта, ценности), продаётся
+	# лишь с читом «лут в продаже»
+	if ItemDb.loot_only(id) and not Settings.shop_loot:
 		return false
 	var cost := buy_price(id) * n
 	var dst := list_of(to)

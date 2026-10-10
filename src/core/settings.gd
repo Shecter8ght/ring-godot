@@ -55,6 +55,9 @@ const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_d
 var god: bool = false
 ## Админский ассортимент Михалыча: показывает все стволы и не проверяет доверие для оружия.
 var all_weapons: bool = false
+## Чит «лут в продаже» (окно Михалыча, Настройки, консоль: shoploot): Михалыч показывает и продаёт то,
+## что обычно только находят в рейде, — головку станка, сигнал вызова самолёта, ценности, детали.
+var shop_loot: bool = false
 ## Чит «открыть всё» для плейтеста (Настройки — и из главного меню; консоль: unlock): у Михалыча весь
 ## товар без доверия, все модули убежища на максимуме (верстак, генератор, рация, станок гравировки).
 ## Ничего не строит и не тратит: выключил — прогресс сохранения прежний. Исключение — тайник и
@@ -117,6 +120,7 @@ func _load() -> void:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
 	all_weapons = bool(cfg.get_value("cheats", "all_weapons", false))
+	shop_loot = bool(cfg.get_value("cheats", "shop_loot", false))
 	unlock_all = bool(cfg.get_value("cheats", "unlock_all", false))
 	raid_time = String(cfg.get_value("raid", "time", ""))
 	raid_weather = String(cfg.get_value("raid", "weather", ""))
@@ -149,6 +153,7 @@ func save() -> void:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
 	cfg.set_value("cheats", "all_weapons", all_weapons)
+	cfg.set_value("cheats", "shop_loot", shop_loot)
 	cfg.set_value("cheats", "unlock_all", unlock_all)
 	cfg.set_value("raid", "time", raid_time)
 	cfg.set_value("raid", "weather", raid_weather)
@@ -355,6 +360,13 @@ func set_god(on: bool) -> void:
 ## Полный оружейный ассортимент у Михалыча; деньги и место в инвентаре по-прежнему нужны.
 func set_all_weapons(on: bool) -> void:
 	all_weapons = on
+	save()
+	changed.emit()
+
+
+## Находимое в рейде — в продаже у Михалыча (чит).
+func set_shop_loot(on: bool) -> void:
+	shop_loot = on
 	save()
 	changed.emit()
 

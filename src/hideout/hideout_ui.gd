@@ -39,6 +39,13 @@ var _stash_heading: Label
 var _backpack_heading: Label
 ## Торговец: раздел ассортимента ("all" — всё, иначе ключ CAT_TABS).
 var _cat_tab: String = "all"
+## Торговец: подгруппа внутри раздела ("" — все): класс оружия, калибр, назначение обвеса.
+var _sub_tab: String = ""
+## Торговец: поиск по названию и порядок по цене ("" — как в каталоге, "up" / "down").
+var _shop_search: String = ""
+var _shop_sort: String = ""
+## Торговец: список товаров под закреплённой шапкой (перезаполняется без перестройки окна).
+var _shop_list: VBoxContainer
 ## Кадр открытия: Tab, открывший окно, его же не закрывает.
 var _opened_frame: int = -1
 var _toast: Label
@@ -176,14 +183,19 @@ func _process(delta: float) -> void:
 		_toast.visible = _toast_t > 0.0
 	# Esc закрыл описание предмета — окно остаётся; Tab, открывший окно, его не закрывает
 	var just_opened := Engine.get_process_frames() == _opened_frame
-	if (Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory")) and not ItemInfo.blocking() and not just_opened:
+	if UiTheme.typing():
+		# курсор в поле (поиск, количество, имя шаблона): Esc — выйти из поля, клавиши окно не закрывают
+		if Input.is_action_just_pressed("ui_cancel"):
+			get_viewport().gui_release_focus()
+	elif (Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory")) and not ItemInfo.blocking() and not just_opened:
 		close_ui()
 		return
 	if _kind == HideoutStation.Kind.ENGRAVER and _sig == "engraver":
 		return
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
-	sig += "|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab]
+	# количество к покупке в подписи нет: карточка правит цену на месте, поле ввода не теряет курсор
+	sig += "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab, _sub_tab, _shop_sort, Settings.shop_loot]
 	sig += "|" + str(Profile.loadout_templates) + "|" + str(_sell_sel) + "|" + str(_sell_picks)
 	# собрание: кто в сети и где — окно выхода обновляется
 	sig += "|%s|%s|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene), str(Net.host_conditions), Settings.shop_all()]
@@ -655,55 +667,59 @@ func _build_trader() -> void:
 			_missions_column()
 
 
-## Купить: карточки по разделам; у расходников — количество (− / +).
+## Купить: шапка (поиск, куда класть, разделы, подгруппы, порядок) закреплена над списком и не уезжает
+## при прокрутке; ниже — карточки по разделам и подгруппам (оружие — по классам, патроны и магазины —
+## по калибрам, обвес — по назначению). Справа — готовые комплекты и свои шаблоны.
 func _trader_buy() -> void:
 	var shop := _column("Купить", 1.0)
-	# куда класть купленное
-	var dest := HBoxContainer.new()
-	dest.add_theme_constant_override("separation", 6)
-	dest.add_child(_text("Куда класть:", Color(0.75, 0.75, 0.72)))
-	for d in [["backpack", "В рюкзак"], ["stash", "В тайник (стеллаж)"]]:
-		var key := String(d[0])
-		var chosen := _buy_to == key
-		var b := _button(("▶ " if chosen else "") + String(d[1]), func() -> void: _buy_to = key)
-		b.toggle_mode = true
-		b.button_pressed = chosen
-		if chosen:
-			b.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
-			b.add_theme_color_override("font_pressed_color", Color(1.0, 0.86, 0.6))
-		dest.add_child(b)
-	dest.add_child(_text("рюкзак: %d / %d ячеек" % [Profile.backpack_cells(), Profile.backpack_capacity()], Color(0.6, 0.62, 0.6)))
-	shop.add_child(dest)
-	if _focus != "":
-		var fr := HBoxContainer.new()
-		fr.add_theme_constant_override("separation", 6)
-		fr.add_child(_text("Подходит к: %s" % ItemDb.item_name(_focus), Color(1.0, 0.82, 0.45)))
-		var only := _button("Только подходящее", func() -> void: _focus_only = not _focus_only)
-		only.toggle_mode = true
-		only.button_pressed = _focus_only
-		fr.add_child(only)
-		fr.add_child(_button("Сбросить", func() -> void:
-			_focus = ""
-			_focus_only = false))
-		shop.add_child(fr)
-	if Profile.needs_rescue():
-		# без ствола и без денег — Михалыч выручает, иначе из этой ямы не выбраться
-		var kit: Array[String] = []
-		for pair in Balance.RESCUE_KIT:
-			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
-		shop.add_child(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55)))
-		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
-	# свои шаблоны — собрать комплект одной кнопкой (докупить недостающее)
-	if not LoadoutTemplates.all().is_empty():
-		_templates_block(shop, false)
-	# каталоги: что открыто и когда следующий
-	var open_n := Profile.trust_level()
-	var cat_line := "Открыто каталогов: %d из %d — %s" % [open_n, TraderStock.catalogs().size(), TraderStock.catalog_name(open_n)]
-	if open_n < TraderStock.catalogs().size():
-		cat_line += "   ·   следующий «%s» — со ступени %d" % [TraderStock.catalog_name(open_n + 1), TraderStock.step_of(open_n + 1)]
-	shop.add_child(_text(cat_line, Color(0.95, 0.82, 0.6)))
-	# разделы: всё, оружие, патроны, магазины, обвес… — только те, где что-то есть
+	_shop_list = shop
+	var scroll := shop.get_parent() as ScrollContainer
+	var box := scroll.get_parent() as VBoxContainer
 	var stock := _trader_stock()
+	# --- шапка: панель с золотой кромкой снизу, стоит на месте
+	var head_panel := PanelContainer.new()
+	var hsb := StyleBoxFlat.new()
+	hsb.bg_color = Color(0.125, 0.115, 0.1, 1.0)
+	hsb.border_color = Color(1.0, 0.8, 0.45, 0.85)
+	hsb.border_width_bottom = 2
+	hsb.set_corner_radius_all(5)
+	hsb.set_content_margin_all(10)
+	hsb.shadow_color = Color(0, 0, 0, 0.55)
+	hsb.shadow_size = 6
+	hsb.shadow_offset = Vector2(0, 3)
+	head_panel.add_theme_stylebox_override("panel", hsb)
+	box.add_child(head_panel)
+	box.move_child(head_panel, 1)
+	var head := VBoxContainer.new()
+	head.add_theme_constant_override("separation", 8)
+	head_panel.add_child(head)
+	var to_top := func() -> void: scroll.scroll_vertical = 0
+	# поиск и куда класть
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 8)
+	head.add_child(top)
+	var search := LineEdit.new()
+	search.placeholder_text = "Поиск по названию…"
+	search.text = _shop_search
+	search.clear_button_enabled = true
+	search.custom_minimum_size = Vector2(260, 34)
+	search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	search.add_theme_font_size_override("font_size", 16)
+	search.text_changed.connect(func(t: String) -> void:
+		_shop_search = t
+		scroll.scroll_vertical = 0
+		_fill_shop())
+	search.text_submitted.connect(func(_t: String) -> void: search.release_focus())
+	top.add_child(search)
+	top.add_child(_text("Класть:", Color(0.75, 0.75, 0.72)))
+	for d in [["backpack", "В рюкзак"], ["stash", "В тайник"]]:
+		var key := String(d[0])
+		var b := _button(String(d[1]), func() -> void: _buy_to = key)
+		b.toggle_mode = true
+		b.button_pressed = _buy_to == key
+		top.add_child(b)
+	top.add_child(_text("рюкзак %d / %d" % [Profile.backpack_cells(), Profile.backpack_capacity()], Color(0.6, 0.62, 0.6)))
+	# разделы: всё, оружие, патроны, магазины, обвес… — только те, где что-то есть
 	var cats := HFlowContainer.new()
 	cats.add_theme_constant_override("h_separation", 6)
 	cats.add_theme_constant_override("v_separation", 6)
@@ -715,69 +731,437 @@ func _trader_buy() -> void:
 				cnt += 1
 		if cnt == 0:
 			continue
-		var tb := _button("%s  %d" % [String(t[1]), cnt], func() -> void: _cat_tab = key)
+		var tb := _button("%s  %d" % [String(t[1]), cnt], func() -> void:
+			_cat_tab = key
+			_sub_tab = ""
+			to_top.call())
 		tb.toggle_mode = true
 		tb.button_pressed = _cat_tab == key
+		tb.custom_minimum_size.y = 36
+		tb.add_theme_font_size_override("font_size", 16)
 		cats.add_child(tb)
-	shop.add_child(cats)
-	var heads := {"weapon": "Оружие", "ammo": "Патроны", "mag": "Магазины", "mod": "Обвес", "armor": "Броня и снаряжение", "plate": "Броня и снаряжение", "backpack": "Рюкзаки",
-		"med": "Медицина", "food": "Медицина", "throw": "Гранаты и свет"}
-	var last_head := ""
-	var flow: HFlowContainer = null
-	for id in stock:
-		var sid := String(id)
-		if _cat_tab != "all" and _cat_of(sid) != _cat_tab:
+	head.add_child(cats)
+	# подгруппы выбранного раздела (пистолеты, ПП, автоматы… / калибры / прицелы, дульные…)
+	if _cat_tab != "all":
+		var subs: Array = []
+		var counts := {}
+		for id in stock:
+			if _cat_of(String(id)) != _cat_tab:
+				continue
+			var g := _subgroup(String(id))
+			if not counts.has(g[1]):
+				subs.append(g)
+			counts[g[1]] = int(counts.get(g[1], 0)) + 1
+		subs.sort_custom(func(a: Array, b: Array) -> bool: return int(a[0]) < int(b[0]))
+		if subs.size() > 1:
+			var chips := HFlowContainer.new()
+			chips.add_theme_constant_override("h_separation", 4)
+			chips.add_theme_constant_override("v_separation", 4)
+			var all_b := _button("Все", func() -> void:
+				_sub_tab = ""
+				to_top.call())
+			all_b.toggle_mode = true
+			all_b.button_pressed = _sub_tab == ""
+			chips.add_child(all_b)
+			for g in subs:
+				var gname := String(g[1])
+				var cb := _button("%s  %d" % [gname, int(counts[gname])], func() -> void:
+					_sub_tab = gname
+					to_top.call())
+				cb.toggle_mode = true
+				cb.button_pressed = _sub_tab == gname
+				chips.add_child(cb)
+			head.add_child(chips)
+		elif _sub_tab != "":
+			_sub_tab = ""
+	# порядок, «к чему подходит», чит
+	var tools := HBoxContainer.new()
+	tools.add_theme_constant_override("separation", 6)
+	head.add_child(tools)
+	var sort_names := {"": "Цена: по каталогу", "up": "Цена ↑ дешёвые", "down": "Цена ↓ дорогие"}
+	var sort_b := _button(String(sort_names[_shop_sort]), func() -> void:
+		_shop_sort = {"": "up", "up": "down", "down": ""}[_shop_sort]
+		to_top.call())
+	sort_b.toggle_mode = true
+	sort_b.button_pressed = _shop_sort != ""
+	tools.add_child(sort_b)
+	if _focus != "":
+		tools.add_child(_text("Подходит к: %s" % ItemDb.item_name(_focus), Color(1.0, 0.82, 0.45)))
+		var only := _button("Только подходящее", func() -> void: _focus_only = not _focus_only)
+		only.toggle_mode = true
+		only.button_pressed = _focus_only
+		tools.add_child(only)
+		tools.add_child(_button("Сбросить", func() -> void:
+			_focus = ""
+			_focus_only = false))
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools.add_child(gap)
+	var loot := CheckButton.new()
+	loot.text = "Чит: лут в продаже"
+	loot.focus_mode = Control.FOCUS_NONE
+	loot.button_pressed = Settings.shop_loot
+	loot.tooltip_text = "Показать и продавать то, что обычно только находят в рейде: головку станка, сигнал вызова самолёта, ценности, детали."
+	loot.add_theme_font_size_override("font_size", 13)
+	loot.toggled.connect(func(on: bool) -> void: Settings.set_shop_loot(on))
+	tools.add_child(loot)
+	_fill_shop()
+	_kits_column()
+
+
+## Список товаров под шапкой: перезаполняется сам (поиск) — шапка и поле поиска остаются на месте.
+func _fill_shop() -> void:
+	if _shop_list == null or not is_instance_valid(_shop_list):
+		return
+	var shop := _shop_list
+	for c in shop.get_children():
+		shop.remove_child(c)
+		c.queue_free()
+	if Profile.needs_rescue():
+		# без ствола и без денег — Михалыч выручает, иначе из этой ямы не выбраться
+		var kit: Array[String] = []
+		for pair in Balance.RESCUE_KIT:
+			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
+		shop.add_child(_wrap(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55))))
+		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
+	# каталоги: что открыто и когда следующий
+	var open_n := Profile.trust_level()
+	var cat_line := "Открыто каталогов: %d из %d — %s" % [open_n, TraderStock.catalogs().size(), TraderStock.catalog_name(open_n)]
+	if open_n < TraderStock.catalogs().size():
+		cat_line += "   ·   следующий «%s» — со ступени %d" % [TraderStock.catalog_name(open_n + 1), TraderStock.step_of(open_n + 1)]
+	var cl := _wrap(_text(cat_line, Color(0.7, 0.66, 0.58)))
+	cl.add_theme_font_size_override("font_size", 13)
+	shop.add_child(cl)
+	# что показываем: раздел, подгруппа, поиск, «только подходящее»
+	var needle := _shop_search.strip_edges().to_lower()
+	var rows: Array = []
+	var stock := _trader_stock()
+	for i in stock.size():
+		var sid := String(stock[i])
+		var cat := _cat_of(sid)
+		if _cat_tab != "all" and cat != _cat_tab:
 			continue
-		var head := String(heads.get(String(ItemDb.item(sid).cat), "Разное"))
-		if head != last_head:
-			last_head = head
-			shop.add_child(_text(head, Color(0.95, 0.82, 0.6)))
+		var g := _subgroup(sid)
+		if _cat_tab != "all" and _sub_tab != "" and String(g[1]) != _sub_tab:
+			continue
+		if needle != "" and not needle in ItemDb.item_name(sid).to_lower() and not needle in String(ItemDb.item(sid).get("short", "")).to_lower():
+			continue
+		if _focus_only and _fits_focus(sid) < 0:
+			continue
+		var cat_rank := 0
+		for ti in CAT_TABS.size():
+			if String(CAT_TABS[ti][0]) == cat:
+				cat_rank = ti
+		rows.append({"id": sid, "cat": cat, "cat_rank": cat_rank, "g_rank": int(g[0]), "g": String(g[1]), "i": i, "price": Profile.buy_price(sid)})
+	var by_price := _shop_sort
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if a.cat_rank != b.cat_rank:
+			return int(a.cat_rank) < int(b.cat_rank)
+		if a.g_rank != b.g_rank:
+			return int(a.g_rank) < int(b.g_rank)
+		if a.g != b.g:
+			return String(a.g) < String(b.g)
+		if by_price != "" and a.price != b.price:
+			return int(a.price) < int(b.price) if by_price == "up" else int(a.price) > int(b.price)
+		return int(a.i) < int(b.i))
+	if rows.is_empty():
+		shop.add_child(_text("Ничего не найдено." if needle != "" else "В этом разделе пусто.", Color(0.7, 0.6, 0.5)))
+		return
+	var cat_names := {}
+	for t in CAT_TABS:
+		cat_names[String(t[0])] = String(t[1])
+	var last_cat := ""
+	var last_g := ""
+	var flow: HFlowContainer = null
+	var count_label: Label = null
+	var count := 0
+	for r: Dictionary in rows:
+		if String(r.cat) != last_cat and _cat_tab == "all":
+			# заголовок раздела — крупно, с чертой
+			if last_cat != "":
+				var pad := Control.new()
+				pad.custom_minimum_size.y = 10
+				shop.add_child(pad)
+			var ch := _text(String(cat_names.get(String(r.cat), "Разное")).to_upper(), Color(1.0, 0.86, 0.6))
+			ch.add_theme_font_size_override("font_size", 20)
+			shop.add_child(ch)
+			var sep := HSeparator.new()
+			sep.modulate = Color(1.0, 0.8, 0.45, 0.5)
+			shop.add_child(sep)
+			last_g = ""
+		if String(r.cat) != last_cat or String(r.g) != last_g:
+			last_cat = String(r.cat)
+			last_g = String(r.g)
+			if count_label:
+				count_label.text += "   %d" % count
+			count = 0
+			count_label = _text(last_g, Color(0.88, 0.8, 0.66))
+			count_label.add_theme_font_size_override("font_size", 16)
+			shop.add_child(count_label)
 			flow = HFlowContainer.new()
 			flow.add_theme_constant_override("h_separation", 8)
 			flow.add_theme_constant_override("v_separation", 8)
 			shop.add_child(flow)
-		# к выбранному стволу: подходит / не к месту (только патроны, магазины, обвес)
-		var fit := _fits_focus(sid)
-		if _focus_only and fit < 0:
-			continue
-		var stackable := ItemDb.stack(sid) > 1
-		var n := _qty_of(sid) if stackable else 1
-		var price := Profile.buy_price(sid) * n
-		# сколько выбрано — счётчиком между «−» и «+», цена — за всё выбранное
-		var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(price), ItemCard.W, true)
-		var tl := maxi(TraderStock.catalog_of(sid), 1)
-		if _trust_blocked(sid, tl):
-			# сильное Михалыч продаёт только тем, кому доверяет: каталог — со своей ступени
-			card.controls.add_child(_text("ступень %d" % TraderStock.step_of(tl), Color(0.8, 0.5, 0.4)))
-			card.modulate = Color(1, 1, 1, 0.6)
-		else:
-			if stackable:
-				card.controls.add_child(_button("−", func() -> void: _step_qty(sid, -1)))
-				card.controls.add_child(_qty_label(n))
-				card.controls.add_child(_button("+", func() -> void: _step_qty(sid, 1)))
-			var b := _button("Купить", func() -> void:
-				if not Profile.buy(sid, n, _buy_to):
-					if Profile.buy_price(sid) * n > Profile.money:
-						toast("Не хватает денег")
-					else:
-						toast("Не купил: не влезает в %s — освободи место или выбери «%s»" % ["рюкзак" if _buy_to == "backpack" else "тайник",
-							"В тайник" if _buy_to == "backpack" else "В рюкзак"])
-					return
-				# купил — количество снова по умолчанию
-				_qty.erase(sid)
-				if WeaponDb.is_weapon(sid):
-					# купил ствол — сразу видно, что к нему подходит
-					_focus = sid)
-			b.disabled = price > Profile.money
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			card.controls.add_child(b)
-		if WeaponDb.is_weapon(sid):
-			card.controls.add_child(_button("Что подходит", func() -> void: _focus = "" if _focus == sid else sid))
-			if sid == _focus:
-				card.mark(1)
-		elif fit != 0:
-			card.mark(fit)
-		flow.add_child(card)
+		count += 1
+		flow.add_child(_shop_card(String(r.id)))
+	if count_label:
+		count_label.text += "   %d" % count
+
+
+## Абзац в колонке: переносится по словам (строки, добавленные после общей перестройки окна).
+func _wrap(l: Label) -> Label:
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return l
+
+
+## Карточка товара: у расходников — количество («−», поле для числа руками, «+»), цена за всё выбранное.
+func _shop_card(sid: String) -> ItemCard:
+	var fit := _fits_focus(sid)
+	var stackable := ItemDb.stack(sid) > 1
+	var n := _qty_of(sid) if stackable else 1
+	var unit := Profile.buy_price(sid)
+	var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(unit * n), ItemCard.W, true)
+	var tl := maxi(TraderStock.catalog_of(sid), 1)
+	if _trust_blocked(sid, tl):
+		# сильное Михалыч продаёт только тем, кому доверяет: каталог — со своей ступени
+		card.controls.add_child(_text("ступень %d" % TraderStock.step_of(tl), Color(0.8, 0.5, 0.4)))
+		card.modulate = Color(1, 1, 1, 0.6)
+	else:
+		var b := _button("Купить", func() -> void:
+			var q := _qty_of(sid) if ItemDb.stack(sid) > 1 else 1
+			if not Profile.buy(sid, q, _buy_to):
+				if Profile.buy_price(sid) * q > Profile.money:
+					toast("Не хватает денег")
+				else:
+					toast("Не купил: не влезает в %s — освободи место или выбери «%s»" % ["рюкзак" if _buy_to == "backpack" else "тайник",
+						"В тайник" if _buy_to == "backpack" else "В рюкзак"])
+				return
+			# купил — количество снова по умолчанию
+			_qty.erase(sid)
+			if WeaponDb.is_weapon(sid):
+				# купил ствол — сразу видно, что к нему подходит
+				_focus = sid)
+		b.disabled = unit * n > Profile.money
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if stackable:
+			# количество: шаг кнопками (патроны — по 30), любое число — руками в поле
+			var qrow := HBoxContainer.new()
+			qrow.add_theme_constant_override("separation", 4)
+			var field := LineEdit.new()
+			field.text = str(n)
+			field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+			field.max_length = 4
+			field.select_all_on_focus = true
+			field.custom_minimum_size.x = 58
+			field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			field.tooltip_text = "Сколько купить — можно набрать число"
+			var show := func() -> void:
+				var q := _qty_of(sid)
+				if card.price_label:
+					card.price_label.text = "%s ₽" % InventoryUI.money(unit * q)
+				b.disabled = unit * q > Profile.money
+			var step := func(dir: int) -> void:
+				_step_qty(sid, dir)
+				field.text = str(_qty_of(sid))
+				show.call()
+			qrow.add_child(_button("−", func() -> void: step.call(-1)))
+			qrow.add_child(field)
+			qrow.add_child(_button("+", func() -> void: step.call(1)))
+			field.text_changed.connect(func(t: String) -> void:
+				if t.is_valid_int() and int(t) >= 1:
+					_qty[sid] = clampi(int(t), 1, _qty_max(sid))
+					show.call())
+			field.focus_exited.connect(func() -> void: field.text = str(_qty_of(sid)))
+			field.text_submitted.connect(func(_t: String) -> void: field.release_focus())
+			var body := card.controls.get_parent()
+			body.add_child(qrow)
+			body.move_child(qrow, card.controls.get_index())
+		card.controls.add_child(b)
+	if WeaponDb.is_weapon(sid):
+		card.controls.add_child(_button("Что подходит", func() -> void: _focus = "" if _focus == sid else sid))
+		if sid == _focus:
+			card.mark(1)
+	elif fit != 0:
+		card.mark(fit)
+	return card
+
+
+## Правая колонка у Михалыча: готовые комплекты (Balance.TRADER_KITS) и свои шаблоны — полный набор
+## одной кнопкой: что есть в тайнике — оттуда, остальное докупается.
+func _kits_column() -> void:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size.x = 330
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.13, 0.115, 0.085, 0.96)
+	sb.border_color = Color(1.0, 0.8, 0.45, 0.7)
+	sb.set_border_width_all(1)
+	sb.border_width_top = 3
+	sb.set_corner_radius_all(5)
+	sb.set_content_margin_all(12)
+	panel.add_theme_stylebox_override("panel", sb)
+	_cols.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	var title := _text("Готовые комплекты", Color(1.0, 0.86, 0.6))
+	title.add_theme_font_size_override("font_size", 18)
+	box.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 8)
+	scroll.add_child(list)
+	for kit: Dictionary in Balance.TRADER_KITS:
+		list.add_child(_kit_card(kit))
+	# свои комплекты: игрок собирает под себя — надел, сложил в рюкзак, сохранил под именем
+	var own_title := _text("Свои комплекты  %d / %d" % [LoadoutTemplates.all().size(), LoadoutTemplates.MAX], Color(1.0, 0.86, 0.6))
+	own_title.add_theme_font_size_override("font_size", 18)
+	list.add_child(own_title)
+	for i in range(LoadoutTemplates.all().size()):
+		list.add_child(_kit_card(LoadoutTemplates.all()[i], i))
+	var hint := _text("Надень и сложи в рюкзак то, с чем ходишь, — и сохрани: потом соберётся одной кнопкой (что есть в тайнике — оттуда, остальное докупится). То же имя — заменить.", Color(0.6, 0.6, 0.56))
+	hint.add_theme_font_size_override("font_size", 13)
+	list.add_child(hint)
+	var name_edit := LineEdit.new()
+	name_edit.placeholder_text = "Имя комплекта"
+	name_edit.max_length = 24
+	list.add_child(name_edit)
+	var save := _button("Сохранить надетое и рюкзак", func() -> void:
+		if Profile.equipment.is_empty() and Profile.backpack.is_empty():
+			toast("Сохранять нечего: ничего не надето и рюкзак пуст")
+			return
+		var t := LoadoutTemplates.capture(name_edit.text)
+		toast("Комплект «%s» сохранён" % String(t.name)))
+	save.custom_minimum_size.y = 34
+	list.add_child(save)
+
+
+## Карточка комплекта: что в нём, сколько докупить, чего не хватает (доверие, верстак), «Собрать».
+func _kit_card(kit: Dictionary, own_idx: int = -1) -> Control:
+	var card := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.085, 0.08, 0.072, 0.96)
+	sb.border_color = Color(0.95, 0.78, 0.5, 0.25)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(4)
+	sb.set_content_margin_all(10)
+	card.add_theme_stylebox_override("panel", sb)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	card.add_child(v)
+	var slots: Dictionary = kit.get("slots", {})
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 8)
+	v.add_child(head)
+	var icon := ItemCard.IconBox.new()
+	icon.id = String((slots.get("primary", {}) as Dictionary).get("id", ""))
+	icon.custom_minimum_size = Vector2(120, 48)
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	head.add_child(icon)
+	var name := _text(String(kit.name), Color(1.0, 0.9, 0.7))
+	name.add_theme_font_size_override("font_size", 18)
+	head.add_child(name)
+	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name.clip_text = true
+	if own_idx >= 0:
+		var del := _button("✕", func() -> void: LoadoutTemplates.remove(own_idx))
+		del.tooltip_text = "Удалить комплект"
+		head.add_child(del)
+	if String(kit.get("about", "")) != "":
+		var about := _text(String(kit.get("about", "")), Color(0.75, 0.75, 0.7))
+		about.add_theme_font_size_override("font_size", 13)
+		v.add_child(about)
+	# состав одной строкой: стволы, броня, шлем, рюкзак, сколько всего в рюкзаке
+	var parts: Array[String] = []
+	for slot in ["primary", "secondary", "armor", "helmet", "backpack"]:
+		if slots.has(slot):
+			parts.append(ItemDb.item_name(String((slots[slot] as Dictionary).id)))
+	var bp_n := (kit.get("backpack", []) as Array).size()
+	if bp_n > 0:
+		parts.append("в рюкзаке %d поз." % bp_n)
+	var what := _text(" · ".join(parts), Color(0.86, 0.84, 0.78))
+	what.add_theme_font_size_override("font_size", 13)
+	v.add_child(what)
+	var p := LoadoutTemplates.plan(kit)
+	var cost := int(p.cost)
+	if int(p.missing) > 0:
+		var why := ""
+		for r in p.rows:
+			if String(r.how) == "нет":
+				why = String(r.why)
+				break
+		var miss := _text("не собрать полностью: %d поз. — %s" % [int(p.missing), why], Color(0.85, 0.55, 0.45))
+		miss.add_theme_font_size_override("font_size", 13)
+		v.add_child(miss)
+	var go := _button("Собрать — всё есть" if cost == 0 and int(p.missing) == 0 else "Собрать  ·  докупить на %s ₽" % InventoryUI.money(cost), func() -> void: _confirm_template(kit))
+	go.disabled = cost > Profile.money
+	go.custom_minimum_size.y = 34
+	go.add_theme_font_size_override("font_size", 15)
+	if go.disabled:
+		go.tooltip_text = "Не хватает денег"
+	v.add_child(go)
+	return card
+
+
+## Группы оружия на витрине: название и классы (WeaponDb) в нём.
+const WEAPON_GROUPS := [["Пистолеты", ["PISTOL"]], ["Пистолеты-пулемёты", ["SMG", "PDW"]], ["Ружья", ["SHOTGUN"]],
+	["Автоматы и карабины", ["ASSAULT_RIFLE", "CARBINE", "SPECIAL"]], ["Марксманские и боевые винтовки", ["BATTLE_RIFLE", "DMR"]],
+	["Снайперские винтовки", ["SNIPER"]], ["Пулемёты", ["LMG"]]]
+## Калибры по возрастанию: пистолетные, промежуточные, винтовочные, крупные, ружейный.
+const CALIBER_ORDER := ["9x18", "9x19", "45acp", "57x28", "9x21", "545x39", "9x39", "556x45", "300blk", "68x51", "762x51", "762x54r",
+	"338lm", "50bmg", "12x76"]
+
+
+## Подгруппа предмета внутри раздела: [порядок, название]. Оружие — по классам, патроны и магазины —
+## по калибрам, обвес — по назначению, броня — по виду; так же делятся и находки (чит «лут в продаже»).
+func _subgroup(id: String) -> Array:
+	var w := WeaponDb.weapon(id)
+	if not w.is_empty():
+		var cls := String(w["class"])
+		for i in WEAPON_GROUPS.size():
+			if cls in (WEAPON_GROUPS[i][1] as Array):
+				return [i, String(WEAPON_GROUPS[i][0])]
+		return [WEAPON_GROUPS.size(), "Прочее оружие"]
+	var cal := ""
+	if not WeaponDb.ammo(id).is_empty():
+		cal = String((WeaponDb.ammo(id) as Dictionary).get("caliber", ""))
+	elif not WeaponDb.magazine(id).is_empty():
+		cal = WeaponDb.mag_caliber(id)
+	if cal != "":
+		var ci := CALIBER_ORDER.find(cal)
+		return [ci if ci >= 0 else CALIBER_ORDER.size(), WeaponDb.caliber_name(cal)]
+	var at := WeaponDb.attachment(id)
+	if not at.is_empty():
+		var kind := String(at.get("type", ""))
+		match WeaponBuilder.tab_of(id):
+			"optic":
+				return [0, "Прицелы"]
+			"muzzle":
+				return [2, "Глушители"] if kind == "SUPPRESSOR" else [1, "Дульные устройства"]
+			"stock":
+				return [5, "Приклады"]
+			"adapter":
+				return [6, "Кронштейны и планки"]
+		if "FLASHLIGHT" in kind or "LASER" in kind:
+			return [4, "Фонари и ЛЦУ"]
+		return [3, "Рукоятки и сошки"]
+	if not WeaponDb.helmet(id).is_empty():
+		return [0, "Шлемы"]
+	if not WeaponDb.vest(id).is_empty():
+		return [1, "Бронежилеты и плитоносцы"]
+	if not WeaponDb.plate(id).is_empty():
+		return [2, "Бронеплиты"]
+	if not WeaponDb.headset(id).is_empty():
+		return [3, "Гарнитуры"]
+	var cat := String(ItemDb.item(id).get("cat", "misc"))
+	if cat == "backpack":
+		return [4, "Рюкзаки"]
+	var order := ["med", "food", "throw", "tools", "tech", "barter", "value"]
+	var oi := order.find(cat)
+	return [oi if oi >= 0 else order.size(), String(ItemInfo.CAT_NAMES.get(cat, "Разное"))]
 
 
 ## Раздел ассортимента предмета (ключ CAT_TABS).
@@ -798,10 +1182,13 @@ const STOCK_ORDER := ["weapon", "mag", "ammo", "mod", "armor", "plate", "backpac
 ## (квестовые), без ступеней доверия.
 func _trader_stock() -> Array:
 	var stock: Array = TraderStock.stock().duplicate()
-	if Settings.shop_all():
+	if Settings.shop_all() or Settings.shop_loot:
 		for id in ItemDb.all_ids():
 			var cat := String(ItemDb.item(String(id)).get("cat", "misc"))
-			if not id in stock and not cat in ["key", "intel"] and ItemDb.value(String(id)) > 0:
+			if id in stock or cat in ["key", "intel"] or ItemDb.value(String(id)) <= 0:
+				continue
+			# находки из рейда (головка станка, сигнал самолёта, ценности) — отдельным читом
+			if Settings.shop_loot if ItemDb.loot_only(String(id)) else Settings.shop_all():
 				stock.append(id)
 	var keyed: Array = []
 	for i in stock.size():
@@ -835,30 +1222,29 @@ func _fits_focus(sid: String) -> int:
 	return 0
 
 
-## Сколько брать расходника: патроны — шагом 10 (от 10 до 5 стопок), остальное — поштучно.
+## Сколько брать расходника: патроны — шагом Balance.TRADER_AMMO_STEP (магазин), остальное — поштучно;
+## любое число — руками в поле между «−» и «+».
 func _qty_step(sid: String) -> int:
-	return 10 if String(ItemDb.item(sid).cat) == "ammo" else 1
+	return Balance.TRADER_AMMO_STEP if String(ItemDb.item(sid).cat) == "ammo" else 1
+
+
+func _qty_max(sid: String) -> int:
+	return mini(ItemDb.stack(sid) * Balance.TRADER_QTY_STACKS, 999)
 
 
 func _qty_of(sid: String) -> int:
 	var step := _qty_step(sid)
-	return int(_qty.get(sid, mini(ItemDb.stack(sid), 30) if step > 1 else 1))
+	return int(_qty.get(sid, step))
 
 
+## «+» — до следующего кратного шагу (30 → 60, набранные 45 → 60), «−» — до предыдущего, не ниже шага.
 func _step_qty(sid: String, dir: int) -> void:
 	var step := _qty_step(sid)
-	_qty[sid] = clampi(_qty_of(sid) + dir * step, step, ItemDb.stack(sid) * 5)
-
-
-## Выбранное количество между «−» и «+».
-func _qty_label(n: int) -> Label:
-	var l := Label.new()
-	l.text = "%d шт" % n
-	l.custom_minimum_size.x = 46
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_font_size_override("font_size", 14)
-	l.add_theme_color_override("font_color", Color(1.0, 0.9, 0.6))
-	return l
+	var n := _qty_of(sid)
+	var next := (n / step + 1) * step if dir > 0 else ((n - 1) / step) * step
+	if next < 1:
+		next = mini(n, step)
+	_qty[sid] = clampi(next, 1, _qty_max(sid))
 
 
 ## Короткая строка под именем: чем предмет важен (класс и калибр, урон и пробитие, эффект, класс брони).
@@ -956,9 +1342,29 @@ func _weapon_pick_card(parent: Control, e: Dictionary, where: String, chosen: bo
 	var card := ItemCard.make(e, where, "", 260.0)
 	if chosen:
 		card.controls.add_child(_text("▶ на схеме", Color(1.0, 0.86, 0.6)))
+		card.mark(1)
 	else:
+		# выбрать — клик в любое место карточки (кнопка оставлена для привычки)
 		card.controls.add_child(_button("Выбрать", pick))
+		_clickable(card, pick)
 	parent.add_child(card)
+
+
+## Вся плашка — как кнопка: «рука», подсветка под курсором, клик в любое место (кроме её же кнопок).
+func _clickable(card: Control, action: Callable) -> void:
+	card.mouse_filter = Control.MOUSE_FILTER_STOP
+	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	for n in card.find_children("*", "Control", true, false):
+		var c := n as Control
+		if not c is BaseButton and c.mouse_filter == Control.MOUSE_FILTER_STOP:
+			c.mouse_filter = Control.MOUSE_FILTER_PASS
+	card.mouse_entered.connect(func() -> void: card.self_modulate = Color(1.35, 1.3, 1.2))
+	card.mouse_exited.connect(func() -> void: card.self_modulate = Color(1, 1, 1))
+	card.gui_input.connect(func(ev: InputEvent) -> void:
+		var mb := ev as InputEventMouseButton
+		if mb and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			card.accept_event()
+			action.call())
 
 
 ## Выбранное на схеме оружие: [где, индекс, запись] ("equip:<слот>", -1 — надетое; список и индекс —

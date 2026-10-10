@@ -339,6 +339,9 @@ func carry_stamina_k() -> float:
 func ui_blocked() -> bool:
 	if PauseMenu.shown or (Raid.current and Raid.current.ui_open()):
 		return true
+	# набирают текст (надпись гравировки, ник, чат) — клавиши идут в поле, а не в действия
+	if UiTheme.typing():
+		return true
 	for n in get_tree().get_nodes_in_group("esc_windows"):
 		if n.has_method("is_open") and bool(n.call("is_open")):
 			return true

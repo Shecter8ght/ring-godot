@@ -6,6 +6,8 @@ extends SubViewportContainer
 
 signal clicked(at: Vector2)
 signal hovered(at: Vector2)
+## Щелчок без протяжки правой или средней кнопкой (протяжка ими двигает модель).
+signal alt_clicked(at: Vector2, button: int)
 
 const VIEW_SIDE := Vector2(deg_to_rad(-90.0), deg_to_rad(6.0))
 const VIEW_TOP := Vector2(deg_to_rad(-90.0), deg_to_rad(80.0))
@@ -250,6 +252,8 @@ func _gui_input(event: InputEvent) -> void:
 		elif not mb.pressed and mb.button_index == _drag:
 			if not _moved and _drag == MOUSE_BUTTON_LEFT:
 				clicked.emit(mb.position)
+			elif not _moved:
+				alt_clicked.emit(mb.position, _drag)
 			_drag = 0
 			_want.x = _yaw
 			_want.y = _pitch

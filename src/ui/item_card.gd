@@ -7,6 +7,8 @@ extends PanelContainer
 const W := 200.0
 
 var controls: HBoxContainer
+## Строка цены (нет цены — null): окно правит её на месте, когда меняют количество.
+var price_label: Label
 
 
 ## entry — запись предмета (id, n, состояние) или {id}; sub — подробности; price — "" без цены;
@@ -49,7 +51,8 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	if sub != "":
 		v.add_child(_label(sub, 12, Color(0.66, 0.68, 0.66)))
 	if price != "":
-		v.add_child(_label(price, 14, Color(0.72, 0.87, 0.66)))
+		c.price_label = _label(price, 14, Color(0.72, 0.87, 0.66))
+		v.add_child(c.price_label)
 	c.controls = HBoxContainer.new()
 	c.controls.add_theme_constant_override("separation", 4)
 	v.add_child(c.controls)

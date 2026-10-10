@@ -377,7 +377,7 @@ func _process(delta: float) -> void:
 	if _ui.is_open():
 		return
 	# Tab — рюкзак и снаряжение (окно тайника) где угодно в убежище
-	if Input.is_action_just_pressed("inventory") and not _player.ui_blocked():
+	if Input.is_action_just_pressed("inventory") and not _player.ui_blocked() and not UiTheme.typing():
 		_player.flush_weapon_state()
 		_ui.open(HideoutStation.Kind.STASH)
 		return

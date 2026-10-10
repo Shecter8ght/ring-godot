@@ -113,7 +113,7 @@ static func _corners(xf: Transform3D, w: float, d: float) -> PackedVector2Array:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("map") and not event.is_echo() and not PauseMenu.shown:
+	if event.is_action_pressed("map") and not event.is_echo() and not PauseMenu.shown and not UiTheme.typing():
 		if not _root.visible and Raid.current and Raid.current.ui_open():
 			return
 		_root.visible = not _root.visible

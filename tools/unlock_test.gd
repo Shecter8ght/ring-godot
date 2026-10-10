@@ -50,7 +50,8 @@ func _ready() -> void:
 			top_gun = String(id)
 			break
 	_check("ствол последнего каталога и головка станка покупаются",
-		top_gun != "" and LoadoutTemplates._buy_block(top_gun) == "" and Profile.buy(top_gun, 1, "stash", false) and Profile.buy("laser_head", 1, "stash", false) and Engraver.heads().size() == 1,
+		top_gun != "" and LoadoutTemplates._buy_block(top_gun) == "" and Profile.buy(top_gun, 1, "stash", false) and not Profile.buy("laser_head", 1, "stash", false)
+		and _buy_loot("laser_head") and Engraver.heads().size() == 1,
 		top_gun)
 
 	Settings.set_unlock_all(false)
@@ -65,6 +66,14 @@ func _ready() -> void:
 	_check("консоль: unlock — выключил", not Settings.unlock_all and Upgrades.level("generator") == 0, "")
 	print("unlock_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
+
+
+## Находимое только в рейде покупается лишь с отдельным читом «лут в продаже».
+func _buy_loot(id: String) -> bool:
+	Settings.set_shop_loot(true)
+	var ok: bool = Profile.buy(id, 1, "stash", false)
+	Settings.set_shop_loot(false)
+	return ok
 
 
 func _check(what: String, ok: bool, info: String) -> void:

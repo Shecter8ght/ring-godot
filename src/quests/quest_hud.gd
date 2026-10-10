@@ -195,7 +195,7 @@ func _input(event: InputEvent) -> void:
 			_dlg_done = Callable()
 			get_viewport().set_input_as_handled()
 			return
-	if event.is_action_pressed("journal") and not event.is_echo() and _in_game() and not _console.visible:
+	if event.is_action_pressed("journal") and not event.is_echo() and _in_game() and not _console.visible and not UiTheme.typing():
 		_journal.visible = not _journal.visible
 		if _journal.visible:
 			_fill_journal()
@@ -261,6 +261,10 @@ func _run(cmd: String) -> void:
 		# чит плейтеста: весь товар Михалыча и все модули убежища (как в меню Esc → Настройки)
 		Settings.set_unlock_all(not Settings.unlock_all if a.size() < 2 else a[1] in ["1", "on", "вкл"])
 		out = "всё открыто (Михалыч, верстак, модули, гравировка): " + ("да" if Settings.unlock_all else "нет")
+	elif a.size() >= 1 and a[0] == "shoploot":
+		# чит: находимое в рейде — в продаже у Михалыча
+		Settings.set_shop_loot(not Settings.shop_loot if a.size() < 2 else a[1] in ["1", "on", "вкл"])
+		out = "лут в продаже у Михалыча: " + ("да" if Settings.shop_loot else "нет")
 	elif a.size() >= 1 and a[0] == "fly":
 		# отладка: полёт сквозь всё (как в меню Esc → Настройки)
 		Settings.cheat_fly = not Settings.cheat_fly if a.size() < 2 else a[1] in ["1", "on", "вкл"]
@@ -274,7 +278,7 @@ func _run(cmd: String) -> void:
 		# событие рейда сейчас: свет погас, генератор встал, сброс груза, ЧВК (решает хост)
 		out = _dev_event(a[1] if a.size() > 1 else "")
 	elif a.size() >= 1 and a[0] == "help":
-		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · unlock — открыть всё: товар Михалыча, верстак, модули убежища, гравировка · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · unlock — открыть всё: товар Михалыча, верстак, модули убежища, гравировка · shoploot — лут в продаже у Михалыча · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
 " + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"

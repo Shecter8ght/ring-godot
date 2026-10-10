@@ -273,7 +273,7 @@ func _process(delta: float) -> void:
 		return
 	# пока открыт вопрос про буфер (и кадр после) — клавиши его, не окна
 	var asking := (_confirm != null and is_instance_valid(_confirm)) or Engine.get_process_frames() - _confirm_frame <= 1
-	if Input.is_action_just_pressed("inventory") and not asking:
+	if Input.is_action_just_pressed("inventory") and not asking and not UiTheme.typing():
 		if _backpack_open or _looting:
 			request_close()
 		else:
@@ -283,7 +283,7 @@ func _process(delta: float) -> void:
 	# Esc закрыл окно описания — рюкзак остаётся
 	if Input.is_action_just_pressed("ui_cancel") and is_open() and not ItemInfo.blocking() and not asking:
 		request_close()
-	if Input.is_action_just_pressed("use_med"):
+	if Input.is_action_just_pressed("use_med") and not UiTheme.typing():
 		if _med_menu and _med_menu.visible:
 			_med_menu.visible = false
 		else:

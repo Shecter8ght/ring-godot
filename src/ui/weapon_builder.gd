@@ -46,6 +46,8 @@ var _place: Dictionary = {}
 var _hover: Dictionary = {}
 var _tab: String = "all"
 var _source: String = "mine"
+## Порядок деталей в полосе: "" — как лежат, "up" — дешёвые первыми, "down" — дорогие первыми.
+var _sort: String = ""
 var _status_t: float = 0.0
 var _plan: Dictionary = {}
 
@@ -175,21 +177,12 @@ func _button(text: String, action: Callable, accent: bool = false) -> Button:
 	b.text = text
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_font_size_override("font_size", 13)
-	var normal := _panel(Color(0.96, 0.74, 0.38, 0.22) if accent else Color(0.14, 0.142, 0.15), 6, 8)
-	normal.content_margin_top = 5
-	normal.content_margin_bottom = 5
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.96, 0.74, 0.38, 0.36) if accent else Color(0.2, 0.2, 0.21)
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(0.96, 0.74, 0.38, 0.5)
-	var disabled := normal.duplicate() as StyleBoxFlat
-	disabled.bg_color = Color(0.1, 0.1, 0.105)
-	b.add_theme_stylebox_override("normal", normal)
-	b.add_theme_stylebox_override("hover", hover)
-	b.add_theme_stylebox_override("pressed", pressed)
-	b.add_theme_stylebox_override("disabled", disabled)
-	b.add_theme_color_override("font_color", C_ACCENT if accent else C_TEXT)
-	b.add_theme_color_override("font_disabled_color", Color(0.4, 0.4, 0.4))
+	# обычная кнопка — из общей темы (UiTheme); выбранная / главная — залита золотым
+	if accent:
+		b.add_theme_stylebox_override("normal", UiTheme.face(Color(0.5, 0.36, 0.14), Color(1.0, 0.8, 0.45), 2))
+		b.add_theme_stylebox_override("hover", UiTheme.face(Color(0.62, 0.45, 0.18), Color(1.0, 0.9, 0.65), 2))
+		b.add_theme_stylebox_override("pressed", UiTheme.face(Color(0.4, 0.28, 0.1), Color(1.0, 0.8, 0.45), 0))
+		b.add_theme_color_override("font_color", Color(1.0, 0.95, 0.82))
 	b.pressed.connect(action)
 	return b
 
@@ -273,6 +266,7 @@ func _build_ui() -> void:
 	center.add_child(_view)
 	_view.clicked.connect(_on_view_click)
 	_view.hovered.connect(_on_view_hover)
+	_view.alt_clicked.connect(_on_view_alt_click)
 	_overlay = Control.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -287,7 +281,7 @@ func _build_ui() -> void:
 	_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	_hint.add_theme_constant_override("outline_size", 5)
 	center.add_child(_hint)
-	var keys := _label("ЛКМ — вращать · колесо — ближе · ПКМ — сдвинуть · двойной клик — к детали", 12, Color(1, 1, 1, 0.32))
+	var keys := _label("ЛКМ — вращать · колесо — ближе · ПКМ тянуть — сдвинуть · ПКМ по детали — снять · СКМ — поставить / применить", 12, Color(1, 1, 1, 0.32))
 	keys.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	keys.position = Vector2(10, -24)
 	keys.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -776,17 +770,39 @@ func _on_view_click(at: Vector2) -> void:
 		_confirm_place()
 		return
 	# клик по точке на модели
-	var best: String = ""
+	var s: Dictionary = _spot_at(at)
+	if not s.is_empty():
+		_select(String(s.key), bool(s.get("add", false)))
+
+
+## Точка крепления под курсором ({} — мимо).
+func _spot_at(at: Vector2) -> Dictionary:
+	var best: Dictionary = {}
 	var best_d: float = 18.0
-	var add: bool = false
 	for s: Dictionary in _spots:
 		var d: float = (s.pos as Vector2).distance_to(at)
 		if d < best_d:
 			best_d = d
-			best = String(s.key)
-			add = bool(s.get("add", false))
-	if best != "":
-		_select(best, add)
+			best = s
+	return best
+
+
+## Щелчок без протяжки: правой по детали — снять её, средней — поставить / применить сборку.
+func _on_view_alt_click(at: Vector2, button: int) -> void:
+	if button == MOUSE_BUTTON_MIDDLE:
+		_middle_click()
+	elif button == MOUSE_BUTTON_RIGHT and _place.is_empty():
+		var s: Dictionary = _spot_at(at)
+		if not s.is_empty() and _draft.has(String(s.key)):
+			_remove(String(s.key))
+
+
+## Средняя кнопка: призрак на планке — поставить; иначе — применить собранное (как Enter).
+func _middle_click() -> void:
+	if not _place.is_empty():
+		_confirm_place()
+	else:
+		_apply()
 
 
 func _select(key: String, add: bool = false) -> void:
@@ -908,6 +924,10 @@ func _tree_row(key: String, title: String, sub: String, depth: int, filled: bool
 	v.add_child(_label(title, 14, C_TEXT if filled else C_MUTED))
 	v.add_child(_label(sub, 11, C_MUTED))
 	row.gui_input.connect(func(ev: InputEvent) -> void:
+		if ev is InputEventMouseButton and (ev as InputEventMouseButton).pressed and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
+			if _draft.has(key):
+				_remove(key)
+			return
 		if ev is InputEventMouseButton and (ev as InputEventMouseButton).pressed and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			if key == "@mag":
 				_tab = "mag"
@@ -929,7 +949,7 @@ func _refresh_actions() -> void:
 		return
 	var id: String = WeaponDb.mod_id(_draft[_sel])
 	var key: String = _sel
-	_actions.add_child(_button("Снять  Del", func() -> void: _remove(key)))
+	_actions.add_child(_button("Снять  ПКМ", func() -> void: _remove(key)))
 	var pt: Dictionary = WeaponBuild.point(String(_weapon.id), BuildPlan.clean(_draft), key)
 	if WeaponBuild.is_rail(pt):
 		_actions.add_child(_button("◀ паз", func() -> void: _nudge(-1)))
@@ -1006,12 +1026,25 @@ func _refresh_strip() -> void:
 		var shop: Callable = func() -> void: _pick_source("shop")
 		_source_box.add_child(_button("Мои вещи", mine, _source == "mine"))
 		_source_box.add_child(_button("У Михалыча", shop, _source == "shop"))
+	var sort_names: Dictionary = {"": "Цена: как лежат", "up": "Цена ↑ дешёвые", "down": "Цена ↓ дорогие"}
+	var next_sort: Callable = func() -> void:
+		_sort = {"": "up", "up": "down", "down": ""}[_sort]
+		_refresh()
+	_source_box.add_child(_button(String(sort_names[_sort]), next_sort, _sort != ""))
 	if _tab == "mag":
 		_mag_strip()
 		return
 	var e: Dictionary = _draft_entry()
 	var any: bool = false
-	for part: Dictionary in _pool():
+	var pool: Array[Dictionary] = _pool()
+	if _sort != "":
+		# по цене: у Михалыча — за сколько продаст, своё — сколько стоит
+		var up: bool = _sort == "up"
+		pool.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			var pa: int = int(a.get("price", ItemDb.value(String(a.id))))
+			var pb: int = int(b.get("price", ItemDb.value(String(b.id))))
+			return pa < pb if up else pa > pb)
+	for part: Dictionary in pool:
 		var id: String = String(part.id)
 		if _tab != "all" and tab_of(id) != _tab:
 			continue
@@ -1258,7 +1291,7 @@ func _process(delta: float) -> void:
 	_hint.visible = not _place.is_empty()
 	if not _place.is_empty():
 		var ok: bool = bool(_place.get("ok", false))
-		_hint.text = ("✓ паз %d — клик, чтобы поставить" % (int(_place.slot) + 1)) if ok else ("✕ " + String(_place.get("why", "")))
+		_hint.text = ("✓ паз %d — клик или СКМ, чтобы поставить" % (int(_place.slot) + 1)) if ok else ("✕ " + String(_place.get("why", "")))
 		_hint.add_theme_color_override("font_color", C_OK if ok else C_BAD)
 
 
@@ -1485,10 +1518,18 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	# колесо над студией в режиме установки сдвигает по пазам (студия его не берёт)
-	if _place.is_empty() or not (event is InputEventMouseButton):
+	if not (event is InputEventMouseButton):
 		return
 	var mb := event as InputEventMouseButton
+	# средняя кнопка мимо студии (над деталями, деревом) — то же «поставить / применить»;
+	# над студией её щелчок приходит от самой студии (протяжка там двигает модель)
+	if mb.pressed and mb.button_index == MOUSE_BUTTON_MIDDLE and not _view.get_global_rect().has_point(mb.global_position):
+		_middle_click()
+		get_viewport().set_input_as_handled()
+		return
+	# колесо над студией в режиме установки сдвигает по пазам (студия его не берёт)
+	if _place.is_empty():
+		return
 	if not mb.pressed or not _view.get_global_rect().has_point(mb.global_position):
 		return
 	if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
@@ -1591,4 +1632,8 @@ class _SpotCard:
 	func _gui_input(event: InputEvent) -> void:
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			owner_builder._select(key, add)
+			accept_event()
+		elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
+			if owner_builder._place.is_empty() and owner_builder._draft.has(key):
+				owner_builder._remove(key)
 			accept_event()

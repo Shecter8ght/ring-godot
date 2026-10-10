@@ -223,9 +223,12 @@ static func apply(t: Dictionary) -> Array[String]:
 					break
 				need -= k
 				continue
-			if _buy_block(id) != "" or not Profile.buy(id, need, "backpack", false):
+			# вещи с состоянием (магазины) не складываются — покупаются по одной
+			var per := need if ItemDb.stack(id) > 1 else 1
+			if _buy_block(id) != "" or not Profile.buy(id, per, "backpack", false):
 				fails.append(ItemDb.item_name(id))
-			break
+				break
+			need -= per
 	Profile.save()
 	return fails
 
