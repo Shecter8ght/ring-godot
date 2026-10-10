@@ -137,6 +137,7 @@ static func ensure() -> void:
 	else:
 		_starter()
 		save()
+	grow_unlocked()
 
 
 ## Первый запуск: немного денег и базовый набор в тайнике.
@@ -288,6 +289,8 @@ static func raid_kit_gaps() -> Array[String]:
 
 ## Ступень доверия Михалыча: очки + 1, до Balance.TRUST_STEPS.max.
 static func trust_step() -> int:
+	if Settings.unlocked():
+		return int(Balance.TRUST_STEPS.max)
 	return clampi(trust + 1, 1, int(Balance.TRUST_STEPS.max))
 
 
@@ -299,6 +302,22 @@ static func trust_level() -> int:
 		if trust_step() >= int(c.step):
 			lv = maxi(lv, int(c.n))
 	return lv
+
+
+## Чит «открыть всё» (Settings.unlocked): тайник и карман вырастают до предела в самом сохранении
+## и остаются такими после выключения — в добавленных рядах лежат вещи, отнять ряды значит их
+## потерять. Остальные модули чит открывает на лету (Upgrades.level), сохранение их не помнит.
+static func grow_unlocked() -> void:
+	if not _loaded or not Settings.unlocked():
+		return
+	var grown := false
+	for id: String in ["stash", "pocket"]:
+		var top := Upgrades.max_level(id)
+		if int(modules.get(id, 0)) < top:
+			modules[id] = top
+			grown = true
+	if grown:
+		save()
 
 
 ## Сетка тайника — растёт с модулем «тайник».
@@ -780,7 +799,8 @@ static func sell_price(entry: Dictionary) -> int:
 ## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack"); wear — одну вещь со слотом
 ## снаряжения (оружие, броня, рюкзак…) сразу надеть, если слот свободен.
 static func buy(id: String, n: int, to: String = "stash", wear: bool = true) -> bool:
-	if bool(ItemDb.item(id).get("raid_only", false)):
+	# то, что бывает только в рейде (головка станка гравировки), продаётся лишь с читом «всё у Михалыча»
+	if bool(ItemDb.item(id).get("raid_only", false)) and not Settings.shop_all():
 		return false
 	var cost := buy_price(id) * n
 	var dst := list_of(to)

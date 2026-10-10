@@ -4,7 +4,7 @@ extends RefCounted
 
 
 static func block() -> String:
-	if Quests.flag("engraver_installed") != true:
+	if Upgrades.level("engraver") < 1:
 		return "Восстановите станок по заданию Михалыча «Своя метка»."
 	if int(Quests.campaign_modules().get("generator", 0)) < 1:
 		return "Нужно питание: восстановите генератор убежища."

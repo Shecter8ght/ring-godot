@@ -439,6 +439,17 @@ func _build_settings(h: HBoxContainer) -> void:
 	god.tooltip_text = "Попадания видно, но здоровье не убывает; лёжа — сразу встаёшь. В коопе остальным пишется в чат."
 	god.toggled.connect(func(on: bool) -> void: Settings.set_god(on))
 	grid.add_child(god)
+	grid.add_child(_label("Чит: открыть всё"))
+	var unlock := CheckButton.new()
+	unlock.focus_mode = Control.FOCUS_NONE
+	unlock.button_pressed = Settings.unlock_all
+	unlock.tooltip_text = "Для плейтеста: у Михалыча весь товар без доверия, верстак и все модули убежища на максимуме, станок гравировки стоит и запитан. Денег не даёт — они в «Админ: деньги». Чит хоста действует на всю группу. Выключил — прогресс сохранения прежний; только тайник и карман остаются большими, чтобы вещи не пропали."
+	unlock.toggled.connect(func(on: bool) -> void: Settings.set_unlock_all(on))
+	# консоль (unlock) переключила — кнопка показывает то же
+	Settings.changed.connect(func() -> void:
+		if is_instance_valid(unlock):
+			unlock.set_pressed_no_signal(Settings.unlock_all))
+	grid.add_child(unlock)
 	# отладка для аудита уровня: полёт, скорость, переместиться к точке карты
 	grid.add_child(_label("Отладка: полёт"))
 	var fly := CheckButton.new()

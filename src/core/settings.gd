@@ -55,6 +55,11 @@ const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_d
 var god: bool = false
 ## Админский ассортимент Михалыча: показывает все стволы и не проверяет доверие для оружия.
 var all_weapons: bool = false
+## Чит «открыть всё» для плейтеста (Настройки — и из главного меню; консоль: unlock): у Михалыча весь
+## товар без доверия, все модули убежища на максимуме (верстак, генератор, рация, станок гравировки).
+## Ничего не строит и не тратит: выключил — прогресс сохранения прежний. Исключение — тайник и
+## карман, они вырастают в самом сохранении (Profile.grow_unlocked). В коопе чит хоста — на всех.
+var unlock_all: bool = false
 ## Отладка для аудита уровней (Esc → Настройки): полёт сквозь всё и множитель скорости
 ## (ходьба и полёт). Не сохраняются — после перезапуска выключены.
 var cheat_fly: bool = false
@@ -112,6 +117,7 @@ func _load() -> void:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
 	all_weapons = bool(cfg.get_value("cheats", "all_weapons", false))
+	unlock_all = bool(cfg.get_value("cheats", "unlock_all", false))
 	raid_time = String(cfg.get_value("raid", "time", ""))
 	raid_weather = String(cfg.get_value("raid", "weather", ""))
 	raid_hour = float(cfg.get_value("raid", "hour", -1.0))
@@ -143,6 +149,7 @@ func save() -> void:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
 	cfg.set_value("cheats", "all_weapons", all_weapons)
+	cfg.set_value("cheats", "unlock_all", unlock_all)
 	cfg.set_value("raid", "time", raid_time)
 	cfg.set_value("raid", "weather", raid_weather)
 	cfg.set_value("raid", "hour", raid_hour)
@@ -350,6 +357,26 @@ func set_all_weapons(on: bool) -> void:
 	all_weapons = on
 	save()
 	changed.emit()
+
+
+## «Открыть всё» вкл/выкл: сохраняется, группа узнаёт сразу (снимок кампании), станции убежища
+## перечитывают модули.
+func set_unlock_all(on: bool) -> void:
+	unlock_all = on
+	save()
+	Profile.grow_unlocked()
+	Quests.modules_changed()
+	changed.emit()
+
+
+## Открыто ли всё: свой чит или чит хоста собрания.
+func unlocked() -> bool:
+	return unlock_all or Quests.host_unlock()
+
+
+## Михалыч продаёт вообще всё: админский ассортимент или «открыть всё».
+func shop_all() -> bool:
+	return all_weapons or unlocked()
 
 
 func set_volume(bus: String, v: float) -> void:

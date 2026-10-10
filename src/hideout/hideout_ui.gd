@@ -186,7 +186,7 @@ func _process(delta: float) -> void:
 	sig += "|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab]
 	sig += "|" + str(Profile.loadout_templates) + "|" + str(_sell_sel) + "|" + str(_sell_picks)
 	# собрание: кто в сети и где — окно выхода обновляется
-	sig += "|%s|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene), str(Net.host_conditions)]
+	sig += "|%s|%s|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene), str(Net.host_conditions), Settings.shop_all()]
 	if sig == _sig:
 		return
 	_sig = sig
@@ -627,7 +627,7 @@ func _split(name: String, idx: int) -> void:
 
 func _build_trader() -> void:
 	_title.text = "%s   ·   у тебя %s ₽   ·   доверие: ступень %d / %d%s" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust_step(), int(Balance.TRUST_STEPS.max),
-		"   ·   АДМИН: всё у Михалыча" if Settings.all_weapons else ""]
+		"   ·   АДМИН: всё у Михалыча" if Settings.shop_all() else ""]
 	# вкладки слева: купить, обвес оружия, продать, задания (разговор — отметка)
 	var tabs := VBoxContainer.new()
 	tabs.custom_minimum_size.x = 170
@@ -798,7 +798,7 @@ const STOCK_ORDER := ["weapon", "mag", "ammo", "mod", "armor", "plate", "backpac
 ## (квестовые), без ступеней доверия.
 func _trader_stock() -> Array:
 	var stock: Array = TraderStock.stock().duplicate()
-	if Settings.all_weapons:
+	if Settings.shop_all():
 		for id in ItemDb.all_ids():
 			var cat := String(ItemDb.item(String(id)).get("cat", "misc"))
 			if not id in stock and not cat in ["key", "intel"] and ItemDb.value(String(id)) > 0:
@@ -816,7 +816,7 @@ func _trader_stock() -> Array:
 
 
 func _trust_blocked(id: String, level: int) -> bool:
-	if Settings.all_weapons:
+	if Settings.shop_all():
 		return false
 	return Profile.trust_level() < level and not id in Profile.unlocked_stock
 
@@ -1257,7 +1257,8 @@ func _talk(qid: String, did: String) -> void:
 # ---------------------------------------------------------------- модули убежища
 
 func _build_upgrades() -> void:
-	_title.text = "Модули убежища   ·   %s ₽   ·   доверие Михалыча: ступень %d (каталог %d)" % [InventoryUI.money(Profile.money), Profile.trust_step(), Profile.trust_level()]
+	_title.text = "Модули убежища   ·   %s ₽   ·   доверие Михалыча: ступень %d (каталог %d)%s" % [InventoryUI.money(Profile.money), Profile.trust_step(), Profile.trust_level(),
+		"   ·   ЧИТ: всё открыто" if Settings.unlocked() else ""]
 	var col := _column("Что построено и что дальше", 1.0)
 	for m in Upgrades.all():
 		var id := String(m.id)

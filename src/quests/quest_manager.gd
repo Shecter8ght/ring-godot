@@ -61,12 +61,19 @@ var _cargo_claims: Dictionary = {}
 
 
 func campaign_modules() -> Dictionary:
+	if Settings.unlocked():
+		return Upgrades.max_levels()
 	return _remote.get("modules", {}) if is_client() else Profile.modules
 
 
 func modules_changed() -> void:
 	_broadcast()
 	changed.emit()
+
+
+## Гость: хост включил чит «открыть всё» — он действует на всю группу (Settings.unlocked).
+func host_unlock() -> bool:
+	return is_client() and bool(_remote.get("unlock_all", false))
 
 
 func cargo_claimed(sid: String) -> bool:
@@ -548,7 +555,8 @@ func _commit_host() -> void:
 func _snapshot() -> Dictionary:
 	return {"campaign": Profile.own_campaign(), "quests": _quests(), "flags": _flags(), "raid": not _live.is_empty(),
 		"delivered": _delivered, "carry": _carry, "npc_pos": _npc_pos, "trust_level": Profile.trust_level(),
-		"contracts": Contracts.board(), "modules": Profile.modules, "cargo_claims": _cargo_claims}
+		"contracts": Contracts.board(), "modules": Profile.modules, "cargo_claims": _cargo_claims,
+		"unlock_all": Settings.unlock_all}
 
 
 func _broadcast() -> void:
@@ -559,6 +567,7 @@ func _broadcast() -> void:
 @rpc("authority", "call_remote", "reliable")
 func _rpc_state(snap: Dictionary) -> void:
 	_remote = snap.duplicate(true)
+	Profile.grow_unlocked()
 	# заказы хоста — квесты-экземпляры и у гостя (награда за них — по их описанию)
 	Contracts.on_snapshot(snap.get("contracts", []))
 	# вне рейда хоста или группа уже что-то вынесла — это засчитано: в свой профиль

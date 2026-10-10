@@ -148,6 +148,7 @@ tools/godot.cmd --headless res://tools/coop_quest_host.tscn  # + coop_quest_clie
 tools/godot.cmd --headless res://tools/templates_test.tscn  # шаблоны снаряжения: сохранить, собрать из тайника, докупить, причины «нет»
 tools/godot.cmd --headless res://tools/vehicle_test.tscn   # транспорт: одна коллизия на модель, навмеш под машинами вырезан (и под автобусом, и повёрнутым)
 tools/godot.cmd --headless res://tools/god_test.tscn       # чит «бессмертие»: голова, граната, очередь — жив; лёжа — встал; выключил — урон проходит
+tools/godot.cmd --headless res://tools/unlock_test.tscn    # чит «открыть всё» (Настройки / консоль unlock): каталоги, модули, верстак, станок гравировки; выключил — прогресс прежний
 tools/godot.cmd --headless res://tools/stress_test.tscn    # стресс: пули рядом, спад в тишине, пороги, адреналин, обезболивающее
 tools/godot.cmd res://tools/breaker_test.tscn              # главный рубильник света ТЦ: щитовая, свет погас → поднять, генератор; снимок breaker.png
 tools/godot.cmd res://tools/vault_test.tscn                # перелезание (игрок и мародёр по связке навигации), бросок на землю; снимки vault_*

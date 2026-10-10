@@ -26,6 +26,9 @@ static func find(id: String) -> Dictionary:
 
 
 static func level(id: String) -> int:
+	# чит «открыть всё»: модуль считается построенным до предела, сохранение не меняется
+	if Settings.unlocked():
+		return max_level(id)
 	var flag: String = String(find(id).get("world_flag", ""))
 	if flag != "":
 		return 1 if Quests.flag(flag) == true else 0
@@ -34,6 +37,14 @@ static func level(id: String) -> int:
 
 static func max_level(id: String) -> int:
 	return (find(id).get("levels", []) as Array).size()
+
+
+## Все модули на пределе: id -> уровень (чит «открыть всё»).
+static func max_levels() -> Dictionary:
+	var out: Dictionary = {}
+	for m in all():
+		out[String(m.id)] = max_level(String(m.id))
+	return out
 
 
 ## Что нужно для следующего уровня ({} — уже максимум).

@@ -11,11 +11,11 @@ func _ready() -> void:
 
 
 func _refresh() -> void:
-	var installed: bool = Quests.flag("engraver_installed") == true
+	var installed: bool = Upgrades.level("engraver") > 0
 	visible = installed
 	for node: Node in find_children("*", "CollisionObject3D", true, false):
 		(node as CollisionObject3D).collision_layer = 1 if installed else 0
 
 
 func can_use() -> bool:
-	return Quests.flag("engraver_installed") == true
+	return Upgrades.level("engraver") > 0
