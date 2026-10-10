@@ -517,15 +517,20 @@ static func _fix_sight(e: Dictionary) -> void:
 # ---------------------------------------------------------------- прицелы
 
 ## Ключ основного прицела: на верхней планке или над ней на проставке/удлинителе (без крена).
-## "" — основного прицела нет.
+## На верхней планке прицела нет — основным становится прицел на планке над цевьём (дальней): через
+## него и целятся, оптика работает с кратностью (раньше он считался «угловым» — без увеличения, с
+## красной линзой-заглушкой). "" — основного прицела нет.
 static func primary_key(mods: Dictionary) -> String:
-	var best: String = ""
-	for k: String in sorted_keys(mods):
-		if top_mount(k) != "optic_primary" or not WeaponDb.is_optic(WeaponDb.mod_id(mods[k])):
-			continue
-		if _straight(mods, k) and (best == "" or depth(k) < depth(best)):
-			best = k
-	return best
+	for top: String in ["optic_primary", "top_front"]:
+		var best: String = ""
+		for k: String in sorted_keys(mods):
+			if top_mount(k) != top or not WeaponDb.is_optic(WeaponDb.mod_id(mods[k])):
+				continue
+			if _straight(mods, k) and (best == "" or depth(k) < depth(best)):
+				best = k
+		if best != "":
+			return best
+	return ""
 
 
 ## Вся цепочка до точки оружия — без крена (проставки, удлинители), а не угловые кронштейны.
@@ -537,7 +542,7 @@ static func _straight(mods: Dictionary, key: String) -> bool:
 			return false
 		k = parent_key(k)
 	# второй прицел прямо на планке (optic_primary#2) — дополнительный, не основной
-	return depth(key) > 0 or key == "optic_primary"
+	return depth(key) > 0 or key in ["optic_primary", "top_front"]
 
 
 ## Прицелы экземпляра по порядку: "primary" (основной, встроенная оптика или прицела нет вовсе)

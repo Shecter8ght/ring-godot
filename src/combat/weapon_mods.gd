@@ -160,7 +160,10 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 		for node: Node in part.find_children("*", "MeshInstance3D", true, false):
 			var mesh: MeshInstance3D = node as MeshInstance3D
 			var material: Material = mesh.get_active_material(0) if mesh.mesh and mesh.mesh.get_surface_count() > 0 else null
-			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and optic:
+			# светящаяся метка прицела (её красит ПНВ и ведёт люфт) — тёплое свечение; голубоватое стекло
+			# линзы оптики к меткам не относится (иначе линза становилась красным диском)
+			var glow: Color = (material as StandardMaterial3D).emission if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled else Color.BLACK
+			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and optic and glow.r >= glow.b:
 				mesh.set_meta("reticle_dot", true)
 				mesh.set_meta("mount", key)
 	update_condition(root, mods)
@@ -705,7 +708,9 @@ static func _scope4x(root: Node3D, m: Dictionary, len_k: float = 1.0, obj_k: flo
 	var oz := zc - 0.0615
 	root.set_meta("ocular", Vector3(0, cy, oz))
 	root.set_meta("ocular_r", 0.0148)
-	root.set_meta("ads_z", 0.075 - oz)
+	# прицел далеко на цевье: оружие к лицу ближе Balance.SCOPE_ADS_Z_MIN не подтягивается (приклад не
+	# проходит сквозь голову) — окуляр остаётся дальше от глаза, картинка в нём меньше, как и в жизни
+	root.set_meta("ads_z", maxf(0.075 - oz, Balance.SCOPE_ADS_Z_MIN))
 
 
 # ---------------------------------------------------------------- дульные

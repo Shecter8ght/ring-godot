@@ -123,6 +123,7 @@ tools/godot.cmd --windowed --resolution 1280x720 res://tools/build_shots.tscn # 
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/thumb_shots.tscn # миниатюры экземпляров в сетке рюкзака (сборка, вынутый магазин, магазин на 60); docs/screens/thumb_*.png
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/builder_shots.tscn # конструктор оружия: обзор, точка, кронштейн по пазам (можно/занято), прицел на нём, из глаза, торговец, применено; docs/screens/builder_*.png
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_adapters.py -- [id …] # переходники (кронштейн 45°, проставка, удлинитель, поворотный) → assets/models/attachments/adapters
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/scope_far_shots.tscn # сильная оптика на планке над цевьём: в прицеле картинка, линза не красная; снимки scope_far_*
 tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика против солнца (блики, аберрация) и открытые прицельные из глаза
 tools/build_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.7.2 + RING.pck, шаблоны не нужны)
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —

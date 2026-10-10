@@ -1011,7 +1011,8 @@ func _update_scope(zoom: float, illum: bool = false) -> void:
 	var half_main := atan(r / dist)
 	var main_px_per_rad := get_viewport().get_visible_rect().size.y * 0.5 / tan(deg_to_rad(_ads_cam.fov) * 0.5)
 	var half_scope := atan(tan(half_main) / maxf(1.0, zoom))
-	_scope_cam.fov = rad_to_deg(half_scope * 2.0)
+	# окуляр далеко от глаза (прицел на цевье) — угол крошечный: камере меньше 1° нельзя
+	_scope_cam.fov = clampf(rad_to_deg(half_scope * 2.0), 1.0, 179.0)
 	var c := _ads_cam.unproject_position(ocular)
 	var rad_px := tan(half_main) * main_px_per_rad
 	_scope_view.position = c - Vector2(rad_px, rad_px)
