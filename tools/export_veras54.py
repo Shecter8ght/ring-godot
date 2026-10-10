@@ -17,7 +17,8 @@
               (вблизи); пишется и вместе с world.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips]
-  grips — добавить во вьюмодель наборы клипов под рукоятки ВАРН V1 / V2 (после правки поз владельцем)
+  grips — добавить во вьюмодель наборы клипов под рукоятки ВАРН V1 / V2 (после правки поз владельцем);
+          grips=varn_v2 — только названные
 → assets/models/weapons/veras54/veras54_viewmodel.glb, veras54.glb, veras54.json (проверки)
 """
 from __future__ import annotations
@@ -39,7 +40,13 @@ BASE = SRC / "VERAS54_Reload_Full_v05.blend"
 SRC2 = SRC.parent / "Клипы v02 (Claude)"
 # Позы кистей на рукоятках владелец правит сам (2026-10-10: «в игру пока не вноси»): наборы под
 # рукоятки запекаются только с аргументом grips; без него в игре левая держит цевьё позади рукоятки.
-GRIPS = ("varn_v1", "varn_v2") if "grips" in sys.argv else ()
+# grips=varn_v2 — только названные (2026-10-10: владелец поправил позу ВАРН V2; ВАРН V1 ждёт его правки).
+GRIPS: tuple = ()
+for _arg in sys.argv:
+    if _arg == "grips":
+        GRIPS = ("varn_v1", "varn_v2")
+    elif _arg.startswith("grips="):
+        GRIPS = tuple(g for g in _arg.split("=", 1)[1].split(",") if g in ("varn_v1", "varn_v2"))
 # клип в игре: (суффикс действий build_clips.py, последний кадр, файл с действиями; None — база сцены)
 CLIPS = {"reload_tactical": ("Tactical", 79, SRC / "VERAS54_Reload_Tactical_v04.blend"),
          "mag_check": ("Check", 104, SRC / "VERAS54_Mag_Check_v02.blend"),
