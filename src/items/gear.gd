@@ -15,8 +15,7 @@ static func normalize_chamber(entry: Dictionary) -> Dictionary:
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 	if not e.has("chamber"):
 		e["chamber"] = 1 if int(mag.get("rounds", 0)) > 0 else 0
-		mag["rounds"] = maxi(0, int(mag.get("rounds", 0)) - int(e.chamber))
-		e["chamber_ammo"] = String(mag.get("ammo", "")) if int(e.chamber) > 0 else ""
+		e["chamber_ammo"] = mag_pop(mag) if int(e.chamber) > 0 else ""
 		e["mag"] = mag
 	return e
 
@@ -33,10 +32,9 @@ static func chamber_round(entry: Dictionary) -> void:
 		return
 	var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
 	if int(entry.get("chamber", 0)) <= 0 and int(mag.get("rounds", 0)) > 0:
-		mag["rounds"] = int(mag.rounds) - 1
+		entry["chamber_ammo"] = mag_pop(mag)
 		entry["mag"] = mag
 		entry["chamber"] = 1
-		entry["chamber_ammo"] = String(mag.get("ammo", ""))
 
 
 static func strip(entry: Dictionary, part: String) -> Array:
@@ -63,14 +61,17 @@ static func strip(entry: Dictionary, part: String) -> Array:
 			return [entry, {}]
 		var w := WeaponDb.weapon(String(e.id))
 		if w.has("internal_mag") or String(mag.get("id", "")) == "":
-			# встроенный магазин: вынимаются только патроны
-			if int(mag.get("rounds", 0)) <= 0:
+			# встроенный магазин: вынимаются только патроны (вперемешку — верхние одного типа, остальные следом)
+			var layers: Array = mag_layers(mag)
+			if layers.is_empty():
 				return [entry, {}]
-			var ammo := {"id": String(mag.ammo), "n": int(mag.rounds)}
-			mag.rounds = 0
+			var top: Array = layers.pop_back()
+			var ammo := {"id": String(top[0]), "n": int(top[1])}
+			mag_apply(mag, layers)
+			e["mag"] = mag
 			_bump(e)
 			return [e, ammo]
-		var out := WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), int(mag.get("rounds", 0)))
+		var out := mag_item(mag)
 		e["mag"] = {"id": "", "ammo": String(mag.get("ammo", "")), "rounds": 0}
 		_bump(e)
 		return [e, out]
@@ -127,7 +128,7 @@ static func fit(entry: Dictionary, item: Dictionary, hint: String = "") -> Array
 			return [entry, {}, "магазин не подходит"]
 		var r := strip(e, "mag")
 		e = r[0]
-		e["mag"] = {"id": iid, "ammo": String(item.get("ammo", "")), "rounds": int(item.get("rounds", 0))}
+		e["mag"] = mag_record(item)
 		_bump(e)
 		return [e, r[1], ""]
 	return [entry, {}, "сюда не ставится"]
@@ -162,7 +163,8 @@ static func _bump(e: Dictionary) -> void:
 
 ## Перезарядка (хост): weapon — запись оружия (уже с состоянием владельца), list — рюкзак (меняется).
 ## Отстёгиваемый магазин: самый полный подходящий из рюкзака (тем же патроном — лучше), старый —
-## в рюкзак с остатком; снаряжённых нет — досыпать россыпь в текущий. Встроенный — россыпью.
+## в рюкзак с остатком; снаряжённых нет — досыпать россыпь в текущий (того же типа нет — любым своего
+## калибра, поверх: в магазине можно мешать). Магазин вынут — вставляется и пустой. Встроенный — россыпью.
 ## Возвращает [оружие, выпавшее (старый магазин без места), вид: "swap" / "topup" / ""].
 static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Array:
 	var e: Dictionary = normalize_chamber(weapon)
@@ -171,10 +173,11 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Ar
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 	if not w.has("internal_mag"):
 		var best := -1
-		var best_n := 0
+		var best_n := -1
+		var mag_out: bool = String(mag.get("id", "")) == ""
 		for i in range(list.size()):
 			var it: Dictionary = list[i]
-			if not WeaponDb.mag_fits(wid, String(it.id)) or int(it.get("rounds", 0)) <= 0:
+			if not it.has("rounds") or not WeaponDb.mag_fits(wid, String(it.id)) or (int(it.get("rounds", 0)) <= 0 and not mag_out):
 				continue
 			var n := int(it.rounds) + (1000 if String(it.get("ammo", "")) == String(mag.get("ammo", "")) else 0)
 			if n > best_n:
@@ -184,8 +187,8 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Ar
 			var fresh: Dictionary = ItemDb.remove_at(list, best, 1)
 			var old := {}
 			if String(mag.get("id", "")) != "":
-				old = WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), int(mag.get("rounds", 0)))
-			e["mag"] = {"id": String(fresh.id), "ammo": String(fresh.get("ammo", "")), "rounds": int(fresh.get("rounds", 0))}
+				old = mag_item(mag)
+			e["mag"] = mag_record(fresh)
 			chamber_round(e)
 			_bump(e)
 			var spill := {}
@@ -194,16 +197,16 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Ar
 			return [e, spill, "swap"]
 		if String(mag.get("id", "")) == "":
 			return [weapon, {}, ""]
-	# россыпью: тем же патроном; магазин пуст — любым своего калибра
+	# россыпью: тем же патроном, что сверху; его нет (или магазин пуст) — любым своего калибра
 	var cap := WeaponDb.capacity(e)
 	var need := cap - int(mag.get("rounds", 0))
 	if need <= 0:
 		return [weapon, {}, ""]
-	var ammo_id := String(mag.get("ammo", ""))
+	var ammo_id := mag_top(mag)
 	var have := _count(list, ammo_id)
-	if have <= 0 and int(mag.get("rounds", 0)) == 0:
+	if have <= 0:
 		for it in list:
-			if WeaponDb.ammo_fits(wid, String(it.id)):
+			if WeaponDb.ammo_fits(wid, String(it.id)) and not it.has("rounds"):
 				ammo_id = String(it.id)
 				have = _count(list, ammo_id)
 				break
@@ -211,8 +214,7 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Ar
 		return [weapon, {}, ""]
 	var take := mini(need, have)
 	_remove(list, ammo_id, take)
-	mag.ammo = ammo_id
-	mag.rounds = int(mag.get("rounds", 0)) + take
+	mag_push(mag, ammo_id, take)
 	e["mag"] = mag
 	chamber_round(e)
 	_bump(e)
@@ -225,15 +227,16 @@ static func reload_kind(weapon: Dictionary, list: Array) -> String:
 	var w := WeaponDb.weapon(wid)
 	var mag: Dictionary = weapon.get("mag", {}) if weapon.get("mag") is Dictionary else {}
 	if not w.has("internal_mag"):
+		var mag_out: bool = String(mag.get("id", "")) == ""
 		for it in list:
-			if WeaponDb.mag_fits(wid, String(it.id)) and int(it.get("rounds", 0)) > 0:
+			if it.has("rounds") and WeaponDb.mag_fits(wid, String(it.id)) and (int(it.get("rounds", 0)) > 0 or mag_out):
 				return "swap"
-		if String(mag.get("id", "")) == "":
+		if mag_out:
 			return ""
 	if int(mag.get("rounds", 0)) >= WeaponDb.capacity(weapon):
 		return ""
 	for it in list:
-		if WeaponDb.ammo_fits(wid, String(it.id)) and (int(mag.get("rounds", 0)) == 0 or String(it.id) == String(mag.get("ammo", ""))):
+		if WeaponDb.ammo_fits(wid, String(it.id)) and not it.has("rounds"):
 			return "topup"
 	return ""
 
@@ -268,10 +271,131 @@ static func load_mags(list: Array, extra: Array = []) -> int:
 		if take <= 0:
 			continue
 		_remove(list, ammo_id, take)
-		mag["ammo"] = ammo_id
-		mag["rounds"] = int(mag.get("rounds", 0)) + take
+		mag_push(mag, ammo_id, take)
 		used += take
 	return used
+
+
+# ---------------------------------------------------------------- патроны в магазине вперемешку
+
+## Слои патронов магазина снизу вверх: [[id патрона, сколько], …] — ровно на rounds патронов.
+## Один тип — поля "mix" нет, тип — "ammo". Вперемешку — "mix" хранит слои, "ammo" — верхний патрон
+## (он уходит в ствол первым). Выстрел уменьшает только rounds: лишнее сверху отбрасывается здесь.
+## mag — предмет-магазин или запись магазина в оружии (поля одни и те же).
+static func mag_layers(mag: Dictionary) -> Array:
+	var out: Array = []
+	var left: int = int(mag.get("rounds", 0))
+	if left <= 0:
+		return out
+	var mix: Variant = mag.get("mix")
+	if mix is Array:
+		for layer: Variant in (mix as Array):
+			if left <= 0:
+				break
+			var n: int = mini(int(layer[1]), left)
+			if n <= 0:
+				continue
+			_layer_add(out, String(layer[0]), n)
+			left -= n
+	if left > 0:
+		# слоёв нет (один тип) или меньше, чем патронов: остальное — типом "ammo"
+		_layer_add(out, String(mag.get("ammo", "")), left)
+	return out
+
+
+static func _layer_add(layers: Array, ammo_id: String, n: int) -> void:
+	if not layers.is_empty() and String(layers[-1][0]) == ammo_id:
+		layers[-1][1] = int(layers[-1][1]) + n
+	else:
+		layers.append([ammo_id, n])
+
+
+## Записать слои в магазин: счёт, верхний тип, "mix" — только если типов больше одного.
+static func mag_apply(mag: Dictionary, layers: Array) -> void:
+	var total: int = 0
+	for layer: Variant in layers:
+		total += int(layer[1])
+	mag["rounds"] = total
+	if not layers.is_empty():
+		mag["ammo"] = String(layers[-1][0])
+	if layers.size() > 1:
+		mag["mix"] = layers
+	else:
+		mag.erase("mix")
+
+
+## Тип верхнего патрона (следующий в ствол); пустой магазин — последний тип, что в нём был.
+static func mag_top(mag: Dictionary) -> String:
+	var layers: Array = mag_layers(mag)
+	return String(layers[-1][0]) if not layers.is_empty() else String(mag.get("ammo", ""))
+
+
+## Дослать сверху n патронов типа ammo_id.
+static func mag_push(mag: Dictionary, ammo_id: String, n: int = 1) -> void:
+	var layers: Array = mag_layers(mag)
+	_layer_add(layers, ammo_id, n)
+	mag_apply(mag, layers)
+
+
+## Снять верхний патрон: его тип ("" — магазин пуст).
+static func mag_pop(mag: Dictionary) -> String:
+	var layers: Array = mag_layers(mag)
+	if layers.is_empty():
+		return ""
+	var top: String = String(layers[-1][0])
+	layers[-1][1] = int(layers[-1][1]) - 1
+	if int(layers[-1][1]) <= 0:
+		layers.pop_back()
+	mag_apply(mag, layers)
+	if layers.is_empty():
+		mag["ammo"] = top
+	return top
+
+
+## Типов патронов в магазине больше одного.
+static func mag_mixed(mag: Dictionary) -> bool:
+	return mag_layers(mag).size() > 1
+
+
+## Чем снаряжён, сверху вниз: «БП ×10, ПС ×20» ("" — пуст). Один тип — просто его имя.
+static func mag_text(mag: Dictionary) -> String:
+	var layers: Array = mag_layers(mag)
+	if layers.is_empty():
+		return ""
+	if layers.size() == 1:
+		return ItemDb.item_name(String(layers[0][0]))
+	var parts: Array[String] = []
+	for i: int in range(layers.size() - 1, -1, -1):
+		var short: String = String(ItemDb.item(String(layers[i][0])).get("short", ""))
+		parts.append("%s ×%d" % [short if short != "" else ItemDb.item_name(String(layers[i][0])), int(layers[i][1])])
+	return ", ".join(parts)
+
+
+## Какие типы лежат вперемешку, сверху вниз, без счёта (ответ проверки магазина): «сверху БП, ниже ПС».
+## Один тип — "".
+static func mag_types_text(mag: Dictionary) -> String:
+	var layers: Array = mag_layers(mag)
+	if layers.size() < 2:
+		return ""
+	var names: Array[String] = []
+	for i: int in range(layers.size() - 1, -1, -1):
+		var short: String = String(ItemDb.item(String(layers[i][0])).get("short", ""))
+		names.append(short if short != "" else ItemDb.item_name(String(layers[i][0])))
+	return "сверху %s, ниже %s" % [names[0], ", ".join(names.slice(1))]
+
+
+## Предмет-магазин (в рюкзак) из записи магазина оружия — с тем же содержимым.
+static func mag_item(mag: Dictionary) -> Dictionary:
+	var out: Dictionary = WeaponDb.make_mag(String(mag.get("id", "")), String(mag.get("ammo", "")), int(mag.get("rounds", 0)))
+	mag_apply(out, mag_layers(mag))
+	return out
+
+
+## Запись магазина в оружии из предмета-магазина.
+static func mag_record(item: Dictionary) -> Dictionary:
+	var out: Dictionary = {"id": WeaponDb.canonical(String(item.get("id", ""))), "ammo": String(item.get("ammo", "")), "rounds": int(item.get("rounds", 0))}
+	mag_apply(out, mag_layers(item))
+	return out
 
 
 ## Точно считает патроны только у пистолетов и болтовок (мало патронов, видно в окно) — у

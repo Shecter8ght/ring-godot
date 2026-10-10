@@ -79,11 +79,42 @@ func _ready() -> void:
 	Input.action_release("reload")
 	await get_tree().create_timer(0.2).timeout
 	_check("отпустили — магазин убран, перезарядки нет", not _me.mag_inspect and _me.reload_timer <= 0.0 and _me.ammo == 17)
+
+	# --- магазин вынут: R (по нажатию) вставляет новый; двойное R и удержание — ничего особенного
+	var insert_sec: float = float(WeaponDb.weapon(ID).stats.reload_empty) * float(Balance.RELOAD_INSERT.time_k)
+	_arm(-1, [30])
+	await get_tree().create_timer(0.4).timeout
+	_check("магазин вынут: в руках оружие без магазина", _me.mag_out() and _me.ammo == 0, _me.weapon_mag)
+	Input.action_press("reload")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_check("без магазина: R сразу вставляет новый (не ждёт отпускания)", _me.reload_timer > 0.0 and _me._reload_insert, "%.2f" % _me.reload_timer)
+	_check("без магазина: вставка короче полной перезарядки", absf(_me.reload_timer + _me._reload_age - insert_sec) < 0.25, "%.2f при %.2f" % [_me.reload_timer, insert_sec])
+	Input.action_release("reload")
+	await get_tree().physics_frame
+	await _tap()
+	_check("без магазина: двойное R — быстрой нет", not _me._reload_fast and _me.reload_timer > 0.0)
+	await _until_done()
+	_check("без магазина: вставлен полный магазин", _me.ammo == 30 and not _me.mag_out() and _dropped().is_empty(), "%d %s" % [_me.ammo, _me.weapon_mag])
+	_arm(-1, [])
+	await get_tree().create_timer(0.4).timeout
+	_me.ammo_check_text = ""
+	Input.action_press("reload")
+	await get_tree().create_timer(float(Balance.AMMO_CHECK.hold_sec) + 0.4).timeout
+	_check("без магазина: держать R — ни проверки, ни перезарядки", not _me.mag_inspect and _me.ammo_check_text == "" and _me.reload_timer <= 0.0)
+	Input.action_release("reload")
+	await get_tree().physics_frame
+	# только пустой магазин в рюкзаке — вставляется и он (дальше можно досыпать россыпью)
+	_arm(-1, [0])
+	await get_tree().create_timer(0.4).timeout
+	await _tap()
+	await _until_done()
+	_check("без магазина: вставляется и пустой магазин", not _me.mag_out() and _me.ammo == 0 and _mag_rounds().is_empty(), "%s %s" % [_me.weapon_mag, str(_mag_rounds())])
 	print("reload_fast_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails else 0)
 
 
-## Игрок со снаряжением: ВЕРАС с магазином на rounds патронов, в рюкзаке — магазины spare.
+## Игрок со снаряжением: ВЕРАС с магазином на rounds патронов (−1 — магазин вынут), в рюкзаке — магазины spare.
 func _arm(rounds: int, spare: Array) -> void:
 	for n: Node in get_tree().get_nodes_in_group("loot_containers"):
 		var c := n as LootContainer
@@ -93,6 +124,9 @@ func _arm(rounds: int, spare: Array) -> void:
 	var entry: Dictionary = WeaponDb.bare_weapon(ID, rng, [100, 100])
 	var ammo_id: String = WeaponDb.default_ammo("545x39")
 	entry["mag"] = {"id": WeaponDb.default_mag(ID), "ammo": ammo_id, "rounds": rounds}
+	if rounds < 0:
+		# магазин вынут
+		entry["mag"] = {"id": "", "ammo": ammo_id, "rounds": 0}
 	_me.loadout_mode = true
 	_me.cancel_weapon_action()
 	_me.inventory.equipment = {"primary": entry}

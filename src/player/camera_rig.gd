@@ -40,6 +40,9 @@ var _down_label: Label
 var _muffle: AudioEffectLowPassFilter
 ## ПНВ: зелёная усиленная картинка с зерном.
 var _nvg_fx: ColorRect
+## Новый снимок экрана сразу после ПНВ: эффекты ранения и стресса рисуются следом и тоже читают экран.
+## Без него они получали кадр ДО ПНВ и закрашивали зелёную картинку — в бою фильтр «пропадал».
+var _nvg_copy: BackBufferCopy
 ## Выносливость — тонкая полоса внизу, пока не полная.
 var _stamina_bar: ProgressBar
 var _hitmarker_t: float = 0.0
@@ -242,10 +245,12 @@ uniform float amount = 0.0;
 uniform float pulse = 0.0;
 // стресс: сужается поле зрения (тёмные края в такт сердцу), краски тускнеют — без крови
 uniform float stress = 0.0;
+// в ПНВ картинка и так одноцветная (зелёный экран трубки): серой её не делаем — иначе «фильтр пропадает»
+uniform float nvg = 0.0;
 void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
 	float g = dot(c, vec3(0.299, 0.587, 0.114));
-	c = mix(c, vec3(g), amount * 0.75 + stress * 0.3);
+	c = mix(c, vec3(g), (amount * 0.75 + stress * 0.3) * (1.0 - nvg));
 	vec2 d = SCREEN_UV - 0.5;
 	d.x *= SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
 	float r = length(d);
@@ -336,6 +341,7 @@ func _update_hurt(pl: Player, delta: float) -> void:
 		sm.set_shader_parameter("amount", _hurt_amount)
 		sm.set_shader_parameter("pulse", pulse)
 		sm.set_shader_parameter("stress", _stress_fx)
+		sm.set_shader_parameter("nvg", 1.0 if pl.nvg_on else 0.0)
 	_set_muffle(down)
 	_down_label.visible = down
 	if down:
@@ -462,6 +468,7 @@ func _process(delta: float) -> void:
 			WeaponModels.set_night_vision(on)
 			_reticle_nv(on)
 		_nvg_fx.visible = on
+		_nvg_copy.visible = on
 		_tick_nvg_ir(on)
 	var cam := get_viewport().get_camera_3d()
 	if _glare:
@@ -1131,6 +1138,11 @@ func _build_hud() -> void:
 	_nvg_fx.visible = false
 	layer.add_child(_nvg_fx)
 	layer.move_child(_nvg_fx, 0)
+	_nvg_copy = BackBufferCopy.new()
+	_nvg_copy.copy_mode = BackBufferCopy.COPY_MODE_VIEWPORT
+	_nvg_copy.visible = false
+	layer.add_child(_nvg_copy)
+	layer.move_child(_nvg_copy, 1)
 	_stamina_bar = ProgressBar.new()
 	_stamina_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_stamina_bar.offset_left = -120
@@ -1177,15 +1189,17 @@ func _build_hud() -> void:
 		_hitmarker.add_child(r)
 	# оружие, патроны, гранаты — внизу справа
 	_weapon_label = Label.new()
-	_weapon_label.anchor_left = 1.0
+	# во всю ширину экрана: длинная строка (запасные магазины, прицел, СВЕТ, ЛЦУ) обрезалась слева
+	_weapon_label.anchor_left = 0.0
 	_weapon_label.anchor_right = 1.0
 	_weapon_label.anchor_top = 1.0
 	_weapon_label.anchor_bottom = 1.0
-	_weapon_label.offset_left = -900.0
+	_weapon_label.offset_left = 28.0
 	_weapon_label.offset_right = -28.0
 	# длинная строка растёт влево — не за край экрана
 	_weapon_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	_weapon_label.clip_text = true
+	_weapon_label.clip_text = false
+	_weapon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_weapon_label.offset_top = -64.0
 	_weapon_label.offset_bottom = -24.0
 	_weapon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -1334,6 +1348,8 @@ func _update_hud(pl: Player) -> void:
 		return
 	# сколько в магазине — не видно: держать R — проверить (итог — несколько секунд)
 	var t := "%s   маг. %d %s" % [String(spec.name), int(spec.mag), String(ItemDb.item(String(spec.ammo)).get("short", ""))]
+	if pl.mag_out():
+		t = "%s   без магазина (%s — вставить)" % [String(spec.name), PauseMenu.key_name("reload")]
 	if pl.ammo_check_t > 0.0:
 		t += "   [%s]" % pl.ammo_check_text
 	if pl.loadout_mode:

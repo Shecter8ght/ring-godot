@@ -105,7 +105,7 @@ static func resolve(weapon: Dictionary, draft: Dictionary, draft_mag: Dictionary
 		if w.has("internal_mag"):
 			return _fail(out, "магазин встроенный")
 		if String(old_mag.get("id", "")) != "":
-			returned.append(WeaponDb.make_mag(String(old_mag.id), String(old_mag.get("ammo", "")), int(old_mag.get("rounds", 0))))
+			returned.append(Gear.mag_item(old_mag))
 		if mag_from == "none":
 			entry["mag"] = {"id": "", "ammo": String(old_mag.get("ammo", "")), "rounds": 0}
 		else:
@@ -119,7 +119,7 @@ static func resolve(weapon: Dictionary, draft: Dictionary, draft_mag: Dictionary
 			if used_take.has("%s:%d" % [mag_from, mi]):
 				return _fail(out, "одна вещь — в двух местах")
 			(out.take as Array).append([mag_from, mi])
-			entry["mag"] = {"id": WeaponDb.canonical(String(mag_item.id)), "ammo": String(mag_item.get("ammo", "")), "rounds": int(mag_item.get("rounds", 0))}
+			entry["mag"] = Gear.mag_record(mag_item)
 	# выбранный прицел остался на месте?
 	if not String(entry.get("sight", "primary")) in WeaponStats.sights_of(entry):
 		entry["sight"] = "primary"

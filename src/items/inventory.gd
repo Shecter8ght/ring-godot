@@ -315,6 +315,8 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 		e["_condition_shots"] = requested_shots
 	if not mag.is_empty():
 		mag.rounds = clampi(int(st.get("rounds", mag.get("rounds", 0))), 0, WeaponDb.capacity(e))
+		# патроны вперемешку: отстрелянное снято сверху — тип верхнего и слои по новому счёту
+		Gear.mag_apply(mag, Gear.mag_layers(mag))
 		e["mag"] = mag
 	if int(WeaponDb.weapon(String(e.get("id", ""))).get("chamber_capacity", 0)) > 0:
 		e["chamber"] = clampi(int(st.get("chamber", e.get("chamber", 0))), 0, 1)

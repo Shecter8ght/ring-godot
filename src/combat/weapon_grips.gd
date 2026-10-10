@@ -36,7 +36,10 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 	var under_socket: Dictionary = WeaponMods.socket(model, "underbarrel")
 	if not under_socket.is_empty():
 		under_pos = under_socket.pos
-		if under_key != "":
+		if under_key != "" and WeaponBuild.depth(under_key) > 0:
+			# рукоятка на удлинителе планки: её место — от рамки переходника (ниже планки и дальше по его пазам)
+			under_pos = WeaponMods.point_frame(root, model, mods, under_key).origin
+		elif under_key != "":
 			under_pos.z = WeaponBuild.placed_z(model, mods, under_key)
 	if grip == "grip_offset":
 		# у рукоятки под 45° своей позы контакта нет — пальцы как на вертикальной
@@ -89,15 +92,22 @@ static func vector(value: Array) -> Vector3:
 	return Vector3(float(value[0]), float(value[1]), float(value[2]))
 
 
-## Устройство под цевьём, на котором лежит ладонь: рукоятка, иначе самое заднее ("" — пусто).
+## Устройство под цевьём, на котором лежит ладонь: рукоятка (в том числе на удлинителе нижней
+## планки), иначе самое заднее на самой планке ("" — пусто).
 static func _under_key(mods: Dictionary) -> String:
 	var best: String = ""
+	var deep: String = ""
 	for k: Variant in mods:
 		var key: String = String(k)
-		if WeaponBuild.depth(key) != 0 or WeaponBuild.base_of(key) != "underbarrel":
+		if WeaponBuild.top_mount(key) != "underbarrel":
 			continue
-		if String(WeaponDb.attachment(WeaponDb.mod_id(mods[k])).get("look", "")).begins_with("grip_"):
+		var is_grip: bool = String(WeaponDb.attachment(WeaponDb.mod_id(mods[k])).get("look", "")).begins_with("grip_")
+		if WeaponBuild.depth(key) > 0:
+			if is_grip and (deep == "" or key < deep):
+				deep = key
+			continue
+		if is_grip:
 			return key
 		if best == "" or key < best:
 			best = key
-	return best
+	return deep if deep != "" else best

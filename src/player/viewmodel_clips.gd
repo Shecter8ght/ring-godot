@@ -54,13 +54,21 @@ var _grip_z: float = NAN
 var _grip_w: float = 0.0
 var _arm_skel: Skeleton3D
 var _arm_bones: Array[int] = []
-## Набор клипов под рукоятку ("" — рука на цевье) и на сколько её место на планке отличается от того,
-## где она стояла в Blender (кисть переезжает вместе с ней).
+## Поза левой руки клипа до поправки под место хвата ([положение, поворот] трёх костей): в начале
+## следующего кадра возвращается. У костей рук в клипах есть не все дорожки (положение не записано),
+## и без возврата поправка прибавлялась кадр за кадром — кисть уезжала от оружия.
+var _arm_saved: Array = []
+## Набор клипов под рукоятку ("" — рука на цевье) и на сколько её место отличается от того, где она
+## стояла в Blender (кисть переезжает вместе с ней): вдоль планки по пазам, а на удлинителе — ещё и вниз.
 var _set: String = ""
-var _grip_dz: float = NAN
+var _grip_shift: Vector3 = Vector3.ZERO
 ## Гильза задержки и таймер клипа «устранить задержку» на прошлом кадре.
 var _jam_case: Node3D
 var _last_clear: float = 0.0
+## Вставка магазина в оружие без магазина (Player._reload_insert): клип перезарядки идёт с кадра, где
+## новый магазин уже в руке; пока руки переходят к этой позе, магазин не виден (иначе он «выезжал»
+## бы из шахты в ладонь).
+var _insert_hide: float = 0.0
 ## Старый магазин быстрой перезарядки (корпус и его патроны) и идёт ли сейчас быстрый клип.
 var _spare_parts: Array[Node3D] = []
 var _spare_rounds: Node3D
@@ -100,6 +108,13 @@ func _setup(id: String, mods: Dictionary) -> void:
 	if _weapon_skel:
 		_follower = _weapon_skel.find_bone("MagazineFollower")
 		_bolt = _weapon_skel.find_bone("Bolt")
+	# Стойка идёт по кругу: пока клип играет, он каждый кадр заново ставит кости рук. Иначе, доиграв,
+	# он оставлял позу как есть, и поправка кисти под рукоятку (сдвиг относительно клипа) прибавлялась
+	# кадр за кадром — рука уезжала от оружия.
+	var idle_base: String = String((config.get("clips", {}) as Dictionary).get("idle", "idle"))
+	for clip_name: StringName in _anim.get_animation_list():
+		if String(clip_name) == idle_base or String(clip_name).begins_with(idle_base + "_"):
+			_anim.get_animation(clip_name).loop_mode = Animation.LOOP_LINEAR
 	_follower_src = _anim.get_animation("follower_by_rounds") if _anim.has_animation("follower_by_rounds") else null
 	_bolt_src = _anim.get_animation("bolt_travel") if _anim.has_animation("bolt_travel") else null
 	if _bolt_src:
@@ -117,15 +132,6 @@ func _setup(id: String, mods: Dictionary) -> void:
 			_arm_skel = arm
 			_arm_bones = [arm.find_bone("upper_arm.L"), arm.find_bone("forearm.L"), arm.find_bone("hand.L")]
 	var model_key: String = String(WeaponDb.weapon(id).get("model", ""))
-	_grip_z = _support_z(model_key, mods)
-	var under: String = WeaponGrips._under_key(mods)
-	if under != "":
-		var grip_set: String = String(WeaponDb.attachment(WeaponDb.mod_id(mods[under])).get("viewmodel_set", ""))
-		var idle: String = String((config.get("clips", {}) as Dictionary).get("idle", "idle"))
-		if grip_set != "" and _anim.has_animation(idle + "_" + grip_set):
-			_set = grip_set
-			var base_z: float = float((WeaponMods.socket(model_key, WeaponBuild.base_of(under)).get("pos", Vector3.ZERO) as Vector3).z)
-			_grip_dz = WeaponBuild.placed_z(model_key, mods, under) - base_z
 	_jam_case = model.find_child("Part_JamCase*", true, false) as Node3D
 	if _jam_case:
 		_jam_case.visible = false
@@ -135,6 +141,15 @@ func _setup(id: String, mods: Dictionary) -> void:
 	_spare_rounds = model.find_child("SpareRounds*", true, false) as Node3D
 	if _spare_rounds:
 		_spare_rounds.visible = false
+	# выброшенный магазин и вылетающая гильза — не объём оружия: в быстрой перезарядке магазин падает
+	# на землю, и ствол «складывался» бы вслед за ним (WeaponClearance)
+	var loose: Array[Node3D] = _spare_parts.duplicate()
+	if _spare_rounds: loose.append(_spare_rounds)
+	if _jam_case: loose.append(_jam_case)
+	for part: Node3D in loose:
+		part.set_meta("weapon_clearance_ignore", true)
+		for sub: Node in part.find_children("*", "MeshInstance3D", true, false):
+			sub.set_meta("weapon_clearance_ignore", true)
 	if _weapon_skel:
 		_mag_bone = _weapon_skel.find_bone("Magazine_Control")
 	for raw_part: Node in model.find_children("Part_Magazine*", "Node3D", true, false):
@@ -145,6 +160,21 @@ func _setup(id: String, mods: Dictionary) -> void:
 		model.add_child(frame)
 	WeaponModels.apply_markers(frame, model, float(config.get("ads_z", 0.3)))
 	WeaponMods.fit(frame, String(WeaponDb.weapon(id).get("model", "rifle")), mods)
+	# место хвата — после установки обвеса: у рукоятки на удлинителе оно считается от рамки переходника
+	var under: String = WeaponGrips._under_key(mods)
+	if under != "":
+		var place: Vector3 = WeaponMods.point_frame(frame, model_key, mods, under).origin
+		var socket_pos: Vector3 = WeaponMods.socket(model_key, "underbarrel").get("pos", Vector3.ZERO)
+		var under_id: String = WeaponDb.mod_id(mods[under])
+		_grip_shift = place - socket_pos
+		if String(WeaponDb.attachment(under_id).get("look", "")).begins_with("grip_"):
+			_grip_z = place.z - float(Balance.SUPPORT_GRIP.behind_grip)
+		else:
+			_grip_z = place.z - WeaponBuild.clamp_of(under_id) * 0.5 - float(Balance.SUPPORT_GRIP.behind_device)
+		var grip_set: String = String(WeaponDb.attachment(under_id).get("viewmodel_set", ""))
+		var idle: String = String((config.get("clips", {}) as Dictionary).get("idle", "idle"))
+		if grip_set != "" and _anim.has_animation(idle + "_" + grip_set):
+			_set = grip_set
 	# meta основы — и на корне: CameraRig проверяет прицел (ocular, reticle_illum) у модели в руках
 	for k: StringName in frame.get_meta_list():
 		set_meta(k, frame.get_meta(k))
@@ -190,6 +220,14 @@ func update(pl: Player, delta: float) -> void:
 		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(role), -1))
 		_fast = false
 		_play(_clip_name(role), BLEND_IN, pl.reload_timer)
+		if pl._reload_insert and _swap_frame >= 0:
+			# магазина в оружии нет: вынимать нечего — клип с кадра, где новый магазин уже в руке
+			var from: float = float(_swap_frame) / float(config.get("fps", 30))
+			var length: float = _anim.get_animation(_clip_name(role)).length
+			if from < length - 0.05:
+				_anim.seek(from, true)
+				_anim.speed_scale = (length - from) / maxf(pl.reload_timer, 0.05)
+				_insert_hide = BLEND_IN
 	elif reloading and pl._reload_fast and not _fast and _clip_name("reload_fast") != "":
 		# второе R: перезарядка стала быстрой — её клип с начала, на оставшееся время
 		_fast = true
@@ -225,6 +263,7 @@ func update(pl: Player, delta: float) -> void:
 			# выстрел посреди проверки — руки сразу на оружие
 			_play(_clip_name("idle"), 0.1)
 	_last_ammo = pl.ammo
+	_restore_arm()
 	_advance(pl, delta)
 	if _clip != "" and not _anim.is_playing():
 		_play(_clip_name("idle"), BLEND_OUT)
@@ -234,7 +273,11 @@ func update(pl: Player, delta: float) -> void:
 		shown = _rounds_after if _swap_frame >= 0 and f >= _swap_frame else _rounds_before
 	for i in range(_rounds.size()):
 		_rounds[i].visible = i < shown
-	var mag_in: bool = pl.weapon_mag != "" or reloading
+	_insert_hide = maxf(0.0, _insert_hide - delta) if reloading else 0.0
+	if _insert_hide > 0.0:
+		for round_node: Node3D in _rounds:
+			round_node.visible = false
+	var mag_in: bool = (pl.weapon_mag != "" or reloading) and _insert_hide <= 0.0
 	for part: Node3D in _mag_parts:
 		part.visible = mag_in
 	# старый магазин быстрой перезарядки: виден с кадра, когда новый уже в руке, до конца клипа
@@ -338,21 +381,11 @@ func _apply_sample(src: Animation, bone_name: String, bone: int, t: float) -> vo
 				_weapon_skel.set_bone_pose_rotation(bone, src.rotation_track_interpolate(i, t))
 
 
-## Где должно быть левое запястье вдоль цевья (z в осях рамы) при обвесе mods; NAN — как в клипе.
-## Рукоятка — ладонь сразу за ней; фонарь, сошки — кисть позади их зажима.
-static func _support_z(model_key: String, mods: Dictionary) -> float:
-	var key: String = WeaponGrips._under_key(mods)
-	if key == "":
-		return NAN
-	var id: String = WeaponDb.mod_id(mods[key])
-	var z: float = WeaponBuild.placed_z(model_key, mods, key)
-	if String(WeaponDb.attachment(id).get("look", "")).begins_with("grip_"):
-		return z - float(Balance.SUPPORT_GRIP.behind_grip)
-	return z - WeaponBuild.clamp_of(id) * 0.5 - float(Balance.SUPPORT_GRIP.behind_device)
-
-
-## Сдвинуть левую кисть клипа вдоль цевья к месту хвата: запястье переезжает, поворот кисти —
-## клиповый, плечо и предплечье — двухзвенным IK (длины костей сохраняются).
+## Сдвинуть левую кисть клипа к месту хвата: запястье переезжает (вдоль цевья; за рукояткой на
+## удлинителе — ещё и вниз), поворот кисти — клиповый, плечо и предплечье — двухзвенным IK (длины
+## костей сохраняются). Без своих клипов (_grip_z): рукоятка — ладонь сразу за ней, фонарь, сошки —
+## кисть позади их зажима. Рукоятка со своими клипами: кисть уже на ней — едет ровно на её сдвиг от
+## места, где она стояла в Blender.
 func _support_hand(weight: float) -> void:
 	if _arm_skel == null or weight <= 0.001 or is_nan(_grip_z) or frame == null:
 		return
@@ -363,26 +396,39 @@ func _support_hand(weight: float) -> void:
 	# ось цевья (+Z рамы) в осях скелета; на сколько ехать — по текущему запястью клипа
 	var to_frame: Transform3D = frame.global_transform.affine_inverse() * sk.global_transform
 	var wrist_z: float = (to_frame * hand.origin).z
-	# рукоятка со своими клипами: кисть уже на ней — едет ровно на её сдвиг по планке
-	var want: float = _grip_dz if not is_nan(_grip_dz) else _grip_z - wrist_z
-	var dz: float = clampf(want, -float(Balance.SUPPORT_GRIP.max_shift), float(Balance.SUPPORT_GRIP.max_shift)) * weight
-	if absf(dz) < 0.0005:
+	var shift: Vector3 = _grip_shift if _set != "" else Vector3(_grip_shift.x, _grip_shift.y, _grip_z - wrist_z)
+	shift = shift.limit_length(float(Balance.SUPPORT_GRIP.max_shift)) * weight
+	if shift.length() < 0.0005:
 		return
-	var axis: Vector3 = (sk.global_transform.affine_inverse().basis * frame.global_basis * Vector3(0, 0, 1)).normalized()
-	var target: Vector3 = hand.origin + axis * dz
+	var to_skel: Basis = (sk.global_transform.affine_inverse().basis * frame.global_basis).orthonormalized()
+	var target: Vector3 = hand.origin + to_skel * shift
 	var upper_len: float = up.origin.distance_to(fore.origin)
 	var lower_len: float = fore.origin.distance_to(hand.origin)
 	var pole: Vector3 = fore.origin - (up.origin + hand.origin) * 0.5
 	var ik: Dictionary = ArmIKSolver.solve(up.origin, target, upper_len, lower_len, pole, sk.global_transform)
 	var elbow: Vector3 = ik.elbow
 	var wrist: Vector3 = ik.wrist
+	_arm_saved.clear()
+	for bone: int in _arm_bones:
+		_arm_saved.append([sk.get_bone_pose_position(bone), sk.get_bone_pose_rotation(bone)])
 	var up_rot := Basis(Quaternion((fore.origin - up.origin).normalized(), (elbow - up.origin).normalized()))
 	var new_up := Transform3D(up_rot * up.basis, up.origin)
 	sk.set_bone_global_pose(_arm_bones[0], new_up)
 	var fore_now: Transform3D = new_up * (up.affine_inverse() * fore)
-	var fore_rot := Basis(Quaternion((hand.origin - fore.origin).normalized(), (wrist - elbow).normalized()))
+	# предплечье уже повёрнуто вместе с плечом — доворачиваем от нового направления, а не от клипового
+	var fore_rot := Basis(Quaternion((up_rot * (hand.origin - fore.origin)).normalized(), (wrist - elbow).normalized()))
 	sk.set_bone_global_pose(_arm_bones[1], Transform3D(fore_rot * fore_now.basis, elbow))
 	sk.set_bone_global_pose(_arm_bones[2], Transform3D(hand.basis, wrist))
+
+
+## Вернуть кости левой руки к позе клипа (до прошлой поправки) — перед шагом клипа.
+func _restore_arm() -> void:
+	if _arm_saved.is_empty() or _arm_skel == null:
+		return
+	for i: int in range(_arm_bones.size()):
+		_arm_skel.set_bone_pose_position(_arm_bones[i], _arm_saved[i][0])
+		_arm_skel.set_bone_pose_rotation(_arm_bones[i], _arm_saved[i][1])
+	_arm_saved.clear()
 
 
 func is_busy() -> bool:

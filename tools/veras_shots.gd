@@ -65,6 +65,10 @@ func _ready() -> void:
 			await _lag()
 		elif part == "check":
 			await _check_hold()
+		elif part == "ext":
+			await _extender()
+		elif part == "insert":
+			await _insert()
 		print("veras_shots: ошибок ", _failures)
 		get_tree().quit(1 if _failures else 0)
 		return
@@ -130,8 +134,57 @@ func _ready() -> void:
 	await _cant()
 	await _fast_reload()
 	await _check_hold()
+	await _extender()
+	await _insert()
 	print("veras_shots: ошибок ", _failures)
 	get_tree().quit(1 if _failures else 0)
+
+
+## Магазин вынут: в руках автомат без магазина; R — вставить новый (клип перезарядки с кадра, где новый
+## магазин уже в руке), без вынимания старого.
+func _insert() -> void:
+	await _equip({})
+	(_player.sandbox_weapons[_player.weapon_slot] as Dictionary)["mag"] = {"id": "", "ammo": WeaponDb.default_ammo("545x39"), "rounds": 0}
+	Gear._bump(_player.sandbox_weapons[_player.weapon_slot])
+	await get_tree().create_timer(0.5).timeout
+	var vm := _camera._viewmodel as ViewmodelClips
+	_check("без магазина: корпус магазина скрыт", _player.mag_out() and not vm._mag_parts.is_empty() and not vm._mag_parts[0].visible)
+	await _shot("veras_insert_0_nomag")
+	Input.action_press("reload")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	Input.action_release("reload")
+	_check("без магазина: R — вставка", _player._reload_insert and _player.reload_timer > 0.0)
+	var total: float = _player.reload_timer
+	var elapsed: float = 0.0
+	for f: float in [0.04, 0.15, 0.3, 0.45, 0.7, 0.9]:
+		await get_tree().create_timer(maxf(0.0, total * f - elapsed)).timeout
+		elapsed = total * f
+		await _shot("veras_insert_%02d" % int(f * 100))
+	await get_tree().create_timer(total - elapsed + 0.5).timeout
+	# песочница: счёт патронов без магазина не меняется (со снаряжением магазин ставит хост — reload_fast_test)
+	_check("вставка закончена: руки на оружии", _player.reload_timer <= 0.0 and vm._clip == "", vm._clip)
+
+
+## Удлинитель на нижней планке и рукоятка на нём: кисть держит рукоятку там, где она теперь стоит
+## (ниже планки на высоту удлинителя и дальше по его пазам), а не остаётся на цевье.
+func _extender() -> void:
+	for pair: Array in [["v1", "grip_vertical_01", 0], ["v2", "grip_offset_01", 0], ["v1_far", "grip_vertical_01", 3], ["angled", "grip_angled_01", 1]]:
+		await _equip({"underbarrel": {"id": "mount_rail_ext_01", "slot": 2}, "underbarrel/rail": {"id": pair[1], "slot": pair[2]}})
+		await get_tree().create_timer(0.6).timeout
+		var vm := _camera._viewmodel as ViewmodelClips
+		var grip: Node3D = vm.frame.find_child("Attachment_underbarrel__rail", true, false) as Node3D
+		_check("удлинитель %s: рукоятка стоит на модели" % pair[0], grip != null)
+		if grip == null:
+			continue
+		# запястье левой — у рукоятки: не дальше ладони от места, где она стоит
+		var at: Vector3 = WeaponMods.point_frame(vm.frame, "veras54", _player.weapon_mods, "underbarrel/rail").origin
+		var wrist: Vector3 = vm.frame.global_transform.affine_inverse() * (vm._arm_skel.global_transform * vm._arm_skel.get_bone_global_pose(vm._arm_bones[2]).origin)
+		var gap: float = Vector2(wrist.y - at.y, wrist.z - at.z).length()
+		_check("удлинитель %s: кисть у рукоятки (%.0f мм)" % [pair[0], gap * 1000.0], gap < 0.14, "запястье %s, рукоятка %s" % [wrist, at])
+		await _shot("veras_ext_%s_hip" % pair[0])
+		await _side("veras_ext_%s_side" % pair[0])
+		await _side("veras_ext_%s_low" % pair[0], false, 0.16, 0.3, -0.3)
 
 
 ## Рукоятки ВАРН и глушитель: модель, хват левой и клипы набора — у бедра и сбоку, слева.

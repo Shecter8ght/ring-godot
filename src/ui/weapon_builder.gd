@@ -367,7 +367,7 @@ func _draft_entry(p_mods: Variant = null, p_mag: Variant = null) -> Dictionary:
 		var list: Array = _lists().get(from, [])
 		var mi: int = int(mag.get("idx", -1))
 		if mi >= 0 and mi < list.size():
-			e["mag"] = {"id": String(list[mi].id), "ammo": String(list[mi].get("ammo", "")), "rounds": int(list[mi].get("rounds", 0))}
+			e["mag"] = Gear.mag_record(list[mi])
 	return e
 
 

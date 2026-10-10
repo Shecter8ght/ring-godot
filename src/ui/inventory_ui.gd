@@ -674,7 +674,9 @@ func _load_mag(me: Player, role: String, idx: int) -> void:
 func _check_mag(role: String, idx: int, it: Dictionary) -> void:
 	var cap := int(WeaponDb.magazine(String(it.id)).get("capacity", 0))
 	var est := Gear.ammo_estimate(int(it.get("rounds", 0)), cap, Gear.mag_exact(String(it.id)))
-	Raid.current.notify("%s: %s" % [ItemDb.item_name(String(it.id)), est])
+	# патроны вперемешку — проверка показывает и какие лежат сверху
+	var types := Gear.mag_types_text(it)
+	Raid.current.notify("%s: %s%s" % [ItemDb.item_name(String(it.id)), est, " · " + types if types != "" else ""])
 	Raid.current.request_check_mag(role, idx, _looting if role == "loot" else null)
 
 

@@ -1743,9 +1743,14 @@ func _finish_reload() -> void:
 			return
 		var fresh: Dictionary = spare[best]
 		spare.remove_at(best)
-		spare.append(WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), magazine_rounds))
+		spare.append(Gear.mag_item(mag))
 		mag["id"] = String(fresh.id)
 		mag["ammo"] = String(fresh.get("ammo", ""))
+		# патроны вперемешку (магазин игрока): слои переезжают вместе с магазином
+		if fresh.get("mix") is Array:
+			mag["mix"] = (fresh.mix as Array).duplicate(true)
+		else:
+			mag.erase("mix")
 		magazine_rounds = int(fresh.rounds)
 	mag["rounds"] = magazine_rounds
 	Gear.chamber_round(e)
@@ -1991,6 +1996,13 @@ func _show_say(text: String) -> void:
 		voice = "ai_search"
 	if voice != "":
 		Audio.play(voice, global_position + Vector3.UP * 1.5)
+	# Надпись над головой — только вблизи и не сквозь стены: издали она висела в воздухе мелкой
+	# строчкой и выдавала мародёра за стеной (голос слышно и так).
+	var viewer: Camera3D = get_viewport().get_camera_3d() if is_inside_tree() else null
+	if viewer == null or viewer.global_position.distance_to(global_position) > Balance.AI_SAY_TEXT_M:
+		if _say_label:
+			_say_label.visible = false
+		return
 	if _say_label == null:
 		_say_label = Label3D.new()
 		_say_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -1998,7 +2010,6 @@ func _show_say(text: String) -> void:
 		_say_label.font_size = 48
 		_say_label.outline_size = 12
 		_say_label.modulate = Color(1.0, 0.85, 0.6)
-		_say_label.no_depth_test = true
 		_say_label.position = Vector3(0, 2.25, 0)
 		add_child(_say_label)
 	_say_label.text = text

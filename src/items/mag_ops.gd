@@ -1,9 +1,10 @@
 class_name MagOps
 extends RefCounted
 ## Поштучные операции с предметом в сетке — не мгновенно, по шагу (Balance.MAG_OPS):
-##   "load"   — снарядить ОДИН магазин: по патрону, любыми подходящими патронами из sources (тем
-##              же, что уже в магазине; пустой — тем, которого больше всего, или заданным ammo);
-##   "unload" — разрядить магазин: по патрону — в первую сетку из dests, где есть место;
+##   "load"   — снарядить ОДИН магазин: по патрону из sources — заданным ammo (бросили патроны на
+##              магазин), иначе тем же, что сверху в магазине, а нет его — тем, которого больше всего.
+##              Типы можно мешать: новый патрон ложится сверху и уйдёт в ствол первым (Gear.mag_layers);
+##   "unload" — разрядить магазин: по патрону сверху — в первую сетку из dests, где есть место;
 ##   "plates" — вынуть плиты из жилета: по одной — туда же (only_side — только эту).
 ## Прервали — что сделано, то сделано. Кончилось само — полный / пустой / патронов нет / места нет
 ## (reason).
@@ -92,19 +93,17 @@ func start(idx: int) -> bool:
 			if int(e.rounds) >= capacity(e):
 				reason = "full"
 				return false
-			if int(e.rounds) > 0:
-				ammo = String(e.get("ammo", ""))
-			elif ammo == "" or not ammo_fits(e, ammo):
+			if ammo == "" or not ammo_fits(e, ammo):
 				ammo = pick_ammo(e, _all(sources))
 			if ammo == "" or count_of(_all(sources), ammo) <= 0:
 				reason = "no_ammo"
 				return false
 			s = int(e.rounds)
 		"unload":
-			if not e.has("rounds") or int(e.rounds) <= 0 or String(e.get("ammo", "")) == "":
+			if not e.has("rounds") or int(e.rounds) <= 0 or Gear.mag_top(e) == "":
 				reason = "empty"
 				return false
-			if not _room_for({"id": String(e.ammo), "n": 1}):
+			if not _room_for({"id": Gear.mag_top(e), "n": 1}):
 				reason = "no_room"
 				return false
 			s = int(e.rounds)
@@ -191,15 +190,14 @@ func _load_one(e: Dictionary) -> bool:
 	if int(e.rounds) >= cap:
 		reason = "full"
 		return false
-	var want := String(e.get("ammo", "")) if int(e.rounds) > 0 else ammo
+	var want := ammo
 	for r in sources:
 		var src := _list(r)
 		for j in range(src.size()):
 			var it: Dictionary = src[j]
 			if String(it.id) == want and not it.has("rounds"):
 				ItemDb.remove_at(src, j, 1)
-				e["ammo"] = want
-				e.rounds = int(e.rounds) + 1
+				Gear.mag_push(e, want)
 				_dirty[r] = true
 				_dirty[role] = true
 				if int(e.rounds) >= cap:
@@ -214,12 +212,12 @@ func _unload_one(e: Dictionary) -> bool:
 	if int(e.rounds) <= 0:
 		reason = "empty"
 		return false
-	var one := {"id": String(e.ammo), "n": 1}
+	var one := {"id": Gear.mag_top(e), "n": 1}
 	if bool(e.get("fir", false)):
 		one["fir"] = true
 	for r in dests:
 		if ItemDb.add_to(_list(r), one, grid_of.call(r)) > 0:
-			e.rounds = int(e.rounds) - 1
+			Gear.mag_pop(e)
 			_dirty[r] = true
 			_dirty[role] = true
 			if int(e.rounds) <= 0:
@@ -305,19 +303,18 @@ static func capacity(mag: Dictionary) -> int:
 	return int(WeaponDb.magazine(String(mag.id)).get("capacity", 0))
 
 
-## Патрон подходит к магазину: калибр, а если в магазине уже есть патроны — тот же тип.
+## Патрон подходит к магазину: свой калибр. Тип — любой: в магазине их можно мешать.
 static func ammo_fits(mag: Dictionary, ammo_id: String) -> bool:
 	if WeaponDb.ammo(ammo_id).is_empty():
 		return false
-	if String(WeaponDb.ammo(ammo_id).get("caliber", "")) != WeaponDb.mag_caliber(String(mag.id)):
-		return false
-	return int(mag.get("rounds", 0)) <= 0 or String(mag.get("ammo", "")) == ammo_id
+	return String(WeaponDb.ammo(ammo_id).get("caliber", "")) == WeaponDb.mag_caliber(String(mag.id))
 
 
-## Каким патроном снаряжать: тем, что в магазине; пустой — подходящим, которого больше всего.
+## Каким патроном снаряжать: тем, что сверху в магазине, если он есть в lists; иначе (и в пустой) —
+## подходящим, которого больше всего.
 static func pick_ammo(mag: Dictionary, lists: Array) -> String:
-	if int(mag.get("rounds", 0)) > 0:
-		return String(mag.get("ammo", ""))
+	if int(mag.get("rounds", 0)) > 0 and count_of(lists, Gear.mag_top(mag)) > 0:
+		return Gear.mag_top(mag)
 	var best := ""
 	var most := 0
 	var counts := {}
@@ -342,11 +339,7 @@ static func count_of(lists: Array, ammo_id: String) -> int:
 
 ## «Нет подходящих патронов. Требуются: … В наличии: …» — lists: всё, что у игрока с собой.
 static func no_ammo_text(mag: Dictionary, lists: Array) -> String:
-	var need := ""
-	if int(mag.get("rounds", 0)) > 0:
-		need = "%s (как в магазине)" % ItemDb.item_name(String(mag.get("ammo", "")))
-	else:
-		need = "патроны %s" % WeaponDb.caliber_name(WeaponDb.mag_caliber(String(mag.id)))
+	var need := "патроны %s" % WeaponDb.caliber_name(WeaponDb.mag_caliber(String(mag.id)))
 	var have := {}
 	for it in lists:
 		var iid := String(it.id)

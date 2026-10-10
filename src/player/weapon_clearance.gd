@@ -64,6 +64,10 @@ func _refresh_bounds(model: Node3D) -> void:
 		# 1.6 м): ствол упирался бы во всё вокруг. Кисти таких рук — ниже, по костям.
 		if mesh.mesh == null or mesh.skin != null or bool(mesh.get_meta("weapon_clearance_ignore", false)) or String(mesh.name).begins_with("Laser"):
 			continue
+		# Скрытая деталь (старый магазин быстрой перезарядки, гильза задержки, вынутый магазин) объёма
+		# не занимает: спрятанный магазин лежал в 1.8 м под оружием, и ствол «упирался» в землю и стены.
+		if not _shown(mesh, model):
+			continue
 		var local: AABB = WeaponRig._relative_transform(mesh, model) * mesh.get_aabb()
 		bounds = local if first else bounds.merge(local)
 		first = false
@@ -82,6 +86,16 @@ func _refresh_bounds(model: Node3D) -> void:
 		var point: Vector3 = inverse * (sk.global_transform * sk.get_bone_global_pose(int(hand[1])).origin) if model.is_inside_tree() 			else WeaponRig._relative_transform(sk, model) * sk.get_bone_global_pose(int(hand[1])).origin
 		bounds = bounds.merge(AABB(point - radius, radius * 2.0))
 		if String(hand[2]) == "R": _pivot = point
+
+
+## Видна ли деталь внутри модели. Сама модель может быть скрыта (ствол убран от стены) — её не считаем.
+func _shown(node: Node3D, model: Node3D) -> bool:
+	var at: Node = node
+	while at != null and at != model:
+		if at is Node3D and not (at as Node3D).visible:
+			return false
+		at = at.get_parent()
+	return true
 
 
 ## Кисти рук со скелетом: [скелет, кость, сторона]. Только у скелетов, на которых есть кожа.

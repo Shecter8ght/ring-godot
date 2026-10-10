@@ -81,6 +81,9 @@ var _reload_empty: bool = false
 var _reload_fast: bool = false
 var _reload_age: float = 0.0
 var _reload_old_mag: Dictionary = {}
+## Магазин был вынут: перезарядка — только вставить новый (короче: Balance.RELOAD_INSERT.time_k);
+## быстрой (двойное R) у неё нет — выбивать нечего.
+var _reload_insert: bool = false
 ## Проверка магазина: R ещё держат — магазин перед глазами (вьюмодель ждёт), отпустили — убирает.
 ## inspect_turn — поворот кисти с магазином мышью, доли −1…1 (вбок, вверх-вниз).
 var mag_inspect: bool = false
@@ -518,13 +521,29 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 		if mods[m] is Dictionary:
 			tac[m] = {"light": bool((mods[m] as Dictionary).get("light", false)), "laser": bool((mods[m] as Dictionary).get("laser", false))}
 	var jam := bool(_ws[key].get("jam", false)) if _ws.has(key) and String(_ws[key].id) == String(base.id) else false
-	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": String(mag.get("ammo", "")),
+	# mix — слои патронов магазина (вперемешку, Gear.mag_layers): по ним после выстрела виден следующий тип
+	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": Gear.mag_top(mag),
+		"mix": (mag.get("mix") as Array).duplicate(true) if mag.get("mix") is Array else [],
 		"dur": WeaponCondition.percent(base), "mod_dur": mod_dur, "shots": int(base.get("_condition_shots", 0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
 		"chamber": int(normalized.get("chamber", 0)), "chamber_ammo": String(normalized.get("chamber_ammo", ""))}
 
 
 static func _has_chamber(id: String) -> bool:
 	return int(WeaponDb.weapon(id).get("chamber_capacity", 0)) > 0
+
+
+## Верхний патрон магазина ушёл (в ствол или в патронник): его тип. В состоянии — счёт и тип
+## следующего: в магазине патроны могут лежать вперемешку.
+static func _take_round(st: Dictionary) -> String:
+	var took: String = String(st.ammo)
+	st.rounds = int(st.rounds) - 1
+	st.ammo = Gear.mag_top({"ammo": took, "rounds": int(st.rounds), "mix": st.get("mix", [])})
+	return took
+
+
+## Отъёмный магазин вынут: в руках оружие без магазина (R — вставить новый).
+func mag_out() -> bool:
+	return weapon_id != "" and weapon_mag == ""
 
 
 func _state_rounds(key: String) -> int:
@@ -1009,12 +1028,19 @@ func _combat(delta: float) -> void:
 		inspect_turn = Vector2.ZERO
 	# R: коротко — перезарядка (или устранить задержку), держать — проверить патроны
 	if Input.is_action_just_pressed("reload"):
+		if mag_out() and not is_jammed():
+			# магазин вынут: R сразу вставляет новый; держать R и нажимать дважды — без особых действий
+			_reload_hold = -1.0
+			_start_reload(spec)
+			return
 		_reload_hold = 0.0
 	if _reload_hold >= 0.0:
 		if Input.is_action_pressed("reload"):
 			_reload_hold += delta
 			if _reload_hold >= float(Balance.AMMO_CHECK.hold_sec):
 				_reload_hold = -1.0
+				if mag_out():
+					return
 				_check_ammo(spec)
 				# у ствола с клипом проверки магазин остаётся в руке, пока держат R
 				mag_inspect = ViewmodelClips.available(weapon_id)
@@ -1051,8 +1077,12 @@ func _start_reload(spec: Dictionary) -> void:
 	_reload_fast = false
 	_reload_age = 0.0
 	_reload_old_mag = {}
+	_reload_insert = mag_out()
 	var t: float = float(spec.get("reload_empty", spec.reload)) if _reload_empty else float(spec.reload)
 	var chambered: bool = _has_chamber(weapon_id)
+	if _reload_insert and not chambered:
+		# старый магазин вынимать не надо — только вставить новый и дослать
+		t *= float(Balance.RELOAD_INSERT.time_k)
 	# Потраченные выстрелами патроны сохраняем до анимации: её отмена не возвращает боезапас.
 	if chambered and _ws_dirty:
 		_send_ws(weapon_slot)
@@ -1060,7 +1090,8 @@ func _start_reload(spec: Dictionary) -> void:
 		var e := weapon_entry()
 		var kind := Gear.reload_kind(e, inventory.items)
 		if kind == "":
-			_say("Нечем зарядить: " + WeaponDb.caliber_name(String(spec.caliber)))
+			_say("Нет магазина к оружию" if _reload_insert else "Нечем зарядить: " + WeaponDb.caliber_name(String(spec.caliber)))
+			_reload_insert = false
 			return
 		_reload_kind = kind
 		_reload_rev = int(e.get("rev", 0))
@@ -1108,7 +1139,7 @@ func _start_reload(spec: Dictionary) -> void:
 ## старый магазин падает на землю. Только смена отъёмного магазина (со снаряжением — когда есть запасной).
 func _try_fast_reload() -> void:
 	var cfg: Dictionary = Balance.RELOAD_FAST
-	if _reload_fast or _reload_age > float(cfg.tap_sec) or _reload_kind == "clear" or not _pm_action.is_empty():
+	if _reload_fast or _reload_insert or _reload_age > float(cfg.tap_sec) or _reload_kind == "clear" or not _pm_action.is_empty():
 		return
 	if loadout_mode and _reload_kind != "swap":
 		return
@@ -1269,6 +1300,7 @@ func cancel_weapon_action() -> void:
 	reload_timer = 0.0
 	_reload_hold = -1.0
 	_reload_fast = false
+	_reload_insert = false
 	mag_inspect = false
 	_reload_kind = ""
 	_reload_slot = ""
@@ -1576,7 +1608,10 @@ func _check_ammo(spec: Dictionary) -> void:
 	ammo_check_t = float(Balance.AMMO_CHECK.show_sec)
 	_play_weapon_sound(spec, "mag_check", -12.0)
 	if is_local():
-		_say("Магазин: " + ammo_check_text)
+		# патроны вперемешку — видно и какие сверху
+		var mag: Dictionary = weapon_entry().get("mag", {}) if weapon_entry().get("mag") is Dictionary else {}
+		var types: String = Gear.mag_types_text(mag)
+		_say("Магазин: " + ammo_check_text + (" · " + types if types != "" else ""))
 
 
 ## Запасных магазинов к оружию в руках в рюкзаке (сколько в них патронов — не видно).
@@ -1671,17 +1706,15 @@ func _fire(spec: Dictionary) -> void:
 		if int(st.get("chamber", 0)) <= 0:
 			if int(st.rounds) <= 0:
 				return
-			st.rounds = int(st.rounds) - 1
+			st["chamber_ammo"] = _take_round(st)
 			st["chamber"] = 1
-			st["chamber_ammo"] = String(st.ammo)
 		st["chamber"] = 0
 		st["chamber_ammo"] = ""
 		if int(st.rounds) > 0:
-			st.rounds = int(st.rounds) - 1
+			st["chamber_ammo"] = _take_round(st)
 			st["chamber"] = 1
-			st["chamber_ammo"] = String(st.ammo)
 	else:
-		st.rounds = int(st.rounds) - 1
+		_take_round(st)
 	ammo = _state_rounds(weapon_slot)
 	weapon_rounds = ammo
 	_weapon_action("shot", ammo <= 0, 0.0, ammo, false)

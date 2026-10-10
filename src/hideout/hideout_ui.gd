@@ -467,7 +467,8 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 		menu.add_item("Проверить патроны")
 		var cap := int(WeaponDb.magazine(id).get("capacity", 0))
 		acts.append(func() -> void:
-			toast("%s: %s" % [ItemDb.item_name(id), Gear.ammo_estimate(int(entry.get("rounds", 0)), cap, Gear.mag_exact(id))])
+			var types := Gear.mag_types_text(entry)
+			toast("%s: %s%s" % [ItemDb.item_name(id), Gear.ammo_estimate(int(entry.get("rounds", 0)), cap, Gear.mag_exact(id)), " · " + types if types != "" else ""])
 			Profile.check_mag(name, idx))
 		menu.add_item("Снарядить")
 		acts.append(func() -> void: _load_mag(name, idx))

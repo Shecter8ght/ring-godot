@@ -82,9 +82,11 @@ static func entry_weight(e: Dictionary) -> float:
 	if not mag.is_empty():
 		if String(mag.get("id", "")) != "":
 			w += weight(String(mag.id))
-		w += weight(String(mag.get("ammo", ""))) * int(mag.get("rounds", 0))
+		for layer: Variant in Gear.mag_layers(mag):
+			w += weight(String(layer[0])) * int(layer[1])
 	if e.has("rounds"):
-		w += weight(String(e.get("ammo", ""))) * int(e.rounds)
+		for layer: Variant in Gear.mag_layers(e):
+			w += weight(String(layer[0])) * int(layer[1])
 	if int(e.get("chamber", 0)) > 0:
 		w += weight(String(e.get("chamber_ammo", mag.get("ammo", "")))) * int(e.chamber)
 	for s in e.get("plates", {}):
@@ -763,9 +765,11 @@ static func entry_value(entry: Dictionary) -> int:
 	if not mag.is_empty():
 		if String(mag.get("id", "")) != "":
 			v += float(value(String(mag.id)))
-		v += float(value(String(mag.get("ammo", "")))) * int(mag.get("rounds", 0))
+		for layer: Variant in Gear.mag_layers(mag):
+			v += float(value(String(layer[0]))) * int(layer[1])
 	if entry.has("rounds"):
-		v += float(value(String(entry.get("ammo", "")))) * int(entry.rounds)
+		for layer: Variant in Gear.mag_layers(entry):
+			v += float(value(String(layer[0]))) * int(layer[1])
 	if int(entry.get("chamber", 0)) > 0:
 		v += float(value(String(entry.get("chamber_ammo", mag.get("ammo", ""))))) * int(entry.chamber)
 	for s in entry.get("plates", {}):
