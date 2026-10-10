@@ -88,6 +88,13 @@ var _reload_insert: bool = false
 ## inspect_turn — поворот кисти с магазином мышью, доли −1…1 (вбок, вверх-вниз).
 var mag_inspect: bool = false
 var inspect_turn: Vector2 = Vector2.ZERO
+## Дыхание в прицеле: запас воздуха 0…1, задержано ли сейчас (держат «бег» в прицеле), сколько ещё
+## длится одышка после полной задержки, с.
+var breath: float = 1.0
+var breath_held: bool = false
+var _breath_gasp: float = 0.0
+## Тир: ствол стойки — копия своего (слот снаряжения; "" — ствол зала): пристрелка пишется в своё.
+var range_own_slot: String = ""
 ## ПМ меняет предметы только после окончания действия. До этого прерывание отменяет лишь позу.
 var _pm_action: Dictionary = {}
 var _pm_action_seq: int = 0
@@ -493,6 +500,9 @@ func entry_of(key: String) -> Dictionary:
 	e["dur"] = float(st.dur)
 	e["_condition_shots"] = int(st.get("shots", 0))
 	e["sight"] = String(st.sight)
+	var zc: Array = st.get("zero_c", [0, 0])
+	if Gear.zero_clicks(e) != Vector2i(int(zc[0]), int(zc[1])):
+		Gear.set_zero_clicks(e, Vector2i(int(zc[0]), int(zc[1])))
 	var mods: Dictionary = e.get("mods", {})
 	for m in mods:
 		var md: Dictionary = mods[m] if mods[m] is Dictionary else {"id": String(mods[m])}
@@ -524,6 +534,7 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 	# mix — слои патронов магазина (вперемешку, Gear.mag_layers): по ним после выстрела виден следующий тип
 	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": Gear.mag_top(mag),
 		"mix": (mag.get("mix") as Array).duplicate(true) if mag.get("mix") is Array else [],
+		"zero_c": [Gear.zero_clicks(base).x, Gear.zero_clicks(base).y],
 		"dur": WeaponCondition.percent(base), "mod_dur": mod_dur, "shots": int(base.get("_condition_shots", 0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
 		"chamber": int(normalized.get("chamber", 0)), "chamber_ammo": String(normalized.get("chamber_ammo", ""))}
 
@@ -539,6 +550,76 @@ static func _take_round(st: Dictionary) -> String:
 	st.rounds = int(st.rounds) - 1
 	st.ammo = Gear.mag_top({"ammo": took, "rounds": int(st.rounds), "mix": st.get("mix", [])})
 	return took
+
+
+## Пристрелка: щелчок барабанчика — попадания сдвигаются на Balance.ZEROING.click_moa вправо (dx) /
+## вверх (dy). Щелчки хранятся на экземпляре ствола (хосту уходят с состоянием оружия); ствол стойки
+## тира, взятый как «свой», — сразу в запись своего снаряжения.
+func zero_click(dx: int, dy: int) -> void:
+	if weapon_slot == "" or not _ws.has(weapon_slot):
+		return
+	var st: Dictionary = _ws[weapon_slot]
+	var lim: int = int(Balance.ZEROING.max_clicks)
+	var c: Array = st.get("zero_c", [0, 0])
+	var now := Vector2i(clampi(int(c[0]) + dx, -lim, lim), clampi(int(c[1]) + dy, -lim, lim))
+	st["zero_c"] = [now.x, now.y]
+	_ws_dirty = true
+	_ws_sync_t = 0.4
+	Audio.play_ui("ui_click")
+	_say("Пристрелка: %s" % (Gear.zero_text(now) if now != Vector2i.ZERO else "барабанчики на нуле"))
+	if in_range_mode() and range_own_slot != "":
+		_push_own_zero(now)
+
+
+## Сколько накручено на стволе в руках.
+func zero_clicks() -> Vector2i:
+	var c: Array = (_ws.get(weapon_slot, {}) as Dictionary).get("zero_c", [0, 0])
+	return Vector2i(int(c[0]), int(c[1]))
+
+
+## Тир: в руках копия своего ствола (со стойки, патроны не тратятся) — щелчки сразу в своё снаряжение.
+func _push_own_zero(clicks: Vector2i) -> void:
+	var own: Dictionary = inventory.equipment.get(range_own_slot, {})
+	var h := items_host()
+	if own.is_empty() or h == null or String(own.get("uid", "")) != String(range_weapon.get("uid", "")):
+		return
+	var mag: Dictionary = own.get("mag", {}) if own.get("mag") is Dictionary else {}
+	h.call("request_weapon_state", range_own_slot, {"id": String(own.id), "rev": int(own.get("rev", 0)),
+		"rounds": int(mag.get("rounds", 0)), "dur": WeaponCondition.percent(own), "shots": int(own.get("_condition_shots", 0)),
+		"sight": String(own.get("sight", "primary")), "tac": {}, "chamber": int(own.get("chamber", 0)),
+		"chamber_ammo": String(own.get("chamber_ammo", "")), "zero_c": [clicks.x, clicks.y]})
+
+
+## Дыхание в прицеле: запас воздуха (задержка — «бег» в прицеле) и одышка после неё. Balance.BREATH.
+func _tick_breath(delta: float) -> void:
+	var cfg: Dictionary = Balance.BREATH
+	var want: bool = aiming and ads and weapon_id != "" and Input.is_action_pressed("sprint") and not ui_blocked() \
+			and breath > 0.0 and _breath_gasp <= 0.0 and health.alive
+	breath_held = want
+	if breath_held:
+		breath = maxf(0.0, breath - delta / float(cfg.hold_sec))
+		if breath <= 0.0:
+			# выдохся: одышка, прицел ходит сильнее обычного
+			breath_held = false
+			_breath_gasp = float(cfg.gasp_sec)
+	else:
+		breath = minf(1.0, breath + delta / float(cfg.refill_sec))
+	_breath_gasp = maxf(0.0, _breath_gasp - delta)
+
+
+## Во сколько раз сильнее обычного ходит прицел от дыхания: усталость, стресс, задержка, одышка.
+func breath_k() -> float:
+	var cfg: Dictionary = Balance.BREATH
+	var k: float = 1.0 + float(cfg.fatigue_k) * (1.0 - clampf(stamina / Balance.STAMINA_MAX, 0.0, 1.0)) + float(cfg.stress_k) * stress_k()
+	if breath_held:
+		return k * float(cfg.held_k)
+	if _breath_gasp > 0.0:
+		k *= lerpf(1.0, float(cfg.gasp_k), _breath_gasp / float(cfg.gasp_sec))
+	return k
+
+
+func breath_gasping() -> bool:
+	return _breath_gasp > 0.0
 
 
 ## Отъёмный магазин вынут: в руках оружие без магазина (R — вставить новый).
@@ -578,7 +659,8 @@ func _ws_state(key: String) -> Dictionary:
 	return {"id": String(st.get("id", "")), "rev": int(st.get("rev", 0)), "rounds": int(st.get("rounds", 0)), "dur": float(st.get("dur", 100.0)),
 		"shots": int(st.get("shots", 0)),
 		"sight": String(st.get("sight", "primary")), "tac": (st.get("tac", {}) as Dictionary).duplicate(true),
-		"chamber": int(st.get("chamber", 0)), "chamber_ammo": String(st.get("chamber_ammo", ""))}
+		"chamber": int(st.get("chamber", 0)), "chamber_ammo": String(st.get("chamber_ammo", "")),
+		"zero_c": (st.get("zero_c", [0, 0]) as Array).duplicate()}
 
 
 func _send_ws(key: String) -> void:
@@ -862,6 +944,10 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 		kh *= Balance.ADS_RECOIL_HORIZONTAL_SCALE
 	var back := float(spec.get("recover", 0.5))
 	if ads and rig:
+		if not in_ads:
+			# от бедра оружие гуляет в руках, взгляд почти стоит (подброс ствола — у модели, HAND_RECOIL)
+			rise *= float(Balance.HAND_RECOIL.hip_cam_k)
+			kh *= float(Balance.HAND_RECOIL.hip_cam_k)
 		rig.add_recoil(rise * (1.0 - back), kh * (1.0 - back))
 		_recoil += rise * back
 		_recoil_h += kh * back
@@ -992,6 +1078,7 @@ func _combat(delta: float) -> void:
 		if Input.is_action_just_pressed(String(pair[0])) and fire_timer <= 0.0:
 			_throw_light(String(pair[1]))
 	_tick_nvg(delta)
+	_tick_breath(delta)
 	if weapon_id == "":
 		return
 	if Input.is_action_just_pressed("flashlight"):
@@ -1000,6 +1087,11 @@ func _combat(delta: float) -> void:
 		_toggle_tac("laser")
 	if Input.is_action_just_pressed("toggle_sight"):
 		_toggle_sight()
+	# пристрелка: в прицеле стрелки — щелчки барабанчиков
+	if aiming and ads and not ui_blocked():
+		for z: Array in [["zero_up", 0, 1], ["zero_down", 0, -1], ["zero_left", -1, 0], ["zero_right", 1, 0]]:
+			if InputMap.has_action(String(z[0])) and Input.is_action_just_pressed(String(z[0])):
+				zero_click(int(z[1]), int(z[2]))
 	var spec := spec()
 	if InputMap.has_action("toggle_suppressor") and Input.is_action_just_pressed("toggle_suppressor"):
 		toggle_suppressor()
@@ -1561,9 +1653,10 @@ func in_range_mode() -> bool:
 ## Тир: взять ствол стойки (запись оружия из пресета). Своё снаряжение остаётся в профиле нетронутым:
 ## состояние оружия в руках сначала уходит в профиль, затем игрок переходит на «песочницу» с одним
 ## этим стволом — вещи и патроны рюкзака тир не расходует.
-func set_range_weapon(entry: Dictionary) -> void:
+func set_range_weapon(entry: Dictionary, own_slot: String = "") -> void:
 	if entry.is_empty():
 		return
+	range_own_slot = own_slot
 	cancel_weapon_action()
 	if loadout_mode:
 		flush_weapon_state()
@@ -1583,6 +1676,7 @@ func clear_range_weapon() -> void:
 	cancel_weapon_action()
 	_cancel_nade_aim()
 	range_weapon = {}
+	range_own_slot = ""
 	sandbox_weapons = {}
 	_ws.erase(RANGE_KEY)
 	_pm_entries.erase(RANGE_KEY)
@@ -1754,6 +1848,14 @@ func _fire(spec: Dictionary) -> void:
 		if dir.length_squared() < 0.01:
 			dir = Vector3(sin(_body.rotation.y), 0.0, cos(_body.rotation.y))
 		dir = dir.normalized()
+	# пристрелка: ноль сбит — пули уходят от точки прицеливания на поправку экземпляра (Gear.zero_offset)
+	var zero_moa: Vector2 = Gear.zero_offset(worn_entry)
+	if zero_moa != Vector2.ZERO:
+		var z_right: Vector3 = dir.cross(Vector3.UP)
+		if z_right.length() > 0.001:
+			z_right = z_right.normalized()
+			var z_up: Vector3 = z_right.cross(dir).normalized()
+			dir = (dir + z_right * tan(deg_to_rad(zero_moa.x / 60.0)) + z_up * tan(deg_to_rad(zero_moa.y / 60.0))).normalized()
 	var exclude: Array[RID] = [get_rid()]
 	# разброс: от бедра (ЛЦУ включён — меньше, hip_spread), в прицеле — по мере «довода» к
 	# прицельному (выбранный прицел: у углового — свой довод и точность); сидя/лёжа на сошках —
@@ -1881,10 +1983,50 @@ func _tick_nvg(delta: float) -> void:
 			_say("ПНВ: батарея села")
 
 
-## Ракета / химсвет: из рюкзака (в песочнице — без счёта); бросок видят все peer.
+## Осветительная ракета из сигнального пистолета: вверх (с небольшим уклоном по взгляду), высоко, на
+## Balance.SKY_FLARE.air_sec — освещает большой участок и медленно опускается (SkyFlare). Нужны
+## пистолет и ракета в рюкзаке (в песочнице — без счёта). Выстрел слышат NPC, видят все peer.
+func launch_sky_flare() -> bool:
+	if in_range_mode():
+		_say("В тире — только стрельба")
+		return false
+	if not health.alive or is_downed():
+		return false
+	if loadout_mode:
+		if not inventory.has("signal_launcher"):
+			_say("Нужен сигнальный пистолет в рюкзаке")
+			return false
+		if inventory.count("flare") <= 0:
+			_say("Нет: " + ItemDb.item_name("flare"))
+			return false
+		items_host().call("request_consume", "flare", 1)
+	fire_timer = 0.6
+	var aim: Vector3 = look_dir() if ads else Vector3(sin(_body.rotation.y), 0.0, cos(_body.rotation.y))
+	var flat: Vector3 = Vector3(aim.x, 0.0, aim.z)
+	var dir: Vector3 = (Vector3.UP + (flat.normalized() if flat.length() > 0.05 else Vector3.ZERO) * float(Balance.SKY_FLARE.drift)).normalized()
+	var from: Vector3 = eye_position() + Vector3.UP * 0.25 + flat.normalized() * 0.3 if flat.length() > 0.05 else eye_position() + Vector3.UP * 0.25
+	NoiseBus.emit(global_position, float(Balance.SKY_FLARE.noise_m), "shot")
+	if Net.is_networked():
+		Net.broadcast_scene(self, &"_rpc_sky_flare", [from, dir])
+	else:
+		_rpc_sky_flare(from, dir)
+	return true
+
+
+@rpc("authority", "call_local", "reliable")
+func _rpc_sky_flare(from: Vector3, dir: Vector3) -> void:
+	SkyFlare.launch(get_tree().current_scene, from, dir)
+
+
+## Ракета / химсвет: из рюкзака (в песочнице — без счёта); бросок видят все peer. Ракета при
+## сигнальном пистолете в рюкзаке (и в песочнице) запускается из него в небо; без пистолета —
+## бросается рукой и горит на земле.
 func _throw_light(k: String) -> void:
 	if in_range_mode():
 		_say("В тире — только стрельба")
+		return
+	if k == "flare" and (not loadout_mode or inventory.has("signal_launcher")):
+		launch_sky_flare()
 		return
 	if loadout_mode:
 		if inventory.count(k) <= 0:

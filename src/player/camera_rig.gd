@@ -27,6 +27,15 @@ var _punch: Vector2 = Vector2.ZERO
 ## Люфт оружия: где было направление взгляда кадр назад и на сколько оружие сейчас отстаёт (в осях камеры).
 var _lag_prev: Basis = Basis.IDENTITY
 var _lag_q: Quaternion = Quaternion.IDENTITY
+## Люфт, применённый к модели в этом кадре (с долей «от бедра»): от него считается своя инерция метки.
+var _lag_used: Quaternion = Quaternion.IDENTITY
+## Дыхание в прицеле: фаза вдоха-выдоха.
+var _breath_t: float = 0.0
+## Отдача в руках: три пружины (x — увод вбок, y — подброс ствола, z — толчок назад) и их скорости;
+## _kick_seen — толчок игрока на прошлом кадре (новый выстрел — скачок вверх).
+var _hand_kick: Vector3 = Vector3.ZERO
+var _hand_kick_v: Vector3 = Vector3.ZERO
+var _kick_seen: float = 0.0
 var _lag_ready: bool = false
 var _punch_t: float = 0.0
 var _hitmarker: Control
@@ -595,6 +604,13 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if pl.is_downed():
 		amp *= Balance.DOWN_SWAY
 	var sway := Vector2(sin(_sway_t * 1.13) * 0.7 + sin(_sway_t * 2.71 + 1.3) * 0.3, sin(_sway_t * 0.87 + 0.5) * 0.6 + sin(_sway_t * 2.05) * 0.4) * amp
+	# дыхание: в прицеле линия медленно ходит вверх-вниз с дрейфом вбок; устал, стресс — сильнее,
+	# сидя и лёжа — слабее, задержал дыхание — почти стоит (Player.breath_k)
+	var br: Dictionary = Balance.BREATH
+	_breath_t += delta * TAU / float(br.period)
+	if pl.aiming and wid != "":
+		var breath_amp: float = deg_to_rad(float(br.deg)) * pl.breath_k() * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * aim_t
+		sway += Vector2(sin(_breath_t * 0.5 + 0.7) * float(br.side), sin(_breath_t)) * breath_amp
 	# отдача подкидывает взгляд, дальше игрок сам возвращает прицел
 	var pitch := _look_pitch + pl.recoil() + sway.y
 	var yaw := _look_yaw + sway.x - pl.recoil_h()
@@ -684,10 +700,14 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
 	# толчок в плечо: модель откатывается назад, дуло подскакивает, чуть заваливается; пружиной обратно
 	# в прицеле дуло подскакивает меньше, а оружие сильнее уходит назад, в плечо и камеру
-	var kv := pl.kick_vis
-	var flip := kv * lerpf(1.0, Balance.ADS_RECOIL_FLIP_SCALE, k)
-	var kick_back := kv * lerpf(1.0, Balance.ADS_RECOIL_BACK_SCALE, k)
-	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k)).rotated(Vector3.RIGHT, flip * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
+	# отдача в руках — пружинами: толчок назад, подброс, увод вбок, возврат с небольшим перелётом;
+	# от бедра оружие гуляет сильнее (взгляд при этом почти стоит — Player._apply_recoil)
+	_tick_hand_kick(pl, delta)
+	var hip_gain: float = lerpf(float(Balance.HAND_RECOIL.hip_k), 1.0, k)
+	var flip := _hand_kick.y * hip_gain * lerpf(1.0, Balance.ADS_RECOIL_FLIP_SCALE, k)
+	var kick_back := _hand_kick.z * hip_gain * lerpf(1.0, Balance.ADS_RECOIL_BACK_SCALE, k)
+	var kick_side := deg_to_rad(float(Balance.HAND_RECOIL.side_deg)) * _hand_kick.x * hip_gain
+	var vm_basis := Basis(Vector3.UP, PI + deg_to_rad(4.0) * (1.0 - k) + kick_side).rotated(Vector3.RIGHT, flip * 0.05).rotated(Vector3.FORWARD, pl.recoil_h() * 1.5 + deg_to_rad(-3.0) * (1.0 - k)) * Basis(Vector3(0, 0, 1), -sroll * k)
 	var action_offset: Vector3 = pl._weapon_rig.view_offset() * (1.0 - k) if is_instance_valid(pl._weapon_rig) else Vector3.ZERO
 	if is_instance_valid(pl._weapon_rig):
 		vm_basis *= Basis.from_euler(pl._weapon_rig.view_rotation_degrees() * (PI / 180.0) * (1.0 - k))
@@ -703,10 +723,12 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		var hip: Transform3D = _viewmodel.call("hip_transform")
 		var selected_ads: Transform3D = cant_ads(primary_ads, float(_viewmodel.get_meta("sight_h", 0.08)), line)
 		var vt: Transform3D = hip.interpolate_with(selected_ads, k)
-		vt.basis = Basis(Vector3.RIGHT, flip * 0.05) * Basis(Vector3.FORWARD, pl.recoil_h() * 1.5) * vt.basis
+		vt.basis = Basis(Vector3.UP, kick_side) * Basis(Vector3.RIGHT, flip * 0.05) * Basis(Vector3.FORWARD, pl.recoil_h() * 1.5) * vt.basis
 		vt.origin += bob + Vector3(0.0, flip * 0.004, kick_back * 0.028)
 		_viewmodel.transform = vt
+	var before_lag: Transform3D = _viewmodel.transform
 	_viewmodel.transform = _weapon_lag(delta, k) * _viewmodel.transform
+	_float_reticle(before_lag)
 	if _viewmodel_rig:
 		if is_instance_valid(pl._weapon_rig):
 			_viewmodel_rig.synchronize_from(pl._weapon_rig)
@@ -787,7 +809,60 @@ func _weapon_lag(delta: float, aim_k: float) -> Transform3D:
 	var limit: float = deg_to_rad(float(cfg.max_deg))
 	if _lag_q.get_angle() > limit:
 		_lag_q = Quaternion(_lag_q.get_axis().normalized(), limit)
-	return Transform3D(Basis(Quaternion.IDENTITY.slerp(_lag_q, lerpf(float(cfg.hip_k), 1.0, aim_k))), Vector3.ZERO)
+	_lag_used = Quaternion.IDENTITY.slerp(_lag_q, lerpf(float(cfg.hip_k), 1.0, aim_k))
+	return Transform3D(Basis(_lag_used), Vector3.ZERO)
+
+
+## Своя инерция метки коллиматора: корпус прицела отстал от взгляда на весь люфт, а светящаяся метка —
+## только на долю Balance.AIM_LAG.dot_k. Метка плавает в окне и остаётся почти на цели (пули летят по
+## взгляду). before — поза модели до люфта (в осях ViewmodelSpace). Метки — сетки с meta "reticle_dot"
+## (WeaponMods.fit); место покоя запоминается в meta "dot_rest".
+func _float_reticle(before: Transform3D) -> void:
+	var keep: float = 1.0 - float(Balance.AIM_LAG.dot_k)
+	var moving: bool = _lag_used.get_angle() > 0.00002
+	var partial: Transform3D = Transform3D(Basis(Quaternion.IDENTITY.slerp(_lag_used, float(Balance.AIM_LAG.dot_k))), Vector3.ZERO) * before
+	var model_inv: Transform3D = _viewmodel.global_transform.affine_inverse()
+	for node: Node in _viewmodel.find_children("*", "MeshInstance3D", true, false):
+		if not node.has_meta("reticle_dot"):
+			continue
+		var dot: MeshInstance3D = node as MeshInstance3D
+		if not dot.has_meta("dot_rest"):
+			dot.set_meta("dot_rest", dot.position)
+		var rest: Vector3 = dot.get_meta("dot_rest")
+		var parent: Node3D = dot.get_parent() as Node3D
+		if not moving or keep <= 0.0 or parent == null:
+			dot.position = rest
+			continue
+		# место метки в осях модели → куда она встала бы при полном люфте и при своём (меньшем)
+		var in_model: Transform3D = model_inv * parent.global_transform
+		var at: Vector3 = in_model * rest
+		var shift: Vector3 = _viewmodel.transform.affine_inverse() * (partial * at) - at
+		dot.position = rest + in_model.basis.inverse() * shift
+
+
+## Отдача в руках: новый выстрел (скачок Player.kick_vis) толкает три пружины — назад в плечо, вверх
+## (подброс ствола) и вбок; каждая возвращается с небольшим перелётом (Balance.HAND_RECOIL).
+func _tick_hand_kick(pl: Player, delta: float) -> void:
+	var cfg: Dictionary = Balance.HAND_RECOIL
+	var impulse: float = pl.kick_vis - _kick_seen
+	_kick_seen = pl.kick_vis
+	var axes: Array = [cfg.side, cfg.rise, cfg.back]
+	if impulse > 0.05:
+		# скорость такая, чтобы пик пружины был около величины толчка
+		var side_sign: float = signf(pl.recoil_h()) if absf(pl.recoil_h()) > 0.0005 else (1.0 if _rng.randf() < 0.5 else -1.0)
+		var push := Vector3(side_sign * _rng.randf_range(0.4, 1.0), 1.0, 1.0) * impulse
+		for i in range(3):
+			_hand_kick_v[i] += push[i] * sqrt(float(axes[i][0])) * 2.0
+	# шаг пружин мелкими долями: при просадке кадров не разлетаются
+	var steps: int = clampi(int(ceil(delta / 0.004)), 1, 12)
+	var h: float = delta / float(steps)
+	for s in range(steps):
+		for i in range(3):
+			var stiff: float = float(axes[i][0])
+			var damp: float = 2.0 * float(axes[i][1]) * sqrt(stiff)
+			_hand_kick_v[i] += (-stiff * _hand_kick[i] - damp * _hand_kick_v[i]) * h
+			_hand_kick[i] += _hand_kick_v[i] * h
+	_hand_kick = _hand_kick.clamp(Vector3(-2.5, -1.0, -1.0), Vector3(2.5, 3.0, 3.0))
 
 
 ## Готовая поза основного прицела → поза дополнительного, независимо от осей исходной сцены.
@@ -1354,6 +1429,12 @@ func _update_hud(pl: Player) -> void:
 		t += "   [%s]" % pl.ammo_check_text
 	if pl.loadout_mode:
 		t += "   · запасных маг. %d, россыпью %d" % [pl.spare_mags(), pl.loose_rounds()]
+	if pl.aiming and pl.zero_clicks() != Vector2i.ZERO:
+		t += "   [поправка: %s]" % Gear.zero_text(pl.zero_clicks())
+	if pl.breath_held:
+		t += "   [дыхание задержано]"
+	elif pl.breath_gasping():
+		t += "   [одышка]"
 	if pl.aim_cant:
 		t += "   [с завалом]"
 	elif (spec.sights as Array).size() > 1:

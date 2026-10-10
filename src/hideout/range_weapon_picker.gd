@@ -19,6 +19,8 @@ var _root: Control
 var _list: VBoxContainer
 var _hand_label: Label
 var _return_button: Button
+## Свои надетые стволы — взять копию на зал для пристрелки (кнопки пересобираются при открытии).
+var _own_box: HBoxContainer
 var _opened_frame: int = -1
 
 
@@ -78,6 +80,9 @@ func _ready() -> void:
 	_return_button.focus_mode = Control.FOCUS_NONE
 	_return_button.pressed.connect(_return_weapon)
 	hand.add_child(_return_button)
+	_own_box = HBoxContainer.new()
+	_own_box.add_theme_constant_override("separation", 10)
+	v.add_child(_own_box)
 	var scroll: ScrollContainer = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -96,6 +101,7 @@ func is_open() -> bool:
 func open_for(pl: Player) -> void:
 	_player = pl
 	_refresh_hand()
+	_fill_own()
 	_root.visible = true
 	_opened_frame = Engine.get_process_frames()
 	Audio.play_ui("stash")
@@ -161,6 +167,51 @@ func _fill() -> void:
 				row.add_child(_variant_button("штатный", wid, ""))
 			for entry: Array in variants:
 				row.add_child(_variant_button(_variant_name(String(entry[0])), wid, String(entry[0])))
+
+
+## Пристрелка своего оружия: копия надетого ствола на зал (патроны не тратятся); щелчки барабанчиков
+## (стрелки в прицеле) сразу записываются в свой ствол.
+func _fill_own() -> void:
+	for old: Node in _own_box.get_children():
+		old.queue_free()
+	if _player == null or _player.inventory == null:
+		return
+	var any: bool = false
+	for slot: String in ["primary", "secondary"]:
+		var own: Dictionary = _player.inventory.equipment.get(slot, {})
+		if own.is_empty() or not WeaponDb.is_weapon(String(own.get("id", ""))):
+			continue
+		if not any:
+			var note: Label = Label.new()
+			note.text = "Пристрелять своё (стрелки в прицеле — щелчки, смотри по листу):"
+			note.add_theme_color_override("font_color", Color(0.78, 0.74, 0.66))
+			_own_box.add_child(note)
+			any = true
+		var b: Button = Button.new()
+		b.text = "%s: %s" % [Inventory.SLOT_NAMES[slot], ItemDb.item_name(String(own.id))]
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(_take_own.bind(slot))
+		_own_box.add_child(b)
+
+
+func _take_own(slot: String) -> void:
+	if _player == null:
+		return
+	# состояние своего ствола — сначала в профиль (сдаёт текущий ствол зала, если он в руках)
+	if _player.in_range_mode():
+		_player.clear_range_weapon()
+	_player.flush_weapon_state()
+	var own: Dictionary = (_player.inventory.equipment.get(slot, {}) as Dictionary).duplicate(true)
+	if own.is_empty():
+		return
+	# на зал — с полным магазином: патроны тир не считает
+	if own.get("mag") is Dictionary:
+		if String((own.mag as Dictionary).get("id", "")) == "" and not WeaponDb.weapon(String(own.id)).has("internal_mag"):
+			(own.mag as Dictionary)["id"] = WeaponDb.default_mag(String(own.id))
+		(own.mag as Dictionary).erase("mix")
+		(own.mag as Dictionary)["rounds"] = WeaponDb.capacity(own)
+	_player.set_range_weapon(own, slot)
+	close_ui()
 
 
 func _variant_button(text: String, wid: String, preset_id: String) -> Button:

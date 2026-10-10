@@ -42,6 +42,8 @@ var drag_enabled: bool = true
 var marks: Dictionary = {}
 ## Выбранная запись (-1 — нет): светлая рамка.
 var selected: int = -1
+## Отмеченные записи (индекс → true): светлая рамка и галочка — выбор нескольких (продажа).
+var picked: Dictionary = {}
 
 var _layout: Array = []   # [x, y, r] на запись (при auto_layout — вычисленные)
 var _hover: Vector2i = Vector2i(-1, -1)
@@ -157,12 +159,19 @@ func _draw() -> void:
 				var tc := Color(0.55, 0.9, 0.55) if tag == "ПОЛН" else (Color(0.62, 0.62, 0.6) if tag == "ПУСТ" else Color(1.0, 0.82, 0.45))
 				draw_string_outline(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, 3, Color(0, 0, 0, 0.8))
 				draw_string(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, tc)
-		if not marks.is_empty() and not marks.has(i) and i != selected:
+		if not marks.is_empty() and not marks.has(i) and i != selected and not picked.has(i):
 			draw_rect(r, Color(0, 0, 0, 0.55))
 		if marks.has(i):
 			draw_rect(r.grow(0.5), marks[i] as Color, false, 2.5)
 		if i == selected:
 			draw_rect(r.grow(1.0), Color(1.0, 0.95, 0.8), false, 3.0)
+		if picked.has(i):
+			draw_rect(r, Color(1.0, 0.9, 0.6, 0.14))
+			draw_rect(r.grow(1.0), Color(1.0, 0.95, 0.8), false, 3.0)
+			# галочка в углу
+			var tick := r.position + Vector2(r.size.x - 15.0, 5.0)
+			draw_rect(Rect2(tick - Vector2(2, 2), Vector2(14, 14)), Color(0.1, 0.1, 0.08, 0.85))
+			draw_polyline(PackedVector2Array([tick + Vector2(1, 5), tick + Vector2(4, 9), tick + Vector2(10, 1)]), Color(0.6, 1.0, 0.55), 2.0)
 	if _hover.x >= 0:
 		var hr := Rect2(Vector2(_hover) * CELL, Vector2(_hover_size) * CELL)
 		draw_rect(hr, Color(0.3, 0.9, 0.4, 0.28) if _hover_ok else Color(0.95, 0.3, 0.25, 0.28))

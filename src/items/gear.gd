@@ -44,6 +44,9 @@ static func strip(entry: Dictionary, part: String) -> Array:
 		var r: Array = WeaponBuild.extract(e, part.trim_prefix("mod:"))
 		if (r[1] as Dictionary).is_empty():
 			return [entry, {}]
+		if WeaponDb.is_optic(String((r[1] as Dictionary).get("id", ""))):
+			# прицел сняли — открытые прицельные пристреливать заново
+			knock_zero(r[0], Balance.ZEROING.sight_moa)
 		_bump(r[0])
 		return r
 	if part.begins_with("plate:"):
@@ -106,6 +109,9 @@ static func fit(entry: Dictionary, item: Dictionary, hint: String = "") -> Array
 			return [entry, {}, String(r[2])]
 		if not (r[3] as Dictionary).is_empty():
 			return [entry, {}, "на переходнике не всё встанет"]
+		if WeaponDb.is_optic(iid):
+			# новый прицел — ноль сбит, пристреливать заново
+			knock_zero(r[0], Balance.ZEROING.sight_moa)
 		return [r[0], r[1], ""]
 	if not WeaponDb.plate(iid).is_empty() and e.has("plates"):
 		var slots: Array = WeaponDb.vest(String(e.id)).get("plates", [])
@@ -274,6 +280,63 @@ static func load_mags(list: Array, extra: Array = []) -> int:
 		mag_push(mag, ammo_id, take)
 		used += take
 	return used
+
+
+# ---------------------------------------------------------------- пристрелка
+
+## "zero" экземпляра ствола: [ошибка вбок, ошибка вверх, щелчки вбок, щелчки вверх]. Ошибка — в
+## угловых минутах, игроку не видна (сбитый ноль); щелчки — что он накрутил барабанчиками.
+## Нет поля — ствол пристрелян. Balance.ZEROING.
+static func _zero(entry: Dictionary) -> Array:
+	var z: Variant = entry.get("zero")
+	if z is Array and (z as Array).size() >= 4:
+		return [float(z[0]), float(z[1]), int(z[2]), int(z[3])]
+	return [0.0, 0.0, 0, 0]
+
+
+## Куда уходят пули от точки прицеливания, угл. мин: x — вправо, y — вверх.
+static func zero_offset(entry: Dictionary) -> Vector2:
+	var z: Array = _zero(entry)
+	var click: float = float(Balance.ZEROING.click_moa)
+	return Vector2(float(z[0]) + float(z[2]) * click, float(z[1]) + float(z[3]) * click)
+
+
+static func zero_clicks(entry: Dictionary) -> Vector2i:
+	var z: Array = _zero(entry)
+	return Vector2i(int(z[2]), int(z[3]))
+
+
+static func set_zero_clicks(entry: Dictionary, clicks: Vector2i) -> void:
+	var z: Array = _zero(entry)
+	var lim: int = int(Balance.ZEROING.max_clicks)
+	z[2] = clampi(clicks.x, -lim, lim)
+	z[3] = clampi(clicks.y, -lim, lim)
+	if is_zero_approx(float(z[0])) and is_zero_approx(float(z[1])) and int(z[2]) == 0 and int(z[3]) == 0:
+		entry.erase("zero")
+	else:
+		entry["zero"] = z
+
+
+## Сбить ноль: ошибка в случайную сторону на moa = [от, до] угл. мин; щелчки остаются как были.
+static func knock_zero(entry: Dictionary, moa: Array, rng: RandomNumberGenerator = null) -> void:
+	if not WeaponDb.is_weapon(String(entry.get("id", ""))):
+		return
+	var angle: float = rng.randf() * TAU if rng else randf() * TAU
+	var size: float = rng.randf_range(float(moa[0]), float(moa[1])) if rng else randf_range(float(moa[0]), float(moa[1]))
+	var z: Array = _zero(entry)
+	z[0] = snappedf(cos(angle) * size, 0.1)
+	z[1] = snappedf(sin(angle) * size, 0.1)
+	entry["zero"] = z
+
+
+## Что накручено: «вверх 3, вправо 2» ("" — барабанчики на нуле).
+static func zero_text(clicks: Vector2i) -> String:
+	var parts: Array[String] = []
+	if clicks.y != 0:
+		parts.append("%s %d" % ["вверх" if clicks.y > 0 else "вниз", absi(clicks.y)])
+	if clicks.x != 0:
+		parts.append("%s %d" % ["вправо" if clicks.x > 0 else "влево", absi(clicks.x)])
+	return ", ".join(parts)
 
 
 # ---------------------------------------------------------------- патроны в магазине вперемешку

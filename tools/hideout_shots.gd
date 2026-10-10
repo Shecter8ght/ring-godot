@@ -1,6 +1,7 @@
 extends Node
 ## Снимки убежища на тестовом профиле: общий вид, окно тайника, торговца, выхода —
 ## docs/screens/hideout_*.png. godot --path . res://tools/hideout_shots.tscn
+## HIDEOUT_ONLY=sell — только вкладка «Продать»: сетки рядом, отметка нескольких предметов, продажа разом.
 
 func _ready() -> void:
 	await get_tree().process_frame
@@ -26,6 +27,9 @@ func _ready() -> void:
 	Profile.fit_part("equip:primary", -1, "stash", _idx("mag_545_45"))
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	await _frames(240)
+	if OS.get_environment("HIDEOUT_ONLY") == "sell":
+		await _sell_only()
+		return
 	_save("hideout")
 	var level := get_tree().current_scene
 	for kind in [HideoutStation.Kind.STASH, HideoutStation.Kind.TRADER, HideoutStation.Kind.EXIT, HideoutStation.Kind.WORKBENCH, HideoutStation.Kind.UPGRADES]:
@@ -53,10 +57,12 @@ func _ready() -> void:
 		for i in range(list.size()):
 			if WeaponDb.is_weapon(String(list[i].id)) and ui._sell_sel.is_empty():
 				ui._sell_sel = [ln, i]
+	ui._sell_picks = [ui._sell_sel.duplicate()] if not ui._sell_sel.is_empty() else []
 	ui._trader_tab = "sell"
 	await _frames(30)
 	_save("hideout_trader_sell_focus")
 	ui._sell_sel = []
+	ui._sell_picks = []
 	# схема: клик по квадратику прицела — список (купить и поставить / своё)
 	ui._trader_tab = "mods"
 	await _frames(20)
@@ -69,6 +75,56 @@ func _ready() -> void:
 		await _frames(20)
 		_save("hideout_trader_board_popup")
 	get_tree().quit(0)
+
+
+## Вкладка «Продать»: тайник и рюкзак рядом; отмечено несколько предметов — список и общая цена;
+## «Продать выбранное» — деньги пришли, предметов нет.
+func _sell_only() -> void:
+	var level := get_tree().current_scene
+	var ui := level.get("_ui") as HideoutUI
+	for st in get_tree().get_nodes_in_group("interactables"):
+		if st is HideoutStation and (st as HideoutStation).kind == HideoutStation.Kind.TRADER:
+			level.call("open_station", st)
+			break
+	ui._trader_tab = "sell"
+	await _frames(30)
+	_save("hideout_trader_sell")
+	for ln in ["stash", "backpack"]:
+		var list := Profile.list_of(ln)
+		for i in range(list.size()):
+			if WeaponDb.is_weapon(String(list[i].id)) and ui._sell_sel.is_empty():
+				ui._sell_sel = [ln, i]
+	ui._sell_picks = [ui._sell_sel.duplicate()]
+	await _frames(30)
+	_save("hideout_trader_sell_focus")
+	# несколько: три из тайника и всё из рюкзака
+	ui._sell_picks = [["stash", 0], ["stash", 2], ["stash", 3]]
+	for i in range(Profile.backpack.size()):
+		ui._sell_picks.append(["backpack", i])
+	ui._sell_sel = ["stash", 3]
+	await _frames(30)
+	_save("hideout_trader_sell_multi")
+	var want := 0
+	for p in ui._sell_picks:
+		want += Profile.sell_price(Profile.list_of(String(p[0]))[int(p[1])])
+	var money := Profile.money
+	var stash_n := Profile.stash.size()
+	var buttons := ui.find_children("*", "Button", true, false).filter(func(b: Node) -> bool: return (b as Button).text.begins_with("Продать выбранное"))
+	var fails := 0
+	if buttons.size() != 1:
+		fails += 1
+		print("[FAIL] кнопка «Продать выбранное» одна: ", buttons.size())
+	else:
+		(buttons[0] as Button).pressed.emit()
+	await _frames(30)
+	for check in [["деньги пришли: +%d" % want, Profile.money == money + want], ["из тайника ушли три записи", Profile.stash.size() == stash_n - 3],
+			["рюкзак пуст", Profile.backpack.is_empty()], ["отметки сняты", ui._sell_picks.is_empty()]]:
+		if not bool(check[1]):
+			fails += 1
+		print("%s %s" % ["[ok]  " if bool(check[1]) else "[FAIL]", String(check[0])])
+	_save("hideout_trader_sell_done")
+	print("hideout_shots (sell): провалено %d" % fails)
+	get_tree().quit(1 if fails else 0)
 
 
 func _idx(id: String) -> int:

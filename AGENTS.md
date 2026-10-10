@@ -65,6 +65,10 @@ tools/godot.cmd res://tools/conditions_test.tscn            # условия р�
 tools/godot.cmd res://tools/weather_test.tscn               # погода: дождь (в т.ч. начинается в рейде), туман и снайпер, жара и очки, выносливость
 tools/godot.cmd --headless res://tools/events_test.tscn     # события и фракции: жильцы, сигнализация, свет погас, генератор, сброс, ЧВК против мародёров, рация
 tools/godot.cmd --headless res://tools/reload_fast_test.tscn # ВЕРАС со снаряжением: одно R — обычная перезарядка, два быстрых — быстрая (−28 %, старый магазин на землю), держать R — магазин в руке
+tools/godot.cmd --headless res://tools/ammo_mix_test.tscn  # патроны в магазине вперемешку: слои, снаряжение и разрядка сверху, стрельба по слоям, смена и досыпка
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/nvg_stress_test.tscn # ПНВ в бою: зелёная картинка не пропадает под эффектами стресса и ранения; снимки nvg_stress_*
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/sky_flare_shots.tscn # осветительная ракета из сигнального пистолета во дворе зоны 1 ночью: 15 с в воздухе, высота, кадры в секунду; снимки sky_flare_*
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/aim_feel_test.tscn  # пристрелка (сбитый ноль, щелчки), дыхание и его задержка, отдача в руках пружинами, своя инерция метки коллиматора
 tools/godot.cmd --headless res://tools/rivals_test.tscn    # чужие отряды («другие игроки»): входят, обыскивают, уходят через выход с добычей, воюют между собой и с мародёрами, память состава
 tools/godot.cmd res://tools/rain_test.tscn                  # дождь шейдерами: карта «что над головой» = лучи физики; снимки rain_* (RAIN_TIME=night RAIN_SUFFIX=_night — ночью)
 tools/godot.cmd res://tools/light_shots.tscn                # заградительные огни (ночь/туман горят, ясный день — нет), мягкий свет ТЦ; снимки light_*

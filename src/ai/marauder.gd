@@ -301,6 +301,11 @@ func _equip_loadout() -> void:
 	var p2 := _pick(lo.get("secondary", []))
 	if p2 != "":
 		equipment["secondary"] = WeaponDb.make_weapon(p2, _rng, dr)
+	# снятый с тела ствол пристрелян не под игрока: ноль сбит (самому мародёру это не мешает).
+	# Случайность — общая, не _rng мародёра: его броски (поведение, выкладка) не сдвигаются.
+	for slot_key: String in ["primary", "secondary"]:
+		if equipment.has(slot_key):
+			Gear.knock_zero(equipment[slot_key], Balance.ZEROING.found_moa)
 	var sm: Array = lo.get("spare_mags", [1, 2])
 	for slot in ["primary", "secondary"]:
 		if not equipment.has(slot):

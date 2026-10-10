@@ -285,6 +285,9 @@ static func _partial_mag(w: Dictionary, rng: RandomNumberGenerator, opts: Dictio
 		return
 	var r: Array = opts.get("rounds", [0.0, 1.0])
 	mag.rounds = int(round(float(mag.rounds) * rng.randf_range(float(r[0]), float(r[1]))))
+	# найденный ствол не пристрелян под тебя: ноль сбит (Balance.ZEROING); случайность общая — броски
+	# таблицы лута (rng) не сдвигаются
+	Gear.knock_zero(w, Balance.ZEROING.found_moa)
 
 
 static func _merge(list: Array, id: String, n: int) -> void:

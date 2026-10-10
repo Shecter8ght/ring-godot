@@ -829,6 +829,37 @@ static func sell(idx: int, n: int, from: String = "stash") -> bool:
 	return true
 
 
+## Продать несколько записей разом (вкладка «Продать»): picks — [[откуда, индекс], …]. Один звук,
+## одно сохранение. Возвращает выручку.
+static func sell_many(picks: Array) -> int:
+	var by: Dictionary = {}
+	for p: Variant in picks:
+		var from: String = String((p as Array)[0])
+		if not by.has(from):
+			by[from] = []
+		(by[from] as Array).append(int((p as Array)[1]))
+	var total: int = 0
+	for from: Variant in by:
+		var list := list_of(String(from))
+		# с конца списка: продажа записи сдвигает индексы тех, что после неё
+		var order: Array = by[from]
+		order.sort()
+		order.reverse()
+		var last: int = -1
+		for i: int in order:
+			if i == last or i < 0 or i >= list.size():
+				continue
+			last = i
+			var out := ItemDb.remove_at(list, i, int(list[i].n))
+			if not out.is_empty():
+				total += sell_price(out)
+	if total > 0:
+		money += total
+		save()
+		Audio.play_ui("cash")
+	return total
+
+
 static func unpack(from: String, idx: int, expected_id: String) -> bool:
 	var result: Array = ItemDb.unpack(list_of(from), grid_of(from), idx, expected_id)
 	if result.is_empty():

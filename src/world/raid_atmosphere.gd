@@ -357,6 +357,12 @@ func view_distance(p: Vector3, own_light: bool, light_k: float = 1.0, laser: boo
 		if fl and fl.global_position.distance_to(p) <= fl.radius():
 			d = maxf(d, Balance.FLARE_LIT_VIEW)
 			break
+	# ракета в небе: на улице в её круге видно всех (под крышу её свет не попадает)
+	for sky: Node in get_tree().get_nodes_in_group("sky_flares"):
+		var sf := sky as SkyFlare
+		if sf and not is_indoor(p) and Vector2(sf.global_position.x - p.x, sf.global_position.z - p.z).length() <= sf.radius():
+			d = maxf(d, Balance.FLARE_LIT_VIEW)
+			break
 	if own_light:
 		d = maxf(d, Balance.AI_VIEW_FLASHLIGHT * light_k)
 	elif laser and d < Balance.AI_VIEW_LASER:

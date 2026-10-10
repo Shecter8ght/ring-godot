@@ -323,6 +323,9 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 		e["chamber_ammo"] = String(st.get("chamber_ammo", e.get("chamber_ammo", ""))) if int(e.chamber) > 0 else ""
 	e["sight"] = String(st.get("sight", e.get("sight", "primary")))
 	e["sight"] = WeaponStats.active_sight(e)
+	# пристрелка: щелчки барабанчиков крутит владелец (ошибку нуля он не видит и не меняет)
+	if st.get("zero_c") is Array and (st.zero_c as Array).size() == 2:
+		Gear.set_zero_clicks(e, Vector2i(int(st.zero_c[0]), int(st.zero_c[1])))
 	var mods: Dictionary = e.get("mods", {})
 	var tac: Dictionary = st.get("tac", {})
 	for m in mods:

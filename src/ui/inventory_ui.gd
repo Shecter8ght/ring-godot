@@ -609,6 +609,9 @@ func _item_menu(me: Player, role: String, idx: int, at: Vector2) -> void:
 	if role == "backpack" and id == "signal_launcher":
 		names.append("Вызвать самолёт снабжения")
 		acts.append(func() -> void: Raid.current.request_supply_signal())
+	if role == "backpack" and id in ["signal_launcher", "flare"] and me.inventory.has("signal_launcher"):
+		names.append("Запустить осветительную ракету")
+		acts.append(func() -> void: me.launch_sky_flare())
 	if not ItemDb.equip(id).is_empty():
 		names.append("В руки" if ItemDb.equip(id).has("weapon") else "Надеть")
 		acts.append(func() -> void: Raid.current.request_equip_from(role, idx, box))
