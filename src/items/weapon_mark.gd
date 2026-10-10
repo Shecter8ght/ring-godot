@@ -17,8 +17,12 @@ static func identify(entry: Dictionary) -> void:
 		entry["uid"] = new_id()
 
 
+## Размеры надписи на выбор: множитель к обычной ширине и подпись в окне станка.
+const SCALES := [[0.7, "Мелко"], [1.0, "Обычно"], [1.5, "Крупно"], [2.1, "Очень крупно"]]
+
+
 static func key(mark: Dictionary) -> String:
-	return "%s|%s|%s|%s" % [String(mark.get("text", "")), String(mark.get("date", "")), String(mark.get("serial", "")), String(mark.get("site", "right_1"))] if not mark.is_empty() else ""
+	return "%s|%s|%s|%s|%.2f" % [String(mark.get("text", "")), String(mark.get("date", "")), String(mark.get("serial", "")), String(mark.get("site", "right_1")), float(mark.get("scale", 1.0))] if not mark.is_empty() else ""
 
 
 ## Позиции привязаны к коробке, рукоятке или затвору, вне магазинов и сменных обвесов.
@@ -113,8 +117,11 @@ func _build() -> void:
 	if not is_inside_tree() or not is_instance_valid(best) or maps.is_empty():
 		return
 	var bounds: AABB = best.get_aabb()
-	var width: float = minf(float(WeaponDb.weapon(weapon_id).get("engraving_width", Balance.ENGRAVING.pistol_width if pistol else Balance.ENGRAVING.width)), bounds.size.z * 0.62)
-	var height: float = minf(width / 4.0, bounds.size.y * 0.65)
+	# размер по выбору игрока (scale): крупная надпись может занять почти всю длину детали
+	var scale_k: float = clampf(float(inscription.get("scale", 1.0)), 0.5, 2.5)
+	var width: float = minf(float(WeaponDb.weapon(weapon_id).get("engraving_width", Balance.ENGRAVING.pistol_width if pistol else Balance.ENGRAVING.width)) * scale_k,
+		bounds.size.z * (0.62 if scale_k <= 1.0 else 0.92))
+	var height: float = minf(width / 4.0, bounds.size.y * (0.65 if scale_k <= 1.0 else 0.9))
 	if width < 0.012 or height < 0.004:
 		return
 	# Свой слой получателя исключает ладонь и соседние детали из проекции.

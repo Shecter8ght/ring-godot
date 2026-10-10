@@ -144,6 +144,7 @@ tools/godot.cmd --headless res://tools/coop_items_test.tscn -- host [сцена]
 tools/godot.cmd --disable-vsync res://tools/cpu_probe.tscn  # во что упирается процессор на уровне: выключает системы по очереди
 tools/godot.cmd --headless res://tools/mesh_census.tscn     # какие модели дают треугольники на уровне
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/rig_shots.tscn # ростовая фигура со слотами и разгрузка (подсумки, сумка сброса): тайник и окно рюкзака в рейде; снимки doll_*
+tools/godot.cmd --headless res://tools/engraver_head_test.tscn # головка гравировщика в станке: вставить, нанести (размер, слева), вынуть; с окном — снимок окна станка
 tools/godot.cmd --headless res://tools/mags_test.tscn      # магазины: ПОЛН/ПУСТ и оценка после проверки, снарядить/разрядить поштучно (MagOps), нет патронов — текст, разрядка в клетки ящика и буфер 3×3, плиты по одной, вопрос о буфере, держать R
 tools/godot.cmd res://tools/sight_nvg_shots.tscn             # коллиматор в ПНВ, ЛЦУ: точка без ПНВ, луч в ПНВ; снимки sight_nvg_* (SHOTS_LOW=1 — качество «низко»)
 tools/godot.cmd --headless res://tools/evac_test.tscn      # эвакуация группой: общий отсчёт 3 мин, ждём напарника, сброс, все в зоне — короткий, раненого выносят, не успел — без добычи

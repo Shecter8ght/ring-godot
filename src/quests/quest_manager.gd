@@ -71,6 +71,84 @@ func modules_changed() -> void:
 	changed.emit()
 
 
+## Головка, вставленная в станок гравировки: {uid, charges} или {} — пусто. Общая для группы: лежит во
+## флагах кампании хоста (сохраняется у него, гостям приходит снимком). Головка — либо в станке, либо в
+## вещах игрока (рюкзак, тайник): вставил — из вещей ушла, вынул — вернулась тому, кто вынул.
+func engraver_head() -> Dictionary:
+	var v: Variant = flag("engraver_head")
+	return v if v is Dictionary else {}
+
+
+## Вставить свою головку (запись предмета, уже вынутая из вещей) / вынуть себе / потратить заряд.
+func request_engraver(kind: String, head: Dictionary = {}) -> void:
+	if is_client():
+		_rpc_engraver.rpc_id(1, kind, head)
+	else:
+		_engraver(multiplayer.get_unique_id() if Net.is_networked() else 1, kind, head)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_engraver(kind: String, head: Dictionary) -> void:
+	if multiplayer.is_server():
+		_engraver(multiplayer.get_remote_sender_id(), kind, head)
+
+
+## Хост / соло: станок один на группу — занят, значит вторую головку возвращаем хозяину.
+func _engraver(peer: int, kind: String, head: Dictionary) -> void:
+	var cur: Dictionary = engraver_head()
+	match kind:
+		"insert":
+			if String(head.get("id", "")) != "laser_head":
+				return
+			if not cur.is_empty():
+				_engraver_give(peer, head)
+				return
+			_set_engraver_head({"uid": String(head.get("uid", "")), "charges": int(head.get("charges", 0))})
+		"eject":
+			if cur.is_empty():
+				return
+			_set_engraver_head({})
+			var item: Dictionary = ItemDb.make("laser_head", 1)
+			item["uid"] = String(cur.get("uid", item.uid))
+			item["charges"] = int(cur.get("charges", 0))
+			_engraver_give(peer, item)
+		"use":
+			if int(cur.get("charges", 0)) <= 0:
+				return
+			cur = cur.duplicate(true)
+			cur["charges"] = int(cur.charges) - 1
+			_set_engraver_head(cur)
+
+
+func _set_engraver_head(head: Dictionary) -> void:
+	Profile.ensure()
+	for store: Dictionary in [Profile.flags] + ([_live.flags] if not _live.is_empty() else []):
+		if head.is_empty():
+			store.erase("engraver_head")
+		else:
+			store["engraver_head"] = head.duplicate(true)
+	Profile.save()
+	_broadcast()
+	changed.emit()
+
+
+## Головку — игроку peer в тайник (вынул из станка; станок был занят).
+func _engraver_give(peer: int, head: Dictionary) -> void:
+	if Net.is_networked() and peer != multiplayer.get_unique_id():
+		if peer in multiplayer.get_peers():
+			_rpc_engraver_give.rpc_id(peer, head)
+	else:
+		_rpc_engraver_give(head)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_engraver_give(head: Dictionary) -> void:
+	Profile.ensure()
+	ItemDb.add_to(Profile.stash, head, Profile.stash_grid())
+	Profile.save()
+	changed.emit()
+
+
 ## Гость: хост включил чит «открыть всё» — он действует на всю группу (Settings.unlocked).
 func host_unlock() -> bool:
 	return is_client() and bool(_remote.get("unlock_all", false))

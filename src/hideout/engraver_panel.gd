@@ -16,6 +16,11 @@ var _apply_button: Button
 var _view: BuilderView
 var _preview: Dictionary = {}
 var _inventory_sig: String = ""
+var _scale: OptionButton
+## Головка: что стоит в станке (общая для группы) и кнопки «вставить» / «вынуть».
+var _head_state: Label
+var _head_insert: Button
+var _head_eject: Button
 
 
 func _ready() -> void:
@@ -35,11 +40,40 @@ func _ready() -> void:
 	_label(left, "Место нанесения", 16)
 	_site = OptionButton.new()
 	left.add_child(_site)
-	_site.item_selected.connect(func(_idx: int) -> void: _invalidate(); _show_weapon())
-	_label(left, "Лазерная головка", 16)
+	# выбрал место — сразу крупный план этого места на оружии
+	_site.item_selected.connect(func(_idx: int) -> void: _invalidate(); _show_weapon(); _zoom_to_mark())
+	_label(left, "Размер надписи", 16)
+	_scale = OptionButton.new()
+	for row: Array in WeaponMark.SCALES:
+		_scale.add_item(String(row[1]))
+	_scale.select(1)
+	left.add_child(_scale)
+	_scale.item_selected.connect(func(_idx: int) -> void: _invalidate(); _show_weapon(); _zoom_to_mark())
+	# головка работает только вставленной в станок: она общая для группы и видна на станке всем
+	_label(left, "Лазерная головка в станке", 16)
+	_head_state = _label(left, "", 16)
 	_head = OptionButton.new()
 	left.add_child(_head)
-	_head.item_selected.connect(func(_idx: int) -> void: _invalidate())
+	var head_row: HBoxContainer = HBoxContainer.new()
+	head_row.add_theme_constant_override("separation", 8)
+	left.add_child(head_row)
+	_head_insert = Button.new()
+	_head_insert.text = "Вставить в станок"
+	head_row.add_child(_head_insert)
+	_head_insert.pressed.connect(func() -> void:
+		if _head.selected < 0 or _head.selected >= _heads.size():
+			return
+		var row: Dictionary = _heads[_head.selected]
+		var why: String = Engraver.insert(String(row.where), int(row.idx), String(row.entry.uid))
+		_status.text = why if why != "" else "Головка вставлена в станок."
+		_refresh())
+	_head_eject = Button.new()
+	_head_eject.text = "Вынуть в тайник"
+	head_row.add_child(_head_eject)
+	_head_eject.pressed.connect(func() -> void:
+		var why: String = Engraver.eject()
+		_status.text = why if why != "" else "Головка вынута — лежит в тайнике."
+		_refresh())
 	_label(left, "Надпись · до %d символов" % int(Balance.ENGRAVING.max_text), 16)
 	_text = LineEdit.new()
 	_text.max_length = int(Balance.ENGRAVING.max_text)
@@ -58,7 +92,7 @@ func _ready() -> void:
 	_apply_button.pressed.connect(_apply)
 	_status = _label(left, "", 16)
 	_status.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_label(left, "Головка рассчитана на три надписи.\nПредпросмотр не расходует ресурс.", 14)
+	_label(left, "Головка рассчитана на три надписи и работает только в станке.\nПредпросмотр не расходует ресурс.", 14)
 	var right: VBoxContainer = VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	add_child(right)
@@ -94,7 +128,7 @@ func _label(parent: Node, text: String, font_size: int) -> Label:
 
 
 func _signature() -> String:
-	return str(Profile.equipment) + str(Profile.stash) + str(Profile.backpack) + str(Profile.pocket) + Engraver.block()
+	return str(Profile.equipment) + str(Profile.stash) + str(Profile.backpack) + str(Profile.pocket) + Engraver.block() + str(Engraver.installed())
 
 
 func _process(_delta: float) -> void:
@@ -119,8 +153,26 @@ func _refresh() -> void:
 		_head.add_item("Головка · %d / %d · %s" % [int(row.entry.charges), int(Balance.ENGRAVING.charges), _place(String(row.where))])
 		if String(row.entry.get("uid", "")) == selected_head:
 			_head.select(_head.item_count - 1)
+	# что в станке: заряды и кто может вставить / вынуть
+	var inst: Dictionary = Engraver.installed()
+	if inst.is_empty():
+		_head_state.text = "Пусто — вставьте головку из своих вещей." if not _heads.is_empty() else "Пусто. Головки находят в рейдах."
+	else:
+		_head_state.text = "Стоит головка: осталось %d из %d надписей." % [int(inst.get("charges", 0)), int(Balance.ENGRAVING.charges)]
+	_head.visible = inst.is_empty() and not _heads.is_empty()
+	_head_insert.visible = inst.is_empty() and not _heads.is_empty()
+	_head_eject.visible = not inst.is_empty()
 	_invalidate()
 	_show_weapon()
+
+
+## Крупный план места нанесения: метка рисуется несколько кадров — приближаем, когда появилась.
+func _zoom_to_mark() -> void:
+	for frame: int in range(10):
+		await get_tree().process_frame
+		if not is_inside_tree():
+			return
+	_view.focus_mark()
 
 
 func _place(role: String) -> String:
@@ -134,8 +186,10 @@ func _invalidate() -> void:
 	var reason: String = Engraver.block()
 	if reason == "" and _weapons.is_empty():
 		reason = "Нужно собственное оружие."
-	if reason == "" and _heads.is_empty():
-		reason = "Найдите в рейде лазерную головку с оставшимся ресурсом."
+	if reason == "" and Engraver.installed().is_empty():
+		reason = "Вставьте лазерную головку в станок." if not _heads.is_empty() else "Найдите в рейде лазерную головку и вставьте её в станок."
+	if reason == "" and int(Engraver.installed().get("charges", 0)) <= 0:
+		reason = "Головка в станке исчерпана — выньте её."
 	if reason == "" and not (_entry().get("engraving", {}) as Dictionary).is_empty():
 		reason = "На этом оружии уже есть постоянная надпись."
 	_status.text = reason
@@ -159,11 +213,21 @@ func _show_weapon() -> void:
 		_site.clear()
 		for row: Dictionary in _positions:
 			_site.add_item(String(row.name))
+		# по умолчанию — левая сторона: её видно у себя в руках от первого лица
+		for index: int in range(_positions.size()):
+			if int(_positions[index].side) > 0:
+				_site.select(index)
+				break
 	var mark: Dictionary = entry.get("engraving", {}) if _preview.is_empty() else _preview
 	if not mark.is_empty():
 		for index: int in range(_positions.size()):
 			if String(_positions[index].id) == String(mark.get("site", "right_1")):
 				_site.select(index)
+	elif _site.selected >= 0 and _site.selected < _positions.size():
+		# надписи ещё нет — образец на выбранном месте и в выбранном размере: видно, куда и как ляжет
+		var sample: String = WeaponMark.clean_text(_text.text)
+		mark = WeaponMark.make(entry, sample if sample != "" else "ОБРАЗЕЦ", String(_positions[_site.selected].id))
+		mark["scale"] = _scale_value()
 	_site.disabled = not (entry.get("engraving", {}) as Dictionary).is_empty()
 	_view.show_build(String(entry.id), entry.get("mods", {}), WeaponCondition.percent(entry), WeaponMods.mag_state(entry), str(entry) + WeaponMark.key(mark), mark)
 	_view.set_view("mark_left" if _site.selected >= 0 and int(_positions[_site.selected].side) > 0 else "mark")
@@ -180,17 +244,21 @@ func _make_preview() -> void:
 		_status.text = "Выберите место нанесения."
 		return
 	_preview = WeaponMark.make(_entry(), clean, String(_positions[_site.selected].id))
+	_preview["scale"] = _scale_value()
 	_status.text = "Проверьте написание. После нанесения изменить его нельзя."
 	_apply_button.disabled = false
 	_show_weapon()
 
 
+func _scale_value() -> float:
+	return float(WeaponMark.SCALES[clampi(_scale.selected, 0, WeaponMark.SCALES.size() - 1)][0])
+
+
 func _apply() -> void:
-	if _preview.is_empty() or _weapon.selected < 0 or _head.selected < 0:
+	if _preview.is_empty() or _weapon.selected < 0:
 		return
 	var row: Dictionary = _weapons[_weapon.selected]
-	var head: Dictionary = _heads[_head.selected]
-	var reason: String = Engraver.apply(String(row.where), int(row.idx), String(row.entry.uid), String(head.where), int(head.idx), String(head.entry.uid), _text.text, _preview)
+	var reason: String = Engraver.apply_installed(String(row.where), int(row.idx), String(row.entry.uid), _text.text, _preview)
 	if reason != "":
 		_status.text = reason
 		return

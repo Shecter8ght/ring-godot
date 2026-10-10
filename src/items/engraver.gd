@@ -36,6 +36,79 @@ static func heads() -> Array[Dictionary]:
 	return out
 
 
+## Головка в станке (общая для группы, Quests.engraver_head): {uid, charges} или {}.
+static func installed() -> Dictionary:
+	return Quests.engraver_head()
+
+
+## Вставить свою головку в станок: из вещей она уходит. "" — вставлена.
+static func insert(head_where: String, head_idx: int, head_uid: String) -> String:
+	var reason: String = block()
+	if reason != "":
+		return reason
+	if not installed().is_empty():
+		return "В станке уже стоит головка."
+	var head: Dictionary = Profile._entry_at(head_where, head_idx)
+	if String(head.get("id", "")) != "laser_head" or String(head.get("uid", "")) != head_uid:
+		return "Головка переместилась. Выберите её снова."
+	if int(head.get("charges", 0)) <= 0:
+		return "Головка исчерпана."
+	var taken: Dictionary = head.duplicate(true)
+	Profile.list_of(head_where).remove_at(head_idx)
+	if not Profile.save():
+		return "Не удалось сохранить."
+	for key: String in ["x", "y", "r"]:
+		taken.erase(key)
+	Quests.request_engraver("insert", taken)
+	return ""
+
+
+## Вынуть головку из станка — в свой тайник (придёт от хоста).
+static func eject() -> String:
+	if installed().is_empty():
+		return "В станке нет головки."
+	Quests.request_engraver("eject")
+	return ""
+
+
+## Нанести надпись головкой, вставленной в станок: один заряд. "" — нанесено.
+static func apply_installed(where: String, idx: int, expected_uid: String, text: String, preview: Dictionary) -> String:
+	var reason: String = block()
+	if reason != "":
+		return reason
+	var head: Dictionary = installed()
+	if head.is_empty():
+		return "Вставьте лазерную головку в станок."
+	if int(head.get("charges", 0)) <= 0:
+		return "Головка в станке исчерпана — выньте её."
+	var entry: Dictionary = Profile._entry_at(where, idx)
+	if not WeaponDb.is_weapon(String(entry.get("id", ""))) or String(entry.get("uid", "")) != expected_uid:
+		return "Оружие переместилось. Выберите его снова."
+	if not (entry.get("engraving", {}) as Dictionary).is_empty():
+		return "На этом стволе уже есть постоянная гравировка."
+	var clean: String = WeaponMark.clean_text(text)
+	if clean == "" or clean.length() > int(Balance.ENGRAVING.max_text):
+		return "Введите надпись длиной от 1 до %d символов." % int(Balance.ENGRAVING.max_text)
+	if String(preview.get("text", "")) != clean or String(preview.get("serial", "")) != expected_uid.substr(0, 10).to_upper():
+		return "Предпросмотр устарел. Проверьте надпись снова."
+	var site: String = String(preview.get("site", "right_1"))
+	if WeaponMark.position_spec(String(entry.id), site).is_empty():
+		return "Выберите место нанесения на оружии."
+	var before: Dictionary = entry.duplicate(true)
+	var changed: Dictionary = entry.duplicate(true)
+	var mark: Dictionary = WeaponMark.make(entry, clean, site)
+	# размер надписи выбирает игрок (WeaponMark.SCALES)
+	if preview.has("scale"):
+		mark["scale"] = float(preview.scale)
+	changed["engraving"] = mark
+	Profile._set_entry(where, idx, changed)
+	if not Profile.save():
+		Profile._set_entry(where, idx, before)
+		return "Не удалось сохранить нанесение. Ресурс головки сохранён."
+	Quests.request_engraver("use")
+	return ""
+
+
 static func apply(where: String, idx: int, expected_uid: String, head_where: String, head_idx: int, head_uid: String, text: String, preview: Dictionary) -> String:
 	var reason: String = block()
 	if reason != "":

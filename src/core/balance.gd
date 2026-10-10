@@ -1156,17 +1156,21 @@ const CIVILIAN_LOOT := {
 		["wires", 4, [1, 2]], ["battery", 2, [1, 1]], ["toolset", 1, [1, 1]], ["screwdriver", 3, [1, 1]],
 		["pliers", 2, [1, 1]], ["hammer", 2, [1, 1]], ["pipe_wrench", 1.5, [1, 1]], ["measuring_tape", 2, [1, 1]],
 		["work_gloves", 2, [1, 1]], ["oil_tin", 1.5, [1, 1]], ["metal_toolbox", 1, [1, 1]], ["bench_vice", 0.5, [1, 1]],
-		["multimeter", 0.4, [1, 1]], ["junction_box", 1, [1, 1]], ["empty_jerrycan", 0.8, [1, 1]], ["nothing", 5, [0, 0]]
+		["multimeter", 0.4, [1, 1]], ["junction_box", 1, [1, 1]], ["empty_jerrycan", 0.8, [1, 1]], ["nothing", 5, [0, 0]],
+		["spray_paint", 1.2, [1, 2]], ["stencil_kit", 0.5, [1, 1]]
 	]},
 	"storage": {"rolls": [1, 2], "entries": [
 		["water", 3, [1, 1]], ["canned", 3, [1, 1]], ["wires", 2, [1, 2]], ["battery", 1, [1, 1]],
 		["cigarettes", 1, [1, 2]], ["work_gloves", 1.5, [1, 1]], ["oil_tin", 1, [1, 1]], ["metal_toolbox", 0.6, [1, 1]],
-		["empty_jerrycan", 0.6, [1, 1]], ["junction_box", 0.7, [1, 1]], ["screwdriver", 1, [1, 1]], ["nothing", 6, [0, 0]]
+		["empty_jerrycan", 0.6, [1, 1]], ["junction_box", 0.7, [1, 1]], ["screwdriver", 1, [1, 1]], ["nothing", 6, [0, 0]],
+		["spray_paint", 0.8, [1, 1]], ["sticker_film", 0.7, [1, 2]], ["printer_body", 0.12, [1, 1]]
 	]},
 	"office": {"rolls": [1, 2], "entries": [
 		["documents", 1, [1, 1]], ["cash", 2, [1, 1]], ["phone", 1, [1, 1]], ["powerbank", 2, [1, 1]],
 		["painkillers", 1, [1, 1]], ["lighter", 2, [1, 1]], ["clipboard", 2, [1, 1]], ["desk_lamp", 1, [1, 1]],
-		["wall_clock", 1, [1, 1]], ["thermos", 1, [1, 1]], ["cassette_player", 0.7, [1, 1]], ["nothing", 4, [0, 0]]
+		["wall_clock", 1, [1, 1]], ["thermos", 1, [1, 1]], ["cassette_player", 0.7, [1, 1]], ["nothing", 4, [0, 0]],
+		["sticker_film", 1.2, [1, 2]], ["ink_set", 0.8, [1, 1]], ["stencil_kit", 0.3, [1, 1]], ["printer_body", 0.2, [1, 1]],
+		["printer_board", 0.15, [1, 1]], ["sticker_tally", 0.4, [1, 2]]
 	]},
 	"bank": {"rolls": [1, 2], "entries": [
 		["cash", 5, [2, 5]], ["documents", 2, [1, 1]], ["clipboard", 1, [1, 1]], ["desk_lamp", 0.5, [1, 1]],
@@ -1174,11 +1178,13 @@ const CIVILIAN_LOOT := {
 	]},
 	"kiosk": {"rolls": [1, 2], "entries": [
 		["cigarettes", 4, [1, 3]], ["lighter", 3, [1, 2]], ["energy_bar", 3, [1, 2]], ["cash", 1, [1, 1]],
-		["thermos", 0.5, [1, 1]], ["cassette_player", 0.4, [1, 1]], ["measuring_tape", 0.5, [1, 1]]
+		["thermos", 0.5, [1, 1]], ["cassette_player", 0.4, [1, 1]], ["measuring_tape", 0.5, [1, 1]],
+		["sticker_skull", 0.5, [1, 2]], ["sticker_tally", 0.5, [1, 2]], ["sticker_shark", 0.12, [1, 1]]
 	]},
 	"server_rack": {"rolls": [1, 2], "entries": [
 		["server_drive", 3, [1, 1]], ["gpu", 2, [1, 1]], ["wires", 2, [1, 2]], ["circuit_board", 2, [1, 1]],
-		["power_unit", 1, [1, 1]], ["multimeter", 0.3, [1, 1]], ["junction_box", 1, [1, 1]]
+		["power_unit", 1, [1, 1]], ["multimeter", 0.3, [1, 1]], ["junction_box", 1, [1, 1]],
+		["printer_head", 0.3, [1, 1]], ["printer_board", 0.4, [1, 1]]
 	]},
 	"sport": {"rolls": [1, 1], "entries": [
 		["ammo_12_buck", 2, [5, 15]], ["ammo_12_slug", 1, [5, 10]], ["ammo_556_civ", 0.5, [10, 20]], ["headset_passive", 0.5, [1, 1]],
