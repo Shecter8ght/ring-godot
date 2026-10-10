@@ -1,10 +1,9 @@
 [gd_scene format=3 uid="uid://b5sxwxwnkmrpy"]
 
 [ext_resource type="PackedScene" path="res://levels/shelter/Shelter_Interior.tscn" id="1_shelter"]
-
 [ext_resource type="PackedScene" path="res://scenes/hideout/laser_engraver.tscn" id="engraver_module"]
 
-[sub_resource type="Shader" id="Shader_xqsva"]
+[sub_resource type="Shader" id="Shader_kqklu"]
 code = "
 shader_type spatial;
 render_mode unshaded, cull_back, shadows_disabled;
@@ -52,9 +51,9 @@ void fragment() {
 }
 "
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_kqklu"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_j4gxj"]
 render_priority = 0
-shader = SubResource("Shader_xqsva")
+shader = SubResource("Shader_kqklu")
 shader_parameter/channel = 0
 
 [node name="Hideout" unique_id=664396580 instance=ExtResource("1_shelter")]
@@ -65,10 +64,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4814796e-08, 0, 0.7964697)
 [node name="FinishedMesh_00" parent="Props/SH_Int_MainHub/PlanningChair_04" parent_id_path=PackedInt32Array(1296310451) index="0" unique_id=522453603]
 transform = Transform3D(1, -2.0798062e-08, -5.264983e-09, 2.0798062e-08, 0.87955123, 0.4758042, -5.2649796e-09, -0.4758042, 0.87955123, 4.690019e-08, 0, 1.0729513)
 
-[node name="FinishedMesh_00" parent="Props/SH_Int_MainHub/PlanningChair_05" parent_id_path=PackedInt32Array(1108001606) index="0" unique_id=522453603]
-transform = Transform3D(-0.7141978, 0, 0.699944, 0, 1, 0, -0.699944, 0, -0.7141978, -0.9264605, 0, -0.42001152)
+[node name="PlanningChair_05" parent="Props/SH_Int_MainHub" parent_id_path=PackedInt32Array(1352625740) index="5" unique_id=1108001606]
+transform = Transform3D(0.58843154, 0, 0.808547, 0, 1, 0, -0.808547, 0, 0.58843154, -1.4341407, 0, 1.7)
 
-[node name="Hull_00" parent="Props/SH_Int_MainHub/PlanningChair_05/SimplifiedCollision" parent_id_path=PackedInt32Array(1108001606, 46055589) index="0" unique_id=1574370318]
+[node name="FinishedMesh_00" parent="Props/SH_Int_MainHub/PlanningChair_05" index="0" unique_id=522453603]
+transform = Transform3D(-0.023468822, 0, 0.99972475, 0, 1, 0, -0.99972475, 0, -0.023468822, -0.12673509, 0, -0.100794554)
+
+[node name="SimplifiedCollision" parent="Props/SH_Int_MainHub/PlanningChair_05" index="1" unique_id=46055589]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0076863766, 0, 0)
+
+[node name="Hull_00" parent="Props/SH_Int_MainHub/PlanningChair_05/SimplifiedCollision" index="0" unique_id=1574370318]
 transform = Transform3D(-0.999732, 0, -0.023149706, 0, 1, 0, 0.023149706, 0, -0.999732, 0, 0.6318855, 0)
 
 [node name="FinishedMesh_00" parent="Props/SH_Int_MainHub/PlanningChair_06" parent_id_path=PackedInt32Array(1013631804) index="0" unique_id=522453603]
@@ -80,8 +85,33 @@ transform = Transform3D(-0.87411565, 0, -0.48571783, 0, 1, 0, 0.48571783, 0, -0.
 [node name="FinishedMesh_00" parent="Props/SH_Int_MainHub/PlanningChair_08" parent_id_path=PackedInt32Array(503554985) index="0" unique_id=522453603]
 transform = Transform3D(-0.7424257, 0, -0.66992843, 0, 1, 0, 0.66992843, 0, -0.7424257, 0, 0, 0)
 
+[node name="BayBench1" parent="Props/SH_Int_PersonalAndTechnical" parent_id_path=PackedInt32Array(4625705) index="21" unique_id=721295102]
+transform = Transform3D(-0.9986709, 0, 0.051541455, 0, 1, 0, -0.051541455, 0, -0.9986709, -5.1, 0, 5.6318254)
+visible = false
+
+[node name="HubMedicReserve" parent="Props/SH_Int_PersonalAndTechnical" parent_id_path=PackedInt32Array(4625705) index="31" unique_id=314168736]
+transform = Transform3D(0.15622102, 0, 0.9877221, 0, 1, 0, -0.9877221, 0, 0.15622102, -7.329179, 2.0433645, -3.5781035)
+
+[node name="HubRouteBoard" parent="Props/SH_Int_PersonalAndTechnical" parent_id_path=PackedInt32Array(4625705) index="64" unique_id=2077370836]
+visible = false
+
+[node name="BayHelmet" parent="Props/SH_Int_PersonalAndTechnical" parent_id_path=PackedInt32Array(4625705) index="85" unique_id=2126096796]
+visible = false
+
+[node name="Fixture_HubWallLeft" parent="Props" parent_id_path=PackedInt32Array(393731058) index="52" unique_id=2007076486]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.65, 2.05, 0.1806978)
+
+[node name="Fixture_HubWallLeft2" parent="Props" parent_id_path=PackedInt32Array(393731058) index="53" unique_id=1804249363]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.65, 2.05, 1.7806977)
+
+[node name="HubWallLeft" parent="Lights" parent_id_path=PackedInt32Array(1434640452) index="48" unique_id=334475503]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.65, 2.05, 0.180897)
+
+[node name="HubWallLeft2" parent="Lights" parent_id_path=PackedInt32Array(1434640452) index="49" unique_id=595907168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.65, 2.05, 1.7808969)
+
 [node name="Screen" parent="Activities/Tv/TV_Visual" parent_id_path=PackedInt32Array(2123821538) index="0" unique_id=2057456523]
-material_override = SubResource("ShaderMaterial_kqklu")
+material_override = SubResource("ShaderMaterial_j4gxj")
 
 [node name="GeneratorHum" parent="Audio/ExistingAudioBridge" parent_id_path=PackedInt32Array(790355439) index="0" unique_id=618534773]
 bus = &"Master"
@@ -89,8 +119,17 @@ bus = &"Master"
 [node name="VentilationHum" parent="Audio/ExistingAudioBridge" parent_id_path=PackedInt32Array(790355439) index="1" unique_id=127242075]
 bus = &"Master"
 
-[node name="LaserEngraver" parent="." instance=ExtResource("engraver_module")]
-position = Vector3(15.7, 0.9, -4.25)
+[node name="BayGloves_0" parent="Dressing" parent_id_path=PackedInt32Array(1443542778) index="63" unique_id=1339241499]
+visible = false
+
+[node name="BayHeadset_0" parent="Dressing" parent_id_path=PackedInt32Array(1443542778) index="64" unique_id=726251548]
+visible = false
+
+[node name="FinishedMesh_00" parent="Dressing/BayCloth_0" parent_id_path=PackedInt32Array(2132973394) index="0" unique_id=1396732530]
+visible = false
+
+[node name="LaserEngraver" parent="." index="18" unique_id=1634068650 instance=ExtResource("engraver_module")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.7, 0.9, -4.25)
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]
 [editable path="Architecture/SH_Int_Ceiling_MainHub"]
