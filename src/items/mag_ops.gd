@@ -41,6 +41,8 @@ var all_roles: Array[String] = []
 var active_ids: Array = []
 ## Сколько шагов сделано (звук на каждый).
 var steps: int = 0
+## Снаряжают с ускорителем (Balance.MAG_OPS.loader_item лежит в одной из сеток хозяина) — быстрее.
+var fast: bool = false
 
 var _t: float = 0.0
 var _lists: Dictionary = {}
@@ -62,10 +64,22 @@ static func make(p_kind: String, p_role: String, p_owner: int, p_get: Callable, 
 func step_sec() -> float:
 	match kind:
 		"load":
-			return float(Balance.MAG_OPS.load_sec)
+			return 1.0 / float(Balance.MAG_OPS.loader_rate) if fast else float(Balance.MAG_OPS.load_sec)
 		"unload":
 			return float(Balance.MAG_OPS.unload_sec)
 	return float(Balance.MAG_OPS.plate_sec)
+
+
+## Есть ли у хозяина ускоритель снаряжения: в любой его сетке (ящик с добычей не в счёт — он чужой).
+func _has_loader() -> bool:
+	var want := String(Balance.MAG_OPS.loader_item)
+	for r: String in all_roles:
+		if r == "loot":
+			continue
+		for e: Dictionary in _list(r):
+			if String(e.get("id", "")) == want:
+				return true
+	return false
 
 
 ## Начать с предмета idx в сетке role: проверить, что есть что делать, и пометить. false — нечего
@@ -87,6 +101,7 @@ func start(idx: int) -> bool:
 	var s := 0
 	match kind:
 		"load":
+			fast = _has_loader()
 			if not e.has("rounds"):
 				reason = "gone"
 				return false

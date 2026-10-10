@@ -203,6 +203,19 @@ func _ready() -> void:
 	_set_weapon_rounds(7)
 	await _hold_reload(0.7)
 	_check("пистолет — точно", _me.ammo_check_text == "7 из %d" % int(_me.spec().mag), _me.ammo_check_text)
+	# --- ускоритель снаряжения в рюкзаке: 10 патронов в секунду, 30 — за три секунды
+	_raid.request_cancel_op()
+	inv.items = []
+	inv.add_entry(WeaponDb.make_mag("mag_545_30", "", 0))
+	inv.add("ammo_545_std", 60)
+	inv.add("mag_loader", 1)
+	_raid.request_item_op("load", "backpack", 0)
+	await _wait(1.05)
+	var fast_n := int(_mag(inv.items).rounds)
+	_check("с ускорителем — около 10 патронов в секунду", fast_n >= 8 and fast_n <= 12, "%d за секунду" % fast_n)
+	await _wait(2.4)
+	_check("магазин на 30 снаряжён за три с небольшим секунды, ускоритель не потрачен", int(_mag(inv.items).rounds) == 30 and inv.has("mag_loader"), "%d" % int(_mag(inv.items).rounds))
+	_check("ускоритель продаёт Михалыч (каталог 2), находится у охраны и ЧВК", TraderStock.catalog_of("mag_loader") == 2 and not ItemDb.loot_only("mag_loader"), "")
 	print("mags_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
 
