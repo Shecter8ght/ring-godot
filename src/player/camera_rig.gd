@@ -604,7 +604,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			_viewmodel = ViewmodelClips.create(wid, pl.weapon_mods)
 		else:
 			_viewmodel = WeaponModels.build(wid, pl.weapon_mods, 0, pl.weapon_condition, pl.weapon_mag) if wid != "" else Node3D.new()
-		WeaponCondition.apply_visual(_viewmodel, {"dur": pl.weapon_condition})
+		WeaponCondition.apply_visual(_viewmodel, {"id": wid, "dur": pl.weapon_condition})
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			var gi := mi as GeometryInstance3D
 			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

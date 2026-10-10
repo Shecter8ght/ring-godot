@@ -656,7 +656,7 @@ const FLASHLIGHT_BLIND_M := 15.0
 # --- Арсенал (data/weapons.json, data/armor.json; docs/design/weapons.md) ---
 ## Износ оружия: разброс × (1 + износ² × spread); задержка за выстрел = (1 − надёжность) ×
 ## jam_base × (1 + износ² × jam_worn) (износ = (100 − прочность)/100); устранить — clear_sec.
-const WEAPON_WEAR := {"spread": 0.8, "jam_base": 0.012, "jam_worn": 25.0, "clear_sec": 0.9}
+const WEAPON_WEAR := {"spread": 0.8, "jam_base": 0.012, "jam_worn": 25.0, "clear_sec": 1.5}
 ## Ресурс оружия/обвесов в процентах; пороги материалов, расход на выстрел и ремонт.
 const CONDITION := {"full": 100.0, "used": 60.0, "worn": 20.0,
 	"weapon_wear": 0.02, "mod_wear": 0.002,

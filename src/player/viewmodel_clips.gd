@@ -1,12 +1,16 @@
 class_name ViewmodelClips
 extends Node3D
 ## Руки и оружие от первого лица с заготовленными клипами из Blender (tools/export_veras54.py):
-## стойка, тактическая и полная перезарядка, проверка магазина. Сцена уже в осях камеры (камера в
-## начале, взгляд по −Z), поэтому у бедра узел почти не сдвигается — поза та, что в Blender.
+## стойка, тактическая и полная перезарядка, проверка магазина, устранение задержки. Сцена уже в осях
+## камеры (камера в начале, взгляд по −Z), поэтому у бедра узел почти не сдвигается — поза та, что в Blender.
+## Под рукоятку под цевьём со своим набором клипов (attach.viewmodel_set: ВАРН V1 / V2) берутся клипы
+## «<клип>_<набор>»: левая держит рукоятку, в перезарядке отпускает её и берёт снова.
 ##
 ## Клипом управляет состояние игрока (опрос каждый кадр, без новых событий в Player): началась
 ## перезарядка — клип по пустому/непустому магазину, растянутый на её время (стресс удлиняет);
 ## прервали — плавно в стойку; проверка патронов — клип проверки; выстрел — отвод затвора.
+## Задержка (Player.is_jammed): затвор недозакрыт, в окне торчит гильза (узел Part_JamCase); R — клип
+## jam_clear: правая отводит затвор, гильза выпадает.
 ## Патроны в магазине — узлы Round_NN (1 — верхний), подаватель — по счёту (служебный клип
 ## follower_by_rounds). Обвесы и метки — у узла WeaponFrame (оси игры у пистолетной рукоятки).
 
@@ -45,6 +49,13 @@ var _grip_z: float = NAN
 var _grip_w: float = 0.0
 var _arm_skel: Skeleton3D
 var _arm_bones: Array[int] = []
+## Набор клипов под рукоятку ("" — рука на цевье) и на сколько её место на планке отличается от того,
+## где она стояла в Blender (кисть переезжает вместе с ней).
+var _set: String = ""
+var _grip_dz: float = NAN
+## Гильза задержки и таймер клипа «устранить задержку» на прошлом кадре.
+var _jam_case: Node3D
+var _last_clear: float = 0.0
 
 
 static func available(id: String) -> bool:
@@ -77,6 +88,10 @@ func _setup(id: String, mods: Dictionary) -> void:
 		_bolt = _weapon_skel.find_bone("Bolt")
 	_follower_src = _anim.get_animation("follower_by_rounds") if _anim.has_animation("follower_by_rounds") else null
 	_bolt_src = _anim.get_animation("bolt_travel") if _anim.has_animation("bolt_travel") else null
+	if _bolt_src:
+		# две записи (закрыт / отведён) импортируются «ступенькой» — промежуточный ход затвора нужен плавным
+		for i in range(_bolt_src.get_track_count()):
+			_bolt_src.track_set_interpolation_type(i, Animation.INTERPOLATION_LINEAR)
 	for i in range(1, 31):
 		var r: Node3D = model.find_child("Round_%02d" % i, true, false) as Node3D
 		if r == null:
@@ -87,7 +102,19 @@ func _setup(id: String, mods: Dictionary) -> void:
 		if arm.find_bone("hand.L") >= 0 and arm.find_bone("forearm.L") >= 0 and arm.find_bone("upper_arm.L") >= 0:
 			_arm_skel = arm
 			_arm_bones = [arm.find_bone("upper_arm.L"), arm.find_bone("forearm.L"), arm.find_bone("hand.L")]
-	_grip_z = _support_z(String(WeaponDb.weapon(id).get("model", "")), mods)
+	var model_key: String = String(WeaponDb.weapon(id).get("model", ""))
+	_grip_z = _support_z(model_key, mods)
+	var under: String = WeaponGrips._under_key(mods)
+	if under != "":
+		var grip_set: String = String(WeaponDb.attachment(WeaponDb.mod_id(mods[under])).get("viewmodel_set", ""))
+		var idle: String = String((config.get("clips", {}) as Dictionary).get("idle", "idle"))
+		if grip_set != "" and _anim.has_animation(idle + "_" + grip_set):
+			_set = grip_set
+			var base_z: float = float((WeaponMods.socket(model_key, WeaponBuild.base_of(under)).get("pos", Vector3.ZERO) as Vector3).z)
+			_grip_dz = WeaponBuild.placed_z(model_key, mods, under) - base_z
+	_jam_case = model.find_child("Part_JamCase*", true, false) as Node3D
+	if _jam_case:
+		_jam_case.visible = false
 	for raw_part: Node in model.find_children("Part_Magazine*", "Node3D", true, false):
 		_mag_parts.append(raw_part as Node3D)
 	frame = model.find_child("WeaponFrame", true, false) as Node3D
@@ -104,10 +131,18 @@ func _setup(id: String, mods: Dictionary) -> void:
 		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# руки и оружие не уходят за дальнюю плоскость при близкой камере
 		gi.extra_cull_margin = 0.5
-	_play(String((config.get("clips", {}) as Dictionary).get("idle", "idle")), 0.0)
+	_play(_clip_name("idle"), 0.0)
 
 
+## Клип по роли (idle, reload, reload_empty, check, clear) — из набора под рукоятку, если он есть.
 func _clip_name(kind: String) -> String:
+	var clip: String = _base_clip(kind)
+	if _set != "" and clip != "" and _anim.has_animation(clip + "_" + _set):
+		return clip + "_" + _set
+	return clip
+
+
+func _base_clip(kind: String) -> String:
 	return String((config.get("clips", {}) as Dictionary).get(kind, ""))
 
 
@@ -127,15 +162,26 @@ func update(pl: Player, delta: float) -> void:
 	var reloading: bool = pl.reload_timer > 0.0 and pl._reload_kind != "clear"
 	if reloading and _last_reload <= 0.0:
 		var empty: bool = pl._reload_empty
-		var clip := _clip_name("reload_empty" if empty else "reload")
+		var role: String = "reload_empty" if empty else "reload"
 		_rounds_before = 0 if empty else clampi(pl.ammo, 0, _rounds.size())
 		_rounds_after = clampi(mag, 0, _rounds.size())
-		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(clip, -1))
-		_play(clip, BLEND_IN, pl.reload_timer)
+		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(role), -1))
+		_play(_clip_name(role), BLEND_IN, pl.reload_timer)
 	elif not reloading and _last_reload > 0.0 and _clip != "" and _clip != _clip_name("check"):
 		# закончилась или прервана — в стойку (досылка уже показана клипом)
 		_play(_clip_name("idle"), BLEND_OUT)
 	_last_reload = pl.reload_timer if reloading else 0.0
+	# задержка: R — передёрнуть затвор (клип на время устранения); прервали — в стойку
+	var clearing: bool = pl.reload_timer > 0.0 and pl._reload_kind == "clear"
+	if clearing and _last_clear <= 0.0:
+		_rounds_before = clampi(pl.ammo, 0, _rounds.size())
+		_rounds_after = _rounds_before
+		_swap_frame = -1
+		_play(_clip_name("clear"), BLEND_IN, pl.reload_timer)
+	elif not clearing and _last_clear > 0.0 and _clip != "" and _clip == _clip_name("clear"):
+		_play(_clip_name("idle"), BLEND_OUT)
+	_last_clear = pl.reload_timer if clearing else 0.0
+	var jammed: bool = pl.is_jammed()
 	if pl.ammo_check_t > _last_check + 0.5 and _clip == "":
 		_rounds_before = clampi(pl.ammo, 0, _rounds.size())
 		_rounds_after = _rounds_before
@@ -160,20 +206,34 @@ func update(pl: Player, delta: float) -> void:
 	var mag_in: bool = pl.weapon_mag != "" or reloading
 	for part: Node3D in _mag_parts:
 		part.visible = mag_in
-	_pose_overrides(shown, delta)
+	var clear_clip: bool = _clip != "" and _clip == _clip_name("clear")
+	if _jam_case:
+		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
+		_jam_case.visible = jammed or clear_clip
+	_pose_overrides(shown, delta, jammed and not clear_clip)
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
 	_support_hand(_grip_w)
 
 
-func _pose_overrides(shown: int, delta: float) -> void:
+## jam_hold — задержка не устранена: затвор стоит недозакрытым на зажатой гильзе (config.jam_open — доля хода).
+func _pose_overrides(shown: int, delta: float, jam_hold: bool = false) -> void:
 	if _weapon_skel == null:
 		return
 	if _follower >= 0 and _follower_src:
-		_apply_sample(_follower_src, "MagazineFollower", _follower, float(shown) / 30.0)
-	if _kick > 0.0 and _bolt >= 0 and _bolt_src:
+		_apply_sample(_follower_src, "MagazineFollower", _follower, _table_time(_follower_src, float(shown), 31))
+	var open: float = float(config.get("jam_open", 0.4)) if jam_hold else 0.0
+	if _kick > 0.0:
 		_kick = maxf(0.0, _kick - delta)
-		var k: float = sin(PI * (1.0 - _kick / BOLT_KICK_SEC))
-		_apply_sample(_bolt_src, "Bolt", _bolt, k / 30.0)
+		open = maxf(open, sin(PI * (1.0 - _kick / BOLT_KICK_SEC)))
+	if open > 0.0 and _bolt >= 0 and _bolt_src:
+		_apply_sample(_bolt_src, "Bolt", _bolt, _table_time(_bolt_src, open, 2))
+
+
+## Время записи index в служебном клипе-таблице из count записей по кадру на запись. Отсчёт — от конца
+## клипа: экспорт glTF начинает дорожку на кадр раньше первой записи (счёт от начала давал сдвиг на
+## кадр — затвор при выстреле стоял закрытым).
+func _table_time(src: Animation, index: float, count: int) -> float:
+	return maxf(0.0, src.length - (float(count - 1) - index) / float(config.get("fps", 30)))
 
 
 ## Поза одной кости из служебного клипа в момент t (с): клип — таблица «счёт → поза».
@@ -214,7 +274,9 @@ func _support_hand(weight: float) -> void:
 	# ось цевья (+Z рамы) в осях скелета; на сколько ехать — по текущему запястью клипа
 	var to_frame: Transform3D = frame.global_transform.affine_inverse() * sk.global_transform
 	var wrist_z: float = (to_frame * hand.origin).z
-	var dz: float = clampf(_grip_z - wrist_z, -float(Balance.SUPPORT_GRIP.max_shift), float(Balance.SUPPORT_GRIP.max_shift)) * weight
+	# рукоятка со своими клипами: кисть уже на ней — едет ровно на её сдвиг по планке
+	var want: float = _grip_dz if not is_nan(_grip_dz) else _grip_z - wrist_z
+	var dz: float = clampf(want, -float(Balance.SUPPORT_GRIP.max_shift), float(Balance.SUPPORT_GRIP.max_shift)) * weight
 	if absf(dz) < 0.0005:
 		return
 	var axis: Vector3 = (sk.global_transform.affine_inverse().basis * frame.global_basis * Vector3(0, 0, 1)).normalized()

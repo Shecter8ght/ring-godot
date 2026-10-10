@@ -91,6 +91,10 @@ static func apply_visual(root: Node3D, entry: Dictionary) -> void:
 	if int(root.get_meta("condition_visual", -1)) == visual:
 		return
 	root.set_meta("condition_visual", visual)
+	# у модели свои карты износа (ВЕРАС-54: weapon.state_maps) — общий налёт не нужен
+	var maps: String = String(WeaponDb.weapon(String(entry.get("id", ""))).get("state_maps", ""))
+	if maps != "" and visual < int(Balance.CONDITION.full) and _apply_state_maps(root, maps, visual):
+		return
 	var amount: float = float(Balance.CONDITION.grime_worn if visual == int(Balance.CONDITION.worn) else Balance.CONDITION.grime_used) if visual < int(Balance.CONDITION.full) else 0.0
 	if amount <= 0.0:
 		return
@@ -124,3 +128,49 @@ static func apply_visual(root: Node3D, entry: Dictionary) -> void:
 					mesh.material_override = _materials[key] as Material
 					break
 				mesh.set_surface_override_material(surface, _materials[key] as Material)
+
+
+## Собственные карты состояния модели: материалу «GAME • <Поверхность> • 100» из GLB ставятся цвет,
+## нормали и ORM из <maps>_<Поверхность>_<состояние>_*.png (tools/veras54_game_materials.py --states).
+## Обвесы и руки не трогаются. false — карт нет (остаётся общий налёт).
+static func _apply_state_maps(root: Node3D, maps: String, visual: int) -> bool:
+	var done: bool = false
+	for raw: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mesh: MeshInstance3D = raw as MeshInstance3D
+		var parent: Node = mesh
+		var skip: bool = false
+		# руки не отсекаются по имени узла: во вьюмодели оружие висит на кости рига рук, а материал рук
+		# и так не «GAME • …»
+		while parent != null and parent != root:
+			if parent.has_meta("condition_part"):
+				skip = true
+				break
+			parent = parent.get_parent()
+		if skip or mesh.mesh == null:
+			continue
+		for surface: int in range(mesh.mesh.get_surface_count()):
+			var source: StandardMaterial3D = mesh.mesh.surface_get_material(surface) as StandardMaterial3D
+			if source == null:
+				continue
+			var parts: PackedStringArray = source.resource_name.split(" • ")
+			if parts.size() < 3 or parts[0] != "GAME":
+				continue
+			var prefix: String = "%s_%s_%d_" % [maps, parts[1], visual]
+			var key: String = "maps:%d:%s" % [source.get_instance_id(), prefix]
+			if not _materials.has(key):
+				if not ResourceLoader.exists(prefix + "albedo.png"):
+					continue
+				var worn: StandardMaterial3D = source.duplicate() as StandardMaterial3D
+				worn.albedo_texture = load(prefix + "albedo.png") as Texture2D
+				if ResourceLoader.exists(prefix + "normal.png"):
+					worn.normal_texture = load(prefix + "normal.png") as Texture2D
+				if ResourceLoader.exists(prefix + "orm.png"):
+					var orm: Texture2D = load(prefix + "orm.png") as Texture2D
+					worn.roughness_texture = orm
+					worn.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_GREEN
+					worn.metallic_texture = orm
+					worn.metallic_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_BLUE
+				_materials[key] = worn
+			mesh.set_surface_override_material(surface, _materials[key] as Material)
+			done = true
+	return done

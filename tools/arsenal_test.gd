@@ -240,7 +240,7 @@ func _data_cases(rng: RandomNumberGenerator) -> void:
 			catalog_count += 1
 			if String(ItemDb.item(id).get("flavor", "")).strip_edges() == "":
 				missing_flavor.append(id)
-	_check("каталог: у всех 143 элементов есть отдельная игровая фраза", catalog_count == 143 and missing_flavor.is_empty(),
+	_check("каталог: у всех 144 элементов есть отдельная игровая фраза", catalog_count == 144 and missing_flavor.is_empty(),
 		"элементов %d, без фразы: %s" % [catalog_count, ", ".join(missing_flavor)])
 	var vss_item: Dictionary = ItemDb.item("wpn_sp_02")
 	var vss_spec: Dictionary = WeaponDb.weapon("wpn_sp_02")

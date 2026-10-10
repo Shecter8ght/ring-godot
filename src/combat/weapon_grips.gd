@@ -38,7 +38,10 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 		under_pos = under_socket.pos
 		if under_key != "":
 			under_pos.z = WeaponBuild.placed_z(model, mods, under_key)
-	if not attachment.is_empty() and not grip in ["grip_vertical", "grip_angled"]:
+	if grip == "grip_offset":
+		# у рукоятки под 45° своей позы контакта нет — пальцы как на вертикальной
+		contact_attachment = "grip_vertical_01"
+	elif not attachment.is_empty() and not grip in ["grip_vertical", "grip_angled"]:
 		contact_attachment = "tac_flashlight_01"
 	if model == "pistol":
 		contact_attachment = ""

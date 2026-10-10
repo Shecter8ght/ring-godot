@@ -320,6 +320,9 @@ static func _adapter(pivot: Node3D, m: Dictionary, a: Dictionary) -> void:
 
 
 static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
+	# готовая модель обвеса (tools/prepare_veras_attachments.py); нет файла — процедурный вид ниже
+	if a.has("model") and _model_part(root, m, a):
+		return
 	match String(a.get("look", "")):
 		"red_dot":
 			_red_dot(root, m)
@@ -343,6 +346,8 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 			_scaled(root, m, float(a.get("scale", 1.0)), _grip_vertical)
 		"grip_angled":
 			_scaled(root, m, float(a.get("scale", 1.0)), _grip_angled)
+		"grip_offset":
+			_grip_offset(root, m)
 		"stock_tele":
 			_stock_tele(root, m)
 		"flashlight":
@@ -355,6 +360,61 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 			_combo(root, m, a)
 		"bipod":
 			_bipod(root, m)
+
+
+## Обвес готовой моделью: a.model = {scene, offset [x, y, z] от точки, length_m — длина дульной насадки}.
+## Сетки Body / Body_LOD1 (вид со стороны), карты по состоянию 100 / 60 / 20 лежат рядом с моделью:
+## <имя>_<состояние>_{base_color,roughness,metallic,normal}.png. Начало модели — место посадки:
+## у рукоятки — нижняя плоскость планки, у глушителя — задний торец на оси ствола.
+static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
+	var spec: Dictionary = a.model
+	var path: String = String(spec.get("scene", ""))
+	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
+		return false
+	var model: Node3D = (load(path) as PackedScene).instantiate() as Node3D
+	if model == null:
+		return false
+	var visual: int = WeaponCondition.stage(m.get("state", {}))
+	var material: Material = _model_material(path.get_basename() + "_%d_" % visual)
+	if material == null:
+		model.free()
+		return false
+	var o: Array = spec.get("offset", [0, 0, 0])
+	var at: Vector3 = (m.pos as Vector3) + Vector3(float(o[0]), float(o[1]), float(o[2]))
+	model.position = at
+	root.add_child(model)
+	for raw: Node in model.find_children("Body*", "MeshInstance3D", true, false):
+		var body: MeshInstance3D = raw as MeshInstance3D
+		body.material_override = material
+		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
+	if spec.has("length_m"):
+		# дульная насадка: штатный тормоз снят, срез — на её торце
+		if bool(m.get("replace", false)):
+			_hide_part(root, "muzzle_device")
+		root.set_meta("muzzle", at + Vector3(0, 0, float(spec.length_m)))
+		if bool((a.get("fx", {}) as Dictionary).get("suppressed", false)):
+			root.set_meta("suppressed", true)
+	return true
+
+
+## Материал модели обвеса по картам состояния (общий на все экземпляры); нет карт — null.
+static func _model_material(prefix: String) -> Material:
+	var key: String = "model:" + prefix
+	if WeaponModels._mats.has(key):
+		return WeaponModels._mats[key] as Material
+	if not ResourceLoader.exists(prefix + "base_color.png"):
+		return null
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.albedo_texture = load(prefix + "base_color.png") as Texture2D
+	material.metallic = 1.0
+	material.metallic_texture = load(prefix + "metallic.png") as Texture2D
+	material.metallic_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
+	material.roughness_texture = load(prefix + "roughness.png") as Texture2D
+	material.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
+	material.normal_enabled = true
+	material.normal_texture = load(prefix + "normal.png") as Texture2D
+	WeaponModels._mats[key] = material
+	return material
 
 
 ## Игровая модель ЛУМАР: общий крепёж, карты состояния и отдельные стекло/марка.
@@ -701,6 +761,19 @@ static func _grip_vertical(root: Node3D, m: Dictionary) -> void:
 	for i in range(4):
 		WeaponModels._box(g, Vector3(0, -0.022 - i * 0.017, 0.0152), Vector3(0.022, 0.006, 0.002), _mat("polymer_grip"))
 	WeaponModels._cbox(g, Vector3(0, -0.09, 0), Vector3(0.028, 0.006, 0.032), _mat("rubber"), 0.002)
+
+
+## Рукоятка под 45° влево от стрелка (запасной вид без модели): вертикальная, повёрнутая вокруг ствола.
+static func _grip_offset(root: Node3D, m: Dictionary) -> void:
+	var p: Vector3 = m.pos
+	var n := Node3D.new()
+	n.position = p
+	# +X модели — левая сторона стрелка: низ рукоятки уходит к +X
+	n.rotation.z = deg_to_rad(45.0)
+	root.add_child(n)
+	var mm := m.duplicate()
+	mm.pos = Vector3.ZERO
+	_grip_vertical(n, mm)
 
 
 ## Угловая рукоятка: клин вдоль цевья — упор для ладони, без выступа вниз.

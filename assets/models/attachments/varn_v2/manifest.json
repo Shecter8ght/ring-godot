@@ -1,0 +1,30 @@
+{
+  "source": {
+    "100": "Foregrip_Angled_State100_New_v11.blend",
+    "60": "Foregrip_Angled_State060_Used40_v11.blend",
+    "20": "Foregrip_Angled_State020_Worn80_v11.blend"
+  },
+  "triangles": {
+    "Body": 12380,
+    "Body_LOD1": 2476
+  },
+  "axis": "X left, Y up, Z forward",
+  "bounds_m": {
+    "min": [
+      -0.0167,
+      -0.0793,
+      -0.02
+    ],
+    "max": [
+      0.0643,
+      0.004,
+      0.02
+    ]
+  },
+  "states": [
+    100,
+    60,
+    20
+  ],
+  "texture_size": 1024
+}

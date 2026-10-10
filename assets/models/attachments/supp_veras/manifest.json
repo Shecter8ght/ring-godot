@@ -1,0 +1,28 @@
+{
+  "source": {
+    "100": "Глушитель отдельно/Suppressor_Game_State100_v01.blend"
+  },
+  "triangles": {
+    "Body": 12420,
+    "Body_LOD1": 2484
+  },
+  "axis": "X left, Y up, Z forward",
+  "bounds_m": {
+    "min": [
+      -0.021,
+      -0.021,
+      -0.0
+    ],
+    "max": [
+      0.021,
+      0.021,
+      0.18
+    ]
+  },
+  "states": [
+    100,
+    60,
+    20
+  ],
+  "texture_size": 1024
+}

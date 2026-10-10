@@ -34,9 +34,20 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = Path("E:/Models Blender/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Игровая версия/Перезарядка v01 (Claude)")
 OUT = ROOT / "assets/models/weapons/veras54"
 BASE = SRC / "VERAS54_Reload_Full_v05.blend"
-CLIP_FILES = {"Tactical": SRC / "VERAS54_Reload_Tactical_v04.blend", "Check": SRC / "VERAS54_Mag_Check_v02.blend"}
-# клип в игре: (суффикс действий build_clips.py, последний кадр)
-CLIPS = {"reload_tactical": ("Tactical", 79), "mag_check": ("Check", 104), "reload_full": ("Full", 114)}
+# v02: те же клипы с левой на рукоятке под цевьём (ВАРН V1 / V2) и устранение задержки (гильза в окне)
+SRC2 = SRC.parent / "Клипы v02 (Claude)"
+GRIPS = ("varn_v1", "varn_v2")
+# клип в игре: (суффикс действий build_clips.py, последний кадр, файл с действиями; None — база сцены)
+CLIPS = {"reload_tactical": ("Tactical", 79, SRC / "VERAS54_Reload_Tactical_v04.blend"),
+         "mag_check": ("Check", 104, SRC / "VERAS54_Mag_Check_v02.blend"),
+         "reload_full": ("Full", 114, None),
+         "jam_clear": ("Jam", 46, SRC2 / "VERAS54_Jam_Clear_v01.blend")}
+for _g in GRIPS:
+    for _clip, _tag, _last, _file in (("reload_tactical", "Tactical", 79, "Reload_Tactical"), ("mag_check", "Check", 104, "Mag_Check"),
+                                      ("reload_full", "Full", 114, "Reload_Full"), ("jam_clear", "Jam", 46, "Jam_Clear")):
+        CLIPS[f"{_clip}_{_g}"] = (f"{_tag}_{_g}", _last, SRC2 / f"VERAS54_{_file}_{_g}_v01.blend")
+# стойка — первый кадр тактической: без рукоятки и с каждой из них
+IDLES = {"idle": "Tactical", **{f"idle_{g}": f"Tactical_{g}" for g in GRIPS}}
 GRIP = Vector((-0.14, -0.323, 1.635))        # пистолетная рукоятка — начало осей игры
 MARKS = {"SightRear": Vector((-0.14, -0.30, 1.755)), "SightFront": Vector((-0.14, -0.768, 1.755)),
          "Muzzle": Vector((-0.14, -0.955, 1.70))}
@@ -54,6 +65,76 @@ def finish_materials(path: Path) -> None:
     ассетов); Python Blender для этой операции не используется.
     """
     subprocess.run(["python", str(ROOT / "tools/veras54_game_materials.py"), str(path)], check=True)
+
+
+GLOSS_MASK_PX = 1024
+
+
+def _under_any(ob, prefix: str) -> bool:
+    p = ob.parent
+    while p is not None:
+        if p.name.startswith(prefix):
+            return True
+        p = p.parent
+    return False
+
+
+def _uv_raster(obs: list, n: int):
+    """Треугольники GameUV объектов → булева карта n×n (строка 0 — низ картинки)."""
+    import numpy as np
+    m = np.zeros((n, n), dtype=bool)
+    for ob in obs:
+        me = ob.data
+        uv = me.uv_layers["GameUV"].data
+        me.calc_loop_triangles()
+        for t in me.loop_triangles:
+            p = np.array([uv[l].uv[:] for l in t.loops]) * n
+            x0, y0 = np.maximum(np.floor(p.min(0)).astype(int) - 1, 0)
+            x1, y1 = np.minimum(np.ceil(p.max(0)).astype(int) + 1, n - 1)
+            d = (p[1, 1] - p[2, 1]) * (p[0, 0] - p[2, 0]) + (p[2, 0] - p[1, 0]) * (p[0, 1] - p[2, 1])
+            if x1 < x0 or y1 < y0 or abs(d) < 1e-9:
+                continue
+            xs, ys = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+            a = ((p[1, 1] - p[2, 1]) * (xs - p[2, 0]) + (p[2, 0] - p[1, 0]) * (ys - p[2, 1])) / d
+            b = ((p[2, 1] - p[0, 1]) * (xs - p[2, 0]) + (p[0, 0] - p[2, 0]) * (ys - p[2, 1])) / d
+            e = -0.6 / max(1.0, abs(d) ** 0.5)      # край пикселя тоже считается накрытым
+            m[y0:y1 + 1, x0:x1 + 1] |= (a >= e) & (b >= e) & (1 - a - b >= e)
+    return m
+
+
+def write_gloss_mask() -> None:
+    """Где на развёртке металла остаётся блеск: затворная рама и трубка приклада (решение владельца,
+    2026-10-10 — остальной автомат матовый). Читает tools/veras54_game_materials.py."""
+    import numpy as np
+    metal = [o for o in objs("MESH") if o.data.materials and o.data.materials[0]
+             and "WeaponMetal" in o.data.materials[0].name and "GameUV" in o.data.uv_layers]
+    gloss = [o for o in metal if _under_any(o, "BoltCarrier") or o.name.startswith("Stock • sliding extension tube")]
+    if len(gloss) < 2:
+        raise RuntimeError("не найдены затворная рама и трубка приклада")
+    n = GLOSS_MASK_PX
+    g = _uv_raster(gloss, n)
+    rest = _uv_raster([o for o in metal if o not in gloss], n)
+    # поля островов (отступ текстуры) — тоже блеск, но не на чужих островах
+    grown = g.copy()
+    for _ in range(3):
+        grown[1:, :] |= grown[:-1, :]
+        grown[:-1, :] |= grown[1:, :]
+        grown[:, 1:] |= grown[:, :-1]
+        grown[:, :-1] |= grown[:, 1:]
+    g |= grown & ~rest
+    img = bpy.data.images.new("gloss_mask", n, n, alpha=False)
+    px = np.zeros((n, n, 4), dtype=np.float32)
+    px[..., :3] = g[..., None]
+    px[..., 3] = 1.0
+    img.pixels.foreach_set(px.ravel())
+    tmp = ROOT / "tools/veras54_gloss.mask.png"
+    img.filepath_raw = str(tmp)
+    img.file_format = "PNG"
+    img.save()
+    bpy.data.images.remove(img)
+    # расширение не .png: Godot не должен импортировать служебную карту как текстуру
+    tmp.replace(ROOT / "tools/veras54_gloss.mask")
+    print("VERAS gloss mask", int(g.sum()), "px", flush=True)
 
 
 def objs(kind=None):
@@ -167,9 +248,12 @@ def fcurves(act):
 
 
 def append_actions() -> None:
-    for suffix, path in CLIP_FILES.items():
+    for suffix, _, path in CLIPS.values():
+        if path is None:
+            continue
         with bpy.data.libraries.load(str(path), link=False) as (src, dst):
-            dst.actions = [a for a in src.actions if a.startswith(f"VERAS54_{suffix}_")]
+            dst.actions = [a for a in src.actions if a.startswith(f"VERAS54_{suffix}_") and a.endswith("_v01")
+                           and a.split("_v01")[0].rsplit("_", 1)[0] == f"VERAS54_{suffix}"]
 
 
 def assign(ob, act) -> None:
@@ -183,6 +267,10 @@ def sample(arms, wr, frames: list, skip=()) -> dict:
     """Итоговая поза костей (с IK, ограничениями и драйверами) в локальных осях — по кадрам."""
     sc = bpy.context.scene
     data = {arms.name: {}, wr.name: {}}
+    # кость без ключей в этом клипе — в покое, а не там, где её оставил прошлый клип (гильза задержки)
+    for arm in (arms, wr):
+        for pb in arm.pose.bones:
+            pb.matrix_basis = Matrix.Identity(4)
     for f in frames:
         sc.frame_set(int(f), subframe=f - int(f))
         bpy.context.view_layer.update()
@@ -232,19 +320,30 @@ def viewmodel() -> None:
     magob = bpy.data.objects["Magazine"]
     cam = bpy.data.objects["FPS • Camera"]
     acts = {a.name: a for a in bpy.data.actions}
+    write_gloss_mask()
+    # гильза задержки: кость JamCase у WeaponRoot и сетка на ней (стоит в окне; клип jam_clear её выбрасывает)
+    sys.path.insert(0, str(SRC2))
+    import rig_common
+    sc.frame_set(1)
+    bpy.context.view_layer.update()
+    rig_common.add_jam_case(wr)
     # подаватель в клипах не запекается — его ставит игра по счёту патронов (клип follower_by_rounds)
     skip = ("MagazineFollower",)
     baked = {}
-    for clip, (suffix, last) in CLIPS.items():
+    for clip, (suffix, last, _) in CLIPS.items():
+        for kind in ("Arms", "Weapon"):
+            if f"VERAS54_{suffix}_{kind}_v01" not in acts:
+                raise RuntimeError(f"нет действия VERAS54_{suffix}_{kind}_v01 для клипа {clip}")
         for ob, kind in ((arms, "Arms"), (wr, "Weapon"), (root, "Controls"), (magob, "Rounds")):
             assign(ob, acts.get(f"VERAS54_{suffix}_{kind}_v01"))
         frames = list(range(1, last + 1))
         baked[clip] = (frames, sample(arms, wr, frames, skip))
         print("VERAS clip", clip, len(frames), flush=True)
     # стойка — первый кадр тактической (боевой хват владельца), два кадра для зацикливания
-    for ob, kind in ((arms, "Arms"), (wr, "Weapon"), (root, "Controls"), (magob, "Rounds")):
-        assign(ob, acts.get(f"VERAS54_Tactical_{kind}_v01"))
-    baked["idle"] = ([1, 2], sample(arms, wr, [1, 1], skip))
+    for idle, suffix in IDLES.items():
+        for ob, kind in ((arms, "Arms"), (wr, "Weapon"), (root, "Controls"), (magob, "Rounds")):
+            assign(ob, acts.get(f"VERAS54_{suffix}_{kind}_v01"))
+        baked[idle] = ([1, 2], sample(arms, wr, [1, 1], skip))
     # служебные: подаватель по счёту патронов и затвор (отвод для выстрела)
     for ob in (arms, wr, root, magob):
         assign(ob, None)
@@ -334,6 +433,7 @@ def world(detail: bool = False) -> None:
     где ствол разглядывают вблизи; обычная — упрощённая для вида со стороны."""
     bpy.ops.wm.open_mainfile(filepath=str(SRC / "VERAS54_Reload_Tactical_v04.blend"))
     sc = bpy.context.scene
+    write_gloss_mask()
     for ob in objs():
         if ob.animation_data:
             ob.animation_data.action = None

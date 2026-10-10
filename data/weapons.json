@@ -1124,8 +1124,10 @@
       "idle": "idle",
       "reload": "reload_tactical",
       "reload_empty": "reload_full",
-      "check": "mag_check"
+      "check": "mag_check",
+      "clear": "jam_clear"
      },
+     "jam_open": 0.42,
      "swap_frame": {
       "reload_tactical": 42,
       "reload_full": 42
@@ -1172,7 +1174,8 @@
     "sound": "shot_rifle",
     "reload_sound": "reload_rifle",
     "cycle_sound": "",
-    "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.glb"
+  "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.glb",
+    "state_maps": "res://assets/models/weapons/veras54/states/veras54"
    },
    "flavor": "Ствол на каждый день: не лучший ни в одной крайности, зато почти везде уместен."
   },
@@ -4719,6 +4722,15 @@
      "THREAD_545"
     ],
     "look": "suppressor",
+    "model": {
+     "scene": "res://assets/models/attachments/supp_veras/supp_veras.glb",
+     "offset": [
+      0,
+      0,
+      -0.013
+     ],
+     "length_m": 0.18
+    },
     "fx": {
      "noise": 0.35,
      "db": -14,
@@ -4852,7 +4864,7 @@
    "flavor": "Не делает выстрел бесшумным — только оставляет соседним отрядам меньше подсказок."
   },
   "grip_vertical_01": {
-   "name": "Рукоятка вертикальная",
+   "name": "Рукоятка вертикальная ВАРН V1",
    "cat": "mod",
    "size": [
     1,
@@ -4875,6 +4887,10 @@
      "RAIL_BOTTOM"
     ],
     "look": "grip_vertical",
+    "model": {
+     "scene": "res://assets/models/attachments/varn_v1/varn_v1.glb"
+    },
+    "viewmodel_set": "varn_v1",
     "fx": {
      "kick": 0.8,
      "spread": 0.9,
@@ -4917,6 +4933,44 @@
     "clamp_m": 0.05
    },
    "flavor": "Хороша для первого номера: быстрее поднял оружие — раньше решил исход встречи."
+  },
+  "grip_offset_01": {
+   "name": "Рукоятка ВАРН V2, 45° влево",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 9000,
+   "stack": 1,
+   "weight": 0.12,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Рук. 45°",
+   "attach": {
+    "type": "OFFSET_GRIP",
+    "fits": [
+     "RAIL_BOTTOM"
+    ],
+    "look": "grip_offset",
+    "model": {
+     "scene": "res://assets/models/attachments/varn_v2/varn_v2.glb"
+    },
+    "viewmodel_set": "varn_v2",
+    "fx": {
+     "kick": 0.84,
+     "kick_h": 0.9,
+     "aim": 1.08,
+     "ergo": 6
+    },
+    "desc": "Кисть не выворачивается: и подброс меньше, и вскидка быстрее.",
+    "clamp_m": 0.04
+   },
+   "flavor": "Рукоятка смотрит влево-вниз, под естественный поворот кисти: держать удобнее, чем прямую."
   },
   "grip_compact_01": {
    "name": "Рукоятка короткая",
@@ -7061,6 +7115,7 @@
   "mod_comp": "muzzle_comp_545_01",
   "mod_grip": "grip_vertical_01",
   "mod_grip_angled": "grip_angled_01",
+  "mod_grip_offset": "grip_offset_01",
   "mod_stock_tele": "stock_tele_ak_01",
   "mod_mag_ext": "mag_545_45",
   "mod_mag_pistol": "mag_919_33",

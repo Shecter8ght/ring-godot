@@ -4,6 +4,15 @@ python tools/veras54_game_materials.py [путь.glb ...]
 Меняет только упакованные карты Roughness/Metallic оружия и шероховатость
 маркировки. Исходные бинарные данные сеток, рук, скелетов и клипов сохраняются.
 Повторный запуск для той же версии отделки ничего не меняет.
+
+v2 (владелец, 2026-10-10): по автомату не должны скользить блики ламп и солнца —
+всё матовое, блеск остаётся только у затворной рамы и трубки приклада. Их места на
+развёртке — tools/veras54_gloss.mask (PNG; пишет tools/export_veras54.py из GameUV).
+
+python tools/veras54_game_materials.py --states
+Карты состояний 60 % и 20 % (износ из библиотеки модели) с той же матовой отделкой:
+assets/models/weapons/veras54/states/veras54_<поверхность>_<состояние>_{albedo,normal,orm}.png.
+В GLB зашито состояние 100 %; игра подменяет карты по ресурсу ствола (WeaponCondition).
 """
 from __future__ import annotations
 
@@ -16,11 +25,18 @@ import struct
 import numpy as np
 from PIL import Image
 
-VERSION = 1
+VERSION = 2
+GLOSS_MASK = Path(__file__).resolve().parent / "veras54_gloss.mask"
+# Матовое покрытие: бликов нет, цвет меняется только от освещённости.
+MATTE_ROUGHNESS = 0.94
+# Открытая сталь вне затвора и трубки (оси, винты): матовая, но остаётся металлом.
+MATTE_STEEL = {"roughness": 0.86, "metallic": 0.6}
+STATE_SOURCE = Path("E:/Models Blender/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Игровая версия/Риг v01/Текстуры")
+STATE_PX = 2048
 MARKER = "ring_veras54_material_finish"
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS = [ROOT / "assets/models/weapons/veras54" / name
-            for name in ("veras54.glb", "veras54_viewmodel.glb")]
+            for name in ("veras54.glb", "veras54_viewmodel.glb", "veras54_detail.glb")]
 
 
 def read_glb(path: Path) -> tuple[dict, bytes]:
@@ -41,28 +57,66 @@ def read_glb(path: Path) -> tuple[dict, bytes]:
     return document, raw[offset + 8:]
 
 
+def gloss_mask(size: tuple[int, int]) -> np.ndarray:
+    """Где на развёртке металла блеск остаётся исходным (затворная рама, трубка приклада)."""
+    with Image.open(GLOSS_MASK) as mask:
+        return np.array(mask.convert("L").resize(size, Image.NEAREST)) > 127
+
+
+def matte_channels(roughness: np.ndarray, metallic: np.ndarray, surface: str) -> None:
+    """Матовая отделка на месте: каналы 0..1, размер — как у карты."""
+    steel = metallic >= 0.8
+    if surface == "WeaponMetal":
+        # Карта разделяет чёрную отделку и открытую сталь (~1); блеск — только по маске.
+        matte = ~gloss_mask((roughness.shape[1], roughness.shape[0]))
+    elif surface in ("Furniture", "Magazine"):
+        matte = np.ones(roughness.shape, dtype=bool)
+    else:
+        raise ValueError(f"Неизвестная поверхность: {surface}")
+    roughness[matte & ~steel] = MATTE_ROUGHNESS
+    metallic[matte & ~steel] = 0.0
+    roughness[matte & steel] = MATTE_STEEL["roughness"]
+    metallic[matte & steel] = MATTE_STEEL["metallic"]
+
+
 def matte_orm(png: bytes, surface: str) -> bytes:
     source = Image.open(BytesIO(png))
     pixels = np.array(source.convert("RGB"), dtype=np.uint8)
     roughness = pixels[:, :, 1].astype(np.float32) / 255.0
     metallic = pixels[:, :, 2].astype(np.float32) / 255.0
-    if surface == "WeaponMetal":
-        # Карта разделяет чёрную отделку (~0.48) и открытую сталь (~1).
-        # Микроструктура покрытия сохраняется; сталь не становится краской.
-        coating = metallic < 0.8
-        roughness[coating] = np.clip(roughness[coating] + 0.20, 0.62, 0.80)
-        metallic[coating] *= 0.08
-    elif surface in ("Furniture", "Magazine"):
-        polymer = metallic < 0.2
-        roughness[polymer] = np.clip(roughness[polymer] + 0.09, 0.70, 0.88)
-        metallic[polymer] = 0.0
-    else:
-        raise ValueError(f"Неизвестная поверхность: {surface}")
+    matte_channels(roughness, metallic, surface)
     pixels[:, :, 1] = np.rint(roughness * 255).astype(np.uint8)
     pixels[:, :, 2] = np.rint(metallic * 255).astype(np.uint8)
     output = BytesIO()
     Image.fromarray(pixels).save(output, format="PNG")
     return output.getvalue()
+
+
+def write_states() -> None:
+    """Карты изношенных состояний из библиотеки модели → assets/…/veras54/states (2048, ORM упакован)."""
+    out = ROOT / "assets/models/weapons/veras54/states"
+    out.mkdir(parents=True, exist_ok=True)
+    size = (STATE_PX, STATE_PX)
+    for state in (60, 20):
+        folder = STATE_SOURCE / f"{state:03d}"
+        for surface in ("WeaponMetal", "Furniture", "Magazine"):
+            stem = folder / f"VERAS54_{surface}_{state:03d}_"
+            Image.open(str(stem) + "BaseColor.png").convert("RGB").resize(size, Image.LANCZOS).save(
+                out / f"veras54_{surface}_{state}_albedo.png")
+            Image.open(str(stem) + "Normal.png").convert("RGB").resize(size, Image.LANCZOS).save(
+                out / f"veras54_{surface}_{state}_normal.png")
+            roughness = np.array(Image.open(str(stem) + "Roughness.png").convert("L").resize(size, Image.LANCZOS),
+                                 dtype=np.float32) / 255.0
+            metallic = np.array(Image.open(str(stem) + "Metallic.png").convert("L").resize(size, Image.LANCZOS),
+                                dtype=np.float32) / 255.0
+            matte_channels(roughness, metallic, surface)
+            orm = np.full((STATE_PX, STATE_PX, 3), 255, dtype=np.uint8)
+            orm[:, :, 1] = np.rint(roughness * 255).astype(np.uint8)
+            orm[:, :, 2] = np.rint(metallic * 255).astype(np.uint8)
+            Image.fromarray(orm).save(out / f"veras54_{surface}_{state}_orm.png")
+        Image.open(folder / f"VERAS54_Markings_{state:03d}_BaseColorAlpha.png").convert("RGBA").resize(
+            size, Image.LANCZOS).save(out / f"veras54_Markings_{state}_albedo.png")
+        print(f"состояние {state}: карты записаны в {out}")
 
 
 def fix_glb(path: Path) -> bool:
@@ -71,8 +125,7 @@ def fix_glb(path: Path) -> bool:
     if extras.get(MARKER) == VERSION:
         print(f"{path.name}: матовая отделка v{VERSION} уже применена")
         return False
-    if MARKER in extras:
-        raise ValueError("Для новой версии отделки нужен свежий экспорт из Blender")
+    # v1 оставила сталь (metallic >= 0.8) исходной, а покрытие v2 задаёт заново — поверх v1 можно.
     binary = bytearray(original_binary)
     replaced: set[int] = set()
     surfaces: set[str] = set()
@@ -83,7 +136,7 @@ def fix_glb(path: Path) -> bool:
         surface = name.split(" • ")[1]
         pbr = material.get("pbrMetallicRoughness", {})
         if surface == "Markings":
-            pbr["roughnessFactor"] = 0.70
+            pbr["roughnessFactor"] = MATTE_ROUGHNESS
             continue
         if surface not in ("WeaponMetal", "Furniture", "Magazine"):
             continue
@@ -125,6 +178,10 @@ def fix_glb(path: Path) -> bool:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", type=Path, nargs="*")
+    parser.add_argument("--states", action="store_true", help="записать карты состояний 60 и 20")
     args = parser.parse_args()
-    for path in args.paths or DEFAULTS:
-        fix_glb(path)
+    if args.states:
+        write_states()
+    else:
+        for path in args.paths or DEFAULTS:
+            fix_glb(path)

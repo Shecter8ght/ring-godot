@@ -3,6 +3,9 @@ extends Node
 ## tools/godot.cmd res://tools/veras_shots.tscn  (с окном) → docs/screens/veras_*.png
 ## Кадры: у бедра, в прицеле, фазы тактической (12 патронов) и полной (0) перезарядки, проверка
 ## магазина (держать R), в прицеле с коллиматором на верхней планке. VERAS_ONLY=имя,имя — выборочно.
+## Обвесы готовыми моделями: рукоятки ВАРН V1 / V2 (свой хват и клипы) и глушитель — у бедра и сбоку
+## (veras_varn_*), задержка «гильза не вышла» и её устранение (veras_jam_*), карты состояний 60 / 20
+## (veras_state_*). VERAS_PART=grips|jam|states — только эта часть.
 
 const ID := "wpn_ar_01"
 const OUT := "res://docs/screens/"
@@ -11,6 +14,8 @@ var _player: Player
 var _camera: CameraRig
 var _only: PackedStringArray = []
 var _failures: int = 0
+## Камера глаз игрока: свои камеры снимков возвращают вид ей.
+var _eye: Camera3D
 
 
 func _ready() -> void:
@@ -41,6 +46,18 @@ func _ready() -> void:
 		return
 	var vm := _camera._viewmodel as ViewmodelClips
 	print("veras_shots: клипы ", vm._anim.get_animation_list(), " патронов-узлов ", vm._rounds.size())
+	_eye = get_viewport().get_camera_3d()
+	var part: String = OS.get_environment("VERAS_PART")
+	if part != "":
+		if part == "grips":
+			await _grips()
+		elif part == "jam":
+			await _jam()
+		elif part == "states":
+			await _states()
+		print("veras_shots: ошибок ", _failures)
+		get_tree().quit(1 if _failures else 0)
+		return
 	await _shot("veras_hip")
 	var fr: Transform3D = vm.global_transform.affine_inverse() * vm.frame.global_transform
 	print("veras_shots: рама у бедра ", fr.origin, " ось ", fr.basis.z, " sight_h ", vm.frame.get_meta("sight_h"), " ads ", vm.ads_transform())
@@ -93,14 +110,111 @@ func _ready() -> void:
 	print("veras_shots: мировая модель, ассет ", world.get_meta("asset_loaded", false), " дуло ", world.get_meta("muzzle", Vector3.ZERO))
 	await get_tree().create_timer(0.3).timeout
 	await _shot("veras_world_model")
+	shot_cam.current = false
+	shot_cam.queue_free()
+	_eye.current = true
+	await get_tree().process_frame
+	await _grips()
+	await _jam()
+	await _states()
 	print("veras_shots: ошибок ", _failures)
 	get_tree().quit(1 if _failures else 0)
 
 
-func _equip(mods: Dictionary) -> void:
+## Рукоятки ВАРН и глушитель: модель, хват левой и клипы набора — у бедра и сбоку, слева.
+func _grips() -> void:
+	for pair: Array in [["varn_v1", "grip_vertical_01"], ["varn_v2", "grip_offset_01"]]:
+		await _equip({"underbarrel": {"id": pair[1]}, "muzzle": {"id": "muzzle_supp_545_01"}})
+		var vm := _camera._viewmodel as ViewmodelClips
+		_check(String(pair[0]) + ": набор клипов под рукоятку", vm != null and vm._set == String(pair[0]))
+		_check(String(pair[0]) + ": модель рукоятки из ассета", vm != null and vm.find_child(String(pair[0]), true, false) != null)
+		_check(String(pair[0]) + ": модель глушителя из ассета", vm != null and vm.find_child("supp_veras", true, false) != null)
+		await get_tree().create_timer(0.5).timeout
+		await _shot("veras_%s_hip" % pair[0])
+		await _side("veras_%s_side" % pair[0])
+		await _set_rounds(12)
+		await _reload([0.1, 0.3, 0.92], "veras_%s_reload" % pair[0], true)
+	# рукоятка в другом пазу: кисть едет вместе с ней
+	await _equip({"underbarrel": {"id": "grip_vertical_01", "slot": 0}})
+	await get_tree().create_timer(0.6).timeout
+	await _side("veras_varn_v1_slot0_side")
+
+
+## Задержка: гильза торчит в окне, затвор недозакрыт; R — передёрнуть, гильза выпадает.
+func _jam() -> void:
+	await _equip({})
+	await _set_rounds(14)
+	var vm := _camera._viewmodel as ViewmodelClips
+	_player._ws[_player.weapon_slot]["jam"] = true
+	await get_tree().create_timer(0.3).timeout
+	_check("задержка: гильза видна", vm._jam_case != null and vm._jam_case.visible)
+	var bolt_x: float = vm._weapon_skel.get_bone_pose_position(vm._bolt).distance_to(vm._weapon_skel.get_bone_rest(vm._bolt).origin)
+	_check("задержка: затвор недозакрыт (%.0f мм)" % (bolt_x * 1000.0), bolt_x > 0.02 and bolt_x < 0.045)
+	var case_at: Vector3 = vm.frame.global_transform.affine_inverse() * vm._jam_case.global_position
+	_check("задержка: гильза в окне коробки %s" % case_at, case_at.distance_to(Vector3(-0.011, 0.077, 0.144)) < 0.01)
+	await _shot("veras_jam_hold")
+	await _side("veras_jam_hold_right", true)
+	Input.action_press("reload")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	Input.action_release("reload")
+	for i in range(30):
+		if _player.reload_timer > 0.0:
+			break
+		await get_tree().physics_frame
+	_check("задержка: R запускает устранение", _player._reload_kind == "clear" and _player.reload_timer > 0.0)
+	var total: float = _player.reload_timer
+	var elapsed: float = 0.0
+	for f: float in [0.35, 0.5, 0.58, 0.7]:
+		await get_tree().create_timer(maxf(0.0, total * f - elapsed)).timeout
+		elapsed = total * f
+		_check("устранение: клип jam_clear на %d%%" % int(f * 100), vm._clip == "jam_clear")
+		await _shot("veras_jam_clear_%02d" % int(f * 100))
+	await get_tree().create_timer(total - elapsed + 0.5).timeout
+	_check("задержка устранена: гильзы нет, патроны на месте", not _player.is_jammed() and not vm._jam_case.visible and _player.ammo == 14)
+	await _shot("veras_jam_done")
+
+
+## Карты состояний автомата и обвесов: 60 % и 20 %.
+func _states() -> void:
+	for dur: float in [100.0, 60.0, 20.0]:
+		await _equip({"underbarrel": {"id": "grip_vertical_01", "dur": dur}, "muzzle": {"id": "muzzle_supp_545_01", "dur": dur}}, dur)
+		await get_tree().create_timer(0.4).timeout
+		await _side("veras_state_%d" % int(dur))
+		await _side("veras_state_%d_muzzle" % int(dur), false, 0.42, 0.45)
+
+
+func _check(label: String, ok: bool) -> void:
+	if not ok:
+		_failures += 1
+	print("veras_shots: ", "ok   " if ok else "ПРОВАЛ ", label)
+
+
+## Снимок оружия в руках со стороны: слева (или справа — окно выброса) от стрелка.
+func _side(label: String, right: bool = false, forward: float = 0.0, distance: float = 0.62) -> void:
+	if not _only.is_empty() and not label in _only:
+		return
+	var t: Transform3D = _eye.global_transform
+	var cam := Camera3D.new()
+	add_child(cam)
+	cam.fov = 40.0
+	cam.near = 0.02
+	var k: float = 1.0 if right else -1.0
+	var target: Vector3 = t.origin - t.basis.z * (0.42 + forward) + t.basis.x * 0.13 - t.basis.y * 0.13
+	cam.look_at_from_position(target + t.basis.x * k * distance + t.basis.y * 0.12 - t.basis.z * 0.1, target, t.basis.y)
+	cam.current = true
+	await get_tree().process_frame
+	await _shot(label)
+	cam.current = false
+	cam.queue_free()
+	_eye.current = true
+	await get_tree().process_frame
+
+
+func _equip(mods: Dictionary, dur: float = 100.0) -> void:
 	var slot: String = String(WeaponDb.sandbox()[0])
 	var magazine: String = WeaponDb.default_mag(ID)
-	_player.sandbox_weapons[slot] = {"id": ID, "n": 1, "dur": 100.0, "mods": mods,
+	_player.sandbox_weapons[slot] = {"id": ID, "n": 1, "dur": dur, "mods": mods,
 		"mag": {"id": magazine, "ammo": WeaponDb.default_ammo("545x39"), "rounds": 30}, "sight": "primary", "rev": randi()}
 	_player.weapon_slot = ""
 	_player._switch(slot, false)
@@ -116,7 +230,7 @@ func _set_rounds(n: int) -> void:
 
 
 ## Перезарядка по R и кадры на долях её времени.
-func _reload(fractions: Array, prefix: String) -> void:
+func _reload(fractions: Array, prefix: String, side: bool = false) -> void:
 	Input.action_press("reload")
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -131,7 +245,10 @@ func _reload(fractions: Array, prefix: String) -> void:
 	for f: float in fractions:
 		await get_tree().create_timer(maxf(0.0, total * f - elapsed)).timeout
 		elapsed = total * f
-		await _shot("%s_%02d" % [prefix, int(f * 100)])
+		if side:
+			await _side("%s_%02d" % [prefix, int(f * 100)])
+		else:
+			await _shot("%s_%02d" % [prefix, int(f * 100)])
 	await get_tree().create_timer(maxf(0.0, total - elapsed) + 0.4).timeout
 
 
