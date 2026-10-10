@@ -9,6 +9,11 @@ extends Node3D
 ## Клипом управляет состояние игрока (опрос каждый кадр, без новых событий в Player): началась
 ## перезарядка — клип по пустому/непустому магазину, растянутый на её время (стресс удлиняет);
 ## прервали — плавно в стойку; проверка патронов — клип проверки; выстрел — отвод затвора.
+## Проверка магазина с удержанием: пока R держат (Player.mag_inspect), клип стоит на участке «магазин
+## перед глазами» (config.check_hold — кадры), кисть с магазином поворачивается мышью
+## (Player.inspect_turn); отпустили — клип идёт дальше, магазин возвращается в оружие.
+## Быстрая перезарядка (Player._reload_fast, двойное R): клипы reload_fast / reload_fast_empty — новым
+## магазином выбивают старый (узлы Part_SpareMag и SpareRounds видны только в этом клипе).
 ## Задержка (Player.is_jammed): затвор недозакрыт, в окне торчит гильза (узел Part_JamCase); R — клип
 ## jam_clear: правая отводит затвор, гильза выпадает.
 ## Патроны в магазине — узлы Round_NN (1 — верхний), подаватель — по счёту (служебный клип
@@ -56,6 +61,15 @@ var _grip_dz: float = NAN
 ## Гильза задержки и таймер клипа «устранить задержку» на прошлом кадре.
 var _jam_case: Node3D
 var _last_clear: float = 0.0
+## Старый магазин быстрой перезарядки (корпус и его патроны) и идёт ли сейчас быстрый клип.
+var _spare_parts: Array[Node3D] = []
+var _spare_rounds: Node3D
+var _fast: bool = false
+## Проверка с удержанием: клип стоит на участке показа; фаза покачивания; сглаженный поворот кисти.
+var _holding: bool = false
+var _hold_phase: float = 0.0
+var _turn: Vector2 = Vector2.ZERO
+var _mag_bone: int = -1
 
 
 static func available(id: String) -> bool:
@@ -115,6 +129,14 @@ func _setup(id: String, mods: Dictionary) -> void:
 	_jam_case = model.find_child("Part_JamCase*", true, false) as Node3D
 	if _jam_case:
 		_jam_case.visible = false
+	for raw_spare: Node in model.find_children("Part_SpareMag*", "Node3D", true, false):
+		_spare_parts.append(raw_spare as Node3D)
+		(raw_spare as Node3D).visible = false
+	_spare_rounds = model.find_child("SpareRounds*", true, false) as Node3D
+	if _spare_rounds:
+		_spare_rounds.visible = false
+	if _weapon_skel:
+		_mag_bone = _weapon_skel.find_bone("Magazine_Control")
 	for raw_part: Node in model.find_children("Part_Magazine*", "Node3D", true, false):
 		_mag_parts.append(raw_part as Node3D)
 	frame = model.find_child("WeaponFrame", true, false) as Node3D
@@ -166,11 +188,20 @@ func update(pl: Player, delta: float) -> void:
 		_rounds_before = 0 if empty else clampi(pl.ammo, 0, _rounds.size())
 		_rounds_after = clampi(mag, 0, _rounds.size())
 		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(role), -1))
+		_fast = false
 		_play(_clip_name(role), BLEND_IN, pl.reload_timer)
+	elif reloading and pl._reload_fast and not _fast and _clip_name("reload_fast") != "":
+		# второе R: перезарядка стала быстрой — её клип с начала, на оставшееся время
+		_fast = true
+		var fast_role: String = "reload_fast_empty" if pl._reload_empty else "reload_fast"
+		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(fast_role), -1))
+		_play(_clip_name(fast_role), BLEND_IN, pl.reload_timer)
 	elif not reloading and _last_reload > 0.0 and _clip != "" and _clip != _clip_name("check"):
 		# закончилась или прервана — в стойку (досылка уже показана клипом)
 		_play(_clip_name("idle"), BLEND_OUT)
 	_last_reload = pl.reload_timer if reloading else 0.0
+	if not reloading:
+		_fast = false
 	# задержка: R — передёрнуть затвор (клип на время устранения); прервали — в стойку
 	var clearing: bool = pl.reload_timer > 0.0 and pl._reload_kind == "clear"
 	if clearing and _last_clear <= 0.0:
@@ -194,7 +225,7 @@ func update(pl: Player, delta: float) -> void:
 			# выстрел посреди проверки — руки сразу на оружие
 			_play(_clip_name("idle"), 0.1)
 	_last_ammo = pl.ammo
-	_anim.advance(delta)
+	_advance(pl, delta)
 	if _clip != "" and not _anim.is_playing():
 		_play(_clip_name("idle"), BLEND_OUT)
 	var shown: int = clampi(pl.ammo, 0, _rounds.size())
@@ -206,13 +237,71 @@ func update(pl: Player, delta: float) -> void:
 	var mag_in: bool = pl.weapon_mag != "" or reloading
 	for part: Node3D in _mag_parts:
 		part.visible = mag_in
+	# старый магазин быстрой перезарядки: виден с кадра, когда новый уже в руке, до конца клипа
+	var spare_on: bool = _fast and _clip != "" and _swap_frame >= 0 \
+			and _anim.current_animation_position * float(config.get("fps", 30)) >= _swap_frame
+	for spare: Node3D in _spare_parts:
+		spare.visible = spare_on
+	if _spare_rounds:
+		_spare_rounds.visible = spare_on and _rounds_before > 0
 	var clear_clip: bool = _clip != "" and _clip == _clip_name("clear")
 	if _jam_case:
 		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
 		_jam_case.visible = jammed or clear_clip
 	_pose_overrides(shown, delta, jammed and not clear_clip)
+	_inspect_turn(pl, delta)
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
 	_support_hand(_grip_w)
+
+
+## Шаг клипа. Проверка магазина с удержанием: пока R держат, клип дошёл до участка показа и стоит на
+## нём (медленно покачиваясь между его кадрами); отпустили — продолжается с конца участка.
+func _advance(pl: Player, delta: float) -> void:
+	var hold: Array = config.get("check_hold", [])
+	var fps: float = float(config.get("fps", 30))
+	if hold.size() == 2 and _clip != "" and _clip == _clip_name("check"):
+		var from: float = float(hold[0]) / fps
+		var to: float = float(hold[1]) / fps
+		var pos: float = _anim.current_animation_position
+		if pl.mag_inspect and (_holding or pos >= from):
+			if not _holding:
+				_holding = true
+				_hold_phase = 0.0
+			_hold_phase += delta * 0.9
+			_anim.seek(lerpf(from, to, 0.5 - 0.5 * cos(_hold_phase)), true)
+			return
+		if _holding:
+			_holding = false
+			_anim.seek(to, true)
+	else:
+		_holding = false
+	_anim.advance(delta)
+
+
+## Поворот кисти с магазином мышью, пока магазин держат перед глазами: как рукой — предплечье на месте,
+## кисть проворачивается вокруг его оси (мышь вбок: магазин показывает то один бок, то другой) и
+## сгибается в запястье (мышь вверх-вниз). Ось — запястье, магазин едет вместе с кистью.
+## Отпустили — плавно назад.
+func _inspect_turn(pl: Player, delta: float) -> void:
+	var want: Vector2 = pl.inspect_turn if _holding else Vector2.ZERO
+	_turn = _turn.lerp(want, minf(1.0, delta * 10.0))
+	if _turn.length() < 0.004 or _arm_skel == null or _mag_bone < 0 or _weapon_skel != _arm_skel:
+		return
+	var sk: Skeleton3D = _arm_skel
+	var cam: Camera3D = get_viewport().get_camera_3d() if is_inside_tree() else null
+	if cam == null:
+		return
+	var limits: Array = Balance.AMMO_CHECK.turn_deg
+	var mag: Transform3D = sk.get_bone_global_pose(_mag_bone)
+	var hand: Transform3D = sk.get_bone_global_pose(_arm_bones[2])
+	var fore: Transform3D = sk.get_bone_global_pose(_arm_bones[1])
+	var along: Vector3 = (hand.origin - fore.origin).normalized()
+	var right: Vector3 = (sk.global_basis.inverse().orthonormalized() * cam.global_basis.x).normalized()
+	var rot := Basis(along, deg_to_rad(float(limits[0])) * _turn.x) * Basis(right, deg_to_rad(float(limits[1])) * _turn.y)
+	var pivot: Vector3 = hand.origin
+	var turn := Transform3D(rot, pivot - rot * pivot)
+	sk.set_bone_global_pose(_arm_bones[2], turn * hand)
+	sk.set_bone_global_pose(_mag_bone, turn * mag)
 
 
 ## jam_hold — задержка не устранена: затвор стоит недозакрытым на зажатой гильзе (config.jam_open — доля хода).

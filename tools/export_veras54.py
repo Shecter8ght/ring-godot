@@ -51,10 +51,14 @@ for _arg in sys.argv:
 CLIPS = {"reload_tactical": ("Tactical", 79, SRC / "VERAS54_Reload_Tactical_v04.blend"),
          "mag_check": ("Check", 104, SRC / "VERAS54_Mag_Check_v02.blend"),
          "reload_full": ("Full", 114, None),
-         "jam_clear": ("Jam", 46, SRC2 / "VERAS54_Jam_Clear_v01.blend")}
+         "jam_clear": ("Jam", 46, SRC2 / "VERAS54_Jam_Clear_v01.blend"),
+         # быстрая перезарядка (двойное R): новым магазином выбивают старый; _full — с досылкой затвором
+         "reload_fast": ("Fast", 58, SRC2 / "VERAS54_Reload_Fast_v01.blend"),
+         "reload_fast_full": ("Fastfull", 92, SRC2 / "VERAS54_Reload_FastFull_v01.blend")}
 for _g in GRIPS:
     for _clip, _tag, _last, _file in (("reload_tactical", "Tactical", 79, "Reload_Tactical"), ("mag_check", "Check", 104, "Mag_Check"),
-                                      ("reload_full", "Full", 114, "Reload_Full"), ("jam_clear", "Jam", 46, "Jam_Clear")):
+                                      ("reload_full", "Full", 114, "Reload_Full"), ("jam_clear", "Jam", 46, "Jam_Clear"),
+                                      ("reload_fast", "Fast", 58, "Reload_Fast"), ("reload_fast_full", "Fastfull", 92, "Reload_FastFull")):
         CLIPS[f"{_clip}_{_g}"] = (f"{_tag}_{_g}", _last, SRC2 / f"VERAS54_{_file}_{_g}_v01.blend")
 # стойка — первый кадр тактической: без рукоятки и с каждой из них
 IDLES = {"idle": "Tactical", **{f"idle_{g}": f"Tactical_{g}" for g in GRIPS}}
@@ -219,7 +223,7 @@ def rounds_join() -> int:
     return n
 
 
-def join_by_parent(skip_prefix=("Round_", "FPS_")) -> int:
+def join_by_parent(skip_prefix=("Round_", "FPS_", "SpareRounds")) -> int:
     """Детали с одним родителем (кость/пустышка) — одной сеткой: меньше вызовов отрисовки."""
     groups: dict = {}
     for ob in objs("MESH"):
@@ -337,6 +341,8 @@ def viewmodel() -> None:
     sc.frame_set(1)
     bpy.context.view_layer.update()
     rig_common.add_jam_case(wr)
+    # старый магазин быстрой перезарядки: кость SpareMag и копия магазина на ней (вне клипа скрыт игрой)
+    rig_common.add_spare_mag(wr)
     # подаватель в клипах не запекается — его ставит игра по счёту патронов (клип follower_by_rounds)
     skip = ("MagazineFollower",)
     baked = {}
@@ -399,6 +405,8 @@ def viewmodel() -> None:
     drop_extras()
     apply_mods()
     report["rounds"] = rounds_join()
+    # патроны запасного магазина — отдельным узлом: у пустого старого магазина игра их не показывает
+    join([o for o in objs("MESH") if o.name.startswith("SpareMag • round")], "SpareRounds")
     report["parts_viewmodel"] = join_by_parent()
     scale_images(TEX_VIEW)
     # оси камеры: камера в начале, взгляд Blender +Y (= −Z glTF/Godot), верх +Z

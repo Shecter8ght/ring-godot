@@ -1131,12 +1131,20 @@
       "reload": "reload_tactical",
       "reload_empty": "reload_full",
       "check": "mag_check",
-      "clear": "jam_clear"
+      "clear": "jam_clear",
+      "reload_fast": "reload_fast",
+      "reload_fast_empty": "reload_fast_full"
      },
      "jam_open": 0.42,
+     "check_hold": [
+      40,
+      57
+     ],
      "swap_frame": {
       "reload_tactical": 42,
-      "reload_full": 42
+      "reload_full": 42,
+      "reload_fast": 13,
+      "reload_fast_full": 13
      },
      "ads_z": 0.3,
      "hip_offset": [

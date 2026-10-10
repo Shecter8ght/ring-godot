@@ -400,7 +400,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				_distance = minf(Balance.CAMERA_ZOOM_MAX, _distance + Balance.CAMERA_ZOOM_STEP)
 	elif event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
-		if ads_active and not _ui_blocking():
+		var inspecting := _target as Player
+		if inspecting and inspecting.mag_inspect and inspecting.is_local() and not _ui_blocking():
+			# держит магазин перед глазами: мышь поворачивает кисть с магазином, взгляд стоит
+			var turn_k: float = float(Balance.AMMO_CHECK.turn_sens)
+			inspecting.inspect_turn = Vector2(clampf(inspecting.inspect_turn.x + mm.relative.x * turn_k, -1.0, 1.0),
+				clampf(inspecting.inspect_turn.y + mm.relative.y * turn_k, -1.0, 1.0))
+		elif ads_active and not _ui_blocking():
 			# вправо — поворот вправо; у оптики чувствительность меньше пропорционально полю зрения
 			var sens := ads_sens()
 			var dy := -mm.relative.y if Settings.invert_y else mm.relative.y

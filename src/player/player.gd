@@ -75,6 +75,16 @@ var _reload_slot: String = ""
 var _reload_rev: int = -1
 var _reload_wait: float = 0.0
 var _reload_empty: bool = false
+## Быстрая перезарядка (двойное R): старый магазин выбит новым и падает на землю. _reload_age — сколько
+## идёт текущая перезарядка (второе R считается только в первые Balance.RELOAD_FAST.tap_sec),
+## _reload_old_mag — какой магазин стоял ({id, rounds}): его и выбросить из рюкзака в конце.
+var _reload_fast: bool = false
+var _reload_age: float = 0.0
+var _reload_old_mag: Dictionary = {}
+## Проверка магазина: R ещё держат — магазин перед глазами (вьюмодель ждёт), отпустили — убирает.
+## inspect_turn — поворот кисти с магазином мышью, доли −1…1 (вбок, вверх-вниз).
+var mag_inspect: bool = false
+var inspect_turn: Vector2 = Vector2.ZERO
 ## ПМ меняет предметы только после окончания действия. До этого прерывание отменяет лишь позу.
 var _pm_action: Dictionary = {}
 var _pm_action_seq: int = 0
@@ -981,11 +991,22 @@ func _combat(delta: float) -> void:
 	if _ws_dirty and _ws_sync_t <= 0.0:
 		_send_ws(weapon_slot)
 	if reload_timer > 0.0:
+		_reload_age += delta
+		# второе быстрое R — быстрая перезарядка: старый магазин на землю
+		if Input.is_action_just_pressed("reload"):
+			_try_fast_reload()
 		reload_timer -= delta
 		if reload_timer <= 0.0:
 			_finish_reload(spec)
 		return
 	ammo_check_t = maxf(0.0, ammo_check_t - delta)
+	# проверка магазина: пока R держат — магазин в руке перед глазами; отпустили (или выстрел) — убрать
+	if mag_inspect:
+		if Input.is_action_pressed("reload") and not Input.is_action_pressed("fire"):
+			ammo_check_t = maxf(ammo_check_t, 0.6)
+			return
+		mag_inspect = false
+		inspect_turn = Vector2.ZERO
 	# R: коротко — перезарядка (или устранить задержку), держать — проверить патроны
 	if Input.is_action_just_pressed("reload"):
 		_reload_hold = 0.0
@@ -995,6 +1016,8 @@ func _combat(delta: float) -> void:
 			if _reload_hold >= float(Balance.AMMO_CHECK.hold_sec):
 				_reload_hold = -1.0
 				_check_ammo(spec)
+				# у ствола с клипом проверки магазин остаётся в руке, пока держат R
+				mag_inspect = ViewmodelClips.available(weapon_id)
 			return
 		_reload_hold = -1.0
 		if is_jammed():
@@ -1025,6 +1048,9 @@ func _start_reload(spec: Dictionary) -> void:
 	_reload_kind = "full"
 	_reload_slot = weapon_slot
 	_reload_empty = ammo <= 0
+	_reload_fast = false
+	_reload_age = 0.0
+	_reload_old_mag = {}
 	var t: float = float(spec.get("reload_empty", spec.reload)) if _reload_empty else float(spec.reload)
 	var chambered: bool = _has_chamber(weapon_id)
 	# Потраченные выстрелами патроны сохраняем до анимации: её отмена не возвращает боезапас.
@@ -1038,6 +1064,9 @@ func _start_reload(spec: Dictionary) -> void:
 			return
 		_reload_kind = kind
 		_reload_rev = int(e.get("rev", 0))
+		var standing: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+		if kind == "swap" and String(standing.get("id", "")) != "":
+			_reload_old_mag = {"id": String(standing.id), "rounds": ammo}
 		_reload_wait = 1.5
 		var st := _ws_state(weapon_slot)
 		# под сильным стрессом старый магазин выскальзывает на землю (редко)
@@ -1075,6 +1104,39 @@ func _start_reload(spec: Dictionary) -> void:
 		_play_weapon_sound(spec, "round_insert", -4.0)
 
 
+## Второе R сразу после первого: перезарядка становится быстрой — короче в Balance.RELOAD_FAST.time_k раз,
+## старый магазин падает на землю. Только смена отъёмного магазина (со снаряжением — когда есть запасной).
+func _try_fast_reload() -> void:
+	var cfg: Dictionary = Balance.RELOAD_FAST
+	if _reload_fast or _reload_age > float(cfg.tap_sec) or _reload_kind == "clear" or not _pm_action.is_empty():
+		return
+	if loadout_mode and _reload_kind != "swap":
+		return
+	if WeaponDb.weapon(weapon_id).has("internal_mag") or _has_chamber(weapon_id):
+		return
+	_reload_fast = true
+	reload_timer = maxf(0.2, (reload_timer + _reload_age) * float(cfg.time_k) - _reload_age)
+	_say("Быстрая перезарядка — старый магазин на землю")
+
+
+## Быстрая перезарядка закончена: старый магазин (хост уже положил его в рюкзак) — на землю.
+func _drop_old_mag() -> void:
+	if not _reload_fast:
+		return
+	_reload_fast = false
+	_play_weapon_sound(spec(), "mag_drop")
+	if not loadout_mode or _reload_old_mag.is_empty():
+		return
+	var h := items_host()
+	if h == null or not h.has_method("request_drop_entry"):
+		return
+	for i in range(inventory.items.size()):
+		var it: Dictionary = inventory.items[i]
+		if String(it.get("id", "")) == String(_reload_old_mag.id) and it.has("rounds") and int(it.rounds) == int(_reload_old_mag.rounds):
+			h.call("request_drop_entry", "backpack", i)
+			return
+
+
 ## Задержка: передёрнуть (R) — патроны не тратятся.
 func _start_clear(spec: Dictionary) -> void:
 	_reload_kind = "clear"
@@ -1098,6 +1160,7 @@ func _finish_reload(spec: Dictionary) -> void:
 			_ws[_reload_slot].jam = false
 		ammo = int(spec.mag)
 		_finish_reload_sounds(spec)
+		_drop_old_mag()
 		return
 	# хост поменял запись (ревизия выросла) — состояние перечитается; ответ ещё в пути — подождать
 	var base := _base_entry(_reload_slot)
@@ -1111,6 +1174,7 @@ func _finish_reload(spec: Dictionary) -> void:
 	if _reload_slot == weapon_slot:
 		ammo = _state_rounds(weapon_slot)
 	_finish_reload_sounds(spec)
+	_drop_old_mag()
 
 
 func _finish_reload_sounds(specification: Dictionary) -> void:
@@ -1204,6 +1268,8 @@ func cancel_weapon_action() -> void:
 	_pm_action.clear()
 	reload_timer = 0.0
 	_reload_hold = -1.0
+	_reload_fast = false
+	mag_inspect = false
 	_reload_kind = ""
 	_reload_slot = ""
 	if _weapon_rig:

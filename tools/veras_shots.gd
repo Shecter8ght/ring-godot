@@ -59,6 +59,10 @@ func _ready() -> void:
 			await _hand()
 		elif part == "cant":
 			await _cant()
+		elif part == "fast":
+			await _fast_reload()
+		elif part == "check":
+			await _check_hold()
 		print("veras_shots: ошибок ", _failures)
 		get_tree().quit(1 if _failures else 0)
 		return
@@ -122,6 +126,8 @@ func _ready() -> void:
 	await _jam()
 	await _states()
 	await _cant()
+	await _fast_reload()
+	await _check_hold()
 	print("veras_shots: ошибок ", _failures)
 	get_tree().quit(1 if _failures else 0)
 
@@ -192,6 +198,58 @@ func _cant() -> void:
 	await get_tree().create_timer(0.4).timeout
 
 
+## Быстрая перезарядка (два быстрых R): свой клип, старый магазин виден отдельно и вылетает.
+func _fast_reload() -> void:
+	await _equip({})
+	await _set_rounds(12)
+	var vm := _camera._viewmodel as ViewmodelClips
+	for i in range(2):
+		Input.action_press("reload")
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+		Input.action_release("reload")
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+	_check("быстрая: два R — быстрая перезарядка", _player._reload_fast and _player.reload_timer > 0.0)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check("быстрая: идёт свой клип", vm._fast and vm._clip == "reload_fast", vm._clip)
+	var total: float = _player.reload_timer
+	var elapsed: float = 0.0
+	var spare_seen: bool = false
+	for f: float in [0.3, 0.42, 0.47, 0.52, 0.62]:
+		await get_tree().create_timer(maxf(0.0, total * f - elapsed)).timeout
+		elapsed = total * f
+		spare_seen = spare_seen or (not vm._spare_parts.is_empty() and vm._spare_parts[0].visible)
+		await _shot("veras_fast_%02d" % int(f * 100))
+	_check("быстрая: старый магазин виден отдельно", spare_seen)
+	await get_tree().create_timer(total - elapsed + 0.5).timeout
+	_check("быстрая: закончена, старый магазин скрыт, патронов 30", _player.ammo == 30 and not vm._spare_parts[0].visible and vm._clip == "")
+
+
+## Проверка магазина с удержанием: пока R держат — магазин перед глазами, мышь поворачивает кисть.
+func _check_hold() -> void:
+	await _equip({})
+	await _set_rounds(17)
+	var vm := _camera._viewmodel as ViewmodelClips
+	Input.action_press("reload")
+	await get_tree().create_timer(float(Balance.AMMO_CHECK.hold_sec) + 1.6).timeout
+	_check("проверка: магазин стоит перед глазами, пока держат R", _player.mag_inspect and vm._holding)
+	await _shot("veras_check_hold")
+	await get_tree().create_timer(2.5).timeout
+	_check("проверка: держим долго — всё ещё стоит", vm._holding and vm._clip == vm._clip_name("check"))
+	for turn: Array in [["left", Vector2(-1.0, 0.0)], ["right", Vector2(1.0, 0.0)], ["up", Vector2(0.4, -1.0)]]:
+		_player.inspect_turn = turn[1]
+		await get_tree().create_timer(0.6).timeout
+		await _shot("veras_check_turn_%s" % turn[0])
+	_check("проверка: кисть с магазином повёрнута", vm._turn.length() > 0.8)
+	Input.action_release("reload")
+	await get_tree().create_timer(0.3).timeout
+	_check("проверка: отпустили — магазин убирается", not _player.mag_inspect and not vm._holding and vm._clip != "")
+	await get_tree().create_timer(2.2).timeout
+	_check("проверка: магазин на месте, руки на оружии", vm._clip == "" and _player.ammo == 17, vm._clip)
+
+
 ## Задержка: гильза торчит в окне, затвор недозакрыт; R — передёрнуть, гильза выпадает.
 func _jam() -> void:
 	await _equip({})
@@ -236,10 +294,10 @@ func _states() -> void:
 		await _side("veras_state_%d_muzzle" % int(dur), false, 0.42, 0.45)
 
 
-func _check(label: String, ok: bool) -> void:
+func _check(label: String, ok: bool, detail: String = "") -> void:
 	if not ok:
 		_failures += 1
-	print("veras_shots: ", "ok   " if ok else "ПРОВАЛ ", label)
+	print("veras_shots: ", "ok   " if ok else "ПРОВАЛ ", label, "  (" + detail + ")" if detail != "" and not ok else "")
 
 
 ## Снимок оружия в руках со стороны: слева (или справа — окно выброса) от стрелка.
