@@ -27,7 +27,10 @@ func _ready() -> void:
 	_me = _raid.local_player()
 	_me.health.invulnerable = true
 	await get_tree().create_timer(0.3).timeout
-	var spec_reload: float = float(WeaponDb.weapon(ID).stats.reload)
+	# без разгрузки магазин достаётся из рюкзака — дольше (Balance.RIG.backpack_reload_k); из подсумков —
+	# по паспорту ствола (раздел «разгрузка» ниже)
+	var base_reload: float = float(WeaponDb.weapon(ID).stats.reload)
+	var spec_reload: float = base_reload * float(Balance.RIG.backpack_reload_k)
 	var k: float = float(Balance.RELOAD_FAST.time_k)
 	_check("быстрая перезарядка на 25–30 %% быстрее обычной (%.0f %%)" % ((1.0 - k) * 100.0), k >= 0.70 and k <= 0.75)
 
@@ -94,7 +97,7 @@ func _ready() -> void:
 	_check("отпустили — магазин убран, перезарядки нет", not _me.mag_inspect and _me.reload_timer <= 0.0 and _me.ammo == 17)
 
 	# --- магазин вынут: R (по нажатию) вставляет новый; двойное R и удержание — ничего особенного
-	var insert_sec: float = float(WeaponDb.weapon(ID).stats.reload_empty) * float(Balance.RELOAD_INSERT.time_k)
+	var insert_sec: float = float(WeaponDb.weapon(ID).stats.reload_empty) * float(Balance.RELOAD_INSERT.time_k) * float(Balance.RIG.backpack_reload_k)
 	_arm(-1, [30])
 	await get_tree().create_timer(0.4).timeout
 	_check("магазин вынут: в руках оружие без магазина", _me.mag_out() and _me.ammo == 0, _me.weapon_mag)
@@ -123,6 +126,42 @@ func _ready() -> void:
 	await _tap()
 	await _until_done()
 	_check("без магазина: вставляется и пустой магазин", not _me.mag_out() and _me.ammo == 0 and _mag_rounds().is_empty(), "%s %s" % [_me.weapon_mag, str(_mag_rounds())])
+	# --- разгрузка: магазин из подсумка — без надбавки, старый — в сумку сброса
+	_arm(12, [])
+	_wear_rig("rig_chest", [30, 30])
+	await _tap()
+	_check("разгрузка: перезарядка из подсумка — по паспорту ствола", _me.reload_timer > 0.0 and absf(_me.reload_timer - base_reload) < 0.25, "%.2f при %.2f" % [_me.reload_timer, base_reload])
+	await _until_done()
+	_check("разгрузка: в оружии полный магазин, в подсумках остался один", _me.ammo == 30 and _rounds_in("rig") == [30], "%d, %s" % [_me.ammo, str(_rounds_in("rig"))])
+	_check("разгрузка: старый магазин (12) — в сумке сброса, не в рюкзаке", _rounds_in("dump") == [12] and _mag_rounds().is_empty(), "%s / %s" % [str(_rounds_in("dump")), str(_mag_rounds())])
+	_check("разгрузка: счётчик запасных магазинов видит подсумки", _me.spare_mags() == 1, str(_me.spare_mags()))
+	# быстрая (два R): старый магазин — из сумки сброса на землю
+	_me._ws.clear()
+	var eq2: Dictionary = _me.inventory.equipment.duplicate(true)
+	(eq2.primary.mag as Dictionary)["rounds"] = 7
+	_me.inventory.equipment = eq2
+	_me.weapon_slot = ""
+	_me._switch("primary", false)
+	await get_tree().create_timer(0.3).timeout
+	await _tap()
+	await _tap()
+	await _until_done()
+	await get_tree().create_timer(0.3).timeout
+	_check("разгрузка, быстрая: старый магазин (7) лежит на земле, в сумке сброса — только прежний", _dropped().has(7) and _rounds_in("dump") == [12], "%s / %s" % [str(_dropped()), str(_rounds_in("dump"))])
+	# в подсумки — только магазины; сумка сброса полна — старый магазин уходит в рюкзак
+	_check("в подсумки кладутся только магазины", _me.inventory.add_entry_in("rig", ItemDb.make("bandage", 1)) == 0
+		and _me.inventory.add_entry_in("rig", WeaponDb.make_mag(WeaponDb.default_mag(ID), "ammo_545_std", 30)) == 1)
+	_arm(5, [])
+	_wear_rig("rig_belt", [30])
+	_me.inventory.add_entry_in("dump", WeaponDb.make_mag(WeaponDb.default_mag(ID), "", 0))
+	_me.inventory.add_entry_in("dump", WeaponDb.make_mag(WeaponDb.default_mag(ID), "", 0))
+	var dump_before: int = _me.inventory.list_of("dump").size()
+	await _tap()
+	await _until_done()
+	_check("сумка сброса полна — старый магазин (5) в рюкзаке", _me.inventory.list_of("dump").size() == dump_before and _mag_rounds().has(5), "%s / %s" % [str(_rounds_in("dump")), str(_mag_rounds())])
+	# вес и цена разгрузки — с магазинами внутри; снял разгрузку — магазины едут с ней
+	var rig_entry: Dictionary = _me.inventory.equipment.rig
+	_check("вес разгрузки — с магазинами внутри", ItemDb.entry_weight(rig_entry) > ItemDb.weight("rig_belt") + 0.1, "%.2f" % ItemDb.entry_weight(rig_entry))
 	print("reload_fast_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails else 0)
 
@@ -168,6 +207,23 @@ func _until_done() -> void:
 		await get_tree().physics_frame
 		guard += get_physics_process_delta_time()
 	await get_tree().create_timer(0.2).timeout
+
+
+## Надеть разгрузку id с магазинами (патронов в каждом — по списку) в подсумках.
+func _wear_rig(id: String, mags: Array) -> void:
+	var eq: Dictionary = _me.inventory.equipment.duplicate(true)
+	eq["rig"] = ItemDb.make(id, 1)
+	_me.inventory.equipment = eq
+	for n: int in mags:
+		_me.inventory.add_entry_in("rig", WeaponDb.make_mag(WeaponDb.default_mag(ID), WeaponDb.default_ammo("545x39"), n))
+
+
+## Остатки в магазинах сетки разгрузки role ("rig" — подсумки, "dump" — сумка сброса).
+func _rounds_in(role: String) -> Array:
+	var out: Array = []
+	for it: Dictionary in _me.inventory.list_of(role):
+		out.append(int(it.rounds))
+	return out
 
 
 ## Остатки во всех магазинах рюкзака.

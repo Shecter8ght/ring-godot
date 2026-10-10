@@ -338,6 +338,9 @@ static func list_of(name: String) -> Array:
 			return backpack
 		"pocket":
 			return pocket
+		"rig", "dump":
+			# подсумки и сумка сброса надетой разгрузки — внутри её записи
+			return ItemDb.rig_list(equipment, name)
 	return stash
 
 
@@ -347,6 +350,8 @@ static func grid_of(name: String) -> Vector2i:
 			return ItemDb.bag_grid(equipment)
 		"pocket":
 			return pocket_grid()
+		"rig", "dump":
+			return ItemDb.rig_grid(equipment, name)
 	return stash_grid()
 
 
@@ -411,7 +416,7 @@ static func move_in(name: String, idx: int, x: int, y: int, r: bool) -> bool:
 ## Перенести запись idx из сетки from в сетку to прямо в место (x, y); false — не влезло.
 static func transfer(from: String, idx: int, to: String, x: int, y: int, r: bool) -> bool:
 	var src := list_of(from)
-	if idx < 0 or idx >= src.size() or grid_of(to) == Vector2i.ZERO:
+	if idx < 0 or idx >= src.size() or grid_of(to) == Vector2i.ZERO or not ItemDb.grid_accepts(to, src[idx]):
 		return false
 	var e: Dictionary = (src[idx] as Dictionary).duplicate(true)
 	var k := ItemDb.put_at(list_of(to), e, grid_of(to), x, y, r)
@@ -428,6 +433,9 @@ static func quick_move(from: String, idx: int) -> bool:
 	if idx < 0 or idx >= src.size():
 		return false
 	var to := "backpack" if from == "stash" else "stash"
+	if from in ["rig", "dump"]:
+		# из разгрузки — в рюкзак, нет места — в тайник
+		return _move(src, backpack, idx, 1, grid_of("backpack")) or _move(src, stash, idx, 1, stash_grid())
 	return _move(src, list_of(to), idx, int(src[idx].n), grid_of(to))
 
 
@@ -525,7 +533,7 @@ static func unequip(slot: String) -> bool:
 
 ## Снять прямо в место (x, y) тайника или рюкзака (перетащили из слота в сетку).
 static func unequip_to(slot: String, to_name: String, x: int, y: int, r: bool) -> bool:
-	if not equipment.has(slot) or grid_of(to_name) == Vector2i.ZERO:
+	if not equipment.has(slot) or grid_of(to_name) == Vector2i.ZERO or not ItemDb.grid_accepts(to_name, equipment[slot]):
 		return false
 	# рюкзак сам в себя не кладётся
 	if slot == "backpack" and to_name == "backpack":

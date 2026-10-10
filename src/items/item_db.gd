@@ -103,6 +103,10 @@ static func entry_weight(e: Dictionary) -> float:
 		w += weight(String(e.get("chamber_ammo", mag.get("ammo", "")))) * int(e.chamber)
 	for s in e.get("plates", {}):
 		w += weight(String(e.plates[s].id))
+	# разгрузка: магазины в подсумках и в сумке сброса
+	for part: String in ["mags", "dump"]:
+		for inner: Variant in e.get(part, []):
+			w += entry_weight(inner)
 	return w
 
 
@@ -332,6 +336,34 @@ static func slot_ok(id: String, slot: String) -> bool:
 	return s == slot
 
 
+## Сетки разгрузки по надетому: part — "rig" (подсумки) или "dump" (сумка сброса). ZERO — нет.
+static func rig_grid(eq: Dictionary, part: String = "rig") -> Vector2i:
+	var e: Dictionary = eq.get("rig", {})
+	if e.is_empty():
+		return Vector2i.ZERO
+	var spec: Dictionary = item(String(e.get("id", ""))).get("rig", {})
+	var n := int(spec.get("dump" if part == "dump" else "pouches", 0))
+	return Vector2i(n, int(Balance.RIG.rows)) if n > 0 else Vector2i.ZERO
+
+
+## Что лежит в разгрузке записи снаряжения: part — "rig" (подсумки, поле mags) или "dump".
+static func rig_list(eq: Dictionary, part: String = "rig") -> Array:
+	var e: Dictionary = eq.get("rig", {})
+	if e.is_empty():
+		return []
+	var key := "dump" if part == "dump" else "mags"
+	if not e.get(key) is Array:
+		e[key] = []
+	return e[key]
+
+
+## Можно ли положить запись в сетку role: в подсумки и сумку сброса — только магазины.
+static func grid_accepts(role: String, entry: Dictionary) -> bool:
+	if role in ["rig", "dump"]:
+		return entry.has("rounds") and not WeaponDb.magazine(String(entry.get("id", ""))).is_empty()
+	return true
+
+
 ## Куда надеть предмет: want — слот, на который бросили (если подходит); оружие без указания —
 ## в свой слот по данным, если он занят, а другой свободен — в другой.
 static func pick_slot(id: String, eq: Dictionary, want: String = "") -> String:
@@ -358,6 +390,11 @@ static func make(id: String, n: int) -> Dictionary:
 		e["mods"] = {}
 		e["mag"] = {"id": "" if w.has("internal_mag") else WeaponDb.default_mag(id), "ammo": WeaponDb.default_ammo(String(w.caliber)), "rounds": 0}
 		e["sight"] = "primary"
+	elif item(id).has("rig"):
+		# разгрузка: что в подсумках и в сумке сброса — внутри самой записи (ездит вместе с ней)
+		e.n = 1
+		e["mags"] = []
+		e["dump"] = []
 	elif id == "laser_head":
 		e.n = 1
 		e["uid"] = WeaponMark.new_id()
@@ -397,7 +434,7 @@ static func _merged_fir(dst: Dictionary, src: Dictionary) -> void:
 
 ## Экземпляр со своим состоянием — всегда поштучно.
 static func _stateful(e: Dictionary) -> bool:
-	return e.has("dur") or e.has("mods") or e.has("mag") or e.has("rounds") or e.has("plates") or e.has("charges")
+	return e.has("dur") or e.has("mods") or e.has("mag") or e.has("rounds") or e.has("plates") or e.has("charges") or e.has("mags")
 
 
 ## Определение обвеса (data/weapons.json → attach).
@@ -790,6 +827,9 @@ static func entry_value(entry: Dictionary) -> int:
 	for s in entry.get("plates", {}):
 		var p: Dictionary = entry.plates[s]
 		v += float(value(String(p.id))) * clampf(float(p.dur) / maxf(1.0, max_dur(String(p.id))), 0.2, 1.0)
+	for part: String in ["mags", "dump"]:
+		for inner: Variant in entry.get(part, []):
+			v += float(entry_value(inner))
 	return int(v)
 
 

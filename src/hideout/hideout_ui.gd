@@ -263,6 +263,10 @@ func _restore_scroll(scrolls: Dictionary) -> void:
 ## Снаряжение магазина меняет числа, но не дерево окна: мышь продолжает держать живую сетку.
 func _refresh_stash_content() -> bool:
 	var expected: int = 2 if Profile.pocket_grid() == Vector2i.ZERO else 3
+	# подсумки и сумка сброса надетой разгрузки — тоже сетки окна
+	for part: String in ["rig", "dump"]:
+		if Profile.grid_of(part) != Vector2i.ZERO:
+			expected += 1
 	if _stash_views.size() != expected or _stash_slots.size() != Inventory.SLOTS.size():
 		return false
 	for index: int in range(_stash_views.size()):
@@ -295,9 +299,12 @@ func _build_stash() -> void:
 	stash.set_items(Profile.stash)
 	stash_col.add_child(stash)
 	var gear := _column("Снаряжение", 0.8)
+	# ростовая фигура: слоты стоят на своих местах
+	var doll := EquipDoll.new()
+	gear.add_child(doll)
 	for slot in Inventory.SLOTS:
 		var s := String(slot)
-		var sv := SlotView.new(s)
+		var sv: SlotView = doll.views[s]
 		_stash_slots.append(sv)
 		sv.set_entry(Profile.equipment.get(s, {}))
 		sv.equip_from.connect(func(src: GridView, idx: int) -> void: Profile.equip_from(src.role, idx, s))
@@ -312,7 +319,30 @@ func _build_stash() -> void:
 			else:
 				Profile.fit_part("equip:" + s, -1, src.role, idx, ""))
 		sv.context.connect(func(at: Vector2) -> void: _parts_menu("equip:" + s, -1, Profile.equipment.get(s, {}), at))
-		gear.add_child(sv)
+	# разгрузка: подсумки под магазины (перезарядка — из них) и сумка сброса пустых
+	var rig_views: Array[GridView] = []
+	if Profile.grid_of("rig") != Vector2i.ZERO:
+		var rig_row := HBoxContainer.new()
+		rig_row.add_theme_constant_override("separation", 14)
+		gear.add_child(rig_row)
+		for part: Array in [["rig", "Подсумки — магазины"], ["dump", "Сброс пустых"]]:
+			var pg2: Vector2i = Profile.grid_of(String(part[0]))
+			if pg2 == Vector2i.ZERO:
+				continue
+			var box := VBoxContainer.new()
+			box.add_theme_constant_override("separation", 3)
+			rig_row.add_child(box)
+			var cap := _text(String(part[1]), Color(0.95, 0.82, 0.6))
+			cap.add_theme_font_size_override("font_size", 13)
+			box.add_child(cap)
+			var gv := GridView.new(pg2, String(part[0]))
+			gv.set_items(Profile.list_of(String(part[0])))
+			box.add_child(gv)
+			rig_views.append(gv)
+	else:
+		var no_rig := _text("Разгрузки нет: магазины в рейде достаются из рюкзака — перезарядка дольше.", Color(0.6, 0.6, 0.56))
+		no_rig.add_theme_font_size_override("font_size", 13)
+		gear.add_child(no_rig)
 	gear.add_child(_text("Тащи мышью · R — повернуть на лету\nДвойной клик — надеть / перенести\nCtrl+клик — в другую сетку\nПравая кнопка — действия", Color(0.6, 0.62, 0.6)))
 	_templates_block(gear, true)
 	var bp_col := _column(("Рюкзак" if Profile.equipment.has("backpack") else "Карманы (рюкзака нет)") + "   %d / %d ячеек   (с ним — в рейд)" % [Profile.backpack_cells(), Profile.backpack_capacity()], 0.95)
@@ -332,6 +362,7 @@ func _build_stash() -> void:
 		views.append(pk)
 	else:
 		bp_col.add_child(_text("Защищённого кармана нет — строится в «Модулях убежища».", Color(0.55, 0.57, 0.55)))
+	views.append_array(rig_views)
 	_stash_views.assign(views)
 	for v in views:
 		var name := v.role
@@ -514,7 +545,7 @@ func _start_op(kind: String, role: String, idx: int, ammo: String = "", src: Str
 		func(_r: String, _list: Array) -> void: pass,
 		func(r: String) -> Vector2i: return Profile.grid_of(r))
 	var have: Array[String] = []
-	for r in [role, "backpack", "pocket", "stash"]:
+	for r in [role, "backpack", "pocket", "stash", "rig", "dump"]:
 		if not String(r) in have and Profile.grid_of(String(r)) != Vector2i.ZERO:
 			have.append(String(r))
 	op.all_roles.assign(have)
@@ -1076,7 +1107,7 @@ func _kit_card(kit: Dictionary, own_idx: int = -1) -> Control:
 		v.add_child(about)
 	# состав одной строкой: стволы, броня, шлем, рюкзак, сколько всего в рюкзаке
 	var parts: Array[String] = []
-	for slot in ["primary", "secondary", "armor", "helmet", "backpack"]:
+	for slot in ["primary", "secondary", "armor", "rig", "helmet", "backpack"]:
 		if slots.has(slot):
 			parts.append(ItemDb.item_name(String((slots[slot] as Dictionary).id)))
 	var bp_n := (kit.get("backpack", []) as Array).size()
@@ -1156,9 +1187,11 @@ func _subgroup(id: String) -> Array:
 		return [2, "Бронеплиты"]
 	if not WeaponDb.headset(id).is_empty():
 		return [3, "Гарнитуры"]
+	if ItemDb.item(id).has("rig"):
+		return [4, "Разгрузки"]
 	var cat := String(ItemDb.item(id).get("cat", "misc"))
 	if cat == "backpack":
-		return [4, "Рюкзаки"]
+		return [5, "Рюкзаки"]
 	var order := ["med", "food", "throw", "tools", "tech", "barter", "value"]
 	var oi := order.find(cat)
 	return [oi if oi >= 0 else order.size(), String(ItemInfo.CAT_NAMES.get(cat, "Разное"))]
@@ -1267,6 +1300,9 @@ func _sub_of(id: String) -> String:
 	var v := WeaponDb.vest(id)
 	if not v.is_empty():
 		return "плиты: " + ("спереди и сзади" if not (v.get("plates", []) as Array).is_empty() else "нет")
+	var rig: Dictionary = ItemDb.item(id).get("rig", {})
+	if not rig.is_empty():
+		return "подсумков %d · сброс %d" % [int(rig.pouches), int(rig.dump)]
 	# остальное — вид предмета; подробно — по «i»
 	return String(ItemInfo.CAT_NAMES.get(String(ItemDb.item(id).get("cat", "misc")), ""))
 

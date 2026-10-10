@@ -5,8 +5,8 @@ extends Node
 ## экземпляр предмета. Меняет только хост (авторитет узла — 1, как у Health); у всех peer
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
-const SLOTS := ["primary", "secondary", "armor", "helmet", "ears", "eyes", "backpack"]
-const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "armor": "Броня", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
+const SLOTS := ["primary", "secondary", "armor", "rig", "helmet", "ears", "eyes", "backpack"]
+const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "armor": "Броня", "rig": "Разгрузка", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
 
 var items: Array = []
 ## Ревизия слота не забывается, когда оружие вынуто: поздний пакет не попадёт в новый экземпляр.
@@ -134,13 +134,16 @@ func add_entry(entry: Dictionary) -> int:
 	return k
 
 
-## Сетки по имени: "backpack" (items), "pocket", "buffer".
+## Сетки по имени: "backpack" (items), "pocket", "buffer"; у надетой разгрузки — "rig" (подсумки) и
+## "dump" (сумка сброса пустых магазинов): лежат внутри записи снаряжения, принимают только магазины.
 func list_of(role: String) -> Array:
 	match role:
 		"pocket":
 			return pocket
 		"buffer":
 			return buffer
+		"rig", "dump":
+			return ItemDb.rig_list(equipment, role)
 	return items
 
 
@@ -150,6 +153,8 @@ func grid_of(role: String) -> Vector2i:
 			return pocket_grid
 		"buffer":
 			return Balance.BUFFER_GRID
+		"rig", "dump":
+			return ItemDb.rig_grid(equipment, role)
 	return backpack_grid()
 
 
@@ -171,6 +176,11 @@ func _set_list(role: String, list: Array) -> void:
 			pocket = list
 		"buffer":
 			buffer = list
+		"rig", "dump":
+			if equipment.has("rig"):
+				var eq := equipment.duplicate(true)
+				(eq.rig as Dictionary)["dump" if role == "dump" else "mags"] = list
+				equipment = eq
 		_:
 			items = list
 
@@ -178,7 +188,7 @@ func _set_list(role: String, list: Array) -> void:
 ## Кладёт экземпляр куда влезет в сетку into ("backpack" / "pocket" / "buffer"); сколько положил (хост).
 func add_entry_in(into: String, entry: Dictionary) -> int:
 	var grid := grid_of(into)
-	if grid == Vector2i.ZERO:
+	if grid == Vector2i.ZERO or not ItemDb.grid_accepts(into, entry):
 		return 0
 	var list := list_of(into).duplicate(true)
 	var k := ItemDb.add_to(list, entry, grid)
@@ -191,7 +201,7 @@ func add_entry_in(into: String, entry: Dictionary) -> int:
 ## положил (хост).
 func put_at(entry: Dictionary, x: int, y: int, r: bool, into: String = "backpack") -> int:
 	var grid := grid_of(into)
-	if grid == Vector2i.ZERO:
+	if grid == Vector2i.ZERO or not ItemDb.grid_accepts(into, entry):
 		return 0
 	var list := list_of(into).duplicate(true)
 	var k := ItemDb.put_at(list, entry, grid, x, y, r)
@@ -348,15 +358,44 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 	apply_weapon_state(slot, st)
 	if not equipment.has(slot):
 		return ["", {}]
+	var eq := equipment.duplicate(true)
 	var list := items.duplicate(true)
-	var r := Gear.reload_weapon(equipment[slot], list, backpack_grid())
+	var r: Array = []
+	# магазин — из подсумков разгрузки (под рукой); нет там — из рюкзака, как раньше
+	var pouches: Array = ItemDb.rig_list(eq, "rig")
+	if ItemDb.rig_grid(eq, "rig") != Vector2i.ZERO:
+		r = Gear.reload_weapon(eq[slot], pouches, ItemDb.rig_grid(eq, "rig"), true)
+	if r.is_empty() or String(r[2]) != "swap":
+		r = Gear.reload_weapon(eq[slot], list, backpack_grid(), true)
 	if String(r[2]) == "":
 		return ["", {}]
-	items = list
-	var eq := equipment.duplicate(true)
 	eq[slot] = r[0]
+	# старый магазин: сумка сброса → рюкзак → свободный подсумок → на землю
+	var old: Dictionary = r[1]
+	if not old.is_empty():
+		for key in ["x", "y", "r"]:
+			old.erase(key)
+		if ItemDb.rig_grid(eq, "dump") != Vector2i.ZERO and ItemDb.add_to(ItemDb.rig_list(eq, "dump"), old, ItemDb.rig_grid(eq, "dump")) > 0:
+			old = {}
+		elif ItemDb.add_to(list, old, ItemDb.bag_grid(eq)) > 0:
+			old = {}
+		elif ItemDb.rig_grid(eq, "rig") != Vector2i.ZERO and ItemDb.add_to(pouches, old, ItemDb.rig_grid(eq, "rig")) > 0:
+			old = {}
+	items = list
 	equipment = eq
-	return [String(r[2]), r[1]]
+	return [String(r[2]), old]
+
+
+## Есть ли в подсумках разгрузки магазин к оружию slot (перезарядка из них — быстрая).
+func rig_has_mag(slot: String) -> bool:
+	var e: Dictionary = equipment.get(slot, {})
+	if e.is_empty():
+		return false
+	var out: bool = e.get("mag") is Dictionary and String((e.mag as Dictionary).get("id", "")) == ""
+	for it: Dictionary in list_of("rig"):
+		if it.has("rounds") and WeaponDb.mag_fits(String(e.id), String(it.id)) and (int(it.get("rounds", 0)) > 0 or out):
+			return true
+	return false
 
 
 ## Быстрое действие глушителя — атомарно: на ошибке ни обвес, ни рюкзак не меняются.
@@ -405,9 +444,32 @@ func prepare_mags() -> void:
 	for slot in ["primary", "secondary"]:
 		if eq.has(slot):
 			extra.append(eq[slot])
-	if Gear.load_mags(list, extra) > 0:
+	# магазины в подсумках разгрузки тоже снаряжаются
+	var pouched: Array = ItemDb.rig_list(eq, "rig")
+	var used := Gear.load_mags(list, extra + pouched)
+	if used > 0:
 		for e in extra:
 			Gear._bump(e)
+	# подсумки пусты — снаряжённые магазины к своим стволам переезжают из рюкзака в них сами
+	var moved := false
+	var rg := ItemDb.rig_grid(eq, "rig")
+	if rg != Vector2i.ZERO and pouched.is_empty():
+		var i := 0
+		while i < list.size():
+			var it: Dictionary = list[i]
+			var fits := false
+			for w in extra:
+				fits = fits or WeaponDb.mag_fits(String((w as Dictionary).id), String(it.id))
+			if it.has("rounds") and int(it.get("rounds", 0)) > 0 and fits:
+				var one: Dictionary = it.duplicate(true)
+				for key in ["x", "y", "r"]:
+					one.erase(key)
+				if ItemDb.add_to(pouched, one, rg) > 0:
+					list.remove_at(i)
+					moved = true
+					continue
+			i += 1
+	if used > 0 or moved:
 		items = list
 		equipment = eq
 
@@ -421,7 +483,7 @@ func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -
 		_set_list(src, same)
 		return true
 	var from: Array = list_of(src)
-	if idx < 0 or idx >= from.size():
+	if idx < 0 or idx >= from.size() or grid_of(dst) == Vector2i.ZERO or not ItemDb.grid_accepts(dst, from[idx]):
 		return false
 	# клетка не задана (x < 0) — куда влезет
 	if x < 0:

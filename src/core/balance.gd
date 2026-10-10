@@ -129,7 +129,8 @@ const START_STASH := [["wpn_hg_02", 1], ["wpn_ar_01", 1], ["ammo_919_fmj", 100],
 ## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
 const RESCUE_KIT := [["wpn_hg_01", 1], ["ammo_918_pst", 48], ["bandage", 2]]
 ## Готовые комплекты у Михалыча (правая колонка окна): полный набор одной кнопкой — стволы с обвесом,
-## броня с плитами, шлем, гарнитура, рюкзак, в рюкзаке магазины, патроны, медицина, гранаты. Формат —
+## броня с плитами, разгрузка, шлем, гарнитура, рюкзак, в рюкзаке магазины, патроны, медицина, гранаты
+## (снаряжённые магазины на входе в рейд сами переезжают в пустые подсумки — Inventory.prepare_mags). Формат —
 ## как у своих шаблонов (LoadoutTemplates): что есть в тайнике — берётся оттуда, остальное докупается.
 ## По одному на ступень снабжения: каталог 1, 2, 3 и 5.
 const TRADER_KITS := [
@@ -138,6 +139,7 @@ const TRADER_KITS := [
 			"primary": {"id": "wpn_sg_03", "mods": {"optic_primary": "optic_rd_01"}},
 			"secondary": {"id": "wpn_hg_01"},
 			"armor": {"id": "vest_homemade"},
+			"rig": {"id": "rig_belt"},
 			"helmet": {"id": "helmet_military_old"},
 			"ears": {"id": "headset_passive"},
 			"backpack": {"id": "bp_daypack"}},
@@ -147,6 +149,7 @@ const TRADER_KITS := [
 			"primary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_holo_01", "muzzle": "muzzle_comp_545_01", "underbarrel": "grip_vertical_01", "side_right": "tac_flashlight_01"}},
 			"secondary": {"id": "wpn_hg_02"},
 			"armor": {"id": "carrier_simple", "plates": {"front": "plate_steel", "back": "plate_steel"}},
+			"rig": {"id": "rig_chest"},
 			"helmet": {"id": "helmet_police"},
 			"ears": {"id": "headset_active"},
 			"backpack": {"id": "bp_tourist"}},
@@ -156,6 +159,7 @@ const TRADER_KITS := [
 			"primary": {"id": "wpn_ar_02", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_556_01", "underbarrel": "grip_angled_01", "side_right": "tac_combo_01"}},
 			"secondary": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01", "underbarrel": "tac_flashlight_01"}},
 			"armor": {"id": "carrier_tactical", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}},
+			"rig": {"id": "rig_assault"},
 			"helmet": {"id": "helmet_army"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
@@ -166,6 +170,7 @@ const TRADER_KITS := [
 			"primary": {"id": "wpn_dmr_01", "mods": {"optic_primary": "optic_8x_01", "muzzle": "muzzle_supp_762_01", "underbarrel": "bipod_01"}},
 			"secondary": {"id": "wpn_smg_03", "mods": {"optic_primary": "optic_holo_01", "underbarrel": "grip_angled_01"}},
 			"armor": {"id": "carrier_tactical", "plates": {"front": "plate_military", "back": "plate_military"}},
+			"rig": {"id": "rig_heavy"},
 			"helmet": {"id": "helmet_tactical"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
@@ -665,6 +670,11 @@ const AMMO_CHECK := {"hold_sec": 0.4, "show_sec": 3.0, "turn_deg": [45.0, 18.0],
 	# метка на магазине в сетке: полный / пустой видно всегда, остальное — после проверки
 	"short": {"полный": "ПОЛН", "почти полный": "~ПОЛН", "больше половины": ">½", "половина": "½",
 		"меньше половины": "<½", "почти пустой": "~ПУСТ", "пустой": "ПУСТ"}}
+## Разгрузка (слот снаряжения "rig", предметы с полем rig в data/items.json): подсумки — сетка
+## «подсумков × rows» только под магазины, сумка сброса — «dump × rows», тоже только магазины.
+## Перезарядка берёт магазин из подсумков; нет там — из рюкзака, но дольше в backpack_reload_k раз.
+## Старый магазин — в сумку сброса, нет места — в рюкзак, потом в подсумки, иначе на землю.
+const RIG := {"rows": 2, "backpack_reload_k": 1.35}
 ## Поштучно (MagOps): снарядить магазин — с на патрон, разрядить — с на патрон, вынуть плиту из
 ## жилета — с на плиту. Игровой темп, не армейский норматив: 30 патронов — около 8 с.
 ## С ускорителем снаряжения (предмет loader_item в рюкзаке, кармане, буфере; в убежище — и в тайнике) —

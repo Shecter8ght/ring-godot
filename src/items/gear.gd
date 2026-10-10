@@ -172,7 +172,7 @@ static func _bump(e: Dictionary) -> void:
 ## в рюкзак с остатком; снаряжённых нет — досыпать россыпь в текущий (того же типа нет — любым своего
 ## калибра, поверх: в магазине можно мешать). Магазин вынут — вставляется и пустой. Встроенный — россыпью.
 ## Возвращает [оружие, выпавшее (старый магазин без места), вид: "swap" / "topup" / ""].
-static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Array:
+static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i, keep_old: bool = false) -> Array:
 	var e: Dictionary = normalize_chamber(weapon)
 	var wid := String(e.id)
 	var w := WeaponDb.weapon(wid)
@@ -198,7 +198,8 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i) -> Ar
 			chamber_round(e)
 			_bump(e)
 			var spill := {}
-			if not old.is_empty() and ItemDb.add_to(list, old, grid) == 0:
+			# keep_old: старый магазин вызывающий раскладывает сам (сумка сброса разгрузки, рюкзак)
+			if not old.is_empty() and (keep_old or ItemDb.add_to(list, old, grid) == 0):
 				spill = old
 			return [e, spill, "swap"]
 		if String(mag.get("id", "")) == "":
@@ -259,6 +260,9 @@ static func load_mags(list: Array, extra: Array = []) -> int:
 			targets.append(it)
 	for e in extra:
 		if e is Dictionary and WeaponDb.is_weapon(String(e.get("id", ""))) and e.get("mag") is Dictionary:
+			targets.append(e)
+		elif e is Dictionary and e.has("rounds"):
+			# магазин вне сетки (в подсумке разгрузки)
 			targets.append(e)
 	for rec in targets:
 		var mag: Dictionary = rec if rec.has("rounds") else rec.mag

@@ -733,7 +733,7 @@ func _make_op(pl: Player, c: LootContainer, kind: String, role: String) -> MagOp
 		var g := inv.grid_of(r)
 		return g if g != Vector2i.ZERO else Vector2i(1, 1)
 	var op := MagOps.make(kind, role, pl.peer_id, get_list, commit, grid_of)
-	op.all_roles.assign(["backpack", "pocket", "buffer"] + (["loot"] if c else []))
+	op.all_roles.assign(["backpack", "pocket", "buffer", "rig", "dump"] + (["loot"] if c else []))
 	return op
 
 
@@ -1425,7 +1425,7 @@ func _strip(peer_id: int, where: String, idx: int, part: String, path: NodePath)
 	var ok := false
 	if where.begins_with("equip:"):
 		ok = pl.inventory.strip_equipped(where.trim_prefix("equip:"), part)
-	elif where in ["backpack", "pocket", "buffer"]:
+	elif where in ["backpack", "pocket", "buffer", "rig", "dump"]:
 		ok = pl.inventory.strip_in(where, idx, part)
 	elif where == "loot":
 		# с предмета в ящике — в тот же ящик, нет места — в буфер (прямо в рюкзак — нет)

@@ -395,24 +395,24 @@ func _refresh_lists(me: Player) -> void:
 ## Слоты: в слот тащат из любой сетки (рюкзак, карман, буфер, ящик) — надеть / взять в руки; на
 ## оружие — обвес или магазин, в плитоносец — плиту.
 func _build_equipment(me: Player) -> void:
-	# Изменение патронов не должно уничтожать источник/приёмник текущего перетаскивания.
+	# Изменение патронов не должно уничтожать источник/приёмник текущего перетаскивания: фигура и сетки
+	# разгрузки живут, пока не сменилась сама разгрузка (другие сетки).
+	var rig_sig := "%s|%s" % [str(me.inventory.grid_of("rig")), str(me.inventory.grid_of("dump"))]
 	for child: Node in _eq_list.get_children():
-		if child is GridContainer and not child.is_queued_for_deletion():
-			for slot_view: Node in child.get_children():
-				if slot_view is SlotView:
-					slot_view.set_entry(me.inventory.equipment.get(slot_view.slot, {}))
+		if child is EquipDoll and not child.is_queued_for_deletion() and String(child.get_meta("rig_sig", "")) == rig_sig:
+			(child as EquipDoll).set_equipment(me.inventory.equipment)
+			for part: String in ["rig", "dump"]:
+				var gv: GridView = _grid_deep(_eq_list, part)
+				if gv != null:
+					gv.set_items(me.inventory.list_of(part))
 			return
 	_clear(_eq_list)
-	var slots := GridContainer.new()
-	slots.columns = 2
-	slots.add_theme_constant_override("h_separation", 8)
-	slots.add_theme_constant_override("v_separation", 8)
-	slots.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_eq_list.add_child(slots)
+	# ростовая фигура: слоты стоят на своих местах
+	var doll := EquipDoll.new()
+	doll.set_meta("rig_sig", rig_sig)
+	_eq_list.add_child(doll)
 	for slot in Inventory.SLOTS:
-		var sv := SlotView.new(String(slot))
-		sv.custom_minimum_size = Vector2(3.0 * GridView.CELL, 1.7 * GridView.CELL)
-		sv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var sv: SlotView = doll.views[String(slot)]
 		sv.set_entry(me.inventory.equipment.get(slot, {}))
 		var ws := String(slot)
 		sv.equip_from.connect(func(src: GridView, idx: int) -> void:
@@ -434,7 +434,35 @@ func _build_equipment(me: Player) -> void:
 		# двойной клик — снять в рюкзак; ПКМ — снять, выбросить, снять обвес / магазин / плиту
 		sv.unequip_requested.connect(func() -> void: Raid.current.request_unequip(ws))
 		sv.context.connect(func(at: Vector2) -> void: _slot_menu(me, ws, at))
-		slots.add_child(sv)
+	# разгрузка: подсумки под магазины (перезарядка — из них) и сумка сброса пустых
+	if me.inventory.grid_of("rig") != Vector2i.ZERO:
+		var rig_row := HBoxContainer.new()
+		rig_row.add_theme_constant_override("separation", 14)
+		_eq_list.add_child(rig_row)
+		for part: Array in [["rig", "Подсумки — магазины"], ["dump", "Сброс пустых"]]:
+			var role := String(part[0])
+			var pg: Vector2i = me.inventory.grid_of(role)
+			if pg == Vector2i.ZERO:
+				continue
+			var box := VBoxContainer.new()
+			box.add_theme_constant_override("separation", 3)
+			rig_row.add_child(box)
+			var cap := _row_label(String(part[1]), Color(0.95, 0.82, 0.6))
+			cap.add_theme_font_size_override("font_size", 13)
+			box.add_child(cap)
+			var gv := GridView.new(pg, role)
+			gv.set_items(me.inventory.list_of(role))
+			box.add_child(gv)
+			_wire_grid(gv)
+			gv.context.connect(func(idx: int, at: Vector2) -> void: _item_menu(me, role, idx, at))
+			# двойной клик / Ctrl+клик — в рюкзак
+			gv.activated.connect(func(idx: int) -> void: Raid.current.request_grid_move(role, idx, "backpack", -1, -1, false))
+			gv.quick_move.connect(func(idx: int) -> void: Raid.current.request_grid_move(role, idx, "backpack", -1, -1, false))
+	else:
+		var no_rig := _row_label("Разгрузки нет: магазины достаются из рюкзака — перезарядка дольше.", Color(0.6, 0.6, 0.56))
+		no_rig.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		no_rig.add_theme_font_size_override("font_size", 13)
+		_eq_list.add_child(no_rig)
 	var hint := _row_label("В слот — из рюкзака, ящика, буфера: перетащи. Двойной клик — снять. Правая кнопка — снять обвес, магазин, плиту.", Color(0.6, 0.62, 0.6))
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_theme_font_size_override("font_size", 13)
@@ -553,7 +581,7 @@ func _wire_grid(g: GridView) -> void:
 	g.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void:
 		if src.role == "loot" and _looting:
 			Raid.current.request_take_to(_looting, idx, x, y, r, dst)
-		elif src.role in ["backpack", "pocket", "buffer"]:
+		elif src.role in ["backpack", "pocket", "buffer", "rig", "dump"]:
 			Raid.current.request_grid_move(src.role, idx, dst, x, y, r))
 	g.dropped_on.connect(func(src: GridView, si: int, di: int) -> void:
 		var me := Raid.current.local_player() if Raid.current else null
@@ -869,6 +897,17 @@ func _row_label(text: String, color: Color) -> Label:
 
 
 ## При изменении содержимого обновляем данные, а не удаляем узел, на который ссылается drag.
+## Сетка role где угодно внутри box (сетки разгрузки лежат в своих рамках).
+func _grid_deep(box: Node, role: String) -> GridView:
+	for child: Node in box.get_children():
+		if child is GridView and not child.is_queued_for_deletion() and (child as GridView).role == role:
+			return child
+		var inner: GridView = _grid_deep(child, role)
+		if inner != null:
+			return inner
+	return null
+
+
 func _existing_grid(box: Container, role: String) -> GridView:
 	for child: Node in box.get_children():
 		if child is GridView and not child.is_queued_for_deletion() and child.role == role:

@@ -81,6 +81,8 @@ var _reload_empty: bool = false
 ## идёт текущая перезарядка (второе R считается только в первые Balance.RELOAD_FAST.tap_sec),
 ## _reload_old_mag — какой магазин стоял ({id, rounds}): его и выбросить из рюкзака в конце.
 var _reload_fast: bool = false
+## Подсказка «магазин из рюкзака — дольше» — один раз за рейд.
+var _rig_hint_shown: bool = false
 var _reload_age: float = 0.0
 var _reload_old_mag: Dictionary = {}
 ## Магазин был вынут: перезарядка — только вставить новый (короче: Balance.RELOAD_INSERT.time_k);
@@ -1221,7 +1223,8 @@ func _start_reload(spec: Dictionary) -> void:
 		_send_ws(weapon_slot)
 	if loadout_mode:
 		var e := weapon_entry()
-		var kind := Gear.reload_kind(e, inventory.items)
+		# магазин — из подсумков разгрузки или из рюкзака (Inventory.reload_slot берёт в том же порядке)
+		var kind := Gear.reload_kind(e, inventory.list_of("rig") + inventory.items)
 		if kind == "":
 			_say("Нет магазина к оружию" if _reload_insert else "Нечем зарядить: " + WeaponDb.caliber_name(String(spec.caliber)))
 			_reload_insert = false
@@ -1249,6 +1252,12 @@ func _start_reload(spec: Dictionary) -> void:
 		# досыпать россыпью в отстёгиваемый магазин — дольше, чем сменить
 		if kind == "topup" and not WeaponDb.weapon(weapon_id).has("internal_mag"):
 			t *= Balance.RELOAD_TOPUP_K
+		# магазин не в подсумке, а в рюкзаке за спиной — доставать дольше
+		elif kind == "swap" and not inventory.rig_has_mag(weapon_slot):
+			t *= float(Balance.RIG.backpack_reload_k)
+			if not _rig_hint_shown and is_local():
+				_rig_hint_shown = true
+				_say("Магазин из рюкзака — дольше. Держи магазины в подсумках разгрузки")
 	# руки дрожат — дольше
 	reload_timer = t * (1.0 + float(Balance.STRESS.reload_k) * stress_k())
 	_animation_event("pistol_reload" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_reload")
@@ -1295,11 +1304,14 @@ func _drop_old_mag() -> void:
 	var h := items_host()
 	if h == null or not h.has_method("request_drop_entry"):
 		return
-	for i in range(inventory.items.size()):
-		var it: Dictionary = inventory.items[i]
-		if String(it.get("id", "")) == String(_reload_old_mag.id) and it.has("rounds") and int(it.rounds) == int(_reload_old_mag.rounds):
-			h.call("request_drop_entry", "backpack", i, true)
-			return
+	# хост убрал старый магазин в сумку сброса разгрузки или в рюкзак — оттуда и роняем
+	for where: String in ["dump", "backpack", "rig"]:
+		var list: Array = inventory.list_of(where)
+		for i in range(list.size()):
+			var it: Dictionary = list[i]
+			if String(it.get("id", "")) == String(_reload_old_mag.id) and it.has("rounds") and int(it.rounds) == int(_reload_old_mag.rounds):
+				h.call("request_drop_entry", where, i, true)
+				return
 
 
 ## Задержка: передёрнуть (R) — патроны не тратятся.
@@ -1753,7 +1765,7 @@ func _check_ammo(spec: Dictionary) -> void:
 ## Запасных магазинов к оружию в руках в рюкзаке (сколько в них патронов — не видно).
 func spare_mags() -> int:
 	var n := 0
-	for it in inventory.items:
+	for it in inventory.list_of("rig") + inventory.items:
 		if it.has("rounds") and WeaponDb.mag_fits(weapon_id, String(it.id)):
 			n += 1
 	return n
