@@ -607,8 +607,8 @@ const LOOT_GRID_W := 6
 const DROP_MERGE_M := 3.0
 const LOOT_ROWS := {"NONE": 3, "SAFE": 3, "RACK": 4, "BODY": 4, "BAG": 3, "CRATE": 3}
 ## ЛЦУ (LaserSight): докуда видна точка, м; её радиус вблизи и прирост на метр дистанции (чтобы
-## разглядеть сверху), отсвет точки — сила и радиус, м.
-const LASER := {"range_m": 150.0, "dot_radius": 0.012, "dot_grow": 0.0012, "light_energy": 1.2, "light_range": 0.5}
+## разглядеть сверху). Цветного отсвета вокруг точки нет.
+const LASER := {"range_m": 150.0, "dot_radius": 0.012, "dot_grow": 0.0012}
 ## Брошенный свет: осветительная ракета и химсвет — цвет, сила, радиус, сколько горит, с.
 const THROWN_LIGHTS := {
 	"flare": {"color": Color(1.0, 0.32, 0.22), "energy": 9.0, "range": 20.0, "sec": 60.0, "shadow": true},
