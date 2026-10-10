@@ -132,7 +132,8 @@ static func _give(pl: Player, id: String, n: int) -> String:
 		e = ItemDb.make(WeaponDb.canonical(id), maxi(1, n))
 	if e.is_empty():
 		return "нет такой сборки: " + id
-	if pl and pl.loadout_mode:
+	# в убежище руки игрока — копия профиля: выданное туда профиль не видел (станок, торговец) и затирал
+	if pl and pl.loadout_mode and Raid.current != null:
 		var k := pl.inventory.add_entry(e)
 		return "в рюкзак: %s × %d" % [ItemDb.label(e), k] if k > 0 else "в рюкзаке нет места"
 	Profile.ensure()
