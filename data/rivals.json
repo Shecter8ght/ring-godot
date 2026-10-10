@@ -1,0 +1,26 @@
+{
+ "_comment": "Чужие отряды (RivalRaids): постоянный состав «других игроков». style — характер (Balance.RIVALS не трогает: множители здесь): loot_k — сколько грабят относительно обычного, goal_k — сколько добычи им хватит, archs — типы бойцов по порядку (первый — ведущий; rival / rival_scout / rival_sniper). Имена — позывные для рации и хроники.",
+ "styles": {
+  "assault": {"name": "штурмовики", "loot_k": 1.0, "goal_k": 1.0, "archs": ["rival", "rival", "rival_scout"]},
+  "rats": {"name": "крысы", "loot_k": 0.7, "goal_k": 0.6, "archs": ["rival_scout", "rival_scout", "rival_scout"]},
+  "marksmen": {"name": "стрелки", "loot_k": 1.2, "goal_k": 0.8, "archs": ["rival", "rival_sniper", "rival_scout"]},
+  "greedy": {"name": "жадные", "loot_k": 1.5, "goal_k": 1.4, "archs": ["rival", "rival_scout", "rival"]}
+ },
+ "squads": [
+  {"id": "barsuk", "name": "Барсук", "style": "assault"},
+  {"id": "tishina", "name": "Тишина", "style": "rats"},
+  {"id": "severny", "name": "Северный", "style": "marksmen"},
+  {"id": "kombinat", "name": "Комбинат", "style": "greedy"},
+  {"id": "lom", "name": "Лом", "style": "assault"},
+  {"id": "sorok", "name": "Сорок Первый", "style": "marksmen"},
+  {"id": "vorony", "name": "Вороны", "style": "rats"},
+  {"id": "garazh", "name": "Гараж", "style": "greedy"},
+  {"id": "zavod", "name": "Заводские", "style": "assault"},
+  {"id": "mayak", "name": "Маяк", "style": "marksmen"},
+  {"id": "shepot", "name": "Шёпот", "style": "rats"},
+  {"id": "kirpich", "name": "Кирпич", "style": "assault"},
+  {"id": "tretiy", "name": "Третий Подъезд", "style": "greedy"},
+  {"id": "polyn", "name": "Полынь", "style": "marksmen"},
+  {"id": "sanitary", "name": "Санитары", "style": "rats"}
+ ]
+}

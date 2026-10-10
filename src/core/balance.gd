@@ -810,10 +810,30 @@ const AI_ARCHETYPES := {
 	"resident": {"name": "Жилец", "weight": 0.0, "loadout": "civilian", "speed": 0.95, "hp": 1.0,
 		"memory": 1.0, "view": 0.9, "color": Color(0.55, 0.48, 0.38), "scale": Vector3(0.96, 0.98, 0.96), "holds": false,
 		"faction": "resident", "loots": false},
+	# чужие отряды (RivalRaids): пришли за добычей, как и игроки, — обыскивают, уносят, воюют со всеми
+	"rival": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_veteran", "leader": {"chance": 0.0, "loadout": "scav_leader"},
+		"speed": 1.08, "hp": 1.0, "memory": 1.3, "view": 1.15, "color": Color(0.2, 0.24, 0.3),
+		"scale": Vector3(1.02, 1.0, 1.02), "holds": false, "faction": "rival"},
+	"rival_scout": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_standard", "speed": 1.25, "hp": 0.9,
+		"memory": 0.9, "view": 1.2, "color": Color(0.26, 0.28, 0.22), "scale": Vector3(0.94, 1.0, 0.94), "holds": false,
+		"faction": "rival"},
+	"rival_sniper": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_sniper", "speed": 0.95, "hp": 0.9,
+		"memory": 1.5, "view": 2.0, "color": Color(0.24, 0.27, 0.2), "scale": Vector3(0.96, 1.0, 0.96), "holds": false,
+		"faction": "rival"},
 }
 ## Кто кому враг (фракции ИИ). Игрок — враг мародёрам и ЧВК; жильцам — только если к ним полез
 ## (зашёл к ним, стрелял рядом, попал) или группа враждебная с самого начала.
-const AI_HOSTILE := {"marauder": ["pmc", "resident"], "pmc": ["marauder", "resident"], "resident": ["marauder", "pmc"]}
+## Чужие отряды («rival») враждуют со всеми, и друг с другом тоже — свои только в своём отряде.
+const AI_HOSTILE := {"marauder": ["pmc", "resident", "rival"], "pmc": ["marauder", "resident", "rival"],
+	"resident": ["marauder", "pmc", "rival"], "rival": ["marauder", "pmc", "resident", "rival"]}
+## Чужие отряды в рейде (RivalRaids, docs/design/rival_raids.md): сколько отрядов и бойцов; когда входят
+## (с от начала рейда); не ближе стольких метров к игрокам; сколько грабят, прежде чем идти к выходу, с;
+## уходят раньше, если в сумках набралось столько записей или отряд потерял такую долю состава;
+## у выхода стоят столько секунд в зоне такого радиуса (без боя) — и уходят с добычей; шанс, что о
+## входе / выходе отряда скажут по рации.
+const RIVALS := {"squads": [1, 3], "size": [2, 3], "enter_sec": [15.0, 260.0], "spawn_min_m": 55.0,
+	"loot_sec": [200.0, 380.0], "pack_goal": 5, "loss_share": 0.5, "extract_sec": 18.0, "extract_m": 7.0,
+	"radio_chance": 0.6}
 ## Жильцы: сколько групп, по сколько, доля враждебных сразу; ближе стольких метров к их
 ## магазину — «полез к ним»; враждебные стреляют с такого расстояния.
 const RESIDENTS := {"groups": [1, 2], "size": [2, 3], "hostile_share": 0.3, "trespass_m": 7.0, "hostile_m": 22.0}

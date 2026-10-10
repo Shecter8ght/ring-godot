@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Порядок в рассказе: чем вооружился → бой → мир → здоровье → добыча → уход.
 const ORDER := ["weapon_upgrade", "weapon_switches", "some_kills", "zero_kills", "high_kill_count", "kill_streak",
-	"grenade_kills", "weak_weapon_kills", "pmc_kill", "sniper_kill", "leader_kill", "enemy_self_grenade",
+	"grenade_kills", "weak_weapon_kills", "pmc_kill", "rival_kill", "sniper_kill", "leader_kill", "enemy_self_grenade",
 	"enemy_ally_grenade", "high_accuracy", "low_accuracy", "trigger_happy", "friendly_fire", "player_low_hp",
 	"survived_downed", "many_heals", "no_damage", "big_find", "valuable_loot", "empty_handed", "missions_done",
 	"long_raid", "camped_exit", "fast_death", "killed_by_weak", "near_extract_death"]

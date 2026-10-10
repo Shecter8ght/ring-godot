@@ -96,7 +96,7 @@ static func from(a: RaidAnalytics) -> RaidSummary:
 			s.grenade_kills += 1
 		elif _weak(String(k.weapon)):
 			s.weak_kills += 1
-		var key := "pmc" if String(k.faction) == "pmc" else ("resident" if String(k.faction) == "resident" else String(k.arch))
+		var key := String(k.faction) if String(k.faction) in ["pmc", "resident", "rival"] else String(k.arch)
 		s.kills_by_arch[key] = int(s.kills_by_arch.get(key, 0)) + 1
 		if bool(k.get("leader", false)):
 			s.kills_by_arch["leader"] = int(s.kills_by_arch.get("leader", 0)) + 1
@@ -119,7 +119,7 @@ static func killer_key(d: Dictionary) -> String:
 		"self_grenade":
 			return "self"
 	var faction := String(d.get("faction", ""))
-	if faction == "pmc" or faction == "resident":
+	if faction == "pmc" or faction == "resident" or faction == "rival":
 		return faction
 	var arch := String(d.get("arch", ""))
 	return arch if arch != "" else "*"
@@ -183,6 +183,8 @@ func tags(history: Array) -> Array:
 		out.append(_t("weak_weapon_kills", 0.7, "mid", {"n": weak_kills}))
 	if kills_by_arch.has("pmc"):
 		out.append(_t("pmc_kill", 0.85, "mid", {"n": int(kills_by_arch.pmc)}))
+	if kills_by_arch.has("rival"):
+		out.append(_t("rival_kill", 0.8, "mid", {"n": int(kills_by_arch.rival)}))
 	if kills_by_arch.has("sniper"):
 		out.append(_t("sniper_kill", 0.65, "mid"))
 	if kills_by_arch.has("leader"):

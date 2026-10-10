@@ -5,7 +5,7 @@ extends RefCounted
 ## повредить плиту, выставить износ, показать характеристики. Только хост или соло: состояние
 ## оружия и снаряжения ведёт хост (Gear._bump — владелец перечитает).
 
-const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|headsets|loadouts. Пример: give weapon VERAS54 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
+const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · spawn rivals [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|headsets|loadouts. Пример: give weapon VERAS54 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
 ## Точки в записи ТЗ (camelCase) → точки арсенала.
 const MOUNT_ALIAS := {"primaryOptic": "optic_primary", "offsetOptic": "optic_offset", "sideLeft": "side_left", "sideRight": "side_right",
 	"underbarrel": "underbarrel", "muzzle": "muzzle", "stock": "stock"}
@@ -231,6 +231,16 @@ static func _spawn(tree: SceneTree, pl: Player, what: String, n: int) -> String:
 	var level := tree.current_scene
 	if level == null or not level.has_method("spawn_squad"):
 		return "не в рейде"
+	# «spawn rivals [n]» — чужие отряды входят в рейд, как пришли бы сами (с дальней стороны, со своим выходом)
+	if what == "rivals":
+		if RivalRaids.current == null:
+			return "чужих отрядов у этого уровня нет"
+		var names: PackedStringArray = []
+		for record: Variant in RivalRoster.pick(maxi(n, 1), RandomNumberGenerator.new()):
+			var entered: RivalSquad = RivalRaids.current.enter(record)
+			if entered:
+				names.append("«%s» → %s" % [entered.name, entered.exit_name])
+		return "вошли: " + ", ".join(names) if not names.is_empty() else "некуда войти: игроки рядом со всеми входами"
 	var arch := what
 	var opts := {}
 	if not Balance.AI_ARCHETYPES.has(what):

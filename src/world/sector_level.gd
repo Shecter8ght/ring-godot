@@ -98,6 +98,10 @@ func _ready() -> void:
 	var events := RaidEvents.new()
 	events.name = "Events"
 	add_child(events)
+	# чужие отряды — «другие игроки» рейда (узел есть у всех: по нему хост шлёт рацию)
+	var rivals := RivalRaids.new()
+	rivals.name = "Rivals"
+	add_child(rivals)
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})
@@ -243,10 +247,11 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 ## Хост: отряд из archs (типы AI_ARCHETYPES) у точки at. opts: home + home_r — держатся у места
 ## (жильцы, охрана), hostile — жильцы враждебны сразу, target — сразу идут проверить точку (ЧВК к
 ## грузу), loadout — выкладка всем (data/loadouts.json). До готовности навмеша — в очередь.
-func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> void:
+## Возвращает отряд (null — навигация ещё не готова: отряд появится позже, из очереди).
+func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> Squad:
 	if _marauders_spawned == 0:
 		_pending_squads.append([at, archs, opts])
-		return
+		return null
 	var map := get_world_3d().navigation_map
 	var squad := Squad.new()
 	var n := archs.size()
@@ -284,6 +289,7 @@ func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> void:
 	var target: Vector3 = opts.get("target", Vector3.INF)
 	if first and target != Vector3.INF:
 		first.investigate_at.call_deferred(target)
+	return squad
 
 
 ## Хост: отряд, который держится у точки (сюжетное место — «здесь их много»): n бойцов, не

@@ -68,6 +68,8 @@ var _foe_t: float = 0.0
 var faction: String = "marauder"
 ## Жильцы: враждебны игроку (сразу или после того, как к ним полезли).
 var hostile_to_players: bool = true
+## Чужой отряд идёт к выходу с добычей: по дороге контейнеры больше не обыскивает (RivalSquad).
+var no_loot: bool = false
 var _facing: float = 0.0
 var _nav_ready: bool = false
 ## Перелезает через преграду (связка навигации Vault): путь и доля пройденного (-1 — нет).
@@ -656,6 +658,9 @@ func _scan_foes(delta: float, fwd: Vector3, exclude: Array[RID]) -> Marauder:
 		var m := n as Marauder
 		if m == null or m == self or m.state == State.DEAD or not m.faction in hostile:
 			continue
+		# чужие отряды враждуют и между собой, но не внутри своего отряда
+		if m.faction == faction and m.squad == squad:
+			continue
 		var d := m.global_position.distance_to(global_position)
 		if d < best_d and Perception.can_see_body(get_world_3d(), _eye(), fwd, m, exclude, view, m.state == State.DOWNED):
 			best = m
@@ -669,6 +674,8 @@ func _foe_shout(foe: Marauder) -> String:
 			return "Периметр! Наёмники!"
 		"resident":
 			return "Тут крысы засели!"
+		"rival":
+			return "Чужая группа! Контакт!"
 	return "Мародёры!"
 
 
@@ -702,6 +709,9 @@ func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node)
 		return
 	# окрик — только своим
 	if speaker is Marauder and (speaker as Marauder).faction != faction:
+		return
+	# у чужих отрядов «свои» — только свой отряд
+	if speaker is Marauder and faction == "rival" and (speaker as Marauder).squad != squad:
 		return
 	if global_position.distance_to(from) > radius_m:
 		return
@@ -891,7 +901,7 @@ func _patrol(delta: float) -> void:
 			var ha := _rng.randf() * TAU
 			_agent.target_position = _snap(home + Vector3(cos(ha), 0.0, sin(ha)) * _rng.randf_range(1.0, home_radius))
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 1.5
-		elif pause_timer <= 0.0 and not _holds() and bool(_arch.get("loots", true)) and _pick_loot():
+		elif pause_timer <= 0.0 and not _holds() and not no_loot and bool(_arch.get("loots", true)) and _pick_loot():
 			pass
 		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
 			_agent.target_position = _snap(patrol_point_provider.call())
