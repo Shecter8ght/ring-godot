@@ -31,6 +31,8 @@ static func build(id: String) -> Node3D:
 		return r
 	var root := Node3D.new()
 	root.name = "Item_" + id
+	if id in ["laser_head", "engraver_frame", "engraver_controller"] and _scan_path(root, "res://assets/items/models/%s.glb" % id):
+		return root
 	# рюкзаки — модели проекта (tools/build_backpacks.py)
 	if String(it.get("cat", "")) == "backpack" and _scan_path(root, "res://assets/items/models/%s.glb" % id):
 		return root

@@ -27,7 +27,7 @@ static var _meshes: Dictionary = {}
 ## mag — магазин в оружии: "*" — штатный вид (как в модели), "" — магазина нет, id — его вид
 ## (WeaponMods.mag_state по записи). lod −1 — подробная модель для разглядывания вблизи
 ## (конструктор оружия: weapon.asset_detail), если она есть; иначе как lod 0.
-static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 100.0, mag: String = "*") -> Node3D:
+static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 100.0, mag: String = "*", engraving: Dictionary = {}) -> Node3D:
 	var root: Node3D = Node3D.new()
 	root.name = "Weapon_" + id
 	var key := id
@@ -81,6 +81,7 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 		if not child.has_meta("no_shadow"):
 			(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if is_equal_approx(scale, 1.0):
+		WeaponMark.attach(root, id, engraving)
 		return root
 	# масштаб основы: геометрия — во внутреннем узле, meta — в осях внешнего
 	var outer := Node3D.new()
@@ -109,6 +110,7 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 	# ads_z — вынос глаза, от масштаба не зависит
 	if root.has_meta("ads_z"):
 		outer.set_meta("ads_z", root.get_meta("ads_z"))
+	WeaponMark.attach(outer, id, engraving)
 	return outer
 
 
@@ -282,7 +284,9 @@ static func _pistol(r: Node3D) -> void:
 	var zr := zf - 0.186
 	var zc := (zf + zr) * 0.5
 	# затвор: коробка с крупной фаской по рёбрам (у Glock верх скошен)
-	_cbox(r, Vector3(0, (slide_bot + slide_top) * 0.5, zc), Vector3(0.0255, slide_top - slide_bot, 0.186), slide_m, 0.0034)
+	var engraving_slide: MeshInstance3D = _cbox(r, Vector3(0, (slide_bot + slide_top) * 0.5, zc), Vector3(0.0255, slide_top - slide_bot, 0.186), slide_m, 0.0034)
+	engraving_slide.name = "EngravingSlide"
+	engraving_slide.set_meta("engraving_positions", [[], [], [0.32, 0.72]])
 	# насечки сзади по бокам — вертикальные канавки
 	for side in [-1.0, 1.0]:
 		for k in range(8):
@@ -320,7 +324,9 @@ static func _pistol(r: Node3D) -> void:
 	var pts: Array[Vector3] = [t - d * 0.012, t + d * 0.004, t + d * 0.03, t + d * 0.06, t + d * PISTOL_GRIP_LEN]
 	_sweep(r, pts, [Vector2(0.0232, 0.05), Vector2(0.0295, 0.05), Vector2(0.03, 0.049), Vector2(0.0302, 0.048), Vector2(0.03, 0.046)] as Array[Vector2], poly, 0.32)
 	# стиплинг — чуть шире рукояти в средней части, другой полимер
-	_sweep(r, [t + d * 0.018, t + d * 0.072] as Array[Vector3], [Vector2(0.0312, 0.043), Vector2(0.0312, 0.041)] as Array[Vector2], _mat("polymer_grip"), 0.35)
+	var engraving_grip: MeshInstance3D = _sweep(r, [t + d * 0.018, t + d * 0.072] as Array[Vector3], [Vector2(0.0312, 0.043), Vector2(0.0312, 0.041)] as Array[Vector2], _mat("polymer_grip"), 0.35)
+	engraving_grip.name = "EngravingGrip"
+	engraving_grip.set_meta("engraving_positions", [[0.73, 0.63], [0.27, 0.37]])
 	# пятка магазина — по оси рукояти вплотную к её низу
 	var base := _cbox(r, t + d * (PISTOL_GRIP_LEN + 0.0045), Vector3(0.0315, 0.009, 0.05), poly, 0.0025)
 	base.basis = Basis(Vector3.RIGHT, deg_to_rad(PISTOL_GRIP_ANGLE))
@@ -352,7 +358,9 @@ static func _rifle(r: Node3D) -> void:
 	var gm := _mat("gunmetal")
 	var wood := _mat("wood_red")
 	# ствольная коробка и крышка
-	_cbox(r, Vector3(0, 0.042, 0.075), Vector3(0.043, 0.055, 0.29), steel, 0.004)
+	var engraving_receiver: MeshInstance3D = _cbox(r, Vector3(0, 0.042, 0.075), Vector3(0.043, 0.055, 0.29), steel, 0.004)
+	engraving_receiver.name = "EngravingReceiver"
+	engraving_receiver.set_meta("engraving_positions", [[0.23, 0.23], [0.23, 0.45], [0.23, 0.66], [0.54, 0.12], [0.48, 0.85]])
 	var cover := _cyl(r, Vector3(0, 0.07, 0.065), 0.0205, 0.25, steel)
 	cover.scale = Vector3(1.0, 0.45, 1.0)
 	# рёбра жёсткости на крышке
@@ -441,7 +449,9 @@ static func _shotgun(r: Node3D) -> void:
 	var steel := _mat("blued")
 	var gm := _mat("gunmetal")
 	var wood := _mat("wood_walnut")
-	_cbox(r, Vector3(0, 0.045, 0.07), Vector3(0.042, 0.064, 0.2), steel, 0.005)
+	var engraving_receiver: MeshInstance3D = _cbox(r, Vector3(0, 0.045, 0.07), Vector3(0.042, 0.064, 0.2), steel, 0.005)
+	engraving_receiver.name = "EngravingReceiver"
+	engraving_receiver.set_meta("engraving_positions", [[0.27, 0.20], [0.27, 0.40], [0.27, 0.60], [0.55, 0.20], [0.55, 0.28]])
 	# окно выброса справа (-X) и затворная задержка слева
 	_box(r, Vector3(-0.0212, 0.055, 0.1), Vector3(0.001, 0.022, 0.06), _mat("dark"))
 	_cbox(r, Vector3(0.0215, 0.035, 0.02), Vector3(0.003, 0.008, 0.012), gm, 0.001)
@@ -496,8 +506,10 @@ static func _bolt(r: Node3D) -> void:
 	var gm := _mat("gunmetal")
 	var wood := _mat("wood_walnut")
 	# ложе одной линией: цевьё сужается к дулу, шейка под руку, приклад с гребнем
-	_sweep(r, [Vector3(0, 0.03, 0.54), Vector3(0, 0.034, 0.3), Vector3(0, 0.036, 0.1), Vector3(0, 0.033, 0.04)] as Array[Vector3],
+	var engraving_body: MeshInstance3D = _sweep(r, [Vector3(0, 0.03, 0.54), Vector3(0, 0.034, 0.3), Vector3(0, 0.036, 0.1), Vector3(0, 0.033, 0.04)] as Array[Vector3],
 		[Vector2(0.034, 0.03), Vector2(0.042, 0.042), Vector2(0.046, 0.05), Vector2(0.044, 0.056)] as Array[Vector2], wood, 0.35)
+	engraving_body.name = "EngravingBody"
+	engraving_body.set_meta("engraving_positions", [[0.40, 0.15], [0.40, 0.35], [0.40, 0.55], [0.62, 0.25], [0.62, 0.45]])
 	_sweep(r, [Vector3(0, 0.033, 0.04), Vector3(0, 0.012, -0.02), Vector3(0, 0.0, -0.075), Vector3(0, 0.004, -0.13), Vector3(0, 0.0, -0.22), Vector3(0, -0.006, -0.325)] as Array[Vector3],
 		[Vector2(0.044, 0.056), Vector2(0.032, 0.05), Vector2(0.031, 0.05), Vector2(0.038, 0.09), Vector2(0.041, 0.118), Vector2(0.042, 0.124)] as Array[Vector2], wood, 0.3)
 	# щека — отдельная подушка поверх гребня

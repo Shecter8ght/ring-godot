@@ -956,3 +956,13 @@ const URBAN_WORLD := {
 	"nav_detail_error": 2.0,
 	"extract_seconds": 8.0,
 }
+
+## Лазерная метка: ресурс головки — единственное ограничение частоты нанесения.
+const ENGRAVING := {"charges": 3, "max_text": 24, "width": 0.065, "pistol_width": 0.045,
+	"fade_begin": 3.0, "fade_length": 5.0, "cache": 32, "head_chance": 0.012,
+	"head_tables": ["electronics", "tools"], "cargo_search_s": 8.0,
+	"head_value": 12000, "spent_value": 500, "guards": 3, "guard_radius": 8.0,
+	"parts_loot": {"engraver_frame": {"tables": ["tools"], "chance": 0.025, "value": 8500},
+		"engraver_controller": {"tables": ["electronics"], "chance": 0.025, "value": 6000}}}
+## Возврат оставленного оружия в следующих рейдах владельца в той же зоне кампании.
+const WEAPON_RECOVERY := {"raids": 5, "chance": 0.25, "checkpoint_sec": 1.0}

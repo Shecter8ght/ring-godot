@@ -1,5 +1,28 @@
 class_name Marauder
 extends CharacterBody3D
+## Оружие, оставшееся в этом мире: хост выдаёт реальный экземпляр, не отдельную награду.
+var recovered_weapon: Dictionary = {}:
+	set(value):
+		recovered_weapon = value.duplicate(true)
+		if is_inside_tree():
+			_accept_recovered.call_deferred()
+
+
+func _accept_recovered() -> void:
+	if recovered_weapon.is_empty() or _body == null:
+		return
+	_store_mag_rounds()
+	equipment["primary"] = recovered_weapon.duplicate(true)
+	_main_slot = "primary"
+	# Запас соответствует найденному стволу. Патроны и износ самого экземпляра сохраняются.
+	spare.clear()
+	var mag: Dictionary = recovered_weapon.get("mag", {})
+	var capacity: int = WeaponDb.capacity(recovered_weapon)
+	if String(mag.get("id", "")) != "":
+		spare.append(WeaponDb.make_mag(String(mag.id), String(mag.get("ammo", "")), capacity))
+	elif capacity > 0:
+		spare.append({"id": String(mag.get("ammo", "")), "n": capacity})
+	_use("primary")
 ## Мародёр: ходит отрядом по контейнерам и грабит их (ведущий роется, отряд прикрывает; сумка
 ## выпадает с трупа) → расследование шума → бой → поиск, раненый — отход.
 ## Позицию игрока получает только через Perception.can_see (зрение), NoiseBus.noise (слух) и
@@ -394,7 +417,7 @@ func _show_gun() -> void:
 	if not equipment.has(_active):
 		return
 	var e: Dictionary = equipment[_active]
-	var gun := WeaponModels.build(String(e.id), e.get("mods", {}), 1, WeaponCondition.percent(e), WeaponMods.mag_state(e))
+	var gun := WeaponModels.build(String(e.id), e.get("mods", {}), 1, WeaponCondition.percent(e), WeaponMods.mag_state(e), e.get("engraving", {}))
 	for l in gun.find_children("Flashlight_*", "SpotLight3D", true, false):
 		_fade(l as Light3D)
 	# в правой руке модели (кость руки): идёт за руками в любой позе; без Persona — у груди
@@ -467,7 +490,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:animation_event", ".:animation_event_seq"]:
+	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)

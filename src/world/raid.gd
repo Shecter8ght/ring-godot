@@ -82,6 +82,8 @@ var analytics: RaidAnalytics
 var chronicle: RaidStory
 var _chronicle_wait: float = 0.0
 var _delta: float = 0.0
+var recovery: WeaponRecovery
+var _exit_receipt: Dictionary = {}
 
 
 func _ready() -> void:
@@ -96,6 +98,10 @@ func _ready() -> void:
 	quest_world.name = "QuestWorld"
 	quest_world.raid = true
 	add_child(quest_world)
+	recovery = WeaponRecovery.new()
+	recovery.name = "WeaponRecovery"
+	recovery.raid = self
+	add_child(recovery)
 	analytics = RaidAnalytics.new()
 	analytics.name = "Analytics"
 	add_child(analytics)
@@ -112,6 +118,8 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	if recovery != null:
+		recovery.finish()
 	if current == self:
 		current = null
 
@@ -494,6 +502,8 @@ func _check_over() -> void:
 		if not has_left(int(peer)) and not dead.has(peer):
 			return
 	over = true
+	if recovery != null:
+		recovery.finish()
 
 
 # ---------------------------------------------------------------- лут (просьбы к хосту)
@@ -1011,9 +1021,9 @@ func _drop_entry(peer_id: int, where: String, idx: int) -> void:
 ## Владелец: отдать хосту снаряжение из профиля (вызывает уровень при появлении игрока).
 func submit_loadout(lo: Dictionary) -> void:
 	if _is_host():
-		_give_loadout(multiplayer.get_unique_id(), lo.equipment, lo.backpack, lo.get("pocket", []), lo.get("pocket_grid", Vector2i.ZERO))
+		_give_loadout(multiplayer.get_unique_id(), lo.equipment, lo.backpack, lo.get("pocket", []), lo.get("pocket_grid", Vector2i.ZERO), String(lo.get("profile_id", "")))
 	else:
-		_rpc_give_loadout.rpc_id(1, lo.equipment, lo.backpack, lo.get("pocket", []), lo.get("pocket_grid", Vector2i.ZERO))
+		_rpc_give_loadout.rpc_id(1, lo.equipment, lo.backpack, lo.get("pocket", []), lo.get("pocket_grid", Vector2i.ZERO), String(lo.get("profile_id", "")))
 
 
 ## Потратить патроны/гранату из рюкзака (перезарядка, бросок).
@@ -1460,9 +1470,9 @@ func request_equip(idx: int) -> void:
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_give_loadout(eq: Dictionary, items: Array, pocket: Array, pgrid: Vector2i) -> void:
+func _rpc_give_loadout(eq: Dictionary, items: Array, pocket: Array, pgrid: Vector2i, owner: String = "") -> void:
 	if multiplayer.is_server():
-		_give_loadout(multiplayer.get_remote_sender_id(), eq, items)
+		_give_loadout(multiplayer.get_remote_sender_id(), eq, items, pocket, pgrid, owner)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -1528,7 +1538,7 @@ func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
 
 
 ## Хост: снаряжение из профиля игрока (рейд из убежища) — в его рюкзак и слоты.
-func _give_loadout(peer_id: int, eq: Dictionary, items: Array, pocket: Array = [], pgrid: Vector2i = Vector2i.ZERO) -> void:
+func _give_loadout(peer_id: int, eq: Dictionary, items: Array, pocket: Array = [], pgrid: Vector2i = Vector2i.ZERO, owner: String = "") -> void:
 	var pl := player_of(peer_id)
 	if pl == null:
 		return
@@ -1539,6 +1549,8 @@ func _give_loadout(peer_id: int, eq: Dictionary, items: Array, pocket: Array = [
 	# пустые магазины и оружие — снарядить россыпью из рюкзака
 	pl.inventory.prepare_mags()
 	pl.inventory.loadout_ready = true
+	if recovery != null:
+		recovery.register_owner(peer_id, owner)
 
 
 func _consume(peer_id: int, id: String, n: int) -> void:
@@ -1996,17 +2008,19 @@ func _story_end(me: Player) -> void:
 func _save_profile(me: Player) -> void:
 	if _profile_saved or me == null or not me.loadout_mode or not is_extracted(me.peer_id):
 		return
+	if _exit_receipt.is_empty():
+		return
 	_profile_saved = true
-	var items: Array = me.inventory.items.duplicate(true)
-	# оружие — с тем, что в магазине сейчас, износом, прицелом, фонарями (у владельца свежее хоста)
-	Profile.return_loadout(me.equipment_state(), items, int(loot_value.get(me.peer_id, 0)))
+	var items: Array = (_exit_receipt.items as Array).duplicate(true)
+	# Подтверждённый хостом состав после приёмки груза: износ, магазин и обвесы сохранены.
+	Profile.return_loadout(_exit_receipt.equipment, items, int(loot_value.get(me.peer_id, 0)))
 	# Михалыч доплачивает за риск условий: доля ценности вынесенного
 	var bonus := int(float(loot_value.get(me.peer_id, 0)) * RaidConditions.pay_bonus())
 	if bonus > 0:
 		Profile.money += bonus
 		Profile.save()
 		notify("Михалыч доплатит за риск: %s ₽" % InventoryUI.money(bonus))
-	Profile.set_pocket(me.inventory.pocket)
+	Profile.set_pocket(_exit_receipt.pocket)
 	if RaidEvents.current:
 		RaidEvents.current.on_local_extracted(me)
 	# задание «уйти через точку»: в итоге рейда — видимое имя, задания знают имя узла
@@ -2029,8 +2043,51 @@ func _save_death(me: Player) -> void:
 
 ## Сюжет (хост): участник эвакуировался — с тем, что вынес; сделанное группой засчитано всем.
 func _quest_extracted(pl: Player) -> void:
+	var delivery: String = ""
 	if quest_world:
-		Quests.on_extracted(quest_world.extraction_payload(pl.peer_id))
+		var payload: Dictionary = quest_world.extraction_payload(pl.peer_id)
+		var objective: Dictionary = Quests.objective("own_mark")
+		if Quests.state("own_mark") == "ACTIVE" and String(objective.get("type", "")) == "extract_cargo" and String(objective.get("site", "")) in payload.cargo:
+			delivery = String(objective.item)
+		Quests.on_extracted(payload)
+	# Михалычу передан один нужный узел, включая обычный лут. Остальные находки остаются.
+	for role: String in ["backpack", "pocket"]:
+		var list: Array = pl.inventory.list_of(role).duplicate(true)
+		for idx: int in range(list.size() - 1, -1, -1):
+			var sid: String = String(list[idx].get("quest_cargo", ""))
+			if delivery in ["engraver_frame", "engraver_controller"] and String(list[idx].id) == delivery and bool(list[idx].get("fir", false)):
+				list.remove_at(idx)
+				delivery = ""
+			elif sid == "engraver_head":
+				list[idx].erase("quest_cargo")
+		if role == "backpack":
+			pl.inventory.items = list
+		else:
+			pl.inventory.pocket = list
+	var receipt: Dictionary = {"equipment": pl.equipment_state(), "items": pl.inventory.items.duplicate(true), "pocket": pl.inventory.pocket.duplicate(true)}
+	if recovery != null:
+		recovery.escaped((receipt.equipment as Dictionary).values() + receipt.items + receipt.pocket)
+	if not Net.is_networked() or pl.peer_id == multiplayer.get_unique_id():
+		_exit_receipt = receipt
+	else:
+		_rpc_exit_receipt.rpc_id(pl.peer_id, receipt)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_exit_receipt(receipt: Dictionary) -> void:
+	_exit_receipt = receipt.duplicate(true)
+
+
+func notify_peer(peer: int, text: String) -> void:
+	if not Net.is_networked() or peer == multiplayer.get_unique_id():
+		notify(text)
+	else:
+		_rpc_notify_peer.rpc_id(peer, text)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_notify_peer(text: String) -> void:
+	notify(text)
 
 
 ## Сюжет считает хост (см. _quest_extracted); у себя ничего не нужно.

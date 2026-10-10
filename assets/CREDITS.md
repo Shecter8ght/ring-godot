@@ -250,3 +250,14 @@
   Строит `tools/build_adapters.py` в Blender; размеры — по описаниям Arisaka Defense Offset Mount,
   Vector Optics SCRA-60 и Extended Picatinny, Strike Industries Rotatable Optic Mount, профиль —
   MIL-STD-1913 (подробно — `_asset_src/adapters/license.txt`, `asset-state.md`).
+
+## Лазерный гравировщик и узлы (assets/items/models/engraver*.glb, laser_head.glb)
+
+- Собственные модели проекта, CC0: станок, переносимая рама, контроллер, вымышленный сервисный
+  оптический картридж LP-03; построены в Blender (`tools/build_engraver.py`), материалы собственные.
+  Иконки — рендер этих моделей (`tools/icon_bake.tscn`). Исходник с отдельными деталями —
+  `_asset_src/engraver/engraver.blend`, игровой экспорт объединён по материалам.
+- Фото-референс компоновки — OMTech Galvo Fiber 20, настольный маркировщик:
+  https://omtech.com/products/pre-owned-galvo-fiber-20-20w-split-fiber-laser-marker-engraving-machine-with-4-3x-4-3-working-area
+  Фото хранится только в локальном сырье и не распространяется с проектом; логотип производителя
+  и его изображения не включены в модель или текстуры. Три применения картриджа — игровое условие.

@@ -23,6 +23,17 @@ var _npc_vis: Node3D
 
 
 func _build_visual(parent: Node3D) -> void:
+	var cargo: String = String(spec.get("cargo", ""))
+	if cargo != "":
+		var model: Node3D = ItemModels.build(cargo)
+		model.name = "QuestCargo"
+		parent.add_child(model)
+		var minimum_y: float = 0.0
+		for child: Node in model.find_children("*", "MeshInstance3D", true, false):
+			var mesh: MeshInstance3D = child as MeshInstance3D
+			var box: AABB = ItemModels._xf_to(model, mesh) * mesh.get_aabb()
+			minimum_y = minf(minimum_y, box.position.y)
+		model.position.y = -minimum_y + 0.02
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(site_id)
 	for p in spec.get("props", []):
@@ -73,13 +84,17 @@ func _done() -> void:
 	if not lines.is_empty():
 		Quests.subtitles.emit(lines)
 	if active:
-		active = false
+		if String(Quests.objective(quest_id).get("type", "")) != "extract_cargo":
+			active = false
 		Quests.request_site(site_id)
 
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	var cargo: Node3D = _vis.get_node_or_null("QuestCargo") as Node3D if _vis != null else null
+	if cargo != null:
+		cargo.visible = not Quests.cargo_claimed(site_id)
 	var me := _local_player()
 	if me == null:
 		return

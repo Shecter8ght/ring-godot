@@ -47,6 +47,9 @@ static var unlocked_stock: Array = []
 ## Сюжетная кампания этого сохранения (id): в группе все идут по кампании хоста. Чужие кампании,
 ## в которых участвовал гостем, — отдельно (campaign id -> {quests, flags}): не смешиваются со своей.
 static var campaign_id: String = ""
+## Постоянный владелец и журнал оружия мира хоста, независимо от временного peer_id.
+static var profile_id: String = ""
+static var weapon_world: Dictionary = {}
 ## Шаблоны снаряжения (LoadoutTemplates): что надето и что в рюкзаке — собрать одной кнопкой.
 static var loadout_templates: Array = []
 static var guest_campaigns: Dictionary = {}
@@ -77,6 +80,8 @@ static func ensure() -> void:
 	_loaded = true
 	var text := FileAccess.get_file_as_string(path) if FileAccess.file_exists(path) else ""
 	var d: Variant = JSON.parse_string(text) if text != "" else null
+	if not d is Dictionary and FileAccess.file_exists(path + ".bak"):
+		d = JSON.parse_string(FileAccess.get_file_as_string(path + ".bak"))
 	if d is Dictionary:
 		money = int(d.get("money", 0))
 		profile_name = String(d.get("name", ""))
@@ -107,6 +112,10 @@ static func ensure() -> void:
 		flags = d.get("flags", {})
 		unlocked_stock = d.get("unlocked_stock", [])
 		campaign_id = String(d.get("campaign_id", ""))
+		profile_id = String(d.get("profile_id", ""))
+		weapon_world = d.get("weapon_world", {})
+		if profile_id == "":
+			profile_id = WeaponMark.new_id()
 		loadout_templates = d.get("loadout_templates", [])
 		guest_campaigns = d.get("guest_campaigns", {})
 		contracts = d.get("contracts", {})
@@ -124,6 +133,7 @@ static func ensure() -> void:
 				equipment["backpack"] = ItemDb.make(Balance.BACKPACK_START, 1)
 		_fix_numbers()
 		_fit_grids()
+		save()
 	else:
 		_starter()
 		save()
@@ -149,6 +159,8 @@ static func _starter() -> void:
 	flags = {}
 	unlocked_stock = []
 	campaign_id = ""
+	profile_id = WeaponMark.new_id()
+	weapon_world = {}
 	guest_campaigns = {}
 	contracts = {}
 	loadout_templates = []
@@ -184,24 +196,37 @@ static func _fit_grids() -> void:
 			push_warning("Profile: тайник переполнен, не поместилось: %s" % str(lost))
 
 
-static func save() -> void:
-	var f := FileAccess.open(path, FileAccess.WRITE)
+static func save() -> bool:
+	# Сначала полный временный файл. Ошибка записи не списывает ресурс гравировки.
+	var f := FileAccess.open(path + ".tmp", FileAccess.WRITE)
 	if f == null:
 		push_error("Profile: не удалось записать " + path)
-		return
+		return false
 	f.store_string(JSON.stringify({"name": profile_name, "money": money, "stash": stash, "equipment": equipment, "backpack": backpack,
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
 		"modules": modules, "hideout_media": hideout_media, "missions_active": missions_active, "missions_done": missions_done,
-		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "campaign_id": campaign_id, "guest_campaigns": guest_campaigns, "contracts": contracts, "loadout_templates": loadout_templates, "next_conditions": next_conditions,
+		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "campaign_id": campaign_id, "profile_id": profile_id, "weapon_world": weapon_world, "guest_campaigns": guest_campaigns, "contracts": contracts, "loadout_templates": loadout_templates, "next_conditions": next_conditions,
 		"raid_history": raid_history, "story_recent": story_recent}, "  "))
+	f.flush()
+	var error: Error = f.get_error()
+	f.close()
+	if error != OK:
+		return false
+	var absolute: String = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(path):
+		if DirAccess.copy_absolute(absolute, absolute + ".bak") != OK:
+			return false
+	return DirAccess.rename_absolute(absolute + ".tmp", absolute) == OK
 
 
 ## Тесты: свой файл и чистый старт.
 static func use_file(p: String, fresh: bool) -> void:
 	path = p
 	_loaded = false
-	if fresh and FileAccess.file_exists(p):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+	if fresh:
+		for suffix: String in ["", ".bak", ".tmp"]:
+			if FileAccess.file_exists(p + suffix):
+				DirAccess.remove_absolute(ProjectSettings.globalize_path(p + suffix))
 	ensure()
 
 
@@ -697,10 +722,15 @@ static func _migrate() -> void:
 		for i in range(list.size()):
 			var r := WeaponDb.migrate(list[i])
 			list[i] = r[0]
+			WeaponMark.identify(list[i])
+			if String(list[i].get("id", "")) == "laser_head":
+				list[i]["uid"] = list[i].get("uid", WeaponMark.new_id())
+				list[i]["charges"] = int(list[i].get("charges", Balance.ENGRAVING.charges))
 			spill.append_array(r[1])
 	for slot in equipment.keys():
 		var r := WeaponDb.migrate(equipment[slot])
 		equipment[slot] = r[0]
+		WeaponMark.identify(equipment[slot])
 		spill.append_array(r[1])
 	# старая броня в слоте — может не встать своим слотом (плитоносец надевается в armor)
 	for e in spill:
@@ -750,6 +780,8 @@ static func sell_price(entry: Dictionary) -> int:
 ## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack"); wear — одну вещь со слотом
 ## снаряжения (оружие, броня, рюкзак…) сразу надеть, если слот свободен.
 static func buy(id: String, n: int, to: String = "stash", wear: bool = true) -> bool:
+	if bool(ItemDb.item(id).get("raid_only", false)):
+		return false
 	var cost := buy_price(id) * n
 	var dst := list_of(to)
 	var grid := grid_of(to)
@@ -803,7 +835,7 @@ static func sell(idx: int, n: int, from: String = "stash") -> bool:
 static func take_loadout() -> Dictionary:
 	ensure()
 	var out := {"equipment": equipment.duplicate(true), "backpack": backpack.duplicate(true),
-		"pocket": pocket.duplicate(true), "pocket_grid": pocket_grid()}
+		"pocket": pocket.duplicate(true), "pocket_grid": pocket_grid(), "profile_id": profile_id}
 	equipment = {}
 	backpack = []
 	save()

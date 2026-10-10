@@ -360,6 +360,9 @@
     "class": "PISTOL",
     "caliber": "9x18",
     "model": "pistol",
+    "engraving_positions": [[0.66, 0.27], [0.47, 0.25], [0.27, 0.18]],
+    "engraving_width": 0.045,
+    "engraving_slide_anchor": [0.42, 0.82],
     "scale": 1,
     "length": 0.161,
     "stats": {
@@ -575,6 +578,9 @@
     "class": "PISTOL",
     "caliber": "9x19",
     "model": "pistol",
+    "engraving_positions": [[0.64, 0.22], [0.46, 0.20], [0.30, 0.16]],
+    "engraving_width": 0.045,
+    "engraving_slide_anchor": {"right": [0.58, 0.70], "left": [0.58, 0.37]},
     "scale": 1,
     "length": 0.202,
     "stats": {
@@ -1175,7 +1181,9 @@
     "reload_sound": "reload_rifle",
     "cycle_sound": "",
   "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.glb",
-    "state_maps": "res://assets/models/weapons/veras54/states/veras54"
+    "state_maps": "res://assets/models/weapons/veras54/states/veras54",
+    "engraving_anchor": [0.86, 0.23],
+    "engraving_positions": [[0.86, 0.23], [0.86, 0.31], [0.86, 0.37], [0.91, 0.16], [0.91, 0.28]]
    },
    "flavor": "Ствол на каждый день: не лучший ни в одной крайности, зато почти везде уместен."
   },

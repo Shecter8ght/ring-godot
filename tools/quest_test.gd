@@ -65,6 +65,11 @@ func _ready() -> void:
 	me.global_position = meet.global_position + Vector3(1.0, 0.2, 0.0)
 	for i in range(5):
 		await get_tree().physics_frame
+	# Зона проверяется в _process, а физика без окна иногда успевает несколько тиков подряд.
+	for i in range(20):
+		if String(Quests.objective(Q).id) == "p3note":
+			break
+		await get_tree().process_frame
 	_check("вошёл в зону встречи", String(Quests.objective(Q).id) == "p3note", _obj())
 	_site("p3_note").request_use()
 	_site("p3_ammo").request_use()

@@ -134,6 +134,15 @@ func _build(entry: Dictionary) -> void:
 	text.add_theme_font_size_override("bold_font_size", 16)
 	text.add_theme_color_override("default_color", Color(0.9, 0.89, 0.85))
 	text.text = describe(id)
+	var engraving: Dictionary = entry.get("engraving", {})
+	if not engraving.is_empty():
+		text.append_text("\n\n[b]Лазерная гравировка[/b]\n")
+		text.add_text(String(engraving.get("text", "")))
+		text.add_text("\n%s · № %s\nНадпись постоянная." % [String(engraving.get("date", "")), String(engraving.get("serial", ""))])
+		var site: Dictionary = WeaponMark.position_spec(id, String(engraving.get("site", "right_1")))
+		text.add_text("\nМесто: " + String(site.get("name", "")))
+	if id == "laser_head":
+		text.add_text("\n\nОсталось нанесений: %d / %d" % [int(entry.get("charges", 0)), int(Balance.ENGRAVING.charges)])
 	v.add_child(text)
 	var close := Button.new()
 	close.text = "Понятно"

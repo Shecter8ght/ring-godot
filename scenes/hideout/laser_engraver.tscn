@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/hideout/engraver_station.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/items/models/engraver.glb" id="2"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Workbench.tscn" id="3"]
+
+[sub_resource type="BoxShape3D" id="MachineShape"]
+size = Vector3(0.64, 0.82, 0.55)
+
+[node name="LaserEngraver" type="Node3D"]
+script = ExtResource("1")
+kind = 5
+authored_visual = true
+display_name = "Лазерный гравировщик"
+
+[node name="Table" parent="." instance=ExtResource("3")]
+position = Vector3(0, -0.9, 0)
+scale = Vector3(0.5, 1, 1)
+
+[node name="Machine" parent="." instance=ExtResource("2")]
+position = Vector3(-0.12, 0.03, 0)
+
+[node name="MachineBody" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineBody"]
+position = Vector3(0.12, 0.43, 0)
+shape = SubResource("MachineShape")

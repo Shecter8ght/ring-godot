@@ -2,6 +2,8 @@
 
 [ext_resource type="PackedScene" path="res://levels/shelter/Shelter_Interior.tscn" id="1_shelter"]
 
+[ext_resource type="PackedScene" path="res://scenes/hideout/laser_engraver.tscn" id="engraver_module"]
+
 [sub_resource type="Shader" id="Shader_xqsva"]
 code = "
 shader_type spatial;
@@ -86,6 +88,9 @@ bus = &"Master"
 
 [node name="VentilationHum" parent="Audio/ExistingAudioBridge" parent_id_path=PackedInt32Array(790355439) index="1" unique_id=127242075]
 bus = &"Master"
+
+[node name="LaserEngraver" parent="." instance=ExtResource("engraver_module")]
+position = Vector3(15.7, 0.9, -4.25)
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]
 [editable path="Architecture/SH_Int_Ceiling_MainHub"]

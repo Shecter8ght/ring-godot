@@ -177,6 +177,8 @@ func _process(delta: float) -> void:
 	if (Input.is_action_just_pressed("ui_cancel") or Input.is_action_just_pressed("inventory")) and not ItemInfo.blocking() and not just_opened:
 		close_ui()
 		return
+	if _kind == HideoutStation.Kind.ENGRAVER and _sig == "engraver":
+		return
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
 	sig += "|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, str(_qty), _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab]
@@ -208,6 +210,10 @@ func _process(delta: float) -> void:
 			_build_workbench()
 		HideoutStation.Kind.UPGRADES:
 			_build_upgrades()
+		HideoutStation.Kind.ENGRAVER:
+			_title.text = "Лазерный гравировщик"
+			_cols.add_child(EngraverPanel.new())
+			_sig = "engraver"
 	# строки-абзацы в колонках переносятся по словам: длинная строка не раздвигает окно за экран
 	for l in _cols.find_children("*", "Label", true, false):
 		if l.get_parent() is VBoxContainer and (l as Label).autowrap_mode == TextServer.AUTOWRAP_OFF:

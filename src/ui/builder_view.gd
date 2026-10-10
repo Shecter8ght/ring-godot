@@ -18,6 +18,7 @@ var _model: Node3D
 ## Внутренний узел модели (у оружия с масштабом основы — "Scaled"): оси данных.
 var _space: Node3D
 var _key: String = ""
+var _weapon_id: String = ""
 var _center: Vector3 = Vector3.ZERO
 var _radius: float = 0.5
 ## Камера: рысканье, тангаж, расстояние (в радиусах модели), сдвиг цели.
@@ -89,15 +90,16 @@ func _light(rot: Vector3, color: Color, energy: float, shadow: bool) -> void:
 
 ## Показать сборку: пересобрать модель, если изменился вид (key). keep_frame — не перекадрировать
 ## (смена обвеса не дёргает камеру).
-func show_build(weapon_id: String, mods: Dictionary, dur: float, mag: String, key: String) -> void:
+func show_build(weapon_id: String, mods: Dictionary, dur: float, mag: String, key: String, engraving: Dictionary = {}) -> void:
 	if key == _key and _model:
 		return
-	var first: bool = _model == null
+	var first: bool = _model == null or _weapon_id != weapon_id
+	_weapon_id = weapon_id
 	_key = key
 	if _model:
 		_model.queue_free()
 	# вблизи — подробная модель (у ВЕРАСа мировая упрощена в 7 раз и ломается на крупном плане)
-	_model = WeaponModels.build(weapon_id, mods, -1, dur, mag)
+	_model = WeaponModels.build(weapon_id, mods, -1, dur, mag, engraving)
 	_pivot.add_child(_model)
 	for l: Node in _model.find_children("*", "Light3D", true, false):
 		(l as Light3D).visible = false
@@ -172,6 +174,10 @@ func tint(node: Node3D, ok: bool) -> void:
 func set_view(view: String, eye: Transform3D = Transform3D.IDENTITY) -> void:
 	_eye = view == "eye"
 	match view:
+		"mark":
+			_want = Vector4(PI, deg_to_rad(4.0), 4.5, 0.0)
+		"mark_left":
+			_want = Vector4(0.0, deg_to_rad(4.0), 4.5, 0.0)
 		"side":
 			_want = Vector4(VIEW_SIDE.x, VIEW_SIDE.y, 2.2, 0.0)
 		"top":
@@ -190,6 +196,19 @@ func focus(p: Vector3) -> void:
 	if _space and _space.is_inside_tree():
 		_pan = _space.global_transform * p - _center
 	_want.z = 1.1
+
+
+func focus_mark() -> void:
+	if _model == null:
+		return
+	var marks: Array[Node] = _model.find_children("LaserMark", "Decal", true, false)
+	if marks.is_empty():
+		return
+	var left: bool = (marks[0] as Node3D).basis.y.x > 0
+	set_view("mark_left" if left else "mark")
+	_pan = (marks[0] as Node3D).global_position - _center
+	var pistol: bool = String(WeaponDb.weapon(_weapon_id).get("slot", "")) == "secondary"
+	_want.z = (0.22 if pistol else 0.35) / _radius
 
 
 func _process(delta: float) -> void:

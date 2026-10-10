@@ -569,6 +569,7 @@ static func bare_weapon(weapon_id: String, rng: RandomNumberGenerator, dur_range
 static func _from_preset(p: Dictionary, rng: RandomNumberGenerator, dur_range: Array) -> Dictionary:
 	var wid := String(p.weapon)
 	var e := {"id": wid, "n": 1}
+	WeaponMark.identify(e)
 	var dr: Array = dur_range if not dur_range.is_empty() else p.get("dur", [80, 100])
 	e["dur"] = roundf(rng.randf_range(float(dr[0]), float(dr[1])))
 	var mods := {}

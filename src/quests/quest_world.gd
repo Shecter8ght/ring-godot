@@ -93,7 +93,9 @@ func _spawn_site(qid: String, sid: String, sd: Dictionary) -> QuestSite:
 	if xf == null:
 		push_warning("QuestWorld: не найти место %s" % sid)
 		return null
-	var spec := sd
+	var spec: Dictionary = sd.duplicate(true)
+	if sd.has("search_balance"):
+		spec["search_s"] = float(Balance.ENGRAVING.get(String(sd.search_balance), 0.0))
 	if String(sd.get("npc", "")) != "" and not (sd.get("props", []) as Array).is_empty():
 		# NPC — сам по себе (его понесут), декорации — отдельным узлом на месте
 		var decor := QuestSite.new()
@@ -196,16 +198,22 @@ func extraction_payload(peer: int) -> Dictionary:
 	var pl := _player(peer)
 	var items: Array = []
 	var npcs: Array = []
+	var cargo: Array = []
 	if pl:
-		for e in pl.inventory.items:
+		for e in pl.inventory.items + pl.inventory.pocket:
 			items.append(String(e.id))
+			if String(e.get("quest_cargo", "")) != "":
+				cargo.append(String(e.quest_cargo))
+			var compatible: String = Quests.cargo_site_for(e)
+			if compatible != "" and not compatible in cargo:
+				cargo.append(compatible)
 		for sid in _sites:
 			var s: QuestSite = _sites[sid]
 			if s.npc_id() == "":
 				continue
 			if Quests.carrier_of(String(sid)) == peer or (not s.carried and s.global_position.distance_to(pl.global_position) <= 5.0):
 				npcs.append(s.npc_id())
-	return {"items": items, "npcs": npcs, "peer": peer}
+	return {"items": items, "npcs": npcs, "peer": peer, "cargo": cargo}
 
 
 # ---------------------------------------------------------------- раненого несут
@@ -241,6 +249,27 @@ func carrying() -> QuestSite:
 
 func _my_id() -> int:
 	return multiplayer.get_unique_id() if Net.is_networked() else 1
+
+
+## Единственный физический груз получает тот, кто обыскал место; счёт идёт за вынос.
+func give_cargo(peer: int, sid: String, item: String) -> bool:
+	var pl: Player = _player(peer)
+	if pl == null or pl.inventory == null or not near_site(peer, sid) or not pl.is_alive():
+		return false
+	for node: Node in get_tree().get_nodes_in_group("players"):
+		var player: Player = node as Player
+		if player == null or player.inventory == null:
+			continue
+		for e: Dictionary in player.inventory.items + player.inventory.pocket:
+			if String(e.get("quest_cargo", "")) == sid:
+				return false
+	var entry: Dictionary = ItemDb.make(item, 1)
+	entry["quest_cargo"] = sid
+	entry["fir"] = true
+	if pl.inventory.add_entry(entry) != 1:
+		Raid.current.notify_peer(peer, "Освободите место в рюкзаке для " + ItemDb.item_name(item))
+		return false
+	return true
 
 
 func _me() -> Player:

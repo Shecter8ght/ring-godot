@@ -57,6 +57,35 @@ var _npc_pos: Dictionary = {}
 ## Клиент: последний снимок от хоста {campaign, quests, flags, raid, delivered, carry, npc_pos,
 ## trust_level}; не в сети — пусто.
 var _remote: Dictionary = {}
+var _cargo_claims: Dictionary = {}
+
+
+func campaign_modules() -> Dictionary:
+	return _remote.get("modules", {}) if is_client() else Profile.modules
+
+
+func modules_changed() -> void:
+	_broadcast()
+	changed.emit()
+
+
+func cargo_claimed(sid: String) -> bool:
+	return bool((_remote.get("cargo_claims", {}) if is_client() else _cargo_claims).get(sid, false))
+
+
+## Совместимый узел из обычного ящика тоже годится. Купленные / незавершённые головки — нет.
+func cargo_site_for(entry: Dictionary) -> String:
+	if not bool(entry.get("fir", false)) or int(entry.get("n", 0)) < 1:
+		return ""
+	for qid: String in _order:
+		var o: Dictionary = objective(qid)
+		if state(qid) != "ACTIVE" or String(o.get("type", "")) != "extract_cargo" or String(o.get("item", "")) != String(entry.get("id", "")):
+			continue
+		if String(entry.id) == "laser_head" and int(entry.get("charges", 0)) != int(Balance.ENGRAVING.charges):
+			continue
+		return String(o.site)
+	return ""
+
 ## Мир уровня (места, раненые) — регистрируется сам; хост сверяет по нему, рядом ли просящий.
 var world: QuestWorld
 ## Интерфейс: цель, сообщения, разговоры, журнал, консоль разработчика.
@@ -210,6 +239,8 @@ func status(qid: String) -> String:
 			return "RETURN_TO_NPC"
 		"reach_extraction", "extract_with_item", "extract_with_npc", "survive":
 			return "WAITING_FOR_EXTRACTION"
+		"extract_cargo":
+			return "WAITING_FOR_EXTRACTION" if cargo_claimed(String(o.site)) else "OBJECTIVE"
 	return "OBJECTIVE"
 
 
@@ -308,7 +339,7 @@ func request_site(sid: String) -> void:
 	if is_client():
 		_rpc_site.rpc_id(1, sid)
 	else:
-		event("site", {"site": sid})
+		_use_site(multiplayer.get_unique_id() if Net.is_networked() else 1, sid)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -319,6 +350,18 @@ func _rpc_site(sid: String) -> void:
 	var peer := multiplayer.get_remote_sender_id()
 	if world == null or not world.near_site(peer, sid):
 		return
+	_use_site(peer, sid)
+
+
+func _use_site(peer: int, sid: String) -> void:
+	for qid: String in _order:
+		var o: Dictionary = objective(qid)
+		if state(qid) == "ACTIVE" and String(o.get("type", "")) == "extract_cargo" and String(o.get("site", "")) == sid:
+			if world != null and not cargo_claimed(sid) and world.give_cargo(peer, sid, String(o.item)):
+				_cargo_claims[sid] = true
+				_broadcast()
+			changed.emit()
+			return
 	event("site", {"site": sid})
 
 
@@ -338,6 +381,8 @@ func _matches(qid: String, o: Dictionary, type: String, p: Dictionary) -> bool:
 			return type == "extracted"
 		"extract_with_item":
 			return type == "extracted" and String(o.get("item", "")) in (p.get("items", []) as Array)
+		"extract_cargo":
+			return type == "extracted" and String(o.get("site", "")) in (p.get("cargo", []) as Array)
 		"extract_with_npc":
 			return type == "extracted" and String(o.get("npc", "")) in (p.get("npcs", []) as Array)
 		"kill_targets":
@@ -442,6 +487,7 @@ func begin_raid() -> void:
 	_delivered = false
 	_carry = {}
 	_npc_pos = {}
+	_cargo_claims = {}
 	_broadcast()
 	changed.emit()
 
@@ -502,7 +548,7 @@ func _commit_host() -> void:
 func _snapshot() -> Dictionary:
 	return {"campaign": Profile.own_campaign(), "quests": _quests(), "flags": _flags(), "raid": not _live.is_empty(),
 		"delivered": _delivered, "carry": _carry, "npc_pos": _npc_pos, "trust_level": Profile.trust_level(),
-		"contracts": Contracts.board()}
+		"contracts": Contracts.board(), "modules": Profile.modules, "cargo_claims": _cargo_claims}
 
 
 func _broadcast() -> void:
@@ -637,7 +683,7 @@ func sites_for(level: String) -> Array:
 			for o in stage(qid).get("objectives", []):
 				var sid := String((o as Dictionary).get("site", ""))
 				if sid != "":
-					wanted[sid] = sid == cur
+					wanted[sid] = sid == cur and not cargo_claimed(sid)
 			# NPC, которого надо вынести, — его место остаётся
 			var npc := String(objective(qid).get("npc", ""))
 			for sid in sites:
@@ -672,8 +718,10 @@ func guards_for(level: String) -> Array:
 		if String(sd.get("level", "")) == level:
 			# охраны больше с группой: соло ×1, двое ×1.4, трое ×1.8 (docs/design/contracts_and_map.md §3)
 			var group := clampi(Net.player_names.size() if Net.is_networked() else 1, 1, 3)
-			var n := ceili(int(g.get("n", 3)) * [1.0, 1.4, 1.8][group - 1])
-			out.append({"quest": qid, "site": String(g.site), "n": n, "radius": float(g.get("radius", 8.0))})
+			var count: int = int(Balance.ENGRAVING.guards) if String(g.get("balance", "")) == "engraving" else int(g.get("n", 3))
+			var radius: float = float(Balance.ENGRAVING.guard_radius) if String(g.get("balance", "")) == "engraving" else float(g.get("radius", 8.0))
+			var n := ceili(count * [1.0, 1.4, 1.8][group - 1])
+			out.append({"quest": qid, "site": String(g.site), "n": n, "radius": radius})
 	return out
 
 

@@ -26,6 +26,9 @@ static func find(id: String) -> Dictionary:
 
 
 static func level(id: String) -> int:
+	var flag: String = String(find(id).get("world_flag", ""))
+	if flag != "":
+		return 1 if Quests.flag(flag) == true else 0
 	return int(Profile.modules.get(id, int(find(id).get("start", 0))))
 
 
@@ -42,6 +45,8 @@ static func next_cost(id: String) -> Dictionary:
 
 ## Почему следующий уровень пока нельзя построить ("" — можно).
 static func block(id: String) -> String:
+	if String(find(id).get("world_flag", "")) != "":
+		return "восстановление по заданию Михалыча «Своя метка»"
 	var c := next_cost(id)
 	if c.is_empty():
 		return "максимальный уровень"
@@ -68,5 +73,6 @@ static func build(id: String) -> bool:
 		Profile.take_from_stash(String(pair[0]), int(pair[1]))
 	Profile.modules[id] = level(id) + 1
 	Profile.save()
+	Quests.modules_changed()
 	Audio.play_ui("upgrade")
 	return true

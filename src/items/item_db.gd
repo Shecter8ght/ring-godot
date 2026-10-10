@@ -26,6 +26,10 @@ static func _ensure() -> void:
 	_items = (JSON.parse_string(FileAccess.get_file_as_string(ITEMS_PATH)) as Dictionary).get("items", {})
 	# арсенал: оружие, патроны, магазины, обвес, броня — свои файлы данных (WeaponDb)
 	_items.merge(WeaponDb.items())
+	if _items.has("laser_head"):
+		_items.laser_head["value"] = int(Balance.ENGRAVING.head_value)
+	for id: String in Balance.ENGRAVING.parts_loot:
+		_items[id]["value"] = int(Balance.ENGRAVING.parts_loot[id].value)
 	# у оружия слот надевания — из его определения
 	for id in WeaponDb.ids("weapons"):
 		var it: Dictionary = _items[id]
@@ -190,6 +194,12 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 						_merge(out, WeaponDb.canonical(id), n)
 				break
 	# найдено в рейде: сдать Михалычу по заданию можно только такое (купленное — нет)
+	if table_id in Balance.ENGRAVING.head_tables and rng.randf() < float(Balance.ENGRAVING.head_chance):
+		out.append(make("laser_head", 1))
+	for id: String in Balance.ENGRAVING.parts_loot:
+		var spec: Dictionary = Balance.ENGRAVING.parts_loot[id]
+		if table_id in spec.tables and rng.randf() < float(spec.chance):
+			out.append(make(id, 1))
 	for e in out:
 		e["fir"] = true
 	return out
@@ -262,12 +272,17 @@ static func make(id: String, n: int) -> Dictionary:
 	id = WeaponDb.canonical(id)
 	var e := {"id": id, "n": n}
 	if WeaponDb.is_weapon(id):
+		WeaponMark.identify(e)
 		e.n = 1
 		var w := WeaponDb.weapon(id)
 		e["dur"] = 100.0
 		e["mods"] = {}
 		e["mag"] = {"id": "" if w.has("internal_mag") else WeaponDb.default_mag(id), "ammo": WeaponDb.default_ammo(String(w.caliber)), "rounds": 0}
 		e["sight"] = "primary"
+	elif id == "laser_head":
+		e.n = 1
+		e["uid"] = WeaponMark.new_id()
+		e["charges"] = int(Balance.ENGRAVING.charges)
 	elif not WeaponDb.attachment(id).is_empty():
 		e.n = 1
 		e["dur"] = float(Balance.CONDITION.full)
@@ -303,7 +318,7 @@ static func _merged_fir(dst: Dictionary, src: Dictionary) -> void:
 
 ## Экземпляр со своим состоянием — всегда поштучно.
 static func _stateful(e: Dictionary) -> bool:
-	return e.has("dur") or e.has("mods") or e.has("mag") or e.has("rounds") or e.has("plates")
+	return e.has("dur") or e.has("mods") or e.has("mag") or e.has("rounds") or e.has("plates") or e.has("charges")
 
 
 ## Определение обвеса (data/weapons.json → attach).
@@ -675,6 +690,8 @@ static func _label(entry: Dictionary) -> String:
 static func entry_value(entry: Dictionary) -> int:
 	var id := String(entry.id)
 	var v := float(value(id)) * int(entry.get("n", 1))
+	if id == "laser_head":
+		v = lerpf(float(Balance.ENGRAVING.spent_value), float(Balance.ENGRAVING.head_value), float(entry.get("charges", 0)) / float(Balance.ENGRAVING.charges))
 	var mx := max_dur(id)
 	if entry.has("dur") and mx > 0.0:
 		v *= clampf(float(entry.dur) / mx, 0.2, 1.0)
