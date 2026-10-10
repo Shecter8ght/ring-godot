@@ -261,3 +261,62 @@
   https://omtech.com/products/pre-owned-galvo-fiber-20-20w-split-fiber-laser-marker-engraving-machine-with-4-3x-4-3-working-area
   Фото хранится только в локальном сырье и не распространяется с проектом; логотип производителя
   и его изображения не включены в модель или текстуры. Три применения картриджа — игровое условие.
+
+## Переносимый гражданский лут (2026-10-10)
+
+24 модели Poly Haven, CC0 1.0. Готовая геометрия и PBR; удалены разложенные аксессуары, сетки облегчены до 6500 треугольников, ручной инструмент уложен на опору. Иконки — рендер этих же моделей.
+
+- `circuit_board.glb` — [circuit_board](https://polyhaven.com/a/circuit_board), Benny Weimer, CC0 1.0.
+- `pliers.glb` — [pliers](https://polyhaven.com/a/pliers), PierreB3D, CC0 1.0.
+- `screwdriver.glb` — [screwdriver](https://polyhaven.com/a/screwdriver), PierreB3D, CC0 1.0.
+- `measuring_tape.glb` — [measuring_tape_01](https://polyhaven.com/a/measuring_tape_01), Kuutti Siitonen, CC0 1.0.
+- `hammer.glb` — [cross_pein_hammer](https://polyhaven.com/a/cross_pein_hammer), Tics, CC0 1.0.
+- `pipe_wrench.glb` — [pipe_wrench](https://polyhaven.com/a/pipe_wrench), Will Evarts, CC0 1.0.
+- `multimeter.glb` — [retro_multimeter](https://polyhaven.com/a/retro_multimeter), elli moeller, CC0 1.0.
+- `oil_tin.glb` — [oil_tin](https://polyhaven.com/a/oil_tin), Niklas, CC0 1.0.
+- `thermos.glb` — [modified_thermos](https://polyhaven.com/a/modified_thermos), Alex Weber, CC0 1.0.
+- `kettle.glb` — [vintage_electric_kettle](https://polyhaven.com/a/vintage_electric_kettle), SV Garip, CC0 1.0.
+- `radio_transceiver.glb` — [vintage_radio_transceiver](https://polyhaven.com/a/vintage_radio_transceiver), Mateusz Sadek, CC0 1.0.
+- `cassette_player.glb` — [cassette_player](https://polyhaven.com/a/cassette_player), Oday Abuzaeed, CC0 1.0.
+- `video_camera.glb` — [vintage_video_camera](https://polyhaven.com/a/vintage_video_camera), James Ray Cock, Jenelle van Heerden, CC0 1.0.
+- `binoculars.glb` — [binoculars](https://polyhaven.com/a/binoculars), Derek Wight, CC0 1.0.
+- `wall_clock.glb` — [wall_clock](https://polyhaven.com/a/wall_clock), PierreB3D, CC0 1.0.
+- `work_gloves.glb` — [garden_gloves_01](https://polyhaven.com/a/garden_gloves_01), Satyaki Mandal, CC0 1.0.
+- `clipboard.glb` — [clipboard](https://polyhaven.com/a/clipboard), ProgrammerOnCoffee, CC0 1.0.
+- `empty_jerrycan.glb` — [metal_jerrycan_green](https://polyhaven.com/a/metal_jerrycan_green), Ulan Cabanilla, CC0 1.0.
+- `medical_case.glb` — [medical_box](https://polyhaven.com/a/medical_box), Ulan Cabanilla, CC0 1.0.
+- `metal_toolbox.glb` — [metal_toolbox](https://polyhaven.com/a/metal_toolbox), Mateusz Sadek, CC0 1.0.
+- `bench_vice.glb` — [bench_vice_01](https://polyhaven.com/a/bench_vice_01), Yann Kervran, Antanas Kep, CC0 1.0.
+- `desk_lamp.glb` — [desk_lamp_arm_01](https://polyhaven.com/a/desk_lamp_arm_01), Yann Kervran, Kuutti Siitonen, CC0 1.0.
+- `junction_box.glb` — [utility_box_01](https://polyhaven.com/a/utility_box_01), James Ray Cock, CC0 1.0.
+- `power_unit.glb` — [power_box_01](https://polyhaven.com/a/power_box_01), Rico Cilliers, Yann Kervran, CC0 1.0.
+
+## Ценные находки (2026-10-10)
+
+- https://polyhaven.com/a/cardboard_box_01 — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/classic_laptop — CC0 1.0 — Poly Haven.
+- https://opengameart.org/content/smartphone-1 — CC0 1.0 — Brian MacIntosh.
+- https://polyhaven.com/a/Camera_01 — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/circuit_board — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/security_camera_01 — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/security_camera_02 — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/industrial_microscope — CC0 1.0 — Poly Haven.
+- assets\models\weapons\pm\pm.glb — RING: existing approved geometry.
+- assets\models\weapons\glock17\glock17.glb — RING: existing approved geometry.
+- assets\models\weapons\veras54\veras54_detail.glb — RING: existing approved geometry.
+- https://polyhaven.com/a/metal_toolbox — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/medical_box — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/vintage_microscope — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/medical_tape — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/old_tyre — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/rusted_wheel_rim_01 — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/tire_pump — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/lubricant_spray — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/small_oil_can_01 — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/ratchet_wrench — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/long_life_food — CC0 1.0 — Poly Haven.
+- https://polyhaven.com/a/ammo_box — CC0 1.0 — Poly Haven.
+- https://3dmodelscc0.itch.io/free-cc0-guns-explosives-pack — CC0 1.0 — 3dmodelscc0.
+- Самолёт: Innerscene, Twin turboprop aircraft — CC0 1.0: https://www.innerscene.com/tools/library/3d-parts/twin-turboprop-aircraft-f8c5fa80
+- Самолёт, запись винтового двигателя: jakobthiesen, монтаж для цикла AntumDeluge — CC BY 3.0: https://opengameart.org/content/airplane-prop-loop ; https://creativecommons.org/licenses/by/3.0/ . Файл переименован в supply_plane_01.ogg.
+- Этикетки запечатанных партий — собственная графика RING. Игровые детали оружия извлечены из моделей проекта; оригинальные лицензии и авторы указаны выше.

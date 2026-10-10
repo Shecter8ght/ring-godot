@@ -1,0 +1,907 @@
+{
+  "gpu_compute": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "GPU / COMPUTE",
+    "max_dimension": 0.33,
+    "dimensions": [
+      0.33,
+      0.21,
+      0.075
+    ],
+    "print": "GPU"
+  },
+  "gpu_gaming": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "GPU / GAMING",
+    "max_dimension": 0.33,
+    "dimensions": [
+      0.33,
+      0.21,
+      0.075
+    ],
+    "print": "GPU"
+  },
+  "ssd_sata": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "SSD / SATA / 1 TB",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.115,
+      0.08,
+      0.025
+    ],
+    "print": "SSD"
+  },
+  "ssd_nvme": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "SSD / NVMe / 2 TB",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.115,
+      0.08,
+      0.025
+    ],
+    "print": "SSD"
+  },
+  "ram_desktop": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "RAM / 16 GB",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.17,
+      0.048,
+      0.025
+    ],
+    "print": "RAM"
+  },
+  "ram_server": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "RAM / ECC / 32 GB",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.17,
+      0.048,
+      0.025
+    ],
+    "print": "RAM"
+  },
+  "cpu_desktop": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "CPU / DESKTOP",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "CPU"
+  },
+  "cpu_server": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "CPU / SERVER",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "CPU"
+  },
+  "switch_managed": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "NETWORK / SWITCH",
+    "max_dimension": 0.33,
+    "dimensions": [
+      0.33,
+      0.23099999999999998,
+      0.0726
+    ],
+    "print": "NETWORK"
+  },
+  "router_industrial": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "NETWORK / ROUTER",
+    "max_dimension": 0.24,
+    "dimensions": [
+      0.24,
+      0.16799999999999998,
+      0.0528
+    ],
+    "print": "NETWORK"
+  },
+  "thermal_imager": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "THERMAL / MODULE",
+    "max_dimension": 0.24,
+    "dimensions": [
+      0.24,
+      0.16799999999999998,
+      0.0528
+    ],
+    "print": "THERMAL"
+  },
+  "nvg_tube": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "OPTICS / IMAGE TUBE",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "OPTICS"
+  },
+  "laser_rangefinder": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "OPTICS / RANGEFINDER",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "OPTICS"
+  },
+  "satellite_modem": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "SATELLITE / MODEM",
+    "max_dimension": 0.24,
+    "dimensions": [
+      0.24,
+      0.16799999999999998,
+      0.0528
+    ],
+    "print": "SATELLITE"
+  },
+  "oscilloscope_portable": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "TEST / OSCILLOSCOPE",
+    "max_dimension": 0.24,
+    "dimensions": [
+      0.24,
+      0.16799999999999998,
+      0.0528
+    ],
+    "print": "TEST"
+  },
+  "laptop_business": {
+    "source": "classic_laptop",
+    "group": "electronics"
+  },
+  "laptop_workstation": {
+    "source": "classic_laptop",
+    "group": "electronics"
+  },
+  "smartphone_business": {
+    "source": "phone",
+    "group": "electronics"
+  },
+  "photo_camera_pro": {
+    "source": "Camera_01",
+    "group": "electronics",
+    "selector": [
+      "Camera_01"
+    ]
+  },
+  "motherboard_server": {
+    "source": "circuit_board",
+    "group": "electronics"
+  },
+  "cctv_bullet": {
+    "source": "security_camera_01",
+    "group": "electronics"
+  },
+  "cctv_dome": {
+    "source": "security_camera_02",
+    "group": "electronics"
+  },
+  "microscope_digital": {
+    "source": "industrial_microscope",
+    "group": "electronics",
+    "selector": [
+      "industrial_microscope"
+    ]
+  },
+  "cpu_cooling_kit": {
+    "source": "cardboard_box_01",
+    "group": "electronics",
+    "label": "COOLING / SERVICE KIT",
+    "max_dimension": 0.26,
+    "dimensions": [
+      0.26,
+      0.182,
+      0.0572
+    ],
+    "print": "COOLING"
+  },
+  "part_pm_barrel": {
+    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "group": "parts",
+    "selector": [
+      "Barrel_Mesh"
+    ]
+  },
+  "part_pm_slide": {
+    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "group": "parts",
+    "selector": [
+      "Slide_Mesh"
+    ]
+  },
+  "part_pm_hammer": {
+    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "group": "parts",
+    "selector": [
+      "Hammer_Mesh"
+    ]
+  },
+  "part_pm_trigger": {
+    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "group": "parts",
+    "selector": [
+      "Trigger_Mesh"
+    ]
+  },
+  "part_pm_safety": {
+    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "group": "parts",
+    "selector": [
+      "Safety_Mesh"
+    ]
+  },
+  "part_glock_barrel": {
+    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "group": "parts",
+    "selector": [
+      "Barrel"
+    ]
+  },
+  "part_glock_slide": {
+    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "group": "parts",
+    "selector": [
+      "Slide"
+    ]
+  },
+  "part_glock_recoil": {
+    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "group": "parts",
+    "selector": [
+      "GuideRod",
+      "RecoilSpring"
+    ]
+  },
+  "part_glock_trigger": {
+    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "group": "parts",
+    "selector": [
+      "Trigger",
+      "TriggerBar",
+      "TriggerHousing"
+    ]
+  },
+  "part_glock_extractor": {
+    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "group": "parts",
+    "selector": [
+      "LockingBlock"
+    ]
+  },
+  "part_veras_receiver": {
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "group": "parts",
+    "selector": [
+      "Body"
+    ]
+  },
+  "part_veras_stock": {
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "group": "parts",
+    "selector": [
+      "Stock"
+    ]
+  },
+  "part_veras_muzzle": {
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "group": "parts",
+    "selector": [
+      "MuzzleDevice"
+    ]
+  },
+  "part_veras_mag_body": {
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "group": "parts",
+    "selector": [
+      "Magazine"
+    ]
+  },
+  "weapon_cleaning_kit": {
+    "source": "ammo_box",
+    "group": "parts",
+    "label": "ARMORY / CLEANING KIT",
+    "max_dimension": 0.28
+  },
+  "weapon_gauges": {
+    "source": "medical_box",
+    "group": "parts",
+    "label": "ARMORY / GAUGES",
+    "max_dimension": 0.24
+  },
+  "microscope_optical": {
+    "source": "vintage_microscope",
+    "group": "medical"
+  },
+  "surgical_tape": {
+    "source": "medical_tape",
+    "group": "medical"
+  },
+  "suture_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / SUTURE",
+    "max_dimension": 0.24
+  },
+  "scalpel_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / SCALPELS",
+    "max_dimension": 0.24
+  },
+  "hemostat_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / HEMOSTATS",
+    "max_dimension": 0.24
+  },
+  "dental_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / DENTAL",
+    "max_dimension": 0.24
+  },
+  "orthopedic_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / ORTHOPEDIC",
+    "max_dimension": 0.24
+  },
+  "intubation_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / AIRWAY",
+    "max_dimension": 0.24
+  },
+  "diagnostic_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / DIAGNOSTIC",
+    "max_dimension": 0.24
+  },
+  "sterile_dressing_kit": {
+    "source": "medical_box",
+    "group": "medical",
+    "label": "MEDICAL / DRESSINGS",
+    "max_dimension": 0.24
+  },
+  "antibiotics_pack": {
+    "source": "cardboard_box_01",
+    "group": "medical",
+    "label": "MEDICAL / ANTIBIOTICS",
+    "max_dimension": 0.18,
+    "dimensions": [
+      0.18,
+      0.126,
+      0.039599999999999996
+    ],
+    "print": "ANTIBIOTICS"
+  },
+  "anesthetic_pack": {
+    "source": "cardboard_box_01",
+    "group": "medical",
+    "label": "MEDICAL / ANESTHETIC",
+    "max_dimension": 0.18,
+    "dimensions": [
+      0.18,
+      0.126,
+      0.039599999999999996
+    ],
+    "print": "ANESTHETIC"
+  },
+  "insulin_pack": {
+    "source": "cardboard_box_01",
+    "group": "medical",
+    "label": "MEDICAL / INSULIN / COLD PACK",
+    "max_dimension": 0.18,
+    "dimensions": [
+      0.18,
+      0.126,
+      0.039599999999999996
+    ],
+    "print": "COLD PACK"
+  },
+  "antiseptic_pack": {
+    "source": "cardboard_box_01",
+    "group": "medical",
+    "label": "MEDICAL / ANTISEPTIC",
+    "max_dimension": 0.18,
+    "dimensions": [
+      0.18,
+      0.126,
+      0.039599999999999996
+    ],
+    "print": "ANTISEPTIC"
+  },
+  "hemostatic_pack": {
+    "source": "cardboard_box_01",
+    "group": "medical",
+    "label": "MEDICAL / HEMOSTATIC",
+    "max_dimension": 0.18,
+    "dimensions": [
+      0.18,
+      0.126,
+      0.039599999999999996
+    ],
+    "print": "HEMOSTATIC"
+  },
+  "iv_solution_pack": {
+    "source": "cardboard_box_01",
+    "group": "medical",
+    "label": "MEDICAL / IV SOLUTIONS",
+    "max_dimension": 0.18,
+    "dimensions": [
+      0.18,
+      0.126,
+      0.039599999999999996
+    ],
+    "print": "IV SOLUTIONS"
+  },
+  "car_tire": {
+    "source": "old_tyre",
+    "group": "vehicle"
+  },
+  "car_rim": {
+    "source": "rusted_wheel_rim_01",
+    "group": "vehicle"
+  },
+  "tire_pump": {
+    "source": "tire_pump",
+    "group": "vehicle"
+  },
+  "auto_lubricant": {
+    "source": "lubricant_spray",
+    "group": "vehicle"
+  },
+  "precision_oiler": {
+    "source": "small_oil_can_01",
+    "group": "vehicle"
+  },
+  "ratchet_socket": {
+    "source": "ratchet_wrench",
+    "group": "vehicle"
+  },
+  "alternator_rebuild": {
+    "source": "cardboard_box_01",
+    "group": "vehicle",
+    "label": "AUTO / ALTERNATOR / REBUILD",
+    "max_dimension": 0.26,
+    "dimensions": [
+      0.26,
+      0.182,
+      0.0572
+    ],
+    "print": "REBUILD"
+  },
+  "injector_set": {
+    "source": "cardboard_box_01",
+    "group": "vehicle",
+    "label": "AUTO / FUEL / INJECTORS",
+    "max_dimension": 0.26,
+    "dimensions": [
+      0.26,
+      0.182,
+      0.0572
+    ],
+    "print": "INJECTORS"
+  },
+  "car_ecu": {
+    "source": "cardboard_box_01",
+    "group": "vehicle",
+    "label": "AUTO / ENGINE / ECU",
+    "max_dimension": 0.26,
+    "dimensions": [
+      0.26,
+      0.182,
+      0.0572
+    ],
+    "print": "ECU"
+  },
+  "timing_kit": {
+    "source": "cardboard_box_01",
+    "group": "vehicle",
+    "label": "AUTO / ENGINE / TIMING KIT",
+    "max_dimension": 0.26,
+    "dimensions": [
+      0.26,
+      0.182,
+      0.0572
+    ],
+    "print": "TIMING KIT"
+  },
+  "brake_service_kit": {
+    "source": "cardboard_box_01",
+    "group": "vehicle",
+    "label": "AUTO / BRAKE / SERVICE",
+    "max_dimension": 0.26,
+    "dimensions": [
+      0.26,
+      0.182,
+      0.0572
+    ],
+    "print": "SERVICE"
+  },
+  "bearing_set": {
+    "source": "cardboard_box_01",
+    "group": "vehicle",
+    "label": "AUTO / WHEEL / BEARINGS",
+    "max_dimension": 0.26,
+    "dimensions": [
+      0.26,
+      0.182,
+      0.0572
+    ],
+    "print": "BEARINGS"
+  },
+  "food_milk": {
+    "source": "long_life_food",
+    "group": "food",
+    "selector": [
+      "long_life_food_milk"
+    ]
+  },
+  "food_tomatoes": {
+    "source": "long_life_food",
+    "group": "food",
+    "selector": [
+      "long_life_food_tomatoes"
+    ]
+  },
+  "food_beans": {
+    "source": "long_life_food",
+    "group": "food",
+    "selector": [
+      "long_life_food_beans"
+    ]
+  },
+  "food_sardines": {
+    "source": "long_life_food",
+    "group": "food",
+    "selector": [
+      "long_life_food_sardines"
+    ]
+  },
+  "ration_daily": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "RATION / 24 H",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "RATION"
+  },
+  "ration_patrol": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "RATION / PATROL",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "RATION"
+  },
+  "ration_arctic": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "RATION / ARCTIC",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "RATION"
+  },
+  "ration_emergency": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "RATION / EMERGENCY",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "RATION"
+  },
+  "freeze_dried_meals": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "FOOD / FREEZE DRIED",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "FOOD"
+  },
+  "coffee_pack": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "FOOD / COFFEE",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "FOOD"
+  },
+  "protein_pack": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "FOOD / PROTEIN",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "FOOD"
+  },
+  "water_purification": {
+    "source": "cardboard_box_01",
+    "group": "food",
+    "label": "WATER / PURIFICATION",
+    "max_dimension": 0.23,
+    "dimensions": [
+      0.23,
+      0.161,
+      0.0506
+    ],
+    "print": "WATER"
+  },
+  "pack_918_pst": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 9×18 ПСт / 40 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "9×18 ПСт"
+  },
+  "pack_918_ap": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 9×18 бронебойные / 32 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "9×18 бронебойные"
+  },
+  "pack_919_fmj": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 9×19 FMJ / 50 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "9×19 FMJ"
+  },
+  "pack_919_ap": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 9×19 бронебойные / 30 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "9×19 бронебойные"
+  },
+  "pack_45_fmj": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны .45 ACP FMJ / 30 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": ".45 ACP FMJ"
+  },
+  "pack_57_ap": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 5.7×28 бронебойные / 40 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "5.7×28 бронебойные"
+  },
+  "pack_921_ap": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 9×21 бронебойные / 30 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "9×21 бронебойные"
+  },
+  "pack_545_std": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 5.45×39 / 60 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "5.45×39"
+  },
+  "pack_545_ap": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 5.45×39 бронебойные / 40 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "5.45×39 бронебойные"
+  },
+  "pack_939_sp5": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 9×39 СП-5 / 40 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "9×39 СП-5"
+  },
+  "pack_939_sp6": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 9×39 СП-6 / 30 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "9×39 СП-6"
+  },
+  "pack_556_std": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 5.56×45 / 60 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "5.56×45"
+  },
+  "pack_556_ap": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 5.56×45 бронебойные / 40 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "5.56×45 бронебойные"
+  },
+  "pack_76251_std": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Патроны 7.62×51 / 40 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "7.62×51"
+  },
+  "pack_12_buck": {
+    "source": "cardboard_box_01",
+    "group": "ammo",
+    "label": "Картечь 12/76 / 20 ROUNDS",
+    "max_dimension": 0.14,
+    "dimensions": [
+      0.14,
+      0.098,
+      0.030800000000000004
+    ],
+    "print": "Картечь 12/76"
+  },
+  "pack_frag": {
+    "source": "ammo_box",
+    "group": "ammo",
+    "label": "FRAG / 3",
+    "max_dimension": 0.25
+  },
+  "pack_flares": {
+    "source": "ammo_box",
+    "group": "ammo",
+    "label": "LIGHT FLARES / 4",
+    "max_dimension": 0.25
+  },
+  "pack_chemlights": {
+    "source": "ammo_box",
+    "group": "ammo",
+    "label": "CHEM LIGHTS / 6",
+    "max_dimension": 0.25
+  },
+  "signal_launcher": {
+    "source": "flare_gun",
+    "group": "signal"
+  },
+  "supply_signal": {
+    "source": "cardboard_box_01",
+    "group": "signal",
+    "label": "SUPPLY / SIGNAL",
+    "max_dimension": 0.09,
+    "dimensions": [
+      0.11,
+      0.046,
+      0.046
+    ],
+    "print": "SIGNAL"
+  }
+}

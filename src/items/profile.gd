@@ -829,6 +829,20 @@ static func sell(idx: int, n: int, from: String = "stash") -> bool:
 	return true
 
 
+static func unpack(from: String, idx: int, expected_id: String) -> bool:
+	var result: Array = ItemDb.unpack(list_of(from), grid_of(from), idx, expected_id)
+	if result.is_empty():
+		return false
+	match from:
+		"backpack":
+			backpack = result
+		"pocket":
+			pocket = result
+		_:
+			stash = result
+	return save()
+
+
 # ---------------------------------------------------------------- рейд
 
 ## Вход в рейд: снаряжение и рюкзак уходят с профиля (на кону), возвращаются при эвакуации.

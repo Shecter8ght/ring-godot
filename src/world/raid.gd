@@ -19,6 +19,7 @@ signal kill_credited
 static var current: Raid
 
 const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
+const SUPPLY_DROP_NAME := "Редкий груз снабжения"
 ## Приписка к точке у того, кого дотащили раненым (итог рейда, хроника).
 const CARRIED_SUFFIX := " (вынесли раненым)"
 
@@ -84,6 +85,9 @@ var _chronicle_wait: float = 0.0
 var _delta: float = 0.0
 var recovery: WeaponRecovery
 var _exit_receipt: Dictionary = {}
+## Сигнал снабжения общий на рейд; хост хранит время и факт единственного сброса.
+var supply_state: Dictionary = {}
+var _supply_visual: Node3D
 
 
 func _ready() -> void:
@@ -131,7 +135,7 @@ func _setup_sync() -> void:
 	sync.name = "Sync"
 	sync.replication_interval = 0.1
 	var config := SceneReplicationConfig.new()
-	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded"]:
+	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded", ".:supply_state"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -1161,6 +1165,8 @@ func _put(peer_id: int, path: NodePath, idx: int, from: String = "backpack", x: 
 	var c := _near_container(pl, path)
 	if c == null or idx < 0 or idx >= pl.inventory.list_of(from).size():
 		return
+	if c is LooseLoot:
+		return
 	_cancel_op(peer_id)
 	c.ensure_grid()
 	var src := pl.inventory.list_of(from).duplicate(true)
@@ -1498,6 +1504,132 @@ func request_use_med(id: String) -> void:
 		_rpc_use_med.rpc_id(1, id)
 
 
+func request_unpack(idx: int, expected_id: String) -> void:
+	if _is_host():
+		_unpack(multiplayer.get_unique_id(), idx, expected_id)
+	else:
+		_rpc_unpack.rpc_id(1, idx, expected_id)
+
+
+func request_supply_signal() -> void:
+	if _is_host():
+		_supply_signal(multiplayer.get_unique_id())
+	else:
+		_rpc_supply_signal.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_supply_signal() -> void:
+	if multiplayer.is_server():
+		_supply_signal(multiplayer.get_remote_sender_id())
+
+
+func _supply_signal(peer_id: int) -> void:
+	var pl: Player = player_of(peer_id)
+	if pl == null or not pl.is_alive() or pl.is_downed() or has_left(peer_id) or over:
+		return
+	if not supply_state.is_empty():
+		_tell(peer_id, "Самолёт снабжения уже вызван в этом рейде")
+		return
+	if not pl.inventory.has("signal_launcher") or not pl.inventory.has("supply_signal"):
+		_tell(peer_id, "Нужны сигнальный пистолет и патрон снабжения в рюкзаке")
+		return
+	var pos: Vector3 = _supply_site(pl)
+	if not pos.is_finite():
+		_tell(peer_id, "Выйди под открытое небо к свободному месту для сброса")
+		return
+	# Проверки закончены: предмет расходуется ровно один раз, без ожидания RPC.
+	if pl.inventory.remove("supply_signal", 1) != 1:
+		return
+	supply_state = {"pos": pos, "origin": pl.global_position + Vector3.UP, "elapsed": 0.0, "dropped": false}
+	NoiseBus.emit(pl.global_position, float(Balance.SUPPLY_SIGNAL.noise_m), "shot")
+	_tell(peer_id, "Сигнал принят. Самолёт сбросит груз примерно через %d с" % int(Balance.SUPPLY_SIGNAL.delay))
+
+
+## Физика хоста: небо над стрелком и площадкой, опора и свободные боковые стороны ящика.
+func _supply_site(pl: Player) -> Vector3:
+	var space: PhysicsDirectSpaceState3D = pl.get_world_3d().direct_space_state
+	var mask: int = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS
+	var sky: Vector3 = pl.global_position + Vector3.UP * float(Balance.SUPPLY_SIGNAL.roof_check)
+	if not space.intersect_ray(PhysicsRayQueryParameters3D.create(pl.global_position + Vector3.UP, sky, mask)).is_empty():
+		return Vector3.INF
+	var forward: Vector3 = Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
+	var at: Vector3 = pl.global_position + forward * float(Balance.SUPPLY_SIGNAL.clear_radius)
+	var hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(at + Vector3.UP, at - Vector3.UP * float(Balance.SUPPLY_SIGNAL.ground_check), mask))
+	if hit.is_empty() or (hit.normal as Vector3).dot(Vector3.UP) < float(Balance.SUPPLY_SIGNAL.normal_min):
+		return Vector3.INF
+	at = hit.position
+	if not space.intersect_ray(PhysicsRayQueryParameters3D.create(at + Vector3.UP, at + Vector3.UP * float(Balance.SUPPLY_SIGNAL.roof_check), mask)).is_empty():
+		return Vector3.INF
+	for direction: Vector3 in [Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK, Vector3(-1, 0, -1), Vector3(-1, 0, 1), Vector3(1, 0, -1), Vector3(1, 0, 1)]:
+		var center: Vector3 = at + Vector3.UP * float(Balance.SUPPLY_SIGNAL.site_height)
+		var edge: Vector3 = at + direction * float(Balance.SUPPLY_SIGNAL.site_half)
+		if not space.intersect_ray(PhysicsRayQueryParameters3D.create(center, edge + Vector3.UP * float(Balance.SUPPLY_SIGNAL.site_height), mask)).is_empty():
+			return Vector3.INF
+		var support: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(edge + Vector3.UP, edge - Vector3.UP * float(Balance.SUPPLY_SIGNAL.ground_check), mask))
+		if support.is_empty() or absf(float(support.position.y) - at.y) > float(Balance.SUPPLY_SIGNAL.terrain_tolerance):
+			return Vector3.INF
+		if not space.intersect_ray(PhysicsRayQueryParameters3D.create(edge + Vector3.UP * float(Balance.SUPPLY_SIGNAL.site_height), edge + Vector3.UP * float(Balance.SUPPLY_SIGNAL.roof_check), mask)).is_empty():
+			return Vector3.INF
+	return at
+
+
+func _tick_supply(delta: float) -> void:
+	if supply_state.is_empty():
+		return
+	if _is_host() and not over:
+		var state: Dictionary = supply_state.duplicate()
+		state.elapsed = minf(float(state.elapsed) + delta, float(Balance.SUPPLY_SIGNAL.delay) + float(Balance.SUPPLY_SIGNAL.flight))
+		if not bool(state.dropped) and float(state.elapsed) >= float(Balance.SUPPLY_SIGNAL.delay):
+			state.dropped = true
+			spawn_drop(state.pos, SUPPLY_DROP_NAME, _supply_loot(), LootContainer.Look.CRATE, Vector3.UP * float(Balance.SUPPLY_SIGNAL.drop_height))
+		if not bool(state.get("landed", false)) and float(state.elapsed) >= float(Balance.SUPPLY_SIGNAL.delay) + float(Balance.SUPPLY_SIGNAL.fall_sec):
+			state["landed"] = true
+			Audio.play("drop_land", state.pos)
+			NoiseBus.emit(state.pos, float(Balance.SUPPLY_SIGNAL.noise_m), "drop")
+		supply_state = state
+	if not is_instance_valid(_supply_visual):
+		_supply_visual = (load("res://scenes/world/supply_flight.tscn") as PackedScene).instantiate() as Node3D
+		_supply_visual.name = "SupplyFlight"
+		get_parent().add_child(_supply_visual)
+
+
+## Ценные вещи без сигнальных патронов: вызов не позволяет бесконечно размножать вызовы.
+func _supply_loot() -> Array:
+	var pool: Array[String] = []
+	for id: String in Balance.VALUABLE_LOOT_VALUES:
+		if id not in ["signal_launcher", "supply_signal"] and int(Balance.VALUABLE_LOOT_VALUES[id]) >= int(Balance.SUPPLY_SIGNAL.minimum_value):
+			pool.append(id)
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.randomize()
+	pool.shuffle()
+	var result: Array = []
+	var count: int = rng.randi_range(int(Balance.SUPPLY_SIGNAL.loot_count[0]), int(Balance.SUPPLY_SIGNAL.loot_count[1]))
+	for i: int in range(mini(count, pool.size())):
+		var entry: Dictionary = ItemDb.make(pool[i], 1)
+		entry["fir"] = true
+		result.append(entry)
+	return result
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_unpack(idx: int, expected_id: String) -> void:
+	if multiplayer.is_server():
+		_unpack(multiplayer.get_remote_sender_id(), idx, expected_id)
+
+
+func _unpack(peer_id: int, idx: int, expected_id: String) -> void:
+	var pl: Player = player_of(peer_id)
+	if pl == null or not pl.is_alive() or pl.is_downed() or has_left(peer_id):
+		return
+	var result: Array = ItemDb.unpack(pl.inventory.items, pl.inventory.backpack_grid(), idx, expected_id)
+	if result.is_empty():
+		_tell(peer_id, "Вскрыть не удалось: проверь место в рюкзаке")
+		return
+	pl.inventory.items = result
+	Audio.play(_pickup_sound(expected_id), pl.global_position)
+
+
 @rpc("any_peer", "call_remote", "reliable")
 func _rpc_take(path: NodePath, id: String, n: int) -> void:
 	if multiplayer.is_server():
@@ -1725,7 +1857,7 @@ func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.
 	# выброшенное из рюкзака — в тот же мешок, что уже лежит рядом (не россыпь мешков по полу)
 	if display == DROP_NAME and _merge_drop(pos, list):
 		return
-	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look), "toss": toss}
+	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look), "toss": toss, "fall_sec": float(Balance.SUPPLY_SIGNAL.fall_sec) if display == SUPPLY_DROP_NAME else 0.0}
 	_drop_count += 1
 	if _drop_spawner:
 		_drop_spawner.spawn(data)
@@ -1766,6 +1898,7 @@ func _make_drop(data: Dictionary) -> Node:
 	c.place_all()
 	c.rolled = true
 	c.toss_from = data.get("toss", Vector3.ZERO)
+	c.toss_duration = float(data.get("fall_sec", 0.0))
 	c.search_s = Balance.SEARCH_BODY_SEC
 	return c
 
@@ -1774,6 +1907,7 @@ func _make_drop(data: Dictionary) -> Node:
 
 func _process(delta: float) -> void:
 	_delta = delta
+	_tick_supply(delta)
 	var me := local_player()
 	_update_channel_hud(me)
 	_update_prompt(me)
@@ -1924,7 +2058,7 @@ func _update_prompt(me: Player) -> void:
 	_prompt.visible = true
 	_prompt.text = PauseMenu.key_name("interact") + " — " + best.prompt()
 	if Input.is_action_just_pressed("interact"):
-		if best is LootContainer:
+		if best is LootContainer and not best is LooseLoot:
 			ui.start_search(best as LootContainer)
 		best.request_use()
 

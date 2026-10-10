@@ -603,6 +603,12 @@ func _item_menu(me: Player, role: String, idx: int, at: Vector2) -> void:
 	if role == "backpack" and ItemDb.item(id).has("use"):
 		names.append("Лечиться")
 		acts.append(func() -> void: _try_heal_with(me, id))
+	if role == "backpack" and Balance.LOOT_PACKS.has(id):
+		names.append("Вскрыть упаковку")
+		acts.append(func() -> void: Raid.current.request_unpack(idx, id))
+	if role == "backpack" and id == "signal_launcher":
+		names.append("Вызвать самолёт снабжения")
+		acts.append(func() -> void: Raid.current.request_supply_signal())
 	if not ItemDb.equip(id).is_empty():
 		names.append("В руки" if ItemDb.equip(id).has("weapon") else "Надеть")
 		acts.append(func() -> void: Raid.current.request_equip_from(role, idx, box))
@@ -682,7 +688,11 @@ func _use_item(me: Player, idx: int) -> void:
 	if idx >= me.inventory.items.size():
 		return
 	var id := String(me.inventory.items[idx].id)
-	if ItemDb.item(id).has("use"):
+	if Balance.LOOT_PACKS.has(id):
+		Raid.current.request_unpack(idx, id)
+	elif id == "signal_launcher":
+		Raid.current.request_supply_signal()
+	elif ItemDb.item(id).has("use"):
 		_try_heal_with(me, id)
 	elif not ItemDb.equip(id).is_empty():
 		Raid.current.request_equip(idx)

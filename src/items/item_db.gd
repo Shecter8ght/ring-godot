@@ -30,6 +30,10 @@ static func _ensure() -> void:
 		_items.laser_head["value"] = int(Balance.ENGRAVING.head_value)
 	for id: String in Balance.ENGRAVING.parts_loot:
 		_items[id]["value"] = int(Balance.ENGRAVING.parts_loot[id].value)
+	for id: String in Balance.CIVILIAN_LOOT_VALUES:
+		_items[id]["value"] = int(Balance.CIVILIAN_LOOT_VALUES[id])
+	for id: String in Balance.VALUABLE_LOOT_VALUES:
+		_items[id]["value"] = int(Balance.VALUABLE_LOOT_VALUES[id])
 	# у оружия слот надевания — из его определения
 	for id in WeaponDb.ids("weapons"):
 		var it: Dictionary = _items[id]
@@ -154,6 +158,8 @@ static func room_table(room_id: String) -> String:
 static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 	_ensure()
 	var table: Dictionary = (_loot.get("tables", {}) as Dictionary).get(table_id, {})
+	if String(table.get("balance", "")) == "civilian":
+		table = Balance.CIVILIAN_LOOT.get(table_id, {})
 	var out: Array = []
 	if table.is_empty():
 		return out
@@ -194,6 +200,10 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 						_merge(out, WeaponDb.canonical(id), n)
 				break
 	# найдено в рейде: сдать Михалычу по заданию можно только такое (купленное — нет)
+	if rng.randf() < float(Balance.VALUABLE_LOOT_CHANCE.get(table_id, 0.0)):
+		var valuable: String = valuable_item(table_id, rng)
+		if valuable != "":
+			out.append(make(valuable, 1))
 	if table_id in Balance.ENGRAVING.head_tables and rng.randf() < float(Balance.ENGRAVING.head_chance):
 		out.append(make("laser_head", 1))
 	for id: String in Balance.ENGRAVING.parts_loot:
@@ -203,6 +213,58 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 	for e in out:
 		e["fir"] = true
 	return out
+
+
+## Одна видимая находка из темы: только переносимые гражданские модели, без вложенных бросков.
+## Редкие лазерные головки и сюжетные грузы по-прежнему получают свой отдельный бросок в ящиках.
+static func loose_item(table_id: String, rng: RandomNumberGenerator) -> String:
+	var entries: Array = ((Balance.CIVILIAN_LOOT.get(table_id, {}) as Dictionary).get("entries", []) as Array).duplicate(true)
+	entries.append_array(Balance.VALUABLE_LOOT.get(table_id, []))
+	var total: float = 0.0
+	for entry: Array in entries:
+		if Balance.CIVILIAN_LOOT_VALUES.has(String(entry[0])) or Balance.VALUABLE_LOOT_VALUES.has(String(entry[0])):
+			total += float(entry[1])
+	if total <= 0.0:
+		return ""
+	var pick: float = rng.randf() * total
+	for entry: Array in entries:
+		if not Balance.CIVILIAN_LOOT_VALUES.has(String(entry[0])) and not Balance.VALUABLE_LOOT_VALUES.has(String(entry[0])):
+			continue
+		pick -= float(entry[1])
+		if pick <= 0.0:
+			return String(entry[0])
+	return ""
+
+
+## Взвешенная ценная находка из темы, без переброса остальных предметов контейнера.
+static func valuable_item(table_id: String, rng: RandomNumberGenerator) -> String:
+	var entries: Array = Balance.VALUABLE_LOOT.get(table_id, [])
+	var total: float = 0.0
+	for entry: Array in entries:
+		total += float(entry[1])
+	var pick: float = rng.randf() * total
+	for entry: Array in entries:
+		pick -= float(entry[1])
+		if pick <= 0.0:
+			return String(entry[0])
+	return ""
+
+
+## Вскрытие одной партии на копии сетки. При отказе исходная сетка не меняется.
+static func unpack(list: Array, grid: Vector2i, idx: int, expected_id: String) -> Array:
+	if idx < 0 or idx >= list.size() or String(list[idx].id) != expected_id or not Balance.LOOT_PACKS.has(expected_id):
+		return []
+	var copy: Array = list.duplicate(true)
+	var found: bool = bool(copy[idx].get("fir", false))
+	copy[idx].n = int(copy[idx].n) - 1
+	if int(copy[idx].n) <= 0:
+		copy.remove_at(idx)
+	for content: Array in Balance.LOOT_PACKS[expected_id]:
+		var item_entry: Dictionary = make(String(content[0]), int(content[1]))
+		item_entry["fir"] = found
+		if add_to(copy, item_entry, grid) != int(content[1]):
+			return []
+	return copy
 
 
 ## Износ найденного: прочность × случайная доля; плиты — отдельно.

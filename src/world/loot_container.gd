@@ -24,7 +24,10 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 
 ## Содержимое: [{"id", "n", "x", "y", "r"}] — стоит в клетках сетки grid (как рюкзак); rolled —
 ## брошено ли уже (иначе бросит хост при первом обыске).
-var items: Array = []
+var items: Array = []:
+	set(value):
+		items = value
+		_contents_changed()
 var rolled: bool = false
 ## Сетка ящика: Balance.LOOT_GRID_W × рядов по виду (бросок не влез — рядов больше). Задаётся, когда
 ## появляется содержимое (place_all); у всех peer одинаково.
@@ -32,6 +35,12 @@ var grid: Vector2i = Vector2i.ZERO
 ## Откуда «вываливается» при появлении (смещение от места покоя; ноль — просто стоит): ящик из
 ## трупа летит с высоты груди и падает на пол, кувыркнувшись. Анимация у каждого peer своя.
 var toss_from: Vector3 = Vector3.ZERO
+var toss_duration: float = 0.0
+
+
+## Вид отдельной находки обновляется и при местном подборе, и при репликации списка.
+func _contents_changed() -> void:
+	pass
 
 
 func _ready() -> void:
@@ -62,7 +71,7 @@ func _toss() -> void:
 	var tw := create_tween()
 	tw.tween_method(func(t: float) -> void:
 		position = start.lerp(rest, t) + Vector3.UP * 0.25 * sin(PI * t)
-		rotation = Vector3((1.0 - t) * 1.4, spin * (1.0 - t) * 2.0, 0.0), 0.0, 1.0, Balance.CRATE_TOSS_SEC).set_ease(Tween.EASE_IN)
+		rotation = Vector3((1.0 - t) * 1.4, spin * (1.0 - t) * 2.0, 0.0), 0.0, 1.0, toss_duration if toss_duration > 0.0 else Balance.CRATE_TOSS_SEC).set_ease(Tween.EASE_IN)
 
 
 func can_use() -> bool:

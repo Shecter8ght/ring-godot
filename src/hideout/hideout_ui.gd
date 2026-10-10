@@ -440,6 +440,12 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 	var entry: Dictionary = (list[idx] as Dictionary).duplicate(true)
 	menu.add_item("Описание")
 	acts.append(func() -> void: ItemInfo.open(self, entry))
+	if Balance.LOOT_PACKS.has(id):
+		menu.add_item("Вскрыть упаковку")
+		acts.append(func() -> void:
+			if not Profile.unpack(name, idx, id):
+				toast("Нет места для содержимого упаковки")
+			_sig = "")
 	if not ItemDb.equip(id).is_empty():
 		menu.add_item("Надеть" if not ItemDb.equip(id).has("weapon") else "Взять (слот оружия)")
 		acts.append(func() -> void: Profile.equip_from(name, idx))

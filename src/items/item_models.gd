@@ -31,6 +31,8 @@ static func build(id: String) -> Node3D:
 		return r
 	var root := Node3D.new()
 	root.name = "Item_" + id
+	if String(it.get("model", "")) != "" and _scan_path(root, String(it.model)):
+		return root
 	if id in ["laser_head", "engraver_frame", "engraver_controller"] and _scan_path(root, "res://assets/items/models/%s.glb" % id):
 		return root
 	# рюкзаки — модели проекта (tools/build_backpacks.py)
@@ -288,6 +290,22 @@ static func _magazine(root: Node3D, id: String, mag: Dictionary) -> void:
 
 ## Готовая модель снаряжения (tools/import_sketchfab.py → assets/zone01/models/sf_<имя>.glb) по
 ## центру узла, как формы; нет файла — false (тогда строится из форм).
+static func bounds(root: Node3D) -> AABB:
+	var box: AABB = AABB()
+	var first: bool = true
+	var meshes: Array = root.find_children("*", "MeshInstance3D", true, false)
+	if root is MeshInstance3D:
+		meshes.append(root)
+	for node: Node in meshes:
+		var mesh: MeshInstance3D = node as MeshInstance3D
+		if mesh.mesh == null or not mesh.visible:
+			continue
+		var part: AABB = _xf_to(root, mesh) * mesh.get_aabb()
+		box = part if first else box.merge(part)
+		first = false
+	return box
+
+
 static func _scan(root: Node3D, name: String) -> bool:
 	return _scan_path(root, "res://assets/zone01/models/sf_%s.glb" % name)
 

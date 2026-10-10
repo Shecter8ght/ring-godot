@@ -1,0 +1,1102 @@
+{
+  "gpu_compute": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.33,
+      0.075,
+      0.21
+    ],
+    "packaged": true
+  },
+  "gpu_gaming": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.33,
+      0.075,
+      0.21
+    ],
+    "packaged": true
+  },
+  "ssd_sata": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6201,
+    "size": [
+      0.115,
+      0.025,
+      0.08
+    ],
+    "packaged": true
+  },
+  "ssd_nvme": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6201,
+    "size": [
+      0.115,
+      0.025,
+      0.08
+    ],
+    "packaged": true
+  },
+  "ram_desktop": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.17,
+      0.025,
+      0.048
+    ],
+    "packaged": true
+  },
+  "ram_server": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.17,
+      0.025,
+      0.048
+    ],
+    "packaged": true
+  },
+  "cpu_desktop": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "cpu_server": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "switch_managed": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.33,
+      0.0726,
+      0.231
+    ],
+    "packaged": true
+  },
+  "router_industrial": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.24,
+      0.0528,
+      0.168
+    ],
+    "packaged": true
+  },
+  "thermal_imager": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.24,
+      0.0528,
+      0.168
+    ],
+    "packaged": true
+  },
+  "nvg_tube": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "laser_rangefinder": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "satellite_modem": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.24,
+      0.0528,
+      0.168
+    ],
+    "packaged": true
+  },
+  "oscilloscope_portable": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.24,
+      0.0528,
+      0.168
+    ],
+    "packaged": true
+  },
+  "laptop_business": {
+    "source": "https://polyhaven.com/a/classic_laptop",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6199,
+    "size": [
+      0.6519,
+      0.5428,
+      0.4859
+    ],
+    "packaged": false
+  },
+  "laptop_workstation": {
+    "source": "https://polyhaven.com/a/classic_laptop",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6199,
+    "size": [
+      0.6519,
+      0.5428,
+      0.4859
+    ],
+    "packaged": false
+  },
+  "smartphone_business": {
+    "source": "https://opengameart.org/content/smartphone-1",
+    "license": "CC0 1.0 — Brian MacIntosh",
+    "triangles": 300,
+    "size": [
+      0.0811,
+      0.16,
+      0.0148
+    ],
+    "packaged": false
+  },
+  "photo_camera_pro": {
+    "source": "https://polyhaven.com/a/Camera_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6200,
+    "size": [
+      0.1473,
+      0.0776,
+      0.0888
+    ],
+    "packaged": false
+  },
+  "motherboard_server": {
+    "source": "https://polyhaven.com/a/circuit_board",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6200,
+    "size": [
+      0.4035,
+      0.0783,
+      0.3974
+    ],
+    "packaged": false
+  },
+  "cctv_bullet": {
+    "source": "https://polyhaven.com/a/security_camera_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6199,
+    "size": [
+      0.1696,
+      0.286,
+      0.5537
+    ],
+    "packaged": false
+  },
+  "cctv_dome": {
+    "source": "https://polyhaven.com/a/security_camera_02",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6199,
+    "size": [
+      0.1407,
+      0.2086,
+      0.3938
+    ],
+    "packaged": false
+  },
+  "microscope_digital": {
+    "source": "https://polyhaven.com/a/industrial_microscope",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6200,
+    "size": [
+      0.2145,
+      0.4601,
+      0.4466
+    ],
+    "packaged": false
+  },
+  "cpu_cooling_kit": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.26,
+      0.0572,
+      0.182
+    ],
+    "packaged": true
+  },
+  "part_pm_barrel": {
+    "source": "assets\\models\\weapons\\pm\\pm.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 640,
+    "size": [
+      0.0123,
+      0.0121,
+      0.093
+    ],
+    "packaged": false
+  },
+  "part_pm_slide": {
+    "source": "assets\\models\\weapons\\pm\\pm.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 6200,
+    "size": [
+      0.0242,
+      0.0299,
+      0.1602
+    ],
+    "packaged": false
+  },
+  "part_pm_hammer": {
+    "source": "assets\\models\\weapons\\pm\\pm.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 700,
+    "size": [
+      0.005,
+      0.0184,
+      0.014
+    ],
+    "packaged": false
+  },
+  "part_pm_trigger": {
+    "source": "assets\\models\\weapons\\pm\\pm.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 450,
+    "size": [
+      0.0042,
+      0.0223,
+      0.0189
+    ],
+    "packaged": false
+  },
+  "part_pm_safety": {
+    "source": "assets\\models\\weapons\\pm\\pm.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 486,
+    "size": [
+      0.0034,
+      0.0118,
+      0.0141
+    ],
+    "packaged": false
+  },
+  "part_glock_barrel": {
+    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 1318,
+    "size": [
+      0.0166,
+      0.0247,
+      0.1389
+    ],
+    "packaged": false
+  },
+  "part_glock_slide": {
+    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 1302,
+    "size": [
+      0.0254,
+      0.0206,
+      0.186
+    ],
+    "packaged": false
+  },
+  "part_glock_recoil": {
+    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 3080,
+    "size": [
+      0.01,
+      0.01,
+      0.1076
+    ],
+    "packaged": false
+  },
+  "part_glock_trigger": {
+    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 3532,
+    "size": [
+      0.0168,
+      0.0399,
+      0.0707
+    ],
+    "packaged": false
+  },
+  "part_glock_extractor": {
+    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 396,
+    "size": [
+      0.0168,
+      0.0142,
+      0.017
+    ],
+    "packaged": false
+  },
+  "part_veras_receiver": {
+    "source": "assets\\models\\weapons\\veras54\\veras54_detail.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 6200,
+    "size": [
+      0.0703,
+      0.3492,
+      0.6296
+    ],
+    "packaged": false
+  },
+  "part_veras_stock": {
+    "source": "assets\\models\\weapons\\veras54\\veras54_detail.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 6200,
+    "size": [
+      0.0534,
+      0.1344,
+      0.2334
+    ],
+    "packaged": false
+  },
+  "part_veras_muzzle": {
+    "source": "assets\\models\\weapons\\veras54\\veras54_detail.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 2768,
+    "size": [
+      0.0249,
+      0.0244,
+      0.088
+    ],
+    "packaged": false
+  },
+  "part_veras_mag_body": {
+    "source": "assets\\models\\weapons\\veras54\\veras54_detail.glb",
+    "license": "RING: existing approved geometry",
+    "triangles": 6200,
+    "size": [
+      0.034,
+      0.1925,
+      0.1123
+    ],
+    "packaged": false
+  },
+  "weapon_cleaning_kit": {
+    "source": "https://polyhaven.com/a/ammo_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 4384,
+    "size": [
+      0.094,
+      0.1927,
+      0.28
+    ],
+    "packaged": true
+  },
+  "weapon_gauges": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "microscope_optical": {
+    "source": "https://polyhaven.com/a/vintage_microscope",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6197,
+    "size": [
+      0.1068,
+      0.3996,
+      0.1819
+    ],
+    "packaged": false
+  },
+  "surgical_tape": {
+    "source": "https://polyhaven.com/a/medical_tape",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 1408,
+    "size": [
+      0.0453,
+      0.025,
+      0.0452
+    ],
+    "packaged": false
+  },
+  "suture_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "scalpel_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "hemostat_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "dental_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "orthopedic_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "intubation_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "diagnostic_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "sterile_dressing_kit": {
+    "source": "https://polyhaven.com/a/medical_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 3720,
+    "size": [
+      0.24,
+      0.0445,
+      0.1599
+    ],
+    "packaged": true
+  },
+  "antibiotics_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.18,
+      0.0396,
+      0.126
+    ],
+    "packaged": true
+  },
+  "anesthetic_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.18,
+      0.0396,
+      0.126
+    ],
+    "packaged": true
+  },
+  "insulin_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.18,
+      0.0396,
+      0.126
+    ],
+    "packaged": true
+  },
+  "antiseptic_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.18,
+      0.0396,
+      0.126
+    ],
+    "packaged": true
+  },
+  "hemostatic_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.18,
+      0.0396,
+      0.126
+    ],
+    "packaged": true
+  },
+  "iv_solution_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.18,
+      0.0396,
+      0.126
+    ],
+    "packaged": true
+  },
+  "car_tire": {
+    "source": "https://polyhaven.com/a/old_tyre",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 2880,
+    "size": [
+      0.6,
+      0.6,
+      0.165
+    ],
+    "packaged": false
+  },
+  "car_rim": {
+    "source": "https://polyhaven.com/a/rusted_wheel_rim_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6200,
+    "size": [
+      0.4029,
+      0.3955,
+      0.1541
+    ],
+    "packaged": false
+  },
+  "tire_pump": {
+    "source": "https://polyhaven.com/a/tire_pump",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6200,
+    "size": [
+      0.2549,
+      0.5795,
+      0.101
+    ],
+    "packaged": false
+  },
+  "auto_lubricant": {
+    "source": "https://polyhaven.com/a/lubricant_spray",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 5476,
+    "size": [
+      0.067,
+      0.1649,
+      0.0646
+    ],
+    "packaged": false
+  },
+  "precision_oiler": {
+    "source": "https://polyhaven.com/a/small_oil_can_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6199,
+    "size": [
+      0.2661,
+      0.2368,
+      0.1038
+    ],
+    "packaged": false
+  },
+  "ratchet_socket": {
+    "source": "https://polyhaven.com/a/ratchet_wrench",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6200,
+    "size": [
+      0.0441,
+      0.2462,
+      0.0434
+    ],
+    "packaged": false
+  },
+  "alternator_rebuild": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.26,
+      0.0572,
+      0.182
+    ],
+    "packaged": true
+  },
+  "injector_set": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.26,
+      0.0572,
+      0.182
+    ],
+    "packaged": true
+  },
+  "car_ecu": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.26,
+      0.0572,
+      0.182
+    ],
+    "packaged": true
+  },
+  "timing_kit": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.26,
+      0.0572,
+      0.182
+    ],
+    "packaged": true
+  },
+  "brake_service_kit": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.26,
+      0.0572,
+      0.182
+    ],
+    "packaged": true
+  },
+  "bearing_set": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.26,
+      0.0572,
+      0.182
+    ],
+    "packaged": true
+  },
+  "food_milk": {
+    "source": "https://polyhaven.com/a/long_life_food",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 116,
+    "size": [
+      0.1001,
+      0.2376,
+      0.0716
+    ],
+    "packaged": false
+  },
+  "food_tomatoes": {
+    "source": "https://polyhaven.com/a/long_life_food",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 1512,
+    "size": [
+      0.1136,
+      0.1186,
+      0.1136
+    ],
+    "packaged": false
+  },
+  "food_beans": {
+    "source": "https://polyhaven.com/a/long_life_food",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 1512,
+    "size": [
+      0.0883,
+      0.1475,
+      0.0881
+    ],
+    "packaged": false
+  },
+  "food_sardines": {
+    "source": "https://polyhaven.com/a/long_life_food",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 1572,
+    "size": [
+      0.1313,
+      0.0275,
+      0.0796
+    ],
+    "packaged": false
+  },
+  "ration_daily": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "ration_patrol": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "ration_arctic": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "ration_emergency": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "freeze_dried_meals": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "coffee_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "protein_pack": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "water_purification": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.23,
+      0.0506,
+      0.161
+    ],
+    "packaged": true
+  },
+  "pack_918_pst": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_918_ap": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_919_fmj": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_919_ap": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_45_fmj": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_57_ap": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_921_ap": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_545_std": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_545_ap": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_939_sp5": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_939_sp6": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_556_std": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_556_ap": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_76251_std": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_12_buck": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.14,
+      0.0308,
+      0.098
+    ],
+    "packaged": true
+  },
+  "pack_frag": {
+    "source": "https://polyhaven.com/a/ammo_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 4384,
+    "size": [
+      0.0839,
+      0.1721,
+      0.25
+    ],
+    "packaged": true
+  },
+  "pack_flares": {
+    "source": "https://polyhaven.com/a/ammo_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 4384,
+    "size": [
+      0.0839,
+      0.1721,
+      0.25
+    ],
+    "packaged": true
+  },
+  "pack_chemlights": {
+    "source": "https://polyhaven.com/a/ammo_box",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 4384,
+    "size": [
+      0.0839,
+      0.1721,
+      0.25
+    ],
+    "packaged": true
+  },
+  "signal_launcher": {
+    "source": "https://3dmodelscc0.itch.io/free-cc0-guns-explosives-pack",
+    "license": "CC0 1.0 — 3dmodelscc0",
+    "triangles": 2281,
+    "size": [
+      0.0346,
+      0.1869,
+      0.29
+    ],
+    "packaged": false
+  },
+  "supply_signal": {
+    "source": "https://polyhaven.com/a/cardboard_box_01",
+    "license": "CC0 1.0 — Poly Haven",
+    "triangles": 6202,
+    "size": [
+      0.11,
+      0.046,
+      0.046
+    ],
+    "packaged": true
+  }
+}

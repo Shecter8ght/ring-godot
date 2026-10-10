@@ -1661,5 +1661,8 @@
   "pit": -4.0,
   "podium": 1.5,
   "ponds": 3.0
- }
+ },
+ "extras": [
+  "res://scenes/levels/zone01/zone01_loose_loot.tscn"
+ ]
 }

@@ -3016,5 +3016,8 @@
     "buildings": 75,
     "secondary_buildings": 35,
     "roads": 28
-  }
+  },
+  "extras": [
+    "res://scenes/levels/zone02/zone02_loose_loot.tscn"
+  ]
 }

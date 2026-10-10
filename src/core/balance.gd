@@ -980,3 +980,2122 @@ const ENGRAVING := {"charges": 3, "max_text": 24, "width": 0.065, "pistol_width"
 		"engraver_controller": {"tables": ["electronics"], "chance": 0.025, "value": 6000}}}
 ## Возврат оставленного оружия в следующих рейдах владельца в той же зоне кампании.
 const WEAPON_RECOVERY := {"raids": 5, "chance": 0.25, "checkpoint_sec": 1.0}
+
+## Гражданский лут: базовая оценка. Михалыч покупает с TRADER_SELL_MULT.
+const CIVILIAN_LOOT_VALUES := {
+	"circuit_board": 10500,
+	"pliers": 1200,
+	"screwdriver": 700,
+	"measuring_tape": 900,
+	"hammer": 1100,
+	"pipe_wrench": 1900,
+	"multimeter": 7800,
+	"oil_tin": 1400,
+	"thermos": 1700,
+	"kettle": 2400,
+	"radio_transceiver": 14000,
+	"cassette_player": 3200,
+	"video_camera": 11500,
+	"binoculars": 8500,
+	"wall_clock": 1800,
+	"work_gloves": 500,
+	"clipboard": 600,
+	"empty_jerrycan": 2200,
+	"medical_case": 1600,
+	"metal_toolbox": 2800,
+	"bench_vice": 3600,
+	"desk_lamp": 2600,
+	"junction_box": 2800,
+	"power_unit": 6400
+}
+## Тематические матрицы: [минимум, максимум] бросков, затем [предмет, вес, количество].
+const CIVILIAN_LOOT := {
+	"register": {"rolls": [1, 2], "entries": [
+		["cash", 5, [1, 3]], ["cigarettes", 2, [1, 2]], ["lighter", 1, [1, 1]], ["measuring_tape", 0.3, [1, 1]],
+		["nothing", 2, [0, 0]]
+	]},
+	"shelf": {"rolls": [1, 1], "entries": [
+		["water", 3, [1, 1]], ["energy_bar", 3, [1, 2]], ["lighter", 2, [1, 1]], ["perfume", 1, [1, 1]],
+		["thermos", 1.5, [1, 1]], ["wall_clock", 0.8, [1, 1]], ["work_gloves", 2, [1, 1]], ["kettle", 0.8, [1, 1]],
+		["nothing", 5, [0, 0]]
+	]},
+	"grocery": {"rolls": [1, 2], "entries": [
+		["water", 4, [1, 1]], ["canned", 4, [1, 1]], ["energy_bar", 3, [1, 2]], ["cigarettes", 1, [1, 2]],
+		["thermos", 0.8, [1, 1]], ["kettle", 0.5, [1, 1]], ["work_gloves", 0.7, [1, 1]], ["nothing", 2, [0, 0]]
+	]},
+	"pharmacy": {"rolls": [1, 2], "entries": [
+		["bandage", 5, [1, 3]], ["painkillers", 4, [1, 2]], ["medkit", 1, [1, 1]], ["medical_case", 0.8, [1, 1]],
+		["clipboard", 0.7, [1, 1]], ["nothing", 2, [0, 0]]
+	]},
+	"electronics": {"rolls": [1, 2], "entries": [
+		["phone", 3, [1, 1]], ["headphones", 3, [1, 1]], ["powerbank", 3, [1, 1]], ["camera", 1, [1, 1]],
+		["laptop", 1, [1, 1]], ["wires", 2, [1, 2]], ["circuit_board", 0.65, [1, 1]], ["multimeter", 0.5, [1, 1]],
+		["radio_transceiver", 0.2, [1, 1]], ["cassette_player", 1.5, [1, 1]], ["video_camera", 0.4, [1, 1]], ["power_unit", 0.4, [1, 1]],
+		["junction_box", 1, [1, 1]], ["desk_lamp", 1.2, [1, 1]], ["nothing", 4, [0, 0]]
+	]},
+	"tools": {"rolls": [1, 2], "entries": [
+		["wires", 4, [1, 2]], ["battery", 2, [1, 1]], ["toolset", 1, [1, 1]], ["screwdriver", 3, [1, 1]],
+		["pliers", 2, [1, 1]], ["hammer", 2, [1, 1]], ["pipe_wrench", 1.5, [1, 1]], ["measuring_tape", 2, [1, 1]],
+		["work_gloves", 2, [1, 1]], ["oil_tin", 1.5, [1, 1]], ["metal_toolbox", 1, [1, 1]], ["bench_vice", 0.5, [1, 1]],
+		["multimeter", 0.4, [1, 1]], ["junction_box", 1, [1, 1]], ["empty_jerrycan", 0.8, [1, 1]], ["nothing", 5, [0, 0]]
+	]},
+	"storage": {"rolls": [1, 2], "entries": [
+		["water", 3, [1, 1]], ["canned", 3, [1, 1]], ["wires", 2, [1, 2]], ["battery", 1, [1, 1]],
+		["cigarettes", 1, [1, 2]], ["work_gloves", 1.5, [1, 1]], ["oil_tin", 1, [1, 1]], ["metal_toolbox", 0.6, [1, 1]],
+		["empty_jerrycan", 0.6, [1, 1]], ["junction_box", 0.7, [1, 1]], ["screwdriver", 1, [1, 1]], ["nothing", 6, [0, 0]]
+	]},
+	"office": {"rolls": [1, 2], "entries": [
+		["documents", 1, [1, 1]], ["cash", 2, [1, 1]], ["phone", 1, [1, 1]], ["powerbank", 2, [1, 1]],
+		["painkillers", 1, [1, 1]], ["lighter", 2, [1, 1]], ["clipboard", 2, [1, 1]], ["desk_lamp", 1, [1, 1]],
+		["wall_clock", 1, [1, 1]], ["thermos", 1, [1, 1]], ["cassette_player", 0.7, [1, 1]], ["nothing", 4, [0, 0]]
+	]},
+	"bank": {"rolls": [1, 2], "entries": [
+		["cash", 5, [2, 5]], ["documents", 2, [1, 1]], ["clipboard", 1, [1, 1]], ["desk_lamp", 0.5, [1, 1]],
+		["nothing", 2, [0, 0]]
+	]},
+	"kiosk": {"rolls": [1, 2], "entries": [
+		["cigarettes", 4, [1, 3]], ["lighter", 3, [1, 2]], ["energy_bar", 3, [1, 2]], ["cash", 1, [1, 1]],
+		["thermos", 0.5, [1, 1]], ["cassette_player", 0.4, [1, 1]], ["measuring_tape", 0.5, [1, 1]]
+	]},
+	"server_rack": {"rolls": [1, 2], "entries": [
+		["server_drive", 3, [1, 1]], ["gpu", 2, [1, 1]], ["wires", 2, [1, 2]], ["circuit_board", 2, [1, 1]],
+		["power_unit", 1, [1, 1]], ["multimeter", 0.3, [1, 1]], ["junction_box", 1, [1, 1]]
+	]},
+	"sport": {"rolls": [1, 1], "entries": [
+		["ammo_12_buck", 2, [5, 15]], ["ammo_12_slug", 1, [5, 10]], ["ammo_556_civ", 0.5, [10, 20]], ["headset_passive", 0.5, [1, 1]],
+		["bipod_01", 0.2, [1, 1]], ["water", 2, [1, 1]], ["binoculars", 0.6, [1, 1]], ["thermos", 1, [1, 1]],
+		["work_gloves", 1, [1, 1]], ["nothing", 4, [0, 0]]
+	]},
+	"home": {"rolls": [1, 2], "entries": [
+		["thermos", 2, [1, 1]], ["kettle", 2, [1, 1]], ["wall_clock", 2, [1, 1]], ["cassette_player", 1.5, [1, 1]],
+		["work_gloves", 1, [1, 1]], ["desk_lamp", 1.5, [1, 1]], ["video_camera", 0.3, [1, 1]], ["binoculars", 0.4, [1, 1]],
+		["nothing", 4, [1, 1]]
+	]},
+	"components": {"rolls": [1, 2], "entries": [
+		["wires", 4, [1, 1]], ["battery", 2, [1, 1]], ["junction_box", 3, [1, 1]], ["power_unit", 1.5, [1, 1]],
+		["circuit_board", 0.8, [1, 1]], ["multimeter", 0.5, [1, 1]], ["nothing", 5, [1, 1]]
+	]},
+	"workshop": {"rolls": [1, 2], "entries": [
+		["pliers", 2, [1, 1]], ["screwdriver", 3, [1, 1]], ["measuring_tape", 2, [1, 1]], ["hammer", 2, [1, 1]],
+		["pipe_wrench", 1.5, [1, 1]], ["oil_tin", 2, [1, 1]], ["work_gloves", 2, [1, 1]], ["metal_toolbox", 1, [1, 1]],
+		["bench_vice", 0.6, [1, 1]], ["empty_jerrycan", 1, [1, 1]], ["multimeter", 0.35, [1, 1]], ["power_unit", 0.6, [1, 1]],
+		["nothing", 5, [1, 1]]
+	]},
+}
+## Отдельный предмет на опоре: шанс на точку, отсечение вдали, зазор от поверхности.
+const LOOSE_LOOT := {"chance": 0.42, "distance": 65.0, "surface_gap": 0.002, "floor_points": 0.16}
+
+## Ценные находки: цены, тематические веса и содержимое вскрываемых комплектов.
+const VALUABLE_LOOT_VALUES := {
+	"gpu_compute": 92000,
+	"gpu_gaming": 54000,
+	"ssd_sata": 12500,
+	"ssd_nvme": 24000,
+	"ram_desktop": 7500,
+	"ram_server": 19000,
+	"cpu_desktop": 28000,
+	"cpu_server": 62000,
+	"switch_managed": 26000,
+	"router_industrial": 21500,
+	"thermal_imager": 78000,
+	"nvg_tube": 88000,
+	"laser_rangefinder": 16500,
+	"satellite_modem": 48000,
+	"oscilloscope_portable": 34000,
+	"laptop_business": 38000,
+	"laptop_workstation": 76000,
+	"smartphone_business": 22000,
+	"photo_camera_pro": 68000,
+	"motherboard_server": 28500,
+	"cctv_bullet": 14500,
+	"cctv_dome": 17500,
+	"microscope_digital": 58000,
+	"cpu_cooling_kit": 18500,
+	"part_pm_barrel": 6500,
+	"part_pm_slide": 11500,
+	"part_pm_hammer": 4200,
+	"part_pm_trigger": 3000,
+	"part_pm_safety": 2700,
+	"part_glock_barrel": 12000,
+	"part_glock_slide": 23000,
+	"part_glock_recoil": 6500,
+	"part_glock_trigger": 10500,
+	"part_glock_extractor": 4500,
+	"part_veras_receiver": 19500,
+	"part_veras_stock": 7500,
+	"part_veras_muzzle": 5200,
+	"part_veras_mag_body": 3900,
+	"weapon_cleaning_kit": 8500,
+	"weapon_gauges": 14500,
+	"microscope_optical": 42000,
+	"surgical_tape": 1600,
+	"suture_kit": 8500,
+	"scalpel_kit": 12500,
+	"hemostat_kit": 10500,
+	"dental_kit": 18000,
+	"orthopedic_kit": 24000,
+	"intubation_kit": 21000,
+	"diagnostic_kit": 15500,
+	"sterile_dressing_kit": 6500,
+	"antibiotics_pack": 11500,
+	"anesthetic_pack": 14500,
+	"insulin_pack": 22000,
+	"antiseptic_pack": 5500,
+	"hemostatic_pack": 17500,
+	"iv_solution_pack": 8500,
+	"car_tire": 7500,
+	"car_rim": 5500,
+	"tire_pump": 4200,
+	"auto_lubricant": 2200,
+	"precision_oiler": 2800,
+	"ratchet_socket": 4500,
+	"alternator_rebuild": 14500,
+	"injector_set": 24500,
+	"car_ecu": 19500,
+	"timing_kit": 12500,
+	"brake_service_kit": 8500,
+	"bearing_set": 9500,
+	"food_milk": 1600,
+	"food_tomatoes": 1300,
+	"food_beans": 1800,
+	"food_sardines": 2200,
+	"ration_daily": 6500,
+	"ration_patrol": 4200,
+	"ration_arctic": 8500,
+	"ration_emergency": 5200,
+	"freeze_dried_meals": 4500,
+	"coffee_pack": 6500,
+	"protein_pack": 4800,
+	"water_purification": 5500,
+	"pack_918_pst": 1800,
+	"pack_918_ap": 3520,
+	"pack_919_fmj": 3000,
+	"pack_919_ap": 4800,
+	"pack_45_fmj": 2700,
+	"pack_57_ap": 12000,
+	"pack_921_ap": 8400,
+	"pack_545_std": 5400,
+	"pack_545_ap": 10400,
+	"pack_939_sp5": 9600,
+	"pack_939_sp6": 12600,
+	"pack_556_std": 6000,
+	"pack_556_ap": 12000,
+	"pack_76251_std": 7200,
+	"pack_12_buck": 1800,
+	"pack_frag": 13500,
+	"pack_flares": 6400,
+	"pack_chemlights": 3600,
+	"signal_launcher": 38000,
+	"supply_signal": 28000
+}
+const LOOT_PACKS := {
+	"pack_918_pst": [
+		[
+			"ammo_918_pst",
+			40
+		]
+	],
+	"pack_918_ap": [
+		[
+			"ammo_918_ap",
+			32
+		]
+	],
+	"pack_919_fmj": [
+		[
+			"ammo_919_fmj",
+			50
+		]
+	],
+	"pack_919_ap": [
+		[
+			"ammo_919_ap",
+			30
+		]
+	],
+	"pack_45_fmj": [
+		[
+			"ammo_45_fmj",
+			30
+		]
+	],
+	"pack_57_ap": [
+		[
+			"ammo_57_ap",
+			40
+		]
+	],
+	"pack_921_ap": [
+		[
+			"ammo_921_ap",
+			30
+		]
+	],
+	"pack_545_std": [
+		[
+			"ammo_545_std",
+			60
+		]
+	],
+	"pack_545_ap": [
+		[
+			"ammo_545_ap",
+			40
+		]
+	],
+	"pack_939_sp5": [
+		[
+			"ammo_939_sp5",
+			40
+		]
+	],
+	"pack_939_sp6": [
+		[
+			"ammo_939_sp6",
+			30
+		]
+	],
+	"pack_556_std": [
+		[
+			"ammo_556_std",
+			60
+		]
+	],
+	"pack_556_ap": [
+		[
+			"ammo_556_ap",
+			40
+		]
+	],
+	"pack_76251_std": [
+		[
+			"ammo_76251_std",
+			40
+		]
+	],
+	"pack_12_buck": [
+		[
+			"ammo_12_buck",
+			20
+		]
+	],
+	"pack_frag": [
+		[
+			"grenade",
+			3
+		]
+	],
+	"pack_flares": [
+		[
+			"flare",
+			4
+		]
+	],
+	"pack_chemlights": [
+		[
+			"chemlight",
+			6
+		]
+	]
+}
+const VALUABLE_LOOT := {
+	"electronics": [
+		[
+			"gpu_compute",
+			0.07
+		],
+		[
+			"gpu_gaming",
+			0.18
+		],
+		[
+			"ssd_sata",
+			0.5
+		],
+		[
+			"ssd_nvme",
+			0.5
+		],
+		[
+			"ram_desktop",
+			1
+		],
+		[
+			"ram_server",
+			0.5
+		],
+		[
+			"cpu_desktop",
+			0.5
+		],
+		[
+			"cpu_server",
+			0.07
+		],
+		[
+			"switch_managed",
+			0.5
+		],
+		[
+			"router_industrial",
+			0.5
+		],
+		[
+			"thermal_imager",
+			0.07
+		],
+		[
+			"nvg_tube",
+			0.07
+		],
+		[
+			"laser_rangefinder",
+			0.5
+		],
+		[
+			"satellite_modem",
+			0.18
+		],
+		[
+			"oscilloscope_portable",
+			0.18
+		],
+		[
+			"laptop_business",
+			0.18
+		],
+		[
+			"laptop_workstation",
+			0.07
+		],
+		[
+			"smartphone_business",
+			0.5
+		],
+		[
+			"photo_camera_pro",
+			0.07
+		],
+		[
+			"motherboard_server",
+			0.5
+		],
+		[
+			"cctv_bullet",
+			0.5
+		],
+		[
+			"cctv_dome",
+			0.5
+		],
+		[
+			"microscope_digital",
+			0.18
+		],
+		[
+			"cpu_cooling_kit",
+			0.5
+		]
+	],
+	"office": [
+		[
+			"gpu_compute",
+			0.07
+		],
+		[
+			"gpu_gaming",
+			0.18
+		],
+		[
+			"ssd_sata",
+			0.5
+		],
+		[
+			"ssd_nvme",
+			0.5
+		],
+		[
+			"ram_desktop",
+			1
+		],
+		[
+			"ram_server",
+			0.5
+		],
+		[
+			"cpu_desktop",
+			0.5
+		],
+		[
+			"cpu_server",
+			0.07
+		],
+		[
+			"switch_managed",
+			0.5
+		],
+		[
+			"router_industrial",
+			0.5
+		],
+		[
+			"thermal_imager",
+			0.07
+		],
+		[
+			"nvg_tube",
+			0.07
+		],
+		[
+			"laser_rangefinder",
+			0.5
+		],
+		[
+			"satellite_modem",
+			0.18
+		],
+		[
+			"oscilloscope_portable",
+			0.18
+		],
+		[
+			"laptop_business",
+			0.18
+		],
+		[
+			"laptop_workstation",
+			0.07
+		],
+		[
+			"smartphone_business",
+			0.5
+		],
+		[
+			"photo_camera_pro",
+			0.07
+		],
+		[
+			"motherboard_server",
+			0.5
+		],
+		[
+			"cctv_bullet",
+			0.5
+		],
+		[
+			"cctv_dome",
+			0.5
+		],
+		[
+			"microscope_digital",
+			0.18
+		],
+		[
+			"cpu_cooling_kit",
+			0.5
+		]
+	],
+	"server_rack": [
+		[
+			"gpu_compute",
+			0.07
+		],
+		[
+			"gpu_gaming",
+			0.18
+		],
+		[
+			"ssd_sata",
+			0.5
+		],
+		[
+			"ssd_nvme",
+			0.5
+		],
+		[
+			"ram_desktop",
+			1
+		],
+		[
+			"ram_server",
+			0.5
+		],
+		[
+			"cpu_desktop",
+			0.5
+		],
+		[
+			"cpu_server",
+			0.07
+		],
+		[
+			"switch_managed",
+			0.5
+		],
+		[
+			"router_industrial",
+			0.5
+		],
+		[
+			"thermal_imager",
+			0.07
+		],
+		[
+			"nvg_tube",
+			0.07
+		],
+		[
+			"laser_rangefinder",
+			0.5
+		],
+		[
+			"satellite_modem",
+			0.18
+		],
+		[
+			"oscilloscope_portable",
+			0.18
+		],
+		[
+			"laptop_business",
+			0.18
+		],
+		[
+			"laptop_workstation",
+			0.07
+		],
+		[
+			"smartphone_business",
+			0.5
+		],
+		[
+			"photo_camera_pro",
+			0.07
+		],
+		[
+			"motherboard_server",
+			0.5
+		],
+		[
+			"cctv_bullet",
+			0.5
+		],
+		[
+			"cctv_dome",
+			0.5
+		],
+		[
+			"microscope_digital",
+			0.18
+		],
+		[
+			"cpu_cooling_kit",
+			0.5
+		]
+	],
+	"components": [
+		[
+			"gpu_compute",
+			0.07
+		],
+		[
+			"gpu_gaming",
+			0.18
+		],
+		[
+			"ssd_sata",
+			0.5
+		],
+		[
+			"ssd_nvme",
+			0.5
+		],
+		[
+			"ram_desktop",
+			1
+		],
+		[
+			"ram_server",
+			0.5
+		],
+		[
+			"cpu_desktop",
+			0.5
+		],
+		[
+			"cpu_server",
+			0.07
+		],
+		[
+			"switch_managed",
+			0.5
+		],
+		[
+			"router_industrial",
+			0.5
+		],
+		[
+			"thermal_imager",
+			0.07
+		],
+		[
+			"nvg_tube",
+			0.07
+		],
+		[
+			"laser_rangefinder",
+			0.5
+		],
+		[
+			"satellite_modem",
+			0.18
+		],
+		[
+			"oscilloscope_portable",
+			0.18
+		],
+		[
+			"laptop_business",
+			0.18
+		],
+		[
+			"laptop_workstation",
+			0.07
+		],
+		[
+			"smartphone_business",
+			0.5
+		],
+		[
+			"photo_camera_pro",
+			0.07
+		],
+		[
+			"motherboard_server",
+			0.5
+		],
+		[
+			"cctv_bullet",
+			0.5
+		],
+		[
+			"cctv_dome",
+			0.5
+		],
+		[
+			"microscope_digital",
+			0.18
+		],
+		[
+			"cpu_cooling_kit",
+			0.5
+		]
+	],
+	"home": [
+		[
+			"gpu_compute",
+			0.07
+		],
+		[
+			"gpu_gaming",
+			0.18
+		],
+		[
+			"ssd_sata",
+			0.5
+		],
+		[
+			"ssd_nvme",
+			0.5
+		],
+		[
+			"ram_desktop",
+			1
+		],
+		[
+			"ram_server",
+			0.5
+		],
+		[
+			"cpu_desktop",
+			0.5
+		],
+		[
+			"cpu_server",
+			0.07
+		],
+		[
+			"switch_managed",
+			0.5
+		],
+		[
+			"router_industrial",
+			0.5
+		],
+		[
+			"thermal_imager",
+			0.07
+		],
+		[
+			"nvg_tube",
+			0.07
+		],
+		[
+			"laser_rangefinder",
+			0.5
+		],
+		[
+			"satellite_modem",
+			0.18
+		],
+		[
+			"oscilloscope_portable",
+			0.18
+		],
+		[
+			"laptop_business",
+			0.18
+		],
+		[
+			"laptop_workstation",
+			0.07
+		],
+		[
+			"smartphone_business",
+			0.5
+		],
+		[
+			"photo_camera_pro",
+			0.07
+		],
+		[
+			"motherboard_server",
+			0.5
+		],
+		[
+			"cctv_bullet",
+			0.5
+		],
+		[
+			"cctv_dome",
+			0.5
+		],
+		[
+			"microscope_digital",
+			0.18
+		],
+		[
+			"cpu_cooling_kit",
+			0.5
+		]
+	],
+	"security": [
+		[
+			"part_pm_barrel",
+			1
+		],
+		[
+			"part_pm_slide",
+			0.5
+		],
+		[
+			"part_pm_hammer",
+			1
+		],
+		[
+			"part_pm_trigger",
+			1
+		],
+		[
+			"part_pm_safety",
+			1
+		],
+		[
+			"part_glock_barrel",
+			0.5
+		],
+		[
+			"part_glock_slide",
+			0.5
+		],
+		[
+			"part_glock_recoil",
+			1
+		],
+		[
+			"part_glock_trigger",
+			0.5
+		],
+		[
+			"part_glock_extractor",
+			1
+		],
+		[
+			"part_veras_receiver",
+			0.5
+		],
+		[
+			"part_veras_stock",
+			1
+		],
+		[
+			"part_veras_muzzle",
+			1
+		],
+		[
+			"part_veras_mag_body",
+			1
+		],
+		[
+			"weapon_cleaning_kit",
+			1
+		],
+		[
+			"weapon_gauges",
+			0.5
+		],
+		[
+			"pack_918_pst",
+			1
+		],
+		[
+			"pack_918_ap",
+			1
+		],
+		[
+			"pack_919_fmj",
+			1
+		],
+		[
+			"pack_919_ap",
+			1
+		],
+		[
+			"pack_45_fmj",
+			1
+		],
+		[
+			"pack_57_ap",
+			0.5
+		],
+		[
+			"pack_921_ap",
+			1
+		],
+		[
+			"pack_545_std",
+			1
+		],
+		[
+			"pack_545_ap",
+			0.5
+		],
+		[
+			"pack_939_sp5",
+			1
+		],
+		[
+			"pack_939_sp6",
+			0.5
+		],
+		[
+			"pack_556_std",
+			1
+		],
+		[
+			"pack_556_ap",
+			0.5
+		],
+		[
+			"pack_76251_std",
+			1
+		],
+		[
+			"pack_12_buck",
+			1
+		],
+		[
+			"pack_frag",
+			0.5
+		],
+		[
+			"pack_flares",
+			1
+		],
+		[
+			"pack_chemlights",
+			1
+		],
+		[
+			"signal_launcher",
+			0.18
+		],
+		[
+			"supply_signal",
+			0.5
+		]
+	],
+	"sport": [
+		[
+			"part_pm_barrel",
+			1
+		],
+		[
+			"part_pm_slide",
+			0.5
+		],
+		[
+			"part_pm_hammer",
+			1
+		],
+		[
+			"part_pm_trigger",
+			1
+		],
+		[
+			"part_pm_safety",
+			1
+		],
+		[
+			"part_glock_barrel",
+			0.5
+		],
+		[
+			"part_glock_slide",
+			0.5
+		],
+		[
+			"part_glock_recoil",
+			1
+		],
+		[
+			"part_glock_trigger",
+			0.5
+		],
+		[
+			"part_glock_extractor",
+			1
+		],
+		[
+			"part_veras_receiver",
+			0.5
+		],
+		[
+			"part_veras_stock",
+			1
+		],
+		[
+			"part_veras_muzzle",
+			1
+		],
+		[
+			"part_veras_mag_body",
+			1
+		],
+		[
+			"weapon_cleaning_kit",
+			1
+		],
+		[
+			"weapon_gauges",
+			0.5
+		],
+		[
+			"pack_918_pst",
+			1
+		],
+		[
+			"pack_918_ap",
+			1
+		],
+		[
+			"pack_919_fmj",
+			1
+		],
+		[
+			"pack_919_ap",
+			1
+		],
+		[
+			"pack_45_fmj",
+			1
+		],
+		[
+			"pack_57_ap",
+			0.5
+		],
+		[
+			"pack_921_ap",
+			1
+		],
+		[
+			"pack_545_std",
+			1
+		],
+		[
+			"pack_545_ap",
+			0.5
+		],
+		[
+			"pack_939_sp5",
+			1
+		],
+		[
+			"pack_939_sp6",
+			0.5
+		],
+		[
+			"pack_556_std",
+			1
+		],
+		[
+			"pack_556_ap",
+			0.5
+		],
+		[
+			"pack_76251_std",
+			1
+		],
+		[
+			"pack_12_buck",
+			1
+		],
+		[
+			"pack_frag",
+			0.5
+		],
+		[
+			"pack_flares",
+			1
+		],
+		[
+			"pack_chemlights",
+			1
+		]
+	],
+	"workshop": [
+		[
+			"part_pm_barrel",
+			1
+		],
+		[
+			"part_pm_slide",
+			0.5
+		],
+		[
+			"part_pm_hammer",
+			1
+		],
+		[
+			"part_pm_trigger",
+			1
+		],
+		[
+			"part_pm_safety",
+			1
+		],
+		[
+			"part_glock_barrel",
+			0.5
+		],
+		[
+			"part_glock_slide",
+			0.5
+		],
+		[
+			"part_glock_recoil",
+			1
+		],
+		[
+			"part_glock_trigger",
+			0.5
+		],
+		[
+			"part_glock_extractor",
+			1
+		],
+		[
+			"part_veras_receiver",
+			0.5
+		],
+		[
+			"part_veras_stock",
+			1
+		],
+		[
+			"part_veras_muzzle",
+			1
+		],
+		[
+			"part_veras_mag_body",
+			1
+		],
+		[
+			"weapon_cleaning_kit",
+			1
+		],
+		[
+			"weapon_gauges",
+			0.5
+		],
+		[
+			"car_tire",
+			1
+		],
+		[
+			"car_rim",
+			1
+		],
+		[
+			"tire_pump",
+			1
+		],
+		[
+			"auto_lubricant",
+			1
+		],
+		[
+			"precision_oiler",
+			1
+		],
+		[
+			"ratchet_socket",
+			1
+		],
+		[
+			"alternator_rebuild",
+			0.5
+		],
+		[
+			"injector_set",
+			0.5
+		],
+		[
+			"car_ecu",
+			0.5
+		],
+		[
+			"timing_kit",
+			0.5
+		],
+		[
+			"brake_service_kit",
+			1
+		],
+		[
+			"bearing_set",
+			1
+		]
+	],
+	"storage": [
+		[
+			"part_pm_barrel",
+			1
+		],
+		[
+			"part_pm_slide",
+			0.5
+		],
+		[
+			"part_pm_hammer",
+			1
+		],
+		[
+			"part_pm_trigger",
+			1
+		],
+		[
+			"part_pm_safety",
+			1
+		],
+		[
+			"part_glock_barrel",
+			0.5
+		],
+		[
+			"part_glock_slide",
+			0.5
+		],
+		[
+			"part_glock_recoil",
+			1
+		],
+		[
+			"part_glock_trigger",
+			0.5
+		],
+		[
+			"part_glock_extractor",
+			1
+		],
+		[
+			"part_veras_receiver",
+			0.5
+		],
+		[
+			"part_veras_stock",
+			1
+		],
+		[
+			"part_veras_muzzle",
+			1
+		],
+		[
+			"part_veras_mag_body",
+			1
+		],
+		[
+			"weapon_cleaning_kit",
+			1
+		],
+		[
+			"weapon_gauges",
+			0.5
+		],
+		[
+			"microscope_optical",
+			0.18
+		],
+		[
+			"surgical_tape",
+			1
+		],
+		[
+			"suture_kit",
+			1
+		],
+		[
+			"scalpel_kit",
+			0.5
+		],
+		[
+			"hemostat_kit",
+			0.5
+		],
+		[
+			"dental_kit",
+			0.5
+		],
+		[
+			"orthopedic_kit",
+			0.5
+		],
+		[
+			"intubation_kit",
+			0.5
+		],
+		[
+			"diagnostic_kit",
+			0.5
+		],
+		[
+			"sterile_dressing_kit",
+			1
+		],
+		[
+			"antibiotics_pack",
+			0.5
+		],
+		[
+			"anesthetic_pack",
+			0.5
+		],
+		[
+			"insulin_pack",
+			0.5
+		],
+		[
+			"antiseptic_pack",
+			1
+		],
+		[
+			"hemostatic_pack",
+			0.5
+		],
+		[
+			"iv_solution_pack",
+			1
+		],
+		[
+			"car_tire",
+			1
+		],
+		[
+			"car_rim",
+			1
+		],
+		[
+			"tire_pump",
+			1
+		],
+		[
+			"auto_lubricant",
+			1
+		],
+		[
+			"precision_oiler",
+			1
+		],
+		[
+			"ratchet_socket",
+			1
+		],
+		[
+			"alternator_rebuild",
+			0.5
+		],
+		[
+			"injector_set",
+			0.5
+		],
+		[
+			"car_ecu",
+			0.5
+		],
+		[
+			"timing_kit",
+			0.5
+		],
+		[
+			"brake_service_kit",
+			1
+		],
+		[
+			"bearing_set",
+			1
+		],
+		[
+			"food_milk",
+			1
+		],
+		[
+			"food_tomatoes",
+			1
+		],
+		[
+			"food_beans",
+			1
+		],
+		[
+			"food_sardines",
+			1
+		],
+		[
+			"ration_daily",
+			1
+		],
+		[
+			"ration_patrol",
+			1
+		],
+		[
+			"ration_arctic",
+			1
+		],
+		[
+			"ration_emergency",
+			1
+		],
+		[
+			"freeze_dried_meals",
+			1
+		],
+		[
+			"coffee_pack",
+			1
+		],
+		[
+			"protein_pack",
+			1
+		],
+		[
+			"water_purification",
+			1
+		],
+		[
+			"pack_918_pst",
+			1
+		],
+		[
+			"pack_918_ap",
+			1
+		],
+		[
+			"pack_919_fmj",
+			1
+		],
+		[
+			"pack_919_ap",
+			1
+		],
+		[
+			"pack_45_fmj",
+			1
+		],
+		[
+			"pack_57_ap",
+			0.5
+		],
+		[
+			"pack_921_ap",
+			1
+		],
+		[
+			"pack_545_std",
+			1
+		],
+		[
+			"pack_545_ap",
+			0.5
+		],
+		[
+			"pack_939_sp5",
+			1
+		],
+		[
+			"pack_939_sp6",
+			0.5
+		],
+		[
+			"pack_556_std",
+			1
+		],
+		[
+			"pack_556_ap",
+			0.5
+		],
+		[
+			"pack_76251_std",
+			1
+		],
+		[
+			"pack_12_buck",
+			1
+		],
+		[
+			"pack_frag",
+			0.5
+		],
+		[
+			"pack_flares",
+			1
+		],
+		[
+			"pack_chemlights",
+			1
+		]
+	],
+	"pmc": [
+		[
+			"part_pm_barrel",
+			1
+		],
+		[
+			"part_pm_slide",
+			0.5
+		],
+		[
+			"part_pm_hammer",
+			1
+		],
+		[
+			"part_pm_trigger",
+			1
+		],
+		[
+			"part_pm_safety",
+			1
+		],
+		[
+			"part_glock_barrel",
+			0.5
+		],
+		[
+			"part_glock_slide",
+			0.5
+		],
+		[
+			"part_glock_recoil",
+			1
+		],
+		[
+			"part_glock_trigger",
+			0.5
+		],
+		[
+			"part_glock_extractor",
+			1
+		],
+		[
+			"part_veras_receiver",
+			0.5
+		],
+		[
+			"part_veras_stock",
+			1
+		],
+		[
+			"part_veras_muzzle",
+			1
+		],
+		[
+			"part_veras_mag_body",
+			1
+		],
+		[
+			"weapon_cleaning_kit",
+			1
+		],
+		[
+			"weapon_gauges",
+			0.5
+		],
+		[
+			"pack_918_pst",
+			1
+		],
+		[
+			"pack_918_ap",
+			1
+		],
+		[
+			"pack_919_fmj",
+			1
+		],
+		[
+			"pack_919_ap",
+			1
+		],
+		[
+			"pack_45_fmj",
+			1
+		],
+		[
+			"pack_57_ap",
+			0.5
+		],
+		[
+			"pack_921_ap",
+			1
+		],
+		[
+			"pack_545_std",
+			1
+		],
+		[
+			"pack_545_ap",
+			0.5
+		],
+		[
+			"pack_939_sp5",
+			1
+		],
+		[
+			"pack_939_sp6",
+			0.5
+		],
+		[
+			"pack_556_std",
+			1
+		],
+		[
+			"pack_556_ap",
+			0.5
+		],
+		[
+			"pack_76251_std",
+			1
+		],
+		[
+			"pack_12_buck",
+			1
+		],
+		[
+			"pack_frag",
+			0.5
+		],
+		[
+			"pack_flares",
+			1
+		],
+		[
+			"pack_chemlights",
+			1
+		],
+		[
+			"signal_launcher",
+			0.18
+		],
+		[
+			"supply_signal",
+			0.5
+		]
+	],
+	"pharmacy": [
+		[
+			"microscope_optical",
+			0.18
+		],
+		[
+			"surgical_tape",
+			1
+		],
+		[
+			"suture_kit",
+			1
+		],
+		[
+			"scalpel_kit",
+			0.5
+		],
+		[
+			"hemostat_kit",
+			0.5
+		],
+		[
+			"dental_kit",
+			0.5
+		],
+		[
+			"orthopedic_kit",
+			0.5
+		],
+		[
+			"intubation_kit",
+			0.5
+		],
+		[
+			"diagnostic_kit",
+			0.5
+		],
+		[
+			"sterile_dressing_kit",
+			1
+		],
+		[
+			"antibiotics_pack",
+			0.5
+		],
+		[
+			"anesthetic_pack",
+			0.5
+		],
+		[
+			"insulin_pack",
+			0.5
+		],
+		[
+			"antiseptic_pack",
+			1
+		],
+		[
+			"hemostatic_pack",
+			0.5
+		],
+		[
+			"iv_solution_pack",
+			1
+		]
+	],
+	"resident": [
+		[
+			"microscope_optical",
+			0.18
+		],
+		[
+			"surgical_tape",
+			1
+		],
+		[
+			"suture_kit",
+			1
+		],
+		[
+			"scalpel_kit",
+			0.5
+		],
+		[
+			"hemostat_kit",
+			0.5
+		],
+		[
+			"dental_kit",
+			0.5
+		],
+		[
+			"orthopedic_kit",
+			0.5
+		],
+		[
+			"intubation_kit",
+			0.5
+		],
+		[
+			"diagnostic_kit",
+			0.5
+		],
+		[
+			"sterile_dressing_kit",
+			1
+		],
+		[
+			"antibiotics_pack",
+			0.5
+		],
+		[
+			"anesthetic_pack",
+			0.5
+		],
+		[
+			"insulin_pack",
+			0.5
+		],
+		[
+			"antiseptic_pack",
+			1
+		],
+		[
+			"hemostatic_pack",
+			0.5
+		],
+		[
+			"iv_solution_pack",
+			1
+		],
+		[
+			"food_milk",
+			1
+		],
+		[
+			"food_tomatoes",
+			1
+		],
+		[
+			"food_beans",
+			1
+		],
+		[
+			"food_sardines",
+			1
+		],
+		[
+			"ration_daily",
+			1
+		],
+		[
+			"ration_patrol",
+			1
+		],
+		[
+			"ration_arctic",
+			1
+		],
+		[
+			"ration_emergency",
+			1
+		],
+		[
+			"freeze_dried_meals",
+			1
+		],
+		[
+			"coffee_pack",
+			1
+		],
+		[
+			"protein_pack",
+			1
+		],
+		[
+			"water_purification",
+			1
+		]
+	],
+	"tools": [
+		[
+			"car_tire",
+			1
+		],
+		[
+			"car_rim",
+			1
+		],
+		[
+			"tire_pump",
+			1
+		],
+		[
+			"auto_lubricant",
+			1
+		],
+		[
+			"precision_oiler",
+			1
+		],
+		[
+			"ratchet_socket",
+			1
+		],
+		[
+			"alternator_rebuild",
+			0.5
+		],
+		[
+			"injector_set",
+			0.5
+		],
+		[
+			"car_ecu",
+			0.5
+		],
+		[
+			"timing_kit",
+			0.5
+		],
+		[
+			"brake_service_kit",
+			1
+		],
+		[
+			"bearing_set",
+			1
+		]
+	],
+	"grocery": [
+		[
+			"food_milk",
+			1
+		],
+		[
+			"food_tomatoes",
+			1
+		],
+		[
+			"food_beans",
+			1
+		],
+		[
+			"food_sardines",
+			1
+		],
+		[
+			"ration_daily",
+			1
+		],
+		[
+			"ration_patrol",
+			1
+		],
+		[
+			"ration_arctic",
+			1
+		],
+		[
+			"ration_emergency",
+			1
+		],
+		[
+			"freeze_dried_meals",
+			1
+		],
+		[
+			"coffee_pack",
+			1
+		],
+		[
+			"protein_pack",
+			1
+		],
+		[
+			"water_purification",
+			1
+		]
+	],
+	"kiosk": [
+		[
+			"food_milk",
+			1
+		],
+		[
+			"food_tomatoes",
+			1
+		],
+		[
+			"food_beans",
+			1
+		],
+		[
+			"food_sardines",
+			1
+		],
+		[
+			"ration_daily",
+			1
+		],
+		[
+			"ration_patrol",
+			1
+		],
+		[
+			"ration_arctic",
+			1
+		],
+		[
+			"ration_emergency",
+			1
+		],
+		[
+			"freeze_dried_meals",
+			1
+		],
+		[
+			"coffee_pack",
+			1
+		],
+		[
+			"protein_pack",
+			1
+		],
+		[
+			"water_purification",
+			1
+		]
+	],
+	"shelf": [
+		[
+			"food_milk",
+			1
+		],
+		[
+			"food_tomatoes",
+			1
+		],
+		[
+			"food_beans",
+			1
+		],
+		[
+			"food_sardines",
+			1
+		],
+		[
+			"ration_daily",
+			1
+		],
+		[
+			"ration_patrol",
+			1
+		],
+		[
+			"ration_arctic",
+			1
+		],
+		[
+			"ration_emergency",
+			1
+		],
+		[
+			"freeze_dried_meals",
+			1
+		],
+		[
+			"coffee_pack",
+			1
+		],
+		[
+			"protein_pack",
+			1
+		],
+		[
+			"water_purification",
+			1
+		]
+	],
+	"marauder": [
+		[
+			"pack_918_pst",
+			1
+		],
+		[
+			"pack_918_ap",
+			1
+		],
+		[
+			"pack_919_fmj",
+			1
+		],
+		[
+			"pack_919_ap",
+			1
+		],
+		[
+			"pack_45_fmj",
+			1
+		],
+		[
+			"pack_57_ap",
+			0.5
+		],
+		[
+			"pack_921_ap",
+			1
+		],
+		[
+			"pack_545_std",
+			1
+		],
+		[
+			"pack_545_ap",
+			0.5
+		],
+		[
+			"pack_939_sp5",
+			1
+		],
+		[
+			"pack_939_sp6",
+			0.5
+		],
+		[
+			"pack_556_std",
+			1
+		],
+		[
+			"pack_556_ap",
+			0.5
+		],
+		[
+			"pack_76251_std",
+			1
+		],
+		[
+			"pack_12_buck",
+			1
+		],
+		[
+			"pack_frag",
+			0.5
+		],
+		[
+			"pack_flares",
+			1
+		],
+		[
+			"pack_chemlights",
+			1
+		]
+	],
+	"supply_drop": [
+		[
+			"signal_launcher",
+			0.18
+		],
+		[
+			"supply_signal",
+			0.5
+		]
+	]
+}
+const VALUABLE_LOOT_CHANCE := {"electronics": 0.24, "office": 0.14, "server_rack": 0.32, "components": 0.18, "home": 0.1, "security": 0.22, "sport": 0.18, "workshop": 0.26, "storage": 0.14, "pmc": 0.22, "pharmacy": 0.28, "resident": 0.15, "tools": 0.2, "grocery": 0.22, "kiosk": 0.12, "shelf": 0.14, "marauder": 0.06, "supply_drop": 0.6}
+const SUPPLY_SIGNAL := {"delay": 45.0, "altitude": 170.0, "speed": 70.0, "flight": 18.0, "drop_height": 40.0, "fall_sec": 8.0, "roof_check": 180.0, "ground_check": 4.0, "clear_radius": 3.5, "site_half": 1.0, "site_height": 0.5, "terrain_tolerance": 0.15, "normal_min": 0.85, "flare_height": 65.0, "flare_sec": 18.0, "loot_count": [4, 6], "minimum_value": 28000, "noise_m": 180.0}
+const SUPPLY_PLANE_SOUND := {"db": 12.0, "unit": 60.0, "max": 600.0}

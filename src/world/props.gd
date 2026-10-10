@@ -181,7 +181,8 @@ func _desk(body: StaticBody3D, sz: Vector3) -> void:
 	for x in [-sz.x * 0.5 + 0.05, sz.x * 0.5 - 0.05]:
 		_box(body, Vector3(x, sz.y * 0.5, 0), Vector3(0.06, sz.y, sz.z * 0.9), _flat(Color(0.3, 0.3, 0.32), 0.6, 0.3))
 	if _rng.randf() < 0.7:
-		_box(body, Vector3(_rng.randf_range(-0.3, 0.3), sz.y + 0.2, -0.1), Vector3(0.45, 0.32, 0.05), _flat(Color(0.1, 0.1, 0.11), 0.4, 0.2))
+		# Правая половина столешницы свободна для физической находки.
+		_box(body, Vector3(-0.32, sz.y + 0.2, -0.21), Vector3(0.45, 0.32, 0.05), _flat(Color(0.1, 0.1, 0.11), 0.4, 0.2))
 
 
 func _bench(body: StaticBody3D, sz: Vector3) -> void:

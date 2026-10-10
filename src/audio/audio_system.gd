@@ -32,6 +32,7 @@ const KINDS := {
 	"thunder": {"db": 6.0, "unit": 60.0, "max": 400.0},
 	"breaker": {"db": 2.0, "unit": 10.0, "max": 80.0},
 	"heli": {"db": 10.0, "unit": 60.0, "max": 500.0},
+	"supply_plane": Balance.SUPPLY_PLANE_SOUND,
 	"engine": {"db": 2.0, "unit": 15.0, "max": 160.0},
 	# мародёр роется в контейнере — слышно за стеной
 	"rummage": {"db": -13.0, "unit": 3.0, "max": 22.0, "occlude": true},
@@ -91,6 +92,7 @@ const SAMPLES := {
 	# у этих до сих пор только синтез: положи записи — зазвучат они (каталог data/sound_catalog.json)
 	"heartbeat": ["body/heart_"], "thunder": ["weather/thunder_"], "breaker": ["world/breaker_"],
 	"heli": ["vehicles/heli_"], "engine": ["vehicles/truck_"], "glass_break": ["glass/break_"],
+	"supply_plane": ["vehicles/supply_plane_"],
 	"explosion": ["boom/explosion_"], "pin": ["gear/pin_"],
 }
 ## Свой набор вместо общего из SAMPLES, если в нём есть хоть одна запись: затвор сейчас звучит

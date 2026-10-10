@@ -114,6 +114,7 @@ var holes: Array = []
 
 const DOOR_SCENE := preload("res://scenes/props/door.tscn")
 const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
+const LOOSE_LOOT_SCENE := preload("res://scenes/world/loose_loot.tscn")
 const ARCH_DEFAULT := {
 	"plinth_h": 0.4, "cornice_h": 0.35, "pilaster_w": 0.5, "pilaster_spacing": 6.0, "column_spacing": 6.0,
 	"storefront_h": 3.6, "door_h": 2.2, "shutter_h": 3.2, "gate_h": 4.5,
@@ -1535,6 +1536,18 @@ func _build_props(root: Node3D) -> void:
 	placement.place(props, _rooms, _openings, root.get_meta("spawn", Vector3.ZERO), hash(String(_def.get("id", ""))), keepouts)
 	root.set_meta("prop_count", placement.count)
 	_build_loot(root, placement.lootables)
+	var loose: Node3D = Node3D.new()
+	loose.name = "LooseLoot"
+	root.add_child(loose)
+	for index: int in range(placement.loose_points.size()):
+		var point: Dictionary = placement.loose_points[index]
+		var found: LooseLoot = LOOSE_LOOT_SCENE.instantiate() as LooseLoot
+		found.name = "Found_%d" % index
+		found.position = point.pos
+		found.rotation.y = float(point.yaw)
+		found.table = String(point.table)
+		loose.add_child(found)
+	root.set_meta("loose_loot_points", placement.loose_points.size())
 	# меши пропсов склеиваются по клеткам — иначе каждая коробка на стеллаже отдельный вызов отрисовки
 	root.set_meta("prop_batches", PropBatcher.batch(props, PROP_BATCH_CELL, PROP_VIS_END))
 

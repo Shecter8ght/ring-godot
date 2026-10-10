@@ -23,6 +23,8 @@ var count: int = 0
 ## Пропсы, которые обыскиваются (data/loot.json → containers): {kind, pos, room}. Сами
 ## LootContainer ставит SectorBuilder — порядок и выбор детерминированы сидом, как и пропсы.
 var lootables: Array[Dictionary] = []
+## Свободная опора/пол возле пропа: {pos, room, table, yaw}. Не зависит от броска ящика.
+var loose_points: Array[Dictionary] = []
 var _room_id: String = ""
 var _rooms: Array = []
 ## Запретные прямоугольники в мировых XZ: проёмы в стенах полос и keepout-узлы сцены.
@@ -251,6 +253,7 @@ func _put_strip(id: String, ax: float, s: float, t: float, yaw_extra: float) -> 
 	_root.add_child(node)
 	_taken_world.append(foot)
 	count += 1
+	_loose_point(node, id, sz)
 	var loot := ItemDb.container(id)
 	if not loot.is_empty() and _rng.randf() < float(loot.chance):
 		lootables.append({"kind": id, "pos": node.position, "room": _room_id})
@@ -323,10 +326,36 @@ func _put(id: String, a: float, r: float, orient: String, variant: String = "", 
 	_root.add_child(node)
 	_taken.append(rect)
 	count += 1
+	_loose_point(node, id, sz)
 	var loot := ItemDb.container(id)
 	if not loot.is_empty() and _rng.randf() < float(loot.chance):
 		lootables.append({"kind": id, "pos": node.position, "room": _room_id})
 	return true
+
+
+func _loose_point(node: Node3D, kind: String, size: Vector3) -> void:
+	var offset: Vector3
+	match kind:
+		"desk":
+			offset = Vector3(0.38, size.y, 0.06)
+		"checkout":
+			offset = Vector3(-0.4, 0.94, 0.0)
+		"kiosk":
+			offset = Vector3(0.0, 1.1, 0.0)
+		"shelf_retail", "shelf_warehouse":
+			# Рассыпанные вещи только у части рядов; сид расстановки мебели не меняется.
+			if float(absi(hash(node.position)) % 1000) / 1000.0 >= float(Balance.LOOSE_LOOT.floor_points):
+				return
+			offset = Vector3(0.0, 0.0, size.z * 0.5 + 0.45)
+		_:
+			return
+	var point: Vector3 = node.transform * offset
+	if String(SectorBuilder.owner_of(_rooms, point).get("id", "")) != _room_id:
+		return
+	var theme: String = ItemDb.room_table(_room_id)
+	if theme == "":
+		theme = String(ItemDb.container(kind).get("table", "storage"))
+	loose_points.append({"pos": point, "room": _room_id, "table": theme, "yaw": node.rotation.y})
 
 
 ## Углы пропа — в своём помещении (его не перекрыла полоса) и вне запретных прямоугольников.

@@ -1,0 +1,81 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/loose_loot.tscn" id="1_0ox27"]
+[ext_resource type="Script" path="res://src/world/loose_loot.gd" id="2_wfpgk"]
+
+[node name="Zone 01LooseLoot" type="Node3D" unique_id=471878985]
+
+[node name="Found_00" type="Node3D" parent="." unique_id=53134723 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214.2, 0.7381, -127)
+script = ExtResource("2_wfpgk")
+table = "home"
+
+[node name="Found_01" type="Node3D" parent="." unique_id=2119734900 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -201.4, 0.8351, -127)
+script = ExtResource("2_wfpgk")
+table = "home"
+
+[node name="Found_02" type="Node3D" parent="." unique_id=732881200 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -165.4, 0.80439997, -110.2)
+script = ExtResource("2_wfpgk")
+table = "home"
+
+[node name="Found_03" type="Node3D" parent="." unique_id=1486823903 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -165.4, 0.7704, -81.4)
+script = ExtResource("2_wfpgk")
+table = "home"
+
+[node name="Found_04" type="Node3D" parent="." unique_id=825817465 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -227.2, 0.7709, -77.5)
+script = ExtResource("2_wfpgk")
+table = "home"
+
+[node name="Found_05" type="Node3D" parent="." unique_id=1243890129 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.3, 0.5213001, -69.6)
+script = ExtResource("2_wfpgk")
+
+[node name="Found_06" type="Node3D" parent="." unique_id=1515218398 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.3, 0.5213001, -66.4)
+script = ExtResource("2_wfpgk")
+
+[node name="Found_07" type="Node3D" parent="." unique_id=1524540870 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 0.39507145, -61.9)
+script = ExtResource("2_wfpgk")
+
+[node name="Found_08" type="Node3D" parent="." unique_id=1039688914 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214, 0.24523222, -68.3)
+script = ExtResource("2_wfpgk")
+
+[node name="Found_09" type="Node3D" parent="." unique_id=2018950868 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214, 0.3655032, -102.3)
+script = ExtResource("2_wfpgk")
+
+[node name="Found_10" type="Node3D" parent="." unique_id=1566007943 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.43848422, -157)
+script = ExtResource("2_wfpgk")
+table = "workshop"
+
+[node name="Found_11" type="Node3D" parent="." unique_id=118711756 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.40413207, -146.8)
+script = ExtResource("2_wfpgk")
+table = "workshop"
+
+[node name="Found_12" type="Node3D" parent="." unique_id=1282389973 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.48109692, -137.2)
+script = ExtResource("2_wfpgk")
+table = "workshop"
+
+[node name="Found_13" type="Node3D" parent="." unique_id=623101321 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.57289845, -127)
+script = ExtResource("2_wfpgk")
+table = "workshop"
+
+[node name="Found_14" type="Node3D" parent="." unique_id=1456301441 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.57224256, -117.4)
+script = ExtResource("2_wfpgk")
+table = "workshop"
+
+[node name="Found_15" type="Node3D" parent="." unique_id=1959213153 instance=ExtResource("1_0ox27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.4247529, -107.2)
+script = ExtResource("2_wfpgk")
+table = "workshop"
