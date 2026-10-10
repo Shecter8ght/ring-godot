@@ -910,7 +910,16 @@ func _set_scope(on: bool) -> void:
 ## увеличение zoom относительно основного вида. Окно — ровно на проекции окуляра.
 func _update_scope(zoom: float, illum: bool = false) -> void:
 	_scope_zoom = zoom
-	(_scope_view.material as ShaderMaterial).set_shader_parameter("illum", 1.0 if illum else 0.0)
+	var scope_mat := _scope_view.material as ShaderMaterial
+	scope_mat.set_shader_parameter("illum", 1.0 if illum else 0.0)
+	# люфт оружия → глаз сошёл с оси прицела: сдвиг картинки, тень с края, искажение
+	var lag_cfg: Dictionary = Balance.AIM_LAG
+	var lag_euler: Vector3 = Basis(_lag_q).get_euler()
+	var lag_k: float = 1.0 / deg_to_rad(float(lag_cfg.max_deg))
+	scope_mat.set_shader_parameter("lag", Vector2(clampf(-lag_euler.y * lag_k, -1.0, 1.0), clampf(lag_euler.x * lag_k, -1.0, 1.0)))
+	scope_mat.set_shader_parameter("lag_shift", float(lag_cfg.scope_shift))
+	scope_mat.set_shader_parameter("lag_shadow", float(lag_cfg.scope_shadow))
+	scope_mat.set_shader_parameter("lag_warp", float(lag_cfg.scope_warp))
 	var ocular: Vector3 = _vm_frame().to_global(_vm_frame().get_meta("ocular"))
 	# окуляр рисуется в ViewmodelSpace — на экране он больше (меньше) в масштаб пространства
 	var r := float(_vm_frame().get_meta("ocular_r")) * _vm_space.scale.x
@@ -993,12 +1002,22 @@ uniform vec2 sun_dir = vec2(0.0, -1.0);
 // подсветка центра сетки: 0 — выкл, 1 — горит красным
 uniform float illum = 0.0;
 uniform vec3 illum_color = vec3(1.0, 0.12, 0.06);
+// люфт: глаз ушёл с оси прицела (−1…1 по осям окна): картинка сдвигается, с края наползает тень,
+// искажение растёт («жидкое стекло»)
+uniform vec2 lag = vec2(0.0);
+uniform float lag_shift = 0.07;
+uniform float lag_shadow = 0.42;
+uniform float lag_warp = 0.3;
 
 void fragment() {
 	vec2 c = UV - 0.5;
 	float r = length(c) * 2.0;
 	// бочка: к краю картинка сжимается (прямые выгибаются наружу), центр чуть увеличен
-	vec2 w = c * (1.0 + barrel * r * r) / (1.0 + barrel);
+	float off_axis = length(lag);
+	float bar = barrel + lag_warp * off_axis;
+	vec2 w = c * (1.0 + bar * r * r) / (1.0 + bar);
+	// поле «плывёт» в сторону люфта, сильнее к краю
+	w += lag * lag_shift * (0.35 + r * r);
 	vec2 uv = 0.5 + w;
 	// аберрация: смещение каналов растёт квадратом радиуса (красный наружу, синий внутрь)
 	vec2 off = w * ca * r * r;
@@ -1050,6 +1069,9 @@ void fragment() {
 	col = mix(col, illum_color * 2.6, illum * dot_c);
 	col += illum_color * illum * 0.35 * exp(-length(c) * 60.0);
 	col *= smoothstep(1.0, 0.72, r);
+	// тень окуляра: тёмный серп с той стороны, куда ушёл глаз
+	float shade_r = length(c + lag * lag_shadow) * 2.0;
+	col *= mix(1.0, smoothstep(1.0, 0.62, shade_r), clamp(off_axis * 1.6, 0.0, 1.0));
 	COLOR = vec4(col, 1.0 - smoothstep(0.97, 1.0, r));
 }
 """

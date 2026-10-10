@@ -220,6 +220,20 @@ func _lag() -> void:
 	_check("люфт: догнало взгляд", _camera._lag_q.get_angle() < deg_to_rad(0.05))
 	Input.action_release("aim")
 	await get_tree().create_timer(0.4).timeout
+	# оптика: при люфте картинка в окуляре сдвигается, с края наползает тень
+	await _equip({"optic_primary": {"id": "optic_4x_01"}})
+	Input.action_press("aim")
+	await get_tree().create_timer(float(_player.spec().aim_time) + 0.6).timeout
+	await _shot("veras_lag_2_scope_still")
+	for i in range(6):
+		_camera._look_yaw -= deg_to_rad(0.5)
+		_camera._look_pitch += deg_to_rad(0.2)
+		await get_tree().process_frame
+	var scope_lag: Vector2 = (_camera._scope_view.material as ShaderMaterial).get_shader_parameter("lag")
+	_check("люфт: оптика получает смещение глаза %s" % scope_lag, scope_lag.length() > 0.3)
+	await _shot("veras_lag_3_scope_turning")
+	Input.action_release("aim")
+	await get_tree().create_timer(0.4).timeout
 
 
 ## Быстрая перезарядка (два быстрых R): свой клип, старый магазин виден отдельно и вылетает.
