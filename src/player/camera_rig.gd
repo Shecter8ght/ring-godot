@@ -24,6 +24,10 @@ var _shake: float = 0.0
 var _hurt: HurtFx
 ## толчок взгляда от попадания: (кивок, крен), рад; _punch_t — 1 → 0
 var _punch: Vector2 = Vector2.ZERO
+## Люфт оружия: где было направление взгляда кадр назад и на сколько оружие сейчас отстаёт (в осях камеры).
+var _lag_prev: Basis = Basis.IDENTITY
+var _lag_q: Quaternion = Quaternion.IDENTITY
+var _lag_ready: bool = false
 var _punch_t: float = 0.0
 var _hitmarker: Control
 ## Ранен: кровь по краям, блёклые цвета, стук сердца, звук глуше; лёжа — надпись с таймером.
@@ -695,6 +699,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		vt.basis = Basis(Vector3.RIGHT, flip * 0.05) * Basis(Vector3.FORWARD, pl.recoil_h() * 1.5) * vt.basis
 		vt.origin += bob + Vector3(0.0, flip * 0.004, kick_back * 0.028)
 		_viewmodel.transform = vt
+	_viewmodel.transform = _weapon_lag(delta, k) * _viewmodel.transform
 	if _viewmodel_rig:
 		if is_instance_valid(pl._weapon_rig):
 			_viewmodel_rig.synchronize_from(pl._weapon_rig)
@@ -756,6 +761,26 @@ func _aim_line(model: Node3D, sight: String, delta: float) -> Vector3:
 	_sight_k = move_toward(_sight_k, 1.0, delta / Balance.SIGHT_SWITCH_SEC)
 	_sight_pose = _sight_from.lerp(_sight_to, smoothstep(0.0, 1.0, _sight_k))
 	return _sight_pose
+
+
+## Люфт оружия: взгляд повернулся (мышь, отдача) — оружие на миг остаётся, где было, и догоняет
+## пружиной. Поворот — вокруг глаза, поэтому прицельная линия уходит с оси взгляда: метка коллиматора
+## смещается в окне, показываются стенки, мушка расходится с целиком. Только вид: пули летят по взгляду.
+## aim_k — доля прицеливания (у бедра люфт слабее, Balance.AIM_LAG.hip_k).
+func _weapon_lag(delta: float, aim_k: float) -> Transform3D:
+	var cfg: Dictionary = Balance.AIM_LAG
+	var now: Basis = _ads_cam.global_basis.orthonormalized()
+	if _lag_ready:
+		# прошлое направление взгляда в осях нынешней камеры — туда оружие «хочет» остаться
+		var back := Quaternion((now.inverse() * _lag_prev).orthonormalized())
+		_lag_q = (Quaternion.IDENTITY.slerp(back, float(cfg.share)) * _lag_q).normalized()
+	_lag_prev = now
+	_lag_ready = true
+	_lag_q = _lag_q.slerp(Quaternion.IDENTITY, 1.0 - exp(-float(cfg.follow) * delta))
+	var limit: float = deg_to_rad(float(cfg.max_deg))
+	if _lag_q.get_angle() > limit:
+		_lag_q = Quaternion(_lag_q.get_axis().normalized(), limit)
+	return Transform3D(Basis(Quaternion.IDENTITY.slerp(_lag_q, lerpf(float(cfg.hip_k), 1.0, aim_k))), Vector3.ZERO)
 
 
 ## Готовая поза основного прицела → поза дополнительного, независимо от осей исходной сцены.

@@ -61,6 +61,8 @@ func _ready() -> void:
 			await _cant()
 		elif part == "fast":
 			await _fast_reload()
+		elif part == "lag":
+			await _lag()
 		elif part == "check":
 			await _check_hold()
 		print("veras_shots: ошибок ", _failures)
@@ -194,6 +196,28 @@ func _cant() -> void:
 	_check("завал: второе нажатие — основной прицел", not _player.aim_cant)
 	await get_tree().create_timer(float(Balance.SIGHT_SWITCH_SEC) + 0.3).timeout
 	await _shot("veras_cant_3_back")
+	Input.action_release("aim")
+	await get_tree().create_timer(0.4).timeout
+
+
+## Люфт оружия в прицеле: взгляд резко повернулся — оружие на миг отстаёт (метка уходит из центра окна),
+## потом догоняет и снова стоит точно.
+func _lag() -> void:
+	await _equip({"optic_primary": {"id": "optic_rd_01"}})
+	Input.action_press("aim")
+	await get_tree().create_timer(float(_player.spec().aim_time) + 0.5).timeout
+	_check("люфт: в покое оружие стоит точно", _camera._lag_q.get_angle() < deg_to_rad(0.05))
+	await _shot("veras_lag_0_still")
+	var peak: float = 0.0
+	for i in range(6):
+		_camera._look_yaw -= deg_to_rad(1.2)
+		_camera._look_pitch += deg_to_rad(0.5)
+		await get_tree().process_frame
+		peak = maxf(peak, rad_to_deg(_camera._lag_q.get_angle()))
+	await _shot("veras_lag_1_turning")
+	_check("люфт: при повороте оружие отстаёт (%.2f°), но не больше предела" % peak, peak > 0.4 and peak <= float(Balance.AIM_LAG.max_deg) + 0.01)
+	await get_tree().create_timer(0.6).timeout
+	_check("люфт: догнало взгляд", _camera._lag_q.get_angle() < deg_to_rad(0.05))
 	Input.action_release("aim")
 	await get_tree().create_timer(0.4).timeout
 
