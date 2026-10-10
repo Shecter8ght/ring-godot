@@ -555,7 +555,8 @@ func _set_ads(on: bool, pl: Player) -> void:
 func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var wid := pl.weapon_id
 	var spec := pl.spec() if wid != "" else {}
-	var scoped := bool(spec.get("scoped", false))
+	# с завалом в оптику не смотрят: вид и чувствительность — как с открытым прицелом
+	var scoped := bool(spec.get("scoped", false)) and not pl.aim_cant
 	# без ПКМ (режим от первого лица) — широкий вид, оружие у бедра
 	var aim_t := pl.aim_progress()
 	_look.aim_k = aim_t if pl.aiming else 0.0
@@ -636,7 +637,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
 		(n as SpotLight3D).visible = Player.tac_on(pl.weapon_mods, n, "light")
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
-	var line: Vector3 = _aim_line(_viewmodel, String(spec.get("sight", "primary")), delta)
+	var line: Vector3 = _aim_line(_viewmodel, "cant" if pl.aim_cant else String(spec.get("sight", "primary")), delta)
 	var sx: float = line.x
 	var sh: float = line.y
 	var sroll: float = line.z
@@ -730,6 +731,10 @@ func _aim_line(model: Node3D, sight: String, delta: float) -> Vector3:
 	var primary: Vector3 = Vector3(0.0, float(model.get_meta("sight_h", 0.08)), 0.0)
 	var data: Dictionary = (model.get_meta("sights", {}) as Dictionary).get(sight, {})
 	var target: Vector3 = Vector3(float(data.get("x", primary.x)), float(data.get("h", primary.y)), float(data.get("roll", 0.0)))
+	if sight == "cant":
+		# с завалом: взгляд проходит правее и выше прицельной линии, оружие — затвором к глазам
+		var c: Dictionary = Balance.AIM_CANT
+		target = Vector3(-float(c.right), primary.y + float(c.up), deg_to_rad(float(c.roll_deg)))
 	if _sight_mode == "":
 		_sight_pose = primary
 		_sight_from = primary
@@ -798,7 +803,7 @@ func _ads_fov_tuned(pl: Player) -> float:
 		return 60.0
 	var spec := pl.spec()
 	# в убежище оружие в руках — для вида, характеристик нет
-	return Balance.SCOPE_MAIN_FOV if bool(spec.get("scoped", false)) else float(spec.get("ads_fov", 60.0))
+	return Balance.SCOPE_MAIN_FOV if bool(spec.get("scoped", false)) and not pl.aim_cant else float(spec.get("ads_fov", 60.0))
 
 
 ## Поле зрения, подобранное при опорном Balance.FPS_FOV у бедра (ads_fov ствола, оптика), — для
@@ -1279,7 +1284,9 @@ func _update_hud(pl: Player) -> void:
 		t += "   [%s]" % pl.ammo_check_text
 	if pl.loadout_mode:
 		t += "   · запасных маг. %d, россыпью %d" % [pl.spare_mags(), pl.loose_rounds()]
-	if (spec.sights as Array).size() > 1:
+	if pl.aim_cant:
+		t += "   [с завалом]"
+	elif (spec.sights as Array).size() > 1:
 		t += "   [%s]" % WeaponStats.sight_name(String(spec.sight), pl.weapon_entry()).to_lower()
 	if pl.light_on:
 		t += "   СВЕТ"

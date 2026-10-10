@@ -52,6 +52,9 @@ var light_on: bool = false
 var laser_on: bool = false
 ## Песочница: стволы по ключам (пресеты WeaponDb.sandbox()) — записи оружия.
 var sandbox_weapons: Dictionary = {}
+## Прицеливание «с завалом»: автомат повёрнут на 45° затвором к глазам (СКМ в прицеле, Balance.AIM_CANT).
+## Только у своего игрока и только вид и точность — на экземпляре оружия не хранится.
+var aim_cant: bool = false
 ## Тир убежища: ствол стойки тира (запись оружия; пусто — тира нет). Ключ его слота — RANGE_KEY.
 var range_weapon: Dictionary = {}
 const RANGE_KEY := "range"
@@ -1384,8 +1387,26 @@ func _toggle_tac(kind: String) -> void:
 
 ## O или СКМ от первого лица: основной / угловой / боковые прицелы. Прицеливание не
 ## сбрасывается — камера переводит линию прицеливания прямо (CameraRig, SIGHT_SWITCH_SEC).
+## Последняя ступень круга — «с завалом» (aim_cant): есть и у ствола с одним прицелом.
 func toggle_sight() -> void:
-	_toggle_sight()
+	if weapon_id == "":
+		return
+	var e := weapon_entry()
+	var sights := WeaponStats.sights_of(e)
+	if aim_cant:
+		# с завала — снова к основному прицелу
+		aim_cant = false
+		if sights.size() > 1 and _ws.has(weapon_slot):
+			_ws[weapon_slot].sight = String(sights[0])
+			_send_ws(weapon_slot)
+		_say(WeaponStats.sight_name(String(sights[0]), e) + " прицел")
+		Audio.play("sight_switch", global_position, -16.0)
+	elif sights.size() < 2 or WeaponStats.active_sight(e) == String(sights[sights.size() - 1]):
+		aim_cant = true
+		_say("С завалом: автомат на бок, огонь по точке ЛЦУ")
+		Audio.play("sight_switch", global_position, -16.0)
+	else:
+		_toggle_sight()
 
 
 func _toggle_sight() -> void:
@@ -1544,6 +1565,7 @@ func _switch(key: String, sound: bool = true) -> void:
 	if key == weapon_slot and weapon_id != "" and not _base_entry(key).is_empty():
 		return
 	cancel_weapon_action()
+	aim_cant = false
 	if weapon_slot != "" and _ws.has(weapon_slot):
 		_send_ws(weapon_slot)
 	if sound and weapon_id != "":
@@ -1635,7 +1657,9 @@ func _fire(spec: Dictionary) -> void:
 	var hip := float(spec.hip_spread)
 	var mult := hip
 	if ads and aiming:
-		mult = lerpf(hip, float(spec.ads_spread), aim_progress())
+		# с завалом целятся по точке ЛЦУ, не через прицел: точность — между прицельной и «от бедра»
+		var aimed: float = lerpf(float(spec.ads_spread), hip, float(Balance.AIM_CANT.spread_k)) if aim_cant else float(spec.ads_spread)
+		mult = lerpf(hip, aimed, aim_progress())
 	elif not ads:
 		# изометрия, от бедра: угловой коллиматор — навскидку точнее, крупная оптика мешает
 		if String(spec.sight) != "primary" and not bool(spec.scoped):

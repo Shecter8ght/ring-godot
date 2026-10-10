@@ -55,6 +55,10 @@ func _ready() -> void:
 			await _jam()
 		elif part == "states":
 			await _states()
+		elif part == "hand":
+			await _hand()
+		elif part == "cant":
+			await _cant()
 		print("veras_shots: ошибок ", _failures)
 		get_tree().quit(1 if _failures else 0)
 		return
@@ -117,6 +121,7 @@ func _ready() -> void:
 	await _grips()
 	await _jam()
 	await _states()
+	await _cant()
 	print("veras_shots: ошибок ", _failures)
 	get_tree().quit(1 if _failures else 0)
 
@@ -126,7 +131,10 @@ func _grips() -> void:
 	for pair: Array in [["varn_v1", "grip_vertical_01"], ["varn_v2", "grip_offset_01"]]:
 		await _equip({"underbarrel": {"id": pair[1]}, "muzzle": {"id": "muzzle_supp_545_01"}})
 		var vm := _camera._viewmodel as ViewmodelClips
-		_check(String(pair[0]) + ": набор клипов под рукоятку", vm != null and vm._set == String(pair[0]))
+		# наборы клипов под рукоятки в игру не внесены (позы кистей правит владелец): есть набор в модели —
+		# он берётся, нет — левая держит цевьё позади рукоятки
+		var has_set: bool = vm != null and vm._anim.has_animation("idle_" + String(pair[0]))
+		_check(String(pair[0]) + ": набор клипов — %s" % ("свой" if has_set else "нет, рука на цевье"), vm != null and vm._set == (String(pair[0]) if has_set else ""))
 		_check(String(pair[0]) + ": модель рукоятки из ассета", vm != null and vm.find_child(String(pair[0]), true, false) != null)
 		_check(String(pair[0]) + ": модель глушителя из ассета", vm != null and vm.find_child("supp_veras", true, false) != null)
 		await get_tree().create_timer(0.5).timeout
@@ -138,6 +146,50 @@ func _grips() -> void:
 	await _equip({"underbarrel": {"id": "grip_vertical_01", "slot": 0}})
 	await get_tree().create_timer(0.6).timeout
 	await _side("veras_varn_v1_slot0_side")
+
+
+## Левая кисть крупно: на цевье (без рукоятки) и на рукоятках — слева, снизу-слева и спереди.
+func _hand() -> void:
+	for pair: Array in [["bare", {}], ["varn_v1", {"underbarrel": {"id": "grip_vertical_01"}}], ["varn_v2", {"underbarrel": {"id": "grip_offset_01"}}]]:
+		await _equip(pair[1])
+		await get_tree().create_timer(0.5).timeout
+		await _side("veras_hand_%s_left" % pair[0], false, 0.16, 0.38)
+		await _side("veras_hand_%s_low" % pair[0], false, 0.16, 0.3, -0.3)
+		await _side("veras_hand_%s_right" % pair[0], true, 0.16, 0.38)
+
+
+## «С завалом»: СКМ в прицеле кладёт автомат на 45° затвором к глазам — и с одной оптикой на планке;
+## выстрел двигает затвор; следующее нажатие возвращает основной прицел.
+func _cant() -> void:
+	await _equip({"optic_primary": {"id": "optic_4x_01"}, "side_right": {"id": "tac_laser_01", "laser": true}})
+	await _set_rounds(30)
+	var vm := _camera._viewmodel as ViewmodelClips
+	Input.action_press("aim")
+	await get_tree().create_timer(float(_player.spec().aim_time) + 0.4).timeout
+	await _shot("veras_cant_0_scope")
+	_player.toggle_sight()
+	_check("завал: включается и с одним прицелом", _player.aim_cant)
+	await get_tree().create_timer(float(Balance.SIGHT_SWITCH_SEC) + 0.3).timeout
+	var roll: float = rad_to_deg(vm.global_basis.y.signed_angle_to(_eye.global_basis.y, _eye.global_basis.z))
+	_check("завал: автомат повёрнут на 45° (%.0f°)" % absf(roll), absf(absf(roll) - 45.0) < 4.0)
+	await _shot("veras_cant_1_on")
+	# затвор при выстреле: посреди хода он отведён
+	var rest: Vector3 = vm._weapon_skel.get_bone_rest(vm._bolt).origin
+	var far: float = 0.0
+	Input.action_press("fire")
+	for i in range(12):
+		await get_tree().process_frame
+		far = maxf(far, vm._weapon_skel.get_bone_pose_position(vm._bolt).distance_to(rest))
+	Input.action_release("fire")
+	_check("выстрел: затвор отходит (%.0f мм)" % (far * 1000.0), far > 0.03)
+	await _shot("veras_cant_2_fire")
+	await get_tree().create_timer(0.3).timeout
+	_player.toggle_sight()
+	_check("завал: второе нажатие — основной прицел", not _player.aim_cant)
+	await get_tree().create_timer(float(Balance.SIGHT_SWITCH_SEC) + 0.3).timeout
+	await _shot("veras_cant_3_back")
+	Input.action_release("aim")
+	await get_tree().create_timer(0.4).timeout
 
 
 ## Задержка: гильза торчит в окне, затвор недозакрыт; R — передёрнуть, гильза выпадает.
@@ -191,7 +243,7 @@ func _check(label: String, ok: bool) -> void:
 
 
 ## Снимок оружия в руках со стороны: слева (или справа — окно выброса) от стрелка.
-func _side(label: String, right: bool = false, forward: float = 0.0, distance: float = 0.62) -> void:
+func _side(label: String, right: bool = false, forward: float = 0.0, distance: float = 0.62, up: float = 0.12) -> void:
 	if not _only.is_empty() and not label in _only:
 		return
 	var t: Transform3D = _eye.global_transform
@@ -201,7 +253,7 @@ func _side(label: String, right: bool = false, forward: float = 0.0, distance: f
 	cam.near = 0.02
 	var k: float = 1.0 if right else -1.0
 	var target: Vector3 = t.origin - t.basis.z * (0.42 + forward) + t.basis.x * 0.13 - t.basis.y * 0.13
-	cam.look_at_from_position(target + t.basis.x * k * distance + t.basis.y * 0.12 - t.basis.z * 0.1, target, t.basis.y)
+	cam.look_at_from_position(target + t.basis.x * k * distance + t.basis.y * up - t.basis.z * 0.1, target, t.basis.y)
 	cam.current = true
 	await get_tree().process_frame
 	await _shot(label)

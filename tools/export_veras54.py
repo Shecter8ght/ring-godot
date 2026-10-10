@@ -16,7 +16,8 @@
   detail    — та же мировая без упрощения, текстуры 2048: veras54_detail.glb для конструктора оружия
               (вблизи); пишется и вместе с world.
 
-"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] [detail]
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips]
+  grips — добавить во вьюмодель наборы клипов под рукоятки ВАРН V1 / V2 (после правки поз владельцем)
 → assets/models/weapons/veras54/veras54_viewmodel.glb, veras54.glb, veras54.json (проверки)
 """
 from __future__ import annotations
@@ -36,7 +37,9 @@ OUT = ROOT / "assets/models/weapons/veras54"
 BASE = SRC / "VERAS54_Reload_Full_v05.blend"
 # v02: те же клипы с левой на рукоятке под цевьём (ВАРН V1 / V2) и устранение задержки (гильза в окне)
 SRC2 = SRC.parent / "Клипы v02 (Claude)"
-GRIPS = ("varn_v1", "varn_v2")
+# Позы кистей на рукоятках владелец правит сам (2026-10-10: «в игру пока не вноси»): наборы под
+# рукоятки запекаются только с аргументом grips; без него в игре левая держит цевьё позади рукоятки.
+GRIPS = ("varn_v1", "varn_v2") if "grips" in sys.argv else ()
 # клип в игре: (суффикс действий build_clips.py, последний кадр, файл с действиями; None — база сцены)
 CLIPS = {"reload_tactical": ("Tactical", 79, SRC / "VERAS54_Reload_Tactical_v04.blend"),
          "mag_check": ("Check", 104, SRC / "VERAS54_Mag_Check_v02.blend"),
@@ -399,6 +402,8 @@ def viewmodel() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(filepath=str(OUT / "veras54_viewmodel.glb"), export_format="GLB", export_yup=True,
                               export_animations=True, export_animation_mode="NLA_TRACKS", export_skins=True,
+                              # у основания большого пальца на вершину до 8 костей: с четырьмя перчатка там ломалась
+                              export_all_influences=True,
                               export_def_bones=False, export_force_sampling=True, export_materials="EXPORT",
                               export_image_format="AUTO", export_apply=False, export_cameras=False, export_lights=False)
     finish_materials(OUT / "veras54_viewmodel.glb")
