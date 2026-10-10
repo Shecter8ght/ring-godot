@@ -288,8 +288,7 @@ static func _magazine(root: Node3D, id: String, mag: Dictionary) -> void:
 	_cyl(root, Vector3(0, h * 0.5 + r, 0), r, l * 0.9, brass).rotation.z = PI * 0.5
 
 
-## Готовая модель снаряжения (tools/import_sketchfab.py → assets/zone01/models/sf_<имя>.glb) по
-## центру узла, как формы; нет файла — false (тогда строится из форм).
+## Границы всей видимой геометрии с трансформом корня: опора физической находки.
 static func bounds(root: Node3D) -> AABB:
 	var box: AABB = AABB()
 	var first: bool = true
@@ -306,6 +305,7 @@ static func bounds(root: Node3D) -> AABB:
 	return box
 
 
+## Готовая модель снаряжения по центру узла; нет файла — false (запасные формы).
 static func _scan(root: Node3D, name: String) -> bool:
 	return _scan_path(root, "res://assets/zone01/models/sf_%s.glb" % name)
 

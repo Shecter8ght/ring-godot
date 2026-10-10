@@ -20,6 +20,7 @@ func _run() -> void:
 	for id: String in Balance.VALUABLE_LOOT_VALUES:
 		var item: Dictionary = ItemDb.item(id)
 		check(id, ItemDb.value(id) > 0 and String(item.desc).length() > 50 and ItemDb.weight(id) > 0 and ResourceLoader.exists(String(item.model)) and ResourceLoader.exists("res://assets/icons/%s.png" % id))
+		check(id + " текстуры внутри модели", FileAccess.get_file_as_string(String(item.model) + ".import").contains("gltf/embedded_image_handling=2"))
 		var model: Node3D = ItemModels.build(id)
 		var bounds: AABB = ItemModels.bounds(model)
 		check(id + " сетка/метры", int(manifest[id].triangles) < 6600 and bounds.size.length() > 0.01 and bounds.size.length() < 1.8)
