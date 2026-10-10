@@ -13,6 +13,9 @@ static var pending_raid: bool = false
 ## Пришёл в лобби из убежища — рейд, который начнёт хост, будет со снаряжением профиля.
 ## Тесты сети сюда не заходят и остаются в песочнице.
 static var from_hideout: bool = false
+## Вещи, вынутые в буфер обмена с напарником (Trade): пока обмен не состоялся — здесь; игра закрылась
+## посреди обмена — при загрузке возвращаются в тайник.
+static var trade_hold: Array = []
 ## Путь к файлу (тесты подменяют, чтобы не портить настоящий профиль).
 static var path: String = PATH
 
@@ -117,6 +120,13 @@ static func ensure() -> void:
 		if profile_id == "":
 			profile_id = WeaponMark.new_id()
 		loadout_templates = d.get("loadout_templates", [])
+		# обмен оборвался (вылет, выход) — вещи из буфера обмена обратно в тайник
+		trade_hold = []
+		for held: Variant in d.get("trade_hold", []):
+			if held is Dictionary:
+				for key in ["x", "y", "r"]:
+					(held as Dictionary).erase(key)
+				ItemDb.add_to(stash, held, Vector2i.ZERO)
 		guest_campaigns = d.get("guest_campaigns", {})
 		contracts = d.get("contracts", {})
 		raid_history = d.get("raid_history", [])
@@ -207,7 +217,7 @@ static func save() -> bool:
 		"pocket": pocket, "trust": trust, "extractions": extractions, "floors_open": floors_open, "floor": floor,
 		"modules": modules, "hideout_media": hideout_media, "missions_active": missions_active, "missions_done": missions_done,
 		"quests": quests, "flags": flags, "unlocked_stock": unlocked_stock, "campaign_id": campaign_id, "profile_id": profile_id, "weapon_world": weapon_world, "guest_campaigns": guest_campaigns, "contracts": contracts, "loadout_templates": loadout_templates, "next_conditions": next_conditions,
-		"raid_history": raid_history, "story_recent": story_recent}, "  "))
+		"raid_history": raid_history, "story_recent": story_recent, "trade_hold": trade_hold}, "  "))
 	f.flush()
 	var error: Error = f.get_error()
 	f.close()

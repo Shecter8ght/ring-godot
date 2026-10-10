@@ -58,6 +58,9 @@ var _inv_sig: String = ""
 var _floor_items: Array[HideoutFloorItem] = []
 
 
+## Сколько держат «действие» рядом с напарником (обмен вещами начинается после Balance.TRADE.hold_sec).
+var _trade_hold: float = 0.0
+
 func _ready() -> void:
 	_apply_materials(self)
 	if Engine.is_editor_hint():
@@ -384,6 +387,26 @@ func _process(delta: float) -> void:
 			if d < best_d:
 				best = it
 				best_d = d
+	# напарник рядом (ближе любой станции) — подержать «действие»: обмен вещами
+	var mate: Player = null
+	var mate_d: float = Balance.TRADE.reach_m
+	for id: Variant in _others:
+		var other := _others[id] as Player
+		if other == null or not is_instance_valid(other) or not Trade.can_trade(other.peer_id):
+			continue
+		var d2 := other.global_position.distance_to(_player.global_position)
+		if d2 < mate_d:
+			mate_d = d2
+			mate = other
+	if mate != null and mate_d < best_d:
+		_prompt.visible = true
+		_prompt.text = "%s (держать) — обмен вещами: %s" % [PauseMenu.key_name("interact"), String(Net.player_names.get(mate.peer_id, "напарник"))]
+		_trade_hold = _trade_hold + get_process_delta_time() if Input.is_action_pressed("interact") else 0.0
+		if _trade_hold >= float(Balance.TRADE.hold_sec):
+			_trade_hold = 0.0
+			Trade.request(mate.peer_id)
+		return
+	_trade_hold = 0.0
 	if best == null:
 		return
 	# несколько рядом (кнопки пульта тира) — та, что под курсором, если курсор на одной из них

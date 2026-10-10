@@ -36,6 +36,7 @@ Pause="*res://src/ui/pause_menu.gd"
 Quests="*res://src/quests/quest_manager.gd"
 Contracts="*res://src/quests/contracts.gd"
 Chat="*res://src/net/chat.gd"
+Trade="*res://src/net/trade.gd"
 
 [debug]
 
