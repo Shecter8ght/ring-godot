@@ -13,6 +13,10 @@ extends LootContainer
 		_rebuild()
 ## -1 — общий шанс Balance.LOOSE_LOOT.chance. 1 — гарантированная находка.
 @export_range(-1.0, 1.0) var spawn_chance: float = -1.0
+## Вещь уронил игрок (магазин при быстрой перезарядке): лежит плашмя, повёрнута на lay_yaw; пришла
+## готовой от Raid (items, rolled), точка ничего не бросает сама.
+var dropped: bool = false
+var lay_yaw: float = 0.0
 
 
 func _ready() -> void:
@@ -74,11 +78,47 @@ func _build_visual(parent: Node3D) -> void:
 		id = String(items[0].id)
 	if id == "":
 		return
+	if dropped:
+		lay_item(parent, id, lay_yaw)
+		return
 	var model: Node3D = ItemModels.build(id)
 	parent.add_child(model)
 	var angles: Array = ItemDb.item(id).get("loot_rotation", [0, 0, 0])
 	model.rotation_degrees = Vector3(float(angles[0]), float(angles[1]), float(angles[2]))
 	var box: AABB = ItemModels.bounds(model)
 	model.position.y = -box.position.y + float(Balance.LOOSE_LOOT.surface_gap)
+	for node: Node in model.find_children("*", "GeometryInstance3D", true, false):
+		(node as GeometryInstance3D).visibility_range_end = float(Balance.LOOSE_LOOT.distance)
+
+
+## Куда падает вещь, выпавшая из рук игрока: рядом с ногами (Balance.DROPPED_MAG.radius), на пол под
+## этой точкой (ступени, склон, край перекрытия).
+static func floor_near(pl: Player) -> Vector3:
+	var cfg: Dictionary = Balance.DROPPED_MAG
+	var angle: float = randf() * TAU
+	var pos: Vector3 = pl.global_position + Vector3(sin(angle), 0.0, cos(angle)) * randf_range(float(cfg.radius[0]), float(cfg.radius[1]))
+	var query := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 0.8, pos + Vector3.DOWN * 2.5, Hitscan.LAYER_WORLD)
+	var hit: Dictionary = pl.get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.position if not hit.is_empty() else pos
+
+
+## Положить вещь на пол плашмя (самой тонкой стороной вверх) и повернуть на yaw: уроненный магазин
+## лежит как упал, а не стоит столбиком. Магазин — тот, что в оружии (ItemModels.weapon_magazine).
+static func lay_item(parent: Node3D, id: String, yaw: float) -> void:
+	var holder := Node3D.new()
+	holder.name = "Laid"
+	holder.rotation.y = yaw
+	parent.add_child(holder)
+	var model: Node3D = ItemModels.weapon_magazine(id) if not WeaponDb.magazine(id).is_empty() else null
+	if model == null:
+		model = ItemModels.build(id)
+	holder.add_child(model)
+	var size: Vector3 = ItemModels.bounds(model).size
+	if size.x <= size.y and size.x <= size.z:
+		model.rotation.z = PI * 0.5
+	elif size.z <= size.y:
+		model.rotation.x = PI * 0.5
+	var box: AABB = ItemModels.bounds(model)
+	model.position -= Vector3(box.get_center().x, box.position.y - float(Balance.LOOSE_LOOT.surface_gap), box.get_center().z)
 	for node: Node in model.find_children("*", "GeometryInstance3D", true, false):
 		(node as GeometryInstance3D).visibility_range_end = float(Balance.LOOSE_LOOT.distance)

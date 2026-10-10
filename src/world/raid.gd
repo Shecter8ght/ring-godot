@@ -19,6 +19,7 @@ signal kill_credited
 static var current: Raid
 
 const LOOT_SCENE := preload("res://scenes/world/loot_container.tscn")
+const LOOSE_SCENE := preload("res://scenes/world/loose_loot.tscn")
 const SUPPLY_DROP_NAME := "Редкий груз снабжения"
 ## Приписка к точке у того, кого дотащили раненым (итог рейда, хроника).
 const CARRIED_SUFFIX := " (вынесли раненым)"
@@ -993,20 +994,21 @@ func _sort(peer_id: int, where: String) -> void:
 
 ## Выбросить предмет целиком (с обвесом, магазином, износом) — мешком на землю перед собой;
 ## where — "backpack" / "pocket" (индекс) или "equip:<слот>".
-func request_drop_entry(where: String, idx: int) -> void:
+## loose — уронить под ноги саму вещь (сброшенный магазин): лежит моделью, а не мешком.
+func request_drop_entry(where: String, idx: int, loose: bool = false) -> void:
 	if _is_host():
-		_drop_entry(multiplayer.get_unique_id(), where, idx)
+		_drop_entry(multiplayer.get_unique_id(), where, idx, loose)
 	else:
-		_rpc_drop_entry.rpc_id(1, where, idx)
+		_rpc_drop_entry.rpc_id(1, where, idx, loose)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_drop_entry(where: String, idx: int) -> void:
+func _rpc_drop_entry(where: String, idx: int, loose: bool) -> void:
 	if multiplayer.is_server():
-		_drop_entry(multiplayer.get_remote_sender_id(), where, idx)
+		_drop_entry(multiplayer.get_remote_sender_id(), where, idx, loose)
 
 
-func _drop_entry(peer_id: int, where: String, idx: int) -> void:
+func _drop_entry(peer_id: int, where: String, idx: int, loose: bool = false) -> void:
 	_cancel_op(peer_id)
 	var pl := player_of(peer_id)
 	if pl == null or not pl.is_alive():
@@ -1014,6 +1016,9 @@ func _drop_entry(peer_id: int, where: String, idx: int) -> void:
 	pl.inventory.spilled = []
 	var e := pl.inventory.take_entry(where, idx)
 	if e.is_empty():
+		return
+	if loose and where != "equip:backpack":
+		spawn_loose(pl, e)
 		return
 	var fwd := Vector3(sin(pl.body_yaw()), 0.0, cos(pl.body_yaw()))
 	# бросил рюкзак — с ним и то, что не влезло в карманы
@@ -1218,7 +1223,7 @@ func _reload(peer_id: int, slot: String, state: Dictionary) -> void:
 		return
 	var r := pl.inventory.reload_slot(slot, state)
 	if not (r[1] as Dictionary).is_empty():
-		spawn_drop(pl.global_position, DROP_NAME, [r[1]], LootContainer.Look.BAG)
+		spawn_loose(pl, r[1])
 
 
 func _weapon_state(peer_id: int, slot: String, state: Dictionary) -> void:
@@ -1865,6 +1870,18 @@ func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.
 		_drops.add_child(_make_drop(data))
 
 
+## Хост: вещь упала под ноги игроку и лежит сама по себе (сброшенный магазин) — рядом с ногами, на
+## полу, повёрнута как упала. Не мешок: издалека не видно, найдёшь — подберёшь (F).
+func spawn_loose(pl: Player, entry: Dictionary) -> void:
+	var data := {"name": "Drop_%d" % _drop_count, "pos": LooseLoot.floor_near(pl), "display": ItemDb.item_name(String(entry.id)), "items": [entry], "look": int(LootContainer.Look.NONE),
+		"toss": Vector3.UP * float(Balance.DROPPED_MAG.fall), "fall_sec": 0.0, "loose": true, "yaw": randf() * TAU}
+	_drop_count += 1
+	if _drop_spawner:
+		_drop_spawner.spawn(data)
+	else:
+		_drops.add_child(_make_drop(data))
+
+
 ## Хост: ближайший мешок «Выброшено» в Balance.DROP_MERGE_M от pos — добавить в него list
 ## (сетка ящика растёт, ничего не теряется). Нет такого — false.
 func _merge_drop(pos: Vector3, list: Array) -> bool:
@@ -1889,7 +1906,11 @@ func _merge_drop(pos: Vector3, list: Array) -> bool:
 
 
 func _make_drop(data: Dictionary) -> Node:
-	var c := LOOT_SCENE.instantiate() as LootContainer
+	var loose: bool = bool(data.get("loose", false))
+	var c := (LOOSE_SCENE if loose else LOOT_SCENE).instantiate() as LootContainer
+	if loose:
+		(c as LooseLoot).dropped = true
+		(c as LooseLoot).lay_yaw = float(data.get("yaw", 0.0))
 	c.name = String(data.name)
 	c.position = data.pos
 	c.display_name = String(data.display)

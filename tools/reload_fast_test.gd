@@ -1,7 +1,7 @@
 extends Node
 ## Перезарядка и проверка магазина со снаряжением (ВЕРАС-54): одно R — обычная смена, старый магазин в
 ## рюкзаке; два быстрых R — быстрая: короче в Balance.RELOAD_FAST.time_k раз, старый магазин лежит на
-## земле в мешке «Выброшено»; второе R позже окна — обычная; держать R — проверка: магазин остаётся в
+## земле под ногами — сам магазин (LooseLoot), а не мешок, и подбирается обратно с теми же патронами; второе R позже окна — обычная; держать R — проверка: магазин остаётся в
 ## руке, пока держат (Player.mag_inspect), перезарядка не начинается; отпустили — убран.
 ## tools/godot.cmd --headless res://tools/reload_fast_test.tscn
 
@@ -52,6 +52,19 @@ func _ready() -> void:
 	_check("быстрая: в оружии полный магазин", _me.ammo == 30, str(_me.ammo))
 	_check("быстрая: старого магазина в рюкзаке нет", not _mag_rounds().has(12), str(_mag_rounds()))
 	_check("быстрая: старый магазин лежит на земле", _dropped().has(12), str(_dropped()))
+	var lying: LooseLoot = _lying()
+	_check("быстрая: на земле сам магазин, а не мешок", lying != null and lying.dropped and lying.look == LootContainer.Look.NONE)
+	if lying:
+		await get_tree().create_timer(float(Balance.CRATE_TOSS_SEC) + 0.2).timeout
+		var flat: Vector3 = lying.global_position - _me.global_position
+		_check("быстрая: магазин под ногами (%.2f м), на полу" % Vector2(flat.x, flat.z).length(), Vector2(flat.x, flat.z).length() <= float(Balance.DROPPED_MAG.radius[1]) + 0.05 and absf(flat.y) < 0.3, str(flat))
+		var box: AABB = ItemModels.bounds(lying._vis)
+		_check("быстрая: лежит плашмя моделью магазина (%.0f × %.0f × %.0f мм)" % [box.size.x * 1000.0, box.size.y * 1000.0, box.size.z * 1000.0],
+			box.size.y < 0.06 and maxf(box.size.x, box.size.z) > 0.08, str(box))
+		_check("быстрая: подсказка — подобрать магазин", lying.can_use() and lying.prompt().begins_with("подобрать"), lying.prompt())
+		lying.request_use()
+		await get_tree().create_timer(0.2).timeout
+		_check("подобрал: магазин с теми же 12 патронами снова в рюкзаке, на земле пусто", _mag_rounds().has(12) and _dropped().is_empty(), str(_mag_rounds()))
 
 	# --- второе R позже окна — перезарядка остаётся обычной
 	_arm(12, [30])
@@ -118,7 +131,7 @@ func _ready() -> void:
 func _arm(rounds: int, spare: Array) -> void:
 	for n: Node in get_tree().get_nodes_in_group("loot_containers"):
 		var c := n as LootContainer
-		if c and c.display_name == Raid.DROP_NAME:
+		if c and (c.display_name == Raid.DROP_NAME or (c is LooseLoot and (c as LooseLoot).dropped)):
 			c.queue_free()
 	var rng := RandomNumberGenerator.new()
 	var entry: Dictionary = WeaponDb.bare_weapon(ID, rng, [100, 100])
@@ -166,12 +179,21 @@ func _mag_rounds() -> Array:
 	return out
 
 
-## Остатки в магазинах, лежащих на земле в мешках «Выброшено».
+## Сброшенный магазин, лежащий на земле сам по себе.
+func _lying() -> LooseLoot:
+	for n: Node in get_tree().get_nodes_in_group("loot_containers"):
+		var c := n as LooseLoot
+		if c != null and c.dropped and not c.is_queued_for_deletion() and not c.items.is_empty():
+			return c
+	return null
+
+
+## Остатки в магазинах, лежащих на земле (сами по себе или в мешках «Выброшено»).
 func _dropped() -> Array:
 	var out: Array = []
 	for n: Node in get_tree().get_nodes_in_group("loot_containers"):
 		var c := n as LootContainer
-		if c == null or c.is_queued_for_deletion() or c.display_name != Raid.DROP_NAME:
+		if c == null or c.is_queued_for_deletion() or not (c.display_name == Raid.DROP_NAME or (c is LooseLoot and (c as LooseLoot).dropped)):
 			continue
 		for it: Dictionary in c.items:
 			if it.has("rounds"):

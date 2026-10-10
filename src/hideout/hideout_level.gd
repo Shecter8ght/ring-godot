@@ -54,6 +54,8 @@ var _toast: Label
 var _toast_t: float = 0.0
 ## Каким профиль был, когда его в последний раз переписали в руки игроку (или из рук в профиль).
 var _inv_sig: String = ""
+## Сброшенные магазины на полу (HideoutFloorItem): в профиле их нет, пока не подобраны.
+var _floor_items: Array[HideoutFloorItem] = []
 
 
 func _ready() -> void:
@@ -134,6 +136,7 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	if Engine.is_editor_hint():
 		return
+	_floor_to_stash()
 	if get_tree().node_added.is_connected(_on_node_added):
 		get_tree().node_added.disconnect(_on_node_added)
 
@@ -280,6 +283,44 @@ func request_reload(slot: String, state: Dictionary) -> void:
 	if not out.is_empty():
 		ItemDb.add_to(Profile.stash, out, Profile.stash_grid())
 	_to_profile()
+
+
+## Быстрая перезарядка: старый магазин — из рюкзака на пол, лежать моделью магазина (как в рейде).
+## Подобрать — F; не подобранное при уходе из убежища возвращается в тайник.
+func request_drop_entry(where: String, idx: int, _loose: bool = false) -> void:
+	var entry: Dictionary = _player.inventory.take_entry(where, idx)
+	if entry.is_empty():
+		return
+	_to_profile()
+	var item := HideoutFloorItem.new()
+	item.entry = entry
+	item.lay_yaw = randf() * TAU
+	add_child(item)
+	item.global_position = LooseLoot.floor_near(_player)
+	item.picked.connect(_pick_floor.bind(item))
+	_floor_items.append(item)
+
+
+func _pick_floor(item: HideoutFloorItem) -> void:
+	if not item in _floor_items:
+		return
+	_floor_items.erase(item)
+	if _player.inventory.add_entry(item.entry.duplicate(true)) <= 0:
+		ItemDb.add_to(Profile.stash, item.entry.duplicate(true), Profile.stash_grid())
+		notify("В рюкзаке нет места — убрано в тайник")
+	_to_profile()
+	Audio.play("pick_ammo", item.global_position, -8.0)
+	item.queue_free()
+
+
+## Уходим из убежища: что осталось лежать на полу — в тайник.
+func _floor_to_stash() -> void:
+	if _floor_items.is_empty():
+		return
+	for item: HideoutFloorItem in _floor_items:
+		ItemDb.add_to(Profile.stash, item.entry.duplicate(true), Profile.stash_grid())
+	_floor_items.clear()
+	Profile.save()
 
 
 ## Патроны в магазине, износ, прицел, фонари — в профиль.

@@ -288,6 +288,43 @@ static func _magazine(root: Node3D, id: String, mag: Dictionary) -> void:
 	_cyl(root, Vector3(0, h * 0.5 + r, 0), r, l * 0.9, brass).rotation.z = PI * 0.5
 
 
+## Магазин таким, каким он стоит в оружии: из модели ствола, к которому он штатный (или хотя бы
+## подходит), остаётся одна деталь магазина. Центр — в начале узла. Нет такой детали — null.
+static func weapon_magazine(mag_id: String) -> Node3D:
+	var owner: String = ""
+	for wid: Variant in WeaponDb.ids("weapons"):
+		if WeaponDb.default_mag(String(wid)) == mag_id:
+			owner = String(wid)
+			break
+		if owner == "" and WeaponDb.mag_fits(String(wid), mag_id):
+			owner = String(wid)
+	if owner == "":
+		return null
+	var gun: Node3D = WeaponModels.build(owner, {}, 0, 100.0, mag_id)
+	var parts: Array[Node3D] = []
+	var poses: Array[Transform3D] = []
+	for node: Node in gun.find_children("*", "Node3D", true, false):
+		var part: Node3D = node as Node3D
+		if (String(part.get_meta("part", "")) == "mag" and part.visible) or part.name == "MagLook":
+			parts.append(part)
+			poses.append(WeaponModels.between(gun, part))
+	if parts.is_empty():
+		gun.free()
+		return null
+	var root := Node3D.new()
+	root.name = "Item_" + mag_id
+	for i: int in range(parts.size()):
+		parts[i].get_parent().remove_child(parts[i])
+		parts[i].owner = null
+		root.add_child(parts[i])
+		parts[i].transform = poses[i]
+	gun.free()
+	var center: Vector3 = bounds(root).get_center()
+	for child: Node in root.get_children():
+		(child as Node3D).position -= center
+	return root
+
+
 ## Границы всей видимой геометрии с трансформом корня: опора физической находки.
 static func bounds(root: Node3D) -> AABB:
 	var box: AABB = AABB()

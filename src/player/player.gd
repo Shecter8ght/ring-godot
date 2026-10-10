@@ -1242,7 +1242,8 @@ func _try_fast_reload() -> void:
 	_say("Быстрая перезарядка — старый магазин на землю")
 
 
-## Быстрая перезарядка закончена: старый магазин (хост уже положил его в рюкзак) — на землю.
+## Быстрая перезарядка закончена: старый магазин (хост уже положил его в рюкзак) — на землю,
+## лежать под ногами магазином (Raid.spawn_loose; в убежище — HideoutLevel.request_drop_entry).
 func _drop_old_mag() -> void:
 	if not _reload_fast:
 		return
@@ -1256,7 +1257,7 @@ func _drop_old_mag() -> void:
 	for i in range(inventory.items.size()):
 		var it: Dictionary = inventory.items[i]
 		if String(it.get("id", "")) == String(_reload_old_mag.id) and it.has("rounds") and int(it.rounds) == int(_reload_old_mag.rounds):
-			h.call("request_drop_entry", "backpack", i)
+			h.call("request_drop_entry", "backpack", i, true)
 			return
 
 
