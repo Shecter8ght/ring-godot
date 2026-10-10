@@ -343,8 +343,8 @@ func _inspect_turn(pl: Player, delta: float) -> void:
 	var rot := Basis(along, deg_to_rad(float(limits[0])) * _turn.x) * Basis(right, deg_to_rad(float(limits[1])) * _turn.y)
 	var pivot: Vector3 = hand.origin
 	var turn := Transform3D(rot, pivot - rot * pivot)
-	sk.set_bone_global_pose(_arm_bones[2], turn * hand)
-	sk.set_bone_global_pose(_mag_bone, turn * mag)
+	_pose_bone(sk, _arm_bones[2], turn * hand)
+	_pose_bone(sk, _mag_bone, turn * mag)
 
 
 ## jam_hold — задержка не устранена: затвор стоит недозакрытым на зажатой гильзе (config.jam_open — доля хода).
@@ -413,12 +413,21 @@ func _support_hand(weight: float) -> void:
 		_arm_saved.append([sk.get_bone_pose_position(bone), sk.get_bone_pose_rotation(bone)])
 	var up_rot := Basis(Quaternion((fore.origin - up.origin).normalized(), (elbow - up.origin).normalized()))
 	var new_up := Transform3D(up_rot * up.basis, up.origin)
-	sk.set_bone_global_pose(_arm_bones[0], new_up)
+	_pose_bone(sk, _arm_bones[0], new_up)
 	var fore_now: Transform3D = new_up * (up.affine_inverse() * fore)
 	# предплечье уже повёрнуто вместе с плечом — доворачиваем от нового направления, а не от клипового
 	var fore_rot := Basis(Quaternion((up_rot * (hand.origin - fore.origin)).normalized(), (wrist - elbow).normalized()))
-	sk.set_bone_global_pose(_arm_bones[1], Transform3D(fore_rot * fore_now.basis, elbow))
-	sk.set_bone_global_pose(_arm_bones[2], Transform3D(hand.basis, wrist))
+	_pose_bone(sk, _arm_bones[1], Transform3D(fore_rot * fore_now.basis, elbow))
+	_pose_bone(sk, _arm_bones[2], Transform3D(hand.basis, wrist))
+
+
+## Поставить кость в позу в осях скелета, не трогая её масштаб. set_bone_global_pose раскладывает позу
+## на положение, поворот и масштаб; масштаб выходит с погрешностью, клипы его не пишут и не возвращают —
+## погрешность копилась кадр за кадром всё быстрее, и левая кисть на рукоятке раздувалась.
+func _pose_bone(sk: Skeleton3D, bone: int, pose: Transform3D) -> void:
+	var keep: Vector3 = sk.get_bone_pose_scale(bone)
+	sk.set_bone_global_pose(bone, pose)
+	sk.set_bone_pose_scale(bone, keep)
 
 
 ## Вернуть кости левой руки к позе клипа (до прошлой поправки) — перед шагом клипа.
