@@ -108,9 +108,26 @@ func _run() -> void:
 		check("ровно один общий груз", crates.size() == 1 and bool(Raid.current.supply_state.dropped))
 		if not crates.is_empty():
 			var crate: LootContainer = crates[0] as LootContainer
-			check("груз содержит 4–6 ценных вещей", crate.items.size() >= 4 and crate.items.size() <= 6)
+			# груз — боевое (Balance.SUPPLY_LOOT): ствол высокого тира, магазины и обвес к нему, броня
+			var guns: int = 0
+			var mags: int = 0
+			var mods: int = 0
+			var armor: int = 0
 			for e: Dictionary in crate.items:
-				check("редкий FIR без патрона вызова", ItemDb.value(String(e.id)) >= int(Balance.SUPPLY_SIGNAL.minimum_value) and bool(e.fir) and String(e.id) != "supply_signal")
+				var id: String = String(e.id)
+				if WeaponDb.is_weapon(id):
+					guns += 1
+					check("ствол из груза — высокого тира, в хорошем состоянии, с полным магазином", int(ItemDb.item(id).get("tier", 1)) >= int(Balance.SUPPLY_LOOT.weapon_tier)
+						and float(e.dur) >= float(Balance.SUPPLY_LOOT.dur[0]) and int((e.mag as Dictionary).rounds) > 0)
+				elif not WeaponDb.magazine(id).is_empty():
+					mags += 1
+				elif not WeaponDb.attachment(id).is_empty():
+					mods += 1
+				elif not WeaponDb.vest(id).is_empty() or not WeaponDb.helmet(id).is_empty():
+					armor += 1
+				check("всё найдено в рейде, без патрона вызова и без ценностей на продажу", bool(e.fir) and id != "supply_signal" and not Balance.VALUABLE_LOOT_VALUES.has(id))
+			check("в грузе ствол, обвес к нему и броня", guns >= 1 and mods >= 1 and armor >= 1)
+			print("  груз: стволов %d, магазинов %d, обвеса %d, брони %d, всего %d" % [guns, mags, mods, armor, crate.items.size()])
 	print("valuable_loot_test: failures=", fails)
 	get_tree().quit(1 if fails else 0)
 

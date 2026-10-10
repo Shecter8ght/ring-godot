@@ -138,6 +138,10 @@ tools/godot.cmd --headless res://tools/coop_raid_test.tscn -- host   # кооп 
                                                               # напарников видно, дверь ТЦ, открытая клиентом, открыта у всех,
                                                               # генератор встал у хоста — c2 чинит, у всех снова весь свет,
                                                               # хост и c1 в зоне эвакуации, c2 нет — общий отсчёт, c2 не успел
+tools/godot.cmd --headless res://tools/coop_items_test.tscn -- host [сцена] [two] # + «-- client …» через 3 с (порт 17791): гость в рейде снаряжает
+                                                              # магазин, сортирует, меняет ствол, клавиши 1/2; гость вышел — рейд не ждёт (COOP_ITEMS_PEERS=3 — двое гостей)
+tools/godot.cmd --disable-vsync res://tools/cpu_probe.tscn  # во что упирается процессор на уровне: выключает системы по очереди
+tools/godot.cmd --headless res://tools/mesh_census.tscn     # какие модели дают треугольники на уровне
 tools/godot.cmd --headless res://tools/mags_test.tscn      # магазины: ПОЛН/ПУСТ и оценка после проверки, снарядить/разрядить поштучно (MagOps), нет патронов — текст, разрядка в клетки ящика и буфер 3×3, плиты по одной, вопрос о буфере, держать R
 tools/godot.cmd res://tools/sight_nvg_shots.tscn             # коллиматор в ПНВ, ЛЦУ: точка без ПНВ, луч в ПНВ; снимки sight_nvg_* (SHOTS_LOW=1 — качество «низко»)
 tools/godot.cmd --headless res://tools/evac_test.tscn      # эвакуация группой: общий отсчёт 3 мин, ждём напарника, сброс, все в зоне — короткий, раненого выносят, не успел — без добычи

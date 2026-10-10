@@ -10,6 +10,8 @@ extends CharacterBody3D
 enum Stance { STAND, CROUCH, PRONE }
 
 @export var peer_id: int = 1
+## Ник над головой (только у чужих игроков в сети).
+var _name_tag: Label3D
 
 var stance: Stance = Stance.STAND
 var aiming: bool = false
@@ -255,6 +257,8 @@ func _ready() -> void:
 		listener.make_current()
 	if Net.is_networked():
 		_setup_sync()
+		if not is_local():
+			_make_name_tag()
 	# чит «бессмертие» из настроек — на каждый рейд (хосту — когда узел у него уже есть)
 	if is_local() and Settings.god:
 		set_god.call_deferred(true)
@@ -755,7 +759,41 @@ func set_first_person(on: bool) -> void:
 			(mi as MeshInstance3D).layers = layer
 
 
-func _process(_delta: float) -> void:
+## Ник над головой напарника (убежище и рейд): виден сквозь стены — своих не путать с чужими.
+func _make_name_tag() -> void:
+	_name_tag = Label3D.new()
+	_name_tag.name = "NameTag"
+	_name_tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_name_tag.font_size = int(Balance.NAME_TAG.font)
+	_name_tag.pixel_size = float(Balance.NAME_TAG.pixel)
+	_name_tag.modulate = Color(1.0, 0.9, 0.7)
+	_name_tag.outline_size = 8
+	_name_tag.no_depth_test = true
+	_name_tag.position = Vector3(0, float(Balance.NAME_TAG.height[0]), 0)
+	add_child(_name_tag)
+
+
+## Ник держится над головой в любой стойке; лежит раненым — помечен; ушёл или убит — пропадает.
+func _tick_name_tag(delta: float) -> void:
+	var nick := String(Net.player_names.get(peer_id, "Игрок %d" % peer_id))
+	if health.downed:
+		nick += "  ✚"
+	if _name_tag.text != nick:
+		_name_tag.text = nick
+	_name_tag.visible = health.alive and visible
+	var h: Array = Balance.NAME_TAG.height
+	var want: float = float(h[2]) if stance == Stance.PRONE or health.downed else (float(h[1]) if stance == Stance.CROUCH else float(h[0]))
+	_name_tag.position.y = lerpf(_name_tag.position.y, want, clampf(delta * 8.0, 0.0, 1.0))
+	# вдали подпись не мельчает до нечитаемой: растёт с расстоянием до камеры
+	var cam := get_viewport().get_camera_3d()
+	if cam:
+		var d := cam.global_position.distance_to(_name_tag.global_position)
+		_name_tag.pixel_size = float(Balance.NAME_TAG.pixel) * clampf(d / float(Balance.NAME_TAG.near), 1.0, float(Balance.NAME_TAG.grow_max))
+
+
+func _process(delta: float) -> void:
+	if _name_tag:
+		_tick_name_tag(delta)
 	# эвакуирован (решает хост, видят все) — уходит из мира
 	# ушёл из рейда (эвакуирован / не успел) — уходит из мира; дальше его здесь нет (раненый, которого
 	# вынесли, не «умирает» у всех на виду, если у хоста его кровотечение ещё идёт)
@@ -1888,7 +1926,7 @@ func _fire(spec: Dictionary) -> void:
 	var marked := false
 	last_shot_ms = Time.get_ticks_msec()
 	var bullet := {"pen": float(spec.pen), "armor_dmg": float(spec.armor_dmg), "src": {"kind": "player", "peer": peer_id},
-		"falloff": spec.get("falloff", []), "point_blank": spec.get("point_blank", [])}
+		"falloff": spec.get("falloff", []), "point_blank": spec.get("point_blank", []), "overkill": float(spec.damage) >= Balance.OVERKILL_DAMAGE}
 	var hit_person := false
 	for i in range(int(spec.pellets)):
 		var hit := Hitscan.fire(get_world_3d(), from, dir, spread, float(spec.range_m), mask, float(spec.damage), exclude, _rng, -1, bullet)

@@ -40,6 +40,11 @@ var evac_left: float = -1.0
 var evac_wait: Array = []
 ## Не успели к эвакуации: peer_id -> точка, через которую ушла группа (вернулись без добычи).
 var stranded: Dictionary = {}
+## Пропал из рейда посреди рейда: отключился, вылетел или ушёл в убежище через меню — {peer: true}.
+## Группа его не ждёт у эвакуации, и рейд может закончиться без него; вещи остаются мешком.
+var gone: Dictionary = {}
+var _seen_in_raid: Dictionary = {}
+var _gone_poll: float = 0.0
 var _all_in_t: float = 0.0
 ## Погибшие: peer_id -> true (хост — по сигналу Health).
 var dead: Dictionary = {}
@@ -115,6 +120,10 @@ func _ready() -> void:
 	add_child(ui)
 	if Net.is_networked():
 		_setup_sync()
+		# отключился — сразу, пока его узел ещё в дереве (вещи — мешком); остальное ловит _check_gone
+		multiplayer.peer_disconnected.connect(func(id: int) -> void:
+			if _is_host() and participants.has(id) and not gone.has(id):
+				_peer_gone(id))
 		_drop_spawner = MultiplayerSpawner.new()
 		_drop_spawner.name = "DropSpawner"
 		add_child(_drop_spawner)
@@ -136,7 +145,7 @@ func _setup_sync() -> void:
 	sync.name = "Sync"
 	sync.replication_interval = 0.1
 	var config := SceneReplicationConfig.new()
-	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded", ".:supply_state"]:
+	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded", ".:supply_state", ".:gone"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -225,9 +234,62 @@ func extraction_block_reason(ext: ExtractionPoint) -> String:
 func _physics_process(delta: float) -> void:
 	if not _is_host() or over:
 		return
+	_check_gone(delta)
 	_check_drags()
 	_tick_ops(delta)
 	_update_evac(delta)
+
+
+## Хост: кто из участников пропал (нет соединения или его сцена уже не рейд) — раз в полсекунды.
+## «Был в рейде» запоминается: пока гость ещё грузит уровень, его сцена тоже не «raid».
+func _check_gone(delta: float) -> void:
+	if not Net.is_networked():
+		return
+	_gone_poll -= delta
+	if _gone_poll > 0.0:
+		return
+	_gone_poll = 0.5
+	var me: int = multiplayer.get_unique_id()
+	var peers: PackedInt32Array = multiplayer.get_peers()
+	for raw: Variant in participants.keys():
+		var peer: int = int(raw)
+		if peer == me or gone.has(peer):
+			continue
+		if not peer in peers:
+			_peer_gone(peer)
+		elif Net.visible_in(peer, "raid"):
+			_seen_in_raid[peer] = true
+		elif _seen_in_raid.has(peer) and String(Net.peer_scene.get(peer, "")) != "loading":
+			_peer_gone(peer)
+
+
+## Участник пропал: что нёс — мешком на месте (свои подберут), сам он больше не в рейде.
+func _peer_gone(peer_id: int) -> void:
+	var g := gone.duplicate()
+	g[peer_id] = true
+	gone = g
+	_cancel_op(peer_id)
+	var who := String(participants.get(peer_id, "Игрок"))
+	var pl := player_of(peer_id)
+	if pl and not has_left(peer_id) and not dead.has(peer_id):
+		if pl.is_alive() and not pl.inventory.items.is_empty():
+			spawn_drop(pl.global_position, "Вещи: " + who, pl.inventory.take_all(), LootContainer.Look.BAG)
+		var d := drags.duplicate()
+		d.erase(peer_id)
+		drags = d
+		_clear_drag_of(peer_id)
+	if pl:
+		pl.remove_from_group("players")
+		if not pl.is_queued_for_deletion():
+			pl.queue_free()
+	print("raid: участник пропал peer=", peer_id)
+	Net.broadcast_scene(self, &"_rpc_notify_all", ["%s вышел из игры — его вещи остались мешком" % who])
+	_check_over()
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_notify_all(text: String) -> void:
+	notify(text)
 
 
 ## Открытая зона эвакуации, в которой стоит точка p (null — ни в какой).
@@ -246,7 +308,7 @@ func _update_evac(delta: float) -> void:
 	var others: Array[Player] = []
 	for node in get_tree().get_nodes_in_group("players"):
 		var pl := node as Player
-		if pl == null or not pl.is_alive() or has_left(pl.peer_id):
+		if pl == null or not pl.is_alive() or has_left(pl.peer_id) or gone.has(pl.peer_id) or pl.is_queued_for_deletion():
 			continue
 		var ext := open_zone_at(pl.global_position)
 		# раненый сам не эвакуируется — только если его дотащили или он лежит в зоне рядом со своими
@@ -504,7 +566,7 @@ func _check_over() -> void:
 	if participants.is_empty():
 		return
 	for peer in participants:
-		if not has_left(int(peer)) and not dead.has(peer):
+		if not has_left(int(peer)) and not dead.has(peer) and not gone.has(peer):
 			return
 	over = true
 	if recovery != null:
@@ -568,6 +630,26 @@ func _rpc_item_op(kind: String, role: String, idx: int, path: NodePath, ammo: St
 		_item_op(multiplayer.get_remote_sender_id(), kind, role, idx, path, ammo, src, side)
 
 
+## Хост: игрок peer_id для просьбы what (снарядить, сортировать, надеть…) — или null с отказом. Отказ
+## пишется в журнал хоста и строкой тому, кто просил: «ничего не происходит» молча больше не бывает
+## (по журналу после игры видно, почему хост не выполнил просьбу).
+func _actor(peer_id: int, what: String) -> Player:
+	var pl := player_of(peer_id)
+	var why := ""
+	if pl == null:
+		why = "хост не нашёл твоего персонажа"
+	elif not pl.is_alive():
+		why = "у хоста ты числишься убитым"
+	elif has_left(peer_id) or gone.has(peer_id):
+		why = "у хоста ты числишься ушедшим из рейда"
+	if why == "":
+		return pl
+	print("raid: отказ peer=%d «%s» — %s (участники %s, убиты %s, ушли %s/%s/%s)" % [peer_id, what, why, str(participants.keys()), str(dead.keys()),
+		str(extracted.keys()), str(stranded.keys()), str(gone.keys())])
+	_tell(peer_id, "Не выполнено (%s): %s" % [what, why])
+	return null
+
+
 ## Прервать свою операцию (закрыл окно, взялся за другое): что сделано — остаётся.
 func request_cancel_op() -> void:
 	if _is_host():
@@ -589,8 +671,8 @@ func _cancel_op(peer_id: int) -> void:
 
 
 func _item_op(peer_id: int, kind: String, role: String, idx: int, path: NodePath, ammo: String, src: String, side: String) -> void:
-	var pl := player_of(peer_id)
-	if pl == null or not pl.is_alive() or has_left(peer_id):
+	var pl := _actor(peer_id, "магазин / плиты")
+	if pl == null:
 		return
 	_cancel_op(peer_id)
 	var c := _near_container(pl, path) if not path.is_empty() else null
@@ -784,8 +866,8 @@ func _rpc_equip_from(src: String, idx: int, path: NodePath, want: String) -> voi
 
 
 func _equip_from(peer_id: int, src: String, idx: int, path: NodePath, want: String = "") -> void:
-	var pl := player_of(peer_id)
-	if pl == null or not pl.is_alive():
+	var pl := _actor(peer_id, "надеть")
+	if pl == null:
 		return
 	_cancel_op(peer_id)
 	var inv := pl.inventory
@@ -846,8 +928,8 @@ func _rpc_fit_grid(src: String, si: int, dst: String, di: int, path: NodePath) -
 
 
 func _fit_grid(peer_id: int, src: String, si: int, dst: String, di: int, path: NodePath) -> void:
-	var pl := player_of(peer_id)
-	if pl == null or not pl.is_alive():
+	var pl := _actor(peer_id, "вставить")
+	if pl == null:
 		return
 	_cancel_op(peer_id)
 	var inv := pl.inventory
@@ -960,8 +1042,8 @@ func _rpc_unequip(slot: String, x: int, y: int, r: bool) -> void:
 
 func _unequip(peer_id: int, slot: String, x: int, y: int, r: bool) -> void:
 	_cancel_op(peer_id)
-	var pl := player_of(peer_id)
-	if pl == null or not pl.is_alive():
+	var pl := _actor(peer_id, "снять")
+	if pl == null:
 		return
 	if pl.inventory.unequip(slot, x, y, r):
 		Audio.play("item_drop", pl.global_position, -10.0)
@@ -985,8 +1067,8 @@ func _rpc_sort(where: String) -> void:
 
 func _sort(peer_id: int, where: String) -> void:
 	_cancel_op(peer_id)
-	var pl := player_of(peer_id)
-	if pl == null or not pl.is_alive():
+	var pl := _actor(peer_id, "сортировка")
+	if pl == null:
 		return
 	if not pl.inventory.sort_grid(where) and peer_id == multiplayer.get_unique_id():
 		notify("Не разложить — сначала освободи место")
@@ -1075,8 +1157,8 @@ func _rpc_grid_move(src: String, idx: int, dst: String, x: int, y: int, r: bool)
 
 func _grid_move(peer_id: int, src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
 	_cancel_op(peer_id)
-	var pl := player_of(peer_id)
-	if pl and pl.is_alive():
+	var pl := _actor(peer_id, "переложить")
+	if pl:
 		if pl.inventory.move_between(src, idx, dst, x, y, r):
 			Audio.play("item_move", pl.global_position, -10.0)
 
@@ -1601,19 +1683,79 @@ func _tick_supply(delta: float) -> void:
 
 ## Ценные вещи без сигнальных патронов: вызов не позволяет бесконечно размножать вызовы.
 func _supply_loot() -> Array:
-	var pool: Array[String] = []
-	for id: String in Balance.VALUABLE_LOOT_VALUES:
-		if id not in ["signal_launcher", "supply_signal"] and int(Balance.VALUABLE_LOOT_VALUES[id]) >= int(Balance.SUPPLY_SIGNAL.minimum_value):
-			pool.append(id)
+	# груз снабжения — то, что помогает в бою (Balance.SUPPLY_LOOT): готовые стволы высокого тира в
+	# хорошем состоянии, к каждому — снаряжённые магазины, лучший патрон калибра и обвес, который на
+	# него встаёт; броня с плитами, шлем, медицина, гранаты. Ценностей на продажу в нём нет.
+	var spec: Dictionary = Balance.SUPPLY_LOOT
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.randomize()
-	pool.shuffle()
 	var result: Array = []
-	var count: int = rng.randi_range(int(Balance.SUPPLY_SIGNAL.loot_count[0]), int(Balance.SUPPLY_SIGNAL.loot_count[1]))
-	for i: int in range(mini(count, pool.size())):
-		var entry: Dictionary = ItemDb.make(pool[i], 1)
+	var taken: Array[String] = []
+	for i: int in range(rng.randi_range(int(spec.weapons[0]), int(spec.weapons[1]))):
+		var pid: String = WeaponDb.pick("kind=preset;min_tier=%d" % int(spec.weapon_tier), rng)
+		var weapon: Dictionary = WeaponDb.make_weapon(pid.trim_prefix("preset:"), rng, spec.dur)
+		if weapon.is_empty() or String(weapon.id) in taken:
+			continue
+		taken.append(String(weapon.id))
+		result.append(weapon)
+		var wid: String = String(weapon.id)
+		var caliber: String = String(WeaponDb.weapon(wid).caliber)
+		# лучший патрон калибра — по пробитию
+		var ammo_id: String = WeaponDb.default_ammo(caliber)
+		for aid: Variant in WeaponDb.ids("ammo"):
+			var a: Dictionary = WeaponDb.ammo(String(aid))
+			if String(a.get("caliber", "")) == caliber and int(a.get("pen", 0)) > int(WeaponDb.ammo(ammo_id).get("pen", 0)):
+				ammo_id = String(aid)
+		if weapon.get("mag") is Dictionary:
+			(weapon.mag as Dictionary)["ammo"] = ammo_id
+		var mag_id: String = String((weapon.get("mag", {}) as Dictionary).get("id", ""))
+		var cap: int = int(WeaponDb.magazine(mag_id).get("capacity", 0))
+		if mag_id != "":
+			for k: int in range(int(spec.mags)):
+				result.append(WeaponDb.make_mag(mag_id, ammo_id, cap))
+		var rounds: int = maxi(cap, int(WeaponDb.capacity(weapon))) * int(spec.ammo_mags)
+		var st: int = maxi(ItemDb.stack(ammo_id), 1)
+		while rounds > 0:
+			result.append(ItemDb.make(ammo_id, mini(rounds, st)))
+			rounds -= st
+		# обвес под этот ствол: по одному каждого вида, которого на нём ещё нет (прицел, дульное, цевьё)
+		var have: Array[String] = []
+		for m: Variant in weapon.get("mods", {}):
+			have.append(WeaponBuilder.tab_of(WeaponDb.mod_id(weapon.mods[m])))
+		var by_tab: Dictionary = {}
+		for att: Variant in WeaponDb.ids("attachments"):
+			var aid2: String = String(att)
+			var tab: String = WeaponBuilder.tab_of(aid2)
+			if tab in have or not tab in ["optic", "muzzle", "fore"] or int(ItemDb.item(aid2).get("tier", 1)) < int(spec.mod_tier):
+				continue
+			if WeaponDb.free_mount_for(weapon, aid2) == "":
+				continue
+			if not by_tab.has(tab):
+				by_tab[tab] = []
+			(by_tab[tab] as Array).append(aid2)
+		var tabs: Array = by_tab.keys()
+		tabs.shuffle()
+		for t: int in range(mini(int(spec.mods), tabs.size())):
+			var pool: Array = by_tab[tabs[t]]
+			result.append(ItemDb.make(String(pool[rng.randi() % pool.size()]), 1))
+	# броня: плитоносец с плитами того же уровня и шлем
+	var vest_id: String = WeaponDb.pick("kind=vest;min_tier=%d" % int(spec.armor_tier), rng)
+	var plate_id: String = WeaponDb.pick("kind=plate;min_tier=%d" % int(spec.armor_tier), rng)
+	if vest_id != "":
+		var plates: Dictionary = {}
+		for side: Variant in WeaponDb.vest(vest_id).get("plates", []):
+			if plate_id != "":
+				plates[String(side)] = plate_id
+		result.append(WeaponDb.make_vest(vest_id, plates))
+	var helmet_id: String = WeaponDb.pick("kind=helmet;min_tier=%d" % int(spec.armor_tier), rng)
+	if helmet_id != "":
+		result.append(ItemDb.make(helmet_id, 1))
+	for pair: Array in spec.extras:
+		var n: int = rng.randi_range(int(pair[1]), int(pair[2]))
+		if n > 0:
+			result.append(ItemDb.make(String(pair[0]), n))
+	for entry: Dictionary in result:
 		entry["fir"] = true
-		result.append(entry)
 	return result
 
 
@@ -2119,6 +2261,8 @@ func _update_summary(me: Player) -> void:
 			lines.append("%s — не успел к эвакуации, вернулся без добычи" % who)
 		elif dead.has(peer):
 			lines.append("%s — погиб, рюкзак остался в рейде" % who)
+		elif gone.has(peer):
+			lines.append("%s — вышел из игры, вещи остались в рейде" % who)
 		else:
 			lines.append("%s — ещё в рейде" % who)
 	lines.append("")

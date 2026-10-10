@@ -3017,7 +3017,7 @@
     "accuracy": 1,
     "ricochet": 0.1,
     "frag": 0,
-    "damage": 130,
+    "damage": 220,
     "pen": 80,
     "armor_dmg": 80,
     "velocity": 880
@@ -3048,7 +3048,7 @@
     "accuracy": 1,
     "ricochet": 0.1,
     "frag": 0,
-    "damage": 125,
+    "damage": 200,
     "pen": 95,
     "armor_dmg": 92,
     "velocity": 890

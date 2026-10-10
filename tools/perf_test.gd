@@ -35,7 +35,7 @@ func _ready() -> void:
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	player.health.hp = 1e9
 	print("perf: %s" % scene)
-	print("  %-20s %-6s %7s %8s %8s %10s" % ["точка", "режим", "FPS", "draw", "объектов", "треуг."])
+	print("  %-20s %-6s %7s %8s %8s %10s %8s %8s" % ["точка", "режим", "FPS", "draw", "объектов", "треуг.", "скрипты", "физика"])
 	for spot in SPOTS:
 		player.global_position = SectorBuilder.polar(float(spot[1]), float(spot[2])) + Vector3(0, 0.05, 0)
 		var yaw := deg_to_rad(float(spot[3]))
@@ -46,7 +46,7 @@ func _ready() -> void:
 				Input.action_press("aim")
 			await _frames(WARM_FRAMES)
 			var r := await _measure()
-			print("  %-20s %-6s %7.1f %8d %8d %10d" % [spot[0], mode, r.fps, r.draw, r.objects, r.prims])
+			print("  %-20s %-6s %7.1f %8d %8d %10d %6.2fмс %6.2fмс" % [spot[0], mode, r.fps, r.draw, r.objects, r.prims, r.proc, r.phys])
 			Input.action_release("aim")
 			await _frames(10)
 	get_tree().quit(0)
@@ -57,13 +57,19 @@ func _measure() -> Dictionary:
 	var draw := 0
 	var objects := 0
 	var prims := 0
+	# время кадра на процессоре: обработка узлов (скрипты, анимация) и физика — видно, во что упирается
+	var proc := 0.0
+	var phys := 0.0
 	for i in range(MEASURE_FRAMES):
 		await get_tree().process_frame
+		proc += Performance.get_monitor(Performance.TIME_PROCESS)
+		phys += Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)
 		draw += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		objects += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME)
 		prims += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 	var sec := float(Time.get_ticks_usec() - t0) / 1e6
-	return {"fps": MEASURE_FRAMES / sec, "draw": draw / MEASURE_FRAMES, "objects": objects / MEASURE_FRAMES, "prims": prims / MEASURE_FRAMES}
+	return {"fps": MEASURE_FRAMES / sec, "draw": draw / MEASURE_FRAMES, "objects": objects / MEASURE_FRAMES, "prims": prims / MEASURE_FRAMES,
+		"proc": proc / MEASURE_FRAMES * 1000.0, "phys": phys / MEASURE_FRAMES * 1000.0}
 
 
 func _frames(n: int) -> void:

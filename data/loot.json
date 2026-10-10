@@ -636,7 +636,7 @@
    "entries": [
     [
      "medkit",
-     3,
+     2,
      [
       1,
       2
@@ -651,19 +651,19 @@
      ]
     ],
     [
-     "pick:kind=preset;tags=MILITARY;tier=3",
-     1.2,
+     "pick:kind=preset;tags=MILITARY;min_tier=3",
+     3.0,
      [
       1,
       1
      ],
      {
       "dur": [
-       60,
+       75,
        100
       ],
       "rounds": [
-       0.5,
+       1.0,
        1.0
       ]
      }
@@ -712,7 +712,7 @@
     ],
     [
      "pick:kind=mod;tags=MILITARY;min_tier=2",
-     2,
+     3.5,
      [
       1,
       1
@@ -720,7 +720,7 @@
     ],
     [
      "pick:kind=mag;tags=MILITARY;min_tier=2",
-     1.5,
+     2.5,
      [
       1,
       1
@@ -744,26 +744,10 @@
     ],
     [
      "flare",
-     2,
+     1,
      [
       2,
       3
-     ]
-    ],
-    [
-     "water",
-     2,
-     [
-      2,
-      4
-     ]
-    ],
-    [
-     "canned",
-     2,
-     [
-      2,
-      4
      ]
     ]
    ]

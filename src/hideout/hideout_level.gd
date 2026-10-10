@@ -178,17 +178,7 @@ func _sync_others() -> void:
 		p.global_position = _spawn_for(id)
 		if Net.is_host() and has_node("Gameplay/SpawnPoints") and not id in _already_here:
 			_assign_spawn.rpc_id(id,int(_spawn_slots[id]))
-		# над головой — ник
-		var tag := Label3D.new()
-		tag.text = String(Net.player_names.get(id, "Игрок %d" % id))
-		tag.position = Vector3(0, 2.15, 0)
-		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		tag.font_size = 40
-		tag.pixel_size = 0.004
-		tag.modulate = Color(1.0, 0.9, 0.7)
-		tag.outline_size = 8
-		tag.no_depth_test = true
-		p.add_child(tag)
+		# ник над головой игрок ставит себе сам (Player._make_name_tag) — и здесь, и в рейде
 		_others[id] = p
 
 

@@ -111,7 +111,10 @@ func take_damage(amount: float, from: Vector3, zone: String = "", at: Vector3 = 
 	hp = maxf(0.0, hp - amount)
 	damaged.emit(amount, from)
 	if hp <= 0.0:
-		if can_down and downs < Balance.DOWN_MAX:
+		# крупный калибр (пуля с пометкой overkill — .50 BMG), снявший за раз весь запас здоровья, — не
+		# «ранен и отстреливается», а убит; игроку оставлен шанс: он сначала падает раненым
+		var overkill := not always_down_first and bool(bullet.get("overkill", false)) and amount >= max_hp
+		if can_down and downs < Balance.DOWN_MAX and not overkill:
 			_go_down()
 		else:
 			_die()

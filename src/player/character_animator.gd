@@ -36,6 +36,14 @@ var _downed_clip: String = ""
 var _downed_lay: bool = false
 var _downed_fire: bool = false
 var _dead: bool = false
+## Дальность: отбрасывает ли тени и рисуется ли (см. _tick_lod).
+var _lod_t: float = 0.0
+var _lod_shadows: bool = true
+var _lod_shown: bool = true
+var _lod_ik: bool = true
+var _lod_skip: int = 1
+var _lod_acc: float = 0.0
+var _lod_frame: int = 0
 
 
 func _ready() -> void:
@@ -71,8 +79,73 @@ func _ready() -> void:
 	_play("unarmed_idle")
 
 
+## Дальний персонаж дешевле (Balance.CHARACTER_LOD): модель подробная (170 тыс. треугольников), а солнце
+## рисует тени на сотни метров — два десятка мародёров по всей карте давали миллионы треугольников в
+## каждом проходе теней. Дальше shadows_m персонаж теней не отбрасывает, дальше hide_m — не рисуется.
+## Процессор: дальше ik_m руки не подгоняются к оружию и стенам (IK с лучами физики), дальше anim_m[0]
+## клип считается через кадр, дальше anim_m[1] — раз в четыре кадра (вдали этого не видно).
+## Проверка — раз в every секунд, у каждого в свой момент; своё тело игрока не трогаем.
+func _tick_lod(delta: float) -> void:
+	_lod_t -= delta
+	if _lod_t > 0.0:
+		return
+	var lod: Dictionary = Balance.CHARACTER_LOD
+	_lod_t = float(lod.every) * randf_range(0.8, 1.2)
+	if _actor is Player and (_actor as Player).is_local():
+		return
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	var d: float = cam.global_position.distance_to(_actor.global_position)
+	# запас на возврат: на границе тень не мигает
+	var keep: float = float(lod.hysteresis)
+	var shadows: bool = d < float(lod.shadows_m) - (keep if not _lod_shadows else 0.0)
+	var shown: bool = d < float(lod.hide_m) - (keep if not _lod_shown else 0.0)
+	if shown != _lod_shown:
+		_lod_shown = shown
+		_model.visible = shown
+	var ik: bool = d < float(lod.ik_m)
+	if ik != _lod_ik and not _dead:
+		_lod_ik = ik
+		if _support:
+			_support.active = ik
+		if _collision_ik:
+			_collision_ik.active = ik
+	var steps: Array = lod.anim_m
+	var skip: int = 4 if d > float(steps[1]) else (2 if d > float(steps[0]) else 1)
+	if skip != _lod_skip:
+		_lod_skip = skip
+		# вдали клип двигаем сами, реже; вблизи — снова каждый кадр
+		_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL if skip > 1 else AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
+		if skip == 1 and _lod_acc > 0.0:
+			_player.advance(_lod_acc)
+			_lod_acc = 0.0
+	# пока теней нет — проходим каждый раз: оружие в руках могли сменить, новая модель тоже без тени
+	if shadows == _lod_shadows and shadows:
+		return
+	_lod_shadows = shadows
+	for n: Node in _actor.find_children("*", "GeometryInstance3D", true, false):
+		var gi: GeometryInstance3D = n as GeometryInstance3D
+		if shadows:
+			if gi.has_meta("lod_cast"):
+				gi.cast_shadow = int(gi.get_meta("lod_cast")) as GeometryInstance3D.ShadowCastingSetting
+				gi.remove_meta("lod_cast")
+		elif gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+			gi.set_meta("lod_cast", int(gi.cast_shadow))
+			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+
 func _process(delta: float) -> void:
 	if _player == null or delta <= 0.0:
+		return
+	_tick_lod(delta)
+	if _lod_skip > 1:
+		_lod_acc += delta
+		_lod_frame += 1
+		if _lod_frame % _lod_skip == 0:
+			_player.advance(_lod_acc)
+			_lod_acc = 0.0
+	if _dead:
 		return
 	var travel: Vector3 = _actor.global_position - _last_position
 	_last_position = _actor.global_position
@@ -274,7 +347,8 @@ func die(clip: String) -> void:
 	# мёртвая рука цевьё не держит
 	if _support:
 		_support.influence = 0.0
-	set_process(false)
+	# обработка остаётся ради дальности (_tick_lod): тело вдали тоже перестаёт отбрасывать тень, а клип
+	# смерти вдали доигрывается реже; остальное мёртвому не нужно (см. начало _process)
 
 
 ## Клип смерти: from — откуда стреляли (мир), zone — куда попали (Health.last_zone),

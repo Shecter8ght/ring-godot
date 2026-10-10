@@ -56,6 +56,11 @@ const PLAYER_TURN_SPEED := 12.0
 ## выбора сглажена за speed_smooth_sec, с (иначе на мониторе 144+ клип скачет каждый кадр);
 ## с автоматом от sprint_from, м/с, — спринт (бег игрока 5.2, сглаженная скорость к ней снизу).
 ## Модель опущена под стойку, м: присед на месте, ходьба вприсядку (у клипа таз выше), лёжа.
+## Дальние персонажи (мародёры, чужие отряды, напарники): дальше shadows_m от камеры не отбрасывают
+## тень, дальше hide_m не рисуются (ИИ и звук работают как прежде); дальше ik_m руки не подгоняются к
+## оружию и стенам, дальше anim_m[0] клип считается через кадр, дальше anim_m[1] — раз в четыре кадра;
+## every — как часто проверять, с; hysteresis — запас в метрах на возврат, чтобы тень не мигала.
+const CHARACTER_LOD := {"shadows_m": 55.0, "hide_m": 320.0, "ik_m": 35.0, "anim_m": [45.0, 100.0], "every": 0.4, "hysteresis": 6.0}
 const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "sprint_from": 4.8, "blend_sec": 0.16, "prone_hold_sec": 1.0, "prone_aim_hold_sec": 0.3, "hurt_below": 0.35, "support_blend_sec": 0.15, "speed_smooth_sec": 0.1}
 
 # --- Капсула по стойкам: высота, м ---
@@ -175,6 +180,9 @@ const TRADER_CATALOG_MULT := [1.3, 1.7, 2.2, 2.8, 3.5]
 const TRADER_CONSUMABLE_K := 0.4
 const TRADER_MOD_BUY_MULT := 1.3
 const TRADER_SELL_MULT := 0.55
+## Ник над головой напарника: высота над землёй стоя / сидя / лёжа, размер шрифта и «пикселя»; дальше
+## near метров подпись растёт с расстоянием (не больше чем в grow_max раз) — читается и через двор.
+const NAME_TAG := {"height": [2.1, 1.55, 0.75], "font": 40, "pixel": 0.004, "near": 12.0, "grow_max": 6.0}
 ## Покупка расходников: «+» у патронов прибавляет по столько (магазин); больше стольких стопок за раз не взять.
 const TRADER_AMMO_STEP := 30
 const TRADER_QTY_STACKS := 10
@@ -408,6 +416,9 @@ const RISK_PAY_BONUS := 0.05
 ## шлема, граната ближе GRENADE_LETHAL_M, добили лежащего (кончился запас DOWN_HP — 1–3
 ## попадания), истёк кровью, третье ранение за рейд (больше DOWN_MAX).
 const DOWN_HP := 30.0
+## Пуля с уроном от стольких единиц (.50 BMG) убивает мародёра сразу, если за раз сняла всё его здоровье
+## (после брони): он не ложится раненым и не отстреливается. На игроков не действует.
+const OVERKILL_DAMAGE := 180.0
 ## До смерти от кровотечения, с: первое ранение, второе.
 const DOWN_BLEED_SEC := [60.0, 35.0]
 const DOWN_MAX := 2
@@ -3187,4 +3198,10 @@ const VALUABLE_LOOT := {
 }
 const VALUABLE_LOOT_CHANCE := {"electronics": 0.24, "office": 0.14, "server_rack": 0.32, "components": 0.18, "home": 0.1, "security": 0.22, "sport": 0.18, "workshop": 0.26, "storage": 0.14, "pmc": 0.22, "pharmacy": 0.28, "resident": 0.15, "tools": 0.2, "grocery": 0.22, "kiosk": 0.12, "shelf": 0.14, "marauder": 0.06, "supply_drop": 0.6}
 const SUPPLY_SIGNAL := {"delay": 45.0, "altitude": 170.0, "speed": 70.0, "flight": 18.0, "drop_height": 40.0, "fall_sec": 8.0, "roof_check": 180.0, "ground_check": 4.0, "clear_radius": 3.5, "site_half": 1.0, "site_height": 0.5, "terrain_tolerance": 0.15, "normal_min": 0.85, "flare_height": 65.0, "flare_sec": 18.0, "loot_count": [4, 6], "minimum_value": 28000, "noise_m": 180.0}
+## Что лежит в грузе, вызванном сигналом: боевое, а не ценности на продажу. weapons — сколько готовых
+## стволов (сборки тира weapon_tier и выше, состояние dur %), к каждому mags снаряжённых магазинов и
+## патронов ещё на ammo_mags магазинов (лучший по пробитию патрон калибра), mods деталей обвеса тира
+## mod_tier и выше, которые на него встают; броня и шлем тира armor_tier и выше; extras — [id, от, до].
+const SUPPLY_LOOT := {"weapons": [1, 2], "weapon_tier": 3, "dur": [85, 100], "mags": 3, "ammo_mags": 3, "mods": 2, "mod_tier": 2,
+	"armor_tier": 3, "extras": [["medkit", 1, 2], ["painkillers", 1, 2], ["grenade", 2, 3]]}
 const SUPPLY_PLANE_SOUND := {"db": 12.0, "unit": 60.0, "max": 600.0}
