@@ -2,7 +2,9 @@ extends Node
 ## Чужие отряды (RivalRaids): в тестовом запуске сами не появляются; отряд входит, обыскивает
 ## контейнеры (после него в них меньше), идёт к выходу и уходит с добычей — память состава это
 ## помнит; два чужих отряда воюют между собой и с мародёрами, внутри отряда — нет; отряд, выбитый
-## игроком, записан за игроком. Печатает [ok]/[FAIL] и итог.
+## игроком, записан за игроком. Правила мира — как для игроков: выход за рубильником — сначала щёлкают
+## рубильник; выход по карте-ключу — сначала подбирают карту (на карте её больше нет, лежит в сумке);
+## запертая на ключ дверь без ключа не открывается. Печатает [ok]/[FAIL] и итог.
 ## tools/godot.cmd --headless res://tools/rivals_test.tscn
 
 var _fails: int = 0
@@ -41,13 +43,17 @@ func _ready() -> void:
 	await _loot_and_leave(exits)
 	await _fights()
 	await _wiped_by_player()
+	Engine.time_scale = 6.0
+	await _switch_exit(exits)
+	await _key_exit(exits)
 	Engine.time_scale = 1.0
 	_finish()
 
 
 ## Отряд входит у комнаты с добычей, грабит, уходит через выход.
 func _loot_and_leave(exits: Array) -> void:
-	var exit: Dictionary = exits[0]
+	var free: Array = exits.filter(func(e: Dictionary) -> bool: return String(e.key) == "" and String(e.switch) == "")
+	var exit: Dictionary = free[0] if not free.is_empty() else exits[0]
 	var at: Vector3 = _container_near(exit.pos)
 	var before: int = _loot_left()
 	var s: RivalSquad = _rivals.enter(RivalRoster.squads()[0], at, exit.pos)
@@ -56,6 +62,7 @@ func _loot_and_leave(exits: Array) -> void:
 		return
 	_check("бойцы — фракция rival, враждебны игрокам", s.alive()[0].faction == "rival" and s.alive()[0].hostile_to_players)
 	_check("память: рейд записан", int(RivalRoster.memory(s.id).raids) == 1)
+	s._key_checked = true
 	s.loot_budget = 70.0
 	s.pack_goal = 3
 	var t := 0.0
@@ -138,6 +145,75 @@ func _wiped_by_player() -> void:
 	var mem: Dictionary = RivalRoster.memory(s.id)
 	_check("память: выбиты игроком", int(mem.wiped) == 1 and int(mem.wiped_by_you) == 1)
 	_check("итог рейда перечисляет отряды", _rivals.results().size() == _rivals.squads.size() and _rivals.results().size() >= 5)
+	await _clear(s)
+
+
+## Выход за рубильником: отряд сначала идёт к рубильнику и включает его, потом уходит.
+func _switch_exit(exits: Array) -> void:
+	var gated: Array = exits.filter(func(e: Dictionary) -> bool: return String(e.switch) != "")
+	_check("на уровне есть выход за рубильником", not gated.is_empty() and Raid.current != null)
+	if gated.is_empty() or Raid.current == null:
+		return
+	var exit: Dictionary = gated[0]
+	var sw: PowerSwitch = RivalSquad._switch(get_tree(), String(exit.switch))
+	_check("рубильник этого выхода стоит на уровне и выключен", sw != null and not sw.is_on())
+	if sw == null:
+		return
+	# входят у самого выхода (место заведомо проходимое), к рубильнику идут сами
+	var s: RivalSquad = _rivals.enter(RivalRoster.squads()[5], exit.pos, exit.pos)
+	_check("отряд с выходом за рубильником", s != null and s.exit_switch == String(exit.switch))
+	if s == null:
+		return
+	s._key_checked = true
+	s.loot_budget = 3.0
+	var t := 0.0
+	while t < 400.0 and not sw.is_on():
+		await _wait(1.0)
+		t += 1.0
+	_check("отряд включил рубильник", sw.is_on() and s.phase == RivalSquad.Phase.EXTRACT, "прошло %d с, фаза %d" % [int(t), s.phase])
+	t = 0.0
+	while t < 400.0 and s.phase == RivalSquad.Phase.EXTRACT:
+		await _wait(1.0)
+		t += 1.0
+	_check("и ушёл через открытый выход", s.phase == RivalSquad.Phase.OUT, "фаза %d, прошло %d с, до выхода %s" % [s.phase, int(t),
+		s.alive().map(func(m: Marauder) -> int: return int(m.global_position.distance_to(s.exit_pos)))])
+	await _clear(s)
+
+
+## Выход по карте-ключу и запертая дверь: без ключа нельзя, отряд подбирает ключ — ключ у него.
+func _key_exit(exits: Array) -> void:
+	var keyed: Array = exits.filter(func(e: Dictionary) -> bool: return String(e.key) != "")
+	_check("на уровне есть выход по ключу", not keyed.is_empty())
+	if keyed.is_empty():
+		return
+	var exit: Dictionary = keyed[0]
+	var key_id: String = String(exit.key)
+	var pickup: KeyPickup = RivalSquad._key_pickup(get_tree(), key_id)
+	_check("ключ этого выхода лежит на уровне", pickup != null)
+	if pickup == null:
+		return
+	var s: RivalSquad = _rivals.enter(RivalRoster.squads()[6], exit.pos, exit.pos)
+	_check("отряд с выходом по ключу", s != null and s.exit_key == key_id)
+	if s == null:
+		return
+	s._key_checked = true
+	var lead: Marauder = s.alive()[0]
+	_check("запертую дверь без ключа не открыть", not RivalRaids.may_open(lead, key_id) and not s.has_key(key_id))
+	_check("мародёрам двери открыты, как раньше", RivalRaids.may_open(lead, ""))
+	s.loot_budget = 3.0
+	var t := 0.0
+	while t < 600.0 and not s.has_key(key_id):
+		await _wait(1.0)
+		t += 1.0
+	_check("отряд подобрал ключ: на карте его нет, он в сумке", s.has_key(key_id) and pickup.taken and s.alive().any(func(m: Marauder) -> bool:
+		return m.pack.any(func(e: Dictionary) -> bool: return String(e.id) == key_id)), "прошло %d с" % int(t))
+	_check("с ключом дверь открывается", RivalRaids.may_open(s.alive()[0], key_id))
+	t = 0.0
+	while t < 700.0 and s.phase != RivalSquad.Phase.OUT:
+		await _wait(1.0)
+		t += 1.0
+	_check("ушёл через выход по ключу", s.phase == RivalSquad.Phase.OUT, "фаза %d, прошло %d с, до выхода %s" % [s.phase, int(t),
+		s.alive().map(func(m: Marauder) -> int: return int(m.global_position.distance_to(s.exit_pos)))])
 
 
 ## Точка у ближайшего к p контейнера.
@@ -163,6 +239,14 @@ func _loot_left() -> int:
 		if c:
 			n += c.items.size() if c.rolled else 1000
 	return n
+
+
+## Убрать отряд с карты (следующей проверке чужие не нужны: отряды враждуют между собой).
+func _clear(s: RivalSquad) -> void:
+	for m: Marauder in s.squad.members:
+		if is_instance_valid(m):
+			m.queue_free()
+	await _wait(0.5)
 
 
 func _wait(sec: float) -> void:

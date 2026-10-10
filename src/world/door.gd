@@ -7,7 +7,7 @@ extends Node3D
 @export var height: float = 2.2
 @export var thickness: float = 0.05
 ## Заперта для тех, у кого в рюкзаке нет этого ключа (data/items.json); пусто — обычная дверь.
-## Мародёры открывают любые двери — у них свои ключи.
+## Мародёры открывают любые двери — у них свои ключи; чужим отрядам (RivalRaids) нужен тот же ключ.
 @export var required_key: String = ""
 
 var is_open: bool = false
@@ -71,6 +71,9 @@ func _on_body_entered(body: Node3D) -> void:
 	elif body is Marauder and not is_open and is_multiplayer_authority():
 		# Мародёр открывает дверь сам — и это слышно. Тело мародёра реплицировано на всех peer,
 		# поэтому Area3D сработает у каждого; открывает только хост (он авторитет двери).
+		# Чужим отрядам запертая на ключ дверь без ключа не открывается — как игрокам.
+		if not RivalRaids.may_open(body as Marauder, required_key):
+			return
 		toggle(body.global_position)
 		NoiseBus.emit(global_position, 10.0, "door")
 

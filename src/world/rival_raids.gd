@@ -97,11 +97,14 @@ func enter(record: Dictionary, at: Vector3 = Vector3.INF, exit_at: Vector3 = Vec
 	if at == Vector3.INF:
 		print("rivals: «%s» — некуда войти (игроки рядом со всеми входами)" % record.get("name", "?"))
 		return null
-	var exit_name := "выход"
+	var exit: Dictionary = {"pos": exit_at, "name": "выход"}
 	if exit_at == Vector3.INF:
-		var out: Dictionary = _pick_exit(exits, at)
-		exit_at = out.pos
-		exit_name = out.name
+		exit = _pick_exit(exits, at)
+	else:
+		# выход задан точкой: если это точка эвакуации уровня — с её условиями (рубильник, ключ)
+		for e: Dictionary in exits:
+			if (e.pos as Vector3).distance_to(exit_at) < 1.0:
+				exit = e
 	var style: Dictionary = RivalRoster.style(String(record.get("style", "assault")))
 	var archs: Array = (style.get("archs", ["rival", "rival"]) as Array).duplicate()
 	var cfg: Dictionary = Balance.RIVALS
@@ -110,10 +113,11 @@ func enter(record: Dictionary, at: Vector3 = Vector3.INF, exit_at: Vector3 = Vec
 	if sq == null or sq.members.is_empty():
 		return null
 	var s := RivalSquad.new()
-	s.setup(record, sq, exit_at, exit_name, _rng)
+	s.setup(record, sq, exit, _rng)
+	s.other_exit = _other_exit
 	squads.append(s)
 	RivalRoster.note(s.id, "raids")
-	print("rivals: вошли «%s» (%d) у %s, выход «%s», грабят %d с, хватит %d" % [s.name, sq.members.size(), at.round(), exit_name, int(s.loot_budget), s.pack_goal])
+	print("rivals: вошли «%s» (%d) у %s, выход «%s», грабят %d с, хватит %d" % [s.name, sq.members.size(), at.round(), s.exit_name, int(s.loot_budget), s.pack_goal])
 	_radio("В ТЦ зашла ещё одна группа — «%s»." % s.name)
 	return s
 
@@ -133,18 +137,53 @@ func _on_phase(s: RivalSquad, phase: int) -> void:
 			if by_you:
 				RivalRoster.note(s.id, "wiped_by_you")
 			print("rivals: «%s» выбиты (%s), игроки %d / остальные %d" % [s.name, "игроками" if by_you else "не игроками", s.killed_by_players, s.killed_by_ai])
-			if not by_you:
-				_radio("«%s» больше не отвечают." % s.name)
+			_radio("«%s» больше не отвечают." % s.name)
 
 
-## Точки эвакуации уровня: [{pos, name}].
+## Точки эвакуации уровня: [{pos, name, switch, key}] — с тем, что нужно, чтобы через них уйти.
 func _exits() -> Array:
 	var out: Array = []
 	for n: Node in get_tree().get_nodes_in_group("extractions"):
 		var e := n as ExtractionPoint
 		if e and e.is_inside_tree():
-			out.append({"pos": e.global_position, "name": e.display_name if e.display_name != "" else "выход"})
+			out.append({"pos": e.global_position, "name": e.display_name if e.display_name != "" else "выход",
+				"switch": e.required_switch, "key": e.required_key})
 	return out
+
+
+## Выход отряда стал недоступен (ключ унесли, питания нет): дать другой — без условий, а если таких
+## нет, любой другой. true — выход сменён.
+func _other_exit(s: RivalSquad) -> bool:
+	var options: Array = _exits().filter(func(e: Dictionary) -> bool: return (e.pos as Vector3).distance_to(s.exit_pos) > 1.0)
+	var free: Array = options.filter(func(e: Dictionary) -> bool: return String(e.key) == "" and String(e.switch) == "")
+	if not free.is_empty():
+		options = free
+	if options.is_empty():
+		return false
+	s.set_exit(options[_rng.randi_range(0, options.size() - 1)])
+	print("rivals: «%s» меняют выход на «%s»" % [s.name, s.exit_name])
+	return true
+
+
+## Отряд бойца (хост); null — не из чужих отрядов.
+func squad_of(m: Marauder) -> RivalSquad:
+	for s: RivalSquad in squads:
+		if s.squad == m.squad:
+			return s
+	return null
+
+
+## Зовёт Door: можно ли бойцу открыть дверь, запертую на ключ key_id. Чужим отрядам — только с
+## ключом (как игрокам); без ключа отряд идёт его искать или выбирает другое место. Остальным
+## ботам двери открыты, как раньше.
+static func may_open(m: Marauder, key_id: String) -> bool:
+	if key_id == "" or m.faction != "rival" or current == null:
+		return true
+	var s: RivalSquad = current.squad_of(m)
+	if s == null or s.has_key(key_id):
+		return true
+	s.on_locked_door(key_id, current.level.call("_room_point") if current.level.has_method("_room_point") else Vector3.INF)
+	return false
 
 
 ## Где войти: точка эвакуации, самая дальняя от игроков, но не ближе spawn_min_m; нет таких —
@@ -186,11 +225,9 @@ func _players_distance(p: Vector3) -> float:
 	return best
 
 
-## Рация: слышат все в рейде, но не каждое событие (Balance.RIVALS.radio_chance) — чужие группы
-## не отчитываются, это обрывки эфира.
+## Рация: о входе и выходе чужих групп слышат все в рейде и всегда (решение владельца, 2026-10-10;
+## посмотреть, как влияет на игру).
 func _radio(text: String) -> void:
-	if _rng.randf() > float(Balance.RIVALS.radio_chance):
-		return
 	if Net.is_networked():
 		_rpc_radio.rpc("Рация: " + text)
 	else:
