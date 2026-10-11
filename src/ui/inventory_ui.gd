@@ -634,6 +634,9 @@ func _item_menu(me: Player, role: String, idx: int, at: Vector2) -> void:
 	if role == "backpack" and Balance.LOOT_PACKS.has(id):
 		names.append("Вскрыть упаковку")
 		acts.append(func() -> void: Raid.current.request_unpack(idx, id))
+	if role == "backpack" and id in ["flare", "supply_signal"] and me.has_signal_launcher():
+		names.append("Выбрать для ракетницы")
+		acts.append(func() -> void: me.select_signal_ammo(id))
 	if role == "backpack" and id == "signal_launcher":
 		names.append("Вызвать самолёт снабжения")
 		acts.append(func() -> void: Raid.current.request_supply_signal())

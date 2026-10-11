@@ -110,6 +110,10 @@ var _pm_host_seq: int = 0
 var _weapon_rig: WeaponRig
 ## Ответ хоста может прийти раньше снимка Inventory; до его ревизии читаем подтверждённую запись.
 var _pm_entries: Dictionary = {}
+## The break-action launcher uses the same atomic action protocol as the PM.
+var signal_reload_ammo: String = "flare"
+var weapon_signal_ammo: String = "flare"
+var _signal_host_fire_ms: int = -10000
 var _was_downed: bool = false
 var _sandbox_picked: bool = false
 ## Сколько секунд держим прицел — «довод» по эргономике (WeaponStats.aim_time).
@@ -288,7 +292,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -560,6 +564,8 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 		"zero_c": [Gear.zero_clicks(base).x, Gear.zero_clicks(base).y],
 		"dur": WeaponCondition.percent(base), "mod_dur": mod_dur, "shots": int(base.get("_condition_shots", 0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
 		"chamber": int(normalized.get("chamber", 0)), "chamber_ammo": String(normalized.get("chamber_ammo", ""))}
+	if String(base.id) == "signal_launcher":
+		_ws[key].ammo = String(mag.get("ammo", "flare"))
 
 
 static func _has_chamber(id: String) -> bool:
@@ -647,7 +653,7 @@ func breath_gasping() -> bool:
 
 ## Отъёмный магазин вынут: в руках оружие без магазина (R — вставить новый).
 func mag_out() -> bool:
-	return weapon_id != "" and weapon_mag == ""
+	return weapon_id != "" and weapon_mag == "" and not WeaponDb.weapon(weapon_id).has("internal_mag")
 
 
 func _state_rounds(key: String) -> int:
@@ -873,6 +879,8 @@ func _physics_process(delta: float) -> void:
 		if _pm_action.is_empty():
 			ammo = _state_rounds(weapon_slot)
 			weapon_rounds = ammo
+		if is_signal_launcher():
+			weapon_signal_ammo = String(spec().get("ammo", "flare"))
 		var mods: Dictionary = we.get("mods", {})
 		if mods != weapon_mods:
 			weapon_mods = mods
@@ -1190,6 +1198,9 @@ func _combat(delta: float) -> void:
 		inspect_turn = Vector2.ZERO
 	# R: коротко — перезарядка (или устранить задержку), держать — проверить патроны
 	if Input.is_action_just_pressed("reload"):
+		if is_signal_launcher():
+			_start_signal_reload(spec)
+			return
 		if mag_out() and not is_jammed():
 			# магазин вынут: R сразу вставляет новый; держать R и нажимать дважды — без особых действий
 			_reload_hold = -1.0
@@ -1231,6 +1242,9 @@ func _combat(delta: float) -> void:
 ## Перезарядка: в снаряжении — смена магазина из рюкзака или досыпка россыпью (делает хост,
 ## Inventory.reload_slot); в песочнице — полный магазин.
 func _start_reload(spec: Dictionary) -> void:
+	if is_signal_launcher():
+		_start_signal_reload(spec)
+		return
 	if not _pm_action.is_empty() or reload_timer > 0.0 or weapon_id == "":
 		return
 	_reload_kind = "full"
@@ -1350,7 +1364,7 @@ func _start_clear(spec: Dictionary) -> void:
 
 
 func _finish_reload(spec: Dictionary) -> void:
-	if _has_chamber(weapon_id) and _reload_kind != "clear":
+	if (_has_chamber(weapon_id) or is_signal_launcher()) and _reload_kind != "clear":
 		_commit_pm_action()
 		return
 	if _reload_kind == "clear":
@@ -1527,8 +1541,10 @@ func _host_pm_commit(request: Dictionary) -> Dictionary:
 		return {"error": "Оружие уже изменилось"}
 	var kind: String = String(request.get("kind", ""))
 	if kind == "reload":
-		if not _has_chamber(wid):
+		if not _has_chamber(wid) and wid != "signal_launcher":
 			return {"error": "У оружия другая схема перезарядки"}
+		if wid == "signal_launcher" and not WeaponDb.ammo_fits(wid, String(state.get("reload_ammo", "flare"))):
+			return {"error": "Неверный патрон для ракетницы"}
 		if loadout_mode:
 			var h: Node = items_host()
 			if Net.scene_of(self) == "hideout" and h and h.has_method("request_reload"):
@@ -1549,11 +1565,17 @@ func _host_pm_commit(request: Dictionary) -> Dictionary:
 			var mag: Dictionary = fresh.get("mag", {})
 			mag["rounds"] = WeaponDb.capacity(fresh)
 			fresh["mag"] = mag
-			fresh["chamber"] = int(state.get("chamber", 0))
-			fresh["chamber_ammo"] = String(state.get("chamber_ammo", ""))
-			Gear.chamber_round(fresh)
+			if wid == "signal_launcher":
+				mag["ammo"] = String(state.get("reload_ammo", "flare"))
+				fresh["signal_spent"] = false
+			else:
+				fresh["chamber"] = int(state.get("chamber", 0))
+				fresh["chamber_ammo"] = String(state.get("chamber_ammo", ""))
+				Gear.chamber_round(fresh)
 			Gear._bump(fresh)
 			sandbox_weapons[slot] = fresh
+	elif kind == "signal_shot":
+		return _host_signal_shot(slot, base, request)
 	elif kind == "suppressor":
 		var error: String
 		if loadout_mode:
@@ -1632,6 +1654,9 @@ func _accept_pm_result(sequence: int, result: Dictionary) -> void:
 		_ws[weapon_slot].jam = false
 	if action == "reload":
 		_weapon_action("finish_reload", false, 0.0, ammo)
+	elif action == "signal_shot":
+		# The host broadcasts the accepted visual shot once to all scene peers.
+		pass
 	else:
 		_weapon_action("suppressed", bool(spec().get("suppressed", false)))
 		_weapon_action("cancel", false, 0.0, ammo)
@@ -1886,12 +1911,18 @@ func _switch(key: String, sound: bool = true) -> void:
 	reload_timer = 0.0
 	_aim_t = 0.0
 	fire_timer = 0.35
+	if is_signal_launcher():
+		fire_timer = 23.0 / 30.0
+		weapon_signal_ammo = String((e.get("mag", {}) as Dictionary).get("ammo", "flare"))
 	if sound and weapon_id != "":
 		_play_weapon_sound(spec(), "draw", -6.0)
 		_animation_event("pistol_draw" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_draw")
 
 
 func _fire(spec: Dictionary) -> void:
+	if is_signal_launcher():
+		_fire_signal(spec)
+		return
 	if bool(spec.get("broken", false)):
 		fire_timer = float(spec.interval)
 		_say("Оружие сломано — нужен ремонт на верстаке")
@@ -2021,6 +2052,144 @@ func _fire(spec: Dictionary) -> void:
 		Net.broadcast_scene(self, &"_rpc_shot_fx", [muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"), ammo], false)
 
 
+func is_signal_launcher() -> bool:
+	return weapon_id == "signal_launcher"
+
+
+func has_signal_launcher() -> bool:
+	if inventory.has("signal_launcher"):
+		return true
+	for entry: Dictionary in inventory.equipment.values():
+		if String(entry.get("id", "")) == "signal_launcher":
+			return true
+	return false
+
+
+func select_signal_ammo(aid: String) -> bool:
+	if not WeaponDb.ammo_fits("signal_launcher", aid):
+		return false
+	if reload_timer > 0.0 or not _pm_action.is_empty():
+		_say("Дождись окончания действия ракетницы")
+		return false
+	signal_reload_ammo = aid
+	_say(("Зелёный: вызов снабжения" if aid == "supply_signal" else "Красный: освещение") + ". R — зарядить ракетницу")
+	return true
+
+
+func _start_signal_reload(specification: Dictionary) -> void:
+	if not is_signal_launcher() or reload_timer > 0.0 or not _pm_action.is_empty():
+		return
+	if ammo > 0 and String(specification.ammo) == signal_reload_ammo:
+		_say("Этот патрон уже заряжен")
+		return
+	if loadout_mode and not inventory.has(signal_reload_ammo):
+		_say("Нет патрона: " + ItemDb.item_name(signal_reload_ammo))
+		return
+	_reload_kind = "signal"
+	_reload_slot = weapon_slot
+	_reload_empty = ammo <= 0
+	_reload_age = 0.0
+	_reload_fast = false
+	_reload_insert = false
+	_reload_hold = -1.0
+	var state: Dictionary = _ws_state(weapon_slot)
+	state["reload_ammo"] = signal_reload_ammo
+	_pm_action_seq += 1
+	_pm_action = {"kind": "reload", "seq": _pm_action_seq, "slot": weapon_slot, "id": weapon_id,
+		"state": state, "empty": _reload_empty, "sent": false}
+	reload_timer = float(specification.reload) * (1.0 + float(Balance.STRESS.reload_k) * stress_k())
+	_animation_event("pistol_reload")
+	_weapon_action("reload", _reload_empty, reload_timer)
+
+
+## Expensive signals use a host transaction rather than predicting ammo locally.
+func _fire_signal(specification: Dictionary) -> bool:
+	if not _pm_action.is_empty() or reload_timer > 0.0 or ammo <= 0 or not health.alive or is_downed():
+		return false
+	if weapon_obstruction > float(Balance.WEAPON_CLEARANCE.fire_threshold):
+		return false
+	if in_range_mode():
+		_say("В тире сигналы не запускают")
+		return false
+	_pm_action_seq += 1
+	_pm_action = {"kind": "signal_shot", "seq": _pm_action_seq, "slot": weapon_slot, "id": weapon_id,
+		"state": _ws_state(weapon_slot), "sent": false, "muzzle": _muzzle_world()}
+	fire_timer = float(specification.interval)
+	_commit_pm_action()
+	return true
+
+
+func _host_signal_shot(slot: String, base: Dictionary, request: Dictionary) -> Dictionary:
+	if String(base.get("id", "")) != "signal_launcher" or WeaponCondition.broken(base):
+		return {"error": "Ракетница недоступна"}
+	if Time.get_ticks_msec() - _signal_host_fire_ms < 850:
+		return {"error": "Дождись окончания выстрела"}
+	if Raid.current and (Raid.current.over or Raid.current.has_left(peer_id)):
+		return {"error": "Рейд уже окончен"}
+	var entry: Dictionary = base.duplicate(true)
+	var mag: Dictionary = entry.get("mag", {})
+	if int(mag.get("rounds", 0)) != 1:
+		return {"error": "Ракетница не заряжена"}
+	var aid: String = Gear.mag_top(mag)
+	if not WeaponDb.ammo_fits("signal_launcher", aid):
+		return {"error": "Неверный сигнальный патрон"}
+	var supply: bool = aid == "supply_signal"
+	if supply:
+		if Raid.current == null:
+			return {"error": "Снабжение вызывают только в рейде"}
+		var error: String = Raid.current.start_loaded_supply_signal(self)
+		if error != "":
+			return {"error": error}
+	Gear.mag_pop(mag)
+	entry["mag"] = mag
+	entry["signal_spent"] = true
+	WeaponCondition.wear_shots(entry, 1)
+	entry["_condition_shots"] = int(base.get("_condition_shots", 0)) + 1
+	Gear._bump(entry)
+	if loadout_mode:
+		var eq: Dictionary = inventory.equipment.duplicate(true)
+		eq[slot] = entry
+		inventory.equipment = eq
+	else:
+		sandbox_weapons[slot] = entry
+	_signal_host_fire_ms = Time.get_ticks_msec()
+	var flat := Vector3(sin(body_yaw()), 0, cos(body_yaw()))
+	var direction: Vector3 = (Vector3.UP + flat * float(Balance.SKY_FLARE.drift)).normalized()
+	var origin: Vector3 = eye_position() + flat * 0.3
+	var requested: Vector3 = request.get("muzzle", origin)
+	if requested.is_finite() and requested.distance_to(eye_position()) < 0.8:
+		var q := PhysicsRayQueryParameters3D.create(eye_position(), requested, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS, [get_rid()])
+		if get_world_3d().direct_space_state.intersect_ray(q).is_empty():
+			origin = requested
+	if not supply:
+		NoiseBus.emit(global_position, float(Balance.SKY_FLARE.noise_m), "shot")
+	Net.broadcast_scene(self, &"_rpc_signal_effect", [origin, direction, supply], false)
+	_apply_signal_effect(origin, direction, supply)
+	return {"error": "", "entry": entry, "slot": slot, "kind": "signal_shot"}
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_signal_effect(origin: Vector3, direction: Vector3, supply: bool) -> void:
+	var sender: int = multiplayer.get_remote_sender_id()
+	if Net.is_networked() and sender != 0 and sender != 1:
+		return
+	_apply_signal_effect(origin, direction, supply)
+
+
+func _apply_signal_effect(origin: Vector3, direction: Vector3, supply: bool) -> void:
+	weapon_rounds = 0
+	weapon_signal_ammo = "supply_signal" if supply else "flare"
+	_weapon_action("shot", true, 0.0, 0, false)
+	_shot_fx(origin, "shot_pistol", -2.0, 0.35, "", "")
+	SkyFlare.launch(get_tree().current_scene, origin, direction, supply, false)
+	last_shot_ms = Time.get_ticks_msec()
+	if is_local() and is_signal_launcher():
+		var specification: Dictionary = spec()
+		_apply_recoil(specification, stance != Stance.STAND, _camera_rig as CameraRig)
+		if _camera_rig is CameraRig:
+			(_camera_rig as CameraRig).add_shake(float(specification.shake))
+
+
 ## Что видно и слышно от выстрела: вспышка у дула, звук, щелчок помпы/затвора. След пули
 ## обозначают только эффекты попадания, созданные Hitscan. У стрелявшего — из _fire, у остальных
 ## — по сети (_rpc_shot_fx).
@@ -2095,13 +2264,15 @@ func _tick_nvg(delta: float) -> void:
 ## Balance.SKY_FLARE.air_sec — освещает большой участок и медленно опускается (SkyFlare). Нужны
 ## пистолет и ракета в рюкзаке (в песочнице — без счёта). Выстрел слышат NPC, видят все peer.
 func launch_sky_flare() -> bool:
+	if is_signal_launcher():
+		return _fire_signal(spec())
 	if in_range_mode():
 		_say("В тире — только стрельба")
 		return false
 	if not health.alive or is_downed():
 		return false
 	if loadout_mode:
-		if not inventory.has("signal_launcher"):
+		if not has_signal_launcher():
 			_say("Нужен сигнальный пистолет в рюкзаке")
 			return false
 		if inventory.count("flare") <= 0:
@@ -2130,6 +2301,9 @@ func _rpc_sky_flare(from: Vector3, dir: Vector3) -> void:
 ## сигнальном пистолете в рюкзаке (и в песочнице) запускается из него в небо; без пистолета —
 ## бросается рукой и горит на земле.
 func _throw_light(k: String) -> void:
+	if k == "flare" and is_signal_launcher():
+		select_signal_ammo("supply_signal" if signal_reload_ammo == "flare" else "flare")
+		return
 	if in_range_mode():
 		_say("В тире — только стрельба")
 		return

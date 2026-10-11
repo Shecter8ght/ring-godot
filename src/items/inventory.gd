@@ -322,6 +322,10 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 		# владелец ещё не видел последнюю перемену (сменили магазин / обвес) — его состояние устарело
 		return
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	if String(e.get("id", "")) == "signal_launcher":
+		# Signals and their expensive payloads are spent only by the host's shot
+		# transaction. An old state echo cannot put a fired round back in the gun.
+		return
 	# Хост считает ресурс по подтверждённому расходу патронов, не принимает чужой процент.
 	var shot_count: int = int(e.get("_condition_shots", 0))
 	var requested_shots: int = int(st.get("shots", shot_count))
@@ -364,6 +368,8 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 	# Устаревший пакет не должен перезарядить уже заменённое оружие.
 	if not equipment.has(slot) or not _weapon_state_matches(equipment[slot], st):
 		return ["", {}]
+	if String((equipment[slot] as Dictionary).get("id", "")) == "signal_launcher":
+		return _reload_signal(slot, st)
 	apply_weapon_state(slot, st)
 	if not equipment.has(slot):
 		return ["", {}]
@@ -393,6 +399,39 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 	items = list
 	equipment = eq
 	return [String(r[2]), old]
+
+
+## One cartridge, committed at the end of the hand animation. A live round is
+## returned before replacing its type; failure leaves both inventories intact.
+func _reload_signal(slot: String, state: Dictionary) -> Array:
+	var aid: String = String(state.get("reload_ammo", "flare"))
+	if not WeaponDb.ammo_fits("signal_launcher", aid) or not has(aid):
+		return ["", {}]
+	var entry: Dictionary = (equipment[slot] as Dictionary).duplicate(true)
+	var mag: Dictionary = entry.get("mag", {})
+	if int(mag.get("rounds", 0)) > 0 and Gear.mag_top(mag) == aid:
+		return ["", {}]
+	var list: Array = items.duplicate(true)
+	var found: int = -1
+	for index: int in range(list.size()):
+		if String((list[index] as Dictionary).id) == aid and int((list[index] as Dictionary).n) > 0:
+			found = index
+			break
+	if found < 0:
+		return ["", {}]
+	ItemDb.remove_at(list, found, 1)
+	if int(mag.get("rounds", 0)) > 0:
+		var old := {"id": Gear.mag_top(mag), "n": 1}
+		if ItemDb.add_to(list, old, backpack_grid()) != 1:
+			return ["", {}]
+	entry["mag"] = {"id": "", "ammo": aid, "rounds": 1}
+	entry["signal_spent"] = false
+	Gear._bump(entry)
+	var eq: Dictionary = equipment.duplicate(true)
+	eq[slot] = entry
+	items = list
+	equipment = eq
+	return ["signal", {}]
 
 
 ## Есть ли в подсумках разгрузки магазин к оружию slot (перезарядка из них — быстрая).

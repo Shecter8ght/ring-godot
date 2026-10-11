@@ -328,3 +328,20 @@
 ## Сигнальный пистолет и патроны (`assets/models/weapons/flare_gun_claude/`)
 
 Собственные модели проекта (Claude), собраны скриптами `tools/trace_flare_gun_claude.py` и `tools/build_flare_gun_claude.py` (Blender 5.2): `flare_gun_claude.glb`, `flare_red_claude.glb` (осветительный), `flare_green_claude.glb` (вызов груза). Образец формы — фотографии владельца компактной переломной ракетницы 12-го калибра (тип Orion) и её патронов: контуры обведены с фото, размеры — оценка от диаметра ствола; логотипов и надписей производителя нет. Модель со Sketchfab по ссылке владельца (i_c_e_m_a_n_, CC-BY) использована только для просмотра формы со всех сторон — геометрия и текстуры из неё не брались. Исходник — `_asset_src/flare_gun_claude/`.
+
+
+## Компактная ракетница Codex (`assets/models/weapons/flare_pistol_codex/`)
+
+Собственные игровые модели и материалы проекта, авторинг Codex по фотографиям владельца:
+`flare_pistol_codex.glb`, `flare_red_codex.glb`, `flare_green_codex.glb` и FPS-версия
+`flare_pistol_codex_viewmodel.glb`. Нативный UCUPaint worn_v01, исправления пазов/бойка,
+уникальная UV, PBR и normal bake — собственная работа. Публичные фотографии и превью
+Sketchfab использованы как ориентир формы; сторонние сетки/текстуры и логотипы не заимствованы.
+Руководство Orion — https://www.orionsignals.com/wp-content/uploads/2021/02/SM_ALinsertw_Safety-WebVersion-1.21v4.pdf —
+источник общей последовательности действий; отдельный боёк — визуальная реконструкция для игры.
+FPS-руки, их сетка, материалы и веса повторно использованы из собственных ассетов владельца
+ВЕРАС-54 (`VERAS54_Reload_Full_v05.blend`); источник не перезаписан. Новые клипы ракетницы — Codex.
+Оценочные размеры ракетницы 198 × 33 × 130 мм, 12 348 треугольников; каждый патрон — 1 072;
+FPS с руками и патронами — 21 396. Скрипты: `tools/prepare_flare_pistol_codex.py`,
+`tools/animate_flare_pistol_codex.py`. Исходники — `_asset_src/flare_pistol_codex/` и
+`E:/Models Blender/Ракетница — Codex/game_codex/`. Подробности: `docs/assets/flare_pistol_codex.md`.

@@ -113,3 +113,20 @@
 | note_0…8, notes.png (надписи маркером и мелом) | шрифт Neucha — https://fonts.google.com/specimen/Neucha | Jovanny Lemonad | SIL OFL 1.1 (рисованный текст, шрифт в игру не входит) |
 
 Собственные (процедурный шум): macro.png, streaks.png (маски шейдера `aged_surface.gdshader`), soot.png, dust_strip.png, floor_grime_0…2.
+
+
+## Компактная ракетница Codex (`assets/models/weapons/flare_pistol_codex/`)
+
+Собственные игровые модели и материалы проекта, авторинг Codex по фотографиям владельца:
+`flare_pistol_codex.glb`, `flare_red_codex.glb`, `flare_green_codex.glb` и FPS-версия
+`flare_pistol_codex_viewmodel.glb`. Нативный UCUPaint worn_v01, исправления пазов/бойка,
+уникальная UV, PBR и normal bake — собственная работа. Публичные фотографии и превью
+Sketchfab использованы как ориентир формы; сторонние сетки/текстуры и логотипы не заимствованы.
+Руководство Orion — https://www.orionsignals.com/wp-content/uploads/2021/02/SM_ALinsertw_Safety-WebVersion-1.21v4.pdf —
+источник общей последовательности действий; отдельный боёк — визуальная реконструкция для игры.
+FPS-руки, их сетка, материалы и веса повторно использованы из собственных ассетов владельца
+ВЕРАС-54 (`VERAS54_Reload_Full_v05.blend`); источник не перезаписан. Новые клипы ракетницы — Codex.
+Оценочные размеры ракетницы 198 × 33 × 130 мм, 12 348 треугольников; каждый патрон — 1 072;
+FPS с руками и патронами — 21 396. Скрипты: `tools/prepare_flare_pistol_codex.py`,
+`tools/animate_flare_pistol_codex.py`. Исходники — `_asset_src/flare_pistol_codex/` и
+`E:/Models Blender/Ракетница — Codex/game_codex/`. Подробности: `docs/assets/flare_pistol_codex.md`.

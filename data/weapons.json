@@ -45,6 +45,9 @@
   },
   "762x54r": {
    "name": "7.62×54R"
+  },
+  "signal_26": {
+   "name": "Сигнальный патрон"
   }
  },
  "models": {
@@ -333,6 +336,10 @@
      ]
     }
    }
+  },
+  "flare_pistol_codex": {
+   "anim": "pistol",
+   "sockets": {}
   }
  },
  "weapons": {
@@ -360,9 +367,25 @@
     "class": "PISTOL",
     "caliber": "9x18",
     "model": "pistol",
-    "engraving_positions": [[0.66, 0.27], [0.47, 0.25], [0.27, 0.18]],
+    "engraving_positions": [
+     [
+      0.66,
+      0.27
+     ],
+     [
+      0.47,
+      0.25
+     ],
+     [
+      0.27,
+      0.18
+     ]
+    ],
     "engraving_width": 0.045,
-    "engraving_slide_anchor": [0.42, 0.82],
+    "engraving_slide_anchor": [
+     0.42,
+     0.82
+    ],
     "scale": 1,
     "length": 0.161,
     "stats": {
@@ -443,7 +466,11 @@
      },
      "viewmodel_offsets": {
       "reload": {
-       "rotation_deg": [0, 35, -8],
+       "rotation_deg": [
+        0,
+        35,
+        -8
+       ],
        "offset_m": [
         -0.22,
         0.22,
@@ -578,9 +605,31 @@
     "class": "PISTOL",
     "caliber": "9x19",
     "model": "pistol",
-    "engraving_positions": [[0.64, 0.22], [0.46, 0.20], [0.30, 0.16]],
+    "engraving_positions": [
+     [
+      0.64,
+      0.22
+     ],
+     [
+      0.46,
+      0.2
+     ],
+     [
+      0.3,
+      0.16
+     ]
+    ],
     "engraving_width": 0.045,
-    "engraving_slide_anchor": {"right": [0.58, 0.70], "left": [0.58, 0.37]},
+    "engraving_slide_anchor": {
+     "right": [
+      0.58,
+      0.7
+     ],
+     "left": [
+      0.58,
+      0.37
+     ]
+    },
     "scale": 1,
     "length": 0.202,
     "stats": {
@@ -643,7 +692,11 @@
      },
      "viewmodel_offsets": {
       "reload": {
-       "rotation_deg": [0, 35, -8],
+       "rotation_deg": [
+        0,
+        35,
+        -8
+       ],
        "offset_m": [
         -0.22,
         0.22,
@@ -1188,10 +1241,34 @@
     "sound": "shot_rifle",
     "reload_sound": "reload_rifle",
     "cycle_sound": "",
-  "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.glb",
+    "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.glb",
     "state_maps": "res://assets/models/weapons/veras54/states/veras54",
-    "engraving_anchor": [0.86, 0.23],
-    "engraving_positions": [[0.86, 0.23], [0.86, 0.31], [0.86, 0.37], [0.91, 0.16], [0.91, 0.28]]
+    "engraving_anchor": [
+     0.86,
+     0.23
+    ],
+    "engraving_positions": [
+     [
+      0.86,
+      0.23
+     ],
+     [
+      0.86,
+      0.31
+     ],
+     [
+      0.86,
+      0.37
+     ],
+     [
+      0.91,
+      0.16
+     ],
+     [
+      0.91,
+      0.28
+     ]
+    ]
    },
    "flavor": "Ствол на каждый день: не лучший ни в одной крайности, зато почти везде уместен."
   },
@@ -2082,6 +2159,245 @@
     "cycle_sound": ""
    },
    "flavor": "Лента покупает отряду время для манёвра, а стрелку — обязанность не отстать с восемью килограммами."
+  },
+  "signal_launcher": {
+   "name": "Компактная сигнальная ракетница",
+   "cat": "weapon",
+   "value": 0,
+   "weight": 0.65,
+   "size": [
+    1,
+    2
+   ],
+   "stack": 1,
+   "short": "РАКЕТНИЦА",
+   "desc": "Однозарядная переломная ракетница. Красный патрон освещает местность, зелёный вызывает снабжение. Взять во вторичный слот; B выбирает тип следующего патрона, R раскрывает ствол, заряжает и взводит курок. ЛКМ — выстрел. Тип также выбирается через меню патрона в рюкзаке. Зелёный сигнал требует открытого неба и свободной площадки.",
+   "raid_only": true,
+   "weapon": {
+    "slot": "secondary",
+    "class": "PISTOL",
+    "caliber": "signal_26",
+    "model": "flare_pistol_codex",
+    "asset": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex.glb",
+    "scale": 1,
+    "length": 0.1981,
+    "internal_mag": 1,
+    "mechanism": "break_action",
+    "mounts": {},
+    "sound": "shot_pistol",
+    "reload_sound": "reload_pistol",
+    "cycle_sound": "",
+    "hand_grips": {
+     "right": {
+      "pos": [
+       0,
+       0,
+       0
+      ],
+      "fingers": [
+       0,
+       1,
+       0.12
+      ],
+      "thumb": [
+       -1,
+       0,
+       0
+      ],
+      "curl": [
+       55,
+       75,
+       45
+      ]
+     },
+     "left": {
+      "pos": [
+       0.02,
+       -0.029,
+       -0.006
+      ],
+      "fingers": [
+       0,
+       1,
+       0.1
+      ],
+      "thumb": [
+       1,
+       0,
+       0
+      ],
+      "curl": [
+       50,
+       70,
+       40
+      ]
+     }
+    },
+    "stats": {
+     "spread": 1,
+     "ads_spread": 0.5,
+     "ads_fov": 65,
+     "kick": 0.011,
+     "kick_h": 0.004,
+     "kick_bias": 0.1,
+     "recover": 0.4,
+     "shake": 0.055,
+     "ergo": 75,
+     "rpm": 60,
+     "auto": false,
+     "reload": 5.166666666666667,
+     "reload_empty": 5.166666666666667,
+     "range": 80,
+     "noise": 60,
+     "reliability": 1,
+     "wear": 0.012
+    },
+    "rig": {
+     "mechanism": "break_action",
+     "ads_z": 0.32,
+     "shot_duration": 0.7666666666666667,
+     "barrel_open_deg": 48,
+     "hammer_cocked_deg": -19.480565,
+     "trigger_angle_deg": -9.740283,
+     "reload": {
+      "open_start": 0.0967741935483871,
+      "open_end": 0.1870967741935484,
+      "close_start": 0.7612903225806451,
+      "close_end": 0.8193548387096774,
+      "insert_start": 0.5806451612903226,
+      "insert_end": 0.7032258064516129,
+      "cock_start": 0.8387096774193549,
+      "cock_end": 0.9225806451612903
+     }
+    },
+    "viewmodel": {
+     "scene": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex_viewmodel.glb",
+     "fps": 30,
+     "mechanism": "break_action",
+     "clips": {
+      "idle": "idle",
+      "idle_empty": "idle_empty",
+      "draw": "draw",
+      "reload": "reload_live",
+      "reload_empty": "reload_empty",
+      "shot": "fire",
+      "holster": "holster"
+     },
+     "ads_z": 0.32,
+     "hip_offset": [
+      0,
+      0,
+      0.015
+     ],
+     "round_windows": {
+      "old": [
+       1,
+       65
+      ],
+      "new": [
+       73,
+       156
+      ]
+     },
+     "left_hand_windows": [
+      [
+       1,
+       36
+      ],
+      [
+       70,
+       117
+      ]
+     ],
+     "events": {
+      "open": 30,
+      "chamber_down": 42,
+      "shake_1": 48,
+      "shake_2": 56,
+      "case_free": 58,
+      "upright": 70,
+      "insert": 110,
+      "snap": 123,
+      "close": 128,
+      "cock": 144
+     },
+     "clearance_parts": {
+      "Frame": {
+       "min": [
+        -0.013097022518533147,
+        -0.059968924883014335,
+        -0.04428961566970435
+       ],
+       "max": [
+        0.013182143652415795,
+        0.06958500184246566,
+        0.12398731121245105
+       ]
+      },
+      "Barrel": {
+       "min": [
+        -0.016407926119128835,
+        -0.008718693331326965,
+        -0.05259046725041333
+       ],
+       "max": [
+        0.01640700864015407,
+        0.03539588940493263,
+        0.03979905222047336
+       ]
+      },
+      "FiringPin": {
+       "min": [
+        -0.0026610104570840565,
+        -0.0027808812397795424,
+        -0.01309994923130181
+       ],
+       "max": [
+        0.0029041558054949124,
+        0.002749595339910149,
+        0.004650046285011977
+       ]
+      },
+      "Hammer": {
+       "min": [
+        -0.00419969268326395,
+        -0.006996604968339301,
+        -0.03729728794581427
+       ],
+       "max": [
+        0.004199617585972676,
+        0.01878991209858462,
+        0.012897450989014903
+       ]
+      },
+      "Latch": {
+       "min": [
+        -0.015398270530901315,
+        -0.0054806141374366055,
+        -0.0027102946431923347
+       ],
+       "max": [
+        0.015395538078471174,
+        0.004076875508571207,
+        0.0027009427811792164
+       ]
+      },
+      "Trigger": {
+       "min": [
+        -0.0032999636604622573,
+        -0.028803791048752733,
+        -0.003278019045200531
+       ],
+       "max": [
+        0.0032999692485495835,
+        0.0023423769099886887,
+        0.00875577279141404
+       ]
+      }
+     }
+    }
+   },
+   "model": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex.glb"
   }
  },
  "ammo": {
@@ -3244,6 +3560,53 @@
     "velocity": 840
    },
    "flavor": "Клади в начало ленты, если ожидаешь броню, и не поливай ими пустой коридор."
+  },
+  "flare": {
+   "name": "Осветительный патрон — красный",
+   "cat": "ammo",
+   "cells": 1,
+   "value": 1600,
+   "stack": 3,
+   "size": [
+    1,
+    1
+   ],
+   "short": "Ракета",
+   "desc": "Красный патрон для ракетницы: освещает местность 15 секунд. Выбрать для заряжания через меню патрона или B с ракетницей в руках, затем R и ЛКМ. Без ракетницы B по-прежнему зажигает осветительную ракету на земле.",
+   "model": "res://assets/models/weapons/flare_pistol_codex/flare_red_codex.glb",
+   "ammo": {
+    "caliber": "signal_26",
+    "effect": "illumination",
+    "damage": 0,
+    "pen": 0,
+    "armor_dmg": 0,
+    "pellets": 1,
+    "velocity": 45
+   }
+  },
+  "supply_signal": {
+   "name": "Сигнальный патрон снабжения — зелёный",
+   "cat": "ammo",
+   "value": 0,
+   "weight": 0.09,
+   "size": [
+    1,
+    1
+   ],
+   "stack": 1,
+   "short": "СИГНАЛЬН",
+   "desc": "Зелёный патрон для вызова airdrop. Выбрать для ракетницы, зарядить R и выстрелить ЛКМ под открытым небом у свободной площадки. Один сброс на рейд. Отказ вызова сохраняет патрон.",
+   "model": "res://assets/models/weapons/flare_pistol_codex/flare_green_codex.glb",
+   "ammo": {
+    "caliber": "signal_26",
+    "effect": "airdrop",
+    "damage": 0,
+    "pen": 0,
+    "armor_dmg": 0,
+    "pellets": 1,
+    "velocity": 45
+   },
+   "raid_only": true
   }
  },
  "magazines": {

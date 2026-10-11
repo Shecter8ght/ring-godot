@@ -1,0 +1,144 @@
+{
+	"captures": [
+		"res://docs/screens/flare_codex_idle_right_only.png",
+		"res://docs/screens/flare_codex_ads.png",
+		"res://docs/screens/flare_codex_trigger_hammer.png",
+		"res://docs/screens/flare_codex_latch.png",
+		"res://docs/screens/flare_codex_barrel_open.png",
+		"res://docs/screens/flare_codex_chamber_down.png",
+		"res://docs/screens/flare_codex_shake_1.png",
+		"res://docs/screens/flare_codex_shake_2.png",
+		"res://docs/screens/flare_codex_upright.png",
+		"res://docs/screens/flare_codex_green_round_align.png",
+		"res://docs/screens/flare_codex_round_seated.png",
+		"res://docs/screens/flare_codex_snap_close.png",
+		"res://docs/screens/flare_codex_barrel_closed.png",
+		"res://docs/screens/flare_codex_hammer_cocked.png",
+		"res://docs/screens/flare_codex_reload_complete_right_only.png"
+	],
+	"failures": 0,
+	"hands": "VERAS54 FPS arms",
+	"samples": [
+		{
+			"clip": "idle",
+			"frame": 12.99956,
+			"left_visible": false,
+			"speed": 1.0,
+			"stage": "idle_right_only",
+			"timer": 0.0
+		},
+		{
+			"clip": "idle",
+			"frame": 1.12779000000002,
+			"left_visible": false,
+			"speed": 1.0,
+			"stage": "ads",
+			"timer": 0.0
+		},
+		{
+			"clip": "fire",
+			"frame": 7.78509000000001,
+			"left_visible": false,
+			"speed": 1.0,
+			"stage": "trigger_hammer",
+			"timer": 0.0
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 14.630561825633,
+			"left_visible": true,
+			"speed": 1.00970864295959,
+			"stage": "latch",
+			"timer": 4.71666666666667
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 30.6774574047327,
+			"left_visible": true,
+			"speed": 1.00970864295959,
+			"stage": "barrel_open",
+			"timer": 4.18333333333334
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 42.7939611202478,
+			"left_visible": false,
+			"speed": 1.00970864295959,
+			"stage": "chamber_down",
+			"timer": 3.78333333333334
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 48.9893919942379,
+			"left_visible": false,
+			"speed": 1.00970864295959,
+			"stage": "shake_1",
+			"timer": 3.58333333333334
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 56.5076421613693,
+			"left_visible": false,
+			"speed": 1.00970864295959,
+			"stage": "shake_2",
+			"timer": 3.33333333333334
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 70.7590940257311,
+			"left_visible": true,
+			"speed": 1.00970864295959,
+			"stage": "upright",
+			"timer": 2.86666666666668
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 91.8661646631956,
+			"left_visible": true,
+			"speed": 1.00970864295959,
+			"stage": "green_round_align",
+			"timer": 2.16666666666668
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 110.949294520021,
+			"left_visible": true,
+			"speed": 1.00970864295959,
+			"stage": "round_seated",
+			"timer": 1.53333333333335
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 123.818717776418,
+			"left_visible": false,
+			"speed": 1.00970864295959,
+			"stage": "snap_close",
+			"timer": 1.11666666666668
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 128.619195771813,
+			"left_visible": false,
+			"speed": 1.00970864295959,
+			"stage": "barrel_closed",
+			"timer": 0.950000000000015
+		},
+		{
+			"clip": "reload_empty",
+			"frame": 140.834358118832,
+			"left_visible": false,
+			"speed": 1.00970864295959,
+			"stage": "hammer_cocked",
+			"timer": 0.550000000000014
+		},
+		{
+			"clip": "idle",
+			"frame": 11.99957,
+			"left_visible": false,
+			"speed": 1.0,
+			"stage": "reload_complete_right_only",
+			"timer": 0.0
+		}
+	],
+	"weapon": "signal_launcher"
+}

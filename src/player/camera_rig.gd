@@ -935,6 +935,8 @@ static func cant_ads(primary: Transform3D, primary_h: float, line: Vector3) -> T
 
 ## Действия деталей одинаковы у модели перед глазами и у модели в руке персонажа.
 func weapon_action(action: String, flag: bool = false, duration: float = 0.0, rounds: int = -1) -> void:
+	if _viewmodel is ViewmodelClips:
+		(_viewmodel as ViewmodelClips).weapon_action(action, flag, duration, rounds)
 	if not is_instance_valid(_viewmodel_rig):
 		return
 	match action:

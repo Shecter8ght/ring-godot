@@ -1,0 +1,13 @@
+{
+  "world_triangles": 12348,
+  "axes": "+Z muzzle, +Y up, origin at grip",
+  "parts": [
+    "Frame",
+    "Barrel",
+    "Hammer",
+    "Trigger",
+    "Latch",
+    "FiringPin"
+  ],
+  "source": "E:\\Games\\RING-godot\\_asset_src\\flare_pistol_codex\\integration\\flare_pistol_codex_lowpoly.blend"
+}

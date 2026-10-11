@@ -1805,7 +1805,7 @@ func _supply_signal(peer_id: int) -> void:
 	if not supply_state.is_empty():
 		_tell(peer_id, "Самолёт снабжения уже вызван в этом рейде")
 		return
-	if not pl.inventory.has("signal_launcher") or not pl.inventory.has("supply_signal"):
+	if not pl.has_signal_launcher() or not pl.inventory.has("supply_signal"):
 		_tell(peer_id, "Нужны сигнальный пистолет и патрон снабжения в рюкзаке")
 		return
 	var pos: Vector3 = _supply_site(pl)
@@ -1818,6 +1818,22 @@ func _supply_signal(peer_id: int) -> void:
 	supply_state = {"pos": pos, "origin": pl.global_position + Vector3.UP, "elapsed": 0.0, "dropped": false}
 	NoiseBus.emit(pl.global_position, float(Balance.SUPPLY_SIGNAL.noise_m), "shot")
 	_tell(peer_id, "Сигнал принят. Самолёт сбросит груз примерно через %d с" % int(Balance.SUPPLY_SIGNAL.delay))
+
+
+## The player's host transaction has already validated the loaded green round.
+## This operation checks the drop site before the transaction spends that round.
+func start_loaded_supply_signal(pl: Player) -> String:
+	if not _is_host() or pl == null or not pl.is_alive() or pl.is_downed() or has_left(pl.peer_id) or over:
+		return "Вызов снабжения недоступен"
+	if not supply_state.is_empty():
+		return "Самолёт снабжения уже вызван в этом рейде"
+	var pos: Vector3 = _supply_site(pl)
+	if not pos.is_finite():
+		return "Выйди под открытое небо к свободному месту для сброса"
+	supply_state = {"pos": pos, "origin": pl.global_position + Vector3.UP, "elapsed": 0.0, "dropped": false}
+	NoiseBus.emit(pl.global_position, float(Balance.SUPPLY_SIGNAL.noise_m), "shot")
+	_tell(pl.peer_id, "Сигнал принят. Самолёт сбросит груз примерно через %d с" % int(Balance.SUPPLY_SIGNAL.delay))
+	return ""
 
 
 ## Физика хоста: небо над стрелком и площадкой, опора и свободные боковые стороны ящика.

@@ -71,6 +71,10 @@ func _refresh_bounds(model: Node3D) -> void:
 		var local: AABB = WeaponRig._relative_transform(mesh, model) * mesh.get_aabb()
 		bounds = local if first else bounds.merge(local)
 		first = false
+	if model.has_method("clearance_boxes"):
+		for box: AABB in model.call("clearance_boxes"):
+			bounds = box if first else bounds.merge(box)
+			first = false
 	for side: String in ["Right", "Left"]:
 		var grip: Node3D = model.find_child(side + "Grip", true, false) as Node3D
 		if grip:
@@ -82,6 +86,8 @@ func _refresh_bounds(model: Node3D) -> void:
 	var radius: Vector3 = Vector3.ONE * float(Balance.WEAPON_CLEARANCE.hand_radius)
 	var inverse: Transform3D = model.global_transform.affine_inverse() if model.is_inside_tree() else Transform3D.IDENTITY
 	for hand: Array in _hand_bones(model):
+		if String(hand[2]) == "L" and model.has_method("uses_left_hand") and not bool(model.call("uses_left_hand")):
+			continue
 		var sk: Skeleton3D = hand[0] as Skeleton3D
 		var point: Vector3 = inverse * (sk.global_transform * sk.get_bone_global_pose(int(hand[1])).origin) if model.is_inside_tree() 			else WeaponRig._relative_transform(sk, model) * sk.get_bone_global_pose(int(hand[1])).origin
 		bounds = bounds.merge(AABB(point - radius, radius * 2.0))

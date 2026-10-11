@@ -78,6 +78,10 @@ var _holding: bool = false
 var _hold_phase: float = 0.0
 var _turn: Vector2 = Vector2.ZERO
 var _mag_bone: int = -1
+var _signal_props: Dictionary = {}
+var _signal_old_type: String = "flare"
+var _signal_has_old: bool = false
+var _signal_left_arm: Node3D
 
 
 static func available(id: String) -> bool:
@@ -98,6 +102,15 @@ func _setup(id: String, mods: Dictionary) -> void:
 	var model: Node3D = (load(String(config.scene)) as PackedScene).instantiate() as Node3D
 	model.name = "Model"
 	add_child(model)
+	if String(config.get("mechanism", "")) == "break_action":
+		_signal_left_arm = model.find_child("FPS_Arms_Left", true, false) as Node3D
+		if _signal_left_arm:
+			_signal_left_arm.visible = false
+		for prop: String in ["LoadRoundRed", "LoadRoundGreen", "OldRoundRed", "OldRoundGreen"]:
+			var node: Node3D = model.find_child(prop, true, false) as Node3D
+			if node:
+				_signal_props[prop] = node
+				node.visible = false
 	_anim = model.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	# клип ведём сами (advance), чтобы подаватель и затвор ставить поверх клипа в том же кадре
 	_anim.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
@@ -184,6 +197,8 @@ func _setup(id: String, mods: Dictionary) -> void:
 		# руки и оружие не уходят за дальнюю плоскость при близкой камере
 		gi.extra_cull_margin = 0.5
 	_play(_clip_name("idle"), 0.0)
+	if String(config.get("mechanism", "")) == "break_action":
+		_play(_clip_name("draw"), 0.0)
 
 
 ## Клип по роли (idle, reload, reload_empty, check, clear) — из набора под рукоятку, если он есть.
@@ -204,12 +219,15 @@ func _play(clip: String, blend: float, duration: float = 0.0) -> void:
 	_anim.play(clip, blend)
 	var length: float = _anim.get_animation(clip).length
 	_anim.speed_scale = length / duration if duration > 0.0 else 1.0
-	_clip = "" if clip == _clip_name("idle") else clip
+	_clip = "" if clip in [_clip_name("idle"), _clip_name("idle_empty")] else clip
 
 
 ## Опрос состояния игрока: перезарядка (начало по фронту таймера, отмена — в стойку), проверка
 ## магазина, выстрелы (затвор), счёт патронов на виду. Затем шаг клипа и затвор/подаватель поверх.
 func update(pl: Player, delta: float) -> void:
+	if String(config.get("mechanism", "")) == "break_action":
+		_update_signal(pl, delta)
+		return
 	var mag: int = int(pl.spec().get("mag", 30))
 	var reloading: bool = pl.reload_timer > 0.0 and pl._reload_kind != "clear"
 	if reloading and _last_reload <= 0.0:
@@ -295,6 +313,75 @@ func update(pl: Player, delta: float) -> void:
 	_inspect_turn(pl, delta)
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
 	_support_hand(_grip_w)
+
+
+func weapon_action(action: String, _flag: bool = false, _duration: float = 0.0, _rounds_left: int = -1) -> void:
+	if String(config.get("mechanism", "")) != "break_action":
+		return
+	if action == "shot":
+		_play(_clip_name("shot"), 0.03)
+	elif action == "cancel":
+		_last_reload = 0.0
+		_play(_clip_name("idle_empty") if _rounds_left <= 0 else _clip_name("idle"), BLEND_OUT)
+
+
+## Ракетница деформируется жёсткими костями: AABB покоя всего меша не описывает открытый ствол.
+func clearance_boxes() -> Array[AABB]:
+	var boxes: Array[AABB] = []
+	if _arm_skel == null:
+		return boxes
+	var parts: Dictionary = config.get("clearance_parts", {})
+	var skeleton_at: Transform3D = WeaponRig._relative_transform(_arm_skel, self)
+	for part_name: String in parts:
+		var bone: int = _arm_skel.find_bone(part_name)
+		if bone < 0:
+			continue
+		var low: Array = (parts[part_name] as Dictionary).min
+		var high: Array = (parts[part_name] as Dictionary).max
+		var point := Vector3(float(low[0]), float(low[1]), float(low[2]))
+		var end := Vector3(float(high[0]), float(high[1]), float(high[2]))
+		var bone_at: Transform3D = skeleton_at * _arm_skel.get_bone_global_pose(bone)
+		boxes.append(bone_at * AABB(point, end - point).grow(0.001))
+	return boxes
+
+
+func uses_left_hand() -> bool:
+	return String(config.get("mechanism", "")) != "break_action" or (_signal_left_arm != null and _signal_left_arm.visible)
+
+
+func _update_signal(pl: Player, delta: float) -> void:
+	var reloading: bool = pl.reload_timer > 0.0
+	var resting: String = _clip_name("idle") if pl.ammo > 0 else _clip_name("idle_empty")
+	if reloading and _last_reload <= 0.0:
+		_signal_old_type = pl.weapon_signal_ammo
+		_signal_has_old = pl.ammo > 0 or bool(pl.weapon_entry().get("signal_spent", false))
+		_play(_clip_name("reload_empty" if pl._reload_empty else "reload"), BLEND_IN, pl.reload_timer)
+	elif not reloading and _last_reload > 0.0:
+		_play(resting, BLEND_OUT)
+	_last_reload = pl.reload_timer if reloading else 0.0
+	_anim.advance(delta)
+	if not reloading and (_clip == "" or not _anim.is_playing()) and String(_anim.current_animation) != resting:
+		_play(resting, BLEND_OUT)
+	var f: float = 1.0 + _anim.current_animation_position * float(config.get("fps", 30))
+	if _signal_left_arm:
+		var assisting: bool = false
+		for window: Array in config.get("left_hand_windows", [[1,36],[70,117]]):
+			assisting = assisting or (f >= float(window[0]) and f <= float(window[1]))
+		_signal_left_arm.visible = reloading and assisting
+	var windows: Dictionary = config.get("round_windows", {})
+	var old_window: Array = windows.get("old", [1, 65])
+	var new_window: Array = windows.get("new", [73, 156])
+	for name: String in _signal_props:
+		var old: bool = name.begins_with("Old")
+		var green: bool = name.ends_with("Green")
+		var type: String = (_signal_old_type if old else pl.signal_reload_ammo) if reloading else pl.weapon_signal_ammo
+		var window: Array = old_window if old else new_window
+		var shown: bool = reloading and f >= float(window[0]) and f <= float(window[1])
+		if reloading:
+			shown = shown and (not old or _signal_has_old)
+		else:
+			shown = pl.ammo == 0 and bool(pl.weapon_entry().get("signal_spent", false)) if old else pl.ammo > 0
+		(_signal_props[name] as Node3D).visible = shown and green == (type == "supply_signal")
 
 
 ## Шаг клипа. Проверка магазина с удержанием: пока R держат, клип дошёл до участка показа и стоит на

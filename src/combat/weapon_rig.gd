@@ -6,7 +6,7 @@ extends Node3D
 signal sound_event(slot: String)
 signal action_finished(action: String)
 
-const PART_NAMES: Array[String] = ["Frame", "Slide", "Barrel", "Trigger", "Hammer", "SlideStop", "Safety", "MagCatch", "Magazine", "Suppressor"]
+const PART_NAMES: Array[String] = ["Frame", "Slide", "Barrel", "Trigger", "Hammer", "Latch", "FiringPin", "SlideStop", "Safety", "MagCatch", "Magazine", "Suppressor"]
 ## Курок, предохранитель и глушитель есть не у каждого пистолета (у Glock их нет) — они необязательны:
 ## без них риг просто не двигает эти детали, а глушитель ставится процедурным обвесом.
 const REQUIRED_PARTS: Array[String] = ["Frame", "Slide", "Trigger", "SlideStop", "MagCatch", "Magazine"]
@@ -114,6 +114,14 @@ func marker(marker_name: String) -> Node3D:
 
 
 func has_parts() -> bool:
+	if String(_config.get("mechanism", "")) == "break_action":
+		for required: String in ["Frame", "Barrel", "Trigger", "Hammer", "Latch"]:
+			if part(required) == null:
+				return false
+		for required: String in REQUIRED_MARKERS:
+			if marker(required) == null:
+				return false
+		return true
 	for part_name: String in REQUIRED_PARTS:
 		if part(part_name) == null:
 			return false
@@ -164,6 +172,8 @@ func action_progress() -> float:
 func set_ammo_state(rounds: int) -> void:
 	_ammo = maxi(0, rounds)
 	_locked = _ammo == 0
+	if String(_config.get("mechanism", "")) == "break_action" and not is_busy():
+		_cocked = _ammo > 0
 	if not is_busy():
 		action = ""
 		_apply_pose()
@@ -195,6 +205,13 @@ func play_reload(empty: bool, duration: float) -> void:
 	_empty_reload = empty
 	_begin("reload", duration)
 	var phases: Dictionary = _config.get("reload", {})
+	if String(_config.get("mechanism", "")) == "break_action":
+		_queue_sound("breech_open", float(phases.get("open_start", 0.1)))
+		_queue_sound("round_insert", float(phases.get("insert_end", 0.7)))
+		_queue_sound("breech_close", float(phases.get("close_end", 0.8)))
+		_queue_sound("charge", float(phases.get("cock_end", 0.93)))
+		_apply_pose()
+		return
 	_queue_sound("mag_out", float(phases.get("mag_out", 0.0)))
 	_queue_sound("mag_in", float(phases.get("mag_in", 1.0)))
 	if empty:
@@ -307,6 +324,9 @@ func _apply_pose() -> void:
 		var node: Node3D = part(part_name)
 		if node:
 			node.transform = _rest[part_name] as Transform3D
+	if String(_config.get("mechanism", "")) == "break_action":
+		_apply_break_action_pose()
+		return
 	var magazine: Node3D = part("Magazine")
 	if magazine:
 		magazine.visible = true
@@ -328,6 +348,40 @@ func _apply_pose() -> void:
 			_pose_reload(progress)
 		"suppressor":
 			_pose_suppressor(progress)
+	_update_muzzle()
+	_update_hand_binding()
+
+
+## The barrel pivot and both travel grooves are authored in Blender; the world
+## model follows the same phase markers as the exported FPS reload clip.
+func _apply_break_action_pose() -> void:
+	_weight = 0.0
+	var cock: float = 1.0 if _ammo > 0 else 0.0
+	var trigger: float = 0.0
+	var p: float = action_progress()
+	if action == "reload":
+		var phases: Dictionary = _config.get("reload", {})
+		var frame: float = 1.0 + p * 155.0
+		var weight: float = _ramp(frame, 1.0, 16.0) * (1.0 - _ramp(frame, 144.0, 156.0))
+		var inverted: float = _ramp(frame, 33.0, 42.0) * (1.0 - _ramp(frame, 60.0, 70.0))
+		var shake_1: float = _ramp(frame, 45.0, 48.0) * (1.0 - _ramp(frame, 48.0, 50.0))
+		var shake_2: float = _ramp(frame, 53.0, 56.0) * (1.0 - _ramp(frame, 56.0, 60.0))
+		var windup: float = _ramp(frame, 112.0, 117.0) * (1.0 - _ramp(frame, 117.0, 123.0))
+		var snap: float = _ramp(frame, 117.0, 123.0) * (1.0 - _ramp(frame, 123.0, 131.0))
+		var pitch: float = -42.0 * inverted - 8.0 * shake_1 - 9.0 * shake_2 - 8.0 * windup + 18.0 * snap
+		_visual.basis = Basis(Vector3.UP, deg_to_rad(-12.0 * weight)) * Basis(Vector3.RIGHT, deg_to_rad(pitch)) * Basis(Vector3.FORWARD, PI * inverted)
+		_visual.position = Vector3(.022, .018, .008) * weight
+		_visual.position.y += -.026 * shake_1 - .031 * shake_2 + .008 * windup - .015 * snap
+		var opening: float = _ramp(p, float(phases.open_start), float(phases.open_end)) * (1.0 - _ramp(p, float(phases.close_start), float(phases.close_end)))
+		_rotate_part("Barrel", Vector3.RIGHT, float(_config.get("barrel_open_deg", 48.0)) * opening)
+		_rotate_part("Latch", Vector3.RIGHT, 9.167325 * _ramp(p, 9.0 / 155.0, 16.0 / 155.0) * (1.0 - _ramp(p, 22.0 / 155.0, 32.0 / 155.0)))
+		cock = _ramp(p, float(phases.cock_start), float(phases.cock_end))
+	elif action == "shot":
+		cock = 1.0 - _ramp(p, 6.0 / 23.0, 8.0 / 23.0)
+		trigger = _ramp(p, 0.0, 6.0 / 23.0) * (1.0 - _ramp(p, 10.0 / 23.0, 22.0 / 23.0))
+		_move_part("FiringPin", Vector3.BACK * 0.00055 * _ramp(p, 6.0 / 23.0, 7.0 / 23.0) * (1.0 - _ramp(p, 8.0 / 23.0, 10.0 / 23.0)))
+	_rotate_part("Hammer", Vector3.RIGHT, float(_config.get("hammer_cocked_deg", -19.48)) * cock)
+	_rotate_part("Trigger", Vector3.RIGHT, float(_config.get("trigger_angle_deg", -9.74)) * trigger)
 	_update_muzzle()
 	_update_hand_binding()
 

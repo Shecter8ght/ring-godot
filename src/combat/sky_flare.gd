@@ -22,13 +22,17 @@ var _halo: MeshInstance3D
 var _sparks: CPUParticles3D
 var _core_mat: StandardMaterial3D
 var _halo_mat: StandardMaterial3D
+var _signal: bool = false
+var _shot_sound: bool = true
 
 
 ## Запуск из точки from по направлению dir (вверх, с небольшим уклоном по взгляду).
-static func launch(parent: Node, from: Vector3, dir: Vector3) -> SkyFlare:
+static func launch(parent: Node, from: Vector3, dir: Vector3, signal_round: bool = false, shot_sound: bool = true) -> SkyFlare:
 	var f := SkyFlare.new()
 	f.name = "SkyFlare"
 	f._from = from
+	f._signal = signal_round
+	f._shot_sound = shot_sound
 	f._dir = dir.normalized() if dir.length_squared() > 0.0001 else Vector3.UP
 	f._seed = fmod(absf(from.x * 12.9898 + from.z * 78.233), TAU)
 	parent.add_child(f)
@@ -38,7 +42,7 @@ static func launch(parent: Node, from: Vector3, dir: Vector3) -> SkyFlare:
 func _ready() -> void:
 	var cfg: Dictionary = Balance.SKY_FLARE
 	add_to_group("flares")
-	add_to_group("sky_flares")
+	add_to_group("supply_signals" if _signal else "sky_flares")
 	global_position = _from
 	# куда долетит: до вершины или до потолка над головой; где под вершиной земля
 	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
@@ -50,7 +54,7 @@ func _ready() -> void:
 	var top: Vector3 = _from + _dir * _apex
 	var down_hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(top, top + Vector3.DOWN * 400.0, mask))
 	_floor_y = float((down_hit.position as Vector3).y) + 0.15 if not down_hit.is_empty() else -INF
-	var color: Color = cfg.color
+	var color: Color = Color(0.13, 1.0, 0.28) if _signal else cfg.color
 	_light = SpotLight3D.new()
 	_light.name = "Light"
 	# свои настройки рассеяния — общее смягчение источников (Settings.soften) не нужно
@@ -71,7 +75,7 @@ func _ready() -> void:
 	_light.shadow_normal_bias = 1.5
 	add_child(_light)
 	# звезда и ореолы: не затеняются, смотрят в камеру
-	_core_mat = _glow_material(Color(1.0, 0.82, 0.74))
+	_core_mat = _glow_material(Color(0.7, 1.0, 0.75) if _signal else Color(1.0, 0.82, 0.74))
 	_core = _glow_quad(float(cfg.core_m), _core_mat)
 	_halo_mat = _glow_material(color)
 	_halo = _glow_quad(float(cfg.halo_m), _halo_mat)
@@ -88,13 +92,14 @@ func _ready() -> void:
 	_sparks.scale_amount_max = 1.0
 	var spark := QuadMesh.new()
 	spark.size = Vector2(0.22, 0.22)
-	var spark_mat := _glow_material(Color(1.0, 0.5, 0.3))
+	var spark_mat := _glow_material(color if _signal else Color(1.0, 0.5, 0.3))
 	spark_mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	spark.material = spark_mat
 	_sparks.mesh = spark
 	_sparks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_sparks)
-	Audio.play("shot_pistol", _from, -2.0)
+	if _shot_sound:
+		Audio.play("shot_pistol", _from, -2.0)
 	Audio.play("flare_ignite", _from, -4.0)
 
 
@@ -119,7 +124,7 @@ func _process(delta: float) -> void:
 	# разгорается на подъёме, горит неровно, к концу гаснет
 	var burn: float = smoothstep(0.0, float(cfg.rise_sec) * 0.6, _t) * clampf((air - _t) / float(cfg.fade_sec), 0.0, 1.0)
 	var flicker: float = 1.0 + 0.07 * sin(_t * 23.0 + _seed) + 0.05 * sin(_t * 41.0 + _seed * 2.0)
-	_light.light_energy = float(cfg.energy) * burn * flicker
+	_light.light_energy = 0.0 if _signal else float(cfg.energy) * burn * flicker
 	_core_mat.albedo_color.a = burn
 	_halo_mat.albedo_color.a = 0.55 * burn * flicker
 	_sparks.emitting = burn > 0.2
