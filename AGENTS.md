@@ -92,12 +92,11 @@ tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки кот
 # Пересборка убежища: python tools/shelter_boiler_materials.py [--fetch]; blender --background --factory-startup --python
 #   tools/build_shelter_boiler.py (стены, зал, котлы, тир), tools/build_shelter_gear.py, tools/integrate_shelter_boiler_external.py;
 #   --headless --import; res://tools/author_shelter_scene.tscn; res://tools/author_shelter_dressing.tscn;
-#   python tools/shelter_grime_textures.py → res://tools/author_shelter_grime.tscn (декали старения);
-#   res://tools/author_shelter_light.tscn (UV2, LightmapGI) → запекание в редакторе (12 вариантов погоды и питания):
-#   tools/bake_shelter_light_draft.cmd [варианты] — черновое, быстро, для проверки правок;
-#   tools/bake_shelter_light.cmd [варианты] — чистовое, перед сборкой игры (~10–15 мин на все).
-#   Варианты — day/dusk/night + _sun/_grey (+ _off без генератора), напр. «day_sun night_grey»; без них — все.
-#   Перепекать только после изменения геометрии/ламп убежища; при обычном открытии редактора плагин молчит.
+#   python tools/shelter_grime_textures.py → res://tools/author_shelter_grime.tscn (декали старения).
+#   Запечённого света нет (решение владельца 2026-10-11): свет уличный, рассеянный — SDFGI.
+#   Двор и выход (после author_shelter_scene его запускать заново — он же возвращает проём в стене тамбура):
+#   blender … --python tools/build_shelter_exterior.py; --headless --import; res://tools/author_shelter_exterior.tscn
+#   → levels/shelter/Shelter_Exterior.tscn (земля, лес, забор, ворота, дверь, зона сбора); дальше сцену правят руками.
 #   Только материалы (шейдер старения стен): SHELTER_MATERIALS_ONLY=1 … res://tools/author_shelter_scene.tscn
 tools/godot.cmd res://tools/look_shots.tscn                 # вид «как с камеры»: те же кадры с эффектами и без (убежище, рейд день/ночь, поворот головы)
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
@@ -155,6 +154,7 @@ tools/godot.cmd --headless res://tools/holster_test.tscn    # оружие уб�
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/stickers_test.tscn # наклейки на оружии: клеить (предмет тратится), три на ствол, снять — пропала, зарубки «Счёта» за эвакуацию, страница верстака; снимок stickers_panel
 tools/godot.cmd --headless res://tools/sticker_icons.tscn  # иконки наклеек из их рисунков (assets/stickers/<id>.png владельца или знак кодом) → assets/icons; затем --import
 tools/godot.cmd --headless res://tools/birds_test.tscn     # птицы зоны 1: стаи сидят и кружат, взлетают от выстрела и от пробежавшего рядом, садятся, ночью нет, в дождь меньше; с окном — снимки birds_*
+tools/godot.cmd --headless res://tools/shelter_exit_test.tscn # выход в рейд пешком: запечённого света нет, дверь тамбура, коридор и лестница во двор, план у стола, зона сбора — отсчёт и рейд
 tools/godot.cmd --headless res://tools/mags_test.tscn      # магазины: ПОЛН/ПУСТ и оценка после проверки, снарядить/разрядить поштучно (MagOps), нет патронов — текст, разрядка в клетки ящика и буфер 3×3, плиты по одной, вопрос о буфере, держать R
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/lumar_reticle_shots.tscn # ЛУМАР: метка шейдером (формы, цвета, толщина), окно под ПНВ на голове, ночной режим окна, окно настройки (P); снимки lumar_ret_*
 tools/godot.cmd res://tools/sight_nvg_shots.tscn             # коллиматор в ПНВ, ЛЦУ: точка без ПНВ, луч в ПНВ; снимки sight_nvg_* (SHOTS_LOW=1 — качество «низко»)
@@ -250,8 +250,12 @@ docs/          STATUS.md (что сделано / что дальше), реше
    `Missions`), модули убежища (`data/hideout.json`, `Upgrades`: верстак, генератор, защищённый
    карман, тайник, рация). Контейнеры на пропсах строит SectorBuilder (Loot/Loot_N),
    особые (сейф, стойка) — `loot_container.tscn` руками в сцене. Ключи — предметы в рюкзаке.
-   Убежище — старая котельная в зоне 5, отдельная от ТЦ карта (люков из ТЦ нет): `scenes/levels/hideout.tscn`
-   → `levels/shelter/Shelter_Interior.tscn`, собирается инструментами (см. «Пересборка убежища»); в котельном
+   Убежище — старая полуподвальная котельная в зоне 5, отдельная от ТЦ карта (люков из ТЦ нет): `scenes/levels/hideout.tscn`
+   → `levels/shelter/Shelter_Interior.tscn` + двор `levels/shelter/Shelter_Exterior.tscn` (узел `Exterior`): здание стоит на
+   открытой местности, окна настоящие, свет уличный (`ShelterWeather`), запечённого нет. В рейд выходят пешком: план
+   принимают у стола планирования, дальше дверь тамбура (`ShelterExitDoor`), коридор, лестница, двор — и зона сбора у
+   ворот (`RaidStartZone`): все, кто в убежище, в зоне — отсчёт и рейд (`HideoutLevel._tick_raid_start`).
+   Собирается инструментами (см. «Пересборка убежища»); в котельном
    зале тир (`ShootingRange`, `RangeLane`, `RangeTarget`, стойка `RangeWeaponRack` — любой ствол игры на зал).
    Прежнее описание: CSG-узлы (двигать руками; материал —
    meta "mat"/"color"/"emit", см. hideout_level.gd), станции `hideout_station.tscn` (тайник, торговец,

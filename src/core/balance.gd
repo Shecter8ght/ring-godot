@@ -778,21 +778,33 @@ const DEPTH_FOG := {
 const HEAT_TIME := {"day": 1.0, "dusk": 0.5, "night": 0.0}
 const VOLUMETRIC_TIME := {"day": {"density": 1.0, "sun": 1.4}, "dusk": {"density": 1.6, "sun": 2.6}, "night": {"density": 1.0, "sun": 0.6}}
 ## Погода за окнами убежища (ShelterWeather) — та, что ждёт в следующем рейде (Profile.next_conditions).
-## Вид: солнце в окна (ясно, жара — днём и на закате), серо (дождь, туман), ночь (луна только в ясно).
-## По виду: свечение армированного стекла (энергия, цвет), рассеянный дневной свет зала (доля от
-## авторского), пыль в воздухе (доля плотности тумана). Солнце: азимут, град от юга к востоку (окна
-## зала смотрят на юг), сила — доля от RAID_TIME.sun_energy, свечение в пыли (лучи из окон).
-## Запечённый свет — свой вариант на каждый вид и питание (tools/bake_shelter_light.cmd).
-const SHELTER_WEATHER := {"poll_sec": 1.0, "sun_k": 1.1, "sun_fog": 3.5,
+## Котельная стоит на открытой местности с настоящими окнами, свет уличный, запечённого нет. Солнце: азимут,
+## град от юга к востоку (окна зала смотрят на юг), сила — доля от RAID_TIME.sun_energy, свечение в пыли
+## (лучи из окон). ambient — сила рассеянного света неба по виду («<время>_sun» — ясно и жара,
+## «<время>_grey» — дождь и туман; ночью — ровный цвет NIGHT_ENV); gi — сила отражённого света (SDFGI) по
+## виду; overcast — «свет облаков» в дождь вместо солнца: высота, доля силы дневного солнца (× time_k по времени суток),
+## цвет, размытость тени, град; exposure — выдержка по времени; fog — доля пыли в воздухе по виду.
+const SHELTER_WEATHER := {"poll_sec": 1.0, "sun_k": 1.0, "sun_fog": 3.0,
 	"sun_azimuth": {"day": 20.0, "dusk": 55.0, "night": -30.0},
-	"looks": {
-		"day_sun": {"glass": 0.42, "glass_color": Color(1.0, 0.97, 0.9), "daylight": 1.6, "fog": 1.4},
-		"day_grey": {"glass": 0.2, "glass_color": Color(0.78, 0.84, 0.9), "daylight": 0.9, "fog": 1.0},
-		"dusk_sun": {"glass": 0.3, "glass_color": Color(1.0, 0.72, 0.48), "daylight": 0.8, "fog": 1.3},
-		"dusk_grey": {"glass": 0.09, "glass_color": Color(0.66, 0.66, 0.74), "daylight": 0.45, "fog": 1.0},
-		"night_sun": {"glass": 0.02, "glass_color": Color(0.45, 0.55, 0.8), "daylight": 0.05, "fog": 0.9},
-		"night_grey": {"glass": 0.008, "glass_color": Color(0.4, 0.45, 0.6), "daylight": 0.0, "fog": 0.9}},
+	"ambient": {"day_sun": 1.5, "day_grey": 2.4, "dusk_sun": 1.5, "dusk_grey": 2.2, "night": 0.5},
+	"gi": {"day_sun": 1.0, "day_grey": 1.6, "dusk_sun": 1.0, "dusk_grey": 1.6, "night_sun": 1.0, "night_grey": 1.0},
+	"overcast": {"elev": 72.0, "energy_k": 0.5, "time_k": {"day": 1.0, "dusk": 0.45, "night": 0.04}, "color": Color(0.78, 0.84, 0.92), "soft_deg": 6.0},
+	"exposure": {"day": 1.0, "dusk": 1.05, "night": 1.2},
+	"fog": {"day_sun": 1.2, "day_grey": 1.0, "dusk_sun": 1.3, "dusk_grey": 1.0, "night_sun": 0.9, "night_grey": 0.9},
 	"fog_weather_k": 1.7, "rain_db": -10.0}
+## Небо над двором убежища по времени и погоде — те же панорамы, что у района ТЦ (RaidAtmosphere.hdri_sky).
+const SHELTER_SKY := {
+	"day": {"a": "res://assets/sky/kloppenheim_03_puresky.hdr", "exposure": 1.0, "sun_k": 0.9, "haze": 0.35},
+	"day_rain": {"a": "res://assets/sky/kloofendal_overcast_puresky.hdr", "exposure": 0.9, "sun_k": 0.0, "veil": 0.8, "haze": 0.55},
+	"day_fog": {"a": "res://assets/sky/kloofendal_overcast_puresky.hdr", "exposure": 1.05, "sun_k": 0.2, "veil": 0.4, "haze": 0.6},
+	"dusk": {"a": "res://assets/sky/kloppenheim_06_puresky.hdr", "exposure": 1.0, "sun_k": 1.0, "haze": 0.4},
+	"dusk_rain": {"a": "res://assets/sky/kloppenheim_01_puresky.hdr", "exposure": 0.9, "sun_k": 0.0, "veil": 0.8, "haze": 0.55},
+	"dusk_fog": {"a": "res://assets/sky/kloppenheim_01_puresky.hdr", "exposure": 1.05, "sun_k": 0.22, "veil": 0.4, "haze": 0.6}}
+## Двор котельной (убежище полуподвальное): отметка земли над полом; где кончается ровное место и с какого
+## расстояния идут бугры леса, их размах и подъём, м. Дверь выхода: угол и время открывания. Сбор перед
+## рейдом (RaidStartZone): план принят и все, кто в убежище, стоят в зоне — отсчёт countdown_sec, рейд.
+const SHELTER_YARD := {"ground": 1.2, "flat_margin_m": 4.0, "hills_from_m": 46.0, "hill_m": 2.4, "hill_lift_m": 0.5,
+	"door_open_deg": 100.0, "door_sec": 1.8, "start_radius": 4.0, "countdown_sec": 5.0}
 const RAID_POWER := {
 	"on": {"name": "Свет есть", "risk": 0},
 	"emergency": {"name": "Аварийное освещение", "risk": 1},

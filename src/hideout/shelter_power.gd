@@ -89,10 +89,6 @@ func _apply() -> void:
 				var material: StandardMaterial3D = mi.mesh.surface_get_material(index) as StandardMaterial3D
 				if material and material.resource_name == "WarmEmitter":
 					material.emission_energy_multiplier = 2.4 if enabled else 0.0
-	# запечённый рассеянный свет — свой вариант с лампами и без (ShelterWeather)
-	var weather: ShelterWeather = level.get_node_or_null("Weather") as ShelterWeather
-	if weather:
-		weather.refresh.call_deferred(true)
 	_refresh_reflections.call_deferred()
 
 ## Свет снаружи (солнце, дневной свет из окон) — не от генератора.

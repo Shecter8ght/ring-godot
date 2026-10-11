@@ -119,8 +119,20 @@ func _apply_hdri(e: Environment, sun: DirectionalLight3D) -> void:
 	if hdri_override != "" and not conf.is_empty():
 		conf["a"] = hdri_override
 		conf.erase("sun_u")
-	if conf.is_empty() or not ResourceLoader.exists(String(conf.get("a", ""))):
+	var sky: Sky = hdri_sky(conf, String(RaidConditions.current.weather), sun)
+	if sky == null:
 		return
+	e.sky = sky
+	e.background_energy_multiplier = 1.0
+
+
+## Небо из панорамы по записи conf {a, b, mix_b, rotation, sun_u, exposure, sun_k, haze, veil, …} и
+## погоде: панорама разворачивается солнцем к свету sun, сила света умножается на долю этой панорамы.
+## Общая для карт рейда и двора убежища (ShelterWeather). Нет панорамы — null.
+static func hdri_sky(conf: Dictionary, weather: String, sun: DirectionalLight3D) -> Sky:
+	if conf.is_empty() or not ResourceLoader.exists(String(conf.get("a", ""))):
+		return null
+	conf = conf.duplicate()
 	# где солнце на панораме — tools/sky_info.py
 	if not conf.has("sun_u") and FileAccess.file_exists(SKY_INFO):
 		var info: Variant = JSON.parse_string(FileAccess.get_file_as_string(SKY_INFO))
@@ -128,7 +140,7 @@ func _apply_hdri(e: Environment, sun: DirectionalLight3D) -> void:
 			var si: Dictionary = (info as Dictionary).get(String(conf.a).get_file().get_basename(), {})
 			if si.has("sun_u"):
 				conf["sun_u"] = si.sun_u
-	var w: Dictionary = Balance.HDRI_WEATHER.get(String(RaidConditions.current.weather), Balance.HDRI_WEATHER["clear"])
+	var w: Dictionary = Balance.HDRI_WEATHER.get(weather, Balance.HDRI_WEATHER["clear"])
 	var m := ShaderMaterial.new()
 	m.shader = load("res://src/world/hdri_sky.gdshader")
 	m.set_meta("hdri", true)
@@ -156,8 +168,7 @@ func _apply_hdri(e: Environment, sun: DirectionalLight3D) -> void:
 	var sky := Sky.new()
 	sky.sky_material = m
 	sky.radiance_size = Sky.RADIANCE_SIZE_256
-	e.sky = sky
-	e.background_energy_multiplier = 1.0
+	return sky
 
 
 ## Ночь: своё небо (звёзды, Луна), рассеянный свет ровным цветом, умеренное свечение; днём —

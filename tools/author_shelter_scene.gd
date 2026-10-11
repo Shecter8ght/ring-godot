@@ -114,14 +114,10 @@ func _make_materials() -> void:
 		if label == "Brick":
 			m.normal_scale = 0.7
 		if label == "WiredGlass":
-			# матовое армированное стекло светится рассеянным дневным светом снаружи котельной
-			m.emission_enabled = true
-			m.emission_texture = m.albedo_texture
-			m.emission = Color(0.80, 0.86, 0.92)
-			m.emission_energy_multiplier = 0.16
-			m.albedo_color = Color(0.62, 0.64, 0.64, 0.5)
+			# армированное стекло прозрачное: сквозь него видно двор, солнце проходит — на полу пятна с
+			# тенью переплёта. Само не светится: свет за окном настоящий (ShelterWeather)
+			m.albedo_color = Color(0.78, 0.84, 0.84, 0.2)
 			m.metallic_specular = 0.6
-			# полупрозрачное — пропускает солнце (ShelterWeather): на полу пятна с тенью переплёта
 			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		if label == "RangePaper":
 			# лист тира: пробоины рисуются в копию этой текстуры, поэтому без сжатия на видеокарте

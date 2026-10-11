@@ -58,6 +58,14 @@ var _inv_sig: String = ""
 var _floor_items: Array[HideoutFloorItem] = []
 
 
+## План рейда принят у стола планирования (в сети — хостом): теперь к воротам во дворе, в зону сбора
+## (RaidStartZone). Все, кто в убежище, стоят в зоне — отсчёт Balance.SHELTER_YARD.countdown_sec и рейд.
+var raid_plan_accepted: bool = false
+var _start_left: float = -1.0
+var _start_sync: float = 0.0
+var _start_label: Label
+
+
 ## Сколько держат «действие» рядом с напарником (обмен вещами начинается после Balance.TRADE.hold_sec).
 var _trade_hold: float = 0.0
 
@@ -107,6 +115,99 @@ func _ready() -> void:
 	_build_tipsy()
 	Net.scenes_changed.connect(_sync_others)
 	Net.enter_scene("hideout")
+
+
+# ---------------------------------------------------------------- выход в рейд пешком
+
+## Принять или отменить план рейда (окно стола планирования): соло — сам, в сети — только хост.
+func accept_raid_plan(on: bool) -> void:
+	if Net.is_networked() and not Net.is_host():
+		return
+	raid_plan_accepted = on
+	_start_left = -1.0
+	_start_sync = 0.0
+	notify("План принят — к воротам во дворе" if on else "План рейда отменён")
+
+
+## Хост считает, кто стоит в зоне сбора, ведёт отсчёт и начинает рейд; остальным — состояние 4 раза в с.
+## true — рейд начат: сцена уже снята с дерева, дальше в этом кадре ничего делать нельзя.
+func _tick_raid_start(delta: float) -> bool:
+	var zone: RaidStartZone = get_tree().get_first_node_in_group("raid_start_zones") as RaidStartZone
+	if zone == null or _player == null:
+		return false
+	if Net.is_networked() and not Net.is_host():
+		return false
+	var total: int = 1
+	var inside: int = 1 if zone.contains(_player.global_position) else 0
+	for id: Variant in _others:
+		var other: Player = _others[id] as Player
+		if other == null or not is_instance_valid(other):
+			continue
+		total += 1
+		if zone.contains(other.global_position):
+			inside += 1
+	if raid_plan_accepted and inside == total:
+		if _start_left < 0.0:
+			_start_left = float(Balance.SHELTER_YARD.countdown_sec)
+		_start_left -= delta
+		if _start_left <= 0.0:
+			return _launch_raid()
+	else:
+		_start_left = -1.0
+	_start_sync -= delta
+	if _start_sync <= 0.0:
+		_start_sync = 0.25
+		Net.broadcast_scene(self, &"_rpc_start_state", [raid_plan_accepted, inside, total, _start_left], false)
+	_show_start(raid_plan_accepted, inside, total, _start_left)
+	return false
+
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _rpc_start_state(accepted: bool, inside: int, total: int, left: float) -> void:
+	if accepted != raid_plan_accepted:
+		notify("План принят — к воротам во дворе" if accepted else "План рейда отменён")
+	raid_plan_accepted = accepted
+	_show_start(accepted, inside, total, left)
+
+
+## Надпись над зоной и подсказка тому, кто в ней стоит.
+func _show_start(accepted: bool, inside: int, total: int, left: float) -> void:
+	var zone: RaidStartZone = get_tree().get_first_node_in_group("raid_start_zones") as RaidStartZone
+	if zone == null or _start_label == null:
+		return
+	var here: bool = _player != null and zone.contains(_player.global_position)
+	var text: String = ""
+	if not accepted:
+		zone.show_state(false, "СБОР ПЕРЕД РЕЙДОМ")
+		if here:
+			text = "Сначала примите план рейда у стола планирования" if not Net.is_networked() or Net.is_host() else "План рейда принимает хост — у стола планирования"
+	elif left >= 0.0:
+		zone.show_state(true, "РЕЙД ЧЕРЕЗ %d" % int(ceil(left)))
+		text = "Рейд через %d…" % int(ceil(left))
+	else:
+		zone.show_state(true, "СБОР: %d / %d" % [inside, total])
+		if here or total > 1:
+			text = "Сбор у ворот: %d из %d. Ждём остальных." % [inside, total] if total > 1 else ""
+	_start_label.text = text
+	_start_label.visible = text != ""
+
+
+func _launch_raid() -> bool:
+	_start_left = -1.0
+	var block: String = Floors.start_block(Profile.floor)
+	if block != "":
+		raid_plan_accepted = false
+		notify(block)
+		return false
+	raid_plan_accepted = false
+	Floors.pay_fee(Profile.floor)
+	if Net.is_networked():
+		# все, кто в сети, идут по маршруту хоста (плата — с хоста)
+		Net.start_level.rpc(Floors.scene(Profile.floor), RaidConditions.next_own())
+	else:
+		Profile.pending_raid = true
+		get_tree().change_scene_to_file(Floors.scene(Profile.floor))
+	return true
 
 
 ## Пиво: чем больше выпито, тем сильнее качает (до 5 бутылок), проходит за TIPSY_SEC на бутылку.
@@ -367,6 +468,8 @@ func _process(delta: float) -> void:
 	if _profile_sig() != _inv_sig:
 		_from_profile()
 	_prompt.visible = false
+	if _tick_raid_start(delta):
+		return
 	if _ui.is_open():
 		return
 	# Tab — рюкзак и снаряжение (окно тайника) где угодно в убежище
@@ -449,6 +552,20 @@ func _build_hud() -> void:
 	_prompt.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	_prompt.add_theme_constant_override("outline_size", 6)
 	layer.add_child(_prompt)
+	_start_label = Label.new()
+	_start_label.anchor_left = 0.5
+	_start_label.anchor_right = 0.5
+	_start_label.offset_left = -500
+	_start_label.offset_right = 500
+	_start_label.offset_top = 96
+	_start_label.offset_bottom = 132
+	_start_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_start_label.add_theme_font_size_override("font_size", 24)
+	_start_label.add_theme_color_override("font_color", Color(0.75, 1.0, 0.75))
+	_start_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_start_label.add_theme_constant_override("outline_size", 6)
+	_start_label.visible = false
+	layer.add_child(_start_label)
 	_money = Label.new()
 	_money.offset_left = 24
 	_money.offset_top = 18

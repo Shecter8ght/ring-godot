@@ -51,10 +51,6 @@ window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/ring_tools/plugin.cfg")
-
 [input]
 
 move_forward={

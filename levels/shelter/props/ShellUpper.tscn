@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://levels/shelter/props/ShellUpper_00.res" id="1_dmatb"]
+
+[node name="ShellUpper" type="Node3D" unique_id=296452394]
+
+[node name="FinishedMesh_00" type="MeshInstance3D" parent="." unique_id=221159189]
+mesh = ExtResource("1_dmatb")

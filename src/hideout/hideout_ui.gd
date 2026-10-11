@@ -200,6 +200,8 @@ func _process(delta: float) -> void:
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
 	# количество к покупке в подписи нет: карточка правит цену на месте, поле ввода не теряет курсор
+	var plan_level: Node = get_tree().get_first_node_in_group("hideout_level")
+	sig += "|plan%s" % str(plan_level != null and bool(plan_level.get("raid_plan_accepted")))
 	sig += "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab, _sub_tab, _shop_sort, Settings.shop_loot]
 	sig += "|" + str(Profile.loadout_templates) + "|" + str(_sell_sel) + "|" + str(_sell_picks)
 	# собрание: кто в сети и где — окно выхода обновляется
@@ -1745,7 +1747,7 @@ func _build_upgrades() -> void:
 # ---------------------------------------------------------------- выход
 
 func _build_exit() -> void:
-	_title.text = "Выход в рейд"
+	_title.text = "План рейда"
 	var col := _column("С собой", 1.0)
 	for slot in Inventory.SLOTS:
 		var e: Dictionary = Profile.equipment.get(slot, {})
@@ -1767,24 +1769,32 @@ func _build_exit() -> void:
 	if fee > 0:
 		go.add_child(_text("Вылет — %s ₽" % InventoryUI.money(fee), Color(0.9, 0.75, 0.5)))
 	var block := Floors.start_block(Profile.floor)
-	if not Net.is_networked():
-		var solo := _button("Соло-рейд", func() -> void:
-			_confirm_raid(func() -> void:
-				Floors.pay_fee(Profile.floor)
-				Profile.pending_raid = true
-				get_tree().change_scene_to_file(Floors.scene(Profile.floor))))
-		solo.disabled = block != ""
-		go.add_child(solo)
-	elif Net.is_host():
-		# все, кто в сети, идут по маршруту хоста (плата — с хоста)
-		var all := _button("Рейд всем (%d в сети)" % (Net.player_names.size()), func() -> void:
-			_confirm_raid(func() -> void:
-				Floors.pay_fee(Profile.floor)
-				Net.start_level.rpc(Floors.scene(Profile.floor), RaidConditions.next_own())))
-		all.disabled = block != ""
-		go.add_child(all)
+	# в рейд выходят пешком: здесь план только принимают, а начинается рейд у ворот во дворе, когда
+	# все, кто в убежище, встанут в зону сбора (HideoutLevel._tick_raid_start)
+	var level: Node = get_tree().get_first_node_in_group("hideout_level")
+	var accepted: bool = level != null and bool(level.get("raid_plan_accepted"))
+	if Net.is_networked() and not Net.is_host():
+		go.add_child(_wrapped("План рейда принимает хост. Идёте по его маршруту и в его условия." if not accepted
+			else "Хост принял план. К воротам во дворе — рейд начнётся, когда все встанут в зону сбора.", Color(0.9, 0.8, 0.6)))
+	elif accepted:
+		go.add_child(_wrapped("План принят. Дверь тамбура, коридор, лестница — и к воротам во дворе. Рейд начнётся, когда все, кто в убежище, встанут в зону сбора.", Color(0.75, 1.0, 0.75)))
+		go.add_child(_button("Отменить план", func() -> void:
+			level.call("accept_raid_plan", false)
+			_sig = ""))
 	else:
-		go.add_child(_text("Рейд начинает хост — ждём его. Идёте по его маршруту и в его условия.", Color(0.9, 0.8, 0.6)))
+		var accept := _button("Принять план (%d в сети)" % Net.player_names.size() if Net.is_networked() else "Принять план", func() -> void:
+			_confirm_raid(func() -> void:
+				if level:
+					level.call("accept_raid_plan", true)
+				close_ui()))
+		accept.name = "AcceptRaidPlan"
+		accept.custom_minimum_size.y = 40
+		accept.disabled = block != "" or level == null
+		accept.add_theme_stylebox_override("normal", UiTheme.face(Color(0.5, 0.36, 0.14), Color(1.0, 0.8, 0.45), 2))
+		accept.add_theme_stylebox_override("hover", UiTheme.face(Color(0.62, 0.45, 0.18), Color(1.0, 0.9, 0.65), 2))
+		accept.add_theme_stylebox_override("pressed", UiTheme.face(Color(0.4, 0.28, 0.1), Color(1.0, 0.8, 0.45), 0))
+		go.add_child(accept)
+		go.add_child(_wrapped("После этого — пешком: дверь тамбура, коридор, лестница, ворота во дворе.", Color(0.7, 0.72, 0.7)))
 	if block != "":
 		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
 	_coop_block(go)
@@ -1801,8 +1811,8 @@ func _confirm_raid(go: Callable) -> void:
 	var d := ConfirmationDialog.new()
 	d.name = "RaidKitCheck"
 	d.title = "Проверка снаряжения"
-	d.dialog_text = "С собой нет:\n\n· " + "\n· ".join(gaps) + "\n\nВсё равно выйти в рейд?"
-	d.ok_button_text = "Выйти в рейд"
+	d.dialog_text = "С собой нет:\n\n· " + "\n· ".join(gaps) + "\n\nВсё равно идти в рейд?"
+	d.ok_button_text = "Принять план"
 	d.cancel_button_text = "Остаться"
 	d.confirmed.connect(go)
 	d.visibility_changed.connect(func() -> void:

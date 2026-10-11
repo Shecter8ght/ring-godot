@@ -1,0 +1,19 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_base.jpg" id="1_edpal"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_orm.jpg" id="2_7axpe"]
+[ext_resource type="Texture2D" path="res://assets/shelter/textures/DampConcrete_normal.jpg" id="3_css2y"]
+
+[resource]
+resource_name = "DampConcreteOutdoor"
+albedo_color = Color(1.55, 1.62, 1.7, 1)
+albedo_texture = ExtResource("1_edpal")
+metallic_specular = 0.3
+roughness_texture = ExtResource("2_7axpe")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.5
+normal_texture = ExtResource("3_css2y")
+ao_enabled = true
+ao_texture = ExtResource("2_7axpe")
+texture_filter = 5

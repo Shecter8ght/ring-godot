@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://levels/shelter/Shelter_Interior.tscn" id="1_shelter"]
 [ext_resource type="PackedScene" path="res://scenes/hideout/laser_engraver.tscn" id="engraver_module"]
+[ext_resource type="PackedScene" path="res://levels/shelter/Shelter_Exterior.tscn" id="shelter_exterior"]
 
 [sub_resource type="Shader" id="Shader_kqklu"]
 code = "
@@ -130,6 +131,8 @@ visible = false
 
 [node name="LaserEngraver" parent="." index="18" unique_id=1634068650 instance=ExtResource("engraver_module")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.7, 0.9, -4.25)
+
+[node name="Exterior" parent="." instance=ExtResource("shelter_exterior")]
 
 [editable path="Architecture/SH_Int_Floor_MainHub"]
 [editable path="Architecture/SH_Int_Ceiling_MainHub"]
@@ -268,7 +271,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.7, 0.9, -4.25)
 [editable path="Props/SH_Int_EquipmentBays/Bay_03_Locker"]
 [editable path="Props/SH_Int_EquipmentBays/Bay_03_Pack"]
 [editable path="Props/SH_Int_EquipmentBays/Bay_03_Boots"]
-[editable path="Props/SH_Int_Entry/EntryBlastDoor"]
 [editable path="Props/SH_Int_Entry/UnloadingBench"]
 [editable path="Props/SH_Int_Entry/ReturnLocker"]
 [editable path="Props/SH_Int_Entry/UnloadingCase"]
