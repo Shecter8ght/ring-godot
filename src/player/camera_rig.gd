@@ -1476,7 +1476,14 @@ func _update_hud(pl: Player) -> void:
 		_weapon_label.text = ""
 		return
 	if pl.weapon_id == "":
-		_weapon_label.text = "без оружия      гранаты × %d" % pl.grenade_count()
+		var put_away: String = "без оружия"
+		if pl.holstered and pl.weapon_slot != "":
+			# убрано повторным нажатием клавиши ствола — подсказать, как достать
+			var away: String = String(pl.entry_of(pl.weapon_slot).get("id", ""))
+			var slot_n: int = pl.weapon_keys().find(pl.weapon_slot) + 1
+			put_away = "%s убрано%s" % [ItemDb.item_name(away) if away != "" else "оружие",
+				" (%s — достать)" % PauseMenu.key_name("weapon_%d" % slot_n) if slot_n > 0 and InputMap.has_action("weapon_%d" % slot_n) else ""]
+		_weapon_label.text = "%s      гранаты × %d" % [put_away, pl.grenade_count()]
 		return
 	var spec := pl.spec()
 	if spec.is_empty():

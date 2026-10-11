@@ -58,6 +58,9 @@ var sandbox_weapons: Dictionary = {}
 ## Прицеливание «с завалом»: автомат повёрнут на 45° затвором к глазам (СКМ в прицеле, Balance.AIM_CANT).
 ## Только у своего игрока и только вид и точность — на экземпляре оружия не хранится.
 var aim_cant: bool = false
+## Оружие убрано (за спину / в кобуру) повторным нажатием его клавиши: руки пусты, бежит быстрее и
+## дольше (Balance.HOLSTER); слот в weapon_slot остаётся — та же клавиша достаёт обратно.
+var holstered: bool = false
 ## Тир убежища: ствол стойки тира (запись оружия; пусто — тира нет). Ключ его слота — RANGE_KEY.
 var range_weapon: Dictionary = {}
 const RANGE_KEY := "range"
@@ -354,16 +357,11 @@ func ui_blocked() -> bool:
 	return false
 
 
-## Клавиши движения и стойки не для персонажа: набирают текст (поиск у торговца, ник, чат) или открыто
-## окно убежища (торговец, тайник, верстак, терминал) — иначе, печатая название, игрок уходил от
-## прилавка. В рейде с открытым рюкзаком идти по-прежнему можно.
+## Клавиши движения и стойки не для персонажа: открыто любое окно (рюкзак и обыск в рейде, торговец,
+## тайник, верстак, терминал, обмен, карта, журнал) или набирают текст — иначе, печатая название у
+## торговца, игрок уходил от прилавка, а с открытым рюкзаком бегал по рейду (владелец, 2026-10-11).
 func keys_blocked() -> bool:
-	if PauseMenu.shown or UiTheme.typing():
-		return true
-	for n in get_tree().get_nodes_in_group("esc_windows"):
-		if (n is HideoutUI or n is TerminalUI) and n.has_method("is_open") and bool(n.call("is_open")):
-			return true
-	return false
+	return PauseMenu.shown or ui_blocked()
 
 
 func _can_sprint() -> bool:
@@ -380,6 +378,9 @@ func _tick_stamina(delta: float) -> void:
 			k = Balance.STAMINA_HEAT
 		# адреналин: дыхания хватает дольше
 		k *= 1.0 - float(Balance.STRESS.adr_stamina) * stress_k()
+		# оружие убрано — бежать легче
+		if hands_free():
+			k *= float(Balance.HOLSTER.stamina_k)
 		# рюкзак: чем больше, тем быстрее садится выносливость в спринте (data/items.json sprint_k)
 		stamina = maxf(0.0, stamina - Balance.STAMINA_DRAIN * k * carry_stamina_k() * ItemDb.bag_sprint_k(inventory.equipment) * delta)
 		_rest_t = Balance.STAMINA_REGEN_DELAY
@@ -1112,7 +1113,11 @@ func _combat(delta: float) -> void:
 	var keys := weapon_keys()
 	for i in range(keys.size()):
 		if Input.is_action_just_pressed("weapon_%d" % (i + 1)) and String(keys[i]) != "" and String(keys[i]) in allowed_weapons():
-			_switch(String(keys[i]))
+			# клавиша ствола, который уже в руках, — убрать его; ещё раз — достать
+			if String(keys[i]) == weapon_slot and weapon_id != "":
+				_holster()
+			else:
+				_switch(String(keys[i]))
 	# лёжа раненым и таща раненого — только пистолет (нет — руки пусты, гранаты можно)
 	if not loadout_mode and weapon_slot == "" and not _sandbox_picked:
 		# песочница: сразу в руках пистолет (клавиша 2), как было всегда
@@ -1815,6 +1820,11 @@ func ammo_reserve() -> int:
 func _loadout_tick() -> void:
 	if not inventory.loadout_ready:
 		return
+	if holstered:
+		# убранный ствол сам в руки не возвращается, пока он есть в слоте
+		if weapon_slot != "" and not _base_entry(weapon_slot).is_empty():
+			return
+		holstered = false
 	# в слоте теперь другое оружие (сменили в окне) — взять его в руки
 	if weapon_slot != "" and weapon_id != String(_base_entry(weapon_slot).get("id", "")) and not _base_entry(weapon_slot).is_empty():
 		var k := weapon_slot
@@ -1831,10 +1841,32 @@ func _loadout_tick() -> void:
 			_switch(pick, false)
 
 
+## Убрать оружие из рук (за спину / в кобуру): состояние уходит хосту, как при смене; слот остаётся.
+func _holster() -> void:
+	if weapon_id == "":
+		return
+	cancel_weapon_action()
+	_cancel_nade_aim()
+	aim_cant = false
+	if weapon_slot != "" and _ws.has(weapon_slot):
+		_send_ws(weapon_slot)
+	_play_weapon_sound(spec(), "holster", -6.0)
+	holstered = true
+	weapon_id = ""
+	reload_timer = 0.0
+	_aim_t = 0.0
+
+
+## Руки пусты (оружие убрано или его нет): бежит быстрее и дольше.
+func hands_free() -> bool:
+	return weapon_id == "" and not is_downed() and not is_burdened()
+
+
 ## Смена оружия: состояние прежнего уходит хосту, перезарядка прерывается.
 func _switch(key: String, sound: bool = true) -> void:
 	if key == weapon_slot and weapon_id != "" and not _base_entry(key).is_empty():
 		return
+	holstered = false
 	cancel_weapon_action()
 	aim_cant = false
 	if weapon_slot != "" and _ws.has(weapon_slot):
@@ -2416,9 +2448,11 @@ func _stance_speed() -> float:
 			s = Balance.PLAYER_PRONE_SPEED
 		_:
 			s = Balance.PLAYER_SPRINT_SPEED if _can_sprint() and Input.is_action_pressed("sprint") and not aiming else Balance.PLAYER_WALK_SPEED
-			# адреналин: бежит быстрее
+			# адреналин: бежит быстрее; руки пусты (оружие убрано) — тоже
 			if s == Balance.PLAYER_SPRINT_SPEED:
 				s *= 1.0 + float(Balance.STRESS.adr_speed) * stress_k()
+				if hands_free():
+					s *= float(Balance.HOLSTER.sprint_k)
 	if aiming:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
 	# перегруз: тяжелее free_kg — медленнее
