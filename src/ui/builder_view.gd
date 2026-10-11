@@ -200,10 +200,10 @@ func focus(p: Vector3) -> void:
 	_want.z = 1.1
 
 
-func focus_mark() -> void:
+func focus_mark(decal_name: String = "LaserMark") -> void:
 	if _model == null:
 		return
-	var marks: Array[Node] = _model.find_children("LaserMark", "Decal", true, false)
+	var marks: Array[Node] = _model.find_children(decal_name, "Decal", true, false)
 	if marks.is_empty():
 		return
 	var left: bool = (marks[0] as Node3D).basis.y.x > 0

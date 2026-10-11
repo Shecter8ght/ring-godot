@@ -422,7 +422,7 @@ func _show_gun() -> void:
 	if not equipment.has(_active):
 		return
 	var e: Dictionary = equipment[_active]
-	var gun := WeaponModels.build(String(e.id), e.get("mods", {}), 1, WeaponCondition.percent(e), WeaponMods.mag_state(e), e.get("engraving", {}))
+	var gun := WeaponModels.build(String(e.id), e.get("mods", {}), 1, WeaponCondition.percent(e), WeaponMods.mag_state(e), WeaponMark.marks(e))
 	for l in gun.find_children("Flashlight_*", "SpotLight3D", true, false):
 		_fade(l as Light3D)
 	# в правой руке модели (кость руки): идёт за руками в любой позе; без Persona — у груди

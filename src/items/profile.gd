@@ -945,6 +945,10 @@ static func return_loadout(eq: Dictionary, items: Array, loot_value: int = 0) ->
 		trust += Balance.TRUST_BONUS
 	equipment = eq.duplicate(true)
 	backpack = items.duplicate(true)
+	# наклейка «Счёт» на вынесенном в руках стволе — зарубка за эвакуацию
+	for slot: String in ["primary", "secondary"]:
+		if equipment.get(slot) is Dictionary:
+			Stickers.tally_extract(equipment[slot])
 	_fix_numbers()
 	_fit_grids()
 	save()

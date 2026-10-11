@@ -43,7 +43,9 @@ func _ready() -> void:
 	pl.health.head_protected = func() -> bool: return true
 	pl.global_position = SectorBuilder.polar(-100.0, 72.0) + Vector3(0, 0.1, 0)
 	await _frames(5)
-	await _tap("weapon_1")
+	# клавиша ствола, который уже в руках, убирает его — нажимаем, только если в руках не он
+	if pl.weapon_slot != "primary" or pl.weapon_id == "":
+		await _tap("weapon_1")
 	_check("в руках AK-12 из снаряжения", pl.weapon_id == "wpn_ar_01" and pl.weapon_slot == "primary", pl.weapon_id)
 
 	# CASE 4: фонарь слева и ЛЦУ справа — оба на модели одновременно

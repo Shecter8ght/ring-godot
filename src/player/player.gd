@@ -61,6 +61,7 @@ var aim_cant: bool = false
 ## Оружие убрано (за спину / в кобуру) повторным нажатием его клавиши: руки пусты, бежит быстрее и
 ## дольше (Balance.HOLSTER); слот в weapon_slot остаётся — та же клавиша достаёт обратно.
 var holstered: bool = false
+var _ui_blocked_ms: int = -100000
 ## Тир убежища: ствол стойки тира (запись оружия; пусто — тира нет). Ключ его слота — RANGE_KEY.
 var range_weapon: Dictionary = {}
 const RANGE_KEY := "range"
@@ -867,7 +868,8 @@ func _physics_process(delta: float) -> void:
 	if weapon_slot != "":
 		var we := weapon_entry()
 		weapon_condition = WeaponCondition.percent(we)
-		weapon_engraving = (we.get("engraving", {}) as Dictionary).duplicate(true)
+		# гравировка и наклейки вместе: по этому словарю модель строится у всех игроков
+		weapon_engraving = WeaponMark.marks(we)
 		if _pm_action.is_empty():
 			ammo = _state_rounds(weapon_slot)
 			weapon_rounds = ammo
@@ -1107,12 +1109,15 @@ func _combat(delta: float) -> void:
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
 	if not combat_enabled or ui_blocked():
 		_cancel_nade_aim()
+		_ui_blocked_ms = Time.get_ticks_msec()
 		return
 	if loadout_mode:
 		_loadout_tick()
 	var keys := weapon_keys()
+	# цифра, которой только что выбрали пункт в окне (лечение: «1 — бинт»), — не команда оружию
+	var fresh_ui: bool = Time.get_ticks_msec() - _ui_blocked_ms < 200
 	for i in range(keys.size()):
-		if Input.is_action_just_pressed("weapon_%d" % (i + 1)) and String(keys[i]) != "" and String(keys[i]) in allowed_weapons():
+		if Input.is_action_just_pressed("weapon_%d" % (i + 1)) and not fresh_ui and String(keys[i]) != "" and String(keys[i]) in allowed_weapons():
 			# клавиша ствола, который уже в руках, — убрать его; ещё раз — достать
 			if String(keys[i]) == weapon_slot and weapon_id != "":
 				_holster()

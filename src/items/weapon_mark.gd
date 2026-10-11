@@ -4,6 +4,8 @@ extends Node3D
 
 var weapon_id: String = ""
 var inscription: Dictionary = {}
+## Наклейка вместо гравировки: {id, site, scale, n} (Stickers); preview — образец в окне верстака.
+var sticker: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _surfaces: Dictionary = {}
 
@@ -22,7 +24,21 @@ const SCALES := [[0.7, "Мелко"], [1.0, "Обычно"], [1.5, "Крупно
 
 
 static func key(mark: Dictionary) -> String:
-	return "%s|%s|%s|%s|%.2f" % [String(mark.get("text", "")), String(mark.get("date", "")), String(mark.get("serial", "")), String(mark.get("site", "right_1")), float(mark.get("scale", 1.0))] if not mark.is_empty() else ""
+	if mark.is_empty():
+		return ""
+	var out: String = "%s|%s|%s|%s|%.2f" % [String(mark.get("text", "")), String(mark.get("date", "")), String(mark.get("serial", "")), String(mark.get("site", "right_1")), float(mark.get("scale", 1.0))]
+	for st: Variant in mark.get("stickers", []):
+		out += "|%s:%s:%.2f:%d" % [String(st.get("id", "")), String(st.get("site", "")), float(st.get("scale", 1.0)), int(st.get("n", 0))]
+	return out
+
+
+## Всё, что нанесено на ствол, одним словарём для моделей и сети: гравировка и "stickers" — наклейки.
+static func marks(entry: Dictionary) -> Dictionary:
+	var out: Dictionary = (entry.get("engraving", {}) as Dictionary).duplicate(true)
+	var list: Array = Stickers.of(entry)
+	if not list.is_empty():
+		out["stickers"] = list.duplicate(true)
+	return out
 
 
 ## Позиции привязаны к коробке, рукоятке или затвору, вне магазинов и сменных обвесов.
@@ -67,7 +83,21 @@ static func make(entry: Dictionary, text: String, site: String = "right_1") -> D
 
 
 static func attach(root: Node3D, id: String, mark: Dictionary) -> void:
-	if mark.is_empty() or String(mark.get("text", "")) == "":
+	if mark.is_empty():
+		return
+	var index: int = 0
+	for st: Variant in mark.get("stickers", []):
+		if not st is Dictionary:
+			continue
+		var paper: WeaponMark = WeaponMark.new()
+		paper.name = "Sticker%d" % index
+		index += 1
+		paper.weapon_id = id
+		paper.sticker = (st as Dictionary).duplicate(true)
+		paper.inscription = {"site": String(st.get("site", "right_1")), "scale": float(st.get("scale", 1.0))}
+		paper.set_meta("weapon_clearance_ignore", true)
+		root.add_child(paper)
+	if String(mark.get("text", "")) == "":
 		return
 	var node: WeaponMark = WeaponMark.new()
 	node.name = "Engraving"
@@ -113,7 +143,8 @@ func _build() -> void:
 			best = mesh
 	if best == null:
 		return
-	var maps: Dictionary = await _maps()
+	var paper: bool = not sticker.is_empty()
+	var maps: Dictionary = _sticker_maps() if paper else await _maps()
 	if not is_inside_tree() or not is_instance_valid(best) or maps.is_empty():
 		return
 	var bounds: AABB = best.get_aabb()
@@ -122,12 +153,19 @@ func _build() -> void:
 	var width: float = minf(float(WeaponDb.weapon(weapon_id).get("engraving_width", Balance.ENGRAVING.pistol_width if pistol else Balance.ENGRAVING.width)) * scale_k,
 		bounds.size.z * (0.62 if scale_k <= 1.0 else 0.92))
 	var height: float = minf(width / 4.0, bounds.size.y * (0.65 if scale_k <= 1.0 else 0.9))
+	if paper:
+		# наклейка: свой размер и свои пропорции, не шире детали
+		var ratio: float = StickerArt.aspect(String(sticker.get("id", "")))
+		height = minf(float(Balance.STICKERS.pistol_size_m if pistol else Balance.STICKERS.size_m) * scale_k, bounds.size.y * 0.92)
+		height = minf(height, bounds.size.z * 0.9 / ratio)
+		width = height * ratio
 	if width < 0.012 or height < 0.004:
 		return
 	# Свой слой получателя исключает ладонь и соседние детали из проекции.
 	best.layers |= 1 << 18
 	var decal: Decal = Decal.new()
-	decal.name = "LaserMark"
+	# наклеек на детали несколько — у каждой своё имя (образец в окне верстака ищут по «StickerPreview»)
+	decal.name = ("StickerPreview" if bool(sticker.get("preview", false)) else "StickerMark_" + String(name)) if paper else "LaserMark"
 	decal.cull_mask = 1 << 18
 	# Объём только проецирует на существующую поверхность; рукоятка округлая, ей нужен запас.
 	decal.size = Vector3(width, 0.028 if pistol else 0.008, height)
@@ -138,9 +176,9 @@ func _build() -> void:
 	decal.distance_fade_begin = float(Balance.ENGRAVING.fade_begin)
 	decal.distance_fade_length = float(Balance.ENGRAVING.fade_length)
 	decal.texture_albedo = maps.albedo
-	decal.texture_normal = maps.normal
+	decal.texture_normal = maps.get("normal")
 	decal.texture_orm = maps.orm
-	decal.modulate = Color(0.8, 0.8, 0.8)
+	decal.modulate = Color(1, 1, 1) if paper else Color(0.8, 0.8, 0.8)
 	var side: int = int(_position().side)
 	decal.basis = Basis(Vector3(0, 0, -side), Vector3(side, 0, 0), Vector3(0, -1, 0))
 	decal.position = _surface(best, bounds)
@@ -202,6 +240,20 @@ func _attachment(mesh: Node, root: Node) -> bool:
 			return true
 		parent = parent.get_parent()
 	return false
+
+
+## Наклейка: готовый рисунок (StickerArt), гладкая плёнка без рельефа.
+func _sticker_maps() -> Dictionary:
+	var signature: String = "sticker|%s|%d" % [String(sticker.get("id", "")), int(sticker.get("n", 0))]
+	if _textures.has(signature):
+		return _textures[signature]
+	var orm: Image = Image.create(1, 1, false, Image.FORMAT_RGB8)
+	orm.fill(Color(1.0, 0.42, 0.0))
+	var maps: Dictionary = {"albedo": StickerArt.texture(String(sticker.get("id", "")), int(sticker.get("n", 0))), "orm": ImageTexture.create_from_image(orm)}
+	if _textures.size() >= int(Balance.ENGRAVING.cache):
+		_textures.clear()
+	_textures[signature] = maps
+	return maps
 
 
 func _maps() -> Dictionary:

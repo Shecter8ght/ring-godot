@@ -837,7 +837,7 @@ func _refresh_model() -> void:
 	var e: Dictionary = _draft_entry()
 	var mag: String = WeaponMods.mag_state(e)
 	var key: String = ItemThumbs.key_of({"id": _weapon.id, "mods": mods, "dur": _weapon.get("dur", 100.0), "mag": e.get("mag", {})}) + "|" + mag + "|" + str(mods.size())
-	_view.show_build(String(_weapon.id), mods, WeaponCondition.percent(_weapon), mag, key + WeaponMark.key(_weapon.get("engraving", {})), _weapon.get("engraving", {}))
+	_view.show_build(String(_weapon.id), mods, WeaponCondition.percent(_weapon), mag, key + WeaponMark.key(WeaponMark.marks(_weapon)), WeaponMark.marks(_weapon))
 
 
 func _row_style(selected: bool) -> StyleBoxFlat:

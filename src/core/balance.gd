@@ -1112,6 +1112,11 @@ const ENGRAVING := {"charges": 3, "max_text": 24, "width": 0.065, "pistol_width"
 	"head_value": 12000, "spent_value": 500, "guards": 3, "guard_radius": 8.0,
 	"parts_loot": {"engraver_frame": {"tables": ["tools"], "chance": 0.025, "value": 8500},
 		"engraver_controller": {"tables": ["electronics"], "chance": 0.025, "value": 6000}}}
+## Наклейки на оружии (Stickers, решения владельца 2026-10-11): не больше max на стволе; «Счёт» (tally)
+## получает зарубку за эвакуацию со стволом, до tally_max; сторона наклейки на длинном стволе и на
+## пистолете, м (× размер по выбору, WeaponMark.SCALES); aspect — ширина к высоте, если не квадрат.
+const STICKERS := {"max": 3, "tally": "sticker_tally", "tally_max": 25, "size_m": 0.034, "pistol_size_m": 0.022,
+	"ids": ["sticker_skull", "sticker_tally", "sticker_shark", "sticker_perimeter"], "aspect": {"sticker_tally": 2.0}}
 ## Возврат оставленного оружия в следующих рейдах владельца в той же зоне кампании.
 const WEAPON_RECOVERY := {"raids": 5, "chance": 0.25, "checkpoint_sec": 1.0}
 

@@ -44,9 +44,9 @@ static func key_of(entry: Dictionary) -> String:
 		return ""
 	var mods: Dictionary = entry.get("mods", {})
 	var mag: String = WeaponMods.mag_state(entry)
-	if mods.is_empty() and mag == "*" and (entry.get("engraving", {}) as Dictionary).is_empty():
+	if mods.is_empty() and mag == "*" and WeaponMark.marks(entry).is_empty():
 		return ""
-	return WeaponCondition.model_key(id, mods, WeaponCondition.percent(entry), mag) + "|" + _placement(mods) + "|" + WeaponMark.key(entry.get("engraving", {}))
+	return WeaponCondition.model_key(id, mods, WeaponCondition.percent(entry), mag) + "|" + _placement(mods) + "|" + WeaponMark.key(WeaponMark.marks(entry))
 
 
 ## Пазы, стороны и углы в ключ: сдвинул прицел — новая миниатюра.
@@ -120,7 +120,7 @@ func _shoot(key: String, entry: Dictionary) -> void:
 	fill.light_color = Color(0.75, 0.85, 1.0)
 	fill.light_energy = 0.9
 	vp.add_child(fill)
-	var model: Node3D = WeaponModels.build(id, entry.get("mods", {}), 0, WeaponCondition.percent(entry), WeaponMods.mag_state(entry), entry.get("engraving", {}))
+	var model: Node3D = WeaponModels.build(id, entry.get("mods", {}), 0, WeaponCondition.percent(entry), WeaponMods.mag_state(entry), WeaponMark.marks(entry))
 	vp.add_child(model)
 	# фонарь и лазер в миниатюре не светят
 	for l: Node in model.find_children("*", "Light3D", true, false):

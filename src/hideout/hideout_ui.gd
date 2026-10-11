@@ -22,6 +22,8 @@ var _sig: String = ""
 var _trader: Dictionary = {}
 ## Верстак: какое оружие собираем (слот снаряжения) и его витрина.
 var _wb_slot: String = "primary"
+## Верстак: "build" — обвесы и ремонт, "stickers" — наклейки на оружие (StickerPanel).
+var _wb_mode: String = "build"
 ## Торговец: вкладка, количество расходников к покупке, оружие на схеме обвеса (где и uid).
 var _trader_tab: String = "buy"
 ## Куда класть купленное: рюкзак (по умолчанию — собираешься в рейд) или тайник (стеллаж).
@@ -191,6 +193,9 @@ func _process(delta: float) -> void:
 		close_ui()
 		return
 	if _kind == HideoutStation.Kind.ENGRAVER and _sig == "engraver":
+		return
+	# страница наклеек — своя панель, сама следит за вещами (как окно гравировщика)
+	if _kind == HideoutStation.Kind.WORKBENCH and _wb_mode == "stickers" and _sig == "stickers":
 		return
 	var sig := "%d|%d|%s|%s|%s|%s|%s|%s|%d|%s|%s|%s" % [_kind, Profile.money, str(Profile.stash), str(Profile.equipment), str(Profile.backpack), _wb_slot,
 		Profile.floor, str(Profile.floors_open), Profile.trust, str(Profile.pocket), str(Profile.modules), str(Profile.missions_active) + str(Profile.next_conditions)]
@@ -1932,12 +1937,24 @@ func _floors_column() -> void:
 
 func _build_workbench() -> void:
 	_title.text = "Верстак — обвесы и ремонт"
+	if _wb_mode == "stickers":
+		_title.text = "Верстак — наклейки"
+		var page := VBoxContainer.new()
+		page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		page.add_theme_constant_override("separation", 8)
+		_cols.add_child(page)
+		_workbench_modes(page)
+		page.add_child(StickerPanel.new())
+		_sig = "stickers"
+		return
 	if not Profile.equipment.has(_wb_slot):
 		_wb_slot = "secondary" if Profile.equipment.has("secondary") else "primary"
 	var left := VBoxContainer.new()
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.add_theme_constant_override("separation", 8)
 	_cols.add_child(left)
+	_workbench_modes(left)
 	var tabs := HBoxContainer.new()
 	left.add_child(tabs)
 	for ws in ["primary", "secondary"]:
@@ -1988,6 +2005,22 @@ func _build_workbench() -> void:
 				row.add_child(_button("Вставить", func() -> void: Profile.fit_part("equip:" + _wb_slot, -1, "backpack" if bp else "stash", idx, "")))
 				right.add_child(row)
 	_build_repairs()
+
+
+## Переключатель страниц верстака: обвесы и ремонт / наклейки.
+func _workbench_modes(parent: Container) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	parent.add_child(row)
+	for pair: Array in [["build", "Обвесы и ремонт"], ["stickers", "Наклейки"]]:
+		var mode: String = pair[0]
+		var b := _button(String(pair[1]), func() -> void:
+			_wb_mode = mode
+			_sig = "")
+		b.toggle_mode = true
+		b.button_pressed = _wb_mode == mode
+		b.custom_minimum_size.y = 32
+		row.add_child(b)
 
 
 ## Ремонт — своя колонка верстака: всё изношенное из снаряжения, тайника и рюкзака плашками, сразу

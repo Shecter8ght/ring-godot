@@ -134,6 +134,11 @@ func _build(entry: Dictionary) -> void:
 	text.add_theme_font_size_override("bold_font_size", 16)
 	text.add_theme_color_override("default_color", Color(0.9, 0.89, 0.85))
 	text.text = describe(id)
+	if not Stickers.of(entry).is_empty():
+		var names: Array[String] = []
+		for st: Variant in Stickers.of(entry):
+			names.append(Stickers.label(id, st))
+		text.add_text("\nНаклейки: %s.\n" % "; ".join(names))
 	var engraving: Dictionary = entry.get("engraving", {})
 	if not engraving.is_empty():
 		text.append_text("\n\n[b]Лазерная гравировка[/b]\n")
