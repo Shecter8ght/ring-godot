@@ -3,7 +3,7 @@ extends Node
 ## Шаги — звук у каждого peer: по перемещению родителя (своего игрока, чужого — по синхронизации,
 ## мародёра — тоже), поэтому в коопе слышно и напарника, и мародёров, которых считает хост.
 ## Темп — от скорости (Balance.STEP_*), бег — отдельными записями, поверхность — под ногами
-## (Audio.step: плитка/бетон, асфальт, металл, снег), левая/правая — чуть разным тоном.
+## (Audio.step: плитка/бетон, асфальт, металл, снег), левая/правая — источник у стопы и чуть разный тон.
 ## Шум для слуха AI сюда не относится — его шлёт Player._footsteps (только свой игрок).
 
 ## () -> float: насколько тише/громче шаг сейчас (присел, лёг), дБ. Пусто — 0.
@@ -59,4 +59,4 @@ func _process(delta: float) -> void:
 	if special != "":
 		Audio.play(special, pos, extra)
 		return
-	Audio.step(pos, _speed > Balance.STEP_RUN_SPEED, ai, extra, _left)
+	Audio.step(pos, _speed > Balance.STEP_RUN_SPEED, ai, extra, _left, (get_parent() as Node3D).global_basis.x)

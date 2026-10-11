@@ -956,6 +956,12 @@ const STEP_STRIDE := 1.2
 const STEP_INTERVAL := [0.26, 0.75]
 const STEP_RUN_SPEED := 3.8
 const STEP_STANCE_DB := {"stand": 0.0, "crouch": -8.0, "prone": -14.0}
+## Источник у стопы даёт мягкое чередование панорамы, включая поворот персонажа.
+const STEP_FOOT_SIDE_M := 0.12
+## Свои записи владельца — только ходьба по мокрому асфальту; бег пока отдельным старым набором.
+## Плёнка сохнет раньше луж, поэтому вода под ногами остаётся слышна после дождя.
+const WET_STEPS := {"film_min": 0.35, "puddle_min": 0.2, "roof_lift": 0.35, "roof_height": 128.0,
+	"sound": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true}}
 const AUDIO_OCCLUDED_DB := 8.0
 const AUDIO_OCCLUDED_CUTOFF := 700.0
 

@@ -345,3 +345,14 @@ FPS-руки, их сетка, материалы и веса повторно �
 FPS с руками и патронами — 21 396. Скрипты: `tools/prepare_flare_pistol_codex.py`,
 `tools/animate_flare_pistol_codex.py`. Исходники — `_asset_src/flare_pistol_codex/` и
 `E:/Models Blender/Ракетница — Codex/game_codex/`. Подробности: `docs/assets/flare_pistol_codex.md`.
+
+## Собственные записи шагов владельца, iPhone (2026-10-11)
+
+`assets/audio/steps/asphalt_wet_01.ogg` — `asphalt_wet_16.ogg`: настоящая ходьба по мокрому
+асфальту с неглубокими лужами. Автор и правообладатель — Shecter8ght, владелец RING;
+он предоставил две свои записи и поручил обработать и использовать их в игре. CC0 не объявляется.
+Исходники M4A/AAC (были названы `.ogg`), их побайтные копии и `license.txt` —
+`_asset_src/owner_wet_asphalt/`, исходная папка `Записанные звуки/` сохранена.
+Очистка и нарезка: `tools/prepare_owner_footsteps.py`, рецепт с хешами и границами —
+`data/audio_recipes/owner_wet_asphalt.json`. Моно Vorbis, 48 кГц, без искусственной реверберации
+и записанной в файл панорамы; пространственное положение определяет игра.

@@ -25,6 +25,7 @@ const KINDS := {
 	"step_stone_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
 	"step_dirt": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
 	"step_dirt_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
+	"step_asphalt_wet": Balance.WET_STEPS.sound,
 	"step_snow": {"db": -16.0, "unit": 3.0, "max": 24.0, "occlude": true},
 	"step_snow_run": {"db": -13.0, "unit": 3.0, "max": 30.0, "occlude": true},
 	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
@@ -302,7 +303,7 @@ func _on_audio_node_added(node: Node) -> void:
 
 
 ## Шаг в точке pos: поверхность под ногами, бег/шаг, мародёр (ботинки ниже и громче), левая/правая.
-func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool) -> void:
+func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right: Vector3 = Vector3.ZERO) -> void:
 	# дальше, чем слышно бег, — не считаем (24 мародёра шагают всё время)
 	if _has_ears() and _listener_pos().distance_to(pos) > float(KINDS.step_stone_run["max"]):
 		return
@@ -312,12 +313,32 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool) -> voi
 	var db := extra_db + (1.5 if ai else 0.0)
 	var has_run_set := sset in ["stone", "dirt", "snow"]
 	var kind := "step_%s%s" % [sset, "_run" if run and has_run_set else ""]
-	play(kind, pos, db, pitch)
+	if surf == "asphalt" and not run and _wet_asphalt_at(pos):
+		kind = "step_asphalt_wet"
+	# Записи моно: направление определяют стопа и уши в мире, а не панорама внутри файла.
+	var sound_pos: Vector3 = pos + right.normalized() * Balance.STEP_FOOT_SIDE_M * (-1.0 if left else 1.0)
+	play(kind, sound_pos, db, pitch)
 	if run:
 		play("gear_rattle", pos, db - 5.0, pitch)
 	stepped.emit(kind, surf, pos)
 	if surf == "metal":
-		play("step_metal", pos, db + (2.0 if run else 0.0), pitch)
+		play("step_metal", sound_pos, db + (2.0 if run else 0.0), pitch)
+
+
+## Под навесом асфальт сухой, как в шейдере покрытия; погода проверяется у шагающего, не у слушателя.
+func _wet_asphalt_at(pos: Vector3) -> bool:
+	var weather: RaidWeather = RaidWeather.current
+	if weather == null:
+		return false
+	var cfg: Dictionary = Balance.WET_STEPS
+	if weather.wet < float(cfg.film_min) and weather.puddles < float(cfg.puddle_min):
+		return false
+	var world: World3D = get_viewport().find_world_3d() if get_viewport() else null
+	if world == null:
+		return false
+	var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		pos + Vector3.UP * float(cfg.roof_lift), pos + Vector3.UP * float(cfg.roof_height), Hitscan.LAYER_WORLD)
+	return world.direct_space_state.intersect_ray(q).is_empty()
 
 
 ## Из чего пол под точкой (Surfaces), "concrete" — если не понять.

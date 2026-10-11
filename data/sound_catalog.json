@@ -1247,6 +1247,20 @@
    "group": "Шаги снаружи"
   },
   {
+   "id": "step_asphalt_wet",
+   "cat": "Шаги и движение",
+   "name": "Шаг: мокрый асфальт с лужами",
+   "when": "ходьба по открытому мокрому асфальту, в дождь и пока покрытие сохнет",
+   "file": "steps/asphalt_wet_",
+   "kind": "step_asphalt_wet",
+   "fallback": "step_dirt",
+   "type": "one",
+   "variants": 16,
+   "prio": 1,
+   "now": "собственные записи владельца, iPhone",
+   "group": "Шаги снаружи"
+  },
+  {
    "id": "step_asphalt_run",
    "cat": "Шаги и движение",
    "name": "Бег: асфальт, земля",
