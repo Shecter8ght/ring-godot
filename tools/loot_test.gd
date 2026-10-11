@@ -35,7 +35,7 @@ func _run() -> void:
 				if Balance.CIVILIAN_LOOT_VALUES.has(String(entry.id)):
 					reached[entry.id] = true
 			var visible_id: String = ItemDb.loose_item(table, rng)
-			check_silent("видимая вещь соответствует теме " + table, visible_id != "" and (Balance.CIVILIAN_LOOT_VALUES.has(visible_id) or Balance.VALUABLE_LOOT_VALUES.has(visible_id)))
+			check_silent("видимая вещь соответствует теме " + table, visible_id != "" and (_loose_gear(table, visible_id) or Balance.CIVILIAN_LOOT_VALUES.has(visible_id) or Balance.VALUABLE_LOOT_VALUES.has(visible_id)))
 	check("все 24 предмета достижимы в тематическом луте", reached.size() == 24)
 	Profile.equipment = {"backpack": ItemDb.make(Balance.BACKPACK_START, 1)}
 	Profile.backpack = []
@@ -106,3 +106,11 @@ func count_item(list: Array, id: String) -> int:
 		if String(entry.id) == id:
 			count += int(entry.n)
 	return count
+
+
+## Снаряжение, которому в этой теме можно лежать на виду (Balance.LOOSE_GEAR).
+func _loose_gear(table: String, id: String) -> bool:
+	for pair: Array in Balance.LOOSE_GEAR.get(table, []):
+		if String(pair[0]) == id:
+			return true
+	return false

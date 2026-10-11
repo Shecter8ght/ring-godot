@@ -238,15 +238,21 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 static func loose_item(table_id: String, rng: RandomNumberGenerator) -> String:
 	var entries: Array = ((Balance.CIVILIAN_LOOT.get(table_id, {}) as Dictionary).get("entries", []) as Array).duplicate(true)
 	entries.append_array(Balance.VALUABLE_LOOT.get(table_id, []))
+	# снаряжение темы, которое может лежать на виду (разгрузки) — отдельным списком, вложенные в тему
+	# броски ящиков сюда не попадают
+	var gear: Array = Balance.LOOSE_GEAR.get(table_id, [])
+	var gear_ids: Array = gear.map(func(g: Array) -> String: return String(g[0]))
+	entries = entries.filter(func(e: Array) -> bool: return not String(e[0]) in gear_ids)
+	entries.append_array(gear)
 	var total: float = 0.0
 	for entry: Array in entries:
-		if Balance.CIVILIAN_LOOT_VALUES.has(String(entry[0])) or Balance.VALUABLE_LOOT_VALUES.has(String(entry[0])):
+		if Balance.CIVILIAN_LOOT_VALUES.has(String(entry[0])) or Balance.VALUABLE_LOOT_VALUES.has(String(entry[0])) or String(entry[0]) in gear_ids:
 			total += float(entry[1])
 	if total <= 0.0:
 		return ""
 	var pick: float = rng.randf() * total
 	for entry: Array in entries:
-		if not Balance.CIVILIAN_LOOT_VALUES.has(String(entry[0])) and not Balance.VALUABLE_LOOT_VALUES.has(String(entry[0])):
+		if not Balance.CIVILIAN_LOOT_VALUES.has(String(entry[0])) and not Balance.VALUABLE_LOOT_VALUES.has(String(entry[0])) and not String(entry[0]) in gear_ids:
 			continue
 		pick -= float(entry[1])
 		if pick <= 0.0:

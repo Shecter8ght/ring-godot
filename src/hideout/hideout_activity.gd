@@ -37,6 +37,9 @@ var _known: Array[int] = []
 var _want: String = ""
 var _audio_tasks: Array[int] = []
 var _shared_ready: bool = false
+## ТВ: яркость света от экрана без мерцания и фаза мерцания.
+var _glow_energy: float = 0.0
+var _glow_t: float = 0.0
 static var _cache: Dictionary = {}
 
 
@@ -201,14 +204,36 @@ func _apply() -> void:
 				_screen_mat.set_shader_parameter("channel", state)
 			var gl := get_node_or_null(glow_light) as Light3D
 			if gl:
-				if not gl.has_meta("energy"):
-					gl.set_meta("energy", gl.light_energy)
+				# экран — единственный свет в комнате без генератора: видно мебель и дальнюю стену
+				var cfg: Dictionary = Balance.TV_LIGHT
 				gl.visible = state != 0
-				gl.light_color = TV_GLOW[state]
-				gl.light_energy = float(gl.get_meta("energy")) * (1.2 if state == 3 else 1.0)
+				gl.light_color = (TV_GLOW[state] as Color).lerp(Color.WHITE, float(cfg.white))
+				_glow_energy = float(cfg.energy) * (float(cfg.static_k) if state == 3 else 1.0)
+				gl.light_energy = _glow_energy
+				gl.shadow_enabled = bool(cfg.shadows)
+				var omni := gl as OmniLight3D
+				if omni:
+					omni.omni_range = float(cfg.range)
+					omni.omni_attenuation = float(cfg.attenuation)
+			set_process(state != 0 and gl != null)
 			_loop(["", "news", "crowd", "static"][state])
 		Kind.RADIO:
 			_loop(["", "lofi", "rock", "waltz"][state])
+
+
+## ТВ: свет от экрана «дышит» вместе с картинкой — плавно, двумя несовпадающими волнами.
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint() or kind != Kind.TV or state == 0:
+		set_process(false)
+		return
+	var gl := get_node_or_null(glow_light) as Light3D
+	if gl == null:
+		set_process(false)
+		return
+	var cfg: Dictionary = Balance.TV_LIGHT
+	_glow_t += delta * float(cfg.flicker_hz)
+	var wave: float = sin(_glow_t * TAU) * 0.6 + sin(_glow_t * TAU * 2.7 + 1.3) * 0.4
+	gl.light_energy = _glow_energy * (1.0 + wave * float(cfg.flicker))
 
 
 # ---------------------------------------------------------------- вид

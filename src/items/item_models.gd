@@ -38,6 +38,9 @@ static func build(id: String) -> Node3D:
 	# рюкзаки — модели проекта (tools/build_backpacks.py)
 	if String(it.get("cat", "")) == "backpack" and _scan_path(root, "res://assets/items/models/%s.glb" % id):
 		return root
+	# разгрузки — модели проекта (tools/build_rigs.py)
+	if it.has("rig") and _scan_path(root, "res://assets/items/models/%s.glb" % id):
+		return root
 	if _arsenal(root, id):
 		return root
 	match id:

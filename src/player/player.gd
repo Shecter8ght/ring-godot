@@ -354,6 +354,18 @@ func ui_blocked() -> bool:
 	return false
 
 
+## Клавиши движения и стойки не для персонажа: набирают текст (поиск у торговца, ник, чат) или открыто
+## окно убежища (торговец, тайник, верстак, терминал) — иначе, печатая название, игрок уходил от
+## прилавка. В рейде с открытым рюкзаком идти по-прежнему можно.
+func keys_blocked() -> bool:
+	if PauseMenu.shown or UiTheme.typing():
+		return true
+	for n in get_tree().get_nodes_in_group("esc_windows"):
+		if (n is HideoutUI or n is TerminalUI) and n.has_method("is_open") and bool(n.call("is_open")):
+			return true
+	return false
+
+
 func _can_sprint() -> bool:
 	return not _winded and stamina > 0.0
 
@@ -2366,6 +2378,9 @@ func is_vaulting() -> bool:
 
 
 func _read_stance() -> void:
+	if keys_blocked():
+		aiming = false
+		return
 	if Input.is_action_just_pressed("crouch"):
 		stance = Stance.STAND if stance == Stance.CROUCH else Stance.CROUCH
 		_apply_stance()
@@ -2422,7 +2437,7 @@ func _stance_speed() -> float:
 ## WASD: в прицеле — относительно взгляда (вперёд — куда смотришь), иначе — относительно камеры
 ## («вверх» на экране — от камеры вглубь).
 func _wish_direction() -> Vector3:
-	if PauseMenu.shown:
+	if keys_blocked():
 		return Vector3.ZERO
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	if input.length_squared() == 0.0:

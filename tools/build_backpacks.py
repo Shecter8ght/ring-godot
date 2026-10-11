@@ -533,4 +533,5 @@ def main() -> None:
 									  export_yup=True, export_apply=True)
 
 
-main()
+if __name__ == "__main__":
+	main()

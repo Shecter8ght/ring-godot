@@ -41,7 +41,8 @@ var all_roles: Array[String] = []
 var active_ids: Array = []
 ## Сколько шагов сделано (звук на каждый).
 var steps: int = 0
-## Снаряжают с ускорителем (Balance.MAG_OPS.loader_item лежит в одной из сеток хозяина) — быстрее.
+## Снаряжают или разряжают с ускорителем (Balance.MAG_OPS.loader_item лежит в одной из сеток хозяина):
+## патроны идут пачками по loader_batch за шаг loader_sec.
 var fast: bool = false
 
 var _t: float = 0.0
@@ -64,9 +65,9 @@ static func make(p_kind: String, p_role: String, p_owner: int, p_get: Callable, 
 func step_sec() -> float:
 	match kind:
 		"load":
-			return 1.0 / float(Balance.MAG_OPS.loader_rate) if fast else float(Balance.MAG_OPS.load_sec)
+			return float(Balance.MAG_OPS.loader_sec) if fast else float(Balance.MAG_OPS.load_sec)
 		"unload":
-			return float(Balance.MAG_OPS.unload_sec)
+			return float(Balance.MAG_OPS.loader_sec) if fast else float(Balance.MAG_OPS.unload_sec)
 	return float(Balance.MAG_OPS.plate_sec)
 
 
@@ -115,6 +116,7 @@ func start(idx: int) -> bool:
 				return false
 			s = int(e.rounds)
 		"unload":
+			fast = _has_loader()
 			if not e.has("rounds") or int(e.rounds) <= 0 or Gear.mag_top(e) == "":
 				reason = "empty"
 				return false
@@ -149,7 +151,12 @@ func tick(delta: float) -> bool:
 		_t -= per
 		_lists.clear()
 		_dirty.clear()
-		var more := _step()
+		# с ускорителем за шаг уходит пачка патронов, без него — один
+		var more := true
+		for n in range(int(Balance.MAG_OPS.loader_batch) if fast and kind != "plates" else 1):
+			more = _step()
+			if not more:
+				break
 		_flush()
 		steps += 1
 		if not more:
