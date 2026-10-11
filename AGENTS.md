@@ -115,6 +115,8 @@ python tools/veras54_game_materials.py --states              # карты изн
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
+python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/texture_flare_gun_claude.py -- build|render|inspect # ракетница Claude: слои UCUPaint на принятой геометрии, превью, проверка стека
 python tools/import_weapon_model.py pm_highpoly_v5          # проверенный ПМ из _asset_src: дерево, PBR, размеры, бюджеты, CREDITS
 python tools/import_weapon_model.py glock17_gen5            # Glock 17 Gen5 из _asset_src (--check — только проверка): дерево, PBR, размеры, бюджеты, CREDITS
 tools/godot.cmd --headless res://tools/glock_test.tscn        # Glock: детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом
