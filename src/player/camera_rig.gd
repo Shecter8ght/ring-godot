@@ -920,7 +920,9 @@ func _tick_hand_kick(pl: Player, delta: float) -> void:
 			var damp: float = 2.0 * float(axes[i][1]) * sqrt(stiff)
 			_hand_kick_v[i] += (-stiff * _hand_kick[i] - damp * _hand_kick_v[i]) * h
 			_hand_kick[i] += _hand_kick_v[i] * h
-	_hand_kick = _hand_kick.clamp(Vector3(-2.5, -1.0, -1.0), Vector3(2.5, 3.0, 3.0))
+	# границы шире на прибавку отдачи: очередь из крупного калибра не должна в них упираться
+	var room: float = maxf(float(Balance.RECOIL_GAIN.hip), float(Balance.RECOIL_GAIN.ads))
+	_hand_kick = _hand_kick.clamp(Vector3(-2.5, -1.0, -1.0) * room, Vector3(2.5, 3.0, 3.0) * room)
 
 
 ## Готовая поза основного прицела → поза дополнительного, независимо от осей исходной сцены.

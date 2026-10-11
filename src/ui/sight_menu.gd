@@ -79,7 +79,7 @@ func _fill() -> void:
 	for c in _box.get_children():
 		_box.remove_child(c)
 		c.queue_free()
-	_box.add_child(_label("ЛУМАР H1 — настройка метки", 20, Color(1.0, 0.86, 0.6)))
+	_box.add_child(_label("ЛУМАР H1 — настройка прицела", 20, Color(1.0, 0.86, 0.6)))
 	_box.add_child(_label("Форма", 14, Color(0.7, 0.7, 0.66)))
 	var shapes := HFlowContainer.new()
 	shapes.add_theme_constant_override("h_separation", 6)
@@ -107,17 +107,17 @@ func _fill() -> void:
 		var idx := i
 		bolds.add_child(_pick(String(BOLDS[i][1]), int(Settings.reticle.bold) == i, func() -> void: Settings.set_reticle("bold", idx)))
 	_box.add_child(HSeparator.new())
-	var nv := CheckButton.new()
-	nv.text = "Ночной режим окна (NV)"
-	nv.focus_mode = Control.FOCUS_NONE
-	nv.button_pressed = rig != null and rig.sight_nv
-	nv.add_theme_font_size_override("font_size", 16)
-	nv.toggled.connect(func(on: bool) -> void:
-		if rig:
-			rig.sight_nv = on
-		Audio.play_ui("tac_click"))
-	_box.add_child(nv)
-	_box.add_child(_label("В окне прицела — усиленная зелёная картинка: видно в темноте без ПНВ и фонаря, но только в этом окошке. С ПНВ на голове не нужен.", 13, Color(0.6, 0.62, 0.6)))
+	_box.add_child(_label("Режим окна", 14, Color(0.7, 0.7, 0.66)))
+	var modes := HBoxContainer.new()
+	modes.add_theme_constant_override("separation", 6)
+	_box.add_child(modes)
+	var night: bool = rig != null and rig.sight_nv
+	for mode: Array in [[false, "Обычный"], [true, "Ночной (NV)"]]:
+		var on: bool = mode[0]
+		modes.add_child(_pick(String(mode[1]), night == on, func() -> void:
+			if rig:
+				rig.sight_nv = on))
+	_box.add_child(_label("Ночной: в окне прицела — усиленная зелёная картинка, видно в темноте без ПНВ и фонаря, но только в этом окошке. С ПНВ на голове не нужен.", 13, Color(0.6, 0.62, 0.6)))
 	_box.add_child(_label("%s или Esc — закрыть" % PauseMenu.key_name("sight_menu"), 13, Color(0.6, 0.62, 0.6)))
 
 
@@ -131,5 +131,6 @@ func _pick(text: String, chosen: bool, action: Callable) -> Button:
 	b.add_theme_font_size_override("font_size", 14)
 	b.pressed.connect(func() -> void:
 		action.call()
+		Audio.play_ui("tac_click")
 		_fill())
 	return b

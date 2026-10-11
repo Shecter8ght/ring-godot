@@ -1948,9 +1948,9 @@ func _build_workbench() -> void:
 		b.button_pressed = ws == _wb_slot
 		tabs.add_child(b)
 	var weapon: Dictionary = Profile.equipment.get(_wb_slot, {})
-	_build_repairs(left)
 	if weapon.is_empty():
-		left.add_child(_text("Надень оружие в тайнике — обвесы ставятся на надетое.", Color(1.0, 0.7, 0.5)))
+		left.add_child(_wrapped("Надень оружие в тайнике — обвесы ставятся на надетое.", Color(1.0, 0.7, 0.5)))
+		_build_repairs()
 		return
 	var wid := String(weapon.id)
 	# схема: от точек крепления — квадратики; клик — что подходит из тайника и рюкзака
@@ -1959,13 +1959,13 @@ func _build_workbench() -> void:
 	var spec := WeaponStats.compute(weapon)
 	var mag: Dictionary = weapon.get("mag", {}) if weapon.get("mag") is Dictionary else {}
 	var w := WeaponDb.weapon(wid)
-	left.add_child(_text("%s · %s · %s · состояние %d%% · %.1f кг" % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber)),
+	left.add_child(_wrapped("%s · %s · %s · состояние %d%% · %.1f кг" % [String(WeaponDb.CLASS_NAMES.get(String(w["class"]), "")), WeaponDb.caliber_name(String(w.caliber)),
 		"встроенный магазин" if w.has("internal_mag") else ItemDb.item_name(String(mag.get("id", ""))) if String(mag.get("id", "")) != "" else "без магазина",
 		int(weapon.get("dur", 100)), float(spec.weight)], Color(0.85, 0.85, 0.8)))
 	# сколько внутри — не видно: полный / пустой (проверка — в рейде, держать R)
 	var loaded := "пустой" if int(mag.get("rounds", 0)) <= 0 else ("полный" if int(mag.get("rounds", 0)) >= int(spec.mag) else "не пустой")
-	left.add_child(_text("Магазин на %d — %s · %s — урон %d, пробитие %d" % [int(spec.mag), loaded, ItemDb.item_name(String(spec.ammo)), int(spec.damage), int(spec.pen)], Color(0.8, 0.85, 0.75)))
-	left.add_child(_text("Клик по квадратику у точки крепления — поставить или снять.", Color(0.6, 0.62, 0.6)))
+	left.add_child(_wrapped("Магазин на %d — %s · %s — урон %d, пробитие %d" % [int(spec.mag), loaded, ItemDb.item_name(String(spec.ammo)), int(spec.damage), int(spec.pen)], Color(0.8, 0.85, 0.75)))
+	left.add_child(_wrapped("Клик по квадратику у точки крепления — поставить или снять.", Color(0.6, 0.62, 0.6)))
 	# справа: характеристики (сравнение с «голым») и магазин
 	var right := _column("Характеристики", 1.0)
 	var bare := weapon.duplicate(true)
@@ -1987,51 +1987,140 @@ func _build_workbench() -> void:
 				row.add_child(l)
 				row.add_child(_button("Вставить", func() -> void: Profile.fit_part("equip:" + _wb_slot, -1, "backpack" if bp else "stash", idx, "")))
 				right.add_child(row)
+	_build_repairs()
 
 
-## Изношенные предметы из снаряжения, тайника и рюкзака ремонтируются по отдельности.
-func _build_repairs(parent: Container) -> void:
-	parent.add_child(_text("Ремонт до 100%% · деньги: %d ₽" % Profile.money, Color(0.95, 0.82, 0.6)))
-	var scroll: ScrollContainer = ScrollContainer.new()
-	scroll.custom_minimum_size.y = 100.0
+## Ремонт — своя колонка верстака: всё изношенное из снаряжения, тайника и рюкзака плашками, сразу
+## целиком (раньше — строки в окошке на три строки, его приходилось листать). Оружие, следом его обвесы;
+## чинится по одной плашке или всё разом.
+func _build_repairs() -> void:
+	var jobs: Array[Dictionary] = _repair_jobs()
+	var total: int = 0
+	for job: Dictionary in jobs:
+		total += int(job.cost)
+	var box := VBoxContainer.new()
+	box.name = "Repairs"
+	box.custom_minimum_size.x = 470
+	box.add_theme_constant_override("separation", 6)
+	_cols.add_child(box)
+	var title := _text("Ремонт до 100%" if jobs.is_empty() else "Ремонт до 100%% · %d шт." % jobs.size(), Color(0.95, 0.82, 0.6))
+	title.add_theme_font_size_override("font_size", 18)
+	box.add_child(title)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
+	box.add_child(head)
+	var money := _text("Деньги: %s ₽" % InventoryUI.money(Profile.money), Color(0.72, 0.87, 0.66))
+	money.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(money)
+	if jobs.is_empty():
+		box.add_child(_wrapped("Чинить нечего: оружие и обвесы в порядке.", Color(0.6, 0.62, 0.6)))
+		return
+	if jobs.size() > 1:
+		var all := _button("Починить всё · %s ₽" % InventoryUI.money(total), _repair_all)
+		all.name = "RepairAll"
+		all.custom_minimum_size.y = 34
+		all.disabled = Profile.money < total
+		all.tooltip_text = "Не хватает %s ₽" % InventoryUI.money(total - Profile.money) if all.disabled else "Восстановить всё до 100%"
+		all.add_theme_stylebox_override("normal", UiTheme.face(Color(0.5, 0.36, 0.14), Color(1.0, 0.8, 0.45), 2))
+		all.add_theme_stylebox_override("hover", UiTheme.face(Color(0.62, 0.45, 0.18), Color(1.0, 0.9, 0.65), 2))
+		all.add_theme_stylebox_override("pressed", UiTheme.face(Color(0.4, 0.28, 0.1), Color(1.0, 0.8, 0.45), 0))
+		head.add_child(all)
+	# листать приходится, только если плашек больше, чем влезает в высоту окна
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	parent.add_child(scroll)
-	var rows: VBoxContainer = VBoxContainer.new()
-	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(rows)
+	box.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.name = "Plates"
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 4)
+	scroll.add_child(list)
+	for job: Dictionary in jobs:
+		list.add_child(_repair_plate(job))
+
+
+## Что можно починить: {where, idx, mount, entry, cost, place, host} — host: оружие, на котором стоит
+## обвес ("" — сам предмет). Надетое — первым.
+func _repair_jobs() -> Array[Dictionary]:
+	var sources: Array = []
 	for slot: String in ["primary", "secondary"]:
-		var entry: Dictionary = Profile.equipment.get(slot, {})
-		if entry.is_empty():
-			continue
-		_repair_row(rows, "equip:" + slot, -1, entry)
-		for raw_mount: Variant in entry.get("mods", {}):
-			var mount: String = String(raw_mount)
-			_repair_row(rows, "equip:" + slot, -1, WeaponCondition.mod_entry(entry.mods[mount]), mount)
+		var worn: Dictionary = Profile.equipment.get(slot, {})
+		if not worn.is_empty():
+			sources.append(["equip:" + slot, -1, worn, "надето"])
 	for where: String in ["stash", "backpack"]:
 		var items: Array = Profile.list_of(where)
 		for idx: int in range(items.size()):
-			var entry: Dictionary = items[idx]
-			if not WeaponCondition.supported(String(entry.id)):
-				continue
-			_repair_row(rows, where, idx, entry)
-			for raw_mount: Variant in entry.get("mods", {}):
-				var mount: String = String(raw_mount)
-				_repair_row(rows, where, idx, WeaponCondition.mod_entry(entry.mods[mount]), mount)
+			if WeaponCondition.supported(String(items[idx].id)):
+				sources.append([where, idx, items[idx], "тайник" if where == "stash" else "рюкзак"])
+	var jobs: Array[Dictionary] = []
+	for src: Array in sources:
+		var entry: Dictionary = src[2]
+		var parts: Array = [["", entry]]
+		for raw_mount: Variant in entry.get("mods", {}):
+			parts.append([String(raw_mount), WeaponCondition.mod_entry(entry.mods[raw_mount])])
+		for part: Array in parts:
+			var cost: int = WeaponCondition.repair_price(part[1])
+			if cost > 0:
+				jobs.append({"where": String(src[0]), "idx": int(src[1]), "mount": String(part[0]), "entry": part[1], "cost": cost,
+					"place": String(src[3]), "host": ItemDb.item_name(String(entry.id)) if String(part[0]) != "" else ""})
+	return jobs
 
 
-func _repair_row(parent: Container, where: String, idx: int, entry: Dictionary, mount: String = "") -> void:
-	var cost: int = WeaponCondition.repair_price(entry)
-	if cost <= 0:
-		return
-	var row: HBoxContainer = HBoxContainer.new()
-	var label: Label = _text(ItemDb.label(entry), Color(0.85, 0.85, 0.8))
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(label)
-	var button: Button = _button("Починить · %d ₽" % cost, func() -> void: Profile.repair_part(where, idx, mount))
-	button.disabled = Profile.money < cost
-	button.tooltip_text = "Восстановить состояние до 100%" if not button.disabled else "Не хватает денег"
-	row.add_child(button)
-	parent.add_child(row)
+func _repair_all() -> void:
+	for job: Dictionary in _repair_jobs():
+		Profile.repair_part(String(job.where), int(job.idx), String(job.mount))
+	Audio.play_ui("tac_click")
+
+
+## Плашка ремонта: иконка, имя, состояние и где лежит, кнопка с ценой.
+func _repair_plate(job: Dictionary) -> PanelContainer:
+	var entry: Dictionary = job.entry
+	var plate := PanelContainer.new()
+	plate.set_meta("repair_job", job)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.11, 0.105, 0.1, 0.96)
+	sb.border_color = Color(0.95, 0.78, 0.5, 0.18)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(3)
+	sb.set_content_margin_all(6)
+	plate.add_theme_stylebox_override("panel", sb)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	plate.add_child(row)
+	var icon := ItemCard.IconBox.new()
+	icon.id = String(entry.id)
+	icon.entry = entry
+	icon.custom_minimum_size = Vector2(76, 46)
+	row.add_child(icon)
+	var texts := VBoxContainer.new()
+	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texts.add_theme_constant_override("separation", 0)
+	texts.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_child(texts)
+	var name := _text(ItemDb.item_name(String(entry.id)), Color(0.93, 0.91, 0.86))
+	name.add_theme_font_size_override("font_size", 15)
+	# обрезаемая подпись сама высоты не просит — задаём (иначе строка схлопывается в 1 px)
+	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name.custom_minimum_size.y = 22
+	texts.add_child(name)
+	var state := "СЛОМАНО" if WeaponCondition.broken(entry) else "%d%%" % int(WeaponCondition.percent(entry))
+	var tone := Color(1.0, 0.45, 0.38)
+	if not WeaponCondition.broken(entry):
+		tone = Color(1.0, 0.66, 0.36) if WeaponCondition.stage(entry) == int(Balance.CONDITION.worn) else Color(0.9, 0.84, 0.55)
+	var where := String(job.place) + (" · на %s" % String(job.host) if String(job.host) != "" else "")
+	var sub := _text("%s · %s" % [state, where], tone)
+	sub.add_theme_font_size_override("font_size", 13)
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	sub.custom_minimum_size.y = 19
+	texts.add_child(sub)
+	var cost: int = int(job.cost)
+	var fix := _button("Починить · %s ₽" % InventoryUI.money(cost), func() -> void:
+		Profile.repair_part(String(job.where), int(job.idx), String(job.mount)))
+	fix.custom_minimum_size = Vector2(150, 0)
+	fix.disabled = Profile.money < cost
+	fix.tooltip_text = "Не хватает денег" if fix.disabled else "Восстановить состояние до 100%"
+	row.add_child(fix)
+	return plate
 
 
 func _owned_candidates(weapon: Dictionary, mount: String, where: String, bench: bool, idx: int = -1) -> Array:
@@ -2158,6 +2247,13 @@ func _text(t: String, color: Color) -> Label:
 	l.text = t
 	l.add_theme_font_size_override("font_size", 16)
 	l.add_theme_color_override("font_color", color)
+	return l
+
+
+## Текст с переносом строк: длинная строка не распирает колонку.
+func _wrapped(t: String, color: Color) -> Label:
+	var l := _text(t, color)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
 
 

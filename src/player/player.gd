@@ -980,7 +980,11 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 	var in_ads := ads and aiming
 	if in_ads:
 		k *= Balance.ADS_RECOIL_SCALE
-	var kv := float(spec.kick) * k * _rng.randf_range(0.85, 1.15)
+	# общая прибавка отдачи: на неё растут и взгляд, и толчок модели в руках; разброс — по прежней величине
+	var gain: float = float(Balance.RECOIL_GAIN.ads if in_ads else Balance.RECOIL_GAIN.hip)
+	var kv_base := float(spec.kick) * k * _rng.randf_range(0.85, 1.15)
+	var kv := kv_base * gain
+	k *= gain
 	var rise := kv * (Balance.ADS_RECOIL_RISE_SCALE if in_ads else 1.0)
 	var kh := float(spec.get("kick_h", 0.0)) * k * (_rng.randf_range(-1.0, 1.0) + float(spec.get("kick_bias", 0.0)))
 	if in_ads:
@@ -996,9 +1000,10 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 		_recoil_h += kh * back
 	else:
 		_recoil += rise
-	_bloom += kv * Balance.RECOIL_BLOOM
-	# толчок модели в руках; в прицеле подскок и откат масштабирует CameraRig (ADS_RECOIL_FLIP / BACK)
-	kick_vis += clampf(kv / 0.05, 0.3, 1.8)
+	_bloom += kv_base * Balance.RECOIL_BLOOM
+	# толчок модели в руках; в прицеле подскок и откат масштабирует CameraRig (ADS_RECOIL_FLIP / BACK).
+	# Прибавка — после границ: у слабых стволов толчок упирался в нижнюю границу и не вырос бы
+	kick_vis += clampf(kv_base / 0.05, 0.3, 1.8) * gain
 
 
 ## Оружие — в правой руке модели (кость руки, CharacterAnimator.weapon_grip): идёт за руками

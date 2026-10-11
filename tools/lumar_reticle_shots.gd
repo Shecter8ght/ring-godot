@@ -80,8 +80,17 @@ func _ready() -> void:
 	Input.action_release("sight_menu")
 	await _frames(10)
 	_check("клавиша открывает окно настройки прицела", rig._sight_menu != null and rig._sight_menu.is_open(), "")
-	_save("lumar_ret_menu")
 	if rig._sight_menu:
+		# режим окна — в том же окне настройки, парой кнопок «Обычный / Ночной»
+		for mode: String in ["Ночной (NV)", "Обычный"]:
+			for raw: Node in rig._sight_menu.find_children("*", "Button", true, false):
+				if (raw as Button).text == mode:
+					(raw as Button).pressed.emit()
+					break
+			await _frames(4)
+			_check("окно настройки: режим окна «%s»" % mode, rig.sight_nv == (mode != "Обычный"), "")
+			if mode != "Обычный":
+				_save("lumar_ret_menu")
 		rig._sight_menu.close_ui()
 	print("lumar_reticle_shots: провалено %d" % _fails)
 	get_tree().quit(_fails)
