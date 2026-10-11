@@ -74,6 +74,10 @@ var archetype: String = ""
 var squad: Squad
 ## Откуда брать точки патруля: Callable() -> Vector3 (даёт сцена сектора).
 var patrol_point_provider: Callable
+var _stuck_t: float = 0.0
+var _stuck_n: int = 0
+var _side_t: float = 0.0
+var _side_sign: float = 1.0
 var last_known: Vector3 = Vector3.ZERO
 var memory_timer: float = 0.0
 var notice_timer: float = 0.0
@@ -2081,6 +2085,9 @@ func _move(delta: float) -> void:
 	var wish := Vector3.ZERO
 	if _nav_ready and not _agent.is_navigation_finished():
 		var next := _agent.get_next_path_position()
+		# точка пути подгоняется по высоте под ноги: достигнутой её делает расстояние по земле
+		var fix: float = float(Balance.AI_PATH_HEIGHT_FIX)
+		_agent.path_height_offset = clampf(next.y + _agent.path_height_offset - global_position.y, -fix, fix)
 		var to := next - global_position
 		to.y = 0.0
 		if to.length() > 0.05:
@@ -2088,17 +2095,85 @@ func _move(delta: float) -> void:
 			# в бою смотрит на цель, а не под ноги
 			if state != State.COMBAT or not _seen_now:
 				_facing = lerp_angle(_facing, atan2(to.x, to.z), minf(1.0, 8.0 * delta))
+	# упёрся в то, чего нет в сетке путей (ствол дерева, край пропса): шаг вбок, потом — другая точка
+	if _side_t > 0.0 and wish.length_squared() > 0.01:
+		_side_t -= delta
+		wish = Vector3(wish.z, 0.0, -wish.x) * _side_sign
 	velocity.x = move_toward(velocity.x, wish.x, 14.0 * delta)
 	velocity.z = move_toward(velocity.z, wish.z, 14.0 * delta)
 	if not is_on_floor():
 		velocity.y -= 9.8 * delta
 	else:
 		velocity.y = 0.0
+	var from := global_position
 	($CartContact as CartContact).move_character(delta)
+	if wish.length_squared() > 0.01:
+		_step_up(from, wish * delta)
+		_tick_stuck(from, delta)
+	else:
+		_stuck_t = 0.0
 	_body.rotation.y = _facing
 	# попадание откидывает корпус назад (Body:rotation синхронизируется — видно всем)
 	_body.rotation.x = -0.35 * _flinch
 	# шаги (их слышно — так мародёра можно засечь раньше, чем он тебя) — Footsteps
+
+
+func _tick_stuck(from: Vector3, delta: float) -> void:
+	var cfg: Dictionary = Balance.AI_UNSTUCK
+	var step := global_position - from
+	step.y = 0.0
+	if step.length() > float(cfg.min_speed) * delta:
+		_stuck_t = 0.0
+		if _side_t <= 0.0:
+			_stuck_n = 0
+		return
+	_stuck_t += delta
+	if _stuck_t < float(cfg.stuck_sec) or _side_t > 0.0:
+		return
+	_stuck_t = 0.0
+	_stuck_n += 1
+	_side_t = float(cfg.side_sec)
+	_side_sign = 1.0 if _rng.randf() < 0.5 else -1.0
+	if _stuck_n >= int(cfg.tries) and state == State.PATROL and patrol_point_provider.is_valid():
+		_stuck_n = 0
+		_agent.target_position = _snap(patrol_point_provider.call())
+
+
+## Шаг на ступень (бордюр, порожек): упёрся — пробуем встать выше, как игрок (Balance.STEP_UP).
+## Навигация через бордюр пускает (он ниже nav_climb), а тело без этого шага упиралось в него и стояло:
+## на дорогах района ТЦ так застревали и мародёры, и чужие отряды.
+func _step_up(from: Vector3, want: Vector3) -> void:
+	if not is_on_floor() or want.length_squared() < 0.000001:
+		return
+	var dir := want.normalized()
+	var moved := global_position - from
+	moved.y = 0.0
+	if moved.dot(dir) > want.length() * 0.6:
+		return
+	var su: Dictionary = Balance.STEP_UP
+	var max_h := float(su.max_h)
+	var t := global_transform
+	var r := KinematicCollision3D.new()
+	var up := Vector3.UP * max_h
+	if test_move(t, up, r):
+		up = r.get_travel()
+	if up.y < 0.05:
+		return
+	for fwd_len: float in [want.length(), float(su.reach) * 0.5, float(su.reach)]:
+		var t1 := t.translated(up)
+		var fwd := dir * maxf(fwd_len, 0.02)
+		if test_move(t1, fwd, r):
+			continue
+		var t2 := t1.translated(fwd)
+		var down := Vector3.DOWN * (up.y + 0.05)
+		if not test_move(t2, down, r):
+			continue
+		var rise := t2.origin.y + r.get_travel().y - from.y
+		if rise < 0.01 or rise > max_h or r.get_normal().y < cos(floor_max_angle):
+			continue
+		global_position = t2.origin + r.get_travel()
+		apply_floor_snap()
+		return
 
 
 ## Вспышка на теле при попадании — видно, что пуля дошла.
