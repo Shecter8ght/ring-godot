@@ -320,3 +320,7 @@
 - Самолёт: Innerscene, Twin turboprop aircraft — CC0 1.0: https://www.innerscene.com/tools/library/3d-parts/twin-turboprop-aircraft-f8c5fa80
 - Самолёт, запись винтового двигателя: jakobthiesen, монтаж для цикла AntumDeluge — CC BY 3.0: https://opengameart.org/content/airplane-prop-loop ; https://creativecommons.org/licenses/by/3.0/ . Файл переименован в supply_plane_01.ogg.
 - Этикетки запечатанных партий — собственная графика RING. Игровые детали оружия извлечены из моделей проекта; оригинальные лицензии и авторы указаны выше.
+
+## Ускоритель снаряжения магазинов (`assets/items/models/mag_loader.glb`)
+
+Собственная модель проекта, собрана скриптом `tools/build_mag_loader.py` (Blender 5.2) по фотографиям полимерных планочных загрузчиков магазинов под обойму (образец формы и размеров — 135 × 28 × 30 мм; надписей и логотипов нет). Исходник — `_asset_src/mag_loader/mag_loader.blend`.
