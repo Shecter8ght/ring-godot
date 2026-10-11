@@ -75,6 +75,13 @@ var weapon_clearance: WeaponClearance = WeaponClearance.new()
 var _cheek_parts: Array[GeometryInstance3D] = []
 ## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
 var scope_active: bool = false
+## Ночной режим окна голографа ЛУМАР (кнопка NV, включается в окне настройки прицела — SightMenu).
+var sight_nv: bool = false
+var _sight_menu: SightMenu
+var _sight_menu_frame: int = -1
+var _sight_parts_of: int = 0
+var _sight_reticles: Array[MeshInstance3D] = []
+var _sight_lenses: Array[MeshInstance3D] = []
 ## Плавный переход между линиями основного, углового и боковых прицелов.
 var _sight_k: float = 1.0
 var _sight_mode: String = ""
@@ -379,11 +386,61 @@ func _set_muffle(on: bool) -> void:
 		_muffle = null
 
 
+## Голограф ЛУМАР в руках: клавиша «sight_menu» открывает окно настройки (форма, цвет, толщина метки,
+## ночной режим окна); каждый кадр метке и стеклу ставятся выбранные параметры. Под ПНВ на голове метка
+## тускнеет, а стекло перестаёт бликовать — через окно видно; ночной режим окна (sight_nv) рисует в
+## стекле усиленную зелёную картинку (lumar_glass.gdshader).
+func _tick_sight(pl: Player) -> void:
+	if pl == null or not pl.is_local() or _viewmodel == null or not is_instance_valid(_viewmodel):
+		return
+	if _sight_parts_of != _viewmodel.get_instance_id():
+		_sight_parts_of = _viewmodel.get_instance_id()
+		_sight_reticles.clear()
+		_sight_lenses.clear()
+		for mi: Node in _viewmodel.find_children("*", "MeshInstance3D", true, false):
+			if mi.has_meta("lumar_reticle"):
+				_sight_reticles.append(mi as MeshInstance3D)
+			elif mi.has_meta("lumar_lens"):
+				_sight_lenses.append(mi as MeshInstance3D)
+	if Input.is_action_just_pressed("sight_menu") and not _ui_blocking() and not UiTheme.typing() \
+			and (_sight_menu == null or not _sight_menu.is_open()) and Engine.get_process_frames() != _sight_menu_frame:
+		if _sight_reticles.is_empty():
+			if Raid.current:
+				Raid.current.notify("На оружии в руках нет прицела с настройкой метки (нужен ЛУМАР H1)")
+		else:
+			if _sight_menu == null:
+				_sight_menu = SightMenu.new()
+				_sight_menu.rig = self
+				add_child(_sight_menu)
+			_sight_menu.open()
+	if _sight_menu and _sight_menu.is_open():
+		_sight_menu_frame = Engine.get_process_frames()
+		# сменили ствол при открытом окне — закрыть
+		if _sight_reticles.is_empty():
+			_sight_menu.close_ui()
+	var head_nvg: bool = pl.nvg_on
+	for mesh: MeshInstance3D in _sight_reticles:
+		if is_instance_valid(mesh):
+			mesh.scale = Vector3.ONE
+			WeaponMods.apply_reticle(mesh, float(Balance.LUMAR.nvg_energy) if head_nvg else 1.0)
+	for lens: MeshInstance3D in _sight_lenses:
+		var glass: ShaderMaterial = lens.material_override as ShaderMaterial if is_instance_valid(lens) else null
+		if glass:
+			glass.set_shader_parameter("head_nvg", 1.0 if head_nvg else 0.0)
+			# с ПНВ на голове ночной режим окна не нужен: трубка усилила бы его до белого пятна
+			glass.set_shader_parameter("window_nv", 1.0 if sight_nv and not head_nvg else 0.0)
+			glass.set_shader_parameter("nv_gain", float(Balance.LUMAR.nv_gain))
+			glass.set_shader_parameter("nv_ir_range", float(Balance.LUMAR.nv_ir_range))
+
+
 ## Точка коллиматора / голографа в руках: в ПНВ крупнее (в трубке тонкая точка теряется).
 func _reticle_nv(on: bool) -> void:
 	if _viewmodel == null:
 		return
 	for mi in _viewmodel.find_children("*", "MeshInstance3D", true, false):
+		if mi.has_meta("lumar_reticle"):
+			# метка ЛУМАРа — шейдер: в трубке не раздувается, а тускнеет (_tick_sight)
+			continue
 		if mi.has_meta("reticle_dot"):
 			(mi as MeshInstance3D).scale = Vector3.ONE * (Balance.NVG_RETICLE_SCALE if on else 1.0)
 			if mi.has_meta("condition_reticle_material"):
@@ -470,6 +527,7 @@ func _process(delta: float) -> void:
 	if _stamina_bar and pl and pl.is_local():
 		_stamina_bar.visible = pl.stamina < Balance.STAMINA_MAX - 0.5 and pl.combat_enabled
 		_stamina_bar.value = pl.stamina
+	_tick_sight(pl)
 	if _nvg_fx:
 		var on := pl != null and pl.is_local() and pl.nvg_on
 		if on != _nvg_fx.visible:

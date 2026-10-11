@@ -29,8 +29,10 @@ func _ready() -> void:
 	me.health.hp = 1e9
 	me.inventory.equipment = {"eyes": ItemDb.make("nvg", 1)}
 	await _frames(5)
-	me.set_sandbox_mods("AR_03_BASE", MODS)
-	me._switch("AR_03_BASE", false)
+	# первый ствол набора «песочницы» (раньше здесь был зашит пресет, которого в наборе уже нет)
+	var key: String = String(me.weapon_keys()[0])
+	me.set_sandbox_mods(key, MODS)
+	me._switch(key, false)
 	await _frames(5)
 	me._toggle_tac("laser")
 	var at := SectorBuilder.polar(-104.0, 72.0)

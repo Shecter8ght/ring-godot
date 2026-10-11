@@ -458,13 +458,38 @@ static func _lumar(root: Node3D, m: Dictionary, attachment: Dictionary) -> bool:
 		lens.material_override = glass
 	var reticle: MeshInstance3D = model.find_child("Reticle", true, false) as MeshInstance3D
 	if reticle:
+		# метка рисуется шейдером на квадрате (форма, цвет, толщина — на выбор игрока), а не сеткой
+		# из модели: та была одной формы и одного цвета
+		var quad: QuadMesh = QuadMesh.new()
+		quad.size = Vector2.ONE * float(Balance.LUMAR.reticle_m)
+		reticle.mesh = quad
+		var mark: ShaderMaterial = ShaderMaterial.new()
+		mark.shader = load("res://src/combat/lumar_reticle.gdshader") as Shader
+		mark.render_priority = 1
+		reticle.material_override = mark
+		apply_reticle(reticle, 1.0)
 		reticle.set_meta("reticle_dot", true)
 		reticle.set_meta("lumar_reticle", true)
 		reticle.set_meta("mount", String(m.mount))
+	if lens:
+		lens.set_meta("lumar_lens", true)
 	root.set_meta("asset_loaded", true)
 	var axis: Node3D = model.find_child("SightAxis", true, false) as Node3D
 	root.set_meta("sight_h", model.position.y + (axis.position.y if axis else 0.056))
 	return true
+
+
+## Метке ЛУМАРа — форма, цвет и толщина из настроек игрока (Settings.reticle); k — множитель яркости
+## (ПНВ на голове), износ прицела учитывается сам (meta "condition_k").
+static func apply_reticle(mesh: MeshInstance3D, k: float) -> void:
+	var mat: ShaderMaterial = mesh.material_override as ShaderMaterial
+	if mat == null:
+		return
+	var prefs: Dictionary = Settings.reticle
+	mat.set_shader_parameter("shape", int(prefs.shape))
+	mat.set_shader_parameter("tint", SightMenu.COLORS[clampi(int(prefs.color), 0, SightMenu.COLORS.size() - 1)][1])
+	mat.set_shader_parameter("bold", float(SightMenu.BOLDS[clampi(int(prefs.bold), 0, SightMenu.BOLDS.size() - 1)][0]))
+	mat.set_shader_parameter("energy", k * float(mesh.get_meta("condition_k", 1.0)))
 
 
 ## Ресурс устройств меняется без пересоздания геометрии и сброса анимаций.
@@ -478,6 +503,10 @@ static func update_condition(root: Node3D, mods: Dictionary) -> void:
 		var state: Dictionary = WeaponCondition.mod_entry(mods[mount])
 		(raw as MeshInstance3D).visible = not WeaponCondition.broken(state)
 		var mesh: MeshInstance3D = raw as MeshInstance3D
+		if mesh.has_meta("lumar_reticle"):
+			# метка шейдером: износ — множителем яркости (ставит apply_reticle)
+			mesh.set_meta("condition_k", lerpf(float(Balance.CONDITION.reticle_min), 1.0, WeaponCondition.effectiveness(state)))
+			continue
 		if not mesh.has_meta("condition_reticle_material"):
 			var source: Material = mesh.get_active_material(0) if mesh.mesh and mesh.mesh.get_surface_count() > 0 else null
 			if source is StandardMaterial3D:

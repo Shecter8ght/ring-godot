@@ -44,6 +44,9 @@ var sens_ads: float = 1.0
 var invert_y: bool = false
 ## Поле зрения от первого лица по горизонтали (на 16:9), град; камере — fps_fov_v().
 var fov_h: float = FOV_H_DEFAULT
+## Метка голографического прицела ЛУМАР (окно настройки прицела, SightMenu): форма (номер в шейдере),
+## номер цвета и толщины из списков SightMenu. Привычка игрока — одна на все его прицелы.
+var reticle: Dictionary = {"shape": 1, "color": 0, "bold": 1}
 ## Громкость по шине, 0–1.
 var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.0, "Ambient": 1.0}
 ## Гарнитура на ушах своего игрока (data/armor.json → headsets[…].headset): поправки шин, дБ, и
@@ -116,6 +119,8 @@ func _load() -> void:
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
 	invert_y = bool(cfg.get_value("mouse", "invert_y", invert_y))
 	fov_h = clampf(float(cfg.get_value("view", "fov_h", fov_h)), FOV_H_RANGE[0], FOV_H_RANGE[1])
+	for key: String in reticle.keys():
+		reticle[key] = int(cfg.get_value("sight", key, reticle[key]))
 	for b in BUSES:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
@@ -149,6 +154,8 @@ func save() -> void:
 	cfg.set_value("mouse", "ads", sens_ads)
 	cfg.set_value("mouse", "invert_y", invert_y)
 	cfg.set_value("view", "fov_h", fov_h)
+	for key: String in reticle:
+		cfg.set_value("sight", key, int(reticle[key]))
 	for b in BUSES:
 		cfg.set_value("audio", String(b), float(volume[b]))
 	cfg.set_value("cheats", "god", god)
@@ -360,6 +367,15 @@ func set_god(on: bool) -> void:
 ## Полный оружейный ассортимент у Михалыча; деньги и место в инвентаре по-прежнему нужны.
 func set_all_weapons(on: bool) -> void:
 	all_weapons = on
+	save()
+	changed.emit()
+
+
+## Метка прицела: форма / цвет / толщина (key — "shape", "color", "bold").
+func set_reticle(key: String, value: int) -> void:
+	if not reticle.has(key):
+		return
+	reticle[key] = value
 	save()
 	changed.emit()
 
