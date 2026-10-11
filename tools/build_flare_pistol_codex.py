@@ -544,7 +544,7 @@ def set_gpu():
         print("GPU fallback",str(err),flush=True)
 
 
-def render_view(name,loc,target,scale,open_deg=0,only=None,red=False,res=(1100,850)):
+def render_view(name,loc,target,scale,open_deg=0,only=None,red=False,res=(1100,850),directory=None):
     scene=bpy.context.scene
     ctrl=bpy.data.objects.get("CTRL_Launcher")
     if ctrl:
@@ -566,7 +566,7 @@ def render_view(name,loc,target,scale,open_deg=0,only=None,red=False,res=(1100,8
     cam.data.type="ORTHO"
     cam.data.ortho_scale=scale
     scene.render.resolution_x,scene.render.resolution_y=res
-    scene.render.filepath=str(OUT/"previews"/(name+".png"))
+    scene.render.filepath=str((Path(directory) if directory else OUT/"previews")/(name+".png"))
     print("RENDER_BEGIN",name,flush=True)
     bpy.ops.render.render(write_still=True)
     print("RENDER_DONE",name,flush=True)
@@ -693,13 +693,14 @@ def verify():
     print("CODEX_REOPEN_CHECK",json.dumps(report,ensure_ascii=False),flush=True)
 
 
-if MODE=="build":
-    build()
-elif MODE=="render":
-    render()
-elif MODE=="parts":
-    parts()
-elif MODE=="verify":
-    verify()
-else:
-    raise ValueError(MODE)
+if __name__ == "__main__":
+    if MODE=="build":
+        build()
+    elif MODE=="render":
+        render()
+    elif MODE=="parts":
+        parts()
+    elif MODE=="verify":
+        verify()
+    else:
+        raise ValueError(MODE)
