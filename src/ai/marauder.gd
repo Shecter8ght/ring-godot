@@ -74,6 +74,8 @@ var archetype: String = ""
 var squad: Squad
 ## Откуда брать точки патруля: Callable() -> Vector3 (даёт сцена сектора).
 var patrol_point_provider: Callable
+## Приказ плана отряда (RivalSquad): {"kind": "fallback" | "hold", "until": мс[, "face": точка]}.
+var _order: Dictionary = {}
 var _stuck_t: float = 0.0
 var _stuck_n: int = 0
 var _side_t: float = 0.0
@@ -910,6 +912,15 @@ func _patrol(delta: float) -> void:
 		_set_crouch(false)
 	if not _nav_ready:
 		return
+	if String(_order.get("kind", "")) == "hold":
+		# прикрывает, пока товарищ обыскивает тела: стоит на месте, смотрит наружу
+		if Time.get_ticks_msec() >= int(_order.until):
+			_order = {}
+		else:
+			if _agent.is_navigation_finished():
+				_set_crouch(true)
+				_face(_order.face)
+			return
 	var lead := squad.leader() if squad else null
 	if lead != null and lead != self:
 		# ведомый: строем за ведущим, чуть в стороне
@@ -938,6 +949,62 @@ func _patrol(delta: float) -> void:
 		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
 			_agent.target_position = _snap(patrol_point_provider.call())
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1]))
+
+
+# ---------------------------------------------------------------- приказы плана отряда (RivalSquad)
+
+## Разорвать контакт: бегом в точку to; дошёл или прошло sec секунд — бой для него окончен.
+func break_contact(to: Vector3, sec: float) -> void:
+	if state in [State.DEAD, State.DOWNED, State.RESCUE]:
+		return
+	_drop_loot_claim()
+	_order = {"kind": "fallback", "since": Time.get_ticks_msec(), "until": Time.get_ticks_msec() + int(sec * 1000.0)}
+	state = State.RETREAT
+	_set_crouch(false)
+	_agent.target_position = _snap(to)
+	linger_timer = sec
+
+
+## Бой для бойца окончен: цель забыта, он снова идёт по плану отряда (увидит врага — вступит заново).
+func stand_down() -> void:
+	if state in [State.DEAD, State.DOWNED, State.RESCUE]:
+		return
+	_order = {}
+	state = State.PATROL
+	memory_timer = 0.0
+	pause_timer = 0.0
+	_set_crouch(false)
+
+
+## Встать в точке pos и смотреть на face, пока не пройдёт sec секунд (или не начнётся бой).
+func hold_post(pos: Vector3, face: Vector3, sec: float) -> void:
+	if state != State.PATROL:
+		return
+	_order = {"kind": "hold", "until": Time.get_ticks_msec() + int(sec * 1000.0), "face": face}
+	_agent.target_position = _snap(pos)
+
+
+## Снять приказ «стоять» (обыск окончен).
+func release_post() -> void:
+	if String(_order.get("kind", "")) == "hold":
+		_order = {}
+
+
+## Обыскать именно этот контейнер (ящик с убитого). false — не до того или сумка полна.
+func order_loot(c: LootContainer) -> bool:
+	if state != State.PATROL or c == null or pack.size() >= Balance.AI_LOOT_PACK_MAX:
+		return false
+	_drop_loot_claim()
+	_visited.erase(c.get_instance_id())
+	_loot_target = c
+	_loot_t = -1.0
+	_loot_claims[c.get_instance_id()] = [self, Time.get_ticks_msec()]
+	_agent.target_position = _snap(c.global_position)
+	return true
+
+
+func is_looting() -> bool:
+	return _loot_target != null
 
 
 # ---------------------------------------------------------------- грабёж
@@ -1393,6 +1460,14 @@ func _start_retreat() -> void:
 
 
 func _retreat(delta: float) -> void:
+	if String(_order.get("kind", "")) == "fallback":
+		# отряд разрывает контакт: бежит, за укрытием не отсиживается; дошёл или вышло время — по плану
+		_set_crouch(false)
+		# «дошёл» — не раньше, чем путь проложен (в первый кадр агент ещё считает прежний путь законченным)
+		var now_ms: int = Time.get_ticks_msec()
+		if now_ms >= int(_order.until) or (now_ms - int(_order.since) > 800 and _agent.is_navigation_finished()):
+			stand_down()
+		return
 	if not _agent.is_navigation_finished():
 		_set_crouch(false)
 		return

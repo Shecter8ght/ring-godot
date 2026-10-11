@@ -7,6 +7,11 @@ extends RefCounted
 ## по дороге не грабит, у выхода стоит без боя Balance.RIVALS.extract_sec и уходит с добычей (OUT);
 ## WIPED — никого не осталось (сумки лежат на телах — добыча достаётся тому, кто их выбил).
 ##
+## Бой между группами (Balance.RIVALS): потеряли в бою бойца — разрывают контакт и уходят из рейда
+## (бегом к выходу, а не до последнего); победители не гонятся дальше pursuit_m от места боя; бой стих
+## — ведущий обыскивает тела, остальные прикрывают, потом отряд идёт дальше. Так ждать, пока все
+## перебьют друг друга, невыгодно: проигравшие уносят своё, победители забирают лучшее с тел.
+##
 ## Правила мира для них те же, что для игроков (решение владельца, 2026-10-10): дверь, запертая на
 ## ключ, без ключа не открывается — отряд идёт за ключом (KeyPickup: подобрал — на карте его больше
 ## нет, лежит в сумке ведущего и выпадает с телом); выход за рубильником — сначала щёлкнуть рубильник
@@ -57,6 +62,17 @@ var _door_cd: float = 0.0
 var _patrol: Callable
 var _key_checked: bool = false
 var _rng := RandomNumberGenerator.new()
+## Бой: где начался (INF — боя нет), сколько боеспособных было в начале, сколько секунд тихо; сколько
+## секунд назад отступили (−1 — не отступали). Обыск тел: {left, bodies, i}. Счётчики — для итога и тестов.
+var _fight_at: Vector3 = Vector3.INF
+var _fight_size: int = 0
+## Сколько боеспособных было до боя (потеря в первые же мгновения боя — тоже потеря).
+var _peace_able: int = 0
+var _calm: float = 0.0
+var _broke_t: float = -1.0
+var _sweep: Dictionary = {}
+var breaks: int = 0
+var sweeps: int = 0
 
 
 func setup(record: Dictionary, sq: Squad, exit: Dictionary, rng: RandomNumberGenerator) -> void:
@@ -67,6 +83,7 @@ func setup(record: Dictionary, sq: Squad, exit: Dictionary, rng: RandomNumberGen
 	set_exit(exit)
 	_rng.seed = rng.randi()
 	_size0 = sq.members.size()
+	_peace_able = _size0
 	if not sq.members.is_empty():
 		_patrol = sq.members[0].patrol_point_provider
 	var cfg: Dictionary = Balance.RIVALS
@@ -107,6 +124,9 @@ func tick(delta: float) -> int:
 	if living.is_empty():
 		phase = Phase.WIPED
 		return phase
+	var was: Phase = phase
+	if _tick_fight(living, delta):
+		return phase if phase != was else -1
 	if phase == Phase.LOOT:
 		var lost: float = 1.0 - float(living.size()) / float(maxi(_size0, 1))
 		if _age >= loot_budget or packed() >= pack_goal or lost >= float(Balance.RIVALS.loss_share):
@@ -146,6 +166,148 @@ func tick(delta: float) -> int:
 			return m.global_position.distance_to(exit_pos) <= float(Balance.RIVALS.extract_m) and m.state != Marauder.State.DOWNED))
 		return phase
 	return -1
+
+
+# ---------------------------------------------------------------- бой: отход, предел погони, обыск тел
+
+func _able(living: Array[Marauder]) -> Array[Marauder]:
+	return living.filter(func(m: Marauder) -> bool: return not m.state in [Marauder.State.DOWNED, Marauder.State.RESCUE])
+
+
+## Шаг боя. true — отряд занят (отходит или обыскивает тела): обычный план в этот шаг не идёт.
+func _tick_fight(living: Array[Marauder], delta: float) -> bool:
+	var cfg: Dictionary = Balance.RIVALS
+	var able: Array[Marauder] = _able(living)
+	var fighting: bool = false
+	for m: Marauder in living:
+		if m.state == Marauder.State.COMBAT:
+			fighting = true
+			break
+	if _broke_t >= 0.0:
+		_broke_t += delta
+		if _broke_t > float(cfg.rearm_sec) and not fighting:
+			_broke_t = -1.0
+	var lead: Marauder = squad.leader()
+	if fighting:
+		_calm = 0.0
+		_cancel_sweep(living)
+		if _fight_at == Vector3.INF:
+			_fight_at = lead.global_position if lead else living[0].global_position
+			_fight_size = maxi(able.size(), _peace_able)
+			# «крысы» с добычей в драку не лезут — отходят при первом контакте
+			if bool(style.get("flee", false)) and packed() >= int(cfg.flee_packed) and _broke_t < 0.0:
+				_break_contact(living)
+				return true
+		# потеряли в этом бою бойца (убит или лежит) — разрываем контакт; прижали повторно — дерутся
+		if _broke_t < 0.0 and not able.is_empty() and able.size() < _fight_size:
+			_break_contact(living)
+			return true
+		return false
+	_peace_able = able.size()
+	if _fight_at != Vector3.INF:
+		_calm += delta
+		# победители не гонятся бесконечно: ушёл дальше предела от места боя — возвращается к плану
+		for m: Marauder in able:
+			if m.state in [Marauder.State.SEARCH, Marauder.State.INVESTIGATE] and m.global_position.distance_to(_fight_at) > float(cfg.pursuit_m):
+				m.stand_down()
+		if _calm >= float(cfg.calm_sec):
+			if _broke_t < 0.0 and phase == Phase.LOOT:
+				_start_sweep(living)
+			_fight_at = Vector3.INF
+			_fight_size = 0
+	if not _sweep.is_empty():
+		return _run_sweep(living, delta)
+	return false
+
+
+## Разорвать контакт: все, кто на ногах, бегут к выходу; отряд из рейда уходит.
+func _break_contact(living: Array[Marauder]) -> void:
+	breaks += 1
+	_broke_t = 0.0
+	_cancel_sweep(living)
+	var lead: Marauder = squad.leader()
+	if lead:
+		lead.say("Отходим!")
+	if phase == Phase.LOOT:
+		_head_out(living)
+	var to: Vector3 = _exit_point()
+	for m: Marauder in _able(living):
+		m.no_loot = true
+		m.break_contact(to, float(Balance.RIVALS.retreat_sec))
+	print("rivals: «%s» разрывают контакт, уходят к выходу «%s»" % [name, exit_name])
+
+
+## Бой стих, отряд на ногах: ведущий обыскивает ящики с убитых рядом с местом боя, остальные прикрывают.
+func _start_sweep(living: Array[Marauder]) -> void:
+	var cfg: Dictionary = Balance.RIVALS
+	var lead: Marauder = squad.leader()
+	if lead == null or packed() >= pack_goal or bool(style.get("flee", false)):
+		return
+	var bodies: Array = []
+	for n: Node in lead.get_tree().get_nodes_in_group("loot_containers"):
+		var c: LootContainer = n as LootContainer
+		if c == null or c.look != LootContainer.Look.CRATE or (c.rolled and c.items.is_empty()):
+			continue
+		if c.global_position.distance_to(_fight_at) <= float(cfg.sweep_m):
+			bodies.append(c)
+	if bodies.is_empty():
+		return
+	var from: Vector3 = lead.global_position
+	bodies.sort_custom(func(a: LootContainer, b: LootContainer) -> bool: return a.global_position.distance_to(from) < b.global_position.distance_to(from))
+	bodies.resize(mini(bodies.size(), int(cfg.sweep_bodies)))
+	_sweep = {"left": float(cfg.sweep_sec), "bodies": bodies, "i": -1}
+	sweeps += 1
+	lead.say("Проверю тела. Прикройте.")
+	print("rivals: «%s» обыскивают тела (%d) после боя" % [name, bodies.size()])
+
+
+## true — обыск идёт. Ведущий берёт ящики по очереди; на каждый остальные встают вокруг лицом наружу.
+func _run_sweep(living: Array[Marauder], delta: float) -> bool:
+	_sweep["left"] = float(_sweep.left) - delta
+	var lead: Marauder = squad.leader()
+	if lead == null or float(_sweep.left) <= 0.0:
+		_cancel_sweep(living)
+		return false
+	if lead.state in [Marauder.State.SEARCH, Marauder.State.INVESTIGATE]:
+		lead.stand_down()
+	# прикрытие: остальные — вокруг тела, лицом наружу (кто ещё «ищет» — бой окончен, встаёт на пост)
+	if _sweep.has("at"):
+		var k: int = 0
+		for m: Marauder in living:
+			if m == lead:
+				continue
+			if m.state in [Marauder.State.SEARCH, Marauder.State.INVESTIGATE]:
+				m.stand_down()
+			if m.state == Marauder.State.PATROL and String(m._order.get("kind", "")) != "hold":
+				var ang: float = float(_sweep.turn) + TAU * 0.5 * float(k)
+				var out: Vector3 = Vector3(cos(ang), 0.0, sin(ang))
+				var at0: Vector3 = _sweep.at
+				m.hold_post(at0 + out * float(Balance.RIVALS.cover_m), at0 + out * 30.0, float(_sweep.left))
+			k += 1
+	if lead.is_looting():
+		return true
+	var bodies: Array = _sweep.bodies
+	var i: int = int(_sweep.i) + 1
+	while i < bodies.size() and (not is_instance_valid(bodies[i]) or ((bodies[i] as LootContainer).rolled and (bodies[i] as LootContainer).items.is_empty())):
+		i += 1
+	_sweep["i"] = i
+	if i >= bodies.size() or not lead.order_loot(bodies[i] as LootContainer):
+		_cancel_sweep(living)
+		return false
+	# новое тело — прикрытие переставляется вокруг него
+	_sweep["at"] = (bodies[i] as LootContainer).global_position
+	_sweep["turn"] = _rng.randf() * TAU
+	for m: Marauder in living:
+		m.release_post()
+	return true
+
+
+func _cancel_sweep(living: Array[Marauder]) -> void:
+	if _sweep.is_empty():
+		return
+	_sweep = {}
+	for m: Marauder in living:
+		m.release_post()
 
 
 func _head_out(living: Array[Marauder]) -> void:

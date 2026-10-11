@@ -70,6 +70,7 @@ tools/godot.cmd --windowed --resolution 1280x720 res://tools/nvg_stress_test.tsc
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/sky_flare_shots.tscn # осветительная ракета из сигнального пистолета во дворе зоны 1 ночью: 15 с в воздухе, высота, кадры в секунду; снимки sky_flare_*
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/aim_feel_test.tscn  # пристрелка (сбитый ноль, щелчки), дыхание и его задержка, отдача в руках пружинами, своя инерция метки коллиматора
 tools/godot.cmd --headless res://tools/rivals_test.tscn    # чужие отряды («другие игроки»): входят, обыскивают, уходят через выход с добычей, воюют между собой и с мародёрами, память состава
+tools/godot.cmd --headless res://tools/rivals_fight_test.tscn # бой между группами: потеряли бойца — отход к выходу, «крысы» с добычей уходят сразу, предел погони, обыск тел под прикрытием
 tools/godot.cmd res://tools/rain_test.tscn                  # дождь шейдерами: карта «что над головой» = лучи физики; снимки rain_* (RAIN_TIME=night RAIN_SUFFIX=_night — ночью)
 tools/godot.cmd res://tools/light_shots.tscn                # заградительные огни (ночь/туман горят, ясный день — нет), мягкий свет ТЦ; снимки light_*
 tools/godot.cmd res://tools/light_tour.tscn                 # свет: помещения ночью, аварийный (панели = огни), ракета/химсвет за стеной, засвет от фонаря, фонарь на оружии за взглядом, ПНВ; снимки tour_* (TOUR_ONLY=glare — только засвет/ПНВ)
