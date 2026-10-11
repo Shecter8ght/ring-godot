@@ -980,6 +980,20 @@ const AI_HOSTILE := {"marauder": ["pmc", "resident", "rival"], "pmc": ["marauder
 const RIVALS := {"squads": [1, 3], "size": [2, 3], "enter_sec": [15.0, 260.0], "spawn_min_m": 55.0,
 	"loot_sec": [200.0, 380.0], "pack_goal": 5, "loss_share": 0.5, "extract_sec": 18.0, "extract_m": 7.0,
 	"key_chance": 0.5}
+## Птицы на открытой карте (BirdFlocks; число стай можно переопределить в данных карты, ключ "birds"):
+## sitting / circling — сидящих стай и кружащих в небе; flock — птиц в стае; crow_share — доля вороньих стай
+## (остальные — голуби, они не каркают); perches_per_district — мест посадки на район; sit_spread_m —
+## разброс сидящих. Взлетают: от шума — на расстоянии радиус шума × noise_k, но не дальше noise_cap_m;
+## от шагов по шине шума — не дальше step_m; кто идёт быстрее walk_speed ближе near_m или подошёл на
+## touch_m — тоже (проверка раз в scan_sec). Взлёт: разом за takeoff_spread_sec, набор высоты climb_sec,
+## кружат air_sec, садятся land_sec; circle_r / circle_h — радиус и высота круга, м; speed — м/с.
+## В дождь остаётся доля rain_k стай, ночью птиц нет. idle_caw_sec — как часто каркают кружащие.
+## ai_noise_m — слышат ли взлёт мародёры (0 — нет). Звук: громкость, «единица» и предел слышимости.
+const BIRDS := {"sitting": 14, "circling": 3, "flock": [5, 11], "crow_share": 0.6, "perches_per_district": 5, "sit_spread_m": 2.6,
+	"noise_k": 0.8, "noise_cap_m": 90.0, "step_m": 7.0, "near_m": 9.0, "touch_m": 3.5, "walk_speed": 2.2, "scan_sec": 0.4,
+	"takeoff_spread_sec": 0.7, "climb_sec": 4.0, "air_sec": [35.0, 80.0], "land_sec": 6.0,
+	"circle_r": [7.0, 15.0], "circle_h": [16.0, 30.0], "speed": 9.0, "rain_k": 0.4, "idle_caw_sec": [9.0, 26.0],
+	"ai_noise_m": 0.0, "start_sec": 2.0, "sound_db": 2.0, "sound_unit": 22.0, "sound_max_m": 260.0}
 ## Жильцы: сколько групп, по сколько, доля враждебных сразу; ближе стольких метров к их
 ## магазину — «полез к ним»; враждебные стреляют с такого расстояния.
 const RESIDENTS := {"groups": [1, 2], "size": [2, 3], "hostile_share": 0.3, "trespass_m": 7.0, "hostile_m": 22.0}

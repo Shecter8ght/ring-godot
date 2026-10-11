@@ -94,6 +94,10 @@
   "ambient_k_night_rain": 4.2,
   "ambient_k_night_fog": 2.2
  },
+ "birds": {
+  "sitting": 14,
+  "circling": 3
+ },
  "sky_hdri": {
   "day": {
    "a": "res://assets/sky/kloppenheim_03_puresky.hdr",
