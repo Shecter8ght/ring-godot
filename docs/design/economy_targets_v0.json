@@ -19,6 +19,8 @@
     "plate": 6,
     "weapon": 24
   },
+  "pocket_rule": "unchanged; balance prices and rarity, not capacity or item restrictions",
+  "scenario_note": "Assumptions only: pocket income is the sale equivalent of newly found items on failed raids, not measured player income.",
   "kits": [
     {
       "name": "Дворовый",
@@ -46,6 +48,7 @@
       "survival": 0.3,
       "net_success": 120000,
       "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 61667,
       "wins_to_patrol": 11.1,
       "attempts_to_patrol": 37.2
@@ -54,6 +57,7 @@
       "survival": 0.4,
       "net_success": 120000,
       "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 82500,
       "wins_to_patrol": 8.3,
       "attempts_to_patrol": 20.8
@@ -62,6 +66,7 @@
       "survival": 0.5,
       "net_success": 120000,
       "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 95000,
       "wins_to_patrol": 7.2,
       "attempts_to_patrol": 14.5
@@ -70,6 +75,7 @@
       "survival": 0.6,
       "net_success": 120000,
       "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 103333,
       "wins_to_patrol": 6.7,
       "attempts_to_patrol": 11.1
@@ -78,9 +84,145 @@
       "survival": 0.75,
       "net_success": 120000,
       "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 111667,
       "wins_to_patrol": 6.2,
       "attempts_to_patrol": 8.2
+    },
+    {
+      "survival": 0.3,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 10000,
+      "savings_per_success_after_failures": 85000,
+      "wins_to_patrol": 8.1,
+      "attempts_to_patrol": 27.0
+    },
+    {
+      "survival": 0.4,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 10000,
+      "savings_per_success_after_failures": 97500,
+      "wins_to_patrol": 7.1,
+      "attempts_to_patrol": 17.6
+    },
+    {
+      "survival": 0.5,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 10000,
+      "savings_per_success_after_failures": 105000,
+      "wins_to_patrol": 6.5,
+      "attempts_to_patrol": 13.1
+    },
+    {
+      "survival": 0.6,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 10000,
+      "savings_per_success_after_failures": 110000,
+      "wins_to_patrol": 6.2,
+      "attempts_to_patrol": 10.4
+    },
+    {
+      "survival": 0.75,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 10000,
+      "savings_per_success_after_failures": 115000,
+      "wins_to_patrol": 6.0,
+      "attempts_to_patrol": 8.0
+    },
+    {
+      "survival": 0.3,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 25000,
+      "savings_per_success_after_failures": 120000,
+      "wins_to_patrol": 5.7,
+      "attempts_to_patrol": 19.1
+    },
+    {
+      "survival": 0.4,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 25000,
+      "savings_per_success_after_failures": 120000,
+      "wins_to_patrol": 5.7,
+      "attempts_to_patrol": 14.3
+    },
+    {
+      "survival": 0.5,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 25000,
+      "savings_per_success_after_failures": 120000,
+      "wins_to_patrol": 5.7,
+      "attempts_to_patrol": 11.5
+    },
+    {
+      "survival": 0.6,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 25000,
+      "savings_per_success_after_failures": 120000,
+      "wins_to_patrol": 5.7,
+      "attempts_to_patrol": 9.5
+    },
+    {
+      "survival": 0.75,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 25000,
+      "savings_per_success_after_failures": 120000,
+      "wins_to_patrol": 5.7,
+      "attempts_to_patrol": 7.6
+    },
+    {
+      "survival": 0.3,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 50000,
+      "savings_per_success_after_failures": 178333,
+      "wins_to_patrol": 3.9,
+      "attempts_to_patrol": 12.8
+    },
+    {
+      "survival": 0.4,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 50000,
+      "savings_per_success_after_failures": 157500,
+      "wins_to_patrol": 4.4,
+      "attempts_to_patrol": 10.9
+    },
+    {
+      "survival": 0.5,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 50000,
+      "savings_per_success_after_failures": 145000,
+      "wins_to_patrol": 4.7,
+      "attempts_to_patrol": 9.5
+    },
+    {
+      "survival": 0.6,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 50000,
+      "savings_per_success_after_failures": 136667,
+      "wins_to_patrol": 5.0,
+      "attempts_to_patrol": 8.4
+    },
+    {
+      "survival": 0.75,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "new_pocket_income_on_failure": 50000,
+      "savings_per_success_after_failures": 128333,
+      "wins_to_patrol": 5.4,
+      "attempts_to_patrol": 7.1
     }
   ]
 }

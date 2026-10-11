@@ -115,17 +115,22 @@ def main() -> None:
     # Это сценарная арифметика, а не измерение игроков; все предположения выводим рядом.
     scenarios = []
     good_kit = next(k["draft"] for k in kits if k["name"] == "Патрульный")
-    for survival in [0.3, 0.4, 0.5, 0.6, 0.75]:
-        win_net, cheap_loss = 120000, 25000
-        loss_per_win = (1 - survival) / survival * cheap_loss
-        savings_per_win = win_net - loss_per_win
-        scenarios.append({"survival": survival, "net_success": win_net, "cheap_loss": cheap_loss,
-                          "savings_per_success_after_failures": round(savings_per_win),
-                          "wins_to_patrol": round(good_kit / savings_per_win, 1),
-                          "attempts_to_patrol": round(good_kit / savings_per_win / survival, 1)})
+    for pocket_income in [0, 10000, 25000, 50000]:
+        for survival in [0.3, 0.4, 0.5, 0.6, 0.75]:
+            win_net, cheap_loss = 120000, 25000
+            # Только новая добыча неудачной попытки; взятые из убежища вещи не являются доходом.
+            loss_per_win = (1 - survival) / survival * (cheap_loss - pocket_income)
+            savings_per_win = win_net - loss_per_win
+            scenarios.append({"survival": survival, "net_success": win_net, "cheap_loss": cheap_loss,
+                              "new_pocket_income_on_failure": pocket_income,
+                              "savings_per_success_after_failures": round(savings_per_win),
+                              "wins_to_patrol": round(good_kit / savings_per_win, 1),
+                              "attempts_to_patrol": round(good_kit / savings_per_win / survival, 1)})
     output = {"status": "proposal_only", "shop_items": len(shop), "catalog_items": sum(r["catalog"] > 0 for r in shop),
               "hidden_items": sum(r["catalog"] == 0 for r in shop),
               "categories": dict(Counter(r["definition"]["cat"] for r in shop)),
+              "pocket_rule": "unchanged; balance prices and rarity, not capacity or item restrictions",
+              "scenario_note": "Assumptions only: pocket income is the sale equivalent of newly found items on failed raids, not measured player income.",
               "kits": kits, "scenarios": scenarios}
     (DESIGN / "economy_targets_v0.json").write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(output, ensure_ascii=False, indent=2))
