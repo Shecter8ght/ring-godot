@@ -327,4 +327,4 @@
 
 ## Сигнальный пистолет и патроны (`assets/models/weapons/flare_gun_claude/`)
 
-Собственные модели проекта (Claude), собраны скриптом `tools/build_flare_gun_claude.py` (Blender 5.2) по фотографиям сигнального пистолета СП-81 калибра 26 мм и его патронов (образец формы и размеров; клейм и надписей нет): `flare_gun_claude.glb`, `flare_red_claude.glb` (осветительный), `flare_green_claude.glb` (вызов груза). Исходник — `_asset_src/flare_gun_claude/`.
+Собственные модели проекта (Claude), собраны скриптами `tools/trace_flare_gun_claude.py` и `tools/build_flare_gun_claude.py` (Blender 5.2): `flare_gun_claude.glb`, `flare_red_claude.glb` (осветительный), `flare_green_claude.glb` (вызов груза). Образец формы — фотографии владельца компактной переломной ракетницы 12-го калибра (тип Orion) и её патронов: контуры обведены с фото, размеры — оценка от диаметра ствола; логотипов и надписей производителя нет. Модель со Sketchfab по ссылке владельца (i_c_e_m_a_n_, CC-BY) использована только для просмотра формы со всех сторон — геометрия и текстуры из неё не брались. Исходник — `_asset_src/flare_gun_claude/`.
