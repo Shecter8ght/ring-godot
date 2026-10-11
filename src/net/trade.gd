@@ -20,6 +20,11 @@ var _their: Array = []
 ## Рюкзак напарника в убежище (он присылает его вместе со своей половиной буфера).
 var _their_bp: Array = []
 var _their_bp_grid: Vector2i = Vector2i(5, 4)
+## Подсумки разгрузки напарника в убежище: {"rig": [список, сетка], "dump": […]}.
+var _their_rig: Dictionary = {}
+## Сетки разгрузки в окне: свои (тащить можно) и напарника (смотреть).
+var _own_rig_grids: Dictionary = {}
+var _mate_rig_grids: Dictionary = {}
 var _ready_me: bool = false
 var _ready_them: bool = false
 ## Ведущий отправил «меняемся» и ждёт подтверждения: буфер заперт.
@@ -199,13 +204,14 @@ func _mate_inv() -> Inventory:
 	return pl.inventory if pl else null
 
 
-## Свои сетки: "backpack", "stash" (только убежище), "offer" — своя половина буфера.
+## Свои сетки: "backpack", "stash" (только убежище), "rig" и "dump" (надетая разгрузка: подсумки и сумка
+## сброса), "offer" — своя половина буфера.
 func _list(role: String) -> Array:
 	if _raid():
 		var inv := _my_inv()
 		if inv == null:
 			return []
-		return inv.trade if role == "offer" else inv.items
+		return inv.list_of("trade" if role == "offer" else role)
 	return _offer if role == "offer" else Profile.list_of(role)
 
 
@@ -213,8 +219,21 @@ func _grid(role: String) -> Vector2i:
 	if role == "offer":
 		return grid()
 	if _raid():
-		return _my_inv().backpack_grid() if _my_inv() else Vector2i(5, 4)
+		return _my_inv().grid_of(role) if _my_inv() else Vector2i(5, 4)
 	return Profile.grid_of(role)
+
+
+## Разгрузка напарника: что лежит в подсумках / сумке сброса и какая у них сетка (ZERO — нет).
+func _their_rig_list(part: String) -> Array:
+	if _raid():
+		return _mate_inv().list_of(part) if _mate_inv() else []
+	return (_their_rig.get(part, [[], Vector2i.ZERO]) as Array)[0]
+
+
+func _their_rig_grid(part: String) -> Vector2i:
+	if _raid():
+		return _mate_inv().grid_of(part) if _mate_inv() else Vector2i.ZERO
+	return (_their_rig.get(part, [[], Vector2i.ZERO]) as Array)[1]
 
 
 func _their_offer() -> Array:
@@ -289,7 +308,18 @@ func _build() -> void:
 	_mate_grid = GridView.new(_their_backpack_grid(), "mate")
 	_mate_grid.drag_enabled = false
 	left.add_child(_mate_grid)
-	var look := _label("Чужой рюкзак — только посмотреть. Напарник сам кладёт в буфер то, что отдаёт.", 13, Color(0.6, 0.62, 0.6))
+	# его разгрузка: подсумки с магазинами и сумка сброса
+	_mate_rig_grids = {}
+	for part: Array in [["rig", "Его подсумки"], ["dump", "Его сброс пустых"]]:
+		var g1: Vector2i = _their_rig_grid(String(part[0]))
+		if g1 == Vector2i.ZERO:
+			continue
+		left.add_child(_label(String(part[1]), 15, Color(0.6, 0.85, 1.0)))
+		var gv1 := GridView.new(g1, "mate_" + String(part[0]))
+		gv1.drag_enabled = false
+		left.add_child(gv1)
+		_mate_rig_grids[String(part[0])] = gv1
+	var look := _label("Чужие вещи — только посмотреть. Напарник сам кладёт в буфер то, что отдаёт.", 13, Color(0.6, 0.62, 0.6))
 	look.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	left.add_child(look)
 	# посередине — буфер обмена: половина напарника сверху, своя снизу
@@ -324,6 +354,17 @@ func _build() -> void:
 	_bp_grid = GridView.new(_grid("backpack"), "backpack")
 	right.add_child(_bp_grid)
 	var own: Array[GridView] = [_bp_grid, _mine_grid]
+	# своя разгрузка: магазины из подсумков отдаются прямо отсюда
+	_own_rig_grids = {}
+	for part: Array in [["rig", "Твои подсумки — магазины"], ["dump", "Твой сброс пустых"]]:
+		var g2: Vector2i = _grid(String(part[0]))
+		if g2 == Vector2i.ZERO:
+			continue
+		right.add_child(_label(String(part[1]), 15, Color(0.95, 0.82, 0.6)))
+		var gv2 := GridView.new(g2, String(part[0]))
+		right.add_child(gv2)
+		own.append(gv2)
+		_own_rig_grids[String(part[0])] = gv2
 	_stash_grid = null
 	if not raid:
 		right.add_child(_label("Твой тайник", 18, Color(0.95, 0.82, 0.6)))
@@ -362,11 +403,15 @@ func _label(text: String, size: int, color: Color) -> Label:
 ## Перенести запись между своими сетками (рюкзак, тайник, своя половина буфера).
 func _move(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
 	var from := _list(src)
-	if idx < 0 or idx >= from.size() or not src in ["backpack", "stash", "offer"] or not dst in ["backpack", "stash", "offer"]:
+	var roles := ["backpack", "stash", "offer", "rig", "dump"]
+	if idx < 0 or idx >= from.size() or not src in roles or not dst in roles:
+		return
+	if dst in ["rig", "dump"] and not ItemDb.grid_accepts(dst, from[idx]):
+		_notify("В подсумки — только магазины")
 		return
 	if _raid():
-		# в рейде перекладывает хост (сетка "trade" рюкзака игрока)
-		var role := {"offer": "trade", "backpack": "backpack"}
+		# в рейде перекладывает хост (сетка "trade" рюкзака игрока, подсумки — "rig" / "dump")
+		var role := {"offer": "trade", "backpack": "backpack", "rig": "rig", "dump": "dump"}
 		if role.has(src) and role.has(dst):
 			_raid().request_grid_move(String(role[src]), idx, String(role[dst]), x, y, r)
 		return
@@ -391,7 +436,7 @@ func _bare(e: Dictionary) -> Dictionary:
 	return e
 
 
-## Двойной клик: из рюкзака / тайника — в буфер, из буфера — в рюкзак (в убежище нет места — в тайник).
+## Двойной клик: из рюкзака / тайника / подсумков — в буфер, из буфера — в рюкзак (в убежище нет места — в тайник).
 func _quick(role: String, idx: int) -> void:
 	if role == "offer":
 		var before := _list("offer").size()
@@ -414,14 +459,18 @@ func _touched(offer_changed: bool) -> void:
 	_refresh()
 
 
-## Убежище: своя половина буфера и свой рюкзак — напарнику (рюкзак он видит слева).
+## Убежище: своя половина буфера, свой рюкзак и разгрузка — напарнику (он видит их слева).
 func _send_offer() -> void:
 	if partner in multiplayer.get_peers():
-		_rpc_offer.rpc_id(partner, _offer, Profile.backpack, Profile.grid_of("backpack"))
+		var rig := {}
+		for part: String in ["rig", "dump"]:
+			if Profile.grid_of(part) != Vector2i.ZERO:
+				rig[part] = [Profile.list_of(part), Profile.grid_of(part)]
+		_rpc_offer.rpc_id(partner, _offer, Profile.backpack, Profile.grid_of("backpack"), rig)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_offer(list: Array, backpack: Array = [], backpack_grid: Vector2i = Vector2i(5, 4)) -> void:
+func _rpc_offer(list: Array, backpack: Array = [], backpack_grid: Vector2i = Vector2i(5, 4), rig: Dictionary = {}) -> void:
 	if multiplayer.get_remote_sender_id() != partner:
 		return
 	if str(_stripped(list)) != str(_stripped(_their)):
@@ -431,6 +480,7 @@ func _rpc_offer(list: Array, backpack: Array = [], backpack_grid: Vector2i = Vec
 	_their = list.duplicate(true)
 	_their_bp = backpack.duplicate(true)
 	_their_bp_grid = backpack_grid
+	_their_rig = rig.duplicate(true)
 	_refresh()
 
 
@@ -554,6 +604,8 @@ func _refresh() -> void:
 		return
 	# сетки поменяли размер (другой рюкзак) или другой напарник — окно собирается заново
 	var shape := "%d|%s|%s|%s" % [mate, str(_their_backpack_grid()), str(_grid("backpack")), str(_raid() != null)]
+	for part: String in ["rig", "dump"]:
+		shape += "|%s|%s" % [str(_grid(part)), str(_their_rig_grid(part))]
 	if shape != _built or _mine_grid == null or not is_instance_valid(_mine_grid):
 		_built = shape
 		_build()
@@ -566,6 +618,10 @@ func _refresh() -> void:
 		_stash_grid.set_items(Profile.stash)
 	_mine_grid.set_items(_list("offer"))
 	_their_grid.set_items(_their_offer())
+	for part: String in _own_rig_grids:
+		(_own_rig_grids[part] as GridView).set_items(_list(part))
+	for part: String in _mate_rig_grids:
+		(_mate_rig_grids[part] as GridView).set_items(_their_rig_list(part))
 	var me_ready := _ready_of(true)
 	var mate_ready := _ready_of(false)
 	_give.set_pressed_no_signal(me_ready)
@@ -596,6 +652,8 @@ func _process(_delta: float) -> void:
 		var inv := _my_inv()
 		var other := _mate_inv()
 		var sig := "%s|%s|%s|%s|%s" % [str(inv.items) if inv else "", str(inv.trade) if inv else "", str(other.items) if other else "", str(other.trade) if other else "", str(raid.trades)]
+		# разгрузки обоих — в снаряжении
+		sig += "|%s|%s" % [str(inv.equipment.get("rig", {})) if inv else "", str(other.equipment.get("rig", {})) if other else ""]
 		if sig != _sig:
 			_sig = sig
 			_refresh()

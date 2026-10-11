@@ -24,7 +24,11 @@ func _ready() -> void:
 func _run() -> void:
 	role = String(OS.get_cmdline_user_args()[0])
 	Profile.use_file("user://trade_net_%s.json" % role, true)
-	Profile.equipment = {"backpack": ItemDb.make("bp_tourist", 1)}
+	# у обоих надета разгрузка с пистолетным магазином в подсумке — его отдают прямо из подсумка
+	var rig: Dictionary = ItemDb.make("rig_belt", 1)
+	(rig.mags as Array).append(WeaponDb.make_mag("mag_919_17", "ammo_919_fmj", 17))
+	((rig.mags as Array)[0] as Dictionary).merge({"x": 0, "y": 0, "r": false})
+	Profile.equipment = {"backpack": ItemDb.make("bp_tourist", 1), "rig": rig}
 	Profile.backpack = []
 	Profile.stash = []
 	# хост отдаёт магазин с патронами, гость — бинты
@@ -128,6 +132,32 @@ func _raid_part(mine: String, back: String) -> void:
 	await until(func() -> bool: return not raid.trades.has(multiplayer.get_unique_id()), 30)
 	await get_tree().create_timer(0.5).timeout
 	check("рейд: обмен состоялся — своя вещь вернулась, чужая ушла", _in(inv.items, back) >= 0 and _in(inv.items, mine) < 0 and inv.trade.is_empty() and not Trade.is_open(), str(inv.items))
+	# магазин — прямо из подсумка надетой разгрузки: отдаёт хост, гость ничего не кладёт
+	await get_tree().create_timer(1.0).timeout
+	if role == "host":
+		raid.request_trade(_other())
+	await until(func() -> bool: return Trade.is_open(), 20)
+	await get_tree().create_timer(0.4).timeout
+	check("рейд: в окне видны подсумки — свои и напарника", Trade._grid("rig") != Vector2i.ZERO and Trade._their_rig_grid("rig") != Vector2i.ZERO and Trade._their_rig_list("rig").size() == 1)
+	if role == "host":
+		Trade._quick("rig", 0)
+		await until(func() -> bool: return inv.trade.size() == 1 and inv.list_of("rig").is_empty(), 20)
+		check("рейд: магазин из подсумка лёг в буфер", inv.trade.size() == 1 and inv.list_of("rig").is_empty())
+	else:
+		await until(func() -> bool: return Trade._their_offer().size() == 1, 20)
+	await get_tree().create_timer(0.5 if role == "host" else 1.2).timeout
+	if DisplayServer.get_name() != "headless":
+		for i in range(20):
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/trade_raid_rig_%s.png" % role))
+	Trade._set_ready(true)
+	await until(func() -> bool: return not raid.trades.has(multiplayer.get_unique_id()), 30)
+	await get_tree().create_timer(0.5).timeout
+	if role == "host":
+		check("рейд: магазин ушёл из подсумка насовсем", inv.list_of("rig").is_empty() and _in(inv.items, "mag_919_17") < 0 and inv.trade.is_empty())
+	else:
+		var got: int = _in(inv.items, "mag_919_17")
+		check("рейд: получил магазин напарника с патронами, свой остался в подсумке", got >= 0 and int(inv.items[got].get("rounds", 0)) == 17 and inv.list_of("rig").size() == 1, str(inv.items))
 	# второй обмен: положили вещь и разошлись — хост рвёт обмен, вещь снова в рюкзаке
 	await get_tree().create_timer(1.0).timeout
 	if role == "host":

@@ -1,33 +1,41 @@
 class_name EquipDoll
 extends Control
-## Ростовая фигура со слотами снаряжения (окно рюкзака в рейде и тайник в убежище): шлем на голове,
-## очки и наушники у головы, броня на груди, разгрузка на животе, рюкзак за спиной, оружие в руках.
-## Слоты — обычные SlotView (views: слот → ячейка): окно само подключает их сигналы. Фигура рисуется
-## кодом — силуэт без лица, чтобы слоты читались, а не картинка.
+## Снаряжение на фигуре (окно рюкзака в рейде и тайник в убежище) — как в играх жанра: в середине
+## стоит сам персонаж (CharacterPreview, настоящая модель), слева от него узкая колонка «голова» (шлем,
+## наушники, глаза), справа — «корпус» (броня, разгрузка, рюкзак), под ногами — два широких слота оружия.
+## Слоты маленькие и одинаковые, без рамок-плит. Сами слоты — обычные SlotView (views: слот → ячейка):
+## окно подключает их сигналы, перетаскивание работает как раньше.
 
-const SIZE := Vector2(430.0, 470.0)
-## Где слот стоит на фигуре (в координатах SIZE).
+const SIZE := Vector2(440.0, 344.0)
+## Малый слот и где какой стоит (в координатах SIZE).
+const CELL := Vector2(92.0, 80.0)
 const LAYOUT := {
-	"helmet": Rect2(155, 2, 120, 60),
-	"eyes": Rect2(8, 8, 130, 54),
-	"ears": Rect2(292, 8, 130, 54),
-	"armor": Rect2(130, 96, 170, 88),
-	"rig": Rect2(130, 190, 170, 80),
-	"backpack": Rect2(310, 92, 112, 110),
-	"primary": Rect2(8, 286, 204, 78),
-	"secondary": Rect2(218, 286, 204, 78),
+	"helmet": Rect2(0, 0, 92, 80),
+	"ears": Rect2(0, 86, 92, 80),
+	"eyes": Rect2(0, 172, 92, 80),
+	"armor": Rect2(348, 0, 92, 80),
+	"rig": Rect2(348, 86, 92, 80),
+	"backpack": Rect2(348, 172, 92, 80),
+	"primary": Rect2(0, 262, 217, 82),
+	"secondary": Rect2(223, 262, 217, 82),
 }
-const C_BODY := Color(0.3, 0.29, 0.27, 0.9)
-const C_EDGE := Color(1.0, 0.86, 0.6, 0.16)
+## Где стоит фигура.
+const FIGURE := Rect2(98, 0, 244, 258)
 
 var views: Dictionary = {}
+var _figure: CharacterPreview
 
 
 func _init() -> void:
 	custom_minimum_size = SIZE
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_figure = CharacterPreview.new()
+	_figure.position = FIGURE.position
+	_figure.size = FIGURE.size
+	_figure.custom_minimum_size = FIGURE.size
+	add_child(_figure)
 	for slot: String in Inventory.SLOTS:
-		var r: Rect2 = LAYOUT.get(slot, Rect2(8, 380, 130, 60))
+		var r: Rect2 = LAYOUT.get(slot, Rect2(0, 262, 92, 80))
 		var sv := SlotView.new(slot)
 		sv.custom_minimum_size = r.size
 		sv.position = r.position
@@ -43,22 +51,7 @@ func set_equipment(eq: Dictionary) -> void:
 
 
 func _draw() -> void:
-	var cx := SIZE.x * 0.5
-	# голова, шея
-	draw_circle(Vector2(cx, 44), 30.0, C_BODY)
-	draw_rect(Rect2(cx - 11, 70, 22, 22), C_BODY)
-	# плечи и корпус — трапеция, таз
-	draw_colored_polygon(PackedVector2Array([Vector2(cx - 88, 92), Vector2(cx + 88, 92), Vector2(cx + 62, 268), Vector2(cx - 62, 268)]), C_BODY)
-	draw_colored_polygon(PackedVector2Array([Vector2(cx - 62, 268), Vector2(cx + 62, 268), Vector2(cx + 66, 300), Vector2(cx - 66, 300)]), C_BODY)
-	# руки: от плеч к кистям у бёдер
-	for side: float in [-1.0, 1.0]:
-		draw_colored_polygon(PackedVector2Array([Vector2(cx + side * 88, 94), Vector2(cx + side * 116, 104), Vector2(cx + side * 124, 300),
-			Vector2(cx + side * 96, 304)]), C_BODY)
-		# ноги
-		draw_colored_polygon(PackedVector2Array([Vector2(cx + side * 6, 300), Vector2(cx + side * 66, 300), Vector2(cx + side * 56, 456),
-			Vector2(cx + side * 16, 456)]), C_BODY)
-		draw_rect(Rect2(cx + side * 36 - 26, 456, 52, 12), C_BODY)
-	# выноски: очки и наушники — к голове, рюкзак — к спине
-	draw_line(Vector2(138, 35), Vector2(cx - 30, 40), C_EDGE, 1.5)
-	draw_line(Vector2(292, 35), Vector2(cx + 30, 44), C_EDGE, 1.5)
-	draw_line(Vector2(310, 140), Vector2(cx + 80, 130), C_EDGE, 1.5)
+	# мягкая подложка под фигурой: человек не висит в пустоте
+	var c := FIGURE.get_center()
+	draw_circle(Vector2(c.x, FIGURE.end.y - 10.0), 62.0, Color(1.0, 0.86, 0.6, 0.035))
+	draw_circle(Vector2(c.x, FIGURE.end.y - 10.0), 40.0, Color(1.0, 0.86, 0.6, 0.04))

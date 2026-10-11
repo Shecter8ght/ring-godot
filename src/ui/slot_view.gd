@@ -30,26 +30,33 @@ func set_entry(e: Dictionary) -> void:
 
 func _draw() -> void:
 	var r := Rect2(Vector2.ZERO, size)
-	draw_rect(r, Color(0.05, 0.055, 0.06, 0.9))
-	var border := Color(1, 1, 1, 0.15)
+	var slot_name := String(Inventory.SLOT_NAMES.get(slot, slot))
+	draw_rect(r, Color(0.085, 0.087, 0.092, 0.86))
+	var border := Color(1, 1, 1, 0.1)
 	if _hover == 1:
 		border = Color(0.3, 0.9, 0.4, 0.8)
 	elif _hover == -1:
 		border = Color(0.95, 0.3, 0.25, 0.8)
-	draw_rect(r, border, false, 1.5)
-	draw_string(_font, Vector2(6, 15), String(Inventory.SLOT_NAMES.get(slot, slot)), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.65, 0.68, 0.7))
 	if entry.is_empty():
+		# пустой слот: только название по центру, приглушённо — не плита с рамкой
+		draw_rect(r, border, false, 1.0)
+		draw_string(_font, Vector2(0, size.y * 0.5 + 4.0), slot_name, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, Color(0.46, 0.48, 0.5))
 		return
 	var cat := String(ItemDb.item(String(entry.id)).get("cat", "misc"))
-	var inner := r.grow(-6)
-	inner.position.y += 14
-	inner.size.y -= 14
 	var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
 	var has_icon := ItemIcons.get_icon(String(entry.id)) != null
-	draw_rect(inner, ItemIcons.backdrop(col) if has_icon else col)
-	ItemIcons.draw_entry(self, entry, inner.grow(-4.0), false)
-	draw_string_outline(_font, inner.position + Vector2(5, 16), ItemDb.label(entry), HORIZONTAL_ALIGNMENT_LEFT, inner.size.x - 8, 13, 3, Color(0, 0, 0, 0.7))
-	draw_string(_font, inner.position + Vector2(5, 16), ItemDb.label(entry), HORIZONTAL_ALIGNMENT_LEFT, inner.size.x - 8, 13, Color(0.95, 0.93, 0.88))
+	draw_rect(r, ItemIcons.backdrop(col) if has_icon else col)
+	# предмет — во весь слот; подписи поверх: чей слот (мелко, сверху) и что надето (снизу)
+	var art := r.grow(-3.0)
+	art.size.y -= 12.0
+	ItemIcons.draw_entry(self, entry, art, false)
+	draw_rect(r, border if _hover != 0 else Color(1.0, 0.86, 0.6, 0.28), false, 1.0)
+	draw_string(_font, Vector2(5, 12), slot_name, HORIZONTAL_ALIGNMENT_LEFT, size.x - 8, 10, Color(1, 1, 1, 0.5))
+	var fs := 11 if size.x < 150.0 else 13
+	var label := ItemDb.label(entry)
+	var at := Vector2(4, size.y - 5.0)
+	draw_rect(Rect2(0, size.y - float(fs) - 7.0, size.x, float(fs) + 7.0), Color(0, 0, 0, 0.45))
+	draw_string(_font, at, label, HORIZONTAL_ALIGNMENT_LEFT, size.x - 8, fs, Color(0.95, 0.93, 0.88))
 
 
 func _get_tooltip(_at: Vector2) -> String:
