@@ -2,6 +2,7 @@
  "_comment": "Список сюжетных квестов (файлы data/quests/<id>.json). Новый квест — файл + строка здесь.",
  "quests": [
   "missing_anton",
-  "own_mark"
+  "own_mark",
+  "brand_seal"
  ]
 }

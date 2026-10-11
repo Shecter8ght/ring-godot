@@ -62,6 +62,9 @@ static func item(id: String) -> Dictionary:
 const ARSENAL_CATS := ["weapon", "mag", "ammo", "mod", "armor", "plate"]
 
 static func loot_only(id: String) -> bool:
+	# плёнку для наклеек Михалыч держит на продажу после задания «Фирменный знак»
+	if id == String(Balance.STICKERS.film) and Stickers.printer_ready():
+		return false
 	var it := item(id)
 	if bool(it.get("raid_only", false)):
 		return true

@@ -155,6 +155,7 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/stickers_test.tscn 
 tools/godot.cmd --headless res://tools/sticker_icons.tscn  # иконки наклеек из их рисунков (assets/stickers/<id>.png владельца или знак кодом) → assets/icons; затем --import
 tools/godot.cmd --headless res://tools/birds_test.tscn     # птицы зоны 1: стаи сидят и кружат, взлетают от выстрела и от пробежавшего рядом, садятся, ночью нет, в дождь меньше; с окном — снимки birds_*
 tools/godot.cmd --headless res://tools/shelter_exit_test.tscn # выход в рейд пешком: запечённого света нет, дверь тамбура, коридор и лестница во двор, план у стола, зона сбора — отсчёт и рейд
+tools/godot.cmd --headless res://tools/printer_quest_test.tscn # задание «Фирменный знак»: этапы, сдача расходников разговором, печать наклеек, плёнка у Михалыча; с окном — снимок stickers_printer
 tools/godot.cmd --headless res://tools/mags_test.tscn      # магазины: ПОЛН/ПУСТ и оценка после проверки, снарядить/разрядить поштучно (MagOps), нет патронов — текст, разрядка в клетки ящика и буфер 3×3, плиты по одной, вопрос о буфере, держать R
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/lumar_reticle_shots.tscn # ЛУМАР: метка шейдером (формы, цвета, толщина), окно под ПНВ на голове, ночной режим окна, окно настройки (P); снимки lumar_ret_*
 tools/godot.cmd res://tools/sight_nvg_shots.tscn             # коллиматор в ПНВ, ЛЦУ: точка без ПНВ, луч в ПНВ; снимки sight_nvg_* (SHOTS_LOW=1 — качество «низко»)

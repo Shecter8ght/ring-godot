@@ -356,12 +356,28 @@ func talk_options(npc: String) -> Array:
 		elif st == "ACTIVE":
 			var o := objective(qid)
 			if String(o.get("type", "")) == "talk" and String(o.get("npc", "")) == npc:
-				out.append({"quest": qid, "dialogue": String(o.get("dialogue", "")), "label": "%s — %s" % [String(d.title), String(o.get("text", "поговорить"))]})
+				# разговор со сдачей вещей (take): пока их нет в тайнике — другой разговор, цель не засчитывается
+				var did: String = String(o.get("dialogue", "")) if take_ready(o) else String(o.get("dialogue_missing", o.get("dialogue", "")))
+				out.append({"quest": qid, "dialogue": did, "label": "%s — %s" % [String(d.title), String(o.get("text", "поговорить"))]})
 	return out
 
 
 func dialogue(qid: String, did: String) -> Array:
 	return (def(qid).get("dialogues", {}) as Dictionary).get(did, [])
+
+
+## Цель «поговорить» со сдачей вещей (take: {предмет: сколько}): всё ли лежит в тайнике. Сдаёт тот,
+## чья кампания, — хост (в соло — сам игрок); гостю кнопка сдачи недоступна.
+func take_ready(o: Dictionary) -> bool:
+	var need: Dictionary = o.get("take", {})
+	if need.is_empty():
+		return true
+	if is_client():
+		return false
+	for id: String in need:
+		if Profile.stash_count(id) < int(need[id]):
+			return false
+	return true
 
 
 ## Разговор дочитан: доступный квест начинается, цель «поговорить» засчитывается (клиент — просит хост).
@@ -371,6 +387,13 @@ func finish_talk(qid: String, npc: String, did: String) -> void:
 		return
 	if state(qid) == "AVAILABLE":
 		start(qid)
+	# сдача вещей: забираются из тайника в момент, когда разговор засчитывается
+	var o: Dictionary = objective(qid)
+	if state(qid) == "ACTIVE" and String(o.get("type", "")) == "talk" and String(o.get("dialogue", "")) == did and not (o.get("take", {}) as Dictionary).is_empty():
+		if not take_ready(o):
+			return
+		for id: String in o.take:
+			Profile.take_from_stash(id, int(o.take[id]))
 	event("talk", {"npc": npc, "dialogue": did})
 
 

@@ -16,6 +16,9 @@ var _apply_button: Button
 var _status: Label
 var _view: BuilderView
 var _inventory_sig: String = ""
+var _print_pick: OptionButton
+var _print_button: Button
+var _print_state: Label
 
 
 func _ready() -> void:
@@ -63,6 +66,24 @@ func _ready() -> void:
 	_apply_button.pressed.connect(_apply)
 	_status = _label(left, "", 16)
 	_status.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# принтер: печать наклейки из набора рисунков — лист плёнки и краска из тайника
+	left.add_child(HSeparator.new())
+	_label(left, "Принтер наклеек", 16)
+	var print_row: HBoxContainer = HBoxContainer.new()
+	print_row.add_theme_constant_override("separation", 8)
+	left.add_child(print_row)
+	_print_pick = OptionButton.new()
+	_print_pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for id: String in Balance.STICKERS.printable:
+		_print_pick.add_item(ItemDb.item_name(id))
+	print_row.add_child(_print_pick)
+	_print_pick.item_selected.connect(func(_idx: int) -> void: _refresh_printer())
+	_print_button = Button.new()
+	_print_button.name = "StickerPrint"
+	_print_button.text = "Напечатать"
+	print_row.add_child(_print_button)
+	_print_button.pressed.connect(_print)
+	_print_state = _label(left, "", 14)
 	_label(left, "Наклейки находят в рейдах: киоски, офисы, тела мародёров и бойцов ЧВК.\n«Счёт» сам получает зарубку за каждую эвакуацию с этим стволом.", 14)
 	var right: VBoxContainer = VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -102,7 +123,32 @@ func _label(parent: Node, text: String, font_size: int) -> Label:
 
 
 func _signature() -> String:
-	return str(Profile.equipment) + str(Profile.stash) + str(Profile.backpack) + str(Profile.pocket)
+	return str(Profile.equipment) + str(Profile.stash) + str(Profile.backpack) + str(Profile.pocket) + str(Stickers.printer_ready()) + str(Stickers.ink_left())
+
+
+func _print_id() -> String:
+	var list: Array = Balance.STICKERS.printable
+	return String(list[clampi(_print_pick.selected, 0, list.size() - 1)])
+
+
+func _refresh_printer() -> void:
+	var why: String = Stickers.print_block(_print_id())
+	_print_button.disabled = why != ""
+	_print_pick.disabled = not Stickers.printer_ready()
+	if not Stickers.printer_ready():
+		_print_state.text = why
+		return
+	var line: String = "Плёнки в тайнике: %d · краски хватит на листов: %d (+ комплектов: %d)" % [Profile.stash_count(String(Balance.STICKERS.film)),
+		Stickers.ink_left(), Profile.stash_count(String(Balance.STICKERS.ink))]
+	_print_state.text = line if why == "" else line + "\n" + why
+
+
+func _print() -> void:
+	var why: String = Stickers.print_sticker(_print_id())
+	_refresh()
+	_status.text = why if why != "" else "Напечатано: %s — лежит в тайнике." % ItemDb.item_name(_print_id())
+	if why == "":
+		Audio.play_ui("workbench")
 
 
 func _process(_delta: float) -> void:
@@ -130,6 +176,7 @@ func _refresh() -> void:
 			pick = _sticker.item_count - 1
 	if _sticker.item_count > 0:
 		_sticker.select(maxi(pick, 0))
+	_refresh_printer()
 	_show_weapon()
 
 

@@ -95,6 +95,55 @@ static func remove(where: String, idx: int, uid: String, n: int) -> String:
 	return ""
 
 
+# ---------------------------------------------------------------- принтер
+
+## Принтер собран и отдан в пользование (задание «Фирменный знак»; чит «открыть всё» — тоже).
+static func printer_ready() -> bool:
+	return Settings.unlocked() or Quests.flag(String(Balance.STICKERS.printer_flag)) == true
+
+
+## На сколько листов ещё хватит начатого комплекта картриджей (и подарка Михалыча).
+static func ink_left() -> int:
+	var media: Dictionary = Profile.hideout_media
+	if not media.has("printer_ink"):
+		return int(Balance.STICKERS.free_prints)
+	return int(media.printer_ink)
+
+
+## Почему сейчас нельзя напечатать ("" — можно).
+static func print_block(id: String) -> String:
+	if not printer_ready():
+		return "Принтера нет. Его собирает Михалыч — задание «Фирменный знак»."
+	if not id in (Balance.STICKERS.printable as Array):
+		return "Такой рисунок принтер не печатает."
+	var free: bool = not Profile.hideout_media.has("printer_ink") and int(Balance.STICKERS.free_prints) > 0
+	if not free and Profile.stash_count(String(Balance.STICKERS.film)) < 1:
+		return "Нет плёнки в тайнике. Плёнку продаёт Михалыч."
+	if ink_left() <= 0 and Profile.stash_count(String(Balance.STICKERS.ink)) < 1:
+		return "Краска кончилась — нужен комплект картриджей в тайнике."
+	if ItemDb.room_in(Profile.stash, ItemDb.make(id, 1), Profile.stash_grid()) < 1:
+		return "В тайнике нет места для наклейки."
+	return ""
+
+
+## Напечатать наклейку id: лист плёнки и краска — из тайника, наклейка — в тайник. "" — готово.
+static func print_sticker(id: String) -> String:
+	var why: String = print_block(id)
+	if why != "":
+		return why
+	var free: bool = not Profile.hideout_media.has("printer_ink") and int(Balance.STICKERS.free_prints) > 0
+	var ink: int = ink_left()
+	if ink <= 0:
+		Profile.take_from_stash(String(Balance.STICKERS.ink), 1)
+		ink = int(Balance.STICKERS.ink_sheets)
+	if not free:
+		Profile.take_from_stash(String(Balance.STICKERS.film), 1)
+	Profile.hideout_media["printer_ink"] = ink - 1
+	ItemDb.add_to(Profile.stash, ItemDb.make(id, 1), Profile.stash_grid())
+	Profile.save()
+	return ""
+
+
 ## Эвакуация со стволом: наклейкам «Счёт» на нём — по зарубке.
 static func tally_extract(entry: Dictionary) -> void:
 	for st: Variant in of(entry):

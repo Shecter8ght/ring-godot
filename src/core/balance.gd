@@ -1540,7 +1540,12 @@ const ENGRAVING := {"charges": 3, "max_text": 24, "width": 0.065, "pistol_width"
 ## получает зарубку за эвакуацию со стволом, до tally_max; сторона наклейки на длинном стволе и на
 ## пистолете, м (× размер по выбору, WeaponMark.SCALES); aspect — ширина к высоте, если не квадрат.
 const STICKERS := {"max": 3, "tally": "sticker_tally", "tally_max": 25, "size_m": 0.034, "pistol_size_m": 0.022,
-	"ids": ["sticker_skull", "sticker_tally", "sticker_shark", "sticker_perimeter"], "aspect": {"sticker_tally": 2.0}}
+	"ids": ["sticker_skull", "sticker_tally", "sticker_shark", "sticker_perimeter"], "aspect": {"sticker_tally": 2.0},
+	# принтер наклеек (задание «Фирменный знак»): что печатает (эмблему ЧВК — нет, её только находят), на одну
+	# наклейку — лист film и доля комплекта ink (комплекта хватает на ink_sheets листов); после задания
+	# Михалыч продаёт film; первая печать — из его остатков (free_prints)
+	"printable": ["sticker_skull", "sticker_tally", "sticker_shark"], "film": "sticker_film", "ink": "ink_set", "ink_sheets": 4,
+	"printer_flag": "printer_ready", "free_prints": 1}
 ## Возврат оставленного оружия в следующих рейдах владельца в той же зоне кампании.
 const WEAPON_RECOVERY := {"raids": 5, "chance": 0.25, "checkpoint_sec": 1.0}
 

@@ -1222,6 +1222,9 @@ const STOCK_ORDER := ["weapon", "mag", "ammo", "mod", "armor", "plate", "backpac
 ## (квестовые), без ступеней доверия.
 func _trader_stock() -> Array:
 	var stock: Array = TraderStock.stock().duplicate()
+	# после «Фирменного знака» Михалыч продаёт плёнку для наклеек
+	if Stickers.printer_ready() and not String(Balance.STICKERS.film) in stock:
+		stock.append(String(Balance.STICKERS.film))
 	if Settings.shop_all() or Settings.shop_loot:
 		for id in ItemDb.all_ids():
 			var cat := String(ItemDb.item(String(id)).get("cat", "misc"))
