@@ -1,0 +1,86 @@
+{
+  "status": "proposal_only",
+  "shop_items": 342,
+  "catalog_items": 180,
+  "hidden_items": 162,
+  "categories": {
+    "tools": 45,
+    "ammo": 37,
+    "med": 19,
+    "value": 9,
+    "mod": 51,
+    "backpack": 3,
+    "tech": 46,
+    "food": 15,
+    "armor": 23,
+    "throw": 3,
+    "barter": 29,
+    "mag": 32,
+    "plate": 6,
+    "weapon": 24
+  },
+  "kits": [
+    {
+      "name": "Дворовый",
+      "current": 122675,
+      "draft": 132240
+    },
+    {
+      "name": "Патрульный",
+      "current": 484261,
+      "draft": 687380
+    },
+    {
+      "name": "Штурмовик",
+      "current": 1177684,
+      "draft": 2171890
+    },
+    {
+      "name": "Снайпер",
+      "current": 2356817,
+      "draft": 4061400
+    }
+  ],
+  "scenarios": [
+    {
+      "survival": 0.3,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "savings_per_success_after_failures": 61667,
+      "wins_to_patrol": 11.1,
+      "attempts_to_patrol": 37.2
+    },
+    {
+      "survival": 0.4,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "savings_per_success_after_failures": 82500,
+      "wins_to_patrol": 8.3,
+      "attempts_to_patrol": 20.8
+    },
+    {
+      "survival": 0.5,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "savings_per_success_after_failures": 95000,
+      "wins_to_patrol": 7.2,
+      "attempts_to_patrol": 14.5
+    },
+    {
+      "survival": 0.6,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "savings_per_success_after_failures": 103333,
+      "wins_to_patrol": 6.7,
+      "attempts_to_patrol": 11.1
+    },
+    {
+      "survival": 0.75,
+      "net_success": 120000,
+      "cheap_loss": 25000,
+      "savings_per_success_after_failures": 111667,
+      "wins_to_patrol": 6.2,
+      "attempts_to_patrol": 8.2
+    }
+  ]
+}
