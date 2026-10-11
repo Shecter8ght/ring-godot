@@ -324,3 +324,7 @@
 ## Ускоритель снаряжения магазинов (`assets/items/models/mag_loader.glb`)
 
 Собственная модель проекта, собрана скриптом `tools/build_mag_loader.py` (Blender 5.2) по фотографиям полимерных планочных загрузчиков магазинов под обойму (образец формы и размеров — 135 × 28 × 30 мм; надписей и логотипов нет). Исходник — `_asset_src/mag_loader/mag_loader.blend`.
+
+## Сигнальный пистолет и патроны (`assets/models/weapons/flare_gun_claude/`)
+
+Собственные модели проекта (Claude), собраны скриптом `tools/build_flare_gun_claude.py` (Blender 5.2) по фотографиям сигнального пистолета СП-81 калибра 26 мм и его патронов (образец формы и размеров; клейм и надписей нет): `flare_gun_claude.glb`, `flare_red_claude.glb` (осветительный), `flare_green_claude.glb` (вызов груза). Исходник — `_asset_src/flare_gun_claude/`.
