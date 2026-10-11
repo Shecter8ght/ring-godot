@@ -15,7 +15,7 @@ func _ready() -> void:
 	Settings.unlock_all = false
 	Settings.all_weapons = false
 	Settings.shop_loot = false
-	Profile.money = 400000
+	Profile.money = Profile.buy_price("supply_signal") + 400000
 
 	# --- данные: что продаётся, как делится на группы
 	_check("головка станка и сигнал самолёта — только из рейда", ItemDb.loot_only("laser_head") and ItemDb.loot_only("supply_signal") and not ItemDb.loot_only("wpn_hg_01") and not ItemDb.loot_only("bandage"), "")

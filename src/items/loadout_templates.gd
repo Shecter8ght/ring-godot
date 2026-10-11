@@ -75,6 +75,8 @@ static func remove(i: int) -> void:
 
 ## Можно ли купить у Михалыча ("" — можно, иначе почему нет).
 static func _buy_block(id: String) -> String:
+	if Profile.buy_price(id) <= 0:
+		return "у предмета нет цены Михалыча"
 	var n := TraderStock.catalog_of(id)
 	if n <= 0:
 		return "у Михалыча нет"

@@ -1,5 +1,5 @@
 {
- "_comment": "Модули убежища. start — уровень, с которого модуль уже есть. levels[k-1] — что нужно для уровня k: money, items [[id, n]] (из тайника), trust — уровень доверия Михалыча (1–4), needs — {модуль: уровень}; effect — что даёт. Числа эффектов — в Balance (WORKBENCH_SLOT_LEVEL, POCKET_GRIDS, STASH_ROWS, MISSION_SLOTS).",
+ "_comment": "Модули убежища. start — уровень, с которого модуль уже есть. levels[k-1] — что нужно для уровня k: items [[id, n]] (из тайника), trust — уровень доверия Михалыча (1–4), needs — {модуль: уровень}; effect — что даёт. Денежная часть — в Balance.HIDEOUT_MODULE_PRICES. Числа эффектов — в Balance (WORKBENCH_SLOT_LEVEL, POCKET_GRIDS, STASH_ROWS, MISSION_SLOTS).",
  "modules": [
   {
    "id": "workbench",
@@ -8,7 +8,7 @@
    "start": 1,
    "levels": [
     {"effect": "дульные устройства, рукоятки, приклады, магазины"},
-    {"money": 40000, "items": [["toolset", 1], ["wires", 2]], "needs": {"generator": 1}, "trust": 2, "effect": "+ прицелы, фонари, ЛЦУ, сошки"}
+    {"items": [["toolset", 1], ["wires", 2]], "needs": {"generator": 1}, "trust": 2, "effect": "+ прицелы, фонари, ЛЦУ, сошки"}
    ]
   },
   {
@@ -17,7 +17,7 @@
    "what": "Питание: без него не работают второй уровень верстака и рация.",
    "start": 0,
    "levels": [
-    {"money": 20000, "items": [["battery", 2], ["wires", 3]], "trust": 1, "effect": "питание модулей"}
+    {"items": [["battery", 2], ["wires", 3]], "trust": 1, "effect": "питание модулей"}
    ]
   },
   {
@@ -26,8 +26,8 @@
    "what": "Что лежит в кармане, не теряется при смерти.",
    "start": 0,
    "levels": [
-    {"money": 30000, "items": [["cigarettes", 5], ["lighter", 2]], "trust": 1, "effect": "карман 2×2"},
-    {"money": 90000, "items": [["documents", 2], ["gold_chain", 2]], "trust": 3, "effect": "карман 3×3"}
+    {"items": [["cigarettes", 5], ["lighter", 2]], "trust": 1, "effect": "карман 2×2"},
+    {"items": [["documents", 2], ["gold_chain", 2]], "trust": 3, "effect": "карман 3×3"}
    ]
   },
   {
@@ -37,8 +37,8 @@
    "start": 1,
    "levels": [
     {"effect": "10 × 30"},
-    {"money": 35000, "items": [["toolset", 1]], "trust": 1, "effect": "10 × 40"},
-    {"money": 80000, "items": [["toolset", 2], ["wires", 4]], "trust": 2, "effect": "10 × 50"}
+    {"items": [["toolset", 1]], "trust": 1, "effect": "10 × 40"},
+    {"items": [["toolset", 2], ["wires", 4]], "trust": 2, "effect": "10 × 50"}
    ]
   },
   {
@@ -47,7 +47,7 @@
    "what": "Связь с Михалычем: больше заданий одновременно.",
    "start": 0,
    "levels": [
-    {"money": 25000, "items": [["battery", 1], ["phone", 1], ["wires", 2]], "needs": {"generator": 1}, "trust": 1, "effect": "3 задания одновременно"}
+    {"items": [["battery", 1], ["phone", 1], ["wires", 2]], "needs": {"generator": 1}, "trust": 1, "effect": "3 задания одновременно"}
    ]
   },
   {

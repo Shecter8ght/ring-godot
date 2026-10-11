@@ -15,6 +15,11 @@ static func all() -> Array:
 		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 		if d is Dictionary:
 			_mods = (d as Dictionary).get("modules", [])
+			for module: Dictionary in _mods:
+				var prices: Dictionary = Balance.HIDEOUT_MODULE_PRICES.get(String(module.id), {})
+				var levels: Array = module.get("levels", [])
+				for i: int in range(levels.size()):
+					(levels[i] as Dictionary)["money"] = int(prices.get(i + 1, 0))
 	return _mods
 
 

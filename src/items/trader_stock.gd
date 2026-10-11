@@ -2,8 +2,8 @@ class_name TraderStock
 extends RefCounted
 ## Ассортимент Михалыча (data/trader.json, собирается tools/gen_trader_catalogs.py): пять
 ## каталогов, каждый открывается на своей ступени доверия (каждые Balance.TRUST_STEPS.catalog_every
-## ступеней — новый). Предмет — в одном каталоге; цена растёт с каталогом
-## (Balance.TRADER_CATALOG_MULT). Снаряжения ЧВК «Периметр» в каталогах нет — только с тел.
+## ступеней — новый). Предмет — в одном каталоге; цены заданы отдельно в Balance.TRADER_BUY_PRICES.
+## Снаряжения ЧВК «Периметр» в каталогах нет — только с тел.
 
 const PATH := "res://data/trader.json"
 

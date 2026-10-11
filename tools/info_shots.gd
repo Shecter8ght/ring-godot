@@ -1,6 +1,7 @@
 extends Node
 ## Снимки: окно описания предмета (патроны, оружие, плитоносец) и прицел гранаты (G зажата).
 ## docs/screens/info_*.png, nade_aim.png. godot --path . res://tools/info_shots.tscn
+## INFO_ONLY=1 — только описания, без тестового участка гранаты.
 
 func _ready() -> void:
 	RaidEvents.enabled = false
@@ -22,6 +23,10 @@ func _ready() -> void:
 		w.queue_free()
 		await get_tree().process_frame
 	layer.queue_free()
+	# Для проверки описаний не нужен участок гранаты со старой тестовой лестницей.
+	if OS.get_environment("INFO_ONLY") == "1":
+		get_tree().quit()
+		return
 	var inst: Node = load(Balance.RAID_SCENE).instantiate()
 	get_tree().root.add_child(inst)
 	get_tree().current_scene = inst

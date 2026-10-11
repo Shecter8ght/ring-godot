@@ -212,7 +212,7 @@ func _get_tooltip(at: Vector2) -> String:
 	var t := ItemDb.label(e)
 	if int(e.n) > 1:
 		t += "  ×%d" % int(e.n)
-	return "%s\n%s ₽" % [t, InventoryUI.money(ItemDb.entry_value(e))]
+	return "%s\nПродать: %s ₽" % [t, InventoryUI.money(Profile.sell_price(e))]
 
 
 # ---------------------------------------------------------------- мышь

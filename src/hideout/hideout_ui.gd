@@ -1750,7 +1750,7 @@ func _build_exit() -> void:
 	for slot in Inventory.SLOTS:
 		var e: Dictionary = Profile.equipment.get(slot, {})
 		col.add_child(_text("%s:  %s" % [Inventory.SLOT_NAMES[slot], ItemDb.label(e) if not e.is_empty() else "—"], Color(0.85, 0.85, 0.82)))
-	col.add_child(_text("Рюкзак: %d / %d ячеек, на %s ₽" % [Profile.backpack_cells(), Profile.backpack_capacity(), InventoryUI.money(ItemDb.value_of(Profile.backpack))], Color(0.85, 0.85, 0.82)))
+	col.add_child(_text("Рюкзак: %d / %d ячеек, продажа %s ₽" % [Profile.backpack_cells(), Profile.backpack_capacity(), InventoryUI.money(Profile.sell_value_of(Profile.backpack))], Color(0.85, 0.85, 0.82)))
 	# чего из основного не хватает — видно заранее (выйти всё равно можно, спросим)
 	var gaps := Profile.raid_kit_gaps()
 	if not gaps.is_empty():

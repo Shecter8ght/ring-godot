@@ -776,18 +776,9 @@ static func _migrate() -> void:
 
 # ---------------------------------------------------------------- торговец
 
-## Цена у Михалыча: стоимость × наценка каталога (Balance.TRADER_CATALOG_MULT); расходникам —
-## доля наценки, обвесу — ещё сверху.
+## Покупка — явная цена за преимущество; оценка находки и ремонт от неё не зависят.
 static func buy_price(id: String) -> int:
-	var table: Array = Balance.TRADER_CATALOG_MULT
-	var n := clampi(TraderStock.catalog_of(id), 1, table.size())
-	var mult := float(table[n - 1])
-	var cat := String(ItemDb.item(id).get("cat", ""))
-	if cat in ["ammo", "mag", "med", "food", "throw"]:
-		mult = 1.0 + (mult - 1.0) * Balance.TRADER_CONSUMABLE_K
-	elif cat == "mod":
-		mult *= Balance.TRADER_MOD_BUY_MULT
-	return int(ceil(float(ItemDb.value(id)) * mult))
+	return int(Balance.TRADER_BUY_PRICES.get(WeaponDb.canonical(id), 0))
 
 
 ## Нет ни одного огнестрела (надето, рюкзак, карман, тайник) и не на что купить самый дешёвый.
@@ -811,7 +802,48 @@ static func take_rescue() -> bool:
 
 
 static func sell_price(entry: Dictionary) -> int:
-	return int(floor(float(ItemDb.entry_value(entry)) * Balance.TRADER_SELL_MULT))
+	return maxi(0, floori(float(ItemDb.entry_value(entry)) * Balance.TRADER_SELL_MULT + _sale_adjustment(entry)))
+
+
+## Общая выручка списка для окна убежища; рейдовая ценность ItemDb остаётся отдельной оценкой.
+static func sell_value_of(items: Array) -> int:
+	var total: int = 0
+	for entry: Dictionary in items:
+		total += sell_price(entry)
+	return total
+
+
+## Дешёвые магазины и медицина переоценены и внутри сборки. Исходную оценку ItemDb оставляем
+## для ремонта и рейдовой аналитики; поправка продажи обходит всё содержимое экземпляра.
+static func _sale_adjustment(entry: Dictionary) -> float:
+	var id: String = WeaponDb.canonical(String(entry.get("id", "")))
+	var delta: float = _sale_unit_adjustment(id) * int(entry.get("n", 1))
+	var mx: float = ItemDb.max_dur(id)
+	if entry.has("dur") and mx > 0.0:
+		delta *= clampf(float(entry.dur) / mx, 0.2, 1.0)
+	for slot: String in entry.get("mods", {}):
+		delta += _sale_adjustment(WeaponCondition.mod_entry(entry.mods[slot]))
+	var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
+	if not mag.is_empty():
+		delta += _sale_adjustment(Gear.mag_item(mag))
+	if entry.has("rounds"):
+		for layer: Variant in Gear.mag_layers(entry):
+			delta += _sale_unit_adjustment(String(layer[0])) * int(layer[1])
+	if int(entry.get("chamber", 0)) > 0:
+		delta += _sale_unit_adjustment(String(entry.get("chamber_ammo", mag.get("ammo", "")))) * int(entry.chamber)
+	for side: String in entry.get("plates", {}):
+		delta += _sale_adjustment(entry.plates[side])
+	for part: String in ["mags", "dump"]:
+		for inner: Variant in entry.get(part, []):
+			delta += _sale_adjustment(inner)
+	return delta
+
+
+static func _sale_unit_adjustment(id: String) -> float:
+	var canonical: String = WeaponDb.canonical(id)
+	if not Balance.TRADER_SELL_PRICES.has(canonical):
+		return 0.0
+	return float(Balance.TRADER_SELL_PRICES[canonical]) - ItemDb.value(canonical) * Balance.TRADER_SELL_MULT
 
 
 ## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack"); wear — одну вещь со слотом
@@ -821,7 +853,10 @@ static func buy(id: String, n: int, to: String = "stash", wear: bool = true) -> 
 	# лишь с читом «лут в продаже»
 	if ItemDb.loot_only(id) and not Settings.shop_loot:
 		return false
-	var cost := buy_price(id) * n
+	var unit: int = buy_price(id)
+	if unit <= 0 or n <= 0:
+		return false
+	var cost := unit * n
 	var dst := list_of(to)
 	var grid := grid_of(to)
 	var bought := ItemDb.make(id, n)

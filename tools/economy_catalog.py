@@ -1,10 +1,10 @@
-"""Полная таблица текущих цен и проект цен v0 для обсуждения экономики.
+"""Воспроизводимая согласованная таблица v0 относительно снимка ДО внедрения.
 
-После tools/godot.cmd --headless res://tools/economy_audit.tscn:
     python tools/economy_catalog.py
 
-Проект не подключён к игре. После согласования числа переносятся в Balance,
-а эта таблица остаётся воспроизводимым снимком для проверки покрытия ассортимента.
+Цены уже в Balance; эта таблица остаётся эталоном первой версии. Вход economy_current.json
+зафиксирован до внедрения, новые аудиты пишутся в economy_live.json. Не применять коэффициенты
+проекта повторно к новым игровым ценам. Сверка игры — economy_prices_test.tscn.
 """
 from __future__ import annotations
 
@@ -184,7 +184,7 @@ def main() -> None:
                                "hours_20_min_cycle": round(attempts * 20 / 60, 1),
                                "hours_25_min_cycle": round(attempts * 25 / 60, 1),
                                "hours_30_min_cycle": round(attempts * 30 / 60, 1)})
-    output = {"status": "proposal_only", "shop_items": len(shop), "catalog_items": sum(r["catalog"] > 0 for r in shop),
+    output = {"status": "v0_prices_implemented; income_and_timing_are_scenarios", "shop_items": len(shop), "catalog_items": sum(r["catalog"] > 0 for r in shop),
               "hidden_items": sum(r["catalog"] == 0 for r in shop),
               "categories": dict(Counter(r["definition"]["cat"] for r in shop)),
               "pocket_rule": "unchanged; balance prices and rarity, not capacity or item restrictions",

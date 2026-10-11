@@ -120,7 +120,7 @@ func _build(entry: Dictionary) -> void:
 	title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
 	hv.add_child(title)
 	var facts := Label.new()
-	facts.text = facts_line(id)
+	facts.text = facts_line(id, entry)
 	facts.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	facts.add_theme_font_size_override("font_size", 14)
 	facts.add_theme_color_override("font_color", Color(0.68, 0.7, 0.66))
@@ -158,13 +158,18 @@ func _build(entry: Dictionary) -> void:
 
 
 ## Строка фактов: вид, размер, вес, цена, стопка.
-static func facts_line(id: String) -> String:
+static func facts_line(id: String, entry: Dictionary = {}) -> String:
 	var it := ItemDb.item(id)
 	var s := ItemDb.size(id)
 	var parts: Array[String] = [String(CAT_NAMES.get(String(it.get("cat", "misc")), "Разное"))]
 	parts.append("%d×%d клет." % [s.x, s.y])
 	parts.append("%.2f кг" % ItemDb.weight(id) if ItemDb.weight(id) < 1.0 else "%.1f кг" % ItemDb.weight(id))
-	parts.append("цена %s ₽" % InventoryUI.money(ItemDb.value(id)))
+	var buy: int = Profile.buy_price(id)
+	if buy > 0 and (TraderStock.catalog_of(id) > 0 or Settings.shop_loot or Settings.all_weapons):
+		parts.append("купить %s ₽" % InventoryUI.money(buy))
+	if ItemDb.value(id) > 0:
+		var shown: Dictionary = entry if not entry.is_empty() else ItemDb.make(id, 1)
+		parts.append("продать %s ₽" % InventoryUI.money(Profile.sell_price(shown)))
 	if ItemDb.stack(id) > 1:
 		parts.append("в стопке до %d" % ItemDb.stack(id))
 	return "  ·  ".join(parts)

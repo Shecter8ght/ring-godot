@@ -33,7 +33,7 @@ func _ready() -> void:
 	Profile.buy("ammo_12", 20)
 	_check("покупка у торговца", Profile.money < m0 and _idx("ammo_12") >= 0, "%d ₽" % Profile.money)
 	# ствол у Михалыча — со снаряжённым штатным магазином; продали обратно, чтобы не мешал дальше
-	Profile.money += 100000
+	Profile.money += Profile.buy_price("wpn_sg_02")
 	Profile.buy("wpn_sg_02", 1, "stash", false)
 	var gun: Dictionary = Profile.stash[_idx("wpn_sg_02")] if _idx("wpn_sg_02") >= 0 else {}
 	_check("купленный ствол — магазин полный", not gun.is_empty() and int(gun.mag.rounds) > 0 and int(gun.mag.rounds) == WeaponDb.capacity(gun), str(gun.get("mag", {})))
@@ -43,9 +43,9 @@ func _ready() -> void:
 	Profile.sell(_idx("painkillers"), 2)
 	_check("продажа торговцу", Profile.money > m1 and _idx("painkillers") < 0, "%d ₽" % Profile.money)
 	# верстак: обвесы на автомат (обвесы у Михалыча дорогие)
-	_check("обвесы дороже обычной наценки", Profile.buy_price("mod_grip") > int(ItemDb.value("mod_grip") * float(Balance.TRADER_CATALOG_MULT[TraderStock.catalog_of("mod_grip") - 1])),
+	_check("обвесы дороже исходной оценки", Profile.buy_price("mod_grip") > ItemDb.value("mod_grip"),
 		"рукоятка %d ₽" % Profile.buy_price("mod_grip"))
-	Profile.money += 150000
+	Profile.money += Profile.buy_price("mod_supp_545") + Profile.buy_price("mod_grip")
 	var st0 := WeaponStats.compute(Profile.equipment.primary)
 	for id in ["mod_supp_545", "mod_grip"]:
 		Profile.buy(id, 1)
@@ -62,7 +62,7 @@ func _ready() -> void:
 	Profile.install_mod("primary", _idx("w_pistol")) # не обвес — не ставится
 	_check("чужое на верстак не ставится", Profile.weapon_mods("primary").size() == 2, "")
 	# модули убежища: верстак 1 не ставит прицелы; генератор + верстак 2 — ставит
-	Profile.money += 200000
+	Profile.money += Profile.buy_price("mod_rmr") + int(Upgrades.next_cost("generator").money) + int(Upgrades.next_cost("workbench").money) + int(Upgrades.next_cost("pocket").money)
 	Profile.buy("mod_rmr", 1)
 	_check("верстак 1: коллиматор нельзя", Profile.mod_block("mod_rmr", "optic_primary") != "", Profile.mod_block("mod_rmr", "optic_primary"))
 	_check("генератор без деталей не строится", Upgrades.block("generator") != "", Upgrades.block("generator"))
@@ -164,7 +164,7 @@ func _ready() -> void:
 	_check("эвакуация добавила доверия Михалыча", Profile.extractions == 1 and Profile.trust >= Balance.TRUST_PER_EXTRACTION, "доверие %d, выходов %d" % [Profile.trust, Profile.extractions])
 	# доверие набрано — маршрут на 2F открывается за деньги, но этаж ещё не собран
 	Profile.trust = 9  # ступень 10 — второй каталог, верстак 2, маршрут на 2F
-	Profile.money += 50000
+	Profile.money += int(Floors.find("f2").price)
 	var m2 := Profile.money
 	_check("маршрут на 2F открыт за доверие и деньги", Floors.unlock("f2") and Floors.is_open("f2") and Profile.money == m2 - int(Floors.find("f2").price),
 		"%d ₽" % Profile.money)

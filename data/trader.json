@@ -1,5 +1,5 @@
 {
- "_comment": "Михалыч: пять каталогов, открываются на ступенях доверия (catalogs.step). catalog — в каком каталоге предмет. Цена — Balance.TRADER_CATALOG_MULT по каталогу. Снаряжение «Периметра» не продаётся. Собирается tools/gen_trader_catalogs.py.",
+ "_comment": "Михалыч: пять каталогов, открываются на ступенях доверия (catalogs.step). catalog — в каком каталоге предмет. Цена — Balance.TRADER_BUY_PRICES. Снаряжение «Периметра» не продаётся. Собирается tools/gen_trader_catalogs.py.",
  "name": "Сергей «Михалыч»",
  "catalogs": [
   {

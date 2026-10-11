@@ -2,7 +2,8 @@ extends Node
 ## Снимок экономики для обсуждения баланса: настоящие цены и стопки из ItemDb/Profile.
 ## Профиль и настройки не меняет; броски лута изолированы фиксированным зерном.
 
-const OUTPUT := "res://docs/design/economy_current.json"
+## Снимок до v0 (economy_current.json) сохраняем для сравнения; новый аудит пишет отдельно.
+const OUTPUT := "res://docs/design/economy_live.json"
 const SAMPLES := 10000
 
 
@@ -84,8 +85,8 @@ func _ready() -> void:
 		"condition": Balance.CONDITION, "supply_signal": Balance.SUPPLY_SIGNAL,
 		"supply_loot": Balance.SUPPLY_LOOT, "loot_packs": Balance.LOOT_PACKS,
 		"plane_drop": {"samples": supplies.size(), "mean_sell": float(supply_total) / supplies.size(), "p50": supplies[supplies.size() / 2], "p90": supplies[int(supplies.size() * 0.9)]},
-		"modules": JSON.parse_string(FileAccess.get_file_as_string("res://data/hideout.json")),
-		"floors": JSON.parse_string(FileAccess.get_file_as_string("res://data/floors.json")),
+		"modules": {"modules": Upgrades.all()},
+		"floors": {"floors": Floors.all()},
 		"missions": JSON.parse_string(FileAccess.get_file_as_string("res://data/missions.json"))}
 	var file: FileAccess = FileAccess.open(OUTPUT, FileAccess.WRITE)
 	if file == null:

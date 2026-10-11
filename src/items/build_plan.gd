@@ -42,6 +42,8 @@ static func resolve(weapon: Dictionary, draft: Dictionary, draft_mag: Dictionary
 			"shop":
 				if not bool(rules.get("shop", false)):
 					return _fail(out, "торговца здесь нет")
+				if Profile.buy_price(att) <= 0:
+					return _fail(out, "у детали нет цены Михалыча")
 				(out.buy as Array).append(att)
 				real = {"id": att, "dur": float(Balance.CONDITION.full)}
 			_:

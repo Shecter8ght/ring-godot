@@ -16,6 +16,10 @@ static func all() -> Array:
 		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 		if d is Dictionary:
 			_floors = (d as Dictionary).get("floors", [])
+			for route: Dictionary in _floors:
+				var prices: Dictionary = Balance.FLOOR_PRICES.get(String(route.id), {})
+				route["price"] = int(prices.get("price", 0))
+				route["fee"] = int(prices.get("fee", 0))
 	return _floors
 
 

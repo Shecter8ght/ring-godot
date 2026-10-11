@@ -13,6 +13,7 @@ var _me: Player
 
 
 func _ready() -> void:
+	Profile.use_file("user://mags_test_profile.json", true)
 	RaidEvents.enabled = false
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame

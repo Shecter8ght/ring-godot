@@ -62,7 +62,7 @@ func _draw() -> void:
 func _get_tooltip(_at: Vector2) -> String:
 	if entry.is_empty():
 		return String(Inventory.SLOT_NAMES.get(slot, slot))
-	return "%s\n%s ₽" % [ItemDb.label(entry), InventoryUI.money(ItemDb.entry_value(entry))]
+	return "%s\nПродать: %s ₽" % [ItemDb.label(entry), InventoryUI.money(Profile.sell_price(entry))]
 
 
 func _fits(id: String) -> bool:

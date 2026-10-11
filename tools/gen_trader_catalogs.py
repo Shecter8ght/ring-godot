@@ -110,7 +110,7 @@ def main() -> None:
     old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
     out = {
         "_comment": "Михалыч: пять каталогов, открываются на ступенях доверия (catalogs.step). catalog — в каком "
-                    "каталоге предмет. Цена — Balance.TRADER_CATALOG_MULT по каталогу. Снаряжение «Периметра» не "
+                    "каталоге предмет. Цена — Balance.TRADER_BUY_PRICES. Снаряжение «Периметра» не "
                     "продаётся. Собирается tools/gen_trader_catalogs.py.",
         "name": old.get("name", "Сергей «Михалыч»"),
         "catalogs": [{k: c[k] for k in ("n", "step", "name", "what")} for c in CATALOGS],
