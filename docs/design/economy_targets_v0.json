@@ -25,22 +25,90 @@
     {
       "name": "Дворовый",
       "current": 122675,
-      "draft": 132240
+      "draft": 128440
     },
     {
       "name": "Патрульный",
       "current": 484261,
-      "draft": 687380
+      "draft": 647680
     },
     {
       "name": "Штурмовик",
       "current": 1177684,
-      "draft": 2171890
+      "draft": 2112190
     },
     {
       "name": "Снайпер",
       "current": 2356817,
-      "draft": 4061400
+      "draft": 3824700
+    }
+  ],
+  "suggested_kits": [
+    {
+      "name": "Практичная стрелковая · MK12",
+      "draft": 1020340,
+      "lines": [
+        [
+          "wpn_dmr_02",
+          1
+        ],
+        [
+          "optic_4x_01",
+          1
+        ],
+        [
+          "bipod_01",
+          1
+        ],
+        [
+          "carrier_simple",
+          1
+        ],
+        [
+          "plate_steel",
+          2
+        ],
+        [
+          "rig_chest",
+          1
+        ],
+        [
+          "helmet_police",
+          1
+        ],
+        [
+          "headset_active",
+          1
+        ],
+        [
+          "bp_tourist",
+          1
+        ],
+        [
+          "mag_556_30",
+          3
+        ],
+        [
+          "ammo_556_std",
+          90
+        ],
+        [
+          "bandage",
+          3
+        ],
+        [
+          "medkit",
+          2
+        ],
+        [
+          "painkillers",
+          1
+        ],
+        [
+          "water",
+          1
+        ]
+      ]
     }
   ],
   "scenarios": [
@@ -50,8 +118,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 61667,
-      "wins_to_patrol": 11.1,
-      "attempts_to_patrol": 37.2
+      "wins_to_patrol": 10.5,
+      "attempts_to_patrol": 35.0
     },
     {
       "survival": 0.4,
@@ -59,8 +127,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 82500,
-      "wins_to_patrol": 8.3,
-      "attempts_to_patrol": 20.8
+      "wins_to_patrol": 7.9,
+      "attempts_to_patrol": 19.6
     },
     {
       "survival": 0.5,
@@ -68,8 +136,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 95000,
-      "wins_to_patrol": 7.2,
-      "attempts_to_patrol": 14.5
+      "wins_to_patrol": 6.8,
+      "attempts_to_patrol": 13.6
     },
     {
       "survival": 0.6,
@@ -77,8 +145,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 103333,
-      "wins_to_patrol": 6.7,
-      "attempts_to_patrol": 11.1
+      "wins_to_patrol": 6.3,
+      "attempts_to_patrol": 10.4
     },
     {
       "survival": 0.75,
@@ -86,8 +154,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 0,
       "savings_per_success_after_failures": 111667,
-      "wins_to_patrol": 6.2,
-      "attempts_to_patrol": 8.2
+      "wins_to_patrol": 5.8,
+      "attempts_to_patrol": 7.7
     },
     {
       "survival": 0.3,
@@ -95,8 +163,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 10000,
       "savings_per_success_after_failures": 85000,
-      "wins_to_patrol": 8.1,
-      "attempts_to_patrol": 27.0
+      "wins_to_patrol": 7.6,
+      "attempts_to_patrol": 25.4
     },
     {
       "survival": 0.4,
@@ -104,8 +172,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 10000,
       "savings_per_success_after_failures": 97500,
-      "wins_to_patrol": 7.1,
-      "attempts_to_patrol": 17.6
+      "wins_to_patrol": 6.6,
+      "attempts_to_patrol": 16.6
     },
     {
       "survival": 0.5,
@@ -113,8 +181,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 10000,
       "savings_per_success_after_failures": 105000,
-      "wins_to_patrol": 6.5,
-      "attempts_to_patrol": 13.1
+      "wins_to_patrol": 6.2,
+      "attempts_to_patrol": 12.3
     },
     {
       "survival": 0.6,
@@ -122,8 +190,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 10000,
       "savings_per_success_after_failures": 110000,
-      "wins_to_patrol": 6.2,
-      "attempts_to_patrol": 10.4
+      "wins_to_patrol": 5.9,
+      "attempts_to_patrol": 9.8
     },
     {
       "survival": 0.75,
@@ -131,8 +199,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 10000,
       "savings_per_success_after_failures": 115000,
-      "wins_to_patrol": 6.0,
-      "attempts_to_patrol": 8.0
+      "wins_to_patrol": 5.6,
+      "attempts_to_patrol": 7.5
     },
     {
       "survival": 0.3,
@@ -140,8 +208,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 25000,
       "savings_per_success_after_failures": 120000,
-      "wins_to_patrol": 5.7,
-      "attempts_to_patrol": 19.1
+      "wins_to_patrol": 5.4,
+      "attempts_to_patrol": 18.0
     },
     {
       "survival": 0.4,
@@ -149,8 +217,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 25000,
       "savings_per_success_after_failures": 120000,
-      "wins_to_patrol": 5.7,
-      "attempts_to_patrol": 14.3
+      "wins_to_patrol": 5.4,
+      "attempts_to_patrol": 13.5
     },
     {
       "survival": 0.5,
@@ -158,8 +226,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 25000,
       "savings_per_success_after_failures": 120000,
-      "wins_to_patrol": 5.7,
-      "attempts_to_patrol": 11.5
+      "wins_to_patrol": 5.4,
+      "attempts_to_patrol": 10.8
     },
     {
       "survival": 0.6,
@@ -167,8 +235,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 25000,
       "savings_per_success_after_failures": 120000,
-      "wins_to_patrol": 5.7,
-      "attempts_to_patrol": 9.5
+      "wins_to_patrol": 5.4,
+      "attempts_to_patrol": 9.0
     },
     {
       "survival": 0.75,
@@ -176,8 +244,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 25000,
       "savings_per_success_after_failures": 120000,
-      "wins_to_patrol": 5.7,
-      "attempts_to_patrol": 7.6
+      "wins_to_patrol": 5.4,
+      "attempts_to_patrol": 7.2
     },
     {
       "survival": 0.3,
@@ -185,8 +253,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 50000,
       "savings_per_success_after_failures": 178333,
-      "wins_to_patrol": 3.9,
-      "attempts_to_patrol": 12.8
+      "wins_to_patrol": 3.6,
+      "attempts_to_patrol": 12.1
     },
     {
       "survival": 0.4,
@@ -194,8 +262,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 50000,
       "savings_per_success_after_failures": 157500,
-      "wins_to_patrol": 4.4,
-      "attempts_to_patrol": 10.9
+      "wins_to_patrol": 4.1,
+      "attempts_to_patrol": 10.3
     },
     {
       "survival": 0.5,
@@ -203,8 +271,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 50000,
       "savings_per_success_after_failures": 145000,
-      "wins_to_patrol": 4.7,
-      "attempts_to_patrol": 9.5
+      "wins_to_patrol": 4.5,
+      "attempts_to_patrol": 8.9
     },
     {
       "survival": 0.6,
@@ -212,8 +280,8 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 50000,
       "savings_per_success_after_failures": 136667,
-      "wins_to_patrol": 5.0,
-      "attempts_to_patrol": 8.4
+      "wins_to_patrol": 4.7,
+      "attempts_to_patrol": 7.9
     },
     {
       "survival": 0.75,
@@ -221,8 +289,220 @@
       "cheap_loss": 25000,
       "new_pocket_income_on_failure": 50000,
       "savings_per_success_after_failures": 128333,
-      "wins_to_patrol": 5.4,
-      "attempts_to_patrol": 7.1
+      "wins_to_patrol": 5.0,
+      "attempts_to_patrol": 6.7
+    }
+  ],
+  "time_assumptions": {
+    "net_success": 120000,
+    "cheap_loss": 25000,
+    "cycle_minutes": [
+      20,
+      25,
+      30
+    ],
+    "note": "Time to save cash for one complete purchase from zero; raid plus preparation. Excludes trust/module gates and use/loss of the target kit. Scenario assumptions, not a playtest measurement."
+  },
+  "timing": [
+    {
+      "kit": "Дворовый",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 0,
+      "wins": 1.4,
+      "attempts": 2.7,
+      "hours_20_min_cycle": 0.9,
+      "hours_25_min_cycle": 1.1,
+      "hours_30_min_cycle": 1.4
+    },
+    {
+      "kit": "Дворовый",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 1.2,
+      "attempts": 2.4,
+      "hours_20_min_cycle": 0.8,
+      "hours_25_min_cycle": 1.0,
+      "hours_30_min_cycle": 1.2
+    },
+    {
+      "kit": "Дворовый",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 0,
+      "wins": 1.2,
+      "attempts": 2.1,
+      "hours_20_min_cycle": 0.7,
+      "hours_25_min_cycle": 0.9,
+      "hours_30_min_cycle": 1.0
+    },
+    {
+      "kit": "Дворовый",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 1.2,
+      "attempts": 1.9,
+      "hours_20_min_cycle": 0.6,
+      "hours_25_min_cycle": 0.8,
+      "hours_30_min_cycle": 1.0
+    },
+    {
+      "kit": "Патрульный",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 0,
+      "wins": 6.8,
+      "attempts": 13.6,
+      "hours_20_min_cycle": 4.5,
+      "hours_25_min_cycle": 5.7,
+      "hours_30_min_cycle": 6.8
+    },
+    {
+      "kit": "Патрульный",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 6.2,
+      "attempts": 12.3,
+      "hours_20_min_cycle": 4.1,
+      "hours_25_min_cycle": 5.1,
+      "hours_30_min_cycle": 6.2
+    },
+    {
+      "kit": "Патрульный",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 0,
+      "wins": 6.3,
+      "attempts": 10.4,
+      "hours_20_min_cycle": 3.5,
+      "hours_25_min_cycle": 4.4,
+      "hours_30_min_cycle": 5.2
+    },
+    {
+      "kit": "Патрульный",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 5.9,
+      "attempts": 9.8,
+      "hours_20_min_cycle": 3.3,
+      "hours_25_min_cycle": 4.1,
+      "hours_30_min_cycle": 4.9
+    },
+    {
+      "kit": "Штурмовик",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 0,
+      "wins": 22.2,
+      "attempts": 44.5,
+      "hours_20_min_cycle": 14.8,
+      "hours_25_min_cycle": 18.5,
+      "hours_30_min_cycle": 22.2
+    },
+    {
+      "kit": "Штурмовик",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 20.1,
+      "attempts": 40.2,
+      "hours_20_min_cycle": 13.4,
+      "hours_25_min_cycle": 16.8,
+      "hours_30_min_cycle": 20.1
+    },
+    {
+      "kit": "Штурмовик",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 0,
+      "wins": 20.4,
+      "attempts": 34.1,
+      "hours_20_min_cycle": 11.4,
+      "hours_25_min_cycle": 14.2,
+      "hours_30_min_cycle": 17.0
+    },
+    {
+      "kit": "Штурмовик",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 19.2,
+      "attempts": 32.0,
+      "hours_20_min_cycle": 10.7,
+      "hours_25_min_cycle": 13.3,
+      "hours_30_min_cycle": 16.0
+    },
+    {
+      "kit": "Снайпер",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 0,
+      "wins": 40.3,
+      "attempts": 80.5,
+      "hours_20_min_cycle": 26.8,
+      "hours_25_min_cycle": 33.5,
+      "hours_30_min_cycle": 40.3
+    },
+    {
+      "kit": "Снайпер",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 36.4,
+      "attempts": 72.9,
+      "hours_20_min_cycle": 24.3,
+      "hours_25_min_cycle": 30.4,
+      "hours_30_min_cycle": 36.4
+    },
+    {
+      "kit": "Снайпер",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 0,
+      "wins": 37.0,
+      "attempts": 61.7,
+      "hours_20_min_cycle": 20.6,
+      "hours_25_min_cycle": 25.7,
+      "hours_30_min_cycle": 30.8
+    },
+    {
+      "kit": "Снайпер",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 34.8,
+      "attempts": 58.0,
+      "hours_20_min_cycle": 19.3,
+      "hours_25_min_cycle": 24.1,
+      "hours_30_min_cycle": 29.0
+    },
+    {
+      "kit": "Практичная стрелковая · MK12",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 0,
+      "wins": 10.7,
+      "attempts": 21.5,
+      "hours_20_min_cycle": 7.2,
+      "hours_25_min_cycle": 9.0,
+      "hours_30_min_cycle": 10.7
+    },
+    {
+      "kit": "Практичная стрелковая · MK12",
+      "survival": 0.5,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 9.7,
+      "attempts": 19.4,
+      "hours_20_min_cycle": 6.5,
+      "hours_25_min_cycle": 8.1,
+      "hours_30_min_cycle": 9.7
+    },
+    {
+      "kit": "Практичная стрелковая · MK12",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 0,
+      "wins": 9.9,
+      "attempts": 16.5,
+      "hours_20_min_cycle": 5.5,
+      "hours_25_min_cycle": 6.9,
+      "hours_30_min_cycle": 8.2
+    },
+    {
+      "kit": "Практичная стрелковая · MK12",
+      "survival": 0.6,
+      "new_pocket_income_on_failure": 10000,
+      "wins": 9.3,
+      "attempts": 15.5,
+      "hours_20_min_cycle": 5.2,
+      "hours_25_min_cycle": 6.4,
+      "hours_30_min_cycle": 7.7
     }
   ]
 }
