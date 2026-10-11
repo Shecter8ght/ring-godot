@@ -315,7 +315,8 @@ func _player_cases() -> void:
 	_check("Player снимает глушитель без копии и потери патронов", not bool(actor.spec().suppressed) and _supp_count(actor.inventory.items) == 1 and _rounds(actor.weapon_entry(), actor.inventory.items) == all_rounds)
 	_reset_player(actor, _weapon(0, 0))
 	actor._start_reload(actor.spec())
-	_check("Player выбирает длительность пустой перезарядки", is_equal_approx(actor.reload_timer, float(actor.spec().reload_empty)))
+	# магазин лежит в рюкзаке, разгрузки нет — надбавка Balance.RIG.backpack_reload_k
+	_check("Player выбирает длительность пустой перезарядки", is_equal_approx(actor.reload_timer, float(actor.spec().reload_empty) * float(Balance.RIG.backpack_reload_k)))
 	actor._finish_reload(actor.spec())
 	_check("Player завершает пустую перезарядку в 8 патронов", actor.ammo == 8 and int(actor.weapon_entry().mag.rounds) == 7 and int(actor.weapon_entry().chamber) == 1)
 	_reset_player(actor, _weapon(8, 0))

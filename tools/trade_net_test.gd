@@ -1,7 +1,8 @@
 extends Node
-## Обмен вещами в убежище, два реальных ENet peer (порт 17793): хост предлагает обмен — окно у обоих;
+## Обмен вещами, два реальных ENet peer (порт 17793). Убежище: хост предлагает обмен — окно у обоих;
 ## каждый кладёт вещь в свою половину буфера, оба жмут «Передать» — вещи меняются хозяевами и не
-## двоятся; отменённый обмен возвращает вещь владельцу.
+## двоятся; отменённый обмен возвращает вещь владельцу; слева виден рюкзак напарника. Затем рейд: то же
+## через хоста (сетка "trade" рюкзака, Raid.trades) — обмен обратно, и обмен, сорванный расстоянием.
 ## tools/godot.cmd --headless res://tools/trade_net_test.tscn -- host  и через 3 с то же с «-- client».
 const PORT: int = 17793
 var role: String = "host"
@@ -63,6 +64,7 @@ func _run() -> void:
 	Trade._quick("backpack", _find(give))
 	await until(func() -> bool: return Trade._their.size() == 1, 20)
 	check("вижу, что отдаёт напарник", Trade._their.size() == 1 and String(Trade._their[0].id) == take)
+	check("вижу рюкзак напарника (вода осталась в нём)", Trade._their_backpack().size() == 1 and String(Trade._their_backpack()[0].id) == "water", str(Trade._their_backpack()))
 	await get_tree().create_timer(0.5 if role == "host" else 1.2).timeout
 	if DisplayServer.get_name() != "headless":
 		# с окном — снимок окна обмена
@@ -78,6 +80,7 @@ func _run() -> void:
 	else:
 		check("магазин пришёл с патронами", int(Profile.backpack[_find("mag_545_30")].get("rounds", 0)) == 30)
 	check("в буфере ничего не осталось", Profile.trade_hold.is_empty())
+	await _raid_part(take, give)
 	if role == "client":
 		_result.rpc_id(1, fails)
 		await get_tree().create_timer(0.5).timeout
@@ -88,6 +91,64 @@ func _run() -> void:
 	print("trade_net_host: failures=", fails + maxi(result, 0))
 	await get_tree().create_timer(0.6).timeout
 	get_tree().quit(1 if fails > 0 or result > 0 else 0)
+
+
+## Рейд: вещи у хоста. Меняемся обратно (у меня сейчас mine, хочу вернуть back), потом обмен рвётся,
+## когда расходимся.
+func _raid_part(mine: String, back: String) -> void:
+	Profile.from_hideout = true
+	RaidEvents.enabled = false
+	await get_tree().create_timer(1.0).timeout
+	if role == "host":
+		Net.start_level.rpc("res://scenes/levels/f1_market.tscn", {"time": "day", "weather": "clear", "power": "on"})
+	await until(func() -> bool: return Raid.current != null and Raid.current.local_player() != null and get_tree().get_nodes_in_group("players").size() == 2 and Raid.current.local_player().inventory.loadout_ready, 240)
+	var raid: Raid = Raid.current
+	var me: Player = raid.local_player()
+	var inv: Inventory = me.inventory
+	for m: Node in get_tree().get_nodes_in_group("marauders"):
+		m.set_physics_process(false)
+	me.health.invulnerable = true
+	await get_tree().create_timer(1.5).timeout
+	check("в рейде при мне вещь из обмена в убежище", _in(inv.items, mine) >= 0, str(inv.items))
+	if role == "host":
+		raid.request_trade(_other())
+	await until(func() -> bool: return Trade.is_open(), 20)
+	check("рейд: окно обмена открылось у обоих", Trade.is_open() and raid.trades.has(multiplayer.get_unique_id()))
+	# хост кладёт вещь в буфер первым — гость может увидеть её уже там, а в рюкзаке напарника — только воду
+	check("рейд: слева виден рюкзак напарника", _in(Trade._their_backpack(), "water") >= 0 and (_in(Trade._their_backpack(), back) >= 0 or _in(Trade._their_offer(), back) >= 0), str(Trade._their_backpack()))
+	Trade._quick("backpack", _in(inv.items, mine))
+	await until(func() -> bool: return inv.trade.size() == 1 and Trade._their_offer().size() == 1, 20)
+	check("рейд: вещь в моей половине буфера, вижу половину напарника", inv.trade.size() == 1 and _in(inv.items, mine) < 0 and _in(Trade._their_offer(), back) >= 0)
+	await get_tree().create_timer(0.5 if role == "host" else 1.2).timeout
+	if DisplayServer.get_name() != "headless":
+		for i in range(20):
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/trade_raid_%s.png" % role))
+	Trade._set_ready(true)
+	await until(func() -> bool: return not raid.trades.has(multiplayer.get_unique_id()), 30)
+	await get_tree().create_timer(0.5).timeout
+	check("рейд: обмен состоялся — своя вещь вернулась, чужая ушла", _in(inv.items, back) >= 0 and _in(inv.items, mine) < 0 and inv.trade.is_empty() and not Trade.is_open(), str(inv.items))
+	# второй обмен: положили вещь и разошлись — хост рвёт обмен, вещь снова в рюкзаке
+	await get_tree().create_timer(1.0).timeout
+	if role == "host":
+		raid.request_trade(_other())
+	await until(func() -> bool: return Trade.is_open(), 20)
+	Trade._quick("backpack", _in(inv.items, back))
+	await until(func() -> bool: return inv.trade.size() == 1, 20)
+	check("рейд: вещь снова в буфере", inv.trade.size() == 1)
+	await get_tree().create_timer(1.0).timeout
+	if role == "host":
+		me.global_position += Vector3(float(Balance.TRADE.break_m) + 3.0, 0.0, 0.0)
+	await until(func() -> bool: return not raid.trades.has(multiplayer.get_unique_id()), 30)
+	await get_tree().create_timer(0.5).timeout
+	check("рейд: разошлись — обмен отменён, вещь вернулась в рюкзак", _in(inv.items, back) >= 0 and inv.trade.is_empty() and not Trade.is_open(), str(inv.items))
+
+
+func _in(list: Array, id: String) -> int:
+	for i: int in range(list.size()):
+		if String(list[i].id) == id:
+			return i
+	return -1
 
 
 func _other() -> int:

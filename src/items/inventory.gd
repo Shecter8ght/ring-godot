@@ -28,6 +28,9 @@ var loadout_ready: bool = false
 ## отсюда. Живёт, только пока открыт ящик: закрыли окно — что осталось, пропадает (окно спросит);
 ## эвакуация — в рюкзак, смерть — в тело.
 var buffer: Array = []
+## Своя половина буфера обмена с напарником (Raid.trades): что отдаёшь. Сделку ведёт хост; обмен
+## сорвался — возвращается в рюкзак, смерть — в тело.
+var trade: Array = []
 
 
 ## Все пути экипировки, включая назначения из Raid/Profile, проходят через один барьер.
@@ -81,7 +84,7 @@ func _ready() -> void:
 		var sync := MultiplayerSynchronizer.new()
 		sync.name = "Sync"
 		var config := SceneReplicationConfig.new()
-		for prop in [".:items", ".:equipment", ".:loadout_ready", ".:pocket", ".:pocket_grid", ".:buffer"]:
+		for prop in [".:items", ".:equipment", ".:loadout_ready", ".:pocket", ".:pocket_grid", ".:buffer", ".:trade"]:
 			var path := NodePath(prop)
 			config.add_property(path)
 			config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -142,6 +145,8 @@ func list_of(role: String) -> Array:
 			return pocket
 		"buffer":
 			return buffer
+		"trade":
+			return trade
 		"rig", "dump":
 			return ItemDb.rig_list(equipment, role)
 	return items
@@ -153,6 +158,8 @@ func grid_of(role: String) -> Vector2i:
 			return pocket_grid
 		"buffer":
 			return Balance.BUFFER_GRID
+		"trade":
+			return Vector2i(int(Balance.TRADE.grid[0]), int(Balance.TRADE.grid[1]))
 		"rig", "dump":
 			return ItemDb.rig_grid(equipment, role)
 	return backpack_grid()
@@ -176,6 +183,8 @@ func _set_list(role: String, list: Array) -> void:
 			pocket = list
 		"buffer":
 			buffer = list
+		"trade":
+			trade = list
 		"rig", "dump":
 			if equipment.has("rig"):
 				var eq := equipment.duplicate(true)
@@ -542,8 +551,9 @@ func remove_at(idx: int, n: int) -> Dictionary:
 
 ## Всё содержимое наружу (смерть — рюкзак и снаряжение в тело), пусто (хост).
 func take_all() -> Array:
-	var all := items.duplicate(true) + buffer.duplicate(true)
+	var all := items.duplicate(true) + buffer.duplicate(true) + trade.duplicate(true)
 	buffer = []
+	trade = []
 	for slot in equipment:
 		all.append((equipment[slot] as Dictionary).duplicate(true))
 	items = []

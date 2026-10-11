@@ -1,23 +1,25 @@
 extends CanvasLayer
-## Обмен вещами между игроками в убежище (autoload `Trade`). Подошёл к напарнику, подержал «действие» —
-## у обоих открывается окно: слева свои вещи (рюкзак и тайник), посередине большой буфер обмена из двух
-## половин — «ты отдаёшь» и «тебе отдают». Каждый кладёт в свою половину что хочет и жмёт «Передать»;
-## когда нажали оба — вещи меняются хозяевами. Любая правка буфера снимает готовность у обоих: отдать
-## «не то, что видел» нельзя (перед обменом сверяется отпечаток обеих половин).
+## Обмен вещами между игроками (autoload `Trade`) — в убежище и в рейде. Подошёл к напарнику, подержал
+## «действие» — у обоих открывается окно: слева рюкзак напарника (только смотреть), справа свой, посередине
+## буфер обмена из двух половин — «отдаёт напарник» и «отдаёшь ты». Каждый кладёт в свою половину что
+## хочет и жмёт «Передать»; нажали оба — вещи меняются хозяевами. Любая правка буфера снимает готовность
+## у обоих: отдать «не то, что видел» нельзя.
 ##
-## Вещи в убежище — в профиле у каждого своего игрока, поэтому обмен идёт между двумя peer напрямую,
-## без хоста: каждый убирает своё и принимает чужое. Пока вещь лежит в буфере, она вынута из рюкзака в
-## Profile.trade_hold (сохраняется): закрыл окно, вылетел, напарник ушёл — возвращается в тайник.
-## В рейде обмена нет: там вещь выбрасывают из рюкзака, и напарник её подбирает.
+## В рейде вещи считает хост: буфер — сетка "trade" в Inventory игрока, сделку ведёт Raid (trades,
+## request_trade…), окно только показывает и просит. В убежище вещи — в профиле у каждого своего игрока,
+## поэтому обмен идёт между двумя peer напрямую: каждый убирает своё и принимает чужое; пока вещь лежит
+## в буфере, она вынута из рюкзака в Profile.trade_hold (сохраняется): закрыл окно, вылетел, напарник
+## ушёл — возвращается в тайник.
 
 signal changed
 
-## Сетка одной половины буфера.
-const GRID := Vector2i(8, 5)
-
+## Напарник по обмену в убежище (0 — обмена нет); в рейде — из Raid.trades.
 var partner: int = 0
 var _offer: Array = []
 var _their: Array = []
+## Рюкзак напарника в убежище (он присылает его вместе со своей половиной буфера).
+var _their_bp: Array = []
+var _their_bp_grid: Vector2i = Vector2i(5, 4)
 var _ready_me: bool = false
 var _ready_them: bool = false
 ## Ведущий отправил «меняемся» и ждёт подтверждения: буфер заперт.
@@ -27,9 +29,13 @@ var _mine_grid: GridView
 var _their_grid: GridView
 var _bp_grid: GridView
 var _stash_grid: GridView
+var _mate_grid: GridView
 var _title: Label
+var _mate_title: Label
 var _state: Label
 var _give: Button
+## Окно собрано для этого напарника и этих размеров сеток (сменились — пересобрать).
+var _built: String = ""
 var _sig: String = ""
 
 
@@ -49,18 +55,36 @@ func is_open() -> bool:
 	return _root.visible
 
 
-## Можно ли начать обмен с peer: оба в убежище, окно не занято.
+static func grid() -> Vector2i:
+	return Vector2i(int(Balance.TRADE.grid[0]), int(Balance.TRADE.grid[1]))
+
+
+func _raid() -> Raid:
+	return Raid.current
+
+
+## С кем сейчас обмен: в рейде — по записи хоста, в убежище — свой.
+func _mate() -> int:
+	var raid := _raid()
+	if raid:
+		var rec: Array = raid.trades.get(multiplayer.get_unique_id(), [])
+		return int(rec[0]) if rec.size() >= 2 else 0
+	return partner
+
+
+## Можно ли начать обмен с peer в убежище: оба там, окно не занято.
 func can_trade(peer: int) -> bool:
 	return Net.is_networked() and partner == 0 and peer != multiplayer.get_unique_id() and Net.visible_in(peer, "hideout") \
 		and Net.visible_in(multiplayer.get_unique_id(), "hideout")
 
 
-## Предложить обмен игроку peer: окно открывается у обоих.
+## Убежище: предложить обмен игроку peer — окно открывается у обоих. (В рейде — Raid.request_trade.)
 func request(peer: int) -> void:
 	if not can_trade(peer):
 		return
 	_open(peer)
 	_rpc_invite.rpc_id(peer)
+	_send_offer()
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -70,6 +94,7 @@ func _rpc_invite() -> void:
 		_rpc_cancel.rpc_id(from, "Напарник занят")
 		return
 	_open(from)
+	_send_offer()
 
 
 ## Открыто другое окно (тайник, торговец, меню) — обмен сейчас не к месту.
@@ -86,38 +111,53 @@ func _open(peer: int) -> void:
 	partner = peer
 	_offer = []
 	_their = []
+	_their_bp = []
 	_ready_me = false
 	_ready_them = false
 	_committing = false
 	Profile.ensure()
-	_build()
-	_root.visible = true
+	_show()
+
+
+## Показать окно (обмен уже идёт): собрать и обновить.
+func _show() -> void:
+	_built = ""
 	_sig = ""
+	_root.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Audio.play_ui("bag_open")
+	_refresh()
 	changed.emit()
 
 
 func close_ui() -> void:
+	if _raid():
+		_raid().request_trade_close()
+		return
 	_close(true, "")
 
 
-## Закрыть: своё из буфера — обратно в рюкзак (не влезло — в тайник); tell — сказать напарнику.
+## Убежище: закрыть — своё из буфера обратно в рюкзак (не влезло — в тайник); tell — сказать напарнику.
 func _close(tell: bool, why: String) -> void:
 	if partner == 0:
 		return
 	var other := partner
 	partner = 0
 	_return_offer()
-	_root.visible = false
-	for c in _root.get_children():
-		c.queue_free()
+	_hide()
 	if tell and Net.is_networked() and other in multiplayer.get_peers():
 		_rpc_cancel.rpc_id(other, "Напарник закрыл обмен")
 	if why != "":
 		_notify(why)
-	Audio.play_ui("bag_close")
 	changed.emit()
+
+
+func _hide() -> void:
+	_root.visible = false
+	_built = ""
+	for c in _root.get_children():
+		c.queue_free()
+	Audio.play_ui("bag_close")
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -139,9 +179,67 @@ func _return_offer() -> void:
 
 
 func _notify(text: String) -> void:
+	if _raid():
+		_raid().notify(text)
+		return
 	var level := get_tree().get_first_node_in_group("hideout_level")
 	if level and level.has_method("notify"):
 		level.call("notify", text)
+
+
+# ---------------------------------------------------------------- данные: рейд (у хоста) или убежище (профиль)
+
+func _my_inv() -> Inventory:
+	var me := _raid().local_player() if _raid() else null
+	return me.inventory if me else null
+
+
+func _mate_inv() -> Inventory:
+	var pl := _raid().player_of(_mate()) if _raid() else null
+	return pl.inventory if pl else null
+
+
+## Свои сетки: "backpack", "stash" (только убежище), "offer" — своя половина буфера.
+func _list(role: String) -> Array:
+	if _raid():
+		var inv := _my_inv()
+		if inv == null:
+			return []
+		return inv.trade if role == "offer" else inv.items
+	return _offer if role == "offer" else Profile.list_of(role)
+
+
+func _grid(role: String) -> Vector2i:
+	if role == "offer":
+		return grid()
+	if _raid():
+		return _my_inv().backpack_grid() if _my_inv() else Vector2i(5, 4)
+	return Profile.grid_of(role)
+
+
+func _their_offer() -> Array:
+	if _raid():
+		return _mate_inv().trade if _mate_inv() else []
+	return _their
+
+
+func _their_backpack() -> Array:
+	if _raid():
+		return _mate_inv().items if _mate_inv() else []
+	return _their_bp
+
+
+func _their_backpack_grid() -> Vector2i:
+	if _raid():
+		return _mate_inv().backpack_grid() if _mate_inv() else Vector2i(5, 4)
+	return _their_bp_grid
+
+
+func _ready_of(mine: bool) -> bool:
+	if _raid():
+		var rec: Array = _raid().trades.get(multiplayer.get_unique_id() if mine else _mate(), [])
+		return rec.size() >= 2 and bool(rec[1])
+	return _ready_me if mine else _ready_them
 
 
 # ---------------------------------------------------------------- окно
@@ -149,6 +247,7 @@ func _notify(text: String) -> void:
 func _build() -> void:
 	for c in _root.get_children():
 		c.queue_free()
+	var raid := _raid() != null
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.5)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -183,34 +282,30 @@ func _build() -> void:
 	cols.add_theme_constant_override("separation", 22)
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(cols)
-	# слева — свои вещи
-	var left_scroll := ScrollContainer.new()
-	left_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	cols.add_child(left_scroll)
-	var left := VBoxContainer.new()
-	left.add_theme_constant_override("separation", 6)
-	left_scroll.add_child(left)
-	left.add_child(_label("Твой рюкзак", 18, Color(0.95, 0.82, 0.6)))
-	_bp_grid = GridView.new(Profile.grid_of("backpack"), "backpack")
-	left.add_child(_bp_grid)
-	left.add_child(_label("Твой тайник", 18, Color(0.95, 0.82, 0.6)))
-	_stash_grid = GridView.new(Profile.stash_grid(), "stash")
-	left.add_child(_stash_grid)
-	# посередине — буфер обмена: две половины
+	# слева — рюкзак напарника: только смотреть
+	var left := _side(cols)
+	_mate_title = _label("", 18, Color(0.6, 0.85, 1.0))
+	left.add_child(_mate_title)
+	_mate_grid = GridView.new(_their_backpack_grid(), "mate")
+	_mate_grid.drag_enabled = false
+	left.add_child(_mate_grid)
+	var look := _label("Чужой рюкзак — только посмотреть. Напарник сам кладёт в буфер то, что отдаёт.", 13, Color(0.6, 0.62, 0.6))
+	look.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	left.add_child(look)
+	# посередине — буфер обмена: половина напарника сверху, своя снизу
 	var mid := VBoxContainer.new()
 	mid.add_theme_constant_override("separation", 6)
 	cols.add_child(mid)
-	mid.add_child(_label("Ты отдаёшь", 18, Color(1.0, 0.86, 0.6)))
-	_mine_grid = GridView.new(GRID, "offer")
-	mid.add_child(_mine_grid)
-	mid.add_child(_label("Тебе отдают", 18, Color(0.6, 0.85, 1.0)))
-	_their_grid = GridView.new(GRID, "their")
+	mid.add_child(_label("Отдаёт напарник", 18, Color(0.6, 0.85, 1.0)))
+	_their_grid = GridView.new(grid(), "their")
 	_their_grid.drag_enabled = false
 	mid.add_child(_their_grid)
+	mid.add_child(_label("Отдаёшь ты", 18, Color(1.0, 0.86, 0.6)))
+	_mine_grid = GridView.new(grid(), "offer")
+	mid.add_child(_mine_grid)
 	_state = _label("", 16, Color(0.8, 0.82, 0.78))
 	_state.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_state.custom_minimum_size.x = float(GRID.x) * GridView.CELL
+	_state.custom_minimum_size.x = float(grid().x) * GridView.CELL
 	mid.add_child(_state)
 	_give = Button.new()
 	_give.focus_mode = Control.FOCUS_NONE
@@ -219,17 +314,41 @@ func _build() -> void:
 	_give.add_theme_font_size_override("font_size", 20)
 	_give.toggled.connect(_set_ready)
 	mid.add_child(_give)
-	var hint := _label("Тащи вещи мышью в верхнюю половину. Двойной клик — туда и обратно. Обмен пройдёт, когда «Передать» нажали оба. Поменял что-то — готовность снимается у обоих.", 13, Color(0.6, 0.62, 0.6))
+	var hint := _label("Тащи свои вещи мышью в нижнюю половину. Двойной клик — туда и обратно. Обмен пройдёт, когда «Передать» нажали оба. Поменял что-то — готовность снимается у обоих.", 13, Color(0.6, 0.62, 0.6))
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.custom_minimum_size.x = float(GRID.x) * GridView.CELL
+	hint.custom_minimum_size.x = float(grid().x) * GridView.CELL
 	mid.add_child(hint)
+	# справа — свои вещи
+	var right := _side(cols)
+	right.add_child(_label("Твой рюкзак", 18, Color(0.95, 0.82, 0.6)))
+	_bp_grid = GridView.new(_grid("backpack"), "backpack")
+	right.add_child(_bp_grid)
+	var own: Array[GridView] = [_bp_grid, _mine_grid]
+	_stash_grid = null
+	if not raid:
+		right.add_child(_label("Твой тайник", 18, Color(0.95, 0.82, 0.6)))
+		_stash_grid = GridView.new(Profile.stash_grid(), "stash")
+		right.add_child(_stash_grid)
+		own.append(_stash_grid)
 	# перетаскивание: между своими сетками и своей половиной буфера
-	for g: GridView in [_bp_grid, _stash_grid, _mine_grid]:
+	for g: GridView in own:
 		var dst: String = g.role
 		g.dropped.connect(func(src: GridView, idx: int, x: int, y: int, r: bool) -> void: _move(src.role, idx, dst, x, y, r))
 		g.quick_move.connect(func(idx: int) -> void: _quick(dst, idx))
 		g.activated.connect(func(idx: int) -> void: _quick(dst, idx))
-	_refresh()
+
+
+## Боковая колонка с прокруткой; возвращает список, куда класть строки.
+func _side(cols: HBoxContainer) -> VBoxContainer:
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	cols.add_child(scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 6)
+	scroll.add_child(box)
+	return box
 
 
 func _label(text: String, size: int, color: Color) -> Label:
@@ -240,18 +359,18 @@ func _label(text: String, size: int, color: Color) -> Label:
 	return l
 
 
-func _list(role: String) -> Array:
-	return _offer if role == "offer" else Profile.list_of(role)
-
-
-func _grid(role: String) -> Vector2i:
-	return GRID if role == "offer" else Profile.grid_of(role)
-
-
 ## Перенести запись между своими сетками (рюкзак, тайник, своя половина буфера).
 func _move(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
 	var from := _list(src)
-	if _committing or idx < 0 or idx >= from.size() or not src in ["backpack", "stash", "offer"] or not dst in ["backpack", "stash", "offer"]:
+	if idx < 0 or idx >= from.size() or not src in ["backpack", "stash", "offer"] or not dst in ["backpack", "stash", "offer"]:
+		return
+	if _raid():
+		# в рейде перекладывает хост (сетка "trade" рюкзака игрока)
+		var role := {"offer": "trade", "backpack": "backpack"}
+		if role.has(src) and role.has(dst):
+			_raid().request_grid_move(String(role[src]), idx, String(role[dst]), x, y, r)
+		return
+	if _committing:
 		return
 	if src == dst:
 		if ItemDb.move_in(from, _grid(src), idx, x, y, r):
@@ -272,41 +391,54 @@ func _bare(e: Dictionary) -> Dictionary:
 	return e
 
 
-## Двойной клик: из рюкзака / тайника — в буфер, из буфера — в рюкзак (нет места — в тайник).
+## Двойной клик: из рюкзака / тайника — в буфер, из буфера — в рюкзак (в убежище нет места — в тайник).
 func _quick(role: String, idx: int) -> void:
 	if role == "offer":
-		var before := _offer.size()
+		var before := _list("offer").size()
 		_move("offer", idx, "backpack", -1, -1, false)
-		if _offer.size() == before:
+		if not _raid() and _offer.size() == before:
 			_move("offer", idx, "stash", -1, -1, false)
 	else:
 		_move(role, idx, "offer", -1, -1, false)
 
 
-## Что-то переложили: сохранить; если тронули буфер — готовность снята у обоих, напарнику — новая половина.
+## Убежище: что-то переложили — сохранить; напарнику — новая половина и рюкзак; тронули буфер —
+## готовность снята у обоих.
 func _touched(offer_changed: bool) -> void:
 	Profile.trade_hold = _offer.duplicate(true)
 	Profile.save()
 	if offer_changed:
 		_ready_me = false
 		_ready_them = false
-		if partner in multiplayer.get_peers():
-			_rpc_offer.rpc_id(partner, _offer)
+	_send_offer()
 	_refresh()
 
 
+## Убежище: своя половина буфера и свой рюкзак — напарнику (рюкзак он видит слева).
+func _send_offer() -> void:
+	if partner in multiplayer.get_peers():
+		_rpc_offer.rpc_id(partner, _offer, Profile.backpack, Profile.grid_of("backpack"))
+
+
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_offer(list: Array) -> void:
+func _rpc_offer(list: Array, backpack: Array = [], backpack_grid: Vector2i = Vector2i(5, 4)) -> void:
 	if multiplayer.get_remote_sender_id() != partner:
 		return
+	if str(_stripped(list)) != str(_stripped(_their)):
+		_ready_me = false
+		_ready_them = false
+		_committing = false
 	_their = list.duplicate(true)
-	_ready_me = false
-	_ready_them = false
-	_committing = false
+	_their_bp = backpack.duplicate(true)
+	_their_bp_grid = backpack_grid
 	_refresh()
 
 
 func _set_ready(on: bool) -> void:
+	if _raid():
+		if on != _ready_of(true):
+			_raid().request_trade_ready(on)
+		return
 	if on == _ready_me or partner == 0 or _committing:
 		_refresh()
 		return
@@ -341,16 +473,16 @@ func _rpc_ready(on: bool, their_print: String) -> void:
 	# напарник видит сделку так же, как я: его «отдаю» — моё «получаю»
 	if on and their_print != _print(_their, _offer):
 		_ready_them = false
-		_rpc_offer.rpc_id(partner, _offer)
+		_send_offer()
 	else:
 		_ready_them = on
 	_refresh()
 	_try_commit()
 
 
-## Оба готовы — обмен ведёт тот, у кого номер peer меньше: говорит второму «меняемся», тот меняет у
-## себя и подтверждает, и только тогда ведущий меняет у себя (второй передумал — вместо подтверждения
-## придёт его новая половина, и всё начнётся заново).
+## Убежище: оба готовы — обмен ведёт тот, у кого номер peer меньше: говорит второму «меняемся», тот
+## меняет у себя и подтверждает, и только тогда ведущий меняет у себя (второй передумал — вместо
+## подтверждения придёт его новая половина, и всё начнётся заново).
 func _try_commit() -> void:
 	if not (_ready_me and _ready_them) or partner == 0 or _committing or multiplayer.get_unique_id() > partner:
 		return
@@ -367,7 +499,7 @@ func _rpc_commit(their_print: String) -> void:
 		# уже передумал или видим сделку по-разному — заново
 		_ready_me = false
 		_ready_them = false
-		_rpc_offer.rpc_id(from, _offer)
+		_send_offer()
 		_refresh()
 		return
 	_commit()
@@ -392,7 +524,7 @@ func _room_for(list: Array) -> int:
 	return n
 
 
-## Обмен: моя половина уходит (она уже вынута из вещей), чужая — в рюкзак, не влезло — в тайник.
+## Убежище, обмен: моя половина уходит (она уже вынута из вещей), чужая — в рюкзак, не влезло — в тайник.
 func _commit() -> void:
 	var got: Array[String] = []
 	for e: Dictionary in _their:
@@ -411,29 +543,63 @@ func _commit() -> void:
 	Audio.play_ui("cash")
 	var other := partner
 	partner = 0
-	_root.visible = false
-	for c in _root.get_children():
-		c.queue_free()
+	_hide()
 	_notify("Обмен с %s: отдал %d, получил %d%s" % [String(Net.player_names.get(other, "напарником")), gave, got.size(), (" — " + ", ".join(got.slice(0, 3))) if not got.is_empty() else ""])
 	changed.emit()
 
 
 func _refresh() -> void:
-	if partner == 0 or not _root.visible or _mine_grid == null or not is_instance_valid(_mine_grid):
+	var mate := _mate()
+	if mate == 0 or not _root.visible:
 		return
-	_title.text = "Обмен с игроком %s" % String(Net.player_names.get(partner, "Игрок %d" % partner))
-	_bp_grid.set_items(Profile.backpack)
-	_stash_grid.set_items(Profile.stash)
-	_mine_grid.set_items(_offer)
-	_their_grid.set_items(_their)
-	_give.set_pressed_no_signal(_ready_me)
-	_give.text = "Готов — ждём напарника…" if _ready_me else "Передать"
-	_give.disabled = _offer.is_empty() and _their.is_empty()
-	_state.text = "Напарник: %s   ·   Ты: %s" % ["готов ✓" if _ready_them else "ещё выбирает", "готов ✓" if _ready_me else "ещё выбираешь"]
-	_state.add_theme_color_override("font_color", Color(0.5, 0.95, 0.6) if _ready_them else Color(0.8, 0.82, 0.78))
+	# сетки поменяли размер (другой рюкзак) или другой напарник — окно собирается заново
+	var shape := "%d|%s|%s|%s" % [mate, str(_their_backpack_grid()), str(_grid("backpack")), str(_raid() != null)]
+	if shape != _built or _mine_grid == null or not is_instance_valid(_mine_grid):
+		_built = shape
+		_build()
+	var who := String(Net.player_names.get(mate, "Игрок %d" % mate))
+	_title.text = "Обмен с игроком %s" % who
+	_mate_title.text = "Рюкзак: %s" % who
+	_mate_grid.set_items(_their_backpack())
+	_bp_grid.set_items(_list("backpack"))
+	if _stash_grid:
+		_stash_grid.set_items(Profile.stash)
+	_mine_grid.set_items(_list("offer"))
+	_their_grid.set_items(_their_offer())
+	var me_ready := _ready_of(true)
+	var mate_ready := _ready_of(false)
+	_give.set_pressed_no_signal(me_ready)
+	_give.text = "Готов — ждём напарника…" if me_ready else "Передать"
+	_give.disabled = _list("offer").is_empty() and _their_offer().is_empty()
+	_state.text = "Напарник: %s   ·   Ты: %s" % ["готов ✓" if mate_ready else "ещё выбирает", "готов ✓" if me_ready else "ещё выбираешь"]
+	_state.add_theme_color_override("font_color", Color(0.5, 0.95, 0.6) if mate_ready else Color(0.8, 0.82, 0.78))
 
 
 func _process(_delta: float) -> void:
+	# убежище: сам ушёл (начался рейд, вышел в меню) посреди обмена — своё вернуть, напарнику сказать
+	if partner != 0 and not Net.visible_in(multiplayer.get_unique_id(), "hideout"):
+		_close(true, "")
+	var raid := _raid()
+	if raid:
+		# рейд: окно следует за записью хоста — появилась сделка, открыть; пропала — закрыть
+		var mate := _mate()
+		if mate != 0 and not _root.visible:
+			_show()
+		elif mate == 0 and _root.visible:
+			_hide()
+			changed.emit()
+		if mate == 0:
+			return
+		if Input.is_action_just_pressed("ui_cancel") and not ItemInfo.blocking():
+			close_ui()
+			return
+		var inv := _my_inv()
+		var other := _mate_inv()
+		var sig := "%s|%s|%s|%s|%s" % [str(inv.items) if inv else "", str(inv.trade) if inv else "", str(other.items) if other else "", str(other.trade) if other else "", str(raid.trades)]
+		if sig != _sig:
+			_sig = sig
+			_refresh()
+		return
 	if partner == 0 or not _root.visible:
 		return
 	if Input.is_action_just_pressed("ui_cancel") and not ItemInfo.blocking():

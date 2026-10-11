@@ -43,6 +43,11 @@ var stranded: Dictionary = {}
 ## Пропал из рейда посреди рейда: отключился, вылетел или ушёл в убежище через меню — {peer: true}.
 ## Группа его не ждёт у эвакуации, и рейд может закончиться без него; вещи остаются мешком.
 var gone: Dictionary = {}
+## Обмен вещами между игроками: {peer: [с кем, готов]} — запись у каждого из двоих. Вещи лежат в
+## Inventory.trade каждого; оба готовы — хост меняет их местами. Окно — autoload Trade.
+var trades: Dictionary = {}
+var _trade_sigs: Dictionary = {}
+var _trade_hold_t: float = 0.0
 var _seen_in_raid: Dictionary = {}
 var _gone_poll: float = 0.0
 var _all_in_t: float = 0.0
@@ -145,7 +150,7 @@ func _setup_sync() -> void:
 	sync.name = "Sync"
 	sync.replication_interval = 0.1
 	var config := SceneReplicationConfig.new()
-	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded", ".:supply_state", ".:gone"]:
+	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded", ".:supply_state", ".:gone", ".:trades"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -235,9 +240,187 @@ func _physics_process(delta: float) -> void:
 	if not _is_host() or over:
 		return
 	_check_gone(delta)
+	_tick_trades()
 	_check_drags()
 	_tick_ops(delta)
 	_update_evac(delta)
+
+
+# ---------------------------------------------------------------- обмен вещами между игроками
+
+## Предложить обмен игроку target: у обоих откроется окно (Trade).
+func request_trade(target: int) -> void:
+	if _is_host():
+		_trade_start(multiplayer.get_unique_id(), target)
+	else:
+		_rpc_trade.rpc_id(1, "start", target)
+
+
+## «Передать» нажато / отжато.
+func request_trade_ready(on: bool) -> void:
+	if _is_host():
+		_trade_ready(multiplayer.get_unique_id(), on)
+	else:
+		_rpc_trade.rpc_id(1, "ready", 1 if on else 0)
+
+
+## Отменить обмен: вещи из буфера возвращаются хозяевам.
+func request_trade_close() -> void:
+	if _is_host():
+		_trade_end(multiplayer.get_unique_id(), "Обмен отменён")
+	else:
+		_rpc_trade.rpc_id(1, "close", 0)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_trade(kind: String, value: int) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer := multiplayer.get_remote_sender_id()
+	match kind:
+		"start":
+			_trade_start(peer, value)
+		"ready":
+			_trade_ready(peer, value != 0)
+		"close":
+			_trade_end(peer, "Обмен отменён")
+
+
+## Годится ли игрок для обмена: жив, на ногах, в рейде.
+func _can_trade(peer_id: int) -> bool:
+	var pl := player_of(peer_id)
+	return pl != null and pl.is_alive() and not pl.is_downed() and not has_left(peer_id) and not gone.has(peer_id)
+
+
+func _trade_start(a: int, b: int) -> void:
+	if a == b or trades.has(a) or trades.has(b) or not _can_trade(a) or not _can_trade(b):
+		if trades.has(b):
+			_tell(a, "Напарник уже меняется с другим")
+		return
+	if player_of(a).global_position.distance_to(player_of(b).global_position) > float(Balance.TRADE.break_m):
+		_tell(a, "Подойди ближе к напарнику")
+		return
+	_cancel_op(a)
+	_cancel_op(b)
+	var t := trades.duplicate(true)
+	t[a] = [b, false]
+	t[b] = [a, false]
+	trades = t
+	_trade_sigs[mini(a, b)] = _trade_sig(a, b)
+
+
+func _trade_sig(a: int, b: int) -> String:
+	var pa := player_of(a)
+	var pb := player_of(b)
+	return str(pa.inventory.trade if pa else []) + "|" + str(pb.inventory.trade if pb else [])
+
+
+func _trade_ready(peer_id: int, on: bool) -> void:
+	if not trades.has(peer_id):
+		return
+	var other := int((trades[peer_id] as Array)[0])
+	var t := trades.duplicate(true)
+	(t[peer_id] as Array)[1] = on
+	trades = t
+	if on and bool((trades.get(other, [0, false]) as Array)[1]):
+		_trade_commit(peer_id, other)
+
+
+## Оба готовы: вещи из половин буфера меняются хозяевами (в рюкзак). Кому-то не влезает — никому.
+func _trade_commit(a: int, b: int) -> void:
+	var pa := player_of(a)
+	var pb := player_of(b)
+	if pa == null or pb == null:
+		_trade_end(a, "Обмен сорвался")
+		return
+	var a_items: Array = pa.inventory.items.duplicate(true)
+	var b_items: Array = pb.inventory.items.duplicate(true)
+	for pair: Array in [[pb.inventory.trade, a_items, pa.inventory.backpack_grid(), a], [pa.inventory.trade, b_items, pb.inventory.backpack_grid(), b]]:
+		for e: Dictionary in pair[0]:
+			var one: Dictionary = e.duplicate(true)
+			for k in ["x", "y", "r", "op"]:
+				one.erase(k)
+			if ItemDb.add_to(pair[1], one, pair[2]) < int(one.get("n", 1)):
+				var who := String(participants.get(int(pair[3]), "напарника"))
+				for peer: int in [a, b]:
+					_tell(peer, "Обмен не прошёл: у %s не хватает места в рюкзаке" % who)
+				var t := trades.duplicate(true)
+				(t[a] as Array)[1] = false
+				(t[b] as Array)[1] = false
+				trades = t
+				return
+	var gave_a := pa.inventory.trade.size()
+	var gave_b := pb.inventory.trade.size()
+	pa.inventory.trade = []
+	pb.inventory.trade = []
+	pa.inventory.items = a_items
+	pb.inventory.items = b_items
+	var t2 := trades.duplicate(true)
+	t2.erase(a)
+	t2.erase(b)
+	trades = t2
+	_trade_sigs.erase(mini(a, b))
+	Audio.play("item_move", pa.global_position, -8.0)
+	_tell(a, "Обмен с %s: отдал %d, получил %d" % [String(participants.get(b, "напарником")), gave_a, gave_b])
+	_tell(b, "Обмен с %s: отдал %d, получил %d" % [String(participants.get(a, "напарником")), gave_b, gave_a])
+
+
+## Обмен окончен без сделки: у каждого из двоих буфер возвращается в рюкзак (не влезло — мешком под ноги).
+func _trade_end(peer_id: int, why: String) -> void:
+	if not trades.has(peer_id):
+		return
+	var other := int((trades[peer_id] as Array)[0])
+	for peer: int in [peer_id, other]:
+		var pl := player_of(peer)
+		if pl and not pl.inventory.trade.is_empty():
+			var back: Array = pl.inventory.trade.duplicate(true)
+			pl.inventory.trade = []
+			var list: Array = pl.inventory.items.duplicate(true)
+			var spill: Array = []
+			for e: Dictionary in back:
+				for k in ["x", "y", "r", "op"]:
+					e.erase(k)
+				var left := int(e.get("n", 1)) - ItemDb.add_to(list, e, pl.inventory.backpack_grid())
+				if left > 0:
+					e["n"] = left
+					spill.append(e)
+			pl.inventory.items = list
+			if not spill.is_empty():
+				spawn_drop(pl.global_position, DROP_NAME, spill, LootContainer.Look.BAG)
+		if why != "":
+			_tell(peer, why)
+	var t := trades.duplicate(true)
+	t.erase(peer_id)
+	t.erase(other)
+	trades = t
+	_trade_sigs.erase(mini(peer_id, other))
+
+
+## Хост, каждый тик: кто-то упал, ушёл, отошёл — обмен рвётся; буфер тронули — готовность снята у обоих.
+func _tick_trades() -> void:
+	if trades.is_empty():
+		return
+	for raw: Variant in trades.keys():
+		var a := int(raw)
+		if not trades.has(a):
+			continue
+		var b := int((trades[a] as Array)[0])
+		if a > b:
+			continue
+		if not _can_trade(a) or not _can_trade(b):
+			_trade_end(a, "Обмен прерван")
+			continue
+		if player_of(a).global_position.distance_to(player_of(b).global_position) > float(Balance.TRADE.break_m):
+			_trade_end(a, "Разошлись — обмен отменён")
+			continue
+		var sig := _trade_sig(a, b)
+		if sig != String(_trade_sigs.get(a, "")):
+			_trade_sigs[a] = sig
+			if bool((trades[a] as Array)[1]) or bool((trades[b] as Array)[1]):
+				var t := trades.duplicate(true)
+				(t[a] as Array)[1] = false
+				(t[b] as Array)[1] = false
+				trades = t
 
 
 ## Хост: кто из участников пропал (нет соединения или его сцена уже не рейд) — раз в полсекунды.
@@ -383,6 +566,7 @@ func _evacuate(inside: Dictionary, carried: Dictionary, wait: Array) -> void:
 
 ## Раненый в зоне: выносят с собой — со всем, что при нём.
 func _extract_carried(pl: Player, ext: ExtractionPoint) -> void:
+	_trade_end(pl.peer_id, "")
 	var e := extracted.duplicate()
 	e[pl.peer_id] = ext.display_name + CARRIED_SUFFIX
 	var v := loot_value.duplicate()
@@ -408,6 +592,7 @@ func _strand(pl: Player, exit_name: String) -> void:
 
 
 func _extract(pl: Player, ext: ExtractionPoint) -> void:
+	_trade_end(pl.peer_id, "")
 	# буфер окна лута — в рюкзак (что не влезло — остаётся лежать)
 	var left := pl.inventory.flush_buffer()
 	if not left.is_empty():
@@ -1158,6 +1343,8 @@ func _rpc_grid_move(src: String, idx: int, dst: String, x: int, y: int, r: bool)
 func _grid_move(peer_id: int, src: String, idx: int, dst: String, x: int, y: int, r: bool) -> void:
 	_cancel_op(peer_id)
 	var pl := _actor(peer_id, "переложить")
+	if pl and "trade" in [src, dst] and not trades.has(peer_id):
+		return
 	if pl:
 		if pl.inventory.move_between(src, idx, dst, x, y, r):
 			Audio.play("item_move", pl.global_position, -10.0)
@@ -2168,7 +2355,7 @@ static func _clock(sec: float) -> String:
 ## напарник — «поднять» (держать F, аптечка) и «тащить» (X).
 func _update_prompt(me: Player) -> void:
 	_prompt.visible = false
-	if me == null or not me.is_alive() or has_left(me.peer_id) or ui.is_looting():
+	if me == null or not me.is_alive() or has_left(me.peer_id) or ui.is_looting() or Trade.is_open():
 		_revive_t = 0.0
 		return
 	if me.is_downed():
@@ -2216,6 +2403,27 @@ func _update_prompt(me: Player) -> void:
 		if d < Balance.INTERACT_RADIUS and d < best_d:
 			best = it
 			best_d = d
+	# напарник на ногах рядом (ближе любого предмета) — подержать «действие»: обмен вещами
+	var pal: Player = null
+	var pal_d: float = Balance.TRADE.reach_m
+	if Net.is_networked() and not trades.has(me.peer_id):
+		for n in get_tree().get_nodes_in_group("players"):
+			var other := n as Player
+			if other == null or other == me or not other.is_alive() or other.is_downed() or trades.has(other.peer_id):
+				continue
+			var d2 := other.global_position.distance_to(me.global_position)
+			if d2 < pal_d:
+				pal_d = d2
+				pal = other
+	if pal != null and pal_d < best_d:
+		_prompt.visible = true
+		_prompt.text = "%s (держать) — обмен вещами: %s" % [PauseMenu.key_name("interact"), String(Net.player_names.get(pal.peer_id, participants.get(pal.peer_id, "напарник")))]
+		_trade_hold_t = _trade_hold_t + _delta if Input.is_action_pressed("interact") and not PauseMenu.shown else 0.0
+		if _trade_hold_t >= float(Balance.TRADE.hold_sec):
+			_trade_hold_t = 0.0
+			request_trade(pal.peer_id)
+		return
+	_trade_hold_t = 0.0
 	if best == null:
 		return
 	_prompt.visible = true
