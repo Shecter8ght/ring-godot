@@ -4,7 +4,7 @@ import sys,argparse,os,json
 import bpy,addon_utils
 from mathutils import Vector
 PROJECT=Path(__file__).resolve().parents[1];ROOT=PROJECT/'_asset_src/pm_texturing';REV=ROOT/'revision_20_v02'
-ap=argparse.ArgumentParser();ap.add_argument('--file',required=True);ap.add_argument('--views',default='metal,grip');ap.add_argument('--lights',default='neutral,left,right');ap.add_argument('--prefix',default='study');ap.add_argument('--samples',type=int,default=48);ap.add_argument('--fingerprint-diagnostic',action='store_true')
+ap=argparse.ArgumentParser();ap.add_argument('--file',required=True);ap.add_argument('--views',default='metal,grip');ap.add_argument('--lights',default='neutral,left,right');ap.add_argument('--prefix',default='study');ap.add_argument('--samples',type=int,default=48);ap.add_argument('--fingerprint-diagnostic',action='store_true');ap.add_argument('--revision',default='02');ap.add_argument('--out-dir');ap.add_argument('--no-denoise',action='store_true');ap.add_argument('--width',type=int,default=1400)
 args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
 for sub in ('work/optix_cache','work/cuda_cache'):(ROOT/sub).mkdir(parents=True,exist_ok=True)
 os.environ['OPTIX_CACHE_PATH']=str(ROOT/'work/optix_cache');os.environ['CUDA_CACHE_PATH']=str(ROOT/'work/cuda_cache')
@@ -12,12 +12,12 @@ bpy.context.preferences.use_preferences_save=False;addon_utils.enable('bl_ext.bl
 bpy.ops.wm.open_mainfile(filepath=args.file)
 sys.path.insert(0,str(PROJECT/'tools'));from pm_engraving_geometry import cache_engraving_preview
 cache_engraving_preview()
-S=bpy.context.scene;S.frame_set(1);S.render.engine='CYCLES';S.cycles.samples=args.samples;S.cycles.use_denoising=True
+S=bpy.context.scene;S.frame_set(1);S.render.engine='CYCLES';S.cycles.samples=args.samples;S.cycles.use_denoising=not args.no_denoise
 prefs=bpy.context.preferences.addons['cycles'].preferences
 prefs.compute_device_type='OPTIX';prefs.get_devices()
 for d in prefs.devices:d.use=d.type!='CPU'
 S.cycles.device='GPU';S.cycles.max_bounces=16;S.cycles.transmission_bounces=12
-S.render.resolution_x=1400;S.render.resolution_y=1000;S.render.resolution_percentage=100
+S.render.resolution_x=args.width;S.render.resolution_y=round(args.width*5/7);S.render.resolution_percentage=100
 S.render.image_settings.file_format='PNG';S.render.film_transparent=False;S.view_settings.exposure=-.5
 for o in bpy.data.objects:
     if o.type=='LIGHT' or o.name.startswith(('Reference','Animation |','Studio |')):o.hide_render=True
@@ -43,6 +43,7 @@ if args.fingerprint_diagnostic:
         output=next(n for n in mat.node_tree.nodes if n.type=='OUTPUT_MATERIAL')
         mat.node_tree.links.new(node.outputs['Roughness'],subtract.inputs[1]);mat.node_tree.links.new(subtract.outputs[0],amplify.inputs[0]);mat.node_tree.links.new(amplify.outputs[0],emit.inputs['Color']);mat.node_tree.links.new(emit.outputs[0],output.inputs['Surface'])
 cam=bpy.data.objects['CHECK 01 | Complete PM and separate sight'];cam.data.type='ORTHO';cam.data.clip_start=.0001;cam.data.clip_end=10;S.camera=cam
+cam.data.dof.use_dof=False
 def area(name,loc,energy,size,target):
     d=bpy.data.lights.new(name,'AREA');d.energy=energy;d.shape='DISK';d.size=size
     o=bpy.data.objects.new(name,d);S.collection.objects.link(o);o.location=loc;o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler();return o
@@ -57,8 +58,10 @@ views={
  'left':((-.18,-.42,.224),(-.002,0,.084),.258),
  'right':((-.19,.42,.224),(-.002,0,.084),.258),
  'top':((-.18,-.05,.35),(-.002,0,.117),.232),
+ 'micro_slide':((.049,-.137,.137),(.030,-.013,.108),.068),
+ 'micro_grip':((.068,-.14,.086),(.049,-.014,.066),.076),
 }
-out=REV/'images';out.mkdir(parents=True,exist_ok=True)
+out=(Path(args.out_dir) if Path(args.out_dir).is_absolute() else PROJECT/args.out_dir).resolve() if args.out_dir else REV/'images';out.mkdir(parents=True,exist_ok=True)
 for v in args.views.split(','):
     eye,target,scale=views[v];cam.location=eye;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.ortho_scale=scale
     for lighting in args.lights.split(','):
@@ -71,7 +74,7 @@ for v in args.views.split(','):
             sign=-1 if lighting=='left' else 1
             active.append(area('QA grazing strip',(-.13,sign*.075,.155),5,.045,target))
             active.append(area('QA weak fill',(.13,-sign*.17,.22),1.2,.19,target))
-        path=out/f'PM_20_v02_{args.prefix}_{v}_{lighting}.png';S.render.filepath=str(path)
+        path=out/f'PM_20_v{args.revision}_{args.prefix}_{v}_{lighting}.png';S.render.filepath=str(path)
         bpy.ops.render.render(write_still=True);print('PM_REVIEW_STILL',path,flush=True)
         for o in active:o.hide_render=True
 print('PM_20_REVIEW_DONE',flush=True)
