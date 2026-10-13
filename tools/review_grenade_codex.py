@@ -141,5 +141,17 @@ def animation():
     print('ANIMATION_FRAMES_OK',flush=True)
 
 
+def comparison():
+    for path,names in [(T.MASTER,['01_textured_overall','04_head_ring_marking']),
+                       (PREVIEW,['12_baked_comparison','13_baked_head_comparison'])]:
+        start(path)
+        scene=bpy.context.scene
+        scene.render.resolution_x,scene.render.resolution_y=1800,2200
+        scene.cycles.samples=128
+        T.S.shot(names[0],(0,0,0))
+        T.S.shot(names[1],(0,0,0),(.09,-.14,.22),(0,0,.101),.071)
+    print('MATCHED_COMPARISON_READY',flush=True)
+
+
 if __name__=='__main__':
-    {'finalize':finalize,'measure':measure,'render':render,'animation':animation}[MODE]()
+    {'finalize':finalize,'measure':measure,'render':render,'animation':animation,'comparison':comparison}[MODE]()

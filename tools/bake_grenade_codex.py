@@ -62,6 +62,7 @@ for suffix,size in [('Body_CastIron_OD',8192),('Lever_SilverAndDarkSteel',8192),
         images={}
         for channel,file in zip(['Color','Metallic','Roughness','Normal'],expected):
             im=bpy.data.images.get(file) or bpy.data.images.load(str(MAPS/file),check_existing=True)
+            im.colorspace_settings.name='sRGB' if channel=='Color' else 'Non-Color'
             im.use_fake_user=True
             images[channel]=im
             im.buffers_free()
@@ -151,6 +152,7 @@ for suffix,size in [('Body_CastIron_OD',8192),('Lever_SilverAndDarkSteel',8192),
         bpy.data.images.remove(im)
         im=bpy.data.images.load(str(MAPS/file),check_existing=False)
         im.name=file
+        im.colorspace_settings.name='sRGB' if channel=='Color' else 'Non-Color'
         im.pack()
         im.filepath='//textures/pbr_v06/'+file
         im.use_fake_user=True

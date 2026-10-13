@@ -548,6 +548,7 @@ def render():
 
 def inspect():
     P.native()
+    candidate=Path(os.environ.get('GRENADE_INSPECT_CANDIDATE',str(MASTER)))
     bpy.ops.wm.open_mainfile(filepath=str(GEOMETRY))
     bpy.context.scene.frame_set(1)
     bpy.context.view_layer.update()
@@ -581,14 +582,18 @@ def inspect():
             arr=np.empty(len(uv.data)*2,np.float32)
             uv.data.foreach_get('uv',arr)
             row['uv_hashes'][uv.name]=hashlib.sha256(arr.tobytes()).hexdigest()
-    bpy.ops.wm.open_mainfile(filepath=str(MASTER))
-    report={'pass':True,'candidate':str(MASTER),'source_sha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'materials':[],
+    bpy.ops.wm.open_mainfile(filepath=str(candidate))
+    report={'pass':True,'candidate':str(candidate),'source_sha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'materials':[],
             'geometry':[],'poses':[],'images':[],'assigned_materials':[],
             'blender':bpy.app.version_string,'ucupaint':P.U.common.get_current_version_str()}
     bpy.context.scene.frame_set(1)
     bpy.context.view_layer.update()
     for ob in bpy.context.scene.objects:
         if ob.type=='MESH':
+            if ob.name not in source and os.environ.get('GRENADE_INSPECT_STUDIO')=='1':
+                assert ob.name in {'STUDIO • seamless graphite backdrop','STUDIO • charcoal mineral pedestal'},ob.name
+                report.setdefault('presentation_meshes',[]).append(ob.name)
+                continue
             old=source[ob.name]
             sig=signature(ob.data)
             assert sig==old['hash'],ob.name
@@ -683,6 +688,9 @@ def inspect():
             continue
         path=Path(bpy.path.abspath(im.filepath))
         assert im.packed_file and path.is_file(),im.name
+        if im.name.startswith('MkII_'):
+            expected_space='sRGB' if '_BaseColor_' in im.name else 'Non-Color'
+            assert im.colorspace_settings.name==expected_space,(im.name,im.colorspace_settings.name,expected_space)
         a=hashlib.sha256(bytes(im.packed_file.data)).hexdigest()
         assert a==hashlib.sha256(path.read_bytes()).hexdigest(),im.name
         report['images'].append({'name':im.name,'path':im.filepath,'sha256':a,'size':list(im.size),
