@@ -65,7 +65,8 @@ added=sorted(set(final['objects'])-set(original['objects']))
 extra_changes=[k for k in original_extra if original_extra[k]!=final_extra[k]]
 rig=bpy.data.objects['PM_CONTROLS • select me'];condition=int(rig['condition_percent'])
 errors=list(final['dependency_errors']);native=[]
-authoring=json.loads((ROOT/'checks'/f'authoring_{condition}.json').read_text(encoding='utf-8'))
+author_path=Path(ARGV[2]).resolve() if len(ARGV)>2 else ROOT/'checks'/f'authoring_{condition}.json'
+authoring=json.loads(author_path.read_text(encoding='utf-8'))
 for name in authoring['materials']:
  m=bpy.data.materials.get(name)
  groups=[n for n in m.node_tree.nodes if n.type=='GROUP' and n.node_tree and n.node_tree.yp.is_ypaint_node] if m else []
