@@ -5,10 +5,10 @@ import bpy, bmesh, numpy as np
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
-ap=argparse.ArgumentParser();ap.add_argument('--draft',action='store_true');ap.add_argument('--only',default='');ap.add_argument('--audit-only',action='store_true');ap.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09','v10'])
+ap=argparse.ArgumentParser();ap.add_argument('--draft',action='store_true');ap.add_argument('--only',default='');ap.add_argument('--audit-only',action='store_true');ap.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09','v10','v11'])
 args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/('review_'+args.revision)
-if args.revision in {'v09','v10'}:
+if args.revision in {'v09','v10','v11'}:
     import addon_utils
     bpy.context.preferences.use_preferences_save=False
     addon_utils.enable('bl_ext.blender_org.ucupaint',default_set=True)
@@ -17,7 +17,7 @@ S=bpy.context.scene;rig=bpy.data.objects['PM_CONTROLS • select me'];S.frame_se
 action=rig.animation_data.action if rig.animation_data else None
 rig.animation_data_clear()
 for k in ('Slide','Hammer','Trigger','Safety','Magazine','Suppressor','MagCatch'):rig[k]=0.0
-if args.revision=='v10':rig['SlideStop']=0.0
+if args.revision in {'v10','v11'}:rig['SlideStop']=0.0
 for marker in S.timeline_markers:marker.camera=None
 def pose(**values):
     for k,v in values.items():rig[k]=float(v)
@@ -59,17 +59,17 @@ report['reference_proportions']=dict(rail=rail,slide=slide_bounds,
     trigger=bbox([o for o in scope if o.name.startswith('Trigger |')]),
     clamp_plate=bbox([o for o in scope if o.name.startswith('Mount | rounded two-screw')]))
 report['reference_proportions']['pass']=all(.30<report['reference_proportions'][k]<.36 for k in ('rail_length_ratio','rail_width_ratio')) and report['reference_proportions']['mount_screw_count']==2
-if args.revision=='v10':report['reference_proportions']['pass']=.30<report['reference_proportions']['rail_length_ratio']<.36 and 18<rail['dimensions_mm'][1]<22 and report['reference_proportions']['mount_screw_count']==2
+if args.revision in {'v10','v11'}:report['reference_proportions']['pass']=.30<report['reference_proportions']['rail_length_ratio']<.36 and 18<rail['dimensions_mm'][1]<22 and report['reference_proportions']['mount_screw_count']==2
 names=[o.name for o in scope if o.type=='MESH' and o.name.startswith(('Frame | traced','Slide | continuous','Hammer |','Safety | tapered','Safety | beveled','Safety | prominent','Safety | ribbed','Slide catch |','Trigger |','Barrel | stepped','Rear sight |','Extractor |','MagCatch |','Lanyard | molded','Grip checkering |','Mount |','Reflex |','Magazine | aligned','Magazine | straight','Magazine | inset floorplate'))]
 dg=bpy.context.evaluated_depsgraph_get()
-if args.revision=='v10':names.append('Bakelite | one-piece rounded grip')
+if args.revision in {'v10','v11'}:names.append('Bakelite | one-piece rounded grip')
 for name in names:
     o=bpy.data.objects[name];eo=o.evaluated_get(dg);m=eo.to_mesh();bm=bmesh.new();bm.from_mesh(m)
     row=dict(vertices=len(bm.verts),faces=len(bm.faces),boundary=sum(e.is_boundary for e in bm.edges),overfull=sum(len(e.link_faces)>2 for e in bm.edges),wire=sum(e.is_wire for e in bm.edges),zero_area=sum(f.calc_area()<1e-14 for f in bm.faces))
     row['closed_pass']=row['boundary']==row['overfull']==row['wire']==row['zero_area']==0
     report['geometry'][name]=row;bm.free();eo.to_mesh_clear()
     print('PM_TOPOLOGY',name,row,flush=True)
-if args.revision in {'v08','v09','v10'}:
+if args.revision in {'v08','v09','v10','v11'}:
     manifest=json.loads((OUT/'Проверки/revision_manifest.json').read_text(encoding='utf-8'));unchanged={}
     for name,expected in manifest['unchanged_fingerprints'].items():
         o=bpy.data.objects[name];h=hashlib.sha256()
@@ -81,7 +81,7 @@ if args.revision in {'v08','v09','v10'}:
     mark_report=[dict(object=o.name,text=o.data.body,font_packed=bool(o.data.font.packed_file)) for o in markings]
     report['k1']=dict(unchanged=unchanged,markings=mark_report,brand=optic['Brand'],model=optic['Model'],
         pass_k1=all(unchanged.values()) and len(markings)>=10 and all(x['font_packed'] for x in mark_report))
-if args.revision in {'v09','v10'}:
+if args.revision in {'v09','v10','v11'}:
     sys.path.insert(0,str(Path(__file__).resolve().parent))
     from pm_engraving_geometry import engraving_report,cache_engraving_preview,paint_fill_report
     report['engraving']=engraving_report(json.loads((OUT/'Проверки/engraving.json').read_text(encoding='utf-8')))
@@ -94,7 +94,7 @@ if args.revision in {'v09','v10'}:
     # Native operands, depths, source meshes and topology have been inspected.
     # Freeze evaluated cuts in this unsaved process for transform-only checks.
     report['unsaved_inspection_cache']=cache_engraving_preview()
-control_keys=('Slide','Hammer','Safety','Trigger','Magazine','MagCatch')+(('SlideStop',) if args.revision=='v10' else ())
+control_keys=('Slide','Hammer','Safety','Trigger','Magazine','MagCatch')+(('SlideStop',) if args.revision in {'v10','v11'} else ())
 for key in control_keys:
     for value in (0,.5,1):
         pose(**{key:value})
@@ -108,7 +108,7 @@ for key in control_keys:
     delta=[b['world_location_mm'][i]-a['world_location_mm'][i] for i in range(3)]
     angle=b['world_rotation'][1]-a['world_rotation'][1]
     passed=(25<delta[0]<45) if key=='Slide' else (delta[2]<-65) if key=='Magazine' else (angle<-.15) if key=='Trigger' else (angle>.1)
-    if args.revision=='v10' and key in {'MagCatch','SlideStop'}:passed=angle<-.05
+    if args.revision in {'v10','v11'} and key in {'MagCatch','SlideStop'}:passed=angle<-.05
     motion[key]=dict(delta_mm=delta,delta_angle_rad=angle,pass_motion=passed)
 catch_matrix=bpy.data.objects['MagCatch • pivot'].matrix_world.copy()
 mount_matrix=mount.matrix_world.copy()
@@ -135,7 +135,7 @@ for u in (-.085,0,.085):
         a=at(-.065);b=at(1.46);d=b-a;l=d.length;d.normalize();hit,_,_,_=frame_tree.ray_cast(a,d,l)
         passage.append(dict(u=u,y=y,clear=hit is None,hit_mm=[v*1000 for v in hit] if hit else None))
 report['passages']['frame_magazine']=passage
-if args.revision in {'v07','v08','v09','v10'}:
+if args.revision in {'v07','v08','v09','v10','v11'}:
     spine=bbox([bpy.data.objects['Mount | continuous relieved rail spine']])
     roof_world=mw@Vector((-.118,0,1.528333333))
     gap=spine['min_mm'][2]-roof_world.z*1000
@@ -149,11 +149,11 @@ if args.revision in {'v07','v08','v09','v10'}:
         floorplate_parallel_dot=normal_dot,rear_blade_mm=new_rear['dimensions_mm'],
         optic_origin_error_mm=(optic_anchor-expected_anchor).length*1000,
         pass_corrections=1.2<gap<2.0 and 2.9<rail['dimensions_mm'][2]<3.8 and normal_dot>.999999 and (optic_anchor-expected_anchor).length<1e-6)
-    if args.revision=='v10':report['owner_corrections']['pass_corrections']=1.2<gap<2.0 and 6<rail['dimensions_mm'][2]<10 and normal_dot>.999999 and (optic_anchor-expected_anchor).length<1e-6
+    if args.revision in {'v10','v11'}:report['owner_corrections']['pass_corrections']=1.2<gap<2.0 and 6<rail['dimensions_mm'][2]<10 and normal_dot>.999999 and (optic_anchor-expected_anchor).length<1e-6
 report['audit_pass']=all(r['closed_pass'] for r in report['geometry'].values()) and all(r['front_clear'] and r['rear_clear'] for r in samples) and all(r['clear'] for r in passage) and all(r['finite'] for r in report['poses']) and report['reference_proportions']['pass'] and all(r['pass_motion'] for r in motion.values())
-if args.revision in {'v07','v08','v09','v10'}:report['audit_pass']=report['audit_pass'] and report['owner_corrections']['pass_corrections']
-if args.revision in {'v08','v09','v10'}:report['audit_pass']=report['audit_pass'] and report['k1']['pass_k1']
-if args.revision in {'v09','v10'}:
+if args.revision in {'v07','v08','v09','v10','v11'}:report['audit_pass']=report['audit_pass'] and report['owner_corrections']['pass_corrections']
+if args.revision in {'v08','v09','v10','v11'}:report['audit_pass']=report['audit_pass'] and report['k1']['pass_k1']
+if args.revision in {'v09','v10','v11'}:
     report['audit_pass']=report['audit_pass'] and report['engraving']['pass_engraving']
     report['audit_pass']=report['audit_pass'] and len(report['engraving']['markings'])==25
     report['audit_pass']=report['audit_pass'] and report['paint_fill']['pass_paint']
@@ -164,6 +164,10 @@ if args.revision=='v10':
     from check_pm_body_v10 import inspect_body
     report['body_v10']=inspect_body(json.loads((OUT/'Проверки/body_geometry.json').read_text(encoding='utf-8')))
     report['audit_pass']=report['audit_pass'] and report['body_v10']['pass_body']
+if args.revision=='v11':
+    from check_pm_surfaces_v11 import inspect_repairs
+    report['repairs_v11']=inspect_repairs(json.loads((OUT/'Проверки/repairs_geometry.json').read_text(encoding='utf-8')),json.loads((OUT/'Проверки/controls_geometry.json').read_text(encoding='utf-8')))
+    report['audit_pass']=report['audit_pass'] and report['repairs_v11']['pass_repairs']
 (OUT/'Проверки/fresh_file_geometry.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print('PM_QA',report['audit_pass'],'base',report['base_closed']['dimensions_mm'],'assembly',report['assembly_closed']['dimensions_mm'],flush=True)
 if not report['audit_pass']:raise RuntimeError('Fresh-file PM geometry QA failed; see saved report')
@@ -207,7 +211,7 @@ views=[
 ('20_Планка_пропорции_сверху',(-.009,-.038,.36),(-.006,0,.107),.196,True,{}),
 ('21_Крепление_над_спуском',(-.003,-.33,.098),(-.003,0,.098),.181,True,{}),
 ('23_Защёлка_закруглённый_профиль',(.045,-.15,.025),(.064,0,.011),.032,False,{},'catch')]
-if args.revision in {'v07','v08','v09','v10'}:
+if args.revision in {'v07','v08','v09','v10','v11'}:
     views += [
     ('24_Коллиматор_сбоку',(-.009,-.25,.142),(-.013,0,.142),.071,True,{},'optic'),
     ('25_Коллиматор_спереди',(-.24,0,.147),(-.016,0,.147),.060,True,{},'optic'),
@@ -215,13 +219,13 @@ if args.revision in {'v07','v08','v09','v10'}:
     ('27_Скругление_и_низкая_посадка',(-.018,-.105,.170),(-.008,-.009,.123),.064,True,{}),
     ('28_Параллельная_пятка',(.043,-.18,.008),(.052,0,.008),.076,False,{}),
     ('29_Защёлка_сбоку',(.068,-.18,.010),(.068,0,.009),.029,False,{},'catch')]
-if args.revision in {'v08','v09','v10'}:
+if args.revision in {'v08','v09','v10','v11'}:
     optic_scales={'18':.085,'24':.078,'25':.075,'26':.080}
     views=[(name,eye,(target[0],target[1],.149),optic_scales[name[:2]],accessories,values,*tail) if name[:2] in optic_scales else (name,eye,target,scale,accessories,values,*tail) for name,eye,target,scale,accessories,values,*tail in views]
     views += [
     ('30_ЗОРИН_справа_маркировка',(-.009,.25,.146),(-.011,0,.148),.073,True,{},'optic'),
     ('31_ЗОРИН_сверху_крышка',(-.011,0,.38),(-.011,0,.146),.066,True,{},'optic')]
-if args.revision in {'v09','v10'}:
+if args.revision in {'v09','v10','v11'}:
     views += [
     ('32_Гравировка_ЗОРИН_и_эмблема',(-.0176,-.115,.158),(-.0176,-.01685,.1460),.040,True,{},'engraving'),
     ('33_Гравировка_ВВЕРХ_и_стрелка',(.005,.003,.300),(.005,.003,.146),.022,True,{},'engraving'),
@@ -230,7 +234,7 @@ if args.revision in {'v09','v10'}:
     ('36_КОРС9_рамка_светлая_эмаль',(.053,-.105,.101),(.053,-.0108,.0928),.032,False,{},'frame-marking'),
     ('37_КОРС9_калибр_и_партия',(.056,.105,.101),(.056,.0108,.0928),.028,False,{},'frame-marking'),
     ('38_КОРС9_буквы_дно_и_сколы',(.060,-.060,.097),(.057,-.0108,.094),.015,False,{},'frame-marking')]
-if args.revision=='v10':
+if args.revision in {'v10','v11'}:
     views += [
     ('39_Планка_в_основном_зажиме',(.16,0,.134),(-.008,0,.130),.057,True,{}),
     ('40_Лепесток_задержки_и_прорези',(.010,-.115,.105),(.018,-.014,.092),.035,False,{}),
@@ -246,6 +250,17 @@ if args.revision=='v10':
     ('50_Расширения_и_насечки_справа',(.045,.12,.124),(.031,.012,.109),.077,False,{}),
     ('51_Тонкие_стенки_накладки',(.040,-.070,.140),(.050,0,.055),.102,False,{},'grip'),
     ('52_Курок_широкие_вырезы',(.115,-.065,.143),(.074,0,.115),.029,False,{'Hammer':.12})]
+if args.revision=='v11':
+    views=[
+      ('53_Рамка_слева_плавный_блик',(.095,-.160,.086),(.056,-.0108,.085),.072,False,{}),
+      ('54_Рамка_справа_плавный_блик',(.095,.160,.086),(.060,.0108,.085),.072,False,{}),
+      ('55_Планка_единая_поверхность',(.025,-.120,.127),(-.010,0,.126),.077,True,{},'mount'),
+      ('56_Предохранитель_горизонтальные_прорези',(.034,-.120,.130),(.057,-.013,.113),.044,False,{}),
+      ('57_Скругление_выемки',(.034,-.120,.130),(.057,-.013,.113),.044,False,{'Safety':1}),
+      ('58_Курок_радиальные_вырезы',(.130,-.090,.165),(.074,0,.115),.039,False,{}),
+      ('59_Глубокие_шлицы_крепления',(-.035,-.120,.137),(-.016,-.015,.131),.060,True,{}),
+      ('60_Шлиц_затыльника',(.145,-.075,.054),(.075,0,.040),.026,False,{}),
+      ('61_Шлицы_верхних_винтов',(-.012,-.034,.230),(-.003,0,.145),.068,True,{},'optic')]
 only=set(args.only.split(',')) if args.only else set()
 saved_hide={o.name:o.hide_render for o in bpy.data.objects}
 fill_data=bpy.data.lights.new('Inspection | heel fill','AREA');fill_data.energy=.45;fill_data.size=.12
@@ -254,14 +269,14 @@ fill.location=(.065,-.025,-.080);fill.rotation_euler=(Vector((.061,0,.009))-fill
 for view in views:
     name,eye,target,scale,accessories,values,*kind=view
     if only and name.split('_')[0] not in only:continue
-    macro=(kind and kind[0] in {'engraving','frame-marking'}) or (args.revision=='v10' and int(name[:2])>=39)
+    macro=(kind and kind[0] in {'engraving','frame-marking'}) or (args.revision in {'v10','v11'} and int(name[:2])>=39)
     S.render.resolution_x=1100 if args.draft else (2400 if macro else 1800)
     S.render.resolution_y=760 if args.draft else (1600 if macro else 1240)
     S.cycles.samples=24 if args.draft else (128 if macro else 96)
     for o in bpy.data.objects:
         if o.name in saved_hide:o.hide_render=saved_hide[o.name]
     pose(Slide=0,Hammer=0,Safety=0,Trigger=0,Magazine=0,MagCatch=0)
-    if args.revision=='v10':pose(SlideStop=0)
+    if args.revision in {'v10','v11'}:pose(SlideStop=0)
     pose(**values);set_accessories(accessories)
     fill.hide_render=name.split('_')[0] not in {'11','12','19','28','29','42','43'}
     if not fill.hide_render:bpy.data.objects['Studio | matte charcoal stage'].hide_render=True
@@ -273,7 +288,7 @@ for view in views:
             elif kind[0]=='grip':o.hide_render=not o.name.startswith(('Bakelite |','Grip checkering |','Backstrap |'))
             else:o.hide_render=not within(o,bpy.data.objects['MagCatch • pivot'])
     cam.location=eye;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.ortho_scale=scale;S.camera=cam
-    if args.revision in {'v08','v09','v10'} and ((kind and kind[0] in {'optic','mount'}) or name[:2] in {'01','02','03','04','14','15','16'}):
+    if args.revision in {'v08','v09','v10','v11'} and ((kind and kind[0] in {'optic','mount'}) or name[:2] in {'01','02','03','04','14','15','16'}):
         bpy.context.view_layer.update();inv=cam.matrix_world.inverted();dg=bpy.context.evaluated_depsgraph_get();coords=[]
         for o in scope:
             if o.hide_render:continue

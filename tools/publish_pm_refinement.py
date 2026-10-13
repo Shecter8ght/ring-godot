@@ -51,10 +51,10 @@ class Links(HTMLParser):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['publish', 'check'])
-    parser.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09','v10'])
+    parser.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09','v10','v11'])
     args = parser.parse_args()
     STAGE = PROJECT / ('_asset_src/pm_refinement/review_'+args.revision)
-    DEST = LIBRARY / {'v06':'08_Доработка_v6_на_проверку','v07':'09_Доработка_v7_на_проверку','v08':'10_Доработка_v8_ЗОРИН_на_проверку','v09':'11_Доработка_v9_Гравировка_на_проверку','v10':'12_Доработка_v10_Рычаги_на_проверку'}[args.revision]
+    DEST = LIBRARY / {'v06':'08_Доработка_v6_на_проверку','v07':'09_Доработка_v7_на_проверку','v08':'10_Доработка_v8_ЗОРИН_на_проверку','v09':'11_Доработка_v9_Гравировка_на_проверку','v10':'12_Доработка_v10_Рычаги_на_проверку','v11':'13_Доработка_v11_Сопряжения_на_проверку'}[args.revision]
     manifest = json.loads((STAGE / MANIFEST).read_text(encoding='utf-8'))
     if Path(manifest['source']).resolve() != STAGE.resolve():
         raise ValueError('Unexpected source folder')
