@@ -14,6 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / '_asset_src/grenade_codex/materials_v09_stage1'
 LIBRARY = Path('E:/Models Blender/From Scenario/Grenade/Codex_Texture_v09_Task1_На_проверку')
 NAME = 'Grenade_MkII_Studio_v09_Task1.blend'
+LABEL_BEFORE = 'ДО · принятая v08'
+LABEL_AFTER = 'ПОСЛЕ · только фактура v09'
 TITLES = {'head': 'Головка — отдельная мелкозернистая фактура',
           'lever': 'Скоба — тонкая фактура листового металла',
           'wire': 'Кольцо — продольная фактура волочения'}
@@ -58,8 +60,8 @@ def comparison(shot):
         draw = ImageDraw.Draw(canvas)
         title = TITLES[shot] + (' · фрагмент 1:1' if detail else '')
         draw.text((14, 7), title, fill=(237, 239, 239), font=font)
-        draw.text((14, 44), 'ДО · принятая v08', fill=(185, 195, 197), font=label_font)
-        draw.text((width + margin + 14, 44), 'ПОСЛЕ · только фактура v09', fill=(221, 209, 167), font=label_font)
+        draw.text((14, 44), LABEL_BEFORE, fill=(185, 195, 197), font=label_font)
+        draw.text((width + margin + 14, 44), LABEL_AFTER, fill=(221, 209, 167), font=label_font)
         canvas.paste(images[0], (0, top))
         canvas.paste(images[1], (width + margin, top))
         path = folder / f'{shot}_comparison{"_detail" if detail else ""}.jpg'
