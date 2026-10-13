@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ассеты: подготовка к Godot"
+  short_description: "Игровая сетка, PBR, LOD, коллизии и проверка импорта"
+  default_prompt: "Используй $godot-asset-preparation: подготовь утверждённый ассет к игре Godot, сохрани исходник и проверь импорт в проекте."

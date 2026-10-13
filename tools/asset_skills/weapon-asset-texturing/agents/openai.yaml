@@ -1,0 +1,4 @@
+interface:
+  display_name: "PBR: реалистичные материалы"
+  short_description: "UCUPaint для ассетов, оружие в состояниях 100/60/20"
+  default_prompt: "Используй $weapon-asset-texturing: текстурируй принятый ассет реалистично в UCUPaint, а огнестрельное оружие подготовь в состояниях 100/60/20."

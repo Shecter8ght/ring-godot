@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blender: деревья и растительность"
+  short_description: "Органическая форма, кора, листва и просмотр геометрии"
+  default_prompt: "Используй $blender-vegetation-workflow: создай растительный ассет по подтверждённым референсам и покажи геометрию до PBR."

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Blender: предметные 3D-ассеты"
+  short_description: "Форма оружия и предметов → принятие → PBR"
+  default_prompt: "Используй $blender-asset-workflow: создай или исправь геометрию ассета по референсам, уточняй неясные решения и предъяви форму до текстурирования."
+policy:
+  allow_implicit_invocation: true
