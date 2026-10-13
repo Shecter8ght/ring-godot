@@ -4,7 +4,7 @@ import argparse, json, subprocess, sys
 import bpy
 from mathutils import Vector
 
-ap=argparse.ArgumentParser();ap.add_argument('mode',choices=['prepare','render']);ap.add_argument('--revision',default='v06',choices=['v06','v07']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
+ap=argparse.ArgumentParser();ap.add_argument('mode',choices=['prepare','render']);ap.add_argument('--revision',default='v06',choices=['v06','v07','v08']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
 ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/('review_'+args.revision)
 S=bpy.context.scene;rig=bpy.data.objects['PM_CONTROLS • select me']
 keys=('Slide','Hammer','Safety','Trigger','Magazine','MagCatch')

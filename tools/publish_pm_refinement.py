@@ -51,10 +51,10 @@ class Links(HTMLParser):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['publish', 'check'])
-    parser.add_argument('--revision',default='v06',choices=['v06','v07'])
+    parser.add_argument('--revision',default='v06',choices=['v06','v07','v08'])
     args = parser.parse_args()
     STAGE = PROJECT / ('_asset_src/pm_refinement/review_'+args.revision)
-    DEST = LIBRARY / ('09_Доработка_v7_на_проверку' if args.revision=='v07' else '08_Доработка_v6_на_проверку')
+    DEST = LIBRARY / {'v06':'08_Доработка_v6_на_проверку','v07':'09_Доработка_v7_на_проверку','v08':'10_Доработка_v8_ЗОРИН_на_проверку'}[args.revision]
     manifest = json.loads((STAGE / MANIFEST).read_text(encoding='utf-8'))
     if Path(manifest['source']).resolve() != STAGE.resolve():
         raise ValueError('Unexpected source folder')

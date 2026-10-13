@@ -1,11 +1,11 @@
 """Fresh-file geometry QA and neutral Cycles views for PM v06."""
 from pathlib import Path
-import argparse, hashlib, json, math, sys
+import argparse, hashlib, json, math, struct, sys
 import bpy, bmesh, numpy as np
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
-ap=argparse.ArgumentParser();ap.add_argument('--draft',action='store_true');ap.add_argument('--only',default='');ap.add_argument('--audit-only',action='store_true');ap.add_argument('--revision',default='v06',choices=['v06','v07'])
+ap=argparse.ArgumentParser();ap.add_argument('--draft',action='store_true');ap.add_argument('--only',default='');ap.add_argument('--audit-only',action='store_true');ap.add_argument('--revision',default='v06',choices=['v06','v07','v08'])
 args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/('review_'+args.revision)
 S=bpy.context.scene;rig=bpy.data.objects['PM_CONTROLS • select me'];S.frame_set(1);bpy.context.view_layer.update()
@@ -28,7 +28,7 @@ def tree_of(o):
 def bbox(objects):
     lo=np.array([math.inf]*3);hi=-lo.copy();dg=bpy.context.evaluated_depsgraph_get()
     for o in objects:
-        if o.type not in {'MESH','CURVE'}:continue
+        if o.type not in {'MESH','CURVE','FONT'}:continue
         eo=o.evaluated_get(dg);m=eo.to_mesh()
         if not m or not m.vertices:eo.to_mesh_clear();continue
         v=np.empty(len(m.vertices)*3,dtype=np.float32);m.vertices.foreach_get('co',v);v=v.reshape(-1,3)
@@ -37,7 +37,7 @@ def bbox(objects):
     return dict(min_mm=(lo*1000).tolist(),max_mm=(hi*1000).tolist(),dimensions_mm=((hi-lo)*1000).tolist())
 mount=bpy.data.objects['PM_OpticMount • asset root'];optic=bpy.data.objects['PM_ReflexSight • asset root']
 props=[o for o in bpy.data.objects if o.type=='EMPTY' and o.name.startswith('Animation |')]
-scope=[o for o in bpy.data.objects if within(o,rig) and o.type in {'MESH','CURVE'} and not within(o,bpy.data.objects['Suppressor • removal']) and not any(within(o,p) for p in props) and not o.name.startswith(('Animation','Reference','Safety wear'))]
+scope=[o for o in bpy.data.objects if within(o,rig) and o.type in {'MESH','CURVE','FONT'} and not within(o,bpy.data.objects['Suppressor • removal']) and not any(within(o,p) for p in props) and not o.name.startswith(('Animation','Reference','Safety wear'))]
 for p in props:
     for o in bpy.data.objects:
         if within(o,p):o.hide_render=True
@@ -100,7 +100,7 @@ for u in (-.085,0,.085):
         a=at(-.065);b=at(1.46);d=b-a;l=d.length;d.normalize();hit,_,_,_=frame_tree.ray_cast(a,d,l)
         passage.append(dict(u=u,y=y,clear=hit is None,hit_mm=[v*1000 for v in hit] if hit else None))
 report['passages']['frame_magazine']=passage
-if args.revision=='v07':
+if args.revision in {'v07','v08'}:
     spine=bbox([bpy.data.objects['Mount | continuous relieved rail spine']])
     roof_world=mw@Vector((-.118,0,1.528333333))
     gap=spine['min_mm'][2]-roof_world.z*1000
@@ -115,7 +115,20 @@ if args.revision=='v07':
         optic_origin_error_mm=(optic_anchor-expected_anchor).length*1000,
         pass_corrections=1.2<gap<2.0 and 2.9<rail['dimensions_mm'][2]<3.8 and normal_dot>.999999 and (optic_anchor-expected_anchor).length<1e-6)
 report['audit_pass']=all(r['closed_pass'] for r in report['geometry'].values()) and all(r['front_clear'] and r['rear_clear'] for r in samples) and all(r['clear'] for r in passage) and all(r['finite'] for r in report['poses']) and report['reference_proportions']['pass'] and all(r['pass_motion'] for r in motion.values())
-if args.revision=='v07':report['audit_pass']=report['audit_pass'] and report['owner_corrections']['pass_corrections']
+if args.revision in {'v07','v08'}:report['audit_pass']=report['audit_pass'] and report['owner_corrections']['pass_corrections']
+if args.revision=='v08':
+    manifest=json.loads((OUT/'Проверки/revision_manifest.json').read_text(encoding='utf-8'));unchanged={}
+    for name,expected in manifest['unchanged_fingerprints'].items():
+        o=bpy.data.objects[name];h=hashlib.sha256()
+        for v in o.data.vertices:h.update(struct.pack('<3f',*v.co))
+        for p in o.data.polygons:h.update(str(tuple(p.vertices)).encode())
+        h.update(str(tuple(tuple(row) for row in o.matrix_local)).encode());h.update((o.parent.name if o.parent else '').encode())
+        unchanged[name]=h.hexdigest()==expected
+    markings=[o for o in scope if o.type=='FONT' and within(o,optic)]
+    mark_report=[dict(object=o.name,text=o.data.body,font_packed=bool(o.data.font.packed_file)) for o in markings]
+    report['k1']=dict(unchanged=unchanged,markings=mark_report,brand=optic['Brand'],model=optic['Model'],
+        pass_k1=all(unchanged.values()) and len(markings)>=10 and all(x['font_packed'] for x in mark_report))
+    report['audit_pass']=report['audit_pass'] and report['k1']['pass_k1']
 (OUT/'Проверки/fresh_file_geometry.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print('PM_QA',report['audit_pass'],'base',report['base_closed']['dimensions_mm'],'assembly',report['assembly_closed']['dimensions_mm'],flush=True)
 if not report['audit_pass']:raise RuntimeError('Fresh-file PM geometry QA failed; see saved report')
@@ -159,7 +172,7 @@ views=[
 ('20_Планка_пропорции_сверху',(-.009,-.038,.36),(-.006,0,.107),.196,True,{}),
 ('21_Крепление_над_спуском',(-.003,-.33,.098),(-.003,0,.098),.181,True,{}),
 ('23_Защёлка_закруглённый_профиль',(.045,-.15,.025),(.064,0,.011),.032,False,{},'catch')]
-if args.revision=='v07':
+if args.revision in {'v07','v08'}:
     views += [
     ('24_Коллиматор_сбоку',(-.009,-.25,.142),(-.013,0,.142),.071,True,{},'optic'),
     ('25_Коллиматор_спереди',(-.24,0,.147),(-.016,0,.147),.060,True,{},'optic'),
@@ -167,6 +180,12 @@ if args.revision=='v07':
     ('27_Скругление_и_низкая_посадка',(-.018,-.105,.170),(-.008,-.009,.123),.064,True,{}),
     ('28_Параллельная_пятка',(.043,-.18,.008),(.052,0,.008),.076,False,{}),
     ('29_Защёлка_сбоку',(.068,-.18,.010),(.068,0,.009),.029,False,{},'catch')]
+if args.revision=='v08':
+    optic_scales={'18':.085,'24':.078,'25':.075,'26':.080}
+    views=[(name,eye,(target[0],target[1],.149),optic_scales[name[:2]],accessories,values,*tail) if name[:2] in optic_scales else (name,eye,target,scale,accessories,values,*tail) for name,eye,target,scale,accessories,values,*tail in views]
+    views += [
+    ('30_ЗОРИН_справа_маркировка',(-.009,.25,.146),(-.011,0,.148),.073,True,{},'optic'),
+    ('31_ЗОРИН_сверху_крышка',(-.011,0,.38),(-.011,0,.146),.066,True,{},'optic')]
 only=set(args.only.split(',')) if args.only else set()
 saved_hide={o.name:o.hide_render for o in bpy.data.objects}
 fill_data=bpy.data.lights.new('Inspection | heel fill','AREA');fill_data.energy=.45;fill_data.size=.12
@@ -187,6 +206,16 @@ for view in views:
             elif kind[0]=='optic':o.hide_render=not within(o,optic)
             else:o.hide_render=not within(o,bpy.data.objects['MagCatch • pivot'])
     cam.location=eye;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.ortho_scale=scale;S.camera=cam
+    if args.revision=='v08' and ((kind and kind[0] in {'optic','mount'}) or name[:2] in {'01','02','03','04','14','15','16'}):
+        bpy.context.view_layer.update();inv=cam.matrix_world.inverted();dg=bpy.context.evaluated_depsgraph_get();coords=[]
+        for o in scope:
+            if o.hide_render:continue
+            eo=o.evaluated_get(dg)
+            coords.extend(inv@eo.matrix_world@Vector(p) for p in eo.bound_box)
+        lo=Vector((min(p.x for p in coords),min(p.y for p in coords),0));hi=Vector((max(p.x for p in coords),max(p.y for p in coords),0))
+        aspect=S.render.resolution_x/S.render.resolution_y
+        cam.data.ortho_scale=max(scale,max(hi.x-lo.x,(hi.y-lo.y)*aspect)*1.12)
+        cam.location+=cam.matrix_world.to_3x3()@((lo+hi)/2)
     S.render.filepath=str(OUT/'Превью'/((name+'_draft' if args.draft else name)+'.png'))
     bpy.ops.render.render(write_still=True);print('PM_RENDER',name,flush=True)
 print('PM_REVIEW_FINISHED',flush=True)

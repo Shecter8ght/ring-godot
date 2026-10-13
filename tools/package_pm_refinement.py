@@ -5,10 +5,10 @@ import argparse, hashlib, html, json, shutil
 from urllib.parse import quote
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-ap=argparse.ArgumentParser();ap.add_argument('--revision',default='v06',choices=['v06','v07']);args=ap.parse_args()
-rev=args.revision;accessory_rev='v02' if rev=='v07' else 'v01'
+ap=argparse.ArgumentParser();ap.add_argument('--revision',default='v06',choices=['v06','v07','v08']);args=ap.parse_args()
+rev=args.revision;accessory_rev={'v06':'v01','v07':'v02','v08':'v03'}[rev]
 PROJECT=Path(__file__).resolve().parents[1];ROOT=PROJECT/'_asset_src/pm_refinement';OUT=ROOT/('review_'+rev)
-LIB=Path('E:/Models Blender/WEAPONS/ПМ — модели и текстуры')/('09_Доработка_v7_на_проверку' if rev=='v07' else '08_Доработка_v6_на_проверку')
+LIB=Path('E:/Models Blender/WEAPONS/ПМ — модели и текстуры')/{'v06':'08_Доработка_v6_на_проверку','v07':'09_Доработка_v7_на_проверку','v08':'10_Доработка_v8_ЗОРИН_на_проверку'}[rev]
 qa=json.loads((OUT/'Проверки/fresh_file_geometry.json').read_text(encoding='utf-8'))
 revision=json.loads((OUT/'Проверки/revision_manifest.json').read_text(encoding='utf-8'))
 assert qa['audit_pass']
@@ -19,7 +19,7 @@ for source,folder in [(ROOT/'references','Референсы'),(ROOT/'surface_so
         if p.is_file():
             dest=target/p.relative_to(source);dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,dest)
 scripts=OUT/'Скрипты';scripts.mkdir(exist_ok=True)
-for name in ('inspect_pm_refinement.py','fetch_pm_refinement_sources.py','fetch_pm_optic_references.py','revise_pm_refinement.py','correct_pm_refinement_v07.py','review_pm_refinement.py','separate_pm_refinement.py','animate_pm_refinement.py','package_pm_refinement.py','check_pm_refinement_delivery.py','publish_pm_refinement.py'):
+for name in ('inspect_pm_refinement.py','fetch_pm_refinement_sources.py','fetch_pm_optic_references.py','fetch_pm_k1_references.py','revise_pm_refinement.py','correct_pm_refinement_v07.py','build_pm_zorin_k1.py','review_pm_refinement.py','separate_pm_refinement.py','animate_pm_refinement.py','package_pm_refinement.py','check_pm_refinement_delivery.py','publish_pm_refinement.py'):
     p=PROJECT/'tools'/name
     if p.exists():shutil.copy2(p,scripts/name)
 def dims(bounds):return ' × '.join(f'{v:.2f}' for v in bounds['dimensions_mm'])+' мм'
@@ -79,7 +79,7 @@ state=f'''# ПМ — доработка {rev}
 Маркировки на металле, надписи/метка на коллиматоре и микроповреждения ещё требуют текстурного этапа.
 Сам прицел геометрический: визуальная линза есть, прицельная метка пока не сделана.
 Галерея показывает нейтральные проверочные материалы. Итоговая засаленная отделка ещё не создана.
-Живая сцена Blender через MCP недоступна: открывать переданные новые файлы; старые окна автоматически не обновлялись.
+Работа выполнена на сохранённом источнике: для просмотра открыть новые переданные файлы; прежние окна автоматически не обновляются.
 
 ## Следующий этап после принятия геометрии
 
@@ -106,11 +106,20 @@ if rev=='v07':
     state+='Коллиматор восстановлен по официальным фото R47 и авторскому руководству Umarex/Walther MRS, с размерами по скриншотам владельца. Точная марка его образца не установлена.\n'
     state+='Источники: '+', '.join(revision['optic_sources'])+'.\nФото/руководство архивированы только как визуальные референсы; это материалы с авторскими правами, не CC0-текстуры.\n'
     state+='RG49 из архива рассматривался и отвергнут: его корпус не соответствует образцу.\n'
+if rev=='v08':
+    state+='\n## ЗОРИН К-1 — новый вариант по десяти видам владельца\n\n'
+    state+='Предыдущий коллиматор R47/MRS заменён. Новая форма: арочная глубокая защитная дуга, компактное окно, низкий хвост, круглая верхняя крышка с кнопкой и отдельный зажим.\n'
+    state+='Русские надписи редактируются как FONT/Curve; шрифт встроен в .blend. Это проверочная компоновка маркировок до производственного UCUPaint.\n'
+    state+='Вымышленный бренд ЗОРИН, модель К-1. Маркировки: ЗОРИН, К-1, РОССИЯ, № 061284, ВВЕРХ, ВПРАВО и 3 В.\n'
+    state+=f"Геометрия {len(qa['k1']['unchanged'])} сеток ПМ/крепления/других прежних узлов совпала с v07 по вершинам, граням, матрицам и родителям.\n"
+    state+='Новая база адаптирована к узкой планке данного художественного ПМ; внешняя форма по скриншотам владельца, масштаб корпуса по руководству DeltaPoint Pro.\n'
+    state+='Официальный источник масштаба: https://www.leupold.com/media/manuals/deltapoint-pro-manual.pdf . Руководство использовалось для габаритов и расположения видимых деталей.\n'
+    state+='Новые референсы и первичный документ — Референсы/k1. Прежние оптические референсы сохранены как история, а не источник текущей формы.\n'
 (OUT/'asset-state.md').write_text(state,encoding='utf-8')
 (OUT/'00_ОТКРЫТЬ_СНАЧАЛА.txt').write_text(f'ПМ {rev} — геометрия на проверку\n\nОткройте gallery.html для просмотра.\nМодели: 01_ПМ, 02_Крепление, 03_Коллиматор.\nУправление, состояние и следующий этап: asset-state.md.\nТекстуры UCUPaint ещё не начинались: сначала принятие показанной геометрии.\n',encoding='utf-8')
 
 images=sorted(p for p in (OUT/'Превью').glob('*.png') if not p.stem.endswith('_draft') and p.stem[:2].isdigit())
-expected_images=28 if rev=='v07' else 22
+expected_images={'v06':22,'v07':28,'v08':30}[rev]
 assert len(images)==expected_images, (len(images),expected_images)
 assert (OUT/'Превью/22_Движение_контролов.mp4').is_file()
 delivery=json.loads((OUT/'Проверки/delivery_check.json').read_text(encoding='utf-8'))
@@ -118,6 +127,8 @@ assert delivery['pass_delivery']
 hero=next(p for p in images if p.name.startswith('01_'))
 groups=[('Сборка и пропорции',{'01','02','03','04','20','21'}),('Детали крупным планом',{'05','06','07','08','09','10','11','12','13','23'}),('Движение и отдельные обвесы',{'14','15','16','17','18','19'})]
 if rev=='v07':groups.insert(0,('Исправления по вашему просмотру',{'24','25','26','27','28','29'}))
+if rev=='v08':
+    groups=[('ЗОРИН К-1 — новая форма и русские надписи',{'18','24','25','26','30','31'})]+[(title,ids-{'18'}) for title,ids in groups]+[('Крепление и пятка v07',{'27','28','29'})]
 sections=[]
 for title,ids in groups:
     cards=[]
@@ -134,8 +145,20 @@ document='''<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="vie
 document=document.replace('v06',rev)
 if rev=='v07':
     document+='<p>Правки v07: плавные скобы; плоская планка ближе к затвору; тонкий целик со скошенными боковинами; прямая пятка магазина; развёрнутая рифлёная защёлка. Коллиматор полностью перестроен по фотографиям Umarex R47 и Walther MRS, масштаб подогнан под ваши референсы.</p>'
+if rev=='v08':
+    document=document.replace('<h1>Пистолет Макарова</h1>','<h1>ЗОРИН К-1 · ПМ v08</h1>')
+    document+='<p>Коллиматор заменён по вашим десяти новым видам: глубокая арочная защита, компактное окно, круглая крышка с кнопкой, плоский хвост и низкий зажим. Вымышленный бренд «ЗОРИН», модель «К-1»; надписи русские и редактируемые. Геометрия ПМ и крепления v07 сохранена. Сейчас показаны материалы проверки формы; окончательная отделка следует после принятия.</p>'
 document+='<div class="links">'+''.join(f'<a href="{quote(path)}">{label}</a>' for path,label in [(f'01_ПМ/PM_Geometry_{rev}.blend','ПМ · .blend'),(f'02_Крепление/PM_OpticMount_Geometry_{accessory_rev}.blend','Крепление · .blend'),(f'03_Коллиматор/PM_ReflexSight_Geometry_{accessory_rev}.blend','Коллиматор · .blend'),('asset-state.md','Состояние и управление')])+'</div>'
 document+=f'<img class="hero" src="{quote("Превью/"+hero.name)}" alt="Новая сборка ПМ">'+''.join(sections)
+if rev=='v08':
+    pairs=[]
+    for owner,prefix,label in [('01','25','Спереди'),('02','24','Сбоку'),('06','31','Сверху')]:
+        rendered=next(p for p in images if p.name.startswith(prefix+'_'))
+        cards=[]
+        for path,title in [(f'Референсы/k1/owner_k1_{owner}.jpg',label+' · ваш образец'),('Превью/'+rendered.name,label+' · ЗОРИН К-1')]:
+            url=quote(path);cards.append(f'<button class="card" data-src="{url}" data-label="{title}"><img src="{url}" alt="{title}" loading="lazy"><span>{title}</span></button>')
+        pairs.append('<div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:18px">'+''.join(cards)+'</div>')
+    document+='<section><h2>Сверка с вашими ракурсами</h2><p>Исходные скриншоты и текущая форма. Цвет и износ на образце относятся к следующему текстурному этапу.</p>'+''.join(pairs)+'</section>'
 if (OUT/'Превью/22_Движение_контролов.mp4').is_file():document+='<section><h2>Демонстрация контролов</h2><p>5 секунд, постановочная анимация геометрии. Редактируемые ключи сохранены в основном .blend.</p><video controls preload="metadata" src="'+quote('Превью/22_Движение_контролов.mp4')+'"></video></section>'
 document+='''<footer>Основа v5 сохранена. Референсы и CC0-сырьё — в соответствующих папках; новые текстуры ещё не создавались. Нажмите изображение, чтобы увеличить.</footer></main><dialog id="zoom"><div class="dialogbar"><span id="caption"></span><button class="close" id="close">Закрыть</button></div><img id="full" alt=""></dialog><script>const d=document.getElementById('zoom'),i=document.getElementById('full'),c=document.getElementById('caption');document.querySelectorAll('.card').forEach(b=>b.addEventListener('click',()=>{i.src=b.dataset.src;i.alt=b.dataset.label;c.textContent=b.dataset.label;d.showModal()}));document.getElementById('close').onclick=()=>d.close();d.addEventListener('click',e=>{if(e.target===d)d.close()});</script></html>'''
 (OUT/'gallery.html').write_text(document,encoding='utf-8')
@@ -144,6 +167,7 @@ sheet=Image.new('RGB',(1920,1420),'#151b22');draw=ImageDraw.Draw(sheet)
 font=ImageFont.truetype('C:/Windows/Fonts/segoeui.ttf',27)
 overview=[('01','Сборка / короткое крепление'),('05','Ствол и зацеп в окне'),('06','Курок и фаски'),('12','Нижняя рифлёная защёлка')]
 if rev=='v07':overview=[('27','Плавное низкое крепление'),('07','Тонкий целик / скошенные боковины'),('18','Новый коллиматор'),('12','Параллельная пятка / защёлка')]
+if rev=='v08':overview=[('18','ЗОРИН К-1 / арочная форма'),('24','Боковой профиль / русский бренд'),('31','Крышка, кнопка и регулировки'),('01','Новый коллиматор на ПМ')]
 for j,(prefix,label) in enumerate(overview):
     p=next(p for p in images if p.name.startswith(prefix+'_'));im=ImageOps.contain(Image.open(p).convert('RGB'),(940,650))
     x=(j%2)*960;y=(j//2)*710;sheet.paste(im,(x+(960-im.width)//2,y+45+(650-im.height)//2));draw.text((x+22,y+8),label,font=font,fill='#e5edf3')
