@@ -1,11 +1,14 @@
 """Save mount and sight as independent editable Blender files, with exact scale."""
 from pathlib import Path
-import json
+import argparse, json, sys
 import bpy
 from mathutils import Vector
 
-ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement/review_v06'
-SOURCE=ROOT/'01_ПМ/PM_Geometry_v06.blend'
+ap=argparse.ArgumentParser();ap.add_argument('--revision',default='v06',choices=['v06','v07'])
+args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+ROOT=Path(__file__).resolve().parents[1]/('_asset_src/pm_refinement/review_'+args.revision)
+SOURCE=ROOT/f'01_ПМ/PM_Geometry_{args.revision}.blend'
+accessory_revision='v02' if args.revision=='v07' else 'v01'
 def desc(o,root):
     while o:
         if o==root:return True
@@ -13,8 +16,8 @@ def desc(o,root):
     return False
 report=[]
 for name,folder,filename,exclude in [
- ('PM_OpticMount • asset root','02_Крепление','PM_OpticMount_Geometry_v01.blend','PM_ReflexSight • asset root'),
- ('PM_ReflexSight • asset root','03_Коллиматор','PM_ReflexSight_Geometry_v01.blend',None)]:
+ ('PM_OpticMount • asset root','02_Крепление',f'PM_OpticMount_Geometry_{accessory_revision}.blend','PM_ReflexSight • asset root'),
+ ('PM_ReflexSight • asset root','03_Коллиматор',f'PM_ReflexSight_Geometry_{accessory_revision}.blend',None)]:
     bpy.ops.wm.open_mainfile(filepath=str(SOURCE))
     S=bpy.context.scene;S.frame_set(1);bpy.context.view_layer.update()
     root=bpy.data.objects[name];omit=bpy.data.objects.get(exclude) if exclude else None

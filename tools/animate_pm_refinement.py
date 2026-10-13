@@ -4,8 +4,8 @@ import argparse, json, subprocess, sys
 import bpy
 from mathutils import Vector
 
-ap=argparse.ArgumentParser();ap.add_argument('mode',choices=['prepare','render']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
-ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/'review_v06'
+ap=argparse.ArgumentParser();ap.add_argument('mode',choices=['prepare','render']);ap.add_argument('--revision',default='v06',choices=['v06','v07']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
+ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/('review_'+args.revision)
 S=bpy.context.scene;rig=bpy.data.objects['PM_CONTROLS • select me']
 keys=('Slide','Hammer','Safety','Trigger','Magazine','MagCatch')
 def desc(o,root):
@@ -25,7 +25,7 @@ if args.mode=='prepare':
     for frame,values in poses:
         for key in keys:
             rig[key]=float(values.get(key,0));rig.keyframe_insert(data_path='["'+key+'"]',frame=frame)
-    action=rig.animation_data.action;action.name='Geometry inspection v06';action.use_fake_user=True
+    action=rig.animation_data.action;action.name='Geometry inspection '+args.revision;action.use_fake_user=True
     for layer in action.layers:
         for strip in layer.strips:
             bag=strip.channelbag(rig.animation_data.action_slot)
@@ -41,9 +41,9 @@ if args.mode=='prepare':
     for o in bpy.data.objects:
         if any(desc(o,p) for p in props):o.hide_render=True;o.hide_set(True)
     S.frame_set(1);bpy.context.view_layer.update()
-    text=bpy.data.texts.new('v06 • управление демонстрацией')
-    text.write('Geometry inspection v06: 1–120, 24 fps. Ключевая демонстрация художественной геометрии.\nДля ручного изменения свойств Slide/Hammer/Safety/Trigger/Magazine/MagCatch отключить Action у PM_CONTROLS.\nПрежняя Demo v5 сохранена в Actions (её диапазон 1–240).\n')
-    bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'01_ПМ/PM_Geometry_v06.blend'))
+    text=bpy.data.texts.new(args.revision+' • управление демонстрацией')
+    text.write(f'Geometry inspection {args.revision}: 1–120, 24 fps. Ключевая демонстрация художественной геометрии.\nДля ручного изменения свойств Slide/Hammer/Safety/Trigger/Magazine/MagCatch отключить Action у PM_CONTROLS.\nПрежняя Demo v5 сохранена в Actions (её диапазон 1–240).\n')
+    bpy.ops.wm.save_as_mainfile(filepath=str(OUT/f'01_ПМ/PM_Geometry_{args.revision}.blend'))
     print('PM_INSPECTION_ACTION_SAVED',flush=True)
     sys.exit(0)
 
@@ -61,7 +61,7 @@ cam=bpy.data.objects['CHECK 01 | Complete PM and separate sight'];cam.location=(
 cam.rotation_euler=(Vector((.012,0,.054))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.ortho_scale=.342;cam.data.clip_start=.0001;S.camera=cam
 S.render.resolution_x=1000;S.render.resolution_y=700;S.render.resolution_percentage=100
 S.render.image_settings.file_format='PNG';S.view_settings.exposure=-1.25
-frames=ROOT/'work/motion_frames';frames.mkdir(exist_ok=True)
+frames=ROOT/f'work/motion_frames_{args.revision}';frames.mkdir(exist_ok=True)
 for i,frame in enumerate(range(1,121,2)):
     S.frame_set(frame);bpy.context.view_layer.update();S.camera=cam
     S.render.filepath=str(frames/f'{i:04d}.png');bpy.ops.render.render(write_still=True)
@@ -70,7 +70,7 @@ ffmpeg=Path('D:/whisper/ffmpeg/bin/ffmpeg.exe');video=OUT/'Превью/22_Дв�
 subprocess.run([str(ffmpeg),'-hide_banner','-loglevel','error','-y','-framerate','12','-i',str(frames/'%04d.png'),'-c:v','libx264','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart',str(video)],check=True)
 ffprobe=ffmpeg.with_name('ffprobe.exe')
 metadata=json.loads(subprocess.check_output([str(ffprobe),'-v','error','-show_streams','-show_format','-of','json',str(video)],text=True))
-(OUT/'Проверки/motion_preview.json').write_text(json.dumps(dict(video=str(video),frames=60,fps=12,source_fps=24,source_action='Geometry inspection v06',kind='Keyframed inspection, not a physical simulation',metadata=metadata),ensure_ascii=False,indent=2),encoding='utf-8')
+(OUT/'Проверки/motion_preview.json').write_text(json.dumps(dict(video=str(video),frames=60,fps=12,source_fps=24,source_action='Geometry inspection '+args.revision,kind='Keyframed inspection, not a physical simulation',metadata=metadata),ensure_ascii=False,indent=2),encoding='utf-8')
 for seconds,name in ((0,'start'),(2.1,'middle'),(4.8,'end')):
-    subprocess.run([str(ffmpeg),'-hide_banner','-loglevel','error','-y','-ss',str(seconds),'-i',str(video),'-frames:v','1',str(ROOT/'work'/f'encoded_{name}.png')],check=True)
+    subprocess.run([str(ffmpeg),'-hide_banner','-loglevel','error','-y','-ss',str(seconds),'-i',str(video),'-frames:v','1',str(ROOT/'work'/f'encoded_{args.revision}_{name}.png')],check=True)
 print('PM_MOTION_VIDEO_SAVED',str(video),flush=True)

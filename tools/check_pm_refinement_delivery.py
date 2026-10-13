@@ -3,8 +3,9 @@ from pathlib import Path
 import argparse, hashlib, json, math, sys
 import bpy, numpy as np
 
-ap=argparse.ArgumentParser();ap.add_argument('--folder',default='');ap.add_argument('--out',default='');args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
-PROJECT=Path(__file__).resolve().parents[1];STAGE=PROJECT/'_asset_src/pm_refinement/review_v06'
+ap=argparse.ArgumentParser();ap.add_argument('--folder',default='');ap.add_argument('--out',default='');ap.add_argument('--revision',default='v06',choices=['v06','v07']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+PROJECT=Path(__file__).resolve().parents[1];STAGE=PROJECT/('_asset_src/pm_refinement/review_'+args.revision)
+accessory_revision='v02' if args.revision=='v07' else 'v01'
 folder=Path(args.folder) if args.folder else STAGE
 qa=json.loads((STAGE/'Проверки/fresh_file_geometry.json').read_text(encoding='utf-8'))
 revision=json.loads((STAGE/'Проверки/revision_manifest.json').read_text(encoding='utf-8'))
@@ -14,7 +15,7 @@ def within(o,root):
         if o==root:return True
         o=o.parent
     return False
-for sub,name,rootname,key in [('01_ПМ','PM_Geometry_v06.blend','PM_CONTROLS • select me','assembly_closed'),('02_Крепление','PM_OpticMount_Geometry_v01.blend','PM_OpticMount • asset root','mount'),('03_Коллиматор','PM_ReflexSight_Geometry_v01.blend','PM_ReflexSight • asset root','optic')]:
+for sub,name,rootname,key in [('01_ПМ',f'PM_Geometry_{args.revision}.blend','PM_CONTROLS • select me','assembly_closed'),('02_Крепление',f'PM_OpticMount_Geometry_{accessory_revision}.blend','PM_OpticMount • asset root','mount'),('03_Коллиматор',f'PM_ReflexSight_Geometry_{accessory_revision}.blend','PM_ReflexSight • asset root','optic')]:
     path=folder/sub/name;bpy.ops.wm.open_mainfile(filepath=str(path))
     S=bpy.context.scene;S.frame_set(1);bpy.context.view_layer.update();root=bpy.data.objects[rootname]
     objects=[o for o in bpy.data.objects if within(o,root) and o.type in {'MESH','CURVE'}]
@@ -41,7 +42,8 @@ for sub,name,rootname,key in [('01_ПМ','PM_Geometry_v06.blend','PM_CONTROLS �
     row['pass']=row['scale_pass'] and row['resources_pass'] and row.get('file_hash_pass',True) and row.get('independent_pass',True)
     rows.append(row);print('PM_DELIVERY_FILE',name,row['pass'],dimensions,flush=True)
 source=Path(revision['source']);source_pass=hashlib.sha256(source.read_bytes()).hexdigest()==revision['source_sha256']
-report=dict(folder=str(folder),files=rows,source_unchanged=source_pass,pass_delivery=all(r['pass'] for r in rows) and source_pass)
+parent_pass=not revision.get('parent_geometry') or hashlib.sha256(Path(revision['parent_geometry']).read_bytes()).hexdigest()==revision['parent_sha256']
+report=dict(folder=str(folder),files=rows,source_unchanged=source_pass,parent_unchanged=parent_pass,pass_delivery=all(r['pass'] for r in rows) and source_pass and parent_pass)
 out=Path(args.out) if args.out else STAGE/'Проверки/delivery_check.json';out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print('PM_DELIVERY_PASS',report['pass_delivery'],flush=True)
 if not report['pass_delivery']:raise RuntimeError('Saved delivery files failed verification')

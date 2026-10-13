@@ -8,9 +8,7 @@ import json
 import shutil
 
 PROJECT = Path(__file__).resolve().parents[1]
-STAGE = PROJECT / '_asset_src/pm_refinement/review_v06'
 LIBRARY = Path('E:/Models Blender/WEAPONS/ПМ — модели и текстуры')
-DEST = LIBRARY / '08_Доработка_v6_на_проверку'
 MANIFEST = Path('Проверки/package_manifest.json')
 
 
@@ -53,7 +51,10 @@ class Links(HTMLParser):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['publish', 'check'])
+    parser.add_argument('--revision',default='v06',choices=['v06','v07'])
     args = parser.parse_args()
+    STAGE = PROJECT / ('_asset_src/pm_refinement/review_'+args.revision)
+    DEST = LIBRARY / ('09_Доработка_v7_на_проверку' if args.revision=='v07' else '08_Доработка_v6_на_проверку')
     manifest = json.loads((STAGE / MANIFEST).read_text(encoding='utf-8'))
     if Path(manifest['source']).resolve() != STAGE.resolve():
         raise ValueError('Unexpected source folder')
@@ -102,7 +103,7 @@ def main():
                   bytes=sum(r['bytes'] for _, _, r in pairs),
                   manifest_identical=True, hashes_pass=True,
                   gallery_links=len(links.paths), gallery_pass=True)
-    (PROJECT / '_asset_src/pm_refinement/work/published_check.json').write_text(
+    (PROJECT / f'_asset_src/pm_refinement/work/published_check_{args.revision}.json').write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print('PM_PUBLISHED_PASS', json.dumps(report, ensure_ascii=False), flush=True)
 

@@ -5,9 +5,9 @@ import bpy, bmesh, numpy as np
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
-ap=argparse.ArgumentParser();ap.add_argument('--draft',action='store_true');ap.add_argument('--only',default='');ap.add_argument('--audit-only',action='store_true')
+ap=argparse.ArgumentParser();ap.add_argument('--draft',action='store_true');ap.add_argument('--only',default='');ap.add_argument('--audit-only',action='store_true');ap.add_argument('--revision',default='v06',choices=['v06','v07'])
 args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
-ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/'review_v06'
+ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/('review_'+args.revision)
 S=bpy.context.scene;rig=bpy.data.objects['PM_CONTROLS • select me'];S.frame_set(1);bpy.context.view_layer.update()
 action=rig.animation_data.action if rig.animation_data else None
 rig.animation_data_clear()
@@ -53,7 +53,7 @@ report['reference_proportions']=dict(rail=rail,slide=slide_bounds,
     trigger=bbox([o for o in scope if o.name.startswith('Trigger |')]),
     clamp_plate=bbox([o for o in scope if o.name.startswith('Mount | rounded two-screw')]))
 report['reference_proportions']['pass']=all(.30<report['reference_proportions'][k]<.36 for k in ('rail_length_ratio','rail_width_ratio')) and report['reference_proportions']['mount_screw_count']==2
-names=[o.name for o in scope if o.type=='MESH' and o.name.startswith(('Frame | traced','Slide | continuous','Hammer |','Safety | tapered','Safety | beveled','Trigger |','Barrel | stepped','Rear sight |','Extractor |','MagCatch |','Lanyard | molded','Grip checkering |','Mount |','Reflex |'))]
+names=[o.name for o in scope if o.type=='MESH' and o.name.startswith(('Frame | traced','Slide | continuous','Hammer |','Safety | tapered','Safety | beveled','Trigger |','Barrel | stepped','Rear sight |','Extractor |','MagCatch |','Lanyard | molded','Grip checkering |','Mount |','Reflex |','Magazine | aligned','Magazine | straight','Magazine | inset floorplate'))]
 dg=bpy.context.evaluated_depsgraph_get()
 for name in names:
     o=bpy.data.objects[name];eo=o.evaluated_get(dg);m=eo.to_mesh();bm=bmesh.new();bm.from_mesh(m)
@@ -100,7 +100,22 @@ for u in (-.085,0,.085):
         a=at(-.065);b=at(1.46);d=b-a;l=d.length;d.normalize();hit,_,_,_=frame_tree.ray_cast(a,d,l)
         passage.append(dict(u=u,y=y,clear=hit is None,hit_mm=[v*1000 for v in hit] if hit else None))
 report['passages']['frame_magazine']=passage
+if args.revision=='v07':
+    spine=bbox([bpy.data.objects['Mount | continuous relieved rail spine']])
+    roof_world=mw@Vector((-.118,0,1.528333333))
+    gap=spine['min_mm'][2]-roof_world.z*1000
+    eo=bpy.data.objects['Magazine | aligned thin floorplate and extraction toe'].evaluated_get(bpy.context.evaluated_depsgraph_get());me=eo.to_mesh()
+    face=max(me.polygons,key=lambda f:f.area);normal=(eo.matrix_world.to_3x3().inverted().transposed()@face.normal).normalized()
+    normal_dot=abs(normal.dot(Vector((0,0,1))));eo.to_mesh_clear()
+    new_rear=bbox([bpy.data.objects['Rear sight | beveled twin-ear blade']])
+    optic_anchor=optic.matrix_world.translation
+    expected_anchor=mw@Vector((-.145,0,1.591))
+    report['owner_corrections']=dict(rail_underside_gap_mm=gap,rail_height_mm=rail['dimensions_mm'][2],
+        floorplate_parallel_dot=normal_dot,rear_blade_mm=new_rear['dimensions_mm'],
+        optic_origin_error_mm=(optic_anchor-expected_anchor).length*1000,
+        pass_corrections=1.2<gap<2.0 and 2.9<rail['dimensions_mm'][2]<3.8 and normal_dot>.999999 and (optic_anchor-expected_anchor).length<1e-6)
 report['audit_pass']=all(r['closed_pass'] for r in report['geometry'].values()) and all(r['front_clear'] and r['rear_clear'] for r in samples) and all(r['clear'] for r in passage) and all(r['finite'] for r in report['poses']) and report['reference_proportions']['pass'] and all(r['pass_motion'] for r in motion.values())
+if args.revision=='v07':report['audit_pass']=report['audit_pass'] and report['owner_corrections']['pass_corrections']
 (OUT/'Проверки/fresh_file_geometry.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print('PM_QA',report['audit_pass'],'base',report['base_closed']['dimensions_mm'],'assembly',report['assembly_closed']['dimensions_mm'],flush=True)
 if not report['audit_pass']:raise RuntimeError('Fresh-file PM geometry QA failed; see saved report')
@@ -144,6 +159,14 @@ views=[
 ('20_Планка_пропорции_сверху',(-.009,-.038,.36),(-.006,0,.107),.196,True,{}),
 ('21_Крепление_над_спуском',(-.003,-.33,.098),(-.003,0,.098),.181,True,{}),
 ('23_Защёлка_закруглённый_профиль',(.045,-.15,.025),(.064,0,.011),.032,False,{},'catch')]
+if args.revision=='v07':
+    views += [
+    ('24_Коллиматор_сбоку',(-.009,-.25,.142),(-.013,0,.142),.071,True,{},'optic'),
+    ('25_Коллиматор_спереди',(-.24,0,.147),(-.016,0,.147),.060,True,{},'optic'),
+    ('26_Коллиматор_сзади',(.20,-.13,.177),(-.012,0,.143),.070,True,{},'optic'),
+    ('27_Скругление_и_низкая_посадка',(-.018,-.105,.170),(-.008,-.009,.123),.064,True,{}),
+    ('28_Параллельная_пятка',(.043,-.18,.008),(.052,0,.008),.076,False,{}),
+    ('29_Защёлка_сбоку',(.068,-.18,.010),(.068,0,.009),.029,False,{},'catch')]
 only=set(args.only.split(',')) if args.only else set()
 saved_hide={o.name:o.hide_render for o in bpy.data.objects}
 fill_data=bpy.data.lights.new('Inspection | heel fill','AREA');fill_data.energy=.45;fill_data.size=.12
@@ -156,7 +179,7 @@ for view in views:
         if o.name in saved_hide:o.hide_render=saved_hide[o.name]
     pose(Slide=0,Hammer=0,Safety=0,Trigger=0,Magazine=0,MagCatch=0)
     pose(**values);set_accessories(accessories)
-    fill.hide_render=name.split('_')[0] not in {'11','12','19'}
+    fill.hide_render=name.split('_')[0] not in {'11','12','19','28','29'}
     if not fill.hide_render:bpy.data.objects['Studio | matte charcoal stage'].hide_render=True
     if kind:
         for o in scope:
