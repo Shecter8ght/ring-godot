@@ -3,11 +3,11 @@ from pathlib import Path
 import argparse, hashlib, json, math, sys
 import bpy, numpy as np
 
-ap=argparse.ArgumentParser();ap.add_argument('--folder',default='');ap.add_argument('--out',default='');ap.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+ap=argparse.ArgumentParser();ap.add_argument('--folder',default='');ap.add_argument('--out',default='');ap.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09','v10']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 PROJECT=Path(__file__).resolve().parents[1];STAGE=PROJECT/('_asset_src/pm_refinement/review_'+args.revision)
-accessory_revision={'v06':'v01','v07':'v02','v08':'v03','v09':'v04'}[args.revision]
+accessory_revision={'v06':'v01','v07':'v02','v08':'v03','v09':'v04','v10':'v05'}[args.revision]
 folder=Path(args.folder) if args.folder else STAGE
-if args.revision=='v09':
+if args.revision in {'v09','v10'}:
     import addon_utils
     bpy.context.preferences.use_preferences_save=False
     addon_utils.enable('bl_ext.blender_org.ucupaint',default_set=True)
@@ -22,7 +22,7 @@ def within(o,root):
 for sub,name,rootname,key in [('01_ПМ',f'PM_Geometry_{args.revision}.blend','PM_CONTROLS • select me','assembly_closed'),('02_Крепление',f'PM_OpticMount_Geometry_{accessory_revision}.blend','PM_OpticMount • asset root','mount'),('03_Коллиматор',f'PM_ReflexSight_Geometry_{accessory_revision}.blend','PM_ReflexSight • asset root','optic')]:
     path=folder/sub/name;bpy.ops.wm.open_mainfile(filepath=str(path))
     S=bpy.context.scene;S.frame_set(1);bpy.context.view_layer.update();root=bpy.data.objects[rootname]
-    objects=[o for o in bpy.data.objects if within(o,root) and o.type in {'MESH','CURVE','FONT'} and not o.get('PM engraving helper')]
+    objects=[o for o in bpy.data.objects if within(o,root) and o.type in {'MESH','CURVE','FONT'} and not o.get('PM engraving helper') and not o.get('PM geometry helper')]
     if key=='assembly_closed':
         suppressor=bpy.data.objects['Suppressor • removal']
         props=[o for o in bpy.data.objects if o.type=='EMPTY' and o.name.startswith('Animation |')]
@@ -43,7 +43,7 @@ for sub,name,rootname,key in [('01_ПМ',f'PM_Geometry_{args.revision}.blend','P
         actions=[a.name for a in bpy.data.actions],camera=S.camera.name if S.camera else None)
     if key=='assembly_closed':row['file_hash_pass']=row['sha256']==qa['sha256']
     else:row['independent_pass']=root.parent is None and all(o.name.startswith(('Mount |',)) if key=='mount' else o.name.startswith(('Reflex |',)) for o in objects)
-    if args.revision=='v09' and key!='mount':
+    if args.revision in {'v09','v10'} and key!='mount':
         sys.path.insert(0,str(Path(__file__).resolve().parent))
         from pm_engraving_geometry import engraving_report,paint_fill_report
         row['engraving']=engraving_report(json.loads((STAGE/'Проверки/engraving.json').read_text(encoding='utf-8')),optic_only=key=='optic')
@@ -51,6 +51,9 @@ for sub,name,rootname,key in [('01_ПМ',f'PM_Geometry_{args.revision}.blend','P
     row['pass']=row['scale_pass'] and row['resources_pass'] and not row['external_fonts'] and row.get('file_hash_pass',True) and row.get('independent_pass',True)
     if 'engraving' in row:row['pass']=row['pass'] and row['engraving']['pass_engraving']
     if 'paint_fill' in row:row['pass']=row['pass'] and row['paint_fill']['pass_paint']
+    if args.revision=='v10' and key=='assembly_closed':
+        row['manual_controls_pass']=not root.animation_data or root.animation_data.action is None
+        row['pass']=row['pass'] and row['manual_controls_pass']
     rows.append(row);print('PM_DELIVERY_FILE',name,row['pass'],dimensions,flush=True)
 source=Path(revision['source']);source_pass=hashlib.sha256(source.read_bytes()).hexdigest()==revision['source_sha256']
 parent_pass=not revision.get('parent_geometry') or hashlib.sha256(Path(revision['parent_geometry']).read_bytes()).hexdigest()==revision['parent_sha256']

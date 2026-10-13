@@ -51,10 +51,10 @@ class Links(HTMLParser):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', choices=['publish', 'check'])
-    parser.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09'])
+    parser.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09','v10'])
     args = parser.parse_args()
     STAGE = PROJECT / ('_asset_src/pm_refinement/review_'+args.revision)
-    DEST = LIBRARY / {'v06':'08_Доработка_v6_на_проверку','v07':'09_Доработка_v7_на_проверку','v08':'10_Доработка_v8_ЗОРИН_на_проверку','v09':'11_Доработка_v9_Гравировка_на_проверку'}[args.revision]
+    DEST = LIBRARY / {'v06':'08_Доработка_v6_на_проверку','v07':'09_Доработка_v7_на_проверку','v08':'10_Доработка_v8_ЗОРИН_на_проверку','v09':'11_Доработка_v9_Гравировка_на_проверку','v10':'12_Доработка_v10_Рычаги_на_проверку'}[args.revision]
     manifest = json.loads((STAGE / MANIFEST).read_text(encoding='utf-8'))
     if Path(manifest['source']).resolve() != STAGE.resolve():
         raise ValueError('Unexpected source folder')
@@ -94,7 +94,8 @@ def main():
     if digest(manifest_target) != digest(STAGE / MANIFEST):
         raise ValueError('Delivered manifest differs')
     links = Links()
-    links.feed((DEST / 'gallery.html').read_text(encoding='utf-8'))
+    native_only=manifest.get('delivery')=='native-only'
+    if not native_only:links.feed((DEST / 'gallery.html').read_text(encoding='utf-8'))
     for name in links.paths:
         target = inside(DEST / relative(name), DEST)
         if not target.is_file():
@@ -102,7 +103,7 @@ def main():
     report = dict(destination=str(DEST), files=len(verified),
                   bytes=sum(r['bytes'] for _, _, r in pairs),
                   manifest_identical=True, hashes_pass=True,
-                  gallery_links=len(links.paths), gallery_pass=True)
+                  gallery_links=len(links.paths), gallery_pass=None if native_only else True,delivery='native-only' if native_only else 'gallery')
     (PROJECT / f'_asset_src/pm_refinement/work/published_check_{args.revision}.json').write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print('PM_PUBLISHED_PASS', json.dumps(report, ensure_ascii=False), flush=True)

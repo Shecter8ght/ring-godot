@@ -4,11 +4,11 @@ import argparse, json, sys
 import bpy
 from mathutils import Vector
 
-ap=argparse.ArgumentParser();ap.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09'])
+ap=argparse.ArgumentParser();ap.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09','v10'])
 args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 ROOT=Path(__file__).resolve().parents[1]/('_asset_src/pm_refinement/review_'+args.revision)
 SOURCE=ROOT/f'01_ПМ/PM_Geometry_{args.revision}.blend'
-accessory_revision={'v06':'v01','v07':'v02','v08':'v03','v09':'v04'}[args.revision]
+accessory_revision={'v06':'v01','v07':'v02','v08':'v03','v09':'v04','v10':'v05'}[args.revision]
 def desc(o,root):
     while o:
         if o==root:return True
@@ -30,14 +30,14 @@ for name,folder,filename,exclude in [
     bpy.context.view_layer.update()
     coords=[];dg=bpy.context.evaluated_depsgraph_get()
     for o in keep:
-        if o.type not in {'MESH','CURVE','FONT'} or o.get('PM engraving helper'):continue
+        if o.type not in {'MESH','CURVE','FONT'} or o.get('PM engraving helper') or o.get('PM geometry helper'):continue
         eo=o.evaluated_get(dg);me=eo.to_mesh();coords.extend(eo.matrix_world@v.co for v in me.vertices);eo.to_mesh_clear()
     low=Vector([min(p[i] for p in coords) for i in range(3)]);high=Vector([max(p[i] for p in coords) for i in range(3)])
     center=(low+high)/2;extent=max(high-low)
     collection=bpy.data.collections.new('Studio — separate');S.collection.children.link(collection)
     camera_data=bpy.data.cameras.new('Review');camera=bpy.data.objects.new('Review',camera_data);collection.objects.link(camera)
     camera.location=center+Vector((-extent*1.2,-extent*1.6,extent*1.1));camera.rotation_euler=(center-camera.location).to_track_quat('-Z','Y').to_euler()
-    camera_data.type='ORTHO';camera_data.ortho_scale=extent*(1.85 if args.revision in {'v08','v09'} and name.startswith('PM_ReflexSight') else 1.45);camera_data.clip_start=.0001;camera_data.clip_end=10;S.camera=camera
+    camera_data.type='ORTHO';camera_data.ortho_scale=extent*(1.85 if args.revision in {'v08','v09','v10'} and name.startswith('PM_ReflexSight') else 1.45);camera_data.clip_start=.0001;camera_data.clip_end=10;S.camera=camera
     for i,(offset,power,size) in enumerate([((-1.0,-1.3,1.7),2.0,.12),((.8,.6,1.1),1.4,.10)]):
         data=bpy.data.lights.new('Review light '+str(i),'AREA');data.energy=power;data.size=size
         light=bpy.data.objects.new(data.name,data);collection.objects.link(light);light.location=center+Vector(offset)*extent
