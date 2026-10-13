@@ -4,7 +4,7 @@ import argparse, json, subprocess, sys
 import bpy
 from mathutils import Vector
 
-ap=argparse.ArgumentParser();ap.add_argument('mode',choices=['prepare','render']);ap.add_argument('--revision',default='v06',choices=['v06','v07','v08']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
+ap=argparse.ArgumentParser();ap.add_argument('mode',choices=['prepare','render']);ap.add_argument('--revision',default='v06',choices=['v06','v07','v08','v09']);args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
 ROOT=Path(__file__).resolve().parents[1]/'_asset_src/pm_refinement';OUT=ROOT/('review_'+args.revision)
 S=bpy.context.scene;rig=bpy.data.objects['PM_CONTROLS • select me']
 keys=('Slide','Hammer','Safety','Trigger','Magazine','MagCatch')
@@ -47,6 +47,10 @@ if args.mode=='prepare':
     print('PM_INSPECTION_ACTION_SAVED',flush=True)
     sys.exit(0)
 
+if args.revision=='v09':
+    sys.path.insert(0,str(Path(__file__).resolve().parent))
+    from pm_engraving_geometry import cache_engraving_preview
+    print('PM_UNSAVED_RENDER_CACHE',cache_engraving_preview(),flush=True)
 S.render.engine='CYCLES';S.cycles.samples=12;S.cycles.use_denoising=True
 stage=bpy.data.objects.get('Studio | matte charcoal stage')
 if stage:stage.hide_render=True
