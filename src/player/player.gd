@@ -145,6 +145,7 @@ var _hand: Node3D
 var _aimed: Array[Node3D] = []
 var _weapon_model: Node3D
 var _weapon_model_id: String = ""
+var _weapon_model_cache: Dictionary = {}
 var _ragdoll: Ragdoll
 ## Смерть показана клипом (CharacterAnimator.die), регдолла нет.
 var _died_shown: bool = false
@@ -1036,30 +1037,57 @@ func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
 	kick_vis += clampf(kv_base / 0.05, 0.3, 1.8) * gain
 
 
-## Оружие — в правой руке модели (кость руки, CharacterAnimator.weapon_grip): идёт за руками
-## в любой позе — ходьба, бег, присед, лёжа, перезарядка. Без модели Persona — у груди, как раньше.
+## Подготовка при входе на уровень: тяжёлая сборка не приходится на нажатие клавиши ствола.
+func prepare_weapon_model(entry: Dictionary) -> void:
+	_cached_weapon_model(String(entry.id), entry.get("mods", {}), WeaponCondition.percent(entry), WeaponMods.mag_state(entry), WeaponMark.marks(entry))
+
+
+func _cached_weapon_model(id: String, mods: Dictionary, dur: float, mag: String, marks: Dictionary) -> Node3D:
+	var key: String = WeaponCondition.model_key(id, mods, dur, mag) + "|" + WeaponMark.key(marks)
+	var model: Node3D = _weapon_model_cache.get(key) as Node3D
+	if model == null:
+		model = WeaponModels.build(id, mods, 1, dur, mag, marks) if id != "" else Node3D.new()
+		model.visible = false
+		model.process_mode = Node.PROCESS_MODE_DISABLED
+		_hand.add_child(model)
+	_weapon_model_cache.erase(key)
+	_weapon_model_cache[key] = model
+	while _weapon_model_cache.size() > Balance.WEAPON_VISUAL_CACHE:
+		var oldest: String = String(_weapon_model_cache.keys()[0])
+		(_weapon_model_cache[oldest] as Node3D).queue_free()
+		_weapon_model_cache.erase(oldest)
+	return model
+
+
+## Оружие следует за правой кистью Persona в любой стойке; без Persona — у груди.
 func _update_hand() -> void:
 	var key := WeaponCondition.model_key(weapon_id, weapon_mods, weapon_condition, weapon_mag) + "|" + WeaponMark.key(weapon_engraving)
 	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
 	var yaw := _body.rotation.y
 	if _weapon_model_id != key:
 		if _weapon_model:
-			_weapon_model.queue_free()
-		_weapon_model = WeaponModels.build(weapon_id, weapon_mods, 1, weapon_condition, weapon_mag, weapon_engraving) if weapon_id != "" else Node3D.new()
+			_weapon_model.visible = false
+			_weapon_model.process_mode = Node.PROCESS_MODE_DISABLED
+		_weapon_model = _cached_weapon_model(weapon_id, weapon_mods, weapon_condition, weapon_mag, weapon_engraving)
+		_weapon_model.process_mode = Node.PROCESS_MODE_INHERIT
 		var family := String(WeaponDb.weapon(weapon_id).get("model", "rifle")) if weapon_id != "" else "rifle"
 		var grip: Node3D = _animator.weapon_grip(family, weapon_id) if _animator else null
-		(grip if grip else _hand).add_child(_weapon_model)
+		var parent: Node3D = grip if grip else _hand
+		if _weapon_model.get_parent() != parent:
+			_weapon_model.reparent(parent, false)
 		_weapon_rig = WeaponRig.find_on(_weapon_model)
 		if _weapon_rig:
 			_weapon_rig.set_ammo_state(weapon_rounds)
-			_weapon_rig.sound_event.connect(_rig_sound)
+			if not _weapon_rig.sound_event.is_connected(_rig_sound):
+				_weapon_rig.sound_event.connect(_rig_sound)
 		_weapon_model_id = key
 		# фонари и лазеры смотрят туда, куда целится игрок, а не куда анимация повернула ствол:
 		# запоминаем их поворот внутри модели оружия
 		_aimed.clear()
 		for n in _weapon_model.find_children("*", "Node3D", true, false):
 			if n is SpotLight3D or String(n.name).begins_with("LaserBeam"):
-				n.set_meta("aim_rel", _weapon_model.global_basis.orthonormalized().inverse() * (n as Node3D).global_basis)
+				if not n.has_meta("aim_rel"):
+					n.set_meta("aim_rel", _weapon_model.global_basis.orthonormalized().inverse() * (n as Node3D).global_basis)
 				_aimed.append(n as Node3D)
 		if ads:
 			set_first_person(true)

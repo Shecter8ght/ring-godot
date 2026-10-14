@@ -12,6 +12,7 @@ var _fails: int = 0
 
 
 func _ready() -> void:
+	Profile.use_file("user://veras_hand_test.json", true)
 	RaidEvents.enabled = false
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame

@@ -222,6 +222,20 @@ func _play(clip: String, blend: float, duration: float = 0.0) -> void:
 	_clip = "" if clip in [_clip_name("idle"), _clip_name("idle_empty")] else clip
 
 
+## Повторно достали готовую модель: старые таймеры не запускают выстрел или чужую перезарядку.
+func equip() -> void:
+	_last_reload = 0.0
+	_last_check = 0.0
+	_last_clear = 0.0
+	_last_ammo = -1
+	_kick = 0.0
+	_insert_hide = 0.0
+	_holding = false
+	_turn = Vector2.ZERO
+	_fast = false
+	_play(_clip_name("draw") if String(config.get("mechanism", "")) == "break_action" else _clip_name("idle"), 0.0)
+
+
 ## Опрос состояния игрока: перезарядка (начало по фронту таймера, отмена — в стойку), проверка
 ## магазина, выстрелы (затвор), счёт патронов на виду. Затем шаг клипа и затвор/подаватель поверх.
 func update(pl: Player, delta: float) -> void:

@@ -69,6 +69,12 @@ var _viewmodel: Node3D
 var _viewmodel_rig: WeaponRig
 var _arms: FirstPersonArms
 var _viewmodel_id: String = ""
+var _viewmodel_cache: Dictionary = {}
+var _warmed_player: int = 0
+var _warmed_loadout: bool = false
+## Доля визуальной позы сохраняется при отпускании ПКМ и быстром повторном нажатии.
+var _aim_pose: float = 0.0
+var _aim_pose_weapon: String = ""
 var weapon_clearance: WeaponClearance = WeaponClearance.new()
 ## Приклад и затыльник модели в руках: у бедра видны, в прицеле (под щекой) — прячутся.
 var _cheek_parts: Array[GeometryInstance3D] = []
@@ -506,6 +512,7 @@ func _process(delta: float) -> void:
 			return
 	var pl := _target as Player
 	load_settings()
+	_warm_weapon_models(pl)
 	# режим от первого лица (V) — и в рейде, и в убежище (в том числе сидя на диване)
 	var want_ads := pl != null and pl.is_local() and pl.is_alive() and (pl.aiming or first_person_mode)
 	if want_ads != ads_active:
@@ -606,8 +613,63 @@ func _process_iso(delta: float, s: float) -> void:
 
 # ---------------------------------------------------------------- прицел от первого лица
 
+## Подготовить оба слота до первого переключения; в песочнице — автомат и пистолет.
+func _warm_weapon_models(pl: Player) -> void:
+	if pl == null or not pl.is_local():
+		return
+	if _warmed_player == pl.get_instance_id() and _warmed_loadout == pl.loadout_mode:
+		return
+	if pl.loadout_mode and not pl.inventory.loadout_ready:
+		return
+	var prepared: bool = false
+	for key: Variant in pl.weapon_keys().slice(0, 2):
+		var entry: Dictionary = pl.entry_of(String(key))
+		if entry.is_empty():
+			continue
+		prepared = true
+		pl.prepare_weapon_model(entry)
+		_cached_viewmodel(String(entry.id), entry.get("mods", {}), WeaponCondition.percent(entry), WeaponMods.mag_state(entry), WeaponMark.marks(entry))
+	if prepared:
+		_warmed_player = pl.get_instance_id()
+		_warmed_loadout = pl.loadout_mode
+
+
+## Сборка живёт под камерой до вытеснения из ограниченного кэша; скрытые узлы не обрабатываются.
+func _cached_viewmodel(id: String, mods: Dictionary, dur: float, mag: String, marks: Dictionary) -> Node3D:
+	var key: String = WeaponCondition.model_key(id, mods, dur, mag) + "|" + WeaponMark.key(marks)
+	var model: Node3D = _viewmodel_cache.get(key) as Node3D
+	if model == null:
+		if ViewmodelClips.available(id):
+			model = ViewmodelClips.create(id, mods)
+			WeaponMark.attach(model, id, marks)
+		else:
+			model = WeaponModels.build(id, mods, 0, dur, mag, marks) if id != "" else Node3D.new()
+		WeaponCondition.apply_visual(model, {"id": id, "dur": dur})
+		for child: Node in model.find_children("*", "GeometryInstance3D", true, false):
+			var mesh: GeometryInstance3D = child as GeometryInstance3D
+			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mesh.layers = 2
+		for child: Node in model.find_children("Flashlight*", "SpotLight3D", true, false):
+			child.set_meta("own", true)
+			child.set_meta("vm_local", (child as Node3D).transform)
+			(child as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
+		model.visible = false
+		model.process_mode = Node.PROCESS_MODE_DISABLED
+		_vm_space.add_child(model)
+	_viewmodel_cache.erase(key)
+	_viewmodel_cache[key] = model
+	while _viewmodel_cache.size() > Balance.WEAPON_VISUAL_CACHE:
+		var oldest: String = String(_viewmodel_cache.keys()[0])
+		(_viewmodel_cache[oldest] as Node3D).queue_free()
+		_viewmodel_cache.erase(oldest)
+	return model
+
+
 func _set_ads(on: bool, pl: Player) -> void:
 	ads_active = on
+	if not on:
+		_aim_pose = 0.0
+		_aim_pose_weapon = ""
 	if not on and _look:
 		_look.aim_k = 0.0
 	if pl:
@@ -645,8 +707,13 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# с завалом в оптику не смотрят: вид и чувствительность — как с открытым прицелом
 	var scoped := bool(spec.get("scoped", false)) and not pl.aim_cant
 	# ПКМ подводит оружие к глазам; поле зрения мира остаётся выбранным в настройках.
-	var aim_t := pl.aim_progress()
-	_look.aim_k = aim_t if pl.aiming else 0.0
+	if _aim_pose_weapon != wid:
+		_aim_pose_weapon = wid
+		_aim_pose = 0.0
+	var pose_time: float = float(spec.get("aim_time", Balance.AIM_TIME_FAST)) if pl.aiming else Balance.ADS_LOWER_TIME
+	_aim_pose = move_toward(_aim_pose, 1.0 if pl.aiming and wid != "" else 0.0, delta / pose_time)
+	var aim_t: float = _aim_pose
+	_look.aim_k = aim_t
 	_look.iron = not scoped
 	_ads_cam.fov = Settings.fps_fov_v()
 	# руки и оружие — со своим полем зрения, сколько бы ни было у мира
@@ -655,8 +722,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
 	_sway_t += delta
 	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
-	if pl.aiming:
-		amp *= Balance.ADS_SWAY_SCALE
+	amp *= lerpf(1.0, Balance.ADS_SWAY_SCALE, aim_t)
 	# стресс — руки ходят сильнее
 	amp *= 1.0 + float(Balance.STRESS.sway_k) * pl.stress_k()
 	if pl.stance != Player.Stance.STAND:
@@ -692,29 +758,16 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var vm_key := WeaponCondition.model_key(wid, pl.weapon_mods, pl.weapon_condition, pl.weapon_mag) + "|" + WeaponMark.key(pl.weapon_engraving)
 	if _viewmodel_id != vm_key:
 		if _viewmodel:
-			_viewmodel.queue_free()
-		# ствол с заготовленными клипами (ВЕРАС-54) — свои руки и анимации из Blender
-		if ViewmodelClips.available(wid):
-			_viewmodel = ViewmodelClips.create(wid, pl.weapon_mods)
-			WeaponMark.attach(_viewmodel, wid, pl.weapon_engraving)
-		else:
-			_viewmodel = WeaponModels.build(wid, pl.weapon_mods, 0, pl.weapon_condition, pl.weapon_mag, pl.weapon_engraving) if wid != "" else Node3D.new()
-		WeaponCondition.apply_visual(_viewmodel, {"id": wid, "dur": pl.weapon_condition})
-		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
-			var gi := mi as GeometryInstance3D
-			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			# слой 2 — только для глаз: камера оптики его не видит (иначе рисовала бы свой прицел)
-			gi.layers = 2
+			_viewmodel.visible = false
+			_viewmodel.process_mode = Node.PROCESS_MODE_DISABLED
+		_viewmodel = _cached_viewmodel(wid, pl.weapon_mods, pl.weapon_condition, pl.weapon_mag, pl.weapon_engraving)
+		_viewmodel.process_mode = Node.PROCESS_MODE_INHERIT
+		if _viewmodel is ViewmodelClips:
+			(_viewmodel as ViewmodelClips).equip()
 		_cheek_parts.clear()
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			if (mi as GeometryInstance3D).has_meta("hide_ads"):
 				_cheek_parts.append(mi as GeometryInstance3D)
-		# фонарь у себя светит от модели в руках: луч идёт за стволом (у модели на теле он погашен)
-		for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
-			n.set_meta("own", true)
-			n.set_meta("vm_local", (n as Node3D).transform)
-			(n as SpotLight3D).shadow_caster_mask = 0xFFFFF & ~Player.OWN_BODY_LAYER
-		_vm_space.add_child(_viewmodel)
 		if not _viewmodel is ViewmodelClips:
 			_arms.bind_weapon(_viewmodel)
 		weapon_clearance.bind(_viewmodel)
@@ -735,7 +788,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var sx: float = line.x
 	var sh: float = line.y
 	var sroll: float = line.z
-	# у бедра (без ПКМ) → в прицел: «довод» по эргономике (aim_progress), плавно
+	# Подъём по эргономике и опускание идут от текущей доли позы, без сброса на отпускании ПКМ.
 	var k := smoothstep(0.0, 1.0, aim_t)
 	# приклад у бедра виден; вскинул к щеке — он под щекой и заслонял бы низ прицельной линии
 	for gi in _cheek_parts:
