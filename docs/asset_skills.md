@@ -36,6 +36,10 @@ python -X utf8 tools/install_asset_skills.py --install --verify-installed
 
 Установка выполнена 2026-10-13: четыре скилла в каждой среде, восемь установленных копий. Прежние версии двух скиллов обеих сред сохранены в `_asset_src/asset_skill_backups/20261013-103529/`. Проверены официальный формат, 39 относительных ссылок, синтаксис трёх Python-помощников, совпадение общих файлов Codex/Claude Code и 90 файлов скиллов внутри ZIP. Отчёты находятся в `_asset_src/asset_skill_build/`.
 
+Обновление 2026-10-14: `weapon-asset-texturing` дополнен по ПМ 20% v04 (образец готовой отделки, свет сравнения, крупные тональные зоны, быстрые несохраняемые пробы, диагностика Color и ловушки UCUPaint). Все 17 файлов совпадают по SHA-256 в `.codex/skills`, `.claude/skills` и ранее установленной `.agents/skills`; предыдущие версии — `_asset_src/asset_skill_backups/texturing-v04-20261014-112900/`.
+
+Для **Claude Desktop / claude.ai → Skills → Мои** локальное копирование в `.claude/skills` недостаточно: загружайте отдельный ZIP через «Добавить → Загрузить Skill». Текущий архив текстурирования — `_asset_src/asset_skill_build/weapon-asset-texturing.zip` (одна корневая папка, 16 файлов, без интерфейсной метадаты Codex; description короче 200 символов). Общий ZIP от 13.10 — историческая сборка и это обновление не содержит. Перед новым выпуском его нужно пересобрать. Загрузка/замена в аккаунте — отдельное действие; создание архива её не выполняет. Проверенный diff перед сборкой сохранён в `_asset_src/asset_skill_build/weapon-asset-texturing-v04.diff`.
+
 ## Вызов
 
 Codex: `$blender-asset-workflow`, `$weapon-asset-texturing`, `$blender-vegetation-workflow`, `$godot-asset-preparation`.
