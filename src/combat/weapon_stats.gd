@@ -44,7 +44,6 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	s.spread_deg = float(b.spread)
 	s.ads_spread = float(b.ads_spread)
 	s.hip_spread = 1.0
-	s.ads_fov = float(b.ads_fov)
 	s.kick = float(b.kick)
 	s.kick_h = float(b.kick_h)
 	s.kick_bias = float(b.kick_bias)
@@ -58,6 +57,8 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	s.braced_spread = 1.0
 	s.aim_k = 1.0
 	s.zoom = 0.0
+	s.zoom_min = 0.0
+	s.zoom_max = 0.0
 	s.scoped = false
 	# патрон
 	var a := WeaponDb.ammo(aid) if aid != "" else {}
@@ -93,7 +94,9 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	# встроенное: прицел (болтовки), глушитель
 	var integ: Dictionary = w.get("integral", {})
 	if integ.has("zoom"):
-		s.zoom = float(integ.zoom)
+		s.zoom = zoom_value(integ)
+		s.zoom_min = zoom_limits(integ).x
+		s.zoom_max = zoom_limits(integ).y
 		s.scoped = true
 	if bool(integ.get("suppressed", false)):
 		s.suppressed = true
@@ -144,11 +147,15 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		if is_optic and effectiveness > 0.0:
 			s.aim_k = float(s.aim_k) * lerpf(1.0, float(att.get("aim_k", 1.0)), effectiveness)
 			if float(att.get("zoom", 0.0)) > 0.0:
-				s.zoom = float(att.zoom)
+				s.zoom = zoom_value(att, st)
+				s.zoom_min = zoom_limits(att).x
+				s.zoom_max = zoom_limits(att).y
 				s.scoped = true
 			elif active != "primary":
 				# угловой коллиматор: основной (оптика) не работает, пока смотришь в угловой
 				s.zoom = 0.0
+				s.zoom_min = 0.0
+				s.zoom_max = 0.0
 				s.scoped = false
 		if att.has("light") and effectiveness > 0.0:
 			s.light = true
@@ -162,6 +169,8 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	# угловой — без кратности, даже если у ствола встроенная оптика
 	if active != "primary":
 		s.zoom = 0.0
+		s.zoom_min = 0.0
+		s.zoom_max = 0.0
 		s.scoped = false
 	# износ: разброс растёт, задержки чаще (на хорошем стволе — редкость)
 	var worn := pow(clampf((100.0 - dur) / 100.0, 0.0, 1.0), 2.0)
@@ -175,14 +184,58 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	var e := float(s.ergo) / 100.0
 	s.aim_time = lerpf(Balance.AIM_TIME_SLOW, Balance.AIM_TIME_FAST, e) / maxf(float(s.aim_k), 0.1)
 	s.sway = lerpf(Balance.SWAY_MAX, Balance.SWAY_MIN, e)
-	if bool(s.scoped):
-		s.ads_fov = Balance.SCOPE_MAIN_FOV
 	# изометрия: оптика — приближение камеры в прицеле, коллиматор — без
 	s.iso_zoom = 1.0 + (minf(float(s.zoom), 8.0) * float(Balance.ISO_AIM.zoom_per_x) if bool(s.scoped) else 0.0)
 	if _cache.size() >= int(Balance.CONDITION.cache_entries):
 		_cache.clear()
 	_cache[key] = s
 	return s
+
+
+## Без диапазона кратность фиксированная. zoom — прежнее умолчание для старых экземпляров.
+static func zoom_limits(optic: Dictionary) -> Vector2:
+	var nominal: float = maxf(0.0, float(optic.get("zoom", 0.0)))
+	if nominal <= 0.0:
+		return Vector2.ZERO
+	var low: float = maxf(1.0, float(optic.get("zoom_min", nominal)))
+	return Vector2(low, maxf(low, float(optic.get("zoom_max", nominal))))
+
+
+static func zoom_value(optic: Dictionary, state: Dictionary = {}) -> float:
+	var limits: Vector2 = zoom_limits(optic)
+	if limits == Vector2.ZERO:
+		return 0.0
+	var selected: float = float(state.get("zoom", optic.get("zoom", limits.x)))
+	if not is_finite(selected):
+		selected = float(optic.get("zoom", limits.x))
+	return clampf(selected, limits.x, limits.y)
+
+
+## Выбор кратности каждого регулируемого прицела хранится на самом обвесе.
+static func scope_zooms(entry: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	var mods: Dictionary = entry.get("mods", {})
+	for mount: Variant in mods:
+		var optic: Dictionary = WeaponDb.attachment(WeaponDb.mod_id(mods[mount]))
+		var limits: Vector2 = zoom_limits(optic)
+		if limits.y > limits.x:
+			out[mount] = zoom_value(optic, WeaponCondition.mod_entry(mods[mount]))
+	return out
+
+
+## Эхо владельца: только существующие регулируемые прицелы, в пределах их диапазона.
+static func apply_scope_zooms(entry: Dictionary, selections: Dictionary) -> void:
+	var mods: Dictionary = entry.get("mods", {})
+	for mount: Variant in selections:
+		if not mods.has(mount) or not (selections[mount] is float or selections[mount] is int):
+			continue
+		var rec: Dictionary = WeaponCondition.mod_entry(mods[mount])
+		var optic: Dictionary = WeaponDb.attachment(String(rec.id))
+		var limits: Vector2 = zoom_limits(optic)
+		if limits.y > limits.x:
+			rec["zoom"] = zoom_value(optic, {"zoom": selections[mount]})
+			mods[mount] = rec
+	entry["mods"] = mods
 
 
 ## Основной и все дополнительные прицелы сборки (на кронштейнах, боковых планках, второй на

@@ -167,8 +167,6 @@ func _fp(stage: String, ads: bool, action_name: String = "", progress: float = 0
 		var height: float = float(_weapon.get_meta("sight_h", 0.0))
 		var distance: float = float(_weapon.get_meta("ads_z", 0.36))
 		_weapon.position = Vector3(0.0, -height, -distance)
-		var stats: Dictionary = WeaponDb.weapon(WEAPON_ID).get("stats", {}) as Dictionary
-		_camera.fov = CameraRig.relative_fov(float(stats.get("ads_fov", 62.0)), Settings.fps_fov_v())
 	# камера в начале координат без поворота — оси камеры совпадают с осями сцены
 	var vk: float = CameraRig.viewmodel_scale(_camera.fov)
 	_vm_space.transform = Transform3D(Basis.from_scale(Vector3(vk, vk, 1.0)), Vector3.ZERO)

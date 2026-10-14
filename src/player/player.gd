@@ -539,6 +539,7 @@ func entry_of(key: String) -> Dictionary:
 		md["dur"] = float((st.get("mod_dur", {}) as Dictionary).get(m, WeaponCondition.percent(md)))
 		mods[m] = md
 	e["mods"] = mods
+	WeaponStats.apply_scope_zooms(e, st.get("optic_zoom", {}))
 	return e
 
 
@@ -562,6 +563,7 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": Gear.mag_top(mag),
 		"mix": (mag.get("mix") as Array).duplicate(true) if mag.get("mix") is Array else [],
 		"zero_c": [Gear.zero_clicks(base).x, Gear.zero_clicks(base).y],
+		"optic_zoom": WeaponStats.scope_zooms(base),
 		"dur": WeaponCondition.percent(base), "mod_dur": mod_dur, "shots": int(base.get("_condition_shots", 0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
 		"chamber": int(normalized.get("chamber", 0)), "chamber_ammo": String(normalized.get("chamber_ammo", ""))}
 	if String(base.id) == "signal_launcher":
@@ -597,7 +599,7 @@ func zero_click(dx: int, dy: int) -> void:
 	Audio.play_ui("ui_click")
 	_say("Пристрелка: %s" % (Gear.zero_text(now) if now != Vector2i.ZERO else "барабанчики на нуле"))
 	if in_range_mode() and range_own_slot != "":
-		_push_own_zero(now)
+		_push_own_sight_state({"zero_c": [now.x, now.y]})
 
 
 ## Сколько накручено на стволе в руках.
@@ -606,17 +608,19 @@ func zero_clicks() -> Vector2i:
 	return Vector2i(int(c[0]), int(c[1]))
 
 
-## Тир: в руках копия своего ствола (со стойки, патроны не тратятся) — щелчки сразу в своё снаряжение.
-func _push_own_zero(clicks: Vector2i) -> void:
+## Тир: поправки и кратность на копии своего ствола со стойки — сразу в своё снаряжение.
+func _push_own_sight_state(settings: Dictionary) -> void:
 	var own: Dictionary = inventory.equipment.get(range_own_slot, {})
 	var h := items_host()
 	if own.is_empty() or h == null or String(own.get("uid", "")) != String(range_weapon.get("uid", "")):
 		return
 	var mag: Dictionary = own.get("mag", {}) if own.get("mag") is Dictionary else {}
-	h.call("request_weapon_state", range_own_slot, {"id": String(own.id), "rev": int(own.get("rev", 0)),
+	var state: Dictionary = {"id": String(own.id), "rev": int(own.get("rev", 0)),
 		"rounds": int(mag.get("rounds", 0)), "dur": WeaponCondition.percent(own), "shots": int(own.get("_condition_shots", 0)),
 		"sight": String(own.get("sight", "primary")), "tac": {}, "chamber": int(own.get("chamber", 0)),
-		"chamber_ammo": String(own.get("chamber_ammo", "")), "zero_c": [clicks.x, clicks.y]})
+		"chamber_ammo": String(own.get("chamber_ammo", ""))}
+	state.merge(settings, true)
+	h.call("request_weapon_state", range_own_slot, state)
 
 
 ## Дыхание в прицеле: запас воздуха (задержка — «бег» в прицеле) и одышка после неё. Balance.BREATH.
@@ -688,6 +692,7 @@ func _ws_state(key: String) -> Dictionary:
 	return {"id": String(st.get("id", "")), "rev": int(st.get("rev", 0)), "rounds": int(st.get("rounds", 0)), "dur": float(st.get("dur", 100.0)),
 		"shots": int(st.get("shots", 0)),
 		"sight": String(st.get("sight", "primary")), "tac": (st.get("tac", {}) as Dictionary).duplicate(true),
+		"optic_zoom": (st.get("optic_zoom", {}) as Dictionary).duplicate(),
 		"chamber": int(st.get("chamber", 0)), "chamber_ammo": String(st.get("chamber_ammo", "")),
 		"zero_c": (st.get("zero_c", [0, 0]) as Array).duplicate()}
 
@@ -698,6 +703,8 @@ func _send_ws(key: String) -> void:
 		h.call("request_weapon_state", key, _ws_state(key))
 		_ws_dirty = false
 	elif not loadout_mode:
+		if _ws.has(key):
+			WeaponStats.apply_scope_zooms(_base_entry(key), (_ws[key] as Dictionary).get("optic_zoom", {}))
 		_ws_dirty = false
 
 
@@ -1723,6 +1730,28 @@ func _toggle_sight() -> void:
 	_say(WeaponStats.sight_name(nxt, e) + ": " + name)
 	Audio.play("sight_switch", global_position, -16.0)
 	_send_ws(weapon_slot)
+
+
+## Колесо при ADS: только активная регулируемая оптика. Выбор переживает отпускание ПКМ,
+## смену оружия, перезарядку и сохранение; хост получает его вместе с состоянием оружия.
+func adjust_scope_zoom(direction: int) -> bool:
+	if not is_local() or not is_alive() or not ads or not aiming or aim_cant or weapon_id == "" or ui_blocked():
+		return false
+	var stats: Dictionary = spec()
+	if not bool(stats.get("scoped", false)) or float(stats.zoom_max) <= float(stats.zoom_min):
+		return false
+	var selected: float = clampf(float(stats.zoom) + direction * float(Balance.SCOPE_ZOOM.step), float(stats.zoom_min), float(stats.zoom_max))
+	if is_equal_approx(selected, float(stats.zoom)):
+		return true
+	var mount: String = WeaponStats.sight_mount(String(stats.sight), weapon_entry())
+	var st: Dictionary = _ws[weapon_slot]
+	(st.optic_zoom as Dictionary)[mount] = selected
+	_ws_dirty = true
+	_ws_sync_t = float(Balance.SCOPE_ZOOM.sync_sec)
+	Audio.play_ui("ui_click")
+	if in_range_mode() and range_own_slot != "":
+		_push_own_sight_state({"optic_zoom": {mount: selected}})
+	return true
 
 
 ## Клавиши 1…: в песочнице — стволы песочницы (автомат, пистолет, дробовик, винтовка), со

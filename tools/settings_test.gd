@@ -45,7 +45,7 @@ func _ready() -> void:
 		pl.aiming = false
 		_check("не целится — множитель прицела не действует", is_equal_approx(rig.ads_sens(), aim1), "%.5f" % rig.ads_sens())
 		Settings.set_sens_ads(1.0)
-	# поле зрения: по горизонтали на 16:9, в камеру — вертикальное; прицелы — то же увеличение
+	# Поле зрения мира по горизонтали на 16:9; ADS сохраняет его, оружие имеет своё.
 	_check("поле зрения по умолчанию 90°", is_equal_approx(Settings.fov_h, 90.0), "%.1f" % Settings.fov_h)
 	Settings.set_fov_h(10.0)
 	var lo := Settings.fov_h
@@ -55,17 +55,6 @@ func _ready() -> void:
 	_check("90° по горизонтали — 58.72° по вертикали", absf(Settings.fps_fov_v() - 58.72) < 0.01, "%.3f" % Settings.fps_fov_v())
 	var h74 := rad_to_deg(2.0 * atan(tan(deg_to_rad(Balance.FPS_FOV) * 0.5) * 16.0 / 9.0))
 	_check("%.2f° по горизонтали — опорные 74° по вертикали" % h74, absf(Settings.fov_v_from_h(h74) - 74.0) < 0.001, "%.3f" % Settings.fov_v_from_h(h74))
-	var zoom_ok := true
-	var zoom_info := ""
-	for hip in [Settings.fov_v_from_h(50.0), Settings.fps_fov_v(), Balance.FPS_FOV, Settings.fov_v_from_h(120.0)]:
-		for tuned in [62.0, 60.0, Balance.SCOPE_MAIN_FOV]:
-			var ads := CameraRig.relative_fov(tuned, hip)
-			var want := tan(deg_to_rad(Balance.FPS_FOV) * 0.5) / tan(deg_to_rad(tuned) * 0.5)
-			var got := tan(deg_to_rad(hip) * 0.5) / tan(deg_to_rad(ads) * 0.5)
-			if absf(got - want) > 1e-4:
-				zoom_ok = false
-				zoom_info += " %.1f/%.1f: %.4f≠%.4f" % [hip, tuned, got, want]
-	_check("прицел увеличивает одинаково при любом поле зрения", zoom_ok and is_equal_approx(CameraRig.relative_fov(62.0, Balance.FPS_FOV), 62.0), zoom_info)
 	var vm_ok := is_equal_approx(CameraRig.viewmodel_scale(Balance.FPS_VIEWMODEL_FOV), 1.0)
 	for cam_v in [40.0, 58.72, 74.0, 100.0]:
 		var vk := CameraRig.viewmodel_scale(cam_v)
