@@ -8,11 +8,12 @@ Magazine_Control (в позах — на Frame, в перезарядке её �
 
 Решения владельца 2026-10-14: во всех стойках две руки; по умолчанию — наискосок влево-вниз (CARRY), колесо вверх —
 от бедра (READY), ПКМ — прицел (ADS); хват ставит агент, владелец правит позы в Blender.
-Кисти жёстко держат пистолет, поэтому пальцы подгоняются один раз (в осях ПМ), а стойка — только положение ПМ;
-руки к нему тянет IK (ik_hand.R / ik_hand.L).
+Пистолет — главный: кость Frame (под корнем рук) несёт ПМ, цели кистей ik_hand.R / ik_hand.L — её дочерние.
+Стойка — только положение Frame (действие PM_Stances: кадр 1 — наискосок, 11 — от бедра, 21 — прицел), хват — положение
+кистей на пистолете и пальцы, общее для всех стоек (без ключей). Пальцы подгоняются по сетке перчатки один раз.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/animate_pm_v11.py -- grip|stills [стойки]
-  grip   → _asset_src/pm_game/anim/PM_FPS_Grip_v01.blend (действия PM_Pose_Carry / PM_Pose_Ready / PM_Pose_Ads)
+  grip   → _asset_src/pm_game/anim/PM_FPS_Grip_v02.blend (действие PM_Stances, хват без ключей)
   stills → _asset_src/pm_game/anim/Кадры/<стойка>_<вид>.png (глазами, справа, слева, снизу, спереди)
 """
 from __future__ import annotations
@@ -30,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "_asset_src/pm_game"
 ARMS_FILE = Path(r"E:\Models Blender\WEAPONS\ВЕРАС-54 — модель и обвесы\ВЕРАС-54\Игровая версия\Перезарядка v01 (Claude)\VERAS54_Reload_Full_v05.blend")
 GUN_FILE = SRC / "lp/PM_Game_export_v01.blend"
-GRIP_FILE = SRC / "anim/PM_FPS_Grip_v01.blend"
+GRIP_FILE = SRC / "anim/PM_FPS_Grip_v02.blend"
 STILLS = SRC / "anim/Кадры"
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 MODE = ARGS[0] if ARGS else "grip"
@@ -511,26 +512,80 @@ def grip() -> None:
            "left_mm": {f: round(skin.gap(tree_l, [f"{f}.{i:02d}.L" for i in (1, 2, 3)]) * 1000, 1) for f in FINGERS + ("thumb",)},
            "left_hand_error_mm": reach(arms, "hand.L", frame_w @ l_in_gun)}
 
-    # ---- действия-позы: владелец правит ik_hand.R / ik_hand.L (кисти) и вращения пальцев
+    # ---- пистолет — главный: Frame отцепляется от кисти, цели кистей становятся его дочерними. Тогда стойка — это
+    # только положение пистолета (одна кость), а хват — положение кистей на пистолете, общее для всех стоек.
+    regrip_rig(arms)
+    clip = Clip(arms, "PM_Stances")
+    all_stances = stances(rear_sight)
+    for stance, frame in STANCE_FRAMES.items():
+        clip.key_matrix("Frame", frame, all_stances[stance])
+        bpy.context.scene.timeline_markers.new(STANCE_NAMES[stance], frame=frame)
+    for fc in fcurves(clip.action):
+        for kp in fc.keyframe_points:
+            kp.interpolation = "CONSTANT"                            # кадр = стойка, без промежуточных положений
+    scene.frame_start, scene.frame_end = 1, STANCE_FRAMES["ADS"] + 9
+    scene.frame_set(STANCE_FRAMES["READY"])
+    g = all_stances["READY"]
+    set_world(arms, "ik_hand.R", g @ hand_of_gun)                    # без ключей: хват общий для всех стоек
+    set_world(arms, "ik_hand.L", g @ l_in_gun)
+    apply(arms, r_fire)
+    apply(arms, l_pose)
+    hands.place(arms)
     report = {"fit": fit, "reach_mm": {}}
-    for stance, g in stances(rear_sight).items():
-        clip = Clip(arms, f"PM_Pose_{stance.title()}")
-        r = r_carry if stance == "CARRY" else r_fire
-        for f in (1,):
-            clip.key_matrix("ik_hand.R", f, g @ hand_of_gun)
-            clip.key_matrix("ik_hand.L", f, g @ l_in_gun)
-            clip.key_pose(f, r)
-            clip.key_pose(f, l_pose)
-            clip.key_locs(f, hands.loc)
-        scene.frame_set(1)
+    for stance, frame in STANCE_FRAMES.items():
+        scene.frame_set(frame)
         bpy.context.view_layer.update()
-        report["reach_mm"][stance] = {"R": reach(arms, "hand.R", g @ hand_of_gun), "L": reach(arms, "hand.L", g @ l_in_gun)}
-    arms.animation_data.action = bpy.data.actions["PM_Pose_Ready"]
-    scene.frame_set(1)
+        gs = all_stances[stance]
+        report["reach_mm"][stance] = {"R": reach(arms, "hand.R", gs @ hand_of_gun), "L": reach(arms, "hand.L", gs @ l_in_gun)}
+    scene.frame_set(STANCE_FRAMES["READY"])
     GRIP_FILE.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(GRIP_FILE))
     (SRC / "anim/grip_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print("PM_GRIP saved", GRIP_FILE, json.dumps(report, ensure_ascii=False), flush=True)
+
+
+STANCE_FRAMES = {"CARRY": 1, "READY": 11, "ADS": 21}
+STANCE_NAMES = {"CARRY": "Наискосок", "READY": "От бедра", "ADS": "Прицел"}
+GUN_PARTS = ("Bolt", "Hammer", "Trigger", "SlideStop", "MagCatch", "Safety", "Magazine_Control", "MagazineFollower",
+             "RoundChamber", "JamCase", "Suppressor")
+
+
+def regrip_rig(arms) -> None:
+    """Frame — под корнем рук, ik_hand.R / ik_hand.L — под Frame: двигаешь Frame — едет пистолет и обе кисти с ним;
+    двигаешь ik_hand.R — кисть скользит по рукоятке, пистолет стоит. Кости деталей ПМ — в скрытой коллекции."""
+    keep = {n: world(arms, n) for n in ("Frame", "ik_hand.R", "ik_hand.L")}
+    bpy.context.view_layer.objects.active = arms
+    bpy.ops.object.mode_set(mode="EDIT")
+    ebs = arms.data.edit_bones
+    ebs["Frame"].parent = ebs["FPS_Root"]                           # длину не трогать: детали висят на её конце
+    for n in ("ik_hand.R", "ik_hand.L"):
+        ebs[n].parent = ebs["Frame"]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for pb in arms.pose.bones:
+        pb.rotation_mode = "QUATERNION"
+    for n, m in keep.items():                                       # сначала родитель, потом кисти
+        set_world(arms, n, m)
+    cols = arms.data.collections
+    parts = cols.get("ПМ — детали") or cols.new("ПМ — детали")
+    ctrl = cols.get("ПМ — пистолет") or cols.new("ПМ — пистолет")
+    for n in GUN_PARTS + ("Frame",):
+        bone = arms.data.bones[n]
+        for c in list(bone.collections):
+            c.unassign(bone)
+        (ctrl if n == "Frame" else parts).assign(bone)
+    parts.is_visible = False
+
+
+def fcurves(action) -> list:
+    """Кривые действия: в Blender 5 они лежат в слоях и полосах, в старых — прямо в действии."""
+    if hasattr(action, "layers") and len(action.layers):
+        out = []
+        for layer in action.layers:
+            for strip in layer.strips:
+                for bag in strip.channelbags:
+                    out += list(bag.fcurves)
+        return out
+    return list(action.fcurves)
 
 
 def stills() -> None:
@@ -562,12 +617,11 @@ def stills() -> None:
     scene.collection.objects.link(side)
     STILLS.mkdir(parents=True, exist_ok=True)
     only = ARGS[1:]
-    for action in ("PM_Pose_Carry", "PM_Pose_Ready", "PM_Pose_Ads"):
-        short = action.replace("PM_Pose_", "").lower()
+    for stance, frame in STANCE_FRAMES.items():
+        short = stance.lower()
         if only and short not in only:
             continue
-        arms.animation_data.action = bpy.data.actions[action]
-        scene.frame_set(1)
+        scene.frame_set(frame)
         bpy.context.view_layer.update()
         focus = arms.matrix_world @ arms.pose.bones["Frame"].head
         for view, off in (("glaz", None), ("sprava", Vector((-0.42, 0.06, 0.08))), ("sleva", Vector((0.40, -0.12, 0.06))),
