@@ -38,9 +38,9 @@ func _ready() -> void:
 	# панель админа хоста: поднять сервер (без клиентов — в списке только хост)
 	Net.host("Хост")
 	Net.player_names[2] = "Друг"   # для снимка: вторая строка
-	pause.open_admin()
+	pause.open_cheats()
 	await _frames(4)
-	_save("ui_admin")
+	_save("ui_cheats")
 	Net.disconnect_all()
 	_press("pause")
 	await _frames(4)

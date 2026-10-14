@@ -812,7 +812,7 @@ func _trader_buy() -> void:
 			head.add_child(chips)
 		elif _sub_tab != "":
 			_sub_tab = ""
-	# порядок, «к чему подходит», чит
+	# порядок и «к чему подходит»
 	var tools := HBoxContainer.new()
 	tools.add_theme_constant_override("separation", 6)
 	head.add_child(tools)
@@ -835,14 +835,6 @@ func _trader_buy() -> void:
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools.add_child(gap)
-	var loot := CheckButton.new()
-	loot.text = "Чит: лут в продаже"
-	loot.focus_mode = Control.FOCUS_NONE
-	loot.button_pressed = Settings.shop_loot
-	loot.tooltip_text = "Показать и продавать то, что обычно только находят в рейде: головку станка, сигнал вызова самолёта, ценности, детали."
-	loot.add_theme_font_size_override("font_size", 13)
-	loot.toggled.connect(func(on: bool) -> void: Settings.set_shop_loot(on))
-	tools.add_child(loot)
 	_fill_shop()
 	_kits_column()
 

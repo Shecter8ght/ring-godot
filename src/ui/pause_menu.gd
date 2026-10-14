@@ -60,9 +60,7 @@ var _controls: VBoxContainer
 var _settings: VBoxContainer
 var _leave: Button
 var _to_menu: Button
-var _admin_btn: Button
-var _admin: VBoxContainer
-var _admin_rows: GridContainer
+var _cheats: VBoxContainer
 var _mouse_before: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
 ## Ждём новую клавишу для этого действия (кнопка — чтобы показать «нажмите…»).
 var _capture: String = ""
@@ -110,10 +108,7 @@ func _ready() -> void:
 	_main.add_child(_button("Продолжить", close_menu))
 	_main.add_child(_button("Управление", func() -> void: _show_side(_controls)))
 	_main.add_child(_button("Настройки", func() -> void: _show_side(_settings)))
-	_admin_btn = _button("Админ: деньги", func() -> void:
-		_show_side(_admin)
-		_fill_admin())
-	_main.add_child(_admin_btn)
+	_main.add_child(_button("Читы", open_cheats))
 	_leave = _button("Покинуть рейд", _on_leave)
 	_main.add_child(_leave)
 	# из убежища — в главное меню (собрание распускается)
@@ -129,11 +124,10 @@ func _ready() -> void:
 	_controls.visible = false
 	h.add_child(_controls)
 	_fill_controls()
-	_build_admin(h)
+	_cheats = (load("res://src/ui/cheats_panel.gd") as Script).new() as VBoxContainer
+	_cheats.visible = false
+	h.add_child(_cheats)
 	_build_settings(h)
-	Net.player_list_changed.connect(func() -> void:
-		if _admin.visible:
-			_fill_admin())
 
 
 func _button(text: String, cb: Callable) -> Button:
@@ -303,6 +297,13 @@ func _input(event: InputEvent) -> void:
 	if shown and _capture_input(event):
 		get_viewport().set_input_as_handled()
 		return
+	if event.is_action_pressed("dev_console") and not event.is_echo() and not UiTheme.typing() and not Loading.visible:
+		if shown:
+			open_cheats()
+		elif not _other_ui_open():
+			open_cheats()
+		get_viewport().set_input_as_handled()
+		return
 	if not event.is_action_pressed("pause") or event.is_echo():
 		return
 	if shown:
@@ -327,10 +328,8 @@ func open_menu() -> void:
 	shown = true
 	_root.visible = true
 	_controls.visible = false
-	_admin.visible = false
+	_cheats.visible = false
 	_settings.visible = false
-	# в сети — только хосту; в соло и в убежище — себе
-	_admin_btn.visible = Net.is_host() or not Net.is_networked()
 	_mouse_before = Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var scene := get_tree().current_scene
@@ -345,13 +344,13 @@ func open_menu() -> void:
 		get_tree().paused = true
 
 
-## Справа от кнопок — одна панель за раз (управление, настройки, админ); повторное нажатие — закрыть.
+## Справа от кнопок — одна панель за раз (управление, настройки, читы); повторное нажатие — закрыть.
 func _show_side(panel: Control) -> void:
 	_capture = ""
 	if panel == _controls:
 		_fill_controls()
 	var was := panel.visible
-	for p in [_controls, _settings, _admin]:
+	for p in [_controls, _settings, _cheats]:
 		(p as Control).visible = false
 	panel.visible = not was
 
@@ -368,7 +367,11 @@ func _build_settings(h: HBoxContainer) -> void:
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 18)
 	grid.add_theme_constant_override("v_separation", 8)
-	_settings.add_child(grid)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(540, 470)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_settings.add_child(scroll)
+	scroll.add_child(grid)
 	grid.add_child(_label("Графика"))
 	var q := OptionButton.new()
 	q.focus_mode = Control.FOCUS_NONE
@@ -389,12 +392,6 @@ func _build_settings(h: HBoxContainer) -> void:
 		if is_instance_valid(wm):
 			wm.selected = Settings.WINDOW_MODES.find(Settings.window_mode))
 	grid.add_child(wm)
-	grid.add_child(_label("Время суток"))
-	grid.add_child(_cond_option(Balance.RAID_TIME, true))
-	grid.add_child(_label("Точное время"))
-	grid.add_child(_hour_row())
-	grid.add_child(_label("Погода"))
-	grid.add_child(_cond_option(Balance.RAID_WEATHER, false))
 	grid.add_child(_label("Эффекты камеры"))
 	var lens := CheckButton.new()
 	lens.focus_mode = Control.FOCUS_NONE
@@ -408,6 +405,15 @@ func _build_settings(h: HBoxContainer) -> void:
 	blur.button_pressed = Settings.motion_blur
 	blur.toggled.connect(func(on: bool) -> void: Settings.set_motion_blur(on))
 	grid.add_child(blur)
+	grid.add_child(_label("Хит-маркер"))
+	var hitmarker: CheckButton = CheckButton.new()
+	hitmarker.name = "HitmarkerToggle"
+	hitmarker.focus_mode = Control.FOCUS_NONE
+	hitmarker.button_pressed = Settings.hitmarker
+	hitmarker.tooltip_text = "Показывать крестик при попадании и убийстве."
+	hitmarker.toggled.connect(Settings.set_hitmarker)
+	Settings.changed.connect(func() -> void: hitmarker.set_pressed_no_signal(Settings.hitmarker))
+	grid.add_child(hitmarker)
 	grid.add_child(_label("Клавиши"))
 	var keys_btn := Button.new()
 	keys_btn.text = "Сменить клавиши…"
@@ -437,47 +443,6 @@ func _build_settings(h: HBoxContainer) -> void:
 		grid.add_child(_label("Громкость: " + String(Settings.BUSES[b]).to_lower()))
 		grid.add_child(_slider(0.0, 1.0, 0.05, float(Settings.volume[bus]), "%.0f%%",
 			func(v: float) -> void: Settings.set_volume(bus, v), 100.0))
-	grid.add_child(_label("Чит: бессмертие"))
-	var god := CheckButton.new()
-	god.focus_mode = Control.FOCUS_NONE
-	god.button_pressed = Settings.god
-	god.tooltip_text = "Попадания видно, но здоровье не убывает; лёжа — сразу встаёшь. В коопе остальным пишется в чат."
-	god.toggled.connect(func(on: bool) -> void: Settings.set_god(on))
-	grid.add_child(god)
-	grid.add_child(_label("Чит: открыть всё"))
-	var unlock := CheckButton.new()
-	unlock.focus_mode = Control.FOCUS_NONE
-	unlock.button_pressed = Settings.unlock_all
-	unlock.tooltip_text = "Для плейтеста: у Михалыча весь товар без доверия, верстак и все модули убежища на максимуме, станок гравировки стоит и запитан. Денег не даёт — они в «Админ: деньги». Чит хоста действует на всю группу. Выключил — прогресс сохранения прежний; только тайник и карман остаются большими, чтобы вещи не пропали."
-	unlock.toggled.connect(func(on: bool) -> void: Settings.set_unlock_all(on))
-	# консоль (unlock) переключила — кнопка показывает то же
-	Settings.changed.connect(func() -> void:
-		if is_instance_valid(unlock):
-			unlock.set_pressed_no_signal(Settings.unlock_all))
-	grid.add_child(unlock)
-	grid.add_child(_label("Чит: лут в продаже"))
-	var loot := CheckButton.new()
-	loot.focus_mode = Control.FOCUS_NONE
-	loot.button_pressed = Settings.shop_loot
-	loot.tooltip_text = "Михалыч показывает и продаёт то, что обычно только находят в рейде: головку станка гравировки, сигнал вызова самолёта, ценности, детали. Тот же переключатель — в шапке окна Михалыча."
-	loot.toggled.connect(func(on: bool) -> void: Settings.set_shop_loot(on))
-	Settings.changed.connect(func() -> void:
-		if is_instance_valid(loot):
-			loot.set_pressed_no_signal(Settings.shop_loot))
-	grid.add_child(loot)
-	# отладка для аудита уровня: полёт, скорость, переместиться к точке карты
-	grid.add_child(_label("Отладка: полёт"))
-	var fly := CheckButton.new()
-	fly.focus_mode = Control.FOCUS_NONE
-	fly.button_pressed = Settings.cheat_fly
-	fly.tooltip_text = "Сквозь стены и землю: WASD — куда смотришь, пробел — вверх, присесть — вниз, спринт — ×4. Выключить — упадёшь вниз."
-	fly.toggled.connect(func(on: bool) -> void: Settings.cheat_fly = on)
-	grid.add_child(fly)
-	grid.add_child(_label("Отладка: скорость"))
-	grid.add_child(_slider(0.25, 10.0, 0.25, Settings.cheat_speed, "×%.2f",
-		func(v: float) -> void: Settings.cheat_speed = v))
-	grid.add_child(_label("Отладка: переместиться"))
-	grid.add_child(_teleport_option())
 	var hint := Label.new()
 	hint.text = "«Низко» — если тормозит: без глобального освещения, тумана и SSAO, рендер в 77 %."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -565,103 +530,23 @@ func _slider(lo: float, hi: float, step: float, value: float, fmt: String, cb: C
 	return row
 
 
-## Панель админа (только хост в сети): читы магазина и деньги игроков.
-func _build_admin(h: HBoxContainer) -> void:
-	_admin = VBoxContainer.new()
-	_admin.add_theme_constant_override("separation", 8)
-	_admin.visible = false
-	h.add_child(_admin)
-	var head := Label.new()
-	head.text = "Админ"
-	head.add_theme_font_size_override("font_size", 22)
-	head.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
-	_admin.add_child(head)
-	var all_weapons := CheckButton.new()
-	all_weapons.text = "Всё у Михалыча"
-	all_weapons.focus_mode = Control.FOCUS_NONE
-	all_weapons.button_pressed = Settings.all_weapons
-	all_weapons.tooltip_text = "В магазине — вообще всё: оружие, магазины, патроны, обвес, броня, снаряжение, медицина; доверие не требуется. Деньги и свободное место всё ещё нужны."
-	all_weapons.toggled.connect(func(on: bool) -> void: Settings.set_all_weapons(on))
-	_admin.add_child(all_weapons)
-	var money_head := Label.new()
-	money_head.text = "Деньги игрокам"
-	money_head.add_theme_font_size_override("font_size", 18)
-	money_head.add_theme_color_override("font_color", Color(0.95, 0.82, 0.6))
-	_admin.add_child(money_head)
-	var hint := Label.new()
-	hint.text = "Сумма уходит на счёт игрока сразу (минус — списать)."
-	hint.add_theme_font_size_override("font_size", 14)
-	hint.add_theme_color_override("font_color", Color(0.7, 0.7, 0.68))
-	_admin.add_child(hint)
-	_admin_rows = GridContainer.new()
-	_admin_rows.columns = 5
-	_admin_rows.add_theme_constant_override("h_separation", 10)
-	_admin_rows.add_theme_constant_override("v_separation", 8)
-	_admin.add_child(_admin_rows)
-
-
-func _fill_admin() -> void:
-	for c in _admin_rows.get_children():
-		c.queue_free()
-	var names: Dictionary = Net.player_names if Net.is_networked() else {multiplayer.get_unique_id(): "Ты"}
-	var ids: Array = names.keys()
-	ids.sort()
-	for id in ids:
-		var peer := int(id)
-		var name := Label.new()
-		name.text = String(names[id]) + (" (ты)" if Net.is_networked() and peer == multiplayer.get_unique_id() else "")
-		name.add_theme_font_size_override("font_size", 17)
-		name.custom_minimum_size.x = 150
-		_admin_rows.add_child(name)
-		var amount := SpinBox.new()
-		amount.min_value = -10000000
-		amount.max_value = 10000000
-		amount.step = 1000
-		amount.value = 100000
-		amount.suffix = "₽"
-		amount.custom_minimum_size.x = 150
-		_admin_rows.add_child(amount)
-		var give := Button.new()
-		give.text = "Начислить"
-		give.focus_mode = Control.FOCUS_NONE
-		_admin_rows.add_child(give)
-		for quick in [100000, 1000000]:
-			var q := Button.new()
-			q.text = "+%s" % ("1 млн" if quick == 1000000 else "100 тыс")
-			q.focus_mode = Control.FOCUS_NONE
-			q.pressed.connect(func() -> void: _grant(peer, int(quick), q))
-			_admin_rows.add_child(q)
-		give.pressed.connect(func() -> void: _grant(peer, int(amount.value), give))
-
-
-func _grant(peer: int, amount: int, btn: Button) -> void:
-	Net.grant_money(peer, amount)
-	var was := btn.text
-	btn.text = "✓ отправлено"
-	btn.disabled = true
-	get_tree().create_timer(1.0, true, false, true).timeout.connect(func() -> void:
-		if is_instance_valid(btn):
-			btn.text = was
-			btn.disabled = false)
-
-
-## Открыть меню сразу на панели денег (кнопка в лобби).
 ## Главное меню: сразу настройки.
 func open_settings() -> void:
 	if not shown:
 		open_menu()
 	_controls.visible = false
-	_admin.visible = false
+	_cheats.visible = false
 	_settings.visible = true
 
 
-func open_admin() -> void:
+func open_cheats() -> void:
 	if not shown:
 		open_menu()
+	_capture = ""
 	_controls.visible = false
 	_settings.visible = false
-	_admin.visible = true
-	_fill_admin()
+	_cheats.visible = true
+	_cheats.call("refresh")
 
 
 func close_menu() -> void:
@@ -679,128 +564,3 @@ func _on_leave() -> void:
 		Net.disconnect_all()
 		Profile.pending_raid = false
 		Net.change_scene(Balance.HIDEOUT_SCENE)
-
-
-## Время суток / погода рейда: «как в убежище» или любой вариант; в рейде меняется сразу.
-func _cond_option(table: Dictionary, is_time: bool) -> OptionButton:
-	var ob := OptionButton.new()
-	ob.focus_mode = Control.FOCUS_NONE
-	ob.tooltip_text = "Сразу в текущем рейде (в одиночной игре и у хоста) и в следующих; в коопе гости получат со следующего рейда. «Как в убежище» — по выбору у лестницы."
-	var keys: Array = [""]
-	ob.add_item("Как в убежище")
-	for k in table:
-		keys.append(String(k))
-		ob.add_item(String((table[k] as Dictionary).name))
-	var cur: String = Settings.raid_time if is_time else Settings.raid_weather
-	ob.selected = maxi(0, keys.find(cur))
-	ob.item_selected.connect(func(i: int) -> void:
-		if is_time:
-			Settings.set_raid_conditions(String(keys[i]), Settings.raid_weather)
-		else:
-			Settings.set_raid_conditions(Settings.raid_time, String(keys[i])))
-	return ob
-
-
-## Точки карты для аудита: старт, точки входа (группа spawn_points), центры районов из данных
-## сектора. Выбор — сразу переносит своего игрока (на землю под точкой).
-func _teleport_option() -> OptionButton:
-	var ob := OptionButton.new()
-	ob.focus_mode = Control.FOCUS_NONE
-	ob.tooltip_text = "Перенести себя к точке карты (для осмотра уровня)."
-	ob.add_item("— выбрать точку —")
-	var pts: Array = [null]
-	var level := get_tree().current_scene
-	var path: Variant = level.get("sector_path") if level else null
-	var def: Dictionary = SectorBuilder.load_def(String(path)) if path != null and String(path) != "" else {}
-	if def.has("spawn"):
-		var sp: Array = def.spawn
-		ob.add_item("Старт карты")
-		pts.append(Vector3(float(sp[0]), float(sp[1]), float(sp[2])))
-	var i := 0
-	for n in get_tree().get_nodes_in_group("spawn_points"):
-		i += 1
-		ob.add_item("Вход %d (%s)" % [i, String(n.name)])
-		pts.append((n as Node3D).global_position)
-	for d in def.get("districts", []):
-		var r: Array = (d as Dictionary).get("rect", [])
-		if r.size() < 4:
-			continue
-		ob.add_item(String(d.get("name", d.get("id", "?"))))
-		pts.append(Vector3((float(r[0]) + float(r[2])) * 0.5, NAN, (float(r[1]) + float(r[3])) * 0.5))
-	ob.item_selected.connect(func(idx: int) -> void:
-		if idx <= 0 or idx >= pts.size():
-			return
-		_teleport_to(pts[idx] as Vector3)
-		ob.select(0))
-	return ob
-
-
-func _teleport_to(p: Vector3) -> void:
-	var me: Player = Raid.current.local_player() if Raid.current else null
-	if me == null:
-		return
-	var y := p.y
-	var t := get_tree().get_first_node_in_group("district_terrain")
-	if is_nan(y) and t and t.has_method("height_at"):
-		y = float(t.call("height_at", p.x, p.z))
-	# сверху вниз: на крышу, крыльцо, а не внутрь
-	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, (0.0 if is_nan(y) else y) + 120.0, p.z), Vector3(p.x, (0.0 if is_nan(y) else y) - 50.0, p.z))
-	q.exclude = [me.get_rid()]
-	var hit := me.get_world_3d().direct_space_state.intersect_ray(q)
-	if not hit.is_empty():
-		y = (hit.position as Vector3).y
-	me.global_position = Vector3(p.x, (0.0 if is_nan(y) else y) + 0.1, p.z)
-	me.velocity = Vector3.ZERO
-
-
-## Точное время рейда: ползунок по 15 минут (сдвинул — время задано: в рейде сразу, у хоста — у
-## всех, следующие рейды начнутся с него) и «Авто» — снова по времени суток из убежища. Пока
-## ползунок тащат — меняется только подпись, часы переводятся, когда его отпустили.
-func _hour_row() -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	var s := HSlider.new()
-	s.min_value = 0.0
-	s.max_value = 23.75
-	s.step = 0.25
-	s.value = Settings.raid_hour if Settings.raid_hour >= 0.0 else (DayCycle.current.hour if DayCycle.current else 12.0)
-	s.custom_minimum_size = Vector2(200, 24)
-	s.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	s.focus_mode = Control.FOCUS_NONE
-	var v := Label.new()
-	v.custom_minimum_size.x = 92
-	var auto := Button.new()
-	auto.text = "Авто"
-	auto.focus_mode = Control.FOCUS_NONE
-	auto.tooltip_text = "Время — как выбрано у стола в убежище (день 11:00, закат 18:00, ночь 23:00)."
-	var show := func(h: float) -> void:
-		var m := int(round(h * 60.0)) % (24 * 60)
-		v.text = "%02d:%02d" % [m / 60, m % 60] if Settings.raid_hour >= 0.0 or s.has_meta("touched") else "%02d:%02d авто" % [m / 60, m % 60]
-	show.call(s.value)
-	# меню строится до рейда — при каждом открытии ползунок встаёт на нынешнее время рейда
-	s.visibility_changed.connect(func() -> void:
-		if s.is_visible_in_tree() and DayCycle.current and Settings.raid_hour < 0.0:
-			s.set_value_no_signal(snappedf(DayCycle.current.hour, 0.25))
-			show.call(s.value))
-	var dragging := [false]
-	s.drag_started.connect(func() -> void: dragging[0] = true)
-	s.drag_ended.connect(func(_changed: bool) -> void:
-		dragging[0] = false
-		s.set_meta("touched", true)
-		Settings.set_raid_hour(s.value)
-		show.call(s.value))
-	s.value_changed.connect(func(x: float) -> void:
-		s.set_meta("touched", true)
-		show.call(x)
-		# щелчок по полосе / колесо — сразу; перетаскивание — когда отпустят
-		if not dragging[0]:
-			Settings.set_raid_hour(x))
-	auto.pressed.connect(func() -> void:
-		s.remove_meta("touched")
-		Settings.set_raid_hour(-1.0)
-		show.call(s.value))
-	row.add_child(s)
-	row.add_child(v)
-	row.add_child(auto)
-	return row
-

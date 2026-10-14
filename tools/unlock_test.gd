@@ -60,9 +60,9 @@ func _ready() -> void:
 		"каталог %d, верстак %d" % [Profile.trust_level(), Upgrades.level("workbench")])
 	_check("…а тайник остался большим (вещи не пропадут)", Profile.stash_grid().y > stash_before.y and ItemDb.grid_ok(Profile.stash, Profile.stash_grid()), str(Profile.stash_grid()))
 
-	Quests.hud._run("unlock on")
+	Pause._cheats.call("run_command", "unlock on")
 	_check("консоль: unlock on", Settings.unlock_all and Upgrades.level("generator") == Upgrades.max_level("generator"), "")
-	Quests.hud._run("unlock")
+	Pause._cheats.call("run_command", "unlock")
 	_check("консоль: unlock — выключил", not Settings.unlock_all and Upgrades.level("generator") == 0, "")
 	print("unlock_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)

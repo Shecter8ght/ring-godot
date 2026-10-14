@@ -3,8 +3,7 @@ extends CanvasLayer
 ## Интерфейс сюжета (создаёт Quests): компактная цель справа сверху (квест, этап, что делать,
 ## подсказка), всплывающие сообщения («Найдена улика», «Задание обновлено»), реплики на экране
 ## (осмотр места, раненый), разговор в убежище (Enter / клик — дальше), журнал улик (J), полоса
-## обыска, подсказка «несёшь раненого». Консоль разработчика (`) — и при запуске из
-## проекта, и в собранной игре.
+## обыска, подсказка «несёшь раненого». Читы открываются отдельным пунктом меню Esc.
 
 const TOAST_SEC := 3.2
 const SUB_SEC := 2.6
@@ -37,8 +36,6 @@ var _bar_seen: bool = false
 var _carry: Label
 var _journal: PanelContainer
 var _journal_text: Label
-var _console: LineEdit
-var _console_out: Label
 
 
 func _ready() -> void:
@@ -59,7 +56,7 @@ func _ready() -> void:
 
 
 func is_open() -> bool:
-	return _dlg.visible or _journal.visible or _console.visible
+	return _dlg.visible or _journal.visible
 
 
 func _in_game() -> bool:
@@ -195,7 +192,7 @@ func _input(event: InputEvent) -> void:
 			_dlg_done = Callable()
 			get_viewport().set_input_as_handled()
 			return
-	if event.is_action_pressed("journal") and not event.is_echo() and _in_game() and not _console.visible and not UiTheme.typing():
+	if event.is_action_pressed("journal") and not event.is_echo() and _in_game() and not PauseMenu.shown and not UiTheme.typing():
 		_journal.visible = not _journal.visible
 		if _journal.visible:
 			_fill_journal()
@@ -205,14 +202,7 @@ func _input(event: InputEvent) -> void:
 		_journal.visible = false
 		get_viewport().set_input_as_handled()
 		return
-	# консоль (`) — и в сборке для друзей (RING.zip), не только при запуске из проекта
-	if event.is_action_pressed("dev_console") and not event.is_echo():
-		_console.visible = not _console.visible
-		_console_out.visible = _console.visible
-		if _console.visible:
-			_console.grab_focus()
-			_console.text = ""
-		get_viewport().set_input_as_handled()
+
 
 
 func _fill_journal() -> void:
@@ -227,101 +217,6 @@ func _fill_journal() -> void:
 		for c in Quests.clues(qid):
 			lines.append("   • %s — %s" % [String((c as Dictionary).get("title", "")), String((c as Dictionary).get("text", ""))])
 	_journal_text.text = "\n".join(lines) if not lines.is_empty() else "Сюжетных заданий пока нет."
-
-
-# ---------------------------------------------------------------- консоль разработчика
-
-func _run(cmd: String) -> void:
-	var a := cmd.strip_edges().split(" ", false)
-	var out := ""
-	if a.size() >= 2 and a[0] == "quest":
-		var fallback := Quests.tracked() if Quests.tracked() != "" else (Quests.ids()[0] if not Quests.ids().is_empty() else "")
-		var qid := a[2] if a.size() > 2 and not a[2].is_valid_int() else fallback
-		match a[1]:
-			"start":
-				out = Quests.dev_start(qid)
-			"stage":
-				out = Quests.dev_stage(qid, int(a[a.size() - 1]))
-			"reset":
-				out = Quests.dev_reset(qid)
-			"completeObjective", "obj":
-				out = Quests.dev_complete_objective(a[2] if a.size() > 2 else "")
-			"list", "state":
-				out = Quests.dev_describe()
-			_:
-				out = "quest start|stage|reset|completeObjective|list <id> [n]"
-	elif a.size() >= 1 and a[0] in ["give", "mount", "unmount", "sight", "light", "laser", "spawn", "plate", "dur", "stats", "list", "arsenal"]:
-		# арсенал: выдать, обвес, прицел / фонарь / ЛЦУ, ИИ с выкладкой, плиты, износ
-		out = ArsenalDev.run(get_tree(), a.slice(1) if a[0] == "arsenal" else a)
-	elif a.size() >= 1 and a[0] == "god":
-		# чит: бессмертие вкл/выкл (как в меню Esc → Настройки)
-		Settings.set_god(not Settings.god if a.size() < 2 else a[1] in ["1", "on", "вкл"])
-		out = "бессмертие: " + ("включено" if Settings.god else "выключено")
-	elif a.size() >= 1 and a[0] == "unlock":
-		# чит плейтеста: весь товар Михалыча и все модули убежища (как в меню Esc → Настройки)
-		Settings.set_unlock_all(not Settings.unlock_all if a.size() < 2 else a[1] in ["1", "on", "вкл"])
-		out = "всё открыто (Михалыч, верстак, модули, гравировка): " + ("да" if Settings.unlock_all else "нет")
-	elif a.size() >= 1 and a[0] == "shoploot":
-		# чит: находимое в рейде — в продаже у Михалыча
-		Settings.set_shop_loot(not Settings.shop_loot if a.size() < 2 else a[1] in ["1", "on", "вкл"])
-		out = "лут в продаже у Михалыча: " + ("да" if Settings.shop_loot else "нет")
-	elif a.size() >= 1 and a[0] == "fly":
-		# отладка: полёт сквозь всё (как в меню Esc → Настройки)
-		Settings.cheat_fly = not Settings.cheat_fly if a.size() < 2 else a[1] in ["1", "on", "вкл"]
-		out = "полёт: " + ("включён" if Settings.cheat_fly else "выключен")
-	elif a.size() >= 1 and a[0] == "speed":
-		Settings.cheat_speed = clampf(float(a[1]) if a.size() > 1 else 1.0, 0.1, 20.0)
-		out = "скорость ×%.2f" % Settings.cheat_speed
-	elif a.size() >= 1 and a[0] == "upgrade":
-		out = _dev_upgrade(a)
-	elif a.size() >= 1 and a[0] == "event":
-		# событие рейда сейчас: свет погас, генератор встал, сброс груза, ЧВК (решает хост)
-		out = _dev_event(a[1] if a.size() > 1 else "")
-	elif a.size() >= 1 and a[0] == "help":
-		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · unlock — открыть всё: товар Михалыча, верстак, модули убежища, гравировка · shoploot — лут в продаже у Михалыча · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
-" + ArsenalDev.HELP
-	else:
-		out = "неизвестно: " + cmd + " (help)"
-	_console_out.text = out
-	_update_tracker()
-
-
-## Для плейтеста: поднять модуль своего профиля без денег, деталей и доверия.
-## Понижать уровень нельзя: уменьшение тайника или кармана может вытеснить предметы.
-func _dev_upgrade(a: PackedStringArray) -> String:
-	var usage: String = "upgrade <workbench|generator|pocket|stash|radio> <уровень>; пример: upgrade workbench 2"
-	if a.size() != 3 or not a[2].is_valid_int():
-		return usage
-	var id: String = a[1]
-	var module: Dictionary = Upgrades.find(id)
-	if module.is_empty():
-		return "нет такого модуля: " + id + " · " + usage
-	var level: int = int(a[2])
-	var maximum: int = Upgrades.max_level(id)
-	if level < 1 or level > maximum:
-		return "уровень %s: 1–%d" % [String(module.name), maximum]
-	if Net.is_networked() and not multiplayer.is_server():
-		return "только на хосте"
-	if Raid.current != null or get_tree().get_first_node_in_group("hideout_level") == null:
-		return "модули повышаются в убежище"
-	Profile.ensure()
-	var current: int = Upgrades.level(id)
-	if level < current:
-		return "%s уже уровня %d; понижение отключено" % [String(module.name), current]
-	Profile.modules[id] = level
-	Profile.save()
-	return "%s: уровень %d, сохранено. Переоткрой окно модуля или конструктор." % [String(module.name), level]
-
-
-func _dev_event(kind: String) -> String:
-	if not kind in ["outage", "generator", "drop", "pmc"]:
-		return "event outage|generator|drop|pmc"
-	if RaidEvents.current == null:
-		return "не в рейде"
-	if Net.is_networked() and not multiplayer.is_server():
-		return "события рейда решает хост"
-	RaidEvents.current.trigger(kind)
-	return "событие: " + kind
 
 
 # ---------------------------------------------------------------- построение
@@ -436,26 +331,7 @@ func _build() -> void:
 	_journal.visible = false
 	_root.add_child(_journal)
 
-	_console = LineEdit.new()
-	_console.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_console.offset_top = 4
-	_console.offset_bottom = 36
-	_console.offset_left = 300
-	_console.offset_right = -300
-	_console.placeholder_text = "quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list"
-	_console.visible = false
-	_console.text_submitted.connect(func(t: String) -> void:
-		_run(t)
-		_console.text = "")
-	_root.add_child(_console)
-	_console_out = _label("", 14, Color(0.7, 1.0, 0.7))
-	_console_out.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_console_out.offset_top = 40
-	_console_out.offset_left = 300
-	_console_out.offset_right = -300
-	_console_out.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_console_out.visible = false
-	_root.add_child(_console_out)
+
 
 
 func _label(text: String, size: int, color: Color) -> Label:

@@ -176,9 +176,18 @@ func add_shake(amount: float) -> void:
 
 ## Крестик у курсора (в прицеле — по центру): попал; kill — крупнее и красный.
 func show_hitmarker(kill: bool) -> void:
+	if not Settings.hitmarker:
+		return
 	_hitmarker_t = Balance.HITMARKER_SEC * (1.6 if kill else 1.0)
 	_hitmarker.modulate = Color(1.0, 0.25, 0.2) if kill else Color(1, 1, 1)
 	_hitmarker.scale = Vector2.ONE * (1.5 if kill else 1.0)
+
+
+## Настройка убирает уже показанное попадание даже при открытом меню и остановленном мире.
+func clear_hitmarker() -> void:
+	_hitmarker_t = 0.0
+	if is_instance_valid(_hitmarker):
+		_hitmarker.visible = false
 
 
 ## Точка, из которой «смотрит» игрок: для силы тряски от взрыва и т.п.
@@ -524,8 +533,8 @@ func _process(delta: float) -> void:
 		_set_ads(want_ads, pl)
 	_shake = maxf(0.0, _shake - Balance.SHAKE_DECAY * _shake * delta - 0.01 * delta)
 	var s := _shake * _shake * 4.0
-	_hitmarker_t -= delta
-	_hitmarker.visible = _hitmarker_t > 0.0
+	_hitmarker_t = maxf(0.0, _hitmarker_t - delta) if Settings.hitmarker else 0.0
+	_hitmarker.visible = Settings.hitmarker and _hitmarker_t > 0.0
 	if ads_active:
 		_process_ads(pl, delta, s)
 		# окно открыто — курсор свободен; закрыли — снова взгляд мышью

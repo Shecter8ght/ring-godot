@@ -8,6 +8,7 @@ var _fails: int = 0
 
 
 func _ready() -> void:
+	Profile.use_file("user://settings_test.json", true)
 	await get_tree().process_frame
 	var inst: Node = load("res://scenes/levels/f1_ring.tscn").instantiate()
 	get_tree().root.add_child(inst)
@@ -32,6 +33,25 @@ func _ready() -> void:
 	_check("высоко — как в сцене", env.sdfgi_enabled == sdfgi0 and is_equal_approx(get_viewport().scaling_3d_scale, 1.0), "")
 	Settings.set_sens(2.0, 0.5)
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
+	_check("хит-маркер по умолчанию включён", Settings.hitmarker, "")
+	rig.show_hitmarker(false)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check("попадание показывает маркер", rig._hitmarker.visible, "")
+	Pause.open_menu()
+	Settings.set_hitmarker(false)
+	_check("отключение на паузе действует сразу", not rig._hitmarker.visible and rig._hitmarker_t <= 0.0, "")
+	Pause.close_menu()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check("отключение убирает текущий маркер", not rig._hitmarker.visible and rig._hitmarker_t <= 0.0, "")
+	rig.show_hitmarker(true)
+	_check("убийство при выключенном маркере не запускает таймер", rig._hitmarker_t <= 0.0, "")
+	Settings.set_hitmarker(true)
+	await get_tree().process_frame
+	_check("после включения старое попадание не возвращается", not rig._hitmarker.visible, "")
+	rig.show_hitmarker(true)
+	_check("новое убийство снова показывает красный маркер", rig._hitmarker_t > 0.0 and rig._hitmarker.modulate.r > rig._hitmarker.modulate.g, "")
 	_check("чувствительность мыши — множитель", is_equal_approx(Settings.sens_fps, 2.0) and rig != null, "")
 	Settings.set_sens(0.05, 10.0)
 	_check("чувствительность: от ×0.05 до ×10", is_equal_approx(Settings.sens_fps, 0.05) and is_equal_approx(Settings.sens_iso, 10.0), "%.2f / %.2f" % [Settings.sens_fps, Settings.sens_iso])

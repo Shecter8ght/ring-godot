@@ -33,6 +33,8 @@ var quality: String = "high"
 var lens_fx: bool = true
 ## Размытие в движении (поворот головы, бег). По умолчанию выключено: владелец — «хвост» и «мыло».
 var motion_blur: bool = false
+## Крестик попадания и убийства; обычная настройка интерфейса.
+var hitmarker: bool = true
 ## Во весь экран или в окне (WINDOW_MODES).
 var window_mode: String = "fullscreen"
 ## Множитель чувствительности мыши: от первого лица (взгляд) и в изометрии (поворот камеры СКМ).
@@ -54,19 +56,19 @@ var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.
 var headset: Dictionary = {}
 const HEADSET_DB := {"Shots": "shots_db", "Steps": "steps_db", "World": "world_db"}
 
-## Чит «бессмертие» (меню Esc → Настройки, консоль: god) — раздел cheats; в коопе решает хост.
+## Чит «бессмертие» (меню Esc → Читы) — раздел cheats; в коопе решает хост.
 var god: bool = false
 ## Админский ассортимент Михалыча: показывает все стволы и не проверяет доверие для оружия.
 var all_weapons: bool = false
-## Чит «лут в продаже» (окно Михалыча, Настройки, консоль: shoploot): Михалыч показывает и продаёт то,
+## Чит «лут в продаже» (меню Esc → Читы): Михалыч показывает и продаёт то,
 ## что обычно только находят в рейде, — головку станка, сигнал вызова самолёта, ценности, детали.
 var shop_loot: bool = false
-## Чит «открыть всё» для плейтеста (Настройки — и из главного меню; консоль: unlock): у Михалыча весь
+## Чит «открыть всё» для плейтеста (меню Esc → Читы, в том числе из главного меню): у Михалыча весь
 ## товар без доверия, все модули убежища на максимуме (верстак, генератор, рация, станок гравировки).
 ## Ничего не строит и не тратит: выключил — прогресс сохранения прежний. Исключение — тайник и
 ## карман, они вырастают в самом сохранении (Profile.grow_unlocked). В коопе чит хоста — на всех.
 var unlock_all: bool = false
-## Отладка для аудита уровней (Esc → Настройки): полёт сквозь всё и множитель скорости
+## Отладка для аудита уровней (Esc → Читы): полёт сквозь всё и множитель скорости
 ## (ходьба и полёт). Не сохраняются — после перезапуска выключены.
 var cheat_fly: bool = false
 var cheat_speed: float = 1.0
@@ -119,6 +121,7 @@ func _load() -> void:
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
 	invert_y = bool(cfg.get_value("mouse", "invert_y", invert_y))
 	fov_h = clampf(float(cfg.get_value("view", "fov_h", fov_h)), FOV_H_RANGE[0], FOV_H_RANGE[1])
+	hitmarker = bool(cfg.get_value("view", "hitmarker", hitmarker))
 	for key: String in reticle.keys():
 		reticle[key] = int(cfg.get_value("sight", key, reticle[key]))
 	for b in BUSES:
@@ -154,6 +157,7 @@ func save() -> void:
 	cfg.set_value("mouse", "ads", sens_ads)
 	cfg.set_value("mouse", "invert_y", invert_y)
 	cfg.set_value("view", "fov_h", fov_h)
+	cfg.set_value("view", "hitmarker", hitmarker)
 	for key: String in reticle:
 		cfg.set_value("sight", key, int(reticle[key]))
 	for b in BUSES:
@@ -200,6 +204,15 @@ func set_raid_conditions(time_key: String, weather_key: String) -> void:
 
 func set_lens_fx(on: bool) -> void:
 	lens_fx = on
+	save()
+	changed.emit()
+
+
+func set_hitmarker(on: bool) -> void:
+	hitmarker = on
+	if not on:
+		for node: Node in get_tree().get_nodes_in_group("camera_rig"):
+			(node as CameraRig).clear_hitmarker()
 	save()
 	changed.emit()
 

@@ -30,8 +30,8 @@ func _ready() -> void:
 	($Center/Panel/VBox as VBoxContainer).add_child(back)
 	# хост: деньги игрокам — то же окно, что в меню Esc
 	_admin_button = Button.new()
-	_admin_button.text = "Деньги игрокам (админ)"
-	_admin_button.pressed.connect(func() -> void: Pause.open_admin())
+	_admin_button.text = "Читы"
+	_admin_button.pressed.connect(func() -> void: Pause.open_cheats())
 	($Center/Panel/VBox as VBoxContainer).add_child(_admin_button)
 	Net.money_received.connect(func(t: String) -> void: _status.text = t)
 	# имя и адрес хоста — с прошлого раза
