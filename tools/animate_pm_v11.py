@@ -14,7 +14,8 @@ Magazine_Control (в позах — на Frame, в перезарядке её �
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/animate_pm_v11.py -- grip|stills [стойки]
   grip   → _asset_src/pm_game/anim/PM_FPS_Grip_v02.blend (действие PM_Stances, хват без ключей)
-  stills → _asset_src/pm_game/anim/Кадры/<стойка>_<вид>.png (глазами, справа, слева, снизу, спереди)
+  clips  → _asset_src/pm_game/anim/PM_FPS_Clips_v01.blend (от хвата владельца в v02; его файл не меняется)
+  stills [carry|ready|ads …] [out=<папка>] → _asset_src/pm_game/anim/Кадры/<стойка>_<вид>.png (глазами, справа, слева, снизу, спереди)
 """
 from __future__ import annotations
 
@@ -588,6 +589,150 @@ def fcurves(action) -> list:
     return list(action.fcurves)
 
 
+# ================================================================ клипы (от хвата владельца)
+
+CLIPS_FILE = SRC / "anim/PM_FPS_Clips_v01.blend"
+GRIP_BONES = ["ik_hand.R", "ik_hand.L", "pole.R", "pole.L"] + RIGHT + LEFT
+CLIP_INFO: dict = {}
+
+
+def cam_offset(gun: Matrix, d: Vector = Vector(), pitch: float = 0.0, yaw: float = 0.0, roll: float = 0.0) -> Matrix:
+    """Сдвиг и поворот пистолета в осях камеры вокруг его рукоятки: pitch — дуло вверх, yaw — дуло влево,
+    roll — верх влево (градусы); d — в мире сцены (−X — вправо по кадру, +Z — вверх, −Y — от глаз)."""
+    r = rot("Z", yaw) @ rot("X", -pitch) @ rot("Y", roll)
+    return Matrix.Translation(gun.translation + d) @ r @ gun.to_3x3().to_4x4()
+
+
+def blend(a: Matrix, b: Matrix, t: float) -> Matrix:
+    q = a.to_quaternion().slerp(b.to_quaternion(), t)
+    return Matrix.Translation(a.translation.lerp(b.translation, t)) @ q.to_matrix().to_4x4()
+
+
+def ease(t: float) -> float:
+    """Разгон и торможение без рывка на краях (квинтика: нулевые скорость и ускорение)."""
+    t = min(1.0, max(0.0, t))
+    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
+
+
+class Keyer:
+    """Клип: на первом и последнем кадре ключи всех костей хвата и деталей (иначе кость без ключей осталась бы там,
+    где её бросил прошлый клип), между ними — только то, что движется."""
+
+    def __init__(self, arms, rest: dict, name: str, length: int, loop: bool = False) -> None:
+        self.arms, self.rest, self.length = arms, rest, length
+        self.action = bpy.data.actions.new(name)
+        self.action.use_fake_user = True
+        self.action.use_frame_range = True
+        self.action.frame_start, self.action.frame_end = 0, length
+        self.action.use_cyclic = loop
+        arms.animation_data.action = self.action
+        self.last: dict = {}
+        CLIP_INFO[name] = {"frames": length, "loop": loop}
+
+    def _key(self, name: str, frame: float) -> None:
+        pb = self.arms.pose.bones[name]
+        q = pb.rotation_quaternion.copy()
+        prev = self.last.get(name)
+        if prev is not None and prev.dot(q) < 0.0:
+            q.negate()
+            pb.rotation_quaternion = q
+        self.last[name] = q
+        pb.keyframe_insert("location", frame=frame)
+        pb.keyframe_insert("rotation_quaternion", frame=frame)
+
+    def pose(self, frame: float, gun: Matrix, over: dict | None = None, all_bones: bool = False) -> None:
+        """Поставить пистолет (мир) и кости (over: имя → matrix_basis поверх хвата) и ключи."""
+        over = over or {}
+        for n, m in self.rest.items():
+            self.arms.pose.bones[n].matrix_basis = over.get(n, m)
+        self.arms.pose.bones["Frame"].matrix = self.arms.matrix_world.inverted() @ gun
+        names = list(self.rest) if all_bones or frame in (0, self.length) else list(over)
+        for n in names + ["Frame"]:
+            self._key(n, frame)
+
+    def finish(self) -> None:
+        for fc in fcurves(self.action):
+            for kp in fc.keyframe_points:
+                kp.interpolation = "BEZIER"
+                kp.handle_left_type = kp.handle_right_type = "AUTO_CLAMPED"
+            fc.update()
+
+
+def cycle(phase: float, a: float, b: float, c: float, e: float, p: float) -> tuple:
+    """Два шага на цикл: на каждом ударе стопы пистолет проседает (a, м), раз за цикл уходит вбок (b, м)
+    с креном (c, °) и поворотом (e, °); кивок p (°) — вместе с проседанием."""
+    w = math.tau * phase
+    bounce = 0.5 + 0.5 * math.cos(2.0 * w)            # 1 — удар стопы (фаза 0 и 0.5), 0 — середина шага
+    d = Vector((-b * math.sin(w), 0.0, -a * bounce))
+    return d, -p * bounce, e * math.sin(w + 0.35), c * math.sin(w)
+
+
+def clips() -> None:
+    """Первая партия: покой в обеих стойках, переходы между ними и в прицел, ходьба и бег (бег всегда наискосок)."""
+    bpy.ops.wm.open_mainfile(filepath=str(GRIP_FILE))
+    scene = bpy.context.scene
+    arms = bpy.data.objects["FPS_ArmsRig"]
+    st = {}
+    for name, frame in STANCE_FRAMES.items():
+        scene.frame_set(frame)
+        bpy.context.view_layer.update()
+        st[name] = world(arms, "Frame")
+    rest = {n: arms.pose.bones[n].matrix_basis.copy() for n in GRIP_BONES + list(GUN_PARTS) if n in arms.pose.bones}
+    arms.animation_data.action = None
+    carry, ready, ads = st["CARRY"], st["READY"], st["ADS"]
+    run_base = cam_offset(carry, Vector((0.0, 0.025, 0.012)), pitch=-6.0, roll=8.0)     # на бегу ближе к телу, сильнее завален
+
+    def idle(name: str, gun: Matrix) -> None:
+        k = Keyer(arms, rest, name, 60, loop=True)
+        for f in range(0, 61, 3):
+            w = math.tau * f / 60.0
+            k.pose(f, cam_offset(gun, Vector((0.0005 * math.sin(w * 0.5), 0.0, 0.0012 * math.sin(w))), pitch=0.3 * math.sin(w + 0.5)))
+        k.finish()
+
+    def move(name: str, gun: Matrix, frames: int, a: float, b: float, c: float, e: float, p: float, step: int) -> None:
+        k = Keyer(arms, rest, name, frames, loop=True)
+        for f in range(0, frames + 1, step):
+            d, pitch, yaw, roll = cycle(f / frames, a, b, c, e, p)
+            k.pose(f, cam_offset(gun, d, pitch, yaw, roll))
+        k.finish()
+
+    def go(name: str, a: Matrix, b: Matrix, frames: int, arc: Vector = Vector(), settle: float = 1.0) -> None:
+        """Переход стойки: плавный путь с дугой arc (м, в середине пути) и лёгким дотягом в конце."""
+        k = Keyer(arms, rest, name, frames)
+        main = frames - 3
+        for f in range(0, main + 1):
+            t = ease(f / main)
+            m = blend(a, b, t)
+            m.translation += arc * math.sin(math.pi * t)
+            k.pose(f, m)
+        d = (b.translation - a.translation).normalized() * 0.002 * settle
+        k.pose(main + 2, cam_offset(b, d, pitch=0.6 * settle))
+        k.pose(frames, b)
+        k.finish()
+
+    idle("PM_Idle_Ready", ready)
+    idle("PM_Idle_Carry", carry)
+    go("PM_Carry_To_Ready", carry, ready, 10, Vector((0.0, -0.01, 0.012)))
+    go("PM_Ready_To_Carry", ready, carry, 12, Vector((0.0, 0.0, -0.008)), settle=0.5)
+    go("PM_Ready_To_ADS", ready, ads, 9, Vector((0.004, 0.006, 0.004)))
+    go("PM_ADS_To_Ready", ads, ready, 9, Vector((0.0, 0.0, -0.004)), settle=0.5)
+    go("PM_Carry_To_ADS", carry, ads, 12, Vector((-0.01, -0.012, 0.015)))
+    go("PM_ADS_To_Carry", ads, carry, 13, Vector((0.0, 0.0, -0.01)), settle=0.5)
+    move("PM_Walk_Ready", ready, 40, 0.004, 0.006, 1.5, 0.8, 0.6, 2)
+    move("PM_Walk_Carry", carry, 40, 0.005, 0.008, 2.0, 1.0, 0.8, 2)
+    move("PM_Run", run_base, 16, 0.014, 0.016, 5.0, 3.0, 3.0, 1)
+    go("PM_Carry_To_Run", carry, run_base, 8)
+    go("PM_Run_To_Carry", run_base, carry, 10, settle=0.5)
+    arms.animation_data.action = bpy.data.actions["PM_Idle_Carry"]
+    scene.frame_start, scene.frame_end = 0, 60
+    scene.frame_set(0)
+    for m in list(scene.timeline_markers):
+        scene.timeline_markers.remove(m)
+    bpy.ops.wm.save_as_mainfile(filepath=str(CLIPS_FILE))
+    (SRC / "anim/clips.json").write_text(json.dumps(CLIP_INFO, ensure_ascii=False, indent=1), encoding="utf-8")
+    print("PM_CLIPS saved", CLIPS_FILE, json.dumps(CLIP_INFO, ensure_ascii=False), flush=True)
+
+
 def stills() -> None:
     bpy.ops.wm.open_mainfile(filepath=str(GRIP_FILE))
     scene = bpy.context.scene
@@ -615,8 +760,9 @@ def stills() -> None:
     side.data.lens = 40
     side.data.clip_start = 0.01
     scene.collection.objects.link(side)
-    STILLS.mkdir(parents=True, exist_ok=True)
-    only = ARGS[1:]
+    out = next((Path(a[4:]) for a in ARGS[1:] if a.startswith("out=")), STILLS)
+    out.mkdir(parents=True, exist_ok=True)
+    only = [a for a in ARGS[1:] if not a.startswith("out=")]
     for stance, frame in STANCE_FRAMES.items():
         short = stance.lower()
         if only and short not in only:
@@ -635,12 +781,14 @@ def stills() -> None:
                 m.translation = focus + off
                 side.matrix_world = m
                 scene.camera = side
-            scene.render.filepath = str(STILLS / f"{short}_{view}.png")
+            scene.render.filepath = str(out / f"{short}_{view}.png")
             bpy.ops.render.render(write_still=True)
     print("PM_STILLS done", flush=True)
 
 
 if MODE == "stills":
     stills()
+elif MODE == "clips":
+    clips()
 else:
     grip()
