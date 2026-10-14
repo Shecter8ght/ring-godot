@@ -1667,6 +1667,7 @@
   "ponds": 3.0
  },
  "extras": [
-  "res://scenes/levels/zone01/zone01_loose_loot.tscn"
+  "res://scenes/levels/zone01/zone01_loose_loot.tscn",
+  "res://scenes/levels/zone01/zone01_ai.tscn"
  ]
 }
