@@ -1,0 +1,18 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.341 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 5070 Ti
+
+net: загрузка res://scenes/levels/f1_ring.tscn peer=1
+sector: собран за 2009 мс (пропсов 1058, склеено в 409 мешей)
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+net: сцена готова raid peer=1
+net: переход завершён за 26810 мс peer=1
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 3480 мс
+sector: мародёров 24 в 12 отрядах, попыток 12
+AI WORK {"draw":967.317395727365,"fps":98.2942301286915,"frames":983,"max_ms":20.059,"npc":24,"p95_ms":14.808,"p99_ms":17.619,"perception":{},"position":"(0.0, 0.000391, -108.0)","seconds":10.000587,"work":{}}
+AI WORK {"draw":286.249190938511,"fps":61.7846650461355,"frames":618,"max_ms":279.43,"npc":24,"p95_ms":22.085,"p99_ms":31.043,"perception":{},"position":"(6.077686, 0.000391, -34.46827)","seconds":10.002482,"work":{}}
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)

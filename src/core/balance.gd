@@ -1283,6 +1283,10 @@ const AI_TORCH_RANGE := 24.0
 ## Фонари ИИ (налобный и на оружии) дальше begin м от камеры плавно гаснут (за length м), тень —
 ## только ближе shadow м: много мародёров с фонарями ночью не роняют кадр.
 const AI_LIGHT_FADE := {"begin": 70.0, "length": 20.0, "shadow": 28.0}
+## Раскладка периодических проверок ИИ по времени и повторные одинаковые запросы.
+## Зрение игрока, движение тела и стрельба остаются на каждом физическом шаге.
+const AI_WORK := {"phase_slots": 16, "foe_scan_sec": 0.3, "glare_scan_sec": 0.5,
+	"follow_repath_sec": 0.5, "target_epsilon_m": 0.05, "cover_retry_sec": 0.2}
 const AI_VIEW_HALF_ANGLE_DEG := 60.0
 const AI_VIEW_STANCE_SCALE := {"stand": 1.0, "crouch": 0.7, "prone": 0.4}
 ## Сколько секунд непрерывной видимости нужно, чтобы заметить (ближе — быстрее).

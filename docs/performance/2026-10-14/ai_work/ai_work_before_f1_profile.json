@@ -1,0 +1,91 @@
+{
+	"gpu": "NVIDIA GeForce RTX 5070 Ti",
+	"map": "f1",
+	"profile": true,
+	"samples": [
+		{
+			"draw": 1010.46585365854,
+			"fps": 81.9989094145048,
+			"frames": 820,
+			"max_ms": 27.682,
+			"npc": 24,
+			"p95_ms": 17.997,
+			"p99_ms": 21.818,
+			"position": "(0.0, 0.000391, -108.0)",
+			"seconds": 10.000133,
+			"work": {
+				"agent_path": {
+					"count": 10924,
+					"max_us": 6,
+					"us": 8455
+				},
+				"decision": {
+					"count": 14376,
+					"max_us": 781,
+					"us": 127125
+				},
+				"move": {
+					"count": 14376,
+					"max_us": 1663,
+					"us": 1066109
+				},
+				"perception": {
+					"count": 14376,
+					"max_us": 255,
+					"us": 196769
+				},
+				"weapon": {
+					"count": 14376,
+					"max_us": 79,
+					"us": 12894
+				}
+			}
+		},
+		{
+			"draw": 331.964953271028,
+			"fps": 42.7783712554932,
+			"frames": 428,
+			"max_ms": 299.28,
+			"npc": 24,
+			"p95_ms": 39.686,
+			"p99_ms": 71.671,
+			"position": "(6.077686, 0.000391, -34.46827)",
+			"seconds": 10.005056,
+			"work": {
+				"agent_path": {
+					"count": 8069,
+					"max_us": 28,
+					"us": 7127
+				},
+				"decision": {
+					"count": 14208,
+					"max_us": 8588,
+					"us": 608856
+				},
+				"move": {
+					"count": 14208,
+					"max_us": 1821,
+					"us": 1822044
+				},
+				"perception": {
+					"count": 14208,
+					"max_us": 830,
+					"us": 315471
+				},
+				"tactical_path": {
+					"count": 11,
+					"max_us": 338,
+					"us": 2980
+				},
+				"weapon": {
+					"count": 14208,
+					"max_us": 434,
+					"us": 14797
+				}
+			}
+		}
+	],
+	"seed": 20261014,
+	"tag": "before",
+	"viewport": "(1920.0, 1080.0)"
+}

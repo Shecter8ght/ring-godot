@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.341 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 5070 Ti
+
+net: загрузка res://scenes/levels/f1_ring.tscn peer=1
+sector: собран за 1778 мс (пропсов 1058, склеено в 409 мешей)
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+net: сцена готова raid peer=1
+net: переход завершён за 10333 мс peer=1
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2892 мс
+sector: мародёров 24 в 12 отрядах, попыток 12
+AI WORK {"draw":963.906532663317,"fps":99.4706661005669,"frames":995,"max_ms":19.922,"npc":24,"p95_ms":14.669,"p99_ms":16.568,"perception":{"range_calculations":601,"range_requests":4616,"rays":1830},"position":"(0.0, 0.000391, -108.0)","seconds":10.002949,"work":{"agent_path":{"count":10265,"max_us":63,"us":7246},"decision":{"count":14424,"max_us":545,"us":119898},"move":{"count":14424,"max_us":1483,"us":986224},"perception":{"count":14424,"max_us":213,"us":161029},"target_set":{"count":173,"max_us":6,"us":264},"weapon":{"count":14424,"max_us":65,"us":11607}}}
+AI WORK {"draw":179.688768606225,"fps":73.8493319733331,"frames":739,"max_ms":35.395,"npc":24,"p95_ms":19.359,"p99_ms":22.556,"perception":{"range_calculations":601,"range_requests":11091,"rays":7241},"position":"(6.077686, 0.000391, -34.46827)","seconds":10.006861,"work":{"agent_path":{"count":6923,"max_us":135,"us":5230},"decision":{"count":14424,"max_us":7624,"us":555729},"move":{"count":14424,"max_us":1767,"us":915801},"perception":{"count":14424,"max_us":13316,"us":276751},"tactical_path":{"count":18,"max_us":1327,"us":6534},"target_set":{"count":295,"max_us":5,"us":478},"weapon":{"count":14424,"max_us":121,"us":12072}}}

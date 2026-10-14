@@ -1,0 +1,30 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+sector: собран за 1117 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2538 мс
+sector: мародёров 24 в 16 отрядах, попыток 16
+  [ok] A видит игрока — бой  COMBAT/ENGAGE
+  [ok] B за стеной сам не видит, но знает по окрику — бой  COMBAT/COVER_MOVE, видит false, до цели по памяти 0.0 м
+  [FAIL] B не стреляет в стену, пока не видит  в магазине 17 из 18
+  [ok] двое к одной точке — в разные места  между целями 4.3 м
+  [ok] попали издалека — в укрытие / перебежкой  COMBAT/COVER_MOVE, направление угадано с ошибкой 0.0 м
+  [ok] …и продвигается к стрелку  было 34.8 м, стало 21.2, COMBAT/COVER_MOVE
+  [ok] A под огнём ищет укрытие и приседает  тактика COVER_PEEK, присел true, до укрытия было 0.6 м, осталось 0.6
+  [ok] пустой магазин — перезарядка  2.4 с
+  [ok] цель потеряна — поиск  SEARCH/PUSH / SEARCH/COVER_PEEK
+  [ok] здоровье мародёра — из баланса  100
+  [ok] типы: здоровье и снаряжение по выкладке типа  ["scout", "gunner", "heavy", "sniper"]
+  [ok] бывалый: броня держит слабую пулю  прошло 6.0 из 20
+  [ok] попадание: повело и откинуло  0.43 с, наклон -0.10
+  [ok] снайпер держит позицию (окрик — не бежит)  COMBAT/ENGAGE, сдвинулся на 0.1 м
+  [ok] мародёр грабит контейнер: самое ценное — в сумку  сумка [{ "id": "gold_chain", "n": 2 }, { "id": "bandage", "n": 1 }], в ящике [{ "id": "water", "n": 1 }]
+  [ok] роли по порядку: штурм, обход, прикрытие  [1, 2, 3]
+  [ok] прикрытие идёт на позицию с обзором  OVERWATCH
+  [ok] штурм кидает гранату туда, где цель скрылась  гранат осталось 0, в мире 1
+ai_squad_test: провалено 1

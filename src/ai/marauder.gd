@@ -128,6 +128,12 @@ var _search_left: int = 0
 var _search_total: int = 0
 var _search_ang: float = 0.0
 var _repath_t: float = 0.0
+## Повторная команда не сбрасывает готовый путь; версия карты отменяет сохранённую проекцию.
+var _nav_request: Vector3 = Vector3.INF
+var _nav_resolved: Vector3 = Vector3.INF
+var _nav_iteration: int = -1
+## Безрезультатный поиск укрытия повторяем с короткой паузой при прежней угрозе и позиции.
+var _cover_miss: Dictionary = {}
 var _say_label: Label3D
 var _arch: Dictionary = {}
 var _base_scale: Vector3 = Vector3.ONE
@@ -183,6 +189,13 @@ var _capsule: CapsuleShape3D
 
 func _ready() -> void:
 	add_to_group("marauders")
+	# Первый запрос остаётся сразу; последующие таймеры получают свою фазу без расхода RNG.
+	var slots: int = int(Balance.AI_WORK.phase_slots)
+	var slot: int = get_tree().get_nodes_in_group("marauders").size() - 1
+	var phase: float = float(slot % slots) / float(slots)
+	_foe_t = -phase * float(Balance.AI_WORK.foe_scan_sec)
+	_blind_t = -phase * float(Balance.AI_WORK.glare_scan_sec)
+	_repath_t = -phase * float(Balance.AI_WORK.follow_repath_sec)
 	_rng.seed = hash(name) + int(global_position.x * 13.0)
 	if not Balance.AI_ARCHETYPES.has(archetype):
 		archetype = pick_archetype(_rng)
@@ -513,6 +526,19 @@ func _setup_sync() -> void:
 	add_child(sync)
 
 
+static var work_profile_enabled: bool = false
+static var work_profile: Dictionary = {}
+
+
+static func _record_work(key: String, started: int) -> void:
+	var row: Dictionary = work_profile.get(key, {"us": 0, "count": 0, "max_us": 0})
+	var elapsed: int = Time.get_ticks_usec() - started
+	row.us = int(row.us) + elapsed
+	row.count = int(row.count) + 1
+	row.max_us = maxi(int(row.max_us), elapsed)
+	work_profile[key] = row
+
+
 func _physics_process(delta: float) -> void:
 	if Net.is_networked() and not is_multiplayer_authority():
 		return
@@ -529,8 +555,15 @@ func _physics_process(delta: float) -> void:
 	_suppress_t = maxf(0.0, _suppress_t - delta)
 	_shot_heard_t += delta
 	_repath_t -= delta
+	var work_started: int = Time.get_ticks_usec() if work_profile_enabled else 0
 	_perceive(delta)
+	if work_profile_enabled:
+		_record_work("perception", work_started)
+	work_started = Time.get_ticks_usec() if work_profile_enabled else 0
 	_tick_weapon(delta)
+	if work_profile_enabled:
+		_record_work("weapon", work_started)
+	work_started = Time.get_ticks_usec() if work_profile_enabled else 0
 	match state:
 		State.DOWNED:
 			_downed(delta)
@@ -546,7 +579,12 @@ func _physics_process(delta: float) -> void:
 			_search(delta)
 		State.RETREAT:
 			_retreat(delta)
+	if work_profile_enabled:
+		_record_work("decision", work_started)
+	work_started = Time.get_ticks_usec() if work_profile_enabled else 0
 	_move(delta)
+	if work_profile_enabled:
+		_record_work("move", work_started)
 
 
 func _eye() -> Vector3:
@@ -628,7 +666,7 @@ func _perceive(delta: float) -> void:
 	# горящая ракета рядом, смотрит на неё — слепит: целится как только что заметивший
 	_blind_t -= delta
 	if _blind_t <= 0.0:
-		_blind_t = 0.5
+		_blind_t = _next_work_delay(_blind_t, float(Balance.AI_WORK.glare_scan_sec))
 		for f in get_tree().get_nodes_in_group("flares"):
 			var to := (f as Node3D).global_position - global_position
 			if to.length() < Balance.FLARE_BLIND_M and fwd.dot(Vector3(to.x, 0.0, to.z).normalized()) > 0.8:
@@ -685,7 +723,7 @@ func _scan_foes(delta: float, fwd: Vector3, exclude: Array[RID]) -> Marauder:
 	_foe_t -= delta
 	if _foe_t > 0.0:
 		return null
-	_foe_t = 0.3
+	_foe_t = _next_work_delay(_foe_t, float(Balance.AI_WORK.foe_scan_sec))
 	var best: Marauder = null
 	var best_d := INF
 	for n in get_tree().get_nodes_in_group("marauders"):
@@ -801,7 +839,7 @@ func investigate_at(pos: Vector3) -> void:
 	state = State.INVESTIGATE
 	linger_timer = Balance.AI_INVESTIGATE_LINGER
 	# держащий позицию — не идёт, только поворачивается на шум
-	_agent.target_position = global_position if _holds() else _snap(pos)
+	_set_move_target(global_position if _holds() else _snap(pos))
 	if _holds():
 		_face(pos)
 
@@ -925,10 +963,10 @@ func _patrol(delta: float) -> void:
 	if lead != null and lead != self:
 		# ведомый: строем за ведущим, чуть в стороне
 		if _repath_t <= 0.0:
-			_repath_t = 0.5
+			_repath_t = _next_work_delay(_repath_t, float(Balance.AI_WORK.follow_repath_sec))
 			var lf := Vector3(sin(lead._facing), 0.0, cos(lead._facing))
 			var side := Vector3(lf.z, 0.0, -lf.x) * (1.0 if _rank() % 2 == 1 else -1.0)
-			_agent.target_position = _snap(lead.global_position - lf * Balance.AI_FOLLOW_DIST * _rank() + side * 1.0)
+			_set_move_target(lead.global_position - lf * Balance.AI_FOLLOW_DIST * _rank() + side * 1.0, true)
 		return
 	if _agent.is_navigation_finished():
 		pause_timer -= delta
@@ -937,17 +975,17 @@ func _patrol(delta: float) -> void:
 		if pause_timer <= 0.0 and _holds() and _post != Vector3.INF:
 			# держит позицию: пара шагов у поста, долго смотрит
 			var a := _rng.randf() * TAU
-			_agent.target_position = _snap(_post + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(0.0, Balance.AI_HOLD_PATROL_R))
+			_set_move_target(_post + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(0.0, Balance.AI_HOLD_PATROL_R), true)
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 3.0
 		elif pause_timer <= 0.0 and home_radius > 0.0 and home != Vector3.INF:
 			# охраняет место: ходит вокруг, смотрит
 			var ha := _rng.randf() * TAU
-			_agent.target_position = _snap(home + Vector3(cos(ha), 0.0, sin(ha)) * _rng.randf_range(1.0, home_radius))
+			_set_move_target(home + Vector3(cos(ha), 0.0, sin(ha)) * _rng.randf_range(1.0, home_radius), true)
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 1.5
 		elif pause_timer <= 0.0 and not _holds() and not no_loot and bool(_arch.get("loots", true)) and _pick_loot():
 			pass
 		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
-			_agent.target_position = _snap(patrol_point_provider.call())
+			_set_move_target(patrol_point_provider.call(), true)
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1]))
 
 
@@ -961,7 +999,7 @@ func break_contact(to: Vector3, sec: float) -> void:
 	_order = {"kind": "fallback", "since": Time.get_ticks_msec(), "until": Time.get_ticks_msec() + int(sec * 1000.0)}
 	state = State.RETREAT
 	_set_crouch(false)
-	_agent.target_position = _snap(to)
+	_set_move_target(to, true)
 	linger_timer = sec
 
 
@@ -981,7 +1019,7 @@ func hold_post(pos: Vector3, face: Vector3, sec: float) -> void:
 	if state != State.PATROL:
 		return
 	_order = {"kind": "hold", "until": Time.get_ticks_msec() + int(sec * 1000.0), "face": face}
-	_agent.target_position = _snap(pos)
+	_set_move_target(pos, true)
 
 
 ## Снять приказ «стоять» (обыск окончен).
@@ -999,7 +1037,7 @@ func order_loot(c: LootContainer) -> bool:
 	_loot_target = c
 	_loot_t = -1.0
 	_loot_claims[c.get_instance_id()] = [self, Time.get_ticks_msec()]
-	_agent.target_position = _snap(c.global_position)
+	_set_move_target(c.global_position, true)
 	return true
 
 
@@ -1039,7 +1077,7 @@ func _pick_loot() -> bool:
 	_loot_target = best
 	_loot_t = -1.0
 	_loot_claims[best.get_instance_id()] = [self, now]
-	_agent.target_position = _snap(best.global_position)
+	_set_move_target(best.global_position, true)
 	return true
 
 
@@ -1069,7 +1107,7 @@ func _loot_tick(delta: float) -> bool:
 				return false
 			return true
 		_loot_t = maxf(Balance.AI_LOOT_SEARCH_MIN, _loot_target.search_s * Balance.AI_LOOT_SEARCH_MULT)
-		_agent.target_position = global_position
+		_set_move_target(global_position)
 	_set_crouch(true)
 	_face(_loot_target.global_position)
 	_loot_t -= delta
@@ -1148,7 +1186,7 @@ func _set_tactic(t: Tactic) -> void:
 			var sgn := squad.flank_side if wide and squad else (1.0 if _rng.randf() < 0.5 else -1.0)
 			var side := Vector3(to.z, 0.0, -to.x).normalized() * sgn
 			var off := Balance.AI_ROLE_FLANK_OFFSET if wide else Balance.AI_FLANK_OFFSET
-			_agent.target_position = _spread_point(last_known + side * off - to.normalized() * (2.0 if wide else 4.0))
+			_set_move_target(_spread_point(last_known + side * off - to.normalized() * (2.0 if wide else 4.0)))
 			say("Обхожу!")
 		Tactic.OVERWATCH:
 			_overwatch_ready = false
@@ -1157,18 +1195,18 @@ func _set_tactic(t: Tactic) -> void:
 				tactic = Tactic.ADVANCE
 				if not _try_advance():
 					tactic = Tactic.PUSH
-					_agent.target_position = _spread_point(last_known)
+					_set_move_target(_spread_point(last_known))
 			else:
-				_agent.target_position = ow
+				_set_move_target(ow)
 				say("Прикрываю!")
 		Tactic.PUSH:
-			_agent.target_position = _spread_point(last_known)
+			_set_move_target(_spread_point(last_known))
 		Tactic.ADVANCE:
 			if not _try_advance():
 				tactic = Tactic.PUSH
-				_agent.target_position = _spread_point(last_known)
+				_set_move_target(_spread_point(last_known))
 		Tactic.ENGAGE:
-			_agent.target_position = global_position
+			_set_move_target(global_position)
 		_:
 			pass
 
@@ -1186,13 +1224,13 @@ func _combat(delta: float) -> void:
 			_set_crouch(false)
 			_face(last_known)
 			if _seen_now and dist <= rng_m:
-				_agent.target_position = global_position
+				_set_move_target(global_position)
 				_try_fire()
 				if want_cover and _tactic_t > 0.4 and _try_cover(Balance.AI_COVER_RADIUS, false):
 					return
 			elif _seen_now and not _holds():
 				# далеко — подходим на дальность своего оружия (дробовик — вплотную)
-				_agent.target_position = _snap(last_known)
+				_set_move_target(last_known, true)
 			elif _unseen_t < 1.5 and _mag > 0:
 				# только что ушёл из виду — подавляющий огонь туда, где был
 				_try_fire(true)
@@ -1298,7 +1336,7 @@ func _overwatch_point() -> Vector3:
 		var travel := cand.distance_to(global_position)
 		if travel >= best_s:
 			continue
-		var path := NavigationServer3D.map_get_path(map, global_position, cand, true)
+		var path := _profile_path(map, cand)
 		var plen := 0.0
 		for k in range(1, path.size()):
 			plen += path[k - 1].distance_to(path[k])
@@ -1378,7 +1416,7 @@ func _try_advance() -> bool:
 		if score >= best_s:
 			continue
 		# и дойти туда можно без обхода через полкарты
-		var path := NavigationServer3D.map_get_path(map, global_position, cand, true)
+		var path := _profile_path(map, cand)
 		var plen := 0.0
 		for k in range(1, path.size()):
 			plen += path[k - 1].distance_to(path[k])
@@ -1389,7 +1427,7 @@ func _try_advance() -> bool:
 	if best == Vector3.INF:
 		return false
 	_cover_pos = best
-	_agent.target_position = best
+	_set_move_target(best)
 	# дошёл — одно «присел-выглянул» и дальше
 	_peeks = 3
 	memory_timer = maxf(memory_timer, _mem() * 0.6)
@@ -1408,7 +1446,7 @@ func _start_search(points: int = Balance.AI_SEARCH_POINTS) -> void:
 	_search_total = points
 	# прочёсывание дугой — от той стороны, откуда пришли, каждый в свою сторону
 	_search_ang = atan2(global_position.z - last_known.z, global_position.x - last_known.x) + (0.8 if hash(name) % 2 == 0 else -0.8)
-	_agent.target_position = global_position if _holds() else _spread_point(last_known)
+	_set_move_target(global_position if _holds() else _spread_point(last_known))
 	linger_timer = 1.5
 	say("Ушёл…" if points == Balance.AI_SEARCH_POINTS else "Проверю тут…")
 
@@ -1444,7 +1482,7 @@ func _search(delta: float) -> void:
 		if p.distance_to(global_position) > 2.0 and not _claimed_near(p, Balance.AI_SEARCH_CLAIM_M):
 			target = p
 			break
-	_agent.target_position = target
+	_set_move_target(target)
 	linger_timer = _rng.randf_range(1.2, 2.4)
 
 
@@ -1455,7 +1493,7 @@ func _start_retreat() -> void:
 		# укрытия нет — просто прочь от угрозы
 		var away := global_position - last_known
 		away.y = 0.0
-		_agent.target_position = _snap(global_position + away.normalized() * 12.0)
+		_set_move_target(global_position + away.normalized() * 12.0, true)
 	linger_timer = _rng.randf_range(float(Balance.AI_RETREAT_HOLD[0]), float(Balance.AI_RETREAT_HOLD[1]))
 
 
@@ -1499,7 +1537,7 @@ func _on_downed_changed(on: bool) -> void:
 			_use("secondary")
 		_reload_t = 0.0
 		_burst_left = 0
-		_agent.target_position = global_position
+		_set_move_target(global_position)
 		say("Меня зацепило!")
 		NoiseBus.emit(global_position, Balance.AI_RESCUE_RADIUS, "death")
 		_help_t = 0.0
@@ -1547,7 +1585,7 @@ func start_rescue(who: Marauder) -> void:
 	state = State.RESCUE
 	crouched = false
 	_apply_shape()
-	_agent.target_position = _snap(who.global_position)
+	_set_move_target(who.global_position, true)
 	say("Держись, иду!")
 
 
@@ -1608,8 +1646,8 @@ func _rescue(delta: float) -> void:
 		0:
 			_set_crouch(false)
 			if _repath_t <= 0.0:
-				_repath_t = 0.5
-				_agent.target_position = _snap(t.global_position)
+				_repath_t = _next_work_delay(_repath_t, float(Balance.AI_WORK.follow_repath_sec))
+				_set_move_target(t.global_position, true)
 			# по пути отвечает огнём, если видит
 			if _seen_now and global_position.distance_to(last_known) <= float(_spec.range):
 				_try_fire()
@@ -1622,7 +1660,7 @@ func _rescue(delta: float) -> void:
 				if cover != Vector3.INF:
 					_rescue_phase = 1
 					t.dragged_by = self
-					_agent.target_position = cover
+					_set_move_target(cover)
 					say("Тащу! Прикрой!")
 				else:
 					_rescue_phase = 2
@@ -1633,7 +1671,7 @@ func _rescue(delta: float) -> void:
 				_rescue_phase = 2
 				_rescue_t = 0.0
 		2:
-			_agent.target_position = global_position
+			_set_move_target(global_position)
 			_set_crouch(true)
 			_face(t.global_position)
 			_rescue_t += delta
@@ -1659,11 +1697,24 @@ func _end_rescue() -> void:
 ## Ищет рядом место, которое стена закрывает от угрозы (last_known), и идёт туда.
 ## far — отход: чем дальше от угрозы, тем лучше.
 func _try_cover(radius: float, far: bool) -> bool:
+	var iteration: int = NavigationServer3D.map_get_iteration_id(get_world_3d().navigation_map)
+	var now: int = Engine.get_physics_frames()
+	if not far and not _cover_miss.is_empty() and now < int(_cover_miss.until) \
+			and _cover_miss.origin == global_position and _cover_miss.threat == last_known \
+			and float(_cover_miss.radius) == radius and int(_cover_miss.iteration) == iteration:
+		return false
 	var best := _cover_point(radius, far)
 	if best == Vector3.INF:
+		# У отхода другой порядок кандидатов: его неудача не заменяет обычный поиск.
+		if far:
+			_cover_miss.clear()
+		else:
+			_cover_miss = {"origin": global_position, "threat": last_known, "radius": radius, "iteration": iteration,
+				"until": now + maxi(1, ceili(float(Balance.AI_WORK.cover_retry_sec) * Engine.physics_ticks_per_second))}
 		return false
+	_cover_miss.clear()
 	_cover_pos = best
-	_agent.target_position = best
+	_set_move_target(best)
 	if state == State.COMBAT:
 		_set_tactic(Tactic.COVER_MOVE)
 	return true
@@ -1700,7 +1751,7 @@ func _cover_point(radius: float, far: bool) -> Vector3:
 	var map := get_world_3d().navigation_map
 	var best := Vector3.INF
 	for c in cands.slice(0, 6):
-		var path := NavigationServer3D.map_get_path(map, global_position, c[1], true)
+		var path := _profile_path(map, c[1])
 		var plen := 0.0
 		for k in range(1, path.size()):
 			plen += path[k - 1].distance_to(path[k])
@@ -1862,10 +1913,10 @@ func _try_fire(suppress: bool = false) -> void:
 	if _target_player and is_instance_valid(_target_player) and _target_player.is_downed() and not _may_finish(_target_player):
 		# лежащего не добивает, пока стреляет кто-то другой
 		return
-	if not _line_of_fire():
-		# между стволом и целью стена — стрелять некуда (ни прицельно, ни «на подавление»)
-		return
 	if _shot_t > 0.0:
+		return
+	if not _line_of_fire():
+		# перед каждым выстрелом заново проверяем стену и дверь
 		return
 	# по игроку — по очереди: без права на прицельный огонь — на подавление (мимо, но рядом)
 	_untoken = _target_player != null and _foe == null and not _fire_token()
@@ -2159,7 +2210,10 @@ func _move(delta: float) -> void:
 		speed *= Balance.AI_HIT_STAGGER_SPEED
 	var wish := Vector3.ZERO
 	if _nav_ready and not _agent.is_navigation_finished():
+		var path_started: int = Time.get_ticks_usec() if work_profile_enabled else 0
 		var next := _agent.get_next_path_position()
+		if work_profile_enabled:
+			_record_work("agent_path", path_started)
 		# точка пути подгоняется по высоте под ноги: достигнутой её делает расстояние по земле
 		var fix: float = float(Balance.AI_PATH_HEIGHT_FIX)
 		_agent.path_height_offset = clampf(next.y + _agent.path_height_offset - global_position.y, -fix, fix)
@@ -2211,7 +2265,7 @@ func _tick_stuck(from: Vector3, delta: float) -> void:
 	_side_sign = 1.0 if _rng.randf() < 0.5 else -1.0
 	if _stuck_n >= int(cfg.tries) and state == State.PATROL and patrol_point_provider.is_valid():
 		_stuck_n = 0
-		_agent.target_position = _snap(patrol_point_provider.call())
+		_set_move_target(patrol_point_provider.call(), true)
 
 
 ## Шаг на ступень (бордюр, порожек): упёрся — пробуем встать выше, как игрок (Balance.STEP_UP).
@@ -2401,3 +2455,38 @@ func _spawn_ragdoll() -> void:
 func _animation_event(clip: String) -> void:
 	animation_event = clip
 	animation_event_seq += 1
+
+
+func _profile_path(map: RID, target: Vector3) -> PackedVector3Array:
+	var began: int = Time.get_ticks_usec() if work_profile_enabled else 0
+	var path: PackedVector3Array = NavigationServer3D.map_get_path(map, global_position, target, true)
+	if work_profile_enabled:
+		_record_work("tactical_path", began)
+	return path
+
+
+## Остаток сохраняет фазу, чтобы периодические проверки не съезжались на один кадр.
+func _next_work_delay(remaining: float, period: float) -> float:
+	return period - fposmod(-remaining, period)
+
+
+## Уже выданный путь не сбрасывается от одинаковой команды на каждом физическом шаге.
+func _set_move_target(target: Vector3, snap: bool = false) -> void:
+	var epsilon_sq: float = pow(float(Balance.AI_WORK.target_epsilon_m), 2.0)
+	var resolved: Vector3 = target
+	if snap:
+		var map: RID = get_world_3d().navigation_map
+		var iteration: int = NavigationServer3D.map_get_iteration_id(map)
+		if _nav_request != Vector3.INF and target.distance_squared_to(_nav_request) <= epsilon_sq \
+				and iteration == _nav_iteration and _agent.target_position.distance_squared_to(_nav_resolved) <= epsilon_sq:
+			return
+		resolved = _snap(target)
+		_nav_request = target
+		_nav_resolved = resolved
+		_nav_iteration = iteration
+	else:
+		_nav_request = Vector3.INF
+	if _agent.target_position.distance_squared_to(resolved) > epsilon_sq:
+		_agent.target_position = resolved
+		if work_profile_enabled:
+			_record_work("target_set", Time.get_ticks_usec())

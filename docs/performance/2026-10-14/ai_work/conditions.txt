@@ -1,0 +1,80 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+  [ok] выбор у лестницы доходит до рейда  { "time": "night", "weather": "fog", "power": "off" }
+  [ok] риск и награда
+sector: собран за 1104 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 125 за 2494 мс
+sector: мародёров 24 в 14 отрядах, попыток 14
+   day/on: снаружи видно 100 м, в магазине 50 м, с фонарём 70 м; огней горит 149 из 149; улица — улица, магазин — помещение
+  [ok] день: снаружи — дальность дня, свет горит
+sector: собран за 1096 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2851 мс
+sector: мародёров 24 в 13 отрядах, попыток 14
+   dusk/on: снаружи видно 75 м, в магазине 50 м, с фонарём 70 м; огней горит 149 из 149; улица — улица, магазин — помещение
+sector: собран за 1094 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2450 мс
+sector: мародёров 24 в 14 отрядах, попыток 14
+   night/off: снаружи видно 40 м, в магазине 12 м, с фонарём 70 м; огней горит 0 из 149; улица — улица, магазин — помещение
+  [ok] ночь без света: снаружи — дальность ночи, в магазине 12, с фонарём 70; огни погашены
+  [ok] в темноте у мародёров фонари
+sector: собран за 1061 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2251 мс
+sector: мародёров 24 в 14 отрядах, попыток 14
+   night/emergency: снаружи видно 40 м, в магазине 25 м, с фонарём 70 м; огней горит 50 из 149; улица — улица, магазин — помещение
+  [ok] аварийное: горит треть огней  50 из 149
+sector: собран за 1126 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2240 мс
+sector: мародёров 24 в 11 отрядах, попыток 11
+sector: собран за 1093 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2218 мс
+sector: мародёров 24 в 14 отрядах, попыток 14
+  [ok] 70 м на улице: днём видит, ночью нет  днём true, ночью false
+sector: собран за 1066 мс (пропсов 1058, склеено в 409 мешей)
+net: сцена готова raid peer=1
+WARNING: Property agent_height is ceiled to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367)
+WARNING: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+   at: generator_bake_from_source_geometry_data (modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370)
+sector: навмеш готов, регионов 1
+sector: связок «перелезть» 126 за 2367 мс
+sector: мародёров 24 в 11 отрядах, попыток 11
+  [ok] ПНВ без ПНВ в слоте не включить
+  [ok] ПНВ в слоте «глаза» — включается, садится  заряд 1200.0
+  [ok] ракета: место освещено — видно издалека  12 → 45 м
+conditions_test: провалено 0

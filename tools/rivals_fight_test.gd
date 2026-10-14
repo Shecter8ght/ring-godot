@@ -27,6 +27,10 @@ func _ready() -> void:
 	player.set_physics_process(false)
 	player.global_position = Vector3(0, -80, 0)
 	_rivals = RivalRaids.current
+	# Сравниваем один состав и расстановку, а не разных случайных противников.
+	seed(20261014)
+	(_level.get("_rng") as RandomNumberGenerator).seed = 20261014
+	_rivals._rng.seed = 20261014
 	var exits: Array = _rivals._exits()
 	var free: Array = exits.filter(func(e: Dictionary) -> bool: return String(e.key) == "" and String(e.switch) == "")
 	var exit: Vector3 = (free[0] if not free.is_empty() else exits[0]).pos

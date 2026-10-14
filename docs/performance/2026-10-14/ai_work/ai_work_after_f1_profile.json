@@ -1,0 +1,111 @@
+{
+	"gpu": "NVIDIA GeForce RTX 5070 Ti",
+	"map": "f1",
+	"profile": true,
+	"samples": [
+		{
+			"draw": 963.906532663317,
+			"fps": 99.4706661005669,
+			"frames": 995,
+			"max_ms": 19.922,
+			"npc": 24,
+			"p95_ms": 14.669,
+			"p99_ms": 16.568,
+			"perception": {
+				"range_calculations": 601,
+				"range_requests": 4616,
+				"rays": 1830
+			},
+			"position": "(0.0, 0.000391, -108.0)",
+			"seconds": 10.002949,
+			"work": {
+				"agent_path": {
+					"count": 10265,
+					"max_us": 63,
+					"us": 7246
+				},
+				"decision": {
+					"count": 14424,
+					"max_us": 545,
+					"us": 119898
+				},
+				"move": {
+					"count": 14424,
+					"max_us": 1483,
+					"us": 986224
+				},
+				"perception": {
+					"count": 14424,
+					"max_us": 213,
+					"us": 161029
+				},
+				"target_set": {
+					"count": 173,
+					"max_us": 6,
+					"us": 264
+				},
+				"weapon": {
+					"count": 14424,
+					"max_us": 65,
+					"us": 11607
+				}
+			}
+		},
+		{
+			"draw": 179.688768606225,
+			"fps": 73.8493319733331,
+			"frames": 739,
+			"max_ms": 35.395,
+			"npc": 24,
+			"p95_ms": 19.359,
+			"p99_ms": 22.556,
+			"perception": {
+				"range_calculations": 601,
+				"range_requests": 11091,
+				"rays": 7241
+			},
+			"position": "(6.077686, 0.000391, -34.46827)",
+			"seconds": 10.006861,
+			"work": {
+				"agent_path": {
+					"count": 6923,
+					"max_us": 135,
+					"us": 5230
+				},
+				"decision": {
+					"count": 14424,
+					"max_us": 7624,
+					"us": 555729
+				},
+				"move": {
+					"count": 14424,
+					"max_us": 1767,
+					"us": 915801
+				},
+				"perception": {
+					"count": 14424,
+					"max_us": 13316,
+					"us": 276751
+				},
+				"tactical_path": {
+					"count": 18,
+					"max_us": 1327,
+					"us": 6534
+				},
+				"target_set": {
+					"count": 295,
+					"max_us": 5,
+					"us": 478
+				},
+				"weapon": {
+					"count": 14424,
+					"max_us": 121,
+					"us": 12072
+				}
+			}
+		}
+	],
+	"seed": 20261014,
+	"tag": "after",
+	"viewport": "(1920.0, 1080.0)"
+}
