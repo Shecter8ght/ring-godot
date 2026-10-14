@@ -58,6 +58,9 @@ tools/smoke.cmd <сцена> [кадров] [overview[:x:z:высота]|at:уг
 tools/godot.cmd res://tools/ai_test.tscn                     # прогон мародёра: шум → бой → выстрелы, печатает состояния
 tools/godot.cmd res://tools/ai_squad_test.tscn               # тактика отряда: окрик, укрытие, перезарядка, поиск
 tools/godot.cmd --headless res://tools/ai_population_test.tscn # население слоями на «Пешем маршруте»: точки, 1/2/3 игрока, рынок, подход, отклик на шум, стычки
+tools/godot.cmd --headless res://tools/coop_population_test.tscn -- host # + «-- client» через 3 с (порт 17795; COOP_POP_PEERS=3 и второй «-- client» —
+                                                              # двое гостей): население по числу игроков, у гостей те же бойцы и ходят, подход вдали от всех,
+                                                              # чужие отряды и ЧВК по составу, стычка с гостем засчитана
 tools/godot.cmd --headless res://tools/steps_test.tscn      # шаги: поверхность под ногами, темп от скорости, глушение стеной
 tools/godot.cmd --headless res://tools/settings_test.tscn   # настройки: шины громкости, качество графики, мышь
 tools/godot.cmd --headless res://tools/downed_test.tscn    # тяжёлое ранение: лечь, добить, голова/граната, поднять, тащить, спасение мародёров
