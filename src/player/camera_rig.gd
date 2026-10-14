@@ -192,6 +192,11 @@ func set_target(node: Node3D) -> void:
 	_target = node
 
 
+## Первый вид из глаз и обе модели оружия готовятся, пока мир ещё закрыт экраном загрузки.
+func prepare_for_play() -> void:
+	_process(0.0)
+
+
 static func load_settings() -> void:
 	if _settings_loaded:
 		return

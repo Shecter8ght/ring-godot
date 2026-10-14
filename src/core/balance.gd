@@ -606,6 +606,10 @@ const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 const HIDEOUT_SCENE := "res://scenes/levels/hideout.tscn"
 ## ENet: обычный обрыв определяется быстро; на загрузку тяжёлой карты даём до трёх минут.
 const NET_TIMEOUT := {"factor": 32, "min_ms": 5000, "max_ms": 30000, "loading_ms": 180000}
+## Доля общего перехода: чтение ресурсов, подготовка сцены и её первого кадра.
+const LOADING_PROGRESS: Dictionary = {"prepare": 2.0, "resources_start": 5.0, "resources_end": 65.0,
+	"scene": 68.0, "geometry": 72.0, "atmosphere": 78.0, "player": 84.0,
+	"equipment": 90.0, "ready": 94.0, "network": 96.0, "image": 98.0}
 const RAID_SCENE := "res://scenes/levels/f1_ring.tscn"
 ## Камера в убежище ближе — комната тесная.
 const HIDEOUT_CAMERA_DISTANCE := 20.0

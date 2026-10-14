@@ -26,7 +26,7 @@ func _ready() -> void:
 	back.text = "В убежище"
 	back.pressed.connect(func() -> void:
 		Net.disconnect_all()
-		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE))
+		Net.change_scene(Balance.HIDEOUT_SCENE))
 	($Center/Panel/VBox as VBoxContainer).add_child(back)
 	# хост: деньги игрокам — то же окно, что в меню Esc
 	_admin_button = Button.new()

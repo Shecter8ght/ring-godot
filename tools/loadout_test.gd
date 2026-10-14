@@ -173,7 +173,8 @@ func _ready() -> void:
 	Input.action_press("ui_accept")
 	await _frames(2)
 	Input.action_release("ui_accept")
-	for i in range(30):
+	var return_began: int = Time.get_ticks_msec()
+	while Loading.active and Time.get_ticks_msec() - return_began < 60000:
 		await get_tree().process_frame
 	_check("Enter — назад в убежище", get_tree().current_scene and get_tree().current_scene.scene_file_path == Balance.HIDEOUT_SCENE and not Profile.pending_raid, str(get_tree().current_scene.scene_file_path if get_tree().current_scene else ""))
 	# выручка Михалыча: ни ствола, ни денег — бесплатный набор; со стволом — не положено

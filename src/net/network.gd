@@ -20,6 +20,8 @@ signal joined
 signal join_failed
 ## Хост начислил деньги (текст для окна, где сейчас игрок).
 signal money_received(text: String)
+## Переход закончен: сцена, свой игрок и первый кадр подготовлены, экран загрузки закрыт.
+signal scene_transition_finished(path: String)
 ## Открыт для чтения из lobby.gd: peer_id -> имя.
 var player_names: Dictionary = {}
 ## Свой флаг вместо multiplayer.has_multiplayer_peer(): в Godot 4.5 он true даже без реального
@@ -39,6 +41,7 @@ var _transition_serial: int = 0
 var _transition_pending: Dictionary = {}
 ## _ready уровня ещё не означает, что пережили создание GPU-ресурсов первого кадра.
 var _ready_scene: String = ""
+var _source_scene_key: String = ""
 ## После потери хоста убежище показывает причину возврата.
 var disconnect_message: String = ""
 ## Условия следующего рейда хоста (RaidConditions.next_own у хоста) — у гостей: погода за окнами
@@ -125,6 +128,11 @@ func _keep_own_scene(peer: MultiplayerPeer) -> void:
 func disconnect_all() -> void:
 	var previous_peer: MultiplayerPeer = multiplayer.multiplayer_peer
 	_active = false
+	if Loading.active:
+		_transition_serial += 1
+		_changing_scene = false
+		_ready_scene = ""
+		Loading.dismiss()
 	_transition_pending.clear()
 	# Сохраняем свой id и сцену до close(): закрытый ENet уже не возвращает unique_id.
 	_keep_own_scene(OfflineMultiplayerPeer.new())
@@ -179,6 +187,11 @@ func enter_scene(key: String) -> void:
 	if _changing_scene:
 		_ready_scene = key
 		return
+	_publish_scene(key)
+
+
+## Спавнеры клиента готовы раньше его персонажа: разрешаем репликацию под экраном загрузки.
+func _publish_scene(key: String) -> void:
 	peer_scene[multiplayer.get_unique_id()] = key
 	_refresh_timeouts()
 	print("net: сцена готова ", key, " peer=", _own_id)
@@ -188,86 +201,130 @@ func enter_scene(key: String) -> void:
 		_scene_is.rpc(key)
 
 
-## Сначала закрыть старую сцену у всех, затем удалить её. Иначе пакеты движения
-## продолжают приходить по старому пути во время тяжёлой загрузки следующего уровня.
-func change_scene(path: String) -> void:
-	if not is_networked():
-		get_tree().change_scene_to_file(path)
+## Экран появляется до чтения сохранения и ресурсов, в соло и коопе одинаково.
+## В сети сначала закрываем старые потоки, чтобы пакеты не приходили к удалённым узлам.
+func change_scene(path: String, title: String = "", prepare: Callable = Callable()) -> void:
+	if _changing_scene or Loading.active:
 		return
-	if _changing_scene:
-		return
+	if PauseMenu.shown:
+		Pause.close_menu()
 	_changing_scene = true
 	_ready_scene = ""
 	var session: MultiplayerPeer = multiplayer.multiplayer_peer
 	var began: int = Time.get_ticks_msec()
 	print("net: загрузка ", path, " peer=", _own_id)
 	_transition_serial += 1
+	var serial: int = _transition_serial
+	_source_scene_key = String(peer_scene.get(_own_id, scene_of(get_tree().current_scene)))
+	Loading.begin(title if title != "" else ("Возвращение в убежище" if path == Balance.HIDEOUT_SCENE else "Начало рейда"))
 	_transition_pending.clear()
-	for peer: int in multiplayer.get_peers():
-		_transition_pending[peer] = true
-	peer_scene[multiplayer.get_unique_id()] = "loading"
-	_refresh_timeouts()
-	_refresh_scoped_syncs()
-	scenes_changed.emit()
-	_scene_is.rpc("loading", _transition_serial)
-	while is_networked() and not _transition_pending.is_empty():
-		for peer: int in _transition_pending.keys():
-			if not peer in multiplayer.get_peers():
-				_transition_pending.erase(peer)
-		await get_tree().process_frame
+	if is_networked():
+		for peer: int in multiplayer.get_peers():
+			_transition_pending[peer] = true
+		peer_scene[multiplayer.get_unique_id()] = "loading"
+		_refresh_timeouts()
+		_refresh_scoped_syncs()
+		scenes_changed.emit()
+		_scene_is.rpc("loading", serial)
+	await Loading.stage("Подготовка сохранения" if prepare.is_valid() else "Подготовка перехода", float(Balance.LOADING_PROGRESS.prepare))
+	if not _transition_is_current(serial, session):
+		return
+	if prepare.is_valid():
+		prepare.call()
+	if is_networked() and not _transition_pending.is_empty():
+		Loading.report("Ожидание участников", float(Balance.LOADING_PROGRESS.prepare))
+		while not _transition_pending.is_empty():
+			for peer: int in _transition_pending.keys():
+				if not peer in multiplayer.get_peers():
+					_transition_pending.erase(peer)
+			await get_tree().process_frame
+			if not _transition_is_current(serial, session):
+				return
+	var loadout_required: bool = Profile.pending_raid
 	# Чтение большой карты в главном потоке останавливает ENet: медленный компьютер
 	# исчезал у хоста, а после загрузки получал server_disconnected и возвращался в убежище.
+	await Loading.stage("Загрузка ресурсов", float(Balance.LOADING_PROGRESS.resources_start))
+	if not _transition_is_current(serial, session):
+		return
 	var result: Error = ResourceLoader.load_threaded_request(path, "PackedScene")
 	if result != OK:
 		_finish_scene_error(path, result)
 		return
-	while ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+	var progress: Array = []
+	var status: ResourceLoader.ThreadLoadStatus = ResourceLoader.load_threaded_get_status(path, progress)
+	while status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		if not progress.is_empty():
+			Loading.report("Загрузка ресурсов", lerpf(float(Balance.LOADING_PROGRESS.resources_start),
+				float(Balance.LOADING_PROGRESS.resources_end), float(progress[0])))
 		await get_tree().process_frame
-		if not is_networked() or multiplayer.multiplayer_peer != session:
-			_changing_scene = false
+		if not _transition_is_current(serial, session):
 			return
-	if not is_networked() or multiplayer.multiplayer_peer != session:
-		_changing_scene = false
-		return
-	if ResourceLoader.load_threaded_get_status(path) != ResourceLoader.THREAD_LOAD_LOADED:
+		status = ResourceLoader.load_threaded_get_status(path, progress)
+	if status != ResourceLoader.THREAD_LOAD_LOADED:
 		_finish_scene_error(path, ERR_CANT_OPEN)
 		return
 	var scene: PackedScene = ResourceLoader.load_threaded_get(path) as PackedScene
 	if scene == null:
 		_finish_scene_error(path, ERR_INVALID_DATA)
 		return
-	await get_tree().process_frame
-	if not is_networked() or multiplayer.multiplayer_peer != session:
-		_changing_scene = false
+	await Loading.stage("Создание локации", float(Balance.LOADING_PROGRESS.scene))
+	if not _transition_is_current(serial, session):
 		return
 	result = get_tree().change_scene_to_packed(scene)
-	if result == OK:
-		await get_tree().scene_changed
-		# До первого отрисованного кадра компиляция шейдеров ещё может остановить поток.
-		# Пока этого не прошли, остальные видят loading и сохраняют увеличенный таймаут.
-		await get_tree().process_frame
-		await get_tree().process_frame
-	else:
+	if result != OK:
 		_finish_scene_error(path, result)
 		return
-	if not is_networked() or multiplayer.multiplayer_peer != session:
-		_changing_scene = false
+	await get_tree().scene_changed
+	if not _transition_is_current(serial, session):
 		return
-	_changing_scene = false
+	var level: Node = get_tree().current_scene
+	Loading.hold_scene(level)
+	# _ready с этапами возвращает управление раньше конца подготовки; ждём enter_scene уровня.
+	while _ready_scene == "":
+		await get_tree().process_frame
+		if not _transition_is_current(serial, session):
+			return
+	await Loading.stage("Подготовка изображения", float(Balance.LOADING_PROGRESS.ready))
+	if not _transition_is_current(serial, session):
+		return
 	var key: String = _ready_scene
 	_ready_scene = ""
-	if key != "":
-		enter_scene(key)
-	else:
-		_refresh_timeouts()
+	_publish_scene(key)
+	# Клиент получает своего игрока и снаряжение после объявления готовности спавнеров.
+	if key == "raid":
+		Loading.report("Подготовка игрока и снаряжения", float(Balance.LOADING_PROGRESS.network))
+		while Raid.current == null or Raid.current.local_player() == null or (loadout_required and not Raid.current.local_player().inventory.loadout_ready):
+			await get_tree().process_frame
+			if not _transition_is_current(serial, session):
+				return
+	await Loading.stage("Подготовка снаряжения и камеры", float(Balance.LOADING_PROGRESS.image))
+	if not _transition_is_current(serial, session):
+		return
+	for node: Node in get_tree().get_nodes_in_group("camera_rig"):
+		if level.is_ancestor_of(node):
+			(node as CameraRig).prepare_for_play()
+	# До первого отрисованного кадра компиляция шейдеров ещё может остановить поток.
+	await Loading.stage("Готово", 100.0)
+	if not _transition_is_current(serial, session):
+		return
+	_changing_scene = false
+	Loading.finish()
+	_refresh_timeouts()
 	print("net: переход завершён за ", Time.get_ticks_msec() - began, " мс peer=", _own_id)
+	scene_transition_finished.emit(path)
+
+
+## Старый переход после потери хоста не должен закрыть экран нового возврата в убежище.
+func _transition_is_current(serial: int, session: MultiplayerPeer) -> bool:
+	return serial == _transition_serial and multiplayer.multiplayer_peer == session
 
 
 func _finish_scene_error(path: String, error: Error) -> void:
 	_changing_scene = false
+	_ready_scene = ""
 	push_error("Net: не удалось загрузить %s (%s)" % [path, error_string(error)])
-	if is_networked():
-		enter_scene(scene_of(get_tree().current_scene))
+	enter_scene(_source_scene_key)
+	Loading.fail("Не удалось загрузить локацию.")
 
 
 ## Таймаут увеличен у обеих сторон, пока хотя бы один участник загружает сцену.
@@ -413,7 +470,8 @@ func _on_server_disconnected() -> void:
 	player_list_changed.emit()
 	# хост ушёл: снаряжение, взятое в рейд, остаётся там (как при смерти); дальше — в своё убежище
 	Profile.pending_raid = false
-	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+	Loading.dismiss()
+	change_scene(Balance.HIDEOUT_SCENE, "Возвращение после потери соединения")
 
 
 @rpc("any_peer", "reliable")

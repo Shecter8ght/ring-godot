@@ -70,6 +70,9 @@ var _start_label: Label
 var _trade_hold: float = 0.0
 
 func _ready() -> void:
+	if not Engine.is_editor_hint() and Loading.active:
+		Loading.hold_scene(self)
+		await Loading.stage("Подготовка убежища", float(Balance.LOADING_PROGRESS.geometry))
 	_apply_materials(self)
 	if Engine.is_editor_hint():
 		return
@@ -83,6 +86,8 @@ func _ready() -> void:
 			if peer != multiplayer.get_unique_id() and Net.visible_in(peer,"hideout"):
 				_already_here.append(peer)
 	get_tree().node_added.connect(_on_node_added)
+	if Loading.active:
+		await Loading.stage("Подготовка персонажа", float(Balance.LOADING_PROGRESS.player))
 	var me := multiplayer.get_unique_id() if Net.is_networked() else 1
 	_player = PLAYER_SCENE.instantiate() as Player
 	_player.name = "Player_%d" % me
@@ -99,6 +104,8 @@ func _ready() -> void:
 	_camera_rig.set_target(_player)
 	_camera_rig.rotation.y = _spawn.rotation.y
 	_camera_rig.set_distance(Balance.HIDEOUT_CAMERA_DISTANCE)
+	if Loading.active:
+		await Loading.stage("Подготовка снаряжения и убежища", float(Balance.LOADING_PROGRESS.equipment))
 	_ui = HideoutUI.new()
 	add_child(_ui)
 	_build_hud()
@@ -206,7 +213,7 @@ func _launch_raid() -> bool:
 		Net.start_level.rpc(Floors.scene(Profile.floor), RaidConditions.next_own())
 	else:
 		Profile.pending_raid = true
-		get_tree().change_scene_to_file(Floors.scene(Profile.floor))
+		Net.change_scene(Floors.scene(Profile.floor))
 	return true
 
 

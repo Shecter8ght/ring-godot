@@ -2662,7 +2662,7 @@ func _host_left() -> void:
 ## Новый рейд: хост переводит всех заново в сектор; без сети — перезагрузка сцены.
 func _restart() -> void:
 	if not Net.is_networked():
-		get_tree().reload_current_scene()
+		Net.change_scene(get_tree().current_scene.scene_file_path)
 	elif multiplayer.is_server():
 		Net.start_level.rpc(get_tree().current_scene.scene_file_path, RaidConditions.current)
 

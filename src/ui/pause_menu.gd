@@ -121,7 +121,7 @@ func _ready() -> void:
 		close_menu()
 		Net.disconnect_all()
 		Profile.pending_raid = false
-		get_tree().change_scene_to_file(Balance.MAIN_MENU_SCENE))
+		Net.change_scene(Balance.MAIN_MENU_SCENE, "Возвращение в главное меню"))
 	_main.add_child(_to_menu)
 	_main.add_child(_button("Выйти из игры", func() -> void: get_tree().quit()))
 	_controls = VBoxContainer.new()
@@ -678,7 +678,7 @@ func _on_leave() -> void:
 	else:
 		Net.disconnect_all()
 		Profile.pending_raid = false
-		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+		Net.change_scene(Balance.HIDEOUT_SCENE)
 
 
 ## Время суток / погода рейда: «как в убежище» или любой вариант; в рейде меняется сразу.

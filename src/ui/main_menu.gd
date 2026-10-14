@@ -99,8 +99,8 @@ func _show_new() -> void:
 	name_edit.add_theme_font_size_override("font_size", 18)
 	_side.add_child(name_edit)
 	var start := _big("Начать", func() -> void:
-		Saves.create(name_edit.text)
-		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE))
+		var save_name: String = name_edit.text
+		Net.change_scene(Balance.HIDEOUT_SCENE, "Новая игра", func() -> void: Saves.create(save_name)))
 	start.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_side.add_child(start)
 	name_edit.text_submitted.connect(func(_t: String) -> void: start.pressed.emit())
@@ -185,7 +185,7 @@ func _show_coop() -> void:
 		if err != "":
 			_status.text = err
 			return
-		get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE))
+		Net.change_scene(Balance.HIDEOUT_SCENE, "Загрузка убежища"))
 	host.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_side.add_child(host)
 	_side.add_child(_label("Друзьям нужен твой IP и открытый порт %d (UDP) — или общая сеть (Radmin VPN, ZeroTier)." % Net.PORT, 13, DIM))
@@ -202,15 +202,14 @@ func _show_coop() -> void:
 			_status.text = err
 			return
 		_status.text = "Подключаюсь к %s…" % ip.text
-		Net.joined.connect(func() -> void: get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE), CONNECT_ONE_SHOT)
+		Net.joined.connect(func() -> void: Net.change_scene(Balance.HIDEOUT_SCENE, "Загрузка общего убежища"), CONNECT_ONE_SHOT)
 		Net.join_failed.connect(func() -> void: _status.text = "Не удалось подключиться к %s" % ip.text, CONNECT_ONE_SHOT))
 	join.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_side.add_child(join)
 
 
 func _play(path: String) -> void:
-	Saves.open(path)
-	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+	Net.change_scene(Balance.HIDEOUT_SCENE, "Продолжить игру", func() -> void: Saves.open(path))
 
 
 func _save_name(path: String) -> String:

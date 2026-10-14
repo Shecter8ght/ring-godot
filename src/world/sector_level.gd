@@ -57,6 +57,9 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		_build_editor_preview()
 		return
+	if Loading.active:
+		Loading.hold_scene(self)
+		await Loading.stage("Подготовка локации", float(Balance.LOADING_PROGRESS.geometry))
 	_rng.randomize()
 	_sector_def = SectorBuilder.load_def(sector_path)
 	# сеть: всё, что синхронизируется в рейде, — только тем, кто в рейде (ушедший в убежище не
@@ -88,6 +91,8 @@ func _ready() -> void:
 	var ceil := sector.get_node_or_null("Ceilings")
 	if ceil:
 		ceil.reparent(self)
+	if Loading.active:
+		await Loading.stage("Подготовка света и погоды", float(Balance.LOADING_PROGRESS.atmosphere))
 	var atmo := RaidAtmosphere.new()
 	atmo.name = "Atmosphere"
 	add_child(atmo)
@@ -154,6 +159,8 @@ func _ready() -> void:
 	_raid.name = "Raid"
 	add_child(_raid)
 
+	if Loading.active:
+		await Loading.stage("Подготовка игроков", float(Balance.LOADING_PROGRESS.player))
 	if not Net.is_networked():
 		_spawn_offline_player()
 	else:
@@ -163,6 +170,8 @@ func _ready() -> void:
 			multiplayer.peer_connected.connect(_on_peer_connected_late)
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 		_find_local_player_when_ready()
+	if Loading.active:
+		await Loading.stage("Подготовка мира", float(Balance.LOADING_PROGRESS.equipment))
 	_bake_navmesh()
 	# Только после создания спавнеров, Weather и Events можно получать пакеты рейда.
 	Net.enter_scene("raid")

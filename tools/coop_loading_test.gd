@@ -53,14 +53,14 @@ func _run() -> void:
 		return
 	if _role == "client":
 		await Net.joined
-	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
+	Net.change_scene(Balance.HIDEOUT_SCENE, "Загрузка общего убежища")
 	await _wait(func() -> bool:
-		return _players().size() == 2 and Net.peer_scene.values().count("hideout") == 2)
+		return not Loading.active and _players().size() == 2 and Net.peer_scene.values().count("hideout") == 2)
 	_check("оба в убежище", not _lost and _players().size() == 2, str(Net.peer_scene))
 	if not _lost:
 		_hideout_ready.rpc_id(1)
 	await _wait(func() -> bool:
-		return get_tree().current_scene.scene_file_path == ROUTE and _players().size() == 2 and Net.peer_scene.values().count("raid") == 2)
+		return not Loading.active and get_tree().current_scene != null and get_tree().current_scene.scene_file_path == ROUTE and _players().size() == 2 and Net.peer_scene.values().count("raid") == 2)
 	_check("оба в рейде после задержки", not _lost and Net.is_networked() and _players().size() == 2 and Net.peer_scene.values().count("raid") == 2, str(Net.peer_scene))
 	if not _lost and Net.is_networked() and Raid.current != null:
 		_mark_ready.rpc_id(1)

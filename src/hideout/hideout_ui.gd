@@ -1835,7 +1835,7 @@ func _coop_block(col: VBoxContainer) -> void:
 			col.add_child(_text("· %s%s — %s" % [String(Net.player_names[id]), tag, String(where.get(String(Net.peer_scene.get(int(id), "")), "подключается"))], Color(0.85, 0.85, 0.8)))
 		col.add_child(_button("Покинуть собрание", func() -> void:
 			Net.disconnect_all()
-			get_tree().reload_current_scene()))
+			Net.change_scene(Balance.HIDEOUT_SCENE, "Возвращение в своё убежище")))
 		return
 	var cfg := ConfigFile.new()
 	cfg.load(CameraRig.SETTINGS_PATH)
@@ -1859,7 +1859,7 @@ func _coop_block(col: VBoxContainer) -> void:
 			status.text = err
 		else:
 			# убежище заново — уже в сети (свой игрок с синхронизацией)
-			get_tree().reload_current_scene()))
+			Net.change_scene(Balance.HIDEOUT_SCENE, "Загрузка общего убежища")))
 	col.add_child(_button("Подключиться по IP", func() -> void:
 		remember.call()
 		var err := Net.join(ip.text, nick.text)
@@ -1867,7 +1867,7 @@ func _coop_block(col: VBoxContainer) -> void:
 			status.text = err
 			return
 		status.text = "Подключаюсь…"
-		Net.joined.connect(func() -> void: get_tree().reload_current_scene(), CONNECT_ONE_SHOT)
+		Net.joined.connect(func() -> void: Net.change_scene(Balance.HIDEOUT_SCENE, "Загрузка общего убежища"), CONNECT_ONE_SHOT)
 		Net.join_failed.connect(func() -> void: status.text = "Не удалось подключиться", CONNECT_ONE_SHOT)))
 	col.add_child(status)
 
