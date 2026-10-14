@@ -1,0 +1,74 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+  [ok] головка станка и сигнал самолёта — только из рейда
+  [ok] без чита находку не купить
+WARNING: Node 'Props/SH_Int_PersonalAndTechnical/MaintenancePistol/PM/PM_LOD1/Suppressor_LOD1' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Parent path './Props/SH_Int_PersonalAndTechnical/MaintenancePistol/PM/PM_LOD1/Suppressor_LOD1' for node 'Suppressor_Mesh_LOD1' has vanished when instantiating: 'res://levels/shelter/Shelter_Interior.tscn'.
+   at: instantiate (scene/resources/packed_scene.cpp:213)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Node './Suppressor_Mesh_LOD1' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Node 'Props/SH_Int_PersonalAndTechnical/MaintenancePistol/PM/Suppressor' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Parent path './Props/SH_Int_PersonalAndTechnical/MaintenancePistol/PM/Suppressor' for node 'Suppressor_Mesh' has vanished when instantiating: 'res://levels/shelter/Shelter_Interior.tscn'.
+   at: instantiate (scene/resources/packed_scene.cpp:213)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Node './Suppressor_Mesh' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Node 'Props/SH_Int_BoilerHall/CabinetPm/PM/PM_LOD1/Suppressor_LOD1' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Parent path './Props/SH_Int_BoilerHall/CabinetPm/PM/PM_LOD1/Suppressor_LOD1' for node 'Suppressor_Mesh_LOD1' has vanished when instantiating: 'res://levels/shelter/Shelter_Interior.tscn'.
+   at: instantiate (scene/resources/packed_scene.cpp:213)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Node './Suppressor_Mesh_LOD1' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Node 'Props/SH_Int_BoilerHall/CabinetPm/PM/Suppressor' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Parent path './Props/SH_Int_BoilerHall/CabinetPm/PM/Suppressor' for node 'Suppressor_Mesh' has vanished when instantiating: 'res://levels/shelter/Shelter_Interior.tscn'.
+   at: instantiate (scene/resources/packed_scene.cpp:213)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+WARNING: Node './Suppressor_Mesh' was modified from inside an instance, but it has vanished.
+   at: instantiate (scene/resources/packed_scene.cpp:312)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://tools/trader_ui_test.gd:23)
+net: сцена готова hideout peer=1
+  [ok] группы оружия: ПМ — пистолеты, ВЕРАС — автоматы
+  [ok] патроны и магазины — по калибру  5.45×39
+  [ok] без читов находок в продаже нет  180 поз.
+  [ok] шапка закреплена над списком
+  [ok] патроны по умолчанию — 30  30
+  [ok] «+» — ещё 30  60
+  [ok] поле количества есть в карточке
+  [ok] число руками принято  45
+  [ok] «+» от 45 — до 60  60
+  [ok] «−» не уходит ниже шага  30
+  [ok] подгруппа «Пистолеты»: в списке только они  3 карточек
+  [ok] поиск «глуш»: нашлись глушители, остальное скрыто  11 карточек
+  [ok] с читом находки продаются  335 поз.
+  [ok] комплектов четыре
+  [ok] комплект «Дворовый» собран целиком  102 640 ₽
+  [ok] комплект «Патрульный» собран целиком  362 100 ₽
+  [ok] комплект «Штурмовик» собран целиком  2 025 890 ₽
+  [ok] комплект «Снайпер» собран целиком  3 799 900 ₽
+  [ok] карточка своего оружия — кликабельна
+  [ok] клик по карточке выбрал оружие  stash
+trader_ui_test: провалов 0

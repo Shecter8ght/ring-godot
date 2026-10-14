@@ -1,0 +1,234 @@
+{
+	"cpu": "AMD Ryzen 7 7700 8-Core Processor",
+	"engine": {
+		"build": "steam",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (steam)",
+		"timestamp": 0
+	},
+	"geometry": [
+		{
+			"meshes": 3796,
+			"source": "res://scenes/levels/zone01/zone01_world.tscn",
+			"triangles": 105784703
+		},
+		{
+			"meshes": 822,
+			"source": "res://assets/models/characters/persona_animated.glb",
+			"triangles": 4295762
+		},
+		{
+			"meshes": 104,
+			"source": "res://scenes/levels/zone01/zone01_yard05.tscn",
+			"triangles": 1238172
+		},
+		{
+			"meshes": 12,
+			"source": "res://assets/zone01/models/sf_vaz2104.glb",
+			"triangles": 719988
+		},
+		{
+			"meshes": 7,
+			"source": "res://assets/zone01/models/sf_car_burned.glb",
+			"triangles": 560000
+		},
+		{
+			"meshes": 47,
+			"source": "res://assets/models/weapons/veras54/veras54_viewmodel.glb",
+			"triangles": 261488
+		},
+		{
+			"meshes": 24,
+			"source": "res://assets/models/weapons/veras54/veras54.glb",
+			"triangles": 194460
+		},
+		{
+			"meshes": 1,
+			"source": "res://assets/zone01/models/khrushchevka_panel_b.glb",
+			"triangles": 103804
+		},
+		{
+			"meshes": 1,
+			"source": "res://assets/zone01/models/khrushchevka_panel_a.glb",
+			"triangles": 102660
+		},
+		{
+			"meshes": 72,
+			"source": "res://scenes/ai/marauder.tscn",
+			"triangles": 83280
+		},
+		{
+			"meshes": 1,
+			"source": "res://assets/zone01/models/khrushchevka_brick.glb",
+			"triangles": 70088
+		},
+		{
+			"meshes": 5,
+			"source": "res://assets/zone01/models/sf_panel5_brutal.glb",
+			"triangles": 50720
+		},
+		{
+			"meshes": 2,
+			"source": "res://assets/zone01/models/sf_dead_tree.glb",
+			"triangles": 40000
+		},
+		{
+			"meshes": 2,
+			"source": "res://assets/models/characters/persona_arms.glb",
+			"triangles": 32256
+		},
+		{
+			"meshes": 126,
+			"source": "res://assets/models/weapons/pm/pm.glb",
+			"triangles": 29022
+		},
+		{
+			"meshes": 6,
+			"source": "res://assets/zone01/models/sf_panel12.glb",
+			"triangles": 17166
+		},
+		{
+			"meshes": 798,
+			"source": "res://scenes/world/urban_road.tscn",
+			"triangles": 11272
+		},
+		{
+			"meshes": 15,
+			"source": "res://assets/zone01/models/sf_garage_row.glb",
+			"triangles": 9540
+		},
+		{
+			"meshes": 20,
+			"source": "res://assets/zone01/models/lawn_fence.glb",
+			"triangles": 9200
+		},
+		{
+			"meshes": 52,
+			"source": "res://scenes/levels/zone01/zone01_blockout.tscn",
+			"triangles": 9196
+		}
+	],
+	"gpu": "NVIDIA GeForce RTX 5070 Ti",
+	"load_max_frame_ms": 7780.607,
+	"load_ms": 11486,
+	"map": "zone01",
+	"nodes": 17181.0,
+	"quality": "high",
+	"resolution": "(1920.0, 1080.0)",
+	"resources": 1527.0,
+	"samples": [
+		{
+			"ads": false,
+			"draw": 3264.96296296296,
+			"fps": 101.149381652601,
+			"frames": 405,
+			"max_ms": 20.203,
+			"p95_ms": 14.45,
+			"physics_ms": 8.93147407407413,
+			"position": "(-194.0, 0.344612, -90.0)",
+			"process_ms": 26.4999629629629,
+			"spot": "courtyard",
+			"triangles": 11018362.6296296
+		},
+		{
+			"ads": true,
+			"draw": 3380.85635359116,
+			"fps": 90.251830030374,
+			"frames": 362,
+			"max_ms": 25.497,
+			"p95_ms": 16.265,
+			"physics_ms": 8.85449171270722,
+			"position": "(-194.0, 0.344612, -90.0)",
+			"process_ms": 14.881220994475,
+			"spot": "courtyard",
+			"triangles": 11357928.6298343
+		},
+		{
+			"ads": false,
+			"draw": 1677.60878661088,
+			"fps": 119.441354295041,
+			"frames": 478,
+			"max_ms": 17.936,
+			"p95_ms": 12.759,
+			"physics_ms": 8.13677615062761,
+			"position": "(0.0, 0.300275, -130.0)",
+			"process_ms": 13.0166841004184,
+			"spot": "mall",
+			"triangles": 3549124.78033473
+		},
+		{
+			"ads": true,
+			"draw": 1672.22886597938,
+			"fps": 121.18010937192,
+			"frames": 485,
+			"max_ms": 20.665,
+			"p95_ms": 14.392,
+			"physics_ms": 9.83538556701034,
+			"position": "(0.0, 0.300275, -130.0)",
+			"process_ms": 10.667006185567,
+			"spot": "mall",
+			"triangles": 3541771.6556701
+		}
+	],
+	"stages": [
+		{
+			"ms": 0,
+			"stage": "Подготовка"
+		},
+		{
+			"ms": 18,
+			"stage": "Подготовка перехода"
+		},
+		{
+			"ms": 590,
+			"stage": "Загрузка ресурсов"
+		},
+		{
+			"ms": 5736,
+			"stage": "Создание локации"
+		},
+		{
+			"ms": 2385,
+			"stage": "Подготовка локации"
+		},
+		{
+			"ms": 258,
+			"stage": "Подготовка света и погоды"
+		},
+		{
+			"ms": 46,
+			"stage": "Подготовка игроков"
+		},
+		{
+			"ms": 59,
+			"stage": "Подготовка мира"
+		},
+		{
+			"ms": 5,
+			"stage": "Подготовка изображения"
+		},
+		{
+			"ms": 0,
+			"stage": "Подготовка игрока и снаряжения"
+		},
+		{
+			"ms": 907,
+			"stage": "Подготовка снаряжения и камеры"
+		},
+		{
+			"ms": 1481,
+			"stage": "Готово"
+		}
+	],
+	"static_mb": 398.124095916748,
+	"tag": "cached",
+	"video_mb": 3742.99415588379,
+	"window": "(1920, 1080)",
+	"world_ready_ms": 11486,
+	"world_wait_max_ms": 0.0
+}

@@ -152,6 +152,9 @@ func _write_manifest() -> void:
 
 
 func _source_hash(path: String) -> String:
+	# Карта высот — двоичные float, её нельзя проверять как текст UTF-8.
+	if path.get_extension() == "r32":
+		return FileAccess.get_sha256(path)
 	# Git нормализует текст в LF: кэш не должен устаревать только из-за CRLF другой машины.
 	return FileAccess.get_file_as_string(path).replace("\r\n", "\n").sha256_text()
 

@@ -1,11 +1,12 @@
 {
 	"files": {
-		"res://data/sectors/zone01_mall.json": "e86e3f070490b9b5600c49451de29cc211e1fcd47457b85d129ca65fd4ceb8de",
-		"res://data/terrain/zone01_heights.r32": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		"res://data/sectors/zone01_mall.json": "cdef989431fce4238c6f54f62296f1a36ba0330cd1efcbb9553bb57039852e3f",
+		"res://data/terrain/zone01_heights.r32": "67c9e55daf4c0f60678c259a6e3dc16272ebed9651043e3676f81ebd49366a33",
 		"res://scenes/levels/zone01/zone01_blockout.tscn": "64f6d91944ac0eeaf3a2bbeae284278c3320459f29edecdf47b54a440859e056",
-		"res://scenes/levels/zone01/zone01_world.tscn": "c747ec9bf76f6858d8274c8b1afe8f0a30a5f278630836aa808665dabd883de8",
-		"res://scenes/levels/zone01/zone01_yard05.tscn": "a9855585935971fb6d18f0f1f327e230d7fde573f96bc2e1f09c62c11f911f50",
-		"res://scenes/levels/zone01_mall.tscn": "5fc1a1816067b43e8c1abf15483528157e232bab1f6ca1dbdc94d06fac00de15",
+		"res://scenes/levels/zone01/zone01_loose_loot.tscn": "0d07a638246a4aa832a02cae3da329ed790b98c2dd4375b80983d5e86609441e",
+		"res://scenes/levels/zone01/zone01_world.tscn": "ce8bc0fb640b8da4c8a9bbb8a35c06cda561719f064d212446be3716557de1c3",
+		"res://scenes/levels/zone01/zone01_yard05.tscn": "6922994bde64c824fa9c9cba8d568c0a5ba4b82742dd1022e56e43df142f8349",
+		"res://scenes/levels/zone01_mall.tscn": "cc62a8db5a9aa75928b0f282693a239b8e97448a6faffa9dda041655a6dde28e",
 		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
 		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
 		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",
@@ -16,7 +17,7 @@
 		"res://src/world/blockout_opening.gd": "063660bf3bf804e031428db167352fee000c98f2795b32136787ab6395cd27f9",
 		"res://src/world/district_terrain.gd": "96ab2325e89e3b1c8e48b90b820b5b81237474a2286f36becbb666947ac49cac",
 		"res://src/world/urban_facade.gd": "096868a4c07b617b9b2d482c64e6cffc666637252df1bbe1d81de88e006ed22c",
-		"res://src/world/urban_navigation.gd": "c5f58d528e3f5aaf018394bd9644c54ad580b8fa109faf4d2eb1b080ef7c3979",
+		"res://src/world/urban_navigation.gd": "e897f92ec4d8e4be57b31669b713807a21baf48cc8e1441018943661941f1e98",
 		"res://src/world/urban_props.gd": "8893c14356c82bcb31fb6b0cfb81777266c3cb794442a57cf32022345c1e2adf",
 		"res://src/world/urban_road.gd": "38cde9cfa97e3ff7c9d10ca910abd1b2ad60ccaee9a76fa54e218caf20b63918",
 		"res://src/world/urban_terrain.gd": "1d3093285257ceaa25802a3c00c547e7b50fc322518e97236bfaebf7db1f0001"

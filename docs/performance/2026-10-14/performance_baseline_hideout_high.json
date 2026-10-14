@@ -1,0 +1,93 @@
+{
+	"cpu": "AMD Ryzen 7 7700 8-Core Processor",
+	"engine": {
+		"build": "steam",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (steam)",
+		"timestamp": 0
+	},
+	"gpu": "NVIDIA GeForce RTX 5070 Ti",
+	"load_max_frame_ms": 10891.44,
+	"load_ms": 48532,
+	"map": "hideout",
+	"nodes": 5179.0,
+	"quality": "high",
+	"resolution": "(1920.0, 1080.0)",
+	"resources": 2469.0,
+	"samples": [
+		{
+			"ads": false,
+			"draw": 1545.86666666667,
+			"fps": 155.907463723365,
+			"max_ms": 7.459,
+			"p95_ms": 7.021,
+			"physics_ms": 0.678383333333335,
+			"position": "(-1.6, 0.00039, 9.55)",
+			"process_ms": 81.6044333333329,
+			"spot": "start",
+			"triangles": 11748620.2
+		},
+		{
+			"ads": true,
+			"draw": 1525.0,
+			"fps": 160.343777058012,
+			"max_ms": 8.413,
+			"p95_ms": 7.401,
+			"physics_ms": 0.730972222222222,
+			"position": "(-1.6, 0.00039, 9.55)",
+			"process_ms": 7.47697222222219,
+			"spot": "start",
+			"triangles": 11723815.0
+		}
+	],
+	"stages": [
+		{
+			"ms": 0,
+			"stage": "Подготовка"
+		},
+		{
+			"ms": 39,
+			"stage": "Подготовка перехода"
+		},
+		{
+			"ms": 26267,
+			"stage": "Загрузка ресурсов"
+		},
+		{
+			"ms": 5080,
+			"stage": "Создание локации"
+		},
+		{
+			"ms": 6023,
+			"stage": "Подготовка убежища"
+		},
+		{
+			"ms": 104,
+			"stage": "Подготовка персонажа"
+		},
+		{
+			"ms": 14,
+			"stage": "Подготовка снаряжения и убежища"
+		},
+		{
+			"ms": 29,
+			"stage": "Подготовка изображения"
+		},
+		{
+			"ms": 994,
+			"stage": "Подготовка снаряжения и камеры"
+		},
+		{
+			"ms": 9981,
+			"stage": "Готово"
+		}
+	],
+	"static_mb": 292.551085472107,
+	"tag": "baseline",
+	"video_mb": 3647.7880859375
+}

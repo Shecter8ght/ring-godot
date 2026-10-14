@@ -1,0 +1,289 @@
+{
+	"ablations": [
+		{
+			"disabled": [
+				"marauder.gd",
+				"rival_squad.gd",
+				"rival_raids.gd"
+			],
+			"draw": 921.422222222222,
+			"fps": 194.226299535799,
+			"max_ms": 22.703,
+			"p95_ms": 9.827,
+			"physics_ms": 1.23271111111111,
+			"process_ms": 21.8619555555555,
+			"triangles": 812335.5
+		},
+		{
+			"disabled": [
+				"character_animator.gd",
+				"support_hand_ik.gd",
+				"weapon_collision_ik.gd"
+			],
+			"draw": 928.65,
+			"fps": 309.445834085459,
+			"max_ms": 10.283,
+			"p95_ms": 3.964,
+			"physics_ms": 0.454111111111112,
+			"process_ms": 11.1816666666666,
+			"triangles": 813980.433333333
+		},
+		{
+			"disabled": [
+				"shopping_cart.gd",
+				"cart_contact.gd",
+				"shopping_cart_visuals.gd"
+			],
+			"draw": 920.905555555556,
+			"fps": 336.155797006719,
+			"max_ms": 6.085,
+			"p95_ms": 3.727,
+			"physics_ms": 0.463999999999999,
+			"process_ms": 10.298,
+			"triangles": 812707.011111111
+		},
+		{
+			"disabled": [
+				"door.gd",
+				"lamp_head.gd",
+				"street_lamp.gd",
+				"health.gd"
+			],
+			"draw": 919.488888888889,
+			"fps": 367.059284152827,
+			"max_ms": 11.332,
+			"p95_ms": 3.283,
+			"physics_ms": 0.579933333333333,
+			"process_ms": 10.2714,
+			"triangles": 812807.288888889
+		}
+	],
+	"cpu": "AMD Ryzen 7 7700 8-Core Processor",
+	"engine": {
+		"build": "steam",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (steam)",
+		"timestamp": 0
+	},
+	"geometry": [
+		{
+			"meshes": 976,
+			"source": "res://assets/models/characters/persona_animated.glb",
+			"triangles": 4311988
+		},
+		{
+			"meshes": 47,
+			"source": "res://assets/models/weapons/veras54/veras54_viewmodel.glb",
+			"triangles": 261488
+		},
+		{
+			"meshes": 32,
+			"source": "res://assets/models/weapons/veras54/veras54.glb",
+			"triangles": 259280
+		},
+		{
+			"meshes": 195,
+			"source": "res://scenes/world/urban_terrain.tscn",
+			"triangles": 150000
+		},
+		{
+			"meshes": 279,
+			"source": "res://scenes/levels/zone02/zone02_world.tscn",
+			"triangles": 130140
+		},
+		{
+			"meshes": 72,
+			"source": "res://scenes/ai/marauder.tscn",
+			"triangles": 83280
+		},
+		{
+			"meshes": 400,
+			"source": "res://scenes/world/blockout_building.tscn",
+			"triangles": 74448
+		},
+		{
+			"meshes": 3675,
+			"source": "res://scenes/world/urban_road.tscn",
+			"triangles": 48400
+		},
+		{
+			"meshes": 2,
+			"source": "res://assets/models/characters/persona_arms.glb",
+			"triangles": 32256
+		},
+		{
+			"meshes": 105,
+			"source": "res://scenes/levels/zone02/zone02_perimeter.tscn",
+			"triangles": 17028
+		},
+		{
+			"meshes": 54,
+			"source": "res://assets/models/weapons/pm/pm.glb",
+			"triangles": 12438
+		},
+		{
+			"meshes": 36,
+			"source": "res://scenes/levels/zone02/zone02_residential.tscn",
+			"triangles": 10272
+		},
+		{
+			"meshes": 24,
+			"source": "res://scenes/levels/zone02/zone02_bus_station.tscn",
+			"triangles": 6720
+		},
+		{
+			"meshes": 1,
+			"source": "res://assets/items/models/loot/thermos.glb",
+			"triangles": 6500
+		},
+		{
+			"meshes": 1,
+			"source": "res://assets/items/models/loot/work_gloves.glb",
+			"triangles": 6499
+		},
+		{
+			"meshes": 4,
+			"source": "res://assets/items/models/loot/metal_toolbox.glb",
+			"triangles": 6498
+		},
+		{
+			"meshes": 2,
+			"source": "res://assets/items/models/valuable/pack_919_ap.glb",
+			"triangles": 6202
+		},
+		{
+			"meshes": 2,
+			"source": "res://assets/items/models/valuable/switch_managed.glb",
+			"triangles": 6202
+		},
+		{
+			"meshes": 3,
+			"source": "res://assets/items/models/valuable/laptop_business.glb",
+			"triangles": 6199
+		},
+		{
+			"meshes": 19,
+			"source": "res://scenes/levels/zone02/zone02_garages.tscn",
+			"triangles": 5904
+		}
+	],
+	"gpu": "NVIDIA GeForce RTX 5070 Ti",
+	"load_max_frame_ms": 4416.559,
+	"load_ms": 7900,
+	"map": "zone02",
+	"nodes": 21424.0,
+	"quality": "high",
+	"resolution": "(1920.0, 1080.0)",
+	"resources": 952.0,
+	"samples": [
+		{
+			"ads": false,
+			"draw": 900.911111111111,
+			"fps": 81.7339215753941,
+			"max_ms": 34.788,
+			"p95_ms": 25.45,
+			"physics_ms": 16.4467777777778,
+			"position": "(-515.0, 3.520391, -365.0)",
+			"process_ms": 20.6431166666667,
+			"spot": "residential",
+			"triangles": 1673439.16666667
+		},
+		{
+			"ads": true,
+			"draw": 898.744444444444,
+			"fps": 128.659928222056,
+			"max_ms": 24.567,
+			"p95_ms": 14.263,
+			"physics_ms": 14.4367055555555,
+			"position": "(-515.0, 3.520391, -365.0)",
+			"process_ms": 12.7235555555555,
+			"spot": "residential",
+			"triangles": 1690557.18888889
+		},
+		{
+			"ads": false,
+			"draw": 882.266666666667,
+			"fps": 154.079643767864,
+			"max_ms": 114.377,
+			"p95_ms": 9.785,
+			"physics_ms": 54.7640666666667,
+			"position": "(400.0, -2.62961, 240.0)",
+			"process_ms": 14.3140222222223,
+			"spot": "station",
+			"triangles": 296189.733333333
+		},
+		{
+			"ads": true,
+			"draw": 922.888888888889,
+			"fps": 85.6860093312064,
+			"max_ms": 125.216,
+			"p95_ms": 22.687,
+			"physics_ms": 95.6190666666663,
+			"position": "(400.0, -2.62961, 240.0)",
+			"process_ms": 19.7936555555555,
+			"spot": "station",
+			"triangles": 721836.055555556
+		}
+	],
+	"stages": [
+		{
+			"ms": 0,
+			"stage": "Подготовка"
+		},
+		{
+			"ms": 18,
+			"stage": "Подготовка перехода"
+		},
+		{
+			"ms": 535,
+			"stage": "Загрузка ресурсов"
+		},
+		{
+			"ms": 4030,
+			"stage": "Создание локации"
+		},
+		{
+			"ms": 1094,
+			"stage": "Подготовка локации"
+		},
+		{
+			"ms": 135,
+			"stage": "Подготовка света и погоды"
+		},
+		{
+			"ms": 45,
+			"stage": "Подготовка игроков"
+		},
+		{
+			"ms": 6,
+			"stage": "Подготовка мира"
+		},
+		{
+			"ms": 5,
+			"stage": "Подготовка изображения"
+		},
+		{
+			"ms": 0,
+			"stage": "Подготовка игрока и снаряжения"
+		},
+		{
+			"ms": 805,
+			"stage": "Подготовка снаряжения и камеры"
+		},
+		{
+			"ms": 1226,
+			"stage": "Готово"
+		}
+	],
+	"static_mb": 518.45702457428,
+	"tag": "verified",
+	"video_mb": 1802.97799682617,
+	"window": "(1920, 1080)",
+	"world_ready_ms": 11563,
+	"world_wait_max_ms": 1421.484
+}

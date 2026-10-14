@@ -1,0 +1,22 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+OK cheats/settings: хит-маркер включён по умолчанию
+OK cheats/settings: отключение сохраняется
+OK cheats/settings: включение сохраняется
+OK cheats/settings: переключатель в обычных настройках
+OK cheats/settings: в настройках нет преимуществ и подмены мира
+OK cheats/settings: отдельная кнопка Читы
+OK cheats/settings: четыре раздела читов
+OK cheats/settings: возможности перенесены
+OK cheats/settings: время, погода и телепорт перенесены
+OK cheats/settings: команда и переключатель полёта согласованы
+OK cheats/settings: команда и ползунок скорости согласованы
+OK cheats/settings: выдача предметов работает из раздела команд
+OK cheats/settings: деньги начисляются из раздела читов
+OK cheats/settings: старая консоль удалена из HUD
+OK cheats/settings: меню помещается на экране
+OK cheats/settings: старая клавиша открывает раздел Читы
+OK cheats/settings: гость не получает панель начисления денег
+OK cheats/settings: гость не меняет условия общего мира
+OK cheats/settings: команды изменения заданий доступны хосту
+cheats_settings_test: провалов 0
