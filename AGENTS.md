@@ -102,6 +102,10 @@ tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки кот
 tools/godot.cmd res://tools/look_shots.tscn                 # вид «как с камеры»: те же кадры с эффектами и без (убежище, рейд день/ночь, поворот головы)
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
+tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # ПМ v11: карты износа 100/60/20 по прочности, магазин/патроны/глушитель — одно состояние 60
+# ПМ v11 в игру (без прицела): blender … --python tools/pm_v11_build_lp.py (сетка) → tools/pm_v11_build_lp_supp.py (глушитель) →
+#   tools/pm_v11_markers.py → tools/pm_v11_bake.py -- 100|60|20|mag|ammo|supp [--channels …] (карты; AO: -- 100 --channels ao --tag _ao) →
+#   python -X utf8 tools/pm_v11_pack_maps.py → blender … --python tools/export_pm_v11.py → --headless --import
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] [detail] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка), мировая модель и подробная (конструктор) в assets/models/weapons/veras54; ещё аргумент grips — наборы клипов под рукоятки ВАРН (позы кистей ждут правки владельца)

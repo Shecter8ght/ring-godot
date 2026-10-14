@@ -1,0 +1,70 @@
+{
+ "schema": "pm_v11_game",
+ "source": "E:\\Games\\RING-godot\\_asset_src\\pm_game\\lp\\PM_Game_LP_v01.blend",
+ "triangles": {
+  "first_person": 23972,
+  "lod1": 5419
+ },
+ "axes": "+Z дуло, +Y верх, −X правая сторона стрелка; начало — рукоятка (как v5)",
+ "markers_game_m": {
+  "Muzzle": [
+   -0.0,
+   0.06303,
+   0.13071
+  ],
+  "MuzzleSuppressed": [
+   -0.0,
+   0.06303,
+   0.2897
+  ],
+  "SightFront": [
+   -0.0,
+   0.07725,
+   0.12416
+  ],
+  "SightRear": [
+   0.0,
+   0.07725,
+   -0.01072
+  ]
+ },
+ "pivots_game_m": {
+  "Slide • translation": [
+   -0.0,
+   -0.04824,
+   0.0495
+  ],
+  "Hammer • pivot": [
+   0.0,
+   0.0498,
+   -0.01863
+  ],
+  "Trigger • pivot": [
+   -0.0,
+   0.03929,
+   0.05442
+  ],
+  "Safety • pivot": [
+   0.01228,
+   0.06285,
+   -0.01193
+  ],
+  "SlideStop • pivot": [
+   -0.0,
+   0.0455,
+   0.0231
+  ],
+  "MagCatch • pivot": [
+   0.0,
+   -0.0295,
+   -0.0227
+  ]
+ },
+ "materials": [
+  "GAME • Steel • 100",
+  "GAME • Grip • 100",
+  "GAME • Magazine • 60",
+  "GAME • Ammo • 60",
+  "GAME • Suppressor • 60"
+ ]
+}
