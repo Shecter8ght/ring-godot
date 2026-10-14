@@ -614,9 +614,30 @@ def ease(t: float) -> float:
     return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
 
 
+MAG_CON = "Магазин в руке"
+SCALED = ("JamCase",)
+HIDDEN = Matrix.Scale(1e-4, 4)                      # кость гильзы задержки «спрятана» (нулевой масштаб ломает разложение)
+U = Vector((0.0, -0.2, 1.0)).normalized()           # ось шахты магазина вверх (ПМ: рукоятка ≈ 11° от вертикали)
+MAG_FREE = 0.09                                     # на столько магазин выходит вдоль оси, чтобы освободить шахту
+MAG_SHORT = 0.008                                   # недосланный магазин: левая отпускает, большой дожимает
+SLIDE = 0.036                                       # ход затвора до задержки (data/weapons.json rig.slide_travel_m)
+SLIDE_PULL = 0.040                                  # оттянуть чуть дальше задержки, чтобы сорвать затвор с неё
+JAM_OPEN = 0.011                                    # «печная труба»: гильза держит затвор приоткрытым
+HAMMER_COCKED = -44.0                               # rig.hammer_cocked_deg
+SLIDE_STOP_UP = -12.0                               # задержка поднята (проверено картинкой: −12° — передний край вверх)
+CATCH_PRESSED = 15.0                                # защёлка на пятке отжата назад
+STOVEPIPE = (Vector((-0.002, -0.016, 0.064)), Vector((-0.35, 0.25, 0.90)))   # донце гильзы и её ось (дульцем вверх-вправо)
+
+
+def qx(deg: float) -> Matrix:
+    return Matrix.Rotation(math.radians(deg), 4, "X")
+
+
 class Keyer:
     """Клип: на первом и последнем кадре ключи всех костей хвата и деталей (иначе кость без ключей осталась бы там,
-    где её бросил прошлый клип), между ними — только то, что движется."""
+    где её бросил прошлый клип), между ними — только то, что движется.
+    over — matrix_basis поверх хвата; place — мировые матрицы детей Frame (кисть левой в перезарядке);
+    infl — доля «магазин в руке» (ограничение Copy Transforms на Magazine_Control, ключи ступенькой)."""
 
     def __init__(self, arms, rest: dict, name: str, length: int, loop: bool = False) -> None:
         self.arms, self.rest, self.length = arms, rest, length
@@ -626,8 +647,10 @@ class Keyer:
         self.action.frame_start, self.action.frame_end = 0, length
         self.action.use_cyclic = loop
         arms.animation_data.action = self.action
+        self.con = arms.pose.bones["Magazine_Control"].constraints.get(MAG_CON)
         self.last: dict = {}
-        CLIP_INFO[name] = {"frames": length, "loop": loop}
+        self.events: dict = {}
+        CLIP_INFO[name] = {"frames": length, "loop": loop, "events": self.events}
 
     def _key(self, name: str, frame: float) -> None:
         pb = self.arms.pose.bones[name]
@@ -639,22 +662,39 @@ class Keyer:
         self.last[name] = q
         pb.keyframe_insert("location", frame=frame)
         pb.keyframe_insert("rotation_quaternion", frame=frame)
+        if name in SCALED:
+            pb.keyframe_insert("scale", frame=frame)
 
-    def pose(self, frame: float, gun: Matrix, over: dict | None = None, all_bones: bool = False) -> None:
-        """Поставить пистолет (мир) и кости (over: имя → matrix_basis поверх хвата) и ключи."""
-        over = over or {}
+    def pose(self, frame: float, gun: Matrix, over: dict | None = None, place: dict | None = None,
+             infl: float | None = None, all_bones: bool = False) -> None:
+        over, place = dict(over or {}), place or {}
+        inv = self.arms.matrix_world.inverted()
         for n, m in self.rest.items():
             self.arms.pose.bones[n].matrix_basis = over.get(n, m)
-        self.arms.pose.bones["Frame"].matrix = self.arms.matrix_world.inverted() @ gun
-        names = list(self.rest) if all_bones or frame in (0, self.length) else list(over)
-        for n in names + ["Frame"]:
+        self.arms.pose.bones["Frame"].matrix = inv @ gun
+        for n, m in place.items():
+            pb = self.arms.pose.bones[n]
+            rel = pb.parent.bone.matrix_local.inverted() @ pb.bone.matrix_local
+            pb.matrix_basis = (inv @ gun @ rel).inverted() @ (inv @ m)      # родитель — Frame (поставлен выше)
+            over[n] = pb.matrix_basis.copy()
+        edge = all_bones or frame in (0, self.length)
+        for n in (list(self.rest) if edge else list(over)) + ["Frame"]:
             self._key(n, frame)
+        if self.con is not None and (infl is not None or edge):
+            self.con.influence = 0.0 if infl is None else infl
+            self.con.keyframe_insert("influence", frame=frame)
+
+    def event(self, name: str, frame: int) -> None:
+        self.events[name] = frame
 
     def finish(self) -> None:
         for fc in fcurves(self.action):
             for kp in fc.keyframe_points:
-                kp.interpolation = "BEZIER"
-                kp.handle_left_type = kp.handle_right_type = "AUTO_CLAMPED"
+                if fc.data_path.endswith("influence"):
+                    kp.interpolation = "CONSTANT"
+                else:
+                    kp.interpolation = "BEZIER"
+                    kp.handle_left_type = kp.handle_right_type = "AUTO_CLAMPED"
             fc.update()
 
 
@@ -667,8 +707,65 @@ def cycle(phase: float, a: float, b: float, c: float, e: float, p: float) -> tup
     return d, -p * bounce, e * math.sin(w + 0.35), c * math.sin(w)
 
 
+def left_pose(arms, mcp: Vector, fingers: Vector, palm: Vector) -> Matrix:
+    """Кисть левой в осях ПМ: костяшка среднего пальца в точке mcp, пальцы и ладонь по направлениям."""
+    m = basis(fingers, palm, "L")
+    hand_rest = arms.data.bones["hand.L"].matrix_local
+    mcp_local = hand_rest.inverted() @ arms.data.bones["f_middle.01.L"].head_local
+    m.translation = mcp - m.to_3x3() @ mcp_local
+    return m
+
+
+def add_reload_rig(arms) -> None:
+    """Для перезарядки: кость MagHand на левой кисти (магазин в руке) и ограничение на Magazine_Control;
+    гильза задержки Part_JamCase на кости JamCase (из LP-файла, «печная труба» в окне выброса)."""
+    if "MagHand" not in arms.data.bones:
+        bpy.context.view_layer.objects.active = arms
+        bpy.ops.object.mode_set(mode="EDIT")
+        ebs = arms.data.edit_bones
+        eb = ebs.new("MagHand")
+        eb.head, eb.tail = ebs["hand.L"].head, ebs["hand.L"].head + Vector((0.0, 0.0, 0.02))
+        eb.parent = ebs["hand.L"]
+        eb.use_deform = False
+        bpy.ops.object.mode_set(mode="OBJECT")
+        for pb in arms.pose.bones:
+            pb.rotation_mode = "QUATERNION"
+        parts = arms.data.collections.get("ПМ — детали")
+        if parts:
+            parts.assign(arms.data.bones["MagHand"])
+    pb = arms.pose.bones["Magazine_Control"]
+    con = pb.constraints.get(MAG_CON) or pb.constraints.new("COPY_TRANSFORMS")
+    con.name = MAG_CON
+    con.target = arms
+    con.subtarget = "MagHand"
+    con.influence = 0.0
+    if "Part_JamCase" not in bpy.data.objects:
+        with bpy.data.libraries.load(str(SRC / "lp/PM_Game_LP_v01.blend"), link=False) as (src, dst):
+            dst.objects = ["JamCase"]
+        case = dst.objects[0]
+        case.name = "Part_JamCase"
+        case.parent = None
+        bpy.context.scene.collection.objects.link(case)
+        ammo = bpy.data.materials.get("GAME • Ammo • 60")
+        if ammo is not None:
+            case.data.materials.clear()
+            case.data.materials.append(ammo)
+        base, axis = STOVEPIPE
+        rot_ = axis.normalized().to_track_quat("Y", "Z").to_matrix().to_4x4()
+        bpy.context.view_layer.update()
+        w = world(arms, "Frame") @ Matrix.Translation(base) @ rot_
+        case.parent = arms
+        case.parent_type = "BONE"
+        case.parent_bone = "JamCase"
+        case.matrix_parent_inverse = Matrix.Identity(4)
+        bpy.context.view_layer.update()
+        case.matrix_world = w
+    bpy.context.view_layer.update()
+
+
 def clips() -> None:
-    """Первая партия: покой в обеих стойках, переходы между ними и в прицел, ходьба и бег (бег всегда наискосок)."""
+    """Клипы от хвата владельца (v02): покой в двух стойках, переходы, прицел, ходьба, бег (наискосок);
+    перезарядки (тактическая, полная с задержкой затвора), проверка магазина, устранение задержки."""
     bpy.ops.wm.open_mainfile(filepath=str(GRIP_FILE))
     scene = bpy.context.scene
     arms = bpy.data.objects["FPS_ArmsRig"]
@@ -678,9 +775,98 @@ def clips() -> None:
         bpy.context.view_layer.update()
         st[name] = world(arms, "Frame")
     rest = {n: arms.pose.bones[n].matrix_basis.copy() for n in GRIP_BONES + list(GUN_PARTS) if n in arms.pose.bones}
-    arms.animation_data.action = None
     carry, ready, ads = st["CARRY"], st["READY"], st["ADS"]
+    scene.frame_set(STANCE_FRAMES["READY"])
+    bpy.context.view_layer.update()
+    l_support = ready.inverted() @ world(arms, "ik_hand.L")              # хват левой владельца в осях ПМ
+    arms.animation_data.action = None
+    hands = Hands(arms, read_ready(scene, arms))                           # оси сгиба пальцев (его хват на ВЕРАСе)
+    add_reload_rig(arms)
+    rest["Hammer"] = qx(HAMMER_COCKED)                                     # после передёргивания курок взведён
+    rest["JamCase"] = HIDDEN
+    for n, m in rest.items():
+        arms.pose.bones[n].matrix_basis = m
+    arms.pose.bones["Frame"].matrix = arms.matrix_world.inverted() @ ready
+    bpy.context.view_layer.update()
+    skin = Skin(bpy.data.objects["FPS_Arms"])
+    obj = bpy.data.objects
+    gun_parts = [obj[n] for n in ("Frame_Mesh", "Grip_Mesh", "Slide_Mesh", "Part_Magazine", "MagCatch_Mesh")]
+
+    def fit_left(in_gun: Matrix, k: float, tree: BVHTree | None, thumb: Vector | None, knuckle: Vector | None = None,
+                 fingers=FINGERS) -> dict:
+        """Пальцы левой для позы in_gun (ПМ в стойке «от бедра»): стартовый сгиб k, большой — в точку, пальцы — до касания."""
+        for n, m in rest.items():
+            arms.pose.bones[n].matrix_basis = m
+        arms.pose.bones["Frame"].matrix = arms.matrix_world.inverted() @ ready
+        bpy.context.view_layer.update()
+        set_world(arms, "ik_hand.L", ready @ in_gun)
+        pose = hands.pose("L", k, thumb=0.3)
+        apply(arms, pose)
+        if thumb is not None:
+            pose = thumb_to(arms, skin, tree, ready, pose, "L", thumb, knuckle)
+        if tree is not None and fingers:
+            pose = wrap(arms, hands, skin, pose, "L", tree, fingers=fingers, start=(k, k, k))
+        out = {}
+        for n, q in pose.items():
+            loc = rest[n].to_translation() if n in rest else Vector()
+            out[n] = Matrix.LocRotScale(loc, q, None)
+        return out
+
+    # ---- позы левой (в осях ПМ)
+    heel = left_pose(arms, Vector((0.024, -0.040, -0.062)), Vector((-0.32, -0.51, 0.77)), Vector((-0.95, 0.0, -0.3)))
+    seat = left_pose(arms, Vector((0.030, -0.030, -0.086)), Vector((-0.20, -0.75, 0.60)), Vector((-0.95, 0.0, -0.3)))
+    # передёргивание: кисть слева сверху (пистолет завален вправо), ладонь на левой грани затвора, указательный через
+    # верх на правое рифление, большой — на левое рифление ниже: щепоть у заднего края затвора
+    rack = left_pose(arms, Vector((0.028, -0.002, 0.092)), Vector((-0.83, 0.05, 0.55)), Vector((-0.55, 0.0, -0.83)))
+    t_mag = surface([(o, "") for o in gun_parts])
+    f_heel = fit_left(heel, 0.25, t_mag, Vector((0.0, 0.018, -0.058)))
+    f_seat = fit_left(seat, 0.45, t_mag, Vector((0.0, 0.004, -0.061)), fingers=())
+    f_rack = fit_left(rack, 0.3, bvh_of([obj["Slide_Mesh"]]), Vector((0.027, 0.020, 0.056)), fingers=("f_index", "f_middle"))
+    # магазин в руке: его место относительно кисти в позе «у пятки» (магазин ещё в шахте)
+    for n, m in rest.items():
+        arms.pose.bones[n].matrix_basis = m
+    arms.pose.bones["Frame"].matrix = arms.matrix_world.inverted() @ ready
+    bpy.context.view_layer.update()
+    set_world(arms, "ik_hand.L", ready @ heel)
+    apply(arms, {n: m.to_quaternion() for n, m in f_heel.items()})
+    set_world(arms, "MagHand", world(arms, "Magazine_Control"))
+    rest["MagHand"] = arms.pose.bones["MagHand"].matrix_basis.copy()
+    mag_in_hand = world(arms, "hand.L").inverted() @ world(arms, "Magazine_Control")
+    # пальцы на вынутом магазине: кисть ниже на ход магазина, магазин — с ней; касание только по магазину
+    for n, m in rest.items():
+        arms.pose.bones[n].matrix_basis = m
+    arms.pose.bones["Frame"].matrix = arms.matrix_world.inverted() @ ready
+    bpy.context.view_layer.update()
+    set_world(arms, "ik_hand.L", ready @ Matrix.Translation(U * -MAG_FREE) @ heel)
+    set_world(arms, "Magazine_Control", world(arms, "hand.L") @ mag_in_hand)
+    pose = hands.pose("L", 0.15, thumb=0.3)
+    apply(arms, pose)
+    t_held = bvh_of([obj["Part_Magazine"]])
+    pose = thumb_to(arms, skin, t_held, ready, pose, "L", Vector((0.006, 0.020, -0.135)))
+    pose = wrap(arms, hands, skin, pose, "L", t_held, start=(0.15, 0.15, 0.15))
+    f_hold = {n: Matrix.LocRotScale(rest[n].to_translation() if n in rest else Vector(), q, None) for n, q in pose.items()}
+    arms.pose.bones["Magazine_Control"].matrix_basis = Matrix()
+    # правый указательный в перезарядке — со спуска: разогнуть вдоль его оси сгиба
+    r_off = {}
+    for i, deg in ((1, 35.0), (2, 25.0), (3, 15.0)):
+        n = f"f_index.{i:02d}.R"
+        axis, _ = hands.axis[n]
+        loc, q, _sc = rest[n].decompose()
+        r_off[n] = Matrix.LocRotScale(loc, q @ Quaternion(axis, -math.radians(deg)), None)
+
     run_base = cam_offset(carry, Vector((0.0, 0.025, 0.012)), pitch=-6.0, roll=8.0)     # на бегу ближе к телу, сильнее завален
+    # шахтой к левой и к глазу: выше, дуло задрано — магазин выходит и входит в кадре
+    present = cam_offset(ready, Vector((0.08, 0.02, 0.075)), pitch=32.0, yaw=20.0, roll=-25.0)
+    # передёргивание: верх затвора завален к левой руке — к глазу правый бок с окном, кисть и запястье слева-снизу
+    racking = cam_offset(ready, Vector((0.10, 0.0, 0.04)), pitch=8.0, yaw=-10.0, roll=40.0)
+    jam_gun = cam_offset(ready, Vector((0.10, 0.0, 0.05)), pitch=8.0, yaw=-10.0, roll=30.0)    # как при передёргивании: гильза уходит вправо
+    check_gun = cam_offset(ready, Vector((0.02, 0.06, -0.06)), pitch=-12.0, yaw=8.0, roll=-8.0)
+    pouch = Matrix.Translation(Vector((0.22, -0.08, 1.38))) @ rot("X", -40.0) @ rot("Z", 30.0)   # за кадром: подсумок
+    look_mag = Matrix.Translation(Vector((0.035, -0.26, 1.70))) @ rot("Z", 80.0) @ rot("X", -11.3)
+
+    def shifted(m: Matrix, d: float) -> Matrix:
+        """Поза левой, сдвинутая вдоль оси шахты (−d — вниз, из шахты)."""
+        return Matrix.Translation(U * d) @ m
 
     def idle(name: str, gun: Matrix) -> None:
         k = Keyer(arms, rest, name, 60, loop=True)
@@ -710,6 +896,37 @@ def clips() -> None:
         k.pose(frames, b)
         k.finish()
 
+    def mag_swap(k: Keyer, f0: int, extra: dict, gun_work: Matrix = None) -> int:
+        """Общая часть перезарядки с кадра f0: левая к пятке, защёлка, магазин вниз и за кадр, новый — в шахту,
+        большой палец дожимает. extra — кости, что держатся всё это время (затвор на задержке). Возвращает кадр конца."""
+        g = gun_work or present
+        e = dict(extra)
+        k.pose(f0 + 4, blend(ready, g, 0.45), {**e, **r_off})
+        k.pose(f0 + 9, g, {**e, **r_off, **f_heel}, {"ik_hand.L": g @ heel}, infl=0.0)
+        k.pose(f0 + 12, g, {**e, **r_off, **f_heel, "MagCatch": qx(CATCH_PRESSED)}, {"ik_hand.L": g @ heel}, infl=1.0)
+        k.event("catch", f0 + 11)
+        k.pose(f0 + 15, g, {**e, **r_off, **f_heel, "MagCatch": Matrix()}, {"ik_hand.L": g @ shifted(heel, -0.04)}, infl=1.0)
+        k.pose(f0 + 19, g, {**e, **r_off, **f_hold}, {"ik_hand.L": g @ shifted(heel, -MAG_FREE)}, infl=1.0)
+        k.event("mag_out", f0 + 17)
+        k.pose(f0 + 27, g, {**e, **r_off, **f_hold}, {"ik_hand.L": pouch}, infl=1.0)
+        k.event("swap", f0 + 27)
+        k.pose(f0 + 35, g, {**e, **r_off, **f_hold}, {"ik_hand.L": g @ shifted(heel, -0.05)}, infl=1.0)
+        k.pose(f0 + 40, g, {**e, **r_off, **f_heel, "Magazine_Control": Matrix.Translation(-U * MAG_SHORT)},
+               {"ik_hand.L": g @ shifted(heel, -MAG_SHORT)}, infl=0.0)
+        k.event("mag_in", f0 + 39)
+        bump = cam_offset(g, Vector((0.0, 0.0, 0.003)), pitch=1.0)
+        k.pose(f0 + 43, g, {**e, **r_off, **f_seat, "Magazine_Control": Matrix.Translation(-U * MAG_SHORT)},
+               {"ik_hand.L": g @ shifted(seat, -MAG_SHORT - 0.004)}, infl=0.0)
+        k.pose(f0 + 46, bump, {**e, **r_off, **f_seat, "Magazine_Control": Matrix()}, {"ik_hand.L": bump @ seat}, infl=0.0)
+        k.event("seat", f0 + 45)
+        return f0 + 46
+
+    def back_to_ready(k: Keyer, f: int, extra: dict) -> None:
+        k.pose(f + 4, blend(present, ready, 0.6), {**extra, **r_off})
+        k.pose(f + 8, ready, dict(extra))
+        k.pose(k.length, ready, dict(extra))
+
+    # ---- первая партия (как была)
     idle("PM_Idle_Ready", ready)
     idle("PM_Idle_Carry", carry)
     go("PM_Carry_To_Ready", carry, ready, 10, Vector((0.0, -0.01, 0.012)))
@@ -723,8 +940,86 @@ def clips() -> None:
     move("PM_Run", run_base, 16, 0.014, 0.016, 5.0, 3.0, 3.0, 1)
     go("PM_Carry_To_Run", carry, run_base, 8)
     go("PM_Run_To_Carry", run_base, carry, 10, settle=0.5)
+
+    # ---- тактическая: патрон в патроннике, затвор вперёд
+    k = Keyer(arms, rest, "PM_Reload_Tactical", 56)
+    k.pose(0, ready)
+    end = mag_swap(k, 0, {})
+    back_to_ready(k, end, {})
+    k.finish()
+
+    # ---- полная: затвор на задержке; после магазина левая передёргивает затвор (большой и указательный)
+    locked = {"Bolt": Matrix.Translation((0.0, SLIDE, 0.0)), "SlideStop": qx(SLIDE_STOP_UP)}
+    k = Keyer(arms, rest, "PM_Reload_Full", 74)
+    k.pose(0, ready, dict(locked))
+    end = mag_swap(k, 0, locked)
+    k.pose(end + 6, racking, {**locked, **r_off, **f_rack}, {"ik_hand.L": racking @ rack})
+    pulled = Matrix.Translation((0.0, SLIDE_PULL - SLIDE, 0.0))
+    k.pose(end + 9, racking, {**r_off, **f_rack, "Bolt": Matrix.Translation((0.0, SLIDE_PULL, 0.0)), "SlideStop": qx(SLIDE_STOP_UP)},
+           {"ik_hand.L": racking @ pulled @ rack})
+    k.pose(end + 10, racking, {**r_off, **f_rack, "Bolt": Matrix.Translation((0.0, SLIDE_PULL, 0.0)), "SlideStop": qx(SLIDE_STOP_UP * 0.3)},
+           {"ik_hand.L": racking @ Matrix.Translation((0.0, 0.012, 0.012)) @ rack})
+    k.event("slide_release", end + 10)
+    k.pose(end + 11, cam_offset(racking, Vector((0.0, 0.0, 0.004)), pitch=2.5), {**r_off, "Bolt": Matrix(), "SlideStop": Matrix()},
+           {"ik_hand.L": racking @ Matrix.Translation((0.0, 0.02, 0.02)) @ rack})
+    k.pose(end + 13, racking, {**r_off, "Bolt": Matrix(), "SlideStop": Matrix()})
+    k.pose(end + 20, blend(racking, ready, 0.6), dict(r_off))
+    k.pose(end + 25, ready)
+    k.pose(k.length, ready)
+    k.finish()
+
+    # ---- проверка магазина: вынуть, поднести к глазам (держать R — стоит на показе), вставить, дожать
+    k = Keyer(arms, rest, "PM_Mag_Check", 74)
+    k.pose(0, ready)
+    k.pose(4, blend(ready, present, 0.45), dict(r_off))
+    k.pose(9, present, {**r_off, **f_heel}, {"ik_hand.L": present @ heel}, infl=0.0)
+    k.pose(12, present, {**r_off, **f_heel, "MagCatch": qx(CATCH_PRESSED)}, {"ik_hand.L": present @ heel}, infl=1.0)
+    k.event("catch", 11)
+    k.pose(15, present, {**r_off, **f_heel, "MagCatch": Matrix()}, {"ik_hand.L": present @ shifted(heel, -0.04)}, infl=1.0)
+    k.pose(20, present, {**r_off, **f_hold}, {"ik_hand.L": present @ shifted(heel, -MAG_FREE)}, infl=1.0)
+    k.event("mag_out", 18)
+    look_hand = look_mag @ mag_in_hand.inverted()
+    for f, sway in ((30, 0.0), (36, 1.0), (42, -1.0), (46, 0.0)):
+        jig = Matrix.Translation(Vector((0.0015 * sway, 0.0, 0.001 * sway))) @ rot("Z", 2.0 * sway)
+        k.pose(f, check_gun, {**r_off, **f_hold}, {"ik_hand.L": jig @ look_hand}, infl=1.0)
+    k.event("hold_start", 32)
+    k.event("hold_end", 46)
+    k.pose(56, present, {**r_off, **f_hold}, {"ik_hand.L": present @ shifted(heel, -0.05)}, infl=1.0)
+    k.pose(60, present, {**r_off, **f_heel, "Magazine_Control": Matrix.Translation(-U * MAG_SHORT)},
+           {"ik_hand.L": present @ shifted(heel, -MAG_SHORT)}, infl=0.0)
+    k.event("mag_in", 59)
+    k.pose(63, present, {**r_off, **f_seat, "Magazine_Control": Matrix.Translation(-U * MAG_SHORT)},
+           {"ik_hand.L": present @ shifted(seat, -MAG_SHORT - 0.004)}, infl=0.0)
+    bump = cam_offset(present, Vector((0.0, 0.0, 0.003)), pitch=1.0)
+    k.pose(66, bump, {**r_off, **f_seat, "Magazine_Control": Matrix()}, {"ik_hand.L": bump @ seat}, infl=0.0)
+    k.event("seat", 65)
+    back_to_ready(k, 66, {})
+    k.finish()
+
+    # ---- задержка «печная труба»: гильза в окне держит затвор приоткрытым; левая отводит затвор, гильза вылетает
+    jam = {"Bolt": Matrix.Translation((0.0, JAM_OPEN, 0.0)), "JamCase": Matrix()}
+    k = Keyer(arms, rest, "PM_Jam_Clear", 34)
+    k.pose(0, ready, dict(jam))
+    k.pose(4, blend(ready, jam_gun, 0.5), {**jam, **r_off})
+    k.pose(8, jam_gun, {**jam, **r_off, **f_rack}, {"ik_hand.L": jam_gun @ Matrix.Translation((0.0, JAM_OPEN, 0.0)) @ rack})
+    k.pose(12, jam_gun, {**r_off, **f_rack, "Bolt": Matrix.Translation((0.0, SLIDE_PULL, 0.0)),
+                         "JamCase": Matrix.Translation((-0.012, 0.0, 0.006)) @ rot("Y", -25.0)},
+           {"ik_hand.L": jam_gun @ Matrix.Translation((0.0, SLIDE_PULL, 0.0)) @ rack})
+    k.event("case_out", 11)
+    k.pose(13, cam_offset(jam_gun, Vector((0.0, 0.0, 0.004)), pitch=2.5), {**r_off, "Bolt": Matrix(),
+           "JamCase": Matrix.Translation((-0.045, 0.01, -0.01)) @ rot("Y", -110.0) @ rot("X", 40.0)},
+           {"ik_hand.L": jam_gun @ Matrix.Translation((0.0, 0.05, 0.02)) @ rack})
+    k.event("slide_release", 13)
+    k.pose(17, jam_gun, {**r_off, "JamCase": Matrix.Translation((-0.11, 0.03, -0.09)) @ rot("Y", -260.0) @ rot("X", 90.0)})
+    k.pose(18, jam_gun, dict(r_off))
+    k.pose(24, blend(jam_gun, ready, 0.6), dict(r_off))
+    k.pose(29, ready)
+    k.pose(k.length, ready)
+    k.finish()
+    CLIP_INFO["_meta"] = {"jam_open": round(JAM_OPEN / SLIDE, 3), "slide_travel_m": SLIDE, "mag_axis": list(U), "fps": FPS}
+
     arms.animation_data.action = bpy.data.actions["PM_Idle_Carry"]
-    scene.frame_start, scene.frame_end = 0, 60
+    scene.frame_start, scene.frame_end = 0, 74
     scene.frame_set(0)
     for m in list(scene.timeline_markers):
         scene.timeline_markers.remove(m)
