@@ -36,6 +36,10 @@ var _marauders_root: Node3D
 var _player_spawner: MultiplayerSpawner
 var _marauder_spawner: MultiplayerSpawner
 var _marauders_spawned: int = 0
+## Номер следующего мародёра (имя «MarauderN» одно у всех peer — его передаёт спавнер).
+var _marauder_seq: int = 0
+## Население слоями (точки AIPost/AIRoute/AINest/AIArrival на карте) и счётчик стычек.
+var _population: AIPopulation
 ## Охрана сюжетного места, заказанная до готовности навмеша: [[точка, сколько, радиус], …].
 var _pending_guards: Array = []
 var _pending_squads: Array = []
@@ -112,6 +116,14 @@ func _ready() -> void:
 	var rivals := RivalRaids.new()
 	rivals.name = "Rivals"
 	add_child(rivals)
+	# население слоями (если на карте есть точки) и счётчик стычек — считает хост
+	_population = AIPopulation.new()
+	_population.name = "Population"
+	_population.definition = _sector_def
+	add_child(_population)
+	var contacts := RaidContacts.new()
+	contacts.name = "Contacts"
+	add_child(contacts)
 	_rooms = sector.get_meta("rooms", [])
 	_spawn = sector.get_meta("spawn", Vector3.ZERO)
 	_ring = sector.get_meta("ring", {})
@@ -457,8 +469,14 @@ func _on_nav_baked() -> void:
 		_spawn_marauders()
 
 
-## Отряды по AI_SQUAD_SIZE рядом друг с другом; снаряжение каждому — по выкладке архетипа (data/loadouts.json).
+## Хост, навмеш готов: население рейда. Есть на карте точки слоёв — AIPopulation (гарнизоны, патрули,
+## гнёзда, подход); нет — отряды по AI_SQUAD_SIZE рядом друг с другом, всего MARAUDER_COUNT.
 func _spawn_marauders() -> void:
+	if AIPopulation.has_points(get_tree()):
+		# хотя бы один — иначе ждущие «мародёры расставлены» (чужие отряды, охрана) не дождутся
+		_marauders_spawned = maxi(1, _population.spawn_start())
+		_spawn_pending()
+		return
 	var placed := 0
 	var tries := 0
 	var squads := 0
@@ -499,28 +517,51 @@ func _spawn_marauders() -> void:
 			var arch := lead_arch
 			while k > 0 and (arch == lead_arch and _rng.randf() < 0.4 or bool(Balance.AI_ARCHETYPES[arch].holds)):
 				arch = Marauder.pick_archetype(_rng)
-			var wpn := Marauder.loadout_for(arch, _rng)
-			var m: Marauder
-			if _marauder_spawner:
-				m = _marauder_spawner.spawn({"name": "Marauder%d" % placed, "pos": at + Vector3(0, 0.1, 0), "loadout": wpn, "arch": arch}) as Marauder
-			else:
-				m = MARAUDER_SCENE.instantiate() as Marauder
-				m.name = "Marauder%d" % placed
-				m.loadout_id = wpn
-				m.archetype = arch
-				_marauders_root.add_child(m)
-				m.global_position = at + Vector3(0, 0.1, 0)
-			m.patrol_point_provider = _random_room_point
-			squad.add(m)
+			squad.add(spawn_marauder(at, arch))
 			placed += 1
 	_marauders_spawned = placed
+	_spawn_pending()
+	print("sector: мародёров %d в %d отрядах, попыток %d" % [placed, squads, tries])
+
+
+## Охрана и отряды, заказанные до готовности навмеша.
+func _spawn_pending() -> void:
 	for g in _pending_guards:
 		spawn_guards(g[0], int(g[1]), float(g[2]))
 	_pending_guards.clear()
 	for q in _pending_squads:
 		spawn_squad(q[0], q[1], q[2])
 	_pending_squads.clear()
-	print("sector: мародёров %d в %d отрядах, попыток %d" % [placed, squads, tries])
+
+
+## Хост: один мародёр типа arch у точки at (на навигации); снаряжение — по выкладке типа
+## (opts.loadout — задать явно), opts.home / home_r — держится у места. Клиентам его реплицирует спавнер.
+func spawn_marauder(at: Vector3, arch: String, opts: Dictionary = {}) -> Marauder:
+	var data := {"name": "Marauder%d" % _marauder_seq, "pos": at + Vector3(0, 0.1, 0),
+		"loadout": String(opts.get("loadout", Marauder.loadout_for(arch, _rng))), "arch": arch}
+	_marauder_seq += 1
+	if opts.has("home"):
+		data["home"] = opts.home
+		data["home_r"] = float(opts.get("home_r", 6.0))
+	var m: Marauder
+	if _marauder_spawner:
+		m = _marauder_spawner.spawn(data) as Marauder
+	else:
+		m = _spawn_marauder_node(data) as Marauder
+		_marauders_root.add_child(m)
+		m.global_position = data.pos
+	m.patrol_point_provider = _random_room_point
+	return m
+
+
+## Где появляются игроки (точка рейда, выбранная хостом).
+func spawn_pos() -> Vector3:
+	return _spawn
+
+
+## Видно ли точку появления игроков отсюда (население не ставит бойцов на виду у неё).
+func sees_spawn(p: Vector3) -> bool:
+	return _sees_spawn(p)
 
 
 ## Видно ли точку появления игрока отсюда (открыто и ближе SPAWN_SAFE.los_m): там мародёра не ставим.

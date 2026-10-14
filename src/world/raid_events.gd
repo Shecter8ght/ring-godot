@@ -310,7 +310,8 @@ func _pmc_arrive() -> void:
 	Audio.play("truck_doors", at)
 	_notify("На парковке заглушили мотор. Хлопнули двери.")
 	if _is_host() and level.has_method("spawn_squad"):
-		var n := int(Balance.PMC_SQUAD)
+		# сколько их — под число игроков (Balance.AI_POPULATION.pmc)
+		var n := AIPopulation.pmc_size()
 		var archs: Array = []
 		for i in range(n):
 			archs.append("pmc")

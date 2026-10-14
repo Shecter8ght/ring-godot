@@ -79,7 +79,9 @@ func _process(delta: float) -> void:
 ## Расписание рейда: сколько отрядов и когда входят.
 func _plan() -> void:
 	var cfg: Dictionary = Balance.RIVALS
-	var n := _rng.randi_range(int(cfg.squads[0]), int(cfg.squads[1]))
+	# сколько отрядов — под число игроков
+	var by_party: Array = cfg.squads[AIPopulation.party_size() - 1]
+	var n := _rng.randi_range(int(by_party[0]), int(by_party[1]))
 	for record: Variant in RivalRoster.pick(n, _rng):
 		_queue.append({"t": _rng.randf_range(float(cfg.enter_sec[0]), float(cfg.enter_sec[1])), "record": record})
 	_queue.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a.t) < float(b.t))

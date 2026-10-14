@@ -68,7 +68,7 @@ func _run() -> void:
 	var world_wait_start: int = Time.get_ticks_msec()
 	var world_wait_max: float = 0.0
 	previous = Time.get_ticks_usec()
-	while map != "hideout" and int(get_tree().current_scene.get("_marauders_spawned")) < Balance.MARAUDER_COUNT and Time.get_ticks_msec() - world_wait_start < 120000:
+	while map != "hideout" and int(get_tree().current_scene.get("_marauders_spawned")) <= 0 and Time.get_ticks_msec() - world_wait_start < 120000:
 		await get_tree().process_frame
 		var now: int = Time.get_ticks_usec()
 		world_wait_max = maxf(world_wait_max, float(now - previous) / 1000.0)

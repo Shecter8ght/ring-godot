@@ -143,6 +143,23 @@ var _flinch: float = 0.0
 ## Охрана сюжетного места: держится в радиусе home_radius от home, не уходит грабить.
 var home: Vector3 = Vector3.INF
 var home_radius: float = 0.0
+## Гарнизон поста (AIPost): обходит эти точки, а не случайные в радиусе home_radius. Считает хост.
+var home_points: PackedVector3Array = PackedVector3Array()
+## Патруль по маршруту (AIRoute): точки по порядку; route_loop — по кругу, иначе туда-обратно.
+var route: PackedVector3Array = PackedVector3Array()
+var route_loop: bool = false
+var _route_i: int = -1
+var _route_dir: int = 1
+## Гнездо (AINest): держащий позицию смотрит вдоль watch_dir в секторе watch_sector_deg и отходит не
+## дальше hold_radius (меньше нуля — Balance.AI_HOLD_PATROL_R).
+var watch_dir: Vector3 = Vector3.ZERO
+var watch_sector_deg: float = 0.0
+var hold_radius: float = -1.0
+## Насторожен (AI_NOISE_RESPONSE): шум проверяют другие — стоит и смотрит туда до этого времени, мс.
+var _alert_until: int = 0
+var _alert_at: Vector3 = Vector3.ZERO
+## Когда последний раз видел игрока или стрелял по нему, мс (счётчик стычек RaidContacts).
+var player_contact_ms: int = 0
 ## Пост (где появился) — у держащего позицию патруль вокруг него.
 var _post: Vector3 = Vector3.INF
 ## Раненый: кто идёт спасать (null — никто), кто тащит; основное оружие на время пистолета.
@@ -644,6 +661,7 @@ func _perceive(delta: float) -> void:
 			_seen_now = true
 			_unseen_t = 0.0
 			_target_player = seen
+			player_contact_ms = Time.get_ticks_msec()
 			last_known = seen.global_position
 			memory_timer = _mem()
 			if not was_seen:
@@ -819,6 +837,12 @@ func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
 		return
 	if state == State.RETREAT:
 		return
+	# проверять идут не больше AI_NOISE_RESPONSE.groups групп — остальные настороже на месте
+	if faction == "marauder" and d > Balance.AI_INVESTIGATE_NEAR and not _may_respond(pos, radius_m):
+		var head := squad.leader() if squad else self
+		if head != null:
+			head.alert_at(pos)
+		return
 	# ведомый: шёпотом ведущему — проверяют отрядом, строем за ним
 	var lead := squad.leader() if squad else null
 	if lead != null and lead != self and lead.state in [State.PATROL, State.INVESTIGATE] \
@@ -842,6 +866,61 @@ func investigate_at(pos: Vector3) -> void:
 	_set_move_target(global_position if _holds() else _snap(pos))
 	if _holds():
 		_face(pos)
+
+
+## Может ли отряд пойти проверять шум в pos (Balance.AI_NOISE_RESPONSE): места хватает, если отрядов,
+## уже занятых этим местом, и услышавших шум свободных отрядов ближе нашего меньше groups. Расстояние
+## отряда — его ближайший боец, поэтому все бойцы одного отряда решают одинаково, а порядок, в котором
+## бойцы услышали шум, не важен: идут ближайшие.
+func _may_respond(pos: Vector3, radius_m: float) -> bool:
+	if squad == null:
+		return true
+	var cfg: Dictionary = Balance.AI_NOISE_RESPONSE
+	var same_m: float = float(cfg.same_m)
+	var busy: Dictionary = {}
+	var free_d: Dictionary = {}
+	var mine := INF
+	for n in get_tree().get_nodes_in_group("marauders"):
+		var m := n as Marauder
+		if m == null or m.faction != faction or m.squad == null or m.state in [State.DEAD, State.DOWNED, State.RESCUE, State.RETREAT]:
+			continue
+		# занят этим местом: идёт сюда / ищет здесь / воюет здесь (шум — его же выстрелы)
+		var engaged := m.state in [State.INVESTIGATE, State.SEARCH, State.COMBAT] and m.last_known.distance_to(pos) < same_m
+		engaged = engaged or (m.state == State.COMBAT and m.global_position.distance_to(pos) < same_m)
+		if m.squad == squad:
+			# свой отряд уже занят этим местом — продолжаем
+			if engaged:
+				return true
+			mine = minf(mine, m.global_position.distance_to(pos))
+			continue
+		if engaged:
+			busy[m.squad] = true
+		elif m.state in [State.PATROL, State.INVESTIGATE, State.SEARCH]:
+			var d := m.global_position.distance_to(pos)
+			if d <= radius_m:
+				free_d[m.squad] = minf(d, float(free_d.get(m.squad, INF)))
+	var nearer := 0
+	for s in free_d:
+		if not busy.has(s) and float(free_d[s]) < mine:
+			nearer += 1
+	return busy.size() + nearer < int(cfg.groups)
+
+
+## Насторожиться: шум слышал, но проверяют другие (AI_NOISE_RESPONSE) — стоит и смотрит туда. Увидит
+## цель сам — бой как обычно.
+func alert_at(pos: Vector3) -> void:
+	if state != State.PATROL:
+		return
+	var sec: Array = Balance.AI_NOISE_RESPONSE.alert_sec
+	_alert_until = Time.get_ticks_msec() + int(_rng.randf_range(float(sec[0]), float(sec[1])) * 1000.0)
+	_alert_at = pos
+	_drop_loot_claim()
+	_set_crouch(false)
+	_set_move_target(global_position)
+
+
+func is_alert() -> bool:
+	return Time.get_ticks_msec() < _alert_until and state == State.PATROL
 
 
 ## Другой отряд уже проверяет / прочёсывает место рядом с pos.
@@ -968,25 +1047,68 @@ func _patrol(delta: float) -> void:
 			var side := Vector3(lf.z, 0.0, -lf.x) * (1.0 if _rank() % 2 == 1 else -1.0)
 			_set_move_target(lead.global_position - lf * Balance.AI_FOLLOW_DIST * _rank() + side * 1.0, true)
 		return
+	if is_alert():
+		# насторожен: шум проверяют другие — стоит, смотрит туда
+		_facing = lerp_angle(_facing, atan2(_alert_at.x - global_position.x, _alert_at.z - global_position.z), minf(1.0, 4.0 * delta))
+		return
 	if _agent.is_navigation_finished():
 		pause_timer -= delta
 		if _loot_tick(delta):
 			return
+		if _holds() and watch_dir != Vector3.ZERO:
+			_watch_sector(delta)
 		if pause_timer <= 0.0 and _holds() and _post != Vector3.INF:
 			# держит позицию: пара шагов у поста, долго смотрит
 			var a := _rng.randf() * TAU
-			_set_move_target(_post + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(0.0, Balance.AI_HOLD_PATROL_R), true)
+			var hr: float = hold_radius if hold_radius >= 0.0 else Balance.AI_HOLD_PATROL_R
+			_set_move_target(_post + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(0.0, hr), true)
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 3.0
 		elif pause_timer <= 0.0 and home_radius > 0.0 and home != Vector3.INF:
-			# охраняет место: ходит вокруг, смотрит
+			# охраняет место: ходит вокруг (гарнизон поста — по его точкам), смотрит
 			var ha := _rng.randf() * TAU
-			_set_move_target(home + Vector3(cos(ha), 0.0, sin(ha)) * _rng.randf_range(1.0, home_radius), true)
+			var to := home + Vector3(cos(ha), 0.0, sin(ha)) * _rng.randf_range(1.0, home_radius)
+			if not home_points.is_empty():
+				to = home_points[_rng.randi_range(0, home_points.size() - 1)]
+			_set_move_target(to, true)
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1])) * 1.5
+		elif pause_timer <= 0.0 and not route.is_empty():
+			# патруль: следующая точка маршрута
+			_set_move_target(_next_route_point(), true)
+			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1]))
 		elif pause_timer <= 0.0 and not _holds() and not no_loot and bool(_arch.get("loots", true)) and _pick_loot():
 			pass
 		elif pause_timer <= 0.0 and patrol_point_provider.is_valid():
 			_set_move_target(patrol_point_provider.call(), true)
 			pause_timer = _rng.randf_range(float(Balance.AI_PATROL_PAUSE[0]), float(Balance.AI_PATROL_PAUSE[1]))
+
+
+## Следующая точка маршрута: первая — ближайшая, дальше по порядку (по кругу или туда-обратно).
+func _next_route_point() -> Vector3:
+	var n := route.size()
+	if _route_i < 0 or _route_i >= n:
+		var best := INF
+		for i in range(n):
+			var d := route[i].distance_to(global_position)
+			if d < best:
+				best = d
+				_route_i = i
+		return route[_route_i]
+	if n == 1:
+		return route[0]
+	if route_loop:
+		_route_i = (_route_i + 1) % n
+	else:
+		if _route_i + _route_dir < 0 or _route_i + _route_dir >= n:
+			_route_dir = -_route_dir
+		_route_i += _route_dir
+	return route[_route_i]
+
+
+## Гнездо: медленно водит взглядом по своему сектору.
+func _watch_sector(delta: float) -> void:
+	var base := atan2(watch_dir.x, watch_dir.z)
+	var sweep := sin(Time.get_ticks_msec() / 1000.0 * 0.35 + float(get_instance_id() % 7)) * deg_to_rad(watch_sector_deg * 0.5)
+	_facing = lerp_angle(_facing, base + sweep, minf(1.0, 1.5 * delta))
 
 
 # ---------------------------------------------------------------- приказы плана отряда (RivalSquad)
@@ -2023,6 +2145,8 @@ func _shoot(suppress: bool) -> void:
 	var from := _gun_pos()
 	var h := 1.1
 	var at_ai := _foe != null and is_instance_valid(_foe) and _target_player == null
+	if not at_ai and _target_player != null and is_instance_valid(_target_player):
+		player_contact_ms = Time.get_ticks_msec()
 	if _target_player and is_instance_valid(_target_player):
 		h = float(Perception.TARGET_HEIGHT[Perception.stance_key(_target_player)])
 	elif at_ai:
@@ -2263,9 +2387,15 @@ func _tick_stuck(from: Vector3, delta: float) -> void:
 	_stuck_n += 1
 	_side_t = float(cfg.side_sec)
 	_side_sign = 1.0 if _rng.randf() < 0.5 else -1.0
-	if _stuck_n >= int(cfg.tries) and state == State.PATROL and patrol_point_provider.is_valid():
+	if _stuck_n >= int(cfg.tries) and state == State.PATROL:
 		_stuck_n = 0
-		_set_move_target(patrol_point_provider.call(), true)
+		# патруль и гарнизон — к другой своей точке, не в случайное место карты
+		if not route.is_empty():
+			_set_move_target(_next_route_point(), true)
+		elif not home_points.is_empty():
+			_set_move_target(home_points[_rng.randi_range(0, home_points.size() - 1)], true)
+		elif patrol_point_provider.is_valid():
+			_set_move_target(patrol_point_provider.call(), true)
 
 
 ## Шаг на ступень (бордюр, порожек): упёрся — пробуем встать выше, как игрок (Balance.STEP_UP).

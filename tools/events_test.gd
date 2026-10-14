@@ -90,7 +90,7 @@ func _ready() -> void:
 	for m in get_tree().get_nodes_in_group("marauders"):
 		if (m as Marauder).faction == "pmc":
 			pmc.append(m)
-	_check("ЧВК приехали группой", pmc.size() == Balance.PMC_SQUAD, str(pmc.size()))
+	_check("ЧВК приехали группой", pmc.size() == AIPopulation.pmc_size(), str(pmc.size()))
 	# ЧВК против мародёра: друг друга видят и стреляют, игроку не засчитано
 	var credited := [0]
 	Raid.current.kill_credited.connect(func() -> void: credited[0] += 1)
