@@ -466,12 +466,14 @@ func _on_nav_baked() -> void:
 			if n > 0:
 				await NavigationServer3D.map_changed
 			print("sector: связок «перелезть» %d за %d мс" % [n, Time.get_ticks_msec() - t0])
-		_spawn_marauders()
+		await _spawn_marauders()
 
 
 ## Хост, навмеш готов: население рейда. Есть на карте точки слоёв — AIPopulation (гарнизоны, патрули,
 ## гнёзда, подход); нет — отряды по AI_SQUAD_SIZE рядом друг с другом, всего MARAUDER_COUNT.
 func _spawn_marauders() -> void:
+	# навигация из кэша синхронизируется не сразу — точки спавна должны на неё встать
+	await _population.wait_navigation()
 	if AIPopulation.has_points(get_tree()):
 		# хотя бы один — иначе ждущие «мародёры расставлены» (чужие отряды, охрана) не дождутся
 		_marauders_spawned = maxi(1, _population.spawn_start())

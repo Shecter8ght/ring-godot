@@ -92,6 +92,38 @@ func group_count(key: String) -> int:
 
 # ---------------------------------------------------------------- начало рейда
 
+## Хост, перед расстановкой: навигация из кэша приходит тайлами, и сервер синхронизирует их не за один
+## кадр — первое время точка «прилипает» не к своему тайлу, и расстановка отбросила бы посты как стоящие
+## вне карты (так было в сетевом рейде на «Пешем маршруте»: ноль бойцов). Ждём, пока все точки населения
+## (без слоёв — старые ai_spawn_points) встанут на навигацию, не дольше nav_wait_sec.
+func wait_navigation() -> void:
+	var points := PackedVector3Array()
+	var groups: Array = ["ai_posts", "ai_nests", "ai_arrivals"] if has_points(get_tree()) else ["ai_spawn_points"]
+	for g in groups:
+		for n in get_tree().get_nodes_in_group(g):
+			points.append((n as Node3D).global_position)
+	for n in get_tree().get_nodes_in_group("ai_routes"):
+		points.append_array((n as AIRoute).points())
+	var start := Time.get_ticks_msec()
+	var end := start + int(float(cfg().nav_wait_sec) * 1000.0)
+	var first := -1
+	var frames := 0
+	while true:
+		var bad := 0
+		for p in points:
+			if _ground(p) == Vector3.INF:
+				bad += 1
+		if first < 0:
+			first = bad
+		if bad == 0 or Time.get_ticks_msec() >= end:
+			if first > 0 or bad > 0:
+				print("population: навигация приняла точки за %d мс (%d кадров): сначала мимо %d из %d, осталось %d" % [
+					Time.get_ticks_msec() - start, frames, first, points.size(), bad])
+			return
+		frames += 1
+		await get_tree().physics_frame
+
+
 ## Хост, навмеш готов: гарнизоны, патрули, гнёзда; расписание подхода. Возвращает, сколько бойцов.
 func spawn_start() -> int:
 	layered = true
