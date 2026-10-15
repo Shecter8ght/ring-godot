@@ -14,7 +14,7 @@ import mosin_lib as L  # noqa: E402
 
 A = L.ASSET_DIR
 args = L.script_args()
-RV = args[0] if len(args) > 0 else "v05"
+RV = args[0] if len(args) > 0 else "v06"
 MV = args[1] if len(args) > 1 else "v01"
 SV = args[2] if len(args) > 2 else "v01"
 FILES = {

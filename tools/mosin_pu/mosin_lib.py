@@ -322,12 +322,21 @@ def ring_tube(name: str, outer: Sequence[Sequence[float]], inner: Sequence[Seque
 
 
 def sweep_circle(name: str, path: Sequence[Sequence[float]], radii: Sequence[float] | float, seg: int = 24,
-                 mat: str | None = None, col=None, cap: bool = True, smooth_angle: float = 40.0):
-    """Трубка круглого сечения вдоль ломаной (мм), радиус по точкам; рамки — параллельный перенос."""
+                 mat: str | None = None, col=None, cap: bool = True, smooth_angle: float = 40.0,
+                 radii_b: Sequence[float] | float | None = None):
+    """Трубка вдоль ломаной (мм), радиус по точкам; рамки — параллельный перенос.
+
+    radii — полуось по бинормали, radii_b — по нормали (None — круг). Нормаль в начале — проекция +Z
+    (или +X, если путь начинается вдоль Z).
+    """
     P = [Vector(p) for p in path]
     n = len(P)
     if not isinstance(radii, (list, tuple)):
         radii = [radii] * n
+    if radii_b is None:
+        radii_b = radii
+    elif not isinstance(radii_b, (list, tuple)):
+        radii_b = [radii_b] * n
     tangents = []
     for i in range(n):
         a, b = P[max(0, i - 1)], P[min(n - 1, i + 1)]
@@ -345,7 +354,7 @@ def sweep_circle(name: str, path: Sequence[Sequence[float]], radii: Sequence[flo
         binormal = tangents[i].cross(normal)
         for k in range(seg):
             a = 2 * math.pi * k / seg
-            p = P[i] + (normal * math.cos(a) + binormal * math.sin(a)) * radii[i]
+            p = P[i] + normal * (math.cos(a) * radii_b[i]) + binormal * (math.sin(a) * radii[i])
             verts.append(tuple(c * MM for c in p))
     for i in range(n - 1):
         a, b = i * seg, (i + 1) * seg
@@ -404,12 +413,16 @@ def set_origin_mm(ob: bpy.types.Object, point_mm: Sequence[float]) -> None:
 
 
 def boolean(target: bpy.types.Object, cutter: bpy.types.Object, op: str = "DIFFERENCE",
-            solver: str = "EXACT", apply: bool = True, remove_cutter: bool = True) -> None:
+            solver: str = "EXACT", apply: bool = True, remove_cutter: bool = True,
+            self_intersect: bool = False) -> None:
+    """self_intersect — резак из пересекающихся кусков (клейма: буквы и риски внахлёст)."""
     n_mats = len(target.data.materials)
     mod = target.modifiers.new("bool_" + cutter.name, "BOOLEAN")
     mod.operation = op
     mod.object = cutter
     mod.solver = solver
+    if self_intersect:
+        mod.use_self = True
     if apply:
         bpy.context.view_layer.objects.active = target
         with bpy.context.temp_override(object=target, active_object=target):
@@ -423,6 +436,82 @@ def boolean(target: bpy.types.Object, cutter: bpy.types.Object, op: str = "DIFFE
                 poly.material_index = 0
             while len(me.materials) > max(n_mats, 1):
                 me.materials.pop()
+
+
+CAP_HEIGHT = 0.729          # высота прописной буквы встроенного шрифта (DejaVu Sans) в долях кегля
+
+
+def text_polys(body: str, height_mm: float, u0: float = 0.0, v0: float = 0.0,
+               align: str = "CENTER") -> tuple[list, list]:
+    """Надпись как замкнутое тело: вершины (u, v, w) в мм и грани. u — вдоль строки, v — вверх по буквам,
+    w ∈ [−1, 1] — толщина (потом растягивается картой на глубину клейма). Шрифт — встроенный в Blender."""
+    font = bpy.data.fonts.get("Bfont Regular") or bpy.data.fonts.load("<builtin>")
+    cu = bpy.data.curves.new("stamp_text", "FONT")
+    cu.body = body
+    cu.font = font
+    cu.size = height_mm / CAP_HEIGHT
+    cu.extrude = 0.0
+    cu.align_x = align
+    cu.align_y = "CENTER"
+    cu.resolution_u = 4
+    ob = bpy.data.objects.new("stamp_text", cu)
+    bpy.context.scene.collection.objects.link(ob)
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = ob.evaluated_get(dg)
+    me = ev.to_mesh()
+    # плоская заливка букв → своё выдавливание: замкнутые тела без Т-стыков (выдавливание шрифта их даёт)
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    ev.to_mesh_clear()
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
+    for v in bm.verts:
+        v.co.z = -1.0
+    res = bmesh.ops.extrude_face_region(bm, geom=list(bm.faces))
+    for v in (g for g in res["geom"] if isinstance(g, bmesh.types.BMVert)):
+        v.co.z = 1.0
+    verts = [(v.co.x + u0, v.co.y + v0, v.co.z) for v in bm.verts]
+    bm.verts.index_update()
+    faces = [tuple(v.index for v in f.verts) for f in bm.faces]
+    bm.free()
+    bpy.data.objects.remove(ob, do_unlink=True)
+    bpy.data.curves.remove(cu)
+    return verts, faces
+
+
+def box_polys(u0: float, u1: float, v0: float, v1: float) -> tuple[list, list]:
+    """Риска как брусок в тех же координатах (u, v, w ∈ [−1, 1])."""
+    verts = [(u, v, w) for u in (u0, u1) for v in (v0, v1) for w in (-1.0, 1.0)]
+    faces = [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)]
+    return verts, faces
+
+
+def stamp_cutter(name: str, parts: Sequence[tuple[list, list]], mapping, depth_mm: float,
+                 lift_mm: float = 0.6) -> bpy.types.Object:
+    """Резак клейма: части (надписи, риски) переносятся на поверхность детали картой
+    mapping(u, v, h) → точка в мм, где h — высота над поверхностью (от −depth до +lift)."""
+    verts, faces = [], []
+    for pv, pf in parts:
+        off = len(verts)
+        for u, v, w in pv:
+            h = -depth_mm + (w + 1.0) / 2.0 * (depth_mm + lift_mm)
+            verts.append(tuple(c * MM for c in mapping(u, v, h)))
+        faces += [tuple(i + off for i in f) for f in pf]
+    ob = mesh_object(name, verts, faces, None, None, None)
+    fix_normals(ob)
+    return ob
+
+
+def triangulate(ob: bpy.types.Object) -> None:
+    """Разбить грани на треугольники: перед мелкими врезками (клейма) точная булева на больших
+    n-угольниках после объединений оставляет трещины, на треугольниках — нет."""
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
 
 
 def cleanup(ob: bpy.types.Object, dist_mm: float = 0.01) -> None:
