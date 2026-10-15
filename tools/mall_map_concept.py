@@ -22,11 +22,11 @@ from matplotlib.patches import Circle, Ellipse, FancyArrowPatch, Polygon, Rectan
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "design" / "mall_map_concept"
 
-# Здание — предложение: Ø175, атриум Ø54 под куполом, подиум с тротуаром, пожарный проезд вокруг
-MALL_R = 87.5
-ATRIUM_R = 27.0
-PODIUM_R = 96.0
-FIRE_LANE = (100.0, 110.0)
+# Здание — решение владельца 2026-10-15: Ø200; атриум Ø60 под куполом, подиум с тротуаром, пожарный проезд
+MALL_R = 100.0
+ATRIUM_R = 30.0
+PODIUM_R = 108.0
+FIRE_LANE = (112.0, 122.0)
 LOOP_R = 255.0  # объездная дорога вокруг всей территории ТЦ (как на образце)
 
 C = {
@@ -150,15 +150,15 @@ def main() -> None:
         road(ax, [pol(a, LOOP_R), pol(a, FIRE_LANE[1])], 8.0)
 
     # --- парковки: юг (главная, террасами), запад, восток
-    ax.add_patch(Wedge((0, 0), 240, -160, -20, width=240 - 118, fc=C["parking"], ec="#9d998f", lw=0.6, zorder=2))
-    ax.add_patch(Wedge((0, 0), 238, 150, 210, width=238 - 118, fc=C["parking"], ec="#9d998f", lw=0.6, zorder=2))
-    ax.add_patch(Wedge((0, 0), 238, -20, 18, width=238 - 118, fc=C["parking"], ec="#9d998f", lw=0.6, zorder=2))
+    ax.add_patch(Wedge((0, 0), 240, -160, -20, width=240 - 130, fc=C["parking"], ec="#9d998f", lw=0.6, zorder=2))
+    ax.add_patch(Wedge((0, 0), 238, 150, 210, width=238 - 130, fc=C["parking"], ec="#9d998f", lw=0.6, zorder=2))
+    ax.add_patch(Wedge((0, 0), 238, -20, 18, width=238 - 130, fc=C["parking"], ec="#9d998f", lw=0.6, zorder=2))
     for rr in (172, 206):  # подпорные стенки террас южной парковки
         ax.plot(*zip(*arc_pts(-158, -22, rr, 80)), color="#5c574f", lw=1.6, zorder=7)
-    car_rows(ax, -158, -118, 118, 240, seed=2, density=0.45)
-    car_rows(ax, -62, -22, 118, 240, seed=3, density=0.5)
-    car_rows(ax, 152, 208, 118, 238, seed=4, density=0.8)
-    car_rows(ax, -18, 16, 118, 238, seed=5, density=0.35)
+    car_rows(ax, -158, -118, 130, 240, seed=2, density=0.45)
+    car_rows(ax, -62, -22, 130, 240, seed=3, density=0.5)
+    car_rows(ax, 152, 208, 130, 238, seed=4, density=0.8)
+    car_rows(ax, -18, 16, 130, 238, seed=5, density=0.35)
     # навесы для тележек и островки зелени на главной парковке
     for a, r in ((-140, 190), (-128, 222), (-50, 190), (-38, 222), (-150, 150), (-30, 150)):
         x, y = pol(a, r)
@@ -167,13 +167,13 @@ def main() -> None:
         ax.add_patch(Circle(pol(a, r), 5.5, fc=C["green"], ec="#7f966b", lw=0.6, zorder=7.5))
 
     # --- главная площадь (юг)
-    ax.add_patch(Wedge((0, 0), 158, -116, -64, width=158 - PODIUM_R, fc=C["plaza"], ec="#a89a80", lw=0.8, zorder=3))
-    ax.add_patch(Circle(pol(-90, 128), 8, fc=C["water"], ec="#6f8fa1", zorder=8))  # сухой фонтан
+    ax.add_patch(Wedge((0, 0), 168, -116, -64, width=168 - PODIUM_R, fc=C["plaza"], ec="#a89a80", lw=0.8, zorder=3))
+    ax.add_patch(Circle(pol(-90, 140), 8, fc=C["water"], ec="#6f8fa1", zorder=8))  # сухой фонтан
     for a in (-104, -76):
-        ax.add_patch(Circle(pol(a, 140), 6, fc=C["green"], ec="#7f966b", zorder=8))
-    rect(ax, *pol(-90, 152), 4, 14, "#5b5046", z=9)  # рекламная стела «РИНГ»
+        ax.add_patch(Circle(pol(a, 152), 6, fc=C["green"], ec="#7f966b", zorder=8))
+    rect(ax, *pol(-90, 162), 4, 14, "#5b5046", z=9)  # рекламная стела «РИНГ»
     # крытая галерея от автостанции к площади
-    gal = [(-150, -272), (-118, -222), (-70, -175), pol(-100, 158)]
+    gal = [(-150, -272), (-118, -222), (-70, -175), pol(-100, 168)]
     ax.plot(*zip(*gal), color="#a9926f", lw=5.0 * PT_PER_M, zorder=8, solid_capstyle="round")
     ax.plot(*zip(*gal), color="#e9dcc2", lw=2.2 * PT_PER_M, zorder=8.1, solid_capstyle="round", ls=(0, (2, 1)))
 
@@ -185,7 +185,7 @@ def main() -> None:
         ax.plot(*zip(pol(a, ATRIUM_R + 12), pol(a, MALL_R)), color="#a4977f", lw=0.8, ls=(0, (3, 2)), zorder=5.5)
     ax.add_patch(Circle((0, 0), ATRIUM_R, fc=C["atrium"], ec="#7f9cad", lw=1.0, zorder=6))
     label(ax, (0, 8), "ТЦ «РИНГ»", 12, weight="bold")
-    label(ax, (0, -12), "Ø175 м, 4 этажа\nатриум под куполом", 8)
+    label(ax, (0, -14), "Ø200 м, 4 этажа\nатриум Ø60 под куполом", 8)
 
     # входы в здание
     def door(a: float, color: str, text: str, dr: float = 30.0, ha: str = "center") -> None:
@@ -202,12 +202,12 @@ def main() -> None:
     door(45, "#2d6cc0", "", 30)
 
     # --- разгрузочный двор (северо-восток), в выемке −4 м
-    ax.add_patch(Wedge((0, 0), 205, 22, 70, width=205 - 112, fc=C["pit"], ec="#6f6a60", lw=1.4, zorder=3, hatch="..."))
+    ax.add_patch(Wedge((0, 0), 210, 22, 70, width=210 - 124, fc=C["pit"], ec="#6f6a60", lw=1.4, zorder=3, hatch="..."))
     for a in (30, 38, 46, 54, 62):
-        x, y = pol(a, 150)
+        x, y = pol(a, 158)
         rect(ax, x, y, 3.0, 16, "#e8e4da", angle=a - 90, z=7, ec="#5d574e")  # фуры у доков
-    rect(ax, *pol(48, 196), 7, 7, C["danger"], z=9)  # пост ЧВК у ворот двора
-    label(ax, pol(46, 178), "пост ЧВК", 7, C["danger"], "bold")
+    rect(ax, *pol(48, 202), 7, 7, C["danger"], z=9)  # пост ЧВК у ворот двора
+    label(ax, pol(46, 186), "пост ЧВК", 7, C["danger"], "bold")
 
     # --- многоуровневый паркинг (восток) с мостом на 2-й этаж
     rect(ax, 185, -42, 64, 100, "#a19a90", lw=1.4, z=8)
@@ -218,17 +218,17 @@ def main() -> None:
     label(ax, (122, 9), "мост на 2-й этаж", 7, "#6a5d47", "bold")
 
     # --- восточная баррикада перед входом
-    for i, (a, r) in enumerate(((-8, 120), (0, 126), (8, 120), (-4, 140), (5, 141))):
+    for i, (a, r) in enumerate(((-8, 130), (0, 136), (8, 130), (-4, 150), (5, 151))):
         rect(ax, *pol(a, r), 3.2, 12, C["danger"], angle=a + (20 if i % 2 else -15), z=9, alpha=0.85)
 
     # --- сквер с летней верандой на севере (между зданием и объездной)
-    ax.add_patch(Wedge((0, 0), 236, 74, 146, width=236 - 116, fc=C["green"], ec="#8aa276", lw=0.6, zorder=2))
+    ax.add_patch(Wedge((0, 0), 236, 74, 146, width=236 - 128, fc=C["green"], ec="#8aa276", lw=0.6, zorder=2))
     rnd = random.Random(11)
     for i in range(60):
         a = rnd.uniform(76, 144)
-        r = rnd.uniform(122, 232)
+        r = rnd.uniform(134, 232)
         ax.add_patch(Circle(pol(a, r), rnd.uniform(3.5, 6.0), fc="#86a873", ec="none", zorder=3, alpha=0.9))
-    rect(ax, *pol(100, 132), 26, 12, "#b9a888", angle=10, z=7)  # летняя веранда
+    rect(ax, *pol(100, 144), 26, 12, "#b9a888", angle=10, z=7)  # летняя веранда
     rect(ax, *pol(128, 186), 18, 18, "#d8c9a5", z=7)  # детская площадка
 
     # --- противопожарный водоём (север), ливнёвка
@@ -266,8 +266,8 @@ def main() -> None:
 
     # --- подписи участков (номера → легенда)
     nums = [
-        (1, (0, -32)), (2, pol(-90, 168)), (3, (-140, -200)), (4, (-158, -300)),
-        (5, (185, -100)), (6, (262, -280)), (7, pol(0, 175)), (8, pol(46, 120)), (9, (300, 128)),
+        (1, (0, -38)), (2, pol(-90, 180)), (3, (-140, -200)), (4, (-158, -300)),
+        (5, (185, -100)), (6, (262, -280)), (7, pol(0, 178)), (8, pol(46, 132)), (9, (300, 128)),
         (10, (-110, 315)), (11, pol(110, 200)), (12, (-250, 160)), (13, (-340, 62)), (14, pol(180, 220)),
         (15, (-40, -340)),
     ]
@@ -279,7 +279,7 @@ def main() -> None:
     for name, (x, y) in spawns.items():
         ax.add_patch(Circle((x, y), 8, fc=C["spawn"], ec="white", lw=1.4, zorder=45))
     extracts = [((-182, -296), C["extract"], "Автостанция"), ((-60, 256), C["extract"], "Ливнёвка"),
-                ((-430, 34), C["cond"], "Дорога за КПП\n(плата)"), (pol(46, 160), C["cond"], "Грузовик\n(питание ворот)"),
+                ((-430, 34), C["cond"], "Дорога за КПП\n(плата)"), (pol(46, 168), C["cond"], "Грузовик\n(питание ворот)"),
                 ((405, 120), C["extract"], "Пролом в заборе"), ((-38, 50), C["cond"], "Крыша — вертолёт\n(позже, 4-й этаж)")]
     for (x, y), col, text in extracts:
         ax.add_patch(Polygon([(x, y + 10), (x - 9, y - 6), (x + 9, y - 6)], closed=True, fc=col, ec="white", lw=1.2, zorder=45))
@@ -319,7 +319,7 @@ def main() -> None:
         ("а раскладка для согласования; размеры — ориентиры.", 8, "normal"),
         ("", 6, "normal"),
         ("Участки", 10.5, "bold"),
-        ("1  ТЦ: Ø175, 4 этажа, 6 секторов по 60°", 8.5, "normal"),
+        ("1  ТЦ: Ø200, 4 этажа, 6 секторов по 60°", 8.5, "normal"),
         ("2  Главная площадь: фонтан, стела, ступени, навес", 8.5, "normal"),
         ("3  Главная парковка: 2 террасы (−2 и −4 м), ряды машин", 8.5, "normal"),
         ("4  Автостанция и крытая галерея к площади", 8.5, "normal"),
@@ -335,7 +335,7 @@ def main() -> None:
         ("14 Западная парковка: пробка, пункт эвакуации (палатки)", 8.5, "normal"),
         ("15 Трасса с пробкой и пешеходный мост", 8.5, "normal"),
         ("", 6, "normal"),
-        ("Подходы (от появления до здания 250–390 м, 1,5–3 мин)", 10.5, "bold"),
+        ("Подходы (от появления до здания 260–380 м, 1,5–3 мин)", 10.5, "bold"),
         ("A  юг, быстрый и открытый: автостанция → парковка → площадь", 8.5, "normal"),
         ("B  запад: поле → мимо КПП → АЗС → лагерь → пожарный выход", 8.5, "normal"),
         ("C  восток, вертикальный: кафе → паркинг → мост / вост. вход", 8.5, "normal"),
