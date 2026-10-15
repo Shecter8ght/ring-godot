@@ -85,6 +85,7 @@ material = SubResource("ShaderMaterial_1")
 [node name="Terrain" parent="." type="Node3D"]
 script = ExtResource("1")
 data_path = "res://data/sectors/zone01_mall.json"
+excavations = Array[AABB]([AABB(-225, -1.9, -144, 17, 2.3, 12)])
 
 [node name="Roads" parent="." type="Node3D"]
 

@@ -1,11 +1,17 @@
 {
 	"files": {
-		"res://data/sectors/zone01_mall.json": "cdef989431fce4238c6f54f62296f1a36ba0330cd1efcbb9553bb57039852e3f",
+		"res://assets/zone01/nw/furniture.json": "aef491365bccc6dd969d43e849908b9990a7aff100f2b46d0f203b9babf5fe04",
+		"res://assets/zone01/nw/manifest.json": "2f0710c3e44771adba38708bb6b704d456295866583b5366da46d027a2cb270c",
+		"res://data/sectors/zone01_mall.json": "93ea78ad8137dd49ff11b34847e4c094d90793db697d2090141f40d66a90a4b9",
 		"res://data/terrain/zone01_heights.r32": "67c9e55daf4c0f60678c259a6e3dc16272ebed9651043e3676f81ebd49366a33",
-		"res://scenes/levels/zone01/zone01_blockout.tscn": "64f6d91944ac0eeaf3a2bbeae284278c3320459f29edecdf47b54a440859e056",
-		"res://scenes/levels/zone01/zone01_loose_loot.tscn": "0d07a638246a4aa832a02cae3da329ed790b98c2dd4375b80983d5e86609441e",
-		"res://scenes/levels/zone01/zone01_world.tscn": "ce8bc0fb640b8da4c8a9bbb8a35c06cda561719f064d212446be3716557de1c3",
-		"res://scenes/levels/zone01/zone01_yard05.tscn": "6922994bde64c824fa9c9cba8d568c0a5ba4b82742dd1022e56e43df142f8349",
+		"res://scenes/levels/zone01/zone01_ai.tscn": "bbc7727369fb45ae7121077a5a581ec43ea18afd288d3319c36f4543607c92b0",
+		"res://scenes/levels/zone01/zone01_blockout.tscn": "295bc1815e798408986f1cdccf976e0b9a1575afba5f4e3a51388ed12c8a2299",
+		"res://scenes/levels/zone01/zone01_houses12.tscn": "6d979a6120df1d06e7bb41a5d057864d1725d43b686b6dff90605042b2ccbf65",
+		"res://scenes/levels/zone01/zone01_loose_loot.tscn": "eeaced99ad2d05279d80dd14a892b90ca7bb0606c5fc6045cf7ffc98b36f212f",
+		"res://scenes/levels/zone01/zone01_market06.tscn": "dccaca9858353eabe7879c3f99392325372c37c41ca022ebb9b80ed383be2c9d",
+		"res://scenes/levels/zone01/zone01_world.tscn": "6bc04268a7d22d851deea537da9a5ccee62f21d94b4b9418fcfafa5ffc44212d",
+		"res://scenes/levels/zone01/zone01_yard05.tscn": "b19734319acee3dd8036d96b163f1b22036b39de2fc48cf07e75e40c75e7da8d",
+		"res://scenes/levels/zone01/zone01_yard05_gameplay.tscn": "e813a390eeea1eb3601c8f8b048355b8422872626c5b8d4fae6f43e2072f2fd5",
 		"res://scenes/levels/zone01_mall.tscn": "cc62a8db5a9aa75928b0f282693a239b8e97448a6faffa9dda041655a6dde28e",
 		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
 		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
@@ -15,9 +21,10 @@
 		"res://src/world/blockout_building.gd": "7ad9d854dc416f779d7ca25fa8e1f23d151b24a5b1be65b87a12b6289dd43892",
 		"res://src/world/blockout_mesh.gd": "a9a58ebc4b958e67cb3f2af541c10e199c1ba8098665049b0c119a43fbb2378a",
 		"res://src/world/blockout_opening.gd": "063660bf3bf804e031428db167352fee000c98f2795b32136787ab6395cd27f9",
-		"res://src/world/district_terrain.gd": "96ab2325e89e3b1c8e48b90b820b5b81237474a2286f36becbb666947ac49cac",
+		"res://src/world/district_model.gd": "98e3cecd261e8741dce44d1488a201d9db48626236a0f6c2eb5f99de0502fca8",
+		"res://src/world/district_terrain.gd": "1cbec9b2e9022fccfe8d42f813ee30831e2afa034b218418e05c645270dba6e2",
 		"res://src/world/urban_facade.gd": "096868a4c07b617b9b2d482c64e6cffc666637252df1bbe1d81de88e006ed22c",
-		"res://src/world/urban_navigation.gd": "e897f92ec4d8e4be57b31669b713807a21baf48cc8e1441018943661941f1e98",
+		"res://src/world/urban_navigation.gd": "58cc7e757b78dacc586d241c5e5c30d54aef62ef6f88fdfabea1b76ad777d3f9",
 		"res://src/world/urban_props.gd": "8893c14356c82bcb31fb6b0cfb81777266c3cb794442a57cf32022345c1e2adf",
 		"res://src/world/urban_road.gd": "38cde9cfa97e3ff7c9d10ca910abd1b2ad60ccaee9a76fa54e218caf20b63918",
 		"res://src/world/urban_terrain.gd": "1d3093285257ceaa25802a3c00c547e7b50fc322518e97236bfaebf7db1f0001"
@@ -25,13 +32,13 @@
 	"settings": {
 		"nav_agent_height": 1.8,
 		"nav_border": 2.0,
-		"nav_cell": 0.5,
+		"nav_cell": 0.125,
 		"nav_climb": 0.4,
-		"nav_detail_error": 2.0,
-		"nav_height": 0.25,
-		"nav_merge_scale": 0.125,
-		"nav_radius": 0.5,
+		"nav_detail_error": 1.0,
+		"nav_height": 0.0625,
+		"nav_merge_scale": 0.0078125,
+		"nav_radius": 0.375,
 		"nav_slope": 40.0,
-		"nav_tile": 250.0
+		"nav_tile": 240.0
 	}
 }

@@ -356,3 +356,24 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 Очистка и нарезка: `tools/prepare_owner_footsteps.py`, рецепт с хешами и границами —
 `data/audio_recipes/owner_wet_asphalt.json`. Моно Vorbis, 48 кГц, без искусственной реверберации
 и записанной в файл панорамы; пространственное положение определяет игра.
+
+## Северо-запад района ТЦ: игровая архитектура (2026-10-14)
+
+`assets/zone01/nw/`: производная модель доступного подъезда на основе собственного фасада
+`khrushchevka_panel_a` RING, ангар, павильоны, частные дома, сарай, ограды, мост и установленная
+мебель. Новая геометрия, метрические UV и упрощённые коллизии — собственные; сборка
+`tools/build_zone01_nw_assets.py`, размещение `tools/author_zone01_nw.py`.
+Архитектурный ориентир — [поэтажные чертежи 1-464](https://gsps.ru/home_series/1-464.php),
+изображения используются только как референсы и не являются игровыми текстурами.
+Материалы повторно используют уже перечисленные CC0-текстуры Poly Haven. Мебель и предметы
+`levels/shelter/props/PH_*` повторно используются с теми же лицензиями и атрибуцией выше.
+Для бытовой мебели добавлены два CC0 1.0 ассета:
+
+- [Painted Wooden Cabinet](https://polyhaven.com/a/painted_wooden_cabinet), Kirill Sannikov;
+- [Wooden Crate 01](https://polyhaven.com/a/wooden_crate_01), James Ray Cock.
+
+Исходные glTF, 2K PBR и `license.txt` — `_asset_src/zone01_nw/external/<id>/`;
+производные `ph_cabinet.glb`, `ph_household_chest.glb` и их отдельный `furniture.json` —
+в `assets/zone01/nw/`. Равномерный масштаб и экспорт: `tools/prepare_zone01_nw_furniture.py`.
+Состояние и исходники —
+`assets/zone01/nw/asset-state.md`, `docs/design/zone01_nw_implementation.md`.

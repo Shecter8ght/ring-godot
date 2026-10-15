@@ -27,6 +27,9 @@ func _author(zone: String, path: String) -> void:
 		for point: Vector3 in [Vector3(-180.3, 1.3, -69.6), Vector3(-180.3, 1.3, -66.4),
 			Vector3(-176, 1.3, -61.9), Vector3(-214, 1.3, -68.3), Vector3(-214, 1.3, -102.3)]:
 			candidates.append({"pos": point, "table": "storage"})
+		# Дворовые находки теперь внутри доступных квартир; отдельный слой хранит только гаражи.
+		if ResourceLoader.exists("res://scenes/levels/zone01/zone01_yard05_gameplay.tscn"):
+			candidates.clear()
 		for point: Vector3 in [Vector3(-264.5, 1.4, -157), Vector3(-264.5, 1.4, -146.8),
 			Vector3(-264.5, 1.4, -137.2), Vector3(-264.5, 1.4, -127),
 			Vector3(-264.5, 1.4, -117.4), Vector3(-264.5, 1.4, -107.2)]:

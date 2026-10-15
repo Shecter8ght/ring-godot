@@ -952,7 +952,8 @@ def fence(scene, name, a, b, height=2.2, parent="Props", solid=False, color=(.42
 
 def world_scene() -> None:
     s = Scene("World")
-    s.node("Terrain", script=s.resource("res://src/world/district_terrain.gd", "Script"), data_path=SECTOR)
+    s.node("Terrain", script=s.resource("res://src/world/district_terrain.gd", "Script"), data_path=SECTOR,
+           excavations=Raw("Array[AABB]([AABB(-225, -1.9, -144, 17, 2.3, 12)])"))
     s.node("Roads")
     for road in ROADS:
         raw = "PackedVector3Array(" + ", ".join(str(v) for p in road["points"] for v in p) + ")"
@@ -1178,6 +1179,9 @@ def zone_plaza(s: Scene) -> None:
 
 def zone_market(s: Scene) -> None:
     """Рынок (6): ряды павильонов и контейнеры в 1–2 яруса, узкие проходы, ангар-склад."""
+    if (OUT / "zone01_market06.tscn").exists():
+        s.node("Z06_Market", scene="res://scenes/levels/zone01/zone01_market06.tscn")
+        return
     z = zone_root(s, "Z06_Market")
     props(s, "MarketPaving", -170, 25, [box((0, -.05, 0), (130, .2, 162), (.38, .38, .37))], z + "/Props", y=0.3, surface="asphalt")
     building(s, "Hangar", -192, 6, 24, 42, 9.0, z + "/Buildings", title="Ангар", floors=0, doors=((0, -1), (0, 1)), yaw=0)
@@ -1303,6 +1307,9 @@ def zone_substation(s: Scene) -> None:
 
 def zone_ravine(s: Scene) -> None:
     """Овраг (12): металлический ферменный мост на западе, три частных дома с огородами."""
+    if (OUT / "zone01_houses12.tscn").exists():
+        s.node("Z12_Ravine", scene="res://scenes/levels/zone01/zone01_houses12.tscn")
+        return
     z = zone_root(s, "Z12_Ravine")
     by = ground(-372, 38)
     length = 58
@@ -1505,7 +1512,11 @@ def write_definition(h: np.ndarray) -> None:
         districts=[dict(id=r[0], name=r[1], rect=list(r[2])) for r in ROOMS],
         heights=dict(rail_top=RAIL_TOP, ravine_depth=RAVINE_DEPTH, hill=HILL_H, pit=PIT_H, podium=PODIUM_H, ponds=PONDS_H),
     )
-    (ROOT / "data/sectors/zone01_mall.json").write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    definition_path = ROOT / "data/sectors/zone01_mall.json"
+    # Отдельно авторские слои (россыпь и население) не теряются при пересборке географии.
+    if definition_path.exists():
+        result["extras"] = json.loads(definition_path.read_text(encoding="utf-8")).get("extras", [])
+    definition_path.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"zone01: площадь {area:.0f} м2, высоты {h.min():.1f}..{h.max():.1f} м, дорог {len(ROADS)}")
 
 

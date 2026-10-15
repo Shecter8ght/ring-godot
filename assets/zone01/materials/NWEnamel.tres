@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "NWEnamel"
+albedo_color = Color(0.68, 0.68, 0.59, 1)
+roughness = 0.32
+metallic = 0.05
+metallic_specular = 0.5

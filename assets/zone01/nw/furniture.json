@@ -1,0 +1,54 @@
+{
+ "ph_cabinet": {
+  "external": true,
+  "source": "https://polyhaven.com/a/painted_wooden_cabinet",
+  "license": "CC0 1.0",
+  "bounds_m": [
+   1.05,
+   1.0387,
+   0.542
+  ],
+  "triangles": 2227,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.5193729400634766,
+     0
+    ],
+    "size": [
+     1.0499999523162842,
+     1.0387458801269531,
+     0.5419613122940063
+    ],
+    "yaw": 0
+   }
+  ]
+ },
+ "ph_household_chest": {
+  "external": true,
+  "source": "https://polyhaven.com/a/wooden_crate_01",
+  "license": "CC0 1.0",
+  "bounds_m": [
+   1.2,
+   0.5084,
+   0.5946
+  ],
+  "triangles": 6576,
+  "collisions": [
+   {
+    "pos": [
+     0,
+     0.2541837692260742,
+     0
+    ],
+    "size": [
+     1.2000000476837158,
+     0.5083675384521484,
+     0.594645082950592
+    ],
+    "yaw": 0
+   }
+  ]
+ }
+}

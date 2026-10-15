@@ -1,0 +1,705 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PracticalLight.tscn" id="1"]
+[ext_resource type="Script" path="res://src/world/district_model.gd" id="2"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Sofa.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_CoffeeTable.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_FoldingStool.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Kettle.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/world/loose_loot.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Bed.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_MetalDesk.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_MedicalBox.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Workbench.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_ToolChest.tscn" id="13"]
+
+[node name="Yard05Gameplay" type="Node3D"]
+
+[node name="Interior" parent="." type="Node3D" groups=["nav_source"]]
+position = Vector3(-212.0, 0.3731, -138.0)
+
+[node name="Furniture" parent="Interior" type="Node3D"]
+
+[node name="Loot" parent="Interior" type="Node3D"]
+
+[node name="Floor_1" parent="Interior" type="Label3D"]
+position = Vector3(-4.8, 2.6, -1.065)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "1"
+font_size = 48
+pixel_size = 0.007
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="LandingLamp_0" parent="Interior" instance=ExtResource("1")]
+position = Vector3(-4.8, 3.55, 0.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LandingLight_0" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-4.8, 3.45, 0.6)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.6
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Floor_2" parent="Interior" type="Label3D"]
+position = Vector3(-4.8, 5.4, -1.065)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "2"
+font_size = 48
+pixel_size = 0.007
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="LandingLamp_1" parent="Interior" instance=ExtResource("1")]
+position = Vector3(-4.8, 6.35, 0.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LandingLight_1" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-4.8, 6.25, 0.6)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.6
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Floor_3" parent="Interior" type="Label3D"]
+position = Vector3(-4.8, 8.2, -1.065)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "3"
+font_size = 48
+pixel_size = 0.007
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="LandingLamp_2" parent="Interior" instance=ExtResource("1")]
+position = Vector3(-4.8, 9.15, 0.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LandingLight_2" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-4.8, 9.05, 0.6)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.6
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Floor_4" parent="Interior" type="Label3D"]
+position = Vector3(-4.8, 11.0, -1.065)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "4"
+font_size = 48
+pixel_size = 0.007
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="LandingLamp_3" parent="Interior" instance=ExtResource("1")]
+position = Vector3(-4.8, 11.95, 0.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LandingLight_3" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-4.8, 11.85, 0.6)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.6
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Floor_5" parent="Interior" type="Label3D"]
+position = Vector3(-4.8, 13.8, -1.065)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "5"
+font_size = 48
+pixel_size = 0.007
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="LandingLamp_4" parent="Interior" instance=ExtResource("1")]
+position = Vector3(-4.8, 14.75, 0.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LandingLight_4" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-4.8, 14.65, 0.6)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.6
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Kitchen_0" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-7.65, 1.1, 4.9)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+model = "res://assets/zone01/nw/kitchen.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Seat_0" parent="Interior/Furniture" instance=ExtResource("3")]
+position = Vector3(-11.25, 1.1, 3.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomTable_0" parent="Interior/Furniture" instance=ExtResource("4")]
+position = Vector3(-10.4, 1.1, 3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="KitchenStool_0" parent="Interior/Furniture" instance=ExtResource("5")]
+position = Vector3(-8.25, 1.1, 3.4)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Kettle_0" parent="Interior/Furniture" instance=ExtResource("6")]
+position = Vector3(-7.35, 2.04, 4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Wardrobe_0" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-11.25, 1.1, 1.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+model = "res://assets/zone01/nw/ph_cabinet.glb"
+manifest = "res://assets/zone01/nw/furniture.json"
+surface = "wood"
+materials_dir = ""
+
+[node name="YardKitchen" parent="Interior/Loot" instance=ExtResource("7")]
+position = Vector3(-7.65, 1.7, 4.4)
+display_name = "Кухонный шкаф"
+table = "home"
+require_line_of_sight = true
+
+[node name="YardLoose_00" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-7.9, 2.04, 4.9)
+table = "home"
+require_line_of_sight = true
+
+[node name="YardLoose_06" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-10.4, 1.57, 3.0)
+table = "office"
+require_line_of_sight = true
+
+[node name="RoomLamp_0" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-7.65, 3.53, 3.1)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomLight_0" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-7.65, 3.4, 3.1)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 4.5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="LivingLamp_0" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-11.25, 3.5, 3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LivingLight_0" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-11.25, 3.4, 3.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.15
+omni_range = 6.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Kitchen_1" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-6.05, 1.1, -4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/nw/kitchen.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Seat_1" parent="Interior/Furniture" instance=ExtResource("3")]
+position = Vector3(-11.25, 1.1, -3.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomTable_1" parent="Interior/Furniture" instance=ExtResource("4")]
+position = Vector3(-10.4, 1.1, -3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="KitchenStool_1" parent="Interior/Furniture" instance=ExtResource("5")]
+position = Vector3(-6.65, 1.1, -3.4)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Kettle_1" parent="Interior/Furniture" instance=ExtResource("6")]
+position = Vector3(-5.75, 2.04, -4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Wardrobe_1" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-11.25, 1.1, -1.3)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/nw/ph_cabinet.glb"
+manifest = "res://assets/zone01/nw/furniture.json"
+surface = "wood"
+materials_dir = ""
+
+[node name="Bed_1" parent="Interior/Furniture" instance=ExtResource("9")]
+position = Vector3(-10.7, 1.1, -4.05)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="YardWardrobe" parent="Interior/Loot" instance=ExtResource("7")]
+position = Vector3(-11.25, 1.75, -0.8)
+display_name = "Вещевой комод"
+table = "home"
+require_line_of_sight = true
+
+[node name="YardLoose_01" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-6.3, 2.04, -4.9)
+table = "home"
+require_line_of_sight = true
+
+[node name="RoomLamp_1" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-6.05, 3.53, -3.1)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomLight_1" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-6.05, 3.4, -3.1)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 4.5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="LivingLamp_1" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-11.25, 3.5, -3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LivingLight_1" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-11.25, 3.4, -3.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.15
+omni_range = 6.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Kitchen_2" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-1.95, 3.9, 4.9)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+model = "res://assets/zone01/nw/kitchen.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Seat_2" parent="Interior/Furniture" instance=ExtResource("3")]
+position = Vector3(1.0, 3.9, 3.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomTable_2" parent="Interior/Furniture" instance=ExtResource("4")]
+position = Vector3(0.15, 3.9, 3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="KitchenStool_2" parent="Interior/Furniture" instance=ExtResource("5")]
+position = Vector3(-2.55, 3.9, 3.4)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Kettle_2" parent="Interior/Furniture" instance=ExtResource("6")]
+position = Vector3(-1.65, 4.84, 4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Wardrobe_2" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(1.0, 3.9, 1.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+model = "res://assets/zone01/nw/ph_cabinet.glb"
+manifest = "res://assets/zone01/nw/furniture.json"
+surface = "wood"
+materials_dir = ""
+
+[node name="MedicineDesk" parent="Interior/Furniture" instance=ExtResource("10")]
+position = Vector3(1.0, 3.9, 1.8)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MedicineCase" parent="Interior/Furniture" instance=ExtResource("11")]
+position = Vector3(1.0, 4.69, 1.8)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="YardMedicine" parent="Interior/Loot" instance=ExtResource("7")]
+position = Vector3(0.4, 4.8, 1.8)
+display_name = "Домашняя аптечка"
+table = "pharmacy"
+require_line_of_sight = true
+
+[node name="YardLoose_02" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-2.2, 4.84, 4.9)
+table = "home"
+require_line_of_sight = true
+
+[node name="YardLoose_08" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(0.15, 4.37, 3.0)
+table = "pharmacy"
+require_line_of_sight = true
+
+[node name="RoomLamp_2" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-1.95, 6.33, 3.1)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomLight_2" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-1.95, 6.2, 3.1)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 4.5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="LivingLamp_2" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(1.0, 6.3, 3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LivingLight_2" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(1.0, 6.2, 3.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.15
+omni_range = 6.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Kitchen_3" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-6.05, 6.7, -4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/nw/kitchen.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Seat_3" parent="Interior/Furniture" instance=ExtResource("3")]
+position = Vector3(-11.25, 6.7, -3.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomTable_3" parent="Interior/Furniture" instance=ExtResource("4")]
+position = Vector3(-10.4, 6.7, -3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="KitchenStool_3" parent="Interior/Furniture" instance=ExtResource("5")]
+position = Vector3(-6.65, 6.7, -3.4)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Kettle_3" parent="Interior/Furniture" instance=ExtResource("6")]
+position = Vector3(-5.75, 7.64, -4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Wardrobe_3" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-11.25, 6.7, -1.3)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/nw/ph_cabinet.glb"
+manifest = "res://assets/zone01/nw/furniture.json"
+surface = "wood"
+materials_dir = ""
+
+[node name="WritingDesk" parent="Interior/Furniture" instance=ExtResource("10")]
+position = Vector3(-10.8, 6.7, -4.65)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="YardDesk" parent="Interior/Loot" instance=ExtResource("7")]
+position = Vector3(-9.5, 7.35, -4.6)
+display_name = "Ящики письменного стола"
+table = "office"
+require_line_of_sight = true
+
+[node name="YardLoose_03" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-6.3, 7.64, -4.9)
+table = "home"
+require_line_of_sight = true
+
+[node name="YardLoose_09" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-10.4, 7.17, -3.0)
+table = "office"
+require_line_of_sight = true
+
+[node name="RoomLamp_3" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-6.05, 9.13, -3.1)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomLight_3" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-6.05, 9.0, -3.1)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 4.5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="LivingLamp_3" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-11.25, 9.1, -3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LivingLight_3" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-11.25, 9.0, -3.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.15
+omni_range = 6.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Kitchen_4" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-7.65, 9.5, 4.9)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+model = "res://assets/zone01/nw/kitchen.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Seat_4" parent="Interior/Furniture" instance=ExtResource("3")]
+position = Vector3(-11.25, 9.5, 3.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomTable_4" parent="Interior/Furniture" instance=ExtResource("4")]
+position = Vector3(-10.4, 9.5, 3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="KitchenStool_4" parent="Interior/Furniture" instance=ExtResource("5")]
+position = Vector3(-8.25, 9.5, 3.4)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Kettle_4" parent="Interior/Furniture" instance=ExtResource("6")]
+position = Vector3(-7.35, 10.44, 4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Wardrobe_4" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-11.25, 9.5, 1.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+model = "res://assets/zone01/nw/ph_cabinet.glb"
+manifest = "res://assets/zone01/nw/furniture.json"
+surface = "wood"
+materials_dir = ""
+
+[node name="YardDresser" parent="Interior/Loot" instance=ExtResource("7")]
+position = Vector3(-11.25, 10.15, 0.5)
+display_name = "Вещевой комод"
+table = "home"
+require_line_of_sight = true
+
+[node name="YardLoose_04" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-7.9, 10.44, 4.9)
+table = "home"
+require_line_of_sight = true
+
+[node name="RoomLamp_4" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-7.65, 11.93, 3.1)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomLight_4" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-7.65, 11.8, 3.1)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 4.5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="LivingLamp_4" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-11.25, 11.9, 3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LivingLight_4" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-11.25, 11.8, 3.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.15
+omni_range = 6.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="Kitchen_5" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(-3.55, 12.3, -4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/nw/kitchen.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Seat_5" parent="Interior/Furniture" instance=ExtResource("3")]
+position = Vector3(1.0, 12.3, -3.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomTable_5" parent="Interior/Furniture" instance=ExtResource("4")]
+position = Vector3(0.15, 12.3, -3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="KitchenStool_5" parent="Interior/Furniture" instance=ExtResource("5")]
+position = Vector3(-4.15, 12.3, -3.4)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Kettle_5" parent="Interior/Furniture" instance=ExtResource("6")]
+position = Vector3(-3.25, 13.24, -4.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Wardrobe_5" parent="Interior/Furniture" type="StaticBody3D"]
+script = ExtResource("2")
+position = Vector3(1.0, 12.3, -1.3)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/nw/ph_cabinet.glb"
+manifest = "res://assets/zone01/nw/furniture.json"
+surface = "wood"
+materials_dir = ""
+
+[node name="Bed_5" parent="Interior/Furniture" instance=ExtResource("9")]
+position = Vector3(1.55, 12.3, -4.05)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="YardUpperKitchen" parent="Interior/Loot" instance=ExtResource("7")]
+position = Vector3(-3.55, 12.9, -4.4)
+display_name = "Кухонный шкаф пятого этажа"
+table = "home"
+require_line_of_sight = true
+
+[node name="YardLoose_05" parent="Interior/Loot" instance=ExtResource("8")]
+position = Vector3(-3.8, 13.24, -4.9)
+table = "home"
+require_line_of_sight = true
+
+[node name="RoomLamp_5" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(-3.55, 14.73, -3.1)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="RoomLight_5" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-3.55, 14.6, -3.1)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 4.5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="LivingLamp_5" parent="Interior/Furniture" instance=ExtResource("1")]
+position = Vector3(1.0, 14.7, -3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="LivingLight_5" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(1.0, 14.6, -3.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.15
+omni_range = 6.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="BasementWorkbench" parent="Interior/Furniture" instance=ExtResource("12")]
+position = Vector3(-10.6, -1.7, -4.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="BasementChest" parent="Interior/Furniture" instance=ExtResource("13")]
+position = Vector3(-8.8, -1.7, -4.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="YardBasement" parent="Interior/Loot" instance=ExtResource("7")]
+position = Vector3(-8.8, -1.2, -4.1)
+display_name = "Инструмент в подвале"
+table = "workshop"
+require_line_of_sight = true
+
+[node name="BasementLight" parent="Interior" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-8.0, 0.55, -1.8)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.65
+omni_range = 8
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="BasementSign" parent="Interior" type="Label3D"]
+position = Vector3(-4.8, -0.45, 1.61)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+text = "ПОДВАЛ"
+font_size = 48
+pixel_size = 0.003
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0

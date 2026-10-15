@@ -1,0 +1,1979 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://src/world/district_paving.gd" id="1"]
+[ext_resource type="Material" path="res://assets/zone01/materials/YardAsphalt.tres" id="2"]
+[ext_resource type="Script" path="res://src/world/district_model.gd" id="3"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Shelf.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Carton.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Crate.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_MilitaryCrate.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_MetalDesk.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Chair.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Laptop.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Locker.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Workbench.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://scenes/world/loose_loot.tscn" id="14"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_HangingLamp.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Counter.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Toolbox.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Vice.tscn" id="18"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_Multimeter.tscn" id="19"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_MedicalBox.tscn" id="20"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/Backpack.tscn" id="21"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_PlasticCrate.tscn" id="22"]
+[ext_resource type="PackedScene" path="res://levels/shelter/props/PH_OilTin.tscn" id="23"]
+
+[node name="Z06_Market" type="Node3D"]
+
+[node name="Architecture" parent="." type="Node3D" groups=["nav_source"]]
+
+[node name="Paving" parent="." type="Node3D" groups=["nav_source"]]
+
+[node name="MarketApron_0" parent="Paving" type="StaticBody3D"]
+script = ExtResource("1")
+points = PackedVector2Array(-226, -51, -226, 104)
+width = 17.0
+curb_height = 0.0
+material = ExtResource("2")
+lift = 0.075
+
+[node name="MarketApron_1" parent="Paving" type="StaticBody3D"]
+script = ExtResource("1")
+points = PackedVector2Array(-211, -51, -211, 104)
+width = 17.0
+curb_height = 0.0
+material = ExtResource("2")
+lift = 0.075
+
+[node name="MarketApron_2" parent="Paving" type="StaticBody3D"]
+script = ExtResource("1")
+points = PackedVector2Array(-177, -51, -177, 104)
+width = 17.0
+curb_height = 0.0
+material = ExtResource("2")
+lift = 0.075
+
+[node name="MarketApron_3" parent="Paving" type="StaticBody3D"]
+script = ExtResource("1")
+points = PackedVector2Array(-151, -51, -151, 104)
+width = 17.0
+curb_height = 0.0
+material = ExtResource("2")
+lift = 0.075
+
+[node name="MarketApron_4" parent="Paving" type="StaticBody3D"]
+script = ExtResource("1")
+points = PackedVector2Array(-136, -51, -136, 104)
+width = 17.0
+curb_height = 0.0
+material = ExtResource("2")
+lift = 0.075
+
+[node name="MarketApron_5" parent="Paving" type="StaticBody3D"]
+script = ExtResource("1")
+points = PackedVector2Array(-116, -51, -116, 104)
+width = 17.0
+curb_height = 0.0
+material = ExtResource("2")
+lift = 0.075
+
+[node name="Hangar" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-192.0, 0.48, 6.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/nw/market_hangar.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "concrete"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Furniture" parent="Architecture/Hangar" type="Node3D"]
+
+[node name="WarehouseShelf_0_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(-5.1, 0.0, -15.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_0_0_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 0.52, -15.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_0_0_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 1.05, -15.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="WarehouseShelf_0_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(-5.1, 0.0, -8.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_0_1_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 0.52, -8.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_0_1_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 1.05, -8.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="WarehouseShelf_0_2" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(-5.1, 0.0, -1.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_0_2_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 0.52, -1.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_0_2_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 1.05, -1.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="WarehouseShelf_0_3" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(-5.1, 0.0, 6.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_0_3_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 0.52, 6.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_0_3_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-5.1, 1.05, 6.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="WarehouseShelf_1_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(5.8, 0.0, -15.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_1_0_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 0.52, -15.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_1_0_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 1.05, -15.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="WarehouseShelf_1_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(5.8, 0.0, -8.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_1_1_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 0.52, -8.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_1_1_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 1.05, -8.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="WarehouseShelf_1_2" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(5.8, 0.0, -1.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_1_2_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 0.52, -1.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_1_2_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 1.05, -1.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="WarehouseShelf_1_3" parent="Architecture/Hangar/Furniture" instance=ExtResource("4")]
+position = Vector3(5.8, 0.0, 6.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="StockCarton_1_3_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 0.52, 6.0)
+rotation_degrees = Vector3(0.0, 15.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="StockCarton_1_3_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(5.8, 1.05, 6.0)
+rotation_degrees = Vector3(0.0, 100.0, 0.0)
+scale = Vector3(0.55, 0.55, 0.55)
+
+[node name="DeliveryStock_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("6")]
+position = Vector3(8.0, 0.0, -13.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryBox_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(8.0, 0.64, -13.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(0.7, 0.7, 0.7)
+
+[node name="DeliveryStock_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("6")]
+position = Vector3(8.0, 0.0, 1.0)
+rotation_degrees = Vector3(0.0, 12.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryBox_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(8.0, 0.64, 1.0)
+rotation_degrees = Vector3(0.0, 12.0, 0.0)
+scale = Vector3(0.7, 0.7, 0.7)
+
+[node name="DeliveryStock_2" parent="Architecture/Hangar/Furniture" instance=ExtResource("6")]
+position = Vector3(-2.5, 0.0, -9.0)
+rotation_degrees = Vector3(0.0, 24.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryBox_2" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(-2.5, 0.64, -9.0)
+rotation_degrees = Vector3(0.0, 24.0, 0.0)
+scale = Vector3(0.7, 0.7, 0.7)
+
+[node name="DeliveryStock_3" parent="Architecture/Hangar/Furniture" instance=ExtResource("6")]
+position = Vector3(2.4, 0.0, 7.0)
+rotation_degrees = Vector3(0.0, 36.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryBox_3" parent="Architecture/Hangar/Furniture" instance=ExtResource("5")]
+position = Vector3(2.4, 0.64, 7.0)
+rotation_degrees = Vector3(0.0, 36.0, 0.0)
+scale = Vector3(0.7, 0.7, 0.7)
+
+[node name="Cargo_0" parent="Architecture/Hangar/Furniture" instance=ExtResource("7")]
+position = Vector3(8.5, 0.0, 15.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketCargo_0" parent="Architecture/Hangar" instance=ExtResource("8")]
+position = Vector3(8.5, 0.35, 15.5)
+display_name = "Грузовая тара ангара"
+table = "storage"
+require_line_of_sight = true
+
+[node name="Cargo_1" parent="Architecture/Hangar/Furniture" instance=ExtResource("7")]
+position = Vector3(6.5, 0.0, 18.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketCargo_1" parent="Architecture/Hangar" instance=ExtResource("8")]
+position = Vector3(6.5, 0.35, 18.5)
+display_name = "Грузовая тара ангара"
+table = "storage"
+require_line_of_sight = true
+
+[node name="OfficeDesk" parent="Architecture/Hangar/Furniture" instance=ExtResource("9")]
+position = Vector3(-6.0, 3.61, 18.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="OfficeChair" parent="Architecture/Hangar/Furniture" instance=ExtResource("10")]
+position = Vector3(-6.0, 3.61, 17.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="OfficeLaptop" parent="Architecture/Hangar/Furniture" instance=ExtResource("11")]
+position = Vector3(-6.2, 4.4, 18.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="OfficeCabinet" parent="Architecture/Hangar/Furniture" instance=ExtResource("12")]
+position = Vector3(-4.2, 3.61, 19.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="WarehouseWorkbench" parent="Architecture/Hangar/Furniture" instance=ExtResource("13")]
+position = Vector3(7.2, 0.0, -19.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketOffice" parent="Architecture/Hangar" instance=ExtResource("8")]
+position = Vector3(-4.2, 4.45, 19.2)
+display_name = "Служебный шкаф конторы"
+table = "office"
+require_line_of_sight = true
+
+[node name="MarketLoose_06" parent="Architecture/Hangar" instance=ExtResource("14")]
+position = Vector3(-5.6, 4.41, 18.6)
+table = "office"
+require_line_of_sight = true
+
+[node name="MarketLoose_07" parent="Architecture/Hangar" instance=ExtResource("14")]
+position = Vector3(6.5, 0.47, 18.0)
+table = "storage"
+require_line_of_sight = true
+
+[node name="MarketLoose_08" parent="Architecture/Hangar" instance=ExtResource("14")]
+position = Vector3(7.8, 0.92, -19.0)
+table = "tools"
+require_line_of_sight = true
+
+[node name="WarehouseSign" parent="." type="Label3D"]
+position = Vector3(-192.0, 5.8, -15.17)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+text = "ПРИЁМКА  /  СКЛАД"
+font_size = 48
+pixel_size = 0.014
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="OfficeSign" parent="Architecture/Hangar" type="Label3D"]
+position = Vector3(-7.0, 5.3, 12.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+text = "КОНТОРА"
+font_size = 48
+pixel_size = 0.004
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="HangarLamp_0" parent="Architecture/Hangar" instance=ExtResource("15")]
+position = Vector3(0.0, 6.6, -13.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="HangarLight_0" parent="Architecture/Hangar" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 5.8, -13.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.5
+omni_range = 14
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="HangarLamp_1" parent="Architecture/Hangar" instance=ExtResource("15")]
+position = Vector3(0.0, 6.6, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="HangarLight_1" parent="Architecture/Hangar" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 5.8, 0.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.5
+omni_range = 14
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="HangarLamp_2" parent="Architecture/Hangar" instance=ExtResource("15")]
+position = Vector3(0.0, 6.6, 13.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="HangarLight_2" parent="Architecture/Hangar" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 5.8, 13.0)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 1.5
+omni_range = 14
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="OfficeLight" parent="Architecture/Hangar" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(-7.2, 6.0, 16.5)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.5
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="OpenStall_0" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.0, 0.48, -40.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_open.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Counter" parent="Architecture/OpenStall_0" instance=ExtResource("16")]
+position = Vector3(0.0, 0.0, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="BackShelf" parent="Architecture/OpenStall_0" instance=ExtResource("4")]
+position = Vector3(-1.8, 0.0, -2.13)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="SideShelf" parent="Architecture/OpenStall_0" instance=ExtResource("4")]
+position = Vector3(2.85, 0.0, -0.7)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="TradeSign" parent="Architecture/OpenStall_0" type="Label3D"]
+position = Vector3(0.0, 2.75, 2.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "ИНСТРУМЕНТ"
+font_size = 48
+pixel_size = 0.004
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="Tools" parent="Architecture/OpenStall_0" instance=ExtResource("17")]
+position = Vector3(-0.6, 0.93, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="ToolVice" parent="Architecture/OpenStall_0" instance=ExtResource("18")]
+position = Vector3(0.65, 0.93, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketStallSearch_0" parent="Architecture/OpenStall_0" instance=ExtResource("8")]
+position = Vector3(0.0, 0.65, 0.6)
+display_name = "Инструментальный прилавок"
+table = "tools"
+require_line_of_sight = true
+
+[node name="MarketLoose_00" parent="Architecture/OpenStall_0" instance=ExtResource("14")]
+position = Vector3(0.8, 0.94, 0.0)
+table = "tools"
+require_line_of_sight = true
+
+[node name="StallLight_0" parent="Architecture/OpenStall_0" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 2.45, 0.2)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="OpenStall_1" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, -38.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_open.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Counter" parent="Architecture/OpenStall_1" instance=ExtResource("16")]
+position = Vector3(0.0, 0.0, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="BackShelf" parent="Architecture/OpenStall_1" instance=ExtResource("4")]
+position = Vector3(-1.8, 0.0, -2.13)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="SideShelf" parent="Architecture/OpenStall_1" instance=ExtResource("4")]
+position = Vector3(2.85, 0.0, -0.7)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="TradeSign" parent="Architecture/OpenStall_1" type="Label3D"]
+position = Vector3(0.0, 2.75, 2.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "РАДИОДЕТАЛИ"
+font_size = 48
+pixel_size = 0.004
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="Laptop" parent="Architecture/OpenStall_1" instance=ExtResource("11")]
+position = Vector3(-0.65, 0.93, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Meter" parent="Architecture/OpenStall_1" instance=ExtResource("19")]
+position = Vector3(0.65, 0.93, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketStallSearch_1" parent="Architecture/OpenStall_1" instance=ExtResource("8")]
+position = Vector3(0.0, 0.65, 0.6)
+display_name = "Шкаф ремонта электроники"
+table = "electronics"
+require_line_of_sight = true
+
+[node name="MarketLoose_01" parent="Architecture/OpenStall_1" instance=ExtResource("14")]
+position = Vector3(0.8, 0.94, 0.0)
+table = "electronics"
+require_line_of_sight = true
+
+[node name="StallLight_1" parent="Architecture/OpenStall_1" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 2.45, 0.2)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="OpenStall_2" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, -8.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_open.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Counter" parent="Architecture/OpenStall_2" instance=ExtResource("16")]
+position = Vector3(0.0, 0.0, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="BackShelf" parent="Architecture/OpenStall_2" instance=ExtResource("4")]
+position = Vector3(-1.8, 0.0, -2.13)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="SideShelf" parent="Architecture/OpenStall_2" instance=ExtResource("4")]
+position = Vector3(2.85, 0.0, -0.7)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="TradeSign" parent="Architecture/OpenStall_2" type="Label3D"]
+position = Vector3(0.0, 2.75, 2.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "АПТЕЧНЫЕ ТОВАРЫ"
+font_size = 48
+pixel_size = 0.004
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="MedicalCase" parent="Architecture/OpenStall_2" instance=ExtResource("20")]
+position = Vector3(0.0, 0.93, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketStallSearch_2" parent="Architecture/OpenStall_2" instance=ExtResource("8")]
+position = Vector3(0.0, 0.65, 0.6)
+display_name = "Медицинские запасы"
+table = "pharmacy"
+require_line_of_sight = true
+
+[node name="MarketLoose_02" parent="Architecture/OpenStall_2" instance=ExtResource("14")]
+position = Vector3(0.8, 0.94, 0.0)
+table = "pharmacy"
+require_line_of_sight = true
+
+[node name="StallLight_2" parent="Architecture/OpenStall_2" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 2.45, 0.2)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="OpenStall_3" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.0, 0.48, 41.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_open.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Counter" parent="Architecture/OpenStall_3" instance=ExtResource("16")]
+position = Vector3(0.0, 0.0, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="BackShelf" parent="Architecture/OpenStall_3" instance=ExtResource("4")]
+position = Vector3(-1.8, 0.0, -2.13)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="SideShelf" parent="Architecture/OpenStall_3" instance=ExtResource("4")]
+position = Vector3(2.85, 0.0, -0.7)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="TradeSign" parent="Architecture/OpenStall_3" type="Label3D"]
+position = Vector3(0.0, 2.75, 2.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "ОДЕЖДА"
+font_size = 48
+pixel_size = 0.004
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="ClothesBag" parent="Architecture/OpenStall_3" instance=ExtResource("21")]
+position = Vector3(0.0, 0.0, -1.6)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketStallSearch_3" parent="Architecture/OpenStall_3" instance=ExtResource("8")]
+position = Vector3(0.0, 0.65, 0.6)
+display_name = "Вещи павильона"
+table = "home"
+require_line_of_sight = true
+
+[node name="MarketLoose_03" parent="Architecture/OpenStall_3" instance=ExtResource("14")]
+position = Vector3(0.8, 0.94, 0.0)
+table = "home"
+require_line_of_sight = true
+
+[node name="StallLight_3" parent="Architecture/OpenStall_3" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 2.45, 0.2)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="OpenStall_4" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.0, 0.48, 48.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_open.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Counter" parent="Architecture/OpenStall_4" instance=ExtResource("16")]
+position = Vector3(0.0, 0.0, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="BackShelf" parent="Architecture/OpenStall_4" instance=ExtResource("4")]
+position = Vector3(-1.8, 0.0, -2.13)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="SideShelf" parent="Architecture/OpenStall_4" instance=ExtResource("4")]
+position = Vector3(2.85, 0.0, -0.7)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="TradeSign" parent="Architecture/OpenStall_4" type="Label3D"]
+position = Vector3(0.0, 2.75, 2.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "ХОЗТОВАРЫ"
+font_size = 48
+pixel_size = 0.004
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="EmptyCrate" parent="Architecture/OpenStall_4" instance=ExtResource("22")]
+position = Vector3(0.0, 0.0, -1.7)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="WorkCan" parent="Architecture/OpenStall_4" instance=ExtResource("23")]
+position = Vector3(0.65, 0.93, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketLoose_04" parent="Architecture/OpenStall_4" instance=ExtResource("14")]
+position = Vector3(0.8, 0.94, 0.0)
+table = "tools"
+require_line_of_sight = true
+
+[node name="StallLight_4" parent="Architecture/OpenStall_4" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 2.45, 0.2)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="OpenStall_5" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, 87.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_open.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="Counter" parent="Architecture/OpenStall_5" instance=ExtResource("16")]
+position = Vector3(0.0, 0.0, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="BackShelf" parent="Architecture/OpenStall_5" instance=ExtResource("4")]
+position = Vector3(-1.8, 0.0, -2.13)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="SideShelf" parent="Architecture/OpenStall_5" instance=ExtResource("4")]
+position = Vector3(2.85, 0.0, -0.7)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="TradeSign" parent="Architecture/OpenStall_5" type="Label3D"]
+position = Vector3(0.0, 2.75, 2.9)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+text = "ПРОДУКТЫ"
+font_size = 48
+pixel_size = 0.004
+billboard = 0
+no_depth_test = false
+modulate = Color(0.78, 0.76, 0.65, 1)
+outline_size = 0
+
+[node name="EmptyCrate" parent="Architecture/OpenStall_5" instance=ExtResource("22")]
+position = Vector3(0.0, 0.0, -1.7)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="WorkCan" parent="Architecture/OpenStall_5" instance=ExtResource("23")]
+position = Vector3(0.65, 0.93, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="MarketLoose_05" parent="Architecture/OpenStall_5" instance=ExtResource("14")]
+position = Vector3(0.8, 0.94, 0.0)
+table = "grocery"
+require_line_of_sight = true
+
+[node name="StallLight_5" parent="Architecture/OpenStall_5" type="OmniLight3D" groups=["mall_lights"]]
+position = Vector3(0.0, 2.45, 0.2)
+light_color = Color(1, 0.78, 0.53, 1)
+light_energy = 0.35
+omni_range = 5
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 35.0
+distance_fade_length = 8.0
+
+[node name="ClosedStall_0" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.0, 0.48, -25.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_1" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.0, 0.48, 8.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_2" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.0, 0.48, 24.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_3" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.0, 0.48, 57.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_4" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.0, 0.48, 87.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_5" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, -25.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_6" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, 8.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_7" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, 24.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_8" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, 41.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_9" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, 57.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_10" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-170.0, 0.48, 87.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_11" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.0, 0.48, -40.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_12" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.0, 0.48, -25.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_13" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.0, 0.48, -8.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_14" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.0, 0.48, 8.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_15" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.0, 0.48, 24.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_16" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.0, 0.48, 87.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_17" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, -40.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_18" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, -25.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_19" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, -8.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_20" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, 8.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_21" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, 24.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_22" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, 41.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_23" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-131.0, 0.48, 57.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_24" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, -40.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_25" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, -25.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_26" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, -8.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_27" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, 8.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_28" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, 24.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_29" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, 41.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_2_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_30" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, 57.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_0_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="ClosedStall_31" parent="Architecture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-114.0, 0.48, 87.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/market_stall_1_closed.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "metal"
+materials_dir = "res://assets/zone01/materials"
+
+[node name="StreetFurniture" parent="." type="Node3D" groups=["nav_source"]]
+
+[node name="DeliveryCrate_0" parent="StreetFurniture" instance=ExtResource("6")]
+position = Vector3(-172.0, 0.48, -32.0)
+rotation_degrees = Vector3(0.0, 10.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryCarton_0" parent="StreetFurniture" instance=ExtResource("5")]
+position = Vector3(-171.4, 0.48, -31.5)
+rotation_degrees = Vector3(0.0, 10.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryCrate_1" parent="StreetFurniture" instance=ExtResource("6")]
+position = Vector3(-175.0, 0.48, 39.0)
+rotation_degrees = Vector3(0.0, 85.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryCarton_1" parent="StreetFurniture" instance=ExtResource("5")]
+position = Vector3(-174.4, 0.48, 39.5)
+rotation_degrees = Vector3(0.0, 85.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryCrate_2" parent="StreetFurniture" instance=ExtResource("6")]
+position = Vector3(-164.0, 0.48, 67.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryCarton_2" parent="StreetFurniture" instance=ExtResource("5")]
+position = Vector3(-163.4, 0.48, 67.5)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryCrate_3" parent="StreetFurniture" instance=ExtResource("6")]
+position = Vector3(-208.0, 0.48, 80.0)
+rotation_degrees = Vector3(0.0, -10.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="DeliveryCarton_3" parent="StreetFurniture" instance=ExtResource("5")]
+position = Vector3(-207.4, 0.48, 80.5)
+rotation_degrees = Vector3(0.0, -10.0, 0.0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Fence_0_0" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-234.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_1" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-231.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_2" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-228.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_3" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-225.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_4" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-222.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_5" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-219.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_6" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-216.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_7" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-213.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_8" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-210.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_9" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-207.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_0_10" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-204.5, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(1.0, 1.0, 1)
+
+[node name="Fence_1_0" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-186.5185, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_1" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-183.5556, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_2" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-180.5926, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_3" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-177.6296, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_4" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-174.6667, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_5" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-171.7037, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_6" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-168.7407, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_7" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-165.7778, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_8" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-162.8148, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_9" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-159.8519, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_10" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-156.8889, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_11" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-153.9259, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_12" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-150.963, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_13" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-148.0, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_14" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-145.037, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_15" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-142.0741, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_16" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-139.1111, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_17" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-136.1481, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_18" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-133.1852, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_19" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-130.2222, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_20" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-127.2593, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_21" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-124.2963, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_22" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-121.3333, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_23" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-118.3704, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_24" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-115.4074, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_25" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-112.4444, 0.33, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_1_26" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-109.4815, 0.2784, -55.0)
+rotation_degrees = Vector3(0.0, -0.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9876543209876543, 1.0, 1)
+
+[node name="Fence_2_0" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -53.5357)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_1" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -50.6071)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_2" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -47.6786)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_3" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -44.75)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_4" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -41.8214)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_5" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -38.8929)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_6" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -35.9643)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_7" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -33.0357)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_8" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -30.1071)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_9" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -27.1786)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_10" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -24.25)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_11" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -21.3214)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_12" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -18.3929)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_13" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -15.4643)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_14" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -12.5357)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_15" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -9.6071)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_16" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -6.6786)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_17" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -3.75)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_18" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, -0.8214)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_19" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 2.1071)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_20" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 5.0357)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_21" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 7.9643)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_22" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 10.8929)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_23" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 13.8214)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_24" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 16.75)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_25" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 19.6786)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_26" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 22.6071)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_2_27" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 25.5357)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9761904761904762, 1.0, 1)
+
+[node name="Fence_3_0" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 44.4545)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_1" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 47.3636)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_2" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 50.2727)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_3" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 53.1818)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_4" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 56.0909)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_5" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 59.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_6" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 61.9091)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_7" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 64.8182)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_8" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 67.7273)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_9" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 70.6364)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_10" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 73.5455)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_11" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 76.4545)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_12" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 79.3636)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_13" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 82.2727)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_14" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 85.1818)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_15" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 88.0909)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_16" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 91.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_17" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 93.9091)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_18" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 96.8182)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_19" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 99.7273)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_20" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 102.6364)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)
+
+[node name="Fence_3_21" parent="StreetFurniture" type="StaticBody3D"]
+script = ExtResource("3")
+position = Vector3(-236.0, 0.33, 105.5455)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+model = "res://assets/zone01/nw/garden_fence.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
+surface = "wood"
+materials_dir = "res://assets/zone01/materials"
+scale = Vector3(0.9696969696969697, 1.0, 1)

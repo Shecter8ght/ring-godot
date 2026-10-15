@@ -3747,3 +3747,9 @@ const SUPPLY_SIGNAL := {"delay": 45.0, "altitude": 170.0, "speed": 70.0, "flight
 const SUPPLY_LOOT := {"weapons": [1, 2], "weapon_tier": 3, "dur": [85, 100], "mags": 3, "ammo_mags": 3, "mods": 2, "mod_tier": 2,
 	"armor_tier": 3, "extras": [["medkit", 1, 2], ["painkillers", 1, 2], ["grenade", 2, 3], ["rig_assault", 0, 1]]}
 const SUPPLY_PLANE_SOUND := {"db": 12.0, "unit": 60.0, "max": 600.0}
+
+## Узкие жилые двери и лестницы зоны 1: отдельная точность кэша, остальные карты прежние.
+const ZONE01_INTERIOR_NAV := {
+	"nav_tile": 240.0, "nav_cell": 0.125, "nav_height": 0.0625, "nav_border": 2.0,
+	"nav_radius": 0.375, "nav_detail_error": 1.0, "nav_merge_scale": 0.0078125,
+}

@@ -106,7 +106,13 @@ def main() -> None:
         meta = info[model]
         by = footprint_y(x, z, meta["length"], meta["depth"], yaw)
         y.model("Buildings", name, model, x, z, yaw, by, MANIFEST_K, "concrete")
-        s.nodes[-1] += "\nshadow_proxy = true"
+        if name == "Korpus1" and (ROOT / "assets/zone01/nw/manifest.json").exists():
+            s.nodes[-1] = s.nodes[-1].replace(f"{MODELS}/{model}.glb", "res://assets/zone01/nw/panel_playable.glb")
+            s.nodes[-1] = s.nodes[-1].replace(MANIFEST_K, "res://assets/zone01/nw/manifest.json")
+        else:
+            s.nodes[-1] += "\nshadow_proxy = true"
+    if (ROOT / "scenes/levels/zone01/zone01_yard05_gameplay.tscn").exists():
+        s.node("GameplayInterior", scene="res://scenes/levels/zone01/zone01_yard05_gameplay.tscn")
 
     # покрытие: проезды асфальт, тротуары — тоже асфальт, но светлее и с бордюром
     s.node("Paving", groups=["nav_source"])

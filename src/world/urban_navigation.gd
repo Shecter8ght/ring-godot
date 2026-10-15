@@ -9,7 +9,8 @@ const CACHE_DIR: String = "res://data/navigation/zone02"
 const SOURCES := {
 	"zone02_urban_belt": ["res://data/sectors/zone02_urban_belt.json", "res://scenes/levels/zone02_urban_belt.tscn", "res://scenes/levels/zone02"],
 	"zone01_mall": ["res://data/sectors/zone01_mall.json", "res://scenes/levels/zone01_mall.tscn", "res://scenes/levels/zone01",
-		"res://data/terrain/zone01_heights.r32", "res://src/world/district_terrain.gd"],
+		"res://data/terrain/zone01_heights.r32", "res://src/world/district_terrain.gd",
+		"res://src/world/district_model.gd", "res://assets/zone01/nw/manifest.json", "res://assets/zone01/nw/furniture.json"],
 }
 
 var definition: Dictionary = {}
@@ -18,6 +19,12 @@ var _bake_done: bool = false
 var _map: RID
 var _previous_cell: float = 0.25
 var _previous_height: float = 0.25
+
+
+func _config() -> Dictionary:
+	if String(definition.get("id", "")) == "zone01_mall":
+		return Balance.URBAN_WORLD.merged(Balance.ZONE01_INTERIOR_NAV, true)
+	return Balance.URBAN_WORLD
 
 
 func _ready() -> void:
@@ -37,11 +44,12 @@ func _prepare() -> void:
 	_previous_cell = NavigationServer3D.map_get_cell_size(map)
 	_previous_height = NavigationServer3D.map_get_cell_height(map)
 	var initial_iteration: int = NavigationServer3D.map_get_iteration_id(map)
-	NavigationServer3D.map_set_cell_size(map, float(Balance.URBAN_WORLD.nav_cell))
-	NavigationServer3D.map_set_cell_height(map, float(Balance.URBAN_WORLD.nav_height))
-	NavigationServer3D.map_set_merge_rasterizer_cell_scale(map, float(Balance.URBAN_WORLD.nav_merge_scale))
+	var cfg: Dictionary = _config()
+	NavigationServer3D.map_set_cell_size(map, float(cfg.nav_cell))
+	NavigationServer3D.map_set_cell_height(map, float(cfg.nav_height))
+	NavigationServer3D.map_set_merge_rasterizer_cell_scale(map, float(cfg.nav_merge_scale))
 	var bounds: Array = definition.get("bounds", [-750, -625, 750, 625])
-	var tile: float = float(Balance.URBAN_WORLD.nav_tile)
+	var tile: float = float(cfg.nav_tile)
 	var columns: int = int(ceil((float(bounds[2]) - float(bounds[0])) / tile))
 	var rows: int = int(ceil((float(bounds[3]) - float(bounds[1])) / tile))
 	var cached: bool = not save_cache and _cache_valid()
@@ -60,6 +68,7 @@ func _prepare() -> void:
 		if save_cache:
 			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_cache_dir()))
 	var start_ms: int = Time.get_ticks_msec()
+	var synchronization_samples := PackedVector3Array()
 	for x in range(columns):
 		for z in range(rows):
 			var mesh: NavigationMesh
@@ -67,7 +76,7 @@ func _prepare() -> void:
 				mesh = load(_path(x, z)) as NavigationMesh
 			else:
 				mesh = _settings()
-				var border: float = float(Balance.URBAN_WORLD.nav_border)
+				var border: float = float(cfg.nav_border)
 				mesh.border_size = border
 				mesh.filter_baking_aabb = AABB(Vector3(float(bounds[0]) + float(x) * tile - border, -16, float(bounds[1]) + float(z) * tile - border), Vector3(tile + border * 2, 54, tile + border * 2))
 				_bake_done = false
@@ -84,17 +93,43 @@ func _prepare() -> void:
 			region.name = "Tile_%d_%d" % [x, z]
 			region.navigation_mesh = mesh
 			add_child(region)
+			if mesh.get_polygon_count() > 0:
+				var polygon: PackedInt32Array = mesh.get_polygon(mesh.get_polygon_count() / 2)
+				var vertices: PackedVector3Array = mesh.get_vertices()
+				if not polygon.is_empty():
+					synchronization_samples.append(vertices[polygon[0]])
 	if save_cache:
 		_write_manifest()
 	print("zone02: навигация %d тайлов, %d мс, кэш %s" % [columns * rows, Time.get_ticks_msec() - start_ms, str(cached)])
 	# Асинхронная синхронизация тридцати регионов может занимать больше одного физического кадра.
 	var synchronization_start: int = Time.get_ticks_msec()
-	while NavigationServer3D.map_get_iteration_id(map) <= initial_iteration or not NavigationServer3D.map_get_closest_point_owner(map, Vector3.ZERO).is_valid():
-		if Time.get_ticks_msec() - synchronization_start > 10000:
+	var synchronization_frames: int = 0
+	while NavigationServer3D.map_get_iteration_id(map) <= initial_iteration or not _map_contains_regions(map, synchronization_samples):
+		# Первый кадр Forward+ может долго компилировать шейдеры. Даём серверу реальные
+		# физические кадры на публикацию, даже если во время первого из них истёк таймер.
+		if synchronization_frames >= 120 and Time.get_ticks_msec() - synchronization_start > 10000:
+			for sample: Vector3 in synchronization_samples:
+				var closest: Vector3 = NavigationServer3D.map_get_closest_point(map, sample)
+				if closest.distance_to(sample) > float(_config().nav_cell):
+					push_warning("Навигация: не опубликована опора %s, ближайшая %s" % [sample, closest])
 			push_error("zone02: сервер навигации не подготовил полигоны")
 			return
 		await get_tree().physics_frame
+		synchronization_frames += 1
 	ready_for_agents.emit()
+
+
+func _map_contains_regions(map: RID, samples: PackedVector3Array) -> bool:
+	# Кэш добавляет все тайлы сразу. Первый готовый тайл ещё не означает готовность всей карты.
+	for child: Node in get_children():
+		if child is NavigationRegion3D:
+			var region := child as NavigationRegion3D
+			if region.navigation_mesh.get_polygon_count() > 0 and NavigationServer3D.region_get_iteration_id(region.get_rid()) == 0:
+				return false
+	for sample: Vector3 in samples:
+		if NavigationServer3D.map_get_closest_point(map, sample).distance_to(sample) > float(_config().nav_cell):
+			return false
+	return not samples.is_empty()
 
 
 func _cache_dir() -> String:
@@ -161,9 +196,10 @@ func _source_hash(path: String) -> String:
 
 func _settings_signature() -> Dictionary:
 	var signature: Dictionary = {}
-	for key: String in Balance.URBAN_WORLD:
+	var cfg: Dictionary = _config()
+	for key: String in cfg:
 		if key.begins_with("nav_"):
-			signature[key] = Balance.URBAN_WORLD[key]
+			signature[key] = cfg[key]
 	return signature
 
 
@@ -189,18 +225,19 @@ func _remove_submerged(mesh: NavigationMesh) -> void:
 
 func _settings() -> NavigationMesh:
 	var mesh := NavigationMesh.new()
+	var cfg: Dictionary = _config()
 	mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
 	mesh.geometry_collision_mask = Hitscan.LAYER_WORLD
 	mesh.geometry_source_geometry_mode = NavigationMesh.SOURCE_GEOMETRY_GROUPS_WITH_CHILDREN
 	mesh.geometry_source_group_name = "nav_source"
-	mesh.cell_size = float(Balance.URBAN_WORLD.nav_cell)
-	mesh.cell_height = float(Balance.URBAN_WORLD.nav_height)
-	mesh.agent_height = ceilf(float(Balance.URBAN_WORLD.nav_agent_height) / mesh.cell_height) * mesh.cell_height
-	mesh.agent_radius = float(Balance.URBAN_WORLD.nav_radius)
-	mesh.agent_max_climb = floorf(float(Balance.URBAN_WORLD.nav_climb) / mesh.cell_height) * mesh.cell_height
-	mesh.agent_max_slope = float(Balance.URBAN_WORLD.nav_slope)
+	mesh.cell_size = float(cfg.nav_cell)
+	mesh.cell_height = float(cfg.nav_height)
+	mesh.agent_height = ceilf(float(cfg.nav_agent_height) / mesh.cell_height) * mesh.cell_height
+	mesh.agent_radius = float(cfg.nav_radius)
+	mesh.agent_max_climb = floorf(float(cfg.nav_climb) / mesh.cell_height) * mesh.cell_height
+	mesh.agent_max_slope = float(cfg.nav_slope)
 	mesh.edge_max_error = 1.0
-	mesh.detail_sample_max_error = float(Balance.URBAN_WORLD.nav_detail_error)
+	mesh.detail_sample_max_error = float(cfg.nav_detail_error)
 	mesh.region_min_size = 4.0
 	mesh.region_merge_size = 12.0
 	return mesh

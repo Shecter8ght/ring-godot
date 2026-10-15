@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "NWSign"
+albedo_color = Color(0.17, 0.23, 0.25, 1)
+roughness = 0.75
+metallic = 0.1
+metallic_specular = 0.5

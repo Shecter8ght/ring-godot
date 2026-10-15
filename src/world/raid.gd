@@ -1392,6 +1392,8 @@ func _near_container(pl: Player, path: NodePath) -> LootContainer:
 		return null
 	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
 		return null
+	if not c.reachable_from(pl):
+		return null
 	return c
 
 
@@ -2006,6 +2008,8 @@ func _take(peer_id: int, path: NodePath, id: String, n: int) -> void:
 		return
 	if pl.global_position.distance_to(c.global_position) > Balance.INTERACT_RADIUS + 1.5:
 		return
+	if not c.reachable_from(pl):
+		return
 	for i in range(c.items.size()):
 		if String(c.items[i].id) != id:
 			continue
@@ -2417,6 +2421,8 @@ func _update_prompt(me: Player) -> void:
 			continue
 		var d := it.global_position.distance_to(me.global_position)
 		if d < Balance.INTERACT_RADIUS and d < best_d:
+			if it is LootContainer and not (it as LootContainer).reachable_from(me):
+				continue
 			best = it
 			best_d = d
 	# напарник на ногах рядом (ближе любого предмета) — подержать «действие»: обмен вещами

@@ -16,6 +16,8 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 ## Таблица лута (data/loot.json → tables).
 @export var table: String = "storage"
 @export var search_s: float = 2.0
+## У авторской мебели точка стоит перед фасадом: стену соседней комнаты обыском не пройти.
+@export var require_line_of_sight: bool = false
 ## Как выглядит (у контейнеров на пропсах — NONE: вид даёт сам проп).
 @export var look: Look = Look.NONE:
 	set(v):
@@ -82,8 +84,22 @@ func prompt() -> String:
 	return "обыскать: " + display_name
 
 
+func reachable_from(player: Player) -> bool:
+	if not require_line_of_sight:
+		return true
+	if player == null or not is_inside_tree():
+		return false
+	# Высота берётся из реальной стойки: присевший не тянется лучом сквозь низкую стенку.
+	var eye: Vector3 = player.eye_position()
+	var target: Vector3 = global_position + Vector3.UP * 0.08
+	var query := PhysicsRayQueryParameters3D.create(eye, target, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
+	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+
 ## F у контейнера: начать обыск (окно откроет InventoryUI, когда пройдёт search_s).
 func _use(_peer_id: int) -> void:
+	if require_line_of_sight and (Raid.current == null or not reachable_from(Raid.current.player_of(_peer_id))):
+		return
 	roll()
 
 

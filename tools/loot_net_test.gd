@@ -8,6 +8,7 @@ var ack: int = 0
 var result: int = -1
 var client_ready: bool = false
 var target: NodePath
+var result_confirmed: bool = false
 
 
 func _ready() -> void:
@@ -34,7 +35,10 @@ func _run() -> void:
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	await until(func() -> bool: return get_tree().get_nodes_in_group("players").size() == 2)
 	if role == "host":
-		Net.start_level.rpc("res://scenes/levels/f1_market.tscn", {"time": "day", "weather": "clear", "power": "on"})
+		var level_path: String = OS.get_environment("LOOT_NET_LEVEL")
+		if level_path == "":
+			level_path = "res://scenes/levels/f1_market.tscn"
+		Net.start_level.rpc(level_path, {"time": "day", "weather": "clear", "power": "on"})
 	await until(func() -> bool: return Raid.current != null and Raid.current.local_player() != null and get_tree().get_nodes_in_group("players").size() == 2 and Raid.current.local_player().inventory.loadout_ready)
 	var me: Player = Raid.current.local_player()
 	# Поздний спавн отрядов после готовности навмеша не должен вмешиваться в проверку вещей.
@@ -68,6 +72,7 @@ func _run() -> void:
 		var before: int = Profile.money
 		check("клиент сохранил и продал вынесенную вещь", Profile.sell(0, 1, "backpack") and Profile.money - before == Profile.sell_price(ItemDb.make("multimeter", 1)))
 		_result.rpc_id(1, fails)
+		await until(func() -> bool: return result_confirmed)
 		await get_tree().create_timer(0.5).timeout
 		print("loot_net_client: failures=", fails)
 		get_tree().quit(1 if fails else 0)
@@ -104,6 +109,8 @@ func _run() -> void:
 	Raid.current._extract(friend, ext)
 	_set_phase.rpc(3)
 	await until(func() -> bool: return result >= 0)
+	if not multiplayer.get_peers().is_empty():
+		_confirm_result.rpc_id(int(multiplayer.get_peers()[0]))
 	print("loot_net_host: failures=", fails + maxi(result, 0))
 	await get_tree().create_timer(0.6).timeout
 	get_tree().quit(1 if fails > 0 or result > 0 else 0)
@@ -134,8 +141,14 @@ func _result(value: int) -> void:
 	result = value
 
 
+@rpc("authority", "call_remote", "reliable")
+func _confirm_result() -> void:
+	result_confirmed = true
+
+
 func until(condition: Callable) -> void:
-	var end: int = Time.get_ticks_msec() + 40000
+	var wait_ms: int = 120000 if OS.get_environment("LOOT_NET_LEVEL") != "" else 40000
+	var end: int = Time.get_ticks_msec() + wait_ms
 	while not condition.call() and Time.get_ticks_msec() < end:
 		await get_tree().create_timer(0.1).timeout
 	if not condition.call():

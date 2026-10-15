@@ -19,6 +19,12 @@ extends Node3D
 	set(value):
 		tile_size = clampi(value, 16, 256)
 		_queue_build()
+## Локальные выемки под настоящими подвалами: position.y — дно, X/Z — границы.
+## Исходная карта высот сохраняется; у видимой земли и физики одна исправленная сетка.
+@export var excavations: Array[AABB] = []:
+	set(value):
+		excavations = value
+		_queue_build()
 
 const SHADER: Shader = preload("res://src/world/district_terrain.gdshader")
 
@@ -82,6 +88,14 @@ func _load() -> Dictionary:
 		push_error("DistrictTerrain: карта высот %s не совпадает с сеткой %dx%d" % [terrain.get("heights", ""), _cols, _rows])
 		_heights = PackedFloat32Array()
 		return {}
+	for excavation: AABB in excavations:
+		var first_x: int = maxi(0, int(ceil((excavation.position.x - _origin.x) / _step)))
+		var last_x: int = mini(_cols - 1, int(floor((excavation.end.x - _origin.x) / _step)))
+		var first_z: int = maxi(0, int(ceil((excavation.position.z - _origin.y) / _step)))
+		var last_z: int = mini(_rows - 1, int(floor((excavation.end.z - _origin.y) / _step)))
+		for iz in range(first_z, last_z + 1):
+			for ix in range(first_x, last_x + 1):
+				_heights[iz * _cols + ix] = minf(_heights[iz * _cols + ix], excavation.position.y)
 	return terrain
 
 

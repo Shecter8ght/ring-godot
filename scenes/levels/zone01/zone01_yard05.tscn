@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://src/world/district_model.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/levels/zone01/zone01_yard05_gameplay.tscn" id="nw_gameplay"]
 [ext_resource type="Script" path="res://src/world/district_paving.gd" id="2"]
 [ext_resource type="Material" path="res://assets/zone01/materials/YardAsphalt.tres" id="3"]
 [ext_resource type="Material" path="res://assets/zone01/materials/YardWalk.tres" id="4"]
@@ -15,10 +16,10 @@
 script = ExtResource("1")
 position = Vector3(-212.0, 0.3731, -138.0)
 rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/khrushchevka_panel_a.glb"
-manifest = "res://assets/zone01/models/khrushchevka.json"
+model = "res://assets/zone01/nw/panel_playable.glb"
+manifest = "res://assets/zone01/nw/manifest.json"
 surface = "concrete"
-shadow_proxy = true
+shadow_proxy = false
 
 [node name="Korpus2" parent="Buildings" type="StaticBody3D"]
 script = ExtResource("1")
@@ -1125,3 +1126,5 @@ cell = 48.0
 shadows = true
 foliage = true
 foliage_tint = Color(0.78, 0.82, 0.72, 1)
+
+[node name="GameplayInterior" parent="." instance=ExtResource("nw_gameplay")]

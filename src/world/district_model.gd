@@ -66,7 +66,8 @@ func _build() -> void:
 		col.name = "_Col_%d" % i
 		col.shape = shape
 		col.position = Vector3(float(pos[0]), float(pos[1]), float(pos[2]))
-		col.rotation_degrees.y = float(info.get("yaw", 0.0))
+		var angles: Array = info.get("rotation", [0.0, float(info.get("yaw", 0.0)), 0.0])
+		col.rotation_degrees = Vector3(float(angles[0]), float(angles[1]), float(angles[2]))
 		add_child(col)
 	if shadow_proxy:
 		var st := SurfaceTool.new()
