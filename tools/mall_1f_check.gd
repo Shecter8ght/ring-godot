@@ -36,7 +36,9 @@ var _fails: int = 0
 
 func _ready() -> void:
 	RaidEvents.enabled = false
-	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
+	var time := OS.get_environment("MALL_TIME")
+	var weather := OS.get_environment("MALL_WEATHER")
+	RaidConditions.from_host = {"time": time if time != "" else "day", "weather": weather if weather != "" else "clear", "power": "on"}
 	Profile.use_file("user://profile_mall_1f_check.json", true)
 	Profile.ensure()
 	await get_tree().process_frame
@@ -59,6 +61,7 @@ func _ready() -> void:
 			break
 		await get_tree().physics_frame
 	_check_reach(level)
+	await _check_population()
 	if DisplayServer.get_name() != "headless":
 		var only := OS.get_environment("MALL_ONLY")
 		# сначала глазами: верхняя камера после себя оставляет текущей не камеру игрока
@@ -66,6 +69,10 @@ func _ready() -> void:
 			await _eye_shots(level)
 		if only == "" or "top" in only:
 			await _top_shots(level)
+		if "atrium" in only:
+			await _atrium_probe(level)
+		if "perf" in only:
+			await _perf(level)
 	print("mall_1f_check: провалов %d" % _fails)
 	get_tree().quit(_fails)
 
@@ -119,6 +126,52 @@ func _check_reach(level: Node3D) -> void:
 	for e: Array in EXITS_SHUT:
 		var d := _walk(map, float(e[0]), float(e[1]), 108.0)
 		_check("выхода нет: %s (в обход %.0f м)" % [e[2], d], d > 35.0)
+
+
+## Население слоями (посты, патрули, подход): на старте мародёров немного, гарнизон на востоке — всегда.
+func _check_population() -> void:
+	var t0 := Time.get_ticks_msec()
+	while (AIPopulation.current == null or AIPopulation.current.placed.is_empty()) and Time.get_ticks_msec() - t0 < 60000:
+		await get_tree().process_frame
+	var pop := AIPopulation.current
+	var placed: Dictionary = pop.placed if pop else {}
+	var n := get_tree().get_nodes_in_group("marauders").size()
+	print("  население: %s" % placed)
+	_check("население расставлено слоями", pop != null and pop.layered, "")
+	_check("гарнизон у восточного входа занят", "Post_east_camp" in (placed.get("posts", []) as Array), "")
+	_check("на старте мародёров немного (%d)" % n, n > 0 and n <= int(Balance.AI_POPULATION.posts[1]) * 3 + int(Balance.AI_POPULATION.routes[1]) * 2, "")
+
+
+## Кадры в секунду: стоять на главном перекрёстке и смотреть вдоль улицы — с мародёрами и без них,
+## сколько тележек не спит (MALL_ONLY=perf).
+func _perf(level: Node3D) -> void:
+	var me := get_tree().get_first_node_in_group("players") as Player
+	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
+	me.health.hp = 1e9
+	var p := SectorBuilder.polar(-272.0, 61.0)
+	var d := SectorBuilder.polar(-245.0, 63.0) - p
+	var measure := func(label: String) -> void:
+		var frames := 0
+		var t_end := Time.get_ticks_msec() + 6000
+		var t_start := Time.get_ticks_msec() + 1500
+		while Time.get_ticks_msec() < t_end:
+			me.global_position = p + Vector3.UP * 0.1
+			me.velocity = Vector3.ZERO
+			rig.set("_look_yaw", atan2(d.x, d.z))
+			rig.set("_look_pitch", 0.0)
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			await get_tree().process_frame
+			if Time.get_ticks_msec() >= t_start:
+				frames += 1
+		var awake := 0
+		for b: Node in level.find_children("*", "RigidBody3D", true, false):
+			if not (b as RigidBody3D).sleeping and not (b as RigidBody3D).freeze:
+				awake += 1
+		print("mall_1f_check: кадры %s — %.0f к/с, мародёров %d, тележек и тел не спит %d" % [label, frames / 4.5,
+			get_tree().get_nodes_in_group("marauders").size(), awake])
+	await measure.call("с населением")
+	_clear_ai()
+	await measure.call("без мародёров")
 
 
 ## Длина пути по навмешу от точки внутри (угол плана, радиус) до точки снаружи на том же луче.
@@ -269,6 +322,67 @@ func _eye_shots(level: Node3D) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			await get_tree().process_frame
 		_save("mall_1f_" + String(spot[0]))
+
+
+## Засвет под куполом атриума: стоять и смотреть через атриум, яркость кадра со временем и по очереди
+## без объёмного тумана, без SDFGI, без автоэкспозиции, без свечения (MALL_ONLY=atrium, MALL_TIME=dusk,
+## MALL_WEATHER=heat — жара: под куполом не должно быть пересвета «на улице без очков»).
+func _atrium_probe(level: Node3D) -> void:
+	var me := get_tree().get_first_node_in_group("players") as Player
+	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
+	me.health.hp = 1e9
+	CameraRig.first_person_mode = true
+	var env := (level.get_node("WorldEnvironment") as WorldEnvironment).environment
+	var look: Object = rig.get("_look")
+	var attr := look.get("_attr") as CameraAttributesPractical
+	var p := SectorBuilder.polar(-5.0, 27.0)
+	var q := SectorBuilder.polar(-180.0, 27.0)
+	var d := q - p
+	# лямбда берёт копии переменных — точку и взгляд передаём явно
+	var hold := func(sec: float, at: Vector3, dir: Vector3) -> void:
+		var t_end := Time.get_ticks_msec() + int(sec * 1000.0)
+		while Time.get_ticks_msec() < t_end:
+			_clear_ai()
+			me.global_position = at + Vector3.UP * 0.1
+			me.velocity = Vector3.ZERO
+			rig.set("_look_yaw", atan2(dir.x, dir.z))
+			rig.set("_look_pitch", 0.05)
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			await get_tree().process_frame
+	for t: float in [1.0, 7.0, 12.0]:
+		await hold.call(t, p, d)
+		_save_lum("mall_1f_atrium_probe_%02d" % int(t))
+	var toggles := [
+		["vol_fog", func(on: bool) -> void: env.volumetric_fog_enabled = on],
+		["sdfgi", func(on: bool) -> void: env.sdfgi_enabled = on],
+		["auto_exposure", func(on: bool) -> void: attr.auto_exposure_enabled = on],
+		["glow", func(on: bool) -> void: env.glow_enabled = on],
+		["fog", func(on: bool) -> void: env.fog_enabled = on],
+	]
+	for t: Array in toggles:
+		(t[1] as Callable).call(false)
+		await hold.call(10.0, p, d)
+		_save_lum("mall_1f_atrium_probe_no_" + String(t[0]))
+		(t[1] as Callable).call(true)
+		await hold.call(6.0, p, d)
+	print("mall_1f_check: под куполом — под крышей: %s" % RaidAtmosphere.current.is_indoor(p))
+	# для сравнения — на площади у главного входа (там жара без очков даёт пересвет — так задумано)
+	var out_p := SectorBuilder.polar(90.0, 125.0)
+	await hold.call(12.0, out_p, SectorBuilder.polar(90.0, 160.0) - out_p)
+	_save_lum("mall_1f_atrium_probe_outside")
+
+
+## Снимок и средняя яркость кадра (0..1) — чтобы сравнить засвет числом, а не на глаз.
+func _save_lum(n: String) -> void:
+	var img := get_viewport().get_texture().get_image()
+	var small := img.duplicate() as Image
+	small.resize(64, 36, Image.INTERPOLATE_BILINEAR)
+	var sum := 0.0
+	for y in range(36):
+		for x in range(64):
+			sum += small.get_pixel(x, y).get_luminance()
+	img.save_png(ProjectSettings.globalize_path("res://docs/screens/%s.png" % n))
+	print("mall_1f_check: снимок %s, яркость %.3f" % [n, sum / (64.0 * 36.0)])
 
 
 func _frames(n: int) -> void:

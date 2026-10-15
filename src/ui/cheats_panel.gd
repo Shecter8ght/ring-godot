@@ -227,9 +227,14 @@ func _teleport_option() -> OptionButton:
 	var path: Variant = level.get("sector_path") if level else null
 	var def: Dictionary = SectorBuilder.load_def(String(path)) if path != null and String(path) != "" else {}
 	if def.has("spawn"):
-		var sp: Array = def.spawn
-		ob.add_item("Старт карты")
-		pts.append(Vector3(float(sp[0]), float(sp[1]), float(sp[2])))
+		# у районной карты старт — точка [x, y, z], у кольца ТЦ — угол и радиус {a, r}
+		var sp: Variant = def.spawn
+		if sp is Array and (sp as Array).size() >= 3:
+			ob.add_item("Старт карты")
+			pts.append(Vector3(float(sp[0]), float(sp[1]), float(sp[2])))
+		elif sp is Dictionary:
+			ob.add_item("Старт карты")
+			pts.append(SectorBuilder.polar(float(sp.get("a", 0.0)), float(sp.get("r", 0.0))))
 	var i: int = 0
 	for n in get_tree().get_nodes_in_group("spawn_points"):
 		i += 1

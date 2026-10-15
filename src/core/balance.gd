@@ -1357,6 +1357,9 @@ const CART: Dictionary = {
 	"mass_kg": 15.0, "person_kg": 80.0, "center_y": 0.40,
 	"friction": 0.012, "tipped_friction": 0.55, "bounce": 0.16,
 	"linear_damp": 0.025, "angular_damp": 0.65, "rolling_decel": 0.13,
+	# медленнее — тележка стоит: сопротивление качению не прикладывается, и тело засыпает (физика
+	# сотни тележек ТЦ иначе ест кадр)
+	"rest_mps": 0.02,
 	"wheel_ground_dot": 0.65, "upright_dot": 0.55, "contacts": 24,
 	"caster_response": 9.0,
 	"push_restitution": 0.05, "push_min_speed": 0.04, "push_reach_m": 1.6,

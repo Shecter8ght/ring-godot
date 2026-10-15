@@ -194,11 +194,12 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 		var p: Dictionary = people[id]
 		_hit_person.call_deferred(p.body, p.dir, p.at, float(p.speed), float(p.force), bool(p.fresh), state.step)
 	_contacts = current
-	if grounded and not _tipped:
+	var rolling: Vector3 = Vector3(state.linear_velocity.x, 0.0, state.linear_velocity.z)
+	# стоящую тележку не толкать: любой импульс будит тело, и она никогда не засыпает
+	if grounded and not _tipped and rolling.length() > float(Balance.CART.rest_mps):
 		# Сопротивление качению почти постоянно; без контакта с полом остаются гравитация и воздух.
-		var horizontal: Vector3 = Vector3(state.linear_velocity.x, 0.0, state.linear_velocity.z)
-		var loss: float = minf(horizontal.length(), float(Balance.CART.rolling_decel) * state.step)
-		state.apply_central_impulse(-horizontal.normalized() * loss * mass)
+		var loss: float = minf(rolling.length(), float(Balance.CART.rolling_decel) * state.step)
+		state.apply_central_impulse(-rolling.normalized() * loss * mass)
 	_prior_velocity = _last_velocity
 	_prior_angular = _last_angular
 	_last_velocity = state.linear_velocity

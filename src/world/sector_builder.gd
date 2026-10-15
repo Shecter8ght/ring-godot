@@ -1392,6 +1392,15 @@ func _build_dome(parent: Node3D, radius: float, base_y: float) -> void:
 	# стекло глубину не пишет — дождю нужен его непрозрачный двойник (RainOcclusion)
 	glass.add_to_group("rain_block", true)
 	parent.add_child(glass)
+	# купол — крыша: под ним не «улица» (жара, звук дождя, дальность взгляда), а пули и шаги его не видят
+	var roof := StaticBody3D.new()
+	roof.name = "DomeRoof"
+	roof.collision_layer = Hitscan.LAYER_ROOF
+	roof.collision_mask = 0
+	var roof_cs := CollisionShape3D.new()
+	roof_cs.shape = (glass.mesh as ArrayMesh).create_trimesh_shape()
+	roof.add_child(roof_cs)
+	parent.add_child(roof)
 	var steel := SectorMaterials.get_material(_gb("steel_dark", "gb_structural"), true)
 	var ribs := SurfaceTool.new()
 	ribs.begin(Mesh.PRIMITIVE_TRIANGLES)

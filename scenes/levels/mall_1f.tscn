@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" path="res://scenes/world/rubble_pile.tscn" id="4_rub"]
 [ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="5_spawn"]
 [ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="6_ext"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_post.tscn" id="7_post"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_route.tscn" id="8_route"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_arrival.tscn" id="9_arr"]
 
 [sub_resource type="PhysicalSkyMaterial" id="sky_mat"]
 rayleigh_coefficient = 2.2
@@ -209,3 +212,188 @@ position = Vector3(97.581, 0.000, -97.581)
 display_name = "Двор разгрузки (временно)"
 radius = 5.0
 rule = "Временный выход серого черновика: территории вокруг ТЦ ещё нет."
+
+[node name="Population" type="Node3D" parent="."]
+
+[node name="Posts" type="Node3D" parent="Population"]
+
+[node name="Post_east_camp" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(93.00, 0.30, 0.00)
+district = "east_camp"
+weight = 2.0
+radius = 14.0
+always_from = 1
+
+[node name="Post_market" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(62.29, 0.30, -45.26)
+district = "market"
+weight = 1.5
+radius = 18.0
+exclusive = "food"
+
+[node name="Post_docks" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(65.05, 0.30, -65.05)
+district = "docks"
+weight = 1.0
+radius = 12.0
+exclusive = "food"
+
+[node name="Post_electronics" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(66.68, 0.30, 38.50)
+district = "electronics"
+weight = 1.5
+radius = 16.0
+
+[node name="Post_atrium" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(0.00, 0.30, -14.00)
+district = "atrium"
+weight = 1.0
+radius = 20.0
+
+[node name="Post_fashion" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(-72.36, 0.30, 26.34)
+district = "fashion"
+weight = 0.8
+radius = 14.0
+
+[node name="Post_diy" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(-59.84, 0.30, -48.46)
+district = "diy"
+weight = 0.8
+radius = 14.0
+
+[node name="Post_sport" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(-7.94, 0.30, -75.58)
+district = "sport"
+weight = 1.0
+radius = 16.0
+
+[node name="Post_bank" parent="Population/Posts" instance=ExtResource("7_post")]
+position = Vector3(8.97, 0.30, 46.14)
+district = "bank"
+weight = 1.0
+radius = 12.0
+
+[node name="Routes" type="Node3D" parent="Population"]
+
+[node name="Route_street_west" parent="Population/Routes" instance=ExtResource("8_route")]
+title = "кольцевая улица, запад"
+
+[node name="P01" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(21.55, 0.30, 59.20)
+
+[node name="P02" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-0.00, 0.30, 63.00)
+
+[node name="P03" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-21.55, 0.30, 59.20)
+
+[node name="P04" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-40.50, 0.30, 48.26)
+
+[node name="P05" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-54.56, 0.30, 31.50)
+
+[node name="P06" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-62.04, 0.30, 10.94)
+
+[node name="P07" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-62.04, 0.30, -10.94)
+
+[node name="P08" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-54.56, 0.30, -31.50)
+
+[node name="P09" type="Marker3D" parent="Population/Routes/Route_street_west"]
+position = Vector3(-40.50, 0.30, -48.26)
+
+[node name="Route_street_east" parent="Population/Routes" instance=ExtResource("8_route")]
+title = "кольцевая улица, восток"
+
+[node name="P01" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(-21.55, 0.30, -59.20)
+
+[node name="P02" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(0.00, 0.30, -63.00)
+
+[node name="P03" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(21.55, 0.30, -59.20)
+
+[node name="P04" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(40.50, 0.30, -48.26)
+
+[node name="P05" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(54.56, 0.30, -31.50)
+
+[node name="P06" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(62.04, 0.30, -10.94)
+
+[node name="P07" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(62.04, 0.30, 10.94)
+
+[node name="P08" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(54.56, 0.30, 31.50)
+
+[node name="P09" type="Marker3D" parent="Population/Routes/Route_street_east"]
+position = Vector3(40.50, 0.30, 48.26)
+
+[node name="Route_gallery" parent="Population/Routes" instance=ExtResource("8_route")]
+title = "галерея атриума"
+loop = true
+
+[node name="P01" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(33.81, 0.30, -9.06)
+
+[node name="P02" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(24.75, 0.30, -24.75)
+
+[node name="P03" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(9.06, 0.30, -33.81)
+
+[node name="P04" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(-9.06, 0.30, -33.81)
+
+[node name="P05" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(-24.75, 0.30, -24.75)
+
+[node name="P06" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(-33.81, 0.30, -9.06)
+
+[node name="P07" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(-33.81, 0.30, 9.06)
+
+[node name="P08" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(-24.75, 0.30, 24.75)
+
+[node name="P09" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(-9.06, 0.30, 33.81)
+
+[node name="P10" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(9.06, 0.30, 33.81)
+
+[node name="P11" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(24.75, 0.30, 24.75)
+
+[node name="P12" type="Marker3D" parent="Population/Routes/Route_gallery"]
+position = Vector3(33.81, 0.30, 9.06)
+
+[node name="Arrivals" type="Node3D" parent="Population"]
+
+[node name="Arrive_sw" parent="Population/Arrivals" instance=ExtResource("9_arr")]
+position = Vector3(-89.99, 0.10, 107.25)
+title = "юго-запад"
+
+[node name="Arrive_nw" parent="Population/Arrivals" instance=ExtResource("9_arr")]
+position = Vector3(-89.99, 0.10, -107.25)
+title = "северо-запад"
+
+[node name="Arrive_n" parent="Population/Arrivals" instance=ExtResource("9_arr")]
+position = Vector3(-12.20, 0.10, -139.47)
+title = "север"
+
+[node name="Arrive_ne" parent="Population/Arrivals" instance=ExtResource("9_arr")]
+position = Vector3(135.23, 0.10, -36.23)
+title = "северо-восток"
+
+[node name="Arrive_se" parent="Population/Arrivals" instance=ExtResource("9_arr")]
+position = Vector3(126.88, 0.10, 59.17)
+title = "юго-восток"

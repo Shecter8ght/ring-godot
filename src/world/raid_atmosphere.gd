@@ -14,6 +14,8 @@ const NIGHT_SHADER := "res://src/world/night_sky.gdshader"
 const SKY_INFO := "res://assets/sky/sky_info.json"
 ## Подмена панорамы для сравнения вариантов (снимки, отладка): путь к .hdr, пусто — как задано картой.
 static var hdri_override: String = ""
+## Докуда вверх искать крышу-купол атриума (Hitscan.LAYER_ROOF), м: купол — над 4-м этажом.
+const ROOF_RAY_M := 40.0
 
 var _indoor_cache: Dictionary = {}
 
@@ -326,7 +328,7 @@ func _sync_panels() -> void:
 
 # ---------------------------------------------------------------- видимость
 
-## Под крышей (над точкой — перекрытие ТЦ).
+## Под крышей (над точкой — перекрытие ТЦ или стеклянный купол атриума: он выше, луч к нему длиннее).
 func is_indoor(p: Vector3) -> bool:
 	var key := Vector3i(int(floor(p.x / 2.0)), int(floor(p.y / 2.0)), int(floor(p.z / 2.0)))
 	if _indoor_cache.has(key):
@@ -334,6 +336,9 @@ func is_indoor(p: Vector3) -> bool:
 	var world := get_viewport().find_world_3d()
 	var q := PhysicsRayQueryParameters3D.create(p + Vector3.UP * 1.6, p + Vector3.UP * 14.0, Hitscan.LAYER_WORLD)
 	var hit := not world.direct_space_state.intersect_ray(q).is_empty()
+	if not hit:
+		var q_roof := PhysicsRayQueryParameters3D.create(p + Vector3.UP * 1.6, p + Vector3.UP * ROOF_RAY_M, Hitscan.LAYER_ROOF)
+		hit = not world.direct_space_state.intersect_ray(q_roof).is_empty()
 	_indoor_cache[key] = hit
 	return hit
 
