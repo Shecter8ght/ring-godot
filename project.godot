@@ -274,3 +274,19 @@ rain_wet={
 "type": "float",
 "value": 0.0
 }
+fx_time={
+"type": "float",
+"value": 0.0
+}
+grass_wind={
+"type": "vec4",
+"value": Vector4(0.89, 0.45, 1, 1)
+}
+grass_trample={
+"type": "sampler2D",
+"value": ""
+}
+grass_trample_area={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}

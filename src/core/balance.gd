@@ -34,8 +34,71 @@ const IMPACT_SURFACES: Dictionary = {
 	"cardboard": {"mesh": "paper", "count": Vector2i(3, 5), "size": Vector2(0.015, 0.045), "speed": Vector2(0.5, 1.8), "life": 0.75, "spread": 50.0, "drag": 2.2, "color": Color(0.58, 0.44, 0.27), "dust": 1, "dust_size": Vector2(0.06, 0.12), "dust_life": 0.4, "opacity": 0.1},
 	"fabric": {"mesh": "fiber", "count": Vector2i(2, 4), "size": Vector2(0.005, 0.018), "speed": Vector2(0.3, 1.0), "life": 0.4, "spread": 55.0, "drag": 3.0, "color": Color(0.28, 0.25, 0.22), "dust": 1, "dust_size": Vector2(0.04, 0.09), "dust_life": 0.3, "opacity": 0.08},
 	"plastic": {"mesh": "flake", "count": Vector2i(3, 6), "size": Vector2(0.008, 0.032), "speed": Vector2(1.0, 3.0), "life": 0.5, "spread": 48.0, "drag": 0.8, "color": Color(0.24, 0.25, 0.27), "dust": 0},
-	"flesh": {"mesh": "drop", "count": Vector2i(5, 9), "size": Vector2(0.004, 0.014), "speed": Vector2(0.8, 2.6), "life": 0.45, "spread": 30.0, "drag": 0.9, "color": Color(0.22, 0.018, 0.012), "dust": 0},
+	"flesh": {"mesh": "drop", "count": Vector2i(10, 18), "size": Vector2(0.004, 0.013), "speed": Vector2(1.4, 4.8), "life": 0.5, "spread": 24.0, "drag": 0.8, "color": Color(0.26, 0.016, 0.012), "dust": 5, "dust_size": Vector2(0.09, 0.26), "dust_life": 0.5, "opacity": 0.4},
 	"snow": {"mesh": "chip", "count": Vector2i(5, 9), "size": Vector2(0.01, 0.032), "speed": Vector2(0.6, 2.3), "life": 0.6, "spread": 55.0, "drag": 1.4, "color": Color(0.82, 0.87, 0.9), "dust": 4, "dust_size": Vector2(0.12, 0.3), "dust_life": 0.7, "opacity": 0.24},
+}
+
+# --- Кровь (BloodFx): размеры в метрах, скорость м/с, время с ---
+## Попадание в тело: капель drops; доля exit_share летит по ходу пули (конус exit_spread°, скорость
+## exit_speed), остальные — назад к стрелку (back_spread°, back_speed, мельче). gush — тяжёлые капли
+## почти вниз (gush_speed, gush_size). drop_size — радиус капли. Полёт: gravity, drag (сопротивление
+## воздуха, доля скорости за с), не дольше drop_life; в кадре капля крупнее в drop_visual_k раз и
+## вытянута по скорости (stretch_k на м/с); одновременно — не больше max_drops.
+## След: капля мельче splat_min_drop следа не оставляет (морось); сторона следа = радиус × splat_k ×
+## (1 + скорость/10), в пределах splat_size, проекция не глубже splat_depth (не красить обувь); вскользь — вытянут, не больше max_elong; следов — max_splats
+## (Decal движка: с выбоинами ImpactFx их не больше ~512 в кадре). Крупнее drip_min_drop на стене —
+## с вероятностью drip_chance подтёк: ширина drip_width, растекается за drip_grow_sec, проекция drip_depth.
+## Рана капает ещё bleed_sec, по капле раз в drip_every; таких ран — max_bleeders.
+## Лужи (коробки с шейдером, вместе с подтёками — max_boxes, видны до draw_m): под убитым — сторона
+## pool_dead, растекается за pool_dead_sec; под раненым — pool_down, pool_down_sec; проекция pool_depth;
+## уклон — круче slope_cos (косинус) — течёт языком вниз. Лежащих проверяем раз в scan_sec; лужа — когда
+## тело улеглось (settle_dead / settle_down) — под костью body_bone; утащили дальше drag_m — мазок
+## следами через smear_step и новая лужа. Сохнет за dry_sec: wet → dried (цвет следов-Decal).
+## Рана ближе mist_skip_m к камере (попали в себя) — без облачка мороси.
+const BLOOD := {
+	"drops": Vector2i(12, 20), "exit_share": 0.72, "exit_spread": 24.0, "back_spread": 40.0,
+	"exit_speed": Vector2(2.2, 6.5), "back_speed": Vector2(0.8, 2.6), "drop_size": Vector2(0.0012, 0.0065),
+	"gush": Vector2i(2, 4), "gush_speed": Vector2(0.6, 1.8), "gush_size": Vector2(0.005, 0.01),
+	"gravity": 9.81, "drag": 0.35, "drop_life": 3.0, "max_drops": 192, "drop_visual_k": 2.8, "stretch_k": 0.18,
+	"splat_min_drop": 0.0022, "splat_k": 26.0, "splat_size": Vector2(0.05, 0.42), "splat_depth": 0.12, "max_elong": 3.5, "max_splats": 300,
+	"drip_min_drop": 0.004, "drip_chance": 0.6, "drip_width": Vector2(0.3, 0.55), "drip_grow_sec": Vector2(6.0, 16.0), "drip_depth": 0.16,
+	"bleed_sec": Vector2(1.5, 4.0), "drip_every": Vector2(0.12, 0.45), "max_bleeders": 24,
+	"pool_dead": Vector2(1.5, 2.3), "pool_dead_sec": Vector2(50.0, 90.0), "pool_down": Vector2(1.0, 1.5), "pool_down_sec": Vector2(70.0, 110.0),
+	"pool_depth": 0.36, "slope_cos": 0.985, "max_boxes": 64, "draw_m": 90.0,
+	"scan_sec": 0.4, "settle_dead": 1.6, "settle_down": 0.8, "body_bone": "mixamorig_Spine", "drag_m": 0.6, "smear_step": 0.22,
+	"dry_sec": 420.0, "wet": Color(0.3, 0.012, 0.01, 0.96), "dried": Color(0.12, 0.045, 0.032, 0.93),
+	"mist_skip_m": 0.6,
+}
+
+# --- Трава (DistrictGrass, GrassBlades, GrassTrample): размеры в метрах, время в секундах ---
+## Густой нижний ярус: куртина patch×patch м, травинок в ней blades_near (ближнее кольцо, segments_near
+## звеньев) и blades_far (дальнее: реже, шире в far_width_k раз, segments_far звеньев); variants раскладок.
+## height — высота травинок в куртине; height_k — множитель куртины по пятнам (шум): низко — высоко;
+## thatch — доля полёглых сухих травинок (прошлогодний «войлок» у земли).
+## Густота куртин — по плотности карты (R + G/2): от lawn_from (нет) до lawn_full (сплошь).
+## cell — клетка яруса; max_tilt — круче этого (косинус) куртина наклоняется только наполовину.
+## quality — по качеству графики: near/far — радиусы ближнего и дальнего колец, density — доля куртин,
+## scan — радиус пучков-сканов, scan_density — их доля; fade_m — у края травинки уходят в землю;
+## lod_margin — ширина растворения между кольцами.
+## Ветер: wind — направление (x, z), сила (1 — обычный), скорость волн; в дождь сила ×wind_rain_k.
+## Примятие: окно trample_extent м вокруг камеры, trample_res клеток, обновление trample_hz раз в с;
+## поднимается за trample_recover_sec; радиусы — стоя, присев, лёжа, у кости тела (body),
+## взрыв — радиус гранаты × blast_k; body_bones — кости модели лежащего, которыми он мнёт траву.
+const GRASS := {
+	"patch": 0.6, "blades_near": 80, "segments_near": 4, "blades_far": 24, "segments_far": 2,
+	"far_width_k": 2.1, "variants": 4, "thatch": 0.2,
+	"height": Vector2(0.16, 0.44), "height_k": Vector2(0.8, 1.3),
+	"lawn_from": 0.02, "lawn_full": 0.22, "cell": 8.0, "max_tilt": 0.8,
+	"quality": {
+		"low": {"near": 5.0, "far": 11.0, "density": 0.55, "scan": 16.0, "scan_density": 0.25},
+		"medium": {"near": 7.0, "far": 19.0, "density": 0.8, "scan": 22.0, "scan_density": 0.35},
+		"high": {"near": 9.0, "far": 26.0, "density": 1.0, "scan": 26.0, "scan_density": 0.45},
+	},
+	"fade_m": 6.0, "lod_margin": 2.0,
+	"wind": Vector4(0.89, 0.45, 1.0, 1.0), "wind_rain_k": 1.7,
+	"trample_extent": 48.0, "trample_res": 128, "trample_hz": 30.0, "trample_recover_sec": 9.0,
+	"trample_radius": {"stand": 0.36, "crouch": 0.44, "prone": 0.62, "body": 0.3, "blast_k": 0.8},
+	"body_bones": ["mixamorig_Hips", "mixamorig_Spine2", "mixamorig_Head", "mixamorig_LeftLeg", "mixamorig_RightLeg", "mixamorig_LeftFoot", "mixamorig_RightFoot"],
 }
 
 # --- Игрок: движение по стойкам, м/с ---

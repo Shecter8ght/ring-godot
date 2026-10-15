@@ -28,6 +28,7 @@ var _decal_normals: Dictionary = {}
 var _bursts: Array[Node3D] = []
 var _chip_mesh: BoxMesh
 var _dust_mesh: QuadMesh
+var _blood_fx: BloodFx
 
 
 func _ready() -> void:
@@ -41,6 +42,11 @@ func _ready() -> void:
 	_chip_mesh.size = Vector3(1, 1, 1)
 	_dust_mesh = QuadMesh.new()
 	_dust_mesh.size = Vector2(1, 1)
+	# капли, следы, подтёки, лужи — отдельный узел (src/combat/blood_fx.gd)
+	_blood_fx = BloodFx.new()
+	_blood_fx.name = "Blood"
+	add_child(_blood_fx)
+	_blood_fx.set_fallback_splat(_tex_splat)
 
 
 ## Внешние ассеты необязательны: без них игра продолжает использовать процедурные следы.
@@ -141,6 +147,8 @@ func explosion(pos: Vector3) -> void:
 	var parent := get_tree().current_scene
 	if parent == null:
 		return
+	# трава вокруг ложится от взрыва
+	GrassTrample.blast(pos, float(Balance.GRENADE.radius))
 	var light := OmniLight3D.new()
 	light.light_color = Color(1.0, 0.72, 0.4)
 	light.light_energy = 18.0
@@ -241,21 +249,14 @@ func _puffs(parent: Node, pos: Vector3, amount: int, life: float, speed: Vector2
 # ---------------------------------------------------------------- кровь
 
 func _blood(parent: Node, pos: Vector3, dir: Vector3, body: Object) -> void:
-	# брызги — по ходу пули (выходное) и чуть назад
-	_particles(parent, "flesh", pos, dir, dir)
+	# морось и брызги у раны — частицами; попали в себя (рана у самой камеры) — без облака в глаза
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera == null or camera.global_position.distance_to(pos) > float(Balance.BLOOD.mist_skip_m):
+		_particles(parent, "flesh", pos, dir, dir)
 	if body is Marauder:
 		(body as Marauder).hit_flash()
-	# пятно на полу под точкой попадания
-	var world: World3D = (get_tree().current_scene as Node3D).get_world_3d()
-	var down := PhysicsRayQueryParameters3D.create(pos, pos + Vector3.DOWN * 3.0, Hitscan.LAYER_WORLD)
-	var floor_hit: Dictionary = world.direct_space_state.intersect_ray(down)
-	if not floor_hit.is_empty():
-		_place_decal(parent, _tex_splat, floor_hit.position, floor_hit.normal, _rng.randf_range(0.7, 1.2), Color(0.35, 0.02, 0.02, 0.9))
-	# пятно на стене позади — по направлению пули
-	var behind := PhysicsRayQueryParameters3D.create(pos, pos + dir * 3.0, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
-	var wall_hit: Dictionary = world.direct_space_state.intersect_ray(behind)
-	if not wall_hit.is_empty():
-		_place_decal(parent, _tex_splat, wall_hit.position, wall_hit.normal, _rng.randf_range(0.45, 0.7), Color(0.4, 0.03, 0.03, 0.85))
+	# капли летят и ложатся следами, на стене — подтёки (BloodFx)
+	_blood_fx.wound(parent, pos, dir, body)
 
 
 # ---------------------------------------------------------------- декали

@@ -163,6 +163,7 @@
   собственные модели проекта (tools/build_khrushchevka.py, tools/build_zone01_props.py) по фото-референсам
   Wikimedia Commons (только для просмотра, в игру не входят).
 - Кора берёзы, листва, пучки травы, шум рельефа — собственные процедурные текстуры
+- `assets/textures/blood/` — карты растекания луж, подтёков и следы капель крови: собственные процедурные (tools/gen_blood_maps.py)
   (tools/build_zone01_foliage_textures.py, tools/build_zone01.py).
 - Фототекстуры поверхностей и фасадов — Poly Haven, CC0 (список выше, раздел текстур).
 
