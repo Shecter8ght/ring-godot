@@ -36,15 +36,41 @@ func _ready() -> void:
 	_check("4 выбирает гранату, слоты и патроны оружия сохранены", _me.grenade_equipped and _me.weapon_id == "" and _me.ammo == rounds)
 	_check("руки с гранатой заняты", not _me.hands_free())
 	await _frames(5)
-	_check("CameraRig действительно показывает гранату и существующие руки", _camera._viewmodel is GrenadeModel and _camera._viewmodel.visible and _camera._arms.visible)
+	_check("CameraRig показывает гранату; прежние руки Persona отключены", _camera._viewmodel is GrenadeModel and _camera._viewmodel.visible and not _camera._arms.visible and _camera._arms._weapon == null)
 	var model: GrenadeModel = _camera._viewmodel as GrenadeModel
+	_check("гранату держат те же FPS_ArmsRig/перчатки, что у ВЕРАС-54", model.hands_model != null and model.hands_skeleton != null and String(model.get_meta("hands_source", "")) == "VERAS54_FPS_ArmsRig" and model.hands_skeleton.find_bone("hand.R") >= 0 and model.hands_skeleton.find_bone("hand.L") >= 0)
 	_check("загружен игровой ассет, не запасная модель", bool(model.get_meta("asset_loaded", false)))
-	_check("семь деталей и морф сжатия концов чеки импортированы", model.find_children("*", "MeshInstance3D", true, false).size() == 7 and model._pin_mesh.mesh.get_blend_shape_count() == 1)
+	var meshes: Array[Node] = model.find_children("*", "MeshInstance3D", true, false)
+	_check("семь деталей, отдельная сетка рук и морф чеки импортированы", meshes.size() == 8 and model._pin_mesh.mesh.get_blend_shape_count() == 1)
+	var world_model: GrenadeModel = GrenadeModel.create()
+	_check("мировая и летящая граната собираются без FPS-рук", world_model.hands_model == null and world_model.find_children("*", "Skeleton3D", true, false).is_empty() and world_model.find_children("*", "MeshInstance3D", true, false).size() == 7)
+	world_model.free()
+	if model.hands_skeleton:
+		var skeleton: Skeleton3D = model.hands_skeleton
+		var right: int = skeleton.find_bone("hand.R")
+		var left: int = skeleton.find_bone("hand.L")
+		model.prepare(0.2)
+		var right_hold: Transform3D = skeleton.get_bone_global_pose(right)
+		var left_contact: Vector3 = skeleton.get_bone_global_pose(left).origin
+		model.prepare(1.0)
+		var left_extracted: Transform3D = skeleton.get_bone_global_pose(left)
+		for repeat: int in range(10):
+			for progress: float in [0.0, 0.2, 0.5, 1.0]:
+				model.prepare(progress)
+		var pull: float = left_contact.distance_to(left_extracted.origin)
+		_check("чека ведёт левую кисть; повторная подготовка сохраняет хват и масштаб костей", pull > 0.045 and pull < 0.055 and skeleton.get_bone_global_pose(right).is_equal_approx(right_hold) and skeleton.get_bone_global_pose(left).is_equal_approx(left_extracted), "ход кисти %.1f мм" % (pull * 1000.0))
+	model.prepare(0.0)
 	var home: Vector3 = model._pin.position
 	model.prepare(1.0)
 	_check("чека с кольцом извлекается на 52 мм, скоба остаётся прижата", absf(model._pin.position.distance_to(home) - 0.052) < 0.0001 and model._lever.rotation == model._lever_home)
 	model.prepare(0.0)
 	await _shot("grenade_hand_idle")
+	_me._return_from_grenade()
+	await _frames(3)
+	_check("возврат к ВЕРАС-54 показывает его клипы и скрывает руки гранаты", gun == "wpn_ar_01" and _camera._viewmodel is ViewmodelClips and _camera._viewmodel.visible and not model.visible and not _camera._arms.visible)
+	_me._equip_grenade()
+	await _frames(3)
+	_check("повторный выбор гранаты возвращает её хват из кэша без старых рук", _camera._viewmodel == model and model.visible and not _camera._arms.visible and _camera._arms._weapon == null)
 	_me._combat(0.5)
 	await _frames(1)
 	Input.action_press("fire")

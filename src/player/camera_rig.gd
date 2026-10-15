@@ -653,7 +653,9 @@ func _cached_viewmodel(id: String, mods: Dictionary, dur: float, mag: String, ma
 	var key: String = WeaponCondition.model_key(id, mods, dur, mag) + "|" + WeaponMark.key(marks)
 	var model: Node3D = _viewmodel_cache.get(key) as Node3D
 	if model == null:
-		if ViewmodelClips.available(id):
+		if id == "grenade":
+			model = GrenadeModel.create(true)
+		elif ViewmodelClips.available(id):
 			model = ViewmodelClips.create(id, mods)
 			WeaponMark.attach(model, id, marks)
 		else:
@@ -782,7 +784,9 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			if (mi as GeometryInstance3D).has_meta("hide_ads"):
 				_cheek_parts.append(mi as GeometryInstance3D)
-		if not _viewmodel is ViewmodelClips:
+		if pl.grenade_equipped:
+			_arms.unbind_weapon()
+		elif not _viewmodel is ViewmodelClips:
 			_arms.bind_weapon(_viewmodel)
 		weapon_clearance.bind(_viewmodel)
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
@@ -898,7 +902,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
 
 
-## Временный хват существующими руками Persona; будущие клипы не требуют переделки модели.
+## Гранату держит отдельный FPS_ArmsRig ВЕРАС-54; поза левой синхронна движению чеки.
 func _process_grenade_viewmodel(pl: Player, delta: float) -> void:
 	var cfg: Dictionary = Balance.GRENADE_HAND
 	var position: Vector3 = cfg.pose
@@ -911,9 +915,7 @@ func _process_grenade_viewmodel(pl: Player, delta: float) -> void:
 	if _viewmodel is GrenadeModel:
 		(_viewmodel as GrenadeModel).prepare(pl.grenade_pin)
 	_viewmodel.visible = pl.grenade_in_hand
-	_arms.collision_exclude = [pl.get_rid()]
-	_arms.update_pose()
-	_arms.visible = _arms.visible and _viewmodel.visible
+	_arms.visible = false
 	pl.weapon_obstruction = 0.0
 
 

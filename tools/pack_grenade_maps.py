@@ -24,6 +24,8 @@ for atlas in ['body', 'mechanism']:
                      'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
 (OUT / 'maps.json').write_text(json.dumps(manifest, indent=2), encoding='utf8')
 for path in OUT.glob('*.png.import'):
+    if not path.name.startswith(('grenade_body_', 'grenade_mechanism_')):
+        continue
     settings = path.read_text(encoding='utf8')
     settings = settings.replace('compress/mode=0', 'compress/mode=2')
     settings = settings.replace('mipmaps/generate=false', 'mipmaps/generate=true')

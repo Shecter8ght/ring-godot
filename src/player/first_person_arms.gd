@@ -38,6 +38,13 @@ func _ready() -> void:
 	visible = false
 
 
+func unbind_weapon() -> void:
+	_weapon = null
+	_grips.clear()
+	_actions.clear()
+	visible = false
+
+
 func bind_weapon(weapon: Node3D) -> void:
 	_weapon = weapon
 	_grips.clear()

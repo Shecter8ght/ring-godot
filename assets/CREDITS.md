@@ -395,3 +395,11 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 сохранены в `Codex_Texture_v08/resources/`; копия лицензии —
 `_asset_src/grenade_game/license.txt`. Состояние и связь с high-poly —
 `assets/models/weapons/grenade/asset-state.md`.
+
+## Руки ВЕРАС-54 с гранатой (2026-10-15)
+
+`assets/models/weapons/grenade/grenade_veras_hands.glb` и карты `grenade_veras_hands_arm*` —
+те же собственные FPS-руки, перчатки, рукава, UV и веса владельца проекта из
+`VERAS54_Reload_Full_v05.blend`, которые используются у ВЕРАС-54. Исходник не изменялся.
+Производный хват и извлечение чеки — `tools/prepare_grenade_hands.py`;
+редактируемый файл — `_asset_src/grenade_hands/Grenade_VERAS_Hands.blend`.

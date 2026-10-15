@@ -3,7 +3,12 @@ extends Node3D
 ## Игровая производная принятой v08. Чека с кольцом и скоба остаются отдельными узлами.
 
 const ASSET: String = "res://assets/models/weapons/grenade/grenade.glb"
+const HANDS: String = "res://assets/models/weapons/grenade/grenade_veras_hands.glb"
 static var _materials: Dictionary = {}
+var hands_model: Node3D
+var hands_skeleton: Skeleton3D
+var _hands_animation: AnimationPlayer
+var _hands_progress: float = -1.0
 var _pin: Node3D
 var _lever: Node3D
 var _pin_home: Vector3 = Vector3.ZERO
@@ -12,7 +17,7 @@ var _left_home: Transform3D = Transform3D.IDENTITY
 var _pin_mesh: MeshInstance3D
 
 
-static func create() -> GrenadeModel:
+static func create(first_person: bool = false) -> GrenadeModel:
 	var root: GrenadeModel = GrenadeModel.new()
 	root.name = "Weapon_grenade"
 	if ResourceLoader.exists(ASSET):
@@ -39,7 +44,28 @@ static func create() -> GrenadeModel:
 		root._left_home = left.transform
 	root.set_meta("ads_z", 0.38)
 	root.set_meta("sight_h", 0.0)
+	if first_person:
+		root._attach_hands()
 	return root
+
+
+func _attach_hands() -> void:
+	if not ResourceLoader.exists(HANDS):
+		return
+	hands_model = (load(HANDS) as PackedScene).instantiate() as Node3D
+	hands_model.name = "VERAS54_Hands"
+	add_child(hands_model)
+	set_meta("hands_source", "VERAS54_FPS_ArmsRig")
+	var skeletons: Array[Node] = hands_model.find_children("*", "Skeleton3D", true, false)
+	if not skeletons.is_empty():
+		hands_skeleton = skeletons[0] as Skeleton3D
+	var animations: Array[Node] = hands_model.find_children("*", "AnimationPlayer", true, false)
+	if not animations.is_empty():
+		_hands_animation = animations[0] as AnimationPlayer
+		_hands_animation.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		if _hands_animation.has_animation("pin_pull"):
+			_hands_animation.play("pin_pull")
+			_hands_animation.seek(0.0, true)
 
 
 static func _material(atlas: String) -> StandardMaterial3D:
@@ -65,6 +91,10 @@ static func _material(atlas: String) -> StandardMaterial3D:
 
 func prepare(progress: float) -> void:
 	var amount: float = clampf(progress, 0.0, 1.0)
+	if _hands_animation and _hands_animation.has_animation("pin_pull") and not is_equal_approx(_hands_progress, amount):
+		_hands_progress = amount
+		_hands_animation.seek(amount * _hands_animation.get_animation("pin_pull").length, true)
+		_hands_animation.advance(0.0)
 	# Исходный контроль двигает чеку по −Y Blender, то есть +Z после glTF.
 	var travel: float = 0.0006 * minf(1.0, amount / 0.16) + 0.0514 * maxf(0.0, (amount - 0.16) / 0.84)
 	if _pin:

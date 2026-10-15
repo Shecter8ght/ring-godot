@@ -1,0 +1,246 @@
+{
+  "status": "PASS",
+  "checks": {
+    "source_hands_unchanged": true,
+    "source_grenade_unchanged": true,
+    "skin": true,
+    "right_hand_attachment": true,
+    "separate_pin_lever": true,
+    "pin_morph": true,
+    "ring_contact_after_approach": true,
+    "right_grip_fixed": true,
+    "original_mesh_uv_weights": true,
+    "original_maps": true,
+    "original_rest_bones": true,
+    "packed_2k_maps": true,
+    "glb_hands_only": true,
+    "glb_pin_clip": true,
+    "glb_maps": true,
+    "glb_eight_weights": true
+  },
+  "arms_source": "E:\\Models Blender\\WEAPONS\\ВЕРАС-54 — модель и обвесы\\ВЕРАС-54\\Игровая версия\\Перезарядка v01 (Claude)\\VERAS54_Reload_Full_v05.blend",
+  "arms_source_sha256": "1241f1a41231ac356915e17345f0ae4e50246e5cad0a5c4b19915c6b3495f4c4",
+  "grenade_source_sha256": "61a9068a544a4c3c149110bbd1b01e7d760a991770250c1a54a3a445fc68f64c",
+  "editable_blend": "_asset_src\\grenade_hands\\Grenade_VERAS_Hands.blend",
+  "editable_blend_sha256": "0fd269f7af0165e8f54b98e60ea86a76a7ff2adde3eb770e076ea9cc0f0a4752",
+  "glb_sha256": "44d9089fe2e0db6089a59d47bb89dd318084baa5d60cf0863dad3f5adba227b9",
+  "glb_bytes": 14386036,
+  "vertices": 2384,
+  "triangles": 4760,
+  "bones": 60,
+  "maps": {
+    "Image Texture": {
+      "size": [
+        2048,
+        2048
+      ],
+      "packed": true,
+      "sha256": "eea1abc707b04d24e8a0ee13f0d27e29210c11f504f7987c26005c83288a35c8"
+    },
+    "Image Texture.001": {
+      "size": [
+        2048,
+        2048
+      ],
+      "packed": true,
+      "sha256": "c95c24addb95f494ddfb2f8cf9fcdebba6188596fba42c123ceec2b3e9967023"
+    },
+    "Image Texture.002": {
+      "size": [
+        2048,
+        2048
+      ],
+      "packed": true,
+      "sha256": "ad86382c48104850de72ad4741a3445cc3dc824230044171818017c53456741b"
+    }
+  },
+  "max_ring_contact_error_m": 4.1885481671575024e-05,
+  "poses": [
+    {
+      "progress": 0.0,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 0.13881611725001172
+    },
+    {
+      "progress": 0.03333333333333333,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 0.12392176439078238
+    },
+    {
+      "progress": 0.06666666666666667,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 0.08797972977497974
+    },
+    {
+      "progress": 0.1,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 0.04508011049055066
+    },
+    {
+      "progress": 0.13333333333333333,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 0.010646029898424959
+    },
+    {
+      "progress": 0.16666666666666666,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 1.1438077850382002e-05
+    },
+    {
+      "progress": 0.2,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 9.092834591669693e-06
+    },
+    {
+      "progress": 0.23333333333333334,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 8.016551206533487e-06
+    },
+    {
+      "progress": 0.26666666666666666,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 7.368774877787921e-06
+    },
+    {
+      "progress": 0.3,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 6.831235784941425e-06
+    },
+    {
+      "progress": 0.3333333333333333,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 6.218807309359564e-06
+    },
+    {
+      "progress": 0.36666666666666664,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 5.684377974175845e-06
+    },
+    {
+      "progress": 0.4,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 5.166046909030211e-06
+    },
+    {
+      "progress": 0.43333333333333335,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 4.631367438123352e-06
+    },
+    {
+      "progress": 0.4666666666666667,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 4.078129584611657e-06
+    },
+    {
+      "progress": 0.5,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 3.690678019622021e-06
+    },
+    {
+      "progress": 0.5333333333333333,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 3.2533111823967553e-06
+    },
+    {
+      "progress": 0.5666666666666667,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 2.887607056941094e-06
+    },
+    {
+      "progress": 0.6,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 2.60936309574217e-06
+    },
+    {
+      "progress": 0.6333333333333333,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 2.4323150399614222e-06
+    },
+    {
+      "progress": 0.6666666666666666,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 2.3398619240537457e-06
+    },
+    {
+      "progress": 0.7,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 2.381623276845002e-06
+    },
+    {
+      "progress": 0.7333333333333333,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 2.5592283429724765e-06
+    },
+    {
+      "progress": 0.7666666666666667,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 2.8019334567998456e-06
+    },
+    {
+      "progress": 0.8,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 3.1342158242588556e-06
+    },
+    {
+      "progress": 0.8333333333333334,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 3.487540297111768e-06
+    },
+    {
+      "progress": 0.8666666666666667,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 3.895592191644457e-06
+    },
+    {
+      "progress": 0.9,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 4.39122455495626e-06
+    },
+    {
+      "progress": 0.9333333333333333,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 4.1885481671575024e-05
+    },
+    {
+      "progress": 0.9666666666666667,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 3.93932284171161e-05
+    },
+    {
+      "progress": 1.0,
+      "right_wrist_drift_m": 0.0,
+      "right_wrist_rotation_rad": 0.0,
+      "left_index_to_ring_m": 3.679795218682421e-05
+    }
+  ]
+}
