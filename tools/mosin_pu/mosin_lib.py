@@ -425,6 +425,18 @@ def boolean(target: bpy.types.Object, cutter: bpy.types.Object, op: str = "DIFFE
                 me.materials.pop()
 
 
+def cleanup(ob: bpy.types.Object, dist_mm: float = 0.01) -> None:
+    """Убрать осколки после булевых операций: слить вершины ближе dist_mm и растворить вырожденные грани."""
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=dist_mm * MM)
+    bmesh.ops.dissolve_degenerate(bm, edges=bm.edges, dist=dist_mm * MM)
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+
+
 def join(objs: Sequence[bpy.types.Object], name: str) -> bpy.types.Object:
     target = objs[0]
     with bpy.context.temp_override(active_object=target, selected_editable_objects=list(objs),

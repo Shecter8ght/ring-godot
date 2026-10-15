@@ -19,7 +19,7 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mosin_lib as L  # noqa: E402
 
-OUT = os.path.join(L.ASSET_DIR, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v04.blend")
+OUT = os.path.join(L.ASSET_DIR, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v05.blend")
 MUZZLE = 728.8
 SEC = 120                     # точек в сечении ложи
 
@@ -149,6 +149,8 @@ def build_stock(col):
     L.boolean(stock, L.extrude_profile("cut_handle_relief", L.fillet([(-102.0, -9.0), (-89.0, -9.0), (-89.0, 12.0),
                                                                        (-102.0, 12.0)], [4.5, 4.5, 0, 0], 6,
                                                                       closed=True), -32.0, -12.0, None, None, None))
+    # паз под обойму колодки прицела
+    L.boolean(stock, L.lathe("cut_rs_base", [(87.0, 0), (87.0, 12.45), (164.0, 12.45), (164.0, 0)], 64))
     # магазин и спусковая скоба
     L.boolean(stock, _magazine_cutter())
     # пазы под пальцы с обеих сторон
@@ -421,28 +423,87 @@ def build_magazine(col):
     return box, follower, bow, latch, trigger, screw
 
 
+RS_PIN = (157.5, 16.8)       # ось шарнира прицельной планки (снимок RIA 265)
+
+
+def _leaf_top(x: float) -> float:
+    """Верх прицельной планки в положении «1»: от оси (20,2) с подъёмом 1,8 мм к целику."""
+    return 20.2 + (RS_PIN[0] - x) * (1.8 / 72.0)
+
+
+def _pin_cutter(r: float):
+    """Отверстие под ось шарнира планки (вдоль Y)."""
+    return L.lathe("cut_pin", [(-20.0, 0), (-20.0, r), (20.0, r), (20.0, 0)], 32, axis="Y",
+                   origin=(RS_PIN[0], 0.0, RS_PIN[1]))
+
+
 def build_sights(col):
-    # колодка прицела: обойма на стволе и две щеки с подъёмом вперёд
-    sleeve = L.lathe("RearSight_Base", [(86.0, 9.8), (86.0, 12.2), (163.5, 12.2), (163.5, 9.8)], 64,
-                     "Steel_Blued", col, closed=True)
-    cheek = L.fillet([(86.0, 4.0), (86.0, 12.5), (100.0, 18.6), (150.0, 19.8), (163.5, 19.8), (163.5, 4.0)],
-                     [0, 1.5, 6, 4, 1.0, 0], 6, closed=True)
+    # Прицел обр. 1891/30 в положении «1» (хомутик сзади). Сбоку — снимок RIA 265 (ось шарнира, высоты,
+    # хомутик x 85,5…99,5), ширины — снимок планки сверху (длина хомутика 14 мм совпадает на обоих):
+    # планка 19,5 мм, целик 21 мм с прорезью ≈2 мм, хомутик 29,5 мм, с кнопками 34 мм.
+    px, pz = RS_PIN
+    # обойма колодки — по стволу (он сужается к дулу), зазор 0,02 мм
+    sleeve = L.lathe("RearSight_Base", [(87.6, barrel_radius(87.6) + 0.02), (87.6, 12.2), (163.5, 12.2),
+                                        (163.5, barrel_radius(163.5) + 0.02)], 64, "Steel_Blued", col, closed=True)
+    # щёки-секторы: верх — кривая, по которой хомутик поднимает планку; спереди ушки с осью
+    sector = [(88.0, 1.5), (88.0, 14.6), (100.0, 15.4), (110.0, 16.5), (120.0, 17.7), (130.0, 18.9),
+              (140.0, 19.9), (147.0, 20.6), (152.0, 21.5), (160.0, 21.5), (163.5, 18.0), (163.5, 1.5)]
+    radii = [0, 1.0, 8, 10, 10, 10, 10, 6, 3, 3, 3, 0]
     parts = [sleeve]
-    for y0, y1 in ((8.8, 11.8), (-11.8, -8.8)):
-        c = L.extrude_profile("RearSight_Cheek", cheek, y0, y1, "Steel_Blued", col)
-        L.bevel_mod(c, 0.5, 2)
-        parts.append(c)
-    # прицельная планка (лежит), хомутик и целик сзади
-    leaf_root = L.empty("RearSight_Leaf", (160.0, 0, 18.5), col, 0.01)
-    leaf = L.extrude_profile("RearSight_Leaf_Mesh", L.fillet([(78.5, 19.0), (161.5, 19.0), (161.5, 22.0),
-                                                               (85.0, 22.2), (82.5, 25.8), (78.5, 25.0)],
-                                                              [0.5, 1.5, 1.0, 1.0, 1.2, 1.0], 4, closed=True),
-                             -5.0, 5.0, "Steel_Blued", col)
-    L.bevel_mod(leaf, 0.4, 2)
-    slider = L.extrude_profile("RearSight_Slider", L.fillet([(92.0, 18.3), (105.5, 18.3), (105.5, 25.0),
-                                                              (92.0, 25.0)], 1.0, 3, closed=True),
-                               -7.5, 7.5, "Steel_Blued", col)
-    L.bevel_mod(slider, 0.6, 2)
+    for y0, y1 in ((10.0, 12.0), (-12.0, -10.0)):
+        c = L.extrude_profile("RearSight_Cheek", L.fillet(sector, radii, 6, closed=True), y0, y1,
+                              "Steel_Blued", col)
+        L.boolean(sleeve, c, "UNION")          # колодка со щеками — одна деталь
+    L.boolean(sleeve, _pin_cutter(1.5))
+    L.cleanup(sleeve, 0.02)
+    L.bevel_mod(sleeve, 0.5, 2)
+    pin = L.lathe("RearSight_Pin", L.fillet([(-12.7, 0), (-12.7, 2.1), (-12.05, 2.1), (-12.05, 1.45),
+                                             (12.05, 1.45), (12.05, 2.1), (12.7, 2.1), (12.7, 0)],
+                                            [0, 0.3, 0, 0, 0, 0, 0.3, 0], 3),
+                  32, "Steel_Blued", col, axis="Y", origin=(px, 0.0, pz))
+    parts.append(pin)
+
+    # планка: шарнир на оси, тело 19,5 × 3,2 мм, снизу по бокам зубцы защёлки хомутика
+    leaf_root = L.empty("RearSight_Leaf", (px, 0.0, pz), col, 0.01)
+    top = lambda x: _leaf_top(x)  # noqa: E731
+    body = L.extrude_profile("RearSight_Leaf_Mesh", [(84.5, top(84.5)), (px, top(px)), (px, top(px) - 3.2),
+                                                      (84.5, top(84.5) - 3.2)], -9.75, 9.75, "Steel_Blued", col)
+    knuckle = L.lathe("leaf_knuckle", L.fillet([(-9.7, 0), (-9.7, 3.4), (9.7, 3.4), (9.7, 0)], [0, 0.6, 0.6, 0], 3),
+                      48, "Steel_Blued", col, axis="Y", origin=(px, 0.0, pz))
+    L.boolean(body, knuckle, "UNION")
+    # целик: брусок шире планки, сверху U-прорезь вдоль оси (ширина 2, глубина 1,5; верх 26,0 — по снимку)
+    block = L.extrude_profile("leaf_notch_block", L.fillet([(85.5, top(85.5) - 3.0), (85.5, 24.5), (84.0, 26.0),
+                                                            (78.0, 26.0), (77.2, 25.2), (77.2, 21.5),
+                                                            (79.5, 19.2)], [0, 1.2, 0.6, 0.6, 0.6, 2.0, 1.0], 4,
+                                                           closed=True), -10.5, 10.5, "Steel_Blued", col)
+    L.boolean(body, block, "UNION")
+    notch = L.extrude_profile("cut_notch", L.fillet([(-1.0, 31.0), (-1.0, 24.5), (1.0, 24.5), (1.0, 31.0)],
+                                                    [0, 1.0, 1.0, 0], 8, closed=True), 70.0, 90.0,
+                              None, None, None, plane="YZ")
+    L.boolean(body, notch)
+    teeth = []
+    x = 100.0
+    while x < 143.0:
+        zb = top(x) - 3.2
+        for y0, y1 in ((9.0, 10.5), (-10.5, -9.0)):
+            teeth.append(_box("cut_tooth", (x, x + 1.4), (y0, y1), (zb - 0.5, zb + 2.0)))
+        x += 3.5
+    L.boolean(body, L.join(teeth, "cut_teeth"))
+    L.boolean(body, _pin_cutter(1.5))
+    L.cleanup(body, 0.02)
+    L.bevel_mod(body, 0.35, 2)
+    leaf = body
+
+    # хомутик: рамка вокруг планки, выступами снизу лежит на секторах; по бокам кнопки защёлки
+    slider = L.extrude_profile("RearSight_Slider", L.fillet([(-14.5, 15.6), (14.5, 15.6), (14.5, 24.4),
+                                                             (-14.5, 24.4)], [1.0, 1.0, 1.5, 1.5], 3, closed=True),
+                               85.8, 99.8, "Steel_Blued", col, plane="YZ")
+    L.boolean(slider, _box("cut_slider_window", (80.0, 105.0), (-9.9, 9.9), (16.1, 22.15)))
+    oval = [(92.8 + 5.25 * math.cos(2 * math.pi * k / 40), 20.0 + 3.45 * math.sin(2 * math.pi * k / 40))
+            for k in range(40)]
+    for y0, y1 in ((14.0, 17.0), (-17.0, -14.0)):
+        L.boolean(slider, L.extrude_profile("RearSight_Slider_Button", oval, y0, y1, "Steel_Blued", col), "UNION")
+    L.bevel_mod(slider, 0.5, 2)
     L.parent_keep(leaf, leaf_root)
     L.parent_keep(slider, leaf_root)
     # мушка: основание на стволе, намушник (кольцо вдоль канала), пенёк
