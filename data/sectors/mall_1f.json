@@ -1,0 +1,4295 @@
+{
+ "id": "mall_1f",
+ "name": "ТЦ «РИНГ» · 1-й этаж (серый черновик)",
+ "floor": 1,
+ "angle": [
+  -180.0,
+  180.0
+ ],
+ "ring": {
+  "outer_r": 100.0,
+  "atrium_r": 30,
+  "floors": 4,
+  "zones": {
+   "atr": [
+    0.5,
+    30
+   ],
+   "gal": [
+    30,
+    40
+   ],
+   "inn": [
+    40,
+    58
+   ],
+   "st": [
+    58,
+    68
+   ],
+   "out": [
+    68,
+    96
+   ],
+   "svc": [
+    96,
+    100
+   ]
+  },
+  "sectors_deg": 60,
+  "site_r": 150.0
+ },
+ "sectors": [
+  {
+   "id": "a",
+   "letter": "A",
+   "name": "Аллея",
+   "a": [
+    60.0,
+    120.0
+   ]
+  },
+  {
+   "id": "b",
+   "letter": "B",
+   "name": "Мода",
+   "a": [
+    120.0,
+    180.0
+   ]
+  },
+  {
+   "id": "c",
+   "letter": "C",
+   "name": "Дом и ремонт",
+   "a": [
+    -180.0,
+    -120.0
+   ]
+  },
+  {
+   "id": "d",
+   "letter": "D",
+   "name": "Спорт и туризм",
+   "a": [
+    -120.0,
+    -60.0
+   ]
+  },
+  {
+   "id": "e",
+   "letter": "E",
+   "name": "Продукты",
+   "a": [
+    -60.0,
+    0.0
+   ]
+  },
+  {
+   "id": "f",
+   "letter": "F",
+   "name": "Техника",
+   "a": [
+    0.0,
+    60.0
+   ]
+  }
+ ],
+ "walls": {
+  "height": 6.0,
+  "thickness": 0.3,
+  "fence_height": 2.2,
+  "barrier_height": 1.2,
+  "facade": 0.5,
+  "fire": 0.3,
+  "structural": 0.3,
+  "partition": 0.15,
+  "fence": 0.25,
+  "column": 0.6,
+  "column_grid": 9.0,
+  "building_height": 22.5,
+  "site_fence_height": 3.0
+ },
+ "columns": [
+  {
+   "r": 49.0,
+   "step": 10.0,
+   "offset": 0.0
+  },
+  {
+   "r": 77.0,
+   "step": 6.0,
+   "offset": 0.0
+  }
+ ],
+ "greybox": true,
+ "arch": {
+  "storefront_h": 3.6,
+  "door_h": 2.4,
+  "shutter_h": 3.2,
+  "gate_h": 4.5,
+  "entrance_w": 3.2,
+  "broken_pane_pct": 22,
+  "half_gap": 0.8,
+  "open_split_columns": false,
+  "storefront_split_entrances": false
+ },
+ "camera_yaw": 0,
+ "spawn": {
+  "a": 90.0,
+  "r": 118
+ },
+ "rooms": [
+  {
+   "id": "atrium",
+   "name": "Атриум под куполом",
+   "type": "atrium",
+   "a": [
+    -180.0,
+    180.0
+   ],
+   "r": [
+    0.5,
+    30
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "note": "Ø60, сухой фонтан, эскалаторы на 2-й (штора наверху)"
+  },
+  {
+   "id": "gallery",
+   "name": "Галерея атриума",
+   "type": "gallery",
+   "a": [
+    -180.0,
+    180.0
+   ],
+   "r": [
+    30,
+    40
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall"
+  },
+  {
+   "id": "street_a",
+   "name": "Кольцевая улица",
+   "type": "gallery",
+   "a": [
+    60.0,
+    120.0
+   ],
+   "r": [
+    58,
+    68
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "A"
+  },
+  {
+   "id": "street_b",
+   "name": "Кольцевая улица",
+   "type": "gallery",
+   "a": [
+    120.0,
+    180.0
+   ],
+   "r": [
+    58,
+    68
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "B"
+  },
+  {
+   "id": "street_c",
+   "name": "Кольцевая улица",
+   "type": "gallery",
+   "a": [
+    -180.0,
+    -120.0
+   ],
+   "r": [
+    58,
+    68
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "C"
+  },
+  {
+   "id": "street_d",
+   "name": "Кольцевая улица",
+   "type": "gallery",
+   "a": [
+    -120.0,
+    -60.0
+   ],
+   "r": [
+    58,
+    68
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "D"
+  },
+  {
+   "id": "street_e",
+   "name": "Кольцевая улица",
+   "type": "gallery",
+   "a": [
+    -60.0,
+    0.0
+   ],
+   "r": [
+    58,
+    68
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "E"
+  },
+  {
+   "id": "street_f",
+   "name": "Кольцевая улица",
+   "type": "gallery",
+   "a": [
+    0.0,
+    60.0
+   ],
+   "r": [
+    58,
+    68
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "F"
+  },
+  {
+   "id": "pass_in_240",
+   "name": "Поперечный проход",
+   "type": "corridor",
+   "axis": 120.0,
+   "t": [
+    -3,
+    3
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "A"
+  },
+  {
+   "id": "pass_out_240",
+   "name": "Проход к выходу",
+   "type": "corridor",
+   "axis": 120.0,
+   "t": [
+    -2.5,
+    2.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "A"
+  },
+  {
+   "id": "wc_a",
+   "name": "Санузлы",
+   "type": "utility",
+   "a": [
+    108.0,
+    120.0
+   ],
+   "r": [
+    68.0,
+    80.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A",
+   "core": true,
+   "theme": "core_w",
+   "note": "М, Ж, для маломобильных"
+  },
+  {
+   "id": "stair_a",
+   "name": "Лестница и лифт",
+   "type": "utility",
+   "a": [
+    108.0,
+    120.0
+   ],
+   "r": [
+    80.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "pass_in_180",
+   "name": "Поперечный проход",
+   "type": "corridor",
+   "axis": -180.0,
+   "t": [
+    -3,
+    3
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "B"
+  },
+  {
+   "id": "pass_out_180",
+   "name": "Проход к выходу",
+   "type": "corridor",
+   "axis": -180.0,
+   "t": [
+    -2.5,
+    2.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "B"
+  },
+  {
+   "id": "wc_b",
+   "name": "Санузлы",
+   "type": "utility",
+   "a": [
+    168.0,
+    180.0
+   ],
+   "r": [
+    68.0,
+    80.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "B",
+   "core": true,
+   "theme": "core_w",
+   "note": "М, Ж, для маломобильных"
+  },
+  {
+   "id": "stair_b",
+   "name": "Лестница и лифт",
+   "type": "utility",
+   "a": [
+    168.0,
+    180.0
+   ],
+   "r": [
+    80.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "B",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "pass_in_120",
+   "name": "Поперечный проход",
+   "type": "corridor",
+   "axis": -120.0,
+   "t": [
+    -3,
+    3
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "C"
+  },
+  {
+   "id": "pass_out_120",
+   "name": "Проход к выходу",
+   "type": "corridor",
+   "axis": -120.0,
+   "t": [
+    -2.5,
+    2.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "C"
+  },
+  {
+   "id": "wc_c",
+   "name": "Санузлы",
+   "type": "utility",
+   "a": [
+    -132.0,
+    -120.0
+   ],
+   "r": [
+    68.0,
+    80.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "C",
+   "core": true,
+   "theme": "core_w",
+   "note": "М, Ж, для маломобильных"
+  },
+  {
+   "id": "stair_c",
+   "name": "Лестница и лифт",
+   "type": "utility",
+   "a": [
+    -132.0,
+    -120.0
+   ],
+   "r": [
+    80.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "C",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "pass_in_60",
+   "name": "Поперечный проход",
+   "type": "corridor",
+   "axis": -60.0,
+   "t": [
+    -3,
+    3
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "D"
+  },
+  {
+   "id": "pass_out_60",
+   "name": "Проход к выходу",
+   "type": "corridor",
+   "axis": -60.0,
+   "t": [
+    -2.5,
+    2.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "D"
+  },
+  {
+   "id": "wc_d",
+   "name": "Санузлы",
+   "type": "utility",
+   "a": [
+    -72.0,
+    -60.0
+   ],
+   "r": [
+    68.0,
+    80.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D",
+   "core": true,
+   "theme": "core_w",
+   "note": "М, Ж, для маломобильных"
+  },
+  {
+   "id": "stair_d",
+   "name": "Лестница и лифт",
+   "type": "utility",
+   "a": [
+    -72.0,
+    -60.0
+   ],
+   "r": [
+    80.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "pass_in_0",
+   "name": "Поперечный проход",
+   "type": "corridor",
+   "axis": 0.0,
+   "t": [
+    -3,
+    3
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "E"
+  },
+  {
+   "id": "pass_in_300",
+   "name": "Поперечный проход",
+   "type": "corridor",
+   "axis": 60.0,
+   "t": [
+    -3,
+    3
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "F"
+  },
+  {
+   "id": "pass_out_300",
+   "name": "Проход к выходу",
+   "type": "corridor",
+   "axis": 60.0,
+   "t": [
+    -2.5,
+    2.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "F"
+  },
+  {
+   "id": "wc_f",
+   "name": "Санузлы",
+   "type": "utility",
+   "a": [
+    48.0,
+    60.0
+   ],
+   "r": [
+    68.0,
+    80.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "F",
+   "core": true,
+   "theme": "core_w",
+   "note": "М, Ж, для маломобильных"
+  },
+  {
+   "id": "stair_f",
+   "name": "Лестница и лифт",
+   "type": "utility",
+   "a": [
+    48.0,
+    60.0
+   ],
+   "r": [
+    80.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "F",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "pass_out_0",
+   "name": "Восточный проход",
+   "type": "corridor",
+   "axis": 0.0,
+   "t": [
+    -4,
+    4
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "E"
+  },
+  {
+   "id": "vestibule_e",
+   "name": "Восточный вестибюль",
+   "type": "corridor",
+   "axis": 0.0,
+   "t": [
+    -8,
+    8
+   ],
+   "r": [
+    86.0,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "E",
+   "note": "лагерь гарнизона мародёров"
+  },
+  {
+   "id": "wc_e",
+   "name": "Санузлы",
+   "type": "utility",
+   "a": [
+    -12.0,
+    0.0
+   ],
+   "r": [
+    68.0,
+    77.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E",
+   "core": true,
+   "theme": "core_w",
+   "note": "М, Ж, для маломобильных"
+  },
+  {
+   "id": "stair_e",
+   "name": "Лестница и лифт",
+   "type": "utility",
+   "a": [
+    -12.0,
+    0.0
+   ],
+   "r": [
+    77.0,
+    86.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "alley_s_in",
+   "name": "Главная аллея",
+   "type": "gallery",
+   "axis": 90.0,
+   "t": [
+    -7,
+    7
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "A"
+  },
+  {
+   "id": "alley_s_out",
+   "name": "Главная аллея",
+   "type": "gallery",
+   "axis": 90.0,
+   "t": [
+    -7,
+    7
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "A"
+  },
+  {
+   "id": "lobby_s",
+   "name": "Главный вестибюль",
+   "type": "corridor",
+   "axis": 90.0,
+   "t": [
+    -10,
+    10
+   ],
+   "r": [
+    86.0,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "note": "частично обрушен"
+  },
+  {
+   "id": "stair_s_w",
+   "name": "Лестница",
+   "type": "utility",
+   "axis": 90.0,
+   "t": [
+    10,
+    16
+   ],
+   "r": [
+    86.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "stair_s_e",
+   "name": "Лестница",
+   "type": "utility",
+   "axis": 90.0,
+   "t": [
+    -16,
+    -10
+   ],
+   "r": [
+    86.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "pharmacy",
+   "name": "Аптека",
+   "type": "retail",
+   "a": [
+    90.0,
+    108.0
+   ],
+   "r": [
+    68,
+    77
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "pharmacy",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "flowers",
+   "name": "Цветы",
+   "type": "retail",
+   "a": [
+    90.0,
+    108.0
+   ],
+   "r": [
+    77,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "department",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "security",
+   "name": "Пост охраны ТЦ",
+   "type": "security",
+   "a": [
+    90.0,
+    108.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A",
+   "theme": "cpu"
+  },
+  {
+   "id": "phones",
+   "name": "Салон связи",
+   "type": "retail",
+   "a": [
+    72.0,
+    90.0
+   ],
+   "r": [
+    68,
+    77
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "phones",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "coffee",
+   "name": "Кофейня",
+   "type": "retail",
+   "a": [
+    72.0,
+    90.0
+   ],
+   "r": [
+    77,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "note": "сгорела",
+   "theme": "coffee",
+   "sign_color": "#ff9a8a",
+   "locked": true
+  },
+  {
+   "id": "admin",
+   "name": "Администрация ТЦ",
+   "type": "office",
+   "a": [
+    72.0,
+    90.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "note": "сейф управляющего",
+   "theme": "staff"
+  },
+  {
+   "id": "kids",
+   "name": "Детский мир",
+   "type": "retail",
+   "a": [
+    60.0,
+    72.0
+   ],
+   "r": [
+    68,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "department",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "optics",
+   "name": "Оптика",
+   "type": "retail",
+   "a": [
+    110.0,
+    120.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "optics",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "jewelry",
+   "name": "Ювелирный",
+   "type": "retail",
+   "a": [
+    90.0,
+    110.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "jewelry",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "bank",
+   "name": "Банк",
+   "type": "retail",
+   "a": [
+    73.0,
+    90.0
+   ],
+   "r": [
+    40,
+    51
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "bank",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "bank_back",
+   "name": "Банк",
+   "type": "retail",
+   "a": [
+    79.0,
+    90.0
+   ],
+   "r": [
+    51,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "bank"
+  },
+  {
+   "id": "bank_vault",
+   "name": "Хранилище банка",
+   "type": "office",
+   "a": [
+    73.0,
+    79.0
+   ],
+   "r": [
+    51,
+    58
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A",
+   "theme": "bank"
+  },
+  {
+   "id": "pawn",
+   "name": "Ломбард",
+   "type": "retail",
+   "a": [
+    60.0,
+    73.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "A",
+   "theme": "jewelry",
+   "sign_color": "#ff9a8a"
+  },
+  {
+   "id": "evac_b",
+   "name": "Проход к пожарному выходу",
+   "type": "corridor",
+   "axis": 150.0,
+   "t": [
+    -1.5,
+    1.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "B"
+  },
+  {
+   "id": "stair_b",
+   "name": "Лестница",
+   "type": "utility",
+   "axis": 150.0,
+   "t": [
+    1.5,
+    8
+   ],
+   "r": [
+    86.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "B",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "fashion",
+   "name": "«Модный дом»",
+   "type": "retail",
+   "a": [
+    150.0,
+    168.0
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "clothes",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "fashion_st",
+   "name": "Склад «Модного дома»",
+   "type": "storage",
+   "a": [
+    150.0,
+    168.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "B",
+   "theme": "department"
+  },
+  {
+   "id": "shoes",
+   "name": "Обувь",
+   "type": "retail",
+   "a": [
+    138.0,
+    150.0
+   ],
+   "r": [
+    68,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "clothes",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "jeans",
+   "name": "Джинсы",
+   "type": "retail",
+   "a": [
+    129.0,
+    138.0
+   ],
+   "r": [
+    68,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "clothes",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "linen",
+   "name": "Бельё",
+   "type": "retail",
+   "a": [
+    120.0,
+    129.0
+   ],
+   "r": [
+    68,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "clothes",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "barber",
+   "name": "Парикмахерская",
+   "type": "retail",
+   "a": [
+    170.0,
+    180.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "cosmetics",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "watches",
+   "name": "Часы",
+   "type": "retail",
+   "a": [
+    160.0,
+    170.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "watches",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "bags",
+   "name": "Сумки",
+   "type": "retail",
+   "a": [
+    150.0,
+    160.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "clothes",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "cosmetics",
+   "name": "Косметика",
+   "type": "retail",
+   "a": [
+    140.0,
+    150.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "cosmetics",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "bijou",
+   "name": "Бижутерия",
+   "type": "retail",
+   "a": [
+    130.0,
+    140.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "jewelry",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "keys",
+   "name": "Ключи, ремонт обуви",
+   "type": "retail",
+   "a": [
+    120.0,
+    130.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "B",
+   "theme": "hardware",
+   "sign_color": "#ffbb66"
+  },
+  {
+   "id": "evac_c",
+   "name": "Проход к пожарному выходу",
+   "type": "corridor",
+   "axis": -150.0,
+   "t": [
+    -1.5,
+    1.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "C"
+  },
+  {
+   "id": "stair_c",
+   "name": "Лестница",
+   "type": "utility",
+   "axis": -150.0,
+   "t": [
+    1.5,
+    8
+   ],
+   "r": [
+    86.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "C",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "diy",
+   "name": "«Дом и ремонт»",
+   "type": "retail",
+   "a": [
+    -150.0,
+    -132.0
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "diy",
+   "sign_color": "#ffd84a",
+   "note": "инструмент"
+  },
+  {
+   "id": "diy_st",
+   "name": "Склад «Дом и ремонт»",
+   "type": "storage",
+   "a": [
+    -150.0,
+    -132.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "C",
+   "theme": "diy_st"
+  },
+  {
+   "id": "home",
+   "name": "Товары для дома",
+   "type": "retail",
+   "a": [
+    -162.0,
+    -150.0
+   ],
+   "r": [
+    68,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "note": "дом жильцов",
+   "theme": "department",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "pets",
+   "name": "Зоотовары",
+   "type": "retail",
+   "a": [
+    -171.0,
+    -162.0
+   ],
+   "r": [
+    68,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "department",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "hardware",
+   "name": "Хозтовары",
+   "type": "retail",
+   "a": [
+    -180.0,
+    -171.0
+   ],
+   "r": [
+    68,
+    88
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "hardware",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "stash",
+   "name": "Тайник",
+   "type": "storage",
+   "a": [
+    -180.0,
+    -171.0
+   ],
+   "r": [
+    88,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "C",
+   "note": "ключ К7",
+   "theme": "hardware_st"
+  },
+  {
+   "id": "textile",
+   "name": "Текстиль",
+   "type": "retail",
+   "a": [
+    -130.0,
+    -120.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "department",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "dishes",
+   "name": "Посуда",
+   "type": "retail",
+   "a": [
+    -140.0,
+    -130.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "department",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "garden",
+   "name": "Сад",
+   "type": "retail",
+   "a": [
+    -150.0,
+    -140.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "hardware",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "photo",
+   "name": "Фотоателье",
+   "type": "retail",
+   "a": [
+    -160.0,
+    -150.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "photo",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "books",
+   "name": "Книги",
+   "type": "retail",
+   "a": [
+    -170.0,
+    -160.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "note": "сгорел",
+   "theme": "press",
+   "sign_color": "#ffd84a",
+   "locked": true
+  },
+  {
+   "id": "tobacco",
+   "name": "Табак",
+   "type": "retail",
+   "a": [
+    -180.0,
+    -170.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "C",
+   "theme": "press",
+   "sign_color": "#ffd84a"
+  },
+  {
+   "id": "alley_n_in",
+   "name": "Северная аллея",
+   "type": "gallery",
+   "axis": -90.0,
+   "t": [
+    -6,
+    6
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "D"
+  },
+  {
+   "id": "alley_n_out",
+   "name": "Северная аллея",
+   "type": "gallery",
+   "axis": -90.0,
+   "t": [
+    -6,
+    6
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "note": "тупик у завала"
+  },
+  {
+   "id": "lobby_n",
+   "name": "Северный вестибюль",
+   "type": "corridor",
+   "axis": -90.0,
+   "t": [
+    -10,
+    10
+   ],
+   "r": [
+    86.0,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "locked": true,
+   "note": "завал"
+  },
+  {
+   "id": "stair_n_e",
+   "name": "Лестница",
+   "type": "utility",
+   "axis": -90.0,
+   "t": [
+    10,
+    16
+   ],
+   "r": [
+    86.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "stair_n_w",
+   "name": "Лестница",
+   "type": "utility",
+   "axis": -90.0,
+   "t": [
+    -16,
+    -10
+   ],
+   "r": [
+    86.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено",
+   "locked": true
+  },
+  {
+   "id": "sport",
+   "name": "Спорттовары",
+   "type": "retail",
+   "a": [
+    -90.0,
+    -72.0
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "theme": "sport",
+   "sign_color": "#86dd86"
+  },
+  {
+   "id": "sport_st",
+   "name": "Склад спорттоваров",
+   "type": "storage",
+   "a": [
+    -90.0,
+    -72.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D",
+   "theme": "sport_st"
+  },
+  {
+   "id": "tourism",
+   "name": "Туризм",
+   "type": "retail",
+   "a": [
+    -108.0,
+    -90.0
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "theme": "sport",
+   "sign_color": "#86dd86"
+  },
+  {
+   "id": "tourism_st",
+   "name": "Склад туризма",
+   "type": "storage",
+   "a": [
+    -108.0,
+    -90.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D",
+   "theme": "sport_st"
+  },
+  {
+   "id": "taiga",
+   "name": "Оружейный «Тайга»",
+   "type": "retail",
+   "a": [
+    -120.0,
+    -108.0
+   ],
+   "r": [
+    68,
+    96
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "note": "электророллета: питание и ключ-карта",
+   "theme": "sport",
+   "sign_color": "#86dd86"
+  },
+  {
+   "id": "sportpit",
+   "name": "Спортпит",
+   "type": "retail",
+   "a": [
+    -72.0,
+    -60.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "theme": "sport",
+   "sign_color": "#86dd86"
+  },
+  {
+   "id": "bikes",
+   "name": "Велосипеды",
+   "type": "retail",
+   "a": [
+    -90.0,
+    -72.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "theme": "sport",
+   "sign_color": "#86dd86"
+  },
+  {
+   "id": "toys",
+   "name": "Игрушки",
+   "type": "retail",
+   "a": [
+    -108.0,
+    -90.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "theme": "department",
+   "sign_color": "#86dd86"
+  },
+  {
+   "id": "medpoint",
+   "name": "Медпункт ТЦ",
+   "type": "office",
+   "a": [
+    -120.0,
+    -108.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "painted_plaster_wall",
+   "sector": "D",
+   "theme": "pharmacy"
+  },
+  {
+   "id": "market",
+   "name": "Супермаркет «Корзина»",
+   "type": "retail",
+   "a": [
+    -60.0,
+    -12.0
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "E",
+   "theme": "hyper",
+   "sign_color": "#74cdf0"
+  },
+  {
+   "id": "cold",
+   "name": "Холодильные камеры",
+   "type": "storage",
+   "a": [
+    -30.0,
+    0.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E",
+   "theme": "cold"
+  },
+  {
+   "id": "electrical",
+   "name": "Щитовая",
+   "type": "utility",
+   "a": [
+    -36.0,
+    -30.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E",
+   "theme": "electrical",
+   "note": "рубильник этажа"
+  },
+  {
+   "id": "receiving",
+   "name": "Приёмка товара",
+   "type": "storage",
+   "a": [
+    -54.0,
+    -36.0
+   ],
+   "r": [
+    86.0,
+    100.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E",
+   "theme": "hyper_st",
+   "note": "доки, грузовой лифт на 3-й рядом"
+  },
+  {
+   "id": "dock_stair",
+   "name": "Лестница и грузовой лифт",
+   "type": "utility",
+   "a": [
+    -60.0,
+    -54.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E",
+   "core": true,
+   "theme": "core_e",
+   "note": "грузовой лифт на 3-й, закрыт"
+  },
+  {
+   "id": "bakery",
+   "name": "Пекарня",
+   "type": "retail",
+   "a": [
+    -10.0,
+    0.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "E",
+   "theme": "coffee",
+   "sign_color": "#74cdf0"
+  },
+  {
+   "id": "deli",
+   "name": "Кулинария",
+   "type": "retail",
+   "a": [
+    -20.0,
+    -10.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "E",
+   "theme": "coffee",
+   "sign_color": "#74cdf0"
+  },
+  {
+   "id": "cafe",
+   "name": "Кафе «Ринг»",
+   "type": "retail",
+   "a": [
+    -40.0,
+    -20.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "E",
+   "theme": "coffee",
+   "sign_color": "#74cdf0"
+  },
+  {
+   "id": "liquor",
+   "name": "Алкоголь и табак",
+   "type": "retail",
+   "a": [
+    -50.0,
+    -40.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "E",
+   "theme": "press",
+   "sign_color": "#74cdf0"
+  },
+  {
+   "id": "tea",
+   "name": "Чай и кофе",
+   "type": "retail",
+   "a": [
+    -60.0,
+    -50.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "E",
+   "theme": "coffee",
+   "sign_color": "#74cdf0"
+  },
+  {
+   "id": "evac_f",
+   "name": "Проход к пожарному выходу",
+   "type": "corridor",
+   "axis": 12.0,
+   "t": [
+    -1.5,
+    1.5
+   ],
+   "r": [
+    68,
+    100.0
+   ],
+   "floor": "large_floor_tiles_02",
+   "wall": "painted_plaster_wall",
+   "sector": "F"
+  },
+  {
+   "id": "stair_f",
+   "name": "Лестница",
+   "type": "utility",
+   "axis": 12.0,
+   "t": [
+    1.5,
+    8
+   ],
+   "r": [
+    86.0,
+    96.0
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "F",
+   "core": true,
+   "theme": "core_w",
+   "note": "наверх заварено"
+  },
+  {
+   "id": "electronics",
+   "name": "Электроника «Вольт»",
+   "type": "retail",
+   "a": [
+    12.0,
+    48.0
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "electronics",
+   "sign_color": "#c9a2f5"
+  },
+  {
+   "id": "electronics_st",
+   "name": "Склад электроники",
+   "type": "storage",
+   "a": [
+    24.0,
+    48.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "F",
+   "theme": "electronics_st"
+  },
+  {
+   "id": "service",
+   "name": "Сервис «Вольта»",
+   "type": "office",
+   "a": [
+    12.0,
+    24.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "service"
+  },
+  {
+   "id": "phone_repair",
+   "name": "Ремонт телефонов",
+   "type": "retail",
+   "a": [
+    0.0,
+    12.0
+   ],
+   "r": [
+    68,
+    86.0
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "phones",
+   "sign_color": "#c9a2f5"
+  },
+  {
+   "id": "camp_store",
+   "name": "Подсобка лагеря",
+   "type": "storage",
+   "a": [
+    0.0,
+    12.0
+   ],
+   "r": [
+    86.0,
+    96
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "F",
+   "theme": "workshop"
+  },
+  {
+   "id": "photo_video",
+   "name": "Фото и видео",
+   "type": "retail",
+   "a": [
+    50.0,
+    60.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "photo",
+   "sign_color": "#c9a2f5"
+  },
+  {
+   "id": "consoles",
+   "name": "Приставки",
+   "type": "retail",
+   "a": [
+    40.0,
+    50.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "electronics",
+   "sign_color": "#c9a2f5"
+  },
+  {
+   "id": "computers",
+   "name": "Компьютеры",
+   "type": "retail",
+   "a": [
+    30.0,
+    40.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "electronics",
+   "sign_color": "#c9a2f5"
+  },
+  {
+   "id": "audio",
+   "name": "Аудио",
+   "type": "retail",
+   "a": [
+    20.0,
+    30.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "electronics",
+   "sign_color": "#c9a2f5"
+  },
+  {
+   "id": "telecom",
+   "name": "Связь",
+   "type": "retail",
+   "a": [
+    10.0,
+    20.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "note": "сгорел",
+   "theme": "phones",
+   "sign_color": "#c9a2f5",
+   "locked": true
+  },
+  {
+   "id": "tech_repair",
+   "name": "Ремонт техники",
+   "type": "retail",
+   "a": [
+    0.0,
+    10.0
+   ],
+   "r": [
+    40,
+    58
+   ],
+   "floor": "worn_tile_floor",
+   "wall": "painted_plaster_wall",
+   "sector": "F",
+   "theme": "service",
+   "sign_color": "#c9a2f5"
+  },
+  {
+   "id": "svc_e1",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    -36.0,
+    0.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E"
+  },
+  {
+   "id": "svc_e2",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    -60.0,
+    -54.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "E"
+  },
+  {
+   "id": "svc_d1",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    -90.0,
+    -60.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D"
+  },
+  {
+   "id": "svc_d2",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    -120.0,
+    -90.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "D"
+  },
+  {
+   "id": "svc_c1",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    -150.0,
+    -120.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "C"
+  },
+  {
+   "id": "svc_c2",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    -180.0,
+    -150.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "C"
+  },
+  {
+   "id": "svc_b1",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    150.0,
+    180.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "B"
+  },
+  {
+   "id": "svc_b2",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    120.0,
+    150.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "B"
+  },
+  {
+   "id": "svc_a1",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    90.0,
+    120.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A"
+  },
+  {
+   "id": "svc_a2",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    60.0,
+    90.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "A"
+  },
+  {
+   "id": "svc_f1",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    12.0,
+    60.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "F"
+  },
+  {
+   "id": "svc_f2",
+   "name": "Служебный коридор",
+   "type": "corridor",
+   "a": [
+    0.0,
+    12.0
+   ],
+   "r": [
+    96,
+    100
+   ],
+   "floor": "concrete_floor_worn_001",
+   "wall": "concrete_wall_006",
+   "sector": "F"
+  }
+ ],
+ "openings": [
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 30,
+   "a": [
+    -180.0,
+    180.0
+   ],
+   "note": "атриум открыт на галерею"
+  },
+  {
+   "wall": "radial",
+   "kind": "open",
+   "a": 120.0,
+   "r": [
+    58,
+    68
+   ],
+   "note": "противопожарная штора"
+  },
+  {
+   "wall": "radial",
+   "kind": "open",
+   "a": -180.0,
+   "r": [
+    58,
+    68
+   ],
+   "note": "противопожарная штора"
+  },
+  {
+   "wall": "radial",
+   "kind": "locked",
+   "a": -120.0,
+   "r": [
+    58,
+    68
+   ],
+   "note": "противопожарная штора"
+  },
+  {
+   "wall": "radial",
+   "kind": "open",
+   "a": -60.0,
+   "r": [
+    58,
+    68
+   ],
+   "note": "противопожарная штора"
+  },
+  {
+   "wall": "radial",
+   "kind": "open",
+   "a": 0.0,
+   "r": [
+    58,
+    68
+   ],
+   "note": "противопожарная штора"
+  },
+  {
+   "wall": "radial",
+   "kind": "half",
+   "a": 60.0,
+   "r": [
+    58,
+    68
+   ],
+   "note": "противопожарная штора"
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    115.6988,
+    124.3012
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    117.0351,
+    122.9649
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    117.8931,
+    122.107
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 120.0,
+   "t": 2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 120.0,
+   "t": -2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 120.0,
+   "t": -2.5,
+   "s": [
+    72.7578,
+    75.1578
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 120.0,
+   "t": -2.5,
+   "s": [
+    86.7645,
+    89.1645
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    175.6988,
+    184.3012
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    177.0351,
+    182.9649
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    177.8931,
+    182.107
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 100.0,
+   "a": [
+    179.4843,
+    180.5156
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -180.0,
+   "t": 2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -180.0,
+   "t": -2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -180.0,
+   "t": -2.5,
+   "s": [
+    72.7578,
+    75.1578
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -180.0,
+   "t": -2.5,
+   "s": [
+    86.7645,
+    89.1645
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    -124.3012,
+    -115.6988
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    -122.9649,
+    -117.0351
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    -122.1069,
+    -117.893
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 100.0,
+   "a": [
+    -120.5157,
+    -119.4844
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -120.0,
+   "t": 2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -120.0,
+   "t": -2.5,
+   "s": [
+    72.7578,
+    75.1578
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -120.0,
+   "t": -2.5,
+   "s": [
+    86.7645,
+    89.1645
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    -64.3012,
+    -55.6988
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    -62.9649,
+    -57.0351
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    -62.1069,
+    -57.893
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -60.0,
+   "t": 2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -60.0,
+   "t": -2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -60.0,
+   "t": -2.5,
+   "s": [
+    72.7578,
+    75.1578
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -60.0,
+   "t": -2.5,
+   "s": [
+    86.7645,
+    89.1645
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    -4.3012,
+    4.3012
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    -2.9649,
+    2.9649
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    55.6988,
+    64.3012
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    57.0351,
+    62.9649
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    57.8931,
+    62.107
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 100.0,
+   "a": [
+    59.4843,
+    60.5156
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 60.0,
+   "t": 2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 60.0,
+   "t": -2.5,
+   "s": [
+    96.7681,
+    99.1681
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 60.0,
+   "t": -2.5,
+   "s": [
+    72.7578,
+    75.1578
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 60.0,
+   "t": -2.5,
+   "s": [
+    86.7645,
+    89.1645
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    -3.3723,
+    3.3723
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 86.0,
+   "a": [
+    -2.6659,
+    2.6659
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 100.0,
+   "a": [
+    -1.7189,
+    1.7188
+   ],
+   "note": "восточный вход, баррикада снаружи"
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 0.0,
+   "t": 8,
+   "s": [
+    96.4729,
+    98.8729
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 0.0,
+   "t": -8,
+   "s": [
+    96.4729,
+    98.8729
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 0.0,
+   "t": -4.0,
+   "s": [
+    71.1896,
+    73.5896
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 0.0,
+   "t": -4.0,
+   "s": [
+    80.2018,
+    82.6018
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    79.9213,
+    100.0786
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    83.0681,
+    96.9319
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    84.0914,
+    95.9085
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 86.0,
+   "a": [
+    85.3312,
+    94.6687
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 100.0,
+   "a": [
+    88.5676,
+    91.4324
+   ],
+   "note": "пролом главного входа"
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 90.0,
+   "t": 10,
+   "s": [
+    96.2885,
+    98.6885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 90.0,
+   "t": -10,
+   "s": [
+    96.2885,
+    98.6885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 90.0,
+   "t": 10,
+   "s": [
+    89.2489,
+    91.6489
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 90.0,
+   "t": -10,
+   "s": [
+    89.2489,
+    91.6489
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 68,
+   "a": [
+    97.7223,
+    106.1863
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "half",
+   "axis": 90.0,
+   "t": 7,
+   "s": [
+    68.9951,
+    75.3248
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": 90.0,
+   "t": 7,
+   "s": [
+    78.0362,
+    84.3596
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    103.0808,
+    104.5132
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    73.8137,
+    82.2777
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": 90.0,
+   "t": -7,
+   "s": [
+    68.9951,
+    75.3248
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "locked",
+   "axis": 90.0,
+   "t": -7,
+   "s": [
+    78.0362,
+    84.3596
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    75.4868,
+    76.9192
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 68,
+   "a": [
+    63.5909,
+    70.516
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    66.0299,
+    67.4623
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    110.8548,
+    114.8439
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    112.3321,
+    114.703
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 40,
+   "a": [
+    101.5669,
+    108.5118
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "half",
+   "axis": 90.0,
+   "t": 7,
+   "s": [
+    42.1117,
+    54.847
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    102.2805,
+    104.6514
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": 90.0,
+   "t": -7,
+   "s": [
+    41.0529,
+    48.8471
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    74.0382,
+    78.8831
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 51,
+   "a": [
+    79.0,
+    90.0
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    79.8146,
+    82.1855
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 51,
+   "a": [
+    74.6519,
+    77.3482
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 40,
+   "a": [
+    65.606,
+    71.6951
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    66.797,
+    69.1679
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    148.736,
+    151.264
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 100.0,
+   "a": [
+    149.3125,
+    150.6876
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 150.0,
+   "t": 1.5,
+   "s": [
+    96.7885,
+    99.1885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 150.0,
+   "t": -1.5,
+   "s": [
+    96.7885,
+    99.1885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 150.0,
+   "t": 1.5,
+   "s": [
+    89.7876,
+    92.1876
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    160.8035,
+    166.159
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    153.1049,
+    158.4604
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 86.0,
+   "a": [
+    160.2005,
+    161.7995
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    162.2838,
+    163.7162
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 68,
+   "a": [
+    139.6104,
+    147.1256
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    142.8362,
+    144.2686
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    130.35,
+    136.65
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    132.7838,
+    134.2162
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 68,
+   "a": [
+    123.1409,
+    127.966
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    124.5299,
+    125.9623
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    170.8548,
+    174.8439
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    172.3321,
+    174.703
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 40,
+   "a": [
+    161.5,
+    168.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    163.8146,
+    166.1855
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    151.5,
+    158.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    153.2811,
+    156.7188
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    141.5,
+    148.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    141.5,
+    148.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 40,
+   "a": [
+    131.5,
+    138.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    133.8146,
+    136.1855
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    124.0202,
+    128.9448
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    125.4317,
+    128.8694
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    -151.264,
+    -148.736
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -150.0,
+   "t": 1.5,
+   "s": [
+    96.7885,
+    99.1885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -150.0,
+   "t": -1.5,
+   "s": [
+    96.7885,
+    99.1885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -150.0,
+   "t": 1.5,
+   "s": [
+    89.7876,
+    92.1876
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 68,
+   "a": [
+    -145.3888,
+    -135.3472
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 86.0,
+   "a": [
+    -140.7995,
+    -139.2005
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -137.7162,
+    -136.2838
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    -160.3896,
+    -152.8744
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -157.1638,
+    -155.7314
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    -169.65,
+    -163.35
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -167.2162,
+    -165.7838
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 68,
+   "a": [
+    -176.8591,
+    -172.034
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -175.4701,
+    -174.0377
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -129.1452,
+    -125.1561
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -127.6679,
+    -125.297
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    -138.5,
+    -131.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    -136.7189,
+    -133.2812
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 40,
+   "a": [
+    -148.5,
+    -141.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -146.1854,
+    -143.8145
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -158.5,
+    -151.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    -158.5,
+    -151.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 40,
+   "a": [
+    -168.5,
+    -161.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 58,
+   "a": [
+    -175.9798,
+    -171.0552
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    -174.5683,
+    -171.1306
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 40,
+   "a": [
+    -98.6269,
+    -81.373
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 58,
+   "a": [
+    -95.9378,
+    -84.0623
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    -95.0621,
+    -84.9379
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 86.0,
+   "a": [
+    -94.0006,
+    -85.9993
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96.0,
+   "a": [
+    -82.9335,
+    -81.5011
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": -90.0,
+   "t": -10,
+   "s": [
+    89.2489,
+    91.6489
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    -82.9972,
+    -73.9407
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90.0,
+   "t": 6,
+   "s": [
+    70.4431,
+    83.0821
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 86.0,
+   "a": [
+    -78.7995,
+    -77.2005
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -76.7162,
+    -75.2838
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90.0,
+   "t": -6,
+   "s": [
+    70.4431,
+    83.0821
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 68,
+   "a": [
+    -106.0593,
+    -97.0028
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 86.0,
+   "a": [
+    -103.7995,
+    -102.2005
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -104.7162,
+    -103.2838
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 68,
+   "a": [
+    -116.4091,
+    -109.484
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 40,
+   "a": [
+    -70.8452,
+    -65.4561
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -68.6679,
+    -66.297
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -79.9671,
+    -73.4059
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90.0,
+   "t": 6,
+   "s": [
+    42.2686,
+    54.9676
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -79.2165,
+    -76.8456
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "storefront",
+   "axis": -90.0,
+   "t": -6,
+   "s": [
+    42.2686,
+    54.9676
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -106.594,
+    -100.0328
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -103.1543,
+    -100.7834
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -113.703,
+    -111.3321
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    -28.0626,
+    -18.884
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    -48.7145,
+    -39.5359
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "shutter",
+   "r": 86.0,
+   "a": [
+    -23.1992,
+    -20.8008
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "shutter",
+   "r": 86.0,
+   "a": [
+    -46.1992,
+    -43.8008
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -25.7162,
+    -24.2838
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    -33.7162,
+    -32.2838
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "gate",
+   "r": 100.0,
+   "a": [
+    -42.2892,
+    -39.7109
+   ],
+   "note": "док"
+  },
+  {
+   "wall": "arc",
+   "kind": "gate",
+   "r": 100.0,
+   "a": [
+    -46.2892,
+    -43.7109
+   ],
+   "note": "док"
+  },
+  {
+   "wall": "arc",
+   "kind": "gate",
+   "r": 100.0,
+   "a": [
+    -50.2892,
+    -47.7109
+   ],
+   "note": "док"
+  },
+  {
+   "wall": "radial",
+   "kind": "door",
+   "a": -36.0,
+   "r": [
+    97.1,
+    98.9
+   ]
+  },
+  {
+   "wall": "radial",
+   "kind": "door",
+   "a": -54.0,
+   "r": [
+    97.1,
+    98.9
+   ]
+  },
+  {
+   "wall": "radial",
+   "kind": "door",
+   "a": -54.0,
+   "r": [
+    90.1,
+    91.9
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    -8.9447,
+    -4.0201
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    -8.8695,
+    -5.4318
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -18.5,
+    -11.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -16.1854,
+    -13.8145
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    -37.0,
+    -23.0
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -31.1854,
+    -28.8145
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 58,
+   "a": [
+    -48.5,
+    -41.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    -46.7189,
+    -43.2812
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 40,
+   "a": [
+    -54.844,
+    -50.8549
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    -54.703,
+    -52.3321
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "open",
+   "r": 68,
+   "a": [
+    10.736,
+    13.264
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 12.0,
+   "t": 1.5,
+   "s": [
+    96.7885,
+    99.1885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 12.0,
+   "t": -1.5,
+   "s": [
+    96.7885,
+    99.1885
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 12.0,
+   "t": 1.5,
+   "s": [
+    89.7876,
+    92.1876
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 68,
+   "a": [
+    18.4744,
+    42.7896
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 86.0,
+   "a": [
+    35.2005,
+    36.7995
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 86.0,
+   "a": [
+    19.2005,
+    20.7995
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    41.2838,
+    42.7162
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 96,
+   "a": [
+    19.6739,
+    21.1063
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 68,
+   "a": [
+    4.4768,
+    9.6314
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 86.0,
+   "a": [
+    6.0338,
+    7.6328
+   ]
+  },
+  {
+   "wall": "along",
+   "kind": "door",
+   "axis": 0.0,
+   "t": 8,
+   "s": [
+    89.4477,
+    91.8477
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "half",
+   "r": 40,
+   "a": [
+    50.8548,
+    54.8439
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    52.3321,
+    54.703
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 40,
+   "a": [
+    41.5,
+    48.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 58,
+   "a": [
+    43.8146,
+    46.1855
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 40,
+   "a": [
+    31.5,
+    38.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    31.5,
+    38.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    21.5,
+    28.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    23.2811,
+    26.7188
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "locked",
+   "r": 40,
+   "a": [
+    11.5,
+    18.5
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "storefront",
+   "r": 58,
+   "a": [
+    4.0202,
+    8.9448
+   ]
+  },
+  {
+   "wall": "arc",
+   "kind": "door",
+   "r": 40,
+   "a": [
+    5.4317,
+    8.8694
+   ]
+  }
+ ]
+}

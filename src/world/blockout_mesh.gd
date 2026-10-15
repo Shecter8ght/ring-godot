@@ -38,6 +38,22 @@ func box(mat_id: String, center: Vector3, size: Vector3) -> void:
 	_quad(s, c[1], c[2], c[6], c[5], Vector3.RIGHT)
 
 
+## Коробка, повёрнутая базисом basis вокруг своего центра (обломки, завалы).
+func box_rotated(mat_id: String, center: Vector3, size: Vector3, basis: Basis) -> void:
+	var s := st(mat_id)
+	var h := size * 0.5
+	var c: Array[Vector3] = []
+	for k in [Vector3(-1, -1, -1), Vector3(1, -1, -1), Vector3(1, -1, 1), Vector3(-1, -1, 1),
+			Vector3(-1, 1, -1), Vector3(1, 1, -1), Vector3(1, 1, 1), Vector3(-1, 1, 1)]:
+		c.append(center + basis * (h * k))
+	_quad(s, c[4], c[5], c[6], c[7], basis.y)
+	_quad(s, c[3], c[2], c[1], c[0], -basis.y)
+	_quad(s, c[0], c[1], c[5], c[4], -basis.z)
+	_quad(s, c[2], c[3], c[7], c[6], basis.z)
+	_quad(s, c[3], c[0], c[4], c[7], -basis.x)
+	_quad(s, c[1], c[2], c[6], c[5], basis.x)
+
+
 ## Пандус вдоль Z: от (z0, y0) до (z1, y1), ширина по X [x0, x1], толщина плиты t.
 func ramp(mat_id: String, x0: float, x1: float, z0: float, z1: float, y0: float, y1: float, t: float) -> void:
 	var s := st(mat_id)

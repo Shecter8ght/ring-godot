@@ -33,6 +33,8 @@ r 109–121, служебный коридор r 121–125, снаружи — �
 **Решение владельца 2026-10-15:** ТЦ — отдельная карта Ø200 с прилегающей территорией
 (`docs/design/mall_map.md`); `f1_ring` Ø250 — прежний серый черновик, будет пересобран; ТЦ с карты
 зоны 1 уходит. Кольцо на Ø250 больше не развивать.
+Серый черновик 1-го этажа Ø200 — `data/sectors/mall_1f.json` (генератор `tools/gen_mall_1f.py`, план —
+`docs/design/mall_1f_plan.md`) + `scenes/levels/mall_1f.tscn`; в рейды через убежище пока не подключён.
 
 **Блокаут.** Сейчас уровень — серый блокаут (`"greybox": true`): стены без текстур, толщина по
 классу конструкции (фасад 0.5 / противопожарная 0.3 / несущая 0.3 / перегородка 0.15), нормы и
@@ -89,6 +91,11 @@ tools/godot.cmd res://tools/asphalt_shots.tscn              # мокрый ас�
 tools/godot.cmd res://tools/ssr_probe.tscn                  # SSR движка: зеркало и мокрый асфальт при разных настройках отражений; снимки ssr_probe_*
 python tools/fetch_sky.py                                      # ночное небо: HDRI Poly Haven + карта Луны NASA в assets/sky, CREDITS
 tools/godot.cmd res://tools/ceiling_shots.tscn             # потолки и купол атриума: от первого лица вверх и изометрия
+python -X utf8 tools/gen_mall_1f.py                          # ТЦ Ø200, 1-й этаж: раскладка плана docs/design/mall_1f_plan.md → data/sectors/mall_1f.json
+tools/godot.cmd --headless res://tools/mall_1f_check.tscn   # серый черновик ТЦ Ø200: ИИ доходит во все открытые места, выходы по плану;
+                                                              # с окном (--windowed --resolution 1920x1080) — снимки mall_1f_* (MALL_ONLY=top|eye)
+tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
+                                                              # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона
 python tools/import_model.py <id>                              # модель из _asset_src/<id> (+license.txt) в assets/models/props, CREDITS
 tools/godot.cmd res://tools/ui_shots.tscn                    # снимки: карта (M), меню (Esc), управление, рюкзак и лут

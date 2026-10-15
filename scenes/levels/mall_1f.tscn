@@ -1,0 +1,211 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="PackedScene" uid="uid://4n4o4n5y1vtv" path="res://scenes/player/camera_rig.tscn" id="2_rig"]
+[ext_resource type="Script" uid="uid://bui2urvf4v4xu" path="res://src/world/sector_level.gd" id="3_level"]
+[ext_resource type="PackedScene" path="res://scenes/world/escalator.tscn" id="3_esc"]
+[ext_resource type="PackedScene" path="res://scenes/world/rubble_pile.tscn" id="4_rub"]
+[ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="5_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="6_ext"]
+
+[sub_resource type="PhysicalSkyMaterial" id="sky_mat"]
+rayleigh_coefficient = 2.2
+mie_eccentricity = 0.86
+mie_color = Color(0.93, 0.76, 0.58, 1)
+turbidity = 6.0
+sun_disk_scale = 1.6
+ground_color = Color(0.22, 0.2, 0.18, 1)
+energy_multiplier = 1.15
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 0.8
+reflected_light_source = 2
+tonemap_mode = 4
+tonemap_exposure = 1.15
+ssao_enabled = true
+ssao_radius = 1.4
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_cascades = 6
+sdfgi_energy = 1.3
+glow_enabled = true
+glow_intensity = 0.55
+glow_bloom = 0.12
+fog_enabled = true
+fog_light_color = Color(0.78, 0.62, 0.5, 1)
+fog_light_energy = 0.7
+fog_sun_scatter = 0.15
+fog_density = 0.0011
+fog_aerial_perspective = 0.55
+fog_sky_affect = 0.15
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0018
+volumetric_fog_albedo = Color(0.96, 0.86, 0.74, 1)
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_anisotropy = 0.6
+volumetric_fog_length = 96.0
+adjustment_enabled = true
+adjustment_contrast = 1.05
+adjustment_saturation = 1.08
+
+[node name="Mall1F" type="Node3D"]
+script = ExtResource("3_level")
+sector_path = "res://data/sectors/mall_1f.json"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.342, 0.1954, -0.9192, 0, 0.9781, 0.2079, 0.9397, 0.0711, -0.3345, 0, 30, 0)
+light_color = Color(1, 0.74, 0.5, 1)
+light_energy = 2.6
+light_volumetric_fog_energy = 1.6
+shadow_enabled = true
+shadow_blur = 1.1
+directional_shadow_split_1 = 0.08
+directional_shadow_split_3 = 0.45
+directional_shadow_max_distance = 220.0
+
+[node name="CameraRig" parent="." instance=ExtResource("2_rig")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="HUD/Root"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 600.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.9, 0.86, 0.76, 1)
+theme_override_font_sizes/font_size = 20
+text = "HP 100   Патроны 8/8"
+
+[node name="Dead" type="Label" parent="HUD/Root"]
+visible = false
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(0.85, 0.2, 0.15, 1)
+theme_override_font_sizes/font_size = 40
+text = "УБИТ  —  R: заново"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Escalators" type="Node3D" parent="."]
+
+[node name="North" parent="Escalators" instance=ExtResource("3_esc")]
+position = Vector3(0.000, 0.000, -19.600)
+rotation = Vector3(0.000, -0.000, 0.000)
+
+[node name="SouthWest" parent="Escalators" instance=ExtResource("3_esc")]
+position = Vector3(-16.974, 0.000, 9.800)
+rotation = Vector3(0.000, 2.094, 0.000)
+
+[node name="SouthEast" parent="Escalators" instance=ExtResource("3_esc")]
+position = Vector3(16.974, 0.000, 9.800)
+rotation = Vector3(0.000, -2.094, 0.000)
+
+[node name="Rubble" type="Node3D" parent="."]
+
+[node name="MainEntrance" parent="Rubble" instance=ExtResource("4_rub")]
+position = Vector3(0.000, 0.000, 93.600)
+rotation = Vector3(0.000, 0.000, 0.000)
+size = Vector2(14.5, 11.0)
+height = 3.2
+count = 24
+lane_width = 4.5
+seed_value = 11
+
+[node name="NorthEntrance" parent="Rubble" instance=ExtResource("4_rub")]
+position = Vector3(0.000, 0.000, -93.000)
+rotation = Vector3(0.000, 3.142, 0.000)
+size = Vector2(19.5, 13.0)
+height = 4.8
+count = 60
+seed_value = 23
+block_max = Vector3(3.2, 1.6, 4.2)
+
+[node name="EastBarricade" parent="Rubble" instance=ExtResource("4_rub")]
+position = Vector3(104.500, 0.000, 0.000)
+rotation = Vector3(0.000, 1.571, 0.000)
+size = Vector2(18.0, 7.0)
+height = 2.6
+count = 9
+lane_width = 2.2
+seed_value = 5
+block_min = Vector3(0.8, 1.2, 2.2)
+block_max = Vector3(2.5, 2.6, 6.0)
+material_id = "gb_fence"
+
+[node name="EastCamp" parent="Rubble" instance=ExtResource("4_rub")]
+position = Vector3(93.500, 0.000, 0.000)
+rotation = Vector3(0.000, 1.571, 0.000)
+size = Vector2(13.0, 8.0)
+height = 1.4
+count = 8
+lane_width = 3.0
+seed_value = 7
+block_min = Vector3(0.8, 0.4, 1.6)
+block_max = Vector3(1.8, 1.2, 2.4)
+material_id = "gb_partition"
+
+[node name="DomeDebris" parent="Rubble" instance=ExtResource("4_rub")]
+position = Vector3(10.649, 0.000, -7.456)
+rotation = Vector3(0.000, 2.182, 0.000)
+size = Vector2(10.0, 8.0)
+height = 1.6
+count = 14
+seed_value = 3
+material_id = "steel_dark"
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="South" parent="SpawnPoints" instance=ExtResource("5_spawn")]
+position = Vector3(0.000, 0.050, 118.000)
+display_name = "Площадь у главного входа"
+entry = true
+
+[node name="West" parent="SpawnPoints" instance=ExtResource("5_spawn")]
+position = Vector3(-118.000, 0.050, -0.000)
+display_name = "У западного выхода"
+entry = true
+
+[node name="Docks" parent="SpawnPoints" instance=ExtResource("5_spawn")]
+position = Vector3(85.560, 0.050, -85.560)
+display_name = "Двор разгрузки, у доков"
+entry = true
+
+[node name="Extractions" type="Node3D" parent="."]
+
+[node name="Plaza" parent="Extractions" instance=ExtResource("6_ext")]
+position = Vector3(0.000, 0.000, 138.000)
+display_name = "Площадь (временно)"
+radius = 5.0
+rule = "Временный выход серого черновика: территории вокруг ТЦ ещё нет."
+
+[node name="Yard" parent="Extractions" instance=ExtResource("6_ext")]
+position = Vector3(97.581, 0.000, -97.581)
+display_name = "Двор разгрузки (временно)"
+radius = 5.0
+rule = "Временный выход серого черновика: территории вокруг ТЦ ещё нет."

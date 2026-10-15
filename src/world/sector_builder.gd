@@ -44,6 +44,8 @@ void fragment() {
 	EMISSION = COLOR.rgb * energy;
 }
 """
+## Углы линий стен хранятся приведёнными к [-180, 180): у полного кольца (ТЦ Ø200) помещения
+## по обе стороны «шва» ±180 — одна и та же радиальная линия, а не две.
 ## Сдвиг от линии стены при поиске помещений по сторонам, м / град.
 const EPS_R := 0.05
 const EPS_A := 0.05
@@ -53,6 +55,11 @@ const FIRE_TOL_DEG := 2.0
 ## ~80 м от камеры; в прицеле дальше всё равно стены и дымка).
 const PROP_BATCH_CELL := 24.0
 const PROP_VIS_END := 110.0
+## Колонны каркаса (блок "columns" в JSON) — только в залах этих типов, не ближе этого к проёму, м,
+## и не ближе COLUMN_CLEAR к стене (иначе колонна встала бы в стену или в дверь).
+const COLUMN_ROOMS := ["retail", "storage"]
+const COLUMN_DOOR_GAP := 2.5
+const COLUMN_CLEAR := 0.9
 ## Серые полы блокаута по текстурным (см. SectorMaterials.GREYBOX).
 const GREYBOX_FLOOR := {
 	"large_floor_tiles_02": "gbf_tile", "worn_tile_floor": "gbf_tile",
@@ -119,7 +126,21 @@ const ARCH_DEFAULT := {
 	"plinth_h": 0.4, "cornice_h": 0.35, "pilaster_w": 0.5, "pilaster_spacing": 6.0, "column_spacing": 6.0,
 	"storefront_h": 3.6, "door_h": 2.2, "shutter_h": 3.2, "gate_h": 4.5,
 	"entrance_w": 3.2, "pane_w": 1.6, "broken_pane_pct": 22, "sign_h": 0.9,
+	# роллета, поднятая наполовину (проём "half"): просвет под полотном — пролезть только лёжа
+	"half_gap": 0.8,
+	# колонна блокаута и там, где проём «open» делят границы соседних помещений (посреди проёма);
+	# false — колонны только по краям проёма и по шагу сетки (узкие проходы не перегораживаются)
+	"open_split_columns": true,
+	# витрина, которую делит граница соседних помещений, строится кусками — у каждого свой вход и
+	# вывеска; false — вход и вывеска одни, посередине всей витрины
+	"storefront_split_entrances": true,
 }
+
+
+## Открыто всё кольцо (поле "angle" охватывает 360°) — у дуг есть отрезок через шов ±180.
+func _ring_full() -> bool:
+	var ang: Array = _def.get("angle", [0.0, 0.0])
+	return not _ring.is_empty() and float(ang[1]) - float(ang[0]) >= 359.9
 
 
 static func polar(a_deg: float, r: float) -> Vector3:
@@ -136,6 +157,11 @@ static func is_strip(room: Dictionary) -> bool:
 ## Точка полосы: s — вдоль оси от центра кольца, t — поперёк.
 static func strip_point(axis_deg: float, s: float, t: float) -> Vector3:
 	return polar(axis_deg, s) + polar(axis_deg + 90.0, t)
+
+
+## Угол, приведённый к [-180, 180) — ключ радиальной линии и точки разбиения дуг.
+static func _wrap(a: float) -> float:
+	return wrapf(a, -180.0, 180.0)
 
 
 ## Угол a внутри [a0, a1] с учётом перехода через ±180.
@@ -246,6 +272,7 @@ func build(path: String) -> Node3D:
 
 	_build_floors()
 	_build_walls()
+	_build_columns()
 	_build_surroundings()
 	if not _greybox:
 		_build_overhead()
@@ -526,24 +553,21 @@ func _opening_at(kind_wall: String, fixed: float, along: float, axis: float = 0.
 	for op in _openings:
 		if String(op.wall) != kind_wall:
 			continue
-		var f := 0.0
-		var rng: Array
 		match kind_wall:
 			"arc":
-				f = float(op.r)
-				rng = op.a
+				# дуга проёма может переходить через ±180
+				if absf(float(op.r) - fixed) <= 0.01 and angle_in(along, float(op.a[0]), float(op.a[1])):
+					return op
 			"along":
-				if absf(float(op.axis) - axis) > 0.01:
+				if absf(float(op.axis) - axis) > 0.01 or absf(float(op.t) - fixed) > 0.01:
 					continue
-				f = float(op.t)
-				rng = op.s
+				if along >= float(op.s[0]) - 1e-6 and along <= float(op.s[1]) + 1e-6:
+					return op
 			_:
-				f = float(op.a)
-				rng = op.r
-		if absf(f - fixed) > 0.01:
-			continue
-		if along >= float(rng[0]) - 1e-6 and along <= float(rng[1]) + 1e-6:
-			return op
+				if absf(wrapf(float(op.a) - fixed, -180.0, 180.0)) > 0.01:
+					continue
+				if along >= float(op.r[0]) - 1e-6 and along <= float(op.r[1]) + 1e-6:
+					return op
 	return {}
 
 
@@ -556,16 +580,16 @@ func _build_walls() -> void:
 		if is_strip(room):
 			continue
 		for r in [float(room.r[0]), float(room.r[1])]:
-			_add_breaks(arcs, r, [float(room.a[0]), float(room.a[1])])
+			_add_breaks(arcs, r, [_wrap(float(room.a[0])), _wrap(float(room.a[1]))])
 		for a in [float(room.a[0]), float(room.a[1])]:
-			_add_breaks(rads, a, [float(room.r[0]), float(room.r[1])])
+			_add_breaks(rads, _wrap(a), [float(room.r[0]), float(room.r[1])])
 	# полосы: торцы — дуги, бока — прямые вдоль оси
 	for room in _rooms:
 		if not is_strip(room):
 			continue
 		var ax := float(room.axis)
 		for r in [float(room.r[0]), float(room.r[1])]:
-			_add_breaks(arcs, r, [ax + rad_to_deg(asin(float(room.t[0]) / r)), ax + rad_to_deg(asin(float(room.t[1]) / r))])
+			_add_breaks(arcs, r, [_wrap(ax + rad_to_deg(asin(float(room.t[0]) / r))), _wrap(ax + rad_to_deg(asin(float(room.t[1]) / r)))])
 		for t in [float(room.t[0]), float(room.t[1])]:
 			var key := "%.2f@%.2f" % [t, ax]
 			if not alongs.has(key):
@@ -574,13 +598,13 @@ func _build_walls() -> void:
 	for op in _openings:
 		match String(op.wall):
 			"arc":
-				_add_breaks(arcs, float(op.r), [float(op.a[0]), float(op.a[1])])
+				_add_breaks(arcs, float(op.r), [_wrap(float(op.a[0])), _wrap(float(op.a[1]))])
 			"along":
 				var key := "%.2f@%.2f" % [float(op.t), float(op.axis)]
 				if alongs.has(key):
 					_add_breaks(alongs, float(op.t), [float(op.s[0]), float(op.s[1])], key)
 			_:
-				_add_breaks(rads, float(op.a), [float(op.r[0]), float(op.r[1])])
+				_add_breaks(rads, _wrap(float(op.a)), [float(op.r[0]), float(op.r[1])])
 	# пересечения прямых полос с дугами и радиусами — чтобы по обе стороны каждого отрезка
 	# было ровно по одному помещению
 	for key in alongs:
@@ -596,8 +620,10 @@ func _build_walls() -> void:
 				if s > s_min and s < s_max:
 					_add_breaks(alongs, t, [s], key)
 				# точка разбиения только внутри уже существующей дуги — иначе она бы её удлинила
-				var ab := ax + rad_to_deg(asin(t / r))
+				var ab := _wrap(ax + rad_to_deg(asin(t / r)))
 				if ab > (arcs[ak].breaks as Array).min() and ab < (arcs[ak].breaks as Array).max():
+					_add_breaks(arcs, r, [ab])
+				elif _ring_full():
 					_add_breaks(arcs, r, [ab])
 		for rk in rads:
 			var a: float = rads[rk].fixed
@@ -616,6 +642,8 @@ func _build_walls() -> void:
 		var r: float = arcs[key].fixed
 		var br: Array = arcs[key].breaks
 		br.sort()
+		if _ring_full() and br.size() >= 1:
+			br.append(float(br[0]) + 360.0)
 		for i in range(br.size() - 1):
 			var a0: float = br[i]
 			var a1: float = br[i + 1]
@@ -651,6 +679,48 @@ func _build_walls() -> void:
 			var side_a := owner_of(_rooms, strip_point(ax, mid, t - EPS_R))
 			var side_b := owner_of(_rooms, strip_point(ax, mid, t + EPS_R))
 			_emit_wall_segment(line, s0, s1, side_a, side_b, _opening_at("along", t, mid, ax))
+
+
+## Колонны каркаса внутри больших залов: кольца {"r", "step", "offset"} (град) из блока "columns".
+## На линиях перегородок колонны не ставятся — там их роль играет стена (блокаут).
+func _build_columns() -> void:
+	var rings: Array = _def.get("columns", [])
+	if rings.is_empty():
+		return
+	var col := float(_thick.get("column", 0.6))
+	var st := _st(_walls, _gb("painted_plaster_wall", "gb_structural"))
+	var near_ops: Array[Vector3] = []
+	for op in _openings:
+		match String(op.wall):
+			"arc":
+				near_ops.append(polar((float(op.a[0]) + float(op.a[1])) * 0.5, float(op.r)))
+			"along":
+				near_ops.append(strip_point(float(op.axis), (float(op.s[0]) + float(op.s[1])) * 0.5, float(op.t)))
+			_:
+				near_ops.append(polar(float(op.a), (float(op.r[0]) + float(op.r[1])) * 0.5))
+	for ring in rings:
+		var r := float(ring.r)
+		var step := float(ring.step)
+		for k in range(int(round(360.0 / step))):
+			var a := float(ring.get("offset", 0.0)) + step * float(k)
+			var pos := polar(a, r)
+			var room := owner_of(_rooms, pos)
+			if room.is_empty() or is_strip(room) or bool(room.get("locked", false)) or bool(room.get("outdoor", false)):
+				continue
+			if not String(room.get("type", "")) in COLUMN_ROOMS:
+				continue
+			var tdir := polar(a + 90.0, 1.0)
+			var rdir := polar(a, 1.0)
+			var ok := true
+			for off in [tdir * COLUMN_CLEAR, -tdir * COLUMN_CLEAR, rdir * COLUMN_CLEAR, -rdir * COLUMN_CLEAR]:
+				if String(owner_of(_rooms, pos + off).get("id", "")) != String(room.get("id", "")):
+					ok = false
+					break
+			for q in near_ops:
+				if ok and q.distance_to(pos) < COLUMN_DOOR_GAP:
+					ok = false
+			if ok:
+				_post(st, pos, tdir, col, col, _wall_h)
 
 
 ## Где прямая t полосы пересекает дугу r (по эту сторону центра), м вдоль оси.
@@ -696,13 +766,15 @@ func _emit_wall_segment(line: Dictionary, p0: float, p1: float, side_a: Dictiona
 	if not op.is_empty():
 		match String(op.kind):
 			"open":
-				_colonnade(line, p0, p1, mat, float(op.get("height", float(_arch.storefront_h))))
+				_colonnade(line, p0, p1, mat, float(op.get("height", float(_arch.storefront_h))), op)
 			"storefront":
-				_storefront(line, p0, p1, mat, side_a, side_b)
+				_storefront(line, p0, p1, mat, side_a, side_b, op)
 			"door":
 				_doorway(line, p0, p1, mat, float(op.get("height", float(_arch.door_h))))
 			"shutter":
 				_rolling_gate(line, p0, p1, mat, float(op.get("height", float(_arch.shutter_h))), false)
+			"half":
+				_rolling_gate(line, p0, p1, mat, float(op.get("height", float(_arch.shutter_h))), false, float(_arch.half_gap))
 			"gate":
 				_rolling_gate(line, p0, p1, mat, float(op.get("height", float(_arch.gate_h))), false)
 			"locked":
@@ -730,7 +802,7 @@ func _wall_class(line: Dictionary, side_a: Dictionary, side_b: Dictionary, facad
 		return "structural"
 	if String(line.kind) == "radial":
 		for fa in _fire_angles:
-			if absf(float(line.fixed) - fa) <= FIRE_TOL_DEG:
+			if absf(wrapf(float(line.fixed) - fa, -180.0, 180.0)) <= FIRE_TOL_DEG:
 				return "fire"
 	for side in [side_a, side_b]:
 		if bool(side.get("core", false)) or String(side.get("type", "")) in ["corridor", "gallery", "atrium"]:
@@ -789,7 +861,7 @@ func _lintel(line: Dictionary, p0: float, p1: float, mat: String, y: float) -> v
 
 
 ## Колоннада: проход без стены, балка только под перекрытием, колонны по концам и через шаг.
-func _colonnade(line: Dictionary, p0: float, p1: float, mat: String, _y: float) -> void:
+func _colonnade(line: Dictionary, p0: float, p1: float, mat: String, _y: float, op: Dictionary = {}) -> void:
 	if _greybox:
 		# балка перекрытия и колонны по сетке каркаса (квадратные, шаг column_grid)
 		_lintel(line, p0, p1, mat, _wall_h - 0.7)
@@ -798,6 +870,8 @@ func _colonnade(line: Dictionary, p0: float, p1: float, mat: String, _y: float) 
 		var cn := maxi(1, int(round(clen / float(_thick.get("column_grid", 9.0)))))
 		for i in range(cn + 1):
 			var cp := _line_advance(line, p0, clen * float(i) / float(cn))
+			if (i == 0 or i == cn) and not bool(_arch.open_split_columns) and _inside_opening(line, op, cp):
+				continue
 			var pos := _line_point(line, cp)
 			var key := "%.1f,%.1f" % [pos.x, pos.z]
 			if _posts.has(key):
@@ -812,6 +886,24 @@ func _colonnade(line: Dictionary, p0: float, p1: float, mat: String, _y: float) 
 	var n := int(floor(len / float(_arch.column_spacing)))
 	for i in range(1, n + 1):
 		_pilaster(line, _line_advance(line, p0, len * float(i) / float(n + 1)), mat)
+
+
+## Точка p линии лежит внутри проёма op, а не на его краю: отрезок проёма разделён границей
+## соседних помещений, колонна тут встала бы посреди прохода.
+func _inside_opening(line: Dictionary, op: Dictionary, p: float) -> bool:
+	if op.is_empty():
+		return false
+	var tol := 0.05
+	match String(line.kind):
+		"arc":
+			var a0 := float(op.a[0])
+			var span := float(op.a[1]) - a0
+			var x := fposmod(p - a0, 360.0)
+			var tol_deg := rad_to_deg(tol / float(line.fixed))
+			return x > tol_deg and x < span - tol_deg
+		"along":
+			return p > float(op.s[0]) + tol and p < float(op.s[1]) - tol
+	return p > float(op.r[0]) + tol and p < float(op.r[1]) - tol
 
 
 ## Дверной проём: ригель, косяки и створка (сцена door.tscn) на петле у p0.
@@ -834,8 +926,9 @@ func _doorway(line: Dictionary, p0: float, p1: float, mat: String, y: float) -> 
 	_doors.append(door)
 
 
-## Роллета: рулон под ригелем; closed — полотно опущено до пола (непроходимо).
-func _rolling_gate(line: Dictionary, p0: float, p1: float, mat: String, y: float, closed: bool) -> void:
+## Роллета: рулон под ригелем; closed — полотно опущено до пола (непроходимо); gap > 0 — полотно
+## опущено до этой высоты над полом (поднята наполовину: под ней пролезают лёжа, ИИ не проходит).
+func _rolling_gate(line: Dictionary, p0: float, p1: float, mat: String, y: float, closed: bool, gap: float = 0.0) -> void:
 	_lintel(line, p0, p1, mat, y)
 	_pilaster(line, p0, mat)
 	_pilaster(line, p1, mat)
@@ -844,10 +937,12 @@ func _rolling_gate(line: Dictionary, p0: float, p1: float, mat: String, y: float
 	_wall_strip(_st(_walls, shutter), pts, _wall_t + 0.3, 0.45, y - 0.45)
 	if closed:
 		_wall_strip(_st(_walls, shutter), pts, 0.06, y - 0.45)
+	elif gap > 0.0:
+		_wall_strip(_st(_walls, shutter), pts, 0.06, y - 0.45 - gap, gap)
 
 
 ## Витрина: стекло в стальных рамах по бокам, вход посередине с рулоном роллеты и вывеской.
-func _storefront(line: Dictionary, p0: float, p1: float, mat: String, side_a: Dictionary, side_b: Dictionary) -> void:
+func _storefront(line: Dictionary, p0: float, p1: float, mat: String, side_a: Dictionary, side_b: Dictionary, op: Dictionary = {}) -> void:
 	var y: float = float(_arch.storefront_h)
 	_lintel(line, p0, p1, mat, y)
 	_pilaster(line, p0, mat)
@@ -856,6 +951,21 @@ func _storefront(line: Dictionary, p0: float, p1: float, mat: String, side_a: Di
 	var entrance := minf(float(_arch.entrance_w), len * 0.6)
 	var e0 := _line_advance(line, p0, (len - entrance) * 0.5)
 	var e1 := _line_advance(line, p0, (len + entrance) * 0.5)
+	if not bool(_arch.storefront_split_entrances) and not op.is_empty():
+		# кусок разделённой витрины: вход один — посередине всей витрины, остальное стекло
+		var mid := _op_mid(line, op, p0)
+		if mid < p0 - 1e-4 or mid > p1 + 1e-4:
+			_glass_run(line, p0, p1, y)
+			return
+		entrance = minf(float(_arch.entrance_w), minf(_op_len(line, op) * 0.6, len))
+		e0 = _line_advance(line, mid, -entrance * 0.5)
+		e1 = _line_advance(line, mid, entrance * 0.5)
+		if e0 < p0:
+			e0 = p0
+			e1 = _line_advance(line, p0, entrance)
+		elif e1 > p1:
+			e1 = p1
+			e0 = _line_advance(line, p1, -entrance)
 	_glass_run(line, p0, e0, y)
 	_glass_run(line, e1, p1, y)
 	# вход: рулон роллеты и вывеска над ним
@@ -878,12 +988,33 @@ func _storefront(line: Dictionary, p0: float, p1: float, mat: String, side_a: Di
 	label.text = String(shop.get("name", "")).to_upper()
 	label.font_size = 64
 	label.pixel_size = 0.01
-	label.modulate = Color(1.0, 0.86, 0.6)
+	label.modulate = Color.from_string(String(shop.get("sign_color", "")), Color(1.0, 0.86, 0.6))
 	label.shaded = false
 	label.outline_size = 0
 	label.position = pos + toward_gallery * (_wall_t * 0.5 + 0.5) + Vector3.UP * (y + 0.5 + float(_arch.sign_h) * 0.5)
 	label.basis = Basis.looking_at(-toward_gallery, Vector3.UP)
 	_labels.append(label)
+
+
+## Середина проёма op в параметре линии (у дуги — угол рядом с near, через шов ±180).
+func _op_mid(line: Dictionary, op: Dictionary, near: float) -> float:
+	match String(line.kind):
+		"arc":
+			var m := (float(op.a[0]) + float(op.a[1])) * 0.5
+			return near + wrapf(m - near, -180.0, 180.0)
+		"along":
+			return (float(op.s[0]) + float(op.s[1])) * 0.5
+	return (float(op.r[0]) + float(op.r[1])) * 0.5
+
+
+## Длина проёма op, м.
+func _op_len(line: Dictionary, op: Dictionary) -> float:
+	match String(line.kind):
+		"arc":
+			return deg_to_rad(float(op.a[1]) - float(op.a[0])) * float(line.fixed)
+		"along":
+			return float(op.s[1]) - float(op.s[0])
+	return float(op.r[1]) - float(op.r[0])
 
 
 ## Единичная нормаль линии в точке p, направленная в сторону помещения room.
@@ -969,6 +1100,9 @@ func _build_ring_surroundings() -> void:
 	var c1 := a0 + 360.0
 	var zones: Dictionary = _ring.get("zones", {})
 	var inner_arcs: Array[float] = []
+	# полное кольцо (открыто всё здание) — закрытой части нет
+	if c1 - c0 < 0.5:
+		zones = {}
 	for key in zones:
 		var z: Array = zones[key]
 		_annulus(_st(_floors, _floor_mat(String(ZONE_FLOOR.get(key, "concrete_floor_worn_001")))), c0, c1, float(z[0]), float(z[1]), 0.0)
@@ -984,7 +1118,8 @@ func _build_ring_surroundings() -> void:
 	var t_fac := float(_thick.get("facade", _base_t))
 	var bh := float(_thick.get("building_height", _wall_h))
 	var fmat := _gb("concrete_panels", "gb_facade")
-	_wall_strip(_st(_walls, fmat), _arc_points(outer, c0, c1), t_fac, bh)
+	if c1 - c0 >= 0.5:
+		_wall_strip(_st(_walls, fmat), _arc_points(outer, c0, c1), t_fac, bh)
 	if bh > _wall_h:
 		_wall_strip(_st(_walls, fmat), _arc_points(outer, a0, a1), t_fac, bh - _wall_h, _wall_h)
 	# участок: асфальт вокруг и забор — дуга по краю открытой части и две радиальные отсечки
@@ -993,6 +1128,8 @@ func _build_ring_surroundings() -> void:
 	var t_fence := float(_thick.get("fence", _base_t))
 	var fence := _st(_walls, _gb("concrete_block_wall_02", "gb_fence"))
 	_wall_strip(fence, _arc_points(site, a0, a1), t_fence, fence_h)
+	if _ring_full():
+		return
 	for a in [a0, a1]:
 		_wall_strip(fence, PackedVector3Array([polar(a, outer), polar(a, site)]), t_fence, fence_h)
 
@@ -1512,6 +1649,10 @@ func _build_loot(root: Node3D, lootables: Array[Dictionary]) -> void:
 	var folder := Node3D.new()
 	folder.name = "Loot"
 	root.add_child(folder)
+	var theme_of := {}
+	for room in _rooms:
+		if room.has("theme"):
+			theme_of[String(room.id)] = String(room.theme)
 	var i := 0
 	for l in lootables:
 		var spec := ItemDb.container(String(l.kind))
@@ -1519,7 +1660,7 @@ func _build_loot(root: Node3D, lootables: Array[Dictionary]) -> void:
 		c.name = "Loot_%d" % i
 		i += 1
 		c.display_name = String(spec.name)
-		var themed := ItemDb.room_table(String(l.room))
+		var themed := ItemDb.room_table(String(theme_of.get(String(l.room), String(l.room))))
 		# стеллажи, кассы и киоски берут тему магазина; шкафы/коробки — своё
 		c.table = themed if themed != "" and String(l.kind) in ["shelf_retail", "checkout", "kiosk", "shelf_warehouse"] else String(spec.table)
 		c.search_s = float(spec.search)

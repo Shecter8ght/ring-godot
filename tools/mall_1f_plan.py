@@ -180,7 +180,7 @@ def build_rooms() -> list[Room]:
         Room("Ломбард", R_GAL, R_IN, S(287), S(300, -PASS_IN), "A", fronts=[("r0", "C")], star=True),
     ]
     # хранилище банка — комнатой в глубине банка
-    R.append(Room("Хранилище", 50, R_IN, S(270, 7), S(279), "A", "service", fronts=[("r0:door", "K", "К4")],
+    R.append(Room("Хранилище", 51, R_IN, S(281), S(287), "A", "service", fronts=[("r0:door", "K", "К4")],
                   star=True, fs=5.6, area=False))
 
     # ---------------- B — Мода (юго-запад, 180–240) ----------------
@@ -411,13 +411,14 @@ def rect_at(ax, a: float, r: float, w: float, h: float, fc: str, ec: str = "#4c4
 
 
 def escalator_pair(ax, a: float, r: float) -> None:
+    """Пара эскалаторов по радиусу: низ у фонтана, верхняя площадка — на краю галереи 2-го этажа."""
     x, y = pol(a, r)
-    ax.add_patch(Rectangle((x - 7.5, y - 1.85), 15, 3.7, angle=a - 90, rotation_point="center", fc="#666c73",
+    ax.add_patch(Rectangle((x - 7.5, y - 1.85), 15, 3.7, angle=a, rotation_point="center", fc="#666c73",
                            ec="#3e4246", lw=0.9, zorder=9))
-    ax.add_patch(Rectangle((x - 7.5, y - 0.2), 15, 0.4, angle=a - 90, rotation_point="center", fc="#3e4246",
+    ax.add_patch(Rectangle((x - 7.5, y - 0.2), 15, 0.4, angle=a, rotation_point="center", fc="#3e4246",
                            ec="none", zorder=9.2))
-    ax.text(x, y, "эскалаторы ↑2-й\n(штора наверху)", fontsize=5.2, color="white", ha="center", va="center",
-            rotation=text_rot(a - 90), zorder=14, linespacing=1.0)
+    ax.text(x, y, "эскалаторы ↑2-й", fontsize=5.2, color="white", ha="center", va="center",
+            rotation=text_rot(a), zorder=14, linespacing=1.0)
 
 
 def main() -> None:
@@ -503,9 +504,7 @@ def main() -> None:
     for b, d in ((150, EVAC), (210, EVAC), (348, EVAC)):
         svc_doors += [(S(b, -d), "door"), (S(b, d), "door")]
     svc_doors += [(S(36), "door"), (S(54), "door"), (S(270, -10), "door"), (S(270, 10), "door"),
-                  (S(90, -10), "rubble"), (S(90, 10), "rubble"), (S(30), "door"), (S(330), "door"), (S(195), "door"),
-                  (S(225), "door"), (S(135), "door"), (S(165), "door"), (S(105), "door"), (S(75), "door"),
-                  (S(255), "door"), (S(285), "door"), (S(15), "door"), (S(315), "door")]
+                  (S(90, -10), "rubble"), (S(90, 10), "rubble")]
     locked = {(240.0, -PASS_OUT): "К2", (60.0, PASS_OUT): "К2"}
     welded = {(120.0, PASS_OUT)}
     for side, kind in svc_doors:
@@ -529,7 +528,7 @@ def main() -> None:
     ax.add_patch(Circle((0, 0), 6.0, fc="#b9cfdb", ec="#6f8fa1", lw=1.0, zorder=9))
     ax.text(0, 0, "сухой\nфонтан", fontsize=5.6, ha="center", va="center", zorder=14, color="#3b5566")
     for a in (90.0, 210.0, 330.0):
-        escalator_pair(ax, a, 20.0)
+        escalator_pair(ax, a, 21.0)
     lx, ly = pol(150.0, 24.0)
     ax.add_patch(Circle((lx, ly), 1.9, fc="#9fb4c2", ec="#3e4246", lw=0.9, zorder=9))
     ax.text(lx, ly - 4.0, "панорамный\nлифт (стоит)", fontsize=5.0, ha="center", va="center", zorder=14)
