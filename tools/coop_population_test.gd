@@ -8,7 +8,7 @@ extends Node
 const PORT: int = 17795
 const LEVEL: String = "res://scenes/levels/zone01_mall.tscn"
 ## Где стоят игроки на проверке подхода: хост — у северного входа подхода, гости — у южного и восточного.
-const PLACES: Array[Vector3] = [Vector3(-130.0, 0.3, -165.0), Vector3(-60.0, 0.3, 240.0), Vector3(380.0, 5.5, -60.0)]
+const PLACES: Array[Vector3] = [Vector3(-130.0, 0.3, -165.0), Vector3(-60.0, 0.3, 240.0), Vector3(130.0, 0.3, -60.0)]
 ## Сколько раз выбирать вход подхода: если гостя не учитывают, хоть раз выпадет вход у него.
 const ARRIVAL_ROLLS: int = 40
 

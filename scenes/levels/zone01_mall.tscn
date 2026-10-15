@@ -22,51 +22,64 @@ sector_path = "res://data/sectors/zone01_mall.json"
 [node name="Gameplay" parent="." type="Node3D"]
 
 [node name="Entry_0" parent="Gameplay" instance=ExtResource("5")]
-position = Vector3(-249.0, 0.5596, -176.0)
-display_name = "Пролом у насыпи"
+position = Vector3(-372.0, 0.2515, -215.0)
+display_name = "Лесная дорога"
 entry = true
 
 [node name="Entry_1" parent="Gameplay" instance=ExtResource("5")]
-position = Vector3(292.0, 2.5848, -136.0)
-display_name = "Гаражи"
+position = Vector3(150.0, 0.1604, -322.0)
+display_name = "За речкой"
 entry = true
 
 [node name="Entry_2" parent="Gameplay" instance=ExtResource("5")]
-position = Vector3(-344.0, -0.4136, 81.0)
-display_name = "Тропа в овраге"
+position = Vector3(252.0, 0.5926, 30.0)
+display_name = "Из-за насыпи"
 entry = true
 
 [node name="Entry_3" parent="Gameplay" instance=ExtResource("5")]
-position = Vector3(-114.0, 0.5134, 282.0)
-display_name = "Лесополоса"
+position = Vector3(110.0, 0.2442, 290.0)
+display_name = "Южная лесополоса"
+entry = true
+
+[node name="Entry_4" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-250.0, 0.4145, 292.0)
+display_name = "Юго-запад"
+entry = true
+
+[node name="Entry_5" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-385.0, 0.2882, 150.0)
+display_name = "За оврагом"
 entry = true
 
 [node name="Extraction_0" parent="Gameplay" instance=ExtResource("6")]
-position = Vector3(0.0, 0.32, -206.0)
-display_name = "Путепровод"
+position = Vector3(-345.0, 0.0464, -322.0)
+display_name = "Лесная дорога"
 radius = 6.0
 
 [node name="Extraction_1" parent="Gameplay" instance=ExtResource("6")]
+position = Vector3(58.0, -0.2871, -286.0)
+display_name = "Старый мост"
+radius = 6.0
+
+[node name="Extraction_2" parent="Gameplay" instance=ExtResource("6")]
 position = Vector3(-386.0, 0.3705, 40.0)
 display_name = "Мост через овраг"
 radius = 6.0
 
-[node name="Extraction_2" parent="Gameplay" instance=ExtResource("6")]
-position = Vector3(2.0, 0.08, 292.0)
-display_name = "Лесная дорога"
-radius = 6.0
-
 [node name="Extraction_3" parent="Gameplay" instance=ExtResource("6")]
-position = Vector3(432.0, 5.877, 26.0)
-display_name = "Блокпост"
+position = Vector3(188.0, 3.08, 292.0)
+display_name = "Ж/д пути"
 radius = 6.0
-rule = "За плату или по условию"
 
 [node name="Extraction_4" parent="Gameplay" instance=ExtResource("6")]
-position = Vector3(-5.0, -1.4, 186.0)
-display_name = "Погрузка ТЦ"
+position = Vector3(8.0, 0.28, 126.0)
+display_name = "Автостанция"
 radius = 6.0
-rule = "Машина — по контракту"
+
+[node name="Extraction_5" parent="Gameplay" instance=ExtResource("6")]
+position = Vector3(258.0, 0.0781, -60.0)
+display_name = "К ТЦ"
+radius = 6.0
 
 [node name="AI_Spawns" parent="Gameplay" type="Node3D"]
 
@@ -80,37 +93,40 @@ position = Vector3(-170.0, 0.45, 20.0)
 position = Vector3(-150.0, 0.45, 80.0)
 
 [node name="AI_Spawn_04" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(0.0, 0.3575, -128.0)
-
-[node name="AI_Spawn_05" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(160.0, 0.25, -14.0)
-
-[node name="AI_Spawn_06" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(230.0, 0.35, -126.0)
-
-[node name="AI_Spawn_07" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(290.0, 3.0413, -40.0)
-
-[node name="AI_Spawn_08" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(236.0, 0.4326, 96.0)
-
-[node name="AI_Spawn_09" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(365.0, 16.1772, 190.0)
-
-[node name="AI_Spawn_10" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(108.0, 0.5, 137.0)
-
-[node name="AI_Spawn_11" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(-5.0, -3.8, 140.0)
-
-[node name="AI_Spawn_12" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
 position = Vector3(-280.0, 0.2, 30.0)
 
+[node name="AI_Spawn_05" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(-70.0, 0.4877, -110.0)
+
+[node name="AI_Spawn_06" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(100.0, 0.559, -160.0)
+
+[node name="AI_Spawn_07" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(190.0, 0.2, -170.0)
+
+[node name="AI_Spawn_08" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(95.0, 0.4, 10.0)
+
+[node name="AI_Spawn_09" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(180.0, 0.5, -30.0)
+
+[node name="AI_Spawn_10" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(-20.0, 0.4, 150.0)
+
+[node name="AI_Spawn_11" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(150.0, 0.5, 160.0)
+
+[node name="AI_Spawn_12" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(-150.0, 0.2, -194.0)
+
 [node name="AI_Spawn_13" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(-100.0, 0.6937, 250.0)
+position = Vector3(100.0, 0.2, -285.0)
 
 [node name="AI_Spawn_14" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(200.0, 0.5807, 230.0)
+position = Vector3(240.0, 0.8915, 0.0)
+
+[node name="AI_Spawn_15" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
+position = Vector3(-120.0, 0.5273, 240.0)
 
 [node name="Navigation" parent="." type="Node3D"]
 

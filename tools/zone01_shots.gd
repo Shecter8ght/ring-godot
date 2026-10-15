@@ -1,5 +1,5 @@
 ﻿extends Node
-## Снимки зоны 1 (район ТЦ) в docs/screens/zone01_*.png: обзор с воздуха и виды с высоты глаз.
+## Снимки зоны 1 «Городской пояс» в docs/screens/zone01_*.png: обзор с воздуха и виды с высоты глаз.
 ## tools/godot.cmd res://tools/zone01_shots.tscn       (ZONE01_ONLY=yard,plaza — выборочно)
 
 const OUT_DIR := "res://docs/screens"
@@ -8,10 +8,19 @@ const SCENE := "res://scenes/levels/zone01_mall.tscn"
 ## имя: [откуда (x, над землёй, z), куда смотреть (x, y абсолютная, z), угол обзора]
 const SHOTS := {
 	"warmup": [Vector3(0, 300, 300), Vector3(0, 0, 0), 60.0],
-	"aerial": [Vector3(40, 380, 420), Vector3(0, 0, 20), 50.0],
-	"aerial_top": [Vector3(15, 760, 41), Vector3(15, 0, 40), 50.0],
+	"aerial": [Vector3(-60, 380, 420), Vector3(-60, 0, -20), 50.0],
+	"aerial_top": [Vector3(-67, 760, -14), Vector3(-67, 0, -15), 50.0],
+	"aerial_swamp": [Vector3(-60, 140, -60), Vector3(-130, 0, -250), 55.0],
+	"aerial_rail": [Vector3(60, 120, -20), Vector3(210, 0, -100), 55.0],
 	"aerial_yard": [Vector3(-120, 70, -20), Vector3(-200, 0, -105), 55.0],
-	"plaza": [Vector3(30, 1.7, -152), Vector3(0, 12, 0), 70.0],
+	"swamp": [Vector3(-120, 1.7, -172), Vector3(-130, -1, -250), 70.0],
+	"swamp_in": [Vector3(-160, 1.7, -238), Vector3(-90, -1, -270), 70.0],
+	"river": [Vector3(40, 1.7, -280), Vector3(120, -1, -306), 70.0],
+	"rail_gap": [Vector3(150, 1.7, -60), Vector3(215, 2, -60), 70.0],
+	"rail_north": [Vector3(191, 1.7, -100), Vector3(205, 3, -240), 70.0],
+	"station_site": [Vector3(100, 1.7, 60), Vector3(160, 1, 170), 70.0],
+	"bus_site": [Vector3(-10, 1.7, 60), Vector3(-10, 1, 160), 70.0],
+	"construction_site": [Vector3(90, 1.7, -60), Vector3(100, 1, -160), 70.0],
 	"yard": [Vector3(-196, 1.7, -66), Vector3(-212, 7, -136), 70.0],
 	"yard_entrance": [Vector3(-200, 1.7, -118), Vector3(-212, 4, -132), 70.0],
 	"yard_brick": [Vector3(-212, 1.7, -88), Vector3(-232, 5, -80), 70.0],
@@ -29,25 +38,18 @@ const SHOTS := {
 	"yard_garages": [Vector3(-232, 1.7, -128), Vector3(-270, 3, -150), 70.0],
 	"ravine": [Vector3(-330, 1.8, 38), Vector3(-300, -6, 100), 70.0],
 	"ravine_bottom": [Vector3(-341, 1.7, 0), Vector3(-344, -3, -50), 70.0],
-	"overpass": [Vector3(0, 1.7, -140), Vector3(0, 3, -200), 70.0],
-	"embankment": [Vector3(-80, 1.7, -160), Vector3(-20, 6, -192), 70.0],
-	"hill": [Vector3(120, 1.7, 100), Vector3(370, 20, 185), 60.0],
-	"hill_top": [Vector3(360, 1.7, 175), Vector3(150, 0, 60), 70.0],
-	"loading": [Vector3(42, 1.7, 182), Vector3(-5, -3, 130), 70.0],
-	"forest_road": [Vector3(-3, 1.7, 225), Vector3(-2, 1, 295), 70.0],
-	"spruce_close": [Vector3(30, 1.7, 236), Vector3(40, 6, 252), 70.0],
+	"forest_road": [Vector3(-292, 1.7, -205), Vector3(-330, 1, -280), 70.0],
+	"spruce_close": [Vector3(20, 1.7, 285), Vector3(30, 6, 300), 70.0],
 	"birch_close": [Vector3(-212, 1.7, -96), Vector3(-214, 5, -82), 70.0],
-	"pine_grove": [Vector3(-78, 1.7, 200), Vector3(-92, 9, 222), 70.0],
-	"pine_thick": [Vector3(-95.5, 1.7, 205.0), Vector3(-96.2, 2.2, 209.5), 75.0],
-	"pine_crown": [Vector3(-94, 1.7, 204), Vector3(-96, 22, 212), 75.0],
+	"pine_grove": [Vector3(-60, 1.7, 284), Vector3(-80, 9, 300), 70.0],
 	"pine_old": [Vector3(-152, 1.7, 160), Vector3(-165.7, 8, 178), 70.0],
 	"pine_yard": [Vector3(-198, 1.7, -92), Vector3(-208, 8, -72), 70.0],
 	"rain_up": [Vector3(-196, 1.7, -96), Vector3(-196, 30, -80), 75.0],
 	"rain_street": [Vector3(-205, 1.7, -122), Vector3(-185, 1.0, -120), 70.0],
-	"sun_forest": [Vector3(-60, 1.7, 240), Vector3(0, 0, 0), 70.0],
-	"forest_floor": [Vector3(-60, 1.7, 240), Vector3(-56, 0, 247), 75.0],
+	"sun_forest": [Vector3(-60, 1.7, 284), Vector3(0, 0, 0), 70.0],
+	"forest_floor": [Vector3(-60, 1.7, 284), Vector3(-56, 0, 291), 75.0],
 	"sun_yard": [Vector3(-200, 1.7, -100), Vector3(0, 0, 0), 70.0],
-	"garages": [Vector3(250, 1.7, -110), Vector3(300, 4, -20), 70.0],
+	"garages": [Vector3(191, 1.7, -100), Vector3(191, 2, -200), 70.0],
 }
 
 

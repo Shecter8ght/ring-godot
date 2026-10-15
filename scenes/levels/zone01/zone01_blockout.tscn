@@ -1,90 +1,14 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/world/district_model.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/levels/zone01/zone01_houses12.tscn" id="nw_houses"]
-[ext_resource type="PackedScene" path="res://scenes/levels/zone01/zone01_market06.tscn" id="nw_market"]
-[ext_resource type="PackedScene" path="res://scenes/world/urban_props.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/world/blockout_building.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/world/blockout_opening.tscn" id="4"]
-[ext_resource type="Script" path="res://src/world/urban_facade.gd" id="5"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_1"]
-top_radius = 87.5
-bottom_radius = 87.5
-height = 22.5
-radial_segments = 96
-rings = 1
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_2"]
-radius = 87.5
-height = 22.5
-
-[sub_resource type="SphereMesh" id="SphereMesh_3"]
-radius = 30.0
-height = 16.0
-radial_segments = 64
-rings = 16
-is_hemisphere = true
+[ext_resource type="PackedScene" path="res://scenes/levels/zone01/zone01_market06.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/levels/zone01/zone01_houses12.tscn" id="3"]
 
 [node name="Blockout" type="Node3D"]
 
 [node name="Background" parent="." type="Node3D"]
 
 [node name="Building_0" parent="Background" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(-290.0, 0.2465, -262.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_panel12.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Building_1" parent="Background" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(-170.0, -0.3, -270.0)
-rotation_degrees = Vector3(0.0, 8.0, 0.0)
-model = "res://assets/zone01/models/sf_panel12.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Building_2" parent="Background" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(110.0, -0.3, -268.0)
-rotation_degrees = Vector3(0.0, -5.0, 0.0)
-model = "res://assets/zone01/models/sf_panel12.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Building_3" parent="Background" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(250.0, -0.3, -262.0)
-rotation_degrees = Vector3(0.0, 3.0, 0.0)
-model = "res://assets/zone01/models/sf_panel12.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Building_4" parent="Background" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(-40.0, -0.164, -250.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_panel5_brutal.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Building_5" parent="Background" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(360.0, -0.1803, -250.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_panel5_brutal.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Building_6" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
 position = Vector3(-450.0, -0.0588, -110.0)
 rotation_degrees = Vector3(0.0, 90.0, 0.0)
@@ -93,7 +17,7 @@ manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
 materials_dir = ""
 
-[node name="Building_7" parent="Background" type="StaticBody3D"]
+[node name="Building_1" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
 position = Vector3(-452.0, 0.1734, -40.0)
 rotation_degrees = Vector3(0.0, 92.0, 0.0)
@@ -102,7 +26,7 @@ manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
 materials_dir = ""
 
-[node name="Building_8" parent="Background" type="StaticBody3D"]
+[node name="Building_2" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
 position = Vector3(-450.0, 0.3057, 60.0)
 rotation_degrees = Vector3(0.0, 88.0, 0.0)
@@ -111,437 +35,81 @@ manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
 materials_dir = ""
 
-[node name="Building_9" parent="Background" type="StaticBody3D"]
+[node name="Building_3" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(500.0, 5.4046, -60.0)
+position = Vector3(-150.0, -0.0198, -405.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+model = "res://assets/zone01/models/sf_panel12.glb"
+manifest = "res://assets/zone01/models/sketchfab.json"
+surface = "concrete"
+materials_dir = ""
+
+[node name="Building_4" parent="Background" type="StaticBody3D"]
+script = ExtResource("1")
+position = Vector3(70.0, -0.3, -412.0)
+rotation_degrees = Vector3(0.0, 4.0, 0.0)
+model = "res://assets/zone01/models/sf_panel5_brutal.glb"
+manifest = "res://assets/zone01/models/sketchfab.json"
+surface = "concrete"
+materials_dir = ""
+
+[node name="Building_5" parent="Background" type="StaticBody3D"]
+script = ExtResource("1")
+position = Vector3(300.0, 0.0785, -402.0)
+rotation_degrees = Vector3(0.0, -6.0, 0.0)
+model = "res://assets/zone01/models/sf_panel12.glb"
+manifest = "res://assets/zone01/models/sketchfab.json"
+surface = "concrete"
+materials_dir = ""
+
+[node name="Building_6" parent="Background" type="StaticBody3D"]
+script = ExtResource("1")
+position = Vector3(420.0, -0.3, 130.0)
+rotation_degrees = Vector3(0.0, -92.0, 0.0)
+model = "res://assets/zone01/models/sf_panel12.glb"
+manifest = "res://assets/zone01/models/sketchfab.json"
+surface = "concrete"
+materials_dir = ""
+
+[node name="Building_7" parent="Background" type="StaticBody3D"]
+script = ExtResource("1")
+position = Vector3(380.0, -0.3, 230.0)
+rotation_degrees = Vector3(0.0, -84.0, 0.0)
+model = "res://assets/zone01/models/sf_panel5_brutal.glb"
+manifest = "res://assets/zone01/models/sketchfab.json"
+surface = "concrete"
+materials_dir = ""
+
+[node name="Building_8" parent="Background" type="StaticBody3D"]
+script = ExtResource("1")
+position = Vector3(470.0, -0.3, -40.0)
 rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/sf_panel12.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
 materials_dir = ""
 
-[node name="Building_10" parent="Background" type="StaticBody3D"]
+[node name="Building_9" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(495.0, 5.5099, 60.0)
+position = Vector3(470.0, -0.3, 60.0)
 rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/sf_panel5_brutal.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
 materials_dir = ""
 
-[node name="Z01_Mall" parent="." type="Node3D"]
+[node name="Z06_Market" parent="." instance=ExtResource("2")]
 
-[node name="Buildings" parent="Z01_Mall" type="Node3D"]
-
-[node name="Props" parent="Z01_Mall" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="MallMass" parent="Z01_Mall" type="StaticBody3D"]
-position = Vector3(0.0, 12.75, 0.0)
-
-[node name="Mesh" parent="Z01_Mall/MallMass" type="MeshInstance3D"]
-mesh = SubResource("CylinderMesh_1")
-
-[node name="Shape" parent="Z01_Mall/MallMass" type="CollisionShape3D"]
-shape = SubResource("CylinderShape3D_2")
-
-[node name="AtriumDome" parent="Z01_Mall" type="MeshInstance3D"]
-mesh = SubResource("SphereMesh_3")
-position = Vector3(0.0, 24.0, 0.0)
-
-[node name="PodiumWall" parent="Z01_Mall/Props" instance=ExtResource("2")]
-position = Vector3(0.0, 0.0, 0.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [92.412, 0.55, 4.035], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 87.5, 0]}, {"at": [91.709, 0.55, 12.074], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 82.5, 0]}, {"at": [90.307, 0.55, 20.021], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 77.5, 0]}, {"at": [88.219, 0.55, 27.815], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 72.5, 0]}, {"at": [85.459, 0.55, 35.398], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 67.5, 0]}, {"at": [82.049, 0.55, 42.712], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 62.5, 0]}, {"at": [78.014, 0.55, 49.7], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 57.5, 0]}, {"at": [73.385, 0.55, 56.31], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 52.5, 0]}, {"at": [68.198, 0.55, 62.492], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 47.5, 0]}, {"at": [62.492, 0.55, 68.198], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 42.5, 0]}, {"at": [56.31, 0.55, 73.385], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 37.5, 0]}, {"at": [49.7, 0.55, 78.014], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 32.5, 0]}, {"at": [42.712, 0.55, 82.049], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 27.5, 0]}, {"at": [35.398, 0.55, 85.459], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 22.5, 0]}, {"at": [27.815, 0.55, 88.219], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 17.5, 0]}, {"at": [20.021, 0.55, 90.307], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 12.5, 0]}, {"at": [12.074, 0.55, 91.709], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 7.5, 0]}, {"at": [-12.074, 0.55, 91.709], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -7.5, 0]}, {"at": [-20.021, 0.55, 90.307], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -12.5, 0]}, {"at": [-27.815, 0.55, 88.219], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -17.5, 0]}, {"at": [-35.398, 0.55, 85.459], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -22.5, 0]}, {"at": [-42.712, 0.55, 82.049], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -27.5, 0]}, {"at": [-49.7, 0.55, 78.014], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -32.5, 0]}, {"at": [-56.31, 0.55, 73.385], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -37.5, 0]}, {"at": [-62.492, 0.55, 68.198], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -42.5, 0]}, {"at": [-68.198, 0.55, 62.492], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -47.5, 0]}, {"at": [-73.385, 0.55, 56.31], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -52.5, 0]}, {"at": [-78.014, 0.55, 49.7], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -57.5, 0]}, {"at": [-82.049, 0.55, 42.712], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -62.5, 0]}, {"at": [-85.459, 0.55, 35.398], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -67.5, 0]}, {"at": [-88.219, 0.55, 27.815], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -72.5, 0]}, {"at": [-90.307, 0.55, 20.021], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -77.5, 0]}, {"at": [-91.709, 0.55, 12.074], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -82.5, 0]}, {"at": [-92.412, 0.55, 4.035], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -87.5, 0]}, {"at": [-92.412, 0.55, -4.035], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -92.5, 0]}, {"at": [-91.709, 0.55, -12.074], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -97.5, 0]}, {"at": [-90.307, 0.55, -20.021], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -102.5, 0]}, {"at": [-88.219, 0.55, -27.815], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -107.5, 0]}, {"at": [-85.459, 0.55, -35.398], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -112.5, 0]}, {"at": [-82.049, 0.55, -42.712], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -117.5, 0]}, {"at": [-78.014, 0.55, -49.7], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -122.5, 0]}, {"at": [-73.385, 0.55, -56.31], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -127.5, 0]}, {"at": [-68.198, 0.55, -62.492], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -132.5, 0]}, {"at": [-62.492, 0.55, -68.198], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -137.5, 0]}, {"at": [-56.31, 0.55, -73.385], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -142.5, 0]}, {"at": [-49.7, 0.55, -78.014], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -147.5, 0]}, {"at": [-42.712, 0.55, -82.049], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -152.5, 0]}, {"at": [-35.398, 0.55, -85.459], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -157.5, 0]}, {"at": [-27.815, 0.55, -88.219], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -162.5, 0]}, {"at": [-20.021, 0.55, -90.307], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -167.5, 0]}, {"at": [20.021, 0.55, -90.307], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -192.5, 0]}, {"at": [27.815, 0.55, -88.219], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -197.5, 0]}, {"at": [35.398, 0.55, -85.459], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -202.5, 0]}, {"at": [42.712, 0.55, -82.049], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -207.5, 0]}, {"at": [49.7, 0.55, -78.014], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -212.5, 0]}, {"at": [56.31, 0.55, -73.385], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -217.5, 0]}, {"at": [62.492, 0.55, -68.198], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -222.5, 0]}, {"at": [68.198, 0.55, -62.492], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -227.5, 0]}, {"at": [73.385, 0.55, -56.31], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -232.5, 0]}, {"at": [78.014, 0.55, -49.7], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -237.5, 0]}, {"at": [82.049, 0.55, -42.712], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -242.5, 0]}, {"at": [85.459, 0.55, -35.398], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -247.5, 0]}, {"at": [88.219, 0.55, -27.815], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -252.5, 0]}, {"at": [90.307, 0.55, -20.021], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -257.5, 0]}, {"at": [91.709, 0.55, -12.074], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -262.5, 0]}, {"at": [92.412, 0.55, -4.035], "size": [8.172, 2.0, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, -267.5, 0]}, {"at": [89.914, 1.4, 3.926], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 87.5, 0], "surface": "concrete"}, {"at": [89.23, 1.4, 11.747], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 82.5, 0], "surface": "concrete"}, {"at": [87.867, 1.4, 19.48], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 77.5, 0], "surface": "concrete"}, {"at": [85.835, 1.4, 27.064], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 72.5, 0], "surface": "concrete"}, {"at": [83.149, 1.4, 34.442], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 67.5, 0], "surface": "concrete"}, {"at": [79.831, 1.4, 41.557], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 62.5, 0], "surface": "concrete"}, {"at": [75.905, 1.4, 48.357], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 57.5, 0], "surface": "concrete"}, {"at": [71.402, 1.4, 54.789], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 52.5, 0], "surface": "concrete"}, {"at": [66.355, 1.4, 60.803], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 47.5, 0], "surface": "concrete"}, {"at": [60.803, 1.4, 66.355], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 42.5, 0], "surface": "concrete"}, {"at": [54.789, 1.4, 71.402], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 37.5, 0], "surface": "concrete"}, {"at": [48.357, 1.4, 75.905], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 32.5, 0], "surface": "concrete"}, {"at": [41.557, 1.4, 79.831], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 27.5, 0], "surface": "concrete"}, {"at": [34.442, 1.4, 83.149], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 22.5, 0], "surface": "concrete"}, {"at": [27.064, 1.4, 85.835], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 17.5, 0], "surface": "concrete"}, {"at": [19.48, 1.4, 87.867], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 12.5, 0], "surface": "concrete"}, {"at": [11.747, 1.4, 89.23], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 7.5, 0], "surface": "concrete"}, {"at": [3.926, 1.4, 89.914], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, 2.5, 0], "surface": "concrete"}, {"at": [-3.926, 1.4, 89.914], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -2.5, 0], "surface": "concrete"}, {"at": [-11.747, 1.4, 89.23], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -7.5, 0], "surface": "concrete"}, {"at": [-19.48, 1.4, 87.867], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -12.5, 0], "surface": "concrete"}, {"at": [-27.064, 1.4, 85.835], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -17.5, 0], "surface": "concrete"}, {"at": [-34.442, 1.4, 83.149], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -22.5, 0], "surface": "concrete"}, {"at": [-41.557, 1.4, 79.831], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -27.5, 0], "surface": "concrete"}, {"at": [-48.357, 1.4, 75.905], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -32.5, 0], "surface": "concrete"}, {"at": [-54.789, 1.4, 71.402], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -37.5, 0], "surface": "concrete"}, {"at": [-60.803, 1.4, 66.355], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -42.5, 0], "surface": "concrete"}, {"at": [-66.355, 1.4, 60.803], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -47.5, 0], "surface": "concrete"}, {"at": [-71.402, 1.4, 54.789], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -52.5, 0], "surface": "concrete"}, {"at": [-75.905, 1.4, 48.357], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -57.5, 0], "surface": "concrete"}, {"at": [-79.831, 1.4, 41.557], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -62.5, 0], "surface": "concrete"}, {"at": [-83.149, 1.4, 34.442], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -67.5, 0], "surface": "concrete"}, {"at": [-85.835, 1.4, 27.064], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -72.5, 0], "surface": "concrete"}, {"at": [-87.867, 1.4, 19.48], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -77.5, 0], "surface": "concrete"}, {"at": [-89.23, 1.4, 11.747], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -82.5, 0], "surface": "concrete"}, {"at": [-89.914, 1.4, 3.926], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -87.5, 0], "surface": "concrete"}, {"at": [-89.914, 1.4, -3.926], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -92.5, 0], "surface": "concrete"}, {"at": [-89.23, 1.4, -11.747], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -97.5, 0], "surface": "concrete"}, {"at": [-87.867, 1.4, -19.48], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -102.5, 0], "surface": "concrete"}, {"at": [-85.835, 1.4, -27.064], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -107.5, 0], "surface": "concrete"}, {"at": [-83.149, 1.4, -34.442], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -112.5, 0], "surface": "concrete"}, {"at": [-79.831, 1.4, -41.557], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -117.5, 0], "surface": "concrete"}, {"at": [-75.905, 1.4, -48.357], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -122.5, 0], "surface": "concrete"}, {"at": [-71.402, 1.4, -54.789], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -127.5, 0], "surface": "concrete"}, {"at": [-66.355, 1.4, -60.803], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -132.5, 0], "surface": "concrete"}, {"at": [-60.803, 1.4, -66.355], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -137.5, 0], "surface": "concrete"}, {"at": [-54.789, 1.4, -71.402], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -142.5, 0], "surface": "concrete"}, {"at": [-48.357, 1.4, -75.905], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -147.5, 0], "surface": "concrete"}, {"at": [-41.557, 1.4, -79.831], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -152.5, 0], "surface": "concrete"}, {"at": [-34.442, 1.4, -83.149], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -157.5, 0], "surface": "concrete"}, {"at": [-27.064, 1.4, -85.835], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -162.5, 0], "surface": "concrete"}, {"at": [-19.48, 1.4, -87.867], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -167.5, 0], "surface": "concrete"}, {"at": [-11.747, 1.4, -89.23], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -172.5, 0], "surface": "concrete"}, {"at": [-3.926, 1.4, -89.914], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -177.5, 0], "surface": "concrete"}, {"at": [3.926, 1.4, -89.914], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -182.5, 0], "surface": "concrete"}, {"at": [11.747, 1.4, -89.23], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -187.5, 0], "surface": "concrete"}, {"at": [19.48, 1.4, -87.867], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -192.5, 0], "surface": "concrete"}, {"at": [27.064, 1.4, -85.835], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -197.5, 0], "surface": "concrete"}, {"at": [34.442, 1.4, -83.149], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -202.5, 0], "surface": "concrete"}, {"at": [41.557, 1.4, -79.831], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -207.5, 0], "surface": "concrete"}, {"at": [48.357, 1.4, -75.905], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -212.5, 0], "surface": "concrete"}, {"at": [54.789, 1.4, -71.402], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -217.5, 0], "surface": "concrete"}, {"at": [60.803, 1.4, -66.355], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -222.5, 0], "surface": "concrete"}, {"at": [66.355, 1.4, -60.803], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -227.5, 0], "surface": "concrete"}, {"at": [71.402, 1.4, -54.789], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -232.5, 0], "surface": "concrete"}, {"at": [75.905, 1.4, -48.357], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -237.5, 0], "surface": "concrete"}, {"at": [79.831, 1.4, -41.557], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -242.5, 0], "surface": "concrete"}, {"at": [83.149, 1.4, -34.442], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -247.5, 0], "surface": "concrete"}, {"at": [85.835, 1.4, -27.064], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -252.5, 0], "surface": "concrete"}, {"at": [87.867, 1.4, -19.48], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -257.5, 0], "surface": "concrete"}, {"at": [89.23, 1.4, -11.747], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -262.5, 0], "surface": "concrete"}, {"at": [89.914, 1.4, -3.926], "size": [8.272, 0.2, 5.4], "color": [0.5, 0.5, 0.48], "collision": true, "rotation": [0, -267.5, 0], "surface": "concrete"}])
-
-[node name="NorthPortal" parent="Z01_Mall/Props" instance=ExtResource("2")]
-position = Vector3(0.0, 1.5, -91.5)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 4.5, 0.0], "size": [24.0, 9.0, 10.0], "color": [0.55, 0.62, 0.66], "collision": true}, {"at": [0.0, 0.4, -9.5], "size": [24.0, 0.8, 9.0], "color": [0.62, 0.61, 0.58], "collision": true}])
-
-[node name="FireStair_0" parent="Z01_Mall/Props" instance=ExtResource("2")]
-position = Vector3(-84.1025, 1.5, -30.6108)
-rotation_degrees = Vector3(0.0, -110.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 12.0, 0.0], "size": [3.0, 24.0, 6.0], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}])
-
-[node name="FireStair_1" parent="Z01_Mall/Props" instance=ExtResource("2")]
-position = Vector3(84.1025, 1.5, -30.6108)
-rotation_degrees = Vector3(0.0, -250.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 12.0, 0.0], "size": [3.0, 24.0, 6.0], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}])
-
-[node name="Z02_Parking" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z02_Parking" type="Node3D"]
-
-[node name="Props" parent="Z02_Parking" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="ParkingDeck" parent="Z02_Parking/Buildings" instance=ExtResource("3")]
-position = Vector3(160.0, 0.15, -14.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(70, 110)
-height = 7.5
-simple_collision = true
-display_name = "Паркинг"
-levels = 3
-level_height = 3.75
-
-[node name="SkyBridge" parent="Z02_Parking/Props" instance=ExtResource("2")]
-position = Vector3(105.75, 0.0, -4.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 7.35, 0.0], "size": [38.5, 0.3, 4.5], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 10.7, 0.0], "size": [38.5, 0.25, 5.0], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [0.0, 8.05, -2.2], "size": [38.5, 1.1, 0.12], "color": [0.5, 0.6, 0.65], "collision": true, "surface": "glass"}, {"at": [0.0, 8.05, 2.2], "size": [38.5, 1.1, 0.12], "color": [0.5, 0.6, 0.65], "collision": true, "surface": "glass"}, {"at": [-13.25, 3.75, 0.0], "size": [0.8, 7.5, 0.8], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [13.25, 3.75, 0.0], "size": [0.8, 7.5, 0.8], "color": [0.62, 0.61, 0.58], "collision": true}])
-
-[node name="Car_0" parent="Z02_Parking/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(140.0, 0.05, -50.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
-model = "res://assets/zone01/models/sf_car_burned.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_1" parent="Z02_Parking/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(180.0, 0.05, -40.0)
-rotation_degrees = Vector3(0.0, 270.0, 0.0)
-model = "res://assets/zone01/models/sf_car_burned.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_2" parent="Z02_Parking/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(150.0, 0.05, 20.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-model = "res://assets/zone01/models/sf_car_burned.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_3" parent="Z02_Parking/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(176.0, 0.05, 30.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
-model = "res://assets/zone01/models/sf_vaz2104.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_4" parent="Z02_Parking/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(138.0, 0.05, 34.0)
-rotation_degrees = Vector3(0.0, 270.0, 0.0)
-model = "res://assets/zone01/models/sf_vaz2104.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Z03_Loading" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z03_Loading" type="Node3D"]
-
-[node name="Props" parent="Z03_Loading" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="PitStructure" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(0.0, 0.0, 0.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-30.5, -1.7, 112.0], "size": [49.4, 4.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [28.0, -1.7, 112.0], "size": [44.4, 4.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [50.0, -1.7, 140.0], "size": [56.4, 4.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 90, 0]}, {"at": [-55.0, -1.7, 140.0], "size": [56.4, 4.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 90, 0]}, {"at": [-32.5, -1.7, 168.0], "size": [45.4, 4.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [25.0, -1.7, 168.0], "size": [50.4, 4.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [-10.2, -1.6, 183.0], "size": [0.4, 4.8, 30.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.2, -1.6, 183.0], "size": [0.4, 4.8, 30.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-6.2, -2.0, 99.0], "size": [0.4, 4.2, 26.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [6.2, -2.0, 99.0], "size": [0.4, 4.2, 26.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 0.05, 99.0], "size": [13.2, 0.5, 24.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, -1.4, 86.3], "size": [12.0, 5.2, 0.3], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [-2.5, -4.04, 140.0], "size": [105.0, 0.2, 56.0], "color": [0.45, 0.45, 0.44], "collision": true}])
-
-[node name="DockPlatform" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(-2.0, -4.0, 116.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 0.6, 0.0], "size": [90.0, 1.2, 8.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 6.0, -1.0], "size": [90.0, 0.3, 12.0], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Truck_0" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(-40.0, -4.0, 134.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, -6.2], "size": [2.5, 2.9, 2.4], "color": [0.55, 0.2, 0.18], "collision": true, "surface": "metal"}, {"at": [0.0, 0.7, -3.0], "size": [2.4, 0.6, 4.0], "color": [0.36, 0.37, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 2.3, 2.2], "size": [2.5, 2.9, 12.0], "color": [0.7, 0.71, 0.7], "collision": true, "surface": "metal"}, {"at": [0.0, 0.55, 2.2], "size": [2.3, 0.5, 12.0], "color": [0.36, 0.37, 0.38], "collision": false}])
-
-[node name="Truck_1" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(-22.0, -4.0, 134.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, -6.2], "size": [2.5, 2.9, 2.4], "color": [0.55, 0.2, 0.18], "collision": true, "surface": "metal"}, {"at": [0.0, 0.7, -3.0], "size": [2.4, 0.6, 4.0], "color": [0.36, 0.37, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 2.3, 2.2], "size": [2.5, 2.9, 12.0], "color": [0.7, 0.71, 0.7], "collision": true, "surface": "metal"}, {"at": [0.0, 0.55, 2.2], "size": [2.3, 0.5, 12.0], "color": [0.36, 0.37, 0.38], "collision": false}])
-
-[node name="Truck_2" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(22.0, -4.0, 134.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, -6.2], "size": [2.5, 2.9, 2.4], "color": [0.55, 0.2, 0.18], "collision": true, "surface": "metal"}, {"at": [0.0, 0.7, -3.0], "size": [2.4, 0.6, 4.0], "color": [0.36, 0.37, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 2.3, 2.2], "size": [2.5, 2.9, 12.0], "color": [0.7, 0.71, 0.7], "collision": true, "surface": "metal"}, {"at": [0.0, 0.55, 2.2], "size": [2.3, 0.5, 12.0], "color": [0.36, 0.37, 0.38], "collision": false}])
-
-[node name="Truck_3" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(38.0, -4.0, 134.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, -6.2], "size": [2.5, 2.9, 2.4], "color": [0.55, 0.2, 0.18], "collision": true, "surface": "metal"}, {"at": [0.0, 0.7, -3.0], "size": [2.4, 0.6, 4.0], "color": [0.36, 0.37, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 2.3, 2.2], "size": [2.5, 2.9, 12.0], "color": [0.7, 0.71, 0.7], "collision": true, "surface": "metal"}, {"at": [0.0, 0.55, 2.2], "size": [2.3, 0.5, 12.0], "color": [0.36, 0.37, 0.38], "collision": false}])
-
-[node name="Container_0" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(30.0, -4.0, 158.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [0.0, 1.3, 0.0], "size": [6.06, 2.6, 2.44], "color": [0.36, 0.45, 0.5], "collision": true, "surface": "metal"}])
-
-[node name="Container_1" parent="Z03_Loading/Props" instance=ExtResource("2")]
-position = Vector3(-42.0, -4.0, 160.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [0.0, 1.3, 0.0], "size": [6.06, 2.6, 2.44], "color": [0.55, 0.27, 0.2], "collision": true, "surface": "metal"}])
-
-[node name="Z04_Plaza" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z04_Plaza" type="Node3D"]
-
-[node name="Props" parent="Z04_Plaza" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="PlazaPaving" parent="Z04_Plaza/Props" instance=ExtResource("2")]
-position = Vector3(4.0, 0.25, -128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "asphalt"
-pieces = Array[Dictionary]([{"at": [0.0, -0.05, 0.0], "size": [172.0, 0.2, 48.0], "color": [0.42, 0.42, 0.41], "collision": true}])
-
-[node name="BusShelter" parent="Z04_Plaza/Buildings" instance=ExtResource("3")]
-position = Vector3(52.0, 0.3, -150.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(10, 2.4)
-height = 2.8
-simple_collision = true
-display_name = ""
-
-[node name="Bus" parent="Z04_Plaza/Props" instance=ExtResource("2")]
-position = Vector3(66.0, 0.1542, -158.5)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [0.0, 1.7, 0.0], "size": [2.55, 2.9, 11.5], "color": [0.78, 0.62, 0.3], "collision": true, "surface": "metal"}, {"at": [0.0, 2.2, 0.0], "size": [2.6, 1.0, 10.6], "color": [0.2, 0.25, 0.28], "collision": false}])
-
-[node name="Kiosk_0" parent="Z04_Plaza/Buildings" instance=ExtResource("3")]
-position = Vector3(-60.0, 0.3, -140.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(4, 3)
-height = 2.9
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z04_Plaza/Buildings/Kiosk_0" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, 1.5)
-width = 1.6
-
-[node name="Kiosk_1" parent="Z04_Plaza/Buildings" instance=ExtResource("3")]
-position = Vector3(-46.0, 0.3, -140.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(4, 3)
-height = 2.9
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z04_Plaza/Buildings/Kiosk_1" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, 1.5)
-width = 1.6
-
-[node name="Kiosk_2" parent="Z04_Plaza/Buildings" instance=ExtResource("3")]
-position = Vector3(-32.0, 0.3, -140.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(4, 3)
-height = 2.9
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z04_Plaza/Buildings/Kiosk_2" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, 1.5)
-width = 1.6
-
-[node name="Kiosk_3" parent="Z04_Plaza/Buildings" instance=ExtResource("3")]
-position = Vector3(28.0, 0.3, -114.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(4, 3)
-height = 2.9
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z04_Plaza/Buildings/Kiosk_3" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, 1.5)
-width = 1.6
-
-[node name="Kiosk_4" parent="Z04_Plaza/Buildings" instance=ExtResource("3")]
-position = Vector3(42.0, 0.3, -114.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(4, 3)
-height = 2.9
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z04_Plaza/Buildings/Kiosk_4" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, 1.5)
-width = 1.6
-
-[node name="Car_0" parent="Z04_Plaza/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(-20.0, 0.2, -120.0)
-rotation_degrees = Vector3(0.0, 120.0, 0.0)
-model = "res://assets/zone01/models/sf_car_burned.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_1" parent="Z04_Plaza/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(12.0, 0.2, -136.0)
-rotation_degrees = Vector3(0.0, 185.0, 0.0)
-model = "res://assets/zone01/models/sf_vaz2104.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_2" parent="Z04_Plaza/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(-70.0, 0.2, -116.0)
-rotation_degrees = Vector3(0.0, 250.0, 0.0)
-model = "res://assets/zone01/models/sf_vaz2104.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_3" parent="Z04_Plaza/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(78.0, 0.2, -126.0)
-rotation_degrees = Vector3(0.0, 100.0, 0.0)
-model = "res://assets/zone01/models/sf_vaz2104.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_4" parent="Z04_Plaza/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(-5.0, 0.2635, -150.0)
-rotation_degrees = Vector3(0.0, 170.0, 0.0)
-model = "res://assets/zone01/models/sf_car_burned.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Blocks_0" parent="Z04_Plaza/Props" instance=ExtResource("2")]
-position = Vector3(0.0, 0.3098, -158.0)
-rotation_degrees = Vector3(0.0, -0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-8.571, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-5.714, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-2.857, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [2.857, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [5.714, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.571, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}])
-
-[node name="Blocks_1" parent="Z04_Plaza/Props" instance=ExtResource("2")]
-position = Vector3(-34.0, 0.2, -107.0)
-rotation_degrees = Vector3(0.0, -26.5651, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-5.367, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-2.683, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [2.683, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [5.367, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}])
-
-[node name="Z07_Fuel" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z07_Fuel" type="Node3D"]
-
-[node name="Props" parent="Z07_Fuel" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="Apron" parent="Z07_Fuel/Props" instance=ExtResource("2")]
-position = Vector3(230.0, 0.2, -126.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "asphalt"
-pieces = Array[Dictionary]([{"at": [0.0, -0.05, 0.0], "size": [100.0, 0.2, 40.0], "color": [0.4, 0.4, 0.39], "collision": true}])
-
-[node name="Canopy" parent="Z07_Fuel/Buildings" instance=ExtResource("3")]
-position = Vector3(226.0, 0.25, -128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(30, 18)
-height = 5.5
-simple_collision = true
-display_name = "АЗС"
-
-[node name="Pump_0" parent="Z07_Fuel/Props" instance=ExtResource("2")]
-position = Vector3(216.0, 0.15, -128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 0.15, 0.0], "size": [1.2, 0.3, 6.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.1, -1.5], "size": [0.8, 1.9, 0.5], "color": [0.75, 0.2, 0.15], "collision": true}, {"at": [0.0, 1.1, 1.5], "size": [0.8, 1.9, 0.5], "color": [0.75, 0.2, 0.15], "collision": true}])
-
-[node name="Pump_1" parent="Z07_Fuel/Props" instance=ExtResource("2")]
-position = Vector3(226.0, 0.15, -128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 0.15, 0.0], "size": [1.2, 0.3, 6.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.1, -1.5], "size": [0.8, 1.9, 0.5], "color": [0.75, 0.2, 0.15], "collision": true}, {"at": [0.0, 1.1, 1.5], "size": [0.8, 1.9, 0.5], "color": [0.75, 0.2, 0.15], "collision": true}])
-
-[node name="Pump_2" parent="Z07_Fuel/Props" instance=ExtResource("2")]
-position = Vector3(236.0, 0.15, -128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 0.15, 0.0], "size": [1.2, 0.3, 6.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.1, -1.5], "size": [0.8, 1.9, 0.5], "color": [0.75, 0.2, 0.15], "collision": true}, {"at": [0.0, 1.1, 1.5], "size": [0.8, 1.9, 0.5], "color": [0.75, 0.2, 0.15], "collision": true}])
-
-[node name="Shop" parent="Z07_Fuel/Buildings" instance=ExtResource("3")]
-position = Vector3(196.0, 0.25, -130.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(14, 9)
-height = 4.0
-simple_collision = true
-display_name = "Магазин АЗС"
-
-[node name="Door_0" parent="Z07_Fuel/Buildings/Shop" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, 4.5)
-width = 1.6
-
-[node name="Facade" parent="Z07_Fuel/Buildings/Shop" type="Node3D"]
-script = ExtResource("5")
-floors = 1
-style = "service"
-window_pitch = 4.5
-
-[node name="TyreShop" parent="Z07_Fuel/Buildings" instance=ExtResource("3")]
-position = Vector3(262.0, 0.25, -124.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(16, 11)
-height = 4.5
-simple_collision = true
-display_name = "Шиномонтаж"
-
-[node name="Door_0" parent="Z07_Fuel/Buildings/TyreShop" instance=ExtResource("4")]
-position = Vector3(-3.2, 0.0, 5.5)
-width = 1.6
-
-[node name="Door_1" parent="Z07_Fuel/Buildings/TyreShop" instance=ExtResource("4")]
-position = Vector3(2.4, 0.0, 5.5)
-width = 1.6
-
-[node name="Facade" parent="Z07_Fuel/Buildings/TyreShop" type="Node3D"]
-script = ExtResource("5")
-floors = 1
-style = "service"
-window_pitch = 4.5
-
-[node name="Car_0" parent="Z07_Fuel/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(248.0, 0.15, -112.0)
-rotation_degrees = Vector3(0.0, 160.0, 0.0)
-model = "res://assets/zone01/models/sf_vaz2104.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
-
-[node name="Car_1" parent="Z07_Fuel/Props" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(208.0, 0.15, -112.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
-model = "res://assets/zone01/models/sf_vaz2104.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
-materials_dir = ""
+[node name="Z12_Ravine" parent="." instance=ExtResource("3")]
 
 [node name="Z08_Garages" parent="." type="Node3D"]
 
 [node name="Buildings" parent="Z08_Garages" type="Node3D"]
 
-[node name="Props" parent="Z08_Garages" type="Node3D" groups=["urban_prop_batches"]]
-
 [node name="Row0_Block0" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(268.0, 0.3869, -81.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
+position = Vector3(182.0, -0.05, -121.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -549,8 +117,8 @@ materials_dir = ""
 
 [node name="Row0_Block1" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(268.0, 0.2708, -59.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
+position = Vector3(182.0, -0.05, -143.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -558,8 +126,8 @@ materials_dir = ""
 
 [node name="Row0_Block2" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(268.0, 0.4568, -37.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
+position = Vector3(182.0, -0.05, -165.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -567,8 +135,8 @@ materials_dir = ""
 
 [node name="Row0_Block3" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(268.0, 0.7572, -15.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
+position = Vector3(182.0, -0.05, -187.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -576,8 +144,8 @@ materials_dir = ""
 
 [node name="Row0_Block4" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(268.0, 0.613, 7.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
+position = Vector3(182.0, -0.05, -209.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -585,8 +153,8 @@ materials_dir = ""
 
 [node name="Row1_Block0" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(290.0, 2.3861, -81.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
+position = Vector3(199.0, -0.05, -121.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -594,8 +162,8 @@ materials_dir = ""
 
 [node name="Row1_Block1" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(290.0, 2.6297, -59.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
+position = Vector3(199.0, -0.05, -143.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -603,8 +171,8 @@ materials_dir = ""
 
 [node name="Row1_Block2" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(290.0, 2.7631, -37.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
+position = Vector3(199.0, -0.05, -165.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -612,8 +180,8 @@ materials_dir = ""
 
 [node name="Row1_Block3" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(290.0, 2.7865, -15.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
+position = Vector3(199.0, -0.05, -187.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
@@ -621,384 +189,9 @@ materials_dir = ""
 
 [node name="Row1_Block4" parent="Z08_Garages/Buildings" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(290.0, 2.6415, 7.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row2_Block0" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(312.0, 4.6633, -81.0)
+position = Vector3(199.0, -0.05, -209.0)
 rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/sf_garage_row.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
 materials_dir = ""
-
-[node name="Row2_Block1" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(312.0, 4.9378, -59.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row2_Block2" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(312.0, 4.8899, -37.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row2_Block3" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(312.0, 4.969, -15.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row2_Block4" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(312.0, 4.9296, 7.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="GarageGateL" parent="Z08_Garages/Props" instance=ExtResource("2")]
-position = Vector3(262.0, 0.3592, -98.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.0, 0.0], "size": [0.2, 2.0, 8.0], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}])
-
-[node name="Fence_E" parent="Z08_Garages/Props" instance=ExtResource("2")]
-position = Vector3(325.0, 5.5658, -40.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-54.0, 0.813, 0.0], "size": [12.03, 2.831, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [-42.0, 1.03, 0.0], "size": [12.03, 2.802, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [-30.0, 1.148, 0.0], "size": [12.03, 2.642, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [-18.0, 1.051, 0.0], "size": [12.03, 2.75, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [-6.0, 0.938, 0.0], "size": [12.03, 2.676, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [6.0, 0.955, 0.0], "size": [12.03, 2.71, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [18.0, 1.077, 0.0], "size": [12.03, 2.733, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [30.0, 1.17, 0.0], "size": [12.03, 2.653, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [42.0, 1.225, 0.0], "size": [12.03, 2.684, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}, {"at": [54.0, 1.218, 0.0], "size": [12.03, 2.773, 0.2], "color": [0.6, 0.6, 0.58], "collision": true, "surface": "concrete"}])
-
-[node name="Z09_Construction" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z09_Construction" type="Node3D"]
-
-[node name="Props" parent="Z09_Construction" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="Frame" parent="Z09_Construction/Props" instance=ExtResource("2")]
-position = Vector3(236.0, 0.3326, 96.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 0.0, 0.0], "size": [36.0, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 1.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 1.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 1.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 1.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 1.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 1.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 1.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 1.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 1.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 1.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 1.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 1.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.5, 10.85], "size": [32.0, 3.0, 0.3], "color": [0.58, 0.45, 0.4], "collision": true}, {"at": [0.0, 3.0, 0.0], "size": [36.0, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 4.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 4.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 4.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 4.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 4.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 4.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 4.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 4.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 4.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 4.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 4.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 4.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 4.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 4.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 4.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 4.5, 10.85], "size": [32.0, 3.0, 0.3], "color": [0.58, 0.45, 0.4], "collision": true}, {"at": [0.0, 6.0, 0.0], "size": [36.0, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 7.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 7.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 7.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 7.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 7.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 7.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 7.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 7.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 7.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 7.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 7.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 7.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 7.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 7.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 7.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 7.5, 10.85], "size": [32.0, 3.0, 0.3], "color": [0.58, 0.45, 0.4], "collision": true}, {"at": [0.0, 9.0, 0.0], "size": [36.0, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 10.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 10.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 10.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 10.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 10.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 10.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 10.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 10.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 10.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 10.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 10.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 10.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 10.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 10.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 10.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 12.0, 0.0], "size": [36.0, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 13.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 13.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 13.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 13.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 13.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 13.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 13.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 13.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 13.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 13.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 13.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 13.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 13.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 13.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 13.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 15.0, 0.0], "size": [36.0, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 16.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 16.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 16.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 16.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 16.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 16.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 16.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 16.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 16.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 16.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 16.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 16.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 16.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 16.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 16.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 18.0, 0.0], "size": [36.0, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 19.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 19.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 19.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 19.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 19.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 19.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 19.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 19.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 19.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 19.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 19.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 19.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 19.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 19.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 19.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 21.0, 0.0], "size": [25.2, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 22.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 22.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 22.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 22.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 22.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 22.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 22.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 22.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 22.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 22.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 22.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 22.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 22.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 22.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 22.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 24.0, 0.0], "size": [25.2, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 25.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 25.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-17.6, 25.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 25.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 25.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-8.8, 25.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 25.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 25.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 25.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 25.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 25.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [8.8, 25.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 25.5, -10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 25.5, 0.0], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [17.6, 25.5, 10.6], "size": [0.45, 3.0, 0.45], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 27.0, 0.0], "size": [25.2, 0.25, 22.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [14.5, 13.5, 0.0], "size": [5.0, 27.0, 6.0], "color": [0.55, 0.55, 0.53], "collision": true}])
-
-[node name="TowerCrane" parent="Z09_Construction/Props" instance=ExtResource("2")]
-position = Vector3(262.0, 0.1844, 80.0)
-rotation_degrees = Vector3(0.0, -25.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 15.0, 0.0], "size": [2.0, 30.0, 2.0], "color": [0.85, 0.7, 0.15], "collision": true, "surface": "metal"}, {"at": [12.0, 30.6, 0.0], "size": [44.0, 1.2, 1.2], "color": [0.85, 0.7, 0.15], "collision": true, "surface": "metal"}, {"at": [-9.0, 30.6, 0.0], "size": [14.0, 1.2, 1.6], "color": [0.85, 0.7, 0.15], "collision": true, "surface": "metal"}, {"at": [-14.0, 29.5, 0.0], "size": [3.0, 2.5, 3.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [1.6, 28.8, 0.0], "size": [2.2, 2.2, 2.2], "color": [0.8, 0.75, 0.6], "collision": true, "surface": "metal"}, {"at": [0.0, 0.5, 0.0], "size": [6.0, 1.0, 6.0], "color": [0.62, 0.61, 0.58], "collision": true}])
-
-[node name="Cabin_0" parent="Z09_Construction/Buildings" instance=ExtResource("3")]
-position = Vector3(206.0, 0.3457, 116.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(6, 2.5)
-height = 2.6
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z09_Construction/Buildings/Cabin_0" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, -1.25)
-width = 1.6
-
-[node name="Cabin_1" parent="Z09_Construction/Buildings" instance=ExtResource("3")]
-position = Vector3(206.0, 0.3417, 104.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(6, 2.5)
-height = 2.6
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z09_Construction/Buildings/Cabin_1" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, -1.25)
-width = 1.6
-
-[node name="Cabin_2" parent="Z09_Construction/Buildings" instance=ExtResource("3")]
-position = Vector3(276.0, 0.288, 122.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
-size = Vector2(6, 2.5)
-height = 2.6
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z09_Construction/Buildings/Cabin_2" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, -1.25)
-width = 1.6
-
-[node name="Cabin_3" parent="Z09_Construction/Buildings" instance=ExtResource("3")]
-position = Vector3(212.0, 0.3517, 76.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(6, 2.5)
-height = 2.6
-simple_collision = true
-display_name = ""
-
-[node name="Door_0" parent="Z09_Construction/Buildings/Cabin_3" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, -1.25)
-width = 1.6
-
-[node name="SiteFence_S" parent="Z09_Construction/Props" instance=ExtResource("2")]
-position = Vector3(240.0, 0.4691, 132.0)
-rotation_degrees = Vector3(0.0, -0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-36.0, 0.819, 0.0], "size": [12.03, 2.688, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-24.0, 0.879, 0.0], "size": [12.03, 2.632, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-12.0, 0.904, 0.0], "size": [12.03, 2.623, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [0.0, 0.908, 0.0], "size": [12.03, 2.615, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [12.0, 0.895, 0.0], "size": [12.03, 2.66, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [24.0, 0.96, 0.0], "size": [12.03, 2.789, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [36.0, 1.305, 0.0], "size": [12.03, 3.101, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="SiteFence_W" parent="Z09_Construction/Props" instance=ExtResource("2")]
-position = Vector3(198.0, 0.2114, 101.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-25.833, 0.875, 0.0], "size": [10.363, 2.647, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-15.5, 0.837, 0.0], "size": [10.363, 2.631, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-5.167, 0.861, 0.0], "size": [10.363, 2.68, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [5.167, 0.923, 0.0], "size": [10.363, 2.647, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [15.5, 0.926, 0.0], "size": [10.363, 2.631, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [25.833, 0.974, 0.0], "size": [10.363, 2.718, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Z10_Hill" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z10_Hill" type="Node3D"]
-
-[node name="Props" parent="Z10_Hill" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="Mast" parent="Z10_Hill/Buildings" instance=ExtResource("3")]
-position = Vector3(378.0, 16.0, 176.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(4, 4)
-height = 25
-simple_collision = true
-display_name = "Ретранслятор"
-
-[node name="EquipmentShelter" parent="Z10_Hill/Buildings" instance=ExtResource("3")]
-position = Vector3(356.0, 16.05, 184.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(6, 4)
-height = 3.0
-simple_collision = true
-display_name = "Аппаратная"
-
-[node name="Door_0" parent="Z10_Hill/Buildings/EquipmentShelter" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, -2.0)
-width = 1.6
-
-[node name="Facade" parent="Z10_Hill/Buildings/EquipmentShelter" type="Node3D"]
-script = ExtResource("5")
-floors = 1
-style = "service"
-window_pitch = 4.5
-
-[node name="Pillbox" parent="Z10_Hill/Props" instance=ExtResource("2")]
-position = Vector3(350.0, 15.9939, 202.0)
-rotation_degrees = Vector3(0.0, 200.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 0.9, 0.0], "size": [6.0, 2.2, 6.0], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 1.1, -3.05], "size": [2.0, 0.3, 0.2], "color": [0.1, 0.1, 0.1], "collision": false}])
-
-[node name="Fence_0" parent="Z10_Hill/Props" instance=ExtResource("2")]
-position = Vector3(366.0, 15.2847, 162.0)
-rotation_degrees = Vector3(0.0, -0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-14.25, 0.506, 0.0], "size": [9.53, 3.013, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-4.75, 0.806, 0.0], "size": [9.53, 2.787, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [4.75, 1.174, 0.0], "size": [9.53, 3.149, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [14.25, 1.06, 0.0], "size": [9.53, 3.124, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Fence_1" parent="Z10_Hill/Props" instance=ExtResource("2")]
-position = Vector3(385.0, 15.9993, 184.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-16.5, 0.458, 0.0], "size": [11.03, 3.349, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-5.5, 1.078, 0.0], "size": [11.03, 3.091, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [5.5, 0.912, 0.0], "size": [11.03, 2.625, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [16.5, 0.845, 0.0], "size": [11.03, 3.282, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Fence_2" parent="Z10_Hill/Props" instance=ExtResource("2")]
-position = Vector3(371.0, 16.0174, 206.0)
-rotation_degrees = Vector3(0.0, -180.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-9.333, 0.71, 0.0], "size": [9.363, 3.049, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [0.0, 0.908, 0.0], "size": [9.363, 2.662, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [9.333, 0.952, 0.0], "size": [9.363, 2.625, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Fence_3" parent="Z10_Hill/Props" instance=ExtResource("2")]
-position = Vector3(347.0, 15.517, 170.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-4.0, 0.484, 0.0], "size": [8.03, 3.432, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [4.0, 1.142, 0.0], "size": [8.03, 3.083, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Z11_Substation" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z11_Substation" type="Node3D"]
-
-[node name="Props" parent="Z11_Substation" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="Fence_0" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(108.0, 0.3, 108.0)
-rotation_degrees = Vector3(0.0, -0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-38.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-27.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-16.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-5.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [5.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [16.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [27.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [38.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Fence_1" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(152.0, 0.3, 137.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-23.2, 1.1, 0.0], "size": [11.63, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-11.6, 1.1, 0.0], "size": [11.63, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [0.0, 1.1, 0.0], "size": [11.63, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [11.6, 1.1, 0.0], "size": [11.63, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [23.2, 1.175, 0.0], "size": [11.63, 3.15, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Fence_2" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(108.0, 0.4496, 166.0)
-rotation_degrees = Vector3(0.0, -180.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-38.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-27.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-16.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-5.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [5.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [16.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [27.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [38.5, 1.1, 0.0], "size": [11.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Fence_3" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(64.0, 0.3, 142.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-18.0, 1.175, 0.0], "size": [12.03, 3.15, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-6.0, 1.1, 0.0], "size": [12.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [6.0, 1.1, 0.0], "size": [12.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [18.0, 1.1, 0.0], "size": [12.03, 3.0, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="ControlRoom" parent="Z11_Substation/Buildings" instance=ExtResource("3")]
-position = Vector3(76.0, 0.4, 156.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(16, 8)
-height = 4.0
-simple_collision = true
-display_name = "Щитовая"
-
-[node name="Door_0" parent="Z11_Substation/Buildings/ControlRoom" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, -4.0)
-width = 1.6
-
-[node name="Facade" parent="Z11_Substation/Buildings/ControlRoom" type="Node3D"]
-script = ExtResource("5")
-floors = 1
-style = "service"
-window_pitch = 4.5
-
-[node name="Transformer_0" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(92.0, 0.3, 128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, 0.0], "size": [4.0, 3.2, 3.0], "color": [0.38, 0.42, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 4.2, 0.0], "size": [3.0, 2.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Transformer_1" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(107.0, 0.3, 128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, 0.0], "size": [4.0, 3.2, 3.0], "color": [0.38, 0.42, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 4.2, 0.0], "size": [3.0, 2.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Transformer_2" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(122.0, 0.3, 128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, 0.0], "size": [4.0, 3.2, 3.0], "color": [0.38, 0.42, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 4.2, 0.0], "size": [3.0, 2.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Transformer_3" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(137.0, 0.3, 128.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.6, 0.0], "size": [4.0, 3.2, 3.0], "color": [0.38, 0.42, 0.38], "collision": true, "surface": "metal"}, {"at": [0.0, 4.2, 0.0], "size": [3.0, 2.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Portal_0" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(84.0, 0.3, 146.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 5.0, 0.0], "size": [0.4, 10.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [0.0, 9.6, 0.0], "size": [0.3, 0.3, 8.0], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Portal_1" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(96.0, 0.3, 146.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 5.0, 0.0], "size": [0.4, 10.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [0.0, 9.6, 0.0], "size": [0.3, 0.3, 8.0], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Portal_2" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(108.0, 0.3, 146.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 5.0, 0.0], "size": [0.4, 10.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [0.0, 9.6, 0.0], "size": [0.3, 0.3, 8.0], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Portal_3" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(120.0, 0.3, 146.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 5.0, 0.0], "size": [0.4, 10.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [0.0, 9.6, 0.0], "size": [0.3, 0.3, 8.0], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Portal_4" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(132.0, 0.3, 146.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 5.0, 0.0], "size": [0.4, 10.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [0.0, 9.6, 0.0], "size": [0.3, 0.3, 8.0], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="Portal_5" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(144.0, 0.3, 146.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 5.0, 0.0], "size": [0.4, 10.0, 0.4], "color": [0.42, 0.45, 0.46], "collision": true, "surface": "metal"}, {"at": [0.0, 9.6, 0.0], "size": [0.3, 0.3, 8.0], "color": [0.42, 0.45, 0.46], "collision": false, "surface": "metal"}])
-
-[node name="PondWalls_0" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(0.0, 0.6, 0.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [82.0, 1.8, 178.0], "size": [40.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [102.0, 1.8, 190.0], "size": [24.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 90, 0]}, {"at": [82.0, 1.8, 202.0], "size": [40.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [62.0, 1.8, 190.0], "size": [24.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 90, 0]}])
-
-[node name="PondWalls_1" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(0.0, 0.6, 0.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [128.0, 1.8, 178.0], "size": [40.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [148.0, 1.8, 190.0], "size": [24.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 90, 0]}, {"at": [128.0, 1.8, 202.0], "size": [40.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 0, 0]}, {"at": [108.0, 1.8, 190.0], "size": [24.4, 2.6, 0.4], "color": [0.62, 0.61, 0.58], "collision": true, "rotation": [0, 90, 0]}])
-
-[node name="PondsFence_N" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(105.0, 3.0, 172.0)
-rotation_degrees = Vector3(0.0, -0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-43.556, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-32.667, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-21.778, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-10.889, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [0.0, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [10.889, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [21.778, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [32.667, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [43.556, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="PondsFence_S" parent="Z11_Substation/Props" instance=ExtResource("2")]
-position = Vector3(105.0, 3.0, 208.0)
-rotation_degrees = Vector3(0.0, -0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-43.556, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-32.667, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-21.778, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [-10.889, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [0.0, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [10.889, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [21.778, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [32.667, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}, {"at": [43.556, 0.9, 0.0], "size": [10.919, 2.6, 0.08], "color": [0.42, 0.44, 0.44], "collision": true, "surface": "metal"}])
-
-[node name="Z14_Checkpoint" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z14_Checkpoint" type="Node3D"]
-
-[node name="Props" parent="Z14_Checkpoint" type="Node3D" groups=["urban_prop_batches"]]
-
-[node name="Booth" parent="Z14_Checkpoint/Buildings" instance=ExtResource("3")]
-position = Vector3(404.0, 5.8896, 18.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-size = Vector2(3, 3)
-height = 2.7
-simple_collision = true
-display_name = "Блокпост"
-
-[node name="Door_0" parent="Z14_Checkpoint/Buildings/Booth" instance=ExtResource("4")]
-position = Vector3(0.0, 0.0, 1.5)
-width = 1.6
-
-[node name="Tower" parent="Z14_Checkpoint/Props" instance=ExtResource("2")]
-position = Vector3(416.0, 5.8112, 14.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "metal"
-pieces = Array[Dictionary]([{"at": [-1.4, 3.0, -1.4], "size": [0.2, 6.0, 0.2], "color": [0.42, 0.45, 0.46], "collision": true}, {"at": [1.4, 3.0, -1.4], "size": [0.2, 6.0, 0.2], "color": [0.42, 0.45, 0.46], "collision": true}, {"at": [-1.4, 3.0, 1.4], "size": [0.2, 6.0, 0.2], "color": [0.42, 0.45, 0.46], "collision": true}, {"at": [1.4, 3.0, 1.4], "size": [0.2, 6.0, 0.2], "color": [0.42, 0.45, 0.46], "collision": true}, {"at": [0.0, 6.0, 0.0], "size": [3.4, 0.2, 3.4], "color": [0.4, 0.38, 0.3], "collision": true}, {"at": [0.0, 7.3, 0.0], "size": [3.6, 2.6, 3.6], "color": [0.42, 0.4, 0.32], "collision": false}, {"at": [0.0, 8.7, 0.0], "size": [4.0, 0.2, 4.0], "color": [0.42, 0.45, 0.46], "collision": false}])
-
-[node name="Barrier" parent="Z14_Checkpoint/Props" instance=ExtResource("2")]
-position = Vector3(398.0, 5.7881, 26.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 0.55, 0.0], "size": [0.4, 1.1, 0.4], "color": [0.8, 0.2, 0.15], "collision": true}, {"at": [0.0, 1.0, 4.5], "size": [0.12, 0.12, 9.0], "color": [0.9, 0.9, 0.85], "collision": false}])
-
-[node name="Blocks_0" parent="Z14_Checkpoint/Props" instance=ExtResource("2")]
-position = Vector3(388.0, 5.8063, 25.5)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-4.125, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [-1.375, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [1.375, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [4.125, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}])
-
-[node name="Blocks_1" parent="Z14_Checkpoint/Props" instance=ExtResource("2")]
-position = Vector3(420.0, 5.7981, 35.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
-surface = "concrete"
-pieces = Array[Dictionary]([{"at": [-3.333, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [0.0, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}, {"at": [3.333, 0.4, 0.0], "size": [2.3, 0.8, 0.9], "color": [0.62, 0.61, 0.58], "collision": true}])
-
-[node name="Z06_Market" parent="." instance=ExtResource("nw_market")]
-
-[node name="Z12_Ravine" parent="." instance=ExtResource("nw_houses")]

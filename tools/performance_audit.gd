@@ -84,7 +84,7 @@ func _run() -> void:
 				{"name": "atrium", "pos": SectorBuilder.polar(-80.0, 35.0) + Vector3.UP * 0.05, "yaw": 0.0}]
 		"zone01":
 			spots = [{"name": "courtyard", "pos": Vector3(-194, 0, -90), "yaw": 0.0},
-				{"name": "mall", "pos": Vector3(0, 0, -130), "yaw": PI}]
+				{"name": "center", "pos": Vector3(-10, 0, -60), "yaw": PI}]
 		"zone02":
 			spots = [{"name": "residential", "pos": Vector3(-515, 0, -365), "yaw": 0.0},
 				{"name": "station", "pos": Vector3(400, 0, 240), "yaw": PI}]

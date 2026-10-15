@@ -84,7 +84,7 @@ func _ready() -> void:
 	_path("второй дом → мансарда", second_house.to_global(Vector3(-2.1,.27,3.2)), second_house.to_global(Vector3(-.7,3.1,.8)))
 	_path("дома → мост", Vector3(-305, .5, 35), Vector3(-360, .5, 36))
 	_path("мост → эвакуация", Vector3(-360,.5,36), Vector3(-386,.3705,40))
-	_path("двор → путепровод", Vector3(-196,.5,-62), Vector3(0,.32,-206))
+	_path("двор → лесная дорога", Vector3(-196,.5,-62), Vector3(-340,.3,-300), 200000)
 	if OS.get_environment("NW_SKIP_WALK") == "1":
 		print("zone01_nw_test: checks=", checks, " failures=", failures)
 		get_tree().quit(1 if failures else 0)
@@ -136,8 +136,18 @@ func _has_standing_place(container: LootContainer) -> bool:
 	return false
 
 
-func _path(title: String, from: Vector3, to: Vector3) -> void:
+## max_polygons > 0 — длинный маршрут через лес и болото: связность без предела поиска агента (4096).
+func _path(title: String, from: Vector3, to: Vector3, max_polygons: int = 0) -> void:
 	var path: PackedVector3Array = NavigationServer3D.map_get_path(map, from, to, true)
+	if max_polygons > 0:
+		var query := NavigationPathQueryParameters3D.new()
+		query.map = map
+		query.start_position = from
+		query.target_position = to
+		query.path_search_max_polygons = max_polygons
+		var result := NavigationPathQueryResult3D.new()
+		NavigationServer3D.query_path(query, result)
+		path = result.path
 	var reached: bool = not path.is_empty() and path[-1].distance_to(to) < .8
 	check(title, reached)
 	if not reached:
