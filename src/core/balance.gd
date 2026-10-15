@@ -1001,8 +1001,8 @@ const GRENADE_AIM := {"step": 0.03, "max_t": 3.0, "width": 0.05}
 ## Граната в руках: удержание увеличивает силу, запал начинается только после броска.
 const GRENADE_HAND := {"equip_sec": 0.35, "prepare_sec": 0.28, "charge_sec": 1.2,
 	"recover_sec": 0.65, "over_min": 6.0, "over_max": 15.0, "over_lift": 0.35,
-	"under_min": 3.0, "under_max": 6.5, "under_lift": 0.6,
-	"over_drop": 0.08, "under_drop": 0.55, "release_forward": 0.28,
+	"under_min": 4.5, "under_max": 9.8, "under_lift": 0.72,
+	"over_drop": 0.08, "under_drop": 0.25, "release_forward": 0.28,
 	"spawn_radius": 0.036, "wall_margin": 0.06,
 	"pose": Vector3(0.13, -0.10, -0.38), "pose_charge": Vector3(0.035, 0.025, 0.02),
 	"pose_under": Vector3(0.0, -0.04, 0.025)}

@@ -1,0 +1,127 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://tools/grenade_window_test.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="WallMaterial"]
+albedo_color = Color(0.44, 0.48, 0.52, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial"]
+albedo_color = Color(0.2, 0.24, 0.27, 1)
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(24, 0.2, 24)
+
+[sub_resource type="BoxMesh" id="FloorMesh"]
+material = SubResource("GroundMaterial")
+size = Vector3(24, 0.2, 24)
+
+[sub_resource type="BoxShape3D" id="LowerShape"]
+size = Vector3(8, 2.6, 0.24)
+
+[sub_resource type="BoxMesh" id="LowerMesh"]
+material = SubResource("WallMaterial")
+size = Vector3(8, 2.6, 0.24)
+
+[sub_resource type="BoxShape3D" id="SideShape"]
+size = Vector3(3.2, 2.1, 0.24)
+
+[sub_resource type="BoxMesh" id="SideMesh"]
+material = SubResource("WallMaterial")
+size = Vector3(3.2, 2.1, 0.24)
+
+[sub_resource type="BoxShape3D" id="LintelShape"]
+size = Vector3(1.6, 0.85, 0.24)
+
+[sub_resource type="BoxMesh" id="LintelMesh"]
+material = SubResource("WallMaterial")
+size = Vector3(1.6, 0.85, 0.24)
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
+sky_top_color = Color(0.18, 0.34, 0.53, 1)
+sky_horizon_color = Color(0.58, 0.68, 0.76, 1)
+ground_bottom_color = Color(0.2, 0.22, 0.25, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMaterial")
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.7, 0.8, 1, 1)
+ambient_light_energy = 0.6
+tonemap_mode = 2
+
+[node name="GrenadeWindowTest" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-40, -150, 0)
+light_energy = 1.5
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.1, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("FloorMesh")
+
+[node name="Window" type="Node3D" parent="."]
+
+[node name="Lower" type="StaticBody3D" parent="Window" groups=["grenade_window_frame"]]
+position = Vector3(0, 0.8, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Window/Lower"]
+shape = SubResource("LowerShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Window/Lower"]
+mesh = SubResource("LowerMesh")
+
+[node name="Left" type="StaticBody3D" parent="Window" groups=["grenade_window_frame"]]
+position = Vector3(-2.4, 3.15, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Window/Left"]
+shape = SubResource("SideShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Window/Left"]
+mesh = SubResource("SideMesh")
+
+[node name="Right" type="StaticBody3D" parent="Window" groups=["grenade_window_frame"]]
+position = Vector3(2.4, 3.15, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Window/Right"]
+shape = SubResource("SideShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Window/Right"]
+mesh = SubResource("SideMesh")
+
+[node name="Lintel" type="StaticBody3D" parent="Window" groups=["grenade_window_frame"]]
+position = Vector3(0, 3.775, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Window/Lintel"]
+shape = SubResource("LintelShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Window/Lintel"]
+mesh = SubResource("LintelMesh")
+
+[node name="Aim" type="Marker3D" parent="Window"]
+position = Vector3(0, 2.6, 0)
+
+[node name="SillTop" type="Marker3D" parent="Window"]
+position = Vector3(0, 2.1, 0)
+
+[node name="OpeningTop" type="Marker3D" parent="Window"]
+position = Vector3(0, 3.35, 0)
+
+[node name="Observer" type="Camera3D" parent="."]
+position = Vector3(2.5, 2.5, -3)
+fov = 65.0
+near = 0.01
