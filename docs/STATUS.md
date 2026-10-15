@@ -5083,3 +5083,7 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
 - Подготовлены хват и извлечение чеки; отдельных клипов замаха и выпуска пока нет.
   Рецепт — `tools/prepare_grenade_hands.py`, состояние —
   `assets/models/weapons/grenade/asset-state.md`, происхождение — `assets/CREDITS.md`.
+- По следующей просьбе владельца переданы `Grenade_VERAS_Grip_Edit_v01.blend` и
+  `Grenade_VERAS_Pin_Edit_v01.blend` в `_asset_src/grenade_hands/` — две статичные копии
+  для корректировки хвата: IK сохранена, ключи отвязаны, карты встроены, Pose Mode,
+  памятка внутри файлов. Повторное открытие обеих копий: 16/16 PASS.

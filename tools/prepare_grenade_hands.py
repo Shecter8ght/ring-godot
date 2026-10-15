@@ -1,6 +1,6 @@
 """Граната с теми же перчатками/ригом FPS_ArmsRig, что у ВЕРАС-54.
 
-Blender --background --factory-startup --python-exit-code 1 --python tools/prepare_grenade_hands.py -- build|export|stills|audit
+Blender --background --factory-startup --python-exit-code 1 --python tools/prepare_grenade_hands.py -- build|export|stills|audit|edit_files
 Оба исходника только читаются. Производный Blender сохраняет IK и редактируемый хват.
 В игру экспортируются только руки; игровая граната и её чека остаются прежними.
 """
@@ -437,6 +437,114 @@ def stills():
         scene.render.filepath=str(WORK/f'hands_{index:02d}.png')
         bpy.ops.render.render(write_still=True)
         log('STILL',index)
+
+
+def edit_files():
+    """Две статичные копии для ручной правки. Повторный запуск не затирает файлы владельца."""
+    entries = [('Grenade_VERAS_Grip_Edit_v01.blend', 1, 'Хват: чека вставлена'),
+               ('Grenade_VERAS_Pin_Edit_v01.blend', 31, 'Чека вынута: левая кисть у кольца')]
+    for name, _, _ in entries:
+        if (WORK/name).exists():
+            raise FileExistsError(f'Не перезаписываю файл для ручной правки: {WORK/name}')
+    guide = '''РУКИ ВЕРАС-54 С ГРАНАТОЙ — ПРАВКА ХВАТА
+
+Grenade_VERAS_Grip_Edit_v01.blend — исходный хват, чека вставлена.
+Grenade_VERAS_Pin_Edit_v01.blend — чека вынута, левая кисть у кольца.
+Оба файла статичные: ключи отключены, поза не сбрасывается от смены кадра.
+Все изображения встроены. Исходники ВЕРАС-54 и гранаты не изменены.
+
+Риг FPS_ArmsRig уже выбран в Pose Mode.
+ik_hand.R / ik_hand.L: G — положение кисти, R — её поворот.
+Пальцы: f_index / f_middle / f_ring / f_pinky, фаланги .01–.03, стороны .R / .L.
+Большой палец: thumb.01–.03.R / .L. Пальцы сгибать поворотом R, без масштаба.
+hand.R / hand.L управляются IK — для перемещения кистей использовать ik_hand.
+
+Граната привязана к hand.R и следует за правой кистью.
+Чтобы поправить предмет относительно ладони: Tab в Object Mode, объект Grenade.
+Чека с кольцом: объект Pin. Скоба: Lever. Это отдельные узлы, не объединять с руками.
+У LP_SafetyPin сохранён morph SplitTips_Compress для сжатия концов чеки.
+
+Num 0 — исходная камера от первого лица. Num . — приблизить выбранную кость.
+Для внешнего обзора выйти из камеры средней кнопкой мыши.
+Автоключ выключен. Сохранять правки в этих файлах через Ctrl+S.
+
+Grenade_VERAS_Hands.blend — отдельная исходная заготовка с клипом, кадры 1–31.
+1: начальный хват; 6: кольцо взято; 31: чека вынута.
+Файлы Grip_Edit / Pin_Edit сохраняют IK, а не запечённый экспортный скелет.
+Их сохранение не меняет игру автоматически. Для игрового экспорта использовать
+исправленные копии; повторный build пересоздаёт только первоначальную заготовку.
+'''
+    expected, report = {}, []
+    for name, source_frame, label in entries:
+        bpy.ops.wm.open_mainfile(filepath=str(BLEND))
+        bpy.context.preferences.use_preferences_save = False
+        scene = bpy.context.scene
+        scene.frame_set(source_frame)
+        bpy.context.view_layer.update()
+        arm = bpy.data.objects['FPS_ArmsRig']
+        bases = {bone.name: bone.matrix_basis.copy() for bone in arm.pose.bones}
+        for obj in scene.objects:
+            obj.animation_data_clear()
+            if obj.type == 'MESH' and obj.data.shape_keys:
+                obj.data.shape_keys.animation_data_clear()
+        for name_bone, basis in bases.items():
+            arm.pose.bones[name_bone].matrix_basis = basis
+        scene.frame_start = scene.frame_end = 1
+        scene.frame_set(1)
+        scene.tool_settings.use_keyframe_insert_auto = False
+        scene['grip_edit_pose'] = label
+        scene['grip_edit_source_frame'] = source_frame
+        notes = bpy.data.texts.get('НАЧАТЬ_ХВАТ.txt') or bpy.data.texts.new('НАЧАТЬ_ХВАТ.txt')
+        notes.clear()
+        notes.write(guide)
+        bpy.ops.object.select_all(action='DESELECT')
+        arm.hide_set(False)
+        arm.select_set(True)
+        bpy.context.view_layer.objects.active = arm
+        arm.show_in_front = True
+        arm.data.display_type = 'STICK'
+        for bone in arm.data.bones:
+            bone.hide = False
+            bone.hide_select = False
+            arm.pose.bones[bone.name].select = bone.name in ('ik_hand.R','ik_hand.L')
+        arm.data.bones.active = arm.data.bones['ik_hand.R']
+        bpy.ops.object.mode_set(mode='POSE')
+        for obj in scene.objects:
+            if obj.type == 'LIGHT':
+                obj.hide_set(True)
+        for screen in bpy.data.screens:
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    space = area.spaces.active
+                    space.shading.type = 'MATERIAL'
+                    space.overlay.show_floor = False
+                    space.overlay.show_relationship_lines = False
+                    space.region_3d.view_perspective = 'CAMERA'
+                elif area.type == 'PROPERTIES':
+                    area.spaces.active.context = 'DATA'
+        bpy.context.view_layer.update()
+        expected[name] = {side: world(arm, 'hand.'+side).translation.copy() for side in ('R','L')}
+        bpy.ops.file.pack_all()
+        bpy.ops.wm.save_as_mainfile(filepath=str(WORK/name),compress=True)
+    # Проверяем точные выдаваемые файлы после повторного открытия.
+    for name, _, label in entries:
+        path = WORK/name
+        bpy.ops.wm.open_mainfile(filepath=str(path))
+        arm, mesh = bpy.data.objects['FPS_ArmsRig'], bpy.data.objects['FPS_Arms']
+        bpy.context.view_layer.update()
+        checks = {'pose_preserved': all((world(arm,'hand.'+side).translation-expected[name][side]).length < .0001 for side in ('R','L')),
+                  'ik_editable': all(any(c.type == 'IK' for c in arm.pose.bones['forearm.'+side].constraints) for side in ('R','L')),
+                  'static_pose': not arm.animation_data and not bpy.data.objects['Pin'].animation_data,
+                  'packed_maps': all(m['packed'] for m in material_maps(mesh).values()),
+                  'right_hand_parent': bpy.data.objects['Grenade'].parent_bone == 'hand.R',
+                  'rig_60_bones': len(arm.data.bones) == 60,
+                  'start_in_pose_mode': arm.mode == 'POSE',
+                  'embedded_guide': bool(bpy.data.texts.get('НАЧАТЬ_ХВАТ.txt'))}
+        assert all(checks.values()), (name,checks)
+        report.append({'file':name,'pose':label,'bytes':path.stat().st_size,'sha256':sha(path),'checks':checks})
+        log('EDIT_FILE PASS',path)
+    (WORK/'НАЧАТЬ_ХВАТ.txt').write_text(guide,encoding='utf8')
+    (WORK/'edit_files_audit.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
 
 
 if __name__=='__main__':
