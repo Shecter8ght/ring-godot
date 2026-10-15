@@ -4867,3 +4867,22 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   обрывается раньше цели — мародёр идёт частями. Застревать начнут — поднять предел у `NavigationAgent3D`.
 - Не сделано (моделями в Blender, по слову владельца): рельсы и шпалы, мосты над улицей и через речку,
   старый мост, мостки и насосная болота, все постройки участков; ходьба по воде.
+
+### 2026-10-15 — Зона 2 (прежний «Городской пояс», администрация) убрана полностью (Claude)
+
+- Решение владельца: зона 2 не нужна. Имя «Городской пояс» теперь только у зоны 1.
+- Удалены: маршрут в `data/floors.json` и цена в `Balance.FLOOR_PRICES`; сцены `scenes/levels/zone02_urban_belt.tscn`,
+  `scenes/levels/zone02/`; данные `data/sectors/zone02_urban_belt.json`, навигация `data/navigation/zone02/`;
+  инструменты и тесты `tools/build_zone02.py`, `bake_zone02_nav`, `zone02_*`; описание `docs/zone02_urban_belt.md`,
+  снимки `docs/screens/zone02_*`; скрипты, нужные только ей: `UrbanTerrain` (`src/world/urban_terrain.gd`,
+  `scenes/world/urban_terrain.tscn`) и `urban_facade.gd`. Аудит производительности 14 октября и журнал
+  оставлены как история.
+- `UrbanNavigation` теперь по умолчанию — зона 1; сообщения без «zone02». Кэш навигации зоны 1 перезаписан
+  (тайлы те же, новый манифест). `performance_audit`, `ai_work_benchmark`, `author_loose_loot`,
+  `economy_prices_test` — без зоны 2.
+- Старые сохранения с выбранной зоной 2: `Profile` сбрасывает выбор на первый этаж (проверено разовой
+  пробой: floor=f1).
+- Проверки: `compile_check` 0; `zone01_nw_test` 93/0 (без прохода капсулой), кэш навигации «true»;
+  `economy_prices_test` — 1 провал не по этой задаче: цена продажи `signal_launcher` (сигнальный пистолет,
+  его сейчас дорабатывает другой агент) 21780 против 20900.
+

@@ -3,7 +3,7 @@ extends Node
 ## tools/godot.cmd --windowed --resolution 1280x720 --disable-vsync res://tools/performance_audit.tscn -- hideout high baseline
 
 const MAPS: Dictionary = {"hideout": "res://scenes/levels/hideout.tscn", "f1": "res://scenes/levels/f1_ring.tscn",
-	"zone01": "res://scenes/levels/zone01_mall.tscn", "zone02": "res://scenes/levels/zone02_urban_belt.tscn"}
+	"zone01": "res://scenes/levels/zone01_mall.tscn"}
 const SAMPLE_FRAMES: int = 180
 var _result: Dictionary = {}
 var _stages: Array[Dictionary] = []
@@ -85,9 +85,6 @@ func _run() -> void:
 		"zone01":
 			spots = [{"name": "courtyard", "pos": Vector3(-194, 0, -90), "yaw": 0.0},
 				{"name": "center", "pos": Vector3(-10, 0, -60), "yaw": PI}]
-		"zone02":
-			spots = [{"name": "residential", "pos": Vector3(-515, 0, -365), "yaw": 0.0},
-				{"name": "station", "pos": Vector3(400, 0, 240), "yaw": PI}]
 	for spot: Dictionary in spots:
 		player.global_position = _ground(spot.pos as Vector3, player)
 		player.velocity = Vector3.ZERO
@@ -140,8 +137,6 @@ func _stage(text: String, _percent: float) -> void:
 func _ground(pos: Vector3, player: Player) -> Vector3:
 	var terrain: Node = get_tree().get_first_node_in_group("district_terrain")
 	var y: float = float(terrain.call("height_at", pos.x, pos.z)) if terrain and terrain.has_method("height_at") else pos.y
-	if String(_result.map) == "zone02":
-		y = UrbanTerrain.height_at(pos.x, pos.z)
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(Vector3(pos.x, y + 2.0, pos.z), Vector3(pos.x, y - 10.0, pos.z), Hitscan.LAYER_WORLD)
 	query.exclude = [player.get_rid()]
 	var hit: Dictionary = player.get_world_3d().direct_space_state.intersect_ray(query)

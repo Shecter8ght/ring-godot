@@ -4,10 +4,9 @@ extends Node3D
 
 signal ready_for_agents
 
-const CACHE_DIR: String = "res://data/navigation/zone02"
+const CACHE_DIR: String = "res://data/navigation/zone01"
 ## Сцены и компоненты, от которых зависит выпечка, для каждой карты (кэш сверяется по хэшам).
 const SOURCES := {
-	"zone02_urban_belt": ["res://data/sectors/zone02_urban_belt.json", "res://scenes/levels/zone02_urban_belt.tscn", "res://scenes/levels/zone02"],
 	"zone01_mall": ["res://data/sectors/zone01_mall.json", "res://scenes/levels/zone01_mall.tscn", "res://scenes/levels/zone01",
 		"res://data/terrain/zone01_heights.r32", "res://src/world/district_terrain.gd",
 		"res://src/world/district_model.gd", "res://assets/zone01/nw/manifest.json", "res://assets/zone01/nw/furniture.json"],
@@ -63,7 +62,7 @@ func _prepare() -> void:
 		var parser: NavigationMesh = _settings()
 		NavigationServer3D.parse_source_geometry_data(parser, source, get_parent().get_parent())
 		if not source.has_data():
-			push_error("zone02: нет исходной геометрии для навигации")
+			push_error("навигация: нет исходной геометрии")
 			return
 		if save_cache:
 			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_cache_dir()))
@@ -87,8 +86,8 @@ func _prepare() -> void:
 				if save_cache:
 					var error: Error = ResourceSaver.save(mesh, _path(x, z))
 					if error != OK:
-						push_error("zone02: не сохранён " + _path(x, z))
-				print("zone02 nav: %d/%d, полигонов %d" % [x * rows + z + 1, columns * rows, mesh.get_polygon_count()])
+						push_error("навигация: не сохранён " + _path(x, z))
+				print("навигация: тайл %d/%d, полигонов %d" % [x * rows + z + 1, columns * rows, mesh.get_polygon_count()])
 			var region := NavigationRegion3D.new()
 			region.name = "Tile_%d_%d" % [x, z]
 			region.navigation_mesh = mesh
@@ -100,7 +99,7 @@ func _prepare() -> void:
 					synchronization_samples.append(vertices[polygon[0]])
 	if save_cache:
 		_write_manifest()
-	print("zone02: навигация %d тайлов, %d мс, кэш %s" % [columns * rows, Time.get_ticks_msec() - start_ms, str(cached)])
+	print("навигация: %d тайлов, %d мс, кэш %s" % [columns * rows, Time.get_ticks_msec() - start_ms, str(cached)])
 	# Асинхронная синхронизация тридцати регионов может занимать больше одного физического кадра.
 	var synchronization_start: int = Time.get_ticks_msec()
 	var synchronization_frames: int = 0
@@ -112,7 +111,7 @@ func _prepare() -> void:
 				var closest: Vector3 = NavigationServer3D.map_get_closest_point(map, sample)
 				if closest.distance_to(sample) > float(_config().nav_cell):
 					push_warning("Навигация: не опубликована опора %s, ближайшая %s" % [sample, closest])
-			push_error("zone02: сервер навигации не подготовил полигоны")
+			push_error("навигация: сервер не подготовил полигоны")
 			return
 		await get_tree().physics_frame
 		synchronization_frames += 1
@@ -164,14 +163,14 @@ func _cache_valid() -> bool:
 
 func _write_manifest() -> void:
 	var paths: Array[String] = []
-	for source: String in SOURCES.get(String(definition.get("id", "zone02_urban_belt")), SOURCES["zone02_urban_belt"]):
+	for source: String in SOURCES.get(String(definition.get("id", "zone01_mall")), SOURCES["zone01_mall"]):
 		if source.get_extension() == "":
 			for filename: String in DirAccess.get_files_at(source):
 				if filename.get_extension() == "tscn":
 					paths.append(source + "/" + filename)
 		else:
 			paths.append(source)
-	for component: String in ["blockout_building", "blockout_opening", "blockout_mesh", "urban_props", "urban_road", "urban_terrain", "urban_facade", "urban_navigation"]:
+	for component: String in ["blockout_building", "blockout_opening", "blockout_mesh", "urban_props", "urban_road", "urban_navigation"]:
 		paths.append("res://src/world/" + component + ".gd")
 		var scene_path: String = "res://scenes/world/" + component + ".tscn"
 		if FileAccess.file_exists(scene_path):
@@ -183,7 +182,7 @@ func _write_manifest() -> void:
 	if file:
 		file.store_string(JSON.stringify({"settings": _settings_signature(), "files": hashes}, "\t") + "\n")
 	else:
-		push_error("zone02: не сохранён манифест навигации")
+		push_error("навигация: не сохранён манифест")
 
 
 func _source_hash(path: String) -> String:

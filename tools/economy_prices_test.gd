@@ -118,7 +118,7 @@ func _ready() -> void:
 	_check("не хватает одного рубля на модуль — деньги и детали целы", not Upgrades.build("generator") and Profile.money == 99999 and Profile.stash_count("battery") == 2 and Upgrades.level("generator") == 0, "")
 	Profile.money = 100000
 	_check("строительство списывает новую цену и детали", Upgrades.build("generator") and Profile.money == 0 and Profile.stash_count("battery") == 0 and Upgrades.level("generator") == 1, "")
-	_check("карты доступны бесплатно; наводки 2F/3F/4F подорожали", int(Floors.find("zone01").price) == 0 and int(Floors.find("zone02").fee) == 0 and int(Floors.find("f2").price) == 200000 and int(Floors.find("f3").price) == 450000 and int(Floors.find("f4").price) == 900000, "")
+	_check("карты доступны бесплатно; наводки 2F/3F/4F подорожали", int(Floors.find("zone01").price) == 0 and int(Floors.find("zone01").fee) == 0 and int(Floors.find("f2").price) == 200000 and int(Floors.find("f3").price) == 450000 and int(Floors.find("f4").price) == 900000, "")
 	Profile.floors_open.erase("f2")
 	Profile.money = 199999
 	_check("не хватает одного рубля на маршрут — ничего не списано", not Floors.unlock("f2") and Profile.money == 199999 and not Floors.is_open("f2"), "")

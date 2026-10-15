@@ -8,7 +8,6 @@ const LOOSE: PackedScene = preload("res://scenes/world/loose_loot.tscn")
 func _ready() -> void:
 	Profile.use_file("user://author_loose_loot.json", true)
 	await _author("zone01", "res://scenes/levels/zone01_mall.tscn")
-	await _author("zone02", "res://scenes/levels/zone02_urban_belt.tscn")
 	get_tree().quit(0)
 
 

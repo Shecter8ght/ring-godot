@@ -101,7 +101,8 @@ static func ensure() -> void:
 		if not "f1" in floors_open:
 			floors_open.append("f1")
 		floor = String(d.get("floor", "f1"))
-		if not floor in floors_open:
+		# выбранного маршрута больше нет в data/floors.json (так убрали зону 2) — снова первый этаж
+		if not floor in floors_open or Floors.find(floor).is_empty():
 			floor = "f1"
 		modules = d.get("modules", {})
 		hideout_media = d.get("hideout_media", {})
