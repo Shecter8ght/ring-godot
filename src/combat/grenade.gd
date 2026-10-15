@@ -38,10 +38,13 @@ static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, 
 	g.angular_damp = 1.2
 	var cs := CollisionShape3D.new()
 	var sh := SphereShape3D.new()
-	sh.radius = 0.036
+	sh.radius = float(Balance.GRENADE_HAND.spawn_radius)
 	cs.shape = sh
 	g.add_child(cs)
-	g.add_child(WeaponModels.build("grenade"))
+	var model: GrenadeModel = GrenadeModel.create()
+	model.release()
+	g.add_child(model)
+	g.add_to_group("thrown_grenades")
 	g.contact_monitor = true
 	g.max_contacts_reported = 2
 	parent.add_child(g)
@@ -51,7 +54,6 @@ static func throw(parent: Node, from: Vector3, velocity: Vector3, thrower: RID, 
 	g._fuse = float(Balance.GRENADE.fuse)
 	g._build_led()
 	g.body_entered.connect(g._on_bounce)
-	Audio.play("pin", from)
 	Audio.play("nade_throw", from, -4.0)
 	return g
 
@@ -150,7 +152,7 @@ func _explode() -> void:
 			if not space.intersect_ray(q).is_empty():
 				continue
 			var dmg := float(spec.damage) * pow(1.0 - d / radius, 1.3)
-			if body is Target:
+			if body is Target and _damage:
 				(body as Target).on_hit(point, (point - pos).normalized(), dmg)
 			var h := body.get_node_or_null("Health") as Health
 			if h and _damage:

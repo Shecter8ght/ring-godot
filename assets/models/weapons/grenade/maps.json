@@ -1,0 +1,56 @@
+[
+  {
+    "file": "grenade_body_albedo.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "color_space": "sRGB",
+    "sha256": "9177bae5fc8e8d47b57e4565c4e4f41845f1c61e6a09bdccadef707b500a75a2"
+  },
+  {
+    "file": "grenade_body_normal.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "color_space": "linear",
+    "sha256": "979101fc2d0c7dcb0b51943392013bd47ff8a9eb612fbbef7c2d53f0d7147ea6"
+  },
+  {
+    "file": "grenade_body_orm.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "color_space": "linear",
+    "sha256": "a16f0d659b719a0086c7b7a720cdc9c3023db0c8cb43bcca48bf51d41bd99cf3"
+  },
+  {
+    "file": "grenade_mechanism_albedo.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "color_space": "sRGB",
+    "sha256": "054d9ada05dc181a60e061103e43b3a70101bf98a9b5bda9a85f9fcad2857445"
+  },
+  {
+    "file": "grenade_mechanism_normal.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "color_space": "linear",
+    "sha256": "e3adddc48ab0b4866a60143d1591b3c06a3d095d232927df2d9e73ccd48a45a3"
+  },
+  {
+    "file": "grenade_mechanism_orm.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "color_space": "linear",
+    "sha256": "b3222b32e416fa2723a8082a5a01df6c5b309a9df0986f4a45cf73ec082b3c55"
+  }
+]

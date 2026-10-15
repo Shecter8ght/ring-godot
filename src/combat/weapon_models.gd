@@ -28,6 +28,8 @@ static var _meshes: Dictionary = {}
 ## (WeaponMods.mag_state по записи). lod −1 — подробная модель для разглядывания вблизи
 ## (конструктор оружия: weapon.asset_detail), если она есть; иначе как lod 0.
 static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 100.0, mag: String = "*", engraving: Dictionary = {}) -> Node3D:
+	if id == "grenade":
+		return GrenadeModel.create()
 	var root: Node3D = Node3D.new()
 	root.name = "Weapon_" + id
 	var key := id

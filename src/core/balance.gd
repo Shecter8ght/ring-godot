@@ -996,9 +996,16 @@ const GRENADE := {"fuse": 2.6, "radius": 7.0, "damage": 140.0, "throw_speed": 13
 	"noise_m": 130.0, "push": 28.0, "shake_radius": 28.0}
 ## Огонёк на гранате: мигает всё чаще к взрыву (период от slow до fast, с), свет вокруг и ореол.
 const GRENADE_LED := {"slow": 0.6, "fast": 0.07, "light_range": 2.5, "light_energy": 2.2, "halo_m": 0.5}
-## Прицел гранаты (G зажата — траектория и радиус, отпустил — бросок): шаг расчёта дуги, с;
-## сколько секунд полёта считать; толщина линии, м.
+## Старый расчёт дуги оставлен для технических стендов; игроку подсказка на земле не рисуется.
 const GRENADE_AIM := {"step": 0.03, "max_t": 3.0, "width": 0.05}
+## Граната в руках: удержание увеличивает силу, запал начинается только после броска.
+const GRENADE_HAND := {"equip_sec": 0.35, "prepare_sec": 0.28, "charge_sec": 1.2,
+	"recover_sec": 0.65, "over_min": 6.0, "over_max": 15.0, "over_lift": 0.35,
+	"under_min": 3.0, "under_max": 6.5, "under_lift": 0.6,
+	"over_drop": 0.08, "under_drop": 0.55, "release_forward": 0.28,
+	"spawn_radius": 0.036, "wall_margin": 0.06,
+	"pose": Vector3(0.13, -0.10, -0.38), "pose_charge": Vector3(0.035, 0.025, 0.02),
+	"pose_under": Vector3(0.0, -0.04, 0.025)}
 
 # --- Регдолл ---
 ## Через сколько секунд покоя тела замирают (экономия физики).

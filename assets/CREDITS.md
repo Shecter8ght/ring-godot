@@ -378,3 +378,20 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 в `assets/zone01/nw/`. Равномерный масштаб и экспорт: `tools/prepare_zone01_nw_furniture.py`.
 Состояние и исходники —
 `assets/zone01/nw/asset-state.md`, `docs/design/zone01_nw_implementation.md`.
+
+## Граната: игровой bake принятой v08 (2026-10-15)
+
+`assets/models/weapons/grenade/`: игровая производная собственного принятого мастера
+`E:/Models Blender/WEAPONS/Grenade/Codex_Texture_v08/Grenade_MkII_UCUPaint_v08.blend`.
+Геометрия и авторские маски/маркировка солнце + «СЛНШК» — материалы проекта владельца;
+сохраняются права исходной Scenario-геометрии. Фото владельца служили референсами,
+их пиксели не использованы в текстурных картах. Low Poly, UV, bake и экспорт —
+`tools/prepare_grenade_game.py`, `tools/pack_grenade_maps.py`.
+
+Нативные материалы используют [Metal049C](https://ambientcg.com/view?id=Metal049C),
+[Metal009](https://ambientcg.com/view?id=Metal009),
+[Metal063](https://ambientcg.com/view?id=Metal063) от ambientCG,
+[CC0 1.0](https://docs.ambientcg.com/license/). Исходные лицензии и provenance
+сохранены в `Codex_Texture_v08/resources/`; копия лицензии —
+`_asset_src/grenade_game/license.txt`. Состояние и связь с high-poly —
+`assets/models/weapons/grenade/asset-state.md`.

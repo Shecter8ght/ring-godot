@@ -1,0 +1,104 @@
+{
+  "triangles": 13359,
+  "meshes": 7,
+  "dimensions_blender": [
+    0.06655426323413849,
+    0.0632176622748375,
+    0.11445429921150208
+  ],
+  "maps": [
+    {
+      "file": "E:\\Games\\RING-godot\\assets\\models\\weapons\\grenade\\grenade_body_albedo.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "space": "sRGB"
+    },
+    {
+      "file": "E:\\Games\\RING-godot\\assets\\models\\weapons\\grenade\\grenade_body_normal.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "space": "Non-Color"
+    },
+    {
+      "file": "E:\\Games\\RING-godot\\assets\\models\\weapons\\grenade\\grenade_body_orm.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "space": "Non-Color"
+    },
+    {
+      "file": "E:\\Games\\RING-godot\\assets\\models\\weapons\\grenade\\grenade_mechanism_albedo.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "space": "sRGB"
+    },
+    {
+      "file": "E:\\Games\\RING-godot\\assets\\models\\weapons\\grenade\\grenade_mechanism_normal.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "space": "Non-Color"
+    },
+    {
+      "file": "E:\\Games\\RING-godot\\assets\\models\\weapons\\grenade\\grenade_mechanism_orm.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "space": "Non-Color"
+    }
+  ],
+  "uv": [
+    {
+      "part": "LP_GrenadeBody",
+      "triangles": 7999,
+      "uv_area": 0.5040278151940807,
+      "min_uv_area": 1.298445464925635e-06
+    },
+    {
+      "part": "LP_FuzeCasting",
+      "triangles": 2400,
+      "uv_area": 0.13910614768424087,
+      "min_uv_area": 4.348732982606407e-07
+    },
+    {
+      "part": "LP_SafetyLever",
+      "triangles": 1200,
+      "uv_area": 0.18314765279361683,
+      "min_uv_area": 1.5757555038575788e-07
+    },
+    {
+      "part": "LP_SafetyPin",
+      "triangles": 640,
+      "uv_area": 0.004738152918359198,
+      "min_uv_area": 1.655323038640688e-07
+    },
+    {
+      "part": "LP_PullRing",
+      "triangles": 800,
+      "uv_area": 0.023958939620245034,
+      "min_uv_area": 3.45329886553003e-06
+    },
+    {
+      "part": "LP_PinEyelet",
+      "triangles": 192,
+      "uv_area": 0.0011548432238526196,
+      "min_uv_area": 1.5395668280238084e-06
+    },
+    {
+      "part": "LP_BottomPlug",
+      "triangles": 128,
+      "uv_area": 0.012721592096599288,
+      "min_uv_area": 5.133319289640781e-06
+    }
+  ],
+  "source_unchanged": true
+}

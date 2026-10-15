@@ -122,6 +122,22 @@ var _aim_t: float = 0.0
 var weapon_obstruction: float = 0.0
 var weapon_ready_up: bool = false
 var grenades: int = Balance.GRENADES_START
+## Выбор гранаты отделён от слотов огнестрельного оружия: состояние магазина сохраняется.
+var grenade_equipped: bool = false
+var grenade_in_hand: bool = false
+var grenade_pin: float = 0.0
+var grenade_charge: float = 0.0
+var grenade_underhand: bool = false
+var _grenade_hold: float = 0.0
+var _grenade_button: String = ""
+var _grenade_released: bool = false
+var _grenade_input_ready: bool = false
+var _grenade_recover: float = 0.0
+var _grenade_pending: bool = false
+var _grenade_seq: int = 0
+var _grenade_host_seq: int = 0
+var _grenade_host_ms: int = -10000
+var _grenade_result_seq: int = 0
 var fire_timer: float = 0.0
 ## Когда стрелял (мс) — ИИ замечает стреляющего быстрее (Balance.AI_NOTICE.shot).
 var last_shot_ms: int = -100000
@@ -187,9 +203,6 @@ var _allies_down: Dictionary = {}
 var _dive_t: float = -1.0
 var _dive_dir: Vector3 = Vector3.ZERO
 var _dive_cd: float = 0.0
-## G зажата — прицел гранаты (дуга и круг поражения), отпустил — бросок.
-var _nade_aiming: bool = false
-var _nade_aim: GrenadeAim
 
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
@@ -293,7 +306,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up", ".:grenade_equipped", ".:grenade_in_hand", ".:grenade_pin", ".:grenade_charge", ".:grenade_underhand"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -914,7 +927,7 @@ func _physics_process(delta: float) -> void:
 		if stance != Stance.PRONE:
 			stance = Stance.PRONE
 			_apply_stance()
-		aiming = Input.is_action_pressed("aim") and not ui_blocked()
+		aiming = Input.is_action_pressed("aim") and not grenade_equipped and not ui_blocked()
 		_give_up_t = _give_up_t + delta if Input.is_action_pressed("drag") and not PauseMenu.shown else 0.0
 		if _give_up_t >= Balance.GIVE_UP_SEC and Raid.current:
 			_give_up_t = -INF
@@ -1061,16 +1074,17 @@ func _cached_weapon_model(id: String, mods: Dictionary, dur: float, mag: String,
 
 ## Оружие следует за правой кистью Persona в любой стойке; без Persona — у груди.
 func _update_hand() -> void:
-	var key := WeaponCondition.model_key(weapon_id, weapon_mods, weapon_condition, weapon_mag) + "|" + WeaponMark.key(weapon_engraving)
+	var shown_id: String = held_model_id()
+	var key := WeaponCondition.model_key(shown_id, weapon_mods, weapon_condition, weapon_mag) + "|" + WeaponMark.key(weapon_engraving)
 	var h := float(Balance.STANCE_HEIGHT[_stance_key()]) / float(Balance.STANCE_HEIGHT.stand)
 	var yaw := _body.rotation.y
 	if _weapon_model_id != key:
 		if _weapon_model:
 			_weapon_model.visible = false
 			_weapon_model.process_mode = Node.PROCESS_MODE_DISABLED
-		_weapon_model = _cached_weapon_model(weapon_id, weapon_mods, weapon_condition, weapon_mag, weapon_engraving)
+		_weapon_model = _cached_weapon_model(shown_id, weapon_mods, weapon_condition, weapon_mag, weapon_engraving)
 		_weapon_model.process_mode = Node.PROCESS_MODE_INHERIT
-		var family := String(WeaponDb.weapon(weapon_id).get("model", "rifle")) if weapon_id != "" else "rifle"
+		var family: String = "pistol" if grenade_equipped else (String(WeaponDb.weapon(weapon_id).get("model", "rifle")) if weapon_id != "" else "rifle")
 		var grip: Node3D = _animator.weapon_grip(family, weapon_id) if _animator else null
 		var parent: Node3D = grip if grip else _hand
 		if _weapon_model.get_parent() != parent:
@@ -1094,7 +1108,9 @@ func _update_hand() -> void:
 	_hand.visible = health.alive
 	if _weapon_model:
 		WeaponMods.update_condition(_weapon_model, weapon_mods)
-	_weapon_model.visible = health.alive
+	_weapon_model.visible = health.alive and (not grenade_equipped or grenade_in_hand)
+	if _weapon_model is GrenadeModel:
+		(_weapon_model as GrenadeModel).prepare(grenade_pin)
 	if _weapon_rig and not _weapon_rig.is_busy():
 		_weapon_rig.set_ammo_state(weapon_rounds)
 	# фонари и лазеры — каждый по своему состоянию; от первого лица у себя светит модель в руках
@@ -1144,14 +1160,15 @@ func show_kill_marker() -> void:
 		(_camera_rig as CameraRig).show_hitmarker(true)
 
 
-## Стрельба, перезарядка на R, смена оружия 1–4, граната G.
+## Стрельба и перезарядка; гранату сначала выбирают отдельной клавишей, затем бросают мышью.
 func _combat(delta: float) -> void:
 	if PauseMenu.shown:
+		_cancel_grenade_prepare()
 		return
 	fire_timer -= delta
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
 	if not combat_enabled or ui_blocked():
-		_cancel_nade_aim()
+		_cancel_grenade_prepare()
 		_ui_blocked_ms = Time.get_ticks_msec()
 		return
 	if loadout_mode:
@@ -1166,27 +1183,21 @@ func _combat(delta: float) -> void:
 				_holster()
 			else:
 				_switch(String(keys[i]))
+	if Input.is_action_just_pressed("grenade") and not fresh_ui:
+		_equip_grenade()
 	# лёжа раненым и таща раненого — только пистолет (нет — руки пусты, гранаты можно)
-	if not loadout_mode and weapon_slot == "" and not _sandbox_picked:
+	if not loadout_mode and weapon_slot == "" and not _sandbox_picked and not grenade_equipped:
 		# песочница: сразу в руках пистолет (клавиша 2), как было всегда
 		_sandbox_picked = true
 		_switch(sidearm_key() if sidearm_key() != "" else String(keys[0]), false)
 	if not weapon_slot in allowed_weapons() and weapon_slot != "":
 		var pistol := String(allowed_weapons()[0]) if not allowed_weapons().is_empty() else ""
 		_switch(pistol, pistol != "")
-	# граната: держишь G — видно, куда упадёт и где достанет; отпустил — бросок
-	if Input.is_action_just_pressed("grenade"):
-		if grenade_count() > 0:
-			_nade_aiming = true
-		elif loadout_mode:
-			_say("Гранат нет")
-	if _nade_aiming:
-		if Input.is_action_pressed("grenade"):
-			_show_nade_aim()
-		else:
-			_cancel_nade_aim()
-			if grenade_count() > 0 and fire_timer <= 0.0:
-				_throw_grenade()
+	if grenade_equipped:
+		_tick_grenade(delta)
+		_tick_nvg(delta)
+		_tick_breath(delta)
+		return
 	for pair in [["throw_flare", "flare"], ["throw_chem", "chemlight"]]:
 		if Input.is_action_just_pressed(String(pair[0])) and fire_timer <= 0.0:
 			_throw_light(String(pair[1]))
@@ -1517,6 +1528,7 @@ func _tick_suppressor(delta: float) -> void:
 
 ## Прерывание до подтверждения не трогает инвентарь; уже подтверждённый перенос остаётся целым.
 func cancel_weapon_action() -> void:
+	_cancel_grenade_prepare()
 	var had_action: bool = not _pm_action.is_empty() or reload_timer > 0.0 or (_weapon_rig and _weapon_rig.is_busy())
 	_pm_action.clear()
 	reload_timer = 0.0
@@ -1782,7 +1794,7 @@ func adjust_scope_zoom(direction: int) -> bool:
 	return true
 
 
-## Клавиши 1…: в песочнице — стволы песочницы (автомат, пистолет, дробовик, винтовка), со
+## Клавиши 1/2/3/5: в песочнице — автомат, пистолет, дробовик, винтовка; со
 ## снаряжением — [основное, пистолет] (слоты; "" — пусто).
 func weapon_keys() -> Array:
 	if not loadout_mode:
@@ -1837,7 +1849,7 @@ func clear_range_weapon() -> void:
 	if not in_range_mode():
 		return
 	cancel_weapon_action()
-	_cancel_nade_aim()
+	_cancel_grenade_prepare()
 	range_weapon = {}
 	range_own_slot = ""
 	sandbox_weapons = {}
@@ -1907,6 +1919,8 @@ func ammo_reserve() -> int:
 func _loadout_tick() -> void:
 	if not inventory.loadout_ready:
 		return
+	if grenade_equipped:
+		return
 	if holstered:
 		# убранный ствол сам в руки не возвращается, пока он есть в слоте
 		if weapon_slot != "" and not _base_entry(weapon_slot).is_empty():
@@ -1933,7 +1947,7 @@ func _holster() -> void:
 	if weapon_id == "":
 		return
 	cancel_weapon_action()
-	_cancel_nade_aim()
+	_cancel_grenade_prepare()
 	aim_cant = false
 	if weapon_slot != "" and _ws.has(weapon_slot):
 		_send_ws(weapon_slot)
@@ -1946,13 +1960,16 @@ func _holster() -> void:
 
 ## Руки пусты (оружие убрано или его нет): бежит быстрее и дольше.
 func hands_free() -> bool:
-	return weapon_id == "" and not is_downed() and not is_burdened()
+	return weapon_id == "" and not grenade_equipped and not is_downed() and not is_burdened()
 
 
 ## Смена оружия: состояние прежнего уходит хосту, перезарядка прерывается.
 func _switch(key: String, sound: bool = true) -> void:
 	if key == weapon_slot and weapon_id != "" and not _base_entry(key).is_empty():
 		return
+	grenade_equipped = false
+	grenade_in_hand = false
+	_cancel_grenade_prepare()
 	holstered = false
 	cancel_weapon_action()
 	aim_cant = false
@@ -2395,50 +2412,191 @@ func _rpc_throw_light(k: String, from: Vector3, v: Vector3) -> void:
 	ThrownLight.throw(get_tree().current_scene, k, from, v)
 
 
-## Откуда и с какой скоростью полетит граната: [from, v] — из глаз в прицеле, к курсору в изометрии.
-func _grenade_launch() -> Array:
-	var g: Dictionary = Balance.GRENADE
-	var from := eye_position() + Vector3.UP * 0.1
-	var v: Vector3
-	if ads:
-		from += look_dir() * 0.4
-		v = look_dir() * float(g.throw_speed) + Vector3.UP * 2.0
+## Идентификатор для обеих моделей — в руках игрока и у его напарников.
+func held_model_id() -> String:
+	return "grenade" if grenade_equipped else weapon_id
+
+
+func _equip_grenade() -> void:
+	if grenade_equipped:
+		_return_from_grenade()
+		return
+	if grenade_count() <= 0:
+		_say("Гранат нет")
+		return
+	cancel_weapon_action()
+	if weapon_slot != "" and _ws.has(weapon_slot):
+		_send_ws(weapon_slot)
+	if weapon_id != "":
+		_play_weapon_sound(spec(), "holster", -6.0)
+	weapon_id = ""
+	holstered = false
+	aiming = false
+	aim_cant = false
+	grenade_equipped = true
+	grenade_in_hand = true
+	_cancel_grenade_prepare()
+	fire_timer = float(Balance.GRENADE_HAND.equip_sec)
+
+
+func _return_from_grenade() -> void:
+	grenade_equipped = false
+	grenade_in_hand = false
+	_cancel_grenade_prepare()
+	if weapon_slot in allowed_weapons() and not _base_entry(weapon_slot).is_empty():
+		_switch(weapon_slot)
 	else:
-		var to := cursor_ground - global_position
-		to.y = 0.0
-		if to.length() > float(g.max_range):
-			to = to.normalized() * float(g.max_range)
-		var target := global_position + to
-		from += to.normalized() * 0.4 if to.length() > 0.1 else Vector3.ZERO
-		var t := clampf(to.length() / float(g.throw_speed), 0.45, 1.3)
-		v = (target - from) / t + Vector3.UP * 0.5 * 9.8 * t
-	return [from, v]
+		weapon_id = ""
 
 
-func _show_nade_aim() -> void:
-	if _nade_aim == null:
-		_nade_aim = GrenadeAim.new()
-		add_child(_nade_aim)
-	var l := _grenade_launch()
-	_nade_aim.show_arc(l[0], l[1], Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS, [get_rid()])
+## Клики, зажатые до выбора гранаты или под окном, должны сначала отпуститься.
+func _tick_grenade(delta: float) -> void:
+	aiming = false
+	if _grenade_pending:
+		return
+	if _grenade_recover > 0.0:
+		_grenade_recover = maxf(0.0, _grenade_recover - delta)
+		if _grenade_recover > 0.0:
+			return
+		if grenade_count() <= 0:
+			_return_from_grenade()
+			return
+		grenade_in_hand = true
+	if grenade_count() <= 0:
+		_return_from_grenade()
+		return
+	if not _grenade_input_ready:
+		_grenade_input_ready = not Input.is_action_pressed("fire") and not Input.is_action_pressed("aim")
+		return
+	if _grenade_button == "":
+		if fire_timer > 0.0:
+			return
+		if Input.is_action_just_pressed("fire"):
+			_grenade_button = "fire"
+		elif Input.is_action_just_pressed("aim"):
+			_grenade_button = "aim"
+		else:
+			return
+		grenade_underhand = _grenade_button == "aim"
+		Audio.play("pin", eye_position(), -5.0)
+	_grenade_hold += delta
+	grenade_charge = clampf(_grenade_hold / float(Balance.GRENADE_HAND.charge_sec), 0.0, 1.0)
+	grenade_pin = clampf(_grenade_hold / float(Balance.GRENADE_HAND.prepare_sec), 0.0, 1.0)
+	_grenade_released = _grenade_released or not Input.is_action_pressed(_grenade_button)
+	if _grenade_released and grenade_pin >= 1.0:
+		_throw_grenade()
 
 
-func _cancel_nade_aim() -> void:
-	_nade_aiming = false
-	if _nade_aim:
-		_nade_aim.hide_arc()
+## Дальность задаётся силой и направлением взгляда. Начальная точка не перескакивает сквозь стену.
+func _grenade_launch(power: float = 1.0, underhand: bool = false, direction: Vector3 = Vector3.ZERO) -> Array:
+	var cfg: Dictionary = Balance.GRENADE_HAND
+	var forward: Vector3 = direction
+	if forward.is_zero_approx():
+		forward = look_dir() if ads else (cursor_ground - eye_position()).normalized()
+	if forward.is_zero_approx():
+		forward = Vector3(sin(body_yaw()), 0.0, cos(body_yaw()))
+	forward = forward.normalized()
+	var origin: Vector3 = eye_position()
+	var from: Vector3 = origin - Vector3.UP * float(cfg.under_drop if underhand else cfg.over_drop)
+	from += forward * float(cfg.release_forward)
+	var mask: int = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS
+	var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(origin, from, mask, [get_rid()])
+	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(ray)
+	if not hit.is_empty():
+		from = (hit.position as Vector3) + (hit.normal as Vector3) * float(cfg.wall_margin)
+	var lift: float = float(cfg.under_lift if underhand else cfg.over_lift)
+	var speed: float = lerpf(float(cfg.under_min if underhand else cfg.over_min), float(cfg.under_max if underhand else cfg.over_max), clampf(power, 0.0, 1.0))
+	var velocity: Vector3 = (forward + Vector3.UP * lift).normalized() * speed
+	return [from, velocity]
+
+
+func _cancel_grenade_prepare() -> void:
+	_grenade_button = ""
+	_grenade_hold = 0.0
+	_grenade_released = false
+	_grenade_input_ready = false
+	grenade_pin = 0.0
+	grenade_charge = 0.0
 
 
 func _throw_grenade() -> void:
+	if not grenade_equipped or _grenade_pending or grenade_count() <= 0:
+		return
+	var power: float = grenade_charge
+	var under: bool = grenade_underhand
+	var direction: Vector3 = look_dir() if ads else (cursor_ground - eye_position()).normalized()
 	_animation_event("grenade_throw")
-	if loadout_mode:
-		items_host().call("request_consume", "grenade", 1)
+	_grenade_seq += 1
+	_grenade_pending = true
+	grenade_in_hand = false
+	_cancel_grenade_prepare()
+	if Net.is_networked() and not multiplayer.is_server():
+		_rpc_grenade_request.rpc_id(1, _grenade_seq, power, under, direction)
 	else:
+		_server_grenade_throw(_grenade_seq, power, under, direction)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_grenade_request(sequence: int, power: float, under: bool, direction: Vector3) -> void:
+	if multiplayer.is_server() and multiplayer.get_remote_sender_id() == peer_id:
+		_server_grenade_throw(sequence, power, under, direction)
+
+
+## Расход и создание снаряда — одна операция хоста; повтор пакета не создаёт вторую гранату.
+func _server_grenade_throw(sequence: int, power: float, under: bool, direction: Vector3) -> void:
+	if sequence <= _grenade_host_seq:
+		return
+	_grenade_host_seq = sequence
+	var now: int = Time.get_ticks_msec()
+	var accepted: bool = is_alive() and combat_enabled and not in_range_mode() and direction.is_finite() and is_finite(power) and direction.length_squared() > 0.01 \
+		and now - _grenade_host_ms >= int(float(Balance.GRENADE_HAND.recover_sec) * 1000.0) and grenade_count() > 0
+	if accepted and loadout_mode:
+		accepted = inventory.remove("grenade", 1) == 1
+	elif accepted:
 		grenades -= 1
-	fire_timer = 0.6
-	var l := _grenade_launch()
-	var g := Grenade.throw(get_tree().current_scene, l[0], l[1], get_rid())
-	g.src = {"kind": "grenade", "by": "player", "peer": peer_id}
+	if accepted:
+		_grenade_host_ms = now
+		var launch: Array = _grenade_launch(clampf(power, 0.0, 1.0), under, direction.normalized())
+		# Локальное создание не проходит через RPC-обработчик: вложенный вызов ещё несёт sender гостя.
+		_spawn_grenade_local(launch[0], launch[1])
+		Net.broadcast_scene(self, &"_rpc_grenade_spawn", [launch[0], launch[1]], false)
+	if is_local():
+		_grenade_result(sequence, accepted, grenade_count())
+	else:
+		_rpc_grenade_result.rpc_id(peer_id, sequence, accepted, grenade_count())
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_grenade_result(sequence: int, accepted: bool, remaining: int) -> void:
+	if multiplayer.get_remote_sender_id() == 1:
+		_grenade_result(sequence, accepted, remaining)
+
+
+func _grenade_result(sequence: int, accepted: bool, remaining: int) -> void:
+	if sequence != _grenade_seq or sequence <= _grenade_result_seq:
+		return
+	_grenade_result_seq = sequence
+	_grenade_pending = false
+	if not loadout_mode:
+		grenades = remaining
+	_grenade_recover = float(Balance.GRENADE_HAND.recover_sec)
+	fire_timer = _grenade_recover
+	if not accepted:
+		_say("Бросок отменён: граната не израсходована")
+	elif remaining <= 0 and grenade_equipped:
+		_return_from_grenade()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_grenade_spawn(from: Vector3, velocity: Vector3) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	_spawn_grenade_local(from, velocity)
+
+
+func _spawn_grenade_local(from: Vector3, velocity: Vector3) -> void:
+	var grenade: Grenade = Grenade.throw(get_tree().current_scene, from, velocity, get_rid(), multiplayer.is_server(), peer_id)
+	grenade.src = {"kind": "grenade", "by": "player", "peer": peer_id}
 
 
 ## Куда: по нажатым WASD, иначе — куда смотрит корпус.
@@ -2477,7 +2635,7 @@ func _try_vault() -> void:
 		_say("Запнулся — руки не слушаются")
 	stamina = maxf(0.0, stamina - float(v.stamina) * carry_stamina_k())
 	_rest_t = Balance.STAMINA_REGEN_DELAY
-	_cancel_nade_aim()
+	_cancel_grenade_prepare()
 	var d: Vector3 = (path.land as Vector3) - global_position
 	if not ads:
 		_body.rotation.y = atan2(d.x, d.z)
@@ -2518,7 +2676,7 @@ func _try_dive() -> void:
 	stamina = maxf(0.0, stamina - float(dv.stamina) * carry_stamina_k())
 	_rest_t = Balance.STAMINA_REGEN_DELAY
 	fire_timer = maxf(fire_timer, float(dv.sec) + float(dv.recover))
-	_cancel_nade_aim()
+	_cancel_grenade_prepare()
 	NoiseBus.emit(global_position, float(dv.noise_m), "step")
 	get_tree().create_timer(float(dv.sec)).timeout.connect(func() -> void:
 		if is_inside_tree():
@@ -2656,7 +2814,7 @@ func _read_stance() -> void:
 		stance = Stance.STAND if stance == Stance.PRONE else Stance.PRONE
 		_apply_stance()
 	var was_aiming := aiming
-	aiming = Input.is_action_pressed("aim") and not ui_blocked()
+	aiming = Input.is_action_pressed("aim") and not grenade_equipped and not ui_blocked()
 	if aiming and not was_aiming and weapon_id != "":
 		# вскинул — синтетический шорох (записи «ads_raise» отвлекали; Audio «ads_in»)
 		Audio.play("ads_in", global_position + Vector3.UP * 1.4)

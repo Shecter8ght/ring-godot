@@ -1,0 +1,66 @@
+{
+  "source": "E:\\Models Blender\\WEAPONS\\Grenade\\Codex_Texture_v08\\Grenade_MkII_UCUPaint_v08.blend",
+  "sha256": "847f0d7be4d144f27e4523b486fb3816f7682ff8a5cf60daae60ee0e5a79f99c",
+  "accepted_version": "v08",
+  "sizes": {
+    "body": 2048,
+    "mechanism": 2048
+  },
+  "parts": {
+    "GrenadeBody": {
+      "high_triangles": 655872,
+      "low_triangles": 7999,
+      "atlas": "body"
+    },
+    "FuzeCasting": {
+      "high_triangles": 2086912,
+      "low_triangles": 2400,
+      "atlas": "mechanism"
+    },
+    "SafetyLever": {
+      "high_triangles": 6748,
+      "low_triangles": 1200,
+      "atlas": "mechanism"
+    },
+    "SafetyPin": {
+      "high_triangles": 10116,
+      "low_triangles": 640,
+      "atlas": "mechanism"
+    },
+    "PullRing": {
+      "high_triangles": 11564,
+      "low_triangles": 800,
+      "atlas": "mechanism"
+    },
+    "PinEyelet": {
+      "high_triangles": 4608,
+      "low_triangles": 192,
+      "atlas": "mechanism"
+    },
+    "BottomPlug": {
+      "high_triangles": 380,
+      "low_triangles": 128,
+      "atlas": "mechanism"
+    }
+  },
+  "center_blender": [
+    0.0,
+    0.0,
+    0.04500000178813934
+  ],
+  "pin_drivers": [
+    {
+      "object": "CTRL_PinAssembly",
+      "path": "location",
+      "index": 1,
+      "expression": "-0.0006*min(1,p/0.16)-0.0514*max(0,(p-0.16)/0.84)"
+    },
+    {
+      "object": "CTRL_LeverPose",
+      "path": "rotation_euler",
+      "index": 1,
+      "expression": "-1.18682389*l*min(1,max(0,(p-0.65)/0.35))"
+    }
+  ],
+  "triangles": 13359
+}

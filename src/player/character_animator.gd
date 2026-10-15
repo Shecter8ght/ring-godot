@@ -164,6 +164,8 @@ func _process(delta: float) -> void:
 		var person: Player = _actor as Player
 		var weapon_class: String = String(WeaponDb.weapon(person.weapon_id).get("class", "")) if person.weapon_id != "" else ""
 		family = "unarmed" if weapon_class == "" else ("pistol" if weapon_class == "PISTOL" else "rifle")
+		if person.grenade_equipped:
+			family = "pistol"
 		crouched = person.stance == Player.Stance.CROUCH
 		prone = person.stance == Player.Stance.PRONE
 		downed = person.health.downed

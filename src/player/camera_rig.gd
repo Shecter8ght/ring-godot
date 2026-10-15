@@ -716,8 +716,8 @@ func _set_ads(on: bool, pl: Player) -> void:
 
 
 func _process_ads(pl: Player, delta: float, s: float) -> void:
-	var wid := pl.weapon_id
-	var spec := pl.spec() if wid != "" else {}
+	var wid: String = pl.held_model_id()
+	var spec: Dictionary = pl.spec() if pl.weapon_id != "" and not pl.grenade_equipped else {}
 	# с завалом в оптику не смотрят: вид и чувствительность — как с открытым прицелом
 	var scoped := bool(spec.get("scoped", false)) and not pl.aim_cant
 	# ПКМ подводит оружие к глазам; поле зрения мира остаётся выбранным в настройках.
@@ -792,6 +792,10 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_sight_mode = ""
 		_reticle_nv(pl.nvg_on)
 	_viewmodel.visible = true
+	if pl.grenade_equipped:
+		_process_grenade_viewmodel(pl, delta)
+		_set_scope(false)
+		return
 	WeaponMods.update_condition(_viewmodel, pl.weapon_mods)
 	for n in _viewmodel.find_children("LaserBeam*", "Node3D", true, false):
 		(n as Node3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
@@ -892,6 +896,25 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
+
+
+## Временный хват существующими руками Persona; будущие клипы не требуют переделки модели.
+func _process_grenade_viewmodel(pl: Player, delta: float) -> void:
+	var cfg: Dictionary = Balance.GRENADE_HAND
+	var position: Vector3 = cfg.pose
+	position += (cfg.pose_charge as Vector3) * pl.grenade_charge
+	if pl.grenade_underhand and pl.grenade_pin > 0.0:
+		position += cfg.pose_under as Vector3
+	var basis: Basis = Basis(Vector3.UP, PI)
+	_viewmodel.transform = Transform3D(basis, position)
+	_viewmodel.transform = _weapon_lag(delta, 0.0) * _viewmodel.transform
+	if _viewmodel is GrenadeModel:
+		(_viewmodel as GrenadeModel).prepare(pl.grenade_pin)
+	_viewmodel.visible = pl.grenade_in_hand
+	_arms.collision_exclude = [pl.get_rid()]
+	_arms.update_pose()
+	_arms.visible = _arms.visible and _viewmodel.visible
+	pl.weapon_obstruction = 0.0
 
 
 ## Линия выбранного прицела в осях оружия: x, высота, крен. Между любыми двумя — один переход.
@@ -1524,6 +1547,9 @@ class Compass extends Control:
 func _update_hud(pl: Player) -> void:
 	if pl == null or not pl.is_local() or not pl.combat_enabled:
 		_weapon_label.text = ""
+		return
+	if pl.grenade_equipped:
+		_weapon_label.text = "Граната × %d   ·   ЛКМ — верхом   ПКМ — снизу   ·   держать — сильнее" % pl.grenade_count()
 		return
 	if pl.weapon_id == "":
 		var put_away: String = "без оружия"
