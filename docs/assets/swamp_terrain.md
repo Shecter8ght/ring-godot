@@ -169,7 +169,7 @@ BaseColor sRGB, Normal/ORM Non-Color. После повторного откры
 `lowpoly_bake_report.json`, `lowpoly_map_compression.json`, `lowpoly_reopened_validation.json`,
 `lowpoly_projection_samples.json`, `lowpoly_export_validation.json`.
 
-Low-poly передан на просмотр; отдельное его принятие владельцем ещё не зафиксировано.
+15 октября 2026 года владелец принял комплект ответом «гуд, отлично»: формы, отделку и итоговый low-poly с запеканием и четырьмя glTF. Запись принятия — `checks/lowpoly_acceptance.json` в библиотеке ассета.
 LOD, коллизии, навигация, растения, полноценная вода и импорт в Godot этим этапом
 не выполнялись. Код/сцены игры и прежние наборы свай/плит не менялись.
 Проверка glTF в Blender не заменяет проверку в Godot. Blender MCP недоступен;

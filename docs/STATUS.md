@@ -5123,3 +5123,11 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
 - Low-poly передан на просмотр. Godot, LOD, коллизии, навигация и новые растения
   этим этапом не выполнялись; код/сцены игры и прежние наборы не менялись.
 - Подробности: `docs/assets/swamp_terrain.md`, версии и принятие — `asset-state.md` в библиотеке.
+
+### 2026-10-15 — Болото: набор грунта принят целиком (Codex)
+
+- Владелец принял итоговый комплект ответом «гуд, отлично»: формы, native UCUPaint,
+  low-poly с запеканием и четыре glTF. Запись — `checks/lowpoly_acceptance.json`
+  в библиотеке `E:\Models Blender\ENVIRONMENT\RING_Swamp_Terrain`.
+- SHA-256 принятого low-poly: `483f16cde9671c4e8cf10bcfbb226dde23648cc919bd69fc6018692311518e9d`.
+- Состояние и описание обновлены; импорт в Godot не выполнялся.
