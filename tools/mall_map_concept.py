@@ -279,7 +279,7 @@ def main() -> None:
     for name, (x, y) in spawns.items():
         ax.add_patch(Circle((x, y), 8, fc=C["spawn"], ec="white", lw=1.4, zorder=45))
     extracts = [((-182, -296), C["extract"], "Автостанция"), ((-60, 256), C["extract"], "Ливнёвка"),
-                ((-430, 34), C["cond"], "Дорога за КПП\n(плата)"), (pol(46, 168), C["cond"], "Грузовик\n(питание ворот)"),
+                ((-430, 34), C["cond"], "Дорога на окраину\n(за КПП, плата)"), (pol(46, 168), C["cond"], "Грузовик\n(питание ворот)"),
                 ((405, 120), C["extract"], "Пролом в заборе"), ((-38, 50), C["cond"], "Крыша — вертолёт\n(позже, 4-й этаж)")]
     for (x, y), col, text in extracts:
         ax.add_patch(Polygon([(x, y + 10), (x - 9, y - 6), (x + 9, y - 6)], closed=True, fc=col, ec="white", lw=1.2, zorder=45))
