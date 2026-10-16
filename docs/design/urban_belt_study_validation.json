@@ -1,0 +1,181 @@
+{
+  "balance_unchanged": true,
+  "buildings": 51,
+  "checks": [
+    {
+      "check": "Число мест и физический масштаб",
+      "details": {
+        "area_m2": 333103.0,
+        "swamp_m2": 48352.6
+      },
+      "pass": true
+    },
+    {
+      "check": "Габариты и скорость из Balance",
+      "details": {
+        "eye_m": 1.62000000476837,
+        "sprint_m_s": 5.2,
+        "walk_m_s": 1.82
+      },
+      "pass": true
+    },
+    {
+      "check": "Пятиэтажные дома имеют высоту 15 м",
+      "details": {
+        "height_m": 15.0
+      },
+      "pass": true
+    },
+    {
+      "check": "Вода находится над настоящим понижением рельефа",
+      "details": {
+        "bed_y": -1.14999866485596,
+        "water_y": -0.5
+      },
+      "pass": true
+    },
+    {
+      "check": "Безопасная стартовая точка БОЛОТО",
+      "details": {
+        "position": "(-276.0, 0.000166, -100.8)"
+      },
+      "pass": true
+    },
+    {
+      "check": "Безопасная стартовая точка ПАНЕЛЬНЫЕ ДОМА",
+      "details": {
+        "position": "(-177.6, 0.0, 94.4)"
+      },
+      "pass": true
+    },
+    {
+      "check": "Безопасная стартовая точка НЕДОСТРОЙ",
+      "details": {
+        "position": "(45.6, 0.0, -112.0)"
+      },
+      "pass": true
+    },
+    {
+      "check": "Безопасная стартовая точка СПОРТПЛОЩАДКА",
+      "details": {
+        "position": "(16.8, 0.0, 52.0)"
+      },
+      "pass": true
+    },
+    {
+      "check": "Безопасная стартовая точка АВТОСТАНЦИЯ",
+      "details": {
+        "position": "(-64.0, 0.000156, 133.6)"
+      },
+      "pass": true
+    },
+    {
+      "check": "Безопасная стартовая точка ЖЕЛЕЗНАЯ ДОРОГА",
+      "details": {
+        "position": "(198.4, 0.000156, 180.0)"
+      },
+      "pass": true
+    },
+    {
+      "check": "Проход капсулой: residential_street",
+      "details": {
+        "position": "(-181.59, 0.000827, -86.29653)",
+        "walked_m": 176.2
+      },
+      "pass": true
+    },
+    {
+      "check": "Проход капсулой: bus_to_sports",
+      "details": {
+        "position": "(39.86077, 0.000234, -1.558045)",
+        "walked_m": 268.9
+      },
+      "pass": true
+    },
+    {
+      "check": "Проход капсулой: construction_to_station",
+      "details": {
+        "position": "(168.0286, 0.000914, 177.4987)",
+        "walked_m": 321.7
+      },
+      "pass": true
+    },
+    {
+      "check": "Проход капсулой: swamp_dry_ridge",
+      "details": {
+        "position": "(-59.27803, 0.039532, -94.46025)",
+        "walked_m": 298.2
+      },
+      "pass": true
+    },
+    {
+      "check": "Лестница и крыша: Construction/Construction_09F",
+      "details": {
+        "actual_y": 28.9003486633301,
+        "expected_y": 28.9
+      },
+      "pass": true
+    },
+    {
+      "check": "Лестница и крыша: Construction/Construction_05F",
+      "details": {
+        "actual_y": 16.1003894805908,
+        "expected_y": 16.1
+      },
+      "pass": true
+    },
+    {
+      "check": "Лестница и крыша: Residential/Panel_06_Enterable",
+      "details": {
+        "actual_y": 15.1002960205078,
+        "expected_y": 15.1
+      },
+      "pass": true
+    },
+    {
+      "check": "Закрытый фасад останавливает капсулу",
+      "details": {},
+      "pass": true
+    }
+  ],
+  "fails": 0,
+  "limitations": [
+    "Бой, добыча, эвакуация и сетевой режим не проверяются этим исследованием",
+    "Условные материалы и растительность; нет итоговых PBR ассетов",
+    "Измеряются скорости без выносливости, снаряжения и перегруза"
+  ],
+  "mesh_batches": 167,
+  "mesh_triangles_excluding_multimesh": 192272,
+  "renderer": "forward_plus",
+  "scene": "res://scenes/levels/urban_belt_study.tscn",
+  "date": "2026-10-16",
+  "engine": "Godot 4.7.2 Steam",
+  "compile_check_failed_scripts": 0,
+  "preservation": [
+    {
+      "path": "E:\\Games\\RING-godot\\scenes\\levels\\zone01_mall.tscn",
+      "unchanged": true,
+      "sha256": "48F2A423839774B90B502A4199528E33DA1B44F4D4AB9844E1E5C6CAB88A68FA"
+    },
+    {
+      "path": "E:\\Games\\RING-godot\\data\\floors.json",
+      "unchanged": true,
+      "sha256": "62138268419AB3B122739679593564361E4538DAB3379D5C92D1FFE50BC78EFB"
+    },
+    {
+      "path": "E:\\Games\\RING-godot\\src\\core\\balance.gd",
+      "unchanged": true,
+      "sha256": "0102783BC9F423A2B51D0A2B407F94D8878DA10ED52026A35BB2A88B2B1E5AE5"
+    },
+    {
+      "path": "E:\\Games\\RING-godot\\scenes\\levels\\zone01\\zone01_environment.tres",
+      "unchanged": true,
+      "sha256": "F3212AE1664AF8CE6474E81B3EC1FBBE06C451D48AE0100F37188592B4817A96"
+    },
+    {
+      "path": "E:\\Games\\RING-godot\\docs\\design\\concepts\\urban_belt_2026-10-15\\01_urban_belt_starting_concept.png",
+      "unchanged": true,
+      "sha256": "79DFF6BFB2A73C9648E3EC3AA839CBACEC29F362E6AB186CE10CA57E073B8CEB"
+    }
+  ]
+}

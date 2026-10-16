@@ -1,0 +1,1009 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/blockout/study_landscape.gd" id="1_land"]
+
+[ext_resource type="Script" path="res://src/blockout/study_building.gd" id="2_build"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+
+sky_top_color = Color(0.37, 0.43, 0.46, 1)
+
+sky_horizon_color = Color(0.63, 0.67, 0.65, 1)
+
+ground_bottom_color = Color(0.28, 0.32, 0.29, 1)
+
+ground_horizon_color = Color(0.63, 0.67, 0.65, 1)
+
+sun_angle_max = 0.5
+
+[sub_resource type="Sky" id="Sky"]
+
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Environment" id="Environment"]
+
+background_mode = 2
+
+sky = SubResource("Sky")
+
+ambient_light_source = 3
+
+ambient_light_color = Color(0.66, 0.72, 0.75, 1)
+
+ambient_light_energy = 0.50
+
+reflected_light_source = 2
+
+tonemap_mode = 2
+
+tonemap_exposure = 1.05
+
+fog_enabled = true
+
+fog_light_color = Color(0.57, 0.63, 0.61, 1)
+
+fog_light_energy = 0.65
+
+fog_density = 0.0004
+
+ssao_enabled = true
+
+ssao_radius = 1.5
+
+ssao_intensity = 1.3
+
+[node name="UrbanBeltStudy" type="Node3D"]
+
+metadata/purpose = "Отдельный масштабный тест по рисунку владельца · 2026-10-16"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+environment = SubResource("Environment")
+
+[node name="OvercastSun" type="DirectionalLight3D" parent="."]
+
+rotation_degrees = Vector3(-48, -38, 0)
+
+light_color = Color(0.88, 0.91, 0.87, 1)
+
+light_energy = 0.75
+
+light_angular_distance = 5.0
+
+shadow_enabled = true
+
+directional_shadow_max_distance = 150.0
+
+[node name="Landscape" type="Node3D" parent="."]
+
+script = ExtResource("1_land")
+
+[node name="Swamp" type="Node3D" parent="."]
+
+[node name="Swamp_Service_Hut" type="Node3D" parent="Swamp"]
+
+position = Vector3(-290.4, 0.0, -110.4)
+
+rotation_degrees = Vector3(0, 85, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(20, 11)
+
+floors = 1
+
+story_height = 3.3
+
+label = "Служебная постройка у затопления"
+
+[node name="Swamp_Pump" type="Node3D" parent="Swamp"]
+
+position = Vector3(-126.4, 0.0, -108.8)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(28, 10)
+
+floors = 1
+
+story_height = 3.8
+
+label = "Опорная постройка на берегу"
+
+[node name="Residential" type="Node3D" parent="."]
+
+[node name="Panel_01" type="Node3D" parent="Residential"]
+
+position = Vector3(-231.2, 0.0, -67.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(55, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_02" type="Node3D" parent="Residential"]
+
+position = Vector3(-202.4, 0.0, -44.0)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(52, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_03" type="Node3D" parent="Residential"]
+
+position = Vector3(-267.2, 0.0, -21.6)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(53, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_04" type="Node3D" parent="Residential"]
+
+position = Vector3(-204.0, 0.0, 18.4)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(56, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_05" type="Node3D" parent="Residential"]
+
+position = Vector3(-234.4, 0.0, 51.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(44, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_06_Enterable" type="Node3D" parent="Residential"]
+
+position = Vector3(-148.8, 0.0, -8.8)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "apartments"
+
+footprint = Vector2(56, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Жилой дом · сквозной проход и лестница"
+
+[node name="Panel_07" type="Node3D" parent="Residential"]
+
+position = Vector3(-106.4, 0.0, 25.6)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(62, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_08" type="Node3D" parent="Residential"]
+
+position = Vector3(-65.6, 0.0, -32.0)
+
+rotation_degrees = Vector3(0, 20, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(40, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_09" type="Node3D" parent="Residential"]
+
+position = Vector3(-22.4, 0.0, -4.8)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(48, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_10" type="Node3D" parent="Residential"]
+
+position = Vector3(-136.0, 0.0, 80.0)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(56, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Panel_11" type="Node3D" parent="Residential"]
+
+position = Vector3(-40.0, 0.0, 49.6)
+
+rotation_degrees = Vector3(0, 70, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(48, 12)
+
+floors = 5
+
+story_height = 3.0
+
+label = "Панельный дом · 5 этажей"
+
+[node name="Construction" type="Node3D" parent="."]
+
+[node name="Northern_Service" type="Node3D" parent="Construction"]
+
+position = Vector3(68.8, 0.0, -225.6)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(62, 17)
+
+floors = 1
+
+story_height = 5
+
+label = "Закрытый технический корпус"
+
+[node name="Construction_09F" type="Node3D" parent="Construction"]
+
+position = Vector3(103.2, 0.0, -137.6)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "skeleton"
+
+footprint = Vector2(64, 28)
+
+floors = 9
+
+story_height = 3.2
+
+label = "Недострой · 9 этажей, высота 28,8 м"
+
+[node name="Construction_05F" type="Node3D" parent="Construction"]
+
+position = Vector3(127.2, 0.0, -80.0)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "skeleton"
+
+footprint = Vector2(52, 26)
+
+floors = 5
+
+story_height = 3.2
+
+label = "Недострой · 5 этажей, высота 16 м"
+
+[node name="Crane" type="Node3D" parent="Construction"]
+
+position = Vector3(72.8, 0.0, -93.6)
+
+rotation_degrees = Vector3(0, 20, 0)
+
+script = ExtResource("2_build")
+
+kind = "crane"
+
+footprint = Vector2(6, 6)
+
+floors = 1
+
+story_height = 38
+
+label = "Башенный кран · 38 м"
+
+[node name="Site_Hut_A" type="Node3D" parent="Construction"]
+
+position = Vector3(25.6, 0.0, -149.6)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(9, 3)
+
+floors = 1
+
+story_height = 2.7
+
+label = "Бытовка стройки"
+
+[node name="Site_Hut_B" type="Node3D" parent="Construction"]
+
+position = Vector3(30.4, 0.0, -83.2)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(9, 3)
+
+floors = 1
+
+story_height = 2.7
+
+label = "Бытовка стройки"
+
+[node name="Site_Stack_1" type="Node3D" parent="Construction"]
+
+position = Vector3(55.2, 0.0, -59.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(5, 2.6)
+
+floors = 1
+
+story_height = 1.4
+
+label = "Штабель стройматериалов"
+
+[node name="Site_Stack_2" type="Node3D" parent="Construction"]
+
+position = Vector3(61.6, 0.0, -59.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(5, 2.6)
+
+floors = 1
+
+story_height = 1.4
+
+label = "Штабель стройматериалов"
+
+[node name="Site_Stack_3" type="Node3D" parent="Construction"]
+
+position = Vector3(68.0, 0.0, -59.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(5, 2.6)
+
+floors = 1
+
+story_height = 1.4
+
+label = "Штабель стройматериалов"
+
+[node name="Site_Stack_4" type="Node3D" parent="Construction"]
+
+position = Vector3(25.6, 0.0, -120.0)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(5, 2.6)
+
+floors = 1
+
+story_height = 1.4
+
+label = "Штабель стройматериалов"
+
+[node name="Site_Stack_5" type="Node3D" parent="Construction"]
+
+position = Vector3(155.2, 0.0, -157.6)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(5, 2.6)
+
+floors = 1
+
+story_height = 1.4
+
+label = "Штабель стройматериалов"
+
+[node name="Site_Stack_6" type="Node3D" parent="Construction"]
+
+position = Vector3(160.8, 0.0, -157.6)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(5, 2.6)
+
+floors = 1
+
+story_height = 1.4
+
+label = "Штабель стройматериалов"
+
+[node name="Sports" type="Node3D" parent="."]
+
+[node name="Sports_Club" type="Node3D" parent="Sports"]
+
+position = Vector3(120.0, 0.0, 100.0)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(38, 14)
+
+floors = 1
+
+story_height = 4
+
+label = "Спортивный павильон"
+
+[node name="Sports_Hall" type="Node3D" parent="Sports"]
+
+position = Vector3(157.6, 0.0, 88.8)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(48, 27)
+
+floors = 1
+
+story_height = 8
+
+label = "Спортивный зал"
+
+[node name="BusStation" type="Node3D" parent="."]
+
+[node name="Bus_Terminal" type="Node3D" parent="BusStation"]
+
+position = Vector3(28.8, 0.0, 188.0)
+
+rotation_degrees = Vector3(0, 90, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(68, 18)
+
+floors = 1
+
+story_height = 5.5
+
+label = "Автостанция · зал и проход"
+
+[node name="Bus_Repair_Hangar" type="Node3D" parent="BusStation"]
+
+position = Vector3(-110.4, 0.0, 166.4)
+
+rotation_degrees = Vector3(0, -28, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(44, 23)
+
+floors = 1
+
+story_height = 7
+
+label = "Ремонтный ангар"
+
+[node name="Bus_Dispatch" type="Node3D" parent="BusStation"]
+
+position = Vector3(-56.8, 0.0, 235.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(24, 12)
+
+floors = 2
+
+story_height = 3.1
+
+label = "Диспетчерская"
+
+[node name="Bus_Gates_Hut" type="Node3D" parent="BusStation"]
+
+position = Vector3(-163.2, 0.0, 146.4)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(12, 8)
+
+floors = 1
+
+story_height = 3
+
+label = "Пост у выезда"
+
+[node name="Bus_Canopy_1" type="Node3D" parent="BusStation"]
+
+position = Vector3(-28.8, 0.0, 148.8)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "canopy"
+
+footprint = Vector2(57, 4)
+
+floors = 1
+
+story_height = 4.2
+
+label = "Пассажирский перрон"
+
+[node name="Bus_Canopy_2" type="Node3D" parent="BusStation"]
+
+position = Vector3(-28.8, 0.0, 172.0)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "canopy"
+
+footprint = Vector2(57, 4)
+
+floors = 1
+
+story_height = 4.2
+
+label = "Пассажирский перрон"
+
+[node name="Bus_Canopy_3" type="Node3D" parent="BusStation"]
+
+position = Vector3(-28.8, 0.0, 195.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "canopy"
+
+footprint = Vector2(57, 4)
+
+floors = 1
+
+story_height = 4.2
+
+label = "Пассажирский перрон"
+
+[node name="Bus_1" type="Node3D" parent="BusStation"]
+
+position = Vector3(-48.0, 0.0, 151.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Габарит автобуса · 12 м"
+
+[node name="Bus_2" type="Node3D" parent="BusStation"]
+
+position = Vector3(-13.6, 0.0, 172.0)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Габарит автобуса · 12 м"
+
+[node name="Bus_3" type="Node3D" parent="BusStation"]
+
+position = Vector3(-57.6, 0.0, 196.8)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Габарит автобуса · 12 м"
+
+[node name="Bus_4" type="Node3D" parent="BusStation"]
+
+position = Vector3(-19.2, 0.0, 216.8)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Габарит автобуса · 12 м"
+
+[node name="Bus_5" type="Node3D" parent="BusStation"]
+
+position = Vector3(-95.2, 0.0, 215.2)
+
+rotation_degrees = Vector3(0, 0, 0)
+
+script = ExtResource("2_build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Габарит автобуса · 12 м"
+
+[node name="Bus_6" type="Node3D" parent="BusStation"]
+
+position = Vector3(-136.8, 0.0, 174.4)
+
+rotation_degrees = Vector3(0, -25, 0)
+
+script = ExtResource("2_build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Габарит автобуса · 12 м"
+
+[node name="Railway" type="Node3D" parent="."]
+
+[node name="Station" type="Node3D" parent="Railway"]
+
+position = Vector3(226.4, 0.0, 155.2)
+
+rotation_degrees = Vector3(0, 73, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(51, 16)
+
+floors = 1
+
+story_height = 6
+
+label = "Железнодорожная станция"
+
+[node name="Rail_Warehouse" type="Node3D" parent="Railway"]
+
+position = Vector3(244.8, 0.0, 94.4)
+
+rotation_degrees = Vector3(0, 73, 0)
+
+script = ExtResource("2_build")
+
+kind = "hall"
+
+footprint = Vector2(48, 18)
+
+floors = 1
+
+story_height = 6
+
+label = "Железнодорожный склад"
+
+[node name="Rail_Workshop" type="Node3D" parent="Railway"]
+
+position = Vector3(244.8, 0.0, 212.0)
+
+rotation_degrees = Vector3(0, 73, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(27, 17)
+
+floors = 1
+
+story_height = 5
+
+label = "Мастерская"
+
+[node name="Garage_01" type="Node3D" parent="Railway"]
+
+position = Vector3(189.6, 0.0, 228.8)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"
+
+[node name="Garage_02" type="Node3D" parent="Railway"]
+
+position = Vector3(194.24, 0.0, 229.84)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"
+
+[node name="Garage_03" type="Node3D" parent="Railway"]
+
+position = Vector3(198.88, 0.0, 230.88)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"
+
+[node name="Garage_04" type="Node3D" parent="Railway"]
+
+position = Vector3(203.52, 0.0, 231.92)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"
+
+[node name="Garage_05" type="Node3D" parent="Railway"]
+
+position = Vector3(208.16, 0.0, 232.96)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"
+
+[node name="Garage_06" type="Node3D" parent="Railway"]
+
+position = Vector3(212.8, 0.0, 234.0)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"
+
+[node name="Garage_07" type="Node3D" parent="Railway"]
+
+position = Vector3(217.44, 0.0, 235.04)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"
+
+[node name="Garage_08" type="Node3D" parent="Railway"]
+
+position = Vector3(222.08, 0.0, 236.08)
+
+rotation_degrees = Vector3(0, 17, 0)
+
+script = ExtResource("2_build")
+
+kind = "mass"
+
+footprint = Vector2(4.3, 6.4)
+
+floors = 1
+
+story_height = 3.1
+
+label = "Гараж у железной дороги"

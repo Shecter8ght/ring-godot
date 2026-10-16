@@ -1,0 +1,13 @@
+{
+  "envelope_m": [
+    690,
+    650
+  ],
+  "boundary_area_m2": 333103.0,
+  "swamp_polygon_area_m2": 48352.6,
+  "buildings": 51,
+  "source_scale": "0.8 м/пиксель, рабочее предположение по домам и проездам",
+  "roads": 16,
+  "tallest_building_m": 28.8,
+  "crane_m": 38
+}
