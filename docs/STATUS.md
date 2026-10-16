@@ -5233,3 +5233,18 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
 - 8 итоговых видов 2100 × 1600 без DOF/denoise — библиотека previews/ucupaint_v01. Отделка на просмотр;
   после принятия — low-poly/high→low bake. Godot/LOD/ветер/коллизии и игровые сцены не менялись.
 - Мостки остаются отдельной будущей задачей для другого участка. Описание: docs/assets/swamp_water_duckweed.md.
+
+
+### 2026-10-16 — Болото: low-poly воды и ряски с high→low bake (Codex)
+
+- Владелец принял native UCUPaint v01 и поручил облегчение/запекание. Принятые geometry/native мастера сохранены без изменения.
+- Отдельный файл: `E:\Models Blender\ENVIRONMENT\RING_Swamp_Water_Duckweed\low_poly\RING_Swamp_Water_Duckweed_LOW_POLY_v01.blend`; 53.1 МиБ вместо 127.9 (−58.5%); SHA-256 `3535aa78508f8b7f153ff2edf9a838ba343dcd3d003e5433cd92ad773d04bb7b`.
+- Уникальная сетка воды/12 шаблонов: 60,102 → 8,580 треугольников (−85.7%).
+  Реальные замкнутые пластинки/корни; 5 ROOT, точки/варианты/матрицы, Density/Seed сохранены.
+- Три packed 4K карты: BaseColor sRGB без света, Normal tangent +Y Non-Color, RTC Roughness/Translucency/WetCuticle Non-Color.
+  Настоящий selected-to-active bake с изоляцией тонких сторон, без непреднамеренных UV-пересечений и пропусков в проверенной внутренней части UV.
+  Вода сохранила native UCUPaint/IOR 1,333/поглощение; объёмная оптика не запекалась в albedo.
+- Итоговое повторное открытие 248 PASS / 0 FAIL; max deviation 17.45 мкм. Оптика: 4 PASS; сравнение рендеров: 10 PASS.
+  8 видов 2100 × 1600 + сравнение 1:1 в previews/lowpoly_v01. Все виды визуально осмотрены.
+- Godot/LOD/ветер/коллизии и игровые сцены не менялись; полный игровой бюджет болота ещё не проверен.
+  Мостки остаются задачей другого участка. Описание: docs/assets/swamp_water_duckweed.md.
