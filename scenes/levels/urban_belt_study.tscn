@@ -4,6 +4,8 @@
 
 [ext_resource type="Script" path="res://src/blockout/study_building.gd" id="2_build"]
 
+[ext_resource type="Script" path="res://src/blockout/study_level.gd" id="3_launch"]
+
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
 
 sky_top_color = Color(0.37, 0.43, 0.46, 1)
@@ -53,6 +55,8 @@ ssao_radius = 1.5
 ssao_intensity = 1.3
 
 [node name="UrbanBeltStudy" type="Node3D"]
+
+script = ExtResource("3_launch")
 
 metadata/purpose = "Отдельный масштабный тест по рисунку владельца · 2026-10-16"
 

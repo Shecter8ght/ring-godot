@@ -177,5 +177,37 @@
       "unchanged": true,
       "sha256": "79DFF6BFB2A73C9648E3EC3AA839CBACEC29F362E6AB186CE10CA57E073B8CEB"
     }
-  ]
+  ],
+  "direct_launch_fix": {
+    "date": "2026-10-16",
+    "reproduced_before": {
+      "active_camera": null,
+      "walker": false,
+      "hud": false
+    },
+    "entrypoints": [
+      {
+        "active_camera": "/root/UrbanBeltStudy/WalkSession/StudyWalker/Eye",
+        "cameras": 1,
+        "entry": "res://scenes/levels/urban_belt_study.tscn",
+        "hud": true,
+        "pass": true,
+        "walkers": 1,
+        "worlds": 1
+      },
+      {
+        "active_camera": "/root/UrbanBeltScaleStudy/StudyWalker/Eye",
+        "cameras": 1,
+        "entry": "res://tools/urban_belt_study.tscn",
+        "hud": true,
+        "pass": true,
+        "walkers": 1,
+        "worlds": 1
+      }
+    ],
+    "direct_map_physics_checks": 18,
+    "direct_map_physics_fails": 0,
+    "direct_map_forward_plus_frame_reviewed": true,
+    "generator_reproduces_scene": true
+  }
 }

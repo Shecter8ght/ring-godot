@@ -21,7 +21,8 @@ var mode: String = "walk"
 
 func _enter_tree() -> void:
 	# Отложенный sync контрактов тоже должен видеть отдельный тестовый профиль.
-	Profile.use_file("user://profile_urban_belt_study_test.json", true)
+	if world == null:
+		Profile.use_file("user://profile_urban_belt_study_test.json", true)
 
 func _ready() -> void:
 	DisplayServer.window_set_title("RING · Городской пояс · БЛОКАУТ 1:1")
@@ -35,8 +36,9 @@ func _ready() -> void:
 	output_dir = OS.get_environment("URBAN_STUDY_OUTPUT")
 	if output_dir.is_empty():
 		output_dir = ProjectSettings.globalize_path("res://docs/screens/urban_belt_study")
-	world = (load(LEVEL) as PackedScene).instantiate() as Node3D
-	add_child(world)
+	if world == null:
+		world = (load(LEVEL) as PackedScene).instantiate() as Node3D
+		add_child(world)
 	landscape = world.get_node("Landscape") as Landscape
 	plan = landscape.plan
 	walker = Walker.new()

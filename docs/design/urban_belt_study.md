@@ -16,7 +16,8 @@ tools\godot.cmd --windowed --resolution 1600x900 res://tools/urban_belt_study.ts
 ```
 
 Для редактирования открыть `scenes/levels/urban_belt_study.tscn` в Godot.
-Для прогулки из редактора запускать **tools/urban_belt_study.tscn** текущей сценой (F6).
+**F6 прямо из этой карты запускает прогулку с игроком и камерой.**
+Отдельный вход `tools/urban_belt_study.tscn` тоже поддерживает F6 и запуск через .cmd.
 Обычный F5 по-прежнему запускает основную игру.
 
 | Управление | Действие |
@@ -82,6 +83,9 @@ tools\godot.cmd --windowed --resolution 1600x900 res://tools/urban_belt_study.ts
 
 ## Как редактировать и заменять объёмы
 
+При прямом запуске карты `study_level.gd` добавляет сессию прогулки к уже собранному миру.
+При запуске через tools-сцену мир повторно не создаётся; в редакторе сессии игрока нет.
+
 У каждого крупного объекта отдельный именованный Node3D в соответствующем районе сцены:
 `Residential`, `Construction`, `BusStation` и т. д. В инспекторе меняются `kind`,
 `footprint`, `floors`, `story_height`; скрипт @tool обновляет геометрию.
@@ -111,6 +115,8 @@ Godot 4.7.2 Steam, Forward+. Скрипты всего проекта: `compile_
 ```bat
 tools\godot.cmd --headless --fixed-fps 60 res://tools/urban_belt_study.tscn -- verify
 tools\godot.cmd --windowed --resolution 1600x900 --disable-vsync --fixed-fps 60 res://tools/urban_belt_study.tscn -- shots
+tools\godot.cmd --headless --fixed-fps 60 res://tools/urban_belt_launch_test.tscn -- res://scenes/levels/urban_belt_study.tscn
+tools\godot.cmd --headless --fixed-fps 60 res://tools/urban_belt_launch_test.tscn -- res://tools/urban_belt_study.tscn
 ```
 
 `URBAN_STUDY_OUTPUT` задаёт каталог отчёта/кадров; без него используется
@@ -140,3 +146,15 @@ AudioStreamWAV / AudioStreamPlaybackWAV `Ambient`; ошибок компиляц
 После прогулки оценить прежде всего длины пустых переходов, читаемость шести мест,
 число обходов и обзор с верхних этажей. Размещение финальных ассетов и решение о замене
 основной компоновки принимаются по результату этого просмотра.
+
+### Исправление прямого F6-запуска 2026-10-16
+
+При запуске открытой `scenes/levels/urban_belt_study.tscn` раньше создавалась только геометрия:
+активной камеры, игрока и HUD не было. Именно эта сцена была открыта владельцу в редакторе,
+поэтому F6 давал чёрный экран. Первоначальная проверка через отдельную tools-сцену этот случай не покрывала.
+
+Теперь сама карта запускает ту же сессию прогулки на уже собранном мире. При вложенном
+запуске через tools-сцену второй мир/игрок не создаются. Воспроизведено отсутствие камеры
+до правки; после неё обе точки входа проверяются отдельным launch-тестом: один мир,
+один игрок, одна активная камера и HUD. Дополнительно 18 физических проверок пройдены
+через прямой запуск карты, кадр с реальной стартовой камерой/HUD просмотрен в Forward+.
