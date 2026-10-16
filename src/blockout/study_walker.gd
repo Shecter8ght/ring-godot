@@ -43,7 +43,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion
-		var sensitivity: float = deg_to_rad(Balance.ADS_SENS * Settings.sens_fps * (Balance.FPS_FOV / 62.0))
+		# ADS_SENS уже в радианах на отсчёт мыши, как в основной CameraRig.
+		var sensitivity: float = Balance.ADS_SENS * Settings.sens_fps * (Balance.FPS_FOV / 62.0)
 		rotate_y(-motion.relative.x * sensitivity)
 		camera.rotation.x = clampf(camera.rotation.x - motion.relative.y * sensitivity, deg_to_rad(-87), deg_to_rad(87))
 	if event is InputEventKey and (event as InputEventKey).pressed and not event.is_echo():
