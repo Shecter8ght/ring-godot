@@ -5218,3 +5218,18 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   Восемь нейтральных видов без DOF/denoise — библиотека `previews/geometry_v01/`; SHA/инструкции/источники записаны.
 - Форма ещё не принята; производственные UV/UCUPaint/PBR, low-poly и bake не начаты.
   Код/сцены Godot, игровой импорт и прежние принятые наборы не менялись. Описание: `docs/assets/swamp_water_duckweed.md`.
+
+
+### 2026-10-16 — Болото: отделка воды и ряски в native UCUPaint на просмотр (Codex)
+
+- Владелец принял формы geometry_v01 и поручил UCUPaint/материал воды. Принятый .blend сохранён без изменения.
+- Файл: `E:\Models Blender\ENVIRONMENT\RING_Swamp_Water_Duckweed\models\RING_Swamp_Water_Duckweed_UCUPaint_v01.blend`; SHA-256 `225bc4370a1184c2ec9f461923a01a9c3b8c6cda989e607aacc315945a5bc1b0`.
+  4 настоящих стека UCUPaint 2.4.9, 23 слоя; физические UV, жилки/микро-рельеф, отдельная изнанка/просвет,
+  влажная кромка, молодые пластинки, редкие старые пятна и отдельные светлые корешки с локальным илом.
+- Вода: IOR 1.333, спокойная рябь, управление Roughness/Transmission/Absorption и поглощение по расстоянию.
+  5 карт packed + relative copies: пигмент CC0 8K, лесной HDRI CC0 4K, собственные маски 4K 16-bit.
+- Повторное открытие: 214 PASS / 0 FAIL, 78 actual inputs;
+  принятые сетки/роли/матрицы/коллекции/точки и зависимости проверены. Оптический рендер-эксперимент: 4 PASS.
+- 8 итоговых видов 2100 × 1600 без DOF/denoise — библиотека previews/ucupaint_v01. Отделка на просмотр;
+  после принятия — low-poly/high→low bake. Godot/LOD/ветер/коллизии и игровые сцены не менялись.
+- Мостки остаются отдельной будущей задачей для другого участка. Описание: docs/assets/swamp_water_duckweed.md.
