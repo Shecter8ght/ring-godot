@@ -526,6 +526,20 @@ def cleanup(ob: bpy.types.Object, dist_mm: float = 0.01) -> None:
     ob.data.update()
 
 
+def fill_small_holes(ob: bpy.types.Object, max_sides: int = 8) -> int:
+    """Закрыть крошечные дыры (выпавшие треугольники-осколки после цепочки точных булевых). Возвращает число
+    открытых рёбер до закрытия."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    edges = [e for e in bm.edges if e.is_boundary]
+    if edges:
+        bmesh.ops.holes_fill(bm, edges=edges, sides=max_sides)
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+    return len(edges)
+
+
 def join(objs: Sequence[bpy.types.Object], name: str) -> bpy.types.Object:
     target = objs[0]
     with bpy.context.temp_override(active_object=target, selected_editable_objects=list(objs),

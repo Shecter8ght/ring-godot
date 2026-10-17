@@ -21,7 +21,10 @@ import mosin_lib as L  # noqa: E402
 
 OUT = os.path.join(L.ASSET_DIR, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v07.blend")
 MUZZLE = 728.8
-SEC = 120                     # точек в сечении ложи
+SEC = 120                     # точек в сечении накладки и колец
+STOCK_SEC = 280               # точек в сечении ложи (у паза под пальцы гуще)
+GROOVE = (-16.0, 108.0, -17.0)  # паз под пальцы (с обеих сторон): задний и передний концы, высота оси, мм
+GROOVE_RY, GROOVE_RZ, GROOVE_DEPTH, GROOVE_LIP = 5.28, 6.0, 3.2, 1.2   # профиль паза и скругление кромки
 
 # ------------------------------------------------------------------ контуры ложи (сняты с подложки, мм)
 STOCK_TOP = [
@@ -137,7 +140,70 @@ def _wrist_groove(y: float) -> float:
         return -12.0
     if a < 12.0:
         return -6.0 - math.sqrt(36.0 - (a - 6.0) ** 2)
-    return 1e9
+    # выше стенка не отвесная, а крутая: отвесный уступ при густых точках сечения рвёт сетку булевыми
+    return -6.0 + (a - 12.0) * 6.0
+
+
+def _groove_profile():
+    """Глубина паза под пальцы по расстоянию ρ от его оси (мм): прежний эллипс (полуоси 5,28 × 6, глубина 3,2),
+    кромки скруглены дугой GROOVE_LIP — касание и со стенкой паза, и с поверхностью ложи (без острого ребра)."""
+    ry, rz, dep, rr = GROOVE_RY, GROOVE_RZ, GROOVE_DEPTH, GROOVE_LIP
+
+    def wall(r: float) -> float:            # высота поверхности: 0 — ложа, минус — вглубь паза
+        return -max(0.0, ry * math.sqrt(max(0.0, 1 - (r / rz) ** 2)) - (ry - dep))
+    edge = rz * math.sqrt(1 - ((ry - dep) / ry) ** 2)
+    samples = [(edge * i / 4000, wall(edge * i / 4000)) for i in range(4001)]
+
+    def dist(c: float) -> float:
+        return min(math.hypot(r - c, h + rr) for r, h in samples)
+    # центр дуги (c, −R) — в дереве: от точки, где глубина паза равна R, до края паза + R
+    lo, hi = rz * math.sqrt(1 - ((rr + ry - dep) / ry) ** 2), edge + rr
+    for _ in range(50):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if dist(mid) < rr else (lo, mid)
+    c = (lo + hi) / 2
+    rt = min(samples, key=lambda s: math.hypot(s[0] - c, s[1] + rr))[0]
+
+    def depth(rho: float) -> float:
+        rho = abs(rho)
+        if rho <= rt:
+            return -wall(rho)
+        if rho >= c:
+            return 0.0
+        return rr - math.sqrt(max(0.0, rr * rr - (rho - c) ** 2))
+    return depth, c
+
+
+_GROOVE_DEPTH_FN, GROOVE_HALF = _groove_profile()
+
+
+def _groove_rho(x: float, z: float) -> float:
+    """Расстояние в боковой плоскости от точки (x, z) до оси паза; концы паза — полукруги радиуса GROOVE_RZ."""
+    x0, x1, zc = GROOVE
+    xa, xb = x0 + GROOVE_RZ, x1 - GROOVE_RZ
+    xx = min(max(x, xa), xb)
+    return math.hypot(x - xx, z - zc)
+
+
+def _resample_weighted(pts, count: int, weight) -> list[tuple[float, float]]:
+    """Перестановка точек замкнутого контура по длине с весом weight(z): где вес больше — точки гуще.
+    Начало — первая точка, как у resample_closed: точки сечений лофта соответствуют друг другу."""
+    n = len(pts)
+    seg = []
+    for i in range(n):
+        (y0, z0), (y1, z1) = pts[i], pts[(i + 1) % n]
+        seg.append(math.hypot(y1 - y0, z1 - z0) * weight((z0 + z1) / 2))
+    total = sum(seg)
+    out, i, acc = [], 0, 0.0
+    for k in range(count):
+        target = total * k / count
+        while acc + seg[i] < target and i < n - 1:
+            acc += seg[i]
+            i += 1
+        t = (target - acc) / seg[i] if seg[i] > 0 else 0.0
+        (y0, z0), (y1, z1) = pts[i], pts[(i + 1) % n]
+        out.append((y0 + (y1 - y0) * t, z0 + (z1 - z0) * t))
+    return out
 
 
 def stock_section(x: float):
@@ -145,28 +211,45 @@ def stock_section(x: float):
     zb = L.smooth_interp(STOCK_BOT, x, 1.5 if 190 < x < 210 else 3.0)
     hw = L.smooth_interp(STOCK_W, x, 2.0) / 2
     rt, rb, hwb = _section_params(x, zt - zb, hw)
-    pts = L.rounded_rect_yz(zt, zb, hw, rt, rb, SEC, hwb)
+    poly = [(0.0, zt), (hw, zt), (hwb, zb), (-hwb, zb), (-hw, zt)]
+    dense = L.resample_closed(L.fillet(poly, [0.0, rt, rb, rb, rt], seg=24, closed=True), 2400)
+    # у паза под пальцы точки гуще (иначе скруглённые кромки паза гранятся); вдали от паза — равномерно
+    x0, x1, zc = GROOVE
+    gx = 1.0 - _smoothstep((max(x0 - x, x - x1, 0.0) - 6.0) / 30.0)
+    pts = _resample_weighted(dense, STOCK_SEC,
+                             lambda z: 1.0 + 5.0 * gx * (1.0 - _smoothstep((abs(z - zc) - 8.0) / 3.0)))
     if -210.0 < x < -160.0:
         # ложбина в верху шейки: грибок проходит над деревом, когда затвор закрыт и при отводе
         pts = [(y, min(z, _wrist_groove(y))) for y, z in pts]
+    if x0 - 1.0 < x < x1 + 1.0:
+        # паз под пальцы с обеих сторон — прямо в сечениях, на постоянную глубину от поверхности ложи
+        # (булевым резаком паз мелел к дулу вместе с ложей, кромка была то острой, то размытой)
+        pts = [(y - math.copysign(_GROOVE_DEPTH_FN(_groove_rho(x, z)), y) if abs(y) > hw - 3.0 else y, z)
+               for y, z in pts]
     return [(x, y, z) for y, z in pts]
 
 
 def build_stock(col):
     xs = []
     x = -512.0
+    g0, g1 = GROOVE[0], GROOVE[1]
     while x < 623.0:
         xs.append(x)
-        # гуще у магазина: иначе кромка выреза в дереве идёт «пилой» по шагу сечений
-        x += 2.0 if (x < -150 or 185 < x < 215) else (1.5 if -125 < x < 15 else 4.0)
+        # гуще у магазина: иначе кромка выреза в дереве идёт «пилой» по шагу сечений;
+        # у полукруглых концов паза под пальцы — ещё гуще
+        if g0 - 1.0 <= x < g0 + GROOVE_RZ + 1.0 or g1 - GROOVE_RZ - 1.0 <= x < g1 + 1.0:
+            x += 0.4
+        else:
+            x += 2.0 if (x < -150 or 185 < x < 215) else (1.5 if -125 < x < 15 else 4.0)
     xs.append(623.0)
     secs = [stock_section(x) for x in xs]
     # скругление переднего торца цевья: последние сечения сжимаются к центру
     for k, shrink in ((-1, 0.82), (-2, 0.93), (-3, 0.98)):
-        cx = sum(p[1] for p in secs[k]) / SEC
-        cz = sum(p[2] for p in secs[k]) / SEC
+        cx = sum(p[1] for p in secs[k]) / len(secs[k])
+        cz = sum(p[2] for p in secs[k]) / len(secs[k])
         secs[k] = [(p[0], cx + (p[1] - cx) * shrink, cz + (p[2] - cz) * shrink) for p in secs[k]]
     stock = L.loft("Stock", secs, "Wood_Stock", col, smooth_angle=50)
+    L.cleanup(stock, 0.002)            # ложбина шейки прижимает соседние точки сечения к одному дну
 
     # затылок: срез плоскостью затыльника (дерево кончается на толщине пластины)
     heel, toe = Vector((BUTT_HEEL[0], 0, BUTT_HEEL[1])), Vector((BUTT_TOE[0], 0, BUTT_TOE[1]))
@@ -205,9 +288,7 @@ def build_stock(col):
     L.boolean(stock, L.lathe("cut_rs_base", [(87.0, 0), (87.0, 12.45), (164.0, 12.45), (164.0, 0)], 64))
     # магазин и спусковая скоба
     L.boolean(stock, _magazine_cutter())
-    # пазы под пальцы с обеих сторон
-    for side in (-1, 1):
-        L.boolean(stock, _groove_cutter(side))
+    # пазы под пальцы — в сечениях ложи (stock_section)
     # гнёзда под шляпки поперечного винта: дно паза под пальцы вогнутое, плоская шляпка без гнезда уходила
     # краями в дерево; на снимке RIA 265 головка сидит в круглом высверленном гнезде
     yb, (xs, zs, rs) = cross_screw_base(), CROSS_SCREW
@@ -220,6 +301,8 @@ def build_stock(col):
     # канал шомпола
     L.boolean(stock, L.lathe("cut_rod", [(30, 0), (30, 3.2), (630, 3.2), (630, 0)], 24,
                              origin=(0, 0, -21.3)))
+    holes = L.fill_small_holes(stock)      # осколок у паза хвостовика (под металлом) — закрыть
+    print("STOCK holes filled, open edges:", holes)
     stock.data.shade_smooth()
     stock.data.set_sharp_from_angle(angle=math.radians(50))
     return stock
@@ -268,26 +351,6 @@ def _magazine_cutter():
            (-114, -90), (-114, -49.6), (-196.0, -19.0)]
     L.boolean(cut, L.extrude_profile("cut_bow_tang", bow, -4.8, 4.8, None, None, None), "UNION")
     return cut
-
-
-def _groove_cutter(side: int):
-    """Удлинённый паз под пальцы: капсула 124×12 мм, глубина 3,2 мм — один замкнутый лофт эллипсов."""
-    x0, x1, zc, rz = -16.0, 108.0, -17.0, 6.0
-    ry = 3.3 * 1.6
-    hw = L.smooth_interp(STOCK_W, 46.0) / 2
-    yc = side * (hw + ry - 3.2)
-    secs = []
-    n = 48
-    xs = [x0 + rz * (1 - math.cos(math.pi / 2 * i / 8)) for i in range(9)]
-    xs += [x0 + rz + (x1 - x0 - 2 * rz) * i / 12 for i in range(1, 12)]
-    xs += [x1 - rz * (1 - math.cos(math.pi / 2 * i / 8)) for i in range(8, -1, -1)]
-    for x in xs:
-        e = min(x - x0, x1 - x)
-        k = math.sqrt(max(0.0, 1 - ((rz - min(e, rz)) / rz) ** 2)) if e < rz else 1.0
-        k = max(k, 0.02)
-        secs.append([(x, yc + ry * k * math.cos(2 * math.pi * j / n), zc + rz * k * math.sin(2 * math.pi * j / n))
-                     for j in range(n)])
-    return L.loft("cut_groove", secs, None, None, cap_center=True)
 
 
 def _slot_cutter(center, length, height, angle_deg):
