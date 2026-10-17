@@ -50,6 +50,47 @@ MALL_R = 100.0
 PODIUM_R = 108.0
 FIRE_LANE = [112.0, 122.0]
 LOOP_R = 255.0
+# южная парковка террасами (углы игры): с востока террасы начинаются за паркингом — он стоит на ровном
+TERRACE_A = [ga(-36), ga(-158)]
+TERRACE_WALLS = [172.0, 206.0]
+
+
+def in_terraces(a_game: float) -> bool:
+    return (a_game - TERRACE_A[0]) % 360.0 <= (TERRACE_A[1] - TERRACE_A[0]) % 360.0
+
+
+def near_terrace_wall(x: float, y: float) -> bool:
+    """Точка схемы у подпорной стенки террас: у лестницы через стенку навеса нет."""
+    r = math.hypot(x, y)
+    return in_terraces(ga(math.degrees(math.atan2(y, x)))) and any(w - 4.5 < r < w + 5.0 for w in TERRACE_WALLS)
+
+
+def gallery_with_stairs(points, half_w: float = 2.5, piece: float = 6.0):
+    """Крытая галерея кусками не длиннее piece (каждый на своём уровне рельефа) и лестницы там, где
+    она пересекает подпорную стенку террас: радиальный марш со своим проёмом в стенке, без навеса."""
+    pieces, stairs = [], []
+    for (x0, y0), (x1, y1) in zip(points, points[1:]):
+        dx, dy = x1 - x0, y1 - y0
+        length = math.hypot(dx, dy)
+        qa, qb = dx * dx + dy * dy, 2.0 * (x0 * dx + y0 * dy)
+        for w in TERRACE_WALLS:
+            disc = qb * qb - 4.0 * qa * (x0 * x0 + y0 * y0 - w * w)
+            if disc < 0.0:
+                continue
+            for t in sorted(((-qb - math.sqrt(disc)) / (2.0 * qa), (-qb + math.sqrt(disc)) / (2.0 * qa))):
+                a_game = ga(math.degrees(math.atan2(y0 + t * dy, x0 + t * dx)))
+                if 0.0 <= t <= 1.0 and in_terraces(a_game):
+                    stairs.append({"a": round(a_game, 2), "r": w})
+        n = max(1, math.ceil(length / piece))
+        ux, uy = dx / length, dy / length
+        for i in range(n):
+            ends = [(x0 + dx * k / n, y0 + dy * k / n) for k in (i, i + 1)]
+            corners = [(px - uy * half_w * s, py + ux * half_w * s) for px, py in ends for s in (-1.0, 1.0)]
+            if any(near_terrace_wall(*c) for c in corners):
+                continue
+            pieces.append(((ends[0][0] + ends[1][0]) / 2, (ends[0][1] + ends[1][1]) / 2, length / n,
+                           math.degrees(math.atan2(dy, dx))))
+    return pieces, stairs
 
 # ------------------------------------------------------------------ постройки участков
 buildings: list[dict] = []
@@ -69,14 +110,14 @@ building("Entrance_Canopy", "Навес над главным входом", pol
 building("Bus_Pavilion", "Автостанция · касса и зал", (-158, -284), (70, 16), "BusStation", kind="hall", height=5.0)
 for i in range(4):
     building(f"Bus_Platform_{i + 1}", "Перрон под навесом", (-186 + i * 18, -268), (12, 3), "BusStation", kind="canopy", height=4.0)
-for i, x in enumerate((-180, -144)):
+# автобусы у западных перронов: галерея уходит к площади от третьего, путь под ней свободен
+for i, x in enumerate((-186, -168)):
     building(f"Bus_{i + 1}", "Автобус · 12 м", (x, -258), (12, 2.6), "BusStation", kind="bus")
-gallery = [(-150, -272), (-118, -222), (-70, -175), pol(-100, 168)]
-for i in range(len(gallery) - 1):
-    (x0, y0), (x1, y1) = gallery[i], gallery[i + 1]
-    length = math.hypot(x1 - x0, y1 - y0)
-    building(f"Gallery_{i + 1}", "Крытая галерея к площади", ((x0 + x1) / 2, (y0 + y1) / 2), (length, 5), "BusStation",
-             kind="canopy", height=3.4, yaw=math.degrees(math.atan2(y1 - y0, x1 - x0)))
+GALLERY = [(-150, -272), (-118, -222), (-70, -175), pol(-100, 168)]
+gallery_pieces, gallery_stairs = gallery_with_stairs(GALLERY)
+for i, (x, y, length, yaw) in enumerate(gallery_pieces):
+    building(f"Gallery_{i + 1}", "Крытая галерея к площади", (x, y), (length, 5), "BusStation",
+             kind="canopy", height=3.4, yaw=yaw)
 # 5 — многоуровневый паркинг: 4 яруса по 3 м — второй ярус вровень со 2-м этажом ТЦ (6 м), мост
 building("Parking_Garage", "Многоуровневый паркинг · 4 яруса", (185, -42), (64, 100), "Garage", kind="skeleton", floors=4, height=3.0)
 # 6 — придорожное кафе и мойка
@@ -141,18 +182,18 @@ plan = {
     "purpose": "Серый черновик территории ТЦ в настоящем масштабе: прогулка и замер, не рейдовая карта",
     "reference": "docs/design/mall_map_concept.png (принята 2026-10-17), docs/design/concepts/mall_2026-10-15/01_ring_territory.png",
     "north": "-Z",
-    "bounds": [-470, -400, 460, 400],
+    "bounds": [-470, -400, 520, 470],  # с новостройками за трассой и складами промзоны
     "boundary": gs([(-400, -350), (380, -350), (425, -150), (412, 205), (335, 345), (-150, 368), (-385, 305), (-438, 60)]),
     "forest": [gs([(-385, 305), (-150, 368), (335, 345), (300, 300), (60, 318), (-160, 322), (-330, 270)]),
                gs([(335, 345), (412, 205), (425, 60), (380, 70), (372, 200), (300, 300)])],
     "mall": {"r": MALL_R, "podium_r": PODIUM_R, "fire_lane": FIRE_LANE, "loop_r": LOOP_R, "flat_r": 150.0,
              "sector": "res://data/sectors/mall_1f.json"},
     "roads": roads,
-    "highway": {"z": 318.0, "width": 24.0, "x": [-470.0, 460.0], "y": -5.0, "crossing_x": [-34.0, -26.0]},
+    "highway": {"z": 318.0, "width": 24.0, "x": [-470.0, 520.0], "y": -5.0, "crossing_x": [-34.0, -26.0]},
     # уровни рельефа (м): север выше, южная парковка террасами, трасса ниже всего
     "levels": {"north": 3.5, "north_from": 130.0, "north_to": 330.0, "south": -5.0, "south_from": 150.0, "south_to": 306.0},
-    "terraces": {"a": [ga(-22), ga(-158)], "walls": [172.0, 206.0], "steps": [-2.0, -4.0], "ramps": [55.0, 90.0, 125.0],
-                 "ramp_half_deg": 4.0, "ramp_len": 14.0},
+    "terraces": {"a": TERRACE_A, "walls": TERRACE_WALLS, "steps": [-2.0, -4.0], "ramps": [55.0, 90.0, 125.0],
+                 "ramp_half_deg": 4.0, "ramp_len": 14.0, "stairs": gallery_stairs, "stair_w": 3.0},
     "parkings": [{"a": [ga(-20), ga(-160)], "r": [130.0, 240.0], "rows": {"a": [ga(-22), ga(-62)], "density": 0.5, "seed": 3}},
                  {"a": [ga(-118), ga(-158)], "r": [130.0, 240.0], "rows": {"a": [ga(-118), ga(-158)], "density": 0.45, "seed": 2}},
                  {"a": [ga(210), ga(150)], "r": [130.0, 238.0], "rows": {"a": [ga(208), ga(152)], "density": 0.8, "seed": 4}},
@@ -198,6 +239,9 @@ plan = {
         {"id": "B_запад_мимо_КПП", "points": [[-405.0, 100.0], [-395.0, 40.0], [-300.0, -60.0], [-250.0, -140.0], [-252.0, 0.0], [-124.0, 0.0]]},
         {"id": "C_восток_к_баррикаде", "points": [[385.0, 275.0], [300.0, 220.0], [240.0, 130.0], [240.0, 0.0], [155.0, 0.0]]},
         {"id": "D_север_во_двор", "points": [[130.0, -336.0], [200.0, -265.0], g(*pol(46, 240)), g(*pol(44, 190)), g(*pol(42, 150))]},
+        # от автостанции под галереей к площади: через подпорные стенки террас — по лестницам
+        {"id": "E_автостанция_по_галерее", "points": gs(GALLERY[:2]) + [
+            g(*pol(-st["a"], st["r"] + dr)) for st in gallery_stairs for dr in (6.5, -3.0)] + gs(GALLERY[-1:])},
     ],
 }
 

@@ -6,8 +6,8 @@
  "bounds": [
   -470,
   -400,
-  460,
-  400
+  520,
+  470
  ],
  "boundary": [
   [
@@ -1243,7 +1243,7 @@
   "width": 24.0,
   "x": [
    -470.0,
-   460.0
+   520.0
   ],
   "y": -5.0,
   "crossing_x": [
@@ -1261,7 +1261,7 @@
  },
  "terraces": {
   "a": [
-   22,
+   36,
    158
   ],
   "walls": [
@@ -1278,7 +1278,18 @@
    125.0
   ],
   "ramp_half_deg": 4.0,
-  "ramp_len": 14.0
+  "ramp_len": 14.0,
+  "stairs": [
+   {
+    "a": 113.93,
+    "r": 206.0
+   },
+   {
+    "a": 102.94,
+    "r": 172.0
+   }
+  ],
+  "stair_w": 3.0
  },
  "parkings": [
   {
@@ -1595,7 +1606,7 @@
    "id": "Bus_1",
    "label": "Автобус · 12 м",
    "at": [
-    -180,
+    -186,
     258
    ],
    "size": [
@@ -1613,7 +1624,7 @@
    "id": "Bus_2",
    "label": "Автобус · 12 м",
    "at": [
-    -144,
+    -168,
     258
    ],
    "size": [
@@ -1631,11 +1642,11 @@
    "id": "Gallery_1",
    "label": "Крытая галерея к площади",
    "at": [
-    -134.0,
-    247.0
+    -148.4,
+    269.5
    ],
    "size": [
-    59.36,
+    5.94,
     5
    ],
    "floors": 1,
@@ -1649,11 +1660,173 @@
    "id": "Gallery_2",
    "label": "Крытая галерея к площади",
    "at": [
-    -94.0,
-    198.5
+    -145.2,
+    264.5
    ],
    "size": [
-    67.18,
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_3",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -142.0,
+    259.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_4",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -138.8,
+    254.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_5",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -135.6,
+    249.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_6",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -132.4,
+    244.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_7",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -129.2,
+    239.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_8",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -126.0,
+    234.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_9",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -122.8,
+    229.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_10",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -119.6,
+    224.5
+   ],
+   "size": [
+    5.94,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 57.38,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_11",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -116.0,
+    220.04
+   ],
+   "size": [
+    5.6,
     5
    ],
    "floors": 1,
@@ -1664,14 +1837,176 @@
    "lift": 0.0
   },
   {
-   "id": "Gallery_3",
+   "id": "Gallery_12",
    "label": "Крытая галерея к площади",
    "at": [
-    -49.59,
-    170.22
+    -112.0,
+    216.12
    ],
    "size": [
-    41.93,
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_13",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -108.0,
+    212.21
+   ],
+   "size": [
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_14",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -104.0,
+    208.29
+   ],
+   "size": [
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_15",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -100.0,
+    204.38
+   ],
+   "size": [
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_16",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -96.0,
+    200.46
+   ],
+   "size": [
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_17",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -92.0,
+    196.54
+   ],
+   "size": [
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_18",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -76.0,
+    180.88
+   ],
+   "size": [
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_19",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -72.0,
+    176.96
+   ],
+   "size": [
+    5.6,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 44.4,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_20",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -67.08,
+    174.32
+   ],
+   "size": [
+    5.99,
+    5
+   ],
+   "floors": 1,
+   "story_height": 3.4,
+   "yaw": 13.17,
+   "kind": "canopy",
+   "region": "BusStation",
+   "lift": 0.0
+  },
+  {
+   "id": "Gallery_21",
+   "label": "Крытая галерея к площади",
+   "at": [
+    -61.25,
+    172.95
+   ],
+   "size": [
+    5.99,
     5
    ],
    "floors": 1,
@@ -2992,6 +3327,39 @@
     [
      111.47,
      -100.37
+    ]
+   ]
+  },
+  {
+   "id": "E_автостанция_по_галерее",
+   "points": [
+    [
+     -150,
+     272
+    ],
+    [
+     -118,
+     222
+    ],
+    [
+     -86.19,
+     194.23
+    ],
+    [
+     -82.34,
+     185.55
+    ],
+    [
+     -39.97,
+     173.97
+    ],
+    [
+     -37.84,
+     164.71
+    ],
+    [
+     -29.17,
+     165.45
     ]
    ]
   }

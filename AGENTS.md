@@ -117,7 +117,8 @@ tools/godot.cmd --headless res://tools/mall_1f_check.tscn   # серый чер�
                                                               # MALL_ONLY=perf — кадры с мародёрами и без, atrium — засвет под куполом (MALL_TIME, MALL_WEATHER)
 python -X utf8 tools/build_mall_study.py                     # черновик территории ТЦ по принятой схеме → data/blockouts/mall_study.json, scenes/levels/mall_study.tscn
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
-                                                              # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–D, паркинг, мосты, двор); -- shots — снимки
+                                                              # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–D, галерея, паркинг, мосты, двор); -- shots — снимки
+                                                              # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — один свой кадр, MALL_STUDY_OUTPUT — папка)
 tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона

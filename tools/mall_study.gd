@@ -193,7 +193,7 @@ func _ray_y(x: float, z: float) -> float:
 
 
 func _verify() -> void:
-	_check("15 участков схемы, 4 подхода", plan.locations.size() == 15 and plan.probe_routes.size() == 4, {"area_m2": plan.boundary_area_m2})
+	_check("15 участков схемы, подходы A–D и галерея автостанции", plan.locations.size() == 15 and plan.probe_routes.size() == 5, {"area_m2": plan.boundary_area_m2})
 	_check("Габариты и скорость из Balance", is_equal_approx((walker.capsule.shape as CapsuleShape3D).height, Balance.STANCE_HEIGHT.stand),
 		{"walk_m_s": Balance.PLAYER_WALK_SPEED, "sprint_m_s": Balance.PLAYER_SPRINT_SPEED})
 	var sector: Node = world.get_node_or_null("Mall/Sector")
@@ -241,6 +241,8 @@ func _verify() -> void:
 		gpath.append(garage.to_global(Vector3(origin.x + 1.05, ly + story * 0.5, -3.45)))
 		gpath.append(garage.to_global(Vector3(origin.x + 1.05, ly + story, 3.45)))
 		gpath.append(garage.to_global(Vector3(origin.x - 1.05, ly + story, 3.45)))
+	# с площадки — в сторону на перекрытие яруса: прямо вперёд — снова марш вверх, под плиту следующего
+	gpath.append(garage.to_global(Vector3(origin.x - 3.2, 0.1 + 2.0 * story, 3.45)))
 	var gb: Dictionary = plan.garage_bridge
 	var bridge_y: float = float(gb.y)
 	gpath.append(Vector3(float(gb.from[0]) + 2.0, bridge_y, float(gb.from[1])))
@@ -258,15 +260,17 @@ func _verify() -> void:
 	_check("Пешеходный мост через трассу", fpass, {"position": str(walker.global_position)})
 	# двор: с платформы доков по лестнице наверх, к пожарному проезду
 	var dock: Array = y.dock
-	var stair_up: float = (float(y.a[0]) + float(y.a[1])) * 0.5 + 6.0
-	var mid_r: float = (float(dock[0]) + float(dock[1])) * 0.5
+	var ds: Dictionary = landscape.dock_stair()
 	var yard_low: Vector2 = MallLandscape.polar(float(y.a[0]) + 12.0, float(dock[1]) + 6.0)
 	var dock_low: Vector2 = MallLandscape.polar(float(y.a[0]) + 12.0, float(dock[1]) - 1.0)
-	var s0: Vector2 = MallLandscape.polar(stair_up - 4.2, mid_r)
-	var s1: Vector2 = MallLandscape.polar(stair_up + 0.3, mid_r)
-	var top: Vector2 = MallLandscape.polar(stair_up + 1.6, float(plan.mall.fire_lane[1]) + 3.0)
+	var s0: Vector2 = ds.s0
+	var s1: Vector2 = ds.s1
+	var landing: Vector2 = ds.landing
+	var top: Vector2 = ds.top
+	# к началу марша — чуть раньше его низа, наверх — до самой верхней ступени
+	var before: Vector2 = s0 + (s0 - s1).normalized() * 0.6
 	var dpath: Array[Vector3] = [Vector3(yard_low.x, float(y.floor) + 0.04, yard_low.y), Vector3(dock_low.x, float(y.dock_top), dock_low.y),
-		Vector3(s0.x, float(y.dock_top), s0.y), Vector3(s1.x, 0.0, s1.y), Vector3(top.x, 0.04, top.y)]
+		Vector3(before.x, float(y.dock_top), before.y), Vector3(s1.x, 0.0, s1.y), Vector3(landing.x, 0.0, landing.y), Vector3(top.x, 0.04, top.y)]
 	var dpass: bool = await _walk_path(dpath, false)
 	_check("Двор → платформа доков → лестница к пожарному проезду", dpass and walker.global_position.y > -0.4, {"position": str(walker.global_position)})
 	var visual_count: int = 0
@@ -275,8 +279,7 @@ func _verify() -> void:
 		var visual: MeshInstance3D = mesh as MeshInstance3D
 		visual_count += 1
 		if visual.mesh:
-			for surface: int in range(visual.mesh.get_surface_count()):
-				triangle_count += visual.mesh.surface_get_array_len(surface) / 3
+			triangle_count += visual.mesh.get_faces().size() / 3
 	var fails: int = 0
 	for result: Dictionary in results:
 		if not bool(result["pass"]):
@@ -343,11 +346,17 @@ func _shots() -> void:
 	DirAccess.make_dir_recursive_absolute(output_dir)
 	var views: Array[Dictionary] = [
 		{"id": "01_overview", "at": Vector3(0, 720, 430), "look": Vector3(0, 0, -10)},
-		{"id": "02_plaza_eye", "at": Vector3(18, 1.62, 175), "look": Vector3(0, 4, 95)},
+		{"id": "02_plaza_eye", "at": Vector3(22, 1.62, 150), "look": Vector3(0, 4, 100)},
 		{"id": "03_terraces", "at": Vector3(-150, 18, 290), "look": Vector3(-60, -2, 190)},
 		{"id": "04_yard", "at": Vector3(220, 24, -220), "look": Vector3(110, -4, -115)},
 		{"id": "05_gas_checkpoint", "at": Vector3(-180, 30, -120), "look": Vector3(-300, 0, -110)},
-		{"id": "06_tech_garage", "at": Vector3(330, 40, 80), "look": Vector3(220, 5, -60)}]
+		{"id": "06_tech_garage", "at": Vector3(330, 40, 80), "look": Vector3(220, 5, -60)},
+		{"id": "07_gallery_stairs", "at": Vector3(-104, 0, 196), "look": Vector3(-82, -2, 185.5)}]
+	# свой кадр вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z (без плана)
+	var custom: PackedStringArray = OS.get_environment("MALL_STUDY_VIEW").split(":")
+	if custom.size() == 7:
+		views = [{"id": custom[0], "at": Vector3(custom[1].to_float(), custom[2].to_float(), custom[3].to_float()),
+			"look": Vector3(custom[4].to_float(), custom[5].to_float(), custom[6].to_float())}]
 	for view: Dictionary in views:
 		var environment: Environment = (world.get_node("WorldEnvironment") as WorldEnvironment).environment
 		environment.fog_enabled = view.id != "01_overview"
@@ -359,6 +368,9 @@ func _shots() -> void:
 		var image: Image = get_viewport().get_texture().get_image()
 		var path: String = output_dir.path_join(String(view.id) + ".png")
 		print("mall_study: снимок ", path, " ошибка=", image.save_png(path))
+	if custom.size() == 7:
+		get_tree().quit()
+		return
 	walker.camera.position = Vector3(0, Balance.ADS_EYE.stand, 0)
 	walker.camera.rotation = Vector3.ZERO
 	_jump_to(START)
@@ -367,5 +379,5 @@ func _shots() -> void:
 	map.queue_redraw()
 	await _frames(10)
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(output_dir.path_join("07_map.png"))
+	get_viewport().get_texture().get_image().save_png(output_dir.path_join("08_map.png"))
 	get_tree().quit()

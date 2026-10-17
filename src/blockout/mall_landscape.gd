@@ -11,8 +11,14 @@ const Geometry = preload("res://src/blockout/study_geometry.gd")
 const PLAN: String = "res://data/blockouts/mall_study.json"
 ## Шаг сетки рельефа, м: меш и коллизия.
 const STEP_M: float = 3.0
-## Полутолщина «ступени» рельефа под стенкой и длина пандуса — земля под стенкой не торчит наружу.
-const WALL_SOFT_M: float = 0.5
+## Полутолщина «ступени» рельефа под стенкой (стенка 0,6 м): уступ вместе с дроблением (SPLIT_MIN_M) — внутри неё.
+const WALL_SOFT_M: float = 0.15
+## Рельеф у уступов дробится: ребро клетки делят пополам, если земля посередине уходит от прямой между
+## концами больше SPLIT_DEV_M, а само ребро длиннее SPLIT_MIN_M. Решение зависит только от ребра —
+## соседние треугольники делят его одинаково, щелей нет. Без этого сетка 3 м превращает уступ под
+## стенкой в скат на клетку: вдоль стенок «пила», снизу вал, сверху провал.
+const SPLIT_DEV_M: float = 0.05
+const SPLIT_MIN_M: float = 0.25
 
 var plan: Dictionary = {}
 var generated: Node3D
@@ -201,8 +207,8 @@ func _terrain(g: RefCounted) -> void:
 			var c: Vector3 = Vector3(x + STEP_M, heights[(iz + 1) * (nx + 1) + ix + 1], z + STEP_M)
 			var d: Vector3 = Vector3(x, heights[(iz + 1) * (nx + 1) + ix], z + STEP_M)
 			var key: String = "grass" if Geometry2D.is_point_in_polygon(Vector2(x, z), boundary) else "ground"
-			g.quad(a, b, c, d, key)
-			faces.append_array(PackedVector3Array([a, b, c, a, c, d]))
+			_terrain_tri(g, faces, a, b, c, key, 0)
+			_terrain_tri(g, faces, a, c, d, key, 0)
 	var shape: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
 	shape.set_faces(faces)
 	shape.backface_collision = true
@@ -210,6 +216,72 @@ func _terrain(g: RefCounted) -> void:
 	cs.name = "Terrain"
 	cs.shape = shape
 	g.body.add_child(cs)
+
+
+## Треугольник рельефа (или накладки на lift выше): рёбра через уступ делятся (см. SPLIT_DEV_M), остальные — как есть.
+func _terrain_tri(g: RefCounted, faces: PackedVector3Array, a: Vector3, b: Vector3, c: Vector3, key: String, depth: int, lift: float = 0.0) -> void:
+	var mab: Vector3 = _split_point(a, b, depth, lift)
+	var mbc: Vector3 = _split_point(b, c, depth, lift)
+	var mca: Vector3 = _split_point(c, a, depth, lift)
+	var split: int = int(is_finite(mab.y)) + int(is_finite(mbc.y)) + int(is_finite(mca.y))
+	if split == 0:
+		g.tri(a, b, c, key)
+		faces.append_array(PackedVector3Array([a, b, c]))
+		return
+	if split == 3:
+		_terrain_tri(g, faces, a, mab, mca, key, depth + 1, lift)
+		_terrain_tri(g, faces, mab, b, mbc, key, depth + 1, lift)
+		_terrain_tri(g, faces, mca, mbc, c, key, depth + 1, lift)
+		_terrain_tri(g, faces, mab, mbc, mca, key, depth + 1, lift)
+		return
+	# одно или два ребра: поворачиваем так, чтобы делилось ab (и bc), а ca — нет
+	if split == 1:
+		if is_finite(mbc.y):
+			_terrain_tri_one(g, faces, b, c, a, mbc, key, depth, lift)
+		elif is_finite(mca.y):
+			_terrain_tri_one(g, faces, c, a, b, mca, key, depth, lift)
+		else:
+			_terrain_tri_one(g, faces, a, b, c, mab, key, depth, lift)
+		return
+	if not is_finite(mca.y):
+		_terrain_tri_two(g, faces, a, b, c, mab, mbc, key, depth, lift)
+	elif not is_finite(mab.y):
+		_terrain_tri_two(g, faces, b, c, a, mbc, mca, key, depth, lift)
+	else:
+		_terrain_tri_two(g, faces, c, a, b, mca, mab, key, depth, lift)
+
+
+## Делится только ab (точка m).
+func _terrain_tri_one(g: RefCounted, faces: PackedVector3Array, a: Vector3, b: Vector3, c: Vector3, m: Vector3, key: String, depth: int, lift: float) -> void:
+	_terrain_tri(g, faces, a, m, c, key, depth + 1, lift)
+	_terrain_tri(g, faces, m, b, c, key, depth + 1, lift)
+
+
+## Делятся ab (m1) и bc (m2), ca — нет.
+func _terrain_tri_two(g: RefCounted, faces: PackedVector3Array, a: Vector3, b: Vector3, c: Vector3, m1: Vector3, m2: Vector3, key: String, depth: int, lift: float) -> void:
+	_terrain_tri(g, faces, m1, b, m2, key, depth + 1, lift)
+	_terrain_tri(g, faces, a, m1, m2, key, depth + 1, lift)
+	_terrain_tri(g, faces, a, m2, c, key, depth + 1, lift)
+
+
+## Середина ребра на земле, если ребро надо делить; иначе y = NAN. Ровные рёбра (перепад концов
+## меньше 0,2 м) не проверяются — землю там не спрашиваем, так быстрее.
+func _split_point(p: Vector3, q: Vector3, depth: int, lift: float) -> Vector3:
+	if depth >= 10 or absf(p.y - q.y) < 0.2 or Vector2(p.x - q.x, p.z - q.z).length() < SPLIT_MIN_M:
+		return Vector3(0.0, NAN, 0.0)
+	var m: Vector3 = (p + q) * 0.5
+	var h: float = ground(m.x, m.z) + lift
+	if absf(h - m.y) < SPLIT_DEV_M:
+		return Vector3(0.0, NAN, 0.0)
+	return Vector3(m.x, h, m.z)
+
+
+## Накладка поверх рельефа (асфальт, плитка): на уступе дробится, как сама земля, — иначе её край
+## ложится скатом поперёк стенки. Коллизии у накладки нет.
+func _drape_quad(g: RefCounted, pts: Array[Vector3], key: String, lift: float) -> void:
+	var scratch: PackedVector3Array = PackedVector3Array()
+	_terrain_tri(g, scratch, pts[0], pts[1], pts[2], key, 0, lift)
+	_terrain_tri(g, scratch, pts[0], pts[2], pts[3], key, 0, lift)
 
 
 ## Кольцевой участок по земле (тонкая накладка поверх рельефа).
@@ -228,7 +300,7 @@ func _annulus(g: RefCounted, a0: float, a1: float, r0: float, r1: float, key: St
 			var pts: Array[Vector3] = []
 			for v: Vector2 in [polar(pa, ra), polar(pb, ra), polar(pb, rb), polar(pa, rb)]:
 				pts.append(Vector3(v.x, ground(v.x, v.y) + lift, v.y))
-			g.quad(pts[0], pts[1], pts[2], pts[3], key)
+			_drape_quad(g, pts, key, lift)
 
 
 func _surfaces(g: RefCounted) -> void:
@@ -260,7 +332,7 @@ func _strip(g: RefCounted, line: PackedVector2Array, width: float, key: String, 
 			var pts: Array[Vector3] = []
 			for v: Vector2 in [p + side, q + side, q - side, p - side]:
 				pts.append(Vector3(v.x, ground(v.x, v.y) + offset, v.y))
-			g.quad(pts[0], pts[1], pts[2], pts[3], key)
+			_drape_quad(g, pts, key, offset)
 
 
 func _roads(g: RefCounted) -> void:
@@ -284,19 +356,33 @@ func _wall_segment(g: RefCounted, p: Vector2, q: Vector2, probe: Vector2) -> voi
 	g.box(Vector3(mid.x, (low + high) * 0.5, mid.y), Vector3(dir.length() + 0.05, high - low, 0.6), "concrete", true, -atan2(dir.y, dir.x))
 
 
-func _wall_arc(g: RefCounted, r: float, a0: float, a1: float, gaps: Array, gap_half: float) -> void:
+## Стенка по дуге от a0 до a1 (меньше 180°) с проёмами точно по краям: gaps — середины пандусов
+## шириной ±gap_half, openings — проёмы под лестницы (угол середины, полуширина в градусах).
+func _wall_arc(g: RefCounted, r: float, a0: float, a1: float, gaps: Array, gap_half: float, openings: Array[Vector2] = []) -> void:
 	var span: float = fposmod(a1 - a0, 360.0)
-	var n: int = maxi(2, int(span / 1.5))
-	for i: int in range(n):
-		var pa: float = a0 + span * float(i) / float(n)
-		var pb: float = a0 + span * float(i + 1) / float(n)
-		var skip: bool = false
-		for ga: Variant in gaps:
-			skip = skip or angle_gap((pa + pb) * 0.5, float(ga)) < gap_half
-		if skip:
-			continue
-		var mid_dir: Vector2 = polar((pa + pb) * 0.5, 1.0)
-		_wall_segment(g, polar(pa, r), polar(pb, r), mid_dir * 2.0)
+	var cuts: Array[Vector2] = openings.duplicate()
+	for ga: Variant in gaps:
+		cuts.append(Vector2(float(ga), gap_half))
+	# куски стенки между проёмами — смещения от a0
+	var pieces: Array[Vector2] = [Vector2(0.0, span)]
+	for cut: Vector2 in cuts:
+		var c: float = wrapf(cut.x - a0, -180.0, 180.0)
+		var rest: Array[Vector2] = []
+		for p: Vector2 in pieces:
+			if c + cut.y <= p.x or c - cut.y >= p.y:
+				rest.append(p)
+				continue
+			if c - cut.y > p.x:
+				rest.append(Vector2(p.x, c - cut.y))
+			if c + cut.y < p.y:
+				rest.append(Vector2(c + cut.y, p.y))
+		pieces = rest
+	for p: Vector2 in pieces:
+		var n: int = maxi(1, ceili((p.y - p.x) / 1.5))
+		for i: int in range(n):
+			var pa: float = a0 + lerpf(p.x, p.y, float(i) / float(n))
+			var pb: float = a0 + lerpf(p.x, p.y, float(i + 1) / float(n))
+			_wall_segment(g, polar(pa, r), polar(pb, r), polar((pa + pb) * 0.5, 2.0))
 
 
 func _wall_radial(g: RefCounted, a: float, r0: float, r1: float, inside_sign: float) -> void:
@@ -309,11 +395,33 @@ func _wall_radial(g: RefCounted, a: float, r0: float, r1: float, inside_sign: fl
 func _terrace_walls(g: RefCounted) -> void:
 	var t: Dictionary = plan.terraces
 	var a: Array = t.a
+	var half_w: float = float(t.stair_w) * 0.5
 	for r: Variant in t.walls:
-		_wall_arc(g, float(r), float(a[0]), float(a[1]), t.ramps, float(t.ramp_half_deg))
-	# края террас по бокам — тоже стенки (снаружи террас земля выше)
-	_wall_radial(g, float(a[0]) + 0.6, 168.0, 238.0, 1.0)
-	_wall_radial(g, float(a[1]) - 0.6, 168.0, 238.0, -1.0)
+		var openings: Array[Vector2] = []
+		for st: Dictionary in t.stairs:
+			if is_equal_approx(float(st.r), float(r)):
+				openings.append(Vector2(float(st.a), rad_to_deg((half_w + 0.1) / float(r))))
+		_wall_arc(g, float(r), float(a[0]), float(a[1]), t.ramps, float(t.ramp_half_deg), openings)
+	# края террас по бокам — тоже стенки, точно по уступу (снаружи террас земля выше); где уступа нет,
+	# куски стенки не ставятся (см. _wall_segment)
+	_wall_radial(g, float(a[0]), 168.0, 254.0, 1.0)
+	_wall_radial(g, float(a[1]), 168.0, 254.0, -1.0)
+	# бока пандусов: у стенки террасы пандус ниже соседней земли
+	for ra: Variant in t.ramps:
+		for w: Variant in t.walls:
+			for side: float in [-1.0, 1.0]:
+				_wall_radial(g, float(ra) + side * float(t.ramp_half_deg), float(w) - float(t.ramp_len) * 0.5, float(w) + float(t.ramp_len) * 0.5, side)
+	# лестницы галереи автостанции через стенки: марш снизу к кромке и площадка наверху в проёме стенки
+	for st: Dictionary in t.stairs:
+		var sa: float = float(st.a)
+		var w: float = float(st.r)
+		var low: Vector2 = polar(sa, w + 4.6)
+		var high: Vector2 = polar(sa, w + 0.4)
+		var upper: Vector2 = polar(sa, w - 2.0)
+		var top: float = ground(upper.x, upper.y)
+		g.stairs(Vector3(low.x, ground(low.x, low.y), low.y), Vector3(high.x, top, high.y), float(t.stair_w), 12, "concrete")
+		var landing: Vector2 = polar(sa, w - 1.8)
+		g.box(Vector3(landing.x, top - 0.5, landing.y), Vector3(float(t.stair_w) + 0.6, 1.0, 4.6), "concrete", true, -deg_to_rad(sa + 90.0))
 
 
 func _yard(g: RefCounted) -> void:
@@ -325,15 +433,15 @@ func _yard(g: RefCounted) -> void:
 	var floor_y: float = float(y.floor)
 	var a0: float = float(a[0])
 	var a1: float = float(a[1])
-	var stair_up: float = (a0 + a1) * 0.5 + 6.0
-	# стенка у пожарного проезда: проём под лестницу с доков наверх
-	_wall_arc(g, float(r[0]), a0, a1, [stair_up + 1.6], 1.2)
-	_wall_radial(g, a0 - 0.4, float(r[0]), float(r[1]), -1.0)
-	_wall_radial(g, a1 + 0.4, float(r[0]), float(r[1]), 1.0)
+	var ds: Dictionary = dock_stair()
+	# стенка у пожарного проезда: проём под площадку лестницы с доков наверх
+	_wall_arc(g, float(r[0]), a0, a1, [], 0.0, [Vector2(float(ds.landing_a), rad_to_deg(1.9 / float(r[0])))])
+	_wall_radial(g, a0, float(r[0]), float(r[1]), -1.0)
+	_wall_radial(g, a1, float(r[0]), float(r[1]), 1.0)
 	_wall_arc(g, float(r[1]), a0, a1, [float(y.ramp_a)], float(y.ramp_half_deg))
 	var rr: Array = y.ramp_r
-	_wall_radial(g, float(y.ramp_a) - float(y.ramp_half_deg) - 0.4, float(r[1]), float(rr[1]), -1.0)
-	_wall_radial(g, float(y.ramp_a) + float(y.ramp_half_deg) + 0.4, float(r[1]), float(rr[1]), 1.0)
+	_wall_radial(g, float(y.ramp_a) - float(y.ramp_half_deg), float(r[1]), float(rr[1]), -1.0)
+	_wall_radial(g, float(y.ramp_a) + float(y.ramp_half_deg), float(r[1]), float(rr[1]), 1.0)
 	# доковая платформа на высоте кузова: фуры подходят к ней задом
 	var span: float = fposmod(a1 - a0, 360.0)
 	var n: int = int(span / 1.5)
@@ -351,12 +459,28 @@ func _yard(g: RefCounted) -> void:
 		var low: Vector2 = polar(sa, float(dock[1]) + 4.2)
 		var high: Vector2 = polar(sa, float(dock[1]) + 0.1)
 		g.stairs(Vector3(low.x, floor_y, low.y), Vector3(high.x, top, high.y), 2.0, 8, "concrete")
-	var s0: Vector2 = polar(stair_up - 3.6, mid_r)
-	var s1: Vector2 = polar(stair_up, mid_r)
+	var s0: Vector2 = ds.s0
+	var s1: Vector2 = ds.s1
 	g.stairs(Vector3(s0.x, top, s0.y), Vector3(s1.x, 0.0, s1.y), 2.0, 16, "concrete")
-	# площадка наверху лестницы: через проём в стенке к пожарному проезду
-	var landing: Vector2 = polar(stair_up + 1.6, (float(r[0]) + mid_r) * 0.5)
-	g.box(Vector3(landing.x, -0.15, landing.y), Vector3(5.0, 0.3, 5.5), "concrete", true, -deg_to_rad(stair_up + 1.6 + 90.0))
+	# площадка наверху лестницы впритык к последней ступени: через проём в стенке к пожарному проезду
+	var landing: Vector2 = ds.landing
+	g.box(Vector3(landing.x, -0.48, landing.y), Vector3(5.4, 1.0, float(ds.landing_len)), "concrete", true, -deg_to_rad(float(ds.landing_a) + 90.0))
+
+
+## Лестница с доковой платформы наверх, к пожарному проезду: низ и верх марша (вдоль платформы),
+## площадка у проёма в стенке — впритык к верхней ступени. Её же проходит проверка черновика.
+func dock_stair() -> Dictionary:
+	var y: Dictionary = plan.yard
+	var dock: Array = y.dock
+	var stair_up: float = (float(y.a[0]) + float(y.a[1])) * 0.5 + 6.0
+	var mid_r: float = (float(dock[0]) + float(dock[1])) * 0.5
+	# поперёк — от верхней ступени до 4 м за стенку, по дуге 5,4 м: край заходит на 0,2 м под ступень
+	var inner: float = float(y.r[0]) - 4.0
+	var outer: float = mid_r + 1.5
+	var land_r: float = (inner + outer) * 0.5
+	var land_a: float = stair_up + rad_to_deg(2.5 / mid_r)
+	return {"s0": polar(stair_up - 3.6, mid_r), "s1": polar(stair_up, mid_r), "landing": polar(land_a, land_r),
+		"landing_a": land_a, "landing_len": outer - inner, "top": polar(land_a, float(y.r[0]) - 12.0)}
 
 
 func _plaza(g: RefCounted) -> void:
@@ -421,6 +545,13 @@ func _car_blocked(at: Vector2, ang: float, rad: float) -> bool:
 		for ra: Variant in t.ramps:
 			if angle_gap(ang, float(ra)) < float(t.ramp_half_deg) + 1.0:
 				return true
+	# стенки по краям террас и лестницы галереи
+	for edge: Variant in t.a:
+		if angle_gap(ang, float(edge)) < rad_to_deg(4.0 / maxf(rad, 1.0)):
+			return true
+	for st: Dictionary in t.stairs:
+		if polar(float(st.a), float(st.r)).distance_to(at) < 9.0:
+			return true
 	for road: Dictionary in plan.roads:
 		if String(road.id).begins_with("entry_") and line_distance(at, poly(road.points)) < float(road.width) * 0.5 + 2.5:
 			return true
