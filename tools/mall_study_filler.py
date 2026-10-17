@@ -22,6 +22,8 @@ from __future__ import annotations
 import math
 import random
 
+from mall_study_density import densify
+
 SEED = 20261017
 # Стройка второй очереди ТЦ: между кольцевой дорогой и лесом на севере
 SITE_CENTER = (35.0, -290.0)
@@ -42,7 +44,8 @@ CAMP = (-205.0, -240.0)
 CRASH = (128.0, 297.0)
 SANDBAG_POST = (232.0, 262.0)
 DITCH_Z = 299.5
-DITCH_PIECES = [(-400.0, -200.0), (-132.0, -68.0), (-12.0, 196.0), (226.0, 385.0)]
+# разрывы — под съезды с трассы (к автостанции x −212, к кафе x ≈205) и пешеходный мост (x −40)
+DITCH_PIECES = [(-400.0, -224.0), (-200.0, -68.0), (-12.0, 196.0), (226.0, 385.0)]
 # Ритм подходов: укрытия там, где замер проверки нашёл открытые куски длиннее 60 м
 # [набор, x, z, поворот°, состояние машины]; земляные кучи [x, z, rx, rz, высота]
 ROUTE_COVER = [
@@ -51,6 +54,8 @@ ROUTE_COVER = [
     ("wreck", -383.0, 52.0, 140.0, "burnt"), ("fbs", -283.0, -72.0, 60.0, None),
     ("fbs", -262.0, -95.0, 10.0, None), ("roadside_car", -264.0, -70.0, 170.0, ""),
     ("pallets", 354.0, 262.0, 30.0, None), ("fbs", 142.0, -308.0, 45.0, None),
+    # въезд во двор под постом ЧВК перекрыт блоками по обе стороны дороги (подход D через кольцевую)
+    ("jerseys", 188.0, -201.5, 40.0, None), ("fbs", 197.6, -181.1, 130.0, None), ("fbs", 151.3, -190.2, 135.0, None),
 ]
 ROUTE_MOUNDS = [(160.0, -292.0, 6.0, 4.5, 1.8)]
 CAR_TINTS = ["6f7880", "8b8a83", "5d5853", "8d7a63", "4f5d6b", "9a9c97", "6b3f35", "7a8a6e"]
@@ -177,7 +182,19 @@ class Layout:
         self.loop = next(float(r["width"]) for r in plan["roads"] if r["id"] == "loop")
         self.other_roads = [(r["points"], float(r["width"])) for r in plan["roads"] if r["id"] != "loop"]
         self.ruts: list[list] = []
+        # галерея автостанции, аллея к площади, переходы и площадка автобусов — без укрытий и кустов
+        for part in plan["gallery"]["parts"]:
+            self.corridors.append((part, plan["gallery"]["width"] * 0.5 + 2.5))
+        self.corridors.append((plan["alley"]["points"], plan["alley"]["width"] * 0.5 + 2.0))
+        for c in plan["crossings"]:
+            self.corridors.append((c["points"], c["width"] * 0.5 + 3.0))
+        for apron in plan["aprons"]:
+            cx, cz, w, h, _ = apron["rect"]
+            self.rects.append((cx - w / 2 - 2.0, cz - h / 2 - 2.0, cx + w / 2 + 2.0, cz + h / 2 + 2.0))
         self.near_cover = Near()
+        # знаки, фонари, светофоры, столбики улиц — не заставлять
+        for item in plan.get("streets", {}).get("items", []):
+            self.taken.append((item[1], item[2], 2.0))
         self.building_spots = [b["at"] for b in plan["buildings"] if b["region"] != "Outside"]
         self.routes = [r["points"] for r in plan["probe_routes"]]
         # точки, у которых ничего не ставится: появления, выходы, места участков и точки замера рельефа проверки
@@ -677,6 +694,86 @@ class Layout:
                 self.weed_patch(x + self.rng.uniform(-2.0, 2.0), z + self.rng.uniform(-2.0, 2.0), self.rng.uniform(3.0, 5.0))
         return count
 
+    def rocks(self) -> int:
+        """Валуны (владелец, 2026-10-17: «не хватает камней»): россыпи рельефа, по горкам, вдоль берегов
+        речки, в лесу. Крупные — укрытие; в землю притоплены, часть наклонена."""
+        rng = self.rng
+        relief = self.plan.get("relief", {})
+        spots: list[tuple[float, float, float]] = []
+        for x, z, r, n in relief.get("boulders", []):
+            for _ in range(int(n)):
+                q = polar(rng.uniform(0.0, 360.0), r * math.sqrt(rng.random()))
+                spots.append((x + q[0], z + q[1], rng.uniform(0.8, 2.2)))
+        for x, z, r, h in relief.get("hills", []):
+            for _ in range(int(4 + h * 1.2)):
+                q = polar(rng.uniform(0.0, 360.0), r * 0.75 * math.sqrt(rng.random()))
+                spots.append((x + q[0], z + q[1], rng.uniform(0.6, 1.6)))
+        river = relief.get("river", {})
+        if river:
+            pts = river["points"]
+            for a, b in zip(pts, pts[1:]):
+                d = math.dist(a, b)
+                s = rng.uniform(0.0, 12.0)
+                while s < d:
+                    t = s / d
+                    nx, nz = (b[1] - a[1]) / d, -(b[0] - a[0]) / d
+                    off = rng.choice((-1.0, 1.0)) * rng.uniform(10.5, 15.0)
+                    spots.append((a[0] + (b[0] - a[0]) * t + nx * off, a[1] + (b[1] - a[1]) * t + nz * off, rng.uniform(0.5, 1.3)))
+                    s += rng.uniform(14.0, 30.0)
+        for p in self.candidates(24.0):
+            if any(in_poly(p, f) for f in self.plan["forest"]) and rng.random() < 0.35:
+                spots.append((p[0], p[1], rng.uniform(0.6, 1.5)))
+        placed = self.cliff_rocks()
+        for x, z, s in spots:
+            if self.blocked((x, z), 1.5 + s * 0.6, veg=True):
+                continue
+            kit = rng.choices(("rock_a", "rock_b", "rock_c"), (5, 4, 2))[0]
+            self.put(kit, x, z, rng.uniform(0.0, 360.0), s, dy=-0.18 * s, roll=rng.uniform(-14.0, 14.0), cover=s > 1.0)
+            self.reserve(x, z, 1.2 * s)
+            placed += 1
+        return placed
+
+    def cliff_rocks(self) -> int:
+        """Глыбы по лицу утёса (высокие, наклонённые, разной высоты — не частокол) и валуны у подножия.
+        Места замера обрыва проверкой (середина кромки ±) свободны."""
+        rng = self.rng
+        placed = 0
+        for cliff in self.plan.get("relief", {}).get("cliffs", []):
+            edge = cliff["points"]
+            side = cliff["side"]
+            height = cliff["height"]
+            total = sum(math.dist(a, b) for a, b in zip(edge, edge[1:]))
+            mid = edge[1]
+            walked = 0.0
+            for a, b in zip(edge, edge[1:]):
+                seg = math.dist(a, b)
+                dx, dz = (b[0] - a[0]) / seg, (b[1] - a[1]) / seg
+                # к низу утёса — противоположно стороне верха
+                down = (dz * side, -dx * side)
+                s = rng.uniform(0.0, 2.0)
+                while s < seg:
+                    along_m = walked + s
+                    taper = min(1.0, along_m / 15.0, (total - along_m) / 15.0)
+                    if taper > 0.25:
+                        off = rng.uniform(0.6, 2.2)
+                        x, z = a[0] + dx * s + down[0] * off, a[1] + dz * s + down[1] * off
+                        if math.dist((x, z), mid) > 9.0:
+                            tall = height * taper * rng.uniform(0.45, 1.0)
+                            kit = "rock_c" if tall > 2.5 else rng.choice(("rock_a", "rock_b"))
+                            size = tall / (1.7 if kit == "rock_c" else 1.0)
+                            self.put(kit, x, z, rng.uniform(0.0, 360.0), max(0.6, size), dy=-0.25, roll=rng.uniform(-12.0, 12.0), cover=True)
+                            placed += 1
+                        if rng.random() < 0.4:
+                            off = rng.uniform(3.5, 8.0)
+                            x, z = a[0] + dx * s + down[0] * off, a[1] + dz * s + down[1] * off
+                            if math.dist((x, z), mid) > 9.0 and not self.blocked((x, z), 1.0, veg=True):
+                                self.put(rng.choice(("rock_a", "rock_b")), x, z, rng.uniform(0.0, 360.0), rng.uniform(0.7, 1.5),
+                                         dy=-0.2, roll=rng.uniform(-14.0, 14.0), cover=True)
+                                placed += 1
+                    s += rng.uniform(2.0, 3.6)
+                walked += seg
+        return placed
+
     def field_mounds(self, count: int) -> None:
         """Земляные кучи в полях — укрытие самим рельефом."""
         placed = 0
@@ -793,11 +890,14 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
     lay.south()
     lay.camp()
     lay.route_rhythm()
+    rocks = lay.rocks()
     clusters = lay.cover_clusters()
     gaps = lay.fill_route_gaps()
     lay.field_mounds(10)
     lay.vegetation()
     lay.puddles()
+    # уплотнение по «карте пустоты»: группы в самые лысые места (tools/mall_study_density.py)
+    density, soil, gas = densify(lay)
     kits: dict[str, int] = {}
     for item in lay.items:
         kits[item[0]] = kits.get(item[0], 0) + 1
@@ -810,7 +910,9 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
                   "heat": heat, "ruts": lay.ruts},
         "stories": lay.stories,
         "cover": lay.cover,
+        "soil": soil,
+        "gas": gas,
     }
-    stats = {"items": len(lay.items), "cover_clusters": clusters, "route_gaps_filled": gaps, "weed_patches": len(lay.weeds),
-             "weed_tufts": sum(w[3] for w in lay.weeds), "stories": len(lay.stories), "kits": kits}
+    stats = {"items": len(lay.items), "rocks": rocks, "cover_clusters": clusters, "route_gaps_filled": gaps, "weed_patches": len(lay.weeds),
+             "weed_tufts": sum(w[3] for w in lay.weeds), "stories": len(lay.stories), "density": density, "kits": kits}
     return filler, stats

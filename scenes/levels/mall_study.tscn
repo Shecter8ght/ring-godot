@@ -10,6 +10,8 @@
 
 [ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]
 
+[ext_resource type="Script" path="res://src/blockout/mall_streets.gd" id="streets"]
+
 [ext_resource type="PackedScene" path="res://scenes/world/escalator.tscn" id="esc"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/rubble_pile.tscn" id="rub"]
@@ -92,6 +94,10 @@ script = ExtResource("land")
 
 script = ExtResource("fill")
 
+[node name="Streets" type="Node3D" parent="."]
+
+script = ExtResource("streets")
+
 [node name="Mall" type="Node3D" parent="."]
 
 script = ExtResource("ring")
@@ -173,7 +179,7 @@ script = ExtResource("build")
 
 kind = "mass"
 
-footprint = Vector2(4, 14)
+footprint = Vector2(6, 2)
 
 floors = 1
 
@@ -311,347 +317,11 @@ story_height = 3.0
 
 label = "Автобус · 12 м"
 
-[node name="Gallery_1" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -148.4, 0, 269.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_2" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -145.2, 0, 264.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_3" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -142.0, 0, 259.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_4" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -138.8, 0, 254.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_5" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -135.6, 0, 249.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_6" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -132.4, 0, 244.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_7" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -129.2, 0, 239.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_8" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -126.0, 0, 234.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_9" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -122.8, 0, 229.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_10" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -119.6, 0, 224.5)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.94, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_11" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -116.0, 0, 220.04)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_12" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -112.0, 0, 216.12)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_13" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -108.0, 0, 212.21)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_14" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -104.0, 0, 208.29)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_15" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -100.0, 0, 204.38)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_16" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -96.0, 0, 200.46)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_17" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -92.0, 0, 196.54)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_18" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -76.0, 0, 180.88)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_19" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -72.0, 0, 176.96)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.6, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_20" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.97370, 0, -0.22784, 0, 1, 0, 0.22784, 0, 0.97370, -67.08, 0, 174.32)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.99, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
-[node name="Gallery_21" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
-
-transform = Transform3D(0.97370, 0, -0.22784, 0, 1, 0, 0.22784, 0, 0.97370, -61.25, 0, 172.95)
-
-script = ExtResource("build")
-
-kind = "canopy"
-
-footprint = Vector2(5.99, 5)
-
-floors = 1
-
-story_height = 3.4
-
-label = "Крытая галерея к площади"
-
 [node name="Garage" type="Node3D" parent="."]
 
 [node name="Parking_Garage" type="Node3D" parent="Garage" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 185, 0, 42)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 185.0, 0, 62.0)
 
 script = ExtResource("build")
 
@@ -865,7 +535,7 @@ label = "Фура у дока"
 
 [node name="PMC_Post" type="Node3D" parent="Yard" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 135.16, 0, -150.12)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 122.17, 0, -174.48)
 
 script = ExtResource("build")
 
@@ -963,7 +633,7 @@ label = "Водонапорная башня"
 
 [node name="Service_Warehouse" type="Node3D" parent="Tech" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 283, 0, -192)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 262, 0, -226)
 
 script = ExtResource("build")
 

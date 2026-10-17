@@ -14,7 +14,13 @@ const FOOTPRINTS: Dictionary = {"car": Vector2(1.9, 4.6), "truck": Vector2(2.5, 
 	"trailer": Vector2(2.5, 13.0), "bus_wreck": Vector2(2.6, 12.0), "container40": Vector2(2.4, 12.2),
 	"container20": Vector2(2.4, 6.1), "garage": Vector2(3.2, 6.0), "garage_open": Vector2(3.2, 6.0),
 	"cabin": Vector2(2.4, 6.0), "slab": Vector2(2.0, 6.0), "pipes": Vector2(3.2, 8.0), "fence": Vector2(0.3, 3.0),
-	"billboard": Vector2(12.0, 0.8), "billboard_fallen": Vector2(12.0, 4.0), "bus_stop": Vector2(6.0, 2.0)}
+	"billboard": Vector2(12.0, 0.8), "billboard_fallen": Vector2(12.0, 4.0), "bus_stop": Vector2(6.0, 2.0),
+	"po2": Vector2(0.4, 2.5), "picket": Vector2(0.25, 2.5), "chainlink": Vector2(0.2, 2.0), "shed": Vector2(3.0, 4.0),
+	"greenhouse": Vector2(3.0, 6.0), "house_small": Vector2(6.0, 8.0), "ruin_l": Vector2(0.6, 7.0), "ruin_i": Vector2(0.6, 5.0),
+	"log_pile": Vector2(1.8, 5.0), "ktp": Vector2(2.5, 2.0), "roller": Vector2(1.7, 3.6), "road_barrier": Vector2(0.4, 2.0),
+	"kiosk": Vector2(3.0, 2.4), "gantry": Vector2(28.0, 1.0)}
+## Цвета площадок плана ground.zones.
+const ZONE_COLORS: Dictionary = {"gravel": Color("6f6e66"), "concrete": Color("7c7b74"), "asphalt": Color("5a5d58"), "dirt": Color("6b5a43")}
 
 
 func _ready() -> void:
@@ -61,14 +67,33 @@ func _draw() -> void:
 		draw_colored_polygon(points(f, rect), Color("2f4a2f"))
 	for p: Dictionary in plan.parkings:
 		_wedge(rect, float(p.a[0]), float(p.a[1]), float(p.r[0]), float(p.r[1]), Color("555a55"))
+	var cover: Dictionary = plan.get("ground", {}) as Dictionary
+	for zone: Dictionary in cover.get("zones", []):
+		var zr: Array = zone.rect
+		var zh: Vector2 = Vector2(float(zr[2]), float(zr[3])) * 0.5
+		draw_rect(Rect2(map_point(Vector2(float(zr[0]), float(zr[1])) - zh, rect), zh * 2.0 * k), ZONE_COLORS.get(String(zone.kind), Color("6f6e66")))
+	for path: Array in cover.get("paths", []):
+		draw_polyline(points(path, rect), Color("7a6448"), 1.0)
 	var sq: Dictionary = plan.square
 	_wedge(rect, float(sq.a[0]), float(sq.a[1]), float(sq.r[0]), float(sq.r[1]), Color("4c6447"))
 	var pl: Dictionary = plan.plaza
 	_wedge(rect, float(pl.a[0]), float(pl.a[1]), float(pl.r[0]), float(pl.r[1]), Color("8f8670"))
 	var y: Dictionary = plan.yard
 	_wedge(rect, float(y.a[0]), float(y.a[1]), float(y.r[0]), float(y.r[1]), Color("6e6a5c"))
+	for apron: Dictionary in plan.get("aprons", []):
+		var ar: Array = apron.rect
+		var half: Vector2 = Vector2(float(ar[2]), float(ar[3])) * 0.5
+		draw_rect(Rect2(map_point(Vector2(float(ar[0]), float(ar[1])) - half, rect), half * 2.0 * k), Color("8b8e7d"))
 	for road: Dictionary in plan.roads:
 		draw_polyline(points(road.points, rect), Color("8b8e7d"), maxf(1.5, float(road.width) * k), true)
+	var alley: Dictionary = plan.get("alley", {}) as Dictionary
+	if not alley.is_empty():
+		draw_polyline(points(alley.points, rect), Color("8f8670"), maxf(1.5, float(alley.width) * k))
+	var gallery: Dictionary = plan.get("gallery", {}) as Dictionary
+	for part: Array in gallery.get("parts", []):
+		draw_polyline(points(part, rect), Color("c1bca8"), maxf(1.5, float(gallery.width) * k))
+	for crossing: Dictionary in plan.get("crossings", []):
+		draw_polyline(points(crossing.points, rect), Color("e3e6d4"), maxf(1.5, float(crossing.width) * k))
 	var hw: Dictionary = plan.highway
 	draw_line(map_point(Vector2(float(hw.x[0]), float(hw.z)), rect), map_point(Vector2(float(hw.x[1]), float(hw.z)), rect), Color("777a70"), float(hw.width) * k)
 	var pond: Dictionary = plan.pond
@@ -103,7 +128,7 @@ func _draw() -> void:
 			arrow.append(at + local.rotated(-walker.rotation.y))
 		draw_colored_polygon(arrow, Color.WHITE)
 	draw_string(font, Vector2(rect.position.x, rect.position.y - 20), "ТЦ «РИНГ» · ТЕРРИТОРИЯ · ЧЕРНОВИК 1:1 · СЕВЕР ↑", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("e3e6d4"))
-	draw_string(font, Vector2(rect.position.x, rect.end.y + 28), "M — закрыть · 1–9, 0 — места 1–10 · N / B — места · синие — появление, зелёные — выход, жёлтые — по условию · ◆ — история · оранжевая — теплотрасса · пунктир — ЛЭП · синяя — речка · зубцы — утёс", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c0c9bd"))
+	draw_string(font, Vector2(rect.position.x, rect.end.y + 28), "M — закрыть · 1–9, 0 — места 1–10 · N / B — места · синие — появление, зелёные — выход, жёлтые — по условию · ◆ — история · оранжевая — теплотрасса · жёлтая — газ · пунктир — ЛЭП · синяя — речка · зубцы — утёс", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c0c9bd"))
 	var a: Vector2 = rect.end + Vector2(-100.0 * k, 12)
 	draw_line(a, rect.end + Vector2(0, 12), Color("c0c9bd"), 2)
 	draw_string(font, a + Vector2(0, 30), "100 м", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("c0c9bd"))
@@ -155,6 +180,8 @@ func _draw_filler(filler: Dictionary, rect: Rect2, k: float) -> void:
 	var lines: Dictionary = filler.get("lines", {}) as Dictionary
 	for rut: Array in lines.get("ruts", []):
 		draw_polyline(points(rut, rect), Color("6a5a43"), 1.0)
+	for gas: Array in filler.get("gas", []):
+		draw_polyline(points(gas, rect), Color("d2ad2c"), 2.0)
 	var heat: Dictionary = lines.get("heat", {}) as Dictionary
 	if heat.has("points"):
 		draw_polyline(points(heat.points, rect), Color("d97a2b"), 3.0)
@@ -167,8 +194,14 @@ func _draw_filler(filler: Dictionary, rect: Rect2, k: float) -> void:
 	for item: Array in filler.get("items", []):
 		var kit: String = String(item[0])
 		var at: Vector2 = map_point(Vector2(float(item[1]), float(item[2])), rect)
-		if kit in ["bush", "sapling"]:
+		if kit in ["bush", "sapling", "reeds"]:
 			draw_circle(at, 1.1, Color("587a45"))
+		elif kit in ["tree_birch", "tree_poplar"]:
+			draw_circle(at, maxf(1.5, 2.0 * k), Color("456b3a"))
+		elif kit.begins_with("rock"):
+			draw_circle(at, 1.3, Color("8a877e"))
+		elif kit == "hay_roll":
+			draw_circle(at, 1.4, Color("b49a5c"))
 		elif kit in ["puddle", "find", "suitcase", "log", "fire_ring", "cart"]:
 			continue
 		elif FOOTPRINTS.has(kit):

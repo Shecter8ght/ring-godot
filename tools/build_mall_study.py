@@ -20,7 +20,9 @@ import re
 from pathlib import Path
 
 from mall_study_filler import make_filler
+from mall_study_ground import make_ground
 from mall_study_relief import make_relief
+from mall_study_streets import make_streets
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -62,19 +64,12 @@ def in_terraces(a_game: float) -> bool:
     return (a_game - TERRACE_A[0]) % 360.0 <= (TERRACE_A[1] - TERRACE_A[0]) % 360.0
 
 
-def near_terrace_wall(x: float, y: float) -> bool:
-    """Точка схемы у подпорной стенки террас: у лестницы через стенку навеса нет."""
-    r = math.hypot(x, y)
-    return in_terraces(ga(math.degrees(math.atan2(y, x)))) and any(w - 4.5 < r < w + 5.0 for w in TERRACE_WALLS)
-
-
-def gallery_with_stairs(points, half_w: float = 2.5, piece: float = 6.0):
-    """Крытая галерея кусками не длиннее piece (каждый на своём уровне рельефа) и лестницы там, где
-    она пересекает подпорную стенку террас: радиальный марш со своим проёмом в стенке, без навеса."""
-    pieces, stairs = [], []
+def gallery_stairs(points):
+    """Лестницы там, где галерея пересекает подпорную стенку террас: радиальный марш со своим проёмом
+    в стенке, без навеса (саму галерею — пол, стойки по краям, сплошную кровлю — строит MallLandscape)."""
+    stairs = []
     for (x0, y0), (x1, y1) in zip(points, points[1:]):
         dx, dy = x1 - x0, y1 - y0
-        length = math.hypot(dx, dy)
         qa, qb = dx * dx + dy * dy, 2.0 * (x0 * dx + y0 * dy)
         for w in TERRACE_WALLS:
             disc = qb * qb - 4.0 * qa * (x0 * x0 + y0 * y0 - w * w)
@@ -84,21 +79,12 @@ def gallery_with_stairs(points, half_w: float = 2.5, piece: float = 6.0):
                 a_game = ga(math.degrees(math.atan2(y0 + t * dy, x0 + t * dx)))
                 if 0.0 <= t <= 1.0 and in_terraces(a_game):
                     stairs.append({"a": round(a_game, 2), "r": w})
-        n = max(1, math.ceil(length / piece))
-        ux, uy = dx / length, dy / length
-        for i in range(n):
-            ends = [(x0 + dx * k / n, y0 + dy * k / n) for k in (i, i + 1)]
-            corners = [(px - uy * half_w * s, py + ux * half_w * s) for px, py in ends for s in (-1.0, 1.0)]
-            if any(near_terrace_wall(*c) for c in corners):
-                continue
-            pieces.append(((ends[0][0] + ends[1][0]) / 2, (ends[0][1] + ends[1][1]) / 2, length / n,
-                           math.degrees(math.atan2(dy, dx))))
-    return pieces, stairs
+    return stairs
 
 
-def gallery_walk(points, stairs, lane: float = 1.3):
-    """Путь пешехода под галереей (точки игры): стойки навеса — по её оси, идут сбоку, в lane от оси,
-    к каждой лестнице — от полосы напротив её низа; после последней лестницы — прямо к концу галереи."""
+def gallery_walk(points, stairs, lane: float = 0.0):
+    """Путь пешехода под галереей (точки игры): по оси (стойки навеса — по краям), к каждой лестнице —
+    от точки напротив её низа; после последней лестницы — прямо к концу галереи."""
     line = [g(*p) for p in points]
     units, normals = [], []
     for (x0, z0), (x1, z1) in zip(line, line[1:]):
@@ -151,23 +137,29 @@ def building(key, label, xy, size, region, kind="mass", floors=1, height=3.0, ya
                       "region": region, "lift": lift})
 
 
-# 2 — главная площадь: стела и навес над главным входом
-building("Stela", "Рекламная стела «РИНГ»", pol(-90, 162), (4, 14), "Plaza", height=12)
+# 2 — главная площадь: стела (пилон лицом к аллее) и навес над главным входом; машин на площади нет —
+# от кольцевой к ней идёт пешеходная аллея (владелец, 2026-10-17: дорога через площадь, стелу и фонтан — нет)
+building("Stela", "Рекламная стела «РИНГ»", pol(-90, 162), (6, 2), "Plaza", height=12)
 building("Entrance_Canopy", "Навес над главным входом", pol(-90, 113), (30, 9), "Plaza", kind="canopy", height=5.2)
-# 4 — автостанция: павильон, перроны, автобусы, крытая галерея к площади
+# 4 — автостанция: павильон у трассы, перроны, площадка для автобусов к северу от них, крытая галерея к площади.
+# Дороги к павильону не идут сквозь него: с кольцевой — на площадку, с трассы — западнее павильона.
 building("Bus_Pavilion", "Автостанция · касса и зал", (-158, -284), (70, 16), "BusStation", kind="hall", height=5.0)
 for i in range(4):
     building(f"Bus_Platform_{i + 1}", "Перрон под навесом", (-186 + i * 18, -268), (12, 3), "BusStation", kind="canopy", height=4.0)
-# автобусы у западных перронов: галерея уходит к площади от третьего, путь под ней свободен
 for i, x in enumerate((-186, -168)):
     building(f"Bus_{i + 1}", "Автобус · 12 м", (x, -258), (12, 2.6), "BusStation", kind="bus")
-GALLERY = [(-150, -272), (-118, -222), (-70, -175), pol(-100, 168)]
-gallery_pieces, gallery_stairs = gallery_with_stairs(GALLERY)
-for i, (x, y, length, yaw) in enumerate(gallery_pieces):
-    building(f"Gallery_{i + 1}", "Крытая галерея к площади", (x, y), (length, 5), "BusStation",
-             kind="canopy", height=3.4, yaw=yaw)
-# 5 — многоуровневый паркинг: 4 яруса по 3 м — второй ярус вровень со 2-м этажом ТЦ (6 м), мост
-building("Parking_Garage", "Многоуровневый паркинг · 4 яруса", (185, -42), (64, 100), "Garage", kind="skeleton", floors=4, height=3.0)
+BUS_APRON = (-162.0, -251.0, 72.0, 26.0)  # площадка автобусов: центр схемы, ширина (восток), глубина (север)
+# галерея: от восточного торца павильона — к кольцевой, через неё по пешеходному переходу со светофором,
+# дальше по парковке (две лестницы через стенки террас) к площади
+GALLERY_OUT = [(-118.0, -272.0), pol(-115, 263)]
+GALLERY_IN = [pol(-115, 247), pol(-108, 190), pol(-100, 168)]
+GALLERY = GALLERY_OUT + GALLERY_IN
+gallery_stair_list = gallery_stairs(GALLERY)
+# 5 — многоуровневый паркинг: 4 яруса по 3 м — второй ярус вровень со 2-м этажом ТЦ (6 м), мост.
+# Южнее въезда с востока (раньше дорога заходила в его первый ярус).
+GARAGE_AT = (185.0, -62.0)
+GARAGE_BRIDGE_Y = -26.0
+building("Parking_Garage", "Многоуровневый паркинг · 4 яруса", GARAGE_AT, (64, 100), "Garage", kind="skeleton", floors=4, height=3.0)
 # 6 — придорожное кафе и мойка
 building("Cafe", "Придорожное кафе · окно выдачи", (262, -262), (30, 20), "Cafe", kind="hall", height=4.0)
 building("Car_Wash", "Автомойка", (300, -240), (18, 26), "Cafe", kind="canopy", height=4.5)
@@ -178,14 +170,16 @@ for i, (a, r) in enumerate(((-8, 130), (0, 136), (8, 130), (-4, 150), (5, 151)))
 # 8 — разгрузочный двор в выемке −4 м: фуры у доков, пост ЧВК у ворот
 for i, a in enumerate((30, 38, 46, 54, 62)):
     building(f"Truck_{i + 1}", "Фура у дока", pol(a, 153), (2.6, 16), "Yard", height=4.0, yaw=a - 90)
-building("PMC_Post", "Пост ЧВК у ворот двора", pol(48, 202), (7, 7), "Yard", kind="hall", height=3.0)
+# у края выемки сбоку от пандуса — смотрит на въезд, не стоит на нём
+building("PMC_Post", "Пост ЧВК у ворот двора", pol(55, 213), (7, 7), "Yard", kind="hall", height=3.0)
 # 9 — техкомплекс: котельная с трубой 45 м (ориентир), ТП, генераторы, водонапорная башня
 building("Boiler_House", "Котельная", (300, 150), (44, 30), "Tech", kind="hall", height=7.0)
 building("Chimney", "Труба котельной · 45 м", (322, 172), (8, 8), "Tech", height=45.0)
 building("Substation", "Трансформаторная подстанция", (262, 112), (16, 12), "Tech", height=4.0)
 building("Generators", "Генераторная", (338, 120), (20, 14), "Tech", height=3.6)
 building("Water_Tower", "Водонапорная башня", (350, 178), (12, 12), "Tech", height=24.0)
-building("Service_Warehouse", "Склад обслуживания техники", (283, 192), (26, 14), "Tech", kind="hall", height=4.5)
+# севернее служебной дороги (раньше она шла сквозь него)
+building("Service_Warehouse", "Склад обслуживания техники", (262, 226), (26, 14), "Tech", kind="hall", height=4.5)
 # 11 — сквер: летняя веранда
 building("Veranda", "Летняя веранда кафе", pol(100, 144), (26, 12), "Square", kind="canopy", height=3.2, yaw=10)
 # 12 — АЗС: навес колонок, магазин, мойка и сервисный бокс
@@ -215,16 +209,35 @@ for i, y in enumerate((-60, 60, 180)):
     building(f"Warehouse_{i + 1}", "Склад промзоны", (470, y), (40, 70), "Outside", height=9.0)
 
 # ------------------------------------------------------------------ дороги (в метрах игры)
+# class: «main» — с разметкой, бордюром, фонарями и знаками; «local» — проезд без бордюра (обочина)
+bax, bay, baw, bah = BUS_APRON
 roads = [
-    {"id": "loop", "width": 9, "points": arc(0, 360, LOOP_R, 240)},
-    {"id": "highway_exit", "width": 8, "points": gs([(205, -318), (215, -280), (205, -245), pol(-50, LOOP_R)])},
-    {"id": "to_bus_station", "width": 8, "points": gs([(-150, -318), (-150, -292), pol(-122, LOOP_R)])},
-    {"id": "west_road", "width": 9, "points": gs([(-470, 30), (-300, 22), pol(175, LOOP_R)])},
-    {"id": "service_road", "width": 7, "points": gs([(400, 268), (300, 205), pol(38, LOOP_R)])},
+    {"id": "loop", "width": 9, "class": "main", "points": arc(0, 360, LOOP_R, 240)},
+    {"id": "highway_exit", "width": 8, "class": "main", "points": gs([(205, -318), (215, -280), (205, -245), pol(-50, LOOP_R)])},
+    # автобусы с трассы — западнее павильона на площадку; с кольцевой — сверху на площадку
+    {"id": "to_bus_station", "width": 8, "class": "main", "points": gs([(-212, -318), (-212, -266), (bax - baw / 2, bay - 4)])},
+    {"id": "bus_access", "width": 8, "class": "main", "points": gs([pol(-131, LOOP_R), (pol(-131, LOOP_R)[0], bay + bah / 2)])},
+    {"id": "west_road", "width": 9, "class": "main", "points": gs([(-470, 30), (-300, 22), pol(175, LOOP_R)])},
+    {"id": "service_road", "width": 7, "class": "local", "points": gs([(400, 268), (300, 205), pol(38, LOOP_R)])},
+    # АЗС стояла без дороги: съезд с кольцевой мимо колонок, дальше — тупик у речки (к мостику — тропа)
+    {"id": "gas_road", "width": 7, "class": "main", "points": gs([pol(150, LOOP_R), (-229, 156), (-252, 165), (-280, 168)])},
 ]
-for a in (-90, 180, 0, 45):
-    roads.append({"id": f"entry_{int(a) % 360}", "width": 8, "points": gs([pol(a, LOOP_R), pol(a, FIRE_LANE[1])])})
-roads.append({"id": "car_wash_drive", "width": 4, "points": gs([(240, -282), (248, -290), (285, -290), (292, -275)])})
+# к пожарному проезду здания — с запада и востока; с юга, к главному входу, — пешеходная аллея (не дорога)
+for a in (180, 0):
+    roads.append({"id": f"entry_{int(a) % 360}", "width": 8, "class": "main", "points": gs([pol(a, LOOP_R), pol(a, FIRE_LANE[1])])})
+# во двор — по пандусу на дно выемки, до площадки разворота перед доками (не сквозь доки к зданию)
+roads.append({"id": "yard_road", "width": 8, "class": "main", "points": gs([pol(46, LOOP_R), pol(46, 172)])})
+# въезды на южную парковку — по пандусам террас
+for a in (-55, -125):
+    roads.append({"id": f"parking_in_{-a}", "width": 7, "class": "local", "points": gs([pol(a, LOOP_R), pol(a, 176)])})
+roads.append({"id": "car_wash_drive", "width": 4, "class": "local", "points": gs([(240, -282), (248, -290), (285, -290), (292, -275)])})
+# пешеходная аллея от кольцевой к площади по оси главного входа; галерея автостанции — сплошная кровля на
+# стойках по краям, на кольцевой — разрыв и переход со светофором
+ALLEY = {"points": gs([pol(-90, LOOP_R - 5.5), pol(-90, 168)]), "width": 10.0}
+gallery = {"parts": [gs(GALLERY_OUT), gs(GALLERY_IN)], "width": 5.0, "height": 3.4}
+crossings = [{"id": "gallery", "points": gs([pol(-115, 263), pol(-115, 247)]), "width": 5.0, "lights": True},
+             {"id": "alley", "points": gs([pol(-90, LOOP_R + 6.5), pol(-90, LOOP_R - 6.5)]), "width": 8.0, "lights": True}]
+aprons = [{"kind": "road", "rect": [bax, -bay, baw, bah, 0.0]}]
 
 # ------------------------------------------------------------------ план
 plan = {
@@ -243,7 +256,7 @@ plan = {
     # уровни рельефа (м): север выше, южная парковка террасами, трасса ниже всего
     "levels": {"north": 3.5, "north_from": 130.0, "north_to": 330.0, "south": -5.0, "south_from": 150.0, "south_to": 306.0},
     "terraces": {"a": TERRACE_A, "walls": TERRACE_WALLS, "steps": [-2.0, -4.0], "ramps": [55.0, 90.0, 125.0],
-                 "ramp_half_deg": 4.0, "ramp_len": 14.0, "stairs": gallery_stairs, "stair_w": 3.0},
+                 "ramp_half_deg": 4.0, "ramp_len": 14.0, "stairs": gallery_stair_list, "stair_w": 3.0},
     "parkings": [{"a": [ga(-20), ga(-160)], "r": [130.0, 240.0], "rows": {"a": [ga(-22), ga(-62)], "density": 0.5, "seed": 3}},
                  {"a": [ga(-118), ga(-158)], "r": [130.0, 240.0], "rows": {"a": [ga(-118), ga(-158)], "density": 0.45, "seed": 2}},
                  {"a": [ga(210), ga(150)], "r": [130.0, 238.0], "rows": {"a": [ga(208), ga(152)], "density": 0.8, "seed": 4}},
@@ -254,7 +267,12 @@ plan = {
              "ramp_a": ga(46), "ramp_half_deg": 5.0, "ramp_r": [205.0, 236.0]},
     "square": {"a": [ga(146), ga(74)], "r": [128.0, 236.0], "trees": 60, "seed": 11, "playground": g(*pol(128, 186))},
     "pond": {"at": g(-110, 288), "size": [120.0, 56.0], "yaw": 8.0, "depth": 1.8, "drain": gs([(-60, 276), (-40, 262), (-12, 254)])},
-    "garage_bridge": {"from": g(153, -2), "to": g(MALL_R - 0.5, -2), "width": 8.0, "y": 6.0},
+    "garage_bridge": {"from": g(GARAGE_AT[0] - 32.0, GARAGE_BRIDGE_Y),
+                      "to": g(math.sqrt(MALL_R ** 2 - GARAGE_BRIDGE_Y ** 2) - 0.5, GARAGE_BRIDGE_Y), "width": 8.0, "y": 6.0},
+    "alley": ALLEY,
+    "gallery": gallery,
+    "crossings": crossings,
+    "aprons": aprons,
     "foot_bridge": {"x": -40.0, "z": [298.0, 338.0], "width": 4.0, "y": 1.2},
     "buildings": buildings,
     "spawns": [{"id": k, "at": g(*xy)} for k, xy in
@@ -271,7 +289,7 @@ plan = {
         {"id": 2, "label": "ГЛАВНАЯ ПЛОЩАДЬ", "at": g(*pol(-90, 150)), "spawn": [18.0, 160.0], "look": [0.0, 120.0]},
         {"id": 3, "label": "ГЛАВНАЯ ПАРКОВКА", "at": [-90.0, 200.0], "spawn": [0.0, 214.0], "look": [-90.0, 190.0]},
         {"id": 4, "label": "АВТОСТАНЦИЯ", "at": g(-158, -284), "spawn": [-130.0, 255.0], "look": [-158.0, 284.0]},
-        {"id": 5, "label": "МНОГОУРОВНЕВЫЙ ПАРКИНГ", "at": g(185, -42), "spawn": [240.0, 30.0], "look": [185.0, 42.0]},
+        {"id": 5, "label": "МНОГОУРОВНЕВЫЙ ПАРКИНГ", "at": g(*GARAGE_AT), "spawn": [240.0, 30.0], "look": g(*GARAGE_AT)},
         {"id": 6, "label": "ПРИДОРОЖНОЕ КАФЕ", "at": g(262, -262), "spawn": [235.0, 235.0], "look": [262.0, 262.0]},
         {"id": 7, "label": "ВОСТОЧНЫЙ ВХОД · БАРРИКАДА", "at": g(*pol(0, 140)), "spawn": [165.0, -30.0], "look": [115.0, 0.0]},
         {"id": 8, "label": "РАЗГРУЗОЧНЫЙ ДВОР", "at": g(*pol(46, 165)), "spawn": g(*pol(46, 232)), "look": g(*pol(46, 150))},
@@ -292,7 +310,7 @@ plan = {
         {"id": "C_восток_к_баррикаде", "points": [[385.0, 275.0], [300.0, 220.0], [240.0, 130.0], [240.0, 0.0], [155.0, 0.0]]},
         {"id": "D_север_во_двор", "points": [[130.0, -336.0], [200.0, -265.0], g(*pol(46, 240)), g(*pol(44, 190)), g(*pol(42, 150))]},
         # от автостанции под галереей к площади: через подпорные стенки террас — по лестницам
-        {"id": "E_автостанция_по_галерее", "points": gallery_walk(GALLERY, gallery_stairs)},
+        {"id": "E_автостанция_по_галерее", "points": gallery_walk(GALLERY, gallery_stair_list)},
     ],
 }
 
@@ -305,8 +323,14 @@ plan["boundary_area_m2"] = round(area(plan["boundary"]), 1)
 # рельеф: горки, утёсы, речка, рощи (владелец, 2026-10-17: «как в Battlefield или Hunt: Showdown»)
 plan["relief"] = make_relief(plan)
 plan["forest"] += plan["relief"].pop("groves")
-# наполнение пустых мест между участками: укрытия, природа, ориентиры, истории (владелец, 2026-10-17)
+# дорожная обстановка: перекрёстки, разметка, бордюры, отбойники, знаки, светофоры, фонари, опоры проводов
+plan["streets"], streets_stats = make_streets(plan)
+# наполнение пустых мест между участками: укрытия, природа, ориентиры, истории (владелец, 2026-10-17);
+# наборы улиц (знаки, фонари, столбики) — в том же списке, их рисует тот же узел пачками
 plan["filler"], filler_stats = make_filler(plan)
+plan["filler"]["items"] = plan["streets"].pop("items") + plan["filler"]["items"]
+# покрытия земли: площадки, пятна, тропы (остальное MallLandscape красит по высоте, уклону и влажности)
+plan["ground"], ground_stats = make_ground(plan)
 (ROOT / "data/blockouts").mkdir(parents=True, exist_ok=True)
 # простые списки (точки, предметы наполнения) — в строку: файл читаемый и без тысяч строк по числу
 text = re.sub(r"\[[^\[\]{}]*\]", lambda m: re.sub(r"\s*\n\s*", " ", m.group(0)).replace("[ ", "[").replace(" ]", "]"),
@@ -337,6 +361,7 @@ scene = [
     '[ext_resource type="Script" path="res://src/blockout/mall_ring.gd" id="ring"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_study_level.gd" id="launch"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]',
+    '[ext_resource type="Script" path="res://src/blockout/mall_streets.gd" id="streets"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/escalator.tscn" id="esc"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/rubble_pile.tscn" id="rub"]',
     '[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]',
@@ -366,6 +391,7 @@ scene = [
     'directional_shadow_max_distance = 220.0',
     '[node name="Landscape" type="Node3D" parent="."]', 'script = ExtResource("land")',
     '[node name="Filler" type="Node3D" parent="."]', 'script = ExtResource("fill")',
+    '[node name="Streets" type="Node3D" parent="."]', 'script = ExtResource("streets")',
     '[node name="Mall" type="Node3D" parent="."]', 'script = ExtResource("ring")',
     '[node name="Escalators" type="Node3D" parent="Mall"]',
     *copied_nodes("Escalators"),
@@ -392,5 +418,5 @@ for region in regions:
 dest = ROOT / "scenes/levels/mall_study.tscn"
 dest.write_text("\n\n".join(scene) + "\n", encoding="utf-8")
 print(json.dumps({"boundary_area_m2": plan["boundary_area_m2"], "buildings": len(buildings), "roads": len(roads),
-                  "locations": len(plan["locations"]), "routes": len(plan["probe_routes"]), "filler": filler_stats},
+                  "locations": len(plan["locations"]), "routes": len(plan["probe_routes"]), "streets": streets_stats, "ground": ground_stats, "filler": filler_stats},
                  ensure_ascii=False))

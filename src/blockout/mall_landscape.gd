@@ -22,6 +22,23 @@ const SPLIT_MIN_M: float = 0.25
 
 ## Сетка поиска земляных работ наполнения, м.
 const EARTH_CELL: float = 32.0
+## Клетка растра «лес / не лес» для окраски земли, м (между клетками — плавно).
+const RASTER_CELL: float = 6.0
+
+## Окраска земли (владелец, 2026-10-17: «всё зелёное, будто ТЦ в поле»): трава, сухостой, проплешины,
+## подстилка, у воды — грязь и песок, на крутом — глина и камень. Цвет в вершинах, поверх — мелкий шум.
+const GRASS_GREEN: Color = Color(0.33, 0.42, 0.22)
+const GRASS_LUSH: Color = Color(0.26, 0.37, 0.19)
+const GRASS_DRY: Color = Color(0.53, 0.52, 0.33)
+const EARTH: Color = Color(0.42, 0.35, 0.26)
+const ROCK_FACE: Color = Color(0.53, 0.52, 0.49)
+const FOREST_FLOOR: Color = Color(0.33, 0.3, 0.22)
+## Мягкие пятна плана (ground.soil): земля, щебень, грязь, песок, сухая трава, гарь — как в mall_study_ground.py.
+const SOIL_COLORS: Array[Color] = [Color(0.5, 0.42, 0.31), Color(0.6, 0.59, 0.55), Color(0.34, 0.3, 0.23),
+	Color(0.71, 0.65, 0.51), Color(0.66, 0.61, 0.41), Color(0.19, 0.18, 0.16)]
+## Площадки плана (ground.zones) и тропы.
+const ZONE_COLORS: Dictionary = {"gravel": Color(0.56, 0.55, 0.51), "concrete": Color(0.62, 0.62, 0.58),
+	"dirt": Color(0.47, 0.4, 0.3), "path": Color(0.45, 0.39, 0.29)}
 ## Дальше этого от середины русла речка землю не трогает, м.
 const RIVER_REACH: float = 26.0
 
@@ -48,6 +65,18 @@ var _river_grid: Dictionary = {}
 var _river_dry: Vector2 = Vector2.ZERO
 var _river_bed_half: float = 3.0
 var _river_depth: float = 1.1
+## Окраска земли: сетка с цветом в вершинах, кэш цвета по точке, шумы, растр леса, пятна по клеткам.
+var _soil_st: SurfaceTool
+var _soil_cache: Dictionary = {}
+var _noise_low: FastNoiseLite
+var _noise_mid: FastNoiseLite
+var _noise_hi: FastNoiseLite
+var _forest_raster: PackedFloat32Array = PackedFloat32Array()
+var _raster_size: Vector2i = Vector2i.ZERO
+var _raster_origin: Vector2 = Vector2.ZERO
+var _soil_spots: Array = []
+var _soil_grid: Dictionary = {}
+var _detail: NoiseTexture2D
 
 
 func _ready() -> void:
@@ -68,6 +97,7 @@ func load_plan() -> void:
 		forests.append(poly(points))
 	flat_r = float((plan.mall as Dictionary).flat_r)
 	_load_earth()
+	_load_soil()
 
 
 func _load_earth() -> void:
@@ -108,6 +138,140 @@ func _load_earth() -> void:
 			_earth.append(PackedFloat32Array([3.0, a.x, a.y, b.x, b.y, half, float(ditch.depth)]))
 			var box: Rect2 = Rect2(a, Vector2.ZERO).expand(b).grow(half)
 			_grid_add(index, box)
+
+
+## Окраска земли: шумы, растр леса (клетка RASTER_CELL), мягкие пятна плана по клеткам EARTH_CELL.
+func _load_soil() -> void:
+	_soil_cache.clear()
+	_noise_low = _noise(20261017, 0.006, 3)
+	_noise_mid = _noise(20261018, 0.035, 3)
+	_noise_hi = _noise(20261019, 0.22, 1)
+	var bounds: Array = plan.bounds
+	_raster_origin = Vector2(float(bounds[0]), float(bounds[1]))
+	_raster_size = Vector2i(ceili((float(bounds[2]) - float(bounds[0])) / RASTER_CELL) + 1,
+		ceili((float(bounds[3]) - float(bounds[1])) / RASTER_CELL) + 1)
+	_forest_raster.resize(_raster_size.x * _raster_size.y)
+	for j: int in range(_raster_size.y):
+		for i: int in range(_raster_size.x):
+			var p: Vector2 = _raster_origin + Vector2(i, j) * RASTER_CELL
+			var inside: float = 0.0
+			for f: PackedVector2Array in forests:
+				if Geometry2D.is_point_in_polygon(p, f):
+					inside = 1.0
+					break
+			_forest_raster[j * _raster_size.x + i] = inside
+	_soil_spots = (plan.get("ground", {}) as Dictionary).get("soil", []) as Array
+	_soil_grid.clear()
+	for index: int in range(_soil_spots.size()):
+		var s: Array = _soil_spots[index]
+		var reach: float = float(s[2]) * 1.3
+		for cx: int in range(floori((float(s[0]) - reach) / EARTH_CELL), floori((float(s[0]) + reach) / EARTH_CELL) + 1):
+			for cz: int in range(floori((float(s[1]) - reach) / EARTH_CELL), floori((float(s[1]) + reach) / EARTH_CELL) + 1):
+				var key: Vector2i = Vector2i(cx, cz)
+				var list: PackedInt32Array = _soil_grid.get(key, PackedInt32Array())
+				list.append(index)
+				_soil_grid[key] = list
+
+
+static func _noise(seed_value: int, frequency: float, octaves: int) -> FastNoiseLite:
+	var n: FastNoiseLite = FastNoiseLite.new()
+	n.seed = seed_value
+	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	n.frequency = frequency
+	n.fractal_octaves = octaves
+	return n
+
+
+## Растр в точке — с плавным переходом между клетками.
+func _raster_at(raster: PackedFloat32Array, x: float, z: float) -> float:
+	var f: Vector2 = (Vector2(x, z) - _raster_origin) / RASTER_CELL
+	var i: int = clampi(floori(f.x), 0, _raster_size.x - 2)
+	var j: int = clampi(floori(f.y), 0, _raster_size.y - 2)
+	var u: float = clampf(f.x - float(i), 0.0, 1.0)
+	var v: float = clampf(f.y - float(j), 0.0, 1.0)
+	var w: int = _raster_size.x
+	return lerpf(lerpf(raster[j * w + i], raster[j * w + i + 1], u), lerpf(raster[(j + 1) * w + i], raster[(j + 1) * w + i + 1], u), v)
+
+
+## Цвет земли в точке без уклона: трава и сухостой по шуму, высоте и влажности, проплешины, лесная
+## подстилка, грязь у воды, мягкие пятна плана. Считается один раз на точку (кэш по четверти метра).
+func _soil_base(x: float, z: float) -> Color:
+	var key: Vector2i = Vector2i(roundi(x * 4.0), roundi(z * 4.0))
+	if _soil_cache.has(key):
+		return _soil_cache[key]
+	var low: float = _noise_low.get_noise_2d(x, z)
+	var mid: float = _noise_mid.get_noise_2d(x, z)
+	var hi: float = _noise_hi.get_noise_2d(x, z)
+	var h: float = base_height(x, z)
+	var rd: float = river_distance(Vector2(x, z))
+	var pq: float = _pond_q(x, z)
+	var wet: float = 0.0
+	if rd < 32.0:
+		wet = 1.0 - smoothstep(8.0, 32.0, rd)
+	wet = maxf(wet, 1.0 - smoothstep(1.0, 2.4, pq))
+	# сухость: крупный шум, выше по рельефу — суше, у воды — сочнее
+	var dry: float = clampf(0.38 + low * 1.0 + h * 0.03, 0.0, 1.0) * (1.0 - wet)
+	var c: Color = GRASS_GREEN.lerp(GRASS_DRY, smoothstep(0.45, 0.9, dry))
+	c = c.lerp(GRASS_LUSH, wet * 0.75)
+	# проплешины и вытоптанное — средний шум
+	c = c.lerp(EARTH, smoothstep(0.32, 0.65, mid) * 0.6)
+	c = c.lerp(FOREST_FLOOR, _raster_at(_forest_raster, x, z) * 0.85)
+	# у кромки речки и водоёма — грязь
+	var mud: float = 1.0 - smoothstep(_river_bed_half + 2.5, _river_bed_half + 7.0, rd)
+	mud = maxf(mud, 1.0 - smoothstep(0.85, 1.3, pq))
+	c = c.lerp(SOIL_COLORS[2], mud * 0.9)
+	# мягкие пятна плана: край рваный (тот же средний шум)
+	var cell: Vector2i = Vector2i(floori(x / EARTH_CELL), floori(z / EARTH_CELL))
+	if _soil_grid.has(cell):
+		for index: int in _soil_grid[cell] as PackedInt32Array:
+			var s: Array = _soil_spots[index]
+			var r: float = float(s[2])
+			var d: float = Vector2(x - float(s[0]), z - float(s[1])).length() + mid * r * 0.35
+			var w: float = 1.0 - smoothstep(r * 0.5, r * 1.1, d)
+			if w > 0.0:
+				c = c.lerp(SOIL_COLORS[int(s[3])], w * 0.9)
+	c = c * (1.0 + hi * 0.08)
+	c.a = 1.0
+	_soil_cache[key] = c
+	return c
+
+
+## Треугольник земли с цветом в вершинах; крутой склон — глина, обрыв — камень.
+func _soil_tri(a: Vector3, b: Vector3, c: Vector3) -> void:
+	var normal: Vector3 = (c - a).cross(b - a).normalized()
+	var steep: float = 1.0 - smoothstep(0.66, 0.86, normal.y)
+	var rocky: float = 1.0 - smoothstep(0.5, 0.68, normal.y)
+	_soil_st.set_normal(normal)
+	for v: Vector3 in [a, b, c]:
+		var col: Color = _soil_base(v.x, v.z).lerp(EARTH, steep * 0.75).lerp(ROCK_FACE, rocky)
+		_soil_st.set_color(col)
+		_soil_st.add_vertex(v)
+
+
+## Мелкий шум поверх цвета (мировые координаты, без швов): трава и асфальт не плоские.
+func _detail_texture() -> NoiseTexture2D:
+	if _detail != null:
+		return _detail
+	var n: FastNoiseLite = _noise(7, 0.045, 4)
+	_detail = NoiseTexture2D.new()
+	_detail.width = 256
+	_detail.height = 256
+	_detail.seamless = true
+	_detail.noise = n
+	var ramp: Gradient = Gradient.new()
+	ramp.set_color(0, Color(0.74, 0.74, 0.74))
+	ramp.set_color(1, Color(1.0, 1.0, 1.0))
+	_detail.color_ramp = ramp
+	return _detail
+
+
+func _with_detail(material: StandardMaterial3D, scale: float) -> StandardMaterial3D:
+	material.albedo_texture = _detail_texture()
+	material.uv1_triplanar = true
+	material.uv1_world_triplanar = true
+	material.uv1_scale = Vector3.ONE * scale
+	material.albedo_color = material.albedo_color * 1.14
+	return material
 
 
 func _add_earth(entry: PackedFloat32Array, at: Vector2, reach: float) -> void:
@@ -402,6 +566,7 @@ func rebuild() -> void:
 	cover_spots = PackedVector2Array()
 	var g: RefCounted = Geometry.new(generated, _palette())
 	_terrain(g)
+	_ground_cover(g)
 	_surfaces(g)
 	_roads(g)
 	_terrace_walls(g)
@@ -425,11 +590,17 @@ func _palette() -> Dictionary:
 		"car_a": Color("6f7880"), "car_b": Color("8b8a83"), "car_c": Color("5d5853"), "car_d": Color("8d7a63"),
 		"spawn": Color("3d6fb5"), "exit": Color("3c9b5a"), "exit_cond": Color("c48a2c"), "danger": Color("a8473d"),
 		"rock": Color("6f6c63"), "timber": Color("6e5a43")}
+	for key: String in ZONE_COLORS:
+		extra[key] = ZONE_COLORS[key]
 	for key: String in extra:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = extra[key]
 		material.roughness = 0.9
 		result[key] = material
+	# асфальт, плитка, щебень и грунт — с тем же мелким шумом, что и земля: не плоские заливки
+	for key: String in ["road", "walk", "parking", "plaza", "court", "pit", "mud"] + ZONE_COLORS.keys():
+		var material: StandardMaterial3D = (result[key] as StandardMaterial3D).duplicate() as StandardMaterial3D
+		result[key] = _with_detail(material, 0.22)
 	return result
 
 
@@ -447,6 +618,13 @@ func _terrain(g: RefCounted) -> void:
 		for ix: int in range(nx + 1):
 			heights[iz * (nx + 1) + ix] = ground(x0 + float(ix) * STEP_M, z0 + float(iz) * STEP_M)
 	var faces: PackedVector3Array = PackedVector3Array()
+	# земля — одна сетка с цветом в вершинах (см. _soil_base)
+	_soil_st = SurfaceTool.new()
+	_soil_st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var soil_material: StandardMaterial3D = StandardMaterial3D.new()
+	soil_material.vertex_color_use_as_albedo = true
+	soil_material.roughness = 0.95
+	_soil_st.set_material(_with_detail(soil_material, 0.16))
 	for iz: int in range(nz):
 		for ix: int in range(nx):
 			var x: float = x0 + float(ix) * STEP_M
@@ -458,9 +636,14 @@ func _terrain(g: RefCounted) -> void:
 			var b: Vector3 = Vector3(x + STEP_M, heights[iz * (nx + 1) + ix + 1], z)
 			var c: Vector3 = Vector3(x + STEP_M, heights[(iz + 1) * (nx + 1) + ix + 1], z + STEP_M)
 			var d: Vector3 = Vector3(x, heights[(iz + 1) * (nx + 1) + ix], z + STEP_M)
-			var key: String = "grass" if Geometry2D.is_point_in_polygon(Vector2(x, z), boundary) else "ground"
-			_terrain_tri(g, faces, a, b, c, key, 0)
-			_terrain_tri(g, faces, a, c, d, key, 0)
+			_terrain_tri(g, faces, a, b, c, "soil", 0)
+			_terrain_tri(g, faces, a, c, d, "soil", 0)
+	var soil_mesh: MeshInstance3D = MeshInstance3D.new()
+	soil_mesh.name = "Mesh_soil"
+	soil_mesh.mesh = _soil_st.commit()
+	generated.add_child(soil_mesh)
+	_soil_st = null
+	_soil_cache.clear()
 	var shape: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
 	shape.set_faces(faces)
 	shape.backface_collision = true
@@ -477,7 +660,10 @@ func _terrain_tri(g: RefCounted, faces: PackedVector3Array, a: Vector3, b: Vecto
 	var mca: Vector3 = _split_point(c, a, depth, lift)
 	var split: int = int(is_finite(mab.y)) + int(is_finite(mbc.y)) + int(is_finite(mca.y))
 	if split == 0:
-		g.tri(a, b, c, key)
+		if key == "soil":
+			_soil_tri(a, b, c)
+		else:
+			g.tri(a, b, c, key)
 		faces.append_array(PackedVector3Array([a, b, c]))
 		return
 	if split == 3:
@@ -550,7 +736,23 @@ func _annulus(g: RefCounted, a0: float, a1: float, r0: float, r1: float, key: St
 			var ra: float = lerpf(r0, r1, float(j) / float(nr))
 			var rb: float = lerpf(r0, r1, float(j + 1) / float(nr))
 			var pts: Array[Vector3] = []
-			for v: Vector2 in [polar(pa, ra), polar(pb, ra), polar(pb, rb), polar(pa, rb)]:
+			# обход — как у клеток рельефа (лицом вверх); прежний обратный прятал площадь, парковки,
+			# пожарный проезд и дно двора — сверху была видна трава
+			for v: Vector2 in [polar(pa, ra), polar(pa, rb), polar(pb, rb), polar(pb, ra)]:
+				pts.append(Vector3(v.x, ground(v.x, v.y) + lift, v.y))
+			_drape_quad(g, pts, key, lift)
+
+
+## Прямоугольник по земле (площадка, двор): центр, размер (по X и Z до поворота), поворот в градусах.
+func _rect_drape(g: RefCounted, center: Vector2, size: Vector2, yaw_deg: float, key: String, lift: float) -> void:
+	var nx: int = maxi(1, ceili(size.x / 4.0))
+	var nz: int = maxi(1, ceili(size.y / 4.0))
+	var yaw: float = deg_to_rad(yaw_deg)
+	for i: int in range(nx):
+		for j: int in range(nz):
+			var pts: Array[Vector3] = []
+			for k: Vector2 in [Vector2(i, j), Vector2(i + 1, j), Vector2(i + 1, j + 1), Vector2(i, j + 1)]:
+				var v: Vector2 = center + (Vector2(k.x / float(nx) - 0.5, k.y / float(nz) - 0.5) * size).rotated(yaw)
 				pts.append(Vector3(v.x, ground(v.x, v.y) + lift, v.y))
 			_drape_quad(g, pts, key, lift)
 
@@ -558,18 +760,41 @@ func _annulus(g: RefCounted, a0: float, a1: float, r0: float, r1: float, key: St
 func _surfaces(g: RefCounted) -> void:
 	var mall: Dictionary = plan.mall
 	var lane: Array = mall.fire_lane
+	var pl: Dictionary = plan.plaza
 	_annulus(g, 0.0, 360.0, float(mall.r), float(mall.podium_r), "walk", 0.03)
-	_annulus(g, 0.0, 360.0, float(lane[0]), float(lane[1]), "road", 0.035)
+	# пожарный проезд через площадь — её плиткой (машины сюда не ездят, у краёв площади — столбики)
+	_annulus(g, float(pl.a[1]), float(pl.a[0]), float(lane[0]), float(lane[1]), "road", 0.035)
 	for p: Dictionary in plan.parkings:
 		var a: Array = p.a
 		var r: Array = p.r
 		_annulus(g, float(a[0]), float(a[1]), float(r[0]), float(r[1]), "parking", 0.03)
-	var pl: Dictionary = plan.plaza
 	_annulus(g, float(pl.a[0]), float(pl.a[1]), float(pl.r[0]), float(pl.r[1]), "plaza", 0.04)
+	# аллея от кольцевой к площади — той же плиткой, поверх парковки
+	var alley: Dictionary = plan.get("alley", {}) as Dictionary
+	if not alley.is_empty():
+		_strip(g, poly(alley.points), float(alley.width), "plaza", 0.045)
+	# площадки (автобусы у автостанции): прямоугольник по земле
+	for apron: Dictionary in plan.get("aprons", []):
+		var rect: Array = apron.rect
+		_rect_drape(g, Vector2(float(rect[0]), float(rect[1])), Vector2(float(rect[2]), float(rect[3])), float(rect[4]),
+			"road" if String(apron.kind) == "road" else String(apron.kind), 0.055)
 	var sq: Dictionary = plan.square
 	_annulus(g, float(sq.a[0]), float(sq.a[1]), float(sq.r[0]), float(sq.r[1]), "court", 0.03)
 	var y: Dictionary = plan.yard
 	_annulus(g, float(y.a[0]), float(y.a[1]), float(y.r[0]) + 8.0, float(y.r[1]), "pit", 0.03)
+
+
+## Площадки (щебень, бетон, асфальт, грунт — с чёткими краями) и грунтовые тропы плана ground.
+func _ground_cover(g: RefCounted) -> void:
+	var cover: Dictionary = plan.get("ground", {}) as Dictionary
+	for zone: Dictionary in cover.get("zones", []):
+		var rect: Array = zone.rect
+		var kind: String = String(zone.kind)
+		_rect_drape(g, Vector2(float(rect[0]), float(rect[1])), Vector2(float(rect[2]), float(rect[3])), float(rect[4]),
+			"road" if kind == "asphalt" else kind, 0.02)
+	var width: float = float(cover.get("path_width", 1.7))
+	for path: Array in cover.get("paths", []):
+		_strip(g, poly(path), width, "path", 0.024)
 
 
 func _strip(g: RefCounted, line: PackedVector2Array, width: float, key: String, offset: float) -> void:
@@ -592,11 +817,31 @@ func drape_strip(g: RefCounted, line: PackedVector2Array, width: float, key: Str
 	_strip(g, line, width, key, lift)
 
 
+## Круг по земле (площадка скругления перекрёстка): веер из треугольников, дробится на уступах.
+func drape_disk(g: RefCounted, center: Vector2, radius: float, key: String, lift: float) -> void:
+	var scratch: PackedVector3Array = PackedVector3Array()
+	var c: Vector3 = Vector3(center.x, ground(center.x, center.y) + lift, center.y)
+	var n: int = 18
+	for i: int in range(n):
+		var p: Vector2 = center + polar(360.0 * float(i) / float(n), radius)
+		var q: Vector2 = center + polar(360.0 * float(i + 1) / float(n), radius)
+		_terrain_tri(g, scratch, c, Vector3(p.x, ground(p.x, p.y) + lift, p.y), Vector3(q.x, ground(q.x, q.y) + lift, q.y), key, 0, lift)
+
+
+## Занято ли место ряда парковки (стенки террас, пандусы, въезды, аллея, галерея, постройки) — для разметки мест.
+func parking_spot_blocked(at: Vector2, ang: float, rad: float) -> bool:
+	return _car_blocked(at, ang, rad)
+
+
 func _roads(g: RefCounted) -> void:
 	for road: Dictionary in plan.roads:
 		var line: PackedVector2Array = poly(road.points)
 		var width: float = float(road.width)
-		_strip(g, line, width + 2.0, "walk", 0.045)
+		# у главных — тротуар за бордюром, у местных и загородных — щебёночная обочина
+		if String(road.get("class", "main")) == "main":
+			_strip(g, line, width + 4.5, "walk", 0.045)
+		else:
+			_strip(g, line, width + 3.2, "gravel", 0.04)
 		_strip(g, line, width, "road", 0.06)
 
 
@@ -814,7 +1059,15 @@ func _car_blocked(at: Vector2, ang: float, rad: float) -> bool:
 		if polar(float(st.a), float(st.r)).distance_to(at) < 9.0:
 			return true
 	for road: Dictionary in plan.roads:
-		if String(road.id).begins_with("entry_") and line_distance(at, poly(road.points)) < float(road.width) * 0.5 + 2.5:
+		if String(road.id) != "loop" and line_distance(at, poly(road.points)) < float(road.width) * 0.5 + 2.5:
+			return true
+	# аллея к площади и галерея автостанции идут через парковку — машины не под ними
+	var alley: Dictionary = plan.get("alley", {}) as Dictionary
+	if not alley.is_empty() and line_distance(at, poly(alley.points)) < float(alley.width) * 0.5 + 2.5:
+		return true
+	var gallery: Dictionary = plan.get("gallery", {}) as Dictionary
+	for part: Array in gallery.get("parts", []):
+		if line_distance(at, poly(part)) < float(gallery.width) * 0.5 + 3.0:
 			return true
 	# теплотрасса наполнения идёт через восточную парковку
 	var heat: Array = ((plan.get("filler", {}) as Dictionary).get("lines", {}) as Dictionary).get("heat", {}).get("points", [])
@@ -834,6 +1087,7 @@ func _highway(g: RefCounted) -> void:
 	var xs: Array = hw.x
 	var z: float = float(hw.z)
 	var line: PackedVector2Array = PackedVector2Array([Vector2(float(xs[0]), z), Vector2(float(xs[1]), z)])
+	_strip(g, line, float(hw.width) + 5.0, "gravel", 0.045)
 	_strip(g, line, float(hw.width), "road", 0.06)
 	for zz: float in [z - 0.15, z + 0.15]:
 		_strip(g, PackedVector2Array([Vector2(float(xs[0]), zz), Vector2(float(xs[1]), zz)]), 0.15, "stripe", 0.08)
@@ -1094,10 +1348,7 @@ func _river_features(g: RefCounted) -> void:
 			# оголовок трубы в откосе насыпи: бетонная рамка и тёмное отверстие
 			g.box(Vector3(float(at[0]), base - 1.4, float(at[1])), Vector3(6.0, 3.0, 1.0), "concrete", true, yaw)
 			g.box(Vector3(float(at[0]), base - 1.9, float(at[1])), Vector3(3.2, 2.0, 1.06), "dark", false, yaw)
-	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = 7117
-	for cliff: Dictionary in relief.get("cliffs", []):
-		_cliff_rocks(g, cliff, rng)
+	# глыбы по лицу утёсов и валуны у подножия — наборы наполнения (tools/mall_study_filler.py, cliff_rocks)
 
 
 ## Мост поперёк русла: настил вровень с берегами, перила, опоры; дорожный — на ширину дороги.
@@ -1126,39 +1377,3 @@ func _bridge(g: RefCounted, bridge: Dictionary) -> void:
 		var pier: Vector2 = at + across * side * (_river_bed_half + 1.0)
 		var foot: float = ground(pier.x, pier.y)
 		g.box(Vector3(pier.x, (foot + deck - 0.5) * 0.5, pier.y), Vector3(0.8, maxf(0.2, deck - 0.5 - foot), width * 0.8), "concrete", true, yaw)
-
-
-## Камни по лицу утёса и валуны у подножия: серые глыбы, у подножия — укрытие.
-func _cliff_rocks(g: RefCounted, cliff: Dictionary, rng: RandomNumberGenerator) -> void:
-	var edge: PackedVector2Array = poly(cliff.points)
-	var height: float = float(cliff.height)
-	var side: float = float(cliff.side)
-	var total: float = 0.0
-	for i: int in range(edge.size() - 1):
-		total += edge[i].distance_to(edge[i + 1])
-	var walked: float = 0.0
-	for i: int in range(edge.size() - 1):
-		var a: Vector2 = edge[i]
-		var b: Vector2 = edge[i + 1]
-		var dir: Vector2 = (b - a).normalized()
-		# к низу утёса — сторона, противоположная верху
-		var down: Vector2 = Vector2(dir.y, -dir.x) * side
-		var seg: float = a.distance_to(b)
-		var s: float = 0.0
-		while s < seg:
-			var along: float = walked + s
-			var taper: float = smoothstep(0.0, 15.0, along) * smoothstep(0.0, 15.0, total - along)
-			var p: Vector2 = a + dir * s + down * rng.randf_range(0.2, 0.9)
-			var tall: float = height * taper * rng.randf_range(0.55, 1.0)
-			if tall > 0.8:
-				var low: float = ground(p.x + down.x * 2.0, p.y + down.y * 2.0)
-				g.box(Vector3(p.x, low + tall * 0.5 - 0.3, p.y), Vector3(rng.randf_range(1.6, 3.6), tall, rng.randf_range(1.2, 2.4)), "rock", true,
-					-atan2(dir.y, dir.x) + rng.randf_range(-0.35, 0.35))
-			if rng.randf() < 0.35 and taper > 0.3:
-				var boulder: Vector2 = a + dir * s + down * rng.randf_range(3.0, 7.0)
-				var size: float = rng.randf_range(0.9, 1.7)
-				g.box(Vector3(boulder.x, ground(boulder.x, boulder.y) + size * 0.4, boulder.y), Vector3(size * 1.3, size, size * 1.1), "rock", true,
-					rng.randf_range(0.0, TAU))
-				cover_spots.append(boulder)
-			s += rng.randf_range(2.2, 3.4)
-		walked += seg

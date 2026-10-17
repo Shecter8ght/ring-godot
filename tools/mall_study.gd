@@ -224,7 +224,8 @@ func _verify() -> void:
 	_check("Разгрузочный двор в выемке −4 м", absf(yard_y - float(y.floor)) < 0.3, {"y": yard_y})
 	var north_y: float = _ray_y(-200.0, -300.0)
 	var hw: Dictionary = plan.highway
-	var hw_y: float = _ray_y(150.0, float(hw.z))
+	# по полосе, а не по оси: посередине трассы — бетонный разделитель
+	var hw_y: float = _ray_y(150.0, float(hw.z) + 6.0)
 	_check("Север выше, трасса ниже всего", north_y > 2.5 and absf(hw_y - float(hw.y)) < 0.3, {"north_y": north_y, "highway_y": hw_y})
 	# рельеф: горка, речка, утёсы (tools/mall_study_relief.py)
 	var relief: Dictionary = plan.get("relief", {}) as Dictionary
@@ -463,7 +464,7 @@ func _shots() -> void:
 		{"id": "06_tech_garage", "at": Vector3(330, 40, 80), "look": Vector3(220, 5, -60)},
 		{"id": "07_gallery_stairs", "at": Vector3(-104, 0, 196), "look": Vector3(-82, -2, 185.5)},
 		{"id": "08_construction", "at": Vector3(30, 26, -228), "look": Vector3(40, 0, -292)},
-		{"id": "09_field_eye", "at": Vector3(-300, 1.7, 40), "look": Vector3(-345, 1.0, 200)},
+		{"id": "09_field_eye", "at": Vector3(-262, 1.7, 40), "look": Vector3(-300, 1.0, 200)},
 		{"id": "10_convoy", "at": Vector3(-270, 16, 190), "look": Vector3(-320, 0, 238)},
 		{"id": "11_heat_main", "at": Vector3(215, 7, -18), "look": Vector3(150, 1, -46)},
 		{"id": "12_garages", "at": Vector3(298, 9, 92), "look": Vector3(332, 1, 55)},
@@ -473,12 +474,23 @@ func _shots() -> void:
 		{"id": "17_west_hill_view", "at": Vector3(-385, 11.5, 150), "look": Vector3(0, 5, 0)},
 		{"id": "18_pond_cliff", "at": Vector3(-110, 4, -250), "look": Vector3(-110, 3, -326)},
 		{"id": "19_ford", "at": Vector3(-308, 7, 248), "look": Vector3(-331, -2, 227)},
-		{"id": "20_forest_eye", "at": Vector3(-372, 9.7, 160), "look": Vector3(-300, 6, 150)}]
-	# свой кадр вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z (без плана)
-	var custom: PackedStringArray = OS.get_environment("MALL_STUDY_VIEW").split(":")
-	if custom.size() == 7:
-		views = [{"id": custom[0], "at": Vector3(custom[1].to_float(), custom[2].to_float(), custom[3].to_float()),
-			"look": Vector3(custom[4].to_float(), custom[5].to_float(), custom[6].to_float())}]
+		{"id": "20_forest_eye", "at": Vector3(-372, 9.7, 160), "look": Vector3(-300, 6, 150)},
+		# вторая очередь (владелец, 2026-10-17): галерея с переходом, аллея к площади, перекрёсток, уплотнение, гора
+		{"id": "22_gallery_crossing", "at": Vector3(-70, 14, 290), "look": Vector3(-115, 0, 225)},
+		{"id": "23_alley_eye", "at": Vector3(3, 1.7, 236), "look": Vector3(0, 3, 150)},
+		{"id": "24_junction", "at": Vector3(205, 18, -205), "look": Vector3(150, -4, -140)},
+		{"id": "25_east_field", "at": Vector3(250, 30, 160), "look": Vector3(320, 0, 80)},
+		{"id": "26_dachas_kpp", "at": Vector3(-320, 22, 60), "look": Vector3(-400, 0, 0)},
+		{"id": "27_mountain", "at": Vector3(-300, 30, -170), "look": Vector3(-400, 10, -250)}]
+	# свои кадры вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z[;имя:…] (без плана)
+	var custom_views: Array[Dictionary] = []
+	for spec: String in OS.get_environment("MALL_STUDY_VIEW").split(";", false):
+		var custom: PackedStringArray = spec.split(":")
+		if custom.size() == 7:
+			custom_views.append({"id": custom[0], "at": Vector3(custom[1].to_float(), custom[2].to_float(), custom[3].to_float()),
+				"look": Vector3(custom[4].to_float(), custom[5].to_float(), custom[6].to_float())})
+	if not custom_views.is_empty():
+		views = custom_views
 	for view: Dictionary in views:
 		var environment: Environment = (world.get_node("WorldEnvironment") as WorldEnvironment).environment
 		environment.fog_enabled = view.id != "01_overview"
@@ -490,7 +502,7 @@ func _shots() -> void:
 		var image: Image = get_viewport().get_texture().get_image()
 		var path: String = output_dir.path_join(String(view.id) + ".png")
 		print("mall_study: снимок ", path, " ошибка=", image.save_png(path))
-	if custom.size() == 7:
+	if not custom_views.is_empty():
 		get_tree().quit()
 		return
 	walker.camera.position = Vector3(0, Balance.ADS_EYE.stand, 0)
