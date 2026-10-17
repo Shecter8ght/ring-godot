@@ -87,8 +87,8 @@ BUDGET_DETAIL = {'Stock': 26000, 'Handguard': 3000, 'Barrel': 4500, 'Receiver': 
 # прицел (обод окуляра обрамляет картинку прицела), круглое под рукой (шар рукояти, грибок, головка стопора — иначе
 # вблизи видны грани); меньше у дальнего и
 # скрытого. Не указанные детали — FP_SMALL.
-FP_TOTAL = 12600                                 # запас на деление длинных рёбер и швы развёртки: в итоге ≈ 15 000
-FP_WEIGHTS = {'Stock': 2700, 'Handguard': 420, 'Barrel': 600, 'Receiver': 1050, 'Magazine_Box': 320, 'TriggerGuard': 330,
+FP_TOTAL = 16000                                 # до удаления прижатых граней и деления длинных рёбер: в итоге ≈ 15 000
+FP_WEIGHTS = {'Stock': 2700, 'Handguard': 420, 'Barrel': 420, 'Receiver': 1450, 'Magazine_Box': 320, 'TriggerGuard': 330,
               'RearSight_Base': 380, 'RearSight_Leaf_Mesh': 460, 'RearSight_Slider': 150, 'RearSight_Pin': 56,
               'Bolt_Body': 550, 'Bolt_Head': 380, 'Bolt_Handle': 340, 'Bolt_Handle_Ball': 380, 'Bolt_CockingPiece': 320,
               'Bolt_Knob': 300, 'Bolt_ConnectingBar': 180, 'Bolt_FiringPin_End': 24, 'Bolt_Extractor': 32,
@@ -103,6 +103,13 @@ FP_WEIGHTS = {'Stock': 2700, 'Handguard': 420, 'Barrel': 600, 'Receiver': 1050, 
               'Mount_Bracket': 700, 'Mount_LockScrew': 240, 'Mount_Base': 120, 'Mount_Base_FrontStop': 120,
               'Mount_Base_RearBlock': 120, 'Mount_Base_Screw': 32, 'Mount_RingScrew': 32}
 FP_SMALL = 32
+# Круглый крепёж и мелкие круглые детали у глаза — доля треугольников исходника, вне общего масштаба: при меньшем
+# числе головки винтов и грибок становятся многогранными (владелец, 2026-10-18: «болтики не с круглыми шляпками,
+# а с угольными — очень бросается в глаза»).
+FP_ROUND = {'Receiver_TangScrew': 0.3, 'Stock_CrossScrew': 0.7, 'Buttplate_Screw': 0.6, 'Magazine_FrontScrew': 0.6,
+            'Mount_RingScrew': 0.55, 'Mount_Base_Screw': 0.55, 'Scope_TurretElev_CapScrew': 0.5,
+            'Scope_TurretWind_CapScrew': 0.5, 'Bolt_FiringPin_End': 0.4, 'RearSight_Pin': 0.35, 'Mount_LockScrew': 0.12,
+            'Bolt_Knob': 0.12, 'FrontSight_Hood': 0.15}
 FP_AMMO = {'Cartridge_Case': 700, 'Cartridge_Bullet': 420, 'Cartridge_Primer': 64}
 # У глаза (шейка, гребень, коробка, затвор, начало накладки; x −380…+170 мм) сетка гуще в EYE_DENSITY раз;
 # переход к дальней плотности — за 150 мм.
@@ -116,6 +123,7 @@ ATLAS_SIZE = {'Wood': 4096, 'Steel': 4096, 'Optic': 4096, 'Ammo': 1024}
 # чья развёртка — сотни островков (стенки букв клейм: ствол, коробка, стебель, планка); у всех заново круглые детали
 # рвутся на узкие полосы и атлас пустеет (проверено: сталь заполнена на 28 % против 47 %). detail — всё исходника.
 UV_RESET_ISLANDS = 150 if VARIANT == 'fp' else 10 ** 9
+CONTACT = 0.004                                 # «прижатая» грань: половина лучей упирается ближе 4 мм
 HIDDEN_UV_SCALE = 0.1                           # скрытые грани — в 10 раз реже текселей
 UV_SLAB = 0.15                                  # длина полосы развёртки вдоль оси, м
 # поля островов развёртки, пикселей атласа: в fp побольше — на mip-уровнях швы не плывут
@@ -141,6 +149,8 @@ def budget_for(name: str, n: int) -> int:
         return max(48, int(n * 0.5))
     if base in FP_AMMO:
         return FP_AMMO[base]
+    if base in FP_ROUND:
+        return max(24, int(n * FP_ROUND[base]))
     return max(12, min(n, int(FP_WEIGHTS.get(base, FP_SMALL) * FP_SCALE)))
 
 
@@ -400,19 +410,34 @@ def build_bvh(posed):
     return BVHTree.FromPolygons(verts, polys)
 
 
-def visible_faces(o, m, bvh) -> set:
-    """Грани, с которых хоть один луч из полусферы уходит за пределы сборки (2 м). Лучи — из центра и от углов
-    грани: длинная грань трубы прицела или шомпола видна лишь краем (центр под кольцом / в ложе)."""
+def visible_faces(o, m, bvh) -> tuple:
+    """Грани, с которых хоть один луч из полусферы уходит за пределы сборки (2 м), и прижатые — невидимые, у которых
+    все лучи упираются ближе CONTACT (ствол под накладкой, ложе под стволом, низ головок винтов). Лучи — из центра и
+    от углов грани: длинная грань трубы прицела или шомпола видна лишь краем (центр под кольцом / в ложе)."""
     nm = m.to_3x3()
     me = o.data
-    vis = set()
+    vis, contact = set(), set()
     for pl in me.polygons:
         n = (nm @ pl.normal).normalized()
         c = m @ pl.center
         starts = [c] + [c + ((m @ me.vertices[i].co) - c) * 0.85 for i in pl.vertices]
-        if any(bvh.ray_cast(s + n * 1e-5, d, 2.0)[0] is None for s in starts for d in FIB if d.dot(n) > 0.05):
+        dirs = [d for d in FIB if d.dot(n) > 0.05]
+        dist, seen = [], False
+        for st in starts:
+            for d in dirs:
+                hit = bvh.ray_cast(st + n * 1e-5, d, 2.0)
+                if hit[0] is None:
+                    seen = True
+                    break
+                dist.append(hit[3])
+            if seen:
+                break
+        if seen:
             vis.add(pl.index)
-    return vis
+        elif sorted(dist)[len(dist) // 2] < CONTACT:
+            # типичный луч упирается рядом (скользящие вдоль узкой щели уходят далеко — по ним не судим)
+            contact.add(pl.index)
+    return vis, contact
 
 
 def uv_islands(bm, uvl, faces) -> list:
@@ -681,7 +706,20 @@ GROUPS['Frame_Steel'] = ('Steel', 'Frame', sorted(o.name for o in bpy.data.objec
                                                   and not o.name.startswith(SKIP)))
 lp = bpy.data.collections.new('MOSIN_GAME_LP')
 all_sources = [n for g in GROUPS.values() for n in g[2] if not n.startswith('Cartridge')]
-FP_SCALE = FP_TOTAL / sum(FP_WEIGHTS.get(n.split('.')[0], FP_SMALL) for n in all_sources)
+
+
+def hp_tris(n: str) -> int:
+    eo = bpy.data.objects[n].evaluated_get(dg)
+    me = eo.to_mesh()
+    me.calc_loop_triangles()
+    k = len(me.loop_triangles)
+    eo.to_mesh_clear()
+    return k
+
+
+fixed = sum(max(24, int(hp_tris(n) * FP_ROUND[n.split('.')[0]])) for n in all_sources if n.split('.')[0] in FP_ROUND)
+FP_SCALE = (FP_TOTAL - fixed) / sum(FP_WEIGHTS.get(n.split('.')[0], FP_SMALL) for n in all_sources
+                                    if n.split('.')[0] not in FP_ROUND)
 S.collection.children.link(lp)
 low, parts, cage, budgets = {}, {}, {}, {}
 for gname, (atlas, node, names) in GROUPS.items():
@@ -717,13 +755,41 @@ I4 = Matrix.Identity(4)
 back = Matrix.Translation((-0.088, 0, 0))
 OPEN = {'Bolt_Rotor_Mesh': back @ Matrix.Rotation(math.radians(-90), 4, 'X'), 'Bolt_Bar_Mesh': back,
         'Bolt_Cocking_Mesh': back @ Matrix.Translation((-0.0095, 0, 0))}
-hidden, hidden_share = {}, {}
-for pose in (None, OPEN):
+# планка прицела поднята (дальние дистанции): открывается колодка под ней
+leaf_pivot = Vector((0.1575, 0.0, 0.0168))
+LEAF_UP = Matrix.Translation(leaf_pivot) @ Matrix.Rotation(math.radians(35), 4, 'Y') @ Matrix.Translation(-leaf_pivot)
+LEAF = {'RearSight_Leaf_Mesh': LEAF_UP, 'RearSight_Slider_Mesh': LEAF_UP}
+hidden, hidden_share, contact = {}, {}, {}
+for pose in (None, OPEN, LEAF):
     posed = [(o, (pose or {}).get(o.name, I4)) for o in rifle_low]
     bvh = build_bvh(posed)
     for o, m in posed:
-        vis = visible_faces(o, m, bvh)
+        vis, cont = visible_faces(o, m, bvh)
         hidden[o.name] = (hidden.get(o.name, set(range(len(o.data.polygons))))) - vis
+        contact[o.name] = (contact.get(o.name, cont)) & cont
+removed_hidden = 0
+if VARIANT == 'fp':
+    # прижатые невидимые грани — удалить (правило AAA: в невидимых местах геометрия не нужна), их треугольники
+    # уходят видимому: круглому крепежу, ободу окуляра, ложе. Невидимые, но не прижатые (канал ствола, внутренность
+    # коробки) — остаются, мелким островом: в дуло и в окно коробки можно заглянуть под узким углом.
+    for o in rifle_low:
+        cont = contact[o.name] & hidden[o.name]
+        if not cont:
+            continue
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bm.faces.ensure_lookup_table()
+        mark = bm.faces.layers.int.new('lp_hidden')
+        for i in hidden[o.name]:
+            bm.faces[i][mark] = 1
+        drop = [bm.faces[i] for i in cont]
+        removed_hidden += sum(len(f.verts) - 2 for f in drop)
+        bmesh.ops.delete(bm, geom=drop, context='FACES')
+        hidden[o.name] = {f.index for f in bm.faces if f[mark]}
+        bm.faces.layers.int.remove(mark)
+        bm.to_mesh(o.data)
+        bm.free()
+    log('contact hidden faces removed, tris', removed_hidden)
 for g, o in low.items():
     if g.startswith('Round'):
         continue
@@ -816,7 +882,7 @@ for k, e in nodes.items():                      # то же у пустышек 
     e.name = k
 fp = sum(tris(o.data) for o in lp.all_objects if o.type == 'MESH' and not o.name.startswith('Round'))
 record = dict(variant=VARIANT, sources={k: str(v) for k, v in SRC.items()}, groups={g: dict(atlas=v[0], node=v[1], sources=parts[g]) for g, v in GROUPS.items()},
-              materials=MATNAME, atlas_size=ATLAS_SIZE, uv_margin_px=UV_MARGIN_PX, uv_atlas=UV_ATLAS, texel_px_mm=texels, hidden_area_share=hidden_share, cage=cage, budgets=budgets,
+              materials=MATNAME, atlas_size=ATLAS_SIZE, uv_margin_px=UV_MARGIN_PX, removed_hidden_tris=removed_hidden, uv_atlas=UV_ATLAS, texel_px_mm=texels, hidden_area_share=hidden_share, cage=cage, budgets=budgets,
               triangles_first_person=fp, meshes={o.name: tris(o.data) for o in lp.all_objects if o.type == 'MESH'},
               pivots_mm={k: mm(v.matrix_world.translation) for k, v in nodes.items()}, markers_mm=markers,
               scope_socket=socket_world, skipped=list(SKIP),

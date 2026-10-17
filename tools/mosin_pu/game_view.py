@@ -1,7 +1,7 @@
 """Мосин ПУ: файл просмотра игровой модели (15 000 треугольников) для владельца — в библиотеке модели.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_view.py
-→ E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/06_Игровая/fp/Mosin_PU_Game15k_v01.blend
+→ E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/06_Игровая/fp/Mosin_PU_Game15k_v02.blend
 Берёт сохранённый экспорт (_asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend, после game_export.py -- fp) и
 возвращает его в оси винтовки (дуло +X, верх +Z), как у остальных файлов библиотеки. Коллекции: игровая модель,
 LOD1 (выключена), коллизия (выключена), патрон и гильза; студия и мир — из сборки исходника (как там, для режима
@@ -19,7 +19,7 @@ SRC = ROOT / '_asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend'
 INFO = ROOT / 'assets/models/weapons/mosin_pu/mosin_pu.json'
 LIB = Path('E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models')
 STUDIO = LIB / '00_Сборка/Mosin_9130PU_Assembly_tex20_v02.blend'
-OUT = LIB / '06_Игровая/fp/Mosin_PU_Game15k_v01.blend'
+OUT = LIB / '06_Игровая/fp/Mosin_PU_Game15k_v02.blend'
 log = lambda *a: print('MOSIN_VIEW', *a, flush=True)
 
 bpy.context.preferences.use_preferences_save = False
@@ -91,8 +91,9 @@ S.view_settings.exposure = -0.2
 S.unit_settings.system = 'METRIC'
 S.unit_settings.length_unit = 'MILLIMETERS'
 tris = sum(len(o.data.polygons) for o in game.all_objects if o.type == 'MESH')
-S['Мосин'] = ('Игровая модель Мосина ПУ: 14 976 треугольников (винтовка, крепление, прицел), LOD1 4 992, '
-              'карты 20 % 4K запечены с high-poly. Источник — tools/mosin_pu/game_*.py (RING).')
+info = json.loads(INFO.read_text(encoding='utf-8'))['triangles']
+S['Мосин'] = (f"Игровая модель Мосина ПУ: {info['first_person']} треугольников (винтовка, крепление, прицел), "
+              f"LOD1 {info['lod1']}, карты 20 % 4K запечены с high-poly. Источник — tools/mosin_pu/game_*.py (RING).")
 bpy.ops.file.pack_all()
 OUT.parent.mkdir(parents=True, exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT), compress=True)

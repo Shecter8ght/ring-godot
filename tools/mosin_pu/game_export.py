@@ -88,9 +88,11 @@ def material(name: str, tag: str, lens: bool = False) -> None:
         nt.links.new(uv.outputs['UV'], t.inputs['Vector'])
         return t
     if lens:
-        # стекло: тёмное просветлённое, отражает окружение; пыль — шероховатостью из атласа прицела
-        # (белый цвет стекла исходника рассчитан на пропускание Cycles, в игре давал молочный диск)
-        p.inputs['Base Color'].default_value = (0.012, 0.014, 0.017, 1.0)
+        # стекло: тёмное просветлённое (лёгкий синий налёт), отражает окружение; пыль — шероховатостью из атласа прицела.
+        # Непрозрачное: при прицеливании окуляр закрывает картинка оптики (CameraRig — отдельная камера кругом поверх
+        # экрана по метке ScopeEye и радиусу окуляра), снаружи настоящая оптика тоже тёмная, а прозрачность во вьюмодели
+        # даёт ошибки сортировки. Белый цвет стекла исходника рассчитан на пропускание Cycles — в игре был молочный диск.
+        p.inputs['Base Color'].default_value = (0.010, 0.013, 0.020, 1.0)
     else:
         nt.links.new(tex('albedo', 'sRGB').outputs['Color'], p.inputs['Base Color'])
     orm = tex('orm', 'Non-Color')
@@ -111,8 +113,7 @@ def material(name: str, tag: str, lens: bool = False) -> None:
     gn.node_tree = g
     nt.links.new(sep.outputs['Red'], gn.inputs['Occlusion'])
     if lens:
-        p.inputs['Alpha'].default_value = 0.6
-        m.surface_render_method = 'BLENDED'
+        p.inputs['Coat Weight'].default_value = 0.0
 
 
 material('GAME • Wood • 20', 'Wood_20')
@@ -332,9 +333,11 @@ report = dict(
          'Trigger': 'ось спуска — начало узла', 'RearSight_Leaf': 'ось шарнира колодки — начало узла (подъём — поворот вокруг X)',
          'RearSight_Slider': 'хомутик скользит по планке', 'Follower': 'подаватель (магазин без патронов)'},
     materials={'GAME • Wood • 20': 'Wood_20', 'GAME • Steel • 20': 'Steel_20', 'GAME • Optic • 20': 'Optic_20',
-               'GAME • Lens • 20': 'тёмное стекло, альфа 0,6, шероховатость — Optic_20 ORM', 'GAME • Ammo': 'Ammo'},
+               'GAME • Lens • 20': 'тёмное просветлённое стекло, непрозрачное (в прицеле — картинка оптики), шероховатость — Optic_20 ORM', 'GAME • Ammo': 'Ammo'},
     wear_masks=[f'{NAME}_{a}_20_wear.png' for a in ('Wood', 'Steel', 'Optic')], uv_margin_px=REC.get('uv_margin_px', 8),
     texel_px_mm=REC['texel_px_mm'], hidden_area_share=REC['hidden_area_share'],
-    collision=list(COLLISION), skipped=REC['skipped'])
+    collision=list(COLLISION), skipped=REC['skipped'],
+    # для подключения оптики (CameraRig: meta ocular / ocular_r): центр — метка ScopeEye, радиус стекла окуляра
+    ocular_r_m=0.0118, removed_hidden_tris=REC.get('removed_hidden_tris', 0))
 (OUT / f'{NAME}.json').write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding='utf-8')
 log('SAVED', 'tris', main_total, 'lod1', lod_total)
