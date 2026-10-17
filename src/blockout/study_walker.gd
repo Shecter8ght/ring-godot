@@ -41,7 +41,8 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if is_probe or blocked_input:
 		return
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	# Мышь не захвачена (Esc, окно игры встроено во вкладку «Game» редактора) — осмотр с зажатой ПКМ.
+	if event is InputEventMouseMotion and (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)):
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion
 		# ADS_SENS уже в радианах на отсчёт мыши, как в основной CameraRig.
 		var sensitivity: float = Balance.ADS_SENS * Settings.sens_fps * (Balance.FPS_FOV / 62.0)
@@ -79,14 +80,15 @@ func _physics_process(delta: float) -> void:
 	var sprint: bool = probe_sprint if is_probe else Input.is_physical_key_pressed(KEY_SHIFT)
 	if is_probe:
 		direction = probe_direction
-	elif not blocked_input and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	elif not blocked_input:
+		# ходьба не ждёт захвата мыши: клавиши и так приходят только в окно с фокусом
 		var axis: Vector2 = Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)), float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
 		direction = (global_basis * Vector3(axis.x, 0, axis.y)).normalized()
 	if flight:
 		var axis: Vector2 = Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)), float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
 		direction = camera.global_basis * Vector3(axis.x, 0, axis.y)
 		direction.y += float(Input.is_physical_key_pressed(KEY_SPACE)) - float(Input.is_physical_key_pressed(KEY_CTRL))
-		if blocked_input or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		if blocked_input or is_probe:
 			direction = Vector3.ZERO
 		# Ускоренный полёт — только инструмент осмотра, его путь не считается прогулкой.
 		global_position += direction.normalized() * (60.0 if sprint else 18.0) * delta

@@ -20,6 +20,8 @@ var plan: Dictionary
 var hud: CanvasLayer
 var title: Label
 var status: Label
+## Мышь не захвачена (Esc, игра во вкладке «Game» редактора) — как вернуть обзор.
+var hint: Label
 var map: PlanMap
 var output_dir: String
 var results: Array[Dictionary] = []
@@ -98,8 +100,19 @@ func _ui() -> void:
 	controls.add_theme_font_size_override("font_size", 16)
 	controls.add_theme_color_override("font_shadow_color", Color.BLACK)
 	controls.add_theme_constant_override("shadow_outline_size", 8)
-	controls.text = "WASD — идти   Shift — бежать   Space — прыжок   C — присесть\nM — план   1–9, 0 — места 1–10   N / B — следующее / прошлое из 15   F — полёт   R — сначала\nEsc — освободить мышь · щелчок — продолжить · это черновик для замера, не рейд"
+	controls.text = "WASD — идти   Shift — бежать   Space — прыжок   C — присесть\nM — план   1–9, 0 — места 1–10   N / B — следующее / прошлое из 15   F — полёт   R — сначала\nEsc — освободить мышь · щелчок — продолжить · ПКМ — осмотр без захвата · это черновик для замера, не рейд"
 	root.add_child(controls)
+	hint = Label.new()
+	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hint.grow_vertical = Control.GROW_DIRECTION_BOTH
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 22)
+	hint.add_theme_color_override("font_shadow_color", Color.BLACK)
+	hint.add_theme_constant_override("shadow_outline_size", 10)
+	hint.text = "Щёлкните по картинке — мышь будет управлять обзором\n(или держите ПКМ и ведите мышью). WASD — идти."
+	hint.hide()
+	root.add_child(hint)
 	map = PlanMap.new()
 	map.name = "Plan"
 	map.plan = plan
@@ -128,6 +141,8 @@ func _process(_delta: float) -> void:
 		int(walker.walking_sec) % 60, walker.global_position.y, to_mall, Engine.get_frames_per_second()]
 	if map.visible:
 		map.queue_redraw()
+	hint.visible = mode == "walk" and not map.visible and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
+		and not Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
 
 
 func _unhandled_input(event: InputEvent) -> void:

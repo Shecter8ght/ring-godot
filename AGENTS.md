@@ -110,6 +110,10 @@ tools/godot.cmd res://tools/glass_test.tscn                 # витрины: п
 tools/godot.cmd res://tools/asphalt_shots.tscn              # мокрый асфальт: сухо / сыро / лужи, от первого лица и изометрия (ASPH_TIME=day|dusk|night); снимки asphalt_*
 tools/godot.cmd res://tools/ssr_probe.tscn                  # SSR движка: зеркало и мокрый асфальт при разных настройках отражений; снимки ssr_probe_*
 python tools/fetch_sky.py                                      # ночное небо: HDRI Poly Haven + карта Луны NASA в assets/sky, CREDITS
+python -X utf8 tools/gen_sky_atmosphere.py                    # расчётное небо: таблицы рассеяния и подгонка яркости к небу из панорам → data/sky_atmosphere.json
+                                                              # (--preview <папка> — панорамы обоих режимов по высотам солнца)
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/sky_compare_shots.tscn # небо из панорам и расчётное (Esc → Читы → Мир → «Небо»):
+                                                              # 05:00, 13:00, 18:30, 21:00, дождь → docs/screens/sky_cmp_*.png, кадры в секунду (SKY_CMP_ONLY=0500,2100)
 tools/godot.cmd res://tools/ceiling_shots.tscn             # потолки и купол атриума: от первого лица вверх и изометрия
 python -X utf8 tools/gen_mall_1f.py                          # ТЦ Ø200, 1-й этаж: раскладка плана docs/design/mall_1f_plan.md → data/sectors/mall_1f.json
 tools/godot.cmd --headless res://tools/mall_1f_check.tscn   # серый черновик ТЦ Ø200: ИИ доходит во все открытые места, выходы по плану;
