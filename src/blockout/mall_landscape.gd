@@ -83,6 +83,9 @@ var _detail: NoiseTexture2D
 ## Перекаты: шум и растр «где можно» (0 — ровно, 1 — полная высота), клетка RASTER_CELL.
 var _roll_noise: FastNoiseLite
 var _roll_raster: PackedFloat32Array = PackedFloat32Array()
+## Насыпь ветки: полуширина верха и откос (метров в сторону на метр высоты).
+var _rail_half: float = 3.2
+var _rail_slope: float = 1.5
 
 
 func _ready() -> void:
@@ -135,6 +138,18 @@ func _load_earth() -> void:
 		_earth.append(entry)
 		_grid_add(cliff_index, reach.grow(float(cliff.fall) + 2.0))
 	_load_river(relief.get("river", {}) as Dictionary)
+	# насыпь железнодорожной ветки (tools/mall_study_railway.py): отрезки [6, ax, az, bx, bz, верх a, верх b]
+	var rail: Dictionary = (plan.get("filler", {}) as Dictionary).get("rail", {}) as Dictionary
+	if not rail.is_empty():
+		var pts: PackedVector2Array = poly(rail.points)
+		var tops: Array = rail.tops
+		_rail_half = float(rail.top_half)
+		_rail_slope = float(rail.slope)
+		for i: int in range(pts.size() - 1):
+			var index: int = _earth.size()
+			_earth.append(PackedFloat32Array([6.0, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, float(tops[i]), float(tops[i + 1])]))
+			var reach: float = _rail_half + (maxf(float(tops[i]), float(tops[i + 1])) + 2.0) * _rail_slope
+			_grid_add(index, Rect2(pts[i], Vector2.ZERO).expand(pts[i + 1]).grow(reach))
 	for ditch: Dictionary in earth.get("ditches", []):
 		var pts: PackedVector2Array = poly(ditch.points)
 		var half: float = float(ditch.width) * 0.5
@@ -191,6 +206,11 @@ func _load_roll() -> void:
 		if String(road.id) != "loop":
 			roads.append(poly(road.points))
 			road_w.append(float(road.width) * 0.5)
+	# насыпь ветки — ровная, как дорога шириной по подошве
+	var rail: Dictionary = (plan.get("filler", {}) as Dictionary).get("rail", {}) as Dictionary
+	if not rail.is_empty():
+		roads.append(poly(rail.points))
+		road_w.append(float(rail.top_half) + 2.0 * float(rail.slope))
 	var rects: Array[Array] = []
 	for b: Dictionary in plan.buildings:
 		rects.append([Vector2(float(b.at[0]), float(b.at[1])), Vector2(float(b.size[0]), float(b.size[1])) * 0.5, deg_to_rad(float(b.yaw))])
@@ -464,6 +484,41 @@ func river_water_at(i: int, t: float) -> Vector3:
 	return Vector3(water, _river_bed_half + depth / kl, _river_bed_half + depth / kr)
 
 
+## Насыпь ветки: земля не ниже верха насыпи у пути и откосов в стороны (только поднимает).
+func _rail_fill(x: float, z: float, h: float) -> float:
+	var key: Vector2i = Vector2i(floori(x / EARTH_CELL), floori(z / EARTH_CELL))
+	if not _earth_grid.has(key):
+		return h
+	var p: Vector2 = Vector2(x, z)
+	for index: int in _earth_grid[key] as PackedInt32Array:
+		var e: PackedFloat32Array = _earth[index]
+		if int(e[0]) != 6:
+			continue
+		var a: Vector2 = Vector2(e[1], e[2])
+		var ab: Vector2 = Vector2(e[3], e[4]) - a
+		var t: float = clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var d: float = p.distance_to(a + ab * t)
+		h = maxf(h, lerpf(e[5], e[6], t) - maxf(0.0, d - _rail_half) / _rail_slope)
+	return h
+
+
+## Верх насыпи ветки в точке пути (для рельсов, моста и платформы): ближайший отрезок.
+func rail_top(p: Vector2) -> float:
+	var best: float = INF
+	var top: float = 0.0
+	for e: PackedFloat32Array in _earth:
+		if int(e[0]) != 6:
+			continue
+		var a: Vector2 = Vector2(e[1], e[2])
+		var ab: Vector2 = Vector2(e[3], e[4]) - a
+		var t: float = clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var d: float = p.distance_to(a + ab * t)
+		if d < best:
+			best = d
+			top = lerpf(e[5], e[6], t)
+	return top
+
+
 ## Поправка высоты от земляных работ в точке.
 func _earth_offset(x: float, z: float) -> float:
 	var key: Vector2i = Vector2i(floori(x / EARTH_CELL), floori(z / EARTH_CELL))
@@ -599,6 +654,7 @@ func ground(x: float, z: float) -> float:
 	h += _roll_at(x, z)
 	if not _earth_grid.is_empty():
 		h += _earth_offset(x, z)
+		h = _rail_fill(x, z, h)
 	if not _river_grid.is_empty():
 		h = _river_carve(x, z, h)
 	return h
@@ -1278,6 +1334,9 @@ func _clear_for_tree(p: Vector2) -> bool:
 	for track: Dictionary in ((plan.get("filler", {}) as Dictionary).get("lines", {}) as Dictionary).get("tracks", []):
 		if line_distance(p, poly(track.points)) < float(track.width) * 0.5 + 2.0:
 			return false
+	var rail: Dictionary = (plan.get("filler", {}) as Dictionary).get("rail", {}) as Dictionary
+	if not rail.is_empty() and line_distance(p, poly(rail.points)) < 8.0:
+		return false
 	for route: Dictionary in plan.probe_routes:
 		if line_distance(p, poly(route.points)) < 4.0:
 			return false

@@ -139,7 +139,7 @@ func _draw() -> void:
 			arrow.append(at + local.rotated(-walker.rotation.y))
 		draw_colored_polygon(arrow, Color.WHITE)
 	draw_string(font, Vector2(rect.position.x, rect.position.y - 20), "ТЦ «РИНГ» · ТЕРРИТОРИЯ · ЧЕРНОВИК 1:1 · СЕВЕР ↑", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("e3e6d4"))
-	draw_string(font, Vector2(rect.position.x, rect.end.y + 28), "M — закрыть · 1–9, 0 — места 1–10 · N / B — места · синие — появление, зелёные — выход, жёлтые — по условию · ◆ — история · оранжевая — теплотрасса · жёлтая — газ · пунктир — ЛЭП · синяя — речка · зубцы — утёс", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c0c9bd"))
+	draw_string(font, Vector2(rect.position.x, rect.end.y + 28), "M — закрыть · 1–9, 0 — места 1–10 · N / B — места · синие — появление, зелёные — выход, жёлтые — по условию · ◆ — история · оранжевая — теплотрасса · жёлтая — газ · штрихи — ж/д ветка · пунктир — ЛЭП · синяя — речка · зубцы — утёс", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c0c9bd"))
 	var a: Vector2 = rect.end + Vector2(-100.0 * k, 12)
 	draw_line(a, rect.end + Vector2(0, 12), Color("c0c9bd"), 2)
 	draw_string(font, a + Vector2(0, 30), "100 м", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("c0c9bd"))
@@ -193,6 +193,14 @@ func _draw_filler(filler: Dictionary, rect: Rect2, k: float) -> void:
 		draw_polyline(points(rut, rect), Color("6a5a43"), 1.0)
 	for gas: Array in filler.get("gas", []):
 		draw_polyline(points(gas, rect), Color("d2ad2c"), 2.0)
+	# железнодорожная ветка: тёмная линия со шпалами-штрихами
+	var rail: Dictionary = filler.get("rail", {}) as Dictionary
+	if not rail.is_empty():
+		var rp: PackedVector2Array = points(rail.points, rect)
+		draw_polyline(rp, Color("2b2824"), 3.0)
+		for i: int in range(0, rp.size() - 1, 2):
+			var dir: Vector2 = (rp[i + 1] - rp[i]).normalized()
+			draw_line(rp[i] + dir.orthogonal() * 4.0, rp[i] - dir.orthogonal() * 4.0, Color("2b2824"), 1.5)
 	var heat: Dictionary = lines.get("heat", {}) as Dictionary
 	if heat.has("points"):
 		draw_polyline(points(heat.points, rect), Color("d97a2b"), 3.0)

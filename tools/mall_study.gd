@@ -297,6 +297,35 @@ func _verify() -> void:
 		var crossed: bool = await _walk_path(bridge_path, false)
 		_check("Пешеходный мостик у АЗС: через речку по настилу", crossed and walker.global_position.y > float(bridge.deck) - 1.5,
 			{"position": str(walker.global_position)})
+	# железнодорожная ветка (tools/mall_study_railway.py): насыпь выше земли рядом, мост над речкой,
+	# по грунтовке через переезд — пешком
+	var rail: Dictionary = (plan.get("filler", {}) as Dictionary).get("rail", {}) as Dictionary
+	if not rail.is_empty():
+		var line: PackedVector2Array = MallLandscape.poly(rail.points)
+		# между эшелоном и переездом (на вагоне луч попал бы в крышу)
+		var on: Vector2 = line[line.size() * 3 / 5]
+		var dir: Vector2 = (line[line.size() * 3 / 5 + 1] - on).normalized()
+		var bank: float = _ray_y(on.x, on.y) - _ray_y(on.x - dir.y * 12.0, on.y + dir.x * 12.0)
+		_check("Ж/д ветка: насыпь выше земли рядом", bank > 0.9, {"embankment_m": snappedf(bank, 0.1)})
+		var deck: Vector2 = Vector2.ZERO
+		var nearest: float = INF
+		for q: Vector2 in line:
+			var rd: float = landscape.river_distance(q)
+			if rd < nearest:
+				nearest = rd
+				deck = q
+		var deck_y: float = _ray_y(deck.x, deck.y)
+		var water_side: float = landscape.ground(deck.x, deck.y)
+		_check("Ж/д ветка: мост над речкой", deck_y > water_side + 2.0 and absf(deck_y - landscape.rail_top(deck)) < 0.5,
+			{"deck_y": snappedf(deck_y, 0.1), "bed_y": snappedf(water_side, 0.1)})
+		for crossing: Dictionary in rail.get("crossings", []):
+			var at: Vector2 = Vector2(float(crossing.at[0]), float(crossing.at[1]))
+			var road: Vector2 = Vector2(float(crossing.road[0]), float(crossing.road[1]))
+			var cross_path: Array[Vector3] = []
+			for q: Vector2 in [at - road * 20.0, at + road * 20.0]:
+				cross_path.append(Vector3(q.x, landscape.ground(q.x, q.y) + 0.04, q.y))
+			var crossed: bool = await _walk_path(cross_path, false)
+			_check("Ж/д переезд: по грунтовке через пути пешком", crossed, {"position": str(walker.global_position)})
 	# паркинг: лестница на 2-й ярус и мост к фасаду ТЦ на высоте 2-го этажа
 	var garage: Node3D = world.get_node("Garage/Parking_Garage") as Node3D
 	var story: float = float(garage.get("story_height"))
@@ -485,7 +514,12 @@ func _shots() -> void:
 		# поля, сценки (tools/mall_study_scenery.py): высокая трава с уровня глаз, пшеница с трактором, сбитый вертолёт
 		{"id": "28_meadow_eye", "at": Vector3(300, 1.7, 110), "look": Vector3(300, 1, 170)},
 		{"id": "29_wheat", "at": Vector3(235, 12, -228), "look": Vector3(285, 0, -275)},
-		{"id": "30_heli", "at": Vector3(255, 9, 135), "look": Vector3(288, 1, 168)}]
+		{"id": "30_heli", "at": Vector3(255, 9, 135), "look": Vector3(288, 1, 168)},
+		# железнодорожная ветка: переезд, мост, эшелон, платформа у тупика
+		{"id": "31_rail_crossing", "at": Vector3(-322, 9, 48), "look": Vector3(-336, 1.5, 74)},
+		{"id": "32_rail_bridge", "at": Vector3(-300, 8, 100), "look": Vector3(-306, 0, 72)},
+		{"id": "33_train", "at": Vector3(-372, 12, 50), "look": Vector3(-430, 2, 82)},
+		{"id": "34_rail_platform", "at": Vector3(-255, 10, 50), "look": Vector3(-285, 2, 74)}]
 	# свои кадры вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z[;имя:…] (без плана)
 	var custom_views: Array[Dictionary] = []
 	for spec: String in OS.get_environment("MALL_STUDY_VIEW").split(";", false):

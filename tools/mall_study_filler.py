@@ -914,6 +914,7 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
         "lines": {"power": {"towers": [list(p) for p in POWER_TOWERS], "end": list(POWER_END)},
                   "heat": heat, "ruts": lay.ruts, "tracks": scene.tracks},
         "fields": scene.fields,
+        "rail": scene.rail,
         "stories": lay.stories,
         "cover": lay.cover,
         "soil": soil + scene.soil_extra,

@@ -52,6 +52,7 @@ func rebuild() -> void:
 	_stalls(g)
 	for gas: Array in (landscape.plan.get("filler", {}) as Dictionary).get("gas", []):
 		_gas_pipe(g, MallLandscape.poly(gas))
+	_railway(g)
 	g.finish()
 	stats = {"triangles": g.triangles, "collision_shapes": (g.body as StaticBody3D).get_child_count()}
 	set_meta("stats", stats)
@@ -60,7 +61,8 @@ func rebuild() -> void:
 func _palette() -> Dictionary:
 	var result: Dictionary = Geometry.materials()
 	var extra: Dictionary = {"plaza": Color("a49c86"), "metal": Color("9ea2a0"), "timber": Color("5f4c38"),
-		"curb": Color("97978c"), "paint": Color("c9c7b6"), "gas": Color("d2ad2c")}
+		"curb": Color("97978c"), "paint": Color("c9c7b6"), "gas": Color("d2ad2c"), "ballast": Color("6b6862"),
+		"sleeper": Color("4a3f33"), "rail": Color("6e6a64"), "warn": Color("c9a33a")}
 	for key: String in extra:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = extra[key]
@@ -207,6 +209,146 @@ func _near_road(p: Vector2, margin: float) -> bool:
 		elif MallLandscape.line_distance(p, MallLandscape.poly(road.points)) < float(road.width) * 0.5 + margin:
 			return true
 	return false
+
+
+# ---------------------------------------------------------------- железнодорожная ветка
+
+## Шаг шпал, м.
+const SLEEPER_STEP: float = 0.8
+
+## Ветка: балласт по насыпи, шпалы, рельсы колеи 1520 (без коллизии — капсула не цепляется), мост там,
+## где земля уходит ниже насыпи (речка), настил переезда вровень с рельсами, платформа с лестницами.
+func _railway(g: RefCounted) -> void:
+	var rail: Dictionary = (landscape.plan.get("filler", {}) as Dictionary).get("rail", {}) as Dictionary
+	if rail.is_empty():
+		return
+	var line: PackedVector2Array = MallLandscape.poly(rail.points)
+	var gauge: float = float(rail.gauge)
+	var pts: PackedVector2Array = _resample(line, SLEEPER_STEP)
+	var tops: PackedFloat32Array = PackedFloat32Array()
+	var bridge: Array[bool] = []
+	for p: Vector2 in pts:
+		var top: float = landscape.rail_top(p)
+		tops.append(top)
+		bridge.append(landscape.ground(p.x, p.y) < top - 0.4)
+	# балласт — по насыпи кусками, на мосту его нет
+	var piece: PackedVector2Array = PackedVector2Array()
+	for i: int in range(pts.size()):
+		if not bridge[i]:
+			piece.append(pts[i])
+		if (bridge[i] or i == pts.size() - 1) and piece.size() > 1:
+			landscape.drape_strip(g, piece, 3.4, "ballast", 0.05)
+			piece = PackedVector2Array()
+		elif bridge[i]:
+			piece = PackedVector2Array()
+	# шпалы и рельсы
+	for i: int in range(pts.size()):
+		var dir: Vector2 = _dir_at(pts, i)
+		var y: float = maxf(tops[i], landscape.ground(pts[i].x, pts[i].y))
+		g.box(Vector3(pts[i].x, y + 0.1, pts[i].y), Vector3(2.7, 0.14, 0.26), "sleeper", false, -atan2(dir.y, dir.x) + PI * 0.5)
+	for side: float in [-0.5, 0.5]:
+		var k: int = 0
+		while k < pts.size() - 1:
+			var n: int = mini(k + 4, pts.size() - 1)
+			var a: Vector2 = pts[k] + _dir_at(pts, k).orthogonal() * gauge * side
+			var b: Vector2 = pts[n] + _dir_at(pts, n).orthogonal() * gauge * side
+			var ya: float = maxf(tops[k], landscape.ground(pts[k].x, pts[k].y)) + 0.25
+			var yb: float = maxf(tops[n], landscape.ground(pts[n].x, pts[n].y)) + 0.25
+			g.beam(Vector3(a.x, ya, a.y), Vector3(b.x, yb, b.y), 0.08, 0.15, "rail")
+			k = n
+	_rail_bridges(g, pts, tops, bridge)
+	for crossing: Dictionary in rail.get("crossings", []):
+		_rail_crossing(g, crossing, gauge)
+	_platform(g, rail, line)
+
+
+func _dir_at(pts: PackedVector2Array, i: int) -> Vector2:
+	return (pts[mini(i + 1, pts.size() - 1)] - pts[maxi(i - 1, 0)]).normalized()
+
+
+## Мост ветки: настил на двух балках, перила, устои на концах и опора посередине длинного пролёта.
+func _rail_bridges(g: RefCounted, pts: PackedVector2Array, tops: PackedFloat32Array, bridge: Array[bool]) -> void:
+	var i: int = 0
+	while i < pts.size():
+		if not bridge[i]:
+			i += 1
+			continue
+		var s: int = maxi(0, i - 2)
+		while i < pts.size() and bridge[i]:
+			i += 1
+		var e: int = mini(pts.size() - 1, i + 1)
+		var a: Vector3 = Vector3(pts[s].x, tops[s], pts[s].y)
+		var b: Vector3 = Vector3(pts[e].x, tops[e], pts[e].y)
+		g.beam(a - Vector3.UP * 0.2, b - Vector3.UP * 0.2, 4.2, 0.4, "concrete", true)
+		var dir: Vector2 = (pts[e] - pts[s]).normalized()
+		var across: Vector3 = Vector3(-dir.y, 0.0, dir.x)
+		for side: float in [-1.2, 1.2]:
+			g.beam(a + across * side - Vector3.UP * 1.0, b + across * side - Vector3.UP * 1.0, 0.5, 1.2, "steel")
+			var rail_a: Vector3 = a + across * side * 1.7 + Vector3.UP * 0.9
+			var rail_b: Vector3 = b + across * side * 1.7 + Vector3.UP * 0.9
+			g.beam(rail_a, rail_b, 0.08, 0.08, "metal", true)
+			var span: float = Vector2(b.x - a.x, b.z - a.z).length()
+			for k: int in range(int(span / 2.5) + 1):
+				var post: Vector3 = a.lerp(b, float(k) * 2.5 / maxf(span, 0.01)) + across * side * 1.7
+				g.box(post + Vector3.UP * 0.45, Vector3(0.08, 0.9, 0.08), "metal", false)
+		# устои и опора посередине
+		for t: float in [0.0, 0.5, 1.0]:
+			var c: Vector3 = a.lerp(b, t)
+			var foot: float = landscape.ground(c.x, c.z)
+			if t == 0.5 and Vector2(b.x - a.x, b.z - a.z).length() < 18.0:
+				continue
+			var low: float = minf(foot, c.y - 1.6) - 0.5
+			g.box(Vector3(c.x, (low + c.y - 1.6) * 0.5, c.z), Vector3(1.2, maxf(0.3, c.y - 1.6 - low), 4.0), "concrete", true,
+				-atan2(dir.y, dir.x))
+
+
+## Переезд: настил вровень с головкой рельса поперёк пути на ширину дороги. Только картинка: ходят по
+## насыпи под ним (настил с коллизией — ступенька 0,3 м, о которую цепляется капсула).
+func _rail_crossing(g: RefCounted, crossing: Dictionary, gauge: float) -> void:
+	var at: Vector2 = Vector2(float(crossing.at[0]), float(crossing.at[1]))
+	var road: Vector2 = Vector2(float(crossing.road[0]), float(crossing.road[1]))
+	var top: float = landscape.rail_top(at)
+	var yaw: float = -atan2(road.y, road.x)
+	# вдоль дороги — ширина пути с запасом, поперёк — ширина дороги
+	g.box(Vector3(at.x, top + 0.24, at.y), Vector3(gauge + 1.8, 0.12, float(crossing.width)), "timber", false, yaw)
+
+
+## Платформа у тупика: бетон на высоте 1,1 над рельсами, жёлтая кромка, лестницы с обоих концов.
+func _platform(g: RefCounted, rail: Dictionary, line: PackedVector2Array) -> void:
+	var spec: Dictionary = rail.get("platform", {}) as Dictionary
+	if spec.is_empty():
+		return
+	var x0: float = float((spec.x as Array)[0])
+	var x1: float = float((spec.x as Array)[1])
+	var width: float = float(spec.width)
+	var off: float = float(rail.gauge) * 0.5 + 1.6 + width * 0.5
+	var side: float = float(spec.side)
+	var pts: PackedVector2Array = PackedVector2Array()
+	for p: Vector2 in _resample(line, 2.0):
+		if p.x >= x0 and p.x <= x1:
+			pts.append(p)
+	if pts.size() < 2:
+		return
+	var top_y: float = landscape.rail_top(pts[0]) + 0.25 + float(spec.height)
+	for i: int in range(pts.size() - 1):
+		var d: Vector2 = (pts[i + 1] - pts[i]).normalized()
+		var right: Vector2 = Vector2(-d.y, d.x)
+		var a: Vector2 = pts[i] + right * side * off
+		var b: Vector2 = pts[i + 1] + right * side * off
+		var bottom: float = minf(landscape.ground(a.x, a.y), landscape.ground(b.x, b.y)) - 0.3
+		var depth: float = top_y - bottom
+		g.beam(Vector3(a.x, top_y - depth * 0.5, a.y), Vector3(b.x, top_y - depth * 0.5, b.y), width, depth, "concrete", true)
+		var edge_a: Vector2 = pts[i] + right * side * (off - width * 0.5 + 0.2)
+		var edge_b: Vector2 = pts[i + 1] + right * side * (off - width * 0.5 + 0.2)
+		g.beam(Vector3(edge_a.x, top_y + 0.01, edge_a.y), Vector3(edge_b.x, top_y + 0.01, edge_b.y), 0.3, 0.02, "warn")
+	# лестницы с концов — вдоль пути вниз на землю
+	var last: int = pts.size() - 1
+	for end: int in [0, last]:
+		var along: Vector2 = (pts[mini(end + 1, last)] - pts[maxi(end - 1, 0)]).normalized()
+		var outward: Vector2 = -along if end == 0 else along
+		var top_at: Vector2 = pts[end] + Vector2(-along.y, along.x) * side * off
+		var bottom_at: Vector2 = top_at + outward * 6.0
+		g.stairs(Vector3(bottom_at.x, landscape.ground(bottom_at.x, bottom_at.y), bottom_at.y), Vector3(top_at.x, top_y, top_at.y), 2.4, 10, "concrete")
 
 
 # ---------------------------------------------------------------- галерея автостанции

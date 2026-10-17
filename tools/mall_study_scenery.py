@@ -17,6 +17,7 @@ from __future__ import annotations
 import math
 
 from mall_study_ground import ZONES
+from mall_study_railway import make_railway
 
 # грунтовки: точки игры; колея КПП — брод — автостанция берётся из наполнения (RUT_LINE)
 TRACKS = [
@@ -399,9 +400,11 @@ class Scenery:
 
 
 def scenery_early(lay, rut_line) -> "Scenery":
-    """До укрытий: грунтовки (коридоры), вертолёт и вышка (резерв мест)."""
+    """До укрытий: грунтовки и железнодорожная ветка (коридоры), вертолёт и вышка (резерв мест)."""
     sc = Scenery(lay)
     sc.make_tracks(rut_line)
+    # железнодорожная ветка — после грунтовок (переезд ищет, какую дорогу пересекает), до укрытий
+    sc.rail = make_railway(lay, sc.tracks)
     sc.heli()
     sc.cell_tower()
     return sc
