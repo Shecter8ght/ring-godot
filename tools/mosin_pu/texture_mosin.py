@@ -1,4 +1,6 @@
 """Текстуры Мосина 1891/30 ПУ, состояние 20 %: нативные слои UCUPaint 2.4.9 на принятой геометрии (форма не меняется).
+Винтовка — v02 на форме v07 (лак с отражениями, полированный затвор, копоть у клейм, отпечатки — см. блок v02);
+прицел, крепление, патрон и обойма — v01.
 
 Образец отделки — Sketchfab «Mosin Nagant 1891» (KusogakiVirus), по износу ≈ 60 %; 20 % — тяжелее, палитра та же:
 воронение, вытертое до серой стали на гранях и хвате, светлая сталь затвора, красно-коричневое дерево под лаком
@@ -11,6 +13,7 @@
           build   — UV и слои → models/…_tex20_v01.blend (картинки встроены)
           render  — кадры из сохранённого файла
           inspect — стеки, слои, маски, сверка значений с фактическими входами групп → checks/
+          studio  — в сохранённый файл: свет для Rendered (HDRI, софтбоксы, камера) отдельной коллекцией
 Принятые копии формы (не меняются) — models/approved/*.blend, их SHA-256 — в asset-state.md.
 """
 from __future__ import annotations
@@ -32,19 +35,21 @@ ASSET = Path("E:/Models Blender/WEAPONS/Мосин — винтовка и уз�
 APPROVED = ASSET / "models/approved"
 MASKS = Path("E:/Models Blender/Маски_АЛЬФА")
 WOOD = ASSET / "textures/wood"
-VIEW = ASSET / "renders/tex20"
+VIEW = ASSET / "renders/tex20"                       # прицел, крепление, патрон, обойма (v01)
+VIEW2 = ASSET / "renders/tex20_v02"                  # винтовка v07 и сборка (v02)
 CHECKS = ASSET / "checks"
 SKILL = Path("C:/Users/Schecter_8ght/.claude/skills/weapon-asset-texturing")
 UV = "UVMap"
 MM = 0.001
 
 MODELS = {
-    "rifle": ("Mosin_9130PU_Rifle_v06.blend", "models/01_Винтовка/Mosin_9130PU_Rifle_v06_tex20_v01.blend"),
+    # v02: форма v07 (механика затвора, принята 2026-10-17); v01 — на v06, файл ..._v06_tex20_v01.blend не меняется
+    "rifle": ("Mosin_9130PU_Rifle_v07.blend", "models/01_Винтовка/Mosin_9130PU_Rifle_v07_tex20_v02.blend"),
     "scope": ("Mosin_PU_Scope_v01.blend", "models/02_Прицел/Mosin_PU_Scope_v01_tex20_v01.blend"),
     "mount": ("Mosin_PU_Mount_v01.blend", "models/03_Крепление/Mosin_PU_Mount_v01_tex20_v01.blend"),
     "cartridge": ("Mosin_Cartridge_762x54R_v01.blend", "models/04_Патрон/Mosin_Cartridge_762x54R_v01_tex_v01.blend"),
     "clip": ("Mosin_StripperClip_v01.blend", "models/05_Обойма/Mosin_StripperClip_v01_tex_v01.blend"),
-    "assembly": (None, "models/00_Сборка/Mosin_9130PU_Assembly_tex20_v01.blend"),   # только render
+    "assembly": (None, "models/00_Сборка/Mosin_9130PU_Assembly_tex20_v02.blend"),   # только render
 }
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 MODEL = ARGS[0] if ARGS else "rifle"
@@ -154,6 +159,9 @@ def layer(tree, name: str, color=None, metal=None, rough=None, height=None, sour
         src.inputs["Detail"].default_value = detail
         src.inputs["Roughness"].default_value = 0.62
     H.sync_property(U, result, "intensity_value", amount)
+    skip = [p for p in os.environ.get("MOSIN_SKIP", "").split(",") if p]      # проба: выключить слои по номеру
+    if any(name.startswith(p + " ") for p in skip):
+        result.enable = False
     return result
 
 
@@ -263,7 +271,8 @@ RIFLE_CONTACT = {
     "FrontSight_Hood": 0.9, "FrontSight_Post": 0.4, "CleaningRod": 0.7, "Stock_NoseCap": 0.85,
     "Handguard_Ferrule_Rear": 0.8, "Handguard_Ferrule_Front": 0.8, "Sling_Escutcheon": 0.9,
     "Bolt_Body": 1.0, "Bolt_Head": 0.8, "Bolt_Handle": 1.0, "Bolt_Handle_Ball": 1.0, "Bolt_CockingPiece": 0.85,
-    "Bolt_Knob": 1.0, "Bolt_FiringPin_End": 0.7,
+    "Bolt_Knob": 1.0, "Bolt_FiringPin_End": 0.7, "Bolt_Extractor": 0.6, "Bolt_ConnectingBar": 0.5,
+    "Bolt_FiringPin": 0.4, "Stock_CrossScrew": 0.7,
 }
 
 
@@ -553,6 +562,409 @@ def clip_steel(material: str, label: str):
     return tree
 
 
+# ---------------------------------------------------------------- v02 (винтовка v07): доводка 20 % по замечаниям владельца 2026-10-17
+# Дерево: целый лак глянцевый (чёткие отражения), местами истончён и стёрт до сухого дерева, грязь в порах и у металла,
+# хорошо видные царапины сквозь лак и тонкие царапины в самом лаке; затвор полированный, слегка потрёпанный; вокруг клейм
+# копоть, в буквах и прорезях грязь; отпечатки пальцев и ладоней — отдельными штампами там, где берут руками.
+WOOD8K = ASSET / "textures/src/polyhaven_dark_wood_8k"
+GEN = ASSET / "textures/gen"                         # синтетические маски (gen_wood_scratches.py)
+WOOD_SCALE = (1.0 / 1.0, 1.0 / 0.5, 1.0 / 0.5)        # плитка 1 м вдоль ложи, 0,5 м поперёк (как в v01)
+FAR = 5.0                                              # координата вне [0, 1]: обрезанная (CLIP) маска там пуста
+
+P2 = {
+    "bolt": (0.27, 0.27, 0.28),            # полированная сталь затвора: светлая, но не хром (образец темнее)
+    "bolt_haze": (0.13, 0.125, 0.12),      # потускнение плёнкой окисла и масла
+    "bolt_warm": (0.30, 0.27, 0.23),       # тёплый налёт (пот, старое масло)
+    "lacquer_tint": (0.030, 0.011, 0.007), # шеллак/лак — тёмный красно-коричневый тон образца
+    "wood_bare": (0.055, 0.027, 0.017),    # дерево без лака — светлее основы, суше и глуше
+    "wood_bare_dirty": (0.020, 0.010, 0.0065),
+    "wood_scratch": (0.11, 0.06, 0.035),   # царапина сквозь лак до светлого волокна (не белая)
+    "pore_dirt": (0.012, 0.007, 0.005),
+    "soot": (0.007, 0.0065, 0.006),        # копоть
+    "print_oil": (0.03, 0.025, 0.02),
+}
+
+
+def chan_intensity(lay, channel: str, value: float) -> None:
+    """Сила отдельного канала слоя (например, отпечаток: шероховатость полностью, цвет — слегка)."""
+    for root, ch in zip(lay.id_data.yp.channels, lay.channels):
+        if root.name == channel:
+            H.sync_property(U, ch, "intensity_value", value)
+
+
+def image_mask(target, path: Path, label: str, scale=(1.0, 1.0, 1.0), blend: float = 0.2, lo=None, hi=None,
+               invert: bool = False, colorspace: str = "Non-Color"):
+    """Маска-картинка объёмной проекцией с явным масштабом (раз на метр по осям X, Y, Z)."""
+    img = bpy.data.images.load(str(path), check_existing=True)
+    img.colorspace_settings.name = colorspace
+    result = U.Mask.add_new_mask(target, label, "IMAGE", "Object", UV, image=img)
+    src = U.common.get_mask_tree(result).nodes[result.source]
+    src.projection = "BOX"
+    src.projection_blend = blend
+    src.extension = "REPEAT"
+    result.enable_uniform_scale = False
+    U.common.set_entity_prop_value(result, "scale", Vector(scale))
+    if invert:
+        importlib.import_module(U.__name__ + ".MaskModifier").add_new_mask_modifier(result, "INVERT")
+    if lo is not None:
+        ramp(result, lo, hi)
+    return result
+
+
+def stamp_mask(target, rel: str, label: str, centre_mm, size_mm: float, angle_deg: float, axis: str,
+               lo: float = 0.12, hi: float = 0.8, stretch: float = 1.0):
+    """Один штамп (отпечаток) из Маски_АЛЬФА в точке centre_mm детали: проекция вдоль оси axis (X/Y/Z), картинка
+    size_mm в поперечнике, поворот angle_deg вокруг оси проекции, вне картинки пусто (CLIP). Проекции по другим осям
+    уходят за картинку — на гранях, повёрнутых от оси, штамп плавно сходит на нет."""
+    from mathutils import Euler
+    img = bpy.data.images.load(str(rel if isinstance(rel, Path) else MASKS / rel), check_existing=True)
+    img.colorspace_settings.name = "Non-Color"
+    result = U.Mask.add_new_mask(target, label, "IMAGE", "Object", UV, image=img)
+    src = U.common.get_mask_tree(result).nodes[result.source]
+    src.projection = "BOX"
+    src.projection_blend = 0.3
+    src.extension = "CLIP"
+    s = 1.0 / (size_mm * MM)
+    a = math.radians(angle_deg)
+    k = {"X": 0, "Y": 1, "Z": 2}[axis]
+    scale = [s, s, s]
+    scale[k] = 0.0
+    scale[(k + 1) % 3] *= stretch                        # вытянуть мазок вдоль одной из осей картинки
+    rot = [0.0, 0.0, 0.0]
+    rot[k] = a
+    centre = [0.5, 0.5, 0.5]
+    centre[k] = FAR
+    p = Vector(centre_mm) * MM
+    scaled = Vector((p.x * scale[0], p.y * scale[1], p.z * scale[2]))
+    t = Vector(centre) - Euler(rot, "XYZ").to_matrix() @ scaled
+    result.enable_uniform_scale = False
+    U.common.set_entity_prop_value(result, "scale", Vector(scale))
+    U.common.set_entity_prop_value(result, "rotation", Vector(rot))
+    U.common.set_entity_prop_value(result, "translation", t)
+    ramp(result, lo, hi)
+    return result
+
+
+def print_layer(tree, name: str, rel: str, centre_mm, size_mm: float, angle_deg: float, axis: str, facing: str,
+                rough: float = 0.32, darken: float = 0.12, amount: float = 1.0, lo: float = 0.12, hi: float = 0.8,
+                stretch: float = 1.0):
+    """Отпечаток: жир меняет шероховатость (на глянце — матовое пятно, на сухом — блестящее), цвет — чуть темнее."""
+    debug = os.environ.get("MOSIN_DEBUG_PRINTS") == "1"          # проба: где легли штампы (красным)
+    lay = layer(tree, name, (1.0, 0.0, 0.0) if debug else P2["print_oil"], None, rough, amount=amount)
+    chan_intensity(lay, "Color", 1.0 if debug else darken)
+    stamp_mask(lay, rel, "Штамп — " + rel.split("/")[-1], centre_mm, size_mm, angle_deg, axis, lo, hi, stretch)
+    vcol(lay, facing, "Только грани, обращённые туда")
+    return lay
+
+
+def cavity_grime(tree, amount: float, distance: float = 0.00035) -> None:
+    """Грязь в клеймах, рисках шкал, шлицах и мелких прорезях: близость поверхностей в доли миллиметра."""
+    dbg = os.environ.get("MOSIN_DEBUG_STAMPS") == "1"           # проба: где маски (зелёный — прорези, синий — копоть)
+    lay = layer(tree, "74 • Грязь в буквах клейм и мелких прорезях", (0, 1, 0) if dbg else P["grime"], 0.0, 0.9,
+                amount=amount)
+    ao_inv(lay, "Мелкие углубления — 0,35 мм", distance)
+    noise(lay, "Не равномерно", 2000.0, 0.25, 0.6, (0.013, 0.07, 0.021))
+
+
+HALOS: dict = {}            # объект → (картинка ореола, центр мм, размер мм, ось проекции); заполняет stamp_halos()
+
+
+def _blur(a, sigma_px: float):
+    """Гауссово размытие через БПФ (в Python Blender нет PIL)."""
+    n = a.shape[0]
+    f = np.fft.fftfreq(n)
+    g = np.exp(-2.0 * (np.pi * sigma_px) ** 2 * (f[:, None] ** 2 + f[None, :] ** 2))
+    return np.real(np.fft.ifft2(np.fft.fft2(a) * g))
+
+
+def stamp_halos() -> None:
+    """Ореол копоти вокруг клейм по их настоящей форме: дно букв (вершины ниже поверхности) проецируется на плоскость
+    (ствол — сверху, номер на гребне — сбоку) и размывается на ~1 мм; картинка → маска-штамп (CLIP) по той же оси.
+    Заодно атрибут Stamp_Cavity — дно букв (грязь внутри клейм)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import build_rifle as R
+    bx, br = zip(*R.BARREL_OUT[2:])
+    GEN.mkdir(parents=True, exist_ok=True)
+    specs = {"Barrel": ((56.0, 0.0, 0.0), 32.0, "Z"), "Bolt_Body": ((-54.0, R.RIB_Y[0], 0.55), 32.0, "Y")}
+    for name, (centre, size, axis) in specs.items():
+        ob = bpy.data.objects[name]
+        me = ob.data
+        co = np.empty(len(me.vertices) * 3, np.float32)
+        me.vertices.foreach_get("co", co)
+        v = co.reshape(-1, 3).astype(np.float64) * 1000.0
+        if name == "Barrel":
+            rr = np.hypot(v[:, 1], v[:, 2]) - np.interp(v[:, 0], bx, br)        # < 0 — ниже наружной поверхности
+            cav = (rr < -0.04) & (rr > -0.5) & (v[:, 0] > 40) & (v[:, 0] < 72)   # только буквы, не канал ствола
+        else:
+            cav = (v[:, 1] > R.RIB_Y[0] + 0.04) & (v[:, 1] < R.RIB_Y[0] + 0.4) & (v[:, 0] > -70) & (v[:, 0] < -38)                   & (np.abs(v[:, 2] - 0.55) < 3.0)
+        idx = np.empty(len(me.loops), np.int32)
+        me.loops.foreach_get("vertex_index", idx)
+        write_attr(ob, "Stamp_Cavity", cav[idx].astype(np.float32))
+        px = 48.0                                            # пикселей на мм
+        n = int(size * px)
+        u_ax, v_ax = (0, 1) if axis == "Z" else (0, 2)
+        u0, v0 = centre[u_ax] - size / 2, centre[v_ax] - size / 2
+        uv = np.stack(((v[:, u_ax] - u0) * px, (v[:, v_ax] - v0) * px), axis=1)   # строки снизу вверх, как в Blender
+        me.calc_loop_triangles()
+        tri = np.empty(len(me.loop_triangles) * 3, np.int32)
+        me.loop_triangles.foreach_get("vertices", tri)
+        tri = tri.reshape(-1, 3)
+        tri = tri[cav[tri].all(axis=1)]
+        mask = np.zeros((n, n), np.float64)
+        for a, b, c in tri:
+            pa, pb, pc = uv[a], uv[b], uv[c]
+            x0, x1 = int(max(0, np.floor(min(pa[0], pb[0], pc[0])))), int(min(n - 1, np.ceil(max(pa[0], pb[0], pc[0]))))
+            y0, y1 = int(max(0, np.floor(min(pa[1], pb[1], pc[1])))), int(min(n - 1, np.ceil(max(pa[1], pb[1], pc[1]))))
+            if x1 < x0 or y1 < y0:
+                continue
+            gx, gy = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+            d = (pb[1] - pc[1]) * (pa[0] - pc[0]) + (pc[0] - pb[0]) * (pa[1] - pc[1])
+            if abs(d) < 1e-12:
+                continue
+            l1 = ((pb[1] - pc[1]) * (gx - pc[0]) + (pc[0] - pb[0]) * (gy - pc[1])) / d
+            l2 = ((pc[1] - pa[1]) * (gx - pc[0]) + (pa[0] - pc[0]) * (gy - pc[1])) / d
+            inside = (l1 >= 0) & (l2 >= 0) & (l1 + l2 <= 1)
+            mask[y0:y1 + 1, x0:x1 + 1] = np.maximum(mask[y0:y1 + 1, x0:x1 + 1], inside)
+        core, wide = _blur(mask, 0.35 * px), _blur(mask, 1.1 * px)
+        halo = np.clip(np.maximum(core * 1.2, wide * 2.4), 0.0, 1.0).astype(np.float32)
+        path = GEN / f"stamp_halo_{name}.png"
+        img = bpy.data.images.get(path.name) or bpy.data.images.new(path.name, n, n, alpha=False)
+        rgba = np.ones((n, n, 4), np.float32)
+        rgba[..., 0] = rgba[..., 1] = rgba[..., 2] = halo
+        img.pixels.foreach_set(rgba.ravel())
+        img.filepath_raw = str(path)
+        img.file_format = "PNG"
+        img.save()
+        HALOS[name] = (path, centre, size, axis)
+        me.update()
+        print("TEX halo", name, "треугольников букв", len(tri), flush=True)
+
+
+def stamp_soot(tree, amount: float, names: tuple, film: bool = False) -> None:
+    """Копоть и грязь вокруг клейм — ореол по форме букв; внутри букв — тёмная грязь. film — на полированной стали
+    копоть тонкой плёнкой: сталь темнеет и тускнеет, но остаётся металлом (матовая грязь там светлеет в бликах)."""
+    dbg = os.environ.get("MOSIN_DEBUG_STAMPS") == "1"
+    for name in names:
+        path, centre, size, axis = HALOS[name]
+        soot, metal, rough = ((0.035, 0.033, 0.031), 0.85, 0.36) if film else (P2["soot"], 0.35, 0.6)
+        lay = layer(tree, f"76 • Копоть вокруг клейм — {name}", (0, 0, 1) if dbg else soot, metal, rough,
+                    amount=amount)
+        stamp_mask(lay, path, "Ореол по форме букв", centre, size, 0.0, axis, 0.03, 0.75)
+        noise(lay, "Неровно, разводами", 260.0, 0.22, 0.75, (0.04, 0.012, 0.07))
+    soot, metal, rough = ((0.035, 0.033, 0.031), 0.85, 0.36) if film else (P2["soot"], 0.35, 0.6)
+    lay = layer(tree, "77 • Копоть пятнами у клейм", soot, metal, rough, amount=amount * 0.35)
+    vcol(lay, "Stamp_Zone", "Около надписей")
+    owner_mask(lay, "04_Грязь_и_налёт/Налёт_мелкими_пятнами_01.png", 45.0, "Налёт — 45 мм", 0.25, 0.75, (0.031, 0.02, 0.05))
+    lay = layer(tree, "78 • Грязь внутри букв клейм", (0, 1, 0) if dbg else (0.004, 0.0037, 0.0034), 0.2, 0.75,
+                amount=0.92)
+    vcol(lay, "Stamp_Cavity", "Дно букв")
+
+
+def blued_steel_v2(material: str, label: str):
+    tree = blued_steel(material, label)
+    cavity_grime(tree, 0.95)
+    stamp_soot(tree, 0.85, ("Barrel",))
+    H.reconnect(U, tree)
+    return tree
+
+
+def bright_steel_v2(material: str, label: str):
+    """Затвор: полированная светлая сталь, продольные риски от хода, тонкие царапины, лёгкое потускнение пятнами,
+    кромки заполированы, тёмное масло и грязь в пазах и кулачке, редкие точки окисла в укрытых местах; отпечатки."""
+    tree = make_stack(material, label)
+    layer(tree, "00 • Сталь полированная", P2["bolt"], 1.0, 0.22)
+    layer(tree, "02 • Микрофактура полировки", height="source", source="NOISE", scale=9000.0, distance=0.000006)
+    lay = layer(tree, "04 • Блеск неровный — полировка пятнами", rough=0.2, amount=0.6)
+    noise(lay, "Пятна 2–4 см", 35.0, 0.4, 0.75)
+    lay = layer(tree, "06 • Продольная шлифовка (вдоль хода)", rough=0.18, amount=0.7)
+    owner_mask(lay, "09_Царапины/Царапины_длинные_плотные_01.png", 90.0, "Шлифовка вдоль оси", 0.3, 0.9, stretch=(0.08, 1.0, 1.0))
+    lay = layer(tree, "08 • Потускнение плёнкой — пятна 3–6 см", P2["bolt_haze"], 1.0, 0.26, amount=0.55)
+    noise(lay, "Пятна потускнения", 20.0, 0.42, 0.8)
+    lay = layer(tree, "10 • Тёплый налёт в стороне от хвата", P2["bolt_warm"], 1.0, 0.32, amount=0.3)
+    ao_inv(lay, "Укрытые места", 0.004)
+    noise(lay, "Неровно", 90.0, 0.4, 0.7)
+    lay = layer(tree, "12 • Риски от хода затвора — светлые", (0.62, 0.61, 0.6), 1.0, 0.1, height=0.0, distance=0.000012,
+                amount=0.75)
+    owner_mask(lay, "09_Царапины/Царапины_длинные_плотные_01.png", 120.0, "Риски вдоль оси", 0.5, 0.85, stretch=(0.15, 1.0, 1.0))
+    lay = layer(tree, "14 • Тонкие царапины во все стороны", (0.3, 0.3, 0.3), 1.0, 0.24, height=0.0, distance=0.000008,
+                amount=0.55)
+    owner_mask(lay, "09_Царапины/Царапины_мелкие_01.png", 45.0, "Мелкие царапины — 45 мм", 0.5, 0.88, (0.021, 0.011, 0.033))
+    lay = layer(tree, "16 • Кромки заполированы до блеска", (0.6, 0.6, 0.6), 1.0, 0.08, amount=0.75)
+    edges(lay, 0.0006, 0.03, 0.1)
+    noise(lay, "Участками", 160.0, 0.35, 0.58)
+    lay = layer(tree, "20 • Точки окисла в укрытых местах", P["rust"], 0.3, 0.8, height=0.0, distance=0.00002, amount=0.5)
+    ao_inv(lay, "Укрытые места", 0.003)
+    noise(lay, "Редкие точки", 1300.0, 0.66, 0.7, (0.03, 0.08, 0.02))
+    lay = layer(tree, "30 • Тёмное масло в пазах и кулачке", (0.03, 0.026, 0.02), 0.0, 0.35, amount=0.75)
+    ao_inv(lay, "Пазы и щели", 0.0025)
+    noise(lay, "Потёками", 220.0, 0.3, 0.62, (0.04, 0.03, 0.06))
+    grime(tree, 0.8, scale=1400.0)
+    cavity_grime(tree, 0.95)
+    stamp_soot(tree, 0.7, ("Bolt_Body",), film=True)
+    # отпечатки (координаты детали = мировые в закрытом затворе; штампы ездят с деталями)
+    F = "01_Отпечатки_пальцев/"
+    print_layer(tree, "80 • Отпечаток большого пальца на шаре рукояти", F + "Отпечаток_чёткий_01.png",
+                (-85.0, -39.0, -48.0), 20.0, 25.0, "Y", "Face_R", rough=0.32, darken=0.2, amount=0.85)
+    print_layer(tree, "81 • Отпечаток указательного на шаре спереди", F + "Отпечаток_смазанный_по_диагонали_01.png",
+                (-76.0, -30.0, -47.0), 22.0, -40.0, "X", "Face_F", rough=0.32, darken=0.2, amount=0.85)
+    print_layer(tree, "82 • Отпечаток на стебле рукояти", F + "Отпечаток_смазанный_вниз_01.png",
+                (-85.0, -34.0, -26.0), 22.0, 0.0, "Y", "Face_R", rough=0.32, darken=0.2, amount=0.85)
+    print_layer(tree, "83 • Мазок пальца на гребне", F + "Отпечаток_смазанный_вправо_02.png",
+                (-76.0, -16.0, 0.6), 22.0, 8.0, "Y", "Face_R", rough=0.32, darken=0.2, amount=0.85)
+    print_layer(tree, "84 • Отпечаток на гребне у рукояти", F + "Отпечаток_грязный_02.png",
+                (-35.0, -16.0, 0.0), 18.0, 95.0, "Y", "Face_R", rough=0.32, darken=0.2, amount=0.85)
+    print_layer(tree, "85 • Большой палец на торце грибка", F + "Отпечаток_растёртый_01.png",
+                (-178.0, 0.0, 0.5), 22.0, 15.0, "X", "Face_B", rough=0.32, darken=0.2, amount=0.85)
+    print_layer(tree, "86 • Отпечаток на гребне курка", F + "Отпечаток_смазанный_по_диагонали_02.png",
+                (-128.0, 0.0, 14.5), 22.0, -70.0, "Z", "Face_U", rough=0.32, darken=0.2, amount=0.85)
+    print_layer(tree, "87 • Отпечаток на стебле затвора сверху", F + "Отпечаток_грязный_03.png",
+                (-80.0, 2.0, 9.0), 20.0, 80.0, "Z", "Face_U", rough=0.32, darken=0.2, amount=0.85)
+    H.reconnect(U, tree)
+    return tree
+
+
+def wood_stock_v2(material: str, label: str):
+    """Ложа и накладка: волокно 8K под глянцевым лаком (чёткие отражения); лак местами истончён и стёрт до сухого
+    дерева, потемневшего от рук; грязь в порах и у металла; хорошо видные царапины сквозь лак, тонкие царапины лака,
+    забоины; отпечатки пальцев и ладоней на шейке и цевье."""
+    tree = make_stack(material, label)
+    img = bpy.data.images.load(str(WOOD8K / "dark_wood_diff_8k.jpg"), check_existing=True)
+    img.colorspace_settings.name = "sRGB"
+    lay = layer(tree, "00 • Дерево — Poly Haven Dark Wood 8K (CC0) под лаком", color="source", rough=0.08, metal=0.0,
+                source="IMAGE", image=img)
+    src = U.common.get_layer_source(lay)
+    src.projection = "BOX"
+    src.projection_blend = 0.3
+    lay.enable_uniform_scale = False
+    U.common.set_entity_prop_value(lay, "scale", Vector(WOOD_SCALE))
+    ao_img = bpy.data.images.load(str(WOOD8K / "dark_wood_ao_8k.jpg"), check_existing=True)
+    ao_img.colorspace_settings.name = "Non-Color"
+    lay = layer(tree, "01 • Поры волокна — рельеф под лаком", height="source", source="IMAGE", image=ao_img,
+                distance=0.000018)
+    src = U.common.get_layer_source(lay)
+    src.projection = "BOX"
+    src.projection_blend = 0.3
+    lay.enable_uniform_scale = False
+    U.common.set_entity_prop_value(lay, "scale", Vector(WOOD_SCALE))
+    layer(tree, "02 • Тон лака — к образцу (красно-коричневый)", P2["lacquer_tint"], amount=0.62)
+    # фото волокна очень рыжее: по замеру образец вдвое темнее в линейных значениях и глуше по насыщенности
+    layer(tree, "02b • Темнее и глуше — к образцу (умножение)", (0.55, 0.62, 0.75), blend="MULTIPLY")
+    lay = layer(tree, "03 • Грязь в порах волокна", P2["pore_dirt"], 0.0, 0.5, amount=0.7)
+    image_mask(lay, WOOD8K / "dark_wood_ao_8k.jpg", "Поры — AO волокна", WOOD_SCALE, 0.3, 0.55, 0.85, invert=True)
+    noise(lay, "Местами больше", 14.0, 0.25, 0.75)
+    lay = layer(tree, "04 • Лак неровный — блеск пятнами", rough=0.22, amount=0.55)
+    noise(lay, "Пятна 2–5 см", 30.0, 0.45, 0.8)
+    layer(tree, "05 • Шагрень лака — мелкие волны", height="source", source="NOISE", scale=900.0, distance=0.000006,
+          amount=0.6)
+    lay = layer(tree, "06 • Тёмные пятна — неровный тон старого дерева", (0.016, 0.007, 0.0045), 0.0, None, amount=0.35)
+    owner_mask(lay, "04_Грязь_и_налёт/Грязь_пятнами_01.png", 220.0, "Пятна — 220 мм", 0.15, 0.7)
+    lay = layer(tree, "10 • Лак истончился — полуглянец (хват, щека, низ)", (0.03, 0.013, 0.008), 0.0, 0.45, amount=0.55)
+    chan_intensity(lay, "Color", 0.35)
+    vcol(lay, "Wood_Wear", "Где держат и трут")
+    noise(lay, "Пятнами", 18.0, 0.3, 0.68, (0.07, 0.02, 0.11))
+    lay = layer(tree, "12 • Лак стёрт до дерева", P2["wood_bare"], 0.0, 0.62, height=0.0, distance=0.00001, amount=0.85)
+    vcol(lay, "Wood_Wear", "Где держат и трут")
+    owner_mask(lay, "10_Сколы_и_потёртости_покрытия/Потёртости_горизонтальные_01.png", 260.0, "Потёртости — 260 мм", 0.35, 0.85)
+    noise(lay, "Края мягкие", 25.0, 0.3, 0.7)
+    lay = layer(tree, "14 • Голое дерево потемнело от рук и грязи", P2["wood_bare_dirty"], 0.0, 0.5, amount=0.55)
+    vcol(lay, "Wood_Wear", "Где держат")
+    owner_mask(lay, "06_Разводы_и_следы_протирания/" + _first(MASKS / "06_Разводы_и_следы_протирания"), 140.0,
+               "Разводы — 140 мм", 0.2, 0.7)
+    lay = layer(tree, "16 • Затёртые кромки — лак снят", P2["wood_bare"], 0.0, 0.6, height=0.0, distance=0.00006,
+                amount=0.85)
+    edges(lay, 0.0016, 0.03, 0.12)
+    noise(lay, "С перерывами", 300.0, 0.4, 0.6)
+    lay = layer(tree, "20 • Вмятины и забоины", P["wood_dent"], 0.0, 0.62, height=0.0, distance=0.00025, amount=1.0)
+    owner_mask(lay, "10_Сколы_и_потёртости_покрытия/Сколы_пятнами_01.png", 150.0, "Забоины — 150 мм", 0.35, 0.75)
+    owner_mask(lay, "10_Сколы_и_потёртости_покрытия/Сколы_с_потёртостями_01.png", 230.0, "Вторая сетка — без повтора",
+               0.2, 0.6, (0.073, 0.031, 0.052))
+    noise(lay, "Гнёздами — 10–15 см", 7.0, 0.35, 0.7, (0.21, 0.09, 0.04))
+    lay = layer(tree, "22 • Царапины сквозь лак — светлое волокно (синтетика)", P2["wood_scratch"], 0.0, 0.55,
+                height=0.0, distance=0.00004, amount=0.95)
+    image_mask(lay, GEN / "wood_scratches_deep.png", "Царапины — плитка 400 мм", (2.5, 2.5, 2.5), 0.2, 0.12, 0.55)
+    noise(lay, "Не везде", 12.0, 0.3, 0.6, (0.13, 0.05, 0.09))
+    lay = layer(tree, "24 • Мелкие забоинки с грязью", P["wood_dent"], 0.0, 0.6, height=0.0, distance=0.00004,
+                amount=0.55)
+    owner_mask(lay, "09_Царапины/Царапины_мелкие_01.png", 60.0, "Забоинки — 60 мм", 0.72, 0.95, (0.02, 0.05, 0.01))
+    lay = layer(tree, "26 • Волосяные царапины в лаке — видны в бликах (синтетика)", (0.08, 0.06, 0.05), 0.0, 0.3,
+                amount=0.9)
+    chan_intensity(lay, "Color", 0.3)
+    image_mask(lay, GEN / "wood_scratches_fine.png", "Волосяные — плитка 250 мм", (4.0, 4.0, 4.0), 0.2, 0.1, 0.5)
+    lay = layer(tree, "28 • Потёртости лака о снаряжение (матовые)", rough=0.42, amount=0.6)
+    vcol(lay, "Wear_Rest", "Низ приклада")
+    owner_mask(lay, "10_Сколы_и_потёртости_покрытия/Потёртости_горизонтальные_01.png", 90.0, "Потёртости — 90 мм", 0.2, 0.7,
+               (0.011, 0.043, 0.02))
+    lay = layer(tree, "30 • Тёмное масло у металла", (0.022, 0.011, 0.007), 0.0, 0.3, amount=0.6)
+    ao_inv(lay, "У стыков с металлом", 0.008)
+    noise(lay, "Пятнами", 35.0, 0.4, 0.7)
+    lay = layer(tree, "32 • Затемнение хвата — пот и грязь", (0.03, 0.015, 0.009), 0.0, None, amount=0.4)
+    vcol(lay, "Wood_Wear", "Где держат")
+    noise(lay, "Пятнами", 18.0, 0.45, 0.75)
+    dust(tree, 0.14)
+    grime(tree, 0.9, ao=0.006, scale=500.0)
+    cavity_grime(tree, 0.7, distance=0.0008)
+    # отпечатки: правая рука держит шейку (ладонь справа, пальцы обхватывают слева снизу, большой палец сверху),
+    # левая — цевьё снизу (пальцы справа в пазу, большой палец слева); щекой — гребень приклада
+    F, Pm = "01_Отпечатки_пальцев/", "02_Отпечатки_ладоней/"
+    print_layer(tree, "80 • Ладонь на шейке справа (пальцы уходят вниз под шейку)", Pm + "Ладонь_растёртая_01.png",
+                (-230.0, -18.0, -44.0), 115.0, 180.0, "Y", "Face_R", rough=0.27, darken=0.2, amount=0.9)
+    print_layer(tree, "81 • Основание ладони — шейка справа сзади", Pm + "Ладонь_частичная_01.png", (-258.0, -18.0, -58.0),
+                85.0, 160.0, "Y", "Face_R", rough=0.27, darken=0.18, amount=0.8)
+    for i, (x, z, a, img) in enumerate(((-214.0, -62.0, 110.0, "Отпечаток_смазанный_вправо_01.png"),
+                                       (-228.0, -66.0, 118.0, "Отпечаток_грязный_01.png"),
+                                       (-242.0, -68.0, 125.0, "Отпечаток_смазанный_вправо_03.png"))):
+        print_layer(tree, f"8{2 + i} • Палец на шейке слева", F + img, (x, 18.0, z), 24.0, a, "Y", "Face_L",
+                    rough=0.27, darken=0.18, amount=0.9)
+    print_layer(tree, "85 • Большой палец на шейке сверху", F + "Отпечаток_смазанный_по_диагонали_01.png",
+                (-226.0, 3.0, -28.0), 26.0, -15.0, "Z", "Face_U", rough=0.27, darken=0.18, amount=0.9)
+    for i, (x, img) in enumerate(((38.0, "Отпечаток_смазанный_вниз_01.png"), (57.0, "Отпечаток_грязный_02.png"),
+                                  (76.0, "Отпечаток_смазанный_по_диагонали_02.png"))):
+        print_layer(tree, f"8{6 + i} • Палец левой руки в пазу цевья справа", F + img, (x, -20.0, -19.0), 22.0, 95.0 + 8 * i,
+                    "Y", "Face_R", rough=0.27, darken=0.18, amount=0.9)
+    print_layer(tree, "89 • Большой палец на цевье слева", F + "Отпечаток_растёртый_01.png", (66.0, 20.0, -21.0), 26.0,
+                -80.0, "Y", "Face_L", rough=0.27, darken=0.18, amount=0.9)
+    print_layer(tree, "90 • Ладонь под цевьём", Pm + "Ладонь_смазанная_вправо_01.png", (85.0, 0.0, -44.0), 110.0, 90.0,
+                "Z", "Face_D", rough=0.27, darken=0.18, amount=0.9)
+    print_layer(tree, "91 • Жирный след щеки на гребне приклада", Pm + "Ладонь_растёртая_01.png", (-385.0, 0.0, -35.0),
+                130.0, 90.0, "Z", "Face_U", rough=0.3, darken=0.1, amount=0.55)
+    H.reconnect(U, tree)
+    return tree
+
+
+def _first(folder: Path) -> str:
+    return sorted(p.name for p in folder.glob("*.png"))[0]
+
+
+def stamp_zone_and_facing() -> None:
+    """Для v02: Stamp_Zone — около клейм (казённая часть ствола сверху, номер на гребне, шкала прицельной планки);
+    Face_R/L/U/D/F/B — куда обращена поверхность (по сглаженным нормалям вершин), чтобы отпечатки ложились только
+    на свою сторону."""
+    for ob in [o for o in bpy.data.objects if o.type == "MESH"]:
+        me = ob.data
+        w, _ = loops_world(ob)
+        vn = np.empty(len(me.vertices) * 3, np.float32)
+        me.vertices.foreach_get("normal", vn)
+        idx = np.empty(len(me.loops), np.int32)
+        me.loops.foreach_get("vertex_index", idx)
+        mw = np.array(ob.matrix_world, np.float32)[:3, :3]
+        n = vn.reshape(-1, 3)[idx] @ mw.T
+        n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-9)
+        for name, comp in (("Face_R", -n[:, 1]), ("Face_L", n[:, 1]), ("Face_U", n[:, 2]), ("Face_D", -n[:, 2]),
+                           ("Face_F", n[:, 0]), ("Face_B", -n[:, 0])):
+            write_attr(ob, name, np.clip((comp - 0.2) / 0.45, 0.0, 1.0))
+        x, y, z = w[:, 0], w[:, 1], w[:, 2]
+        zone = np.zeros_like(x)
+        if ob.name == "Barrel":
+            zone = smooth_band(x, 40.0, 72.0, 6.0) * np.clip((n[:, 2] - 0.1) / 0.4, 0.0, 1.0)
+        elif ob.name == "Bolt_Body":
+            zone = smooth_band(x, -68.0, -40.0, 5.0) * np.clip((-y - 14.0) / 1.5, 0.0, 1.0)
+        elif ob.name.startswith("RearSight_Leaf"):
+            zone = np.clip((n[:, 2] - 0.3) / 0.4, 0.0, 1.0) * 0.8
+        write_attr(ob, "Stamp_Zone", zone)
+        me.update()
+    print("TEX v2 masks done", flush=True)
+
+
 # ---------------------------------------------------------------- сборка модели
 def load_model(model: str):
     native()
@@ -561,9 +973,11 @@ def load_model(model: str):
     unwrap()
     if model == "rifle":
         rifle_masks()
-        trees = [blued_steel("Steel_Blued", "Claude • Воронёная сталь • 20 %"),
-                 bright_steel("Steel_Bright", "Claude • Светлая сталь затвора • 20 %"),
-                 wood_stock("Wood_Stock", "Claude • Ложа и накладка • 20 %")]
+        stamp_zone_and_facing()
+        stamp_halos()
+        trees = [blued_steel_v2("Steel_Blued", "Claude • Воронёная сталь • 20 % • v02"),
+                 bright_steel_v2("Steel_Bright", "Claude • Полированная сталь затвора • 20 % • v02"),
+                 wood_stock_v2("Wood_Stock", "Claude • Ложа и накладка под лаком • 20 % • v02")]
     elif model == "scope":
         part_masks({"Scope_Body": 0.7, "Scope_TurretElev_Cap": 1.0, "Scope_TurretWind_Cap": 1.0,
                     "Scope_TurretElev_Boss": 0.8, "Scope_TurretWind_Boss": 0.8}, 0.7)
@@ -588,7 +1002,7 @@ def load_model(model: str):
 
 
 # ---------------------------------------------------------------- рендер
-def studio(kind: str, centre: Vector, size: float) -> None:
+def studio(kind: str, centre: Vector, size: float, col=None) -> None:
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     scene.cycles.samples = int(os.environ.get("MOSIN_SAMPLES", "64"))
@@ -642,7 +1056,7 @@ def studio(kind: str, centre: Vector, size: float) -> None:
         m = Matrix((x, z.cross(x), z)).transposed().to_4x4()
         m.translation = loc
         light.matrix_world = m
-        scene.collection.objects.link(light)
+        (col or scene.collection).objects.link(light)
     # как на образце: мягкий верхний ключ спереди-слева, заполнение у камеры, контур сзади
     k = float(os.environ.get("MOSIN_LIGHTS", "0.45"))
     area("Ключ", (0.35, -0.55, 1.0), 1.4, 420.0 * k)
@@ -668,14 +1082,20 @@ def shoot(name: str, target: Vector, offset: Vector, lens: float, res=(1600, 900
     m.translation = target + offset
     cam.matrix_world = m
     scene.render.resolution_x, scene.render.resolution_y = res
-    VIEW.mkdir(parents=True, exist_ok=True)
-    scene.render.filepath = str(VIEW / f"{MODEL}_{name}.png")
+    view = VIEW2 if MODEL in ("rifle", "assembly") else VIEW
+    view.mkdir(parents=True, exist_ok=True)
+    scene.render.filepath = str(view / f"{MODEL}_{name}.png")
     bpy.ops.render.render(write_still=True)
     print("TEX shot", name, flush=True)
 
 
 def shots(model: str) -> None:
     kind = os.environ.get("MOSIN_STUDIO", "sample")
+    saved = bpy.data.collections.get("Студия — свет для просмотра")   # свет просмотра из файла — не удваивать
+    if saved:
+        for ob in saved.objects:
+            if ob.type == "LIGHT":
+                ob.hide_render = True
     if model == "rifle":
         c = Vector((-40.0, 0.0, -10.0)) * MM
         studio(kind, c, 0.9)
@@ -687,6 +1107,15 @@ def shots(model: str) -> None:
         shoot("05_priklad", Vector((-400, 0, -80)) * MM, Vector((0.12, -0.55, 0.12)), 50.0)
         shoot("07_kak_skrin_rukoyat", Vector((-95, -12, 2)) * MM, Vector((-0.10, -0.17, 0.20)), 50.0, (1600, 1030))
         shoot("06_vsya_sprava", Vector((110, 0, -40)) * MM, Vector((0.0, -1.9, 0.12)), 35.0, (2000, 700))
+        # v02 — крупные планы: лак и отпечатки на шейке, паз цевья, затвор, клейма, номер, царапины приклада
+        shoot("08_sheyka_sprava", Vector((-235, -18, -52)) * MM, Vector((0.05, -0.20, 0.07)), 60.0)
+        shoot("09_sheyka_sleva", Vector((-232, 18, -55)) * MM, Vector((0.04, 0.20, -0.02)), 60.0)
+        shoot("10_cevye_paz", Vector((58, -20, -20)) * MM, Vector((0.06, -0.18, 0.04)), 60.0)
+        shoot("11_zatvor", Vector((-80, -20, -10)) * MM, Vector((0.02, -0.17, 0.09)), 70.0)
+        shoot("12_kleyma_stvol", Vector((56, 0, 12)) * MM, Vector((-0.03, -0.07, 0.12)), 90.0)
+        shoot("13_nomer_greben", Vector((-55, -16, 0.5)) * MM, Vector((0.015, -0.11, 0.05)), 90.0)
+        shoot("14_priklad", Vector((-410, -21, -92)) * MM, Vector((0.06, -0.30, 0.05)), 60.0)
+        shoot("15_shkala", Vector((150, 0, 22)) * MM, Vector((-0.05, -0.05, 0.12)), 80.0)
     elif model == "assembly":
         c = Vector((-40.0, 0.0, -10.0)) * MM
         studio(kind, c, 0.9)
@@ -750,9 +1179,53 @@ def inspect() -> None:
     assert all(i["packed"] for i in images), [i for i in images if not i["packed"]]
     report["images"] = images
     CHECKS.mkdir(exist_ok=True)
-    (CHECKS / f"ucupaint_{MODEL}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    tag = "_v02" if MODEL == "rifle" else ""
+    (CHECKS / f"ucupaint_{MODEL}{tag}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print("TEX inspect ok:", MODEL, "стеков", len(report["stacks"]), "слоёв",
           sum(len(v["layers"]) for v in report["stacks"].values()), "картинок", len(images), flush=True)
+
+
+VIEW_COL = "Студия — свет для просмотра"
+
+
+def viewing_setup() -> None:
+    """Свет для режима Rendered прямо в сохранённом файле (владелец смотрит сам в Blender: без света там темно):
+    студийная HDRI (встроена) с серым фоном, три софтбокса и камера «как у образца» — отдельной коллекцией,
+    её можно выключить. Отделку не меняет; повторный запуск заменяет прежнюю студию."""
+    bpy.context.preferences.use_preferences_save = False
+    path = ASSET / MODELS[MODEL][1]
+    bpy.ops.wm.open_mainfile(filepath=str(path))
+    scene = bpy.context.scene
+    old = bpy.data.collections.get(VIEW_COL)
+    if old:
+        for ob in list(old.objects):
+            bpy.data.objects.remove(ob, do_unlink=True)
+        bpy.data.collections.remove(old)
+    col = bpy.data.collections.new(VIEW_COL)
+    scene.collection.children.link(col)
+    os.environ.setdefault("MOSIN_EXPOSURE", "-0.2")
+    os.environ.setdefault("MOSIN_SAMPLES", "128")
+    centre = Vector((-40.0, 0.0, -10.0)) * MM
+    studio("light", centre, 0.9, col)
+    scene.world.name = "Студия — HDRI studio_small_09 (CC0), фон серый"
+    scene.cycles.preview_samples = 64
+    scene.cycles.use_preview_denoising = True
+    cam = bpy.data.objects.new("Камера — как у образца", bpy.data.cameras.new("Камера — как у образца"))
+    cam.data.lens = 42.0 if MODEL == "rifle" else 40.0
+    cam.data.clip_start = 0.005
+    target = centre + Vector((0.08, 0.0, 0.0 if MODEL == "rifle" else 0.03))
+    offset = Vector((-0.36, -0.40, 0.17)) if MODEL == "rifle" else Vector((-0.40, -0.44, 0.22))
+    z = offset.normalized()
+    x = Vector((0, 0, 1)).cross(z).normalized()
+    m = Matrix((x, z.cross(x), z)).transposed().to_4x4()
+    m.translation = target + offset
+    cam.matrix_world = m
+    col.objects.link(cam)
+    scene.camera = cam
+    scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
+    bpy.ops.file.pack_all()
+    bpy.ops.wm.save_as_mainfile(filepath=str(path))
+    print("TEX viewing studio saved", path, flush=True)
 
 
 def main() -> None:
@@ -769,6 +1242,8 @@ def main() -> None:
         shots(MODEL)
     elif MODE == "inspect":
         inspect()
+    elif MODE == "studio":
+        viewing_setup()
     elif MODE == "render":
         bpy.ops.wm.open_mainfile(filepath=str(ASSET / MODELS[MODEL][1]))
         shots(MODEL)

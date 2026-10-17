@@ -20,11 +20,12 @@ SV = args[2] if len(args) > 2 else "v01"
 TEX = "tex" in args          # сборка из текстурных файлов (состояние 20 %) — для просмотра отделки
 if TEX:
     FILES = {
-        "rifle": os.path.join(A, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v06_tex20_v01.blend"),
+        # винтовка — v07 с текстурами v02; прицел и крепление — текстуры v01 (не менялись)
+        "rifle": os.path.join(A, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v07_tex20_v02.blend"),
         "mount": os.path.join(A, "models", "03_Крепление", "Mosin_PU_Mount_v01_tex20_v01.blend"),
         "scope": os.path.join(A, "models", "02_Прицел", "Mosin_PU_Scope_v01_tex20_v01.blend"),
     }
-    OUT = os.path.join(A, "models", "00_Сборка", "Mosin_9130PU_Assembly_tex20_v01.blend")
+    OUT = os.path.join(A, "models", "00_Сборка", "Mosin_9130PU_Assembly_tex20_v02.blend")
 else:
     FILES = {
         "rifle": os.path.join(A, "models", "01_Винтовка", f"Mosin_9130PU_Rifle_{RV}.blend"),
