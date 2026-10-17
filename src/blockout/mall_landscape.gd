@@ -20,11 +20,20 @@ const WALL_SOFT_M: float = 0.15
 const SPLIT_DEV_M: float = 0.05
 const SPLIT_MIN_M: float = 0.25
 
+## Сетка поиска земляных работ наполнения, м.
+const EARTH_CELL: float = 32.0
+
 var plan: Dictionary = {}
 var generated: Node3D
 var boundary: PackedVector2Array
 var forests: Array[PackedVector2Array] = []
 var flat_r: float = 150.0
+## Где за машиной, стенкой или фонтаном можно укрыться — для замера открытых кусков на подходах.
+var cover_spots: PackedVector2Array = PackedVector2Array()
+## Земляные работы наполнения (tools/mall_study_filler.py): котлован стройки, отвалы, воронка, кювет у трассы.
+## Запись — [вид, параметры…]; сетка по EARTH_CELL отвечает, какие из них рядом с точкой.
+var _earth: Array[PackedFloat32Array] = []
+var _earth_grid: Dictionary = {}
 
 
 func _ready() -> void:
@@ -44,6 +53,90 @@ func load_plan() -> void:
 	for points: Array in plan.forest:
 		forests.append(poly(points))
 	flat_r = float((plan.mall as Dictionary).flat_r)
+	_load_earth()
+
+
+func _load_earth() -> void:
+	_earth.clear()
+	_earth_grid.clear()
+	var earth: Dictionary = (plan.get("filler", {}) as Dictionary).get("earth", {}) as Dictionary
+	for m: Array in earth.get("mounds", []):
+		_add_earth(PackedFloat32Array([0.0, m[0], m[1], m[2], m[3], deg_to_rad(float(m[4])), m[5]]),
+			Vector2(float(m[0]), float(m[1])), maxf(float(m[2]), float(m[3])))
+	for c: Array in earth.get("craters", []):
+		_add_earth(PackedFloat32Array([1.0, c[0], c[1], c[2], c[3], c[4]]), Vector2(float(c[0]), float(c[1])), float(c[2]) * 1.6)
+	for pit: Array in earth.get("pits", []):
+		_add_earth(PackedFloat32Array([2.0, pit[0], pit[1], pit[2], pit[3], deg_to_rad(float(pit[4])), pit[5], pit[6], pit[7], pit[8]]),
+			Vector2(float(pit[0]), float(pit[1])), Vector2(float(pit[2]), float(pit[3])).length() * 0.5 + 1.0)
+	for ditch: Dictionary in earth.get("ditches", []):
+		var pts: PackedVector2Array = poly(ditch.points)
+		var half: float = float(ditch.width) * 0.5
+		for i: int in range(pts.size() - 1):
+			var a: Vector2 = pts[i]
+			var b: Vector2 = pts[i + 1]
+			var index: int = _earth.size()
+			_earth.append(PackedFloat32Array([3.0, a.x, a.y, b.x, b.y, half, float(ditch.depth)]))
+			var box: Rect2 = Rect2(a, Vector2.ZERO).expand(b).grow(half)
+			_grid_add(index, box)
+
+
+func _add_earth(entry: PackedFloat32Array, at: Vector2, reach: float) -> void:
+	var index: int = _earth.size()
+	_earth.append(entry)
+	_grid_add(index, Rect2(at - Vector2(reach, reach), Vector2(reach, reach) * 2.0))
+
+
+func _grid_add(index: int, box: Rect2) -> void:
+	for i: int in range(floori(box.position.x / EARTH_CELL), floori(box.end.x / EARTH_CELL) + 1):
+		for j: int in range(floori(box.position.y / EARTH_CELL), floori(box.end.y / EARTH_CELL) + 1):
+			var key: Vector2i = Vector2i(i, j)
+			if not _earth_grid.has(key):
+				_earth_grid[key] = PackedInt32Array()
+			var list: PackedInt32Array = _earth_grid[key]
+			list.append(index)
+			_earth_grid[key] = list
+
+
+## Поправка высоты от земляных работ в точке.
+func _earth_offset(x: float, z: float) -> float:
+	var key: Vector2i = Vector2i(floori(x / EARTH_CELL), floori(z / EARTH_CELL))
+	if not _earth_grid.has(key):
+		return 0.0
+	var dh: float = 0.0
+	for index: int in _earth_grid[key] as PackedInt32Array:
+		var e: PackedFloat32Array = _earth[index]
+		match int(e[0]):
+			0:
+				# отвал: приподнятый косинус по эллипсу
+				var d: Vector2 = Vector2(x - e[1], z - e[2]).rotated(-e[5])
+				var q: float = sqrt(pow(d.x / e[3], 2.0) + pow(d.y / e[4], 2.0))
+				if q < 1.0:
+					dh += e[6] * 0.5 * (1.0 + cos(PI * q))
+			1:
+				# воронка: чаша и невысокий вал по краю
+				var q: float = Vector2(x - e[1], z - e[2]).length() / e[3]
+				if q < 1.0:
+					dh -= e[4] * (1.0 - q * q)
+				if q < 1.6:
+					dh += e[5] * exp(-pow((q - 1.0) / 0.22, 2.0))
+			2:
+				# котлован: откосы по краям, на +X — длинный пандус для машин в полосе ramp_w
+				var d: Vector2 = Vector2(x - e[1], z - e[2]).rotated(-e[5])
+				var hx: float = e[3] * 0.5
+				var hz: float = e[4] * 0.5
+				if absf(d.x) < hx and absf(d.y) < hz:
+					var slope: float = e[7]
+					var east: float = lerpf(e[8], slope, smoothstep(e[9] * 0.5 - 2.0, e[9] * 0.5 + 2.0, absf(d.y)))
+					var k: float = minf(minf(smoothstep(0.0, slope, d.x + hx), smoothstep(0.0, east, hx - d.x)),
+						minf(smoothstep(0.0, slope, d.y + hz), smoothstep(0.0, slope, hz - d.y)))
+					dh -= e[6] * k
+			3:
+				# кювет: косинус поперёк отрезка, концы скруглены
+				var p: Vector2 = Vector2(x, z)
+				var dist: float = Geometry2D.get_closest_point_to_segment(p, Vector2(e[1], e[2]), Vector2(e[3], e[4])).distance_to(p)
+				if dist < e[5]:
+					dh -= e[6] * 0.5 * (1.0 + cos(PI * dist / e[5]))
+	return dh
 
 
 static func poly(points: Array) -> PackedVector2Array:
@@ -128,6 +221,8 @@ func ground(x: float, z: float) -> float:
 	var q: float = _pond_q(x, z)
 	if q < 1.0:
 		h -= float(pond.depth) * (1.0 - q)
+	if not _earth_grid.is_empty():
+		h += _earth_offset(x, z)
 	return h
 
 
@@ -150,6 +245,7 @@ func rebuild() -> void:
 	generated = Node3D.new()
 	generated.name = "_Landscape"
 	add_child(generated)
+	cover_spots = PackedVector2Array()
 	var g: RefCounted = Geometry.new(generated, _palette())
 	_terrain(g)
 	_surfaces(g)
@@ -335,6 +431,11 @@ func _strip(g: RefCounted, line: PackedVector2Array, width: float, key: String, 
 			_drape_quad(g, pts, key, offset)
 
 
+## Полоса по земле (колея, тропа) для соседних узлов черновика: дробится на уступах, как земля.
+func drape_strip(g: RefCounted, line: PackedVector2Array, width: float, key: String, lift: float) -> void:
+	_strip(g, line, width, key, lift)
+
+
 func _roads(g: RefCounted) -> void:
 	for road: Dictionary in plan.roads:
 		var line: PackedVector2Array = poly(road.points)
@@ -352,6 +453,7 @@ func _wall_segment(g: RefCounted, p: Vector2, q: Vector2, probe: Vector2) -> voi
 	var high: float = maxf(y_a, y_b) + 1.0
 	if high - low < 1.6:
 		return
+	cover_spots.append(mid)
 	var dir: Vector2 = q - p
 	g.box(Vector3(mid.x, (low + high) * 0.5, mid.y), Vector3(dir.length() + 0.05, high - low, 0.6), "concrete", true, -atan2(dir.y, dir.x))
 
@@ -495,7 +597,9 @@ func _plaza(g: RefCounted) -> void:
 		var mid: Vector2 = (p + q) * 0.5
 		g.box(Vector3(mid.x, 0.3, mid.y), Vector3(p.distance_to(q) + 0.1, 0.6, 0.5), "concrete", true, -atan2((q - p).y, (q - p).x))
 	g.box(Vector3(c.x, 0.6, c.y), Vector3(1.6, 1.6, 1.6), "concrete")
+	cover_spots.append(c)
 	for planter: Array in pl.planters:
+		cover_spots.append(Vector2(float(planter[0]), float(planter[1])))
 		g.box(Vector3(float(planter[0]), 0.45, float(planter[1])), Vector3(9.0, 0.9, 9.0), "concrete")
 		g.box(Vector3(float(planter[0]), 1.3, float(planter[1])), Vector3(7.0, 1.0, 7.0), "foliage", false)
 	# детская площадка в сквере — несколько низких форм
@@ -508,6 +612,7 @@ func _plaza(g: RefCounted) -> void:
 func _car(g: RefCounted, at: Vector2, yaw: float, rng: RandomNumberGenerator) -> void:
 	var y: float = ground(at.x, at.y)
 	var key: String = ["car_a", "car_b", "car_c", "car_d"][rng.randi_range(0, 3)]
+	cover_spots.append(at)
 	g.box(Vector3(at.x, y + 0.55, at.y), Vector3(1.9, 0.8, 4.6), key, true, yaw)
 	g.box(Vector3(at.x, y + 1.2, at.y), Vector3(1.6, 0.55, 2.4), key, false, yaw)
 
@@ -555,6 +660,10 @@ func _car_blocked(at: Vector2, ang: float, rad: float) -> bool:
 	for road: Dictionary in plan.roads:
 		if String(road.id).begins_with("entry_") and line_distance(at, poly(road.points)) < float(road.width) * 0.5 + 2.5:
 			return true
+	# теплотрасса наполнения идёт через восточную парковку
+	var heat: Array = ((plan.get("filler", {}) as Dictionary).get("lines", {}) as Dictionary).get("heat", {}).get("points", [])
+	if heat.size() > 1 and line_distance(at, poly(heat)) < 4.5:
+		return true
 	for b: Dictionary in plan.buildings:
 		var c: Array = b.at
 		var span: Array = b.size
@@ -644,7 +753,8 @@ func _trees(g: RefCounted) -> void:
 	var crowns: Array[Transform3D] = []
 	var spots: Array[Vector2] = []
 	var bounds: Array = plan.bounds
-	# лесополосы по северу и северо-востоку
+	# лесополосы по северу и северо-востоку; под ЛЭП наполнения — просека
+	var power: PackedVector2Array = poly(((plan.get("filler", {}) as Dictionary).get("lines", {}) as Dictionary).get("power", {}).get("towers", []))
 	var attempts: int = 0
 	while spots.size() < 900 and attempts < 20000:
 		attempts += 1
@@ -652,7 +762,7 @@ func _trees(g: RefCounted) -> void:
 		var inside: bool = false
 		for f: PackedVector2Array in forests:
 			inside = inside or Geometry2D.is_point_in_polygon(p, f)
-		if inside and _clear_of_roads(p, 3.0):
+		if inside and _clear_of_roads(p, 3.0) and (power.size() < 2 or line_distance(p, power) > 12.0):
 			spots.append(p)
 	# сквер: деревья между дорожками
 	var sq: Dictionary = plan.square

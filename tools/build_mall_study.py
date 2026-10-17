@@ -19,6 +19,8 @@ import math
 import re
 from pathlib import Path
 
+from mall_study_filler import make_filler
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -158,6 +160,8 @@ for i in range(7):
         a += 3.5 if a >= 180 else -3.5
     building(f"Tent_{i + 1}", "Палатка эвакуационного пункта", pol(a, 190 + (i % 3) * 13), (8, 5), "WestParking",
              height=2.6, yaw=a - 90)
+# стройка второй очереди (наполнение — tools/mall_study_filler.py): башенный кран у котлована, стрела над ним
+building("Crane", "Башенный кран стройки второй очереди", (12, 300), (6, 6), "Construction", kind="crane")
 # за границей — новостройки за трассой и склады промзоны (декорация без входа)
 for i, x in enumerate((-300, -170, 40, 190, 320)):
     building(f"Tower_{i + 1}", "Новостройка ЖК · 17 этажей", (x, -430), (54, 18), "Outside", floors=17, height=3.0)
@@ -251,8 +255,13 @@ def area(poly):
 
 
 plan["boundary_area_m2"] = round(area(plan["boundary"]), 1)
+# наполнение пустых мест между участками: укрытия, природа, ориентиры, истории (владелец, 2026-10-17)
+plan["filler"], filler_stats = make_filler(plan)
 (ROOT / "data/blockouts").mkdir(parents=True, exist_ok=True)
-(ROOT / "data/blockouts/mall_study.json").write_text(json.dumps(plan, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+# простые списки (точки, предметы наполнения) — в строку: файл читаемый и без тысяч строк по числу
+text = re.sub(r"\[[^\[\]{}]*\]", lambda m: re.sub(r"\s*\n\s*", " ", m.group(0)).replace("[ ", "[").replace(" ]", "]"),
+              json.dumps(plan, ensure_ascii=False, indent=1))
+(ROOT / "data/blockouts/mall_study.json").write_text(text + "\n", encoding="utf-8")
 
 # ------------------------------------------------------------------ сцена
 mall_1f = (ROOT / "scenes/levels/mall_1f.tscn").read_text(encoding="utf-8")
@@ -277,6 +286,7 @@ scene = [
     '[ext_resource type="Script" path="res://src/blockout/study_building.gd" id="build"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_ring.gd" id="ring"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_study_level.gd" id="launch"]',
+    '[ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/escalator.tscn" id="esc"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/rubble_pile.tscn" id="rub"]',
     '[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]',
@@ -305,6 +315,7 @@ scene = [
     'light_angular_distance = 2.0', 'shadow_enabled = true',
     'directional_shadow_max_distance = 220.0',
     '[node name="Landscape" type="Node3D" parent="."]', 'script = ExtResource("land")',
+    '[node name="Filler" type="Node3D" parent="."]', 'script = ExtResource("fill")',
     '[node name="Mall" type="Node3D" parent="."]', 'script = ExtResource("ring")',
     '[node name="Escalators" type="Node3D" parent="Mall"]',
     *copied_nodes("Escalators"),
@@ -331,4 +342,5 @@ for region in regions:
 dest = ROOT / "scenes/levels/mall_study.tscn"
 dest.write_text("\n\n".join(scene) + "\n", encoding="utf-8")
 print(json.dumps({"boundary_area_m2": plan["boundary_area_m2"], "buildings": len(buildings), "roads": len(roads),
-                  "locations": len(plan["locations"]), "routes": len(plan["probe_routes"])}, ensure_ascii=False))
+                  "locations": len(plan["locations"]), "routes": len(plan["probe_routes"]), "filler": filler_stats},
+                 ensure_ascii=False))

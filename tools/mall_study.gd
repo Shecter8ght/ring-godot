@@ -123,9 +123,9 @@ func _process(_delta: float) -> void:
 	title.text = "%d · %s  |  ЧЕРНОВИК 1:1" % [int(nearest.id), String(nearest.label)]
 	var speed_m: float = Vector2(walker.velocity.x, walker.velocity.z).length()
 	var to_mall: float = maxf(0.0, Vector2(walker.global_position.x, walker.global_position.z).length() - float((plan.mall as Dictionary).r))
-	status.text = "%s · %.2f м/с · путь %.0f м · %d:%02d · высота %.1f м · до ТЦ %.0f м" % [
+	status.text = "%s · %.2f м/с · путь %.0f м · %d:%02d · высота %.1f м · до ТЦ %.0f м · %d к/с" % [
 		"ПОЛЁТ" if walker.flight else "ПЕШКОМ", speed_m, walker.travelled_m, int(walker.walking_sec) / 60,
-		int(walker.walking_sec) % 60, walker.global_position.y, to_mall]
+		int(walker.walking_sec) % 60, walker.global_position.y, to_mall, Engine.get_frames_per_second()]
 	if map.visible:
 		map.queue_redraw()
 
@@ -230,6 +230,16 @@ func _verify() -> void:
 		var passed: bool = await _walk_path(path, true)
 		_check("Подход " + String(route.id), passed, {"walked_m": snappedf(walker.travelled_m - before, 0.1),
 			"sprint_sec": snappedf(walker.walking_sec - t0, 0.1), "position": str(walker.global_position)})
+	# наполнение пустых мест (tools/mall_study_filler.py): пачки, коллизия укрытий, ЛЭП, теплотрасса, истории
+	var filler_node: Node3D = world.get_node_or_null("Filler") as Node3D
+	var fstats: Dictionary = filler_node.get_meta("stats", {}) as Dictionary if filler_node else {}
+	var filler: Dictionary = plan.get("filler", {}) as Dictionary
+	_check("Наполнение: укрытия, природа, ЛЭП, теплотрасса, истории", int(fstats.get("instances", 0)) > 5000
+		and (filler.get("stories", []) as Array).size() >= 10 and filler_node.find_children("Mesh_steel", "", true, false).size() > 0, fstats)
+	# ритм: на подходах нет открытого куска длиннее 60 м, где до укрытия дальше 15 м
+	for route: Dictionary in plan.probe_routes:
+		var longest: float = _open_stretch(route.points)
+		_check("Подход %s: открытый кусок не длиннее 60 м" % String(route.id), longest <= 60.0, {"longest_open_m": snappedf(longest, 1.0)})
 	# паркинг: лестница на 2-й ярус и мост к фасаду ТЦ на высоте 2-го этажа
 	var garage: Node3D = world.get_node("Garage/Parking_Garage") as Node3D
 	var story: float = float(garage.get("story_height"))
@@ -296,6 +306,38 @@ func _verify() -> void:
 	get_tree().quit(fails)
 
 
+## Самый длинный кусок ломаной (шаг 2 м), на котором до ближайшего укрытия дальше 15 м: укрытия наполнения,
+## машины, стенки и фонтан рельефа, постройки, стена ТЦ.
+func _open_stretch(points: Array) -> float:
+	var spots: PackedVector2Array = landscape.cover_spots.duplicate()
+	for c: Array in (plan.get("filler", {}) as Dictionary).get("cover", []):
+		spots.append(Vector2(float(c[0]), float(c[1])))
+	var line: PackedVector2Array = MallLandscape.poly(points)
+	var longest: float = 0.0
+	var run: float = 0.0
+	for i: int in range(line.size() - 1):
+		var steps: int = maxi(1, ceili(line[i].distance_to(line[i + 1]) / 2.0))
+		var step_m: float = line[i].distance_to(line[i + 1]) / float(steps)
+		for k: int in range(steps):
+			var p: Vector2 = line[i].lerp(line[i + 1], float(k) / float(steps))
+			var covered: bool = p.length() < float((plan.mall as Dictionary).r) + 15.0
+			for b: Dictionary in plan.buildings:
+				if covered:
+					break
+				var c: Array = b.at
+				var span: Array = b.size
+				var local: Vector2 = (p - Vector2(float(c[0]), float(c[1]))).rotated(deg_to_rad(float(b.yaw)))
+				var outside: Vector2 = (local.abs() - Vector2(float(span[0]), float(span[1])) * 0.5).max(Vector2.ZERO)
+				covered = outside.length() < 15.0
+			for q: Vector2 in spots:
+				if covered:
+					break
+				covered = p.distance_squared_to(q) < 225.0
+			run = 0.0 if covered else run + step_m
+			longest = maxf(longest, run)
+	return longest
+
+
 func _walk_path(path: Array[Vector3], sprint: bool) -> bool:
 	walker.probe_direction = Vector3.ZERO
 	walker.probe_sprint = sprint
@@ -351,7 +393,13 @@ func _shots() -> void:
 		{"id": "04_yard", "at": Vector3(220, 24, -220), "look": Vector3(110, -4, -115)},
 		{"id": "05_gas_checkpoint", "at": Vector3(-180, 30, -120), "look": Vector3(-300, 0, -110)},
 		{"id": "06_tech_garage", "at": Vector3(330, 40, 80), "look": Vector3(220, 5, -60)},
-		{"id": "07_gallery_stairs", "at": Vector3(-104, 0, 196), "look": Vector3(-82, -2, 185.5)}]
+		{"id": "07_gallery_stairs", "at": Vector3(-104, 0, 196), "look": Vector3(-82, -2, 185.5)},
+		{"id": "08_construction", "at": Vector3(30, 26, -228), "look": Vector3(40, 0, -292)},
+		{"id": "09_field_eye", "at": Vector3(-300, 1.7, 40), "look": Vector3(-345, 1.0, 200)},
+		{"id": "10_convoy", "at": Vector3(-270, 16, 190), "look": Vector3(-320, 0, 238)},
+		{"id": "11_heat_main", "at": Vector3(215, 7, -18), "look": Vector3(150, 1, -46)},
+		{"id": "12_garages", "at": Vector3(298, 9, 92), "look": Vector3(332, 1, 55)},
+		{"id": "13_highway", "at": Vector3(165, 9, 268), "look": Vector3(122, 0, 298)}]
 	# свой кадр вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z (без плана)
 	var custom: PackedStringArray = OS.get_environment("MALL_STUDY_VIEW").split(":")
 	if custom.size() == 7:
@@ -379,5 +427,5 @@ func _shots() -> void:
 	map.queue_redraw()
 	await _frames(10)
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(output_dir.path_join("08_map.png"))
+	get_viewport().get_texture().get_image().save_png(output_dir.path_join("14_map.png"))
 	get_tree().quit()
