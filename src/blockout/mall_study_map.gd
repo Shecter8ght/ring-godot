@@ -85,6 +85,7 @@ func _draw() -> void:
 		for local: Vector2 in [Vector2(-half.x, -half.y), Vector2(half.x, -half.y), half, Vector2(-half.x, half.y)]:
 			polygon.append(map_point(center + local.rotated(-deg_to_rad(float(b.yaw))), rect))
 		draw_colored_polygon(polygon, Color("c1bca8") if String(b.kind) in ["hall", "skeleton"] else Color("7d837b"))
+	_draw_relief(plan.get("relief", {}) as Dictionary, rect, k)
 	_draw_filler(plan.get("filler", {}) as Dictionary, rect, k)
 	for s: Dictionary in plan.spawns:
 		draw_circle(map_point(Vector2(float(s.at[0]), float(s.at[1])), rect), 6.0, Color("3d6fb5"))
@@ -102,10 +103,38 @@ func _draw() -> void:
 			arrow.append(at + local.rotated(-walker.rotation.y))
 		draw_colored_polygon(arrow, Color.WHITE)
 	draw_string(font, Vector2(rect.position.x, rect.position.y - 20), "ТЦ «РИНГ» · ТЕРРИТОРИЯ · ЧЕРНОВИК 1:1 · СЕВЕР ↑", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("e3e6d4"))
-	draw_string(font, Vector2(rect.position.x, rect.end.y + 28), "M — закрыть · 1–9, 0 — места 1–10 · N / B — места · синие — появление, зелёные — выход, жёлтые — по условию · ◆ — история · оранжевая — теплотрасса · пунктир — ЛЭП", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c0c9bd"))
+	draw_string(font, Vector2(rect.position.x, rect.end.y + 28), "M — закрыть · 1–9, 0 — места 1–10 · N / B — места · синие — появление, зелёные — выход, жёлтые — по условию · ◆ — история · оранжевая — теплотрасса · пунктир — ЛЭП · синяя — речка · зубцы — утёс", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c0c9bd"))
 	var a: Vector2 = rect.end + Vector2(-100.0 * k, 12)
 	draw_line(a, rect.end + Vector2(0, 12), Color("c0c9bd"), 2)
 	draw_string(font, a + Vector2(0, 30), "100 м", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("c0c9bd"))
+
+
+## Рельеф: горки (кольца), утёсы (кромка с зубцами вниз), речка с мостами и бродом.
+func _draw_relief(relief: Dictionary, rect: Rect2, k: float) -> void:
+	if relief.is_empty():
+		return
+	for hill: Array in relief.get("hills", []):
+		var c: Vector2 = map_point(Vector2(float(hill[0]), float(hill[1])), rect)
+		for ring: float in [1.0, 0.66, 0.33]:
+			draw_arc(c, float(hill[2]) * ring * k, 0.0, TAU, 32, Color(0.75, 0.7, 0.55, 0.35 + 0.15 * (1.0 - ring)), 1.0)
+	var river: Dictionary = relief.get("river", {}) as Dictionary
+	if river.has("points"):
+		draw_polyline(points(river.points, rect), Color("4f7f95"), maxf(2.0, 12.0 * k))
+		for bridge: Dictionary in river.bridges:
+			var at: Vector2 = map_point(Vector2(float(bridge.at[0]), float(bridge.at[1])), rect)
+			draw_rect(Rect2(at - Vector2(5, 3), Vector2(10, 6)), Color("c9c2ac"))
+		for ford: Dictionary in river.fords:
+			draw_circle(map_point(Vector2(float(ford.at[0]), float(ford.at[1])), rect), 4.0, Color("8fb3c0"))
+	for cliff: Dictionary in relief.get("cliffs", []):
+		var edge: PackedVector2Array = points(cliff.points, rect)
+		draw_polyline(edge, Color("2e2a25"), 3.0)
+		for i: int in range(edge.size() - 1):
+			var dir: Vector2 = (edge[i + 1] - edge[i]).normalized()
+			# зубцы — к низу утёса
+			var down: Vector2 = Vector2(-dir.y, dir.x) * -float(cliff.side) * 6.0
+			for t: float in [0.2, 0.4, 0.6, 0.8]:
+				var q: Vector2 = edge[i].lerp(edge[i + 1], t)
+				draw_line(q, q + down, Color("2e2a25"), 1.5)
 
 
 ## Наполнение: колея, кювет, котлован, отвалы, воронка, теплотрасса, ЛЭП, укрытия и кусты, истории.

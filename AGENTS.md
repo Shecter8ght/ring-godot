@@ -116,9 +116,10 @@ tools/godot.cmd --headless res://tools/mall_1f_check.tscn   # серый чер�
                                                               # с окном (--windowed --resolution 1920x1080) — снимки mall_1f_* (MALL_ONLY=top|eye);
                                                               # MALL_ONLY=perf — кадры с мародёрами и без, atrium — засвет под куполом (MALL_TIME, MALL_WEATHER)
 python -X utf8 tools/build_mall_study.py                     # черновик территории ТЦ по принятой схеме → data/blockouts/mall_study.json, scenes/levels/mall_study.tscn
-                                                              # (наполнение пустых мест — tools/mall_study_filler.py → узел Filler, src/blockout/mall_filler.gd)
+                                                              # (наполнение пустых мест — tools/mall_study_filler.py → узел Filler, src/blockout/mall_filler.gd;
+                                                              #  рельеф: речка, горки, утёсы, рощи — tools/mall_study_relief.py → MallLandscape.ground())
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
-                                                              # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–D, галерея, наполнение и открытые куски ≤ 60 м, паркинг, мосты, двор); -- shots — снимки
+                                                              # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–D, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, паркинг, двор); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — один свой кадр, MALL_STUDY_OUTPUT — папка)
 tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться

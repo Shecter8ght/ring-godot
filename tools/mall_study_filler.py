@@ -27,7 +27,7 @@ SEED = 20261017
 SITE_CENTER = (35.0, -290.0)
 SITE_SIZE = (140.0, 48.0)
 # Опоры ЛЭП: с юга через трассу, полем у КПП на север, просекой вдоль леса — к подстанции техкомплекса
-POWER_TOWERS = [(-385.0, 342.0), (-372.0, 170.0), (-358.0, 40.0), (-352.0, -110.0), (-318.0, -235.0),
+POWER_TOWERS = [(-385.0, 342.0), (-372.0, 170.0), (-358.0, 40.0), (-352.0, -110.0), (-345.0, -225.0),
                 (-215.0, -335.0), (-70.0, -340.0), (80.0, -338.0), (225.0, -318.0), (290.0, -236.0),
                 (238.0, -112.0)]
 POWER_END = (262.0, -112.0, 4.6)  # провода спускаются на крышу подстанции
@@ -37,7 +37,7 @@ HEAT_MAIN = [(296.0, -133.0), (296.0, -100.0), (252.0, -55.0), (132.0, -41.0), (
 RUT_LINE = [(-328.0, -6.0), (-333.0, 60.0), (-346.0, 140.0), (-362.0, 214.0), (-300.0, 240.0), (-240.0, 256.0),
             (-205.0, 264.0)]
 CONVOY_FROM = 3  # колонна — от этой точки колеи
-CRATER = (-300.0, 120.0)
+CRATER = (-270.0, 120.0)  # на восточном берегу речки, между ней и кольцевой дорогой
 CAMP = (-205.0, -240.0)
 CRASH = (128.0, 297.0)
 SANDBAG_POST = (232.0, 262.0)
@@ -205,7 +205,14 @@ class Layout:
             return True
         if r < 127.0 + margin or 300.0 - margin < z < 336.0 + margin:
             return True
-        if any(in_poly(p, f) for f in plan["forest"]):
+        # в лесу и рощах укрытиям места нет (там деревья), кустам и бурьяну — можно: подлесок
+        if not veg and any(in_poly(p, f) for f in plan["forest"]):
+            return True
+        relief = plan.get("relief", {})
+        river = relief.get("river")
+        if river and poly_dist(p, river["points"]) < (10.0 if veg else 16.0) + margin:
+            return True
+        if any(poly_dist(p, c["points"]) < (4.0 if veg else 7.0) + margin for c in relief.get("cliffs", [])):
             return True
         side = 1.0 if veg else 2.5
         if abs(r - plan["mall"]["loop_r"]) < self.loop * 0.5 + margin + side:
@@ -424,11 +431,13 @@ class Layout:
 
     def west(self) -> None:
         """Змейка дорожных блоков у КПП, колея через поле, брошенная колонна, воронка со сгоревшей машиной."""
-        for i, x in enumerate((-297.0, -290.0, -283.0, -276.0)):
-            c = -24.5 if i % 2 == 0 else -19.5
+        # змейка — на подъезде к КПП с запада (с востока за КПП — мост через речку)
+        for i, x in enumerate((-410.0, -403.0, -396.0, -389.0)):
+            road_z = -30.0 + 8.0 * (x + 470.0) / 170.0
+            c = road_z - 2.5 if i % 2 == 0 else road_z + 2.5
             for dz in (-1.5, 1.5):
                 self.put("jersey", x, c + dz, 0.0, cover=True)
-        self.story("Змейка у КПП", (-287.0, -22.0), None, 4.0)
+        self.story("Змейка у КПП", (-400.0, -27.0), None, 4.0)
         ruts = RUT_LINE
         self.ruts = [offset_line(ruts, -0.9), offset_line(ruts, 0.9)]
         convoy = ruts[CONVOY_FROM:CONVOY_FROM + 3]

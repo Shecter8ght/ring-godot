@@ -211,6 +211,27 @@ func _verify() -> void:
 	var hw: Dictionary = plan.highway
 	var hw_y: float = _ray_y(150.0, float(hw.z))
 	_check("Север выше, трасса ниже всего", north_y > 2.5 and absf(hw_y - float(hw.y)) < 0.3, {"north_y": north_y, "highway_y": hw_y})
+	# рельеф: горка, речка, утёсы (tools/mall_study_relief.py)
+	var relief: Dictionary = plan.get("relief", {}) as Dictionary
+	var hill: Array = (relief.get("hills", []) as Array)[0]
+	var top_y: float = _ray_y(float(hill[0]), float(hill[1]))
+	var hill_rise: float = top_y - landscape.base_height(float(hill[0]), float(hill[1]))
+	_check("Западная горка за речкой: вершина выше окрестной земли", hill_rise > 6.0, {"rise_m": snappedf(hill_rise, 0.1)})
+	var river: Dictionary = relief.get("river", {}) as Dictionary
+	var rpts: PackedVector2Array = MallLandscape.poly(river.get("points", []))
+	var mid: Vector2 = (rpts[4] + rpts[5]) * 0.5
+	var flow: Vector2 = (rpts[5] - rpts[4]).normalized()
+	var bed_y: float = _ray_y(mid.x, mid.y)
+	var bank_y: float = _ray_y(mid.x - flow.y * 24.0, mid.y + flow.x * 24.0)
+	var water: bool = not landscape.find_children("Mesh_water", "", true, false).is_empty()
+	_check("Речка: русло ниже берегов, вода есть", water and bank_y - bed_y > 1.5, {"bank_m": snappedf(bank_y - bed_y, 0.1)})
+	for cliff: Dictionary in relief.get("cliffs", []):
+		var edge: PackedVector2Array = MallLandscape.poly(cliff.points)
+		var c: Vector2 = edge[1]
+		var along: Vector2 = (edge[2] - edge[0]).normalized()
+		var up: Vector2 = Vector2(-along.y, along.x) * float(cliff.side)
+		var drop: float = _ray_y(c.x + up.x * 4.0, c.y + up.y * 4.0) - _ray_y(c.x - up.x * 6.0, c.y - up.y * 6.0)
+		_check("Утёс «%s»: обрыв не меньше 4 м" % String(cliff.name), drop > 4.0, {"drop_m": snappedf(drop, 0.1)})
 	for loc: Dictionary in plan.locations:
 		_jump_to(int(loc.id))
 		await _frames(8)
@@ -240,6 +261,26 @@ func _verify() -> void:
 	for route: Dictionary in plan.probe_routes:
 		var longest: float = _open_stretch(route.points)
 		_check("Подход %s: открытый кусок не длиннее 60 м" % String(route.id), longest <= 60.0, {"longest_open_m": snappedf(longest, 1.0)})
+	# речку пешком: вброд на колее и по мостику у АЗС (мост на западной дороге проходит подход B)
+	for ford: Dictionary in river.get("fords", []):
+		var across: Vector2 = _across_river(rpts, Vector2(float(ford.at[0]), float(ford.at[1])))
+		var at: Vector2 = Vector2(float(ford.at[0]), float(ford.at[1]))
+		var ford_path: Array[Vector3] = []
+		for q: Vector2 in [at - across * 18.0, at + across * 18.0]:
+			ford_path.append(Vector3(q.x, landscape.ground(q.x, q.y) + 0.04, q.y))
+		var waded: bool = await _walk_path(ford_path, false)
+		_check("Брод на колее: перейти речку пешком", waded, {"position": str(walker.global_position)})
+	for bridge: Dictionary in river.get("bridges", []):
+		if String(bridge.kind) != "foot":
+			continue
+		var bat: Vector2 = Vector2(float(bridge.at[0]), float(bridge.at[1]))
+		var bacross: Vector2 = _across_river(rpts, bat)
+		var bridge_path: Array[Vector3] = []
+		for q: Vector2 in [bat + bacross * (float(bridge.half_left) + 5.0), bat - bacross * (float(bridge.half_right) + 5.0)]:
+			bridge_path.append(Vector3(q.x, landscape.ground(q.x, q.y) + 0.04, q.y))
+		var crossed: bool = await _walk_path(bridge_path, false)
+		_check("Пешеходный мостик у АЗС: через речку по настилу", crossed and walker.global_position.y > float(bridge.deck) - 1.5,
+			{"position": str(walker.global_position)})
 	# паркинг: лестница на 2-й ярус и мост к фасаду ТЦ на высоте 2-го этажа
 	var garage: Node3D = world.get_node("Garage/Parking_Garage") as Node3D
 	var story: float = float(garage.get("story_height"))
@@ -304,6 +345,18 @@ func _verify() -> void:
 	file.close()
 	print("mall_study: DONE checks=%d fails=%d" % [results.size(), fails])
 	get_tree().quit(fails)
+
+
+## Поперёк речки у точки: влево от хода русла (как «слева» у берегов в данных рельефа).
+func _across_river(line: PackedVector2Array, p: Vector2) -> Vector2:
+	var best: float = INF
+	var dir: Vector2 = Vector2.RIGHT
+	for i: int in range(line.size() - 1):
+		var d: float = p.distance_to(Geometry2D.get_closest_point_to_segment(p, line[i], line[i + 1]))
+		if d < best:
+			best = d
+			dir = (line[i + 1] - line[i]).normalized()
+	return Vector2(-dir.y, dir.x)
 
 
 ## Самый длинный кусок ломаной (шаг 2 м), на котором до ближайшего укрытия дальше 15 м: укрытия наполнения,
@@ -399,7 +452,13 @@ func _shots() -> void:
 		{"id": "10_convoy", "at": Vector3(-270, 16, 190), "look": Vector3(-320, 0, 238)},
 		{"id": "11_heat_main", "at": Vector3(215, 7, -18), "look": Vector3(150, 1, -46)},
 		{"id": "12_garages", "at": Vector3(298, 9, 92), "look": Vector3(332, 1, 55)},
-		{"id": "13_highway", "at": Vector3(165, 9, 268), "look": Vector3(122, 0, 298)}]
+		{"id": "13_highway", "at": Vector3(165, 9, 268), "look": Vector3(122, 0, 298)},
+		{"id": "15_river_bridge", "at": Vector3(-268, 8, 8), "look": Vector3(-295, -1, -22)},
+		{"id": "16_cliff_river", "at": Vector3(-290, 6, 150), "look": Vector3(-345, 2, 150)},
+		{"id": "17_west_hill_view", "at": Vector3(-385, 11.5, 150), "look": Vector3(0, 5, 0)},
+		{"id": "18_pond_cliff", "at": Vector3(-110, 4, -250), "look": Vector3(-110, 3, -326)},
+		{"id": "19_ford", "at": Vector3(-308, 7, 248), "look": Vector3(-331, -2, 227)},
+		{"id": "20_forest_eye", "at": Vector3(-372, 9.7, 160), "look": Vector3(-300, 6, 150)}]
 	# свой кадр вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z (без плана)
 	var custom: PackedStringArray = OS.get_environment("MALL_STUDY_VIEW").split(":")
 	if custom.size() == 7:
@@ -427,5 +486,5 @@ func _shots() -> void:
 	map.queue_redraw()
 	await _frames(10)
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(output_dir.path_join("14_map.png"))
+	get_viewport().get_texture().get_image().save_png(output_dir.path_join("21_map.png"))
 	get_tree().quit()

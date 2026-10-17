@@ -22,6 +22,8 @@ const SPLIT_MIN_M: float = 0.25
 
 ## Сетка поиска земляных работ наполнения, м.
 const EARTH_CELL: float = 32.0
+## Дальше этого от середины русла речка землю не трогает, м.
+const RIVER_REACH: float = 26.0
 
 var plan: Dictionary = {}
 var generated: Node3D
@@ -34,6 +36,18 @@ var cover_spots: PackedVector2Array = PackedVector2Array()
 ## Запись — [вид, параметры…]; сетка по EARTH_CELL отвечает, какие из них рядом с точкой.
 var _earth: Array[PackedFloat32Array] = []
 var _earth_grid: Dictionary = {}
+## Речка рельефа (tools/mall_study_relief.py): вершины русла, расстояние вдоль него, уровни воды, крутизна
+## берегов по отрезкам (x — слева, y — справа от хода), броды (x — где вдоль русла, y — полудлина),
+## полоса трассы на насыпи, под которой речка в трубе.
+var _river: PackedVector2Array = PackedVector2Array()
+var _river_s: PackedFloat32Array = PackedFloat32Array()
+var _river_water: PackedFloat32Array = PackedFloat32Array()
+var _river_banks: PackedVector2Array = PackedVector2Array()
+var _river_fords: PackedVector2Array = PackedVector2Array()
+var _river_grid: Dictionary = {}
+var _river_dry: Vector2 = Vector2.ZERO
+var _river_bed_half: float = 3.0
+var _river_depth: float = 1.1
 
 
 func _ready() -> void:
@@ -68,6 +82,22 @@ func _load_earth() -> void:
 	for pit: Array in earth.get("pits", []):
 		_add_earth(PackedFloat32Array([2.0, pit[0], pit[1], pit[2], pit[3], deg_to_rad(float(pit[4])), pit[5], pit[6], pit[7], pit[8]]),
 			Vector2(float(pit[0]), float(pit[1])), Vector2(float(pit[2]), float(pit[3])).length() * 0.5 + 1.0)
+	# горки и утёсы рельефа
+	var relief: Dictionary = plan.get("relief", {}) as Dictionary
+	for hill: Array in relief.get("hills", []):
+		_add_earth(PackedFloat32Array([4.0, hill[0], hill[1], hill[2], hill[3]]), Vector2(float(hill[0]), float(hill[1])), float(hill[2]))
+	for cliff: Dictionary in relief.get("cliffs", []):
+		var edge: PackedVector2Array = poly(cliff.points)
+		var entry: PackedFloat32Array = PackedFloat32Array([5.0, float(cliff.height), float(cliff.fall), float(cliff.side), float(edge.size())])
+		var reach: Rect2 = Rect2(edge[0], Vector2.ZERO)
+		for q: Vector2 in edge:
+			entry.append(q.x)
+			entry.append(q.y)
+			reach = reach.expand(q)
+		var cliff_index: int = _earth.size()
+		_earth.append(entry)
+		_grid_add(cliff_index, reach.grow(float(cliff.fall) + 2.0))
+	_load_river(relief.get("river", {}) as Dictionary)
 	for ditch: Dictionary in earth.get("ditches", []):
 		var pts: PackedVector2Array = poly(ditch.points)
 		var half: float = float(ditch.width) * 0.5
@@ -95,6 +125,120 @@ func _grid_add(index: int, box: Rect2) -> void:
 			var list: PackedInt32Array = _earth_grid[key]
 			list.append(index)
 			_earth_grid[key] = list
+
+
+## Утёс: [5, высота, fall, сторона, число точек, x0, z0, x1, z1…]; сторона +1 — верх слева от хода кромки.
+func _cliff_offset(e: PackedFloat32Array, p: Vector2) -> float:
+	var count: int = int(e[4])
+	var best: float = INF
+	var signed: float = 0.0
+	var along: float = 0.0
+	var walked: float = 0.0
+	for j: int in range(count - 1):
+		var a: Vector2 = Vector2(e[5 + j * 2], e[6 + j * 2])
+		var b: Vector2 = Vector2(e[7 + j * 2], e[8 + j * 2])
+		var ab: Vector2 = b - a
+		var t: float = clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var d: float = p.distance_to(a + ab * t)
+		if d < best:
+			best = d
+			signed = d if ab.cross(p - a) * e[3] > 0.0 else -d
+			along = walked + ab.length() * t
+		walked += ab.length()
+	var taper: float = smoothstep(0.0, 15.0, along) * smoothstep(0.0, 15.0, walked - along)
+	return e[1] * taper * smoothstep(-0.8, 0.8, signed) * (1.0 - smoothstep(e[2] * 0.35, e[2], signed))
+
+
+func _load_river(river: Dictionary) -> void:
+	_river = PackedVector2Array()
+	_river_s = PackedFloat32Array()
+	_river_water = PackedFloat32Array()
+	_river_banks = PackedVector2Array()
+	_river_fords = PackedVector2Array()
+	_river_grid.clear()
+	if river.is_empty():
+		return
+	_river = poly(river.points)
+	var walked: float = 0.0
+	for i: int in range(_river.size()):
+		if i > 0:
+			walked += _river[i - 1].distance_to(_river[i])
+		_river_s.append(walked)
+		_river_water.append(float((river.water as Array)[i]))
+	for bank: Array in river.banks:
+		_river_banks.append(Vector2(float(bank[0]), float(bank[1])))
+	for ford: Dictionary in river.fords:
+		_river_fords.append(Vector2(float(ford.s), float(ford.half)))
+	var dry: Array = river.dry_z
+	_river_dry = Vector2(float(dry[0]), float(dry[1]))
+	_river_bed_half = float(river.bed_half)
+	_river_depth = float(river.depth)
+	for i: int in range(_river.size() - 1):
+		var box: Rect2 = Rect2(_river[i], Vector2.ZERO).expand(_river[i + 1]).grow(RIVER_REACH)
+		for cx: int in range(floori(box.position.x / EARTH_CELL), floori(box.end.x / EARTH_CELL) + 1):
+			for cz: int in range(floori(box.position.y / EARTH_CELL), floori(box.end.y / EARTH_CELL) + 1):
+				var key: Vector2i = Vector2i(cx, cz)
+				var list: PackedInt32Array = _river_grid.get(key, PackedInt32Array())
+				list.append(i)
+				_river_grid[key] = list
+
+
+## Ближайшее место русла: [расстояние, индекс отрезка, доля по отрезку, сторона (0 — слева, 1 — справа)].
+func _river_near(p: Vector2) -> Array:
+	var key: Vector2i = Vector2i(floori(p.x / EARTH_CELL), floori(p.y / EARTH_CELL))
+	if not _river_grid.has(key):
+		return [INF, -1, 0.0, 0]
+	var best: Array = [INF, -1, 0.0, 0]
+	for i: int in _river_grid[key] as PackedInt32Array:
+		var a: Vector2 = _river[i]
+		var ab: Vector2 = _river[i + 1] - a
+		var t: float = clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var d: float = p.distance_to(a + ab * t)
+		if d < float(best[0]):
+			best = [d, i, t, 0 if ab.cross(p - a) > 0.0 else 1]
+	return best
+
+
+## Сколько от точки до середины русла (для посадки деревьев и проверок); далеко — INF.
+func river_distance(p: Vector2) -> float:
+	return float(_river_near(p)[0]) if not _river_grid.is_empty() else INF
+
+
+## Русло: ровное дно, берега с крутизной своей стороны; на броде дно поднято и берега пологие.
+## Под трассой на насыпи речка в трубе — землю там не режет.
+func _river_carve(x: float, z: float, h: float) -> float:
+	if z > _river_dry.x and z < _river_dry.y:
+		return h
+	var near: Array = _river_near(Vector2(x, z))
+	var d: float = near[0]
+	if d > RIVER_REACH:
+		return h
+	var i: int = near[1]
+	var t: float = near[2]
+	var water: float = lerpf(_river_water[i], _river_water[i + 1], t)
+	var along: float = lerpf(_river_s[i], _river_s[i + 1], t)
+	var k: float = _river_banks[i].x if int(near[3]) == 0 else _river_banks[i].y
+	var bed: float = water - _river_depth
+	for ford: Vector2 in _river_fords:
+		var w: float = 1.0 - smoothstep(ford.y, ford.y + 4.0, absf(along - ford.x))
+		bed = lerpf(bed, water - 0.35, w)
+		k = lerpf(k, 0.2, w)
+	return minf(h, bed + maxf(0.0, d - _river_bed_half) * k)
+
+
+## Уровень воды и полуширина зеркала в точке вдоль русла (s) по сторонам.
+func river_water_at(i: int, t: float) -> Vector3:
+	var water: float = lerpf(_river_water[i], _river_water[i + 1], t)
+	var along: float = lerpf(_river_s[i], _river_s[i + 1], t)
+	var depth: float = _river_depth
+	var kl: float = _river_banks[i].x
+	var kr: float = _river_banks[i].y
+	for ford: Vector2 in _river_fords:
+		var w: float = 1.0 - smoothstep(ford.y, ford.y + 4.0, absf(along - ford.x))
+		depth = lerpf(depth, 0.35, w)
+		kl = lerpf(kl, 0.2, w)
+		kr = lerpf(kr, 0.2, w)
+	return Vector3(water, _river_bed_half + depth / kl, _river_bed_half + depth / kr)
 
 
 ## Поправка высоты от земляных работ в точке.
@@ -130,6 +274,14 @@ func _earth_offset(x: float, z: float) -> float:
 					var k: float = minf(minf(smoothstep(0.0, slope, d.x + hx), smoothstep(0.0, east, hx - d.x)),
 						minf(smoothstep(0.0, slope, d.y + hz), smoothstep(0.0, slope, hz - d.y)))
 					dh -= e[6] * k
+			4:
+				# горка: приподнятый косинус
+				var q: float = Vector2(x - e[1], z - e[2]).length() / e[3]
+				if q < 1.0:
+					dh += e[4] * 0.5 * (1.0 + cos(PI * q))
+			5:
+				# утёс: уступ по кромке, верх сходит к земле за fall; концы кромки сходят на нет — обойти можно
+				dh += _cliff_offset(e, Vector2(x, z))
 			3:
 				# кювет: косинус поперёк отрезка, концы скруглены
 				var p: Vector2 = Vector2(x, z)
@@ -223,6 +375,8 @@ func ground(x: float, z: float) -> float:
 		h -= float(pond.depth) * (1.0 - q)
 	if not _earth_grid.is_empty():
 		h += _earth_offset(x, z)
+	if not _river_grid.is_empty():
+		h = _river_carve(x, z, h)
 	return h
 
 
@@ -257,6 +411,7 @@ func rebuild() -> void:
 	_highway(g)
 	_bridges(g)
 	_pond_water(g)
+	_river_features(g)
 	_trees(g)
 	_markers(g)
 	_boundary(g)
@@ -268,7 +423,8 @@ func _palette() -> Dictionary:
 	var extra: Dictionary = {
 		"grass": Color("6a7350"), "plaza": Color("a49c86"), "parking": Color("5f625d"), "pit": Color("6d6b63"),
 		"car_a": Color("6f7880"), "car_b": Color("8b8a83"), "car_c": Color("5d5853"), "car_d": Color("8d7a63"),
-		"spawn": Color("3d6fb5"), "exit": Color("3c9b5a"), "exit_cond": Color("c48a2c"), "danger": Color("a8473d")}
+		"spawn": Color("3d6fb5"), "exit": Color("3c9b5a"), "exit_cond": Color("c48a2c"), "danger": Color("a8473d"),
+		"rock": Color("6f6c63"), "timber": Color("6e5a43")}
 	for key: String in extra:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = extra[key]
@@ -756,13 +912,13 @@ func _trees(g: RefCounted) -> void:
 	# лесополосы по северу и северо-востоку; под ЛЭП наполнения — просека
 	var power: PackedVector2Array = poly(((plan.get("filler", {}) as Dictionary).get("lines", {}) as Dictionary).get("power", {}).get("towers", []))
 	var attempts: int = 0
-	while spots.size() < 900 and attempts < 20000:
+	while spots.size() < 1900 and attempts < 45000:
 		attempts += 1
 		var p: Vector2 = Vector2(rng.randf_range(float(bounds[0]), float(bounds[2])), rng.randf_range(float(bounds[1]), float(bounds[3])))
 		var inside: bool = false
 		for f: PackedVector2Array in forests:
 			inside = inside or Geometry2D.is_point_in_polygon(p, f)
-		if inside and _clear_of_roads(p, 3.0) and (power.size() < 2 or line_distance(p, power) > 12.0):
+		if inside and _clear_of_roads(p, 3.0) and (power.size() < 2 or line_distance(p, power) > 12.0) and _clear_for_tree(p):
 			spots.append(p)
 	# сквер: деревья между дорожками
 	var sq: Dictionary = plan.square
@@ -791,6 +947,27 @@ func _trees(g: RefCounted) -> void:
 		g.body.add_child(cs)
 	_multimesh("TreeTrunks", trunks, false, g.palette.bark)
 	_multimesh("TreeCrowns", crowns, true, g.palette.foliage)
+
+
+## Дереву не место у воды и на откосе русла, на кромке утёса, на трассе, на тропах проверки и у точек
+## появления и выходов.
+func _clear_for_tree(p: Vector2) -> bool:
+	if river_distance(p) < 11.0 or (p.y > 298.0 and p.y < 338.0):
+		return false
+	for route: Dictionary in plan.probe_routes:
+		if line_distance(p, poly(route.points)) < 4.0:
+			return false
+	for list: String in ["spawns", "exits"]:
+		for point: Dictionary in plan.get(list, []):
+			if p.distance_to(Vector2(float(point.at[0]), float(point.at[1]))) < 8.0:
+				return false
+	for loc: Dictionary in plan.locations:
+		if p.distance_to(Vector2(float(loc.spawn[0]), float(loc.spawn[1]))) < 8.0:
+			return false
+	for cliff: Dictionary in (plan.get("relief", {}) as Dictionary).get("cliffs", []):
+		if line_distance(p, poly(cliff.points)) < 3.0:
+			return false
+	return true
 
 
 func _clear_of_roads(p: Vector2, margin: float) -> bool:
@@ -883,3 +1060,105 @@ func snap_buildings() -> void:
 			var p: Vector3 = b.global_transform * Vector3(k.x * fp.x, 0.0, k.y * fp.y)
 			low = minf(low, ground(p.x, p.z))
 		b.global_position.y = low
+
+
+# ---------------------------------------------------------------- речка и утёсы
+
+## Зеркало воды по руслу, мосты (дорожный у КПП и пешеходный у АЗС), трубы под трассой, камни утёсов.
+func _river_features(g: RefCounted) -> void:
+	var relief: Dictionary = plan.get("relief", {}) as Dictionary
+	var river: Dictionary = relief.get("river", {}) as Dictionary
+	if not river.is_empty():
+		for i: int in range(_river.size() - 1):
+			var a: Vector2 = _river[i]
+			var b: Vector2 = _river[i + 1]
+			var dir: Vector2 = (b - a).normalized()
+			var left: Vector2 = Vector2(-dir.y, dir.x)
+			var count: int = maxi(1, ceili(a.distance_to(b) / 3.0))
+			var previous: Array = []
+			for k: int in range(count + 1):
+				var t: float = float(k) / float(count)
+				var c: Vector2 = a.lerp(b, t)
+				var w: Vector3 = river_water_at(i, t)
+				var dry: bool = c.y > _river_dry.x - 1.0 and c.y < _river_dry.y + 1.0
+				var edge: Array = [Vector3(c.x + left.x * w.y, w.x, c.y + left.y * w.y), Vector3(c.x - left.x * w.z, w.x, c.y - left.y * w.z), dry]
+				if not previous.is_empty() and not bool(previous[2]) and not dry:
+					g.quad(previous[0] as Vector3, edge[0] as Vector3, edge[1] as Vector3, previous[1] as Vector3, "water")
+				previous = edge
+		for bridge: Dictionary in river.bridges:
+			_bridge(g, bridge)
+		for culvert: Dictionary in river.culverts:
+			var at: Array = culvert.at
+			var yaw: float = deg_to_rad(float(culvert.yaw))
+			var base: float = float((plan.highway as Dictionary).y)
+			# оголовок трубы в откосе насыпи: бетонная рамка и тёмное отверстие
+			g.box(Vector3(float(at[0]), base - 1.4, float(at[1])), Vector3(6.0, 3.0, 1.0), "concrete", true, yaw)
+			g.box(Vector3(float(at[0]), base - 1.9, float(at[1])), Vector3(3.2, 2.0, 1.06), "dark", false, yaw)
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 7117
+	for cliff: Dictionary in relief.get("cliffs", []):
+		_cliff_rocks(g, cliff, rng)
+
+
+## Мост поперёк русла: настил вровень с берегами, перила, опоры; дорожный — на ширину дороги.
+func _bridge(g: RefCounted, bridge: Dictionary) -> void:
+	var at: Vector2 = Vector2(float(bridge.at[0]), float(bridge.at[1]))
+	# вдоль русла (yaw — как у наборов: локальная Z смотрит по ходу), мост — поперёк, across — влево от хода
+	var along: Vector2 = Vector2(sin(deg_to_rad(float(bridge.yaw))), cos(deg_to_rad(float(bridge.yaw))))
+	var across: Vector2 = Vector2(-along.y, along.x)
+	var left: float = float(bridge.get("half_left", float(bridge.length) * 0.5))
+	var right: float = float(bridge.get("half_right", float(bridge.length) * 0.5))
+	var center: Vector2 = at + across * (left - right) * 0.5
+	var length_m: float = left + right
+	var width: float = float(bridge.width)
+	var deck: float = float(bridge.deck)
+	var yaw: float = -atan2(across.y, across.x)
+	var road: bool = String(bridge.kind) == "road"
+	g.box(Vector3(center.x, deck - 0.25, center.y), Vector3(length_m, 0.5, width), "concrete" if road else "timber", true, yaw)
+	for side: float in [-1.0, 1.0]:
+		var rail: Vector2 = center + along * side * (width * 0.5 - 0.1)
+		g.box(Vector3(rail.x, deck + 0.55, rail.y), Vector3(length_m, 0.1, 0.1), "steel", true, yaw)
+		for k: int in range(int(length_m / 2.5) + 1):
+			var post: Vector2 = rail + across * (float(k) * 2.5 - length_m * 0.5)
+			g.box(Vector3(post.x, deck + 0.3, post.y), Vector3(0.08, 0.6, 0.08), "steel", false)
+	# опоры у кромок русла
+	for side: float in [-1.0, 1.0]:
+		var pier: Vector2 = at + across * side * (_river_bed_half + 1.0)
+		var foot: float = ground(pier.x, pier.y)
+		g.box(Vector3(pier.x, (foot + deck - 0.5) * 0.5, pier.y), Vector3(0.8, maxf(0.2, deck - 0.5 - foot), width * 0.8), "concrete", true, yaw)
+
+
+## Камни по лицу утёса и валуны у подножия: серые глыбы, у подножия — укрытие.
+func _cliff_rocks(g: RefCounted, cliff: Dictionary, rng: RandomNumberGenerator) -> void:
+	var edge: PackedVector2Array = poly(cliff.points)
+	var height: float = float(cliff.height)
+	var side: float = float(cliff.side)
+	var total: float = 0.0
+	for i: int in range(edge.size() - 1):
+		total += edge[i].distance_to(edge[i + 1])
+	var walked: float = 0.0
+	for i: int in range(edge.size() - 1):
+		var a: Vector2 = edge[i]
+		var b: Vector2 = edge[i + 1]
+		var dir: Vector2 = (b - a).normalized()
+		# к низу утёса — сторона, противоположная верху
+		var down: Vector2 = Vector2(dir.y, -dir.x) * side
+		var seg: float = a.distance_to(b)
+		var s: float = 0.0
+		while s < seg:
+			var along: float = walked + s
+			var taper: float = smoothstep(0.0, 15.0, along) * smoothstep(0.0, 15.0, total - along)
+			var p: Vector2 = a + dir * s + down * rng.randf_range(0.2, 0.9)
+			var tall: float = height * taper * rng.randf_range(0.55, 1.0)
+			if tall > 0.8:
+				var low: float = ground(p.x + down.x * 2.0, p.y + down.y * 2.0)
+				g.box(Vector3(p.x, low + tall * 0.5 - 0.3, p.y), Vector3(rng.randf_range(1.6, 3.6), tall, rng.randf_range(1.2, 2.4)), "rock", true,
+					-atan2(dir.y, dir.x) + rng.randf_range(-0.35, 0.35))
+			if rng.randf() < 0.35 and taper > 0.3:
+				var boulder: Vector2 = a + dir * s + down * rng.randf_range(3.0, 7.0)
+				var size: float = rng.randf_range(0.9, 1.7)
+				g.box(Vector3(boulder.x, ground(boulder.x, boulder.y) + size * 0.4, boulder.y), Vector3(size * 1.3, size, size * 1.1), "rock", true,
+					rng.randf_range(0.0, TAU))
+				cover_spots.append(boulder)
+			s += rng.randf_range(2.2, 3.4)
+		walked += seg
