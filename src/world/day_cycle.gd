@@ -3,8 +3,9 @@ extends Node
 ## Смена суток в рейде: часы идут (Balance.DAY_CYCLE.hour_sec — секунд на игровой час), солнце и
 ## Луна ходят по небу как в жизни (широта, день года — Balance.DAY_CYCLE; север карты — −Z, восток —
 ## +X). По высоте солнца плавно смешиваются «день / закат / ночь»: сила и цвет света, рассеянный
-## свет, выдержка, туман, свечение, небо (DayCycleSky — панорамы дня и заката под погоду, ночью —
-## звёзды и Луна). Фаза (RaidConditions.current.time) меняется сама — по ней фонари, зрение ИИ.
+## свет, выдержка, туман, свечение, небо (day_cycle_sky — панорамы дня и заката под погоду, или
+## расчётное AtmosphereSky — Settings.sky_mode; ночью — звёзды и Луна). Фаза (RaidConditions.current.time)
+## меняется сама — по ней фонари, зрение ИИ.
 ## Начало — час старта выбранного времени (Balance.RAID_TIME.start_hour). Время ведёт хост и
 ## раз в sync_sec рассылает. Создаёт RaidAtmosphere.
 
@@ -19,6 +20,8 @@ var view: float = 100.0
 
 var _atm: RaidAtmosphere
 var _sky: ShaderMaterial
+## Небо расчётное (AtmosphereSky), а не из панорам.
+var _calc: bool = false
 var _profiles: Dictionary = {}
 var _conf: Dictionary = {}
 var _phase: String = ""
@@ -184,23 +187,29 @@ func hdri_conf(k: String) -> Dictionary:
 
 # ---------------------------------------------------------------- небо
 
+## Небо: из панорам (как сейчас) или расчётное (Settings.sky_mode = "calc", AtmosphereSky) — ночь у
+## обоих одна. Свет на земле (профили выше) от режима не зависит.
 func _build_sky() -> void:
 	_sky = null
+	_calc = false
 	var day := hdri_conf("day")
 	var dusk := hdri_conf("dusk")
 	_conf = {"day": day, "dusk": dusk}
 	if day.is_empty() or dusk.is_empty():
 		return
-	var m := ShaderMaterial.new()
-	m.shader = load("res://src/world/day_cycle_sky.gdshader")
-	# погода (RaidWeather._set_overcast) небо из панорам не трогает
-	m.set_meta("hdri", true)
-	m.set_shader_parameter("sky_a", load(String(day.a)))
-	m.set_shader_parameter("sky_b", load(String(dusk.a)))
-	m.set_shader_parameter("has_b", true)
-	m.set_shader_parameter("clamp_max", float(day.get("clamp_max", 40.0)))
-	var w: Dictionary = Balance.HDRI_WEATHER.get(String(RaidConditions.current.weather), Balance.HDRI_WEATHER["clear"])
-	m.set_shader_parameter("tint", w.tint)
+	var m: ShaderMaterial = AtmosphereSky.material() if Settings.sky_mode == "calc" else null
+	_calc = m != null
+	if m == null:
+		m = ShaderMaterial.new()
+		m.shader = load("res://src/world/day_cycle_sky.gdshader")
+		# погода (RaidWeather._set_overcast) небо из панорам не трогает
+		m.set_meta("hdri", true)
+		m.set_shader_parameter("sky_a", load(String(day.a)))
+		m.set_shader_parameter("sky_b", load(String(dusk.a)))
+		m.set_shader_parameter("has_b", true)
+		m.set_shader_parameter("clamp_max", float(day.get("clamp_max", 40.0)))
+		var w: Dictionary = Balance.HDRI_WEATHER.get(String(RaidConditions.current.weather), Balance.HDRI_WEATHER["clear"])
+		m.set_shader_parameter("tint", w.tint)
 	var night := RaidAtmosphere.night_sky_material()
 	for pn in ["stars_tex", "has_stars_tex", "stars_energy", "stars_floor", "moon_tex", "has_moon_tex", "moon_size",
 			"moon_energy", "halo_strength", "halo_size"]:
@@ -325,6 +334,12 @@ func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 
 func _apply_sky(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 	var to_sun := dir_from(sa.x, sa.y)
+	_sky.set_shader_parameter("night_k", float(w.night))
+	_sky.set_shader_parameter("stars_rotation", hour * 15.0)
+	_sky.set_shader_parameter("moon_dir", dir_from(ma.x, ma.y))
+	if _calc:
+		AtmosphereSky.update(_sky, to_sun, sa.x, String(RaidConditions.current.weather))
+		return
 	var sun_yaw := rad_to_deg(atan2(to_sun.x, -to_sun.z))
 	for pair in [["day", "rotation_a"], ["dusk", "rotation_b"]]:
 		var conf: Dictionary = _conf[pair[0]]
@@ -345,6 +360,3 @@ func _apply_sky(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 	# панорамы гаснут вместе с солнцем, ночь проступает
 	var dc: Dictionary = Balance.DAY_CYCLE
 	_sky.set_shader_parameter("hdri_k", smoothstep(float(dc.sky_off), float(dc.sky_on), sa.x))
-	_sky.set_shader_parameter("night_k", float(w.night))
-	_sky.set_shader_parameter("stars_rotation", hour * 15.0)
-	_sky.set_shader_parameter("moon_dir", dir_from(ma.x, ma.y))

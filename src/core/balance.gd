@@ -829,6 +829,22 @@ const HDRI_WEATHER := {
 	"fog": {"overcast": 0.7, "exposure": 0.8, "tint": Color(0.95, 0.97, 1.0), "sun_k": 0.45},
 	"rain": {"overcast": 1.0, "exposure": 0.5, "tint": Color(0.8, 0.84, 0.9), "sun_k": 0.0},
 }
+## Расчётное небо — второй режим неба смены суток (DayCycle; Settings.sky_mode = "calc", переключатель —
+## Esc → Читы → Мир): атмосфера считается по положению солнца (atmosphere_sky.gdshader, таблицы —
+## data/sky_atmosphere.json). Погода: mie — во сколько раз больше дымки (белёсый горизонт, ореол
+## солнца), overcast — доля сплошных туч (пасмурное небо CIE: у горизонта втрое темнее зенита).
+## Яркость по высоте солнца сведена к прежнему небу из панорам — свет на земле тот же; ниже match_floor
+## усиление растёт на twilight_adapt порядка за градус (привыкание к сумеркам). amb_match — доля
+## поправки оттенка рассеянного света и отражений к прежнему небу (0 — синева чистого неба как есть).
+## Видимое небо при низком солнце темнее карты отражений (AtmosphereSky.view_k): усиление
+## относительно высоты солнца view_ref, ° — в степени view_dim, не ниже view_min (0 — как карта отражений).
+## Солнце — диск sun_size, °, не ярче sun_clamp. Правка погоды, match_floor, twilight_adapt или
+## cal_from/cal_to — перезапустить python -X utf8 tools/gen_sky_atmosphere.py.
+const SKY_CALC := {"sun_size": 0.53, "sun_clamp": 40.0, "amb_match": 1.0, "ground_blend": 3.0,
+	"view_ref": 30, "view_dim": 0.5, "view_min": 0.25,
+	"match_floor": -7.0, "twilight_adapt": 0.12, "cal_from": -18, "cal_to": 70,
+	"weather": {"clear": {"mie": 1.0, "overcast": 0.0}, "heat": {"mie": 1.8, "overcast": 0.0},
+		"fog": {"mie": 4.0, "overcast": 0.5}, "rain": {"mie": 2.0, "overcast": 1.0}}}
 ## Туман по расстоянию (карты, у которых в окружении fog_mode = depth): вблизи чисто, дальше — дымка,
 ## плотнее к горизонту (кривая). begin/end — метры, density — сколько дымки на end (0..1), curve > 1 —
 ## дольше прозрачно, потом быстрее густеет. Вместо «дыма одной плотности» — воздушная перспектива.
