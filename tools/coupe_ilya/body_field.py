@@ -116,7 +116,7 @@ def build_profiles(layers: dict) -> dict:
         r[ok] = ndimage.gaussian_filter1d(a[ok], sigma, mode="nearest")
         return r
 
-    z_low_top, half_amg = smooth(z_low_top, 3.0), smooth(half_amg, 8.0)
+    z_low_top, half_amg = smooth(z_low_top, 3.0), smooth(half_amg, 18.0)
     return {"ys": ys, "zs": zs, "top": top, "bot": bot, "z_low_top": z_low_top, "in_gh": in_gh,
             "half": half_amg, "side": side, "plan": plan, "outlines": ol}
 

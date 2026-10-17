@@ -52,10 +52,10 @@ FLARE_R0, FLARE_R1 = 0.40, 0.68   # от кромки арки до слияни
 # Линия плеча — острое ребро вдоль борта (Y, Z): спереди от фары, через дверь, над задним колесом
 CREASE = [(-2.10, 0.785), (-1.745, 0.817), (-0.96, 0.860), (-0.40, 0.868), (0.35, 0.900), (0.84, 0.925),
           (1.50, 0.935), (2.00, 0.925)]
-CREASE_AMP, CREASE_W = 0.006, 0.045
+CREASE_AMP, CREASE_W = 0.006, 0.050
 # Нижняя линия двери — мягкая впадина
 DOOR_LINE = [(-1.00, 0.410), (0.12, 0.449), (0.90, 0.480)]
-DOOR_AMP, DOOR_W = -0.004, 0.06
+DOOR_AMP, DOOR_W = -0.004, 0.07
 # Выпуклости капота: центр по X, полуширина, высота; вдоль Y — от лобового к передней кромке
 HOOD_DOMES = [(0.145, 0.120, 0.014)]
 HOOD_DOME_Y = (-1.98, -0.98)
@@ -123,7 +123,9 @@ class BodyField:
         # Профиль носа и кормы к углам уходит назад (по плану), а не обрезается планом
         w_f = smoothstep(-1.55, -2.05, Y)
         w_r = smoothstep(1.75, 2.20, Y)
-        yq = Y - np.interp(ax, *self.sw_f) * w_f + np.interp(ax, *self.sw_r) * w_r
+        axf = np.minimum(ax, self.sw_f[0][-1])
+        axr = np.minimum(ax, self.sw_r[0][-1])
+        yq = Y - cspline(*self.sw_f, axf) * w_f + cspline(*self.sw_r, axr) * w_r
         pv, pk = self.plan.at(Y)
         crown = CROWN_HOOD * np.clip(ax / np.maximum(pv, 0.05), 0, 1.2) ** 2
         tv, tk = self.t_low.at(yq)
@@ -135,7 +137,7 @@ class BodyField:
             q = np.clip(1 - ((ax - xc) / hw) ** 2, 0, None)
             tv = tv + amp * q * q * along
         d_side = smax((Z + crown - tv) * tk, (bv - Z) * bk, R_NOSE)
-        g = np.interp(Z, [p[0] for p in G_SECTION], [p[1] for p in G_SECTION])
+        g = cspline([p[0] for p in G_SECTION], [p[1] for p in G_SECTION], Z)
         d_plan = (ax / g - pv) * pk * g
         # Крылья: выпуклость борта кольцом вокруг оси колеса, ниже порога — нет
         for yc, amp in FLARES:
@@ -143,16 +145,18 @@ class BodyField:
             d_plan = d_plan - amp * (1.0 - smoothstep(FLARE_R0, FLARE_R1, r)) * smoothstep(0.16, 0.30, Z)
         # Линия плеча (острое ребро) и нижняя линия двери (впадина)
         on = smoothstep(CREASE[0][0], CREASE[0][0] + 0.15, Y) * (1 - smoothstep(CREASE[-1][0] - 0.15, CREASE[-1][0], Y))
-        d_plan = d_plan - CREASE_AMP * np.clip(1 - np.abs(Z - pchip(self.crease_x, self.crease_y, Y)) / CREASE_W, 0, None) * on
-        door_z = np.interp(Y, [p[0] for p in DOOR_LINE], [p[1] for p in DOOR_LINE])
+        # Гребень со скруглённой вершиной (smoothstep), а не «домиком»: острый излом на сетке читается как ребро
+        dz = np.abs(Z - cspline(self.crease_x, self.crease_y, Y))
+        d_plan = d_plan - CREASE_AMP * (1 - smoothstep(0.0, CREASE_W, dz)) * on
+        door_z = cspline([p[0] for p in DOOR_LINE], [p[1] for p in DOOR_LINE], Y)
         on_d = smoothstep(-1.05, -0.85, Y) * (1 - smoothstep(0.80, 0.98, Y))
-        d_plan = d_plan - DOOR_AMP * np.clip(1 - np.abs(Z - door_z) / DOOR_W, 0, None) * on_d
+        d_plan = d_plan - DOOR_AMP * (1 - smoothstep(0.0, DOOR_W, np.abs(Z - door_z))) * on_d
         return smax(d_side, d_plan, R_SHOULDER)
 
     def cabin(self, X: np.ndarray, Y: np.ndarray, Z: np.ndarray) -> np.ndarray:
         ax = np.abs(X)
         zlt = np.interp(Y, self.ys, self.zlt_e)
-        gh_half = np.interp(Y, [p[0] for p in GH_HALF], [p[1] for p in GH_HALF])
+        gh_half = cspline([p[0] for p in GH_HALF], [p[1] for p in GH_HALF], Y)
         gv, gk = self.t_gh.at(Y)
         d_gtop = (Z + CROWN_ROOF * (ax / 0.60) ** 2 - gv) * gk
         d_gside = (ax - (gh_half - GH_TUMBLE * np.clip(Z - zlt, 0, None))) * self.kt
@@ -171,6 +175,37 @@ class BodyField:
                 arch = smax(d_c, WELL_X - np.abs(X), 0.02)
                 body = smax(body, -arch, R_ARCH)
         return body
+
+
+def cspline(xk, yk, x):
+    """Естественный кубический сплайн через узлы (непрерывна вторая производная).
+
+    Ломаная (np.interp) даёт излом поверхности на каждом узле — вдоль кузова это видно как ребро.
+    За краями — продолжение по касательной.
+    """
+    xk = np.asarray(xk, dtype=float)
+    yk = np.asarray(yk, dtype=float)
+    n = len(xk)
+    h = np.diff(xk)
+    A = np.zeros((n, n))
+    r = np.zeros(n)
+    A[0, 0] = A[-1, -1] = 1.0
+    for i in range(1, n - 1):
+        A[i, i - 1] = h[i - 1]
+        A[i, i] = 2 * (h[i - 1] + h[i])
+        A[i, i + 1] = h[i]
+        r[i] = 3 * ((yk[i + 1] - yk[i]) / h[i] - (yk[i] - yk[i - 1]) / h[i - 1])
+    c = np.linalg.solve(A, r)
+    b = (yk[1:] - yk[:-1]) / h - h * (2 * c[:-1] + c[1:]) / 3
+    d = (c[1:] - c[:-1]) / (3 * h)
+    x = np.asarray(x, dtype=float)
+    i = np.clip(np.searchsorted(xk, x) - 1, 0, n - 2)
+    t = np.clip(x - xk[i], 0.0, h[i])
+    y = yk[i] + b[i] * t + c[i] * t ** 2 + d[i] * t ** 3
+    slope0 = b[0]
+    slope1 = b[-1] + 2 * c[-2] * h[-1] + 3 * d[-1] * h[-1] ** 2
+    y = np.where(x < xk[0], yk[0] + slope0 * (x - xk[0]), y)
+    return np.where(x > xk[-1], yk[-1] + slope1 * (x - xk[-1]), y)
 
 
 def pchip(xk: np.ndarray, yk: np.ndarray, x: np.ndarray) -> np.ndarray:

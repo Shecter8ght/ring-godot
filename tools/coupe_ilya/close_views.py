@@ -36,6 +36,12 @@ for spec in argv[3:]:
         _, obn, ax, val = spec.split(":")
         ob = bpy.data.objects[obn]
         ob.rotation_euler["xyz".index(ax)] = float(val)
+    elif kind == "matcap":
+        # Проверка гладкости: отражение полос (зебра) — излом поверхности виден как излом полосы
+        sh.light = "MATCAP"
+        sh.studio_light = spec.split(":", 1)[1]
+        sh.color_type = "SINGLE"
+        sh.single_color = (0.8, 0.8, 0.8)
     elif kind in ("show", "hide"):
         c = bpy.data.collections[spec.split(":")[1]]
         c.hide_render = kind == "hide"
