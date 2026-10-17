@@ -3,8 +3,10 @@ extends Node3D
 ## tools/godot.cmd --windowed --resolution 1600x900 res://tools/impact_gallery.tscn → docs/screens/impact_*.png
 ## Стены 3×3 (impact_gallery_*, impact_<вид>_close), ряд грунтов — трава кочками, земля, грязь, гравий:
 ## выстрелы из глаза под углом, как в игре (impact_ground_*), стальной лист на полу — вспышка, веер
-## искр, искры скачут по полу (impact_metal_*), грунты крупно (impact_<вид>_air / _close).
-## IMPACT_ONLY=walls,ground,metal,close — выборочно.
+## искр, искры скачут по полу (impact_metal_*), грунты крупно (impact_<вид>_air / _close), стёкла —
+## одна пуля, три пули, закалённое (сетка кубиков, осыпается волной), ослабленное (трещины ползут,
+## рассыпается на куски, «зубья» в раме) — impact_glass_*.
+## IMPACT_ONLY=walls,ground,metal,close,glass — выборочно.
 
 const SURFACES: Array[String] = [
 	"concrete", "tile", "asphalt",
@@ -29,6 +31,7 @@ const COLORS := {
 }
 ## Ряд грунтов и стальной лист — в стороне от стен, чтобы следы не мешали друг другу.
 const GROUND_AT := Vector3(30.0, 0.0, 0.0)
+const GLASS_AT := Vector3(30.0, 0.0, -9.0)
 const FLOOR_Y: float = -0.3
 
 var _only: PackedStringArray = PackedStringArray()
@@ -55,6 +58,8 @@ func _ready() -> void:
 	if _want("close"):
 		for kind: String in GROUNDS:
 			await _ground_close(kind, grounds[kind])
+	if _want("glass"):
+		await _glass()
 	print("impact_gallery: декалей %d" % _count_decals())
 	get_tree().quit(0)
 
@@ -89,6 +94,7 @@ func _walls() -> void:
 		"floor_y": glass_pos.y - 0.9,
 		"sill": Vector3(1.65, 0.12, 0.18),
 		"broken": false,
+		"tempered": false,
 	}])
 	add_child(glass)
 	_label("glass", glass_pos)
@@ -190,6 +196,86 @@ func _capture(fire: Callable, seconds: float, file_name: String) -> void:
 		await get_tree().process_frame
 	_save(file_name)
 	await get_tree().process_frame
+
+
+## Стёкла перед стеной: обычное — одна пуля и три пули, закалённое, ослабленное до распада.
+func _glass() -> void:
+	var base: Vector3 = GLASS_AT
+	_box("concrete", base + Vector3(0.0, 1.2, -2.0), Vector3(9.0, 3.0, 0.3), "concrete")
+	var specs: Array = []
+	var size := Vector2(1.4, 2.1)
+	var sill := Vector3(1.5, 0.12, 0.16)
+	for index: int in range(4):
+		var center: Vector3 = base + Vector3((float(index) - 1.5) * 1.8, FLOOR_Y + sill.y + size.y * 0.5, 0.0)
+		specs.append({"xf": Transform3D(Basis.IDENTITY, center), "size": size, "floor_y": FLOOR_Y, "sill": sill,
+			"broken": false, "tempered": index == 2})
+	var glass := GlassPanes.new()
+	glass.setup(specs)
+	add_child(glass)
+	await get_tree().physics_frame
+	var body: StaticBody3D = glass.get_node("Glass")
+	var eye_y: float = FLOOR_Y + 1.6
+	# одна пуля
+	var c0: Vector3 = (specs[0].xf as Transform3D).origin
+	_camera.look_at_from_position(c0 + Vector3(0.35, eye_y - c0.y, 1.7), c0 + Vector3(0.0, 0.1, 0.0), Vector3.UP)
+	await get_tree().create_timer(0.3).timeout
+	_glass_shot(glass, body, 0, c0 + Vector3(0.12, 0.25, 0.0), 30.0)
+	await get_tree().create_timer(0.3).timeout
+	_save("impact_glass_hit.png")
+	# три пули — трещины второй и третьей упираются в первую
+	var c1: Vector3 = (specs[1].xf as Transform3D).origin
+	_camera.look_at_from_position(c1 + Vector3(-0.3, eye_y - c1.y, 1.8), c1 + Vector3(0.0, 0.1, 0.0), Vector3.UP)
+	for offset: Vector3 in [Vector3(-0.25, 0.35, 0.0), Vector3(0.2, 0.05, 0.0), Vector3(-0.05, -0.45, 0.0)]:
+		_glass_shot(glass, body, 1, c1 + offset, 12.0)
+		await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(0.3).timeout
+	_save("impact_glass_cracks.png")
+	# закалённое: сетка кубиков, осыпается волной
+	var c2: Vector3 = (specs[2].xf as Transform3D).origin
+	_camera.look_at_from_position(c2 + Vector3(0.6, eye_y - c2.y, 2.2), c2 + Vector3(0.0, -0.2, 0.0), Vector3.UP)
+	await get_tree().create_timer(0.3).timeout
+	await _capture(_glass_shot.bind(glass, body, 2, c2 + Vector3(-0.15, 0.3, 0.0), 30.0), 0.08, "impact_glass_crazed.png")
+	await _until_broken(glass, 2)
+	await _wait_frames_for(0.15)
+	_save("impact_glass_tempered_fall.png")
+	await get_tree().create_timer(2.0).timeout
+	_save("impact_glass_tempered_after.png")
+	# ослабленное: трещины ползут, потом рассыпается на куски
+	var c3: Vector3 = (specs[3].xf as Transform3D).origin
+	_camera.look_at_from_position(c3 + Vector3(-0.7, eye_y - c3.y, 2.3), c3 + Vector3(0.1, -0.25, 0.0), Vector3.UP)
+	await get_tree().create_timer(0.3).timeout
+	_glass_shot(glass, body, 3, c3 + Vector3(0.15, 0.2, 0.0), 25.0)
+	await get_tree().create_timer(0.15).timeout
+	_glass_shot(glass, body, 3, c3 + Vector3(-0.25, -0.3, 0.0), 25.0)
+	await get_tree().create_timer(0.9).timeout
+	_save("impact_glass_creep.png")
+	await _until_broken(glass, 3)
+	await _wait_frames_for(0.12)
+	_save("impact_glass_shatter.png")
+	await _wait_frames_for(0.35)
+	_save("impact_glass_fall.png")
+	await get_tree().create_timer(2.5).timeout
+	_save("impact_glass_after.png")
+	_camera.look_at_from_position(base + Vector3(0.0, eye_y + 0.4, 5.5), base + Vector3(0.0, 0.6, 0.0), Vector3.UP)
+	await get_tree().create_timer(0.3).timeout
+	_save("impact_glass_row.png")
+
+
+func _glass_shot(glass: GlassPanes, body: StaticBody3D, index: int, at: Vector3, damage: float) -> void:
+	glass.bullet(index, damage, at, Vector3.FORWARD)
+	ImpactFx.spawn_hit({"position": at, "normal": Vector3.BACK, "collider": body, "shape": index}, Vector3.FORWARD)
+
+
+func _until_broken(glass: GlassPanes, index: int) -> void:
+	var start: int = Time.get_ticks_msec()
+	while not bool(glass.panes[index].broken) and Time.get_ticks_msec() - start < 6000:
+		await get_tree().process_frame
+
+
+func _wait_frames_for(seconds: float) -> void:
+	var start: int = Time.get_ticks_usec()
+	while float(Time.get_ticks_usec() - start) / 1000000.0 < seconds:
+		await get_tree().process_frame
 
 
 ## Выстрел лучом, как у оружия: попадание туда, куда смотрит ствол (со своей нормалью).

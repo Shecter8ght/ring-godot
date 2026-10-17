@@ -127,6 +127,14 @@ func _show_hit(parent: Node, kind: String, pos: Vector3, n: Vector3, dir: Vector
 
 # ---------------------------------------------------------------- частицы
 
+## Только выброс частиц, без следа и звука (кусок стекла разбился о пол и т. п.). У каждого peer свой.
+func debris_at(kind: String, pos: Vector3, n: Vector3, dir: Vector3) -> void:
+	var parent: Node = get_tree().current_scene
+	if parent == null or not Balance.IMPACT_SURFACES.has(kind):
+		return
+	_particles(parent, kind, pos, n.normalized(), dir.normalized())
+
+
 func _particles(parent: Node, kind: String, pos: Vector3, n: Vector3, dir: Vector3) -> void:
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	if camera != null and camera.global_position.distance_to(pos) > Balance.IMPACT_MAX_DISTANCE:

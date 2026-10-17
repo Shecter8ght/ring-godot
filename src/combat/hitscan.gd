@@ -36,7 +36,7 @@ static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float,
 		var pane := GlassPanes.pane_of(hit)
 		if pane.is_empty():
 			break
-		(pane[0] as GlassPanes).bullet(int(pane[1]), damage, hit.position)
+		(pane[0] as GlassPanes).bullet(int(pane[1]), damage, hit.position, d)
 		ImpactFx.spawn_hit(hit, d)
 		damage *= float(Balance.GLASS.pass_k)
 		start = (hit.position as Vector3) + d * 0.05

@@ -5,7 +5,8 @@ shader_type particles;
 // точкой (plane_b). Позицию по скорости двигает сам движок после process().
 // CUSTOM.xyz — скорость (по ней тянутся полосы искр и веера), CUSTOM.w — доля прожитой жизни.
 // USERDATA1: возраст, своя жизнь, размер, угол поворота; USERDATA2: ось и скорость вращения;
-// USERDATA3: x — оттенок (затемнение), y/z — фаза трепета.
+// USERDATA3: x — оттенок (затемнение), y/z — фаза трепета; USERDATA4: скорость до выпуска и
+// выпущена ли (волна release_*: частица ждёт невидимой, пока до неё не дойдёт волна от точки).
 
 uniform vec3 origin = vec3(0.0);
 uniform vec3 direction = vec3(0.0, 1.0, 0.0);
@@ -25,6 +26,11 @@ uniform float stretch_max = 0.4;
 // размер к концу жизни (дым растёт, искра гаснет точкой)
 uniform float size_end = 1.0;
 uniform float jitter = 0.01;
+// вылет из прямоугольника (полуразмеры в осях узла: панель стекла), а не из точки
+uniform vec3 emit_box = vec3(0.0);
+// волна выпуска: от точки release_from со скоростью release_speed (м/с); 0 — все сразу
+uniform vec3 release_from = vec3(0.0);
+uniform float release_speed = 0.0;
 uniform float bounce = 0.3;
 uniform float friction = 0.6;
 uniform vec4 plane_a = vec4(0.0, 1.0, 0.0, -100000.0);
@@ -92,6 +98,7 @@ void start() {
 	float v = mix(speed.x, speed.y, pow(hash(s + 2u), speed_bias));
 	VELOCITY = d * v;
 	vec3 offset = (vec3(hash(s + 3u), hash(s + 4u), hash(s + 5u)) - 0.5) * 2.0 * jitter;
+	offset += mat3(EMISSION_TRANSFORM) * ((vec3(hash(s + 17u), hash(s + 18u), hash(s + 19u)) - 0.5) * 2.0 * emit_box);
 	float own_size = mix(size.x, size.y, hash(s + 6u));
 	float own_life = mix(life.x, life.y, hash(s + 7u));
 	USERDATA1 = vec4(0.0, own_life, own_size, hash(s + 8u) * TAU);
@@ -107,44 +114,61 @@ void start() {
 	vec4 base = mix(tint, tint_alt, alt);
 	COLOR = base * texture(color_ramp, vec2(0.0, 0.5)) * vec4(vec3(USERDATA3.x), 1.0);
 	CUSTOM = vec4(VELOCITY, 0.0);
+	USERDATA4 = vec4(VELOCITY, 1.0);
+	if (release_speed > 0.0) {
+		float wait = distance(TRANSFORM[3].xyz, release_from) / release_speed;
+		USERDATA4.w = 0.0;
+		USERDATA1.x = -wait;
+		VELOCITY = vec3(0.0);
+	}
 }
 
 void process() {
 	float dt = DELTA;
 	USERDATA1.x += dt;
-	float t = clamp(USERDATA1.x / max(USERDATA1.y, 0.001), 0.0, 1.0);
-	if (USERDATA1.x >= USERDATA1.y) {
-		ACTIVE = false;
-	}
-	vec3 vel = VELOCITY;
-	vel.y -= gravity * dt;
-	vel *= exp(-drag * dt);
-	if (flutter > 0.0) {
-		float age = USERDATA1.x;
-		vel += vec3(sin(age * 9.0 + USERDATA3.y), 0.35 * sin(age * 6.0 + USERDATA3.z), cos(age * 7.0 + USERDATA3.z)) * flutter * dt;
-	}
-	vec3 pos = TRANSFORM[3].xyz;
-	float spin_k = 1.0;
-	vec2 off = (pos - origin).xz;
-	if (dot(off, off) < plane_a_radius * plane_a_radius) {
-		collide(plane_a, dt, vel, pos, spin_k);
-	}
-	collide(plane_b, dt, vel, pos, spin_k);
-	VELOCITY = vel;
-	USERDATA2.w *= spin_k;
-	USERDATA1.w += USERDATA2.w * dt;
-	// конец жизни — уходит в точку, а не исчезает целиком
-	float sz = USERDATA1.z * mix(1.0, size_end, t) * (1.0 - smoothstep(0.82, 1.0, t));
-	mat3 basis;
-	if (stretch > 0.0) {
-		// поворот полосы по скорости делает шейдер отрисовки, здесь — только ширина и длина
-		float len = clamp(sz + length(vel) * stretch, sz, max(stretch_max, sz));
-		basis = mat3(vec3(sz, 0.0, 0.0), vec3(0.0, len, 0.0), vec3(0.0, 0.0, sz));
+	if (USERDATA4.w < 0.5 && USERDATA1.x < 0.0) {
+		// ждёт волну: невидима и неподвижна
+		VELOCITY = vec3(0.0);
+		TRANSFORM = mat4(vec4(0.0), vec4(0.0), vec4(0.0), TRANSFORM[3]);
 	} else {
-		basis = axis_rotation(USERDATA2.xyz, USERDATA1.w) * sz;
+		if (USERDATA4.w < 0.5) {
+			VELOCITY = USERDATA4.xyz;
+			USERDATA4.w = 1.0;
+		}
+		float t = clamp(USERDATA1.x / max(USERDATA1.y, 0.001), 0.0, 1.0);
+		if (USERDATA1.x >= USERDATA1.y) {
+			ACTIVE = false;
+		}
+		vec3 vel = VELOCITY;
+		vel.y -= gravity * dt;
+		vel *= exp(-drag * dt);
+		if (flutter > 0.0) {
+			float age = USERDATA1.x;
+			vel += vec3(sin(age * 9.0 + USERDATA3.y), 0.35 * sin(age * 6.0 + USERDATA3.z), cos(age * 7.0 + USERDATA3.z)) * flutter * dt;
+		}
+		vec3 pos = TRANSFORM[3].xyz;
+		float spin_k = 1.0;
+		vec2 off = (pos - origin).xz;
+		if (dot(off, off) < plane_a_radius * plane_a_radius) {
+			collide(plane_a, dt, vel, pos, spin_k);
+		}
+		collide(plane_b, dt, vel, pos, spin_k);
+		VELOCITY = vel;
+		USERDATA2.w *= spin_k;
+		USERDATA1.w += USERDATA2.w * dt;
+		// конец жизни — уходит в точку, а не исчезает целиком
+		float sz = USERDATA1.z * mix(1.0, size_end, t) * (1.0 - smoothstep(0.82, 1.0, t));
+		mat3 basis;
+		if (stretch > 0.0) {
+			// поворот полосы по скорости делает шейдер отрисовки, здесь — только ширина и длина
+			float len = clamp(sz + length(vel) * stretch, sz, max(stretch_max, sz));
+			basis = mat3(vec3(sz, 0.0, 0.0), vec3(0.0, len, 0.0), vec3(0.0, 0.0, sz));
+		} else {
+			basis = axis_rotation(USERDATA2.xyz, USERDATA1.w) * sz;
+		}
+		TRANSFORM = mat4(vec4(basis[0], 0.0), vec4(basis[1], 0.0), vec4(basis[2], 0.0), vec4(pos, 1.0));
+		vec4 base = mix(tint, tint_alt, USERDATA3.w);
+		COLOR = base * texture(color_ramp, vec2(t, 0.5)) * vec4(vec3(USERDATA3.x), 1.0);
+		CUSTOM = vec4(vel, t);
 	}
-	TRANSFORM = mat4(vec4(basis[0], 0.0), vec4(basis[1], 0.0), vec4(basis[2], 0.0), vec4(pos, 1.0));
-	vec4 base = mix(tint, tint_alt, USERDATA3.w);
-	COLOR = base * texture(color_ramp, vec2(t, 0.5)) * vec4(vec3(USERDATA3.x), 1.0);
-	CUSTOM = vec4(vel, t);
 }

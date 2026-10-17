@@ -1495,7 +1495,22 @@ const CARRY := {"free_kg": 22.0, "max_kg": 50.0, "speed_min": 0.72, "stamina_max
 ## Витринное стекло: урон пули по нему = урон × bullet_k (прочность панели 100); треснувшее
 ## ниже collapse_below — осыпается само через collapse_sec; пуля за стеклом — урон × pass_k;
 ## звон осколков слышно на noise_m.
-const GLASS := {"bullet_k": 1.4, "collapse_below": 0.45, "collapse_sec": [1.2, 3.5], "pass_k": 0.85, "noise_m": 35.0}
+## Закалённое (доля tempered_share, двери): от первой пули — сетка мелких кубиков, через tempered_sec с
+## осыпается волной от точки удара tempered_wave_mps м/с; кубиков cubes_per_m2 (не больше cubes_max).
+## Трещины (GlassCracks): crack_ppm — пикселей на метр (не больше crack_px_max по длинной стороне),
+## rays — лучей у попадания, ray_len_m — длина (слабый удар — сильный), arcs — дуг между лучами,
+## frost_m — радиус белой крошки, hole_m — дырки; ослабленная потрескивает каждые creep_sec с,
+## лучи ползут на creep_px.
+## Куски (GlassShatter): shards_max всего, shards_per_m2 — крупных вдали от дырок, shard_thick (м),
+## fall_speed — от панели по ходу пуль (м/с), fall_spin (рад/с), wave_s_per_m — волна от места удара,
+## teeth_per_m — мелких ячеек вдоль рамы на метр её длины, teeth_share — доля кусков у рамы, что
+## остаются торчать (если меньше teeth_max_m2), land_bursts — сколько крупных бьются о пол блёстками.
+const GLASS := {"bullet_k": 1.4, "collapse_below": 0.45, "collapse_sec": [1.2, 3.5], "pass_k": 0.85, "noise_m": 35.0,
+	"tempered_share": 0.3, "tempered_sec": [0.15, 0.9], "tempered_wave_mps": 3.5, "cubes_per_m2": 220.0, "cubes_max": 900,
+	"crack_ppm": 256.0, "crack_px_max": 896, "rays": Vector2i(6, 14), "ray_len_m": Vector2(0.12, 0.5), "arcs": Vector2i(1, 3),
+	"frost_m": Vector2(0.012, 0.026), "hole_m": Vector2(0.004, 0.007), "creep_sec": Vector2(0.18, 0.5), "creep_px": Vector2(14.0, 48.0),
+	"shards_max": 96, "shards_per_m2": 4.0, "shard_thick": 0.008, "fall_speed": Vector2(0.3, 1.4), "fall_spin": Vector2(2.0, 9.0),
+	"wave_s_per_m": 0.12, "teeth_per_m": 4.0, "teeth_share": 0.65, "teeth_max_m2": 0.08, "land_bursts": 6}
 ## Пустая магазинная тележка: масса, сопротивление колёс и контакт с человеком (СИ).
 ## Стекло и травма зависят от энергии по нормали; прижатие — от силы и стены за человеком.
 const CART: Dictionary = {
