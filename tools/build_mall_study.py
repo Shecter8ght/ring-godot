@@ -95,6 +95,51 @@ def gallery_with_stairs(points, half_w: float = 2.5, piece: float = 6.0):
                            math.degrees(math.atan2(dy, dx))))
     return pieces, stairs
 
+
+def gallery_walk(points, stairs, lane: float = 1.3):
+    """Путь пешехода под галереей (точки игры): стойки навеса — по её оси, идут сбоку, в lane от оси,
+    к каждой лестнице — от полосы напротив её низа; после последней лестницы — прямо к концу галереи."""
+    line = [g(*p) for p in points]
+    units, normals = [], []
+    for (x0, z0), (x1, z1) in zip(line, line[1:]):
+        length = math.hypot(x1 - x0, z1 - z0)
+        units.append(((x1 - x0) / length, (z1 - z0) / length))
+        normals.append((-(z1 - z0) / length, (x1 - x0) / length))
+
+    def shifted(i: int, t: float) -> list[float]:
+        (x0, z0), (ux, uz), (nx, nz) = line[i], units[i], normals[i]
+        return [round(x0 + ux * t + nx * lane, 2), round(z0 + uz * t + nz * lane, 2)]
+
+    def foot(p) -> tuple[int, float]:
+        best = (math.inf, 0, 0.0)
+        for i, (x0, z0) in enumerate(line[:-1]):
+            seg = math.hypot(line[i + 1][0] - x0, line[i + 1][1] - z0)
+            t = min(seg, max(0.0, (p[0] - x0) * units[i][0] + (p[1] - z0) * units[i][1]))
+            d = math.hypot(x0 + units[i][0] * t - p[0], z0 + units[i][1] * t - p[1])
+            best = min(best, (d, i, t))
+        return best[1], best[2]
+
+    flights = []
+    for st in stairs:
+        low, high = g(*pol(-st["a"], st["r"] + 6.5)), g(*pol(-st["a"], st["r"] - 3.0))
+        flights.append((foot(low), low, high))
+    flights.sort(key=lambda f: f[0])
+    route = [shifted(0, 0.0)]
+    for i in range(len(line) - 1):
+        for k, ((seg, t), low, high) in enumerate(flights):
+            if seg != i:
+                continue
+            route += [shifted(i, t), low, high]
+            if k == len(flights) - 1:
+                return route + [line[-1]]
+            route.append(shifted(*foot(high)))
+        # излом галереи: полоса сдвинута по биссектрисе, чтобы не срезать угол через стойки
+        if i + 1 < len(line) - 1:
+            mx, mz = normals[i][0] + normals[i + 1][0], normals[i][1] + normals[i + 1][1]
+            scale = lane / max(0.2, mx * normals[i][0] + mz * normals[i][1])
+            route.append([round(line[i + 1][0] + mx * scale, 2), round(line[i + 1][1] + mz * scale, 2)])
+    return route + [line[-1]]
+
 # ------------------------------------------------------------------ постройки участков
 buildings: list[dict] = []
 
@@ -247,8 +292,7 @@ plan = {
         {"id": "C_восток_к_баррикаде", "points": [[385.0, 275.0], [300.0, 220.0], [240.0, 130.0], [240.0, 0.0], [155.0, 0.0]]},
         {"id": "D_север_во_двор", "points": [[130.0, -336.0], [200.0, -265.0], g(*pol(46, 240)), g(*pol(44, 190)), g(*pol(42, 150))]},
         # от автостанции под галереей к площади: через подпорные стенки террас — по лестницам
-        {"id": "E_автостанция_по_галерее", "points": gs(GALLERY[:2]) + [
-            g(*pol(-st["a"], st["r"] + dr)) for st in gallery_stairs for dr in (6.5, -3.0)] + gs(GALLERY[-1:])},
+        {"id": "E_автостанция_по_галерее", "points": gallery_walk(GALLERY, gallery_stairs)},
     ],
 }
 
