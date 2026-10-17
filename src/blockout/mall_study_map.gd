@@ -74,6 +74,17 @@ func _draw() -> void:
 		draw_rect(Rect2(map_point(Vector2(float(zr[0]), float(zr[1])) - zh, rect), zh * 2.0 * k), ZONE_COLORS.get(String(zone.kind), Color("6f6e66")))
 	for path: Array in cover.get("paths", []):
 		draw_polyline(points(path, rect), Color("7a6448"), 1.0)
+	var fill: Dictionary = plan.get("filler", {}) as Dictionary
+	for field: Dictionary in fill.get("fields", []):
+		var fr: Array = field.rect
+		var fh: Vector2 = Vector2(float(fr[2]), float(fr[3])) * 0.5
+		var fc: Vector2 = Vector2(float(fr[0]), float(fr[1]))
+		var corners: PackedVector2Array = PackedVector2Array()
+		for local: Vector2 in [Vector2(-fh.x, -fh.y), Vector2(fh.x, -fh.y), fh, Vector2(-fh.x, fh.y)]:
+			corners.append(map_point(fc + local.rotated(deg_to_rad(float(fr[4]))), rect))
+		draw_colored_polygon(corners, Color("a08a4e"))
+	for track: Dictionary in (fill.get("lines", {}) as Dictionary).get("tracks", []):
+		draw_polyline(points(track.points, rect), Color("8a7352"), maxf(1.5, float(track.width) * k))
 	var sq: Dictionary = plan.square
 	_wedge(rect, float(sq.a[0]), float(sq.a[1]), float(sq.r[0]), float(sq.r[1]), Color("4c6447"))
 	var pl: Dictionary = plan.plaza
@@ -196,6 +207,8 @@ func _draw_filler(filler: Dictionary, rect: Rect2, k: float) -> void:
 		var at: Vector2 = map_point(Vector2(float(item[1]), float(item[2])), rect)
 		if kit in ["bush", "sapling", "reeds"]:
 			draw_circle(at, 1.1, Color("587a45"))
+		elif kit in ["tall_grass", "tall_grass_dry", "wheat"]:
+			continue
 		elif kit in ["tree_birch", "tree_poplar"]:
 			draw_circle(at, maxf(1.5, 2.0 * k), Color("456b3a"))
 		elif kit.begins_with("rock"):

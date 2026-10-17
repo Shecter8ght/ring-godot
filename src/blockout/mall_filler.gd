@@ -28,9 +28,11 @@ const COLORS: Dictionary = {
 	"paint_blue": Color(0.14, 0.29, 0.55), "paint_yellow": Color(0.86, 0.69, 0.18), "paint_green": Color(0.12, 0.37, 0.24),
 	"black": Color(0.07, 0.07, 0.07), "lamp_head": Color(0.74, 0.73, 0.64), "kiosk": Color(0.7, 0.68, 0.6),
 	"light_red": Color(0.35, 0.08, 0.06), "light_amber": Color(0.38, 0.26, 0.05), "light_green": Color(0.06, 0.3, 0.14),
-	"rock": Color(0.4, 0.39, 0.36), "rock_dark": Color(0.31, 0.3, 0.28),
+	"rock": Color(0.36, 0.35, 0.33), "rock_dark": Color(0.28, 0.27, 0.26),
 	"straw": Color(0.72, 0.62, 0.36), "straw_dark": Color(0.55, 0.46, 0.26), "brick": Color(0.55, 0.36, 0.28),
-	"reed": Color(0.5, 0.5, 0.3), "crown": Color(0.25, 0.34, 0.17), "crown_dark": Color(0.19, 0.27, 0.14)}
+	"reed": Color(0.5, 0.5, 0.3), "crown": Color(0.25, 0.34, 0.17), "crown_dark": Color(0.19, 0.27, 0.14),
+	"tallgrass": Color(0.32, 0.39, 0.19), "tallgrass_tip": Color(0.41, 0.45, 0.23), "tallgrass_dry": Color(0.5, 0.47, 0.27),
+	"tallgrass_straw": Color(0.58, 0.52, 0.3), "wheat": Color(0.66, 0.55, 0.26), "wheat_stem": Color(0.55, 0.46, 0.23)}
 
 ## Цвета для «white», если у экземпляра своего нет: гаражи и контейнеры разные, но не пёстрые.
 const VARY: Dictionary = {
@@ -228,6 +230,39 @@ const KITS: Dictionary = {
 	"planter": {"parts": [["box", Vector3(0, 0.35, 0), Vector3(2.4, 0.7, 2.4), "concrete"], ["box", Vector3(0, 0.71, 0), Vector3(2.1, 0.04, 2.1), "dark"]],
 		"solid": [[Vector3(0, 0.35, 0), Vector3(2.4, 0.7, 2.4)]], "range": 260.0},
 	"manhole": {"parts": [["cyl", Vector3(0, 0.02, 0), Vector3(0.75, 0.04, 0.75), "black"]], "range": 70.0, "shadow": false},
+	# ---- сценки и поля (tools/mall_study_scenery.py): высокая трава и пшеница — мягкое укрытие без коллизии,
+	# без теней и с малой дальностью (их тысячи)
+	"tall_grass": {"parts": [["cone", Vector3(0.0, 0.675, 0.0), Vector3(0.65, 1.35, 0.65), "tallgrass"], ["cone", Vector3(0.55, 0.750, 0.2), Vector3(0.55, 1.5, 0.55), "tallgrass_tip"], ["cone", Vector3(-0.5, 0.575, 0.35), Vector3(0.6, 1.15, 0.6), "tallgrass"], ["cone", Vector3(0.15, 0.650, -0.6), Vector3(0.55, 1.3, 0.55), "tallgrass_tip"],
+		["cone", Vector3(-0.45, 0.525, -0.4), Vector3(0.5, 1.05, 0.5), "tallgrass"], ["cone", Vector3(0.6, 0.600, -0.35), Vector3(0.5, 1.2, 0.5), "tallgrass"], ["cone", Vector3(-0.15, 0.625, 0.65), Vector3(0.55, 1.25, 0.55), "tallgrass_tip"], ["cone", Vector3(0.35, 0.475, 0.6), Vector3(0.45, 0.95, 0.45), "tallgrass"]], "range": 150.0, "shadow": false},
+	"tall_grass_dry": {"parts": [["cone", Vector3(0.0, 0.675, 0.0), Vector3(0.65, 1.35, 0.65), "tallgrass_dry"], ["cone", Vector3(0.55, 0.750, 0.2), Vector3(0.55, 1.5, 0.55), "tallgrass_straw"], ["cone", Vector3(-0.5, 0.575, 0.35), Vector3(0.6, 1.15, 0.6), "tallgrass_dry"], ["cone", Vector3(0.15, 0.650, -0.6), Vector3(0.55, 1.3, 0.55), "tallgrass_straw"],
+		["cone", Vector3(-0.45, 0.525, -0.4), Vector3(0.5, 1.05, 0.5), "tallgrass_dry"], ["cone", Vector3(0.6, 0.600, -0.35), Vector3(0.5, 1.2, 0.5), "tallgrass_dry"], ["cone", Vector3(-0.15, 0.625, 0.65), Vector3(0.55, 1.25, 0.55), "tallgrass_straw"], ["cone", Vector3(0.35, 0.475, 0.6), Vector3(0.45, 0.95, 0.45), "tallgrass_dry"]], "range": 150.0, "shadow": false},
+	# пшеница — плотный ковёр: блоки рядами сливаются в поле, сверху колосья
+	"wheat": {"parts": [["box", Vector3(0, 0.45, 0), Vector3(1.85, 0.9, 1.95), "wheat_stem"], ["box", Vector3(0, 0.93, 0), Vector3(1.8, 0.1, 1.9), "wheat"],
+		["cone", Vector3(0.45, 1.05, 0.3), Vector3(0.35, 0.3, 0.35), "wheat"], ["cone", Vector3(-0.4, 1.03, -0.35), Vector3(0.35, 0.26, 0.35), "wheat"],
+		["cone", Vector3(-0.3, 1.04, 0.5), Vector3(0.3, 0.28, 0.3), "wheat"]],
+		"range": 220.0, "shadow": false},
+	"heli_wreck": {"parts": [["box", Vector3(0, 1.4, 0), Vector3(2.6, 2.6, 10.0), "burnt", Vector3(0, 0, 28)], ["box", Vector3(0.3, 1.1, 5.6), Vector3(2.2, 2.0, 2.2), "dark", Vector3(10, 0, 28)],
+		["box", Vector3(-0.6, 2.9, -0.5), Vector3(1.4, 0.6, 3.5), "olive", Vector3(0, 0, 28)], ["cyl", Vector3(-0.9, 3.3, 0.2), Vector3(0.6, 0.6, 0.6), "dark"],
+		["box", Vector3(0, 0.6, -5.4), Vector3(1.6, 1.1, 1.2), "burnt", Vector3(0, 0, 28)], ["box", Vector3(1.4, 0.35, 1.0), Vector3(0.6, 0.7, 3.5), "olive", Vector3(0, 10, 0)]],
+		"solid": [[Vector3(0, 1.3, 0), Vector3(2.8, 2.6, 10.5)]], "range": 600.0},
+	"heli_tail": {"parts": [["cyl", Vector3(0, 0.45, 0), Vector3(0.8, 7.5, 0.8), "olive", Vector3(90, 0, 0)], ["box", Vector3(0, 1.4, -3.6), Vector3(0.2, 2.2, 1.4), "olive", Vector3(-12, 0, 0)],
+		["box", Vector3(0.5, 2.3, -3.8), Vector3(1.4, 0.06, 0.25), "dark"]],
+		"solid": [[Vector3(0, 0.45, 0), Vector3(0.8, 0.9, 7.5)]], "range": 500.0},
+	"rotor_blade": {"parts": [["box", Vector3(0, 0.05, 0), Vector3(0.5, 0.08, 8.0), "dark"]], "range": 260.0, "shadow": false},
+	"cell_tower": {"parts": [["box", Vector3(-1.3, 21.0, -1.3), Vector3(0.22, 42.0, 0.22), "galv", Vector3(-2, 0, 2)], ["box", Vector3(1.3, 21.0, -1.3), Vector3(0.22, 42.0, 0.22), "galv", Vector3(-2, 0, -2)],
+		["box", Vector3(-1.3, 21.0, 1.3), Vector3(0.22, 42.0, 0.22), "galv", Vector3(2, 0, 2)], ["box", Vector3(1.3, 21.0, 1.3), Vector3(0.22, 42.0, 0.22), "galv", Vector3(2, 0, -2)],
+		["box", Vector3(0, 6.0, 0), Vector3(3.5, 0.12, 3.5), "galv"], ["box", Vector3(0, 14.0, 0), Vector3(2.9, 0.12, 2.9), "galv"],
+		["box", Vector3(0, 22.0, 0), Vector3(2.3, 0.12, 2.3), "galv"], ["box", Vector3(0, 30.0, 0), Vector3(1.8, 0.12, 1.8), "galv"],
+		["box", Vector3(0, 38.0, 0), Vector3(1.6, 0.12, 1.6), "galv"], ["box", Vector3(0, 40.5, 0), Vector3(2.6, 0.15, 2.6), "galv"],
+		["box", Vector3(0, 41.8, 1.2), Vector3(0.45, 1.8, 0.12), "white"], ["box", Vector3(1.1, 41.8, -0.6), Vector3(0.45, 1.8, 0.12), "white", Vector3(0, 120, 0)],
+		["box", Vector3(-1.1, 41.8, -0.6), Vector3(0.45, 1.8, 0.12), "white", Vector3(0, 240, 0)], ["cyl", Vector3(0, 44.0, 0), Vector3(0.1, 3.0, 0.1), "galv"],
+		["cyl", Vector3(0.9, 37.0, 0.9), Vector3(0.8, 0.25, 0.8), "white", Vector3(0, 0, 70)]],
+		"solid": [[Vector3(0, 3.0, 0), Vector3(3.0, 6.0, 3.0)]], "range": 0.0},
+	"tractor": {"parts": [["box", Vector3(0, 1.3, 0.6), Vector3(1.4, 1.1, 2.6), "paint_red"], ["box", Vector3(0, 2.1, -0.7), Vector3(1.5, 1.6, 1.5), "glass"],
+		["box", Vector3(0, 2.95, -0.7), Vector3(1.6, 0.1, 1.6), "paint_red"], ["cyl", Vector3(-1.0, 0.85, -0.8), Vector3(1.7, 0.55, 1.7), "black", Vector3(0, 0, 90)],
+		["cyl", Vector3(1.0, 0.85, -0.8), Vector3(1.7, 0.55, 1.7), "black", Vector3(0, 0, 90)], ["cyl", Vector3(-0.85, 0.5, 1.6), Vector3(1.0, 0.35, 1.0), "black", Vector3(0, 0, 90)],
+		["cyl", Vector3(0.85, 0.5, 1.6), Vector3(1.0, 0.35, 1.0), "black", Vector3(0, 0, 90)], ["cyl", Vector3(0.4, 2.3, 1.4), Vector3(0.12, 1.2, 0.12), "black"]],
+		"solid": [[Vector3(0, 1.3, 0), Vector3(2.4, 2.6, 4.2)]], "range": 420.0},
 	# ---- дорожная обстановка (tools/mall_study_streets.py): знаки лицом по локальной +Z
 	"lamp": {"parts": [["cyl", Vector3(0, 4.5, 0), Vector3(0.18, 9.0, 0.18), "galv"], ["box", Vector3(0, 8.95, 0.95), Vector3(0.08, 0.08, 2.0), "galv"],
 		["box", Vector3(0, 8.85, 1.85), Vector3(0.32, 0.14, 0.7), "lamp_head"]],

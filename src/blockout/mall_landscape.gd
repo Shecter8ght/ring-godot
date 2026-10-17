@@ -31,14 +31,17 @@ const GRASS_GREEN: Color = Color(0.33, 0.42, 0.22)
 const GRASS_LUSH: Color = Color(0.26, 0.37, 0.19)
 const GRASS_DRY: Color = Color(0.53, 0.52, 0.33)
 const EARTH: Color = Color(0.42, 0.35, 0.26)
-const ROCK_FACE: Color = Color(0.53, 0.52, 0.49)
+const ROCK_FACE: Color = Color(0.43, 0.42, 0.39)
 const FOREST_FLOOR: Color = Color(0.33, 0.3, 0.22)
 ## Мягкие пятна плана (ground.soil): земля, щебень, грязь, песок, сухая трава, гарь — как в mall_study_ground.py.
 const SOIL_COLORS: Array[Color] = [Color(0.5, 0.42, 0.31), Color(0.6, 0.59, 0.55), Color(0.34, 0.3, 0.23),
 	Color(0.71, 0.65, 0.51), Color(0.66, 0.61, 0.41), Color(0.19, 0.18, 0.16)]
+## Перекаты полей (владелец, 2026-10-17: «скучно»): пологие бугры и низинки, м — вне кольцевой, дорог,
+## построек, площадок, речки, водоёма и трассы (там земля ровная).
+const ROLL_AMP: float = 1.6
 ## Площадки плана (ground.zones) и тропы.
 const ZONE_COLORS: Dictionary = {"gravel": Color(0.56, 0.55, 0.51), "concrete": Color(0.62, 0.62, 0.58),
-	"dirt": Color(0.47, 0.4, 0.3), "path": Color(0.45, 0.39, 0.29)}
+	"dirt": Color(0.47, 0.4, 0.3), "path": Color(0.45, 0.39, 0.29), "field": Color(0.5, 0.43, 0.28)}
 ## Дальше этого от середины русла речка землю не трогает, м.
 const RIVER_REACH: float = 26.0
 
@@ -77,6 +80,9 @@ var _raster_origin: Vector2 = Vector2.ZERO
 var _soil_spots: Array = []
 var _soil_grid: Dictionary = {}
 var _detail: NoiseTexture2D
+## Перекаты: шум и растр «где можно» (0 — ровно, 1 — полная высота), клетка RASTER_CELL.
+var _roll_noise: FastNoiseLite
+var _roll_raster: PackedFloat32Array = PackedFloat32Array()
 
 
 func _ready() -> void:
@@ -98,6 +104,7 @@ func load_plan() -> void:
 	flat_r = float((plan.mall as Dictionary).flat_r)
 	_load_earth()
 	_load_soil()
+	_load_roll()
 
 
 func _load_earth() -> void:
@@ -171,6 +178,58 @@ func _load_soil() -> void:
 				var list: PackedInt32Array = _soil_grid.get(key, PackedInt32Array())
 				list.append(index)
 				_soil_grid[key] = list
+
+
+## Растр перекатов: где земля может гулять (поля, лес, пустыри), а где должна быть ровной — у дорог,
+## построек и площадок, у воды (мосты и брод стоят на расчётных высотах), у трассы, внутри кольцевой.
+func _load_roll() -> void:
+	_roll_noise = _noise(20261020, 0.011, 2)
+	_roll_raster.resize(_raster_size.x * _raster_size.y)
+	var roads: Array[PackedVector2Array] = []
+	var road_w: PackedFloat32Array = PackedFloat32Array()
+	for road: Dictionary in plan.roads:
+		if String(road.id) != "loop":
+			roads.append(poly(road.points))
+			road_w.append(float(road.width) * 0.5)
+	var rects: Array[Array] = []
+	for b: Dictionary in plan.buildings:
+		rects.append([Vector2(float(b.at[0]), float(b.at[1])), Vector2(float(b.size[0]), float(b.size[1])) * 0.5, deg_to_rad(float(b.yaw))])
+	var cover: Dictionary = plan.get("ground", {}) as Dictionary
+	for zone: Dictionary in cover.get("zones", []):
+		var zr: Array = zone.rect
+		rects.append([Vector2(float(zr[0]), float(zr[1])), Vector2(float(zr[2]), float(zr[3])) * 0.5, deg_to_rad(float(zr[4]))])
+	for apron: Dictionary in plan.get("aprons", []):
+		var ar: Array = apron.rect
+		rects.append([Vector2(float(ar[0]), float(ar[1])), Vector2(float(ar[2]), float(ar[3])) * 0.5, deg_to_rad(float(ar[4]))])
+	var hw: Dictionary = plan.highway
+	var loop_r: float = float((plan.mall as Dictionary).loop_r)
+	for j: int in range(_raster_size.y):
+		for i: int in range(_raster_size.x):
+			var p: Vector2 = _raster_origin + Vector2(i, j) * RASTER_CELL
+			var m: float = smoothstep(loop_r + 8.0, loop_r + 30.0, p.length())
+			m *= 1.0 - smoothstep(float(hw.z) - 40.0, float(hw.z) - 26.0, p.y)
+			if m > 0.0:
+				for k: int in range(roads.size()):
+					m *= smoothstep(4.0, 16.0, line_distance(p, roads[k]) - road_w[k])
+			if m > 0.0:
+				for r: Array in rects:
+					var local: Vector2 = (p - (r[0] as Vector2)).rotated(-float(r[2]))
+					var outside: Vector2 = (local.abs() - (r[1] as Vector2)).max(Vector2.ZERO)
+					m *= smoothstep(3.0, 12.0, outside.length())
+			if m > 0.0 and not _river.is_empty():
+				m *= smoothstep(RIVER_REACH, RIVER_REACH + 16.0, river_distance(p))
+			if m > 0.0:
+				m *= smoothstep(1.5, 2.6, _pond_q(p.x, p.y))
+			_roll_raster[j * _raster_size.x + i] = m
+
+
+func _roll_at(x: float, z: float) -> float:
+	if _roll_raster.is_empty():
+		return 0.0
+	var m: float = _raster_at(_roll_raster, x, z)
+	if m <= 0.0:
+		return 0.0
+	return ROLL_AMP * _roll_noise.get_noise_2d(x, z) * m
 
 
 static func _noise(seed_value: int, frequency: float, octaves: int) -> FastNoiseLite:
@@ -537,6 +596,7 @@ func ground(x: float, z: float) -> float:
 	var q: float = _pond_q(x, z)
 	if q < 1.0:
 		h -= float(pond.depth) * (1.0 - q)
+	h += _roll_at(x, z)
 	if not _earth_grid.is_empty():
 		h += _earth_offset(x, z)
 	if not _river_grid.is_empty():
@@ -795,6 +855,13 @@ func _ground_cover(g: RefCounted) -> void:
 	var width: float = float(cover.get("path_width", 1.7))
 	for path: Array in cover.get("paths", []):
 		_strip(g, poly(path), width, "path", 0.024)
+	# поля пшеницы — пашня под колосьями; грунтовки — основа (колеи и лужи рисует наполнение)
+	var filler: Dictionary = plan.get("filler", {}) as Dictionary
+	for field: Dictionary in filler.get("fields", []):
+		var fr: Array = field.rect
+		_rect_drape(g, Vector2(float(fr[0]), float(fr[1])), Vector2(float(fr[2]), float(fr[3])), float(fr[4]), "field", 0.018)
+	for track: Dictionary in (filler.get("lines", {}) as Dictionary).get("tracks", []):
+		_strip(g, poly(track.points), float(track.width), "path", 0.026)
 
 
 func _strip(g: RefCounted, line: PackedVector2Array, width: float, key: String, offset: float) -> void:
@@ -1166,7 +1233,7 @@ func _trees(g: RefCounted) -> void:
 	# лесополосы по северу и северо-востоку; под ЛЭП наполнения — просека
 	var power: PackedVector2Array = poly(((plan.get("filler", {}) as Dictionary).get("lines", {}) as Dictionary).get("power", {}).get("towers", []))
 	var attempts: int = 0
-	while spots.size() < 1900 and attempts < 45000:
+	while spots.size() < 3400 and attempts < 90000:
 		attempts += 1
 		var p: Vector2 = Vector2(rng.randf_range(float(bounds[0]), float(bounds[2])), rng.randf_range(float(bounds[1]), float(bounds[3])))
 		var inside: bool = false
@@ -1208,6 +1275,9 @@ func _trees(g: RefCounted) -> void:
 func _clear_for_tree(p: Vector2) -> bool:
 	if river_distance(p) < 11.0 or (p.y > 298.0 and p.y < 338.0):
 		return false
+	for track: Dictionary in ((plan.get("filler", {}) as Dictionary).get("lines", {}) as Dictionary).get("tracks", []):
+		if line_distance(p, poly(track.points)) < float(track.width) * 0.5 + 2.0:
+			return false
 	for route: Dictionary in plan.probe_routes:
 		if line_distance(p, poly(route.points)) < 4.0:
 			return false

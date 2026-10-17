@@ -124,7 +124,8 @@ python -X utf8 tools/build_mall_study.py                     # черновик 
                                                               #  рельеф: речка, горки, утёсы, рощи — tools/mall_study_relief.py → MallLandscape.ground();
                                                               #  улицы: перекрёстки, разметка, отбойники, знаки, галерея — tools/mall_study_streets.py → узел Streets;
                                                               #  земля: площадки, пятна, тропы — tools/mall_study_ground.py; уплотнение по «карте пустоты» —
-                                                              #  tools/mall_study_density.py, разбор игр — docs/design/mall_density_research.md)
+                                                              #  tools/mall_study_density.py; поля, грунтовки, машины на дорогах, вертолёт —
+                                                              #  tools/mall_study_scenery.py; разбор игр — docs/design/mall_density_research.md)
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
                                                               # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–D, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, паркинг, двор); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — один свой кадр, MALL_STUDY_OUTPUT — папка)

@@ -481,7 +481,11 @@ func _shots() -> void:
 		{"id": "24_junction", "at": Vector3(205, 18, -205), "look": Vector3(150, -4, -140)},
 		{"id": "25_east_field", "at": Vector3(250, 30, 160), "look": Vector3(320, 0, 80)},
 		{"id": "26_dachas_kpp", "at": Vector3(-320, 22, 60), "look": Vector3(-400, 0, 0)},
-		{"id": "27_mountain", "at": Vector3(-300, 30, -170), "look": Vector3(-400, 10, -250)}]
+		{"id": "27_mountain", "at": Vector3(-300, 30, -170), "look": Vector3(-400, 10, -250)},
+		# поля, сценки (tools/mall_study_scenery.py): высокая трава с уровня глаз, пшеница с трактором, сбитый вертолёт
+		{"id": "28_meadow_eye", "at": Vector3(300, 1.7, 110), "look": Vector3(300, 1, 170)},
+		{"id": "29_wheat", "at": Vector3(235, 12, -228), "look": Vector3(285, 0, -275)},
+		{"id": "30_heli", "at": Vector3(255, 9, 135), "look": Vector3(288, 1, 168)}]
 	# свои кадры вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z[;имя:…] (без плана)
 	var custom_views: Array[Dictionary] = []
 	for spec: String in OS.get_environment("MALL_STUDY_VIEW").split(";", false):

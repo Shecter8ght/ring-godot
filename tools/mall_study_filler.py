@@ -23,6 +23,7 @@ import math
 import random
 
 from mall_study_density import densify
+from mall_study_scenery import scenery_early, scenery_late
 
 SEED = 20261017
 # Стройка второй очереди ТЦ: между кольцевой дорогой и лесом на севере
@@ -889,6 +890,8 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
     lay.west()
     lay.south()
     lay.camp()
+    # грунтовки, сбитый вертолёт, вышка связи — до укрытий (tools/mall_study_scenery.py)
+    scene = scenery_early(lay, RUT_LINE)
     lay.route_rhythm()
     rocks = lay.rocks()
     clusters = lay.cover_clusters()
@@ -898,6 +901,8 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
     lay.puddles()
     # уплотнение по «карте пустоты»: группы в самые лысые места (tools/mall_study_density.py)
     density, soil, gas = densify(lay)
+    # машины на дорогах, высокая трава и пшеница — последними (трава мягкая, места не занимает)
+    scenery = scenery_late(scene)
     kits: dict[str, int] = {}
     for item in lay.items:
         kits[item[0]] = kits.get(item[0], 0) + 1
@@ -907,12 +912,13 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
         "weeds": lay.weeds,
         "earth": lay.earth,
         "lines": {"power": {"towers": [list(p) for p in POWER_TOWERS], "end": list(POWER_END)},
-                  "heat": heat, "ruts": lay.ruts},
+                  "heat": heat, "ruts": lay.ruts, "tracks": scene.tracks},
+        "fields": scene.fields,
         "stories": lay.stories,
         "cover": lay.cover,
-        "soil": soil,
+        "soil": soil + scene.soil_extra,
         "gas": gas,
     }
     stats = {"items": len(lay.items), "rocks": rocks, "cover_clusters": clusters, "route_gaps_filled": gaps, "weed_patches": len(lay.weeds),
-             "weed_tufts": sum(w[3] for w in lay.weeds), "stories": len(lay.stories), "density": density, "kits": kits}
+             "weed_tufts": sum(w[3] for w in lay.weeds), "stories": len(lay.stories), "density": density, "scenery": scenery, "kits": kits}
     return filler, stats
