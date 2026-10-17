@@ -2142,6 +2142,7 @@ func _shoot(suppress: bool) -> void:
 			_show_gun()
 		if _main_gun:
 			WeaponMods.update_condition(_main_gun, entry.get("mods", {}))
+			WeaponCondition.update_wear(_main_gun, WeaponCondition.percent(entry), entry.get("mods", {}))
 	var from := _gun_pos()
 	var h := 1.1
 	var at_ai := _foe != null and is_instance_valid(_foe) and _target_player == null

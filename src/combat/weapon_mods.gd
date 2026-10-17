@@ -379,6 +379,14 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		return false
 	var visual: int = WeaponCondition.stage(m.get("state", {}))
 	var material: Material = _model_material(path.get_basename() + "_%d_" % visual)
+	# новый обвес — одно состояние 100 (решение владельца 2026-10-17): с маской <имя>_100_wear.png вид по
+	# прочности рисует шейдер, без неё — карты 100 при любой прочности
+	var full: StandardMaterial3D = _model_material(path.get_basename() + "_100_") as StandardMaterial3D
+	var worn: ShaderMaterial = WeaponCondition.wear_material(full) if full else null
+	if worn:
+		material = worn
+	elif material == null:
+		material = full
 	if material == null:
 		model.free()
 		return false
@@ -390,6 +398,12 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		var body: MeshInstance3D = raw as MeshInstance3D
 		body.material_override = material
 		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
+		if worn:
+			# свой ресурс обвеса: WeaponCondition.update_wear берёт его из mods по точке крепления
+			var k: float = WeaponCondition.effectiveness(m.get("state", {}))
+			body.set_meta("wear_mount", String(m.get("mount", "")))
+			body.set_meta("wear_k", k)
+			body.set_instance_shader_parameter("condition", k)
 	if spec.has("length_m"):
 		# дульная насадка: штатный тормоз снят, срез — на её торце
 		if bool(m.get("replace", false)):

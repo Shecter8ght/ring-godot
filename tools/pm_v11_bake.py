@@ -5,6 +5,11 @@ blender --background --factory-startup --python-exit-code 1 --python bake_state.
         mag — атлас Magazine из снаряжённого магазина 60%; ammo — атлас Ammo из патрона 60%.
 Карты → maps/<kind>/<Atlas>_<channel>.png. Цвет — sRGB, остальное — Non-Color. Исходники не сохраняются.
 --lp-rays — оставить игровым сеткам видимость для лучей (проверка: перекрывают ли они AO-маски).
+Каналы маски процедурного износа (шейдер weapon_wear, формат — навык godot-asset-preparation):
+  edge — выпуклые кромки high-poly (AO «изнутри» по самой детали), cavity — углубления (AO снаружи по самой
+  детали; щели между деталями даёт AO игровой сетки в ORM), hand — места хвата (атрибут PM_HandContact).
+  Пример: -- 20 --channels edge,cavity,hand --tag _wear (в файле 20 есть атрибуты хвата), затем
+  python -X utf8 tools/pm_v11_pack_maps.py wear.
 """
 from pathlib import Path
 import sys, json, argparse
@@ -98,6 +103,9 @@ bk.cage_extrusion = 0.0015
 bk.max_ray_distance = 0.004
 
 images = {}
+# Маска износа: AO-узел только по самой детали (игровая сетка рядом не затеняет), расстояния — в метрах ПМ.
+WEAR_AO = {'edge': (True, 0.0009), 'cavity': (False, 0.0035)}
+HAND_ATTR = 'PM_HandContact'
 
 
 def target(atlas, channel):
@@ -132,6 +140,29 @@ def ypaint_group(mat):
 saved = {}
 
 
+def wear_socket(nt, channel):
+    """Выход маски износа в дереве материала high-poly: 1 — кромка / углубление / место хвата."""
+    if channel == 'hand':
+        attr = nt.nodes.get('BAKE_HAND') or nt.nodes.new('ShaderNodeAttribute')
+        attr.name = 'BAKE_HAND'
+        attr.attribute_type = 'GEOMETRY'
+        attr.attribute_name = HAND_ATTR
+        return attr.outputs['Color']
+    inside, distance = WEAR_AO[channel]
+    ao = nt.nodes.get('BAKE_AO_' + channel) or nt.nodes.new('ShaderNodeAmbientOcclusion')
+    ao.name = 'BAKE_AO_' + channel
+    ao.inside = inside
+    ao.only_local = True
+    ao.samples = 32
+    ao.inputs['Distance'].default_value = distance
+    inv = nt.nodes.get('BAKE_INV_' + channel) or nt.nodes.new('ShaderNodeMath')
+    inv.name = 'BAKE_INV_' + channel
+    inv.operation = 'SUBTRACT'
+    inv.inputs[0].default_value = 1.0
+    nt.links.new(ao.outputs['AO'], inv.inputs[1])
+    return inv.outputs[0]
+
+
 def route(channel):
     """Канал стека UCUPaint → Emission у всех материалов high-poly (для EMIT); normal — обратно BSDF."""
     for m in bpy.data.materials:
@@ -154,6 +185,10 @@ def route(channel):
         emit.inputs['Strength'].default_value = 1.0
         for l in list(emit.inputs['Color'].links):
             nt.links.remove(l)
+        if channel in WEAR_AO or channel == 'hand':
+            nt.links.new(wear_socket(nt, channel), emit.inputs['Color'])
+            nt.links.new(emit.outputs[0], out.inputs['Surface'])
+            continue
         p = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
         sock_name = {'color': 'Color', 'metal': 'Metallic', 'rough': 'Roughness'}[channel]
         bsdf_name = {'color': 'Base Color', 'metal': 'Metallic', 'rough': 'Roughness'}[channel]

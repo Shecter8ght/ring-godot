@@ -801,6 +801,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_set_scope(false)
 		return
 	WeaponMods.update_condition(_viewmodel, pl.weapon_mods)
+	WeaponCondition.update_wear(_viewmodel, pl.weapon_condition, pl.weapon_mods)
 	for n in _viewmodel.find_children("LaserBeam*", "Node3D", true, false):
 		(n as Node3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
 	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):

@@ -1108,6 +1108,7 @@ func _update_hand() -> void:
 	_hand.visible = health.alive
 	if _weapon_model:
 		WeaponMods.update_condition(_weapon_model, weapon_mods)
+		WeaponCondition.update_wear(_weapon_model, weapon_condition, weapon_mods)
 	_weapon_model.visible = health.alive and (not grenade_equipped or grenade_in_hand)
 	if _weapon_model is GrenadeModel:
 		(_weapon_model as GrenadeModel).prepare(grenade_pin)
