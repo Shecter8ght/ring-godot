@@ -127,10 +127,11 @@ python -X utf8 tools/build_mall_study.py                     # черновик 
                                                               #  земля: площадки, пятна, тропы — tools/mall_study_ground.py; уплотнение по «карте пустоты» —
                                                               #  tools/mall_study_density.py; поля, грунтовки, машины на дорогах, вертолёт —
                                                               #  tools/mall_study_scenery.py; ж/д ветка — tools/mall_study_railway.py;
+                                                              #  сквер-парк — tools/mall_study_park.py → узел Park, src/blockout/mall_park.gd;
                                                               #  разбор игр — docs/design/mall_density_research.md)
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
-                                                              # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор); -- shots — снимки
-                                                              # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — один свой кадр, MALL_STUDY_OUTPUT — папка)
+                                                              # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор, пристройка приёмки); -- shots — снимки
+                                                              # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)
 tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона

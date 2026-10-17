@@ -167,9 +167,15 @@ building("Car_Wash", "Автомойка", (300, -240), (18, 26), "Cafe", kind="
 for i, (a, r) in enumerate(((-8, 130), (0, 136), (8, 130), (-4, 150), (5, 151))):
     building(f"Barricade_{i + 1}", "Баррикада рейдеров · контейнер", pol(a, r), (3.2, 12), "Barricade",
              height=2.6, yaw=a + (20 if i % 2 else -15))
-# 8 — разгрузочный двор в выемке −4 м: фуры у доков, пост ЧВК у ворот
-for i, a in enumerate((30, 38, 46, 54, 62)):
-    building(f"Truck_{i + 1}", "Фура у дока", pol(a, 153), (2.6, 16), "Yard", height=4.0, yaw=a - 90)
+# 8 — разгрузочный двор в выемке −4 м: пост ЧВК у ворот; к ТЦ — пристройка «приёмка» (владелец, 2026-10-17:
+# «товар должен сразу попадать внутрь ТЦ»): от ворот доков в стене здания (−49°, −45°, −41° игры) до двора;
+# в её секторе выемка продлена под пристройку, фуры задом заходят в крытые ворота к рампе, с рампы — пандусы
+# и грузовые лифты на уровень ТЦ. Три фуры — в воротах пристройки, две — у старых рамп по краям двора.
+ANNEX_A = (58, 34)  # углы схемы
+for i, a in enumerate((46, 50, 54)):
+    building(f"Truck_{i + 1}", "Фура в воротах приёмки", pol(a, 140), (2.6, 16), "Yard", height=4.0, yaw=a - 90)
+for i, a in enumerate((28, 64)):
+    building(f"Truck_{i + 4}", "Фура у рампы", pol(a, 153), (2.6, 16), "Yard", height=4.0, yaw=a - 90)
 # у края выемки сбоку от пандуса — смотрит на въезд, не стоит на нём
 building("PMC_Post", "Пост ЧВК у ворот двора", pol(55, 213), (7, 7), "Yard", kind="hall", height=3.0)
 # 9 — техкомплекс: котельная с трубой 45 м (ориентир), ТП, генераторы, водонапорная башня
@@ -202,11 +208,26 @@ for i in range(7):
              height=2.6, yaw=a - 90)
 # стройка второй очереди (наполнение — tools/mall_study_filler.py): башенный кран у котлована, стрела над ним
 building("Crane", "Башенный кран стройки второй очереди", (12, 300), (6, 6), "Construction", kind="crane")
-# за границей — новостройки за трассой и склады промзоны (декорация без входа)
+# недострой 12 этажей у трассы (владелец, 2026-10-17: «больше домов, высокоэтажек») — входимый каркас с
+# лестницей: высокая точка обзора на юг карты
+building("Unfinished_Tower", "Недострой · 12 этажей", (150, -272), (24, 16), "Unfinished", kind="skeleton", floors=12, height=3.0)
+# за границей — город вокруг (декорация без входа): новостройки за трассой в два ряда, панельки за северным лесом,
+# дачи и посёлок за речкой на западе, промзона и высотки на востоке
 for i, x in enumerate((-300, -170, 40, 190, 320)):
     building(f"Tower_{i + 1}", "Новостройка ЖК · 17 этажей", (x, -430), (54, 18), "Outside", floors=17, height=3.0)
+for i, (x, floors) in enumerate(((-240, 22), (-100, 16), (110, 25), (260, 16), (420, 19))):
+    building(f"Tower_S{i + 1}", f"Новостройка · {floors} этажей", (x, -495), (30, 24), "Outside", floors=floors, height=3.0)
+for i, (x, size, floors) in enumerate(((-380, (60, 14), 9), (-250, (24, 24), 16), (-120, (72, 14), 9), (20, (24, 24), 14),
+                                         (140, (60, 14), 9), (270, (24, 24), 16), (400, (48, 14), 12))):
+    building(f"Block_N{i + 1}", f"Панельный дом · {floors} этажей", (x, 468), size, "Outside", floors=floors, height=3.0)
 for i, y in enumerate((-60, 60, 180)):
     building(f"Warehouse_{i + 1}", "Склад промзоны", (470, y), (40, 70), "Outside", height=9.0)
+for i, (x, y) in enumerate(((545, -40), (550, 70), (520, 260), (520, 420))):
+    building(f"Tower_E{i + 1}", "Многоэтажка · 14 этажей", (x, y), (24, 24), "Outside", floors=14, height=3.0)
+for i, (x, y) in enumerate(((-480, 155), (-505, 150), (-530, 158), (-490, 215), (-520, 212), (-470, 140))):
+    building(f"Dacha_W{i + 1}", "Дачный дом", (x, y), (7, 8), "Outside", floors=2, height=3.0, yaw=8 * i)
+for i, (x, y) in enumerate(((-530, 95), (-535, -25), (-515, -220))):
+    building(f"Block_W{i + 1}", "Пятиэтажка посёлка", (x, y), (60, 12), "Outside", floors=5, height=3.0, yaw=90)
 
 # ------------------------------------------------------------------ дороги (в метрах игры)
 # class: «main» — с разметкой, бордюром, фонарями и знаками; «local» — проезд без бордюра (обочина)
@@ -217,10 +238,18 @@ roads = [
     # автобусы с трассы — западнее павильона на площадку; с кольцевой — сверху на площадку
     {"id": "to_bus_station", "width": 8, "class": "main", "points": gs([(-212, -318), (-212, -266), (bax - baw / 2, bay - 4)])},
     {"id": "bus_access", "width": 8, "class": "main", "points": gs([pol(-131, LOOP_R), (pol(-131, LOOP_R)[0], bay + bah / 2)])},
-    {"id": "west_road", "width": 9, "class": "main", "points": gs([(-470, 30), (-300, 22), pol(175, LOOP_R)])},
-    {"id": "service_road", "width": 7, "class": "local", "points": gs([(400, 268), (300, 205), pol(38, LOOP_R)])},
+    {"id": "west_road", "width": 9, "class": "main", "points": gs([(-565, 34), (-470, 30), (-300, 22), pol(175, LOOP_R)])},
+    {"id": "service_road", "width": 7, "class": "local", "points": gs([(565, 362), (470, 312), (400, 268), (300, 205), pol(38, LOOP_R)])},
     # АЗС стояла без дороги: съезд с кольцевой мимо колонок, дальше — тупик у речки (к мостику — тропа)
     {"id": "gas_road", "width": 7, "class": "main", "points": gs([pol(150, LOOP_R), (-229, 156), (-252, 165), (-280, 168)])},
+    # дороги за пределы карты (владелец, 2026-10-17: «территория как будто изолирована»): на север через лес к
+    # панелькам, на восток в промзону, на запад от АЗС через речку к дачам и посёлку (координаты игры)
+    {"id": "north_road", "width": 7, "class": "local", "points": [list(g(*pol(130, LOOP_R))), [-172.0, -232.0], [-178.0, -282.0],
+                                                                  [-183.0, -340.0], [-188.0, -420.0], [-192.0, -505.0]]},
+    {"id": "east_road", "width": 7, "class": "local", "points": [list(g(*pol(-26, LOOP_R))), [300.0, 110.0], [345.0, 112.0],
+                                                                 [400.0, 118.0], [470.0, 124.0], [605.0, 128.0]]},
+    {"id": "dacha_road", "width": 6, "class": "local", "points": [[-280.0, -168.0], [-330.0, -170.0], [-380.0, -172.0],
+                                                                  [-430.0, -178.0], [-480.0, -184.0], [-565.0, -190.0]]},
 ]
 # к пожарному проезду здания — с запада и востока; с юга, к главному входу, — пешеходная аллея (не дорога)
 for a in (180, 0):
@@ -245,7 +274,7 @@ plan = {
     "purpose": "Серый черновик территории ТЦ в настоящем масштабе: прогулка и замер, не рейдовая карта",
     "reference": "docs/design/mall_map_concept.png (принята 2026-10-17), docs/design/concepts/mall_2026-10-15/01_ring_territory.png",
     "north": "-Z",
-    "bounds": [-470, -400, 520, 470],  # с новостройками за трассой и складами промзоны
+    "bounds": [-560, -500, 600, 540],  # с городом вокруг: новостройки за трассой, панельки за лесом, промзона, дачи
     "boundary": gs([(-400, -350), (380, -350), (425, -150), (412, 205), (335, 345), (-150, 368), (-385, 305), (-438, 60)]),
     "forest": [gs([(-385, 305), (-150, 368), (335, 345), (300, 300), (60, 318), (-160, 322), (-330, 270)]),
                gs([(335, 345), (412, 205), (425, 60), (380, 70), (372, 200), (300, 300)]),
@@ -257,11 +286,14 @@ plan = {
                [[398.0, 196.0], [440.0, 196.0], [440.0, 262.0], [404.0, 262.0]],
                [[396.0, -185.0], [440.0, -185.0], [440.0, -140.0], [398.0, -140.0]],
                [[398.0, -100.0], [440.0, -100.0], [440.0, -48.0], [398.0, -48.0]],
-               [[398.0, -10.0], [440.0, -10.0], [440.0, 62.0], [400.0, 62.0]]],
+               [[398.0, -10.0], [440.0, -10.0], [440.0, 62.0], [400.0, 62.0]],
+               # за северной границей — лес до панелек (дорога на север идёт сквозь него)
+               [[-560.0, -330.0], [-385.0, -308.0], [-150.0, -372.0], [335.0, -348.0], [420.0, -300.0], [520.0, -330.0],
+                [520.0, -440.0], [-560.0, -440.0]]],
     "mall": {"r": MALL_R, "podium_r": PODIUM_R, "fire_lane": FIRE_LANE, "loop_r": LOOP_R, "flat_r": 150.0,
              "sector": "res://data/sectors/mall_1f.json"},
     "roads": roads,
-    "highway": {"z": 318.0, "width": 24.0, "x": [-470.0, 520.0], "y": -5.0, "crossing_x": [-34.0, -26.0]},
+    "highway": {"z": 318.0, "width": 24.0, "x": [-560.0, 600.0], "y": -5.0, "crossing_x": [-34.0, -26.0]},
     # уровни рельефа (м): север выше, южная парковка террасами, трасса ниже всего
     "levels": {"north": 3.5, "north_from": 130.0, "north_to": 330.0, "south": -5.0, "south_from": 150.0, "south_to": 306.0},
     "terraces": {"a": TERRACE_A, "walls": TERRACE_WALLS, "steps": [-2.0, -4.0], "ramps": [55.0, 90.0, 125.0],
@@ -273,8 +305,13 @@ plan = {
     "plaza": {"a": [ga(-64), ga(-116)], "r": [PODIUM_R, 168.0], "fountain": g(*pol(-90, 140)), "fountain_r": 8.0,
               "planters": [g(*pol(-104, 152)), g(*pol(-76, 152))]},
     "yard": {"a": [ga(70), ga(22)], "r": [136.0, 205.0], "floor": -4.0, "dock": [136.0, 144.0], "dock_top": -2.8,
+             "annex": {"a": [ga(ANNEX_A[0]), ga(ANNEX_A[1])], "inner": 124.0, "dock": [124.0, 132.0], "outer": 136.0, "roof": 9.0,
+                       "bays": [ga(a) for a in (54, 50, 46, 42, 38)], "lifts": [ga(48), ga(44)],
+                       # в свободных воротах — лестницы со двора на рампу (фуры стоят в трёх других)
+                       "stairs": [ga(42), ga(38)]},
              "ramp_a": ga(46), "ramp_half_deg": 5.0, "ramp_r": [205.0, 236.0]},
-    "square": {"a": [ga(146), ga(74)], "r": [128.0, 236.0], "trees": 60, "seed": 11, "playground": g(*pol(128, 186))},
+    # сквер — парк (tools/mall_study_park.py): аллеи, фонтан, памятник, ларьки, площадка, колесо обозрения, ограда
+    "square": {"a": [ga(146), ga(74)], "r": [128.0, 236.0]},
     "pond": {"at": g(-110, 288), "size": [120.0, 56.0], "yaw": 8.0, "depth": 1.8, "drain": gs([(-60, 276), (-40, 262), (-12, 254)])},
     "garage_bridge": {"from": g(GARAGE_AT[0] - 32.0, GARAGE_BRIDGE_Y),
                       "to": g(math.sqrt(MALL_R ** 2 - GARAGE_BRIDGE_Y ** 2) - 0.5, GARAGE_BRIDGE_Y), "width": 8.0, "y": 6.0},
@@ -371,6 +408,7 @@ scene = [
     '[ext_resource type="Script" path="res://src/blockout/mall_study_level.gd" id="launch"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_streets.gd" id="streets"]',
+    '[ext_resource type="Script" path="res://src/blockout/mall_park.gd" id="park"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/escalator.tscn" id="esc"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/rubble_pile.tscn" id="rub"]',
     '[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]',
@@ -401,6 +439,7 @@ scene = [
     '[node name="Landscape" type="Node3D" parent="."]', 'script = ExtResource("land")',
     '[node name="Filler" type="Node3D" parent="."]', 'script = ExtResource("fill")',
     '[node name="Streets" type="Node3D" parent="."]', 'script = ExtResource("streets")',
+    '[node name="Park" type="Node3D" parent="."]', 'script = ExtResource("park")',
     '[node name="Mall" type="Node3D" parent="."]', 'script = ExtResource("ring")',
     '[node name="Escalators" type="Node3D" parent="Mall"]',
     *copied_nodes("Escalators"),

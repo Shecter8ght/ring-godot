@@ -302,10 +302,20 @@ func _verify() -> void:
 	var rail: Dictionary = (plan.get("filler", {}) as Dictionary).get("rail", {}) as Dictionary
 	if not rail.is_empty():
 		var line: PackedVector2Array = MallLandscape.poly(rail.points)
-		# между эшелоном и переездом (на вагоне луч попал бы в крышу)
-		var on: Vector2 = line[line.size() * 3 / 5]
-		var dir: Vector2 = (line[line.size() * 3 / 5 + 1] - on).normalized()
-		var bank: float = _ray_y(on.x, on.y) - _ray_y(on.x - dir.y * 12.0, on.y + dir.x * 12.0)
+		# в 22 м западнее переезда — между эшелоном и переездом (на вагоне луч попал бы в крышу);
+		# земля рядом — выше из двух сторон в 14 м от оси
+		var probe: Vector2 = line[line.size() / 2]
+		var crossings: Array = rail.get("crossings", [])
+		if not crossings.is_empty():
+			probe = Vector2(float(crossings[0].at[0]) - 22.0, float(crossings[0].at[1]))
+		var k: int = 0
+		for i: int in range(line.size()):
+			if line[i].distance_to(probe) < line[k].distance_to(probe):
+				k = i
+		var on: Vector2 = line[k]
+		var dir: Vector2 = (line[mini(k + 1, line.size() - 1)] - line[maxi(k - 1, 0)]).normalized()
+		var side_y: float = maxf(_ray_y(on.x - dir.y * 14.0, on.y + dir.x * 14.0), _ray_y(on.x + dir.y * 14.0, on.y - dir.x * 14.0))
+		var bank: float = _ray_y(on.x, on.y) - side_y
 		_check("Ж/д ветка: насыпь выше земли рядом", bank > 0.9, {"embankment_m": snappedf(bank, 0.1)})
 		var deck: Vector2 = Vector2.ZERO
 		var nearest: float = INF
@@ -357,8 +367,9 @@ func _verify() -> void:
 	# двор: с платформы доков по лестнице наверх, к пожарному проезду
 	var dock: Array = y.dock
 	var ds: Dictionary = landscape.dock_stair()
-	var yard_low: Vector2 = MallLandscape.polar(float(y.a[0]) + 12.0, float(dock[1]) + 6.0)
-	var dock_low: Vector2 = MallLandscape.polar(float(y.a[0]) + 12.0, float(dock[1]) - 1.0)
+	# со двора на платформу — по короткой лестнице (у западного края двора, вне пристройки приёмки)
+	var yard_low: Vector2 = MallLandscape.polar(float(ds.yard_a), float(dock[1]) + 6.0)
+	var dock_low: Vector2 = MallLandscape.polar(float(ds.yard_a), float(dock[1]) - 1.0)
 	var s0: Vector2 = ds.s0
 	var s1: Vector2 = ds.s1
 	var landing: Vector2 = ds.landing
@@ -369,6 +380,12 @@ func _verify() -> void:
 		Vector3(before.x, float(y.dock_top), before.y), Vector3(s1.x, 0.0, s1.y), Vector3(landing.x, 0.0, landing.y), Vector3(top.x, 0.04, top.y)]
 	var dpass: bool = await _walk_path(dpath, false)
 	_check("Двор → платформа доков → лестница к пожарному проезду", dpass and walker.global_position.y > -0.4, {"position": str(walker.global_position)})
+	# пристройка приёмки: со двора через свободные ворота на рампу, по пандусу в зал, к воротам доков ТЦ
+	var annex_path: Array[Vector3] = landscape.annex_walk()
+	if not annex_path.is_empty():
+		var apass: bool = await _walk_path(annex_path, false)
+		_check("Приёмка: со двора на рампу, по пандусу в зал к воротам ТЦ", apass and absf(walker.global_position.y) < 0.5,
+			{"position": str(walker.global_position)})
 	var visual_count: int = 0
 	var triangle_count: int = 0
 	for mesh: Node in world.find_children("*", "MeshInstance3D", true, false):
@@ -519,7 +536,13 @@ func _shots() -> void:
 		{"id": "31_rail_crossing", "at": Vector3(-322, 9, 48), "look": Vector3(-336, 1.5, 74)},
 		{"id": "32_rail_bridge", "at": Vector3(-300, 8, 100), "look": Vector3(-306, 0, 72)},
 		{"id": "33_train", "at": Vector3(-372, 12, 50), "look": Vector3(-430, 2, 82)},
-		{"id": "34_rail_platform", "at": Vector3(-255, 10, 50), "look": Vector3(-285, 2, 74)}]
+		{"id": "34_rail_platform", "at": Vector3(-255, 10, 50), "look": Vector3(-285, 2, 74)},
+		# сквер-парк, пристройка приёмки у двора, дорога на север к городу
+		{"id": "35_park", "at": Vector3(-20, 30, -110), "look": Vector3(-75, 2, -185)},
+		{"id": "36_park_eye", "at": Vector3(-48, 1.7, -150), "look": Vector3(-62, 2, -171)},
+		{"id": "37_wheel", "at": Vector3(-30, 12, -160), "look": Vector3(7, 15, -206)},
+		{"id": "38_annex", "at": Vector3(175, 45, -175), "look": Vector3(115, 0, -115)},
+		{"id": "39_north_road", "at": Vector3(-150, 25, -230), "look": Vector3(-185, 0, -380)}]
 	# свои кадры вместо набора: MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z[;имя:…] (без плана)
 	var custom_views: Array[Dictionary] = []
 	for spec: String in OS.get_environment("MALL_STUDY_VIEW").split(";", false):

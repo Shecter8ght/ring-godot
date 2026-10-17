@@ -24,6 +24,7 @@ import random
 
 from mall_study_density import densify
 from mall_study_scenery import scenery_early, scenery_late
+from mall_study_park import make_park
 
 SEED = 20261017
 # Стройка второй очереди ТЦ: между кольцевой дорогой и лесом на севере
@@ -241,6 +242,13 @@ class Layout:
             return True
         pl = plan["plaza"]
         if in_arc(a, *pl["a"]) and pl["r"][0] - margin < r < pl["r"][1] + margin:
+            return True
+        # сквер — парк со своей раскладкой (mall_study_park.py); пристройка приёмки у двора
+        sq = plan["square"]
+        if in_arc(a, sq["a"][0] - 1.0, sq["a"][1] + 1.0) and sq["r"][0] - 2.0 - margin < r < sq["r"][1] + 3.0 + margin:
+            return True
+        ax = plan["yard"].get("annex")
+        if ax and in_arc(a, ax["a"][0] - 2.0, ax["a"][1] + 2.0) and r < ax["outer"] + 4.0 + margin:
             return True
         yd = plan["yard"]
         if in_arc(a, yd["a"][0] - 2.0, yd["a"][1] + 2.0) and yd["r"][0] - 4.0 - margin < r < yd["r"][1] + 4.0 + margin:
@@ -532,6 +540,64 @@ class Layout:
             self.bush(x + q[0], z + q[1], self.rng.uniform(1.6, 2.8))
         self.weed_patch(x, z, 8.0, 0.4)
         self.reserve(x, z, 11.0)
+
+    def yard(self) -> None:
+        """Разгрузочный двор: середина свободна для фур и пути со двора (подход D), у задней стенки выемки —
+        контейнеры (по одному на другом), баки и поддоны, вдоль боковых стенок — штабеля поддонов, бочки,
+        катушки, покрышки; полуприцеп без тягача и тягач без прицепа, лужи на дне."""
+        yd = self.plan["yard"]
+        a0, a1 = yd["a"]
+        ramp_lo = yd["ramp_a"] - yd["ramp_half_deg"] - 3.0
+        ramp_hi = yd["ramp_a"] + yd["ramp_half_deg"] + 3.0
+        wall = yd["r"][1] - 3.0
+
+        def tangent(a: float) -> float:
+            return yaw_along(-math.sin(math.radians(a)), math.cos(math.radians(a)))
+
+        def radial(a: float) -> float:
+            return yaw_along(math.cos(math.radians(a)), math.sin(math.radians(a)))
+
+        def barrels(x: float, z: float) -> None:
+            for dx, dz in ((0.0, 0.0), (0.66, 0.05), (0.3, 0.62), (-0.36, 0.6))[:self.rng.randint(2, 4)]:
+                self.put("barrel", x + dx, z + dz, self.rng.uniform(0.0, 360.0))
+
+        # у задней стенки по обе стороны от въезда: контейнеры, второй ярус — на первом
+        for a, kit, top in ((a0 + 4.5, "container40", True), (a0 + 9.0, "container20", False),
+                            (a1 - 8.0, "container40", False), (a1 - 4.0, "container20", True)):
+            x, z = polar(a, wall + 1.0)
+            tint = self.rng.randrange(4)
+            self.put(kit, x, z, tangent(a), tint=tint, cover=True)
+            if top:
+                self.put(kit, x, z, tangent(a) + self.rng.uniform(-3.0, 3.0), dy=2.6, tint=(tint + 1) % 4)
+        for a in (a0 + 12.0, a0 + 13.6):
+            if a < ramp_lo:
+                self.put("dumpster", *polar(a, wall + 1.5), tangent(a), cover=True)
+        for a in (a1 - 12.0, a1 - 13.6):
+            if a > ramp_hi:
+                self.put("dumpster", *polar(a, wall + 1.5), tangent(a), cover=True)
+        x, z = polar(a1 - 15.2, wall)
+        if a1 - 15.2 > ramp_hi:
+            self.put("pallets", x, z, tangent(a1 - 15.2) + 6.0, cover=True)
+        # вдоль боковых стенок
+        for side, a_wall in ((1.0, a0), (-1.0, a1)):
+            r = 168.0
+            while r < wall - 7.0:
+                a = a_wall + side * math.degrees(3.2 / r)
+                x, z = polar(a, r)
+                kit = self.rng.choice(("pallets", "pallets", "barrel", "reel", "tires", "dumpster"))
+                if kit == "barrel":
+                    barrels(x, z)
+                else:
+                    self.put(kit, x, z, radial(a) + self.rng.uniform(-8.0, 8.0), cover=kit in ("pallets", "dumpster", "reel"))
+                r += self.rng.uniform(4.5, 7.0)
+        # полуприцеп без тягача у западной стенки, тягач без прицепа — у восточной
+        self.put("trailer", *polar(a0 + 8.0, 176.0), radial(a0 + 8.0) + 4.0, cover=True)
+        self.put("truck_cab", *polar(a1 - 9.0, 172.0), radial(a1 - 9.0) - 20.0, cover=True)
+        # ещё два брошенных полуприцепа наискось — укрытия по сторонам пути со двора к пристройке
+        self.put("trailer", *polar(yd["ramp_a"] - 6.0, 160.0), radial(yd["ramp_a"] - 6.0) + 18.0, cover=True)
+        self.put("trailer", *polar(yd["ramp_a"] + 10.0, 188.0), radial(yd["ramp_a"] + 10.0) - 24.0, cover=True)
+        for a, r, s in ((yd["ramp_a"] - 5.0, 166.0, 3.2), (yd["ramp_a"] + 9.0, 182.0, 2.6), (a0 + 11.0, 160.0, 2.2)):
+            self.put("puddle", *polar(a, r), self.rng.uniform(0.0, 360.0), s=s)
 
     # ---------------------------------------------------------- россыпь
 
@@ -890,8 +956,11 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
     lay.west()
     lay.south()
     lay.camp()
+    lay.yard()
     # грунтовки, сбитый вертолёт, вышка связи — до укрытий (tools/mall_study_scenery.py)
     scene = scenery_early(lay, RUT_LINE)
+    # сквер — парк: дорожки, фонтан, памятник, ларьки, аттракционы, ограда, деревья (tools/mall_study_park.py)
+    park = make_park(lay)
     lay.route_rhythm()
     rocks = lay.rocks()
     clusters = lay.cover_clusters()
@@ -915,6 +984,7 @@ def make_filler(plan: dict) -> tuple[dict, dict]:
                   "heat": heat, "ruts": lay.ruts, "tracks": scene.tracks},
         "fields": scene.fields,
         "rail": scene.rail,
+        "park": park,
         "stories": lay.stories,
         "cover": lay.cover,
         "soil": soil + scene.soil_extra,

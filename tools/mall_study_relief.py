@@ -46,9 +46,9 @@ CLIFFS = [
 BOULDER_FIELDS = [(-372.0, 140.0, 22.0, 18), (-150.0, -318.0, 16.0, 10), (330.0, 150.0, 20.0, 14), (-395.0, -200.0, 26.0, 22),
                   (194.0, -314.0, 12.0, 8), (360.0, -200.0, 16.0, 12), (-250.0, 210.0, 14.0, 9), (356.0, 96.0, 14.0, 9)]
 # речка: с севера (из-за границы) на юг (под трассой и дальше)
-RIVER = [(-285.0, -395.0), (-300.0, -310.0), (-315.0, -250.0), (-310.0, -170.0), (-300.0, -90.0), (-291.0, -45.0),
+RIVER = [(-280.0, -505.0), (-285.0, -395.0), (-300.0, -310.0), (-315.0, -250.0), (-310.0, -170.0), (-300.0, -90.0), (-291.0, -45.0),
          (-297.0, 40.0), (-315.0, 110.0), (-333.0, 190.0), (-330.0, 255.0), (-318.0, 302.0), (-312.0, 345.0),
-         (-306.0, 410.0)]
+         (-306.0, 410.0), (-300.0, 545.0)]
 RIVER_BELOW = 1.6     # вода ниже окрестной земли, м
 RIVER_DEPTH = 1.1     # глубина воды у середины, м
 RIVER_BED_HALF = 3.0  # полуширина ровного дна, м
@@ -60,7 +60,8 @@ HIGHWAY_Z = (304.0, 332.0)  # трасса на насыпи: речка про�
 # рощи: круги x, z, радиус; и вдоль берегов — куски речки [s0, s1, сторона]
 GROVES = [(-395.0, 150.0, 45.0), (380.0, 165.0, 40.0), (-250.0, 215.0, 25.0), (175.0, -300.0, 22.0), (-258.0, -288.0, 28.0),
           (-430.0, -255.0, 62.0), (385.0, 100.0, 24.0), (400.0, -215.0, 26.0)]
-RIPARIAN = [(60.0, 175.0, 1.0), (245.0, 345.0, -1.0), (420.0, 585.0, 1.0), (440.0, 560.0, -1.0), (680.0, 740.0, -1.0)]
+# (отсчёт — от истока: речку продлили на север на 110 м, отсюда +110)
+RIPARIAN = [(170.0, 285.0, 1.0), (355.0, 455.0, -1.0), (530.0, 695.0, 1.0), (550.0, 670.0, -1.0), (790.0, 850.0, -1.0)]
 
 
 def smoothstep(a: float, b: float, x: float) -> float:
@@ -187,16 +188,20 @@ def make_relief(plan: dict) -> dict:
         return {"half_left": round(RIVER_BED_HALF + max(0.0, deck - bed) / banks[i][0] + 2.5, 1),
                 "half_right": round(RIVER_BED_HALF + max(0.0, deck - bed) / banks[i][1] + 2.5, 1)}
 
-    road = next(r for r in plan["roads"] if r["id"] == "west_road")["points"]
-    road_cross = _crossing(river, road)
     ford_cross = _crossing(river, FORD_TRACK)
     s_foot, foot_at, foot_dir = _nearest_s(river, FOOTBRIDGE_NEAR)
     bridges = []
-    if road_cross:
+    # дорожный мост — у каждой дороги через речку (западная у КПП, к дачам от АЗС)
+    for road in plan["roads"]:
+        if road["id"] == "loop":
+            continue
+        road_cross = _crossing(river, road["points"])
+        if not road_cross:
+            continue
         (x, z), s, d = road_cross
         deck = round(base_height(plan, x, z) + 0.05, 2)
-        bridges.append({"kind": "road", "at": [round(x, 2), round(z, 2)], "s": round(s, 1),
-                        "yaw": round(math.degrees(math.atan2(d[0], d[1])), 1), "length": 26.0, "width": 11.0,
+        bridges.append({"kind": "road", "road": road["id"], "at": [round(x, 2), round(z, 2)], "s": round(s, 1),
+                        "yaw": round(math.degrees(math.atan2(d[0], d[1])), 1), "length": 26.0, "width": float(road["width"]) + 2.0,
                         "deck": deck, **spans((x, z), s, deck)})
     deck = round(base_height(plan, *foot_at) + 0.15, 2)
     bridges.append({"kind": "foot", "at": [round(foot_at[0], 2), round(foot_at[1], 2)], "s": round(s_foot, 1),

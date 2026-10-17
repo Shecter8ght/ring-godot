@@ -641,7 +641,7 @@ func ground(x: float, z: float) -> float:
 	var ya: Array = y.a
 	var yr: Array = y.r
 	if in_arc(a, float(ya[0]), float(ya[1])):
-		if r >= float(yr[0]) - WALL_SOFT_M and r <= float(yr[1]) + WALL_SOFT_M:
+		if r >= yard_inner(a) - WALL_SOFT_M and r <= float(yr[1]) + WALL_SOFT_M:
 			h = float(y.floor)
 		var rr: Array = y.ramp_r
 		if r > float(yr[1]) and r < float(rr[1]) and angle_gap(a, float(y.ramp_a)) < float(y.ramp_half_deg):
@@ -687,6 +687,7 @@ func rebuild() -> void:
 	_roads(g)
 	_terrace_walls(g)
 	_yard(g)
+	_annex(g)
 	_plaza(g)
 	_cars(g)
 	_highway(g)
@@ -898,6 +899,9 @@ func _surfaces(g: RefCounted) -> void:
 	_annulus(g, float(sq.a[0]), float(sq.a[1]), float(sq.r[0]), float(sq.r[1]), "court", 0.03)
 	var y: Dictionary = plan.yard
 	_annulus(g, float(y.a[0]), float(y.a[1]), float(y.r[0]) + 8.0, float(y.r[1]), "pit", 0.03)
+	var annex: Dictionary = y.get("annex", {}) as Dictionary
+	if not annex.is_empty():
+		_annulus(g, float(annex.a[0]), float(annex.a[1]), float((annex.dock as Array)[1]), float(y.r[0]) + 8.0, "pit", 0.03)
 
 
 ## Площадки (щебень, бетон, асфальт, грунт — с чёткими краями) и грунтовые тропы плана ground.
@@ -949,6 +953,11 @@ func drape_disk(g: RefCounted, center: Vector2, radius: float, key: String, lift
 		var p: Vector2 = center + polar(360.0 * float(i) / float(n), radius)
 		var q: Vector2 = center + polar(360.0 * float(i + 1) / float(n), radius)
 		_terrain_tri(g, scratch, c, Vector3(p.x, ground(p.x, p.y) + lift, p.y), Vector3(q.x, ground(q.x, q.y) + lift, q.y), key, 0, lift)
+
+
+## Прямоугольник по земле для соседних узлов (песок детской площадки и т. п.).
+func drape_rect(g: RefCounted, center: Vector2, size: Vector2, yaw_deg: float, key: String, lift: float) -> void:
+	_rect_drape(g, center, size, yaw_deg, key, lift)
 
 
 ## Занято ли место ряда парковки (стенки террас, пандусы, въезды, аллея, галерея, постройки) — для разметки мест.
@@ -1060,53 +1069,118 @@ func _yard(g: RefCounted) -> void:
 	var a0: float = float(a[0])
 	var a1: float = float(a[1])
 	var ds: Dictionary = dock_stair()
-	# стенка у пожарного проезда: проём под площадку лестницы с доков наверх
-	_wall_arc(g, float(r[0]), a0, a1, [], 0.0, [Vector2(float(ds.landing_a), rad_to_deg(1.9 / float(r[0])))])
+	var annex: Dictionary = y.get("annex", {}) as Dictionary
+	var s0: float = float(annex.a[0]) if not annex.is_empty() else a1
+	var s1: float = float(annex.a[1]) if not annex.is_empty() else a1
+	# стенка у пожарного проезда: проём под площадку лестницы с доков наверх; в секторе пристройки
+	# выемка уходит под неё — там стенка ближе к зданию (её ставит _annex), по краям сектора — радиальные
+	# стенки уступа
+	_wall_arc(g, float(r[0]), a0, s0, [], 0.0, [Vector2(float(ds.landing_a), rad_to_deg(1.9 / float(r[0])))])
+	if not annex.is_empty():
+		_wall_arc(g, float(r[0]), s1, a1, [], 0.0)
+		_wall_radial(g, s0, float(annex.inner), float(r[0]), 1.0)
+		_wall_radial(g, s1, float(annex.inner), float(r[0]), -1.0)
 	_wall_radial(g, a0, float(r[0]), float(r[1]), -1.0)
 	_wall_radial(g, a1, float(r[0]), float(r[1]), 1.0)
 	_wall_arc(g, float(r[1]), a0, a1, [float(y.ramp_a)], float(y.ramp_half_deg))
 	var rr: Array = y.ramp_r
 	_wall_radial(g, float(y.ramp_a) - float(y.ramp_half_deg), float(r[1]), float(rr[1]), -1.0)
 	_wall_radial(g, float(y.ramp_a) + float(y.ramp_half_deg), float(r[1]), float(rr[1]), 1.0)
-	# доковая платформа на высоте кузова: фуры подходят к ней задом
-	var span: float = fposmod(a1 - a0, 360.0)
-	var n: int = int(span / 1.5)
-	var mid_r: float = (float(dock[0]) + float(dock[1])) * 0.5
-	for i: int in range(n):
-		var pa: float = a0 + span * float(i) / float(n)
-		var pb: float = a0 + span * float(i + 1) / float(n)
-		var p: Vector2 = polar(pa, mid_r)
-		var q: Vector2 = polar(pb, mid_r)
-		var mid: Vector2 = (p + q) * 0.5
-		var dir: Vector2 = q - p
-		g.box(Vector3(mid.x, (floor_y + top) * 0.5, mid.y), Vector3(dir.length() + 0.05, top - floor_y, float(dock[1]) - float(dock[0])), "slab", true, -atan2(dir.y, dir.x))
-	# со двора на платформу — две короткие лестницы; с платформы наверх — вдоль стенки к проёму
-	for sa: float in [a0 + span * 0.25, a0 + span * 0.75]:
+	# доковая платформа на высоте кузова: фуры подходят к ней задом — по краям двора у старой стенки,
+	# в секторе пристройки — под её крышей, ближе к зданию (_annex)
+	_dock_platform(g, a0, s0, float(dock[0]), float(dock[1]), floor_y, top)
+	_dock_platform(g, s1, a1, float(dock[0]), float(dock[1]), floor_y, top)
+	# со двора на платформу — короткие лестницы на крайних кусках; с платформы наверх — вдоль стенки к проёму
+	for sa: float in [float(ds.yard_a), (s1 + a1) * 0.5]:
 		var low: Vector2 = polar(sa, float(dock[1]) + 4.2)
 		var high: Vector2 = polar(sa, float(dock[1]) + 0.1)
 		g.stairs(Vector3(low.x, floor_y, low.y), Vector3(high.x, top, high.y), 2.0, 8, "concrete")
-	var s0: Vector2 = ds.s0
-	var s1: Vector2 = ds.s1
-	g.stairs(Vector3(s0.x, top, s0.y), Vector3(s1.x, 0.0, s1.y), 2.0, 16, "concrete")
+	var st0: Vector2 = ds.s0
+	var st1: Vector2 = ds.s1
+	g.stairs(Vector3(st0.x, top, st0.y), Vector3(st1.x, 0.0, st1.y), 2.0, 16, "concrete")
 	# площадка наверху лестницы впритык к последней ступени: через проём в стенке к пожарному проезду
 	var landing: Vector2 = ds.landing
 	g.box(Vector3(landing.x, -0.48, landing.y), Vector3(5.4, 1.0, float(ds.landing_len)), "concrete", true, -deg_to_rad(float(ds.landing_a) + 90.0))
 
 
+## Внутренний радиус выемки двора: в секторе пристройки приёмки — ближе к зданию.
+func yard_inner(a: float) -> float:
+	var y: Dictionary = plan.yard
+	var annex: Dictionary = y.get("annex", {}) as Dictionary
+	if not annex.is_empty() and in_arc(a, float(annex.a[0]), float(annex.a[1])):
+		return float(annex.inner)
+	return float((y.r as Array)[0])
+
+
+## Доковая платформа по дуге от a0 до a1 (r0–r1), верх на высоте кузова.
+func _dock_platform(g: RefCounted, a0: float, a1: float, r0: float, r1: float, floor_y: float, top: float) -> void:
+	var span: float = fposmod(a1 - a0, 360.0)
+	if span < 0.5:
+		return
+	var n: int = maxi(1, int(span / 1.5))
+	var mid_r: float = (r0 + r1) * 0.5
+	for i: int in range(n):
+		var p: Vector2 = polar(a0 + span * float(i) / float(n), mid_r)
+		var q: Vector2 = polar(a0 + span * float(i + 1) / float(n), mid_r)
+		var mid: Vector2 = (p + q) * 0.5
+		var dir: Vector2 = q - p
+		g.box(Vector3(mid.x, (floor_y + top) * 0.5, mid.y), Vector3(dir.length() + 0.05, top - floor_y, r1 - r0), "slab", true, -atan2(dir.y, dir.x))
+
+
+## Ширина площадки на уровне зала за верхним концом пандуса пристройки (поперёк — от пандуса до проёма).
+const ANNEX_LANDING_W: float = 3.6
+
+
+## Угол середины площадки за верхним концом пандуса: high_a — верх пандуса, beyond — куда за него (±1).
+static func annex_landing_a(high_a: float, beyond: float, mid_r: float) -> float:
+	return high_a + beyond * rad_to_deg(ANNEX_LANDING_W * 0.5 / mid_r)
+
+
+## Путь через пристройку приёмки для проверки: со дна двора в свободные ворота, по лестнице на рампу,
+## по пандусу на уровень зала, к воротам доков в стене ТЦ. Пусто — пристройки нет.
+func annex_walk() -> Array[Vector3]:
+	var y: Dictionary = plan.yard
+	var annex: Dictionary = y.get("annex", {}) as Dictionary
+	var path: Array[Vector3] = []
+	if annex.is_empty() or (annex.get("stairs", []) as Array).is_empty():
+		return path
+	var sa: float = float((annex.stairs as Array)[0])
+	var dock: Array = annex.dock
+	var mid_r: float = (float(dock[0]) + float(dock[1])) * 0.5
+	var high_a: float = float(annex.a[1]) - 1.6
+	var low_a: float = high_a - rad_to_deg(13.0 / mid_r)
+	var floor_y: float = float(y.floor)
+	var top: float = float(y.dock_top)
+	var mall_r: float = float((plan.mall as Dictionary).r)
+	var land_a: float = annex_landing_a(high_a, 1.0, mid_r)
+	for q: Array in [[sa, float(annex.outer) + 12.0, floor_y], [sa, float(annex.outer) + 1.0, floor_y],
+			[sa, float(dock[1]) - 0.8, top], [low_a - 0.4, mid_r, top], [high_a - 0.3, mid_r, 0.0],
+			[land_a, mid_r, 0.0], [land_a, float(annex.inner) - 3.0, 0.0], [-41.0, mall_r + 4.0, 0.0]]:
+		var p: Vector2 = polar(float(q[0]), float(q[1]))
+		path.append(Vector3(p.x, float(q[2]) + 0.04, p.y))
+	return path
+
+
 ## Лестница с доковой платформы наверх, к пожарному проезду: низ и верх марша (вдоль платформы),
 ## площадка у проёма в стенке — впритык к верхней ступени. Её же проходит проверка черновика.
+## Всё — на западном краю двора, вне сектора пристройки; yard_a — где короткая лестница со двора на платформу.
 func dock_stair() -> Dictionary:
 	var y: Dictionary = plan.yard
 	var dock: Array = y.dock
-	var stair_up: float = (float(y.a[0]) + float(y.a[1])) * 0.5 + 6.0
+	var annex: Dictionary = y.get("annex", {}) as Dictionary
+	var west_end: float = float(annex.a[0]) if not annex.is_empty() else float(y.a[1])
 	var mid_r: float = (float(dock[0]) + float(dock[1])) * 0.5
+	# марш поднимается на запад (верх — у западного края двора), короткая лестница со двора — восточнее него
+	var stair_up: float = float(y.a[0]) + 4.4
+	var low_a: float = stair_up + 3.6
+	var yard_a: float = west_end - 1.5
 	# поперёк — от верхней ступени до 4 м за стенку, по дуге 5,4 м: край заходит на 0,2 м под ступень
 	var inner: float = float(y.r[0]) - 4.0
 	var outer: float = mid_r + 1.5
 	var land_r: float = (inner + outer) * 0.5
-	var land_a: float = stair_up + rad_to_deg(2.5 / mid_r)
-	return {"s0": polar(stair_up - 3.6, mid_r), "s1": polar(stair_up, mid_r), "landing": polar(land_a, land_r),
-		"landing_a": land_a, "landing_len": outer - inner, "top": polar(land_a, float(y.r[0]) - 12.0)}
+	var land_a: float = stair_up - rad_to_deg(2.5 / mid_r)
+	return {"s0": polar(low_a, mid_r), "s1": polar(stair_up, mid_r), "landing": polar(land_a, land_r),
+		"landing_a": land_a, "landing_len": outer - inner, "top": polar(land_a, float(y.r[0]) - 12.0), "yard_a": yard_a}
 
 
 func _plaza(g: RefCounted) -> void:
@@ -1126,10 +1200,6 @@ func _plaza(g: RefCounted) -> void:
 		cover_spots.append(Vector2(float(planter[0]), float(planter[1])))
 		g.box(Vector3(float(planter[0]), 0.45, float(planter[1])), Vector3(9.0, 0.9, 9.0), "concrete")
 		g.box(Vector3(float(planter[0]), 1.3, float(planter[1])), Vector3(7.0, 1.0, 7.0), "foliage", false)
-	# детская площадка в сквере — несколько низких форм
-	var pg: Array = (plan.square as Dictionary).playground
-	for k: int in range(4):
-		g.box(Vector3(float(pg[0]) - 5.0 + float(k % 2) * 10.0, ground(float(pg[0]), float(pg[1])) + 0.9, float(pg[1]) - 5.0 + float(k / 2) * 10.0), Vector3(2.4, 1.8, 2.4), "accent")
 
 
 ## Брошенные машины рядами (с пропусками, как после бегства): короб седана с коллизией.
@@ -1297,16 +1367,10 @@ func _trees(g: RefCounted) -> void:
 			inside = inside or Geometry2D.is_point_in_polygon(p, f)
 		if inside and _clear_of_roads(p, 3.0) and (power.size() < 2 or line_distance(p, power) > 12.0) and _clear_for_tree(p):
 			spots.append(p)
-	# сквер: деревья между дорожками
-	var sq: Dictionary = plan.square
-	var sa: Array = sq.a
-	var sr: Array = sq.r
-	var srng: RandomNumberGenerator = RandomNumberGenerator.new()
-	srng.seed = int(sq.seed)
-	for i: int in range(int(sq.trees)):
-		var p: Vector2 = polar(srng.randf_range(float(sa[0]) + 2.0, float(sa[1]) - 2.0), srng.randf_range(float(sr[0]) + 6.0, float(sr[1]) - 4.0))
-		if _clear_of_roads(p, 2.0):
-			spots.append(p)
+	# сквер-парк: деревья по раскладке парка (аллейные и по газонам, не на дорожках — mall_study_park.py)
+	var park: Dictionary = (plan.get("filler", {}) as Dictionary).get("park", {}) as Dictionary
+	for t: Array in park.get("trees", []):
+		spots.append(Vector2(float(t[0]), float(t[1])))
 	for p: Vector2 in spots:
 		var h: float = rng.randf_range(8.0, 16.0)
 		var r: float = rng.randf_range(0.15, 0.28)
@@ -1506,3 +1570,93 @@ func _bridge(g: RefCounted, bridge: Dictionary) -> void:
 		var pier: Vector2 = at + across * side * (_river_bed_half + 1.0)
 		var foot: float = ground(pier.x, pier.y)
 		g.box(Vector3(pier.x, (foot + deck - 0.5) * 0.5, pier.y), Vector3(0.8, maxf(0.2, deck - 0.5 - foot), width * 0.8), "concrete", true, yaw)
+
+
+# ---------------------------------------------------------------- пристройка приёмки товара
+
+## Пристройка «приёмка товара» между стеной ТЦ (ворота доков −49°, −45°, −41°) и двором (владелец, 2026-10-17:
+## «товар должен сразу попадать внутрь»). Фуры задом заходят в ворота фасада к рампе под крышей; с рампы —
+## пандусы по краям и два грузовых лифта на уровень ТЦ; пожарный проезд — сквозь пристройку (ворота в торцах).
+func _annex(g: RefCounted) -> void:
+	var y: Dictionary = plan.yard
+	var annex: Dictionary = y.get("annex", {}) as Dictionary
+	if annex.is_empty():
+		return
+	var a0: float = float(annex.a[0])
+	var a1: float = float(annex.a[1])
+	var inner: float = float(annex.inner)
+	var outer: float = float(annex.outer)
+	var dock: Array = annex.dock
+	var roof: float = float(annex.roof)
+	var floor_y: float = float(y.floor)
+	var top: float = float(y.dock_top)
+	var mall_r: float = float((plan.mall as Dictionary).r)
+	var lane: Array = (plan.mall as Dictionary).fire_lane
+	# рампа под крышей и стенка уступа к залу (с проёмами у пандусов)
+	_dock_platform(g, a0, a1, float(dock[0]), float(dock[1]), floor_y, top)
+	# пандусы с рампы на уровень зала по краям сектора: вдоль дуги; за верхним концом — площадка на уровне
+	# зала поперёк рампы, от пандуса до проёма в стенке уступа (проём — напротив площадки)
+	var mid_r: float = (float(dock[0]) + float(dock[1])) * 0.5
+	var openings: Array[Vector2] = []
+	for end: Array in [[a0 + 1.6, 1.0], [a1 - 1.6, -1.0]]:
+		var high_a: float = float(end[0])
+		var low_a: float = high_a + float(end[1]) * rad_to_deg(13.0 / mid_r)
+		var low: Vector2 = polar(low_a, mid_r)
+		var high: Vector2 = polar(high_a, mid_r)
+		g.stairs(Vector3(low.x, top, low.y), Vector3(high.x, 0.0, high.y), 3.2, 14, "concrete")
+		var land_a: float = annex_landing_a(high_a, -float(end[1]), mid_r)
+		var land_in: float = inner - 3.5
+		var land_out: float = mid_r + 1.9
+		var land: Vector2 = polar(land_a, (land_in + land_out) * 0.5)
+		g.box(Vector3(land.x, top * 0.5, land.y), Vector3(ANNEX_LANDING_W, -top, land_out - land_in), "concrete", true,
+			-deg_to_rad(land_a + 90.0))
+		openings.append(Vector2(land_a, rad_to_deg(ANNEX_LANDING_W * 0.5 / inner)))
+	_wall_arc(g, inner, a0, a1, [], 0.0, openings)
+	# в свободных воротах — лестница со дна двора на рампу (людям; фуры встают задом к рампе)
+	for sa: Variant in annex.get("stairs", []):
+		var low: Vector2 = polar(float(sa), outer + 0.3)
+		var high: Vector2 = polar(float(sa), float(dock[1]) + 0.1)
+		g.stairs(Vector3(low.x, floor_y, low.y), Vector3(high.x, top, high.y), 2.2, 8, "concrete")
+	# грузовые лифты: шахты от рампы до крыши у стенки уступа
+	for la: Variant in annex.get("lifts", []):
+		var c: Vector2 = polar(float(la), inner - 1.8)
+		g.box(Vector3(c.x, (top + roof) * 0.5, c.y), Vector3(3.2, roof - top, 3.2), "steel", true, -deg_to_rad(float(la) + 90.0))
+		var door: Vector2 = polar(float(la), inner - 0.1)
+		g.box(Vector3(door.x, 1.2, door.y), Vector3(2.4, 2.4, 0.08), "dark", false, -deg_to_rad(float(la) + 90.0))
+	# крыша
+	var span: float = fposmod(a1 - a0, 360.0)
+	var n: int = maxi(2, int(span / 1.5))
+	for i: int in range(n):
+		var pa: float = a0 + span * float(i) / float(n)
+		var pb: float = a0 + span * float(i + 1) / float(n)
+		var p: Vector2 = polar((pa + pb) * 0.5, (mall_r + outer + 1.0) * 0.5)
+		var w: float = deg_to_rad(pb - pa) * outer + 0.1
+		g.box(Vector3(p.x, roof + 0.2, p.y), Vector3(w, 0.4, outer + 1.0 - mall_r), "slab", true, -deg_to_rad((pa + pb) * 0.5 + 90.0))
+	# фасад к двору: от дна двора до крыши, ворота для фур (4,6 × 4,2 м) у каждого дока
+	var bays: Array = annex.get("bays", [])
+	var bay_half: float = rad_to_deg(2.3 / outer)
+	for i: int in range(n * 2):
+		var pa: float = a0 + span * float(i) / float(n * 2)
+		var pb: float = a0 + span * float(i + 1) / float(n * 2)
+		var mid_a: float = (pa + pb) * 0.5
+		var p: Vector2 = polar(mid_a, outer)
+		var w: float = deg_to_rad(pb - pa) * outer + 0.05
+		var gate: bool = false
+		for b: Variant in bays:
+			gate = gate or angle_gap(mid_a, float(b)) < bay_half
+		var bottom: float = floor_y + (4.6 if gate else 0.0)
+		g.box(Vector3(p.x, (bottom + roof) * 0.5, p.y), Vector3(w, roof - bottom, 0.4), "wall", true, -deg_to_rad(mid_a + 90.0))
+		if not gate:
+			cover_spots.append(p)
+	# торцы: от стены ТЦ до фасада; в зоне пожарного проезда — ворота 5 м (проезд сквозь пристройку)
+	for a: float in [a0, a1]:
+		var r: float = mall_r
+		while r < outer - 0.01:
+			var r2: float = minf(outer, r + 2.0)
+			var mid_r2: float = (r + r2) * 0.5
+			var p: Vector2 = polar(a, mid_r2)
+			var low: float = 0.0 if mid_r2 < inner else floor_y
+			if mid_r2 > float(lane[0]) - 1.0 and mid_r2 < float(lane[1]) + 1.0:
+				low = 5.0
+			g.box(Vector3(p.x, (low + roof) * 0.5, p.y), Vector3(r2 - r, roof - low, 0.4), "wall", true, -deg_to_rad(a))
+			r = r2
