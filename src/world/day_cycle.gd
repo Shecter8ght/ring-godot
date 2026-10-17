@@ -338,9 +338,11 @@ func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 			e.volumetric_fog_density = float(e.get_meta("vol_base")) * _mixf(w, "vol") * lerpf(1.0, float(Balance.NIGHT_ENV.fog_k), float(w.night))
 		var day_env: Dictionary = e.get_meta("day", {})
 		if not day_env.is_empty():
+			# свечение днём — Balance.DAY_GLOW (нет), к ночи — как ночью (фонари, ракеты)
 			e.glow_hdr_threshold = lerpf(float(day_env.glow_threshold), float(Balance.NIGHT_ENV.glow_threshold), float(w.night))
-			e.glow_intensity = lerpf(float(day_env.glow_intensity), float(Balance.NIGHT_ENV.glow_intensity), float(w.night))
-			e.glow_bloom = lerpf(float(day_env.glow_bloom), float(Balance.NIGHT_ENV.glow_bloom), float(w.night))
+			e.glow_intensity = lerpf(float(Balance.DAY_GLOW.intensity), float(Balance.NIGHT_ENV.glow_intensity), float(w.night))
+			e.glow_bloom = lerpf(float(Balance.DAY_GLOW.bloom), float(Balance.NIGHT_ENV.glow_bloom), float(w.night))
+			e.glow_enabled = bool(day_env.get("glow", true)) and e.glow_intensity > 0.001
 
 
 func _apply_sky(w: Dictionary, sa: Vector2, ma: Vector2) -> void:

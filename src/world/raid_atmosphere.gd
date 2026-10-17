@@ -174,20 +174,23 @@ static func hdri_sky(conf: Dictionary, weather: String, sun: DirectionalLight3D)
 
 
 ## Ночь: своё небо (звёзды, Луна), рассеянный свет ровным цветом, умеренное свечение; днём —
-## всё как в сцене (окружение общее для всех загрузок уровня — исходное запоминается).
+## как в сцене, но без свечения (Balance.DAY_GLOW; окружение общее для всех загрузок уровня — исходное
+## запоминается).
 func _apply_night(e: Environment, sky_mat: ShaderMaterial) -> void:
 	if not e.has_meta("day"):
 		e.set_meta("day", {"sky": e.sky, "ambient_source": e.ambient_light_source, "ambient_color": e.ambient_light_color,
-			"glow_threshold": e.glow_hdr_threshold, "glow_intensity": e.glow_intensity, "glow_bloom": e.glow_bloom,
+			"glow": e.glow_enabled, "glow_threshold": e.glow_hdr_threshold, "glow_intensity": e.glow_intensity, "glow_bloom": e.glow_bloom,
 			"fog_density": e.volumetric_fog_density})
 	var day: Dictionary = e.get_meta("day")
 	if sky_mat == null:
 		e.sky = day.sky
 		e.ambient_light_source = int(day.ambient_source)
 		e.ambient_light_color = day.ambient_color
+		# днём свечения нет (Balance.DAY_GLOW): ореолы от бликов и засвет против солнца
 		e.glow_hdr_threshold = float(day.glow_threshold)
-		e.glow_intensity = float(day.glow_intensity)
-		e.glow_bloom = float(day.glow_bloom)
+		e.glow_intensity = float(Balance.DAY_GLOW.intensity)
+		e.glow_bloom = float(Balance.DAY_GLOW.bloom)
+		e.glow_enabled = bool(day.get("glow", e.glow_enabled)) and e.glow_intensity > 0.001
 		e.volumetric_fog_density = float(day.fog_density)
 		return
 	var n: Dictionary = Balance.NIGHT_ENV
@@ -205,6 +208,7 @@ func _apply_night(e: Environment, sky_mat: ShaderMaterial) -> void:
 	e.glow_hdr_threshold = float(n.glow_threshold)
 	e.glow_intensity = float(n.glow_intensity)
 	e.glow_bloom = float(n.glow_bloom)
+	e.glow_enabled = bool(day.get("glow", true))
 	e.volumetric_fog_density = float(day.fog_density) * float(n.fog_k)
 	# туман не серит небо — звёзды на чёрном
 	e.fog_sky_affect = minf(e.fog_sky_affect, float(n.fog_sky))

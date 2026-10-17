@@ -173,7 +173,7 @@ float hg(float c, float g) {
 // Плотность облака 0..1 в точке q (x, z — км по карте с ветром; y — км над глазом). Карта покрытия решает,
 // где облакам быть, профиль — их высоту (чем гуще покрытие, тем выше башни), форма — сами клубы,
 // детали выедают края.
-float cloud_density(vec3 q, bool detail) {
+float cloud_density(vec3 q, float detail) {
 	float hf = (q.y - cloud_base) / (cloud_top - cloud_base);
 	if (hf <= 0.0 || hf >= 1.0) {
 		return 0.0;
@@ -189,8 +189,8 @@ float cloud_density(vec3 q, bool detail) {
 	// клубы: плавный шум формы с ячейками (Перлин — Ворли) — края «цветной капустой», а не ватой
 	float sh = mix(texture(cloud_shape, q / shape_tile).r, texture(cloud_detail, q / (shape_tile * 0.5)).r, 0.35);
 	float base = clamp((sh - (1.0 - k)) / max(k, 0.05), 0.0, 1.0);
-	if (detail && base > 0.0) {
-		float ero = (1.0 - texture(cloud_detail, q / detail_tile).r) * detail_k;
+	if (detail > 0.0 && base > 0.0) {
+		float ero = (1.0 - texture(cloud_detail, q / detail_tile).r) * detail_k * detail;
 		base = clamp((base - ero) / max(1.0 - ero, 0.05), 0.0, 1.0);
 	}
 	return base;
@@ -217,20 +217,28 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 	}
 	vec3 sd = normalize(sun_dir);
 	float cs = dot(d, sd);
-	float n = float(cloud_steps);
-	float dt = (t1 - t0) / n;
-	// неподвижный сдвиг шагов по направлению — полосы шагов уходят в мелкую рябь, кадр не мерцает
-	float jit = fract(sin(dot(d.xz * 937.0 + vec2(d.y * 113.0), vec2(12.9898, 78.233))) * 43758.5453);
-	float t = t0 + dt * jit;
+	// шаги — между сферами постоянной высоты (через dh км), без случайного сдвига: точки выборки сидят на
+	// одних высотах при любом направлении — при покачивании взгляда края облаков не «кипят» (любой шум
+	// в шагах мерцал: прицел качается на доли пикселя); полосы шагов гасит их частота (cloud_steps)
+	float dh = (cloud_top - cloud_base) / float(cloud_steps);
+	float t_prev = t0;
 	vec3 l = vec3(0.0);
 	float tr = 1.0;
 	float dsum = 0.0;
 	float wsum = 0.0;
 	for (int i = 0; i < cloud_steps; i++) {
+		if (t_prev >= t1) {
+			break;
+		}
+		float rk = rb + dh * (float(i) + 1.0);
+		float t_next = min(-rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rk * rk, 0.0)), t1);
+		float dt = t_next - t_prev;
+		float t = 0.5 * (t_prev + t_next);
+		t_prev = t_next;
 		vec3 p = vec3(0.0, rc, 0.0) + d * t;
 		float r = length(p);
 		vec3 q = vec3(p.x + cam_km.x, r - rc, p.z + cam_km.y);
-		float den = cloud_density(q, true);
+		float den = cloud_density(q, 1.0 - smoothstep(6.0, 20.0, t));
 		if (den > 0.002) {
 			vec3 up = p / r;
 			float mus = dot(up, sd);
@@ -242,7 +250,7 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 			vec3 qq = q;
 			for (int k = 0; k < 6; k++) {
 				qq += sd * ls;
-				tau += cloud_density(qq, false) * ls;
+				tau += cloud_density(qq, 0.0) * ls;
 				ls *= 1.8;
 			}
 			tau *= cloud_sigma;
@@ -261,8 +269,8 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 			float powder = 1.0 - exp(-den * cloud_sigma * 0.1);
 			float hf = (q.y - cloud_base) / (cloud_top - cloud_base);
 			// свет неба сверху гаснет под толщей облака над точкой: в тучах тёмные пятна, под башнями — тёмное дно
-			float up_tau = (cloud_density(q + vec3(0.0, 0.35, 0.0), false) * 0.35
-				+ cloud_density(q + vec3(0.0, 1.1, 0.0), false) * 0.75) * cloud_sigma;
+			float up_tau = (cloud_density(q + vec3(0.0, 0.35, 0.0), 0.0) * 0.35
+				+ cloud_density(q + vec3(0.0, 1.1, 0.0), 0.0) * 0.75) * cloud_sigma;
 			float amb_occ = mix(0.5, 1.0, exp(-up_tau * 0.08));
 			vec3 src = sun_l * ms * 4.0 * PI * mix(1.0, powder, 0.5) + cloud_amb * mix(amb_bottom, 1.0, hf) * amb_occ;
 			float st = exp(-den * cloud_sigma * dt);
@@ -275,7 +283,6 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 				break;
 			}
 		}
-		t += dt;
 	}
 	tr = max(tr - 0.02, 0.0) / 0.98;
 	// дымка между глазом и облаком: дальние облака тонут в цвете неба (в сплошных тучах — в сером)

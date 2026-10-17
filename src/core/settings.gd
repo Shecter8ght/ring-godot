@@ -79,11 +79,12 @@ var raid_weather: String = ""
 ## Точное время рейда, часы (0..24); < 0 — по времени суток (начало дня / заката / ночи).
 ## В рейде меняется сразу (одиночная игра, хост), следующий рейд начнётся с него.
 var raid_hour: float = -1.0
-## Небо смены суток: "hdri" — из фотопанорам (как было), "calc" — расчётное (AtmosphereSky). Раздел
-## graphics, ключ sky; меняется в Esc → Читы → Мир, в рейде — сразу. Свет на земле от режима не зависит.
-const SKY_MODES := ["hdri", "calc"]
-const SKY_MODE_NAMES := {"hdri": "Из фотопанорам", "calc": "Расчётное"}
-var sky_mode: String = "hdri"
+## Небо смены суток: "calc" — расчётное с облаками (AtmosphereSky; по умолчанию — решение владельца
+## 2026-10-17), "hdri" — из фотопанорам, как было. Раздел graphics, ключ sky_v2; меняется в Esc → Читы →
+## Мир, в рейде — сразу. Свет на земле от режима почти не зависит.
+const SKY_MODES := ["calc", "hdri"]
+const SKY_MODE_NAMES := {"calc": "Расчётное", "hdri": "Из фотопанорам"}
+var sky_mode: String = "calc"
 ## Свои клавиши поверх project.godot: действие → {"t": "k", "c": физ. код} или {"t": "m", "b": кнопка
 ## мыши}. Раздел keys; меняются в меню Esc → «Управление».
 var keys: Dictionary = {}
@@ -121,8 +122,9 @@ func _load() -> void:
 	lens_fx = bool(cfg.get_value("graphics", "lens_fx", lens_fx))
 	# ключ сменён: прежнее «включено по умолчанию» уже записано у игроков — с 2026-10-07 выключено
 	motion_blur = bool(cfg.get_value("graphics", "motion_blur_v2", motion_blur))
-	var sm := String(cfg.get_value("graphics", "sky", sky_mode))
-	sky_mode = sm if sm in SKY_MODES else "hdri"
+	# ключ сменён: прежнее умолчание «из панорам» уже записано у игроков — с 2026-10-17 по умолчанию расчётное
+	var sm := String(cfg.get_value("graphics", "sky_v2", sky_mode))
+	sky_mode = sm if sm in SKY_MODES else "calc"
 	sens_fps = clampf(float(cfg.get_value("mouse", "fps", sens_fps)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
@@ -157,7 +159,9 @@ func save() -> void:
 	cfg.set_value("graphics", "window", window_mode)
 	cfg.set_value("graphics", "lens_fx", lens_fx)
 	cfg.set_value("graphics", "motion_blur_v2", motion_blur)
-	cfg.set_value("graphics", "sky", sky_mode)
+	cfg.set_value("graphics", "sky_v2", sky_mode)
+	if cfg.has_section_key("graphics", "sky"):
+		cfg.erase_section_key("graphics", "sky")
 	if cfg.has_section_key("graphics", "motion_blur"):
 		cfg.erase_section_key("graphics", "motion_blur")
 	cfg.set_value("mouse", "fps", sens_fps)

@@ -39,7 +39,8 @@ func _ready() -> void:
 	me.health.max_hp = 1e9
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	CameraRig.first_person_mode = true
-	var at := Vector3(88, 0.0, -5)
+	# двор у спортплощадки (после перекладки зоны 1 в квадрат 600 м прежняя точка ушла в лес)
+	var at := Vector3(41, 0.0, 44)
 	var at_env: String = OS.get_environment("SKY_CMP_AT")
 	if at_env != "":
 		var p: PackedStringArray = at_env.split(":")
