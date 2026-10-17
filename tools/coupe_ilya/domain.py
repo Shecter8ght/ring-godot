@@ -31,11 +31,18 @@ class View:
         "bottom": ((1, 0, 0), (0, 1, 0), (0, 0, 1)),
     }
 
-    def __init__(self, kind: str, c=(0, 0, 0), a=(0, 0, 1), e0=(0, -1, 0), r0: float = 1.0) -> None:
+    def __init__(self, kind: str, c=(0, 0, 0), a=(0, 0, 1), e0=(0, -1, 0), r0: float = 1.0,
+                 u=None, v=None, d=None) -> None:
         self.kind = kind
+        self.planar = kind in self.PLANAR or kind == "plane"
         if kind in self.PLANAR:
             u, v, d = (np.array(t, dtype=float) for t in self.PLANAR[kind])
             self.u, self.v, self.d = u, v, d
+        elif kind == "plane":
+            # свой плоский вид: u, v — оси на плоскости, d — направление луча (внутрь машины)
+            self.u = np.array(u, float) / np.linalg.norm(u)
+            self.v = np.array(v, float) / np.linalg.norm(v)
+            self.d = np.array(d, float) / np.linalg.norm(d)
         else:
             self.c = np.array(c, dtype=float)
             self.a = np.array(a, dtype=float) / np.linalg.norm(a)
@@ -46,14 +53,14 @@ class View:
             self.r0 = r0
 
     def to_uv(self, P: np.ndarray) -> np.ndarray:
-        if self.kind in self.PLANAR:
+        if self.planar:
             return np.c_[P @ self.u, P @ self.v]
         q = P - self.c
         th = np.arctan2(q @ self.e1, q @ self.e0)
         return np.c_[th * self.r0, q @ self.a]
 
     def rays(self, uv: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        if self.kind in self.PLANAR:
+        if self.planar:
             O = uv[:, :1] * self.u + uv[:, 1:2] * self.v - self.d * 3.5
             return O, np.broadcast_to(self.d, O.shape)
         th = uv[:, 0] / self.r0
@@ -176,10 +183,33 @@ def loop_on_surface(surf: Surface, view: View, design_uv, h: float, inset: float
     return resample(closed, n + 1)[:-1]
 
 
+def fit_smooth(view: View, V: np.ndarray, deg: int) -> tuple[np.ndarray, float]:
+    """Точки → гладкая поверхность: расстояние вдоль луча вида как многочлен степени deg от uv.
+
+    Стекло гнут по простой поверхности; поле кузова несёт мелкие волны профиля с чертежа и места
+    сопряжений — на стекле в отражении это видно как искажения. Возвращает точки и наибольший сдвиг.
+    """
+    uv = view.to_uv(V)
+    O, D = view.rays(uv)
+    D = np.broadcast_to(D, V.shape)
+    t = ((V - O) * D).sum(1)
+    c = uv.mean(0)
+    sc = np.maximum(np.ptp(uv, axis=0) / 2, 1e-6)
+    q = (uv - c) / sc
+    A = np.stack([q[:, 0] ** i * q[:, 1] ** j for i in range(deg + 1) for j in range(deg + 1 - i)], 1)
+    coef, *_ = np.linalg.lstsq(A, t, rcond=None)
+    tf = A @ coef
+    return O + tf[:, None] * D, float(np.abs(tf - t).max())
+
+
 def domain_panel(surf: Surface, view: View, outer, holes=(), h: float = 0.012, gap: float = 0.0045,
                  roll_r: float = 0.003, flange: float = 0.012, roll_steps: int = 3,
-                 hole_depth: float | None = None, smooth: bool = True):
-    """Панель: (вершины, грани). hole_depth — глубина стенки проёма (по умолчанию как отбортовка)."""
+                 hole_depth: float | None = None, smooth: bool = True, fit_deg: int | None = None,
+                 fit_blend: float = 0.0):
+    """Панель: (вершины, грани). hole_depth — глубина стенки проёма (по умолчанию как отбортовка).
+
+    fit_deg — для стёкол: поверхность панели подгоняется многочленом этой степени (см. fit_smooth).
+    """
     from mathutils import Vector
     from mathutils.geometry import delaunay_2d_cdt
 
@@ -217,6 +247,23 @@ def domain_panel(surf: Surface, view: View, outer, holes=(), h: float = 0.012, g
     # Подъём на кузов: контуры — уже на поверхности, внутренние точки — лучами вида
     nb = sum(len(L) for L in loops_uv)
     V = np.vstack(loops3 + [view.lift(surf, grid)]) if len(grid) else np.vstack(loops3)
+    if fit_deg:
+        Vf, dev = fit_smooth(view, V, fit_deg)
+        if fit_blend > 0:
+            # у краёв — к проёму кузова (кромки стекла совпадают с панелями), внутри — гладкая поверхность
+            dist = np.zeros(len(V))
+            if len(grid):
+                dist[nb:] = _dist_to_loops(grid, loops_uv)
+            w = np.clip(dist / fit_blend, 0, 1)
+            w = w * w * (3 - 2 * w)
+            Vf = V + (Vf - V) * w[:, None]
+        V = Vf
+        print(f"    стекло: подгонка степени {fit_deg}, наибольший сдвиг {dev * 1000:.1f} мм")
+        cut, out_loops = 0, []
+        for L in loops3:
+            out_loops.append(V[cut:cut + len(L)])
+            cut += len(L)
+        loops3 = out_loops
     # Грани наружу
     nrm = np.cross(V[tris[:, 1]] - V[tris[:, 0]], V[tris[:, 2]] - V[tris[:, 0]])
     sn = surf.normal(V[tris].mean(1))

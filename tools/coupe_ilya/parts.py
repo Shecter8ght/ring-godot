@@ -30,6 +30,20 @@ def rounded_rect(w: float, h: float, r: float, n_corner: int = 4) -> np.ndarray:
     return np.array(pts)
 
 
+def d_section(w: float, h: float, r_front: float, r_rear: float, n_corner: int = 6) -> np.ndarray:
+    """Сечение «D»: по u — длина (минус — перёд), по v — высота; перёд с радиусом r_front, зад — r_rear."""
+    r_front = min(r_front, w * 0.6, h / 2 * 0.999)
+    r_rear = min(r_rear, h / 2 * 0.999)
+    pts = []
+    corners = ((w / 2 - r_rear, h / 2 - r_rear, 0, r_rear), (-w / 2 + r_front, h / 2 - r_front, 90, r_front),
+               (-w / 2 + r_front, -h / 2 + r_front, 180, r_front), (w / 2 - r_rear, -h / 2 + r_rear, 270, r_rear))
+    for cx, cy, a0, r in corners:
+        for k in range(n_corner + 1):
+            a = math.radians(a0 + 90 * k / n_corner)
+            pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
+    return np.array(pts)
+
+
 def loft(path: np.ndarray, U: np.ndarray, Vv: np.ndarray, section, cap: bool = True, scale=None):
     """Труба вдоль path: сечение section(i) (k×2) в осях U[i], Vv[i]. Возвращает V, F (четырёхугольники)."""
     n = len(path)
@@ -265,37 +279,35 @@ def mirror_parts(surf: Surface):
     Vv = np.broadcast_to(np.array([0, 0, 1.0]), path.shape)
 
     def sec(i):
+        # «D»: перёд скруглён крупно, зад — плоский под стекло, с небольшими радиусами по краям
         w, h = yr[i] - yf[i], zt[i] - zb[i]
-        base = rounded_rect(w, h, min(w, h) * 0.42, 6)
-        # перёд (минус по U) — пухлее: сдвигаем переднюю половину по дуге
-        bulge = np.clip(-base[:, 0] / (w / 2), 0, 1) ** 2 * 0.0
-        base[:, 0] -= bulge
-        return base
+        return d_section(w, h, min(w, h) * 0.45, min(0.007, h * 0.2))
     housing = loft(path, U, Vv, sec, cap=True)
-    # Стекло: плоскость чуть утоплена в заднюю кромку корпуса
-    gx = np.linspace(xs[1], xs[-4], 18)
-    gz0 = np.interp(gx, xs, zb) + 0.012
-    gz1 = np.interp(gx, xs, zt) - 0.012
-    gy = np.interp(gx, xs, yr) + 0.0008
-    rows = 10
-    G = []
-    for j in range(rows):
-        t = j / (rows - 1)
-        G.append(np.c_[gx, gy, gz0 + (gz1 - gz0) * t])
-    G = np.array(G)                                               # [rows, len(gx), 3]
-    gv = G.reshape(-1, 3)
-    n = len(gx)
-    gf = [(j * n + i + 1, j * n + i, (j + 1) * n + i, (j + 1) * n + i + 1) for j in range(rows - 1) for i in range(n - 1)]
-    glass = (gv, gf)
+    # Стекло — скруглённая фигура на плоском заду, отступ 9 мм от краёв; вокруг — ободок корпуса
+    gx = np.linspace(xs[2], xs[-3], 14)
+    bot = np.c_[gx, np.interp(gx, xs, zb) + 0.009]
+    top = np.c_[gx, np.interp(gx, xs, zt) - 0.009][::-1]
+    outline = spline2d(np.vstack([bot[1:-1], [[gx[-1] + 0.004, (bot[-1, 1] + top[0, 1]) / 2]], top[1:-1],
+                                  [[gx[0] - 0.004, (bot[0, 1] + top[-1, 1]) / 2]]]), 120, closed=True)[:-1]
+    if poly_area(outline) < 0:
+        outline = outline[::-1]
+    pv, pf = poly_mesh(outline)
+    yy = np.interp(pv[:, 0], xs, yr)
+    glass = (np.c_[pv[:, 0], yy + 0.0012, pv[:, 1]], [f[::-1] for f in pf])
+    ring = np.c_[outline[:, 0], np.interp(outline[:, 0], xs, yr) + 0.0015, outline[:, 1]]
+    ring = np.vstack([ring, ring[:1]])
+    T, N, B = frames(ring, np.array([0, 1.0, 0]))
+    bezel = loft(ring, N, B, rounded_rect(0.006, 0.0045, 0.0021, 3), cap=False)
     # Ножка: от двери под корпусом, обтекаемое сечение
-    door_pt = VIEWS["side"].lift(surf, np.array([[-0.420, 0.925]]))[0]
-    top_pt = np.array([0.905, -0.405, 1.002])
-    t = np.linspace(0, 1, 14)[:, None]
-    mid = (door_pt + top_pt) / 2 + np.array([0.02, 0, -0.01])
+    # Ножка: короткая и широкая, от верхнего переднего угла двери прямо под корпус (в цвет кузова)
+    door_pt = VIEWS["side"].lift(surf, np.array([[-0.425, 0.968]]))[0] - np.array([0.006, 0, 0])
+    top_pt = np.array([0.890, -0.418, 1.004])
+    t = np.linspace(0, 1, 10)[:, None]
+    mid = (door_pt + top_pt) / 2 + np.array([0.0, 0.0, 0.006])
     P = (1 - t) ** 2 * door_pt + 2 * (1 - t) * t * mid + t ** 2 * top_pt
     T, N, B = frames(P, np.array([0, 1.0, 0]))
-    arm = loft(P, N, B, rounded_rect(0.055, 0.022, 0.010, 4), cap=True)
-    return housing, glass, arm
+    arm = loft(P, N, B, rounded_rect(0.075, 0.030, 0.013, 4), cap=True)
+    return merge([housing, bezel]), glass, arm
 
 
 def wheel_liner(yc: float, zc: float, r: float = 0.405, x_in: float = 0.50, x_out: float = 0.955,

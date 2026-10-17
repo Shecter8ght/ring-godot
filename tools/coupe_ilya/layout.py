@@ -258,17 +258,17 @@ def build_rear(surf: Surface, S: dict, out: list) -> None:
 
     # --- Стёкла -----------------------------------------------------------------------------
     ws = sym_loop([S["ws_base"].P, S["ws_side"].P, S["ws_top"].P])
-    V, F = domain_panel(surf, VIEWS["rx_front"], ws, h=0.016, gap=0.006, flange=0.02)
+    V, F = domain_panel(surf, VIEWS["ws"], ws, h=0.016, gap=0.006, flange=0.02, fit_deg=4, fit_blend=0.05)
     out.append(("Glass_Windshield", "glass", V, F))
     bl = sym_loop([S["bl_bot"].reversed(), S["bl_side"].reversed(), S["bl_top"].P])
-    V, F = domain_panel(surf, VIEWS["rx_rear"], bl, h=0.016, gap=0.006, flange=0.02)
+    V, F = domain_panel(surf, VIEWS["bl"], bl, h=0.016, gap=0.006, flange=0.02, fit_deg=4, fit_blend=0.05)
     out.append(("Glass_Rear", "glass", V, F))
     door_g = loop([S["door_top"].P, S["bpillar"].P, S["dlo_up_f"].P])
-    V, F = domain_panel(surf, VIEWS["side"], door_g, h=0.014, gap=0.005, flange=0.02)
+    V, F = domain_panel(surf, VIEWS["side"], door_g, h=0.014, gap=0.005, flange=0.02, fit_deg=3, fit_blend=0.03)
     out.append(("Glass_Door_L", "glass", V, F))
     out.append(("Glass_Door_R", "glass", *mirror_mesh(V, F)))
     q_g = loop([S["q_belt"].P, S["dlo_up_r"].P, S["bpillar"].reversed()])
-    V, F = domain_panel(surf, VIEWS["side"], q_g, h=0.012, gap=0.005, flange=0.02)
+    V, F = domain_panel(surf, VIEWS["side"], q_g, h=0.012, gap=0.005, flange=0.02, fit_deg=3, fit_blend=0.03)
     out.append(("Glass_Quarter_L", "glass", V, F))
     out.append(("Glass_Quarter_R", "glass", *mirror_mesh(V, F)))
     # --- Крыша и подлобовой короб ------------------------------------------------------------
@@ -304,12 +304,18 @@ def build_rear(surf: Surface, S: dict, out: list) -> None:
     # --- Задний бампер с нишей номера -------------------------------------------------------
     bump = sym_loop([S["lid_lower"].reversed(), S["tl_bot_rear"].P, S["bump_quarter"].P, S["arch_r_low"].P,
                      S["diff_top_s"].P, S["diff_top_r"].P])
-    plate = [("rear", x, z) for x, z in [(0.0, 0.612), (0.225, 0.611), (0.238, 0.598), (0.238, 0.512),
-                                         (0.225, 0.498), (0.0, 0.497)]]
+    # Ниша номера 544×134 под номер 520×112: номер стоит внутри, за кромками изогнутого бампера
+    plate = [("rear", x, z) for x, z in [(0.0, 0.623), (0.255, 0.622), (0.272, 0.606), (0.272, 0.504),
+                                         (0.255, 0.488), (0.0, 0.487)]]
     plate = plate + [("rear", -x, z) for _, x, z in reversed(plate[1:-1])]
-    V, F = domain_panel(surf, VIEWS["rr"], bump, holes=[Seam(surf, plate, "rear", n=300, closed=True).P],
-                        h=0.013, gap=GAP_TIGHT, hole_depth=0.015)
+    plate_loop = Seam(surf, plate, "rear", n=300, closed=True).P
+    V, F = domain_panel(surf, VIEWS["rr"], bump, holes=[plate_loop], h=0.013, gap=GAP_TIGHT, hole_depth=0.032)
     out.append(("Bumper_R", "paint", V, F))
+    import parts as _pt
+    # дно ниши шире проёма на 12 мм — заходит под стенку, без щели по кромке
+    import domain as _dm
+    floor_loop = _dm.loop_on_surface(surf, VIEWS["rr"], plate_loop, 0.012, 0.012, True)
+    out.append(("Plate_Recess_Floor", "paint", *_pt.backing(surf, VIEWS["rr"], floor_loop, 0.036)))
     # --- Диффузор с выхлопом ----------------------------------------------------------------
     diff = sym_loop([S["diff_top_r"].reversed(), S["diff_top_s"].reversed(), S["arch_r_diff"].P, S["under"].P])
     ex_l = [("rear", x, z) for x, z in EXHAUST_L]
@@ -366,6 +372,11 @@ def build_parts(surf: Surface, S: dict, out: list) -> None:
     out.append(("Sill_Trim_L_cracked", "chrome", *left))
     out.append(("Sill_Trim_R", "chrome", *mirror_mesh(*pt.strip_on_surface(surf, line, 0.018, 0.004, 0.001))))
     out.append(("Sill_Trim_Fragment", "chrome", *pt.strip_on_surface(surf, frag, 0.018, 0.004, 0.001)))
+    # Молдинг по верху двери и задней боковины: закрывает стык с ровным стеклом (как уплотнитель на CLE)
+    belt = np.vstack([S["door_top"].P, S["q_belt"].P[1:]])
+    bm = pt.strip_on_surface(surf, belt, 0.014, 0.006, 0.0, r=0.0026)
+    out.append(("Belt_Molding_L", "chrome", *bm))
+    out.append(("Belt_Molding_R", "chrome", *mirror_mesh(*bm)))
     # Ручки дверей — заподлицо, тонкая планка у задней кромки двери
     hy = np.linspace(0.30, 0.48, 40)
     hline = side.lift(surf, np.c_[hy, np.full(len(hy), 0.862)])
@@ -375,7 +386,7 @@ def build_parts(surf: Surface, S: dict, out: list) -> None:
     # Зеркала
     housing, mglass, arm = pt.mirror_parts(surf)
     for nm, mat, mesh in (("Mirror_Housing", "paint", housing), ("Mirror_Glass", "mirror", mglass),
-                          ("Mirror_Arm", "trim_gloss_black", arm)):
+                          ("Mirror_Arm", "paint", arm)):
         out.append((nm + "_L", mat, *mesh))
         out.append((nm + "_R", mat, *mirror_mesh(*mesh)))
     # Подкрылки и днище
