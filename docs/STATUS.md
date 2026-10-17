@@ -5481,3 +5481,33 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   assemble.py). Подробности и оценки — `asset-state.md`.
 - Ждёт решения владельца по форме и по анимации; текстуры v07 — после принятия. Принятая v06 и её текстуры не менялись.
 
+
+### 2026-10-17 — уборка папки проекта: 75 → 38 ГБ (Claude)
+
+- По поручению владельца убраны старые итерации и мусор. Ничего не удалено насовсем: всё перенесено
+  в карантин `E:\RING_карантин_2026-10-17\` по тем же относительным путям, список — `СПИСОК.txt` там же.
+  Вернуть вещь — перенести обратно по тому же пути. Карантин удаляет владелец, когда убедится, что всё работает.
+- В карантине (26 ГБ): выпуск моделей на GitHub 16.10 (`_asset_src/weapon_share_20261016`, загружен и сверен);
+  старая сборка `export/` от 09.10; `tools/_probe`, `tools/__pycache__`, логи `tools/_task_*.log`;
+  дизайн-документы оружия v10 и v14 (оставлен v15); граната — `texture_v08`, `materials_v09_stage1`,
+  `materials_v10_stage2` и вложенные `backup_*` (оставлены v10b — принятая и v11 — последняя);
+  ПМ — `pm_texturing/{candidate,delivery,revision_20_v02,revision_20_v03,work}`, `pm_refinement/work/PM_Body_v10.blend`
+  (оставлены 100/60 v02, 20 v04, геометрия v11); `ak12_2018` — промежуточные AK-12 и ВЕРАС v1–v7
+  (оставлены license, `VERAS54_Textured_v7`, `standalone_v7`, `textures_v7`); `vss_stock_v3/Before_Shoulder_Correction.zip`;
+  распакованные архивы (Scratches004, Smear002, `VSS_Textured_Kit.zip`); 249 резервных `.blend1`/`.kra~`
+  рядом с основным файлом; 1 ГБ сирот кэша `.godot/imported` (ассетов, которых больше нет).
+  Последние `.blend` ПМ и гранаты проверены в Blender: текстуры упакованы, на старые папки не ссылаются.
+- Тестовые копии проекта в `_asset_src` (`lumar_h1_game/{commit_check,regression_baseline}`,
+  `flare_pistol_codex/integration/baseline`) содержали junction на настоящие `assets`, `scenes`, `addons`,
+  `.godot/imported` — рекурсивное удаление такой копии стёрло бы ассеты игры. Ссылки сняты, копии в карантине.
+  **Тестовые копии проекта больше не делать через junction** — только полной копией или `git worktree`.
+- `git lfs prune --verify-remote`: локальный LFS 13 → 4,4 ГБ (старые версии есть на GitHub, `git lfs fsck` — OK).
+  20 объектов LFS (50 МБ) на GitHub отсутствуют — единственные копии отложены в карантин (`.git/lfs/objects`).
+- Прототип Codex `first_job` (обучение `first_steps`, заказ `car_parking_check`), заменённый в main
+  согласованными `tutorial_basics` / `car_recovery`, закоммичен в ветку `local-2026-10-17` (314a9c60, не отправлена)
+  и убран из рабочей копии.
+- Проверено: `compile_check` — 0 ошибок; `tutorial_test` — 0 провалов.
+- Не тронуто, решает владелец: `_asset_src/sound_libraries` (3,3 ГБ, сырой архив CC0-библиотеки — скачивается
+  заново), `_asset_src/Zone01/Sketchfab/2_можно_не_использовано` и `3_нельзя` (2 ГБ), `docs/screens` в git (1,7 ГБ),
+  `_sound_try`, `Записанные звуки`, `референсы`, ракетница Claude (незакоммиченные файлы и запечённая GLB
+  в ветке `local-2026-10-17`).
