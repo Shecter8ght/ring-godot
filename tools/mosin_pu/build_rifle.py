@@ -54,6 +54,15 @@ BUTTPLATE_T = 3.0
 # между коробкой и колодкой: строки поперёк ствола, верх букв к дулу; (текст, x середины строки).
 STAMP_BARREL = (("ВЕРАСОВСКІЙ", 66.0), ("ОРУЖЕЙНЫЙ ЗАВОДЪ", 61.8), ("1891 г.", 57.6), ("№ 30417", 46.0))
 STAMP_SERIAL = "30417"         # номер винтовки — тот же на стебле затвора
+CROSS_SCREW = (5.0, -18.0, 5.4)  # поперечный ложевой винт в пазу под пальцы: x, z, радиус шляпки
+CROSS_SEAT_GAP = 0.35            # зазор гнезда в дереве вокруг шляпки
+
+
+def cross_screw_base() -> float:
+    """|y| плоскости основания шляпки поперечного винта (дно гнезда в ложе)."""
+    return L.smooth_interp(STOCK_W, CROSS_SCREW[0]) / 2 - 0.6 - 3.2
+
+
 SLING_SLOTS = (((-329.0, -84.8), 21.0, 6.0, 21.0),   # приклад: центр, длина, высота, наклон (+ — передний конец выше)
                ((444.0, -13.0), 17.0, 5.5, 0.0))     # цевьё
 
@@ -199,6 +208,12 @@ def build_stock(col):
     # пазы под пальцы с обеих сторон
     for side in (-1, 1):
         L.boolean(stock, _groove_cutter(side))
+    # гнёзда под шляпки поперечного винта: дно паза под пальцы вогнутое, плоская шляпка без гнезда уходила
+    # краями в дерево; на снимке RIA 265 головка сидит в круглом высверленном гнезде
+    yb, (xs, zs, rs) = cross_screw_base(), CROSS_SCREW
+    for y0, y1 in ((yb - 0.02, yb + 12.0), (-yb - 12.0, -yb + 0.02)):
+        L.boolean(stock, L.lathe("cut_screw_seat", [(y0, 0), (y0, rs + CROSS_SEAT_GAP), (y1, rs + CROSS_SEAT_GAP),
+                                                    (y1, 0)], 64, axis="Y", origin=(xs, 0.0, zs)))
     # прорези под ремень (антабки-«собачки»)
     for slot in SLING_SLOTS:
         L.boolean(stock, _slot_cutter(*slot))
@@ -965,10 +980,10 @@ def build_fittings(col):
         L.bevel_mod(sp, 0.3, 2)
         out.append(sp)
     for side in (-1, 1):
-        hw = L.smooth_interp(STOCK_W, 5.0) / 2
-        s = L.lathe("Stock_CrossScrew", L.fillet([(0, 0), (0, 5.4), (1.2, 5.4), (2.0, 0)], [0, 0, 1.0, 0], 3),
+        xs, zs, rs = CROSS_SCREW
+        s = L.lathe("Stock_CrossScrew", L.fillet([(0, 0), (0, rs), (1.2, rs), (2.0, 0)], [0, 0, 1.0, 0], 3),
                     40, "Steel_Blued", col, axis="X")
-        s.matrix_world = Matrix.Translation(Vector((5.0, side * (hw - 0.6 - 3.2), -18.0)) * L.MM) @ \
+        s.matrix_world = Matrix.Translation(Vector((xs, side * cross_screw_base(), zs)) * L.MM) @ \
             _basis_from_x(Vector((0, side, 0))).to_4x4()
         out.append(s)
     # наконечник ложи и шомпол
