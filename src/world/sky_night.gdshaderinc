@@ -1,7 +1,8 @@
 // Ночь неба смены суток (DayCycle) — общая для неба из панорам (day_cycle_sky) и расчётного
 // (atmosphere_sky): тёмный свод, звёзды (точки из звёздной панорамы, медленно вращаются), Луна своим
 // путём (днём — бледный диск) и ореол; пасмурно — звёзд и Луны не видно, низкие тучи ночью чуть
-// подсвечены снизу. Параметры выставляет DayCycle.
+// подсвечены снизу. Параметры выставляет DayCycle. vis — доля чистого неба по лучу (облака расчётного
+// неба закрывают звёзды и Луну; у неба из панорам — 1).
 
 uniform float overcast : hint_range(0.0, 1.0) = 0.0;
 uniform float night_k : hint_range(0.0, 1.0) = 0.0;
@@ -28,7 +29,7 @@ uniform float halo_size = 5.0;
 // яркость Луны днём (бледный диск) — доля ночной
 uniform float moon_day = 0.15;
 
-vec3 night_sky(vec3 d) {
+vec3 night_sky(vec3 d, float vis) {
 	float up = d.y;
 	vec3 col;
 	if (up < 0.0) {
@@ -43,16 +44,16 @@ vec3 night_sky(vec3 d) {
 			vec3 raw = texture(stars_tex, uv).rgb;
 			vec3 bg = textureLod(stars_tex, uv, 6.0).rgb;
 			vec3 st = min(max(raw - bg * 1.6 - vec3(stars_floor), vec3(0.0)), vec3(stars_max));
-			col += st * stars_energy * smoothstep(0.0, 0.18, up) * (1.0 - overcast * 0.95);
+			col += st * stars_energy * smoothstep(0.0, 0.18, up) * (1.0 - overcast * 0.95) * vis;
 		}
 	}
 	return col;
 }
 
 // Поверх дневного неба c: ночь (доля night_k), тучи ночью, Луна и её ореол.
-vec3 night_layer(vec3 d, vec3 c) {
+vec3 night_layer(vec3 d, vec3 c, float vis) {
 	if (night_k > 0.001) {
-		c += night_sky(d) * night_k;
+		c += night_sky(d, vis) * night_k;
 		// пасмурная ночь: низкие облака чуть подсвечены снизу
 		c = mix(c, mix(vec3(0.012, 0.013, 0.016), vec3(0.03, 0.031, 0.034), smoothstep(0.25, 0.0, abs(d.y))), overcast * step(0.0, d.y) * 0.9 * night_k);
 	}
@@ -61,7 +62,7 @@ vec3 night_layer(vec3 d, vec3 c) {
 	float cosa = dot(d, md);
 	float ang = acos(clamp(cosa, -1.0, 1.0));
 	float rad = radians(moon_size) * 0.5;
-	float veil = 1.0 - overcast;
+	float veil = (1.0 - overcast) * vis;
 	float mk = mix(moon_day, 1.0, night_k) * veil;
 	if (mk > 0.001 && ang < rad && md.y > -0.05) {
 		vec3 upv = normalize(vec3(0.0, 1.0, 0.0) - md * md.y + vec3(0.0, 0.0, 1e-4));

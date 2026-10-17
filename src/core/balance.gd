@@ -838,13 +838,25 @@ const HDRI_WEATHER := {
 ## поправки оттенка рассеянного света и отражений к прежнему небу (0 — синева чистого неба как есть).
 ## Видимое небо при низком солнце темнее карты отражений (AtmosphereSky.view_k): усиление
 ## относительно высоты солнца view_ref, ° — в степени view_dim, не ниже view_min (0 — как карта отражений).
-## Солнце — диск sun_size, °, не ярче sun_clamp. Правка погоды, match_floor, twilight_adapt или
-## cal_from/cal_to — перезапустить python -X utf8 tools/gen_sky_atmosphere.py.
+## Солнце — диск sun_size, °, не ярче sun_clamp. Правка mie/overcast погоды, match_floor, twilight_adapt
+## или cal_from/cal_to — перезапустить python -X utf8 tools/gen_sky_atmosphere.py.
+## Облака (тот же шейдер): по погоде — покрытие cover (доля неба, 1 — сплошные тучи), слой base..top, км
+## над глазом, свет снизу amb_bottom (доля света неба сверху; overcast — пасмурность для подгонки света,
+## саму пелену рисуют облака). clouds: ослабление sigma, 1/км; плитки шумов, км; detail_k — насколько
+## детали выедают края; sun — множитель солнца на облаках; дальше far, км, облаков нет, дымка до них —
+## haze, км; steps — шагов луча; ветер wind_ms, м/с, откуда — wind_from, ° от севера; солнце за облаком
+## тускнеет до sun_floor (sun_tau — доля толщи, что гасит свет: многократное рассеяние светит насквозь).
 const SKY_CALC := {"sun_size": 0.53, "sun_clamp": 40.0, "amb_match": 1.0, "ground_blend": 3.0,
 	"view_ref": 30, "view_dim": 0.5, "view_min": 0.25,
 	"match_floor": -7.0, "twilight_adapt": 0.12, "cal_from": -18, "cal_to": 70,
-	"weather": {"clear": {"mie": 1.0, "overcast": 0.0}, "heat": {"mie": 1.8, "overcast": 0.0},
-		"fog": {"mie": 4.0, "overcast": 0.5}, "rain": {"mie": 2.0, "overcast": 1.0}}}
+	"weather": {
+		"clear": {"mie": 1.0, "overcast": 0.0, "cover": 0.4, "base": 1.4, "top": 3.6, "amb_bottom": 0.4},
+		"heat": {"mie": 1.8, "overcast": 0.0, "cover": 0.2, "base": 2.0, "top": 4.0, "amb_bottom": 0.6},
+		"fog": {"mie": 4.0, "overcast": 0.5, "cover": 0.8, "base": 0.5, "top": 1.8, "amb_bottom": 1.1},
+		"rain": {"mie": 2.0, "overcast": 1.0, "cover": 1.0, "base": 0.6, "top": 4.0, "amb_bottom": 1.35}},
+	"clouds": {"sigma": 30.0, "cover_tile": 30.0, "shape_tile": 9.0, "detail_tile": 1.2, "detail_k": 0.55,
+		"sun": 0.3, "far": 70.0, "haze": 35.0, "steps": 48, "wind_ms": 9.0, "wind_from": 250.0,
+		"sun_tau": 0.25, "sun_floor": 0.25}}
 ## Туман по расстоянию (карты, у которых в окружении fog_mode = depth): вблизи чисто, дальше — дымка,
 ## плотнее к горизонту (кривая). begin/end — метры, density — сколько дымки на end (0..1), curve > 1 —
 ## дольше прозрачно, потом быстрее густеет. Вместо «дыма одной плотности» — воздушная перспектива.

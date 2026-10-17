@@ -1,12 +1,13 @@
 shader_type sky;
-render_mode use_quarter_res_pass;
+render_mode use_half_res_pass;
 // Расчётное небо смены суток (DayCycle, режим «расчёт»): цвет неба — рассеяние солнечного света в
 // атмосфере (модель Hillaire: Рэлей, Ми, озон; таблицы пропускания и многократного рассеяния —
-// data/sky_atmosphere.json из tools/gen_sky_atmosphere.py). Луч взгляда маршится в четверть разрешения
-// (небо гладкое), солнце диском, Луна и звёзды — в полном. Яркость (gain), пелена туч, низ и поправка
-// оттенка отражений — из подгонки по высоте солнца и погоде: свет на земле — как от неба из панорам.
+// data/sky_atmosphere.json из tools/gen_sky_atmosphere.py). Луч взгляда маршится в половине разрешения
+// (небо гладкое) вместе с объёмным слоем облаков, солнце диском, Луна и звёзды — в полном. Яркость (gain),
+// низ и поправка оттенка отражений — из подгонки по высоте солнца и погоде: свет на земле — как от неба
+// из панорам. Облака — в той же карте отражений: светят на землю и видны в лужах.
 // Ночь — общий слой sky_night.gdshaderinc. Параметры ставит AtmosphereSky. Без use_debanding: его шум
-// в проходе четверти разрешения после усиления сумерек (×10⁴) заливал небо.
+// в проходе пониженного разрешения после усиления сумерек (×10⁴) заливал небо.
 
 #include "res://src/world/sky_night.gdshaderinc"
 
@@ -35,8 +36,9 @@ uniform vec3 sun_dir = vec3(0.0, 0.5, -0.86);
 uniform float mie_k = 1.0;
 // яркость атмосферы при солнце силой 1 → как прежнее небо на этой высоте солнца
 uniform float gain = 30.0;
-// пасмурно: яркость зенита туч (к горизонту втрое темнее — небо CIE)
+// пелена туч без облачного слоя (veil — доля, небо CIE: к горизонту втрое темнее зенита)
 uniform vec3 oc_zenith = vec3(0.3);
+uniform float veil : hint_range(0.0, 1.0) = 0.0;
 // оттенок для карты отражений и рассеянного света (только в ней)
 uniform vec3 amb_tint = vec3(1.0);
 // видимое небо при низком солнце темнее карты отражений (та сведена к облачным панорамам и при чистом
@@ -49,6 +51,39 @@ uniform float ground_blend = 3.0;
 uniform float sun_size = 0.53;
 uniform float sun_clamp = 40.0;
 uniform float radiance_clamp = 2.5;
+
+// ---- облака: объёмный слой над глазом от cloud_base до cloud_top, км. Шумы (карта покрытия, форма,
+// детали) генерирует движок — AtmosphereSky; xz шумов — км по карте, ветер — cloud_offset.
+uniform bool clouds_on = false;
+uniform sampler2D cloud_cover : filter_linear_mipmap, repeat_enable;
+uniform sampler3D cloud_shape : filter_linear, repeat_enable;
+uniform sampler3D cloud_detail : filter_linear, repeat_enable;
+// доля неба под облаками (1 — сплошные тучи)
+uniform float cloud_coverage = 0.4;
+// ослабление света в облаке плотности 1, 1/км
+uniform float cloud_sigma = 30.0;
+uniform float cloud_base = 1.4;
+uniform float cloud_top = 3.4;
+uniform vec2 cloud_offset = vec2(0.0);
+// размер плиток шума, км
+uniform float cover_tile = 30.0;
+uniform float shape_tile = 9.0;
+uniform float detail_tile = 1.6;
+// насколько детали выедают края
+uniform float detail_k = 0.4;
+// свет неба на облака сверху (итоговые единицы); снизу — доля amb_bottom (свет от земли)
+uniform vec3 cloud_amb = vec3(0.4);
+uniform float amb_bottom = 0.55;
+// множитель солнца на облаках
+uniform float cloud_sun = 1.0;
+// дальше cloud_far, км, облаков нет; дымка до облака — на cloud_haze, км
+uniform float cloud_far = 70.0;
+uniform float cloud_haze = 35.0;
+uniform int cloud_steps = 48;
+// ночью облака — тёмные силуэты, у горизонта чуть подсвечены (огни округи); в сплошных тучах — как
+// пасмурная ночь неба из панорам, редкие облака лишь чуть светлее неба
+uniform vec3 night_cloud = vec3(0.012, 0.013, 0.016);
+uniform vec3 night_cloud_hz = vec3(0.03, 0.031, 0.034);
 
 vec2 lut_uv(vec2 x, sampler2D tex) {
 	vec2 size = vec2(textureSize(tex, 0));
@@ -130,41 +165,170 @@ vec3 atmosphere(vec3 d) {
 	return l;
 }
 
+float hg(float c, float g) {
+	float g2 = g * g;
+	return (1.0 - g2) / (4.0 * PI * pow(max(1.0 + g2 - 2.0 * g * c, 1e-4), 1.5));
+}
+
+// Плотность облака 0..1 в точке q (x, z — км по карте с ветром; y — км над глазом). Карта покрытия решает,
+// где облакам быть, профиль — их высоту (чем гуще покрытие, тем выше башни), форма — сами клубы,
+// детали выедают края.
+float cloud_density(vec3 q, bool detail) {
+	float hf = (q.y - cloud_base) / (cloud_top - cloud_base);
+	if (hf <= 0.0 || hf >= 1.0) {
+		return 0.0;
+	}
+	float t = 1.0 - cloud_coverage;
+	float wc = smoothstep(t - 0.08, t + 0.18, texture(cloud_cover, q.xz / cover_tile).r);
+	if (wc <= 0.0) {
+		return 0.0;
+	}
+	float top_f = mix(0.45, 1.0, wc);
+	float prof = smoothstep(0.0, 0.12, hf) * (1.0 - smoothstep(top_f - 0.35, top_f, hf));
+	float k = wc * prof;
+	// клубы: плавный шум формы с ячейками (Перлин — Ворли) — края «цветной капустой», а не ватой
+	float sh = mix(texture(cloud_shape, q / shape_tile).r, texture(cloud_detail, q / (shape_tile * 0.5)).r, 0.35);
+	float base = clamp((sh - (1.0 - k)) / max(k, 0.05), 0.0, 1.0);
+	if (detail && base > 0.0) {
+		float ero = (1.0 - texture(cloud_detail, q / detail_tile).r) * detail_k;
+		base = clamp((base - ero) / max(1.0 - ero, 0.05), 0.0, 1.0);
+	}
+	return base;
+}
+
+// Облака по лучу d над атмосферой atm (её свет за облаками): rgb — итог неба с облаками, a — сколько неба
+// видно сквозь них (звёзды, солнце, Луна). sun_k — множитель солнца на облаках (в карте отражений при
+// низком солнце — как у видимого неба, иначе розовые облака зари слишком светят на землю).
+vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
+	float rc = r_ground + view_h;
+	// у горизонта и ниже — дымка: при сплошных тучах серая, как их низ (свет сверху там приглушён толщей,
+	// 0.65 — в среднем), ясного неба под ними не видно
+	float oc = cloud_coverage * cloud_coverage;
+	vec3 hz = mix(atm, cloud_amb * amb_bottom * 0.65, oc);
+	if (d.y <= 0.0) {
+		return vec4(hz, 1.0 - oc);
+	}
+	float rb = rc + cloud_base;
+	float rtop = rc + cloud_top;
+	float t0 = -rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rb * rb, 0.0));
+	float t1 = min(-rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rtop * rtop, 0.0)), cloud_far);
+	if (t0 >= t1) {
+		return vec4(atm, 1.0);
+	}
+	vec3 sd = normalize(sun_dir);
+	float cs = dot(d, sd);
+	float n = float(cloud_steps);
+	float dt = (t1 - t0) / n;
+	// неподвижный сдвиг шагов по направлению — полосы шагов уходят в мелкую рябь, кадр не мерцает
+	float jit = fract(sin(dot(d.xz * 937.0 + vec2(d.y * 113.0), vec2(12.9898, 78.233))) * 43758.5453);
+	float t = t0 + dt * jit;
+	vec3 l = vec3(0.0);
+	float tr = 1.0;
+	float dsum = 0.0;
+	float wsum = 0.0;
+	for (int i = 0; i < cloud_steps; i++) {
+		vec3 p = vec3(0.0, rc, 0.0) + d * t;
+		float r = length(p);
+		vec3 q = vec3(p.x + cam_km.x, r - rc, p.z + cam_km.y);
+		float den = cloud_density(q, true);
+		if (den > 0.002) {
+			vec3 up = p / r;
+			float mus = dot(up, sd);
+			// солнце до облака — сквозь атмосферу: на закате свет красный, после заката облака ещё горят
+			vec3 sun_l = transmittance(r, mus) * sun_seen(r, mus) * gain * cloud_sun * sun_k;
+			// толща облака до солнца: шаги растут
+			float tau = 0.0;
+			float ls = 0.08;
+			vec3 qq = q;
+			for (int k = 0; k < 6; k++) {
+				qq += sd * ls;
+				tau += cloud_density(qq, false) * ls;
+				ls *= 1.8;
+			}
+			tau *= cloud_sigma;
+			// многократное рассеяние октавами (Wrenninge): ослабление и вытянутость фазы слабеют
+			float ms = 0.0;
+			float a = 1.0;
+			float b = 1.0;
+			float c = 1.0;
+			for (int o = 0; o < 3; o++) {
+				ms += a * exp(-tau * b) * mix(hg(cs, 0.6 * c), hg(cs, -0.2 * c), 0.35);
+				a *= 0.45;
+				b *= 0.5;
+				c *= 0.5;
+			}
+			// края к солнцу темнее («пудра»): тонкий край рассеивает назад меньше
+			float powder = 1.0 - exp(-den * cloud_sigma * 0.1);
+			float hf = (q.y - cloud_base) / (cloud_top - cloud_base);
+			// свет неба сверху гаснет под толщей облака над точкой: в тучах тёмные пятна, под башнями — тёмное дно
+			float up_tau = (cloud_density(q + vec3(0.0, 0.35, 0.0), false) * 0.35
+				+ cloud_density(q + vec3(0.0, 1.1, 0.0), false) * 0.75) * cloud_sigma;
+			float amb_occ = mix(0.5, 1.0, exp(-up_tau * 0.08));
+			vec3 src = sun_l * ms * 4.0 * PI * mix(1.0, powder, 0.5) + cloud_amb * mix(amb_bottom, 1.0, hf) * amb_occ;
+			float st = exp(-den * cloud_sigma * dt);
+			float w = tr * (1.0 - st);
+			l += src * w;
+			dsum += t * w;
+			wsum += w;
+			tr *= st;
+			if (tr < 0.02) {
+				break;
+			}
+		}
+		t += dt;
+	}
+	tr = max(tr - 0.02, 0.0) / 0.98;
+	// дымка между глазом и облаком: дальние облака тонут в цвете неба (в сплошных тучах — в сером)
+	float fade = 1.0 - exp(-(dsum / max(wsum, 1e-4)) / cloud_haze);
+	l = mix(l, mix(atm, cloud_amb, oc) * (1.0 - tr), fade);
+	// у самого горизонта слой сходит в дымку — без среза по дальности
+	float edge = smoothstep(0.0, 0.03, d.y);
+	return vec4(mix(hz, l + atm * tr, edge), mix(1.0 - oc, tr, edge));
+}
+
 void sky() {
-	if (AT_QUARTER_RES_PASS) {
+	if (AT_HALF_RES_PASS) {
 		// усиление — здесь же: в буфере половинной точности сумеречные 10⁻⁸ иначе обнуляются
 		vec3 a = atmosphere(EYEDIR) * gain;
-		COLOR = a;
+		vec4 cl = clouds_on ? clouds(EYEDIR, a, POSITION.xz / 1000.0 + cloud_offset, AT_CUBEMAP_PASS ? view_k : 1.0) : vec4(a, 1.0);
+		COLOR = cl.rgb;
+		ALPHA = cl.a;
 		// туман движок наложит на итог полного прохода — здесь отменяем (иначе небо затуманится дважды)
-		FOG = vec4(a, 1.0);
+		FOG = vec4(cl.rgb, 1.0);
 	} else {
 		vec3 d = EYEDIR;
 		float elev = degrees(asin(clamp(d.y, -1.0, 1.0)));
-		vec3 c = QUARTER_RES_COLOR.rgb;
+		vec4 q = HALF_RES_COLOR;
+		vec3 c = q.rgb;
+		float vis = clouds_on ? q.a : 1.0;
 		if (!AT_CUBEMAP_PASS) {
 			c *= view_k;
 		}
-		// пасмурно: ровная пелена, к горизонту втрое темнее зенита (небо CIE)
-		c = mix(c, oc_zenith * (1.0 + 2.0 * max(d.y, 0.0)) / 3.0, overcast);
+		// пелена без облачного слоя: к горизонту втрое темнее зенита (небо CIE)
+		c = mix(c, oc_zenith * (1.0 + 2.0 * max(d.y, 0.0)) / 3.0, veil);
 		// солнце диском: цвет — пропускание атмосферы по лучу взгляда, край темнее (потемнение к краю)
 		vec3 sd = normalize(sun_dir);
 		float rad = radians(sun_size) * 0.5;
 		float ang = acos(clamp(dot(d, sd), -1.0, 1.0));
-		if (ang < rad * 1.2 && overcast < 0.999) {
+		if (ang < rad * 1.2 && veil < 0.999 && vis > 0.001) {
 			float r0 = r_ground + view_h;
 			float x = ang / rad;
 			float limb = 1.0 - 0.6 * (1.0 - sqrt(max(1.0 - x * x, 0.0)));
 			float edge = 1.0 - smoothstep(0.9, 1.1, x);
 			vec3 sl = transmittance(r0, d.y) * sun_seen(r0, d.y) * limb * edge * gain / (TAU * (1.0 - cos(rad)));
 			sl *= min(1.0, sun_clamp / max(max(sl.r, max(sl.g, sl.b)), 1e-6));
-			c += sl * (1.0 - overcast);
+			c += sl * (1.0 - veil) * vis;
 		}
 		// под горизонтом — земля ровной яркостью
 		c = mix(c, ground_col, smoothstep(0.0, -ground_blend, elev));
 		if (AT_CUBEMAP_PASS) {
 			c *= amb_tint;
 		}
-		c = night_layer(d, c);
+		c = night_layer(d, c, vis);
+		if (clouds_on) {
+			float nk = mix(0.08, 1.0, cloud_coverage * cloud_coverage * cloud_coverage);
+			c += (1.0 - vis) * mix(night_cloud, night_cloud_hz, smoothstep(0.25, 0.0, abs(d.y))) * nk * night_k * step(0.0, d.y);
+		}
 		if (AT_CUBEMAP_PASS) {
 			c = min(c, vec3(radiance_clamp));
 		}

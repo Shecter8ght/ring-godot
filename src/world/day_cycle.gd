@@ -72,6 +72,9 @@ func rebuild() -> void:
 func _process(delta: float) -> void:
 	hour = fposmod(hour + delta / float(Balance.DAY_CYCLE.hour_sec), 24.0)
 	_tick(delta, false)
+	# облака плывут каждый кадр (карта отражений неба обновляется сама — Sky в реальном времени)
+	if _calc and _sky:
+		AtmosphereSky.clouds_tick(_sky, hour)
 	if Net.is_networked() and multiplayer.is_server():
 		_sync_t -= delta
 		if _sync_t <= 0.0:
@@ -219,6 +222,10 @@ func _build_sky() -> void:
 	var sky := Sky.new()
 	sky.sky_material = m
 	sky.radiance_size = Sky.RADIANCE_SIZE_256
+	if _calc:
+		# облака движутся — отражения и рассеянный свет от неба пересчитываются каждый кадр
+		sky.process_mode = Sky.PROCESS_MODE_REALTIME
+		AtmosphereSky.clouds_tick(m, hour)
 	_sky = m
 	var e := _env()
 	if e:
@@ -310,6 +317,10 @@ func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 			to = dir_from(maxf(ma.x, 2.0), ma.y)
 			energy = float((_profiles.night as Dictionary).sun_energy) * float(w.night) * smoothstep(0.0, 8.0, ma.x)
 			col = (_profiles.night as Dictionary).sun_color
+		# светило за облаком — свет тускнеет (расчётное небо: те же шумы, что рисуют облака)
+		if _calc and _sky:
+			var cam := get_viewport().get_camera_3d()
+			energy *= AtmosphereSky.sun_through(_sky, cam.global_position if cam else Vector3.ZERO, to)
 		# свет идёт от светила: −Z узла смотрит от него
 		sun.global_basis = Basis.looking_at(-to, Vector3.UP if absf(to.y) < 0.99 else Vector3.FORWARD)
 		sun.light_energy = energy

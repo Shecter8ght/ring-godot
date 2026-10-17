@@ -57,7 +57,15 @@ func _ready() -> void:
 	var only: String = OS.get_environment("SKY_CMP_ONLY")
 	var out_dir: String = "user://sky_cmp"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
-	for c: Dictionary in CASES:
+	# SKY_CMP_HOURS=4.8,5,6 — свои часы (погода — SKY_CMP_WEATHER, иначе ясно), листы — в user://sky_cmp, а не в docs
+	var cases: Array = CASES
+	var hours_env: String = OS.get_environment("SKY_CMP_HOURS")
+	if hours_env != "":
+		cases = []
+		for hs: String in hours_env.split(","):
+			var wk: String = OS.get_environment("SKY_CMP_WEATHER") if OS.get_environment("SKY_CMP_WEATHER") != "" else "clear"
+			cases.append({"id": "h" + hs + "_" + wk, "hour": float(hs), "weather": wk})
+	for c: Dictionary in cases:
 		if only != "" and not String(c.id) in only.split(","):
 			continue
 		if String(RaidConditions.current.weather) != String(c.weather):
@@ -65,13 +73,21 @@ func _ready() -> void:
 			await _frames(30)
 		var sa: Vector2 = DayCycle.sun_at(float(c.hour))
 		var sheet: Image = Image.create(TILE.x * MODES.size(), TILE.y * VIEWS.size(), false, Image.FORMAT_RGB8)
+		var ground_lum: Dictionary = {}
 		for mi in range(MODES.size()):
 			Settings.sky_mode = String(MODES[mi])
 			DayCycle.current.rebuild()
 			DayCycle.current.set_hour(float(c.hour))
+			# SKY_CMP_NOCLOUDS=1 — расчётное небо без облаков (сверка света на земле)
+			if OS.get_environment("SKY_CMP_NOCLOUDS") != "" and DayCycle.current._calc:
+				DayCycle.current._sky.set_shader_parameter("clouds_on", false)
 			_check("%s %s: небо %s" % [c.id, MODES[mi], "расчётное" if DayCycle.current._calc else "из панорам"],
 				DayCycle.current._calc == (MODES[mi] == "calc"))
 			await _frames(90)
+			if DayCycle.current._calc:
+				var sun: DirectionalLight3D = level.get_node("Sun") as DirectionalLight3D
+				print("sky_compare_shots: %s — солнце сквозь облака %.2f, сила света %.2f" % [c.id,
+					AtmosphereSky.sun_through(DayCycle.current._sky, me.global_position, DayCycle.dir_from(sa.x, sa.y)), sun.light_energy])
 			for vi in range(VIEWS.size()):
 				var v: Array = VIEWS[vi]
 				_look(rig, me, fposmod(sa.y + float(v[1]), 360.0), float(v[2]))
@@ -82,10 +98,13 @@ func _ready() -> void:
 				var img: Image = get_viewport().get_texture().get_image()
 				img.convert(Image.FORMAT_RGB8)
 				img.save_png(ProjectSettings.globalize_path("%s/%s_%s_%s.png" % [out_dir, c.id, v[0], MODES[mi]]))
+				if v[0] == "back":
+					ground_lum[MODES[mi]] = _ground_lum(img)
 				img.resize(TILE.x, TILE.y, Image.INTERPOLATE_LANCZOS)
 				sheet.blit_rect(img, Rect2i(Vector2i.ZERO, TILE), Vector2i(TILE.x * mi, TILE.y * vi))
-		sheet.save_png(ProjectSettings.globalize_path("res://docs/screens/sky_cmp_%s.png" % c.id))
-		print("sky_compare_shots: %s — солнце %.1f° по азимуту %.0f°" % [c.id, sa.x, sa.y])
+		sheet.save_png(ProjectSettings.globalize_path(("%s/sheet_%s.png" % [out_dir, c.id]) if hours_env != "" else ("res://docs/screens/sky_cmp_%s.png" % c.id)))
+		print("sky_compare_shots: %s — солнце %.1f° по азимуту %.0f°; земля от солнца: расчётное / панорамы = %.2f" % [
+			c.id, sa.x, sa.y, float(ground_lum.get("calc", 0.0)) / maxf(float(ground_lum.get("hdri", 1.0)), 1e-6)])
 	# кадры в секунду честно: режимы по очереди, дважды, на восходе лицом к солнцу (неба в кадре много)
 	if String(RaidConditions.current.weather) != "clear":
 		Settings.set_raid_conditions("", "clear")
@@ -104,6 +123,19 @@ func _ready() -> void:
 	print("sky_compare_shots: кадры — ", ProjectSettings.globalize_path(out_dir))
 	print("sky_compare_shots: провалено %d" % _fails)
 	get_tree().quit(1 if _fails else 0)
+
+
+## Яркость земли в кадре (линейная, слева внизу — трава без оружия): свет на земле в обоих режимах.
+func _ground_lum(img: Image) -> float:
+	var w: int = img.get_width()
+	var h: int = img.get_height()
+	var sum: float = 0.0
+	var n: int = 0
+	for y in range(int(h * 0.72), int(h * 0.95), 4):
+		for x in range(int(w * 0.03), int(w * 0.30), 4):
+			sum += img.get_pixel(x, y).srgb_to_linear().get_luminance()
+			n += 1
+	return sum / float(maxi(n, 1))
 
 
 ## Взгляд по азимуту az (от севера к востоку), на elev над горизонтом.

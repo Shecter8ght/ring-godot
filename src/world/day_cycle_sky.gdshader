@@ -74,7 +74,7 @@ void sky() {
 	if (hdri_k > 0.001) {
 		c += day_sky(d) * hdri_k;
 	}
-	c = night_layer(d, c);
+	c = night_layer(d, c, 1.0);
 	if (AT_CUBEMAP_PASS) {
 		c = min(c, vec3(radiance_clamp));
 	}
