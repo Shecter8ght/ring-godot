@@ -1,0 +1,1142 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/blockout/mall_landscape.gd" id="land"]
+
+[ext_resource type="Script" path="res://src/blockout/study_building.gd" id="build"]
+
+[ext_resource type="Script" path="res://src/blockout/mall_ring.gd" id="ring"]
+
+[ext_resource type="Script" path="res://src/blockout/mall_study_level.gd" id="launch"]
+
+[ext_resource type="PackedScene" path="res://scenes/world/escalator.tscn" id="esc"]
+
+[ext_resource type="PackedScene" path="res://scenes/world/rubble_pile.tscn" id="rub"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+
+sky_top_color = Color(0.36, 0.44, 0.52, 1)
+
+sky_horizon_color = Color(0.72, 0.66, 0.58, 1)
+
+ground_bottom_color = Color(0.3, 0.3, 0.27, 1)
+
+ground_horizon_color = Color(0.72, 0.66, 0.58, 1)
+
+[sub_resource type="Sky" id="Sky"]
+
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Environment" id="Environment"]
+
+background_mode = 2
+
+sky = SubResource("Sky")
+
+ambient_light_source = 3
+
+ambient_light_color = Color(0.68, 0.71, 0.75, 1)
+
+ambient_light_energy = 0.55
+
+reflected_light_source = 2
+
+tonemap_mode = 2
+
+tonemap_exposure = 1.0
+
+fog_enabled = true
+
+fog_light_color = Color(0.7, 0.66, 0.6, 1)
+
+fog_light_energy = 0.6
+
+fog_density = 0.00035
+
+ssao_enabled = true
+
+ssao_radius = 1.5
+
+ssao_intensity = 1.3
+
+[node name="MallStudy" type="Node3D"]
+
+script = ExtResource("launch")
+
+metadata/purpose = "Серый черновик территории ТЦ в настоящем масштабе · раскладка принята 2026-10-17"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+environment = SubResource("Environment")
+
+[node name="EveningSun" type="DirectionalLight3D" parent="."]
+
+rotation_degrees = Vector3(-24, -112, 0)
+
+light_color = Color(1, 0.86, 0.7, 1)
+
+light_energy = 1.1
+
+light_angular_distance = 2.0
+
+shadow_enabled = true
+
+directional_shadow_max_distance = 220.0
+
+[node name="Landscape" type="Node3D" parent="."]
+
+script = ExtResource("land")
+
+[node name="Mall" type="Node3D" parent="."]
+
+script = ExtResource("ring")
+
+[node name="Escalators" type="Node3D" parent="Mall"]
+
+[node name="North" parent="Mall/Escalators" instance=ExtResource("esc")]
+position = Vector3(0.000, 0.000, -19.600)
+rotation = Vector3(0.000, -0.000, 0.000)
+
+[node name="SouthWest" parent="Mall/Escalators" instance=ExtResource("esc")]
+position = Vector3(-16.974, 0.000, 9.800)
+rotation = Vector3(0.000, 2.094, 0.000)
+
+[node name="SouthEast" parent="Mall/Escalators" instance=ExtResource("esc")]
+position = Vector3(16.974, 0.000, 9.800)
+rotation = Vector3(0.000, -2.094, 0.000)
+
+[node name="Rubble" type="Node3D" parent="Mall"]
+
+[node name="MainEntrance" parent="Mall/Rubble" instance=ExtResource("rub")]
+position = Vector3(0.000, 0.000, 93.600)
+rotation = Vector3(0.000, 0.000, 0.000)
+size = Vector2(14.5, 11.0)
+height = 3.2
+count = 24
+lane_width = 4.5
+seed_value = 11
+
+[node name="NorthEntrance" parent="Mall/Rubble" instance=ExtResource("rub")]
+position = Vector3(0.000, 0.000, -93.000)
+rotation = Vector3(0.000, 3.142, 0.000)
+size = Vector2(19.5, 13.0)
+height = 4.8
+count = 60
+seed_value = 23
+block_max = Vector3(3.2, 1.6, 4.2)
+
+[node name="EastBarricade" parent="Mall/Rubble" instance=ExtResource("rub")]
+position = Vector3(104.500, 0.000, 0.000)
+rotation = Vector3(0.000, 1.571, 0.000)
+size = Vector2(18.0, 7.0)
+height = 2.6
+count = 9
+lane_width = 2.2
+seed_value = 5
+block_min = Vector3(0.8, 1.2, 2.2)
+block_max = Vector3(2.5, 2.6, 6.0)
+material_id = "gb_fence"
+
+[node name="EastCamp" parent="Mall/Rubble" instance=ExtResource("rub")]
+position = Vector3(93.500, 0.000, 0.000)
+rotation = Vector3(0.000, 1.571, 0.000)
+size = Vector2(13.0, 8.0)
+height = 1.4
+count = 8
+lane_width = 3.0
+seed_value = 7
+block_min = Vector3(0.8, 0.4, 1.6)
+block_max = Vector3(1.8, 1.2, 2.4)
+material_id = "gb_partition"
+
+[node name="DomeDebris" parent="Mall/Rubble" instance=ExtResource("rub")]
+position = Vector3(10.649, 0.000, -7.456)
+rotation = Vector3(0.000, 2.182, 0.000)
+size = Vector2(10.0, 8.0)
+height = 1.6
+count = 14
+seed_value = 3
+material_id = "steel_dark"
+
+[node name="Plaza" type="Node3D" parent="."]
+
+[node name="Stela" type="Node3D" parent="Plaza" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.0, 0, 162.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(4, 14)
+
+floors = 1
+
+story_height = 12
+
+label = "Рекламная стела «РИНГ»"
+
+[node name="Entrance_Canopy" type="Node3D" parent="Plaza" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 0.0, 0, 113.0)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(30, 9)
+
+floors = 1
+
+story_height = 5.2
+
+label = "Навес над главным входом"
+
+[node name="BusStation" type="Node3D" parent="."]
+
+[node name="Bus_Pavilion" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -158, 0, 284)
+
+script = ExtResource("build")
+
+kind = "hall"
+
+footprint = Vector2(70, 16)
+
+floors = 1
+
+story_height = 5.0
+
+label = "Автостанция · касса и зал"
+
+[node name="Bus_Platform_1" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -186, 0, 268)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(12, 3)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Перрон под навесом"
+
+[node name="Bus_Platform_2" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -168, 0, 268)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(12, 3)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Перрон под навесом"
+
+[node name="Bus_Platform_3" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -150, 0, 268)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(12, 3)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Перрон под навесом"
+
+[node name="Bus_Platform_4" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -132, 0, 268)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(12, 3)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Перрон под навесом"
+
+[node name="Bus_1" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -180, 0, 258)
+
+script = ExtResource("build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.0
+
+label = "Автобус · 12 м"
+
+[node name="Bus_2" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -144, 0, 258)
+
+script = ExtResource("build")
+
+kind = "bus"
+
+footprint = Vector2(12, 2.6)
+
+floors = 1
+
+story_height = 3.0
+
+label = "Автобус · 12 м"
+
+[node name="Gallery_1" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.53906, 0, -0.84226, 0, 1, 0, 0.84226, 0, 0.53906, -134.0, 0, 247.0)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(59.36, 5)
+
+floors = 1
+
+story_height = 3.4
+
+label = "Крытая галерея к площади"
+
+[node name="Gallery_2" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.71447, 0, -0.69966, 0, 1, 0, 0.69966, 0, 0.71447, -94.0, 0, 198.5)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(67.18, 5)
+
+floors = 1
+
+story_height = 3.4
+
+label = "Крытая галерея к площади"
+
+[node name="Gallery_3" type="Node3D" parent="BusStation" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.97370, 0, -0.22784, 0, 1, 0, 0.22784, 0, 0.97370, -49.59, 0, 170.22)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(41.93, 5)
+
+floors = 1
+
+story_height = 3.4
+
+label = "Крытая галерея к площади"
+
+[node name="Garage" type="Node3D" parent="."]
+
+[node name="Parking_Garage" type="Node3D" parent="Garage" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 185, 0, 42)
+
+script = ExtResource("build")
+
+kind = "skeleton"
+
+footprint = Vector2(64, 100)
+
+floors = 4
+
+story_height = 3.0
+
+label = "Многоуровневый паркинг · 4 яруса"
+
+[node name="Cafe" type="Node3D" parent="."]
+
+[node name="Cafe" type="Node3D" parent="Cafe" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 262, 0, 262)
+
+script = ExtResource("build")
+
+kind = "hall"
+
+footprint = Vector2(30, 20)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Придорожное кафе · окно выдачи"
+
+[node name="Car_Wash" type="Node3D" parent="Cafe" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 300, 0, 240)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(18, 26)
+
+floors = 1
+
+story_height = 4.5
+
+label = "Автомойка"
+
+[node name="Barricade" type="Node3D" parent="."]
+
+[node name="Barricade_1" type="Node3D" parent="Barricade" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.92050, 0, 0.39073, 0, 1, 0, -0.39073, 0, 0.92050, 128.73, 0, 18.09)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(3.2, 12)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Баррикада рейдеров · контейнер"
+
+[node name="Barricade_2" type="Node3D" parent="Barricade" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.93969, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.93969, 136.0, 0, -0.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(3.2, 12)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Баррикада рейдеров · контейнер"
+
+[node name="Barricade_3" type="Node3D" parent="Barricade" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.99255, 0, 0.12187, 0, 1, 0, -0.12187, 0, 0.99255, 128.73, 0, -18.09)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(3.2, 12)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Баррикада рейдеров · контейнер"
+
+[node name="Barricade_4" type="Node3D" parent="Barricade" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.96126, 0, -0.27564, 0, 1, 0, 0.27564, 0, 0.96126, 149.63, 0, 10.46)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(3.2, 12)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Баррикада рейдеров · контейнер"
+
+[node name="Barricade_5" type="Node3D" parent="Barricade" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.98481, 0, 0.17365, 0, 1, 0, -0.17365, 0, 0.98481, 150.43, 0, -13.16)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(3.2, 12)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Баррикада рейдеров · контейнер"
+
+[node name="Yard" type="Node3D" parent="."]
+
+[node name="Truck_1" type="Node3D" parent="Yard" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.50000, 0, 0.86603, 0, 1, 0, -0.86603, 0, 0.50000, 132.5, 0, -76.5)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(2.6, 16)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Фура у дока"
+
+[node name="Truck_2" type="Node3D" parent="Yard" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.61566, 0, 0.78801, 0, 1, 0, -0.78801, 0, 0.61566, 120.57, 0, -94.2)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(2.6, 16)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Фура у дока"
+
+[node name="Truck_3" type="Node3D" parent="Yard" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.71934, 0, 0.69466, 0, 1, 0, -0.69466, 0, 0.71934, 106.28, 0, -110.06)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(2.6, 16)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Фура у дока"
+
+[node name="Truck_4" type="Node3D" parent="Yard" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.80902, 0, 0.58779, 0, 1, 0, -0.58779, 0, 0.80902, 89.93, 0, -123.78)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(2.6, 16)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Фура у дока"
+
+[node name="Truck_5" type="Node3D" parent="Yard" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.88295, 0, 0.46947, 0, 1, 0, -0.46947, 0, 0.88295, 71.83, 0, -135.09)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(2.6, 16)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Фура у дока"
+
+[node name="PMC_Post" type="Node3D" parent="Yard" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 135.16, 0, -150.12)
+
+script = ExtResource("build")
+
+kind = "hall"
+
+footprint = Vector2(7, 7)
+
+floors = 1
+
+story_height = 3.0
+
+label = "Пост ЧВК у ворот двора"
+
+[node name="Tech" type="Node3D" parent="."]
+
+[node name="Boiler_House" type="Node3D" parent="Tech" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 300, 0, -150)
+
+script = ExtResource("build")
+
+kind = "hall"
+
+footprint = Vector2(44, 30)
+
+floors = 1
+
+story_height = 7.0
+
+label = "Котельная"
+
+[node name="Chimney" type="Node3D" parent="Tech" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 322, 0, -172)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 8)
+
+floors = 1
+
+story_height = 45.0
+
+label = "Труба котельной · 45 м"
+
+[node name="Substation" type="Node3D" parent="Tech" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 262, 0, -112)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(16, 12)
+
+floors = 1
+
+story_height = 4.0
+
+label = "Трансформаторная подстанция"
+
+[node name="Generators" type="Node3D" parent="Tech" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 338, 0, -120)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(20, 14)
+
+floors = 1
+
+story_height = 3.6
+
+label = "Генераторная"
+
+[node name="Water_Tower" type="Node3D" parent="Tech" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 350, 0, -178)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(12, 12)
+
+floors = 1
+
+story_height = 24.0
+
+label = "Водонапорная башня"
+
+[node name="Service_Warehouse" type="Node3D" parent="Tech" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 283, 0, -192)
+
+script = ExtResource("build")
+
+kind = "hall"
+
+footprint = Vector2(26, 14)
+
+floors = 1
+
+story_height = 4.5
+
+label = "Склад обслуживания техники"
+
+[node name="Square" type="Node3D" parent="."]
+
+[node name="Veranda" type="Node3D" parent="Square" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.98481, 0, -0.17365, 0, 1, 0, 0.17365, 0, 0.98481, -25.01, 0, -141.81)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(26, 12)
+
+floors = 1
+
+story_height = 3.2
+
+label = "Летняя веранда кафе"
+
+[node name="Gas" type="Node3D" parent="."]
+
+[node name="Fuel_Canopy" type="Node3D" parent="Gas" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -250, 0, -182)
+
+script = ExtResource("build")
+
+kind = "canopy"
+
+footprint = Vector2(36, 18)
+
+floors = 1
+
+story_height = 5.0
+
+label = "АЗС · навес колонок"
+
+[node name="Gas_Shop" type="Node3D" parent="Gas" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -274, 0, -210)
+
+script = ExtResource("build")
+
+kind = "hall"
+
+footprint = Vector2(18, 11)
+
+floors = 1
+
+story_height = 3.5
+
+label = "АЗС · магазин"
+
+[node name="Gas_Service_Box" type="Node3D" parent="Gas" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -228, 0, -206)
+
+script = ExtResource("build")
+
+kind = "hall"
+
+footprint = Vector2(14, 12)
+
+floors = 1
+
+story_height = 4.5
+
+label = "АЗС · мойка и сервисный бокс"
+
+[node name="Checkpoint" type="Node3D" parent="."]
+
+[node name="Block_1" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -352, 0, -18)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(5.5, 2.6)
+
+floors = 1
+
+story_height = 1.2
+
+label = "Бетонный блок"
+
+[node name="Block_2" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -345, 0, -30)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(5.5, 2.6)
+
+floors = 1
+
+story_height = 1.2
+
+label = "Бетонный блок"
+
+[node name="Block_3" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -338, 0, -18)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(5.5, 2.6)
+
+floors = 1
+
+story_height = 1.2
+
+label = "Бетонный блок"
+
+[node name="Block_4" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -331, 0, -30)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(5.5, 2.6)
+
+floors = 1
+
+story_height = 1.2
+
+label = "Бетонный блок"
+
+[node name="Block_5" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -324, 0, -18)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(5.5, 2.6)
+
+floors = 1
+
+story_height = 1.2
+
+label = "Бетонный блок"
+
+[node name="Block_6" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -317, 0, -30)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(5.5, 2.6)
+
+floors = 1
+
+story_height = 1.2
+
+label = "Бетонный блок"
+
+[node name="Watchtower" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -330, 0, -44)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(6, 6)
+
+floors = 1
+
+story_height = 8.0
+
+label = "Вышка КПП"
+
+[node name="Wagon_South" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -372, 0, -4)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(16, 6)
+
+floors = 1
+
+story_height = 2.8
+
+label = "Вагончик охраны"
+
+[node name="Wagon_North" type="Node3D" parent="Checkpoint" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -372, 0, -44)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(16, 6)
+
+floors = 1
+
+story_height = 2.8
+
+label = "Вагончик охраны"
+
+[node name="WestParking" type="Node3D" parent="."]
+
+[node name="Tent_1" type="Node3D" parent="WestParking" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.17365, 0, -0.98481, 0, 1, 0, 0.98481, 0, 0.17365, -187.11, 0, -32.99)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 5)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Палатка эвакуационного пункта"
+
+[node name="Tent_2" type="Node3D" parent="WestParking" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.09585, 0, -0.99540, 0, 1, 0, 0.99540, 0, 0.09585, -202.07, 0, -19.46)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 5)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Палатка эвакуационного пункта"
+
+[node name="Tent_3" type="Node3D" parent="WestParking" groups=["mall_study_snap"]]
+
+transform = Transform3D(0.07846, 0, -0.99692, 0, 1, 0, 0.99692, 0, 0.07846, -215.33, 0, -16.95)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 5)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Палатка эвакуационного пункта"
+
+[node name="Tent_4" type="Node3D" parent="WestParking" groups=["mall_study_snap"]]
+
+transform = Transform3D(-0.06105, 0, -0.99813, 0, 1, 0, 0.99813, 0, -0.06105, -189.65, 0, 11.6)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 5)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Палатка эвакуационного пункта"
+
+[node name="Tent_5" type="Node3D" parent="WestParking" groups=["mall_study_snap"]]
+
+transform = Transform3D(-0.13917, 0, -0.99027, 0, 1, 0, 0.99027, 0, -0.13917, -201.02, 0, 28.25)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 5)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Палатка эвакуационного пункта"
+
+[node name="Tent_6" type="Node3D" parent="WestParking" groups=["mall_study_snap"]]
+
+transform = Transform3D(-0.21644, 0, -0.97630, 0, 1, 0, 0.97630, 0, -0.21644, -210.88, 0, 46.75)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 5)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Палатка эвакуационного пункта"
+
+[node name="Tent_7" type="Node3D" parent="WestParking" groups=["mall_study_snap"]]
+
+transform = Transform3D(-0.29237, 0, -0.95630, 0, 1, 0, 0.95630, 0, -0.29237, -181.7, 0, 55.55)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(8, 5)
+
+floors = 1
+
+story_height = 2.6
+
+label = "Палатка эвакуационного пункта"
+
+[node name="Outside" type="Node3D" parent="."]
+
+[node name="Tower_1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -300, 0, 430)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(54, 18)
+
+floors = 17
+
+story_height = 3.0
+
+label = "Новостройка ЖК · 17 этажей"
+
+[node name="Tower_2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -170, 0, 430)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(54, 18)
+
+floors = 17
+
+story_height = 3.0
+
+label = "Новостройка ЖК · 17 этажей"
+
+[node name="Tower_3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 40, 0, 430)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(54, 18)
+
+floors = 17
+
+story_height = 3.0
+
+label = "Новостройка ЖК · 17 этажей"
+
+[node name="Tower_4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 190, 0, 430)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(54, 18)
+
+floors = 17
+
+story_height = 3.0
+
+label = "Новостройка ЖК · 17 этажей"
+
+[node name="Tower_5" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 320, 0, 430)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(54, 18)
+
+floors = 17
+
+story_height = 3.0
+
+label = "Новостройка ЖК · 17 этажей"
+
+[node name="Warehouse_1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 470, 0, 60)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(40, 70)
+
+floors = 1
+
+story_height = 9.0
+
+label = "Склад промзоны"
+
+[node name="Warehouse_2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 470, 0, -60)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(40, 70)
+
+floors = 1
+
+story_height = 9.0
+
+label = "Склад промзоны"
+
+[node name="Warehouse_3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 470, 0, -180)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(40, 70)
+
+floors = 1
+
+story_height = 9.0
+
+label = "Склад промзоны"

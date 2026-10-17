@@ -115,6 +115,9 @@ var _preview: bool = false
 var _cur_key: String = ""
 ## Прямоугольники мировых XZ, где пропсов не ставить (узлы сцены группы "prop_keepout").
 var keepouts: Array[Rect2] = []
+## Кольцо со своим участком: асфальт вокруг здания, забор по site_r и бесконечный пол на 0. Выключают,
+## когда землю вокруг кладёт карта территории (черновик ТЦ Ø200) — тогда пол только под зданием.
+var site_ground: bool = true
 ## Вырезы в земле (узлы группы "ground_holes", их hole_rect): {center: Vector2 (мир XZ),
 ## half: Vector2 (половины вдоль осей X и Z узла), yaw} — асфальт участка там не кладётся.
 var holes: Array = []
@@ -1123,6 +1126,8 @@ func _build_ring_surroundings() -> void:
 	if bh > _wall_h:
 		_wall_strip(_st(_walls, fmat), _arc_points(outer, a0, a1), t_fac, bh - _wall_h, _wall_h)
 	# участок: асфальт вокруг и забор — дуга по краю открытой части и две радиальные отсечки
+	if not site_ground:
+		return
 	_annulus(_st(_floors, _floor_mat("asphalt_02")), 0.0, 360.0, outer, site + 40.0, -0.03)
 	var fence_h := float(_thick.get("site_fence_height", _fence_h))
 	var t_fence := float(_thick.get("fence", _base_t))
@@ -1560,6 +1565,13 @@ func _build_floor_collider(root: Node3D) -> void:
 	body.add_to_group("ground_plane")
 	var cs := CollisionShape3D.new()
 	cs.shape = WorldBoundaryShape3D.new()
+	# без своего участка (землю кладёт карта территории) — пол только под зданием, диском
+	if not site_ground and not _ring.is_empty():
+		var disc := CylinderShape3D.new()
+		disc.radius = float(_ring.get("outer_r", 100.0)) + 0.5
+		disc.height = 2.0
+		cs.shape = disc
+		cs.position.y = -1.0
 	body.add_child(cs)
 	root.add_child(body)
 

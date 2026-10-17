@@ -115,6 +115,9 @@ python -X utf8 tools/gen_mall_1f.py                          # ТЦ Ø200, 1-й 
 tools/godot.cmd --headless res://tools/mall_1f_check.tscn   # серый черновик ТЦ Ø200: ИИ доходит во все открытые места, выходы по плану;
                                                               # с окном (--windowed --resolution 1920x1080) — снимки mall_1f_* (MALL_ONLY=top|eye);
                                                               # MALL_ONLY=perf — кадры с мародёрами и без, atrium — засвет под куполом (MALL_TIME, MALL_WEATHER)
+python -X utf8 tools/build_mall_study.py                     # черновик территории ТЦ по принятой схеме → data/blockouts/mall_study.json, scenes/levels/mall_study.tscn
+tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
+                                                              # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–D, паркинг, мосты, двор); -- shots — снимки
 tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона
