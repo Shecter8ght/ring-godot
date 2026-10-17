@@ -7,12 +7,28 @@ extends Node
 const IMPACT_MAX_BURSTS: int = 72
 const IMPACT_MAX_DECALS: int = 320
 const IMPACT_MAX_DISTANCE: float = 85.0
+## Дальше от камеры — без мелочи (травинки, крошка), искр, обломков и веера вдвое меньше, без света.
+const IMPACT_LOD_M: float = 30.0
 const IMPACT_GRAVITY: float = 9.81
 const IMPACT_OFFSET: float = 0.012
 const IMPACT_CLEANUP_MARGIN: float = 0.15
+## Вращение кусков в полёте, °/с (наибольшее).
 const IMPACT_SPIN: float = 420.0
-const IMPACT_SPARKS := {"count": Vector2i(3, 7), "speed": Vector2(3.5, 9.0), "size": Vector2(0.015, 0.038), "life": 0.2, "spread": 28.0, "emission": 2.8}
-const IMPACT_DUST := {"speed": Vector2(0.25, 0.85), "drag": Vector2(1.3, 2.4), "gravity": -0.15, "spread": 50.0}
+## Куда падают куски (ImpactFx): пол ищем лучом вниз на down_m. Попали в верхнюю грань — смотрим
+## опору в стороне на probe_m (луч с высоты lift_m): ниже точки удара больше чем на edge_m — грань
+## маленькая (стол, капот, ящик), дальше small_radius_m от удара куски падают с неё на пол.
+const IMPACT_FLOOR := {"down_m": 8.0, "probe_m": 0.6, "lift_m": 0.5, "edge_m": 0.35, "small_radius_m": 0.35}
+## Искры: speed (м/с), life (с), width — ширина полосы (м), stretch — длина полосы от скорости (с),
+## не длиннее stretch_max (м), spread — конус (°), drag — доля скорости за с, bounce / friction —
+## отскок от пола, energy — яркость (выше 1 — ярче сцены), aim — вес нормали и отражения пули.
+const IMPACT_SPARKS := {"speed": Vector2(4.0, 15.0), "life": Vector2(0.22, 0.75), "width": Vector2(0.004, 0.009),
+	"stretch": 0.028, "stretch_max": 0.32, "spread": 34.0, "drag": 1.3, "bounce": 0.42, "friction": 0.6,
+	"energy": 3.5, "aim": Vector2(0.4, 1.0)}
+## Вспышка удара: life (с), color, energy — яркость; свет на миг — light_range (м), light_energy,
+## одновременно не больше light_max.
+const IMPACT_FLASH := {"life": 0.06, "color": Color(1.0, 0.78, 0.45), "energy": 5.0, "light_range": 2.6, "light_energy": 3.0, "light_max": 4}
+## Облако пыли: разлёт (м/с), сопротивление воздуха (доля скорости за с), конус (°).
+const IMPACT_DUST := {"speed": Vector2(0.25, 0.85), "drag": Vector2(1.3, 2.4), "spread": 50.0}
 const IMPACT_DECALS: Dictionary = {
 	"concrete": {"asset": "concrete", "size": Vector2(0.10, 0.16), "tint": Color(0.82, 0.78, 0.7, 0.92)},
 	"tile": {"asset": "concrete", "size": Vector2(0.14, 0.22), "tint": Color(0.95, 0.93, 0.88, 0.9)},
@@ -22,21 +38,111 @@ const IMPACT_DECALS: Dictionary = {
 	"cardboard": {"asset": "wood", "size": Vector2(0.08, 0.12), "tint": Color(0.78, 0.62, 0.4, 0.9)},
 	"plastic": {"asset": "metal", "size": Vector2(0.07, 0.11), "tint": Color(0.28, 0.28, 0.3, 0.92)},
 	"fabric": {"asset": "", "size": Vector2(0.07, 0.10), "tint": Color(0.08, 0.07, 0.06, 0.85)},
+	"grass": {"asset": "soil", "size": Vector2(0.14, 0.22), "tint": Color(0.62, 0.55, 0.46, 0.95)},
+	"dirt": {"asset": "soil", "size": Vector2(0.16, 0.24), "tint": Color(0.78, 0.7, 0.6, 0.95)},
+	"mud": {"asset": "soil", "size": Vector2(0.14, 0.22), "tint": Color(0.42, 0.37, 0.32, 0.95)},
+	"gravel": {"asset": "soil", "size": Vector2(0.12, 0.18), "tint": Color(0.86, 0.84, 0.8, 0.85)},
 }
-## Меш определяет форму; size — длина наибольшей стороны, dust_size — диаметр облачка.
+## Слои одного попадания (ImpactBurst), любой необязателен. Общие ключи: count — сколько (от–до),
+## size — наибольшая сторона (м; у веера — ширина полосы), speed (м/с), life (с, от–до), spread —
+## конус (°), drag — доля скорости за с, color, aim — вес нормали и отражения пули в направлении.
+## debris / bits — куски с весом: mesh — форма, bounce — упругость отскока, flutter — трепет (м/с²),
+##   alt / alt_share — второй цвет и его доля (сухие травинки, светлые сколы);
+## spray — веер мелкого материала полосами: gravity — доля тяжести, stretch — длина полосы от
+##   скорости (с), size_end — во сколько раз полоса шире к концу (тает облачком);
+## dust — медленное облако: count, size — диаметр (м), opacity, rise — подъём (м/с², вниз — минус);
+## sparks — искры: count, chance — доля попаданий с искрами (сердечник по камню искрит не всегда);
+## flash — вспышка: size — диаметр (м), light — свет на миг; trample — трава вокруг ложится (радиус, м).
 const IMPACT_SURFACES: Dictionary = {
-	"concrete": {"mesh": "chip", "count": Vector2i(7, 12), "size": Vector2(0.008, 0.035), "speed": Vector2(1.2, 4.2), "life": 0.55, "spread": 48.0, "drag": 0.4, "color": Color(0.59, 0.56, 0.5), "dust": 5, "dust_size": Vector2(0.13, 0.36), "dust_life": 0.8, "opacity": 0.3},
-	"tile": {"mesh": "flake", "count": Vector2i(5, 9), "size": Vector2(0.012, 0.044), "speed": Vector2(1.5, 4.5), "life": 0.5, "spread": 55.0, "drag": 0.3, "color": Color(0.8, 0.78, 0.71), "dust": 3, "dust_size": Vector2(0.08, 0.22), "dust_life": 0.55, "opacity": 0.2},
-	"asphalt": {"mesh": "chip", "count": Vector2i(5, 9), "size": Vector2(0.006, 0.027), "speed": Vector2(1.0, 3.2), "life": 0.48, "spread": 52.0, "drag": 0.5, "color": Color(0.25, 0.24, 0.22), "dust": 3, "dust_size": Vector2(0.1, 0.26), "dust_life": 0.6, "opacity": 0.2},
-	"metal": {"mesh": "flake", "count": Vector2i(2, 4), "size": Vector2(0.003, 0.012), "speed": Vector2(1.5, 4.0), "life": 0.3, "spread": 40.0, "drag": 0.2, "color": Color(0.29, 0.3, 0.31), "dust": 0},
-	"glass": {"mesh": "shard", "count": Vector2i(5, 9), "size": Vector2(0.01, 0.04), "speed": Vector2(1.2, 4.0), "life": 0.6, "spread": 38.0, "drag": 0.2, "color": Color(0.68, 0.79, 0.81, 0.6), "dust": 0},
-	"wood": {"mesh": "splinter", "count": Vector2i(5, 9), "size": Vector2(0.016, 0.065), "speed": Vector2(1.0, 3.8), "life": 0.6, "spread": 42.0, "drag": 0.7, "color": Color(0.54, 0.37, 0.19), "dust": 2, "dust_size": Vector2(0.07, 0.17), "dust_life": 0.45, "opacity": 0.15},
-	"cardboard": {"mesh": "paper", "count": Vector2i(3, 5), "size": Vector2(0.015, 0.045), "speed": Vector2(0.5, 1.8), "life": 0.75, "spread": 50.0, "drag": 2.2, "color": Color(0.58, 0.44, 0.27), "dust": 1, "dust_size": Vector2(0.06, 0.12), "dust_life": 0.4, "opacity": 0.1},
-	"fabric": {"mesh": "fiber", "count": Vector2i(2, 4), "size": Vector2(0.005, 0.018), "speed": Vector2(0.3, 1.0), "life": 0.4, "spread": 55.0, "drag": 3.0, "color": Color(0.28, 0.25, 0.22), "dust": 1, "dust_size": Vector2(0.04, 0.09), "dust_life": 0.3, "opacity": 0.08},
-	"plastic": {"mesh": "flake", "count": Vector2i(3, 6), "size": Vector2(0.008, 0.032), "speed": Vector2(1.0, 3.0), "life": 0.5, "spread": 48.0, "drag": 0.8, "color": Color(0.24, 0.25, 0.27), "dust": 0},
-	"flesh": {"mesh": "drop", "count": Vector2i(10, 18), "size": Vector2(0.004, 0.013), "speed": Vector2(1.4, 4.8), "life": 0.5, "spread": 24.0, "drag": 0.8, "color": Color(0.26, 0.016, 0.012), "dust": 5, "dust_size": Vector2(0.09, 0.26), "dust_life": 0.5, "opacity": 0.4},
-	"snow": {"mesh": "chip", "count": Vector2i(5, 9), "size": Vector2(0.01, 0.032), "speed": Vector2(0.6, 2.3), "life": 0.6, "spread": 55.0, "drag": 1.4, "color": Color(0.82, 0.87, 0.9), "dust": 4, "dust_size": Vector2(0.12, 0.3), "dust_life": 0.7, "opacity": 0.24},
+	"concrete": {
+		"debris": {"mesh": "chip", "count": Vector2i(8, 13), "size": Vector2(0.008, 0.035), "speed": Vector2(2.0, 6.5), "life": Vector2(0.8, 1.5), "spread": 48.0, "drag": 0.4, "bounce": 0.3, "aim": Vector2(1.0, 0.5), "color": Color(0.59, 0.56, 0.5), "alt": Color(0.72, 0.7, 0.65), "alt_share": 0.3},
+		"bits": {"mesh": "chip", "count": Vector2i(14, 22), "size": Vector2(0.003, 0.008), "speed": Vector2(3.0, 9.0), "life": Vector2(0.35, 0.8), "spread": 38.0, "drag": 1.6, "bounce": 0.2, "aim": Vector2(1.0, 0.6), "color": Color(0.66, 0.63, 0.57)},
+		"spray": {"count": Vector2i(12, 18), "size": Vector2(0.045, 0.1), "speed": Vector2(5.0, 12.0), "life": Vector2(0.25, 0.55), "spread": 20.0, "drag": 6.0, "gravity": 0.2, "stretch": 0.035, "aim": Vector2(1.0, 0.5), "color": Color(0.74, 0.71, 0.65, 0.8)},
+		"dust": {"count": 7, "size": Vector2(0.22, 0.6), "life": Vector2(1.2, 2.2), "opacity": 0.36, "rise": 0.04, "color": Color(0.64, 0.62, 0.57)},
+		"sparks": {"count": Vector2i(1, 3), "chance": 0.15},
+	},
+	"tile": {
+		"debris": {"mesh": "flake", "count": Vector2i(5, 9), "size": Vector2(0.012, 0.045), "speed": Vector2(2.0, 6.0), "life": Vector2(0.7, 1.3), "spread": 52.0, "drag": 0.3, "bounce": 0.4, "aim": Vector2(1.0, 0.5), "color": Color(0.8, 0.78, 0.71), "alt": Color(0.9, 0.89, 0.85), "alt_share": 0.4},
+		"bits": {"mesh": "chip", "count": Vector2i(8, 14), "size": Vector2(0.003, 0.007), "speed": Vector2(3.0, 8.0), "life": Vector2(0.35, 0.7), "spread": 40.0, "drag": 1.6, "bounce": 0.3, "aim": Vector2(1.0, 0.6), "color": Color(0.84, 0.82, 0.77)},
+		"spray": {"count": Vector2i(8, 12), "size": Vector2(0.035, 0.075), "speed": Vector2(5.0, 11.0), "life": Vector2(0.2, 0.45), "spread": 22.0, "drag": 6.0, "gravity": 0.2, "stretch": 0.035, "aim": Vector2(1.0, 0.5), "color": Color(0.86, 0.85, 0.81, 0.65)},
+		"dust": {"count": 3, "size": Vector2(0.12, 0.3), "life": Vector2(0.8, 1.4), "opacity": 0.2, "rise": 0.04, "color": Color(0.8, 0.78, 0.72)},
+		"sparks": {"count": Vector2i(1, 2), "chance": 0.08},
+	},
+	"asphalt": {
+		"debris": {"mesh": "chip", "count": Vector2i(6, 10), "size": Vector2(0.006, 0.028), "speed": Vector2(1.8, 5.5), "life": Vector2(0.7, 1.3), "spread": 50.0, "drag": 0.5, "bounce": 0.3, "aim": Vector2(1.0, 0.5), "color": Color(0.25, 0.24, 0.22), "alt": Color(0.42, 0.41, 0.38), "alt_share": 0.3},
+		"bits": {"mesh": "chip", "count": Vector2i(10, 16), "size": Vector2(0.002, 0.006), "speed": Vector2(3.0, 8.0), "life": Vector2(0.35, 0.7), "spread": 40.0, "drag": 1.6, "bounce": 0.2, "aim": Vector2(1.0, 0.6), "color": Color(0.3, 0.29, 0.27)},
+		"spray": {"count": Vector2i(10, 14), "size": Vector2(0.04, 0.085), "speed": Vector2(4.0, 10.0), "life": Vector2(0.22, 0.5), "spread": 22.0, "drag": 6.0, "gravity": 0.2, "stretch": 0.035, "aim": Vector2(1.0, 0.5), "color": Color(0.42, 0.4, 0.37, 0.7)},
+		"dust": {"count": 4, "size": Vector2(0.15, 0.4), "life": Vector2(1.0, 1.8), "opacity": 0.22, "rise": 0.04, "color": Color(0.42, 0.4, 0.37)},
+		"sparks": {"count": Vector2i(1, 3), "chance": 0.12},
+	},
+	"metal": {
+		"debris": {"mesh": "flake", "count": Vector2i(3, 6), "size": Vector2(0.003, 0.012), "speed": Vector2(1.5, 4.5), "life": Vector2(0.5, 1.0), "spread": 40.0, "drag": 0.3, "bounce": 0.4, "aim": Vector2(1.0, 0.6), "color": Color(0.29, 0.3, 0.31), "alt": Color(0.55, 0.52, 0.45), "alt_share": 0.4},
+		"dust": {"count": 2, "size": Vector2(0.08, 0.22), "life": Vector2(0.5, 1.0), "opacity": 0.16, "rise": 0.5, "color": Color(0.5, 0.5, 0.5)},
+		"sparks": {"count": Vector2i(14, 26), "chance": 1.0},
+		"flash": {"size": 0.3, "light": true},
+	},
+	"glass": {
+		"debris": {"mesh": "shard", "count": Vector2i(8, 14), "size": Vector2(0.01, 0.04), "speed": Vector2(1.5, 4.5), "life": Vector2(0.8, 1.4), "spread": 40.0, "drag": 0.2, "bounce": 0.35, "aim": Vector2(1.0, 0.4), "color": Color(0.68, 0.79, 0.81, 0.6)},
+		"bits": {"mesh": "shard", "count": Vector2i(10, 18), "size": Vector2(0.003, 0.008), "speed": Vector2(2.0, 6.0), "life": Vector2(0.4, 0.9), "spread": 45.0, "drag": 0.8, "bounce": 0.3, "aim": Vector2(1.0, 0.4), "color": Color(0.8, 0.88, 0.9, 0.7)},
+	},
+	"wood": {
+		"debris": {"mesh": "splinter", "count": Vector2i(6, 11), "size": Vector2(0.02, 0.075), "speed": Vector2(2.0, 6.0), "life": Vector2(0.8, 1.5), "spread": 42.0, "drag": 0.7, "bounce": 0.25, "aim": Vector2(1.0, 0.5), "color": Color(0.54, 0.37, 0.19), "alt": Color(0.72, 0.56, 0.36), "alt_share": 0.4},
+		"bits": {"mesh": "chip", "count": Vector2i(10, 16), "size": Vector2(0.003, 0.008), "speed": Vector2(2.5, 7.0), "life": Vector2(0.4, 0.9), "spread": 40.0, "drag": 1.8, "bounce": 0.15, "aim": Vector2(1.0, 0.5), "color": Color(0.66, 0.5, 0.3)},
+		"spray": {"count": Vector2i(8, 12), "size": Vector2(0.035, 0.075), "speed": Vector2(4.0, 9.0), "life": Vector2(0.22, 0.45), "spread": 22.0, "drag": 6.0, "gravity": 0.3, "stretch": 0.03, "aim": Vector2(1.0, 0.5), "color": Color(0.7, 0.56, 0.38, 0.6)},
+		"dust": {"count": 2, "size": Vector2(0.1, 0.25), "life": Vector2(0.6, 1.1), "opacity": 0.15, "rise": 0.03, "color": Color(0.6, 0.47, 0.3)},
+	},
+	"cardboard": {
+		"debris": {"mesh": "paper", "count": Vector2i(4, 8), "size": Vector2(0.015, 0.05), "speed": Vector2(0.8, 2.5), "life": Vector2(1.0, 1.8), "spread": 50.0, "drag": 2.4, "bounce": 0.0, "flutter": 6.0, "aim": Vector2(1.0, 0.4), "color": Color(0.58, 0.44, 0.27), "alt": Color(0.7, 0.6, 0.45), "alt_share": 0.3},
+		"dust": {"count": 1, "size": Vector2(0.08, 0.16), "life": Vector2(0.4, 0.8), "opacity": 0.1, "rise": 0.02, "color": Color(0.58, 0.5, 0.4)},
+	},
+	"fabric": {
+		"debris": {"mesh": "fiber", "count": Vector2i(3, 6), "size": Vector2(0.006, 0.02), "speed": Vector2(0.4, 1.4), "life": Vector2(0.6, 1.2), "spread": 55.0, "drag": 3.0, "bounce": 0.0, "flutter": 3.0, "aim": Vector2(1.0, 0.3), "color": Color(0.28, 0.25, 0.22)},
+		"dust": {"count": 1, "size": Vector2(0.05, 0.1), "life": Vector2(0.3, 0.6), "opacity": 0.08, "rise": 0.02, "color": Color(0.4, 0.38, 0.35)},
+	},
+	"plastic": {
+		"debris": {"mesh": "flake", "count": Vector2i(4, 8), "size": Vector2(0.008, 0.032), "speed": Vector2(1.5, 4.0), "life": Vector2(0.6, 1.2), "spread": 48.0, "drag": 0.8, "bounce": 0.45, "aim": Vector2(1.0, 0.5), "color": Color(0.24, 0.25, 0.27)},
+	},
+	"flesh": {
+		"debris": {"mesh": "drop", "count": Vector2i(10, 18), "size": Vector2(0.004, 0.013), "speed": Vector2(1.4, 4.8), "life": Vector2(0.3, 0.6), "spread": 24.0, "drag": 0.8, "bounce": 0.0, "color": Color(0.26, 0.016, 0.012)},
+		"dust": {"count": 5, "size": Vector2(0.09, 0.26), "life": Vector2(0.35, 0.6), "opacity": 0.4, "rise": -0.15, "color": Color(0.26, 0.016, 0.012)},
+	},
+	"snow": {
+		"debris": {"mesh": "chip", "count": Vector2i(5, 9), "size": Vector2(0.01, 0.032), "speed": Vector2(0.8, 2.8), "life": Vector2(0.6, 1.0), "spread": 55.0, "drag": 1.4, "bounce": 0.0, "aim": Vector2(1.0, 0.35), "color": Color(0.82, 0.87, 0.9)},
+		"spray": {"count": Vector2i(8, 12), "size": Vector2(0.04, 0.08), "speed": Vector2(3.0, 7.0), "life": Vector2(0.3, 0.6), "spread": 22.0, "drag": 4.0, "gravity": 0.5, "stretch": 0.03, "aim": Vector2(1.0, 0.35), "color": Color(0.9, 0.93, 0.95, 0.6)},
+		"dust": {"count": 4, "size": Vector2(0.15, 0.35), "life": Vector2(0.8, 1.4), "opacity": 0.25, "rise": 0.02, "color": Color(0.85, 0.88, 0.9)},
+	},
+	# Грунт: веер земли столбом вверх и чуть по ходу пули, комья падают обратно; по траве ещё
+	# взлетают травинки и пятно травы вокруг ложится.
+	"grass": {
+		"debris": {"mesh": "clod", "count": Vector2i(6, 10), "size": Vector2(0.012, 0.04), "speed": Vector2(1.5, 4.5), "life": Vector2(0.9, 1.6), "spread": 28.0, "drag": 0.5, "bounce": 0.12, "aim": Vector2(1.0, 0.35), "color": Color(0.3, 0.24, 0.17), "alt": Color(0.22, 0.17, 0.12), "alt_share": 0.4},
+		"bits": {"mesh": "blade", "count": Vector2i(16, 26), "size": Vector2(0.06, 0.15), "speed": Vector2(2.0, 5.5), "life": Vector2(1.5, 2.6), "spread": 45.0, "drag": 2.6, "bounce": 0.0, "flutter": 5.0, "aim": Vector2(1.0, 0.3), "color": Color(0.42, 0.52, 0.22), "alt": Color(0.62, 0.58, 0.36), "alt_share": 0.35},
+		"spray": {"count": Vector2i(14, 22), "size": Vector2(0.05, 0.1), "speed": Vector2(3.5, 7.5), "life": Vector2(0.4, 0.8), "spread": 18.0, "drag": 3.0, "gravity": 1.0, "stretch": 0.04, "aim": Vector2(1.0, 0.35), "color": Color(0.32, 0.27, 0.2, 0.85)},
+		"dust": {"count": 4, "size": Vector2(0.2, 0.5), "life": Vector2(1.0, 1.8), "opacity": 0.2, "rise": 0.05, "color": Color(0.45, 0.4, 0.32)},
+		"trample": 0.3,
+	},
+	"dirt": {
+		"debris": {"mesh": "clod", "count": Vector2i(8, 13), "size": Vector2(0.012, 0.045), "speed": Vector2(1.5, 5.0), "life": Vector2(0.9, 1.6), "spread": 30.0, "drag": 0.5, "bounce": 0.15, "aim": Vector2(1.0, 0.35), "color": Color(0.42, 0.34, 0.24), "alt": Color(0.33, 0.26, 0.18), "alt_share": 0.4},
+		"bits": {"mesh": "chip", "count": Vector2i(12, 20), "size": Vector2(0.003, 0.009), "speed": Vector2(3.0, 8.0), "life": Vector2(0.5, 1.0), "spread": 36.0, "drag": 1.4, "bounce": 0.1, "aim": Vector2(1.0, 0.35), "color": Color(0.45, 0.37, 0.27)},
+		"spray": {"count": Vector2i(16, 24), "size": Vector2(0.05, 0.11), "speed": Vector2(3.5, 8.0), "life": Vector2(0.45, 0.85), "spread": 18.0, "drag": 3.0, "gravity": 1.0, "stretch": 0.04, "aim": Vector2(1.0, 0.35), "color": Color(0.45, 0.37, 0.27, 0.85)},
+		"dust": {"count": 6, "size": Vector2(0.25, 0.6), "life": Vector2(1.4, 2.4), "opacity": 0.24, "rise": 0.05, "color": Color(0.46, 0.39, 0.3)},
+	},
+	# Грязь мокрая: комья липнут (без отскока), брызги тяжёлые, пыли почти нет.
+	"mud": {
+		"debris": {"mesh": "clod", "count": Vector2i(7, 12), "size": Vector2(0.012, 0.04), "speed": Vector2(1.2, 4.0), "life": Vector2(0.7, 1.2), "spread": 30.0, "drag": 0.4, "bounce": 0.0, "aim": Vector2(1.0, 0.35), "color": Color(0.2, 0.16, 0.11), "alt": Color(0.16, 0.13, 0.09), "alt_share": 0.5},
+		"spray": {"count": Vector2i(10, 16), "size": Vector2(0.03, 0.06), "speed": Vector2(3.0, 6.5), "life": Vector2(0.35, 0.6), "spread": 20.0, "drag": 2.0, "gravity": 1.0, "stretch": 0.03, "size_end": 1.2, "aim": Vector2(1.0, 0.35), "color": Color(0.22, 0.18, 0.13, 0.85)},
+		"dust": {"count": 1, "size": Vector2(0.15, 0.3), "life": Vector2(0.5, 0.9), "opacity": 0.08, "rise": 0.02, "color": Color(0.4, 0.36, 0.3)},
+	},
+	"gravel": {
+		"debris": {"mesh": "pebble", "count": Vector2i(8, 14), "size": Vector2(0.006, 0.025), "speed": Vector2(2.0, 5.5), "life": Vector2(0.8, 1.5), "spread": 42.0, "drag": 0.3, "bounce": 0.45, "aim": Vector2(1.0, 0.45), "color": Color(0.5, 0.49, 0.46), "alt": Color(0.38, 0.36, 0.33), "alt_share": 0.4},
+		"bits": {"mesh": "chip", "count": Vector2i(10, 16), "size": Vector2(0.002, 0.006), "speed": Vector2(3.0, 8.0), "life": Vector2(0.4, 0.8), "spread": 40.0, "drag": 1.5, "bounce": 0.3, "aim": Vector2(1.0, 0.5), "color": Color(0.55, 0.53, 0.5)},
+		"spray": {"count": Vector2i(8, 12), "size": Vector2(0.03, 0.06), "speed": Vector2(4.0, 10.0), "life": Vector2(0.25, 0.5), "spread": 22.0, "drag": 5.0, "gravity": 0.3, "stretch": 0.035, "aim": Vector2(1.0, 0.45), "color": Color(0.6, 0.57, 0.52, 0.5)},
+		"dust": {"count": 4, "size": Vector2(0.18, 0.45), "life": Vector2(1.0, 1.8), "opacity": 0.2, "rise": 0.04, "color": Color(0.54, 0.51, 0.47)},
+		"sparks": {"count": Vector2i(1, 3), "chance": 0.2},
+	},
 }
+## Из чего земля района по маске DistrictTerrain (для попаданий и шагов): канал маски сильнее
+## mask_min — грязь, камень, щебень или листва, иначе газон; круче rock_slope (y нормали) — камень.
+const TERRAIN_SURFACE := {"mask_min": 0.5, "rock_slope": 0.62}
 
 # --- Кровь (BloodFx): размеры в метрах, скорость м/с, время с ---
 ## Попадание в тело: капель drops; доля exit_share летит по ходу пули (конус exit_spread°, скорость

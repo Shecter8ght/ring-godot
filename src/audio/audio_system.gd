@@ -115,6 +115,7 @@ const STEP_SET := {
 	"tile": "stone", "concrete": "stone", "plastic": "stone", "wood": "wood", "glass": "glass",
 	"metal": "stone", "asphalt": "dirt", "cardboard": "cardboard", "fabric": "carpet", "snow": "snow",
 	"water": "water", "trash": "trash", "rubble": "rubble", "gravel": "gravel", "grass": "grass",
+	"dirt": "dirt", "mud": "dirt",
 }
 
 ## Сыгран шаг: вид звука и поверхность (для тестов и отладки).

@@ -3,7 +3,7 @@ extends Node
 ## Карта примятой травы вокруг камеры: квадрат GRASS.trample_extent м, res×res клеток, по кругу
 ## (клетка = мир по модулю окна — при движении камеры ничего не сдвигается). В клетке: RG — куда
 ## отогнута трава (мир xz), B — насколько (1 — легла). Кто примял — игроки (стоя, присев, лёжа),
-## мародёры и чужие отряды, тела убитых, взрывы гранат (blast). Трава поднимается сама за
+## мародёры и чужие отряды, тела убитых, взрывы гранат (blast), попадания пуль (hit). Трава поднимается сама за
 ## trample_recover_sec; процессор обходит только примятые клетки, видеокарте отдаётся маленькая
 ## текстура (глобальная grass_trample, её читают шейдеры травы) не чаще trample_hz раз в секунду.
 ## Всё видно только этому peer: каждый считает по тем, кого у него видно, — по сети ничего не идёт.
@@ -58,6 +58,13 @@ static func blast(pos: Vector3, radius: float) -> void:
 	if current == null:
 		return
 	current._stamp(Vector2(pos.x, pos.z), radius * float(Balance.GRASS.trample_radius.blast_k), Vector2.ZERO, 1.0)
+
+
+## Пуля попала в траву: пятно вокруг точки удара легло от неё (радиус, м).
+static func hit(pos: Vector3, radius: float) -> void:
+	if current == null:
+		return
+	current._stamp(Vector2(pos.x, pos.z), radius, Vector2.ZERO, 1.0)
 
 
 func _process(delta: float) -> void:

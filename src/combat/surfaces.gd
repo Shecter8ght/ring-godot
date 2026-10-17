@@ -2,8 +2,10 @@ class_name Surfaces
 extends RefCounted
 ## Из чего сделана поверхность в точке попадания: по материалу меша (стены/полы сектора),
 ## по типу пропа или по телу. Возвращает вид: concrete, tile, asphalt, metal, glass, wood,
-## cardboard, fabric, plastic, flesh, snow. Для своих уровней из редактора: meta "surface" на
-## StaticBody3D или на CollisionShape3D (например "metal") — главнее всего остального.
+## cardboard, fabric, plastic, flesh, snow, grass, dirt, mud, gravel. Для своих уровней из редактора:
+## meta "surface" на StaticBody3D или на CollisionShape3D (например "metal") — главнее всего остального.
+## Земля района (DistrictTerrain) отвечает сама по своей маске: meta "surface_map" — у кого спросить
+## surface_at(точка, нормаль).
 
 const MATERIAL_KIND := {
 	"large_floor_tiles_02": "tile", "worn_tile_floor": "tile",
@@ -42,6 +44,10 @@ static func kind_at(hit: Dictionary) -> String:
 		var sn := (node as CollisionObject3D).shape_owner_get_owner((node as CollisionObject3D).shape_find_owner(int(hit.shape)))
 		if sn and sn.has_meta("surface"):
 			return String(sn.get_meta("surface"))
+	if node.has_meta("surface_map") and hit.has("position"):
+		var source: Object = node.get_meta("surface_map")
+		if is_instance_valid(source) and source.has_method("surface_at"):
+			return String(source.call("surface_at", hit.position, hit.get("normal", Vector3.UP)))
 	if node.has_meta("surface"):
 		return String(node.get_meta("surface"))
 	if node.get_parent() is Door:

@@ -1,19 +1,21 @@
 extends Node
-## Эффекты попаданий: частицы по виду поверхности, декали (отверстия, трещины, кровь),
-## вспышка искр, звук удара. Autoload `ImpactFx`. Для твёрдых поверхностей используются CC0-декали
-## из assets/textures/impacts; если ассетов нет, остаётся процедурный запасной вариант.
+## Эффекты попаданий: выброс слоями по виду поверхности (ImpactBurst), декали (отверстия, трещины,
+## воронки в грунте, кровь), звук удара; по траве пятно вокруг ложится (GrassTrample). Autoload
+## `ImpactFx`. Декали — CC0 и свои из assets/textures/impacts (tools/import_impact_decals.py,
+## tools/gen_impact_soil.py); если ассетов нет, остаётся процедурный запасной вариант.
 
 ## Сколько декалей держим в мире — старые убираются.
 const MAX_DECALS: int = Balance.IMPACT_MAX_DECALS
 const BURST_SCENE: PackedScene = preload("res://scenes/combat/impact_burst.tscn")
 const DECAL_DIR := "res://assets/textures/impacts"
-const DECAL_COUNTS := {"concrete": 1, "metal": 8, "wood": 8}
+const DECAL_COUNTS := {"concrete": 1, "metal": 8, "wood": 8, "soil": 4}
 
 ## Звук удара по виду поверхности.
 const SOUND := {
 	"concrete": "impact_hard", "tile": "impact_ceramic", "asphalt": "impact_dirt", "metal": "impact_metal",
 	"glass": "impact_glass", "wood": "impact_soft", "cardboard": "impact_soft", "fabric": "impact_soft",
 	"plastic": "impact_soft", "flesh": "hit", "snow": "impact_dirt",
+	"grass": "impact_dirt", "dirt": "impact_dirt", "mud": "impact_dirt", "gravel": "impact_dirt",
 }
 
 var _rng := RandomNumberGenerator.new()
@@ -38,6 +40,7 @@ func _ready() -> void:
 	_tex_splat = _make_splat_texture(128)
 	_tex_dust = _make_soft_texture(48)
 	_load_decal_textures()
+	ImpactBurst.prepare()
 	_chip_mesh = BoxMesh.new()
 	_chip_mesh.size = Vector3(1, 1, 1)
 	_dust_mesh = QuadMesh.new()
@@ -115,6 +118,9 @@ func _show_hit(parent: Node, kind: String, pos: Vector3, n: Vector3, dir: Vector
 		# на витрине след рисуют трещины самой панели (GlassPanes), а выбитая — без висящих в воздухе дыр
 		if kind != "glass":
 			_decal(parent, kind, pos, n)
+		var spec: Dictionary = Balance.IMPACT_SURFACES[kind]
+		if spec.has("trample"):
+			GrassTrample.hit(pos, float(spec.trample))
 
 	Audio.play(String(SOUND.get(kind, "impact_hard")), pos)
 
@@ -133,11 +139,48 @@ func _particles(parent: Node, kind: String, pos: Vector3, n: Vector3, dir: Vecto
 		var oldest: Node3D = _bursts.pop_front()
 		if is_instance_valid(oldest):
 			oldest.free()
+	var far: bool = camera != null and camera.global_position.distance_to(pos) > Balance.IMPACT_LOD_M
+	var floor_plane: Vector4 = ImpactBurst.NO_PLANE
+	var radius: float = ImpactBurst.NO_RADIUS
+	if kind != "flesh":
+		var ground: Array = _ground(parent, pos, n, dir)
+		floor_plane = ground[0]
+		radius = ground[1]
 	var burst: ImpactBurst = BURST_SCENE.instantiate() as ImpactBurst
 	parent.add_child(burst)
 	burst.global_position = pos + n * Balance.IMPACT_OFFSET
-	burst.setup(kind, n, dir.normalized(), _rng.randi())
+	burst.setup(kind, n, dir.normalized(), _rng.randi(), floor_plane, radius, far)
 	_bursts.append(burst)
+
+
+## Куда лягут куски: [плоскость пола под точкой удара, радиус поверхности удара]. Попали в верхнюю
+## грань — есть ли опора в стороне, куда полетят куски: нет на высоте удара — грань маленькая (стол,
+## капот), куски с неё падают на пол под ней.
+func _ground(parent: Node, pos: Vector3, n: Vector3, dir: Vector3) -> Array:
+	var cfg: Dictionary = Balance.IMPACT_FLOOR
+	var world: World3D = (parent as Node3D).get_world_3d() if parent is Node3D else get_viewport().find_world_3d()
+	if world == null:
+		return [ImpactBurst.NO_PLANE, ImpactBurst.NO_RADIUS]
+	var space: PhysicsDirectSpaceState3D = world.direct_space_state
+	if n.y > 0.7:
+		var side: Vector3 = Vector3(dir.x, 0.0, dir.z)
+		side = side.normalized() if side.length_squared() > 0.0001 else Vector3.RIGHT
+		var probe: Vector3 = pos + side * float(cfg.probe_m)
+		var down: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(
+			probe + Vector3.UP * float(cfg.lift_m), probe + Vector3.DOWN * float(cfg.down_m), Hitscan.LAYER_WORLD))
+		if down.is_empty():
+			return [ImpactBurst.NO_PLANE, float(cfg.small_radius_m)]
+		var broad: bool = absf((down.position as Vector3).y - pos.y) <= float(cfg.edge_m)
+		return [_plane(down), ImpactBurst.NO_RADIUS if broad else float(cfg.small_radius_m)]
+	var start: Vector3 = pos + n * 0.05
+	var hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		start, start + Vector3.DOWN * float(cfg.down_m), Hitscan.LAYER_WORLD))
+	return [ImpactBurst.NO_PLANE if hit.is_empty() else _plane(hit), ImpactBurst.NO_RADIUS]
+
+
+static func _plane(hit: Dictionary) -> Vector4:
+	var normal: Vector3 = (hit.normal as Vector3).normalized()
+	return Vector4(normal.x, normal.y, normal.z, normal.dot(hit.position as Vector3))
 
 
 # ---------------------------------------------------------------- взрыв

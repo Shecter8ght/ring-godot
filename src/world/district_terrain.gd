@@ -34,6 +34,10 @@ var _rows: int = 0
 var _origin: Vector2 = Vector2.ZERO
 var _step: float = 1.0
 var _pending: bool = false
+## Маска грязи / камня / щебня / листвы (как у шейдера) — из чего земля в точке, читается по первому
+## попаданию или шагу.
+var _splat_path: String = ""
+var _splat: Image
 
 
 func _ready() -> void:
@@ -65,6 +69,33 @@ func height_at(x: float, z: float) -> float:
 	var c: float = _heights[(iz + 1) * _cols + ix]
 	var d: float = _heights[(iz + 1) * _cols + ix + 1]
 	return lerpf(lerpf(a, b, tx), lerpf(c, d, tx), tz)
+
+
+## Из чего земля в точке (Surfaces — попадания и шаги): канал маски сильнее mask_min — грязь (R),
+## камень (G) или щебень (B) — «gravel», листва (A) — «dirt»; иначе газон; крутой склон — камень.
+func surface_at(pos: Vector3, normal: Vector3) -> String:
+	var cfg: Dictionary = Balance.TERRAIN_SURFACE
+	if normal.y < float(cfg.rock_slope):
+		return "gravel"
+	if _splat == null and _splat_path != "" and ResourceLoader.exists(_splat_path):
+		_splat = (load(_splat_path) as Texture2D).get_image()
+		if _splat != null and _splat.is_compressed():
+			_splat.decompress()
+	if _splat == null or _cols < 2 or _rows < 2:
+		return "grass"
+	var span: Vector2 = Vector2(float(_cols - 1), float(_rows - 1)) * _step
+	var uv: Vector2 = (Vector2(pos.x, pos.z) - _origin) / span
+	var px: int = clampi(int(uv.x * _splat.get_width()), 0, _splat.get_width() - 1)
+	var py: int = clampi(int(uv.y * _splat.get_height()), 0, _splat.get_height() - 1)
+	var m: Color = _splat.get_pixel(px, py)
+	var best: float = maxf(maxf(m.r, m.g), maxf(m.b, m.a))
+	if best < float(cfg.mask_min):
+		return "grass"
+	if best == m.r:
+		return "mud"
+	if best == m.a:
+		return "dirt"
+	return "gravel"
 
 
 func _cell(ix: int, iz: int) -> float:
@@ -116,6 +147,8 @@ func _build() -> void:
 		var path: String = String((terrain.get("textures", {}) as Dictionary).get(key, ""))
 		if ResourceLoader.exists(path):
 			material.set_shader_parameter(key, load(path))
+	_splat_path = String((terrain.get("textures", {}) as Dictionary).get("splat", ""))
+	_splat = null
 	material.set_shader_parameter("splat_origin", _origin)
 	material.set_shader_parameter("splat_size", Vector2(float(_cols - 1), float(_rows - 1)) * _step)
 	var tiles: Array = terrain.get("layer_tiles", [3.0, 3.0, 2.5, 3.0, 4.0, 2.0])
@@ -186,6 +219,7 @@ func _tile(root: Node3D, material: ShaderMaterial, x0: int, z0: int, w: int, d: 
 	body.name = "Ground_%d_%d" % [x0, z0]
 	body.position = base + Vector3(float(w) * _step * 0.5, 0.0, float(d) * _step * 0.5)
 	body.set_meta("surface", "grass")
+	body.set_meta("surface_map", self)
 	var shape := HeightMapShape3D.new()
 	shape.map_width = w + 1
 	shape.map_depth = d + 1
