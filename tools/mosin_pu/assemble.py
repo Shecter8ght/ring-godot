@@ -31,7 +31,9 @@ else:
         "mount": os.path.join(A, "models", "03_Крепление", f"Mosin_PU_Mount_{MV}.blend"),
         "scope": os.path.join(A, "models", "02_Прицел", f"Mosin_PU_Scope_{SV}.blend"),
     }
-    OUT = os.path.join(A, "models", "00_Сборка", "Mosin_9130PU_Assembly_check.blend")
+    # сборка принятой v06 — прежнее имя; новые версии винтовки — своё имя, чтобы прежнюю не затирать
+    OUT = os.path.join(A, "models", "00_Сборка", "Mosin_9130PU_Assembly_check.blend" if RV == "v06"
+                       else f"Mosin_9130PU_Assembly_{RV}_check.blend")
 
 
 def append_all(path, col_name):

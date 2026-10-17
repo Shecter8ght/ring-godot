@@ -19,7 +19,7 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mosin_lib as L  # noqa: E402
 
-OUT = os.path.join(L.ASSET_DIR, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v06.blend")
+OUT = os.path.join(L.ASSET_DIR, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v07.blend")
 MUZZLE = 728.8
 SEC = 120                     # точек в сечении ложи
 
@@ -56,6 +56,36 @@ STAMP_BARREL = (("ВЕРАСОВСКІЙ", 66.0), ("ОРУЖЕЙНЫЙ ЗАВО�
 STAMP_SERIAL = "30417"         # номер винтовки — тот же на стебле затвора
 SLING_SLOTS = (((-329.0, -84.8), 21.0, 6.0, 21.0),   # приклад: центр, длина, высота, наклон (+ — передний конец выше)
                ((444.0, -13.0), 17.0, 5.5, 0.0))     # цевьё
+
+# ------------------------------------------------------------------ затвор (v07)
+# Устройство — по НСД-46 (рис. «Затвор»), разнесённому виду 7.62x54r.net и снимку RIA 265; что оценено — asset-state.md.
+# Углы вокруг оси канала: α = atan2(z, y) — 0° влево, 90° вверх, 180° вправо, 270° вниз. Затвор закрыт:
+# гребень стебля и верхний (с выбрасывателем) упор личинки справа, нижний упор слева; открывание — поворот −90°.
+HANDLE_DX = 4.5               # рукоять ближе к дулу, чем в v06: так она стоит на гребне на снимках RIA 265 и владельца
+RIB_X = (-102.2, -28.5)       # гребень стебля: задний торец — зуб перед кольцом коробки
+RIB_Y = (-16.0, -5.0)         # наружная грань — тело стебля
+RIB_Z = (-5.4, 6.5)
+BODY_X = (-158.5, -42.4)      # трубка стебля: задний торец с кулачком взведения — передний торец
+HEAD_X = (-37.0, -0.2)        # боевая личинка: хвост — чашечка под закраину
+LUG_X = (-16.0, -2.4)         # боевые упоры личинки
+LUG_R = 11.7                  # наружный радиус упоров — вровень с низом соединительной планки (НСД-46)
+LUG_HALF = 26.0               # половина углового размера упора, град
+COCK_TRAVEL = 9.5             # взведение при повороте рукояти вверх, мм (кулачок стебля; оценка по фото разборки)
+EJECTOR_X = (-93.0, -89.0)    # отражательный выступ отсечки-отражателя
+EJECTOR_IN = 2.8              # на сколько выступ уходит внутрь коробки, когда под ним личинка, мм
+EJECTOR_FROM = 56.4           # ход затвора, после которого выступ целиком над личинкой и может войти в её паз, мм
+
+
+def _sector(name, prof, a0, a1, mat=None, col=None, step=2.0):
+    """Тело из контура (x, r) в мм, повёрнутого вокруг оси канала от угла a0 до a1 (град, α = atan2(z, y))."""
+    n = max(2, math.ceil(abs(a1 - a0) / step))
+    secs = []
+    for i in range(n + 1):
+        a = math.radians(a0 + (a1 - a0) * i / n)
+        p = prof(math.degrees(a)) if callable(prof) else prof
+        secs.append([(x, r * math.cos(a), r * math.sin(a)) for x, r in p])
+    return L.loft(name, secs, mat, col)
+
 
 # ------------------------------------------------------------------ ствол (x, r) — 7.62x54r.net
 BARREL_OUT = [(0.0, 12.4), (23.9, 12.4), (23.9, 15.05), (74.7, 13.9), (78.5, 13.6), (84.0, 10.4),
@@ -152,9 +182,16 @@ def build_stock(col):
     L.boolean(cut_tang, _tang_plan(0.15), "INTERSECT")
     L.boolean(stock, cut_tang)
     # выемка правой стенки под изогнутую рукоять (ПУ)
-    L.boolean(stock, L.extrude_profile("cut_handle_relief", L.fillet([(-102.0, -9.0), (-89.0, -9.0), (-89.0, 12.0),
-                                                                       (-102.0, 12.0)], [4.5, 4.5, 0, 0], 6,
-                                                                      closed=True), -32.0, -12.0, None, None, None))
+    dx = HANDLE_DX
+    L.boolean(stock, L.extrude_profile("cut_handle_relief", L.fillet([(-102.0 + dx, -9.0), (-89.0 + dx, -9.0),
+                                                                       (-89.0 + dx, 12.0), (-102.0 + dx, 12.0)],
+                                                                      [4.5, 4.5, 0, 0], 6, closed=True),
+                                       -32.0, -12.0, None, None, None))
+    # справа вдоль окна коробки дерево ниже гребня стебля (на снимке RIA 265 под гребнем — щель, затем ложа)
+    zr = RIB_Z[0] - 0.7
+    L.boolean(stock, L.extrude_profile("cut_rib_relief", L.fillet([(-104.0, zr), (-26.5, zr), (-26.5, 20.0),
+                                                                   (-104.0, 20.0)], [3.0, 1.5, 0, 0], 6, closed=True),
+                                       -40.0, -8.5, None, None, None))
     # паз под обойму колодки прицела
     L.boolean(stock, L.lathe("cut_rs_base", [(87.0, 0), (87.0, 12.45), (164.0, 12.45), (164.0, 0)], 64))
     # магазин и спусковая скоба
@@ -267,6 +304,8 @@ def build_barrel(col):
     radii[len(outer) - 1] = 0.6   # кромка дульного среза
     prof = L.fillet(prof, radii, seg=6, closed=False)
     ob = L.lathe("Barrel", prof, 96, "Steel_Blued", col, closed=True)
+    # выемка в казённом срезе под зацеп выбрасывателя: личинка с выбрасывателем поворачивается на 90° (справа → вверх)
+    L.boolean(ob, _sector("cut_extractor_relief", [(-0.5, 7.15), (-0.5, 9.0), (1.0, 9.0), (1.0, 7.15)], 72.0, 198.0))
 
     def wrap(u: float, v: float, h: float):
         # строка вдоль окружности (читается слева направо, если смотреть сверху дулом от себя)
@@ -283,12 +322,22 @@ def build_receiver(col):
     r_out, r_in = 15.65, 9.35
     ring = L.lathe("Receiver", [(-170, r_in), (-170, r_out), (24.0, r_out), (24.0, r_in)],
                    96, "Steel_Blued", col, closed=True)
-    # окно: справа и сверху от левой стенки (стенка слева y > +6), за кольцом
-    L.boolean(ring, _box("cut_port", (-112.5, -28.0), (-30, 6.0), (1.0, 30)))
-    # вырез правой стенки под рукоять затвора в закрытом положении
-    L.boolean(ring, _box("cut_handle", (-102.5, -88.0), (-30, -4.0), (-6.0, 30)))
-    # ниша отсекателя-отражателя в левой стенке окна
-    L.boolean(ring, _box("cut_interrupter", (-104.0, -48.0), (8.9, 11.4), (-6.5, 3.5)))
+    # окно: справа и сверху от левой стенки (стенка слева y > +7,4 — над ней проходит гребень открытого стебля), за кольцом
+    L.boolean(ring, _box("cut_port", (-112.5, -28.0), (-30, 7.4), (1.0, 30)))
+    # правая стенка окна ниже гребня стебля: в закрытом затворе гребень лежит на ней
+    L.boolean(ring, _box("cut_rib", (-103.5, -28.0), (-30, -4.0), (RIB_Z[0] - 0.7, 30)))
+    # ниша отсечки-отражателя в левой стенке окна: глубже на ход пружины (пластину отжимает стебель)
+    L.boolean(ring, _box("cut_interrupter", (-104.0, -48.0), (8.9, 13.2), (-6.5, 3.5)))
+    # кольцо коробки: пазы для упоров личинки (сверху и снизу — затвор открыт) и гнёзда, где упоры поворачиваются
+    # на 90° и запирают затвор; нижний паз — и для соединительной планки
+    race = [(-31.0, 8.5), (-31.0, LUG_R + 0.55), (LUG_X[0] + 0.0, LUG_R + 0.55), (LUG_X[0] + 0.0, 8.5)]
+    for a in (90.0, 270.0):
+        L.boolean(ring, _sector("cut_raceway", race, a - LUG_HALF - 2.5, a + LUG_HALF + 2.5, step=1.0))
+    seat = [(LUG_X[0] - 0.4, 8.5), (LUG_X[0] - 0.4, LUG_R + 0.55), (-0.05, LUG_R + 0.55), (-0.05, 8.5)]
+    for a0, a1 in ((90.0 - LUG_HALF - 2.0, 180.0 + LUG_HALF + 2.0), (-90.0 - LUG_HALF - 2.0, LUG_HALF + 2.0)):
+        L.boolean(ring, _sector("cut_lug_seat", seat, a0, a1, step=1.0))
+    # паз под соединительную планку по дну коробки (она не вращается и идёт под затвором)
+    L.boolean(ring, _box("cut_bar_groove", (-181.0, -28.0), (-3.9, 3.9), (-12.1, -6.0)))
     # задняя часть: стенки ниже — затвор и курок лежат сверху
     L.boolean(ring, _box("cut_rear", (-180, -104.5), (-30, 30), (0.0, 30)))
     # окно магазина снизу
@@ -316,12 +365,19 @@ def build_receiver(col):
 
 def build_receiver_extras(col):
     out = []
-    # отсекатель-отражатель на левой стенке окна
+    # отсечка-отражатель на левой стенке окна: пластина с отражательным выступом. Пластина пружинит: пока под ней
+    # стебель, она отжата наружу; когда подходит личинка, выступ входит в её паз и выбивает гильзу за закраину
+    slide = L.empty("Interrupter_Slide", (0, 0, 0), col, 0.012)
     cut = L.extrude_profile("Receiver_Interrupter", L.fillet([(-104, -5.5), (-56, -5.5), (-48, -2.0), (-48, 2.5),
                                                                (-104, 2.5)], [0.5, 2, 1.5, 0.5, 0.5], 4,
-                                                              closed=True), 9.05, 10.3, "Steel_Blued", col)
-    L.bevel_mod(cut, 0.3, 2)
-    out.append(cut)
+                                                              closed=True), 9.05, 10.1, "Steel_Blued", col)
+    lug = L.extrude_profile("ejector", L.fillet([(EJECTOR_X[0], -1.4), (EJECTOR_X[1], -1.4), (EJECTOR_X[1], 1.4),
+                                                 (EJECTOR_X[0], 1.4)], 0.4, 3, closed=True),
+                            9.05 - EJECTOR_IN - 0.0, 9.6, None, None)
+    L.boolean(cut, lug, "UNION")
+    L.bevel_mod(cut, 0.25, 2)
+    cut.parent = slide
+    out.append(slide)
     # винт хвостовика
     frame = _tang_screw_frame()
     s = L.lathe("Receiver_TangScrew", L.fillet([(-1.9, 0), (-1.9, 2.4), (-0.3, 4.15), (-0.05, 4.15), (0.3, 3.4),
@@ -365,78 +421,51 @@ def _tang_screw_frame() -> Matrix:
     return Matrix.Translation(p * L.MM) @ _basis_from_x(n).to_4x4()
 
 
-def _root_fillet(s: float, R: float, r0: float, rho: float) -> tuple[float, float, float]:
-    """Галтель корня рукояти в полуплоскости через её ось (s = |sin| угла к оси стебля по вертикали).
-
-    Стебель в этой плоскости — кривая y = −√(R² − (ρ·s)²); ищем круг радиуса rho, касательный к рукояти
-    (ρ = r0) и к этой кривой. Возвращает (y центра, y касания стебля, ρ касания стебля).
-    """
-    rc = r0 + rho
-
-    def ys(r: float) -> float:
-        v = R * R - (r * s) ** 2
-        return -math.sqrt(v) if v > 0 else 0.0
-
-    samples = [i * (rc + rho + 2.0) / 600 for i in range(601)]
-
-    def nearest(yc: float) -> tuple[float, float]:
-        best = (1e9, 0.0)
-        for r in samples:
-            d = math.hypot(r - rc, ys(r) - yc)
-            if d < best[0]:
-                best = (d, r)
-        return best
-    lo, hi = -R - rho - 2.0, ys(rc) - 1e-6
-    for _ in range(50):
-        mid = (lo + hi) / 2
-        if nearest(mid)[0] > rho:
-            lo = mid
-        else:
-            hi = mid
-    yc = (lo + hi) / 2
-    rt = nearest(yc)[1]
-    return yc, ys(rt), rt
-
-
 def _bolt_handle(col):
-    """Изогнутая рукоять ПУ: галтель R3 к стеблю (по цилиндру стебля), плавный изгиб, галтель R3 к шару Ø18,7."""
-    R, r0, rho, seg = 8.9, 4.9, 3.0, 48
-    # корень — прямой участок вдоль −Y; кольца гуще там, где идут галтели
-    ys = [-5.5, -6.0] + [-6.2 - 0.12 * k for k in range(52)] + [-12.6, -13.5, -16.0]
-    path = [Vector((-95.5, y, 0.0)) for y in ys]
-    root_n = len(path)
-    rad = [None] * root_n                         # для корня радиус зависит от направления — считается ниже
-    # изгиб — сплайн Катмулла–Рома по опорным точкам (иначе дуга гранёная)
-    ctrl = [(Vector((-95.5, -13.5, 0.0)), r0), (Vector((-95.5, -16.0, 0.0)), r0), (Vector((-95.0, -22.5, -0.5)), 4.85),
-            (Vector((-93.5, -27.0, -5.0)), 4.7), (Vector((-92.0, -28.6, -12.0)), 4.6),
-            (Vector((-90.8, -29.3, -24.0)), 4.5), (Vector((-90.0, -29.6, -37.0)), 4.5)]
+    """Изогнутая рукоять ПУ: выходит из наружной грани гребня стебля с галтелью вдоль гребня (поперёк гребня места
+    нет — стебель рукояти почти во всю его высоту), плавный изгиб, галтель R3 к шару Ø18,7."""
+    r0, rho, seg = 4.9, 3.0, 48
+    dx = HANDLE_DX
+    face, flare = RIB_Y[0] + 0.02, 3.6         # основание галтели — на грани гребня; длина галтели, мм
+    hx, hz = 7.6, 4.95                         # полуоси основания галтели: вдоль гребня и поперёк
+
+    def flare_r(d: float, a: float) -> float:
+        """Радиус кольца на расстоянии d от грани гребня в направлении a (cos a — к +Z, sin a — к −X)."""
+        p = 3.0
+        base = (abs(math.cos(a) / hz) ** p + abs(math.sin(a) / hx) ** p) ** (-1.0 / p)
+        if d <= 0.0:
+            return base
+        if d >= flare:
+            return r0
+        u = 1.0 - d / flare                    # 1 у грани, 0 в конце галтели: четверть окружности, касание с обеих сторон
+        return r0 + (base - r0) * (1.0 - math.sqrt(max(0.0, 1.0 - u * u)))
+    # корень — внутри гребня, затем сплайн Катмулла–Рома по опорным точкам (иначе дуга гранёная)
+    path = [Vector((-95.5 + dx, y, 0.0)) for y in (-14.4, -14.9, -15.4)]
+    rad = [None] * len(path)                    # у корня и в галтели радиус зависит от направления — считается ниже
+    ctrl = [(Vector((-95.5 + dx, -13.5, 0.0)), r0), (Vector((-95.5 + dx, -15.8, 0.0)), r0),
+            (Vector((-95.0 + dx, -22.5, -0.5)), 4.85), (Vector((-93.5 + dx, -27.0, -5.0)), 4.7),
+            (Vector((-92.0 + dx, -28.6, -12.0)), 4.6), (Vector((-90.8 + dx, -29.3, -24.0)), 4.5),
+            (Vector((-90.0 + dx, -29.6, -37.0)), 4.5)]
     for i in range(1, len(ctrl) - 2):
         p0, p1, p2, p3 = (ctrl[j][0] for j in (i - 1, i, i + 1, i + 2))
-        for k in range(1, 9):
-            t = k / 8
+        steps = 48 if i == 1 else 8             # у галтели кольца гуще
+        for k in range(1, steps + 1):
+            t = k / steps
             path.append(0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t
                                + (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t))
             rad.append(ctrl[i][1] + (ctrl[i + 1][1] - ctrl[i][1]) * t)
+    path.insert(3, ctrl[1][0].copy())
+    rad.insert(3, None)
     # шейка у шара: галтель R3 касается шара
-    c, Rb, rn = Vector((-89.5, -30.0, -48.0)), 9.35, 4.5
-    u = (Vector((-90.0, -29.6, -37.0)) - c).normalized()
+    c, Rb, rn = Vector((-89.5 + dx, -30.0, -48.0)), 9.35, 4.5
+    u = (Vector((-90.0 + dx, -29.6, -37.0)) - c).normalized()
     tc = math.sqrt((Rb + rho) ** 2 - (rn + rho) ** 2)
     tt_, rt = tc * Rb / (Rb + rho), (rn + rho) * Rb / (Rb + rho)
     for t in (11.0, tc, 9.6, 9.35, 9.1, 8.8, 8.5, 8.2, 7.9, 7.65, tt_, 6.5):
         path.append(c + u * t)
         rad.append(rn if t >= tc else (rn + rho - math.sqrt(max(0.0, rho ** 2 - (t - tc) ** 2)) if t > tt_ else rt))
-    # галтель корня по направлениям: точка кольца = нормаль·cos a + бинормаль·sin a; у корня нормаль +Z
-    # касание — к цилиндру на 0,3 мм внутри стебля: галтель входит в стебель под углом, без «пилы» на стыке
-    fil = [_root_fillet(abs(math.cos(2 * math.pi * k / seg)), R - 0.3, r0, rho) for k in range(seg)]
-
-    def root_r(y: float, k: int) -> float:
-        yc, yt, rtk = fil[k]
-        if y <= yc:
-            return r0
-        if y <= yt:
-            return r0 + rho - math.sqrt(max(0.0, rho ** 2 - (y - yc) ** 2))
-        return rtk
-    # рамки — параллельный перенос (как в L.sweep_circle)
+    # рамки — параллельный перенос (как в L.sweep_circle); точка кольца = нормаль·cos a + бинормаль·sin a,
+    # у корня нормаль +Z, бинормаль −X — по ним и задано основание галтели
     n = len(path)
     tang = [(path[min(n - 1, i + 1)] - path[max(0, i - 1)]).normalized() for i in range(n)]
     normal = Vector((0, 0, 1))
@@ -451,7 +480,8 @@ def _bolt_handle(col):
         binormal = tang[i].cross(normal)
         for k in range(seg):
             a = 2 * math.pi * k / seg
-            r = root_r(path[i].y, k) if i < root_n else rad[i]
+            d = face - path[i].y
+            r = flare_r(d, a) if (rad[i] is None or d < flare) else rad[i]
             verts.append(tuple((path[i] + (normal * math.cos(a) + binormal * math.sin(a)) * r) * L.MM))
     for i in range(n - 1):
         a0, b0 = i * seg, (i + 1) * seg
@@ -467,36 +497,146 @@ def _bolt_handle(col):
     return handle, ball
 
 
-def build_bolt(col):
-    """Затвор закрыт. Стебель с изогнутой рукоятью (ПУ), личинка, курок с грибком."""
-    root = L.empty("Bolt", (0, 0, 0), col, 0.02)
-    body = L.lathe("Bolt_Body", L.fillet([(-104, 0), (-104, 8.9), (-20, 8.9), (-20, 0)], [0, 0.8, 0.5, 0], 4),
-                   128, "Steel_Bright", col)
+def _rib_section(x: float):
+    """Сечение гребня стебля (затвор закрыт — гребень справа): наружная грань плоская, её кромки скруглены;
+    торцы скруглены в боковом виде (сзади R3, у зуба R1), как на снимке RIA 265."""
+    zb, zt = RIB_Z
+    for x_end, rr in ((RIB_X[0], 3.0), (RIB_X[1], 1.0)):
+        e = abs(x - x_end)
+        if e < rr:
+            d = rr - math.sqrt(max(0.0, rr * rr - (rr - e) ** 2))
+            zb, zt = zb + d, zt - d
+    rc = min(0.8, (zt - zb) * 0.3)
+    y_out, y_in = RIB_Y
+    poly = [(y_in, zt), (y_out, zt), (y_out, zb), (y_in, zb)]
+    pts = L.resample_closed(L.fillet(poly, [0.0, rc, rc, 0.0], seg=8, closed=True), 72)
+    return [(x, y, z) for y, z in pts]
 
-    def wrap_bolt(u: float, v: float, h: float):
-        # номер вдоль стебля справа-сверху: виден в окне коробки, верх цифр к верху винтовки
-        psi = math.radians(50.0) + v / 8.9
-        return (u, -(8.9 + h) * math.cos(psi), (8.9 + h) * math.sin(psi))
-    L.boolean(body, L.stamp_cutter("cut_stamp_bolt", [L.text_polys(STAMP_SERIAL, 2.4, -76.0, 0.0)], wrap_bolt, 0.12))
-    head = L.lathe("Bolt_Head", L.fillet([(-20, 0), (-20, 8.9), (-0.2, 8.9), (-0.2, 7.5), (-1.8, 7.5),
-                                          (-1.8, 0)], [0, 0.4, 0.6, 0.2, 0.2, 0], 4), 64, "Steel_Bright", col)
+
+def _cam_profile(a: float):
+    """Вырез кулачка взведения в заднем торце стебля (контур x, r при угле a): глубокое гнездо, где стоит выступ
+    курка после выстрела, затем винтовой скос — при повороте стебля на 90° он отжимает курок назад на COCK_TRAVEL."""
+    deep, end = BODY_X[0] + COCK_TRAVEL + 0.0, BODY_X[0] - 0.3
+    if a <= 196.0:
+        xf = deep
+    else:
+        xf = deep + (end - deep) * (a - 196.0) / 91.0
+    return [(BODY_X[0] - 1.5, 2.6), (BODY_X[0] - 1.5, 9.6), (xf, 9.6), (xf, 2.6)]
+
+
+def build_bolt(col):
+    """Затвор закрыт, курок спущен (после выстрела). Детали и движение — как у винтовки обр. 1891/30:
+    стебель с гребнем и рукоятью и боевая личинка с упорами и выбрасывателем поворачиваются вместе;
+    соединительная планка и курок с ударником не вращаются; при повороте рукояти вверх кулачок стебля
+    отжимает курок назад (взведение), затем весь затвор отводится назад."""
+    root = L.empty("Bolt", (0, 0, 0), col, 0.02)
+    # ---- стебель: трубка + гребень, на котором стоит рукоять
+    body = L.lathe("Bolt_Body", L.fillet([(BODY_X[0], 3.0), (BODY_X[0], 8.9), (BODY_X[1], 8.9), (BODY_X[1], 3.0)],
+                                         [0.0, 0.6, 0.5, 0.0], 4, closed=True), 256, "Steel_Bright", col, closed=True)
+    xs, x = [], RIB_X[0]
+    while x < RIB_X[1] - 1e-6:
+        xs.append(x)
+        x += 0.25 if (x < RIB_X[0] + 3.0 or x > RIB_X[1] - 1.25) else 2.0
+    xs.append(RIB_X[1])
+    rib = L.loft("rib", [_rib_section(x) for x in xs], "Steel_Bright", col)
+    L.boolean(body, rib, "UNION")
+    # гребень выходит вперёд за трубку и лежит над хвостом личинки: снизу полость по личинке, впереди зуб —
+    # за него гребень поворачивает личинку (её задний выступ стоит в вырезе перед зубом)
+    # (резаки повёрнуты на полшага относительно вершин трубки: совпадающие вершины рвут сетку при булевой)
+    L.boolean(body, L.lathe("cut_rib_hook", [(-42.5, 0), (-42.5, 12.6), (-30.5, 12.6), (-30.5, 9.1), (-28.0, 9.1),
+                                             (-28.0, 0)], 128, phase=math.pi / 128))
+    # кулачок взведения: справа в заднем торце (там стоит выступ курка)
+    L.boolean(body, _sector("cut_cam", _cam_profile, 163.3, 287.0, step=1.0))
+    L.cleanup(body, 0.002)              # осколки после булевых — иначе фаска и клеймо дают незамкнутые рёбра
+    mod = L.bevel_mod(body, 0.3, 2, 40)
+    bpy.context.view_layer.objects.active = body
+    with bpy.context.temp_override(object=body, active_object=body):
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    L.triangulate(body)
+
+    def wrap_rib(u: float, v: float, h: float):
+        # номер на наружной грани гребня, как на снимке RIA 265: читается от дула к прикладу, верх цифр книзу
+        return (-54.0 - u, RIB_Y[0] - h, 0.55 - v)
+    L.boolean(body, L.stamp_cutter("cut_stamp_bolt", [L.text_polys(STAMP_SERIAL, 3.0, 0.0, 0.0)], wrap_rib, 0.12))
     handle, ball = _bolt_handle(col)
-    # курок: корпус с гребнем — лофт, сечение «D»: круглый низ по стеблю, скруглённый верх
-    ramp = [(-168.0, 4.5), (-163.0, 6.5), (-157.0, 10.0), (-152.0, 12.8), (-146.0, 14.3), (-120.0, 14.5),
-            (-104.5, 14.5)]
-    secs = []
-    x = -168.0
+
+    # ---- боевая личинка: упоры (запирают затвор в кольце коробки), выбрасыватель, пазы отражателя и планки
+    # промежуточные кольца по длине: на длинных гранях точная булева оставляет незамкнутые рёбра у пазов
+    rings = [(x, 8.9) for x in (-34.0, -31.0, -28.0, -24.0, -20.0, -16.0, -12.0, -8.0, -4.0)]
+    head = L.lathe("Bolt_Head", L.fillet([(HEAD_X[0], 1.8), (HEAD_X[0], 8.9)] + rings + [(HEAD_X[1], 8.9),
+                                          (HEAD_X[1], 7.5), (-1.8, 7.5), (-1.8, 1.15), (-3.0, 1.15), (-3.0, 1.8)],
+                                         [0, 0.4] + [0] * len(rings) + [0.6, 0.2, 0.2, 0, 0, 0], 4, closed=True),
+                   128, "Steel_Bright", col, closed=True)
+    lug_prof = L.fillet([(LUG_X[0], 8.5), (LUG_X[0], LUG_R), (-6.0, LUG_R), (LUG_X[1], 8.5)], [0, 0.5, 8.0, 0], 8,
+                        closed=True)
+    for a in (180.0, 0.0):          # затвор закрыт: верхний упор (с выбрасывателем) справа, нижний слева
+        L.boolean(head, _sector("lug", lug_prof, a - LUG_HALF, a + LUG_HALF), "UNION")
+    # задний выступ: стоит в вырезе гребня — через него стебель поворачивает личинку
+    L.boolean(head, _sector("lug_drive", L.fillet([(-35.5, 8.5), (-35.5, 12.3), (-31.5, 12.3), (-31.5, 8.5)],
+                                                  [0, 0.5, 0.5, 0], 3, closed=True), 163.4, 196.6), "UNION")
+    # паз выбрасывателя справа: открытый вдоль личинки, под упором — туннель, впереди — прорезь в бортике чашечки
+    L.boolean(head, _box("cut_extractor", (-31.2, 1.0), (-9.6, -7.55), (-2.05, 2.05)))
+    # паз отражателя сверху (у открытого затвора — слева: по нему идёт выступ отсечки-отражателя до самой гильзы)
+    L.boolean(head, _box("cut_ejector", (-38.0, 1.0), (-1.6, 1.6), (4.8, 13.0)))
+    # кольцевой паз под зуб соединительной планки: личинка поворачивается, планка — нет
+    L.boolean(head, _sector("cut_stud", [(-25.4, 6.0), (-25.4, 9.8), (-19.8, 9.8), (-19.8, 6.0)], -114.0, 24.0))
+    L.bevel_mod(head, 0.3, 2)
+    # выбрасыватель: пластина в пазу личинки, зацеп впереди заходит за закраину гильзы
+    ext = L.extrude_profile("Bolt_Extractor", [(-30.8, -7.75), (-30.8, -8.6), (0.4, -8.6), (0.8, -8.2), (0.8, -6.95),
+                                               (0.5, -6.6), (-0.2, -6.6), (-0.2, -7.3), (-2.6, -7.3), (-3.0, -7.75)],
+                            -1.9, 1.9, "Steel_Bright", col, plane="XY")
+    L.bevel_mod(ext, 0.2, 2)
+
+    # ---- соединительная планка: под затвором, не вращается; зуб в кольцевом пазу личинки, стойка с отверстием
+    # под ударник между стеблем и личинкой (сверху — лапка, видна в окне коробки), сзади — вилка под выступ курка
+    bar = L.extrude_profile("Bolt_ConnectingBar", L.fillet([(-180.0, -LUG_R), (-16.4, -LUG_R), (-16.4, -9.15),
+                                                            (-180.0, -9.15)], [0.6, 0.8, 0.8, 0.6], 3, closed=True),
+                            -3.6, 3.6, "Steel_Blued", col)
+    L.boolean(bar, _box("cut_fork", (-182.0, -152.0), (-1.9, 1.9), (-13.0, -8.0)))
+    L.boolean(bar, _box("stud", (-25.2, -20.0), (-2.4, 2.4), (-9.6, -6.2)), "UNION")
+    stand = L.lathe("stand", [(-42.2, 1.9), (-42.2, 8.6), (-37.3, 8.6), (-37.3, 1.9)], 96, closed=True)
+    L.boolean(stand, _box("stand_tab", (-42.2, -37.3), (-3.0, 3.0), (7.5, 11.3)), "UNION")
+    L.boolean(stand, _box("stand_web", (-42.2, -37.3), (-3.6, 3.6), (-9.6, -7.8)), "UNION")
+    L.boolean(bar, stand, "UNION")
+    L.bevel_mod(bar, 0.3, 2)
+
+    # ---- курок: корпус за стеблем, сверху гребень по стеблю; спереди справа — выступ в кулачке стебля,
+    # снизу — выступ боевого взвода в вилке планки
+    ramp = [(-168.0, 4.5), (-163.0, 6.8), (-158.5, 10.1), (-155.0, 11.8), (-152.0, 12.8), (-146.0, 14.3),
+            (-120.0, 14.5), (-104.5, 14.5)]
+    x_front = BODY_X[0] - 0.4
+    secs, x = [], -168.0
+    while x <= x_front + 1e-6:
+        hw = 8.6
+        e = x + 168.0
+        if e < 3.0:                                  # задний торец — округление в плане
+            hw *= 0.75 + 0.25 * (e / 3.0) ** 0.5
+        pts = L.rounded_rect_yz(L.smooth_interp(ramp, x, 1.0), -8.4, hw, min(5.0, hw * 0.6), hw * 0.98, 64)
+        secs.append([(x, y, z) for y, z in pts])
+        x = min(x + 1.0, x_front) if x < x_front - 1e-6 else x + 1.0
+    cocking = L.loft("Bolt_CockingPiece", secs, "Steel_Bright", col, smooth_angle=45)
+    zb_side = math.sqrt(9.05 ** 2 - 5.4 ** 2)
+    arm, x = [], x_front - 0.6
     while x <= -104.5 + 1e-6:
         zt = L.smooth_interp(ramp, x, 1.0)
-        hw = 8.6
-        # торцы: округление в плане
-        e = min(x + 168.0, -104.5 - x)
-        if e < 3.0:
-            hw *= 0.75 + 0.25 * (e / 3.0) ** 0.5
-        pts = L.rounded_rect_yz(zt, -8.4, hw, min(5.0, hw * 0.6), hw * 0.98, 64)
-        secs.append([(x, y, z) for y, z in pts])
+        hw = 5.4
+        e = -104.5 - x
+        if e < 2.5:                                  # передний торец — округление в плане
+            hw *= 0.8 + 0.2 * (e / 2.5) ** 0.5
+        zs = math.sqrt(9.05 ** 2 - hw ** 2)
+        rc = max(0.2, min(2.0, (zt - zb_side) * 0.45))
+        poly = [(0.0, zt), (hw, zt), (hw, zs)]
+        poly += [(hw - 2 * hw * k / 12, math.sqrt(9.05 ** 2 - (hw - 2 * hw * k / 12) ** 2)) for k in range(1, 12)]
+        poly += [(-hw, zs), (-hw, zt)]
+        pts = L.resample_closed(L.fillet(poly, [0.0, rc] + [0.0] * 13 + [rc], seg=8, closed=True), 64)
+        arm.append([(x, y, z) for y, z in pts])
         x += 1.0 if (x < -150 or x > -108) else 3.0
-    cocking = L.loft("Bolt_CockingPiece", secs, "Steel_Bright", col, smooth_angle=45)
+    L.boolean(cocking, L.loft("arm", arm), "UNION")
+    L.boolean(cocking, _sector("follower", [(x_front - 0.6, 3.5), (x_front - 0.6, 8.6),
+                                             (BODY_X[0] + COCK_TRAVEL - 0.4, 8.6), (BODY_X[0] + COCK_TRAVEL - 0.4, 3.5)],
+                               166.0, 194.0), "UNION")
+    L.boolean(cocking, _box("sear_lug", (-167.0, -160.5), (-1.6, 1.6), (-11.3, -7.5)), "UNION")
+    L.bevel_mod(cocking, 0.3, 2)
     # грибок с гнездом под хвост ударника (кольцо торца — чистые квады, без булевой операции)
     knob = L.lathe("Bolt_Knob", L.fillet([(-174.0, 0), (-174.0, 3.45), (-178.0, 3.45), (-178.0, 3.9),
                                           (-178.0, 10.0), (-178.0, 11.0), (-172.5, 11.0), (-172.5, 5.0),
@@ -506,15 +646,61 @@ def build_bolt(col):
     pin_end = L.lathe("Bolt_FiringPin_End", L.fillet([(-178.3, 0), (-178.3, 3.3), (-174.5, 3.3), (-174.5, 0)],
                                                      [0, 0.35, 0, 0], 3), 48, "Steel_Bright", col)
     L.boolean(pin_end, _box("cut_pin_slot", (-179.0, -177.5), (-0.55, 0.55), (-4.0, 4.0)))
-    # иерархия движения: Bolt — ход вдоль X (весь затвор), Bolt_Rotor — поворот стебля с рукоятью вокруг оси
-    # канала (у Мосина личинка и курок при открывании не вращаются)
+    # ударник: виден в зазоре между стеблем и взведённым курком; боёк после выстрела выходит из чашечки на 0,45 мм
+    pin = L.lathe("Bolt_FiringPin", L.fillet([(x_front, 0), (x_front, 2.8), (-46.0, 2.8), (-45.0, 1.6), (-3.6, 1.6),
+                                              (-3.3, 1.0), (0.1, 1.0), (0.25, 0)], [0, 0.3, 0.3, 0.2, 0.2, 0.2, 0.3, 0],
+                                             3), 48, "Steel_Bright", col)
+
+    # ---- иерархия движения: Bolt — ход назад по X; Bolt_Rotor — поворот стебля с личинкой вокруг оси канала;
+    # Bolt_Cocking — ход курка с ударником (драйвер от поворота: кулачок; свойство cocked — удержание шепталом)
+    root["cocked"] = 0.0
+    root.id_properties_ui("cocked").update(min=0.0, max=1.0, soft_min=0.0, soft_max=1.0,
+                                           description="1 — курок на боевом взводе (затвор закрыт после перезарядки); "
+                                                       "0 — после выстрела. При повороте рукояти вверх курок "
+                                                       "взводится сам (кулачок стебля)")
     rotor = L.empty("Bolt_Rotor", (0, 0, 0), col, 0.015)
     rotor.parent = root
-    for ob in (body, handle, ball):
+    cock = L.empty("Bolt_Cocking", (0, 0, 0), col, 0.012)
+    cock.parent = root
+    for ob in (body, handle, ball, head, ext):
         ob.parent = rotor
-    for ob in (head, cocking, knob, pin_end):
-        ob.parent = root
+    for ob in (cocking, knob, pin_end, pin):
+        ob.parent = cock
+    bar.parent = root
     return root
+
+
+def _driver(ob, path: str, index: int, expr: str, variables) -> None:
+    """Драйвер с простым выражением (работает без разрешения Python-скриптов в Blender)."""
+    fc = ob.driver_add(path, index)
+    d = fc.driver
+    d.type = "SCRIPTED"
+    for name, target, spec in variables:
+        v = d.variables.new()
+        v.name = name
+        if spec.startswith("["):
+            v.type = "SINGLE_PROP"
+            v.targets[0].id_type = "OBJECT"
+            v.targets[0].id = target
+            v.targets[0].data_path = spec
+        else:
+            v.type = "TRANSFORMS"
+            v.targets[0].id = target
+            v.targets[0].transform_type = spec
+            v.targets[0].transform_space = "LOCAL_SPACE"
+    d.expression = expr
+
+
+def rig_drivers() -> None:
+    """Связи движения: курок отходит при повороте стебля (кулачок) или стоит на взводе; отсечка-отражатель
+    отжата, пока под ней стебель, и входит выступом в паз личинки, когда та подходит при отводе затвора."""
+    ob = bpy.data.objects
+    _driver(ob["Bolt_Cocking"], "location", 0,
+            f"-{COCK_TRAVEL * L.MM:.4f}*max(min(max(-r/1.5707963,0),1),h)",
+            [("r", ob["Bolt_Rotor"], "ROT_X"), ("h", ob["Bolt"], '["cocked"]')])
+    _driver(ob["Interrupter_Slide"], "location", 1,
+            f"{EJECTOR_IN * L.MM:.4f}*(1-min(max((-{EJECTOR_FROM * L.MM:.4f}-x)/0.002,0),1))",
+            [("x", ob["Bolt"], "LOC_X")])
 
 
 def build_magazine(col):
@@ -535,9 +721,9 @@ def build_magazine(col):
     for xs in (-98.0, -60.0):
         L.boolean(box, _box("cut_seam", (xs - 0.25, xs + 0.25), (-12, 12), (-90, -58.0)))
     L.bevel_mod(box, 0.8, 3)
-    # подаватель: пустой магазин — поднят до затвора
-    follower = L.extrude_profile("Magazine_Follower", L.fillet([(-107.5, -10.6), (-34.0, -11.6), (-34.0, -14.0),
-                                                                 (-107.5, -13.0)], 0.8, 3, closed=True),
+    # подаватель: пустой магазин — поднят до соединительной планки, идущей под затвором
+    follower = L.extrude_profile("Magazine_Follower", L.fillet([(-107.5, -12.2), (-34.0, -13.2), (-34.0, -15.6),
+                                                                 (-107.5, -14.6)], 0.8, 3, closed=True),
                                  -7.3, 7.3, "Steel_Blued", col)
     L.bevel_mod(follower, 0.4, 2)
     # спусковая скоба: дуга с хвостовиком, узкая (9 мм), скруглённая
@@ -863,6 +1049,8 @@ def build():
     for ob in [stock, hg, fr, ff, barrel, rcv, tang, bolt] + mag_parts + rcv_extra + sights + bands + fittings:
         if ob.parent is None:
             L.parent_keep(ob, root)
+    rig_drivers()
+    bpy.context.view_layer.update()
     lo, hi = L.world_bbox_mm([o for o in bpy.context.scene.objects if o.type == "MESH"])
     print("RIFLE bbox mm", tuple(round(v, 1) for v in lo), tuple(round(v, 1) for v in hi),
           "size", tuple(round(h - l, 1) for l, h in zip(lo, hi)))
