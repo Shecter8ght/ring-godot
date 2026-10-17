@@ -25,11 +25,13 @@ BASE, OUT = Path(argv[0]), Path(argv[1])
 
 MATERIALS = {
     "paint": ((0.42, 0.43, 0.45), 0.35, 0.0),
-    "lamp_glass": ((0.05, 0.06, 0.07), 0.05, 0.0),
+    "lamp_glass": ((0.80, 0.82, 0.85), 0.02, 0.0),
     "trim_black": ((0.02, 0.02, 0.02), 0.5, 0.0),
     "chrome": ((0.8, 0.8, 0.8), 0.1, 1.0),
-    "glass": ((0.03, 0.035, 0.04), 0.02, 0.0),
-    "lamp_red": ((0.35, 0.02, 0.02), 0.08, 0.0),
+    "glass": ((0.05, 0.06, 0.065), 0.03, 0.0),
+    "lamp_red": ((0.55, 0.03, 0.03), 0.06, 0.0),
+    "lamp_red_inner": ((0.25, 0.01, 0.01), 0.3, 0.3),
+    "lamp_red_led": ((0.9, 0.05, 0.04), 0.3, 0.0),
     "trim_gloss_black": ((0.015, 0.015, 0.016), 0.12, 0.0),
     "mesh_black": ((0.01, 0.01, 0.01), 0.7, 0.0),
     "carbon": ((0.03, 0.03, 0.032), 0.25, 0.0),
@@ -62,6 +64,10 @@ MATERIALS = {
 }
 
 
+# Прозрачные материалы: доля непрозрачности (стёкла кабины тонированы слегка, стёкла фар — почти прозрачны)
+TRANSPARENT = {"glass": 0.22, "lamp_glass": 0.12, "lamp_red": 0.55}
+
+
 def material(name: str) -> bpy.types.Material:
     m = bpy.data.materials.get(name)
     if m:
@@ -76,9 +82,19 @@ def material(name: str) -> bpy.types.Material:
     b.inputs["Base Color"].default_value = (*rgb, 1.0)
     b.inputs["Roughness"].default_value = rough
     b.inputs["Metallic"].default_value = metal
-    if name in ("screen_on", "lamp_drl"):
+    if name in TRANSPARENT:
+        # прозрачность смешиванием: так и в Godot придёт прозрачным (glTF alpha blend)
+        alpha = TRANSPARENT[name]
+        m.diffuse_color = (*rgb, alpha)
+        b.inputs["Alpha"].default_value = alpha
+        try:
+            m.surface_render_method = "BLENDED"
+        except AttributeError:
+            m.blend_method = "BLEND"
+        m.use_backface_culling = False
+    if name in ("screen_on", "lamp_drl", "lamp_red_led"):
         b.inputs["Emission Color"].default_value = (*rgb, 1.0)
-        b.inputs["Emission Strength"].default_value = 3.0 if name == "screen_on" else 6.0
+        b.inputs["Emission Strength"].default_value = {"screen_on": 3.0, "lamp_drl": 6.0}.get(name, 4.0)
     return m
 
 
@@ -174,6 +190,16 @@ for name, mat, V, F in wheel.wheel_parts():
     for p in me.polygons:
         p.use_smooth = True
     me.materials.append(material(mat))
+    if name == "Rim_Face":
+        # литое лицо после marching cubes плотное — проредить (форма сохраняется, галтели остаются)
+        tmp = bpy.data.objects.new("_decimate", me)
+        bpy.context.scene.collection.objects.link(tmp)
+        mod = tmp.modifiers.new("dec", "DECIMATE")
+        mod.ratio = 0.5
+        bpy.context.view_layer.objects.active = tmp
+        tmp.select_set(True)
+        bpy.ops.object.modifier_apply(modifier="dec")
+        bpy.data.objects.remove(tmp)
     meshes.append((name, me))
 wcol = bpy.data.collections.get("Wheels")
 for root in [o for o in bpy.data.objects if o.name.startswith("Wheel_") and o.type == "EMPTY"]:

@@ -64,12 +64,21 @@ def tire():
     return revolve(prof, SEG, closed=True)
 
 
-def rim_barrel():
-    """Обод: закраины, посадочные полки, ручей; тонкая стенка (обе стороны видны)."""
-    outer = [(-0.122, 0.262), (-0.114, 0.255), (-0.092, 0.252), (-0.045, 0.229), (0.030, 0.229), (0.080, 0.252),
-             (0.104, 0.255), (0.111, 0.263), (0.117, 0.267), (0.122, 0.264), (0.121, 0.250)]
-    inner = [(0.108, 0.247), (0.078, 0.246), (0.030, 0.223), (-0.045, 0.223), (-0.090, 0.246), (-0.116, 0.249),
-             (-0.124, 0.257)]
+def rim_barrel(with_face_lip: bool = False):
+    """Обод: внутренняя закраина, посадочные полки, ручей; тонкая стенка (обе стороны видны).
+
+    Наружная закраина — часть литого лица диска (wheel_face.py); with_face_lip — для запасного вида без него.
+    """
+    if with_face_lip:
+        outer = [(-0.122, 0.262), (-0.114, 0.255), (-0.092, 0.252), (-0.045, 0.229), (0.030, 0.229),
+                 (0.080, 0.252), (0.104, 0.255), (0.111, 0.263), (0.117, 0.267), (0.122, 0.264), (0.121, 0.250)]
+        inner = [(0.108, 0.247), (0.078, 0.246), (0.030, 0.223), (-0.045, 0.223), (-0.090, 0.246),
+                 (-0.116, 0.249), (-0.124, 0.257)]
+    else:
+        outer = [(-0.122, 0.262), (-0.114, 0.255), (-0.092, 0.252), (-0.045, 0.229), (0.030, 0.229),
+                 (0.080, 0.252), (0.106, 0.255), (0.110, 0.2535)]
+        inner = [(0.104, 0.2465), (0.078, 0.246), (0.030, 0.223), (-0.045, 0.223), (-0.090, 0.246),
+                 (-0.116, 0.249), (-0.124, 0.257)]
     return revolve(outer + inner, SEG, closed=True)
 
 
@@ -111,7 +120,7 @@ def hub():
 
 def lug_nuts(n: int = 5, pcd_r: float = 0.0560):
     """Гайки: шестигранник с фасками (вращение шестью гранями) на окружности крепления."""
-    prof = [(0.071, 0.0), (0.071, 0.0105), (0.078, 0.0110), (0.086, 0.0110), (0.089, 0.0085), (0.0895, 0.0)]
+    prof = [(0.0665, 0.0), (0.0665, 0.0105), (0.073, 0.0110), (0.081, 0.0110), (0.084, 0.0085), (0.0845, 0.0)]
     nut_v, nut_f = revolve(prof, 6, closed=False, phase=math.pi / 6)
     out = []
     for i in range(n):
@@ -162,16 +171,30 @@ def caliper(angle_deg: float = 115.0):
 
 
 def center_badge():
-    return pt.badge(np.array([0.0893, 0.0, 0.0]), (1, 0, 0), (0, 0, 1), 0.040, depth=0.0025)
+    return pt.badge(np.array([0.0893, 0.0, 0.0]), (1, 0, 0), (0, 0, 1), 0.036, depth=0.0025)
 
 
-def wheel_parts() -> list[tuple[str, str, np.ndarray, list]]:
-    """Части колеса: (имя, материал, вершины, грани) в осях колеса."""
+FACE_NPZ = r"E:\Models Blender\VEHICLES\Купе Ильи\models\wheel_face_v02.npz"
+
+
+def wheel_parts(face_npz: str | None = FACE_NPZ) -> list[tuple[str, str, np.ndarray, list]]:
+    """Части колеса: (имя, материал, вершины, грани) в осях колеса.
+
+    Лицо диска — литое тело из wheel_face.py (спицы, закраина, ступица одним куском); если файла нет —
+    запасной вид: отдельные спицы и ступица.
+    """
+    import os
+    if face_npz and os.path.exists(face_npz):
+        z = np.load(face_npz)
+        face = [("Rim_Face", "rim_black", z["verts"].astype(float), [tuple(f) for f in z["faces"]])]
+        barrel = rim_barrel(False)
+    else:
+        face = [("Rim_Spokes", "rim_black", *spokes()), ("Rim_Hub", "rim_black", *hub())]
+        barrel = rim_barrel(True)
     return [
         ("Tire", "rubber", *tire()),
-        ("Rim_Barrel", "rim_black", *rim_barrel()),
-        ("Rim_Spokes", "rim_black", *spokes()),
-        ("Rim_Hub", "rim_black", *hub()),
+        ("Rim_Barrel", "rim_black", *barrel),
+    ] + face + [
         ("Lug_Nuts", "chrome_dark", *lug_nuts()),
         ("Center_Badge", "chrome", *center_badge()),
         ("Brake_Disc", "brake_steel", *brake_disc()),

@@ -301,6 +301,18 @@ def build_rear(surf: Surface, S: dict, out: list) -> None:
     V, F = domain_panel(surf, VIEWS["rr"], tl, h=0.008, gap=GAP_TIGHT, flange=0.03)
     out.append(("Taillamp_L", "lamp_red", V, F))
     out.append(("Taillamp_R", "lamp_red", *mirror_mesh(V, F)))
+    import parts as _pt
+    refl = _pt.backing(surf, VIEWS["rr"], tl, 0.032)
+    out.append(("Taillamp_Reflector_L", "lamp_red_inner", *refl))
+    out.append(("Taillamp_Reflector_R", "lamp_red_inner", *mirror_mesh(*refl)))
+    # светящаяся полоса вдоль верхней кромки фонаря — под стеклом, ближе к середине
+    edge = resample(S["tl_top"].P, 80)[5:-5]
+    edge = surf.project(edge + 0.25 * (tl.mean(0) - edge))
+    edge = edge - surf.normal(edge) * 0.012
+    led = _pt.loft(edge, *_pt.frames(edge, np.array([0, 0, 1.0]))[1:], _pt.rounded_rect(0.007, 0.006, 0.0028, 3))
+    out.append(("Taillamp_LED_L", "lamp_red_led", *led))
+    out.append(("Taillamp_LED_R", "lamp_red_led", *mirror_mesh(*led)))
+    out.append(("Lightbar_Reflector", "lamp_red_inner", *_pt.backing(surf, VIEWS["rear"], bar_loop, 0.022)))
     # --- Задний бампер с нишей номера -------------------------------------------------------
     bump = sym_loop([S["lid_lower"].reversed(), S["tl_bot_rear"].P, S["bump_quarter"].P, S["arch_r_low"].P,
                      S["diff_top_s"].P, S["diff_top_r"].P])

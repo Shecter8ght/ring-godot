@@ -36,6 +36,24 @@ for spec in argv[3:]:
         _, obn, ax, val = spec.split(":")
         ob = bpy.data.objects[obn]
         ob.rotation_euler["xyz".index(ax)] = float(val)
+    elif kind == "eevee":
+        # настоящие материалы (прозрачность стёкол, свечение) — Eevee вместо Workbench
+        for eng in ("BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"):
+            try:
+                scene.render.engine = eng
+                break
+            except TypeError:
+                continue
+        world = scene.world or bpy.data.worlds.new("w")
+        scene.world = world
+        world.use_nodes = True
+        bg = world.node_tree.nodes.get("Background")
+        bg.inputs[0].default_value = (0.45, 0.47, 0.50, 1)
+        bg.inputs[1].default_value = 1.0
+        sun = bpy.data.objects.new("_sun", bpy.data.lights.new("_sun", "SUN"))
+        sun.data.energy = 3.0
+        sun.rotation_euler = (0.9, 0.2, 0.6)
+        scene.collection.objects.link(sun)
     elif kind == "matcap":
         # Проверка гладкости: отражение полос (зебра) — излом поверхности виден как излом полосы
         sh.light = "MATCAP"
