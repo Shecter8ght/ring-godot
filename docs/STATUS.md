@@ -5812,3 +5812,22 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
 - 2026-10-18, v02: по замечанию владельца («вдоль машины видны рёбра») ломаные профили поля формы (сечение борта,
   ширина кабины, отход носа и кормы) заменены кубическим сплайном, линия плеча скруглена; проверка «зеброй»
   (`close_views.py matcap:…`). Файл `models/Coupe_Ilya_v02.blend`.
+
+### 2026-10-17 — Мосин 1891/30 ПУ: игровая модель 15 000 треугольников (Claude)
+
+- Текстуры 20 % v02 приняты владельцем, исходники заморожены (`models/approved`, SHA-256). Игровая модель по правилам AAA
+  (статья DTF, Е. Петров): своя сетка 14 976 треугольников (винтовка, крепление, прицел ПУ) с затвором и подвижными
+  деталями отдельными узлами, LOD1 4 992, развёртка с хардами на швах и ровными островами, плотность текселей выше
+  у глаза, скрытое — крошечными островами; карты 20 % (4K: дерево, сталь, прицел; патрон 1K) запечены с high-poly UCUPaint,
+  маски износа шейдера `_wear`; патрон и гильза, коллизия (5 выпуклых оболочек, отдельный GLB).
+- Файлы: `assets/models/weapons/mosin_pu/` (mosin_pu.glb, mosin_pu_round.glb, mosin_pu_collision.glb, mosin_pu.json,
+  маски износа); скрипты `tools/mosin_pu/game_lp.py`, `game_bake.py`, `game_pack.py`, `game_export.py`,
+  `game_imports.py`; проверка в движке `tools/mosin_pu_shots.tscn` (снимки `docs/screens/mosin_pu_*.png`).
+  Подробная версия (~109 тыс.) — только в библиотеке модели (`E:\Models Blender\WEAPONS\Мосин — винтовка и узлы\models\06_Игровая\detail`).
+- Проверено: форма и запечённые карты против исходника в 6 ракурсах (Blender), в Godot — ракурсы, открытый затвор,
+  износ 100/50/10, LOD; карты сжаты. В игру как предмет не подключено (характеристики, вьюмодель — отдельное задание).
+- Пересборка: blender … game_lp.py -- fp → game_bake.py -- rifle|mount|scope|ammo|ao --variant fp →
+  game_pack.py -- fp → game_export.py -- fp → `tools/godot.cmd --headless --import` → `python -X utf8
+  tools/mosin_pu/game_imports.py` → снова `--import`; снимки — `tools/godot.cmd --windowed --resolution 1100x760
+  res://tools/mosin_pu_shots.tscn`.
+
