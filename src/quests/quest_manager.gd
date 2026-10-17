@@ -21,6 +21,11 @@ extends Node
 ##   kill {arch}             — добил мародёра (kill_targets, n штук, arch — тип или пусто)
 ##   hand_in {item}          — сдал предметы через терминал (контракт «Под заказ», hand_in)
 ##
+## Заказ по переписке (via: "terminal") — заказчик и его люди пишут в терминал убежища: заказ
+## принимают и отчёты (цели talk) отправляют там, история — в записи квеста (log). Цель с reward —
+## оплата этапа, каждому профилю один раз (paid / paid_given; у гостя — «квест#цель»).
+## requires.scenes — задание ждёт, пока его карта не собрана.
+##
 ## Реплики: в диалогах [кто, текст], кто = "player" — герой (подпись «Я», свой цвет); в lines
 ## мест и say / say_start целей — строка (описание) или [кто, текст]. say — цель выполнена,
 ## say_start — цель стала текущей: герой говорит сам, без этого квест «немой».
@@ -296,6 +301,14 @@ func _requirements_met(qid: String) -> bool:
 	for q in req.get("quests", []):
 		if state(String(q)) != "COMPLETED":
 			return false
+	# карта задания ещё не собрана — задание не предлагается (появится само, когда сцена будет)
+	for p in req.get("scenes", []):
+		if not ResourceLoader.exists(String(p)):
+			return false
+	# после другого: тот выполнен или вовсе не начинался (обучение новой игры старым сохранениям не мешает)
+	for q in req.get("after", []):
+		if not state(String(q)) in ["COMPLETED", "LOCKED"]:
+			return false
 	return true
 
 
@@ -357,7 +370,7 @@ func talk_options(npc: String) -> Array:
 			var o := objective(qid)
 			if String(o.get("type", "")) == "talk" and String(o.get("npc", "")) == npc:
 				# разговор со сдачей вещей (take): пока их нет в тайнике — другой разговор, цель не засчитывается
-				var did: String = String(o.get("dialogue", "")) if take_ready(o) else String(o.get("dialogue_missing", o.get("dialogue", "")))
+				var did: String = talk_dialogue(qid, o) if take_ready(o) else String(o.get("dialogue_missing", o.get("dialogue", "")))
 				out.append({"quest": qid, "dialogue": did, "label": "%s — %s" % [String(d.title), String(o.get("text", "поговорить"))]})
 	return out
 
@@ -389,11 +402,21 @@ func finish_talk(qid: String, npc: String, did: String) -> void:
 		start(qid)
 	# сдача вещей: забираются из тайника в момент, когда разговор засчитывается
 	var o: Dictionary = objective(qid)
-	if state(qid) == "ACTIVE" and String(o.get("type", "")) == "talk" and String(o.get("dialogue", "")) == did and not (o.get("take", {}) as Dictionary).is_empty():
+	var counts := state(qid) == "ACTIVE" and String(o.get("type", "")) == "talk" and _talk_ok(o, did)
+	if counts and not (o.get("take", {}) as Dictionary).is_empty():
 		if not take_ready(o):
 			return
 		for id: String in o.take:
 			Profile.take_from_stash(id, int(o.take[id]))
+	# заказ по переписке: отправленное и ответы остаются в истории терминала
+	if counts and is_terminal(qid):
+		_log_lines(qid, dialogue(qid, did))
+	# вариант разговора (что игрок уже знает) может поставить свои флаги
+	if counts:
+		for v: Dictionary in o.get("variants", []):
+			if String(v.get("dialogue", "")) == did:
+				for k in (v.get("set_flags", {}) as Dictionary):
+					_flags()[String(k)] = v.set_flags[k]
 	event("talk", {"npc": npc, "dialogue": did})
 
 
@@ -401,6 +424,326 @@ func finish_talk(qid: String, npc: String, did: String) -> void:
 func _rpc_talk(qid: String, npc: String, did: String) -> void:
 	if multiplayer.is_server():
 		finish_talk(qid, npc, did)
+
+
+# ---------------------------------------------------------------- переписка в терминале
+
+## Заказ по переписке (via: "terminal"): заказчик и его люди пишут в терминал убежища, видимых
+## NPC нет. Заказ принимают и отчёты отправляют в терминале; разговоры — его цели talk, где npc —
+## собеседник из contacts квеста (или заказчик Contracts, например perevalka).
+func is_terminal(qid: String) -> bool:
+	return String(def(qid).get("via", "")) == "terminal"
+
+
+## Заказы по переписке, которые сейчас можно открыть в терминале (не LOCKED).
+func terminal_threads() -> Array[String]:
+	var out: Array[String] = []
+	for qid in _order:
+		if is_terminal(qid) and state(qid) != "LOCKED":
+			out.append(qid)
+	return out
+
+
+## История переписки заказа: [[кто, текст] или строка] — уже отправленное и полученное.
+func thread_log(qid: String) -> Array:
+	return qstate(qid).get("log", [])
+
+
+## Что можно сделать в переписке заказа сейчас: {kind: accept|send, npc, dialogue, label, ready}
+## или пусто (ждём, что игрок сделает в рейде).
+func terminal_action(qid: String) -> Dictionary:
+	if not is_terminal(qid):
+		return {}
+	var d := def(qid)
+	var st := state(qid)
+	if st == "AVAILABLE":
+		var stages: Array = d.get("stages", [])
+		var first: Dictionary = (stages[0].objectives as Array)[0] if not stages.is_empty() else {}
+		return {"kind": "accept", "npc": String(first.get("npc", d.get("giver", ""))), "dialogue": String(first.get("dialogue", "")),
+			"label": String(d.get("offer", "принять заказ")), "ready": true}
+	if st != "ACTIVE":
+		return {}
+	var o := objective(qid)
+	if String(o.get("type", "")) != "talk":
+		return {}
+	var ready := take_ready(o)
+	# button — своя надпись кнопки («ОТВЕТИТЬ НИНЕ»), иначе «ОТПРАВИТЬ: <цель>»
+	var label := String(o.get("button", "ОТПРАВИТЬ: " + String(o.get("text", ""))))
+	return {"kind": "send", "npc": String(o.get("npc", "")), "label": label, "ready": ready,
+		"dialogue": talk_dialogue(qid, o) if ready else String(o.get("dialogue_missing", o.get("dialogue", "")))}
+
+
+## Какой разговор у цели talk сейчас: первый вариант (variants: [{facts, flags, dialogue, set_flags}]),
+## чьи факты уже известны и флаги совпали, иначе обычный dialogue. Так отчёт говорит о том, что
+## игрок нашёл раньше срока (номер на скупке в первом рейде).
+func talk_dialogue(qid: String, o: Dictionary) -> String:
+	var fs := facts(qid)
+	for v: Dictionary in o.get("variants", []):
+		var ok := true
+		for f in v.get("facts", []):
+			ok = ok and String(f) in fs
+		var fl: Dictionary = v.get("flags", {})
+		for k in fl:
+			ok = ok and flag(String(k)) == fl[k]
+		if ok:
+			return String(v.get("dialogue", ""))
+	return String(o.get("dialogue", ""))
+
+
+func _talk_ok(o: Dictionary, did: String) -> bool:
+	if String(o.get("dialogue", "")) == did:
+		return true
+	for v: Dictionary in o.get("variants", []):
+		if String(v.get("dialogue", "")) == did:
+			return true
+	return false
+
+
+# ---------------------------------------------------------------- факты и ранние находки
+
+## Факты квеста: места, которые уже осмотрены / сняты — в том числе заранее (место early работает
+## с принятия заказа, не дожидаясь своего этапа). Цель, чьё место уже в фактах, засчитывается сама,
+## как только станет текущей; skip_if_facts / skip_if_flags — шаг больше не нужен.
+func facts(qid: String) -> Array:
+	return qstate(qid).get("facts", [])
+
+
+func _add_fact(qid: String, sid: String) -> bool:
+	var s := qstate(qid)
+	if s.is_empty():
+		return false
+	var fs: Array = s.get("facts", [])
+	if sid in fs:
+		return false
+	fs.append(sid)
+	s["facts"] = fs
+	return true
+
+
+## Описание места sid (из любого квеста) — пусто, если такого нет.
+func site_spec(sid: String) -> Dictionary:
+	for qid in _order:
+		var sites: Dictionary = def(qid).get("sites", {})
+		if sites.has(sid):
+			return sites[sid]
+	return {}
+
+
+const SITE_GOALS := ["interact", "find_clue", "search_location", "enter_zone", "photo", "take", "put"]
+
+
+## Текущая цель уже сделана заранее или больше не нужна.
+func _already_done(qid: String, o: Dictionary) -> bool:
+	if o.is_empty():
+		return false
+	var fs := facts(qid)
+	if String(o.get("type", "")) in SITE_GOALS and String(o.get("site", "")) in fs:
+		return true
+	if String(o.get("type", "")) == "ui" and ("ui:" + String(o.get("what", ""))) in fs:
+		return true
+	if String(o.get("id", "")) in (qstate(qid).get("durable", []) as Array):
+		return true
+	var need: Array = o.get("skip_if_facts", [])
+	if not need.is_empty():
+		var all_known := true
+		for f in need:
+			all_known = all_known and String(f) in fs
+		if all_known:
+			return true
+	var fl: Dictionary = o.get("skip_if_flags", {})
+	if not fl.is_empty():
+		var all_set := true
+		for k in fl:
+			all_set = all_set and flag(String(k)) == fl[k]
+		if all_set:
+			return true
+	return false
+
+
+# ---------------------------------------------------------------- обучение: окна и само начало
+
+## Свой игрок открыл окно (рюкзак, терминал): факт «ui:<what>» у квестов с такой целью — засчитается
+## и заранее (открыл рюкзак раньше подсказки — повторять не нужно). Гость — просит хост.
+func ui_seen(what: String) -> void:
+	if is_client():
+		_rpc_ui.rpc_id(1, what)
+	else:
+		_ui_seen(what)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_ui(what: String) -> void:
+	if multiplayer.is_server():
+		_ui_seen(what)
+
+
+func _ui_seen(what: String) -> void:
+	var noted := false
+	for qid in _order:
+		if state(qid) != "ACTIVE":
+			continue
+		for st in def(qid).get("stages", []):
+			for o: Dictionary in (st as Dictionary).get("objectives", []):
+				if String(o.get("type", "")) == "ui" and String(o.get("what", "")) == what:
+					noted = _add_fact(qid, "ui:" + what) or noted
+	if not noted:
+		return
+	_auto_all()
+	_commit_if_home()
+	_broadcast()
+	changed.emit()
+
+
+## Хост / соло: задания с auto_start (обучение новой игры) начинаются сами, как только доступны.
+func auto_start() -> void:
+	if is_client():
+		return
+	for qid in _order:
+		if bool(def(qid).get("auto_start", false)) and state(qid) == "AVAILABLE":
+			start(qid)
+
+
+# ---------------------------------------------------------------- груз к месту (без эвакуации)
+
+const HANDOVER_GOALS := ["install", "deliver"]
+
+
+## Сделанное без эвакуации: цели install / deliver, уже выполненные (id целей). Хранится и в профиле
+## сразу — деталь осталась в машине, даже если все потом погибли.
+func durable(qid: String) -> Array:
+	return qstate(qid).get("durable", [])
+
+
+## Цели install / deliver места sid, которые ещё ждут груз (любого этапа: деталь принимают и раньше).
+func pending_handover(qid: String, sid: String) -> Array:
+	var out: Array = []
+	if state(qid) != "ACTIVE":
+		return out
+	var done := durable(qid)
+	for st in def(qid).get("stages", []):
+		for o: Dictionary in (st as Dictionary).get("objectives", []):
+			if String(o.get("type", "")) in HANDOVER_GOALS and String(o.get("site", "")) == sid and not String(o.get("id", "")) in done:
+				out.append(o)
+	return out
+
+
+## Хост: игрок peer у места sid сдаёт всё, что место ждёт и что у него есть в рюкзаке. true — место
+## было местом сдачи (даже если сдавать нечего: тогда игрок узнаёт, что нужно).
+func _hand_over(peer: int, sid: String) -> bool:
+	var any_site := false
+	var given: Array[String] = []
+	var missing: Array[String] = []
+	for qid: String in _order:
+		for o: Dictionary in pending_handover(qid, sid):
+			any_site = true
+			var item := String(o.get("item", ""))
+			if world != null and world.take_item(peer, sid, item, int(o.get("n", 1))):
+				_durable_add(qid, String(o.id))
+				given.append(ItemDb.item_name(item))
+			else:
+				missing.append(ItemDb.item_name(item))
+	if not any_site:
+		return false
+	if given.is_empty():
+		if world != null and not missing.is_empty():
+			world.notify(peer, "Нужно: " + ", ".join(missing))
+		return true
+	_tell("Сдано: " + ", ".join(given))
+	_auto_all()
+	_commit_if_home()
+	if _delivered:
+		_commit_host()
+	_broadcast()
+	changed.emit()
+	return true
+
+
+## Детали, которые заказ ещё ждёт (цели install / deliver любого этапа, не сданные).
+func pending_items(qid: String) -> Array:
+	var out: Array = []
+	if state(qid) != "ACTIVE":
+		return out
+	var done := durable(qid)
+	for st in def(qid).get("stages", []):
+		for o: Dictionary in (st as Dictionary).get("objectives", []):
+			if String(o.get("type", "")) in HANDOVER_GOALS and not String(o.get("id", "")) in done:
+				out.append(String(o.get("item", "")))
+	return out
+
+
+## Раннее место открыто: early = true — с принятия заказа, early = "id этапа" — с этого этапа.
+func _site_open(qid: String, sd: Dictionary) -> bool:
+	var e: Variant = sd.get("early", false)
+	if e is bool:
+		return bool(e)
+	var stages: Array = def(qid).get("stages", [])
+	for i in range(stages.size()):
+		if String((stages[i] as Dictionary).get("id", "")) == String(e):
+			return int(qstate(qid).get("stage", 0)) >= i
+	return false
+
+
+## Хост: место-источник груза (supply: id предмета) выдаёт деталь, пока заказ её ждёт; потерял по
+## дороге — в следующем рейде бери снова (один экземпляр с места за раз, QuestWorld.give_cargo).
+func _supply(peer: int, sid: String) -> bool:
+	var item := String(site_spec(sid).get("supply", ""))
+	if item == "":
+		return false
+	var needed := false
+	for qid: String in _order:
+		needed = needed or item in pending_items(qid)
+	if needed and world != null and world.give_cargo(peer, sid, item):
+		world.notify(peer, "Взято: " + ItemDb.item_name(item))
+	return true
+
+
+## Отметка «сделано без эвакуации» — в текущее состояние и сразу в профиль хоста.
+func _durable_add(qid: String, oid: String) -> void:
+	var stores: Array = [_quests()]
+	if not _live.is_empty():
+		stores.append(Profile.quests)
+	for store: Dictionary in stores:
+		var s: Dictionary = store.get(qid, {})
+		if s.is_empty():
+			continue
+		var d: Array = s.get("durable", [])
+		if not oid in d:
+			d.append(oid)
+		s["durable"] = d
+	Profile.save()
+
+
+## Засчитать по цепочке всё, что уже сделано заранее, — у всех активных квестов. true — что-то сдвинулось.
+func _auto_all() -> bool:
+	var any := false
+	for qid in _order:
+		var guard := 0
+		while guard < 32 and state(qid) == "ACTIVE" and _already_done(qid, objective(qid)):
+			_complete_objective(qid, true)
+			any = true
+			guard += 1
+	return any
+
+
+## Кто пишет: {name, color} — собеседник квеста (contacts), заказчик терминала (Contracts) или «Я».
+func speaker(qid: String, who: String) -> Dictionary:
+	if who == "player":
+		return {"name": "Я", "color": [0.62, 0.84, 0.95]}
+	var c: Dictionary = (def(qid).get("contacts", {}) as Dictionary).get(who, {})
+	if c.is_empty():
+		c = Contracts.giver(who)
+	if c.is_empty():
+		return {"name": who, "color": [1.0, 0.78, 0.45]}
+	return {"name": String(c.get("nick", c.get("name", who))), "color": c.get("color", [1.0, 0.78, 0.45])}
+
+
+func _log_lines(qid: String, lines: Array) -> void:
+	var s := qstate(qid)
+	if s.is_empty():
+		return
+	var lg: Array = s.get("log", [])
+	lg.append_array(lines.duplicate(true))
+	s["log"] = lg
 
 
 # ---------------------------------------------------------------- ход квеста
@@ -433,6 +776,8 @@ func event(type: String, params: Dictionary = {}) -> bool:
 			guard += 1
 			if type != "extracted":
 				break
+	if any:
+		_auto_all()
 	if any:
 		_commit_if_home()
 		if _delivered:
@@ -470,16 +815,39 @@ func _use_site(peer: int, sid: String) -> void:
 				_broadcast()
 			changed.emit()
 			return
-	event("site", {"site": sid})
+	# груз к месту (поставить колесо, положить радиатор в комплект) — отдельно от осмотра
+	if _supply(peer, sid) or _hand_over(peer, sid):
+		return
+	# факт: место текущей цели или раннее (early) — засчитается, когда до него дойдёт очередь
+	var noted := false
+	for qid: String in _order:
+		if state(qid) != "ACTIVE":
+			continue
+		var sd: Dictionary = (def(qid).get("sites", {}) as Dictionary).get(sid, {})
+		if not sd.is_empty() and (_site_open(qid, sd) or String(objective(qid).get("site", "")) == sid):
+			noted = _add_fact(qid, sid) or noted
+	if event("site", {"site": sid}) or not noted:
+		return
+	var found := String(site_spec(sid).get("found", ""))
+	if found != "":
+		_tell(found)
+	_auto_all()
+	_commit_if_home()
+	if _delivered:
+		_commit_host()
+	_broadcast()
+	changed.emit()
 
 
 func _matches(qid: String, o: Dictionary, type: String, p: Dictionary) -> bool:
 	match String(o.get("type", "")):
 		"talk":
 			return type == "talk" and String(p.get("npc", "")) == String(o.get("npc", "")) \
-				and (String(o.get("dialogue", "")) == "" or String(p.get("dialogue", "")) == String(o.dialogue))
-		"interact", "find_clue", "search_location", "enter_zone":
+				and (String(o.get("dialogue", "")) == "" or _talk_ok(o, String(p.get("dialogue", ""))))
+		"interact", "find_clue", "search_location", "enter_zone", "photo", "take", "put":
 			return type == "site" and String(p.get("site", "")) == String(o.get("site", ""))
+		"ui":
+			return type == "ui" and String(p.get("what", "")) == String(o.get("what", ""))
 		"pickup_item":
 			return type == "have_item" and String(p.get("item", "")) == String(o.get("item", ""))
 		"hand_in":
@@ -493,6 +861,12 @@ func _matches(qid: String, o: Dictionary, type: String, p: Dictionary) -> bool:
 			return type == "extracted" and String(o.get("site", "")) in (p.get("cargo", []) as Array)
 		"extract_with_npc":
 			return type == "extracted" and String(o.get("npc", "")) in (p.get("npcs", []) as Array)
+		"install", "deliver":
+			# засчитывается через durable (_hand_over → _auto_all), событий мира не ждёт
+			return false
+		"clear_site":
+			# все бойцы охраны места мертвы (считает QuestWorld хоста)
+			return type == "cleared" and String(p.get("site", "")) == String(o.get("site", ""))
 		"kill_targets":
 			if type != "kill" or (String(o.get("arch", "")) != "" and String(p.get("arch", "")) != String(o.arch)):
 				return false
@@ -502,9 +876,14 @@ func _matches(qid: String, o: Dictionary, type: String, p: Dictionary) -> bool:
 	return false
 
 
-func _complete_objective(qid: String) -> void:
+## auto — цель засчитана сама (сделана заранее или больше не нужна): без её реплик и тоста.
+func _complete_objective(qid: String, auto: bool = false) -> void:
 	var s := qstate(qid)
 	var o := objective(qid)
+	# место цели — факт (на случай, если цель засчитана отладкой); пропущенная цель (auto) — нет:
+	# стоянку, которую не снимали, отчёт не должен упоминать
+	if not auto and String(o.get("type", "")) in SITE_GOALS and String(o.get("site", "")) != "":
+		_add_fact(qid, String(o.site))
 	if o.has("clue"):
 		var cl: Array = s.get("clues", [])
 		cl.append(o.clue)
@@ -513,14 +892,27 @@ func _complete_objective(qid: String) -> void:
 	var fl: Dictionary = o.get("set_flags", {})
 	for k in fl:
 		_flags()[String(k)] = fl[k]
-	if o.has("toast"):
+	# сдача груза засчитывается всегда «сама» (durable), но её тост нужен: «комплект собран — уходи»
+	if o.has("toast") and (not auto or String(o.get("type", "")) in HANDOVER_GOALS):
 		_tell(String(o.toast))
 	# что говорит / думает игрок, когда цель выполнена
-	if not (o.get("say", []) as Array).is_empty():
+	if not (o.get("say", []) as Array).is_empty() and not auto:
 		_say(o.say)
+	# сообщение в терминал по выполнении (обучение: «знакомство завершено»)
+	if is_terminal(qid) and not (o.get("log", []) as Array).is_empty():
+		_log_lines(qid, o.log)
+	# оплата этапа (заказчик платит за проверку, поиск…): отметка в записи квеста, выдача — при
+	# фиксации, как награда за квест (каждому профилю один раз)
+	if o.has("reward") and String(o.get("id", "")) != "":
+		var paid: Array = s.get("paid", [])
+		if not String(o.id) in paid:
+			paid.append(String(o.id))
+		s["paid"] = paid
 	s["count"] = 0
 	s["obj"] = int(s.get("obj", 0)) + 1
 	var objs: Array = stage(qid).get("objectives", [])
+	if _live.is_empty() and not (s.get("paid", []) as Array).is_empty():
+		_reward_completed(Profile.quests)
 	if int(s.obj) >= objs.size():
 		s["obj"] = 0
 		s["stage"] = int(s.get("stage", 0)) + 1
@@ -556,9 +948,35 @@ func _complete_quest(qid: String) -> void:
 func _reward_completed(qs: Dictionary) -> void:
 	for qid in qs:
 		var s: Dictionary = qs[qid]
+		# оплаты этапов: paid — заслужено (общее для группы), paid_given — выдано этому профилю
+		var given: Array = s.get("paid_given", [])
+		for oid in s.get("paid", []):
+			if not String(oid) in given:
+				given.append(String(oid))
+				_pay_objective(String(qid), String(oid))
+		if not given.is_empty():
+			s["paid_given"] = given
 		if String(s.get("state", "")) == "COMPLETED" and not bool(s.get("rewarded", false)):
 			s["rewarded"] = true
 			_give_reward(def(String(qid)).get("reward", {}))
+
+
+## Оплата этапа oid квеста qid — себе (хост, соло; гость — из _commit_guest).
+func _pay_objective(qid: String, oid: String) -> void:
+	var r: Dictionary = _objective_def(qid, oid).get("reward", {})
+	if r.is_empty():
+		return
+	_give_reward(r)
+	if int(r.get("money", 0)) > 0:
+		notice.emit("Оплата: %s ₽" % InventoryUI.money(int(r.money)))
+
+
+func _objective_def(qid: String, oid: String) -> Dictionary:
+	for st in def(qid).get("stages", []):
+		for o in (st as Dictionary).get("objectives", []):
+			if String((o as Dictionary).get("id", "")) == oid:
+				return o
+	return {}
 
 
 func _give_reward(r: Dictionary) -> void:
@@ -593,6 +1011,8 @@ func begin_raid() -> void:
 	Profile.ensure()
 	_live = {"quests": Profile.quests.duplicate(true), "flags": Profile.flags.duplicate(true)}
 	_delivered = false
+	# сдано в прошлом рейде без эвакуации — цель засчитывается сама
+	_auto_all()
 	_carry = {}
 	_npc_pos = {}
 	_cargo_claims = {}
@@ -633,6 +1053,9 @@ func end_raid() -> void:
 	_delivered = false
 	_carry = {}
 	_npc_pos = {}
+	# сданное в рейде без эвакуации (деталь в машине) — шаг засчитан и дома
+	if _auto_all():
+		Profile.save()
 	# доска контрактов стареет и пополняется (рассылает снимок сама)
 	Contracts.on_raid_end()
 	_broadcast()
@@ -689,6 +1112,13 @@ func _commit_guest(snap: Dictionary) -> void:
 	var qs: Dictionary = (snap.get("quests", {}) as Dictionary).duplicate(true)
 	var changed_any := JSON.stringify(qs) != JSON.stringify(store.get("quests", {}))
 	for qid in qs:
+		# оплаты этапов — отметкой «квест#цель», каждая один раз
+		for oid in (qs[qid] as Dictionary).get("paid", []):
+			var key := "%s#%s" % [String(qid), String(oid)]
+			if not key in rewarded:
+				rewarded.append(key)
+				_pay_objective(String(qid), String(oid))
+				changed_any = true
 		if String((qs[qid] as Dictionary).get("state", "")) == "COMPLETED" and not String(qid) in rewarded:
 			rewarded.append(String(qid))
 			_give_reward(def(String(qid)).get("reward", {}))
@@ -799,6 +1229,17 @@ func sites_for(level: String) -> Array:
 			for sid in sites:
 				if String((sites[sid] as Dictionary).get("npc", "")) == npc and npc != "":
 					wanted[String(sid)] = false
+			# раннее место (early) — на карте с принятия заказа или своего этапа; осмотрел — остаётся
+			# декорацией; место сдачи и источник груза работают, пока заказ ждёт деталь
+			var waits := pending_items(qid)
+			for sid in sites:
+				var esd: Dictionary = sites[sid]
+				if _site_open(qid, esd) and not wanted.has(String(sid)):
+					wanted[String(sid)] = not String(sid) in facts(qid) or not pending_handover(qid, String(sid)).is_empty() \
+						or (String(esd.get("supply", "")) != "" and String(esd.supply) in waits)
+			for sid in wanted.keys():
+				if not pending_handover(qid, String(sid)).is_empty():
+					wanted[sid] = true
 		for sid in sites:
 			var sd: Dictionary = sites[sid]
 			var wf: Dictionary = sd.get("when_flags", {})
@@ -844,6 +1285,14 @@ func _dev_sync() -> void:
 		Profile.flags = _live.flags.duplicate(true)
 	Profile.save()
 	_broadcast()
+	changed.emit()
+
+
+## Тесты: добавить описание квеста, которого нет в index.json (поверх сюжетных, до перезагрузки).
+func dev_add_def(qid: String, d: Dictionary) -> void:
+	_defs[qid] = d
+	if not qid in _order:
+		_order.append(qid)
 	changed.emit()
 
 

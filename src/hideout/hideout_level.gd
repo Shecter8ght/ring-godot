@@ -436,6 +436,19 @@ func request_consume(id: String, n: int) -> void:
 	_to_profile()
 
 
+## Сюжет в убежище (обучение): дать себе (give) / забрать у себя один предмет id — у каждого свой
+## рюкзак; шаг засчитывает хост. Нет места в рюкзаке — в тайник.
+func quest_item(id: String, give: bool) -> bool:
+	if give:
+		if _player.inventory.add(id, 1) <= 0:
+			ItemDb.add_to(Profile.stash, ItemDb.make(id, 1), Profile.stash_grid())
+			notify("В рюкзаке нет места — убрано в тайник")
+	elif _player.inventory.remove(id, 1) <= 0:
+		return false
+	_to_profile()
+	return true
+
+
 func _profile_sig() -> String:
 	return str(Profile.equipment) + str(Profile.backpack) + str(Profile.pocket)
 

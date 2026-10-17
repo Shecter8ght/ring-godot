@@ -126,6 +126,20 @@ Claude: `scenes/levels/mall/car_recovery_sites.tscn`, связанные сце�
 Общие системы и регистрацию карт изменяет один автор; при параллельной работе
 отдельные ветки / checkout и последовательная интеграция. Генератор не стирает ручные правки.
 
+**Что ждёт игра (квест сделан, 2026-10-17).** Логика заказа — `data/quests/car_recovery.json`. Места
+ставятся только узлами `QuestAnchor` (свойство `site_id`) в сценах мест; координат в данных нет.
+Уровень ТЦ в данных — `mall_map` (имя файла корневой сцены карты ТЦ; другое имя — поправить `level`
+в данных), Городской пояс — `zone01_mall`. Заказ появится, когда обе сцены мест существуют.
+
+| Сцена | site_id узлов QuestAnchor |
+|---|---|
+| ТЦ | `car_mall_parking_wide`, `car_mall_parking_detail` (две точки съёмки стоянки), `car_mall_lead_plate`, `car_mall_lead_invoice` (скупка у АЗС), `car_mall_supply_wheel` (склад техники) |
+| Городской пояс | `car_belt_search` (центр района дворов, радиус 60 м), `car_belt_hangar` (ангар №8: охрана этапа ставится вокруг), `car_belt_car_body`, `car_belt_car_marking`, `car_belt_photo_engine`, `car_belt_photo_radiator`, `car_belt_photo_wheel`, `car_belt_photo_wiring` (точки съёмки у машины), `car_belt_car_battery`, `car_belt_car_wheel` (установка), `car_belt_delivery` (комплект), `car_belt_parts_wheel`, `car_belt_parts_radiator` (кладовая) |
+
+Седан ставится сценой ангара и сам меняет вид: колесо — когда в `Quests.durable("car_recovery")`
+есть `wheel`, приборная панель — с `battery`; с флагом `car_recovered` машины нет (пустая площадка).
+`car_belt_candidate` — только окружение, квест его не проверяет.
+
 ## 7. Ассеты и бюджет
 
 Нужны статичный седан со сменными состояниями (на кирпичах / на колесе, приборная панель

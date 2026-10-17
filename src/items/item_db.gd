@@ -366,10 +366,14 @@ static func rig_list(eq: Dictionary, part: String = "rig") -> Array:
 	return e[key]
 
 
-## Можно ли положить запись в сетку role: в подсумки и сумку сброса — только магазины.
+## Можно ли положить запись в сетку role: в подсумки и сумку сброса — только магазины, в защищённый
+## карман — всё, кроме груза с no_pocket.
 static func grid_accepts(role: String, entry: Dictionary) -> bool:
 	if role in ["rig", "dump"]:
 		return entry.has("rounds") and not WeaponDb.magazine(String(entry.get("id", ""))).is_empty()
+	# крупный груз заказа (колесо, радиатор) в защищённый карман не кладут — его несут в рюкзаке
+	if role == "pocket":
+		return not bool(item(String(entry.get("id", ""))).get("no_pocket", false))
 	return true
 
 

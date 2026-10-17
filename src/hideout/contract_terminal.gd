@@ -1,8 +1,8 @@
 @tool
 class_name ContractTerminal
 extends Interactable
-## Терминал связи в убежище (старый ноутбук на столе связи): F — доска заказов (TerminalUI,
-## Contracts). Подсказка показывает, есть ли что сдать.
+## Терминал связи в убежище (старый ноутбук на столе связи): F — переписка и доска заказов
+## (TerminalUI, Quests, Contracts). Подсказка показывает, есть ли новое сообщение или что сдать.
 
 var _ui: TerminalUI
 
@@ -10,6 +10,9 @@ var _ui: TerminalUI
 func prompt() -> String:
 	if Engine.is_editor_hint():
 		return "Терминал связи"
+	for qid in Quests.terminal_threads():
+		if not Quests.terminal_action(qid).is_empty():
+			return "Терминал связи — новое сообщение"
 	for e: Dictionary in Contracts.board():
 		if Contracts.can_turn_in(String(e.id)):
 			return "Терминал связи — есть что сдать"

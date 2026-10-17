@@ -3,7 +3,8 @@ extends CanvasLayer
 ## Интерфейс сюжета (создаёт Quests): компактная цель справа сверху (квест, этап, что делать,
 ## подсказка), всплывающие сообщения («Найдена улика», «Задание обновлено»), реплики на экране
 ## (осмотр места, раненый), разговор в убежище (Enter / клик — дальше), журнал улик (J), полоса
-## обыска, подсказка «несёшь раненого». Читы открываются отдельным пунктом меню Esc.
+## обыска, подсказка «несёшь раненого», кадр видоискателя на снимке места (photo_flash).
+## Читы открываются отдельным пунктом меню Esc.
 
 const TOAST_SEC := 3.2
 const SUB_SEC := 2.6
@@ -36,6 +37,18 @@ var _bar_seen: bool = false
 var _carry: Label
 var _journal: PanelContainer
 var _journal_text: Label
+## Тестовые инструкции (Balance.QUEST_TEST_HINTS): что делать на текущем шаге — слева, после смены
+## цели; ключ «квест:этап:цель» последней показанной у каждого квеста.
+var _test_box: PanelContainer
+var _test_title: Label
+var _test_text: Label
+var _test_t: float = 0.0
+var _test_seen: Dictionary = {}
+## Снимок места: рамка видоискателя и вспышка поверх экрана, секунду.
+var _photo: Control
+var _photo_flash: ColorRect
+var _photo_t: float = 0.0
+const PHOTO_SEC := 0.9
 
 
 func _ready() -> void:
@@ -53,6 +66,7 @@ func _ready() -> void:
 		if _sub_t <= 0.0:
 			_next_sub())
 	Quests.changed.connect(_update_tracker)
+	Quests.changed.connect(_update_test_hint)
 
 
 func is_open() -> bool:
@@ -76,6 +90,35 @@ func _update_tracker() -> void:
 	_t_goal.text = String(o.get("text", ""))
 	_t_hint.text = String(o.get("hint", ""))
 	_t_hint.visible = _t_hint.text != ""
+
+
+## Тест: цель сменилась у любого активного квеста — показать её test_hint (последняя — сверху).
+func _update_test_hint() -> void:
+	if not Balance.QUEST_TEST_HINTS:
+		return
+	for qid in Quests.ids():
+		if Quests.state(qid) != "ACTIVE":
+			_test_seen.erase(qid)
+			continue
+		var key := "%d:%d" % [int(Quests.qstate(qid).get("stage", 0)), int(Quests.qstate(qid).get("obj", 0))]
+		if String(_test_seen.get(qid, "")) == key:
+			continue
+		_test_seen[qid] = key
+		var hint := String(Quests.objective(qid).get("test_hint", ""))
+		if hint == "":
+			continue
+		_test_title.text = "ТЕСТ — что делать · %s" % String(Quests.def(qid).get("title", qid))
+		_test_text.text = hint
+		_test_t = Balance.QUEST_TEST_HINT_SEC
+
+
+## Снимок места (точка съёмки): рамка видоискателя, щелчок и короткая вспышка — только у того,
+## кто снимает; сам снимок засчитывает хост (Quests.request_site).
+func photo_flash() -> void:
+	_photo_t = PHOTO_SEC
+	_photo.visible = true
+	_photo_flash.color.a = 0.85
+	Audio.play_ui("tac_click")
 
 
 func toast(text: String) -> void:
@@ -177,6 +220,13 @@ func _process(delta: float) -> void:
 		_bar.visible = false
 		_bar_label.visible = false
 	_bar_seen = false
+	if _test_t > 0.0:
+		_test_t -= delta
+	_test_box.visible = _test_t > 0.0 and game and not PauseMenu.shown and not _journal.visible
+	if _photo_t > 0.0:
+		_photo_t -= delta
+		_photo_flash.color.a = maxf(0.0, _photo_flash.color.a - delta * 3.0)
+		_photo.visible = _photo_t > 0.0
 
 
 func _input(event: InputEvent) -> void:
@@ -207,6 +257,14 @@ func _input(event: InputEvent) -> void:
 
 func _fill_journal() -> void:
 	var lines: Array[String] = []
+	# тест: инструкции текущих шагов — сверху журнала
+	if Balance.QUEST_TEST_HINTS:
+		for qid in Quests.ids():
+			var th := String(Quests.objective(qid).get("test_hint", "")) if Quests.state(qid) == "ACTIVE" else ""
+			if th != "":
+				lines.append("ТЕСТ · %s: %s" % [String(Quests.def(qid).get("title", qid)), th])
+		if not lines.is_empty():
+			lines.append("")
 	for qid in Quests.ids():
 		var st := Quests.state(qid)
 		if st == "LOCKED" or st == "AVAILABLE":
@@ -330,6 +388,58 @@ func _build() -> void:
 	jv.add_child(_journal_text)
 	_journal.visible = false
 	_root.add_child(_journal)
+
+	_test_box = PanelContainer.new()
+	_test_box.anchor_top = 0.5
+	_test_box.anchor_bottom = 0.5
+	_test_box.offset_left = 24
+	_test_box.offset_right = 24 + 460
+	_test_box.offset_top = -170
+	_test_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tsb := StyleBoxFlat.new()
+	tsb.bg_color = Color(0.05, 0.05, 0.03, 0.82)
+	tsb.border_color = Color(1.0, 0.8, 0.3, 0.7)
+	tsb.set_border_width_all(2)
+	tsb.set_content_margin_all(12)
+	_test_box.add_theme_stylebox_override("panel", tsb)
+	var tv := VBoxContainer.new()
+	_test_box.add_child(tv)
+	_test_title = _label("", 15, Color(1.0, 0.8, 0.3))
+	tv.add_child(_test_title)
+	_test_text = _label("", 16, Color(0.95, 0.93, 0.86))
+	_test_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_test_text.custom_minimum_size.x = 436
+	tv.add_child(_test_text)
+	tv.add_child(_label("J — журнал: инструкция там же", 13, Color(0.7, 0.68, 0.6)))
+	_test_box.visible = false
+	_root.add_child(_test_box)
+
+	_photo = ViewfinderFrame.new()
+	_photo.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_photo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_photo.visible = false
+	_root.add_child(_photo)
+	_photo_flash = ColorRect.new()
+	_photo_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_photo_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_photo_flash.color = Color(1, 1, 1, 0)
+	_photo.add_child(_photo_flash)
+
+
+## Рамка видоискателя: уголки кадра и перекрестие по центру.
+class ViewfinderFrame extends Control:
+	func _draw() -> void:
+		var r := Rect2(size * 0.12, size * 0.76)
+		var c := Color(1, 1, 1, 0.8)
+		var l := minf(size.x, size.y) * 0.07
+		for corner: Vector2 in [r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)]:
+			var sx := 1.0 if corner.x < size.x * 0.5 else -1.0
+			var sy := 1.0 if corner.y < size.y * 0.5 else -1.0
+			draw_line(corner, corner + Vector2(l * sx, 0), c, 3.0)
+			draw_line(corner, corner + Vector2(0, l * sy), c, 3.0)
+		var m := size * 0.5
+		draw_line(m - Vector2(14, 0), m + Vector2(14, 0), c, 2.0)
+		draw_line(m - Vector2(0, 14), m + Vector2(0, 14), c, 2.0)
 
 
 

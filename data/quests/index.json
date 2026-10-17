@@ -3,6 +3,8 @@
  "quests": [
   "missing_anton",
   "own_mark",
-  "brand_seal"
+  "brand_seal",
+  "tutorial_basics",
+  "car_recovery"
  ]
 }

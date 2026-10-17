@@ -3,12 +3,18 @@ extends CanvasLayer
 ## Окно терминала связи в убежище: доска заказов (Contracts) в духе старой BBS — зелёный
 ## моноширинный текст на чёрном. Слева заказчики (ник, имя, репутация, сколько заказов), справа —
 ## заказы выбранного: текст от его лица, цели, награда, «Взять» / «Отказаться» / «Сдать».
-## Окно локальное; в группе доска — хоста, действия гостя уходят хосту (Contracts). Esc — закрыть.
+## Над доской — переписка по сюжетным заказам (Quests, via: "terminal"): история сообщений,
+## «Принять заказ» и «Отправить отчёт». Окно локальное; в группе доска и сюжет — хоста, действия
+## гостя уходят хосту (Contracts, Quests). Esc — закрыть.
 
 const GREEN := Color(0.45, 1.0, 0.55)
 const DIM := Color(0.3, 0.62, 0.36)
 const AMBER := Color(1.0, 0.78, 0.35)
 const BG := Color(0.015, 0.03, 0.02, 0.97)
+## Тестовые инструкции (Balance.QUEST_TEST_HINTS) — отдельным цветом, к релизу выключаются.
+const TEST := Color(1.0, 0.8, 0.3)
+## Выбранная переписка в _selected — с этой приставкой (иначе id заказчика доски).
+const THREAD := "q:"
 
 var _root: Control
 var _givers_box: VBoxContainer
@@ -89,6 +95,16 @@ func is_open() -> bool:
 
 func open() -> void:
 	Contracts.sync()
+	var before := {}
+	for qid in Quests.terminal_threads():
+		before[qid] = Quests.thread_log(qid).size()
+	# обучение: «открыть терминал» (сообщение о завершении приходит сюда же)
+	Quests.ui_seen("terminal")
+	# пришло новое или есть что отправить в переписке — сразу туда
+	for qid in Quests.terminal_threads():
+		if Quests.thread_log(qid).size() > int(before.get(qid, 0)) or not Quests.terminal_action(qid).is_empty():
+			_selected = THREAD + qid
+			break
 	if _selected == "" and not Contracts.givers().is_empty():
 		_selected = String(Contracts.givers()[0].id)
 	_root.visible = true
@@ -119,6 +135,25 @@ func _rebuild() -> void:
 	for c: Node in _detail.get_children():
 		c.queue_free()
 	_status.text = "активных: %d/%d   " % [Contracts.active_count(), Contracts.active_limit()]
+	var threads := Quests.terminal_threads()
+	if not threads.is_empty():
+		_givers_box.add_child(_label("ПЕРЕПИСКА", 16, DIM))
+	for qid in threads:
+		var key := THREAD + qid
+		var d := Quests.def(qid)
+		var news := "" if Quests.terminal_action(qid).is_empty() else "  • новое"
+		var mark := ">" if key == _selected else " "
+		var b := _button("%s %s%s" % [mark, String(d.get("title", qid)).to_upper(), news], func() -> void:
+			_selected = key
+			_dirty = true
+			Audio.play_ui("ui_click"))
+		b.add_theme_color_override("font_color", AMBER if key == _selected else GREEN)
+		_givers_box.add_child(b)
+		var who := Quests.speaker(qid, String(d.get("giver", "")))
+		if String(d.get("giver", "")) != "":
+			_givers_box.add_child(_label("    %s" % String(who.name), 13, DIM))
+	if not threads.is_empty():
+		_givers_box.add_child(_label(" ", 8, DIM))
 	_givers_box.add_child(_label("ЗАКАЗЧИКИ", 16, DIM))
 	for g: Dictionary in Contracts.givers():
 		var gid := String(g.id)
@@ -137,6 +172,9 @@ func _rebuild() -> void:
 
 
 func _build_detail() -> void:
+	if _selected.begins_with(THREAD):
+		_build_thread(_selected.substr(THREAD.length()))
+		return
 	var g := Contracts.giver(_selected)
 	if g.is_empty():
 		return
@@ -150,6 +188,77 @@ func _build_detail() -> void:
 		_detail.add_child(_label("Заказов нет. Загляни после рейда.", 16, DIM))
 	for o: Dictionary in offers:
 		_detail.add_child(_card(o))
+
+
+## Переписка сюжетного заказа: история, письмо до принятия, «Принять» / «Отправить» или что делать.
+func _build_thread(qid: String) -> void:
+	var d := Quests.def(qid)
+	if d.is_empty():
+		return
+	var giver := Quests.speaker(qid, String(d.get("giver", "")))
+	var head := String(d.get("title", "")).to_upper()
+	if String(d.get("giver", "")) != "":
+		head += "  //  " + String(giver.name)
+	_detail.add_child(_label(head, 20, _color(giver.color) if String(d.get("giver", "")) != "" else GREEN))
+	for entry: Variant in Quests.thread_log(qid):
+		_detail.add_child(_message(qid, entry))
+	var act := Quests.terminal_action(qid)
+	var st := Quests.state(qid)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	if String(act.get("kind", "")) == "accept":
+		# письмо заказчика целиком, кроме ответа игрока — он появится, когда заказ принят
+		for line: Variant in Quests.dialogue(qid, String(act.dialogue)):
+			if not (line is Array and String((line as Array)[0]) == "player"):
+				_detail.add_child(_message(qid, line))
+		var r: Dictionary = d.get("reward", {})
+		if int(r.get("money", 0)) > 0:
+			_detail.add_child(_label("Расчёт по итогу: %s ₽ · группа: 1–3 игрока" % _money(int(r.money)), 14, DIM))
+		row.add_child(_button("[ ПРИНЯТЬ ЗАКАЗ ]", func() -> void:
+			Quests.finish_talk(qid, String(act.npc), String(act.dialogue))
+			_act("", "Заказ принят")))
+	elif String(act.get("kind", "")) == "send":
+		# входящее до ответа игрока (Нина, механик) видно сразу, ответ — по кнопке
+		for line: Variant in Quests.dialogue(qid, String(act.dialogue)):
+			if line is Array and String((line as Array)[0]) == "player":
+				break
+			_detail.add_child(_message(qid, line))
+		var send := _button("[ %s ]" % String(act.label), func() -> void:
+			Quests.finish_talk(qid, String(act.npc), String(act.dialogue))
+			_act("", "Отправлено"))
+		send.disabled = not bool(act.ready)
+		row.add_child(send)
+		var o := Quests.objective(qid)
+		if not bool(act.ready) and String(o.get("hint", "")) != "":
+			_detail.add_child(_label(String(o.hint), 13, DIM))
+	elif st == "ACTIVE":
+		var o := Quests.objective(qid)
+		_detail.add_child(_label("Сейчас: " + String(o.get("text", "")), 15, AMBER))
+		if String(o.get("hint", "")) != "":
+			_detail.add_child(_label(String(o.hint), 13, DIM))
+	elif st == "COMPLETED":
+		_detail.add_child(_label("Заказ закрыт.", 15, DIM))
+	if row.get_child_count() > 0:
+		_detail.add_child(row)
+	# тестовое прохождение (Balance.QUEST_TEST_HINTS): что делать сейчас — прямо в переписке
+	if Balance.QUEST_TEST_HINTS and st in ["AVAILABLE", "ACTIVE"]:
+		var stages: Array = d.get("stages", [])
+		var cur: Dictionary = Quests.objective(qid) if st == "ACTIVE" else ((stages[0].objectives as Array)[0] if not stages.is_empty() else {})
+		if String(cur.get("test_hint", "")) != "":
+			_detail.add_child(_label("ТЕСТ: " + String(cur.test_hint), 14, TEST))
+
+
+## Строка переписки: [кто, текст] — подпись и цвет собеседника; строка — служебная пометка.
+func _message(qid: String, entry: Variant) -> Label:
+	if entry is Array and (entry as Array).size() >= 2:
+		var who := Quests.speaker(qid, String((entry as Array)[0]))
+		return _label("%s: %s" % [String(who.name).to_upper(), String((entry as Array)[1])], 16, _color(who.color))
+	return _label("* " + str(entry), 14, DIM)
+
+
+func _color(c: Variant) -> Color:
+	var a: Array = c if c is Array else [0.45, 1.0, 0.55]
+	return Color(float(a[0]), float(a[1]), float(a[2]))
 
 
 func _card(o: Dictionary) -> Control:
@@ -219,8 +328,7 @@ func _money(v: int) -> String:
 
 
 func _giver_color(g: Dictionary) -> Color:
-	var c: Array = g.get("color", [0.45, 1.0, 0.55])
-	return Color(float(c[0]), float(c[1]), float(c[2]))
+	return _color(g.get("color", [0.45, 1.0, 0.55]))
 
 
 func _label(text: String, size: int, color: Color) -> Label:

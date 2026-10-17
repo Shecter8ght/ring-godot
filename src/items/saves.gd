@@ -61,6 +61,8 @@ static func create(display_name: String) -> String:
 		k += 1
 	Profile.use_file(path, true)
 	Profile.profile_name = display_name.strip_edges() if display_name.strip_edges() != "" else "Выживший"
+	# новая игра — с короткого обучения в убежище (data/quests/tutorial_basics.json)
+	Profile.flags["new_game"] = true
 	Profile.save()
 	remember(path)
 	return path

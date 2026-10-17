@@ -55,12 +55,32 @@
 | `extract_with_item` (item) | эвакуация с предметом в рюкзаке |
 | `extract_with_npc` (npc) | эвакуация, неся NPC (или он в 5 м) |
 | `kill_targets` (n, arch) | добил мародёров (тип — по желанию) |
+| `photo` (site) | снимок в точке съёмки: F, кадр видоискателя (место с `photo: true`) |
+| `clear_site` (site) | мертвы все бойцы охраны этого места (`guards` этапа), остальные не в счёт |
+| `install`, `deliver` (site, item) | груз из рюкзака у места — засчитан **сразу и без эвакуации** (`durable`, в профиль) |
+| `take`, `put` (site, item) | убежище, обучение: взять предмет себе / положить из своего рюкзака |
+| `ui` (what: inventory / terminal) | открыл окно; открыл раньше подсказки — засчитано заранее |
 
-Поля цели: `text`, `hint`, `clue {title, text}`, `toast`, `set_flags {…}`.
+Поля цели: `text`, `hint`, `clue {title, text}`, `toast`, `set_flags {…}`; `reward {…}` — оплата этапа
+(каждому профилю один раз); `variants [{facts, flags, dialogue, set_flags}]` — другой разговор, если
+игрок уже знает больше; `skip_if_facts […]` / `skip_if_flags {…}` — шаг не нужен (засчитан сам);
+`button` — надпись кнопки в терминале; `log […]` — сообщение в переписку по выполнении;
+`test_hint` — инструкция для тестового прохождения (при `Balance.QUEST_TEST_HINTS`).
+
+**Факты и ранние находки.** Осмотренные / снятые места — факты квеста (`facts`). Место с `early`
+(true — с принятия заказа, «id этапа» — с этого этапа) работает раньше своего этапа; цель, чьё место уже
+в фактах, засчитывается сама, как только станет текущей. Пропущенная цель фактом не становится.
 Поля этапа: `title`, `objectives`, `guards {site, n, radius}` — мародёры держатся у места.
 Поля квеста: `title`, `giver` (кто даёт: `trader`), `summary`, `offer`, `requires {trust_level,
-flags, quests}`, `reward {money, trust, items, unlock_stock}`, `flags_on_complete`, `dialogues`,
-`sites`.
+flags, quests, scenes, after}`, `reward {money, trust, items, unlock_stock}`, `flags_on_complete`, `dialogues`,
+`sites`; `via: "terminal"` + `contacts {id: {nick, name, role, color}}` — заказ по переписке (ниже);
+`auto_start` — начинается сам (обучение). `requires.scenes` — пока сцены нет, задание не предлагается;
+`requires.after` — после другого (выполнен или вовсе не начинался).
+
+**Переписка в терминале** (`via: "terminal"`): заказчик и его люди пишут в терминал убежища (раздел
+«Переписка»), видимых NPC нет. Разговоры — обычные цели `talk` с `npc` из `contacts` (или заказчик
+`Contracts`, например `perevalka`); принять заказ и отправить отчёт — кнопками окна, входящее до ответа
+игрока видно сразу; история — в записи квеста (`log`). Окно — `src/hideout/terminal_ui.gd`.
 
 ### Места (`sites`)
 - `level` — сцена (`f1_ring`, `hideout`).
@@ -69,7 +89,10 @@ flags, quests}`, `reward {money, trust, items, unlock_stock}`, `flags_on_complet
   `QuestAnchor` с тем же `site_id` в сцене уровня главнее** — поставил мышкой, место переехало.
 - `props` — заглушки: `backpack, blood, drops, casings, butts, crate, chair, note, papers, tarp,
   ammo_taped, cabinet, bundle, red_gate, cot, item (id)`.
-- `prompt` + `lines` — осмотр; `search_s`; `zone`; `npc` (раненый: несут на плече);
+- `prompt` + `lines` — осмотр; `search_s`; `zone`; `npc` (раненый: несут на плече); `photo` — точка
+  съёмки; `early` — раннее место; `supply` — источник груза (выдаёт деталь, пока заказ её ждёт; один
+  экземпляр с места за раз); `cargo` / `placed` — модель предмета лежит / появляется; `no_floor` —
+  точно в точке, без поиска пола;
   `when_flags` — место есть всегда, когда флаги совпали (Антон в убежище).
 - На уровне стоят все места текущего этапа (сцена рассказывает историю), осмотреть можно только
   место текущей цели.
@@ -107,6 +130,12 @@ flags, quests}`, `reward {money, trust, items, unlock_stock}`, `flags_on_complet
   своя кампания не трогается.
 - Проверка: `tools/coop_quest_host` + `coop_quest_client` (две копии игры по сети).
 - Ещё не общие: торговые задания Михалыча (`Missions`) — следующим шагом.
+
+## Тестовые инструкции
+
+`Balance.QUEST_TEST_HINTS` (сейчас `true`, владелец 2026-10-17): у целей с `test_hint` при смене цели
+слева всплывает рамка «ТЕСТ — что делать» (`QUEST_TEST_HINT_SEC`), та же строка — в журнале (J) и
+внизу переписки в терминале. К релизу — `false`; тексты в данных можно оставить или удалить.
 
 ## Отладка
 Консоль (`) — только при запуске из проекта (в `RING.zip` её нет):

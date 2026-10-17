@@ -18,6 +18,8 @@ var _sites: Dictionary = {}
 ## Декорации мест с NPC (ящики, кровь) — отдельно: раненого уносят, сцена остаётся на месте.
 var _decor: Dictionary = {}
 var _guarded: Dictionary = {}
+## Охрана места уже стояла (видели живых) — тогда «никого не осталось» значит «зачищено».
+var _guard_seen: Dictionary = {}
 ## Раненые на плече: site -> узел картинки (у всех peer).
 var _carry_vis: Dictionary = {}
 ## Корень уровня (сцена .tscn, в которой живём) — места ставятся в него.
@@ -35,6 +37,9 @@ func _ready() -> void:
 	Quests.world = self
 	if raid:
 		Quests.begin_raid()
+	elif level == "hideout":
+		# обучение новой игры начинается само
+		Quests.auto_start()
 	Quests.changed.connect(_refresh)
 	# коллизии уровня попадают в физику через кадр — пол под местами ищем после
 	for i in range(2):
@@ -148,7 +153,9 @@ func _resolve(sid: String, sd: Dictionary, depth: int) -> Variant:
 		pos = Vector3(float(p[0]), float(p[1]), float(p[2]))
 	if pos == Vector3.INF:
 		return null
-	pos = _floor_under(pos)
+	# no_floor — точно в точке (полка стеллажа): луч вниз упёрся бы в трубы над ней
+	if not bool(sd.get("no_floor", false)):
+		pos = _floor_under(pos)
 	return Transform3D(Basis(Vector3.UP, yaw), pos)
 
 
@@ -272,6 +279,35 @@ func give_cargo(peer: int, sid: String, item: String) -> bool:
 	return true
 
 
+## Живые бойцы охраны места в точке at (SectorLevel.spawn_guards: имя Guard*, дом — место).
+func _guards_alive(at: Vector3) -> int:
+	var n := 0
+	for node: Node in get_tree().get_nodes_in_group("marauders"):
+		var m := node as Marauder
+		if m and String(m.name).begins_with("Guard") and m.home.distance_to(at) < 1.0 and m.state != Marauder.State.DEAD:
+			n += 1
+	return n
+
+
+## Хост: забрать у игрока peer n штук item из рюкзака, если он у места sid и предмет при нём
+## (поставить колесо, положить радиатор в комплект).
+func take_item(peer: int, sid: String, item: String, n: int) -> bool:
+	var pl: Player = _player(peer)
+	if pl == null or pl.inventory == null or not pl.is_alive() or not near_site(peer, sid):
+		return false
+	if pl.inventory.count(item) < n:
+		return false
+	return pl.inventory.remove(item, n) == n
+
+
+## Хост: сообщение игроку peer (в рейде — ему по сети, в убежище — на свой экран).
+func notify(peer: int, text: String) -> void:
+	if Raid.current:
+		Raid.current.notify_peer(peer, text)
+	else:
+		Quests.notice.emit(text)
+
+
 func _me() -> Player:
 	if Raid.current:
 		return Raid.current.local_player()
@@ -330,6 +366,20 @@ func _process(_delta: float) -> void:
 		if pl == null or not pl.is_alive() or pl.is_downed() or not pl.is_in_group("players"):
 			var at := (_sites[sid] as Node3D).global_position
 			Quests.drop_carried(String(sid), _floor_under(at))
+	# хост: «зачистить место» — все бойцы, поставленные его охранять (охрана этапа), мертвы
+	if raid:
+		for qid in Quests.ids():
+			var oc := Quests.objective(qid)
+			if Quests.state(qid) != "ACTIVE" or String(oc.get("type", "")) != "clear_site":
+				continue
+			var csid := String(oc.get("site", ""))
+			var cs: QuestSite = _sites.get(csid)
+			if cs == null or not _guarded.has(String(qid) + ":" + csid):
+				continue
+			if _guards_alive(cs.global_position) > 0:
+				_guard_seen[csid] = true
+			elif bool(_guard_seen.get(csid, false)):
+				Quests.event("cleared", {"site": csid})
 	# хост: «предмет в рюкзаке» — у любого участника
 	if raid:
 		for qid in Quests.ids():

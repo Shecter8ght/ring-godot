@@ -153,6 +153,8 @@ func open(kind: int) -> void:
 	match kind:
 		HideoutStation.Kind.STASH:
 			Audio.play_ui("stash")
+			# обучение: «открыть рюкзак» засчитывается и заранее
+			Quests.ui_seen("inventory")
 		HideoutStation.Kind.WORKBENCH:
 			Audio.play_ui("workbench")
 		HideoutStation.Kind.EXIT:

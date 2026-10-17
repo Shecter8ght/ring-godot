@@ -3826,3 +3826,10 @@ const ZONE01_INTERIOR_NAV := {
 	"nav_tile": 240.0, "nav_cell": 0.125, "nav_height": 0.0625, "nav_border": 2.0,
 	"nav_radius": 0.375, "nav_detail_error": 1.0, "nav_merge_scale": 0.0078125,
 }
+
+## Тестовое прохождение заданий (владелец, 2026-10-17): у целей с test_hint — всплывающая
+## инструкция «что делать» на экране и в журнале (J). К релизу — false (тексты test_hint можно
+## оставить в данных: при false они не показываются нигде).
+const QUEST_TEST_HINTS := true
+## Сколько секунд инструкция видна после смены цели (дальше — в журнале).
+const QUEST_TEST_HINT_SEC := 25.0

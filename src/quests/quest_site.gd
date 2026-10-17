@@ -8,6 +8,11 @@ extends Interactable
 ##   search_s        — обыск: держаться рядом столько секунд
 ##   zone            — войти в радиус — цель засчитана (место встречи, ворота)
 ##   npc             — раненый NPC (сидит / лежит; его несут — см. QuestWorld)
+##   photo           — точка съёмки: F — кадр видоискателя и снимок (цель photo), без свободной камеры
+##   early           — работает с принятия заказа, не дожидаясь своего этапа (ранняя находка)
+##   (цели install / deliver) — F: отдать груз из рюкзака; засчитывается сразу и без эвакуации
+##   cargo / placed  — модель предмета на месте: лежит, пока не взяли (cargo_until_done) /
+##                     появляется, когда положили (цели take / put обучения в убежище)
 
 var quest_id: String = ""
 var site_id: String = ""
@@ -23,10 +28,13 @@ var _npc_vis: Node3D
 
 
 func _build_visual(parent: Node3D) -> void:
-	var cargo: String = String(spec.get("cargo", ""))
-	if cargo != "":
-		var model: Node3D = ItemModels.build(cargo)
-		model.name = "QuestCargo"
+	# cargo — предмет лежит на месте, пока его не взяли; placed — появляется, когда его положили
+	for key: String in ["cargo", "placed"]:
+		var id: String = String(spec.get(key, ""))
+		if id == "":
+			continue
+		var model: Node3D = ItemModels.build(id)
+		model.name = "QuestCargo" if key == "cargo" else "QuestPlaced"
 		parent.add_child(model)
 		var minimum_y: float = 0.0
 		for child: Node in model.find_children("*", "MeshInstance3D", true, false):
@@ -75,7 +83,29 @@ func request_use() -> void:
 	if float(spec.get("search_s", 0.0)) > 0.0 and active:
 		_search_t = 0.0
 		return
+	# обучение в убежище: учебный пакет берут себе и кладут на полку сами — у каждого свой рюкзак
+	var o := Quests.objective(quest_id)
+	if active and String(o.get("site", "")) == site_id:
+		match String(o.get("type", "")):
+			"take":
+				if not _local_item(String(o.item), true):
+					return
+			"put":
+				if not _local_item(String(o.item), false):
+					Quests.notice.emit("Нужно: " + ItemDb.item_name(String(o.item)))
+					return
+	# точка съёмки: кадр видоискателя у снимающего, снимок засчитывает хост
+	if bool(spec.get("photo", false)) and active:
+		Quests.hud.photo_flash()
 	_done()
+
+
+## Свой рюкзак в убежище: дать себе (give) / забрать у себя предмет (HideoutLevel.quest_item).
+func _local_item(id: String, give: bool) -> bool:
+	var lvl: Node = get_tree().get_first_node_in_group("hideout_level")
+	if lvl == null or not lvl.has_method("quest_item"):
+		return false
+	return bool(lvl.call("quest_item", id, give))
 
 
 func _done() -> void:
@@ -84,7 +114,8 @@ func _done() -> void:
 	if not lines.is_empty():
 		Quests.subtitles.emit(lines)
 	if active:
-		if String(Quests.objective(quest_id).get("type", "")) != "extract_cargo":
+		# место сдачи груза остаётся рабочим: деталь могли не донести — подойдут с ней ещё раз
+		if String(Quests.objective(quest_id).get("type", "")) != "extract_cargo" and Quests.pending_handover(quest_id, site_id).is_empty():
 			active = false
 		Quests.request_site(site_id)
 
@@ -93,8 +124,12 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	var cargo: Node3D = _vis.get_node_or_null("QuestCargo") as Node3D if _vis != null else null
+	var done := site_id in Quests.facts(quest_id)
 	if cargo != null:
-		cargo.visible = not Quests.cargo_claimed(site_id)
+		cargo.visible = not Quests.cargo_claimed(site_id) and not (done and bool(spec.get("cargo_until_done", false)))
+	var placed: Node3D = _vis.get_node_or_null("QuestPlaced") as Node3D if _vis != null else null
+	if placed != null:
+		placed.visible = done
 	var me := _local_player()
 	if me == null:
 		return

@@ -89,6 +89,10 @@ python tools/gen_blood_maps.py                                 # карты кр
 tools/godot.cmd --headless res://tools/settings_test.tscn   # настройки: шины громкости, качество графики, мышь
 tools/godot.cmd --headless res://tools/downed_test.tscn    # тяжёлое ранение: лечь, добить, голова/граната, поднять, тащить, спасение мародёров
 tools/godot.cmd --headless res://tools/quest_test.tscn     # сюжет «Не вернулся» целиком: этапы, смерть, эвакуация, сохранение, Антон, второй квест из данных
+tools/godot.cmd --headless res://tools/terminal_story_test.tscn # переписка в терминале: принять заказ, история, отчёт, оплата этапа один раз, гостю тоже, задание ждёт карту
+tools/godot.cmd --headless res://tools/quest_steps_test.tscn # шаги заказа машины в убежище: снимки, ранняя находка, пропуск шагов, сдача деталей без эвакуации, «не в карман»
+tools/godot.cmd --headless res://tools/tutorial_test.tscn   # обучение новой игры: пакет на ящиках → рюкзак → полка → терминал, рюкзак заранее, старые сохранения
+tools/godot.cmd --headless res://tools/car_recovery_test.tscn # заказ «Вернуть машину» по данным: обычный путь, ранняя находка, общий отчёт, оплаты, тестовые инструкции
 tools/godot.cmd res://tools/conditions_test.tscn            # условия рейда: зрение мародёров днём/ночью, свет ТЦ по питанию; с окном — снимки cond_*
 tools/godot.cmd res://tools/weather_test.tscn               # погода: дождь (в т.ч. начинается в рейде), туман и снайпер, жара и очки, выносливость
 tools/godot.cmd --headless res://tools/events_test.tscn     # события и фракции: жильцы, сигнализация, свет погас, генератор, сброс, ЧВК против мародёров, рация
