@@ -161,7 +161,7 @@ func _check_arrival(me: Player) -> void:
 	me.global_position = _pop._ground(stand) + Vector3.UP * 0.1
 	await get_tree().physics_frame
 	var before := _marauder_names()
-	var shot := _pop._ground(Vector3(-150.0, 0.45, 80.0))
+	var shot := _pop._ground(Vector3(-150.0, 0.45, 80.0))  # двор у пятиэтажек (зона 1 — квадрат 2026-10-17)
 	NoiseBus.emit(shot, 120.0, "shot")
 	var n := _pop.arrive_now()
 	await get_tree().process_frame
@@ -196,7 +196,8 @@ func _check_arrival(me: Player) -> void:
 func _check_noise(me: Player) -> void:
 	me.global_position = Vector3(0, -200, 0)
 	var map := (_level as Node3D).get_world_3d().navigation_map
-	var center := NavigationServer3D.map_get_closest_point(map, Vector3(-30.0, 0.3, -130.0))
+	# открытая линия 50 м на восток — южная улица у автостанции
+	var center := NavigationServer3D.map_get_closest_point(map, Vector3(-110.0, 0.3, 103.0))
 	# одинокий выстрел
 	var squads: Array[Marauder] = await _line_of_squads(center, [20.0, 30.0, 40.0, 50.0])
 	NoiseBus.emit(center, 100.0, "shot")
@@ -272,7 +273,7 @@ func _check_contacts() -> void:
 	var map := (_level as Node3D).get_world_3d().navigation_map
 	var crew: Array[Marauder] = []
 	for i in range(4):
-		var at := NavigationServer3D.map_get_closest_point(map, Vector3(-20.0 - 3.0 * i, 0.3, -130.0))
+		var at := NavigationServer3D.map_get_closest_point(map, Vector3(-100.0 - 3.0 * i, 0.3, 103.0))
 		crew.append(_level.call("spawn_marauder", at, "gunner", {}) as Marauder)
 	var now := Time.get_ticks_msec()
 	for m in crew:

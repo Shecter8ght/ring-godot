@@ -1,24 +1,26 @@
-﻿"""Зона 1 «Городской пояс» (бывший «Район ТЦ»): рельеф, маска поверхностей и каркас карты по схеме
-docs/design/zone01_outskirts.md (решение владельца 2026-10-15: ТЦ — отдельная карта, зона 1 — окраина
-с болотом, ж/д насыпью на востоке, речкой на севере). Готовые двор, рынок и дома у оврага стоят на
-прежних координатах; шум рельефа для них считается на прежней сетке — их земля не сдвигается.
-Новых построек-коробок здесь нет: недостающее делается отдельными моделями в Blender.
+"""Зона 1 «Городской пояс»: рельеф, маска поверхностей и каркас карты по раскладке data/zone01_layout.json —
+квадрат ≈ 600 × 600 м по картинке владельца (решение 2026-10-17, docs/design/zone01_outskirts.md §11;
+раскладку пишет tools/zone01_square_plan.py). Готовые двор хрущёвок, рынок и дома у оврага переезжают
+целиком: их сцены ставятся со сдвигом / поворотом, а земля под ними переносится из вырезок прежней карты
+высот (data/terrain/zone01_ready, tools/zone01_freeze_ready_ground.py) — до миллиметра прежняя.
+Всё остальное — блокауты (tools/build_zone01_blockouts.py → zone01_layout.tscn).
 
-Использование: python tools/build_zone01.py
+Использование: python -X utf8 tools/build_zone01.py
 Пишет:
   data/terrain/zone01_heights.r32          карта высот (float32, 1 м), её читает DistrictTerrain
   assets/terrain/zone01_splat.png          маска поверхностей R грязь, G камень, B щебень, A листва
   assets/terrain/zone01_{albedo,normal,arm}.jpg  массивы слоёв рельефа (6 слоёв, полосой)
   data/sectors/zone01_mall.json            данные сектора (границы, точки, дороги, растительность)
   scenes/levels/zone01_mall.tscn           главная сцена уровня
-  scenes/levels/zone01/zone01_world.tscn   рельеф, дороги, вода (ручей, болото, речка), периметр
-  scenes/levels/zone01/zone01_blockout.tscn  готовые сцены рынка и домов, гаражи у путей, город за границей
+  scenes/levels/zone01/zone01_world.tscn   рельеф, дороги, вода (болото, ручей в овраге), периметр
+  scenes/levels/zone01/zone01_blockout.tscn  готовые сцены рынка и домов на новых местах, гаражи, город за границей
+  scenes/levels/zone01/zone01_layout.tscn  блокауты построек, путей, мостков, площадок, машины
   scenes/levels/zone01/zone01_yard05.tscn  двор с хрущёвками — ТОЛЬКО если файла ещё нет
                                            (детальную зону 5 собирает tools/build_zone01_yard.py)
 
-Случайного размещения во время игры нет: план задан координатами здесь, шум — с фиксированным
-зерном. Повторный запуск перезаписывает мир и блокаут (ручные правки этих двух сцен пропадут).
-Оси: X — восток, Z — юг (север = -Z), 1 единица = 1 м. Начало координат — центр бывшего ТЦ.
+Случайного размещения во время игры нет: план задан раскладкой, шум — с фиксированным зерном. Повторный
+запуск перезаписывает мир, блокаут и блокауты построек (ручные правки этих сцен пропадут).
+Оси: X — восток, Z — юг (север = -Z), 1 единица = 1 м. Начало координат — центр квадрата карты.
 """
 from __future__ import annotations
 
@@ -32,86 +34,137 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "scenes/levels/zone01"
 SECTOR = "res://data/sectors/zone01_mall.json"
+LAYOUT = json.loads((ROOT / "data/zone01_layout.json").read_text(encoding="utf-8"))
 
 # ------------------------------------------------------------------ сетка рельефа
-# Прежняя сетка (до 2026-10-15). Шум рельефа считается на ней: двор, рынок и дома у оврага стоят на
-# земле, посчитанной этим шумом, и не должны сдвинуться. Новая сетка шире на север (болото, речка,
-# лес за ними); к северному краю прежней сетки прежний шум плавно переходит в новый (BLEND_M).
-OLD_X0, OLD_Z0, OLD_NX, OLD_NZ = -480.0, -300.0, 1011, 640
-BLEND_M = 60.0
-X0, Z0, NX, NZ = -480.0, -440.0, 1011, 780
+# квадрат карты 600 × 600 м и лес / город вокруг — до ±440 м
+X0, Z0, NX, NZ = -440.0, -440.0, 881, 881
 STEP = 1.0
 xs = X0 + np.arange(NX) * STEP
 zs = Z0 + np.arange(NZ) * STEP
 GX, GZ = np.meshgrid(xs, zs)
-RNG = np.random.default_rng(20261007)
+RNG = np.random.default_rng(20261017)
 
-# граница игровой области (схема docs/design/zone01_outskirts_concept.png; z = −Y схемы)
-BOUNDARY = [
-    [-395, 300], [-170, 312], [140, 305], [262, 300], [272, 120], [276, -130], [258, -325],
-    [40, -342], [-210, -338], [-370, -330], [-405, -160], [-410, 80],
-]
+# граница игровой области (раскладка, квадрат с неровным краем леса)
+BOUNDARY = [list(p) for p in LAYOUT["boundary"]]
 
-# ж/д насыпь вдоль востока: одна линия, у станции — станционные пути; под «улицей к ТЦ» — проём
-# под будущий мост (модель моста — отдельно, в Blender)
-RAIL = [(217.0, -470.0), (217.0, -120.0), (213.0, 60.0), (195.0, 200.0), (185.0, 320.0), (181.0, 460.0)]
-STATION_TRACKS = [(210.0, 70.0), (200.0, 150.0), (188.0, 235.0)]
-RAIL_TOP = 3.0
-RAIL_HALF = 3.5
-STATION_HALF = 7.0
-RAIL_SLOPE = 6.5
-RAIL_GAP_Z = -60.0     # проём насыпи над «улицей к ТЦ»
-RAIL_GAP_HALF = 8.0
+# ж/д: ось из раскладки; главный ход — 2 пути, у вокзала парк из 7 путей. С севера пути идут по насыпи
+# мостом над дорогой к ТЦ (дорога — под ним), в парке — почти вровень с землёй
+RAIL = [tuple(p) for p in LAYOUT["tracks"]["axis"]]
+RAIL_YARD = LAYOUT["tracks"]["yard"]
+RAIL_HALF = 4.6
+RAIL_YARD_HALF = (RAIL_YARD["count"] - 1) / 2 * RAIL_YARD["spacing"] + 3.5
+RAIL_TOP_Z = [(-120.0, 6.2), (-56.0, 6.2), (-15.0, 4.6), (35.0, 1.6), (70.0, 0.9), (250.0, 0.9), (310.0, 1.3)]
+RAIL_BRIDGE = LAYOUT["tracks"]["bridge"]
+RAIL_BRIDGE_TOP = 6.2
+RAIL_TOP = 6.2  # наибольшая высота насыпи (для данных сектора)
 
-# овраг (12): ось русла с севера на юг, глубина 10 м — как был; теперь его исток — болото
-RAVINE = [(-305, -176), (-312, -140), (-318, -108), (-334, -70), (-345, -36), (-343, 4),
-          (-340, 38), (-326, 66), (-310, 90), (-276, 112), (-240, 132), (-208, 158),
-          (-190, 182), (-196, 214), (-214, 250), (-232, 280)]
+# овраг: сток из болота по северному краю, мимо домов на восток; у моста ось — прежняя, повёрнутая
+RAVINE = [tuple(p) for p in LAYOUT["ravine"]]
 RAVINE_DEPTH = 10.0
 RAVINE_BOTTOM = 3.0
 RAVINE_TOP = 22.0
 
 # болото (1): топь ниже улиц, кочки над водой, окна открытой воды
-SWAMP = [(-288, -184), (-250, -200), (-180, -188), (-120, -205), (-60, -197), (0, -214), (20, -250),
-         (5, -290), (-60, -304), (-150, -296), (-240, -300), (-282, -284), (-298, -235)]
+SWAMP = [tuple(p) for p in LAYOUT["swamp"]]
 SWAMP_FLOOR = -1.7
 SWAMP_WATER = -1.15
 SWAMP_EDGE = 14.0
+RIVER_WATER = -1.55  # речки больше нет (вода — ручей в овраге); значение оставлено для данных сектора
 
-# речка из болота на восток, под насыпью — дальше за карту
-RIVER = [(8.0, -292.0), (60.0, -300.0), (130.0, -307.0), (200.0, -301.0), (250.0, -313.0), (300.0, -321.0),
-         (380.0, -334.0), (530.0, -350.0)]
-RIVER_BOTTOM = -2.3
-RIVER_WATER = -1.55
-RIVER_HALF = 3.0
-RIVER_BANK = 9.0
+# готовые куски: сдвиг / поворот из раскладки
+READY = LAYOUT["ready"]
+READY_GROUND = json.loads((ROOT / "data/terrain/zone01_ready/ready.json").read_text(encoding="utf-8"))
+READY_BAND = 6.0  # полоса плавного перехода от прежней земли куска к новой
+SCENES = {"yard05": "Yard05", "market06": "Z06_Market", "houses12": "Z12_Ravine"}
 
-# площадки под участки (x0, z0, x1, z1, высота, откос, доля исходного рельефа); постройки на них —
-# отдельными моделями, пока пусто
-PADS = [
-    ((-282, -160, -132, -44), 0.35, 10.0, 0.5),   # двор хрущёвок (5) — как был
-    ((-238, -58, -104, 112), 0.25, 8.0, 0.0),      # рынок (6) — как был
-    ((-92, -150, -24, -72), 0.3, 8.0, 0.3),        # второй двор (панельки) — между улицами, не задевая их ось
-    ((30, -236, 165, -92), 0.3, 8.0, 0.3),         # недострой
-    ((25, -45, 152, 35), 0.25, 6.0, 0.0),          # спортплощадка
-    ((160, -45, 198, -15), 0.3, 6.0, 0.0),         # АЗС
-    ((-94, 97, 60, 215), 0.2, 8.0, 0.0),           # автостанция
-    ((118, 95, 186, 240), 0.3, 6.0, 0.0),          # привокзальная площадь
-    ((176, -232, 205, -108), None, 6.0, 0.0),      # гаражи у путей — на своей высоте
-]
-HOUSES = [(-270, 3), (-297, 25), (-272, 50)]
+
+def ready_new(key: str, x: float, z: float) -> tuple[float, float]:
+    """Прежняя точка готового куска → новое место."""
+    r = READY[key]
+    if r["rotate"] == 180:
+        (ox, oz), (nx, nz) = r["pivot_old"], r["pivot_new"]
+        return nx - (x - ox), nz - (z - oz)
+    dx, dz = r["move"]
+    return x + dx, z + dz
+
+
+def ready_old(key: str, x, z):
+    """Новая точка → прежняя (работает и с массивами numpy)."""
+    r = READY[key]
+    if r["rotate"] == 180:
+        (ox, oz), (nx, nz) = r["pivot_old"], r["pivot_new"]
+        return ox - (x - nx), oz - (z - nz)
+    dx, dz = r["move"]
+    return x - dx, z - dz
+
+
+def ready_transform(key: str) -> tuple[tuple[float, float, float], float]:
+    """Положение и поворот узла-экземпляра сцены куска (сцены внутри — в прежних координатах)."""
+    r = READY[key]
+    if r["rotate"] == 180:
+        (ox, oz), (nx, nz) = r["pivot_old"], r["pivot_new"]
+        return (nx + ox, 0.0, nz + oz), 180.0
+    dx, dz = r["move"]
+    return (dx, 0.0, dz), 0.0
+
+
+def instance_attrs(key: str) -> dict:
+    """Свойства узла-экземпляра готового куска (положение и поворот) для записи сцены."""
+    (x, y, z), yaw = ready_transform(key)
+    attrs = {"position": v3(x, y, z)}
+    if yaw:
+        attrs["rotation_degrees"] = v3(0, yaw, 0)
+    return attrs
+
+
+def ready_crop_ground(x: float, z: float) -> float:
+    """Прежняя земля готовых кусков в их прежних координатах (вырезки data/terrain/zone01_ready):
+    генераторы двора, рынка и домов (build_zone01_yard.py, author_zone01_nw.py) ставят по ней свои
+    модели — на новом месте под куском та же земля."""
+    for key, crop in READY_GROUND["crops"].items():
+        (ox, oz), (w, hgt) = crop["origin"], crop["size"]
+        if ox <= x <= ox + w - 1 and oz <= z <= oz + hgt - 1:
+            if key not in _CROP_CACHE:
+                _CROP_CACHE[key] = np.fromfile(ROOT / f"data/terrain/zone01_ready/{key}.r32", dtype="<f4").reshape(hgt, w)
+            data = _CROP_CACHE[key]
+            fx, fz = min(x - ox, w - 1.001), min(z - oz, hgt - 1.001)
+            ix, iz = int(fx), int(fz)
+            tx, tz = fx - ix, fz - iz
+            return float((data[iz, ix] * (1 - tx) + data[iz, ix + 1] * tx) * (1 - tz) +
+                         (data[iz + 1, ix] * (1 - tx) + data[iz + 1, ix + 1] * tx) * tz)
+    return 0.0
+
+
+_CROP_CACHE: dict[str, np.ndarray] = {}
+
+# двор хрущёвок (прежние координаты): подвал вырезан в рельефе — на новом месте со сдвигом двора
+YARD_EXCAVATION_OLD = (-225.0, -1.9, -144.0, 17.0, 2.3, 12.0)
+
+
+def yard_excavation() -> str:
+    x, y, z, w, hh, d = YARD_EXCAVATION_OLD
+    dx, dz = READY["yard05"]["move"]
+    return f"Array[AABB]([AABB({x + dx:g}, {y:g}, {z + dz:g}, {w:g}, {hh:g}, {d:g})])"
+HOUSES = [ready_new("houses12", x, z) for x, z in [(-270, 3), (-297, 25), (-272, 50)]]
 
 ROADS: list[dict] = []
-ROAD_DEFS = [
-    # имя, точки, ширина проезжей части, тротуар, грунтовка (без асфальта — только колея по маске)
-    ("NorthRoad", [(-272, -164), (-100, -164), (-10, -164)], 9.0, 2.5, False),
-    ("WestLink", [(-100, -164), (-100, -60), (-100, -14)], 8.0, 2.0, False),
-    ("Prospekt", [(-10, -164), (-10, -60), (-10, 40), (-10, 97)], 9.0, 2.5, False),
-    ("MallStreet", [(-94, -60), (-10, -60), (100, -60), (190, -60), (300, -60), (420, -60)], 9.0, 2.0, False),
-    ("StationRoad", [(-10, 70), (60, 72), (115, 90), (140, 118)], 7.0, 1.5, False),
-    ("BridgeRoad", [(-10, -164), (25, -182), (25, -262), (58, -292), (60, -360)], 7.0, 0.0, False),
-    ("ForestRoad", [(-276, -168), (-272, -195), (-318, -240), (-340, -300), (-356, -362)], 4.5, 0.0, True),
-]
+# дороги из раскладки: имя, точки, ширина проезжей части, тротуар, грунтовка (без асфальта — колея по маске)
+SIDEWALK = {"north": 2.5, "south": 2.5, "artery": 2.5, "east": 2.0, "mall": 2.0, "evac3": 1.5, "tracks_lane": 0.0}
+ROAD_DEFS = [(r["id"], [tuple(p) for p in r["points"]], float(r["width"]), 0.0 if r["dirt"] else SIDEWALK.get(r["id"], 1.5),
+              bool(r["dirt"])) for r in LAYOUT["roads"]]
+
+# площадки под постройками раскладки: (x0, z0, x1, z1) вокруг каждой — ровно, с откосом к рельефу
+def _footprint_rect(b: dict, pad: float) -> tuple[float, float, float, float]:
+    (x, z), (L, D), ang = b["at"], b["size"], b["angle"]
+    a = math.radians(ang)
+    hx = abs(L / 2 * math.cos(a)) + abs(D / 2 * math.sin(a)) + pad
+    hz = abs(L / 2 * math.sin(a)) + abs(D / 2 * math.cos(a)) + pad
+    return (x - hx, z - hz, x + hx, z + hz)
+
+
+BUILDING_PADS = [_footprint_rect(b, 3.0) for b in LAYOUT["buildings"]] + [_footprint_rect(LAYOUT["court"], 2.0)]
+POLY_PADS = [[tuple(p) for p in LAYOUT["site"]], [tuple(p) for p in LAYOUT["bus_lot"]]]
 
 # ------------------------------------------------------------------ помощники numpy
 
@@ -133,16 +186,8 @@ def _noise_grid(cell: float, seed: int, nx: int, nz: int) -> np.ndarray:
 
 
 def noise(cell: float, seed: int) -> np.ndarray:
-    """Шум на новой сетке. Внутри прежней — прежние значения (земля готовых кусков не сдвигается);
-    к её северному краю на BLEND_M метрах плавно переходит в шум новой сетки."""
-    old = _noise_grid(cell, seed, OLD_NX, OLD_NZ)
-    out = _noise_grid(cell, seed + 7919, NX, NZ)
-    row = int(round((OLD_Z0 - Z0) / STEP))
-    col = int(round((OLD_X0 - X0) / STEP))
-    w = smooth((zs[row:row + OLD_NZ] - OLD_Z0) / BLEND_M)[:, None].astype(np.float32)
-    window = out[row:row + OLD_NZ, col:col + OLD_NX]
-    out[row:row + OLD_NZ, col:col + OLD_NX] = old * w + window * (1.0 - w)
-    return out
+    """Плавный шум 0..1 на сетке карты."""
+    return _noise_grid(cell, seed, NX, NZ)
 
 
 def fbm(cell: float, seed: int) -> np.ndarray:
@@ -200,27 +245,25 @@ def polygon_edge_distance(poly) -> np.ndarray:
 
 
 def build_heights() -> np.ndarray:
-    undulation = (fbm(140.0, 1) - 0.5) * 2.0 + (fbm(45.0, 2) - 0.5) * 0.7
+    global PROTECT
+    undulation = (fbm(140.0, 1) - 0.5) * 1.6 + (fbm(45.0, 2) - 0.5) * 0.6
     h = undulation.astype(np.float32)
     detail = fbm(18.0, 3)
 
-    # площадки (что ниже приоритетом — раньше); двор и рынок — первыми, как было
-    for (x0, z0, x1, z1), height, fall, keep in PADS:
-        if height is None:
-            height = float(h[int((z0 + z1) / 2 - Z0), int((x0 + x1) / 2 - X0)])
-        h = flatten(h, rect_distance(x0, z0, x1, z1), height, fall, keep, detail)
+    # площадки под постройками раскладки и большие площадки (стройка, автостанция)
+    for x0, z0, x1, z1 in BUILDING_PADS:
+        cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+        h = flatten(h, rect_distance(x0, z0, x1, z1), float(h[int(cz - Z0), int(cx - X0)]), 6.0, 0.15, detail)
+    for poly in POLY_PADS:
+        cx = sum(p[0] for p in poly) / len(poly)
+        cz = sum(p[1] for p in poly) / len(poly)
+        dist = np.where(inside_polygon(poly), 0.0, polygon_edge_distance(poly))
+        h = flatten(h, dist, float(h[int(cz - Z0), int(cx - X0)]), 8.0, 0.3, detail)
     # фон за границей: ровные площадки под панельки
     for x0, z0, x1, z1 in PADS_BG:
         cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
         h = flatten(h, rect_distance(x0 - 3, z0 - 3, x1 + 3, z1 + 3), float(h[int(cz - Z0), int(cx - X0)]), 10.0)
-    # частные дома у оврага (12)
-    for hx, hz in HOUSES:
-        h = flatten(h, rect_distance(hx - 10, hz - 9, hx + 10, hz + 9), float(h[int(hz - Z0), int(hx - X0)]), 6.0)
-    # место бывшего ТЦ — ровное, как было (на нём держатся край рынка и улица у него)
-    d_c = np.hypot(GX, GZ)
-    h = flatten(h, np.maximum(d_c - 109.0, 0.0), 0.2, 8.0)
-    # низины поднять до нуля — так было всегда (прежняя насыпь делала это попутно), на этом стоят
-    # двор, рынок и дома; болото и речка врезаются уже после
+    # низины поднять до нуля — улицы и дворы не стоят в ямах; болото и овраг врезаются уже после
     h = np.maximum(h, 0.0)
 
     # болото (1): чаша к дну SWAMP_FLOOR с плавным краем; кочки и гряды выше воды, окна воды ниже
@@ -232,22 +275,23 @@ def build_heights() -> np.ndarray:
     bottom = SWAMP_FLOOR + hummock + ridge
     h = h * (1.0 - t) + bottom * t
 
-    # речка (вытекает из болота на восток): русло с пологими берегами
-    d_riv, _ = polyline_distance(RIVER)
-    s = np.clip((d_riv - RIVER_HALF) / (RIVER_BANK - RIVER_HALF), 0.0, 1.0)
-    bed = RIVER_BOTTOM + (detail - 0.5) * 0.3
-    h = np.where(d_riv < RIVER_BANK, np.minimum(h, bed * (1.0 - smooth(s)) + h * smooth(s)), h)
-
-    # ж/д насыпь вдоль востока: трапеция, у станции шире; проём над «улицей к ТЦ»
+    # ж/д: насыпь по оси, у вокзала шире (парк путей); высота — по участкам (мост над дорогой к ТЦ)
     d_rail, _ = polyline_distance(RAIL)
-    d_st, _ = polyline_distance(STATION_TRACKS)
-    top = np.minimum(d_rail - RAIL_HALF, d_st - STATION_HALF)
-    emb = np.where(top < 0.0, RAIL_TOP, RAIL_TOP * (1.0 - smooth(top / RAIL_SLOPE)))
-    emb = np.where(top < RAIL_SLOPE, emb, -100.0)
-    emb = np.where(emb > -100.0, emb * smooth((np.abs(GZ - RAIL_GAP_Z) - RAIL_GAP_HALF) / 2.5), emb)
+    yard_t = rail_yard_weight()
+    half = RAIL_HALF + (RAIL_YARD_HALF - RAIL_HALF) * yard_t
+    top_h = np.interp(GZ, [z for z, _ in RAIL_TOP_Z], [v for _, v in RAIL_TOP_Z]).astype(np.float32)
+    slope_w = np.maximum(6.0, top_h * 2.0)
+    d_top = d_rail - half
+    emb = np.where(d_top < 0.0, top_h, top_h * (1.0 - smooth(d_top / slope_w)))
+    emb = np.where(d_top < slope_w, emb, -100.0)
+    # проём под мостом: дорога к ТЦ проходит под путями
+    (bx, bz) = RAIL_BRIDGE["at"]
+    d_mall, _ = polyline_distance([tuple(p) for r in LAYOUT["roads"] if r["id"] == "mall" for p in r["points"]])
+    near_bridge = np.hypot(GX - bx, GZ - bz) < 40.0
+    emb = np.where((emb > -100.0) & near_bridge, emb * smooth((d_mall - 7.5) / 2.5), emb)
     h = np.maximum(h, emb)
 
-    # овраг (12): чаша к руслу, неровные бровки; в начале мельче — как был
+    # овраг: чаша к руслу, неровные бровки; у болота мельче
     d_rav, along_rav = polyline_distance(RAVINE)
     top_w = RAVINE_TOP * (0.8 + 0.45 * noise(35.0, 5))
     depth = RAVINE_DEPTH * smooth(along_rav / 40.0) * 0.6 + RAVINE_DEPTH * 0.4
@@ -256,10 +300,50 @@ def build_heights() -> np.ndarray:
     cut += np.where(d_rav < RAVINE_BOTTOM, 0.0, (detail - 0.5) * 1.6 * (1.0 - s) * s * 4.0)
     h -= np.where(d_rav < top_w, cut, 0.0)
 
-    # дороги — после рельефа: полотно по сглаженному профилю
+    # готовые куски: прежняя земля на новом месте (подвал двора, площадка рынка, склоны оврага у домов)
+    h, PROTECT = place_ready_ground(h)
+
+    # дороги — после рельефа: полотно по сглаженному профилю; землю готовых кусков не трогают
     for name, points, width, sidewalk, dirt in ROAD_DEFS:
         h = carve_road(h, name, points, width, sidewalk, dirt=dirt)
     return h.astype(np.float32)
+
+
+PROTECT: np.ndarray = np.zeros((1, 1), np.float32)
+
+
+def rail_yard_weight() -> np.ndarray:
+    """0..1: где пути расходятся в парк (вдоль z, с плавными въездами по 40 м)."""
+    y0, y1 = RAIL_YARD["from_z"], RAIL_YARD["to_z"]
+    return np.clip(1.0 - np.maximum(np.maximum(y0 - GZ, GZ - y1), 0.0) / 40.0, 0.0, 1.0).astype(np.float32)
+
+
+def place_ready_ground(h: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Вырезки прежней карты высот — на новые места кусков (сдвиг / поворот), с переходом READY_BAND."""
+    protect = np.zeros(GX.shape, np.float32)
+    for key, crop in READY_GROUND["crops"].items():
+        (ox, oz), (w, hgt) = crop["origin"], crop["size"]
+        data = np.fromfile(ROOT / f"data/terrain/zone01_ready/{key}.r32", dtype="<f4").reshape(hgt, w)
+        corners = [ready_new(key, ox + dx, oz + dz) for dx in (0, w - 1) for dz in (0, hgt - 1)]
+        x0, x1 = min(c[0] for c in corners), max(c[0] for c in corners)
+        z0, z1 = min(c[1] for c in corners), max(c[1] for c in corners)
+        i0, i1 = max(0, int(x0 - X0)), min(NX, int(x1 - X0) + 2)
+        j0, j1 = max(0, int(z0 - Z0)), min(NZ, int(z1 - Z0) + 2)
+        sx, sz = GX[j0:j1, i0:i1], GZ[j0:j1, i0:i1]
+        px, pz = ready_old(key, sx, sz)
+        fx, fz = px - ox, pz - oz
+        ok = (fx >= 0) & (fz >= 0) & (fx <= w - 1) & (fz <= hgt - 1)
+        fxc, fzc = np.clip(fx, 0, w - 1.001), np.clip(fz, 0, hgt - 1.001)
+        ix, iz = fxc.astype(int), fzc.astype(int)
+        tx, tz = fxc - ix, fzc - iz
+        val = ((data[iz, ix] * (1 - tx) + data[iz, ix + 1] * tx) * (1 - tz) +
+               (data[iz + 1, ix] * (1 - tx) + data[iz + 1, ix + 1] * tx) * tz)
+        edge = np.minimum(np.minimum(fx, w - 1 - fx), np.minimum(fz, hgt - 1 - fz))
+        wgt = np.where(ok, smooth(edge / READY_BAND), 0.0).astype(np.float32)
+        sub = h[j0:j1, i0:i1]
+        h[j0:j1, i0:i1] = sub * (1.0 - wgt) + val * wgt
+        protect[j0:j1, i0:i1] = np.maximum(protect[j0:j1, i0:i1], wgt)
+    return h, protect
 
 
 def sample(h: np.ndarray, x: float, z: float) -> float:
@@ -307,7 +391,7 @@ def carve_road(h, name, points, width, sidewalk, closed=False, dirt=False):
         m = d < sub_best
         sub_best[m] = d[m]
         target[j0:j1, i0:i1][m] = y[m]
-    w = 1.0 - smooth((best - half) / 5.0)
+    w = (1.0 - smooth((best - half) / 5.0)) * (1.0 - PROTECT)
     h = np.where(np.isnan(target), h, h * (1 - w) + (np.nan_to_num(target) - 0.06) * w)
     ROADS.append(dict(id=name, width=width, sidewalk=sidewalk, dirt=dirt,
                       points=[[round(x, 2), round(float(y), 3), round(z, 2)] for (x, z), y in list(zip(dense, ys))[::5]] +
@@ -316,6 +400,35 @@ def carve_road(h, name, points, width, sidewalk, closed=False, dirt=False):
 
 
 # ------------------------------------------------------------------ маска поверхностей
+
+def track_distance() -> np.ndarray:
+    """Расстояние от края полотна путей (меньше нуля — на полотне; в парке полотно шире)."""
+    d_rail, _ = polyline_distance(RAIL)
+    return d_rail - (RAIL_HALF + (RAIL_YARD_HALF - RAIL_HALF) * rail_yard_weight())
+
+
+def place_ready_maps(img: np.ndarray, name: str) -> np.ndarray:
+    """Маска поверхностей / густота травы под готовыми кусками — из вырезок прежних карт (как рельеф)."""
+    out = img.astype(np.float32)
+    for key, crop in READY_GROUND["crops"].items():
+        (ox, oz), (w, hgt) = crop["origin"], crop["size"]
+        src = np.asarray(Image.open(ROOT / f"data/terrain/zone01_ready/{key}_{name}.png"), dtype=np.float32)
+        corners = [ready_new(key, ox + dx, oz + dz) for dx in (0, w - 1) for dz in (0, hgt - 1)]
+        x0, x1 = min(c[0] for c in corners), max(c[0] for c in corners)
+        z0, z1 = min(c[1] for c in corners), max(c[1] for c in corners)
+        i0, i1 = max(0, int(x0 - X0)), min(NX, int(x1 - X0) + 2)
+        j0, j1 = max(0, int(z0 - Z0)), min(NZ, int(z1 - Z0) + 2)
+        px, pz = ready_old(key, GX[j0:j1, i0:i1], GZ[j0:j1, i0:i1])
+        fx, fz = px - ox, pz - oz
+        ok = (fx >= 0) & (fz >= 0) & (fx <= w - 1) & (fz <= hgt - 1)
+        ix = np.clip(np.rint(fx), 0, w - 1).astype(int)
+        iz = np.clip(np.rint(fz), 0, hgt - 1).astype(int)
+        edge = np.minimum(np.minimum(fx, w - 1 - fx), np.minimum(fz, hgt - 1 - fz))
+        wgt = np.where(ok, smooth(edge / READY_BAND), 0.0)[..., None]
+        sub = out[j0:j1, i0:i1]
+        out[j0:j1, i0:i1] = sub * (1.0 - wgt) + src[iz, ix] * wgt
+    return out
+
 
 def build_splat(h: np.ndarray) -> np.ndarray:
     detail = fbm(12.0, 11)
@@ -326,12 +439,10 @@ def build_splat(h: np.ndarray) -> np.ndarray:
     gravel = np.zeros(GX.shape, np.float32)
     leaves = np.zeros(GX.shape, np.float32)
 
-    # ж/д: щебень балласта по верху и откосам, у подошвы — пятнами
-    d_rail, _ = polyline_distance(RAIL)
-    d_st, _ = polyline_distance(STATION_TRACKS)
-    d_track = np.minimum(d_rail - RAIL_HALF, d_st - STATION_HALF)
+    # ж/д: щебень балласта по полотну и откосам, у подошвы — пятнами
+    d_track = track_distance()
     gravel = np.maximum(gravel, 1.0 - smooth((d_track - 1.0) / 2.5))
-    gravel = np.maximum(gravel, (1.0 - smooth(d_track / (RAIL_SLOPE + 2))) * smooth((detail - 0.35) / 0.3))
+    gravel = np.maximum(gravel, (1.0 - smooth(d_track / 10.0)) * smooth((detail - 0.35) / 0.3))
 
     d_rav, _ = polyline_distance(RAVINE)
     mud = np.maximum(mud, 1.0 - smooth((d_rav - RAVINE_BOTTOM - 1.5) / 3.0))
@@ -342,81 +453,75 @@ def build_splat(h: np.ndarray) -> np.ndarray:
     in_swamp = inside_polygon(SWAMP)
     wet = in_swamp & (h < SWAMP_WATER + 0.25)
     mud = np.maximum(mud, np.where(wet, 1.0, 0.0))
-    shore = in_swamp & ~wet
-    leaves = np.maximum(leaves, np.where(shore, 0.55 + 0.35 * detail, 0.0))
-    # речка: ил по руслу и урезу
-    d_riv, _ = polyline_distance(RIVER)
-    mud = np.maximum(mud, 1.0 - smooth((d_riv - RIVER_HALF - 1.5) / 2.5))
+    leaves = np.maximum(leaves, np.where(in_swamp & ~wet, 0.55 + 0.35 * detail, 0.0))
 
     # лес по краям; листва под деревьями
     forest = forest_mask()
     leaves = np.maximum(leaves, forest * (0.65 + 0.35 * detail))
 
-    # грунтовки и тропы: лесная дорога, тропа к домам, к южной лесополосе; двор хрущёвок — как был
-    for path, width in [
-        ([(-100, 40), (-160, 38), (-240, 30), (-272, 18), (-310, 34), (-385, 40)], 2.5),
-        ([(-120, 110), (-200, 150), (-185, 200), (-150, 260), (-114, 292)], 2.0),
-        # двор хрущёвок (5): вытоптанные тропинки поперёк газонов, к бакам, к гаражам
-        ([(-204.0, -126.0), (-199.0, -104.0), (-197.0, -92.0)], 1.2),
-        ([(-188.0, -126.0), (-180.0, -96.0), (-176.0, -70.0)], 1.0),
-        ([(-164.0, -100.0), (-182.0, -95.0), (-197.0, -92.0)], 1.1),
-        ([(-228.0, -85.0), (-212.0, -88.0), (-197.0, -92.0)], 1.0),
-        ([(-228.0, -60.0), (-205.0, -57.0)], 1.0),
-        ([(-240.0, -150.0), (-262.0, -150.0)], 1.5),
-        # тропа вдоль путей и проезд гаражей
-        ([(190, -100), (191, -236)], 4.0),
-        ([(205, -10), (208, 60)], 1.5),
-    ] + [(name_pts, w) for _, name_pts, w, _, dirt in ROAD_DEFS if dirt]:
+    # грунтовки и тропы: дороги-грунтовки раскладки, тропы болота, вытоптанные тропинки между домами
+    paths = [(pts, w) for _, pts, w, _, dirt in ROAD_DEFS if dirt] + [([tuple(p) for p in t], 1.6) for t in LAYOUT["trails"]]
+    for path, width in paths:
         d, _ = polyline_distance(path)
         mud = np.maximum(mud, 1.0 - smooth((d - width * 0.5) / 2.5 + (detail - 0.5)))
-    # детская площадка: вытоптанная земля с песком; полоса у гаражей двора
-    d_play = np.hypot(GX + 197.0, GZ + 92.0)
-    mud = np.maximum(mud, (1.0 - smooth((d_play - 9.0 - 4.0 * detail) / 4.0)) * 0.85)
-    mud = np.maximum(mud, (1.0 - smooth(rect_distance(-275, -164, -258, -100) / 3.0)) * (0.5 + 0.5 * detail))
-    leaves = np.maximum(leaves, (1.0 - smooth(rect_distance(-250, -158, -150, -48) / 2.0)) * smooth((patches - 0.35) / 0.35) * 0.55)
-    # стройплощадка — щебень с грязью и колеями; площадки автостанции и станции — щебень пятнами
-    site = rect_distance(30, -236, 165, -92)
+    # стройплощадка — щебень с грязью и колеями; площадка автостанции — щебень пятнами, стоянка
+    site = np.where(inside_polygon(POLY_PADS[0]), 0.0, polygon_edge_distance(POLY_PADS[0]))
     gravel = np.maximum(gravel, (1.0 - smooth(site / 4.0)) * (0.55 + 0.45 * detail))
     mud = np.maximum(mud, (1.0 - smooth(site / 6.0)) * smooth((patches - 0.4) / 0.3))
-    for rect in ((-94, 97, 60, 215), (118, 95, 186, 240), (160, -45, 198, -15), (176, -232, 205, -108)):
-        gravel = np.maximum(gravel, (1.0 - smooth(rect_distance(*rect) / 3.0)) * (0.35 + 0.5 * detail))
+    lot = np.where(inside_polygon(POLY_PADS[1]), 0.0, polygon_edge_distance(POLY_PADS[1]))
+    gravel = np.maximum(gravel, (1.0 - smooth(lot / 3.0)) * (0.45 + 0.45 * detail))
+    # у ангаров, складов, вокзала — укатанный щебень вокруг
+    for b in LAYOUT["buildings"]:
+        if b["kind"] in ("hall", "station", "skeleton"):
+            x0, z0, x1, z1 = _footprint_rect(b, 6.0)
+            gravel = np.maximum(gravel, (1.0 - smooth(rect_distance(x0, z0, x1, z1) / 3.0)) * (0.3 + 0.5 * detail))
     # пятна вытоптанной земли и голой глины по всей карте
     mud = np.maximum(mud, smooth((patches - 0.72) / 0.15) * smooth((detail - 0.4) / 0.4) * 0.8)
     # вне границы — сплошная листва и подлесок (декорация)
     leaves = np.where(inside, leaves, np.maximum(leaves, 0.6))
     rgba = np.stack([mud, rock, gravel, leaves], axis=-1)
-    return (np.clip(rgba, 0.0, 1.0) * 255.0 + 0.5).astype(np.uint8)
+    rgba = (np.clip(rgba, 0.0, 1.0) * 255.0 + 0.5)
+    # готовые куски — их прежняя маска (тропинки двора, площадка, грязь у домов и моста)
+    return np.clip(place_ready_maps(rgba, "splat") + 0.5, 0, 255).astype(np.uint8)
 
 
 # ------------------------------------------------------------------ растительность всей карты
 
-PADS_BG = [(x - 30, z - 12, x + 30, z + 12) if abs(yaw) < 45 else (x - 12, z - 30, x + 12, z + 30)
-           for _, x, z, yaw in [("sf_panel5_brutal", -450, -110, 90), ("sf_panel5_brutal", -452, -40, 92), ("sf_panel12", -450, 60, 88),
-                                ("sf_panel12", -150, -405, 0), ("sf_panel5_brutal", 70, -412, 4), ("sf_panel12", 300, -402, -6),
-                                ("sf_panel12", 420, 130, -92), ("sf_panel5_brutal", 380, 230, -84), ("sf_panel12", 470, -40, -90),
-                                ("sf_panel5_brutal", 470, 60, -90)]]
-PADS_PAVED = PADS_BG + [rect for rect, _, _, _ in PADS]
-# не сажать деревья на готовые дома с сараями, тропы к ним и подход к мосту через овраг
-KEEP_CLEAR = [(hx - 12, hz - 10, hx + 12, hz + 14) for hx, hz in HOUSES] + [(-372, 30, -300, 42)]
+# город за границей — декорация без входа: панельки за лесом с трёх сторон (на востоке — за путями)
+BACKGROUND = [("sf_panel5_brutal", -395, -150, 90), ("sf_panel5_brutal", -398, -40, 92), ("sf_panel12", -395, 80, 88),
+              ("sf_panel12", -150, -400, 0), ("sf_panel5_brutal", 40, -405, 4), ("sf_panel12", 220, -398, -6),
+              ("sf_panel12", 395, 150, -92), ("sf_panel5_brutal", 385, 260, -84), ("sf_panel12", 395, 40, -90),
+              ("sf_panel12", -120, 400, 180), ("sf_panel5_brutal", 60, 402, 178)]
+PADS_BG = [(x - 30, z - 12, x + 30, z + 12) if abs(yaw) < 45 or abs(yaw) > 135 else (x - 12, z - 30, x + 12, z + 30)
+           for _, x, z, yaw in BACKGROUND]
+PADS_PAVED = PADS_BG + BUILDING_PADS
+# не сажать деревья на готовые дома с сараями (дома развёрнуты: огороды к северу) и подход к мосту
+KEEP_CLEAR = [(hx - 12, hz - 14, hx + 12, hz + 10) for hx, hz in HOUSES] + [(210, -167, 282, -155)]
+# двор хрущёвок — свой генератор деревьев и травы; рынок — свои площадки
+YARD_RECT = tuple(v + d for v, d in zip((-285.0, -165.0, -135.0, -42.0), (*READY["yard05"]["move"], *READY["yard05"]["move"])))
+MARKET_RECT = (min(p[0] for p in READY["market06"]["outline"]), min(p[1] for p in READY["market06"]["outline"]),
+               max(p[0] for p in READY["market06"]["outline"]), max(p[1] for p in READY["market06"]["outline"]))
+
+
+def in_rect(x: float, z: float, r) -> bool:
+    return r[0] < x < r[2] and r[1] < z < r[3]
+
 
 def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
-    """Деревья и сухая трава по всей карте (двор хрущёвок — свой генератор): точки в JSON для
-    DistrictScatter. Лес — по маске лесополосы, склоны оврага, кольцо вокруг холма; трава — везде,
-    где нет покрытия, площадок и голой грязи/щебня."""
+    """Деревья, подлесок и трава по всей карте (двор хрущёвок — свой генератор): точки в JSON для
+    DistrictScatter. Лес — полосой у края квадрата и сплошь за ним, по склонам оврага, на кочках болота;
+    внутри — деревья по зелени картинки (раскладка), трава — везде, где нет покрытия и голой грязи/щебня."""
     rng = np.random.default_rng(31)
     inside = inside_polygon(BOUNDARY)
     paved = np.zeros(GX.shape, bool)
-    for rect in PADS_PAVED + KEEP_CLEAR:
+    for rect in PADS_PAVED + KEEP_CLEAR + [MARKET_RECT]:
         paved |= rect_distance(*rect) < 2.0
-    d_path, _ = polyline_distance([(-100, 40), (-160, 38), (-240, 30), (-272, 18), (-310, 34), (-385, 40)])
-    paved |= d_path < 2.5
+    paved |= inside_polygon(POLY_PADS[1])  # площадка автостанции — асфальт и щебень
     for road in ROADS:
         pts = [(p[0], p[2]) for p in road["points"]]
         d, _ = polyline_distance(pts)
         paved |= d < road["width"] * 0.5 + road["sidewalk"] + 1.5
-    d_rail, _ = polyline_distance(RAIL)
-    d_st, _ = polyline_distance(STATION_TRACKS)
-    d_track = np.minimum(d_rail - RAIL_HALF, d_st - STATION_HALF)
+    d_track = track_distance()
     paved |= d_track < 1.0
     d_rav, _ = polyline_distance(RAVINE)
     swamp = inside_polygon(SWAMP)
@@ -430,14 +535,12 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
         # ель — своя (tools/build_spruce.py): в лесу высокие с сухими сучьями и подрост, на открытом —
         # одиночные с юбкой до земли; лиственные — свои
         if kind == "bog":
-            # болото: сухостойные и молодые берёзы на кочках
             key = rng.choice(["birch_bare", "birch_bare", "birch_bare", "birch_young", "birch_c"])
         elif kind == "fir":
             key = rng.choice(["spruce_forest_a", "spruce_forest_a", "spruce_forest_b", "spruce_forest_b", "spruce_young_a", "spruce_young_b"])
         elif kind == "spruce_open":
             key = "spruce_open"
         elif kind == "birch":
-            # берёза — своя (tools/build_birch.py): одиночные, двойные, кусты по три, почти голые, молодые
             key = rng.choice(["birch_a", "birch_a", "birch_b", "birch_c", "birch_bare", "birch_bare", "birch_young"])
         else:
             key = f"tree_{kind}_{int(rng.integers(0, 3))}"
@@ -447,11 +550,12 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
     def ok(ix: int, iz: int) -> bool:
         return 0 <= ix < NX and 0 <= iz < NZ and not paved[iz, ix]
 
+    # лес, склоны оврага, кочки болота, сплошной лес за границей — сеткой 6,5 м
     for gz in np.arange(Z0 + 4, Z0 + NZ - 4, 6.5):
         for gx in np.arange(X0 + 4, X0 + NX - 4, 6.5):
             x, z = gx + rng.uniform(-2.8, 2.8), gz + rng.uniform(-2.8, 2.8)
             ix, iz = int(x - X0), int(z - Z0)
-            if not ok(ix, iz) or (-285 < x < -135 and -165 < z < -42):
+            if not ok(ix, iz) or in_rect(x, z, YARD_RECT):
                 continue
             f = forest[iz, ix]
             r = d_rav[iz, ix]
@@ -464,15 +568,20 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
             elif 4.0 < r < 30.0 and rng.random() < 0.38:
                 put(rng.choice(["maple", "maple", "birch", "fir"]), x, z)
             elif not inside[iz, ix] and rng.random() < 0.3:
-                # за границей — сплошной лес (декорация края карты)
                 put(rng.choice(["fir", "fir", "birch", "maple", "poplar"]), x, z)
-            elif inside[iz, ix] and rng.random() < 0.012:
-                put(rng.choice(["birch", "maple", "spruce_open"]), x, z)
-    # тополя по обе стороны «улицы к ТЦ» — советская посадка, с пропусками
-    for x in np.arange(-88, 190, 11.0):
-        for z in (-51.0, -69.0):
-            if rng.random() < 0.7 and ok(int(x - X0), int(z - Z0)):
-                put("poplar", x + rng.uniform(-2, 2), z + rng.uniform(-1.0, 1.0))
+    # деревья с картинки владельца: внутри квадрата по её зелени — дворы, обочины, пустыри
+    for x, z in LAYOUT["trees"]:
+        ix, iz = int(x - X0), int(z - Z0)
+        if not ok(ix, iz) or in_rect(x, z, YARD_RECT) or forest[iz, ix] > 0.5 or 4.0 < d_rav[iz, ix] < 30.0:
+            continue
+        if swamp[iz, ix]:
+            if dry[iz, ix] and rng.random() < 0.6:
+                put("bog", x, z)
+            continue
+        if x < 0 and -95 < z < 100:  # дворы панелек — берёзы, клёны, тополя
+            put(rng.choice(["birch", "birch", "maple", "maple", "poplar"]), x, z)
+        else:
+            put(rng.choice(["birch", "birch", "maple", "poplar", "spruce_open", "fir"]), x, z)
     add_pines(trees, h, forest, inside, d_rav)
     # подлесок: папоротник, валежник, пни, сухостой, корни — в лесу; камни со мхом — по склонам оврага
     under: dict[str, list] = {k: [] for k in ("forest_fern", "forest_dry_branches", "forest_stump_01", "forest_stump_02",
@@ -481,7 +590,7 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
         for gx in np.arange(X0 + 3, X0 + NX - 3, 4.0):
             x, z = gx + rng.uniform(-1.8, 1.8), gz + rng.uniform(-1.8, 1.8)
             ix, iz = int(x - X0), int(z - Z0)
-            if not ok(ix, iz):
+            if not ok(ix, iz) or in_rect(x, z, YARD_RECT):
                 continue
             f, r = forest[iz, ix], d_rav[iz, ix]
             roll = rng.random()
@@ -517,11 +626,11 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
     for rect in PADS_PAVED:
         d = rect_distance(*rect)
         near_edge = np.maximum(near_edge, (1.0 - smooth((d - 2.0) / 6.0)) * (d > 1.5))
-    near_edge = np.maximum(near_edge, (1.0 - smooth((d_track - RAIL_SLOPE) / 6.0)))
+    near_edge = np.maximum(near_edge, (1.0 - smooth((d_track - 8.0) / 6.0)))
 
     def accept(x: float, z: float) -> bool:
         ix, iz = int(x - X0), int(z - Z0)
-        if not (0 <= ix < NX and 0 <= iz < NZ) or paved[iz, ix] or (-285 < x < -135 and -165 < z < -42):
+        if not (0 <= ix < NX and 0 <= iz < NZ) or paved[iz, ix] or in_rect(x, z, YARD_RECT):
             return False
         return mud[iz, ix] < 0.4 and gravel[iz, ix] < 0.45 and d_rav[iz, ix] > 2.5
 
@@ -546,7 +655,6 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
 
     under.update(scatter_undergrowth(rng, X0 + 2, Z0 + 2, X0 + NX - 3, Z0 + NZ - 3, accept, kind_at))
     # карта плотности травы для DistrictGrass: R — трава, G — сорняки; 1 пиксель = 1 м
-    import build_zone01_yard as yard
     dens = np.clip(0.18 + 0.55 * smooth((patch - 0.35) / 0.35) + 0.4 * near_edge, 0.0, 1.0) * smooth((clump - 0.15) / 0.4)
     dens = (dens * (1.0 - 0.6 * forest) + 0.12 * forest) * np.where(inside, 1.0, 0.35)
     dens = np.where((mud > 0.4) | (gravel > 0.45) | (d_rav < 2.5) | paved, 0.0, dens)
@@ -554,43 +662,16 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
     # болото: на кочках — густая высокая трава, в воде — ничего
     dens = np.where(swamp & dry, np.maximum(dens, 0.8), np.where(swamp, 0.0, dens))
     weeds = np.clip(0.3 + 0.7 * near_edge, 0.0, 1.0) * (dens > 0.05)
-    # двор: тротуары, проезды, дома, гаражи — без травы; у стен гуще; на площадке почти нет
-    in_yard = (GX > -285) & (GX < -135) & (GZ > -165) & (GZ < -42)
-    yard_dens = np.full(GX.shape, 0.55, np.float32)
-    for _, pts, width, _, _ in yard.PAVING:
-        dd, _ = polyline_distance(pts)
-        yard_dens = np.where(dd < width * 0.5 + 0.35, 0.0, yard_dens)
-    for x0, z0, x1, z1 in [(-240.8, -143.8, -183.2, -132.2), (-165.8, -136.8, -142.2, -79.2), (-244.0, -107.2, -232.0, -52.8)]:
-        dd = rect_distance(x0, z0, x1, z1)
-        yard_dens = np.where(dd < 0.5, 0.0, np.maximum(yard_dens, (1.0 - smooth((dd - 0.5) / 4.0)) * 0.95 * (yard_dens > 0)))
-    yard_dens = np.where(rect_distance(-272.5, -162, -266.5, -104) < 0.3, 0.0, yard_dens)
-    play = np.hypot(GX - yard.PLAYGROUND[0], GZ - yard.PLAYGROUND[1])
-    yard_dens = yard_dens * (0.08 + 0.92 * smooth((play - 10.0) / 4.0)) * (0.6 + 0.6 * smooth((patch - 0.3) / 0.4))
-    yard_dens = np.where(mud > 0.4, yard_dens * 0.2, yard_dens)
-    dens = np.where(in_yard, np.clip(yard_dens, 0, 1), dens)
-    img = np.stack([dens, weeds, np.zeros_like(dens)], -1)
-    Image.fromarray((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8), mode="RGB").save(ROOT / "assets/terrain/zone01_grass.png")
+    img = np.stack([dens, weeds, np.zeros_like(dens)], -1) * 255.0
+    # двор хрущёвок, рынок, дома у оврага — их прежняя густота (тротуары, проезды, стены, площадка)
+    img = place_ready_maps(img, "grass")
+    Image.fromarray(np.clip(img + 0.5, 0, 255).astype(np.uint8), mode="RGB").save(ROOT / "assets/terrain/zone01_grass.png")
     imp = ROOT / "assets/terrain/zone01_grass.png.import"
     if not imp.exists():
         imp.write_text(IMPORT_SPLAT.format(name="zone01_grass.png"), encoding="utf-8")
-    grass = []
-    for _ in range(0):
-        x = float(rng.uniform(X0 + 2, X0 + NX - 3))
-        z = float(rng.uniform(Z0 + 2, Z0 + NZ - 3))
-        ix, iz = int(x - X0), int(z - Z0)
-        if paved[iz, ix] or (-285 < x < -135 and -165 < z < -42):
-            continue
-        if mud[iz, ix] > 0.35 or gravel[iz, ix] > 0.4 or d_rav[iz, ix] < 3.5:
-            continue
-        if rng.random() > 0.25 + 0.75 * smooth((patch[iz, ix] - 0.35) / 0.3):
-            continue
-        grass.append([round(x, 2), round(sample(h, x, z) - 0.03, 3), round(z, 2), round(float(rng.uniform(0, 360)), 1),
-                      round(float(rng.uniform(0.5, 1.15)), 2)])
-        if len(grass) >= 90000:
-            break
     data = dict(trees)
     data.update(under)
-    data["grass"] = grass
+    data["grass"] = []
     (ROOT / "data/zone01_vegetation.json").write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
     print(f"zone01: деревьев {sum(len(v) for v in trees.values())}, подлеска {sum(len(v) for v in under.values())}")
 
@@ -717,19 +798,19 @@ def vegetation_nodes(s: "Scene") -> None:
 
 
 def forest_mask() -> np.ndarray:
-    """Лес по краям: за болотом и речкой на севере, за оврагом на западе, полоса на юге; дороги — просеки."""
+    """Лес полосой у края квадрата (неровно, 12–32 м) и сплошь за ним; дороги к выходам, пути и овраг — просеки."""
     n = fbm(50.0, 21)
-    north = smooth((-GZ - 312.0 - (n - 0.5) * 24.0) / 10.0)
-    west = smooth((-GX - 372.0 - (n - 0.5) * 20.0) / 10.0)
-    south = smooth((GZ - 272.0 - (n - 0.5) * 24.0) / 10.0) * smooth((GX + 340.0) / 20.0) * (1.0 - smooth((GX - 160.0) / 20.0))
-    mask = np.maximum(np.maximum(north, west), south)
+    inside = inside_polygon(BOUNDARY)
+    edge = polygon_edge_distance([tuple(p) for p in BOUNDARY])
+    belt = 1.0 - smooth((edge - 12.0 - n * 20.0) / 8.0)
+    mask = np.where(inside, belt, 1.0)
     for name, points, width, sidewalk, _ in ROAD_DEFS:
-        if name in ("ForestRoad", "BridgeRoad"):
-            d, _ = polyline_distance(points)
-            mask *= smooth((d - width * 0.5 - 2.0) / 3.0)
-    d, _ = polyline_distance([(-343, 37), (-420, 40)])
-    mask *= smooth((d - 3.0) / 3.0)
-    return np.clip(mask, 0.0, 1.0)
+        d, _ = polyline_distance(points)
+        mask *= smooth((d - width * 0.5 - sidewalk - 2.0) / 3.0)
+    mask *= smooth((track_distance() - 4.0) / 4.0)
+    d, _ = polyline_distance(RAVINE)
+    mask *= smooth((d - 4.0) / 3.0)
+    return np.clip(mask, 0.0, 1.0).astype(np.float32)
 
 # ------------------------------------------------------------------ текстуры рельефа
 
@@ -945,15 +1026,15 @@ def car(scene, name, x, z, yaw=0.0, color=(.45, .51, .57), parent="Props"):
 def world_scene() -> None:
     s = Scene("World")
     s.node("Terrain", script=s.resource("res://src/world/district_terrain.gd", "Script"), data_path=SECTOR,
-           excavations=Raw("Array[AABB]([AABB(-225, -1.9, -144, 17, 2.3, 12)])"))
+           excavations=Raw(yard_excavation()))
     s.node("Roads")
     for road in ROADS:
         if road.get("dirt"):
             continue  # грунтовка — колея в маске поверхностей, без асфальта
         raw = "PackedVector3Array(" + ", ".join(str(v) for p in road["points"] for v in p) + ")"
-        s.node(road["id"], "Roads", "res://scenes/world/urban_road.tscn", points=Raw(raw),
+        s.node(road["id"].title(), "Roads", "res://scenes/world/urban_road.tscn", points=Raw(raw),
                carriage_width=road["width"], sidewalk_width=road["sidewalk"], sidewalks=road["sidewalk"] > 0,
-               markings=road["id"] not in ("BridgeRoad", "StationRoad"))
+               markings=road["id"] in ("north", "south", "artery", "east", "mall"))
     s.node("Water")
     water = s.resource("res://src/world/district_water.gdshader", "Shader")
     mat = s.sub("ShaderMaterial", shader=water)
@@ -969,16 +1050,9 @@ def world_scene() -> None:
     # болото: одна гладь на уровне SWAMP_WATER — кочки и берега выше неё, окна воды ниже
     sx0, sz0 = min(p[0] for p in SWAMP), min(p[1] for p in SWAMP)
     sx1, sz1 = max(p[0] for p in SWAMP), max(p[1] for p in SWAMP)
-    mesh = s.sub("PlaneMesh", size=v2(sx1 - sx0, sz1 - sz0), material=mat, subdivide_width=16, subdivide_depth=8)
+    mesh = s.sub("PlaneMesh", size=v2(sx1 - sx0, sz1 - sz0), material=mat, subdivide_width=16, subdivide_depth=12)
     s.node("Swamp", "Water", kind="MeshInstance3D", mesh=mesh, position=v3((sx0 + sx1) / 2, SWAMP_WATER, (sz0 + sz1) / 2),
            cast_shadow=0)
-    # речка — полосами вдоль русла; под насыпью и дорогой гладь спрятана рельефом
-    for i, ((ax, az), (bx, bz)) in enumerate(zip(RIVER, RIVER[1:])):
-        length = math.dist((ax, az), (bx, bz)) + 3.0
-        mesh = s.sub("PlaneMesh", size=v2(RIVER_HALF * 2 + 2.0, length), material=mat)
-        s.node(f"River_{i}", "Water", kind="MeshInstance3D", mesh=mesh,
-               position=v3((ax + bx) / 2, RIVER_WATER, (az + bz) / 2),
-               rotation_degrees=v3(0, math.degrees(math.atan2(bx - ax, bz - az)), 0), cast_shadow=0)
     perimeter(s)
     vegetation_nodes(s)
     s.save(OUT / "zone01_world.tscn")
@@ -997,17 +1071,7 @@ def perimeter(s: Scene) -> None:
               "Perimeter", yaw)
 
 
-# ------------------------------------------------------------------ постройки: готовые сцены, гаражи, город за границей
-
-# город за границей — декорация без входа: на западе за оврагом, на севере за лесом, на востоке за полем
-BACKGROUND = [("sf_panel5_brutal", -450, -110, 90), ("sf_panel5_brutal", -452, -40, 92), ("sf_panel12", -450, 60, 88),
-              ("sf_panel12", -150, -405, 0), ("sf_panel5_brutal", 70, -412, 4), ("sf_panel12", 300, -402, -6),
-              ("sf_panel12", 420, 130, -92), ("sf_panel5_brutal", 380, 230, -84), ("sf_panel12", 470, -40, -90),
-              ("sf_panel5_brutal", 470, 60, -90)]
-
-# гаражи у путей: два ряда кирпичных боксов (Sketchfab, ворота модели — на её −X) воротами в общий проезд
-GARAGE_ROWS = [(182.0, 180.0), (199.0, 0.0)]   # x оси ряда, поворот
-GARAGE_BLOCKS_Z = [-121.0, -143.0, -165.0, -187.0, -209.0]
+# ------------------------------------------------------------------ постройки: готовые сцены, город за границей
 
 
 def background(s: "Scene") -> None:
@@ -1017,46 +1081,151 @@ def background(s: "Scene") -> None:
 
 
 def blockout_scene() -> None:
+    """Город за границей и готовые рынок и дома у оврага — их сцены в прежних координатах, на новом месте
+    их ставит сдвиг / поворот экземпляра (дорожки и россыпь внутри — local_points)."""
     s = Scene("Blockout")
     background(s)
     if (OUT / "zone01_market06.tscn").exists():
-        s.node("Z06_Market", scene="res://scenes/levels/zone01/zone01_market06.tscn")
+        s.node("Z06_Market", scene="res://scenes/levels/zone01/zone01_market06.tscn", **instance_attrs("market06"))
     else:
         print("zone01: нет сцены рынка zone01_market06.tscn — tools/author_zone01_nw.py")
     if (OUT / "zone01_houses12.tscn").exists():
-        s.node("Z12_Ravine", scene="res://scenes/levels/zone01/zone01_houses12.tscn")
+        s.node("Z12_Ravine", scene="res://scenes/levels/zone01/zone01_houses12.tscn", **instance_attrs("houses12"))
     else:
         print("zone01: нет сцены домов zone01_houses12.tscn — tools/author_zone01_nw.py")
-    s.node("Z08_Garages")
-    s.node("Buildings", "Z08_Garages")
-    for row, (x, yaw) in enumerate(GARAGE_ROWS):
-        for k, gz in enumerate(GARAGE_BLOCKS_Z):
-            sf_model(s, f"Row{row}_Block{k}", "sf_garage_row", x, gz, yaw, "Z08_Garages/Buildings",
-                     y=ground(x, gz) - .05, surface="concrete")
     s.save(OUT / "zone01_blockout.tscn")
 
 
 # ------------------------------------------------------------------ данные сектора и главная сцена
 
-SPAWNS = [("Лесная дорога", -372, -215), ("За речкой", 150, -322), ("Из-за насыпи", 252, 30),
-          ("Южная лесополоса", 110, 290), ("Юго-запад", -250, 292), ("За оврагом", -385, 150)]
-EXTRACTS = [("Лесная дорога", -345, -322, ""), ("Старый мост", 58, -286, ""), ("Мост через овраг", -386, 40, ""),
-            ("Ж/д пути", 188, 292, ""), ("Автостанция", 8, 126, ""), ("К ТЦ", 258, -60, "")]
-AI_POINTS = [(-200, -95), (-170, 20), (-150, 80), (-280, 30), (-70, -110), (100, -160), (190, -170),
-             (95, 10), (180, -30), (-20, 150), (150, 160), (-150, -194), (100, -285), (240, 0), (-120, 240)]
-ROOMS = [("yard05", "Двор хрущёвок", (-228, -126, -160, -55)), ("market", "Рынок", (-232, -50, -110, 105)),
-         ("houses", "Дома у оврага", (-300, -8, -262, 60)), ("swamp", "Болото", (-290, -300, 10, -190)),
-         ("second_yard", "Второй двор", (-92, -150, -24, -72)), ("construction", "Недострой", (30, -236, 165, -92)),
-         ("sports", "Спортплощадка", (25, -45, 152, 35)), ("fuel", "АЗС", (160, -45, 198, -15)),
-         ("bus_station", "Автостанция", (-94, 97, 60, 215)), ("station", "Ж/д станция", (118, 95, 186, 240)),
-         ("garages", "Гаражи у путей", (176, -232, 205, -108))]
+SPAWNS = [("Запад", -292, -150), ("За болотом", -130, -292), ("Северная просека", 120, -222),
+          ("Из-за путей", 292, 30), ("Южная лесополоса", 60, 294), ("Юго-запад", -292, 210)]
+# «Старый мост» — за мостом через овраг, там же, где был выход «Мост через овраг» (на новом месте домов)
+_BRIDGE_EXIT = ready_new("houses12", -386, 40)
+EXTRACTS = [("Лесная дорога", -292, -287, ""), ("Служебная дорога", -262, 292, ""), ("Ж/д пути", 205, 294, ""),
+            ("Старый мост", round(_BRIDGE_EXIT[0], 1), round(_BRIDGE_EXIT[1], 1), ""), ("Автостанция", -40, 214, ""),
+            ("К ТЦ", 296, -50, "")]
+AI_POINTS = [(-170, -10), (-190, 170), (185, -150), (-120, -200), (-60, 10), (60, -120), (110, -60), (60, 75),
+             (120, 125), (-20, 190), (30, 255), (210, 120), (180, 185), (200, 50), (60, -205), (-230, 255), (-255, -255)]
+
+
+def _bbox(points) -> tuple[float, float, float, float]:
+    return (round(min(p[0] for p in points)), round(min(p[1] for p in points)),
+            round(max(p[0] for p in points)), round(max(p[1] for p in points)))
+
+
+ROOMS = [("yard05", "Двор хрущёвок", tuple(v + d for v, d in zip((-228, -126, -160, -55), (*READY["yard05"]["move"], *READY["yard05"]["move"])))),
+         ("market", "Рынок", _bbox(READY["market06"]["outline"])),
+         ("houses", "Дома у оврага", _bbox([ready_new("houses12", x, z) for x, z in ((-300, -8), (-262, 60))])),
+         ("swamp", "Болото", _bbox(SWAMP)),
+         ("second_yard", "Панельки", (-125, -45, -15, 95)),
+         ("construction", "Недострой", _bbox(LAYOUT["site"])),
+         ("sports", "Спортплощадка", (14, 25, 68, 64)),
+         ("blocks", "Корпуса у спортплощадки", (75, 30, 150, 165)),
+         ("bus_station", "Автостанция", (-124, 114, 60, 255)),
+         ("station", "Ж/д станция", (170, 75, 290, 260)),
+         ("garages", "Гаражи у путей", (180, 28, 215, 68)),
+         ("north", "Техкорпус", (20, -235, 95, -200))]
+
+
+# ------------------------------------------------------------------ население: посты, маршруты, гнёзда, подходы
+# (сцена zone01_ai.tscn, слой extras сектора; район поста — id из ROOMS, только для журнала)
+
+AI_POSTS = [
+    # имя, x, z, район, вес, всегда с N игроков, радиус, группа
+    ("Post_yard05", -176, 2, "yard05", 1.0, 0, 22, None),
+    ("Post_market_hangar", -213, 163, "market", 2.0, 1, 16, None),
+    ("Post_market_rows", -171, 237, "market", 2.0, 2, 18, None),
+    ("Post_houses", 190, -155, "houses", 0.6, 0, 16, None),
+    ("Post_bus_station", -30, 170, "bus_station", 1.5, 0, 22, None),
+    ("Post_depot", 15, 205, "bus_station", 1.0, 0, 18, None),
+    ("Post_station", 200, 135, "station", 1.0, 0, 20, None),
+    ("Post_construction", 75, -110, "construction", 1.2, 0, 22, None),
+    ("Post_garages", 200, 48, "garages", 1.0, 0, 18, None),
+    ("Post_second_yard", -52, 2, "second_yard", 0.6, 0, 18, None),
+    ("Post_sports", 45, 45, "sports", 0.6, 0, 20, (1, 2)),
+    ("Post_swamp_edge", -150, -95, "swamp", 0.5, 0, 14, (1, 2)),
+    ("Post_north", 60, -200, "north", 0.6, 0, 16, (1, 2)),
+]
+AI_ROUTES = [
+    ("Route_north", "Северный: улица у болота — двор — стройка — дома у оврага",
+     [(-200, -82), (-128, -85), (-58, -62), (12, -36), (82, -13), (155, -2), (156, -60), (155, -150)]),
+    ("Route_west", "Западный: двор — панельки — рынок",
+     [(-176, 25), (-150, 72), (-184, 99), (-205, 140), (-170, 200), (-235, 230)]),
+    ("Route_east", "Восточный: дорога к ТЦ — станция — автостанция",
+     [(200, -66), (156, 0), (154, 70), (148, 140), (100, 165), (20, 150), (-40, 170)]),
+]
+AI_NESTS = [
+    # имя, подпись, x, z, куда смотрит (поворот), вес, сектор
+    ("Nest_rail_bridge", "Насыпь у моста к ТЦ", 268, -25, 90.0, 0.8, 75),
+    ("Nest_rail_station", "Насыпь у станции", 236, 172, 90.0, 0.8, 75),
+    ("Nest_ravine_rim", "Бровка оврага у стройки", 100, -242, 180.0, 0.6, 70),
+]
+AI_ARRIVALS = [("Arrive_nw", "Лесная дорога", -275, -200), ("Arrive_ravine_n", "Бровка оврага у болота", 60, -240),
+               ("Arrive_east", "За путями", 290, 110), ("Arrive_se", "Южная лесополоса", 150, 290),
+               ("Arrive_sw", "За рынком", -200, 290), ("Arrive_west", "Западный лес", -292, 40)]
+
+
+def ai_scene() -> None:
+    s = Scene("Zone01AI")
+    post, route = "res://scenes/world/ai_post.tscn", "res://scenes/world/ai_route.tscn"
+    nest, arrival = "res://scenes/world/ai_nest.tscn", "res://scenes/world/ai_arrival.tscn"
+    s.node("Posts")
+    for name, x, z, district, weight, always, radius, group in AI_POSTS:
+        attrs = dict(position=v3(x, ground(x, z) + 0.3, z), district=district, radius=radius)
+        if weight != 1.0:
+            attrs["weight"] = weight
+        if always:
+            attrs["always_from"] = always
+        if group:
+            attrs["group_size"] = Raw(f"Vector2i({group[0]}, {group[1]})")
+        s.node(name, "Posts", post, **attrs)
+    s.node("Routes")
+    for name, title, pts in AI_ROUTES:
+        s.node(name, "Routes", route, title=title)
+        for i, (x, z) in enumerate(pts, 1):
+            s.node(f"P{i:02}", f"Routes/{name}", kind="Marker3D", position=v3(x, ground(x, z) + 0.3, z))
+    s.node("Nests")
+    for name, title, x, z, yaw, weight, sector in AI_NESTS:
+        s.node(name, "Nests", nest, position=v3(x, ground(x, z) + 0.5, z), rotation_degrees=v3(0, yaw, 0),
+               title=title, weight=weight, sector_deg=sector, radius=3)
+    s.node("Arrivals")
+    for name, title, x, z in AI_ARRIVALS:
+        s.node(name, "Arrivals", arrival, position=v3(x, ground(x, z) + 0.4, z), title=title)
+    s.save(OUT / "zone01_ai.tscn")
+
+
+def move_yard_loose_loot() -> None:
+    """Находки у гаражей двора лежат в общей сцене россыпи (не в сцене двора) — сдвинуть вместе с двором.
+    Сдвигаются только точки, стоящие на прежнем месте гаражного ряда (x = −264,5)."""
+    path = OUT / "zone01_loose_loot.tscn"
+    if not path.exists():
+        return
+    dx, dz = READY["yard05"]["move"]
+    lines = path.read_text(encoding="utf-8").split("\n")
+    for i, line in enumerate(lines):
+        if line.startswith("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, "):
+            vals = line[len("transform = Transform3D("):-1].split(", ")
+            x, y, z = float(vals[9]), float(vals[10]), float(vals[11])
+            lines[i] = f"transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {x + dx:g}, {y:g}, {z + dz:g})"
+    path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+
+
+def layout_scene() -> None:
+    """Блокауты построек раскладки (tools/build_zone01_blockouts.py)."""
+    import sys
+
+    import build_zone01_blockouts as blockouts
+    blockouts.build(sys.modules[__name__], LAYOUT)
+
 
 def main_scene() -> None:
     s = Scene("Zone01_Mall")
     s.nodes[0] += "\nscript = " + gvalue(s.resource("res://src/world/sector_level.gd", "Script")) + f'\nsector_path = "{SECTOR}"'
     s.node("World", scene="res://scenes/levels/zone01/zone01_world.tscn")
     s.node("Blockout", scene="res://scenes/levels/zone01/zone01_blockout.tscn")
-    s.node("Yard05", scene="res://scenes/levels/zone01/zone01_yard05.tscn")
+    s.node("Yard05", scene="res://scenes/levels/zone01/zone01_yard05.tscn", **instance_attrs("yard05"))
+    s.node("Layout", scene="res://scenes/levels/zone01/zone01_layout.tscn")
     s.node("Gameplay")
     for i, (title, x, z) in enumerate(SPAWNS):
         s.node(f"Entry_{i}", "Gameplay", "res://scenes/world/spawn_point.tscn", position=v3(x, ground(x, z) + .15, z),
@@ -1225,6 +1394,9 @@ def main() -> None:
     build_vegetation(H, splat)
     world_scene()
     blockout_scene()
+    layout_scene()
+    ai_scene()
+    move_yard_loose_loot()
     main_scene()
     write_definition(H)
     # превью высот для документации

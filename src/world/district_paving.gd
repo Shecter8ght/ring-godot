@@ -31,6 +31,12 @@ extends StaticBody3D
 		curb_material = value
 		_queue()
 @export var surface: String = "asphalt"
+## Точки — в координатах корня своей сцены (owner), а не мира: полоса едет вместе со сценой,
+## поставленной со сдвигом или поворотом (готовые куски зоны 1 на новых местах).
+@export var local_points: bool = false:
+	set(value):
+		local_points = value
+		_queue()
 
 const STEP: float = 1.0
 const CURB_W: float = 0.15
@@ -56,6 +62,30 @@ func _height(terrain: Node, p: Vector2) -> float:
 	return 0.0
 
 
+## Вершина полосы в координатах узла: точка в мире на высоте рельефа (+ подъём).
+func _vertex(terrain: Node, p: Vector2, origin: Vector2) -> Vector3:
+	if local_points and is_inside_tree():
+		var hw: float = global_position.y
+		if terrain and terrain.has_method("height_at"):
+			hw = float(terrain.call("height_at", p.x, p.y))
+		return to_local(Vector3(p.x, hw + lift, p.y))
+	return Vector3(p.x - origin.x, _height(terrain, p) + lift, p.y - origin.y)
+
+
+## Перевод точек в мир: при local_points — через преобразование корня сцены.
+func _world_points() -> PackedVector2Array:
+	if not local_points or not is_inside_tree():
+		return points
+	var frame: Node3D = owner as Node3D if owner is Node3D else get_parent_node_3d()
+	if frame == null:
+		return points
+	var out := PackedVector2Array()
+	for p: Vector2 in points:
+		var w: Vector3 = frame.global_transform * Vector3(p.x, 0.0, p.y)
+		out.append(Vector2(w.x, w.z))
+	return out
+
+
 func _build() -> void:
 	_pending = false
 	for child in get_children():
@@ -64,15 +94,16 @@ func _build() -> void:
 	if points.size() < 2:
 		return
 	var terrain: Node = get_tree().get_first_node_in_group("district_terrain") if is_inside_tree() else null
+	var world: PackedVector2Array = _world_points()
 	# сплошная осевая с шагом 1 м и нормалями на изломах (биссектриса — без щелей)
 	var axis: PackedVector2Array = PackedVector2Array()
-	for i in range(points.size() - 1):
-		var a: Vector2 = points[i]
-		var b: Vector2 = points[i + 1]
+	for i in range(world.size() - 1):
+		var a: Vector2 = world[i]
+		var b: Vector2 = world[i + 1]
 		var n: int = maxi(1, int(ceil(a.distance_to(b) / STEP)))
 		for k in range(n):
 			axis.append(a.lerp(b, float(k) / float(n)))
-	axis.append(points[points.size() - 1])
+	axis.append(world[world.size() - 1])
 	var sides: Array[Vector2] = []
 	for i in range(axis.size()):
 		var prev: Vector2 = axis[maxi(i - 1, 0)]
@@ -89,7 +120,7 @@ func _build() -> void:
 		for k in [i, i + 1]:
 			for s in [-1.0, 1.0]:
 				var p: Vector2 = axis[k] + sides[k] * half * s
-				quad.append(Vector3(p.x - origin.x, _height(terrain, p) + lift, p.y - origin.y))
+				quad.append(_vertex(terrain, p, origin))
 		var tri := [quad[0], quad[2], quad[1], quad[1], quad[2], quad[3]]
 		for v: Vector3 in tri:
 			st.set_uv(Vector2(v.x + origin.x, v.z + origin.y))
@@ -125,7 +156,7 @@ func _curbs(axis: PackedVector2Array, sides: Array[Vector2], terrain: Node, orig
 			for k in [i, i + 1]:
 				for off in [0.0, CURB_W]:
 					var p: Vector2 = axis[k] + sides[k] * (half + off) * s
-					pts.append(Vector3(p.x - origin.x, _height(terrain, p) + lift, p.y - origin.y))
+					pts.append(_vertex(terrain, p, origin))
 			var up := Vector3(0, curb_height, 0)
 			var down := Vector3(0, -0.25, 0)
 			# верх, внутренняя и внешняя грани бордюра

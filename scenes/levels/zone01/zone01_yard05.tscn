@@ -43,6 +43,7 @@ shadow_proxy = true
 
 [node name="DriveIn" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-174.0, -160.0, -174.0, -123.0)
 width = 6.0
 curb_height = 0.0
@@ -52,6 +53,7 @@ lift = 0.05
 
 [node name="DriveLoop" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-223.0, -123.0, -169.0, -123.0, -169.0, -60.0, -223.0, -60.0, -223.0, -123.0)
 width = 5.5
 curb_height = 0.15
@@ -61,6 +63,7 @@ lift = 0.05
 
 [node name="DriveMarket" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-196.0, -60.0, -196.0, -50.0)
 width = 5.5
 curb_height = 0.0
@@ -70,6 +73,7 @@ lift = 0.05
 
 [node name="DriveGarages" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-223.0, -118.0, -262.0, -118.0)
 width = 5.0
 curb_height = 0.0
@@ -79,6 +83,7 @@ lift = 0.05
 
 [node name="GarageLane" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-263.0, -162.0, -263.0, -100.0)
 width = 6.0
 curb_height = 0.0
@@ -88,6 +93,7 @@ lift = 0.05
 
 [node name="WalkK1" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-240.0, -128.4, -184.0, -128.4)
 width = 2.0
 curb_height = 0.12
@@ -97,6 +103,7 @@ lift = 0.1
 
 [node name="WalkK2" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-164.0, -136.0, -164.0, -80.0)
 width = 2.0
 curb_height = 0.12
@@ -106,6 +113,7 @@ lift = 0.1
 
 [node name="WalkK3" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-228.5, -106.0, -228.5, -54.0)
 width = 2.0
 curb_height = 0.12
@@ -115,6 +123,7 @@ lift = 0.1
 
 [node name="ParkingN" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-218.0, -117.4, -176.0, -117.4)
 width = 5.0
 curb_height = 0.0
@@ -124,6 +133,7 @@ lift = 0.05
 
 [node name="ParkingE" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-174.6, -112.0, -174.6, -70.0)
 width = 5.0
 curb_height = 0.0
@@ -133,6 +143,7 @@ lift = 0.05
 
 [node name="ContainerApron" parent="Paving" type="StaticBody3D"]
 script = ExtResource("2")
+local_points = true
 points = PackedVector2Array(-169.0, -68.0, -178.0, -68.0)
 width = 4.0
 curb_height = 0.0
@@ -877,6 +888,7 @@ materials_dir = ""
 
 [node name="TreePoplar0" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_0"
 model = "res://assets/zone01/models/tree_poplar_0.glb"
@@ -886,6 +898,7 @@ trunk_radius = 0.25
 
 [node name="TreePoplar1" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_1"
 model = "res://assets/zone01/models/tree_poplar_1.glb"
@@ -895,6 +908,7 @@ trunk_radius = 0.25
 
 [node name="TreePoplar2" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_2"
 model = "res://assets/zone01/models/tree_poplar_2.glb"
@@ -904,6 +918,7 @@ trunk_radius = 0.25
 
 [node name="TreeMaple0" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_0"
 model = "res://assets/zone01/models/tree_maple_0.glb"
@@ -913,6 +928,7 @@ trunk_radius = 0.25
 
 [node name="TreeMaple1" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_1"
 model = "res://assets/zone01/models/tree_maple_1.glb"
@@ -922,6 +938,7 @@ trunk_radius = 0.25
 
 [node name="TreeMaple2" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_2"
 model = "res://assets/zone01/models/tree_maple_2.glb"
@@ -931,6 +948,7 @@ trunk_radius = 0.25
 
 [node name="BirchA" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_a"
 model = "res://assets/zone01/models/birch_a.glb"
@@ -942,6 +960,7 @@ near_distance = 320.0
 
 [node name="BirchB" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_b"
 model = "res://assets/zone01/models/birch_b.glb"
@@ -953,6 +972,7 @@ near_distance = 320.0
 
 [node name="BirchC" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_c"
 model = "res://assets/zone01/models/birch_c.glb"
@@ -964,6 +984,7 @@ near_distance = 320.0
 
 [node name="BirchBare" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_bare"
 model = "res://assets/zone01/models/birch_bare.glb"
@@ -975,6 +996,7 @@ near_distance = 320.0
 
 [node name="BirchYoung" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_young"
 model = "res://assets/zone01/models/birch_young.glb"
@@ -986,6 +1008,7 @@ near_distance = 320.0
 
 [node name="SpruceOpen" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "spruce_open"
 model = "res://assets/zone01/models/spruce_open.glb"
@@ -997,6 +1020,7 @@ near_distance = 320.0
 
 [node name="SpruceYoungA" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "spruce_young_a"
 model = "res://assets/zone01/models/spruce_young_a.glb"
@@ -1008,6 +1032,7 @@ near_distance = 320.0
 
 [node name="SpruceYoungB" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "spruce_young_b"
 model = "res://assets/zone01/models/spruce_young_b.glb"
@@ -1019,6 +1044,7 @@ near_distance = 320.0
 
 [node name="PineYard" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "pine_yard"
 model = "res://assets/zone01/models/pine_yard.glb"
@@ -1030,6 +1056,7 @@ near_distance = 320.0
 
 [node name="PineTwin" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "pine_twin"
 model = "res://assets/zone01/models/pine_twin.glb"
@@ -1041,6 +1068,7 @@ near_distance = 320.0
 
 [node name="PineOld" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "pine_old"
 model = "res://assets/zone01/models/pine_old.glb"
@@ -1052,6 +1080,7 @@ near_distance = 320.0
 
 [node name="UgBushA" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_a"
 model = "res://assets/zone01/models/ug_bush_a.glb"
@@ -1063,6 +1092,7 @@ foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgBushB" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_b"
 model = "res://assets/zone01/models/ug_bush_b.glb"
@@ -1074,6 +1104,7 @@ foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgBushC" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_c"
 model = "res://assets/zone01/models/ug_bush_c.glb"
@@ -1085,6 +1116,7 @@ foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgBushD" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_d"
 model = "res://assets/zone01/models/ug_bush_d.glb"
@@ -1096,6 +1128,7 @@ foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgSaplingA" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_sapling_a"
 model = "res://assets/zone01/models/ug_sapling_a.glb"
@@ -1107,6 +1140,7 @@ foliage_tint = Color(0.78, 0.82, 0.72, 1)
 
 [node name="UgSaplingB" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_sapling_b"
 model = "res://assets/zone01/models/ug_sapling_b.glb"
@@ -1118,6 +1152,7 @@ foliage_tint = Color(0.78, 0.82, 0.72, 1)
 
 [node name="UgSaplingC" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
+local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_sapling_c"
 model = "res://assets/zone01/models/ug_sapling_c.glb"

@@ -1,200 +1,215 @@
-[gd_scene format=3]
+[gd_scene load_steps=5 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/world/ai_post.tscn" id="1_post"]
-[ext_resource type="PackedScene" path="res://scenes/world/ai_route.tscn" id="2_route"]
-[ext_resource type="PackedScene" path="res://scenes/world/ai_nest.tscn" id="3_nest"]
-[ext_resource type="PackedScene" path="res://scenes/world/ai_arrival.tscn" id="4_arr"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_post.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_route.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_nest.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_arrival.tscn" id="4"]
 
 [node name="Zone01AI" type="Node3D"]
 
-[node name="Posts" type="Node3D" parent="."]
+[node name="Posts" parent="." type="Node3D"]
 
-[node name="Post_yard05" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200, 0.5, -95)
+[node name="Post_yard05" parent="Posts" instance=ExtResource("1")]
+position = Vector3(-176.0, 0.6034, 2.0)
 district = "yard05"
 radius = 22
 
-[node name="Post_market_hangar" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -192, 0.45, 6)
+[node name="Post_market_hangar" parent="Posts" instance=ExtResource("1")]
+position = Vector3(-213.0, 0.55, 163.0)
 district = "market"
-weight = 2
-always_from = 1
 radius = 16
+weight = 2.0
+always_from = 1
 
-[node name="Post_market_rows" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0.45, 80)
+[node name="Post_market_rows" parent="Posts" instance=ExtResource("1")]
+position = Vector3(-171.0, 0.55, 237.0)
 district = "market"
-weight = 2
+radius = 18
+weight = 2.0
 always_from = 2
+
+[node name="Post_houses" parent="Posts" instance=ExtResource("1")]
+position = Vector3(190.0, 0.3, -155.0)
+district = "houses"
+radius = 16
+weight = 0.6
+
+[node name="Post_bus_station" parent="Posts" instance=ExtResource("1")]
+position = Vector3(-30.0, 0.3207, 170.0)
+district = "bus_station"
+radius = 22
+weight = 1.5
+
+[node name="Post_depot" parent="Posts" instance=ExtResource("1")]
+position = Vector3(15.0, 0.3, 205.0)
+district = "bus_station"
 radius = 18
 
-[node name="Post_houses" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -280, 0.2, 30)
-district = "houses"
-weight = 0.6
-radius = 16
-
-[node name="Post_bus_station" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0.4, 175)
-district = "bus_station"
-weight = 1.5
-radius = 22
-
-[node name="Post_station" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 0.5, 165)
+[node name="Post_station" parent="Posts" instance=ExtResource("1")]
+position = Vector3(200.0, 0.3, 135.0)
 district = "station"
 radius = 20
 
-[node name="Post_construction" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0.55, -160)
+[node name="Post_construction" parent="Posts" instance=ExtResource("1")]
+position = Vector3(75.0, 0.4725, -110.0)
 district = "construction"
-weight = 1.2
 radius = 22
+weight = 1.2
 
-[node name="Post_garages" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 191, 0.2, -170)
+[node name="Post_garages" parent="Posts" instance=ExtResource("1")]
+position = Vector3(200.0, 0.2369, 48.0)
 district = "garages"
 radius = 18
 
-[node name="Post_second_yard" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 0.4, -110)
+[node name="Post_second_yard" parent="Posts" instance=ExtResource("1")]
+position = Vector3(-52.0, 0.605, 2.0)
 district = "second_yard"
-weight = 0.6
 radius = 18
-
-[node name="Post_sports" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 0.4, 0)
-district = "sports"
 weight = 0.6
+
+[node name="Post_sports" parent="Posts" instance=ExtResource("1")]
+position = Vector3(45.0, 0.3445, 45.0)
+district = "sports"
 radius = 20
+weight = 0.6
 group_size = Vector2i(1, 2)
 
-[node name="Post_swamp_edge" parent="Posts" instance=ExtResource("1_post")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0.2, -196)
+[node name="Post_swamp_edge" parent="Posts" instance=ExtResource("1")]
+position = Vector3(-150.0, 0.3294, -95.0)
 district = "swamp"
-weight = 0.5
 radius = 14
+weight = 0.5
 group_size = Vector2i(1, 2)
 
-[node name="Routes" type="Node3D" parent="."]
+[node name="Post_north" parent="Posts" instance=ExtResource("1")]
+position = Vector3(60.0, 0.3, -200.0)
+district = "north"
+radius = 16
+weight = 0.6
+group_size = Vector2i(1, 2)
 
-[node name="Route_north" parent="Routes" instance=ExtResource("2_route")]
-title = "Северный: улица у болота — дорога к старому мосту"
+[node name="Routes" parent="." type="Node3D"]
 
-[node name="P01" type="Marker3D" parent="Routes/Route_north"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0.3, -164)
+[node name="Route_north" parent="Routes" instance=ExtResource("2")]
+title = "Северный: улица у болота — двор — стройка — дома у оврага"
 
-[node name="P02" type="Marker3D" parent="Routes/Route_north"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 0.2, -164)
+[node name="P01" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(-200.0, 0.2664, -82.0)
 
-[node name="P03" type="Marker3D" parent="Routes/Route_north"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, -164)
+[node name="P02" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(-128.0, 0.2588, -85.0)
 
-[node name="P04" type="Marker3D" parent="Routes/Route_north"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0.65, -200)
+[node name="P03" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(-58.0, 0.2448, -62.0)
 
-[node name="P05" type="Marker3D" parent="Routes/Route_north"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0.3, -262)
+[node name="P04" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(12.0, 0.3658, -36.0)
 
-[node name="P06" type="Marker3D" parent="Routes/Route_north"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 0.2, -286)
+[node name="P05" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(82.0, 0.2895, -13.0)
 
-[node name="Route_west" parent="Routes" instance=ExtResource("2_route")]
-title = "Западный: двор — рынок — дома у оврага"
+[node name="P06" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(155.0, 0.2428, -2.0)
 
-[node name="P01" type="Marker3D" parent="Routes/Route_west"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -170, 0.3, -60)
+[node name="P07" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(156.0, 0.2459, -60.0)
 
-[node name="P02" type="Marker3D" parent="Routes/Route_west"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110, 0.1, -60)
+[node name="P08" parent="Routes/Route_north" type="Marker3D"]
+position = Vector3(155.0, 0.3277, -150.0)
 
-[node name="P03" type="Marker3D" parent="Routes/Route_west"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 0.19, -14)
+[node name="Route_west" parent="Routes" instance=ExtResource("2")]
+title = "Западный: двор — панельки — рынок"
 
-[node name="P04" type="Marker3D" parent="Routes/Route_west"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 0.3, 40)
+[node name="P01" parent="Routes/Route_west" type="Marker3D"]
+position = Vector3(-176.0, 0.5599, 25.0)
 
-[node name="P05" type="Marker3D" parent="Routes/Route_west"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125, 0.3, 100)
+[node name="P02" parent="Routes/Route_west" type="Marker3D"]
+position = Vector3(-150.0, 0.6001, 72.0)
 
-[node name="P06" type="Marker3D" parent="Routes/Route_west"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200, 0.3, 112)
+[node name="P03" parent="Routes/Route_west" type="Marker3D"]
+position = Vector3(-184.0, 0.2717, 99.0)
 
-[node name="P07" type="Marker3D" parent="Routes/Route_west"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -255, 0.3, 70)
+[node name="P04" parent="Routes/Route_west" type="Marker3D"]
+position = Vector3(-205.0, 0.55, 140.0)
 
-[node name="Route_east" parent="Routes" instance=ExtResource("2_route")]
-title = "Восточный: улица к ТЦ — станция — автостанция"
+[node name="P05" parent="Routes/Route_west" type="Marker3D"]
+position = Vector3(-170.0, 0.55, 200.0)
 
-[node name="P01" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, 0.25, -60)
+[node name="P06" parent="Routes/Route_west" type="Marker3D"]
+position = Vector3(-235.0, 0.55, 230.0)
 
-[node name="P02" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.3, -60)
+[node name="Route_east" parent="Routes" instance=ExtResource("2")]
+title = "Восточный: дорога к ТЦ — станция — автостанция"
 
-[node name="P03" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0.25, -60)
+[node name="P01" parent="Routes/Route_east" type="Marker3D"]
+position = Vector3(200.0, 0.2369, -66.0)
 
-[node name="P04" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 190, 0.15, -60)
+[node name="P02" parent="Routes/Route_east" type="Marker3D"]
+position = Vector3(156.0, 0.2428, 0.0)
 
-[node name="P05" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 176, 0.45, 0)
+[node name="P03" parent="Routes/Route_east" type="Marker3D"]
+position = Vector3(154.0, 0.24, 70.0)
 
-[node name="P06" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 0.5, 110)
+[node name="P04" parent="Routes/Route_east" type="Marker3D"]
+position = Vector3(148.0, 0.2457, 140.0)
 
-[node name="P07" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0.4, 72)
+[node name="P05" parent="Routes/Route_east" type="Marker3D"]
+position = Vector3(100.0, 0.2603, 165.0)
 
-[node name="P08" type="Marker3D" parent="Routes/Route_east"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.4, 110)
+[node name="P06" parent="Routes/Route_east" type="Marker3D"]
+position = Vector3(20.0, 0.3, 150.0)
 
-[node name="Nests" type="Node3D" parent="."]
+[node name="P07" parent="Routes/Route_east" type="Marker3D"]
+position = Vector3(-40.0, 0.3, 170.0)
 
-[node name="Nest_rail_north" parent="Nests" instance=ExtResource("3_nest")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 217, 3.2, -160)
-title = "Насыпь у гаражей"
+[node name="Nests" parent="." type="Node3D"]
+
+[node name="Nest_rail_bridge" parent="Nests" instance=ExtResource("3")]
+position = Vector3(268.0, 5.4902, -25.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
+title = "Насыпь у моста к ТЦ"
 weight = 0.8
 sector_deg = 75
 radius = 3
 
-[node name="Nest_rail_station" parent="Nests" instance=ExtResource("3_nest")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 195, 3.2, 200)
+[node name="Nest_rail_station" parent="Nests" instance=ExtResource("3")]
+position = Vector3(236.0, 1.4, 172.0)
+rotation_degrees = Vector3(0.0, 90.0, 0.0)
 title = "Насыпь у станции"
 weight = 0.8
 sector_deg = 75
 radius = 3
 
-[node name="Nest_rail_river" parent="Nests" instance=ExtResource("3_nest")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 217, 3.2, -280)
-title = "Насыпь у речки"
+[node name="Nest_ravine_rim" parent="Nests" instance=ExtResource("3")]
+position = Vector3(100.0, 0.6065, -242.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+title = "Бровка оврага у стройки"
 weight = 0.6
 sector_deg = 70
 radius = 3
 
-[node name="Arrivals" type="Node3D" parent="."]
+[node name="Arrivals" parent="." type="Node3D"]
 
-[node name="Arrive_nw" parent="Arrivals" instance=ExtResource("4_arr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -330, 0.4, -262)
+[node name="Arrive_nw" parent="Arrivals" instance=ExtResource("4")]
+position = Vector3(-275.0, 0.3666, -200.0)
 title = "Лесная дорога"
 
-[node name="Arrive_ravine_n" parent="Arrivals" instance=ExtResource("4_arr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -305, -5.3, -130)
-title = "Овраг у двора"
+[node name="Arrive_ravine_n" parent="Arrivals" instance=ExtResource("4")]
+position = Vector3(60.0, 0.4, -240.0)
+title = "Бровка оврага у болота"
 
-[node name="Arrive_ravine_s" parent="Arrivals" instance=ExtResource("4_arr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -210, -6.1, 225)
-title = "Овраг на юге"
+[node name="Arrive_east" parent="Arrivals" instance=ExtResource("4")]
+position = Vector3(290.0, 0.6349, 110.0)
+title = "За путями"
 
-[node name="Arrive_river_e" parent="Arrivals" instance=ExtResource("4_arr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0.3, -300)
-title = "За насыпью у речки"
+[node name="Arrive_se" parent="Arrivals" instance=ExtResource("4")]
+position = Vector3(150.0, 0.7538, 290.0)
+title = "Южная лесополоса"
 
-[node name="Arrive_east" parent="Arrivals" instance=ExtResource("4_arr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 250, 0.5, -150)
-title = "За насыпью у гаражей"
+[node name="Arrive_sw" parent="Arrivals" instance=ExtResource("4")]
+position = Vector3(-200.0, 0.606, 290.0)
+title = "За рынком"
 
-[node name="Arrive_se" parent="Arrivals" instance=ExtResource("4_arr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0.5, 200)
-title = "За насыпью у станции"
+[node name="Arrive_west" parent="Arrivals" instance=ExtResource("4")]
+position = Vector3(-292.0, 0.4, 40.0)
+title = "Западный лес"

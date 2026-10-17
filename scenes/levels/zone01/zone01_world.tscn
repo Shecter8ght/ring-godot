@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://src/world/district_terrain.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/urban_road.tscn" id="2"]
@@ -13,146 +13,113 @@ shader = ExtResource("3")
 shader_parameter/noise_tex = ExtResource("4")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_2"]
-size = Vector2(3.2, 38.6742)
+size = Vector2(3.2, 43.3401)
 material = SubResource("ShaderMaterial_1")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_3"]
-size = Vector2(3.2, 34.5576)
+size = Vector2(3.2, 46.7214)
 material = SubResource("ShaderMaterial_1")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_4"]
-size = Vector2(3.2, 43.2311)
+size = Vector2(3.2, 40.0132)
 material = SubResource("ShaderMaterial_1")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_5"]
-size = Vector2(3.2, 37.7351)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_6"]
-size = Vector2(3.2, 42.05)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_7"]
-size = Vector2(3.2, 36.1321)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_8"]
-size = Vector2(3.2, 33.305)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_9"]
-size = Vector2(3.2, 30.8444)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_10"]
-size = Vector2(3.2, 42.4969)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_11"]
-size = Vector2(3.2, 43.1825)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_12"]
 size = Vector2(3.2, 43.2311)
 material = SubResource("ShaderMaterial_1")
 
+[sub_resource type="PlaneMesh" id="PlaneMesh_6"]
+size = Vector2(3.2, 43.1825)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_7"]
+size = Vector2(3.2, 42.4969)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_8"]
+size = Vector2(3.2, 30.8444)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_9"]
+size = Vector2(3.2, 33.305)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_10"]
+size = Vector2(3.2, 36.1321)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_11"]
+size = Vector2(3.2, 23.0238)
+material = SubResource("ShaderMaterial_1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_12"]
+size = Vector2(3.2, 25.0868)
+material = SubResource("ShaderMaterial_1")
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_13"]
-size = Vector2(3.2, 32.0)
+size = Vector2(3.2, 27.7099)
 material = SubResource("ShaderMaterial_1")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_14"]
-size = Vector2(3.2, 34.5576)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_15"]
-size = Vector2(3.2, 42.2492)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_16"]
-size = Vector2(3.2, 36.9857)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_17"]
-size = Vector2(318, 120)
+size = Vector2(248.4, 173.5)
 material = SubResource("ShaderMaterial_1")
 subdivide_width = 16
-subdivide_depth = 8
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_18"]
-size = Vector2(8.0, 55.6118)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_19"]
-size = Vector2(8.0, 73.3491)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_20"]
-size = Vector2(8.0, 73.2567)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_21"]
-size = Vector2(8.0, 54.4198)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_22"]
-size = Vector2(8.0, 53.636)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_23"]
-size = Vector2(8.0, 84.0494)
-material = SubResource("ShaderMaterial_1")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_24"]
-size = Vector2(8.0, 153.8509)
-material = SubResource("ShaderMaterial_1")
+subdivide_depth = 12
 
 [node name="World" type="Node3D"]
 
 [node name="Terrain" parent="." type="Node3D"]
 script = ExtResource("1")
 data_path = "res://data/sectors/zone01_mall.json"
-excavations = Array[AABB]([AABB(-225, -1.9, -144, 17, 2.3, 12)])
+excavations = Array[AABB]([AABB(-201, -1.9, -47, 17, 2.3, 12)])
 
 [node name="Roads" parent="." type="Node3D"]
 
-[node name="NorthRoad" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(-272.0, 0.28, -164.0, -262.0, 0.278, -164.0, -252.0, 0.27, -164.0, -242.0, 0.266, -164.0, -232.0, 0.271, -164.0, -222.0, 0.27, -164.0, -212.0, 0.259, -164.0, -202.0, 0.243, -164.0, -192.0, 0.232, -164.0, -182.0, 0.226, -164.0, -172.0, 0.227, -164.0, -162.0, 0.208, -164.0, -152.0, 0.18, -164.0, -142.0, 0.163, -164.0, -132.0, 0.143, -164.0, -122.0, 0.119, -164.0, -112.0, 0.095, -164.0, -102.0, 0.069, -164.0, -92.0, 0.044, -164.0, -82.0, 0.033, -164.0, -72.0, 0.043, -164.0, -62.0, 0.067, -164.0, -52.0, 0.118, -164.0, -42.0, 0.183, -164.0, -32.0, 0.248, -164.0, -22.0, 0.314, -164.0, -12.0, 0.379, -164.0, -10, 0.392, -164)
+[node name="North" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(-275.4, -0.007, -77.8, -265.22, 0.002, -78.43, -255.05, 0.01, -79.06, -244.87, 0.024, -79.69, -234.69, 0.035, -80.32, -224.51, 0.042, -80.95, -214.34, 0.034, -81.57, -204.27, 0.029, -82.24, -194.24, 0.024, -82.92, -184.2, 0.019, -83.6, -174.16, 0.016, -84.28, -164.13, 0.011, -84.96, -154.1, 0.008, -85.45, -144.1, 0.015, -85.2, -134.1, 0.019, -84.95, -124.2, 0.019, -83.68, -114.45, 0.019, -80.87, -104.7, 0.02, -78.07, -94.95, 0.023, -75.26, -85.2, 0.021, -71.77, -75.45, 0.017, -68.1, -65.7, 0.009, -64.43, -56.05, 0.006, -60.73, -46.82, 0.02, -56.86, -37.58, 0.048, -52.99, -28.34, 0.073, -49.12, -18.9, 0.088, -45.6, -9.15, 0.105, -42.6, 0.6, 0.118, -39.6, 10.35, 0.118, -36.6, 20.1, 0.117, -32.91, 29.85, 0.106, -29.05, 39.6, 0.08, -25.19, 49.35, 0.053, -21.62, 59.1, 0.034, -19.23, 68.85, 0.032, -16.84, 78.6, 0.04, -14.46, 88.68, 0.062, -12.42, 98.97, 0.07, -10.63, 109.26, 0.07, -8.84, 119.57, 0.07, -7.09, 129.9, 0.07, -5.57, 140.23, 0.07, -4.04, 150.57, 0.06, -2.51, 154.7, 0.051, -1.9)
+carriage_width = 8.0
+sidewalk_width = 2.5
+sidewalks = true
+markings = true
+
+[node name="Artery" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(12.3, 0.126, -36.0, 9.8, 0.146, -26.05, 7.3, 0.16, -16.1, 4.8, 0.182, -6.14, 2.3, 0.21, 3.81, -0.85, 0.227, 13.55, -4.16, 0.219, 23.24, -7.48, 0.201, 32.92, -10.51, 0.183, 42.59, -13.35, 0.175, 52.25, -16.19, 0.202, 61.91, -18.44, 0.224, 71.67, -19.81, 0.235, 81.58, -21.17, 0.255, 91.5, -22.53, 0.285, 101.42, -22.8, 0.291, 103.4)
 carriage_width = 9.0
 sidewalk_width = 2.5
 sidewalks = true
 markings = true
 
-[node name="WestLink" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(-100.0, 0.07, -164.0, -100.0, 0.076, -154.0, -100.0, 0.075, -144.0, -100.0, 0.075, -134.0, -100.0, 0.074, -124.0, -100.0, 0.073, -114.0, -100.0, 0.047, -104.0, -100.0, 0.025, -94.0, -100.0, 0.027, -84.0, -100.0, 0.042, -74.0, -100.0, 0.066, -64.0, -100.0, 0.091, -54.0, -100.0, 0.115, -44.0, -100.0, 0.139, -34.0, -100.0, 0.164, -24.0, -100, 0.188, -14)
+[node name="South" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(-240.4, -0.0, 89.4, -230.36, -0.0, 91.06, -220.33, -0.0, 92.72, -210.29, 0.004, 94.38, -200.26, 0.012, 96.04, -190.22, 0.022, 97.7, -180.19, 0.04, 99.04, -170.17, 0.067, 99.88, -160.16, 0.077, 100.71, -150.14, 0.108, 101.55, -140.12, 0.129, 102.39, -130.1, 0.133, 103.23, -119.84, 0.127, 103.21, -109.52, 0.118, 102.98, -99.19, 0.102, 102.74, -88.87, 0.082, 102.6, -78.55, 0.096, 102.6, -68.22, 0.099, 102.6, -57.9, 0.103, 102.6, -47.58, 0.136, 103.28, -37.25, 0.168, 103.95, -26.93, 0.193, 104.63, -16.95, 0.206, 106.45, -7.2, 0.206, 109.03, 2.55, 0.184, 111.62, 12.3, 0.151, 114.2, 20.28, 0.123, 120.54, 28.25, 0.084, 126.88, 36.23, 0.048, 133.22, 44.21, 0.021, 139.56, 52.94, 0.006, 144.53, 62.18, 0.0, 148.58, 71.42, 0.0, 152.64, 80.65, 0.002, 156.69, 89.87, 0.009, 160.76, 99.08, 0.019, 164.84, 108.29, 0.033, 168.92, 117.5, 0.047, 173.0, 126.96, 0.061, 176.58, 136.42, 0.075, 180.15, 142.1, 0.084, 182.3)
+carriage_width = 9.0
+sidewalk_width = 2.5
+sidewalks = true
+markings = true
+
+[node name="East" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(150.5, 0.25, -214.8, 151.34, 0.239, -204.74, 152.18, 0.216, -194.68, 153.02, 0.191, -184.62, 153.86, 0.165, -174.56, 154.7, 0.134, -164.5, 154.88, 0.102, -154.32, 155.07, 0.07, -144.13, 155.25, 0.044, -133.95, 155.44, 0.025, -123.76, 155.62, 0.016, -113.58, 155.81, 0.012, -103.39, 155.99, 0.008, -93.21, 156.1, 0.005, -83.04, 156.1, 0.005, -72.9, 156.1, 0.006, -62.76, 156.1, 0.006, -52.61, 156.1, 0.004, -42.47, 156.1, 0.003, -32.33, 156.1, 0.003, -22.19, 156.1, 0.003, -12.04, 156.1, 0.003, -1.9, 155.64, 0.001, 8.19, 155.19, -0.002, 18.27, 154.73, -0.002, 28.36, 154.27, -0.001, 38.45, 153.79, -0.0, 48.51, 153.27, 0.0, 58.55, 152.76, 0.0, 68.59, 152.24, 0.0, 78.63, 151.72, 0.0, 88.66, 151.2, 0.0, 98.7, 150.59, 0.0, 108.81, 149.98, 0.0, 118.92, 149.37, 0.001, 129.03, 148.77, 0.005, 139.13, 147.7, 0.008, 149.32, 145.95, 0.011, 159.63, 144.2, 0.014, 169.93, 142.45, 0.017, 180.24, 142.1, 0.017, 182.3)
 carriage_width = 8.0
 sidewalk_width = 2.0
 sidewalks = true
 markings = true
 
-[node name="Prospekt" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(-10.0, 0.338, -164.0, -10.0, 0.325, -154.0, -10.0, 0.309, -144.0, -10.0, 0.293, -134.0, -10.0, 0.277, -124.0, -10.0, 0.26, -114.0, -10.0, 0.234, -104.0, -10.0, 0.215, -94.0, -10.0, 0.205, -84.0, -10.0, 0.2, -74.0, -10.0, 0.2, -64.0, -10.0, 0.2, -54.0, -10.0, 0.2, -44.0, -10.0, 0.2, -34.0, -10.0, 0.2, -24.0, -10.0, 0.2, -14.0, -10.0, 0.2, -4.0, -10.0, 0.2, 6.0, -10.0, 0.2, 16.0, -10.0, 0.2, 26.0, -10.0, 0.2, 36.0, -10.0, 0.2, 46.11, -10.0, 0.2, 56.29, -10.0, 0.2, 66.46, -10.0, 0.2, 76.64, -10.0, 0.2, 86.82, -10, 0.2, 97)
-carriage_width = 9.0
-sidewalk_width = 2.5
-sidewalks = true
-markings = true
-
-[node name="MallStreet" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(-94.0, 0.102, -60.0, -84.0, 0.125, -60.0, -74.0, 0.147, -60.0, -64.0, 0.17, -60.0, -54.0, 0.187, -60.0, -44.0, 0.188, -60.0, -34.0, 0.186, -60.0, -24.0, 0.186, -60.0, -14.0, 0.186, -60.0, -4.0, 0.186, -60.0, 6.0, 0.186, -60.0, 16.0, 0.186, -60.0, 26.0, 0.189, -60.0, 36.0, 0.197, -60.0, 46.0, 0.2, -60.0, 56.0, 0.198, -60.0, 66.0, 0.179, -60.0, 76.0, 0.155, -60.0, 86.0, 0.131, -60.0, 96.0, 0.106, -60.0, 106.0, 0.082, -60.0, 116.0, 0.057, -60.0, 126.0, 0.033, -60.0, 136.0, 0.009, -60.0, 146.0, 0.0, -60.0, 156.0, 0.0, -60.0, 166.0, 0.0, -60.0, 176.0, 0.0, -60.0, 186.0, 0.0, -60.0, 196.0, 0.0, -60.0, 206.0, 0.0, -60.0, 216.0, 0.0, -60.0, 226.0, 0.0, -60.0, 236.0, 0.003, -60.0, 246.0, 0.019, -60.0, 256.0, 0.05, -60.0, 266.0, 0.089, -60.0, 276.0, 0.112, -60.0, 286.0, 0.116, -60.0, 296.0, 0.116, -60.0, 306.0, 0.116, -60.0, 316.0, 0.116, -60.0, 326.0, 0.101, -60.0, 336.0, 0.074, -60.0, 346.0, 0.035, -60.0, 356.0, 0.007, -60.0, 366.0, 0.0, -60.0, 376.0, 0.0, -60.0, 386.0, 0.0, -60.0, 396.0, 0.0, -60.0, 406.0, 0.0, -60.0, 416.0, 0.0, -60.0, 420, 0.0, -60)
-carriage_width = 9.0
+[node name="Mall" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(156.1, -0.034, -75.5, 165.97, -0.027, -73.81, 175.85, -0.02, -72.12, 185.72, -0.013, -70.44, 195.5, -0.007, -67.86, 205.25, 0.004, -65.05, 215.0, 0.021, -62.24, 224.83, 0.045, -59.9, 234.99, 0.081, -59.38, 245.15, 0.129, -58.87, 255.31, 0.181, -58.36, 265.46, 0.235, -57.84, 275.62, 0.288, -57.33, 285.78, 0.34, -56.82, 295.94, 0.378, -56.31, 300.0, 0.392, -56.1)
+carriage_width = 10.0
 sidewalk_width = 2.0
 sidewalks = true
 markings = true
 
-[node name="StationRoad" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(-10.0, 0.163, 70.0, 0.0, 0.17, 70.29, 10.0, 0.178, 70.57, 20.0, 0.185, 70.86, 30.0, 0.192, 71.14, 40.0, 0.202, 71.43, 50.0, 0.236, 71.71, 60.0, 0.276, 72.0, 69.82, 0.319, 75.21, 79.64, 0.353, 78.43, 89.46, 0.365, 81.64, 99.29, 0.377, 84.86, 109.11, 0.389, 88.07, 117.78, 0.401, 93.11, 124.72, 0.385, 100.89, 131.67, 0.358, 108.67, 138.61, 0.328, 116.44, 140, 0.322, 118)
+[node name="Evac3" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(142.1, -0.02, 182.3, 147.35, -0.001, 191.6, 152.6, 0.026, 200.9, 158.14, 0.049, 210.04, 163.67, 0.072, 219.19, 169.24, 0.133, 228.19, 174.93, 0.253, 236.62, 180.61, 0.384, 245.06, 186.3, 0.52, 253.5, 191.84, 0.612, 262.36, 197.37, 0.65, 271.21, 202.85, 0.692, 280.11, 208.1, 0.736, 289.15, 213.35, 0.755, 298.19, 214.4, 0.749, 300.0)
 carriage_width = 7.0
 sidewalk_width = 1.5
 sidewalks = true
 markings = false
 
-[node name="BridgeRoad" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(-10.0, 0.369, -164.0, -0.79, 0.4, -168.74, 8.42, 0.441, -173.47, 17.63, 0.477, -178.21, 25.0, 0.503, -184.0, 25.0, 0.525, -194.0, 25.0, 0.514, -204.0, 25.0, 0.492, -214.0, 25.0, 0.445, -224.0, 25.0, 0.385, -234.0, 25.0, 0.31, -244.0, 25.0, 0.238, -254.0, 26.5, 0.176, -263.36, 34.0, -0.091, -270.18, 41.5, -0.279, -277.0, 49.0, -0.329, -283.82, 56.5, -0.345, -290.64, 58.24, -0.345, -300.0, 58.53, -0.345, -310.0, 58.82, -0.345, -320.0, 59.12, -0.345, -330.0, 59.41, -0.192, -340.0, 59.71, 0.0, -350.0, 60, 0.0, -360)
-carriage_width = 7.0
+[node name="Tracks_Lane" parent="Roads" instance=ExtResource("2")]
+points = PackedVector3Array(154.0, -0.036, 44.5, 164.27, -0.029, 47.5, 174.54, -0.021, 50.5, 184.8, -0.014, 51.52, 195.05, -0.007, 49.56, 205.3, -0.0, 47.6)
+carriage_width = 5.0
 sidewalk_width = 0.0
 sidewalks = false
 markings = false
@@ -161,214 +128,178 @@ markings = false
 
 [node name="Stream_0" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_2")
-position = Vector3(-308.5, -5.9023, -158.0)
-rotation_degrees = Vector3(0.0, -11.0035, 0.0)
+position = Vector3(22.5, -6.8006, -251.0)
+rotation_degrees = Vector3(0.0, 122.1523, 0.0)
 cast_shadow = 0
 
 [node name="Stream_1" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_3")
-position = Vector3(-315.0, -9.0753, -124.0)
-rotation_degrees = Vector3(0.0, -10.6197, 0.0)
+position = Vector3(60.0, -9.65, -272.0)
+rotation_degrees = Vector3(0.0, 116.5651, 0.0)
 cast_shadow = 0
 
 [node name="Stream_2" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_4")
-position = Vector3(-326.0, -9.5756, -89.0)
-rotation_degrees = Vector3(0.0, -22.8337, 0.0)
+position = Vector3(99.0, -9.65, -282.5)
+rotation_degrees = Vector3(0.0, 91.5074, 0.0)
 cast_shadow = 0
 
 [node name="Stream_3" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_5")
-position = Vector3(-339.5, -9.532, -53.0)
-rotation_degrees = Vector3(0.0, -17.9279, 0.0)
+position = Vector3(134.0, -9.3805, -270.0)
+rotation_degrees = Vector3(0.0, 50.9061, 0.0)
 cast_shadow = 0
 
 [node name="Stream_4" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_6")
-position = Vector3(-344.0, -9.5033, -16.0)
-rotation_degrees = Vector3(0.0, 2.8624, 0.0)
+position = Vector3(168.0, -9.4557, -247.0)
+rotation_degrees = Vector3(0.0, 60.9454, 0.0)
 cast_shadow = 0
 
 [node name="Stream_5" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_7")
-position = Vector3(-341.5, -9.5985, 21.0)
-rotation_degrees = Vector3(0.0, 5.0425, 0.0)
+position = Vector3(203.0, -9.3656, -226.0)
+rotation_degrees = Vector3(0.0, 57.0948, 0.0)
 cast_shadow = 0
 
 [node name="Stream_6" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_8")
-position = Vector3(-333.0, -9.65, 52.0)
-rotation_degrees = Vector3(0.0, 26.5651, 0.0)
+position = Vector3(228.0, -9.65, -203.0)
+rotation_degrees = Vector3(0.0, 33.6901, 0.0)
 cast_shadow = 0
 
 [node name="Stream_7" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_9")
-position = Vector3(-318.0, -9.65, 78.0)
-rotation_degrees = Vector3(0.0, 33.6901, 0.0)
+position = Vector3(243.0, -9.65, -177.0)
+rotation_degrees = Vector3(0.0, 26.5651, 0.0)
 cast_shadow = 0
 
 [node name="Stream_8" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_10")
-position = Vector3(-293.0, -9.65, 101.0)
-rotation_degrees = Vector3(0.0, 57.0948, 0.0)
+position = Vector3(251.5, -9.6352, -146.0)
+rotation_degrees = Vector3(0.0, 5.0425, 0.0)
 cast_shadow = 0
 
 [node name="Stream_9" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_11")
-position = Vector3(-258.0, -9.65, 122.0)
-rotation_degrees = Vector3(0.0, 60.9454, 0.0)
+position = Vector3(257.5, -9.5985, -119.5)
+rotation_degrees = Vector3(0.0, 25.3462, 0.0)
 cast_shadow = 0
 
 [node name="Stream_10" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_12")
-position = Vector3(-224.0, -9.65, 145.0)
-rotation_degrees = Vector3(0.0, 50.9061, 0.0)
+position = Vector3(273.5, -5.1583, -111.0)
+rotation_degrees = Vector3(0.0, 94.9697, 0.0)
 cast_shadow = 0
 
 [node name="Stream_11" parent="Water" type="MeshInstance3D"]
 mesh = SubResource("PlaneMesh_13")
-position = Vector3(-199.0, -9.65, 170.0)
-rotation_degrees = Vector3(0.0, 36.8699, 0.0)
-cast_shadow = 0
-
-[node name="Stream_12" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_14")
-position = Vector3(-193.0, -9.65, 198.0)
-rotation_degrees = Vector3(0.0, -10.6197, 0.0)
-cast_shadow = 0
-
-[node name="Stream_13" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_15")
-position = Vector3(-205.0, -9.5941, 232.0)
-rotation_degrees = Vector3(0.0, -26.5651, 0.0)
-cast_shadow = 0
-
-[node name="Stream_14" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_16")
-position = Vector3(-223.0, -9.5443, 265.0)
-rotation_degrees = Vector3(0.0, -30.9638, 0.0)
-cast_shadow = 0
-
-[node name="Swamp" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_17")
-position = Vector3(-139.0, -1.15, -244.0)
-cast_shadow = 0
-
-[node name="River_0" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_18")
-position = Vector3(34.0, -1.55, -296.0)
-rotation_degrees = Vector3(0.0, 98.7462, 0.0)
-cast_shadow = 0
-
-[node name="River_1" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_19")
-position = Vector3(95.0, -1.55, -303.5)
-rotation_degrees = Vector3(0.0, 95.7106, 0.0)
-cast_shadow = 0
-
-[node name="River_2" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_20")
-position = Vector3(165.0, -1.55, -304.0)
-rotation_degrees = Vector3(0.0, 85.1009, 0.0)
-cast_shadow = 0
-
-[node name="River_3" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_21")
-position = Vector3(225.0, -1.55, -307.0)
+position = Vector3(297.5, -9.5015, -115.0)
 rotation_degrees = Vector3(0.0, 103.4957, 0.0)
 cast_shadow = 0
 
-[node name="River_4" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_22")
-position = Vector3(275.0, -1.55, -317.0)
-rotation_degrees = Vector3(0.0, 99.0903, 0.0)
-cast_shadow = 0
-
-[node name="River_5" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_23")
-position = Vector3(340.0, -1.55, -327.5)
-rotation_degrees = Vector3(0.0, 99.2299, 0.0)
-cast_shadow = 0
-
-[node name="River_6" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_24")
-position = Vector3(455.0, -1.55, -342.0)
-rotation_degrees = Vector3(0.0, 96.0885, 0.0)
+[node name="Swamp" parent="Water" type="MeshInstance3D"]
+mesh = SubResource("PlaneMesh_14")
+position = Vector3(-114.7, -1.15, -187.75)
 cast_shadow = 0
 
 [node name="Perimeter" parent="." type="Node3D"]
 
 [node name="Wall_0" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(-282.5, 0.6764, 306.0)
-rotation_degrees = Vector3(0.0, -3.0529, 0.0)
+position = Vector3(-221.0, 0.2641, -298.0)
+rotation_degrees = Vector3(0.0, 1.6135, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.409, 0.0], "size": [226.32, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 1.743, 0.0], "size": [143.056, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_1" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(-15.0, 0.0, 308.5)
-rotation_degrees = Vector3(0.0, 1.2936, 0.0)
+position = Vector3(-75.0, 0.0, -298.0)
+rotation_degrees = Vector3(0.0, -1.5275, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [311.079, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_2" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(201.0, 0.3819, 302.5)
-rotation_degrees = Vector3(0.0, 2.3469, 0.0)
+position = Vector3(75.0, -1.2864, -298.0)
+rotation_degrees = Vector3(0.0, 1.5275, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.742, 0.0], "size": [123.102, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 2.643, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_3" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(267.0, 0.2509, 210.0)
-rotation_degrees = Vector3(0.0, 86.8202, 0.0)
+position = Vector3(222.0, 0.0, -297.0)
+rotation_degrees = Vector3(0.0, -2.3859, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.873, 0.0], "size": [181.278, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_4" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(274.0, 0.3803, -5.0)
-rotation_degrees = Vector3(0.0, 89.0833, 0.0)
+position = Vector3(297.0, 0.0, -222.0)
+rotation_degrees = Vector3(0.0, -87.6141, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.62, 0.0], "size": [251.032, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_5" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(267.0, 0.0, -227.5)
-rotation_degrees = Vector3(0.0, 95.2739, 0.0)
+position = Vector3(298.5, 6.184, -75.0)
+rotation_degrees = Vector3(0.0, -91.1458, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [196.829, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, -4.184, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_6" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(149.0, 0.0135, -333.5)
-rotation_degrees = Vector3(0.0, 175.541, 0.0)
+position = Vector3(298.5, 0.0, 75.0)
+rotation_degrees = Vector3(0.0, -88.8542, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.987, 0.0], "size": [219.662, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_7" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(-85.0, 0.01, -340.0)
-rotation_degrees = Vector3(0.0, -179.0833, 0.0)
+position = Vector3(297.0, 0.0234, 222.0)
+rotation_degrees = Vector3(0.0, -92.3859, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.99, 0.0], "size": [251.032, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 1.988, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_8" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(-290.0, 0.3728, -334.0)
-rotation_degrees = Vector3(0.0, -177.1376, 0.0)
+position = Vector3(222.0, 0.5612, 297.0)
+rotation_degrees = Vector3(0.0, -177.6141, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.627, 0.0], "size": [161.2, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 1.573, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_9" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(-387.5, 0.0, -245.0)
-rotation_degrees = Vector3(0.0, -101.6336, 0.0)
+position = Vector3(75.0, 0.0, 298.0)
+rotation_degrees = Vector3(0.0, 178.4725, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [174.566, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_10" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(-407.5, 0.6672, -40.0)
-rotation_degrees = Vector3(0.0, -91.1935, 0.0)
+position = Vector3(-75.0, 0.5327, 298.0)
+rotation_degrees = Vector3(0.0, -178.4725, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 1.419, 0.0], "size": [241.052, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 1.467, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Wall_11" parent="Perimeter" instance=ExtResource("5")]
-position = Vector3(-402.5, 0.0, 190.0)
-rotation_degrees = Vector3(0.0, -86.0995, 0.0)
+position = Vector3(-222.0, 0.1309, 297.0)
+rotation_degrees = Vector3(0.0, 177.6141, 0.0)
 surface = "concrete"
-pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [221.511, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+pieces = Array[Dictionary]([{"at": [0.0, 1.869, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_12" parent="Perimeter" instance=ExtResource("5")]
+position = Vector3(-297.0, 0.0, 222.0)
+rotation_degrees = Vector3(0.0, 92.3859, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_13" parent="Perimeter" instance=ExtResource("5")]
+position = Vector3(-298.5, 0.0, 75.0)
+rotation_degrees = Vector3(0.0, 88.8542, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_14" parent="Perimeter" instance=ExtResource("5")]
+position = Vector3(-298.5, 0.0, -75.0)
+rotation_degrees = Vector3(0.0, 91.1458, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
+
+[node name="Wall_15" parent="Perimeter" instance=ExtResource("5")]
+position = Vector3(-296.0, 0.0, -223.0)
+rotation_degrees = Vector3(0.0, 86.8636, 0.0)
+surface = "concrete"
+pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [147.219, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
 [node name="Vegetation" parent="." type="Node3D"]
 
@@ -784,6 +715,6 @@ foliage_tint = Color(0.78, 0.82, 0.72, 1)
 [node name="Grass" parent="Vegetation" type="Node3D"]
 script = ExtResource("7")
 density_map = "res://assets/terrain/zone01_grass.png"
-origin = Vector2(-480.0, -440.0)
+origin = Vector2(-440.0, -440.0)
 models = PackedStringArray("res://assets/zone01/models/ug_grass_tall_a.glb", "res://assets/zone01/models/ug_grass_tall_b.glb", "res://assets/zone01/models/ug_grass_tall_a.glb", "res://assets/zone01/models/ug_grass_small.glb", "res://assets/zone01/models/ug_grass_mid_b.glb", "res://assets/zone01/models/ug_grass2_c.glb")
 weed_models = PackedStringArray("res://assets/zone01/models/ug_weed_a.glb", "res://assets/zone01/models/ug_weed_b.glb", "res://assets/zone01/models/ug_dandelion_c.glb", "res://assets/zone01/models/ug_dandelion_e.glb")

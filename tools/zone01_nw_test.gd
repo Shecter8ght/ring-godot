@@ -6,6 +6,22 @@ var checks: int = 0
 var level: Node3D
 var probe: Player
 var map: RID
+## Готовые куски стоят на новых местах (сдвиг / поворот узла); их внутренние точки — в прежних координатах.
+var yard: Node3D
+var market: Node3D
+var houses: Node3D
+
+
+func Y(x: float, y: float, z: float) -> Vector3:
+	return yard.global_transform * Vector3(x, y, z)
+
+
+func M(x: float, y: float, z: float) -> Vector3:
+	return market.global_transform * Vector3(x, y, z)
+
+
+func H(x: float, y: float, z: float) -> Vector3:
+	return houses.global_transform * Vector3(x, y, z)
 
 
 func _ready() -> void:
@@ -14,11 +30,14 @@ func _ready() -> void:
 	level = (load("res://scenes/levels/zone01_mall.tscn") as PackedScene).instantiate() as Node3D
 	level.set_script(null)
 	add_child(level)
+	yard = level.get_node("Yard05") as Node3D
+	market = level.get_node("Blockout/Z06_Market") as Node3D
+	houses = level.get_node("Blockout/Z12_Ravine") as Node3D
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	probe = (load("res://scenes/player/player.tscn") as PackedScene).instantiate() as Player
 	probe.name = "GeometryProbe"
-	probe.position = Vector3(-216.8, 1, -129)
+	probe.position = Y(-216.8, 1, -129)
 	add_child(probe)
 	probe.set_physics_process(false)
 	probe.set_process(false)
@@ -40,11 +59,11 @@ func _ready() -> void:
 	check("24 точки россыпи внутри фрагмента", loose == 24)
 	for floor_index in range(5):
 		var floor_y: float = .3731 + 1.1 + 2.8 * floor_index
-		var hit: Dictionary = ray(Vector3(-216.8, floor_y + .6, -137.1), Vector3(-216.8, floor_y - .4, -137.1))
+		var hit: Dictionary = ray(Y(-216.8, floor_y + .6, -137.1), Y(-216.8, floor_y - .4, -137.1))
 		check("плита площадки " + str(floor_index + 1), not hit.is_empty() and absf((hit.position as Vector3).y - floor_y) < .03)
-	var cellar: Dictionary = ray(Vector3(-220, -.7, -140), Vector3(-220, -2.2, -140))
+	var cellar: Dictionary = ray(Y(-220, -.7, -140), Y(-220, -2.2, -140))
 	check("грунт не закрывает пол подвала", not cellar.is_empty() and absf((cellar.position as Vector3).y + 1.3269) < .04)
-	var panel_roof: Dictionary = ray(Vector3(-216.8,20,-135),Vector3(-216.8,14,-135))
+	var panel_roof: Dictionary = ray(Y(-216.8,20,-135),Y(-216.8,14,-135))
 	check("кровля закрывает верхнюю лестничную клетку от дождя", not panel_roof.is_empty() and (panel_roof.position as Vector3).y > 15.4)
 	var hangar: Node3D = level.get_node("Blockout/Z06_Market/Architecture/Hangar") as Node3D
 	var roof: Dictionary = ray(hangar.to_global(Vector3(1, 12, 0)), hangar.to_global(Vector3(1, 0, 0)))
@@ -71,31 +90,33 @@ func _ready() -> void:
 	level.get_node("Navigation").add_child(navigation)
 	await navigation.ready_for_agents
 	map = level.get_world_3d().navigation_map
-	var start := Vector3(-216.8, .6, -129.8)
-	_path("двор → пятый этаж", start, Vector3(-216.8, 12.6731, -137.1))
-	_path("двор → подвал", start, Vector3(-220, -1.3269, -140))
-	_path("двор → рынок", Vector3(-196, .5, -62), Vector3(-171, .5, 4))
+	var start := Y(-216.8, .6, -129.8)
+	_path("двор → пятый этаж", start, Y(-216.8, 12.6731, -137.1))
+	_path("двор → подвал", start, Y(-220, -1.3269, -140))
+	# рынок теперь у автостанции, дома у оврага — в северо-восточном углу: маршруты через всю карту
+	_path("двор → рынок", Y(-196, .5, -62), M(-171, .5, 4), 200000)
 	_path("ангар → контора", hangar.to_global(Vector3(0, 0, -18)), hangar.to_global(Vector3(-7.5, 3.61, 15)))
-	_path("рынок → дома", Vector3(-230, .5, 35), house.to_global(Vector3(-2.1, .27, 3.2)))
+	_path("рынок → дома", M(-230, .5, 35), house.to_global(Vector3(-2.1, .27, 3.2)), 200000)
 	_path("дом → чердак", house.to_global(Vector3(-2.1, .27, 3.2)), house.to_global(Vector3(-.7, 3.1, .8)))
 	_path("прихожая → лестничная комната", house.to_global(Vector3(-2.1,.27,3.2)), house.to_global(Vector3(2.6,.27,3.1)))
 	_path("лестничная комната → начало марша", house.to_global(Vector3(2.6,.27,3.1)), house.to_global(Vector3(.85,.27,-3.9)))
 	var second_house: Node3D = level.get_node("Blockout/Z12_Ravine/Architecture/House_1") as Node3D
 	_path("второй дом → мансарда", second_house.to_global(Vector3(-2.1,.27,3.2)), second_house.to_global(Vector3(-.7,3.1,.8)))
-	_path("дома → мост", Vector3(-305, .5, 35), Vector3(-360, .5, 36))
-	_path("мост → эвакуация", Vector3(-360,.5,36), Vector3(-386,.3705,40))
-	_path("двор → лесная дорога", Vector3(-196,.5,-62), Vector3(-340,.3,-300), 200000)
+	_path("дома → мост", H(-305, .5, 35), H(-360, .5, 36))
+	_path("мост → эвакуация", H(-360,.5,36), H(-386,.3705,40))
+	var forest_road: Vector3 = NavigationServer3D.map_get_closest_point(map, Vector3(-285, 0, -240))
+	_path("двор → лесная дорога", Y(-196,.5,-62), forest_road, 200000)
 	if OS.get_environment("NW_SKIP_WALK") == "1":
 		print("zone01_nw_test: checks=", checks, " failures=", failures)
 		get_tree().quit(1 if failures else 0)
 		return
 	# Настоящая капсула Player и его шаг без прыжка: вход и все пять этажей.
-	var path := PackedVector3Array([start, Vector3(-216.8,.6731,-131.5),Vector3(-216.8,.6731,-133.0),
-		Vector3(-216.03,.6731,-133.8),Vector3(-216.03,1.4731,-137.1)])
+	var path := PackedVector3Array([start, Y(-216.8,.6731,-131.5),Y(-216.8,.6731,-133.0),
+		Y(-216.03,.6731,-133.8),Y(-216.03,1.4731,-137.1)])
 	for floor_index in range(4):
 		var y: float = 1.4731+2.8*floor_index
-		path.append_array(PackedVector3Array([Vector3(-217.57,y,-137.1),Vector3(-217.57,y+1.4,-133.2),
-			Vector3(-216.03,y+1.4,-133.16),Vector3(-216.03,y+2.8,-137.1)]))
+		path.append_array(PackedVector3Array([Y(-217.57,y,-137.1),Y(-217.57,y+1.4,-133.2),
+			Y(-216.03,y+1.4,-133.16),Y(-216.03,y+2.8,-137.1)]))
 	await _walk(path)
 	var house_path := PackedVector3Array()
 	for point: Vector3 in [Vector3(-2.1,.27,3.2),Vector3(2.6,.27,3.1),Vector3(2.6,.27,-3.9),

@@ -29,9 +29,10 @@ func _author(zone: String, path: String) -> void:
 		# Дворовые находки теперь внутри доступных квартир; отдельный слой хранит только гаражи.
 		if ResourceLoader.exists("res://scenes/levels/zone01/zone01_yard05_gameplay.tscn"):
 			candidates.clear()
-		for point: Vector3 in [Vector3(-264.5, 1.4, -157), Vector3(-264.5, 1.4, -146.8),
-			Vector3(-264.5, 1.4, -137.2), Vector3(-264.5, 1.4, -127),
-			Vector3(-264.5, 1.4, -117.4), Vector3(-264.5, 1.4, -107.2)]:
+		# гаражный ряд двора хрущёвок — на новом месте двора (сдвиг +24, +97, зона 1 — квадрат 2026-10-17)
+		for point: Vector3 in [Vector3(-240.5, 1.4, -60), Vector3(-240.5, 1.4, -49.8),
+			Vector3(-240.5, 1.4, -40.2), Vector3(-240.5, 1.4, -30),
+			Vector3(-240.5, 1.4, -20.4), Vector3(-240.5, 1.4, -10.2)]:
 			candidates.append({"pos": point, "table": "workshop"})
 	else:
 		# Уже доступные места обыска: вещь рядом с ящиком, а не новая комната карты.

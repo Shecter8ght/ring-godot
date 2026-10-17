@@ -1,17 +1,19 @@
 extends Node
 ## Снимки согласованного фрагмента из реального Forward+, без вмешательства в профиль.
 
+## Точки — в прежних координатах куска; кусок стоит на новом месте (узел со сдвигом / поворотом).
+const FRAMES := {"yard": "Yard05", "market": "Blockout/Z06_Market", "houses": "Blockout/Z12_Ravine"}
 const SHOTS := {
-	"yard_entry": [Vector3(-211,2.1,-124), Vector3(-216.8,2.0,-132.5)],
-	"stairwell": [Vector3(-216.8,3.1,-137.1), Vector3(-217.55,4.0,-133.8)],
-	"apartment": [Vector3(-223.7,3.05,-136.8), Vector3(-219.2,2.25,-133.3)],
-	"market": [Vector3(-177,2.2,-32), Vector3(-177,1.9,33)],
-	"hangar": [Vector3(-191.0,2.3,-10), Vector3(-197,4.3,19)],
-	"office": [Vector3(-202.1,5.7,18), Vector3(-196.0,4.9,24.0)],
-	"houses": [Vector3(-255,2.3,17), Vector3(-275,2.6,11)],
-	"attic": [Vector3(-270.34,4.87,5.09), Vector3(-271.07,3.82,.96)],
-	"bridge": [Vector3(-316,2.0,35), Vector3(-350,1.2,36)],
-	"aerial_market": [Vector3(-130,60,112), Vector3(-180,0,20)],
+	"yard_entry": ["yard", Vector3(-211,2.1,-124), Vector3(-216.8,2.0,-132.5)],
+	"stairwell": ["yard", Vector3(-216.8,3.1,-137.1), Vector3(-217.55,4.0,-133.8)],
+	"apartment": ["yard", Vector3(-223.7,3.05,-136.8), Vector3(-219.2,2.25,-133.3)],
+	"market": ["market", Vector3(-177,2.2,-32), Vector3(-177,1.9,33)],
+	"hangar": ["market", Vector3(-191.0,2.3,-10), Vector3(-197,4.3,19)],
+	"office": ["market", Vector3(-202.1,5.7,18), Vector3(-196.0,4.9,24.0)],
+	"houses": ["houses", Vector3(-255,2.3,17), Vector3(-275,2.6,11)],
+	"attic": ["houses", Vector3(-270.34,4.87,5.09), Vector3(-271.07,3.82,.96)],
+	"bridge": ["houses", Vector3(-316,2.0,35), Vector3(-350,1.2,36)],
+	"aerial_market": ["market", Vector3(-130,60,112), Vector3(-180,0,20)],
 }
 
 
@@ -48,8 +50,9 @@ func _ready() -> void:
 	for title: String in SHOTS:
 		if not selected.is_empty() and title not in selected:
 			continue
-		cam.global_position = SHOTS[title][0]
-		cam.look_at(SHOTS[title][1])
+		var frame: Node3D = level.get_node(FRAMES[SHOTS[title][0]]) as Node3D
+		cam.global_position = frame.global_transform * (SHOTS[title][1] as Vector3)
+		cam.look_at(frame.global_transform * (SHOTS[title][2] as Vector3))
 		for tick in range(35):
 			await get_tree().process_frame
 		var measure_start: int = Time.get_ticks_usec()

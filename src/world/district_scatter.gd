@@ -35,6 +35,12 @@ extends Node3D
 ## Дальний вид (два скрещённых силуэта, tools/build_spruce.py): дальше near_distance — он вместо модели.
 @export_file("*.glb") var far_model: String = ""
 @export var near_distance: float = 90.0
+## Точки — в координатах корня своей сцены (owner), а не мира: россыпь едет вместе со сценой,
+## поставленной со сдвигом или поворотом (готовые куски зоны 1 на новых местах).
+@export var local_points: bool = false:
+	set(value):
+		local_points = value
+		_queue()
 
 var _pending: bool = false
 
@@ -67,6 +73,12 @@ func _build() -> void:
 	if mesh == null:
 		return
 	var far_mesh: Mesh = _load_model(far_model) if far_model != "" else null
+	# из координат точек — в координаты узла: мир минус положение узла или через корень сцены
+	var to_node: Transform3D = Transform3D(Basis.IDENTITY, -global_position)
+	if local_points and is_inside_tree():
+		var frame: Node3D = owner as Node3D if owner is Node3D else get_parent_node_3d()
+		if frame:
+			to_node = global_transform.affine_inverse() * frame.global_transform
 	var cells: Dictionary = {}
 	for p: Array in points:
 		var c := Vector2i(int(floor(float(p[0]) / cell)), int(floor(float(p[2]) / cell)))
@@ -89,7 +101,7 @@ func _build() -> void:
 		for i in range(list.size()):
 			var p: Array = list[i]
 			var basis := Basis(Vector3.UP, deg_to_rad(float(p[3]))).scaled(Vector3.ONE * float(p[4]))
-			mm.set_instance_transform(i, Transform3D(basis, Vector3(float(p[0]), float(p[1]), float(p[2])) - global_position))
+			mm.set_instance_transform(i, to_node * Transform3D(basis, Vector3(float(p[0]), float(p[1]), float(p[2]))))
 			if mm.use_colors:
 				# оттенок пучка: от выгоревшего до оливкового (из угла поворота — без лишних данных)
 				var t: float = fposmod(float(p[3]) * 0.137, 1.0)
@@ -105,7 +117,7 @@ func _build() -> void:
 				shape.height = trunk_height * float(p[4])
 				var col := CollisionShape3D.new()
 				col.shape = shape
-				col.position = Vector3(float(p[0]), float(p[1]) + trunk_height * float(p[4]) * 0.5, float(p[2])) - global_position
+				col.position = to_node * Vector3(float(p[0]), float(p[1]) + trunk_height * float(p[4]) * 0.5, float(p[2]))
 				body.add_child(col)
 		var mmi := MultiMeshInstance3D.new()
 		mmi.name = "_Cell_%d_%d" % [c.x, c.y]

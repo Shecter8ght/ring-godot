@@ -29,11 +29,11 @@ func _ready() -> void:
 	me.health.max_hp = 1e9
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	CameraRig.first_person_mode = true
-	var at := Vector3(-196, 0.0, -66)
+	var at := Vector3(-172, 0.0, 31)  # двор хрущёвок на новом месте (сдвиг +24, +97)
 	var ground: Dictionary = (level as Node3D).get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(at + Vector3.UP * 30.0, at + Vector3.DOWN * 30.0, Hitscan.LAYER_WORLD))
 	me.global_position = (ground.position as Vector3) + Vector3.UP * 0.1 if not ground.is_empty() else at
 	await _frames(30)
-	_look(rig, me, Vector3(-212, 7, -136))
+	_look(rig, me, Vector3(-188, 7, -39))
 	await _frames(90)
 	var fps_before: float = await _fps(60)
 	await _save("sky_flare_0_before")
@@ -69,7 +69,7 @@ func _ready() -> void:
 				_look(rig, me, flare.global_position)
 				await _frames(20)
 				await _save("sky_flare_2_top_up")
-				_look(rig, me, Vector3(-212, 7, -136))
+				_look(rig, me, Vector3(-188, 7, -39))
 		await get_tree().process_frame
 	_check("в воздухе %.1f с (нужно %.0f)" % [burn_sec, float(Balance.SKY_FLARE.air_sec)], absf(burn_sec - float(Balance.SKY_FLARE.air_sec)) < 0.3)
 	_check("поднялась на %.0f м" % top, top > float(Balance.SKY_FLARE.rise_m) * 0.9)

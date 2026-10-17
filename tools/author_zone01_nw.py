@@ -172,7 +172,7 @@ def build_market():
     for i,x in enumerate((-226,-211,-177,-151,-136,-116)):
         s.node(f"MarketApron_{i}",pave,kind="StaticBody3D",script=paving_script,
                points=z1.Raw(f"PackedVector2Array({x}, -51, {x}, 104)"),width=17.0,curb_height=0.0,
-               material=s.resource("res://assets/zone01/materials/YardAsphalt.tres","Material"),lift=.075)
+               material=s.resource("res://assets/zone01/materials/YardAsphalt.tres","Material"),lift=.075,local_points=True)
     hangar=model(s,"Hangar","market_hangar",(-192,.48,6),"Architecture")
     s.node("Furniture",hangar)
     for row,x in enumerate((-5.1,5.8)):
@@ -283,7 +283,8 @@ def build_houses():
                                ("RavineDescent",[(-310,70),(-323,84),(-331,64),(-335,30)],1.5)]:
         s.node(name,"Paths",kind="StaticBody3D",script=script,
                points=z1.Raw("PackedVector2Array("+", ".join(f"{x}, {z}" for x,z in points)+")"),
-               width=width,curb_height=0.0,material=s.resource("res://assets/zone01/materials/NWTrail.tres","Material"),lift=.07)
+               width=width,curb_height=0.0,material=s.resource("res://assets/zone01/materials/NWTrail.tres","Material"),lift=.07,
+               local_points=True)
     for i,(a,c) in enumerate([((-281,-8),(-273,-8)),((-266,-8),(-259,-8)),
                                ((-309,38),(-302,38)),((-294,38),(-286,38)),((-283,62),(-262,62))]):
         fence_segment((s,f"GardenFence_{i}","Architecture"),a,c,1.2)
@@ -340,14 +341,17 @@ def integrate():
             header=block.split("\n",1)[0]
             if f'parent="{zone}' in header:continue
             kept.append(block)
-        text="".join(kept)+f'\n[node name="{zone}" parent="." instance=ExtResource("{ident}")]\n'
+        # сцена куска — в прежних координатах; на новом месте её ставит сдвиг / поворот экземпляра
+        key={"Z06_Market":"market06","Z12_Ravine":"houses12"}[zone]
+        place="".join(f"\n{k} = {z1.gvalue(v)}" for k,v in z1.instance_attrs(key).items())
+        text="".join(kept)+f'\n[node name="{zone}" parent="." instance=ExtResource("{ident}")]{place}\n'
     blockout.write_text(text,encoding="utf-8")
     world=SCENES/"zone01_world.tscn"; text=world.read_text(encoding="utf-8")
     blocks=re.split(r'(?=\[node )',text)
     for i,block in enumerate(blocks):
         if block.startswith('[node name="Terrain" '):
             block=re.sub(r'excavations = [^\n]+\n?',"",block)
-            blocks[i]=block.rstrip()+"\nexcavations = Array[AABB]([AABB(-225, -1.9, -144, 17, 2.3, 12)])\n\n"
+            blocks[i]=block.rstrip()+f"\nexcavations = {z1.yard_excavation()}\n\n"
     world.write_text("".join(blocks),encoding="utf-8")
     # Прежние 10 дворовых находок перенесены внутрь. Шесть гаражных точек остаются на месте.
     loose_path=SCENES/"zone01_loose_loot.tscn"
@@ -358,7 +362,9 @@ def integrate():
 
 
 def main():
-    z1.H=np.fromfile(ROOT/"data/terrain/zone01_heights.r32",dtype="<f4").reshape(z1.NZ,z1.NX)
+    # куски стоят на своей прежней земле в прежних координатах (вырезки data/terrain/zone01_ready);
+    # в зоне 1 их сцены ставятся со сдвигом / поворотом (tools/build_zone01.py, READY)
+    z1.ground=z1.ready_crop_ground
     make_materials(); build_yard(); build_market(); build_houses(); integrate()
     assert len(REPORT["containers"])==18,len(REPORT["containers"])
     assert len(REPORT["loose"])==24,len(REPORT["loose"])

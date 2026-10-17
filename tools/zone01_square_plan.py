@@ -339,6 +339,7 @@ def build_layout() -> dict:
         "roads": roads,
         "buildings": buildings,
         "buses": [list(m(*q)) for q in PX_BUSES],
+        "crane": list(m(905, 300)),
         "court": {"at": list(m(*PX_COURT[0])), "size": list(PX_COURT[1]), "angle": PX_COURT[2]},
         "site": [list(q) for q in mpath(PX_SITE)],
         "bus_lot": [list(q) for q in mpath(PX_BUSLOT)],
@@ -579,7 +580,7 @@ def trees_from_concept(layout: dict) -> list[tuple[float, float]]:
     mx = arr.max(-1)
     sat = (mx - arr.min(-1)) / (mx + 1)
     green = (g_ >= r_ - 2) & (g_ > b_ + 4) & (mx < 125) & (sat > 0.10)
-    cell = 8
+    cell = 7
     blocked = [rect_pts(*b["at"], b["size"][0] + 6, b["size"][1] + 6, b["angle"]) for b in layout["buildings"]]
     for r in layout["ready"].values():
         blocked.append([tuple(q) for q in r["outline"]])
@@ -588,7 +589,7 @@ def trees_from_concept(layout: dict) -> list[tuple[float, float]]:
     for cy in range(y0, y1, cell):
         for cx in range(x0, x1, cell):
             share = float(green[cy:cy + cell, cx:cx + cell].mean())
-            if share < 0.55:
+            if share < 0.45:
                 continue
             x, z = m(cx + cell / 2, cy + cell / 2)
             if not point_in(layout["boundary"], x, z):

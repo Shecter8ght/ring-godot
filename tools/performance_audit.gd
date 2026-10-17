@@ -83,8 +83,8 @@ func _run() -> void:
 			spots = [{"name": "alley", "pos": Vector3(0, 0.05, -108), "yaw": 0.0},
 				{"name": "atrium", "pos": SectorBuilder.polar(-80.0, 35.0) + Vector3.UP * 0.05, "yaw": 0.0}]
 		"zone01":
-			spots = [{"name": "courtyard", "pos": Vector3(-194, 0, -90), "yaw": 0.0},
-				{"name": "center", "pos": Vector3(-10, 0, -60), "yaw": PI}]
+			spots = [{"name": "courtyard", "pos": Vector3(-170, 0, 7), "yaw": 0.0},
+				{"name": "center", "pos": Vector3(-20, 0, 40), "yaw": PI}]
 	for spot: Dictionary in spots:
 		player.global_position = _ground(spot.pos as Vector3, player)
 		player.velocity = Vector3.ZERO

@@ -6,31 +6,31 @@
 [node name="Zone 01LooseLoot" type="Node3D" unique_id=471878985]
 
 [node name="Found_10" type="Node3D" parent="." unique_id=1566007943 instance=ExtResource("1_0ox27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.43848422, -157)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240.5, 0.438484, -60)
 script = ExtResource("2_wfpgk")
 table = "workshop"
 
 [node name="Found_11" type="Node3D" parent="." unique_id=118711756 instance=ExtResource("1_0ox27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.40413207, -146.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240.5, 0.404132, -49.8)
 script = ExtResource("2_wfpgk")
 table = "workshop"
 
 [node name="Found_12" type="Node3D" parent="." unique_id=1282389973 instance=ExtResource("1_0ox27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.48109692, -137.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240.5, 0.481097, -40.2)
 script = ExtResource("2_wfpgk")
 table = "workshop"
 
 [node name="Found_13" type="Node3D" parent="." unique_id=623101321 instance=ExtResource("1_0ox27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.57289845, -127)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240.5, 0.572898, -30)
 script = ExtResource("2_wfpgk")
 table = "workshop"
 
 [node name="Found_14" type="Node3D" parent="." unique_id=1456301441 instance=ExtResource("1_0ox27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.57224256, -117.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240.5, 0.572243, -20.4)
 script = ExtResource("2_wfpgk")
 table = "workshop"
 
 [node name="Found_15" type="Node3D" parent="." unique_id=1959213153 instance=ExtResource("1_0ox27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264.5, 0.4247529, -107.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240.5, 0.424753, -10.2)
 script = ExtResource("2_wfpgk")
 table = "workshop"

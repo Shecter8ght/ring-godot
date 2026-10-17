@@ -8,7 +8,7 @@ extends Node
 
 const SCENE := "res://scenes/levels/zone01_mall.tscn"
 ## Поле с плотной травой на западе района (карта плотности assets/terrain/zone01_grass.png).
-const DEFAULT_AT := Vector2(-255.0, -55.0)
+const DEFAULT_AT := Vector2(-231.0, 42.0)  # у гаражей двора хрущёвок (зона 1 — квадрат 2026-10-17)
 
 var _suffix: String = ""
 var _only: PackedStringArray = PackedStringArray()

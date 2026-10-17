@@ -56,7 +56,9 @@ PLAYGROUND = (-197.0, -92.0)
 
 
 def load_heights() -> None:
-    z1.H = np.fromfile(ROOT / "data/terrain/zone01_heights.r32", dtype="<f4").reshape(z1.NZ, z1.NX)
+    # двор стоит на своей прежней земле (вырезка data/terrain/zone01_ready/yard05.r32) в прежних координатах;
+    # в зоне 1 сцена ставится со сдвигом (tools/build_zone01.py, READY)
+    z1.ground = z1.ready_crop_ground
 
 
 def footprint_y(x: float, z: float, w: float, d: float, yaw: float) -> float:
@@ -124,7 +126,7 @@ def main() -> None:
         raw = "PackedVector2Array(" + ", ".join(f"{x}, {z}" for x, z in pts) + ")"
         s.node(name, "Paving", kind="StaticBody3D", script=script, points=z1.Raw(raw), width=width,
                curb_height=curb_h, material=asphalt if kind == "asphalt" else walk, curb_material=curb,
-               lift=0.05 if kind == "asphalt" else 0.1)
+               lift=0.05 if kind == "asphalt" else 0.1, local_points=True)
 
     s.node("Props", groups=["nav_source"])
     # лавки у подъездов и фонари вдоль проезда
@@ -266,7 +268,8 @@ def scatter(s: z1.Scene) -> None:
         extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=320.0) if key.startswith(("spruce", "birch", "pine")) else {}
         radius = round(z1.pine_radius(key), 3) if key.startswith("pine") else 0.25
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",
-               key=key, model=f"{MODELS}/{key}.glb", view_distance=900.0, cell=96.0, trunk_radius=radius, **extra)
+               key=key, model=f"{MODELS}/{key}.glb", view_distance=900.0, cell=96.0, trunk_radius=radius,
+               local_points=True, **extra)
     z1.undergrowth_nodes(s, "Vegetation", "res://data/zone01_yard_scatter.json")
     print("trees", sum(len(v) for v in trees.values()), "кустов", sum(len(data[k]) for k in z1.UG_VIEW))
 

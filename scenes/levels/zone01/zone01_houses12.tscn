@@ -330,6 +330,7 @@ materials_dir = "res://assets/zone01/materials"
 
 [node name="MarketToHouses" parent="Paths" type="StaticBody3D"]
 script = ExtResource("11")
+local_points = true
 points = PackedVector2Array(-236, 35, -254, 34, -282, 32, -305, 35, -315, 35)
 width = 2.0
 curb_height = 0.0
@@ -338,6 +339,7 @@ lift = 0.07
 
 [node name="UpperBank" parent="Paths" type="StaticBody3D"]
 script = ExtResource("11")
+local_points = true
 points = PackedVector2Array(-306, -18, -312, 6, -315, 35, -310, 70)
 width = 1.6
 curb_height = 0.0
@@ -346,6 +348,7 @@ lift = 0.07
 
 [node name="RavineDescent" parent="Paths" type="StaticBody3D"]
 script = ExtResource("11")
+local_points = true
 points = PackedVector2Array(-310, 70, -323, 84, -331, 64, -335, 30)
 width = 1.5
 curb_height = 0.0

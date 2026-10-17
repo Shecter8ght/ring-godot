@@ -10,7 +10,7 @@
 
 [node name="Building_0" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(-450.0, -0.0588, -110.0)
+position = Vector3(-395.0, -0.3, -150.0)
 rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/sf_panel5_brutal.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -19,7 +19,7 @@ materials_dir = ""
 
 [node name="Building_1" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(-452.0, 0.1734, -40.0)
+position = Vector3(-398.0, -0.3, -40.0)
 rotation_degrees = Vector3(0.0, 92.0, 0.0)
 model = "res://assets/zone01/models/sf_panel5_brutal.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -28,7 +28,7 @@ materials_dir = ""
 
 [node name="Building_2" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(-450.0, 0.3057, 60.0)
+position = Vector3(-395.0, -0.3, 80.0)
 rotation_degrees = Vector3(0.0, 88.0, 0.0)
 model = "res://assets/zone01/models/sf_panel12.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -37,7 +37,7 @@ materials_dir = ""
 
 [node name="Building_3" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(-150.0, -0.0198, -405.0)
+position = Vector3(-150.0, -0.3, -400.0)
 rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/sf_panel12.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -46,7 +46,7 @@ materials_dir = ""
 
 [node name="Building_4" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(70.0, -0.3, -412.0)
+position = Vector3(40.0, 0.0784, -405.0)
 rotation_degrees = Vector3(0.0, 4.0, 0.0)
 model = "res://assets/zone01/models/sf_panel5_brutal.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -55,7 +55,7 @@ materials_dir = ""
 
 [node name="Building_5" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(300.0, 0.0785, -402.0)
+position = Vector3(220.0, -0.3, -398.0)
 rotation_degrees = Vector3(0.0, -6.0, 0.0)
 model = "res://assets/zone01/models/sf_panel12.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -64,7 +64,7 @@ materials_dir = ""
 
 [node name="Building_6" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(420.0, -0.3, 130.0)
+position = Vector3(395.0, -0.2177, 150.0)
 rotation_degrees = Vector3(0.0, -92.0, 0.0)
 model = "res://assets/zone01/models/sf_panel12.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -73,7 +73,7 @@ materials_dir = ""
 
 [node name="Building_7" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(380.0, -0.3, 230.0)
+position = Vector3(385.0, -0.3, 260.0)
 rotation_degrees = Vector3(0.0, -84.0, 0.0)
 model = "res://assets/zone01/models/sf_panel5_brutal.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -82,7 +82,7 @@ materials_dir = ""
 
 [node name="Building_8" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(470.0, -0.3, -40.0)
+position = Vector3(395.0, -0.2019, 40.0)
 rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/sf_panel12.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
@@ -91,107 +91,25 @@ materials_dir = ""
 
 [node name="Building_9" parent="Background" type="StaticBody3D"]
 script = ExtResource("1")
-position = Vector3(470.0, -0.3, 60.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
+position = Vector3(-120.0, -0.3, 400.0)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+model = "res://assets/zone01/models/sf_panel12.glb"
+manifest = "res://assets/zone01/models/sketchfab.json"
+surface = "concrete"
+materials_dir = ""
+
+[node name="Building_10" parent="Background" type="StaticBody3D"]
+script = ExtResource("1")
+position = Vector3(60.0, -0.2793, 402.0)
+rotation_degrees = Vector3(0.0, 178.0, 0.0)
 model = "res://assets/zone01/models/sf_panel5_brutal.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
 surface = "concrete"
 materials_dir = ""
 
 [node name="Z06_Market" parent="." instance=ExtResource("2")]
+position = Vector3(-21.0, 0.0, 157.0)
 
 [node name="Z12_Ravine" parent="." instance=ExtResource("3")]
-
-[node name="Z08_Garages" parent="." type="Node3D"]
-
-[node name="Buildings" parent="Z08_Garages" type="Node3D"]
-
-[node name="Row0_Block0" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(182.0, -0.05, -121.0)
+position = Vector3(-90.0, 0.0, -125.0)
 rotation_degrees = Vector3(0.0, 180.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row0_Block1" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(182.0, -0.05, -143.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row0_Block2" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(182.0, -0.05, -165.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row0_Block3" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(182.0, -0.05, -187.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row0_Block4" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(182.0, -0.05, -209.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row1_Block0" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(199.0, -0.05, -121.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row1_Block1" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(199.0, -0.05, -143.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row1_Block2" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(199.0, -0.05, -165.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row1_Block3" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(199.0, -0.05, -187.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
-
-[node name="Row1_Block4" parent="Z08_Garages/Buildings" type="StaticBody3D"]
-script = ExtResource("1")
-position = Vector3(199.0, -0.05, -209.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
-model = "res://assets/zone01/models/sf_garage_row.glb"
-manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "concrete"
-materials_dir = ""
