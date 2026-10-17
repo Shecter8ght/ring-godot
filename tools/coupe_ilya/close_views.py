@@ -1,7 +1,9 @@
 """Купе Ильи: крупные планы деталей (Workbench, нейтральный серый).
 
     blender --background --factory-startup --python-exit-code 1 --python tools/coupe_ilya/close_views.py -- \
-        <файл.blend> <папка> <префикс> имя:x,y,z:цель_x,цель_y,цель_z[:фокус_мм] ...
+        <файл.blend> <папка> <префикс> [rot:Объект:ось:рад] [show:Коллекция] [hide:Коллекция]         имя:x,y,z:цель_x,цель_y,цель_z[:фокус_мм] ...
+
+rot — повернуть объект (например rot:Hood_Hinge:x:-0.87 — капот открыт), show/hide — состояния.
 """
 from __future__ import annotations
 
@@ -27,7 +29,22 @@ cam = bpy.data.objects.new("_close_cam", cam_data)
 scene.collection.objects.link(cam)
 scene.camera = cam
 scene.render.resolution_x, scene.render.resolution_y = 1400, 900
+shots = []
 for spec in argv[3:]:
+    kind = spec.split(":")[0]
+    if kind == "rot":
+        _, obn, ax, val = spec.split(":")
+        ob = bpy.data.objects[obn]
+        ob.rotation_euler["xyz".index(ax)] = float(val)
+    elif kind in ("show", "hide"):
+        c = bpy.data.collections[spec.split(":")[1]]
+        c.hide_render = kind == "hide"
+        for ob in c.all_objects:
+            if ob is not None:
+                ob.hide_render = kind == "hide"
+    else:
+        shots.append(spec)
+for spec in shots:
     parts = spec.split(":")
     name = parts[0]
     loc = Vector([float(v) for v in parts[1].split(",")])

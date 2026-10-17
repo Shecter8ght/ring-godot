@@ -14,11 +14,27 @@ import numpy as np
 from domain import domain_panel
 from fieldcore import WHEEL_Y, WHEEL_Z
 from seams import VIEWS, Seam, loop
-from surface import Surface
+from surface import Surface, resample
 
 GAP = 0.0045                 # обычный зазор панелей
 GAP_TIGHT = 0.0035           # бампер — крыло, фары
 ARCH_LIP_R = 0.392           # кромка арки (вырез поля — 0,388)
+
+
+def _sym(half: list[tuple[float, float]], closed_at_axis: bool) -> list[tuple[float, float]]:
+    """Симметричный контур вида спереди/сзади из левой половины (от оси сверху к оси снизу)."""
+    tail = half[1:-1] if closed_at_axis else half[1:]
+    return half + [(-x, z) for x, z in reversed(tail)]
+
+
+# Проёмы переднего бампера, вид спереди (X, Z): решётка, левый боковой, нижний
+GRILLE = _sym([(0.0, 0.790), (0.30, 0.788), (0.40, 0.776), (0.437, 0.745), (0.447, 0.68), (0.441, 0.60),
+               (0.415, 0.537), (0.36, 0.507), (0.20, 0.498)], False)
+INTAKE_L = [(0.555, 0.585), (0.70, 0.620), (0.808, 0.635), (0.842, 0.600), (0.850, 0.45), (0.835, 0.300),
+            (0.780, 0.262), (0.640, 0.270), (0.545, 0.320), (0.515, 0.420), (0.525, 0.530)]
+LOWER = _sym([(0.0, 0.432), (0.32, 0.428), (0.415, 0.408), (0.462, 0.352), (0.448, 0.288), (0.385, 0.265),
+              (0.0, 0.262)], True)
+EXHAUST_L = [(0.470, 0.438), (0.672, 0.440), (0.686, 0.425), (0.665, 0.388), (0.482, 0.388), (0.462, 0.415)]
 
 
 def arch_pts(yc: float, phi0: float, phi1: float, n: int = 9, r: float = ARCH_LIP_R):
@@ -68,8 +84,8 @@ def build_all(surf: Surface) -> list[tuple[str, str, np.ndarray, list]]:
     hood_lamp_in = ("top", 0.455, -2.110)        # A: передний угол капота над фарой
     hood_lamp_out = ("top", 0.720, -1.880)       # B: здесь верх фары уходит от капота на борт
     hood_front_c = ("top", 0.0, -2.150)
-    lamp_tip = ("side", -1.748, 0.766)           # D: хвост фары на борту
-    lamp_in_low = ("front", 0.470, 0.700)        # H: нижний внутренний носик фары
+    lamp_tip = ("side", -1.748, 0.778)           # D: хвост фары на борту
+    lamp_in_low = ("front", 0.470, 0.765)        # H: нижний внутренний носик фары (фара узкая, как на концепте)
     # Шов бампера подходит к арке по радиусу (почти под прямым углом), а не по касательной
     PHI_BUMP = 122.0
     arch_bump = ("side", YF + ARCH_LIP_R * math.cos(math.radians(PHI_BUMP)), WHEEL_Z + ARCH_LIP_R * math.sin(math.radians(PHI_BUMP)))
@@ -91,11 +107,11 @@ def build_all(surf: Surface) -> list[tuple[str, str, np.ndarray, list]]:
                                  hood_lamp_out], "top")
     S["hood_lamp"] = Seam(surf, [hood_lamp_out, ("top", 0.640, -1.975), ("top", 0.540, -2.065), hood_lamp_in], "top")
     S["hood_front"] = Seam(surf, [hood_lamp_in, ("top", 0.330, -2.140), ("top", 0.160, -2.148), hood_front_c], "top")
-    S["lamp_top_out"] = Seam(surf, [hood_lamp_out, rf_pt(69.7, 0.84), ("side", -1.82, 0.792), lamp_tip], "rf")
-    S["lamp_bottom"] = Seam(surf, [lamp_tip, ("side", -1.80, 0.740), ("side", -1.92, 0.690), ("front", 0.800, 0.648),
-                                   ("front", 0.690, 0.650), ("front", 0.580, 0.662), lamp_in_low], "rf")
-    S["lamp_inner"] = Seam(surf, [lamp_in_low, ("front", 0.462, 0.760), hood_lamp_in], "rf")
-    S["bump_fender"] = Seam(surf, [lamp_tip, ("side", -1.700, 0.738), arch_bump], "side")
+    S["lamp_top_out"] = Seam(surf, [hood_lamp_out, rf_pt(69.7, 0.845), ("side", -1.82, 0.802), lamp_tip], "rf")
+    S["lamp_bottom"] = Seam(surf, [lamp_tip, ("side", -1.80, 0.766), ("side", -1.92, 0.752), ("front", 0.800, 0.745),
+                                   ("front", 0.690, 0.748), ("front", 0.580, 0.755), lamp_in_low], "rf")
+    S["lamp_inner"] = Seam(surf, [lamp_in_low, ("front", 0.460, 0.795), hood_lamp_in], "rf")
+    S["bump_fender"] = Seam(surf, [lamp_tip, ("side", -1.700, 0.745), arch_bump], "side")
     S["arch_f_front"] = Seam(surf, [arch_bump] + arch_pts(YF, PHI_BUMP, phi_fb, 9)[1:-1] + [arch_bot_f], "side")
     S["arch_f_top"] = Seam(surf, [arch_bump] + arch_pts(YF, PHI_BUMP, phi_sf, 13)[1:-1] + [arch_sill_f], "side")
     S["sill_f"] = Seam(surf, [arch_sill_f, ("side", -0.90, 0.318), door_fb], "side")
@@ -112,6 +128,7 @@ def build_all(surf: Surface) -> list[tuple[str, str, np.ndarray, list]]:
     left = [S["cowl"].P, S["hood_side"].P, S["hood_lamp"].P, S["hood_front"].P]
     right = [mirror_curve(c)[::-1] for c in reversed(left)]
     hood_loop = loop(left + right)
+    S["_hood_loop"] = hood_loop
     V, F = domain_panel(surf, VIEWS["top"], hood_loop, h=0.014, gap=GAP)
     out.append(("Hood", "paint", V, F))
 
@@ -129,6 +146,20 @@ def build_all(surf: Surface) -> list[tuple[str, str, np.ndarray, list]]:
     out.append(("Door_L", "paint", V, F))
     out.append(("Door_R", "paint", *mirror_mesh(V, F)))
 
+    # --- Порог левый (между арками, под дверью) -------------------------------------------------
+    phi_fs_low = phi_at_z(0.205, False)
+    phi_rs_low = phi_at_z(0.205, True)
+    sk_f_low = ("side", YF + ARCH_LIP_R * math.cos(math.radians(phi_fs_low)), 0.205)
+    sk_r_low = ("side", WHEEL_Y + ARCH_LIP_R * math.cos(math.radians(phi_rs_low)), 0.205)
+    S["arch_f_sill"] = Seam(surf, [sk_f_low] + arch_pts(YF, phi_fs_low, phi_sf, 5)[1:-1] + [arch_sill_f], "side")
+    S["arch_r_sill"] = Seam(surf, [("p", *S["sill_r"].P[-1])] + arch_pts(WHEEL_Y, phi_sr, phi_rs_low, 5)[1:-1] + [sk_r_low], "side")
+    S["skirt_bottom"] = Seam(surf, [sk_r_low, ("side", 0.40, 0.200), ("side", -0.40, 0.199), sk_f_low], "side")
+    skirt = loop([S["sill_f"].P, S["door_bottom"].P, S["sill_r"].P, S["arch_r_sill"].P, S["skirt_bottom"].P,
+                  S["arch_f_sill"].P])
+    V, F = domain_panel(surf, VIEWS["side"], skirt, h=0.010, gap=GAP)
+    out.append(("Skirt_L", "trim_black", V, F))
+    out.append(("Skirt_R", "trim_black", *mirror_mesh(V, F)))
+
     # --- Фара левая (стекло в своём проёме) ------------------------------------------------------
     lamp = loop([S["hood_lamp"].P, S["lamp_inner"].reversed(), S["lamp_bottom"].reversed(), S["lamp_top_out"].reversed()])
     V, F = domain_panel(surf, VIEWS["rf"], lamp, h=0.008, gap=GAP_TIGHT, flange=0.03)
@@ -144,17 +175,10 @@ def build_all(surf: Surface) -> list[tuple[str, str, np.ndarray, list]]:
     # Левая половина идёт от центра верха к центру низа; правая — зеркально обратно
     br = [mirror_curve(c)[::-1] for c in reversed(bl)]
     bumper = loop(bl + br)
-    grille = [("front", x, z) for x, z in
-              [(0.0, 0.790), (0.30, 0.788), (0.40, 0.776), (0.437, 0.745), (0.447, 0.68), (0.441, 0.60),
-               (0.415, 0.537), (0.36, 0.507), (0.20, 0.498)]]
-    grille = grille + [("front", -x, z) for _, x, z in reversed(grille[1:])]
-    intake_l = [("front", x, z) for x, z in
-                [(0.565, 0.468), (0.70, 0.488), (0.800, 0.498), (0.838, 0.462), (0.842, 0.36), (0.830, 0.290),
-                 (0.775, 0.262), (0.640, 0.272), (0.540, 0.322), (0.508, 0.395), (0.520, 0.445)]]
+    grille = [("front", x, z) for x, z in GRILLE]
+    intake_l = [("front", x, z) for x, z in INTAKE_L]
     intake_r = [("front", -x, z) for _, x, z in reversed(intake_l)]
-    lower = [("front", x, z) for x, z in
-             [(0.0, 0.432), (0.32, 0.428), (0.415, 0.408), (0.462, 0.352), (0.448, 0.288), (0.385, 0.265), (0.0, 0.262)]]
-    lower = lower + [("front", -x, z) for _, x, z in reversed(lower[1:-1])]
+    lower = [("front", x, z) for x, z in LOWER]
 
     def hole(pts):
         return Seam(surf, pts, "rf", n=500, closed=True).P
@@ -163,6 +187,7 @@ def build_all(surf: Surface) -> list[tuple[str, str, np.ndarray, list]]:
                         h=0.012, gap=GAP_TIGHT, hole_depth=0.06)
     out.append(("Bumper_F", "paint", V, F))
     build_rear(surf, S, out)
+    build_parts(surf, S, out)
     return out
 
 
@@ -287,10 +312,109 @@ def build_rear(surf: Surface, S: dict, out: list) -> None:
     out.append(("Bumper_R", "paint", V, F))
     # --- Диффузор с выхлопом ----------------------------------------------------------------
     diff = sym_loop([S["diff_top_r"].reversed(), S["diff_top_s"].reversed(), S["arch_r_diff"].P, S["under"].P])
-    ex_l = [("rear", x, z) for x, z in [(0.470, 0.438), (0.672, 0.440), (0.686, 0.425), (0.665, 0.388),
-                                        (0.482, 0.388), (0.462, 0.415)]]
+    ex_l = [("rear", x, z) for x, z in EXHAUST_L]
     ex_r = [("rear", -x, z) for _, x, z in reversed(ex_l)]
     V, F = domain_panel(surf, VIEWS["rx_rear"], diff, holes=[Seam(surf, ex_l, "rear", n=200, closed=True).P,
                                                              Seam(surf, ex_r, "rear", n=200, closed=True).P],
                         h=0.010, gap=GAP, hole_depth=0.08)
     out.append(("Diffuser", "trim_black", V, F))
+
+
+def build_parts(surf: Surface, S: dict, out: list) -> None:
+    """Детали поверх панелей: решётка со знаком, рёбра проёмов, губа, накладки, ручки, выхлоп."""
+    import parts as pt
+
+    front = VIEWS["front"]
+    # Решётка: вертикальные рёбра, задник, знак «Клин» по центру
+    out.append(("Grille_Slats", "trim_gloss_black", *pt.grille_slats(surf, GRILLE, n_slats=13)))
+    g_loop = Seam(surf, [("front", x, z) for x, z in GRILLE], "rf", n=400, closed=True).P
+    out.append(("Grille_Back", "mesh_black", *pt.backing(surf, VIEWS["rf"], g_loop, 0.075)))
+    c = front.lift(surf, np.array([[0.0, 0.648]]))[0]
+    out.append(("Badge_Front", "chrome", *pt.badge(c + np.array([0, -0.006, 0]), (0, -1, 0), (0, 0, 1), 0.125)))
+    # Боковые воздухозаборники: три карбоновые лопатки и соты за ними
+    i_loop = Seam(surf, [("front", x, z) for x, z in INTAKE_L], "rf", n=300, closed=True).P
+    fins = pt.fins_in_loop(surf, VIEWS["rf"], i_loop, [0.545, 0.455, 0.365], t=0.010, depth=0.065)
+    out.append(("Intake_Fins_L", "carbon", *fins))
+    out.append(("Intake_Fins_R", "carbon", *mirror_mesh(*fins)))
+    ib = pt.backing(surf, VIEWS["rf"], i_loop, 0.07)
+    out.append(("Intake_Back_L", "mesh_black", *ib))
+    out.append(("Intake_Back_R", "mesh_black", *mirror_mesh(*ib)))
+    # Нижний воздухозаборник: две лопатки и соты
+    l_loop = Seam(surf, [("front", x, z) for x, z in LOWER], "rf", n=400, closed=True).P
+    out.append(("Lower_Fins", "trim_gloss_black", *pt.fins_in_loop(surf, VIEWS["rf"], l_loop, [0.385, 0.318],
+                                                                   t=0.008, depth=0.05)))
+    out.append(("Lower_Back", "mesh_black", *pt.backing(surf, VIEWS["rf"], l_loop, 0.06)))
+    # Губа под бампером (карбон): плита вдоль нижней кромки, выступает вперёд
+    edge = np.vstack([mirror_curve(S["bump_bottom"].P)[::-1], S["bump_bottom"].P[::-1][1:]])
+    edge = resample(edge, 260)
+    nrm = surf.normal(edge)
+    out_h = nrm.copy()
+    out_h[:, 2] = 0
+    out_h /= np.maximum(np.linalg.norm(out_h, axis=1, keepdims=True), 1e-9)
+    path = edge + out_h * 0.012 - np.array([0, 0, 0.010])
+    sec = pt.rounded_rect(0.075, 0.011, 0.004, 3)
+    out.append(("Splitter", "carbon", *pt.loft(path, out_h, np.broadcast_to(np.array([0, 0, 1.0]), path.shape), sec)))
+    # Хромовая накладка порога. Левая треснула: кусок у задней кромки двери отколот (он на стоянке ТЦ)
+    side = VIEWS["side"]
+    yy = np.linspace(-0.97, 0.97, 200)
+    line = side.lift(surf, np.c_[yy, np.full(len(yy), 0.262)])
+    gap_y0, gap_y1 = 0.255, 0.335
+    keep_a, keep_b = line[yy < gap_y0], line[yy > gap_y1]
+    frag = line[(yy >= gap_y0 + 0.004) & (yy <= gap_y1 - 0.004)]
+    left = pt.merge([pt.strip_on_surface(surf, keep_a, 0.018, 0.004, 0.001),
+                     pt.strip_on_surface(surf, keep_b, 0.018, 0.004, 0.001)])
+    out.append(("Sill_Trim_L_cracked", "chrome", *left))
+    out.append(("Sill_Trim_R", "chrome", *mirror_mesh(*pt.strip_on_surface(surf, line, 0.018, 0.004, 0.001))))
+    out.append(("Sill_Trim_Fragment", "chrome", *pt.strip_on_surface(surf, frag, 0.018, 0.004, 0.001)))
+    # Ручки дверей — заподлицо, тонкая планка у задней кромки двери
+    hy = np.linspace(0.30, 0.48, 40)
+    hline = side.lift(surf, np.c_[hy, np.full(len(hy), 0.862)])
+    h = pt.strip_on_surface(surf, hline, 0.024, 0.006, 0.0005, r=0.0028)
+    out.append(("Door_Handle_L", "chrome", *h))
+    out.append(("Door_Handle_R", "chrome", *mirror_mesh(*h)))
+    # Зеркала
+    housing, mglass, arm = pt.mirror_parts(surf)
+    for nm, mat, mesh in (("Mirror_Housing", "paint", housing), ("Mirror_Glass", "mirror", mglass),
+                          ("Mirror_Arm", "trim_gloss_black", arm)):
+        out.append((nm + "_L", mat, *mesh))
+        out.append((nm + "_R", mat, *mirror_mesh(*mesh)))
+    # Подкрылки и днище
+    for nm, yc in (("F", -WHEEL_Y), ("R", WHEEL_Y)):
+        liner = pt.wheel_liner(yc, WHEEL_Z)
+        out.append((f"Liner_{nm}L", "liner", *liner))
+        out.append((f"Liner_{nm}R", "liner", *mirror_mesh(*liner)))
+    out.append(("Under_Tray", "liner", *pt.under_tray(surf.field)))
+    # Дворники
+    out.append(("Wiper_L", "trim_black", *pt.wiper(surf, (-0.02, -0.795), (0.60, -0.765), (0.30, -0.865))))
+    out.append(("Wiper_R", "trim_black", *pt.wiper(surf, (-0.60, -0.765), (-0.08, -0.795), (-0.38, -0.865))))
+    # Начинка фар
+    lamp_loop = loop([S["hood_lamp"].P, S["lamp_inner"].reversed(), S["lamp_bottom"].reversed(), S["lamp_top_out"].reversed()])
+    top_edge = np.vstack([S["hood_lamp"].reversed(), S["lamp_top_out"].P[1:]])
+    back, drl, lenses = pt.headlamp_inner(surf, lamp_loop, VIEWS["rf"], top_edge)
+    for nm, mat, mesh in (("Headlamp_Reflector", "chrome_dark", back), ("Headlamp_DRL", "lamp_drl", drl),
+                          ("Headlamp_Lenses", "lens", lenses)):
+        out.append((nm + "_L", mat, *mesh))
+        out.append((nm + "_R", mat, *mirror_mesh(*mesh)))
+    # Знак на крышке багажника
+    c = VIEWS["rear"].lift(surf, np.array([[0.0, 0.985]]))[0]
+    out.append(("Badge_Rear", "chrome", *pt.badge(c + np.array([0, 0.004, 0]), (0, 1, 0), (0, 0, 1), 0.095)))
+    # Выхлоп: по две овальные насадки в каждом проёме
+    tips = []
+    for xc in (0.522, 0.616):
+        cpt = VIEWS["rear"].lift(surf, np.array([[xc, 0.413]]))[0]
+        yy0, yy1 = cpt[1] - 0.12, cpt[1] - 0.012
+        ys = np.linspace(yy0, yy1, 12)
+        P = np.c_[np.full(12, xc), ys, np.full(12, 0.413)]
+        U = np.broadcast_to(np.array([1.0, 0, 0]), P.shape)
+        Vv = np.broadcast_to(np.array([0, 0, 1.0]), P.shape)
+        outer = pt.rounded_rect(0.082, 0.040, 0.018, 5)
+        inner = outer * np.array([0.86, 0.78])
+        tips.append(pt.loft(P, U, Vv, outer, cap=False))
+        tips.append(pt.loft(P[::-1], U, Vv, inner, cap=False))
+        # кольцо-торец между наружной и внутренней стенкой
+        k = len(outer)
+        Vr = np.vstack([P[-1] + outer[:, :1] * U[0] + outer[:, 1:2] * Vv[0], P[-1] + inner[:, :1] * U[0] + inner[:, 1:2] * Vv[0]])
+        tips.append((Vr, [(j, (j + 1) % k, k + (j + 1) % k, k + j) for j in range(k)]))
+    ex = pt.merge(tips)
+    out.append(("Exhaust_Tips_L", "chrome_dark", *ex))
+    out.append(("Exhaust_Tips_R", "chrome_dark", *mirror_mesh(*ex)))

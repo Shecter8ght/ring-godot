@@ -56,6 +56,9 @@ CREASE_AMP, CREASE_W = 0.006, 0.045
 # Нижняя линия двери — мягкая впадина
 DOOR_LINE = [(-1.00, 0.410), (0.12, 0.449), (0.90, 0.480)]
 DOOR_AMP, DOOR_W = -0.004, 0.06
+# Выпуклости капота: центр по X, полуширина, высота; вдоль Y — от лобового к передней кромке
+HOOD_DOMES = [(0.145, 0.120, 0.014)]
+HOOD_DOME_Y = (-1.98, -0.98)
 
 
 
@@ -125,6 +128,12 @@ class BodyField:
         crown = CROWN_HOOD * np.clip(ax / np.maximum(pv, 0.05), 0, 1.2) ** 2
         tv, tk = self.t_low.at(yq)
         bv, bk = self.b_low.at(yq)
+        # Выпуклости капота: гладкий горб поперёк, нарастает и спадает по длине
+        y0, y1 = HOOD_DOME_Y
+        along = smoothstep(y0, y0 + 0.30, Y) * (1 - smoothstep(y1 - 0.25, y1, Y))
+        for xc, hw, amp in HOOD_DOMES:
+            q = np.clip(1 - ((ax - xc) / hw) ** 2, 0, None)
+            tv = tv + amp * q * q * along
         d_side = smax((Z + crown - tv) * tk, (bv - Z) * bk, R_NOSE)
         g = np.interp(Z, [p[0] for p in G_SECTION], [p[1] for p in G_SECTION])
         d_plan = (ax / g - pv) * pk * g
