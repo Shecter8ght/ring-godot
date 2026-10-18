@@ -97,10 +97,10 @@ position = Vector3(-190.0, 0.45, 170.0)
 position = Vector3(185.0, 0.2, -150.0)
 
 [node name="AI_Spawn_04" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(-120.0, 0.2141, -200.0)
+position = Vector3(-120.0, 0.6641, -200.0)
 
 [node name="AI_Spawn_05" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
-position = Vector3(-60.0, 0.4642, 10.0)
+position = Vector3(-60.0, 0.4903, 10.0)
 
 [node name="AI_Spawn_06" parent="Gameplay/AI_Spawns" type="Marker3D" groups=["ai_spawn_points"]]
 position = Vector3(60.0, 0.3087, -120.0)

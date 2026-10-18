@@ -484,6 +484,9 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 	if _has_ears() and _listener_pos().distance_to(pos) > float(KINDS.step_stone_run["max"]):
 		return
 	var surf := _surface_under(pos)
+	# вброд — плеск, что бы ни было на дне
+	if WaterBody.depth_at(pos) > float(Balance.WATER.ankle):
+		surf = "water"
 	var sset := String(STEP_SET.get(surf, "stone"))
 	var pitch := (0.97 if left else 1.02) * (0.93 if ai else 1.0) * _rng.randf_range(0.97, 1.03)
 	var db := extra_db + (1.5 if ai else 0.0)

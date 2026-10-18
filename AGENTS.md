@@ -83,6 +83,7 @@ tools/godot.cmd --headless res://tools/coop_population_test.tscn -- host # + «-
                                                               # двое гостей): население по числу игроков, у гостей те же бойцы и ходят, подход вдали от всех,
                                                               # чужие отряды и ЧВК по составу, стычка с гостем засчитана
 tools/godot.cmd --headless res://tools/steps_test.tscn      # шаги: поверхность под ногами, темп от скорости, глушение стеной
+tools/godot.cmd --headless res://tools/water_wade_test.tscn # брод в болоте зоны 1: по пояс, медленнее, без бега и «лечь», шаги — плеск (WaterBody, Balance.WATER)
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/grass_shots.tscn # трава: густой ярус, ветер, след после прохода и подъём, против солнца, кадры в секунду по ярусам; снимки grass_* (GRASS_TIME=dusk, GRASS_ONLY=eye,down)
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/blood_shots.tscn # кровь у стены в зоне 1: капли, следы по углу удара, подтёки, лужа под убитым, высохла; игрок ранен — лужа, утащили — мазок; снимки blood_*
 python tools/gen_blood_maps.py                                 # карты крови: растекание лужи (перколяция), подтёки, следы капель → assets/textures/blood; затем --import

@@ -384,7 +384,20 @@ func keys_blocked() -> bool:
 
 
 func _can_sprint() -> bool:
-	return not _winded and stamina > 0.0
+	return not _winded and stamina > 0.0 and _water_depth() < float(Balance.WATER.no_sprint)
+
+
+## Глубина воды над ступнями (WaterBody), м; считается раз за кадр физики.
+func _water_depth() -> float:
+	var frame: int = Engine.get_physics_frames()
+	if frame != _water_frame:
+		_water_frame = frame
+		_water_cached = WaterBody.depth_at(global_position)
+	return _water_cached
+
+
+var _water_frame: int = -1
+var _water_cached: float = 0.0
 
 
 ## Бег тратит выносливость (в жару на улице — быстрее), стоишь или идёшь — восстанавливается.
@@ -1151,8 +1164,9 @@ func _footsteps(delta: float) -> void:
 	var key := _stance_key()
 	if key == "stand" and Input.is_action_pressed("sprint") and not aiming:
 		key = "sprint"
-	# звук шагов — Footsteps (слышен у всех peer); здесь — шум, по которому слышат мародёры
-	NoiseBus.emit(global_position, float(Balance.NOISE_STEP[key]), "step")
+	# звук шагов — Footsteps (слышен у всех peer); здесь — шум, по которому слышат мародёры; вброд — громче
+	var water_k: float = float(Balance.WATER.noise_k) if _water_depth() > float(Balance.WATER.ankle) else 1.0
+	NoiseBus.emit(global_position, float(Balance.NOISE_STEP[key]) * water_k, "step")
 
 
 ## Хост сообщил: мародёр убит моей пулей — метка убийства (у клиента смерть видна позже выстрела).
@@ -2852,6 +2866,8 @@ func _stance_speed() -> float:
 		s *= Balance.PLAYER_ADS_SPEED_SCALE
 	# перегруз: тяжелее free_kg — медленнее
 	s *= carry_speed_k()
+	# вброд — медленнее, по пояс почти вдвое
+	s *= WaterBody.depth_k(_water_depth(), Balance.WATER.speed)
 	# отладка: множитель скорости (меню Esc → Настройки, консоль speed)
 	s *= Settings.cheat_speed
 	if absf(lean) > 0.3:
@@ -2893,6 +2909,9 @@ func _face_cursor(delta: float) -> void:
 
 
 func _apply_stance() -> void:
+	# в воде глубже щиколотки лечь нельзя — только на колено (раненый лежит всё равно)
+	if stance == Stance.PRONE and not is_downed() and _water_depth() > float(Balance.WATER.no_prone):
+		stance = Stance.CROUCH
 	var key := _stance_key()
 	var h: float = Balance.STANCE_HEIGHT[key]
 	var shape := _capsule.shape as CapsuleShape3D

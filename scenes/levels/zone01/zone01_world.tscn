@@ -1,19 +1,21 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://src/world/district_terrain.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/urban_road.tscn" id="2"]
 [ext_resource type="Shader" path="res://src/world/district_water.gdshader" id="3"]
-[ext_resource type="Texture2D" path="res://assets/terrain/zone01_noise.png" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/world/urban_props.tscn" id="5"]
-[ext_resource type="Script" path="res://src/world/district_scatter.gd" id="6"]
-[ext_resource type="Script" path="res://src/world/district_grass.gd" id="7"]
+[ext_resource type="Script" path="res://src/world/water_body.gd" id="4"]
+[ext_resource type="Texture2D" path="res://assets/terrain/zone01_noise.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/terrain/zone01_swamp_depth.png" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/world/urban_props.tscn" id="7"]
+[ext_resource type="Script" path="res://src/world/district_scatter.gd" id="8"]
+[ext_resource type="Script" path="res://src/world/district_grass.gd" id="9"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1"]
 shader = ExtResource("3")
-shader_parameter/noise_tex = ExtResource("4")
+shader_parameter/noise_tex = ExtResource("5")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_2"]
-size = Vector2(3.2, 43.3401)
+size = Vector2(3.2, 30.8444)
 material = SubResource("ShaderMaterial_1")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_3"]
@@ -60,9 +62,17 @@ material = SubResource("ShaderMaterial_1")
 size = Vector2(3.2, 27.7099)
 material = SubResource("ShaderMaterial_1")
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_14"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_14"]
+shader = ExtResource("3")
+shader_parameter/noise_tex = ExtResource("5")
+shader_parameter/depth_tex = ExtResource("6")
+shader_parameter/depth_rect = Vector4(-238.9, -274.5, 248.4, 173.5)
+shader_parameter/depth_max = 1.5
+shader_parameter/duckweed = 0.25
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_15"]
 size = Vector2(248.4, 173.5)
-material = SubResource("ShaderMaterial_1")
+material = SubResource("ShaderMaterial_14")
 subdivide_width = 16
 subdivide_depth = 12
 
@@ -76,42 +86,42 @@ excavations = Array[AABB]([AABB(-201, -1.9, -47, 17, 2.3, 12)])
 [node name="Roads" parent="." type="Node3D"]
 
 [node name="North" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(-275.4, -0.007, -77.8, -265.22, 0.002, -78.43, -255.05, 0.01, -79.06, -244.87, 0.024, -79.69, -234.69, 0.035, -80.32, -224.51, 0.042, -80.95, -214.34, 0.034, -81.57, -204.27, 0.029, -82.24, -194.24, 0.024, -82.92, -184.2, 0.019, -83.6, -174.16, 0.016, -84.28, -164.13, 0.011, -84.96, -154.1, 0.008, -85.45, -144.1, 0.015, -85.2, -134.1, 0.019, -84.95, -124.2, 0.019, -83.68, -114.45, 0.019, -80.87, -104.7, 0.02, -78.07, -94.95, 0.023, -75.26, -85.2, 0.021, -71.77, -75.45, 0.017, -68.1, -65.7, 0.009, -64.43, -56.05, 0.006, -60.73, -46.82, 0.02, -56.86, -37.58, 0.048, -52.99, -28.34, 0.073, -49.12, -18.9, 0.088, -45.6, -9.15, 0.105, -42.6, 0.6, 0.118, -39.6, 10.35, 0.118, -36.6, 20.1, 0.117, -32.91, 29.85, 0.106, -29.05, 39.6, 0.08, -25.19, 49.35, 0.053, -21.62, 59.1, 0.034, -19.23, 68.85, 0.032, -16.84, 78.6, 0.04, -14.46, 88.68, 0.062, -12.42, 98.97, 0.07, -10.63, 109.26, 0.07, -8.84, 119.57, 0.07, -7.09, 129.9, 0.07, -5.57, 140.23, 0.07, -4.04, 150.57, 0.06, -2.51, 154.7, 0.051, -1.9)
+points = PackedVector3Array(-275.4, -0.007, -77.8, -265.22, 0.002, -78.43, -255.05, 0.01, -79.06, -244.87, 0.024, -79.69, -234.69, 0.035, -80.32, -224.51, 0.042, -80.95, -214.34, 0.034, -81.57, -204.27, 0.029, -82.24, -194.24, 0.024, -82.92, -184.2, 0.019, -83.6, -174.16, 0.016, -84.28, -164.13, 0.011, -84.96, -154.1, 0.008, -85.45, -144.1, 0.015, -85.2, -134.1, 0.019, -84.95, -124.2, 0.019, -83.68, -114.45, 0.019, -80.87, -104.7, 0.02, -78.07, -94.95, 0.023, -75.26, -85.2, 0.021, -71.77, -75.45, 0.019, -68.1, -65.7, 0.012, -64.43, -56.05, 0.008, -60.73, -46.82, 0.023, -56.86, -37.58, 0.051, -52.99, -28.34, 0.076, -49.12, -18.9, 0.091, -45.6, -9.15, 0.108, -42.6, 0.6, 0.119, -39.6, 10.35, 0.118, -36.6, 20.1, 0.117, -32.91, 29.85, 0.106, -29.05, 39.6, 0.08, -25.19, 49.35, 0.053, -21.62, 59.1, 0.034, -19.23, 68.85, 0.032, -16.84, 78.6, 0.04, -14.46, 88.68, 0.062, -12.42, 98.97, 0.07, -10.63, 109.26, 0.07, -8.84, 119.57, 0.07, -7.09, 129.9, 0.07, -5.57, 140.23, 0.07, -4.04, 150.57, 0.06, -2.51, 154.7, 0.051, -1.9)
 carriage_width = 8.0
 sidewalk_width = 2.5
 sidewalks = true
-markings = true
+markings = false
 
 [node name="Artery" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(12.3, 0.126, -36.0, 9.8, 0.146, -26.05, 7.3, 0.16, -16.1, 4.8, 0.182, -6.14, 2.3, 0.21, 3.81, -0.85, 0.227, 13.55, -4.16, 0.219, 23.24, -7.48, 0.201, 32.92, -10.51, 0.183, 42.59, -13.35, 0.175, 52.25, -16.19, 0.202, 61.91, -18.44, 0.224, 71.67, -19.81, 0.235, 81.58, -21.17, 0.255, 91.5, -22.53, 0.285, 101.42, -22.8, 0.291, 103.4)
+points = PackedVector3Array(12.3, 0.126, -36.0, 9.8, 0.146, -26.05, 7.3, 0.16, -16.1, 4.8, 0.182, -6.14, 2.3, 0.21, 3.81, -0.85, 0.226, 13.55, -4.16, 0.219, 23.24, -7.48, 0.201, 32.92, -10.51, 0.183, 42.59, -13.35, 0.175, 52.25, -16.19, 0.202, 61.91, -18.44, 0.224, 71.67, -19.81, 0.235, 81.58, -21.17, 0.255, 91.5, -22.53, 0.285, 101.42, -22.8, 0.291, 103.4)
 carriage_width = 9.0
 sidewalk_width = 2.5
 sidewalks = true
-markings = true
+markings = false
 
 [node name="South" parent="Roads" instance=ExtResource("2")]
 points = PackedVector3Array(-240.4, -0.0, 89.4, -230.36, -0.0, 91.06, -220.33, -0.0, 92.72, -210.29, 0.004, 94.38, -200.26, 0.012, 96.04, -190.22, 0.022, 97.7, -180.19, 0.04, 99.04, -170.17, 0.067, 99.88, -160.16, 0.077, 100.71, -150.14, 0.108, 101.55, -140.12, 0.129, 102.39, -130.1, 0.133, 103.23, -119.84, 0.127, 103.21, -109.52, 0.118, 102.98, -99.19, 0.102, 102.74, -88.87, 0.082, 102.6, -78.55, 0.096, 102.6, -68.22, 0.099, 102.6, -57.9, 0.103, 102.6, -47.58, 0.136, 103.28, -37.25, 0.168, 103.95, -26.93, 0.193, 104.63, -16.95, 0.206, 106.45, -7.2, 0.206, 109.03, 2.55, 0.184, 111.62, 12.3, 0.151, 114.2, 20.28, 0.123, 120.54, 28.25, 0.084, 126.88, 36.23, 0.048, 133.22, 44.21, 0.021, 139.56, 52.94, 0.006, 144.53, 62.18, 0.0, 148.58, 71.42, 0.0, 152.64, 80.65, 0.002, 156.69, 89.87, 0.009, 160.76, 99.08, 0.019, 164.84, 108.29, 0.033, 168.92, 117.5, 0.047, 173.0, 126.96, 0.061, 176.58, 136.42, 0.075, 180.15, 142.1, 0.084, 182.3)
 carriage_width = 9.0
 sidewalk_width = 2.5
 sidewalks = true
-markings = true
+markings = false
 
 [node name="East" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(150.5, 0.25, -214.8, 151.34, 0.239, -204.74, 152.18, 0.216, -194.68, 153.02, 0.191, -184.62, 153.86, 0.165, -174.56, 154.7, 0.134, -164.5, 154.88, 0.102, -154.32, 155.07, 0.07, -144.13, 155.25, 0.044, -133.95, 155.44, 0.025, -123.76, 155.62, 0.016, -113.58, 155.81, 0.012, -103.39, 155.99, 0.008, -93.21, 156.1, 0.005, -83.04, 156.1, 0.005, -72.9, 156.1, 0.006, -62.76, 156.1, 0.006, -52.61, 156.1, 0.004, -42.47, 156.1, 0.003, -32.33, 156.1, 0.003, -22.19, 156.1, 0.003, -12.04, 156.1, 0.003, -1.9, 155.64, 0.001, 8.19, 155.19, -0.002, 18.27, 154.73, -0.002, 28.36, 154.27, -0.001, 38.45, 153.79, -0.0, 48.51, 153.27, 0.0, 58.55, 152.76, 0.0, 68.59, 152.24, 0.0, 78.63, 151.72, 0.0, 88.66, 151.2, 0.0, 98.7, 150.59, 0.0, 108.81, 149.98, 0.0, 118.92, 149.37, 0.001, 129.03, 148.77, 0.005, 139.13, 147.7, 0.008, 149.32, 145.95, 0.011, 159.63, 144.2, 0.014, 169.93, 142.45, 0.017, 180.24, 142.1, 0.017, 182.3)
+points = PackedVector3Array(150.5, 0.25, -214.8, 151.34, 0.239, -204.74, 152.18, 0.216, -194.68, 153.02, 0.191, -184.62, 153.86, 0.165, -174.56, 154.7, 0.134, -164.5, 154.88, 0.102, -154.32, 155.07, 0.07, -144.13, 155.25, 0.044, -133.95, 155.44, 0.025, -123.76, 155.62, 0.016, -113.58, 155.81, 0.012, -103.39, 155.99, 0.008, -93.21, 156.1, 0.005, -83.04, 156.1, 0.005, -72.9, 156.1, 0.006, -62.76, 156.1, 0.006, -52.61, 156.1, 0.004, -42.47, 156.1, 0.003, -32.33, 156.1, 0.003, -22.19, 156.1, 0.003, -12.04, 156.1, 0.003, -1.9, 155.64, 0.001, 8.19, 155.19, -0.002, 18.27, 154.73, -0.002, 28.36, 154.27, -0.001, 38.45, 153.79, -0.0, 48.51, 153.27, 0.0, 58.55, 152.76, 0.0, 68.59, 152.24, 0.0, 78.63, 151.72, 0.0, 88.66, 151.2, 0.0, 98.7, 150.59, 0.0, 108.81, 149.98, 0.0, 118.92, 149.37, 0.01, 129.03, 148.77, 0.014, 139.13, 147.7, 0.017, 149.32, 145.95, 0.02, 159.63, 144.2, 0.023, 169.93, 142.45, 0.026, 180.24, 142.1, 0.026, 182.3)
 carriage_width = 8.0
 sidewalk_width = 2.0
 sidewalks = true
-markings = true
+markings = false
 
 [node name="Mall" parent="Roads" instance=ExtResource("2")]
 points = PackedVector3Array(156.1, -0.034, -75.5, 165.97, -0.027, -73.81, 175.85, -0.02, -72.12, 185.72, -0.013, -70.44, 195.5, -0.007, -67.86, 205.25, 0.004, -65.05, 215.0, 0.021, -62.24, 224.83, 0.045, -59.9, 234.99, 0.081, -59.38, 245.15, 0.129, -58.87, 255.31, 0.181, -58.36, 265.46, 0.235, -57.84, 275.62, 0.288, -57.33, 285.78, 0.34, -56.82, 295.94, 0.378, -56.31, 300.0, 0.392, -56.1)
 carriage_width = 10.0
 sidewalk_width = 2.0
 sidewalks = true
-markings = true
+markings = false
 
 [node name="Evac3" parent="Roads" instance=ExtResource("2")]
-points = PackedVector3Array(142.1, -0.02, 182.3, 147.35, -0.001, 191.6, 152.6, 0.026, 200.9, 158.14, 0.049, 210.04, 163.67, 0.072, 219.19, 169.24, 0.133, 228.19, 174.93, 0.253, 236.62, 180.61, 0.384, 245.06, 186.3, 0.52, 253.5, 191.84, 0.612, 262.36, 197.37, 0.65, 271.21, 202.85, 0.692, 280.11, 208.1, 0.736, 289.15, 213.35, 0.755, 298.19, 214.4, 0.749, 300.0)
+points = PackedVector3Array(142.1, -0.015, 182.3, 147.35, 0.003, 191.6, 152.6, 0.029, 200.9, 158.14, 0.051, 210.04, 163.67, 0.073, 219.19, 169.24, 0.133, 228.19, 174.93, 0.253, 236.62, 180.61, 0.384, 245.06, 186.3, 0.52, 253.5, 191.84, 0.612, 262.36, 197.37, 0.65, 271.21, 202.85, 0.692, 280.11, 208.1, 0.736, 289.15, 213.35, 0.755, 298.19, 214.4, 0.749, 300.0)
 carriage_width = 7.0
 sidewalk_width = 1.5
 sidewalks = true
@@ -127,175 +137,188 @@ markings = false
 [node name="Water" parent="." type="Node3D"]
 
 [node name="Stream_0" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_2")
-position = Vector3(22.5, -6.8006, -251.0)
-rotation_degrees = Vector3(0.0, 122.1523, 0.0)
+position = Vector3(28.0, -5.4275, -254.0)
+rotation_degrees = Vector3(0.0, 123.6901, 0.0)
 cast_shadow = 0
 
 [node name="Stream_1" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_3")
 position = Vector3(60.0, -9.65, -272.0)
 rotation_degrees = Vector3(0.0, 116.5651, 0.0)
 cast_shadow = 0
 
 [node name="Stream_2" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_4")
 position = Vector3(99.0, -9.65, -282.5)
 rotation_degrees = Vector3(0.0, 91.5074, 0.0)
 cast_shadow = 0
 
 [node name="Stream_3" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_5")
 position = Vector3(134.0, -9.3805, -270.0)
 rotation_degrees = Vector3(0.0, 50.9061, 0.0)
 cast_shadow = 0
 
 [node name="Stream_4" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_6")
 position = Vector3(168.0, -9.4557, -247.0)
 rotation_degrees = Vector3(0.0, 60.9454, 0.0)
 cast_shadow = 0
 
 [node name="Stream_5" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_7")
 position = Vector3(203.0, -9.3656, -226.0)
 rotation_degrees = Vector3(0.0, 57.0948, 0.0)
 cast_shadow = 0
 
 [node name="Stream_6" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_8")
 position = Vector3(228.0, -9.65, -203.0)
 rotation_degrees = Vector3(0.0, 33.6901, 0.0)
 cast_shadow = 0
 
 [node name="Stream_7" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_9")
 position = Vector3(243.0, -9.65, -177.0)
 rotation_degrees = Vector3(0.0, 26.5651, 0.0)
 cast_shadow = 0
 
 [node name="Stream_8" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_10")
 position = Vector3(251.5, -9.6352, -146.0)
 rotation_degrees = Vector3(0.0, 5.0425, 0.0)
 cast_shadow = 0
 
 [node name="Stream_9" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_11")
 position = Vector3(257.5, -9.5985, -119.5)
 rotation_degrees = Vector3(0.0, 25.3462, 0.0)
 cast_shadow = 0
 
 [node name="Stream_10" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_12")
 position = Vector3(273.5, -5.1583, -111.0)
 rotation_degrees = Vector3(0.0, 94.9697, 0.0)
 cast_shadow = 0
 
 [node name="Stream_11" parent="Water" type="MeshInstance3D"]
+script = ExtResource("4")
 mesh = SubResource("PlaneMesh_13")
 position = Vector3(297.5, -9.5015, -115.0)
 rotation_degrees = Vector3(0.0, 103.4957, 0.0)
 cast_shadow = 0
 
 [node name="Swamp" parent="Water" type="MeshInstance3D"]
-mesh = SubResource("PlaneMesh_14")
-position = Vector3(-114.7, -1.15, -187.75)
+script = ExtResource("4")
+mesh = SubResource("PlaneMesh_15")
+position = Vector3(-114.7, -0.3, -187.75)
 cast_shadow = 0
 
 [node name="Perimeter" parent="." type="Node3D"]
 
-[node name="Wall_0" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_0" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-221.0, 0.2641, -298.0)
 rotation_degrees = Vector3(0.0, 1.6135, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 1.743, 0.0], "size": [143.056, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_1" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_1" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-75.0, 0.0, -298.0)
 rotation_degrees = Vector3(0.0, -1.5275, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_2" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_2" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(75.0, -1.2864, -298.0)
 rotation_degrees = Vector3(0.0, 1.5275, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.643, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_3" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_3" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(222.0, 0.0, -297.0)
 rotation_degrees = Vector3(0.0, -2.3859, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_4" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_4" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(297.0, 0.0, -222.0)
 rotation_degrees = Vector3(0.0, -87.6141, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_5" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_5" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(298.5, 6.184, -75.0)
 rotation_degrees = Vector3(0.0, -91.1458, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, -4.184, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_6" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_6" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(298.5, 0.0, 75.0)
 rotation_degrees = Vector3(0.0, -88.8542, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_7" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_7" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(297.0, 0.0234, 222.0)
 rotation_degrees = Vector3(0.0, -92.3859, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 1.988, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_8" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_8" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(222.0, 0.5612, 297.0)
 rotation_degrees = Vector3(0.0, -177.6141, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 1.573, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_9" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_9" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(75.0, 0.0, 298.0)
 rotation_degrees = Vector3(0.0, 178.4725, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_10" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_10" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-75.0, 0.5327, 298.0)
 rotation_degrees = Vector3(0.0, -178.4725, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 1.467, 0.0], "size": [151.053, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_11" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_11" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-222.0, 0.1309, 297.0)
 rotation_degrees = Vector3(0.0, 177.6141, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 1.869, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_12" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_12" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-297.0, 0.0, 222.0)
 rotation_degrees = Vector3(0.0, 92.3859, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [145.125, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_13" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_13" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-298.5, 0.0, 75.0)
 rotation_degrees = Vector3(0.0, 88.8542, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_14" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_14" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-298.5, 0.0, -75.0)
 rotation_degrees = Vector3(0.0, 91.1458, 0.0)
 surface = "concrete"
 pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [151.03, 28.0, 0.6], "color": [0.58, 0.59, 0.6], "collision": true, "render": false}])
 
-[node name="Wall_15" parent="Perimeter" instance=ExtResource("5")]
+[node name="Wall_15" parent="Perimeter" instance=ExtResource("7")]
 position = Vector3(-296.0, 0.0, -223.0)
 rotation_degrees = Vector3(0.0, 86.8636, 0.0)
 surface = "concrete"
@@ -304,7 +327,7 @@ pieces = Array[Dictionary]([{"at": [0.0, 2.0, 0.0], "size": [147.219, 28.0, 0.6]
 [node name="Vegetation" parent="." type="Node3D"]
 
 [node name="TreePoplar0" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "tree_poplar_0"
 model = "res://assets/zone01/models/tree_poplar_0.glb"
@@ -313,7 +336,7 @@ cell = 96.0
 trunk_radius = 0.25
 
 [node name="TreePoplar1" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "tree_poplar_1"
 model = "res://assets/zone01/models/tree_poplar_1.glb"
@@ -322,7 +345,7 @@ cell = 96.0
 trunk_radius = 0.25
 
 [node name="TreePoplar2" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "tree_poplar_2"
 model = "res://assets/zone01/models/tree_poplar_2.glb"
@@ -331,7 +354,7 @@ cell = 96.0
 trunk_radius = 0.25
 
 [node name="TreeMaple0" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "tree_maple_0"
 model = "res://assets/zone01/models/tree_maple_0.glb"
@@ -340,7 +363,7 @@ cell = 96.0
 trunk_radius = 0.25
 
 [node name="TreeMaple1" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "tree_maple_1"
 model = "res://assets/zone01/models/tree_maple_1.glb"
@@ -349,7 +372,7 @@ cell = 96.0
 trunk_radius = 0.25
 
 [node name="TreeMaple2" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "tree_maple_2"
 model = "res://assets/zone01/models/tree_maple_2.glb"
@@ -358,7 +381,7 @@ cell = 96.0
 trunk_radius = 0.25
 
 [node name="SpruceForestA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "spruce_forest_a"
 model = "res://assets/zone01/models/spruce_forest_a.glb"
@@ -369,7 +392,7 @@ cell = 64.0
 trunk_radius = 0.3
 
 [node name="SpruceForestB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "spruce_forest_b"
 model = "res://assets/zone01/models/spruce_forest_b.glb"
@@ -380,7 +403,7 @@ cell = 64.0
 trunk_radius = 0.3
 
 [node name="SpruceOpen" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "spruce_open"
 model = "res://assets/zone01/models/spruce_open.glb"
@@ -391,7 +414,7 @@ cell = 64.0
 trunk_radius = 0.3
 
 [node name="SpruceYoungA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "spruce_young_a"
 model = "res://assets/zone01/models/spruce_young_a.glb"
@@ -402,7 +425,7 @@ cell = 64.0
 trunk_radius = 0.08
 
 [node name="SpruceYoungB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "spruce_young_b"
 model = "res://assets/zone01/models/spruce_young_b.glb"
@@ -413,7 +436,7 @@ cell = 64.0
 trunk_radius = 0.08
 
 [node name="BirchA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "birch_a"
 model = "res://assets/zone01/models/birch_a.glb"
@@ -424,7 +447,7 @@ cell = 64.0
 trunk_radius = 0.21
 
 [node name="BirchB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "birch_b"
 model = "res://assets/zone01/models/birch_b.glb"
@@ -435,7 +458,7 @@ cell = 64.0
 trunk_radius = 0.21
 
 [node name="BirchC" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "birch_c"
 model = "res://assets/zone01/models/birch_c.glb"
@@ -446,7 +469,7 @@ cell = 64.0
 trunk_radius = 0.21
 
 [node name="BirchBare" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "birch_bare"
 model = "res://assets/zone01/models/birch_bare.glb"
@@ -457,7 +480,7 @@ cell = 64.0
 trunk_radius = 0.21
 
 [node name="BirchYoung" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "birch_young"
 model = "res://assets/zone01/models/birch_young.glb"
@@ -468,7 +491,7 @@ cell = 64.0
 trunk_radius = 0.056
 
 [node name="PineYoung" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_young"
 model = "res://assets/zone01/models/pine_young.glb"
@@ -479,7 +502,7 @@ cell = 64.0
 trunk_radius = 0.077
 
 [node name="PineSlimA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_slim_a"
 model = "res://assets/zone01/models/pine_slim_a.glb"
@@ -490,7 +513,7 @@ cell = 64.0
 trunk_radius = 0.118
 
 [node name="PineSlimB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_slim_b"
 model = "res://assets/zone01/models/pine_slim_b.glb"
@@ -501,7 +524,7 @@ cell = 64.0
 trunk_radius = 0.157
 
 [node name="PineForest" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_forest"
 model = "res://assets/zone01/models/pine_forest.glb"
@@ -512,7 +535,7 @@ cell = 64.0
 trunk_radius = 0.254
 
 [node name="PineThick" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_thick"
 model = "res://assets/zone01/models/pine_thick.glb"
@@ -523,7 +546,7 @@ cell = 64.0
 trunk_radius = 0.371
 
 [node name="PineOld" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_old"
 model = "res://assets/zone01/models/pine_old.glb"
@@ -534,7 +557,7 @@ cell = 64.0
 trunk_radius = 0.473
 
 [node name="PineTwin" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_twin"
 model = "res://assets/zone01/models/pine_twin.glb"
@@ -545,7 +568,7 @@ cell = 64.0
 trunk_radius = 0.282
 
 [node name="PineYard" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "pine_yard"
 model = "res://assets/zone01/models/pine_yard.glb"
@@ -556,7 +579,7 @@ cell = 64.0
 trunk_radius = 0.298
 
 [node name="ForestFern" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_fern"
 model = "res://assets/zone01/models/forest_fern.glb"
@@ -566,7 +589,7 @@ trunk_radius = 0.0
 trunk_height = 4.0
 
 [node name="ForestDryBranches" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_dry_branches"
 model = "res://assets/zone01/models/forest_dry_branches.glb"
@@ -576,7 +599,7 @@ trunk_radius = 0.0
 trunk_height = 4.0
 
 [node name="ForestStump01" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_stump_01"
 model = "res://assets/zone01/models/forest_stump_01.glb"
@@ -586,7 +609,7 @@ trunk_radius = 0.3
 trunk_height = 0.6
 
 [node name="ForestStump02" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_stump_02"
 model = "res://assets/zone01/models/forest_stump_02.glb"
@@ -596,7 +619,7 @@ trunk_radius = 0.3
 trunk_height = 0.6
 
 [node name="ForestDeadTrunk" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_dead_trunk"
 model = "res://assets/zone01/models/forest_dead_trunk.glb"
@@ -606,7 +629,7 @@ trunk_radius = 0.0
 trunk_height = 4.0
 
 [node name="ForestRoots" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_roots"
 model = "res://assets/zone01/models/forest_roots.glb"
@@ -616,7 +639,7 @@ trunk_radius = 0.0
 trunk_height = 4.0
 
 [node name="ForestRocks01" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_rocks_01"
 model = "res://assets/zone01/models/forest_rocks_01.glb"
@@ -626,7 +649,7 @@ trunk_radius = 0.5
 trunk_height = 0.8
 
 [node name="ForestRocks02" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "forest_rocks_02"
 model = "res://assets/zone01/models/forest_rocks_02.glb"
@@ -636,7 +659,7 @@ trunk_radius = 0.5
 trunk_height = 0.8
 
 [node name="UgBushA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "ug_bush_a"
 model = "res://assets/zone01/models/ug_bush_a.glb"
@@ -647,7 +670,7 @@ foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgBushB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "ug_bush_b"
 model = "res://assets/zone01/models/ug_bush_b.glb"
@@ -658,7 +681,7 @@ foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgBushC" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "ug_bush_c"
 model = "res://assets/zone01/models/ug_bush_c.glb"
@@ -669,7 +692,7 @@ foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgBushD" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "ug_bush_d"
 model = "res://assets/zone01/models/ug_bush_d.glb"
@@ -680,7 +703,7 @@ foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
 
 [node name="UgSaplingA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "ug_sapling_a"
 model = "res://assets/zone01/models/ug_sapling_a.glb"
@@ -691,7 +714,7 @@ foliage = true
 foliage_tint = Color(0.78, 0.82, 0.72, 1)
 
 [node name="UgSaplingB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "ug_sapling_b"
 model = "res://assets/zone01/models/ug_sapling_b.glb"
@@ -702,7 +725,7 @@ foliage = true
 foliage_tint = Color(0.78, 0.82, 0.72, 1)
 
 [node name="UgSaplingC" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
+script = ExtResource("8")
 data_path = "res://data/zone01_vegetation.json"
 key = "ug_sapling_c"
 model = "res://assets/zone01/models/ug_sapling_c.glb"
@@ -713,7 +736,7 @@ foliage = true
 foliage_tint = Color(0.78, 0.82, 0.72, 1)
 
 [node name="Grass" parent="Vegetation" type="Node3D"]
-script = ExtResource("7")
+script = ExtResource("9")
 density_map = "res://assets/terrain/zone01_grass.png"
 origin = Vector2(-440.0, -440.0)
 models = PackedStringArray("res://assets/zone01/models/ug_grass_tall_a.glb", "res://assets/zone01/models/ug_grass_tall_b.glb", "res://assets/zone01/models/ug_grass_tall_a.glb", "res://assets/zone01/models/ug_grass_small.glb", "res://assets/zone01/models/ug_grass_mid_b.glb", "res://assets/zone01/models/ug_grass2_c.glb")

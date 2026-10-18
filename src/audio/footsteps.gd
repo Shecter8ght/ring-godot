@@ -55,6 +55,9 @@ func _process(delta: float) -> void:
 	_t = clampf(Balance.STEP_STRIDE / _speed, float(Balance.STEP_INTERVAL[0]), float(Balance.STEP_INTERVAL[1]))
 	_left = not _left
 	var extra := float(loud_db.call()) if loud_db.is_valid() else 0.0
+	# вброд — брызги и круг на воде у ноги (видно у всех peer, как и шаг)
+	if WaterBody.depth_at(pos) > float(Balance.WATER.ankle):
+		WaterBody.splash(get_tree(), pos, clampf(_speed / 5.0, 0.2, 1.0))
 	var special := String(movement_kind.call()) if movement_kind.is_valid() else ""
 	if special != "":
 		Audio.play(special, pos, extra)

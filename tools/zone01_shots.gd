@@ -17,11 +17,11 @@ const SHOTS := {
 	"aerial_bus": [Vector3(-80, 100, 90), Vector3(-30, 0, 190), 55.0],
 	"aerial_market": [Vector3(-120, 90, 140), Vector3(-190, 0, 180), 55.0],
 	"aerial_houses": [Vector3(150, 70, -90), Vector3(200, 0, -160), 55.0],
-	"swamp": [Vector3(-120, 1.7, -95), Vector3(-130, -1, -180), 70.0],
-	"swamp_in": [Vector3(-50, 1.7, -194), Vector3(-150, -1, -220), 70.0],
+	"swamp": [Vector3(-150, 1.7, -90), Vector3(-140, -1, -180), 70.0],
+	"swamp_in": [Vector3(-30, 2.4, -193), Vector3(-100, -0.5, -240), 70.0],
 	"ravine_n": [Vector3(60, 1.7, -245), Vector3(120, -5, -275), 70.0],
 	"rail_bridge": [Vector3(230, 1.7, -62), Vector3(289, 3, -56), 70.0],
-	"rail_yard": [Vector3(200, 1.7, 100), Vector3(225, 2, 220), 70.0],
+	"rail_yard": [Vector3(232, 2.5, 118), Vector3(219, 3.0, 175), 70.0],
 	"station_site": [Vector3(150, 1.7, 120), Vector3(200, 2, 170), 70.0],
 	"bus_site": [Vector3(-90, 1.7, 115), Vector3(-20, 1, 200), 70.0],
 	"construction_site": [Vector3(60, 1.7, -40), Vector3(90, 8, -150), 70.0],
@@ -57,6 +57,9 @@ const SHOTS := {
 	"forest_floor": [Vector3(-60, 1.7, 280), Vector3(-56, 0, 287), 75.0],
 	"sun_yard": [Vector3(-176, 1.7, -3), Vector3(0, 0, 0), 70.0],
 	"garages": [Vector3(215, 1.7, 47), Vector3(180, 1, 47), 70.0],
+	"overpass_under": [Vector3(-20, 1.7, 232), Vector3(60, 6, 250), 70.0],
+	"supermarket": [Vector3(8, 1.7, 46), Vector3(35, 3, 6), 70.0],
+	"cinema": [Vector3(40, 1.7, 150), Vector3(81, 5, 112), 70.0],
 }
 
 

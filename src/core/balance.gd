@@ -1210,6 +1210,12 @@ const STEP_FOOT_SIDE_M := 0.12
 ## Плёнка сохнет раньше луж, поэтому вода под ногами остаётся слышна после дождя.
 const WET_STEPS := {"film_min": 0.35, "puddle_min": 0.2, "roof_lift": 0.35, "roof_height": 128.0,
 	"sound": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true}}
+## Вода вброд (болото зоны 1 — по пояс, ручей в овраге; владелец 2026-10-18): глубина над ступнями, м.
+## speed / ai_speed — множитель скорости по щиколотку, по колено, по пояс (между — плавно);
+## глубже no_sprint — бежать нельзя, глубже no_prone — лечь нельзя (встаёт на колено);
+## шаги в воде слышнее (noise_k), брызги и круги — ближе fx_distance к камере.
+const WATER := {"ankle": 0.12, "knee": 0.45, "waist": 0.9, "speed": [1.0, 0.78, 0.55], "ai_speed": [1.0, 0.8, 0.6],
+	"no_sprint": 0.5, "no_prone": 0.25, "noise_k": 1.6, "fx_distance": 45.0}
 const AUDIO_OCCLUDED_DB := 8.0
 const AUDIO_OCCLUDED_CUTOFF := 700.0
 

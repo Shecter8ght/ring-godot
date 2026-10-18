@@ -2331,6 +2331,8 @@ func _move(delta: float) -> void:
 	if crouched:
 		speed = Balance.MARAUDER_WALK * 0.7
 	speed *= float(_arch.get("speed", 1.0))
+	# вброд мародёр тоже медленнее
+	speed *= WaterBody.depth_k(WaterBody.depth_at(global_position), Balance.WATER.ai_speed)
 	if _stagger_t > 0.0:
 		speed *= Balance.AI_HIT_STAGGER_SPEED
 	var wish := Vector3.ZERO

@@ -67,8 +67,8 @@ RAVINE_TOP = 22.0
 
 # болото (1): топь ниже улиц, кочки над водой, окна открытой воды
 SWAMP = [tuple(p) for p in LAYOUT["swamp"]]
-SWAMP_FLOOR = -1.7
-SWAMP_WATER = -1.15
+SWAMP_FLOOR = -1.25   # дно открытой воды: ≈ 0,95 м под гладью — по пояс, вброд (владелец 2026-10-18)
+SWAMP_WATER = -0.3
 SWAMP_EDGE = 14.0
 RIVER_WATER = -1.55  # речки больше нет (вода — ручей в овраге); значение оставлено для данных сектора
 
@@ -492,8 +492,15 @@ BACKGROUND = [("sf_panel5_brutal", -395, -150, 90), ("sf_panel5_brutal", -398, -
               ("sf_panel12", -150, -400, 0), ("sf_panel5_brutal", 40, -405, 4), ("sf_panel12", 220, -398, -6),
               ("sf_panel12", 395, 150, -92), ("sf_panel5_brutal", 385, 260, -84), ("sf_panel12", 395, 40, -90),
               ("sf_panel12", -120, 400, 180), ("sf_panel5_brutal", 60, 402, 178)]
+# высотки-блокауты за лесом: (x, z, длина, глубина, этажей, угол) — tools/build_zone01_blockouts.py skyline()
+SKYLINE = [(-300, -370, 24, 24, 16, 0), (-40, -380, 60, 13, 12, 0), (130, -372, 24, 24, 14, 0), (320, -360, 60, 13, 9, 30),
+           (370, -250, 24, 24, 16, 0), (380, -110, 60, 13, 12, 90), (372, 330, 24, 24, 12, 0), (250, 380, 60, 13, 9, 0),
+           (-20, 385, 24, 24, 16, 0), (-240, 380, 60, 13, 12, 0), (-370, 330, 24, 24, 9, 0), (-380, -260, 60, 13, 12, 90),
+           (-372, 200, 24, 24, 16, 0)]
 PADS_BG = [(x - 30, z - 12, x + 30, z + 12) if abs(yaw) < 45 or abs(yaw) > 135 else (x - 12, z - 30, x + 12, z + 30)
            for _, x, z, yaw in BACKGROUND]
+PADS_BG += [(x - (D if yaw > 45 else L) / 2 - 3, z - (L if yaw > 45 else D) / 2 - 3, x + (D if yaw > 45 else L) / 2 + 3,
+             z + (L if yaw > 45 else D) / 2 + 3) for x, z, L, D, _, yaw in SKYLINE]
 PADS_PAVED = PADS_BG + BUILDING_PADS
 # не сажать деревья на готовые дома с сараями (дома развёрнуты: огороды к северу) и подход к мосту
 KEEP_CLEAR = [(hx - 12, hz - 14, hx + 12, hz + 10) for hx, hz in HOUSES] + [(210, -167, 282, -155)]
@@ -1034,28 +1041,53 @@ def world_scene() -> None:
         raw = "PackedVector3Array(" + ", ".join(str(v) for p in road["points"] for v in p) + ")"
         s.node(road["id"].title(), "Roads", "res://scenes/world/urban_road.tscn", points=Raw(raw),
                carriage_width=road["width"], sidewalk_width=road["sidewalk"], sidewalks=road["sidewalk"] > 0,
-               markings=road["id"] in ("north", "south", "artery", "east", "mall"))
+               markings=False)  # старые улицы — разметка стёрлась (кадры картинки)
     s.node("Water")
     water = s.resource("res://src/world/district_water.gdshader", "Shader")
+    body = s.resource("res://src/world/water_body.gd", "Script")  # глубина вброд, плеск, брызги
+    noise_tex = gvalue(s.resource("res://assets/terrain/zone01_noise.png", "Texture2D"))
     mat = s.sub("ShaderMaterial", shader=water)
-    s.subs[-1] += "\nshader_parameter/noise_tex = " + gvalue(s.resource("res://assets/terrain/zone01_noise.png", "Texture2D"))
+    s.subs[-1] += "\nshader_parameter/noise_tex = " + noise_tex
     # ручей по дну оврага — полосы вдоль русла чуть выше дна
     for i, ((ax, az), (bx, bz)) in enumerate(zip(RAVINE, RAVINE[1:])):
         ya = min(ground(ax, az), ground((ax + bx) / 2, (az + bz) / 2)) + 0.35
         length = math.dist((ax, az), (bx, bz)) + 2.0
         mesh = s.sub("PlaneMesh", size=v2(3.2, length), material=mat)
-        s.node(f"Stream_{i}", "Water", kind="MeshInstance3D", mesh=mesh,
+        s.node(f"Stream_{i}", "Water", kind="MeshInstance3D", script=body, mesh=mesh,
                position=v3((ax + bx) / 2, ya, (az + bz) / 2),
                rotation_degrees=v3(0, math.degrees(math.atan2(bx - ax, bz - az)), 0), cast_shadow=0)
-    # болото: одна гладь на уровне SWAMP_WATER — кочки и берега выше неё, окна воды ниже
+    # болото: одна гладь на уровне SWAMP_WATER — кочки и берега выше неё, окна воды ниже; у болота свой
+    # материал: карта глубины (мелко у берега — мутно, глубже — тёмная гладь) и ряска
     sx0, sz0 = min(p[0] for p in SWAMP), min(p[1] for p in SWAMP)
     sx1, sz1 = max(p[0] for p in SWAMP), max(p[1] for p in SWAMP)
-    mesh = s.sub("PlaneMesh", size=v2(sx1 - sx0, sz1 - sz0), material=mat, subdivide_width=16, subdivide_depth=12)
-    s.node("Swamp", "Water", kind="MeshInstance3D", mesh=mesh, position=v3((sx0 + sx1) / 2, SWAMP_WATER, (sz0 + sz1) / 2),
-           cast_shadow=0)
+    depth_png = swamp_depth_map(sx0, sz0, sx1, sz1)
+    swamp_mat = s.sub("ShaderMaterial", shader=water)
+    s.subs[-1] += ("\nshader_parameter/noise_tex = " + noise_tex +
+                   "\nshader_parameter/depth_tex = " + gvalue(s.resource(depth_png, "Texture2D")) +
+                   f"\nshader_parameter/depth_rect = Vector4({sx0}, {sz0}, {sx1 - sx0}, {sz1 - sz0})" +
+                   f"\nshader_parameter/depth_max = {SWAMP_DEPTH_MAX}\nshader_parameter/duckweed = 0.25")
+    mesh = s.sub("PlaneMesh", size=v2(sx1 - sx0, sz1 - sz0), material=swamp_mat, subdivide_width=16, subdivide_depth=12)
+    s.node("Swamp", "Water", kind="MeshInstance3D", script=body, mesh=mesh,
+           position=v3((sx0 + sx1) / 2, SWAMP_WATER, (sz0 + sz1) / 2), cast_shadow=0)
     perimeter(s)
     vegetation_nodes(s)
     s.save(OUT / "zone01_world.tscn")
+
+
+SWAMP_DEPTH_MAX = 1.5
+
+
+def swamp_depth_map(x0: float, z0: float, x1: float, z1: float) -> str:
+    """Глубина под гладью болота (1 пиксель = 1 м, 255 = SWAMP_DEPTH_MAX) — для шейдера воды."""
+    i0, j0 = int(x0 - X0), int(z0 - Z0)
+    i1, j1 = int(x1 - X0) + 1, int(z1 - Z0) + 1
+    depth = np.clip((SWAMP_WATER - H[j0:j1, i0:i1]) / SWAMP_DEPTH_MAX, 0.0, 1.0)
+    path = ROOT / "assets/terrain/zone01_swamp_depth.png"
+    Image.fromarray((depth * 255 + 0.5).astype(np.uint8), mode="L").save(path)
+    imp = path.with_name(path.name + ".import")
+    if not imp.exists():
+        imp.write_text(IMPORT_SPLAT.format(name=path.name), encoding="utf-8")
+    return "res://assets/terrain/zone01_swamp_depth.png"
 
 
 def perimeter(s: Scene) -> None:
