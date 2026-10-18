@@ -18,8 +18,10 @@ Bolt (ход назад по +Y кости, 0…BOLT_TRAVEL), Bolt_Rotor (пов
 прицел через ПУ (ADS): глаз на оси прицела за окуляром на EYE_RELIEF. Владелец правит позы в Blender.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/animate_mosin.py -- grip|clips|stills [стойки|клипы] [out=<папка>]
-  grip   → <библиотека>/models/07_Анимации/Mosin_PU_FPS_Grip_v01.blend (действие Mosin_Stances, хват без ключей)
-  clips  → <библиотека>/models/07_Анимации/Mosin_PU_FPS_Clips_v01.blend (клипы от хвата в файле grip) + clips.json
+  grip [force|out=<файл>] → <библиотека>/models/07_Анимации/Mosin_PU_FPS_Grip_v01.blend (действие Mosin_Stances,
+         хват без ключей). Владелец правит позы в этом файле, поэтому готовый файл без force не перезаписывается.
+  clips [grip=<файл>] → следующая версия Mosin_PU_FPS_Clips_vNN.blend (прежние, в том числе сохранённые владельцем,
+         не трогаются) от хвата в файле grip + clips.json
   stills [carry|ready|ads …] [clip=<имя>:<кадр>,…] out=<папка> → кадры для проверки (глазами, справа, слева, снизу, спереди)
 """
 from __future__ import annotations
@@ -38,8 +40,8 @@ SRC = ROOT / "_asset_src/mosin_pu_game"
 LIB = Path(r"E:\Models Blender\WEAPONS\Мосин — винтовка и узлы\models\07_Анимации")
 ARMS_FILE = Path(r"E:\Models Blender\WEAPONS\ВЕРАС-54 — модель и обвесы\ВЕРАС-54\Игровая версия\Перезарядка v01 (Claude)\VERAS54_Reload_Full_v05.blend")
 GUN_FILE = SRC / "fp/lp/Mosin_Game_export.blend"
-GRIP_FILE = LIB / "Mosin_PU_FPS_Grip_v01.blend"
-CLIPS_FILE = LIB / "Mosin_PU_FPS_Clips_v01.blend"
+GRIP_FILE = LIB / "Mosin_PU_FPS_Grip_v01.blend"       # хват и стойки; после правки владельцем — его файл
+CLIPS_NAME = "Mosin_PU_FPS_Clips_v{:02d}.blend"
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 MODE = ARGS[0] if ARGS else "grip"
 FPS = 30
@@ -549,7 +551,18 @@ def reach(arms, bone: str, target: Matrix) -> float:
     return round((world(arms, bone).translation - target.translation).length * 1000.0, 1)
 
 
+def arg_path(key: str, default: Path) -> Path:
+    return next((Path(a[len(key) + 1:]) for a in ARGS[1:] if a.startswith(key + "=")), default)
+
+
+def clips_files() -> list:
+    return sorted(LIB.glob(CLIPS_NAME.replace("{:02d}", "[0-9][0-9]")))
+
+
 def grip() -> None:
+    target = arg_path("out", GRIP_FILE)
+    if target.exists() and "force" not in ARGS:
+        raise SystemExit(f"{target} уже есть (в нём позы владельца): out=<другой файл> или force")
     scene, arms = append_scene()
     scope_eye = bpy.data.objects["ScopeEye"].matrix_world.translation.copy()   # винтовка ещё в начале координат
     ready = read_ready(scene, arms)
@@ -611,17 +624,18 @@ def grip() -> None:
         gs = all_stances[stance]
         report["reach_mm"][stance] = {"R": reach(arms, "hand.R", gs @ r_in_gun), "L": reach(arms, "hand.L", gs @ l_in_gun)}
     scene.frame_set(STANCE_FRAMES["READY"])
-    LIB.mkdir(parents=True, exist_ok=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
     bpy.context.preferences.filepaths.save_version = 0                # без .blend1 рядом: папку модели держим чистой
-    bpy.ops.wm.save_as_mainfile(filepath=str(GRIP_FILE))
-    (LIB / "grip_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
-    print("MOSIN_GRIP saved", GRIP_FILE, json.dumps(report, ensure_ascii=False), flush=True)
+    bpy.ops.wm.save_as_mainfile(filepath=str(target))
+    (target.parent / "grip_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    print("MOSIN_GRIP saved", target, json.dumps(report, ensure_ascii=False), flush=True)
 
 
 # ================================================================ кадры для проверки
 
 def stills() -> None:
-    bpy.ops.wm.open_mainfile(filepath=str(CLIPS_FILE if any(a.startswith("clip=") for a in ARGS) else GRIP_FILE))
+    clip_file = arg_path("file", clips_files()[-1] if clips_files() else GRIP_FILE)
+    bpy.ops.wm.open_mainfile(filepath=str(clip_file if any(a.startswith("clip=") for a in ARGS) else GRIP_FILE))
     scene = bpy.context.scene
     arms = bpy.data.objects["FPS_ArmsRig"]
     try:
@@ -761,6 +775,21 @@ def fed(t: float) -> Matrix:
     return Matrix.Translation(Vector((0.0, base_y, z)) - SLOT1) @ rot("X", -nod)
 
 
+REACH_R = 0.455                       # дальше этого от плеча кисть не тянется (рука 0,488 м — не в струну)
+
+
+def shoulder_to(arms, base: Matrix, wrist: Vector) -> Matrix:
+    """Плечо правой (matrix_basis upper_arm.R): как в хвате владельца (base), а если запястье дальше REACH_R — подано
+    к нему ровно настолько, чтобы дотянуться: владелец отвёл плечо назад, и к шару рукояти рука так не достаёт.
+    FPS_Root в покое, поэтому сдвиг кости — в осях её покоя."""
+    rest = arms.matrix_world @ arms.data.bones["upper_arm.R"].matrix_local
+    d = wrist - (rest @ base).translation
+    if d.length <= REACH_R:
+        return base.copy()
+    shift = rest.to_3x3().inverted() @ (d * (1.0 - REACH_R / d.length))
+    return Matrix.Translation(base.translation + shift) @ base.to_3x3().to_4x4()
+
+
 class Keyer:
     """Клип: на первом и последнем кадре ключи всех костей хвата и деталей (иначе кость без ключей осталась бы там,
     где её бросил прошлый клип), между ними — только то, что движется.
@@ -803,9 +832,15 @@ class Keyer:
             rel = pb.parent.bone.matrix_local.inverted() @ pb.bone.matrix_local
             pb.matrix_basis = (inv @ gun @ rel).inverted() @ (inv @ m)      # родитель — Frame (поставлен выше)
             over[n] = pb.matrix_basis.copy()
+        if "ik_hand.R" in place and "upper_arm.R" not in over:
+            over["upper_arm.R"] = self.shoulder_to(place["ik_hand.R"].translation)
+            self.arms.pose.bones["upper_arm.R"].matrix_basis = over["upper_arm.R"]
         edge = all_bones or frame in (0, self.length)
         for n in (list(self.rest) if edge else list(over)) + ["Frame"]:
             self._key(n, frame)
+
+    def shoulder_to(self, wrist: Vector) -> Matrix:
+        return shoulder_to(self.arms, self.rest["upper_arm.R"], wrist)
 
     def event(self, name: str, frame: int) -> None:
         self.events[name] = frame
@@ -863,7 +898,10 @@ PRESS_FIST = 1.15                                          # средний, б�
 def clips() -> None:
     """Клипы от хвата в файле grip: покой в двух стойках, переходы, прицел, ходьба, бег; цикл затвора (от бедра и
     в прицеле); заряжание по одному: открыть затвор, патрон (повторяется), закрыть."""
-    bpy.ops.wm.open_mainfile(filepath=str(GRIP_FILE))
+    source = arg_path("grip", GRIP_FILE)
+    have = clips_files()
+    target = LIB / CLIPS_NAME.format(int(have[-1].stem[-2:]) + 1 if have else 1)
+    bpy.ops.wm.open_mainfile(filepath=str(source))
     scene = bpy.context.scene
     arms = bpy.data.objects["FPS_ArmsRig"]
     st = {}
@@ -877,7 +915,8 @@ def clips() -> None:
     r_grip = ready.inverted() @ world(arms, "ik_hand.R")                 # хват правой на шейке в осях винтовки
     rest = {n: arms.pose.bones[n].matrix_basis.copy() for n in GRIP_BONES + list(GUN_PARTS) if n in arms.pose.bones}
     arms.animation_data.action = None
-    hands = Hands(arms, read_ready(scene, arms))
+    hands = Hands(arms, read_ready(scene, arms))                           # оси сгиба пальцев — из хвата на ВЕРАСе,
+    hands.loc = {n: rest[n].to_translation() for n in RIGHT + LEFT if n in rest}   # костяшки — как в файле хвата
     rest.update(bolt(0.0, 0.0, 1.0))                                     # покой: затвор закрыт, курок взведён
     rest.update(mag(4, chamber=True))                                    # 4 в магазине и патрон в патроннике
     skin = Skin(bpy.data.objects["FPS_Arms"])
@@ -892,6 +931,12 @@ def clips() -> None:
         for n, m in (extra or {}).items():
             arms.pose.bones[n].matrix_basis = m
         arms.pose.bones["Frame"].matrix = arms.matrix_world.inverted() @ gun
+        bpy.context.view_layer.update()
+
+    def aim_right(m: Matrix) -> None:
+        """Цель правой кисти (мир) и плечо, поданное к ней, если иначе не дотянуться."""
+        set_world(arms, "ik_hand.R", m)
+        arms.pose.bones["upper_arm.R"].matrix_basis = shoulder_to(arms, rest["upper_arm.R"], m.translation)
         bpy.context.view_layer.update()
 
     def as_basis(pose: dict) -> dict:
@@ -932,7 +977,7 @@ def clips() -> None:
         """Пальцы правой на шаре при повороте стебля rot_deg (затвор у торца): кулак владельца, большой — на шар
         сзади, указательный и средний дожаты до шара."""
         reset(ready, bolt(rot_deg, 0.0, 1.0))
-        set_world(arms, "ik_hand.R", ready @ knob_hand(rot_deg, 0.0))
+        aim_right(ready @ knob_hand(rot_deg, 0.0))
         pose = hands.pose("R", 1.0)
         apply(arms, pose)
         hands.place(arms)
@@ -949,7 +994,7 @@ def clips() -> None:
     press_pt = SLOT1 + PRESS_AT
     press = right_pose(arms, press_pt + PRESS_MCP, PRESS_FINGERS, PRESS_PALM)
     reset(ready, {**bolt(BOLT_OPEN, BOLT_TRAVEL, 1.0), **mag(0, hand=True)})
-    set_world(arms, "ik_hand.R", ready @ press)
+    aim_right(ready @ press)
     pose = hands.pose("R", 1.0)
     for f in ("f_middle", "f_ring", "f_pinky"):                          # остальные — в кулак, мимо стенки коробки
         for i in (1, 2, 3):
@@ -1209,6 +1254,7 @@ def clips() -> None:
     CLIP_INFO["_meta"] = {"fps": FPS, "bolt_travel_m": BOLT_TRAVEL, "bolt_open_deg": BOLT_OPEN, "cock_travel_m": COCK_TRAVEL,
                           "slot1": list(SLOT1), "slot_pitch_m": SLOT_PITCH, "slot_stagger_m": SLOT_STAGGER,
                           "chamber": list(CHAMBER), "eye_relief_m": EYE_RELIEF, "press_reach_mm": press_reach,
+                          "grip_source": str(source), "file": target.name,
                           "preview": "видимость патронов в клипах — для просмотра (цикл: 4 в магазине; патрон: 2; закрыть: 5); "
                                      "игра ставит её по счёту, Round_i сдвигаются клипом на соседнее место"}
     arms.animation_data.action = bpy.data.actions["Mosin_Idle_Ready"]
@@ -1217,9 +1263,9 @@ def clips() -> None:
     for m in list(scene.timeline_markers):
         scene.timeline_markers.remove(m)
     bpy.context.preferences.filepaths.save_version = 0
-    bpy.ops.wm.save_as_mainfile(filepath=str(CLIPS_FILE))
+    bpy.ops.wm.save_as_mainfile(filepath=str(target))
     (LIB / "clips.json").write_text(json.dumps(CLIP_INFO, ensure_ascii=False, indent=1), encoding="utf-8")
-    print("MOSIN_CLIPS saved", CLIPS_FILE, json.dumps({n: v["frames"] for n, v in CLIP_INFO.items() if n != "_meta"}),
+    print("MOSIN_CLIPS saved", target, json.dumps({n: v["frames"] for n, v in CLIP_INFO.items() if n != "_meta"}),
           "press_reach_mm", press_reach, flush=True)
 
 
