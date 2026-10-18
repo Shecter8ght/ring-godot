@@ -14,6 +14,8 @@ const IMPACT_OFFSET: float = 0.012
 const IMPACT_CLEANUP_MARGIN: float = 0.15
 ## Вращение кусков в полёте, °/с (наибольшее).
 const IMPACT_SPIN: float = 420.0
+## У каждого куска свои пропорции: оси растянуты случайно на ± эту долю.
+const IMPACT_SHAPE_VAR: float = 0.2
 ## Куда падают куски (ImpactFx): пол ищем лучом вниз на down_m. Попали в верхнюю грань — смотрим
 ## опору в стороне на probe_m (луч с высоты lift_m): ниже точки удара больше чем на edge_m — грань
 ## маленькая (стол, капот, ящик), дальше small_radius_m от удара куски падают с неё на пол.
@@ -29,14 +31,18 @@ const IMPACT_SPARKS := {"speed": Vector2(4.0, 15.0), "life": Vector2(0.22, 0.75)
 const IMPACT_FLASH := {"life": 0.06, "color": Color(1.0, 0.78, 0.45), "energy": 5.0, "light_range": 2.6, "light_energy": 3.0, "light_max": 4}
 ## Облако пыли: разлёт (м/с), сопротивление воздуха (доля скорости за с), конус (°).
 const IMPACT_DUST := {"speed": Vector2(0.25, 0.85), "drag": Vector2(1.3, 2.4), "spread": 50.0}
+## Следы попаданий (ImpactFx): asset — набор декалей в assets/textures/impacts, size — сторона декали, м.
+## У hole_* дырка вылеплена в реальном размере на плитке (бетон 16 см, плитка 18, асфальт и дерево 14,
+## картон 12, металл и пластик 10 — tools/build_impact_holes.py); в игре — крупнее, в духе Helldivers 2:
+## след должен читаться издали. tint — оттенок поверх запечённого цвета.
 const IMPACT_DECALS: Dictionary = {
-	"concrete": {"asset": "concrete", "size": Vector2(0.10, 0.16), "tint": Color(0.82, 0.78, 0.7, 0.92)},
-	"tile": {"asset": "concrete", "size": Vector2(0.14, 0.22), "tint": Color(0.95, 0.93, 0.88, 0.9)},
-	"asphalt": {"asset": "concrete", "size": Vector2(0.09, 0.14), "tint": Color(0.55, 0.52, 0.48, 0.9)},
-	"metal": {"asset": "metal", "size": Vector2(0.07, 0.11), "tint": Color(0.34, 0.3, 0.25, 0.95)},
-	"wood": {"asset": "wood", "size": Vector2(0.10, 0.16), "tint": Color(0.86, 0.74, 0.64, 0.95)},
-	"cardboard": {"asset": "wood", "size": Vector2(0.08, 0.12), "tint": Color(0.78, 0.62, 0.4, 0.9)},
-	"plastic": {"asset": "metal", "size": Vector2(0.07, 0.11), "tint": Color(0.28, 0.28, 0.3, 0.92)},
+	"concrete": {"asset": "hole_concrete", "size": Vector2(0.21, 0.27), "tint": Color(0.96, 0.94, 0.91, 1.0)},
+	"tile": {"asset": "hole_tile", "size": Vector2(0.24, 0.3), "tint": Color(1.0, 1.0, 1.0, 1.0)},
+	"asphalt": {"asset": "hole_asphalt", "size": Vector2(0.18, 0.24), "tint": Color(1.0, 1.0, 1.0, 1.0)},
+	"metal": {"asset": "hole_metal", "size": Vector2(0.14, 0.18), "tint": Color(1.0, 1.0, 1.0, 1.0)},
+	"wood": {"asset": "hole_wood", "size": Vector2(0.18, 0.24), "tint": Color(1.0, 0.97, 0.94, 1.0)},
+	"cardboard": {"asset": "hole_cardboard", "size": Vector2(0.15, 0.2), "tint": Color(1.0, 1.0, 1.0, 1.0)},
+	"plastic": {"asset": "hole_plastic", "size": Vector2(0.13, 0.17), "tint": Color(1.0, 1.0, 1.0, 1.0)},
 	"fabric": {"asset": "", "size": Vector2(0.07, 0.10), "tint": Color(0.08, 0.07, 0.06, 0.85)},
 	"grass": {"asset": "soil", "size": Vector2(0.14, 0.22), "tint": Color(0.62, 0.55, 0.46, 0.95)},
 	"dirt": {"asset": "soil", "size": Vector2(0.16, 0.24), "tint": Color(0.78, 0.7, 0.6, 0.95)},

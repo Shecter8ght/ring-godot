@@ -5958,3 +5958,19 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   для владельца — `E:\Models Blender\WEAPONS\Мосин — винтовка и узлы\models\06_Игровая\fp\Mosin_PU_Game15k_v02.blend`
   (`tools/mosin_pu/game_view.py`).
 
+### 2026-10-18 — попадания, шаг 2: дырки и обломки из Blender (Claude)
+
+- Дырки (`tools/build_impact_holes.py`): рельеф лепится по материалу в реальном масштабе и запекается в
+  Blender (Cycles: нормали, затенение), цвет/прозрачность/шероховатость/металл — из тех же данных.
+  31 вариант: бетон 6, плитка 4, асфальт 4, металл 6 (4 пробоины, 2 рикошета), дерево 5, пластик 3,
+  картон 3 → `assets/textures/impacts/hole_*` (цвет, `_normal`, `_orm`). Декаль теперь с ORM — у сбитой
+  краски блестит металл. Размеры декалей крупнее реального (`Balance.IMPACT_DECALS`). Чужие CC0-декали
+  бетона/металла/дерева больше не используются (файлы оставлены).
+- Обломки (`tools/build_impact_debris.py` → `assets/models/props/impact_debris/impact_debris.glb`):
+  29 лоупольных кусков 5–80 граней — крошка, сколы, щепки, комья, камешки, травинки, осколки, клочки;
+  у выброса свой вариант, у частицы свои пропорции (`IMPACT_SHAPE_VAR`). Без файлов — процедурные.
+- Для просмотра владельцем: `E:\Models Blender\ENVIRONMENT\RING_Impact_Holes_Debris\models\impact_holes.blend`
+  (рельеф и плитка с картами на подложке своего материала), `impact_debris.blend`.
+- Проверено: compile_check 0, impact_test 0 (дырки с нормалями и ORM, куски загружены), glass_test 0;
+  стенд `impact_gallery` переснят и просмотрен.
+- Осталось (шаг 3): листы кадров дыма и пыли.

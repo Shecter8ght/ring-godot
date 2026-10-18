@@ -8,7 +8,12 @@ extends Node
 const MAX_DECALS: int = Balance.IMPACT_MAX_DECALS
 const BURST_SCENE: PackedScene = preload("res://scenes/combat/impact_burst.tscn")
 const DECAL_DIR := "res://assets/textures/impacts"
-const DECAL_COUNTS := {"concrete": 1, "metal": 8, "wood": 8, "soil": 4}
+## Декали: вид → сколько вариантов. hole_* — дырки, вылепленные и запечённые в Blender
+## (tools/build_impact_holes.py: цвет + прозрачность, нормали, ORM); soil — воронки в грунте.
+const DECAL_COUNTS := {
+	"hole_concrete": 6, "hole_tile": 4, "hole_asphalt": 4, "hole_metal": 6, "hole_wood": 5,
+	"hole_plastic": 3, "hole_cardboard": 3, "soil": 4,
+}
 
 ## Звук удара по виду поверхности.
 const SOUND := {
@@ -27,6 +32,7 @@ var _tex_splat: Texture2D
 var _tex_dust: Texture2D
 var _decal_textures: Dictionary = {}
 var _decal_normals: Dictionary = {}
+var _decal_orms: Dictionary = {}
 var _bursts: Array[Node3D] = []
 var _chip_mesh: BoxMesh
 var _dust_mesh: QuadMesh
@@ -57,17 +63,22 @@ func _load_decal_textures() -> void:
 	for kind: String in DECAL_COUNTS:
 		var albedo: Array[Texture2D] = []
 		var normals: Array[Texture2D] = []
+		var orms: Array[Texture2D] = []
 		for index: int in range(int(DECAL_COUNTS[kind])):
 			var path := "%s/%s_%d.png" % [DECAL_DIR, kind, index]
 			var normal_path := "%s/%s_%d_normal.png" % [DECAL_DIR, kind, index]
+			var orm_path := "%s/%s_%d_orm.png" % [DECAL_DIR, kind, index]
 			if not ResourceLoader.exists(path):
 				continue
 			var texture := load(path) as Texture2D
 			var normal := load(normal_path) as Texture2D if ResourceLoader.exists(normal_path) else null
+			var orm := load(orm_path) as Texture2D if ResourceLoader.exists(orm_path) else null
 			albedo.append(texture)
 			normals.append(normal)
+			orms.append(orm)
 		_decal_textures[kind] = albedo
 		_decal_normals[kind] = normals
+		_decal_orms[kind] = orms
 
 
 ## Точка входа: результат intersect_ray и направление пули.
@@ -321,16 +332,19 @@ func _decal(parent: Node, kind: String, pos: Vector3, n: Vector3) -> void:
 	var tint: Color = spec.tint
 	var textures: Array = _decal_textures.get(asset_kind, [])
 	var normals: Array = _decal_normals.get(asset_kind, [])
+	var orms: Array = _decal_orms.get(asset_kind, [])
 	if not textures.is_empty():
 		var index: int = _rng.randi_range(0, textures.size() - 1)
 		var normal_texture: Texture2D = normals[index] as Texture2D if index < normals.size() else null
-		_place_decal(parent, textures[index] as Texture2D, pos, n, _rng.randf_range(size_range.x, size_range.y), tint, normal_texture)
+		var orm_texture: Texture2D = orms[index] as Texture2D if index < orms.size() else null
+		_place_decal(parent, textures[index] as Texture2D, pos, n, _rng.randf_range(size_range.x, size_range.y), tint, normal_texture, orm_texture)
 	else:
 		_place_decal(parent, _tex_hole, pos, n, _rng.randf_range(size_range.x, size_range.y), tint)
 
 
 ## Декаль проецируется вдоль своей -Y: ставим Y по нормали, случайный поворот вокруг неё.
-func _place_decal(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: float, tint: Color, normal_tex: Texture2D = null) -> void:
+## orm_tex — затенение (R), шероховатость (G), металл (B): у сбитой краски блестит голый металл.
+func _place_decal(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: float, tint: Color, normal_tex: Texture2D = null, orm_tex: Texture2D = null) -> void:
 	# Autoload переживает уровень, а его декали — нет. Проверяем ссылку ДО типизированного присваивания.
 	for index: int in range(_decals.size() - 1, -1, -1):
 		if not is_instance_valid(_decals[index]):
@@ -339,6 +353,8 @@ func _place_decal(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: 
 	d.texture_albedo = tex
 	if normal_tex != null:
 		d.texture_normal = normal_tex
+	if orm_tex != null:
+		d.texture_orm = orm_tex
 	d.modulate = tint
 	d.albedo_mix = 1.0
 	d.size = Vector3(size, maxf(0.12, size * 0.6), size)

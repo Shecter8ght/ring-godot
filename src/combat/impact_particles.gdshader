@@ -41,6 +41,8 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform vec4 tint_alt : source_color = vec4(1.0);
 uniform float alt_share = 0.0;
 uniform float shade_var = 0.3;
+// у каждого куска свои пропорции: оси растянуты случайно на ±shape_var
+uniform float shape_var = 0.0;
 
 float hash(uint x) {
 	x = ((x >> 16u) ^ x) * 0x45d9f3bu;
@@ -115,6 +117,7 @@ void start() {
 	COLOR = base * texture(color_ramp, vec2(0.0, 0.5)) * vec4(vec3(USERDATA3.x), 1.0);
 	CUSTOM = vec4(VELOCITY, 0.0);
 	USERDATA4 = vec4(VELOCITY, 1.0);
+	USERDATA5 = vec4(vec3(1.0) + (vec3(hash(s + 20u), hash(s + 21u), hash(s + 22u)) - 0.5) * 2.0 * shape_var, 0.0);
 	if (release_speed > 0.0) {
 		float wait = distance(TRANSFORM[3].xyz, release_from) / release_speed;
 		USERDATA4.w = 0.0;
@@ -164,7 +167,7 @@ void process() {
 			float len = clamp(sz + length(vel) * stretch, sz, max(stretch_max, sz));
 			basis = mat3(vec3(sz, 0.0, 0.0), vec3(0.0, len, 0.0), vec3(0.0, 0.0, sz));
 		} else {
-			basis = axis_rotation(USERDATA2.xyz, USERDATA1.w) * sz;
+			basis = axis_rotation(USERDATA2.xyz, USERDATA1.w) * mat3(vec3(USERDATA5.x, 0.0, 0.0), vec3(0.0, USERDATA5.y, 0.0), vec3(0.0, 0.0, USERDATA5.z)) * sz;
 		}
 		TRANSFORM = mat4(vec4(basis[0], 0.0), vec4(basis[1], 0.0), vec4(basis[2], 0.0), vec4(pos, 1.0));
 		vec4 base = mix(tint, tint_alt, USERDATA3.w);

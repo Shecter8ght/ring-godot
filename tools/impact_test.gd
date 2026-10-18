@@ -74,6 +74,13 @@ func _ready() -> void:
 		_check(decal.texture_albedo != null and decal.texture_albedo.resource_path == "" and decal.texture_normal == null, "%s: процедурный запасной вариант" % kind)
 	ImpactFx._decal_textures = saved_textures
 	_check(not (ImpactFx._decal_textures.get("soil", []) as Array).is_empty(), "воронки в грунте загружены")
+	for asset: String in ["hole_concrete", "hole_tile", "hole_asphalt", "hole_metal", "hole_wood", "hole_plastic", "hole_cardboard"]:
+		var orms: Array = ImpactFx._decal_orms.get(asset, [])
+		_check(orms.size() == int(ImpactFx.DECAL_COUNTS[asset]) and orms[0] != null, "%s: дырки с нормалями и ORM" % asset)
+	ImpactFx._decal(self, "metal", Vector3.ZERO, Vector3.BACK)
+	_check((ImpactFx._decals.back() as Decal).texture_orm != null, "металл: декаль с ORM (блеск голого металла)")
+	for shape: String in ["chip", "flake", "splinter", "clod", "pebble", "blade", "shard", "paper"]:
+		_check(not (ImpactBurst._debris_shapes().get(shape, []) as Array).is_empty(), "%s: куски из Blender" % shape)
 	for normal: Vector3 in [Vector3.UP, Vector3.DOWN, Vector3.RIGHT]:
 		ImpactFx._particles(self, "concrete", Vector3.ZERO, normal, -normal)
 		var burst: ImpactBurst = ImpactFx._bursts.back() as ImpactBurst

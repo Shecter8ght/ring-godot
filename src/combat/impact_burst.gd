@@ -7,6 +7,8 @@ extends Node3D
 
 const PARTICLES_SHADER: Shader = preload("res://src/combat/impact_particles.gdshader")
 const SPARK_SHADER: Shader = preload("res://src/combat/impact_spark.gdshader")
+## Лоупольные куски из Blender (tools/build_impact_debris.py): объекты <вид>_<N>.
+const DEBRIS_PATH := "res://assets/models/props/impact_debris/impact_debris.glb"
 const SPRAY_SHADER: Shader = preload("res://src/combat/impact_spray.gdshader")
 const FLASH_SHADER: Shader = preload("res://src/combat/impact_flash.gdshader")
 ## Плоскость «нигде»: пол не нашли.
@@ -31,6 +33,9 @@ static var _ramps: Dictionary[String, Texture2D] = {}
 static var _dust_texture: Texture2D
 static var _grain_texture: Texture2D
 static var _lights: int = 0
+## вид куска → варианты сеток из DEBRIS_PATH (пусто — процедурные _mesh)
+static var _debris: Dictionary = {}
+static var _debris_loaded: bool = false
 
 
 ## floor_plane — пол под точкой (нормаль и высота вдоль неё, NO_PLANE — нет); surface_radius — дальше
@@ -55,7 +60,7 @@ func setup(kind: String, normal: Vector3, direction: Vector3, seed_value: int, f
 		var cfg: Dictionary = spec[layer]
 		var aim: Vector3 = direction if kind == "flesh" else _aim(cfg.get("aim", Vector2(1.0, 0.45)), normal, reflected)
 		var count: int = _count(cfg.count, rng, far)
-		lifetime = maxf(lifetime, _emit(_layer_node(layer), layer, cfg, count, aim, planes))
+		lifetime = maxf(lifetime, _emit(_layer_node(layer), layer, cfg, count, aim, planes, rng.randi()))
 	if spec.has("sparks") and rng.randf() < float(spec.sparks.get("chance", 1.0)):
 		lifetime = maxf(lifetime, _emit_sparks(spec.sparks.count, normal, reflected, planes, rng, far))
 	if spec.has("dust"):
@@ -75,6 +80,7 @@ static func prepare() -> void:
 	_mesh("streak")
 	_mesh("flash")
 	_mesh("dust")
+	_debris_shapes()
 	for kind: String in Balance.IMPACT_SURFACES:
 		var spec: Dictionary = Balance.IMPACT_SURFACES[kind]
 		for layer: String in ["debris", "bits"]:
@@ -103,7 +109,7 @@ func _count(range_value: Vector2i, rng: RandomNumberGenerator, far: bool) -> int
 
 
 ## Слой на видеокарте: свой материал движения (направление, плоскости — у каждого попадания свои).
-func _emit(particles: GPUParticles3D, layer: String, cfg: Dictionary, count: int, aim: Vector3, planes: Dictionary) -> float:
+func _emit(particles: GPUParticles3D, layer: String, cfg: Dictionary, count: int, aim: Vector3, planes: Dictionary, variant: int = 0) -> float:
 	if count <= 0:
 		return 0.0
 	var life: Vector2 = cfg.life
@@ -135,6 +141,7 @@ func _emit(particles: GPUParticles3D, layer: String, cfg: Dictionary, count: int
 	material.set_shader_parameter("tint_alt", cfg.get("alt", color))
 	material.set_shader_parameter("alt_share", float(cfg.get("alt_share", 0.0)))
 	material.set_shader_parameter("shade_var", 0.0 if streak else 0.32)
+	material.set_shader_parameter("shape_var", 0.0 if streak else Balance.IMPACT_SHAPE_VAR)
 	particles.process_material = material
 	particles.amount = count
 	particles.lifetime = life.y
@@ -145,7 +152,7 @@ func _emit(particles: GPUParticles3D, layer: String, cfg: Dictionary, count: int
 	particles.visibility_aabb = AABB(Vector3(-6.0, -6.0, -6.0), Vector3(12.0, 12.0, 12.0))
 	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var look: String = layer if streak else String(cfg.mesh)
-	particles.draw_pass_1 = _mesh("streak" if streak else look)
+	particles.draw_pass_1 = _mesh("streak") if streak else _shape(look, variant)
 	particles.material_override = _material(look)
 	particles.restart()
 	particles.emitting = true
@@ -326,6 +333,35 @@ static func _material(kind: String) -> Material:
 		result = material
 	_materials[kind] = result
 	return result
+
+
+## Сетка куска: вариант из Blender, если есть, иначе процедурная.
+static func _shape(kind: String, variant: int) -> Mesh:
+	var variants: Array = _debris_shapes().get(kind, [])
+	if variants.is_empty():
+		return _mesh(kind)
+	return variants[absi(variant) % variants.size()] as Mesh
+
+
+## Куски из GLB (tools/build_impact_debris.py): вид → сетки вариантов; нет файла — пусто.
+static func _debris_shapes() -> Dictionary:
+	if _debris_loaded:
+		return _debris
+	_debris_loaded = true
+	if not ResourceLoader.exists(DEBRIS_PATH):
+		return _debris
+	var scene: PackedScene = load(DEBRIS_PATH) as PackedScene
+	if scene == null:
+		return _debris
+	var root: Node = scene.instantiate()
+	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mesh_node: MeshInstance3D = node as MeshInstance3D
+		var kind: String = String(mesh_node.name).rsplit("_", true, 1)[0]
+		if not _debris.has(kind):
+			_debris[kind] = []
+		(_debris[kind] as Array).append(mesh_node.mesh)
+	root.free()
+	return _debris
 
 
 static func _mesh(kind: String) -> Mesh:

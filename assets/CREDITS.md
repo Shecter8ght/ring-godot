@@ -46,6 +46,10 @@
 
 - `assets/textures/impacts/concrete_*.png` — Bullet Decal, musdasch, CC0 1.0, https://opengameart.org/content/bullet-decal — бетонный скол и производная normal-карта
 - `assets/textures/impacts/metal_*.png`, `wood_*.png`, `glass_cracks.png` — Bullet holes sprites, mitaywalle, CC0 1.0, https://realtimevfx.com/t/share-bullet-holes-sprites/21203 — атласы металла, дерева и стекла, прозрачность и normal-карты собраны импортёром
+  (с 2026-10-18 в игре не используются — заменены своими hole_*; файлы оставлены)
+- `assets/textures/impacts/hole_*.png` (+ `_normal`, `_orm`) — собственные: рельеф дырок вылеплен скриптом и запечён в Blender (`tools/build_impact_holes.py`)
+- `assets/textures/impacts/soil_*.png` (+ `_normal`) — собственные процедурные воронки в грунте (`tools/gen_impact_soil.py`)
+- `assets/models/props/impact_debris/impact_debris.glb` — собственные лоупольные обломки попаданий (`tools/build_impact_debris.py`, Blender)
 
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 
