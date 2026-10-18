@@ -211,6 +211,7 @@ tools/godot.cmd --headless res://tools/coop_raid_test.tscn -- host   # кооп 
 tools/godot.cmd --headless res://tools/coop_items_test.tscn -- host [сцена] [two] # + «-- client …» через 3 с (порт 17791): гость в рейде снаряжает
                                                               # магазин, сортирует, меняет ствол, клавиши 1/2; гость вышел — рейд не ждёт (COOP_ITEMS_PEERS=3 — двое гостей)
 tools/godot.cmd --disable-vsync res://tools/cpu_probe.tscn  # во что упирается процессор на уровне: выключает системы по очереди
+python -X utf8 tools/hang_stacks.py [pid] [--all]            # игра зависла: стеки потоков живого процесса Godot — чего ждёт главный поток (без отладчика; не закрывать игру до снятия)
 tools/godot.cmd --headless res://tools/mesh_census.tscn     # какие модели дают треугольники на уровне
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/rig_shots.tscn # ростовая фигура со слотами и разгрузка (подсумки, сумка сброса): тайник и окно рюкзака в рейде; снимки doll_*
 tools/godot.cmd --headless res://tools/engraver_head_test.tscn # головка гравировщика в станке: вставить, нанести (размер, слева), вынуть; с окном — снимок окна станка
