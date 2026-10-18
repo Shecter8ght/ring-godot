@@ -292,7 +292,9 @@ def build_rear(surf: Surface, S: dict, out: list) -> None:
                                        (0.40, 0.906), (0.0, 0.905)]]
     bar = bar + [("rear", -x, z) for _, x, z in reversed(bar[1:-1])]
     bar_loop = Seam(surf, bar, "rear", n=400, closed=True).P
-    V, F = domain_panel(surf, VIEWS["rx_rear"], lid, holes=[bar_loop], h=0.014, gap=GAP, hole_depth=0.02)
+    # у основания заднего стекла лучи одного ряда цепляли щель поля (обрез кабины) — despike_limit
+    V, F = domain_panel(surf, VIEWS["rx_rear"], lid, holes=[bar_loop], h=0.014, gap=GAP, hole_depth=0.02,
+                        despike_limit=0.006)
     out.append(("Trunk_Lid", "paint", V, F))
     V, F = domain_panel(surf, VIEWS["rear"], bar_loop, h=0.006, gap=0.0025, flange=0.02)
     out.append(("Lightbar", "lamp_red", V, F))

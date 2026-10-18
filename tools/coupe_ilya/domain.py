@@ -202,11 +202,46 @@ def fit_smooth(view: View, V: np.ndarray, deg: int) -> tuple[np.ndarray, float]:
     return O + tf[:, None] * D, float(np.abs(tf - t).max())
 
 
+def despike(surf: Surface, V: np.ndarray, tris: np.ndarray, first: int, limit: float) -> tuple[np.ndarray, int]:
+    """Внутренние точки, которые луч вида поднял не на тот лист поверхности, — на кузов по соседям.
+
+    Пример: у основания заднего стекла поле в месте обреза кабины образует узкую щель с «плавником»;
+    лучи одного ряда крышки багажника цеплялись за него, и ряд вставал на 2 см выше — складка,
+    «зубцы» в отражениях. Точка дальше limit от среднего соседей — выброс: ставим её в среднее
+    надёжных соседей (между соседними рядами; на само поле не проецируем — там та же щель).
+    Контуры (индексы < first) не трогаем. Включается для панели явно: на бамперах и фарах
+    резкие ступени поля законны.
+    """
+    n = len(V)
+    if n <= first or not len(tris):
+        return V, 0
+    V = V.copy()
+    e = np.vstack([tris[:, [0, 1]], tris[:, [1, 2]], tris[:, [2, 0]]])
+    e = np.vstack([e, e[:, ::-1]])
+    flagged = np.zeros(n, dtype=bool)
+    for _ in range(4):
+        w = (~flagged[e[:, 1]]).astype(float)
+        acc = np.zeros((n, 3))
+        cnt = np.zeros(n)
+        np.add.at(acc, e[:, 0], V[e[:, 1]] * w[:, None])
+        np.add.at(cnt, e[:, 0], w)
+        mean = acc / np.maximum(cnt, 1)[:, None]
+        dev = np.linalg.norm(V - mean, axis=1)
+        bad = (np.arange(n) >= first) & (cnt > 0) & (dev > limit)
+        if not bad.any():
+            break
+        V[bad] = mean[bad]
+        flagged |= bad
+    return V, int(flagged.sum())
+
+
 def domain_panel(surf: Surface, view: View, outer, holes=(), h: float = 0.012, gap: float = 0.0045,
                  roll_r: float = 0.003, flange: float = 0.012, roll_steps: int = 3,
                  hole_depth: float | None = None, smooth: bool = True, fit_deg: int | None = None,
-                 fit_blend: float = 0.0):
+                 fit_blend: float = 0.0, despike_limit: float | None = None):
     """Панель: (вершины, грани). hole_depth — глубина стенки проёма (по умолчанию как отбортовка).
+
+    despike_limit — убрать выбросы луча дальше этого расстояния от соседей (см. despike).
 
     fit_deg — для стёкол: поверхность панели подгоняется многочленом этой степени (см. fit_smooth).
     """
@@ -247,6 +282,9 @@ def domain_panel(surf: Surface, view: View, outer, holes=(), h: float = 0.012, g
     # Подъём на кузов: контуры — уже на поверхности, внутренние точки — лучами вида
     nb = sum(len(L) for L in loops_uv)
     V = np.vstack(loops3 + [view.lift(surf, grid)]) if len(grid) else np.vstack(loops3)
+    if despike_limit:
+        V, n_spikes = despike(surf, V, tris, nb, despike_limit)
+        print(f"    выбросов луча убрано: {n_spikes}")
     if fit_deg:
         Vf, dev = fit_smooth(view, V, fit_deg)
         if fit_blend > 0:
@@ -264,10 +302,16 @@ def domain_panel(surf: Surface, view: View, outer, holes=(), h: float = 0.012, g
             out_loops.append(V[cut:cut + len(L)])
             cut += len(L)
         loops3 = out_loops
-    # Грани наружу
+    # Грани наружу: сначала все — в одну сторону по обходу на виде, потом вся панель — по большинству
+    # нормалей поля (по одной грани нельзя: у тонких мест поля нормаль смотрит вбок и грань переворачивается)
+    a_uv = verts_uv[tris]
+    ccw = ((a_uv[:, 1, 0] - a_uv[:, 0, 0]) * (a_uv[:, 2, 1] - a_uv[:, 0, 1])
+           - (a_uv[:, 1, 1] - a_uv[:, 0, 1]) * (a_uv[:, 2, 0] - a_uv[:, 0, 0])) > 0
+    tris = np.where(ccw[:, None], tris, tris[:, ::-1])
     nrm = np.cross(V[tris[:, 1]] - V[tris[:, 0]], V[tris[:, 2]] - V[tris[:, 0]])
     sn = surf.normal(V[tris].mean(1))
-    tris = np.where(((nrm * sn).sum(1) < 0)[:, None], tris[:, ::-1], tris)
+    if ((nrm * sn).sum(1) < 0).mean() > 0.5:
+        tris = tris[:, ::-1]
     faces = [tuple(t) for t in tris]
     # Направленные рёбра треугольников: по ним ориентируем кромки
     tri_edges = {}
