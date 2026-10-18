@@ -3,8 +3,8 @@
 Руки — FPS_ArmsRig из VERAS54_Reload_Full_v05.blend (копия; оригинал не трогается), хват — боевой хват владельца на
 ВЕРАСе (действие VERAS54_Grip_Manual_v02): правая кисть с пистолетной рукоятки ВЕРАСа переносится на шейку ложи
 (поворот вперёд на GRIP_TILT — прямая шейка лежит в кулаке наискосок), левая — с цевья ВЕРАСа под цевьё Мосина перед
-магазином; пальцы дожимаются до дерева по сетке перчатки. Мосин — игровая сетка v03
-_asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend (оси до перевода glTF: дуло −Y, верх +Z, правая сторона −X,
+магазином; пальцы дожимаются до дерева по сетке перчатки. Мосин — игровая сетка (с 2026-10-18 — форма v08: ход
+затвора 110 мм, направляющие обоймы) _asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend (оси до перевода glTF: дуло −Y, верх +Z, правая сторона −X,
 начало — середина шейки ложи).
 
 Кости винтовки в арматуре рук: Frame (под FPS_Root, несёт винтовку; цели кистей ik_hand.R / ik_hand.L — её дочерние),
@@ -34,6 +34,9 @@ from pathlib import Path
 import bpy
 from mathutils import Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_rifle as R  # noqa: E402  (ход затвора и место патронов обоймы — одно место)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "_asset_src/mosin_pu_game"
@@ -74,18 +77,22 @@ FINGERS = ("f_index", "f_middle", "f_ring", "f_pinky")
 # Механика (tools/mosin_pu/build_rifle.py, asset-state.md): оси экспорта, метры
 BORE_Z = 0.0578                       # ось канала над началом
 BREECH_Y = -0.24                      # торец ствола / чашечка личинки (пустышка Bolt)
-BOLT_TRAVEL = 0.088                   # ход затвора до упора
+BOLT_TRAVEL = R.BOLT_TRAVEL * 0.001   # ход затвора до упора (форма v08: 110 мм; в клипах v01–v02 было 88)
 BOLT_OPEN = 90.0                      # поворот стебля рукоятью вверх
 COCK_TRAVEL = 0.0095                  # курок отходит назад при подъёме рукояти
 EJECTOR_IN, EJECTOR_FROM = 0.0028, 0.0564   # отсечка-отражатель: на сколько входит, с какого хода затвора (за 2 мм)
-EJECT_AT = 0.0872                     # гильза выбита (ход 87,2 из 88)
-# Патроны в магазине: однорядный столбик под окном, закраина верхнего — перед закраиной нижнего; верхний лежит на
-# подавателе (пустой магазин: верх подавателя на 12,3 мм ниже оси канала), закраина — сразу перед торцом отведённой
-# личинки, чтобы её захватить.
+EJECT_AT = 0.0872                     # гильза выбита на ходе 87,2 мм (отражатель на месте), затвор идёт до упора дальше
+# Патроны в магазине: однорядный столбик под окном, закраина верхнего — перед закраиной нижнего; верхний лежит
+# закраиной на подавателе (пустой магазин: верх подавателя на 12,2 мм ниже оси канала), донце — там же, где у патронов
+# обоймы в направляющих (v08: x −108,1), за 2,1 мм перед торцом отведённой личинки — она его захватывает.
+RIM_R = 0.00724                       # радиус закраины
 ROUND_R = 0.0062                      # радиус гильзы у донца
 SLOT_PITCH = 0.0120                   # шаг столбика
-SLOT_STAGGER = 0.0018                 # нижний патрон — на столько дальше назад
-SLOT1 = Vector((0.0, BREECH_Y + 0.0865, BORE_Z - 0.0123 + ROUND_R))
+# сдвиг закраины нижнего назад — на место: задняя стенка полости магазина у x −109, весь столбик в полости
+# (в v01–v02 — 1,8 мм на место, столбик стоял на 2 см впереди и уходил носами в сталь коробки)
+SLOT_STAGGER = 0.00018
+# на 0,1 мм дальше донец обоймы: пуля верхнего не касается передней стенки полости (x −31), нижний — задней (−109)
+SLOT1 = Vector((0.0, BREECH_Y - (R.CLIP_SPINE_X + 0.5 - 0.1) * 0.001, BORE_Z - 0.0122 + RIM_R))
 CHAMBER = Vector((0.0, BREECH_Y + 0.0002, BORE_Z))
 SLOTS = 5
 
@@ -742,14 +749,31 @@ def rotor(rot_deg: float, travel: float) -> Matrix:
     return Matrix.Translation(BOLT_PIVOT + Vector((0.0, travel, 0.0))) @ rot("Y", rot_deg)
 
 
-def mag(k: int, chamber: bool = False, case: bool = False, hand: bool = False) -> dict:
+# Пока затвор над магазином, столбик поджат вниз: закраина верхнего проходит под соединительной планкой (её низ —
+# 11,7 мм под осью канала) с зазором 0,2 мм. Верхний патрон встаёт на место 1, только когда торец личинки уходит за
+# его донце — на последних ~2 мм хода назад. В закрытом магазине полость упрощена (подаватель не на шарнире): у
+# поджатого нижнего патрона пуля касается наклонной передней стенки до 0,2 мм — снаружи не видно.
+COL_DROP = 0.0142
+
+
+def col_drop(travel: float, k: int) -> float:
+    """На сколько столбик из k патронов ниже своих мест при ходе затвора travel (0 — закрыт)."""
+    if k <= 0:
+        return 0.0
+    reach = SLOT1.y - BREECH_Y
+    return COL_DROP * (1.0 - ease(clamp01((travel - reach) / (BOLT_TRAVEL - reach))))
+
+
+def mag(k: int, chamber: bool = False, case: bool = False, hand: bool = False, travel: float = 0.0) -> dict:
     """Патроны: k в магазине (места 1…k), патрон в патроннике, стреляная гильза в патроннике, патрон в пальцах;
-    подаватель под нижним патроном. Игра потом ставит видимость по счёту сама — здесь показ для просмотра."""
+    подаватель под нижним патроном; travel — ход затвора (столбик поджат, пока затвор над ним). Игра потом ставит
+    видимость по счёту сама — здесь показ для просмотра."""
+    down = Matrix.Translation((0.0, 0.0, -col_drop(travel, k)))
     out = {"RoundChamber": Matrix() if chamber else HIDDEN, "Case": Matrix() if case else HIDDEN,
            "RoundHand": Matrix() if hand else HIDDEN,
-           "Follower": Matrix.Translation((0.0, 0.0, -SLOT_PITCH * max(k - 1, 0)))}
+           "Follower": down @ Matrix.Translation((0.0, 0.0, -SLOT_PITCH * max(k - 1, 0)))}
     for i in range(1, SLOTS + 1):
-        out[f"Round_{i}"] = Matrix() if i <= k else HIDDEN
+        out[f"Round_{i}"] = down if i <= k else HIDDEN
     return out
 
 
@@ -766,7 +790,8 @@ def follower(n: float) -> Matrix:
 
 def fed(t: float) -> Matrix:
     """Верхний патрон (Round_1), который затвор досылает: t — ход затвора (от отведённого к закрытому). Торец личинки
-    подхватывает закраину на ходе 86,5 мм, патрон идёт вперёд с ним, поднимаясь в патронник с кивком пулей вверх."""
+    подхватывает закраину на ходе 108,1 мм (v08; было 86,5), патрон идёт вперёд с ним, поднимаясь в патронник с кивком
+    пулей вверх."""
     reach_y = SLOT1.y - BREECH_Y
     base_y = BREECH_Y + min(t, reach_y)
     u = clamp01((reach_y - t) / (reach_y - 0.020))          # 0 — на губах магазина, 1 — на оси канала
@@ -895,6 +920,48 @@ PRESS_PALM = Vector((0.85, 0.0, -0.5))
 PRESS_FIST = 1.15                                          # средний, безымянный, мизинец — плотнее, чем на рукоятке
 
 
+GUN_MESHES = ("Frame_Steel", "Frame_Wood", "Bolt_Bar_Mesh", "Bolt_Cocking_Mesh", "Bolt_Rotor_Mesh", "Follower_Mesh",
+              "Interrupter_Mesh", "Mount_Base_Mesh", "Mount_Bracket_Mesh", "RearSight_Leaf_Mesh", "RearSight_Slider_Mesh",
+              "Scope_Body_Mesh", "Scope_Lens_Mesh", "Trigger_Mesh", "Round_Mesh", "SpentCase_Mesh")
+
+
+def refresh_gun(arms) -> None:
+    """Файл хвата хранит винтовку и места патронов, какими они были при его сборке (grip). Для клипов — в памяти,
+    файл хвата не меняется: сетки и материалы деталей — из текущего экспорта GUN_FILE (имена сеток те же, пустышки
+    деталей не сдвигались — сетка встаёт на свою кость как была), кости патронов магазина — на места slot(k)."""
+    old = {n: bpy.data.meshes[n] for n in GUN_MESHES if n in bpy.data.meshes}
+    old_mats = {m for me in old.values() for m in me.materials if m}
+    old_imgs = {n.image for m in old_mats if m.node_tree for n in m.node_tree.nodes if n.type == "TEX_IMAGE" and n.image}
+    with bpy.data.libraries.load(str(GUN_FILE), link=False) as (src, dst):
+        dst.meshes = [n for n in GUN_MESHES if n in src.meshes]
+    new = dict(zip([n for n in GUN_MESHES if n in old], [m for m in dst.meshes]))
+    for ob in [o for o in bpy.data.objects if o.type == "MESH" and o.data.name in old]:
+        ob.data = new[ob.data.name]
+    for name, me in old.items():
+        bpy.data.meshes.remove(me)
+        new[name].name = name
+    for m in [m for m in old_mats if m.users == 0]:
+        bpy.data.materials.remove(m)
+    for im in [i for i in old_imgs if i.users == 0]:
+        bpy.data.images.remove(im)
+    for idb in list(bpy.data.materials) + list(bpy.data.images):
+        base = idb.name.rsplit(".", 1)[0]
+        if idb.name.endswith(".001") and base not in (bpy.data.materials if isinstance(idb, bpy.types.Material)
+                                                      else bpy.data.images):
+            idb.name = base
+    bpy.context.view_layer.objects.active = arms
+    bpy.ops.object.mode_set(mode="EDIT")
+    ebs = arms.data.edit_bones
+    frame_rest = ebs["Frame"].matrix.copy()
+    for k in range(1, SLOTS + 1):
+        ebs[f"Round_{k}"].matrix = frame_rest @ Matrix.Translation(slot(k))
+    ebs["RoundHand"].matrix = frame_rest @ Matrix.Translation(slot(1))
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.context.view_layer.update()
+    print("MOSIN_CLIPS винтовка из", GUN_FILE.name, "сеток", len(new), "; патроны магазина: донце верхнего",
+          f"{(SLOT1.y - BREECH_Y) * 1000:.1f} мм за казённым срезом", flush=True)
+
+
 def clips() -> None:
     """Клипы от хвата в файле grip: покой в двух стойках, переходы, прицел, ходьба, бег; цикл затвора (от бедра и
     в прицеле); заряжание по одному: открыть затвор, патрон (повторяется), закрыть."""
@@ -904,6 +971,7 @@ def clips() -> None:
     bpy.ops.wm.open_mainfile(filepath=str(source))
     scene = bpy.context.scene
     arms = bpy.data.objects["FPS_ArmsRig"]
+    refresh_gun(arms)
     st = {}
     for name, frame in STANCE_FRAMES.items():
         scene.frame_set(frame)
@@ -1079,10 +1147,12 @@ def clips() -> None:
         return Matrix.Translation(p) @ rot("Z", -900.0 * dt) @ rot("X", 300.0 * dt)
 
     def stripped(k_in: int, t: float, rise: float) -> dict:
-        """Затвор идёт вперёд (ход t): верхний патрон досылается, остальные поднимаются на место выше (rise 0…1)."""
-        out = {"Round_1": fed(t) if k_in >= 1 else HIDDEN, "Follower": follower(k_in - rise)}
+        """Затвор идёт вперёд (ход t): верхний патрон досылается, остальные поднимаются на место выше (rise 0…1) —
+        под затвор: планка идёт над ними и держит столбик поджатым."""
+        down = Matrix.Translation((0.0, 0.0, -col_drop(t, k_in - 1)))
+        out = {"Round_1": fed(t) if k_in >= 1 else HIDDEN, "Follower": down @ follower(k_in - rise)}
         for i in range(2, k_in + 1):
-            out[f"Round_{i}"] = to_slot(i, i - rise)
+            out[f"Round_{i}"] = down @ to_slot(i, i - rise)
         return out
 
     def bolt_work(name: str, base: Matrix, lift: Matrix, mag_k: int) -> None:
@@ -1116,11 +1186,16 @@ def clips() -> None:
                 return BOLT_OPEN * (1.0 - ease((f - f_fwd) / (f_down - f_fwd)))
             return 0.0
 
-        f_eject = f_up + (f_back - f_up) * 0.93                      # ход 87,2 из 88 — почти у упора
+        # кадр, на котором ход доходит до EJECT_AT (87,2 из 110 мм): обратная к ease на отрезке отвода
+        lo, hi = 0.0, 1.0
+        for _ in range(40):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if ease(mid) * BOLT_TRAVEL < EJECT_AT else (lo, mid)
+        f_eject = f_up + (f_back - f_up) * hi
 
         def state(f: float) -> dict:
             r, t = rot_at(f), travel_at(f)
-            out = {**bolt(r, t, 1.0 if f > f_up else 0.0), **mag(mag_k)}
+            out = {**bolt(r, t, 1.0 if f > f_up else 0.0), **mag(mag_k, travel=t)}
             out["Case"] = case_flight(f, f_eject, travel_at) if f < f_eject + 9 else HIDDEN
             if f > f_rear:
                 out.update(stripped(mag_k, t, ease(clamp01((f - f_rear) / 3.0))))
@@ -1206,7 +1281,7 @@ def clips() -> None:
         """Столбик из have патронов уходит вниз на место под новым патроном (t 0…1)."""
         return {**{f"Round_{i}": to_slot(i, i + t) for i in range(1, have + 1)}, "Follower": follower(have + t)}
 
-    base_mag = {**open_bolt, **mag(have, hand=True)}
+    base_mag = {**open_bolt, **mag(have, hand=True, travel=BOLT_TRAVEL)}
     k.pose(0, present, {**base_mag, "RoundHand": round_basis(at_pouch)}, {"ik_hand.R": POUCH})
     k.event("grab", 0)
     seq = [(0, at_pouch), (11, above), (14, placed), (17, pushed), (19, press), (22, lifted), (33, at_pouch), (36, at_pouch)]
@@ -1234,14 +1309,15 @@ def clips() -> None:
     k = Keyer(arms, rest, "Mosin_Load_End", 34)
     half = blend(present, ready, 0.6)                                # досылает, уже возвращая винтовку из подачи
     gun = track([(0, present), (9, half), (18, half), (27, ready), (34, ready)])
-    k.pose(0, present, {**open_bolt, **mag(5)}, {"ik_hand.R": POUCH})
+    k.pose(0, present, {**open_bolt, **mag(5, travel=BOLT_TRAVEL)}, {"ik_hand.R": POUCH})
     hand_path(k, 1, 9, gun, lambda f: gun(f).inverted() @ POUCH, knob_hand(BOLT_OPEN, BOLT_TRAVEL),
-              lambda f, t: {**open_bolt, **mag(5), **lerp_pose({}, f_knob90, t)}, arc=Vector((0.0, 0.0, 0.03)))
+              lambda f, t: {**open_bolt, **mag(5, travel=BOLT_TRAVEL), **lerp_pose({}, f_knob90, t)},
+              arc=Vector((0.0, 0.0, 0.03)))
     for f in range(10, 19):
         t = BOLT_TRAVEL * (1.0 - ease((f - 9) / 5.0))
         r = BOLT_OPEN * (1.0 - ease((f - 14) / 4.0)) if f > 14 else BOLT_OPEN
         g = gun(f)
-        over = {**bolt(r, t, 1.0), **mag(5), **lerp_pose(f_knob0, f_knob90, r / BOLT_OPEN),
+        over = {**bolt(r, t, 1.0), **mag(5, travel=t), **lerp_pose(f_knob0, f_knob90, r / BOLT_OPEN),
                 **stripped(5, t, ease(clamp01((f - 9) / 3.0)))}
         k.pose(f, g, over, {"ik_hand.R": g @ knob_hand(r, t)})
     k.event("bolt_forward", 12)

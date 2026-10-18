@@ -2,7 +2,8 @@ extends Node3D
 ## Мосин 1891/30 ПУ в движке: игровая модель assets/models/weapons/mosin_pu (tools/mosin_pu/game_*.py) при пасмурной
 ## дневной панораме и солнце. Ракурсы те же, что у сверки формы в Blender (камера и точка взгляда — в осях винтовки, мм), поэтому
 ## кадры можно класть рядом с рендером исходника. Снимки docs/screens/mosin_pu_*.png:
-##   mosin_pu_<ракурс>.png — вид от первого лица, затвор, шейка, прицел, дуло, приклад, целиком слева, окуляр;
+##   mosin_pu_<ракурс>.png — вид от первого лица, затвор, направляющие обоймы, шейка, прицел, дуло, приклад, целиком
+##   слева, окуляр;
 ##   mosin_pu_bolt_open.png — затвор открыт и отведён (узлы Bolt / Bolt_Rotor / Bolt_Cocking двигает код);
 ##   mosin_pu_wear.png — износ шейдером по маске _wear: прочность 100 / 50 / 10;
 ##   mosin_pu_lod.png — вид от первого лица и мировая модель (LOD1) с 3 м.
@@ -18,6 +19,7 @@ const SIZE: Vector2i = Vector2i(1100, 760)
 const VIEWS: Dictionary = {
 	"fp_hip": {"eye": [-430, 85, 120], "at": [60, 0, 0], "fov": 48.0},
 	"bolt_right": {"eye": [-130, -250, 70], "at": [-110, 0, -10], "fov": 40.0},
+	"clip_guides": {"eye": [-20, -110, 160], "at": [-106, 0, 6], "fov": 26.0},
 	"wrist_right": {"eye": [-360, -240, -10], "at": [-240, 0, -55], "fov": 40.0},
 	"scope_left": {"eye": [-260, 230, 140], "at": [-100, 8, 40], "fov": 40.0},
 	"muzzle": {"eye": [560, 160, 90], "at": [690, 0, 0], "fov": 45.0},
@@ -25,7 +27,7 @@ const VIEWS: Dictionary = {
 	"full_left": {"eye": [100, 1500, 150], "at": [100, 0, -40], "fov": 50.0},
 	"ads": {"eye": [-262, 8, 51.2], "at": [0, 8, 51.2], "fov": 50.0},
 }
-const BOLT_BACK: float = 0.088
+const BOLT_BACK: float = 0.110  # ход затвора до упора (форма v08; mosin_pu.json, rig.Bolt)
 const COCK_TRAVEL: float = 0.0095
 
 var _camera: Camera3D

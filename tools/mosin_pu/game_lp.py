@@ -1,4 +1,4 @@
-"""Мосин 1891/30 ПУ (винтовка v07 + крепление + прицел) → игровая сетка вида от первого лица.
+"""Мосин 1891/30 ПУ (винтовка v08 + крепление + прицел) → игровая сетка вида от первого лица.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_lp.py -- [fp|detail]
   fp     — основная игровая модель: ~20 000 треугольников на винтовку с креплением и прицелом (владелец, 2026-10-17:
@@ -7,8 +7,8 @@
   detail — подробная (~109 тыс.): разглядывать вблизи (как veras54_detail).
 → _asset_src/mosin_pu_game/<вариант>/lp/Mosin_Game_LP.blend + lp/parts.json (не в git).
 
-Источник — замороженные принятые файлы библиотеки (models/approved, SHA-256 в SHA256.txt): форма v07 с текстурами
-20 % v02 и прицел/крепление с текстурами 20 % v01; исходники не меняются. Координаты — оси винтовки в покое
+Источник — текстурированный high-poly библиотеки (принят; SHA-256 — checks/approved_SHA256.txt): форма v08 (ход затвора
+110 мм, направляющие обоймы) с текстурами 20 % v03 и прицел/крепление с текстурами 20 % v01; исходники не меняются. Координаты — оси винтовки в покое
 (дуло +X, верх +Z, правая сторона стрелка −Y, начало — ось канала у казённого среза; метры), перевод в оси игры —
 на экспорте (game_export.py). Затвор закрыт, курок спущен (cocked = 0) — как в файле.
 
@@ -33,13 +33,18 @@ import bpy
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_rifle as R  # noqa: E402  (ход затвора и размеры коробки — одно место)
+
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / '_asset_src/mosin_pu_game'
-LIB = Path('E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/approved')
-SRC = {'rifle': LIB / 'Mosin_9130PU_Rifle_v07_tex20_v02.blend',
-       'mount': LIB / 'Mosin_PU_Mount_v01_tex20_v01.blend',
-       'scope': LIB / 'Mosin_PU_Scope_v01_tex20_v01.blend',
-       'ammo': LIB / 'Mosin_Cartridge_762x54R_v01_tex_v01.blend'}
+# текстурированный high-poly библиотеки (принят владельцем; прежние замороженные копии models/approved с теми же SHA-256 —
+# в карантине E:/RING_карантин_2026-10-18, суммы — checks/approved_SHA256.txt)
+LIB = Path('E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models')
+SRC = {'rifle': LIB / '01_Винтовка/Mosin_9130PU_Rifle_v08_tex20_v03.blend',
+       'mount': LIB / '03_Крепление/Mosin_PU_Mount_v01_tex20_v01.blend',
+       'scope': LIB / '02_Прицел/Mosin_PU_Scope_v01_tex20_v01.blend',
+       'ammo': LIB / '04_Патрон/Mosin_Cartridge_762x54R_v01_tex_v01.blend'}
 VARIANT = (sys.argv[sys.argv.index('--') + 1:] + ['fp'])[0] if '--' in sys.argv else 'fp'
 assert VARIANT in ('fp', 'detail'), VARIANT
 OUT = WORK / VARIANT / 'lp'
@@ -91,7 +96,8 @@ BUDGET_DETAIL = {'Stock': 26000, 'Handguard': 3000, 'Barrel': 4500, 'Receiver': 
 # до удаления прижатых граней и деления длинных рёбер: в итоге ≈ 20 000 (владелец, 2026-10-18: «можно поднять бюджет …
 # пускай будет двадцать тысяч»; прежде — 15 000)
 FP_TOTAL = 21300
-FP_WEIGHTS = {'Stock': 3800, 'Handguard': 520, 'Barrel': 1100, 'Receiver': 1700, 'Magazine_Box': 400, 'TriggerGuard': 420,
+# коробка v08 — 1850 (было 1700): стойки направляющих обоймы с гнёздами и нижний паз упора личинки
+FP_WEIGHTS = {'Stock': 3800, 'Handguard': 520, 'Barrel': 1100, 'Receiver': 1850, 'Magazine_Box': 400, 'TriggerGuard': 420,
               'RearSight_Base': 480, 'RearSight_Leaf_Mesh': 900, 'RearSight_Slider': 150, 'RearSight_Pin': 56,
               'Bolt_Body': 550, 'Bolt_Head': 380, 'Bolt_Handle': 340, 'Bolt_Handle_Ball': 380, 'Bolt_CockingPiece': 320,
               'Bolt_Knob': 300, 'Bolt_ConnectingBar': 180, 'Bolt_FiringPin_End': 24, 'Bolt_Extractor': 32,
@@ -865,7 +871,7 @@ for gname, (atlas, node, names) in GROUPS.items():
 # Скрытые грани: ни один луч не уходит наружу ни в покое, ни при открытом отведённом затворе (взведён).
 rifle_low = [o for g, o in low.items() if not g.startswith('Round')]
 I4 = Matrix.Identity(4)
-back = Matrix.Translation((-0.088, 0, 0))
+back = Matrix.Translation((-R.BOLT_TRAVEL * 0.001, 0, 0))     # затвор отведён до упора
 OPEN = {'Bolt_Rotor_Mesh': back @ Matrix.Rotation(math.radians(-90), 4, 'X'), 'Bolt_Bar_Mesh': back,
         'Bolt_Cocking_Mesh': back @ Matrix.Translation((-0.0095, 0, 0))}
 # планка прицела поднята (дальние дистанции): открывается колодка под ней

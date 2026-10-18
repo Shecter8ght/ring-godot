@@ -3,12 +3,12 @@
  "variant": "fp",
  "source_lp": "E:\\Games\\RING-godot\\_asset_src\\mosin_pu_game\\fp\\lp\\Mosin_Game_LP.blend",
  "sources": {
-  "rifle": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\approved\\Mosin_9130PU_Rifle_v07_tex20_v02.blend",
-  "mount": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\approved\\Mosin_PU_Mount_v01_tex20_v01.blend",
-  "scope": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\approved\\Mosin_PU_Scope_v01_tex20_v01.blend",
-  "ammo": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\approved\\Mosin_Cartridge_762x54R_v01_tex_v01.blend"
+  "rifle": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\01_Винтовка\\Mosin_9130PU_Rifle_v08_tex20_v03.blend",
+  "mount": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\03_Крепление\\Mosin_PU_Mount_v01_tex20_v01.blend",
+  "scope": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\02_Прицел\\Mosin_PU_Scope_v01_tex20_v01.blend",
+  "ammo": "E:\\Models Blender\\WEAPONS\\Мосин — винтовка и узлы\\models\\04_Патрон\\Mosin_Cartridge_762x54R_v01_tex_v01.blend"
  },
- "state": "20 % (особый ствол: одно состояние, текстуры приняты владельцем 2026-10-17)",
+ "state": "20 % (особый ствол: одно состояние; текстуры приняты владельцем 2026-10-17, на форме v08 — tex20_v03)",
  "axes": "+Z дуло, +Y верх, −X правая сторона стрелка; начало — середина шейки ложи (хват правой рукой); метры",
  "grip_origin_rifle_mm": [
   -240.0,
@@ -16,26 +16,26 @@
   -57.82
  ],
  "triangles": {
-  "first_person": 20394,
-  "lod1": 5004,
+  "first_person": 20426,
+  "lod1": 5001,
   "round": 1184,
   "spent_case": 764
  },
  "meshes": {
   "Bolt_Bar_Mesh": 99,
-  "Bolt_Cocking_Mesh": 984,
-  "Bolt_Rotor_Mesh": 1150,
-  "Follower_Mesh": 14,
-  "Frame_Steel": 8905,
-  "Frame_Wood": 3330,
-  "Interrupter_Mesh": 27,
-  "Mount_Base_Mesh": 746,
-  "Mount_Bracket_Mesh": 1214,
-  "RearSight_Leaf_Mesh": 642,
+  "Bolt_Cocking_Mesh": 982,
+  "Bolt_Rotor_Mesh": 1132,
+  "Follower_Mesh": 16,
+  "Frame_Steel": 9013,
+  "Frame_Wood": 3302,
+  "Interrupter_Mesh": 28,
+  "Mount_Base_Mesh": 748,
+  "Mount_Bracket_Mesh": 1211,
+  "RearSight_Leaf_Mesh": 636,
   "RearSight_Slider_Mesh": 108,
-  "Scope_Body_Mesh": 2999,
-  "Scope_Lens_Mesh": 100,
-  "Trigger_Mesh": 76
+  "Scope_Body_Mesh": 2980,
+  "Scope_Lens_Mesh": 97,
+  "Trigger_Mesh": 74
  },
  "markers_game_m": {
   "Muzzle": [
@@ -122,7 +122,7 @@
   ]
  },
  "rig": {
-  "Bolt": "ход назад по −Z узла: 0 … −0,088 м (отведён до упора)",
+  "Bolt": "ход назад по −Z узла: 0 … −0,110 м (отведён до упора)",
   "Bolt_Rotor": "поворот вокруг оси канала (Z узла): 0 закрыт … открыт — рукоять вверх на 90° (в осях винтовки −90° вокруг +X)",
   "Bolt_Cocking": "взвод поворотом: смещение назад (−Z) на 0,0095 м × min(поворот/90°, 1); взведён после закрытия",
   "Interrupter": "отсечка-отражатель: внутрь коробки на 0,0028 м (в покое), выходит (по +X игры к 0) за 2 мм до заднего положения затвора: x затвора < −0,0564 м",
@@ -146,16 +146,16 @@
  "uv_margin_px": 12,
  "texel_px_mm": {
   "Wood": [
-   6.05,
-   0.425
+   5.93,
+   0.409
   ],
   "Steel": [
-   6.36,
-   0.364
+   6.37,
+   0.368
   ],
   "Optic": [
-   12.44,
-   0.504
+   12.28,
+   0.491
   ],
   "Ammo": [
    13.79,
@@ -165,19 +165,19 @@
  "hidden_area_share": {
   "Frame_Wood_Stock": 0.005,
   "Frame_Wood_Handguard": 0.0,
-  "Frame_Steel": 0.224,
+  "Frame_Steel": 0.211,
   "Trigger_Mesh": 0.069,
-  "Follower_Mesh": 0.461,
+  "Follower_Mesh": 0.458,
   "RearSight_Leaf_Mesh": 0.008,
   "RearSight_Slider_Mesh": 0.0,
-  "Bolt_Rotor_Mesh": 0.072,
-  "Bolt_Bar_Mesh": 0.016,
+  "Bolt_Rotor_Mesh": 0.074,
+  "Bolt_Bar_Mesh": 0.013,
   "Bolt_Cocking_Mesh": 0.017,
   "Interrupter_Mesh": 0.0,
-  "Mount_Base_Mesh": 0.037,
-  "Mount_Bracket_Mesh": 0.109,
+  "Mount_Base_Mesh": 0.116,
+  "Mount_Bracket_Mesh": 0.108,
   "Scope_Body_Mesh": 0.354,
-  "Scope_Lens_Mesh": 0.361
+  "Scope_Lens_Mesh": 0.364
  },
  "collision": [
   "Col_Butt",
@@ -191,5 +191,5 @@
   "Scope_Reticle"
  ],
  "ocular_r_m": 0.0118,
- "removed_hidden_tris": 2860
+ "removed_hidden_tris": 2814
 }

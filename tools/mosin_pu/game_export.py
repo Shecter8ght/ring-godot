@@ -27,6 +27,9 @@ import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_rifle as R  # noqa: E402  (ход затвора — одно место)
+
 ROOT = Path(__file__).resolve().parents[2]
 VARIANT = (sys.argv[sys.argv.index('--') + 1:] + ['fp'])[0] if '--' in sys.argv else 'fp'
 WORK = ROOT / '_asset_src/mosin_pu_game' / VARIANT
@@ -318,14 +321,14 @@ gl = lambda v: [round(v[0], 5), round(v[2], 5), round(-v[1], 5)]          # Blen
 game = lambda mm: gl(MAP @ (Vector(mm) * 0.001))
 report = dict(
     schema='mosin_pu_game_v02', variant=VARIANT, source_lp=str(WORK / 'lp/Mosin_Game_LP.blend'), sources=REC['sources'],
-    state='20 % (особый ствол: одно состояние, текстуры приняты владельцем 2026-10-17)',
+    state='20 % (особый ствол: одно состояние; текстуры приняты владельцем 2026-10-17, на форме v08 — tex20_v03)',
     axes='+Z дуло, +Y верх, −X правая сторона стрелка; начало — середина шейки ложи (хват правой рукой); метры',
     grip_origin_rifle_mm=[round(c * 1000, 2) for c in GRIP],
     triangles=dict(first_person=main_total, lod1=lod_total, round=tris(O['Round_Mesh']), spent_case=tris(O['SpentCase_Mesh'])),
     meshes={o.name: tris(o) for o in rifle_meshes},
     markers_game_m={k: game(v) for k, v in MK.items()},
     pivots_game_m={k: game(v) for k, v in REC['pivots_mm'].items() if k not in ('Mosin_PU', 'Round', 'Frame')},
-    rig={'Bolt': 'ход назад по −Z узла: 0 … −0,088 м (отведён до упора)',
+    rig={'Bolt': f'ход назад по −Z узла: 0 … −{R.BOLT_TRAVEL / 1000:.3f} м (отведён до упора)'.replace('.', ','),
          'Bolt_Rotor': 'поворот вокруг оси канала (Z узла): 0 закрыт … открыт — рукоять вверх на 90° (в осях винтовки −90° вокруг +X)',
          'Bolt_Cocking': 'взвод поворотом: смещение назад (−Z) на 0,0095 м × min(поворот/90°, 1); взведён после закрытия',
          'Interrupter': 'отсечка-отражатель: внутрь коробки на 0,0028 м (в покое), выходит (по +X игры к 0) за 2 мм до заднего '

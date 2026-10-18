@@ -20,12 +20,12 @@ SV = args[2] if len(args) > 2 else "v01"
 TEX = "tex" in args          # сборка из текстурных файлов (состояние 20 %) — для просмотра отделки
 if TEX:
     FILES = {
-        # винтовка — v07 с текстурами v02; прицел и крепление — текстуры v01 (не менялись)
-        "rifle": os.path.join(A, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v07_tex20_v02.blend"),
+        # винтовка — v08 с текстурами v03; прицел и крепление — текстуры v01 (не менялись)
+        "rifle": os.path.join(A, "models", "01_Винтовка", "Mosin_9130PU_Rifle_v08_tex20_v03.blend"),
         "mount": os.path.join(A, "models", "03_Крепление", "Mosin_PU_Mount_v01_tex20_v01.blend"),
         "scope": os.path.join(A, "models", "02_Прицел", "Mosin_PU_Scope_v01_tex20_v01.blend"),
     }
-    OUT = os.path.join(A, "models", "00_Сборка", "Mosin_9130PU_Assembly_tex20_v02.blend")
+    OUT = os.path.join(A, "models", "00_Сборка", "Mosin_9130PU_Assembly_tex20_v03.blend")
 else:
     FILES = {
         "rifle": os.path.join(A, "models", "01_Винтовка", f"Mosin_9130PU_Rifle_{RV}.blend"),
@@ -52,6 +52,11 @@ def main():
     append_all(FILES["rifle"], "Rifle")
     mount = append_all(FILES["mount"], "Mount")
     scope = append_all(FILES["scope"], "Scope")
+    # свет и камера просмотра из файлов деталей не нужны: у сборки свой (texture_mosin.py -- assembly studio)
+    for ob in [o for o in bpy.data.objects if o.type in ("LIGHT", "CAMERA")]:
+        bpy.data.objects.remove(ob, do_unlink=True)
+    mount = [o for o in mount if o.name in bpy.data.objects]
+    scope = [o for o in scope if o.name in bpy.data.objects]
     bpy.context.view_layer.update()
     socket = next(o for o in mount if o.name.startswith("Mount_ScopeSocket"))
     sroot = next(o for o in scope if o.name == "PU_Scope")

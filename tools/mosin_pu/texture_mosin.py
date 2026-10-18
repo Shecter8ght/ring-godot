@@ -1,5 +1,6 @@
 """Текстуры Мосина 1891/30 ПУ, состояние 20 %: нативные слои UCUPaint 2.4.9 на принятой геометрии (форма не меняется).
-Винтовка — v02 на форме v07 (лак с отражениями, полированный затвор, копоть у клейм, отпечатки — см. блок v02);
+Винтовка — рецепт v02 (лак с отражениями, полированный затвор, копоть у клейм, отпечатки — см. блок v02), с 2026-10-18
+на форме v08 (ход затвора 110 мм, направляющие обоймы, номер на стебле читается нормально) → файл tex20_v03;
 прицел, крепление, патрон и обойма — v01.
 
 Образец отделки — Sketchfab «Mosin Nagant 1891» (KusogakiVirus), по износу ≈ 60 %; 20 % — тяжелее, палитра та же:
@@ -14,7 +15,10 @@
           render  — кадры из сохранённого файла
           inspect — стеки, слои, маски, сверка значений с фактическими входами групп → checks/
           studio  — в сохранённый файл: свет для Rendered (HDRI, софтбоксы, камера) отдельной коллекцией
-Принятые копии формы (не меняются) — models/approved/*.blend, их SHA-256 — в asset-state.md.
+Принятые копии формы (не меняются) — models/approved/*.blend, их SHA-256 — checks/approved_SHA256.txt. С 2026-10-18
+папка approved в карантине E:/RING_карантин_2026-10-18 (уборка по просьбе владельца) — для перетекстуровки вернуть по пути.
+Принятая форма винтовки v08 лежит в models/01_Винтовка (без текстур, SHA-256 там же, в checks/approved_SHA256.txt).
+MOSIN_VIEW_DIR — папка для кадров render/look вместо renders/ библиотеки.
 """
 from __future__ import annotations
 
@@ -32,7 +36,6 @@ import numpy as np
 from mathutils import Matrix, Vector
 
 ASSET = Path("E:/Models Blender/WEAPONS/Мосин — винтовка и узлы")
-APPROVED = ASSET / "models/approved"
 MASKS = Path("E:/Models Blender/Маски_АЛЬФА")
 WOOD = ASSET / "textures/wood"
 VIEW = ASSET / "renders/tex20"                       # прицел, крепление, патрон, обойма (v01)
@@ -43,13 +46,15 @@ UV = "UVMap"
 MM = 0.001
 
 MODELS = {
-    # v02: форма v07 (механика затвора, принята 2026-10-17); v01 — на v06, файл ..._v06_tex20_v01.blend не меняется
-    "rifle": ("Mosin_9130PU_Rifle_v07.blend", "models/01_Винтовка/Mosin_9130PU_Rifle_v07_tex20_v02.blend"),
-    "scope": ("Mosin_PU_Scope_v01.blend", "models/02_Прицел/Mosin_PU_Scope_v01_tex20_v01.blend"),
-    "mount": ("Mosin_PU_Mount_v01.blend", "models/03_Крепление/Mosin_PU_Mount_v01_tex20_v01.blend"),
-    "cartridge": ("Mosin_Cartridge_762x54R_v01.blend", "models/04_Патрон/Mosin_Cartridge_762x54R_v01_tex_v01.blend"),
-    "clip": ("Mosin_StripperClip_v01.blend", "models/05_Обойма/Mosin_StripperClip_v01_tex_v01.blend"),
-    "assembly": (None, "models/00_Сборка/Mosin_9130PU_Assembly_tex20_v02.blend"),   # только render
+    # исходная форма (от папки библиотеки) → файл с текстурами. Винтовка: v03 — рецепт v02 на форме v08 (принята
+    # 2026-10-18); прежние v02 (форма v07) и v01 (форма v06) этим скриптом больше не пишутся
+    "rifle": ("models/01_Винтовка/Mosin_9130PU_Rifle_v08.blend", "models/01_Винтовка/Mosin_9130PU_Rifle_v08_tex20_v03.blend"),
+    "scope": ("models/approved/Mosin_PU_Scope_v01.blend", "models/02_Прицел/Mosin_PU_Scope_v01_tex20_v01.blend"),
+    "mount": ("models/approved/Mosin_PU_Mount_v01.blend", "models/03_Крепление/Mosin_PU_Mount_v01_tex20_v01.blend"),
+    "cartridge": ("models/approved/Mosin_Cartridge_762x54R_v01.blend",
+                  "models/04_Патрон/Mosin_Cartridge_762x54R_v01_tex_v01.blend"),
+    "clip": ("models/approved/Mosin_StripperClip_v01.blend", "models/05_Обойма/Mosin_StripperClip_v01_tex_v01.blend"),
+    "assembly": (None, "models/00_Сборка/Mosin_9130PU_Assembly_tex20_v03.blend"),   # только render
 }
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 MODEL = ARGS[0] if ARGS else "rifle"
@@ -968,7 +973,7 @@ def stamp_zone_and_facing() -> None:
 # ---------------------------------------------------------------- сборка модели
 def load_model(model: str):
     native()
-    src = APPROVED / MODELS[model][0]
+    src = ASSET / MODELS[model][0]
     bpy.ops.wm.open_mainfile(filepath=str(src))
     unwrap()
     if model == "rifle":
@@ -1082,7 +1087,8 @@ def shoot(name: str, target: Vector, offset: Vector, lens: float, res=(1600, 900
     m.translation = target + offset
     cam.matrix_world = m
     scene.render.resolution_x, scene.render.resolution_y = res
-    view = VIEW2 if MODEL in ("rifle", "assembly") else VIEW
+    view = Path(os.environ["MOSIN_VIEW_DIR"]) if os.environ.get("MOSIN_VIEW_DIR") else (
+        VIEW2 if MODEL in ("rifle", "assembly") else VIEW)
     view.mkdir(parents=True, exist_ok=True)
     scene.render.filepath = str(view / f"{MODEL}_{name}.png")
     bpy.ops.render.render(write_still=True)
@@ -1179,7 +1185,7 @@ def inspect() -> None:
     assert all(i["packed"] for i in images), [i for i in images if not i["packed"]]
     report["images"] = images
     CHECKS.mkdir(exist_ok=True)
-    tag = "_v02" if MODEL == "rifle" else ""
+    tag = "_v03" if MODEL == "rifle" else ""
     (CHECKS / f"ucupaint_{MODEL}{tag}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print("TEX inspect ok:", MODEL, "стеков", len(report["stacks"]), "слоёв",
           sum(len(v["layers"]) for v in report["stacks"].values()), "картинок", len(images), flush=True)
