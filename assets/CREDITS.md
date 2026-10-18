@@ -50,7 +50,6 @@
 - `assets/textures/impacts/hole_*.png` (+ `_normal`, `_orm`) — собственные: рельеф дырок вылеплен скриптом и запечён в Blender (`tools/build_impact_holes.py`)
 - `assets/textures/impacts/soil_*.png` (+ `_normal`) — собственные процедурные воронки в грунте (`tools/gen_impact_soil.py`)
 - `assets/models/props/impact_debris/impact_debris.glb` — собственные лоупольные обломки попаданий (`tools/build_impact_debris.py`, Blender)
-- `assets/textures/impacts/fx_*.png` (+ `_normal`) — собственные листы кадров дыма и пыли: симуляция дыма Blender (Mantaflow), рендер Cycles (`tools/build_impact_smoke.py`)
 
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 
