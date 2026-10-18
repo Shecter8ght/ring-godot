@@ -50,10 +50,13 @@ ALU = (0.50, 0.51, 0.52)
 FLUX = (0.60, 0.60, 0.58)
 PA_BLACK = (0.020, 0.020, 0.021)
 EPDM = (0.025, 0.025, 0.026)
-ROAD = (0.11, 0.09, 0.065)
-GRIME = (0.035, 0.03, 0.024)
-DUST = (0.30, 0.28, 0.25)
-BUGS = (0.03, 0.025, 0.015)
+# пыль и грязь — как у кузова купе (texture_coupe.py): почти нейтральные; цветная/рыжая пыль на чёрном
+# пластике читается как ржавчина, а ржавчины у машины нет
+ROAD = (0.155, 0.140, 0.118)          # высохшая дорожная плёнка
+GRIME = (0.050, 0.047, 0.043)         # грязь в щелях и углах
+DUST = (0.43, 0.42, 0.40)             # пыль ангара и кладовой: светлая, почти нейтральная
+FILM = (0.30, 0.29, 0.27)             # рабочий налёт моторного отсека
+BUGS = (0.035, 0.032, 0.027)          # мошки на передней кромке
 COOL_CRUST = (0.56, 0.45, 0.47)        # засохший розово-фиолетовый антифриз (G12-подобный): белёсая корка
 COOL_FILM = (0.26, 0.10, 0.14)         # он же гуще по краю корки — приглушённый розовый
 KRAFT = (0.41, 0.24, 0.12)
@@ -377,6 +380,21 @@ def edges(target, label: str, radius: float, lo: float, hi: float):
     return result
 
 
+def soften(mk, k: float):
+    """Маска-рисунок только разнообразит слой, а не режет его на пятна: доля её влияния k (как у кузова)."""
+    mk.intensity_value = k
+    U.common.set_entity_prop_value(mk, "intensity_value", k)
+    return mk
+
+
+def film(tree, amount: float):
+    """Рабочий налёт, как в моторном отсеке купе: мелкая пыль без пятен; рисунок и шум лишь разнообразят его."""
+    lay = layer(tree, "45 • Рабочий налёт — как под капотом купе", FILM, 0.0, 0.8, amount=amount)
+    soften(image(lay, "dust_sparse", "Пыль редкая — 30 см", 0.30, 0.0, 0.6), 0.5)
+    soften(noise(lay, "Крупная неровность", 3.0, 0.2, 0.8), 0.4)
+    return lay
+
+
 def image(target, key: str, label: str, tile_m: float, lo: float | None = None, hi: float | None = None,
           offset: tuple = (0.0, 0.0, 0.0), coords: str = "Object", uv_unit_m: float = 1.0):
     """Маска-картинка владельца в настоящем масштабе: tile_m — сторона картинки на предмете.
@@ -389,7 +407,8 @@ def image(target, key: str, label: str, tile_m: float, lo: float | None = None, 
         src.projection = "BOX"
         src.projection_blend = 0.2
     s = (uv_unit_m if coords == "UV" else 1.0) / tile_m
-    result.scale = (s, s, s)
+    src.extension = "REPEAT"
+    _scale(result, (s, s, s))
     result.translation = offset
     if lo is not None:
         ramp(result, lo, hi)
@@ -426,14 +445,15 @@ def core():
     vcol(lay, "CoreDepth", "Передние 3–7 мм", 0.12, 0.28, invert=True)
     image(lay, "splash", "Брызги — 12 см", 0.12, 0.3, 0.55, coords="UV", uv_unit_m=CORE_UV_M)
     noise(lay, "Где налипло больше", 6.0, 0.48, 0.72, (0.2, 0.0, 0.1))
-    lay = layer(tree, "35 • Мошки — светлые крылья и пыльца", (0.30, 0.24, 0.10), 0.0, 0.7, amount=0.5)
+    lay = layer(tree, "35 • Мошки — светлые крылья", (0.36, 0.35, 0.32), 0.0, 0.7, amount=0.4)
     vcol(lay, "CoreDepth", "Передняя кромка", 0.12, 0.28, invert=True)
     image(lay, "drops", "Мелкие капли — 6 см", 0.06, 0.35, 0.6, offset=(0.21, 0.37, 0.0), coords="UV",
           uv_unit_m=CORE_UV_M)
     noise(lay, "Местами", 9.0, 0.52, 0.74, (0.1, 0.3, 0.2))
-    lay = layer(tree, "40 • Пыль на верхних гранях — лежал в кладовой", DUST, 0.0, 0.95, amount=0.35)
+    film(tree, 0.35)
+    lay = layer(tree, "50 • Пыль кладовой на верхних гранях", DUST, 0.0, 0.85, amount=0.4)
     vcol(lay, "FaceUp", "Грани вверх", 0.3, 0.85)
-    noise(lay, "Пыль неровно", 160.0, 0.35, 0.7)
+    soften(noise(lay, "Пыль неровно", 160.0, 0.35, 0.7), 0.5)
     H.reconnect(U, tree)
     return tree
 
@@ -452,9 +472,10 @@ def alu_frame():
     vcol(lay, "Front", "Грани вперёд", 0.3, 0.8)
     vcol(lay, "Low", "Низ", 0.0, 0.8)
     noise(lay, "Брызги", 120.0, 0.4, 0.65)
-    lay = layer(tree, "40 • Пыль сверху", DUST, 0.0, 0.95, amount=0.4)
+    film(tree, 0.35)
+    lay = layer(tree, "50 • Пыль кладовой сверху", DUST, 0.0, 0.85, amount=0.45)
     vcol(lay, "FaceUp", "Грани вверх", 0.3, 0.85)
-    image(lay, "dust", "Пыль пятнами — 30 см", 0.30, 0.1, 0.6)
+    soften(image(lay, "dust", "Пыль пятнами — 30 см", 0.30, 0.1, 0.6), 0.5)
     H.reconnect(U, tree)
     return tree
 
@@ -468,7 +489,7 @@ def plastic():
     layer(tree, "05 • Зерно стекловолокна", height="source", source="NOISE", scale=2600.0, distance=0.00003)
     lay = layer(tree, "06 • Неровный блеск литья", rough=0.45, amount=0.4)
     noise(lay, "Пятна блеска", 70.0)
-    lay = layer(tree, "10 • Выцвело от жара сверху", (0.05, 0.05, 0.052), 0.0, 0.62, amount=0.55)
+    lay = layer(tree, "10 • Выцвело от жара сверху", (0.045, 0.045, 0.047), 0.0, 0.62, amount=0.4)
     vcol(lay, "FaceUp", "Грани вверх", 0.2, 0.9)
     noise(lay, "Неравномерно", 30.0, 0.3, 0.7)
     lay = layer(tree, "20 • Грязь в углах и у рёбер", GRIME, 0.0, 0.85, amount=0.7)
@@ -477,7 +498,7 @@ def plastic():
     lay = layer(tree, "30 • Дорожная грязь спереди снизу", ROAD, 0.0, 0.9, amount=0.5)
     vcol(lay, "Front", "Грани вперёд", 0.2, 0.8)
     vcol(lay, "Low", "Низ", 0.0, 0.7)
-    image(lay, "grime", "Грязь пятнами — 15 см", 0.15, 0.25, 0.7)
+    soften(image(lay, "grime", "Грязь пятнами — 15 см", 0.15, 0.25, 0.7), 0.55)
     lay = layer(tree, "40 • Засохший антифриз — корка", COOL_CRUST, 0.0, 0.92, height=1.0, distance=0.00015, amount=0.8)
     uvmask(lay, cool, "Стык патрубка, основание горловины, потёки — по развёртке", 0.38, 0.52)
     noise(lay, "Корка неровно, рваный край", 420.0, 0.34, 0.5, (0.0, 0.0, 0.0), stretch=(2.0, 2.0, 0.6))
@@ -488,9 +509,10 @@ def plastic():
     uvmask(lay, grab, "Где держали руками — по развёртке", 0.2, 0.8)
     image(lay, "print", "Отпечаток — 18 мм", 0.022, 0.2, 0.6)
     noise(lay, "Не везде", 25.0, 0.5, 0.62)
-    lay = layer(tree, "60 • Пыль на горизонталях", DUST, 0.0, 0.95, amount=0.45)
+    film(tree, 0.18)                                # на чёрном налёт виден сильнее, чем на светлой краске отсека
+    lay = layer(tree, "60 • Пыль кладовой на горизонталях", DUST, 0.0, 0.85, amount=0.4)
     vcol(lay, "FaceUp", "Грани вверх", 0.35, 0.9)
-    image(lay, "dust", "Пыль пятнами — 30 см", 0.30, 0.1, 0.6, offset=(0.13, 0.07, 0.0))
+    soften(image(lay, "dust", "Пыль пятнами — 30 см", 0.30, 0.1, 0.6, offset=(0.13, 0.07, 0.0)), 0.5)
     H.reconnect(U, tree)
     return tree
 
@@ -510,9 +532,10 @@ def hose():
     vcol(lay, "Grab", "Где брали руками", 0.2, 0.8)
     image(lay, "print_smear", "Смазанный отпечаток — 20 мм", 0.024, 0.2, 0.6)
     noise(lay, "Не везде", 30.0, 0.48, 0.62, (0.02, 0.05, 0.0))
-    lay = layer(tree, "40 • Пыль сверху", DUST, 0.0, 0.95, amount=0.4)
+    film(tree, 0.18)
+    lay = layer(tree, "50 • Пыль кладовой сверху", DUST, 0.0, 0.85, amount=0.4)
     vcol(lay, "FaceUp", "Грани вверх", 0.35, 0.9)
-    image(lay, "dust_sparse", "Пыль редкая — 25 см", 0.25, 0.1, 0.6)
+    soften(image(lay, "dust_sparse", "Пыль редкая — 25 см", 0.25, 0.1, 0.6), 0.5)
     H.reconnect(U, tree)
     return tree
 
@@ -528,7 +551,8 @@ def clamp():
     lay = layer(tree, "20 • Свежие следы ключа на винте", (0.78, 0.78, 0.79), 1.0, 0.16, amount=0.8)
     edges(lay, "Кромки граней и ленты", 0.0004, 0.05, 0.15)
     noise(lay, "Следы местами", 1200.0, 0.45, 0.6)
-    lay = layer(tree, "30 • Пыль сверху", DUST, 0.0, 0.95, amount=0.35)
+    film(tree, 0.3)
+    lay = layer(tree, "50 • Пыль кладовой сверху", DUST, 0.0, 0.85, amount=0.35)
     vcol(lay, "FaceUp", "Грани вверх", 0.4, 0.9)
     H.reconnect(U, tree)
     return tree
@@ -537,7 +561,7 @@ def clamp():
 def wire():
     tree = make_stack("rad_wire", "Проволока вязальная • рабочая")
     layer(tree, "00 • Отожжённая сталь, тёмная", (0.05, 0.05, 0.052), 1.0, 0.55)
-    lay = layer(tree, "10 • Точки ржавчины", (0.12, 0.05, 0.02), 0.0, 0.9, amount=0.6)
+    lay = layer(tree, "10 • Редкие точки ржавчины", (0.10, 0.06, 0.035), 0.0, 0.9, amount=0.3)
     noise(lay, "Редкие точки", 300.0, 0.55, 0.7)
     H.reconnect(U, tree)
     return tree
