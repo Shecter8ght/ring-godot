@@ -407,12 +407,14 @@ func _track_burst(pos: Vector3, players: Array[AudioStreamPlayer3D]) -> void:
 	var shots: Array = mine.shots
 	shots.append(players)
 	while shots.size() > int(cfg.voices):
-		for p in shots.pop_front():
-			_fade_out(p as AudioStreamPlayer3D, float(cfg.fade_sec))
+		for p: Variant in shots.pop_front():
+			# короткий выстрел мог уже доиграть и освободиться — приводить к типу освобождённый объект нельзя
+			if is_instance_valid(p):
+				_fade_out(p as AudioStreamPlayer3D, float(cfg.fade_sec))
 
 
 func _fade_out(p: AudioStreamPlayer3D, sec: float) -> void:
-	if not is_instance_valid(p) or not p.is_inside_tree():
+	if not p.is_inside_tree():
 		return
 	var tw := p.create_tween()
 	tw.tween_property(p, "volume_db", p.volume_db - 40.0, sec)

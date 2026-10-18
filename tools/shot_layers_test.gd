@@ -10,6 +10,15 @@ const RECIPE := "res://data/audio_recipes/firearm_layers.json"
 var _fails: int = 0
 
 
+## Считает ошибки движка и скриптов за кусок прогона: ошибка внутри Audio сама тест не роняет.
+class ErrorCatcher extends Logger:
+	var errors: int = 0
+
+	func _log_error(_function: String, _file: String, _line: int, _code: String, _rationale: String,
+			_editor_notify: bool, _error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+		errors += 1
+
+
 func _ready() -> void:
 	var cam := Camera3D.new()
 	add_child(cam)
@@ -52,6 +61,25 @@ func _ready() -> void:
 	_check("старые хвосты погасли и убраны", players <= voices * 2, "%d плееров" % players)
 	Audio.play("shot_rifle", at + Vector3(10.0, 0.0, 0.0))
 	_check("другой стрелок в стороне — своя очередь", (Audio.get("_shooters") as Array).size() == 2, "")
+
+	# очередь коротких выстрелов: первый уже доиграл и освобождён, когда очередь перевалила за voices
+	# (в игре так и было: приведение освобождённого плеера к типу — ошибка скрипта, игра из редактора вставала)
+	var short := _silence(0.05)
+	Audio.set_preview({"shot_rifle@self": [short], "shot_rifle@mid": [short], "shot_rifle@far": [short], "shot_rifle@distant": [short]})
+	var at2 := cam.global_position + Vector3(0.0, 0.0, 15.0)
+	var catcher := ErrorCatcher.new()
+	OS.add_logger(catcher)
+	Audio.play("shot_rifle", at2)
+	await get_tree().create_timer(0.25).timeout
+	for i in voices:
+		Audio.play("shot_rifle", at2 + Vector3(0.05 * i, 0.0, 0.0))
+	OS.remove_logger(catcher)
+	var tail_shots := -1
+	for s in Audio.get("_shooters") as Array:
+		if ((s as Dictionary).pos as Vector3).distance_to(at2) < 2.0:
+			tail_shots = ((s as Dictionary).shots as Array).size()
+	_check("очередь, где первые выстрелы уже доиграли, — без ошибки, звучат последние %d" % voices,
+		catcher.errors == 0 and tail_shots == voices, "ошибок %d, выстрелов %d" % [catcher.errors, tail_shots])
 
 	_check("выстрелы моделей и общих наборов — на шине «Выстрелы», механика — нет",
 		Settings.bus_for("wpn_ar_01_shot") == &"Shots" and Settings.bus_for("wpn_sp_01_shot_suppressed") == &"Shots"
