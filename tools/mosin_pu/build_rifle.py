@@ -654,8 +654,9 @@ def build_bolt(col):
     L.triangulate(body)
 
     def wrap_rib(u: float, v: float, h: float):
-        # номер на наружной грани гребня, как на снимке RIA 265: читается от дула к прикладу, верх цифр книзу
-        return (-54.0 - u, RIB_Y[0] - h, 0.55 - v)
+        # номер на наружной грани гребня: читается справа при закрытом затворе, верх цифр кверху (v08, решение
+        # владельца; на снимке RIA 265 и в v07 — перевёрнут, верх цифр книзу)
+        return (-54.0 + u, RIB_Y[0] - h, 0.55 + v)
     L.boolean(body, L.stamp_cutter("cut_stamp_bolt", [L.text_polys(STAMP_SERIAL, 3.0, 0.0, 0.0)], wrap_rib, 0.12))
     handle, ball = _bolt_handle(col)
 
