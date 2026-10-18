@@ -2,7 +2,7 @@
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_export.py -- [fp|detail]
   fp:
-  mosin_pu.glb           — винтовка с креплением и прицелом, 15 000 треугольников (в руках) + ветка Mosin_PU_LOD1 (мировая);
+  mosin_pu.glb           — винтовка с креплением и прицелом, ~20 000 треугольников (в руках) + ветка Mosin_PU_LOD1 (мировая);
   mosin_pu_round.glb     — патрон 7,62×54R (Round) и стреляная гильза (SpentCase);
   mosin_pu_collision.glb — упрощённая физика: выпуклые оболочки «-convcolonly» (Godot делает из них StaticBody3D;
                            отдельным файлом — чтобы у модели в руках не было физики);

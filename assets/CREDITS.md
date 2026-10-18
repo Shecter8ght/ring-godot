@@ -50,6 +50,7 @@
 - `assets/textures/impacts/hole_*.png` (+ `_normal`, `_orm`) — собственные: рельеф дырок вылеплен скриптом и запечён в Blender (`tools/build_impact_holes.py`)
 - `assets/textures/impacts/soil_*.png` (+ `_normal`) — собственные процедурные воронки в грунте (`tools/gen_impact_soil.py`)
 - `assets/models/props/impact_debris/impact_debris.glb` — собственные лоупольные обломки попаданий (`tools/build_impact_debris.py`, Blender)
+- `assets/textures/impacts/fx_*.png` (+ `_normal`) — собственные листы кадров дыма и пыли: симуляция дыма Blender (Mantaflow), рендер Cycles (`tools/build_impact_smoke.py`)
 
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 
@@ -415,7 +416,7 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 
 ## Мосин 1891/30 ПУ (assets/models/weapons/mosin_pu)
 
-- `mosin_pu.glb` (винтовка с креплением и прицелом ПУ, 15 000 треугольников + LOD1), `mosin_pu_round.glb` (патрон
+- `mosin_pu.glb` (винтовка с креплением и прицелом ПУ, ~20 000 треугольников + LOD1), `mosin_pu_round.glb` (патрон
   7,62×54R и стреляная гильза), `mosin_pu_collision.glb` (выпуклые оболочки) — собственная модель, сделана для RING
   по фото-референсам (список — `E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/sources.md`); маркировки вымышленные.
   Игровая сетка, развёртка, запекание и экспорт — `tools/mosin_pu/game_lp.py`, `game_bake.py`, `game_pack.py`,

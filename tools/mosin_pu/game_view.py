@@ -1,7 +1,7 @@
-"""Мосин ПУ: файл просмотра игровой модели (15 000 треугольников) для владельца — в библиотеке модели.
+"""Мосин ПУ: файл просмотра игровой модели (вариант fp, ~20 000 треугольников) для владельца — в библиотеке модели.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_view.py
-→ E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/06_Игровая/fp/Mosin_PU_Game15k_v02.blend
+→ E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/06_Игровая/fp/Mosin_PU_Game20k_v03.blend
 Берёт сохранённый экспорт (_asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend, после game_export.py -- fp) и
 возвращает его в оси винтовки (дуло +X, верх +Z), как у остальных файлов библиотеки. Коллекции: игровая модель,
 LOD1 (выключена), коллизия (выключена), патрон и гильза; студия и мир — из сборки исходника (как там, для режима
@@ -19,7 +19,7 @@ SRC = ROOT / '_asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend'
 INFO = ROOT / 'assets/models/weapons/mosin_pu/mosin_pu.json'
 LIB = Path('E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models')
 STUDIO = LIB / '00_Сборка/Mosin_9130PU_Assembly_tex20_v02.blend'
-OUT = LIB / '06_Игровая/fp/Mosin_PU_Game15k_v02.blend'
+OUT = LIB / '06_Игровая/fp/Mosin_PU_Game20k_v03.blend'
 log = lambda *a: print('MOSIN_VIEW', *a, flush=True)
 
 bpy.context.preferences.use_preferences_save = False
@@ -51,7 +51,7 @@ def move(o, c) -> None:
     c.objects.link(o)
 
 
-game = collection('Игровая модель — 15 000 треугольников')
+game = collection('Игровая модель — 20 000 треугольников')
 lod = collection('LOD1 — мировая модель, 5 000 треугольников')
 col = collection('Коллизия — выпуклые оболочки')
 ammo = collection('Патрон и стреляная гильза')

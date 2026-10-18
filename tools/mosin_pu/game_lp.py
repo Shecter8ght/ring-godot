@@ -1,8 +1,9 @@
 """Мосин 1891/30 ПУ (винтовка v07 + крепление + прицел) → игровая сетка вида от первого лица.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_lp.py -- [fp|detail]
-  fp     — основная игровая модель: 15 000 треугольников на винтовку с креплением и прицелом (владелец, 2026-10-17:
-           «low poly в 15000 треугольников … главное, чтобы геометрия/текстуры не поехали»); своя развёртка и запекание;
+  fp     — основная игровая модель: ~20 000 треугольников на винтовку с креплением и прицелом (владелец, 2026-10-17:
+           «low poly в 15000 … главное, чтобы геометрия/текстуры не поехали», 2026-10-18 — «пускай будет двадцать
+           тысяч»: на 15 000 мелкие круглые формы гранились); своя развёртка и запекание;
   detail — подробная (~109 тыс.): разглядывать вблизи (как veras54_detail).
 → _asset_src/mosin_pu_game/<вариант>/lp/Mosin_Game_LP.blend + lp/parts.json (не в git).
 
@@ -87,20 +88,22 @@ BUDGET_DETAIL = {'Stock': 26000, 'Handguard': 3000, 'Barrel': 4500, 'Receiver': 
 # прицел (обод окуляра обрамляет картинку прицела), круглое под рукой (шар рукояти, грибок, головка стопора — иначе
 # вблизи видны грани); меньше у дальнего и
 # скрытого. Не указанные детали — FP_SMALL.
-FP_TOTAL = 16000                                 # до удаления прижатых граней и деления длинных рёбер: в итоге ≈ 15 000
-FP_WEIGHTS = {'Stock': 2700, 'Handguard': 420, 'Barrel': 420, 'Receiver': 1450, 'Magazine_Box': 320, 'TriggerGuard': 330,
-              'RearSight_Base': 380, 'RearSight_Leaf_Mesh': 460, 'RearSight_Slider': 150, 'RearSight_Pin': 56,
+# до удаления прижатых граней и деления длинных рёбер: в итоге ≈ 20 000 (владелец, 2026-10-18: «можно поднять бюджет …
+# пускай будет двадцать тысяч»; прежде — 15 000)
+FP_TOTAL = 21300
+FP_WEIGHTS = {'Stock': 3800, 'Handguard': 520, 'Barrel': 1100, 'Receiver': 1700, 'Magazine_Box': 400, 'TriggerGuard': 420,
+              'RearSight_Base': 480, 'RearSight_Leaf_Mesh': 900, 'RearSight_Slider': 150, 'RearSight_Pin': 56,
               'Bolt_Body': 550, 'Bolt_Head': 380, 'Bolt_Handle': 340, 'Bolt_Handle_Ball': 380, 'Bolt_CockingPiece': 320,
               'Bolt_Knob': 300, 'Bolt_ConnectingBar': 180, 'Bolt_FiringPin_End': 24, 'Bolt_Extractor': 32,
               'Trigger': 110, 'Receiver_Tang': 110, 'Receiver_TangScrew': 44, 'Receiver_Interrupter': 56,
-              'Band_Front': 190, 'Band_Rear': 190, 'Band_Spring': 24, 'Handguard_Ferrule_Front': 110, 'Handguard_Ferrule_Rear': 110,
-              'Stock_NoseCap': 130, 'FrontSight_Base': 110, 'FrontSight_Hood': 110, 'FrontSight_Block': 36, 'FrontSight_Post': 12,
-              'CleaningRod': 90, 'Buttplate': 130, 'Buttplate_Screw': 32, 'Sling_Escutcheon': 44, 'Stock_CrossScrew': 40,
+              'Band_Front': 330, 'Band_Rear': 330, 'Band_Spring': 24, 'Handguard_Ferrule_Front': 180, 'Handguard_Ferrule_Rear': 180,
+              'Stock_NoseCap': 220, 'FrontSight_Base': 220, 'FrontSight_Hood': 110, 'FrontSight_Block': 80, 'FrontSight_Post': 12,
+              'CleaningRod': 220, 'Buttplate': 200, 'Buttplate_Screw': 32, 'Sling_Escutcheon': 240, 'Stock_CrossScrew': 40,
               'Magazine_FrontScrew': 32, 'Magazine_Latch': 36, 'Magazine_Follower': 36,
-              'Scope_Body': 2500, 'Scope_Lens_Eyepiece': 96, 'Scope_Lens_Objective': 96, 'Scope_TurretElev_Cap': 240,
-              'Scope_TurretWind_Cap': 240, 'Scope_TurretElev_Scale': 100, 'Scope_TurretWind_Scale': 100,
+              'Scope_Body': 2500, 'Scope_Lens_Eyepiece': 96, 'Scope_Lens_Objective': 96, 'Scope_TurretElev_Cap': 320,
+              'Scope_TurretWind_Cap': 320, 'Scope_TurretElev_Scale': 100, 'Scope_TurretWind_Scale': 100,
               'Scope_TurretElev_Boss': 80, 'Scope_TurretWind_Boss': 80, 'Scope_TurretElev_CapScrew': 24, 'Scope_TurretWind_CapScrew': 24,
-              'Mount_Bracket': 700, 'Mount_LockScrew': 240, 'Mount_Base': 120, 'Mount_Base_FrontStop': 120,
+              'Mount_Bracket': 900, 'Mount_LockScrew': 240, 'Mount_Base': 120, 'Mount_Base_FrontStop': 120,
               'Mount_Base_RearBlock': 120, 'Mount_Base_Screw': 32, 'Mount_RingScrew': 32}
 FP_SMALL = 32
 # Круглый крепёж и мелкие круглые детали у глаза — доля треугольников исходника, вне общего масштаба: при меньшем
@@ -109,7 +112,25 @@ FP_SMALL = 32
 FP_ROUND = {'Receiver_TangScrew': 0.3, 'Stock_CrossScrew': 0.7, 'Buttplate_Screw': 0.6, 'Magazine_FrontScrew': 0.6,
             'Mount_RingScrew': 0.55, 'Mount_Base_Screw': 0.55, 'Scope_TurretElev_CapScrew': 0.5,
             'Scope_TurretWind_CapScrew': 0.5, 'Bolt_FiringPin_End': 0.4, 'RearSight_Pin': 0.35, 'Mount_LockScrew': 0.12,
-            'Bolt_Knob': 0.12, 'FrontSight_Hood': 0.15}
+            'Bolt_Knob': 0.12, 'FrontSight_Hood': 0.25, 'Sling_Escutcheon': 0.8}
+# Мелкие формы, которые упрощение с абсолютной ошибкой «съедает» первыми (малый радиус — малая ошибка): срез дула с
+# каналом, головка шомпола, целик с U-прорезью. Их вершины заперты — сетка там как у исходника (владелец, 2026-10-18:
+# «сильно зашкурило срез дула, шомпола, дырки для ремней, у заднего прицела пропал U-образный вырез»). Оси винтовки, м.
+# Деталь сначала режется плоскостями (ось, значение[, рамка (x0, x1, z0, z1) — резать только там]): запертый кусок
+# отделён свободным поясом.
+# Длинные круглые детали — не замком (подробный срез дула исходника — 1 209 вершин, ~2 400 треугольников), а растяжкой
+# поперёк оси на время упрощения: ошибка по кругу сечения весит в k раз больше — дуло, канал и головка шомпола остаются
+# круглыми, экономия идёт по длине. Растягивается только конец (x от, м): растяжка всего ствола раздувала и глубину клейм
+# у казны — треугольники уходили на буквы, которые всё равно приходят картой нормалей. (центр оси Y, Z, м; ось — X)
+FP_RADIAL = {'CleaningRod': ((0.0, -0.0213), 4.0, 0.66)}
+# Замки (группа вершин) — только у маленьких плоских деталей: с группой упрощатель перестаёт беречь кривизну всей
+# остальной детали (ложа и ствол с замком окон / среза: отклонение 1–3 мм против 0,2–0,5, складки на шейке).
+# Срез дула — отдельный кусок со своим бюджетом, без замков: плоскость x проходит под муфтой мушки (689,5–702,5 мм),
+# шов закрыт ею; куски упрощаются каждый сам — кольца среза не соревнуются с длинным стволом.
+FP_SPLIT = {'Barrel': (0.696, 450)}   # деталь → (плоскость x, м; треугольники переднего куска)
+FP_PROTECT = {
+    'RearSight_Leaf_Mesh': ([(0, 0.0865), (0, 0.0905), (2, 0.0225), (2, 0.0205)], lambda co: co.x <= 0.08651 and co.z >= 0.02249),
+}
 FP_AMMO = {'Cartridge_Case': 700, 'Cartridge_Bullet': 420, 'Cartridge_Primer': 64}
 # У глаза (шейка, гребень, коробка, затвор, начало накладки; x −380…+170 мм) сетка гуще в EYE_DENSITY раз;
 # переход к дальней плотности — за 150 мм.
@@ -123,6 +144,8 @@ ATLAS_SIZE = {'Wood': 4096, 'Steel': 4096, 'Optic': 4096, 'Ammo': 1024}
 # чья развёртка — сотни островков (стенки букв клейм: ствол, коробка, стебель, планка); у всех заново круглые детали
 # рвутся на узкие полосы и атлас пустеет (проверено: сталь заполнена на 28 % против 47 %). detail — всё исходника.
 UV_RESET_ISLANDS = 150 if VARIANT == 'fp' else 10 ** 9
+ROOMY = 0.008                                   # скрытая, но просторная (окно под ремень, дуло): половина лучей дальше 8 мм
+HIDDEN_ROOMY_SCALE = 0.5
 CONTACT = 0.004                                 # «прижатая» грань: половина лучей упирается ближе 4 мм
 HIDDEN_UV_SCALE = 0.1                           # скрытые грани — в 10 раз реже текселей
 UV_SLAB = 0.15                                  # длина полосы развёртки вдоль оси, м
@@ -260,8 +283,33 @@ def split_regions(o) -> list:
     return out
 
 
-def merge_into(o, regions) -> None:
-    """Сшить части по запертому шву и вернуть сетку детали в o."""
+def split_x(o, x: float) -> list:
+    """Копии детали: [x ≥ плоскости, x < плоскости]; вершины на плоскости шва не входят в группу 'free'."""
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], dist=1e-7, plane_co=(x, 0, 0), plane_no=(1, 0, 0))
+    bm.to_mesh(o.data)
+    bm.free()
+    out = []
+    for front in (True, False):
+        c = bpy.data.objects.new(o.name + ('_front' if front else '_back'), o.data.copy())
+        for col in o.users_collection:
+            col.objects.link(c)
+        bm = bmesh.new()
+        bm.from_mesh(c.data)
+        drop = [f for f in bm.faces if (f.calc_center_median().x >= x) != front]
+        bmesh.ops.delete(bm, geom=drop, context='FACES')
+        bm.to_mesh(c.data)
+        bm.free()
+        vg = c.vertex_groups.new(name='free')
+        vg.add([v.index for v in c.data.vertices if abs(v.co.x - x) > 1e-6], 1.0, 'REPLACE')
+        out.append(c)
+    return out
+
+
+def merge_into(o, regions, planes=None) -> None:
+    """Сшить части по запертому шву (плоскости x = planes; по умолчанию — зона у глаза) и вернуть сетку в o."""
+    planes = EYE_X if planes is None else planes
     bpy.ops.object.select_all(action='DESELECT')
     for r in regions:
         r.select_set(True)
@@ -270,7 +318,7 @@ def merge_into(o, regions) -> None:
     joined = bpy.context.view_layer.objects.active
     bm = bmesh.new()
     bm.from_mesh(joined.data)
-    seam = [v for v in bm.verts if min(abs(v.co.x - x) for x in EYE_X) <= 1e-6]
+    seam = [v for v in bm.verts if min(abs(v.co.x - x) for x in planes) <= 1e-6]
     bmesh.ops.remove_doubles(bm, verts=seam, dist=1e-6)
     bm.to_mesh(joined.data)
     bm.free()
@@ -281,7 +329,7 @@ def merge_into(o, regions) -> None:
     select_only(o)
 
 
-def simplify(o, budget: int, organic: bool, eye: bool = True) -> int:
+def simplify(o, budget: int, organic: bool, eye: bool = True, protect=None, radial=None, split=None) -> int:
     me = o.data
     strip(me)
     bm = bmesh.new()
@@ -312,6 +360,44 @@ def simplify(o, budget: int, organic: bool, eye: bool = True) -> int:
             collapse_to(reg, int(target), organic, 'free')
             reg.vertex_groups.clear()
         merge_into(o, regions)
+    elif split is not None:
+        x, front_tris = split
+        regions = split_x(o, x)
+        for reg, target in zip(regions, (front_tris, budget)):
+            select_only(reg)
+            reg.vertex_groups.clear()
+            collapse_to(reg, int(target), organic)
+        merge_into(o, regions, (x,))
+    elif protect is not None or radial is not None:
+        # запертые вершины (вне группы 'free') модификатор не трогает — мелкая форма остаётся как у исходника;
+        # растяжка поперёк оси — на время упрощения (см. FP_RADIAL)
+        cuts, keep = protect if protect is not None else ([], lambda co: False)
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        for cut in cuts:
+            axis, value = cut[0], cut[1]
+            no = [0.0, 0.0, 0.0]
+            no[axis] = 1.0
+            co = [0.0, 0.0, 0.0]
+            co[axis] = value
+            if len(cut) > 2:
+                x0, x1, z0, z1 = cut[2]
+                faces = [f for f in bm.faces if x0 <= f.calc_center_median().x <= x1 and z0 <= f.calc_center_median().z <= z1]
+                geom = list({v for f in faces for v in f.verts}) + list({e for f in faces for e in f.edges}) + faces
+            else:
+                geom = bm.verts[:] + bm.edges[:] + bm.faces[:]
+            bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-7, plane_co=co, plane_no=no)
+        bm.to_mesh(o.data)
+        bm.free()
+        vg = o.vertex_groups.new(name='free')
+        vg.add([v.index for v in o.data.vertices if not keep(v.co)], 1.0, 'REPLACE')
+        if radial is not None:
+            (cy, cz), k, x0 = radial
+            stretch(o.data, cy, cz, k, x0)
+        collapse_to(o, budget, organic, 'free' if protect is not None else '')
+        if radial is not None:
+            stretch(o.data, cy, cz, 1.0 / k, x0)
+        o.vertex_groups.clear()
     else:
         collapse_to(o, budget, organic)
     slab_cut(o)
@@ -321,19 +407,33 @@ def simplify(o, budget: int, organic: bool, eye: bool = True) -> int:
     return tris(o.data)
 
 
+def stretch(me, cy: float, cz: float, k: float, x0: float) -> None:
+    """Растянуть сетку поперёк оси X (вокруг оси через cy, cz) в k раз — только вершины с x ≥ x0."""
+    for v in me.vertices:
+        if v.co.x >= x0:
+            v.co.y = cy + (v.co.y - cy) * k
+            v.co.z = cz + (v.co.z - cz) * k
+    me.update()
+
+
 def slab_cut(o):
     """Разрез плоскостями x = k·UV_SLAB: длинные иглы-треугольники (шомпол, ствол, канал) иначе одним островом
     задают размер атласа; заодно острова исходника режутся по тем же границам (unwrap)."""
     bm = bmesh.new()
     bm.from_mesh(o.data)
     if VARIANT == 'fp':
-        # на малом бюджете плоскости через всю деталь дают +30 % треугольников — делятся только длинные рёбра
-        for _ in range(4):
-            long = [e for e in bm.edges if e.calc_length() > UV_SLAB]
-            if not long:
-                break
-            bmesh.ops.subdivide_edges(bm, edges=long, cuts=1, use_grid_fill=False)
-            bmesh.ops.triangulate(bm, faces=bm.faces[:])
+        # на малом бюджете плоскости через всю деталь дают +30 % треугольников — делятся только длинные рёбра, за один
+        # проход и сразу на нужное число частей (деление пополам в несколько проходов лавинообразно множило диагонали
+        # веера у запертого шва: ствол 10 тыс.)
+        by_cuts = {}
+        for e in bm.edges:
+            n = math.ceil(e.calc_length() / UV_SLAB) - 1
+            if n > 0:
+                by_cuts.setdefault(n, []).append(e)
+        for n, edges in by_cuts.items():
+            edges = [e for e in edges if e.is_valid]
+            if edges:
+                bmesh.ops.subdivide_edges(bm, edges=edges, cuts=n, use_grid_fill=False)
     else:
         xs = [v.co.x for v in bm.verts]
         x = (math.floor(min(xs) / UV_SLAB) + 1) * UV_SLAB
@@ -396,9 +496,10 @@ def join(objs, name, coll):
     return o
 
 
-FIB = [Vector((math.cos(2.399963 * k) * math.sqrt(1 - (1 - (2 * k + 1) / 160) ** 2),
-                math.sin(2.399963 * k) * math.sqrt(1 - (1 - (2 * k + 1) / 160) ** 2),
-                1 - (2 * k + 1) / 160)) for k in range(160)]   # равномерные направления на сфере
+FIB_N = 320                                     # направлений: узкое окно под ремень ловится ~10 лучами
+FIB = [Vector((math.cos(2.399963 * k) * math.sqrt(1 - (1 - (2 * k + 1) / FIB_N) ** 2),
+                math.sin(2.399963 * k) * math.sqrt(1 - (1 - (2 * k + 1) / FIB_N) ** 2),
+                1 - (2 * k + 1) / FIB_N)) for k in range(FIB_N)]   # равномерные направления на сфере
 
 
 def build_bvh(posed):
@@ -416,7 +517,7 @@ def visible_faces(o, m, bvh) -> tuple:
     от углов грани: длинная грань трубы прицела или шомпола видна лишь краем (центр под кольцом / в ложе)."""
     nm = m.to_3x3()
     me = o.data
-    vis, contact = set(), set()
+    vis, contact, roomy = set(), set(), set()
     for pl in me.polygons:
         n = (nm @ pl.normal).normalized()
         c = m @ pl.center
@@ -434,10 +535,14 @@ def visible_faces(o, m, bvh) -> tuple:
                 break
         if seen:
             vis.add(pl.index)
-        elif sorted(dist)[len(dist) // 2] < CONTACT:
-            # типичный луч упирается рядом (скользящие вдоль узкой щели уходят далеко — по ним не судим)
-            contact.add(pl.index)
-    return vis, contact
+        else:
+            med = sorted(dist)[len(dist) // 2]
+            if med < CONTACT:
+                # типичный луч упирается рядом (скользящие вдоль узкой щели уходят далеко — по ним не судим)
+                contact.add(pl.index)
+            elif med > ROOMY:
+                roomy.add(pl.index)
+    return vis, contact, roomy
 
 
 def uv_islands(bm, uvl, faces) -> list:
@@ -587,7 +692,7 @@ def harden_on_seams(objs) -> None:
     log('hard edges on seams: +', hard, 'softened', soft)
 
 
-def unwrap(objs, margin, hidden, eye: bool = True):
+def unwrap(objs, margin, hidden, eye: bool = True, roomy=None):
     """Развёртка исходника (Smart UV по плотной сетке) — переупаковка в атлас. Острова режутся на отрезки
     UV_SLAB вдоль оси (длинная ложа, ствол и шомпол иначе задают размер атласа и оставляют его пустым); скрытые
     грани (канал ствола, ложе под стволом, ствол под накладкой) отделяются и уменьшаются в HIDDEN_UV_SCALE раз."""
@@ -597,9 +702,12 @@ def unwrap(objs, margin, hidden, eye: bool = True):
         bm.from_mesh(o.data)
         uvl = bm.loops.layers.uv['GameUV']
         hid = hidden.get(o.name, set())
+        room = (roomy or {}).get(o.name, set())
         for f in bm.faces:
-            # сдвиг в пределах плитки 0–1 рвёт связь островов (упаковка держит острова в их UDIM)
-            off = 0.0005 * (math.floor(f.calc_center_median().x / UV_SLAB) % 40) + (0.0003 if f.index in hid else 0.0)
+            # сдвиг в пределах плитки 0–1 рвёт связь островов (упаковка держит острова в их UDIM); тесные и
+            # просторные скрытые грани — разными сдвигами, чтобы стали разными островами
+            hid_off = (0.0007 if f.index in room else 0.0003) if f.index in hid else 0.0
+            off = 0.0005 * (math.floor(f.calc_center_median().x / UV_SLAB) % 40) + hid_off
             for l in f.loops:
                 l[uvl].uv.x += off
         bm.to_mesh(o.data)
@@ -624,11 +732,13 @@ def unwrap(objs, margin, hidden, eye: bool = True):
         bm.from_mesh(o.data)
         bm.faces.ensure_lookup_table()
         uvl = bm.loops.layers.uv['GameUV']
+        room = (roomy or {}).get(o.name, set())
         for isl in uv_islands(bm, uvl, [bm.faces[i] for i in hid]):
+            k = HIDDEN_ROOMY_SCALE if isl[0].index in room else HIDDEN_UV_SCALE
             loops = [l for f in isl for l in f.loops]
             c = sum((l[uvl].uv for l in loops), Vector((0, 0))) / len(loops)
             for l in loops:
-                l[uvl].uv = c + (l[uvl].uv - c) * HIDDEN_UV_SCALE
+                l[uvl].uv = c + (l[uvl].uv - c) * k
         bm.to_mesh(o.data)
         bm.free()
     bpy.ops.object.mode_set(mode='EDIT')
@@ -732,7 +842,10 @@ for gname, (atlas, node, names) in GROUPS.items():
         c = bpy.data.objects.new(f'{gname}_{i}', hp.data.copy())
         lp.objects.link(c)
         b = budget_for(n, before)
-        after = simplify(c, b, organic=n in ORGANIC, eye=not gname.startswith('Round'))
+        after = simplify(c, b, organic=n in ORGANIC, eye=not gname.startswith('Round'),
+                         protect=FP_PROTECT.get(n.split('.')[0]) if VARIANT == 'fp' else None,
+                         radial=FP_RADIAL.get(n.split('.')[0]) if VARIANT == 'fp' else None,
+                         split=FP_SPLIT.get(n.split('.')[0]) if VARIANT == 'fp' else None)
         devs.append(deviation(c, bvh))
         budgets[n] = [before, after] + [round(x, 3) for x in devs[-1]] if devs else [before, after]
         bpy.data.meshes.remove(hp.data)
@@ -759,14 +872,15 @@ OPEN = {'Bolt_Rotor_Mesh': back @ Matrix.Rotation(math.radians(-90), 4, 'X'), 'B
 leaf_pivot = Vector((0.1575, 0.0, 0.0168))
 LEAF_UP = Matrix.Translation(leaf_pivot) @ Matrix.Rotation(math.radians(35), 4, 'Y') @ Matrix.Translation(-leaf_pivot)
 LEAF = {'RearSight_Leaf_Mesh': LEAF_UP, 'RearSight_Slider_Mesh': LEAF_UP}
-hidden, hidden_share, contact = {}, {}, {}
+hidden, hidden_share, contact, roomy = {}, {}, {}, {}
 for pose in (None, OPEN, LEAF):
     posed = [(o, (pose or {}).get(o.name, I4)) for o in rifle_low]
     bvh = build_bvh(posed)
     for o, m in posed:
-        vis, cont = visible_faces(o, m, bvh)
+        vis, cont, room = visible_faces(o, m, bvh)
         hidden[o.name] = (hidden.get(o.name, set(range(len(o.data.polygons))))) - vis
         contact[o.name] = (contact.get(o.name, cont)) & cont
+        roomy[o.name] = roomy.get(o.name, set()) | room
 removed_hidden = 0
 if VARIANT == 'fp':
     # прижатые невидимые грани — удалить (правило AAA: в невидимых местах геометрия не нужна), их треугольники
@@ -781,11 +895,12 @@ if VARIANT == 'fp':
         bm.faces.ensure_lookup_table()
         mark = bm.faces.layers.int.new('lp_hidden')
         for i in hidden[o.name]:
-            bm.faces[i][mark] = 1
+            bm.faces[i][mark] = 2 if i in roomy[o.name] else 1
         drop = [bm.faces[i] for i in cont]
         removed_hidden += sum(len(f.verts) - 2 for f in drop)
         bmesh.ops.delete(bm, geom=drop, context='FACES')
         hidden[o.name] = {f.index for f in bm.faces if f[mark]}
+        roomy[o.name] = {f.index for f in bm.faces if f[mark] == 2}
         bm.faces.layers.int.remove(mark)
         bm.to_mesh(o.data)
         bm.free()
@@ -802,7 +917,7 @@ texels = {}
 for atlas, size in ATLAS_SIZE.items():
     keys = [g for g, v in GROUPS.items() if UV_ATLAS.get(v[0], v[0]) == atlas]
     objs = [low[k] for k in keys]
-    unwrap(objs, UV_MARGIN_PX / size, hidden, eye=atlas != 'Ammo')   # патрон не на винтовке — без прибавки у глаза
+    unwrap(objs, UV_MARGIN_PX / size, hidden, eye=atlas != 'Ammo', roomy=roomy)   # патрон не на винтовке — без прибавки у глаза
     texels[atlas] = texel(objs, size)
     log('atlas', atlas, size, 'px/mm, uv area', texels[atlas])
 for gname, (atlas, node, names) in GROUPS.items():
