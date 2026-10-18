@@ -79,6 +79,13 @@ func _ready() -> void:
 		_check(orms.size() == int(ImpactFx.DECAL_COUNTS[asset]) and orms[0] != null, "%s: дырки с нормалями и ORM" % asset)
 	ImpactFx._decal(self, "metal", Vector3.ZERO, Vector3.BACK)
 	_check((ImpactFx._decals.back() as Decal).texture_orm != null, "металл: декаль с ORM (блеск голого металла)")
+	for look: String in ["puff_a", "puff_b", "wisp"]:
+		var maps: Array = ImpactBurst._flipbook(look)
+		_check(maps.size() == 2 and maps[0] != null and maps[1] != null, "%s: лист кадров дыма с нормалями" % look)
+	body.set_meta("surface", "concrete")
+	Hitscan.fire(get_world_3d(), Vector3(0, 0, 2), Vector3.FORWARD, 0, 4, Hitscan.LAYER_WORLD, 0, [], rng)
+	var dust_mat: StandardMaterial3D = (ImpactFx._bursts.back() as ImpactBurst).dust.material_override as StandardMaterial3D
+	_check(dust_mat != null and dust_mat.particles_anim_h_frames == ImpactBurst.FLIPBOOK_FRAMES and dust_mat.normal_texture != null, "пыль бетона — лист кадров с нормалями")
 	for shape: String in ["chip", "flake", "splinter", "clod", "pebble", "blade", "shard", "paper"]:
 		_check(not (ImpactBurst._debris_shapes().get(shape, []) as Array).is_empty(), "%s: куски из Blender" % shape)
 	for normal: Vector3 in [Vector3.UP, Vector3.DOWN, Vector3.RIGHT]:

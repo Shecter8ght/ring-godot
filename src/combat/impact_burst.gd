@@ -7,6 +7,9 @@ extends Node3D
 
 const PARTICLES_SHADER: Shader = preload("res://src/combat/impact_particles.gdshader")
 const SPARK_SHADER: Shader = preload("res://src/combat/impact_spark.gdshader")
+## Листы кадров дыма и пыли (tools/build_impact_smoke.py, симуляция Blender): fx_<вид>.png + _normal, 8×8.
+const FLIPBOOK_DIR := "res://assets/textures/impacts"
+const FLIPBOOK_FRAMES: int = 8
 ## Лоупольные куски из Blender (tools/build_impact_debris.py): объекты <вид>_<N>.
 const DEBRIS_PATH := "res://assets/models/props/impact_debris/impact_debris.glb"
 const SPRAY_SHADER: Shader = preload("res://src/combat/impact_spray.gdshader")
@@ -36,6 +39,8 @@ static var _lights: int = 0
 ## вид куска → варианты сеток из DEBRIS_PATH (пусто — процедурные _mesh)
 static var _debris: Dictionary = {}
 static var _debris_loaded: bool = false
+## вид листа кадров → [цвет, нормали] или [] (нет файлов — процедурное облачко)
+static var _flipbooks: Dictionary = {}
 
 
 ## floor_plane — пол под точкой (нормаль и высота вдоль неё, NO_PLANE — нет); surface_radius — дальше
@@ -64,7 +69,7 @@ func setup(kind: String, normal: Vector3, direction: Vector3, seed_value: int, f
 	if spec.has("sparks") and rng.randf() < float(spec.sparks.get("chance", 1.0)):
 		lifetime = maxf(lifetime, _emit_sparks(spec.sparks.count, normal, reflected, planes, rng, far))
 	if spec.has("dust"):
-		lifetime = maxf(lifetime, _emit_dust(spec.dust, normal))
+		lifetime = maxf(lifetime, _emit_dust(spec.dust, normal, rng))
 	if spec.has("flash"):
 		lifetime = maxf(lifetime, _flash(spec.flash, far))
 	get_tree().create_timer(lifetime + Balance.IMPACT_CLEANUP_MARGIN).timeout.connect(queue_free)
@@ -81,6 +86,9 @@ static func prepare() -> void:
 	_mesh("flash")
 	_mesh("dust")
 	_debris_shapes()
+	for look: String in ["puff_a", "puff_b", "wisp"]:
+		if not _flipbook(look).is_empty():
+			_material("dust_" + look)
 	for kind: String in Balance.IMPACT_SURFACES:
 		var spec: Dictionary = Balance.IMPACT_SURFACES[kind]
 		for layer: String in ["debris", "bits"]:
@@ -170,14 +178,24 @@ func _emit_sparks(count_range: Vector2i, normal: Vector3, reflected: Vector3, pl
 	return _emit(sparks, "sparks", layer, _count(count_range, rng, far), _aim(cfg.aim, normal, reflected), planes)
 
 
-func _emit_dust(cfg: Dictionary, normal: Vector3) -> float:
+## Облако: лист кадров из симуляции (клуб пыли — один из двух, у металла — дымок), кадр — по жизни
+## частицы; нет листов — мягкое процедурное облачко.
+func _emit_dust(cfg: Dictionary, normal: Vector3, rng: RandomNumberGenerator) -> float:
 	var common: Dictionary = Balance.IMPACT_DUST
+	var book: Dictionary = Balance.IMPACT_FLIPBOOK
 	var life: Vector2 = cfg.life
+	var look: String = String(cfg.get("look", "puff"))
+	if look == "puff":
+		look = "puff_a" if rng.randf() < 0.5 else "puff_b"
+	var animated: bool = not _flipbook(look).is_empty()
+	var count: int = int(cfg.count)
+	if animated:
+		count = maxi(1, int(round(count * float(book.count_k))))
 	dust.emitting = false
 	dust.one_shot = true
 	dust.explosiveness = 1.0
 	dust.local_coords = false
-	dust.amount = int(cfg.count)
+	dust.amount = count
 	dust.lifetime = life.y
 	dust.lifetime_randomness = clampf(1.0 - life.x / life.y, 0.0, 1.0)
 	dust.direction = normal
@@ -187,22 +205,31 @@ func _emit_dust(cfg: Dictionary, normal: Vector3) -> float:
 	var drag: Vector2 = common.drag
 	dust.initial_velocity_min = speed.x
 	dust.initial_velocity_max = speed.y
-	dust.scale_amount_min = size_range.x
-	dust.scale_amount_max = size_range.y
+	var size_k: float = float(book.size_k) if animated else 1.0
+	dust.scale_amount_min = size_range.x * size_k
+	dust.scale_amount_max = size_range.y * size_k
+	# облако — от поверхности по нормали, иначе пол или стена срезают его прямой линией
+	dust.position = normal * (size_range.x + size_range.y) * 0.5 * size_k * float(book.lift_k) if animated else Vector3.ZERO
 	dust.damping_min = drag.x
 	dust.damping_max = drag.y
 	dust.spread = float(common.spread)
 	dust.gravity = Vector3(0.0, float(cfg.get("rise", 0.0)), 0.0)
 	dust.angle_min = -180.0
 	dust.angle_max = 180.0
-	dust.color = Color(cfg.color as Color, float(cfg.opacity))
-	dust.color_ramp = _fade(0.0, 0.12)
+	dust.color = Color(cfg.color as Color, float(cfg.opacity) * (float(book.opacity_k) if animated else 1.0))
+	# облако из листа растёт и тает само — частица только чуть подрастает и гаснет к концу
+	var grow_range: Vector2 = book.grow if animated else Vector2(0.25, 1.0)
+	dust.color_ramp = _fade(float(book.fade_start), 0.08) if animated else _fade(0.0, 0.12)
 	var grow: Curve = Curve.new()
-	grow.add_point(Vector2(0, 0.25))
-	grow.add_point(Vector2(1, 1.0))
+	grow.add_point(Vector2(0, grow_range.x))
+	grow.add_point(Vector2(1, grow_range.y))
 	dust.scale_amount_curve = grow
+	dust.anim_speed_min = 1.0
+	dust.anim_speed_max = 1.0
+	dust.anim_offset_min = 0.0
+	dust.anim_offset_max = float(book.offset) if animated else 0.0
 	dust.mesh = _mesh("dust")
-	dust.material_override = _material("dust")
+	dust.material_override = _material("dust_" + look if animated else "dust")
 	dust.restart()
 	dust.emitting = true
 	return life.y
@@ -296,6 +323,8 @@ static func _material(kind: String) -> Material:
 		glow.set_shader_parameter("color", Balance.IMPACT_FLASH.color)
 		glow.set_shader_parameter("energy", float(Balance.IMPACT_FLASH.energy))
 		result = glow
+	elif kind.begins_with("dust_"):
+		result = flipbook_material(kind.trim_prefix("dust_"))
 	else:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.vertex_color_use_as_albedo = true
@@ -333,6 +362,47 @@ static func _material(kind: String) -> Material:
 		result = material
 	_materials[kind] = result
 	return result
+
+
+## Лист кадров: [цвет, нормали] или [] — нет файлов.
+static func _flipbook(look: String) -> Array:
+	if _flipbooks.has(look):
+		return _flipbooks[look]
+	var color_path: String = "%s/fx_%s.png" % [FLIPBOOK_DIR, look]
+	var normal_path: String = "%s/fx_%s_normal.png" % [FLIPBOOK_DIR, look]
+	var result: Array = []
+	if ResourceLoader.exists(color_path):
+		result = [load(color_path) as Texture2D, load(normal_path) as Texture2D if ResourceLoader.exists(normal_path) else null]
+	_flipbooks[look] = result
+	return result
+
+
+## Материал облака из листа кадров: смотрит в камеру, повёрнут по углу частицы, кадр — по её жизни
+## (anim_speed 1 — лист целиком за жизнь), освещается по карте нормалей, мягко стыкуется со стеной и полом.
+## Его же берёт дым гранаты (ImpactFx.explosion).
+static func flipbook_material(look: String) -> StandardMaterial3D:
+	var maps: Array = _flipbook(look)
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.vertex_color_use_as_albedo = true
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	material.particles_anim_h_frames = FLIPBOOK_FRAMES
+	material.particles_anim_v_frames = FLIPBOOK_FRAMES
+	material.particles_anim_loop = false
+	material.albedo_texture = maps[0]
+	if maps[1] != null:
+		material.normal_enabled = true
+		material.normal_texture = maps[1]
+	material.roughness = 1.0
+	material.metallic_specular = 0.0
+	material.diffuse_mode = BaseMaterial3D.DIFFUSE_BURLEY
+	# пыль на просвет светлее
+	material.backlight_enabled = true
+	material.backlight = Color(0.35, 0.35, 0.35)
+	material.proximity_fade_enabled = true
+	material.proximity_fade_distance = float(Balance.IMPACT_FLIPBOOK.soft_m)
+	return material
 
 
 ## Сетка куска: вариант из Blender, если есть, иначе процедурная.

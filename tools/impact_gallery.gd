@@ -6,7 +6,8 @@ extends Node3D
 ## искр, искры скачут по полу (impact_metal_*), грунты крупно (impact_<вид>_air / _close), стёкла —
 ## одна пуля, три пули, закалённое (сетка кубиков, осыпается волной), ослабленное (трещины ползут,
 ## рассыпается на куски, «зубья» в раме) — impact_glass_*.
-## IMPACT_ONLY=walls,ground,metal,close,glass — выборочно.
+## Взрыв гранаты на полу — огонь, дым листами кадров (impact_boom_*).
+## IMPACT_ONLY=walls,ground,metal,close,glass,boom — выборочно.
 
 const SURFACES: Array[String] = [
 	"concrete", "tile", "asphalt",
@@ -60,6 +61,8 @@ func _ready() -> void:
 			await _ground_close(kind, grounds[kind])
 	if _want("glass"):
 		await _glass()
+	if _want("boom"):
+		await _boom()
 	print("impact_gallery: декалей %d" % _count_decals())
 	get_tree().quit(0)
 
@@ -259,6 +262,18 @@ func _glass() -> void:
 	_camera.look_at_from_position(base + Vector3(0.0, eye_y + 0.4, 5.5), base + Vector3(0.0, 0.6, 0.0), Vector3.UP)
 	await get_tree().create_timer(0.3).timeout
 	_save("impact_glass_row.png")
+
+
+## Взрыв гранаты на полу: огненный шар, клубы дыма (листы кадров) расползаются и тают.
+func _boom() -> void:
+	var at: Vector3 = Vector3(-8.0, FLOOR_Y, -6.0)
+	_camera.look_at_from_position(at + Vector3(0.0, 2.2, 7.5), at + Vector3(0.0, 1.0, 0.0), Vector3.UP)
+	await get_tree().create_timer(0.3).timeout
+	await _capture(ImpactFx.explosion.bind(at), 0.35, "impact_boom_fire.png")
+	await _wait_frames_for(0.9)
+	_save("impact_boom_smoke.png")
+	await _wait_frames_for(1.6)
+	_save("impact_boom_late.png")
 
 
 func _glass_shot(glass: GlassPanes, body: StaticBody3D, index: int, at: Vector3, damage: float) -> void:

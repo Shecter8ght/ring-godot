@@ -292,15 +292,22 @@ func _puffs(parent: Node, pos: Vector3, amount: int, life: float, speed: Vector2
 	pm.color_ramp = gt
 	p.process_material = pm
 	p.draw_pass_1 = _dust_mesh
-	var mat := StandardMaterial3D.new()
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_texture = _tex_dust
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	if glow:
-		mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	p.material_override = mat
+	if not glow and not ImpactBurst._flipbook("puff_b").is_empty():
+		# дым — лист кадров из симуляции: клубится и освещается; кадр — по жизни частицы
+		pm.anim_speed_min = 1.0
+		pm.anim_speed_max = 1.0
+		pm.anim_offset_max = float(Balance.IMPACT_FLIPBOOK.offset)
+		p.material_override = ImpactBurst._material("dust_puff_b")
+	else:
+		var mat := StandardMaterial3D.new()
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.vertex_color_use_as_albedo = true
+		mat.albedo_texture = _tex_dust
+		mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		if glow:
+			mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		p.material_override = mat
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(p)
 	p.global_position = pos

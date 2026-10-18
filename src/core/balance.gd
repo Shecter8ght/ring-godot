@@ -29,6 +29,12 @@ const IMPACT_SPARKS := {"speed": Vector2(4.0, 15.0), "life": Vector2(0.22, 0.75)
 ## Вспышка удара: life (с), color, energy — яркость; свет на миг — light_range (м), light_energy,
 ## одновременно не больше light_max.
 const IMPACT_FLASH := {"life": 0.06, "color": Color(1.0, 0.78, 0.45), "energy": 5.0, "light_range": 2.6, "light_energy": 3.0, "light_max": 4}
+## Облако из листа кадров (tools/build_impact_smoke.py): крупнее и реже процедурного (size_k, count_k —
+## к size и count профиля), непрозрачность × opacity_k, частица подрастает grow (начало, конец), гаснет
+## с fade_start, кадр начала — случайно до offset доли листа; облако вынесено от поверхности по нормали на
+## lift_k своего размера, стык со стеной и полом мягкий на soft_m (м).
+const IMPACT_FLIPBOOK := {"size_k": 1.7, "count_k": 0.6, "opacity_k": 1.5, "grow": Vector2(0.75, 1.15), "fade_start": 0.75,
+	"offset": 0.06, "lift_k": 0.3, "soft_m": 0.3}
 ## Облако пыли: разлёт (м/с), сопротивление воздуха (доля скорости за с), конус (°).
 const IMPACT_DUST := {"speed": Vector2(0.25, 0.85), "drag": Vector2(1.3, 2.4), "spread": 50.0}
 ## Следы попаданий (ImpactFx): asset — набор декалей в assets/textures/impacts, size — сторона декали, м.
@@ -56,7 +62,8 @@ const IMPACT_DECALS: Dictionary = {
 ##   alt / alt_share — второй цвет и его доля (сухие травинки, светлые сколы);
 ## spray — веер мелкого материала полосами: gravity — доля тяжести, stretch — длина полосы от
 ##   скорости (с), size_end — во сколько раз полоса шире к концу (тает облачком);
-## dust — медленное облако: count, size — диаметр (м), opacity, rise — подъём (м/с², вниз — минус);
+## dust — медленное облако: count, size — диаметр (м), opacity, rise — подъём (м/с², вниз — минус),
+##   look — лист кадров: puff (клуб пыли, один из двух) или wisp (дымок);
 ## sparks — искры: count, chance — доля попаданий с искрами (сердечник по камню искрит не всегда);
 ## flash — вспышка: size — диаметр (м), light — свет на миг; trample — трава вокруг ложится (радиус, м).
 const IMPACT_SURFACES: Dictionary = {
@@ -83,7 +90,7 @@ const IMPACT_SURFACES: Dictionary = {
 	},
 	"metal": {
 		"debris": {"mesh": "flake", "count": Vector2i(3, 6), "size": Vector2(0.003, 0.012), "speed": Vector2(1.5, 4.5), "life": Vector2(0.5, 1.0), "spread": 40.0, "drag": 0.3, "bounce": 0.4, "aim": Vector2(1.0, 0.6), "color": Color(0.29, 0.3, 0.31), "alt": Color(0.55, 0.52, 0.45), "alt_share": 0.4},
-		"dust": {"count": 2, "size": Vector2(0.08, 0.22), "life": Vector2(0.5, 1.0), "opacity": 0.16, "rise": 0.5, "color": Color(0.5, 0.5, 0.5)},
+		"dust": {"count": 2, "size": Vector2(0.08, 0.22), "life": Vector2(0.6, 1.2), "opacity": 0.16, "rise": 0.5, "color": Color(0.5, 0.5, 0.5), "look": "wisp"},
 		"sparks": {"count": Vector2i(14, 26), "chance": 1.0},
 		"flash": {"size": 0.3, "light": true},
 	},
