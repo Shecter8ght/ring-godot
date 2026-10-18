@@ -987,18 +987,32 @@ const HDRI_WEATHER := {
 ## над глазом, свет снизу amb_bottom (доля света неба сверху; overcast — пасмурность для подгонки света,
 ## саму пелену рисуют облака). clouds: ослабление sigma, 1/км; плитки шумов, км; detail_k — насколько
 ## детали выедают края; sun — множитель солнца на облаках; дальше far, км, облаков нет, дымка до них —
-## haze, км; steps — шагов луча; ветер wind_ms, м/с, откуда — wind_from, ° от севера; солнце за облаком
+## haze, км; steps — шагов луча (не меньше; в толстом слое — по шагу step_km, до steps_max); ветер wind_ms, м/с, откуда — wind_from, ° от севера; солнце за облаком
 ## тускнеет до sun_floor (sun_tau — доля толщи, что гасит свет: многократное рассеяние светит насквозь).
+## Непогода по погоде: deck_var — насколько неровна толщина сплошных туч (тоньше — светлее, солнце
+## угадывается), base_rag — рваный низ, км; scud — доля неба под низкими клочьями (слой scud.base..top км,
+## ветер ×wind_k и повёрнут на turn °, шагов steps), shafts — плотность полос дождя вдали. Смена погоды —
+## небо перетекает за change_sec, с; перед дождём тучи собираются за rain_build_sec до него (гром —
+## WEATHER_CHANGE.thunder_lead). Молния (flash): ядро core в радиусе radius_km, общий отсвет неба amb,
+## пульсы pulses — [с от начала, сила], каждый гаснет за fade_sec; вспышка за dist_km от игрока.
 const SKY_CALC := {"sun_size": 0.53, "sun_clamp": 40.0, "amb_match": 1.0, "ground_blend": 3.0,
 	"view_ref": 30, "view_dim": 0.5, "view_min": 0.25,
 	"match_floor": -7.0, "twilight_adapt": 0.12, "cal_from": -18, "cal_to": 70,
 	"weather": {
-		"clear": {"mie": 1.0, "overcast": 0.0, "cover": 0.4, "base": 1.4, "top": 3.6, "amb_bottom": 0.4},
-		"heat": {"mie": 1.8, "overcast": 0.0, "cover": 0.2, "base": 2.0, "top": 4.0, "amb_bottom": 0.6},
-		"fog": {"mie": 4.0, "overcast": 0.5, "cover": 0.8, "base": 0.5, "top": 1.8, "amb_bottom": 1.1},
-		"rain": {"mie": 2.0, "overcast": 1.0, "cover": 1.0, "base": 0.6, "top": 4.0, "amb_bottom": 1.5}},
+		"clear": {"mie": 1.0, "overcast": 0.0, "cover": 0.4, "base": 1.4, "top": 3.6, "amb_bottom": 0.4,
+			"deck_var": 0.0, "base_rag": 0.0, "scud": 0.0, "shafts": 0.0},
+		"heat": {"mie": 1.8, "overcast": 0.0, "cover": 0.2, "base": 2.0, "top": 4.0, "amb_bottom": 0.6,
+			"deck_var": 0.0, "base_rag": 0.0, "scud": 0.0, "shafts": 0.0},
+		"fog": {"mie": 4.0, "overcast": 0.5, "cover": 0.8, "base": 0.5, "top": 1.8, "amb_bottom": 0.85,
+			"deck_var": 0.5, "base_rag": 0.15, "scud": 0.3, "shafts": 0.0},
+		"rain": {"mie": 2.0, "overcast": 1.0, "cover": 1.0, "base": 0.6, "top": 4.0, "amb_bottom": 1.4,
+			"deck_var": 0.6, "base_rag": 0.35, "scud": 0.45, "shafts": 0.5}},
+	"change_sec": 45.0, "rain_build_sec": 150.0,
+	"scud": {"base": 0.25, "top": 0.6, "wind_k": 2.2, "turn": -35.0, "steps": 24},
+	"flash": {"core": 25.0, "radius_km": 0.9, "amb": 0.25, "color": Color(0.75, 0.82, 1.0),
+		"pulses": [[0.0, 1.0], [0.08, 0.45], [0.2, 0.8]], "fade_sec": 0.06, "dist_km": [3.0, 12.0]},
 	"clouds": {"sigma": 30.0, "cover_tile": 30.0, "shape_tile": 9.0, "detail_tile": 1.2, "detail_k": 0.55,
-		"sun": 0.3, "far": 70.0, "haze": 35.0, "steps": 96, "wind_ms": 9.0, "wind_from": 250.0,
+		"sun": 0.3, "far": 70.0, "haze": 35.0, "steps": 96, "step_km": 0.023, "steps_max": 160, "wind_ms": 9.0, "wind_from": 250.0,
 		"sun_tau": 0.25, "sun_floor": 0.25}}
 ## Туман по расстоянию (карты, у которых в окружении fog_mode = depth): вблизи чисто, дальше — дымка,
 ## плотнее к горизонту (кривая). begin/end — метры, density — сколько дымки на end (0..1), curve > 1 —

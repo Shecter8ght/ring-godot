@@ -5,8 +5,10 @@ extends RefCounted
 ## и подгонка по высоте солнца и погоде из того же файла — яркость атмосферы, низ, оттенок отражений
 ## (Balance.SKY_CALC). Облака — объёмный слой в том же шейдере: шумы генерирует движок (FastNoiseLite,
 ## файлов нет), покрытие и высота — от погоды, ветер — от игровых часов (у всех игроков облака одни).
-## Солнце за облаком тускнеет (sun_through) — по тем же шумам, что рисует шейдер. Нет таблиц — режима
-## нет, небо из панорам.
+## Солнце за облаком тускнеет (sun_through) — по тем же шумам, что рисует шейдер. Непогода: тучи
+## неровной толщины с рваным низом, низкие клочья своим ветром, полосы дождя вдали, молния в тучах
+## (lightning). Смена погоды — небо перетекает за SKY_CALC.change_sec, перед дождём тучи собираются заранее
+## (RaidWeather.rain_build). Нет таблиц — режима нет, небо из панорам.
 
 const DATA := "res://data/sky_atmosphere.json"
 const SHADER := "res://src/world/atmosphere_sky.gdshader"
@@ -21,6 +23,15 @@ static var _detail: NoiseTexture3D
 static var _cover_img: Image
 static var _shape_imgs: Array[Image] = []
 static var _detail_imgs: Array[Image] = []
+## Смена погоды: параметры неба в миг смены (с них перетекаем), к какой погоде, доля пути; последние
+## выставленные — снимок для следующей смены.
+static var _from: Dictionary = {}
+static var _to_weather: String = ""
+static var _blend_t: float = 1.0
+static var _last: Dictionary = {}
+## Молния: секунд от начала вспышки (< 0 — нет), где она в тучах (как q шейдера).
+static var _flash_t: float = -1.0
+static var _flash_q: Vector3 = Vector3.ZERO
 
 
 static func available() -> bool:
@@ -63,62 +74,157 @@ static func material() -> ShaderMaterial:
 	m.set_shader_parameter("cloud_far", float(cl.far))
 	m.set_shader_parameter("cloud_haze", float(cl.haze))
 	m.set_shader_parameter("cloud_steps", int(cl.steps))
+	var su: Dictionary = sc.scud
+	m.set_shader_parameter("scud_base", float(su.base))
+	m.set_shader_parameter("scud_top", float(su.top))
+	m.set_shader_parameter("scud_steps", int(su.steps))
+	var fl: Dictionary = sc.flash
+	m.set_shader_parameter("flash_core", float(fl.core))
+	m.set_shader_parameter("flash_radius", float(fl.radius_km))
+	m.set_shader_parameter("flash_amb", float(fl.amb))
+	var fc: Color = fl.color
+	m.set_shader_parameter("flash_color", Vector3(fc.r, fc.g, fc.b))
 	return m
 
 
+## Новый рейд (или время суток сменили руками): небо сразу как погода, без перетекания.
+static func reset_blend() -> void:
+	_from = {}
+	_to_weather = ""
+	_blend_t = 1.0
+	_last = {}
+	_flash_t = -1.0
+
+
 ## Солнце (направление на него, высота, °) и погода: дымка, облака, яркость и оттенок по подгонке.
-static func update(m: ShaderMaterial, to_sun: Vector3, elev: float, weather: String) -> void:
+## Погода сменилась — параметры перетекают за change_sec (delta — с прошлого вызова; 0 — без хода);
+## перед дождём тучи собираются заранее (RaidWeather.rain_build).
+static func update(m: ShaderMaterial, to_sun: Vector3, elev: float, weather: String, delta: float = 0.0) -> void:
 	var d := _load()
 	if d.is_empty() or m == null:
 		return
 	var sc: Dictionary = Balance.SKY_CALC
+	var target := _params(weather, elev)
+	var pre: float = RaidWeather.current.rain_build() if RaidWeather.current and weather != "rain" else 0.0
+	if pre > 0.0:
+		target = _mix(target, _params("rain", elev), pre)
+	if weather != _to_weather:
+		# с того, что было на небе в миг смены (в начале рейда — сразу)
+		_from = _last.duplicate() if not _last.is_empty() and _to_weather != "" else {}
+		_to_weather = weather
+		_blend_t = 0.0 if not _from.is_empty() else 1.0
+	_blend_t = minf(1.0, _blend_t + delta / maxf(float(sc.change_sec), 0.01))
+	var p := target if _from.is_empty() or _blend_t >= 1.0 else _mix(_from, target, smoothstep(0.0, 1.0, _blend_t))
+	_last = p
+	var amb: Vector3 = p.amb
+	var amb_eff := Vector3.ONE.lerp(amb, float(sc.amb_match))
+	var clouds := float(p.cover) > 0.0
+	m.set_shader_parameter("sun_dir", to_sun)
+	m.set_shader_parameter("gain", exp(float(p.log_gain)))
+	m.set_shader_parameter("mie_k", float(p.mie))
+	# пасмурность из подгонки рисуют облака; ровная пелена — только если облаков нет
+	m.set_shader_parameter("veil", 0.0 if clouds else float(p.overcast))
+	m.set_shader_parameter("overcast", 0.0 if clouds else float(p.overcast))
+	m.set_shader_parameter("oc_zenith", p.oc)
+	m.set_shader_parameter("amb_tint", amb_eff)
+	m.set_shader_parameter("view_k", float(p.view_k))
+	# низ в таблице — до поправки оттенка (в карте отражений он умножится на неё)
+	m.set_shader_parameter("ground_col", (p.ground as Vector3) * amb / amb_eff)
+	m.set_shader_parameter("clouds_on", clouds)
+	# солнце за облаком гаснет только там, где свет погоды его ещё не приглушил под пасмурность
+	m.set_meta("cloud_shadow", clouds and float(p.overcast) <= 0.01)
+	if clouds:
+		# шагов по толщине слоя: в толстых тучах дождя иначе на днище ступеньки (в плотном марш кончается рано)
+		var cl: Dictionary = sc.clouds
+		m.set_shader_parameter("cloud_steps", clampi(int(ceil((float(p.top) - float(p.base)) / float(cl.step_km))),
+			int(cl.steps), int(cl.steps_max)))
+		for k: String in ["cover", "base", "top", "amb_bottom", "deck_var", "base_rag", "scud", "shafts"]:
+			m.set_shader_parameter({"cover": "cloud_coverage", "base": "cloud_base", "top": "cloud_top",
+				"scud": "scud_coverage"}.get(k, k), float(p[k]))
+		# свет неба на облака — средняя яркость неба, какой её даёт подгонка (до поправки оттенка):
+		# под сплошными тучами земля освещена, как раньше под пасмурной панорамой
+		m.set_shader_parameter("cloud_amb", (p.oc as Vector3) * (7.0 / 9.0) / amb)
+
+
+## Всё, что небо берёт от погоды на высоте солнца elev: подгонка (усиление — логарифмом, оттенок, низ,
+## пасмурность) и облака из Balance.SKY_CALC.weather.
+static func _params(weather: String, elev: float) -> Dictionary:
+	var sc: Dictionary = Balance.SKY_CALC
 	var ws: Dictionary = (sc.weather as Dictionary).get(weather, sc.weather.clear)
-	var cal: Dictionary = d.calib
+	var cal: Dictionary = _load().calib
 	var rows: Dictionary = (cal.weather as Dictionary).get(weather, cal.weather.clear)
 	var elevs: Array = cal.elev
 	var x := clampf(elev - float(elevs[0]), 0.0, float(elevs.size() - 1))
 	var i := mini(int(floor(x)), elevs.size() - 2)
 	var f := x - float(i)
-	# усиление в сумерках меняется на порядки — между строками по логарифму
-	var gain := exp(lerpf(log(float(rows.gain[i])), log(float(rows.gain[i + 1])), f))
-	var amb := _v3(rows.amb[i]).lerp(_v3(rows.amb[i + 1]), f)
-	var amb_eff := Vector3.ONE.lerp(amb, float(sc.amb_match))
-	# низ в таблице — до поправки оттенка (в карте отражений он умножится на неё)
-	var ground := _v3(rows.ground[i]).lerp(_v3(rows.ground[i + 1]), f) * amb / amb_eff
-	var oc := _v3(rows.oc[i]).lerp(_v3(rows.oc[i + 1]), f)
-	var clouds := float(ws.get("cover", 0.0)) > 0.0
-	m.set_shader_parameter("sun_dir", to_sun)
-	m.set_shader_parameter("gain", gain)
-	m.set_shader_parameter("mie_k", float(ws.mie))
-	# пасмурность из подгонки рисуют облака; ровная пелена — только если облаков нет
-	m.set_shader_parameter("veil", 0.0 if clouds else float(ws.overcast))
-	m.set_shader_parameter("overcast", 0.0 if clouds else float(ws.overcast))
-	m.set_shader_parameter("oc_zenith", oc)
-	m.set_shader_parameter("amb_tint", amb_eff)
-	m.set_shader_parameter("view_k", view_k(rows, cal, elev))
-	m.set_shader_parameter("ground_col", ground)
-	m.set_shader_parameter("clouds_on", clouds)
-	# солнце за облаком гаснет только там, где свет погоды его ещё не приглушил под пасмурность
-	m.set_meta("cloud_shadow", clouds and float(ws.overcast) <= 0.0)
-	if clouds:
-		m.set_shader_parameter("cloud_coverage", float(ws.cover))
-		m.set_shader_parameter("cloud_base", float(ws.base))
-		m.set_shader_parameter("cloud_top", float(ws.top))
-		m.set_shader_parameter("amb_bottom", float(ws.amb_bottom))
-		# свет неба на облака — средняя яркость неба, какой её даёт подгонка (до поправки оттенка):
-		# под сплошными тучами земля освещена, как раньше под пасмурной панорамой
-		m.set_shader_parameter("cloud_amb", oc * (7.0 / 9.0) / amb)
+	var p := {
+		# усиление в сумерках меняется на порядки — между строками по логарифму
+		"log_gain": lerpf(log(float(rows.gain[i])), log(float(rows.gain[i + 1])), f),
+		"amb": _v3(rows.amb[i]).lerp(_v3(rows.amb[i + 1]), f),
+		"ground": _v3(rows.ground[i]).lerp(_v3(rows.ground[i + 1]), f),
+		"oc": _v3(rows.oc[i]).lerp(_v3(rows.oc[i + 1]), f),
+		"view_k": view_k(rows, cal, elev),
+		"overcast": float(ws.overcast),
+	}
+	for k: String in ["mie", "cover", "base", "top", "amb_bottom", "deck_var", "base_rag", "scud", "shafts"]:
+		p[k] = float(ws.get(k, 0.0))
+	return p
 
 
-## Ветер: облака плывут по игровым часам hour — у всех игроков одинаково (часы ведёт хост).
-static func clouds_tick(m: ShaderMaterial, hour: float) -> void:
+static func _mix(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
+	var out := {}
+	for k: String in b:
+		var va: Variant = a.get(k, b[k])
+		out[k] = (va as Vector3).lerp(b[k] as Vector3, t) if va is Vector3 else lerpf(float(va), float(b[k]), t)
+	return out
+
+
+## Каждый кадр: ветер — облака и клочья плывут по игровым часам hour (у всех игроков одинаково, часы
+## ведёт хост), клочья быстрее и под углом; молния — пульсы вспышки.
+static func clouds_tick(m: ShaderMaterial, hour: float, delta: float = 0.0) -> void:
 	if m == null:
 		return
-	var cl: Dictionary = Balance.SKY_CALC.clouds
-	var to := deg_to_rad(float(cl.wind_from) + 180.0)
+	var sc: Dictionary = Balance.SKY_CALC
+	var cl: Dictionary = sc.clouds
 	var km := float(cl.wind_ms) * hour * float(Balance.DAY_CYCLE.hour_sec) / 1000.0
-	# карта на север — −Z, восток — +X; шум сдвигается против движения облаков
-	m.set_shader_parameter("cloud_offset", -Vector2(sin(to), -cos(to)) * fposmod(km, float(cl.cover_tile) * 8.0))
+	# шум сдвигается против движения облаков
+	m.set_shader_parameter("cloud_offset", -_dir_to(float(cl.wind_from) + 180.0) * fposmod(km, float(cl.cover_tile) * 8.0))
+	var su: Dictionary = sc.scud
+	m.set_shader_parameter("scud_offset", -_dir_to(float(cl.wind_from) + 180.0 + float(su.turn))
+		* fposmod(km * float(su.wind_k), float(cl.cover_tile) * 8.0))
+	if _flash_t >= 0.0:
+		_flash_t += delta
+		var fl: Dictionary = sc.flash
+		var v := 0.0
+		for pulse: Array in fl.pulses:
+			var dt := _flash_t - float(pulse[0])
+			if dt >= 0.0:
+				v += float(pulse[1]) * exp(-dt / float(fl.fade_sec))
+		m.set_shader_parameter("flash", v)
+		m.set_shader_parameter("flash_q", _flash_q)
+		if v < 0.002 and _flash_t > 0.5:
+			_flash_t = -1.0
+			m.set_shader_parameter("flash", 0.0)
+
+
+## Молния в тучах у игрока в pos (м, мир): вспышка в случайной стороне на dist_km, в толще туч.
+static func lightning(m: ShaderMaterial, pos: Vector3) -> void:
+	if m == null or m.get_shader_parameter("clouds_on") != true:
+		return
+	var fl: Dictionary = Balance.SKY_CALC.flash
+	var dist := randf_range(float(fl.dist_km[0]), float(fl.dist_km[1]))
+	var off: Vector2 = m.get_shader_parameter("cloud_offset")
+	var dir := _dir_to(randf() * 360.0)
+	var base: float = m.get_shader_parameter("cloud_base")
+	var top: float = m.get_shader_parameter("cloud_top")
+	_flash_q = Vector3(pos.x / 1000.0 + off.x + dir.x * dist, lerpf(base, top, 0.35), pos.z / 1000.0 + off.y + dir.y * dist)
+	_flash_t = 0.0
+
+
+## Направление по карте на азимут az, ° (от севера к востоку): север — −Z, восток — +X.
+static func _dir_to(az: float) -> Vector2:
+	var a := deg_to_rad(az)
+	return Vector2(sin(a), -cos(a))
 
 
 ## Сколько света светила с направления to (солнце или Луна) проходит сквозь облака к точке pos (м, мир):

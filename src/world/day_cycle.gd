@@ -46,6 +46,8 @@ func start(atm: RaidAtmosphere, time_key: String) -> void:
 	# точное время из настроек — у того, кто ведёт время (одиночная игра, хост)
 	if Settings.raid_hour >= 0.0 and (not Net.is_networked() or multiplayer.is_server()):
 		hour = Settings.raid_hour
+	# новый рейд — небо сразу как погода, без перетекания с прошлого
+	AtmosphereSky.reset_blend()
 	rebuild()
 
 
@@ -72,9 +74,12 @@ func rebuild() -> void:
 func _process(delta: float) -> void:
 	hour = fposmod(hour + delta / float(Balance.DAY_CYCLE.hour_sec), 24.0)
 	_tick(delta, false)
-	# облака плывут каждый кадр (карта отражений неба обновляется сама — Sky в реальном времени)
+	# расчётное небо — каждый кадр: солнце без ступенек, погода перетекает, облака плывут, молния
+	# (карта отражений неба обновляется сама — Sky в реальном времени)
 	if _calc and _sky:
-		AtmosphereSky.clouds_tick(_sky, hour)
+		var sa := sun_at(hour)
+		AtmosphereSky.update(_sky, dir_from(sa.x, sa.y), sa.x, String(RaidConditions.current.weather), delta)
+		AtmosphereSky.clouds_tick(_sky, hour, delta)
 	if Net.is_networked() and multiplayer.is_server():
 		_sync_t -= delta
 		if _sync_t <= 0.0:

@@ -131,6 +131,15 @@ func is_raining() -> bool:
 	return String(RaidConditions.current.weather) == "rain"
 
 
+## Тучи собираются перед дождём: 0 — дождя не ждём или он далеко, 1 — вот-вот (за
+## Balance.SKY_CALC.rain_build_sec до начала; расписание у всех peer одно — небо у всех одинаково).
+func rain_build() -> float:
+	if _rain_at == INF:
+		return 0.0
+	var b := float(Balance.SKY_CALC.rain_build_sec)
+	return clampf((_t - (_rain_at - b)) / b, 0.0, 1.0)
+
+
 ## Условия сменили из настроек посреди рейда: погода — сразу, туман — без плавного перехода,
 ## дождь начинается/кончается сразу; гостям — расписание как обычно.
 func conditions_changed() -> void:
@@ -373,6 +382,9 @@ func _set_rain(on: bool) -> void:
 func _thunder() -> void:
 	var me: Player = Raid.current.local_player() if Raid.current else null
 	Audio.play("thunder", (me.global_position if me else Vector3.ZERO) + Vector3(_rng.randf_range(-80, 80), 60, _rng.randf_range(-80, 80)))
+	# расчётное небо: молния вспыхивает в тучах (и днём), отсвет неба мигает на земле
+	if DayCycle.current and DayCycle.current._calc:
+		AtmosphereSky.lightning(DayCycle.current._sky, me.global_position if me else Vector3.ZERO)
 	# ночью — вспышка молнии
 	if String(RaidConditions.current.time) == "night":
 		var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D

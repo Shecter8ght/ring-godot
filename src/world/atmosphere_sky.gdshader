@@ -85,6 +85,25 @@ uniform int cloud_steps = 48;
 uniform vec3 night_cloud = vec3(0.012, 0.013, 0.016);
 uniform vec3 night_cloud_hz = vec3(0.03, 0.031, 0.034);
 
+// ---- непогода (Balance.SKY_CALC по погоде): сплошные тучи неровной толщины (deck_var), рваный низ
+// (base_rag, км), низкие клочья (scud_*: свой слой, свой ветер), полосы дождя вдали (shafts), молния
+uniform float deck_var = 0.0;
+uniform float base_rag = 0.0;
+uniform float scud_coverage = 0.0;
+uniform float scud_base = 0.25;
+uniform float scud_top = 0.6;
+uniform vec2 scud_offset = vec2(0.0);
+uniform int scud_steps = 16;
+uniform float shafts = 0.0;
+// молния: сила вспышки (0 — нет), где в тучах (как q облаков: км по карте и над глазом), цвет, ядро и
+// его радиус, км, общий отсвет неба
+uniform float flash = 0.0;
+uniform vec3 flash_q = vec3(0.0, 2.0, 5.0);
+uniform vec3 flash_color = vec3(0.75, 0.82, 1.0);
+uniform float flash_core = 25.0;
+uniform float flash_radius = 0.9;
+uniform float flash_amb = 0.25;
+
 vec2 lut_uv(vec2 x, sampler2D tex) {
 	vec2 size = vec2(textureSize(tex, 0));
 	return 0.5 / size + clamp(x, 0.0, 1.0) * (1.0 - 1.0 / size);
@@ -174,23 +193,30 @@ float hg(float c, float g) {
 // где облакам быть, профиль — их высоту (чем гуще покрытие, тем выше башни), форма — сами клубы,
 // детали выедают края.
 float cloud_density(vec3 q, float detail) {
-	float hf = (q.y - cloud_base) / (cloud_top - cloud_base);
+	// рваный низ: основание гуляет по крупным ячейкам (км), а не идёт ровной плоскостью
+	float rag = base_rag > 0.0 ? (texture(cloud_detail, vec3(q.x, 0.0, q.z) / (detail_tile * 2.5)).r - 0.5) * base_rag : 0.0;
+	float hf = (q.y - cloud_base - rag) / (cloud_top - cloud_base);
 	if (hf <= 0.0 || hf >= 1.0) {
 		return 0.0;
 	}
 	float t = 1.0 - cloud_coverage;
-	float wc = smoothstep(t - 0.08, t + 0.18, texture(cloud_cover, q.xz / cover_tile).r);
+	float cov = texture(cloud_cover, q.xz / cover_tile).r;
+	float wc = smoothstep(t - 0.08, t + 0.18, cov);
 	if (wc <= 0.0) {
 		return 0.0;
 	}
-	float top_f = mix(0.45, 1.0, wc);
+	// сплошные тучи неровной толщины: где карта покрытия ниже — слой тоньше (светлее, солнце угадывается)
+	float thick = mix(1.0, mix(0.35, 1.0, smoothstep(0.25, 0.75, cov)), deck_var);
+	float top_f = mix(0.45, 1.0, wc) * thick;
 	float prof = smoothstep(0.0, 0.12, hf) * (1.0 - smoothstep(top_f - 0.35, top_f, hf));
 	float k = wc * prof;
 	// клубы: плавный шум формы с ячейками (Перлин — Ворли) — края «цветной капустой», а не ватой
 	float sh = mix(texture(cloud_shape, q / shape_tile).r, texture(cloud_detail, q / (shape_tile * 0.5)).r, 0.35);
 	float base = clamp((sh - (1.0 - k)) / max(k, 0.05), 0.0, 1.0);
 	if (detail > 0.0 && base > 0.0) {
-		float ero = (1.0 - texture(cloud_detail, q / detail_tile).r) * detail_k * detail;
+		// у рваного низа детали выедают сильнее — клочья
+		float ero_k = detail_k * mix(1.0 + base_rag * 2.0, 1.0, smoothstep(0.0, 0.25, hf));
+		float ero = (1.0 - texture(cloud_detail, q / detail_tile).r) * ero_k * detail;
 		base = clamp((base - ero) / max(1.0 - ero, 0.05), 0.0, 1.0);
 	}
 	return base;
@@ -226,6 +252,10 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 	float tr = 1.0;
 	float dsum = 0.0;
 	float wsum = 0.0;
+	// глубоко в туче (сквозь неё видно меньше трети) свет и затенение берутся с прошлого шага, деталей нет:
+	// вклад таких шагов мал, а в сплошных тучах это половина работы
+	float tau_last = 0.0;
+	float occ_last = 1.0;
 	for (int i = 0; i < cloud_steps; i++) {
 		if (t_prev >= t1) {
 			break;
@@ -238,22 +268,27 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 		vec3 p = vec3(0.0, rc, 0.0) + d * t;
 		float r = length(p);
 		vec3 q = vec3(p.x + cam_km.x, r - rc, p.z + cam_km.y);
-		float den = cloud_density(q, 1.0 - smoothstep(6.0, 20.0, t));
+		bool deep = tr < 0.33;
+		float den = cloud_density(q, deep ? 0.0 : 1.0 - smoothstep(6.0, 20.0, t));
 		if (den > 0.002) {
 			vec3 up = p / r;
 			float mus = dot(up, sd);
 			// солнце до облака — сквозь атмосферу: на закате свет красный, после заката облака ещё горят
 			vec3 sun_l = transmittance(r, mus) * sun_seen(r, mus) * gain * cloud_sun * sun_k;
 			// толща облака до солнца: шаги растут
-			float tau = 0.0;
-			float ls = 0.08;
-			vec3 qq = q;
-			for (int k = 0; k < 6; k++) {
-				qq += sd * ls;
-				tau += cloud_density(qq, 0.0) * ls;
-				ls *= 1.8;
+			float tau = tau_last;
+			if (!deep) {
+				tau = 0.0;
+				float ls = 0.08;
+				vec3 qq = q;
+				for (int k = 0; k < 6; k++) {
+					qq += sd * ls;
+					tau += cloud_density(qq, 0.0) * ls;
+					ls *= 1.8;
+				}
+				tau *= cloud_sigma;
+				tau_last = tau;
 			}
-			tau *= cloud_sigma;
 			// многократное рассеяние октавами (Wrenninge): ослабление и вытянутость фазы слабеют
 			float ms = 0.0;
 			float a = 1.0;
@@ -269,10 +304,18 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 			float powder = 1.0 - exp(-den * cloud_sigma * 0.1);
 			float hf = (q.y - cloud_base) / (cloud_top - cloud_base);
 			// свет неба сверху гаснет под толщей облака над точкой: в тучах тёмные пятна, под башнями — тёмное дно
-			float up_tau = (cloud_density(q + vec3(0.0, 0.35, 0.0), 0.0) * 0.35
-				+ cloud_density(q + vec3(0.0, 1.1, 0.0), 0.0) * 0.75) * cloud_sigma;
-			float amb_occ = mix(0.5, 1.0, exp(-up_tau * 0.08));
+			float amb_occ = occ_last;
+			if (!deep) {
+				float up_tau = (cloud_density(q + vec3(0.0, 0.35, 0.0), 0.0) * 0.35
+					+ cloud_density(q + vec3(0.0, 1.1, 0.0), 0.0) * 0.75) * cloud_sigma;
+				amb_occ = mix(0.5, 1.0, exp(-up_tau * 0.08));
+				occ_last = amb_occ;
+			}
 			vec3 src = sun_l * ms * 4.0 * PI * mix(1.0, powder, 0.5) + cloud_amb * mix(amb_bottom, 1.0, hf) * amb_occ;
+			// молния светит изнутри тучи: ядро у точки вспышки, свет гаснет за flash_radius
+			if (flash > 0.001) {
+				src += flash_color * flash * flash_core * exp(-length(q - flash_q) / flash_radius);
+			}
 			float st = exp(-den * cloud_sigma * dt);
 			float w = tr * (1.0 - st);
 			l += src * w;
@@ -293,11 +336,105 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 	return vec4(mix(hz, l + atm * tr, edge), mix(1.0 - oc, tr, edge));
 }
 
+// Низкие рваные клочья под тучами: тонкий слой scud_base..scud_top км, свой ветер (scud_offset —
+// быстрее и под углом к ветру туч), темнее туч — их освещает только свет из-под туч. rgb — свет
+// клочьев, a — сколько видно сквозь них.
+vec4 scud(vec3 d, vec2 cam_km, vec3 haze) {
+	if (scud_coverage <= 0.0 || d.y <= 0.0) {
+		return vec4(0.0, 0.0, 0.0, 1.0);
+	}
+	float rc = r_ground + view_h;
+	float rb = rc + scud_base;
+	float rs = rc + scud_top;
+	float t0 = -rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rb * rb, 0.0));
+	float t1 = min(-rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rs * rs, 0.0)), 12.0);
+	if (t0 >= t1) {
+		return vec4(0.0, 0.0, 0.0, 1.0);
+	}
+	float dh = (scud_top - scud_base) / float(scud_steps);
+	float t_prev = t0;
+	vec3 col = cloud_amb * amb_bottom * 0.5;
+	vec3 l = vec3(0.0);
+	float tr = 1.0;
+	float dsum = 0.0;
+	float wsum = 0.0;
+	for (int i = 0; i < scud_steps; i++) {
+		if (t_prev >= t1) {
+			break;
+		}
+		float rk = rb + dh * (float(i) + 1.0);
+		float t_next = min(-rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rk * rk, 0.0)), t1);
+		float dt = t_next - t_prev;
+		float t = 0.5 * (t_prev + t_next);
+		t_prev = t_next;
+		vec3 p = vec3(0.0, rc, 0.0) + d * t;
+		float r = length(p);
+		vec3 q = vec3(p.x + cam_km.x, r - rc, p.z + cam_km.y);
+		float hf = (q.y - scud_base) / (scud_top - scud_base);
+		// клочья мелкие (пятна ~2 км, рваные ячейки ~0.3 км) и только поблизости: вдали их пятна сливались
+		// в ровный слой с плоским верхом
+		float wc = smoothstep(1.0 - scud_coverage - 0.1, 1.0 - scud_coverage + 0.2, texture(cloud_cover, q.xz / (cover_tile * 0.08)).r);
+		float prof = smoothstep(0.0, 0.3, hf) * (1.0 - smoothstep(0.55, 1.0, hf));
+		float sh = texture(cloud_detail, q / (shape_tile * 0.15)).r * prof;
+		float den = clamp((sh - (1.0 - wc * 0.75)) / 0.25, 0.0, 1.0) * wc * (1.0 - smoothstep(3.0, 12.0, t));
+		if (den > 0.002) {
+			float st = exp(-den * cloud_sigma * 0.35 * dt);
+			float w = tr * (1.0 - st);
+			l += col * w;
+			dsum += t * w;
+			wsum += w;
+			tr *= st;
+		}
+	}
+	float fade = 1.0 - exp(-(dsum / max(wsum, 1e-4)) / (cloud_haze * 0.35));
+	l = mix(l, haze * (1.0 - tr), fade);
+	return vec4(l, tr);
+}
+
+// Полосы дождя вдали: от земли до низа туч — серые завесы под самыми толстыми (тёмными) местами туч,
+// той же картой покрытия, — сверху столб уходит в тёмное днище; к низу туч реже, по азимуту — пряди.
+// Ложатся поверх всего, что за ними: rgb — цвет, a — непрозрачность.
+vec4 rain_shafts(vec3 d, vec2 cam_km, vec3 col) {
+	if (shafts <= 0.0 || d.y < -0.01 || d.y > 0.3) {
+		return vec4(0.0);
+	}
+	float tau = 0.0;
+	float t_prev = 1.5;
+	for (int i = 0; i < 10; i++) {
+		// 1.5 … 27 км, шаги гуще у глаза
+		float t_next = 1.5 * pow(18.0, float(i + 1) / 10.0);
+		float dt = t_next - t_prev;
+		float t = 0.5 * (t_prev + t_next);
+		t_prev = t_next;
+		// высота луча над землёй с поправкой на кривизну, км
+		float h = t * d.y + t * t / (2.0 * r_ground);
+		if (h > cloud_base) {
+			break;
+		}
+		vec2 xz = d.xz * t + cam_km;
+		float rain = smoothstep(0.6, 0.8, texture(cloud_cover, xz / cover_tile).r);
+		float strand = texture(cloud_detail, vec3(xz.x * 3.0, h * 0.15, xz.y * 3.0) / detail_tile).r;
+		tau += rain * mix(0.08, 1.0, strand * strand) * mix(1.0, 0.45, h / cloud_base) * dt;
+	}
+	// пряди по азимуту: быстро меняются вбок, медленно — по высоте
+	float streak = texture(cloud_detail, vec3(atan(d.x, d.z) * 12.0, d.y * 1.5, 0.37)).r;
+	return vec4(col, (1.0 - exp(-tau * shafts)) * mix(0.35, 1.0, streak));
+}
+
 void sky() {
 	if (AT_HALF_RES_PASS) {
-		// усиление — здесь же: в буфере половинной точности сумеречные 10⁻⁸ иначе обнуляются
+		// усиление — здесь же: в буфере половинной точности сумеречные 10⁻⁸ иначе обнуляются (и под тучами её не
+		// пропускать: сквозь тонкие места туч светлеет сторона солнца — это её свечение)
 		vec3 a = atmosphere(EYEDIR) * gain;
 		vec4 cl = clouds_on ? clouds(EYEDIR, a, POSITION.xz / 1000.0 + cloud_offset, AT_CUBEMAP_PASS ? view_k : 1.0) : vec4(a, 1.0);
+		if (clouds_on) {
+			// клочья — ближе туч, полосы дождя — ближе всего
+			vec3 haze = mix(a, cloud_amb * amb_bottom * 0.65, cloud_coverage * cloud_coverage);
+			vec4 sc = scud(EYEDIR, POSITION.xz / 1000.0 + scud_offset, haze);
+			cl = vec4(sc.rgb + cl.rgb * sc.a, cl.a * sc.a);
+			vec4 rs = rain_shafts(EYEDIR, POSITION.xz / 1000.0 + cloud_offset, cloud_amb * amb_bottom * 0.6);
+			cl = vec4(mix(cl.rgb, rs.rgb, rs.a), cl.a * (1.0 - rs.a));
+		}
 		COLOR = cl.rgb;
 		ALPHA = cl.a;
 		// туман движок наложит на итог полного прохода — здесь отменяем (иначе небо затуманится дважды)
@@ -325,6 +462,10 @@ void sky() {
 			vec3 sl = transmittance(r0, d.y) * sun_seen(r0, d.y) * limb * edge * gain / (TAU * (1.0 - cos(rad)));
 			sl *= min(1.0, sun_clamp / max(max(sl.r, max(sl.g, sl.b)), 1e-6));
 			c += sl * (1.0 - veil) * vis;
+		}
+		// молния: всё небо под тучами на миг светлеет
+		if (flash > 0.001) {
+			c += flash_color * flash * flash_amb * (1.0 - vis * 0.7);
 		}
 		// под горизонтом — земля ровной яркостью
 		c = mix(c, ground_col, smoothstep(0.0, -ground_blend, elev));

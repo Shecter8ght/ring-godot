@@ -4,7 +4,8 @@ extends Node
 ## вида — на солнце, от солнца, вверх; лист сравнения: слева панорамы, справа расчёт, ряды — виды.
 ## tools/godot.cmd --windowed --resolution 1600x900 res://tools/sky_compare_shots.tscn
 ## → docs/screens/sky_cmp_<время>.png (отдельные кадры — user://sky_cmp/), кадры в секунду обоих режимов.
-## SKY_CMP_ONLY=0500,2100 — выборочно; SKY_CMP_AT=x:z — другая точка.
+## SKY_CMP_ONLY=0500,2100 — выборочно; SKY_CMP_AT=x:z — своя точка (иначе — самое открытое место зоны:
+## зону переставляют, постоянная точка уходит в лес).
 
 const SCENE := "res://scenes/levels/zone01_mall.tscn"
 const CASES := [
@@ -39,12 +40,12 @@ func _ready() -> void:
 	me.health.max_hp = 1e9
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	CameraRig.first_person_mode = true
-	# двор у спортплощадки (после перекладки зоны 1 в квадрат 600 м прежняя точка ушла в лес)
-	var at := Vector3(41, 0.0, 44)
+	var at: Vector3 = _open_spot(level as Node3D)
 	var at_env: String = OS.get_environment("SKY_CMP_AT")
 	if at_env != "":
 		var p: PackedStringArray = at_env.split(":")
 		at = Vector3(float(p[0]), 0.0, float(p[1]))
+	print("sky_compare_shots: точка %.0f, %.0f" % [at.x, at.z])
 	var ground: Dictionary = (level as Node3D).get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(at + Vector3.UP * 60.0, at + Vector3.DOWN * 30.0, Hitscan.LAYER_WORLD))
 	me.global_position = (ground.position as Vector3) + Vector3.UP * 0.1 if not ground.is_empty() else at
 	await _frames(30)
@@ -72,6 +73,8 @@ func _ready() -> void:
 		if String(RaidConditions.current.weather) != String(c.weather):
 			Settings.set_raid_conditions("", String(c.weather))
 			await _frames(30)
+		# часы стоят — погоду на небе сразу, без перетекания
+		AtmosphereSky.reset_blend()
 		var sa: Vector2 = DayCycle.sun_at(float(c.hour))
 		var sheet: Image = Image.create(TILE.x * MODES.size(), TILE.y * VIEWS.size(), false, Image.FORMAT_RGB8)
 		var ground_lum: Dictionary = {}
@@ -137,6 +140,31 @@ func _ground_lum(img: Image) -> float:
 			sum += img.get_pixel(x, y).srgb_to_linear().get_luminance()
 			n += 1
 	return sum / float(maxi(n, 1))
+
+
+## Самое открытое место зоны: по сетке точек лучи к небу у горизонта (5° и 15°, 16 сторон, до 200 м) —
+## где меньше всего упирается в деревья и дома; земля под точкой должна быть.
+func _open_spot(level: Node3D) -> Vector3:
+	var space: PhysicsDirectSpaceState3D = level.get_world_3d().direct_space_state
+	var best := Vector3(41, 0.0, 44)
+	var best_score: int = -1
+	for gx in range(-280, 281, 40):
+		for gz in range(-280, 281, 40):
+			var top := Vector3(gx, 120.0, gz)
+			var hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(top, Vector3(gx, -40.0, gz), Hitscan.LAYER_WORLD))
+			if hit.is_empty():
+				continue
+			var eye: Vector3 = (hit.position as Vector3) + Vector3.UP * 1.7
+			var score: int = 0
+			for i in range(16):
+				for el: float in [5.0, 15.0]:
+					var d: Vector3 = DayCycle.dir_from(el, float(i) * 22.5)
+					if space.intersect_ray(PhysicsRayQueryParameters3D.create(eye, eye + d * 200.0, Hitscan.LAYER_WORLD)).is_empty():
+						score += 1
+			if score > best_score:
+				best_score = score
+				best = Vector3(gx, 0.0, gz)
+	return best
 
 
 ## Взгляд по азимуту az (от севера к востоку), на elev над горизонтом.
