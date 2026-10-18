@@ -579,7 +579,7 @@ def stroke_ribbon(P: np.ndarray, closed: bool, w: float):
     T /= np.linalg.norm(T, axis=1, keepdims=True)
     Nn = np.c_[-T[:, 1], T[:, 0]]
     V = np.vstack([P + Nn * w / 2, P - Nn * w / 2])
-    F = [(i, (i + 1) % n, n + (i + 1) % n, n + i) for i in range(n if closed else n - 1)]
+    F = [(i, n + i, n + (i + 1) % n, (i + 1) % n) for i in range(n if closed else n - 1)]   # лицом к +Z, как кружки
     parts = [(V, F)]
     for i in range(n):
         if closed:
@@ -657,7 +657,8 @@ def _add_mesh(name: str, mat: str, V, F, smooth: bool, collection, parent):
     bm = bmesh.new()
     bm.from_mesh(me)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    if name != "Tag_Text":                      # плоская краска: лицом наружу с каждой стороны бирки, как построена
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me)
     bm.free()
     for p in me.polygons:
