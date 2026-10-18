@@ -463,6 +463,13 @@ func _make_buses() -> void:
 		var i := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(i, String(b))
 		AudioServer.set_bus_send(i, "Master")
+	# очереди внахлёст и слои дистанции не хрипят: потолок шины выстрелов
+	var shots := AudioServer.get_bus_index("Shots")
+	if shots >= 0 and AudioServer.get_bus_effect_count(shots) == 0:
+		var lim := AudioEffectHardLimiter.new()
+		lim.ceiling_db = float(Balance.AUDIO_SHOTS_LIMIT.ceiling_db)
+		lim.release = float(Balance.AUDIO_SHOTS_LIMIT.release_sec)
+		AudioServer.add_bus_effect(shots, lim)
 
 
 func _apply_audio() -> void:
@@ -483,9 +490,14 @@ func set_headset(h: Dictionary) -> void:
 	_apply_audio()
 
 
+## Выстрел: общие наборы «shot_…» и выстрелы моделей «wpn_…_shot…» (громкость «Выстрелы», гарнитура).
+static func is_shot(kind: String) -> bool:
+	return kind.begins_with("shot_") or (kind.begins_with("wpn_") and kind.contains("_shot"))
+
+
 ## Шина для вида звука (Audio.play).
 static func bus_for(kind: String) -> StringName:
-	if kind.begins_with("shot_") or kind == "explosion":
+	if is_shot(kind) or kind == "explosion":
 		return &"Shots"
 	if kind.begins_with("step"):
 		return &"Steps"

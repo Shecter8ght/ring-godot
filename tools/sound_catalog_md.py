@@ -65,13 +65,13 @@ def weapon_fallback(weapon: dict, fallback: str) -> str:
     shot = weapon.get("sound", "")
     if fallback == "$shot":
         return shot
-    if fallback == "$shot_far":
+    if fallback in ("$shot_self", "$shot_mid", "$shot_far", "$shot_distant"):
+        layer = fallback[len("$shot_"):]
         if shot.startswith("shot_hg_") or shot == "shot_pistol":
-            return "shot_pistol@far"
-        for k in ("shot_smg", "shot_ak762", "shot_shotgun", "shot_bolt"):
-            if shot == k:
-                return k + "@far"
-        return "shot_rifle@far"
+            return "shot_pistol@" + layer
+        if shot in ("shot_smg", "shot_shotgun", "shot_bolt", "shot_battle") or (shot == "shot_ak762" and layer == "far"):
+            return f"{shot}@{layer}"
+        return "shot_rifle@" + layer
     if fallback == "$suppressed":
         if weapon.get("caliber") == "9x39":
             return "shot_sup939"

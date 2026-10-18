@@ -103,6 +103,15 @@ static func weapon_ids() -> Array[String]:
 	return out
 
 
+## Слоты слоёв дистанции выстрела → слой вида (Audio.LAYERS).
+const SHOT_LAYER_SLOTS := {"shot_self": "self", "shot_mid": "mid", "shot_far": "far", "shot_distant": "distant"}
+
+
+static func _kind_base(kind: String) -> String:
+	var at := kind.find("@")
+	return kind if at < 0 else kind.substr(0, at)
+
+
 ## Собственные события одной модели. Пока у события нет своих записей, Audio идёт по fallback к
 ## прежнему общему набору — поэтому переход на помодельный звук не ломает существующее звучание.
 static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
@@ -126,10 +135,12 @@ static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
 			if bool(raw.get("shared", false)) and not bool(raw.get("family", false)):
 				continue
 			var slot := String(raw.id)
-			var base_kind := "%s_%s" % [wid, "shot" if slot == "shot_far" else slot]
+			# слои дистанции выстрела — тот же вид «…_shot» со слоем: «wpn_ar_01_shot@mid»
+			var layer := String(SHOT_LAYER_SLOTS.get(slot, ""))
+			var base_kind := "%s_%s" % [wid, "shot" if layer != "" else slot]
 			var event := raw.duplicate(true)
 			event.id = "%s_%s" % [wid, slot]
-			event.kind = (base_kind + "@far") if slot == "shot_far" and bool(raw.wired) else (base_kind if bool(raw.wired) else "")
+			event.kind = ("%s@%s" % [base_kind, layer] if layer != "" else base_kind) if bool(raw.wired) else ""
 			event.file = "guns/%s_%s_" % [wid.trim_prefix("wpn_"), String(raw.file)]
 			event.fallback = _weapon_sound_fallback(w, String(raw.fallback))
 			event.weapon = wid
@@ -205,7 +216,7 @@ static func family_sound_events() -> Array[Dictionary]:
 static func weapon_sound_kind(id: String, slot: String) -> String:
 	for event in weapon_sound_events(id):
 		if String(event.slot) == slot:
-			return String(event.kind).trim_suffix("@far")
+			return _kind_base(String(event.kind))
 	return ""
 
 
@@ -214,7 +225,7 @@ static func weapon_sound_map(id: String) -> Dictionary:
 	var out: Dictionary = {}
 	for event in weapon_sound_events(id):
 		var kind := String(event.kind)
-		if kind != "" and not kind.ends_with("@far"):
+		if kind != "" and not kind.contains("@"):
 			out[String(event.slot)] = kind
 	var w := weapon(id)
 	for raw in _sound_slots:
@@ -287,19 +298,15 @@ static func _weapon_sound_fallback(w: Dictionary, fallback: String) -> String:
 	match fallback:
 		"$shot":
 			return String(w.get("sound", ""))
-		"$shot_far":
+		"$shot_self", "$shot_mid", "$shot_far", "$shot_distant":
+			var layer := fallback.trim_prefix("$shot_")
 			var shot := String(w.get("sound", ""))
 			if shot.begins_with("shot_hg_") or shot == "shot_pistol":
-				return "shot_pistol@far"
-			if shot == "shot_smg":
-				return "shot_smg@far"
-			if shot == "shot_ak762":
-				return "shot_ak762@far"
-			if shot == "shot_shotgun":
-				return "shot_shotgun@far"
-			if shot == "shot_bolt":
-				return "shot_bolt@far"
-			return "shot_rifle@far"
+				return "shot_pistol@" + layer
+			# у 7.62×39 в каталоге пока только «вдали»; остальные слои — общие автоматные
+			if shot in ["shot_smg", "shot_shotgun", "shot_bolt", "shot_battle"] or (shot == "shot_ak762" and layer == "far"):
+				return "%s@%s" % [shot, layer]
+			return "shot_rifle@" + layer
 		"$suppressed":
 			if String(w.get("caliber", "")) == "9x39":
 				return "shot_sup939"

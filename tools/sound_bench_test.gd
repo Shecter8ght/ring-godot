@@ -156,8 +156,8 @@ func _run() -> void:
 		if String(((bench.get("by_id") as Dictionary)[String((card as Control).get_meta("event"))] as Dictionary).cat) == "Оружие — обращение":
 			handling += 1
 	_check("оружие: общие действия — один раз, отдельным разделом карточек", handling >= 10, "%d" % handling)
-	var pm_suppressed: Dictionary = pm_layout[2]
-	var glock_suppressed: Dictionary = glock_layout[2]
+	var pm_suppressed: Dictionary = pm_layout[pm_order.find("shot_suppressed")]
+	var glock_suppressed: Dictionary = glock_layout[glock_order.find("shot_suppressed")]
 	_check("оружие: выстрел с глушителем доступен ПМ и Glock",
 		String(pm_suppressed.slot) == "shot_suppressed" and bool(pm_suppressed.available)
 		and bool(glock_suppressed.available), "%s / %s" % [str(pm_suppressed), str(glock_suppressed)])
@@ -166,14 +166,14 @@ func _run() -> void:
 	_check("оружие: звуки установки и снятия доступны только ригу с таким действием",
 		pm_actions.has("suppressor_on") and pm_actions.has("suppressor_off")
 		and not glock_actions.has("suppressor_on") and not glock_actions.has("suppressor_off"), str(pm_actions))
-	var pm_dry: Dictionary = pm_layout[4]
+	var pm_dry: Dictionary = pm_layout[pm_order.find("dry_fire")]
 	_check("оружие: сухой спуск — своё событие модели, без записей звучит семейством, оно — общим",
 		String(pm_dry.slot) == "dry_fire" and bool(pm_dry.get("via_family", false)) and not bool(pm_dry.shared)
 		and String(pm_dry.id) == "wpn_hg_01_dry_fire" and String(pm_dry.fallback) == "fam_pistol_dry_fire"
 		and String(WeaponDb.weapon_sound_map("wpn_hg_01").dry_fire) == "wpn_hg_01_dry_fire"
 		and String((Audio.get("_catalog_fallbacks") as Dictionary).get("wpn_hg_01_dry_fire", "")) == "fam_pistol_dry_fire"
 		and String((Audio.get("_catalog_fallbacks") as Dictionary).get("fam_pistol_dry_fire", "")) == "dry_fire", str(pm_dry))
-	var ads_row: Dictionary = pm_layout[22]
+	var ads_row: Dictionary = pm_layout[pm_order.find("ads_raise")]
 	_check("оружие: общие действия без семейства (вскинуть в ADS) — один звук на всё оружие",
 		String(ads_row.slot) == "ads_raise" and bool(ads_row.shared) and String(WeaponDb.weapon_sound_map("wpn_hg_01").ads_raise) == "ads_raise", str(ads_row))
 	var family_events: Array[Dictionary] = bench.get("family_sounds")

@@ -252,6 +252,10 @@ tools/godot.cmd res://tools/sound_bench.tscn               # стенд звук
 tools/godot.cmd --headless res://tools/sound_bench_test.tscn # стенд звуков: каталог покрывает всё, что зовёт игра; страница и карточки; назначения и снятие
                                                               # (и в Audio); новые файлы, отбор, перенос, CREDITS, воспроизведение
 python tools/sound_catalog_md.py                               # список всех звуков для чтения: docs/sound_catalog.md
+python -X utf8 tools/prepare_firearm_layers.py [--only ключ,ключ] # выстрелы CC0-библиотеки (_asset_src/sound_libraries) слоями дистанции:
+                                                              # свой, вблизи, средняя, вдали, очень далеко → кандидаты стенда _sound_try/Выстрелы_CC0_дистанции
+tools/godot.cmd --headless res://tools/shot_layers_test.tscn  # слои дистанции выстрела: какой слой на каком расстоянии, переход без провала громкости,
+                                                              # свой выстрел — своего набора, очередь внахлёст с пределом, шина «Выстрелы» с потолком
 ```
 
 Перед сетевыми тестами — убить висящие процессы Godot: старый хост держит порт 7777, и клиент

@@ -38,6 +38,10 @@ const WEAPON_CATS := ["Оружие — выстрел", "Оружие — об�
 ## Какие разделы свёрнуты — между запусками стенда.
 var ui_state_path: String = "user://sound_bench_ui.json"
 const MODES := {"near": "вблизи", "far": "вдали", "wall": "за стеной"}
+## Слоты выстрела у модели (слои дистанции — WeaponDb.SHOT_LAYER_SLOTS).
+const GUN_SLOTS := ["shot", "shot_suppressed", "shot_self", "shot_mid", "shot_far", "shot_distant"]
+## «Как в игре» по дистанции, м: у дула (свой выстрел) и дальше, до предела слышимости винтовки.
+const GAME_DISTANCES := [0.5, 5.0, 15.0, 40.0, 80.0, 120.0, 250.0, 400.0, 700.0]
 const LICENSE_OPTIONS := [
 	{"key": "", "name": "— выбери право —", "credit": "", "needs_source": true},
 	{"key": "own_recorded", "name": "Собственная запись", "credit": "Записано владельцем проекта · собственный звук", "needs_source": false},
@@ -94,6 +98,8 @@ var _space: String = "dry"
 var _mode: String = "near"
 var _vol_db: float = 0.0
 var _burst_id: int = 0
+## Дистанция для «очереди как в игре» — последняя нажатая на панели события, м.
+var _game_dist: float = 15.0
 var _players: Array[AudioStreamPlayer] = []
 var _rng := RandomNumberGenerator.new()
 var _license_re := RegEx.create_from_string("(?i)\\b(nc|nd|sa)\\b|non-?commercial|некоммерч")
@@ -469,7 +475,7 @@ func status_of(id: String) -> Dictionary:
 	if kind.begins_with("loop:"):
 		st.synth = true
 	elif kind != "" and not no_synth:
-		var base := kind.trim_suffix("@far")
+		var base := Audio.kind_base(kind)
 		st.synth = Audio.has_own_synth(base) if no_fallback else Audio.has_synth(base)
 	# в игре такого звука нет: своей записи нет и код его не зовёт (где-то пока звучит замена — «now»)
 	st.absent = kind == "" and int(st.rec) == 0 and linked == 0
@@ -1215,8 +1221,9 @@ func play_tail() -> void:
 		play_stream(tails[_rng.randi_range(0, tails.size() - 1)])
 
 
-## Как звучит в игре сейчас: тот же вызов Audio.play (запись, если есть, иначе синтез),
-## «дальние» — с 60 м, лупы — тем, что отдаёт звуковая система.
+## Как звучит в игре сейчас: тот же вызов Audio.play (запись, если есть, иначе синтез), вместе с
+## одобренными, но ещё не добавленными кандидатами; слой дистанции — с его расстояния
+## (Balance.AUDIO_LAYERS), лупы — тем, что отдаёт звуковая система.
 func play_game(id: String) -> bool:
 	var kind := String(by_id[id].kind)
 	if kind == "":
@@ -1234,11 +1241,67 @@ func play_game(id: String) -> bool:
 				st = Audio.ambient_stream()
 		play_stream(st, false)
 		return st != null
-	var far := kind.ends_with("@far")
+	var layer := Audio.kind_layer(kind)
+	return play_game_at(id, Audio.layer_at_m(layer) if layer != "" else 3.0)
+
+
+## Выстрел события «как в игре» на расстоянии dist, м, перед слушателем: слои дистанции
+## сменяются, как в рейде (и звук приходит с задержкой — 343 м/с).
+func play_game_at(id: String, dist: float) -> bool:
+	var kind := String(by_id[id].kind) if by_id.has(id) else ""
+	if kind == "" or kind.begins_with("loop:"):
+		return false
+	sync_preview()
 	var cam := get_viewport().get_camera_3d()
-	var at := (cam.global_position if cam else Vector3.ZERO) + Vector3(0.0, 0.0, -60.0 if far else -3.0)
-	Audio.play(kind.trim_suffix("@far"), at)
+	var at := (cam.global_position if cam else Vector3.ZERO) + Vector3(0.0, 0.0, -maxf(dist, 0.3))
+	Audio.play(Audio.kind_base(kind), at)
 	return true
+
+
+## Очередь «как в игре»: count выстрелов с темпом rpm на расстоянии dist — хвосты внахлёст, как в рейде.
+func play_game_burst(id: String, dist: float, count: int, rpm: float) -> void:
+	_burst_id += 1
+	var my := _burst_id
+	for i in count:
+		if my != _burst_id or not is_inside_tree() or not play_game_at(id, dist):
+			return
+		await get_tree().create_timer(60.0 / maxf(rpm, 1.0)).timeout
+
+
+## Пройти все дистанции по очереди: от дула до предела слышимости, с паузой на хвост.
+func play_game_walk(id: String) -> void:
+	_burst_id += 1
+	var my := _burst_id
+	for d in GAME_DISTANCES:
+		if my != _burst_id or not is_inside_tree() or not play_game_at(id, float(d)):
+			return
+		if _status:
+			_status.text = "Как в игре: %s" % _distance_name(float(d))
+		await get_tree().create_timer(float(Balance.AUDIO_BENCH.walk_gap_sec) + float(d) / float(Balance.AUDIO_FAR.sound_mps)).timeout
+
+
+func _distance_name(d: float) -> String:
+	return "у дула — свой выстрел" if d < 1.0 else "%d м" % int(d)
+
+
+## Одобренные, но ещё не добавленные кандидаты — в звуковую систему, чтобы «как в игре» их слышало.
+func sync_preview() -> void:
+	var map: Dictionary = {}
+	for rel in files:
+		var id := assigned_id(rel)
+		var s: Dictionary = selection.get(rel, {})
+		if id == "" or not bool(s.get("use", false)) or String(s.get("moved", "")) != "":
+			continue
+		var kind := String(by_id[id].kind)
+		if kind == "" or kind.begins_with("loop:"):
+			continue
+		var st := load_stream(try_dir.path_join(rel))
+		if st == null:
+			continue
+		if not map.has(kind):
+			map[kind] = []
+		(map[kind] as Array).append(st)
+	Audio.set_preview(map)
 
 
 func _preview_game(id: String) -> void:
@@ -1247,7 +1310,7 @@ func _preview_game(id: String) -> void:
 		return
 	var st := status_of(id)
 	if int(st.pending) > 0:
-		_status.text = "«Как в игре» использует только записи из assets/audio. Одобренных, но ещё не добавленных: %d; сейчас слышен прежний набор или синтез. Заполни источник/лицензию и нажми шаг 4." % int(st.pending)
+		_status.text = "«Как в игре» — записи игры и одобренные кандидаты (ещё не добавлено: %d). В саму игру они попадут после шага 4." % int(st.pending)
 	else:
 		_status.text = "Проигран текущий игровой звук из assets/audio%s." % (" (запасной набор или синтез)" if int(st.rec) == 0 else "")
 
@@ -1259,7 +1322,7 @@ func _is_loop(id: String) -> bool:
 func _is_gun(id: String) -> bool:
 	if id.begins_with("shot_"):
 		return true
-	return by_id.has(id) and String((by_id[id] as Dictionary).get("slot", "")) in ["shot", "shot_suppressed"]
+	return by_id.has(id) and String((by_id[id] as Dictionary).get("slot", "")) in GUN_SLOTS
 
 
 func _build_split_popup(layer: CanvasLayer) -> void:
@@ -2316,6 +2379,8 @@ func _verdict(e: Dictionary, st: Dictionary) -> String:
 		return "✓ В игре: случайная из %d записей (своих %d, назначенных %d)." % [own, int(st.rec), int(st.linked)]
 	if int(st.fallback_rec) > 0:
 		return "▷ Своих записей нет — звучит запасной набор «%s» (%d зап.)." % [String(st.fallback_name), int(st.fallback_rec)]
+	if Audio.kind_layer(kind) != "":
+		return "▷ Своих записей слоя нет — на этой дистанции звучат соседние слои."
 	if bool(st.synth):
 		return "≈ Своих записей нет — звучит синтез."
 	return "○ В игре тишина: своих записей нет, системный звук снят или отсутствует."
@@ -2355,6 +2420,8 @@ func _refresh_details() -> void:
 				play_tail()))
 	if _is_gun(id):
 		bar.add_child(_button("▶▶ очередь", func() -> void: play_burst(streams_of(id), int(_burst_n.value), _rpm.value)))
+	if _is_gun(id) and kind != "":
+		_details.add_child(_game_distance_bar(id))
 	_details.add_child(_wrap_label(_verdict(e, st), 16, _status_color(st)))
 
 	# свои записи: файлы набора события в assets/audio
@@ -2379,12 +2446,14 @@ func _refresh_details() -> void:
 	_details.add_child(add)
 
 	# системный звук — что играет, пока своих записей нет; любой можно снять
-	if kind != "" and not kind.begins_with("loop:") and not kind.ends_with("@far"):
+	if kind != "" and not kind.begins_with("loop:") and Audio.kind_layer(kind) == "":
 		_details.add_child(HSeparator.new())
 		_details.add_child(_heading("Системный звук — когда своих записей нет"))
 		_system_rows(id, e, st)
-	elif kind.ends_with("@far"):
-		_details.add_child(_wrap_label("Дальняя запись: пока её нет, вдали звучит ближний выстрел того же события.", 14, COL_DIM))
+	elif Audio.kind_layer(kind) != "":
+		_details.add_child(_wrap_label(("Слой дистанции (%s): пока своих записей нет, тут звучат соседние слои этого "
+			+ "ствола или тот же слой общего набора. «Свой выстрел» берётся только у того набора, что звучит вблизи.")
+			% _distance_name(Audio.layer_at_m(Audio.kind_layer(kind))), 14, COL_DIM))
 
 	# кандидаты из входящих
 	_details.add_child(HSeparator.new())
@@ -2396,6 +2465,12 @@ func _refresh_details() -> void:
 		+ "участвует в «случайном варианте» и очереди; «Добавить одобренные в игру» наверху скопирует его в assets/audio.") % mine.size(), 15, COL_NEW))
 	if not mine.is_empty():
 		_details.add_child(_wrap_label(LICENSE_HELP, 13, COL_DIM))
+	if mine.size() > 1:
+		var bulk := HBoxContainer.new()
+		bulk.add_theme_constant_override("separation", 8)
+		bulk.add_child(_button("Одобрить все (%d)" % mine.size(), func() -> void: _approve_all(mine, true)))
+		bulk.add_child(_button("Снять все", func() -> void: _approve_all(mine, false)))
+		_details.add_child(bulk)
 	for rel in mine:
 		_details.add_child(_file_row(rel, false))
 
@@ -2404,6 +2479,50 @@ func _refresh_details() -> void:
 		id, kind if kind != "" else "—", String(e.get("now", "")),
 		String(TYPE_NAMES.get(String(e.get("type", "")), String(e.get("type", "")))), int(e.get("variants", 1)),
 		String(PRIO_NAMES.get(int(e.get("prio", 3)), ""))], 13, COL_DIM))
+
+
+## «Как в игре» по дистанции: выстрел события на каждом расстоянии, пройти все подряд, очередь на
+## выбранном (последнем нажатом) расстоянии — слои сменяются плавно, хвосты очереди внахлёст.
+func _game_distance_bar(id: String) -> VBoxContainer:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	box.add_child(_wrap_label("Как в игре по дистанции (с одобренными кандидатами; дальний звук приходит позже — 343 м/с):", 14, COL_DIM))
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 6)
+	row.add_theme_constant_override("v_separation", 6)
+	box.add_child(row)
+	for d in GAME_DISTANCES:
+		var dist := float(d)
+		row.add_child(_button(_distance_name(dist) if dist < 1.0 else "%d м" % int(dist), func() -> void:
+			_game_dist = dist
+			stop_all()
+			play_game_at(id, dist)
+			_status.text = "Как в игре: %s" % _distance_name(dist)))
+	var row2 := HBoxContainer.new()
+	row2.add_theme_constant_override("separation", 8)
+	box.add_child(row2)
+	row2.add_child(_button("▶ пройти все дистанции", func() -> void:
+		stop_all()
+		play_game_walk(id)))
+	row2.add_child(_button("▶▶ очередь как в игре", func() -> void:
+		stop_all()
+		_status.text = "Очередь как в игре: %s, %d выстр., %d/мин" % [_distance_name(_game_dist), int(_burst_n.value), int(_rpm.value)]
+		play_game_burst(id, _game_dist, int(_burst_n.value), _rpm.value)))
+	return box
+
+
+## Отметить «Одобрен к добавлению» у всех кандидатов события (или снять).
+func _approve_all(rels: Array[String], on: bool) -> void:
+	for rel in rels:
+		var s := sel(rel)
+		if String(s.get("moved", "")) != "":
+			continue
+		s.use = on
+		s.seen = true
+	save_selection()
+	_refresh_page()
+	_refresh_details()
+	_status.text = ("Одобрено %d — «как в игре» уже слышит их; в игру — шагом 4." % rels.size()) if on else "Кандидаты сняты с добавления."
 
 
 ## Строка записи в событии: ▶, имя, где ещё звучит; своя — «в игре» (везде), «Ещё событиям…»,
