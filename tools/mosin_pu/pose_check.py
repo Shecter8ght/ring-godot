@@ -21,7 +21,7 @@ args = L.script_args()
 OUT = args[0]
 RENDER = "render" in args
 OPEN_ANGLE = -90.0          # стебель поворачивается рукоятью вверх (правая сторона −Y)
-TRAVEL = -88.0              # ход затвора назад, мм
+TRAVEL = -110.0             # ход затвора назад до упора, мм (v08; в v07 было 88)
 # (имя, поворот стебля, ход затвора, курок на взводе)
 POSES = [
     ("closed", 0.0, 0.0, 0.0),
@@ -41,6 +41,9 @@ POSES = [
     ("back60", OPEN_ANGLE, -60.0, 0.0),
     ("back75", OPEN_ANGLE, -75.0, 0.0),
     ("back87", OPEN_ANGLE, -87.2, 0.0),
+    ("back95", OPEN_ANGLE, -95.0, 0.0),
+    ("back102", OPEN_ANGLE, -102.0, 0.0),
+    ("back107", OPEN_ANGLE, -107.0, 0.0),
     ("open", OPEN_ANGLE, TRAVEL, 0.0),
     ("open_cocked", OPEN_ANGLE, TRAVEL, 1.0),
 ]
