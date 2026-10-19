@@ -3,8 +3,9 @@
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/veras54_v13/game_lp.py
 → _asset_src/veras54_game_v13/lp/VERAS54_Game_LP.blend + lp/parts.json (не в git).
 
-Источник — принятый владельцем текстурированный high-poly v13 (геометрия v13 и текстуры v13 v02 приняты 2026-10-19):
-E:/Models Blender/WEAPONS/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Актуальное/VERAS54_Only_State100_v13_Textured_v02.blend
+Источник — принятый владельцем текстурированный high-poly v13: текстуры v13 v04 (почти чёрный матовый металл, блестят
+потёртости и отпечатки; приняты 2026-10-20) на геометрии v13 с правкой левой стенки s08 (принята 2026-10-19):
+E:/Models Blender/WEAPONS/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Актуальное/VERAS54_Only_State100_v13_Textured_v04.blend
 (SHA-256 — в parts.json); исходник не меняется. Оси — оси автомата (дуло +X, +Y влево стрелка, +Z вверх, начало — ось канала
 у заднего торца коробки; метры), как у узла VERAS54 в сцене рук и клипов; затвор закрыт, переводчик на «АВ».
 
@@ -34,8 +35,8 @@ from mathutils.bvhtree import BVHTree
 
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / '_asset_src/veras54_game_v13'
-SRC = Path('E:/Models Blender/WEAPONS/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Актуальное/VERAS54_Only_State100_v13_Textured_v02.blend')
-SRC_SHA = 'acb5afc842647ec4c079268aaa1497fa6beb3c720cc9f2ab28d7bd9f5cb283dc'
+SRC = Path('E:/Models Blender/WEAPONS/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Актуальное/VERAS54_Only_State100_v13_Textured_v04.blend')
+SRC_SHA = 'a8bd7ab480c4042bf93837704bf850b6d0980ce27f559b80c47ef0460650747b'
 OUT = WORK / 'lp'
 OUT.mkdir(parents=True, exist_ok=True)
 SHARP = math.radians(60)

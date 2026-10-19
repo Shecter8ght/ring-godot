@@ -11,6 +11,11 @@ v13 даёт чёрному фосфату металличность ~0,6 и ш
          — мягче (BARE_*); затворная группа (Bolt_Steel) и трубка приклада (грани StockFold_Steel на её цилиндре) — как в стеке;
   Polymer, Magazine: шероховатость не ниже POLY_ROUGH.
 Жировые следы (маска _coat) шейдер оружия по-прежнему сглаживает до 0,3 — на матовом корпусе они и дают отблеск под углом.
+
+Текстуры v04 (владелец 2026-10-20: «теперь текстура хорошая»): сталь матовая и почти чёрная уже в самом стеке (шероховатость
+~0,86, металличность ~0,70 — у почти чёрного металла отражение темнее, чем у «пластика»), блестят только потёртости. Поэтому
+STEEL_FROM_STACK: сталь — как запечено (умножение металличности на COAT_METAL сделало бы её серой); пол шероховатости — только
+полимеру и магазину.
 → _asset_src/veras54_game_v13/maps/game/veras54_<Атлас>_100_orm.png (те же имена, что у game_pack.py).
 """
 from __future__ import annotations
@@ -30,6 +35,7 @@ BARE_ROUGH = 0.5           # вытертая до стали кромка — �
 BARE_METAL = 0.85
 POLY_ROUGH = 0.66          # полимер цевья, рукоятки, приклада и магазина
 GLOSS_PARTS = ('Bolt_Steel', 'StockFold_Steel')
+STEEL_FROM_STACK = True    # v04: отделка стали — из стека, без пересчёта
 # трубка приклада (выдвижная, Ø25, ось y 0, z −10 мм, x −85…−10 мм) — грани StockFold_Steel на её цилиндре
 TUBE = dict(x=(-0.086, -0.009), axis_z=-0.010, r=(0.008, 0.0135))
 log = lambda *a: print('VERAS_FINISH', *a, flush=True)
@@ -131,7 +137,9 @@ for atlas in ('Steel', 'Polymer', 'Magazine'):
     ao_path = RAW / f'{atlas}_ao.png'
     ao = pushpull(load(ao_path)[..., :1], mask)[..., 0] if ao_path.exists() else np.ones_like(rough)
     before = (float(rough[mask].mean()), float(metal[mask].mean()))
-    if atlas == 'Steel':
+    if atlas == 'Steel' and STEEL_FROM_STACK:
+        log(atlas, 'отделка из стека (v04), без пересчёта')
+    elif atlas == 'Steel':
         albedo = load(GAME / f'veras54_{atlas}_100_albedo.png')[..., :3]     # sRGB-значения файла
         lum = albedo.mean(axis=2)
         bare = smoothstep(0.30, 0.50, lum)                                   # вытертая до стали кромка

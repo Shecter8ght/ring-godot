@@ -8,18 +8,18 @@
  "bolt_travel_m": 0.1006,
  "rounds": 30,
  "parts_viewmodel": 14,
- "tris_viewmodel": 45256,
- "tris_viewmodel_weapon": 40496,
- "tris_world_before": 32873,
- "tris_world": 8997,
+ "tris_viewmodel": 45269,
+ "tris_viewmodel_weapon": 40509,
+ "tris_world_before": 32886,
+ "tris_world": 8995,
  "world_size_m": [
   0.073,
   0.689,
   0.206
  ],
- "tris_detail": 32873,
- "source": "E:\\Models Blender\\WEAPONS\\ВЕРАС-54 — модель и обвесы\\ВЕРАС-54\\Актуальное\\VERAS54_Only_State100_v13_Textured_v02.blend",
- "source_sha256": "acb5afc842647ec4c079268aaa1497fa6beb3c720cc9f2ab28d7bd9f5cb283dc",
+ "tris_detail": 32886,
+ "source": "E:\\Models Blender\\WEAPONS\\ВЕРАС-54 — модель и обвесы\\ВЕРАС-54\\Актуальное\\VERAS54_Only_State100_v13_Textured_v04.blend",
+ "source_sha256": "a8bd7ab480c4042bf93837704bf850b6d0980ce27f559b80c47ef0460650747b",
  "version": "v13 (2026-10-19)",
  "markers_local_m": {
   "SightRear": [
@@ -39,9 +39,9 @@
   ]
  },
  "lp_triangles": {
-  "weapon_with_magazine": 32513,
+  "weapon_with_magazine": 32526,
   "rounds": 5400,
-  "total": 37913
+  "total": 37926
  },
  "mag_marks": [
   "MagAsset",

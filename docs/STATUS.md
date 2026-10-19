@@ -7072,3 +7072,19 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   `downed_test`, `god_test`, `evac_test`, `quest_test`, `shooting_range_test`, `hideout_keys_test`, `story_test`,
   `trader_ui_test`, `rig_shots` — 0. `pm_test` — 3 прежних провала ИИ (было 5: один из прежних — про замену ПМ — теперь проходит
   в слоте «Пистолет»), `arsenal_test` — прежний 1 (фразы каталога ракетницы и патронов).
+
+### 2026-10-20 — ВЕРАС-54 в игре на текстурах v04 и исправленной стенке (Claude)
+
+- Владелец: «теперь текстура хорошая» — v04 в игру. Источник `…/Актуальное/VERAS54_Only_State100_v13_Textured_v04.blend`
+  (сохранён владельцем, SHA-256 a8bd7ab4…747b; стеки совпадают с собранными — отличие только в виде окна), геометрия с правкой
+  левой стенки s08. Цепочка: `game_lp.py` (32 526 + 5 400 патронов = 37 926 треугольников) → `game_bake.py` gun/ammo/ao →
+  `game_pack.py` → `game_finish.py` → `game_rig.py` → `clips/build_all.sh` (18) и `build_fire_modes.sh` (9) →
+  `export_veras54.py -- viewmodel world detail grips` → `--import` → `game_imports.py` → `--import`.
+- `game_finish.py`: `STEEL_FROM_STACK` — сталь v04 матовая и почти чёрная уже в стеке (шероховатость ~0,80, металличность ~0,58 в
+  атласе), пересчёт покрытия (металличность × 0,3) сделал бы её серой; пол шероховатости — по-прежнему полимеру и магазину.
+- Клипы магазинов 45/60 не пересобирались: их делают из файлов хватов владельца («Хваты магазинов 45 и 60» — на ручной правке),
+  кости рига и поза рук те же — действия годятся как есть (согласовано с сессией магазинов).
+- Проверено: `veras_shots` 0 (в двух прогонах из трёх под нагрузкой соседнего Godot плавали «затвор отходит» и «jam_clear на 70 %»;
+  отдельно и в чистом прогоне — проходят), VERAS_PART=firemode 0, `veras_gloss_shots`, `veras_outdoor_shots`, `veras54_mags_vm_shots`,
+  `veras_hand_test` 0, `reload_fast_test` 0, `fire_mode_test` 0, `pm_state_maps_test` PASS, `weapon_condition_test` 0,
+  `veras54_mags_check` PASS, `mags_test` 0, `build_test` 0 (62). Вид: корпус чёрный матовый, клина на левой стороне крышки нет.
