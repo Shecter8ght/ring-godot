@@ -26,6 +26,9 @@ const IMPACT_FLOOR := {"down_m": 8.0, "probe_m": 0.6, "lift_m": 0.5, "edge_m": 0
 const IMPACT_SPARKS := {"speed": Vector2(4.0, 15.0), "life": Vector2(0.22, 0.75), "width": Vector2(0.004, 0.009),
 	"stretch": 0.028, "stretch_max": 0.32, "spread": 34.0, "drag": 1.3, "bounce": 0.42, "friction": 0.6,
 	"energy": 3.5, "aim": Vector2(0.4, 1.0)}
+## Разогрев шейдеров эффектов под экраном загрузки (ImpactFx.warm_up): сколько кадров показывать, на каком
+## расстоянии перед камерой (м) и с каким шагом сетки (м).
+const IMPACT_WARM := {"frames": 8, "distance_m": 0.6, "step_m": 0.06}
 ## Вспышка удара: life (с), color, energy — яркость; свет на миг — light_range (м), light_energy,
 ## одновременно не больше light_max.
 const IMPACT_FLASH := {"life": 0.06, "color": Color(1.0, 0.78, 0.45), "energy": 5.0, "light_range": 2.6, "light_energy": 3.0, "light_max": 4}

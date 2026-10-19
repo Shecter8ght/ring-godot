@@ -100,6 +100,11 @@ func _make_box_mat(file: String, noise: Texture2D) -> ShaderMaterial:
 
 
 ## Без своих ассетов — запасной след (ImpactFx рисует его кодом).
+## Материалы крови (капли, лужи, подтёки) — для разогрева шейдеров под экраном загрузки.
+func warm_materials() -> Array[Material]:
+	return [_drop_mat, _pool_mat, _drip_mat]
+
+
 func set_fallback_splat(tex: Texture2D) -> void:
 	_fallback_splat = tex
 

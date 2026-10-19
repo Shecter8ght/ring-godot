@@ -423,6 +423,13 @@ func _crumble(idx: int, state: Dictionary) -> void:
 	get_tree().create_timer(life.x + reach / wave).timeout.connect(_pile.bind(xf, sz, float(p.floor_y), true))
 
 
+## Материалы повреждённого стекла (трещины, куски, кубики, мелочь на полу) — для разогрева шейдеров.
+static func warm_materials() -> Array[Material]:
+	var damaged: ShaderMaterial = ShaderMaterial.new()
+	damaged.shader = DAMAGED_SHADER
+	return [damaged, _cubes_material(), _shard_mesh().surface_get_material(0)]
+
+
 static func _cubes_material() -> StandardMaterial3D:
 	if _cube_material == null:
 		_cube_material = StandardMaterial3D.new()

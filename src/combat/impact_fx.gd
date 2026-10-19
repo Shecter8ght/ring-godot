@@ -37,6 +37,8 @@ var _bursts: Array[Node3D] = []
 var _chip_mesh: BoxMesh
 var _dust_mesh: QuadMesh
 var _blood_fx: BloodFx
+var _warmed: bool = false
+var _puff_materials: Dictionary = {}
 
 
 func _ready() -> void:
@@ -211,6 +213,11 @@ func explosion(pos: Vector3) -> void:
 		return
 	# трава вокруг ложится от взрыва
 	GrassTrample.blast(pos, float(Balance.GRENADE.radius))
+	_explosion_fx(parent, pos, true)
+
+
+## Видимая часть взрыва; scorch — подпалина на полу под ним (разогрев шейдеров — без неё).
+func _explosion_fx(parent: Node, pos: Vector3, scorch: bool) -> void:
 	var light := OmniLight3D.new()
 	light.light_color = Color(1.0, 0.72, 0.4)
 	light.light_energy = 18.0
@@ -253,12 +260,99 @@ func explosion(pos: Vector3) -> void:
 	chips.global_position = pos
 	chips.emitting = true
 	get_tree().create_timer(1.6).timeout.connect(chips.queue_free)
+	if not scorch:
+		return
 	# подпалина
 	var world: World3D = (parent as Node3D).get_world_3d()
 	var q := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 0.5, pos + Vector3.DOWN * 2.0, Hitscan.LAYER_WORLD)
 	var floor_hit: Dictionary = world.direct_space_state.intersect_ray(q)
 	if not floor_hit.is_empty():
 		_place_decal(parent, _tex_splat, floor_hit.position, floor_hit.normal, _rng.randf_range(2.8, 3.6), Color(0.04, 0.035, 0.03, 0.85))
+
+
+## Мягкий билборд взрыва: огонь — светится поверх (сложение), дым без листа кадров — просто мягкое пятно.
+func _puff_material(glow: bool) -> StandardMaterial3D:
+	if _puff_materials.has(glow):
+		return _puff_materials[glow]
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_texture = _tex_dust
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	if glow:
+		mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_puff_materials[glow] = mat
+	return mat
+
+
+# ---------------------------------------------------------------- разогрев
+
+## Первое попадание нового вида собирает шейдеры — на чистом кэше (у друга при первом запуске) это
+## кадр до секунды. Под экраном загрузки (Net, один раз за запуск): все виды выброса — с ними
+## шейдер движения частиц, искры, полосы, вспышка; каждый материал эффектов квадом (облака из листов
+## кадров, куски, стекло, кровь, дым гранаты); следы всех наборов; взрыв без подпалины и травы.
+## Всё — перед камерой на несколько кадров, потом убирается. Звука и шума для ИИ нет.
+func warm_up() -> void:
+	# без окна ничего не рисуется — и собирать нечего
+	if _warmed or DisplayServer.get_name() == "headless":
+		return
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	_warmed = true
+	var began: int = Time.get_ticks_msec()
+	var cfg: Dictionary = Balance.IMPACT_WARM
+	var holder: Node3D = Node3D.new()
+	holder.name = "WarmUp"
+	add_child(holder)
+	var view: Transform3D = camera.global_transform
+	var forward: Vector3 = -view.basis.z
+	var at: Vector3 = view.origin + forward * float(cfg.distance_m)
+	var step: float = float(cfg.step_m)
+	var index: int = 0
+	for kind: String in Balance.IMPACT_SURFACES:
+		var burst: ImpactBurst = BURST_SCENE.instantiate() as ImpactBurst
+		holder.add_child(burst)
+		burst.global_position = at + _grid(view, index, step)
+		burst.setup(kind, -forward, forward, index)
+		index += 1
+	var materials: Array[Material] = ImpactBurst.warm_materials()
+	materials.append_array(GlassPanes.warm_materials())
+	materials.append_array(_blood_fx.warm_materials())
+	materials.append(_puff_material(true))
+	materials.append(_puff_material(false))
+	var quad: QuadMesh = QuadMesh.new()
+	quad.size = Vector2.ONE * step
+	for material: Material in materials:
+		var mesh: MeshInstance3D = MeshInstance3D.new()
+		mesh.mesh = quad
+		mesh.material_override = material
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		holder.add_child(mesh)
+		mesh.global_transform = Transform3D(view.basis, at + _grid(view, index, step))
+		index += 1
+	for asset: String in _decal_textures:
+		var textures: Array = _decal_textures[asset]
+		for i: int in range(textures.size()):
+			var decal: Decal = Decal.new()
+			decal.texture_albedo = textures[i]
+			decal.texture_normal = (_decal_normals[asset] as Array)[i]
+			decal.texture_orm = (_decal_orms.get(asset, []) as Array)[i] if i < (_decal_orms.get(asset, []) as Array).size() else null
+			decal.size = Vector3.ONE * step
+			holder.add_child(decal)
+			decal.global_position = at + _grid(view, index, step)
+			index += 1
+	_explosion_fx(holder, at + forward * 2.0, false)
+	for frame: int in range(int(cfg.frames)):
+		await RenderingServer.frame_post_draw
+	holder.queue_free()
+	print("ImpactFx: шейдеры эффектов собраны за %d мс" % (Time.get_ticks_msec() - began))
+
+
+## Место в сетке перед камерой: ряды по 8, чтобы всё попало в кадр.
+func _grid(view: Transform3D, index: int, step: float) -> Vector3:
+	return view.basis.x * (float(index % 8) - 3.5) * step + view.basis.y * (float(index / 8) - 3.0) * step
 
 
 ## Облако мягких билбордов: огонь (светится, не отбрасывает тень) или дым.
@@ -299,15 +393,7 @@ func _puffs(parent: Node, pos: Vector3, amount: int, life: float, speed: Vector2
 		pm.anim_offset_max = float(Balance.IMPACT_FLIPBOOK.offset)
 		p.material_override = ImpactBurst._material("dust_puff_b")
 	else:
-		var mat := StandardMaterial3D.new()
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.vertex_color_use_as_albedo = true
-		mat.albedo_texture = _tex_dust
-		mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-		if glow:
-			mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-		p.material_override = mat
+		p.material_override = _puff_material(glow)
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(p)
 	p.global_position = pos

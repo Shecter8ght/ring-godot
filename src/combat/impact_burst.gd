@@ -97,6 +97,15 @@ static func prepare() -> void:
 				_material(String(spec[layer].mesh))
 
 
+## Все общие материалы эффектов (после prepare) — для разогрева шейдеров под экраном загрузки.
+static func warm_materials() -> Array[Material]:
+	prepare()
+	var list: Array[Material] = []
+	for material: Material in _materials.values():
+		list.append(material)
+	return list
+
+
 func _layer_node(layer: String) -> GPUParticles3D:
 	match layer:
 		"spray":

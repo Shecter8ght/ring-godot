@@ -303,6 +303,11 @@ func change_scene(path: String, title: String = "", prepare: Callable = Callable
 	for node: Node in get_tree().get_nodes_in_group("camera_rig"):
 		if level.is_ancestor_of(node):
 			(node as CameraRig).prepare_for_play()
+	# шейдеры эффектов попаданий собираются здесь, под экраном загрузки, а не на первом выстреле
+	Loading.report("Подготовка эффектов", float(Balance.LOADING_PROGRESS.image))
+	await ImpactFx.warm_up()
+	if not _transition_is_current(serial, session):
+		return
 	# До первого отрисованного кадра компиляция шейдеров ещё может остановить поток.
 	await Loading.stage("Готово", 100.0)
 	if not _transition_is_current(serial, session):
