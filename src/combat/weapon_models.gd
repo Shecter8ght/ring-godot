@@ -26,8 +26,9 @@ static var _meshes: Dictionary = {}
 ## по сокетам основы (WeaponMods). Масштаб — внешним узлом: meta (дуло, линии прицела) пересчитаны.
 ## mag — магазин в оружии: "*" — штатный вид (как в модели), "" — магазина нет, id — его вид
 ## (WeaponMods.mag_state по записи). lod −1 — подробная модель для разглядывания вблизи
-## (конструктор оружия: weapon.asset_detail), если она есть; иначе как lod 0.
-static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 100.0, mag: String = "*", engraving: Dictionary = {}) -> Node3D:
+## (конструктор оружия: weapon.asset_detail), если она есть; иначе как lod 0. Прочность (_dur) на вид не влияет —
+## вид один (2026-10-19); параметр остался ради прежних вызовов.
+static func build(id: String, mods: Dictionary = {}, lod: int = 0, _dur: float = 100.0, mag: String = "*", engraving: Dictionary = {}) -> Node3D:
 	if id == "grenade":
 		return GrenadeModel.create()
 	var root: Node3D = Node3D.new()
@@ -78,7 +79,7 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 	if mag != "*":
 		WeaponMods.set_magazine(root, id, mag, lod < 0)
 	WeaponGrips.fit(root, key, w, mods)
-	WeaponCondition.apply_visual(root, {"id": id, "dur": dur})
+	WeaponCondition.apply_visual(root)
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		if not child.has_meta("no_shadow"):
 			(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON

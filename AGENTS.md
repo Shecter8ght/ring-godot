@@ -194,26 +194,22 @@ tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки кот
 tools/godot.cmd res://tools/look_shots.tscn                 # вид «как с камеры»: те же кадры с эффектами и без (убежище, рейд день/ночь, поворот головы)
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
-tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # вид оружия один (2026-10-19): ПМ при любой прочности — карты как есть, выстрел вид не меняет;
-                                                              # прежний износ по виду (WeaponCondition.visual_wear) — шейдер по маске, ручные 60/20, ВЕРАС-54 с жировой плёнкой
-tools/godot.cmd --windowed --resolution 1280x720 res://tools/wear_shots.tscn # прежний износ по виду (в игре выключен): ПМ 60/20 ручными картами и шейдером рядом (ракурсы, от первого лица,
-                                                              # LOD1), прочность 100…0, дождь; снимки wear_* (only=right,fp,steps,wet)
-python -X utf8 tools/gen_weapon_wear_tiles.py                 # общие тайлы износа оружия (царапины, налёт, ржавчина, сколы) → assets/textures/weapon_wear
+tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # вид оружия один (2026-10-19): ПМ при любой прочности — карты 100 из pm.glb, ВЕРАС-54 —
+                                                              # шейдер жировых следов (_coat); файлов прежнего износа (_wear, 60/20, wear_detail) нет
 # ПМ v11 в игру (без прицела): blender … --python tools/pm_v11_build_lp.py (сетка) → tools/pm_v11_build_lp_supp.py (глушитель) →
-#   tools/pm_v11_markers.py → tools/pm_v11_bake.py -- 100|60|20|mag|ammo|supp [--channels …] (карты; AO: -- 100 --channels ao --tag _ao) →
-#   python -X utf8 tools/pm_v11_pack_maps.py → blender … --python tools/export_pm_v11.py → --headless --import;
-#   маска износа шейдером: tools/pm_v11_bake.py -- 20 --channels edge,cavity,hand --tag _wear → pm_v11_pack_maps.py wear
+#   tools/pm_v11_markers.py → tools/pm_v11_bake.py -- 100|mag|ammo|supp [--channels …] (карты; AO: -- 100 --channels ao --tag _ao) →
+#   python -X utf8 tools/pm_v11_pack_maps.py (→ pm/states — исходники экспорта) → blender … --python tools/export_pm_v11.py → --headless --import
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
 # ВЕРАС-54 v13 в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/veras54_v13/game_lp.py (сетка ~33 тыс. + патроны ~5 тыс.)
-#   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски _wear и жировой плёнки _coat в assets) → game_rig.py (риг рук v13 в библиотеке)
+#   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски жировой плёнки _coat в assets) → game_rig.py (риг рук v13 в библиотеке)
 #   → bash tools/veras54_v13/clips/build_all.sh (18 клипов, «Клипы v13») → export_veras54.py → --import → python -X utf8 tools/veras54_v13/game_imports.py → --import;
 #   сверка запекания с исходником в его студии — tools/veras54_v13/bake_compare.py, гильза задержки — clips/jam_check.py
 # Магазины ВЕРАС-54 на 45 и барабан на 60 в игру: sh tools/veras54_mags/chain.sh [m45] [d60] (mags_game_lp → bake → pack → export:
-#   атлас 4096, .gltf «в руках» и _world, маски _wear/_coat — assets/models/weapons/veras54_mags; файл для Blender — «Игровая версия»
+#   атлас 4096, .gltf «в руках» и _world, маски _coat — assets/models/weapons/veras54_mags; файл для Blender — «Игровая версия»
 #   в библиотеке) → --import → python -X utf8 tools/veras54_mags/mags_game_imports.py → --import
 tools/godot.cmd --headless res://tools/veras54_mags_check.tscn # магазины 45/60 в движке: узлы, патроны Round_NN, габарит, карты, шейдер плёнки;
-                                                              # с окном (--windowed --resolution 1600x900) — снимки veras54_mags_* (прочность 100 и 25 %)
+                                                              # с окном (--windowed --resolution 1600x900) — снимки veras54_mags_*
 # Хваты и клипы рук под магазины 45/60: blender … «Риг v13/VERAS54_Rig_v13.blend» --python tools/veras54_mags/mags_grip_file.py -- m45|d60 [--force] (файл хвата —
 #   «Игровая версия/Хваты магазинов 45 и 60», пальцы правит владелец) → bash tools/veras54_mags/mags_clips.sh [m45] [d60] (30 клипов
 #   «Клипы v13/*_{mag45,drum60}_v13»: перезарядки построителем автомата, проверка поворотом — mags_check_clip.py) → export_veras54.py -- viewmodel grips
@@ -228,8 +224,8 @@ tools/godot.cmd --headless res://tools/veras_hand_test.tscn # ВЕРАС-54, л�
 tools/godot.cmd res://tools/veras_gloss_shots.tscn          # ВЕРАС-54 под лампами тира: блики отделки v13 и жировых следов; снимки veras_gloss_*
 tools/godot.cmd --windowed --resolution 1920x1080 res://tools/veras_outdoor_shots.tscn # ВЕРАС-54 днём под небом (Пригород): бедро, магазин у глаз, прицел — на солнце
                                                               # и от солнца; глянец материалов виден только тут; снимки veras_outdoor_* (VERAS_OUT_TAG=имя; VERAS_OUT_MAG=mag_545_45|mag_545_60 — с магазином 45/60)
-"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100|60|20]
-                                                              # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты трёх состояний)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
+                                                              # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр

@@ -91,7 +91,6 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 			m = {"pos": Vector3(0, 0, WeaponBuild.placed_z(model_key, mods, key)), "rail": false, "riser": 0.0}
 		m["mount"] = key
 		m["att"] = a
-		m["state"] = WeaponCondition.mod_entry(mods[key])
 		m["lod"] = lod
 		if top_level:
 			if rig and base == "muzzle" and bare_muzzle is Vector3:
@@ -155,8 +154,6 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 		for meta: StringName in part.get_meta_list():
 			if meta not in [&"condition_part", &"mount"]:
 				root.set_meta(meta, part.get_meta(meta))
-		if not part.get_meta("asset_loaded", false):
-			WeaponCondition.apply_visual(part, m.state)
 		for node: Node in part.find_children("*", "MeshInstance3D", true, false):
 			var mesh: MeshInstance3D = node as MeshInstance3D
 			var material: Material = mesh.get_active_material(0) if mesh.mesh and mesh.mesh.get_surface_count() > 0 else null
@@ -366,8 +363,9 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 
 
 ## Обвес готовой моделью: a.model = {scene, offset [x, y, z] от точки, length_m — длина дульной насадки}.
-## Сетки Body / Body_LOD1 (вид со стороны), карты по состоянию 100 / 60 / 20 лежат рядом с моделью:
-## <имя>_<состояние>_{base_color,roughness,metallic,normal}.png. Начало модели — место посадки:
+## Сетки Body / Body_LOD1 (вид со стороны), карты лежат рядом с моделью:
+## <имя>_100_{base_color,roughness,metallic,normal}.png (вид один при любой прочности, решение владельца
+## 2026-10-19), жировые следы рук — <имя>_100_coat.png, если есть. Начало модели — место посадки:
 ## у рукоятки — нижняя плоскость планки, у глушителя — задний торец на оси ствола.
 static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	var spec: Dictionary = a.model
@@ -377,19 +375,12 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	var model: Node3D = (load(path) as PackedScene).instantiate() as Node3D
 	if model == null:
 		return false
-	# вид один (решение владельца 2026-10-19): карты 100 при любой прочности; прежние 60/20 и шейдер по маске
-	# <имя>_100_wear.png — только при WeaponCondition.visual_wear
-	var visual: int = WeaponCondition.look_stage(m.get("state", {}))
-	var material: Material = _model_material(path.get_basename() + "_%d_" % visual)
 	var full: StandardMaterial3D = _model_material(path.get_basename() + "_100_") as StandardMaterial3D
-	var worn: ShaderMaterial = WeaponCondition.wear_material(full) if full else null
-	if worn:
-		material = worn
-	elif material == null:
-		material = full
-	if material == null:
+	if full == null:
 		model.free()
 		return false
+	var coated: ShaderMaterial = WeaponCondition.wear_material(full)
+	var material: Material = coated if coated else full
 	var o: Array = spec.get("offset", [0, 0, 0])
 	var at: Vector3 = (m.pos as Vector3) + Vector3(float(o[0]), float(o[1]), float(o[2]))
 	model.position = at
@@ -398,12 +389,6 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		var body: MeshInstance3D = raw as MeshInstance3D
 		body.material_override = material
 		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
-		if worn:
-			# свой ресурс обвеса: WeaponCondition.update_wear берёт его из mods по точке крепления
-			var k: float = WeaponCondition.look_k(m.get("state", {}))
-			body.set_meta("wear_mount", String(m.get("mount", "")))
-			body.set_meta("wear_k", k)
-			body.set_instance_shader_parameter("condition", k)
 	if spec.has("length_m"):
 		# дульная насадка: штатный тормоз снят, срез — на её торце
 		if bool(m.get("replace", false)):
@@ -414,7 +399,7 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	return true
 
 
-## Материал модели обвеса по картам состояния (общий на все экземпляры); нет карт — null.
+## Материал модели обвеса по её картам (общий на все экземпляры); нет карт — null.
 static func _model_material(prefix: String) -> Material:
 	var key: String = "model:" + prefix
 	if WeaponModels._mats.has(key):
@@ -434,7 +419,7 @@ static func _model_material(prefix: String) -> Material:
 	return material
 
 
-## Игровая модель ЛУМАР: общий крепёж, карты состояния и отдельные стекло/марка.
+## Игровая модель ЛУМАР: общий крепёж, карты 100 (вид один при любой прочности) и отдельные стекло/марка.
 static func _lumar(root: Node3D, m: Dictionary, attachment: Dictionary) -> bool:
 	var path: String = String(attachment.get("asset", ""))
 	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
@@ -446,10 +431,8 @@ static func _lumar(root: Node3D, m: Dictionary, attachment: Dictionary) -> bool:
 	model.position = m.pos
 	model.position.y = _optic_base(root, m, 0.09)
 	root.add_child(model)
-	# вид один: карты 100 и целое стекло при любой прочности (трещины 20 % — только при visual_wear)
-	var visual: int = WeaponCondition.look_stage(m.get("state", {}))
 	var material: StandardMaterial3D = StandardMaterial3D.new()
-	var prefix: String = path.get_base_dir() + "/lumar_%d_" % visual
+	var prefix: String = path.get_base_dir() + "/lumar_100_"
 	material.albedo_texture = load(prefix + "base_color.png") as Texture2D
 	material.metallic = 1.0
 	material.metallic_texture = load(prefix + "metallic.png") as Texture2D
@@ -466,10 +449,6 @@ static func _lumar(root: Node3D, m: Dictionary, attachment: Dictionary) -> bool:
 	if lens:
 		var glass: ShaderMaterial = ShaderMaterial.new()
 		glass.shader = load("res://src/combat/lumar_glass.gdshader") as Shader
-		var crack_path: String = path.get_base_dir() + "/glass_crack.png"
-		if ResourceLoader.exists(crack_path):
-			glass.set_shader_parameter("crack_map", load(crack_path))
-		glass.set_shader_parameter("cracked", visual == int(Balance.CONDITION.worn))
 		lens.material_override = glass
 	var reticle: MeshInstance3D = model.find_child("Reticle", true, false) as MeshInstance3D
 	if reticle:

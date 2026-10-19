@@ -1,13 +1,13 @@
-"""ЛУМАР H1: отдельная игровая сетка, проекция материалов трёх исходников и GLB.
+"""ЛУМАР H1: отдельная игровая сетка, проекция материалов исходника 100 и GLB.
+Вид в игре один при любой прочности (решение владельца 2026-10-19): карты 60 / 20 и трещины стекла удалены.
 
-blender --background --factory-startup --python-exit-code 1 --python tools/prepare_lumar_game.py -- geometry|bake|export [100|60|20]
+blender --background --factory-startup --python-exit-code 1 --python tools/prepare_lumar_game.py -- geometry|bake 100|export
 Исходники библиотеки только читаются. Промежуточные файлы остаются в _asset_src.
 """
 from pathlib import Path
 import sys
 import json
 import math
-import shutil
 import bpy
 from mathutils import Matrix, Vector
 
@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path('E:/Models Blender/ВЕРАС-54 — модель и обвесы/ЛУМАР H1/Актуальное')
 WORK = ROOT / '_asset_src/lumar_h1_game'
 OUT = ROOT / 'assets/models/attachments/lumar_h1'
-SOURCES = {100:'LUMAR_H1_State100_New_v9.blend',60:'LUMAR_H1_State060_Used40_v9.blend',20:'LUMAR_H1_State020_Worn80_v9.blend'}
+SOURCES = {100:'LUMAR_H1_State100_New_v9.blend'}
 RES = 2048
 WORK.mkdir(parents=True, exist_ok=True)
 OUT.mkdir(parents=True, exist_ok=True)
@@ -195,7 +195,6 @@ def export():
     marker.parent=root
     marker.location=(0,0.056,0.019)
     body=bpy.data.objects['Body']
-    shutil.copyfile(SOURCE/'Текстуры/maps/V9_Glass_Crack.png',OUT/'glass_crack.png')
     mat=bpy.data.materials.new('LumarBody')
     mat.use_nodes=True
     bsdf=mat.node_tree.nodes.get('Principled BSDF')
@@ -227,9 +226,6 @@ def export():
                     lens.data.uv_layers.remove(lens.data.uv_layers[0])
                 game_uv=lens.data.uv_layers.new(name='GameLensUV')
                 for loop,coord in zip(game_uv.data,coords):loop.uv=coord
-            crack=m.node_tree.nodes.new('ShaderNodeTexImage')
-            crack.image=bpy.data.images.load(str(OUT/'glass_crack.png'))
-            m.node_tree.links.new(crack.outputs['Color'],b.inputs['Roughness'])
         o=bpy.data.objects[name];o.data.materials.clear();o.data.materials.append(m)
     # LOD тела — независимый узел, скрытый по умолчанию и выбираемый кодом.
     world=body.copy();world.data=body.data.copy();world.name='Body_LOD1'
@@ -250,7 +246,7 @@ def export():
     for name in ('Body','Body_LOD1','Lens','Reticle'):
         mesh=bpy.data.objects[name].data;mesh.calc_loop_triangles();counts[name]=len(mesh.loop_triangles)
     report=dict(source={str(k):v for k,v in SOURCES.items()},triangles=counts,axis='X left, Y up, Z forward',
-                mount_origin_m=[0,0,0],sight_axis_m=[0,0.056,0.019],states=[100,60,20],texture_size=RES)
+                mount_origin_m=[0,0,0],sight_axis_m=[0,0.056,0.019],states=[100],texture_size=RES)
     (OUT/'manifest.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     bpy.ops.file.pack_all()
     bpy.ops.wm.save_as_mainfile(filepath=str(WORK/'lumar_h1_game.blend'))

@@ -687,7 +687,7 @@ func _cached_viewmodel(id: String, mods: Dictionary, dur: float, mag: String, ma
 			WeaponMark.attach(model, id, marks)
 		else:
 			model = WeaponModels.build(id, mods, 0, dur, mag, marks) if id != "" else Node3D.new()
-		WeaponCondition.apply_visual(model, {"id": id, "dur": dur})
+		WeaponCondition.apply_visual(model)
 		for child: Node in model.find_children("*", "GeometryInstance3D", true, false):
 			var mesh: GeometryInstance3D = child as GeometryInstance3D
 			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -838,7 +838,6 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_set_scope(false)
 		return
 	WeaponMods.update_condition(_viewmodel, pl.weapon_mods)
-	WeaponCondition.update_wear(_viewmodel, pl.weapon_condition, pl.weapon_mods)
 	for n in _viewmodel.find_children("LaserBeam*", "Node3D", true, false):
 		(n as Node3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
 	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):

@@ -5,7 +5,6 @@
 
 [sub_resource type="ShaderMaterial" id="Glass"]
 shader = ExtResource("2")
-shader_parameter/cracked = false
 
 [node name="LUMAR_H1" instance=ExtResource("1")]
 

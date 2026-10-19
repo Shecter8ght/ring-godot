@@ -6,14 +6,8 @@ extends RefCounted
 ## в Blender; прочность показывается процентами и работает логикой — разброс, задержки, отказ на нуле
 ## (WeaponStats), тусклая марка и слабый фонарь обвеса (WeaponMods.update_condition).
 
-## Шейдер материалов с жировой плёнкой рук (<карты>_coat.png) и прежней маской износа <карты>_wear.png.
+## Шейдер материалов с жировыми следами рук (<карты>_coat.png): следы, свечение по карте, дождь.
 const WEAR_SHADER: String = "res://src/combat/weapon_wear.gdshader"
-## Общие детальные тайлы износа (tools/gen_weapon_wear_tiles.py).
-const WEAR_DETAIL: String = "res://assets/textures/weapon_wear/wear_detail.png"
-
-## Вид по прочности (шейдер износа, ручные карты 60/20, налёт, трещины стекла ЛУМАР). Выключен: вид один.
-## Включают только инструменты сравнения прежнего износа (tools/wear_shots.gd, pm_state_maps_test.gd).
-static var visual_wear: bool = false
 
 static var _materials: Dictionary = {}
 
@@ -29,6 +23,7 @@ static func broken(entry: Dictionary) -> bool:
 	return percent(entry) <= 0.0
 
 
+## Ступень прочности (100 / 60 / 20) — для подписи и цвета в окнах; на вид модели не влияет.
 static func stage(entry: Dictionary) -> int:
 	var dur: float = percent(entry)
 	if dur <= float(Balance.CONDITION.worn):
@@ -36,16 +31,6 @@ static func stage(entry: Dictionary) -> int:
 	if dur <= float(Balance.CONDITION.used):
 		return int(Balance.CONDITION.used)
 	return int(Balance.CONDITION.full)
-
-
-## Ступень внешнего вида: при одном виде — всегда полная, иначе по прочности (stage).
-static func look_stage(entry: Dictionary) -> int:
-	return stage(entry) if visual_wear else int(Balance.CONDITION.full)
-
-
-## Прочность для шейдера износа, 0..1: при одном виде — всегда 1 (шейдер рисует карты как есть).
-static func look_k(entry: Dictionary) -> float:
-	return effectiveness(entry) if visual_wear else 1.0
 
 
 static func mod_entry(value: Variant) -> Dictionary:
@@ -98,12 +83,13 @@ static func repair_price(entry: Dictionary) -> int:
 	return maxi(int(Balance.CONDITION.repair_min), ceili(ItemDb.value(String(entry.id)) * factor * (1.0 - effectiveness(entry))))
 
 
-## Ресурс не входит в ключ целиком: выстрел не должен заново создавать модель/анимацию.
-static func model_key(id: String, mods: Dictionary, dur: float = 100.0, mag: String = "*") -> String:
-	var parts: Array[String] = [id, str(look_stage({"dur": dur})), "mag:" + mag]
+## Ключ модели: основа, магазин и обвесы с их местом. Прочности в нём нет — вид один, выстрел и износ модель не
+## пересобирают; _dur остался в подписи ради прежних вызовов.
+static func model_key(id: String, mods: Dictionary, _dur: float = 100.0, mag: String = "*") -> String:
+	var parts: Array[String] = [id, "mag:" + mag]
 	for mount: Variant in mods:
 		var rec: Dictionary = mod_entry(mods[mount])
-		parts.append("%s:%s:%d" % [mount, rec.id, look_stage(rec)])
+		parts.append("%s:%s" % [mount, rec.id])
 		# Паз, сторона и поворот меняют геометрию сборки; фонарь, ЛЦУ и кратность — её состояние.
 		for placement: String in ["slot", "flip", "angle"]:
 			if rec.has(placement):
@@ -111,94 +97,12 @@ static func model_key(id: String, mods: Dictionary, dur: float = 100.0, mag: Str
 	return "|".join(parts)
 
 
-## Материалы модели; руки и обвесы отдельно. У материалов с плёнкой или маской износа — шейдер (при одном
-## виде — карты как есть и плёнка). Прежний вид по прочности (visual_wear): шейдер плавно, ручные карты
-## состояний (weapon.state_maps: ПМ), иначе общий налёт.
-static func apply_visual(root: Node3D, entry: Dictionary) -> void:
-	if root.get_meta("wear_shader", false):
-		update_wear(root, percent(entry))
+## Материалы модели с жировыми следами рук — на шейдер следов; руки и обвесы (condition_part) отдельно.
+## Повторный вызов на той же модели ничего не делает (meta wear_shader — был ли шейдер).
+static func apply_visual(root: Node3D) -> void:
+	if root.has_meta("wear_shader"):
 		return
-	var visual: int = look_stage(entry)
-	if int(root.get_meta("condition_visual", -1)) == visual:
-		return
-	root.set_meta("condition_visual", visual)
-	var shaded: bool = _apply_wear_shader(root)
-	# обвесы с маской (WeaponMods._model_part) несут свой ресурс — в общий список, чтобы обновлять без пересборки
-	var meshes: Array[GeometryInstance3D] = []
-	for raw: Node in root.find_children("*", "GeometryInstance3D", true, false):
-		if raw.has_meta("wear_k"):
-			meshes.append(raw as GeometryInstance3D)
-	if not meshes.is_empty():
-		root.set_meta("wear_meshes", meshes)
-	if shaded:
-		root.set_meta("wear_shader", true)
-		update_wear(root, percent(entry))
-		return
-	# у модели свои карты износа (weapon.state_maps) — общий налёт не нужен
-	var maps: String = String(WeaponDb.weapon(String(entry.get("id", ""))).get("state_maps", ""))
-	if maps != "" and visual < int(Balance.CONDITION.full) and _apply_state_maps(root, maps, visual):
-		return
-	var amount: float = float(Balance.CONDITION.grime_worn if visual == int(Balance.CONDITION.worn) else Balance.CONDITION.grime_used) if visual < int(Balance.CONDITION.full) else 0.0
-	if amount <= 0.0:
-		return
-	for raw: Node in root.find_children("*", "MeshInstance3D", true, false):
-		var mesh: MeshInstance3D = raw as MeshInstance3D
-		var parent: Node = mesh
-		var skip: bool = false
-		while parent != null and parent != root:
-			if parent.has_meta("condition_part") or String(parent.name).contains("Arms"):
-				skip = true
-				break
-			parent = parent.get_parent()
-		if skip or mesh.has_meta("reticle_dot") or mesh.mesh == null:
-			continue
-		for surface: int in range(mesh.mesh.get_surface_count()):
-			var material: Material = mesh.get_active_material(surface)
-			if material is StandardMaterial3D:
-				var source: StandardMaterial3D = material as StandardMaterial3D
-				if source.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED or source.emission_enabled:
-					continue
-				var key: String = "%d:%d" % [source.get_instance_id(), visual]
-				if not _materials.has(key):
-					if _materials.size() >= int(Balance.CONDITION.cache_entries):
-						_materials.clear()
-					var worn: StandardMaterial3D = source.duplicate() as StandardMaterial3D
-					worn.albedo_color = source.albedo_color.lerp(Color(0.24, 0.22, 0.19, source.albedo_color.a), amount)
-					worn.roughness = lerpf(source.roughness, 0.92, amount)
-					_materials[key] = worn
-				# Глобальный override имеет приоритет над поверхностями процедурной модели.
-				if mesh.material_override != null:
-					mesh.material_override = _materials[key] as Material
-					break
-				mesh.set_surface_override_material(surface, _materials[key] as Material)
-
-
-## Прочность в шейдер износа без пересборки модели (ресурс меняется с каждым выстрелом): тело — по ресурсу
-## оружия dur (проценты), обвес с маской — по своему из mods. Значение уходит, только когда изменилось.
-## При одном виде (visual_wear выключен) — всегда 1.
-static func update_wear(root: Node3D, dur: float, mods: Dictionary = {}) -> void:
-	if root == null or not root.has_meta("wear_meshes"):
-		return
-	var body: float = look_k({"dur": dur})
-	for raw: Variant in root.get_meta("wear_meshes") as Array:
-		if not is_instance_valid(raw):
-			continue
-		var mesh: GeometryInstance3D = raw as GeometryInstance3D
-		var k: float = body
-		var mount: String = String(mesh.get_meta("wear_mount", ""))
-		if mount != "":
-			if not mods.has(mount):
-				continue
-			k = look_k(mod_entry(mods[mount]))
-		if absf(float(mesh.get_meta("wear_k", -1.0)) - k) > 0.0001:
-			mesh.set_meta("wear_k", k)
-			mesh.set_instance_shader_parameter("condition", k)
-
-
-## Маска износа рядом с картами материала: <карты>_albedo.png (у обвесов <карты>_base_color.png) →
-## <карты>_wear.png. Пусто — маски нет.
-static func wear_mask_path(material: StandardMaterial3D) -> String:
-	return _beside(material, "_wear.png")
+	root.set_meta("wear_shader", _apply_wear_shader(root))
 
 
 ## Карта рядом с картой цвета материала: <карты>_albedo.png / <карты>_base_color.png → <карты><suffix>.
@@ -214,17 +118,15 @@ static func _beside(material: StandardMaterial3D, suffix: String) -> String:
 	return ""
 
 
-## Материал шейдера износа с картами и настройками исходного StandardMaterial3D (общий на все экземпляры;
-## прочность — instance uniform condition). Нужна жировая плёнка <карты>_coat.png или маска износа; нет
-## ни того ни другого — null (остаётся StandardMaterial3D модели).
+## Материал шейдера следов с картами и настройками исходного StandardMaterial3D (общий на все экземпляры).
+## Нужна карта жировых следов <карты>_coat.png; нет её — null (остаётся StandardMaterial3D модели).
 static func wear_material(source: StandardMaterial3D) -> ShaderMaterial:
 	var key: String = "wear:%d" % source.get_instance_id()
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial
-	var mask: String = wear_mask_path(source)
-	# жировая плёнка рук (ВЕРАС-54 v13): слой Clearcoat шейдера
+	# жировые следы рук (ВЕРАС-54 v13)
 	var coat: String = _beside(source, "_coat.png")
-	if mask == "" and coat == "":
+	if coat == "":
 		return null
 	if _materials.size() >= int(Balance.CONDITION.cache_entries):
 		_materials.clear()
@@ -251,18 +153,12 @@ static func wear_material(source: StandardMaterial3D) -> ShaderMaterial:
 		material.set_shader_parameter("ao_light_affect", source.ao_light_affect)
 	material.set_shader_parameter("uv1_scale", source.uv1_scale)
 	material.set_shader_parameter("uv1_offset", source.uv1_offset)
-	# без маски — только плёнка: прежний износ по прочности такому материалу не ставится (_apply_wear_shader)
-	if mask != "":
-		material.set_shader_parameter("wear_tex", load(mask) as Texture2D)
-	if coat != "":
-		material.set_shader_parameter("coat_tex", load(coat) as Texture2D)
+	material.set_shader_parameter("coat_tex", load(coat) as Texture2D)
 	# свечение по карте (светонакопительные цифры магазина)
 	if source.emission_enabled and source.emission_texture:
 		material.set_shader_parameter("emission_tex", source.emission_texture)
 		material.set_shader_parameter("emission_color", Vector3(source.emission.r, source.emission.g, source.emission.b))
 		material.set_shader_parameter("emission_energy", source.emission_energy_multiplier)
-	if ResourceLoader.exists(WEAR_DETAIL):
-		material.set_shader_parameter("detail_tex", load(WEAR_DETAIL) as Texture2D)
 	_materials[key] = material
 	return material
 
@@ -280,9 +176,8 @@ static func _channel(channel: BaseMaterial3D.TextureChannel) -> Vector4:
 	return Vector4(0.333333, 0.333333, 0.333333, 0)
 
 
-## Шейдер износа всем поверхностям тела оружия, у чьих карт есть плёнка или маска; обвесы (condition_part) —
-## своим путём. Прочность (wear_k) получают только сетки с маской. false — ни плёнки, ни масок (дальше ручные
-## карты или налёт).
+## Шейдер следов всем поверхностям тела оружия, у чьих карт есть жировые следы; обвесы (condition_part) —
+## своим путём. false — следов нет ни у одной поверхности.
 static func _apply_wear_shader(root: Node3D) -> bool:
 	var done: bool = false
 	for raw: Node in root.find_children("*", "MeshInstance3D", true, false):
@@ -306,53 +201,5 @@ static func _apply_wear_shader(root: Node3D) -> bool:
 			if material == null:
 				continue
 			mesh.set_surface_override_material(surface, material)
-			if not mesh.has_meta("wear_k") and material.get_shader_parameter("wear_tex") != null:
-				mesh.set_meta("wear_k", -1.0)
-			done = true
-	return done
-
-
-## Собственные карты состояния модели: материалу «GAME • <Поверхность> • 100» из GLB ставятся цвет,
-## нормали и ORM из <maps>_<Поверхность>_<состояние>_*.png (tools/veras54_game_materials.py --states).
-## Обвесы и руки не трогаются. false — карт нет (остаётся общий налёт).
-static func _apply_state_maps(root: Node3D, maps: String, visual: int) -> bool:
-	var done: bool = false
-	for raw: Node in root.find_children("*", "MeshInstance3D", true, false):
-		var mesh: MeshInstance3D = raw as MeshInstance3D
-		var parent: Node = mesh
-		var skip: bool = false
-		# руки не отсекаются по имени узла: во вьюмодели оружие висит на кости рига рук, а материал рук
-		# и так не «GAME • …»
-		while parent != null and parent != root:
-			if parent.has_meta("condition_part"):
-				skip = true
-				break
-			parent = parent.get_parent()
-		if skip or mesh.mesh == null:
-			continue
-		for surface: int in range(mesh.mesh.get_surface_count()):
-			var source: StandardMaterial3D = mesh.mesh.surface_get_material(surface) as StandardMaterial3D
-			if source == null:
-				continue
-			var parts: PackedStringArray = source.resource_name.split(" • ")
-			if parts.size() < 3 or parts[0] != "GAME":
-				continue
-			var prefix: String = "%s_%s_%d_" % [maps, parts[1], visual]
-			var key: String = "maps:%d:%s" % [source.get_instance_id(), prefix]
-			if not _materials.has(key):
-				if not ResourceLoader.exists(prefix + "albedo.png"):
-					continue
-				var worn: StandardMaterial3D = source.duplicate() as StandardMaterial3D
-				worn.albedo_texture = load(prefix + "albedo.png") as Texture2D
-				if ResourceLoader.exists(prefix + "normal.png"):
-					worn.normal_texture = load(prefix + "normal.png") as Texture2D
-				if ResourceLoader.exists(prefix + "orm.png"):
-					var orm: Texture2D = load(prefix + "orm.png") as Texture2D
-					worn.roughness_texture = orm
-					worn.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_GREEN
-					worn.metallic_texture = orm
-					worn.metallic_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_BLUE
-				_materials[key] = worn
-			mesh.set_surface_override_material(surface, _materials[key] as Material)
 			done = true
 	return done

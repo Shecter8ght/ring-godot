@@ -1,10 +1,9 @@
 """Мосин ПУ: настройки импорта карт Godot после первого `tools/godot.cmd --headless --import`.
 
 python -X utf8 tools/mosin_pu/game_imports.py, затем ещё раз `tools/godot.cmd --headless --import`.
-Godot извлекает карты из mosin_pu.glb, mosin_pu_round.glb и mosin_pu_clip.glb без сжатия (4K RGBA — ~85 МБ видеопамяти каждая), а маски
-износа _wear игра грузит кодом — их Godot сам не сожмёт. Ставятся настройки, как у ПМ (assets/models/weapons/pm):
-сжатие VRAM, mip-уровни; у нормалей — флаг карты нормалей, у ORM — сглаживание шероховатости по нормали; маски
-_wear — сжатие высокого качества (BPTC).
+Godot извлекает карты из mosin_pu.glb, mosin_pu_round.glb и mosin_pu_clip.glb без сжатия (4K RGBA — ~85 МБ видеопамяти каждая).
+Ставятся настройки, как у ПМ (assets/models/weapons/pm): сжатие VRAM, mip-уровни; у нормалей — флаг карты нормалей, у ORM —
+сглаживание шероховатости по нормали.
 """
 import re
 from pathlib import Path
@@ -25,9 +24,7 @@ for f in sorted(D.glob('*.png.import')):
     t = setp(t, 'compress/mode', '2')
     t = setp(t, 'mipmaps/generate', 'true')
     t = setp(t, 'detect_3d/compress_to', '0')
-    if base.endswith('_wear.png'):
-        t = setp(t, 'compress/high_quality', 'true')
-    elif base.endswith('_normal.png'):
+    if base.endswith('_normal.png'):
         t = setp(t, 'compress/normal_map', '1')
         t = setp(t, 'roughness/mode', '1')
         t = setp(t, 'roughness/src_normal', f'"{RES}{base}"')

@@ -6970,3 +6970,31 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   в файл идут только сами следы (> 0,1 — 15 % и 14 % покрытия). Иначе вся деталь ровно сглаживалась.
 - `tools/veras_outdoor_shots` — `VERAS_OUT_MAG=mag_545_45|mag_545_60`: снимки `veras_outdoor_mag45_*`, `veras_outdoor_mag60_*`
   днём в Пригороде — магазин на 45 матовый полимер, барабан чёрная глянцевая сталь со следами пальцев, без «стекла».
+
+### 2026-10-19 — оружие: износ по виду удалён совсем (по согласованию владельца; Claude)
+
+- Владелец подтвердил удалить всё: код, маски `_wear` и тайлы, карты 60/20, инструменты сравнения; ПМ в дождь — «пусть
+  не намокает». Жировые следы `_coat`, свечение по карте и дождь шейдера не тронуты (с d0aaf80d / 4dbe74ae: следы — через
+  `film_roughness`, без Clearcoat).
+- Код: `weapon_wear.gdshader` — без ветки износа (`condition`, `wear_tex`, тайлы, цвета грязи и ржавчины);
+  `WeaponCondition` — без `visual_wear`, `look_stage`/`look_k`, `update_wear`, `_apply_state_maps`, налёта
+  (`Balance.CONDITION.grime_*`), `wear_mask_path`; шейдер ставится только материалам с `_coat`; `apply_visual(root)` —
+  один раз на модель; `model_key` без прочности. `WeaponMods`: обвесы и ЛУМАР — карты 100, стекло без трещин
+  (`lumar_glass.gdshader` без `crack_map`/`cracked`). Вызовы `update_wear` убраны из Player, CameraRig, Marauder.
+  `data/weapons.json` — у ПМ нет `state_maps`.
+- Файлы (146): маски `*_wear.png` (ПМ ×2, ВЕРАС-54 ×3, магазины ×2, Мосин ×3), `assets/textures/weapon_wear/`,
+  `pm/states/pm_{Steel,Grip}_{60,20}_*` (12 карт; карты 100 и магазина/патрона/глушителя 60 в `states/` оставлены —
+  из них `export_pm_v11.py` собирает `pm.glb`), карты 60/20 ЛУМАР, ВАРН V1/V2, глушителя ВЕРАС (32), `lumar_h1/glass_crack.png`,
+  `tools/wear_shots.*`, `tools/gen_weapon_wear_tiles.py`, снимки `wear_*`, `veras54_mags_*_25`, `mosin_pu_wear`.
+- Инструменты: из `pm_v11_bake.py` / `pm_v11_pack_maps.py` / `veras54_v13/game_pack.py` / `veras54_mags/mags_game_pack.py` /
+  `mosin_pu/game_pack.py` убраны режимы 60/20 и запись масок `_wear`; `*_imports.py` — без `_wear`; `prepare_lumar_game.py` и
+  `prepare_veras_attachments.py` — только состояние 100 (манифесты обвесов тоже); `mosin_pu_shots` — без кадров износа;
+  `pm_state_maps_test` переписан под один вид (ПМ — карты 100 при любой прочности, ВЕРАС — шейдер следов, файлов износа нет).
+- Проверено: `compile_check` 0, `weapon_condition_test` 0 ошибок, `pm_state_maps_test` PASS (23 проверки),
+  `veras54_mags_check` PASS, `lumar_mounts_test` 75/1 (прежняя «повторная СКМ»); `veras_shots` VERAS_PART=states —
+  автомат при 100/60/20 одинаков.
+- Осталось: `lumar_h1_glass_crack.png` извлечена из нынешнего `lumar_h1.glb` — удалить после следующего экспорта ЛУМАР
+  (в скрипте карта уже не кладётся). `veras54_v13/game_bake.py` и `mags_game_bake.py` ещё запекают каналы кромок/углублений
+  (ecm R/G, mrh B), которые теперь не используются — безвредно, убрать при следующей правке запекания. Маски `_wear`
+  подробной модели Мосина лежат в библиотеке владельца (`E:/Models Blender/…/06_Игровая/detail`), вне проекта — не трогал.
+  В `veras_shots` кадр `veras_state_*_muzzle` пустой (камера мимо ствола) — так и до уборки.

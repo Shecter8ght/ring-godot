@@ -1,8 +1,6 @@
 {
   "source": {
-    "100": "Foregrip_Angled_State100_New_v11.blend",
-    "60": "Foregrip_Angled_State060_Used40_v11.blend",
-    "20": "Foregrip_Angled_State020_Worn80_v11.blend"
+    "100": "Foregrip_Angled_State100_New_v11.blend"
   },
   "triangles": {
     "Body": 12380,
@@ -22,9 +20,7 @@
     ]
   },
   "states": [
-    100,
-    60,
-    20
+    100
   ],
   "texture_size": 1024
 }

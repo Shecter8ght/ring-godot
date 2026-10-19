@@ -5,9 +5,8 @@
 → _asset_src/veras54_game_v13/maps/game/veras54_<Атлас>_100_{albedo,normal,orm}.png (патрон — veras54_Ammo_{…}); ORM — R: AO
   игровой сетки, G: шероховатость, B: металл. Экспорт (export_veras54.py) кладёт их рядом с моделями .gltf под теми же именами —
   вьюмодель, мировая и подробная делят один набор.
-→ assets/models/weapons/veras54/ (сразу в игру, их грузит код по имени карты цвета):
-  veras54_<Атлас>_100_wear.png — маска износа шейдера (Non-Color, 2048): R — выпуклые кромки, G — углубления и укрытые
-  места, B — места хвата и трения (формат — src/combat/weapon_wear.gdshader).
+→ assets/models/weapons/veras54/ (сразу в игру, их грузит код по имени карты цвета; маски износа _wear больше нет — вид в игре
+  один, решение владельца 2026-10-19):
   veras54_<Атлас>_100_coat.png — жировая плёнка (Non-Color, 2048, R): отпечатки, ладони, масло (в Blender — канал стека Oil film →
   Coat Weight) без ровного «пола» стека; шейдер опускает по ней шероховатость основного слоя — в лоб почти не видно, под углом блестит.
   В maps/game ещё veras54_Magazine_100_emission.png — светонакопительные цифры магазина (sRGB).
@@ -75,34 +74,11 @@ def pushpull(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.where(mask[..., None], img, fill)
 
 
-def blur(a: np.ndarray, r: float) -> np.ndarray:
-    k = max(1, int(round(r)))
-    out = a.astype(np.float32)
-    for _ in range(3):
-        for ax in (0, 1):
-            pad = [(0, 0)] * out.ndim
-            pad[ax] = (k, k)
-            p = np.pad(out, pad, mode='edge')
-            cs = np.cumsum(p, axis=ax, dtype=np.float64)
-            cs = np.concatenate([np.zeros_like(np.take(cs, [0], axis=ax)), cs], axis=ax)
-            n = out.shape[ax]
-            hi = np.take(cs, np.arange(2 * k + 1, 2 * k + 1 + n), axis=ax)
-            lo = np.take(cs, np.arange(0, n), axis=ax)
-            out = ((hi - lo) / (2 * k + 1)).astype(np.float32)
-    return out
-
-
 def half(a: np.ndarray, size: int) -> np.ndarray:
     while a.shape[0] > size:
         h, w = a.shape[0] // 2, a.shape[1] // 2
         a = a[:h * 2, :w * 2].reshape(h, 2, w, 2, *a.shape[2:]).mean(axis=(1, 3))
     return a
-
-
-def level(a: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    lit = a[mask & (a > 0.02)]
-    hi = float(np.percentile(lit, 99.0)) if lit.size else 1.0
-    return np.clip(a / max(hi, 1e-3), 0.0, 1.0)
 
 
 for atlas, state in ATLASES.items():
@@ -140,17 +116,4 @@ for atlas, state in ATLASES.items():
     prints = np.clip((coat - floor) / max(1.0 - floor, 1e-3), 0.0, 1.0)
     save(half(prints, MASK_SIZE), ASSET / f'{tag}_coat.png', False)
     log(atlas, 'coat floor', round(floor, 3), 'prints>0.1', round(float((prints[mask] > 0.1).mean()), 4))
-    # маска износа шейдера: каналы сглажены (шум лучей AO), уровни — по запечённому
-    ec = pushpull(np.dstack([ecm[..., 0], ecm[..., 1], mrh[..., 2]]), mask)
-    edge = level(blur(ec[..., 0], 1.2), mask) ** 1.2
-    cavity = level(blur(ec[..., 1], 3.0), mask)
-    shelter = np.clip((0.9 - blur(ao, 2.0)) / 0.55, 0.0, 1.0)
-    shelter[~mask] = 0.0
-    cavity = np.maximum(cavity, shelter)
-    # хват: заданные места деталей + жировые следы рук (только следы сверх «пола», см. выше)
-    hand = np.maximum(blur(ec[..., 2], 2.0), np.clip(blur(prints, 6.0) * 1.6, 0.0, 0.85))
-    wear = pushpull(np.dstack([edge, cavity, np.clip(hand, 0.0, 1.0)]), mask)
-    save(half(wear, MASK_SIZE), ASSET / f'{tag}_wear.png', False)
-    log(atlas, 'wear edge', round(float(edge[mask].mean()), 3), 'cavity', round(float(cavity[mask].mean()), 3),
-        'hand', round(float(hand[mask].mean()), 3))
 print('VERAS_PACK_DONE', flush=True)

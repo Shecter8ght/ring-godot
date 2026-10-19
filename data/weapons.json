@@ -421,7 +421,6 @@
     "reload_sound": "reload_pistol",
     "cycle_sound": "",
     "asset": "res://assets/models/weapons/pm/pm.glb",
-     "state_maps": "res://assets/models/weapons/pm/states/pm",
     "chamber_capacity": 1,
     "rig": {
      "ads_z": 0.36,

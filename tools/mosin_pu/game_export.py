@@ -337,7 +337,7 @@ report = dict(
          'RearSight_Slider': 'хомутик скользит по планке', 'Follower': 'подаватель (магазин без патронов)'},
     materials={'GAME • Wood • 20': 'Wood_20', 'GAME • Steel • 20': 'Steel_20', 'GAME • Optic • 20': 'Optic_20',
                'GAME • Lens • 20': 'тёмное просветлённое стекло, непрозрачное (в прицеле — картинка оптики), шероховатость — Optic_20 ORM', 'GAME • Ammo': 'Ammo'},
-    wear_masks=[f'{NAME}_{a}_20_wear.png' for a in ('Wood', 'Steel', 'Optic')], uv_margin_px=REC.get('uv_margin_px', 8),
+    uv_margin_px=REC.get('uv_margin_px', 8),
     texel_px_mm=REC['texel_px_mm'], hidden_area_share=REC['hidden_area_share'],
     collision=list(COLLISION), skipped=REC['skipped'],
     # для подключения оптики (CameraRig: meta ocular / ocular_r): центр — метка ScopeEye, радиус стекла окуляра

@@ -4,8 +4,7 @@
 Источник — _asset_src/veras54_game_mags/<m45|d60>/raw/<Атлас>_{color,normal,mrh,ecm,coat,emit,ao}.png.
 → _asset_src/veras54_game_mags/<m45|d60>/game/veras54_<Атлас>_100_{albedo,normal,orm,emission}.png — ORM: R — AO игровой
   сетки, G — шероховатость, B — металл; экспорт (mags_game_export.py) кладёт их рядом с моделью под теми же именами.
-→ assets/models/weapons/veras54_mags/ (игра грузит по имени карты цвета):
-  veras54_<Атлас>_100_wear.png — маска износа шейдера (R кромки, G углубления и укрытые места, B места хвата и трения);
+→ assets/models/weapons/veras54_mags/ (игра грузит по имени карты цвета; маски износа _wear нет — вид в игре один, 2026-10-19):
   veras54_<Атлас>_100_coat.png — жировая плёнка (R, без ровного «пола»; шейдер сглаживает ей основной слой, как у автомата).
 Поля островов добираются «push-pull» по пирамиде до краёв атласа.
 """
@@ -74,34 +73,11 @@ def pushpull(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.where(mask[..., None], img, fill)
 
 
-def blur(a: np.ndarray, r: float) -> np.ndarray:
-    k = max(1, int(round(r)))
-    out = a.astype(np.float32)
-    for _ in range(3):
-        for ax in (0, 1):
-            pad = [(0, 0)] * out.ndim
-            pad[ax] = (k, k)
-            p = np.pad(out, pad, mode='edge')
-            cs = np.cumsum(p, axis=ax, dtype=np.float64)
-            cs = np.concatenate([np.zeros_like(np.take(cs, [0], axis=ax)), cs], axis=ax)
-            n = out.shape[ax]
-            hi = np.take(cs, np.arange(2 * k + 1, 2 * k + 1 + n), axis=ax)
-            lo = np.take(cs, np.arange(0, n), axis=ax)
-            out = ((hi - lo) / (2 * k + 1)).astype(np.float32)
-    return out
-
-
 def half(a: np.ndarray, size: int) -> np.ndarray:
     while a.shape[0] > size:
         h, w = a.shape[0] // 2, a.shape[1] // 2
         a = a[:h * 2, :w * 2].reshape(h, 2, w, 2, *a.shape[2:]).mean(axis=(1, 3))
     return a
-
-
-def level(a: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    lit = a[mask & (a > 0.02)]
-    hi = float(np.percentile(lit, 99.0)) if lit.size else 1.0
-    return np.clip(a / max(hi, 1e-3), 0.0, 1.0)
 
 
 atlas = M['atlas']
@@ -132,22 +108,11 @@ if emit is not None and float(emit[..., :3].max()) > 0.002:
     save(pushpull(emit[..., :3], mask), GAME / f'{tag}_emission.png', True)
 else:
     log('emission: нет свечения в запекании')
-ec = pushpull(np.dstack([ecm[..., 0], ecm[..., 1], mrh[..., 2]]), mask)
-edge = level(blur(ec[..., 0], 1.2), mask) ** 1.2
-cavity = level(blur(ec[..., 1], 3.0), mask)
-shelter = np.clip((0.9 - blur(ao, 2.0)) / 0.55, 0.0, 1.0)
-shelter[~mask] = 0.0
-cavity = np.maximum(cavity, shelter)
 # У стека текстур есть ровный «пол» плёнки по всей детали (первая декаль слоя смешивается MIX с силой < 1). В игре
 # плёнка сглаживает основной слой (шейдер weapon_wear, film_roughness): с полом вся деталь выходила ровно глянцевой,
-# «стеклянной» (владелец 2026-10-19) — пол вычитается и в _coat, и в местах хвата; остаются сами следы.
+# «стеклянной» (владелец 2026-10-19) — пол вычитается; остаются сами следы.
 floor = float(np.percentile(coat[mask], 40.0))
 prints = np.clip((coat - floor) / max(1.0 - floor, 1e-3), 0.0, 1.0)
 save(half(prints, MASK_SIZE), C.ASSET / f'{tag}_coat.png', False)
 log('coat floor', round(floor, 3), 'prints>0.1', round(float((prints[mask] > 0.1).mean()), 4))
-hand = np.maximum(blur(ec[..., 2], 2.0), np.clip(blur(prints, 6.0) * 1.6, 0.0, 0.85))
-wear = pushpull(np.dstack([edge, cavity, np.clip(hand, 0.0, 1.0)]), mask)
-save(half(wear, MASK_SIZE), C.ASSET / f'{tag}_wear.png', False)
-log('wear edge', round(float(edge[mask].mean()), 3), 'cavity', round(float(cavity[mask].mean()), 3),
-    'hand', round(float(hand[mask].mean()), 3))
 print('MAGS_PACK_DONE', MID, flush=True)

@@ -3,7 +3,7 @@
 v13 (2026-10-19): форма и текстуры v13 v02 (приняты владельцем), игровая сетка ~33 тыс. треугольников + 30 патронов
 (tools/veras54_v13: game_lp.py → game_bake.py → game_pack.py → game_rig.py → clips/build_clips.py → этот экспорт).
 Модели — .gltf с картами отдельными PNG рядом: вьюмодель, мировая и подробная делят один набор карт
-(veras54_<Атлас>_100_{albedo,normal,orm}.png); маски износа _wear и жировой плёнки _coat кладёт game_pack.py.
+(veras54_<Атлас>_100_{albedo,normal,orm}.png); маски жировой плёнки _coat кладёт game_pack.py.
 
   viewmodel — руки FPS_ArmsRig и оружие VERAS54_WeaponRig в осях камеры от первого лица (камера в начале, взгляд по −Z
               Godot). Клипы (NLA-дорожки → анимации glTF): idle, reload_tactical, reload_full, mag_check, jam_clear,

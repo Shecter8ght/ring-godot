@@ -138,11 +138,6 @@
   "GAME • Lens • 20": "тёмное просветлённое стекло, непрозрачное (в прицеле — картинка оптики), шероховатость — Optic_20 ORM",
   "GAME • Ammo": "Ammo"
  },
- "wear_masks": [
-  "mosin_pu_Wood_20_wear.png",
-  "mosin_pu_Steel_20_wear.png",
-  "mosin_pu_Optic_20_wear.png"
- ],
  "uv_margin_px": 12,
  "texel_px_mm": {
   "Wood": [

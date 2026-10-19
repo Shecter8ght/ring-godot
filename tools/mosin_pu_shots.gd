@@ -5,9 +5,9 @@ extends Node3D
 ##   mosin_pu_<ракурс>.png — вид от первого лица, затвор, направляющие обоймы, шейка, прицел, дуло, приклад, целиком
 ##   слева, окуляр;
 ##   mosin_pu_bolt_open.png — затвор открыт и отведён (узлы Bolt / Bolt_Rotor / Bolt_Cocking двигает код);
-##   mosin_pu_wear.png — износ шейдером по маске _wear: прочность 100 / 50 / 10;
 ##   mosin_pu_lod.png — вид от первого лица и мировая модель (LOD1) с 3 м.
-## Запуск с окном: tools/godot.cmd --windowed --resolution 1100x760 res://tools/mosin_pu_shots.tscn [-- only=fp_hip,wear]
+## Вид один при любой прочности (решение владельца 2026-10-19) — прежние кадры износа шейдером убраны.
+## Запуск с окном: tools/godot.cmd --windowed --resolution 1100x760 res://tools/mosin_pu_shots.tscn [-- only=fp_hip,lod]
 
 const MODEL: String = "res://assets/models/weapons/mosin_pu/mosin_pu.glb"
 const INFO: String = "res://assets/models/weapons/mosin_pu/mosin_pu.json"
@@ -60,16 +60,11 @@ func _ready() -> void:
 	_build_stage()
 	for view: String in VIEWS:
 		if _wanted(view):
-			_save(view, await _shot(view, 100.0, 0, false, view))
+			_save(view, await _shot(view, 0, false, view))
 	if _wanted("bolt_open"):
-		_save("bolt_open", await _shot("bolt_right", 100.0, 0, true, "затвор открыт и отведён"))
-	if _wanted("wear"):
-		var cells: Array[Image] = []
-		for dur: float in [100.0, 50.0, 10.0]:
-			cells.append(await _shot("bolt_right", dur, 0, false, "прочность %d" % int(dur)))
-		_save_grid("wear", cells, 3)
+		_save("bolt_open", await _shot("bolt_right", 0, true, "затвор открыт и отведён"))
 	if _wanted("lod"):
-		var lods: Array[Image] = [await _shot("full_left", 100.0, 0, false, "LOD0"), await _shot("world", 100.0, 1, false, "LOD1, 3 м")]
+		var lods: Array[Image] = [await _shot("full_left", 0, false, "LOD0"), await _shot("world", 1, false, "LOD1, 3 м")]
 		_save_grid("lod", lods, 2)
 	print("mosin_pu_shots: снимков %d, ошибок %d" % [_written.size(), _failures])
 	for child: Node in get_children():
@@ -132,14 +127,11 @@ func _game(mm: Array) -> Vector3:
 	return Vector3(p.y, p.z, p.x) * 0.001
 
 
-func _shot(view: String, dur: float, lod: int, open: bool, text: String) -> Image:
+func _shot(view: String, lod: int, open: bool, text: String) -> Image:
 	var model: Node3D = (load(MODEL) as PackedScene).instantiate() as Node3D
 	WeaponModels._select_lod(model, lod)
 	add_child(model)
-	WeaponCondition.apply_visual(model, {"dur": dur})
-	if not model.get_meta("wear_shader", false):
-		_failures += 1
-		push_error("mosin_pu_shots: шейдер износа не встал — нет масок _wear рядом с картами")
+	WeaponCondition.apply_visual(model)
 	if open:
 		# как в Blender: стебель повёрнут рукоятью вверх (−90° вокруг оси канала), затвор назад, курок взведён
 		(model.find_child("Bolt_Rotor", true, false) as Node3D).rotation.z = deg_to_rad(-90.0)

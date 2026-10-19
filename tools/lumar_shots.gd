@@ -1,5 +1,6 @@
 extends Node3D
-## Проверка игровых карт 100/60/20, посадки и вида из глаза; снимки реального Forward+.
+## Проверка игровых карт (вид один при прочности 100/60/20 — решение владельца 2026-10-19; на 20 и 0 % тускнеет
+## только марка), посадки и вида из глаза; снимки реального Forward+.
 
 var _camera: Camera3D
 
@@ -50,7 +51,7 @@ func _ready() -> void:
 	add_child(labels)
 	for i: int in range(3):
 		var label: Label = Label.new()
-		label.text = ["20% — сильный износ", "60% — следы использования", "100% — новое"][i]
+		label.text = ["прочность 20 %", "прочность 60 %", "прочность 100 %"][i]
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.add_theme_font_size_override("font_size", 22)
 		label.position = Vector2(get_viewport().get_visible_rect().size.x * i / 3.0, get_viewport().get_visible_rect().size.y * 0.68)

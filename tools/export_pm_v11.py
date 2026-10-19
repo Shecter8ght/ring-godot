@@ -8,7 +8,7 @@
 Frame (с щёчкой рукояти Grip_Mesh), Barrel, Slide → Safety, Hammer, Trigger, SlideStop, MagCatch,
 Magazine → Follower_Mesh, Spring_Mesh, Rounds → Round_01..08 (1 — верхний), Suppressor (глушитель 60%). Метки Muzzle,
 MuzzleSuppressed, SightFront, SightRear. Ветка PM_LOD1 — то же упрощённое (~5 тыс. треугольников).
-Материалы GAME • Steel • 100 / GAME • Grip • 100 (износ 60/20 — states/pm_*), GAME • Magazine • 60,
+Материалы GAME • Steel • 100 / GAME • Grip • 100 (вид в игре один при любой прочности), GAME • Magazine • 60,
 GAME • Ammo • 60. Патрон в патроннике и гильза задержки здесь не экспортируются — они во вьюмодели.
 """
 from pathlib import Path
@@ -43,7 +43,7 @@ def tris(o):
     return len(o.data.loop_triangles)
 
 
-# Материалы на готовых картах (100 — встраиваются; 60/20 игра ставит из states/).
+# Материалы на готовых картах из states/ (tools/pm_v11_pack_maps.py) — встраиваются в pm.glb.
 def material(name, atlas, state, coat=False):
     m = bpy.data.materials[name]
     m.use_nodes = True

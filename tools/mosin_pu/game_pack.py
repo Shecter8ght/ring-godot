@@ -5,9 +5,7 @@
 хват; ecm: кромки, углубления, покрытие).
 → _asset_src/mosin_pu_game/maps/game/<Атлас>_20_{albedo,normal,orm}.png (встраиваются в GLB экспортом; патрон —
   Ammo_{albedo,normal,orm}); ORM — R: AO игровой сетки, G: шероховатость, B: металл.
-→ assets/models/weapons/mosin_pu/mosin_pu_<Атлас>_20_wear.png — маска износа шейдера рядом с картами, которые Godot
-  извлечёт из mosin_pu.glb (mosin_pu_<Атлас>_20_albedo.png): R — выпуклые кромки, G — углубления и укрытые места,
-  B — места хвата (Non-Color, 2048; формат — src/combat/weapon_wear.gdshader).
+Маски износа _wear больше не пишутся: вид в игре один при любой прочности (решение владельца 2026-10-19).
 Поля островов добираются «push-pull» по пирамиде (среднее по запечённому) до краёв атласа: дальние mip-уровни
 не тянут чёрный фон в швы. Читается и пишется через Blender (16-битные нормали без потерь до записи).
 """
@@ -24,13 +22,8 @@ ROOT = Path(__file__).resolve().parents[2]
 VARIANT = (sys.argv[sys.argv.index('--') + 1:] + ['fp'])[0] if '--' in sys.argv else 'fp'
 RAW = ROOT / '_asset_src/mosin_pu_game' / VARIANT / 'maps/raw'
 GAME = ROOT / '_asset_src/mosin_pu_game' / VARIANT / 'maps/game'
-# маска износа — рядом с картами, которые Godot извлечёт из GLB варианта: <имя GLB>_<карта>
-PREFIX = 'mosin_pu' if VARIANT == 'fp' else 'mosin_pu_detail'
-ASSET = ROOT / 'assets/models/weapons/mosin_pu' if VARIANT == 'fp' else Path('E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/06_Игровая/detail')
 GAME.mkdir(parents=True, exist_ok=True)
-ASSET.mkdir(parents=True, exist_ok=True)
 ATLASES = {'Wood': '20', 'Steel': '20', 'Optic': '20', 'Ammo': ''}
-WEAR_SIZE = 2048
 log = lambda *a: print('MOSIN_PACK', *a, flush=True)
 
 
@@ -79,38 +72,6 @@ def pushpull(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.where(mask[..., None], img, fill)
 
 
-def blur(a: np.ndarray, r: float) -> np.ndarray:
-    """≈ гаусс: три прохода прямоугольника по обеим осям (r — радиус в пикселях)."""
-    k = max(1, int(round(r)))
-    out = a.astype(np.float32)
-    for _ in range(3):
-        for ax in (0, 1):
-            pad = [(0, 0)] * out.ndim
-            pad[ax] = (k, k)
-            p = np.pad(out, pad, mode='edge')
-            cs = np.cumsum(p, axis=ax, dtype=np.float64)
-            cs = np.concatenate([np.zeros_like(np.take(cs, [0], axis=ax)), cs], axis=ax)
-            n = out.shape[ax]
-            hi = np.take(cs, np.arange(2 * k + 1, 2 * k + 1 + n), axis=ax)
-            lo = np.take(cs, np.arange(0, n), axis=ax)
-            out = ((hi - lo) / (2 * k + 1)).astype(np.float32)
-    return out
-
-
-def half(a: np.ndarray, size: int) -> np.ndarray:
-    while a.shape[0] > size:
-        h, w = a.shape[0] // 2, a.shape[1] // 2
-        a = a[:h * 2, :w * 2].reshape(h, 2, w, 2, *a.shape[2:]).mean(axis=(1, 3))
-    return a
-
-
-def level(a: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    """0..1 по заполненной части атласа (99-й перцентиль запечённого = 1)."""
-    lit = a[mask & (a > 0.02)]
-    hi = float(np.percentile(lit, 99.0)) if lit.size else 1.0
-    return np.clip(a / max(hi, 1e-3), 0.0, 1.0)
-
-
 for atlas, state in ATLASES.items():
     ecm = load(f'{atlas}_ecm')
     if ecm is None:
@@ -133,25 +94,4 @@ for atlas, state in ATLASES.items():
     save(np.dstack([ao, rough, metal]), GAME / f'{tag}_orm.png', False)
     log(atlas, 'coverage', round(float(mask.mean()), 3), 'rough', round(float(rough[mask].mean()), 3),
         'metal', round(float(metal[mask].mean()), 3), 'ao', round(float(ao[mask].mean()), 3))
-    if not state:
-        continue
-    # маска износа шейдера: каналы сглажены (шум лучей AO), уровни — по запечённому
-    # сначала поля островов (иначе размытие тянет чёрный фон в края островов), потом сглаживание
-    ec = pushpull(np.dstack([ecm[..., 0], ecm[..., 1], mrh[..., 2]]), mask)
-    edge = level(blur(ec[..., 0], 1.2), mask) ** 1.2      # AO изнутри даёт на ребре ~половину — к самой кромке
-    cavity = level(blur(ec[..., 1], 3.0), mask)
-    # укрытые места между деталями — AO игровой сетки: открытое 1 → 0; фон атласа укрытым не считается
-    shelter = np.clip((0.9 - blur(ao, 2.0)) / 0.55, 0.0, 1.0)
-    shelter[~mask] = 0.0
-    cavity = np.maximum(cavity, shelter)
-    hand_raw = ec[..., 2]
-    if atlas == 'Wood':
-        hand_raw = np.clip((hand_raw - 0.28) / 0.72, 0.0, 1.0)   # Wood_Wear: фон 0,28 — лак цел
-    hand = level(blur(hand_raw, 2.0), mask)
-    wear = np.dstack([edge, cavity, hand])
-    wear = pushpull(wear, mask)
-    wear = half(wear, WEAR_SIZE)
-    save(wear, ASSET / f'{PREFIX}_{tag}_wear.png', False)
-    log(atlas, 'wear edge', round(float(edge[mask].mean()), 3), 'cavity', round(float(cavity[mask].mean()), 3),
-        'hand', round(float(hand[mask].mean()), 3))
 print('MOSIN_PACK_DONE', flush=True)

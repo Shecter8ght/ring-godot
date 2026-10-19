@@ -1,15 +1,10 @@
 """Запекание карт игровой сетки ПМ с high-poly UCUPaint.
 
 blender --background --factory-startup --python-exit-code 1 --python bake_state.py -- <kind> [--parts a,b] [--channels color,metal,rough,normal,ao] [--samples N] [--lp-rays]
-  kind: 100 | 60 | 20 — атласы Steel и Grip из файла этого состояния ПМ;
+  kind: 100 — атласы Steel и Grip из файла ПМ 100 % (вид в игре один, решение владельца 2026-10-19);
         mag — атлас Magazine из снаряжённого магазина 60%; ammo — атлас Ammo из патрона 60%.
 Карты → maps/<kind>/<Atlas>_<channel>.png. Цвет — sRGB, остальное — Non-Color. Исходники не сохраняются.
 --lp-rays — оставить игровым сеткам видимость для лучей (проверка: перекрывают ли они AO-маски).
-Каналы маски процедурного износа (шейдер weapon_wear, формат — навык godot-asset-preparation):
-  edge — выпуклые кромки high-poly (AO «изнутри» по самой детали), cavity — углубления (AO снаружи по самой
-  детали; щели между деталями даёт AO игровой сетки в ORM), hand — места хвата (атрибут PM_HandContact).
-  Пример: -- 20 --channels edge,cavity,hand --tag _wear (в файле 20 есть атрибуты хвата), затем
-  python -X utf8 tools/pm_v11_pack_maps.py wear.
 """
 from pathlib import Path
 import sys, json, argparse
@@ -19,8 +14,6 @@ from mathutils import Matrix
 REV = Path(__file__).resolve().parents[1] / '_asset_src/pm_game'   # рабочая папка ассета (не в git)
 LIB = Path('E:/Models Blender/WEAPONS/ПМ — модели и текстуры')
 STATE_FILE = {'100': LIB / '18_Текстуры_v2_100_60_на_проверку/01_ПМ/PM_Textures_100_v02.blend',
-              '60': LIB / '18_Текстуры_v2_100_60_на_проверку/01_ПМ/PM_Textures_60_v02.blend',
-              '20': LIB / '17_Текстуры_v4_20_на_проверку/01_ПМ/PM_Textures_20_v04.blend',
               'mag': LIB / '19_Магазины_и_патрон_60_v01/01_Модели/magazine_loaded_60_v02.blend',
               'ammo': LIB / '19_Магазины_и_патрон_60_v01/01_Модели/cartridge_60_v01.blend',
               'supp': LIB / '19_Магазины_и_патрон_60_v01/01_Модели/suppressor_60_v01.blend'}
@@ -34,7 +27,7 @@ ap.add_argument('--lp-rays', action='store_true')
 ap.add_argument('--tag', default='')
 args = ap.parse_args(sys.argv[sys.argv.index('--') + 1:])
 REC = json.loads((REV / 'lp/parts.json').read_text(encoding='utf-8'))
-ATLAS_PARTS = {'100': ('Steel', 'Grip'), '60': ('Steel', 'Grip'), '20': ('Steel', 'Grip'), 'mag': ('Magazine',), 'ammo': ('Ammo',), 'supp': ('Suppressor',)}[args.kind]
+ATLAS_PARTS = {'100': ('Steel', 'Grip'), 'mag': ('Magazine',), 'ammo': ('Ammo',), 'supp': ('Suppressor',)}[args.kind]
 LP_NAME = {'Slide': 'Slide_Mesh', 'Frame': 'Frame_Mesh', 'Barrel': 'Barrel_Mesh', 'Hammer': 'Hammer_Mesh', 'Trigger': 'Trigger_Mesh',
            'Safety': 'Safety_Mesh', 'SlideStop': 'SlideStop_Mesh', 'MagCatch': 'MagCatch_Mesh', 'Grip': 'Grip_Mesh',
            'MagBody': 'Magazine_Mesh', 'Follower': 'Follower_Mesh', 'Spring': 'Spring_Mesh',
@@ -103,9 +96,6 @@ bk.cage_extrusion = 0.0015
 bk.max_ray_distance = 0.004
 
 images = {}
-# Маска износа: AO-узел только по самой детали (игровая сетка рядом не затеняет), расстояния — в метрах ПМ.
-WEAR_AO = {'edge': (True, 0.0009), 'cavity': (False, 0.0035)}
-HAND_ATTR = 'PM_HandContact'
 
 
 def target(atlas, channel):
@@ -140,29 +130,6 @@ def ypaint_group(mat):
 saved = {}
 
 
-def wear_socket(nt, channel):
-    """Выход маски износа в дереве материала high-poly: 1 — кромка / углубление / место хвата."""
-    if channel == 'hand':
-        attr = nt.nodes.get('BAKE_HAND') or nt.nodes.new('ShaderNodeAttribute')
-        attr.name = 'BAKE_HAND'
-        attr.attribute_type = 'GEOMETRY'
-        attr.attribute_name = HAND_ATTR
-        return attr.outputs['Color']
-    inside, distance = WEAR_AO[channel]
-    ao = nt.nodes.get('BAKE_AO_' + channel) or nt.nodes.new('ShaderNodeAmbientOcclusion')
-    ao.name = 'BAKE_AO_' + channel
-    ao.inside = inside
-    ao.only_local = True
-    ao.samples = 32
-    ao.inputs['Distance'].default_value = distance
-    inv = nt.nodes.get('BAKE_INV_' + channel) or nt.nodes.new('ShaderNodeMath')
-    inv.name = 'BAKE_INV_' + channel
-    inv.operation = 'SUBTRACT'
-    inv.inputs[0].default_value = 1.0
-    nt.links.new(ao.outputs['AO'], inv.inputs[1])
-    return inv.outputs[0]
-
-
 def route(channel):
     """Канал стека UCUPaint → Emission у всех материалов high-poly (для EMIT); normal — обратно BSDF."""
     for m in bpy.data.materials:
@@ -185,10 +152,6 @@ def route(channel):
         emit.inputs['Strength'].default_value = 1.0
         for l in list(emit.inputs['Color'].links):
             nt.links.remove(l)
-        if channel in WEAR_AO or channel == 'hand':
-            nt.links.new(wear_socket(nt, channel), emit.inputs['Color'])
-            nt.links.new(emit.outputs[0], out.inputs['Surface'])
-            continue
         p = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
         sock_name = {'color': 'Color', 'metal': 'Metallic', 'rough': 'Roughness'}[channel]
         bsdf_name = {'color': 'Base Color', 'metal': 'Metallic', 'rough': 'Roughness'}[channel]

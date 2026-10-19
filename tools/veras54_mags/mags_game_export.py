@@ -4,7 +4,7 @@
 После mags_game_lp.py → mags_game_bake.py → mags_game_pack.py.
 → assets/models/weapons/veras54_mags/veras54_<mag45|drum60>.gltf (+ .bin) — игровая сетка целиком (в руках, вблизи);
   veras54_<…>_world.gltf — мировая: упрощена (world_ratio), из патронов только два верхних (остальные всегда в корпусе);
-  карты veras54_<Атлас>_100_{albedo,normal,orm,emission}.png рядом (общие у обеих), маски _wear и _coat кладёт pack;
+  карты veras54_<Атлас>_100_{albedo,normal,orm,emission}.png рядом (общие у обеих), маски жировой плёнки _coat кладёт pack;
   veras54_<…>.json — проверки (треугольники, габарит, узлы).
 Оси игры: +Z к дулу, +Y вверх, −X — правая сторона стрелка (как мировая модель автомата); начало — точка крепления
 магазина. Узлы: Magazine (корпус) → MagazineFollower / DrumKey, Round_01… (01 — верхний).

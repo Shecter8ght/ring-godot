@@ -1,9 +1,9 @@
 """ВЕРАС-54 v13: настройки импорта карт Godot после первого `tools/godot.cmd --headless --import`.
 
 python -X utf8 tools/veras54_v13/game_imports.py, затем ещё раз `tools/godot.cmd --headless --import`.
-Карты моделей .gltf лежат отдельными PNG (veras54_<Атлас>_100_*.png) и маски _wear/_coat, которые грузит код: по умолчанию
-Godot сжал бы их только после первого показа в 3D. Ставятся настройки, как у ПМ и Мосина: сжатие VRAM, mip-уровни; у нормалей —
-флаг карты нормалей, у ORM — сглаживание шероховатости по нормали; маски _wear и _coat — сжатие высокого качества (BPTC).
+Карты моделей .gltf лежат отдельными PNG (veras54_<Атлас>_100_*.png) и маски жировых следов _coat, которые грузит код: по
+умолчанию Godot сжал бы их только после первого показа в 3D. Ставятся настройки, как у ПМ и Мосина: сжатие VRAM, mip-уровни; у
+нормалей — флаг карты нормалей, у ORM — сглаживание шероховатости по нормали; маски _coat — сжатие высокого качества (BPTC).
 Карты рук (FPS_Arms) не трогаются.
 """
 import re
@@ -25,7 +25,7 @@ for f in sorted(D.glob('veras54_*.png.import')):
     t = setp(t, 'compress/mode', '2')
     t = setp(t, 'mipmaps/generate', 'true')
     t = setp(t, 'detect_3d/compress_to', '0')
-    if base.endswith(('_wear.png', '_coat.png')):
+    if base.endswith('_coat.png'):
         t = setp(t, 'compress/high_quality', 'true')
     elif base.endswith('_normal.png'):
         t = setp(t, 'compress/normal_map', '1')

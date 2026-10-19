@@ -1,8 +1,6 @@
 {
   "source": {
-    "100": "LUMAR_H1_State100_New_v9.blend",
-    "60": "LUMAR_H1_State060_Used40_v9.blend",
-    "20": "LUMAR_H1_State020_Worn80_v9.blend"
+    "100": "LUMAR_H1_State100_New_v9.blend"
   },
   "triangles": {
     "Body": 32060,
@@ -22,9 +20,7 @@
     0.019
   ],
   "states": [
-    100,
-    60,
-    20
+    100
   ],
   "texture_size": 2048
 }

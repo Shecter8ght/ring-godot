@@ -1,8 +1,6 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_disabled;
 
-uniform sampler2D crack_map : filter_linear_mipmap;
-uniform bool cracked = false;
 // ПНВ на голове: стекло не бликует и почти исчезает — трубка усиливала блик от ИК-подсветки и
 // едва заметный оттенок стекла до сплошного пятна, через окно ничего не было видно.
 uniform float head_nvg = 0.0;
@@ -17,7 +15,6 @@ uniform sampler2D depth_tex : hint_depth_texture, filter_nearest, repeat_disable
 
 void fragment() {
 	// Исходная LensUV перенесена в первый игровой UV-канал линзы.
-	float crack = cracked ? texture(crack_map, UV).r : 0.0;
 	if (window_nv > 0.5) {
 		vec3 src = texture(screen_tex, SCREEN_UV).rgb;
 		float lum = dot(src, vec3(0.299, 0.587, 0.114));
@@ -37,15 +34,15 @@ void fragment() {
 		vec2 c = UV - vec2(0.5);
 		amp *= 1.0 - smoothstep(0.32, 0.72, length(c));
 		ALBEDO = vec3(0.0);
-		EMISSION = mix(vec3(0.05, 0.62, 0.14), vec3(0.55, 1.0, 0.62), amp) * amp * 1.5 + vec3(0.8) * crack * 0.2;
+		EMISSION = mix(vec3(0.05, 0.62, 0.14), vec3(0.55, 1.0, 0.62), amp) * amp * 1.5;
 		ALPHA = 1.0;
 		ROUGHNESS = 1.0;
 		SPECULAR = 0.0;
 		METALLIC = 0.0;
 	} else {
-		ALBEDO = mix(vec3(0.52, 0.76, 0.64), vec3(0.8), crack);
-		ALPHA = mix(0.055, 0.008, head_nvg) + crack * mix(0.65, 0.25, head_nvg);
-		ROUGHNESS = mix(0.035, 1.0, head_nvg) + crack * 0.75;
+		ALBEDO = vec3(0.52, 0.76, 0.64);
+		ALPHA = mix(0.055, 0.008, head_nvg);
+		ROUGHNESS = mix(0.035, 1.0, head_nvg);
 		METALLIC = 0.0;
 		SPECULAR = mix(0.3, 0.0, head_nvg);
 	}

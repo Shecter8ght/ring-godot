@@ -1,17 +1,18 @@
 """Обвесы ВЕРАС-54 в игру: рукоятки ВАРН V1 (вертикальная) и V2 (45° влево), глушитель 5.45.
 
-Каждый — игровая сетка (Body + Body_LOD1) и карты трёх состояний 100 / 60 / 20 (как ЛУМАР H1):
-assets/models/attachments/<id>/<id>.glb, <id>_<состояние>_{base_color,roughness,metallic,normal}.png.
+Каждый — игровая сетка (Body + Body_LOD1) и карты состояния 100 (вид в игре один при любой прочности, решение
+владельца 2026-10-19; прежние 60 / 20 удалены): assets/models/attachments/<id>/<id>.glb,
+<id>_100_{base_color,roughness,metallic,normal}.png.
 
   рукоятки  — исходники библиотеки высокополигональные со слоями UCUPaint: сетка упрощается,
-              новая развёртка, материалы трёх состояний проецируются запеканием (Cycles).
-  глушитель — уже игровой (GameUV и карты трёх состояний): сетка склеивается, карты копируются.
+              новая развёртка, материалы проецируются запеканием (Cycles).
+  глушитель — уже игровой (GameUV и карты): сетка склеивается, карты копируются.
 
 Оси игры у GLB: X влево стрелка, Y вверх, Z к дулу. Начало рукоятки — нижняя плоскость планки
 (середина зажима), начало глушителя — задний торец на оси ствола.
 
 blender --background --factory-startup --python-exit-code 1 --python tools/prepare_veras_attachments.py -- <шаг> <id> [состояние]
-  шаги: geometry <id> · bake <id> <100|60|20> · export <id> · imports <id> (после первого --import Godot)
+  шаги: geometry <id> · bake <id> 100 · export <id> · imports <id> (после первого --import Godot)
   id: varn_v1 · varn_v2 · supp_veras
 Исходники библиотеки только читаются. Промежуточные файлы — в _asset_src/veras_attachments.
 """
@@ -26,7 +27,7 @@ from mathutils import Matrix
 ROOT = Path(__file__).resolve().parents[1]
 LIB = Path("E:/Models Blender/ВЕРАС-54 — модель и обвесы")
 WORK = ROOT / "_asset_src/veras_attachments"
-STATES = (100, 60, 20)
+STATES = (100,)
 CHANNELS = (("base_color", "Base Color"), ("roughness", "Roughness"), ("metallic", "Metallic"), ("normal", None))
 # Источник (X вперёд, Y влево, Z вверх) → игра (X влево, Y вверх, Z вперёд).
 TO_GAME = Matrix(((0, 1, 0, 0), (0, 0, 1, 0), (1, 0, 0, 0), (0, 0, 0, 1)))
@@ -34,23 +35,21 @@ TO_GAME = Matrix(((0, 1, 0, 0), (0, 0, 1, 0), (1, 0, 0, 0), (0, 0, 0, 1)))
 ASSETS = {
     "varn_v1": {
         "dir": LIB / "ВАРН V1/Актуальное", "res": 1024,
-        "files": {100: "Foregrip_Straight_State100_New_v11.blend", 60: "Foregrip_Straight_State060_Used40_v11.blend",
-                  20: "Foregrip_Straight_State020_Worn80_v11.blend"},
+        "files": {100: "Foregrip_Straight_State100_New_v11.blend"},
         # предел треугольников по имени детали (первое совпадение)
         "limits": (("sculpted grooved handle", 9000), ("cap knurl", 700), ("moulded shoulder", 600),
                    ("rounded base cap", 400), ("clamp bolt", 160), ("rail jaw", 320), ("", 400)),
     },
     "varn_v2": {
         "dir": LIB / "ВАРН V2/Актуальное", "res": 1024,
-        "files": {100: "Foregrip_Angled_State100_New_v11.blend", 60: "Foregrip_Angled_State060_Used40_v11.blend",
-                  20: "Foregrip_Angled_State020_Worn80_v11.blend"},
+        "files": {100: "Foregrip_Angled_State100_New_v11.blend"},
         "limits": (("sculpted grooved handle", 9000), ("cap knurl", 700), ("OffsetGrip_Rigid_Adapter", 700),
                    ("rounded base cap", 400), ("clamp bolt", 160), ("rail jaw", 320), ("", 400)),
     },
     "supp_veras": {
         "dir": LIB / "ВЕРАС-54/Игровая версия/UV и карты v01", "res": 1024,
         "files": {100: "Глушитель отдельно/Suppressor_Game_State100_v01.blend"},
-        "maps": {100: "Текстуры/100", 60: "Текстуры/060", 20: "Текстуры/020"},
+        "maps": {100: "Текстуры/100"},
     },
 }
 

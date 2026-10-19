@@ -1,7 +1,7 @@
 extends Node3D
 ## Магазины ВЕРАС-54 в движке (tools/veras54_mags): магазин на 45 и барабан на 60 — игровая модель и мировая.
-## Проверяет узлы (корпус, подаватель / ключ, патроны Round_NN), габарит, треугольники, карты материала, маски износа и
-## жировой плёнки, шейдер износа (WeaponCondition) при прочности 100 и 25 %.
+## Проверяет узлы (корпус, подаватель / ключ, патроны Round_NN), габарит, треугольники, карты материала, карту жировых
+## следов и шейдер следов (WeaponCondition; вид один при любой прочности — масок износа _wear нет).
 ## tools/godot.cmd --headless res://tools/veras54_mags_check.tscn — только проверка (код выхода 1 — есть ошибки);
 ## с окном (--windowed --resolution 1600x900) — ещё снимки docs/screens/veras54_mags_*.png.
 
@@ -104,12 +104,13 @@ func _check(name: String, spec: Dictionary, world: bool) -> Node3D:
 		_fail("%s: в материале не все карты (нормали, ORM)" % name)
 	elif not (mat.emission_enabled and mat.emission_texture):
 		_fail("%s: нет свечения цифр" % name)
-	for m: String in ["_wear.png", "_coat.png"]:
-		if not ResourceLoader.exists(DIR + tag + m):
-			_fail("%s: нет %s%s" % [name, tag, m])
-	WeaponCondition.apply_visual(root, {"id": "", "dur": 100.0})
+	if not ResourceLoader.exists(DIR + tag + "_coat.png"):
+		_fail("%s: нет %s_coat.png" % [name, tag])
+	if ResourceLoader.exists(DIR + tag + "_wear.png"):
+		_fail("%s: осталась маска износа %s_wear.png (вид один)" % [name, tag])
+	WeaponCondition.apply_visual(root)
 	if not root.get_meta("wear_shader", false):
-		_fail("%s: шейдер износа не встал" % name)
+		_fail("%s: шейдер следов не встал" % name)
 	print("veras54_mags_check: %s — треугольников %d, патронов %d, габарит %.1f × %.1f × %.1f мм" % [
 		name, tris, rounds, size_mm.x, size_mm.y, size_mm.z])
 	return root
@@ -219,14 +220,12 @@ func _shots(name: String, model: Node3D) -> void:
 		first = false
 	var c: Vector3 = box.get_center()
 	var r: float = box.size.length()
-	for dur: float in [100.0, 25.0]:
-		WeaponCondition.update_wear(model, dur)
-		# 3/4 справа спереди (правая сторона стрелка — −X), сзади слева
-		for view: Array in [["r34", Vector3(-0.8, 0.35, 0.6)], ["l34", Vector3(0.8, 0.3, -0.5)]]:
-			_cam.position = c + (view[1] as Vector3).normalized() * r * 1.5
-			_cam.look_at(c)
-			for _i: int in range(20):
-				await get_tree().process_frame
-			var path: String = "res://docs/screens/veras54_mags_%s_%s_%d.png" % [name.trim_prefix("veras54_"), view[0], int(dur)]
-			get_viewport().get_texture().get_image().save_png(path)
-			print("veras54_mags_check: ", path)
+	# 3/4 справа спереди (правая сторона стрелка — −X), сзади слева
+	for view: Array in [["r34", Vector3(-0.8, 0.35, 0.6)], ["l34", Vector3(0.8, 0.3, -0.5)]]:
+		_cam.position = c + (view[1] as Vector3).normalized() * r * 1.5
+		_cam.look_at(c)
+		for _i: int in range(20):
+			await get_tree().process_frame
+		var path: String = "res://docs/screens/veras54_mags_%s_%s_100.png" % [name.trim_prefix("veras54_"), view[0]]
+		get_viewport().get_texture().get_image().save_png(path)
+		print("veras54_mags_check: ", path)

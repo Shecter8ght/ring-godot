@@ -2142,14 +2142,11 @@ func _gun_pos() -> Vector3:
 func _shoot(suppress: bool) -> void:
 	if equipment.has(_active):
 		var entry: Dictionary = equipment[_active]
-		var previous_look: String = WeaponCondition.model_key(String(entry.id), entry.get("mods", {}), WeaponCondition.percent(entry))
 		WeaponCondition.wear_shots(equipment[_active], 1)
 		_spec = _ai_spec(equipment[_active])
-		if previous_look != WeaponCondition.model_key(String(entry.id), entry.get("mods", {}), WeaponCondition.percent(entry)):
-			_show_gun()
+		# вид модели от прочности не зависит — меняются только марка и фонарь обвесов
 		if _main_gun:
 			WeaponMods.update_condition(_main_gun, entry.get("mods", {}))
-			WeaponCondition.update_wear(_main_gun, WeaponCondition.percent(entry), entry.get("mods", {}))
 	var from := _gun_pos()
 	var h := 1.1
 	var at_ai := _foe != null and is_instance_valid(_foe) and _target_player == null
