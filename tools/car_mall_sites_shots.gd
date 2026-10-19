@@ -85,7 +85,7 @@ func _ready() -> void:
 			await _shot(cam, player, wide.global_position + Vector3(-5.0, 2.2, -6.5), wide.global_position + Vector3(0.0, 0.0, 0.6), "parking")
 			# пятно антифриза под передком и кусок накладки у левого порога
 			await _shot(cam, player, wide.global_position + Vector3(-2.0, 1.5, -3.3), wide.global_position + Vector3(-0.4, 0.0, -1.5), "parking_detail")
-			await _shot(cam, player, wide.global_position + Vector3(-1.25, 0.55, -1.55), wide.global_position + Vector3(-1.0, 0.0, -1.2), "parking_trim")
+			await _shot(cam, player, wide.global_position + Vector3(-1.4, 0.55, -1.2), wide.global_position + Vector3(-1.15, 0.0, -0.85), "parking_trim")
 	Quests.finish_talk(Q, "ilya", "report_park")
 	Quests.finish_talk(Q, "perevalka", "hint")
 	# бокс скупки у АЗС

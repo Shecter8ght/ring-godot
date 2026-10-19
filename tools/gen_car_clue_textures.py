@@ -6,10 +6,10 @@
 своё процедурное. Карты для Decal / материалов Godot: albedo (sRGB, в альфе — где есть), normal (OpenGL), ORM
 (R — AO, G — шероховатость, B — металл).
 
-coolant_stain_*   старое пятно охлаждающей жидкости на стоянке у доков (по сюжету — «на выезде потекло охлаждение»;
-                  антифриз розово-фиолетовый, как у радиатора): форма — «Масло_01_Тонкая_плёнка», бетон темнее и
-                  липкая полуглянцевая плёнка гликоля, по краю засохшая розоватая корка — «Кристаллы_06_Порошковый_налёт».
-tire_scuff_*      короткие следы шин там, где стояли колёса (не дорожка вывоза — её по заданию нет):
+coolant_stain_*   пятно на стоянке у доков, где из машины текло (масло с антифризом): почти чёрная глянцевая лужа —
+                  «Масло_01_Тонкая_плёнка», подтёки по уклону — «Масло_05_Капля_размазанная», капли рядом —
+                  «Масло_07_Полупрозрачные_пятна», вокруг пропитанный бетон с сиреневым налётом антифриза.
+tire_scuff_*      короткие почти чёрные следы шин там, где стояли колёса (не дорожка вывоза — её по заданию нет):
                   «Резина_09_Прерывистое_трение» и «Резина_03_Рваные_полоски», вытянуты вдоль хода колеса.
 plate_<код>_*     номера в таре скупки (520×112 мм, 2 пикс/мм): подложка как у купе (tools/coupe_ilya/gen_textures.py),
                   выдавленные знаки и окантовка — в карте нормалей; среди чужих — К 417 МР 77.
@@ -32,7 +32,8 @@ OUT.mkdir(parents=True, exist_ok=True)
 MASKS = Path(r"E:\Models Blender\Маски_АЛЬФА")
 USED = {
     "stain": MASKS / "20_Масляные_плёнки_и_смазка/Масло_01_Тонкая_плёнка.png",
-    "crust": MASKS / "19_Кристаллический_налёт/Кристаллы_06_Порошковый_налёт.png",
+    "run": MASKS / "20_Масляные_плёнки_и_смазка/Масло_05_Капля_размазанная.png",
+    "drips": MASKS / "20_Масляные_плёнки_и_смазка/Масло_07_Полупрозрачные_пятна.png",
     "rubber_a": MASKS / "18_Следы_резины_и_контакта/Резина_09_Прерывистое_трение.png",
     "rubber_b": MASKS / "18_Следы_резины_и_контакта/Резина_03_Рваные_полоски.png",
 }
@@ -87,30 +88,56 @@ def srgb(c: tuple[float, float, float]) -> np.ndarray:
     return np.array(c, np.float32)
 
 
-# --- пятно охлаждающей жидкости ---------------------------------------------------------------------------------
+def mask_rect(key: str, w: int, h: int) -> np.ndarray:
+    """Маска владельца 0..1, обрезана вплотную по содержимому и растянута в w × h (капля с хвостом — хвост вдоль w)."""
+    a = np.asarray(Image.open(USED[key]).convert("L"), dtype=np.float32) / 255.0
+    ys, xs = np.nonzero(a > 0.06)
+    a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    return np.asarray(Image.fromarray((a * 255).astype(np.uint8)).resize((w, h), Image.LANCZOS), dtype=np.float32) / 255.0
+
+
+def paste(canvas: np.ndarray, m: np.ndarray, x: int, y: int) -> None:
+    h, w = m.shape
+    canvas[y:y + h, x:x + w] = np.maximum(canvas[y:y + h, x:x + w], m)
+
+
+# --- пятно: масло с антифризом ----------------------------------------------------------------------------------
 def coolant_stain() -> None:
+    """Владелец 2026-10-19: «почти чёрное, глянцевое, с подтёками, контрастнее». Лужа — «Масло_01_Тонкая_плёнка», от неё
+    по уклону к +u два подтёка — «Масло_05_Капля_размазанная», вокруг капли — «Масло_07_Полупрозрачные_пятна»; бетон вокруг
+    пропитан шире лужи, по краю пропитки — сиреневый налёт антифриза."""
     n = 1024
-    body = ndimage.gaussian_filter(mask("stain", n), 1.2)
-    body = np.clip((body - 0.05) / 0.55, 0, 1)
-    soaked = ndimage.gaussian_filter((body > 0.08).astype(np.float32), 10)        # гликоль впитался в бетон шире плёнки
-    edge = np.clip(soaked - ndimage.gaussian_filter((body > 0.5).astype(np.float32), 6), 0, 1)
-    crust = mask("crust", n) * np.clip(edge * 2.0, 0, 1)                         # корка — только узкой каймой по краю
-    crust = np.clip((crust - 0.22) / 0.5, 0, 1) * 0.8
+    body = np.zeros((n, n), np.float32)
+    paste(body, mask("stain", 640), 40, 190)
+    runs = np.zeros((n, n), np.float32)
+    paste(runs, mask_rect("run", 600, 190), 400, 400)
+    paste(runs, mask_rect("run", 430, 130)[::-1], 430, 590)
+    drips = mask("drips", n) * 0.8
+    # лужа целиком: просветы маски внутри залиты — середина самая толстая и тёмная
+    solid = ndimage.binary_fill_holes(ndimage.binary_closing(body > 0.08, iterations=6))
+    body = np.maximum(body, ndimage.gaussian_filter(solid.astype(np.float32), 3.0) * 0.85)
+    core = ndimage.gaussian_filter(np.maximum(body, runs), 1.0)
+    reach = ndimage.gaussian_filter((core > 0.1).astype(np.float32), 40)
+    drips *= np.clip(1.0 - reach * 3.0, 0, 1) * np.clip(reach * 6.0, 0, 1)         # капли — рядом с лужей, не на ней
+    t = np.clip((np.maximum(core, ndimage.gaussian_filter(drips, 1.0)) - 0.06) / 0.45, 0, 1)
+    soaked = np.clip(ndimage.gaussian_filter((t > 0.05).astype(np.float32), 14) * 1.6, 0, 1)
     grain = fbm((n, n), 4, 24)
-    concrete_dark = srgb((0.17, 0.155, 0.155))                                    # темнее бетона, чуть в сирень
-    film = srgb((0.23, 0.165, 0.20))                                              # плёнка G12 там, где толще
-    residue = srgb((0.70, 0.64, 0.66))                                            # засохшая корка
-    t = np.clip(body * 1.3, 0, 1)[..., None]
-    col = concrete_dark * (1 - t) + film * t
-    col = col * (0.85 + 0.3 * grain[..., None])
-    col = col * (1 - crust[..., None]) + residue * crust[..., None]
-    alpha = np.clip(np.maximum(soaked * 0.5 + body * 0.3, crust * 0.85), 0, 0.85)
-    alpha *= np.clip(0.75 + 0.5 * grain, 0, 1)
+    oil = srgb((0.014, 0.012, 0.011))                                             # толстый слой — почти чёрный
+    thin = srgb((0.045, 0.038, 0.034))
+    halo = srgb((0.10, 0.085, 0.09))                                              # пропитанный бетон, чуть в сирень
+    k = t[..., None] ** 0.6
+    col = np.where(t[..., None] > 0.02, thin * (1 - k) + oil * k, halo)
+    # радужная плёнка на тонком краю
+    hue = fbm((n, n), 3, 10) * 6.283
+    film = np.clip(t * (1 - t) * 4.0, 0, 1)[..., None] * 0.035
+    col = col + film * np.dstack([np.sin(hue), np.sin(hue + 2.1), np.sin(hue + 4.2)])
+    col = col * (0.9 + 0.2 * grain[..., None])
+    alpha = np.clip(np.maximum(soaked * 0.55, t * 1.4), 0, 0.97)
     save_rgb(np.dstack([col, alpha]), "coolant_stain_albedo.png")
-    rough = 0.82 - 0.5 * np.clip(body * 1.4, 0, 1) * (0.7 + 0.3 * grain) + 0.15 * crust
+    rough = np.where(t > 0.02, 0.05 + 0.2 * (1 - t) + 0.05 * grain, 0.72)        # лужа блестит, пропитка — матовая
     save_rgb(np.dstack([np.ones_like(rough), rough, np.zeros_like(rough)]), "coolant_stain_orm.png")
-    height = ndimage.gaussian_filter(crust * 0.8 + body * 0.15, 1.0)
-    save_rgb(normal_from(height, 6.0), "coolant_stain_normal.png")
+    height = ndimage.gaussian_filter(np.clip(t * 1.5, 0, 1), 2.0)                 # мениск по краю лужи
+    save_rgb(normal_from(height, 3.0), "coolant_stain_normal.png")
 
 
 # --- следы шин -----------------------------------------------------------------------------------------------
@@ -124,9 +151,11 @@ def tire_scuff() -> None:
         yy = np.linspace(-1, 1, h)[:, None]
         xx = np.linspace(-1, 1, w)[None, :]
         fall = np.clip(1.15 - xx ** 2 * 1.1, 0, 1) * np.clip(1.25 - yy ** 4, 0, 1)
-        a = np.clip((m - 0.06) * 1.6, 0, 1) * fall
-        a = ndimage.gaussian_filter(a, 0.8) * 0.8
-        col = srgb((0.055, 0.052, 0.05)) * (0.8 + 0.4 * fbm((h, w), 3, 16))[..., None]
+        # владелец 2026-10-19: «почти чёрными, заметно» — резина густо, под ней сплошная тёмная подложка пятна контакта
+        a = np.clip((m - 0.04) * 2.6, 0, 1) * fall
+        base = np.clip(ndimage.gaussian_filter(m, 7.0) * 2.5, 0, 1) * fall * 0.5
+        a = np.clip(np.maximum(ndimage.gaussian_filter(a, 0.7), base), 0, 0.96)
+        col = srgb((0.012, 0.012, 0.012)) * (0.8 + 0.4 * fbm((h, w), 3, 16))[..., None]
         save_rgb(np.dstack([col, a]), f"{name}_albedo.png")
 
 
