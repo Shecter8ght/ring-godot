@@ -35,6 +35,10 @@ extends Node3D
 ## Дальний вид (два скрещённых силуэта, tools/build_spruce.py): дальше near_distance — он вместо модели.
 @export_file("*.glb") var far_model: String = ""
 @export var near_distance: float = 90.0
+## Заслоняет ли россыпь свет в SDFGI. Нет: кроны в нём — сплошная крыша без просветов, и под деревьями
+## рассеянного света неба не было вовсе (лес днём в дождь и пасмурно — чёрный, руки и оружие — тоже).
+## Сама россыпь отражённым светом освещается; тени от солнца — свои, они не меняются.
+@export var gi_occluder: bool = false
 ## Точки — в координатах корня своей сцены (owner), а не мира: россыпь едет вместе со сценой,
 ## поставленной со сдвигом или поворотом (готовые куски зоны 1 на новых местах).
 @export var local_points: bool = false:
@@ -126,6 +130,7 @@ func _build() -> void:
 		mmi.visibility_range_end_margin = 8.0 if far_mesh else view_distance * 0.1
 		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.gi_mode = GeometryInstance3D.GI_MODE_STATIC if gi_occluder else GeometryInstance3D.GI_MODE_DISABLED
 		add_child(mmi)
 		if far_mesh:
 			var fm := MultiMesh.new()
@@ -143,6 +148,7 @@ func _build() -> void:
 			fmi.visibility_range_end_margin = view_distance * 0.1
 			fmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			fmi.cast_shadow = mmi.cast_shadow
+			fmi.gi_mode = mmi.gi_mode
 			add_child(fmi)
 
 

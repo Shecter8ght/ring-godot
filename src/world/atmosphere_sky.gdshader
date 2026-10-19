@@ -51,6 +51,9 @@ uniform float ground_blend = 3.0;
 uniform float sun_size = 0.53;
 uniform float sun_clamp = 40.0;
 uniform float radiance_clamp = 2.5;
+// рассеянный свет ночью — «пол» карты неба (только освещение и отражения, видимое небо не меняется):
+// SDFGI берёт свет неба из неё, ровный цвет окружения под ним не действует (DayCycle, NIGHT_ENV.sky_floor)
+uniform vec3 amb_floor = vec3(0.0);
 
 // ---- облака: объёмный слой над глазом от cloud_base до cloud_top, км. Шумы (карта покрытия, форма,
 // детали) генерирует движок — AtmosphereSky; xz шумов — км по карте, ветер — cloud_offset.
@@ -533,7 +536,7 @@ void sky() {
 			c += bolt_light(d, POSITION.xz / 1000.0 + scud_offset);
 		}
 		if (AT_CUBEMAP_PASS) {
-			c = min(c, vec3(radiance_clamp));
+			c = min(c + amb_floor, vec3(radiance_clamp));
 		}
 		COLOR = c;
 	}

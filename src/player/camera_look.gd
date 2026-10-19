@@ -1,7 +1,8 @@
 class_name CameraLook
 extends Node
-## Вид «как с камеры» поверх кадра (Balance.LOOK): глаз привыкает к свету (автоэкспозиция в узких
-## пределах вокруг экспозиции сцены — ночь остаётся ночью), объектив (лёгкая бочка, цветная кайма к
+## Вид «как с камеры» поверх кадра (Balance.LOOK): глаз привыкает к свету (автоэкспозиция вокруг экспозиции
+## сцены: в темноте — светлее, до adapt_up; ночь остаётся ночью ночным зрением — в тёмном цвет уходит,
+## картинка холодеет; тени не проваливаются в чёрное), объектив (лёгкая бочка, цветная кайма к
 ## краям, виньетка), зерно, резкость и грейд; в прицеле бочка и кайма уходят, оружие у лица чуть
 ## размыто; «зайчики» объектива от ярких источников (LensFlare); размытие в движении (MotionBlurEffect). Настройки: Settings.lens_fx, Settings.motion_blur.
 ## Слой объектива — под всем интерфейсом (layer -1): надписи и окна не искажаются.
@@ -16,8 +17,12 @@ uniform float grain = 0.0;
 uniform float sharpen = 0.0;
 uniform float saturation = 1.0;
 uniform float contrast = 1.0;
+uniform float black_keep = 0.12;
 uniform vec3 shadow_tint = vec3(1.0);
 uniform vec3 high_tint = vec3(1.0);
+uniform float scotopic = 0.0;
+uniform float scotopic_l = 0.2;
+uniform vec3 scotopic_tint = vec3(1.0);
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 void fragment() {
 	vec2 px = SCREEN_PIXEL_SIZE;
@@ -32,8 +37,11 @@ void fragment() {
 	c = max(c + (c - blur * 0.25) * sharpen, vec3(0.0));
 	float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
 	c = mix(vec3(l), c, saturation);
-	c = (c - 0.5) * contrast + 0.5;
+	// контраст вокруг середины, но тени не уходят в ноль: прежде всё темнее ~7/255 становилось чёрным
+	c = mix(c, (c - 0.5) * contrast + 0.5, smoothstep(0.0, black_keep, l));
 	c *= mix(shadow_tint, high_tint, smoothstep(0.05, 0.7, l));
+	// ночное зрение: в темноте цвет уходит, картинка холодеет — ночь видна ночью и при поднятой экспозиции
+	c = mix(c, vec3(dot(c, vec3(0.2126, 0.7152, 0.0722))) * scotopic_tint, scotopic * (1.0 - smoothstep(0.0, scotopic_l, l)));
 	vec2 d = SCREEN_UV - 0.5;
 	d.x *= px.y / px.x;
 	c *= mix(1.0, smoothstep(0.95, 0.25, length(d)), vignette);
@@ -55,6 +63,8 @@ var aim_k: float = 0.0
 var iron: bool = false
 var _prev_xf: Transform3D
 var _has_prev: bool = false
+## В рейде глаз привыкает к темноте шире и есть ночное зрение; в убежище — свет, как его настроил владелец.
+var _raid: bool = false
 
 
 ## Основная камера — главная: по ней размытие в движении; остальные (оптика) получают ту же экспозицию.
@@ -100,15 +110,17 @@ func apply_settings() -> void:
 		var scale: float = float(L.exposure_scale)
 		_attr.auto_exposure_scale = scale
 		_attr.auto_exposure_speed = float(L.adapt_speed)
-		_attr.auto_exposure_min_sensitivity = _iso(scale / float(L.adapt_up))
+		_attr.auto_exposure_min_sensitivity = _iso(scale / float(L.adapt_up if _raid else L.adapt_up_shelter))
 		_attr.auto_exposure_max_sensitivity = _iso(scale / float(L.adapt_down))
 	for cam: Camera3D in _cams:
 		cam.attributes = _attr
 	var mat: ShaderMaterial = _lens.material as ShaderMaterial
-	for k: String in ["vignette", "grain", "sharpen", "saturation", "contrast"]:
+	for k: String in ["vignette", "grain", "sharpen", "saturation", "contrast", "black_keep", "scotopic_l"]:
 		mat.set_shader_parameter(k, float(L[k]))
+	mat.set_shader_parameter("scotopic", float(L.scotopic) if _raid else 0.0)
 	mat.set_shader_parameter("shadow_tint", L.shadow_tint)
 	mat.set_shader_parameter("high_tint", L.high_tint)
+	mat.set_shader_parameter("scotopic_tint", L.scotopic_tint)
 	_blur.max_len = float(L.blur_max)
 	_blur.near_k = _cams[0].near / float(L.blur_keep_m)
 	_blur.samples = int(L.blur_samples)
@@ -123,6 +135,9 @@ static func _iso(luminance: float) -> float:
 func _process(_delta: float) -> void:
 	if _cams.is_empty() or not is_instance_valid(_cams[0]):
 		return
+	if (Raid.current != null) != _raid:
+		_raid = Raid.current != null
+		apply_settings()
 	var L: Dictionary = Balance.LOOK
 	var free_k: float = 1.0 - clampf(aim_k, 0.0, 1.0)
 	if _lens.visible:

@@ -336,7 +336,12 @@ func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 		e.ambient_light_energy = _mixf(w, "ambient")
 		# ночью рассеянный — ровным тёмно-холодным цветом (небо почти чёрное)
 		e.ambient_light_sky_contribution = 1.0 - float(w.night)
-		e.ambient_light_color = Balance.NIGHT_ENV.ambient_color
+		var ac: Color = Balance.NIGHT_ENV.ambient_color
+		e.ambient_light_color = ac
+		# под SDFGI ровный цвет не действует: свет неба он берёт из карты неба, а ночью она почти чёрная —
+		# лес, руки и оружие в черноте. Ночной рассеянный — «полом» в карте неба (небо на вид то же)
+		if _sky:
+			_sky.set_shader_parameter("amb_floor", Vector3(ac.r, ac.g, ac.b) * float(Balance.NIGHT_ENV.sky_floor) * float(w.night))
 		e.tonemap_exposure = _mixf(w, "exposure")
 		e.fog_light_color = _mixc(w, "fog_color")
 		if e.has_meta("vol_base") and e.volumetric_fog_enabled:

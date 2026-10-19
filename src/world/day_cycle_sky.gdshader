@@ -19,6 +19,9 @@ uniform float exposure = 1.0;
 uniform float hdri_k : hint_range(0.0, 1.0) = 1.0;
 uniform float clamp_max = 40.0;
 uniform float radiance_clamp = 2.5;
+// рассеянный свет ночью — «пол» карты неба (только освещение и отражения): SDFGI берёт свет неба из неё,
+// ровный цвет окружения под ним не действует (DayCycle, NIGHT_ENV.sky_floor)
+uniform vec3 amb_floor = vec3(0.0);
 uniform vec3 tint : source_color = vec3(1.0);
 uniform vec3 overcast_color : source_color = vec3(0.62, 0.65, 0.68);
 uniform float horizon_cut = 0.0;
@@ -76,7 +79,7 @@ void sky() {
 	}
 	c = night_layer(d, c, 1.0);
 	if (AT_CUBEMAP_PASS) {
-		c = min(c, vec3(radiance_clamp));
+		c = min(c + amb_floor, vec3(radiance_clamp));
 	}
 	COLOR = c;
 }
