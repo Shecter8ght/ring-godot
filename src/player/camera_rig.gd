@@ -134,6 +134,22 @@ func _ready() -> void:
 	_vm_space = Node3D.new()
 	_vm_space.name = "ViewmodelSpace"
 	_ads_cam.add_child(_vm_space)
+	# руки и оружие у лица — свой слабый свет, только им (слой 2), мир им не освещён: в темноте силуэт
+	# ствола и перчаток читается, днём рядом с солнцем и небом его не видно (Balance.VIEWMODEL_FILL)
+	var vf: Dictionary = Balance.VIEWMODEL_FILL
+	var fill := DirectionalLight3D.new()
+	fill.name = "ViewmodelFill"
+	fill.set_meta("own", true)
+	fill.light_cull_mask = 2
+	fill.shadow_enabled = false
+	# сила — по темноте вокруг (CameraLook); пока — дневная
+	fill.light_energy = float(vf.energy) * float(vf.day_k)
+	fill.light_color = vf.color
+	fill.light_specular = float(vf.specular)
+	fill.light_volumetric_fog_energy = 0.0
+	fill.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
+	fill.rotation_degrees = Vector3(float(vf.pitch), float(vf.yaw), 0.0)
+	_ads_cam.add_child(fill)
 	_arms = (load("res://scenes/player/first_person_arms.tscn") as PackedScene).instantiate() as FirstPersonArms
 	_vm_space.add_child(_arms)
 	_build_hud()
@@ -1187,7 +1203,8 @@ func _sun_dir() -> Vector3:
 		var scene := get_tree().current_scene
 		if scene:
 			for l in scene.find_children("*", "DirectionalLight3D", true, false):
-				if (l as DirectionalLight3D).visible:
+				# свой свет рук и оружия (ViewmodelFill) — не солнце
+				if (l as DirectionalLight3D).visible and not l.has_meta("own"):
 					_sun = l
 					break
 	if _sun == null:

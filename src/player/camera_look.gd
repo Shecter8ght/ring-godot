@@ -65,6 +65,16 @@ var _prev_xf: Transform3D
 var _has_prev: bool = false
 ## В рейде глаз привыкает к темноте шире и есть ночное зрение; в убежище — свет, как его настроил владелец.
 var _raid: bool = false
+## Внутри здания глаз привыкает сильнее (adapt_up_indoor): тёмная квартира на порядок темнее ночного двора.
+var _indoor: bool = false
+## Темнота вокруг (0..1): ночь или помещение без света — плавно; ночное зрение — только тогда (днём тёмные
+## места не обесцвечиваются: листва и стволы в дождь серели).
+var _dark_k: float = 0.0
+var _dark_target: float = 0.0
+var _ctx_t: float = 0.0
+## Свой свет рук и оружия (CameraRig, ViewmodelFill): в темноте сильнее, внутри здания — слабее во
+## столько, во сколько глаз там привыкает сильнее (иначе ствол «светится» в тёмной квартире).
+var _fill: DirectionalLight3D
 
 
 ## Основная камера — главная: по ней размытие в движении; остальные (оптика) получают ту же экспозицию.
@@ -110,14 +120,14 @@ func apply_settings() -> void:
 		var scale: float = float(L.exposure_scale)
 		_attr.auto_exposure_scale = scale
 		_attr.auto_exposure_speed = float(L.adapt_speed)
-		_attr.auto_exposure_min_sensitivity = _iso(scale / float(L.adapt_up if _raid else L.adapt_up_shelter))
 		_attr.auto_exposure_max_sensitivity = _iso(scale / float(L.adapt_down))
+		_apply_exposure()
 	for cam: Camera3D in _cams:
 		cam.attributes = _attr
 	var mat: ShaderMaterial = _lens.material as ShaderMaterial
 	for k: String in ["vignette", "grain", "sharpen", "saturation", "contrast", "black_keep", "scotopic_l"]:
 		mat.set_shader_parameter(k, float(L[k]))
-	mat.set_shader_parameter("scotopic", float(L.scotopic) if _raid else 0.0)
+	mat.set_shader_parameter("scotopic", float(L.scotopic) * _dark_k if _raid else 0.0)
 	mat.set_shader_parameter("shadow_tint", L.shadow_tint)
 	mat.set_shader_parameter("high_tint", L.high_tint)
 	mat.set_shader_parameter("scotopic_tint", L.scotopic_tint)
@@ -127,18 +137,56 @@ func apply_settings() -> void:
 	_has_prev = false
 
 
+## Предел привыкания глаза вверх: убежище — как настроено, в рейде — на улице и внутри здания свой.
+func _apply_exposure() -> void:
+	var L: Dictionary = Balance.LOOK
+	var up: float = float(L.adapt_up_shelter)
+	if _raid:
+		up = float(L.adapt_up_indoor if _indoor else L.adapt_up)
+	_attr.auto_exposure_min_sensitivity = _iso(float(L.exposure_scale) / up)
+	_update_fill()
+
+
+func _update_fill() -> void:
+	if _fill == null and not _cams.is_empty() and is_instance_valid(_cams[0]):
+		_fill = _cams[0].get_node_or_null("ViewmodelFill") as DirectionalLight3D
+	if _fill == null:
+		return
+	var vf: Dictionary = Balance.VIEWMODEL_FILL
+	var L: Dictionary = Balance.LOOK
+	var k: float = lerpf(float(vf.day_k), 1.0, _dark_k)
+	if _raid and Settings.lens_fx:
+		k *= float(L.adapt_up) / float(L.adapt_up_indoor if _indoor else L.adapt_up)
+	_fill.light_energy = float(vf.energy) * k
+
+
 ## Светимость (как её меряет движок) → «чувствительность ISO» CameraAttributesPractical (12.5 ед. = ISO 100).
 static func _iso(luminance: float) -> float:
 	return luminance * 100.0 / 0.125
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _cams.is_empty() or not is_instance_valid(_cams[0]):
 		return
 	if (Raid.current != null) != _raid:
 		_raid = Raid.current != null
 		apply_settings()
 	var L: Dictionary = Balance.LOOK
+	if _raid and Settings.lens_fx:
+		_ctx_t -= delta
+		if _ctx_t <= 0.0 and RaidAtmosphere.current:
+			_ctx_t = float(L.context_sec)
+			var feet: Vector3 = _cams[0].global_position + Vector3.DOWN * 1.6
+			var indoor: bool = RaidAtmosphere.current.is_indoor(feet)
+			if indoor != _indoor:
+				_indoor = indoor
+				_apply_exposure()
+			var night: bool = String(RaidConditions.current.get("time", "day")) == "night"
+			_dark_target = 1.0 if RaidAtmosphere.current.is_dark(feet) or (indoor and night) else 0.0
+		if not is_equal_approx(_dark_k, _dark_target):
+			_dark_k = move_toward(_dark_k, _dark_target, delta / float(L.scotopic_sec))
+			(_lens.material as ShaderMaterial).set_shader_parameter("scotopic", float(L.scotopic) * _dark_k)
+			_update_fill()
 	var free_k: float = 1.0 - clampf(aim_k, 0.0, 1.0)
 	if _lens.visible:
 		var mat: ShaderMaterial = _lens.material as ShaderMaterial
