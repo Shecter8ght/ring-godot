@@ -103,6 +103,25 @@ uniform vec3 flash_color = vec3(0.75, 0.82, 1.0);
 uniform float flash_core = 25.0;
 uniform float flash_radius = 0.9;
 uniform float flash_amb = 0.25;
+// канал молнии до земли (AtmosphereSky.lightning): ломаная в картинной плоскости — проекция из глаза на
+// плоскость с осью bolt_c (bolt_r — вправо, bolt_u — вверх; отрезки остаются прямыми). Отрезки bolt_seg
+// (xy — начало, zw — конец), их сила bolt_k (x, y — у концов, z — толщина, w — 1 у ветвей), bolt_box — рамка
+// с ореолом. bolt — яркость канала сейчас, bolt_branch — ветвей; bolt_w — полуширина канала, bolt_glow —
+// радиус ореола (в тех же долях), bolt_dist — до канала, км: низкие клочья перед ним его заслоняют.
+uniform int bolt_n = 0;
+uniform float bolt = 0.0;
+uniform float bolt_branch = 0.0;
+uniform vec3 bolt_c = vec3(0.0, 0.0, -1.0);
+uniform vec3 bolt_r = vec3(1.0, 0.0, 0.0);
+uniform vec3 bolt_u = vec3(0.0, 1.0, 0.0);
+uniform vec4 bolt_box = vec4(0.0);
+uniform vec4 bolt_seg[64];
+uniform vec4 bolt_k[64];
+uniform float bolt_w = 0.0003;
+uniform float bolt_glow = 0.005;
+uniform float bolt_dist = 5.0;
+uniform float bolt_core = 60.0;
+uniform float bolt_halo = 3.0;
 
 vec2 lut_uv(vec2 x, sampler2D tex) {
 	vec2 size = vec2(textureSize(tex, 0));
@@ -338,8 +357,9 @@ vec4 clouds(vec3 d, vec3 atm, vec2 cam_km, float sun_k) {
 
 // Низкие рваные клочья под тучами: тонкий слой scud_base..scud_top км, свой ветер (scud_offset —
 // быстрее и под углом к ветру туч), темнее туч — их освещает только свет из-под туч. rgb — свет
-// клочьев, a — сколько видно сквозь них.
-vec4 scud(vec3 d, vec2 cam_km, vec3 haze) {
+// клочьев, a — сколько видно сквозь них (до tmax, км). Шагов scud_steps — не меньше 48: шум клочьев мелкий,
+// при 24 на краях пятен были полосы.
+vec4 scud(vec3 d, vec2 cam_km, vec3 haze, float tmax) {
 	if (scud_coverage <= 0.0 || d.y <= 0.0) {
 		return vec4(0.0, 0.0, 0.0, 1.0);
 	}
@@ -347,7 +367,7 @@ vec4 scud(vec3 d, vec2 cam_km, vec3 haze) {
 	float rb = rc + scud_base;
 	float rs = rc + scud_top;
 	float t0 = -rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rb * rb, 0.0));
-	float t1 = min(-rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rs * rs, 0.0)), 12.0);
+	float t1 = min(-rc * d.y + sqrt(max(rc * rc * (d.y * d.y - 1.0) + rs * rs, 0.0)), min(tmax, 12.0));
 	if (t0 >= t1) {
 		return vec4(0.0, 0.0, 0.0, 1.0);
 	}
@@ -421,6 +441,37 @@ vec4 rain_shafts(vec3 d, vec2 cam_km, vec3 col) {
 	return vec4(col, (1.0 - exp(-tau * shafts)) * mix(0.35, 1.0, streak));
 }
 
+// Канал молнии по лучу d: ядро (не тоньше пикселя — иначе рвётся на точки) и ореол в дожде. Ломаная —
+// в картинной плоскости (bolt_*); низкие клочья между глазом и каналом его заслоняют.
+vec3 bolt_light(vec3 d, vec2 scud_km) {
+	float w = dot(d, bolt_c);
+	vec2 p = vec2(dot(d, bolt_r), dot(d, bolt_u)) / max(w, 0.05);
+	// размер пикселя в тех же долях — до любых ветвлений (производные — по соседним пикселям)
+	float px = max(max(fwidth(p.x), fwidth(p.y)), 1e-6);
+	if (w < 0.3 || p.x < bolt_box.x || p.y < bolt_box.y || p.x > bolt_box.z || p.y > bolt_box.w) {
+		return vec3(0.0);
+	}
+	float core = 0.0;
+	float glow = 0.0;
+	for (int i = 0; i < bolt_n; i++) {
+		vec4 s = bolt_seg[i];
+		vec4 k = bolt_k[i];
+		vec2 ba = s.zw - s.xy;
+		vec2 pa = p - s.xy;
+		float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-12), 0.0, 1.0);
+		float dist = length(pa - ba * h);
+		float e = mix(k.x, k.y, h) * mix(bolt, bolt_branch, k.w);
+		float hw = max(bolt_w * k.z, px * 0.6);
+		core = max(core, e * clamp((hw - dist) / px + 0.5, 0.0, 1.0));
+		glow = max(glow, e * exp(-dist / (bolt_glow * k.z)));
+	}
+	if (core + glow < 0.001) {
+		return vec3(0.0);
+	}
+	float tr = scud(d, scud_km, vec3(0.0), bolt_dist).a;
+	return (mix(vec3(1.0), flash_color, 0.35) * core * bolt_core + flash_color * glow * bolt_halo) * tr;
+}
+
 void sky() {
 	if (AT_HALF_RES_PASS) {
 		// усиление — здесь же: в буфере половинной точности сумеречные 10⁻⁸ иначе обнуляются (и под тучами её не
@@ -430,7 +481,7 @@ void sky() {
 		if (clouds_on) {
 			// клочья — ближе туч, полосы дождя — ближе всего
 			vec3 haze = mix(a, cloud_amb * amb_bottom * 0.65, cloud_coverage * cloud_coverage);
-			vec4 sc = scud(EYEDIR, POSITION.xz / 1000.0 + scud_offset, haze);
+			vec4 sc = scud(EYEDIR, POSITION.xz / 1000.0 + scud_offset, haze, 12.0);
 			cl = vec4(sc.rgb + cl.rgb * sc.a, cl.a * sc.a);
 			vec4 rs = rain_shafts(EYEDIR, POSITION.xz / 1000.0 + cloud_offset, cloud_amb * amb_bottom * 0.6);
 			cl = vec4(mix(cl.rgb, rs.rgb, rs.a), cl.a * (1.0 - rs.a));
@@ -476,6 +527,10 @@ void sky() {
 		if (clouds_on) {
 			float nk = mix(0.08, 1.0, cloud_coverage * cloud_coverage * cloud_coverage);
 			c += (1.0 - vis) * mix(night_cloud, night_cloud_hz, smoothstep(0.25, 0.0, abs(d.y))) * nk * night_k * step(0.0, d.y);
+		}
+		// канал молнии — только на экране: в карте отражений тонкая линия теряется, землю освещает отсвет неба
+		if (!AT_CUBEMAP_PASS && bolt_n > 0 && max(bolt, bolt_branch) > 0.001) {
+			c += bolt_light(d, POSITION.xz / 1000.0 + scud_offset);
 		}
 		if (AT_CUBEMAP_PASS) {
 			c = min(c, vec3(radiance_clamp));

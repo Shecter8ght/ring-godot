@@ -394,8 +394,11 @@ func run_command(cmd: String) -> String:
 	elif a.size() >= 1 and a[0] == "event":
 		# событие рейда сейчас: свет погас, генератор встал, сброс груза, ЧВК (решает хост)
 		out = _dev_event(a[1] if a.size() > 1 else "")
+	elif a.size() >= 1 and a[0] == "lightning":
+		# небо: молния сейчас (только у себя) — с каналом до земли или только в тучах
+		out = _dev_lightning(a.size() > 1 and a[1] == "cloud")
 	elif a.size() >= 1 and a[0] == "help":
-		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · unlock — открыть всё: товар Михалыча, верстак, модули убежища, гравировка · shoploot — лут в продаже у Михалыча · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · unlock — открыть всё: товар Михалыча, верстак, модули убежища, гравировка · shoploot — лут в продаже у Михалыча · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · lightning [cloud] — молния сейчас (расчётное небо, тучи): с каналом до земли или только в тучах · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
 " + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"
@@ -439,3 +442,16 @@ func _dev_event(kind: String) -> String:
 		return "события рейда решает хост"
 	RaidEvents.current.trigger(kind)
 	return "событие: " + kind
+
+
+## Молния на расчётном небе у своего игрока (как от грома в дождь, без звука): куда смотреть — азимут.
+func _dev_lightning(cloud_only: bool) -> String:
+	if DayCycle.current == null or not DayCycle.current._calc:
+		return "молния — только на расчётном небе в рейде (Мир → «Небо»)"
+	var me: Player = Raid.current.local_player() if Raid.current else null
+	var info: Dictionary = AtmosphereSky.lightning(DayCycle.current._sky, me.global_position if me else Vector3.ZERO, 0 if cloud_only else 1)
+	if info.is_empty():
+		return "туч нет — молния бывает в непогоду (дождь)"
+	var d: Vector3 = info.dir
+	var az: float = fposmod(rad_to_deg(atan2(d.x, -d.z)), 360.0)
+	return "молния %s, азимут %.0f°" % ["в тучах" if cloud_only else "с каналом до земли", az]

@@ -1001,7 +1001,12 @@ const HDRI_WEATHER := {
 ## ветер ×wind_k и повёрнут на turn °, шагов steps), shafts — плотность полос дождя вдали. Смена погоды —
 ## небо перетекает за change_sec, с; перед дождём тучи собираются за rain_build_sec до него (гром —
 ## WEATHER_CHANGE.thunder_lead). Молния (flash): ядро core в радиусе radius_km, общий отсвет неба amb,
-## пульсы pulses — [с от начала, сила], каждый гаснет за fade_sec; вспышка за dist_km от игрока.
+## пульсы pulses — [с от начала, сила], каждый гаснет за fade_sec; вспышка за dist_km от игрока. Канал до
+## земли (flash.bolt) — у доли chance вспышек, ближе (dist_km): от низа туч (уходит в тучу на into_cloud_km,
+## гаснет к низу туч за fade_km) до земли с наклоном до lean высоты; ломаная — depth делений пополам, середина
+## сдвигается на ~rough длины; ветвей branches (сила branch_k, толщина branch_width, только в первом ударе);
+## толщина width_m и ореол glow_m, м; яркость ядра core и ореола halo; гаснет за fade_sec; вспышка в туче — над
+## верхом канала на flash_above_km. Шагов клочьев steps — не меньше 48 (при 24 по краям пятен полосы).
 const SKY_CALC := {"sun_size": 0.53, "sun_clamp": 40.0, "amb_match": 1.0, "ground_blend": 3.0,
 	"view_ref": 30, "view_dim": 0.5, "view_min": 0.25,
 	"match_floor": -7.0, "twilight_adapt": 0.12, "cal_from": -18, "cal_to": 70,
@@ -1017,9 +1022,12 @@ const SKY_CALC := {"sun_size": 0.53, "sun_clamp": 40.0, "amb_match": 1.0, "groun
 		"rain": {"mie": 2.0, "overcast": 1.0, "cover": 1.0, "base": 0.6, "top": 4.0, "amb_bottom": 1.4,
 			"deck_var": 0.6, "base_rag": 0.35, "scud": 0.45, "shafts": 0.5}},
 	"change_sec": 45.0, "rain_build_sec": 150.0,
-	"scud": {"base": 0.25, "top": 0.6, "wind_k": 2.2, "turn": -35.0, "steps": 24},
+	"scud": {"base": 0.25, "top": 0.6, "wind_k": 2.2, "turn": -35.0, "steps": 64},
 	"flash": {"core": 25.0, "radius_km": 0.9, "amb": 0.25, "color": Color(0.75, 0.82, 1.0),
-		"pulses": [[0.0, 1.0], [0.08, 0.45], [0.2, 0.8]], "fade_sec": 0.06, "dist_km": [3.0, 12.0]},
+		"pulses": [[0.0, 1.0], [0.08, 0.45], [0.2, 0.8]], "fade_sec": 0.06, "dist_km": [3.0, 12.0],
+		"bolt": {"chance": 0.5, "dist_km": [2.0, 7.0], "into_cloud_km": 0.12, "fade_km": 0.06, "lean": 0.35,
+			"depth": 5, "rough": 0.26, "branches": [1, 3], "branch_k": 0.5, "branch_width": 0.55,
+			"width_m": 3.0, "glow_m": 30.0, "core": 60.0, "halo": 3.0, "fade_sec": 0.1, "flash_above_km": 0.15}},
 	"clouds": {"sigma": 30.0, "cover_tile": 30.0, "shape_tile": 9.0, "detail_tile": 1.2, "detail_k": 0.55,
 		"sun": 0.3, "far": 70.0, "haze": 35.0, "steps": 96, "step_km": 0.023, "steps_max": 160, "wind_ms": 9.0, "wind_from": 250.0,
 		"sun_tau": 0.25, "sun_floor": 0.25}}

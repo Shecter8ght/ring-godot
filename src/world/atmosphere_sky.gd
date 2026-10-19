@@ -29,9 +29,12 @@ static var _from: Dictionary = {}
 static var _to_weather: String = ""
 static var _blend_t: float = 1.0
 static var _last: Dictionary = {}
-## Молния: секунд от начала вспышки (< 0 — нет), где она в тучах (как q шейдера).
+## Молния: секунд от начала вспышки (< 0 — нет), где она в тучах (как q шейдера), есть ли у неё видимый
+## канал до земли; _flash_clear — погасить на небе прерванную вспышку (новый рейд).
 static var _flash_t: float = -1.0
 static var _flash_q: Vector3 = Vector3.ZERO
+static var _bolt_on: bool = false
+static var _flash_clear: bool = false
 
 
 static func available() -> bool:
@@ -84,6 +87,9 @@ static func material() -> ShaderMaterial:
 	m.set_shader_parameter("flash_amb", float(fl.amb))
 	var fc: Color = fl.color
 	m.set_shader_parameter("flash_color", Vector3(fc.r, fc.g, fc.b))
+	var bo: Dictionary = fl.bolt
+	m.set_shader_parameter("bolt_core", float(bo.core))
+	m.set_shader_parameter("bolt_halo", float(bo.halo))
 	return m
 
 
@@ -94,6 +100,8 @@ static func reset_blend() -> void:
 	_blend_t = 1.0
 	_last = {}
 	_flash_t = -1.0
+	_bolt_on = false
+	_flash_clear = true
 
 
 ## Солнце (направление на него, высота, °) и погода: дымка, облака, яркость и оттенок по подгонке.
@@ -192,33 +200,149 @@ static func clouds_tick(m: ShaderMaterial, hour: float, delta: float = 0.0) -> v
 	var su: Dictionary = sc.scud
 	m.set_shader_parameter("scud_offset", -_dir_to(float(cl.wind_from) + 180.0 + float(su.turn))
 		* fposmod(km * float(su.wind_k), float(cl.cover_tile) * 8.0))
+	if _flash_clear:
+		_flash_clear = false
+		for k: String in ["flash", "bolt", "bolt_branch"]:
+			m.set_shader_parameter(k, 0.0)
 	if _flash_t >= 0.0:
 		_flash_t += delta
 		var fl: Dictionary = sc.flash
+		var bo: Dictionary = fl.bolt
 		var v := 0.0
+		var vb := 0.0
 		for pulse: Array in fl.pulses:
 			var dt := _flash_t - float(pulse[0])
 			if dt >= 0.0:
 				v += float(pulse[1]) * exp(-dt / float(fl.fade_sec))
+				# канал светится дольше вспышки в туче: ток после удара
+				vb += float(pulse[1]) * exp(-dt / float(bo.fade_sec))
 		m.set_shader_parameter("flash", v)
 		m.set_shader_parameter("flash_q", _flash_q)
-		if v < 0.002 and _flash_t > 0.5:
+		# ветви канала — только в первом ударе (ступенчатый лидер), следующие идут по главному каналу
+		var first: Array = fl.pulses[0]
+		m.set_shader_parameter("bolt", vb if _bolt_on else 0.0)
+		m.set_shader_parameter("bolt_branch", float(first[1]) * exp(-_flash_t / float(bo.fade_sec)) if _bolt_on else 0.0)
+		if maxf(v, vb) < 0.002 and _flash_t > 0.5:
 			_flash_t = -1.0
-			m.set_shader_parameter("flash", 0.0)
+			_flash_clear = true
 
 
-## Молния в тучах у игрока в pos (м, мир): вспышка в случайной стороне на dist_km, в толще туч.
-static func lightning(m: ShaderMaterial, pos: Vector3) -> void:
+## Молния у игрока в pos (м, мир), в случайной стороне. Обычно — вспышка в толще туч на dist_km; с долей
+## bolt.chance — с видимым каналом до земли (ближе, bolt.dist_km), вспышка тогда у его верха, над низом туч.
+## with_bolt: 1 — канал всегда, 0 — никогда (снимки, проверки), −1 — по случаю. Возвращает {"dir" —
+## направление на молнию (мир), "bolt" — есть ли канал}; тучи нет — {}.
+static func lightning(m: ShaderMaterial, pos: Vector3, with_bolt: int = -1) -> Dictionary:
 	if m == null or m.get_shader_parameter("clouds_on") != true:
-		return
+		return {}
 	var fl: Dictionary = Balance.SKY_CALC.flash
-	var dist := randf_range(float(fl.dist_km[0]), float(fl.dist_km[1]))
+	var bo: Dictionary = fl.bolt
+	_bolt_on = randf() < float(bo.chance) if with_bolt < 0 else with_bolt > 0
+	var dk: Array = bo.dist_km if _bolt_on else fl.dist_km
+	var dist := randf_range(float(dk[0]), float(dk[1]))
 	var off: Vector2 = m.get_shader_parameter("cloud_offset")
 	var dir := _dir_to(randf() * 360.0)
 	var base: float = m.get_shader_parameter("cloud_base")
 	var top: float = m.get_shader_parameter("cloud_top")
-	_flash_q = Vector3(pos.x / 1000.0 + off.x + dir.x * dist, lerpf(base, top, 0.35), pos.z / 1000.0 + off.y + dir.y * dist)
+	var qx := pos.x / 1000.0 + off.x + dir.x * dist
+	var qz := pos.z / 1000.0 + off.y + dir.y * dist
+	_flash_q = Vector3(qx, lerpf(base, top, 0.35), qz)
 	_flash_t = 0.0
+	var look := Vector3(dir.x, 0.0, dir.y)
+	m.set_shader_parameter("bolt_n", 0)
+	if _bolt_on:
+		# низ туч над каналом — с рваным низом, как его рисует шейдер
+		var low := base + _rag(m, qx, qz)
+		_flash_q.y = low + float(bo.flash_above_km)
+		look = _make_bolt(m, dir, dist, low)
+	return {"dir": look, "bolt": _bolt_on}
+
+
+## Канал молнии за dist км в сторону dir: от низа туч low (км над глазом; верх уходит в тучу на into_cloud_km
+## и гаснет к низу туч за fade_km) до земли с наклоном до lean его высоты. Главный канал — ломаная середин
+## (_bolt_path), из верхней половины — ветви, к концам тоньше и тусклее. Шейдеру — в картинной плоскости
+## (проекция из глаза: отрезки остаются прямыми). Возвращает направление на середину канала (мир).
+static func _make_bolt(m: ShaderMaterial, dir: Vector2, dist: float, low: float) -> Vector3:
+	var bo: Dictionary = Balance.SKY_CALC.flash.bolt
+	var top := low + float(bo.into_cloud_km)
+	var fade := float(bo.fade_km)
+	var main := _bolt_path(Vector2(0.0, top), Vector2(randf_range(-1.0, 1.0) * float(bo.lean) * top, 0.0),
+		int(bo.depth), float(bo.rough))
+	# x — вбок, км; y — высота над глазом; z — сила (к концу ветви — 0); w — 1 у ветвей
+	var paths: Array[Array] = [[main, 1.0, 0.0]]
+	# шейдеру — не больше 64 отрезков
+	var room := floori(float(64 - (main.size() - 1)) / float(1 << maxi(int(bo.depth) - 2, 0)))
+	for i in range(mini(randi_range(int(bo.branches[0]), int(bo.branches[1])), room)):
+		var at: Vector2 = main[randi_range(floori(main.size() * 0.125), floori(main.size() * 0.5))]
+		var ang := deg_to_rad(randf_range(20.0, 60.0)) * (1.0 if randf() < 0.5 else -1.0)
+		var end := at + Vector2(sin(ang), -cos(ang)) * randf_range(0.25, 0.5) * top
+		paths.append([_bolt_path(at, end, int(bo.depth) - 2, float(bo.rough)), float(bo.branch_k), 1.0])
+	var fwd := Vector3(dir.x, 0.0, dir.y)
+	var side := Vector3(-dir.y, 0.0, dir.x)
+	var c := (fwd * dist + Vector3.UP * top * 0.5).normalized()
+	var r := c.cross(Vector3.UP).normalized()
+	var u := r.cross(c)
+	var segs := PackedVector4Array()
+	var ks := PackedVector4Array()
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for path: Array in paths:
+		var pts: PackedVector2Array = path[0]
+		var k0: float = path[1]
+		var branch: float = path[2]
+		var uv := PackedVector2Array()
+		var kk := PackedFloat32Array()
+		for i in range(pts.size()):
+			var w := fwd * dist + side * pts[i].x + Vector3.UP * pts[i].y
+			uv.append(Vector2(w.dot(r), w.dot(u)) / w.dot(c))
+			# в туче канала не видно; ветвь к концу гаснет
+			var tip := 1.0 - float(i) / float(pts.size() - 1) if branch > 0.0 else 1.0
+			kk.append(k0 * tip * (1.0 - smoothstep(low - fade, low, pts[i].y)))
+			lo = lo.min(uv[i])
+			hi = hi.max(uv[i])
+		for i in range(pts.size() - 1):
+			segs.append(Vector4(uv[i].x, uv[i].y, uv[i + 1].x, uv[i + 1].y))
+			ks.append(Vector4(kk[i], kk[i + 1], 1.0 if branch == 0.0 else float(bo.branch_width), branch))
+	var w_half := float(bo.width_m) * 0.5 / 1000.0 / dist
+	var glow := float(bo.glow_m) / 1000.0 / dist
+	var pad := glow * 7.0 + 0.003
+	var n := segs.size()
+	segs.resize(64)
+	ks.resize(64)
+	m.set_shader_parameter("bolt_c", c)
+	m.set_shader_parameter("bolt_r", r)
+	m.set_shader_parameter("bolt_u", u)
+	m.set_shader_parameter("bolt_seg", segs)
+	m.set_shader_parameter("bolt_k", ks)
+	m.set_shader_parameter("bolt_n", n)
+	m.set_shader_parameter("bolt_box", Vector4(lo.x - pad, lo.y - pad, hi.x + pad, hi.y + pad))
+	m.set_shader_parameter("bolt_w", w_half)
+	m.set_shader_parameter("bolt_glow", glow)
+	m.set_shader_parameter("bolt_dist", dist)
+	return c
+
+
+## Ломаная от a до b: depth раз каждый отрезок делится пополам, середина сдвигается поперёк на долю ~rough
+## его длины — изломы на всех масштабах, как у канала молнии.
+static func _bolt_path(a: Vector2, b: Vector2, depth: int, rough: float) -> PackedVector2Array:
+	var pts := PackedVector2Array([a, b])
+	for level in range(depth):
+		var out := PackedVector2Array()
+		for i in range(pts.size() - 1):
+			var p := pts[i]
+			var q := pts[i + 1]
+			out.append(p)
+			out.append((p + q) * 0.5 + (q - p).orthogonal().normalized() * clampf(randfn(0.0, rough), -2.0 * rough, 2.0 * rough) * p.distance_to(q))
+		out.append(pts[pts.size() - 1])
+		pts = out
+	return pts
+
+
+## Насколько низ туч в точке карты (qx, qz, км) ниже или выше ровного (рваный низ шейдера), км.
+static func _rag(m: ShaderMaterial, qx: float, qz: float) -> float:
+	if not _noise_ready():
+		return 0.0
+	var tile := float(Balance.SKY_CALC.clouds.detail_tile) * 2.5
+	return (_sample3(_detail_imgs, Vector3(qx, 0.0, qz) / tile) - 0.5) * float(m.get_shader_parameter("base_rag"))
 
 
 ## Направление по карте на азимут az, ° (от севера к востоку): север — −Z, восток — +X.
