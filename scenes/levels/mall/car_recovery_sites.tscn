@@ -6,59 +6,60 @@
 [ext_resource type="Texture2D" path="res://assets/textures/car_clues/coolant_stain_albedo.png" id="4"]
 [ext_resource type="Texture2D" path="res://assets/textures/car_clues/coolant_stain_normal.png" id="5"]
 [ext_resource type="Texture2D" path="res://assets/textures/car_clues/coolant_stain_orm.png" id="6"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tire_scuff_a_albedo.png" id="7"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tire_scuff_b_albedo.png" id="8"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/invoice_albedo.png" id="9"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/invoice_normal.png" id="10"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tag_yur8_albedo.png" id="11"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_K417MP77_albedo.png" id="12"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_K417MP77_normal.png" id="13"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_A921BC50_albedo.png" id="14"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_A921BC50_normal.png" id="15"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_E305TK199_albedo.png" id="16"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_E305TK199_normal.png" id="17"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_O774HA77_albedo.png" id="18"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_O774HA77_normal.png" id="19"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_M158PY750_albedo.png" id="20"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_M158PY750_normal.png" id="21"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_T640XO190_albedo.png" id="22"]
-[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_T640XO190_normal.png" id="23"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tire_drag_06_albedo.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tire_drag_05_albedo.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tire_drag_03_albedo.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/invoice_albedo.png" id="10"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/invoice_normal.png" id="11"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tag_yur8_albedo.png" id="12"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_K417MP77_albedo.png" id="13"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_K417MP77_normal.png" id="14"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_A921BC50_albedo.png" id="15"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_A921BC50_normal.png" id="16"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_E305TK199_albedo.png" id="17"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_E305TK199_normal.png" id="18"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_O774HA77_albedo.png" id="19"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_O774HA77_normal.png" id="20"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_M158PY750_albedo.png" id="21"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_M158PY750_normal.png" id="22"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_T640XO190_albedo.png" id="23"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_T640XO190_normal.png" id="24"]
 
 [sub_resource type="StandardMaterial3D" id="Plate_K417MP77"]
-albedo_texture = ExtResource("12")
+albedo_texture = ExtResource("13")
 roughness = 0.5
 normal_enabled = true
-normal_texture = ExtResource("13")
+normal_texture = ExtResource("14")
 
 [sub_resource type="StandardMaterial3D" id="Plate_A921BC50"]
-albedo_texture = ExtResource("14")
+albedo_texture = ExtResource("15")
 roughness = 0.5
 normal_enabled = true
-normal_texture = ExtResource("15")
+normal_texture = ExtResource("16")
 
 [sub_resource type="StandardMaterial3D" id="Plate_E305TK199"]
-albedo_texture = ExtResource("16")
+albedo_texture = ExtResource("17")
 roughness = 0.5
 normal_enabled = true
-normal_texture = ExtResource("17")
+normal_texture = ExtResource("18")
 
 [sub_resource type="StandardMaterial3D" id="Plate_O774HA77"]
-albedo_texture = ExtResource("18")
+albedo_texture = ExtResource("19")
 roughness = 0.5
 normal_enabled = true
-normal_texture = ExtResource("19")
+normal_texture = ExtResource("20")
 
 [sub_resource type="StandardMaterial3D" id="Plate_M158PY750"]
-albedo_texture = ExtResource("20")
+albedo_texture = ExtResource("21")
 roughness = 0.5
 normal_enabled = true
-normal_texture = ExtResource("21")
+normal_texture = ExtResource("22")
 
 [sub_resource type="StandardMaterial3D" id="Plate_T640XO190"]
-albedo_texture = ExtResource("22")
+albedo_texture = ExtResource("23")
 roughness = 0.5
 normal_enabled = true
-normal_texture = ExtResource("23")
+normal_texture = ExtResource("24")
 
 [sub_resource type="StandardMaterial3D" id="PlateBack"]
 albedo_color = Color(0.62, 0.62, 0.6, 1)
@@ -66,17 +67,17 @@ metallic = 0.8
 roughness = 0.55
 
 [sub_resource type="StandardMaterial3D" id="Paper"]
-albedo_texture = ExtResource("9")
+albedo_texture = ExtResource("10")
 roughness = 0.92
 normal_enabled = true
 normal_scale = 0.6
-normal_texture = ExtResource("10")
+normal_texture = ExtResource("11")
 cull_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="Tag"]
 transparency = 2
 alpha_scissor_threshold = 0.5
-albedo_texture = ExtResource("11")
+albedo_texture = ExtResource("12")
 roughness = 0.95
 cull_mode = 2
 
@@ -114,31 +115,24 @@ texture_orm = ExtResource("6")
 upper_fade = 0.2
 lower_fade = 0.2
 
-[node name="TireScuff_0" type="Decal" parent="Parking"]
-transform = Transform3D(0.997564, 0, -0.069756, 0, 1, 0, 0.069756, 0, 0.997564, 0.83, 0.25, -1.43)
-size = Vector3(0.26, 0.8, 0.75)
+[node name="TireDrag_06" type="Decal" parent="Parking"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -0.149, 0.25, -0.742)
+size = Vector3(5.338, 0.8, 5.815)
 texture_albedo = ExtResource("7")
 upper_fade = 0.2
 lower_fade = 0.2
 
-[node name="TireScuff_1" type="Decal" parent="Parking"]
-transform = Transform3D(0.998630, 0, 0.052336, 0, 1, 0, -0.052336, 0, 0.998630, -0.83, 0.25, -1.43)
-size = Vector3(0.26, 0.8, 0.75)
+[node name="TireDrag_05" type="Decal" parent="Parking"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0.044, 0.25, -4.963)
+size = Vector3(4.106, 0.8, 5.678)
 texture_albedo = ExtResource("8")
 upper_fade = 0.2
 lower_fade = 0.2
 
-[node name="TireScuff_2" type="Decal" parent="Parking"]
-transform = Transform3D(0.999391, 0, 0.034899, 0, 1, 0, -0.034899, 0, 0.999391, 0.83, 0.25, 1.43)
-size = Vector3(0.26, 0.8, 0.75)
-texture_albedo = ExtResource("8")
-upper_fade = 0.2
-lower_fade = 0.2
-
-[node name="TireScuff_3" type="Decal" parent="Parking"]
-transform = Transform3D(0.998630, 0, -0.052336, 0, 1, 0, 0.052336, 0, 0.998630, -0.83, 0.25, 1.43)
-size = Vector3(0.26, 0.8, 0.75)
-texture_albedo = ExtResource("7")
+[node name="TireDrag_03" type="Decal" parent="Parking"]
+transform = Transform3D(0.939693, 0, -0.342020, 0, 1, 0, 0.342020, 0, 0.939693, 1.109, 0.25, -9.057)
+size = Vector3(4.875, 0.8, 6.944)
+texture_albedo = ExtResource("9")
 upper_fade = 0.2
 lower_fade = 0.2
 

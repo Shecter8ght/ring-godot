@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cvnp0sn0c6l1g"
-path="res://.godot/imported/tire_scuff_a_albedo.png-c6e5ea41e618055cf77672661bf4e431.ctex"
+uid="uid://sgbwyny6s3r6"
+path="res://.godot/imported/tire_drag_03_albedo.png-6d0e1ac49ca6a0fb6fefaa271889a1c8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/car_clues/tire_scuff_a_albedo.png"
-dest_files=["res://.godot/imported/tire_scuff_a_albedo.png-c6e5ea41e618055cf77672661bf4e431.ctex"]
+source_file="res://assets/textures/car_clues/tire_drag_03_albedo.png"
+dest_files=["res://.godot/imported/tire_drag_03_albedo.png-6d0e1ac49ca6a0fb6fefaa271889a1c8.ctex"]
 
 [params]
 

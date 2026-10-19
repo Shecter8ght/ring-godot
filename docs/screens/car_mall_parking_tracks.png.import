@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dybbxthqrm2k7"
-path="res://.godot/imported/tire_scuff_b_albedo.png-af2124922c957a830cc657396ad8794d.ctex"
+uid="uid://d3qo7rvq52bwo"
+path="res://.godot/imported/car_mall_parking_tracks.png-d2b5410dbf4217873044b544e8ba4787.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/car_clues/tire_scuff_b_albedo.png"
-dest_files=["res://.godot/imported/tire_scuff_b_albedo.png-af2124922c957a830cc657396ad8794d.ctex"]
+source_file="res://docs/screens/car_mall_parking_tracks.png"
+dest_files=["res://.godot/imported/car_mall_parking_tracks.png-d2b5410dbf4217873044b544e8ba4787.ctex"]
 
 [params]
 

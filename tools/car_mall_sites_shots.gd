@@ -83,6 +83,8 @@ func _ready() -> void:
 		var wide: Node3D = _site("car_mall_parking_wide")
 		if wide:
 			await _shot(cam, player, wide.global_position + Vector3(-5.0, 2.2, -6.5), wide.global_position + Vector3(0.0, 0.0, 0.6), "parking")
+			# след вывоза: машину утащили на заблокированных колёсах вперёд и вправо, к въезду во двор
+			await _shot(cam, player, wide.global_position + Vector3(4.0, 3.6, 3.5), wide.global_position + Vector3(0.4, 0.0, -4.5), "parking_tracks")
 			# пятно антифриза под передком и кусок накладки у левого порога
 			await _shot(cam, player, wide.global_position + Vector3(-2.0, 1.5, -3.3), wide.global_position + Vector3(-0.4, 0.0, -1.5), "parking_detail")
 			await _shot(cam, player, wide.global_position + Vector3(-1.4, 0.55, -1.2), wide.global_position + Vector3(-1.15, 0.0, -0.85), "parking_trim")
