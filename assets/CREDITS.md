@@ -59,6 +59,14 @@
   (маски износа — `E:/Models Blender/Маски_АЛЬФА` владельца), игровая сетка и запекание — radiator_game.py;
   исходники — `E:/Models Blender/VEHICLES/Купе Ильи/models/items` (asset-state.md там же).
 
+## Машина Ильи (assets/models/props/coupe_ilya)
+
+- `coupe_ilya.glb` (+ извлечённые карты `coupe_ilya_*.png`) — собственная модель купе Ильи для заказа «Вернуть машину»:
+  форма — `tools/coupe_ilya/build_coupe.py` и соседние скрипты, отделка UCUPaint — `texture_coupe.py` (маски износа —
+  `E:/Models Blender/Маски_АЛЬФА` владельца; карбон, подложки номеров, этикетка аккумулятора — `gen_textures.py`), игровая
+  сетка, запекание и экспорт — `game_lp.py`, `game_bake.py`, `game_pack.py`, `game_export.py`; исходники —
+  `E:/Models Blender/VEHICLES/Купе Ильи` (asset-state.md там же).
+
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 
 - Модель, риг, текстуры (состояние 100) и руки FPS — собственные ассеты владельца проекта

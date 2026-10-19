@@ -99,6 +99,11 @@ tools/godot.cmd --headless res://tools/car_recovery_test.tscn # заказ «В�
                                                               # запекание с принятых текстур UCUPaint, два атласа 2K → assets/items/models/car/car_radiator.glb
                                                               # (imports — после первого --import: сжатие карт как у ПМ; затем --import ещё раз)
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/car_radiator_shots.tscn # радиатор как предмет игры: стоит и лежит, бирка, патрубок, горловина вблизи, издали; снимки car_radiator_*
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/coupe_ilya/game_lp.py -- <отделка.blend>
+                                                              # купе Ильи в игру: сетка LOD 150/50/12 тыс. и развёртки, затем тем же Blender game_bake.py → game_pack.py →
+                                                              # game_export.py → assets/models/props/coupe_ilya; --import, python tools/coupe_ilya/game_imports.py, --import
+tools/godot.cmd --headless res://tools/coupe_ilya_shots.tscn -- check # купе в движке: узлы состояний и LOD, габарит, коллизия, бюджет;
+                                                              # с окном (--windowed --resolution 1280x800) — снимки coupe_ilya_* (-- only=front34,bay,lod)
 tools/godot.cmd res://tools/conditions_test.tscn            # условия рейда: зрение мародёров днём/ночью, свет ТЦ по питанию; с окном — снимки cond_*
 tools/godot.cmd res://tools/weather_test.tscn               # погода: дождь (в т.ч. начинается в рейде), туман и снайпер, жара и очки, выносливость
 tools/godot.cmd --headless res://tools/events_test.tscn     # события и фракции: жильцы, сигнализация, свет погас, генератор, сброс, ЧВК против мародёров, рация

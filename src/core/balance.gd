@@ -243,6 +243,9 @@ const PLAYER_TURN_SPEED := 12.0
 ## оружию и стенам, дальше anim_m[0] клип считается через кадр, дальше anim_m[1] — раз в четыре кадра;
 ## every — как часто проверять, с; hysteresis — запас в метрах на возврат, чтобы тень не мигала.
 const CHARACTER_LOD := {"shadows_m": 55.0, "hide_m": 320.0, "ik_m": 35.0, "anim_m": [45.0, 100.0], "every": 0.4, "hysteresis": 6.0}
+## Машина Ильи (src/world/ilya_car.gd): ближняя модель (~150 тыс. треугольников) до lod1_m от камеры, дальше
+## LOD1 (~50 тыс.), с lod2_m — LOD2 (~12 тыс.); margin_m — запас на возврат, чтобы сетки не мигали на границе.
+const VEHICLE_LOD := {"lod1_m": 15.0, "lod2_m": 40.0, "margin_m": 1.5}
 const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "sprint_from": 4.8, "blend_sec": 0.16, "prone_hold_sec": 1.0, "prone_aim_hold_sec": 0.3, "hurt_below": 0.35, "support_blend_sec": 0.15, "speed_smooth_sec": 0.1}
 
 # --- Капсула по стойкам: высота, м ---

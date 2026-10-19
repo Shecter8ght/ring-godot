@@ -1,0 +1,77 @@
+{
+ "source": "E:\\Models Blender\\VEHICLES\\Купе Ильи\\textured\\Coupe_Ilya_tex_v01.blend",
+ "source_sha256": "2b7303b784f9d76285a3b8975697bb48b5563a86ec6977fbf881c81a932d147c",
+ "budget_owner": "ближняя ~150 тыс., дальше 50 и 12 тыс.; карты 4K кузов, 2K остальное (владелец 2026-10-18)",
+ "triangles": {
+  "LOD0": 154104,
+  "LOD1": 47597,
+  "LOD2": 12428
+ },
+ "nodes_triangles": {
+  "Body": [
+   109636,
+   35009,
+   9514
+  ],
+  "Battery_Installed": [
+   2392,
+   838,
+   240
+  ],
+  "WheelOff_FL": [
+   1198,
+   398,
+   120
+  ],
+  "Battery_Missing": [
+   1670,
+   482,
+   120
+  ],
+  "Wheel(×4)": [
+   8631,
+   2311,
+   500
+  ],
+  "Hood": [
+   4684,
+   1626,
+   434
+  ]
+ },
+ "atlases": {
+  "body": 4096,
+  "glass": 2048,
+  "wheel": 2048,
+  "bay": 2048,
+  "interior": 2048
+ },
+ "axes": "Blender −Y перёд → Godot +Z; +X — левый борт машины (порог с приметой); начало — центр на земле",
+ "hood": {
+  "node": "Hood",
+  "axis": "X",
+  "open_rad": -0.87
+ },
+ "states": {
+  "wheel_fitted": [
+   "Wheel_FL"
+  ],
+  "wheel_removed": [
+   "WheelOff_FL"
+  ],
+  "battery_installed": [
+   "Battery_Installed"
+  ],
+  "battery_missing": [
+   "Battery_Missing"
+  ]
+ },
+ "materials": {
+  "GAME • body": "атлас кузова 4K",
+  "GAME • glass": "стёкла, прозрачность в альфе цвета",
+  "GAME • wheel": "колесо, кирпичи, кулак",
+  "GAME • bay": "моторный отсек, аккумулятор",
+  "GAME • interior": "салон",
+  "GAME • const • …": "светящиеся и зеркальные мелочи без карт"
+ }
+}
