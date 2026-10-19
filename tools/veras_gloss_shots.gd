@@ -4,7 +4,8 @@ extends Node
 ## tools/godot.cmd res://tools/veras_gloss_shots.tscn
 ## → docs/screens/veras_gloss_*.png. GLOSS_TAG=имя — приставка к файлам; GLOSS_MODS=точка:обвес,… — обвесы;
 ## GLOSS_DUR=60 — ресурс ствола и обвесов (карты состояний 100 / 60 / 20); GLOSS_ONLY=имя,имя — выборочно;
-## GLOSS_CANT=1 — в прицеле «с завалом» (автомат боком к лампам, как на снимке владельца 2026-10-19).
+## GLOSS_CANT=1 — в прицеле «с завалом» (автомат боком к лампам, как на снимке владельца 2026-10-19);
+## GLOSS_MAG=mag_545_45|mag_545_60 — с магазином на 45 / барабаном на 60; GLOSS_CHECK=1 — магазин у глаз (держать R).
 
 const ID := "wpn_ar_01"
 ## Курс вдоль дорожки тира (к мишеням, +X).
@@ -34,6 +35,10 @@ func _ready() -> void:
 	var entry: Dictionary = WeaponDb.bare_weapon(ID, rng, [100, 100])
 	entry["mods"] = _mods()
 	entry["dur"] = _dur()
+	var mag: String = OS.get_environment("GLOSS_MAG")
+	if mag != "" and entry.get("mag") is Dictionary:
+		(entry.mag as Dictionary)["id"] = mag
+		(entry.mag as Dictionary)["rounds"] = int(WeaponDb.magazine(mag).get("capacity", 30))
 	pl.set_range_weapon(entry)
 	CameraRig.first_person_mode = true
 	await get_tree().create_timer(0.8).timeout
@@ -42,6 +47,10 @@ func _ready() -> void:
 		await get_tree().create_timer(float(pl.spec().aim_time) + 0.3).timeout
 		pl.aim_cant = true
 		await get_tree().create_timer(0.6).timeout
+	if OS.get_environment("GLOSS_CHECK") == "1":
+		# проверка магазина удержанием R: магазин окнами к глазам, под лампами
+		Input.action_press("reload")
+		await get_tree().create_timer(float(Balance.AMMO_CHECK.hold_sec) + 1.4).timeout
 	var tag: String = OS.get_environment("GLOSS_TAG")
 	var only: PackedStringArray = OS.get_environment("GLOSS_ONLY").split(",", false)
 	for look: Array in LOOKS:
