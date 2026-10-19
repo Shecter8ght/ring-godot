@@ -6201,3 +6201,14 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   временную папку). Перепечено с `TEMP`/`TMP` на E: (`_asset_src/mosin_pu_game/tmp`).
 - Осталось: заряжание обоймой и открытый прицел без ПУ (пазы есть); в `Mosin_Load_Round` на кадрах 9–12 патрон в
   пальцах проходит сквозь крепление (так и в v02); подробная версия для продажи (detail) на v08; клипы в игру.
+
+### 2026-10-19 — машина Ильи: радиатор с патрубками в игре (Claude)
+
+- Игровая модель предмета `car_radiator`: сетка тем же генератором с меньшей плотностью (`radiator.py`, параметр Q; при Q = 1 —
+  ровно принятая форма), 16,5 тыс. треугольников, два атласа 2K (сердцевина и остальное), запечённых с принятых текстур
+  UCUPaint — `tools/coupe_ilya/radiator_game.py -- lp|bake|pack|export|imports`.
+- `assets/items/models/car/car_radiator.glb` (+ извлечённые карты, `car_radiator.json`), иконка `assets/icons/car_radiator.png`,
+  в `data/items.json` — поле `model`: предмет виден в рюкзаке, на полу и везде, где строит `ItemModels`.
+- Проверено: стенд `tools/car_radiator_shots.tscn` (снимки `docs/screens/car_radiator_*`), compile_check — 0,
+  car_recovery_test — 0 провалов. В `AGENTS.md` — обе команды, в `assets/CREDITS.md` — источник.
+- Осталось: показать радиатор моделью в кладовой и в комплекте у машины (у мест заказа нет `cargo` / `placed`).

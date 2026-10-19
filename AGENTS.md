@@ -94,6 +94,11 @@ tools/godot.cmd --headless res://tools/terminal_story_test.tscn # перепис
 tools/godot.cmd --headless res://tools/quest_steps_test.tscn # шаги заказа машины в убежище: снимки, ранняя находка, пропуск шагов, сдача деталей без эвакуации, «не в карман»
 tools/godot.cmd --headless res://tools/tutorial_test.tscn   # обучение новой игры: пакет на ящиках → рюкзак → полка → терминал, рюкзак заранее, старые сохранения
 tools/godot.cmd --headless res://tools/car_recovery_test.tscn # заказ «Вернуть машину» по данным: обычный путь, ранняя находка, общий отчёт, оплаты, тестовые инструкции
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/coupe_ilya/radiator_game.py -- lp|bake|pack|export|imports
+                                                              # радиатор (предмет car_radiator) в игру: сетка ~16,5 тыс. треугольников тем же генератором,
+                                                              # запекание с принятых текстур UCUPaint, два атласа 2K → assets/items/models/car/car_radiator.glb
+                                                              # (imports — после первого --import: сжатие карт как у ПМ; затем --import ещё раз)
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/car_radiator_shots.tscn # радиатор как предмет игры: стоит и лежит, бирка, патрубок, горловина вблизи, издали; снимки car_radiator_*
 tools/godot.cmd res://tools/conditions_test.tscn            # условия рейда: зрение мародёров днём/ночью, свет ТЦ по питанию; с окном — снимки cond_*
 tools/godot.cmd res://tools/weather_test.tscn               # погода: дождь (в т.ч. начинается в рейде), туман и снайпер, жара и очки, выносливость
 tools/godot.cmd --headless res://tools/events_test.tscn     # события и фракции: жильцы, сигнализация, свет погас, генератор, сброс, ЧВК против мародёров, рация

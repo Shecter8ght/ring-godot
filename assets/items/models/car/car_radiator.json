@@ -1,0 +1,30 @@
+{
+ "item": "car_radiator",
+ "source": "E:\\Models Blender\\VEHICLES\\Купе Ильи\\models\\items\\Radiator_Ilya_v01_pbr.blend",
+ "source_sha256": "b7f9bde8fcd12c8e1f4eeafb29cd3b57d914da8b27b84eb115318778afa3eacd",
+ "triangles": 16458,
+ "parts": {
+  "Core": 12,
+  "Frame": 576,
+  "Tank_L": 2304,
+  "Tank_R": 2616,
+  "Drain_Plug": 240,
+  "Hose_Upper": 2304,
+  "Hose_Upper_Clamps": 2208,
+  "Hose_Lower": 2784,
+  "Hose_Lower_Clamps": 2208,
+  "Tag_Wire": 830,
+  "Tag_Card": 120,
+  "Tag_Rings": 256
+ },
+ "atlases": {
+  "core": "2048×2048: albedo (sRGB), normal (OpenGL), orm (R — AO, G — шероховатость, B — металл)",
+  "body": "2048×2048: albedo (sRGB), normal (OpenGL), orm (R — AO, G — шероховатость, B — металл)"
+ },
+ "px_per_mm": {
+  "core_front": 2.51,
+  "body": 1.91
+ },
+ "axes": "Blender: +X — левый борт машины, −Y — перёд; в Godot перёд машины → +Z, Y вверх; начало — под нижними шипами по центру (в машине: (0, −2,02, 0,333) в осях Blender)",
+ "lod": "автоматические LOD движка при импорте (как у остальных предметов)"
+}

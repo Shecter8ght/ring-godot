@@ -47,9 +47,15 @@ HOSE_UP_OD, HOSE_LO_OD, HOSE_WALL = 0.042, 0.046, 0.0045
 CAR_POS = np.array([0.0, Y_C, 0.333])
 TAG_W, TAG_H, TAG_T = 0.070, 0.120, 0.0006     # картонная бирка 70 × 120 мм
 TAG_HOLE = 0.012              # от верхнего края до центра отверстия
+Q = 1.0                       # плотность сетки: 1 — принятая форма (high-poly); меньше — игровая (radiator_game.py)
 
 
 # --- Общие построители ---------------------------------------------------------------------------
+
+def _q(n: int, lo: int) -> int:
+    """Число сегментов при плотности Q; при Q = 1 — ровно как в принятой форме."""
+    return n if Q >= 1.0 else max(lo, int(round(n * Q)))
+
 
 def _unit(v) -> np.ndarray:
     v = np.asarray(v, dtype=float)
@@ -66,7 +72,7 @@ def basis(d) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 def revolve_on(profile, base, direction, seg: int = 48, closed: bool = False, phase: float = 0.0):
     """Тело вращения (профиль: расстояние вдоль оси, радиус) с осью direction от точки base."""
-    V, F = revolve(profile, seg, closed, phase)
+    V, F = revolve(profile, seg if seg <= 6 else _q(seg, 8), closed, phase)   # шестигранник не трогать
     d, e1, e2 = basis(direction)
     return np.asarray(base, float) + V[:, :1] * d + V[:, 1:2] * e1 + V[:, 2:3] * e2, F
 
@@ -77,6 +83,7 @@ def rbox(c, size, r_side: float, r_cap: float, axes=((1, 0, 0), (0, 1, 0), (0, 0
     вдоль axes[2] на size[2]; рёбра торцов скруглены радиусом r_cap (сечение сужается по дуге наружу)."""
     u, v, w = (np.asarray(a, float) for a in axes)
     sx, sy, sz = size
+    n_side, n_cap = _q(n_side, 2), _q(n_cap, 1)
     r_cap = min(r_cap, sx * 0.49, sy * 0.49, sz * 0.49)
     r_side = min(max(r_side, r_cap), sx * 0.4999, sy * 0.4999)
     zs, ins = [], []
@@ -124,7 +131,7 @@ def sweep(path, radius: float, n_sec: int = 12, cap: bool = True, n0=None):
     """Проволока / стержень круглого сечения вдоль кривой."""
     path = np.asarray(path, float)
     _, N, B = rmf(path, n0)
-    a = np.linspace(0, 2 * math.pi, n_sec, endpoint=False)
+    a = np.linspace(0, 2 * math.pi, _q(n_sec, 5), endpoint=False)
     return pt.loft(path, N, B, np.c_[np.cos(a), np.sin(a)] * radius, cap=cap)
 
 
@@ -251,6 +258,8 @@ def core_frame():
     YZX = ((0, 1, 0), (0, 0, 1), (1, 0, 0))
     for s in (1, -1):
         parts.append(rbox((s * (CORE_X + 0.0015), TANK_YC, zc), (hy, hz, 0.003), 0.010, 0.0012, axes=YZX))
+        if Q < 1.0:                                   # игровая сетка: лапки — запечённым рельефом
+            continue
         # лапки обжима: загнуты с коллектора на фланец бачка
         for z in np.arange(TANK_Z0 + 0.010, TANK_Z1 - 0.006, 0.012):
             for sy in (1, -1):
@@ -346,6 +355,9 @@ def hose_radius(s: np.ndarray, L: float, r0: float) -> np.ndarray:
 
 def hose(path: np.ndarray, od: float, n_sec: int = 32):
     """Полый патрубок: наружная и внутренняя стенки, кольцевые торцы."""
+    if Q < 1.0:
+        path = resample(path, 0.007)[0]               # игровая: кольцо через 7 мм (на изгибе ~7°), гладкость — нормалью
+    n_sec = _q(n_sec, 12)
     _, N, B = rmf(path, (0, 0, 1))
     s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1))]
     ro = hose_radius(s, s[-1], od / 2)
@@ -374,7 +386,7 @@ def worm_clamp(P, T, R: float, rad_hint):
     # хвост ленты: второй слой поверх, от замка назад по окружности
     e1 = rad
     e2 = np.cross(T, e1)
-    ang = np.linspace(-0.15, -1.05, 18)
+    ang = np.linspace(-0.15, -1.05, _q(18, 5))
     tail = np.array([P + (R + 0.0013) * (math.cos(t) * e1 + math.sin(t) * e2) for t in ang])
     radial = np.array([math.cos(t) * e1 + math.sin(t) * e2 for t in ang])
     parts.append(pt.loft(tail, np.broadcast_to(T, tail.shape), radial, pt.rounded_rect(0.008, 0.0007, 0.0003, 2)))
@@ -451,6 +463,8 @@ def tag_wire():
     for a in np.linspace(0, -math.pi, 14)[1:-1]:          # петля через бирку — оборотная половина
         pts.append(ct + rt * (math.cos(a) * up + math.sin(a) * n))
     P = smooth_closed(np.array(pts), 3, 0.5)
+    if Q < 1.0:                                       # игровая: та же линия, реже точки
+        P = P[::max(1, int(round(1 / Q)))]
     P = np.vstack([P, P[:2]])                             # замкнуть внахлёст
     return sweep(P, 0.0006, 10, cap=True)
 
@@ -459,8 +473,8 @@ def tag_outline() -> tuple[np.ndarray, list[np.ndarray]]:
     w, h, c = TAG_W, TAG_H, 0.010
     pts = np.array([(-w / 2, -h / 2), (w / 2, -h / 2), (w / 2, h / 2 - c), (w / 2 - c, h / 2), (-w / 2 + c, h / 2),
                     (-w / 2, h / 2 - c)])
-    outer = fillet_poly(pts, 0.002, 4)
-    a = np.linspace(0, 2 * math.pi, 24, endpoint=False)
+    outer = fillet_poly(pts, 0.002, _q(4, 1))
+    a = np.linspace(0, 2 * math.pi, _q(24, 10), endpoint=False)
     hole = np.c_[0.0028 * np.cos(a), h / 2 - TAG_HOLE + 0.0028 * np.sin(a)][::-1]
     return outer, [hole]
 

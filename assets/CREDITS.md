@@ -52,6 +52,13 @@
 - `assets/models/props/impact_debris/impact_debris.glb` — собственные лоупольные обломки попаданий (`tools/build_impact_debris.py`, Blender)
 - `assets/textures/impacts/fx_*.png` (+ `_normal`) — собственные листы кадров дыма и пыли: симуляция дыма Blender (Mantaflow), рендер Cycles (`tools/build_impact_smoke.py`)
 
+## Предметы заказа «Вернуть машину» (assets/items/models/car)
+
+- `car_radiator.glb` (+ извлечённые карты `car_radiator_*.png`) и иконка `assets/icons/car_radiator.png` — собственная
+  модель радиатора купе Ильи: форма — tools/coupe_ilya/radiator.py, отделка UCUPaint — radiator_uv.py и radiator_pbr.py
+  (маски износа — `E:/Models Blender/Маски_АЛЬФА` владельца), игровая сетка и запекание — radiator_game.py;
+  исходники — `E:/Models Blender/VEHICLES/Купе Ильи/models/items` (asset-state.md там же).
+
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 
 - Модель, риг, текстуры (состояние 100) и руки FPS — собственные ассеты владельца проекта
