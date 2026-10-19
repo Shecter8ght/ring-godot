@@ -25,4 +25,5 @@
 *.otf filter=lfs diff=lfs merge=lfs -text
 assets/models/characters/*.res filter=lfs diff=lfs merge=lfs -text
 assets/models/ring_vehicles/*.bin filter=lfs diff=lfs merge=lfs -text
+assets/models/weapons/**/*.bin filter=lfs diff=lfs merge=lfs -text
 levels/shelter/**/*.res filter=lfs diff=lfs merge=lfs -text

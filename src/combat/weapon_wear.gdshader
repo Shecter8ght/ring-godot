@@ -30,6 +30,16 @@ uniform float ao_light_affect = 0.0;
 uniform vec3 uv1_scale = vec3(1.0);
 uniform vec3 uv1_offset = vec3(0.0);
 
+// Жировая плёнка рук (отпечатки, ладони, масло) — маска <карты>_coat.png (R), если есть: прозрачный слой с блеском
+// (в Blender — Coat Weight от канала стека Oil film): в лоб почти не виден, в отражении света под углом блестит.
+uniform sampler2D coat_tex : hint_default_black, filter_linear_mipmap, repeat_enable;
+uniform float coat_weight = 1.0;
+uniform float coat_roughness = 0.12;
+// Свечение по карте (светонакопительные цифры магазина ВЕРАС-54): emission_tex × emission_color × emission_energy.
+uniform sampler2D emission_tex : source_color, hint_default_black, filter_linear_mipmap, repeat_enable;
+uniform vec3 emission_color = vec3(0.0);
+uniform float emission_energy = 0.0;
+
 uniform sampler2D wear_tex : hint_default_black, filter_linear_mipmap, repeat_enable;
 uniform sampler2D detail_tex : hint_default_black, filter_linear_mipmap_anisotropic, repeat_enable;
 // плиток детализации на метр модели (8 — плитка ≈ 12 см)
@@ -76,6 +86,8 @@ void fragment() {
 	float ao = dot(texture(ao_tex, UV), ao_channel);
 	float spec = specular;
 	float u = 1.0 - clamp(condition, 0.0, 1.0);
+	// жировая плёнка: с износом остаётся (рукой берут и потёртое), под грязью и пылью тускнеет (ниже)
+	float film = texture(coat_tex, UV).r * coat_weight;
 	// пористое (грязь, ржавчина, фенопласт) темнеет от воды, металл — только блестит
 	float porous = 1.0 - metal;
 	if (u > 0.001) {
@@ -163,6 +175,7 @@ void fragment() {
 			rough = mix(rough, 0.78, age * 0.5);
 		}
 		porous = max(porous, grime);
+		film *= 1.0 - max(gcov, dust * 0.8);
 	}
 	// дождь: вода сглаживает отражение, пористое темнеет
 	float wet = clamp(rain_wet * wet_k, 0.0, 1.0);
@@ -176,4 +189,7 @@ void fragment() {
 	NORMAL_MAP_DEPTH = normal_scale;
 	AO = ao;
 	AO_LIGHT_AFFECT = ao_light_affect;
+	CLEARCOAT = clamp(film, 0.0, 1.0);
+	CLEARCOAT_ROUGHNESS = coat_roughness;
+	EMISSION = texture(emission_tex, UV).rgb * emission_color * emission_energy;
 }

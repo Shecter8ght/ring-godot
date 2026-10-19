@@ -3,7 +3,7 @@ extends Node
 ## (решение владельца 2026-10-17) при любой прочности, плавно; выстрел меняет прочность в шейдере без
 ## пересборки модели. Ручные карты 60 и 20 (states/pm_<поверхность>_<состояние>_*) остаются и подставляются
 ## прежним путём (для сравнения). Магазин, патроны и глушитель — одно состояние 60 и не меняются.
-## ВЕРАС-54 без маски — по-прежнему свои ручные карты.
+## ВЕРАС-54 v13 (2026-10-19) — тоже на шейдере: маски _wear и жировая плёнка _coat (слой Clearcoat).
 
 const PM: String = "wpn_hg_01"
 const VERAS: String = "wpn_ar_01"
@@ -85,16 +85,21 @@ func _ready() -> void:
 		_check("сталь %d — своя карта" % visual, _look(hand, "Steel") == "pm_Steel_%d_albedo.png" % visual)
 		_check("щёчка %d — своя карта" % visual, _look(hand, "Grip") == "pm_Grip_%d_albedo.png" % visual)
 		hand.queue_free()
-	# без маски — прежний путь: ВЕРАС-54 со своими картами 60
+	# ВЕРАС-54 v13: сталь, полимер и магазин — шейдер износа по своим маскам, у стали и полимера — жировая плёнка
 	var veras: Node3D = WeaponModels.build(VERAS, {}, 0, 60.0)
 	add_child(veras)
 	var shaded: int = 0
+	var coated: int = 0
 	for n: Node in veras.find_children("*", "MeshInstance3D", true, false):
 		var mi: MeshInstance3D = n as MeshInstance3D
 		for s: int in range(mi.mesh.get_surface_count() if mi.mesh else 0):
-			if mi.get_active_material(s) is ShaderMaterial and (mi.get_active_material(s) as ShaderMaterial).shader.resource_path == WeaponCondition.WEAR_SHADER:
+			var sm: ShaderMaterial = mi.get_active_material(s) as ShaderMaterial
+			if sm and sm.shader.resource_path == WeaponCondition.WEAR_SHADER:
 				shaded += 1
-	_check("ВЕРАС-54 без маски — не шейдер износа", shaded == 0 and not veras.get_meta("wear_shader", false))
+				if sm.get_shader_parameter("coat_tex") != null:
+					coated += 1
+	_check("ВЕРАС-54 v13 — шейдер износа (%d поверхн.)" % shaded, shaded >= 3 and veras.get_meta("wear_shader", false))
+	_check("ВЕРАС-54 v13 — жировая плёнка у %d поверхн." % coated, coated >= 2)
 	veras.queue_free()
 	print("PM_STATE_MAPS ", "PASS" if _fails == 0 else "FAIL %d" % _fails)
 	get_tree().quit(_fails)

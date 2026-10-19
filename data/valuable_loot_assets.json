@@ -303,28 +303,28 @@
     ]
   },
   "part_veras_receiver": {
-    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.gltf",
     "group": "parts",
     "selector": [
       "Body"
     ]
   },
   "part_veras_stock": {
-    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.gltf",
     "group": "parts",
     "selector": [
       "Stock"
     ]
   },
   "part_veras_muzzle": {
-    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.gltf",
     "group": "parts",
     "selector": [
       "MuzzleDevice"
     ]
   },
   "part_veras_mag_body": {
-    "source": "weapon:assets/models/weapons/veras54/veras54_detail.glb",
+    "source": "weapon:assets/models/weapons/veras54/veras54_detail.gltf",
     "group": "parts",
     "selector": [
       "Magazine"

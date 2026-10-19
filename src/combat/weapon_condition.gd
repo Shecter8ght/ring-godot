@@ -95,7 +95,7 @@ static func model_key(id: String, mods: Dictionary, dur: float = 100.0, mag: Str
 
 
 ## Вид по прочности; руки и обвесы отдельно. Порядок: у материалов есть маска износа — шейдер (плавно при
-## любой прочности); у оружия ручные карты состояний (weapon.state_maps: ВЕРАС-54) — они; иначе общий налёт.
+## любой прочности); у оружия ручные карты состояний (weapon.state_maps: ПМ, для сравнения) — они; иначе общий налёт.
 static func apply_visual(root: Node3D, entry: Dictionary) -> void:
 	if root.get_meta("wear_shader", false):
 		update_wear(root, percent(entry))
@@ -116,7 +116,7 @@ static func apply_visual(root: Node3D, entry: Dictionary) -> void:
 		root.set_meta("wear_shader", true)
 		update_wear(root, percent(entry))
 		return
-	# у модели свои карты износа (ВЕРАС-54: weapon.state_maps) — общий налёт не нужен
+	# у модели свои карты износа (weapon.state_maps) — общий налёт не нужен
 	var maps: String = String(WeaponDb.weapon(String(entry.get("id", ""))).get("state_maps", ""))
 	if maps != "" and visual < int(Balance.CONDITION.full) and _apply_state_maps(root, maps, visual):
 		return
@@ -224,6 +224,15 @@ static func wear_material(source: StandardMaterial3D) -> ShaderMaterial:
 	material.set_shader_parameter("uv1_scale", source.uv1_scale)
 	material.set_shader_parameter("uv1_offset", source.uv1_offset)
 	material.set_shader_parameter("wear_tex", load(mask) as Texture2D)
+	# жировая плёнка рук (ВЕРАС-54 v13): <карты>_coat.png рядом с маской износа — слой Clearcoat шейдера
+	var coat: String = mask.trim_suffix("_wear.png") + "_coat.png"
+	if ResourceLoader.exists(coat):
+		material.set_shader_parameter("coat_tex", load(coat) as Texture2D)
+	# свечение по карте (светонакопительные цифры магазина)
+	if source.emission_enabled and source.emission_texture:
+		material.set_shader_parameter("emission_tex", source.emission_texture)
+		material.set_shader_parameter("emission_color", Vector3(source.emission.r, source.emission.g, source.emission.b))
+		material.set_shader_parameter("emission_energy", source.emission_energy_multiplier)
 	if ResourceLoader.exists(WEAR_DETAIL):
 		material.set_shader_parameter("detail_tex", load(WEAR_DETAIL) as Texture2D)
 	_materials[key] = material
@@ -260,7 +269,9 @@ static func _apply_wear_shader(root: Node3D) -> bool:
 			continue
 		for surface: int in range(mesh.mesh.get_surface_count()):
 			var source: StandardMaterial3D = mesh.mesh.surface_get_material(surface) as StandardMaterial3D
-			if source == null or source.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED or source.emission_enabled:
+			# свечение без карты (марки, точки прицелов) — мимо шейдера; по карте (цифры магазина) шейдер передаёт сам
+			if source == null or source.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED \
+					or (source.emission_enabled and source.emission_texture == null):
 				continue
 			var material: ShaderMaterial = wear_material(source)
 			if material == null:

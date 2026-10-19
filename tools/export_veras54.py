@@ -1,31 +1,31 @@
-"""ВЕРАС-54: экспорт из Blender в игру — вьюмодель (руки + оружие + клипы) и мировая модель.
+"""ВЕРАС-54: экспорт из Blender в игру — вьюмодель (руки + оружие + клипы), мировая и подробная модели.
 
-Источник — рабочие файлы клипов владельца (E:/Models Blender/…/Перезарядка v01 (Claude)): полная
-перезарядка (база сцены) + действия тактической перезарядки и проверки магазина из своих файлов.
+v13 (2026-10-19): форма и текстуры v13 v02 (приняты владельцем), игровая сетка ~33 тыс. треугольников + 30 патронов
+(tools/veras54_v13: game_lp.py → game_bake.py → game_pack.py → game_rig.py → clips/build_clips.py → этот экспорт).
+Модели — .gltf с картами отдельными PNG рядом: вьюмодель, мировая и подробная делят один набор карт
+(veras54_<Атлас>_100_{albedo,normal,orm}.png); маски износа _wear и жировой плёнки _coat кладёт game_pack.py.
 
-  viewmodel — руки FPS_ArmsRig и оружие VERAS54_WeaponRig в осях камеры от первого лица (камера в
-              начале, взгляд по −Z Godot). Клипы (NLA-дорожки → анимации glTF): idle, reload_tactical,
-              reload_full, mag_check; служебные: follower_by_rounds (подаватель, кадр n = n патронов),
-              bolt_travel (затвор: кадр 0 закрыт, 1 — отведён; суффикс _cycle Godot счёл бы пометкой цикла). IK, копирование поворота и драйверы рига
-              (затвор, защёлка) запечены в ключи костей. Детали склеены по узлам (меньше вызовов отрисовки),
-              патроны — узлы Round_NN (1 — верхний), их показывает игра по счёту. Метки: SightRear,
-              SightFront, Muzzle, WeaponFrame (оси игры у пистолетной рукоятки — сюда встают обвесы).
-  world     — только оружие, без рига: одна сетка на материал, упрощена, начало — пистолетная рукоятка,
-              оси игры (+Z к дулу, +Y вверх, −X — правая сторона стрелка), метки как выше; магазин и
-              складной приклад — отдельные узлы Magazine, Stock (игра прячет / меняет их обвесом).
-  detail    — та же мировая без упрощения, текстуры 2048: veras54_detail.glb для конструктора оружия
-              (вблизи); пишется и вместе с world.
+  viewmodel — руки FPS_ArmsRig и оружие VERAS54_WeaponRig в осях камеры от первого лица (камера в начале, взгляд по −Z
+              Godot). Клипы (NLA-дорожки → анимации glTF): idle, reload_tactical, reload_full, mag_check, jam_clear,
+              reload_fast, reload_fast_full; служебные: follower_by_rounds (подаватель, кадр n = n патронов), bolt_travel
+              (кадр 0 — затвор закрыт, 1 — отведён на 100,6 мм; кости Bolt и RecoilSpring). IK и драйверы рига запечены в
+              ключи костей. Детали склеены по узлам, патроны — узлы Round_NN (1 — верхний). Метки: SightRear (плечики
+              U-прорези целика), SightFront (вершина мушки) — обе на 57 мм над осью канала, Muzzle, WeaponFrame (оси игры у
+              пистолетной рукоятки — сюда встают обвесы).
+  world     — только оружие, без рига, упрощено до WORLD_TRIS: начало — пистолетная рукоятка, оси игры (+Z к дулу, +Y вверх,
+              −X — правая сторона стрелка), метки как выше; магазин, приклад и дульное устройство — отдельные узлы Magazine,
+              Stock, MuzzleDevice (игра прячет / меняет их обвесом).
+  detail    — та же мировая без упрощения (игровая сетка в руках): veras54_detail.gltf для конструктора; пишется и с world.
 
-"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips]
-  grips — добавить во вьюмодель наборы клипов под рукоятки ВАРН V1 / V2 (после правки поз владельцем);
-          grips=varn_v2 — только названные
-→ assets/models/weapons/veras54/veras54_viewmodel.glb, veras54.glb, veras54.json (проверки)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips]
+  grips — добавить во вьюмодель наборы клипов под рукоятки ВАРН V1 / V2 (позы кистей владельца); grips=varn_v2 — только названные
+→ assets/models/weapons/veras54/veras54_viewmodel.gltf, veras54.gltf, veras54_detail.gltf (+ .bin, карты), veras54.json (проверки)
 """
 from __future__ import annotations
 
 import json
 import math
-import subprocess
+import os
 import sys
 from pathlib import Path
 
@@ -33,14 +33,17 @@ import bpy
 from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = Path("E:/Models Blender/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Игровая версия/Перезарядка v01 (Claude)")
+sys.path.insert(0, str(ROOT / "tools/veras54_v13"))
+sys.path.insert(0, str(ROOT / "tools/veras54_v13/clips"))
+import game_mats  # noqa: E402
+
+LIB = Path("E:/Models Blender/WEAPONS/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Игровая версия")
+SRC = LIB / "Клипы v13"
 OUT = ROOT / "assets/models/weapons/veras54"
-BASE = SRC / "VERAS54_Reload_Full_v05.blend"
-# v02: те же клипы с левой на рукоятке под цевьём (ВАРН V1 / V2) и устранение задержки (гильза в окне)
-SRC2 = SRC.parent / "Клипы v02 (Claude)"
-# Позы кистей на рукоятках владелец правит сам (2026-10-10: «в игру пока не вноси»): наборы под
-# рукоятки запекаются только с аргументом grips; без него в игре левая держит цевьё позади рукоятки.
-# grips=varn_v2 — только названные (2026-10-10: владелец поправил позу ВАРН V2; ВАРН V1 ждёт его правки).
+WORK = ROOT / "_asset_src/veras54_game_v13"
+REC = json.loads((WORK / "lp/parts.json").read_text(encoding="utf-8"))
+BASE = SRC / "VERAS54_Reload_Full_v13.blend"
+# Позы кистей на рукоятках владелец правил сам (2026-10-10); наборы под рукоятки — только с аргументом grips.
 GRIPS: tuple = ()
 for _arg in sys.argv:
     if _arg == "grips":
@@ -48,107 +51,33 @@ for _arg in sys.argv:
     elif _arg.startswith("grips="):
         GRIPS = tuple(g for g in _arg.split("=", 1)[1].split(",") if g in ("varn_v1", "varn_v2"))
 # клип в игре: (суффикс действий build_clips.py, последний кадр, файл с действиями; None — база сцены)
-CLIPS = {"reload_tactical": ("Tactical", 79, SRC / "VERAS54_Reload_Tactical_v04.blend"),
-         "mag_check": ("Check", 104, SRC / "VERAS54_Mag_Check_v02.blend"),
+CLIPS = {"reload_tactical": ("Tactical", 79, SRC / "VERAS54_Reload_Tactical_v13.blend"),
+         "mag_check": ("Check", 104, SRC / "VERAS54_Mag_Check_v13.blend"),
          "reload_full": ("Full", 114, None),
-         "jam_clear": ("Jam", 46, SRC2 / "VERAS54_Jam_Clear_v01.blend"),
+         "jam_clear": ("Jam", 46, SRC / "VERAS54_Jam_Clear_v13.blend"),
          # быстрая перезарядка (двойное R): новым магазином выбивают старый; _full — с досылкой затвором
-         "reload_fast": ("Fast", 58, SRC2 / "VERAS54_Reload_Fast_v01.blend"),
-         "reload_fast_full": ("Fastfull", 92, SRC2 / "VERAS54_Reload_FastFull_v01.blend")}
+         "reload_fast": ("Fast", 58, SRC / "VERAS54_Reload_Fast_v13.blend"),
+         "reload_fast_full": ("Fastfull", 92, SRC / "VERAS54_Reload_FastFull_v13.blend")}
 for _g in GRIPS:
     for _clip, _tag, _last, _file in (("reload_tactical", "Tactical", 79, "Reload_Tactical"), ("mag_check", "Check", 104, "Mag_Check"),
                                       ("reload_full", "Full", 114, "Reload_Full"), ("jam_clear", "Jam", 46, "Jam_Clear"),
                                       ("reload_fast", "Fast", 58, "Reload_Fast"), ("reload_fast_full", "Fastfull", 92, "Reload_FastFull")):
-        CLIPS[f"{_clip}_{_g}"] = (f"{_tag}_{_g}", _last, SRC2 / f"VERAS54_{_file}_{_g}_v01.blend")
+        CLIPS[f"{_clip}_{_g}"] = (f"{_tag}_{_g}", _last, SRC / f"VERAS54_{_file}_{_g}_v13.blend")
 # стойка — первый кадр тактической: без рукоятки и с каждой из них
 IDLES = {"idle": "Tactical", **{f"idle_{g}": f"Tactical_{g}" for g in GRIPS}}
-GRIP = Vector((-0.14, -0.323, 1.635))        # пистолетная рукоятка — начало осей игры
-MARKS = {"SightRear": Vector((-0.14, -0.30, 1.755)), "SightFront": Vector((-0.14, -0.768, 1.755)),
-         "Muzzle": Vector((-0.14, -0.955, 1.70))}
-TEX_VIEW = 2048
-TEX_WORLD = 1024
-WORLD_TRIS = 30000
+# Сцена клипов: оси VERAS54 (дуло +X, влево +Y) → мир (оружие смотрит по −Y), ось канала на высоте 1,7 м.
+ROOT_REST = Matrix.Translation((-0.14, -0.25, 1.7)) @ Matrix.Rotation(math.radians(-90), 4, "Z")
+GRIP_LOCAL = Vector((0.073, 0.0, -0.065))      # пистолетная рукоятка — начало осей игры (оси VERAS54)
+GRIP = ROOT_REST @ GRIP_LOCAL
+MARKS_LOCAL = {"SightRear": Vector(REC["markers_m"]["SightRear"]), "SightFront": Vector(REC["markers_m"]["SightFront"]),
+               "Muzzle": Vector(REC["markers_m"]["MuzzleBrakeEnd"])}
+MARKS = {k: ROOT_REST @ v for k, v in MARKS_LOCAL.items()}
+WORLD_TRIS = 9000
+TEX_ARMS = 2048
+# в мировой и подробной модели — только верхние патроны (остальные закрыты корпусом магазина)
+WORLD_ROUNDS = (1, 2)
 
 report: dict = {}
-
-
-def finish_materials(path: Path) -> None:
-    """Отделка оружия в готовом GLB; карты рук и клипы не изменяются.
-
-    Системный Python проекта содержит Pillow/numpy (как остальные инструменты
-    ассетов); Python Blender для этой операции не используется.
-    """
-    subprocess.run(["python", str(ROOT / "tools/veras54_game_materials.py"), str(path)], check=True)
-
-
-GLOSS_MASK_PX = 1024
-
-
-def _under_any(ob, prefix: str) -> bool:
-    p = ob.parent
-    while p is not None:
-        if p.name.startswith(prefix):
-            return True
-        p = p.parent
-    return False
-
-
-def _uv_raster(obs: list, n: int):
-    """Треугольники GameUV объектов → булева карта n×n (строка 0 — низ картинки)."""
-    import numpy as np
-    m = np.zeros((n, n), dtype=bool)
-    for ob in obs:
-        me = ob.data
-        uv = me.uv_layers["GameUV"].data
-        me.calc_loop_triangles()
-        for t in me.loop_triangles:
-            p = np.array([uv[l].uv[:] for l in t.loops]) * n
-            x0, y0 = np.maximum(np.floor(p.min(0)).astype(int) - 1, 0)
-            x1, y1 = np.minimum(np.ceil(p.max(0)).astype(int) + 1, n - 1)
-            d = (p[1, 1] - p[2, 1]) * (p[0, 0] - p[2, 0]) + (p[2, 0] - p[1, 0]) * (p[0, 1] - p[2, 1])
-            if x1 < x0 or y1 < y0 or abs(d) < 1e-9:
-                continue
-            xs, ys = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
-            a = ((p[1, 1] - p[2, 1]) * (xs - p[2, 0]) + (p[2, 0] - p[1, 0]) * (ys - p[2, 1])) / d
-            b = ((p[2, 1] - p[0, 1]) * (xs - p[2, 0]) + (p[0, 0] - p[2, 0]) * (ys - p[2, 1])) / d
-            e = -0.6 / max(1.0, abs(d) ** 0.5)      # край пикселя тоже считается накрытым
-            m[y0:y1 + 1, x0:x1 + 1] |= (a >= e) & (b >= e) & (1 - a - b >= e)
-    return m
-
-
-def write_gloss_mask() -> None:
-    """Где на развёртке металла остаётся блеск: затворная рама и трубка приклада (решение владельца,
-    2026-10-10 — остальной автомат матовый). Читает tools/veras54_game_materials.py."""
-    import numpy as np
-    metal = [o for o in objs("MESH") if o.data.materials and o.data.materials[0]
-             and "WeaponMetal" in o.data.materials[0].name and "GameUV" in o.data.uv_layers]
-    gloss = [o for o in metal if _under_any(o, "BoltCarrier") or o.name.startswith("Stock • sliding extension tube")]
-    if len(gloss) < 2:
-        raise RuntimeError("не найдены затворная рама и трубка приклада")
-    n = GLOSS_MASK_PX
-    g = _uv_raster(gloss, n)
-    rest = _uv_raster([o for o in metal if o not in gloss], n)
-    # поля островов (отступ текстуры) — тоже блеск, но не на чужих островах
-    grown = g.copy()
-    for _ in range(3):
-        grown[1:, :] |= grown[:-1, :]
-        grown[:-1, :] |= grown[1:, :]
-        grown[:, 1:] |= grown[:, :-1]
-        grown[:, :-1] |= grown[:, 1:]
-    g |= grown & ~rest
-    img = bpy.data.images.new("gloss_mask", n, n, alpha=False)
-    px = np.zeros((n, n, 4), dtype=np.float32)
-    px[..., :3] = g[..., None]
-    px[..., 3] = 1.0
-    img.pixels.foreach_set(px.ravel())
-    tmp = ROOT / "tools/veras54_gloss.mask.png"
-    img.filepath_raw = str(tmp)
-    img.file_format = "PNG"
-    img.save()
-    bpy.data.images.remove(img)
-    # расширение не .png: Godot не должен импортировать служебную карту как текстуру
-    tmp.replace(ROOT / "tools/veras54_gloss.mask")
-    print("VERAS gloss mask", int(g.sum()), "px", flush=True)
 
 
 def objs(kind=None):
@@ -161,7 +90,7 @@ def remove(ob) -> None:
 
 def drop_extras() -> None:
     """Глушитель (отдельный ассет), камеры, свет, скрытые и текстовые объекты — не в игру."""
-    sup = {o for c in bpy.data.collections if "Suppressor" in c.name for o in c.all_objects}
+    sup = {o for c in bpy.data.collections if "Suppressor" in c.name for o in c.all_objects if o is not None}
     for ob in list(bpy.data.objects):
         if ob.name not in bpy.data.objects:
             continue
@@ -181,20 +110,13 @@ def strip_drivers() -> None:
             ob.hide_viewport = ob.hide_render = False
 
 
-def scale_images(px: int) -> None:
-    for img in bpy.data.images:
-        if img.size[0] > px:
-            img.scale(px, px * img.size[1] // max(img.size[0], 1))
-
-
-def mesh_list(names_pred):
-    return [o for o in objs("MESH") if names_pred(o)]
-
-
 def join(group: list, name: str):
     """Склеить сетки (модификаторы уже применены), имя — name; возвращает объект."""
     if not group:
         return None
+    for o in group:
+        if o.data.users > 1:
+            o.data = o.data.copy()
     if len(group) == 1:
         group[0].name = name
         return group[0]
@@ -248,6 +170,14 @@ def add_mark(name: str, world: Vector, parent, bone: str = "") -> None:
             e.parent_type = "BONE"
             e.parent_bone = bone
         e.matrix_world = mw
+
+
+def export_gltf(path: Path, **kw) -> None:
+    """glTF с картами отдельными файлами рядом (общими для всех моделей ВЕРАСа)."""
+    OUT.mkdir(parents=True, exist_ok=True)
+    bpy.ops.export_scene.gltf(filepath=str(path), export_format="GLTF_SEPARATE", export_texture_dir="", export_yup=True,
+                              export_materials="EXPORT", export_image_format="AUTO", export_cameras=False,
+                              export_lights=False, **kw)
 
 
 # ---------------------------------------------------------------- вьюмодель
@@ -324,6 +254,11 @@ def push_track(arm, track_name: str, act) -> None:
     tr.strips.new(track_name, 1, act)
 
 
+def local_of(wr, name: str):
+    pb = wr.pose.bones[name]
+    return wr.convert_space(pose_bone=pb, matrix=pb.matrix, from_space="POSE", to_space="LOCAL").copy()
+
+
 def viewmodel() -> None:
     bpy.ops.wm.open_mainfile(filepath=str(BASE))
     append_actions()
@@ -334,9 +269,12 @@ def viewmodel() -> None:
     magob = bpy.data.objects["Magazine"]
     cam = bpy.data.objects["FPS • Camera"]
     acts = {a.name: a for a in bpy.data.actions}
-    write_gloss_mask()
+    report["materials_viewmodel"] = game_mats.build_all()
+    # карты рук — 2048, как в прежней вьюмодели (карты оружия — своего размера из game_pack.py)
+    for img in bpy.data.images:
+        if not img.name.startswith("veras54_") and img.size[0] > TEX_ARMS:
+            img.scale(TEX_ARMS, TEX_ARMS * img.size[1] // max(img.size[0], 1))
     # гильза задержки: кость JamCase у WeaponRoot и сетка на ней (стоит в окне; клип jam_clear её выбрасывает)
-    sys.path.insert(0, str(SRC2))
     import rig_common
     sc.frame_set(1)
     bpy.context.view_layer.update()
@@ -360,25 +298,27 @@ def viewmodel() -> None:
         for ob, kind in ((arms, "Arms"), (wr, "Weapon"), (root, "Controls"), (magob, "Rounds")):
             assign(ob, acts.get(f"VERAS54_{suffix}_{kind}_v01"))
         baked[idle] = ([1, 2], sample(arms, wr, [1, 1], skip))
-    # служебные: подаватель по счёту патронов и затвор (отвод для выстрела)
+    # служебные: подаватель по счёту патронов и затвор (отвод для выстрела; с ним пружина)
     for ob in (arms, wr, root, magob):
         assign(ob, None)
+    for pb in wr.pose.bones:
+        pb.matrix_basis = Matrix.Identity(4)
     follower = []
     for n in range(31):
         magob["Rounds remaining"] = n
         magob.update_tag()
         bpy.context.view_layer.update()
-        pb = wr.pose.bones["MagazineFollower"]
-        follower.append(wr.convert_space(pose_bone=pb, matrix=pb.matrix, from_space="POSE", to_space="LOCAL").copy())
+        follower.append(local_of(wr, "MagazineFollower"))
     magob["Rounds remaining"] = 30
-    bolt = []
+    bolt, spring = [], []
     for v in (0.0, 1.0):
         root["Bolt pull"] = v
         root.update_tag()
         bpy.context.view_layer.update()
-        pb = wr.pose.bones["Bolt"]
-        bolt.append(wr.convert_space(pose_bone=pb, matrix=pb.matrix, from_space="POSE", to_space="LOCAL").copy())
+        bolt.append(local_of(wr, "Bolt"))
+        spring.append(local_of(wr, "RecoilSpring"))
     root["Bolt pull"] = 0.0
+    report["bolt_travel_m"] = round((bolt[1].translation - bolt[0].translation).length, 4)
     # снять ограничения и драйверы — дальше кости ведут только запечённые ключи
     for arm in (arms, wr):
         for pb in arm.pose.bones:
@@ -392,13 +332,14 @@ def viewmodel() -> None:
         push_track(arms, clip, bake_action(arms, f"VM_{clip}_arms", frames, data[arms.name]))
         push_track(wr, clip, bake_action(wr, f"VM_{clip}_weapon", frames, data[wr.name]))
     push_track(wr, "follower_by_rounds", bake_action(wr, "VM_follower", list(range(31)), {"MagazineFollower": follower}))
-    push_track(wr, "bolt_travel", bake_action(wr, "VM_bolt", [0, 1], {"Bolt": bolt}))
+    push_track(wr, "bolt_travel", bake_action(wr, "VM_bolt", [0, 1], {"Bolt": bolt, "RecoilSpring": spring}))
     for arm in (arms, wr):
         arm.data.pose_position = "POSE"
         for pb in arm.pose.bones:
             pb.matrix_basis = Matrix.Identity(4)
     sc.frame_set(1)
-    # метки и рама обвесов — у кости WeaponRoot (в боевой позе, Weapon_CTRL в покое)
+    bpy.context.view_layer.update()
+    # метки и рама обвесов — у кости WeaponRoot (руки в покое: VERAS54 стоит в ROOT_REST)
     for name, p in MARKS.items():
         add_mark(name, p, wr, "WeaponRoot")
     add_mark("WeaponFrame", GRIP, wr, "WeaponRoot")
@@ -408,27 +349,25 @@ def viewmodel() -> None:
     # патроны запасного магазина — отдельным узлом: у пустого старого магазина игра их не показывает
     join([o for o in objs("MESH") if o.name.startswith("SpareMag • round")], "SpareRounds")
     report["parts_viewmodel"] = join_by_parent()
-    scale_images(TEX_VIEW)
     # оси камеры: камера в начале, взгляд Blender +Y (= −Z glTF/Godot), верх +Z
     to_cam = Matrix.Rotation(math.radians(90), 4, "X") @ cam.matrix_world.inverted()
     arms.matrix_world = to_cam @ arms.matrix_world
     remove(cam)
     report["tris_viewmodel"] = tri_count()
-    OUT.mkdir(parents=True, exist_ok=True)
-    bpy.ops.export_scene.gltf(filepath=str(OUT / "veras54_viewmodel.glb"), export_format="GLB", export_yup=True,
-                              export_animations=True, export_animation_mode="NLA_TRACKS", export_skins=True,
-                              # у основания большого пальца на вершину до 8 костей: с четырьмя перчатка там ломалась
-                              export_all_influences=True,
-                              export_def_bones=False, export_force_sampling=True, export_materials="EXPORT",
-                              export_image_format="AUTO", export_apply=False, export_cameras=False, export_lights=False)
-    finish_materials(OUT / "veras54_viewmodel.glb")
+    report["tris_viewmodel_weapon"] = tri_count(lambda o: not o.name.startswith("FPS_"))
+    export_gltf(OUT / "veras54_viewmodel.gltf", export_animations=True, export_animation_mode="NLA_TRACKS",
+                export_skins=True,
+                # у основания большого пальца на вершину до 8 костей: с четырьмя перчатка там ломалась
+                export_all_influences=True, export_def_bones=False, export_force_sampling=True, export_apply=False)
     print("VERAS viewmodel saved", flush=True)
 
 
-def tri_count() -> int:
+def tri_count(pred=None) -> int:
     dg = bpy.context.evaluated_depsgraph_get()
     t = 0
     for ob in objs("MESH"):
+        if pred is not None and not pred(ob):
+            continue
         me = ob.evaluated_get(dg).to_mesh()
         me.calc_loop_triangles()
         t += len(me.loop_triangles)
@@ -438,102 +377,55 @@ def tri_count() -> int:
 
 # ---------------------------------------------------------------- мировая модель
 
-def _under(ob, prefix: str) -> bool:
-    """Объект в иерархии узла, имя которого начинается с prefix (до снятия связей с ригом)."""
-    p = ob.parent
-    while p is not None:
-        if p.name.startswith(prefix):
-            return True
-        p = p.parent
-    return False
-
-
 def world(detail: bool = False) -> None:
-    """Мировая модель. detail — подробная (без упрощения, текстуры 2048) для конструктора оружия,
-    где ствол разглядывают вблизи; обычная — упрощённая для вида со стороны."""
-    bpy.ops.wm.open_mainfile(filepath=str(SRC / "VERAS54_Reload_Tactical_v04.blend"))
-    sc = bpy.context.scene
-    write_gloss_mask()
-    for ob in objs():
-        if ob.animation_data:
-            ob.animation_data.action = None
-    arms = bpy.data.objects["FPS_ArmsRig"]
-    for pb in arms.pose.bones:
-        pb.matrix_basis = Matrix.Identity(4)
-    sc.frame_set(1)
-    bpy.context.view_layer.update()
-    for ob in list(objs()):
-        if ob.name.startswith("FPS_Arms"):
+    """Мировая модель из игровой сетки (оси VERAS54). detail — без упрощения (конструктор, вблизи)."""
+    bpy.ops.wm.open_mainfile(filepath=str(WORK / "lp/VERAS54_Game_LP.blend"))
+    game_mats.build_all()
+    for ob in list(objs("MESH")):
+        if ob.name.startswith("Magazine • loaded") and int(ob.name.rsplit(" ", 1)[1]) not in WORLD_ROUNDS:
             remove(ob)
-    drop_extras()
-    strip_drivers()
-    # складной приклад — отдельной деталью: обвес «приклад» прячет штатный (meta part = stock)
-    stock_names = {ob.name for ob in objs("MESH") if _under(ob, "StockFold")}
-    # мировые матрицы зафиксировать, связи с ригом снять (статичная модель в боевой позе)
-    keep = {}
-    for ob in objs("MESH"):
-        keep[ob.name] = ob.matrix_world.copy()
-    for ob in objs("MESH"):
-        for m in [m for m in ob.modifiers if m.type == "ARMATURE"]:
-            ob.modifiers.remove(m)
-        ob.parent = None
-        ob.matrix_world = keep[ob.name]
-    for ob in list(objs()):
-        if ob.type != "MESH":
-            remove(ob)
-    apply_mods()
     meshes = objs("MESH")
-    # дульное устройство — отдельной деталью (обвес «на резьбу» его прячет: meta part = muzzle_device)
-    brake = [o for o in meshes if o.name.startswith(("Muzzle brake", "Brake"))]
-    # магазин с патронами — отдельной деталью: игра прячет его (магазин вынут) или меняет на другой
-    # (meta part = mag); защёлка ("Magazine catch") остаётся на корпусе
+    brake = [o for o in meshes if o.name.startswith("MuzzleDevice")]
     mag = [o for o in meshes if o.name.startswith(("Magazine_", "Magazine •"))]
-    stock = [o for o in meshes if o.name in stock_names]
+    stock = [o for o in meshes if o.name.startswith("StockFold")]
     rest = [o for o in meshes if o not in brake and o not in mag and o not in stock]
-    body = join(rest, "Body")
-    md = join(brake, "MuzzleDevice")
-    mg = join(mag, "Magazine")
-    st = join(stock, "Stock")
     # начало — пистолетная рукоятка; оси игры совпадают с осями glTF после экспорта Y-up
-    for ob in (body, md, mg, st):
-        if ob is None:
-            continue
-        ob.matrix_world = Matrix.Translation(-GRIP) @ ob.matrix_world
+    to_game = Matrix.Rotation(math.radians(-90), 4, "Z") @ Matrix.Translation(-GRIP_LOCAL)
+    for ob in meshes:
+        ob.matrix_world = to_game @ ob.matrix_world
+    nodes = {"Body": join(rest, "Body"), "MuzzleDevice": join(brake, "MuzzleDevice"), "Magazine": join(mag, "Magazine"),
+             "Stock": join(stock, "Stock")}
+    for ob in nodes.values():
         with bpy.context.temp_override(object=ob, active_object=ob, selected_objects=[ob], selected_editable_objects=[ob]):
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     t0 = tri_count()
     ratio = 1.0 if detail else min(1.0, WORLD_TRIS / max(t0, 1))
     if ratio < 1.0:
-        # корпус, магазин и приклад — с одним коэффициентом: бюджет мировой модели общий
-        for ob in (body, mg, st):
-            if ob is None:
-                continue
+        for ob in nodes.values():
             dec = ob.modifiers.new("dec", "DECIMATE")
             dec.ratio = ratio
             dec.use_collapse_triangulate = True
             with bpy.context.temp_override(object=ob, active_object=ob, selected_objects=[ob], selected_editable_objects=[ob]):
                 bpy.ops.object.modifier_apply(modifier="dec")
-    for name, p in MARKS.items():
-        add_mark(name, p - GRIP, None)
-    scale_images(TEX_VIEW if detail else TEX_WORLD)
-    name = "veras54_detail.glb" if detail else "veras54.glb"
+    for name, p in MARKS_LOCAL.items():
+        add_mark(name, to_game @ p, None)
+    name = "veras54_detail.gltf" if detail else "veras54.gltf"
     if detail:
         report["tris_detail"] = tri_count()
     else:
         report["tris_world_before"] = t0
         report["tris_world"] = tri_count()
-    bb = [v.co for v in body.data.vertices]
+    bb = [v.co for v in nodes["Body"].data.vertices]
     report["world_size_m"] = [round(max(c[i] for c in bb) - min(c[i] for c in bb), 3) for i in range(3)]
-    OUT.mkdir(parents=True, exist_ok=True)
-    bpy.ops.export_scene.gltf(filepath=str(OUT / name), export_format="GLB", export_yup=True,
-                              export_animations=False, export_materials="EXPORT", export_image_format="AUTO",
-                              export_apply=True, export_cameras=False, export_lights=False)
-    finish_materials(OUT / name)
+    export_gltf(OUT / name, export_animations=False, export_apply=True)
     print("VERAS world saved", name, flush=True)
 
 
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else ["viewmodel", "world"]
+    # VERAS_CLAY=1 — пробный экспорт без карт (проверка клипов и меток в игре до конца запекания)
+    if not game_mats.ready() and os.environ.get("VERAS_CLAY") != "1":
+        raise SystemExit("нет игровых карт — сначала tools/veras54_v13/game_pack.py")
     if "viewmodel" in args:
         viewmodel()
     if "world" in args:
@@ -543,5 +435,8 @@ if __name__ == "__main__":
     path = OUT / "veras54.json"
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     old.update(report)
-    path.write_text(json.dumps(old, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    old.update(source=REC["source"], source_sha256=REC["source_sha256"], version="v13 (2026-10-19)",
+               markers_local_m={k: [round(c, 4) for c in v] for k, v in MARKS_LOCAL.items()},
+               lp_triangles=REC["triangles"])
+    path.write_text(json.dumps(old, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     print("VERAS report", report, flush=True)

@@ -1175,10 +1175,10 @@
     "class": "ASSAULT_RIFLE",
     "caliber": "545x39",
     "model": "veras54",
-    "asset": "res://assets/models/weapons/veras54/veras54.glb",
+    "asset": "res://assets/models/weapons/veras54/veras54.gltf",
     "asset_kind": "static",
     "viewmodel": {
-     "scene": "res://assets/models/weapons/veras54/veras54_viewmodel.glb",
+     "scene": "res://assets/models/weapons/veras54/veras54_viewmodel.gltf",
      "fps": 30,
      "clips": {
       "idle": "idle",
@@ -1189,7 +1189,7 @@
       "reload_fast": "reload_fast",
       "reload_fast_empty": "reload_fast_full"
      },
-     "jam_open": 0.42,
+     "jam_open": 0.3,
      "check_hold": [
       40,
       57
@@ -1242,8 +1242,7 @@
     "sound": "shot_rifle",
     "reload_sound": "reload_rifle",
     "cycle_sound": "",
-    "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.glb",
-    "state_maps": "res://assets/models/weapons/veras54/states/veras54",
+    "asset_detail": "res://assets/models/weapons/veras54/veras54_detail.gltf",
     "engraving_anchor": [
      0.86,
      0.23

@@ -32,6 +32,8 @@ var _anim: AnimationPlayer
 var _weapon_skel: Skeleton3D
 var _follower: int = -1
 var _bolt: int = -1
+## Возвратная пружина (кость RecoilSpring, ВЕРАС-54 v13): сжимается вместе с ходом рамы. Нет — −1.
+var _spring: int = -1
 var _follower_src: Animation
 var _bolt_src: Animation
 var _rounds: Array[Node3D] = []
@@ -126,6 +128,7 @@ func _setup(id: String, mods: Dictionary) -> void:
 	if _weapon_skel:
 		_follower = _weapon_skel.find_bone("MagazineFollower")
 		_bolt = _weapon_skel.find_bone("Bolt")
+		_spring = _weapon_skel.find_bone("RecoilSpring")
 	# Стойка идёт по кругу: пока клип играет, он каждый кадр заново ставит кости рук. Иначе, доиграв,
 	# он оставлял позу как есть, и поправка кисти под рукоятку (сдвиг относительно клипа) прибавлялась
 	# кадр за кадром — рука уезжала от оружия.
@@ -465,6 +468,9 @@ func _pose_overrides(shown: int, delta: float, jam_hold: bool = false) -> void:
 		open = maxf(open, sin(PI * (1.0 - _kick / BOLT_KICK_SEC)))
 	if open > 0.0 and _bolt >= 0 and _bolt_src:
 		_apply_sample(_bolt_src, "Bolt", _bolt, _table_time(_bolt_src, open, 2))
+		# возвратная пружина (ВЕРАС-54 v13) сжимается рамой — та же таблица, масштаб кости
+		if _spring >= 0:
+			_apply_sample(_bolt_src, "RecoilSpring", _spring, _table_time(_bolt_src, open, 2))
 
 
 ## Время записи index в служебном клипе-таблице из count записей по кадру на запись. Отсчёт — от конца
@@ -485,6 +491,8 @@ func _apply_sample(src: Animation, bone_name: String, bone: int, t: float) -> vo
 				_weapon_skel.set_bone_pose_position(bone, src.position_track_interpolate(i, t))
 			Animation.TYPE_ROTATION_3D:
 				_weapon_skel.set_bone_pose_rotation(bone, src.rotation_track_interpolate(i, t))
+			Animation.TYPE_SCALE_3D:
+				_weapon_skel.set_bone_pose_scale(bone, src.scale_track_interpolate(i, t))
 
 
 ## Сдвинуть левую кисть клипа к месту хвата: запястье переезжает (вдоль цевья; за рукояткой на

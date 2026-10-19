@@ -1,13 +1,46 @@
 {
- "tris_world_before": 241576,
- "tris_world": 32422,
- "world_size_m": [
-  0.07,
-  0.63,
-  0.349
+ "materials_viewmodel": [
+  "GAME • Steel • 100",
+  "GAME • Polymer • 100",
+  "GAME • Magazine • 100",
+  "GAME • Ammo"
  ],
+ "bolt_travel_m": 0.1006,
  "rounds": 30,
- "parts_viewmodel": 15,
- "tris_viewmodel": 261488,
- "tris_detail": 241576
+ "parts_viewmodel": 14,
+ "tris_viewmodel": 45256,
+ "tris_viewmodel_weapon": 40496,
+ "tris_world_before": 32873,
+ "tris_world": 8997,
+ "world_size_m": [
+  0.073,
+  0.689,
+  0.206
+ ],
+ "tris_detail": 32873,
+ "source": "E:\\Models Blender\\WEAPONS\\ВЕРАС-54 — модель и обвесы\\ВЕРАС-54\\Актуальное\\VERAS54_Only_State100_v13_Textured_v02.blend",
+ "source_sha256": "acb5afc842647ec4c079268aaa1497fa6beb3c720cc9f2ab28d7bd9f5cb283dc",
+ "version": "v13 (2026-10-19)",
+ "markers_local_m": {
+  "SightRear": [
+   0.0291,
+   0.0,
+   0.057
+  ],
+  "SightFront": [
+   0.518,
+   0.0,
+   0.057
+  ],
+  "Muzzle": [
+   0.705,
+   0.0,
+   0.0
+  ]
+ },
+ "lp_triangles": {
+  "weapon_with_magazine": 32513,
+  "rounds": 5400,
+  "total": 37913
+ }
 }

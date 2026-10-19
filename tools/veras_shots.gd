@@ -352,7 +352,8 @@ func _jam() -> void:
 	var bolt_x: float = vm._weapon_skel.get_bone_pose_position(vm._bolt).distance_to(vm._weapon_skel.get_bone_rest(vm._bolt).origin)
 	_check("задержка: затвор недозакрыт (%.0f мм)" % (bolt_x * 1000.0), bolt_x > 0.02 and bolt_x < 0.045)
 	var case_at: Vector3 = vm.frame.global_transform.affine_inverse() * vm._jam_case.global_position
-	_check("задержка: гильза в окне коробки %s" % case_at, case_at.distance_to(Vector3(-0.011, 0.077, 0.144)) < 0.01)
+	# v13: донце у зеркала затвора в окне выброса (крышка сплошная) — tools/veras54_v13/clips/rig_common.JAM_CASE_BASE
+	_check("задержка: гильза в окне коробки %s" % case_at, case_at.distance_to(Vector3(-0.004, 0.070, 0.140)) < 0.01)
 	await _shot("veras_jam_hold")
 	await _side("veras_jam_hold_right", true)
 	Input.action_press("reload")

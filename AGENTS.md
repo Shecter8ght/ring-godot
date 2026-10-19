@@ -205,14 +205,17 @@ python -X utf8 tools/gen_weapon_wear_tiles.py                 # общие та�
 #   маска износа шейдером: tools/pm_v11_bake.py -- 20 --channels edge,cavity,hand --tag _wear → pm_v11_pack_maps.py wear
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
-"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/export_veras54.py -- [viewmodel] [world] [detail] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка), мировая модель и подробная (конструктор) в assets/models/weapons/veras54; ещё аргумент grips — наборы клипов под рукоятки ВАРН (позы кистей ждут правки владельца)
+# ВЕРАС-54 v13 в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/veras54_v13/game_lp.py (сетка ~33 тыс. + патроны ~5 тыс.)
+#   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски _wear и жировой плёнки _coat в assets) → game_rig.py (риг рук v13 в библиотеке)
+#   → bash tools/veras54_v13/clips/build_all.sh (18 клипов, «Клипы v13») → export_veras54.py → --import → python -X utf8 tools/veras54_v13/game_imports.py → --import;
+#   сверка запекания с исходником в его студии — tools/veras54_v13/bake_compare.py, гильза задержки — clips/jam_check.py
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка), мировая и подробная (конструктор) — .gltf с общими картами в assets/models/weapons/veras54; grips — наборы клипов под рукоятки ВАРН
 tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от первого лица: бедро, прицел, перезарядки, проверка магазина, мировая модель; рукоятки ВАРН V1/V2 и глушитель
-                                                              # задержка «гильза в окне» и её устранение, карты износа 60/20, прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)
+                                                              # задержка «гильза в окне» и её устранение, износ шейдером 100/60/20, прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)
 tools/godot.cmd --headless res://tools/veras_hand_test.tscn # ВЕРАС-54, левая рука с рукоятками (ВАРН, угловая, на удлинителе): стоя, на ходу, в прицел и обратно — кости не копят масштаб, кисть у рукоятки
-tools/godot.cmd res://tools/veras_gloss_shots.tscn          # ВЕРАС-54 под лампами тира: корпус матовый, блестят только затворная рама и трубка приклада; снимки veras_gloss_*
+tools/godot.cmd res://tools/veras_gloss_shots.tscn          # ВЕРАС-54 под лампами тира: блики отделки v13 и жировых следов; снимки veras_gloss_*
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100|60|20]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты трёх состояний)
-python tools/veras54_game_materials.py --states              # карты износа автомата 60/20 → assets/models/weapons/veras54/states (матовая отделка та же, что в GLB)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
