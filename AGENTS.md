@@ -226,6 +226,8 @@ tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от
                                                               # задержка «гильза в окне» и её устранение, вид при прочности 100/60/20 (один), прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)
 tools/godot.cmd --headless res://tools/veras_hand_test.tscn # ВЕРАС-54, левая рука с рукоятками (ВАРН, угловая, на удлинителе): стоя, на ходу, в прицел и обратно — кости не копят масштаб, кисть у рукоятки
 tools/godot.cmd res://tools/veras_gloss_shots.tscn          # ВЕРАС-54 под лампами тира: блики отделки v13 и жировых следов; снимки veras_gloss_*
+tools/godot.cmd --windowed --resolution 1920x1080 res://tools/veras_outdoor_shots.tscn # ВЕРАС-54 днём под небом (Пригород): бедро, магазин у глаз, прицел — на солнце
+                                                              # и от солнца; глянец материалов виден только тут; снимки veras_outdoor_* (VERAS_OUT_TAG=имя)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100|60|20]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты трёх состояний)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader

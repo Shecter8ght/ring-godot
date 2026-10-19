@@ -8,8 +8,8 @@
 → assets/models/weapons/veras54/ (сразу в игру, их грузит код по имени карты цвета):
   veras54_<Атлас>_100_wear.png — маска износа шейдера (Non-Color, 2048): R — выпуклые кромки, G — углубления и укрытые
   места, B — места хвата и трения (формат — src/combat/weapon_wear.gdshader).
-  veras54_<Атлас>_100_coat.png — жировая плёнка (Non-Color, 2048, R): отпечатки, ладони, масло — в шейдере слой Clearcoat
-  (в Blender — канал стека Oil film → Coat Weight, Coat IOR 1,47, шероховатость 0,1): в лоб почти не видно, в отражении блестит.
+  veras54_<Атлас>_100_coat.png — жировая плёнка (Non-Color, 2048, R): отпечатки, ладони, масло (в Blender — канал стека Oil film →
+  Coat Weight) без ровного «пола» стека; шейдер опускает по ней шероховатость основного слоя — в лоб почти не видно, под углом блестит.
   В maps/game ещё veras54_Magazine_100_emission.png — светонакопительные цифры магазина (sRGB).
 Поля островов добираются «push-pull» по пирамиде (среднее по запечённому) до краёв атласа.
 """
@@ -134,8 +134,12 @@ for atlas, state in ATLASES.items():
         save(pushpull(emit[..., :3], mask), GAME / f'{tag}_emission.png', True)
     if not state:
         continue
-    # жировая плёнка — отдельной маской (в шейдере Clearcoat)
-    save(half(coat, MASK_SIZE), ASSET / f'{tag}_coat.png', False)
+    # жировая плёнка — отдельной маской, только сами следы: у плёнки стека есть ровный «пол» по всей детали (первая декаль
+    # слоя смешана с силой < 1). В игре он дал бы ровный глянец по всей поверхности («стеклянный» вид, владелец 2026-10-19).
+    floor = float(np.percentile(coat[mask], 40.0)) if mask.any() else 0.0
+    prints = np.clip((coat - floor) / max(1.0 - floor, 1e-3), 0.0, 1.0)
+    save(half(prints, MASK_SIZE), ASSET / f'{tag}_coat.png', False)
+    log(atlas, 'coat floor', round(floor, 3), 'prints>0.1', round(float((prints[mask] > 0.1).mean()), 4))
     # маска износа шейдера: каналы сглажены (шум лучей AO), уровни — по запечённому
     ec = pushpull(np.dstack([ecm[..., 0], ecm[..., 1], mrh[..., 2]]), mask)
     edge = level(blur(ec[..., 0], 1.2), mask) ** 1.2
@@ -143,13 +147,8 @@ for atlas, state in ATLASES.items():
     shelter = np.clip((0.9 - blur(ao, 2.0)) / 0.55, 0.0, 1.0)
     shelter[~mask] = 0.0
     cavity = np.maximum(cavity, shelter)
-    # хват: заданные места деталей + жировые следы рук (отпечатки и ладони — там, где берутся руками). У плёнки стека есть
-    # ровный «пол» по всей детали (первая декаль слоя смешана с силой < 1 — так в принятом high-poly; в _coat он остаётся):
-    # в хват идут только следы сверх пола, иначе «места хвата» были бы по всей поверхности (+0,2…0,4).
-    floor = float(np.percentile(coat[mask], 40.0)) if mask.any() else 0.0
-    prints = np.clip((coat - floor) / max(1.0 - floor, 1e-3), 0.0, 1.0)
+    # хват: заданные места деталей + жировые следы рук (только следы сверх «пола», см. выше)
     hand = np.maximum(blur(ec[..., 2], 2.0), np.clip(blur(prints, 6.0) * 1.6, 0.0, 0.85))
-    log(atlas, 'coat floor', round(floor, 3))
     wear = pushpull(np.dstack([edge, cavity, np.clip(hand, 0.0, 1.0)]), mask)
     save(half(wear, MASK_SIZE), ASSET / f'{tag}_wear.png', False)
     log(atlas, 'wear edge', round(float(edge[mask].mean()), 3), 'cavity', round(float(cavity[mask].mean()), 3),

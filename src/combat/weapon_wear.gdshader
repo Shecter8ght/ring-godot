@@ -30,11 +30,13 @@ uniform float ao_light_affect = 0.0;
 uniform vec3 uv1_scale = vec3(1.0);
 uniform vec3 uv1_offset = vec3(0.0);
 
-// Жировая плёнка рук (отпечатки, ладони, масло) — маска <карты>_coat.png (R), если есть: прозрачный слой с блеском
-// (в Blender — Coat Weight от канала стека Oil film): в лоб почти не виден, в отражении света под углом блестит.
+// Жировая плёнка рук (отпечатки, ладони, масло) — маска <карты>_coat.png (R), если есть (в Blender — Coat Weight от
+// канала стека Oil film). Не слоем Clearcoat: лак Godot всегда почти зеркальный и без карты нормалей — вся деталь
+// выходила стеклянной («полированный пластик с керамикой», владелец 2026-10-19). След гладит основной слой: там, где
+// он есть, шероховатость опускается к film_roughness — в лоб почти не виден, под углом к свету даёт мягкий отблеск.
 uniform sampler2D coat_tex : hint_default_black, filter_linear_mipmap, repeat_enable;
 uniform float coat_weight = 1.0;
-uniform float coat_roughness = 0.12;
+uniform float film_roughness = 0.3;
 // Свечение по карте (светонакопительные цифры магазина ВЕРАС-54): emission_tex × emission_color × emission_energy.
 uniform sampler2D emission_tex : source_color, hint_default_black, filter_linear_mipmap, repeat_enable;
 uniform vec3 emission_color = vec3(0.0);
@@ -177,6 +179,8 @@ void fragment() {
 		porous = max(porous, grime);
 		film *= 1.0 - max(gcov, dust * 0.8);
 	}
+	// жировой след сглаживает поверхность (не грубее film_roughness), карта нормалей остаётся
+	rough = mix(rough, min(rough, film_roughness), clamp(film, 0.0, 1.0));
 	// дождь: вода сглаживает отражение, пористое темнеет
 	float wet = clamp(rain_wet * wet_k, 0.0, 1.0);
 	col *= 1.0 - 0.3 * wet * porous;
@@ -189,7 +193,5 @@ void fragment() {
 	NORMAL_MAP_DEPTH = normal_scale;
 	AO = ao;
 	AO_LIGHT_AFFECT = ao_light_affect;
-	CLEARCOAT = clamp(film, 0.0, 1.0);
-	CLEARCOAT_ROUGHNESS = coat_roughness;
 	EMISSION = texture(emission_tex, UV).rgb * emission_color * emission_energy;
 }
