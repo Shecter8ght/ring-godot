@@ -242,6 +242,7 @@
    "level": "mall_map",
    "prompt": "Взять колесо",
    "supply": "car_wheel",
+   "cargo": "car_wheel",
    "early": "yards"
   },
   "car_belt_search": {
@@ -301,6 +302,7 @@
    "level": "zone01_mall",
    "prompt": "Взять колесо с биркой «ЮР / 8»",
    "supply": "car_wheel",
+   "cargo": "car_wheel",
    "early": "yards"
   },
   "car_belt_parts_radiator": {

@@ -105,6 +105,10 @@ tools/godot.cmd --headless res://tools/car_recovery_test.tscn # заказ «В�
                                                               # запекание с принятых текстур UCUPaint, два атласа 2K → assets/items/models/car/car_radiator.glb
                                                               # (imports — после первого --import: сжатие карт как у ПМ; затем --import ещё раз)
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/car_radiator_shots.tscn # радиатор как предмет игры: стоит и лежит, бирка, патрубок, горловина вблизи, издали; снимки car_radiator_*
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/coupe_ilya/wheel_item.py -- export|imports
+                                                              # колесо (предмет car_wheel) = игровое колесо машины LOD0 и его атлас → assets/items/models/car/car_wheel.glb
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/car_parts_shots.tscn # «Пригород», автобаза: колесо и радиатор в кладовой на этапе «комплект»,
+                                                              # после сдачи — кладовая пуста, радиатор в комплекте; снимки car_parts_*
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/coupe_ilya/game_lp.py -- <отделка.blend>
                                                               # купе Ильи в игру: сетка LOD 150/50/12 тыс. и развёртки, затем тем же Blender game_bake.py → game_pack.py →
                                                               # game_export.py → assets/models/props/coupe_ilya; --import, python tools/coupe_ilya/game_imports.py, --import

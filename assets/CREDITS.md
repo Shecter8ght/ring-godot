@@ -58,6 +58,9 @@
   модель радиатора купе Ильи: форма — tools/coupe_ilya/radiator.py, отделка UCUPaint — radiator_uv.py и radiator_pbr.py
   (маски износа — `E:/Models Blender/Маски_АЛЬФА` владельца), игровая сетка и запекание — radiator_game.py;
   исходники — `E:/Models Blender/VEHICLES/Купе Ильи/models/items` (asset-state.md там же).
+- `car_wheel.glb` (+ извлечённые карты `car_wheel_*.png`) и иконка `assets/icons/car_wheel.png` — собственная модель: колесо
+  купе Ильи — игровая сетка колеса машины LOD0 и атлас колеса машины (tools/coupe_ilya/game_lp.py, game_bake.py), сборка
+  предмета — tools/coupe_ilya/wheel_item.py.
 
 ## Машина Ильи (assets/models/props/coupe_ilya)
 

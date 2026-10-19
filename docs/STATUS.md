@@ -6555,3 +6555,14 @@ ShelterWeather: отсутствует bake_variants(), вызываемая too
   состояния заказа может прийти из обратного вызова физики).
 - Проверено: временный прогон сцены `zone01_car_recovery_sites.tscn` — на месте оба тела включены, после вывоза
   выключены, флаг снят — снова включены; compile_check — 0, car_recovery_test — 0 провалов.
+
+### 2026-10-19 — машина Ильи: колесо-предмет в игре, детали заказа на карте (Claude)
+
+- Предмет `car_wheel` получил модель: то же колесо, что на машине, — игровая сетка колеса машины LOD0 и её атлас 2K
+  (8,6 тыс. треугольников, лежит плашмя лицом диска вверх) — `tools/coupe_ilya/wheel_item.py -- export|imports`,
+  `assets/items/models/car/car_wheel.glb`, иконка `assets/icons/car_wheel.png`, поле `model` в `data/items.json`.
+  Бирки на колесе нет: тот же предмет даёт склад ТЦ.
+- Места-источники колеса (`car_belt_parts_wheel`, `car_mall_supply_wheel`) — `cargo: car_wheel`.
+- Проверено на карте «Пригород» (места заказа уже стоят — `zone01_car_recovery_sites.tscn`): стенд `tools/car_parts_shots.tscn`
+  (заказ на этапе «комплект»: колесо и радиатор в кладовой автобазы; после сдачи — кладовая пуста, радиатор в комплекте),
+  снимки `docs/screens/car_parts_*`. car_recovery_test (и колесо в кладовой) — 0 провалов, quest_steps_test — 0, compile_check — 0.

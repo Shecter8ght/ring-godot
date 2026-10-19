@@ -1,0 +1,19 @@
+{
+ "item": "car_wheel",
+ "source_lp": "_asset_src/coupe_ilya_game/lp/Coupe_Game_LP.blend",
+ "parts": [
+  "Tire_FL",
+  "Rim_Face_FL",
+  "Rim_Barrel_FL",
+  "Lug_Nuts_FL",
+  "Center_Badge_FL"
+ ],
+ "triangles": 8631,
+ "size_m": {
+  "diameter": 0.694,
+  "width": 0.268
+ },
+ "maps": "атлас колеса машины 2048×2048: albedo (sRGB), normal (OpenGL), orm (R — AO, G — шероховатость, B — металл)",
+ "axes": "лежит плашмя: ось колеса — вертикаль (Godot Y), лицо диска вверх; начало — центр нижней грани шины",
+ "lod": "автоматические LOD движка при импорте (как у остальных предметов)"
+}

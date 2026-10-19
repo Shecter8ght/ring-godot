@@ -49,15 +49,18 @@ func _ready() -> void:
 	_check("источники деталей открыты", _site_on("car_belt_parts_wheel", "zone01_mall") and _site_on("car_mall_supply_wheel", "mall_map"))
 	# места заказа узлами, как их ставит QuestWorld: модель радиатора в кладовой и в комплекте
 	var parts := _site_node("car_belt_parts_radiator")
+	var wheel := _site_node("car_belt_parts_wheel")
 	var kit := _site_node("car_belt_delivery")
 	await get_tree().process_frame
-	_check("кладовая: радиатор лежит, пока его ждут", _shown(parts, "QuestCargo"))
+	_check("кладовая: радиатор и колесо лежат, пока их ждут", _shown(parts, "QuestCargo") and _shown(wheel, "QuestCargo"))
 	_check("комплект: радиатора ещё нет", not _shown(kit, "QuestPlaced") and not Quests.handed_over(Q, "car_belt_delivery"))
 	_hand("wheel")
 	_hand("radiator")
 	await get_tree().process_frame
 	_check("радиатор сдан: в кладовой его нет, в комплекте лежит", not _shown(parts, "QuestCargo") and _shown(kit, "QuestPlaced")
 			and Quests.handed_over(Q, "car_belt_delivery"))
+	_check("колесо поставлено: в кладовой его нет", not _shown(wheel, "QuestCargo"))
+	wheel.queue_free()
 	parts.queue_free()
 	kit.queue_free()
 	_check("комплект собран — заключительный отчёт", _oid() == "final")
