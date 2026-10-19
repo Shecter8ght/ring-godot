@@ -26,5 +26,10 @@ func _refresh() -> void:
 	_car.battery_installed = "battery" in done
 	var gone: bool = Quests.flag(recovered_flag) == true
 	_car.visible = not gone
+	# у модели своё тело (импорт машин, tools/editor/vehicle_import.gd) — спрятанная машина не должна держать
+	# игрока и пули; отложенно: изменение состояния заказа может прийти из обратного вызова физики
+	var shapes: Array[Node] = _car.find_children("*", "CollisionShape3D", true, false)
 	if _body:
-		_body.disabled = gone
+		shapes.append(_body)
+	for shape: Node in shapes:
+		shape.set_deferred("disabled", gone)
