@@ -303,14 +303,14 @@
    "shared": true,
    "group": "Проверка и управление",
    "name": "Переводчик огня",
-   "when": "сменить одиночный и автоматический режим",
+   "when": "переводчик щёлкнул на следующий режим огня (X: АВ / очередь по 2 / одиночный)",
    "file": "fire_mode",
    "fallback": "fire_mode",
    "type": "one",
    "variants": 3,
    "prio": 2,
    "condition": "automatic",
-   "wired": false,
+   "wired": true,
    "family": true
   },
   {

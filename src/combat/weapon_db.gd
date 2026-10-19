@@ -93,6 +93,25 @@ static func is_weapon(id: String) -> bool:
 	return not weapon(id).is_empty()
 
 
+## Режимы огня ствола в порядке переводчика (первый — по умолчанию): "fire_modes" из данных; без них — один,
+## по stats.auto. Названия и очередь — Balance.FIRE_MODES.
+static func fire_modes(id: String) -> Array[String]:
+	var w := weapon(id)
+	var out: Array[String] = []
+	for m: Variant in w.get("fire_modes", []):
+		if (Balance.FIRE_MODES.labels as Dictionary).has(String(m)):
+			out.append(String(m))
+	if out.is_empty():
+		out.append("auto" if bool((w.get("stats", {}) as Dictionary).get("auto", false)) else "semi")
+	return out
+
+
+## Режим из записи экземпляра, если ствол его знает; иначе — по умолчанию.
+static func fire_mode_of(id: String, mode: String) -> String:
+	var modes := fire_modes(id)
+	return mode if mode in modes else modes[0]
+
+
 ## Все модели оружия в порядке данных. Стенд строит по этому списку карточки и автоматически
 ## подхватывает новые модели, когда у них появляется запись в weapons.json и иконка.
 static func weapon_ids() -> Array[String]:

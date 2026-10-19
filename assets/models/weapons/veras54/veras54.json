@@ -78,5 +78,6 @@
   "reload_tactical_varn_v1_mag45",
   "reload_tactical_varn_v2_drum60",
   "reload_tactical_varn_v2_mag45"
- ]
+ ],
+ "selector_auto_single_deg": 7.85
 }

@@ -8,7 +8,9 @@ v13 (2026-10-19): форма и текстуры v13 v02 (приняты вла�
   viewmodel — руки FPS_ArmsRig и оружие VERAS54_WeaponRig в осях камеры от первого лица (камера в начале, взгляд по −Z
               Godot). Клипы (NLA-дорожки → анимации glTF): idle, reload_tactical, reload_full, mag_check, jam_clear,
               reload_fast, reload_fast_full; служебные: follower_by_rounds (подаватель, кадр n = n патронов), bolt_travel
-              (кадр 0 — затвор закрыт, 1 — отведён на 100,6 мм; кости Bolt и RecoilSpring). IK и драйверы рига запечены в
+              (кадр 0 — затвор закрыт, 1 — отведён на 100,6 мм; кости Bolt и RecoilSpring), selector_by_mode (рычаг переводчика:
+              кадр на положение — АВ, «2», ОД, как fire_modes ствола); переводчик большим пальцем — fire_mode_<откуда>_<куда>
+              (clips/fire_mode_clip.py). IK и драйверы рига запечены в
               ключи костей. Детали склеены по узлам, патроны — узлы Round_NN (1 — верхний). Метки: SightRear (плечики
               U-прорези целика), SightFront (вершина мушки) — обе на 57 мм над осью канала, Muzzle, WeaponFrame (оси игры у
               пистолетной рукоятки — сюда встают обвесы).
@@ -63,6 +65,12 @@ for _g in GRIPS:
                                       ("reload_full", "Full", 114, "Reload_Full"), ("jam_clear", "Jam", 46, "Jam_Clear"),
                                       ("reload_fast", "Fast", 58, "Reload_Fast"), ("reload_fast_full", "Fastfull", 92, "Reload_FastFull")):
         CLIPS[f"{_clip}_{_g}"] = (f"{_tag}_{_g}", _last, SRC / f"VERAS54_{_file}_{_g}_v13.blend")
+# переводчик огня большим пальцем правой руки (tools/veras54_v13/clips/fire_mode_clip.py): АВ→2, 2→ОД, ОД→АВ, 18 кадров;
+# рычаг в игре ставит сама игра по режиму (служебный клип selector_by_mode)
+for _a, _b in (("auto", "burst"), ("burst", "semi"), ("semi", "auto")):
+    CLIPS[f"fire_mode_{_a}_{_b}"] = (f"Firemode_{_a}_{_b}", 18, SRC / f"VERAS54_FireMode_{_a}_{_b}_v13.blend")
+    for _g in GRIPS:
+        CLIPS[f"fire_mode_{_a}_{_b}_{_g}"] = (f"Firemode_{_a}_{_b}_{_g}", 18, SRC / f"VERAS54_FireMode_{_a}_{_b}_{_g}_v13.blend")
 # стойка — первый кадр тактической: без рукоятки и с каждой из них
 IDLES = {"idle": "Tactical", **{f"idle_{g}": f"Tactical_{g}" for g in GRIPS}}
 # магазины 45 и барабан 60 (tools/veras54_mags/mags_vm.py): свои наборы клипов «<клип>[_<рукоятка>]_<mag45|drum60>»,
@@ -327,6 +335,24 @@ def viewmodel() -> None:
         spring.append(local_of(wr, "RecoilSpring"))
     root["Bolt pull"] = 0.0
     report["bolt_travel_m"] = round((bolt[1].translation - bolt[0].translation).length, 4)
+    # переводчик: положения рычага по порядку fire_modes ствола (data/weapons.json) — АВ, «2», ОД. Драйвер рига знает только
+    # АВ и ОД, «2» — между ними по меткам (3,92° из 7,85°, _asset_src/veras54_v13/tex/gen_selector_track.py)
+    sel = []
+    for mode in (1, 2):
+        for k, v in (("Fire mode", mode), ("Selector from mode", mode), ("Selector blend", 1.0)):
+            root[k] = v
+        root.update_tag()
+        bpy.context.view_layer.update()
+        sel.append(local_of(wr, "Selector"))
+    for k, v in (("Fire mode", 1), ("Selector from mode", 1), ("Selector blend", 1.0)):
+        root[k] = v
+    root.update_tag()
+    bpy.context.view_layer.update()
+    l0, r0, s0 = sel[0].decompose()
+    l1, r1, s1 = sel[1].decompose()
+    k_burst = 3.92 / 7.85
+    sel.insert(1, Matrix.LocRotScale(l0.lerp(l1, k_burst), r0.slerp(r1, k_burst), s0))
+    report["selector_auto_single_deg"] = round(math.degrees(r0.rotation_difference(r1).angle), 2)
     # снять ограничения и драйверы — дальше кости ведут только запечённые ключи
     for arm in (arms, wr):
         for pb in arm.pose.bones:
@@ -341,6 +367,7 @@ def viewmodel() -> None:
         push_track(wr, clip, bake_action(wr, f"VM_{clip}_weapon", frames, data[wr.name]))
     push_track(wr, "follower_by_rounds", bake_action(wr, "VM_follower", list(range(31)), {"MagazineFollower": follower}))
     push_track(wr, "bolt_travel", bake_action(wr, "VM_bolt", [0, 1], {"Bolt": bolt, "RecoilSpring": spring}))
+    push_track(wr, "selector_by_mode", bake_action(wr, "VM_selector", [0, 1, 2], {"Selector": sel}))
     for arm in (arms, wr):
         arm.data.pose_position = "POSE"
         for pb in arm.pose.bones:

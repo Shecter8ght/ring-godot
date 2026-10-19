@@ -682,6 +682,8 @@ func _cached_viewmodel(id: String, mods: Dictionary, dur: float, mag: String, ma
 	if model == null:
 		if id == "grenade":
 			model = GrenadeModel.create(true)
+		elif (Balance.THROWN_LIGHTS as Dictionary).has(id):
+			model = ThrownLight.held_model(id, false)
 		elif ViewmodelClips.available(id):
 			model = ViewmodelClips.create(id, mods)
 			WeaponMark.attach(model, id, marks)
@@ -1018,6 +1020,7 @@ func _process_grenade_viewmodel(pl: Player, delta: float) -> void:
 	_viewmodel.transform = _weapon_lag(delta, 0.0) * _viewmodel.transform
 	if _viewmodel is GrenadeModel:
 		(_viewmodel as GrenadeModel).prepare(pl.grenade_pin)
+	ThrownLight.prepare_held(_viewmodel, pl.grenade_pin)
 	_viewmodel.visible = pl.grenade_in_hand
 	_arms.visible = false
 	pl.weapon_obstruction = 0.0
@@ -1656,7 +1659,8 @@ func _update_hud(pl: Player) -> void:
 		_weapon_label.text = ""
 		return
 	if pl.grenade_equipped:
-		_weapon_label.text = "Граната × %d   ·   ЛКМ — верхом   ПКМ — снизу   ·   держать — сильнее" % pl.grenade_count()
+		var left: String = "без счёта" if not pl.loadout_mode and pl.throwable_id != "grenade" else "× %d" % pl.throwable_count()
+		_weapon_label.text = "%s %s   ·   ЛКМ — верхом   ПКМ — снизу   ·   держать — сильнее" % [pl.throwable_name(), left]
 		return
 	if pl.weapon_id == "":
 		var put_away: String = "без оружия"
@@ -1676,6 +1680,9 @@ func _update_hud(pl: Player) -> void:
 	var t := "%s   маг. %d %s" % [String(spec.name), int(spec.mag), String(ItemDb.item(String(spec.ammo)).get("short", ""))]
 	if pl.mag_out():
 		t = "%s   без магазина (%s — вставить)" % [String(spec.name), PauseMenu.key_name("reload")]
+	# режим огня — у ствола с переводчиком (X — следующий)
+	if WeaponDb.fire_modes(pl.weapon_id).size() > 1:
+		t += "   [%s]" % String((Balance.FIRE_MODES.labels as Dictionary).get(pl.fire_mode(), ""))
 	if pl.ammo_check_t > 0.0:
 		t += "   [%s]" % pl.ammo_check_text
 	if pl.loadout_mode:

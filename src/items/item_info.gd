@@ -292,7 +292,15 @@ static func _weapon_text(id: String, w: Dictionary) -> String:
 				mags.append("%d" % int(WeaponDb.magazine(String(mid)).capacity))
 		lines.append("Магазины: на %s патронов. Продаётся без патронов — купи патроны калибра %s и снаряди магазин." % [", ".join(mags), WeaponDb.caliber_name(String(w.caliber))])
 	var st: Dictionary = w.get("stats", {})
-	lines.append("Огонь: %s, %d выстрелов в минуту. Бьёт прицельно примерно до %d м." % ["очередями" if bool(st.get("auto", false)) else "одиночными", int(st.get("rpm", 0)), int(spec.get("range_m", st.get("range", 0)))])
+	var fire: String = "очередями" if bool(st.get("auto", false)) else "одиночными"
+	var modes: Array[String] = WeaponDb.fire_modes(id)
+	if modes.size() > 1:
+		# переводчик: режимы по кругу (X)
+		var names: Array[String] = []
+		for m: String in modes:
+			names.append("%s — %s" % [String(Balance.FIRE_MODES.labels[m]), String(Balance.FIRE_MODES.names[m])])
+		fire = "переводчик %s (%s — следующий)" % [", ".join(names), PauseMenu.key_name("fire_mode")]
+	lines.append("Огонь: %s, %d выстрелов в минуту. Бьёт прицельно примерно до %d м." % [fire, int(st.get("rpm", 0)), int(spec.get("range_m", st.get("range", 0)))])
 	var ergo := float(spec.get("ergo", 50))
 	lines.append("Перезарядка %.1f с. Надёжность %.1f%%. Эргономика %d/100." % [float(spec.get("reload", st.get("reload", 0.0))), float(spec.get("reliability", st.get("reliability", 1.0))) * 100.0, int(ergo)])
 	lines.append("В руке: %s. Выстрел слышно на %d м." % ["лёгкое и быстрое" if ergo >= 70 else ("среднее по удобству" if ergo >= 45 else "тяжёлое, в прицел вскидывается медленно"), int(spec.get("noise_m", 0))])

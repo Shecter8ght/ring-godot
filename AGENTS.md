@@ -124,6 +124,10 @@ tools/godot.cmd res://tools/conditions_test.tscn            # условия р�
 tools/godot.cmd res://tools/weather_test.tscn               # погода: дождь (в т.ч. начинается в рейде), пасмурно (сыро без капель, потом дождь), туман и снайпер, жара и очки, выносливость
 tools/godot.cmd --headless res://tools/events_test.tscn     # события и фракции: жильцы, сигнализация, свет погас, генератор, сброс, ЧВК против мародёров, рация
 tools/godot.cmd --headless res://tools/reload_fast_test.tscn # ВЕРАС со снаряжением: одно R — обычная перезарядка, два быстрых — быстрая (−28 %, старый магазин на землю), держать R — магазин в руке
+tools/godot.cmd --headless res://tools/fire_mode_test.tscn  # режимы огня (X, ВЕРАС-54: АВ → 2 → ОД → АВ): очередь по 2 на нажатие, ОД — один, пока переводчик щёлкает — не стреляет,
+                                                              # режим на экземпляре ствола (хосту, после перезарядки и смены ствола), у пистолета X ничего не делает
+tools/godot.cmd --headless res://tools/light_keys_test.tscn # свет в руку: Y — химсвет, бросок как граната (ЛКМ/ПКМ); G — ракетница из слота (в руках — тип патрона),
+                                                              # дважды G — фальшфейер в руку; расход у хоста, свет на земле; без ракетницы G ничего не достаёт
 tools/godot.cmd --headless res://tools/ammo_mix_test.tscn  # патроны в магазине вперемешку: слои, снаряжение и разрядка сверху, стрельба по слоям, смена и досыпка
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/nvg_stress_test.tscn # ПНВ в бою: зелёная картинка не пропадает под эффектами стресса и ранения; снимки nvg_stress_*
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/sky_flare_shots.tscn # осветительная ракета из сигнального пистолета во дворе зоны 1 ночью: 15 с в воздухе, высота, кадры в секунду; снимки sky_flare_*
@@ -218,9 +222,11 @@ tools/godot.cmd --headless res://tools/veras54_mags_check.tscn # магазин�
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/veras54_mags_vm_shots.tscn # магазины 45/60 в руках: модель на метке вместо штатного, свой набор клипов,
                                                               # патроны и подаватель по счёту, тактическая/полная/быстрая (старый вылетает), проверка удержанием R —
                                                               # поворот окнами остатка к глазам; снимки veras54_mags_vm_* (MAGS_ONLY=mag_545_45)
-"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка), мировая и подробная (конструктор) — .gltf с общими картами в assets/models/weapons/veras54; grips — наборы клипов под рукоятки ВАРН
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка, переводчик огня), мировая и подробная (конструктор) — .gltf с общими картами в assets/models/weapons/veras54; grips — наборы клипов под рукоятки ВАРН
 tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от первого лица: бедро, прицел, перезарядки, проверка магазина, мировая модель; рукоятки ВАРН V1/V2 и глушитель
-                                                              # задержка «гильза в окне» и её устранение, вид при прочности 100/60/20 (один), прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)
+                                                              # задержка «гильза в окне» и её устранение, вид при прочности 100/60/20 (один), прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check|firemode)
+bash tools/veras54_v13/clips/build_fire_modes.sh              # переводчик огня большим пальцем правой руки (clips/fire_mode_clip.py): АВ→2, 2→ОД, ОД→АВ без рукоятки и под ВАРН V1/V2
+                                                              # → «Клипы v13/VERAS54_FireMode_*_v13.blend»; затем export_veras54.py -- viewmodel grips, --import, veras_shots VERAS_PART=firemode
 tools/godot.cmd --headless res://tools/veras_hand_test.tscn # ВЕРАС-54, левая рука с рукоятками (ВАРН, угловая, на удлинителе): стоя, на ходу, в прицел и обратно — кости не копят масштаб, кисть у рукоятки
 tools/godot.cmd res://tools/veras_gloss_shots.tscn          # ВЕРАС-54 под лампами тира: блики отделки v13 и жировых следов; снимки veras_gloss_*
 tools/godot.cmd --windowed --resolution 1920x1080 res://tools/veras_outdoor_shots.tscn # ВЕРАС-54 днём под небом (Пригород): бедро, магазин у глаз, прицел — на солнце

@@ -114,7 +114,7 @@ func _begin() -> void:
 		player._combat(0.01)
 		_check(action + ": хост подтвердил бросок", await _wait(func() -> bool: return not player._grenade_pending, 5.0))
 		# Тот же пакет ещё раз: ни второго снаряда, ни второго расхода.
-		player._rpc_grenade_request.rpc_id(1, player._grenade_seq, 1.0, false, Vector3.FORWARD)
+		player._rpc_grenade_request.rpc_id(1, player._grenade_seq, 1.0, false, Vector3.FORWARD, "grenade")
 		await get_tree().create_timer(0.8).timeout
 		player._combat(1.0)
 		player._combat(0.01)
@@ -122,7 +122,7 @@ func _begin() -> void:
 	# Даже прямой третий запрос без предмета не создаёт снаряд.
 	player._grenade_seq += 1
 	player._grenade_pending = true
-	player._rpc_grenade_request.rpc_id(1, player._grenade_seq, 1.0, false, Vector3.FORWARD)
+	player._rpc_grenade_request.rpc_id(1, player._grenade_seq, 1.0, false, Vector3.FORWARD, "grenade")
 	_check("пустой запас получил отказ хоста", await _wait(func() -> bool: return not player._grenade_pending, 5.0))
 	_check("гость видел ровно две визуальные гранаты", _spawned == 2, str(_spawned))
 	_completed.rpc_id(1)

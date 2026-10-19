@@ -83,6 +83,54 @@ static func throw(parent: Node, k: String, from: Vector3, velocity: Vector3) -> 
 	return g
 
 
+## Свет в руке до броска (Player.throwable_id, решение владельца 2026-10-19): палочка химсвета / фальшфейер; разгорается,
+## пока его готовят к броску (Player.grenade_pin: переломить палочку, чиркнуть тёркой). with_light — свой свет (модель у
+## всех на виду); у модели от первого лица — только свечение палочки, свет даёт модель в руке персонажа.
+static func held_model(k: String, with_light: bool) -> Node3D:
+	var spec: Dictionary = Balance.THROWN_LIGHTS[k]
+	var root := Node3D.new()
+	root.name = "Held_" + k
+	root.set_meta("light_kind", k)
+	var body := MeshInstance3D.new()
+	body.name = "Stick"
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.018
+	cm.bottom_radius = 0.018
+	cm.height = 0.16
+	body.mesh = cm
+	body.rotation.x = PI * 0.5
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = (spec.color as Color).darkened(0.35)
+	mat.emission_enabled = true
+	mat.emission = spec.color
+	mat.emission_energy_multiplier = 0.0
+	body.material_override = mat
+	root.add_child(body)
+	if with_light:
+		var glow := OmniLight3D.new()
+		glow.name = "Glow"
+		glow.light_color = spec.color
+		glow.light_energy = 0.0
+		glow.omni_range = float(spec.range) * 0.5
+		glow.position = Vector3(0, 0, -0.1)
+		root.add_child(glow)
+	return root
+
+
+## Свечение света в руке: pin 0…1 — насколько его уже разожгли (0 — тёмный).
+static func prepare_held(model: Node3D, pin: float) -> void:
+	if model == null or not model.has_meta("light_kind"):
+		return
+	var spec: Dictionary = Balance.THROWN_LIGHTS[String(model.get_meta("light_kind"))]
+	var on: float = clampf(pin, 0.0, 1.0)
+	var body: MeshInstance3D = model.get_node_or_null("Stick") as MeshInstance3D
+	if body:
+		(body.material_override as StandardMaterial3D).emission_energy_multiplier = 6.0 * on
+	var glow: OmniLight3D = model.get_node_or_null("Glow") as OmniLight3D
+	if glow:
+		glow.light_energy = float(spec.energy) * 0.6 * on
+
+
 func radius() -> float:
 	return float(Balance.THROWN_LIGHTS[kind].range)
 

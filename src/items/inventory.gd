@@ -351,6 +351,10 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 	# пристрелка: щелчки барабанчиков крутит владелец (ошибку нуля он не видит и не меняет)
 	if st.get("zero_c") is Array and (st.zero_c as Array).size() == 2:
 		Gear.set_zero_clicks(e, Vector2i(int(st.zero_c[0]), int(st.zero_c[1])))
+	# режим огня (переводчик) — только из режимов этого ствола
+	var mode: String = String(st.get("fire_mode", ""))
+	if mode != "" and WeaponDb.fire_modes(String(e.get("id", ""))).size() > 1:
+		e["fire_mode"] = WeaponDb.fire_mode_of(String(e.get("id", "")), mode)
 	var mods: Dictionary = e.get("mods", {})
 	var tac: Dictionary = st.get("tac", {})
 	for m in mods:

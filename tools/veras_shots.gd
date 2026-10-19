@@ -5,7 +5,8 @@ extends Node
 ## магазина (держать R), в прицеле с коллиматором на верхней планке. VERAS_ONLY=имя,имя — выборочно.
 ## Обвесы готовыми моделями: рукоятки ВАРН V1 / V2 (свой хват и клипы) и глушитель — у бедра и сбоку
 ## (veras_varn_*), задержка «гильза не вышла» и её устранение (veras_jam_*), прочность 100 / 60 / 20 — вид один,
-## кадры одинаковые (veras_state_*). VERAS_PART=grips|jam|states — только эта часть.
+## кадры одинаковые (veras_state_*); переводчик огня X — клипы большого пальца (veras_fire_mode_*). VERAS_PART=grips|jam|states|firemode —
+## только эта часть.
 
 const ID := "wpn_ar_01"
 const OUT := "res://docs/screens/"
@@ -69,6 +70,8 @@ func _ready() -> void:
 			await _extender()
 		elif part == "insert":
 			await _insert()
+		elif part == "firemode":
+			await _fire_mode()
 		print("veras_shots: ошибок ", _failures)
 		get_tree().quit(1 if _failures else 0)
 		return
@@ -375,6 +378,35 @@ func _jam() -> void:
 	await get_tree().create_timer(total - elapsed + 0.5).timeout
 	_check("задержка устранена: гильзы нет, патроны на месте", not _player.is_jammed() and not vm._jam_case.visible and _player.ammo == 14)
 	await _shot("veras_jam_done")
+
+
+## Переводчик огня (X): АВ → 2 → ОД → АВ — клип большого пальца своего перехода, рычаг идёт между положениями и встаёт
+## по режиму; кадры у бедра и справа (полочка лепестка) посреди нажима.
+func _fire_mode() -> void:
+	await _equip({})
+	var vm := _camera._viewmodel as ViewmodelClips
+	_check("переводчик: таблица положений рычага есть", vm._selector >= 0 and vm._selector_src != null)
+	var angles: Array[float] = []
+	var rest: Quaternion = vm._weapon_skel.get_bone_rest(vm._selector).basis.get_rotation_quaternion()
+	angles.append(rad_to_deg(rest.angle_to(vm._weapon_skel.get_bone_pose_rotation(vm._selector))))
+	for step: int in range(3):
+		var before: String = _player.fire_mode()
+		Input.action_press("fire_mode")
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+		Input.action_release("fire_mode")
+		var total: float = float(Balance.FIRE_MODES.switch_sec)
+		var role: String = "fire_mode_%s_%s" % [before, _player.fire_mode()]
+		await get_tree().create_timer(total * 0.2).timeout
+		_check("переводчик %s: клип %s" % [role, vm._clip], vm._clip.begins_with(role))
+		await get_tree().create_timer(total * 0.3).timeout
+		await _shot("veras_%s_50" % role)
+		await _side("veras_%s_50_right" % role, true, 0.05, 0.42, 0.06)
+		await get_tree().create_timer(total * 0.5 + 0.4).timeout
+		angles.append(rad_to_deg(rest.angle_to(vm._weapon_skel.get_bone_pose_rotation(vm._selector))))
+	# АВ — у рычага покой рига; «2» на 3,92° ниже, ОД на 7,85° (метки и ямки фиксатора)
+	_check("рычаг по режимам АВ / 2 / ОД / АВ: %s°" % str(angles), absf(angles[1] - 3.92) < 0.3 and absf(angles[2] - 7.85) < 0.3
+		and absf(angles[3] - angles[0]) < 0.3, str(angles))
 
 
 ## Автомат и обвесы при прочности 100 / 60 / 20 %: вид один (решение владельца 2026-10-19) — кадры одинаковые.

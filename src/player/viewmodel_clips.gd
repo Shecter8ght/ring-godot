@@ -18,6 +18,9 @@ extends Node3D
 ## jam_clear: правая отводит затвор, гильза выпадает.
 ## Патроны в магазине — узлы Round_NN (1 — верхний), подаватель — по счёту (служебный клип
 ## follower_by_rounds). Обвесы и метки — у узла WeaponFrame (оси игры у пистолетной рукоятки).
+## Переводчик огня (кость Selector) стоит по режиму Player.fire_mode (служебный клип selector_by_mode: запись на
+## положение в порядке fire_modes ствола); X — клип большого пальца на этот переход (clips.fire_mode_<откуда>_<куда>,
+## у ВЕРАС-54 auto_burst, burst_semi, semi_auto), рычаг идёт между положениями на участке клипа config.fire_mode_push.
 
 const BLEND_IN := 0.15
 const BLEND_OUT := 0.25
@@ -36,6 +39,10 @@ var _bolt: int = -1
 var _spring: int = -1
 var _follower_src: Animation
 var _bolt_src: Animation
+## Переводчик огня: кость и таблица положений; таймер переключения на прошлом кадре.
+var _selector: int = -1
+var _selector_src: Animation
+var _last_switch: float = 0.0
 var _rounds: Array[Node3D] = []
 var _clip: String = ""
 var _rounds_before: int = 0
@@ -141,6 +148,7 @@ func _setup(id: String, mods: Dictionary) -> void:
 		_follower = _weapon_skel.find_bone("MagazineFollower")
 		_bolt = _weapon_skel.find_bone("Bolt")
 		_spring = _weapon_skel.find_bone("RecoilSpring")
+		_selector = _weapon_skel.find_bone("Selector")
 	# Стойка идёт по кругу: пока клип играет, он каждый кадр заново ставит кости рук. Иначе, доиграв,
 	# он оставлял позу как есть, и поправка кисти под рукоятку (сдвиг относительно клипа) прибавлялась
 	# кадр за кадром — рука уезжала от оружия.
@@ -150,6 +158,11 @@ func _setup(id: String, mods: Dictionary) -> void:
 			_anim.get_animation(clip_name).loop_mode = Animation.LOOP_LINEAR
 	_follower_src = _anim.get_animation("follower_by_rounds") if _anim.has_animation("follower_by_rounds") else null
 	_bolt_src = _anim.get_animation("bolt_travel") if _anim.has_animation("bolt_travel") else null
+	_selector_src = _anim.get_animation("selector_by_mode") if _anim.has_animation("selector_by_mode") else null
+	if _selector_src:
+		# между положениями рычаг поворачивается плавно (записи — по кадру на положение)
+		for i in range(_selector_src.get_track_count()):
+			_selector_src.track_set_interpolation_type(i, Animation.INTERPOLATION_LINEAR)
 	if _bolt_src:
 		# две записи (закрыт / отведён) импортируются «ступенькой» — промежуточный ход затвора нужен плавным
 		for i in range(_bolt_src.get_track_count()):
@@ -389,6 +402,12 @@ func update(pl: Player, delta: float) -> void:
 		_swap_frame = -1
 		_play(_clip_name("check"), BLEND_IN)
 	_last_check = pl.ammo_check_t
+	# переводчик: большой палец правой руки переводит рычаг (клип своего перехода, растянут на время щелчка)
+	if pl.fire_mode_switch_t > _last_switch + 0.05 and (_clip == "" or _clip.begins_with("fire_mode_")):
+		var modes: Array[String] = WeaponDb.fire_modes(weapon_id)
+		var role: String = "fire_mode_%s_%s" % [modes[pl.fire_mode_from], modes[pl.fire_mode_to]]
+		_play(_clip_name(role), BLEND_IN, pl.fire_mode_switch_t)
+	_last_switch = pl.fire_mode_switch_t
 	if _last_ammo >= 0 and pl.ammo < _last_ammo:
 		_kick = BOLT_KICK_SEC
 		if _clip == _clip_name("check"):
@@ -450,6 +469,7 @@ func update(pl: Player, delta: float) -> void:
 		_jam_case.visible = jammed or clear_clip
 	# штатный подаватель — таблица на 30 (у магазина со своей моделью он скрыт, его подаватель — выше)
 	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip)
+	_selector_pose(pl)
 	_inspect_turn(pl, delta)
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
 	_support_hand(_grip_w)
@@ -592,6 +612,20 @@ func _pose_overrides(shown: int, delta: float, jam_hold: bool = false) -> void:
 		# возвратная пружина (ВЕРАС-54 v13) сжимается рамой — та же таблица, масштаб кости
 		if _spring >= 0:
 			_apply_sample(_bolt_src, "RecoilSpring", _spring, _table_time(_bolt_src, open, 2))
+
+
+## Рычаг переводчика по режиму огня; пока его переводят (Player.fire_mode_switch_t) — от прежнего положения к новому
+## на участке клипа config.fire_mode_push (доли времени: палец лёг на полочку — рычаг щёлкнул).
+func _selector_pose(pl: Player) -> void:
+	if _selector < 0 or _selector_src == null or _weapon_skel == null:
+		return
+	var modes: Array[String] = WeaponDb.fire_modes(weapon_id)
+	var at: float = float(maxi(0, modes.find(pl.fire_mode())))
+	if pl.fire_mode_switch_t > 0.0:
+		var push: Array = config.get("fire_mode_push", [0.35, 0.6])
+		var k: float = 1.0 - pl.fire_mode_switch_t / float(Balance.FIRE_MODES.switch_sec)
+		at = lerpf(float(pl.fire_mode_from), float(pl.fire_mode_to), smoothstep(float(push[0]), float(push[1]), k))
+	_apply_sample(_selector_src, "Selector", _selector, _table_time(_selector_src, at, modes.size()))
 
 
 ## Время записи index в служебном клипе-таблице из count записей по кадру на запись. Отсчёт — от конца
