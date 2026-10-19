@@ -1,6 +1,11 @@
 extends RefCounted
 ## Сборщик простых объёмов: одна поверхность на материал, отдельные простые коллизии.
 ## Детали остаются внутри именованного здания, поэтому его можно заменить целиком.
+## У граней коробок в UV/UV2 — расстояния до рёбер, м (см. _edges): по ним шейдер бетона территории ТЦ
+## (src/world/cast_concrete.gdshader) кладёт швы, грязь у земли и потёки от кромки. Серым материалам не мешают.
+
+## Расстояние до рёбер у треугольников (рельеф, полосы по земле) — «далеко»: ни швов, ни грязи у кромки.
+const FAR_EDGE_M: float = 9.0
 
 var parent: Node3D
 var body: StaticBody3D
@@ -38,6 +43,7 @@ func box(at: Vector3, size: Vector3, key: String, solid: bool = true, yaw: float
 	var basis: Basis = Basis(Vector3.UP, yaw)
 	var st: SurfaceTool = stream(key)
 	for index: int in unit_indices:
+		_edges(st, unit_vertices[index], unit_normals[index], size, 2)
 		st.set_normal(basis * unit_normals[index])
 		st.add_vertex(at + basis * (unit_vertices[index] * size))
 	triangles += 12
@@ -53,6 +59,8 @@ func box(at: Vector3, size: Vector3, key: String, solid: bool = true, yaw: float
 func tri(a: Vector3, b: Vector3, c: Vector3, key: String) -> void:
 	var st: SurfaceTool = stream(key)
 	var normal: Vector3 = (c - a).cross(b - a).normalized()
+	st.set_uv(Vector2(FAR_EDGE_M, FAR_EDGE_M))
+	st.set_uv2(Vector2(FAR_EDGE_M, FAR_EDGE_M))
 	if key == "water" and normal.y < 0.0:
 		var swap: Vector3 = b
 		b = c
@@ -77,6 +85,7 @@ func beam(a: Vector3, b: Vector3, width: float, depth: float, key: String, solid
 	var size: Vector3 = Vector3(width, depth, length_m)
 	var mid: Vector3 = (a + b) * 0.5
 	for index: int in unit_indices:
+		_edges(st, unit_vertices[index], unit_normals[index], size, 0)
 		st.set_normal(basis * unit_normals[index])
 		st.add_vertex(mid + basis * (unit_vertices[index] * size))
 	triangles += 12
@@ -87,6 +96,21 @@ func beam(a: Vector3, b: Vector3, width: float, depth: float, key: String, solid
 		cs.shape = shape
 		cs.transform = Transform3D(basis, mid)
 		body.add_child(cs)
+
+## Расстояния до рёбер грани коробки (local — вершина единичного куба, normal — его грань, size — размер, м).
+## Боковая грань: UV — до двух вертикальных рёбер, UV2 — от низа и до верха. Верх и низ: UV — до рёбер
+## по оси across (поперёк стенки / по ходу ступени: у box — локальная Z, у beam — X), UV2 — вдоль другой оси.
+## У соседних кусков с нахлёстом это одно и то же в нахлёсте — шейдер не мерцает.
+func _edges(st: SurfaceTool, local: Vector3, normal: Vector3, size: Vector3, across: int) -> void:
+	var k: Vector3 = local + Vector3(0.5, 0.5, 0.5)
+	if absf(normal.y) > 0.5:
+		var along: int = 2 - across
+		st.set_uv(Vector2(k[across] * size[across], (1.0 - k[across]) * size[across]))
+		st.set_uv2(Vector2(k[along] * size[along], (1.0 - k[along]) * size[along]))
+	else:
+		var h: int = 2 if absf(normal.x) > 0.5 else 0
+		st.set_uv(Vector2(k[h] * size[h], (1.0 - k[h]) * size[h]))
+		st.set_uv2(Vector2(k.y * size.y, (1.0 - k.y) * size.y))
 
 func stairs(start: Vector3, finish: Vector3, width: float, count: int, key: String) -> void:
 	# Ступени видны, физика идёт по наклонной поверхности без застревания капсулы.

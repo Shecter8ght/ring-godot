@@ -6,6 +6,7 @@ extends Node3D
 ## в выемке −4 м с доками, трасса внизу (−5 м). Дороги, парковки с брошенными машинами, площадь,
 ## сквер, водоём, лес, мосты и граница — условные серые формы для прогулки и замера, не отделка.
 ## Покрытия (асфальт, бетон, плитка, щебень, грунт, газон сквера) — PBR по мировым X/Z (MallGround).
+## Бетон стенок, ступеней, доковой платформы, кадок и бортиков — PBR по граням (MallGround.concrete).
 ## Постройки участков (группа mall_study_snap) встают на землю под собой.
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
@@ -729,11 +730,13 @@ func _palette() -> Dictionary:
 		material.albedo_color = extra[key]
 		material.roughness = 0.9
 		result[key] = material
-	# бетон стенок, ступеней и кадок — с тем же мелким шумом, что и земля
-	result["concrete"] = _with_detail((result["concrete"] as StandardMaterial3D).duplicate() as StandardMaterial3D, 0.22)
-	# покрытия — PBR по мировым X/Z
+	# покрытия — PBR по мировым X/Z; «slab» здесь — бетонные площадки плана по земле, а не коробки
 	for key: String in MallGround.keys():
 		result[key] = MallGround.material(key)
+	# бетон стенок, ступеней, площадок, кадок, бортиков, опор и настилов мостов — PBR по граням коробок;
+	# доковая платформа — свой, грубее
+	result["concrete"] = MallGround.concrete("wall")
+	result["dock"] = MallGround.concrete("dock")
 	return result
 
 
@@ -1144,7 +1147,7 @@ func _dock_platform(g: RefCounted, a0: float, a1: float, r0: float, r1: float, f
 		var q: Vector2 = polar(a0 + span * float(i + 1) / float(n), mid_r)
 		var mid: Vector2 = (p + q) * 0.5
 		var dir: Vector2 = q - p
-		g.box(Vector3(mid.x, (floor_y + top) * 0.5, mid.y), Vector3(dir.length() + 0.05, top - floor_y, r1 - r0), "slab", true, -atan2(dir.y, dir.x))
+		g.box(Vector3(mid.x, (floor_y + top) * 0.5, mid.y), Vector3(dir.length() + 0.05, top - floor_y, r1 - r0), "dock", true, -atan2(dir.y, dir.x))
 
 
 ## Ширина площадки на уровне зала за верхним концом пандуса пристройки (поперёк — от пандуса до проёма).
@@ -1325,7 +1328,7 @@ func _bridges(g: RefCounted) -> void:
 	var w: float = float(gb.width)
 	var mid: Vector2 = (Vector2(float(a[0]), float(a[1])) + Vector2(float(b[0]), float(b[1]))) * 0.5
 	var length_m: float = absf(float(a[0]) - float(b[0]))
-	g.box(Vector3(mid.x, y - 0.2, mid.y), Vector3(length_m, 0.4, w), "slab")
+	g.box(Vector3(mid.x, y - 0.2, mid.y), Vector3(length_m, 0.4, w), "concrete")
 	for side: float in [-1.0, 1.0]:
 		g.box(Vector3(mid.x, y + 0.55, mid.y + side * w * 0.5), Vector3(length_m, 1.1, 0.2), "steel")
 	for k: int in range(1, 4):
@@ -1339,7 +1342,7 @@ func _bridges(g: RefCounted) -> void:
 	var fw: float = float(fb.width)
 	var z0: float = float(zs[0])
 	var z1: float = float(zs[1])
-	g.box(Vector3(x, fy - 0.2, (z0 + z1) * 0.5), Vector3(fw, 0.4, z1 - z0), "slab")
+	g.box(Vector3(x, fy - 0.2, (z0 + z1) * 0.5), Vector3(fw, 0.4, z1 - z0), "concrete")
 	# перила — только над трассой; на концах настила с запада подходят лестницы
 	for side: float in [-1.0, 1.0]:
 		g.box(Vector3(x + side * fw * 0.5, fy + 0.6, (z0 + z1) * 0.5), Vector3(0.15, 1.2, z1 - z0 - 8.0), "steel", true)
@@ -1651,7 +1654,7 @@ func _annex(g: RefCounted) -> void:
 		var pb: float = a0 + span * float(i + 1) / float(n)
 		var p: Vector2 = polar((pa + pb) * 0.5, (mall_r + outer + 1.0) * 0.5)
 		var w: float = deg_to_rad(pb - pa) * outer + 0.1
-		g.box(Vector3(p.x, roof + 0.2, p.y), Vector3(w, 0.4, outer + 1.0 - mall_r), "slab", true, -deg_to_rad((pa + pb) * 0.5 + 90.0))
+		g.box(Vector3(p.x, roof + 0.2, p.y), Vector3(w, 0.4, outer + 1.0 - mall_r), "concrete", true, -deg_to_rad((pa + pb) * 0.5 + 90.0))
 	# фасад к двору: от дна двора до крыши, ворота для фур (4,6 × 4,2 м) у каждого дока
 	var bays: Array = annex.get("bays", [])
 	var bay_half: float = rad_to_deg(2.3 / outer)

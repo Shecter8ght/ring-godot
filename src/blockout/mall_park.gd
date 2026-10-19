@@ -65,6 +65,8 @@ func _palette() -> Dictionary:
 		material.roughness = 0.85
 		result[key] = material
 	result["paving"] = MallGround.material("paving")
+	# бортик фонтана, колонна, площадка колеса — бетон по граням (как стенки у земли)
+	result["concrete"] = MallGround.concrete("wall")
 	return result
 
 

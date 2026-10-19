@@ -1,8 +1,9 @@
 extends Node
 ## Кадры в секунду на территории ТЦ (scenes/levels/mall_study.tscn — она же земля рейдовой карты mall_map):
-## покрытия PBR (MallGround, шейдер paved_ground) и прежние серые с шумом по трём осям — на одних и тех же
-## кадрах в одном прогоне: новые, прежние (на те же меши), снова новые — порядок не влияет. Печатает FPS и
-## время кадра на видеокарте по каждому кадру и в среднем (новые — лучший из двух проходов).
+## покрытия PBR (MallGround, шейдер paved_ground) и бетон стенок, ступеней, бордюров (шейдер cast_concrete)
+## против прежних серых с шумом по трём осям — на одних и тех же кадрах в одном прогоне: новые, прежние
+## (на те же меши), снова новые — порядок не влияет, нагрузка машины от других программ — тоже. Печатает
+## FPS и время кадра на видеокарте по каждому кадру и в среднем (новые — лучший из двух проходов).
 ##   tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/mall_ground_perf.tscn
 
 const MallGround = preload("res://src/blockout/mall_ground.gd")
@@ -36,9 +37,9 @@ func _ready() -> void:
 	for node: Node in world.find_children("Mesh_*", "MeshInstance3D", true, false):
 		var mi: MeshInstance3D = node as MeshInstance3D
 		var material: ShaderMaterial = mi.mesh.surface_get_material(0) as ShaderMaterial if mi.mesh else null
-		if material != null and material.shader == MallGround.SHADER:
+		if material != null and material.shader in [MallGround.SHADER, MallGround.CONCRETE_SHADER]:
 			ground.append(mi)
-	print("mall_ground_perf: мешей покрытий %d" % ground.size())
+	print("mall_ground_perf: мешей покрытий и бетона %d" % ground.size())
 	var results: Dictionary = {}
 	var old: StandardMaterial3D = _old_material()
 	for mode: String in ["pbr", "old", "pbr2"]:

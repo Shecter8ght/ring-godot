@@ -62,7 +62,7 @@ func rebuild() -> void:
 func _palette() -> Dictionary:
 	var result: Dictionary = Geometry.materials()
 	var extra: Dictionary = {"plaza": Color("a49c86"), "metal": Color("9ea2a0"), "timber": Color("5f4c38"),
-		"curb": Color("97978c"), "paint": Color("c9c7b6"), "gas": Color("d2ad2c"), "ballast": Color("6b6862"),
+		"paint": Color("c9c7b6"), "gas": Color("d2ad2c"), "ballast": Color("6b6862"),
 		"sleeper": Color("4a3f33"), "rail": Color("6e6a64"), "warn": Color("c9a33a")}
 	for key: String in extra:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
@@ -72,6 +72,9 @@ func _palette() -> Dictionary:
 	# площадки перекрёстков — асфальт дорог, пол галереи — плитка площади (те же материалы, что у земли)
 	for key: String in ["road", "plaza"]:
 		result[key] = MallGround.material(key)
+	# бордюры, отбойники «Нью-Джерси», мосты и платформа ветки — бетон по граням (как стенки у земли)
+	result["concrete"] = MallGround.concrete("wall")
+	result["curb"] = MallGround.concrete("curb")
 	return result
 
 

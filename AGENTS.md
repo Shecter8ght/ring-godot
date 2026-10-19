@@ -163,7 +163,7 @@ tools/mall_study.cmd                                          # прогулка
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)
 tools/godot.cmd --headless res://tools/bake_mall_nav.tscn      # рейдовая карта ТЦ (scenes/levels/mall_map.tscn = черновик территории + заходы, выходы, мародёры, места заказа):
                                                               # перепечь кэш навигации data/navigation/mall_map после правки территории (~30 с; без кэша рейд печёт сам при загрузке)
-tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/mall_ground_perf.tscn # покрытия территории ТЦ (MallGround, шейдер paved_ground):
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/mall_ground_perf.tscn # покрытия и бетон территории ТЦ (MallGround, шейдеры paved_ground, cast_concrete):
                                                               # кадры в секунду и время видеокарты против прежних серых на одних кадрах (MALL_GROUND_FALLBACK=1 — вид без текстур)
 tools/godot.cmd --headless res://tools/car_mall_sites_shots.tscn # места заказа «Вернуть машину» на карте ТЦ: стоянка у доков, бокс скупки у АЗС, склад техники —
                                                               # F засчитан, путь по навигации от заходов; с окном (--windowed --resolution 1600x900) — снимки car_mall_*

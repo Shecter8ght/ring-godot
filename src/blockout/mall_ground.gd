@@ -8,9 +8,13 @@ extends RefCounted
 ## узорная плитка, обочины — щебень. Наборы — Poly Haven, CC0 (tools/fetch_polyhaven.py, build_textures.py).
 ## Нет assets/textures — тот же шейдер на процедурном зерне (use_maps = false); посмотреть его при текстурах —
 ## переменная окружения MALL_GROUND_FALLBACK=1.
+## Бетон построек (стенки, ступени, доковая платформа, кадки, бортики, бордюры, отбойники) — шейдер
+## src/world/cast_concrete.gdshader по граням коробок (concrete(), наборы CONCRETE): у плоской проекции
+## сверху стенки вышли бы полосами.
 ## Материалы общие для всех узлов черновика (MallLandscape, MallStreets, MallPark) — один кэш.
 
 const SHADER: Shader = preload("res://src/world/paved_ground.gdshader")
+const CONCRETE_SHADER: Shader = preload("res://src/world/cast_concrete.gdshader")
 const TEX_DIR: String = "res://assets/textures/%s/%s.jpg"
 
 ## Поверхность → набор текстур (set), размер плитки (tile, м) и параметры шейдера; fallback — тон и
@@ -68,6 +72,31 @@ const SURFACES: Dictionary = {
 	# газон сквера
 	"court": {"set": "leafy_grass", "tile": 3.0, "tint": Color(0.92, 1.0, 0.85), "saturation": 1.1,
 		"macro_var": 0.18, "macro_m": 16.0, "fallback": Color(0.3, 0.36, 0.2), "grain": 0.2},
+}
+
+## Бетон построек: набор стенок (set, tile — реальный размер, м) и верха (top, top_tile), тон, старение
+## (параметры шейдера cast_concrete); fallback — тон стенок и верха без текстур, fb_panel — щиты опалубки.
+## Подбор — по ярославским ТЦ: подпорные стенки — монолит в щитовой опалубке (стяжки, швы щитов), серый,
+## с потёками от парапета и высолами у швов; верх стенок, ступени и площадки затёрты, местами мох;
+## доковая платформа грубее и грязнее (колёса, поддоны); бордюр — светлый вибропрессованный камень по 1 м.
+const CONCRETE: Dictionary = {
+	# подпорные стенки террас и двора, ступени, площадки, бортики фонтана, кадки, опоры, отбойники
+	"wall": {"set": "concrete_wall_008", "tile": 2.71, "top": "concrete_floor_02", "top_tile": 2.0,
+		"tint": Color(1.02, 1.04, 1.12), "saturation": 0.3, "top_tint": Color(1.5, 1.5, 1.55), "top_saturation": 0.35,
+		"macro_var": 0.15, "face_var": 0.07, "base_dirt": 0.7, "base_h": 0.9, "streaks": 0.7, "streak_len": 2.2,
+		"efflorescence": 0.35, "moss": 0.3,
+		"fallback": Color(0.44, 0.44, 0.42), "top_fallback": Color(0.38, 0.38, 0.36), "fb_panel": Vector2(1.35, 1.35)},
+	# доковая платформа: бетон рампы, побитый колёсами и поддонами
+	"dock": {"set": "concrete_wall_007", "tile": 2.16, "top": "concrete_floor_worn_001", "top_tile": 3.0,
+		"tint": Color(1.0, 1.04, 1.14), "saturation": 0.35, "top_tint": Color(1.18, 1.16, 1.12), "top_saturation": 0.6,
+		"break_side": 1.0, "macro_var": 0.14, "face_var": 0.08, "base_dirt": 0.75, "base_h": 0.6, "streaks": 0.45,
+		"efflorescence": 0.15, "moss": 0.1, "edge_wear": 0.6, "fallback": Color(0.4, 0.4, 0.38), "top_fallback": Color(0.3, 0.3, 0.29)},
+	# бордюрный камень БР 100.30.15: светлый, камни по 1 м, грязь у дороги
+	"curb": {"set": "rough_concrete", "tile": 1.23, "tint": Color(0.72, 0.74, 0.8), "saturation": 0.35,
+		"top_tint": Color(0.72, 0.74, 0.8), "top_saturation": 0.35, "break_side": 1.0, "section_m": 1.0, "joint_at": 0.0,
+		"joint_w": 0.005, "joint_dark": 0.55, "macro_var": 0.08, "face_var": 0.08, "base_dirt": 0.6, "base_h": 0.12, "streaks": 0.0,
+		"efflorescence": 0.0, "moss": 0.1, "edge_wear": 0.25, "bevel_w": 0.01, "fallback": Color(0.5, 0.5, 0.48),
+		"top_fallback": Color(0.5, 0.5, 0.48)},
 }
 
 ## Где у кольца шов угла сетки заплат и плит: там (сквер, север) кольцевых покрытий нет.
@@ -128,7 +157,43 @@ static func material(key: String) -> ShaderMaterial:
 	return m
 
 
-## Сырость покрытий — от погоды рейда (RaidWeather: плёнка и лужи копятся в дождь, сохнут после),
+## Бетон построек по ключу CONCRETE: свой набор стенок и верха, старение (cast_concrete.gdshader).
+static func concrete(key: String) -> ShaderMaterial:
+	var cache_key: String = "concrete/" + key
+	if _cache.has(cache_key):
+		return _cache[cache_key]
+	var spec: Dictionary = CONCRETE[key]
+	var m: ShaderMaterial = ShaderMaterial.new()
+	m.shader = CONCRETE_SHADER
+	var maps: bool = ResourceLoader.exists(TEX_DIR % [spec.set, "albedo"]) and OS.get_environment("MALL_GROUND_FALLBACK") != "1"
+	m.set_shader_parameter("use_maps", maps)
+	if maps:
+		for map: String in ["albedo", "normal", "arm"]:
+			m.set_shader_parameter(map + "_tex", load(TEX_DIR % [spec.set, map]))
+		var top: bool = spec.has("top") and ResourceLoader.exists(TEX_DIR % [spec.get("top", ""), "albedo"])
+		m.set_shader_parameter("has_top", top)
+		if top:
+			for map: String in ["albedo", "normal", "arm"]:
+				m.set_shader_parameter("top_" + map + "_tex", load(TEX_DIR % [spec.top, map]))
+	m.set_shader_parameter("tile_m", float(spec.tile))
+	m.set_shader_parameter("top_tile_m", float(spec.get("top_tile", spec.tile)))
+	for name: String in ["saturation", "top_saturation", "break_side", "break_top", "macro_var", "macro_m", "face_var",
+			"section_m", "joint_at", "joint_w", "joint_dark", "bevel_w", "edge_wear", "base_h", "base_dirt", "streak_len", "streaks",
+			"efflorescence", "moss", "normal_strength", "rough_add"]:
+		if spec.has(name):
+			m.set_shader_parameter(name, float(spec[name]))
+	for name: String in ["tint", "top_tint"]:
+		if spec.has(name):
+			m.set_shader_parameter(name, spec[name] as Color)
+	m.set_shader_parameter("base_tone", spec.get("fallback", Color(0.42, 0.42, 0.4)) as Color)
+	m.set_shader_parameter("top_tone", spec.get("top_fallback", spec.get("fallback", Color(0.4, 0.4, 0.38))) as Color)
+	if spec.has("fb_panel"):
+		m.set_shader_parameter("fb_panel", spec.fb_panel as Vector2)
+	_cache[cache_key] = m
+	return m
+
+
+## Сырость покрытий и бетона — от погоды рейда (RaidWeather: плёнка и лужи копятся в дождь, сохнут после),
 ## под крышей сухо — карта RainOcclusion дождя (RainFx), пока он идёт. Зовёт MallLandscape раз в несколько кадров.
 static func sync_weather(delta: float) -> void:
 	if _cache.is_empty():
