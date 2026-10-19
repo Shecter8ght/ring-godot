@@ -7,7 +7,8 @@ extends Node3D
 ## одна пуля, три пули, закалённое (сетка кубиков, осыпается волной), ослабленное (трещины ползут,
 ## рассыпается на куски, «зубья» в раме) — impact_glass_*.
 ## Взрыв гранаты на полу — огонь, дым листами кадров (impact_boom_*).
-## IMPACT_ONLY=walls,ground,metal,close,glass,boom — выборочно.
+## IMPACT_ONLY=walls,ground,metal,close,glass,boom — выборочно; IMPACT_GLOW=1 — со свечением (блумом), как
+## в помещениях игры: NaN и пересветы в шейдерах видны ореолами.
 
 const SURFACES: Array[String] = [
 	"concrete", "tile", "asphalt",
@@ -311,6 +312,11 @@ func _world() -> void:
 	environment.ambient_light_color = Color(0.42, 0.48, 0.58)
 	environment.ambient_light_energy = 0.65
 	environment.tonemap_mode = Environment.TONE_MAPPER_AGX
+	if OS.get_environment("IMPACT_GLOW") == "1":
+		environment.glow_enabled = true
+		environment.glow_intensity = 0.8
+		environment.glow_bloom = 0.1
+		environment.glow_hdr_threshold = 1.0
 	var world_environment := WorldEnvironment.new()
 	world_environment.environment = environment
 	add_child(world_environment)

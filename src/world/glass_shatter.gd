@@ -77,7 +77,6 @@ func build(size: Vector2, hits: Array, side: float, floor_local: float, seed_val
 			var tl: float = (velocity.y + sqrt(velocity.y * velocity.y + 19.62 * h)) / 9.81
 			_end_t = maxf(_end_t, delay + tl + 0.6)
 			landings.append({"area": area, "time": delay + tl, "at": Vector3(center.x + velocity.x * tl, floor_local, velocity.z * tl)})
-	st.generate_tangents()
 	mesh = st.commit()
 	_material = material
 	_material.set_shader_parameter("fall", true)
@@ -180,31 +179,39 @@ func _voronoi(centers: Array[Vector2], half: Vector2) -> Array[PackedVector2Arra
 
 
 ## Плитка стекла по контуру ячейки: лицо, изнанка, торцы. UV — точка на панели (трещины на месте).
+## Касательные — явно: у торца UV лица и изнанки совпадают, и рассчитанная касательная выходит NaN —
+## шейдер с картой нормалей рисует торец чёрным, а свечение раздувает его в белый ореол.
 func _slab(st: SurfaceTool, cell: PackedVector2Array, thick: float, size: Vector2, c0: Color, c1: Color) -> void:
 	var poly: PackedVector2Array = cell
 	if _area(poly) < 0.0:
 		poly.reverse()
 	var z: float = thick * 0.5
+	var along: Plane = Plane(Vector3.RIGHT, 1.0)
 	for i: int in range(1, poly.size() - 1):
-		_tri(st, Vector3(poly[0].x, poly[0].y, z), Vector3(poly[i].x, poly[i].y, z), Vector3(poly[i + 1].x, poly[i + 1].y, z), Vector3.BACK, size, c0, c1)
-		_tri(st, Vector3(poly[0].x, poly[0].y, -z), Vector3(poly[i + 1].x, poly[i + 1].y, -z), Vector3(poly[i].x, poly[i].y, -z), Vector3.FORWARD, size, c0, c1)
+		_tri(st, Vector3(poly[0].x, poly[0].y, z), Vector3(poly[i].x, poly[i].y, z), Vector3(poly[i + 1].x, poly[i + 1].y, z), Vector3.BACK, along, size, c0, c1)
+		_tri(st, Vector3(poly[0].x, poly[0].y, -z), Vector3(poly[i + 1].x, poly[i + 1].y, -z), Vector3(poly[i].x, poly[i].y, -z), Vector3.FORWARD, Plane(Vector3.RIGHT, -1.0), size, c0, c1)
+	var across: Plane = Plane(Vector3.BACK, 1.0)
 	for i: int in range(poly.size()):
 		var a: Vector2 = poly[i]
 		var b: Vector2 = poly[(i + 1) % poly.size()]
 		var edge: Vector2 = b - a
+		# вырожденное ребро (повтор вершины после обрезки) — без торца: нормаль была бы нулевой
+		if edge.length_squared() < 1e-10:
+			continue
 		var n: Vector3 = Vector3(edge.y, -edge.x, 0.0).normalized()
-		_tri(st, Vector3(a.x, a.y, z), Vector3(b.x, b.y, z), Vector3(b.x, b.y, -z), n, size, c0, c1)
-		_tri(st, Vector3(a.x, a.y, z), Vector3(b.x, b.y, -z), Vector3(a.x, a.y, -z), n, size, c0, c1)
+		_tri(st, Vector3(a.x, a.y, z), Vector3(b.x, b.y, z), Vector3(b.x, b.y, -z), n, across, size, c0, c1)
+		_tri(st, Vector3(a.x, a.y, z), Vector3(b.x, b.y, -z), Vector3(a.x, a.y, -z), n, across, size, c0, c1)
 
 
 ## Треугольник лицевой стороной наружу (обход по часовой стрелке снаружи — лицо у Godot).
-func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, n: Vector3, size: Vector2, c0: Color, c1: Color) -> void:
+func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, n: Vector3, tangent: Plane, size: Vector2, c0: Color, c1: Color) -> void:
 	if (b - a).cross(c - a).dot(n) > 0.0:
 		var swap: Vector3 = b
 		b = c
 		c = swap
 	for v: Vector3 in [a, b, c]:
 		st.set_normal(n)
+		st.set_tangent(tangent)
 		st.set_uv(Vector2(v.x / size.x + 0.5, 0.5 - v.y / size.y))
 		st.set_custom(0, c0)
 		st.set_custom(1, c1)

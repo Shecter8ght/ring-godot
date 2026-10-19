@@ -51,6 +51,7 @@ func _ready() -> void:
 	Hitscan.fire(world, from, -nrm, 0.0, 12.0, Hitscan.LAYER_WORLD, 30.0, [] as Array[RID], rng)
 	await get_tree().create_timer(float(Balance.GLASS.collapse_sec[1]) + 0.5).timeout
 	_check("треснувшая осыпалась сама", bool(gp.panes[pick].broken), "прочность %.0f" % float(gp.panes[pick].hp))
+	_check("куски без NaN в нормалях и касательных (иначе чёрные торцы с ореолом)", _shards_clean(gp), "")
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var q := PhysicsRayQueryParameters3D.create(xf.origin + nrm * 1.0 + Vector3.DOWN * (float(pane.size.y) * 0.5 + 0.2), xf.origin - nrm * 1.0 + Vector3.DOWN * (float(pane.size.y) * 0.5 + 0.2), Hitscan.LAYER_WORLD | Hitscan.LAYER_GLASS)
@@ -88,6 +89,29 @@ func _ready() -> void:
 		await _shot(me, xf2.origin + n2 * 2.5, xf2.origin, "glass_broken")
 	print("glass_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
+
+
+## У всех кусков распавшихся панелей нормали единичные, касательные конечные и поперёк нормали.
+func _shards_clean(gp: GlassPanes) -> bool:
+	var found: bool = false
+	for node: Node in gp.get_children():
+		if not node is GlassShatter:
+			continue
+		var mesh: ArrayMesh = (node as GlassShatter).mesh as ArrayMesh
+		if mesh == null:
+			return false
+		var arrays: Array = mesh.surface_get_arrays(0)
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT]
+		if tangents.size() != normals.size() * 4:
+			return false
+		for i: int in range(normals.size()):
+			var n: Vector3 = normals[i]
+			var t: Vector3 = Vector3(tangents[i * 4], tangents[i * 4 + 1], tangents[i * 4 + 2])
+			if not n.is_finite() or not t.is_finite() or absf(n.length() - 1.0) > 0.01 or absf(t.length() - 1.0) > 0.01 or absf(n.dot(t)) > 0.01:
+				return false
+		found = true
+	return found
 
 
 func _shot(me: Player, at: Vector3, look: Vector3, n: String) -> void:
