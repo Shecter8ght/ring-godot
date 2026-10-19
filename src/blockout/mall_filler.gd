@@ -9,6 +9,7 @@ extends Node3D
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
 const MallLandscape = preload("res://src/blockout/mall_landscape.gd")
+const MallGround = preload("res://src/blockout/mall_ground.gd")
 
 ## Цвета частей наборов; «white» — под цвет экземпляра (машины, гаражи, контейнеры).
 const COLORS: Dictionary = {
@@ -461,7 +462,10 @@ func rebuild() -> void:
 	_water.metallic = 0.15
 	stats = {"instances": 0, "batches": 0, "collision_shapes": 0}
 	_items(filler)
-	var g: RefCounted = Geometry.new(generated, Geometry.materials())
+	# колеи грунтовок — грязью покрытий (MallGround), остальное — серые формы
+	var palette: Dictionary = Geometry.materials()
+	palette["mud"] = MallGround.material("mud")
+	var g: RefCounted = Geometry.new(generated, palette)
 	var lines: Dictionary = filler.get("lines", {}) as Dictionary
 	_power_line(g, lines.get("power", {}) as Dictionary)
 	_heat_main(g, lines.get("heat", {}) as Dictionary)

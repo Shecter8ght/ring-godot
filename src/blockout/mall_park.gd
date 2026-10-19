@@ -8,6 +8,7 @@ extends Node3D
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
 const MallLandscape = preload("res://src/blockout/mall_landscape.gd")
+const MallGround = preload("res://src/blockout/mall_ground.gd")
 
 ## Колесо обозрения: высота оси, радиус обода, число кабинок.
 const WHEEL_HUB: float = 16.0
@@ -63,6 +64,7 @@ func _palette() -> Dictionary:
 		material.albedo_color = extra[key]
 		material.roughness = 0.85
 		result[key] = material
+	result["paving"] = MallGround.material("paving")
 	return result
 
 

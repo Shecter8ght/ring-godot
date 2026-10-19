@@ -7,7 +7,9 @@
 ## Текстуры (assets/textures, материалы в assets/materials)
 
 - `assets/textures/asphalt_02/` — Asphalt 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/asphalt_02 — асфальт парковки и доков
+- `assets/textures/asphalt_04/` — Asphalt 04, Jenelle van Heerden, Sergej Majboroda, CC0 1.0, https://polyhaven.com/a/asphalt_04 — территория ТЦ: светлый выветренный асфальт парковок и разгрузочного двора
 - `assets/textures/bark_brown_02/` — Bark Brown 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/bark_brown_02
+- `assets/textures/brick_pavement_03/` — Brick Pavement 03, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/brick_pavement_03 — территория ТЦ: тротуарная плитка «волна» у дорог и вокруг здания
 - `assets/textures/concrete_block_wall_02/` — Concrete Block Wall 02, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_block_wall_02 — стены доков и ограждения
 - `assets/textures/concrete_floor_02/` — Concrete Floor 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/concrete_floor_02 — ступени, бордюры, плиты дорожек
 - `assets/textures/concrete_floor_worn_001/` — Concrete Floor Worn 001, Dimitrios Savva, Rico Cilliers, CC0 1.0, https://polyhaven.com/a/concrete_floor_worn_001 — пол склада и служебных помещений
@@ -27,6 +29,8 @@
 - `assets/textures/natural_walnut_veneer/` — Natural Walnut Veneer, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/natural_walnut_veneer — ореховое ложе дробовика и винтовки
 - `assets/textures/painted_metal_shutter/` — Painted Metal Shutter, Dario Barresi, Rico Cilliers, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/painted_metal_shutter — роллеты магазинов
 - `assets/textures/painted_plaster_wall/` — Painted Plaster Wall, Amal Kumar, CC0 1.0, https://polyhaven.com/a/painted_plaster_wall — стены магазинов
+- `assets/textures/patterned_brick_floor/` — Patterned Brick Floor, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/patterned_brick_floor — территория ТЦ: плитка дорожек сквера
+- `assets/textures/patterned_paving/` — Patterned Paving, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/patterned_paving — территория ТЦ: узорная плитка площади перед входом
 - `assets/textures/pine_bark/` — Pine Bark, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/pine_bark — ель: старая чешуйчатая кора низа ствола
 - `assets/textures/plywood/` — Plywood, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/plywood — заколоченные окна
 - `assets/textures/red_bricks_04/` — Red Bricks 04, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/red_bricks_04 — кирпичный цоколь, вентшахты на крыше

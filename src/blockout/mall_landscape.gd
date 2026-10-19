@@ -5,9 +5,15 @@ extends Node3D
 ## парковка спускается террасами −2 и −4 м за подпорными стенками с пандусами, разгрузочный двор —
 ## в выемке −4 м с доками, трасса внизу (−5 м). Дороги, парковки с брошенными машинами, площадь,
 ## сквер, водоём, лес, мосты и граница — условные серые формы для прогулки и замера, не отделка.
+## Покрытия (асфальт, бетон, плитка, щебень, грунт, газон сквера) — PBR по мировым X/Z (MallGround).
 ## Постройки участков (группа mall_study_snap) встают на землю под собой.
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
+const MallGround = preload("res://src/blockout/mall_ground.gd")
+## Ширина бетонной полосы перед доками (дальше — асфальт двора), м.
+const APRON_M: float = 12.0
+## Как часто сырость покрытий сверяется с погодой рейда, с.
+const WEATHER_SYNC_SEC: float = 0.25
 const PLAN: String = "res://data/blockouts/mall_study.json"
 ## Шаг сетки рельефа, м: меш и коллизия.
 const STEP_M: float = 3.0
@@ -86,12 +92,21 @@ var _roll_raster: PackedFloat32Array = PackedFloat32Array()
 ## Насыпь ветки: полуширина верха и откос (метров в сторону на метр высоты).
 var _rail_half: float = 3.2
 var _rail_slope: float = 1.5
+var _weather_t: float = 0.0
 
 
 func _ready() -> void:
 	load_plan()
 	rebuild()
 	snap_buildings.call_deferred()
+	set_process(not Engine.is_editor_hint())
+
+
+func _process(delta: float) -> void:
+	_weather_t += delta
+	if _weather_t >= WEATHER_SYNC_SEC:
+		MallGround.sync_weather(_weather_t)
+		_weather_t = 0.0
 
 
 func load_plan() -> void:
@@ -714,10 +729,11 @@ func _palette() -> Dictionary:
 		material.albedo_color = extra[key]
 		material.roughness = 0.9
 		result[key] = material
-	# асфальт, плитка, щебень и грунт — с тем же мелким шумом, что и земля: не плоские заливки
-	for key: String in ["road", "walk", "parking", "plaza", "court", "pit", "mud"] + ZONE_COLORS.keys():
-		var material: StandardMaterial3D = (result[key] as StandardMaterial3D).duplicate() as StandardMaterial3D
-		result[key] = _with_detail(material, 0.22)
+	# бетон стенок, ступеней и кадок — с тем же мелким шумом, что и земля
+	result["concrete"] = _with_detail((result["concrete"] as StandardMaterial3D).duplicate() as StandardMaterial3D, 0.22)
+	# покрытия — PBR по мировым X/Z
+	for key: String in MallGround.keys():
+		result[key] = MallGround.material(key)
 	return result
 
 
@@ -897,11 +913,14 @@ func _surfaces(g: RefCounted) -> void:
 			"road" if String(apron.kind) == "road" else String(apron.kind), 0.055)
 	var sq: Dictionary = plan.square
 	_annulus(g, float(sq.a[0]), float(sq.a[1]), float(sq.r[0]), float(sq.r[1]), "court", 0.03)
+	# дно двора: перед доками — бетонные плиты (так у ворот доков у «Глобуса» и других), дальше асфальт
 	var y: Dictionary = plan.yard
-	_annulus(g, float(y.a[0]), float(y.a[1]), float(y.r[0]) + 8.0, float(y.r[1]), "pit", 0.03)
+	var dock_edge: float = float((y.dock as Array)[1])
+	_annulus(g, float(y.a[0]), float(y.a[1]), dock_edge, dock_edge + APRON_M, "apron", 0.03)
+	_annulus(g, float(y.a[0]), float(y.a[1]), dock_edge + APRON_M, float(y.r[1]), "pit", 0.03)
 	var annex: Dictionary = y.get("annex", {}) as Dictionary
 	if not annex.is_empty():
-		_annulus(g, float(annex.a[0]), float(annex.a[1]), float((annex.dock as Array)[1]), float(y.r[0]) + 8.0, "pit", 0.03)
+		_annulus(g, float(annex.a[0]), float(annex.a[1]), float((annex.dock as Array)[1]), dock_edge, "apron", 0.03)
 
 
 ## Площадки (щебень, бетон, асфальт, грунт — с чёткими краями) и грунтовые тропы плана ground.
@@ -910,8 +929,9 @@ func _ground_cover(g: RefCounted) -> void:
 	for zone: Dictionary in cover.get("zones", []):
 		var rect: Array = zone.rect
 		var kind: String = String(zone.kind)
-		_rect_drape(g, Vector2(float(rect[0]), float(rect[1])), Vector2(float(rect[2]), float(rect[3])), float(rect[4]),
-			"road" if kind == "asphalt" else kind, 0.02)
+		# асфальт — как дороги, бетон — плитами (ключ «concrete» у стенок и ступеней)
+		var key: String = {"asphalt": "road", "concrete": "slab"}.get(kind, kind)
+		_rect_drape(g, Vector2(float(rect[0]), float(rect[1])), Vector2(float(rect[2]), float(rect[3])), float(rect[4]), key, 0.02)
 	var width: float = float(cover.get("path_width", 1.7))
 	for path: Array in cover.get("paths", []):
 		_strip(g, poly(path), width, "path", 0.024)

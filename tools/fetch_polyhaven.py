@@ -55,12 +55,18 @@ TEXTURES: dict[str, str] = {
     "bark_brown_02": "кора тополя и клёна",
     "pine_bark": "ель: старая чешуйчатая кора низа ствола",
     "knotted_pine_bark": "ель: гладкая серая кора верха ствола и молодых елей",
+    # территория ТЦ (MallLandscape, шейдер paved_ground): покрытия по ярославским ТЦ
+    "asphalt_04": "территория ТЦ: светлый выветренный асфальт парковок и разгрузочного двора",
+    "brick_pavement_03": "территория ТЦ: тротуарная плитка «волна» у дорог и вокруг здания",
+    "patterned_paving": "территория ТЦ: узорная плитка площади перед входом",
+    "patterned_brick_floor": "территория ТЦ: плитка дорожек сквера",
 }
 
 # карта Poly Haven → имя файла у нас
 MAPS = {"Diffuse": "albedo", "nor_gl": "normal", "arm": "arm", "Rough": "rough", "AO": "ao"}
 # доп. карты для отдельных наборов: асфальту — высоты (вода собирается во впадинах, шейдер мокрой земли)
-EXTRA_MAPS: dict[str, dict[str, str]] = {"asphalt_02": {"Displacement": "height"}}
+EXTRA_MAPS: dict[str, dict[str, str]] = {"asphalt_02": {"Displacement": "height"},
+                                         "asphalt_04": {"Displacement": "height"}}
 
 
 def get_json(url: str) -> dict:

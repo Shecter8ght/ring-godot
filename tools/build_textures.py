@@ -55,6 +55,11 @@ TILE_M: dict[str, float] = {
     "concrete_floor_02": 3.0,
     "worn_asphalt": 4.0,
     "bark_brown_02": 1.5,
+    # территория ТЦ: реальные размеры наборов Poly Haven
+    "asphalt_04": 4.0,
+    "brick_pavement_03": 2.5,
+    "patterned_paving": 2.0,
+    "patterned_brick_floor": 1.81,
 }
 
 
@@ -108,6 +113,56 @@ def material_tres(asset_id: str, maps: list[str]) -> str:
     return "\n".join(body)
 
 
+IMPORT_TEX = """[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+
+[deps]
+
+source_file="res://assets/textures/{asset}/{name}.jpg"
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map={normal_map}
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode={rough_mode}
+roughness/src_normal="{rough_src}"
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0
+"""
+
+
+def write_import(dest: Path, asset_id: str, name: str) -> None:
+    """Настройки импорта новой карты — сразу сжатие VRAM и мип-уровни, как у карт, которые
+    редактор уже пометил трёхмерными (без редактора --headless --import оставил бы несжатые)."""
+    imp = dest / f"{name}.jpg.import"
+    if imp.exists():
+        return
+    normal = name == "normal"
+    imp.write_text(IMPORT_TEX.format(asset=asset_id, name=name, normal_map=1 if normal else 0,
+                                     rough_mode=1 if normal else 0,
+                                     rough_src=f"res://assets/textures/{asset_id}/normal.jpg" if normal else ""),
+                   encoding="utf-8", newline="\n")
+
+
 def main() -> None:
     OUT_TEX.mkdir(parents=True, exist_ok=True)
     OUT_MAT.mkdir(parents=True, exist_ok=True)
@@ -133,6 +188,7 @@ def main() -> None:
         # высоты — только текстурой (их читает шейдер мокрого асфальта), в .tres не идут
         for m in maps + (["height"] if (src / "height.jpg").exists() else []):
             shutil.copy2(src / f"{m}.jpg", dest / f"{m}.jpg")
+            write_import(dest, src.name, m)
         (OUT_MAT / f"{src.name}.tres").write_text(material_tres(src.name, maps), encoding="utf-8")
         credits.append(
             f"- `assets/textures/{src.name}/` — {info.get('title', src.name)}, "

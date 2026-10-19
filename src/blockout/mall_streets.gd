@@ -8,6 +8,7 @@ extends Node3D
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
 const MallLandscape = preload("res://src/blockout/mall_landscape.gd")
+const MallGround = preload("res://src/blockout/mall_ground.gd")
 
 ## Шаг пролёта галереи, м: стойки по краям через столько.
 const GALLERY_BAY: float = 6.0
@@ -68,6 +69,9 @@ func _palette() -> Dictionary:
 		material.albedo_color = extra[key]
 		material.roughness = 0.9
 		result[key] = material
+	# площадки перекрёстков — асфальт дорог, пол галереи — плитка площади (те же материалы, что у земли)
+	for key: String in ["road", "plaza"]:
+		result[key] = MallGround.material(key)
 	return result
 
 
