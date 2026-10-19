@@ -12,6 +12,9 @@ const MAGS := {
 	"veras54_drum60": {"rounds": 8, "size_mm": Vector3(114.0, 182.67, 103.96), "moving": "DrumKey", "tag": "veras54_Drum60_100"},
 }
 const SIZE_TOL_MM := 1.5
+## предметы-магазины: на автомате (мировая и подробная модель), предмет (значок, инвентарь) и на земле
+const RIFLE := "wpn_ar_01"
+const ITEMS := {"mag_545_45": "veras54_mag45", "mag_545_60": "veras54_drum60"}
 
 var _errors: Array[String] = []
 var _cam: Camera3D
@@ -35,6 +38,12 @@ func _ready() -> void:
 			x += 0.5
 			await _shots(name, model)
 		model.queue_free()
+	for mid: String in ITEMS:
+		var gun: Node3D = _check_on_rifle(mid)
+		if gun and shots:
+			await _rifle_shots(mid, gun)
+		if gun:
+			gun.queue_free()
 	for e: String in _errors:
 		print("veras54_mags_check: ОШИБКА ", e)
 	print("veras54_mags_check: ", "PASS" if _errors.is_empty() else "FAIL (%d)" % _errors.size())
@@ -104,6 +113,65 @@ func _check(name: String, spec: Dictionary, world: bool) -> Node3D:
 	print("veras54_mags_check: %s — треугольников %d, патронов %d, габарит %.1f × %.1f × %.1f мм" % [
 		name, tris, rounds, size_mm.x, size_mm.y, size_mm.z])
 	return root
+
+
+## Магазин на автомате: штатный корпус спрятан, модель файла стоит в точке крепления (низ шахты — где штатный);
+## у подробной модели — подробный магазин; предмет и «на земле» — тоже модели файла.
+func _check_on_rifle(mid: String) -> Node3D:
+	var name: String = String(ITEMS[mid])
+	var std: Node3D = WeaponModels.build(RIFLE)
+	add_child(std)
+	var gun: Node3D = WeaponModels.build(RIFLE, {}, 0, 100.0, mid)
+	add_child(gun)
+	var look: Node3D = gun.find_child("MagAsset", true, false) as Node3D
+	if look == null:
+		_fail("%s: на автомате нет MagAsset" % mid)
+	else:
+		var scene: String = String(look.scene_file_path)
+		if not scene.ends_with(name + "_world.gltf"):
+			_fail("%s: на мировой модели не мировой магазин (%s)" % [mid, scene])
+		# верх магазина — у шахты: начало модели = точка крепления штатного магазина
+		var std_mag: Node3D = std.find_child("Magazine*", true, false) as Node3D
+		if std_mag == null:
+			_fail("%s: у штатной модели нет детали Magazine" % mid)
+		var hidden: bool = true
+		for node: Node in gun.find_children("Magazine*", "MeshInstance3D", true, false):
+			if (node as Node3D).is_visible_in_tree() and not gun.find_child("MagLook", true, false).is_ancestor_of(node):
+				hidden = false
+		if not hidden:
+			_fail("%s: штатный магазин не спрятан" % mid)
+	var det: Node3D = WeaponModels.build(RIFLE, {}, -1, 100.0, mid)
+	add_child(det)
+	var dlook: Node3D = det.find_child("MagAsset", true, false) as Node3D
+	if dlook == null or not String(dlook.scene_file_path).ends_with(name + ".gltf"):
+		_fail("%s: у подробной модели автомата не подробный магазин" % mid)
+	det.queue_free()
+	std.queue_free()
+	var item: Node3D = ItemModels.build(mid)
+	add_child(item)
+	if item.find_child("Magazine", true, false) == null:
+		_fail("%s: предмет — не модель файла" % mid)
+	item.queue_free()
+	var loose: Node3D = ItemModels.weapon_magazine(mid)
+	if loose == null or loose.find_child("MagAsset", true, false) == null:
+		_fail("%s: магазин на земле — не модель файла" % mid)
+	if loose:
+		loose.free()
+	print("veras54_mags_check: %s на автомате, предмет и на земле — проверено" % mid)
+	return gun
+
+
+func _rifle_shots(mid: String, gun: Node3D) -> void:
+	gun.position = Vector3(3.0, 0.0, 0.0)
+	var c: Vector3 = gun.global_position + Vector3(0.0, -0.05, 0.25)
+	for view: Array in [["right", Vector3(-1.0, 0.15, 0.1)], ["left", Vector3(1.0, 0.25, -0.2)]]:
+		_cam.position = c + (view[1] as Vector3).normalized() * 1.1
+		_cam.look_at(c)
+		for _i: int in range(20):
+			await get_tree().process_frame
+		var path: String = "res://docs/screens/veras54_mags_rifle_%s_%s.png" % [mid.trim_prefix("mag_545_"), view[0]]
+		get_viewport().get_texture().get_image().save_png(path)
+		print("veras54_mags_check: ", path)
 
 
 func _stage() -> void:

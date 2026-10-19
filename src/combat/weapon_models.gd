@@ -76,7 +76,7 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, dur: float = 
 			WeaponMods._suppressor(root, ms, 0.021, 0.2)
 	WeaponMods.fit(root, key, mods, lod)
 	if mag != "*":
-		WeaponMods.set_magazine(root, id, mag)
+		WeaponMods.set_magazine(root, id, mag, lod < 0)
 	WeaponGrips.fit(root, key, w, mods)
 	WeaponCondition.apply_visual(root, {"id": id, "dur": dur})
 	for child in root.find_children("*", "MeshInstance3D", true, false):

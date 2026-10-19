@@ -872,7 +872,9 @@ static func mag_state(entry: Dictionary) -> String:
 ## Магазин на модели: штатная деталь (meta part = "mag") видна, если вставлен магазин без своего
 ## вида; у магазина с видом (attach look в данных магазина) — свой корпус на сокете "mag";
 ## mag == "" — магазина нет вовсе (пустой вставленный магазин при этом остаётся на месте).
-static func set_magazine(root: Node3D, weapon_id: String, mag: String) -> void:
+## look "asset" — модель из файла (магазины ВЕРАС-54 на 45 и 60, tools/veras54_mags): начало модели — точка
+## крепления, она встаёт в asset_pos сокета (или в pos); detail — подробная модель (asset_detail) вместо мировой.
+static func set_magazine(root: Node3D, weapon_id: String, mag: String, detail: bool = false) -> void:
 	var old: Node = root.find_child("MagLook", false, false)
 	if old:
 		old.free()
@@ -897,6 +899,27 @@ static func set_magazine(root: Node3D, weapon_id: String, mag: String) -> void:
 			_mag_ak45(holder, m)
 		"mag_pistol_ext":
 			_mag_pistol_ext(holder, m)
+		"asset":
+			var path: String = String(spec.get("asset_detail" if detail else "asset", spec.get("asset", "")))
+			if not _mag_asset(holder, path, m):
+				# нет файла — прежний вид удлинённого магазина
+				_mag_ak45(holder, m)
+
+
+## Магазин из файла на сокете «mag»: модель в осях игры, начало — точка крепления. false — файла нет.
+static func _mag_asset(holder: Node3D, path: String, m: Dictionary) -> bool:
+	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
+		return false
+	var model: Node3D = (ResourceLoader.load(path, "PackedScene") as PackedScene).instantiate() as Node3D
+	if model == null:
+		return false
+	model.name = "MagAsset"
+	model.position = m.pos as Vector3
+	if m.has("asset_pos"):
+		var at: Array = m.asset_pos as Array
+		model.position = Vector3(float(at[0]), float(at[1]), float(at[2]))
+	holder.add_child(model)
+	return true
 
 
 ## Удлинённый коробчатый магазин: та же дуга, что у штатного, длина — по ёмкости (45 — на треть
