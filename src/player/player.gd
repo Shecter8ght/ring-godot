@@ -723,6 +723,21 @@ func mag_out() -> bool:
 	return weapon_id != "" and weapon_mag == "" and not WeaponDb.weapon(weapon_id).has("internal_mag")
 
 
+## Какой магазин вставит перезарядка (руки от первого лица показывают его в руке, пока хост меняет): тот же
+## выбор, что у Inventory.reload_slot — из подсумков разгрузки, нет там — из рюкзака. Вид как weapon_mag:
+## "*" — штатный; без снаряжения (песочница) и без подходящего — тот же, что в оружии.
+func reload_next_mag() -> String:
+	if not loadout_mode or inventory == null or weapon_id == "":
+		return weapon_mag
+	var e: Dictionary = weapon_entry()
+	var pick: String = Gear.next_mag(e, inventory.list_of("rig"))
+	if pick == "":
+		pick = Gear.next_mag(e, inventory.items)
+	if pick == "":
+		return weapon_mag
+	return "*" if pick == WeaponDb.default_mag(weapon_id) else pick
+
+
 func _state_rounds(key: String) -> int:
 	var state: Dictionary = _ws.get(key, {})
 	return int(state.get("rounds", 0)) + int(state.get("chamber", 0))

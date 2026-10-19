@@ -42,5 +42,41 @@
   "weapon_with_magazine": 32513,
   "rounds": 5400,
   "total": 37913
- }
+ },
+ "mag_marks": [
+  "MagAsset",
+  "SpareMagAsset"
+ ],
+ "mag_sets": [
+  "mag_check_drum60",
+  "mag_check_mag45",
+  "mag_check_varn_v1_drum60",
+  "mag_check_varn_v1_mag45",
+  "mag_check_varn_v2_drum60",
+  "mag_check_varn_v2_mag45",
+  "reload_fast_drum60",
+  "reload_fast_full_drum60",
+  "reload_fast_full_mag45",
+  "reload_fast_full_varn_v1_drum60",
+  "reload_fast_full_varn_v1_mag45",
+  "reload_fast_full_varn_v2_drum60",
+  "reload_fast_full_varn_v2_mag45",
+  "reload_fast_mag45",
+  "reload_fast_varn_v1_drum60",
+  "reload_fast_varn_v1_mag45",
+  "reload_fast_varn_v2_drum60",
+  "reload_fast_varn_v2_mag45",
+  "reload_full_drum60",
+  "reload_full_mag45",
+  "reload_full_varn_v1_drum60",
+  "reload_full_varn_v1_mag45",
+  "reload_full_varn_v2_drum60",
+  "reload_full_varn_v2_mag45",
+  "reload_tactical_drum60",
+  "reload_tactical_mag45",
+  "reload_tactical_varn_v1_drum60",
+  "reload_tactical_varn_v1_mag45",
+  "reload_tactical_varn_v2_drum60",
+  "reload_tactical_varn_v2_mag45"
+ ]
 }

@@ -167,6 +167,32 @@ static func _bump(e: Dictionary) -> void:
 	e["rev"] = int(e.get("rev", 0)) + 1
 
 
+## Какой магазин из list вставит reload_weapon: id или "" (подходящего нет). Для рук от первого лица —
+## какой магазин показать в руке, пока хост меняет его на самом деле.
+static func next_mag(weapon: Dictionary, list: Array) -> String:
+	var i := _best_mag(normalize_chamber(weapon), list)
+	return String((list[i] as Dictionary).id) if i >= 0 else ""
+
+
+## Лучший отстёгиваемый магазин для оружия e в list: самый полный, тем же патроном — лучше; оружие без
+## магазина берёт и пустой. −1 — нет.
+static func _best_mag(e: Dictionary, list: Array) -> int:
+	var wid := String(e.id)
+	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
+	var best := -1
+	var best_n := -1
+	var mag_out: bool = String(mag.get("id", "")) == ""
+	for i in range(list.size()):
+		var it: Dictionary = list[i]
+		if not it.has("rounds") or not WeaponDb.mag_fits(wid, String(it.id)) or (int(it.get("rounds", 0)) <= 0 and not mag_out):
+			continue
+		var n := int(it.rounds) + (1000 if String(it.get("ammo", "")) == String(mag.get("ammo", "")) else 0)
+		if n > best_n:
+			best_n = n
+			best = i
+	return best
+
+
 ## Перезарядка (хост): weapon — запись оружия (уже с состоянием владельца), list — рюкзак (меняется).
 ## Отстёгиваемый магазин: самый полный подходящий из рюкзака (тем же патроном — лучше), старый —
 ## в рюкзак с остатком; снаряжённых нет — досыпать россыпь в текущий (того же типа нет — любым своего
@@ -178,17 +204,7 @@ static func reload_weapon(weapon: Dictionary, list: Array, grid: Vector2i, keep_
 	var w := WeaponDb.weapon(wid)
 	var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 	if not w.has("internal_mag"):
-		var best := -1
-		var best_n := -1
-		var mag_out: bool = String(mag.get("id", "")) == ""
-		for i in range(list.size()):
-			var it: Dictionary = list[i]
-			if not it.has("rounds") or not WeaponDb.mag_fits(wid, String(it.id)) or (int(it.get("rounds", 0)) <= 0 and not mag_out):
-				continue
-			var n := int(it.rounds) + (1000 if String(it.get("ammo", "")) == String(mag.get("ammo", "")) else 0)
-			if n > best_n:
-				best_n = n
-				best = i
+		var best := _best_mag(e, list)
 		if best >= 0:
 			var fresh: Dictionary = ItemDb.remove_at(list, best, 1)
 			var old := {}

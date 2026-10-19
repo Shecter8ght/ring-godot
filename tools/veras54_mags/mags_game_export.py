@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 import bpy
-from mathutils import Matrix
+from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mags_game_common as C  # noqa: E402
@@ -97,6 +97,26 @@ mat = bpy.data.materials[C.matname(MID)]
 mat.use_nodes = True
 material(mat)
 body = bpy.data.objects['Magazine']
+# Подаватель по счёту патронов (у 45): стоит под последним патроном и поднимается по дуге вместе со стопкой —
+# шаг стопки от патрона n к n−1 (Кабш по патронам), без бокового сдвига «шахматки»; 0 патронов — ещё шаг вверх.
+follower_v = []
+fol = bpy.data.objects.get('MagazineFollower')
+if fol is not None:
+    # начало узла — середина подавателя (в исходнике оно в начале автомата): сетка и развёртка на месте
+    c = sum((v.co for v in fol.data.vertices), Vector()) / len(fol.data.vertices)
+    fol.data.transform(Matrix.Translation(-c))
+    fol.matrix_world = fol.matrix_world @ Matrix.Translation(c)
+    bpy.context.view_layer.update()
+    n_r = REC['rounds']['count']
+    rm = {i: bpy.data.objects[f'Round_{i:02d}'].matrix_world.copy() for i in range(1, n_r + 1)}
+    full = fol.matrix_world.copy()
+    for n in range(n_r + 1):
+        if n >= 1:
+            m = rm[n] @ rm[n_r].inverted() @ full
+        else:
+            m = rm[1] @ rm[2].inverted() @ (rm[1] @ rm[n_r].inverted() @ full)
+        m.translation.y = full.translation.y
+        follower_v.append(m)
 for o in meshes():
     if o is not body:
         mw = o.matrix_world.copy()
@@ -131,6 +151,16 @@ report = dict(model=NAME, title=M['title'], item=M['item'], source=REC['source']
               attach_in_veras54_m=list(C.ATTACH_IN_VERAS54), atlas=REC['atlas'], atlas_size=REC['atlas_size'],
               texel_px_mm=REC['texel_px_mm'], rounds=REC['rounds']['count'], rounds_detailed=REC['rounds']['detailed'],
               nodes=sorted(o.name for o in bpy.context.scene.objects if o.type in ('MESH', 'EMPTY')))
+if follower_v:
+    # в осях узла Magazine glTF (Y вверх): положение и поворот подавателя для 0…N патронов
+    conv = Matrix(((1, 0, 0, 0), (0, 0, 1, 0), (0, -1, 0, 0), (0, 0, 0, 1)))
+    table = []
+    for m in follower_v:
+        local = body.matrix_world.inverted() @ (to_game @ m)
+        g = conv @ local @ conv.inverted()
+        q = g.to_quaternion()
+        table.append([round(v, 6) for v in (*g.translation, q.x, q.y, q.z, q.w)])
+    report['follower_by_rounds'] = table
 bb = [body.matrix_world @ v.co for v in body.data.vertices]
 report['size_m'] = [round(max(c[i] for c in bb) - min(c[i] for c in bb), 4) for i in range(3)]  # Blender X, Y, Z
 report['tris'] = tris(meshes())

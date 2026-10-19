@@ -1199,6 +1199,16 @@
       40,
       57
      ],
+     "check_hold_sets": {
+      "mag45": [
+       20,
+       40
+      ],
+      "drum60": [
+       20,
+       40
+      ]
+     },
      "swap_frame": {
       "reload_tactical": 42,
       "reload_full": 42,
@@ -3959,7 +3969,8 @@
     "reliability": 0.98,
     "look": "asset",
     "asset": "res://assets/models/weapons/veras54_mags/veras54_mag45_world.gltf",
-    "asset_detail": "res://assets/models/weapons/veras54_mags/veras54_mag45.gltf"
+    "asset_detail": "res://assets/models/weapons/veras54_mags/veras54_mag45.gltf",
+    "viewmodel_set": "mag45"
    },
    "model": "res://assets/models/weapons/veras54_mags/veras54_mag45.gltf",
    "flavor": "Дополнительные патроны полезны, но торчащий магазин делает оружие менее послушным."
@@ -3988,7 +3999,8 @@
     "reliability": 0.95,
     "look": "asset",
     "asset": "res://assets/models/weapons/veras54_mags/veras54_drum60_world.gltf",
-    "asset_detail": "res://assets/models/weapons/veras54_mags/veras54_drum60.gltf"
+    "asset_detail": "res://assets/models/weapons/veras54_mags/veras54_drum60.gltf",
+    "viewmodel_set": "drum60"
    },
    "model": "res://assets/models/weapons/veras54_mags/veras54_drum60.gltf",
    "flavor": "Редко требует перезарядки в бою, зато заметно утяжеляет оружие и ошибки обращения."

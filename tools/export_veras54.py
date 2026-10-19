@@ -65,6 +65,11 @@ for _g in GRIPS:
         CLIPS[f"{_clip}_{_g}"] = (f"{_tag}_{_g}", _last, SRC / f"VERAS54_{_file}_{_g}_v13.blend")
 # стойка — первый кадр тактической: без рукоятки и с каждой из них
 IDLES = {"idle": "Tactical", **{f"idle_{g}": f"Tactical_{g}" for g in GRIPS}}
+# магазины 45 и барабан 60 (tools/veras54_mags/mags_vm.py): свои наборы клипов «<клип>[_<рукоятка>]_<mag45|drum60>»,
+# если их файлы есть в «Клипы v13»; модели магазинов игра ставит сама на метки MagAsset / SpareMagAsset
+sys.path.insert(0, str(ROOT / "tools/veras54_mags"))
+import mags_vm  # noqa: E402
+CLIPS.update(mags_vm.clips(SRC, GRIPS))
 # Сцена клипов: оси VERAS54 (дуло +X, влево +Y) → мир (оружие смотрит по −Y), ось канала на высоте 1,7 м.
 ROOT_REST = Matrix.Translation((-0.14, -0.25, 1.7)) @ Matrix.Rotation(math.radians(-90), 4, "Z")
 GRIP_LOCAL = Vector((0.073, 0.0, -0.065))      # пистолетная рукоятка — начало осей игры (оси VERAS54)
@@ -281,6 +286,9 @@ def viewmodel() -> None:
     rig_common.add_jam_case(wr)
     # старый магазин быстрой перезарядки: кость SpareMag и копия магазина на ней (вне клипа скрыт игрой)
     rig_common.add_spare_mag(wr)
+    # метки моделей магазинов 45 / 60 (оси модели магазина) на костях Magazine и SpareMag
+    report["mag_marks"] = mags_vm.add_marks(wr, magob)
+    report["mag_sets"] = sorted(k for k in CLIPS if k.endswith(mags_vm.MAG_SETS))
     # подаватель в клипах не запекается — его ставит игра по счёту патронов (клип follower_by_rounds)
     skip = ("MagazineFollower",)
     baked = {}

@@ -214,6 +214,13 @@ tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же с
 #   в библиотеке) → --import → python -X utf8 tools/veras54_mags/mags_game_imports.py → --import
 tools/godot.cmd --headless res://tools/veras54_mags_check.tscn # магазины 45/60 в движке: узлы, патроны Round_NN, габарит, карты, шейдер износа;
                                                               # с окном (--windowed --resolution 1600x900) — снимки veras54_mags_* (прочность 100 и 25 %)
+# Хваты и клипы рук под магазины 45/60: blender … «Риг v13/VERAS54_Rig_v13.blend» --python tools/veras54_mags/mags_grip_file.py -- m45|d60 [--force] (файл хвата —
+#   «Игровая версия/Хваты магазинов 45 и 60», пальцы правит владелец) → bash tools/veras54_mags/mags_clips.sh [m45] [d60] (30 клипов
+#   «Клипы v13/*_{mag45,drum60}_v13»: перезарядки построителем автомата, проверка поворотом — mags_check_clip.py) → export_veras54.py -- viewmodel grips
+#   (наборы подхватывает tools/veras54_mags/mags_vm.py) → --import
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/veras54_mags_vm_shots.tscn # магазины 45/60 в руках: модель на метке вместо штатного, свой набор клипов,
+                                                              # патроны и подаватель по счёту, тактическая/полная/быстрая (старый вылетает), проверка удержанием R —
+                                                              # поворот окнами остатка к глазам; снимки veras54_mags_vm_* (MAGS_ONLY=mag_545_45)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка), мировая и подробная (конструктор) — .gltf с общими картами в assets/models/weapons/veras54; grips — наборы клипов под рукоятки ВАРН
 tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от первого лица: бедро, прицел, перезарядки, проверка магазина, мировая модель; рукоятки ВАРН V1/V2 и глушитель
                                                               # задержка «гильза в окне» и её устранение, износ шейдером 100/60/20, прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)

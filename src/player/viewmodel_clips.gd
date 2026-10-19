@@ -84,6 +84,18 @@ var _signal_props: Dictionary = {}
 var _signal_old_type: String = "flare"
 var _signal_has_old: bool = false
 var _signal_left_arm: Node3D
+## Магазины со своей моделью (data/weapons.json mag.viewmodel_set: магазин 45, барабан 60 — tools/veras54_mags):
+## модель встаёт на метку MagAsset (кость Magazine) вместо штатного корпуса, старый магазин быстрой перезарядки — на
+## SpareMagAsset; клипы — свой набор «<клип>[_<рукоятка>]_<набор>» (хват владельца на этом магазине); патроны Round_NN
+## и подаватель (таблица follower_by_rounds из <модель>.json) — у модели. Все подходящие стволу модели создаются
+## заранее скрытыми (износ WeaponCondition ложится и на них); виден тот магазин, что сейчас в оружии или в руке.
+var _mag_looks: Dictionary = {}
+var _spare_looks: Dictionary = {}
+var _std_mag_nodes: Array[Node3D] = []
+var _mag_set: String = ""
+## Перезарядка: какой магазин был в оружии и какой вставят (вид как Player.weapon_mag: "*" — штатный).
+var _reload_old: String = "*"
+var _reload_new: String = "*"
 
 
 static func available(id: String) -> bool:
@@ -175,6 +187,28 @@ func _setup(id: String, mods: Dictionary) -> void:
 		_mag_bone = _weapon_skel.find_bone("Magazine_Control")
 	for raw_part: Node in model.find_children("Part_Magazine*", "Node3D", true, false):
 		_mag_parts.append(raw_part as Node3D)
+	# штатный корпус и подаватель (не защёлка) — прячутся, когда в оружии магазин со своей моделью
+	for std_name: String in ["Part_Magazine", "Part_MagazineFollower"]:
+		var std: Node3D = model.find_child(std_name, true, false) as Node3D
+		if std:
+			_std_mag_nodes.append(std)
+	var mark: Node3D = model.find_child("MagAsset", true, false) as Node3D
+	var spare_mark: Node3D = model.find_child("SpareMagAsset", true, false) as Node3D
+	if mark:
+		for raw_id: Variant in WeaponDb.ids("magazines"):
+			var mid: String = String(raw_id)
+			if String(WeaponDb.magazine(mid).get("viewmodel_set", "")) == "" or not WeaponDb.mag_fits(id, mid):
+				continue
+			var look: Dictionary = _mag_look(mid, mark)
+			if not look.is_empty():
+				_mag_looks[mid] = look
+			if spare_mark:
+				var spare_look: Dictionary = _mag_look(mid, spare_mark)
+				if not spare_look.is_empty():
+					_spare_looks[mid] = spare_look
+					for sub: Node in (spare_look.node as Node3D).find_children("*", "MeshInstance3D", true, false):
+						sub.set_meta("weapon_clearance_ignore", true)
+					(spare_look.node as Node3D).set_meta("weapon_clearance_ignore", true)
 	frame = model.find_child("WeaponFrame", true, false) as Node3D
 	if frame == null:
 		frame = Node3D.new()
@@ -209,12 +243,65 @@ func _setup(id: String, mods: Dictionary) -> void:
 		_play(_clip_name("draw"), 0.0)
 
 
-## Клип по роли (idle, reload, reload_empty, check, clear) — из набора под рукоятку, если он есть.
+## Клип по роли (idle, reload, reload_empty, check, clear) — из набора под магазин со своим хватом (кроме стойки:
+## она общая) и под рукоятку, если они есть: «<клип>_<рукоятка>_<магазин>», «<клип>_<магазин>», «<клип>_<рукоятка>».
 func _clip_name(kind: String) -> String:
 	var clip: String = _base_clip(kind)
-	if _set != "" and clip != "" and _anim.has_animation(clip + "_" + _set):
+	if clip == "":
+		return clip
+	if _mag_set != "" and not kind.begins_with("idle"):
+		for name: String in [clip + ("_" + _set if _set != "" else "") + "_" + _mag_set, clip + "_" + _mag_set]:
+			if _anim.has_animation(name):
+				return name
+	if _set != "" and _anim.has_animation(clip + "_" + _set):
 		return clip + "_" + _set
 	return clip
+
+
+## Набор клипов магазина ("" — штатный и магазины без своей модели). mag — как Player.weapon_mag.
+func _set_of(mag: String) -> String:
+	return String((_mag_looks.get(mag, {}) as Dictionary).get("set", "")) if mag not in ["", "*"] else ""
+
+
+## Ёмкость магазина mag ("*" — штатный ствола).
+func _capacity_of(mag: String) -> int:
+	var mid: String = WeaponDb.default_mag(weapon_id) if mag in ["", "*"] else mag
+	return int(WeaponDb.magazine(mid).get("capacity", 30))
+
+
+## Модель магазина mid на метке mark (скрыта): узел, патроны Round_NN (01 — верхний) и подаватель с таблицей
+## «патронов → положение»: под последним патроном, поднимается по дуге со стопкой (шаг — от патрона к патрону,
+## без бокового сдвига «шахматки»), как в tools/veras54_mags/mags_game_export.py. Нет файла — пусто.
+func _mag_look(mid: String, mark: Node3D) -> Dictionary:
+	var spec: Dictionary = WeaponDb.magazine(mid)
+	var path: String = String(spec.get("asset_detail", spec.get("asset", "")))
+	if path == "" or not ResourceLoader.exists(path, "PackedScene"):
+		return {}
+	var node: Node3D = (ResourceLoader.load(path, "PackedScene") as PackedScene).instantiate() as Node3D
+	node.name = "MagLook_" + mid
+	node.visible = false
+	mark.add_child(node)
+	var rounds: Array[Node3D] = []
+	for i in range(1, 100):
+		var r: Node3D = node.find_child("Round_%02d" % i, true, false) as Node3D
+		if r == null:
+			break
+		rounds.append(r)
+	var look: Dictionary = {"node": node, "rounds": rounds, "set": String(spec.get("viewmodel_set", ""))}
+	var fol: Node3D = node.find_child("MagazineFollower", true, false) as Node3D
+	if fol and rounds.size() >= 2:
+		var full: Transform3D = fol.transform
+		var last_inv: Transform3D = rounds[rounds.size() - 1].transform.affine_inverse()
+		var table: Array[Transform3D] = []
+		for n: int in range(rounds.size() + 1):
+			var t: Transform3D = rounds[maxi(n, 1) - 1].transform * last_inv * full
+			if n == 0:
+				t = rounds[0].transform * rounds[1].transform.affine_inverse() * t
+			t.origin.x = full.origin.x
+			table.append(t)
+		look["follower"] = fol
+		look["table"] = table
+	return look
 
 
 func _base_clip(kind: String) -> String:
@@ -250,13 +337,18 @@ func update(pl: Player, delta: float) -> void:
 	if String(config.get("mechanism", "")) == "break_action":
 		_update_signal(pl, delta)
 		return
-	var mag: int = int(pl.spec().get("mag", 30))
 	var reloading: bool = pl.reload_timer > 0.0 and pl._reload_kind != "clear"
+	if _clip == "":
+		_mag_set = _set_of(pl.weapon_mag)
 	if reloading and _last_reload <= 0.0:
 		var empty: bool = pl._reload_empty
 		var role: String = "reload_empty" if empty else "reload"
-		_rounds_before = 0 if empty else clampi(pl.ammo, 0, _rounds.size())
-		_rounds_after = clampi(mag, 0, _rounds.size())
+		# клипы — по магазину, который вставят (хват на нём); до подмены в руке виден старый
+		_reload_old = pl.weapon_mag
+		_reload_new = pl.reload_next_mag()
+		_mag_set = _set_of(_reload_new)
+		_rounds_before = 0 if empty else maxi(pl.ammo, 0)
+		_rounds_after = _capacity_of(_reload_new)
 		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(role), -1))
 		_fast = false
 		_play(_clip_name(role), BLEND_IN, pl.reload_timer)
@@ -283,7 +375,7 @@ func update(pl: Player, delta: float) -> void:
 	# задержка: R — передёрнуть затвор (клип на время устранения); прервали — в стойку
 	var clearing: bool = pl.reload_timer > 0.0 and pl._reload_kind == "clear"
 	if clearing and _last_clear <= 0.0:
-		_rounds_before = clampi(pl.ammo, 0, _rounds.size())
+		_rounds_before = maxi(pl.ammo, 0)
 		_rounds_after = _rounds_before
 		_swap_frame = -1
 		_play(_clip_name("clear"), BLEND_IN, pl.reload_timer)
@@ -292,7 +384,7 @@ func update(pl: Player, delta: float) -> void:
 	_last_clear = pl.reload_timer if clearing else 0.0
 	var jammed: bool = pl.is_jammed()
 	if pl.ammo_check_t > _last_check + 0.5 and _clip == "":
-		_rounds_before = clampi(pl.ammo, 0, _rounds.size())
+		_rounds_before = maxi(pl.ammo, 0)
 		_rounds_after = _rounds_before
 		_swap_frame = -1
 		_play(_clip_name("check"), BLEND_IN)
@@ -307,31 +399,57 @@ func update(pl: Player, delta: float) -> void:
 	_advance(pl, delta)
 	if _clip != "" and not _anim.is_playing():
 		_play(_clip_name("idle"), BLEND_OUT)
-	var shown: int = clampi(pl.ammo, 0, _rounds.size())
+	var shown: int = maxi(pl.ammo, 0)
+	var after_swap: bool = false
 	if _clip != "":
 		var f: float = _anim.current_animation_position * float(config.get("fps", 30))
-		shown = _rounds_after if _swap_frame >= 0 and f >= _swap_frame else _rounds_before
-	for i in range(_rounds.size()):
-		_rounds[i].visible = i < shown
+		after_swap = _swap_frame >= 0 and f >= _swap_frame
+		shown = _rounds_after if after_swap else _rounds_before
+	# какой магазин виден: в перезарядке до подмены — старый, после — новый; иначе — тот, что в оружии
+	var showing: String = (_reload_new if after_swap else _reload_old) if _clip != "" and _swap_frame >= 0 else pl.weapon_mag
+	var look: Dictionary = _mag_looks.get(showing, {}) if showing not in ["", "*"] else {}
+	var rounds: Array[Node3D] = _rounds
+	if not look.is_empty():
+		rounds = look.rounds
+		for round_node: Node3D in _rounds:
+			round_node.visible = false
+	for i in range(rounds.size()):
+		rounds[i].visible = i < shown
+	if look.has("follower"):
+		var table: Array[Transform3D] = look.table
+		(look.follower as Node3D).transform = table[clampi(shown, 0, table.size() - 1)]
 	_insert_hide = maxf(0.0, _insert_hide - delta) if reloading else 0.0
 	if _insert_hide > 0.0:
-		for round_node: Node3D in _rounds:
+		for round_node: Node3D in rounds:
 			round_node.visible = false
 	var mag_in: bool = (pl.weapon_mag != "" or reloading) and _insert_hide <= 0.0
 	for part: Node3D in _mag_parts:
 		part.visible = mag_in
+	for std: Node3D in _std_mag_nodes:
+		std.visible = mag_in and look.is_empty()
+	for other: Dictionary in _mag_looks.values():
+		(other.node as Node3D).visible = mag_in and other.node == look.get("node")
 	# старый магазин быстрой перезарядки: виден с кадра, когда новый уже в руке, до конца клипа
 	var spare_on: bool = _fast and _clip != "" and _swap_frame >= 0 \
 			and _anim.current_animation_position * float(config.get("fps", 30)) >= _swap_frame
+	var old_look: Dictionary = _spare_looks.get(_reload_old, {}) if _reload_old not in ["", "*"] else {}
 	for spare: Node3D in _spare_parts:
-		spare.visible = spare_on
+		spare.visible = spare_on and old_look.is_empty()
 	if _spare_rounds:
-		_spare_rounds.visible = spare_on and _rounds_before > 0
+		_spare_rounds.visible = spare_on and _rounds_before > 0 and old_look.is_empty()
+	for other: Dictionary in _spare_looks.values():
+		var on: bool = spare_on and other.node == old_look.get("node")
+		(other.node as Node3D).visible = on
+		if on:
+			var old_rounds: Array[Node3D] = other.rounds
+			for i in range(old_rounds.size()):
+				old_rounds[i].visible = i < _rounds_before
 	var clear_clip: bool = _clip != "" and _clip == _clip_name("clear")
 	if _jam_case:
 		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
 		_jam_case.visible = jammed or clear_clip
-	_pose_overrides(shown, delta, jammed and not clear_clip)
+	# штатный подаватель — таблица на 30 (у магазина со своей моделью он скрыт, его подаватель — выше)
+	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip)
 	_inspect_turn(pl, delta)
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
 	_support_hand(_grip_w)
@@ -410,6 +528,9 @@ func _update_signal(pl: Player, delta: float) -> void:
 ## нём (медленно покачиваясь между его кадрами); отпустили — продолжается с конца участка.
 func _advance(pl: Player, delta: float) -> void:
 	var hold: Array = config.get("check_hold", [])
+	var hold_sets: Dictionary = config.get("check_hold_sets", {})
+	if _mag_set != "" and hold_sets.has(_mag_set):
+		hold = hold_sets[_mag_set]
 	var fps: float = float(config.get("fps", 30))
 	if hold.size() == 2 and _clip != "" and _clip == _clip_name("check"):
 		var from: float = float(hold[0]) / fps
@@ -435,7 +556,7 @@ func _advance(pl: Player, delta: float) -> void:
 ## сгибается в запястье (мышь вверх-вниз). Ось — запястье, магазин едет вместе с кистью.
 ## Отпустили — плавно назад.
 func _inspect_turn(pl: Player, delta: float) -> void:
-	var want: Vector2 = pl.inspect_turn if _holding else Vector2.ZERO
+	var want: Vector2 = pl.inspect_turn if _holding and _mag_set == "" else Vector2.ZERO
 	_turn = _turn.lerp(want, minf(1.0, delta * 10.0))
 	if _turn.length() < 0.004 or _arm_skel == null or _mag_bone < 0 or _weapon_skel != _arm_skel:
 		return
