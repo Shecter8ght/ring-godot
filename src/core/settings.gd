@@ -46,6 +46,9 @@ var sens_ads: float = 1.0
 var invert_y: bool = false
 ## Поле зрения от первого лица по горизонтали (на 16:9), град; камере — fps_fov_v().
 var fov_h: float = FOV_H_DEFAULT
+## «Покачивание камеры», 0–1: шаги, бег, остановка, приземление (CameraMotion; поверх общего
+## Balance.CAMERA_MOTION_INTENSITY). 0 — камера стоит ровно в глазах (кого укачивает).
+var camera_motion: float = 1.0
 ## Метка голографического прицела ЛУМАР (окно настройки прицела, SightMenu): форма (номер в шейдере),
 ## номер цвета и толщины из списков SightMenu. Привычка игрока — одна на все его прицелы.
 var reticle: Dictionary = {"shape": 1, "color": 0, "bold": 1}
@@ -130,6 +133,7 @@ func _load() -> void:
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
 	invert_y = bool(cfg.get_value("mouse", "invert_y", invert_y))
 	fov_h = clampf(float(cfg.get_value("view", "fov_h", fov_h)), FOV_H_RANGE[0], FOV_H_RANGE[1])
+	camera_motion = clampf(float(cfg.get_value("view", "camera_motion", camera_motion)), 0.0, 1.0)
 	hitmarker = bool(cfg.get_value("view", "hitmarker", hitmarker))
 	for key: String in reticle.keys():
 		reticle[key] = int(cfg.get_value("sight", key, reticle[key]))
@@ -169,6 +173,7 @@ func save() -> void:
 	cfg.set_value("mouse", "ads", sens_ads)
 	cfg.set_value("mouse", "invert_y", invert_y)
 	cfg.set_value("view", "fov_h", fov_h)
+	cfg.set_value("view", "camera_motion", camera_motion)
 	cfg.set_value("view", "hitmarker", hitmarker)
 	for key: String in reticle:
 		cfg.set_value("sight", key, int(reticle[key]))
@@ -301,6 +306,13 @@ func set_invert_y(on: bool) -> void:
 
 func set_fov_h(v: float) -> void:
 	fov_h = clampf(v, FOV_H_RANGE[0], FOV_H_RANGE[1])
+	save()
+	changed.emit()
+
+
+## «Покачивание камеры» 0–1 — сразу в рейде и в убежище.
+func set_camera_motion(v: float) -> void:
+	camera_motion = clampf(v, 0.0, 1.0)
 	save()
 	changed.emit()
 

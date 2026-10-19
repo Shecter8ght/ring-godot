@@ -16,7 +16,9 @@ var ads_active: bool = false
 static var first_person_mode: bool = true
 static var _settings_loaded: bool = false
 const SETTINGS_PATH := "user://settings.cfg"
-var _bob_t: float = 0.0
+## Вес тела в камере: покачивание в темп шагов, инерция, крен, приземление — отдельный слой поверх
+## взгляда мышью (CameraMotion); и покачивание оружия у бедра в той же фазе.
+var _motion: CameraMotion = CameraMotion.new()
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
@@ -707,6 +709,7 @@ func _set_ads(on: bool, pl: Player) -> void:
 	if pl:
 		pl.ads = on
 		pl.set_first_person(on)
+	_motion.reset()
 	if on:
 		# взгляд — туда, куда уже смотрит корпус; по вертикали — горизонт
 		_look_yaw = pl.body_yaw()
@@ -769,20 +772,23 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if pl.aiming and wid != "":
 		var breath_amp: float = deg_to_rad(float(br.deg)) * pl.breath_k() * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * aim_t
 		sway += Vector2(sin(_breath_t * 0.5 + 0.7) * float(br.side), sin(_breath_t)) * breath_amp
+	# вес тела: шаги, инерция, крен — своим слоем, поверх взгляда мышью; ни мышь, ни отдачу не трогает
+	_motion.update(pl, delta, aim_t, _look_yaw)
 	# отдача подкидывает взгляд, дальше игрок сам возвращает прицел
-	var pitch := _look_pitch + pl.recoil() + sway.y
-	var yaw := _look_yaw + sway.x - pl.recoil_h()
+	var pitch := _look_pitch + pl.recoil() + sway.y + _motion.pitch
+	var yaw := _look_yaw + sway.x - pl.recoil_h() + _motion.yaw
 	# наклон — крен камеры (глаз уже сдвинут в eye_position)
-	var roll := -pl.lean * deg_to_rad(Balance.LEAN_ROLL_DEG)
+	var roll := -pl.lean * deg_to_rad(Balance.LEAN_ROLL_DEG) + _motion.roll
 	# попадание: взгляд дёрнулся и вернулся
 	if _punch_t > 0.0:
 		_punch_t = maxf(0.0, _punch_t - delta / float(Balance.HURT_FX.punch_sec))
 		var pk := _punch_t * _punch_t
 		pitch += _punch.x * pk
 		roll += _punch.y * pk
-	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, yaw + PI, roll)), pl.eye_position())
-	_ads_cam.global_position += _ads_cam.global_basis * Vector3(_rng.randf_range(-s, s), _rng.randf_range(-s, s), 0.0) * 0.15
-	# пули летят туда, куда смотрит прицел, — с раскачкой
+	# глаз — плавно между тиками физики (Player.view_eye) и со сдвигом от шагов и инерции
+	_ads_cam.global_transform = Transform3D(Basis.from_euler(Vector3(pitch, yaw + PI, roll)), pl.view_eye())
+	_ads_cam.global_position += _ads_cam.global_basis * (_motion.offset + Vector3(_rng.randf_range(-s, s), _rng.randf_range(-s, s), 0.0) * 0.15)
+	# пули летят туда, куда смотрит прицел, — с раскачкой и покачиванием шага
 	pl.look_yaw = yaw
 	# пули летят туда, куда сейчас смотрит ствол: с отдачей и раскачкой
 	pl.look_pitch = pitch
@@ -836,19 +842,9 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var ads_pos := -(Basis(Vector3.UP, PI) * cant * Vector3(sx, sh, 0.0)) + Vector3(0.0, 0.0, -az)
 	var hip_pos := Balance.FPS_HIP_POSE
 	if pl.stance == Player.Stance.PRONE: hip_pos.y += float(Balance.WEAPON_CLEARANCE.prone_hip_lift)
-	# На ходу у бедра оружие покачивается. Частота и амплитуда следуют реальной скорости,
-	# поэтому при разгоне и инерционной остановке движение модели не включается рывком.
-	var planar_speed := Vector2(pl.velocity.x, pl.velocity.z).length()
-	var walk_k := clampf(planar_speed / Balance.PLAYER_WALK_SPEED, 0.0, 1.0)
-	var sprint_k := clampf((planar_speed - Balance.PLAYER_WALK_SPEED) \
-		/ (Balance.PLAYER_SPRINT_SPEED - Balance.PLAYER_WALK_SPEED), 0.0, 1.0)
-	var bob_rate := lerpf(float(Balance.WEAPON_BOB.idle_rate), float(Balance.WEAPON_BOB.walk_rate), walk_k)
-	bob_rate = lerpf(bob_rate, float(Balance.WEAPON_BOB.sprint_rate), sprint_k)
-	_bob_t += delta * bob_rate
-	var vertical_bob := lerpf(float(Balance.WEAPON_BOB.idle_vertical),
-		float(Balance.WEAPON_BOB.walk_vertical), walk_k)
-	var bob := Vector3(sin(_bob_t * 0.5) * float(Balance.WEAPON_BOB.horizontal),
-		absf(sin(_bob_t)) * vertical_bob, 0.0) * (1.0 - k)
+	# На ходу у бедра оружие покачивается в темп шагов (та же фаза, что у камеры, руки чуть позже
+	# головы); размах следует реальной скорости — при разгоне и остановке не включается рывком.
+	var bob := _motion.weapon_bob * (1.0 - k)
 	# камера смотрит по −Z, у модели дуло по +Z — разворот на π; отдача — подброс и откат назад
 	# толчок в плечо: модель откатывается назад, дуло подскакивает, чуть заваливается; пружиной обратно
 	# в прицеле дуло подскакивает меньше, а оружие сильнее уходит назад, в плечо и камеру

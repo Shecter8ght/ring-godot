@@ -187,6 +187,13 @@ var _vault_t: float = -1.0
 ## Ступеньки и кочки для глаза: тело поднимается/опускается рывком (шаг на ступень, снап к полу),
 ## камера догоняет плавно — смещение глаза по высоте, гаснет за доли секунды.
 var _eye_dy: float = 0.0
+## Высота глаз своего игрока при смене стойки — плавно к Balance.ADS_EYE (без рывка камеры и прицела),
+## м и м/с; меньше нуля — ещё не задана (первый тик встаёт сразу).
+var _stance_eye: float = -1.0
+var _stance_eye_v: float = 0.0
+## Глаз в начале последнего тика физики: камера ведёт глаз между тиками плавно (view_eye).
+var _eye_tick_prev: Vector3 = Vector3.ZERO
+var _eye_tick_ready: bool = false
 ## Сколько секунд не на полу (шаг на ступень — и в первые мгновения после отрыва: висит на ребре).
 var _ground_t: float = 0.0
 var _vault_sec: float = 0.75
@@ -252,6 +259,8 @@ func _ready() -> void:
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
 	steps.grounded = func() -> bool: return not airborne and _vault_t < 0.0
+	# свой — скорость по физике: темп шагов (и покачивания камеры) без ступенек кадра
+	steps.speed_source = func() -> float: return Vector2(velocity.x, velocity.z).length() if is_local() else -1.0
 	steps.loud_db = func() -> float: return float(Balance.STEP_STANCE_DB.get(_stance_key(), 0.0))
 	steps.movement_kind = func() -> String:
 		if stance == Stance.PRONE or is_downed():
@@ -780,7 +789,41 @@ func aim_progress() -> float:
 
 
 func eye_position() -> Vector3:
-	return global_position + Vector3.UP * (float(Balance.ADS_EYE[_stance_key()]) + _eye_dy) + lean_vector()
+	return global_position + Vector3.UP * (_eye_height() + _eye_dy) + lean_vector()
+
+
+## Высота глаз над ногами: у своего игрока после смены стойки — плавно (_tick_stance_eye), у чужих —
+## сразу по стойке (их камера не наша).
+func _eye_height() -> float:
+	if _stance_eye >= 0.0 and is_local():
+		return _stance_eye
+	return float(Balance.ADS_EYE[_stance_key()])
+
+
+## Глаз для камеры. Физика считает 60 раз в секунду, кадров бывает больше (144 Гц) — между тиками
+## глаз ведётся плавно от прошлого тика к нынешнему, иначе камера ходит ступеньками. Отстаёт от
+## физики меньше чем на тик; поворот взгляда мышью этим не задерживается. Телепорт — сразу.
+func view_eye() -> Vector3:
+	var now := eye_position()
+	if not _eye_tick_ready or _eye_tick_prev.distance_squared_to(now) > 1.0:
+		return now
+	return _eye_tick_prev.lerp(now, clampf(Engine.get_physics_interpolation_fraction(), 0.0, 1.0))
+
+
+## Смена стойки: глаз переходит на новую высоту критически затухающей пружиной — без рывка
+## на старте и без перелёта (Balance.ADS_EYE_SETTLE_SEC).
+func _tick_stance_eye(delta: float) -> void:
+	var target := float(Balance.ADS_EYE[_stance_key()])
+	if _stance_eye < 0.0:
+		_stance_eye = target
+		_stance_eye_v = 0.0
+		return
+	var w := 4.75 / maxf(Balance.ADS_EYE_SETTLE_SEC, 0.01)
+	var steps: int = clampi(ceili(delta / 0.004), 1, 12)
+	var h: float = delta / float(steps)
+	for i in steps:
+		_stance_eye_v += (-w * w * (_stance_eye - target) - 2.0 * w * _stance_eye_v) * h
+		_stance_eye += _stance_eye_v * h
 
 
 ## Куда сдвинут глаз наклоном (вбок от взгляда, чуть ниже).
@@ -872,7 +915,11 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_local() or not is_alive():
 		return
+	# глаз до этого тика — от него камера ведёт глаз к новому положению (view_eye)
+	_eye_tick_prev = eye_position()
+	_eye_tick_ready = true
 	_eye_dy *= exp(-float(Balance.STEP_UP.eye_rate) * delta)
+	_tick_stance_eye(delta)
 	# отладка (аудит уровня): полёт сквозь всё
 	if Settings.cheat_fly:
 		_fly(delta)

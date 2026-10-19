@@ -439,6 +439,12 @@ func _build_settings(h: HBoxContainer) -> void:
 		func(v: float) -> void: Settings.set_fov_h(v))
 	fov.tooltip_text = "От первого лица, как на экране 16:9. Руки и оружие — со своим полем зрения, прицелы увеличивают так же."
 	grid.add_child(fov)
+	grid.add_child(_label("Покачивание камеры"))
+	var bob := _slider(0.0, 1.0, 0.05, Settings.camera_motion, "%.0f%%",
+		func(v: float) -> void: Settings.set_camera_motion(v), 100.0)
+	bob.name = "CameraMotionSlider"
+	bob.tooltip_text = "Шаги, бег, остановка и приземление: камера передаёт вес тела. 0 % — камера стоит ровно, оружие в руках качается как прежде."
+	grid.add_child(bob)
 	for b in Settings.BUSES:
 		var bus := String(b)
 		grid.add_child(_label("Громкость: " + String(Settings.BUSES[b]).to_lower()))

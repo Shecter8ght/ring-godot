@@ -94,6 +94,14 @@ func _ready() -> void:
 		Settings.set_fov_h(90.0)
 		rig._ads_cam.fov = Settings.fps_fov_v()
 		_check("у бедра мышь та же при любом поле зрения", is_equal_approx(s90, s120) and is_equal_approx(s90, Balance.ADS_SENS * Balance.FPS_FOV / 62.0), "%.5f / %.5f" % [s90, s120])
+	# «Покачивание камеры»: по умолчанию полное, от 0 до 100 %, ползунок в меню
+	_check("покачивание камеры по умолчанию 100 %", is_equal_approx(Settings.camera_motion, 1.0), "%.2f" % Settings.camera_motion)
+	Settings.set_camera_motion(-1.0)
+	var cm_lo := Settings.camera_motion
+	Settings.set_camera_motion(3.0)
+	_check("покачивание камеры: от 0 до 100 %", is_equal_approx(cm_lo, 0.0) and is_equal_approx(Settings.camera_motion, 1.0), "%.2f / %.2f" % [cm_lo, Settings.camera_motion])
+	Settings.set_camera_motion(1.0)
+	_check("в настройках есть ползунок «Покачивание камеры»", get_node("/root/Pause").find_child("CameraMotionSlider", true, false) != null, "")
 	# клавиши: F → E у «взаимодействия»; E уже у поворота камеры — видно; сброс — снова F
 	var e := InputEventKey.new()
 	e.physical_keycode = KEY_E
