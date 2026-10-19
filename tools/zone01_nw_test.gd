@@ -47,6 +47,9 @@ func _ready() -> void:
 	var loose: int = 0
 	for node: Node in containers:
 		var container := node as LootContainer
+		# лут интерьеров блокаутов и мест заказа проверяет zone01_ld_test — здесь только готовый фрагмент
+		if level.get_node("Layout").is_ancestor_of(container) or level.get_node("CarRecovery").is_ancestor_of(container):
+			continue
 		if container is LooseLoot:
 			loose += 1
 			check("находка доступна: " + String(container.name), _has_standing_place(container))

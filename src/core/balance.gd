@@ -1909,7 +1909,7 @@ const AI_INVESTIGATE_LINGER := 5.0
 const URBAN_WORLD := {
 	"batch_cell": 64.0, "prop_distance": 650.0, "view_distance": 2400.0,
 	"deck_margin": 0.25,
-	"nav_tile": 250.0, "nav_cell": 0.5, "nav_height": 0.25, "nav_border": 2.0,
+	"nav_tile": 250.0, "nav_cell": 0.5, "nav_height": 0.25, "nav_border": 2.0, "publish_sec": 10.0,
 	"nav_radius": 0.5, "nav_agent_height": 1.8, "nav_climb": 0.4, "nav_slope": 40.0,
 	"nav_merge_scale": 0.125,
 	"nav_detail_error": 2.0,
@@ -4080,10 +4080,18 @@ const SUPPLY_LOOT := {"weapons": [1, 2], "weapon_tier": 3, "dur": [85, 100], "ma
 	"armor_tier": 3, "extras": [["medkit", 1, 2], ["painkillers", 1, 2], ["grenade", 2, 3], ["rig_assault", 0, 1]]}
 const SUPPLY_PLANE_SOUND := {"db": 12.0, "unit": 60.0, "max": 600.0}
 
-## Узкие жилые двери и лестницы зоны 1: отдельная точность кэша, остальные карты прежние.
+## Свет в зданиях блокаутов Пригорода (левел-дизайн 2026-10-19): в залах — вдоль оси (по одной на 14 м, не больше
+## четырёх), на лестничной площадке каждого этажа, в доме — по одной на этаж; без теней, гаснут вдали
+## (fade_begin + fade_length, м); в зале радиус не меньше wide_k ширины. Питание — как у света ТЦ (группа mall_lights): нет — темно, аварийное — красные.
+const BLOCKOUT_LIGHTS := {"energy": 1.1, "range": 9.0, "fade_begin": 30.0, "fade_length": 8.0, "step_m": 14.0, "max": 4, "wide_k": 0.75,
+	"color": Color(1.0, 0.8, 0.58)}
+
+## Узкие жилые двери и лестницы зоны 1: отдельная точность кэша, остальные карты прежние;
+## publish_sec — сколько ждать, пока сервер опубликует тайлы (с интерьерами и укрытиями блокаутов навмеш подробнее,
+## публикация ≈ 5 с — левел-дизайн 2026-10-19).
 const ZONE01_INTERIOR_NAV := {
 	"nav_tile": 240.0, "nav_cell": 0.125, "nav_height": 0.0625, "nav_border": 2.0,
-	"nav_radius": 0.375, "nav_detail_error": 1.0, "nav_merge_scale": 0.0078125,
+	"nav_radius": 0.375, "nav_detail_error": 1.0, "nav_merge_scale": 0.0078125, "publish_sec": 30.0,
 }
 
 ## Тестовое прохождение заданий (владелец, 2026-10-17): у целей с test_hint — всплывающая

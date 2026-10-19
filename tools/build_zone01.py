@@ -1,4 +1,4 @@
-"""Зона 1 «Городской пояс»: рельеф, маска поверхностей и каркас карты по раскладке data/zone01_layout.json —
+"""Зона 1 «Пригород»: рельеф, маска поверхностей и каркас карты по раскладке data/zone01_layout.json —
 квадрат ≈ 600 × 600 м по картинке владельца (решение 2026-10-17, docs/design/zone01_outskirts.md §11;
 раскладку пишет tools/zone01_square_plan.py). Готовые двор хрущёвок, рынок и дома у оврага переезжают
 целиком: их сцены ставятся со сдвигом / поворотом, а земля под ними переносится из вырезок прежней карты
@@ -470,6 +470,12 @@ def build_splat(h: np.ndarray) -> np.ndarray:
     mud = np.maximum(mud, (1.0 - smooth(site / 6.0)) * smooth((patches - 0.4) / 0.3))
     lot = np.where(inside_polygon(POLY_PADS[1]), 0.0, polygon_edge_distance(POLY_PADS[1]))
     gravel = np.maximum(gravel, (1.0 - smooth(lot / 3.0)) * (0.45 + 0.45 * detail))
+    # двор ремонтных площадок — укатанный щебень с масляной грязью пятнами
+    ry0 = LAYOUT["repair_yard"]["fence"]
+    rrect = (min(q[0] for q in ry0), min(q[1] for q in ry0), max(q[0] for q in ry0), max(q[1] for q in ry0))
+    yard_d = rect_distance(*rrect)
+    gravel = np.maximum(gravel, (1.0 - smooth(yard_d / 2.0)) * (0.6 + 0.35 * detail))
+    mud = np.maximum(mud, (1.0 - smooth(yard_d / 2.0)) * smooth((patches - 0.5) / 0.25) * 0.7)
     # у ангаров, складов, вокзала — укатанный щебень вокруг
     for b in LAYOUT["buildings"]:
         if b["kind"] in ("hall", "station", "skeleton"):
@@ -504,6 +510,10 @@ PADS_BG += [(x - (D if yaw > 45 else L) / 2 - 3, z - (L if yaw > 45 else D) / 2 
 PADS_PAVED = PADS_BG + BUILDING_PADS
 # не сажать деревья на готовые дома с сараями (дома развёрнуты: огороды к северу) и подход к мосту
 KEEP_CLEAR = [(hx - 12, hz - 14, hx + 12, hz + 10) for hx, hz in HOUSES] + [(210, -167, 282, -155)]
+# ремонтные дворы автобазы и пустырь до стоянки автобусов — без деревьев (левел-дизайн: открытый подход)
+REPAIR_CLEAR = tuple(LAYOUT["repair_yard"]["clear"])
+_rf = LAYOUT["repair_yard"]["fence"]
+REPAIR_RECT = (min(q[0] for q in _rf), min(q[1] for q in _rf), max(q[0] for q in _rf), max(q[1] for q in _rf))
 # двор хрущёвок — свой генератор деревьев и травы; рынок — свои площадки
 YARD_RECT = tuple(v + d for v, d in zip((-285.0, -165.0, -135.0, -42.0), (*READY["yard05"]["move"], *READY["yard05"]["move"])))
 MARKET_RECT = (min(p[0] for p in READY["market06"]["outline"]), min(p[1] for p in READY["market06"]["outline"]),
@@ -676,6 +686,12 @@ def build_vegetation(h: np.ndarray, splat: np.ndarray) -> None:
     imp = ROOT / "assets/terrain/zone01_grass.png.import"
     if not imp.exists():
         imp.write_text(IMPORT_SPLAT.format(name="zone01_grass.png"), encoding="utf-8")
+    # ремонтные дворы и пустырь до стоянки — без деревьев; во дворе (за забором) — и без подлеска
+    for pts in trees.values():
+        pts[:] = [q for q in pts if not in_rect(q[0], q[2], REPAIR_CLEAR)]
+    for key, pts in under.items():
+        if key not in ("grass", "weed"):
+            pts[:] = [q for q in pts if not in_rect(q[0], q[2], REPAIR_RECT)]
     data = dict(trees)
     data.update(under)
     data["grass"] = []
@@ -948,10 +964,13 @@ def v3(x, y, z):
 
 
 class Scene:
-    def __init__(self, name: str, root_kind: str = "Node3D"):
+    def __init__(self, name: str, root_kind: str = "Node3D", groups=None):
         self.resources: dict[str, tuple[str, str]] = {}
         self.subs: list[str] = []
-        self.nodes: list[str] = [f'[node name="{name}" type="{root_kind}"]']
+        root = f'[node name="{name}" type="{root_kind}"'
+        if groups:
+            root += " groups=" + gvalue(groups)
+        self.nodes: list[str] = [root + "]"]
 
     def resource(self, path: str, kind="PackedScene") -> Raw:
         if path not in self.resources:
@@ -1131,7 +1150,7 @@ def blockout_scene() -> None:
 # ------------------------------------------------------------------ данные сектора и главная сцена
 
 SPAWNS = [("Запад", -292, -150), ("За болотом", -130, -292), ("Северная просека", 120, -222),
-          ("Из-за путей", 292, 30), ("Южная лесополоса", 60, 294), ("Юго-запад", -292, 210)]
+          ("Из-за путей", 292, 30), ("Южная лесополоса", -95, 294), ("Юго-запад", -292, 210)]
 # «Старый мост» — за мостом через овраг, там же, где был выход «Мост через овраг» (на новом месте домов)
 _BRIDGE_EXIT = ready_new("houses12", -386, 40)
 EXTRACTS = [("Лесная дорога", -292, -287, ""), ("Служебная дорога", -262, 292, ""), ("Ж/д пути", 205, 294, ""),
@@ -1157,6 +1176,8 @@ ROOMS = [("yard05", "Двор хрущёвок", tuple(v + d for v, d in zip((-2
          ("bus_station", "Автостанция", (-124, 114, 60, 255)),
          ("station", "Ж/д станция", (170, 75, 290, 260)),
          ("garages", "Гаражи у путей", (180, 28, 215, 68)),
+         ("center", "Универсам и администрация", (0, -10, 70, 110)),
+         ("repair", "Ремонтные дворы автобазы", (60, 256, 186, 296)),
          ("north", "Техкорпус", (20, -235, 95, -200))]
 
 
@@ -1178,6 +1199,11 @@ AI_POSTS = [
     ("Post_sports", 45, 45, "sports", 0.6, 0, 20, (1, 2)),
     ("Post_swamp_edge", -150, -95, "swamp", 0.5, 0, 14, (1, 2)),
     ("Post_north", 60, -200, "north", 0.6, 0, 16, (1, 2)),
+    # левел-дизайн 2026-10-19: середина и ремонтные дворы (бригада заказа «Вернуть машину» — отдельно)
+    ("Post_supermarket", 35, 27, "center", 0.8, 0, 18, None),
+    ("Post_admin", 22, 102, "center", 0.6, 0, 16, (1, 2)),
+    ("Post_cinema", 100, 128, "blocks", 0.7, 0, 18, (1, 3)),
+    ("Post_repair", 120, 278, "repair", 1.2, 0, 20, None),
 ]
 AI_ROUTES = [
     ("Route_north", "Северный: улица у болота — двор — стройка — дома у оврага",
@@ -1186,6 +1212,8 @@ AI_ROUTES = [
      [(-176, 25), (-150, 72), (-184, 99), (-205, 140), (-170, 200), (-235, 230)]),
     ("Route_east", "Восточный: дорога к ТЦ — станция — автостанция",
      [(200, -66), (156, 0), (154, 70), (148, 140), (100, 165), (20, 150), (-40, 170)]),
+    ("Route_south", "Южный: рынок — автостанция — ремонтные дворы — дорога к путям",
+     [(-150, 105), (-60, 103), (5, 140), (55, 262), (100, 265), (150, 270), (190, 271)]),
 ]
 AI_NESTS = [
     # имя, подпись, x, z, куда смотрит (поворот), вес, сектор
@@ -1194,7 +1222,7 @@ AI_NESTS = [
     ("Nest_ravine_rim", "Бровка оврага у стройки", 100, -242, 180.0, 0.6, 70),
 ]
 AI_ARRIVALS = [("Arrive_nw", "Лесная дорога", -275, -200), ("Arrive_ravine_n", "Бровка оврага у болота", 60, -240),
-               ("Arrive_east", "За путями", 290, 110), ("Arrive_se", "Южная лесополоса", 150, 290),
+               ("Arrive_east", "За путями", 290, 110), ("Arrive_se", "Южная лесополоса", -20, 294),
                ("Arrive_sw", "За рынком", -200, 290), ("Arrive_west", "Западный лес", -292, 40)]
 
 
@@ -1251,6 +1279,98 @@ def layout_scene() -> None:
     blockouts.build(sys.modules[__name__], LAYOUT)
 
 
+# ------------------------------------------------------------------ заказ «Вернуть машину»: места на карте
+
+# ангар № 8 — машина Ильи носом к воротам (на север); точки — в осях машины: перёд +Z, левый борт +X
+CAR_AT = (100.0, 276.5)
+CAR_SITES = [
+    # site_id, x, z (оси машины), поворот, назначение
+    ("car_belt_hangar", 0.0, 0.0, 0.0, "ангар № 8: машина Ильи, вокруг — бригада заказа"),
+    ("car_belt_car_body", 2.6, -0.8, 0.0, "съёмка кузова и треснувшей накладки на левом пороге"),
+    ("car_belt_car_marking", -1.7, -0.4, 0.0, "съёмка заводской маркировки на правой стойке"),
+    ("car_belt_photo_engine", 0.0, 3.3, 0.0, "съёмка подкапотного пространства спереди"),
+    ("car_belt_photo_radiator", 0.9, 3.0, 0.0, "съёмка места радиатора"),
+    ("car_belt_photo_wheel", 1.8, 1.44, 0.0, "съёмка колёсной ниши переднего левого"),
+    ("car_belt_car_wheel", 1.8, 2.4, 0.0, "установка колеса"),
+    ("car_belt_car_battery", -1.5, 1.2, 0.0, "установка аккумулятора справа под капотом"),
+    ("car_belt_photo_wiring", -1.5, 0.2, 0.0, "съёмка проводки у аккумулятора"),
+    ("car_belt_delivery", 6.0, -2.5, -90.0, "комплект у машины: сюда кладут радиатор (перёд — к машине)"),
+]
+# кладовая и район поиска — в осях карты
+SITES_WORLD = [
+    ("car_belt_parts_radiator", 131.7, 266.4, -90.0, "Storeroom", "кладовая: радиатор с патрубками, бирка «ЮР / 8»"),
+    ("car_belt_parts_wheel", 131.7, 269.0, -90.0, "Storeroom", "кладовая: колесо, бирка «ЮР / 8»"),
+    ("car_belt_search", 120.0, 276.0, 0.0, "", "центр района ремонтных дворов, радиус 60 м"),
+]
+
+
+def building_floor(bid: str) -> float:
+    """Пол постройки раскладки — как его ставит генератор блокаутов (низший угол минус 5 см)."""
+    import build_zone01_blockouts as blockouts
+    b = next(q for q in LAYOUT["buildings"] if q["id"] == bid)
+    x, z = b["at"]
+    return min(ground(x + dx, z + dz) for dx, dz in blockouts.corners(0, 0, b["size"][0], b["size"][1], b["angle"])) - 0.05
+
+
+def car_sites_scene() -> None:
+    """Места заказа «Вернуть машину» в Пригороде (docs/tasks/car_recovery_maps.md §6): ангар № 8 с машиной
+    Ильи (вид по состоянию заказа — src/quests/car_hangar.gd), точки QuestAnchor, кладовая, бокс № 5 для
+    исключения по приметам. Реестр — data/quest_sites/car_recovery_belt.json."""
+    s = Scene("CarRecoverySites", groups=["nav_source"])
+    anchor = s.resource("res://src/quests/quest_anchor.gd", "Script")
+    hy = building_floor("Hangar_8")
+    cx, cz = CAR_AT
+    s.node("Hangar8", script=s.resource("res://src/quests/car_hangar.gd", "Script"), position=v3(cx, hy, cz),
+           rotation_degrees=v3(0, 180, 0))
+    s.node("IlyaCar", "Hangar8", "res://scenes/props/coupe_ilya.tscn", hood_open=True)
+    # корпус машины — простая коллизия (у сцены модели её нет): пули, игрок, навигация
+    s.node("CarBody", "Hangar8", kind="StaticBody3D", collision_mask=0)
+    s.node("Shape", "Hangar8/CarBody", kind="CollisionShape3D", position=v3(0, 0.78, -0.08),
+           shape=s.sub("BoxShape3D", size=v3(2.08, 1.22, 4.86)))
+    registry = []
+    for sid, lx, lz, yaw, purpose in CAR_SITES:
+        s.node(sid, "Hangar8", kind="Marker3D", script=anchor, site_id=sid, position=v3(lx, 0.05, lz),
+               rotation_degrees=v3(0, yaw, 0))
+        wx, wz = cx - lx, cz - lz
+        registry.append({"id": sid, "node": f"Hangar8/{sid}", "position": [round(wx, 2), round(hy + 0.05, 2), round(wz, 2)],
+                         "yaw": round((180.0 + yaw) % 360.0, 1), "purpose": purpose})
+    s.node("Sites")
+    for sid, wx, wz, yaw, bid, purpose in SITES_WORLD:
+        wy = building_floor(bid) + 0.05 if bid else ground(wx, wz) + 0.05
+        s.node(sid, "Sites", kind="Marker3D", script=anchor, site_id=sid, position=v3(wx, wy, wz),
+               rotation_degrees=v3(0, yaw, 0))
+        registry.append({"id": sid, "node": f"Sites/{sid}", "position": [wx, round(wy, 2), wz], "yaw": yaw, "purpose": purpose})
+    # бокс № 5 — другая машина на разборке: окружение, квест его не проверяет
+    b5 = next(q for q in LAYOUT["buildings"] if q["id"] == "Box_5")
+    s.node("car_belt_candidate", "Sites", kind="Marker3D", position=v3(b5["at"][0], building_floor("Box_5") + 0.05, b5["at"][1]))
+    registry.append({"id": "car_belt_candidate", "node": "Sites/car_belt_candidate", "position": [b5["at"][0], 0.0, b5["at"][1]],
+                     "purpose": "бокс № 5: другая машина на разборке, для исключения по приметам (не место квеста)"})
+    s.save(OUT / "zone01_car_recovery_sites.tscn")
+    data = {
+        "_comment": "Места заказа «Вернуть машину» в Пригороде (зона 1): сцена, узлы, позиции, подходы. Генератор — "
+                    "tools/build_zone01.py (car_sites_scene). Игра читает только QuestAnchor в сцене; этот файл — для людей и проверок.",
+        "map": "Пригород (зона 1)", "level": "zone01_mall",
+        "scene": "res://scenes/levels/zone01/zone01_car_recovery_sites.tscn",
+        "reference": "docs/design/concepts/urban_belt_2026-10-15/01_urban_belt_starting_concept.png",
+        "design": "docs/design/zone01_level_design.md §6",
+        "area": {"name": "Ремонтные дворы автобазы", "fence": LAYOUT["repair_yard"]["fence"],
+                 "gaps": LAYOUT["repair_yard"]["gaps"], "clear": LAYOUT["repair_yard"]["clear"]},
+        "approaches": [
+            {"name": "открытый", "from": "стоянка автобусов (запад)", "via": "пустырь, проход в заборе x 62, z 275"},
+            {"name": "прикрытый", "from": "дорога к путям, насыпь (восток)", "via": "гаражи у дороги, проход x 184, z 271"},
+            {"name": "наблюдение", "from": "эстакада (север, 9,5 м)", "via": "видно двор и ворота ангара № 8"},
+            {"name": "под эстакадой", "from": "Южная улица", "via": "проходы x 80 и x 142 в северном заборе"},
+        ],
+        "camera": {"overpass": [100.0, 12.1, 255.0], "look_at": [100.0, 1.0, 274.0]},
+        "limits": ["без вождения и NPC при машине", "машина меняет вид только по состоянию заказа",
+                   "обычный выход «Автостанция» всегда открыт"],
+        "sites": registry,
+    }
+    out = ROOT / "data/quest_sites/car_recovery_belt.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes((json.dumps(data, ensure_ascii=False, indent=1) + "\n").encode("utf-8"))
+
+
 def main_scene() -> None:
     s = Scene("Zone01_Mall")
     s.nodes[0] += "\nscript = " + gvalue(s.resource("res://src/world/sector_level.gd", "Script")) + f'\nsector_path = "{SECTOR}"'
@@ -1258,6 +1378,7 @@ def main_scene() -> None:
     s.node("Blockout", scene="res://scenes/levels/zone01/zone01_blockout.tscn")
     s.node("Yard05", scene="res://scenes/levels/zone01/zone01_yard05.tscn", **instance_attrs("yard05"))
     s.node("Layout", scene="res://scenes/levels/zone01/zone01_layout.tscn")
+    s.node("CarRecovery", scene="res://scenes/levels/zone01/zone01_car_recovery_sites.tscn")
     s.node("Gameplay")
     for i, (title, x, z) in enumerate(SPAWNS):
         s.node(f"Entry_{i}", "Gameplay", "res://scenes/world/spawn_point.tscn", position=v3(x, ground(x, z) + .15, z),
@@ -1367,7 +1488,7 @@ def write_definition(h: np.ndarray) -> None:
     area = abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(BOUNDARY, BOUNDARY[1:] + BOUNDARY[:1]))) / 2
     x, z = SPAWNS[0][1], SPAWNS[0][2]
     result = dict(
-        id="zone01_mall", name="Зона 1 · Городской пояс", layout="cartesian_scene", greybox=True,
+        id="zone01_mall", name="Зона 1 · Пригород", layout="cartesian_scene", greybox=True,
         bounds=[X0, Z0, X0 + (NX - 1) * STEP, Z0 + (NZ - 1) * STEP], boundary=BOUNDARY, area_m2=area,
         units="metres", north="-Z", spawn=[x, round(ground(x, z) + .2, 3), z], camera_yaw=180,
         nav_cache="res://data/navigation/zone01",
@@ -1431,6 +1552,7 @@ def main() -> None:
     world_scene()
     blockout_scene()
     layout_scene()
+    car_sites_scene()
     ai_scene()
     move_yard_loose_loot()
     main_scene()

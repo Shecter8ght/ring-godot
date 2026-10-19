@@ -9,7 +9,9 @@ const CACHE_DIR: String = "res://data/navigation/zone01"
 const SOURCES := {
 	"zone01_mall": ["res://data/sectors/zone01_mall.json", "res://scenes/levels/zone01_mall.tscn", "res://scenes/levels/zone01",
 		"res://data/terrain/zone01_heights.r32", "res://src/world/district_terrain.gd",
-		"res://src/world/district_model.gd", "res://assets/zone01/nw/manifest.json", "res://assets/zone01/nw/furniture.json"],
+		"res://src/world/district_model.gd", "res://assets/zone01/nw/manifest.json", "res://assets/zone01/nw/furniture.json",
+		# постройки, интерьеры и укрытия блокаутов (левел-дизайн) — тоже источник навигации
+		"res://src/blockout/study_building.gd", "res://src/blockout/study_geometry.gd"],
 }
 
 var definition: Dictionary = {}
@@ -106,7 +108,7 @@ func _prepare() -> void:
 	while NavigationServer3D.map_get_iteration_id(map) <= initial_iteration or not _map_contains_regions(map, synchronization_samples):
 		# Первый кадр Forward+ может долго компилировать шейдеры. Даём серверу реальные
 		# физические кадры на публикацию, даже если во время первого из них истёк таймер.
-		if synchronization_frames >= 120 and Time.get_ticks_msec() - synchronization_start > 10000:
+		if synchronization_frames >= 120 and Time.get_ticks_msec() - synchronization_start > int(float(cfg.publish_sec) * 1000.0):
 			for sample: Vector3 in synchronization_samples:
 				var closest: Vector3 = NavigationServer3D.map_get_closest_point(map, sample)
 				if closest.distance_to(sample) > float(_config().nav_cell):

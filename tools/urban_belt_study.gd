@@ -25,7 +25,7 @@ func _enter_tree() -> void:
 		Profile.use_file("user://profile_urban_belt_study_test.json", true)
 
 func _ready() -> void:
-	DisplayServer.window_set_title("RING · Городской пояс · БЛОКАУТ 1:1")
+	DisplayServer.window_set_title("RING · Пригород · БЛОКАУТ 1:1")
 	# Esc здесь освобождает мышь; общее меню не запускает переход в убежище.
 	get_node("/root/Pause").set_process_input(false)
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED

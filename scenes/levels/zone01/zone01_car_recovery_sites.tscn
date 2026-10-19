@@ -1,0 +1,108 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/quests/quest_anchor.gd" id="1"]
+[ext_resource type="Script" path="res://src/quests/car_hangar.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/props/coupe_ilya.tscn" id="3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(2.08, 1.22, 4.86)
+
+[node name="CarRecoverySites" type="Node3D" groups=["nav_source"]]
+
+[node name="Hangar8" parent="." type="Node3D"]
+script = ExtResource("2")
+position = Vector3(100.0, -0.05, 276.5)
+rotation_degrees = Vector3(0.0, 180.0, 0.0)
+
+[node name="IlyaCar" parent="Hangar8" instance=ExtResource("3")]
+hood_open = true
+
+[node name="CarBody" parent="Hangar8" type="StaticBody3D"]
+collision_mask = 0
+
+[node name="Shape" parent="Hangar8/CarBody" type="CollisionShape3D"]
+position = Vector3(0.0, 0.78, -0.08)
+shape = SubResource("BoxShape3D_1")
+
+[node name="car_belt_hangar" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_hangar"
+position = Vector3(0.0, 0.05, 0.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_car_body" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_car_body"
+position = Vector3(2.6, 0.05, -0.8)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_car_marking" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_car_marking"
+position = Vector3(-1.7, 0.05, -0.4)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_photo_engine" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_photo_engine"
+position = Vector3(0.0, 0.05, 3.3)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_photo_radiator" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_photo_radiator"
+position = Vector3(0.9, 0.05, 3.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_photo_wheel" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_photo_wheel"
+position = Vector3(1.8, 0.05, 1.44)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_car_wheel" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_car_wheel"
+position = Vector3(1.8, 0.05, 2.4)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_car_battery" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_car_battery"
+position = Vector3(-1.5, 0.05, 1.2)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_photo_wiring" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_photo_wiring"
+position = Vector3(-1.5, 0.05, 0.2)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_delivery" parent="Hangar8" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_delivery"
+position = Vector3(6.0, 0.05, -2.5)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+
+[node name="Sites" parent="." type="Node3D"]
+
+[node name="car_belt_parts_radiator" parent="Sites" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_parts_radiator"
+position = Vector3(131.7, 0.0575, 266.4)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+
+[node name="car_belt_parts_wheel" parent="Sites" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_parts_wheel"
+position = Vector3(131.7, 0.0575, 269.0)
+rotation_degrees = Vector3(0.0, -90.0, 0.0)
+
+[node name="car_belt_search" parent="Sites" type="Marker3D"]
+script = ExtResource("1")
+site_id = "car_belt_search"
+position = Vector3(120.0, 0.111, 276.0)
+rotation_degrees = Vector3(0.0, 0.0, 0.0)
+
+[node name="car_belt_candidate" parent="Sites" type="Marker3D"]
+position = Vector3(150.0, 0.2433, 280.0)

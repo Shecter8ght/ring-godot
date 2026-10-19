@@ -1,0 +1,251 @@
+{
+ "_comment": "Места заказа «Вернуть машину» в Пригороде (зона 1): сцена, узлы, позиции, подходы. Генератор — tools/build_zone01.py (car_sites_scene). Игра читает только QuestAnchor в сцене; этот файл — для людей и проверок.",
+ "map": "Пригород (зона 1)",
+ "level": "zone01_mall",
+ "scene": "res://scenes/levels/zone01/zone01_car_recovery_sites.tscn",
+ "reference": "docs/design/concepts/urban_belt_2026-10-15/01_urban_belt_starting_concept.png",
+ "design": "docs/design/zone01_level_design.md §6",
+ "area": {
+  "name": "Ремонтные дворы автобазы",
+  "fence": [
+   [
+    62.0,
+    294.0
+   ],
+   [
+    62.0,
+    258.0
+   ],
+   [
+    184.0,
+    258.0
+   ],
+   [
+    184.0,
+    294.0
+   ]
+  ],
+  "gaps": [
+   [
+    62.0,
+    275.0,
+    6.0
+   ],
+   [
+    80.0,
+    258.0,
+    5.0
+   ],
+   [
+    142.0,
+    258.0,
+    5.0
+   ],
+   [
+    184.0,
+    271.0,
+    6.0
+   ]
+  ],
+  "clear": [
+   5.0,
+   240.0,
+   190.0,
+   297.0
+  ]
+ },
+ "approaches": [
+  {
+   "name": "открытый",
+   "from": "стоянка автобусов (запад)",
+   "via": "пустырь, проход в заборе x 62, z 275"
+  },
+  {
+   "name": "прикрытый",
+   "from": "дорога к путям, насыпь (восток)",
+   "via": "гаражи у дороги, проход x 184, z 271"
+  },
+  {
+   "name": "наблюдение",
+   "from": "эстакада (север, 9,5 м)",
+   "via": "видно двор и ворота ангара № 8"
+  },
+  {
+   "name": "под эстакадой",
+   "from": "Южная улица",
+   "via": "проходы x 80 и x 142 в северном заборе"
+  }
+ ],
+ "camera": {
+  "overpass": [
+   100.0,
+   12.1,
+   255.0
+  ],
+  "look_at": [
+   100.0,
+   1.0,
+   274.0
+  ]
+ },
+ "limits": [
+  "без вождения и NPC при машине",
+  "машина меняет вид только по состоянию заказа",
+  "обычный выход «Автостанция» всегда открыт"
+ ],
+ "sites": [
+  {
+   "id": "car_belt_hangar",
+   "node": "Hangar8/car_belt_hangar",
+   "position": [
+    100.0,
+    0.0,
+    276.5
+   ],
+   "yaw": 180.0,
+   "purpose": "ангар № 8: машина Ильи, вокруг — бригада заказа"
+  },
+  {
+   "id": "car_belt_car_body",
+   "node": "Hangar8/car_belt_car_body",
+   "position": [
+    97.4,
+    0.0,
+    277.3
+   ],
+   "yaw": 180.0,
+   "purpose": "съёмка кузова и треснувшей накладки на левом пороге"
+  },
+  {
+   "id": "car_belt_car_marking",
+   "node": "Hangar8/car_belt_car_marking",
+   "position": [
+    101.7,
+    0.0,
+    276.9
+   ],
+   "yaw": 180.0,
+   "purpose": "съёмка заводской маркировки на правой стойке"
+  },
+  {
+   "id": "car_belt_photo_engine",
+   "node": "Hangar8/car_belt_photo_engine",
+   "position": [
+    100.0,
+    0.0,
+    273.2
+   ],
+   "yaw": 180.0,
+   "purpose": "съёмка подкапотного пространства спереди"
+  },
+  {
+   "id": "car_belt_photo_radiator",
+   "node": "Hangar8/car_belt_photo_radiator",
+   "position": [
+    99.1,
+    0.0,
+    273.5
+   ],
+   "yaw": 180.0,
+   "purpose": "съёмка места радиатора"
+  },
+  {
+   "id": "car_belt_photo_wheel",
+   "node": "Hangar8/car_belt_photo_wheel",
+   "position": [
+    98.2,
+    0.0,
+    275.06
+   ],
+   "yaw": 180.0,
+   "purpose": "съёмка колёсной ниши переднего левого"
+  },
+  {
+   "id": "car_belt_car_wheel",
+   "node": "Hangar8/car_belt_car_wheel",
+   "position": [
+    98.2,
+    0.0,
+    274.1
+   ],
+   "yaw": 180.0,
+   "purpose": "установка колеса"
+  },
+  {
+   "id": "car_belt_car_battery",
+   "node": "Hangar8/car_belt_car_battery",
+   "position": [
+    101.5,
+    0.0,
+    275.3
+   ],
+   "yaw": 180.0,
+   "purpose": "установка аккумулятора справа под капотом"
+  },
+  {
+   "id": "car_belt_photo_wiring",
+   "node": "Hangar8/car_belt_photo_wiring",
+   "position": [
+    101.5,
+    0.0,
+    276.3
+   ],
+   "yaw": 180.0,
+   "purpose": "съёмка проводки у аккумулятора"
+  },
+  {
+   "id": "car_belt_delivery",
+   "node": "Hangar8/car_belt_delivery",
+   "position": [
+    94.0,
+    0.0,
+    279.0
+   ],
+   "yaw": 90.0,
+   "purpose": "комплект у машины: сюда кладут радиатор (перёд — к машине)"
+  },
+  {
+   "id": "car_belt_parts_radiator",
+   "node": "Sites/car_belt_parts_radiator",
+   "position": [
+    131.7,
+    0.06,
+    266.4
+   ],
+   "yaw": -90.0,
+   "purpose": "кладовая: радиатор с патрубками, бирка «ЮР / 8»"
+  },
+  {
+   "id": "car_belt_parts_wheel",
+   "node": "Sites/car_belt_parts_wheel",
+   "position": [
+    131.7,
+    0.06,
+    269.0
+   ],
+   "yaw": -90.0,
+   "purpose": "кладовая: колесо, бирка «ЮР / 8»"
+  },
+  {
+   "id": "car_belt_search",
+   "node": "Sites/car_belt_search",
+   "position": [
+    120.0,
+    0.11,
+    276.0
+   ],
+   "yaw": 0.0,
+   "purpose": "центр района ремонтных дворов, радиус 60 м"
+  },
+  {
+   "id": "car_belt_candidate",
+   "node": "Sites/car_belt_candidate",
+   "position": [
+    150.0,
+    0.0,
+    280.0
+   ],
+   "purpose": "бокс № 5: другая машина на разборке, для исключения по приметам (не место квеста)"
+  }
+ ]
+}

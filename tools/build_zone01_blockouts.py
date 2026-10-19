@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Зона 1 «Городской пояс» — блокауты по раскладке data/zone01_layout.json (решение владельца 2026-10-17:
+"""Зона 1 «Пригород» — блокауты по раскладке data/zone01_layout.json (решение владельца 2026-10-17:
 «всю оставшуюся детализацию — блокаутами»; второй проход по кадрам картинки и «урбанизм» — 2026-10-18).
 
 Пишет scenes/levels/zone01/zone01_layout.tscn. Каждая постройка — отдельный узел StudyBuilding
@@ -23,8 +23,33 @@ KIND = {
     "panel": ("mass", 3.0), "house": ("mass", 3.0), "hall": ("hall", 6.0), "skeleton": ("skeleton", 3.2),
     "shop": ("hall", 3.6), "hut": ("mass", 2.7), "station": ("hall", 4.5), "ruin": ("mass", 1.6),
     "canopy": ("canopy", 3.4), "market": ("hall", 5.5), "office": ("apartments", 3.2), "cinema": ("hall", 9.0),
+    "hangar": ("hall", 5.5), "storeroom": ("hall", 3.5),
 }
-ENTERABLE = {"Panel_E2", "Panel_E6"}
+# --- левел-дизайн 2026-10-19 (docs/design/zone01_level_design.md): какие здания открыты и что внутри
+# залы: интерьер StudyBuilding, тема лута стеллажей и комнат, машина внутри ("bus" / "car")
+INTERIOR = {
+    "Supermarket": ("supermarket", "grocery", ""), "Pharmacy": ("pharmacy", "pharmacy", ""),
+    "Shop_N": ("shop", "tools", ""), "Pavilion_S": ("shop", "kiosk", ""), "East_Brick2": ("shop", "components", ""),
+    "Cinema": ("cinema", "", ""), "Bus_Terminal": ("terminal", "storage", ""), "Rail_Station": ("terminal", "storage", ""),
+    "Bus_Depot": ("depot", "components", "bus"), "Bus_Garage": ("depot", "components", ""),
+    "Rail_Depot": ("depot", "components", ""), "Rail_Workshop": ("workshop", "workshop", ""),
+    "Rail_Store": ("warehouse", "storage", ""), "Site_Store": ("warehouse", "tools", ""), "N_service": ("server", "", ""),
+    "Sport_Hall": ("gym", "sport", ""), "Sport_Locker": ("lockers", "sport", ""),
+    "Hangar_8": ("hangar", "workshop", ""), "Box_5": ("hangar", "workshop", "car"), "Storeroom": ("storeroom", "components", ""),
+}
+# запертая дверь серверной — ключ лежит в дальнем кабинете администрации (OFFICE_KEY)
+LOCKED = {"N_service": "key_server"}
+# многоэтажные с подъездом, лестницей на все этажи и крышу, комнатами: тема лута, доля комнат с лутом
+APARTMENTS = {
+    "Panel_E2": ("home", 0.12), "Panel_E6": ("home", 0.12), "Tower_9A": ("resident", 0.1),
+    "Admin": ("office", 0.3), "School": ("office", 0.25), "Kindergarten": ("home", 0.25),
+    "Bus_Office": ("office", 0.35), "Site_Office": ("tools", 0.35), "East_Brick1": ("office", 0.25),
+}
+OFFICE_KEY = {"Admin": ("key_server", "security")}
+# частные дома и будки у болота — комнаты, у двухэтажных лестница (этаж 2,9 м); доля комнат с лутом
+HOUSES = {"SwampLodge", "SwampPump"}
+HOUSE_LOOT = 0.5
+STORY = {"Box_5": 4.5}
 TALL_HALLS = {"Bus_Depot": 8.0, "Rail_Depot": 9.0, "Sport_Hall": 8.0, "Rail_Store": 6.5}
 # у этих мест фонари горят в сумерки и ночью (остальные разбиты — город брошен; и свет дорогой)
 LIT_NEAR = ("Bus_Terminal", "Cinema", "Supermarket", "Admin")
@@ -46,18 +71,20 @@ PROPS_MANIFEST = "res://assets/zone01/models/props.json"
 
 
 def build(z1, layout: dict) -> dict:
-    """Сцена блокаутов; возвращает прямоугольники построек (для площадок рельефа и проверки машин)."""
-    s = z1.Scene("Layout")
+    """Сцена блокаутов; возвращает прямоугольники построек (для площадок рельефа и проверки машин).
+    Корень — источник навигации (nav_source): мародёры обходят постройки и укрытия и заходят в интерьеры."""
+    s = z1.Scene("Layout", groups=["nav_source"])
     study = s.resource("res://src/blockout/study_building.gd", "Script")
     ground = z1.ground
     rng = random.Random(1017)
     footprints: list[tuple[float, float, float, float, float]] = []  # x, z, длина, глубина, угол
 
     def building(name: str, parent: str, kind: str, x: float, z: float, size, angle: float, floors: int,
-                 story: float, label: str, sign: str = "") -> None:
+                 story: float, label: str, sign: str = "", **extra) -> None:
         y = min(ground(x + dx, z + dz) for dx, dz in corners(0, 0, size[0], size[1], angle)) - 0.05
         study_node(s, z1, name, parent, study, kind, footprint=z1.v2(size[0], size[1]), floors=floors,
-                   story_height=story, label=label, position=z1.v3(x, y, z), rotation_degrees=z1.v3(0, -angle, 0))
+                   story_height=story, label=label, position=z1.v3(x, y, z), rotation_degrees=z1.v3(0, -angle, 0),
+                   **extra)
         footprints.append((x, z, size[0], size[1], angle))
         if sign:
             # вывеска на обоих длинных фасадах: у залов — под карнизом, у многоэтажных — над первым этажом
@@ -80,15 +107,35 @@ def build(z1, layout: dict) -> dict:
         if b["kind"] == "garage":
             continue  # гаражи у путей — модели кирпичных боксов (ниже)
         kind, story = KIND.get(b["kind"], ("mass", 3.0))
-        if b["id"] in ENTERABLE:
+        extra: dict = {}
+        if b["id"] in APARTMENTS:
+            if kind != "apartments":
+                story = 3.0 if b["kind"] == "panel" else 3.2
             kind = "apartments"
+            extra["loot_theme"], extra["loot_density"] = APARTMENTS[b["id"]]
+            if b["id"] in OFFICE_KEY:
+                extra["key_item"], extra["safe_table"] = OFFICE_KEY[b["id"]]
+        elif b["kind"] == "house" or b["id"] in HOUSES:
+            kind, story = "house", 2.9
+            extra["loot_theme"], extra["loot_density"] = "home", HOUSE_LOOT
         floors = int(b["floors"])
         if b["id"] in TALL_HALLS:
             story, floors = TALL_HALLS[b["id"]], 1
+        elif b["id"] in STORY:
+            story, floors = STORY[b["id"]], 1
         elif kind == "hall" and floors > 1:
             story, floors = story * floors, 1  # контора / вокзал — высокий зал с проёмами
+        if kind == "hall" and b["id"] in INTERIOR:
+            extra["interior"], theme, vehicle = INTERIOR[b["id"]]
+            if theme:
+                extra["loot_theme"] = theme
+            if vehicle:
+                extra["vehicle"] = vehicle
+            if b["id"] in LOCKED:
+                extra["locked_key"] = LOCKED[b["id"]]
         x, z = b["at"]
-        building(b["id"], "Buildings", kind, x, z, b["size"], b["angle"], floors, story, b["label"], b.get("sign", ""))
+        building(b["id"], "Buildings", kind, x, z, b["size"], b["angle"], floors, story, b["label"], b.get("sign", ""),
+                 **extra)
 
     # --- автобусы, кран
     s.node("Buses")
@@ -130,7 +177,9 @@ def build(z1, layout: dict) -> dict:
     lamps(s, z1, layout, footprints)
     yards(s, z1, layout, rng, footprints)
     cars(s, z1, layout, rng, footprints)
+    repair_yard(s, z1, layout, rng, footprints)
     clutter(s, z1, layout, rng, footprints)
+    cover(s, z1, layout, rng, footprints)
     skyline(s, z1, study)
     s.save(z1.OUT / "zone01_layout.tscn")
     return {"footprints": footprints}
@@ -760,6 +809,196 @@ def clutter(s, z1, layout: dict, rng: random.Random, footprints) -> None:
             n += 1
         z += 11.0
     print(f"zone01: хлама у домов {n}")
+
+
+# ------------------------------------------------------------------ укрытия (левел-дизайн 2026-10-19)
+
+def cover_pieces(kind: str, rng: random.Random) -> list[dict]:
+    """Укрытие из простых частей (узел UrbanProps): бетонные блоки, отбойники, мешки, поддоны, контейнер,
+    плиты, кольца, трубы, покрышки, двигатель. Высота — от 0,9 (присев) до 2,6 м."""
+    if kind == "blocks":
+        return [dict(at=[0, 0.3 + 0.6 * k, 0], size=[2.4, 0.6, 1.2 if k == 0 else 0.6], color=list(CONCRETE), collision=True,
+                     rotation=[0, rng.uniform(-5, 5), 0]) for k in range(rng.randint(2, 3))]
+    if kind == "jersey":
+        return [dict(at=[dx, 0.43, 0], size=[2.0, 0.86, 0.55], color=[0.7, 0.69, 0.65], collision=True, rotation=[0, rot, 0])
+                for dx, rot in ((-1.05, 0.0), (1.05, rng.uniform(-14, 14)))]
+    if kind == "sandbags":
+        bag = [0.46, 0.42, 0.33]
+        return [dict(at=[0, 0.5, 0], size=[3.2, 1.0, 0.7], color=bag, collision=True),
+                dict(at=[-1.85, 0.5, 0.95], size=[0.7, 1.0, 2.2], color=bag, collision=True)]
+    if kind == "pallets":
+        return [dict(at=[-0.7, 0.6, 0], size=[1.2, 1.2, 1.0], color=list(WOOD), collision=True),
+                dict(at=[0.7, 0.45, rng.uniform(-0.2, 0.2)], size=[1.2, 0.9, 1.0], color=list(WOOD), collision=True,
+                     rotation=[0, rng.uniform(-10, 10), 0])]
+    if kind == "container":
+        return [dict(at=[0, 1.3, 0], size=[6.0, 2.6, 2.4], color=list(rng.choice([RUST, (0.25, 0.33, 0.42), (0.32, 0.38, 0.3)])),
+                     collision=True)]
+    if kind == "slabs":
+        return [dict(at=[rng.uniform(-0.2, 0.2), 0.11 + 0.22 * k, rng.uniform(-0.1, 0.1)], size=[6.0, 0.22, 1.5],
+                     color=list(CONCRETE), collision=True) for k in range(4)]
+    if kind == "rings":
+        return [dict(at=[dx, 0.45, 0], size=[1.5, 0.9, 1.5], shape="cylinder", color=list(CONCRETE), collision=True)
+                for dx in (-0.8, 0.8)] + [dict(at=[-0.8, 1.35, 0], size=[1.5, 0.9, 1.5], shape="cylinder",
+                                                color=list(CONCRETE), collision=True)]
+    if kind == "pipes":
+        return [dict(at=[0, 0.5 + 0.85 * (k == 2), dz], size=[1.0, 6.0, 1.0], shape="cylinder", rotation=[0, 0, 90],
+                     color=list(PIPE), collision=True) for k, dz in enumerate((-0.52, 0.52, 0.0))]
+    if kind == "tires":
+        return [dict(at=[sx + rng.uniform(-0.1, 0.1), 0.15 + 0.3 * k, rng.uniform(-0.1, 0.1)], size=[0.75, 0.28, 0.75],
+                     shape="cylinder", color=[0.12, 0.12, 0.12], collision=True)
+                for sx in (-0.45, 0.45) for k in range(rng.randint(2, 4))]
+    if kind == "engine":
+        return [dict(at=[0, 0.35, 0], size=[1.4, 0.7, 1.0], color=list(STEEL), collision=True),
+                dict(at=[0.1, 0.95, 0], size=[0.9, 0.55, 0.7], color=list(RUST), collision=True)]
+    return [dict(at=[0, 0.6, 0], size=[2.0, 1.2, 1.0], color=list(DEBRIS), collision=True)]
+
+
+COVER_SIZE = {"blocks": (2.4, 1.2), "jersey": (4.2, 0.8), "sandbags": (3.9, 2.4), "pallets": (2.6, 1.2),
+              "container": (6.0, 2.4), "slabs": (6.2, 1.6), "rings": (3.2, 1.6), "pipes": (6.0, 2.1),
+              "tires": (1.8, 0.9), "engine": (1.4, 1.0), "wreck": (4.5, 2.0)}
+
+
+def place_cover(s, z1, kind: str, name: str, x: float, z: float, yaw: float, rng: random.Random, footprints,
+                parent: str) -> None:
+    if kind == "wreck":
+        # брошенная машина — модель (сгоревшая чаще)
+        z1.sf_model(s, name, "sf_car_burned" if rng.random() < 0.55 else "sf_vaz2104", x, z, yaw + 90.0, parent)
+    else:
+        z1.props(s, name, x, z, cover_pieces(kind, rng), parent, yaw=yaw, y=z1.ground(x, z))
+    L, D = COVER_SIZE[kind]
+    footprints.append((x, z, L, D, -yaw))
+
+
+# двор ремонтных площадок: хлам, за которым бьются с бригадой (вид, x, z, поворот)
+REPAIR_JUNK = [("tires", 74.0, 268.0, 0.0), ("wreck", 72.0, 284.0, 30.0), ("tires", 86.0, 289.0, 10.0),
+               ("engine", 113.0, 265.0, 20.0), ("pallets", 118.0, 287.0, 90.0), ("wreck", 136.0, 288.0, -20.0),
+               ("container", 112.0, 290.0, 0.0), ("tires", 150.0, 268.0, 0.0), ("wreck", 178.0, 289.0, 90.0),
+               ("blocks", 92.0, 262.0, 0.0), ("pallets", 70.0, 262.0, 0.0), ("engine", 141.0, 274.0, -30.0)]
+
+
+def repair_yard(s, z1, layout: dict, rng: random.Random, footprints) -> None:
+    """Ремонтные дворы автобазы (заказ «Вернуть машину»): забор из плит с проходами и хлам во дворе."""
+    ry = layout["repair_yard"]
+    pts = ry["fence"]
+    pieces = []
+    for a, b in zip(pts, pts[1:]):
+        length = math.dist(a, b)
+        cuts = []
+        for gx, gz, w in ry["gaps"]:
+            d, (cx, cz), _ = dist_poly([a, b], gx, gz)
+            if d < 0.5:
+                tt = math.dist(a, (cx, cz)) / length
+                cuts.append((tt - w / 2 / length, tt + w / 2 / length))
+        spans, t0 = [], 0.0
+        for c0, c1 in sorted(cuts):
+            spans.append((t0, c0))
+            t0 = c1
+        spans.append((t0, 1.0))
+        for t0, t1 in spans:
+            if t1 - t0 <= 0.0:
+                continue
+            pa = (a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0)
+            pb = (a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1)
+            seg = densify([pa, pb], 6.0)
+            for seg_a, seg_b in zip(seg, seg[1:]):
+                pieces.append(segment_piece(seg_a, seg_b, z1.ground(*seg_a) - 0.1, z1.ground(*seg_b) - 0.1, 0.18, 2.4, CONCRETE))
+        footprints.append(((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, length, 0.4,
+                           math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))))
+    z1.props(s, "RepairFence", 0, 0, pieces, "Small", y=0.0)
+    s.node("RepairYard", "Small")
+    for i, (kind, x, z, yaw) in enumerate(REPAIR_JUNK):
+        place_cover(s, z1, kind, f"Junk_{i:02}", x, z, yaw, rng, footprints, "Small/RepairYard")
+
+
+def cover_kind(layout: dict, x: float, z: float, rng: random.Random, tracks) -> str:
+    """Какое укрытие уместно здесь: стройка — плиты, кольца, трубы; двор ремонта — покрышки, машины;
+    стоянка автобусов — отбойники и блоки; у путей — контейнеры и поддоны; улицы — машины, отбойники, блоки."""
+    if point_in(layout["site"], x, z):
+        return rng.choice(["slabs", "slabs", "rings", "pipes", "pallets"])
+    rx0, rz0, rx1, rz1 = layout["repair_yard"]["clear"]
+    if rx0 < x < rx1 and rz0 < z < rz1:
+        return rng.choice(["tires", "wreck", "pallets", "blocks"])
+    if point_in(layout["bus_lot"], x, z):
+        return rng.choice(["jersey", "jersey", "blocks", "wreck", "container"])
+    if any(dist_poly(tl, x, z)[0] < 25.0 for tl in tracks):
+        return rng.choice(["container", "pallets", "blocks"])
+    return rng.choice(["wreck", "wreck", "jersey", "blocks", "jersey", "container"])
+
+
+def cover(s, z1, layout: dict, rng: random.Random, footprints) -> None:
+    """Укрытия по маршрутам и открытым площадкам: у каждой точки улицы (через 6 м) и площадки (сетка 8 м)
+    укрытие не дальше 8–9 м — иначе ставится новое (у обочины вдоль дороги или на площадке). Деревья
+    считаются укрытием, если их рядом два. Плюс мешки у постов мародёров."""
+    s.node("Cover", "Small")
+    tracks = track_lines(layout)
+    trees: dict[tuple[int, int], list[tuple[float, float]]] = {}
+    for tx, tz in layout["trees"]:
+        trees.setdefault((int(tx // 10), int(tz // 10)), []).append((tx, tz))
+    ready = [[tuple(q) for q in r["outline"]] for r in layout["ready"].values()]
+
+    def treed(x: float, z: float, r: float) -> bool:
+        n = 0
+        for gx in range(int((x - r) // 10), int((x + r) // 10) + 1):
+            for gz in range(int((z - r) // 10), int((z + r) // 10) + 1):
+                n += sum(1 for tx, tz in trees.get((gx, gz), ()) if math.dist((x, z), (tx, tz)) < r)
+        return n >= 2
+
+    def blocked(x: float, z: float) -> bool:
+        return (inside_any(x, z, footprints, 1.2) or not point_in(layout["boundary"], x, z)
+                or point_in(layout["swamp"], x, z) or dist_poly(layout["ravine"], x, z)[0] < 14.0
+                or any(dist_poly(tl, x, z)[0] < 4.5 for tl in tracks) or any(point_in(o, x, z) for o in ready))
+
+    n = 0
+    road_r, area_r = 9.0, 8.0
+    for r in layout["roads"]:
+        pts = densify(r["points"], 6.0)
+        for i in range(1, len(pts) - 1):
+            x, z = pts[i]
+            if inside_any(x, z, footprints, road_r) or treed(x, z, 5.0) or any(point_in(o, x, z) for o in ready):
+                continue
+            a, b = pts[i - 1], pts[i + 1]
+            dx, dz = b[0] - a[0], b[1] - a[1]
+            ln = math.hypot(dx, dz) or 1.0
+            yaw = -math.degrees(math.atan2(dz, dx))
+            off = r["width"] / 2 + 1.4
+            for side in rng.sample((-1, 1), 2):
+                px, pz = x - dz / ln * off * side, z + dx / ln * off * side
+                if blocked(px, pz):
+                    continue
+                kind = cover_kind(layout, px, pz, rng, tracks)
+                place_cover(s, z1, kind, f"Cover_{n:03}", px, pz, yaw + rng.uniform(-8, 8), rng, footprints, "Small/Cover")
+                n += 1
+                break
+    rx0, rz0, rx1, rz1 = layout["repair_yard"]["clear"]
+    areas = [layout["bus_lot"], layout["site"], [[rx0, rz0], [rx1, rz0], [rx1, rz1], [rx0, rz1]]]
+    for poly in areas:
+        xs = [q[0] for q in poly]
+        zs = [q[1] for q in poly]
+        z = min(zs) + 4.0
+        while z < max(zs):
+            x = min(xs) + 4.0
+            while x < max(xs):
+                px, pz = x + rng.uniform(-2.0, 2.0), z + rng.uniform(-2.0, 2.0)
+                x += 8.0
+                if (not point_in(poly, px, pz) or inside_any(px, pz, footprints, area_r) or treed(px, pz, 5.0)
+                        or blocked(px, pz) or near_road(layout, px, pz, 1.0)):
+                    continue
+                kind = cover_kind(layout, px, pz, rng, tracks)
+                place_cover(s, z1, kind, f"Cover_{n:03}", px, pz, rng.uniform(0, 180), rng, footprints, "Small/Cover")
+                n += 1
+            z += 8.0
+    # мешки у постов мародёров (два угла рядом с постом, если есть место)
+    k = 0
+    for post in getattr(z1, "AI_POSTS", []):
+        px0, pz0 = post[1], post[2]
+        for _ in range(2):
+            ang = rng.uniform(0, math.tau)
+            px, pz = px0 + math.cos(ang) * 5.5, pz0 + math.sin(ang) * 5.5
+            if blocked(px, pz) or near_road(layout, px, pz, 0.5):
+                continue
+            place_cover(s, z1, "sandbags", f"Bags_{k:02}", px, pz, -math.degrees(ang) + 90.0, rng, footprints, "Small/Cover")
+            k += 1
+    print(f"zone01: укрытий по маршрутам {n}, мешков у постов {k}")
 
 
 def skyline(s, z1, study) -> None:

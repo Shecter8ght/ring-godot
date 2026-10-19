@@ -1,5 +1,5 @@
 extends Node
-## Снимки зоны 1 «Городской пояс» в docs/screens/zone01_*.png: обзор с воздуха и виды с высоты глаз.
+## Снимки зоны 1 «Пригород» в docs/screens/zone01_*.png: обзор с воздуха и виды с высоты глаз.
 ## tools/godot.cmd res://tools/zone01_shots.tscn       (ZONE01_ONLY=yard,plaza — выборочно)
 
 const OUT_DIR := "res://docs/screens"
@@ -60,6 +60,22 @@ const SHOTS := {
 	"overpass_under": [Vector3(-20, 1.7, 232), Vector3(60, 6, 250), 70.0],
 	"supermarket": [Vector3(8, 1.7, 46), Vector3(35, 3, 6), 70.0],
 	"cinema": [Vector3(40, 1.7, 150), Vector3(81, 5, 112), 70.0],
+	# левел-дизайн 2026-10-19: интерьеры, укрытия, ремонтные дворы (ZONE01_ONLY=ld_… — выборочно)
+	"ld_supermarket": [Vector3(22, 1.7, 15), Vector3(45, 1.2, -2), 75.0],
+	"ld_supermarket_front": [Vector3(35, 1.7, 40), Vector3(35, 1.5, 15), 70.0],
+	"ld_cinema": [Vector3(80.2, 4.6, 116.3), Vector3(83.8, 2.0, 99.2), 75.0],
+	"ld_depot": [Vector3(13.7, 4.9, 165), Vector3(13.7, 1, 217), 75.0],
+	"ld_server": [Vector3(36.5, 1.7, -213), Vector3(27, 1, -222), 75.0],
+	"ld_admin": [Vector3(14, 8.2, 85), Vector3(37, 7.5, 85), 75.0],
+	"ld_house": [Vector3(70, 1.7, 193), Vector3(76, 1.5, 189), 75.0],
+	"ld_bus_lot": [Vector3(-20, 1.7, 205), Vector3(-80, 1, 170), 70.0],
+	"ld_repair_overpass": [Vector3(100, 12.1, 255.0), Vector3(100, 1, 274), 70.0],
+	"ld_repair_west": [Vector3(40, 1.7, 276), Vector3(100, 2, 276), 70.0],
+	"ld_repair_east": [Vector3(192, 1.7, 271), Vector3(130, 1.5, 274), 70.0],
+	"ld_hangar_in": [Vector3(100, 1.7, 271.0), Vector3(100, 0.8, 278), 75.0],
+	"ld_storeroom": [Vector3(125, 1.7, 265.0), Vector3(132, 0.8, 268), 75.0],
+	"ld_aerial_repair": [Vector3(60, 90, 200), Vector3(122, 0, 276), 55.0],
+	"ld_aerial_center": [Vector3(-60, 120, -60), Vector3(20, 0, 60), 55.0],
 }
 
 
