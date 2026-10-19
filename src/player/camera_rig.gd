@@ -19,6 +19,13 @@ const SETTINGS_PATH := "user://settings.cfg"
 ## Вес тела в камере: покачивание в темп шагов, инерция, крен, приземление — отдельный слой поверх
 ## взгляда мышью (CameraMotion); и покачивание оружия у бедра в той же фазе.
 var _motion: CameraMotion = CameraMotion.new()
+## Стойка «наискосок» (Balance.WEAPON_CARRY): доля позы 0–1 (меньше нуля — ещё не задана: встаёт сразу)
+## и её скорость; поза ствола по id (класс + своё из data/weapons.json).
+var _carry_k: float = -1.0
+var _carry_v: float = 0.0
+var _carry_specs: Dictionary = {}
+## Правая кисть на процедурном стволе (RightGrip): вокруг неё ствол поворачивается, руки дотягиваются ИК.
+var _carry_grip: Node3D
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
@@ -509,7 +516,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif mb.pressed and ads_active and not _ui_blocking() \
 				and mb.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			var pl: Player = _target as Player
-			if pl and pl.adjust_scope_zoom(1 if mb.button_index == MOUSE_BUTTON_WHEEL_UP else -1):
+			var wheel := 1 if mb.button_index == MOUSE_BUTTON_WHEEL_UP else -1
+			# в прицеле — кратность оптики; без прицела — стойка оружия (вверх — от бедра, вниз — наискосок)
+			if pl and (pl.adjust_scope_zoom(wheel) or pl.wheel_carry(wheel)):
 				get_viewport().set_input_as_handled()
 		elif mb.pressed and not ads_active:
 			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
@@ -710,6 +719,10 @@ func _set_ads(on: bool, pl: Player) -> void:
 		pl.ads = on
 		pl.set_first_person(on)
 	_motion.reset()
+	# стойка оружия встаёт сразу в выбранную (без «падения» ствола при входе в вид из глаз)
+	_carry_k = -1.0
+	if pl:
+		pl.weapon_lowered = 0.0
 	if on:
 		# взгляд — туда, куда уже смотрит корпус; по вертикали — горизонт
 		_look_yaw = pl.body_yaw()
@@ -811,6 +824,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		elif not _viewmodel is ViewmodelClips:
 			_arms.bind_weapon(_viewmodel)
 		weapon_clearance.bind(_viewmodel)
+		_carry_grip = null if _viewmodel is ViewmodelClips else _viewmodel.find_child("RightGrip", true, false) as Node3D
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
 		if _viewmodel_rig:
 			_viewmodel_rig.set_ammo_state(pl.ammo)
@@ -819,6 +833,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_reticle_nv(pl.nvg_on)
 	_viewmodel.visible = true
 	if pl.grenade_equipped:
+		pl.weapon_lowered = 0.0
 		_process_grenade_viewmodel(pl, delta)
 		_set_scope(false)
 		return
@@ -874,6 +889,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		vt.basis = Basis(Vector3.UP, kick_side) * Basis(Vector3.RIGHT, flip * 0.05) * Basis(Vector3.FORWARD, pl.recoil_h() * 1.5) * vt.basis
 		vt.origin += bob + Vector3(0.0, flip * 0.004, kick_back * 0.028)
 		_viewmodel.transform = vt
+	_carry_pose(pl, delta)
 	var before_lag: Transform3D = _viewmodel.transform
 	_viewmodel.transform = _weapon_lag(delta, k) * _viewmodel.transform
 	_float_reticle(before_lag)
@@ -913,6 +929,82 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
+
+
+## Стойка «наискосок» (Balance.WEAPON_CARRY): ствол вниз-влево вокруг правой кисти. Бегом — всегда, на ходу
+## и стоя — если выбрана колесом (Player.carry_low); в прицеле, лёжа, раненым и пока заняты руки
+## (перезарядка, проверка, задержка) — оружие на изготовку. Доля — пружиной, без рывка; сколько опущено —
+## в Player.weapon_lowered (стрелять можно, только когда поднято).
+func _carry_pose(pl: Player, delta: float) -> void:
+	var cfg: Dictionary = Balance.WEAPON_CARRY
+	var clips := _viewmodel as ViewmodelClips
+	var pose: Dictionary = _carry_spec(pl.weapon_id, clips != null)
+	var busy: bool = pl.reload_timer > 0.0 or pl.mag_inspect or (clips != null and clips.is_busy()) \
+		or (_viewmodel_rig != null and _viewmodel_rig.is_busy())
+	var sprinting: bool = pl.sprint_held() and pl.stance == Player.Stance.STAND \
+		and Vector2(pl.velocity.x, pl.velocity.z).length() > Balance.PLAYER_WALK_SPEED + 0.3
+	var want: bool = not pose.is_empty() and not pl.aiming and not busy and not pl.is_downed() \
+		and pl.stance != Player.Stance.PRONE and (pl.carry_low or sprinting)
+	var target: float = 1.0 if want else 0.0
+	if _carry_k < 0.0:
+		_carry_k = target
+		_carry_v = 0.0
+	# критически затухающая пружина: трогается плавно и встаёт без перелёта
+	var w: float = 4.75 / maxf(float(cfg.lower_sec) if target > _carry_k else float(cfg.raise_sec), 0.01)
+	var steps: int = clampi(ceili(delta / 0.004), 1, 12)
+	var h: float = delta / float(steps)
+	for i in steps:
+		_carry_v += (-w * w * (_carry_k - target) - 2.0 * w * _carry_v) * h
+		_carry_k += _carry_v * h
+	_carry_k = clampf(_carry_k, 0.0, 1.0)
+	pl.weapon_lowered = _carry_k
+	if _carry_k < 0.0005 or pose.is_empty():
+		return
+	# поворот в осях камеры: дуло влево, вниз, завал. Процедурный ствол — вокруг точки на pivot_back позади
+	# правой кисти (руки дотягиваются ИК); у вьюмодели с клипами руки — одно целое с оружием, её
+	# поворачиваем вокруг своей точки (clips_pivot) и мягче — настоящую позу даст хват из Blender
+	var full := Basis(Vector3.UP, deg_to_rad(float(pose.yaw_deg))) * Basis(Vector3.RIGHT, -deg_to_rad(float(pose.pitch_deg))) \
+		* Basis(Vector3.BACK, deg_to_rad(float(pose.roll_deg)))
+	var turn := Basis(Quaternion.IDENTITY.slerp(full.get_rotation_quaternion(), _carry_k))
+	var pivot: Vector3 = pose.get("clips_pivot", Vector3.ZERO) as Vector3
+	if is_instance_valid(_carry_grip):
+		# от кисти назад по оружию (к затыльнику у плеча): приклад остаётся у плеча, а не задирается к лицу
+		var along: Vector3 = _viewmodel.global_basis.z.normalized()
+		pivot = _vm_space.to_local(_carry_grip.global_position - along * float(pose.get("pivot_back", 0.0)))
+	var shift: Vector3 = pose.shift as Vector3
+	_viewmodel.transform = Transform3D(turn, pivot + shift * _carry_k - turn * pivot) * _viewmodel.transform
+
+
+## Поза «наискосок» ствола: по классу (rifle / pistol), у вьюмодели с клипами — поверх своя мягкая
+## (clips), и своя у ствола из data/weapons.json ("carry": {…} поверх всего, "carry": false — без позы).
+## Пусто — без позы.
+func _carry_spec(wid: String, clips: bool) -> Dictionary:
+	if wid == "":
+		return {}
+	var key := carry_key(wid, clips)
+	if _carry_specs.has(key):
+		return _carry_specs[key]
+	var w: Dictionary = WeaponDb.weapon(wid)
+	var own: Variant = w.get("carry", {})
+	var pose: Dictionary = {}
+	if not (own is bool and not bool(own)):
+		var cfg: Dictionary = Balance.WEAPON_CARRY
+		pose = (cfg.pistol if String(w.get("class", "")) == "PISTOL" else cfg.rifle).duplicate()
+		if clips:
+			pose.merge(cfg.clips as Dictionary, true)
+		if own is Dictionary:
+			pose.merge(own as Dictionary, true)
+			for k: String in ["shift", "clips_pivot"]:
+				if pose.get(k) is Array:
+					var a: Array = pose[k]
+					pose[k] = Vector3(float(a[0]), float(a[1]), float(a[2]))
+	_carry_specs[key] = pose
+	return pose
+
+
+## Ключ позы ствола в кэше (вьюмодель с клипами — своя поза).
+static func carry_key(wid: String, clips: bool) -> String:
+	return wid + ("|clips" if clips else "")
 
 
 ## Гранату держит отдельный FPS_ArmsRig ВЕРАС-54; поза левой синхронна движению чеки.

@@ -86,6 +86,10 @@ tools/godot.cmd --headless res://tools/steps_test.tscn      # шаги: пове
 tools/godot.cmd --headless res://tools/camera_motion_test.tscn # движение камеры (CameraMotion, Balance.CAMERA_MOTION) при 144 к/с: покачивание в фазе шагов, бег сильнее,
                                                               # остановка досаживается и не копится, вбок крен, прицел почти стоит, присед плавно, приземление,
                                                               # ползунок 0, вид сверху и обратно, без ступенек между тиками физики
+tools/godot.cmd --headless res://tools/carry_test.tscn       # стойка «наискосок» (Balance.WEAPON_CARRY): по умолчанию опущено, колесо вверх — от бедра, вниз — наискосок,
+                                                              # бегом всегда наискосок, огонь поднимает и стреляет (клик не теряется), ПКМ — и обратно, лёжа и перезарядка
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/carry_shots.tscn # снимки стойки: от бедра и наискосок у стволов песочницы → docs/screens/carry_*;
+                                                              # подбор позы: CARRY_VARIANTS="yaw=35 pitch=22 back=0.15 sy=0.04;…" CARRY_ONLY=wpn_sg_02
 tools/godot.cmd --headless res://tools/zone01_ld_test.tscn   # Пригород, левел-дизайн: в каждом зале с интерьером есть лут и до всех мест лута можно дойти,
                                                               # места заказа «Вернуть машину», путь от появлений к выходам, серверная под ключом, голые отрезки улиц
 python -X utf8 tools/zone01_ld_plan.py                         # схема левел-дизайна Пригорода (маршруты, горячие точки, интерьеры, укрытия, посты) → docs/design/zone01_level_design.png

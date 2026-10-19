@@ -121,6 +121,15 @@ var _aim_t: float = 0.0
 ## Владелец тела передаёт отведение оружия: напарник видит ту же готовую позу.
 var weapon_obstruction: float = 0.0
 var weapon_ready_up: bool = false
+## Как несут оружие от первого лица (не в прицеле): true — «наискосок» вниз-влево (по умолчанию,
+## колесо вниз), false — на изготовку от бедра (колесо вверх). Бегом — всегда наискосок; из прицела —
+## в ту стойку, из которой вскинул. Выстрел из «наискосок» сначала поднимает оружие (raise_weapon).
+var carry_low: bool = true
+## Насколько ствол сейчас опущен в «наискосок», 0–1 — ставит CameraRig каждый кадр (только свой игрок).
+## Пока больше Balance.WEAPON_CARRY.fire_max — не стреляет: ствол смотрит не туда, куда смотрит игрок.
+var weapon_lowered: float = 0.0
+## Нажал огонь, пока ствол опущен: выстрел, как только поднимется (не дольше queue_sec), с.
+var _fire_queue: float = 0.0
 var grenades: int = Balance.GRENADES_START
 ## Выбор гранаты отделён от слотов огнестрельного оружия: состояние магазина сохраняется.
 var grenade_equipped: bool = false
@@ -396,6 +405,24 @@ func _can_sprint() -> bool:
 	return not _winded and stamina > 0.0 and _water_depth() < float(Balance.WATER.no_sprint)
 
 
+## Держат бег: Shift, не в прицеле и не стреляют — огонь прерывает бег, ствол поднимается к выстрелу.
+func sprint_held() -> bool:
+	return Input.is_action_pressed("sprint") and not aiming and not Input.is_action_pressed("fire") and _fire_queue <= 0.0
+
+
+## Поднять оружие из «наискосок» на изготовку от бедра (колесо вверх, выстрел из опущенного).
+func raise_weapon() -> void:
+	carry_low = false
+
+
+## Стойка оружия колесом мыши (не в прицеле): вверх — от бедра, вниз — наискосок. false — колесо не наше.
+func wheel_carry(direction: int) -> bool:
+	if not is_local() or not is_alive() or not ads or aiming or weapon_id == "" or grenade_equipped or ui_blocked():
+		return false
+	carry_low = direction < 0
+	return true
+
+
 ## Глубина воды над ступнями (WaterBody), м; считается раз за кадр физики.
 func _water_depth() -> float:
 	var frame: int = Engine.get_physics_frames()
@@ -411,7 +438,7 @@ var _water_cached: float = 0.0
 
 ## Бег тратит выносливость (в жару на улице — быстрее), стоишь или идёшь — восстанавливается.
 func _tick_stamina(delta: float) -> void:
-	var running := _can_sprint() and Input.is_action_pressed("sprint") and not aiming and stance == Stance.STAND \
+	var running := _can_sprint() and sprint_held() and stance == Stance.STAND \
 		and Vector2(velocity.x, velocity.z).length() > Balance.PLAYER_WALK_SPEED + 0.3
 	if running:
 		var k := 1.0
@@ -1238,7 +1265,7 @@ func _footsteps(delta: float) -> void:
 		return
 	_step_timer = Balance.NOISE_STEP_INTERVAL
 	var key := _stance_key()
-	if key == "stand" and Input.is_action_pressed("sprint") and not aiming:
+	if key == "stand" and sprint_held():
 		key = "sprint"
 	# звук шагов — Footsteps (слышен у всех peer); здесь — шум, по которому слышат мародёры; вброд — громче
 	var water_k: float = float(Balance.WATER.noise_k) if _water_depth() > float(Balance.WATER.ankle) else 1.0
@@ -1362,6 +1389,17 @@ func _combat(delta: float) -> void:
 			_start_reload(spec)
 		return
 	var trigger := Input.is_action_pressed("fire") if bool(spec.auto) else Input.is_action_just_pressed("fire")
+	# ствол опущен «наискосок» (стойка или бег): нажатие поднимает оружие, выстрел — когда поднялось
+	_fire_queue = maxf(0.0, _fire_queue - delta)
+	if weapon_lowered > float(Balance.WEAPON_CARRY.fire_max):
+		if trigger:
+			raise_weapon()
+			_fire_queue = float(Balance.WEAPON_CARRY.queue_sec)
+		return
+	if _fire_queue > 0.0:
+		# короткое нажатие, пока ствол поднимался, — не теряется
+		trigger = true
+	_fire_queue = 0.0
 	if trigger and fire_timer <= 0.0:
 		if is_jammed():
 			fire_timer = 0.3
@@ -2914,7 +2952,7 @@ func _stance_speed() -> float:
 		Stance.PRONE:
 			s = Balance.PLAYER_PRONE_SPEED
 		_:
-			s = Balance.PLAYER_SPRINT_SPEED if _can_sprint() and Input.is_action_pressed("sprint") and not aiming else Balance.PLAYER_WALK_SPEED
+			s = Balance.PLAYER_SPRINT_SPEED if _can_sprint() and sprint_held() else Balance.PLAYER_WALK_SPEED
 			# адреналин: бежит быстрее; руки пусты (оружие убрано) — тоже
 			if s == Balance.PLAYER_SPRINT_SPEED:
 				s *= 1.0 + float(Balance.STRESS.adr_speed) * stress_k()

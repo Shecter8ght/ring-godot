@@ -102,6 +102,11 @@ func _setup(id: String, mods: Dictionary) -> void:
 	var model: Node3D = (load(String(config.scene)) as PackedScene).instantiate() as Node3D
 	model.name = "Model"
 	add_child(model)
+	# Деталь экспорта без кости («Part_», у ВЕРАСа — лишняя копия маркировки) стоит в начале координат
+	# сцены, то есть у самого глаза, позади камеры: от бедра не видна, но в стойке «наискосок» сцена
+	# поворачивается, и надпись въезжала в кадр во весь экран. Своя маркировка — на коробке.
+	for stray: Node in model.find_children("Part_", "MeshInstance3D", true, false):
+		(stray as MeshInstance3D).visible = false
 	if String(config.get("mechanism", "")) == "break_action":
 		_signal_left_arm = model.find_child("FPS_Arms_Left", true, false) as Node3D
 		if _signal_left_arm:
