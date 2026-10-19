@@ -3,14 +3,14 @@
  "source_sha256": "2b7303b784f9d76285a3b8975697bb48b5563a86ec6977fbf881c81a932d147c",
  "budget_owner": "ближняя ~150 тыс., дальше 50 и 12 тыс.; карты 4K кузов, 2K остальное (владелец 2026-10-18)",
  "triangles": {
-  "LOD0": 154104,
-  "LOD1": 47597,
+  "LOD0": 153954,
+  "LOD1": 47537,
   "LOD2": 12428
  },
  "nodes_triangles": {
   "Body": [
-   109636,
-   35009,
+   109486,
+   34949,
    9514
   ],
   "Battery_Installed": [
@@ -65,6 +65,11 @@
   "battery_missing": [
    "Battery_Missing"
   ]
+ },
+ "trim_fragment": {
+  "file": "coupe_ilya_trim_fragment.glb",
+  "source": "Sill_Trim_Fragment",
+  "note": "отколотый кусок накладки левого порога — на машине его нет, лежит на стоянке ТЦ"
  },
  "materials": {
   "GAME • body": "атлас кузова 4K",

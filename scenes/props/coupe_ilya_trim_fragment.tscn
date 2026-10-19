@@ -1,0 +1,20 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/props/coupe_ilya/coupe_ilya_trim_fragment.glb" id="1"]
+[ext_resource type="Texture2D" path="res://assets/models/props/coupe_ilya/coupe_ilya_body_albedo.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/models/props/coupe_ilya/coupe_ilya_body_normal.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/models/props/coupe_ilya/coupe_ilya_body_orm.png" id="4"]
+
+[sub_resource type="ORMMaterial3D" id="Body"]
+albedo_texture = ExtResource("2")
+orm_texture = ExtResource("4")
+normal_enabled = true
+normal_texture = ExtResource("3")
+
+[node name="CoupeTrimFragment" type="Node3D"]
+metadata/purpose = "Отколотый кусок хромированной накладки левого порога купе Ильи (tools/coupe_ilya/game_export.py) — улика на стоянке ТЦ; на самой машине его нет. Длина вдоль Z, наружная сторона — +X."
+
+[node name="Model" parent="." instance=ExtResource("1")]
+
+[node name="TrimFragment" parent="Model" index="0"]
+material_override = SubResource("Body")

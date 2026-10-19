@@ -13,6 +13,9 @@
         Battery_Installed  — аккумулятор, клеммы на нём, экраны горят;
         Battery_Missing    — висящие клеммы, тёмные экраны;
       в каждом узле — сетки <узел>_LOD0/1/2 (дальности включает сцена, см. src/world/ilya_car.gd);
+      отколотого куска хромированной накладки левого порога на машине нет — он улика на стоянке ТЦ:
+  assets/models/props/coupe_ilya/coupe_ilya_trim_fragment.glb — этот кусок отдельно (LOD0, начало — его середина,
+      без карт: материал — атлас кузова, scenes/props/coupe_ilya_trim_fragment.tscn);
   assets/models/props/coupe_ilya/coupe_ilya.json — состав, треугольники, источники;
   E:/Models Blender/VEHICLES/Купе Ильи/game/Coupe_Ilya_Game_v01.blend — файл просмотра (карты встроены).
 """
@@ -24,6 +27,7 @@ import re
 from pathlib import Path
 
 import bpy
+from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / "_asset_src/coupe_ilya_game"
@@ -34,6 +38,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 VIEW = Path(r"E:\Models Blender\VEHICLES\Купе Ильи\game\Coupe_Ilya_Game_v01.blend")
 VIEW.parent.mkdir(parents=True, exist_ok=True)
 HOOD_OPEN_RAD = -0.87
+FRAGMENT = "Sill_Trim_Fragment"                           # отколотый кусок накладки порога — улика на стоянке ТЦ
 DOUBLE_SIDED = {"body", "glass", "bay", "interior"}      # одинарные листы панелей: изнутри и из отсека видны
 log = lambda *a: print("COUPE_EXPORT", *a, flush=True)
 
@@ -153,7 +158,7 @@ for lod in range(3):
     groups: dict[str, list] = {}
     for name in REC["objects"]:
         o = O.get(name + suffix)
-        if o is None:
+        if o is None or name == FRAGMENT:
             continue
         groups.setdefault(node_of(name), []).append(o)
     wheel_mesh = None
@@ -174,8 +179,20 @@ for lod in range(3):
         tris_report.setdefault(n if not n.startswith("Wheel_") else "Wheel(×4)", []).append(len(me.loop_triangles))
 log("треугольники по узлам", tris_report)
 
+# отколотый кусок накладки — отдельной моделью, начало в его середине (оси те же, что у машины)
+src = O[FRAGMENT]
+frag_me = src.data.copy()
+frag_me.transform(src.matrix_world)
+co = [v.co for v in frag_me.vertices]
+center = sum(co, Vector()) / len(co)
+frag_me.transform(Matrix.Translation(-center))
+fragment = bpy.data.objects.new("TrimFragment", frag_me)
+bpy.context.scene.collection.objects.link(fragment)
+frag_me.calc_loop_triangles()
+log("кусок накладки", len(frag_me.loop_triangles), "треугольников, размер", tuple(round(d, 3) for d in fragment.dimensions))
+
 # только игровое дерево
-keep = {root.name} | {o.name for o in root.children_recursive}
+keep = {root.name, fragment.name} | {o.name for o in root.children_recursive}
 for o in list(O):
     if o.name not in keep:
         O.remove(o, do_unlink=True)
@@ -210,7 +227,12 @@ def export(path: Path) -> None:
 
 
 export(OUT / "coupe_ilya.glb")
-size = root.children_recursive
+bpy.ops.object.select_all(action="DESELECT")
+fragment.select_set(True)
+bpy.ops.export_scene.gltf(filepath=str(OUT / "coupe_ilya_trim_fragment.glb"), export_format="GLB", use_selection=True,
+                          export_yup=True, export_apply=True, export_tangents=True, export_animations=False,
+                          export_cameras=False, export_lights=False, export_image_format="NONE")
+log("экспорт", OUT / "coupe_ilya_trim_fragment.glb")
 manifest = {
     "source": REC["source"], "source_sha256": REC["source_sha256"],
     "budget_owner": "ближняя ~150 тыс., дальше 50 и 12 тыс.; карты 4K кузов, 2K остальное (владелец 2026-10-18)",
@@ -220,6 +242,8 @@ manifest = {
     "hood": {"node": "Hood", "axis": "X", "open_rad": HOOD_OPEN_RAD},
     "states": {"wheel_fitted": ["Wheel_FL"], "wheel_removed": ["WheelOff_FL"],
                "battery_installed": ["Battery_Installed"], "battery_missing": ["Battery_Missing"]},
+    "trim_fragment": {"file": "coupe_ilya_trim_fragment.glb", "source": FRAGMENT,
+                      "note": "отколотый кусок накладки левого порога — на машине его нет, лежит на стоянке ТЦ"},
     "materials": {"GAME • body": "атлас кузова 4K", "GAME • glass": "стёкла, прозрачность в альфе цвета",
                   "GAME • wheel": "колесо, кирпичи, кулак", "GAME • bay": "моторный отсек, аккумулятор",
                   "GAME • interior": "салон", "GAME • const • …": "светящиеся и зеркальные мелочи без карт"},

@@ -165,6 +165,8 @@ tools/godot.cmd --headless res://tools/bake_mall_nav.tscn      # рейдова�
                                                               # перепечь кэш навигации data/navigation/mall_map после правки территории (~30 с; без кэша рейд печёт сам при загрузке)
 tools/godot.cmd --headless res://tools/car_mall_sites_shots.tscn # места заказа «Вернуть машину» на карте ТЦ: стоянка у доков, бокс скупки у АЗС, склад техники —
                                                               # F засчитан, путь по навигации от заходов; с окном (--windowed --resolution 1600x900) — снимки car_mall_*
+python -X utf8 tools/gen_car_clue_textures.py                 # улики заказа на карте ТЦ → assets/textures/car_clues: пятно антифриза и следы шин по альфа-маскам
+                                                              # владельца (Маски_АЛЬФА), номера, накладная, бирка «ЮР / 8»; затем --import
 tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона

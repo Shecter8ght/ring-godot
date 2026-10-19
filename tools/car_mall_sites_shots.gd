@@ -54,17 +54,38 @@ func _ready() -> void:
 	var rig: Node = level.get_node("CameraRig")
 	var cam: Camera3D = get_viewport().get_camera_3d()
 	if _shots:
+		# камеру ставим сами: ни камера, ни игрок (его переносят к местам) её не двигают
 		rig.set_process(false)
 		rig.set_physics_process(false)
+		player.set_physics_process(false)
+		player.set_process(false)                                  # иначе игрок каждый кадр поворачивает камеру по своему взгляду
 	# стоянка у северо-восточных доков: оба снимка — отчёт Илье
 	for sid: String in ["car_mall_parking_wide", "car_mall_parking_detail"]:
 		await _use(player, sid)
 	_check("стоянка снята — ждём отчёта", String(Quests.objective(Q).get("id", "")) == "report_park", str(Quests.objective(Q).get("id", "")))
+	# кусок накладки с порога купе лежит на земле стоянки, рядом с местом снимка
+	var trim: MeshInstance3D = level.find_child("CarRecovery", true, false).find_child("TrimFragment", true, false) \
+		.find_child("TrimFragment", true, false) as MeshInstance3D
+	if trim == null:
+		_check("кусок накладки на стоянке", false, "нет узла")
+	else:
+		var box: AABB = trim.global_transform * trim.mesh.get_aabb()
+		var down: Dictionary = get_viewport().get_world_3d().direct_space_state.intersect_ray(
+			PhysicsRayQueryParameters3D.create(box.get_center() + Vector3.UP * 0.5, box.get_center() + Vector3.DOWN * 0.5))
+		# коллизия рельефа, а дно двора нарисовано накладкой на 3 см выше (MallLandscape._surfaces, "pit")
+		var ground: float = (down.position as Vector3).y + 0.03 if not down.is_empty() else NAN
+		var near: Node3D = _site("car_mall_parking_detail")
+		_check("кусок накладки лежит на земле стоянки", trim.is_visible_in_tree() and absf(box.position.y - ground) < 0.03
+			and near != null and near.global_position.distance_to(box.get_center()) < 2.0,
+			"низ %.3f, земля %.3f, размер %s, до места снимка %.1f м" % [box.position.y, ground, str(box.size),
+			near.global_position.distance_to(box.get_center()) if near else -1.0])
 	if _shots:
 		var wide: Node3D = _site("car_mall_parking_wide")
 		if wide:
 			await _shot(cam, player, wide.global_position + Vector3(-5.0, 2.2, -6.5), wide.global_position + Vector3(0.0, 0.0, 0.6), "parking")
-			await _shot(cam, player, wide.global_position + Vector3(-0.8, 1.6, 3.6), wide.global_position + Vector3(0.4, 0.0, 1.3), "parking_detail")
+			# пятно антифриза под передком и кусок накладки у левого порога
+			await _shot(cam, player, wide.global_position + Vector3(-2.0, 1.5, -3.3), wide.global_position + Vector3(-0.4, 0.0, -1.5), "parking_detail")
+			await _shot(cam, player, wide.global_position + Vector3(-1.25, 0.55, -1.55), wide.global_position + Vector3(-1.0, 0.0, -1.2), "parking_trim")
 	Quests.finish_talk(Q, "ilya", "report_park")
 	Quests.finish_talk(Q, "perevalka", "hint")
 	# бокс скупки у АЗС
@@ -75,7 +96,11 @@ func _ready() -> void:
 		var plate: Node3D = _site("car_mall_lead_plate")
 		if plate:
 			await _shot(cam, player, plate.global_position + Vector3(3.9, 1.65, -3.2), plate.global_position + Vector3(3.9, 0.9, 1.6), "lead_box")
-			await _shot(cam, player, plate.global_position + Vector3(0.0, 1.65, -1.2), plate.global_position + Vector3(0.0, 1.15, 1.6), "lead_plates")
+			# тара с номерами на западной стойке, накладная с биркой на восточной
+			await _shot(cam, player, plate.global_position + Vector3(0.25, 1.55, -0.1), plate.global_position + Vector3(0.0, 1.16, 1.55), "lead_plates")
+			var invoice: Node3D = _site("car_mall_lead_invoice")
+			if invoice:
+				await _shot(cam, player, invoice.global_position + Vector3(0.1, 1.55, 0.75), invoice.global_position + Vector3(0.0, 1.06, 1.6), "lead_invoice")
 	# этап «дворы»: склад техники у ТЦ — второй источник колеса
 	Quests.dev_stage(Q, 4)
 	for frame: int in range(10):
@@ -142,7 +167,9 @@ func _shot(cam: Camera3D, player: Player, eye: Vector3, at: Vector3, tag: String
 	await RenderingServer.frame_post_draw
 	var path: String = "res://docs/screens/car_mall_%s.png" % tag
 	get_viewport().get_texture().get_image().save_png(path)
-	print("car_mall_sites_shots: ", path)
+	var now: Camera3D = get_viewport().get_camera_3d()
+	print("car_mall_sites_shots: ", path, " камера ", now.name, " ", now.global_position, " → ", -now.global_basis.z,
+		" (задано ", eye, " → ", (at - eye).normalized(), "), цель на экране ", now.unproject_position(at))
 
 
 func _check(what: String, ok: bool, detail: String = "") -> void:

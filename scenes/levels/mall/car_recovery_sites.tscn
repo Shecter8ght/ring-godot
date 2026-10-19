@@ -1,33 +1,96 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://src/quests/quest_anchor.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/props/coupe_ilya_trim_fragment.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://assets/shelter/models/PH_PlasticCrate.glb" id="3"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/coolant_stain_albedo.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/coolant_stain_normal.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/coolant_stain_orm.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tire_scuff_a_albedo.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tire_scuff_b_albedo.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/invoice_albedo.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/invoice_normal.png" id="10"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/tag_yur8_albedo.png" id="11"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_K417MP77_albedo.png" id="12"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_K417MP77_normal.png" id="13"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_A921BC50_albedo.png" id="14"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_A921BC50_normal.png" id="15"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_E305TK199_albedo.png" id="16"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_E305TK199_normal.png" id="17"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_O774HA77_albedo.png" id="18"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_O774HA77_normal.png" id="19"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_M158PY750_albedo.png" id="20"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_M158PY750_normal.png" id="21"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_T640XO190_albedo.png" id="22"]
+[ext_resource type="Texture2D" path="res://assets/textures/car_clues/plate_T640XO190_normal.png" id="23"]
 
-[sub_resource type="StandardMaterial3D" id="Paint"]
-albedo_color = Color(0.86, 0.68, 0.12, 1)
-roughness = 0.9
+[sub_resource type="StandardMaterial3D" id="Plate_K417MP77"]
+albedo_texture = ExtResource("12")
+roughness = 0.5
+normal_enabled = true
+normal_texture = ExtResource("13")
 
-[sub_resource type="StandardMaterial3D" id="Oil"]
-albedo_color = Color(0.035, 0.03, 0.028, 1)
-roughness = 0.7
+[sub_resource type="StandardMaterial3D" id="Plate_A921BC50"]
+albedo_texture = ExtResource("14")
+roughness = 0.5
+normal_enabled = true
+normal_texture = ExtResource("15")
 
-[sub_resource type="StandardMaterial3D" id="Plastic"]
-albedo_color = Color(0.07, 0.07, 0.075, 1)
+[sub_resource type="StandardMaterial3D" id="Plate_E305TK199"]
+albedo_texture = ExtResource("16")
+roughness = 0.5
+normal_enabled = true
+normal_texture = ExtResource("17")
+
+[sub_resource type="StandardMaterial3D" id="Plate_O774HA77"]
+albedo_texture = ExtResource("18")
+roughness = 0.5
+normal_enabled = true
+normal_texture = ExtResource("19")
+
+[sub_resource type="StandardMaterial3D" id="Plate_M158PY750"]
+albedo_texture = ExtResource("20")
+roughness = 0.5
+normal_enabled = true
+normal_texture = ExtResource("21")
+
+[sub_resource type="StandardMaterial3D" id="Plate_T640XO190"]
+albedo_texture = ExtResource("22")
+roughness = 0.5
+normal_enabled = true
+normal_texture = ExtResource("23")
+
+[sub_resource type="StandardMaterial3D" id="PlateBack"]
+albedo_color = Color(0.62, 0.62, 0.6, 1)
+metallic = 0.8
 roughness = 0.55
 
-[sub_resource type="StandardMaterial3D" id="Cardboard"]
-albedo_color = Color(0.48, 0.36, 0.22, 1)
-roughness = 0.95
-
-[sub_resource type="StandardMaterial3D" id="Plate"]
-albedo_color = Color(0.9, 0.9, 0.88, 1)
-roughness = 0.4
-metallic = 0.3
+[sub_resource type="StandardMaterial3D" id="Paper"]
+albedo_texture = ExtResource("9")
+roughness = 0.92
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("10")
+cull_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="Tag"]
-albedo_color = Color(0.95, 0.55, 0.12, 1)
-roughness = 0.8
+transparency = 2
+alpha_scissor_threshold = 0.5
+albedo_texture = ExtResource("11")
+roughness = 0.95
+cull_mode = 2
+
+[sub_resource type="QuadMesh" id="PlateQuad"]
+size = Vector2(0.52, 0.112)
+
+[sub_resource type="QuadMesh" id="PaperQuad"]
+size = Vector2(0.21, 0.297)
+
+[sub_resource type="QuadMesh" id="TagQuad"]
+size = Vector2(0.06, 0.1)
 
 [node name="CarRecoverySites" type="Node3D"]
+metadata/purpose = "Места заказа «Вернуть машину» на карте ТЦ (scenes/levels/mall_map.tscn); текстуры улик — tools/gen_car_clue_textures.py"
 
 [node name="Parking" type="Node3D" parent="."]
 position = Vector3(76.0, -4.0, -150.0)
@@ -40,29 +103,52 @@ position = Vector3(0.0, 0.02, 0.0)
 [node name="car_mall_parking_detail" type="Marker3D" parent="Parking"]
 script = ExtResource("1")
 site_id = "car_mall_parking_detail"
-position = Vector3(0.4, 0.02, 1.4)
+position = Vector3(-0.4, 0.02, -1.4)
 
-[node name="LineLeft" type="CSGBox3D" parent="Parking"]
-position = Vector3(-1.35, 0.03, 0.0)
-size = Vector3(0.15, 0.04, 5.0)
-material = SubResource("Paint")
+[node name="CoolantStain" type="Decal" parent="Parking"]
+transform = Transform3D(0.920505, 0, 0.390731, 0, 1, 0, -0.390731, 0, 0.920505, 0.1, 0.25, -1.85)
+size = Vector3(1.7, 0.8, 1.7)
+texture_albedo = ExtResource("4")
+texture_normal = ExtResource("5")
+texture_orm = ExtResource("6")
+upper_fade = 0.2
+lower_fade = 0.2
 
-[node name="LineRight" type="CSGBox3D" parent="Parking"]
-position = Vector3(1.35, 0.03, 0.0)
-size = Vector3(0.15, 0.04, 5.0)
-material = SubResource("Paint")
+[node name="TireScuff_0" type="Decal" parent="Parking"]
+transform = Transform3D(0.997564, 0, -0.069756, 0, 1, 0, 0.069756, 0, 0.997564, 0.83, 0.25, -1.43)
+size = Vector3(0.26, 0.8, 0.75)
+texture_albedo = ExtResource("7")
+modulate = Color(1, 1, 1, 0.85)
+upper_fade = 0.2
+lower_fade = 0.2
 
-[node name="OilStain" type="CSGCylinder3D" parent="Parking"]
-position = Vector3(0.3, 0.03, 0.9)
-radius = 0.8
-height = 0.04
-sides = 24
-material = SubResource("Oil")
+[node name="TireScuff_1" type="Decal" parent="Parking"]
+transform = Transform3D(0.998630, 0, 0.052336, 0, 1, 0, -0.052336, 0, 0.998630, -0.83, 0.25, -1.43)
+size = Vector3(0.26, 0.8, 0.75)
+texture_albedo = ExtResource("8")
+modulate = Color(1, 1, 1, 0.85)
+upper_fade = 0.2
+lower_fade = 0.2
 
-[node name="TrimFragment" type="CSGBox3D" parent="Parking"]
-transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 0.7, 0.05, 1.7)
-size = Vector3(0.55, 0.03, 0.09)
-material = SubResource("Plastic")
+[node name="TireScuff_2" type="Decal" parent="Parking"]
+transform = Transform3D(0.999391, 0, 0.034899, 0, 1, 0, -0.034899, 0, 0.999391, 0.83, 0.25, 1.43)
+size = Vector3(0.26, 0.8, 0.75)
+texture_albedo = ExtResource("8")
+modulate = Color(1, 1, 1, 0.85)
+upper_fade = 0.2
+lower_fade = 0.2
+
+[node name="TireScuff_3" type="Decal" parent="Parking"]
+transform = Transform3D(0.998630, 0, -0.052336, 0, 1, 0, 0.052336, 0, 0.998630, -0.83, 0.25, 1.43)
+size = Vector3(0.26, 0.8, 0.75)
+texture_albedo = ExtResource("7")
+modulate = Color(1, 1, 1, 0.85)
+upper_fade = 0.2
+lower_fade = 0.2
+
+[node name="TrimFragment" parent="Parking" instance=ExtResource("2")]
+position = Vector3(-1.0, 0.037, -1.2)
+rotation_degrees = Vector3(0, 32, 90)
 
 [node name="LeadBox" type="Node3D" parent="."]
 
@@ -76,35 +162,78 @@ script = ExtResource("1")
 site_id = "car_mall_lead_invoice"
 position = Vector3(-224.1, 1.14, -206.2)
 
-[node name="PlateCrate" type="CSGBox3D" parent="LeadBox"]
-position = Vector3(-231.9, 2.34, -204.6)
-size = Vector3(0.6, 0.28, 0.4)
-material = SubResource("Cardboard")
+[node name="PlateCrate" parent="LeadBox" instance=ExtResource("3")]
+transform = Transform3D(0, 0, 1.4, 0, 1, 0, -1, 0, 0, -231.9, 2.2, -204.5)
 
-[node name="Plate1" type="CSGBox3D" parent="LeadBox"]
-transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -231.9, 2.5, -204.72)
-size = Vector3(0.52, 0.11, 0.01)
-material = SubResource("Plate")
+[node name="Plate_M158PY750" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(0, 1, 0, 1, 0, 0, 0, 0, -1, -232.0900, 2.4800, -204.5600)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("Plate_M158PY750")
 
-[node name="Plate2" type="CSGBox3D" parent="LeadBox"]
-transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -231.9, 2.5, -204.6)
-size = Vector3(0.52, 0.11, 0.01)
-material = SubResource("Plate")
+[node name="Back" type="MeshInstance3D" parent="LeadBox/Plate_M158PY750"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -0.0012)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("PlateBack")
 
-[node name="Plate3" type="CSGBox3D" parent="LeadBox"]
-transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -231.9, 2.5, -204.48)
-size = Vector3(0.52, 0.11, 0.01)
-material = SubResource("Plate")
+[node name="Plate_T640XO190" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(0, 1, 0, 1, 0, 0, 0, 0, -1, -231.9400, 2.4800, -204.5000)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("Plate_T640XO190")
 
-[node name="Invoice" type="CSGBox3D" parent="LeadBox"]
-position = Vector3(-224.1, 2.203, -204.7)
-size = Vector3(0.21, 0.004, 0.3)
-material = SubResource("Plate")
+[node name="Back" type="MeshInstance3D" parent="LeadBox/Plate_T640XO190"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -0.0012)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("PlateBack")
 
-[node name="BatchTag" type="CSGBox3D" parent="LeadBox"]
-transform = Transform3D(0.94, 0, 0.342, 0, 1, 0, -0.342, 0, 0.94, -223.8, 2.205, -204.55)
-size = Vector3(0.06, 0.004, 0.1)
-material = SubResource("Tag")
+[node name="Plate_E305TK199" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(0, 1, 0, 1, 0, 0, 0, 0, -1, -231.7700, 2.4800, -204.4500)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("Plate_E305TK199")
+
+[node name="Back" type="MeshInstance3D" parent="LeadBox/Plate_E305TK199"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -0.0012)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("PlateBack")
+
+[node name="Plate_O774HA77" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(-1, 0, 0, 0, 0.951057, 0.309017, 0, 0.309017, -0.951057, -231.8700, 2.2543, -204.6693)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("Plate_O774HA77")
+
+[node name="Back" type="MeshInstance3D" parent="LeadBox/Plate_O774HA77"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -0.0012)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("PlateBack")
+
+[node name="Plate_A921BC50" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(-1, 0, 0, 0, 0.951057, 0.309017, 0, 0.309017, -0.951057, -231.9200, 2.2543, -204.6733)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("Plate_A921BC50")
+
+[node name="Back" type="MeshInstance3D" parent="LeadBox/Plate_A921BC50"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -0.0012)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("PlateBack")
+
+[node name="Plate_K417MP77" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(-1, 0, 0, 0, 0.951057, 0.309017, 0, 0.309017, -0.951057, -231.8900, 2.2543, -204.6773)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("Plate_K417MP77")
+
+[node name="Back" type="MeshInstance3D" parent="LeadBox/Plate_K417MP77"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -0.0012)
+mesh = SubResource("PlateQuad")
+surface_material_override/0 = SubResource("PlateBack")
+
+[node name="Invoice" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(-0.978148, 0.207912, 0, 0, 0, 1, 0.207912, 0.978148, 0, -224.1, 2.203, -204.6)
+mesh = SubResource("PaperQuad")
+surface_material_override/0 = SubResource("Paper")
+
+[node name="BatchTag" type="MeshInstance3D" parent="LeadBox"]
+transform = Transform3D(-0.906308, -0.422618, 0, 0, 0, 1, -0.422618, 0.906308, 0, -224.27, 2.206, -204.52)
+mesh = SubResource("TagQuad")
+surface_material_override/0 = SubResource("Tag")
 
 [node name="Supply" type="Node3D" parent="."]
 

@@ -69,6 +69,16 @@
   `E:/Models Blender/Маски_АЛЬФА` владельца; карбон, подложки номеров, этикетка аккумулятора — `gen_textures.py`), игровая
   сетка, запекание и экспорт — `game_lp.py`, `game_bake.py`, `game_pack.py`, `game_export.py`; исходники —
   `E:/Models Blender/VEHICLES/Купе Ильи` (asset-state.md там же).
+- `coupe_ilya_trim_fragment.glb` — отколотый кусок хромированной накладки порога той же модели (улика на стоянке ТЦ), без карт —
+  материал из атласа кузова.
+
+## Улики заказа «Вернуть машину» (assets/textures/car_clues)
+
+- Собственные текстуры `tools/gen_car_clue_textures.py`: пятно охлаждающей жидкости и следы шин — по альфа-маскам владельца
+  (`E:/Models Blender/Маски_АЛЬФА`: «Масло_01_Тонкая_плёнка», «Кристаллы_06_Порошковый_налёт», «Резина_09_Прерывистое_трение»,
+  «Резина_03_Рваные_полоски»; пути и SHA-256 — `masks_used.json`); номера, накладная, бирка — процедурные, текст отрисован
+  шрифтами Windows (Bahnschrift, Arial, Segoe Print). Ящик для номеров — `assets/shelter/models/PH_PlasticCrate.glb`
+  (Poly Haven, CC0 — см. раздел убежища).
 
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 
