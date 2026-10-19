@@ -1353,8 +1353,9 @@ func _trader_mods() -> void:
 		return
 	_builder_card(col, weapon, String(ref[0]), int(ref[1]), "shop")
 	var spec := WeaponStats.compute(weapon)
-	col.add_child(_text("Точность в прицеле %s · отдача %.3f · эргономика %d · шум %d м · %.1f кг" % [
-		"%.2f°" % float(spec.ads_spread), float(spec.kick), int(spec.ergo), int(spec.noise_m), float(spec.weight)], Color(0.8, 0.82, 0.78)))
+	var ads_deg: float = WeaponStats.ads_spread_deg(spec)
+	col.add_child(_text("Разброс в прицеле %s · отдача %.3f · эргономика %d · шум %d м · %.1f кг" % [
+		"нет" if ads_deg <= 0.0 else "%.2f°" % ads_deg, float(spec.kick), int(spec.ergo), int(spec.noise_m), float(spec.weight)], Color(0.8, 0.82, 0.78)))
 	col.add_child(_text("Клик по квадратику у точки крепления: купить у Михалыча и сразу поставить или поставить своё. Снятое — в тайник.", Color(0.6, 0.62, 0.6)))
 
 
@@ -2239,7 +2240,9 @@ func _fx_text(ms: Dictionary) -> String:
 		elif k == "db" or k == "scoped":
 			continue
 		elif FX_NAMES.has(k):
-			parts.append("%s %+d%%" % [FX_NAMES[k], int(round((float(v) - 1.0) * 100.0))])
+			# через прицел пуля идёт без разброса — прицел сужает только сноп дроби
+			var fx_name: String = "разброс дроби в прицеле" if k == "ads_spread" and Balance.ADS_SPREAD_K <= 0.0 else String(FX_NAMES[k])
+			parts.append("%s %+d%%" % [fx_name, int(round((float(v) - 1.0) * 100.0))])
 	return ", ".join(parts)
 
 

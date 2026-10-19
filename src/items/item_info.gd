@@ -399,9 +399,10 @@ static func _mod_text(id: String, attachment: Dictionary) -> String:
 static func _mod_effects(attachment: Dictionary) -> Array[String]:
 	var out: Array[String] = []
 	var fx: Dictionary = attachment.get("fx", {})
+	# через прицел пуля идёт без разброса (Balance.ADS_SPREAD_K) — прицел сужает только сноп дроби
 	var multipliers := {
 		"kick": "вертикальная отдача", "kick_h": "горизонтальная отдача", "shake": "раскачка",
-		"spread": "разброс", "ads_spread": "разброс в прицеле", "noise": "дальность звука",
+		"spread": "разброс", "ads_spread": "разброс в прицеле" if Balance.ADS_SPREAD_K > 0.0 else "разброс дроби в прицеле", "noise": "дальность звука",
 		"damage": "урон", "flash": "вспышка", "aim": "скорость прицеливания",
 		"braced_kick": "отдача с упора", "braced_spread": "разброс с упора",
 	}

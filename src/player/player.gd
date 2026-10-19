@@ -1030,6 +1030,35 @@ func _physics_process(delta: float) -> void:
 	_body.rotation.x = -_recoil * 0.4
 
 
+## Разброс выстрела, град (полуугол конуса, Hitscan). От бедра — полный (ЛЦУ включён — меньше,
+## hip_spread); пока ствол доводят к глазу — спадает к прицельному. Через прицел одной пулей — доля
+## Balance.ADS_SPREAD_K (0 — пуля идёт точно по линии прицеливания: промах только от отдачи, раскачки и
+## дыхания, их держит игрок). Дробь в прицеле расходится по-прежнему — это сноп, а не ошибка стрелка;
+## с завалом целятся по точке ЛЦУ, не через прицел, — точность между прицельной и «от бедра».
+func shot_spread(spec: Dictionary, braced: bool) -> float:
+	var hip := float(spec.hip_spread)
+	var mult := hip
+	var in_ads := ads and aiming
+	if in_ads:
+		var aimed := float(spec.ads_spread)
+		if aim_cant:
+			aimed = lerpf(aimed, hip, float(Balance.AIM_CANT.spread_k))
+		elif int(spec.pellets) <= 1:
+			aimed *= Balance.ADS_SPREAD_K
+		mult = lerpf(hip, aimed, aim_progress())
+	elif not ads:
+		# изометрия, от бедра: угловой коллиматор — навскидку точнее, крупная оптика мешает
+		if String(spec.sight) != "primary" and not bool(spec.scoped):
+			mult *= float(Balance.ISO_AIM.offset_hip)
+		elif bool(spec.scoped):
+			mult *= float(Balance.ISO_AIM.scope_hip)
+	var spread: float = float(spec.spread_deg) * mult * (float(spec.braced_spread) if braced else 1.0)
+	if is_downed():
+		spread *= Balance.DOWN_SPREAD
+	# очередь раскачивает: от бедра сильно, в прицеле — меньше (ствол ведут глазами)
+	return spread * (1.0 + minf(_bloom, Balance.RECOIL_BLOOM_MAX) * (Balance.RECOIL_BLOOM_ADS if in_ads else 1.0))
+
+
 ## Отдача выстрела: подброс и увод вбок. В прицеле невозвращаемая доля уходит во взгляд навсегда
 ## (очередь ползёт вверх — тяни вниз), возвращаемая — временно; от бедра — раскачка разброса.
 func _apply_recoil(spec: Dictionary, braced: bool, rig: CameraRig) -> void:
@@ -2085,27 +2114,9 @@ func _fire(spec: Dictionary) -> void:
 			var z_up: Vector3 = z_right.cross(dir).normalized()
 			dir = (dir + z_right * tan(deg_to_rad(zero_moa.x / 60.0)) + z_up * tan(deg_to_rad(zero_moa.y / 60.0))).normalized()
 	var exclude: Array[RID] = [get_rid()]
-	# разброс: от бедра (ЛЦУ включён — меньше, hip_spread), в прицеле — по мере «довода» к
-	# прицельному (выбранный прицел: у углового — свой довод и точность); сидя/лёжа на сошках —
-	# ещё меньше, и отдача тоже
-	var hip := float(spec.hip_spread)
-	var mult := hip
-	if ads and aiming:
-		# с завалом целятся по точке ЛЦУ, не через прицел: точность — между прицельной и «от бедра»
-		var aimed: float = lerpf(float(spec.ads_spread), hip, float(Balance.AIM_CANT.spread_k)) if aim_cant else float(spec.ads_spread)
-		mult = lerpf(hip, aimed, aim_progress())
-	elif not ads:
-		# изометрия, от бедра: угловой коллиматор — навскидку точнее, крупная оптика мешает
-		if String(spec.sight) != "primary" and not bool(spec.scoped):
-			mult *= float(Balance.ISO_AIM.offset_hip)
-		elif bool(spec.scoped):
-			mult *= float(Balance.ISO_AIM.scope_hip)
+	# сидя/лёжа на сошках — разброс и отдача меньше
 	var braced := stance != Stance.STAND
-	var spread: float = float(spec.spread_deg) * mult * (float(spec.braced_spread) if braced else 1.0)
-	if is_downed():
-		spread *= Balance.DOWN_SPREAD
-	# очередь раскачивает: от бедра сильно, в прицеле — меньше (ствол ведут глазами)
-	spread *= 1.0 + minf(_bloom, Balance.RECOIL_BLOOM_MAX) * (Balance.RECOIL_BLOOM_ADS if ads and aiming else 1.0)
+	var spread: float = shot_spread(spec, braced)
 	var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DEBRIS
 	var muzzle := _muzzle_world()
 	var rig := _camera_rig as CameraRig

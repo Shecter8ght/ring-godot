@@ -49,6 +49,10 @@ func _ready() -> void:
 	await get_tree().physics_frame
 	var saved: Dictionary = _me.inventory.equipment.primary
 	_check("хост сохранил щелчки, ошибку не тронул", Gear.zero_clicks(saved) == Vector2i(-30, -18) and Gear.zero_offset(saved).length() < 0.01, str(saved.get("zero")))
+	# разброс через прицел (владелец 2026-10-19): пуля идёт по линии прицеливания, и после очереди тоже
+	_me._bloom = Balance.RECOIL_BLOOM_MAX
+	var ads_spread: float = _me.shot_spread(_me.spec(), false)
+	_check("через прицел разброса нет, даже после очереди", ads_spread == 0.0, "%.3f°" % ads_spread)
 
 	# --- дыхание: прицел ходит; задержал — почти стоит; выдохся — одышка
 	await _arm({})
@@ -103,6 +107,9 @@ func _ready() -> void:
 		_check("метка вернулась на место", (dot.position - (dot.get_meta("dot_rest") as Vector3)).length() < 0.0005)
 		await RenderingServer.frame_post_draw
 	Input.action_release("aim")
+	await get_tree().create_timer(0.3).timeout
+	var hip_spread: float = _me.shot_spread(_me.spec(), false)
+	_check("от бедра разброс прежний (%.2f°)" % hip_spread, hip_spread > 0.5)
 	print("aim_feel_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails else 0)
 
@@ -127,6 +134,10 @@ func _pure() -> void:
 	var fitted: Array = Gear.fit(w, {"id": "optic_rd_01", "n": 1})
 	_check("поставил прицел — ноль сбит", String(fitted[2]) == "" and Gear.zero_offset(fitted[0]).length() >= float(Balance.ZEROING.sight_moa[0]) - 0.2, str((fitted[0] as Dictionary).get("zero")))
 	_check("купленный ствол пристрелян", Gear.zero_offset(ItemDb.make(ID, 1)) == Vector2.ZERO)
+	# карточка оружия: через прицел одной пулей — без разброса, дробь расходится
+	var shotgun: Dictionary = WeaponStats.compute(ItemDb.make("wpn_sg_01", 1))
+	_check("карточка: у автомата в прицеле разброса нет", WeaponStats.ads_spread_deg(WeaponStats.compute(ItemDb.make(ID, 1))) == 0.0)
+	_check("карточка: дробь в прицеле расходится (%d дробин)" % int(shotgun.pellets), int(shotgun.pellets) > 1 and WeaponStats.ads_spread_deg(shotgun) > 0.5)
 
 
 ## Куда уходит пуля от точки прицеливания, угл. мин (вправо, вверх): выстрел без разброса и отдачи.

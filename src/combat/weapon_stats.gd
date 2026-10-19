@@ -298,7 +298,7 @@ static func rows(s: Dictionary) -> Array:
 		["Пробитие", float(s.pen), clampf(float(s.pen) * 1.6, 0.0, 100.0), true, "%.0f"],
 		["Скорострельность", 60.0 / float(s.interval), clampf(60.0 / float(s.interval) / 9.0, 0.0, 100.0), true, "%.0f выстр/мин"],
 		["Точность от бедра", _acc(float(s.spread_deg) * float(s.hip_spread)), _acc(float(s.spread_deg) * float(s.hip_spread)), true, "%.0f"],
-		["Точность в прицеле", _acc(float(s.spread_deg) * float(s.ads_spread)), _acc(float(s.spread_deg) * float(s.ads_spread)), true, "%.0f"],
+		["Точность в прицеле", _acc(ads_spread_deg(s)), _acc(ads_spread_deg(s)), true, "%.0f"],
 		["Отдача верт.", float(s.kick) * 1100.0, clampf(float(s.kick) * 1100.0, 0.0, 100.0), false, "%.0f"],
 		["Отдача гориз.", float(s.kick_h) * 3000.0, clampf(float(s.kick_h) * 3000.0, 0.0, 100.0), false, "%.0f"],
 		["Эргономика", float(s.ergo), float(s.ergo), true, "%.0f"],
@@ -309,6 +309,13 @@ static func rows(s: Dictionary) -> Array:
 		["Вес", float(s.weight), clampf(float(s.weight) * 14.0, 0.0, 100.0), false, "%.1f кг"],
 		["Состояние", float(s.dur), float(s.dur), true, "%.0f%%"],
 	]
+
+
+## Разброс через прицел, град: одной пулей — доля Balance.ADS_SPREAD_K от прицельного (0 — пуля идёт
+## точно по линии прицеливания), дробь — прицельный разброс ствола (как в Player.shot_spread).
+static func ads_spread_deg(s: Dictionary) -> float:
+	var k: float = Balance.ADS_SPREAD_K if int(s.pellets) <= 1 else 1.0
+	return float(s.spread_deg) * float(s.ads_spread) * k
 
 
 ## Точность 0–100 из разброса в градусах.
