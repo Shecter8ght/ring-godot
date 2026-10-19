@@ -1,0 +1,40 @@
+{
+ "model": "veras54_drum60",
+ "title": "Барабан 5,45 на 60",
+ "item": "mag_545_60",
+ "source": "E:\\Models Blender\\WEAPONS\\ВЕРАС-54 — модель и обвесы\\Барабан 60\\Актуальное\\Drum60_Loaded_State100_Textured_v01.blend",
+ "source_sha256": "ae769714395314f8423ade2bf23ca6359efe960af241a0c7f0e3974c5055db4f",
+ "axes": "+Z к дулу, +Y вверх, −X — правая сторона стрелка; начало — точка крепления магазина",
+ "attach_in_veras54_m": [
+  0.179,
+  0.0,
+  -0.037
+ ],
+ "atlas": "Drum60",
+ "atlas_size": 4096,
+ "texel_px_mm": [
+  7.28,
+  0.227
+ ],
+ "rounds": 8,
+ "rounds_detailed": 2,
+ "nodes": [
+  "DrumKey",
+  "Magazine",
+  "Round_01",
+  "Round_02",
+  "Round_03",
+  "Round_04",
+  "Round_05",
+  "Round_06",
+  "Round_07",
+  "Round_08"
+ ],
+ "size_m": [
+  0.1141,
+  0.104,
+  0.1827
+ ],
+ "tris": 6676,
+ "tris_world": 2452
+}

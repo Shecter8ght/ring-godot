@@ -209,6 +209,11 @@ tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же с
 #   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски _wear и жировой плёнки _coat в assets) → game_rig.py (риг рук v13 в библиотеке)
 #   → bash tools/veras54_v13/clips/build_all.sh (18 клипов, «Клипы v13») → export_veras54.py → --import → python -X utf8 tools/veras54_v13/game_imports.py → --import;
 #   сверка запекания с исходником в его студии — tools/veras54_v13/bake_compare.py, гильза задержки — clips/jam_check.py
+# Магазины ВЕРАС-54 на 45 и барабан на 60 в игру: sh tools/veras54_mags/chain.sh [m45] [d60] (mags_game_lp → bake → pack → export:
+#   атлас 4096, .gltf «в руках» и _world, маски _wear/_coat — assets/models/weapons/veras54_mags; файл для Blender — «Игровая версия»
+#   в библиотеке) → --import → python -X utf8 tools/veras54_mags/mags_game_imports.py → --import
+tools/godot.cmd --headless res://tools/veras54_mags_check.tscn # магазины 45/60 в движке: узлы, патроны Round_NN, габарит, карты, шейдер износа;
+                                                              # с окном (--windowed --resolution 1600x900) — снимки veras54_mags_* (прочность 100 и 25 %)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка), мировая и подробная (конструктор) — .gltf с общими картами в assets/models/weapons/veras54; grips — наборы клипов под рукоятки ВАРН
 tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от первого лица: бедро, прицел, перезарядки, проверка магазина, мировая модель; рукоятки ВАРН V1/V2 и глушитель
                                                               # задержка «гильза в окне» и её устранение, износ шейдером 100/60/20, прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)
