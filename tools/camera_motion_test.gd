@@ -1,6 +1,7 @@
 extends Node
 ## Движение камеры от первого лица (CameraMotion), при 144 кадрах в секунду и физике 60 тиков:
-## стоит — камера ровно в глазах; шаг и бег — покачивание в фазе шагов, бег размашистей и чаще;
+## стоит — камера ровно в глазах; шаг и бег — покачивание в фазе шагов, бег размашистей и чаще (но без
+## тряски: не чаще ~3 шагов в секунду, размах и поворот в пределах);
 ## остановка — голова «досаживается» и возвращается (ничего не копится); назад, вбок, наискосок,
 ## разворот, шаг ↔ бег — без рывков; вбок — лёгкий крен в сторону шага; в прицеле точка почти стоит
 ## и пуля идёт по оси камеры; присед — глаз опускается плавно; прыжок — проседание на приземлении;
@@ -63,7 +64,7 @@ func _ready() -> void:
 	_check("шаг: камера качается (вверх-вниз 3–20 мм)", float(walk.max_up) > 0.003 and float(walk.max_up) < 0.02, "%.1f мм" % (float(walk.max_up) * 1000.0))
 	_check("шаг: фаза камеры совпадает с шагами", float(walk.lock_bad) <= 0.05 * float(walk.frames) and int(walk.steps) >= 2,
 		"мимо фазы %d из %d кадров, шагов %d" % [walk.lock_bad, walk.frames, walk.steps])
-	_check("шаг: удар стопы — камера проседает в кадр шага", int(walk.dips) == int(walk.steps), "%d из %d" % [walk.dips, walk.steps])
+	_check("шаг: удар стопы — камера проседает в кадр шага", int(walk.missed) == 0 and int(walk.dips) >= 2, "просела %d раз из %d шагов, пропущено %d" % [walk.dips, walk.steps, walk.missed])
 	# 5. остановка резкая — камера мягко досаживается и возвращается
 	Input.action_release("move_forward")
 	var stop := await _hold(1.6, "остановка шага")
@@ -80,8 +81,9 @@ func _ready() -> void:
 	var run := await _hold(1.5, "бег", true)
 	var walk_rate := float(walk.steps) / 2.0
 	var run_rate := float(run.steps) / 1.5
-	_check("бег: шаги чаще шага", run_rate > walk_rate * 1.8, "%.1f против %.1f в секунду" % [run_rate, walk_rate])
-	_check("бег: покачивание сильнее шага", float(run.max_up) > float(walk.max_up) * 1.8, "%.1f против %.1f мм" % [float(run.max_up) * 1000.0, float(walk.max_up) * 1000.0])
+	_check("бег: шаги чаще шага, но не чаще ~3 в секунду", run_rate > walk_rate * 1.4 and run_rate < 3.4, "%.1f против %.1f в секунду" % [run_rate, walk_rate])
+	_check("бег: покачивание сильнее шага, но не тряска (до 2 см, поворот до 0.6°)", float(run.max_up) > float(walk.max_up) * 1.3 and float(run.max_up) < 0.02 and float(run.max_ang) < deg_to_rad(0.6),
+		"%.1f против %.1f мм, поворот %.2f°" % [float(run.max_up) * 1000.0, float(walk.max_up) * 1000.0, rad_to_deg(float(run.max_ang))])
 	_check("бег: фаза камеры совпадает с шагами", float(run.lock_bad) <= 0.08 * float(run.frames), "мимо фазы %d из %d" % [run.lock_bad, run.frames])
 	if Engine.get_frames_per_second() > float(Engine.physics_ticks_per_second) * 1.4:
 		_check("бег: между тиками физики камера не стоит на месте (без ступенек)", float(run.still) <= 0.05 * float(run.frames),
@@ -223,7 +225,7 @@ func _eye_h() -> float:
 ## Держит текущие клавиши sec секунд и собирает, как шла камера.
 func _hold(sec: float, label: String, measure_steps: bool = false) -> Dictionary:
 	var st := {"frames": 0, "max_pos": 0.0, "max_ang": 0.0, "max_up": 0.0, "min_up": 0.0, "min_pitch": 0.0,
-		"max_rot": 0.0, "max_aim_err": 0.0, "lock_bad": 0, "steps": 0, "dips": 0, "sum_roll": 0.0, "mean_roll": 0.0,
+		"max_rot": 0.0, "max_aim_err": 0.0, "lock_bad": 0, "steps": 0, "dips": 0, "missed": 0, "sum_roll": 0.0, "mean_roll": 0.0,
 		"max_eye_step": 0.0, "still": 0, "raw_still": 0, "max_weapon": 0.0, "end_pos": 0.0, "end_ang": 0.0}
 	var t := 0.0
 	var steps0 := _fs.steps_taken
@@ -262,6 +264,9 @@ func _hold(sec: float, label: String, measure_steps: bool = false) -> Dictionary
 			if m._impact_v.x < -0.01:
 				st.dips = int(st.dips) + 1
 				dip_wait = 0
+			elif dip_wait == 0:
+				# 3 кадра прошли, а камера не просела — шаг пропущен (шаг у самого конца замера не считается)
+				st.missed = int(st.missed) + 1
 		# камера на бегу: стояла ли на месте этот кадр (ступенька между тиками физики)
 		var view := _me.view_eye()
 		var raw := _me.eye_position()
