@@ -960,8 +960,11 @@ const DAY_CYCLE := {"hour_sec": 300.0, "latitude": 55.75, "day_of_year": 235, "m
 	"day_from": 22.0, "dusk_to": 6.0, "dusk_from": -3.0, "night_to": -12.0, "sun_on": 2.0, "sun_off": -3.0,
 	"sky_on": 2.0, "sky_off": -10.0, "twilight_dim": 0.18, "twilight_end": -6.0, "light_sec": 0.1, "sky_sec": 2.0, "sync_sec": 10.0}
 ## Погода: риск, во сколько раз хуже видно на улице (view), слышно (hear — радиус шума).
+## Пасмурно — сплошные тучи без дождя: сыро, лужи после дождя, солнце едва пробивается, тени мягкие
+## (сырой вечер с картинки зоны 1 — один из вариантов, не единственный; владелец 2026-10-19).
 const RAID_WEATHER := {
 	"clear": {"name": "Ясно", "risk": 0, "view": 1.0, "hear": 1.0},
+	"overcast": {"name": "Пасмурно", "risk": 0, "view": 0.9, "hear": 1.0},
 	"rain": {"name": "Дождь", "risk": 1, "view": 0.75, "hear": 0.6},
 	"fog": {"name": "Туман", "risk": 1, "view": 0.45, "hear": 1.0},
 	"heat": {"name": "Жара", "risk": 1, "view": 1.0, "hear": 1.0},
@@ -971,6 +974,7 @@ const RAID_WEATHER := {
 ## множитель силы солнца (за пеленой прямого света меньше).
 const HDRI_WEATHER := {
 	"clear": {"overcast": 0.0, "exposure": 1.0, "tint": Color(1.0, 1.0, 1.0), "sun_k": 1.0},
+	"overcast": {"overcast": 0.85, "exposure": 0.7, "tint": Color(0.88, 0.91, 0.95), "sun_k": 0.18},
 	"heat": {"overcast": 0.0, "exposure": 1.15, "tint": Color(1.06, 1.0, 0.92), "sun_k": 1.15},
 	"fog": {"overcast": 0.7, "exposure": 0.8, "tint": Color(0.95, 0.97, 1.0), "sun_k": 0.45},
 	"rain": {"overcast": 1.0, "exposure": 0.5, "tint": Color(0.8, 0.84, 0.9), "sun_k": 0.0},
@@ -1004,6 +1008,8 @@ const SKY_CALC := {"sun_size": 0.53, "sun_clamp": 40.0, "amb_match": 1.0, "groun
 	"weather": {
 		"clear": {"mie": 1.0, "overcast": 0.0, "cover": 0.4, "base": 1.4, "top": 3.6, "amb_bottom": 0.4,
 			"deck_var": 0.0, "base_rag": 0.0, "scud": 0.0, "shafts": 0.0},
+		"overcast": {"mie": 1.6, "overcast": 0.85, "cover": 0.95, "base": 0.9, "top": 3.0, "amb_bottom": 1.1,
+			"deck_var": 0.55, "base_rag": 0.2, "scud": 0.25, "shafts": 0.0},
 		"heat": {"mie": 1.8, "overcast": 0.0, "cover": 0.2, "base": 2.0, "top": 4.0, "amb_bottom": 0.6,
 			"deck_var": 0.0, "base_rag": 0.0, "scud": 0.0, "shafts": 0.0},
 		"fog": {"mie": 4.0, "overcast": 0.5, "cover": 0.8, "base": 0.5, "top": 1.8, "amb_bottom": 0.85,
@@ -1022,6 +1028,7 @@ const SKY_CALC := {"sun_size": 0.53, "sun_clamp": 40.0, "amb_match": 1.0, "groun
 ## дольше прозрачно, потом быстрее густеет. Вместо «дыма одной плотности» — воздушная перспектива.
 const DEPTH_FOG := {
 	"clear": {"begin": 25.0, "end": 900.0, "density": 0.55, "curve": 1.35},
+	"overcast": {"begin": 15.0, "end": 650.0, "density": 0.68, "curve": 1.15},
 	"heat": {"begin": 40.0, "end": 1100.0, "density": 0.45, "curve": 1.2},
 	"rain": {"begin": 10.0, "end": 420.0, "density": 0.8, "curve": 1.0},
 	"fog": {"begin": 4.0, "end": 170.0, "density": 0.97, "curve": 0.8},
@@ -1053,7 +1060,9 @@ const SHELTER_SKY := {
 	"day_fog": {"a": "res://assets/sky/kloofendal_overcast_puresky.hdr", "exposure": 1.05, "sun_k": 0.2, "veil": 0.4, "haze": 0.6},
 	"dusk": {"a": "res://assets/sky/kloppenheim_06_puresky.hdr", "exposure": 1.0, "sun_k": 1.0, "haze": 0.4},
 	"dusk_rain": {"a": "res://assets/sky/kloppenheim_01_puresky.hdr", "exposure": 0.9, "sun_k": 0.0, "veil": 0.8, "haze": 0.55},
-	"dusk_fog": {"a": "res://assets/sky/kloppenheim_01_puresky.hdr", "exposure": 1.05, "sun_k": 0.22, "veil": 0.4, "haze": 0.6}}
+	"dusk_fog": {"a": "res://assets/sky/kloppenheim_01_puresky.hdr", "exposure": 1.05, "sun_k": 0.22, "veil": 0.4, "haze": 0.6},
+	"day_overcast": {"a": "res://assets/sky/kloofendal_overcast_puresky.hdr", "exposure": 1.0, "sun_k": 0.0, "veil": 0.6, "haze": 0.45},
+	"dusk_overcast": {"a": "res://assets/sky/kloppenheim_01_puresky.hdr", "exposure": 1.0, "sun_k": 0.0, "veil": 0.6, "haze": 0.45}}
 ## Двор котельной (убежище полуподвальное): отметка земли над полом; где кончается ровное место и с какого
 ## расстояния идут бугры леса, их размах и подъём, м. Дверь выхода: угол и время открывания. Сбор перед
 ## рейдом (RaidStartZone): план принят и все, кто в убежище, стоят в зоне — отсчёт countdown_sec, рейд.
@@ -1065,14 +1074,16 @@ const RAID_POWER := {
 	"off": {"name": "Электричества нет", "risk": 2},
 }
 ## Погода меняется в рейде: ясно → дождь (шанс, через сколько секунд, гром за столько до него),
-## туман → рассеется (шанс, через сколько).
-const WEATHER_CHANGE := {"rain_chance": 0.3, "rain_after": [180.0, 600.0], "thunder_lead": 50.0,
+## пасмурно → дождь (шанс overcast_rain_chance, сроки те же), туман → рассеется (шанс, через сколько).
+const WEATHER_CHANGE := {"rain_chance": 0.3, "overcast_rain_chance": 0.45, "rain_after": [180.0, 600.0], "thunder_lead": 50.0,
 	"fog_lift_chance": 0.4, "fog_lift_after": [300.0, 720.0]}
 ## Мокрая земля (асфальт, шейдер wet_asphalt): за сколько секунд дождя намокает плёнкой и
 ## наливаются лужи, за сколько после дождя сохнет плёнка и уходят лужи; лужи наливаются не
-## выше puddle_max; рейд начался в дождь — уже мокро (start: [плёнка, лужи]).
+## выше puddle_max; рейд начался в дождь — уже мокро (start: [плёнка, лужи]). Пасмурно — сыро
+## после дождя (damp: [плёнка, лужи, сырость фасадов, коры, травы и рельефа — global rain_wet]),
+## ниже этого не сохнет.
 const WET_GROUND := {"film_up_sec": 45.0, "puddle_up_sec": 200.0, "film_dry_sec": 300.0, "puddle_dry_sec": 900.0,
-	"puddle_max": 0.85, "start": [1.0, 0.7]}
+	"puddle_max": 0.85, "start": [1.0, 0.7], "damp": [0.7, 0.45, 0.4]}
 ## Выносливость: запас, расход на бег в секунду, восстановление в секунду (после паузы, с);
 ## выдохся — бег снова с порога. В жару на улице расход × STAMINA_HEAT.
 const STAMINA_MAX := 100.0

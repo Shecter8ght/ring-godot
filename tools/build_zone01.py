@@ -1372,7 +1372,8 @@ def write_definition(h: np.ndarray) -> None:
         units="metres", north="-Z", spawn=[x, round(ground(x, z) + .2, 3), z], camera_yaw=180,
         nav_cache="res://data/navigation/zone01",
         # свет: больше рассеянного неба, солнце мягче — тени читаются, свет не «выжигает»
-        light=dict(ambient_k=1.9, sun_k=0.8, ambient_k_dusk=1.9, ambient_k_day_rain=2.4, ambient_k_dusk_rain=2.4, ambient_k_night_rain=4.2, ambient_k_night_fog=2.2),
+        light=dict(ambient_k=1.9, sun_k=0.8, ambient_k_dusk=1.9, ambient_k_day_rain=2.4, ambient_k_dusk_rain=2.4, ambient_k_night_rain=4.2, ambient_k_night_fog=2.2,
+                   ambient_k_day_overcast=2.2, ambient_k_dusk_overcast=2.2, ambient_k_night_overcast=3.6),
         # небо: пасмурное утро Nqweba Dawn (Poly Haven, CC0) на дневные рейды — его размытое солнце
         # на высоте ~48°, как у дневного солнца рейда; sun_u — где оно на панораме (доля ширины)
         # horizon_cut — ниже 18° на панораме склоны и горы: их заменяет небо над ними и дымка
@@ -1385,6 +1386,9 @@ def write_definition(h: np.ndarray) -> None:
             dusk=dict(a="res://assets/sky/kloppenheim_06_puresky.hdr", exposure=1.0, sun_k=1.0, haze=0.4),
             dusk_rain=dict(a="res://assets/sky/kloppenheim_01_puresky.hdr", exposure=0.9, sun_k=0.0, veil=0.8, haze=0.55),
             dusk_fog=dict(a="res://assets/sky/kloppenheim_01_puresky.hdr", exposure=1.05, sun_k=0.22, veil=0.4, haze=0.6),
+            # пасмурно (сырой вечер с картинки — одна из погод): те же пасмурные панорамы, солнце едва пробивается
+            day_overcast=dict(a="res://assets/sky/kloofendal_overcast_puresky.hdr", exposure=1.0, sun_k=0.35, veil=0.6, haze=0.45),
+            dusk_overcast=dict(a="res://assets/sky/kloppenheim_01_puresky.hdr", exposure=1.0, sun_k=0.4, veil=0.6, haze=0.45),
         ),
         terrain=dict(heights="res://data/terrain/zone01_heights.r32", origin=[X0, Z0], grid=[NX, NZ], step=STEP,
                      layer_tiles=LAYER_TILES, layers=LAYERS,

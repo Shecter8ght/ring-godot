@@ -69,7 +69,7 @@ func _hideout_weather() -> void:
 	Settings.motion_blur = false
 	Settings.changed.emit()
 	var views: Array = [["hall", Vector3(36, 0.05, -8), Vector3(36, 3.0, 7)], ["floor", Vector3(30, 0.05, -6), Vector3(36, 0.3, 3)], ["hub", Vector3(-4.5, 0.05, 4.2), Vector3(1, 1.25, -2)]]
-	for cond: Array in [["day", "clear"], ["day", "rain"], ["dusk", "clear"], ["night", "clear"]]:
+	for cond: Array in [["day", "clear"], ["day", "rain"], ["dusk", "clear"], ["dusk", "overcast"], ["night", "clear"]]:
 		Profile.next_conditions = {"time": cond[0], "weather": cond[1], "power": "on"}
 		weather.refresh(true)
 		for v: Array in views:

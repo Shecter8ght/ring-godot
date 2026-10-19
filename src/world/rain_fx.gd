@@ -419,8 +419,9 @@ func set_amount(k: float) -> void:
 	for m in [_drop_mat, _splash_mat, _wet_mat, _wet_ground]:
 		if m:
 			m.set_shader_parameter("amount", k)
-	# сырость поверхностей (фасады, кора, хвоя, рельеф — шейдеры карты читают глобальный rain_wet)
-	RenderingServer.global_shader_parameter_set("rain_wet", k)
+	# сырость поверхностей (фасады, кора, хвоя, рельеф — шейдеры карты читают глобальный rain_wet);
+	# дождь пошёл в сырую погоду — не суше, чем было
+	RenderingServer.global_shader_parameter_set("rain_wet", maxf(k, RaidWeather.surface_damp()))
 	_drops.visible = k > 0.001
 	_splash.visible = k > 0.001
 

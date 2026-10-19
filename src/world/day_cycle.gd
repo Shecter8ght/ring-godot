@@ -171,7 +171,7 @@ func _profile(k: String) -> Dictionary:
 	p["haze"] = float(conf.get("haze", 0.0))
 	p["horizon_cut"] = float(conf.get("horizon_cut", 0.0))
 	if k == "night":
-		p["sun_energy"] = float(t.sun_energy) * (0.0 if String(c.weather) == "rain" else 1.0)
+		p["sun_energy"] = float(t.sun_energy) * (0.0 if RaidConditions.clouded(String(c.weather)) else 1.0)
 	return p
 
 

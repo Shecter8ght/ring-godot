@@ -4,7 +4,8 @@ render_mode cull_disabled;
 // отражения неба — от движка (SSR/небо), без прозрачности (глубину всё равно не видно, и так дешевле).
 // Болото (владелец 2026-10-18: брод по пояс, «нормальный вид воды, но чтобы компьютер не улетел»):
 // по карте глубины у берега мелко и мутно (ил просвечивает), на глубине тёмная гладь; пятна ряски;
-// в дождь — круги от капель (global rain_wet). Всё — несколько выборок текстур, без прозрачности.
+// в дождь — круги от капель (rain — от RaidWeather через WaterBody.set_rain; сырость без дождя их не рисует).
+// Всё — несколько выборок текстур, без прозрачности.
 
 uniform vec3 deep_color : source_color = vec3(0.07, 0.09, 0.06);
 uniform vec3 murk_color : source_color = vec3(0.18, 0.22, 0.12);
@@ -23,7 +24,8 @@ uniform vec3 mud_color : source_color = vec3(0.21, 0.18, 0.12);
 uniform float duckweed = 0.0;
 uniform vec3 weed_color : source_color = vec3(0.17, 0.25, 0.07);
 
-global uniform float rain_wet;
+// сила дождя 0..1
+uniform float rain = 0.0;
 
 // круг от капли в ячейке: смещение нормали (дождь)
 vec2 drop_ring(vec2 p, float t) {
@@ -53,9 +55,9 @@ void fragment() {
 	float wn = texture(noise_tex, wp.xz / 26.0).g * 0.65 + texture(noise_tex, wp.xz / 6.0).r * 0.35;
 	float weed = duckweed > 0.0 ? smoothstep(0.72 - duckweed * 0.3 - shallow * 0.1, 0.76 - duckweed * 0.3 - shallow * 0.1, wn) : 0.0;
 	// дождь: круги от капель в двух сдвинутых сетках
-	if (rain_wet > 0.01) {
+	if (rain > 0.01) {
 		vec2 rings = drop_ring(wp.xz * 1.6, TIME) + drop_ring(wp.xz * 1.6 + vec2(0.5, 0.31), TIME + 0.43);
-		slope += rings * rain_wet * 0.9;
+		slope += rings * rain * 0.9;
 	}
 	slope *= 1.0 - weed * 0.85;
 	NORMAL_MAP = normalize(vec3(slope.x + 0.5, slope.y + 0.5, 1.0));

@@ -92,7 +92,10 @@
   "ambient_k_day_rain": 2.4,
   "ambient_k_dusk_rain": 2.4,
   "ambient_k_night_rain": 4.2,
-  "ambient_k_night_fog": 2.2
+  "ambient_k_night_fog": 2.2,
+  "ambient_k_day_overcast": 2.2,
+  "ambient_k_dusk_overcast": 2.2,
+  "ambient_k_night_overcast": 3.6
  },
  "sky_hdri": {
   "day": {
@@ -134,6 +137,20 @@
    "sun_k": 0.22,
    "veil": 0.4,
    "haze": 0.6
+  },
+  "day_overcast": {
+   "a": "res://assets/sky/kloofendal_overcast_puresky.hdr",
+   "exposure": 1.0,
+   "sun_k": 0.35,
+   "veil": 0.6,
+   "haze": 0.45
+  },
+  "dusk_overcast": {
+   "a": "res://assets/sky/kloppenheim_01_puresky.hdr",
+   "exposure": 1.0,
+   "sun_k": 0.4,
+   "veil": 0.6,
+   "haze": 0.45
   }
  },
  "terrain": {

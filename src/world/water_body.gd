@@ -12,14 +12,34 @@ static var _splash_mesh: QuadMesh
 static var _splash_mat: StandardMaterial3D
 static var _ring_mesh: QuadMesh
 static var _ring_shader: Shader
+## Сила дождя на глади сейчас (set_rain).
+static var _rain: float = 0.0
 
 
 func _enter_tree() -> void:
 	_bodies.append(self)
+	_apply_rain(self)
 
 
 func _exit_tree() -> void:
 	_bodies.erase(self)
+
+
+## Дождь на глади (круги от капель, шейдер district_water): сила 0..1 от RaidWeather — материалы
+## воды трогаются, только когда она меняется.
+static func set_rain(k: float) -> void:
+	k = snappedf(k, 0.01)
+	if is_equal_approx(k, _rain):
+		return
+	_rain = k
+	for b: WaterBody in _bodies:
+		_apply_rain(b)
+
+
+static func _apply_rain(b: WaterBody) -> void:
+	var m: ShaderMaterial = b.mesh.surface_get_material(0) as ShaderMaterial if b.mesh else null
+	if m:
+		m.set_shader_parameter("rain", _rain)
 
 
 ## Высота глади над точкой или NAN, если воды над ней нет.

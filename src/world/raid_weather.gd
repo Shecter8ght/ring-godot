@@ -53,23 +53,28 @@ func _exit_tree() -> void:
 	wet = 0.0
 	puddles = 0.0
 	_push_wet(0.0)
+	RenderingServer.global_shader_parameter_set("rain_wet", 0.0)
 
 
 func _ready() -> void:
 	_rng.randomize()
 	Net.scenes_changed.connect(_share_schedule)
 	_apply_static()
-	# рейд начался в дождь — льёт давно: мокро, лужи налиты
+	# рейд начался в дождь — льёт давно: мокро, лужи налиты; пасмурно — дождь был недавно: сыро
 	if is_raining():
 		wet = float(Balance.WET_GROUND.start[0])
 		puddles = float(Balance.WET_GROUND.start[1])
+	elif _damp():
+		wet = float(Balance.WET_GROUND.damp[0])
+		puddles = float(Balance.WET_GROUND.damp[1])
 	_push_wet(0.0)
 	if not Net.is_networked() or multiplayer.is_server():
 		var w := String(RaidConditions.current.weather)
 		var sch: Dictionary = Balance.WEATHER_CHANGE
 		var rain_at := INF
 		var fog_at := INF
-		if w == "clear" and _rng.randf() < float(sch.rain_chance):
+		var rain_chance: float = float(sch.rain_chance) if w == "clear" else (float(sch.overcast_rain_chance) if w == "overcast" else 0.0)
+		if _rng.randf() < rain_chance:
 			rain_at = _rng.randf_range(float(sch.rain_after[0]), float(sch.rain_after[1]))
 		if w == "fog" and _rng.randf() < float(sch.fog_lift_chance):
 			fog_at = _rng.randf_range(float(sch.fog_lift_after[0]), float(sch.fog_lift_after[1]))
@@ -154,7 +159,7 @@ func conditions_changed() -> void:
 ## Всё, что зависит от погоды на старте (и после смены).
 func _apply_static() -> void:
 	var w := String(RaidConditions.current.weather)
-	_fog_target = 0.03 if w == "fog" else (0.006 if w == "rain" else 0.0)
+	_fog_target = 0.03 if w == "fog" else (0.006 if w == "rain" else (0.002 if w == "overcast" else 0.0))
 	_fog_sky_target = 0.9 if w == "fog" else 0.4
 	# ночью небо не серит (RaidAtmosphere: звёзды на чёрном)
 	if String(RaidConditions.current.time) == "night":
@@ -177,7 +182,7 @@ func _apply_static() -> void:
 			e.fog_sky_affect = _fog_sky_target
 			e.fog_enabled = _fog_target > 0.0
 	_update_visibility()
-	_set_overcast(w == "rain")
+	_set_overcast(RaidConditions.clouded(w))
 	_set_rain(w == "rain")
 	changed.emit()
 
@@ -250,10 +255,24 @@ static func wetness() -> float:
 	return current.wet if current else 0.0
 
 
+## Сырость фасадов, коры, травы и рельефа (global rain_wet) без капель: по плёнке воды на земле —
+## пасмурно после дождя сыро (Balance.WET_GROUND.damp), дождь кончился — сохнет вместе с асфальтом.
+static func surface_damp() -> float:
+	if current == null:
+		return 0.0
+	var d: Array = Balance.WET_GROUND.damp
+	return current.wet * float(d[2]) / float(d[0])
+
+
+## Пасмурно — не сохнет ниже сырости после дождя.
+static func _damp() -> bool:
+	return String(RaidConditions.current.get("weather", "clear")) == "overcast"
+
+
 var _overcast: Array = []
 
 
-## Дождь — пасмурно: солнце и небо тусклее (вернуть, если дождь кончится / уровень ушёл).
+## Дождь или пасмурно: солнце и небо тусклее (вернуть, если тучи разойдутся / уровень ушёл).
 func _set_overcast(on: bool) -> void:
 	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D
 	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
@@ -306,19 +325,25 @@ func _process(delta: float) -> void:
 
 
 ## Сырость: в дождь плёнка набегает быстро, лужи — медленно; без дождя плёнка сохнет первой,
-## лужи стоят дольше. У всех peer одинаково (от того же дождя), по сети не шлётся.
+## лужи стоят дольше, в пасмурную погоду — не ниже сырости после дождя. У всех peer одинаково
+## (от того же дождя), по сети не шлётся.
 func _tick_wet(delta: float) -> void:
 	var g: Dictionary = Balance.WET_GROUND
 	if _rain_k > 0.01:
 		wet = minf(1.0, wet + delta * _rain_k / float(g.film_up_sec))
 		puddles = minf(float(g.puddle_max), puddles + delta * _rain_k / float(g.puddle_up_sec))
 	else:
-		wet = maxf(0.0, wet - delta / float(g.film_dry_sec))
-		puddles = maxf(0.0, puddles - delta / float(g.puddle_dry_sec))
+		var damp: bool = _damp()
+		wet = maxf(minf(wet, float(g.damp[0])) if damp else 0.0, wet - delta / float(g.film_dry_sec))
+		puddles = maxf(minf(puddles, float(g.damp[1])) if damp else 0.0, puddles - delta / float(g.puddle_dry_sec))
 	_push_wet(_rain_k)
 
 
 func _push_wet(rain: float) -> void:
+	# капли на воде болота и ручья; сырость поверхностей без дождя (в дождь её ставит RainFx)
+	WaterBody.set_rain(rain)
+	if _rain == null:
+		RenderingServer.global_shader_parameter_set("rain_wet", surface_damp())
 	var m := SectorMaterials.get_material("asphalt_02") as ShaderMaterial
 	if m == null:
 		return

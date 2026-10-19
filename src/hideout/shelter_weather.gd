@@ -52,7 +52,7 @@ func refresh(force: bool = false) -> void:
 	_rain_sound(String(c.weather) == "rain")
 
 
-## Вид за окном: «<время>_sun» — ясно или жара, «<время>_grey» — дождь или туман.
+## Вид за окном: «<время>_sun» — ясно или жара, «<время>_grey» — дождь, туман или пасмурно.
 static func look_key(c: Dictionary) -> String:
 	return String(c.time) + ("_sun" if String(c.weather) in ["clear", "heat"] else "_grey")
 
@@ -82,8 +82,8 @@ static func apply_state(level: Node, c: Dictionary) -> void:
 		sun.shadow_enabled = true
 		sun.visible = true
 		sun.light_angular_distance = 0.5
-		if weather == "rain":
-			# сплошные тучи: солнца нет, но небо светит сверху ровным холодным светом — тот же источник
+		if RaidConditions.clouded(weather):
+			# сплошные тучи (дождь, пасмурно): солнца нет, но небо светит сверху ровным холодным светом — тот же источник
 			# становится «светом облаков»: почти из зенита, слабый, с размытой тенью. Без него двор в
 			# дождь был чёрным: рассеянный свет неба через SDFGI слишком слаб
 			var oc: Dictionary = w.overcast
@@ -99,7 +99,7 @@ static func apply_state(level: Node, c: Dictionary) -> void:
 			if n is Light3D and String(n.name).begins_with("HallDaylight"):
 				(n as Light3D).visible = false
 	# фонари двора (группа «shelter_yard_lamps») — в сумерки, ночью и в непогоду
-	var lamps_on: bool = time != "day" or weather in ["rain", "fog"]
+	var lamps_on: bool = time != "day" or weather in ["rain", "fog", "overcast"]
 	for lamp: Node in level.get_tree().get_nodes_in_group("shelter_yard_lamps") if level.is_inside_tree() else []:
 		if lamp is Light3D:
 			(lamp as Light3D).visible = lamps_on
@@ -118,7 +118,7 @@ static func apply_state(level: Node, c: Dictionary) -> void:
 	env.sdfgi_energy = float(w.gi.get(look_key(c), 1.0))
 	if night_sky:
 		var n_cfg: Dictionary = Balance.NIGHT_ENV
-		night_sky.set_shader_parameter("overcast", 1.0 if weather == "rain" else 0.0)
+		night_sky.set_shader_parameter("overcast", 1.0 if RaidConditions.clouded(weather) else 0.0)
 		var sky := Sky.new()
 		sky.sky_material = night_sky
 		sky.radiance_size = Sky.RADIANCE_SIZE_256
@@ -134,8 +134,8 @@ static func apply_state(level: Node, c: Dictionary) -> void:
 			env.sky = sky
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 		env.ambient_light_energy = float(w.ambient.get(look_key(c), 1.0))
-	if sun and weather == "rain":
-		# сила «света облаков» — после неба: панорама под дождь обнуляет солнце (sun_k 0)
+	if sun and RaidConditions.clouded(weather):
+		# сила «света облаков» — после неба: панорама под дождь и пасмурно обнуляет солнце (sun_k 0)
 		var oc2: Dictionary = w.overcast
 		sun.light_energy = float(Balance.RAID_TIME.day.sun_energy) * float(oc2.energy_k) * float(oc2.time_k.get(time, 1.0))
 	var fog_k: float = float(w.fog.get(look_key(c), 1.0)) * (float(w.fog_weather_k) if weather == "fog" else 1.0)

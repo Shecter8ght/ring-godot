@@ -74,9 +74,10 @@ func apply() -> void:
 			e.volumetric_fog_density = float(e.get_meta("vol_base")) * float(vt.density)
 			if sun and not night:
 				sun.light_volumetric_fog_energy = float(vt.sun)
-	# дождь: сплошные тучи — ни солнца, ни Луны: ни прямого света, ни бликов в лужах и на мокром
+	# дождь: сплошные тучи — ни солнца, ни Луны: ни прямого света, ни бликов в лужах и на мокром;
+	# пасмурно — солнце едва пробивается (слабее, RaidWeather / HDRI_WEATHER), Луны за тучами нет
 	if sun:
-		sun.visible = String(c.weather) != "rain"
+		sun.visible = String(c.weather) != "rain" and not (night and RaidConditions.clouded(String(c.weather)))
 	_apply_power(String(c.power))
 	_day_cycle(String(c.time))
 
@@ -195,7 +196,7 @@ func _apply_night(e: Environment, sky_mat: ShaderMaterial) -> void:
 		return
 	var n: Dictionary = Balance.NIGHT_ENV
 	# материал общий между рейдами — облачность ставим по погоде этого рейда
-	sky_mat.set_shader_parameter("overcast", 1.0 if String(RaidConditions.current.get("weather", "")) == "rain" else 0.0)
+	sky_mat.set_shader_parameter("overcast", 1.0 if RaidConditions.clouded(String(RaidConditions.current.get("weather", ""))) else 0.0)
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 	# карта неба крупнее: в гладкой луже читается диск Луны

@@ -1,5 +1,5 @@
 extends Node
-## Погода: дождь (слышно хуже, видно хуже, капли, мокрый асфальт), дождь начинается в рейде,
+## Погода: дождь (слышно хуже, видно хуже, капли, мокрый асфальт), дождь начинается в рейде, пасмурно (сыро без капель),
 ## туман (снайпер с пистолетом, рассеялся — снова винтовка), жара (пересвет без очков),
 ## выносливость (бег тратит, в жару быстрее). С окном — снимки docs/screens/weather_*.png.
 ## godot --path . res://tools/weather_test.tscn (можно --headless)
@@ -29,6 +29,20 @@ func _ready() -> void:
 	RaidWeather.current._rpc_schedule(1.0, -1.0)
 	await get_tree().create_timer(1.6).timeout
 	_check("дождь начался в рейде", RaidWeather.current.is_raining() and _level.find_child("Rain", true, false) != null, str(RaidConditions.current))
+	# пасмурно (сырой вечер — одна из погод): сыро без капель, ниже сырости не сохнет, может пойти дождь
+	await _load({"time": "dusk", "weather": "overcast", "power": "on"})
+	var dmp: Array = Balance.WET_GROUND.damp
+	var rw := RaidWeather.current
+	_check("пасмурно: сыро и лужи, капель нет", rw.wet >= float(dmp[0]) - 0.01 and rw.puddles >= float(dmp[1]) - 0.01
+		and _level.find_child("Rain", true, false) == null, "плёнка %.2f, лужи %.2f" % [rw.wet, rw.puddles])
+	rw._tick_wet(600.0)
+	_check("пасмурно: за 10 минут не высохло, фасады и рельеф сырые", rw.wet >= float(dmp[0]) - 0.01 and RaidWeather.surface_damp() > 0.2,
+		"плёнка %.2f, сырость %.2f" % [rw.wet, RaidWeather.surface_damp()])
+	if shots:
+		await _shot("weather_overcast", SectorBuilder.polar(-96.0, 150.0))
+	rw._rpc_schedule(rw._t + 0.5, -1.0)
+	await get_tree().create_timer(1.2).timeout
+	_check("пасмурно → пошёл дождь", rw.is_raining() and _level.find_child("Rain", true, false) != null, str(RaidConditions.current))
 	# туман: снайпер — с пистолетом; рассеялся — снова винтовка
 	await _load({"time": "day", "weather": "fog", "power": "on"})
 	var sn := (preload("res://scenes/ai/marauder.tscn") as PackedScene).instantiate() as Marauder

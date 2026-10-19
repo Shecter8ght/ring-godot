@@ -1,6 +1,6 @@
 class_name RaidConditions
 extends RefCounted
-## Условия рейда: время (день / закат / ночь), погода (ясно / дождь / туман / жара), электричество
+## Условия рейда: время (день / закат / ночь), погода (ясно / пасмурно / дождь / туман / жара), электричество
 ## в ТЦ (есть / нет / аварийное). Игрок выбирает их у лестницы в убежище (Profile.next_conditions)
 ## — тяжелее условия, больше риск: лучше лут и доплата Михалыча. В коопе условия хоста приходят
 ## всем при старте уровня (Net.start_level). Значения и риск — Balance.RAID_TIME / _WEATHER / _POWER.
@@ -118,6 +118,8 @@ static func hints(c: Dictionary = current) -> Array[String]:
 	if String(c.power) == "off":
 		out.append("Нет питания: ворота и двери на электричестве закрыты.")
 	match String(c.weather):
+		"overcast":
+			out.append("Пасмурно: сыро, лужи, тени мягкие, видно чуть хуже. Может пойти дождь.")
 		"rain":
 			out.append("Дождь: слышно хуже — и тебя, и их. Может начаться прямо в рейде.")
 		"fog":
@@ -125,6 +127,11 @@ static func hints(c: Dictionary = current) -> Array[String]:
 		"heat":
 			out.append("Жара: на улице пересвечено — очки от солнца; устаёшь быстрее.")
 	return out
+
+
+## Сплошные тучи — дождь или пасмурно: ночью ни Луны, ни звёзд; в убежище вместо солнца — свет облаков.
+static func clouded(weather: String) -> bool:
+	return weather == "rain" or weather == "overcast"
 
 
 static func random(rng: RandomNumberGenerator) -> Dictionary:

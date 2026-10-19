@@ -65,7 +65,7 @@ const SHOTS := {
 
 func _ready() -> void:
 	var only: PackedStringArray = OS.get_environment("ZONE01_ONLY").split(",", false)
-	# условия рейда для снимков: ZONE01_TIME=day|dusk|night, ZONE01_WEATHER=clear|rain|fog|heat
+	# условия рейда для снимков: ZONE01_TIME=day|dusk|night, ZONE01_WEATHER=clear|overcast|rain|fog|heat
 	RaidConditions.from_host = {"time": OS.get_environment("ZONE01_TIME") if OS.has_environment("ZONE01_TIME") else "day",
 		"weather": OS.get_environment("ZONE01_WEATHER") if OS.has_environment("ZONE01_WEATHER") else "clear", "power": "on"}
 	# ZONE01_SKY=имя — подменить панораму неба (сравнение вариантов): assets/sky/<имя>.hdr
@@ -116,7 +116,9 @@ func _ready() -> void:
 	# служебный слой карты дождя (RainOcclusion) — не для глаз, как у камеры игрока
 	cam.cull_mask &= ~RainOcclusion.LAYER
 	level.add_child(cam)
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))
+	# ZONE01_OUT=папка — снимки туда, а не в docs/screens (сравнение погоды и т. п.)
+	var out_dir: String = OS.get_environment("ZONE01_OUT") if OS.get_environment("ZONE01_OUT") != "" else OUT_DIR
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	for shot_name: String in SHOTS:
 		if not only.is_empty() and not shot_name in only:
 			continue
@@ -163,7 +165,7 @@ func _ready() -> void:
 		if ground_shot:
 			print("  игрок ", me.global_position, " камера ", get_viewport().get_camera_3d().global_position, " взгляд ", -get_viewport().get_camera_3d().global_basis.z)
 		var img := get_viewport().get_texture().get_image()
-		var out := ProjectSettings.globalize_path("%s/zone01_%s.png" % [OUT_DIR, shot_name])
+		var out := ProjectSettings.globalize_path("%s/zone01_%s.png" % [out_dir, shot_name])
 		img.save_png(out)
 		print("zone01_shots: %s  FPS %d, отрисовок %d, примитивов %d" % [shot_name, Engine.get_frames_per_second(),
 			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
