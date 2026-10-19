@@ -1,7 +1,7 @@
 extends Node
 ## Заказ «Вернуть машину» (data/quests/car_recovery.json) по данным целиком, без карт: пока сцен мест
 ## нет — заказ закрыт; обычный путь — стоянка, Нина, скупка, «ЮР / 8», дворы, банда, механик,
-## аккумулятор, колесо и радиатор, расчёт; ранняя находка на скупке — без стоянки и подсказки;
+## аккумулятор, колесо и радиатор (модель радиатора в кладовой и в комплекте), расчёт; ранняя находка на скупке — без стоянки и подсказки;
 ## обе находки за один рейд — общий отчёт. Оплаты этапов и итог — один раз.
 ## tools/godot.cmd --headless res://tools/car_recovery_test.tscn
 
@@ -47,8 +47,19 @@ func _ready() -> void:
 	_send("report_kirill")
 	_check("список механика — колесо и радиатор", _oid() == "wheel" and Quests.pending_items(Q) == ["car_wheel", "car_radiator"], str(Quests.pending_items(Q)))
 	_check("источники деталей открыты", _site_on("car_belt_parts_wheel", "zone01_mall") and _site_on("car_mall_supply_wheel", "mall_map"))
+	# места заказа узлами, как их ставит QuestWorld: модель радиатора в кладовой и в комплекте
+	var parts := _site_node("car_belt_parts_radiator")
+	var kit := _site_node("car_belt_delivery")
+	await get_tree().process_frame
+	_check("кладовая: радиатор лежит, пока его ждут", _shown(parts, "QuestCargo"))
+	_check("комплект: радиатора ещё нет", not _shown(kit, "QuestPlaced") and not Quests.handed_over(Q, "car_belt_delivery"))
 	_hand("wheel")
 	_hand("radiator")
+	await get_tree().process_frame
+	_check("радиатор сдан: в кладовой его нет, в комплекте лежит", not _shown(parts, "QuestCargo") and _shown(kit, "QuestPlaced")
+			and Quests.handed_over(Q, "car_belt_delivery"))
+	parts.queue_free()
+	kit.queue_free()
 	_check("комплект собран — заключительный отчёт", _oid() == "final")
 	_send("final")
 	_check("заказ закрыт, машина вывезена (флаг)", Quests.state(Q) == "COMPLETED" and Quests.flag("car_recovered") == true)
@@ -90,6 +101,21 @@ func _begin() -> void:
 
 func _site(sid: String) -> void:
 	Quests.request_site(sid)
+
+
+## Место заказа без карты (как его ставит QuestWorld): модели груза строятся по данным места.
+func _site_node(sid: String) -> QuestSite:
+	var s := QuestSite.new()
+	s.quest_id = Q
+	s.site_id = sid
+	s.spec = ((Quests.def(Q).get("sites", {}) as Dictionary).get(sid, {}) as Dictionary).duplicate(true)
+	add_child(s)
+	return s
+
+
+func _shown(s: QuestSite, node: String) -> bool:
+	var n := s.find_child(node, true, false) as Node3D
+	return n != null and n.visible
 
 
 ## Хост засчитал сдачу груза (как QuestWorld.take_item у места): без эвакуации.

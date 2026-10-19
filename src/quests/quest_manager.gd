@@ -63,6 +63,8 @@ var _npc_pos: Dictionary = {}
 ## trust_level}; не в сети — пусто.
 var _remote: Dictionary = {}
 var _cargo_claims: Dictionary = {}
+## Места-источники (supply), чью деталь сейчас несёт кто-то из группы: считает хост, гостям — в снимке.
+var _supply_out: Dictionary = {}
 
 
 func campaign_modules() -> Dictionary:
@@ -161,6 +163,31 @@ func host_unlock() -> bool:
 
 func cargo_claimed(sid: String) -> bool:
 	return bool((_remote.get("cargo_claims", {}) if is_client() else _cargo_claims).get(sid, false))
+
+
+## Деталь места-источника sid сейчас у кого-то из игроков (выдаётся одна за раз): на месте её не видно.
+## Хост смотрит рюкзаки и, когда ответ меняется, рассылает снимок; гость читает снимок.
+func supply_out(sid: String) -> bool:
+	if is_client():
+		return bool((_remote.get("supply_out", {}) as Dictionary).get(sid, false))
+	var out: bool = world != null and world.cargo_carried(sid)
+	if out != bool(_supply_out.get(sid, false)):
+		_supply_out[sid] = out
+		_broadcast()
+	return out
+
+
+## Всё, что ждёт место sid (цели install / deliver), сдано — положенная деталь лежит на месте.
+func handed_over(qid: String, sid: String) -> bool:
+	var any := false
+	var done := durable(qid)
+	for st in def(qid).get("stages", []):
+		for o: Dictionary in (st as Dictionary).get("objectives", []):
+			if String(o.get("type", "")) in HANDOVER_GOALS and String(o.get("site", "")) == sid:
+				if not String(o.get("id", "")) in done:
+					return false
+				any = true
+	return any
 
 
 ## Совместимый узел из обычного ящика тоже годится. Купленные / незавершённые головки — нет.
@@ -1016,6 +1043,7 @@ func begin_raid() -> void:
 	_carry = {}
 	_npc_pos = {}
 	_cargo_claims = {}
+	_supply_out = {}
 	_broadcast()
 	changed.emit()
 
@@ -1079,7 +1107,7 @@ func _commit_host() -> void:
 func _snapshot() -> Dictionary:
 	return {"campaign": Profile.own_campaign(), "quests": _quests(), "flags": _flags(), "raid": not _live.is_empty(),
 		"delivered": _delivered, "carry": _carry, "npc_pos": _npc_pos, "trust_level": Profile.trust_level(),
-		"contracts": Contracts.board(), "modules": Profile.modules, "cargo_claims": _cargo_claims,
+		"contracts": Contracts.board(), "modules": Profile.modules, "cargo_claims": _cargo_claims, "supply_out": _supply_out,
 		"unlock_all": Settings.unlock_all}
 
 

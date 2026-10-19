@@ -294,6 +294,7 @@
   "car_belt_delivery": {
    "level": "zone01_mall",
    "prompt": "Положить радиатор в комплект",
+   "placed": "car_radiator",
    "early": "yards"
   },
   "car_belt_parts_wheel": {
@@ -306,6 +307,7 @@
    "level": "zone01_mall",
    "prompt": "Взять радиатор с биркой «ЮР / 8»",
    "supply": "car_radiator",
+   "cargo": "car_radiator",
    "early": "yards"
   }
  },

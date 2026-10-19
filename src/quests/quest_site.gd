@@ -12,7 +12,9 @@ extends Interactable
 ##   early           — работает с принятия заказа, не дожидаясь своего этапа (ранняя находка)
 ##   (цели install / deliver) — F: отдать груз из рюкзака; засчитывается сразу и без эвакуации
 ##   cargo / placed  — модель предмета на месте: лежит, пока не взяли (cargo_until_done) /
-##                     появляется, когда положили (цели take / put обучения в убежище)
+##                     появляется, когда положили (цели take / put обучения в убежище);
+##                     у места-источника (supply) cargo лежит, пока заказ деталь ждёт и пока её никто
+##                     не несёт; у места сдачи (install / deliver) placed — когда всё, что место ждёт, сдано
 
 var quest_id: String = ""
 var site_id: String = ""
@@ -126,10 +128,16 @@ func _process(delta: float) -> void:
 	var cargo: Node3D = _vis.get_node_or_null("QuestCargo") as Node3D if _vis != null else null
 	var done := site_id in Quests.facts(quest_id)
 	if cargo != null:
-		cargo.visible = not Quests.cargo_claimed(site_id) and not (done and bool(spec.get("cargo_until_done", false)))
+		var supply := String(spec.get("supply", ""))
+		if supply != "":
+			# место-источник детали: лежит, пока заказ её ждёт; взяли — у кого-то в рюкзаке, на месте нет
+			cargo.visible = supply in Quests.pending_items(quest_id) and not Quests.supply_out(site_id)
+		else:
+			cargo.visible = not Quests.cargo_claimed(site_id) and not (done and bool(spec.get("cargo_until_done", false)))
 	var placed: Node3D = _vis.get_node_or_null("QuestPlaced") as Node3D if _vis != null else null
 	if placed != null:
-		placed.visible = done
+		# положенное в машину / комплект остаётся и в следующих рейдах (сдача без эвакуации)
+		placed.visible = done or Quests.handed_over(quest_id, site_id)
 	var me := _local_player()
 	if me == null:
 		return

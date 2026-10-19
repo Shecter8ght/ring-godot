@@ -258,18 +258,23 @@ func _my_id() -> int:
 	return multiplayer.get_unique_id() if Net.is_networked() else 1
 
 
-## Единственный физический груз получает тот, кто обыскал место; счёт идёт за вынос.
-func give_cargo(peer: int, sid: String, item: String) -> bool:
-	var pl: Player = _player(peer)
-	if pl == null or pl.inventory == null or not near_site(peer, sid) or not pl.is_alive():
-		return false
+## Груз с места sid сейчас у кого-то из игроков в рюкзаке (с места выдаётся один за раз).
+func cargo_carried(sid: String) -> bool:
 	for node: Node in get_tree().get_nodes_in_group("players"):
 		var player: Player = node as Player
 		if player == null or player.inventory == null:
 			continue
 		for e: Dictionary in player.inventory.items + player.inventory.pocket:
 			if String(e.get("quest_cargo", "")) == sid:
-				return false
+				return true
+	return false
+
+
+## Единственный физический груз получает тот, кто обыскал место; счёт идёт за вынос.
+func give_cargo(peer: int, sid: String, item: String) -> bool:
+	var pl: Player = _player(peer)
+	if pl == null or pl.inventory == null or not near_site(peer, sid) or not pl.is_alive() or cargo_carried(sid):
+		return false
 	var entry: Dictionary = ItemDb.make(item, 1)
 	entry["quest_cargo"] = sid
 	entry["fir"] = true
