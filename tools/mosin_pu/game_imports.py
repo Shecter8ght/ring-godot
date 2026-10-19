@@ -1,7 +1,7 @@
 """Мосин ПУ: настройки импорта карт Godot после первого `tools/godot.cmd --headless --import`.
 
 python -X utf8 tools/mosin_pu/game_imports.py, затем ещё раз `tools/godot.cmd --headless --import`.
-Godot извлекает карты из mosin_pu.glb и mosin_pu_round.glb без сжатия (4K RGBA — ~85 МБ видеопамяти каждая), а маски
+Godot извлекает карты из mosin_pu.glb, mosin_pu_round.glb и mosin_pu_clip.glb без сжатия (4K RGBA — ~85 МБ видеопамяти каждая), а маски
 износа _wear игра грузит кодом — их Godot сам не сожмёт. Ставятся настройки, как у ПМ (assets/models/weapons/pm):
 сжатие VRAM, mip-уровни; у нормалей — флаг карты нормалей, у ORM — сглаживание шероховатости по нормали; маски
 _wear — сжатие высокого качества (BPTC).

@@ -12,10 +12,14 @@ Bolt (ход назад по +Y кости, 0…BOLT_TRAVEL), Bolt_Rotor (пов
 (курок: назад на COCK_TRAVEL при подъёме рукояти, остаётся взведённым), Interrupter (отсечка-отражатель: в паз личинки
 у конца хода), Trigger, Follower (подаватель), RearSight_Leaf / RearSight_Slider, Scope (кронштейн с прицелом: игра
 прячет, когда прицел снят; основание на коробке — на Frame), патроны RoundChamber, Round_1…Round_5 (места в магазине
-сверху вниз), RoundHand (патрон в пальцах при заряжании), Case (стреляная гильза).
+сверху вниз), RoundHand (патрон в пальцах при заряжании), Case (стреляная гильза); в клипах ещё Clip — обойма
+(игровая сетка — game_clip.py; кость добавляется при сборке клипов, в покое спрятана, единичная — в направляющих).
 
 Стойки — как у ПМ (решения владельца 2026-10-14): по умолчанию наискосок влево-вниз (CARRY), от бедра (READY),
 прицел через ПУ (ADS): глаз на оси прицела за окуляром на EYE_RELIEF. Владелец правит позы в Blender.
+ПУ съёмный (владелец, 2026-10-18): без него — прицел открытым прицелом (стойка считается от ADS: щека там же, глаз
+опущен на линию прорезь целика — мушка) и заряжание обоймой на 5; клипы без ПУ — *_ADS_Iron и Mosin_Clip_* (кость
+Scope в них спрятана масштабом), остальные (покой, ходьба, бег, цикл затвора от бедра) общие.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/animate_mosin.py -- grip|clips|stills [стойки|клипы] [out=<папка>]
   grip [force|out=<файл>] → <библиотека>/models/07_Анимации/Mosin_PU_FPS_Grip_v01.blend (действие Mosin_Stances,
@@ -44,6 +48,8 @@ LIB = Path(r"E:\Models Blender\WEAPONS\Мосин — винтовка и узл
 ARMS_FILE = Path(r"E:\Models Blender\WEAPONS\ВЕРАС-54 — модель и обвесы\ВЕРАС-54\Игровая версия\Перезарядка v01 (Claude)\VERAS54_Reload_Full_v05.blend")
 GUN_FILE = SRC / "fp/lp/Mosin_Game_export.blend"
 GRIP_FILE = LIB / "Mosin_PU_FPS_Grip_v01.blend"       # хват и стойки; после правки владельцем — его файл
+CLIP_FILE = SRC / "fp/lp/Mosin_Clip_export.blend"     # игровая обойма (tools/mosin_pu/game_clip.py)
+CLIP_JSON = ROOT / "assets/models/weapons/mosin_pu/mosin_pu_clip.json"
 CLIPS_NAME = "Mosin_PU_FPS_Clips_v{:02d}.blend"
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 MODE = ARGS[0] if ARGS else "grip"
@@ -102,7 +108,7 @@ PART_BONE = {"Frame": "Frame", "Bolt": "Bolt", "Bolt_Rotor": "Bolt_Rotor", "Bolt
              "RearSight_Slider": "RearSight_Slider", "Mount_Base": "Frame", "Mount_Bracket": "Scope", "Scope": "Scope"}
 MARKERS = {"Muzzle": "Frame", "SightFront": "Frame", "SightRear": "RearSight_Leaf", "ScopeEye": "Scope", "ScopeFront": "Scope"}
 ROUND_BONES = ["RoundChamber"] + [f"Round_{k}" for k in range(1, SLOTS + 1)] + ["RoundHand"]
-SCALED = tuple(ROUND_BONES) + ("Case",)
+SCALED = tuple(ROUND_BONES) + ("Case", "Clip", "Scope")   # прячутся масштабом: патроны, гильза, обойма, кронштейн с ПУ
 HIDDEN = Matrix.Scale(1e-4, 4)       # спрятанная кость патрона (нулевой масштаб ломает разложение матрицы)
 
 
@@ -818,10 +824,12 @@ def shoulder_to(arms, base: Matrix, wrist: Vector) -> Matrix:
 class Keyer:
     """Клип: на первом и последнем кадре ключи всех костей хвата и деталей (иначе кость без ключей осталась бы там,
     где её бросил прошлый клип), между ними — только то, что движется.
-    over — matrix_basis поверх покоя; place — мировые матрицы детей Frame (кисти)."""
+    over — matrix_basis поверх покоя; place — мировые матрицы детей Frame (кисти); base — поверх покоя во всём клипе
+    (без прицела: кронштейн с ПУ спрятан)."""
 
-    def __init__(self, arms, rest: dict, name: str, length: int, loop: bool = False) -> None:
+    def __init__(self, arms, rest: dict, name: str, length: int, loop: bool = False, base: dict | None = None) -> None:
         self.arms, self.rest, self.length = arms, rest, length
+        self.base = dict(base or {})
         self.action = bpy.data.actions.new(name)
         self.action.use_fake_user = True
         self.action.use_frame_range = True
@@ -847,7 +855,7 @@ class Keyer:
 
     def pose(self, frame: float, gun: Matrix, over: dict | None = None, place: dict | None = None,
              all_bones: bool = False) -> None:
-        over, place = dict(over or {}), place or {}
+        over, place = {**self.base, **(over or {})}, place or {}
         inv = self.arms.matrix_world.inverted()
         for n, m in self.rest.items():
             self.arms.pose.bones[n].matrix_basis = over.get(n, m)
@@ -918,6 +926,7 @@ PRESS_MCP = Vector((-0.052, 0.045, -0.008))                # костяшка с
 PRESS_FINGERS = Vector((0.25, -0.92, 0.30))
 PRESS_PALM = Vector((0.85, 0.0, -0.5))
 PRESS_FIST = 1.15                                          # средний, безымянный, мизинец — плотнее, чем на рукоятке
+CLIP_TILT = 25.0                                           # кисть с обоймой: пальцами вниз-вперёд от позы досылки, °
 
 
 GUN_MESHES = ("Frame_Steel", "Frame_Wood", "Bolt_Bar_Mesh", "Bolt_Cocking_Mesh", "Bolt_Rotor_Mesh", "Follower_Mesh",
@@ -962,9 +971,70 @@ def refresh_gun(arms) -> None:
           f"{(SLOT1.y - BREECH_Y) * 1000:.1f} мм за казённым срезом", flush=True)
 
 
+def clip_geometry() -> tuple:
+    """Обойма в осях экспорта (Frame): где её начало в направляющих (середина спинки изнутри) и донца пяти патронов
+    в ней — в её осях, снизу вверх (mosin_pu_clip.json — game_clip.py; оси игры → экспорта: (x, y, z) → (x, −z, y))."""
+    rec = json.loads(CLIP_JSON.read_text(encoding="utf-8"))
+    to_exp = lambda v: Vector((v[0], -v[2], v[1]))           # noqa: E731
+    return to_exp(rec["seat_game_m"]), [to_exp(v) for v in rec["rounds_base_game_m"]]
+
+
+def add_clip(arms, seat: Vector) -> None:
+    """Обойма для заряжания без ПУ: кость Clip (дочерняя Frame; покой — в направляющих, оси — как у Frame) и на ней
+    игровая сетка обоймы из CLIP_FILE. Файл хвата не меняется — всё в памяти при сборке клипов."""
+    with bpy.data.libraries.load(str(CLIP_FILE), link=False) as (src, dst):
+        dst.objects = ["Clip_Mesh"]
+    ob = dst.objects[0]
+    bpy.context.scene.collection.objects.link(ob)
+    ob.parent = None
+    bpy.context.view_layer.objects.active = arms
+    bpy.ops.object.mode_set(mode="EDIT")
+    ebs = arms.data.edit_bones
+    eb = ebs.new("Clip")
+    eb.head, eb.tail = (0.0, 0.0, 0.0), (0.0, 0.012, 0.0)
+    eb.matrix = ebs["Frame"].matrix @ Matrix.Translation(seat)
+    eb.parent = ebs["Frame"]
+    eb.use_deform = False
+    bpy.ops.object.mode_set(mode="OBJECT")
+    arms.pose.bones["Clip"].rotation_mode = "QUATERNION"
+    parts = arms.data.collections.get("Мосин — детали")
+    if parts is not None:
+        parts.assign(arms.data.bones["Clip"])
+    bpy.context.view_layer.update()
+    w = world(arms, "Clip")
+    ob.parent = arms
+    ob.parent_type = "BONE"
+    ob.parent_bone = "Clip"
+    ob.matrix_parent_inverse = Matrix.Identity(4)
+    bpy.context.view_layer.update()
+    ob.matrix_world = w
+    bpy.context.view_layer.update()
+    print("MOSIN_CLIPS обойма из", CLIP_FILE.name, "в направляющих: начало", [round(c * 1000, 2) for c in seat], "мм",
+          flush=True)
+
+
+def iron_sights(ads: Matrix, frame_now: Matrix, eye: Vector, look: Vector) -> tuple:
+    """Прицел открытым прицелом от стойки через ПУ: щека там же (глаз на том же месте вдоль винтовки), глаз опущен на
+    линию прорезь целика → вершина мушки, линия — по взгляду камеры. frame_now — где винтовка сейчас (метки на ней)."""
+    now = frame_now.inverted()
+    rear = now @ bpy.data.objects["SightRear"].matrix_world.translation
+    front = now @ bpy.data.objects["SightFront"].matrix_world.translation
+    eye_pu = ads.inverted() @ eye
+    d = (front - rear).normalized()
+    eye_l = rear + d * ((eye_pu.y - rear.y) / d.y)
+    q = (ads.to_3x3() @ d).rotation_difference(look.normalized())
+    r = (q.to_matrix() @ ads.to_3x3()).to_4x4()
+    m = Matrix.Translation(eye - r.to_3x3() @ eye_l) @ r
+    info = {"eye_to_rear_sight_mm": round((rear - eye_l).length * 1000, 1),
+            "eye_below_pu_mm": round((eye_pu - eye_l).length * 1000, 1),
+            "line_pitch_deg": round(math.degrees(q.angle), 3)}
+    return m, info
+
+
 def clips() -> None:
     """Клипы от хвата в файле grip: покой в двух стойках, переходы, прицел, ходьба, бег; цикл затвора (от бедра и
-    в прицеле); заряжание по одному: открыть затвор, патрон (повторяется), закрыть."""
+    в прицеле); заряжание по одному: открыть затвор, патрон (повторяется), закрыть. Без ПУ (кронштейн с прицелом
+    спрятан): прицел открытым прицелом, переходы и цикл затвора в нём; заряжание обоймой: открыть, обойма, закрыть."""
     source = arg_path("grip", GRIP_FILE)
     have = clips_files()
     target = LIB / CLIPS_NAME.format(int(have[-1].stem[-2:]) + 1 if have else 1)
@@ -972,6 +1042,8 @@ def clips() -> None:
     scene = bpy.context.scene
     arms = bpy.data.objects["FPS_ArmsRig"]
     refresh_gun(arms)
+    clip_seat, clip_rounds = clip_geometry()
+    add_clip(arms, clip_seat)
     st = {}
     for name, frame in STANCE_FRAMES.items():
         scene.frame_set(frame)
@@ -981,7 +1053,10 @@ def clips() -> None:
     scene.frame_set(STANCE_FRAMES["READY"])
     bpy.context.view_layer.update()
     r_grip = ready.inverted() @ world(arms, "ik_hand.R")                 # хват правой на шейке в осях винтовки
-    rest = {n: arms.pose.bones[n].matrix_basis.copy() for n in GRIP_BONES + list(GUN_PARTS) if n in arms.pose.bones}
+    rest = {n: arms.pose.bones[n].matrix_basis.copy() for n in GRIP_BONES + list(GUN_PARTS) + ["Clip"]
+            if n in arms.pose.bones}
+    rest["Clip"] = HIDDEN                                                 # обоймы в покое нет
+    rest["Scope"] = Matrix()
     arms.animation_data.action = None
     hands = Hands(arms, read_ready(scene, arms))                           # оси сгиба пальцев — из хвата на ВЕРАСе,
     hands.loc = {n: rest[n].to_translation() for n in RIGHT + LEFT if n in rest}   # костяшки — как в файле хвата
@@ -1078,8 +1153,55 @@ def clips() -> None:
     press_reach = reach(arms, "hand.R", ready @ press)
     reset(ready)
 
+    # ---- обойма (без ПУ): кисть та же, что при досылке по одному, — большой палец на верхнем патроне у донца (в обойме
+    # он на 72 мм выше места 1, кисть выше на столько же). Пока несёт обойму, указательный прижат к правому боку
+    # патронов — держит её щепотью с большим; выдавливает — пальцы как при досылке.
+    no_scope = {"Scope": HIDDEN}
+
+    def in_clip(c_basis: Matrix) -> dict:
+        """Патроны Round_1 (верхний) … Round_5 в обойме при matrix_basis обоймы c_basis."""
+        m = Matrix.Translation(clip_seat) @ c_basis
+        return {f"Round_{j}": Matrix.Translation(slot(j)).inverted() @ m @ Matrix.Translation(clip_rounds[SLOTS - j])
+                for j in range(1, SLOTS + 1)}
+
+    top_seat = clip_seat + clip_rounds[-1]                               # донце верхнего патрона в обойме
+
+    def tilt(deg: float) -> Matrix:
+        """Кисть досылки, повёрнутая вокруг кончика большого пальца пальцами вниз-вперёд (deg > 0)."""
+        return Matrix.Translation(press_pt) @ rot("X", deg) @ Matrix.Translation(-press_pt) @ press
+
+    # в позе досылки, поднятой на 72 мм, пятка ладони легла бы на поднятый шар рукояти — кисть с обоймой наклонена
+    # (запястье выше шара), к середине выдавливания — снова поза досылки
+    hold = Matrix.Translation(top_seat - SLOT1) @ tilt(CLIP_TILT)
+    clip_in_hand = hold.inverted() @ Matrix.Translation(clip_seat)
+    reset(ready, {**bolt(BOLT_OPEN, BOLT_TRAVEL, 1.0), **mag(0), **no_scope, "Clip": Matrix(), **in_clip(Matrix())})
+    aim_right(ready @ hold)
+    pose = hands.pose("R", 1.0)
+    for f in ("f_middle", "f_ring", "f_pinky"):
+        for i in (1, 2, 3):
+            pose[f"{f}.{i:02d}.R"] = hands.scaled(f"{f}.{i:02d}.R", PRESS_FIST)
+    apply(arms, pose)
+    hands.place(arms)
+    pose = thumb_to(arms, skin, bvh_of([obj["Part_Round_1"]]), ready, pose, "R", top_seat + PRESS_AT,
+                    out=Vector((0.0, 0.0, 0.0015)))
+    held = bvh_of([obj["Clip_Mesh"]] + [obj[f"Part_Round_{j}"] for j in range(1, SLOTS + 1)])
+    pose = wrap(arms, hands, skin, pose, "R", held, fingers=("f_index",), start=(0.6, 0.4, 0.4), joints=(1, 2))
+    f_hold = as_basis(pose)
+    hold_reach = reach(arms, "hand.R", ready @ hold)
+    hold_inside = skin.inside(held, RIGHT)
+    reset(ready)
+
+    # прицел открытым прицелом (без ПУ) — до первых клипов: пока к рукам не привязано действие, позу не перебивает
+    cam = bpy.data.objects["FPS • Camera"]
+    eye = cam.matrix_world.translation.copy()
+    look = cam.matrix_world.to_3x3() @ Vector((0.0, 0.0, -1.0))
+    ads_iron, iron_info = iron_sights(ads, ready, eye, look)
+    iron_info["camera"] = [round(c, 4) for c in eye]
+
     # подача: заряжающий поворачивает винтовку окном к себе — верх влево, дуло вверх, ближе к глазам
     present = cam_offset(ready, Vector((0.05, 0.0, 0.03)), pitch=8.0, yaw=10.0, roll=28.0)
+    # подача под обойму: верх коробки открыт — завал меньше, винтовка ближе к середине кадра, направляющие видны сверху
+    present_clip = cam_offset(ready, Vector((0.07, -0.02, -0.005)), pitch=6.0, yaw=12.0, roll=4.0)
 
     def idle(name: str, gun: Matrix) -> None:
         k = Keyer(arms, rest, name, 60, loop=True)
@@ -1095,9 +1217,10 @@ def clips() -> None:
             k.pose(f, cam_offset(gun, d, pitch, yaw, roll))
         k.finish()
 
-    def go(name: str, a: Matrix, b: Matrix, frames: int, arc: Vector = Vector(), settle: float = 1.0) -> None:
+    def go(name: str, a: Matrix, b: Matrix, frames: int, arc: Vector = Vector(), settle: float = 1.0,
+           base: dict | None = None) -> None:
         """Переход стойки: плавный путь с дугой arc (м, в середине пути) и лёгким дотягом в конце."""
-        k = Keyer(arms, rest, name, frames)
+        k = Keyer(arms, rest, name, frames, base=base)
         main = frames - 3
         for f in range(0, main + 1):
             t = ease(f / main)
@@ -1155,7 +1278,7 @@ def clips() -> None:
             out[f"Round_{i}"] = down @ to_slot(i, i - rise)
         return out
 
-    def bolt_work(name: str, base: Matrix, lift: Matrix, mag_k: int) -> None:
+    def bolt_work(name: str, base: Matrix, lift: Matrix, mag_k: int, keep: dict | None = None) -> None:
         """Цикл затвора после выстрела: правая с шейки на шар, поворот вверх (взвод), назад до упора — гильза
         вылетает, вперёд — верхний патрон в патронник, поворот вниз, правая на шейку. Винтовка на время работы
         отходит в lift и возвращается в base."""
@@ -1201,7 +1324,7 @@ def clips() -> None:
                 out.update(stripped(mag_k, t, ease(clamp01((f - f_rear) / 3.0))))
             return out
 
-        k = Keyer(arms, rest, name, length)
+        k = Keyer(arms, rest, name, length, base=keep)
         k.pose(0, base, state(0))
         hand_path(k, 1, f_reach, gun, r_grip, knob_hand(0.0, 0.0), lambda f, t: {**state(f), **lerp_pose({}, f_knob0, t)},
                   arc=Vector((0.0, 0.0, 0.025)))
@@ -1244,24 +1367,37 @@ def clips() -> None:
     bolt_work("Mosin_Bolt_Cycle", ready, cam_offset(ready, Vector((0.02, 0.0, -0.012)), pitch=1.5, yaw=2.0, roll=9.0), 4)
     bolt_work("Mosin_Bolt_Cycle_ADS", ads, cam_offset(blend(ads, ready, 0.55), Vector((0.01, 0.0, 0.0)), pitch=1.0, yaw=1.0, roll=8.0), 4)
 
+    # ---- без ПУ (кронштейн с прицелом спрятан): прицел открытым прицелом — переходы и цикл затвора как через ПУ
+    go("Mosin_Ready_To_ADS_Iron", ready, ads_iron, 11, Vector((0.004, 0.006, 0.004)), base=no_scope)
+    go("Mosin_ADS_Iron_To_Ready", ads_iron, ready, 11, Vector((0.0, 0.0, -0.004)), settle=0.5, base=no_scope)
+    go("Mosin_Carry_To_ADS_Iron", carry, ads_iron, 14, Vector((-0.01, -0.012, 0.015)), base=no_scope)
+    go("Mosin_ADS_Iron_To_Carry", ads_iron, carry, 15, Vector((0.0, 0.0, -0.01)), settle=0.5, base=no_scope)
+    bolt_work("Mosin_Bolt_Cycle_ADS_Iron", ads_iron, cam_offset(blend(ads_iron, ready, 0.55), Vector((0.01, 0.0, 0.0)),
+                                                                pitch=1.0, yaw=1.0, roll=8.0), 4, keep=no_scope)
+
     # ---- заряжание по одному (с ПУ): открыть затвор и к подсумку / патрон в окно (повторяется) / закрыть затвор
     open_bolt = bolt(BOLT_OPEN, BOLT_TRAVEL, 1.0)
-    k = Keyer(arms, rest, "Mosin_Load_Start", 28)
-    gun = track([(0, ready), (9, present), (28, present)])
-    k.pose(0, ready, {**bolt(0.0, 0.0, 1.0), **mag(0)})
-    hand_path(k, 1, 6, gun, r_grip, knob_hand(0.0, 0.0), lambda f, t: {**bolt(0.0, 0.0, 1.0), **mag(0), **lerp_pose({}, f_knob0, t)},
-              arc=Vector((0.0, 0.0, 0.025)))
-    for f in range(7, 17):
-        r = BOLT_OPEN * ease((f - 6) / 4.0)
-        t = BOLT_TRAVEL * ease((f - 10) / 6.0) if f > 10 else 0.0
-        g = gun(f)
-        k.pose(f, g, {**bolt(r, t, 1.0), **mag(0), **lerp_pose(f_knob0, f_knob90, r / BOLT_OPEN)}, {"ik_hand.R": g @ knob_hand(r, t)})
-    k.event("bolt_up", 8)
-    k.event("bolt_back", 16)
-    hand_path(k, 17, 26, gun, knob_hand(BOLT_OPEN, BOLT_TRAVEL), lambda f: gun(f).inverted() @ POUCH,
-              lambda f, t: {**open_bolt, **mag(0), **lerp_pose(f_knob90, {}, t)})
-    k.pose(28, present, {**open_bolt, **mag(0)}, {"ik_hand.R": POUCH})
-    k.finish()
+
+    def open_to_pouch(name: str, pres: Matrix, keep: dict | None = None) -> None:
+        """Правая на шар, рукоять вверх, затвор назад до упора; винтовка — в подачу pres; правая — к подсумку."""
+        k = Keyer(arms, rest, name, 28, base=keep)
+        gun = track([(0, ready), (9, pres), (28, pres)])
+        k.pose(0, ready, {**bolt(0.0, 0.0, 1.0), **mag(0)})
+        hand_path(k, 1, 6, gun, r_grip, knob_hand(0.0, 0.0), lambda f, t: {**bolt(0.0, 0.0, 1.0), **mag(0), **lerp_pose({}, f_knob0, t)},
+                  arc=Vector((0.0, 0.0, 0.025)))
+        for f in range(7, 17):
+            r = BOLT_OPEN * ease((f - 6) / 4.0)
+            t = BOLT_TRAVEL * ease((f - 10) / 6.0) if f > 10 else 0.0
+            g = gun(f)
+            k.pose(f, g, {**bolt(r, t, 1.0), **mag(0), **lerp_pose(f_knob0, f_knob90, r / BOLT_OPEN)}, {"ik_hand.R": g @ knob_hand(r, t)})
+        k.event("bolt_up", 8)
+        k.event("bolt_back", 16)
+        hand_path(k, 17, 26, gun, knob_hand(BOLT_OPEN, BOLT_TRAVEL), lambda f: gun(f).inverted() @ POUCH,
+                  lambda f, t: {**open_bolt, **mag(0), **lerp_pose(f_knob90, {}, t)})
+        k.pose(28, pres, {**open_bolt, **mag(0)}, {"ik_hand.R": POUCH})
+        k.finish()
+
+    open_to_pouch("Mosin_Load_Start", present)
 
     # патрон: кисть от подсумка с патроном к окну, кладёт сверху на столбик, давит большим (столбик уходит на место
     # вниз), отпускает, обратно к подсумку. Показ — в магазине уже 2.
@@ -1327,9 +1463,110 @@ def clips() -> None:
               arc=Vector((0.0, 0.0, 0.02)))
     k.pose(34, ready, closed)
     k.finish()
+
+    # ---- заряжание обоймой (без ПУ): открыть затвор и к подсумку / обойма в направляющие, большим пальцем пять патронов
+    # в магазин / затвор вперёд — личинка выталкивает пустую обойму вверх, верхний патрон в патронник
+    open_to_pouch("Mosin_Clip_Start", present_clip, no_scope)
+
+    def stack_at(s: float) -> tuple:
+        """Пять патронов из обоймы на свои места в магазине (s 0…1, столбиком); подаватель — под нижним. Возвращает
+        кости и донце верхнего патрона (на нём большой палец)."""
+        out, pts = {}, {}
+        for j in range(1, SLOTS + 1):
+            pts[j] = (clip_seat + clip_rounds[SLOTS - j]).lerp(slot(j), s)
+            out[f"Round_{j}"] = Matrix.Translation(pts[j] - slot(j))
+        out["Follower"] = Matrix.Translation((0.0, 0.0, min(0.0, pts[SLOTS].z - SLOT1.z)))
+        return out, pts[1]
+
+    at_pouch_c = present_clip.inverted() @ POUCH
+    above_c = Matrix.Translation(Vector((0.0, 0.0, 0.035))) @ hold         # обойма над направляющими
+    high_c = Matrix.Translation(Vector((-0.03, 0.015, 0.05))) @ above_c    # подходит сверху справа, мимо коробки
+    lifted_c = Matrix.Translation(Vector((-0.018, -0.004, 0.022))) @ press  # отпустил: вверх и вправо, мимо шара рукояти
+    f_hi, f_in, f_seat, f_s0, f_s1, f_deep, f_back, f_lift, length = 9, 12, 15, 17, 29, 31, 33, 38, 40
+    empty_mag = {**open_bolt, **mag(0, travel=BOLT_TRAVEL)}
+    k = Keyer(arms, rest, "Mosin_Clip_Strip", length, base=no_scope)
+
+    def carried(m_hand: Matrix) -> dict:
+        """Обойма с патронами в пальцах при кисти m_hand (оси винтовки)."""
+        c = Matrix.Translation(clip_seat).inverted() @ m_hand @ clip_in_hand
+        return {"Clip": c, **in_clip(c)}
+
+    k.pose(0, present_clip, {**empty_mag, **carried(at_pouch_c)}, {"ik_hand.R": POUCH})
+    k.event("grab", 0)
+    carry_seq = [(0, at_pouch_c), (f_hi, high_c), (f_in, above_c), (f_seat, hold)]
+    for (fa, ma), (fb, mb) in zip(carry_seq, carry_seq[1:]):
+        for f in range(fa + 1, fb + 1):
+            u = ease((f - fa) / (fb - fa))
+            m = blend(ma, mb, u)
+            if fa == 0:
+                m.translation += Vector((0.0, 0.0, 0.03)) * math.sin(math.pi * u)
+            k.pose(f, present_clip, {**empty_mag, **carried(m), **lerp_pose({}, f_hold, clamp01(f / 10.0))},
+                   {"ik_hand.R": present_clip @ m})
+    k.event("clip_in", f_seat)
+    seated = {**empty_mag, "Clip": Matrix(), **in_clip(Matrix())}
+    for f in range(f_seat + 1, f_s0 + 1):                              # большой палец ложится плотнее, указательный отходит
+        k.pose(f, present_clip, {**seated, **lerp_pose(f_hold, f_press, (f - f_seat) / (f_s0 - f_seat))},
+               {"ik_hand.R": present_clip @ hold})
+    for f in range(f_s0 + 1, f_s1 + 1):
+        s = ease((f - f_s0) / (f_s1 - f_s0))
+        st_, top = stack_at(s)
+        m = Matrix.Translation(top - SLOT1) @ tilt(CLIP_TILT * (1.0 - ease(clamp01(s / 0.6))))
+        k.pose(f, present_clip, {**empty_mag, "Clip": Matrix(), **st_, **f_press}, {"ik_hand.R": present_clip @ m})
+    k.event("strip", f_s0)
+    k.event("rounds_in", f_s1)
+    full = {**open_bolt, **mag(5, travel=BOLT_TRAVEL), "Clip": Matrix()}
+    seq = [(f_s1, press), (f_deep, pushed), (f_back, press), (f_lift, lifted_c), (length, lifted_c)]
+    for (fa, ma), (fb, mb) in zip(seq, seq[1:]):
+        for f in range(fa + 1, fb + 1):
+            m = blend(ma, mb, ease((f - fa) / (fb - fa)))
+            k.pose(f, present_clip, {**full, **lerp_pose(f_press, {}, clamp01((f - f_deep) / 7.0))},
+                   {"ik_hand.R": present_clip @ m})
+    k.event("release", f_deep + 1)
+    k.finish()
+
+    # закрыть: от обоймы к шару; затвор пошёл вперёд — личинка бьёт в низ пустой обоймы, та выскакивает из направляющих
+    # вверх-вправо, кувыркаясь (игра может подменить её предметом с физикой по событию clip_eject); верхний патрон —
+    # в патронник, рукоять вниз, правая на шейку
+    half_c = blend(present_clip, ready, 0.6)
+    gun = track([(0, present_clip), (9, half_c), (18, half_c), (27, ready), (36, ready)])
+    f_eject = 9
+
+    def clip_flight(f: float) -> Matrix:
+        if f < f_eject:
+            return Matrix()
+        dt = (f - f_eject + 0.5) / FPS
+        if dt > 0.35:
+            return HIDDEN
+        p = Vector((-0.6 * dt, -0.25 * dt, 1.8 * dt - 4.9 * dt * dt))
+        return Matrix.Translation(p) @ rot("X", -520.0 * dt) @ rot("Z", 160.0 * dt)
+
+    k = Keyer(arms, rest, "Mosin_Clip_End", 36, base=no_scope)
+    k.pose(0, present_clip, full, {"ik_hand.R": present_clip @ lifted_c})
+    hand_path(k, 1, 8, gun, lifted_c, knob_hand(BOLT_OPEN, BOLT_TRAVEL), lambda f, t: {**full, **lerp_pose({}, f_knob90, t)},
+              arc=Vector((0.0, 0.0, 0.02)))
+    k.event("hand_on_bolt", 8)
+    for f in range(9, 19):
+        t = BOLT_TRAVEL * (1.0 - ease((f - 8) / 5.0))
+        r = BOLT_OPEN * (1.0 - ease((f - 13) / 4.0)) if f > 13 else BOLT_OPEN
+        g = gun(f)
+        over = {**bolt(r, t, 1.0), **mag(5, travel=t), **lerp_pose(f_knob0, f_knob90, r / BOLT_OPEN),
+                **stripped(5, t, ease(clamp01((f - 8) / 3.0))), "Clip": clip_flight(f)}
+        k.pose(f, g, over, {"ik_hand.R": g @ knob_hand(r, t)})
+    k.event("bolt_forward", f_eject)
+    k.event("clip_eject", f_eject)
+    k.event("bolt_down", 17)
+    closed_c = {**closed, "Clip": HIDDEN}                                 # обойма улетела (без ключей вернулась бы назад)
+    hand_path(k, 19, 29, gun, knob_hand(0.0, 0.0), r_grip, lambda f, t: {**closed_c, **lerp_pose(f_knob0, {}, t)},
+              arc=Vector((0.0, 0.0, 0.02)))
+    k.pose(36, ready, closed_c)
+    k.finish()
     CLIP_INFO["_meta"] = {"fps": FPS, "bolt_travel_m": BOLT_TRAVEL, "bolt_open_deg": BOLT_OPEN, "cock_travel_m": COCK_TRAVEL,
                           "slot1": list(SLOT1), "slot_pitch_m": SLOT_PITCH, "slot_stagger_m": SLOT_STAGGER,
                           "chamber": list(CHAMBER), "eye_relief_m": EYE_RELIEF, "press_reach_mm": press_reach,
+                          "clip_seat": [round(c, 5) for c in clip_seat], "clip_hold_reach_mm": hold_reach,
+                          "clip_hold_inside_verts": hold_inside, "ads_iron": iron_info,
+                          "no_scope": "клипы *_ADS_Iron и Mosin_Clip_* — без ПУ: кость Scope спрятана масштабом; обойма — кость "
+                                      "Clip (в покое спрятана; в направляющих — matrix_basis единичная)",
                           "grip_source": str(source), "file": target.name,
                           "preview": "видимость патронов в клипах — для просмотра (цикл: 4 в магазине; патрон: 2; закрыть: 5); "
                                      "игра ставит её по счёту, Round_i сдвигаются клипом на соседнее место"}
