@@ -116,11 +116,7 @@ func apply_settings() -> void:
 	_flare.reference = float(L.flare_ref)
 	_attr.auto_exposure_enabled = on
 	if on:
-		# поправка экспозиции = scale / средняя яркость, яркость зажата так, что поправка в [down, up]
-		var scale: float = float(L.exposure_scale)
-		_attr.auto_exposure_scale = scale
 		_attr.auto_exposure_speed = float(L.adapt_speed)
-		_attr.auto_exposure_max_sensitivity = _iso(scale / float(L.adapt_down))
 		_apply_exposure()
 	for cam: Camera3D in _cams:
 		cam.attributes = _attr
@@ -137,13 +133,17 @@ func apply_settings() -> void:
 	_has_prev = false
 
 
-## Предел привыкания глаза вверх: убежище — как настроено, в рейде — на улице и внутри здания свой.
+## Привыкание глаза: поправка экспозиции = scale / средняя яркость кадра, яркость зажата так, что поправка
+## в [down, up]. Убежище — как настроено; в рейде своя цель (светлее) и свой предел на улице и в здании.
 func _apply_exposure() -> void:
 	var L: Dictionary = Balance.LOOK
+	var scale: float = float(L.exposure_scale_raid if _raid else L.exposure_scale)
 	var up: float = float(L.adapt_up_shelter)
 	if _raid:
 		up = float(L.adapt_up_indoor if _indoor else L.adapt_up)
-	_attr.auto_exposure_min_sensitivity = _iso(float(L.exposure_scale) / up)
+	_attr.auto_exposure_scale = scale
+	_attr.auto_exposure_min_sensitivity = _iso(scale / up)
+	_attr.auto_exposure_max_sensitivity = _iso(scale / float(L.adapt_down))
 	_update_fill()
 
 
