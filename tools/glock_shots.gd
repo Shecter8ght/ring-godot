@@ -231,14 +231,11 @@ func _third() -> void:
 	_player._update_hand()
 	var animator: CharacterAnimator = _player.get_node("CharacterAnimator") as CharacterAnimator
 	animator.set_process(false)
-	if animator._player == null:
+	if not animator.has_model():
 		_failures += 1
 		push_error("glock_shots: аниматор Persona не готов")
 		return
-	animator._player.play("pistol_idle", 0.0)
-	animator._player.seek(0.35, true)
-	animator._player.advance(0.0)
-	animator._player.speed_scale = 0.0
+	animator.hold_pose("pistol_idle", 0.35)
 	# Модификатор SupportHandIK обновляет реальную вторую кисть после клипа.
 	if animator._support:
 		animator._support.influence = 1.0

@@ -6,6 +6,10 @@ extends SkeletonModifier3D
 var grip: Node3D
 var actor: CharacterBody3D
 var enabled_for_pose: bool = true
+## Наклон корпуса за взглядом (рад, + вверх; ставит CharacterAnimator из BodyMotion): ствол на теле
+## смотрит вверх-вниз вместе с грудью, и «вперёд» для отвода от стен — с тем же наклоном, иначе
+## поднятый ствол возвращался в горизонт.
+var aim_pitch: float = 0.0
 var clearance: WeaponClearance = WeaponClearance.new()
 var max_hand_error: float = 0.0
 var arms_clear: bool = true
@@ -26,10 +30,11 @@ func _ready() -> void:
 func _process_modification() -> void:
 	if not is_inside_tree(): return
 	var skeleton: Skeleton3D = get_skeleton()
-	if not enabled_for_pose or not is_instance_valid(grip) or not grip.visible or skeleton == null or _arm < 0 or grip.get_child_count() == 0:
+	if not enabled_for_pose or not is_instance_valid(grip) or not grip.visible or skeleton == null or _arm < 0:
 		return
-	var model: Node3D = grip.get_child(0) as Node3D
-	if model == null or model.is_queued_for_deletion(): return
+	# видимая модель: спрятанные из кэша Player лежат в том же Grip
+	var model: Node3D = CharacterAnimator.held_model(grip)
+	if model == null: return
 	if _model != model:
 		_model = model
 		clearance.bind(model)
@@ -37,12 +42,14 @@ func _process_modification() -> void:
 	var hand: Transform3D = skeleton.get_bone_global_pose(_right)
 	var wanted: Transform3D = skeleton.global_transform * hand * grip.transform * model.transform
 	var body: Node3D = actor.get_node_or_null("Body") as Node3D
-	var forward: Vector3 = body.global_basis.z.normalized() if body else actor.global_basis.z.normalized()
+	var frame: Basis = body.global_basis.orthonormalized() if body else actor.global_basis.orthonormalized()
+	var forward: Vector3 = (frame.z * cos(aim_pitch) + frame.y * sin(aim_pitch)).normalized()
 	var floor_weight: float = 0.0
 	clearance.sideways = actor is Player and (actor as Player).stance == Player.Stance.PRONE
 	if actor is Player:
 		var person: Player = actor as Player
-		forward = person.look_dir() if person.ads else (person.get_node("Body") as Node3D).global_basis.z.normalized()
+		if person.ads:
+			forward = person.look_dir()
 		if not person.is_local() or person.ads:
 			floor_weight = person.weapon_obstruction
 			clearance.ready_up = person.weapon_ready_up

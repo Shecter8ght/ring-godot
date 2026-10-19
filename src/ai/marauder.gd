@@ -87,6 +87,9 @@ var pause_timer: float = 0.0
 var linger_timer: float = 0.0
 ## Присел (в укрытии) — ниже силуэт и коллизия; синхронизируется на клиентов.
 var crouched: bool = false
+## Куда смотрит вверх-вниз (рад, + вверх): корпус модели и ствол идут за ним (CharacterAnimator);
+## синхронизируется на клиентов.
+var look_pitch: float = 0.0
 
 var _rng := RandomNumberGenerator.new()
 var _target_player: Player = null
@@ -531,7 +534,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq"]:
+	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:look_pitch", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -1905,6 +1908,10 @@ func _apply_shape() -> void:
 
 func _face(p: Vector3) -> void:
 	_facing = atan2(p.x - global_position.x, p.z - global_position.z)
+	# взгляд — на грудь стоящего в этой точке (p — где цель стоит, у ног), от своей груди
+	var flat := Vector2(p.x - global_position.x, p.z - global_position.z).length()
+	var eye := 0.9 if crouched else 1.35
+	look_pitch = atan2(p.y + 1.2 - (global_position.y + eye), maxf(flat, 0.5)) if flat > 0.3 else look_pitch
 
 
 # ---------------------------------------------------------------- стрельба
@@ -2168,6 +2175,8 @@ func _shoot(suppress: bool) -> void:
 		spread *= float(Balance.AI_FIRE_TOKENS.untoken_spread)
 	var exclude: Array[RID] = [get_rid()]
 	var dir := (target - from).normalized()
+	# ствол модели — туда же, куда пуля (лежащая цель ниже груди)
+	look_pitch = asin(clampf(dir.y, -1.0, 1.0))
 	for i in range(int(_spec.pellets)):
 		# по ИИ другой фракции — пули бьют и ИИ; урон от ИИ никому из игроков не засчитывается
 		var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER | (Hitscan.LAYER_MARAUDER if at_ai else 0)

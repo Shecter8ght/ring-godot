@@ -238,9 +238,7 @@ const PLAYER_DECEL := 16.0
 const PLAYER_TURN_SPEED := 12.0
 
 ## Визуальный выбор клипа по реальному перемещению; физику персонажа не меняет. Скорость для
-## выбора сглажена за speed_smooth_sec, с (иначе на мониторе 144+ клип скачет каждый кадр);
-## с автоматом от sprint_from, м/с, — спринт (бег игрока 5.2, сглаженная скорость к ней снизу).
-## Модель опущена под стойку, м: присед на месте, ходьба вприсядку (у клипа таз выше), лёжа.
+## выбора сглажена за speed_smooth_sec, с (иначе на мониторе 144+ клип скачет каждый кадр).
 ## Дальние персонажи (мародёры, чужие отряды, напарники): дальше shadows_m от камеры не отбрасывают
 ## тень, дальше hide_m не рисуются (ИИ и звук работают как прежде); дальше ik_m руки не подгоняются к
 ## оружию и стенам, дальше anim_m[0] клип считается через кадр, дальше anim_m[1] — раз в четыре кадра;
@@ -249,7 +247,38 @@ const CHARACTER_LOD := {"shadows_m": 55.0, "hide_m": 320.0, "ik_m": 35.0, "anim_
 ## Машина Ильи (src/world/ilya_car.gd): ближняя модель (~150 тыс. треугольников) до lod1_m от камеры, дальше
 ## LOD1 (~50 тыс.), с lod2_m — LOD2 (~12 тыс.); margin_m — запас на возврат, чтобы сетки не мигали на границе.
 const VEHICLE_LOD := {"lod1_m": 15.0, "lod2_m": 40.0, "margin_m": 1.5}
-const CHARACTER_ANIM := {"move_min": 0.12, "run_from": 3.1, "sprint_from": 4.8, "blend_sec": 0.16, "prone_hold_sec": 1.0, "prone_aim_hold_sec": 0.3, "hurt_below": 0.35, "support_blend_sec": 0.15, "speed_smooth_sec": 0.1}
+## Дерево анимации (CharacterAnimator): от move_min до move_full, м/с, поза на месте плавно сменяется
+## шагом; run_from — с какой скорости падает раненым «с разбега» (и, со sprint_from, пороги бега и
+## спринта у «как было» на стенде сравнения); клипы шага крутятся быстрее или
+## медленнее, чтобы ступни не скользили, но не медленнее rate_min и не быстрее rate_max (лёжа —
+## prone_rate_max); направление шага сглажено за dir_smooth_sec, с; смена стойки и оружия —
+## set_blend_sec, поз целиком (лёжа, ранен, смерть) — pose_blend_sec, прицельной позы на месте —
+## aim_blend_sec; действие верхом тела входит за act_in и уходит за act_out, с.
+const CHARACTER_ANIM := {"move_min": 0.12, "move_full": 0.6, "run_from": 3.1, "sprint_from": 4.8, "prone_hold_sec": 1.0, "prone_aim_hold_sec": 0.3, "hurt_below": 0.35, "support_blend_sec": 0.15, "speed_smooth_sec": 0.1,
+	"rate_min": 0.35, "rate_max": 1.8, "prone_rate_max": 2.5, "dir_smooth_sec": 0.12, "move_smooth_sec": 0.08, "set_blend_sec": 0.3, "pose_blend_sec": 0.22, "aim_blend_sec": 0.2, "act_in": 0.12, "act_out": 0.25}
+## Живость поверх клипов (BodyMotion), углы в радианах:
+## - корпус за взглядом вверх-вниз — не больше pitch_up / pitch_down; лёжа доля pitch_prone, на спринте
+##   pitch_sprint, без оружия pitch_unarmed (остальное добирает голова, не больше head_max); сглажено за pitch_sec;
+## - тело в игре поворачивается мгновенно (мародёр), корпус модели догоняет за torso_sec; ноги на ходу —
+##   за legs_move_sec, на месте ждут, пока корпус не отвернётся больше legs_dead, и доворачиваются за
+##   legs_idle_sec до legs_settle; дальше legs_max ноги тянутся за корпусом;
+## - выглядывание: наклон вбок lean_roll при полном наклоне (за lean_sec);
+## - разгон и поворот: наклон accel_lean на 1 м/с², не больше accel_max, сглажено за accel_sec;
+## - дыхание: в покое breath_rest с частотой breath_rest_hz, после бега до breath_hard / breath_hard_hz;
+##   запыхался за exert_up_sec бега быстрее exert_speed, отдышался за exert_down_sec; на ходу — доля breath_moving;
+## - отдача: толчок recoil_kick (пистолет recoil_pistol, лёжа — доля recoil_prone), пружина recoil_stiff / recoil_damp;
+## - попадание: толчок flinch_kick, пружина flinch_stiff / flinch_damp;
+## - по костям: spine — доли Spine / Spine1 / Spine2 [взгляд, наклон, дыхание, отдача, вздрагивание,
+##   выглядывание, доворот]; голова гасит отдачу и дыхание (head.steady) и держится ровнее при
+##   выглядывании (head.roll_keep); плечи на вдохе — shoulder_breath.
+const BODY_MOTION := {"pitch_up": 1.0, "pitch_down": 0.9, "pitch_prone": 0.35, "pitch_sprint": 0.3, "pitch_unarmed": 0.45, "head_max": 0.6, "pitch_sec": 0.08,
+	"torso_sec": 0.07, "legs_move_sec": 0.12, "legs_idle_sec": 0.2, "legs_dead": 0.75, "legs_settle": 0.06, "legs_max": 1.2,
+	"lean_roll": 0.42, "lean_sec": 0.1, "accel_lean": 0.022, "accel_max": 0.16, "accel_sec": 0.18,
+	"breath_rest": 0.01, "breath_rest_hz": 0.24, "breath_hard": 0.035, "breath_hard_hz": 0.62, "exert_speed": 3.0, "exert_up_sec": 5.0, "exert_down_sec": 14.0, "breath_moving": 0.4,
+	"recoil_kick": 1.6, "recoil_pistol": 1.1, "recoil_prone": 0.4, "recoil_stiff": 260.0, "recoil_damp": 22.0,
+	"flinch_kick": 3.2, "flinch_stiff": 120.0, "flinch_damp": 14.0,
+	"spine": {"0": [0.2, 0.5, 0.0, 0.0, 0.3, 0.3, 0.3], "1": [0.35, 0.3, 0.5, 0.35, 0.35, 0.35, 0.35], "2": [0.45, 0.2, 0.5, 0.65, 0.35, 0.35, 0.35]},
+	"head": {"steady": 0.8, "roll_keep": 0.5}, "shoulder_breath": 0.6}
 
 # --- Капсула по стойкам: высота, м ---
 const STANCE_HEIGHT := {"stand": 1.8, "crouch": 1.2, "prone": 0.5}

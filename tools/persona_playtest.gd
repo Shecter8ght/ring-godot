@@ -47,7 +47,7 @@ func _phase(player: Player, label: String, next_stance: int, moving: bool, durat
 			minimum = y
 			min_bone = skeleton.get_bone_name(i)
 	var animator: CharacterAnimator = player.get_node("CharacterAnimator") as CharacterAnimator
-	print("PLAYTEST ", label, " moved=", player.global_position.distance_to(origin), " feet_y=", (skeleton.global_transform * skeleton.get_bone_global_pose(left_foot)).origin.y, ",", (skeleton.global_transform * skeleton.get_bone_global_pose(right_foot)).origin.y, " min=", minimum, " bone=", min_bone, " hips=", (skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("mixamorig_Hips"))).origin.y, " body_scale=", player.get_node("Body").scale.y, " model_pos=", player.get_node("Body/Persona").position.y, " clip=", animator._current, " playing=", animator._player.current_animation, " shot=", animator._one_shot)
+	print("PLAYTEST ", label, " moved=", player.global_position.distance_to(origin), " feet_y=", (skeleton.global_transform * skeleton.get_bone_global_pose(left_foot)).origin.y, ",", (skeleton.global_transform * skeleton.get_bone_global_pose(right_foot)).origin.y, " min=", minimum, " bone=", min_bone, " hips=", (skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("mixamorig_Hips"))).origin.y, " body_scale=", player.get_node("Body").scale.y, " model_pos=", player.get_node("Body/Persona").position.y, " clip=", animator._current, " shot=", animator._one_shot)
 	get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://docs/screens/persona_playtest_" + label + ".png"))
 	await get_tree().create_timer(duration * 0.5).timeout
 	if moving:

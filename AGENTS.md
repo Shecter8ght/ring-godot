@@ -261,6 +261,9 @@ tools/godot.cmd --headless res://tools/story_test.tscn     # хроника ре
 tools/godot.cmd --headless res://tools/anim_test.tscn      # анимации Persona при 144 к/с: клип ходьбы не скачет, спринт, присед и ходьба вприсядку — ступни на полу, лёжа, оружие в правой руке в любой стойке, левая кисть на цевье (SupportHandIK)
 tools/godot.cmd --headless -s res://tools/bake_character_clips.gd  # клипы Mixamo (tools/character_clips.json) → persona_clips.res; что есть и чего нет — docs/animations.md
 tools/godot.cmd --headless -s res://tools/bake_weapon_sockets.gd  # как оружие лежит в правой руке Persona (по позе прицеливания) → data/weapon_sockets.json
+tools/godot.cmd res://tools/anim_stand.tscn                # стенд анимаций: новая и «как было» рядом, пол в клетку (ЛКМ, колесо, 1–5, Z — замедление);
+                                                              # --headless … -- verify — скольжение опорной ступни и левая кисть на цевье; -- shots — снимки anim_stand_*
+tools/godot.cmd --headless -s res://tools/measure_gait.gd   # шаг клипов передвижения (скорость, число шагов, постановка левой ноги, развёрнутые) → data/character_gait.json; после запекания клипов
 tools/godot.cmd --headless res://tools/coop_quest_host.tscn  # + coop_quest_client.tscn через 3 с: общий сюжет группы (взял задание, осмотр, зачёт обоим)
 tools/godot.cmd --headless res://tools/templates_test.tscn  # шаблоны снаряжения: сохранить, собрать из тайника, докупить, причины «нет»
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/trader_ui_test.tscn # Михалыч «Купить»: закреплённая шапка, поиск, группы, количество руками, чит «лут в продаже», готовые комплекты; снимки trader_*

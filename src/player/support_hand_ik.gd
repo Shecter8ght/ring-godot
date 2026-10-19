@@ -7,7 +7,7 @@ extends SkeletonModifier3D
 ## у рук от первого лица; изгиб локтя — как в клипе. Силу (influence) задаёт CharacterAnimator:
 ## на перезарядке, броске, подборе, раненым и мёртвым рука свободна.
 
-## Узел Grip на кости правой руки: модель оружия — его первый ребёнок.
+## Узел Grip на кости правой руки: модель оружия — его видимый ребёнок (CharacterAnimator.held_model).
 var grip: Node3D
 ## На время действия кисть следует за магазином/затвором/глушителем в мировых координатах.
 var action_target: Node3D
@@ -49,9 +49,9 @@ func _ready() -> void:
 
 ## Метка хвата в осях Grip (правая кисть → сокет → модель → метка); нет модели / метки — null.
 func _target_in_grip() -> Variant:
-	if not is_instance_valid(grip) or not grip.is_inside_tree() or grip.is_queued_for_deletion() or grip.get_child_count() == 0:
+	if not is_instance_valid(grip) or not grip.is_inside_tree() or grip.is_queued_for_deletion():
 		return null
-	var model := grip.get_child(0) as Node3D
+	var model: Node3D = CharacterAnimator.held_model(grip)
 	if not is_instance_valid(model) or not model.is_inside_tree() or model.is_queued_for_deletion():
 		return null
 	if not is_instance_valid(_model) or model != _model:
