@@ -1,8 +1,10 @@
 extends Node
 ## ВЕРАС-54 под лампами тира: автомат матовый — по крышке и коробке не скользят блики, блестят
-## только затворная рама и трубка приклада. tools/godot.cmd res://tools/veras_gloss_shots.tscn
+## только затворная группа, трубка приклада и следы рук (v13: tools/veras54_v13/game_finish.py).
+## tools/godot.cmd res://tools/veras_gloss_shots.tscn
 ## → docs/screens/veras_gloss_*.png. GLOSS_TAG=имя — приставка к файлам; GLOSS_MODS=точка:обвес,… — обвесы;
-## GLOSS_DUR=60 — ресурс ствола и обвесов (карты состояний 100 / 60 / 20); GLOSS_ONLY=имя,имя — выборочно.
+## GLOSS_DUR=60 — ресурс ствола и обвесов (карты состояний 100 / 60 / 20); GLOSS_ONLY=имя,имя — выборочно;
+## GLOSS_CANT=1 — в прицеле «с завалом» (автомат боком к лампам, как на снимке владельца 2026-10-19).
 
 const ID := "wpn_ar_01"
 ## Курс вдоль дорожки тира (к мишеням, +X).
@@ -35,6 +37,11 @@ func _ready() -> void:
 	pl.set_range_weapon(entry)
 	CameraRig.first_person_mode = true
 	await get_tree().create_timer(0.8).timeout
+	if OS.get_environment("GLOSS_CANT") == "1":
+		Input.action_press("aim")
+		await get_tree().create_timer(float(pl.spec().aim_time) + 0.3).timeout
+		pl.aim_cant = true
+		await get_tree().create_timer(0.6).timeout
 	var tag: String = OS.get_environment("GLOSS_TAG")
 	var only: PackedStringArray = OS.get_environment("GLOSS_ONLY").split(",", false)
 	for look: Array in LOOKS:

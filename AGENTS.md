@@ -202,7 +202,8 @@ tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # вид оруж
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
 # ВЕРАС-54 v13 в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/veras54_v13/game_lp.py (сетка ~33 тыс. + патроны ~5 тыс.)
-#   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски жировой плёнки _coat в assets) → game_rig.py (риг рук v13 в библиотеке)
+#   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски жировой плёнки _coat в assets) → game_finish.py (матовый корпус: ORM)
+#   → game_rig.py (риг рук v13 в библиотеке)
 #   → bash tools/veras54_v13/clips/build_all.sh (18 клипов, «Клипы v13») → export_veras54.py → --import → python -X utf8 tools/veras54_v13/game_imports.py → --import;
 #   сверка запекания с исходником в его студии — tools/veras54_v13/bake_compare.py, гильза задержки — clips/jam_check.py
 # Магазины ВЕРАС-54 на 45 и барабан на 60 в игру: sh tools/veras54_mags/chain.sh [m45] [d60] (mags_game_lp → bake → pack → export:
