@@ -828,7 +828,7 @@ func equipment_state() -> Dictionary:
 	# Кэш стрельбы существует у владельца. У хоста для гостя свежий источник — Inventory.
 	if not is_local():
 		return eq
-	for key in ["primary", "secondary"]:
+	for key in ItemDb.WEAPON_SLOTS:
 		if eq.has(key) and WeaponDb.is_weapon(String((eq[key] as Dictionary).get("id", ""))):
 			eq[key] = entry_of(key)
 	return eq
@@ -2011,13 +2011,17 @@ func adjust_scope_zoom(direction: int) -> bool:
 func weapon_keys() -> Array:
 	if not loadout_mode:
 		return [RANGE_KEY] if in_range_mode() else WeaponDb.sandbox()
-	return ["primary" if inventory.slot_weapon("primary") != "" else "", "secondary" if inventory.slot_weapon("secondary") != "" else ""]
+	# клавиши weapon_1…4 (1, 2, 3, 5): оружие 1, оружие 2, пистолет, ракетница (граната — своя клавиша 4)
+	var keys: Array = []
+	for slot: String in ItemDb.WEAPON_SLOTS:
+		keys.append(slot if inventory.slot_weapon(slot) != "" else "")
+	return keys
 
 
 ## Ключ пистолета (клавиша 2): раненым и таща раненого — только он; "" — пистолета нет.
 func sidearm_key() -> String:
 	if loadout_mode:
-		return "secondary" if inventory.slot_weapon("secondary") != "" else ""
+		return "sidearm" if inventory.slot_weapon("sidearm") != "" else ""
 	if in_range_mode():
 		return RANGE_KEY if String(WeaponDb.weapon(String(range_weapon.get("id", ""))).get("class", "")) == "PISTOL" else ""
 	for k in WeaponDb.sandbox():

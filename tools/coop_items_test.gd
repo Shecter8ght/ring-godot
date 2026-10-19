@@ -127,7 +127,7 @@ func _perf(label: String) -> void:
 func _setup_profile() -> void:
 	var rifle: Dictionary = ItemDb.make("wpn_ar_01", 1)
 	(rifle.mag as Dictionary)["rounds"] = 30
-	Profile.equipment = {"primary": rifle, "secondary": ItemDb.make("wpn_hg_02", 1), "backpack": ItemDb.make("bp_tourist", 1)}
+	Profile.equipment = {"primary": rifle, "sidearm": ItemDb.make("wpn_hg_02", 1), "backpack": ItemDb.make("bp_tourist", 1)}
 	Profile.backpack = []
 	var grid: Vector2i = ItemDb.bag_grid(Profile.equipment)
 	# вещи вразброс — сортировке есть что двигать
@@ -166,8 +166,8 @@ func _items_pass(me: Player) -> void:
 	Raid.current.request_equip_from("backpack", gun_idx, null, "primary")
 	await until(func() -> bool: return String((inv.equipment.get("primary", {}) as Dictionary).get("id", "")) == "wpn_smg_04", 15)
 	check("ствол в слоте меняется, прежний — в рюкзаке", String((inv.equipment.get("primary", {}) as Dictionary).get("id", "")) == "wpn_smg_04" and _find(inv, "wpn_ar_01") >= 0)
-	# клавиши 1 / 2 — оружие в руках
-	for pair: Array in [["weapon_2", "secondary"], ["weapon_1", "primary"]]:
+	# клавиши 1 / 3 — оружие в руках (3 — пистолет)
+	for pair: Array in [["weapon_3", "sidearm"], ["weapon_1", "primary"]]:
 		Input.action_press(String(pair[0]))
 		await get_tree().create_timer(0.15).timeout
 		Input.action_release(String(pair[0]))

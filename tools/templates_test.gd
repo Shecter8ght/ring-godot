@@ -18,7 +18,7 @@ func _ready() -> void:
 	Profile.stash_to_backpack(_idx("ammo_919_fmj"), 40)
 	Profile.stash_to_backpack(_idx("bandage"), 2)
 	var t := LoadoutTemplates.capture("Штурм")
-	_check("шаблон сохранён: слоты и рюкзак", t.slots.has("primary") and t.slots.has("secondary") and not (t.backpack as Array).is_empty(), str(t))
+	_check("шаблон сохранён: слоты и рюкзак", t.slots.has("primary") and t.slots.has("sidearm") and not (t.backpack as Array).is_empty(), str(t))
 	# всё обратно в тайник
 	for slot in Profile.equipment.keys():
 		Profile.unequip(String(slot))
@@ -40,7 +40,7 @@ func _ready() -> void:
 	fails = LoadoutTemplates.apply(t)
 	_check("собрано с покупкой: автомат надет, деньги списаны", fails.is_empty() and String(Profile.equipment.primary.id) == "wpn_ar_01" and Profile.money == m0 - price, str(fails))
 	# закрытый каталог и обвес не по верстаку
-	var t2 := {"name": "Мечта", "slots": {"primary": {"id": "wpn_sp_02"}, "secondary": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01"}}}, "backpack": []}
+	var t2 := {"name": "Мечта", "slots": {"primary": {"id": "wpn_sp_02"}, "sidearm": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01"}}}, "backpack": []}
 	p = LoadoutTemplates.plan(t2)
 	var why: Array = []
 	for r in p.rows:

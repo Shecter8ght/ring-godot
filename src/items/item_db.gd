@@ -331,8 +331,19 @@ static func equip(id: String) -> Dictionary:
 	return item(id).get("equip", {})
 
 
-## Слоты оружия: любое оружие встаёт в любой из них (два пистолета, винтовка и дробовик — как угодно).
-const WEAPON_SLOTS := ["primary", "secondary"]
+## Слоты оружия (владелец 2026-10-19): клавиши 1 и 2 — крупное оружие (primary, secondary — любое, кроме пистолета и
+## ракетницы), 3 — пистолет (sidearm), 5 — ракетница (launcher); клавиша 4 — граната. Вид ствола — "slot" в data/weapons.json.
+const WEAPON_SLOTS := ["primary", "secondary", "sidearm", "launcher"]
+
+
+## В какие слоты оружия встаёт ствол id: крупное — в первый и второй, пистолет — в свой, ракетница — в свой.
+static func weapon_slots_for(id: String) -> Array:
+	match String(equip(id).get("slot", "")):
+		"sidearm":
+			return ["sidearm"]
+		"launcher":
+			return ["launcher"]
+	return ["primary", "secondary"]
 
 
 ## Подходит ли предмет в слот снаряжения.
@@ -341,8 +352,25 @@ static func slot_ok(id: String, slot: String) -> bool:
 	if s == "":
 		return false
 	if equip(id).has("weapon"):
-		return slot in WEAPON_SLOTS
+		return slot in weapon_slots_for(id)
 	return s == slot
+
+
+## Оружие из старых слотов (до 2026-10-19 любое оружие стояло в primary / secondary) — в свои: пистолет в sidearm, ракетница
+## в launcher, если там свободно. eq — слот → запись (или запись шаблона с "id"); меняет и возвращает его же.
+static func remap_weapon_slots(eq: Dictionary) -> Dictionary:
+	for slot: String in ["primary", "secondary"]:
+		if not eq.get(slot) is Dictionary:
+			continue
+		var id := String((eq[slot] as Dictionary).get("id", ""))
+		if not equip(id).has("weapon") or slot_ok(id, slot):
+			continue
+		for to: String in weapon_slots_for(id):
+			if not eq.has(to):
+				eq[to] = eq[slot]
+				eq.erase(slot)
+				break
+	return eq
 
 
 ## Сетки разгрузки по надетому: part — "rig" (подсумки) или "dump" (сумка сброса). ZERO — нет.
@@ -383,10 +411,12 @@ static func pick_slot(id: String, eq: Dictionary, want: String = "") -> String:
 	if want != "" and slot_ok(id, want):
 		return want
 	var s := String(equip(id).get("slot", ""))
-	if s != "" and equip(id).has("weapon") and eq.has(s):
-		for o in WEAPON_SLOTS:
+	if s != "" and equip(id).has("weapon"):
+		var fits: Array = weapon_slots_for(id)
+		for o in fits:
 			if not eq.has(o):
 				return String(o)
+		return String(fits[0])
 	return s
 
 

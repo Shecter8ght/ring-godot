@@ -209,7 +209,7 @@ func focus_mark(decal_name: String = "LaserMark") -> void:
 	var left: bool = (marks[0] as Node3D).basis.y.x > 0
 	set_view("mark_left" if left else "mark")
 	_pan = (marks[0] as Node3D).global_position - _center
-	var pistol: bool = String(WeaponDb.weapon(_weapon_id).get("slot", "")) == "secondary"
+	var pistol: bool = String(WeaponDb.weapon(_weapon_id).get("slot", "")) in ["sidearm", "launcher"]
 	_want.z = (0.22 if pistol else 0.35) / _radius
 
 

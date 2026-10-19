@@ -46,14 +46,19 @@ func _ready() -> void:
 	Profile.money = 1000000
 	_check("купил рейдовый — сразу надет", Profile.buy("bp_raid", 1, "stash") and String(Profile.equipment.get("backpack", {}).get("id", "")) == "bp_raid")
 	_check("рейдовый — 60 ячеек", Profile.backpack_capacity() == 60)
-	# любое оружие в любой слот
-	Profile.equipment.erase("primary")
-	Profile.equipment.erase("secondary")
-	ItemDb.add_to(Profile.stash, ItemDb.make("wpn_hg_01", 1), Profile.stash_grid())
-	ItemDb.add_to(Profile.stash, ItemDb.make("wpn_hg_02", 1), Profile.stash_grid())
-	Profile.equip_from("stash", _idx("wpn_hg_01"))
-	Profile.equip_from("stash", _idx("wpn_hg_02"))
-	_check("два пистолета — в оба слота оружия", Profile.equipment.has("primary") and Profile.equipment.has("secondary"), str(Profile.equipment.keys()))
+	# слоты оружия (2026-10-19): 1 и 2 — крупное, 3 — пистолет, 5 — ракетница
+	for slot: String in ItemDb.WEAPON_SLOTS:
+		Profile.equipment.erase(slot)
+	for id: String in ["wpn_hg_01", "wpn_ar_01", "wpn_sg_02", "signal_launcher"]:
+		ItemDb.add_to(Profile.stash, ItemDb.make(id, 1), Profile.stash_grid())
+		Profile.equip_from("stash", _idx(id))
+	var got := func(slot: String) -> String: return String((Profile.equipment.get(slot, {}) as Dictionary).get("id", ""))
+	_check("пистолет — в слот «Пистолет», ракетница — в свой", got.call("sidearm") == "wpn_hg_01" and got.call("launcher") == "signal_launcher", str(Profile.equipment.keys()))
+	_check("крупное — в слоты 1 и 2", got.call("primary") == "wpn_ar_01" and got.call("secondary") == "wpn_sg_02", str(Profile.equipment.keys()))
+	_check("пистолет в слот крупного не встаёт", not ItemDb.slot_ok("wpn_hg_02", "primary") and not ItemDb.slot_ok("signal_launcher", "secondary") and not ItemDb.slot_ok("wpn_ar_01", "sidearm"))
+	var old := {"primary": {"id": "wpn_ar_01"}, "secondary": {"id": "wpn_hg_02"}}
+	ItemDb.remap_weapon_slots(old)
+	_check("старое сохранение: пистолет из «Оружие 2» переехал в «Пистолет»", old.has("sidearm") and not old.has("secondary"), str(old.keys()))
 	_check("спринт с рейдовым дороже", ItemDb.bag_sprint_k(Profile.equipment) > 1.2)
 	print("backpack_test: провалено %d" % _fails)
 	Profile.use_file(TEST_PROFILE, false)

@@ -44,7 +44,7 @@ static func marks(entry: Dictionary) -> Dictionary:
 ## Позиции привязаны к коробке, рукоятке или затвору, вне магазинов и сменных обвесов.
 static func positions(id: String) -> Array[Dictionary]:
 	var weapon: Dictionary = WeaponDb.weapon(id)
-	var pistol: bool = String(weapon.get("slot", "")) == "secondary"
+	var pistol: bool = String(weapon.get("slot", "")) in ["sidearm", "launcher"]
 	var base: Array = weapon.get("engraving_anchor", [0.42, 0.18] if pistol else [0.78, 0.23])
 	var anchors: Array = weapon.get("engraving_positions", [[0.62, 0.20], [0.44, 0.16], [0.26, 0.12]] if pistol else
 		[[base[0], base[1]], [base[0], float(base[1]) + 0.15], [base[0], float(base[1]) + 0.30], [float(base[0]) + 0.06, float(base[1]) - 0.07], [float(base[0]) + 0.06, float(base[1]) + 0.07]])
@@ -115,7 +115,7 @@ func _ready() -> void:
 
 func _build() -> void:
 	var root: Node3D = get_parent() as Node3D
-	var pistol: bool = String(WeaponDb.weapon(weapon_id).get("slot", "")) == "secondary"
+	var pistol: bool = String(WeaponDb.weapon(weapon_id).get("slot", "")) in ["sidearm", "launcher"]
 	var target: String = String(_position().get("part", "receiver"))
 	var best: MeshInstance3D = null
 	var score: float = -INF

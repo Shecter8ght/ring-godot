@@ -56,7 +56,7 @@ func _reset(e: Dictionary, items: Array = []) -> void:
 func _run() -> void:
 	Profile.use_file("user://flare_pistol_test.json", true)
 	RaidEvents.enabled = false
-	check("каталог: оружие во вторичном слоте", WeaponDb.is_weapon("signal_launcher") and String(WeaponDb.weapon("signal_launcher").slot) == "secondary")
+	check("каталог: оружие в своём слоте «Ракетница»", WeaponDb.is_weapon("signal_launcher") and String(WeaponDb.weapon("signal_launcher").slot) == "launcher")
 	check("красный и зелёный подходят, обычные пули отклоняются", WeaponDb.ammo_fits("signal_launcher", "flare") and WeaponDb.ammo_fits("signal_launcher", "supply_signal") and not WeaponDb.ammo_fits("signal_launcher", "ammo_918_pst"))
 	check("один патрон, без съёмного магазина", WeaponDb.capacity(_entry()) == 1 and WeaponDb.default_mag("signal_launcher") == "")
 	var inv := Inventory.new()

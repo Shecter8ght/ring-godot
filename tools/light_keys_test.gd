@@ -62,6 +62,15 @@ func _ready() -> void:
 	await _tap("throw_chem")
 	await get_tree().create_timer(0.5).timeout
 
+	# --- клавиши слотов (2026-10-19): 1, 2 — крупное, 3 — пистолет, 5 — ракетница
+	_check("клавиши слотов: 1, 2, 3 — оружие, 4 — граната, 5 — ракетница",
+		_key("weapon_1") == KEY_1 and _key("weapon_2") == KEY_2 and _key("weapon_3") == KEY_3 and _key("grenade") == KEY_4 and _key("weapon_4") == KEY_5)
+	await _tap("weapon_4")
+	await get_tree().create_timer(0.5).timeout
+	_check("5 — ракетница из своего слота", _me.weapon_id == "signal_launcher" and _me.weapon_slot == "launcher", _me.weapon_slot)
+	await _tap("weapon_1")
+	await get_tree().create_timer(0.5).timeout
+	_check("1 — снова ВЕРАС", _me.weapon_id == rifle, _me.weapon_id)
 	# --- одно G: ракетница из слота; в руках — тип патрона
 	await _tap("throw_flare")
 	await get_tree().create_timer(float(Balance.LIGHT_KEYS.double_tap_sec) + 0.2).timeout
@@ -81,14 +90,14 @@ func _ready() -> void:
 	get_tree().quit(1 if _fails else 0)
 
 
-## ВЕРАС в первом слоте, ракетница (если with_launcher) — во втором; в рюкзаке 2 химсвета, 2 фальшфейера, 2 гранаты.
+## ВЕРАС в первом слоте, ракетница (если with_launcher) — в своём; в рюкзаке 2 химсвета, 2 фальшфейера, 2 гранаты.
 func _arm(with_launcher: bool) -> void:
 	var rng := RandomNumberGenerator.new()
 	var rifle: Dictionary = WeaponDb.bare_weapon("wpn_ar_01", rng, [100, 100])
 	rifle["mag"] = {"id": WeaponDb.default_mag("wpn_ar_01"), "ammo": WeaponDb.default_ammo("545x39"), "rounds": 30}
 	var eq: Dictionary = {"primary": rifle}
 	if with_launcher:
-		eq["secondary"] = WeaponDb.bare_weapon("signal_launcher", rng, [100, 100])
+		eq["launcher"] = WeaponDb.bare_weapon("signal_launcher", rng, [100, 100])
 	_me.loadout_mode = true
 	_me.cancel_weapon_action()
 	_me.inventory.equipment = eq

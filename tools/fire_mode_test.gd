@@ -94,9 +94,9 @@ func _ready() -> void:
 	var pistol: Dictionary = WeaponDb.bare_weapon("wpn_hg_01", rng, [100, 100])
 	pistol["mag"] = {"id": WeaponDb.default_mag("wpn_hg_01"), "ammo": WeaponDb.default_ammo(String(WeaponDb.weapon("wpn_hg_01").caliber)), "rounds": 8}
 	var eq: Dictionary = _me.inventory.equipment.duplicate(true)
-	eq["secondary"] = pistol
+	eq["sidearm"] = pistol
 	_me.inventory.equipment = eq
-	_me._switch("secondary", false)
+	_me._switch("sidearm", false)
 	await get_tree().create_timer(0.5).timeout
 	await _press_x()
 	_check("пистолет: X не переключает", _me.fire_mode() == "semi" and _me.fire_mode_switch_t <= 0.0, _me.fire_mode())

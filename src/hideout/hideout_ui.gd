@@ -1108,7 +1108,7 @@ func _kit_card(kit: Dictionary, own_idx: int = -1) -> Control:
 		v.add_child(about)
 	# состав одной строкой: стволы, броня, шлем, рюкзак, сколько всего в рюкзаке
 	var parts: Array[String] = []
-	for slot in ["primary", "secondary", "armor", "rig", "helmet", "backpack"]:
+	for slot in ["primary", "secondary", "sidearm", "launcher", "armor", "rig", "helmet", "backpack"]:
 		if slots.has(slot):
 			parts.append(ItemDb.item_name(String((slots[slot] as Dictionary).id)))
 	var bp_n := (kit.get("backpack", []) as Array).size()
@@ -1317,7 +1317,7 @@ func _trader_mods() -> void:
 	var pick := _column("Своё оружие", 0.55)
 	var ref := _weapon_ref()
 	var any := false
-	for src in [["equip:primary", Profile.equipment.get("primary", {})], ["equip:secondary", Profile.equipment.get("secondary", {})]]:
+	for src in ItemDb.WEAPON_SLOTS.map(func(s: String) -> Array: return ["equip:" + s, Profile.equipment.get(s, {})]):
 		var e: Dictionary = src[1]
 		if e.is_empty():
 			continue
@@ -1420,7 +1420,7 @@ func _weapon_ref() -> Array:
 		for i in range(list.size()):
 			if String((list[i] as Dictionary).get("uid", "")) == _tb_uid:
 				return [_tb_where, i, list[i]]
-	for slot in ["primary", "secondary"]:
+	for slot in ItemDb.WEAPON_SLOTS:
 		if Profile.equipment.has(slot):
 			return ["equip:" + slot, -1, Profile.equipment[slot]]
 	return ["", -1, {}]
@@ -1578,7 +1578,7 @@ func _trader_sell() -> void:
 				side.add_child(row)
 	# надетое оружие отсюда не продаётся, но к нему можно подсветить припасы
 	var worn_any := false
-	for slot in ["primary", "secondary"]:
+	for slot in ItemDb.WEAPON_SLOTS:
 		var e: Dictionary = Profile.equipment.get(slot, {})
 		if e.is_empty():
 			continue
@@ -1957,7 +1957,11 @@ func _build_workbench() -> void:
 		_sig = "stickers"
 		return
 	if not Profile.equipment.has(_wb_slot):
-		_wb_slot = "secondary" if Profile.equipment.has("secondary") else "primary"
+		_wb_slot = "primary"
+		for ws: String in ItemDb.WEAPON_SLOTS:
+			if Profile.equipment.has(ws):
+				_wb_slot = ws
+				break
 	var left := VBoxContainer.new()
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.add_theme_constant_override("separation", 8)
@@ -1965,7 +1969,7 @@ func _build_workbench() -> void:
 	_workbench_modes(left)
 	var tabs := HBoxContainer.new()
 	left.add_child(tabs)
-	for ws in ["primary", "secondary"]:
+	for ws in ItemDb.WEAPON_SLOTS:
 		var e: Dictionary = Profile.equipment.get(ws, {})
 		var b := _button("%s: %s" % [Inventory.SLOT_NAMES[ws], ItemDb.item_name(String(e.id)) if not e.is_empty() else "—"], func() -> void: _wb_slot = ws)
 		b.disabled = e.is_empty()
@@ -2084,7 +2088,7 @@ func _build_repairs() -> void:
 ## обвес ("" — сам предмет). Надетое — первым.
 func _repair_jobs() -> Array[Dictionary]:
 	var sources: Array = []
-	for slot: String in ["primary", "secondary"]:
+	for slot: String in ItemDb.WEAPON_SLOTS:
 		var worn: Dictionary = Profile.equipment.get(slot, {})
 		if not worn.is_empty():
 			sources.append(["equip:" + slot, -1, worn, "надето"])

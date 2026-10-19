@@ -354,7 +354,7 @@ const TRADER_KITS := [
 	{"name": "Дворовый", "about": "Ружьё и ПМ, самодельный жилет. С чем выходят в первый рейд.",
 		"slots": {
 			"primary": {"id": "wpn_sg_03", "mods": {"optic_primary": "optic_rd_01"}},
-			"secondary": {"id": "wpn_hg_01"},
+			"sidearm": {"id": "wpn_hg_01"},
 			"armor": {"id": "vest_homemade"},
 			"rig": {"id": "rig_belt"},
 			"helmet": {"id": "helmet_military_old"},
@@ -364,7 +364,7 @@ const TRADER_KITS := [
 	{"name": "Патрульный", "about": "ВЕРАС-54 с коллиматором и Glock, плитоносец со стальными плитами.",
 		"slots": {
 			"primary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_holo_01", "muzzle": "muzzle_comp_545_01", "underbarrel": "grip_vertical_01", "side_right": "tac_flashlight_01"}},
-			"secondary": {"id": "wpn_hg_02"},
+			"sidearm": {"id": "wpn_hg_02"},
 			"armor": {"id": "carrier_simple", "plates": {"front": "plate_steel", "back": "plate_steel"}},
 			"rig": {"id": "rig_chest"},
 			"helmet": {"id": "helmet_police"},
@@ -374,7 +374,7 @@ const TRADER_KITS := [
 	{"name": "Штурмовик", "about": "M4A1 с оптикой 4× и глушителем, керамика, ПНВ. Для ночи и тесных коридоров.",
 		"slots": {
 			"primary": {"id": "wpn_ar_02", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_556_01", "underbarrel": "grip_angled_01", "side_right": "tac_combo_01"}},
-			"secondary": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01", "underbarrel": "tac_flashlight_01"}},
+			"sidearm": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01", "underbarrel": "tac_flashlight_01"}},
 			"armor": {"id": "carrier_tactical", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}},
 			"rig": {"id": "rig_assault"},
 			"helmet": {"id": "helmet_army"},

@@ -324,7 +324,7 @@ func _player_cases() -> void:
 	_check("выстрел после пустого патронника расходует один патрон", actor.ammo == 7 and Gear.total_rounds(actor.weapon_entry()) == 7)
 	actor._start_reload(actor.spec())
 	actor.cancel_weapon_action()
-	_check("прерывание после выстрела сохраняет расход на хосте", Gear.total_rounds(actor.inventory.equipment.secondary) == 7)
+	_check("прерывание после выстрела сохраняет расход на хосте", Gear.total_rounds(actor.inventory.equipment.sidearm) == 7)
 	_reset_player(actor, _weapon(0, 1))
 	actor._update_hand()
 	actor._fire(actor.spec())
@@ -368,12 +368,12 @@ func _reset_player(actor: Player, entry: Dictionary) -> void:
 	actor.health.alive = true
 	actor.health.downed = false
 	actor.loadout_mode = true
-	actor.inventory.equipment = {"secondary": entry}
+	actor.inventory.equipment = {"sidearm": entry}
 	actor.inventory.items = []
 	actor.inventory.buffer = []
 	ItemDb.add_to(actor.inventory.items, WeaponDb.make_mag("mag_918_8", "ammo_918_pst", 8), Balance.BACKPACK_GRID)
 	ItemDb.add_to(actor.inventory.items, ItemDb.make(SUP_ID, 1), Balance.BACKPACK_GRID)
-	actor._switch("secondary", false)
+	actor._switch("sidearm", false)
 
 
 ## Настоящий ИИ стреляет и перезаряжается; только получение ящика заменено сборщиком.

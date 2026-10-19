@@ -98,7 +98,7 @@ func _process(delta: float) -> void:
 func _begin(me: Player) -> void:
 	started_ms = Time.get_ticks_msec()
 	loadout = me.loadout_mode
-	for slot in ["primary", "secondary"]:
+	for slot in ItemDb.WEAPON_SLOTS:
 		var e: Dictionary = me.inventory.equipment.get(slot, {})
 		if WeaponDb.is_weapon(String(e.get("id", ""))):
 			start_weapons.append(String(e.id))
@@ -209,7 +209,7 @@ func _finish(how: String, me: Player) -> void:
 		started_ms = ended_ms
 	if me == null:
 		return
-	for slot in ["primary", "secondary"]:
+	for slot in ItemDb.WEAPON_SLOTS:
 		var e: Dictionary = me.inventory.equipment.get(slot, {})
 		if WeaponDb.is_weapon(String(e.get("id", ""))):
 			end_weapons.append(String(e.id))

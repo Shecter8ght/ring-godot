@@ -5,8 +5,9 @@ extends Node
 ## экземпляр предмета. Меняет только хост (авторитет узла — 1, как у Health); у всех peer
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
-const SLOTS := ["primary", "secondary", "armor", "rig", "helmet", "ears", "eyes", "backpack"]
-const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "armor": "Броня", "rig": "Разгрузка", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
+const SLOTS := ["primary", "secondary", "sidearm", "launcher", "armor", "rig", "helmet", "ears", "eyes", "backpack"]
+const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "sidearm": "Пистолет", "launcher": "Ракетница", "armor": "Броня",
+	"rig": "Разгрузка", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
 
 var items: Array = []
 ## Ревизия слота не забывается, когда оружие вынуто: поздний пакет не попадёт в новый экземпляр.
@@ -495,7 +496,7 @@ func prepare_mags() -> void:
 	var list := items.duplicate(true)
 	var eq := equipment.duplicate(true)
 	var extra: Array = []
-	for slot in ["primary", "secondary"]:
+	for slot in ItemDb.WEAPON_SLOTS:
 		if eq.has(slot):
 			extra.append(eq[slot])
 	# магазины в подсумках разгрузки тоже снаряжаются

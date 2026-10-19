@@ -177,7 +177,7 @@ func _fill_own() -> void:
 	if _player == null or _player.inventory == null:
 		return
 	var any: bool = false
-	for slot: String in ["primary", "secondary"]:
+	for slot: String in ItemDb.WEAPON_SLOTS:
 		var own: Dictionary = _player.inventory.equipment.get(slot, {})
 		if own.is_empty() or not WeaponDb.is_weapon(String(own.get("id", ""))):
 			continue

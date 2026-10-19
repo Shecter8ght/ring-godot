@@ -82,9 +82,9 @@ func _ready() -> void:
 	for i in range(Profile.backpack.size()):
 		if String(Profile.backpack[i].id) == WeaponDb.canonical("mod_rmr"):
 			bi = i
-	Profile.install_mod("secondary", bi, true)
-	_check("верстак: обвес из рюкзака (мини-коллиматор на затвор)", WeaponDb.mod_id(Profile.weapon_mods("secondary").get("optic_primary", "")) == "optic_rmr_01" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("secondary")))
-	Profile.remove_mod("secondary", "optic_primary")
+	Profile.install_mod("sidearm", bi, true)
+	_check("верстак: обвес из рюкзака (мини-коллиматор на затвор)", WeaponDb.mod_id(Profile.weapon_mods("sidearm").get("optic_primary", "")) == "optic_rmr_01" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("sidearm")))
+	Profile.remove_mod("sidearm", "optic_primary")
 	# задания: без рации — одно; убил троих — сдал за деньги и доверие
 	_check("задание взято, второе — нет (слот один без рации)", Missions.take("m_kills3") and not Missions.take("m_dock"), str(Profile.missions_active))
 	for i in range(3):
@@ -139,11 +139,11 @@ func _ready() -> void:
 	for i in range(4):
 		pl.health.take_damage(20.0, pl.global_position + fwd * 5.0 + Vector3.UP, "thorax", pl.global_position + Vector3.UP * 1.2, {"pen": 8.0, "armor_dmg": 10.0})
 	_check("броня держит слабую пулю и изнашивается", hp0 - pl.health.hp < 60.0 and float(pl.inventory.equipment.armor.dur) < dur0, "урон %d из 80, броня %.0f→%.0f" % [int(hp0 - pl.health.hp), dur0, float(pl.inventory.equipment.armor.dur)])
-	Input.action_press("weapon_2")
+	Input.action_press("weapon_3")
 	await _frames(3)
-	Input.action_release("weapon_2")
+	Input.action_release("weapon_3")
 	await _frames(2)
-	_check("2 — Glock 17 (магазин снаряжён)", pl.weapon_id == "wpn_hg_02" and pl.ammo == 17, "%s %d" % [pl.weapon_id, pl.ammo])
+	_check("3 — Glock 17 (магазин снаряжён)", pl.weapon_id == "wpn_hg_02" and pl.ammo == 17, "%s %d" % [pl.weapon_id, pl.ammo])
 	# эвакуация через остановку
 	for m in get_tree().get_nodes_in_group("marauders"):
 		(m as Node).queue_free()

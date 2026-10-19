@@ -250,7 +250,7 @@ static func equipped_weapon() -> String:
 ## Оружие в снаряжении (основное, иначе пистолет) — запись; {} — нет.
 static func equipped_entry() -> Dictionary:
 	ensure()
-	for slot in ["primary", "secondary"]:
+	for slot in ItemDb.WEAPON_SLOTS:
 		if equipment.has(slot) and WeaponDb.is_weapon(String(equipment[slot].id)):
 			return equipment[slot]
 	return {}
@@ -264,7 +264,7 @@ static func raid_kit_gaps() -> Array[String]:
 	var out: Array[String] = []
 	var carried: Array = backpack + pocket
 	var weapons: Array = []
-	for slot in ["primary", "secondary"]:
+	for slot in ["primary", "secondary", "sidearm"]:
 		var e: Dictionary = equipment.get(slot, {})
 		if WeaponDb.is_weapon(String(e.get("id", ""))):
 			weapons.append(e)
@@ -770,6 +770,11 @@ static func _migrate() -> void:
 		equipment[slot] = r[0]
 		WeaponMark.identify(equipment[slot])
 		spill.append_array(r[1])
+	# слоты оружия 2026-10-19: пистолет и ракетница из «Оружие 1 / 2» — в свои слоты (и в шаблонах снаряжения)
+	ItemDb.remap_weapon_slots(equipment)
+	for t: Variant in loadout_templates:
+		if t is Dictionary and (t as Dictionary).get("slots") is Dictionary:
+			ItemDb.remap_weapon_slots((t as Dictionary).slots)
 	# старая броня в слоте — может не встать своим слотом (плитоносец надевается в armor)
 	for e in spill:
 		ItemDb.add_to(stash, e, stash_grid())
@@ -982,7 +987,7 @@ static func return_loadout(eq: Dictionary, items: Array, loot_value: int = 0) ->
 	equipment = eq.duplicate(true)
 	backpack = items.duplicate(true)
 	# наклейка «Счёт» на вынесенном в руках стволе — зарубка за эвакуацию
-	for slot: String in ["primary", "secondary"]:
+	for slot: String in ItemDb.WEAPON_SLOTS:
 		if equipment.get(slot) is Dictionary:
 			Stickers.tally_extract(equipment[slot])
 	_fix_numbers()
