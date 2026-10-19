@@ -134,6 +134,9 @@ func _build(entry: Dictionary) -> void:
 	text.add_theme_font_size_override("bold_font_size", 16)
 	text.add_theme_color_override("default_color", Color(0.9, 0.89, 0.85))
 	text.text = describe(id)
+	var condition: String = condition_text(entry)
+	if condition != "":
+		text.append_text("\n\n" + condition)
 	if not Stickers.of(entry).is_empty():
 		var names: Array[String] = []
 		for st: Variant in Stickers.of(entry):
@@ -172,7 +175,31 @@ static func facts_line(id: String, entry: Dictionary = {}) -> String:
 		parts.append("продать %s ₽" % InventoryUI.money(Profile.sell_price(shown)))
 	if ItemDb.stack(id) > 1:
 		parts.append("в стопке до %d" % ItemDb.stack(id))
+	if entry.has("dur") and WeaponCondition.supported(id):
+		parts.append("состояние %d %%" % int(WeaponCondition.percent(entry)))
 	return "  ·  ".join(parts)
+
+
+## Состояние экземпляра ствола или обвеса (BBCode): процент и что он меняет в работе. Внешне оружие от
+## прочности не меняется (решение владельца 2026-10-19) — состояние видно только здесь, полоской в сетке
+## и на верстаке. Пусто — у предмета нет ресурса.
+static func condition_text(entry: Dictionary) -> String:
+	var id: String = String(entry.get("id", ""))
+	if not entry.has("dur") or not WeaponCondition.supported(id):
+		return ""
+	var dur: float = WeaponCondition.percent(entry)
+	var head: String = "[b]Состояние %d %%[/b]" % int(dur)
+	if WeaponCondition.broken(entry):
+		return head + " — сломано: %s. Починить — на верстаке в убежище." % ("не стреляет" if WeaponDb.is_weapon(id) else "не работает")
+	if dur >= float(Balance.CONDITION.full):
+		return head + " — исправно."
+	if not WeaponDb.is_weapon(id):
+		return head + ": полезные свойства слабее — %d %% от исправного. Починить — на верстаке." % roundi(WeaponCondition.effectiveness(entry) * 100.0)
+	# те же формулы, что в WeaponStats.compute
+	var worn: float = pow((float(Balance.CONDITION.full) - dur) / float(Balance.CONDITION.full), 2.0)
+	var spread: int = roundi(worn * float(Balance.WEAPON_WEAR.spread) * 100.0)
+	var jams: float = 1.0 + worn * float(Balance.WEAPON_WEAR.jam_worn)
+	return head + ": разброс +%d %%, задержки в %.1f раза чаще, чем у исправного; на нуле не стреляет. Починить — на верстаке." % [spread, jams]
 
 
 ## Описание простыми словами (BBCode).

@@ -120,7 +120,8 @@ func _data_checks() -> void:
 			var model: Node3D = WeaponModels.build(wid, mods, 1)
 			var part: Node = model.find_child("Attachment_" + WeaponBuild.node_name(key), true, false)
 			var lens: MeshInstance3D = part.find_child("Lens", true, false) as MeshInstance3D if part else null
-			_check("геометрия и износ " + wid + ":" + mount, (model.get_meta("sights", {}) as Dictionary).has(key) and lens != null and bool((lens.material_override as ShaderMaterial).get_shader_parameter("cracked")))
+			# вид один (решение владельца 2026-10-19): и на 20 % стекло целое
+			_check("геометрия и вид " + wid + ":" + mount, (model.get_meta("sights", {}) as Dictionary).has(key) and lens != null and not bool((lens.material_override as ShaderMaterial).get_shader_parameter("cracked")))
 			model.free()
 	var probe: CameraRig = CameraRig.new()
 	var model: Node3D = WeaponModels.build("wpn_ar_01", {"optic_primary": {"id": "optic_lpvo_01"}, "side_right": {"id": "optic_holo_01"}})

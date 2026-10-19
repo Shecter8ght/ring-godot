@@ -377,10 +377,10 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	var model: Node3D = (load(path) as PackedScene).instantiate() as Node3D
 	if model == null:
 		return false
-	var visual: int = WeaponCondition.stage(m.get("state", {}))
+	# вид один (решение владельца 2026-10-19): карты 100 при любой прочности; прежние 60/20 и шейдер по маске
+	# <имя>_100_wear.png — только при WeaponCondition.visual_wear
+	var visual: int = WeaponCondition.look_stage(m.get("state", {}))
 	var material: Material = _model_material(path.get_basename() + "_%d_" % visual)
-	# новый обвес — одно состояние 100 (решение владельца 2026-10-17): с маской <имя>_100_wear.png вид по
-	# прочности рисует шейдер, без неё — карты 100 при любой прочности
 	var full: StandardMaterial3D = _model_material(path.get_basename() + "_100_") as StandardMaterial3D
 	var worn: ShaderMaterial = WeaponCondition.wear_material(full) if full else null
 	if worn:
@@ -400,7 +400,7 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
 		if worn:
 			# свой ресурс обвеса: WeaponCondition.update_wear берёт его из mods по точке крепления
-			var k: float = WeaponCondition.effectiveness(m.get("state", {}))
+			var k: float = WeaponCondition.look_k(m.get("state", {}))
 			body.set_meta("wear_mount", String(m.get("mount", "")))
 			body.set_meta("wear_k", k)
 			body.set_instance_shader_parameter("condition", k)
@@ -446,7 +446,8 @@ static func _lumar(root: Node3D, m: Dictionary, attachment: Dictionary) -> bool:
 	model.position = m.pos
 	model.position.y = _optic_base(root, m, 0.09)
 	root.add_child(model)
-	var visual: int = WeaponCondition.stage(m.get("state", {}))
+	# вид один: карты 100 и целое стекло при любой прочности (трещины 20 % — только при visual_wear)
+	var visual: int = WeaponCondition.look_stage(m.get("state", {}))
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	var prefix: String = path.get_base_dir() + "/lumar_%d_" % visual
 	material.albedo_texture = load(prefix + "base_color.png") as Texture2D

@@ -81,14 +81,21 @@ func _ready() -> void:
 	add_child(model)
 	var markers: Array[Node] = model.find_children("Reticle", "MeshInstance3D", true, false)
 	_check("ЛУМАР загружен, марка на нуле погашена", model.find_child("LUMAR_H1", true, false) != null and not markers.is_empty() and not (markers[0] as MeshInstance3D).visible)
-	for state_value: int in [100, 60, 20]:
-		var sample: Node3D = WeaponModels.build("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": state_value}})
-		var sample_body: MeshInstance3D = sample.find_child("Body", true, false) as MeshInstance3D
-		var sample_lens: MeshInstance3D = sample.find_child("Lens", true, false) as MeshInstance3D
-		var body_material: StandardMaterial3D = sample_body.material_override as StandardMaterial3D
-		var glass_material: ShaderMaterial = sample_lens.material_override as ShaderMaterial
-		_check("состояние %d%% загружает свои карты и правильное стекло" % state_value, body_material.albedo_texture.resource_path.ends_with("lumar_%d_base_color.png" % state_value) and bool(glass_material.get_shader_parameter("cracked")) == (state_value == 20))
-		sample.free()
+	# вид один (решение владельца 2026-10-19): карты 100 и целое стекло при любой прочности; прежние 60/20 и
+	# трещины — только при WeaponCondition.visual_wear
+	for visual_wear: bool in [false, true]:
+		WeaponCondition.visual_wear = visual_wear
+		for state_value: int in [100, 60, 20]:
+			var sample: Node3D = WeaponModels.build("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": state_value}})
+			var sample_body: MeshInstance3D = sample.find_child("Body", true, false) as MeshInstance3D
+			var sample_lens: MeshInstance3D = sample.find_child("Lens", true, false) as MeshInstance3D
+			var body_material: StandardMaterial3D = sample_body.material_override as StandardMaterial3D
+			var glass_material: ShaderMaterial = sample_lens.material_override as ShaderMaterial
+			var shown: int = state_value if visual_wear else 100
+			_check("%s: состояние %d%% — карты %d и %s стекло" % ["прежний вид" if visual_wear else "один вид", state_value, shown, "треснувшее" if shown == 20 else "целое"],
+					body_material.albedo_texture.resource_path.ends_with("lumar_%d_base_color.png" % shown) and bool(glass_material.get_shader_parameter("cracked")) == (shown == 20))
+			sample.free()
+	WeaponCondition.visual_wear = false
 	var compatible: int = 0
 	for raw_id: Variant in WeaponDb.items():
 		var id: String = String(raw_id)

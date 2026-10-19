@@ -1,4 +1,5 @@
 extends Node3D
+## Прежний износ по прочности (в игре выключен, WeaponCondition.visual_wear; вид один — решение владельца 2026-10-19).
 ## Честное сравнение износа ПМ: ручные карты 60 и 20 рядом с шейдером износа (weapon_wear) при той же
 ## прочности — один свет (как tools/pm_shots), одни ракурсы. Снимки docs/screens/wear_*.png:
 ##   wear_<ракурс>.png — сетка 2×2: строки 60 / 20, слева ручные карты, справа шейдер;
@@ -34,6 +35,8 @@ var _written: Array[String] = []
 
 func _ready() -> void:
 	Engine.max_fps = 60
+	# прежний вид по прочности — в игре выключен (вид один, решение владельца 2026-10-19), здесь — для сравнения
+	WeaponCondition.visual_wear = true
 	if DisplayServer.get_name() == "headless":
 		push_error("wear_shots: снимки требуют окна и настоящего GPU, без --headless")
 		get_tree().quit(1)

@@ -194,9 +194,9 @@ tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки кот
 tools/godot.cmd res://tools/look_shots.tscn                 # вид «как с камеры»: те же кадры с эффектами и без (убежище, рейд день/ночь, поворот головы)
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
-tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # ПМ v11: сталь и щёчка — шейдер износа по маске при любой прочности (выстрел — без пересборки),
-                                                              # ручные карты 60/20 подставляются прежним путём, магазин/патроны/глушитель — одно состояние 60
-tools/godot.cmd --windowed --resolution 1280x720 res://tools/wear_shots.tscn # износ шейдером: ПМ 60/20 ручными картами и шейдером рядом (ракурсы, от первого лица,
+tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # вид оружия один (2026-10-19): ПМ при любой прочности — карты как есть, выстрел вид не меняет;
+                                                              # прежний износ по виду (WeaponCondition.visual_wear) — шейдер по маске, ручные 60/20, ВЕРАС-54 с жировой плёнкой
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/wear_shots.tscn # прежний износ по виду (в игре выключен): ПМ 60/20 ручными картами и шейдером рядом (ракурсы, от первого лица,
                                                               # LOD1), прочность 100…0, дождь; снимки wear_* (only=right,fp,steps,wet)
 python -X utf8 tools/gen_weapon_wear_tiles.py                 # общие тайлы износа оружия (царапины, налёт, ржавчина, сколы) → assets/textures/weapon_wear
 # ПМ v11 в игру (без прицела): blender … --python tools/pm_v11_build_lp.py (сетка) → tools/pm_v11_build_lp_supp.py (глушитель) →
@@ -212,7 +212,7 @@ tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же с
 # Магазины ВЕРАС-54 на 45 и барабан на 60 в игру: sh tools/veras54_mags/chain.sh [m45] [d60] (mags_game_lp → bake → pack → export:
 #   атлас 4096, .gltf «в руках» и _world, маски _wear/_coat — assets/models/weapons/veras54_mags; файл для Blender — «Игровая версия»
 #   в библиотеке) → --import → python -X utf8 tools/veras54_mags/mags_game_imports.py → --import
-tools/godot.cmd --headless res://tools/veras54_mags_check.tscn # магазины 45/60 в движке: узлы, патроны Round_NN, габарит, карты, шейдер износа;
+tools/godot.cmd --headless res://tools/veras54_mags_check.tscn # магазины 45/60 в движке: узлы, патроны Round_NN, габарит, карты, шейдер плёнки;
                                                               # с окном (--windowed --resolution 1600x900) — снимки veras54_mags_* (прочность 100 и 25 %)
 # Хваты и клипы рук под магазины 45/60: blender … «Риг v13/VERAS54_Rig_v13.blend» --python tools/veras54_mags/mags_grip_file.py -- m45|d60 [--force] (файл хвата —
 #   «Игровая версия/Хваты магазинов 45 и 60», пальцы правит владелец) → bash tools/veras54_mags/mags_clips.sh [m45] [d60] (30 клипов
@@ -223,7 +223,7 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/veras54_mags_vm_sho
                                                               # поворот окнами остатка к глазам; снимки veras54_mags_vm_* (MAGS_ONLY=mag_545_45)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка), мировая и подробная (конструктор) — .gltf с общими картами в assets/models/weapons/veras54; grips — наборы клипов под рукоятки ВАРН
 tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от первого лица: бедро, прицел, перезарядки, проверка магазина, мировая модель; рукоятки ВАРН V1/V2 и глушитель
-                                                              # задержка «гильза в окне» и её устранение, износ шейдером 100/60/20, прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)
+                                                              # задержка «гильза в окне» и её устранение, вид при прочности 100/60/20 (один), прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check)
 tools/godot.cmd --headless res://tools/veras_hand_test.tscn # ВЕРАС-54, левая рука с рукоятками (ВАРН, угловая, на удлинителе): стоя, на ходу, в прицел и обратно — кости не копят масштаб, кисть у рукоятки
 tools/godot.cmd res://tools/veras_gloss_shots.tscn          # ВЕРАС-54 под лампами тира: блики отделки v13 и жировых следов; снимки veras_gloss_*
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100|60|20]
@@ -298,7 +298,7 @@ tools/godot.cmd --headless res://tools/unlock_test.tscn    # чит «откры
 tools/godot.cmd --headless res://tools/stress_test.tscn    # стресс: пули рядом, спад в тишине, пороги, адреналин, обезболивающее
 tools/godot.cmd res://tools/breaker_test.tscn              # главный рубильник света ТЦ: щитовая, свет погас → поднять, генератор; снимок breaker.png
 tools/godot.cmd res://tools/vault_test.tscn                # перелезание (игрок и мародёр по связке навигации), бросок на землю; снимки vault_*
-tools/godot.cmd res://tools/info_shots.tscn                # снимки окна описания предмета (info_*) и прицела гранаты (nade_aim)
+tools/godot.cmd res://tools/info_shots.tscn                # снимки окна описания предмета (info_*; ствол 47 % и прицел 30 % — состояние процентом) и прицела гранаты (nade_aim)
 tools/godot.cmd res://tools/hideout_move_probe.tscn          # скорость в убежище: шаг / бег (с оружием, от первого лица)
 tools/godot.cmd res://tools/sound_bench.tscn               # стенд звуков: одна страница — сворачиваемые разделы (оружие → классы → стволы, общие наборы;
                                                               # разделы каталога → подгруппы → карточки событий); справа событие: слушать в разных местах /

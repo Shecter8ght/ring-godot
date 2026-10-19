@@ -14,8 +14,13 @@ func _ready() -> void:
 	bg.color = Color(0.1, 0.1, 0.1)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(bg)
+	# ствол и прицел — изношенные экземпляры: состояние процентом и что оно меняет (вид оружия от него не зависит)
+	var worn := {"wpn_ar_01": 47.0, "optic_offset_rd_01": 30.0}
 	for id in ["ammo_545_ap", "wpn_ar_01" if ItemDb.exists("wpn_ar_01") else String(WeaponDb.ids("weapons")[8]), "carrier_tactical", "mag_545_30", "optic_offset_rd_01", "bandage"]:
-		var w := ItemInfo.open(layer, {"id": id, "n": 1})
+		var entry := {"id": id, "n": 1}
+		if worn.has(id):
+			entry["dur"] = worn[id]
+		var w := ItemInfo.open(layer, entry)
 		for i in range(4):
 			await get_tree().process_frame
 		_save("info_" + id)
