@@ -2,7 +2,8 @@ extends Node
 ## ВЕРАС-54 днём под открытым небом (Пригород, ясно): у бедра, проверка магазина у глаз (держать R), в прицеле — на
 ## солнце и от солнца. Материалы оружия под небом (отражения, блики): в помещении и в тёмной студии Blender отражать
 ## нечего, «стеклянный» глянец виден только тут (владелец 2026-10-19).
-## tools/godot.cmd res://tools/veras_outdoor_shots.tscn → docs/screens/veras_outdoor_*.png (VERAS_OUT_TAG=имя — приставка)
+## tools/godot.cmd res://tools/veras_outdoor_shots.tscn → docs/screens/veras_outdoor_*.png (VERAS_OUT_TAG=имя — приставка;
+## VERAS_OUT_MAG=mag_545_45|mag_545_60 — с магазином на 45 / барабаном на 60)
 
 const ID := "wpn_ar_01"
 const OUT := "res://docs/screens/"
@@ -62,8 +63,12 @@ func _ready() -> void:
 
 func _equip() -> void:
 	var slot: String = String(WeaponDb.sandbox()[0])
+	var mag: String = OS.get_environment("VERAS_OUT_MAG")
+	if mag == "":
+		mag = WeaponDb.default_mag(ID)
 	_player.sandbox_weapons[slot] = {"id": ID, "n": 1, "dur": 100.0, "mods": {},
-		"mag": {"id": WeaponDb.default_mag(ID), "ammo": WeaponDb.default_ammo("545x39"), "rounds": 30}, "sight": "primary", "rev": randi()}
+		"mag": {"id": mag, "ammo": WeaponDb.default_ammo("545x39"), "rounds": int(WeaponDb.magazine(mag).get("capacity", 30))},
+		"sight": "primary", "rev": randi()}
 	_player.weapon_slot = ""
 	_player._switch(slot, false)
 	await get_tree().create_timer(0.6).timeout
