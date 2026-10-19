@@ -12,6 +12,12 @@ const SOURCES := {
 		"res://src/world/district_model.gd", "res://assets/zone01/nw/manifest.json", "res://assets/zone01/nw/furniture.json",
 		# постройки, интерьеры и укрытия блокаутов (левел-дизайн) — тоже источник навигации
 		"res://src/blockout/study_building.gd", "res://src/blockout/study_geometry.gd"],
+	# территория ТЦ — серый черновик (tools/build_mall_study.py) внутри рейдового уровня
+	"mall_map": ["res://data/sectors/mall_map.json", "res://scenes/levels/mall_map.tscn",
+		"res://scenes/levels/mall_study.tscn", "res://data/blockouts/mall_study.json", "res://data/sectors/mall_1f.json",
+		"res://src/blockout/mall_landscape.gd", "res://src/blockout/mall_ring.gd", "res://src/blockout/mall_filler.gd",
+		"res://src/blockout/mall_streets.gd", "res://src/blockout/mall_park.gd",
+		"res://src/blockout/study_building.gd", "res://src/blockout/study_geometry.gd"],
 }
 
 var definition: Dictionary = {}
@@ -23,6 +29,7 @@ var _previous_height: float = 0.25
 
 
 func _config() -> Dictionary:
+	# ТЦ — обычная сетка: с точной (как у Пригорода) сервер не публиковал тайлы территории за отведённое время (2026-10-19)
 	if String(definition.get("id", "")) == "zone01_mall":
 		return Balance.URBAN_WORLD.merged(Balance.ZONE01_INTERIOR_NAV, true)
 	return Balance.URBAN_WORLD

@@ -1,6 +1,7 @@
 extends Node
-## Заказ «Вернуть машину» (data/quests/car_recovery.json) по данным целиком, без карт: пока сцен мест
-## нет — заказ закрыт; обычный путь — стоянка, Нина, скупка, «ЮР / 8», дворы, банда, механик,
+## Заказ «Вернуть машину» (data/quests/car_recovery.json) по данным целиком, без карт: сцены мест обеих карт
+## есть (ТЦ — scenes/levels/mall, Пригород — zone01) — заказ предлагается (без сцены — закрыт, общий случай
+## проверяет terminal_story_test); обычный путь — стоянка, Нина, скупка, «ЮР / 8», дворы, банда, механик,
 ## аккумулятор, колесо и радиатор (модель радиатора в кладовой и в комплекте), расчёт; ранняя находка на скупке — без стоянки и подсказки;
 ## обе находки за один рейд — общий отчёт. Оплаты этапов и итог — один раз.
 ## tools/godot.cmd --headless res://tools/car_recovery_test.tscn
@@ -14,7 +15,9 @@ func _ready() -> void:
 	RaidEvents.enabled = false
 	await get_tree().process_frame
 	Profile.use_file("user://car_recovery_test.json", true)
-	_check("сцен мест нет — заказ не предлагается", Quests.state(Q) == "LOCKED" and not Q in Quests.terminal_threads())
+	var scenes: Array = (Quests.def(Q).get("requires", {}) as Dictionary).get("scenes", [])
+	_check("сцены мест обеих карт есть", scenes.size() == 2 and scenes.all(func(p: Variant) -> bool: return ResourceLoader.exists(String(p))), str(scenes))
+	_check("заказ предлагается в терминале", Quests.state(Q) == "AVAILABLE" and Q in Quests.terminal_threads(), Quests.state(Q))
 	# обычный путь
 	_begin()
 	var m0 := Profile.money

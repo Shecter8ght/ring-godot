@@ -1,0 +1,114 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/quests/quest_anchor.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="Paint"]
+albedo_color = Color(0.86, 0.68, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Oil"]
+albedo_color = Color(0.035, 0.03, 0.028, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Plastic"]
+albedo_color = Color(0.07, 0.07, 0.075, 1)
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="Cardboard"]
+albedo_color = Color(0.48, 0.36, 0.22, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Plate"]
+albedo_color = Color(0.9, 0.9, 0.88, 1)
+roughness = 0.4
+metallic = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Tag"]
+albedo_color = Color(0.95, 0.55, 0.12, 1)
+roughness = 0.8
+
+[node name="CarRecoverySites" type="Node3D"]
+
+[node name="Parking" type="Node3D" parent="."]
+position = Vector3(76.0, -4.0, -150.0)
+
+[node name="car_mall_parking_wide" type="Marker3D" parent="Parking"]
+script = ExtResource("1")
+site_id = "car_mall_parking_wide"
+position = Vector3(0.0, 0.02, 0.0)
+
+[node name="car_mall_parking_detail" type="Marker3D" parent="Parking"]
+script = ExtResource("1")
+site_id = "car_mall_parking_detail"
+position = Vector3(0.4, 0.02, 1.4)
+
+[node name="LineLeft" type="CSGBox3D" parent="Parking"]
+position = Vector3(-1.35, 0.03, 0.0)
+size = Vector3(0.15, 0.04, 5.0)
+material = SubResource("Paint")
+
+[node name="LineRight" type="CSGBox3D" parent="Parking"]
+position = Vector3(1.35, 0.03, 0.0)
+size = Vector3(0.15, 0.04, 5.0)
+material = SubResource("Paint")
+
+[node name="OilStain" type="CSGCylinder3D" parent="Parking"]
+position = Vector3(0.3, 0.03, 0.9)
+radius = 0.8
+height = 0.04
+sides = 24
+material = SubResource("Oil")
+
+[node name="TrimFragment" type="CSGBox3D" parent="Parking"]
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 0.7, 0.05, 1.7)
+size = Vector3(0.55, 0.03, 0.09)
+material = SubResource("Plastic")
+
+[node name="LeadBox" type="Node3D" parent="."]
+
+[node name="car_mall_lead_plate" type="Marker3D" parent="LeadBox"]
+script = ExtResource("1")
+site_id = "car_mall_lead_plate"
+position = Vector3(-231.9, 1.14, -206.2)
+
+[node name="car_mall_lead_invoice" type="Marker3D" parent="LeadBox"]
+script = ExtResource("1")
+site_id = "car_mall_lead_invoice"
+position = Vector3(-224.1, 1.14, -206.2)
+
+[node name="PlateCrate" type="CSGBox3D" parent="LeadBox"]
+position = Vector3(-231.9, 2.34, -204.6)
+size = Vector3(0.6, 0.28, 0.4)
+material = SubResource("Cardboard")
+
+[node name="Plate1" type="CSGBox3D" parent="LeadBox"]
+transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -231.9, 2.5, -204.72)
+size = Vector3(0.52, 0.11, 0.01)
+material = SubResource("Plate")
+
+[node name="Plate2" type="CSGBox3D" parent="LeadBox"]
+transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -231.9, 2.5, -204.6)
+size = Vector3(0.52, 0.11, 0.01)
+material = SubResource("Plate")
+
+[node name="Plate3" type="CSGBox3D" parent="LeadBox"]
+transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -231.9, 2.5, -204.48)
+size = Vector3(0.52, 0.11, 0.01)
+material = SubResource("Plate")
+
+[node name="Invoice" type="CSGBox3D" parent="LeadBox"]
+position = Vector3(-224.1, 2.203, -204.7)
+size = Vector3(0.21, 0.004, 0.3)
+material = SubResource("Plate")
+
+[node name="BatchTag" type="CSGBox3D" parent="LeadBox"]
+transform = Transform3D(0.94, 0, 0.342, 0, 1, 0, -0.342, 0, 0.94, -223.8, 2.205, -204.55)
+size = Vector3(0.06, 0.004, 0.1)
+material = SubResource("Tag")
+
+[node name="Supply" type="Node3D" parent="."]
+
+[node name="car_mall_supply_wheel" type="Marker3D" parent="Supply"]
+script = ExtResource("1")
+site_id = "car_mall_supply_wheel"
+position = Vector3(258.0, 1.65, -226.0)

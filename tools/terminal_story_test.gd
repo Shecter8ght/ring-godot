@@ -14,6 +14,11 @@ var _fails: int = 0
 func _ready() -> void:
 	await get_tree().process_frame
 	Profile.use_file("user://terminal_story_test.json", true)
+	# настоящие заказы переписки (их карты уже собраны) на время теста закрыты: окно открывается на тестовом
+	for other: String in Quests.terminal_threads():
+		var closed: Dictionary = Quests.def(other).duplicate(true)
+		closed["requires"] = {"scenes": ["res://scenes/levels/__нет_такой_карты.tscn"]}
+		Quests.dev_add_def(other, closed)
 	Quests.dev_add_def(Q, _def())
 	var locked := _def()
 	locked["requires"] = {"scenes": ["res://scenes/levels/__нет_такой_карты.tscn"]}

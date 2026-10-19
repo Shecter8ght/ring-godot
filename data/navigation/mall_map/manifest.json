@@ -1,0 +1,38 @@
+{
+	"files": {
+		"res://data/blockouts/mall_study.json": "ce7f43b8bfcf0c8d5ac977d8dfe4227f0690771a1a0d275a5e64266b254afc31",
+		"res://data/sectors/mall_1f.json": "8a4005fe3ae99ab7c9c459ae167925bb2cb06b9890b55aee4c65a02d36e45b56",
+		"res://data/sectors/mall_map.json": "b9ccd5573bc2e7d568692f8fa26c549e1cf9f695d3a69641675a90888ef9fc85",
+		"res://scenes/levels/mall_map.tscn": "81bb120dc17023e97eac32ed703c9771f743a3a1218d3fe77af57db7514488e3",
+		"res://scenes/levels/mall_study.tscn": "628019d4cbd7a9e8754de0488750c3e999f7e981a9f1b3a3128f1b33bdfa38a8",
+		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
+		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
+		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",
+		"res://scenes/world/urban_road.tscn": "111466f763d0dcbe5c96b9a2df37493b286cee5325cfcfd8f601752d4fd87563",
+		"res://src/blockout/mall_filler.gd": "9fd87356ea363c5fa1e5f621901c2d16370018fec11b663a18e8481a29e26279",
+		"res://src/blockout/mall_landscape.gd": "8b48d36b414a90e6534f09d3f3cbfbfcb45d29878b6a5897ba8c00ff81d76e8e",
+		"res://src/blockout/mall_park.gd": "4cd103010569d760fcb912ad14ba75cdde7e474b2937e1ab1c5aa78b5085c9e7",
+		"res://src/blockout/mall_ring.gd": "3749c9c0593d5211ccd8dc4a8985e25a0b42256ccf53217b56f2f65e2194c9b8",
+		"res://src/blockout/mall_streets.gd": "bab1f6adf88fd1366d469d0a1e36c93d130b2fc5186c5538fdbbcc15728bb6b4",
+		"res://src/blockout/study_building.gd": "e96ac0821820ee59db18c6e75303097a845a0b8dfb0bed7e1c97239940bca270",
+		"res://src/blockout/study_geometry.gd": "81796394ea32408a9ccfcd0838a945e538895001c147221ce8a7b504e9884366",
+		"res://src/world/blockout_building.gd": "7ad9d854dc416f779d7ca25fa8e1f23d151b24a5b1be65b87a12b6289dd43892",
+		"res://src/world/blockout_mesh.gd": "a7e5dfcc5fb8ce1c27c229ab5629e3525495a10c88e73d554fa7a3ae0124bc40",
+		"res://src/world/blockout_opening.gd": "063660bf3bf804e031428db167352fee000c98f2795b32136787ab6395cd27f9",
+		"res://src/world/urban_navigation.gd": "204ac30d7fc9f8b82f76d65e408ad9320dd5a3bda7ed53a4ee1133f12cb4cc97",
+		"res://src/world/urban_props.gd": "8893c14356c82bcb31fb6b0cfb81777266c3cb794442a57cf32022345c1e2adf",
+		"res://src/world/urban_road.gd": "38cde9cfa97e3ff7c9d10ca910abd1b2ad60ccaee9a76fa54e218caf20b63918"
+	},
+	"settings": {
+		"nav_agent_height": 1.8,
+		"nav_border": 2.0,
+		"nav_cell": 0.5,
+		"nav_climb": 0.4,
+		"nav_detail_error": 2.0,
+		"nav_height": 0.25,
+		"nav_merge_scale": 0.125,
+		"nav_radius": 0.5,
+		"nav_slope": 40.0,
+		"nav_tile": 250.0
+	}
+}

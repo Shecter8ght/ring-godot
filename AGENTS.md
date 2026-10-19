@@ -50,7 +50,9 @@ r 109–121, служебный коридор r 121–125, снаружи — �
 (`docs/design/mall_map.md`); `f1_ring` Ø250 — прежний серый черновик, будет пересобран; ТЦ с карты
 зоны 1 уходит. Кольцо на Ø250 больше не развивать.
 Серый черновик 1-го этажа Ø200 — `data/sectors/mall_1f.json` (генератор `tools/gen_mall_1f.py`, план —
-`docs/design/mall_1f_plan.md`) + `scenes/levels/mall_1f.tscn`; в рейды через убежище пока не подключён.
+`docs/design/mall_1f_plan.md`) + `scenes/levels/mall_1f.tscn`; отдельно в рейды не подключён — в рейде он часть
+карты территории ТЦ `scenes/levels/mall_map.tscn` (черновик `mall_study` внутри рейдового уровня, маршрут
+«ТЦ «РИНГ» · территория», данные `data/sectors/mall_map.json`, места заказа «Вернуть машину» — `scenes/levels/mall/`).
 
 **Блокаут.** Сейчас уровень — серый блокаут (`"greybox": true`): стены без текстур, толщина по
 классу конструкции (фасад 0.5 / противопожарная 0.3 / несущая 0.3 / перегородка 0.15), нормы и
@@ -159,6 +161,10 @@ python -X utf8 tools/build_mall_study.py                     # черновик 
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
                                                               # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор, пристройка приёмки); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)
+tools/godot.cmd --headless res://tools/bake_mall_nav.tscn      # рейдовая карта ТЦ (scenes/levels/mall_map.tscn = черновик территории + заходы, выходы, мародёры, места заказа):
+                                                              # перепечь кэш навигации data/navigation/mall_map после правки территории (~30 с; без кэша рейд печёт сам при загрузке)
+tools/godot.cmd --headless res://tools/car_mall_sites_shots.tscn # места заказа «Вернуть машину» на карте ТЦ: стоянка у доков, бокс скупки у АЗС, склад техники —
+                                                              # F засчитан, путь по навигации от заходов; с окном (--windowed --resolution 1600x900) — снимки car_mall_*
 tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона

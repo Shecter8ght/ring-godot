@@ -1,0 +1,159 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/world/sector_level.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/levels/mall_study.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/levels/mall/car_recovery_sites.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="5"]
+[ext_resource type="Environment" path="res://scenes/levels/zone01/zone01_environment.tres" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="7"]
+
+[node name="Mall_Map" type="Node3D"]
+script = ExtResource("1")
+sector_path = "res://data/sectors/mall_map.json"
+
+[node name="World" parent="." groups=["nav_source"] instance=ExtResource("2")]
+
+[node name="WorldEnvironment" parent="World" index="0"]
+environment = ExtResource("6")
+
+[node name="EveningSun" parent="World" index="1"]
+visible = false
+
+[node name="CarRecovery" parent="." instance=ExtResource("3")]
+
+[node name="Gameplay" type="Node3D" parent="."]
+
+[node name="Entry_0" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(-415.0, 2.36, 110.0)
+display_name = "Запад"
+entry = true
+
+[node name="Entry_1" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(-330.0, 3.06, -278.0)
+display_name = "Северо-запад"
+entry = true
+
+[node name="Entry_2" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(130.0, 3.55, -336.0)
+display_name = "Север"
+entry = true
+
+[node name="Entry_3" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(408.0, -0.02, -30.0)
+display_name = "Восток"
+entry = true
+
+[node name="Entry_4" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(392.0, -4.43, 282.0)
+display_name = "Юго-восток"
+entry = true
+
+[node name="Entry_5" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(-20.0, -4.85, 360.0)
+display_name = "Трасса"
+entry = true
+
+[node name="Extraction_0" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-182.0, -4.89, 296.0)
+display_name = "Автостанция"
+radius = 6.0
+
+[node name="Extraction_1" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-60.0, 2.47, -256.0)
+display_name = "Ливнёвка"
+radius = 6.0
+
+[node name="Extraction_2" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(405.0, 0.79, -120.0)
+display_name = "Пролом в заборе"
+radius = 6.0
+
+[node name="AI_Spawns" type="Node3D" parent="Gameplay"]
+
+[node name="AI_Plaza" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(18.0, 0.2, 160.0)
+
+[node name="AI_MainParking" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(0.0, -3.8, 214.0)
+
+[node name="AI_BusStation" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-130.0, -3.55, 255.0)
+
+[node name="AI_Garage" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(240.0, 0.2, 30.0)
+
+[node name="AI_Cafe" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(235.0, -2.65, 235.0)
+
+[node name="AI_EastEntrance" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(165.0, 0.2, -30.0)
+
+[node name="AI_YardRamp" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(161.2, -0.04, -166.9)
+
+[node name="AI_Yard" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(120.0, -3.8, -125.0)
+
+[node name="AI_Tech" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(245.0, 0.2, -130.0)
+
+[node name="AI_Pond" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-40.0, 2.76, -262.0)
+
+[node name="AI_Square" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-30.0, 0.2, -128.0)
+
+[node name="AI_GasStation" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-245.0, 1.07, -195.0)
+
+[node name="AI_Checkpoint" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-322.0, 0.2, 6.0)
+
+[node name="AI_WestParking" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-140.0, 0.2, 10.0)
+
+[node name="AI_Highway" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-58.0, -4.69, 292.0)
+
+[node name="Navigation" type="Node3D" parent="."]
+
+[node name="Audio" type="Node3D" parent="."]
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("6")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-21.0, -128.0, 0.0)
+light_color = Color(1, 0.88, 0.76, 1)
+light_energy = 2.2
+light_angular_distance = 2.5
+shadow_enabled = true
+shadow_blur = 2.5
+directional_shadow_max_distance = 260.0
+light_volumetric_fog_energy = 1.6
+
+[node name="CameraRig" parent="." instance=ExtResource("7")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="HUD/Root"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 700.0
+offset_bottom = 48.0
+text = "HP 100"
+
+[node name="Dead" type="Label" parent="HUD/Root"]
+visible = false
