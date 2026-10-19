@@ -302,9 +302,8 @@ func _process(delta: float) -> void:
 	_t += delta
 	if not _thundered and _t >= _rain_at - float(Balance.WEATHER_CHANGE.thunder_lead):
 		_thundered = true
-		_thunder()
-		if Raid.current:
-			Raid.current.notify("Гром — будет дождь")
+		# сказать — когда гром дойдёт
+		_thunder("Гром — будет дождь")
 	if _t >= _rain_at:
 		_rain_at = INF
 		RaidConditions.current["weather"] = "rain"
@@ -404,12 +403,19 @@ func _set_rain(on: bool) -> void:
 			_rain_sound = null
 
 
-func _thunder() -> void:
+## Молния сейчас, гром — когда дойдёт: расстояние до неё / скорость звука (AUDIO_FAR.sound_mps), со стороны
+## вспышки. Расчётное небо знает, где молния; на панорамах — та же дальность вспышек (SKY_CALC.flash.dist_km).
+## note — что сказать игроку, когда гром слышно. Возвращает задержку грома, с.
+func _thunder(note: String = "") -> float:
 	var me: Player = Raid.current.local_player() if Raid.current else null
-	Audio.play("thunder", (me.global_position if me else Vector3.ZERO) + Vector3(_rng.randf_range(-80, 80), 60, _rng.randf_range(-80, 80)))
 	# расчётное небо: молния вспыхивает в тучах (и днём), отсвет неба мигает на земле
+	var info: Dictionary = {}
 	if DayCycle.current and DayCycle.current._calc:
-		AtmosphereSky.lightning(DayCycle.current._sky, me.global_position if me else Vector3.ZERO)
+		info = AtmosphereSky.lightning(DayCycle.current._sky, me.global_position if me else Vector3.ZERO)
+	var fl: Dictionary = Balance.SKY_CALC.flash
+	var dist_km: float = float(info.get("dist_km", _rng.randf_range(float(fl.dist_km[0]), float(fl.dist_km[1]))))
+	var delay: float = dist_km * 1000.0 / float(Balance.AUDIO_FAR.sound_mps)
+	get_tree().create_timer(delay).timeout.connect(_thunder_sound.bind(info.get("dir", Vector3.ZERO) as Vector3, note))
 	# ночью — вспышка молнии
 	if String(RaidConditions.current.time) == "night":
 		var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D
@@ -422,6 +428,17 @@ func _thunder() -> void:
 				if is_instance_valid(sun):
 					sun.light_energy = e
 					sun.visible = vis)
+	return delay
+
+
+## Гром дошёл: запись грома и так дальняя — звучит рядом с игроком, но со стороны молнии dir (нет — с любой).
+func _thunder_sound(dir: Vector3, note: String) -> void:
+	var me: Player = Raid.current.local_player() if Raid.current else null
+	var side := Vector3(dir.x, 0.0, dir.z).normalized() * 80.0 if Vector2(dir.x, dir.z).length() > 0.01 \
+		else Vector3(_rng.randf_range(-80, 80), 0.0, _rng.randf_range(-80, 80))
+	Audio.play("thunder", (me.global_position if me else Vector3.ZERO) + side + Vector3.UP * 60.0)
+	if note != "" and Raid.current:
+		Raid.current.notify(note)
 
 
 # ---------------------------------------------------------------- жара

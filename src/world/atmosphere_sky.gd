@@ -230,7 +230,7 @@ static func clouds_tick(m: ShaderMaterial, hour: float, delta: float = 0.0) -> v
 ## Молния у игрока в pos (м, мир), в случайной стороне. Обычно — вспышка в толще туч на dist_km; с долей
 ## bolt.chance — с видимым каналом до земли (ближе, bolt.dist_km), вспышка тогда у его верха, над низом туч.
 ## with_bolt: 1 — канал всегда, 0 — никогда (снимки, проверки), −1 — по случаю. Возвращает {"dir" —
-## направление на молнию (мир), "bolt" — есть ли канал}; тучи нет — {}.
+## направление на молнию (мир), "dist_km" — до неё (гром дойдёт позже), "bolt" — есть ли канал}; туч нет — {}.
 static func lightning(m: ShaderMaterial, pos: Vector3, with_bolt: int = -1) -> Dictionary:
 	if m == null or m.get_shader_parameter("clouds_on") != true:
 		return {}
@@ -254,7 +254,7 @@ static func lightning(m: ShaderMaterial, pos: Vector3, with_bolt: int = -1) -> D
 		var low := base + _rag(m, qx, qz)
 		_flash_q.y = low + float(bo.flash_above_km)
 		look = _make_bolt(m, dir, dist, low)
-	return {"dir": look, "bolt": _bolt_on}
+	return {"dir": look, "dist_km": dist, "bolt": _bolt_on}
 
 
 ## Канал молнии за dist км в сторону dir: от низа туч low (км над глазом; верх уходит в тучу на into_cloud_km
