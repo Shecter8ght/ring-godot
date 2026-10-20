@@ -1,0 +1,701 @@
+{
+  "status": "PASS",
+  "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\NPC_Wardrobe_Concepts_v01\\RING_NPC_Wardrobe_M02_v01.blend",
+  "source": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Appearance_v05\\M02_Appearance_v05.blend",
+  "source_sha256": "0ad4f3819152e30e43fd611e21ff2f004a39651f9c5f272e62c6103816005ead",
+  "body_topology_uv_and_shape_keys_unchanged": true,
+  "anatomy_signature": "88d9211cac40e57fcb6ff411475811c9c3f1a0020fd76903df8eacb8c0556ca4",
+  "items": [
+    {
+      "id": "P01",
+      "collection": "P01 | Straight five-pocket jeans",
+      "isolation_index": 5,
+      "objects": 23,
+      "vertices": 28438,
+      "topology": {
+        "P01 | sewn trouser panels": {
+          "boundary_components": 3,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "P02",
+      "collection": "P02 | Reinforced grey work trousers",
+      "isolation_index": 6,
+      "objects": 29,
+      "vertices": 39913,
+      "topology": {
+        "P02 | sewn trouser panels": {
+          "boundary_components": 3,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "P03",
+      "collection": "P03 | Olive cargo trousers",
+      "isolation_index": 7,
+      "objects": 31,
+      "vertices": 37328,
+      "topology": {
+        "P03 | sewn trouser panels": {
+          "boundary_components": 3,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "P04",
+      "collection": "P04 | Articulated field trousers",
+      "isolation_index": 8,
+      "objects": 33,
+      "vertices": 42743,
+      "topology": {
+        "P04 | sewn trouser panels": {
+          "boundary_components": 3,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "F01",
+      "collection": "F01 | Low trekking shoes",
+      "isolation_index": 1,
+      "objects": 84,
+      "vertices": 47706,
+      "topology": {},
+      "normalized_weights": true
+    },
+    {
+      "id": "F02",
+      "collection": "F02 | Brown leather work boots",
+      "isolation_index": 2,
+      "objects": 82,
+      "vertices": 48458,
+      "topology": {},
+      "normalized_weights": true
+    },
+    {
+      "id": "F03",
+      "collection": "F03 | Tall brown field boots",
+      "isolation_index": 4,
+      "objects": 90,
+      "vertices": 59158,
+      "topology": {},
+      "normalized_weights": true
+    },
+    {
+      "id": "T00",
+      "collection": "T00 | Grey cotton T-shirt",
+      "isolation_index": 9,
+      "objects": 3,
+      "vertices": 15825,
+      "topology": {
+        "T00 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "T01",
+      "collection": "T01 | Checked everyday shirt",
+      "isolation_index": 10,
+      "objects": 26,
+      "vertices": 21492,
+      "topology": {
+        "T01 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "T02",
+      "collection": "T02 | Blue work jacket",
+      "isolation_index": 11,
+      "objects": 28,
+      "vertices": 33665,
+      "topology": {
+        "T02 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "T03",
+      "collection": "T03 | Olive hooded windbreaker",
+      "isolation_index": 12,
+      "objects": 17,
+      "vertices": 29935,
+      "topology": {
+        "T03 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "T04",
+      "collection": "T04 | Burgundy track jacket",
+      "isolation_index": 13,
+      "objects": 17,
+      "vertices": 27077,
+      "topology": {
+        "T04 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "T05",
+      "collection": "T05 | Combat shirt",
+      "isolation_index": 14,
+      "objects": 18,
+      "vertices": 31433,
+      "topology": {
+        "T05 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "T06",
+      "collection": "T06 | Summer field jacket",
+      "isolation_index": 15,
+      "objects": 45,
+      "vertices": 37397,
+      "topology": {
+        "T06 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "F02B",
+      "collection": "F02B | black work boot material variant",
+      "isolation_index": 3,
+      "objects": 82,
+      "vertices": 48458,
+      "topology": {},
+      "normalized_weights": true
+    },
+    {
+      "id": "B01",
+      "collection": "B01 | Open-face cotton hood",
+      "isolation_index": 16,
+      "objects": 6,
+      "vertices": 36171,
+      "topology": {
+        "B01 | tailored hood shell": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "B02",
+      "collection": "B02 | Three-hole heavy rib knit",
+      "isolation_index": 17,
+      "objects": 10,
+      "vertices": 34084,
+      "topology": {
+        "B02 | tailored hood shell": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "B03",
+      "collection": "B03 | Olive cotton single eye slit",
+      "isolation_index": 18,
+      "objects": 6,
+      "vertices": 30876,
+      "topology": {
+        "B03 | tailored hood shell": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "B04",
+      "collection": "B04 | Panelled stretch sports hood",
+      "isolation_index": 19,
+      "objects": 6,
+      "vertices": 36658,
+      "topology": {
+        "B04 | tailored hood shell": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "B05",
+      "collection": "B05 | Thin coyote tactical hood",
+      "isolation_index": 20,
+      "objects": 6,
+      "vertices": 30599,
+      "topology": {
+        "B05 | tailored hood shell": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    },
+    {
+      "id": "B06",
+      "collection": "B06 | Long-skirt field ripstop hood",
+      "isolation_index": 21,
+      "objects": 6,
+      "vertices": 31633,
+      "topology": {
+        "B06 | tailored hood shell": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      },
+      "normalized_weights": true
+    }
+  ],
+  "outfit_checks": [
+    {
+      "preset": 1,
+      "visible": [
+        "B01",
+        "F01",
+        "P01",
+        "T01"
+      ]
+    },
+    {
+      "preset": 2,
+      "visible": [
+        "B02",
+        "F02",
+        "P02",
+        "T02"
+      ]
+    },
+    {
+      "preset": 3,
+      "visible": [
+        "B03",
+        "F01",
+        "P01",
+        "T03"
+      ]
+    },
+    {
+      "preset": 4,
+      "visible": [
+        "B04",
+        "F02B",
+        "P03",
+        "T04"
+      ]
+    },
+    {
+      "preset": 5,
+      "visible": [
+        "B05",
+        "F03",
+        "P04",
+        "T05"
+      ]
+    },
+    {
+      "preset": 6,
+      "visible": [
+        "B06",
+        "F03",
+        "P04",
+        "T06"
+      ]
+    }
+  ],
+  "static_pose_checks": [
+    {
+      "pose": "arms_down",
+      "maximum_displacement_m": 0.5008126412669403
+    },
+    {
+      "pose": "limb_flex",
+      "maximum_displacement_m": 0.2845243120947002
+    },
+    {
+      "pose": "head_turn",
+      "maximum_displacement_m": 0.05665574072489204
+    }
+  ],
+  "native_materials": [
+    {
+      "name": "denim",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "thread_jeans",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "hardware",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "work_grey",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "thread_dark",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "cargo_olive",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "repair_olive",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "field_olive",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "rubber",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "trek_mesh",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "thread_boot",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "suede",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "midsole",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "rib_dark",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "leather_brown",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "leather_field",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "jersey",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "plaid",
+      "layers": 9,
+      "masks": 6
+    },
+    {
+      "name": "button",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "work_blue",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "zip_tape",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "nylon_olive",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "combat_knit",
+      "layers": 9,
+      "masks": 7
+    },
+    {
+      "name": "track_red",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "piping",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "leather_black",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_grey",
+      "layers": 9,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_thread",
+      "layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_charcoal",
+      "layers": 9,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_olive",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_sport",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_sport_side",
+      "layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_coyote",
+      "layers": 9,
+      "masks": 7
+    },
+    {
+      "name": "balaclava_field",
+      "layers": 9,
+      "masks": 6
+    }
+  ],
+  "balaclava_toggle_restores_hair": true,
+  "all_6_balaclavas_can_mix_with_outfits": true,
+  "packed_images": 31,
+  "armature_bones": 163,
+  "limitations": "Редактируемые исходники для художественной оценки. Игровые сетки, bake, LOD, анимационные коррекции и импорт в Godot — отдельно.",
+  "standalone_assets_reopened": [
+    {
+      "id": "P01",
+      "file": "Separate_Assets/P01_M02.blend",
+      "mesh_objects": 23,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "P02",
+      "file": "Separate_Assets/P02_M02.blend",
+      "mesh_objects": 29,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "P03",
+      "file": "Separate_Assets/P03_M02.blend",
+      "mesh_objects": 31,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "P04",
+      "file": "Separate_Assets/P04_M02.blend",
+      "mesh_objects": 33,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "F01",
+      "file": "Separate_Assets/F01_M02.blend",
+      "mesh_objects": 84,
+      "packed_images": 6,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "F02",
+      "file": "Separate_Assets/F02_M02.blend",
+      "mesh_objects": 82,
+      "packed_images": 6,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "F03",
+      "file": "Separate_Assets/F03_M02.blend",
+      "mesh_objects": 90,
+      "packed_images": 9,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "T00",
+      "file": "Separate_Assets/T00_M02.blend",
+      "mesh_objects": 3,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "T01",
+      "file": "Separate_Assets/T01_M02.blend",
+      "mesh_objects": 26,
+      "packed_images": 4,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "T02",
+      "file": "Separate_Assets/T02_M02.blend",
+      "mesh_objects": 28,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "T03",
+      "file": "Separate_Assets/T03_M02.blend",
+      "mesh_objects": 17,
+      "packed_images": 6,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "T04",
+      "file": "Separate_Assets/T04_M02.blend",
+      "mesh_objects": 17,
+      "packed_images": 6,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "T05",
+      "file": "Separate_Assets/T05_M02.blend",
+      "mesh_objects": 18,
+      "packed_images": 6,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "T06",
+      "file": "Separate_Assets/T06_M02.blend",
+      "mesh_objects": 45,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "F02B",
+      "file": "Separate_Assets/F02B_M02.blend",
+      "mesh_objects": 82,
+      "packed_images": 6,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "B01",
+      "file": "Separate_Assets/B01_M02.blend",
+      "mesh_objects": 6,
+      "packed_images": 4,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "B02",
+      "file": "Separate_Assets/B02_M02.blend",
+      "mesh_objects": 10,
+      "packed_images": 4,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "B03",
+      "file": "Separate_Assets/B03_M02.blend",
+      "mesh_objects": 6,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "B04",
+      "file": "Separate_Assets/B04_M02.blend",
+      "mesh_objects": 6,
+      "packed_images": 3,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "B05",
+      "file": "Separate_Assets/B05_M02.blend",
+      "mesh_objects": 6,
+      "packed_images": 4,
+      "self_contained_native_asset": true
+    },
+    {
+      "id": "B06",
+      "file": "Separate_Assets/B06_M02.blend",
+      "mesh_objects": 6,
+      "packed_images": 4,
+      "self_contained_native_asset": true
+    }
+  ],
+  "standalone_assets_status": "PASS",
+  "standalone_native_ucupaint_layers_checked": true,
+  "photo_archive_checked": true,
+  "render_count": 45
+}

@@ -1,0 +1,206 @@
+[
+  {
+    "id": "denim_fabric_03",
+    "source": "https://polyhaven.com/a/denim_fabric_03",
+    "license": "CC0",
+    "license_url": "https://polyhaven.com/license",
+    "authors": {
+      "colormass": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "dimensions": [
+      271.42801281852286,
+      270.9999978542328
+    ],
+    "scale": null,
+    "files": [
+      {
+        "kind": "diff",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\denim_fabric_03\\denim_fabric_03_diff_2k.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/denim_fabric_03/denim_fabric_03_diff_2k.jpg",
+        "sha256": "f7456ece0e77f29ac3594e6965ee61f69998f17311bd5f0e0774092c573ef520"
+      },
+      {
+        "kind": "rough",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\denim_fabric_03\\denim_fabric_03_rough_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/denim_fabric_03/denim_fabric_03_rough_2k.png",
+        "sha256": "be6b5b36dc0ad0183a2c0659ce03f65aa9290cf304694e3e534f4c1e48758c46"
+      },
+      {
+        "kind": "nor_gl",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\denim_fabric_03\\denim_fabric_03_nor_gl_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/denim_fabric_03/denim_fabric_03_nor_gl_2k.png",
+        "sha256": "ea2843a37e2f065275f67fd1725d58d6c7e14081a0cac7033960fb4e1f1de714"
+      },
+      {
+        "kind": "disp",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\denim_fabric_03\\denim_fabric_03_disp_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/denim_fabric_03/denim_fabric_03_disp_2k.png",
+        "sha256": "162f70b291823bc252c29c1f59d5a6b3958911380c810d90a1616f46f12f139d"
+      }
+    ]
+  },
+  {
+    "id": "jersey_melange",
+    "source": "https://polyhaven.com/a/jersey_melange",
+    "license": "CC0",
+    "license_url": "https://polyhaven.com/license",
+    "authors": {
+      "colormass": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "dimensions": [
+      290.62397202303356,
+      276.19999647140503
+    ],
+    "scale": null,
+    "files": [
+      {
+        "kind": "diff",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\jersey_melange\\jersey_melange_diff_2k.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/jersey_melange/jersey_melange_diff_2k.jpg",
+        "sha256": "257e6f6a0e56dade355c3ff94198733c323d04c1f6e8c9e0395f35c0671b7893"
+      },
+      {
+        "kind": "rough",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\jersey_melange\\jersey_melange_rough_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/jersey_melange/jersey_melange_rough_2k.png",
+        "sha256": "e7d7f66873024e494ca242993d5d223baa8cea2da9f1ee99ec1ad0dbe25cc237"
+      },
+      {
+        "kind": "nor_gl",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\jersey_melange\\jersey_melange_nor_gl_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/jersey_melange/jersey_melange_nor_gl_2k.png",
+        "sha256": "ea12955ee9c1418fbb96e3d0e57f792f384d5516eb312a522fe14f83d53a7b32"
+      },
+      {
+        "kind": "disp",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\jersey_melange\\jersey_melange_disp_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/jersey_melange/jersey_melange_disp_2k.png",
+        "sha256": "df67c875ffe2afae7d268e1e8f350a5ae1beec0996bcb51c143c6a410d43eced"
+      }
+    ]
+  },
+  {
+    "id": "stretch_poplin",
+    "source": "https://polyhaven.com/a/stretch_poplin",
+    "license": "CC0",
+    "license_url": "https://polyhaven.com/license",
+    "authors": {
+      "colormass": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "dimensions": [
+      291.0233241569048,
+      280.8000147342682
+    ],
+    "scale": null,
+    "files": [
+      {
+        "kind": "diff",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\stretch_poplin\\stretch_poplin_diff_2k.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/stretch_poplin/stretch_poplin_diff_2k.jpg",
+        "sha256": "227e4a7d75c042fad254c1600e739c4a385eebbe905c8601e7c5c3a90316f523"
+      },
+      {
+        "kind": "rough",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\stretch_poplin\\stretch_poplin_rough_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/stretch_poplin/stretch_poplin_rough_2k.png",
+        "sha256": "75c83c146680866d66cb6e63b4e177a5a38c73374435db6da3a8678df6800bd4"
+      },
+      {
+        "kind": "nor_gl",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\stretch_poplin\\stretch_poplin_nor_gl_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/stretch_poplin/stretch_poplin_nor_gl_2k.png",
+        "sha256": "f1eaad0dfdcf128c65a39ec395b885796eac8b1e6a7fd5ff53e8dcb51a5a32b2"
+      },
+      {
+        "kind": "disp",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\stretch_poplin\\stretch_poplin_disp_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/stretch_poplin/stretch_poplin_disp_2k.png",
+        "sha256": "1c120f4ea2e190ce487c58f747f58895d3ea129f9cd05e06cad9912133c3c3e1"
+      }
+    ]
+  },
+  {
+    "id": "brown_leather",
+    "source": "https://polyhaven.com/a/brown_leather",
+    "license": "CC0",
+    "license_url": "https://polyhaven.com/license",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "dimensions": [
+      400.0000059604645,
+      400.00003576278687
+    ],
+    "scale": "40CM X 40CM",
+    "files": [
+      {
+        "kind": "diff",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\brown_leather\\brown_leather_albedo_2k.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_leather/brown_leather_albedo_2k.jpg",
+        "sha256": "b0de2403a31efa31e501b0028c0bd8e504d5bd6318f4a5ce90c550c3067f96d8"
+      },
+      {
+        "kind": "rough",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\brown_leather\\brown_leather_rough_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/brown_leather/brown_leather_rough_2k.png",
+        "sha256": "f41d74519a09f24e5a58b0c3bd2f2439f292ab8c3553d6e88ed0cbca690c6e73"
+      },
+      {
+        "kind": "nor_gl",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\brown_leather\\brown_leather_nor_gl_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/brown_leather/brown_leather_nor_gl_2k.png",
+        "sha256": "a9a3f2bf3d04c0ffefc97fbe6aa7b9ed56992359a9a97e37571faa6a15aeefd3"
+      },
+      {
+        "kind": "disp",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\brown_leather\\brown_leather_disp_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/brown_leather/brown_leather_disp_2k.png",
+        "sha256": "7b359e04854fe3b4cd84680affbdcfbea69c291b66b6f0b91a4d23edd364586b"
+      }
+    ]
+  },
+  {
+    "id": "bi_stretch",
+    "source": "https://polyhaven.com/a/bi_stretch",
+    "license": "CC0",
+    "license_url": "https://polyhaven.com/license",
+    "authors": {
+      "colormass": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "dimensions": [
+      264.5644946243421,
+      264.4000053405762
+    ],
+    "scale": null,
+    "files": [
+      {
+        "kind": "diff",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\bi_stretch\\bi_stretch_diff_2k.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bi_stretch/bi_stretch_diff_2k.jpg",
+        "sha256": "67cd1633c6417a39448eb03b76c15b974f728691e95429d86cd493276f20f6b0"
+      },
+      {
+        "kind": "rough",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\bi_stretch\\bi_stretch_rough_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/bi_stretch/bi_stretch_rough_2k.png",
+        "sha256": "dbbb4bb2fa7384739978614ee5e1ad53562e1b0cc47b76e69a616bd4dc1f9d4c"
+      },
+      {
+        "kind": "nor_gl",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\bi_stretch\\bi_stretch_nor_gl_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/bi_stretch/bi_stretch_nor_gl_2k.png",
+        "sha256": "18d10f3bae15323abad12bbe83b8fe7eebfd8ff06a3592cf2ac45c00d60c9d95"
+      },
+      {
+        "kind": "disp",
+        "file": "E:\\Games\\RING-godot\\_asset_src\\npc_wardrobe\\materials\\bi_stretch\\bi_stretch_disp_2k.png",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/bi_stretch/bi_stretch_disp_2k.png",
+        "sha256": "21a614196e52bfe72407d1da61f921f80e5f1eeeac7453fe4632b7338c5d387b"
+      }
+    ]
+  }
+]

@@ -57,8 +57,9 @@ def native_item_file(master,out,record,render):
     D.frame(tuple(target),scale*1.4)
     filename=out/'Separate_Assets'/(code+'_M02.blend')
     for im in bpy.data.images:
-        if im.packed_file and im.filepath.startswith('//textures/'):
-            im.filepath='//../textures/'+im.filepath.rsplit('/',1)[-1]
+        normalized=im.filepath.replace('\\','/')
+        if im.packed_file and normalized.startswith('//textures/'):
+            im.filepath='//../textures/'+normalized.rsplit('/',1)[-1]
     bpy.ops.wm.save_as_mainfile(filepath=str(filename),check_existing=False,relative_remap=False)
     if render: bpy.ops.render.render(write_still=True)
     assert all(not o.hide_render for o in selected.objects if o.type=='MESH')

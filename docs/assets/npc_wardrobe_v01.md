@@ -69,11 +69,14 @@
 
 `Previews` содержит настоящие рендеры Blender; фотографии собраны также в
 `RING_NPC_Wardrobe_Photos_v01.zip`. Технический отчёт — `wardrobe_verification.json`.
+Копии [отчёта проверки](npc_wardrobe_v01_verification.json) и
+[метаданных фототекстур](npc_wardrobe_v01_sources.json) сохранены в репозитории.
 
 Библиотека рассчитана на M02. Другие тела, полноценная анимационная доводка,
 игровые сетки, bake, LOD и импорт в Godot требуют отдельного этапа.
 
 Сборка и последующая доводка: `tools/characters/npc_wardrobe.py`, `wardrobe_geometry.py`,
 `wardrobe_materials.py`, `wardrobe_polish.py`, `wardrobe_balaclavas.py`,
-`wardrobe_finish.py`, `wardrobe_clearance.py`, `wardrobe_package_prepare.py`.
-Проверка и выдача — `wardrobe_verify.py`, `wardrobe_deliver.py`.
+`wardrobe_finish.py`, `wardrobe_clearance.py`, `wardrobe_package_prepare.py`,
+`wardrobe_package_polish.py`. Проверка и выдача — `wardrobe_verify.py`,
+`wardrobe_deliver.py`, `wardrobe_delivery_verify.py`.

@@ -57,8 +57,9 @@ def main(out):
         code=file.stem.split('_')[0];bpy.ops.wm.open_mainfile(filepath=str(file))
         bpy.context.preferences.filepaths.save_version=0
         for im in bpy.data.images:
-            if im.packed_file and im.filepath.startswith('//textures/'):
-                im.filepath='//../textures/'+im.filepath.rsplit('/',1)[-1]
+            normalized=im.filepath.replace('\\','/')
+            if im.packed_file and normalized.startswith('//textures/'):
+                im.filepath='//../textures/'+normalized.rsplit('/',1)[-1]
         col=next(c for c in bpy.data.collections if c.get('wardrobe_id')==code and c.asset_data)
         if code.startswith('B'):
             for obj in col.objects:
@@ -66,7 +67,7 @@ def main(out):
         scene=setup(40)
         if code.startswith('T'):
             scene.render.resolution_x=1600;scene.render.resolution_y=1000
-            scene.camera.data.ortho_scale=1.08
+            scene.camera.data.ortho_scale=1.80
         if code.startswith(('B','T')):
             scene.render.filepath=str(previews/(code+'_asset.png'))
         bpy.ops.wm.save_as_mainfile(filepath=str(file),check_existing=False,relative_remap=False)
