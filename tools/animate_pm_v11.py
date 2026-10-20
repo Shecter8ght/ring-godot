@@ -1085,5 +1085,5 @@ if MODE == "stills":
     stills()
 elif MODE == "clips":
     clips()
-else:
-    grip()
+elif MODE == "grip":
+    grip()                                  # другие режимы (import из pm_grip_lock.py) ничего не запускают
