@@ -16,7 +16,8 @@
   stills → anim/Кадры_v03/<стойка>_<вид>.png (из глаз, справа, слева, снизу, спереди); -- stills <файл.blend> — кадры чужого файла
   check <файл.blend> → проверка файла без изменений (зазоры, проникновения, суставы) → <файл>_check.json
   reload → от хвата владельца: позы левой по фазам перезарядки anim/PM_FPS_ReloadPoses_v01.blend (создать / прочитать правленные)
-           и клипы anim/PM_FPS_Clips_v02.blend; poses_stills → кадры поз anim/Кадры_перезарядка_позы
+           и клипы anim/PM_FPS_Clips_v02.blend; poses_stills → кадры поз anim/Кадры_перезарядка_позы;
+  poses_sync_right → правая в файле поз обновляется из файла хвата, левая (правки владельца) остаётся
 Файлы владельца (PM_FPS_Grip_v02*.blend) не меняются.
 """
 from __future__ import annotations
@@ -790,6 +791,42 @@ def check(path: Path) -> None:
     log("report", rep)
 
 
+
+def poses_sync_right(poses: Path, grip: Path) -> None:
+    """Обновить правую кисть и пальцы правой в файле поз перезарядки из файла хвата, не трогая левую:
+    базовая поза правой и её ключи (где есть) заменяются на хват «от бедра» (кадр 11 файла хвата)."""
+    bpy.ops.wm.open_mainfile(filepath=str(grip))
+    sc = bpy.context.scene
+    arms = bpy.data.objects["FPS_ArmsRig"]
+    sc.frame_set(A.STANCE_FRAMES["READY"])
+    bpy.context.view_layer.update()
+    right = {n: arms.pose.bones[n].matrix_basis.copy() for n in A.RIGHT + ["ik_hand.R", "pole.R"]}
+    frame_w = A.world(arms, "Frame")
+    r_in_gun = frame_w.inverted() @ A.world(arms, "ik_hand.R")        # правая кисть в осях ПМ
+    bpy.ops.wm.open_mainfile(filepath=str(poses))
+    sc = bpy.context.scene
+    arms = bpy.data.objects["FPS_ArmsRig"]
+    act = arms.animation_data.action if arms.animation_data else None
+    frames = sorted(set(A.POSE_FRAMES.values()) | {0, 31})
+    for f in frames:
+        sc.frame_set(f)
+        bpy.context.view_layer.update()
+        for n, m in right.items():
+            if n in ("ik_hand.R", "pole.R"):
+                continue
+            arms.pose.bones[n].matrix_basis = m
+        A.set_world(arms, "ik_hand.R", A.world(arms, "Frame") @ r_in_gun)
+        keyed = {fc.data_path.split('"')[1] for fc in A.fcurves(act)} if act else set()
+        for n in right:
+            if n in keyed:
+                pb = arms.pose.bones[n]
+                pb.keyframe_insert("location", frame=f)
+                pb.keyframe_insert("rotation_quaternion", frame=f)
+    sc.frame_set(1)
+    bpy.ops.wm.save_mainfile()
+    log("правая в файле поз обновлена из", grip)
+
+
 if MODE == "build":
     build()
 elif MODE == "check":
@@ -801,6 +838,8 @@ elif MODE == "reload":
     A.CLIPS_FILE = A.SRC / "anim/PM_FPS_Clips_v02.blend"
     A.POSES_FILE = A.SRC / "anim/PM_FPS_ReloadPoses_v01.blend"
     A.clips()
+elif MODE == "poses_sync_right":
+    poses_sync_right(A.SRC / "anim/PM_FPS_ReloadPoses_v01.blend", OWNER_GRIP)
 elif MODE == "poses_stills":
     A.GRIP_FILE = A.SRC / "anim/PM_FPS_ReloadPoses_v01.blend"
     A.STILLS = A.SRC / "anim/Кадры_перезарядка_позы"
