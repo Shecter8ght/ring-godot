@@ -14,6 +14,8 @@ var members: Array[Marauder] = []
 var role: Role = Role.NONE
 var role_at: Vector3 = Vector3.ZERO
 var flank_side: float = 1.0
+## Кто из отряда сейчас сидит в засаде (Tactic.AMBUSH) — второго не сажаем, остальные идут проверять.
+var ambusher: Marauder = null
 var _calm_since: int = 0
 
 

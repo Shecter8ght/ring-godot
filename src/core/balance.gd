@@ -1825,31 +1825,32 @@ const AI_RELOAD_K := 1.1
 ## Типы мародёров: доля среди всех (weight), снаряжение (loadout — data/loadouts.json: оружие,
 ## магазины, броня, шлем, гарнитура, аптечки; leader — с этим шансом главарь), скорость ×,
 ## здоровье ×, память ×, дальность зрения ×, цвет куртки, фигура (масштаб), holds — держит
-## позицию: не сближается, патруль у своего поста, ищет глазами, а не ногами (снайпер ходит один).
+## позицию: не сближается, патруль у своего поста, ищет глазами, а не ногами (снайпер ходит один);
+## ambush — склонность к засаде (× AI_AMBUSH.chance; нет — 1): разведчик рвётся вперёд, бывалый и ЧВК ждут.
 const AI_ARCHETYPES := {
 	"scout": {"name": "Разведчик", "weight": 0.4, "loadout": "scav_poor", "speed": 1.3, "hp": 0.85,
-		"memory": 0.5, "view": 1.1, "color": Color(0.46, 0.4, 0.28), "scale": Vector3(0.9, 1.0, 0.9), "holds": false},
+		"memory": 0.5, "view": 1.1, "color": Color(0.46, 0.4, 0.28), "scale": Vector3(0.9, 1.0, 0.9), "holds": false, "ambush": 0.5},
 	"gunner": {"name": "Штурмовик", "weight": 0.42, "loadout": "scav_standard", "leader": {"chance": 0.1, "loadout": "scav_leader"}, "speed": 1.0, "hp": 1.0,
 		"memory": 1.0, "view": 1.0, "color": Color(0.36, 0.2, 0.16), "scale": Vector3(1.0, 1.0, 1.0), "holds": false},
 	"heavy": {"name": "Бывалый", "weight": 0.1, "loadout": "scav_veteran", "speed": 0.85, "hp": 1.2,
-		"memory": 1.3, "view": 0.95, "color": Color(0.18, 0.22, 0.2), "scale": Vector3(1.18, 1.03, 1.18), "holds": false},
+		"memory": 1.3, "view": 0.95, "color": Color(0.18, 0.22, 0.2), "scale": Vector3(1.18, 1.03, 1.18), "holds": false, "ambush": 1.5},
 	"sniper": {"name": "Снайпер", "weight": 0.08, "loadout": "scav_sniper", "speed": 0.9, "hp": 0.9,
 		"memory": 1.5, "view": 2.2, "color": Color(0.3, 0.33, 0.24), "scale": Vector3(0.95, 1.0, 0.95), "holds": true},
 	# третья сторона — не выпадают случайно (weight 0): ставят события и уровень
 	# «Периметр» — не толще людей: опасны снаряжением (броня, патроны), меткостью и слаженностью
 	"pmc": {"name": "ЧВК «Периметр»", "weight": 0.0, "loadout": "perimeter_rifleman", "speed": 1.05, "hp": 1.0,
 		"memory": 1.4, "view": 1.2, "color": Color(0.1, 0.12, 0.15), "scale": Vector3(1.08, 1.02, 1.08), "holds": false,
-		"faction": "pmc", "loots": false},
+		"faction": "pmc", "loots": false, "ambush": 1.4},
 	"resident": {"name": "Жилец", "weight": 0.0, "loadout": "civilian", "speed": 0.95, "hp": 1.0,
 		"memory": 1.0, "view": 0.9, "color": Color(0.55, 0.48, 0.38), "scale": Vector3(0.96, 0.98, 0.96), "holds": false,
-		"faction": "resident", "loots": false},
+		"faction": "resident", "loots": false, "ambush": 0.4},
 	# чужие отряды (RivalRaids): пришли за добычей, как и игроки, — обыскивают, уносят, воюют со всеми
 	"rival": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_veteran", "leader": {"chance": 0.0, "loadout": "scav_leader"},
 		"speed": 1.08, "hp": 1.0, "memory": 1.3, "view": 1.15, "color": Color(0.2, 0.24, 0.3),
-		"scale": Vector3(1.02, 1.0, 1.02), "holds": false, "faction": "rival"},
+		"scale": Vector3(1.02, 1.0, 1.02), "holds": false, "faction": "rival", "ambush": 1.2},
 	"rival_scout": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_standard", "speed": 1.25, "hp": 0.9,
 		"memory": 0.9, "view": 1.2, "color": Color(0.26, 0.28, 0.22), "scale": Vector3(0.94, 1.0, 0.94), "holds": false,
-		"faction": "rival"},
+		"faction": "rival", "ambush": 0.6},
 	"rival_sniper": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_sniper", "speed": 0.95, "hp": 0.9,
 		"memory": 1.5, "view": 2.0, "color": Color(0.24, 0.27, 0.2), "scale": Vector3(0.96, 1.0, 0.96), "holds": false,
 		"faction": "rival"},
@@ -1965,6 +1966,12 @@ const AI_CALLOUT_EVERY := 3.0
 const AI_COVER_RADIUS := 10.0
 const AI_COVER_HIDE := [0.8, 1.8]
 const AI_COVER_PEEK := [1.2, 2.4]
+## Засада («держит угол», как боты Таркова — docs/design/ai_tarkov_principles.md): цель ушла из виду —
+## с шансом chance (× ambush архетипа) не идёт вперёд, а садится в укрытие стволом на последнюю точку
+## и ждёт hold_sec [от, до]; в отряде так делает не больше одного. Цель показалась у той же точки
+## (ближе near_m) — прицел уже «сидит»: разброс × aim вместо AI_AIM_COLD. Шум цели дальше break_m
+## от точки — засада снята; цель ближе min_dist — не садится (уже в упор).
+const AI_AMBUSH := {"chance": 0.45, "hold_sec": [10.0, 25.0], "near_m": 8.0, "aim": 1.15, "break_m": 15.0, "min_dist": 6.0}
 ## В укрытие — после попадания или если рядом свистят пули (слышал выстрел цели ближе, м).
 const AI_SUPPRESS_RADIUS := 12.0
 ## Раненый (меньше этой доли HP) без товарищей рядом — отходит в дальнее укрытие.

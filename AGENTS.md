@@ -80,6 +80,8 @@ tools/smoke.cmd <сцена> [кадров] [overview[:x:z:высота]|at:уг
                                       # скриншот в docs/screens/, выход (cmd режет «=» и «,» — только «:»)
 tools/godot.cmd res://tools/ai_test.tscn                     # прогон мародёра: шум → бой → выстрелы, печатает состояния
 tools/godot.cmd res://tools/ai_squad_test.tscn               # тактика отряда: окрик, укрытие, перезарядка, поиск
+tools/godot.cmd --headless res://tools/ambush_test.tscn     # засада (AI_AMBUSH): цель ушла за угол — присел, смотрит на точку, ждёт; вышла там же — прицел сидит;
+                                                              # склонность 0 — идёт вперёд; в отряде ждёт один; никто не вышел — встал и пошёл
 tools/godot.cmd --headless res://tools/ai_population_test.tscn # население слоями на «Пешем маршруте»: точки, 1/2/3 игрока, рынок, подход, отклик на шум, стычки
 tools/godot.cmd --headless res://tools/coop_population_test.tscn -- host # + «-- client» через 3 с (порт 17795; COOP_POP_PEERS=3 и второй «-- client» —
                                                               # двое гостей): население по числу игроков, у гостей те же бойцы и ходят, подход вдали от всех,

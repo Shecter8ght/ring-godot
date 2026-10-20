@@ -39,10 +39,12 @@ func _accept_recovered() -> void:
 ## лежит на виду — тащит за укрытие, потом поднимает (аптечка, AI_REVIVE_SEC). Лежащего игрока
 ## добивает, только если никто другой не стреляет (AI_FINISH_QUIET_SEC). Оружие — из снаряжения (data/loadouts.json), стреляет по классу (AI_CLASS); магазин и
 ## перезарядка — в укрытии, если оно есть. Точность садится за AI_AIM_SETTLE_SEC после того, как
-## заметил цель; бегущую цель и на бегу — хуже.
+## заметил цель; бегущую цель и на бегу — хуже. Цель ушла из виду — с шансом (AI_AMBUSH) не идёт
+## за ней, а садится в укрытие стволом на последнюю точку и ждёт (AMBUSH): вышел проверить — уже
+## под прицелом; в отряде ждёт один, остальные идут.
 
 enum State { PATROL, INVESTIGATE, COMBAT, SEARCH, RETREAT, DEAD, DOWNED, RESCUE }
-enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE, OVERWATCH }
+enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE, OVERWATCH, AMBUSH }
 
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE := 1.05
@@ -125,6 +127,13 @@ var _callout_t: float = 0.0
 var _tactic_t: float = 0.0
 var _cover_pos: Vector3 = Vector3.ZERO
 var _peeks: int = 0
+## Засада: сколько ещё ждать, с; у какой точки ждёт; идёт в укрытие, чтобы сесть там; шанс на эту
+## потерю цели уже разыгран. ambush_bias — множитель шанса для тестов (0 — никогда, 100 — всегда).
+var _ambush_t: float = 0.0
+var _ambush_at: Vector3 = Vector3.INF
+var _ambush_pending: bool = false
+var _ambush_rolled: bool = false
+var ambush_bias: float = 1.0
 var _hurt_t: float = 0.0
 var _suppress_t: float = 0.0
 var _search_left: int = 0
@@ -649,7 +658,8 @@ func _perceive(delta: float) -> void:
 		last_known = foe.global_position
 		memory_timer = _mem()
 		if not was_seen:
-			_aim = Balance.AI_AIM_COLD
+			_aim = _fresh_aim(foe.global_position)
+		_ambush_rolled = false
 		if state != State.COMBAT and state != State.RETREAT and state != State.DOWNED and state != State.RESCUE:
 			_enter_combat(Tactic.ENGAGE)
 			say(_foe_shout(foe))
@@ -668,8 +678,9 @@ func _perceive(delta: float) -> void:
 			last_known = seen.global_position
 			memory_timer = _mem()
 			if not was_seen:
-				# только что поймал в поле зрения — первые выстрелы мимо
-				_aim = Balance.AI_AIM_COLD
+				# только что поймал в поле зрения — первые выстрелы мимо (из засады — почти сразу в цель)
+				_aim = _fresh_aim(seen.global_position)
+			_ambush_rolled = false
 			if state != State.COMBAT and state != State.RETREAT and state != State.DOWNED and state != State.RESCUE:
 				_enter_combat(Tactic.ENGAGE)
 				say("Контакт!")
@@ -1284,6 +1295,7 @@ func _investigate(delta: float) -> void:
 func _enter_combat(t: Tactic) -> void:
 	_drop_loot_claim()
 	state = State.COMBAT
+	_ambush_rolled = false
 	# отряд вступил в бой — роль (штурм / обход / прикрытие); сам — по роли, если не видит цель
 	if squad and not _holds():
 		var r := squad.engage(last_known)
@@ -1301,6 +1313,8 @@ func _role() -> Squad.Role:
 func _set_tactic(t: Tactic) -> void:
 	tactic = t
 	_tactic_t = 0.0
+	if t != Tactic.AMBUSH and t != Tactic.COVER_MOVE:
+		_ambush_pending = false
 	match t:
 		Tactic.FLANK:
 			# заходим сбоку: точка в стороне от линии «мы — цель»; отряд обхода — широко и все
@@ -1332,8 +1346,88 @@ func _set_tactic(t: Tactic) -> void:
 				_set_move_target(_spread_point(last_known))
 		Tactic.ENGAGE:
 			_set_move_target(global_position)
+		Tactic.AMBUSH:
+			_ambush_pending = false
+			_ambush_at = last_known
+			_ambush_t = _rng.randf_range(float(Balance.AI_AMBUSH.hold_sec[0]), float(Balance.AI_AMBUSH.hold_sec[1]))
+			if squad:
+				squad.ambusher = self
+			_set_move_target(global_position)
 		_:
 			pass
+
+
+## Цель ушла из виду — сесть в засаду? Шанс AI_AMBUSH.chance × ambush архетипа × ambush_bias, один
+## раз на потерю цели; держащий позицию и так ждёт; в упор не садится; в отряде ждёт один. Укрытие
+## от последней точки есть на месте — сел сразу, иначе идёт к ближайшему (COVER_MOVE → AMBUSH);
+## укрытия нет — засады нет. true — тактика назначена.
+func _try_ambush() -> bool:
+	if _ambush_rolled or _holds() or state != State.COMBAT:
+		return false
+	_ambush_rolled = true
+	if global_position.distance_to(last_known) < float(Balance.AI_AMBUSH.min_dist):
+		return false
+	if squad:
+		var a := squad.ambusher
+		if a != null and is_instance_valid(a) and a != self and a.state == State.COMBAT and a.tactic == Tactic.AMBUSH:
+			return false
+	var chance := float(Balance.AI_AMBUSH.chance) * float(_arch.get("ambush", 1.0)) * ambush_bias
+	if _rng.randf() >= chance:
+		return false
+	var p := _ambush_point()
+	if p == Vector3.INF:
+		return false
+	if p.distance_to(global_position) < 0.9:
+		_set_tactic(Tactic.AMBUSH)
+		return true
+	_set_tactic(Tactic.COVER_MOVE)
+	_cover_pos = p
+	_set_move_target(p)
+	_ambush_pending = true
+	return true
+
+
+## Место для засады: оттуда присевшему видно последнюю точку (укрытие «от неё» её бы и не видело),
+## лучше у стены сбоку (угол, из-за которого выглядывают), недалеко от себя; не в упор к точке и не
+## там, куда уже идёт другой. Vector3.INF — нет такого.
+func _ambush_point() -> Vector3:
+	var space := get_world_3d().direct_space_state
+	var target := last_known + Vector3.UP * 1.2
+	var to := last_known - global_position
+	to.y = 0.0
+	var side := Vector3(to.z, 0.0, -to.x).normalized()
+	var cands: Array[Vector3] = [global_position]
+	for i in range(16):
+		var a := TAU * float(i) / 16.0
+		cands.append(_snap(global_position + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(1.5, Balance.AI_COVER_RADIUS)))
+	var best := Vector3.INF
+	var best_s := INF
+	for c in cands:
+		if c.distance_to(last_known) < float(Balance.AI_AMBUSH.min_dist) or (c != global_position and _claimed_near(c, 3.0)):
+			continue
+		var eye := c + Vector3.UP * CROUCH_EYE
+		var q := PhysicsRayQueryParameters3D.create(eye, target, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR, [get_rid()])
+		if not space.intersect_ray(q).is_empty():
+			continue
+		var wall := false
+		for sgn in [1.0, -1.0]:
+			var qs := PhysicsRayQueryParameters3D.create(eye, eye + side * sgn * 1.5, Hitscan.LAYER_WORLD)
+			if not space.intersect_ray(qs).is_empty():
+				wall = true
+				break
+		var s := c.distance_to(global_position) + (0.0 if wall else 6.0)
+		if s < best_s:
+			best_s = s
+			best = c
+	return best
+
+
+## Разброс в момент, когда цель только что попала в поле зрения: обычно AI_AIM_COLD (первые выстрелы
+## мимо); из засады, если цель вышла у той точки, которую держал под прицелом, — почти севший.
+func _fresh_aim(at: Vector3) -> float:
+	if state == State.COMBAT and tactic == Tactic.AMBUSH and at.distance_to(_ambush_at) < float(Balance.AI_AMBUSH.near_m):
+		return float(Balance.AI_AMBUSH.aim)
+	return Balance.AI_AIM_COLD
 
 
 func _combat(delta: float) -> void:
@@ -1359,13 +1453,16 @@ func _combat(delta: float) -> void:
 			elif _unseen_t < 1.5 and _mag > 0:
 				# только что ушёл из виду — подавляющий огонь туда, где был
 				_try_fire(true)
-			else:
+			elif not _try_ambush():
 				_set_tactic(Tactic.FLANK if _rank() == 1 and _mates_near(30.0) > 0 else _closing_tactic())
 		Tactic.COVER_MOVE:
 			_set_crouch(false)
 			if _agent.is_navigation_finished() or global_position.distance_to(_cover_pos) < 0.9:
-				_set_tactic(Tactic.COVER_HIDE)
-				_tactic_t = -_rng.randf_range(float(Balance.AI_COVER_HIDE[0]), float(Balance.AI_COVER_HIDE[1]))
+				if _ambush_pending:
+					_set_tactic(Tactic.AMBUSH)
+				else:
+					_set_tactic(Tactic.COVER_HIDE)
+					_tactic_t = -_rng.randf_range(float(Balance.AI_COVER_HIDE[0]), float(Balance.AI_COVER_HIDE[1]))
 			elif _seen_now and dist <= rng_m and _tactic_t > 0.6:
 				_try_fire()
 		Tactic.COVER_HIDE:
@@ -1386,7 +1483,10 @@ func _combat(delta: float) -> void:
 			if _tactic_t >= 0.0:
 				if not _cover_still_good() or _peeks >= 4 or (not _seen_now and _unseen_t > 3.0):
 					_peeks = 0
-					_set_tactic(Tactic.ENGAGE if _seen_now else _closing_tactic())
+					if _seen_now:
+						_set_tactic(Tactic.ENGAGE)
+					elif not _try_ambush():
+						_set_tactic(_closing_tactic())
 				else:
 					_set_tactic(Tactic.COVER_HIDE)
 					_tactic_t = -_rng.randf_range(float(Balance.AI_COVER_HIDE[0]), float(Balance.AI_COVER_HIDE[1]))
@@ -1409,6 +1509,25 @@ func _combat(delta: float) -> void:
 					_try_fire(true)
 				if _mag == 0 and _reload_t <= 0.0:
 					_start_reload()
+		Tactic.AMBUSH:
+			# засада: присел в укрытии стволом на последнюю точку, молчит и ждёт; показалась — огонь
+			# с уже севшим прицелом (_fresh_aim); память не истекает, пока ждёт
+			_set_crouch(true)
+			_face(last_known)
+			memory_timer = maxf(memory_timer, 1.0)
+			if _reload_t <= 0.0 and _mag < int(_spec.mag) / 2:
+				_start_reload()
+			if _seen_now:
+				_set_tactic(Tactic.ENGAGE)
+				return
+			_ambush_t -= delta
+			var moved := last_known.distance_to(_ambush_at) > float(Balance.AI_AMBUSH.break_m)
+			if _hurt_t > 0.0 or _suppress_t > 0.0:
+				# засаду раскрыли (попали, пули рядом) — за укрытие, нет его — вперёд
+				if not _try_cover(Balance.AI_COVER_RADIUS, false):
+					_set_tactic(_closing_tactic())
+			elif _ambush_t <= 0.0 or moved:
+				_set_tactic(_closing_tactic())
 		Tactic.FLANK, Tactic.PUSH:
 			_set_crouch(false)
 			if _seen_now:
@@ -2106,8 +2225,11 @@ func _fire_token() -> bool:
 	# живые держатели, у которых срок не вышел
 	var keep: Array = []
 	for h in holders:
+		# освобождённый мародёр (тесты, конец рейда) — не приводить, просто выбросить
+		if not is_instance_valid(h):
+			continue
 		var m := h as Marauder
-		if is_instance_valid(m) and m.state != State.DEAD and m._token_until > now and m._target_player == _target_player:
+		if m != null and m.state != State.DEAD and m._token_until > now and m._target_player == _target_player:
 			keep.append(m)
 	_tokens[key] = keep
 	if self in keep:
