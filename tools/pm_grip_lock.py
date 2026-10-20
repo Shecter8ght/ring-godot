@@ -11,9 +11,10 @@
 Каждая поза проверяется: зазор сетки пальца до оружия, проникновение (лучи по чётности на замкнутых сетках), углы суставов.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/pm_grip_lock.py -- build|stills [carry|ready|ads]
-  build  → _asset_src/pm_game/anim/PM_FPS_Grip_v03.blend (действие PM_Stances: кадры 1 наискосок / 11 от бедра / 21 прицел;
+  build  → _asset_src/pm_game/anim/PM_FPS_Grip_v03_calc.blend (действие PM_Stances: кадры 1 наискосок / 11 от бедра / 21 прицел;
            указательный ключами — вдоль рамки / на спуске), отчёт anim/grip_v03_report.json
-  stills → anim/Кадры_v03/<стойка>_<вид>.png (из глаз, справа, слева, снизу, спереди)
+  stills → anim/Кадры_v03/<стойка>_<вид>.png (из глаз, справа, слева, снизу, спереди); -- stills <файл.blend> — кадры чужого файла
+  check <файл.blend> → проверка файла без изменений (зазоры, проникновения, суставы) → <файл>_check.json
 Файлы владельца (PM_FPS_Grip_v02*.blend) не меняются.
 """
 from __future__ import annotations
@@ -32,10 +33,11 @@ import animate_pm_v11 as A  # noqa: E402  (режим build/stills — у нег
 
 MODE = A.MODE
 STAGE = "right" if "right" in A.ARGS[1:] else "full"       # right — левая убрана, доводится хват правой (предложение владельца)
-SUFFIX = "_right" if STAGE == "right" else ""
+SUFFIX = "_right" if STAGE == "right" else "_calc"       # PM_FPS_Grip_v03.blend — правка владельца (15:24), сборка её не трогает
 OUT = A.SRC / f"anim/PM_FPS_Grip_v03{SUFFIX}.blend"
 REPORT = A.SRC / f"anim/grip_v03{SUFFIX}_report.json"
 STILLS = A.SRC / f"anim/Кадры_v03{SUFFIX}"
+OWNER_GRIP = A.SRC / "anim/PM_FPS_Grip_v03.blend"       # хват с пальцами владельца — база для клипов и поз перезарядки
 # большой правой в одноручном хвате (серия 1, под левую не на что опереться): вдоль рамки под затворной задержкой
 R_THUMB_SOLO_TIP = Vector((0.026, -0.042, 0.040))
 R_THUMB_SOLO_MCP = Vector((0.029, 0.010, 0.036))
@@ -714,11 +716,91 @@ def build() -> None:
         bad = {n: j for side in ("joints_right", "joints_left") for n, j in f[side].items() if j["flags"]}
         log(label, "joints flagged", json.dumps(bad, ensure_ascii=False))
 
+
+def check(path: Path) -> None:
+    """Проверка готового файла хвата (например, правленного владельцем) без изменений: зазоры сетки перчатки до деталей,
+    глубина проникновений по костям, углы суставов — для кадров «от бедра» (11) и «прицел» (21); отчёт рядом с файлом."""
+    bpy.ops.wm.open_mainfile(filepath=str(path))
+    scene = bpy.context.scene
+    arms = bpy.data.objects["FPS_ArmsRig"]
+    scene.frame_set(A.STANCE_FRAMES["READY"])
+    bpy.context.view_layer.update()
+    skin = A.Skin(bpy.data.objects["FPS_Arms"])
+    gun = [bpy.data.objects[n] for n in GUN_PARTS if n in bpy.data.objects]
+    F, G = bpy.data.objects["Frame_Mesh"], bpy.data.objects["Grip_Mesh"]
+    # «оси хвата владельца» для углов суставов — из его действия на ВЕРАСе, если оно в файле; иначе из текущей позы
+    class _Ready:
+        pass
+    ready = {"basis": {pb.name: pb.matrix_basis.copy() for pb in arms.pose.bones}}
+    if "VERAS54_Grip_Manual_v02" in bpy.data.actions:
+        act = bpy.data.actions["VERAS54_Grip_Manual_v02"]
+        cur = arms.animation_data.action if arms.animation_data else None
+        ad = arms.animation_data or arms.animation_data_create()
+        saved = {pb.name: pb.matrix_basis.copy() for pb in arms.pose.bones}
+        ad.action = act
+        if act.slots:
+            ad.action_slot = act.slots[0]
+        scene.frame_set(1)
+        bpy.context.view_layer.update()
+        ready = {"basis": {pb.name: pb.matrix_basis.copy() for pb in arms.pose.bones}}
+        ad.action = cur
+        for n, m in saved.items():
+            arms.pose.bones[n].matrix_basis = m
+        scene.frame_set(A.STANCE_FRAMES["READY"])
+        bpy.context.view_layer.update()
+    hands = A.Hands(arms, ready)
+    out = {"file": str(path)}
+    for label, frame in (("rest", A.STANCE_FRAMES["READY"]), ("fire", A.STANCE_FRAMES["ADS"])):
+        scene.frame_set(frame)
+        bpy.context.view_layer.update()
+        frame_w = A.world(arms, "Frame")
+        tang = faces_where([F], lambda p: p.y > 0.012 and 0.028 < p.z < 0.047)
+        right_panel = faces_where([F, G], lambda p: p.x < -0.006 and p.z < 0.040 and p.y > -0.030)
+        left_panel = faces_where([F, G], lambda p: p.x > 0.006 and p.z < 0.040 and p.y > -0.034)
+        tree = A.bvh_of(gun)
+        tree_l = A.surface([(o, "") for o in gun] + [(bpy.data.objects["FPS_Arms"], "R")])
+        tree_lt = A.surface([(o, "") for o in gun] + [(bpy.data.objects["FPS_Arms"], "L")])
+        gi = frame_w.inverted()
+        out[label] = {
+            "right_gap_mm": {f: round(skin.gap(tree, [f"{f}.{i:02d}.R" for i in (1, 2, 3)]) * 1000, 1) for f in A.FINGERS},
+            "right_thumb_gap_mm": round(skin.gap(tree_lt, ["thumb.02.R", "thumb.03.R"]) * 1000, 1),
+            "web_gap_mm": round(skin.gap(tang, WEB_BONES) * 1000, 1),
+            "palm_gap_mm": round(skin.gap(right_panel, PALM_BONES) * 1000, 1),
+            "left_palm_gap_mm": round(skin.gap(left_panel, ["hand.L", "palm.01.L", "palm.02.L", "palm.03.L", "palm.04.L"]) * 1000, 1),
+            "left_gap_mm": {f: round(skin.gap(tree_l, [f"{f}.{i:02d}.L" for i in (1, 2, 3)]) * 1000, 1) for f in A.FINGERS + ("thumb",)},
+            "inside_right": inside_count(skin, A.RIGHT, gun),
+            "inside_left": inside_count(skin, A.LEFT, gun),
+            "joints_right": joint_report(arms, hands, "R"),
+            "joints_left": joint_report(arms, hands, "L"),
+            "hand_R_in_gun_mm": [round(c * 1000, 1) for c in (gi @ A.world(arms, "hand.R")).translation],
+            "hand_L_in_gun_mm": [round(c * 1000, 1) for c in (gi @ A.world(arms, "hand.L")).translation],
+            "tips_mm": {n: [round(c * 1000, 1) for c in gi @ (arms.matrix_world @ arms.pose.bones[n].tail)]
+                        for n in [f"{f}.03.{sd}" for sd in ("R", "L") for f in A.FINGERS + ("thumb",)]},
+        }
+        f = out[label]
+        log(label, "R gaps", f["right_gap_mm"], "thumbR", f["right_thumb_gap_mm"], "web", f["web_gap_mm"], "palm", f["palm_gap_mm"])
+        log(label, "L gaps", f["left_gap_mm"], "L palm", f["left_palm_gap_mm"])
+        log(label, "inside R", f["inside_right"], "inside L", f["inside_left"])
+        bad = {n: j for side in ("joints_right", "joints_left") for n, j in f[side].items() if j["flags"]}
+        log(label, "joints flagged", json.dumps(bad, ensure_ascii=False))
+    rep = path.with_name(path.stem + "_check.json")
+    rep.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    log("report", rep)
+
+
 if MODE == "build":
     build()
+elif MODE == "check":
+    check(Path(A.ARGS[1]))
 elif MODE == "stills":
-    A.GRIP_FILE = OUT
-    A.STILLS = STILLS
+    extra = [a for a in A.ARGS[1:] if a.endswith(".blend")]
+    if extra:                                              # кадры чужого файла: -- stills <файл.blend> [стойки]
+        A.GRIP_FILE = Path(extra[0])
+        A.STILLS = Path(extra[0]).with_name("Кадры_" + Path(extra[0]).stem)
+        A.ARGS = [a for a in A.ARGS if a != extra[0]]
+    else:
+        A.GRIP_FILE = OUT
+        A.STILLS = STILLS
     A.ARGS = [a for a in A.ARGS if a != "right"]        # иначе «right» примут за имя стойки
     A.stills()
 else:
