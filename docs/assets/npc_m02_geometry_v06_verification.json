@@ -1,0 +1,47 @@
+{
+  "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Geometry_v06\\M02_Body_Head_Geometry_v06.blend",
+  "reopened_in": "5.2.2 LTS",
+  "height_m": 1.779999976279214,
+  "topology": {
+    "vertices": 13380,
+    "faces": 13378,
+    "quads": 13378,
+    "boundary_edges": 0,
+    "nonmanifold_edges": 0
+  },
+  "unweighted_vertices": 0,
+  "rig_bones": 163,
+  "packed_files": [
+    "brown_eye.png",
+    "eyebrow001.png",
+    "eyelashes01.png",
+    "M02_urban_average_front_v01.png",
+    "M02_urban_average_sheet_v01.png",
+    "short02_diffuse.png",
+    "teeth.png",
+    "tongue01_diffuse.png"
+  ],
+  "deformation_checks": [
+    {
+      "joint": "elbow",
+      "bone": "lowerarm01.L",
+      "max_displacement_m": 0.43779417082897865,
+      "finite": true
+    },
+    {
+      "joint": "knee",
+      "bone": "lowerleg01.L",
+      "max_displacement_m": 0.5250135688431026,
+      "finite": true
+    },
+    {
+      "joint": "index_finger",
+      "bone": "finger2-1.L",
+      "max_displacement_m": 0.04900952023839345,
+      "finite": true
+    }
+  ],
+  "parametric_source": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Geometry_v06\\M02_Parametric_Apose_Source.blend",
+  "status": "PASS",
+  "source_shape_keys": 30
+}

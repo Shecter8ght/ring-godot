@@ -468,3 +468,16 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 - `mosin_pu_clip.glb` — обойма на 5 патронов (заряжание без прицела ПУ), 612 треугольников, карты 512 запечены с
   собственной high-poly обоймы и её слоёв UCUPaint (`E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/05_Обойма`);
   сетка, запекание и экспорт — `tools/mosin_pu/game_clip.py`.
+
+## М02 — редактируемая основа NPC (2026-10-20)
+
+- Первая геометрия тела и головы, исходники в `E:/Models Blender/RING_NPC_2026-10-20_v01/M02_Geometry_v06/`:
+  core basemesh hm08, морфы, анатомический rig default и комплектные части головы MakeHuman/MPFB — **CC0**.
+  [Лицензия графических ассетов](https://static.makehumancommunity.org/about/license.html),
+  [разделение лицензий кода и ассетов](https://github.com/makehumancommunity/mpfb2/blob/master/LICENSE.md).
+- Использованы eyes/high-poly, teeth/teeth_base, tongue/tongue01, eyebrows/eyebrow001,
+  eyelashes/eyelashes01, hair/short02; локальные заголовки .mhclo / .mhmat указывают выпуск в CC0
+  (Data Collection AB, Joel Palmius, Jonas Hauquier). Версия установленного MPFB — 2.0.17.
+- Подгонка М02, новая исходная T-поза, очистка вспомогательной топологии, примерочные шорты,
+  организация .blend и проверочные виды — `tools/characters/m02_build.py`.
+  Референсы М02 созданы imagegen для RING. Описание этапа — `docs/assets/npc_m02_geometry.md`.
