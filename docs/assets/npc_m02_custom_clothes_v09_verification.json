@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Custom_Clothes_v09\\M02_Custom_Clothes_v09.blend",
+  "source_sha256": "0ad4f3819152e30e43fd611e21ff2f004a39651f9c5f272e62c6103816005ead",
+  "source_body_topology_uv_and_all_shape_keys_preserved": true,
+  "construction": {
+    "M02_Custom_TShirt": {
+      "boundary_components": 4,
+      "nonmanifold_nonboundary_edges": 0,
+      "zero_area_faces": 0
+    },
+    "M02_Custom_Work_Trousers": {
+      "boundary_components": 3,
+      "nonmanifold_nonboundary_edges": 0,
+      "zero_area_faces": 0
+    }
+  },
+  "modules": {
+    "shirt": {
+      "objects": 9,
+      "independent_toggle": true
+    },
+    "trousers": {
+      "objects": 22,
+      "independent_toggle": true
+    },
+    "boots": {
+      "objects": 64,
+      "independent_toggle": true
+    }
+  },
+  "packed_character_images": 12,
+  "all_clothing_vertices_have_normalized_rig_weights": true,
+  "internal_pose_checks": [
+    {
+      "pose": "arms_down",
+      "maximum_displacement_m": 0.20447998921359137
+    },
+    {
+      "pose": "limb_flex",
+      "maximum_displacement_m": 0.34609158291380526
+    }
+  ],
+  "visible_evaluated_body_vertices_with_masks": 33279,
+  "limitation": "Initial weight transfer and static pose checks; full animation corrections, final UV/PBR and game preparation are later stages.",
+  "separate_assets_reopened": [
+    {
+      "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Custom_Clothes_v09\\Separate_Assets\\T00_TShirt_M02_v09.blend",
+      "mesh_objects": 9,
+      "self_contained_collection_asset": true
+    },
+    {
+      "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Custom_Clothes_v09\\Separate_Assets\\P02_Work_Trousers_M02_v09.blend",
+      "mesh_objects": 22,
+      "self_contained_collection_asset": true
+    },
+    {
+      "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Custom_Clothes_v09\\Separate_Assets\\F02_Work_Boots_M02_v09.blend",
+      "mesh_objects": 64,
+      "self_contained_collection_asset": true
+    }
+  ]
+}

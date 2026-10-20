@@ -1,0 +1,558 @@
+{
+  "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Custom_Clothes_v09\\M02_Custom_Clothes_v09.blend",
+  "source": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Appearance_v05\\M02_Appearance_v05.blend",
+  "source_sha256": "0ad4f3819152e30e43fd611e21ff2f004a39651f9c5f272e62c6103816005ead",
+  "authorship": "All garment and footwear geometry is original RING construction, not fitted clothing-pack meshes.",
+  "parts": [
+    {
+      "name": "M02_Custom_TShirt",
+      "vertices": 7428,
+      "faces": 7324
+    },
+    {
+      "name": "TShirt | rib collar",
+      "vertices": 168,
+      "faces": 126
+    },
+    {
+      "name": "TShirt | turned bottom hem",
+      "vertices": 256,
+      "faces": 128
+    },
+    {
+      "name": "TShirt | sleeve cuff R",
+      "vertices": 48,
+      "faces": 24
+    },
+    {
+      "name": "TShirt | sleeve cuff L",
+      "vertices": 48,
+      "faces": 24
+    },
+    {
+      "name": "TShirt | open chest pocket",
+      "vertices": 247,
+      "faces": 216
+    },
+    {
+      "name": "TShirt | open chest pocket | sewn edges",
+      "vertices": 1424,
+      "faces": 712
+    },
+    {
+      "name": "TShirt | pocket top hem",
+      "vertices": 496,
+      "faces": 248
+    },
+    {
+      "name": "TShirt | hem stitching",
+      "vertices": 5136,
+      "faces": 2568
+    },
+    {
+      "name": "M02_Custom_Work_Trousers",
+      "vertices": 6335,
+      "faces": 6240
+    },
+    {
+      "name": "Trousers | waistband",
+      "vertices": 192,
+      "faces": 96
+    },
+    {
+      "name": "Trousers | double knee -1",
+      "vertices": 247,
+      "faces": 216
+    },
+    {
+      "name": "Trousers | double knee -1 | sewn edges",
+      "vertices": 3568,
+      "faces": 1784
+    },
+    {
+      "name": "Trousers | rear patch pocket -1",
+      "vertices": 247,
+      "faces": 216
+    },
+    {
+      "name": "Trousers | rear patch pocket -1 | sewn edges",
+      "vertices": 1456,
+      "faces": 728
+    },
+    {
+      "name": "Trousers | pocket entry -1",
+      "vertices": 240,
+      "faces": 232
+    },
+    {
+      "name": "Trousers | entry topstitch -1",
+      "vertices": 672,
+      "faces": 336
+    },
+    {
+      "name": "Trousers | double knee 1",
+      "vertices": 247,
+      "faces": 216
+    },
+    {
+      "name": "Trousers | double knee 1 | sewn edges",
+      "vertices": 3552,
+      "faces": 1776
+    },
+    {
+      "name": "Trousers | rear patch pocket 1",
+      "vertices": 247,
+      "faces": 216
+    },
+    {
+      "name": "Trousers | rear patch pocket 1 | sewn edges",
+      "vertices": 1520,
+      "faces": 760
+    },
+    {
+      "name": "Trousers | pocket entry 1",
+      "vertices": 240,
+      "faces": 232
+    },
+    {
+      "name": "Trousers | entry topstitch 1",
+      "vertices": 688,
+      "faces": 344
+    },
+    {
+      "name": "Trousers | fly shield",
+      "vertices": 247,
+      "faces": 216
+    },
+    {
+      "name": "Trousers | fly shield | sewn edges",
+      "vertices": 1488,
+      "faces": 744
+    },
+    {
+      "name": "Trousers | belt loop -1.57",
+      "vertices": 27,
+      "faces": 16
+    },
+    {
+      "name": "Trousers | belt loop -0.79",
+      "vertices": 27,
+      "faces": 16
+    },
+    {
+      "name": "Trousers | belt loop 0.63",
+      "vertices": 27,
+      "faces": 16
+    },
+    {
+      "name": "Trousers | belt loop 1.57",
+      "vertices": 27,
+      "faces": 16
+    },
+    {
+      "name": "Trousers | belt loop 2.51",
+      "vertices": 27,
+      "faces": 16
+    },
+    {
+      "name": "Trousers | belt loop 3.93",
+      "vertices": 27,
+      "faces": 16
+    },
+    {
+      "name": "Boot R | shaped outsole",
+      "vertices": 256,
+      "faces": 194
+    },
+    {
+      "name": "Boot R | leather quarters and vamp",
+      "vertices": 1235,
+      "faces": 1162
+    },
+    {
+      "name": "Boot R | separate gusseted tongue",
+      "vertices": 220,
+      "faces": 190
+    },
+    {
+      "name": "Boot R | padded collar",
+      "vertices": 128,
+      "faces": 64
+    },
+    {
+      "name": "Boot R | welt",
+      "vertices": 520,
+      "faces": 512
+    },
+    {
+      "name": "Boot R | welt stitching",
+      "vertices": 2832,
+      "faces": 1416
+    },
+    {
+      "name": "Boot R | eyelet 0 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 0 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 1 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 1 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 2 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 2 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 3 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 3 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 4 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 4 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 5 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | eyelet 5 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot R | crossed laces",
+      "vertices": 1040,
+      "faces": 960
+    },
+    {
+      "name": "Boot R | panel topstitch",
+      "vertices": 3600,
+      "faces": 1800
+    },
+    {
+      "name": "Boot R | tread lug",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.001",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.002",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.003",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.004",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.005",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.006",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.007",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.008",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.009",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.010",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot R | tread lug.011",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | shaped outsole",
+      "vertices": 256,
+      "faces": 194
+    },
+    {
+      "name": "Boot L | leather quarters and vamp",
+      "vertices": 1235,
+      "faces": 1162
+    },
+    {
+      "name": "Boot L | separate gusseted tongue",
+      "vertices": 220,
+      "faces": 190
+    },
+    {
+      "name": "Boot L | padded collar",
+      "vertices": 128,
+      "faces": 64
+    },
+    {
+      "name": "Boot L | welt",
+      "vertices": 520,
+      "faces": 512
+    },
+    {
+      "name": "Boot L | welt stitching",
+      "vertices": 2848,
+      "faces": 1424
+    },
+    {
+      "name": "Boot L | eyelet 0 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 0 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 1 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 1 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 2 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 2 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 3 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 3 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 4 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 4 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 5 -1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | eyelet 5 1",
+      "vertices": 96,
+      "faces": 96
+    },
+    {
+      "name": "Boot L | crossed laces",
+      "vertices": 1040,
+      "faces": 960
+    },
+    {
+      "name": "Boot L | panel topstitch",
+      "vertices": 3616,
+      "faces": 1808
+    },
+    {
+      "name": "Boot L | tread lug",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.001",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.002",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.003",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.004",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.005",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.006",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.007",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.008",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.009",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.010",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Boot L | tread lug.011",
+      "vertices": 8,
+      "faces": 6
+    }
+  ],
+  "images": [
+    {
+      "image": "brown_eye.png",
+      "path": "textures/brown_eye.png",
+      "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b"
+    },
+    {
+      "image": "eyebrow001.png",
+      "path": "textures/eyebrow001.png",
+      "sha256": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b"
+    },
+    {
+      "image": "eyelashes01.png",
+      "path": "textures/eyelashes01.png",
+      "sha256": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35"
+    },
+    {
+      "image": "M02_urban_average_front_v01.png",
+      "path": "textures/M02_urban_average_front_v01.png",
+      "sha256": "5400ec905e0811df2e0492a107fc908b620f8eb3cc2c377b984810914e2c9f11"
+    },
+    {
+      "image": "M02_urban_average_sheet_v01.png",
+      "path": "textures/M02_urban_average_sheet_v01.png",
+      "sha256": "abaf15e94db1f357d0e1aeffbfb00a24fd957c9c4a722d76fdbfc2c6d088854c"
+    },
+    {
+      "image": "middleage_lightskinned_male_diffuse.png",
+      "path": "textures/middleage_lightskinned_male_diffuse.png",
+      "sha256": "3f94f3f6a5cab92dedf5cce392a87332312fc435f1cb44c6e7b897daef9a5fbb"
+    },
+    {
+      "image": "short02_diffuse.png",
+      "path": "textures/short02_diffuse.png",
+      "sha256": "47fe33831a3929567c733356dd66243116e05df2ace1f884ddca0080b728229f"
+    },
+    {
+      "image": "teeth.png",
+      "path": "textures/teeth.png",
+      "sha256": "d0afb57869c6fbb56b98f5efc4aec629ee7593e70d8dd2bfb9de923acfb65f43"
+    },
+    {
+      "image": "tongue01_diffuse.png",
+      "path": "textures/tongue01_diffuse.png",
+      "sha256": "3150be398e48e8ba1feac164c3143c16c0b2e959d9ffb6155f0171f59cfb4ea9"
+    },
+    {
+      "image": "young_lightskinned_male_diffuse2.png",
+      "path": "textures/young_lightskinned_male_diffuse2.png",
+      "sha256": "03efe1f6b0ae52429649dcefc9dcaef6058032f874a251169cc3e2ed473c3874"
+    }
+  ],
+  "separate_assets": [
+    {
+      "id": "T00_TShirt",
+      "file": "Separate_Assets/T00_TShirt_M02_v09.blend",
+      "mesh_objects": 9,
+      "native_collection_asset": "01_Original_TShirt_M02",
+      "independent_rig_and_controls": true
+    },
+    {
+      "id": "P02_Work_Trousers",
+      "file": "Separate_Assets/P02_Work_Trousers_M02_v09.blend",
+      "mesh_objects": 22,
+      "native_collection_asset": "02_Original_Work_Trousers_M02",
+      "independent_rig_and_controls": true
+    },
+    {
+      "id": "F02_Work_Boots",
+      "file": "Separate_Assets/F02_Work_Boots_M02_v09.blend",
+      "mesh_objects": 64,
+      "native_collection_asset": "03_Original_Work_Boots_M02",
+      "independent_rig_and_controls": true
+    }
+  ]
+}
