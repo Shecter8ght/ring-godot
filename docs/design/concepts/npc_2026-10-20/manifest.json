@@ -1,0 +1,105 @@
+{
+  "project": "RING",
+  "series": "male_npc_v01",
+  "date": "2026-10-20",
+  "generator": "built-in imagegen",
+  "status": "visual proposal",
+  "images": [
+    {
+      "id": "M01",
+      "kind": "sheet",
+      "file": "M01_young_slender_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1868318
+    },
+    {
+      "id": "M01",
+      "kind": "front",
+      "file": "M01_young_slender_front_v01.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1720326
+    },
+    {
+      "id": "M02",
+      "kind": "sheet",
+      "file": "M02_urban_average_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2000327
+    },
+    {
+      "id": "M02",
+      "kind": "front",
+      "file": "M02_urban_average_front_v01.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1741536
+    },
+    {
+      "id": "M03",
+      "kind": "sheet",
+      "file": "M03_broad_sturdy_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1964051
+    },
+    {
+      "id": "M03",
+      "kind": "front",
+      "file": "M03_broad_sturdy_front_v01.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1765345
+    },
+    {
+      "id": "M04",
+      "kind": "sheet",
+      "file": "M04_older_lean_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1944924
+    },
+    {
+      "id": "M04",
+      "kind": "front",
+      "file": "M04_older_lean_front_v01.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1733159
+    },
+    {
+      "id": "M05",
+      "kind": "sheet",
+      "file": "M05_fit_mature_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1974932
+    },
+    {
+      "id": "M05",
+      "kind": "front",
+      "file": "M05_fit_mature_front_v01.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1784080
+    },
+    {
+      "id": "M06",
+      "kind": "sheet",
+      "file": "M06_older_solid_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2000919
+    },
+    {
+      "id": "M06",
+      "kind": "front",
+      "file": "M06_older_solid_front_v01.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1766461
+    }
+  ]
+}

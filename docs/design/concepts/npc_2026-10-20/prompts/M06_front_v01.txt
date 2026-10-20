@@ -1,0 +1,12 @@
+Use case: identity-preserve.
+Asset type: one standalone front-view T-pose modeling reference for realistic game character M06.
+Input image 1 is the identity and anatomy reference sheet of ONE fictional adult man, M06. Preserve his exact face, age, haircut, facial hair, skin tone, physique and shorts. This is the same person, not a new variant.
+
+Create ONE square 1:1 image, high resolution, containing exactly ONE full-body figure strictly from the FRONT in a technical T-pose. Extract the subject conceptually from the upper-left front view and render him alone at a larger scale. Do not reproduce the reference sheet, back view, side view, close-ups or label. No extra heads or figures.
+
+The complete man is centered and fills the square frame with a small safe margin on all four sides. Head, every fingertip and both feet must be fully visible. Arms extend straight horizontally at shoulder height, elbows and wrists straight, palms down, thumbs forward, fingers naturally slightly separated, five anatomically correct fingers per hand. Legs straight, feet slightly apart and parallel, evenly planted on a level floor. Upright spine, level pelvis, relaxed neutral closed-mouth face, eyes looking straight forward.
+
+Match the reference person's body mass, waist, shoulders, limbs and face exactly, including his age-appropriate skin. Normal adult 178 cm proportions, no beautification, no stylization or exaggerated muscles.
+Only plain matte medium-gray fitted mid-thigh shorts. Bare torso, bare legs and feet. Keep the reference hair and stubble. No equipment, weapons, shoes, shirt, jewelry, tattoos or new scars.
+
+Orthographic front elevation, no perspective or foreshortening, uniform very light neutral gray background, soft balanced flat studio lighting, crisp realistic skin and anatomy, no hard shadows or depth of field. No text, ID, logos, border, watermark or collage.
