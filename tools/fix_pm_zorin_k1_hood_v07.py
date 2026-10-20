@@ -14,7 +14,9 @@ bpy.ops.wm.open_mainfile(filepath=src)
 hood = bpy.data.objects['Reflex | K1 deep arched protective hood']
 M = hood.matrix_world.copy(); Minv = M.inverted()
 # геометрия задаётся в мм относительно корня прицела (в сборке ПМ корень стоит на креплении)
-R = bpy.data.objects['PM_ReflexSight • asset root'].matrix_world.copy()
+# корень в сборке несёт масштаб — геометрия прицела в обоих файлах одного размера, перенос только сдвигом корня
+from mathutils import Matrix
+R = Matrix.Translation(bpy.data.objects['PM_ReflexSight • asset root'].matrix_world.translation)
 old = hood.data
 
 def front_x(z): return -23.0 + max(0, z - 26.0) * .22
@@ -120,6 +122,8 @@ dg = bpy.context.evaluated_depsgraph_get(); eo = hood.evaluated_get(dg); em = eo
 pts = [R.inverted() @ (M @ v.co) for v in em.vertices]
 print('HOOD eval bbox mm', [round(min(p[i] for p in pts)*1000,2) for i in range(3)], [round(max(p[i] for p in pts)*1000,2) for i in range(3)], 'tris', len(em.polygons), flush=True)
 eo.to_mesh_clear()
+size = [max(p[i] for p in pts) - min(p[i] for p in pts) for i in range(3)]
+assert size[0] > 0.02 and size[1] > 0.03 and size[2] > 0.02, ('hood collapsed', size)
 assert not nonman
 bpy.ops.wm.save_as_mainfile(filepath=dst)
 print('HOOD_FIXED_SAVED', dst, flush=True)
