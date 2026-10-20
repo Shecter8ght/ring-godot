@@ -1,0 +1,101 @@
+{
+  "project": "RING",
+  "date": "2026-10-20",
+  "version": "v01",
+  "purpose": "Clothing concept sheets for later modeling; artistic proposals awaiting owner review",
+  "generation_mode": "built-in image_gen",
+  "owner_directory": "E:/Models Blender/RING_NPC_2026-10-20_v01/Clothing_Concepts_v01",
+  "images": [
+    {
+      "code": "C01",
+      "title": "Местный · повседневный",
+      "file": "C01_local_everyday_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1992295,
+      "sha256": "6c1fcd70b2b59071271c31a1ba4430364d2bed91123e143c70b4af6e5926aa59",
+      "prompt": "prompts/C01_sheet_v01.txt",
+      "identity_reference": "E:/Models Blender/RING_NPC_2026-10-20_v01/M02_urban_average_front_v01.png",
+      "additional_sheet_references": [],
+      "anatomy_status": "Clothing study only; use original accepted body and face for modeling"
+    },
+    {
+      "code": "C02",
+      "title": "Местный · рабочий",
+      "file": "C02_local_workwear_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2027740,
+      "sha256": "248fd95f595ed715a77f17f28415726f6028c1f9e3dacb9e83230f1a5aaa5804",
+      "prompt": "prompts/C02_sheet_v01.txt",
+      "identity_reference": "E:/Models Blender/RING_NPC_2026-10-20_v01/M06_older_solid_front_v01.png",
+      "additional_sheet_references": [
+        "C01"
+      ],
+      "anatomy_status": "Clothing study only; use original accepted body and face for modeling"
+    },
+    {
+      "code": "C03",
+      "title": "Мародёр · собиратель",
+      "file": "C03_scavenger_windbreaker_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2037036,
+      "sha256": "b5c46650d9f7090876cf6c7a4599c7519ff1ea69b4b3f1011ea715b28b54b749",
+      "prompt": "prompts/C03_sheet_v01.txt",
+      "identity_reference": "E:/Models Blender/RING_NPC_2026-10-20_v01/M01_young_slender_front_v01.png",
+      "additional_sheet_references": [
+        "C01"
+      ],
+      "anatomy_status": "Clothing study only; use original accepted body and face for modeling"
+    },
+    {
+      "code": "C04",
+      "title": "Мародёр · бывалый",
+      "file": "C04_raider_sportswear_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2033447,
+      "sha256": "0420254f62c1f81c914049dba3274a311aaf060879160603bc65ce0e644ea8a2",
+      "prompt": "prompts/C04_sheet_v01.txt",
+      "identity_reference": "E:/Models Blender/RING_NPC_2026-10-20_v01/M04_older_lean_front_v01.png",
+      "additional_sheet_references": [
+        "C02"
+      ],
+      "anatomy_status": "Clothing study only; use original accepted body and face for modeling"
+    },
+    {
+      "code": "C05",
+      "title": "ЧВК · облегчённый",
+      "file": "C05_pmc_light_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1992424,
+      "sha256": "9f901c6dd65eb93fb2d51d44730f6e402feb4696e2d75c347286af4e45024c07",
+      "prompt": "prompts/C05_sheet_v01.txt",
+      "identity_reference": "E:/Models Blender/RING_NPC_2026-10-20_v01/M05_fit_mature_front_v01.png",
+      "additional_sheet_references": [],
+      "anatomy_status": "Clothing study only; use original accepted body and face for modeling"
+    },
+    {
+      "code": "C06",
+      "title": "ЧВК · полевой",
+      "file": "C06_pmc_field_sheet_v01.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1970636,
+      "sha256": "4a0c375716ddf9b9af6369376689867e4036d129ac751a5941a6a4e6977a2806",
+      "prompt": "prompts/C06_sheet_v01.txt",
+      "identity_reference": "E:/Models Blender/RING_NPC_2026-10-20_v01/M03_broad_sturdy_front_v01.png",
+      "additional_sheet_references": [
+        "C05"
+      ],
+      "anatomy_status": "Clothing study only; use original accepted body and face for modeling"
+    }
+  ],
+  "notes": [
+    "No upscaling or manual raster editing.",
+    "C03 footwear consolidated into F01; see README.",
+    "C06 inherits some C05 anatomy; do not treat it as an M03 body reference."
+  ]
+}
