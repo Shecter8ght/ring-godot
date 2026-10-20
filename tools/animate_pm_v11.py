@@ -592,6 +592,11 @@ def fcurves(action) -> list:
 # ================================================================ клипы (от хвата владельца)
 
 CLIPS_FILE = SRC / "anim/PM_FPS_Clips_v01.blend"
+POSES_FILE: Path | None = None            # файл поз левой по фазам перезарядки (кадры 1 защёлка / 11 магазин в руке / 21 дожим / 31 затвор):
+                                          # нет — создаётся из расчёта для правки владельцем; есть — позы читаются из него
+POSE_FRAMES = {"heel": 1, "hold": 11, "seat": 21, "rack": 31}
+POSE_NAMES = {"heel": "Большой на защёлке", "hold": "Магазин в руке", "seat": "Дожим магазина", "rack": "Щепоть на затворе"}
+INDEX_OFF_TRIGGER = True                  # в покое указательный уже вдоль рамки (хват v03) — в перезарядке его не разгибать
 GRIP_BONES = ["ik_hand.R", "ik_hand.L", "pole.R", "pole.L"] + RIGHT + LEFT
 CLIP_INFO: dict = {}
 
@@ -846,13 +851,14 @@ def clips() -> None:
     pose = wrap(arms, hands, skin, pose, "L", t_held, start=(0.15, 0.15, 0.15))
     f_hold = {n: Matrix.LocRotScale(rest[n].to_translation() if n in rest else Vector(), q, None) for n, q in pose.items()}
     arms.pose.bones["Magazine_Control"].matrix_basis = Matrix()
-    # правый указательный в перезарядке — со спуска: разогнуть вдоль его оси сгиба
+    # правый указательный в перезарядке — со спуска: разогнуть вдоль его оси сгиба (если в покое он на спуске)
     r_off = {}
-    for i, deg in ((1, 35.0), (2, 25.0), (3, 15.0)):
-        n = f"f_index.{i:02d}.R"
-        axis, _ = hands.axis[n]
-        loc, q, _sc = rest[n].decompose()
-        r_off[n] = Matrix.LocRotScale(loc, q @ Quaternion(axis, -math.radians(deg)), None)
+    if not INDEX_OFF_TRIGGER:
+        for i, deg in ((1, 35.0), (2, 25.0), (3, 15.0)):
+            n = f"f_index.{i:02d}.R"
+            axis, _ = hands.axis[n]
+            loc, q, _sc = rest[n].decompose()
+            r_off[n] = Matrix.LocRotScale(loc, q @ Quaternion(axis, -math.radians(deg)), None)
 
     run_base = cam_offset(carry, Vector((0.0, 0.025, 0.012)), pitch=-6.0, roll=8.0)     # на бегу ближе к телу, сильнее завален
     # шахтой к левой и к глазу: выше, дуло задрано — магазин выходит и входит в кадре
@@ -867,6 +873,69 @@ def clips() -> None:
     def shifted(m: Matrix, d: float) -> Matrix:
         """Поза левой, сдвинутая вдоль оси шахты (−d — вниз, из шахты)."""
         return Matrix.Translation(U * d) @ m
+
+    locked = {"Bolt": Matrix.Translation((0.0, SLIDE, 0.0)), "SlideStop": qx(SLIDE_STOP_UP)}
+    if POSES_FILE is not None and POSES_FILE.exists():
+        # позы левой — из файла (правка владельца): кисть в осях ПМ и кости пальцев по кадрам
+        with bpy.data.libraries.load(str(POSES_FILE), link=False) as (src, dst):
+            dst.actions = ["PM_Reload_Poses"] if "PM_Reload_Poses" in src.actions else []
+        if dst.actions and dst.actions[0] is not None:
+            pact = dst.actions[0]
+            ad = arms.animation_data or arms.animation_data_create()
+            prev = ad.action
+            ad.action = pact
+            if pact.slots:
+                ad.action_slot = pact.slots[0]
+            read = {}
+            for name, frame in POSE_FRAMES.items():
+                scene.frame_set(frame)
+                bpy.context.view_layer.update()
+                gun_w = world(arms, "Frame")
+                read[name] = {"in_gun": gun_w.inverted() @ world(arms, "ik_hand.L"),
+                              "fingers": {n: arms.pose.bones[n].matrix_basis.copy() for n in LEFT if n != "hand.L"}}
+            ad.action = prev
+            for n, m in rest.items():
+                arms.pose.bones[n].matrix_basis = m
+            arms.pose.bones["Frame"].matrix = arms.matrix_world.inverted() @ ready
+            bpy.context.view_layer.update()
+            heel, seat, rack = read["heel"]["in_gun"], read["seat"]["in_gun"], read["rack"]["in_gun"]
+            # магазин в руке — заново от прочитанной позы «у защёлки»
+            set_world(arms, "ik_hand.L", ready @ heel)
+            apply(arms, {n: m.to_quaternion() for n, m in read["heel"]["fingers"].items()})
+            arms.pose.bones["Magazine_Control"].matrix_basis = Matrix()
+            bpy.context.view_layer.update()
+            set_world(arms, "MagHand", world(arms, "Magazine_Control"))
+            rest["MagHand"] = arms.pose.bones["MagHand"].matrix_basis.copy()
+            mag_in_hand = world(arms, "hand.L").inverted() @ world(arms, "Magazine_Control")
+            f_heel, f_hold, f_seat, f_rack = (read[k]["fingers"] for k in ("heel", "hold", "seat", "rack"))
+            for n, m in rest.items():
+                arms.pose.bones[n].matrix_basis = m
+            bpy.data.actions.remove(pact)
+            print("PM_CLIPS poses from", POSES_FILE, flush=True)
+    elif POSES_FILE is not None:
+        # создать файл поз из расчёта: четыре кадра с метками, пистолет в рабочем положении
+        k = Keyer(arms, rest, "PM_Reload_Poses", 31)
+        k.pose(POSE_FRAMES["heel"], present, {**r_off, **f_heel, "MagCatch": qx(CATCH_PRESSED)}, {"ik_hand.L": present @ heel}, infl=0.0)
+        k.pose(POSE_FRAMES["hold"], present, {**r_off, **f_hold}, {"ik_hand.L": present @ shifted(heel, -MAG_FREE)}, infl=1.0)
+        k.pose(POSE_FRAMES["seat"], present, {**r_off, **f_seat, "Magazine_Control": Matrix.Translation(-U * MAG_SHORT)},
+               {"ik_hand.L": present @ shifted(seat, -MAG_SHORT - 0.004)}, infl=0.0)
+        k.pose(POSE_FRAMES["rack"], racking, {**locked, **r_off, **f_rack}, {"ik_hand.L": racking @ rack}, infl=0.0)
+        for fc in fcurves(k.action):
+            for kp in fc.keyframe_points:
+                kp.interpolation = "CONSTANT"
+        for name, frame in POSE_FRAMES.items():
+            scene.timeline_markers.new(POSE_NAMES[name], frame=frame)
+        scene.frame_start, scene.frame_end = 1, 31
+        scene.frame_set(1)
+        del CLIP_INFO["PM_Reload_Poses"]
+        bpy.ops.wm.save_as_mainfile(filepath=str(POSES_FILE))
+        print("PM_CLIPS poses saved", POSES_FILE, flush=True)
+        for m in list(scene.timeline_markers):
+            scene.timeline_markers.remove(m)
+        for n, m in rest.items():
+            arms.pose.bones[n].matrix_basis = m
+        arms.pose.bones["Frame"].matrix = arms.matrix_world.inverted() @ ready
+        bpy.context.view_layer.update()
 
     def idle(name: str, gun: Matrix) -> None:
         k = Keyer(arms, rest, name, 60, loop=True)
@@ -949,7 +1018,6 @@ def clips() -> None:
     k.finish()
 
     # ---- полная: затвор на задержке; после магазина левая передёргивает затвор (большой и указательный)
-    locked = {"Bolt": Matrix.Translation((0.0, SLIDE, 0.0)), "SlideStop": qx(SLIDE_STOP_UP)}
     k = Keyer(arms, rest, "PM_Reload_Full", 74)
     k.pose(0, ready, dict(locked))
     end = mag_swap(k, 0, locked)

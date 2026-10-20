@@ -15,6 +15,8 @@
            указательный ключами — вдоль рамки / на спуске), отчёт anim/grip_v03_report.json
   stills → anim/Кадры_v03/<стойка>_<вид>.png (из глаз, справа, слева, снизу, спереди); -- stills <файл.blend> — кадры чужого файла
   check <файл.blend> → проверка файла без изменений (зазоры, проникновения, суставы) → <файл>_check.json
+  reload → от хвата владельца: позы левой по фазам перезарядки anim/PM_FPS_ReloadPoses_v01.blend (создать / прочитать правленные)
+           и клипы anim/PM_FPS_Clips_v02.blend; poses_stills → кадры поз anim/Кадры_перезарядка_позы
 Файлы владельца (PM_FPS_Grip_v02*.blend) не меняются.
 """
 from __future__ import annotations
@@ -792,6 +794,19 @@ if MODE == "build":
     build()
 elif MODE == "check":
     check(Path(A.ARGS[1]))
+elif MODE == "reload":
+    # клипы и позы перезарядки от хвата владельца: позы левой по фазам — в PM_FPS_ReloadPoses_v01.blend (нет — создаётся из расчёта,
+    # есть — читается, в т.ч. с его правками), клипы — PM_FPS_Clips_v02.blend
+    A.GRIP_FILE = OWNER_GRIP
+    A.CLIPS_FILE = A.SRC / "anim/PM_FPS_Clips_v02.blend"
+    A.POSES_FILE = A.SRC / "anim/PM_FPS_ReloadPoses_v01.blend"
+    A.clips()
+elif MODE == "poses_stills":
+    A.GRIP_FILE = A.SRC / "anim/PM_FPS_ReloadPoses_v01.blend"
+    A.STILLS = A.SRC / "anim/Кадры_перезарядка_позы"
+    A.STANCE_FRAMES = dict(A.POSE_FRAMES)
+    A.ARGS = [a for a in A.ARGS if a != "right"]
+    A.stills()
 elif MODE == "stills":
     extra = [a for a in A.ARGS[1:] if a.endswith(".blend")]
     if extra:                                              # кадры чужого файла: -- stills <файл.blend> [стойки]
