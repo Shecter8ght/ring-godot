@@ -1,0 +1,209 @@
+{
+  "status": "PASS",
+  "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\C03_Art_Refinement_v01\\RING_C03_M02_Art_v01.blend",
+  "source_body": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Appearance_v05\\M02_Appearance_v05.blend",
+  "source_sha256": "0ad4f3819152e30e43fd611e21ff2f004a39651f9c5f272e62c6103816005ead",
+  "body_topology_uv_and_all_shape_keys_unchanged": true,
+  "anatomy_signature": "88d9211cac40e57fcb6ff411475811c9c3f1a0020fd76903df8eacb8c0556ca4",
+  "items": [
+    {
+      "id": "B03",
+      "collection": "B03 | Olive cotton single eye slit",
+      "meshes": 6,
+      "vertices": 41967,
+      "normalized_weights": true,
+      "topology": {
+        "B03 | tailored cotton hood shell": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      }
+    },
+    {
+      "id": "F01",
+      "collection": "F01 | Low trekking shoes",
+      "meshes": 100,
+      "vertices": 55842,
+      "normalized_weights": true,
+      "topology": {
+        "F01 | woven low upper -1": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        },
+        "F01 | woven low upper 1": {
+          "boundary_components": 2,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      }
+    },
+    {
+      "id": "P01",
+      "collection": "P01 | Straight five-pocket jeans",
+      "meshes": 23,
+      "vertices": 66051,
+      "normalized_weights": true,
+      "topology": {
+        "P01 | sewn trouser panels": {
+          "boundary_components": 3,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      }
+    },
+    {
+      "id": "T03",
+      "collection": "T03 | Olive hooded windbreaker",
+      "meshes": 29,
+      "vertices": 85498,
+      "normalized_weights": true,
+      "topology": {
+        "T03 | sewn main surface": {
+          "boundary_components": 4,
+          "nonmanifold_nonboundary_edges": 0,
+          "zero_area_faces": 0
+        }
+      }
+    }
+  ],
+  "materials": [
+    {
+      "name": "balaclava_olive",
+      "native_ucupaint_layers": 10,
+      "masks": 6
+    },
+    {
+      "name": "balaclava_thread",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | trek_mesh",
+      "native_ucupaint_layers": 10,
+      "masks": 6
+    },
+    {
+      "name": "C03 | suede",
+      "native_ucupaint_layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "C03 | thread_boot",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | midsole",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | rubber",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | hardware",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | denim",
+      "native_ucupaint_layers": 9,
+      "masks": 8
+    },
+    {
+      "name": "C03 | thread_jeans",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | nylon_olive",
+      "native_ucupaint_layers": 10,
+      "masks": 8
+    },
+    {
+      "name": "C03 | zip_tape",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | thread_dark",
+      "native_ucupaint_layers": 6,
+      "masks": 6
+    },
+    {
+      "name": "C03 | jersey",
+      "native_ucupaint_layers": 8,
+      "masks": 6
+    },
+    {
+      "name": "C03 | combat_knit",
+      "native_ucupaint_layers": 8,
+      "masks": 6
+    }
+  ],
+  "static_poses": [
+    {
+      "name": "arms_down",
+      "maximum_displacement_m": 0.4999755950277527,
+      "finite_coordinates": true
+    },
+    {
+      "name": "limb_flex",
+      "maximum_displacement_m": 0.26443920274953164,
+      "finite_coordinates": true
+    },
+    {
+      "name": "head_turn",
+      "maximum_displacement_m": 0.05717972131806437,
+      "finite_coordinates": true
+    }
+  ],
+  "toggles": [
+    {
+      "id": "T03",
+      "property": "Ветровка",
+      "passed": true
+    },
+    {
+      "id": "P01",
+      "property": "Джинсы",
+      "passed": true
+    },
+    {
+      "id": "F01",
+      "property": "Обувь",
+      "passed": true
+    },
+    {
+      "id": "B03",
+      "property": "Балаклава",
+      "passed": true
+    }
+  ],
+  "removing_balaclava_restores_original_hair_and_stubble": true,
+  "packed_images": 30,
+  "rig_bones": 163,
+  "scope": "Editable art candidate for M02. Static rig smoke checks are not full animation approval. No game export, bake or LOD.",
+  "standalone_assets_reopened": [
+    {
+      "id": "T03",
+      "self_contained_native_asset": "PASS"
+    },
+    {
+      "id": "P01",
+      "self_contained_native_asset": "PASS"
+    },
+    {
+      "id": "F01",
+      "self_contained_native_asset": "PASS"
+    },
+    {
+      "id": "B03",
+      "self_contained_native_asset": "PASS"
+    }
+  ]
+}

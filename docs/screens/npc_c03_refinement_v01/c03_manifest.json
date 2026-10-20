@@ -1,0 +1,92 @@
+{
+  "master": "RING_C03_M02_Art_v01.blend",
+  "source_wardrobe": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\NPC_Wardrobe_Concepts_v01\\RING_NPC_Wardrobe_M02_v01.blend",
+  "source_wardrobe_sha256": "6484e1d6a68ab3defe521a4bd7aadb2b23da0c3bd2f310ad58c0fa1ff0e95ec4",
+  "source_body": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Appearance_v05\\M02_Appearance_v05.blend",
+  "source_body_sha256": "0ad4f3819152e30e43fd611e21ff2f004a39651f9c5f272e62c6103816005ead",
+  "items": [
+    {
+      "id": "T03",
+      "collection": "T03 | Olive hooded windbreaker",
+      "file": "Separate_Assets/T03_M02_Art_v01.blend",
+      "meshes": 29
+    },
+    {
+      "id": "P01",
+      "collection": "P01 | Straight five-pocket jeans",
+      "file": "Separate_Assets/P01_M02_Art_v01.blend",
+      "meshes": 23
+    },
+    {
+      "id": "F01",
+      "collection": "F01 | Low trekking shoes",
+      "file": "Separate_Assets/F01_M02_Art_v01.blend",
+      "meshes": 100
+    },
+    {
+      "id": "B03",
+      "collection": "B03 | Olive cotton single eye slit",
+      "file": "Separate_Assets/B03_M02_Art_v01.blend",
+      "meshes": 6
+    }
+  ],
+  "owner_references": [
+    {
+      "file": "owner_finish_01.png",
+      "sha256": "dd9e233d9bb481892620605e75c72e7fa43962fb695d09f256d62f47bfae9a82",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_02.png",
+      "sha256": "e6c600df86ef7e1e1e85565f9461c51f71fea7db6a50784f4c9c085b2e6c050c",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_03.png",
+      "sha256": "eac199a84b1f40f257142c881a090bfff9cc4b7503f33225eac5399a5b2fd97d",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_04.png",
+      "sha256": "b2dea7d105e471e41e9da99db43832f2298e97a2edb263717b42f62ac8d684e1",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_05.png",
+      "sha256": "693047033dcc317706131b9f2b89f77af459feca582c8003e9ba5892fa13a981",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_06.png",
+      "sha256": "2f5f8e2a0b3663bd9165c91ad790ba14fb8ea233aa6151151978d46a82f2fd36",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_07.png",
+      "sha256": "b5e8da118ecc46bcac1071d4e7e0111184e794ec6b23c1fac12bac15a723be60",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_08.png",
+      "sha256": "3105384c256a67b394a4d2da047529e48e38d3f1068d2e796874ed670f93320b",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_09.png",
+      "sha256": "e67e82f7b385e9aa0e940b9fcfc4106666a42c2bc1f31e5ec6fd43e5161b4b48",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_10.png",
+      "sha256": "f87177bcc7a70f58fd731dfae5c448e4826014b5fa2c815579c86fca080ddd69",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    },
+    {
+      "file": "owner_finish_11.png",
+      "sha256": "1dd3399335e28666d623aed24f4c0be6d49cb2d63747fd5f40fdba2632ed3566",
+      "role": "Owner supplied finish reference only; no image projection, geometry or texture extraction."
+    }
+  ],
+  "original_concept": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\Clothing_Concepts_v01\\C03_scavenger_windbreaker_sheet_v01.png",
+  "scope": "Editable art review version, M02 fitting. No game mesh, LOD, bake or import. Other wardrobe presets preserved in previous library."
+}
