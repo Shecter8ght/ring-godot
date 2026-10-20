@@ -199,6 +199,9 @@ tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки кот
 #   Только материалы (шейдер старения стен): SHELTER_MATERIALS_ONLY=1 … res://tools/author_shelter_scene.tscn
 tools/godot.cmd res://tools/look_shots.tscn                 # вид «как с камеры»: те же кадры с эффектами и без (убежище, рейд день/ночь, поворот головы)
 tools/godot.cmd res://tools/icon_bake.tscn [-- id …]      # иконки предметов (ItemModels) в assets/icons/<id>.png, затем --import
+tools/pm_grip_rebuild.cmd [shots]                             # ПМ, руки от первого лица, после правки владельцем хвата (_asset_src/pm_game/anim/PM_FPS_Grip_v03.blend)
+                                                              # или поз перезарядки (PM_FPS_ReloadPoses_v01.blend): проверка хвата, правая → в файл поз, клипы PM_FPS_Clips_v02.blend
+                                                              # (режимы по отдельности — tools/pm_grip_lock.py: build|check|reload|poses_sync_right|poses_stills|stills)
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
 tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # вид оружия один (2026-10-19): ПМ при любой прочности — карты 100 из pm.glb, ВЕРАС-54 —
                                                               # шейдер жировых следов (_coat); файлов прежнего износа (_wear, 60/20, wear_detail) нет
