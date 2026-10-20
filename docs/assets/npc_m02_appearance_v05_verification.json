@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Appearance_v05\\M02_Appearance_v05.blend",
+  "blender": "5.2.2 LTS",
+  "source_sha256": "ab5ba58c3faf8c7d2fc53410a816663a1ebdbad0b420e8cd9c65abd9658740be",
+  "source_cage_and_uv_preserved": true,
+  "nonmanifold_edges": 0,
+  "nonquad_faces": 0,
+  "shape_keys": 2,
+  "packed_images": 10,
+  "native_ucupaint_layers": 11,
+  "groom_strands": {
+    "M02_Groom_Chestnut_Short": 64000,
+    "M02_Groom_Short_Stubble": 11500,
+    "M02_Groom_Natural_Eyebrows": 2200
+  },
+  "maximum_root_distance_rest_m": {
+    "M02_Groom_Chestnut_Short": 0.00033486203756183386,
+    "M02_Groom_Short_Stubble": 8.112507202895358e-05,
+    "M02_Groom_Natural_Eyebrows": 0.002938292920589447
+  },
+  "maximum_root_distance_turned_m": {
+    "M02_Groom_Chestnut_Short": 0.002108522690832615,
+    "M02_Groom_Short_Stubble": 0.00015440340212080628,
+    "M02_Groom_Natural_Eyebrows": 0.002938235178589821
+  },
+  "deformation": [
+    {
+      "bone": "lowerarm01.L",
+      "max_displacement_m": 0.3968285884821145
+    },
+    {
+      "bone": "lowerleg01.L",
+      "max_displacement_m": 0.4756076429478998
+    },
+    {
+      "bone": "finger2-1.L",
+      "max_displacement_m": 0.04073667200003671
+    }
+  ],
+  "portability_render_without_ucupaint": true
+}

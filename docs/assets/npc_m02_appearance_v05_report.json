@@ -1,0 +1,143 @@
+{
+  "file": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Appearance_v05\\M02_Appearance_v05.blend",
+  "source": "E:\\Models Blender\\RING_NPC_2026-10-20_v01\\M02_Geometry_v06\\M02_Body_Head_Geometry_v06.blend",
+  "source_sha256": "ab5ba58c3faf8c7d2fc53410a816663a1ebdbad0b420e8cd9c65abd9658740be",
+  "ucupaint": "2.4.9",
+  "blender": "5.2.2 LTS",
+  "face_shape_max_delta_m": 0.0013826786980370056,
+  "skin_layers": [
+    "08 | Dark roots beneath the groom",
+    "07 | Fine variation of roughness",
+    "06 | Skin pores — fine relief",
+    "05 | Natural lip moisture",
+    "04 | Forehead and nose — softer roughness",
+    "03 | Shaved beard undertone",
+    "02b | Restrained lower-lid tone",
+    "02 | Warm cheeks and nose",
+    "01c | Lower-body scan tone balance",
+    "01b | Adult facial colour detail",
+    "01 | CC0 skin colour base"
+  ],
+  "groom": [
+    {
+      "name": "M02_Groom_Chestnut_Short",
+      "type": "CURVES",
+      "strands": 64000
+    },
+    {
+      "name": "M02_Groom_Short_Stubble",
+      "type": "CURVES",
+      "strands": 11500
+    },
+    {
+      "name": "M02_Groom_Natural_Eyebrows",
+      "type": "CURVES",
+      "strands": 2200
+    }
+  ],
+  "image_count": 10,
+  "renderer": "CYCLES",
+  "device": "GPU",
+  "images": [
+    {
+      "name": "brown_eye.png",
+      "path": "textures/brown_eye.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "sRGB",
+      "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b"
+    },
+    {
+      "name": "eyebrow001.png",
+      "path": "textures/eyebrow001.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorspace": "sRGB",
+      "sha256": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b"
+    },
+    {
+      "name": "eyelashes01.png",
+      "path": "textures/eyelashes01.png",
+      "size": [
+        512,
+        512
+      ],
+      "colorspace": "sRGB",
+      "sha256": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35"
+    },
+    {
+      "name": "M02_urban_average_front_v01.png",
+      "path": "textures/M02_urban_average_front_v01.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "colorspace": "sRGB",
+      "sha256": "5400ec905e0811df2e0492a107fc908b620f8eb3cc2c377b984810914e2c9f11"
+    },
+    {
+      "name": "M02_urban_average_sheet_v01.png",
+      "path": "textures/M02_urban_average_sheet_v01.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "colorspace": "sRGB",
+      "sha256": "abaf15e94db1f357d0e1aeffbfb00a24fd957c9c4a722d76fdbfc2c6d088854c"
+    },
+    {
+      "name": "middleage_lightskinned_male_diffuse.png",
+      "path": "textures/middleage_lightskinned_male_diffuse.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "sRGB",
+      "sha256": "3f94f3f6a5cab92dedf5cce392a87332312fc435f1cb44c6e7b897daef9a5fbb"
+    },
+    {
+      "name": "short02_diffuse.png",
+      "path": "textures/short02_diffuse.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "sRGB",
+      "sha256": "47fe33831a3929567c733356dd66243116e05df2ace1f884ddca0080b728229f"
+    },
+    {
+      "name": "teeth.png",
+      "path": "textures/teeth.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "sRGB",
+      "sha256": "d0afb57869c6fbb56b98f5efc4aec629ee7593e70d8dd2bfb9de923acfb65f43"
+    },
+    {
+      "name": "tongue01_diffuse.png",
+      "path": "textures/tongue01_diffuse.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "sRGB",
+      "sha256": "3150be398e48e8ba1feac164c3143c16c0b2e959d9ffb6155f0171f59cfb4ea9"
+    },
+    {
+      "name": "young_lightskinned_male_diffuse2.png",
+      "path": "textures/young_lightskinned_male_diffuse2.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "sRGB",
+      "sha256": "03efe1f6b0ae52429649dcefc9dcaef6058032f874a251169cc3e2ed473c3874"
+    }
+  ]
+}

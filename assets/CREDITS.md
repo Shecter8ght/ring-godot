@@ -481,3 +481,14 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 - Подгонка М02, новая исходная T-поза, очистка вспомогательной топологии, примерочные шорты,
   организация .blend и проверочные виды — `tools/characters/m02_build.py`.
   Референсы М02 созданы imagegen для RING. Описание этапа — `docs/assets/npc_m02_geometry.md`.
+
+### М02 — кожа и волосы v05
+
+- Карты кожи MakeHuman core `young_caucasian_male2/young_lightskinned_male_diffuse2.png` и
+  `middleage_caucasian_male/middleage_lightskinned_male_diffuse.png` (2048 × 2048), **CC0**.
+  Обе локальные .mhmat прямо указывают выпуск в CC0 в сентябре 2020; их копии сохранены в `licenses/` выдачи.
+  Правообладатели в заголовках: Data Collection AB, Joel Palmius, Jonas Hauquier.
+- Обратимая правка лица, цветовые маски, процедурная микрофактура, настройки материалов и новые кривые волос,
+  бровей и щетины — работа для RING, `tools/characters/m02_appearance.py`.
+  [Описание и проверки](../docs/assets/npc_m02_appearance.md); исходные карты не изменены,
+  настройки поверхности остаются нативными слоями UCUPaint.
