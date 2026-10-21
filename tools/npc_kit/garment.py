@@ -585,7 +585,8 @@ def simulate(obj: bpy.types.Object, fabric: Fabric, frames: int = 90, sew_frames
              self_collision: bool = True, collision_distance: float = 0.004,
              stiff_group: str | None = None, stiff_bending: float = 0.0,
              collide_collection: bpy.types.Collection | None = None, log: Callable[[str], None] = print,
-             debug: tuple[str, ...] = ()) -> None:
+             debug: tuple[str, ...] = (), shrink_frames: int = 0, grow: float = 0.0,
+             struct_group: str | None = None, struct_fabric: Fabric | None = None) -> None:
     """Сначала без тяжести — швы стягиваются; потом тяжесть — ткань садится на тело и складки ложатся."""
     scene = bpy.context.scene
     scene.frame_start = 1
@@ -633,9 +634,30 @@ def simulate(obj: bpy.types.Object, fabric: Fabric, frames: int = 90, sew_frames
         st.vertex_group_bending = stiff_group
         st.bending_stiffness_max = stiff_bending
     if shrink_group:
+        # Усадка на вершину: вес группы × shrink. shrink_frames — нарастает плавно (резинка
+        # стягивает понемногу, кожа успевает собраться в напуск, а не рвётся рывком).
+        # grow — припуск ростом: вне группы ткань растёт на grow (отрицательная усадка), а не сразу
+        # сжата на весь припуск лекала (сжатая с первого кадра кожа от любого толчка мнётся в «фольгу»).
+        # Длина покоя = 1 − shrink_min + (shrink_min − shrink_max)·вес — веса группы считать под это.
         st.vertex_group_shrink = shrink_group
-        st.shrink_min = 0.0
+        st.shrink_min = -grow
         st.shrink_max = shrink
+        if shrink_frames > 1:
+            st.shrink_min = 0.0
+            st.shrink_max = 0.0
+            st.keyframe_insert("shrink_min", frame=1)
+            st.keyframe_insert("shrink_max", frame=1)
+            st.shrink_min = -grow
+            st.shrink_max = shrink
+            st.keyframe_insert("shrink_min", frame=shrink_frames)
+            st.keyframe_insert("shrink_max", frame=shrink_frames)
+    if struct_group and struct_fabric:
+        # Разная ткань в одной вещи: вне группы — fabric (мягкий трикотаж), в группе — struct_fabric (кожа).
+        st.vertex_group_structural_stiffness = struct_group
+        st.tension_stiffness_max = struct_fabric.tension
+        st.compression_stiffness_max = struct_fabric.compression
+        st.vertex_group_shear_stiffness = struct_group
+        st.shear_stiffness_max = struct_fabric.shear
     cs = mod.collision_settings
     cs.use_collision = "nocol" not in debug
     cs.distance_min = collision_distance
@@ -790,10 +812,52 @@ def relax(obj: bpy.types.Object, fabric: Fabric, frames: int = 20, pin_group: st
     co = [v.co.copy() for v in ev.to_mesh().vertices]
     ev.to_mesh_clear()
     obj.modifiers.remove(mod)
-    for i, v in enumerate(obj.data.vertices):
+    # Защита: если досадка взорвалась (ребро растянулось втрое), оставить форму до неё.
+    me = obj.data
+    worst = max(((co[e.vertices[0]] - co[e.vertices[1]]).length /
+                 max((me.vertices[e.vertices[0]].co - me.vertices[e.vertices[1]].co).length, 1e-6)) for e in me.edges)
+    if worst > 3.0:
+        log(f"  {obj.name}: досадка отменена — ребро растянулось в {worst:.1f} раза")
+        return
+    for i, v in enumerate(me.vertices):
         v.co = co[i]
-    obj.data.update()
-    log(f"  {obj.name}: досажено за {frames} кадров")
+    me.update()
+    log(f"  {obj.name}: досажено за {frames} кадров (наибольшее растяжение ребра {worst:.2f})")
+
+
+def taubin(obj: bpy.types.Object, iterations: int = 8, lam: float = 0.5, mu: float = -0.53,
+           keep_boundary: bool = True) -> None:
+    """Сглаживание Таубина: шаг внутрь и шаг наружу — снимает рябь в пару размеров треугольника,
+    не «сдувая» вещь и не трогая крупные складки (обычное сглаживание их тоже съедает)."""
+    me = obj.data
+    nbr: list[set[int]] = [set() for _ in me.vertices]
+    for e in me.edges:
+        a, b = e.vertices
+        nbr[a].add(b)
+        nbr[b].add(a)
+    border = set()
+    if keep_boundary:
+        count: dict[tuple[int, int], int] = {}
+        for poly in me.polygons:
+            vs = list(poly.vertices)
+            for k in range(len(vs)):
+                key = tuple(sorted((vs[k], vs[(k + 1) % len(vs)])))
+                count[key] = count.get(key, 0) + 1
+        border = {i for key, n in count.items() if n == 1 for i in key}
+    pos = [v.co.copy() for v in me.vertices]
+    for _ in range(iterations):
+        for f in (lam, mu):
+            new = []
+            for i, p in enumerate(pos):
+                if i in border or not nbr[i]:
+                    new.append(p)
+                    continue
+                avg = sum((pos[j] for j in nbr[i]), Vector()) / len(nbr[i])
+                new.append(p + (avg - p) * f)
+            pos = new
+    for v, p in zip(me.vertices, pos):
+        v.co = p
+    me.update()
 
 
 def smooth_noise(obj: bpy.types.Object, iterations: int = 4, factor: float = 0.5,

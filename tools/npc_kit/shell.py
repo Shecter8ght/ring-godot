@@ -84,6 +84,77 @@ def bisect(obj: bpy.types.Object, co: Vector, no: Vector, clear_outer: bool = Fa
     obj.data.update()
 
 
+SNAP = 0.22      # доля ребра: ноль поля ближе к концу ребра — переносим вершину на линию, а не дробим
+
+
+def level_cut(obj: bpy.types.Object, field: Callable[[Vector], float]) -> list[float]:
+    """Разрезать сетку по нулю поля (шов любой формы — пройма, кокетка, край): на рёбрах со сменой
+    знака новая вершина в точке нуля (линейно), грани делятся. Если ноль у самого конца ребра,
+    существующая вершина переносится на линию: иначе остаются рёбра в доли миллиметра — в симуляции
+    это сверхжёсткие пружины, ткань дрожит и мнётся «фольгой». Возвращает поле по вершинам после
+    разреза (на линии — ровно 0): по нему потом делить грани на детали."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    val = {v: field(v.co) for v in bm.verts}
+    # Перенос: для вершины — ближайший ноль на её рёбрах со сменой знака.
+    snap: dict = {}
+    for e in bm.edges:
+        a, b = e.verts
+        ga, gb = val[a], val[b]
+        if ga * gb >= 0:
+            continue
+        t = ga / (ga - gb)
+        if t < SNAP and (a not in snap or snap[a][0] > t):
+            snap[a] = (t, a.co.lerp(b.co, t))
+        elif t > 1 - SNAP and (b not in snap or snap[b][0] > 1 - t):
+            snap[b] = (1 - t, a.co.lerp(b.co, t))
+    for v, (_, co) in snap.items():
+        v.co = co
+        val[v] = 0.0
+    cross = [e for e in bm.edges if val[e.verts[0]] * val[e.verts[1]] < 0]
+    on_cut = {v for v, g in val.items() if g == 0.0}
+    for e in cross:
+        a, b = e.verts
+        t = val[a] / (val[a] - val[b])
+        _, nv = bmesh.utils.edge_split(e, a, t)
+        val[nv] = 0.0
+        on_cut.add(nv)
+    for f in list({f for v in on_cut for f in v.link_faces}):
+        vs = [v for v in f.verts if v in on_cut]
+        if len(vs) != 2:
+            continue
+        if any(e.other_vert(vs[0]) is vs[1] for e in vs[0].link_edges):
+            continue                    # линия идёт по ребру — делить нечего
+        bmesh.ops.connect_verts(bm, verts=vs)
+    bm.verts.index_update()
+    out = [0.0] * len(bm.verts)
+    for v in bm.verts:
+        out[v.index] = val[v] if v in val else field(v.co)
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+    return out
+
+
+def clip(obj: bpy.types.Object, field: Callable[[Vector], float]) -> None:
+    """Отрезать по нулю поля и убрать, где поле > 0 (край вещи: низ, конец рукава)."""
+    vals = level_cut(obj, field)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.verts.ensure_lookup_table()
+    kill = [f for f in bm.faces if sum(vals[v.index] for v in f.verts) > 0]
+    bmesh.ops.delete(bm, geom=kill, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+
+
+def short_edges(obj: bpy.types.Object, limit: float = 0.002) -> int:
+    me = obj.data
+    return sum(1 for e in me.edges if (me.vertices[e.vertices[0]].co - me.vertices[e.vertices[1]].co).length < limit)
+
+
 def delete_faces(obj: bpy.types.Object, kill: Callable[[Vector], bool]) -> None:
     bm = bmesh.new()
     bm.from_mesh(obj.data)

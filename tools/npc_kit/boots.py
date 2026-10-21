@@ -31,9 +31,9 @@ import shell as sh  # noqa: E402
 OUT = kc.WORK / "boots"
 BOOT_TOP = 0.235      # верх голенища над полом стопы
 FOOT_GAP = 0.006      # верх от стопы
-SHAFT_GAP = 0.020     # голенище от голени (брюки внутри)
-FOREFOOT = 0.028      # подошва под носком
-HEEL = 0.038          # под пяткой
+SHAFT_GAP = 0.020     # голенище от голени у верха (брюки внутри с напуском); у щиколотки — 8 мм
+FOREFOOT = 0.031      # подошва под носком
+HEEL = 0.045          # под пяткой
 LACE_R = 0.0019
 
 
@@ -59,13 +59,17 @@ def boot_last(body: bpy.types.Object, col: bpy.types.Collection, axis_x: float) 
     bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
     bm.normal_update()
     for v in bm.verts:
-        off = FOOT_GAP + (SHAFT_GAP - FOOT_GAP) * gm.smoothstep((v.co.z - 0.085) / 0.13)
+        # Стопа плотно, щиколотка 8 мм, к верху голенища — SHAFT_GAP: голенище идёт по ноге
+        # (ахилл, икра), а не прямой трубой, как у резинового сапога.
+        off = FOOT_GAP + (0.008 - FOOT_GAP) * gm.smoothstep((v.co.z - 0.06) / 0.04) \
+            + (SHAFT_GAP - 0.008) * gm.smoothstep((v.co.z - 0.12) / 0.10)
         v.co += v.normal * off
     bm.to_mesh(last.data)
     bm.free()
     sh.voxel_remesh(last, 0.004)
     sh.keep_largest(last)
-    sh.smooth(last, 30, 0.6)
+    sh.smooth(last, 30, 0.6, only=lambda c: c.z < 0.10)
+    sh.smooth(last, 12, 0.5, only=lambda c: c.z >= 0.08)
     fr = FootFrame(last, axis_x)
     # Носок: объёмный «стакан» — выше, шире, округлый, на 1 см длиннее стопы.
     for v in last.data.vertices:
@@ -111,8 +115,10 @@ def build_sole(last: bpy.types.Object, col: bpy.types.Collection) -> bpy.types.O
         groove = gm.smoothstep((0.32 - abs(ph - 0.5)) / 0.08)
         return 0.004 * (1.0 - groove)
 
-    profile = [(0.00, -0.001), (0.10, 0.004), (0.25, 0.0062), (0.45, 0.0070), (0.62, 0.0068),
-               (0.66, 0.0058), (0.70, 0.0068), (0.86, 0.0066), (0.95, 0.0050), (1.00, 0.0034)]
+    # Борт: верх — к ранту, посередине — канавка (линия промежуточной подошвы), ниже — зацепы.
+    profile = [(0.00, -0.001), (0.10, 0.004), (0.25, 0.0062), (0.36, 0.0071), (0.40, 0.0054),
+               (0.46, 0.0054), (0.50, 0.0071), (0.62, 0.0069), (0.66, 0.0058), (0.70, 0.0069),
+               (0.86, 0.0067), (0.95, 0.0052), (1.00, 0.0036)]
     top_z = 0.021
     rings = []
     for f, off in profile:
@@ -120,7 +126,9 @@ def build_sole(last: bpy.types.Object, col: bpy.types.Collection) -> bpy.types.O
         for p in base:
             d = Vector((p.x - cx, p.y - cy, 0))
             n = d.normalized() if d.length > 1e-6 else Vector((0, -1, 0))
-            q = Vector((p.x, p.y, 0)) + n * off
+            # Зацепы выходят на борт: в канавках между ними низ борта утоплен.
+            notch = (0.004 - lugs(p.x, p.y)) / 0.004 * 0.0025 * max(0.0, (f - 0.86) / 0.14)
+            q = Vector((p.x, p.y, 0)) + n * (off - notch)
             bz = bottom_z(p.x, p.y) + (lugs(p.x, p.y) - 0.004) * (f > 0.99)
             r.append(Vector((q.x, q.y, top_z + (bz - top_z) * f)))
         rings.append(r)

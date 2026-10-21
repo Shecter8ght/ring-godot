@@ -16,6 +16,7 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / "_asset_src" / "npc_kit"
+VERSION = "v02"         # версия мародёра: рабочий файл npc_scav_<версия>.blend, выдача NPC_Marauder_<версия>.blend
 MPFB = "bl_ext.blender_org.mpfb"
 
 

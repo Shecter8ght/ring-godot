@@ -8,7 +8,7 @@
 (R — нитка, G — грязь в шве) и узлы в материалах (рельеф поверх фото, цвет нитки и грязи).
 
 blender --background --factory-startup --python-exit-code 1 --python tools/npc_kit/details.py [-- render]
-(читает и пересохраняет _asset_src/npc_kit/npc_scav_v01.blend)
+(читает и пересохраняет _asset_src/npc_kit/npc_scav_<версия>.blend)
 """
 from __future__ import annotations
 
@@ -298,15 +298,24 @@ def jacket_details(obj: bpy.types.Object) -> Canvas:
     cv = build_canvas(obj)
     for pts, inward, mat in chains(uv_half_edges(obj)):
         seam_details(cv, pts, inward, [0.004, 0.009] if mat == "Jacket_Leather" else [], True)
-    bvh = BVHTree.FromObject(obj, bpy.context.evaluated_depsgraph_get())
+    # Дерево — по самой сетке, без модификаторов: у вещи толщина (Solidify), и номера граней
+    # вычисленной сетки не совпали бы с развёрткой.
+    me = obj.data
+    bvh = BVHTree.FromPolygons([v.co for v in me.vertices], [list(p.vertices) for p in me.polygons])
     # Прорезные косые карманы спереди: линия кармана и две губки по 6 мм.
+    # Прорез — прямой по лекалу (как его режут), поэтому прямая в развёртке между концами, а не
+    # проекция 3D-линии на складки (та шла зигзагом).
     for sgn in (1, -1):
-        a = Vector((0.105 * sgn, -0.20, 0.985))
-        b = Vector((0.150 * sgn, -0.17, 1.125))
-        draw_uv_path(cv, path_uv(obj, bvh, [a, b], 60), 0.6, 0.0012, [0.004, -0.004])
-        n3 = (b - a).cross(Vector((0, -1, 0))).normalized()
+        ua = uv_at(obj, bvh, Vector((0.105 * sgn, -0.20, 0.985)))
+        ub = uv_at(obj, bvh, Vector((0.150 * sgn, -0.17, 1.125)))
+        if ua is None or ub is None or (ub - ua).length > 0.3:
+            continue
+        d = (ub - ua).normalized()
+        n2 = Vector((-d.y, d.x))
+        line = [ua.lerp(ub, t / 40) for t in range(41)]
+        draw_uv_path(cv, line, 0.6, 0.0012, [0.004, -0.004])
         for off in (0.006, -0.006):
-            draw_uv_path(cv, path_uv(obj, bvh, [a + n3 * off, b + n3 * off], 60), 0.3, 0.0008, [])
+            draw_uv_path(cv, [u + n2 * off for u in line], 0.3, 0.0008, [])
     return cv
 
 
@@ -314,22 +323,13 @@ def pants_details(obj: bpy.types.Object) -> Canvas:
     cv = build_canvas(obj)
     for pts, inward, mat in chains(uv_half_edges(obj)):
         seam_details(cv, pts, inward, [0.004, 0.010], True)
-    bvh = BVHTree.FromObject(obj, bpy.context.evaluated_depsgraph_get())
-    # Карманы-карго на бёдрах с клапаном — контур строчкой.
-    for sgn in (1, -1):
-        x = 0.215 * sgn
-        rect = [Vector((x, -0.06, 0.70)), Vector((x, 0.06, 0.70)), Vector((x, 0.06, 0.52)),
-                Vector((x, -0.06, 0.52)), Vector((x, -0.06, 0.70))]
-        draw_uv_path(cv, path_uv(obj, bvh, rect, 30), 0.45, 0.0012, [0.003, -0.003])
-        flap = [Vector((x, -0.065, 0.715)), Vector((x, 0.065, 0.715)), Vector((x, 0.065, 0.66)),
-                Vector((x, -0.065, 0.66)), Vector((x, -0.065, 0.715))]
-        draw_uv_path(cv, path_uv(obj, bvh, flap, 30), 0.5, 0.0014, [0.003])
+    # Карманы-карго — объёмными деталями (pockets.py), здесь только швы кроя.
     return cv
 
 
 def main() -> None:
     args = kc.args_after_dashes()
-    bpy.ops.wm.open_mainfile(filepath=str(kc.WORK / "npc_scav_v01.blend"))
+    bpy.ops.wm.open_mainfile(filepath=str(kc.WORK / f"npc_scav_{kc.VERSION}.blend"))
     for name, fn, mats in (("jacket", jacket_details, [("Jacket_Leather", (0.045, 0.030, 0.020), 1.0),
                                                          ("Jacket_Rib", (0.03, 0.03, 0.03), 0.6)]),
                            ("pants", pants_details, [("Pants_Fabric", (0.16, 0.15, 0.10), 0.9)])):
@@ -339,7 +339,7 @@ def main() -> None:
         for mname, thread, strength in mats:
             hook_material(bpy.data.materials[mname], hp, mp, cv, thread, strength)
         kc.log("DETAILS", name, cv.w, "x", cv.h)
-    kc.save(kc.WORK / "npc_scav_v01.blend")
+    kc.save(kc.WORK / f"npc_scav_{kc.VERSION}.blend")
     if "render" in args:
         cams = {
             "det_chest": kc.camera("Cam_DetChest", (0.35, -0.75, 1.22), (0.05, -0.08, 1.12), 70),
@@ -348,7 +348,7 @@ def main() -> None:
             "det_sleeve": kc.camera("Cam_DetSleeve", (0.75, -0.6, 1.25), (0.38, -0.03, 1.22), 70),
         }
         for k, cam in cams.items():
-            kc.render(cam, kc.WORK / "previews" / f"scav_v01_{k}.png", (900, 800), 96)
+            kc.render(cam, kc.WORK / "previews" / f"scav_{kc.VERSION}_{k}.png", (900, 800), 96)
 
 
 if __name__ == "__main__":

@@ -287,7 +287,7 @@ def main() -> None:
         w = gm.smoothstep(1.0 - abs(c.x) / 0.07) * gm.smoothstep((c.z - 0.70) / 0.08) * gm.smoothstep((0.95 - c.z) / 0.05)
         # Край голенища берца — гладкий выступ на ноге: штанина садится на него и собирается напуском.
         rim = gm.smoothstep((c.z - (BOOT_TOP - 0.06)) / 0.03) * gm.smoothstep((BOOT_TOP + 0.004 - c.z) / 0.022)
-        return 0.0015 - 0.012 * w + 0.021 * rim
+        return 0.0015 - 0.012 * w + 0.021 * rim       # край голенища: boots.SHAFT_GAP + 1 мм
     body_col = gm.make_collider(body, "Body_Collider", sim_col, thickness=0.003, friction=30.0, offset_fn=crotch_gap)
     # Берцы: из boots.blend в сцену; препятствие — их копии (ткань над голенищем ложится напуском).
     boots_col = kc.collection("04_Boots")
