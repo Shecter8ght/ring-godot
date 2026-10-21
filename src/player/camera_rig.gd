@@ -54,7 +54,6 @@ var _hurt_amount: float = 0.0
 var _stress_fx: float = 0.0
 var _beat_t: float = 0.0
 var _down_label: Label
-var _muffle: AudioEffectLowPassFilter
 ## ПНВ: зелёная усиленная картинка с зерном.
 var _nvg_fx: ColorRect
 ## Новый снимок экрана сразу после ПНВ: эффекты ранения и стресса рисуются следом и тоже читают экран.
@@ -402,7 +401,6 @@ func _update_hurt(pl: Player, delta: float) -> void:
 		sm.set_shader_parameter("pulse", pulse)
 		sm.set_shader_parameter("stress", _stress_fx)
 		sm.set_shader_parameter("nvg", 1.0 if pl.nvg_on else 0.0)
-	_set_muffle(down)
 	_down_label.visible = down
 	if down:
 		var h := pl.health
@@ -412,22 +410,6 @@ func _update_hurt(pl: Player, delta: float) -> void:
 			lines += "\nТЕБЯ ТАЩАТ — стреляй из пистолета, прикрывай"
 		lines += "\n%s — аптечка (подняться) / бинт   ·   %s (держать) — сдаться" % [PauseMenu.key_name("use_med"), PauseMenu.key_name("drag")]
 		_down_label.text = lines
-
-
-## Лёжа раненым звук глуше (на общей шине — срез верхов).
-func _set_muffle(on: bool) -> void:
-	if on == (_muffle != null):
-		return
-	if on:
-		_muffle = AudioEffectLowPassFilter.new()
-		_muffle.cutoff_hz = 900.0
-		AudioServer.add_bus_effect(0, _muffle)
-	else:
-		for i in range(AudioServer.get_bus_effect_count(0)):
-			if AudioServer.get_bus_effect(0, i) == _muffle:
-				AudioServer.remove_bus_effect(0, i)
-				break
-		_muffle = null
 
 
 ## Голограф ЛУМАР в руках: клавиша «sight_menu» открывает окно настройки (форма, цвет, толщина метки,
@@ -493,7 +475,6 @@ func _reticle_nv(on: bool) -> void:
 
 
 func _exit_tree() -> void:
-	_set_muffle(false)
 	# ушли со сцены в ПНВ — точка прицелов снова красная (материал общий, переживает сцену)
 	WeaponModels.set_night_vision(false)
 

@@ -1,5 +1,5 @@
 extends Node
-## Только явно назначенные записи. Пустое действие молчит; расстояние и помещение считает движок.
+## Явные записи без постобработки. Движок выбирает запись места и считает пространственную громкость.
 
 const REGISTRY: String = "res://data/audio_events.json"
 const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
@@ -25,7 +25,7 @@ func _ready() -> void:
 	_rng.randomize()
 	reload_events()
 	get_tree().node_added.connect(_on_audio_node_added)
-	for node: Node in get_tree().root.find_children("*", "BaseButton", true, false):
+	for node: Node in get_tree().root.find_children("*", "", true, false):
 		_on_audio_node_added(node)
 	set_process(true)
 
@@ -105,7 +105,7 @@ func _pick_from(records: Array, key: String) -> AudioStream:
 	_last_pick[key] = index
 	return records[index] as AudioStream
 
-func play(hook: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0, emitter: Node = null) -> void:
+func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0, emitter: Node = null) -> void:
 	if hook == "":
 		return
 	var spec: Dictionary = _kind_spec(hook)
@@ -123,12 +123,11 @@ func play(hook: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0,
 	var stream: AudioStream = _pick(id if id != "" and not _preview.has(hook) else hook, pos)
 	if stream == null:
 		return
-	var baked_place: bool = place != "" and id == String(_bindings.get(hook + "_" + place, ""))
 	var delay: float = distance / float(Balance.AUDIO_FAR.sound_mps) if _has_ears() and bool(spec.get("far", false)) and distance > float(Balance.AUDIO_FAR.delay_from_m) else 0.0
 	if delay > 0.0:
-		get_tree().create_timer(delay).timeout.connect(func() -> void: _play_now(hook, id, stream, pos, extra_db, pitch, spec, place, baked_place))
+		get_tree().create_timer(delay).timeout.connect(func() -> void: _play_now(hook, id, stream, pos, extra_db, spec))
 	else:
-		_play_now(hook, id, stream, pos, extra_db, pitch, spec, place, baked_place)
+		_play_now(hook, id, stream, pos, extra_db, spec)
 
 func _matches_object(emitter: Node, binding: Dictionary) -> bool:
 	var ancestor: Node = emitter
@@ -140,7 +139,7 @@ func _matches_object(emitter: Node, binding: Dictionary) -> bool:
 		ancestor = ancestor.get_parent()
 	return false
 
-func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extra_db: float, pitch: float, spec: Dictionary, place: String, baked_place: bool) -> void:
+func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extra_db: float, spec: Dictionary) -> void:
 	if get_tree().current_scene == null:
 		return
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
@@ -149,14 +148,10 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 	player.unit_size = float(spec.unit) * float(Settings.headset.get("hear_k", 1.0))
 	player.max_distance = float(spec["max"])
 	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
-	player.pitch_scale = pitch if pitch > 0.0 else 1.0
-	if bool(spec.get("far", false)):
-		player.attenuation_filter_cutoff_hz = float(Balance.AUDIO_FAR.cutoff_hz)
-		player.attenuation_filter_db = float(Balance.AUDIO_FAR.filter_db)
-	if _has_ears() and _occluded(_listener_pos(), pos):
+	_configure_recorded_player(player)
+	if bool(spec.get("occlude", true)) and _has_ears() and _occluded(_listener_pos(), pos):
 		player.volume_db -= float(Balance.AUDIO_OCCLUDED_DB)
-		player.attenuation_filter_cutoff_hz = float(Balance.AUDIO_OCCLUDED_CUTOFF)
-	player.bus = _acoustic_bus(hook, place) if not baked_place else Settings.bus_for(hook)
+	player.bus = _bus_for(hook)
 	player.finished.connect(player.queue_free)
 	get_tree().current_scene.add_child(player)
 	player.global_position = pos
@@ -179,23 +174,22 @@ func _kind_spec(hook: String) -> Dictionary:
 		return Balance.SONORA_AUDIO.weapon_action
 	return Balance.AUDIO_EVENT_PROFILES.get(profile, Balance.AUDIO_EVENT_PROFILES.get(hook, Balance.SONORA_AUDIO.world)) as Dictionary
 
-func _acoustic_bus(hook: String, place: String) -> StringName:
-	if not _is_weapon_shot(hook) or place not in ["room", "hall"]:
-		return Settings.bus_for(hook)
-	var bus_name: StringName = StringName("Sonora_" + place)
-	if AudioServer.get_bus_index(bus_name) < 0:
-		var index: int = AudioServer.bus_count
-		AudioServer.add_bus(index)
-		AudioServer.set_bus_name(index, bus_name)
-		AudioServer.set_bus_send(index, &"Shots")
-		var effect: AudioEffectReverb = AudioEffectReverb.new()
-		var cfg: Dictionary = Balance.SONORA_AUDIO.get(place, {}) as Dictionary
-		effect.room_size = float(cfg.size)
-		effect.damping = float(cfg.damping)
-		effect.wet = float(cfg.wet)
-		effect.dry = 1.0
-		AudioServer.add_bus_effect(index, effect)
-	return bus_name
+## Пространственная подача готовой записи: без изменения спектра, высоты и акустики.
+func _configure_recorded_player(player: AudioStreamPlayer3D) -> void:
+	player.attenuation_filter_cutoff_hz = float(Balance.SONORA_AUDIO.unfiltered_hz)
+	player.attenuation_filter_db = 0.0
+	player.pitch_scale = 1.0
+	player.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+	player.emission_angle_enabled = false
+	player.area_mask = 0
+	# Ближний источник не усиливается выше уровня записи; форму пиков никто не обрезает.
+	player.max_db = minf(player.max_db, float(Balance.SONORA_AUDIO.max_db))
+
+func _bus_for(hook: String) -> StringName:
+	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
+	if String(event.get("weapon", "")) != "" and String(event.get("action", "")).begins_with("shot"):
+		return &"Shots"
+	return Settings.bus_for(hook)
 
 func play_ui(hook: String, extra_db: float = 0.0) -> void:
 	var stream: AudioStream = _pick(hook, _listener_pos())
@@ -221,7 +215,8 @@ func start_loop(hook: String, parent: Node3D, extra_db: float = 0.0) -> AudioStr
 	player.volume_db = float(spec.db) + extra_db
 	player.unit_size = float(spec.unit)
 	player.max_distance = float(spec["max"])
-	player.bus = Settings.bus_for(hook)
+	_configure_recorded_player(player)
+	player.bus = _bus_for(hook)
 	parent.add_child(player)
 	player.play()
 	return player
@@ -246,6 +241,8 @@ func set_preview(streams: Dictionary) -> void:
 	_last_pick.clear()
 
 func _on_audio_node_added(node: Node) -> void:
+	if node is AudioStreamPlayer3D:
+		_configure_recorded_player(node as AudioStreamPlayer3D)
 	if node is Node3D and _scene_paths.has(node.scene_file_path):
 		_scan_needed = true
 	if node is BaseButton and not node.has_meta("sound_wired"):
@@ -331,10 +328,6 @@ func place_at(pos: Vector3) -> String:
 	return place
 
 
-## Хвост места к выстрелу: тот же стрелок, та же дальность и шина; громкость — от выстрела по месту
-## (Balance.SHOT_TAIL). null — записей хвоста нет или слушатель слишком далеко.
-
-
 func _track_burst(pos: Vector3, players: Array[AudioStreamPlayer3D]) -> void:
 	var cfg: Dictionary = Balance.AUDIO_BURST
 	var now := Time.get_ticks_msec() * 0.001
@@ -381,7 +374,6 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 	if WaterBody.depth_at(pos) > float(Balance.WATER.ankle):
 		surf = "water"
 	var sset := String(STEP_SET.get(surf, "stone"))
-	var pitch := (0.97 if left else 1.02) * (0.93 if ai else 1.0) * _rng.randf_range(0.97, 1.03)
 	var db := extra_db + (1.5 if ai else 0.0)
 	var has_run_set := sset in ["stone", "dirt", "snow"]
 	var kind := "step_%s%s" % [sset, "_run" if run and has_run_set else ""]
@@ -389,9 +381,9 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 		kind = "step_asphalt_wet"
 	# Записи моно: направление определяют стопа и уши в мире, а не панорама внутри файла.
 	var sound_pos: Vector3 = pos + right.normalized() * Balance.STEP_FOOT_SIDE_M * (-1.0 if left else 1.0)
-	play(kind, sound_pos, db, pitch)
+	play(kind, sound_pos, db)
 	if run:
-		play("gear_rattle", pos, db - 5.0, pitch)
+		play("gear_rattle", pos, db - 5.0)
 	stepped.emit(kind, surf, pos)
 
 
@@ -483,9 +475,6 @@ func _occluded(listener: Vector3, pos: Vector3) -> bool:
 		return false
 	var q := PhysicsRayQueryParameters3D.create(listener, pos + Vector3.UP * 0.4, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
 	return not world.direct_space_state.intersect_ray(q).is_empty()
-
-
-## Запись (или дальняя запись), иначе синтетика.
 
 
 func _listener_pos() -> Vector3:

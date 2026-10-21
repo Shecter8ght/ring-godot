@@ -468,20 +468,17 @@ func set_volume(bus: String, v: float) -> void:
 
 ## Шины звука (все — в Master): создаются при старте, если их нет в раскладке проекта.
 func _make_buses() -> void:
-	for b in BUSES:
-		if AudioServer.get_bus_index(String(b)) >= 0:
-			continue
-		AudioServer.add_bus()
-		var i := AudioServer.bus_count - 1
-		AudioServer.set_bus_name(i, String(b))
-		AudioServer.set_bus_send(i, "Master")
-	# очереди внахлёст и слои дистанции не хрипят: потолок шины выстрелов
-	var shots := AudioServer.get_bus_index("Shots")
-	if shots >= 0 and AudioServer.get_bus_effect_count(shots) == 0:
-		var lim := AudioEffectHardLimiter.new()
-		lim.ceiling_db = float(Balance.AUDIO_SHOTS_LIMIT.ceiling_db)
-		lim.release = float(Balance.AUDIO_SHOTS_LIMIT.release_sec)
-		AudioServer.add_bus_effect(shots, lim)
+	for bus: String in BUSES:
+		var index: int = AudioServer.get_bus_index(bus)
+		if index < 0:
+			AudioServer.add_bus()
+			index = AudioServer.bus_count - 1
+			AudioServer.set_bus_name(index, bus)
+		if bus != "Master":
+			AudioServer.set_bus_send(index, "Master")
+		# Готовые записи проходят через шины громкости без постэффектов.
+		for effect_index: int in range(AudioServer.get_bus_effect_count(index) - 1, -1, -1):
+			AudioServer.remove_bus_effect(index, effect_index)
 
 
 func _apply_audio() -> void:
