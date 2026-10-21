@@ -15,8 +15,9 @@
       "type": "one",
       "profile": "shot_pistol",
       "files": [
-        "guns/hg_01_shot_01.wav"
-      ]
+        "sonora/wpn_hg_01_shot_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_hg_01_shot_suppressed",
@@ -32,8 +33,9 @@
       "type": "one",
       "profile": "shot_pistol",
       "files": [
-        "guns/hg_01_shot_sup_01.wav"
-      ]
+        "sonora/wpn_hg_01_shot_suppressed_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_hg_01_shot_outdoor",
@@ -48,7 +50,10 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_hg_01_shot_outdoor_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_hg_01_shot_room",
