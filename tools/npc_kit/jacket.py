@@ -350,6 +350,10 @@ def main() -> None:
                 stiff_group="stiff", stiff_bending=leather.bending,
                 collide_collection=sim_col, debug=tuple(args), log=kc.log)
     gm.freeze(obj, sew, kc.log)
+    # Швы сварены — досадка со столкновениями по всей вещи: складки, проткнувшие друг друга у швов
+    # (там самостолкновения были выключены), расправляются.
+    gm.relax(obj, gm.Fabric(leather.mass, leather.tension, leather.compression, leather.shear, 20.0,
+                            quality=leather.quality), 14, collide_collection=sim_col, log=kc.log)
     gm.smooth_noise(obj, 3, 0.4)
     kc.log("JACKET_SIM", round(time.time() - t0, 1), "s")
     sim_col.hide_viewport = True

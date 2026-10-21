@@ -419,6 +419,105 @@ def mat_eye(mat: bpy.types.Material) -> None:
     nb.bsdf.inputs["Coat Roughness"].default_value = 0.03
 
 
+# ---------- молния ----------
+
+def add_zipper(jacket: bpy.types.Object, col: bpy.types.Collection) -> bpy.types.Object:
+    """Молния по центру переда: линия застёжки — вершины куртки у x = 0 спереди, по высоте через 1 см;
+    тесьма 2,2 см, зубцы через 3 мм (вперемешку слева и справа), бегунок с язычком у ворота."""
+    from mathutils.bvhtree import BVHTree
+    me = jacket.data
+    pts = [v.co.copy() for v in me.vertices if abs(v.co.x) < 0.005 and v.co.y < -0.04 and 0.90 < v.co.z < 1.52]
+    if len(pts) < 10:
+        return None
+    bins: dict[int, list[Vector]] = {}
+    for p in pts:
+        bins.setdefault(int(p.z / 0.01), []).append(p)
+    line = []
+    for k in sorted(bins):
+        front = min(bins[k], key=lambda q: q.y)
+        line.append(Vector((0.0, front.y, front.z)))
+    for _ in range(4):
+        line = [line[0]] + [(line[i - 1] + line[i] * 2 + line[i + 1]) / 4 for i in range(1, len(line) - 1)] + [line[-1]]
+    bvh = BVHTree.FromObject(jacket, bpy.context.evaluated_depsgraph_get())
+    # Равномерно через 3 мм.
+    cum = [0.0]
+    for a, b in zip(line, line[1:]):
+        cum.append(cum[-1] + (b - a).length)
+    step = 0.003
+    samples = []
+    t = 0.0
+    j = 0
+    while t < cum[-1]:
+        while cum[j + 1] < t:
+            j += 1
+        f = (t - cum[j]) / max(cum[j + 1] - cum[j], 1e-9)
+        samples.append(line[j].lerp(line[j + 1], f))
+        t += step
+    bm = bmesh.new()
+    tape_rows = []
+    for k, p in enumerate(samples):
+        tan = (samples[min(k + 1, len(samples) - 1)] - samples[max(k - 1, 0)]).normalized()
+        hit = bvh.find_nearest(p)
+        nrm = hit[1] if hit[0] is not None else Vector((0, -1, 0))
+        if nrm.y > 0:
+            nrm = -nrm
+        side = tan.cross(nrm).normalized()
+        base = (hit[0] if hit[0] is not None else p) + nrm * 0.0012
+        row = []
+        for o in (-0.011, -0.004, 0.004, 0.011):
+            # Каждую точку тесьмы — на поверхность кожи (складки не прячут тесьму).
+            q = base + side * o
+            h2 = bvh.find_nearest(q)
+            if h2[0] is not None:
+                n2 = h2[1] if h2[1].dot(nrm) > 0 else -h2[1]
+                q = h2[0] + n2 * 0.0014
+            row.append(bm.verts.new(q))
+        tape_rows.append(row)
+        base = (row[1].co + row[2].co) / 2
+        # Зуб: брусок 3,6 × 2,2 × 1,6 мм, через один — с левой и правой ленты (сцепление).
+        sgn = 1 if k % 2 else -1
+        c = base + side * (0.0012 * sgn) + nrm * 0.0016
+        hx, hy, hz = side * 0.0018, tan * 0.0011, nrm * 0.0008
+        vs = [bm.verts.new(c + a * hx + b * hy + d * hz) for a in (-1, 1) for b in (-1, 1) for d in (-1, 1)]
+        for f in ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)):
+            bm.faces.new([vs[i] for i in f])
+    for r0, r1 in zip(tape_rows, tape_rows[1:]):
+        for i in range(3):
+            bm.faces.new((r0[i], r0[i + 1], r1[i + 1], r1[i]))
+    # Бегунок и язычок у верхнего конца.
+    top = samples[-4]
+    tan = (samples[-1] - samples[-6]).normalized()
+    hit = bvh.find_nearest(top)
+    nrm = hit[1] if hit[0] is not None else Vector((0, -1, 0))
+    if nrm.y > 0:
+        nrm = -nrm
+    side = tan.cross(nrm).normalized()
+    for (c, hs, ht, hn) in ((top + nrm * 0.0035, 0.0065, 0.011, 0.0028),
+                            (top + nrm * 0.0055 - tan * 0.022, 0.0045, 0.013, 0.0008)):
+        vs = [bm.verts.new(c + side * (a * hs) + tan * (b * ht) + nrm * (d * hn)) for a in (-1, 1) for b in (-1, 1) for d in (-1, 1)]
+        for f in ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)):
+            bm.faces.new([vs[i] for i in f])
+    mesh = bpy.data.meshes.new("Jacket_Zipper")
+    bm.normal_update()
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(mesh)
+    bm.free()
+    obj = bpy.data.objects.new("Jacket_Zipper", mesh)
+    col.objects.link(obj)
+    tape = bpy.data.materials.new("Zipper_Tape")
+    mat_simple(tape, (0.02, 0.018, 0.016), 0.8, bump_scale=3000.0)
+    metal = bpy.data.materials.new("Zipper_Metal")
+    mat_simple(metal, (0.30, 0.27, 0.22), 0.38, metal=1.0)
+    mesh.materials.append(tape)
+    mesh.materials.append(metal)
+    # Порядок граней — как создавали: зубцы (6 на точку), тесьма, бегунок с язычком.
+    t0 = 6 * len(samples)
+    t1 = t0 + 3 * (len(tape_rows) - 1)
+    for poly in mesh.polygons:
+        poly.material_index = 0 if t0 <= poly.index < t1 else 1
+    return obj
+
+
 # ---------- сборка ----------
 
 def hide_covered_body(body: bpy.types.Object) -> None:
@@ -458,6 +557,8 @@ def main() -> None:
         bcol.objects.link(o)
     body = bpy.data.objects["NPC_Body"]
     hide_covered_body(body)
+    zip_obj = add_zipper(bpy.data.objects["Jacket"], bpy.data.collections["03_Jacket"])
+    kc.log("NPC_ZIPPER", len(zip_obj.data.polygons) if zip_obj else 0, "граней")
     for n in ("NPC_Eyebrows",):
         o = bpy.data.objects.get(n)
         if o:

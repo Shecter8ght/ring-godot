@@ -323,6 +323,9 @@ python -X utf8 tools/prepare_firearm_layers.py [--only ключ,ключ] # вы
                                                               # свой, вблизи, средняя, вдали, очень далеко → кандидаты стенда _sound_try/Выстрелы_CC0_дистанции
 tools/godot.cmd --headless res://tools/shot_layers_test.tscn  # слои дистанции выстрела: какой слой на каком расстоянии, переход без провала громкости,
                                                               # свой выстрел — своего набора, очередь внахлёст с пределом, шина «Выстрелы» с потолком
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/npc_kit/<этап>.py [-- render]
+                                                              # NPC «мародёр» одеждой симуляцией ткани (docs/assets/npc_marauder_v01.md): body → boots → pants →
+                                                              # jacket → balaclava → assemble → details → deliver -- <папка>; схема сменной экипировки — docs/design/npc_modular_kit.md
 ```
 
 Перед сетевыми тестами — убить висящие процессы Godot: старый хост держит порт 7777, и клиент
