@@ -1373,7 +1373,18 @@ const WATER := {"ankle": 0.12, "knee": 0.45, "waist": 0.9, "speed": [1.0, 0.78, 
 const AUDIO_OCCLUDED_DB := 8.0
 const AUDIO_OCCLUDED_CUTOFF := 700.0
 
-## Акустика мест — стенд звуков (tools/sound_bench), дальше — зоны реверберации в игре: параметры
+## Место выстрела (AcousticPlace, лучи физики от ствола): ceiling_max_m — выше потолка нет (небо — улица);
+## четыре луча вверх-вбок под 45° (длина — высота потолка × 2): попали меньше side_hits_min — это навес без
+## стен, улица; восемь лучей по сторонам до wall_max_m, их медиана и высота потолка над стволом: меньше
+## room_median_m и ниже hall_up_m — помещение, иначе большое (ангар, зал, арена, атриум). Результат
+## запоминается на ttl_sec для клетки cell_m (мародёры стреляют часто).
+const SHOT_PLACE := {"ceiling_max_m": 40.0, "wall_max_m": 30.0, "side_hits_min": 2, "room_median_m": 9.0,
+	"hall_up_m": 5.5, "cell_m": 3.0, "ttl_sec": 4.0}
+## Хвост выстрела (Audio._shot_tail): запись «хвоста места» (tail_outdoor / tail_room / tail_hall) идёт
+## вслед за выстрелом тем же положением и дальностью; db — громкость хвоста к выстрелу по месту; дальше
+## fade_from_m хвост убывает до нуля к fade_to_m (в дальних слоях выстрела эхо места уже записано).
+const SHOT_TAIL := {"db": {"outdoor": -6.0, "room": -4.0, "hall": -3.0}, "fade_from_m": 60.0, "fade_to_m": 220.0}
+## Акустика мест — заготовка для зон реверберации в игре (пока в игре не используется): параметры
 ## AudioEffectReverb (размер, затухание верхов, доля эха, задержка первого отражения, мс, и её
 ## повтор) и чей «хвост» выстрела из каталога (data/sound_catalog.json) звучит в этом месте.
 const AUDIO_SPACES := {
@@ -1383,11 +1394,6 @@ const AUDIO_SPACES := {
 	"hall": {"name": "кольцевая улица ТЦ", "room": 0.7, "damping": 0.35, "wet": 0.38, "predelay": 22.0, "feedback": 0.1, "tail": "tail_hall"},
 	"atrium": {"name": "атриум под куполом", "room": 0.92, "damping": 0.22, "wet": 0.5, "predelay": 45.0, "feedback": 0.15, "tail": "tail_hall"},
 }
-## Стенд звуков: «вдали» — срез верхов (Гц) и тише (дБ); очередь по умолчанию — выстрелов и темп
-## (выстр./мин); разброс тона и громкости у каждого выстрела; как часто искать новые файлы, с;
-## пауза между дистанциями в «пройти все дистанции», с (плюс время, пока звук идёт).
-const AUDIO_BENCH := {"far_cutoff": 2200.0, "far_db": -14.0, "burst": 5, "rpm": 650, "pitch_jitter": 0.03,
-	"db_jitter": 1.0, "rescan_sec": 2.0, "walk_gap_sec": 2.4}
 
 # --- Мародёр ---
 ## Кольцо (3 сектора): 24 мародёра отрядами по 1–3 — встречи часто, но не на каждом углу.
@@ -1616,8 +1622,14 @@ const FLASHLIGHT_BLIND_M := 15.0
 
 # --- Арсенал (data/weapons.json, data/armor.json; docs/design/weapons.md) ---
 ## Износ оружия: разброс × (1 + износ² × spread); задержка за выстрел = (1 − надёжность) ×
-## jam_base × (1 + износ² × jam_worn) (износ = (100 − прочность)/100); устранить — clear_sec.
-const WEAPON_WEAR := {"spread": 0.8, "jam_base": 0.012, "jam_worn": 25.0, "clear_sec": 1.5}
+## jam_base × (1 + износ² × jam_worn) (износ = (100 − прочность)/100); устранить — clear_sec, затвор
+## отпускают на доле clear_release_at этого времени (звук «вперёд» и выпавшая гильза).
+const WEAPON_WEAR := {"spread": 0.8, "jam_base": 0.012, "jam_worn": 25.0, "clear_sec": 1.5, "clear_release_at": 0.6}
+## Гильза после выстрела (Audio.shell_drop): падает рядом со стрелком через delay_* с; в сторону side_* м
+## и чуть назад; звук по полу — hard (плитка, бетон), metal, остальное мягкое; на твёрдом иногда катится.
+## Дальше hear_m от слушателя гильзу не считаем (мародёры стреляют часто).
+const SHELL_DROP := {"delay_min": 0.22, "delay_max": 0.42, "side_min": 0.45, "side_max": 0.9, "back": 0.15, "db": -3.0,
+	"roll_chance": 0.3, "roll_delay": 0.16, "hear_m": 30.0, "hard": ["tile", "concrete"], "metal": ["metal"]}
 ## Ресурс оружия/обвесов в процентах; пороги ступеней (подписи, цвет в окнах — вид модели один), расход на
 ## выстрел и ремонт.
 const CONDITION := {"full": 100.0, "used": 60.0, "worn": 20.0,
@@ -4212,3 +4224,76 @@ const ZONE01_INTERIOR_NAV := {
 const QUEST_TEST_HINTS := true
 ## Сколько секунд инструкция видна после смены цели (дальше — в журнале).
 const QUEST_TEST_HINT_SEC := 25.0
+
+
+## Sonora: единые параметры слышимости, никаких чужих записей или дистанционных слоёв.
+const AUDIO_EVENT_PROFILES: Dictionary = {
+	# выстрелы слышно далеко (бой на сотни метров): дальше — тише, глуше (фильтр) и позже (звук
+	# идёт 343 м/с — Audio.play задерживает); по расстоянию сменяются слои записей (LAYERS)
+	"shot_pistol": {"db": 2.0, "unit": 10.0, "max": 450.0, "far": true},
+	"shot_ai": {"db": 1.0, "unit": 10.0, "max": 600.0, "far": true},
+	# прицеливание и патрон в магазин — синтез (записи отвлекали)
+	# поднять / опустить оружие: записи (gear/ads_, gear/ads_lower_), без них — синтез ads_in / ads_out
+	"ads_raise": {"db": -14.0, "unit": 2.0, "max": 12.0},
+	"ads_lower": {"db": -15.0, "unit": 2.0, "max": 12.0},
+	"ads_in": {"db": -21.0, "unit": 2.0, "max": 8.0},
+	"ads_out": {"db": -23.0, "unit": 2.0, "max": 8.0},
+	"mag_round": {"db": -12.0, "unit": 2.0, "max": 10.0},
+	"step": {"db": -16.0, "unit": 3.0, "max": 22.0},
+	"step_ai": {"db": -14.0, "unit": 3.0, "max": 26.0},
+	# шаги по поверхностям (Audio.step): occlude — за стеной глуше
+	"step_stone": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"step_stone_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
+	"step_dirt": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"step_dirt_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
+	"step_asphalt_wet": WET_STEPS.sound,
+	"step_snow": {"db": -16.0, "unit": 3.0, "max": 24.0, "occlude": true},
+	"step_snow_run": {"db": -13.0, "unit": 3.0, "max": 30.0, "occlude": true},
+	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
+	"heartbeat": {"db": -4.0, "unit": 3.0, "max": 6.0},
+	"thunder": {"db": 6.0, "unit": 60.0, "max": 400.0},
+	"breaker": {"db": 2.0, "unit": 10.0, "max": 80.0},
+	"heli": {"db": 10.0, "unit": 60.0, "max": 500.0},
+	"supply_plane": SUPPLY_PLANE_SOUND,
+	"engine": {"db": 2.0, "unit": 15.0, "max": 160.0},
+	# мародёр роется в контейнере — слышно за стеной
+	"rummage": {"db": -13.0, "unit": 3.0, "max": 22.0, "occlude": true},
+	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
+	"hit": {"db": -4.0, "unit": 5.0, "max": 30.0},
+	"reload": {"db": -8.0, "unit": 3.0, "max": 15.0},
+	"impact_hard": {"db": -6.0, "unit": 5.0, "max": 40.0},
+	"impact_metal": {"db": -5.0, "unit": 6.0, "max": 45.0},
+	"impact_glass": {"db": -4.0, "unit": 6.0, "max": 45.0},
+	# витрина осыпалась: звон и шорох осколков
+	"glass_break": {"db": 1.0, "unit": 8.0, "max": 70.0},
+	"impact_soft": {"db": -10.0, "unit": 4.0, "max": 30.0},
+	"shot_rifle": {"db": 2.0, "unit": 12.0, "max": 900.0, "far": true},
+	"shot_shotgun": {"db": 4.0, "unit": 12.0, "max": 450.0, "far": true},
+	"shot_bolt": {"db": 5.0, "unit": 16.0, "max": 1300.0, "far": true},
+	# гильза падает и катится (shell_drop): слышно рядом, за стеной глуше
+	"shell_hard": {"db": -9.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"shell_metal": {"db": -8.0, "unit": 3.0, "max": 30.0, "occlude": true},
+	"shell_soft": {"db": -12.0, "unit": 3.0, "max": 20.0, "occlude": true},
+	"shell_roll": {"db": -12.0, "unit": 3.0, "max": 22.0, "occlude": true},
+	"mech_pistol": {"db": -8.0, "unit": 3.0, "max": 16.0},
+	"mech_rifle": {"db": -7.0, "unit": 3.0, "max": 18.0},
+	"step_run": {"db": -12.0, "unit": 3.0, "max": 28.0},
+	"death": {"db": -2.0, "unit": 5.0, "max": 35.0},
+	"fall": {"db": -6.0, "unit": 4.0, "max": 25.0},
+	"reload_pistol": {"db": -8.0, "unit": 3.0, "max": 15.0},
+	"reload_rifle": {"db": -8.0, "unit": 3.0, "max": 15.0},
+	"reload_shotgun": {"db": -6.0, "unit": 3.0, "max": 18.0},
+	"bolt": {"db": -6.0, "unit": 3.0, "max": 18.0},
+	"pin": {"db": -10.0, "unit": 2.0, "max": 10.0},
+	"debris": {"db": -4.0, "unit": 6.0, "max": 40.0},
+	"explosion": {"db": 8.0, "unit": 20.0, "max": 1200.0, "far": true},
+}
+
+const SONORA_AUDIO: Dictionary = {
+ "shot": {"db": 2.0, "unit": 10.0, "max": 900.0, "far": true, "occlude": true},
+ "weapon_action": {"db": -8.0, "unit": 3.0, "max": 24.0, "occlude": true},
+ "world": {"db": -6.0, "unit": 4.0, "max": 40.0, "occlude": true},
+ "ambient_db": -22.0,
+ "room": {"size": 0.35, "damping": 0.65, "wet": 0.12},
+ "hall": {"size": 0.82, "damping": 0.45, "wet": 0.22}
+}

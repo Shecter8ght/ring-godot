@@ -1,0 +1,1133 @@
+{
+  "schemaVersion": 2,
+  "actions": [
+    {
+      "hook": "mag_drop",
+      "name": "Пустой магазин падает на пол",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "mag_drop",
+      "supportsObject": false
+    },
+    {
+      "hook": "charge",
+      "name": "Затвор на себя — досыл",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "charge",
+      "supportsObject": false
+    },
+    {
+      "hook": "bolt_lock",
+      "name": "Затвор встал на задержку",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "bolt_lock",
+      "supportsObject": false
+    },
+    {
+      "hook": "bolt",
+      "name": "Помпа / затвор после выстрела",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "bolt",
+      "supportsObject": false
+    },
+    {
+      "hook": "weapon_draw",
+      "name": "Достать / убрать оружие",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "weapon_draw",
+      "supportsObject": false
+    },
+    {
+      "hook": "mag_check",
+      "name": "Проверка магазина",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "mag_check",
+      "supportsObject": false
+    },
+    {
+      "hook": "fire_mode",
+      "name": "Переводчик режимов огня",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "fire_mode",
+      "supportsObject": false
+    },
+    {
+      "hook": "tac_click",
+      "name": "Фонарь / ЛЦУ — кнопка",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "tac_click",
+      "supportsObject": false
+    },
+    {
+      "hook": "sight_switch",
+      "name": "Переключение на угловой прицел",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "sight_switch",
+      "supportsObject": false
+    },
+    {
+      "hook": "nvg_on",
+      "name": "ПНВ включён — писк разгона",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "nvg_on",
+      "supportsObject": false
+    },
+    {
+      "hook": "nvg_off",
+      "name": "ПНВ выключен",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "nvg_off",
+      "supportsObject": false
+    },
+    {
+      "hook": "mod_fit",
+      "name": "Обвес: поставить / снять",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "mod_fit",
+      "supportsObject": false
+    },
+    {
+      "hook": "round_in",
+      "name": "Патрон в магазин",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "round_in",
+      "supportsObject": false
+    },
+    {
+      "hook": "round_out",
+      "name": "Патрон из магазина",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "round_out",
+      "supportsObject": false
+    },
+    {
+      "hook": "plate_in",
+      "name": "Плита в плитоносец",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "plate_in",
+      "supportsObject": false
+    },
+    {
+      "hook": "plate_out",
+      "name": "Плита из плитоносца",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "plate_out",
+      "supportsObject": false
+    },
+    {
+      "hook": "pin",
+      "name": "Чека гранаты",
+      "category": "Гранаты и взрывы",
+      "type": "one",
+      "profile": "pin",
+      "supportsObject": false
+    },
+    {
+      "hook": "nade_throw",
+      "name": "Бросок — свист, шорох рукава",
+      "category": "Гранаты и взрывы",
+      "type": "one",
+      "profile": "nade_throw",
+      "supportsObject": false
+    },
+    {
+      "hook": "nade_bounce",
+      "name": "Граната стукается о пол",
+      "category": "Гранаты и взрывы",
+      "type": "one",
+      "profile": "nade_bounce",
+      "supportsObject": false
+    },
+    {
+      "hook": "explosion",
+      "name": "Взрыв гранаты вблизи",
+      "category": "Гранаты и взрывы",
+      "type": "one",
+      "profile": "explosion",
+      "supportsObject": false
+    },
+    {
+      "hook": "debris",
+      "name": "Осыпь обломков",
+      "category": "Гранаты и взрывы",
+      "type": "one",
+      "profile": "debris",
+      "supportsObject": false
+    },
+    {
+      "hook": "tinnitus",
+      "name": "Звон в ушах",
+      "category": "Гранаты и взрывы",
+      "type": "one",
+      "profile": "tinnitus",
+      "supportsObject": false
+    },
+    {
+      "hook": "flare_ignite",
+      "name": "Ракета / химсвет — зажечь",
+      "category": "Гранаты и взрывы",
+      "type": "one",
+      "profile": "flare_ignite",
+      "supportsObject": false
+    },
+    {
+      "hook": "flare_burn",
+      "name": "Ракета горит — шипение",
+      "category": "Гранаты и взрывы",
+      "type": "loop",
+      "profile": "flare_burn",
+      "supportsObject": false
+    },
+    {
+      "hook": "flyby",
+      "name": "Пуля пролетела рядом — свист",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "flyby",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_hard",
+      "name": "Попадание в бетон",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_ceramic",
+      "name": "Пуля в кафель, раковину — со звоном осколков",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_ceramic",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_dirt",
+      "name": "Пуля в землю, газон — фонтанчик",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_dirt",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_metal",
+      "name": "Попадание в металл",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_metal",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_soft",
+      "name": "Попадание в дерево",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_soft",
+      "supportsObject": false
+    },
+    {
+      "hook": "hit",
+      "name": "Попадание в тело",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "hit",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_plate",
+      "name": "Пуля в бронеплиту",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_plate",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_helmet",
+      "name": "Пуля в шлем — звон",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_helmet",
+      "supportsObject": false
+    },
+    {
+      "hook": "impact_glass",
+      "name": "Попадание в стекло",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "impact_glass",
+      "supportsObject": false
+    },
+    {
+      "hook": "glass_crack",
+      "name": "Витрина трескается",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "glass_crack",
+      "supportsObject": false
+    },
+    {
+      "hook": "glass_break",
+      "name": "Витрина осыпается",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "glass_break",
+      "supportsObject": false
+    },
+    {
+      "hook": "glass_shards",
+      "name": "Осколки досыпаются — хвост",
+      "category": "Пули и попадания",
+      "type": "one",
+      "profile": "glass_shards",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_stone",
+      "name": "Шаг: плитка, бетон",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_stone",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_stone_run",
+      "name": "Бег: плитка, бетон",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_stone_run",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_carpet",
+      "name": "Шаг по ковролину",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_carpet",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_wood",
+      "name": "Шаг: дерево",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_wood",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_metal",
+      "name": "Шаг: металл — звонкий слой",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_metal",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_dirt",
+      "name": "Шаг: асфальт, земля, картон",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_dirt",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_asphalt_wet",
+      "name": "Шаг: мокрый асфальт с лужами",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_asphalt_wet",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_dirt_run",
+      "name": "Бег: асфальт, земля",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_dirt_run",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_gravel",
+      "name": "Шаг по гравию, щебню",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_gravel",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_grass",
+      "name": "Шаг по траве",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_grass",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_water",
+      "name": "Шаг по луже",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_water",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_snow",
+      "name": "Шаг: снег",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_snow",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_snow_run",
+      "name": "Бег: снег",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_snow_run",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_glass",
+      "name": "Шаг по битому стеклу",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_glass",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_trash",
+      "name": "Шаг по мусору — бумага, пакеты, пластик",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_trash",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_rubble",
+      "name": "Шаг по обломкам, штукатурке",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_rubble",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_cardboard",
+      "name": "Шаг по картону",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_cardboard",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_crouch",
+      "name": "Шаг вприсядку — мягко, шорох одежды",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_crouch",
+      "supportsObject": false
+    },
+    {
+      "hook": "crawl",
+      "name": "Ползком — шорох по полу",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "crawl",
+      "supportsObject": false
+    },
+    {
+      "hook": "land",
+      "name": "Приземление",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "land",
+      "supportsObject": false
+    },
+    {
+      "hook": "vault",
+      "name": "Перелезание — руки, снаряжение",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "vault",
+      "supportsObject": false
+    },
+    {
+      "hook": "dive",
+      "name": "Бросок на землю",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "dive",
+      "supportsObject": false
+    },
+    {
+      "hook": "gear_rattle",
+      "name": "Снаряжение побрякивает на бегу — слой",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "gear_rattle",
+      "supportsObject": false
+    },
+    {
+      "hook": "pain_player",
+      "name": "Игрока ранило — вскрик, выдох",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "pain_player",
+      "supportsObject": false
+    },
+    {
+      "hook": "pain_ai",
+      "name": "Мародёра ранило — вскрик",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "pain_ai",
+      "supportsObject": false
+    },
+    {
+      "hook": "downed",
+      "name": "Тяжело ранен — стон",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "downed",
+      "supportsObject": false
+    },
+    {
+      "hook": "fall",
+      "name": "Тело падает",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "fall",
+      "supportsObject": false
+    },
+    {
+      "hook": "death",
+      "name": "Предсмертный хрип — стон",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "death",
+      "supportsObject": false
+    },
+    {
+      "hook": "revive",
+      "name": "Поднять раненого — усилие",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "revive",
+      "supportsObject": false
+    },
+    {
+      "hook": "drag",
+      "name": "Тащат тело по полу",
+      "category": "Тело, голос, здоровье",
+      "type": "loop",
+      "profile": "drag",
+      "supportsObject": false
+    },
+    {
+      "hook": "breath",
+      "name": "Тяжёлое дыхание",
+      "category": "Тело, голос, здоровье",
+      "type": "loop",
+      "profile": "breath",
+      "supportsObject": false
+    },
+    {
+      "hook": "heartbeat",
+      "name": "Сердцебиение",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "heartbeat",
+      "supportsObject": false
+    },
+    {
+      "hook": "bandage",
+      "name": "Бинт — упаковка, перевязка",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "bandage",
+      "supportsObject": false
+    },
+    {
+      "hook": "inject",
+      "name": "Шприц-тюбик / адреналин",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "inject",
+      "supportsObject": false
+    },
+    {
+      "hook": "pills",
+      "name": "Таблетки — блистер, банка",
+      "category": "Тело, голос, здоровье",
+      "type": "one",
+      "profile": "pills",
+      "supportsObject": false
+    },
+    {
+      "hook": "ai_spot",
+      "name": "Мародёр заметил — «вон он!»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "ai_spot",
+      "supportsObject": false
+    },
+    {
+      "hook": "ai_search",
+      "name": "Мародёр ищет — «где он?»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "ai_search",
+      "supportsObject": false
+    },
+    {
+      "hook": "ai_reload",
+      "name": "Мародёр — «перезаряжаюсь!»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "ai_reload",
+      "supportsObject": false
+    },
+    {
+      "hook": "ai_nade",
+      "name": "Мародёр — «граната!»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "ai_nade",
+      "supportsObject": false
+    },
+    {
+      "hook": "ai_hurt",
+      "name": "Мародёр — «я ранен!»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "ai_hurt",
+      "supportsObject": false
+    },
+    {
+      "hook": "pmc_radio",
+      "name": "ЧВК — переговоры по рации",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "pmc_radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "resident",
+      "name": "Жилец — «не трогай! уходи!»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "resident",
+      "supportsObject": false
+    },
+    {
+      "hook": "anton",
+      "name": "Антон — стон, фразы",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "anton",
+      "supportsObject": false
+    },
+    {
+      "hook": "trader",
+      "name": "Михалыч — приветствие, сделка",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "trader",
+      "supportsObject": false
+    },
+    {
+      "hook": "door",
+      "name": "Дверь — открыть / закрыть",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "door",
+      "supportsObject": false
+    },
+    {
+      "hook": "door_locked",
+      "name": "Дверь заперта — дёрнуть ручку",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "door_locked",
+      "supportsObject": true
+    },
+    {
+      "hook": "door_unlock",
+      "name": "Ключ в замке",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "door_unlock",
+      "supportsObject": true
+    },
+    {
+      "hook": "door_metal",
+      "name": "Металлическая противопожарная дверь",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "door_metal",
+      "supportsObject": true
+    },
+    {
+      "hook": "breaker",
+      "name": "Рубильник щитовой — лязг",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "breaker",
+      "supportsObject": false
+    },
+    {
+      "hook": "power_switch",
+      "name": "Выключатель подстанции / ворот",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "power_switch",
+      "supportsObject": false
+    },
+    {
+      "hook": "power_down",
+      "name": "Свет погас — гулкий щелчок, гул стихает",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "power_down",
+      "supportsObject": false
+    },
+    {
+      "hook": "power_up",
+      "name": "Свет дали — дроссели, лампы вспыхивают",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "power_up",
+      "supportsObject": false
+    },
+    {
+      "hook": "loop:hum",
+      "name": "Генератор работает",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "loop",
+      "profile": "loop:hum",
+      "supportsObject": false
+    },
+    {
+      "hook": "gen_start",
+      "name": "Генератор заводится",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "gen_start",
+      "supportsObject": false
+    },
+    {
+      "hook": "gen_stop",
+      "name": "Генератор глохнет",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "gen_stop",
+      "supportsObject": false
+    },
+    {
+      "hook": "repair",
+      "name": "Ремонт — ключ по металлу",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "repair",
+      "supportsObject": false
+    },
+    {
+      "hook": "loop:siren",
+      "name": "Сигнализация магазина",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "loop",
+      "profile": "loop:siren",
+      "supportsObject": false
+    },
+    {
+      "hook": "alarm_panel",
+      "name": "Пульт сигнализации — писк кнопок",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "alarm_panel",
+      "supportsObject": false
+    },
+    {
+      "hook": "key_pickup",
+      "name": "Подобрать ключ — связка",
+      "category": "Мир: двери, механизмы, свет",
+      "type": "one",
+      "profile": "key_pickup",
+      "supportsObject": false
+    },
+    {
+      "hook": "rummage",
+      "name": "Мародёр роется в контейнере",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "rummage",
+      "supportsObject": false
+    },
+    {
+      "hook": "loot_drawer",
+      "name": "Обыск: ящик стола, касса",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "loot_drawer",
+      "supportsObject": false
+    },
+    {
+      "hook": "loot_locker",
+      "name": "Обыск: металлический шкаф",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "loot_locker",
+      "supportsObject": false
+    },
+    {
+      "hook": "loot_box",
+      "name": "Обыск: картонная коробка",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "loot_box",
+      "supportsObject": false
+    },
+    {
+      "hook": "loot_bag",
+      "name": "Обыск: сумка — молния",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "loot_bag",
+      "supportsObject": false
+    },
+    {
+      "hook": "loot_shelf",
+      "name": "Полка магазина — товар шуршит",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "loot_shelf",
+      "supportsObject": false
+    },
+    {
+      "hook": "loot_safe",
+      "name": "Сейф — кодовый замок, дверца",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "loot_safe",
+      "supportsObject": false
+    },
+    {
+      "hook": "loot_body",
+      "name": "Обыск тела",
+      "category": "Лут и контейнеры",
+      "type": "one",
+      "profile": "loot_body",
+      "supportsObject": false
+    },
+    {
+      "hook": "loop:rain",
+      "name": "Дождь снаружи",
+      "category": "Погода и фон",
+      "type": "loop",
+      "profile": "loop:rain",
+      "supportsObject": false
+    },
+    {
+      "hook": "thunder",
+      "name": "Гром",
+      "category": "Погода и фон",
+      "type": "one",
+      "profile": "thunder",
+      "supportsObject": false
+    },
+    {
+      "hook": "heli",
+      "name": "Вертолёт — пролёт",
+      "category": "События рейда",
+      "type": "one",
+      "profile": "heli",
+      "supportsObject": false
+    },
+    {
+      "hook": "drop_land",
+      "name": "Груз приземлился — удар ящика",
+      "category": "События рейда",
+      "type": "one",
+      "profile": "drop_land",
+      "supportsObject": false
+    },
+    {
+      "hook": "engine",
+      "name": "Машина ЧВК — двигатель",
+      "category": "События рейда",
+      "type": "one",
+      "profile": "engine",
+      "supportsObject": false
+    },
+    {
+      "hook": "truck_doors",
+      "name": "Двери машины, высадка",
+      "category": "События рейда",
+      "type": "one",
+      "profile": "truck_doors",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio",
+      "name": "Рация — шипение, тангента",
+      "category": "События рейда",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "evac_tick",
+      "name": "Эвакуация — отсчёт",
+      "category": "События рейда",
+      "type": "one",
+      "profile": "evac_tick",
+      "supportsObject": false
+    },
+    {
+      "hook": "raid_leave",
+      "name": "Ушёл из рейда — люк, дверь",
+      "category": "События рейда",
+      "type": "one",
+      "profile": "raid_leave",
+      "supportsObject": false
+    },
+    {
+      "hook": "ui_click",
+      "name": "Кнопка — клик",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "ui_click",
+      "supportsObject": false
+    },
+    {
+      "hook": "ui_hover",
+      "name": "Наведение на кнопку",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "ui_hover",
+      "supportsObject": false
+    },
+    {
+      "hook": "ui_deny",
+      "name": "Нельзя / нет места",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "ui_deny",
+      "supportsObject": false
+    },
+    {
+      "hook": "ui_notify",
+      "name": "Сообщение на экране",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "ui_notify",
+      "supportsObject": false
+    },
+    {
+      "hook": "quest",
+      "name": "Задание обновилось",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "quest",
+      "supportsObject": false
+    },
+    {
+      "hook": "upgrade",
+      "name": "Модуль убежища построен",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "upgrade",
+      "supportsObject": false
+    },
+    {
+      "hook": "map",
+      "name": "Карта — бумага",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "map",
+      "supportsObject": false
+    },
+    {
+      "hook": "bag_open",
+      "name": "Открыть рюкзак — молния",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "bag_open",
+      "supportsObject": false
+    },
+    {
+      "hook": "bag_close",
+      "name": "Закрыть рюкзак",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "bag_close",
+      "supportsObject": false
+    },
+    {
+      "hook": "item_pick",
+      "name": "Взять предмет",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "item_pick",
+      "supportsObject": false
+    },
+    {
+      "hook": "item_drop",
+      "name": "Положить / выбросить предмет",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "item_drop",
+      "supportsObject": false
+    },
+    {
+      "hook": "item_move",
+      "name": "Переложить в сетке",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "item_move",
+      "supportsObject": false
+    },
+    {
+      "hook": "pick_ammo",
+      "name": "Взять патроны — коробка, россыпь",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "pick_ammo",
+      "supportsObject": false
+    },
+    {
+      "hook": "pick_med",
+      "name": "Взять медицину — упаковка",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "pick_med",
+      "supportsObject": false
+    },
+    {
+      "hook": "pick_cloth",
+      "name": "Взять одежду, броню — тяжёлое, ткань",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "pick_cloth",
+      "supportsObject": false
+    },
+    {
+      "hook": "pick_weapon",
+      "name": "Взять оружие — металл",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "pick_weapon",
+      "supportsObject": false
+    },
+    {
+      "hook": "equip_gear",
+      "name": "Надеть снаряжение",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "equip_gear",
+      "supportsObject": false
+    },
+    {
+      "hook": "equip_gun",
+      "name": "Взять оружие в слот",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "equip_gun",
+      "supportsObject": false
+    },
+    {
+      "hook": "cash",
+      "name": "Торговец — деньги",
+      "category": "Инвентарь и интерфейс",
+      "type": "one",
+      "profile": "cash",
+      "supportsObject": false
+    },
+    {
+      "hook": "hatch",
+      "name": "Люк убежища — спуск",
+      "category": "Убежище",
+      "type": "one",
+      "profile": "hatch",
+      "supportsObject": false
+    },
+    {
+      "hook": "stash",
+      "name": "Тайник — металлический шкаф",
+      "category": "Убежище",
+      "type": "one",
+      "profile": "stash",
+      "supportsObject": false
+    },
+    {
+      "hook": "workbench",
+      "name": "Верстак — инструменты",
+      "category": "Убежище",
+      "type": "one",
+      "profile": "workbench",
+      "supportsObject": false
+    },
+    {
+      "hook": "suppressor_on",
+      "name": "Глушитель накручен",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "suppressor_on",
+      "supportsObject": false
+    },
+    {
+      "hook": "suppressor_off",
+      "name": "Глушитель снят",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "suppressor_off",
+      "supportsObject": false
+    },
+    {
+      "hook": "mag_round",
+      "name": "Патрон в магазин — щелчок (синтез)",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "mag_round",
+      "supportsObject": false
+    },
+    {
+      "hook": "supply_plane",
+      "name": "Самолёт снабжения — пролёт",
+      "category": "События рейда",
+      "type": "loop",
+      "profile": "supply_plane",
+      "supportsObject": false
+    },
+    {
+      "hook": "loop:ambient",
+      "name": "Фоновый звук мира",
+      "category": "Мир",
+      "type": "loop",
+      "profile": "ambient",
+      "supportsObject": false
+    },
+    {
+      "hook": "shutter_rattle",
+      "name": "shutter_rattle",
+      "category": "Другие действия",
+      "type": "one",
+      "profile": "shutter_rattle",
+      "supportsObject": false
+    }
+  ]
+}

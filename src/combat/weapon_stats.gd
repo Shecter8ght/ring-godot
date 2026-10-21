@@ -32,9 +32,9 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	s.name = ItemDb.item_name(wid)
 	s["class"] = String(w["class"])
 	s.caliber = String(w.caliber)
-	s.sound = String((s.sounds as Dictionary).get("shot", String(w.sound)))
-	s.reload_sound = String((s.sounds as Dictionary).get("reload", String(w.reload_sound)))
-	s.cycle_sound = String((s.sounds as Dictionary).get("cycle", String(w.cycle_sound)))
+	s.sound = String((s.sounds as Dictionary).get("shot", ""))
+	s.reload_sound = String((s.sounds as Dictionary).get("reload", ""))
+	s.cycle_sound = String((s.sounds as Dictionary).get("cycle", ""))
 	s.interval = 60.0 / float(b.rpm)
 	s.auto = bool(b.auto)
 	s.reload = float(b.reload)
@@ -162,10 +162,9 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		if att.has("laser") and bool(st.get("laser", false)) and effectiveness > 0.0:
 			s.laser = true
 			s.hip_spread = float(s.hip_spread) * lerpf(1.0, float((att.laser as Dictionary).get("hip_spread", 1.0)), effectiveness)
-	# Запись глушителя — не просто прежний выстрел тише. Пока своей записи нет, Audio возьмёт
-	# обычный набор как запасной; после одобрения стенд подхватит suppressed-префикс сам.
+	# Глушитель использует только своё назначение. Без него — тишина.
 	if bool(s.suppressed):
-		s.sound = String((s.sounds as Dictionary).get("shot_suppressed", s.sound))
+		s.sound = String((s.sounds as Dictionary).get("shot_suppressed", ""))
 	# угловой — без кратности, даже если у ствола встроенная оптика
 	if active != "primary":
 		s.zoom = 0.0

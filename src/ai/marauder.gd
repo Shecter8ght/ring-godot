@@ -447,7 +447,7 @@ func _ai_spec(e: Dictionary) -> Dictionary:
 		"interval": maxf(float(ws.interval), float(c.interval_min)), "burst": int(c.burst) if bool(ws.auto) else 1,
 		"burst_pause": float(c.burst_pause), "damage": float(ws.damage) * Balance.AI_DAMAGE_K, "pellets": int(ws.pellets),
 		"spread": float(c.spread) * wear_spread / maxf(skill, 0.3), "range": float(c.range), "noise_m": float(ws.noise_m),
-		"sound": String(ws.sound), "reload_sound": String(ws.reload_sound), "cycle_sound": String(ws.cycle_sound),
+		"db": float(ws.db), "sound": String(ws.sound), "reload_sound": String(ws.reload_sound), "cycle_sound": String(ws.cycle_sound),
 		"sounds": (ws.sounds as Dictionary).duplicate(), "pen": float(ws.pen), "armor_dmg": float(ws.armor_dmg),
 		"flash": float(ws.flash), "falloff": ws.get("falloff", []), "point_blank": ws.get("point_blank", []), "range_m": float(ws.range_m)}
 
@@ -2306,30 +2306,32 @@ func _shoot(suppress: bool) -> void:
 	# свои выстрелы товарищи слышат как «бой» — не как свист пуль у себя
 	NoiseBus.emit(global_position, float(_spec.noise_m), "shot_ai")
 	var flash := float(_spec.get("flash", 1.0))
-	_shot_fx(from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound))
+	_shot_fx(from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound), float(_spec.get("db", 0.0)))
 	# стреляет хост — клиентам видно и слышно то же (раньше мародёр у них стрелял беззвучно)
 	if Net.is_networked():
-		Net.broadcast_scene(self, &"_rpc_shot_fx", [from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound)], false)
+		Net.broadcast_scene(self, &"_rpc_shot_fx", [from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound), float(_spec.get("db", 0.0))], false)
 
 
 ## Вспышка и звук выстрела — у хоста из _shoot, у клиентов — по сети. След пули виден только
 ## по эффекту попадания, который создаёт Hitscan.
-func _shot_fx(from: Vector3, sound: String, flash: float, mechanism_sound: String, cycle_sound: String) -> void:
+func _shot_fx(from: Vector3, sound: String, flash: float, mechanism_sound: String, cycle_sound: String, extra_db: float = 0.0) -> void:
 	if flash > 0.05:
 		_muzzle.visible = true
 		get_tree().create_timer(0.06).timeout.connect(func() -> void: _muzzle.visible = false)
-	Audio.play(sound, from)
+	Audio.play(sound, from, extra_db)
 	if mechanism_sound != "":
-		Audio.play(mechanism_sound, from, -5.0)
+		Audio.play(mechanism_sound, from, extra_db - 5.0)
 	if cycle_sound != "":
 		get_tree().create_timer(0.35).timeout.connect(func() -> void:
 			if is_inside_tree():
 				Audio.play(cycle_sound, global_position))
+	else:
+		Audio.shell_drop(global_position, global_basis.x, 0.0, sound.get_slice("_shot", 0))
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
-func _rpc_shot_fx(from: Vector3, sound: String, flash: float, mechanism_sound: String, cycle_sound: String) -> void:
-	_shot_fx(from, sound, flash, mechanism_sound, cycle_sound)
+func _rpc_shot_fx(from: Vector3, sound: String, flash: float, mechanism_sound: String, cycle_sound: String, extra_db: float = 0.0) -> void:
+	_shot_fx(from, sound, flash, mechanism_sound, cycle_sound, extra_db)
 
 
 ## Чем стреляет — для хроники рейда игрока, в которого попали (Health.last_src).

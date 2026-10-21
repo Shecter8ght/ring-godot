@@ -50,12 +50,6 @@ static func _ensure() -> void:
 		for raw in (sound_data as Dictionary).get("slots", []):
 			if raw is Dictionary:
 				_sound_slots.append(raw as Dictionary)
-		var fams: Variant = (sound_data as Dictionary).get("families", {})
-		if fams is Dictionary:
-			_sound_families = fams as Dictionary
-			for fid in _sound_families:
-				for wid in (_sound_families[fid] as Dictionary).get("weapons", []):
-					_weapon_family[String(wid)] = String(fid)
 	for sec in ["weapons", "ammo", "magazines", "attachments"]:
 		_items.merge(_w.get(sec, {}))
 		for id in _w.get(sec, {}):
@@ -112,8 +106,8 @@ static func fire_mode_of(id: String, mode: String) -> String:
 	return mode if mode in modes else modes[0]
 
 
-## Все модели оружия в порядке данных. Стенд строит по этому списку карточки и автоматически
-## подхватывает новые модели, когда у них появляется запись в weapons.json и иконка.
+## Все модели оружия в порядке данных: новые модели подхватываются, как только у них появляется
+## запись в weapons.json и иконка.
 static func weapon_ids() -> Array[String]:
 	_ensure()
 	var out: Array[String] = []
@@ -122,172 +116,58 @@ static func weapon_ids() -> Array[String]:
 	return out
 
 
-## Слоты слоёв дистанции выстрела → слой вида (Audio.LAYERS).
-const SHOT_LAYER_SLOTS := {"shot_self": "self", "shot_mid": "mid", "shot_far": "far", "shot_distant": "distant"}
-
-
-static func _kind_base(kind: String) -> String:
-	var at := kind.find("@")
-	return kind if at < 0 else kind.substr(0, at)
-
-
-## Собственные события одной модели. Пока у события нет своих записей, Audio идёт по fallback к
-## прежнему общему набору — поэтому переход на помодельный звук не ломает существующее звучание.
+## Каждая модель имеет собственные действия; отсутствие записи означает тишину.
 static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
 	_ensure()
+	var out: Array[Dictionary] = []
 	var ids: Array[String] = weapon_ids()
 	if id != "":
 		ids.clear()
 		ids.append(canonical(id))
-	var out: Array[Dictionary] = []
-	for wid in ids:
-		var item: Dictionary = (_w.weapons as Dictionary).get(wid, {})
-		var w: Dictionary = item.get("weapon", {})
-		if w.is_empty():
-			continue
-		var fid := sound_family(wid)
-		for raw in _sound_slots:
-			if not _sound_slot_applies(raw, w):
+	for wid: String in ids:
+		var item: Dictionary = (_w.weapons as Dictionary).get(wid, {}) as Dictionary
+		var w: Dictionary = item.get("weapon", {}) as Dictionary
+		for slot: Dictionary in _sound_slots:
+			if not _sound_slot_applies(slot, w):
 				continue
-			# Общие действия (поправить ADS, задеть стену) — один раз на всё оружие. Действия
-			# семейства (магазин, затвор, спуск) у модели свои, но без записей звучат семейством.
-			if bool(raw.get("shared", false)) and not bool(raw.get("family", false)):
-				continue
-			var slot := String(raw.id)
-			# слои дистанции выстрела — тот же вид «…_shot» со слоем: «wpn_ar_01_shot@mid»
-			var layer := String(SHOT_LAYER_SLOTS.get(slot, ""))
-			var base_kind := "%s_%s" % [wid, "shot" if layer != "" else slot]
-			var event := raw.duplicate(true)
-			event.id = "%s_%s" % [wid, slot]
-			event.kind = ("%s@%s" % [base_kind, layer] if layer != "" else base_kind) if bool(raw.wired) else ""
-			event.file = "guns/%s_%s_" % [wid.trim_prefix("wpn_"), String(raw.file)]
-			event.fallback = _weapon_sound_fallback(w, String(raw.fallback))
+			var event: Dictionary = slot.duplicate(true)
+			var action: String = String(slot.id)
+			event.id = wid + "_" + action
+			event.kind = wid + "_" + ("shot_sup" if action == "shot_suppressed" else action) if bool(slot.get("wired", false)) else ""
 			event.weapon = wid
-			event.slot = slot
-			event.cat = "Оружие по моделям"
-			event.name = "%s — %s" % [String(item.get("name", wid)), String(raw.name)]
-			event.now = "свой набор модели; пока общий запасной"
-			if bool(raw.get("family", false)):
-				event.erase("shared")
-				event.via_family = true
-				event.family = fid
-				if fid != "":
-					event.fallback = "fam_%s_%s" % [fid, slot]
-					event.now = "свой звук модели; пока звучит семейство «%s»" % sound_family_name(fid)
+			event.slot = action
+			event.name = String(item.get("name", wid)) + " — " + String(slot.name)
+			event.file = "guns/" + wid.trim_prefix("wpn_") + "_" + String(slot.file) + "_"
+			event.cat = "Оружие"
+			event.group = String(item.get("name", wid))
 			out.append(event)
 	return out
 
-
-## Семейство механики ствола ("" — не входит ни в одно: общие действия звучат общим звуком).
-static func sound_family(id: String) -> String:
-	_ensure()
-	return String(_weapon_family.get(canonical(id), ""))
-
-
-static func sound_family_name(fid: String) -> String:
-	_ensure()
-	return String((_sound_families.get(fid, {}) as Dictionary).get("name", fid))
-
-
-## Семейства: id → {name, weapons}.
-static func sound_families() -> Dictionary:
-	_ensure()
-	return _sound_families
-
-
-## События семейств: действие (магазин, затвор…) одно на семейство. Звучит у каждого ствола
-## семейства без своей записи; само без записей — общим звуком действия.
-static func family_sound_events() -> Array[Dictionary]:
-	_ensure()
-	var out: Array[Dictionary] = []
-	for fid in _sound_families:
-		var fam: Dictionary = _sound_families[fid]
-		for raw in _sound_slots:
-			if not bool(raw.get("family", false)):
-				continue
-			var member: Dictionary = {}
-			for wid in fam.get("weapons", []):
-				var w := weapon(String(wid))
-				if not w.is_empty() and _sound_slot_applies(raw, w):
-					member = w
-					break
-			if member.is_empty():
-				continue
-			var slot := String(raw.id)
-			var event := raw.duplicate(true)
-			event.erase("shared")
-			event.id = "fam_%s_%s" % [fid, slot]
-			event.kind = String(event.id) if bool(raw.wired) else ""
-			event.file = "guns/fam_%s_%s_" % [fid, String(raw.file)]
-			event.fallback = _weapon_sound_fallback(member, String(raw.fallback))
-			event.family = String(fid)
-			event.slot = slot
-			event.cat = "Оружие — семейства"
-			event.group = String(fam.get("name", fid))
-			event.name = "%s — %s" % [String(fam.get("name", fid)), String(raw.name)]
-			event.now = "звук семейства; пока общий"
-			out.append(event)
-	return out
-
-
-## Вид Audio для слота; пусто означает, что у этой конструкции такого действия нет или оно пока
-## только предусмотрено в стенде, но не вызывается механикой.
 static func weapon_sound_kind(id: String, slot: String) -> String:
-	for event in weapon_sound_events(id):
-		if String(event.slot) == slot:
-			return _kind_base(String(event.kind))
-	return ""
-
+	return String(weapon_sound_map(id).get(slot, ""))
 
 static func weapon_sound_map(id: String) -> Dictionary:
-	_ensure()
 	var out: Dictionary = {}
-	for event in weapon_sound_events(id):
-		var kind := String(event.kind)
-		if kind != "" and not kind.contains("@"):
-			out[String(event.slot)] = kind
-	var w := weapon(id)
-	for raw in _sound_slots:
-		if not bool(raw.get("shared", false)) or not _sound_slot_applies(raw, w) or out.has(String(raw.id)):
-			continue
-		var shared_kind := _weapon_sound_fallback(w, String(raw.get("fallback", "")))
-		if shared_kind != "":
-			out[String(raw.id)] = shared_kind
+	for event: Dictionary in weapon_sound_events(id):
+		if String(event.kind) != "":
+			out[String(event.slot)] = String(event.kind)
 	return out
 
-
-## Полный одинаковый шаблон карточки стенда. Недоступные строки не исчезают, поэтому владелец
-## всегда видит один порядок и причину, почему действие для конкретной конструкции невозможно.
 static func weapon_sound_layout(id: String) -> Array[Dictionary]:
-	_ensure()
-	var wid := canonical(id)
-	var item: Dictionary = (_w.weapons as Dictionary).get(wid, {})
-	var w: Dictionary = item.get("weapon", {})
-	var available_events: Dictionary = {}
-	for event in weapon_sound_events(wid):
-		available_events[String(event.slot)] = event
-	var out: Array[Dictionary] = []
-	for raw in _sound_slots:
-		var row := raw.duplicate(true)
-		row.slot = String(raw.id)
-		row.available = _sound_slot_applies(raw, w)
-		row.shared = bool(raw.get("shared", false)) and not bool(raw.get("family", false))
-		if bool(raw.get("family", false)) and available_events.has(String(raw.id)):
-			row.merge(available_events[String(raw.id)] as Dictionary, true)
-		elif bool(raw.get("family", false)):
-			row.id = "%s_%s" % [wid, String(raw.id)]
-			row.kind = ""
-		elif bool(row.shared):
-			row.kind = _weapon_sound_fallback(w, String(raw.get("fallback", "")))
-			row.id = String(row.kind)
-		elif available_events.has(String(raw.id)):
-			row.merge(available_events[String(raw.id)] as Dictionary, true)
-		else:
-			row.id = "%s_%s" % [wid, String(raw.id)]
-			row.kind = ""
-		out.append(row)
-	return out
+	return weapon_sound_events(id)
 
+## Оставлено для старых инструментов: общих семейств звуков больше нет.
+static func sound_family(_id: String) -> String:
+	return ""
+
+static func sound_family_name(_id: String) -> String:
+	return ""
+
+static func sound_families() -> Dictionary:
+	return {}
+
+static func family_sound_events() -> Array[Dictionary]:
+	return []
 
 static func _sound_slot_applies(slot: Dictionary, w: Dictionary) -> bool:
 	var condition := String(slot.get("condition", "all"))
@@ -311,39 +191,6 @@ static func _sound_slot_applies(slot: Dictionary, w: Dictionary) -> bool:
 		"automatic":
 			return bool((w.get("stats", {}) as Dictionary).get("auto", false))
 	return true
-
-
-static func _weapon_sound_fallback(w: Dictionary, fallback: String) -> String:
-	match fallback:
-		"$shot":
-			return String(w.get("sound", ""))
-		"$shot_self", "$shot_mid", "$shot_far", "$shot_distant":
-			var layer := fallback.trim_prefix("$shot_")
-			var shot := String(w.get("sound", ""))
-			if shot.begins_with("shot_hg_") or shot == "shot_pistol":
-				return "shot_pistol@" + layer
-			# у 7.62×39 в каталоге пока только «вдали»; остальные слои — общие автоматные
-			if shot in ["shot_smg", "shot_shotgun", "shot_bolt", "shot_battle"] or (shot == "shot_ak762" and layer == "far"):
-				return "%s@%s" % [shot, layer]
-			return "shot_rifle@" + layer
-		"$suppressed":
-			if String(w.get("caliber", "")) == "9x39":
-				return "shot_sup939"
-			# пистолетный патрон (пистолеты, ПП, PDW) — пистолетный набор с глушителем; ружьё — свой
-			# выстрел (тише), а не карабинный; остальное — автоматный набор с глушителем
-			var cls := String(w.get("class", ""))
-			if cls in ["PISTOL", "SMG", "PDW"]:
-				return "shot_pistol_sup"
-			if cls == "SHOTGUN":
-				return String(w.get("sound", "shot_shotgun"))
-			return "shot_rifle_sup"
-		"$mechanism":
-			return "mech_pistol" if String(w.get("class", "")) == "PISTOL" else "mech_rifle"
-		"$reload":
-			return String(w.get("reload_sound", "reload_rifle"))
-		"$cycle":
-			return String(w.get("cycle_sound", "bolt"))
-	return fallback
 
 
 static func ammo(id: String) -> Dictionary:

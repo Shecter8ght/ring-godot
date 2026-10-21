@@ -1,511 +1,285 @@
 {
- "_comment": "Звуковые слоты одной модели оружия. Стенд строит из них карточки для каждого оружия из data/weapons.json; Audio использует те же события в игре. Свой файл модели заменяет fallback только у неё. condition: all / suppressible / detachable_mag / internal_mag / manual_cycle / break_action / not_break_action / automatic. wired=false — слот предусмотрен заранее, но механика ещё не вызывает его. family=true — общее действие звучит по семейству механики (families: магазин и затвор АК звучат иначе, чем у AR): своя запись модели → запись семейства → общий звук. Ствол без семейства берёт общий сразу.",
- "slots": [
-  {
-   "id": "shot",
-   "group": "Выстрел",
-   "name": "Выстрел вблизи",
-   "when": "основной выстрел этой модели рядом со слушателем",
-   "file": "shot",
-   "fallback": "$shot",
-   "type": "one",
-   "variants": 6,
-   "prio": 1,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "shot_self",
-   "group": "Выстрел",
-   "name": "Свой выстрел — как слышит стрелок",
-   "when": "стреляет сам слушатель: запись из-за спины стрелка, вместо «вблизи» у самого дула",
-   "file": "shot_self",
-   "fallback": "$shot_self",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "shot_mid",
-   "group": "Выстрел",
-   "name": "Выстрел на средней дистанции",
-   "when": "тот же выстрел примерно за 40 м: между «вблизи» и «вдали» — плавный переход",
-   "file": "shot_mid",
-   "fallback": "$shot_mid",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "shot_far",
-   "group": "Выстрел",
-   "name": "Выстрел вдали",
-   "when": "тот же выстрел примерно за 120 м; ближе и дальше — плавный переход к соседним слоям",
-   "file": "shot_far",
-   "fallback": "$shot_far",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "shot_distant",
-   "group": "Выстрел",
-   "name": "Выстрел очень далеко",
-   "when": "за несколько сотен метров: глухой удар и раскат по местности",
-   "file": "shot_distant",
-   "fallback": "$shot_distant",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "shot_suppressed",
-   "group": "Выстрел",
-   "name": "Выстрел с глушителем",
-   "when": "выстрел этой модели со штатным или установленным глушителем",
-   "file": "shot_sup",
-   "fallback": "$suppressed",
-   "type": "one",
-   "variants": 5,
-   "prio": 1,
-   "condition": "suppressible",
-   "wired": true
-  },
-  {
-   "id": "mechanism",
-   "group": "Выстрел",
-   "name": "Механика выстрела",
-   "when": "ближний слой затвора, рамы или автоматики поверх выстрела",
-   "file": "mechanism",
-   "fallback": "$mechanism",
-   "type": "layer",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "dry_fire",
-   "shared": true,
-   "group": "Спуск и неисправности",
-   "name": "Сухой спуск",
-   "when": "нажат спуск без патрона",
-   "file": "dry",
-   "fallback": "dry_fire",
-   "type": "one",
-   "variants": 3,
-   "prio": 1,
-   "condition": "all",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "jam",
-   "shared": true,
-   "group": "Спуск и неисправности",
-   "name": "Задержка / осечка",
-   "when": "оружие не выстрелило из-за задержки",
-   "file": "jam",
-   "fallback": "jam",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "condition": "all",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "clear_jam",
-   "shared": true,
-   "group": "Спуск и неисправности",
-   "name": "Устранить задержку",
-   "when": "передёрнуть механизм и устранить задержку",
-   "file": "clear_jam",
-   "fallback": "charge",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "condition": "all",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "reload",
-   "group": "Перезарядка",
-   "name": "Перезарядка целиком",
-   "when": "общая запись полного действия перезарядки этой модели",
-   "file": "reload",
-   "fallback": "$reload",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "mag_out",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Магазин вынуть",
-   "when": "отстегнуть съёмный магазин",
-   "file": "mag_out",
-   "fallback": "mag_out",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "condition": "detachable_mag",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "mag_in",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Магазин вставить",
-   "when": "присоединить съёмный магазин",
-   "file": "mag_in",
-   "fallback": "mag_in",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "condition": "detachable_mag",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "mag_drop",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Магазин выпал",
-   "when": "магазин выскользнул или был сброшен на пол",
-   "file": "mag_drop",
-   "fallback": "mag_drop",
-   "type": "one",
-   "variants": 4,
-   "prio": 3,
-   "condition": "detachable_mag",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "bolt_lock",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Затворная задержка",
-   "when": "последний патрон израсходован, затвор остался открытым",
-   "file": "bolt_lock",
-   "fallback": "bolt_lock",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "condition": "detachable_mag",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "round_insert",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Вложить патрон",
-   "when": "патрон или ружейная гильза вставляется во внутренний магазин",
-   "file": "round_in",
-   "fallback": "round_in",
-   "type": "one",
-   "variants": 5,
-   "prio": 1,
-   "condition": "internal_mag",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "charge",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Дослать патрон",
-   "when": "затвор или рукоятка взведены после зарядки",
-   "file": "charge",
-   "fallback": "charge",
-   "type": "one",
-   "variants": 4,
-   "prio": 1,
-   "condition": "not_break_action",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "cycle",
-   "group": "Перезарядка",
-   "name": "Ручной цикл затвора",
-   "when": "помпа или продольно-скользящий затвор после выстрела",
-   "file": "cycle",
-   "fallback": "$cycle",
-   "type": "one",
-   "variants": 5,
-   "prio": 1,
-   "condition": "manual_cycle",
-   "wired": true
-  },
-  {
-   "id": "breech_open",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Переломить ружьё",
-   "when": "открыть казённую часть переломного ружья",
-   "file": "breech_open",
-   "fallback": "reload_shotgun",
-   "type": "one",
-   "variants": 3,
-   "prio": 1,
-   "condition": "break_action",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "breech_close",
-   "shared": true,
-   "group": "Перезарядка",
-   "name": "Закрыть ружьё",
-   "when": "закрыть и запереть казённую часть переломного ружья",
-   "file": "breech_close",
-   "fallback": "reload_shotgun",
-   "type": "one",
-   "variants": 3,
-   "prio": 1,
-   "condition": "break_action",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "mag_check",
-   "shared": true,
-   "group": "Проверка и управление",
-   "name": "Проверить боезапас",
-   "when": "проверить магазин, патронник или внутренний магазин",
-   "file": "mag_check",
-   "fallback": "mag_check",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "fire_mode",
-   "shared": true,
-   "group": "Проверка и управление",
-   "name": "Переводчик огня",
-   "when": "переводчик щёлкнул на следующий режим огня (X: АВ / очередь по 2 / одиночный)",
-   "file": "fire_mode",
-   "fallback": "fire_mode",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "condition": "automatic",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "safety",
-   "shared": true,
-   "group": "Проверка и управление",
-   "name": "Предохранитель",
-   "when": "поставить оружие на предохранитель или снять с него",
-   "file": "safety",
-   "fallback": "fire_mode",
-   "type": "one",
-   "variants": 3,
-   "prio": 2,
-   "condition": "all",
-   "wired": false,
-   "family": true
-  },
-  {
-   "id": "draw",
-   "shared": true,
-   "group": "Обращение",
-   "name": "Достать оружие",
-   "when": "оружие берут в руки",
-   "file": "draw",
-   "fallback": "weapon_draw",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "holster",
-   "shared": true,
-   "group": "Обращение",
-   "name": "Убрать оружие",
-   "when": "оружие убирают или меняют на другое",
-   "file": "holster",
-   "fallback": "weapon_draw",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true,
-   "family": true
-  },
-  {
-   "id": "ads_raise",
-   "shared": true,
-   "group": "Обращение",
-   "name": "Вскинуть в ADS",
-   "when": "оружие поднято к прицелу",
-   "file": "ads_raise",
-   "fallback": "ads_raise",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "ads_lower",
-   "shared": true,
-   "group": "Обращение",
-   "name": "Опустить из ADS",
-   "when": "оружие опущено из прицельной линии",
-   "file": "ads_lower",
-   "fallback": "ads_raise",
-   "type": "one",
-   "variants": 4,
-   "prio": 2,
-   "condition": "all",
-   "wired": true
-  },
-  {
-   "id": "shell_eject",
-   "shared": true,
-   "group": "Обращение",
-   "name": "Выброс гильзы",
-   "when": "гильза вылетает из окна оружия до падения на поверхность",
-   "file": "shell_eject",
-   "fallback": "",
-   "type": "layer",
-   "variants": 4,
-   "prio": 3,
-   "condition": "all",
-   "wired": false,
-   "family": true
-  },
-  {
-   "id": "weapon_bump",
-   "shared": true,
-   "group": "Обращение",
-   "name": "Удар о препятствие",
-   "when": "ствол или корпус оружия задел стену, дверь или укрытие",
-   "file": "bump",
-   "fallback": "weapon_bump",
-   "type": "one",
-   "variants": 5,
-   "prio": 3,
-   "condition": "all",
-   "wired": false
-  },
-  {
-   "id": "suppressor_on",
-   "group": "Обвес",
-   "name": "Глушитель накручен",
-   "when": "последний оборот при установке глушителя ПМ",
-   "file": "suppressor_on",
-   "fallback": "suppressor_on",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "condition": "rig_suppressor",
-   "wired": true
-  },
-  {
-   "id": "suppressor_off",
-   "group": "Обвес",
-   "name": "Глушитель снят",
-   "when": "глушитель сошёл с резьбы ПМ",
-   "file": "suppressor_off",
-   "fallback": "suppressor_off",
-   "type": "one",
-   "variants": 3,
-   "prio": 3,
-   "condition": "rig_suppressor",
-   "wired": true
-  }
- ],
- "families": {
-  "pistol": {
-   "name": "Пистолеты",
-   "weapons": [
-    "wpn_hg_01",
-    "wpn_hg_02",
-    "wpn_hg_03"
-   ]
-  },
-  "ak": {
-   "name": "Система АК",
-   "weapons": [
-    "wpn_ar_01",
-    "wpn_smg_04",
-    "wpn_sg_02"
-   ]
-  },
-  "ar": {
-   "name": "Система AR / STANAG",
-   "weapons": [
-    "wpn_ar_02",
-    "wpn_ar_03",
-    "wpn_ar_04",
-    "wpn_ar_05",
-    "wpn_dmr_01",
-    "wpn_dmr_02"
-   ]
-  },
-  "smg": {
-   "name": "Пистолеты-пулемёты",
-   "weapons": [
-    "wpn_smg_01",
-    "wpn_smg_02",
-    "wpn_smg_03",
-    "wpn_smg_05"
-   ]
-  },
-  "val": {
-   "name": "АС «Вал» / ВСС",
-   "weapons": [
-    "wpn_sp_01",
-    "wpn_sp_02"
-   ]
-  },
-  "sniper": {
-   "name": "Крупные винтовки",
-   "weapons": [
-    "wpn_sr_01",
-    "wpn_sr_02"
-   ]
-  },
-  "tube": {
-   "name": "Ружья с трубчатым магазином",
-   "weapons": [
-    "wpn_sg_01",
-    "wpn_sg_03"
-   ]
-  },
-  "lmg": {
-   "name": "Пулемёты",
-   "weapons": [
-    "wpn_lmg_01",
-    "wpn_lmg_02"
-   ]
-  }
- }
+  "schemaVersion": 2,
+  "slots": [
+    {
+      "id": "shot",
+      "name": "Выстрел — основной",
+      "file": "shot",
+      "wired": true,
+      "condition": "all",
+      "group": "Выстрел"
+    },
+    {
+      "id": "shot_suppressed",
+      "name": "Выстрел с глушителем",
+      "file": "shot_sup",
+      "wired": true,
+      "condition": "suppressible",
+      "group": "Выстрел"
+    },
+    {
+      "id": "shot_outdoor",
+      "name": "Выстрел на улице",
+      "file": "shot_outdoor",
+      "condition": "all",
+      "wired": true,
+      "group": "Выстрел"
+    },
+    {
+      "id": "shot_room",
+      "name": "Выстрел в небольшом помещении",
+      "file": "shot_room",
+      "wired": true,
+      "condition": "all",
+      "group": "Выстрел"
+    },
+    {
+      "id": "shot_hall",
+      "name": "Выстрел в большом помещении",
+      "file": "shot_hall",
+      "wired": true,
+      "condition": "all",
+      "group": "Выстрел"
+    },
+    {
+      "id": "shot_sup_outdoor",
+      "name": "С глушителем на улице",
+      "file": "shot_sup_outdoor",
+      "condition": "suppressible",
+      "wired": true,
+      "group": "Выстрел"
+    },
+    {
+      "id": "shot_sup_room",
+      "name": "С глушителем в помещении",
+      "file": "shot_sup_room",
+      "condition": "suppressible",
+      "wired": true,
+      "group": "Выстрел"
+    },
+    {
+      "id": "shot_sup_hall",
+      "name": "С глушителем в большом помещении",
+      "file": "shot_sup_hall",
+      "condition": "suppressible",
+      "wired": true,
+      "group": "Выстрел"
+    },
+    {
+      "id": "mechanism",
+      "name": "Механика выстрела",
+      "file": "mechanism",
+      "wired": true,
+      "condition": "all",
+      "group": "Выстрел"
+    },
+    {
+      "id": "dry_fire",
+      "name": "Сухой спуск",
+      "file": "dry",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "jam",
+      "name": "Задержка / осечка",
+      "file": "jam",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "clear_jam",
+      "name": "Устранить задержку — затвор назад",
+      "file": "clear_jam",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "clear_jam_release",
+      "name": "Устранить задержку — затвор вперёд",
+      "file": "clear_jam_release",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "reload",
+      "name": "Перезарядка целиком",
+      "file": "reload",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "mag_out",
+      "name": "Магазин вынуть",
+      "file": "mag_out",
+      "wired": true,
+      "condition": "detachable_mag",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "mag_in",
+      "name": "Магазин вставить",
+      "file": "mag_in",
+      "wired": true,
+      "condition": "detachable_mag",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "mag_drop",
+      "name": "Магазин выпал",
+      "file": "mag_drop",
+      "wired": true,
+      "condition": "detachable_mag",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "bolt_lock",
+      "name": "Затворная задержка",
+      "file": "bolt_lock",
+      "wired": true,
+      "condition": "detachable_mag",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "round_insert",
+      "name": "Вложить патрон",
+      "file": "round_in",
+      "wired": true,
+      "condition": "internal_mag",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "charge",
+      "name": "Затвор вперёд / дослать патрон",
+      "file": "charge",
+      "wired": true,
+      "condition": "not_break_action",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "cycle",
+      "name": "Ручной цикл затвора",
+      "file": "cycle",
+      "wired": true,
+      "condition": "manual_cycle",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "breech_open",
+      "name": "Переломить ружьё",
+      "file": "breech_open",
+      "wired": true,
+      "condition": "break_action",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "breech_close",
+      "name": "Закрыть ружьё",
+      "file": "breech_close",
+      "wired": true,
+      "condition": "break_action",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "mag_check",
+      "name": "Проверить боезапас",
+      "file": "mag_check",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "fire_mode",
+      "name": "Переводчик огня",
+      "file": "fire_mode",
+      "wired": true,
+      "condition": "automatic",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "draw",
+      "name": "Достать оружие",
+      "file": "draw",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "holster",
+      "name": "Убрать оружие",
+      "file": "holster",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "ads_raise",
+      "name": "Поднять оружие",
+      "file": "ads_raise",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "ads_lower",
+      "name": "Опустить оружие",
+      "file": "ads_lower",
+      "wired": true,
+      "condition": "all",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "suppressor_on",
+      "name": "Глушитель накручен",
+      "file": "suppressor_on",
+      "wired": true,
+      "condition": "rig_suppressor",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "suppressor_off",
+      "name": "Глушитель снят",
+      "file": "suppressor_off",
+      "wired": true,
+      "condition": "rig_suppressor",
+      "group": "Обращение с оружием"
+    },
+    {
+      "id": "shell_hard",
+      "name": "Гильза — плитка / бетон",
+      "file": "shell_hard",
+      "wired": true,
+      "condition": "all",
+      "group": "Гильза"
+    },
+    {
+      "id": "shell_metal",
+      "name": "Гильза — металл",
+      "file": "shell_metal",
+      "wired": true,
+      "condition": "all",
+      "group": "Гильза"
+    },
+    {
+      "id": "shell_soft",
+      "name": "Гильза — мягкая поверхность",
+      "file": "shell_soft",
+      "wired": true,
+      "condition": "all",
+      "group": "Гильза"
+    },
+    {
+      "id": "shell_roll",
+      "name": "Гильза катится",
+      "file": "shell_roll",
+      "wired": true,
+      "condition": "all",
+      "group": "Гильза"
+    }
+  ]
 }

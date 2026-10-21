@@ -78,6 +78,8 @@ var weapon_rounds: int = 0
 ## Перезарядка: что делаем ("swap", "topup", "clear" — устранить задержку), для какого слота, какую
 ## ревизию записи ждём от хоста.
 var _reload_kind: String = ""
+## Задержка: затвор уже отпущен (звук «вперёд» и гильза сыграны) — один раз за устранение.
+var _clear_released: bool = false
 var _reload_slot: String = ""
 var _reload_rev: int = -1
 var _reload_wait: float = 0.0
@@ -424,6 +426,8 @@ func sprint_held() -> bool:
 
 ## Поднять оружие из «наискосок» на изготовку от бедра (колесо вверх, выстрел из опущенного).
 func raise_weapon() -> void:
+	if carry_low and weapon_id != "":
+		_play_stance_sound("ads_raise")
 	carry_low = false
 
 
@@ -431,7 +435,11 @@ func raise_weapon() -> void:
 func wheel_carry(direction: int) -> bool:
 	if not is_local() or not is_alive() or not ads or aiming or weapon_id == "" or grenade_equipped or ui_blocked():
 		return false
-	carry_low = direction < 0
+	var low := direction < 0
+	# один звук «поднял» на любой переход вверх, один «опустил» на любой вниз
+	if low != carry_low:
+		_play_stance_sound("ads_lower" if low else "ads_raise")
+	carry_low = low
 	return true
 
 
@@ -777,6 +785,13 @@ func _play_weapon_sound(specification: Dictionary, slot: String, extra_db: float
 	var kind := _weapon_sound(specification, slot)
 	if kind != "":
 		Audio.play(kind, global_position, extra_db)
+
+
+## Поднять / опустить оружие: только запись этого действия у конкретной модели.
+func _play_stance_sound(slot: String) -> void:
+	var kind := _weapon_sound(spec(), slot)
+	if kind != "":
+		Audio.play(kind, global_position + Vector3.UP * 1.4)
 
 
 ## Состояние для хоста (Inventory.apply_weapon_state).
@@ -1417,6 +1432,10 @@ func _combat(delta: float) -> void:
 		if Input.is_action_just_pressed("reload"):
 			_try_fast_reload()
 		reload_timer -= delta
+		if _reload_kind == "clear" and not _clear_released and reload_timer <= float(Balance.WEAPON_WEAR.clear_sec) * (1.0 - float(Balance.WEAPON_WEAR.clear_release_at)):
+			_clear_released = true
+			_play_weapon_sound(spec, "clear_jam_release", -4.0)
+			Audio.shell_drop(global_position, _side_dir(), 0.0, weapon_id)
 		if reload_timer <= 0.0:
 			_finish_reload(spec)
 		return
@@ -1428,6 +1447,8 @@ func _combat(delta: float) -> void:
 			return
 		mag_inspect = false
 		inspect_turn = Vector2.ZERO
+		# магазин вернулся в оружие — тот же звук, что в перезарядке
+		_play_weapon_sound(spec, "mag_in", -6.0)
 	# R: коротко — перезарядка (или устранить задержку), держать — проверить патроны
 	if Input.is_action_just_pressed("reload"):
 		if is_signal_launcher():
@@ -1618,6 +1639,7 @@ func _start_clear(spec: Dictionary) -> void:
 	_reload_kind = "clear"
 	_reload_slot = weapon_slot
 	reload_timer = float(Balance.WEAPON_WEAR.clear_sec)
+	_clear_released = false
 	_play_weapon_sound(spec, "clear_jam", -4.0)
 
 
@@ -2091,7 +2113,11 @@ func allowed_weapons() -> Array:
 func _check_ammo(spec: Dictionary) -> void:
 	ammo_check_text = Gear.ammo_estimate(ammo, int(spec.mag), Gear.exact_count(weapon_id))
 	ammo_check_t = float(Balance.AMMO_CHECK.show_sec)
-	_play_weapon_sound(spec, "mag_check", -12.0)
+	# с клипом проверки магазин вынимают из оружия — звук вытаскивания, как в перезарядке; без клипа — одиночный щелчок
+	if ViewmodelClips.available(weapon_id) and _weapon_sound(spec, "mag_out") != "":
+		_play_weapon_sound(spec, "mag_out", -6.0)
+	else:
+		_play_weapon_sound(spec, "mag_check", -12.0)
 	if is_local():
 		# патроны вперемешку — видно и какие сверху
 		var mag: Dictionary = weapon_entry().get("mag", {}) if weapon_entry().get("mag") is Dictionary else {}
@@ -2319,7 +2345,7 @@ func _fire(spec: Dictionary) -> void:
 		rig.add_shake(float(spec.shake))
 	NoiseBus.emit(global_position, float(spec.noise_m), "shot")
 	_shot_fx(muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"))
-	if ammo <= 0:
+	if ammo <= 0 and _weapon_rig == null:
 		_play_weapon_sound(spec, "bolt_lock", -5.0)
 	# остальным — то же (пули и урон уже посчитаны здесь и у хоста)
 	if Net.is_networked():
@@ -2482,6 +2508,14 @@ func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sou
 		get_tree().create_timer(0.35).timeout.connect(func() -> void:
 			if is_inside_tree():
 				Audio.play(cycle_sound, global_position))
+	else:
+		# самозарядное: гильза вылетает на каждом выстреле (у помпы и болтовки — на цикле, звука гильзы там пока нет)
+		Audio.shell_drop(global_position, _side_dir(), 0.0, weapon_id)
+
+
+## Вправо от стрелка (по телу) — куда вылетает гильза.
+func _side_dir() -> Vector3:
+	return _body.global_basis.x if _body else global_basis.x
 
 
 ## Выстрел напарника: раньше его видел и слышал только он сам.
@@ -3064,10 +3098,10 @@ func _read_stance() -> void:
 	var was_aiming := aiming
 	aiming = Input.is_action_pressed("aim") and not grenade_equipped and not ui_blocked()
 	if aiming and not was_aiming and weapon_id != "":
-		# вскинул — синтетический шорох (записи «ads_raise» отвлекали; Audio «ads_in»)
-		Audio.play("ads_in", global_position + Vector3.UP * 1.4)
+		# вскинул в прицел — «поднял»; нет записей — синтетический шорох (Audio: ads_raise → ads_in)
+		_play_stance_sound("ads_raise")
 	elif was_aiming and not aiming and weapon_id != "":
-		Audio.play("ads_out", global_position + Vector3.UP * 1.4)
+		_play_stance_sound("ads_lower")
 
 
 func _stance_key() -> String:

@@ -1,392 +1,340 @@
 extends Node
-## Звук: записи из assets/audio (см. tools/import_audio.py и CREDITS), случайный вариант на
-## каждое проигрывание; выстрелы издалека — отдельными «дальними» записями. Для всего, у чего
-## записей нет (или без assets/audio вовсе), при старте синтезируется запасной звук
-## (шум + огибающие + простые фильтры) — игра обязана звучать и так. Autoload `Audio`.
+## Только явно назначенные записи. Пустое действие молчит; расстояние и помещение считает движок.
 
-const MIX_RATE := 22050
-const ACTIVE_SELECTION := "res://data/sound_active.json"
-const CATALOG := "res://data/sound_catalog.json"
+const REGISTRY: String = "res://data/audio_events.json"
+const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
 
-## Громкость и дальность по виду звука: дБ, единица дистанции (м, где громкость номинальная), предел слышимости.
-const KINDS := {
-	# выстрелы слышно далеко (бой на сотни метров): дальше — тише, глуше (фильтр) и позже (звук
-	# идёт 343 м/с — Audio.play задерживает); по расстоянию сменяются слои записей (LAYERS)
-	"shot_pistol": {"db": 2.0, "unit": 10.0, "max": 450.0, "far": true},
-	"shot_ai": {"db": 1.0, "unit": 10.0, "max": 600.0, "far": true},
-	# прицеливание и патрон в магазин — синтез (записи отвлекали)
-	"ads_in": {"db": -21.0, "unit": 2.0, "max": 8.0},
-	"ads_out": {"db": -23.0, "unit": 2.0, "max": 8.0},
-	"mag_round": {"db": -12.0, "unit": 2.0, "max": 10.0},
-	"step": {"db": -16.0, "unit": 3.0, "max": 22.0},
-	"step_ai": {"db": -14.0, "unit": 3.0, "max": 26.0},
-	# шаги по поверхностям (Audio.step): occlude — за стеной глуше
-	"step_stone": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
-	"step_stone_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
-	"step_dirt": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
-	"step_dirt_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
-	"step_asphalt_wet": Balance.WET_STEPS.sound,
-	"step_snow": {"db": -16.0, "unit": 3.0, "max": 24.0, "occlude": true},
-	"step_snow_run": {"db": -13.0, "unit": 3.0, "max": 30.0, "occlude": true},
-	"step_metal": {"db": -17.0, "unit": 3.0, "max": 30.0, "occlude": true},
-	"heartbeat": {"db": -4.0, "unit": 3.0, "max": 6.0},
-	"thunder": {"db": 6.0, "unit": 60.0, "max": 400.0},
-	"breaker": {"db": 2.0, "unit": 10.0, "max": 80.0},
-	"heli": {"db": 10.0, "unit": 60.0, "max": 500.0},
-	"supply_plane": Balance.SUPPLY_PLANE_SOUND,
-	"engine": {"db": 2.0, "unit": 15.0, "max": 160.0},
-	# мародёр роется в контейнере — слышно за стеной
-	"rummage": {"db": -13.0, "unit": 3.0, "max": 22.0, "occlude": true},
-	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
-	"hit": {"db": -4.0, "unit": 5.0, "max": 30.0},
-	"reload": {"db": -8.0, "unit": 3.0, "max": 15.0},
-	"impact_hard": {"db": -6.0, "unit": 5.0, "max": 40.0},
-	"impact_metal": {"db": -5.0, "unit": 6.0, "max": 45.0},
-	"impact_glass": {"db": -4.0, "unit": 6.0, "max": 45.0},
-	# витрина осыпалась: звон и шорох осколков
-	"glass_break": {"db": 1.0, "unit": 8.0, "max": 70.0},
-	"impact_soft": {"db": -10.0, "unit": 4.0, "max": 30.0},
-	"shot_rifle": {"db": 2.0, "unit": 12.0, "max": 900.0, "far": true},
-	"shot_shotgun": {"db": 4.0, "unit": 12.0, "max": 450.0, "far": true},
-	"shot_bolt": {"db": 5.0, "unit": 16.0, "max": 1300.0, "far": true},
-	"mech_pistol": {"db": -8.0, "unit": 3.0, "max": 16.0},
-	"mech_rifle": {"db": -7.0, "unit": 3.0, "max": 18.0},
-	"step_run": {"db": -12.0, "unit": 3.0, "max": 28.0},
-	"death": {"db": -2.0, "unit": 5.0, "max": 35.0},
-	"fall": {"db": -6.0, "unit": 4.0, "max": 25.0},
-	"reload_pistol": {"db": -8.0, "unit": 3.0, "max": 15.0},
-	"reload_rifle": {"db": -8.0, "unit": 3.0, "max": 15.0},
-	"reload_shotgun": {"db": -6.0, "unit": 3.0, "max": 18.0},
-	"bolt": {"db": -6.0, "unit": 3.0, "max": 18.0},
-	"pin": {"db": -10.0, "unit": 2.0, "max": 10.0},
-	"debris": {"db": -4.0, "unit": 6.0, "max": 40.0},
-	"explosion": {"db": 8.0, "unit": 20.0, "max": 1200.0, "far": true},
-}
-
-## Свой набор оружия заменяет общий, как только в нём появляется хотя бы одна активная запись.
-## До этого игра продолжает звучать: модель берёт записи, дальний хвост и синтез запасного вида.
-const FALLBACKS := {
-	"shot_hg_01": "shot_pistol", "shot_hg_02": "shot_pistol",
-	"shot_hg_03": "shot_pistol", "shot_hg_04": "shot_pistol",
-	"shot_smg": "shot_pistol", "shot_sup939": "shot_pistol",
-}
-
-## Записанные звуки: вид -> ["группа/префикс", ...] в assets/audio. Префикс ловит только
-## файлы «префикс + номер»: "guns/pistol_" не цепляет "pistol_far_01".
-const SAMPLES := {
-	"shot_pistol": ["guns/pistol_"], "shot_ai": ["guns/pistol_"], "shot_rifle": ["guns/carbine_"],
-	"shot_hg_01": ["guns/hg01_"], "shot_hg_02": ["guns/hg02_"],
-	"shot_hg_03": ["guns/hg03_"], "shot_hg_04": ["guns/hg04_"],
-	"shot_smg": ["guns/smg_"], "shot_sup939": ["guns/sup939_"],
-	"shot_shotgun": ["guns/shotgun_"], "shot_bolt": ["guns/marksman_"],
-	"step": ["steps/stone_"], "step_run": ["steps/stone_run_"], "step_ai": ["steps/stone_"],
-	"step_stone": ["steps/stone_"], "step_stone_run": ["steps/stone_run_"],
-	"step_dirt": ["steps/dirt_"], "step_dirt_run": ["steps/dirt_run_"],
-	"step_snow": ["steps/snow_"], "step_snow_run": ["steps/snow_run_"], "step_metal": ["steps/metal_"],
-	"door": ["world/door_"], "hit": ["body/hit_"], "fall": ["body/fall_"],
-	"death": ["voice/rattle_groan_", "voice/rattle_gurgle_"],
-	"reload": ["guns/reload_pistol_"], "reload_pistol": ["guns/reload_pistol_"],
-	"reload_rifle": ["guns/reload_rifle_"], "reload_shotgun": ["guns/reload_shotgun_"], "bolt": ["guns/reload_shotgun_"],
-	"impact_hard": ["hits/concrete_", "hits/hard_"], "impact_metal": ["hits/metal_"],
-	"impact_glass": ["hits/glass_"], "impact_soft": ["hits/wood_"], "debris": ["world/debris_"],
-	"rummage": ["hits/wood_", "world/debris_"],
-	# у этих до сих пор только синтез: положи записи — зазвучат они (каталог data/sound_catalog.json)
-	"heartbeat": ["body/heart_"], "thunder": ["weather/thunder_"], "breaker": ["world/breaker_"],
-	"heli": ["vehicles/heli_"], "engine": ["vehicles/truck_"], "glass_break": ["glass/break_"],
-	"supply_plane": ["vehicles/supply_plane_"],
-	"explosion": ["boom/explosion_"], "pin": ["gear/pin_"],
-}
-## Свой набор вместо общего из SAMPLES, если в нём есть хоть одна запись: затвор сейчас звучит
-## записями патрона в трубку, возня мародёра — деревом и обломками.
-const OWN := {"bolt": "guns/bolt_", "rummage": "loot/rummage_"}
-## Фоновые лупы из записей (первый файл «префикс + номер»), иначе синтез.
-const LOOPS := {"rain": "amb/rain_", "siren": "world/alarm_", "hum": "world/generator_", "ambient": "amb/wind_"}
-## «Дальние» записи прежних общих наборов — слой far (см. LAYERS).
-const FAR := {
-	"shot_pistol": "guns/pistol_far_", "shot_ai": "guns/pistol_far_", "shot_rifle": "guns/carbine_far_",
-	"shot_smg": "guns/smg_far_",
-	"shot_shotgun": "guns/shotgun_far_", "shot_bolt": "guns/marksman_far_",
-	"explosion": "boom/explosion_far_",
-}
-## Слои дистанции у выстрелов и взрывов (Balance.AUDIO_LAYERS): кроме записи «вблизи» — свой выстрел
-## (слушатель у дула), средняя дистанция, вдали, очень далеко. В каталоге слой — суффикс вида
-## («shot_rifle@mid»). На любом расстоянии звучат один-два соседних слоя, у которых есть записи.
-const LAYERS := ["self", "mid", "far", "distant"]
-## Поверхность под ногами (Surfaces) → набор записей шагов. Металл — камень + звонкий слой
-## step_metal (запись steps/metal_*, если есть, иначе синтез).
-const STEP_SET := {
-	"tile": "stone", "concrete": "stone", "plastic": "stone", "wood": "wood", "glass": "glass",
-	"metal": "stone", "asphalt": "dirt", "cardboard": "cardboard", "fabric": "carpet", "snow": "snow",
-	"water": "water", "trash": "trash", "rubble": "rubble", "gravel": "gravel", "grass": "grass",
-	"dirt": "dirt", "mud": "dirt",
-}
-
-## Сыгран шаг: вид звука и поверхность (для тестов и отладки).
 signal stepped(kind: String, surface: String, pos: Vector3)
+signal event_played(event_id: String, hook: String, pos: Vector3)
 
+var _events: Dictionary = {}
+var _bindings: Dictionary = {}
 var _samples: Dictionary = {}
-## Слои дистанции: слой → {вид → [записи]}.
-var _layers: Dictionary = {}
-var _disabled: Dictionary = {}
-## Каталог даёт новым событиям папку записей и запасной вид без правок этого файла.
-var _catalog_prefixes: Dictionary = {}
-var _catalog_fallbacks: Dictionary = {}
-## Слой → {вид → префикс записей}.
-var _catalog_layers: Dictionary = {}
-## Стенд звуков (data/sound_active.json): событие → ещё записи из других наборов (links) и что у
-## события снято (removed: "synth" — синтез, "fallback" — запасной набор). Ключи — id каталога;
-## при загрузке переводятся в виды Audio.
-var _links_by_id: Dictionary = {}
-var _removed_by_id: Dictionary = {}
-var _kind_links: Dictionary = {}
-## Слой → {вид → [пути назначенных записей]}.
-var _layer_links: Dictionary = {}
-var _no_synth: Dictionary = {}
-var _no_fallback: Dictionary = {}
-## Стенд: ещё не перенесённые в assets/audio кандидаты, чтобы послушать «как в игре» до одобрения.
-## Ключ — вид или «вид@слой», значение — [записи]; в игре пусто.
-var _preview: Dictionary = {}
-
-var _streams: Dictionary = {}
-var _rng := RandomNumberGenerator.new()
-## Последний сыгранный вариант по виду — подряд один и тот же не звучит.
 var _last_pick: Dictionary = {}
-var _ambient: AudioStreamPlayer
-## Очереди (Balance.AUDIO_BURST): недавние стрелки — {pos, t, shots: [[плееры выстрела], …]}.
+var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _place_cache: Dictionary = {}
 var _shooters: Array[Dictionary] = []
-
+var _triggered: Dictionary = {}
+var _ambient: AudioStreamPlayer
+var _preview: Dictionary = {}
+var _scan_needed: bool = true
+var _scene_paths: Dictionary = {}
+var _object_bindings: Dictionary = {}
 
 func _ready() -> void:
 	_rng.randomize()
-	_streams["shot_pistol"] = _make(_gunshot(0.32, 1.0))
-	_streams["shot_ai"] = _make(_gunshot(0.36, 0.85))
-	_streams["step"] = _make(_footstep())
-	_streams["step_ai"] = _make(_footstep())
-	_streams["door"] = _make(_door())
-	_streams["hit"] = _make(_hit())
-	_streams["reload"] = _make(_reload())
-	_streams["impact_hard"] = _make(_impact_hard())
-	_streams["impact_metal"] = _make(_impact_metal())
-	_streams["impact_glass"] = _make(_impact_glass())
-	_streams["glass_break"] = _make(_glass_break())
-	_streams["impact_soft"] = _make(_impact_soft())
-	_streams["shot_rifle"] = _make(_gunshot(0.28, 1.25))
-	_streams["shot_shotgun"] = _make(_gunshot(0.55, 0.7))
-	_streams["shot_bolt"] = _make(_gunshot(0.65, 1.35))
-	_streams["step_run"] = _streams["step"]
-	for k in ["step_stone", "step_stone_run", "step_dirt", "step_dirt_run", "step_snow", "step_snow_run"]:
-		_streams[k] = _streams["step"]
-	_streams["step_metal"] = _make(_step_metal())
-	_streams["heartbeat"] = _make(_heartbeat())
-	_streams["thunder"] = _make(_thunder())
-	_streams["breaker"] = _streams["impact_metal"]
-	_streams["heli"] = _make(_rotor(9.0))
-	_streams["engine"] = _make(_engine())
-	_streams["rummage"] = _streams["impact_soft"]
-	_streams["death"] = _streams["hit"]
-	_streams["fall"] = _streams["hit"]
-	for k in ["reload_pistol", "reload_rifle", "reload_shotgun", "bolt", "pin"]:
-		_streams[k] = _streams["reload"]
-	_streams["debris"] = _streams["impact_hard"]
-	_streams["explosion"] = _make(_explosion())
-	_streams["ads_in"] = _make(_ads_cloth(0.2, 1.0))
-	_streams["ads_out"] = _make(_ads_cloth(0.16, 0.7))
-	_streams["mag_round"] = _make(_mag_round())
-	_load_active_selection()
-	_load_catalog()
-	_load_samples()
-	# фон — только ветер в пустом здании (капли владелец убрал: запись «ветер + капли» не делится)
-	_ambient = AudioStreamPlayer.new()
-	var amb := _make(_ambient_loop(6.0))
-	amb.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	amb.loop_end = amb.data.size() / 2
-	var rec := _loop_sample("ambient")
-	_ambient.stream = rec if rec else amb
-	_ambient.volume_db = -22.0
-	_ambient.autoplay = true
-	_ambient.bus = &"Ambient"
-	add_child(_ambient)
+	reload_events()
 	get_tree().node_added.connect(_on_audio_node_added)
+	for node: Node in get_tree().root.find_children("*", "BaseButton", true, false):
+		_on_audio_node_added(node)
+	set_process(true)
 
-
-## Звук в точке мира. Игрок слушает из своей позиции (AudioListener3D на игроке).
-## pitch 0 — случайный тон ±8 %.
-func play(kind: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0) -> void:
-	var spec := _kind_spec(kind)
-	var listener := _listener_pos()
-	var ears := _has_ears()
-	var dist := listener.distance_to(pos)
-	if ears and dist > float(spec["max"]):
+func reload_events() -> void:
+	_scan_needed = true
+	_events.clear()
+	_bindings.clear()
+	_samples.clear()
+	_scene_paths.clear()
+	_object_bindings.clear()
+	_last_pick.clear()
+	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(REGISTRY))
+	if not raw is Dictionary or int((raw as Dictionary).get("schemaVersion", 0)) != 2:
+		push_warning("Sonora: не найден каталог назначений audio_events.json версии 2")
 		return
-	# дальний выстрел / взрыв: звук идёт со скоростью звука — вспышку видно раньше, чем слышно
-	if ears and bool(spec.get("far", false)) and dist > Balance.AUDIO_FAR.delay_from_m:
-		get_tree().create_timer(dist / float(Balance.AUDIO_FAR.sound_mps)).timeout.connect(
-			func() -> void: _play_now(kind, pos, extra_db, pitch, spec, true))
+	for value: Variant in (raw as Dictionary).get("events", []):
+		if not value is Dictionary:
+			continue
+		var event: Dictionary = value as Dictionary
+		var id: String = String(event.get("id", ""))
+		if id == "" or not bool(event.get("enabled", true)):
+			continue
+		_events[id] = event
+		var binding: Dictionary = event.get("binding", {}) as Dictionary
+		if String(binding.get("type", "action")) == "action":
+			_bindings[String(binding.get("hook", id))] = id
+		elif String(binding.get("type", "")) == "object_action":
+			var hook: String = String(binding.get("hook", ""))
+			if not _object_bindings.has(hook):
+				_object_bindings[hook] = []
+			(_object_bindings[hook] as Array).append(id)
+		else:
+			_scene_paths[String(binding.get("scene", ""))] = true
+		var streams: Array[AudioStream] = []
+		for relative: Variant in event.get("files", []):
+			var rel: String = String(relative)
+			if rel.begins_with("/") or rel.contains(":") or ".." in rel.split("/"):
+				continue
+			var stream: AudioStream = _load_audio_file("res://assets/audio/" + rel)
+			if stream != null:
+				streams.append(stream)
+		_samples[id] = streams
+	if is_instance_valid(_ambient):
+		_ambient.queue_free()
+	var background: AudioStream = _pick("loop:ambient", Vector3.ZERO)
+	if background != null:
+		make_loop(background)
+		_ambient = AudioStreamPlayer.new()
+		_ambient.stream = background
+		_ambient.bus = &"Ambient"
+		_ambient.volume_db = float(Balance.SONORA_AUDIO.ambient_db)
+		add_child(_ambient)
+		_ambient.play()
+
+func resolve_event(hook: String, place: String = "") -> String:
+	var actual: String = hook
+	if _is_weapon_shot(hook) and place != "":
+		var specific: String = String(_bindings.get(hook + "_" + place, ""))
+		if not (_samples.get(specific, []) as Array).is_empty():
+			return specific
+	if _events.has(actual):
+		return actual
+	return String(_bindings.get(actual, ""))
+
+func _pick(hook: String, _pos: Vector3, place: String = "") -> AudioStream:
+	var preview: Array = _preview.get(hook, []) as Array
+	if not preview.is_empty():
+		return _pick_from(preview, hook)
+	var id: String = resolve_event(hook, place)
+	var records: Array = _samples.get(id, []) as Array
+	return null if records.is_empty() else _pick_from(records, id)
+
+func _pick_from(records: Array, key: String) -> AudioStream:
+	var index: int = _rng.randi_range(0, records.size() - 1)
+	if records.size() > 1 and index == int(_last_pick.get(key, -1)):
+		index = (index + 1 + _rng.randi_range(0, records.size() - 2)) % records.size()
+	_last_pick[key] = index
+	return records[index] as AudioStream
+
+func play(hook: String, pos: Vector3, extra_db: float = 0.0, pitch: float = 0.0, emitter: Node = null) -> void:
+	if hook == "":
 		return
-	_play_now(kind, pos, extra_db, pitch, spec, ears)
+	var spec: Dictionary = _kind_spec(hook)
+	var distance: float = _listener_pos().distance_to(pos)
+	if _has_ears() and distance > float(spec["max"]):
+		return
+	var place: String = place_at(pos) if _is_weapon_shot(hook) else ""
+	var id: String = resolve_event(hook, place)
+	if emitter != null:
+		for candidate: String in _object_bindings.get(hook, []):
+			var binding: Dictionary = (_events[candidate] as Dictionary).binding as Dictionary
+			if _matches_object(emitter, binding):
+				id = candidate
+				break
+	var stream: AudioStream = _pick(id if id != "" and not _preview.has(hook) else hook, pos)
+	if stream == null:
+		return
+	var baked_place: bool = place != "" and id == String(_bindings.get(hook + "_" + place, ""))
+	var delay: float = distance / float(Balance.AUDIO_FAR.sound_mps) if _has_ears() and bool(spec.get("far", false)) and distance > float(Balance.AUDIO_FAR.delay_from_m) else 0.0
+	if delay > 0.0:
+		get_tree().create_timer(delay).timeout.connect(func() -> void: _play_now(hook, id, stream, pos, extra_db, pitch, spec, place, baked_place))
+	else:
+		_play_now(hook, id, stream, pos, extra_db, pitch, spec, place, baked_place)
 
+func _matches_object(emitter: Node, binding: Dictionary) -> bool:
+	var ancestor: Node = emitter
+	while ancestor != null:
+		if ancestor.scene_file_path == String(binding.scene):
+			var target: Node = ancestor.get_node_or_null(NodePath(String(binding.node)))
+			if target != null and (target == emitter or target.is_ancestor_of(emitter)):
+				return true
+		ancestor = ancestor.get_parent()
+	return false
 
-func _play_now(kind: String, pos: Vector3, extra_db: float, pitch: float, spec: Dictionary, ears: bool) -> void:
+func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extra_db: float, pitch: float, spec: Dictionary, place: String, baked_place: bool) -> void:
 	if get_tree().current_scene == null:
 		return
-	var listener := _listener_pos()
-	var dist := listener.distance_to(pos)
-	# выстрел и взрыв — слоями дистанции (один-два соседних слоя с плавным переходом)
-	var layered := ears and bool(spec.get("far", false))
-	var mix: Array[Dictionary] = []
-	if layered:
-		mix = _layer_mix(kind, dist)
-	if mix.is_empty():
-		var stream: AudioStream = _pick(kind, pos)
-		if stream == null:
-			return
-		mix.append({"stream": stream, "db": 0.0, "layer": ""})
-	var tone := pitch
-	if tone <= 0.0:
-		# слои — записи настоящих выстрелов: тон гуляет чуть-чуть, как от патрона к патрону
-		var jitter := float(Balance.AUDIO_LAYER_MIX.pitch) if String(mix[0].layer) != "" else 0.08
-		tone = _rng.randf_range(1.0 - jitter, 1.0 + jitter)
-	var occluded := ears and bool(spec.get("occlude", false)) and _occluded(listener, pos)
-	var players: Array[AudioStreamPlayer3D] = []
-	for m in mix:
-		var p := AudioStreamPlayer3D.new()
-		p.stream = m.stream
-		p.volume_db = float(spec.db) + extra_db + float(m.db)
-		# в гарнитуре тихое слышно дальше
-		p.unit_size = float(spec.unit) * float(Settings.headset.get("hear_k", 1.0))
-		p.max_distance = float(spec["max"])
-		p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
-		p.pitch_scale = tone
-		if bool(spec.get("far", false)):
-			_apply_air(p, String(m.layer), dist, spec, pitch <= 0.0)
-		# дождь перекрывает шаги и отчасти выстрелы
-		if String(RaidConditions.current.get("weather", "")) == "rain" and Raid.current != null:
-			p.volume_db -= 6.0 if kind.begins_with("step") else (3.0 if Settings.is_shot(kind) else 0.0)
-		if occluded:
-			# за стеной: тише и без верхов
-			p.volume_db -= Balance.AUDIO_OCCLUDED_DB
-			p.attenuation_filter_cutoff_hz = Balance.AUDIO_OCCLUDED_CUTOFF
-		p.bus = Settings.bus_for(kind)
-		p.finished.connect(p.queue_free)
-		get_tree().current_scene.add_child(p)
-		p.global_position = pos
-		p.play()
-		players.append(p)
-	if layered:
-		_track_burst(pos, players)
+	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+	player.stream = stream
+	player.volume_db = float(spec.db) + extra_db
+	player.unit_size = float(spec.unit) * float(Settings.headset.get("hear_k", 1.0))
+	player.max_distance = float(spec["max"])
+	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+	player.pitch_scale = pitch if pitch > 0.0 else 1.0
+	if bool(spec.get("far", false)):
+		player.attenuation_filter_cutoff_hz = float(Balance.AUDIO_FAR.cutoff_hz)
+		player.attenuation_filter_db = float(Balance.AUDIO_FAR.filter_db)
+	if _has_ears() and _occluded(_listener_pos(), pos):
+		player.volume_db -= float(Balance.AUDIO_OCCLUDED_DB)
+		player.attenuation_filter_cutoff_hz = float(Balance.AUDIO_OCCLUDED_CUTOFF)
+	player.bus = _acoustic_bus(hook, place) if not baked_place else Settings.bus_for(hook)
+	player.finished.connect(player.queue_free)
+	get_tree().current_scene.add_child(player)
+	player.global_position = pos
+	player.play()
+	event_played.emit(id, hook, pos)
+	if _is_weapon_shot(hook):
+		_track_burst(pos, [player])
 
+func _is_weapon_shot(hook: String) -> bool:
+	var id: String = String(_bindings.get(hook, hook))
+	var event: Dictionary = _events.get(id, {}) as Dictionary
+	return String(event.get("weapon", "")) != "" and String(event.get("action", "")) in ["shot", "shot_suppressed"]
 
-## Воздух глушит верхи: фильтр 3D-звука растёт с расстоянием. У записи слоя воздух её дистанции уже
-## в записи — движок добавляет немного и то, что дальше дистанции слоя (Balance.AUDIO_LAYERS). У
-## одного звука без слоёв — прежний сильный фильтр и тон чуть ниже вдали.
-func _apply_air(p: AudioStreamPlayer3D, layer: String, dist: float, spec: Dictionary, free_pitch: bool) -> void:
-	if layer == "":
-		var af: Dictionary = Balance.AUDIO_FAR
-		p.attenuation_filter_cutoff_hz = float(af.cutoff_hz)
-		p.attenuation_filter_db = float(af.filter_db)
-		if free_pitch:
-			p.pitch_scale *= lerpf(1.0, float(af.far_pitch), smoothstep(40.0, float(spec["max"]), dist))
+func _kind_spec(hook: String) -> Dictionary:
+	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
+	var profile: String = String(event.get("profile", ""))
+	if String(event.get("weapon", "")) != "":
+		if String(event.get("action", "")).begins_with("shot"):
+			return Balance.SONORA_AUDIO.shot
+		return Balance.SONORA_AUDIO.weapon_action
+	return Balance.AUDIO_EVENT_PROFILES.get(profile, Balance.AUDIO_EVENT_PROFILES.get(hook, Balance.SONORA_AUDIO.world)) as Dictionary
+
+func _acoustic_bus(hook: String, place: String) -> StringName:
+	if not _is_weapon_shot(hook) or place not in ["room", "hall"]:
+		return Settings.bus_for(hook)
+	var bus_name: StringName = StringName("Sonora_" + place)
+	if AudioServer.get_bus_index(bus_name) < 0:
+		var index: int = AudioServer.bus_count
+		AudioServer.add_bus(index)
+		AudioServer.set_bus_name(index, bus_name)
+		AudioServer.set_bus_send(index, &"Shots")
+		var effect: AudioEffectReverb = AudioEffectReverb.new()
+		var cfg: Dictionary = Balance.SONORA_AUDIO.get(place, {}) as Dictionary
+		effect.room_size = float(cfg.size)
+		effect.damping = float(cfg.damping)
+		effect.wet = float(cfg.wet)
+		effect.dry = 1.0
+		AudioServer.add_bus_effect(index, effect)
+	return bus_name
+
+func play_ui(hook: String, extra_db: float = 0.0) -> void:
+	var stream: AudioStream = _pick(hook, _listener_pos())
+	if stream == null:
 		return
-	var lc: Dictionary = Balance.AUDIO_LAYERS[layer]
-	var mc: Dictionary = Balance.AUDIO_LAYER_MIX
-	p.attenuation_filter_cutoff_hz = float(mc.cutoff_hz)
-	p.attenuation_filter_db = clampf(float(lc.air_db) - maxf(0.0, dist - float(lc.at_m)) * float(mc.air_db_per_m), -80.0, 0.0)
+	var player: AudioStreamPlayer = AudioStreamPlayer.new()
+	player.stream = stream
+	player.volume_db = extra_db
+	player.bus = &"World"
+	player.finished.connect(player.queue_free)
+	add_child(player)
+	player.play()
+	event_played.emit(resolve_event(hook), hook, _listener_pos())
 
+func start_loop(hook: String, parent: Node3D, extra_db: float = 0.0) -> AudioStreamPlayer3D:
+	var stream: AudioStream = _pick(hook, parent.global_position)
+	if stream == null:
+		return null
+	make_loop(stream)
+	var spec: Dictionary = _kind_spec(hook)
+	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+	player.stream = stream
+	player.volume_db = float(spec.db) + extra_db
+	player.unit_size = float(spec.unit)
+	player.max_distance = float(spec["max"])
+	player.bus = Settings.bus_for(hook)
+	parent.add_child(player)
+	player.play()
+	return player
 
-## Слои выстрела на этом расстоянии: [{stream, db, layer}]. Пусто — у вида нет ни одной записи
-## слоёв, звучит один звук, как раньше. Слои дистанции (вблизи → средняя → вдали → очень далеко)
-## сменяются плавно: между дистанциями двух соседних слоёв, у которых есть записи, оба звучат с
-## равной мощностью по логарифму расстояния. У самого дула вместо них — свой выстрел.
-func _layer_mix(kind: String, dist: float) -> Array[Dictionary]:
-	var out: Array[Dictionary] = []
-	var sets: Dictionary = {}
-	for layer in LAYERS:
-		var arr := _layer_streams(kind, String(layer))
-		if not arr.is_empty():
-			sets[layer] = arr
-	if sets.is_empty():
-		return out
-	var cfg: Dictionary = Balance.AUDIO_LAYERS
-	var mc: Dictionary = Balance.AUDIO_LAYER_MIX
-	var near := _near_stream(kind)
-	var chain: Array[String] = []
-	if near != null:
-		chain.append("near")
-	for layer in ["mid", "far", "distant"]:
-		if sets.has(layer):
-			chain.append(layer)
-	var w: Dictionary = {}
-	if not chain.is_empty():
-		var lo := 0
-		for i in chain.size():
-			if dist >= float((cfg[chain[i]] as Dictionary).at_m):
-				lo = i
-		var at_lo := float((cfg[chain[lo]] as Dictionary).at_m)
-		if lo + 1 < chain.size() and dist > at_lo:
-			var at_hi := float((cfg[chain[lo + 1]] as Dictionary).at_m)
-			var t := clampf(log(dist / at_lo) / log(at_hi / at_lo), 0.0, 1.0)
-			w[chain[lo]] = cos(t * PI * 0.5)
-			w[chain[lo + 1]] = sin(t * PI * 0.5)
-		else:
-			w[chain[lo]] = 1.0
-	if sets.has("self"):
-		var u := smoothstep(float(mc.self_m), float(mc.self_to_m), dist)
-		for k in w:
-			w[k] = float(w[k]) * sin(u * PI * 0.5)
-		w["self"] = cos(u * PI * 0.5)
-	var floor_lin := db_to_linear(float(mc.min_db))
-	for layer in w:
-		var g := float(w[layer])
-		if g < floor_lin:
+func rain_loop() -> AudioStream:
+	return _loop_record("loop:rain")
+
+func siren_loop() -> AudioStream:
+	return _loop_record("loop:siren")
+
+func hum_loop() -> AudioStream:
+	return _loop_record("loop:hum")
+
+func _loop_record(hook: String) -> AudioStream:
+	var stream: AudioStream = _pick(hook, Vector3.ZERO)
+	if stream != null:
+		make_loop(stream)
+	return stream
+
+func set_preview(streams: Dictionary) -> void:
+	_preview = streams
+	_last_pick.clear()
+
+func _on_audio_node_added(node: Node) -> void:
+	if node is Node3D and _scene_paths.has(node.scene_file_path):
+		_scan_needed = true
+	if node is BaseButton and not node.has_meta("sound_wired"):
+		var button: BaseButton = node as BaseButton
+		button.set_meta("sound_wired", true)
+		button.pressed.connect(func() -> void: play_ui("ui_click", -5.0))
+		button.mouse_entered.connect(func() -> void:
+			if not button.disabled:
+				play_ui("ui_hover", -11.0))
+
+func _process(_delta: float) -> void:
+	# Уровни могут создаваться и выгружаться внутри Raid; привязки ищутся в их собственных сценах.
+	if not _scan_needed:
+		return
+	_scan_needed = false
+	if _scene_paths.is_empty():
+		return
+	var scenes: Array[Node] = get_tree().root.find_children("*", "Node3D", true, false)
+	for id: String in _events:
+		var event: Dictionary = _events[id] as Dictionary
+		var binding: Dictionary = event.get("binding", {}) as Dictionary
+		var mode: String = String(binding.get("type", "action"))
+		if mode not in ["scene_start", "area"] or (_samples.get(id, []) as Array).is_empty():
 			continue
-		var st: AudioStream = near if layer == "near" else _pick_from(sets[layer], "%s@%s" % [kind, layer])
-		if st == null:
-			continue
-		out.append({"stream": st, "db": linear_to_db(g) + float((cfg[layer] as Dictionary).get("db", 0.0)), "layer": String(layer)})
-	return out
+		for scene: Node in scenes:
+			if scene.scene_file_path != String(binding.get("scene", "")):
+				continue
+			var anchor: Node3D = scene.get_node_or_null(NodePath(String(binding.get("node", ".")))) as Node3D
+			if anchor == null:
+				continue
+			var key: String = id + ":" + str(anchor.get_instance_id())
+			if _triggered.has(key):
+				continue
+			_triggered[key] = true
+			if mode == "scene_start":
+				if String(event.get("type", "one")) == "loop":
+					start_loop(id, anchor)
+				else:
+					play(id, anchor.global_position)
+			else:
+				_add_area(id, anchor, float(binding.get("radius", 3.0)))
+
+func _add_area(id: String, anchor: Node3D, radius: float) -> void:
+	var area: Area3D = Area3D.new()
+	area.name = "Sonora_" + id
+	area.collision_layer = 0
+	area.collision_mask = Hitscan.LAYER_PLAYER
+	var shape: CollisionShape3D = CollisionShape3D.new()
+	var sphere: SphereShape3D = SphereShape3D.new()
+	sphere.radius = radius
+	shape.shape = sphere
+	area.add_child(shape)
+	anchor.add_child.call_deferred(area)
+	area.body_entered.connect(func(body: Node3D) -> void:
+		if body is Player and (body as Player).is_local():
+			play(id, anchor.global_position))
+
+func _load_audio_file(path: String) -> AudioStream:
+	if ResourceLoader.exists(path):
+		return load(path) as AudioStream
+	if not FileAccess.file_exists(path):
+		return null
+	match path.get_extension().to_lower():
+		"wav": return AudioStreamWAV.load_from_file(path)
+		"ogg": return AudioStreamOggVorbis.load_from_file(path)
+		"mp3": return AudioStreamMP3.load_from_file(path)
+	return null
 
 
-## Записи слоя: свои у вида, иначе первые по запасной цепочке (средняя дистанция похожего ствола
-## лучше, чем ничего). Свой выстрел — только из того же набора, что звучит вблизи: иначе свой ПМ
-## с одобренной записью звучал бы у самого уха чужим пистолетом.
-func _layer_streams(kind: String, layer: String) -> Array:
-	var near_owner := _near_owner(kind)
-	var c := kind
-	for _i in 8:
-		var arr := _layer_set(c, layer)
-		if not arr.is_empty():
-			return arr
-		if (layer == "self" and c == near_owner) or _no_fallback.has(c):
-			return []
-		var next := String(FALLBACKS.get(c, _catalog_fallbacks.get(c, c)))
-		if next == c:
-			return []
-		c = next
-	return []
+func place_at(pos: Vector3) -> String:
+	var cfg: Dictionary = Balance.SHOT_PLACE
+	var cell := float(cfg.cell_m)
+	var key := Vector3i(roundi(pos.x / cell), roundi(pos.y / cell), roundi(pos.z / cell))
+	var now := Time.get_ticks_msec() * 0.001
+	var known: Dictionary = _place_cache.get(key, {})
+	if not known.is_empty() and now - float(known.t) < float(cfg.ttl_sec):
+		return String(known.place)
+	var world := get_viewport().find_world_3d() if get_viewport() else null
+	var place: String = AcousticPlace.classify(world, pos) if world != null else AcousticPlace.OUTDOOR
+	if _place_cache.size() > 512:
+		_place_cache.clear()
+	_place_cache[key] = {"place": place, "t": now}
+	return place
 
 
-func _layer_set(kind: String, layer: String) -> Array:
-	var own: Array = (_layers.get(layer, {}) as Dictionary).get(kind, [])
-	var pre: Array = _preview.get("%s@%s" % [kind, layer], [])
-	return own + pre if not pre.is_empty() else own
+## Хвост места к выстрелу: тот же стрелок, та же дальность и шина; громкость — от выстрела по месту
+## (Balance.SHOT_TAIL). null — записей хвоста нет или слушатель слишком далеко.
 
 
-func _near_set(kind: String) -> Array:
-	var own: Array = _samples.get(kind, [])
-	var pre: Array = _preview.get(kind, [])
-	return own + pre if not pre.is_empty() else own
-
-
-## Чей набор звучит вблизи: сам вид, если у него есть записи, иначе конец запасной цепочки.
-func _near_owner(kind: String) -> String:
-	if not _near_set(kind).is_empty() or _no_fallback.has(kind):
-		return kind
-	return _fallback_kind(kind)
-
-
-## Очередь: хвосты выстрелов одного стрелка звучат внахлёст, как в жизни (эхо очереди — сумма эха
-## выстрелов). Сверх voices самый старый хвост быстро гаснет — иначе длинная очередь копит десятки
-## плееров. Один стрелок — выстрелы ближе radius_m друг к другу и не реже window_sec.
 func _track_burst(pos: Vector3, players: Array[AudioStreamPlayer3D]) -> void:
 	var cfg: Dictionary = Balance.AUDIO_BURST
 	var now := Time.get_ticks_msec() * 0.001
@@ -421,67 +369,12 @@ func _fade_out(p: AudioStreamPlayer3D, sec: float) -> void:
 	tw.tween_callback(p.queue_free)
 
 
-## Стенд звуков: кандидаты «как в игре» до переноса в assets/audio. Ключ — вид или «вид@слой»,
-## значение — [записи]; пустой словарь — только assets/audio.
-func set_preview(streams: Dictionary) -> void:
-	_preview = streams
-	_last_pick.clear()
+## Подставить записи поверх assets/audio (см. _preview); пустой словарь — только assets/audio.
 
 
-## Непространственный звук интерфейса. Запись и запасной вариант берутся из того же каталога.
-func play_ui(kind: String, extra_db: float = 0.0) -> void:
-	var stream: AudioStream = _pick(kind, _listener_pos())
-	if stream == null:
-		return
-	var p := AudioStreamPlayer.new()
-	p.stream = stream
-	p.volume_db = extra_db
-	p.bus = &"World"
-	p.finished.connect(p.queue_free)
-	add_child(p)
-	p.play()
-
-
-## Зацикленный пространственный звук, привязанный к объекту (ракета, прибор, источник фона).
-## Если своей или запасной записи пока нет, возвращает null: игровой объект продолжает работать.
-func start_loop(kind: String, parent: Node3D, extra_db: float = 0.0) -> AudioStreamPlayer3D:
-	var stream: AudioStream = _pick(kind, parent.global_position)
-	if stream == null:
-		return null
-	make_loop(stream)
-	var spec := _kind_spec(kind)
-	var p := AudioStreamPlayer3D.new()
-	p.stream = stream
-	p.volume_db = float(spec.db) + extra_db
-	p.unit_size = float(spec.unit)
-	p.max_distance = float(spec["max"])
-	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
-	p.bus = Settings.bus_for(kind)
-	parent.add_child(p)
-	p.play()
-	return p
-
-
-func _kind_spec(kind: String) -> Dictionary:
-	return KINDS.get(kind, KINDS.get(_fallback_kind(kind), KINDS.pin))
-
-
-## Все обычные кнопки получают единый клик и наведение, включая созданные кодом позднее.
-func _on_audio_node_added(node: Node) -> void:
-	var button := node as BaseButton
-	if button == null or button.has_meta("sound_wired"):
-		return
-	button.set_meta("sound_wired", true)
-	button.pressed.connect(func() -> void: play_ui("ui_click", -5.0))
-	button.mouse_entered.connect(func() -> void:
-		if not button.disabled:
-			play_ui("ui_hover", -11.0))
-
-
-## Шаг в точке pos: поверхность под ногами, бег/шаг, мародёр (ботинки ниже и громче), левая/правая.
 func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right: Vector3 = Vector3.ZERO) -> void:
 	# дальше, чем слышно бег, — не считаем (24 мародёра шагают всё время)
-	if _has_ears() and _listener_pos().distance_to(pos) > float(KINDS.step_stone_run["max"]):
+	if _has_ears() and _listener_pos().distance_to(pos) > float(Balance.AUDIO_EVENT_PROFILES.step_stone_run["max"]):
 		return
 	var surf := _surface_under(pos)
 	# вброд — плеск, что бы ни было на дне
@@ -500,11 +393,40 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 	if run:
 		play("gear_rattle", pos, db - 5.0, pitch)
 	stepped.emit(kind, surf, pos)
-	if surf == "metal":
-		play("step_metal", sound_pos, db + (2.0 if run else 0.0), pitch)
+
+
+## Гильза упала рядом со стрелком (from — его ноги, right — вправо от него): звук по полу под ней,
+## на твёрдом иногда ещё катится. Физической гильзы нет, только звук. Записей нет — молчит.
+
+
+func shell_drop(from: Vector3, right: Vector3, extra_db: float = 0.0, weapon_id: String = "") -> void:
+	var cfg: Dictionary = Balance.SHELL_DROP
+	if _has_ears() and _listener_pos().distance_to(from) > float(cfg.hear_m):
+		return
+	var side := right * _rng.randf_range(float(cfg.side_min), float(cfg.side_max))
+	# right × вверх = назад стрелка (взгляд по −Z, вправо +X)
+	var land := from + side + right.cross(Vector3.UP) * float(cfg.back)
+	var delay := _rng.randf_range(float(cfg.delay_min), float(cfg.delay_max))
+	get_tree().create_timer(delay).timeout.connect(func() -> void: _shell_land(land, extra_db, weapon_id))
+
+
+func _shell_land(land: Vector3, extra_db: float, weapon_id: String = "") -> void:
+	var cfg: Dictionary = Balance.SHELL_DROP
+	var surf := _surface_under(land)
+	var kind := "shell_soft"
+	if surf in (cfg.metal as Array):
+		kind = "shell_metal"
+	elif surf in (cfg.hard as Array):
+		kind = "shell_hard"
+	play(weapon_id + "_" + kind if weapon_id != "" else kind, land, float(cfg.db) + extra_db)
+	if kind != "shell_soft" and _rng.randf() < float(cfg.roll_chance):
+		get_tree().create_timer(float(cfg.roll_delay)).timeout.connect(
+			func() -> void: play(weapon_id + "_shell_roll" if weapon_id != "" else "shell_roll", land, float(cfg.db) + extra_db))
 
 
 ## Под навесом асфальт сухой, как в шейдере покрытия; погода проверяется у шагающего, не у слушателя.
+
+
 func _wet_asphalt_at(pos: Vector3) -> bool:
 	var weather: RaidWeather = RaidWeather.current
 	if weather == null:
@@ -521,6 +443,8 @@ func _wet_asphalt_at(pos: Vector3) -> bool:
 
 
 ## Из чего пол под точкой (Surfaces), "concrete" — если не понять.
+
+
 func _surface_under(pos: Vector3) -> String:
 	var world := get_viewport().find_world_3d() if get_viewport() else null
 	if world == null:
@@ -543,12 +467,16 @@ func _is_boundary(hit: Dictionary) -> bool:
 
 
 ## Есть кто слушает (камера или AudioListener3D) — иначе расстояние до «ушей» не знаем.
+
+
 func _has_ears() -> bool:
 	var vp := get_viewport()
 	return vp != null and (vp.get_audio_listener_3d() != null or vp.get_camera_3d() != null)
 
 
 ## Между ушами и источником — стена или дверь.
+
+
 func _occluded(listener: Vector3, pos: Vector3) -> bool:
 	var world := get_viewport().find_world_3d() if get_viewport() else null
 	if world == null or listener.distance_to(pos) < 1.5:
@@ -558,50 +486,6 @@ func _occluded(listener: Vector3, pos: Vector3) -> bool:
 
 
 ## Запись (или дальняя запись), иначе синтетика.
-func _pick(kind: String, pos: Vector3) -> AudioStream:
-	if _has_ears() and bool(_kind_spec(kind).get("far", false)):
-		var mix := _layer_mix(kind, _listener_pos().distance_to(pos))
-		if not mix.is_empty():
-			var best: Dictionary = mix[0]
-			for m in mix:
-				if float(m.db) > float(best.db):
-					best = m
-			return best.stream
-	return _near_stream(kind)
-
-
-## Запись «вблизи» (или синтез), без слоёв дистанции.
-func _near_stream(kind: String) -> AudioStream:
-	# запасной набор снят на стенде — событие звучит только своим (или молчит)
-	var fallback := kind if _no_fallback.has(kind) else _fallback_kind(kind)
-	var sample_kind := kind if not _near_set(kind).is_empty() else fallback
-	var arr := _near_set(sample_kind)
-	if not arr.is_empty():
-		return _pick_from(arr, sample_kind)
-	if _no_synth.has(kind):
-		return null
-	return _streams.get(kind, _streams.get(fallback))
-
-
-## Случайный вариант; подряд один и тот же не звучит.
-func _pick_from(arr: Array, key: String) -> AudioStream:
-	var i := _rng.randi_range(0, arr.size() - 1)
-	if arr.size() > 1 and i == int(_last_pick.get(key, -1)):
-		i = (i + 1 + _rng.randi_range(0, arr.size() - 2)) % arr.size()
-	_last_pick[key] = i
-	return arr[i]
-
-
-func _fallback_kind(kind: String) -> String:
-	var current := kind
-	# Некоторые подробные события наследуют другой каталоговый звук, а тот — базовый синтез.
-	# Идём по цепочке с пределом, чтобы ошибочный цикл в данных не повесил игру.
-	for _i in 8:
-		var next := String(FALLBACKS.get(current, _catalog_fallbacks.get(current, current)))
-		if next == current:
-			return current
-		current = next
-	return current
 
 
 func _listener_pos() -> Vector3:
@@ -613,80 +497,6 @@ func _listener_pos() -> Vector3:
 	return cam.global_position if cam else Vector3.ZERO
 
 
-func _load_samples() -> void:
-	for kind in SAMPLES:
-		var arr := _load_prefixes(SAMPLES[kind])
-		if not arr.is_empty():
-			_samples[kind] = arr
-	for layer in LAYERS:
-		_layers[layer] = {}
-	for kind in FAR:
-		var arr := _load_prefixes([FAR[kind]])
-		if not arr.is_empty():
-			_layers.far[kind] = arr
-	for layer in _catalog_layers:
-		for kind in _catalog_layers[layer]:
-			var arr := _load_prefixes([String(_catalog_layers[layer][kind])])
-			if not arr.is_empty():
-				(_layers[layer] as Dictionary)[kind] = arr
-	for kind in OWN:
-		var own := _load_prefixes([OWN[kind]])
-		if not own.is_empty():
-			_samples[kind] = own
-	# Новое событие достаточно описать в каталоге и вызвать Audio.play(id): одобренные записи
-	# начнут работать без очередного изменения таблицы SAMPLES.
-	for kind in _catalog_prefixes:
-		var prefixes: Array[String] = []
-		for prefix in _catalog_prefixes[kind]:
-			prefixes.append(String(prefix))
-		var arr := _load_prefixes(prefixes)
-		if not arr.is_empty():
-			_samples[kind] = arr
-	# записи, назначенные событию из чужих наборов: добавляются к своим (и, как свои, заменяют
-	# запасной набор)
-	for kind in _kind_links:
-		var arr := _load_files(_kind_links[kind])
-		if not arr.is_empty():
-			var own: Array = _samples.get(kind, [])
-			_samples[kind] = own + arr
-	for layer in _layer_links:
-		for kind in _layer_links[layer]:
-			var arr := _load_files(_layer_links[layer][kind])
-			if not arr.is_empty():
-				var into: Dictionary = _layers[layer]
-				var own: Array = into.get(kind, [])
-				into[kind] = own + arr
-
-
-## Перечитать записи с диска. Стенд вызывает это после принятия нового файла: запись начинает
-## звучать через настоящий Audio.play уже в текущем запуске, даже до переимпорта редактором.
-func reload_samples() -> void:
-	_samples.clear()
-	_layers.clear()
-	_last_pick.clear()
-	_rain_loop = null
-	_siren = null
-	_hum = null
-	_load_active_selection()
-	_load_catalog()
-	_load_samples()
-	var ambient := _loop_sample("ambient")
-	if _ambient != null and ambient != null:
-		_ambient.stream = ambient
-		_ambient.play()
-
-
-## Луп из записи (LOOPS), иначе null — тогда синтез.
-func _loop_sample(name: String) -> AudioStream:
-	var arr := _load_prefixes([String(LOOPS[name])])
-	if arr.is_empty():
-		return null
-	var st: AudioStream = arr[0]
-	make_loop(st)
-	return st
-
-
-## Зациклить запись любого формата (ogg / mp3 / wav).
 func make_loop(st: AudioStream) -> void:
 	if st is AudioStreamOggVorbis:
 		(st as AudioStreamOggVorbis).loop = true
@@ -700,607 +510,11 @@ func make_loop(st: AudioStream) -> void:
 		w.loop_end = w.data.size() / bytes
 
 
-## Фон, который сейчас играет (ветер) — для стенда звуков.
-func ambient_stream() -> AudioStream:
-	return _ambient.stream if _ambient else null
-
-
-## Есть синтетический запасной звук этого вида (стенд звуков: «как в игре»).
-func has_synth(kind: String) -> bool:
-	return _streams.has(kind) or _streams.has(_fallback_kind(kind))
-
-
-## Синтез у самого вида, без запасной цепочки (стенд: снят запасной набор — остаётся ли синтез).
-func has_own_synth(kind: String) -> bool:
-	return _streams.has(kind)
-
-
-## Синтез, которым звучит вид без записей (стенд: прослушать); own_only — без запасной цепочки.
-func synth_stream(kind: String, own_only: bool = false) -> AudioStream:
-	if own_only:
-		return _streams.get(kind)
-	return _streams.get(kind, _streams.get(_fallback_kind(kind)))
-
-
-## Отдельные записи по путям относительно assets/audio (назначенные на стенде).
-func _load_files(rels: Array) -> Array:
-	var out: Array = []
-	for rel in rels:
-		var r := String(rel)
-		if _disabled.has(r):
-			continue
-		var resource_path := "res://assets/audio/" + r
-		var st: AudioStream = load(resource_path) as AudioStream if ResourceLoader.exists(resource_path) else null
-		if st == null and FileAccess.file_exists(resource_path):
-			st = _load_audio_file(ProjectSettings.globalize_path(resource_path))
-		if st:
-			out.append(st)
-	return out
-
-
-func _load_prefixes(prefixes: Array) -> Array:
-	var out: Array = []
-	for pr in prefixes:
-		var parts := String(pr).split("/")
-		var dir := "res://assets/audio/%s/" % parts[0]
-		if not DirAccess.dir_exists_absolute(dir):
-			continue
-		for f in DirAccess.get_files_at(dir):
-			var stem := String(f).get_basename()
-			if not stem.begins_with(parts[1]):
-				continue
-			if not stem.trim_prefix(parts[1]).is_valid_int():
-				continue
-			var resource_path := dir + f
-			if _disabled.has(resource_path.trim_prefix("res://assets/audio/")):
-				continue
-			var st: AudioStream = load(resource_path) as AudioStream if ResourceLoader.exists(resource_path) else null
-			# Сразу после копирования из _sound_try импорт ещё не успел создать ресурс. Декодеры
-			# форматов умеют читать исходник напрямую; при следующем запуске пойдёт обычный ресурс.
-			if st == null:
-				st = _load_audio_file(ProjectSettings.globalize_path(resource_path))
-			if st:
-				out.append(st)
-	return out
-
-
-func _load_active_selection() -> void:
-	_disabled.clear()
-	_links_by_id.clear()
-	_removed_by_id.clear()
-	if not FileAccess.file_exists(ACTIVE_SELECTION):
-		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ACTIVE_SELECTION))
-	if not parsed is Dictionary:
-		return
-	for rel in (parsed as Dictionary).get("disabled", []):
-		_disabled[String(rel).replace("\\", "/")] = true
-	var links: Variant = (parsed as Dictionary).get("links", {})
-	if links is Dictionary:
-		_links_by_id = (links as Dictionary).duplicate(true)
-	var removed: Variant = (parsed as Dictionary).get("removed", {})
-	if removed is Dictionary:
-		_removed_by_id = (removed as Dictionary).duplicate(true)
-
-
-func _load_catalog() -> void:
-	_catalog_prefixes.clear()
-	_catalog_fallbacks.clear()
-	_catalog_layers.clear()
-	if not FileAccess.file_exists(CATALOG):
-		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(CATALOG))
-	if not parsed is Dictionary:
-		return
-	var entries: Array = (parsed as Dictionary).get("sounds", []).duplicate()
-	entries.append_array(WeaponDb.weapon_sound_events())
-	entries.append_array(WeaponDb.family_sound_events())
-	var id_kinds: Dictionary = {}
-	var raw_kinds: Dictionary = {}
-	for raw in entries:
-		if raw is Dictionary:
-			var e := raw as Dictionary
-			id_kinds[String(e.get("id", ""))] = kind_base(String(e.get("kind", "")))
-			raw_kinds[String(e.get("id", ""))] = String(e.get("kind", ""))
-	_resolve_bench(raw_kinds)
-	for raw in entries:
-		if not raw is Dictionary:
-			continue
-		var e := raw as Dictionary
-		var kind := String(e.get("kind", ""))
-		if kind == "" or kind.begins_with("loop:"):
-			continue
-		var base_kind := kind_base(kind)
-		var layer := kind_layer(kind)
-		if layer != "":
-			if not _catalog_layers.has(layer):
-				_catalog_layers[layer] = {}
-			(_catalog_layers[layer] as Dictionary)[base_kind] = String(e.get("file", ""))
-			continue
-		var prefix := String(e.get("file", ""))
-		if prefix != "":
-			if not _catalog_prefixes.has(base_kind):
-				_catalog_prefixes[base_kind] = []
-			var prefixes := _catalog_prefixes[base_kind] as Array
-			if prefix not in prefixes:
-				prefixes.append(prefix)
-		var fallback := String(e.get("fallback", ""))
-		if fallback != "":
-			_catalog_fallbacks[base_kind] = String(id_kinds.get(fallback, fallback))
-
-
-## Вид без слоя: «shot_rifle@mid» → «shot_rifle».
-func kind_base(kind: String) -> String:
-	var at := kind.find("@")
-	return kind if at < 0 else kind.substr(0, at)
-
-
-## Слой дистанции вида («self», «mid», «far», «distant»); "" — запись «вблизи» или не выстрел.
-func kind_layer(kind: String) -> String:
-	var at := kind.find("@")
-	var layer := "" if at < 0 else kind.substr(at + 1)
-	return layer if layer in LAYERS else ""
-
-
-## Расстояние, на котором слой звучит один (стенд ставит туда звук «как в игре»).
-func layer_at_m(layer: String) -> float:
-	if layer == "self":
-		return 0.5
-	return float((Balance.AUDIO_LAYERS.get(layer if layer != "" else "near", {}) as Dictionary).get("at_m", 3.0))
-
-
-## Назначения стенда — из id каталога в виды Audio (событие без вида в коде пока не звучит).
-func _resolve_bench(raw_kinds: Dictionary) -> void:
-	_kind_links.clear()
-	_layer_links.clear()
-	_no_synth.clear()
-	_no_fallback.clear()
-	for id in _links_by_id:
-		var kind := String(raw_kinds.get(String(id), ""))
-		if kind == "" or kind.begins_with("loop:") or not _links_by_id[id] is Array:
-			continue
-		var layer := kind_layer(kind)
-		if layer != "" and not _layer_links.has(layer):
-			_layer_links[layer] = {}
-		var into: Dictionary = _layer_links[layer] if layer != "" else _kind_links
-		var base := kind_base(kind)
-		var arr: Array = into.get(base, [])
-		for rel in _links_by_id[id]:
-			if not String(rel) in arr:
-				arr.append(String(rel))
-		into[base] = arr
-	for id in _removed_by_id:
-		var kind := String(raw_kinds.get(String(id), ""))
-		if kind == "" or kind.begins_with("loop:") or kind_layer(kind) != "" or not _removed_by_id[id] is Array:
-			continue
-		if "synth" in _removed_by_id[id]:
-			_no_synth[kind] = true
-		if "fallback" in _removed_by_id[id]:
-			_no_fallback[kind] = true
-
-
-func _load_audio_file(path: String) -> AudioStream:
-	match path.get_extension().to_lower():
-		"ogg":
-			return AudioStreamOggVorbis.load_from_file(path)
-		"wav":
-			return AudioStreamWAV.load_from_file(path)
-		"mp3":
-			return AudioStreamMP3.load_from_file(path)
-	return null
-
-
-# ---------------------------------------------------------------- синтез
-
-func _make(samples: PackedFloat32Array) -> AudioStreamWAV:
-	var wav := AudioStreamWAV.new()
-	wav.format = AudioStreamWAV.FORMAT_16_BITS
-	wav.mix_rate = MIX_RATE
-	wav.stereo = false
-	var bytes := PackedByteArray()
-	bytes.resize(samples.size() * 2)
-	for i in range(samples.size()):
-		var v := int(clampf(samples[i], -1.0, 1.0) * 32767.0)
-		bytes.encode_s16(i * 2, v)
-	wav.data = bytes
-	return wav
-
-
-func _noise() -> float:
-	return _rng.randf_range(-1.0, 1.0)
-
-
-## Выстрел: щелчок белого шума с быстрым спадом + низкий удар + хвост.
-func _gunshot(dur: float, brightness: float) -> PackedFloat32Array:
-	var n := int(dur * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var crack := _noise() * exp(-t * 60.0)
-		lp += (_noise() - lp) * (0.25 * brightness)
-		var body := lp * exp(-t * 14.0) * 1.6
-		var thump := sin(TAU * 70.0 * t) * exp(-t * 18.0) * 0.9
-		out[i] = tanh((crack * 1.2 + body + thump) * 1.4)
-	return out
-
-
-## Шаг: короткий глухой шорох.
-func _footstep() -> PackedFloat32Array:
-	var n := int(0.11 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		lp += (_noise() - lp) * 0.18
-		var env := minf(1.0, t * 400.0) * exp(-t * 45.0)
-		out[i] = lp * env * 1.8
-	return out
-
-
-## Звонкий слой шага по металлу (решётка, лист, эскалатор): пара негармоничных обертонов + щелчок.
-func _step_metal() -> PackedFloat32Array:
-	var n := int(0.22 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var ring := sin(TAU * 690.0 * t) * 0.5 + sin(TAU * 1130.0 * t) * 0.35 + sin(TAU * 1870.0 * t) * 0.2
-		var click := _noise() * exp(-t * 180.0)
-		out[i] = (ring * exp(-t * 26.0) * 0.55 + click * 0.5) * minf(1.0, t * 900.0)
-	return out
-
-
-var _rain_loop: AudioStream
-
-
-## Шум дождя — 4 с петлёй: «розовый» шум с каплями.
-func rain_loop() -> AudioStream:
-	if _rain_loop:
-		return _rain_loop
-	var rec := _loop_sample("rain")
-	if rec:
-		_rain_loop = rec
-		return rec
-	var n := int(4.0 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var b0 := 0.0
-	var b1 := 0.0
-	for i in range(n):
-		var w := _noise()
-		b0 = 0.97 * b0 + w * 0.08
-		b1 = 0.6 * b1 + w * 0.3
-		var drop := _noise() * 0.6 if _rng.randf() < 0.004 else 0.0
-		out[i] = (b0 + b1 * 0.5 + drop) * 0.5
-	var w := _make(out)
-	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	w.loop_end = n
-	_rain_loop = w
-	return w
-
-
-var _siren: AudioStream
-var _hum: AudioStream
-
-
-## Сирена сигнализации: два тона по очереди, петлёй.
-func siren_loop() -> AudioStream:
-	if _siren:
-		return _siren
-	var rec := _loop_sample("siren")
-	if rec:
-		_siren = rec
-		return rec
-	var n := int(1.6 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var ph := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var f := 960.0 if fmod(t, 0.8) < 0.4 else 720.0
-		ph += TAU * f / MIX_RATE
-		out[i] = (sin(ph) * 0.5 + sin(ph * 2.0) * 0.15) * 0.8
-	var w := _make(out)
-	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	w.loop_end = n
-	_siren = w
-	return w
-
-
-## Гул генератора: низкий тон с дребезгом, петлёй.
-func hum_loop() -> AudioStream:
-	if _hum:
-		return _hum
-	var rec := _loop_sample("hum")
-	if rec:
-		_hum = rec
-		return rec
-	var n := int(1.0 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		out[i] = (sin(TAU * 50.0 * t) * 0.5 + sin(TAU * 100.0 * t) * 0.25 + sin(TAU * 150.0 * t) * 0.1) * (0.8 + 0.2 * sin(TAU * 7.0 * t))
-	var w := _make(out)
-	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	w.loop_end = n
-	_hum = w
-	return w
-
-
-## Вертолёт: хлопки лопастей по шуму, нарастает и уходит.
-func _rotor(dur: float) -> PackedFloat32Array:
-	var n := int(dur * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		lp += (_noise() - lp) * 0.08
-		var blade := pow(maxf(0.0, sin(TAU * 11.0 * t)), 6.0)
-		var env := sin(PI * t / dur)
-		out[i] = lp * (0.3 + blade * 1.4) * env
-	return out
-
-
-## Мотор машины: низкое урчание, заглох, хлопки дверей.
-func _engine() -> PackedFloat32Array:
-	var n := int(3.0 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var ph := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var f := lerpf(42.0, 18.0, clampf(t / 1.8, 0.0, 1.0))
-		ph += TAU * f / MIX_RATE
-		var v := (sin(ph) + sin(ph * 2.0) * 0.4) * (0.4 if t < 1.8 else 0.0)
-		for d in [2.2, 2.6]:
-			var dt: float = t - float(d)
-			if dt >= 0.0:
-				v += _noise() * exp(-dt * 40.0) * 0.8
-		out[i] = v
-	return out
-
-
-## Гром: низкий раскат — шум через фильтр, медленная огибающая с толчками.
-func _thunder() -> PackedFloat32Array:
-	var n := int(3.5 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		lp += (_noise() - lp) * 0.02
-		var env := minf(1.0, t * 6.0) * exp(-t * 0.9) * (0.7 + 0.3 * sin(t * 7.0))
-		out[i] = lp * env * 3.0
-	return out
-
-
-## Стук сердца: «тук-тук» — два низких глухих удара.
-func _heartbeat() -> PackedFloat32Array:
-	var n := int(0.5 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var v := 0.0
-		for pair in [[0.0, 1.0], [0.19, 0.7]]:
-			var tt: float = t - float(pair[0])
-			if tt >= 0.0:
-				v += sin(TAU * 52.0 * tt) * exp(-tt * 22.0) * float(pair[1]) * minf(1.0, tt * 300.0)
-		out[i] = v * 0.9
-	return out
-
-
-## Дверь: скрип — свип синуса с дрожанием + шорох.
-func _door() -> PackedFloat32Array:
-	var n := int(0.55 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var phase := 0.0
-	var lp := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var f := 210.0 - 90.0 * t + sin(t * 40.0) * 12.0
-		phase += TAU * f / MIX_RATE
-		lp += (_noise() - lp) * 0.1
-		var env := sin(PI * t / 0.55)
-		out[i] = (sin(phase) * 0.35 + sin(phase * 2.01) * 0.12 + lp * 0.5) * env
-	return out
-
-
-## Попадание: глухой удар.
-func _hit() -> PackedFloat32Array:
-	var n := int(0.18 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		lp += (_noise() - lp) * 0.08
-		out[i] = (lp * 2.0 + sin(TAU * 55.0 * t) * 0.6) * exp(-t * 28.0)
-	return out
-
-
-## Перезарядка: два металлических щелчка.
-func _reload() -> PackedFloat32Array:
-	var n := int(0.45 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var v := 0.0
-		for click: float in [0.0, 0.27]:
-			var dt: float = t - click
-			if dt >= 0.0:
-				v += _noise() * exp(-dt * 220.0) * 0.8 + sin(TAU * 1800.0 * dt) * exp(-dt * 90.0) * 0.3
-		out[i] = v
-	return out
-
-
-## Вскинул оружие к плечу / опустил: мягкий шорох ткани (шум через фильтр, колокол огибающей) и
-## еле слышное касание снаряжения. soft — сколько «касания».
-func _ads_cloth(dur: float, soft: float) -> PackedFloat32Array:
-	var n := int(dur * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	var lp2 := 0.0
-	var tick_at := dur * _rng.randf_range(0.45, 0.7)
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var x := t / dur
-		# шорох: шум, сглаженный дважды (ткань — глухая), огибающая — быстрый подъём, плавный спад
-		lp += (_noise() - lp) * 0.18
-		lp2 += (lp - lp2) * 0.3
-		var env := sin(PI * clampf(x * 1.15, 0.0, 1.0)) * (1.0 - x * 0.4)
-		var v := lp2 * env * 1.4
-		# касание: короткий тихий тык (ремень, антабка)
-		var dt := t - tick_at
-		if dt >= 0.0:
-			v += (sin(TAU * 900.0 * dt) * 0.4 + _noise() * 0.3) * exp(-dt * 160.0) * 0.18 * soft
-		out[i] = v
-	return out
-
-
-## Патрон в магазин: щелчок металла о губы магазина (узкий звонкий удар) + короткий шорох пружины
-## и мягкий «досыл» следом.
-func _mag_round() -> PackedFloat32Array:
-	var n := int(0.12 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var prev := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var w := _noise()
-		var hp := w - prev * 0.85
-		prev = w
-		var click := (hp * 0.7 + sin(TAU * 3400.0 * t) * 0.5 + sin(TAU * 5200.0 * t) * 0.25) * exp(-t * 240.0)
-		var spring := hp * exp(-t * 55.0) * 0.18
-		var dt := t - 0.045
-		var seat := 0.0
-		if dt >= 0.0:
-			seat = (sin(TAU * 2100.0 * dt) * 0.35 + hp * 0.2) * exp(-dt * 300.0)
-		out[i] = tanh((click + spring + seat) * 1.3)
-	return out
-
-
-## Удар по бетону/плитке: сухой щелчок с крошкой.
-func _impact_hard() -> PackedFloat32Array:
-	var n := int(0.14 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var prev := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var w := _noise()
-		var hp := w - prev * 0.6
-		prev = w
-		out[i] = hp * exp(-t * 55.0) * 1.3 + _noise() * exp(-t * 25.0) * 0.25
-	return out
-
-
-## Удар по металлу: звон.
-func _impact_metal() -> PackedFloat32Array:
-	var n := int(0.32 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var f := _rng.randf_range(1900.0, 2600.0)
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		out[i] = _noise() * exp(-t * 90.0) * 0.9 + (sin(TAU * f * t) * 0.5 + sin(TAU * f * 1.51 * t) * 0.25) * exp(-t * 14.0)
-	return out
-
-
-## Удар по стеклу: звон осколков.
-func _impact_glass() -> PackedFloat32Array:
-	var n := int(0.5 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var tones: Array[float] = []
-	for k in range(5):
-		tones.append(_rng.randf_range(2800.0, 6500.0))
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var v := _noise() * exp(-t * 70.0) * 0.8
-		for k in range(tones.size()):
-			var on := 0.03 * k
-			if t > on:
-				v += sin(TAU * tones[k] * (t - on)) * exp(-(t - on) * 12.0) * 0.18
-		out[i] = v
-	return out
-
-
-## Витрина осыпалась: хруст в начале, потом сотни звонких осколков с затуханием (0.9 с).
-func _glass_break() -> PackedFloat32Array:
-	var n := int(0.9 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var tinks: Array = []
-	for k in range(38):
-		# осколки падают не сразу: гуще в начале
-		tinks.append([pow(_rng.randf(), 1.8) * 0.7, _rng.randf_range(2400.0, 7800.0), _rng.randf_range(0.05, 0.22)])
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		var v := _noise() * (exp(-t * 18.0) * 0.9 + exp(-t * 4.0) * 0.12)
-		for tk in tinks:
-			var on: float = tk[0]
-			if t > on:
-				var dt := t - on
-				v += sin(TAU * float(tk[1]) * dt) * exp(-dt * 30.0) * float(tk[2])
-		out[i] = clampf(v, -1.0, 1.0) * 0.8
-	return out
-
-
-## Удар по дереву/картону: глухой тук.
-func _impact_soft() -> PackedFloat32Array:
-	var n := int(0.12 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		lp += (_noise() - lp) * 0.12
-		out[i] = lp * exp(-t * 40.0) * 2.2 + sin(TAU * 140.0 * t) * exp(-t * 35.0) * 0.4
-	return out
-
-
-## Взрыв: удар низкой частоты, рваный шум, долгий гул-хвост.
-func _explosion() -> PackedFloat32Array:
-	var n := int(1.8 * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var lp := 0.0
-	var lp2 := 0.0
-	for i in range(n):
-		var t := float(i) / MIX_RATE
-		lp += (_noise() - lp) * 0.06
-		lp2 += (lp - lp2) * 0.08
-		var boom := sin(TAU * (48.0 - 20.0 * t) * t) * exp(-t * 4.0) * 1.2
-		var crack := _noise() * exp(-t * 35.0)
-		out[i] = tanh((boom + lp2 * 6.0 * exp(-t * 1.8) + crack) * 1.3)
-	return out
-
-
-## Фон: коричневый шум (ветер в пустом здании), зациклен.
-func _ambient_loop(dur: float) -> PackedFloat32Array:
-	var n := int(dur * MIX_RATE)
-	var out := PackedFloat32Array()
-	out.resize(n)
-	var brown := 0.0
-	var lp := 0.0
-	for i in range(n):
-		brown = clampf(brown + _noise() * 0.02, -1.0, 1.0) * 0.998
-		lp += (brown - lp) * 0.05
-		var t := float(i) / MIX_RATE
-		var swell := 0.7 + 0.3 * sin(TAU * t / dur)
-		out[i] = lp * swell * 2.5
-	# сшивка петли: плавно к началу
-	var fade := int(0.05 * MIX_RATE)
-	for i in range(fade):
-		var k := float(i) / fade
-		out[n - fade + i] = out[n - fade + i] * (1.0 - k) + out[i] * k
-	return out
+## Отдельные записи по путям относительно assets/audio (назначенные в data/sound_active.json).
+
+const STEP_SET: Dictionary = {
+	"tile": "stone", "concrete": "stone", "plastic": "stone", "wood": "wood", "glass": "glass",
+	"metal": "metal", "asphalt": "dirt", "cardboard": "cardboard", "fabric": "carpet", "snow": "snow",
+	"water": "water", "trash": "trash", "rubble": "rubble", "gravel": "gravel", "grass": "grass",
+	"dirt": "dirt", "mud": "dirt",
+}

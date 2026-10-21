@@ -353,8 +353,8 @@ src/combat/    weapon_models.gd (процедурное оружие; в рук�
                weapon_stats.gd (характеристики с обвесами — одно место расчёта), grenade.gd, ragdoll.gd, target.gd (мишени),
                health.gd, hitscan.gd (выстрел лучом + разброс), tracer.gd, surfaces.gd (из чего
                поверхность в точке попадания), impact_fx.gd (частицы, декали, звук удара)
-src/audio/     audio_system.gd — записи assets/audio по префиксам (SAMPLES/FAR/OWN/LOOPS), иначе синтез;
-               каталог всех звуков — data/sound_catalog.json (стенд tools/sound_bench)
+src/audio/     audio_system.gd — явные назначения data/audio_events.json; пустое действие молчит.
+               Стенд Sonora 1.3, действия моделей — data/weapon_sound_slots.json; семейств и синтеза нет.
 src/world/     сборка сектора из данных, коллизии, навигация, шум/зрение
 src/net/       network.gd (autoload `Net` — host/join, `Net.is_networked()`), lobby.gd
 src/ui/        HUD, инвентарь, убежище
