@@ -144,16 +144,18 @@ class RotFrame:
 
 
 class ArmFrame:
-    """Поверхность вокруг руки: u — вдоль оси от плечевого сустава, v — дуга по окружности (0 — верх
-    руки, + — вперёд), радиус r(u) по рукаву одежды."""
+    """Поверхность вокруг конечности: u — вдоль оси от сустава a к b, v — дуга по окружности (0 — по ref,
+    у руки — верх; + — к side_hint, у руки — вперёд), радиус r(u) по одежде. Бедро: ref — перёд,
+    side_hint — наружу."""
 
-    def __init__(self, a: Vector, b: Vector, radius: Callable[[float], float]):
+    def __init__(self, a: Vector, b: Vector, radius: Callable[[float], float], ref: Vector | None = None,
+                 side_hint: Vector | None = None):
         self.a = a
         self.d = (b - a).normalized()
-        up = Vector((0.0, 0.0, 1.0))
+        up = Vector((0.0, 0.0, 1.0)) if ref is None else ref
         self.e_up = (up - self.d * up.dot(self.d)).normalized()
         self.e_side = self.d.cross(self.e_up).normalized()
-        if self.e_side.y > 0:                  # «вперёд» — к −Y
+        if self.e_side.dot(Vector((0.0, -1.0, 0.0)) if side_hint is None else side_hint) < 0:
             self.e_side = -self.e_side
         self.radius = radius
 
@@ -166,6 +168,127 @@ class ArmFrame:
 
     def point(self, u: float, v: float, off: float = 0.0) -> Vector:
         return self.a + self.d * u + self._dir(u, v) * (self.radius(u) + off)
+
+
+class ShellFrame:
+    """Оболочка вокруг оси a→b по замерам лучами к оси: радиус r(u, θ) — внешняя из поверхностей под
+    деталью (каждая со своим зазором, у мягкой одежды он может быть отрицательным — деталь её поджимает).
+    u — вдоль оси, v — дуга по опорному радиусу r0 (θ = v / r0; 0 — по ref, + — к side_hint).
+    Сетка сглажена; fill="valleys" — впадины вдоль оси заполнены (погон по плечу не провисает между
+    накладкой лямки и наплечником), fill="taper" — ниже по оси не шире, чем выше (щиток бедра — конус)."""
+
+    def __init__(self, a: Vector, b: Vector, layers: list[tuple[BVHTree, float]], u0: float, u1: float,
+                 th0: float, th1: float, r0: float, ref: Vector | None = None, side_hint: Vector | None = None,
+                 nu: int = 28, nth: int = 28, fill: str = "", smooth: int = 3, r_min: float = 0.03,
+                 convex: bool = False):
+        base = ArmFrame(a, b, lambda u: r0, ref, side_hint)
+        self.a, self.d, self.e_up, self.e_side, self.r0 = base.a, base.d, base.e_up, base.e_side, r0
+        self.u0, self.u1, self.th0, self.th1, self.nu, self.nth = u0, u1, th0, th1, nu, nth
+        grid = []
+        for i in range(nu + 1):
+            u = u0 + (u1 - u0) * i / nu
+            c = self.a + self.d * u
+            row = []
+            for j in range(nth + 1):
+                dv = self._dir(th0 + (th1 - th0) * j / nth)
+                r = r_min
+                for bvh, clr in layers:
+                    hit = bvh.ray_cast(c + dv * 0.45, -dv, 0.45)
+                    if hit[0] is not None:
+                        r = max(r, (hit[0] - c).dot(dv) + clr)
+                row.append(r)
+            grid.append(row)
+        if fill:
+            for j in range(nth + 1):
+                col = [grid[i][j] for i in range(nu + 1)]
+                for i in range(nu + 1):
+                    if fill == "taper":
+                        col[i] = max(col[i:])
+                    elif 0 < i < nu:
+                        col[i] = max(col[i], min(max(col[:i]), max(col[i + 1:])))
+                for i in range(nu + 1):
+                    grid[i][j] = col[i]
+        if convex:
+            # Поперёк — выпуклая оболочка сечения: жёсткая деталь перекрывает карман, складку, накладку
+            # лямки мостиком, а не повторяет их.
+            ths = [th0 + (th1 - th0) * j / nth for j in range(nth + 1)]
+            for i in range(nu + 1):
+                hull = gm._hull([(0.0, 0.0)] + [(r * math.cos(t), r * math.sin(t)) for t, r in zip(ths, grid[i])])
+                row = []
+                for t, r in zip(ths, grid[i]):
+                    dx, dy = math.cos(t), math.sin(t)
+                    best = r
+                    for k in range(len(hull)):
+                        (px, py), (qx, qy) = hull[k], hull[(k + 1) % len(hull)]
+                        ex, ey = qx - px, qy - py
+                        den = dx * ey - dy * ex
+                        if abs(den) < 1e-12:
+                            continue
+                        s = (px * ey - py * ex) / den
+                        w = (px * dy - py * dx) / den
+                        if s > 0 and -1e-9 <= w <= 1 + 1e-9:
+                            best = max(best, s)
+                    row.append(best)
+                grid[i] = row
+        for _ in range(smooth):
+            new = [row[:] for row in grid]
+            for i in range(nu + 1):
+                for j in range(nth + 1):
+                    nb = [grid[i2][j2] for i2, j2 in ((i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1))
+                          if 0 <= i2 <= nu and 0 <= j2 <= nth]
+                    # сглаживание только наружу: деталь не должна уйти внутрь того, что под ней
+                    new[i][j] = max(grid[i][j], 0.5 * grid[i][j] + 0.5 * sum(nb) / len(nb))
+            grid = new
+        self.grid = grid
+
+    def _dir(self, th: float) -> Vector:
+        return (self.e_up * math.cos(th) + self.e_side * math.sin(th)).normalized()
+
+    def radius(self, u: float, th: float) -> float:
+        fi = max(0.0, min(self.nu - 1e-6, (u - self.u0) / (self.u1 - self.u0) * self.nu))
+        fj = max(0.0, min(self.nth - 1e-6, (th - self.th0) / (self.th1 - self.th0) * self.nth))
+        i, j = int(fi), int(fj)
+        ti, tj = fi - i, fj - j
+        g = self.grid
+        r0 = g[i][j] + (g[i][j + 1] - g[i][j]) * tj
+        r1 = g[i + 1][j] + (g[i + 1][j + 1] - g[i + 1][j]) * tj
+        return r0 + (r1 - r0) * ti
+
+    def _raw(self, u: float, v: float) -> Vector:
+        th = v / self.r0
+        return self.a + self.d * u + self._dir(th) * self.radius(u, th)
+
+    def normal(self, u: float, v: float) -> Vector:
+        h = 0.004
+        du = self._raw(u + h, v) - self._raw(u - h, v)
+        dv = self._raw(u, v + h) - self._raw(u, v - h)
+        n = du.cross(dv)
+        if n.length < 1e-12:
+            return self._dir(v / self.r0)
+        n.normalize()
+        return n if n.dot(self._dir(v / self.r0)) > 0 else -n
+
+    def point(self, u: float, v: float, off: float = 0.0) -> Vector:
+        return self._raw(u, v) + self.normal(u, v) * off
+
+
+def bvh_of(parts: list[tuple[list[Vector], list[list[int]]]]) -> BVHTree:
+    """Одно дерево лучей из нескольких наборов (вершины в мире, грани)."""
+    co, faces = [], []
+    for verts, fs in parts:
+        base = len(co)
+        co += verts
+        faces += [[base + i for i in f] for f in fs]
+    return BVHTree.FromPolygons(co, faces)
+
+
+def mesh_parts(obj: bpy.types.Object, skip_groups: tuple[str, ...] = ()) -> tuple[list[Vector], list[list[int]]]:
+    """Вершины (в мире) и грани объекта без модификаторов; грани с вершинами групп skip_groups — не в счёт."""
+    me = obj.data
+    gi = {g.index for g in obj.vertex_groups if g.name.startswith(skip_groups)} if skip_groups else set()
+    skip = {v.index for v in me.vertices if any(g.group in gi and g.weight > 0.5 for g in v.groups)} if gi else set()
+    return ([obj.matrix_world @ v.co for v in me.vertices],
+            [list(p.vertices) for p in me.polygons if not any(i in skip for i in p.vertices)])
 
 
 class NeckFrame:
@@ -203,6 +326,38 @@ class NeckFrame:
 
     def point(self, u: float, v: float, off: float = 0.0) -> Vector:
         return self._raw(u / self.length, v) + self.normal(u, v) * off
+
+
+class LidFrame:
+    """Клапан кармана: от задней стенки у горловины через верх и вниз по лицевой стороне на over.
+    u — поперёк (x), v — длина от шарнира (у задней стенки). v_top(u) — высота горловины по лекалу пакета."""
+
+    def __init__(self, frame, v_top: Callable[[float], float], r: float, over: float):
+        self.frame, self.vt, self.r, self.over = frame, v_top, r, over
+        self.arc = math.pi * r
+        self.length = self.arc + over
+
+    def _up(self, u: float, v: float) -> Vector:
+        return (self.frame.point(u, v + 0.001, 0.0) - self.frame.point(u, v, 0.0)).normalized()
+
+    def _base(self, u: float, s: float) -> tuple[Vector, Vector]:
+        vt = self.vt(u)
+        if s <= self.arc:
+            th = -math.pi / 2 + s / self.r
+            p = self.frame.point(u, vt + self.r * math.cos(th), self.r * math.sin(th))
+            n = (self._up(u, vt) * math.cos(th) + self.frame.normal(u, vt) * math.sin(th)).normalized()
+            return p, n
+        return self.frame.point(u, vt - (s - self.arc), self.r), self.frame.normal(u, vt)
+
+    def hinge(self) -> Vector:
+        return self._base(0.0, 0.0)[0]
+
+    def normal(self, u: float, v: float) -> Vector:
+        return self._base(u, v)[1]
+
+    def point(self, u: float, v: float, off: float = 0.0) -> Vector:
+        p, n = self._base(u, v)
+        return p + n * off
 
 
 class OffsetFrame:
@@ -255,9 +410,14 @@ class BandFrame:
     push(p, n) → новая точка (обход пакетов: пояс проходит поверх / под ними)."""
 
     def __init__(self, hull: Hull, z_bot: float, height: float, a0: float, a1: float, offset: float,
-                 push: Callable[[Vector, Vector], Vector] | None = None, rows: int = 18, samples: int = 140):
+                 push: Callable[[Vector, Vector], Vector] | None = None, rows: int = 18, samples: int = 140,
+                 vsmooth: int = 0, press: float = 0.0):
+        """vsmooth — сколько раз сгладить контур по высоте и вдоль: у подмышки выпуклые сечения торса
+        меняются скачками, и толстый камербанд по ним шёл волнами. Внутрь — не глубже press (пояс
+        поджимает мягкую куртку, как плита)."""
         self.z_bot, self.height = z_bot, height
         self.rows = []
+        raw = []
         for j in range(rows + 1):
             v = height * j / rows
             ring = hull.ring(z_bot + v)
@@ -271,6 +431,27 @@ class BandFrame:
                 if push:
                     p = push(p, n)
                 pts.append(p)
+            raw.append((pts, ring.c))
+        grid = [[p.copy() for p in pts] for pts, _ in raw]
+        for _ in range(vsmooth):
+            new = [[p.copy() for p in row] for row in grid]
+            for j in range(len(grid)):
+                cx, cy = raw[j][1]
+                for k in range(len(grid[j])):
+                    last = len(grid[j]) - 1             # концы пояса вдоль не сглаживать — иначе он укоротится
+                    near = ((j - 1, k), (j + 1, k)) if k in (0, last) else ((j - 1, k), (j + 1, k), (j, k - 1), (j, k + 1))
+                    nb = [grid[j2][k2] for j2, k2 in near if 0 <= j2 < len(grid)]
+                    q = grid[j][k] * 0.5 + sum(nb, Vector()) * (0.5 / len(nb))
+                    q.z = grid[j][k].z
+                    o = raw[j][0][k]
+                    r_o = math.hypot(o.x - cx, o.y - cy)
+                    r_q = math.hypot(q.x - cx, q.y - cy)
+                    if r_q < r_o - press:               # не глубже press в одежду
+                        q.x = cx + (q.x - cx) * (r_o - press) / max(r_q, 1e-9)
+                        q.y = cy + (q.y - cy) * (r_o - press) / max(r_q, 1e-9)
+                    new[j][k] = q
+            grid = new
+        for pts in grid:
             # выровнять по длине дуги
             cum = [0.0]
             for k in range(1, len(pts)):
@@ -343,7 +524,7 @@ class Mesh:
                 self.f(q, uq, mat)
 
     def build(self, name: str, col: bpy.types.Collection, materials: list[bpy.types.Material],
-              smooth: bool = True) -> bpy.types.Object:
+              smooth: bool = True, origin: Vector | None = None) -> bpy.types.Object:
         me = bpy.data.meshes.new(name)
         me.from_pydata([tuple(p) for p in self.verts], [], self.faces)
         me.update()
@@ -364,6 +545,11 @@ class Mesh:
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
         bm.to_mesh(me)
         bm.free()
+        if origin is not None:
+            # Опорная точка детали (шарнир клапана, центр плиты) — для будущей анимации.
+            from mathutils import Matrix
+            me.transform(Matrix.Translation(-origin))
+            obj.location = origin
         return obj
 
 
@@ -439,7 +625,48 @@ def inset(poly: list[Vec2], d: float) -> tuple[list[Vec2], list[Vec2]]:
         q = p1 - m * (d / c)
         out.append((q.x, q.y))
         nrm.append((m.x, m.y))
-    return out, nrm
+    return _cut_loops(out, nrm)
+
+
+def _seg_cross(a: Vec2, b: Vec2, c: Vec2, d: Vec2) -> Vec2 | None:
+    """Точка пересечения отрезков ab и cd (без касаний концами)."""
+    rx, ry = b[0] - a[0], b[1] - a[1]
+    sx, sy = d[0] - c[0], d[1] - c[1]
+    den = rx * sy - ry * sx
+    if abs(den) < 1e-14:
+        return None
+    t = ((c[0] - a[0]) * sy - (c[1] - a[1]) * sx) / den
+    w = ((c[0] - a[0]) * ry - (c[1] - a[1]) * rx) / den
+    if 1e-9 < t < 1 - 1e-9 and 1e-9 < w < 1 - 1e-9:
+        return (a[0] + rx * t, a[1] + ry * t)
+    return None
+
+
+def _cut_loops(pts: list[Vec2], nrm: list[Vec2], window: int = 16) -> tuple[list[Vec2], list[Vec2]]:
+    """Срезать петли («ласточкин хвост»), которые даёт отступ внутрь у острого угла с малым скруглением
+    рядом с другим углом: из них по краю горловины кармана и по углам пакета торчали лепестки."""
+    pts, nrm = list(pts), list(nrm)
+    changed = True
+    while changed and len(pts) > 8:
+        changed = False
+        n = len(pts)
+        for i in range(n):
+            a, b = pts[i], pts[(i + 1) % n]
+            for k in range(2, min(window, n - 2)):
+                j = (i + k) % n
+                hit = _seg_cross(a, b, pts[j], pts[(j + 1) % n])
+                if hit is None:
+                    continue
+                seq = [(j + 1 + t) % n for t in range(n - k)]       # от j+1 по кругу до i включительно
+                na = Vector(nrm[i]) + Vector(nrm[(j + 1) % n])
+                na = na.normalized() if na.length > 1e-9 else Vector(nrm[i])
+                pts = [pts[s] for s in seq] + [hit]
+                nrm = [nrm[s] for s in seq] + [(na.x, na.y)]
+                changed = True
+                break
+            if changed:
+                break
+    return pts, nrm
 
 
 def dist_to_poly(p: Vec2, poly: list[Vec2]) -> float:
@@ -447,6 +674,64 @@ def dist_to_poly(p: Vec2, poly: list[Vec2]) -> float:
 
 
 # ---------- детали ----------
+
+def _sheet(m: Mesh, frame, ins: list[Vec2], boundary: list[int], off_fn: Callable[[float, float], float],
+           step: float, mat: int, flip: bool) -> None:
+    """Лист по контуру ins: вершины края — готовые (boundary[i]), внутри — сетка ~step и CDT."""
+    n = len(ins)
+    xs = [p[0] for p in ins]
+    ys = [p[1] for p in ins]
+    interior = []
+    yy = min(ys) + step
+    row_i = 0
+    while yy < max(ys):
+        xx = min(xs) + (step / 2 if row_i % 2 else 0.0)
+        while xx < max(xs):
+            if gm._inside((xx, yy), ins) and dist_to_poly((xx, yy), ins) > step * 0.6:
+                interior.append((xx, yy))
+            xx += step
+        yy += step * 0.87
+        row_i += 1
+    pts2 = [Vector(p) for p in ins + interior]
+    _, _, ofaces, orig, _, _ = mgeo.delaunay_2d_cdt(pts2, [], [list(range(n))], 1, 1e-9, True)
+    remap = {k: o[0] for k, o in enumerate(orig) if o}
+    ids = {}
+    for k2, o in remap.items():
+        if o < n:
+            ids[k2] = boundary[o]
+        else:
+            u, v = interior[o - n]
+            ids[k2] = m.v(frame.point(u, v, off_fn(u, v)))
+    for f in ofaces:
+        if not all(k2 in ids for k2 in f):
+            continue
+        idx = [ids[k2] for k2 in f]
+        uv = [tuple(pts2[remap[k2]]) for k2 in f]
+        if flip:
+            idx, uv = idx[::-1], uv[::-1]
+        m.f(idx, uv, mat)
+
+
+def _face_off(ins: list[Vec2], half: float, bulge: float, binding: float,
+              relief: Callable[[float, float], float] | None) -> Callable[[float, float, float], float]:
+    def f(u: float, v: float, sign: float) -> float:
+        d = dist_to_poly((u, v), ins)
+        h = half
+        if sign > 0:
+            h += bulge * gm.smoothstep(d / 0.05)
+            h += 0.0007 * gm.smoothstep((binding - d) / 0.002)
+            if relief:
+                h += relief(u, v)
+        return sign * h
+    return f
+
+
+def _perimeter(ins: list[Vec2]) -> list[float]:
+    per = [0.0]
+    for i in range(1, len(ins) + 1):
+        per.append(per[-1] + (Vector(ins[i % len(ins)]) - Vector(ins[i - 1])).length)
+    return per
+
 
 def padded_panel(m: Mesh, frame, outline: list[Vec2], thick: float, mat: int = 0, step: float = 0.006,
                  bulge: float = 0.003, binding: float = 0.011, relief: Callable[[float, float], float] | None = None,
@@ -459,24 +744,11 @@ def padded_panel(m: Mesh, frame, outline: list[Vec2], thick: float, mat: int = 0
     r = thick / 2
     ins, nrm = inset(outline, r)
     n = len(ins)
-
-    def face_off(u: float, v: float, sign: float) -> float:
-        d = dist_to_poly((u, v), ins)
-        h = r
-        if sign > 0:
-            h += bulge * gm.smoothstep(d / 0.05)
-            h += 0.0007 * gm.smoothstep((binding - d) / 0.002)
-            if relief:
-                h += relief(u, v)
-        return sign * h
-
+    face_off = _face_off(ins, r, bulge, binding, relief)
     # борт: кольца от внутренней стороны (−90°) к лицевой (+90°)
     K = 8
-    rings = []
-    uvr = []
-    per = [0.0]
-    for i in range(1, n + 1):
-        per.append(per[-1] + (Vector(ins[i % n]) - Vector(ins[i - 1])).length)
+    rings, uvr = [], []
+    per = _perimeter(ins)
     for k in range(K + 1):
         phi = -math.pi / 2 + math.pi * k / K
         row, urow = [], []
@@ -493,43 +765,82 @@ def padded_panel(m: Mesh, frame, outline: list[Vec2], thick: float, mat: int = 0
         rings.append(row)
         uvr.append(urow)
     m.grid(rings, uvr, mat, closed_u=True)
-    # грани сторон: CDT по контуру и внутренним точкам
-    xs = [p[0] for p in ins]
-    ys = [p[1] for p in ins]
-    interior = []
-    yy = min(ys) + step
-    row_i = 0
-    while yy < max(ys):
-        xx = min(xs) + (step / 2 if row_i % 2 else 0.0)
-        while xx < max(xs):
-            if gm._inside((xx, yy), ins) and dist_to_poly((xx, yy), ins) > step * 0.6:
-                interior.append((xx, yy))
-            xx += step
-        yy += step * 0.87
-        row_i += 1
-    pts2 = [Vector(p) for p in ins + interior]
-    out = mgeo.delaunay_2d_cdt(pts2, [], [list(range(n))], 1, 1e-9, True)
-    _, _, ofaces, orig, _, _ = out
-    remap = {k: o[0] for k, o in enumerate(orig) if o}
-    for sign, ring in ((1.0, rings[K]), (-1.0, rings[0])):
-        if sign < 0 and not inner:
-            continue
-        ids = {}
-        for k2, o in remap.items():
-            if o < n:
-                ids[k2] = ring[o]
-            else:
-                u, v = interior[o - n]
-                ids[k2] = m.v(frame.point(u, v, face_off(u, v, sign)))
-        for f in ofaces:
-            if not all(k2 in ids for k2 in f):
-                continue
-            idx = [ids[k2] for k2 in f]
-            uv = [tuple(pts2[remap[k2]]) for k2 in f]
-            if sign > 0:
-                m.f(idx, uv, mat)
-            else:
-                m.f(idx[::-1], uv[::-1], mat)
+    _sheet(m, frame, ins, rings[K], lambda u, v: face_off(u, v, 1.0), step, mat, False)
+    if inner:
+        _sheet(m, frame, ins, rings[0], lambda u, v: face_off(u, v, -1.0), step, mat, True)
+
+
+def pocket_bag(m: Mesh, frame, outline: list[Vec2], cav: float, wall: float, mouth: Callable[[float, float], bool],
+               mat: int = 0, step: float = 0.006, bulge: float = 0.003, binding: float = 0.011) -> None:
+    """Пакет-карман под плиту: две стенки толщиной wall, между ними полость cav, по бокам и снизу —
+    закруглённый борт, сверху (где mouth) — открытая горловина с закруглёнными губами стенок.
+    Плиту можно вынуть вверх (под анимацию смены плит)."""
+    outline = resample_closed(outline, step)
+    if poly_area(outline) < 0:
+        outline = outline[::-1]
+    r = cav / 2 + wall
+    ins, nrm = inset(outline, r)
+    n = len(ins)
+    is_m = [mouth(u, v) for u, v in ins]
+    if not any(is_m) or all(is_m):
+        padded_panel(m, frame, outline, 2 * r, mat, step, bulge, binding)
+        return
+    s0 = next(i for i in range(n) if not is_m[i] and is_m[i - 1])     # первый борт после горловины
+    ins, nrm, is_m = ins[s0:] + ins[:s0], nrm[s0:] + nrm[:s0], is_m[s0:] + is_m[:s0]
+    j0 = is_m.index(True)                                            # горловина — хвост списка
+    face_off = _face_off(ins, r, bulge, binding, None)
+    per = _perimeter(ins)
+    fo = [m.v(frame.point(u, v, face_off(u, v, 1.0))) for u, v in ins]     # лицевая
+    bo = [m.v(frame.point(u, v, face_off(u, v, -1.0))) for u, v in ins]    # к телу
+    fc = [m.v(frame.point(u, v, cav / 2)) for u, v in ins]                 # полость, лицевая стенка
+    bc = [m.v(frame.point(u, v, -cav / 2)) for u, v in ins]                # полость, задняя стенка
+    K = 8
+
+    def rim(radius: float, a: list[int], b: list[int], idx: list[int], kk: int, center: float = 0.0,
+            scale: list[float] | None = None) -> list[list[int]]:
+        rows = []
+        for k in range(kk + 1):
+            phi = -math.pi / 2 + math.pi * k / kk
+            row = []
+            for n_i, i in enumerate(idx):
+                if k == 0:
+                    row.append(a[i])
+                elif k == kk:
+                    row.append(b[i])
+                else:
+                    sc = scale[n_i] if scale else 1.0
+                    u = ins[i][0] + nrm[i][0] * radius * math.cos(phi) * sc
+                    v = ins[i][1] + nrm[i][1] * radius * math.cos(phi) * sc
+                    row.append(m.v(frame.point(u, v, center + radius * math.sin(phi))))
+            rows.append(row)
+        return rows
+
+    def uvs(rows: list[list[int]], idx: list[int], radius: float) -> list[list[Vec2]]:
+        return [[(per[i], math.pi * radius * k / (len(rows) - 1)) for i in idx] for k in range(len(rows))]
+    side = list(range(j0))
+    outer = rim(r, bo, fo, side, K)
+    m.grid(outer, uvs(outer, side, r), mat)
+    inner = rim(cav / 2, bc, fc, side, K)
+    m.grid(inner, uvs(inner, side, cav / 2), mat, flip=True)
+    lip_idx = [j0 - 1] + list(range(j0, n)) + [0]
+    # У концов горловины губа сходит в плоскость торца борта (нормаль контура там смотрит вбок, и полная
+    # губа торчала лепестком сбоку от горловины).
+    ramp = [0.0, 0.55, 0.85]
+    lip_sc = [min(1.0, ramp[min(k, len(lip_idx) - 1 - k)] if min(k, len(lip_idx) - 1 - k) < len(ramp) else 1.0)
+              for k in range(len(lip_idx))]
+    back_lip = rim(wall / 2, bo, bc, lip_idx, 4, -(cav / 2 + wall / 2), lip_sc)
+    m.grid(back_lip, uvs(back_lip, lip_idx, wall / 2), mat)
+    front_lip = rim(wall / 2, fc, fo, lip_idx, 4, cav / 2 + wall / 2, lip_sc)
+    m.grid(front_lip, uvs(front_lip, lip_idx, wall / 2), mat)
+    for col_i in (len(side) - 1, 0):                                 # торцы борта у горловины
+        oc = [outer[k][col_i] for k in range(K + 1)]
+        ic = [inner[k][col_i] for k in range(K + 1)]
+        m.grid([oc, ic], [[(0.0, k * 0.01) for k in range(K + 1)], [(0.004, k * 0.01) for k in range(K + 1)]], mat,
+               flip=(col_i == 0))
+    _sheet(m, frame, ins, fo, lambda u, v: face_off(u, v, 1.0), step, mat, False)
+    _sheet(m, frame, ins, bo, lambda u, v: face_off(u, v, -1.0), step, mat, True)
+    _sheet(m, frame, ins, fc, lambda u, v: cav / 2, step, mat, True)
+    _sheet(m, frame, ins, bc, lambda u, v: -cav / 2, step, mat, False)
 
 
 def webbing_rows(m: Mesh, frame, u0: float, u1: float, v_rows: list[float], base_off: float, mat: int = 0,
@@ -686,6 +997,29 @@ def side_release(m: Mesh, center: Vector, ax: Vector, ay: Vector, az: Vector, wi
              (0.0045, 0.016, 0.0072), 0.0015, mat=mat)                                   # защёлки в окнах
     rbox(m, center - ay * 0.006, ax, ay, az, (w * 0.7, 0.014, 0.0062), 0.003, mat=mat)    # язык
     rbox(m, center - ay * 0.017, ax, ay, az, (w - 0.003, 0.008, 0.0052), 0.0025, mat=mat)  # рамка стропы папы
+
+
+def zipper(tape: Mesh, teeth: Mesh, rib: RibbonFrame, base_off: float = 0.0, pull_at: float | None = None,
+           tape_w: float = 0.020, pitch: float = 0.0042) -> None:
+    """Молния: лента и звенья в шахматном порядке (сцеплены), pull_at — где бегунок с язычком."""
+    strap(tape, rib, tape_w, 0.0012, base_off, step=0.006)
+    n = max(2, int(rib.length / pitch))
+    for i in range(n):
+        p, tan, nn = rib._at((i + 0.5) * rib.length / n)
+        side = nn.cross(tan).normalized()
+        c = p + nn * (base_off + 0.0019) + side * (0.0011 if i % 2 else -0.0011)
+        box(teeth, c, side, tan, nn, (0.0058, 0.0026, 0.0018))
+    if pull_at is not None:
+        p, tan, nn = rib._at(pull_at)
+        side = nn.cross(tan).normalized()
+        rbox(teeth, p + nn * (base_off + 0.0042), side, tan, nn, (0.0095, 0.016, 0.0045), 0.002)
+        rbox(teeth, p + nn * (base_off + 0.0070) - tan * 0.017, side, tan, nn, (0.0075, 0.024, 0.0018), 0.0025)
+
+
+def cord_lock(m: Mesh, center: Vector, ax: Vector, ay: Vector, az: Vector, mat: int = 0) -> None:
+    """Фиксатор шнура: бочонок с кнопкой; ay — вдоль шнура."""
+    rbox(m, center, ax, ay, az, (0.013, 0.020, 0.010), 0.0055, mat=mat)
+    rbox(m, center - ay * 0.012, ax, ay, az, (0.008, 0.006, 0.007), 0.003, mat=mat)
 
 
 def tube(m: Mesh, pts: list[Vector], radius: float, mat: int = 0, sides: int = 8) -> None:

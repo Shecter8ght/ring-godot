@@ -1,10 +1,14 @@
 """NPC: плитоносец «средний» (уровень брони 2 из 3) по фото владельца — на мародёре поверх куртки.
 
 Состав (_asset_src/npc_kit/armor/asset-state.md): передний пакет с вырезом «под приклад» и вогнутым
-верхом, задний пакет; спереди вверху велкро-панель с решёткой прорезей, полоса велкро по верхнему
-краю, два ряда MOLLE; плечевые лямки с мягкими накладками и кольцами; камербанд с тремя рядами MOLLE
-заходит спереди под откидной клапан «кенгуру» (четыре ряда MOLLE); на левом боку два фастекса сброса;
-по нижним углам клапана — язычки с пряжками; сзади вверху — ручка эвакуации.
+верхом — карман под плиту: полость, открытая сверху, клапан через верх на велкро (сменить плиту —
+открыть клапан, вынуть плиту вверх; плита и клапан — отдельные объекты с опорными точками под
+анимацию; на краю клапана — язычок, за который его открывают); задний пакет; спереди велкро-панель
+с решёткой прорезей и резинками-держателями по краям, два ряда MOLLE; плечевые лямки с мягкими накладками,
+кольцами и петлями под провод гарнитуры / трубку питья; камербанд с тремя рядами MOLLE заходит спереди
+под откидной клапан «кенгуру» (четыре ряда MOLLE, над ним — язычки резинок вставки под магазины); на левом
+боку два фастекса сброса; по нижним углам клапана — язычки с пряжками; сзади — ручка эвакуации и люверсы
+стока воды внизу. Мелочи сверены с фото серийных плитоносцев (2026-10-22).
 Сборка — build_carrier(CarrierSpec): та же основа у «крутой» (armor_top.py) с другими размерами.
 Форма — нейтральным материалом (на согласование), текстуры — после принятия.
 
@@ -41,7 +45,11 @@ class CarrierSpec:
     back_bot: float = 1.100
     back_h: float = 0.390
     back_w: float = 0.290
-    bag_t: float = 0.032                 # толщина пакета с плитой
+    cav: float = 0.024                   # полость под плиту (керамика / композит до 21 мм)
+    wall: float = 0.007                  # стенка пакета (ткань с подкладкой)
+    bag_t: float = 0.038                 # толщина пакета: полость + две стенки
+    pocket: bool = True                  # передний пакет — карман со сменой плиты сверху
+    lid_over: float = 0.022              # клапан кармана заходит на лицевую сторону
     flap_h: float = 0.178                # клапан «кенгуру»
     flap_w: float = 0.330
     flap_t: float = 0.022
@@ -49,15 +57,20 @@ class CarrierSpec:
     cummer_h: float = 0.165
     cummer_t: float = 0.007              # у «крутой» толще: в камербанде боковые плиты
     cummer_rows: int = 3
-    front_rows: list[float] = field(default_factory=lambda: [0.192, 0.192 + MOLLE_PITCH * 0.6])
-    admin: tuple = (-0.075, 0.075, 0.258, 0.338, 4, 3)       # велкро-панель: u0, u1, v0, v1, столбцов, рядов
+    front_rows: list[float] = field(default_factory=lambda: [0.184, 0.212])
+    admin: tuple = (-0.075, 0.075, 0.243, 0.309, 4, 3)       # велкро-панель: u0, u1, v0, v1, столбцов, рядов
     top_strip: bool = True               # полоса велкро по верху переднего пакета
     back_velcro: tuple = (-0.112, 0.112, 0.205, 0.352)
     back_rows: int = 4
+    back_molle_u: float = 0.115          # ряды MOLLE сзади — от −u до u
     side_buckles: bool = True
     bottom_tabs: bool = True
     drag_handle: bool = True
     pad: tuple = (0.074, 0.016)           # плечевая накладка: ширина, толщина
+    keepers: bool = True                 # резинки-держатели по краям велкро-панели (жгут, фонарь)
+    cable_loops: bool = True             # петли на плечевых накладках под провод рации и трубку питья
+    kangaroo_tabs: bool = True           # язычки резинок вставки под магазины над клапаном «кенгуру»
+    grommets: bool = True                # люверсы для стока воды внизу заднего пакета
 
 
 @dataclass
@@ -86,6 +99,7 @@ def materials() -> dict[str, bpy.types.Material]:
         "velcro": kc.clay("Armor_Velcro", (0.12, 0.115, 0.095), 0.95),
         "plastic": kc.clay("Armor_Plastic", (0.05, 0.05, 0.045), 0.45),
         "metal": kc.clay("Armor_Metal", (0.35, 0.34, 0.32), 0.35),
+        "plate": kc.clay("Armor_Plate", (0.06, 0.06, 0.058), 0.6),
     }
 
 
@@ -96,6 +110,18 @@ def front_outline(w: float, h: float) -> list[tuple[float, float]]:
            (0.05, h - 0.010), (0.0, h - 0.014), (-0.05, h - 0.010), (-0.096, h), (-0.106, 0.952 * h), (-hw, 0.58 * h)]
     radii = [0.022, 0.022, 0.035, 0.010, 0.005, 0.0, 0.0, 0.0, 0.005, 0.010, 0.035]
     return ak.rounded_poly(pts, radii)
+
+
+def front_top_v(u: float, h: float) -> float:
+    """Верх переднего пакета по лекалу: вогнутый вырез у шеи (0 — середина, ±0,096 — углы под лямки)."""
+    t = min(1.0, abs(u) / 0.096)
+    return h - 0.014 + 0.014 * t * t
+
+
+def plate_outline(v0: float) -> list[tuple[float, float]]:
+    """Плита 24 × 31 см с вырезом «под приклад» по верхним углам (низ — на v0)."""
+    pts = [(-0.120, v0), (0.120, v0), (0.120, v0 + 0.220), (0.075, v0 + 0.310), (-0.075, v0 + 0.310), (-0.120, v0 + 0.220)]
+    return ak.rounded_poly(pts, [0.015, 0.015, 0.020, 0.020, 0.020, 0.020])
 
 
 def back_outline(w: float, h: float) -> list[tuple[float, float]]:
@@ -158,8 +184,28 @@ def build_carrier(f: Fit, spec: CarrierSpec, col: bpy.types.Collection, mats: di
     velcro = spec.bag_t / 2 + 0.003 + 0.0012     # велкро поверх ткани на 1,2 мм (вровень — поверхности мерцают)
 
     m = ak.Mesh()
-    ak.padded_panel(m, front, front_outline(spec.front_w, spec.front_h), spec.bag_t, bulge=0.003)
-    m.build(f"{P}_Front_Bag", col, [mats["cordura"]])
+    if spec.pocket:
+        # Карман: горловина сверху между лямками; плита — отдельный объект, клапан — отдельный, на шарнире.
+        ak.pocket_bag(m, front, front_outline(spec.front_w, spec.front_h), spec.cav, spec.wall,
+                      lambda u, v: v > spec.front_h - 0.05 and abs(u) < 0.092, bulge=0.003)
+        m.build(f"{P}_Front_Bag", col, [mats["cordura"]])
+        pm = ak.Mesh()
+        ak.padded_panel(pm, front, plate_outline(0.020), spec.cav - 0.003, bulge=0.0, binding=0.0, step=0.008)
+        pm.build(f"{P}_Plate_Front", col, [mats["plate"]], origin=front.point(0.0, 0.175, 0.0))
+        r_bag = spec.bag_t / 2
+        lid = ak.LidFrame(front, lambda u: front_top_v(u, spec.front_h) - r_bag + 0.002, r_bag + 0.004, spec.lid_over)
+        lm = ak.Mesh()
+        ak.padded_panel(lm, ak.OffsetFrame(lid, 0.0025), rect(-0.088, 0.088, 0.0, lid.length, 0.008), 0.004,
+                        bulge=0.0005, binding=0.006, step=0.004)
+        # Язычок посередине края клапана — за него берутся рукой, открывая карман (часть клапана).
+        ss = [lid.length - 0.012 + 0.040 * k / 16 for k in range(17)]
+        tab_off = [0.0058 if s <= lid.length else 0.0058 - 0.0022 * gm.smoothstep((s - lid.length) / 0.008) for s in ss]
+        ak.strap(lm, ak.RibbonFrame([lid.point(0.0, s, o) for s, o in zip(ss, tab_off)], [lid.normal(0.0, s) for s in ss]),
+                 0.025, 0.003, mat=1)
+        lm.build(f"{P}_Pocket_Lid", col, [mats["cordura"], mats["webbing"]], origin=lid.hinge())
+    else:
+        ak.padded_panel(m, front, front_outline(spec.front_w, spec.front_h), spec.bag_t, bulge=0.003)
+        m.build(f"{P}_Front_Bag", col, [mats["cordura"]])
     m = ak.Mesh()
     ak.padded_panel(m, back, back_outline(spec.back_w, spec.back_h), spec.bag_t, bulge=0.003)
     m.build(f"{P}_Back_Bag", col, [mats["cordura"]])
@@ -170,8 +216,9 @@ def build_carrier(f: Fit, spec: CarrierSpec, col: bpy.types.Collection, mats: di
     ak.padded_panel(m, ak.OffsetFrame(front, velcro), rect(u0, u1, v0, v1, 0.006), 0.003, bulge=0.0,
                     binding=0.0, relief=grid_relief(u0, u1, v0, v1, cols, rows), step=0.002)
     if spec.top_strip:
-        ak.padded_panel(m, ak.OffsetFrame(front, velcro - 0.0005), rect(-0.088, 0.088, spec.front_h - 0.027,
-                        spec.front_h - 0.018, 0.003), 0.0025, bulge=0.0, binding=0.0, step=0.003)
+        # Полоса велкро по верху лицевой стороны — на неё застёгивается клапан кармана.
+        ak.padded_panel(m, ak.OffsetFrame(front, velcro - 0.0005), rect(-0.085, 0.085, spec.front_h - 0.055,
+                        spec.front_h - 0.035, 0.003), 0.0025, bulge=0.0, binding=0.0, step=0.003)
     bu0, bu1, bv0, bv1 = spec.back_velcro
     ak.padded_panel(m, ak.OffsetFrame(back, velcro), rect(bu0, bu1, bv0, bv1, 0.008), 0.003,
                     bulge=0.0, binding=0.0, step=0.004)
@@ -198,7 +245,7 @@ def build_carrier(f: Fit, spec: CarrierSpec, col: bpy.types.Collection, mats: di
     m = ak.Mesh()
     bands = []
     for a0, a1 in ((52.0, -60.0), (128.0, 240.0)):
-        band = ak.BandFrame(hull, spec.front_bot + 0.008, spec.cummer_h, a0, a1, 0.003, push)
+        band = ak.BandFrame(hull, spec.front_bot + 0.008, spec.cummer_h, a0, a1, 0.003, push, vsmooth=12, press=0.010)
         bands.append(band)
         ak.padded_panel(m, ak.OffsetFrame(band, spec.cummer_t / 2), rect(0.0, band.length, 0.0, spec.cummer_h, 0.012),
                         spec.cummer_t, bulge=0.0006 + 0.1 * max(0.0, spec.cummer_t - 0.01), binding=0.009)
@@ -210,7 +257,8 @@ def build_carrier(f: Fit, spec: CarrierSpec, col: bpy.types.Collection, mats: di
         ak.webbing_rows(m, front, -0.112, 0.112, spec.front_rows, face)
     ak.webbing_rows(m, flap, -spec.flap_w / 2 + 0.015, spec.flap_w / 2 - 0.015,
                     [0.010 + MOLLE_PITCH * i for i in range(spec.flap_rows)], 0.003)
-    ak.webbing_rows(m, back, -0.115, 0.115, [0.035 + MOLLE_PITCH * i for i in range(spec.back_rows)], face)
+    ak.webbing_rows(m, back, -spec.back_molle_u, spec.back_molle_u,
+                    [0.035 + MOLLE_PITCH * i for i in range(spec.back_rows)], face)
     for band in bands:
         ak.webbing_rows(m, ak.OffsetFrame(band, spec.cummer_t), 0.025, band.length - 0.06,
                         [0.018 + 0.05 * i for i in range(spec.cummer_rows)], 0.0)
@@ -229,6 +277,15 @@ def build_carrier(f: Fit, spec: CarrierSpec, col: bpy.types.Collection, mats: di
         p = sp.point(u_ring, sgn * 0.030, spec.pad[1] + 0.005)
         tan = (sp.point(u_ring + 0.01, 0, 0) - sp.point(u_ring, 0, 0)).normalized()
         ak.torus(metal, p, sp.normal(u_ring, 0).cross(tan).normalized(), 0.011, 0.0025)
+        if spec.cable_loops:
+            # Петли поперёк накладки (провод гарнитуры, трубка питьевой системы) — спереди и сзади плеча.
+            hw = spec.pad[0] / 2
+            top = 0.003 + spec.pad[1]
+            for uc in (mid - 0.065, mid + 0.055):
+                ws = [-hw - 0.001] + [-hw + 0.004 + (2 * hw - 0.008) * k / 12 for k in range(13)] + [hw + 0.001]
+                offs = [top * 0.55] + [top + 0.0004 + 0.0045 * math.sin(math.pi * k / 12) for k in range(13)] + [top * 0.55]
+                ak.strap(straps, ak.RibbonFrame([sp.point(uc, w, o) for w, o in zip(ws, offs)], [sp.normal(uc, 0)] * len(ws)),
+                         0.020, 0.0022)
     straps.build(f"{P}_Straps", col, [mats["webbing"]])
     pads.build(f"{P}_Shoulder_Pads", col, [mats["cordura"]])
 
@@ -253,6 +310,23 @@ def build_carrier(f: Fit, spec: CarrierSpec, col: bpy.types.Collection, mats: di
         hp = [back.point(0.04 * math.cos(math.pi * k / 12), spec.back_h - 0.02 + 0.038 * math.sin(math.pi * k / 12),
                          face + 0.004) for k in range(13)]
         ak.strap(web, ak.RibbonFrame(hp, [back.normal(0, spec.back_h)] * len(hp)), 0.025, 0.003)
+    if spec.keepers:
+        # Резинки-держатели по краям велкро-панели: пришиты концами, посередине чуть приподняты.
+        u0, u1, v0, v1, _, _ = spec.admin
+        for uc in (u0 - 0.024, u1 + 0.024):
+            vs = [v0 + 0.004 + (v1 - v0 - 0.008) * k / 16 for k in range(17)]
+            offs = [face + 0.0008 + 0.0035 * math.sin(math.pi * k / 16) ** 0.6 for k in range(17)]
+            ak.strap(web, ak.RibbonFrame([front.point(uc, v, o) for v, o in zip(vs, offs)],
+                                         [front.normal(uc, v) for v in vs]), 0.018, 0.0025)
+    if spec.kangaroo_tabs:
+        # Над клапаном «кенгуру» — язычки резинок вставки под магазины (магазины вынимаются вверх).
+        for uc in (-0.075, 0.0, 0.075):
+            vs = [spec.flap_h - 0.030 + 0.050 * k / 10 for k in range(11)]
+            ak.strap(web, ak.RibbonFrame([flap_base.point(uc, v, -0.0012) for v in vs],
+                                         [flap_base.normal(uc, v) for v in vs]), 0.020, 0.0025)
+    if spec.grommets:
+        for uc in (-(spec.back_w / 2 - 0.038), spec.back_w / 2 - 0.038):
+            ak.torus(metal, back.point(uc, 0.020, face + 0.0012), back.normal(uc, 0.020), 0.0048, 0.0014, seg=14, sides=6)
     if plastic.faces:
         plastic.build(f"{P}_Buckles", col, [mats["plastic"]])
     if web.faces:
@@ -330,10 +404,13 @@ def render_previews(col: bpy.types.Collection, tag: str, focus_z: float = 1.28, 
 
 
 README = (
-    "Плитоносец «средний» (броня уровня 2 из 3) — ФОРМА на согласование, материал нейтральный.\n"
-    "По фото владельца (voenform.ru): передний и задний пакеты под плиты, велкро-панель с решёткой,\n"
-    "MOLLE, плечевые накладки с кольцами, камербанд под клапаном «кенгуру», фастексы на левом боку,\n"
-    "язычки с пряжками внизу, ручка сзади. Коллекция 06_Armor_Mid; надет на мародёра v02 поверх куртки.\n"
+    "Плитоносец «средний» (броня уровня 2 из 3) — ФОРМА v02 на согласование, материал нейтральный.\n"
+    "По фото владельца (voenform.ru) и фото серийных плитоносцев: передний пакет — карман смены плиты сверху\n"
+    "(клапан на велкро с язычком; плита Mid_Plate_Front и клапан Mid_Pocket_Lid — отдельные объекты с опорными\n"
+    "точками под анимацию), задний пакет, велкро-панель с решёткой и резинками-держателями, MOLLE, плечевые\n"
+    "накладки с кольцами и петлями под провод, камербанд под клапаном «кенгуру» (над ним язычки вставки под\n"
+    "магазины), фастексы на левом боку, язычки с пряжками внизу, ручка и люверсы сзади.\n"
+    "Коллекция 06_Armor_Mid; надет на мародёра v02 поверх куртки.\n"
     "Текстуры (расцветка) — после принятия формы. Марки и нашивки с фото не переносятся.\n"
     "Скрипт: tools/npc_kit/armor_mid.py (детали — armor_kit.py).\n")
 
@@ -355,7 +432,7 @@ def main() -> None:
         })
     dest = next((a.split("=", 1)[1] for a in args if a.startswith("deliver=")), None)
     if dest:
-        deliver(Path(dest), "Броня_средняя_v01_форма.blend", README)
+        deliver(Path(dest), "Броня_средняя_v02_форма.blend", README)
 
 
 if __name__ == "__main__":
