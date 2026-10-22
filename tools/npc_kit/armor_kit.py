@@ -328,36 +328,115 @@ class NeckFrame:
         return self._raw(u / self.length, v) + self.normal(u, v) * off
 
 
-class LidFrame:
-    """Клапан кармана: от задней стенки у горловины через верх и вниз по лицевой стороне на over.
-    u — поперёк (x), v — длина от шарнира (у задней стенки). v_top(u) — высота горловины по лекалу пакета."""
+class MouthLidFrame:
+    """Мягкий клапан кармана по горловине-подкове (верх пакета вместе с плечевыми вырезами): s — длина
+    вдоль горловины (curve — контур пакета, отступленный внутрь на радиус борта, против часовой), t — от
+    шарнира у задней стенки через край (дуга радиуса r) и вниз на лицевую сторону на over(u) (u — поперёк
+    пакета в точке горловины: сверху клапан заходит дальше, на плечевых вырезах — узкой полосой).
+    opened (0…1) — клапан откинут: каждое сечение повёрнуто вокруг своей оси шарнира на angle градусов
+    (клапан мягкий — у подковы нет одной оси, состояние «Открыт» идёт ключом формы)."""
 
-    def __init__(self, frame, v_top: Callable[[float], float], r: float, over: float):
-        self.frame, self.vt, self.r, self.over = frame, v_top, r, over
+    def __init__(self, frame, curve: list[Vec2], r: float, over: Callable[[float], float], opened: float = 0.0,
+                 angle: float = 150.0):
+        self.frame, self.r, self.over = frame, r, over
+        self.pts = [Vector(p) for p in curve]
+        self.cum = [0.0]
+        for i in range(1, len(self.pts)):
+            self.cum.append(self.cum[-1] + (self.pts[i] - self.pts[i - 1]).length)
+        self.length = self.cum[-1]
         self.arc = math.pi * r
-        self.length = self.arc + over
+        self.ang = math.radians(angle) * opened
 
-    def _up(self, u: float, v: float) -> Vector:
-        return (self.frame.point(u, v + 0.001, 0.0) - self.frame.point(u, v, 0.0)).normalized()
+    def at(self, s: float) -> tuple[Vector, Vector, Vector]:
+        """Точка горловины (u, v), наружная нормаль и касательная в развёртке; за концами горловины —
+        продолжение по касательной (клапан чуть длиннее горловины и закрывает её концы)."""
+        if s < 0.0 or s > self.length:
+            if s < 0.0:
+                tan = (self.pts[1] - self.pts[0]).normalized()
+                e = self.pts[0] + tan * s
+            else:
+                tan = (self.pts[-1] - self.pts[-2]).normalized()
+                e = self.pts[-1] + tan * (s - self.length)
+            return e, Vector((tan.y, -tan.x)), tan
+        i = 0
+        while i < len(self.cum) - 2 and self.cum[i + 1] < s:
+            i += 1
+        t = (s - self.cum[i]) / max(self.cum[i + 1] - self.cum[i], 1e-12)
+        e = self.pts[i].lerp(self.pts[i + 1], t)
+        tan = (self.pts[i + 1] - self.pts[i]).normalized()
+        return e, Vector((tan.y, -tan.x)), tan
 
-    def _base(self, u: float, s: float) -> tuple[Vector, Vector]:
-        vt = self.vt(u)
-        if s <= self.arc:
-            th = -math.pi / 2 + s / self.r
-            p = self.frame.point(u, vt + self.r * math.cos(th), self.r * math.sin(th))
-            n = (self._up(u, vt) * math.cos(th) + self.frame.normal(u, vt) * math.sin(th)).normalized()
-            return p, n
-        return self.frame.point(u, vt - (s - self.arc), self.r), self.frame.normal(u, vt)
+    def _base(self, s: float, t: float) -> tuple[Vector, Vector]:
+        e, nn, tan = self.at(s)
+        f = self.frame
+        up = (f.point(e.x + nn.x * 0.001, e.y + nn.y * 0.001, 0.0) - f.point(e.x, e.y, 0.0)).normalized()
+        if t <= self.arc:
+            th = -math.pi / 2 + t / self.r
+            q = e + nn * (self.r * math.cos(th))
+            p = f.point(q.x, q.y, self.r * math.sin(th))
+            n = (up * math.cos(th) + f.normal(e.x, e.y) * math.sin(th)).normalized()
+        else:
+            q = e - nn * (t - self.arc)
+            p = f.point(q.x, q.y, self.r)
+            n = f.normal(q.x, q.y)
+        if self.ang:
+            from mathutils import Matrix
+            h = f.point(e.x, e.y, -self.r)
+            # ось сгиба — касательная, усреднённая на ±5 см: у плечевых изгибов подковы соседние сечения
+            # иначе поворачиваются вокруг слишком разных осей и ткань сминается в гармошку
+            ts = [self.at(s + d)[2] for d in (-0.05, -0.025, 0.0, 0.025, 0.05)]
+            tm = sum(ts, Vector((0.0, 0.0))).normalized()
+            axis = (f.point(e.x + tm.x * 0.001, e.y + tm.y * 0.001, -self.r) - h).normalized()
+            rot = Matrix.Rotation(self.ang, 3, axis)
+            p = h + rot @ (p - h)
+            n = rot @ n
+        return p, n
 
-    def hinge(self) -> Vector:
-        return self._base(0.0, 0.0)[0]
+    def hinge(self, s: float) -> Vector:
+        return self._base(s, 0.0)[0]
 
-    def normal(self, u: float, v: float) -> Vector:
-        return self._base(u, v)[1]
+    def far(self, s: float) -> float:
+        """Длина клапана в сечении s: дуга через край и заход на лицевую сторону."""
+        return self.arc + self.over(self.at(s)[0].x)
 
-    def point(self, u: float, v: float, off: float = 0.0) -> Vector:
-        p, n = self._base(u, v)
+    def normal(self, s: float, t: float) -> Vector:
+        return self._base(s, t)[1]
+
+    def point(self, s: float, t: float, off: float = 0.0) -> Vector:
+        p, n = self._base(s, t)
         return p + n * off
+
+
+def mouth_curve(outline: list[Vec2], inset_d: float, mouth: Callable[[float, float], bool], step: float = 0.006,
+                smooth: int = 3) -> list[Vec2]:
+    """Линия горловины: контур, отступленный внутрь на inset_d, участок, где mouth(u, v), — по порядку обхода
+    (против часовой), сглаженный (у плечевых углов выкройки малые скругления)."""
+    outline = resample_closed(outline, step)
+    if poly_area(outline) < 0:
+        outline = outline[::-1]
+    ins, _ = inset(outline, inset_d)
+    n = len(ins)
+    flags = [mouth(u, v) for u, v in ins]
+    s0 = next(i for i in range(n) if flags[i] and not flags[i - 1])
+    run = []
+    for k in range(n):
+        i = (s0 + k) % n
+        if not flags[i]:
+            break
+        run.append(Vector(ins[i]))
+    # Скользящее среднее на ±2,4 см: у плечевых углов выкройки отступленный контур почти острый, и край
+    # клапана, заходящий на лицевую сторону, на нём перехлёстывался заломами.
+    for _ in range(2):
+        run = [run[0]] + [sum(run[max(0, i - 4):i + 5], Vector((0.0, 0.0))) / len(run[max(0, i - 4):i + 5])
+                          for i in range(1, len(run) - 1)] + [run[-1]]
+    for _ in range(smooth):
+        sm = [run[0]]
+        for i in range(len(run) - 1):
+            sm.append(run[i].lerp(run[i + 1], 0.25))
+            sm.append(run[i].lerp(run[i + 1], 0.75))
+        sm.append(run[-1])
+        run = sm
+    return [(p.x, p.y) for p in run]
 
 
 class OffsetFrame:
@@ -524,7 +603,11 @@ class Mesh:
                 self.f(q, uq, mat)
 
     def build(self, name: str, col: bpy.types.Collection, materials: list[bpy.types.Material],
-              smooth: bool = True, origin: Vector | None = None) -> bpy.types.Object:
+              smooth: bool = True, origin: Vector | None = None,
+              axes: tuple[Vector, Vector, Vector] | None = None,
+              shape_keys: dict[str, "Mesh"] | None = None) -> bpy.types.Object:
+        """origin — опорная точка объекта, axes — его оси (X, Y, Z, правая тройка): плита ходит вдоль своей Z.
+        shape_keys — ключи формы из сеток той же топологии (клапан «Открыт»)."""
         me = bpy.data.meshes.new(name)
         me.from_pydata([tuple(p) for p in self.verts], [], self.faces)
         me.update()
@@ -539,6 +622,13 @@ class Mesh:
             poly.use_smooth = smooth
         obj = bpy.data.objects.new(name, me)
         col.objects.link(obj)
+        if shape_keys:
+            obj.shape_key_add(name="Basis", from_mix=False)
+            for key_name, other in shape_keys.items():
+                assert len(other.verts) == len(self.verts), f"{name}: ключ {key_name} — другая топология"
+                kb = obj.shape_key_add(name=key_name, from_mix=False)
+                for i, p in enumerate(other.verts):
+                    kb.data[i].co = p
         bm = bmesh.new()
         bm.from_mesh(me)
         bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
@@ -548,8 +638,11 @@ class Mesh:
         if origin is not None:
             # Опорная точка детали (шарнир клапана, центр плиты) — для будущей анимации.
             from mathutils import Matrix
-            me.transform(Matrix.Translation(-origin))
-            obj.location = origin
+            m = Matrix.Translation(origin)
+            if axes is not None:
+                m = m @ Matrix((axes[0], axes[1], axes[2])).transposed().to_4x4()
+            me.transform(m.inverted(), shape_keys=True)
+            obj.matrix_world = m
         return obj
 
 
