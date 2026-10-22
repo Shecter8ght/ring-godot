@@ -627,6 +627,7 @@ class Mesh:
             for key_name, other in shape_keys.items():
                 assert len(other.verts) == len(self.verts), f"{name}: ключ {key_name} — другая топология"
                 kb = obj.shape_key_add(name=key_name, from_mix=False)
+                kb.value = 0.0                  # новый ключ в Blender 5 включён (1) — клапан был откинут по умолчанию
                 for i, p in enumerate(other.verts):
                     kb.data[i].co = p
         bm = bmesh.new()

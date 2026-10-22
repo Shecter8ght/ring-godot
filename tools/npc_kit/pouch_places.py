@@ -167,12 +167,13 @@ def put(src: bpy.types.Object, col: bpy.types.Collection, m: Matrix, local: Vect
 
 def main() -> None:
     args = kc.args_after_dashes()
+    tex = "tex" in args                                  # с текстурами: подсумки и пояс из *_tex.blend
     bpy.ops.wm.open_mainfile(filepath=str(kc.WORK / f"armor_fitting_{kc.VERSION}.blend"))
-    with bpy.data.libraries.load(str(kc.WORK / "armor" / "armor_belt.blend")) as (lsrc, ldst):
+    with bpy.data.libraries.load(str(kc.WORK / "armor" / ("armor_belt_tex.blend" if tex else "armor_belt.blend"))) as (lsrc, ldst):
         ldst.collections = ["06_Armor_Belt"]
     bpy.context.scene.collection.children.link(ldst.collections[0])
     names = tuple(n for v in POUCH_OBJS.values() for n in v) + MAGS
-    src = append(OUT / "pouches.blend", names)
+    src = append(OUT / ("pouches_tex.blend" if tex else "pouches.blend"), names)
     hold = kc.collection("98_Pouch_Sources")
     for o in src.values():
         hold.objects.link(o)
@@ -181,6 +182,8 @@ def main() -> None:
             for kb in o.data.shape_keys.key_blocks[1:]:
                 kb.value = 0.0
     bpy.context.view_layer.layer_collection.children["98_Pouch_Sources"].exclude = True
+    import armor_fitting as af
+    kc.log("  картинок-копий сведено:", af.dedupe_images())     # общие с бронёй карты не дублировать
     dims = {}
     for kind, objs in POUCH_OBJS.items():
         body = src[objs[0]]
@@ -259,7 +262,7 @@ def main() -> None:
         check(tier, col, frames, src, armor_objs, body_bvh, Tr)
     (OUT / "places.json").write_text(json.dumps(places_json, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
     show_tier("mid")
-    kc.save(OUT / "pouch_places.blend")
+    kc.save(OUT / ("pouch_places_tex.blend" if tex else "pouch_places.blend"))
     if "render" in args:
         render()
         show_tier("mid")
@@ -267,7 +270,8 @@ def main() -> None:
     if dest:
         import armor_mid as am
         show_tier("mid")
-        am.deliver(Path(dest), f"Подсумки_на_броне_{VERSION}.blend", README.format(ver=VERSION), focus_z=1.10, near=0.75)
+        am.deliver(Path(dest), f"Подсумки_на_броне_{VERSION}{'_текстуры' if tex else ''}.blend", README.format(ver=VERSION),
+                   focus_z=1.10, near=0.75)
 
 
 def check(tier: str, col: bpy.types.Collection, frames: list[Matrix], src: dict, armor_objs: list, body_bvh: BVHTree,

@@ -561,7 +561,7 @@ README = (
     "Скрипт: tools/npc_kit/pouches.py.\n")
 
 
-def deliver(folder: Path) -> None:
+def deliver(folder: Path, filename: str | None = None) -> None:
     """Файл на просмотр: основные магазины видны, длинный и ПМ скрыты, студия, камера спереди, всё упаковано."""
     from mathutils import Quaternion
     set_state("", None, None)
@@ -593,8 +593,9 @@ def deliver(folder: Path) -> None:
     text.write(README.format(ver=VERSION))
     bpy.ops.file.pack_all()
     folder.mkdir(parents=True, exist_ok=True)
-    kc.save(folder / f"Подсумки_{VERSION}_форма.blend")
-    kc.log("DELIVERED", folder / f"Подсумки_{VERSION}_форма.blend")
+    name = filename or f"Подсумки_{VERSION}_форма.blend"
+    kc.save(folder / name)
+    kc.log("DELIVERED", folder / name)
 
 
 SHOTS = (  # (подсумок, x на сцене, видимый магазин, ключ формы, подпись)
