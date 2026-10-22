@@ -67,6 +67,8 @@ func _build() -> void:
 	left.add_child(_big("Загрузить", _show_load))
 	left.add_child(_big("Собрание (кооп)", _show_coop))
 	left.add_child(_big("Настройки", func() -> void: Pause.open_settings()))
+	left.add_child(_big("Настройка положения оружия", func() -> void:
+		Net.change_scene("res://scenes/debug/weapon_pose_lab.tscn", "Стенд настройки оружия")))
 	left.add_child(_big("Выход", func() -> void: get_tree().quit()))
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL

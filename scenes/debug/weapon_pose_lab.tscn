@@ -1,0 +1,125 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/debug/weapon_pose_lab.gd" id="1_lab"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="3_camera"]
+[ext_resource type="Script" path="res://src/ui/weapon_pose_panel.gd" id="4_panel"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.32, 0.42, 0.55, 1)
+sky_horizon_color = Color(0.74, 0.78, 0.81, 1)
+ground_horizon_color = Color(0.55, 0.59, 0.62, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 0.6
+tonemap_mode = 2
+
+[sub_resource type="Shader" id="grid_shader"]
+code = "shader_type spatial;
+void fragment() {
+ vec2 grid = UV * 24.0;
+ vec2 edge = abs(fract(grid - 0.5) - 0.5) / max(fwidth(grid), vec2(0.001));
+ float line = 1.0 - min(min(edge.x, edge.y), 1.0);
+ float checker = mod(floor(grid.x) + floor(grid.y), 2.0);
+ ALBEDO = mix(mix(vec3(0.28, 0.32, 0.34), vec3(0.34, 0.38, 0.40), checker), vec3(0.56, 0.60, 0.61), line * 0.5);
+ ROUGHNESS = 0.9;
+}"
+
+[sub_resource type="ShaderMaterial" id="grid_material"]
+shader = SubResource("grid_shader")
+
+[sub_resource type="PlaneMesh" id="floor_mesh"]
+size = Vector2(24, 24)
+material = SubResource("grid_material")
+
+[sub_resource type="BoxShape3D" id="floor_shape"]
+size = Vector3(24, 0.5, 24)
+
+[sub_resource type="BoxMesh" id="wall_mesh"]
+size = Vector3(24, 3, 0.3)
+
+[sub_resource type="BoxShape3D" id="wall_shape"]
+size = Vector3(24, 3, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="wall_material"]
+albedo_color = Color(0.48, 0.5, 0.5, 1)
+roughness = 0.9
+
+[node name="WeaponPoseLab" type="Node3D"]
+script = ExtResource("1_lab")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-48, -30, 0)
+light_color = Color(1, 0.94, 0.84, 1)
+light_energy = 1.4
+shadow_enabled = true
+directional_shadow_max_distance = 40.0
+
+[node name="Ground" type="StaticBody3D" parent="."]
+position = Vector3(0, 0, 2)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("floor_mesh")
+
+[node name="Collision" type="CollisionShape3D" parent="Ground"]
+position = Vector3(0, -0.25, 0)
+shape = SubResource("floor_shape")
+
+[node name="Backstop" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.5, 13)
+
+[node name="Mesh" type="MeshInstance3D" parent="Backstop"]
+mesh = SubResource("wall_mesh")
+material_override = SubResource("wall_material")
+
+[node name="Collision" type="CollisionShape3D" parent="Backstop"]
+shape = SubResource("wall_shape")
+
+[node name="Targets" type="Node3D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector3(0, 0.03, -4)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+target_path = NodePath("../Player")
+
+[node name="Interface" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="Panel" type="PanelContainer" parent="Interface"]
+anchors_preset = 12
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 472.0
+offset_bottom = -20.0
+grow_vertical = 2
+script = ExtResource("4_panel")
+
+[node name="Hint" type="PanelContainer" parent="Interface"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 492.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 86.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Interface/Hint"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

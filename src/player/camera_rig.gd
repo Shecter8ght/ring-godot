@@ -77,6 +77,9 @@ var _viewmodel: Node3D
 var _viewmodel_rig: WeaponRig
 var _arms: FirstPersonArms
 var _viewmodel_id: String = ""
+## Стенд подставляет свой черновик; обычная игра читает только явно сохранённые поправки.
+var weapon_pose_preview: bool = false
+var weapon_pose_profiles: Dictionary = {}
 var _viewmodel_cache: Dictionary = {}
 var _warmed_player: int = 0
 var _warmed_loadout: bool = false
@@ -872,6 +875,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		vt.origin += bob + Vector3(0.0, flip * 0.004, kick_back * 0.028)
 		_viewmodel.transform = vt
 	_carry_pose(pl, delta)
+	var pose_profiles: Dictionary = weapon_pose_profiles if weapon_pose_preview else WeaponPoseProfiles.active()
+	_viewmodel.transform = WeaponPoseProfiles.apply(_viewmodel.transform, pose_profiles, wid, k, maxf(_carry_k, 0.0))
 	var before_lag: Transform3D = _viewmodel.transform
 	_viewmodel.transform = _weapon_lag(delta, k) * _viewmodel.transform
 	_float_reticle(before_lag)
