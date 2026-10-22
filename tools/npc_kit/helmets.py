@@ -33,6 +33,7 @@ import garment as gm  # noqa: E402
 import kit_common as kc  # noqa: E402
 
 OUT = kc.WORK / "helmets"
+VERSION = "v02"                # v02 — площадка ПНВ с приёмником-выемкой (замечание владельца к v01)
 R0 = 0.10                      # опорный радиус развёртки купола (м)
 
 
@@ -438,22 +439,66 @@ def build_simple(col, mats, head: Head) -> None:
     plastic.build("Helmet_Simple_Buckle", col, [mats["plastic"]])
 
 
-def nvg_mount(cap: CapFrame, plate: ak.Mesh, metal: ak.Mesh, shell_t: float, el: float = 33.0) -> tuple[Vector, Vector]:
-    """Площадка ПНВ спереди: пластина по куполу, гнездо внизу, три винта. Возвращает (гнездо, нормаль)."""
-    patch(plate, cap, -90.0, el, 0.058, 0.042, 0.010, shell_t, 0.005)
-    x, y = CapFrame.xy(-90.0, el - 3.0)
+NVG_EL = 32.0                  # центр площадки ПНВ по возвышению: низ — над окантовкой козырька
+
+
+def local_ae(cap: CapFrame, el0: float, u: float, v: float) -> tuple[float, float]:
+    """Местные метры на лбу купола (u — вбок к +X, v — вверх от центра на возвышении el0) → (азимут, возвышение)."""
+    R = cap.r(-90.0, el0)
+    el = el0 + math.degrees(v / R)
+    return -90.0 + math.degrees(u / (R * math.cos(math.radians(el)))), el
+
+
+def cap_panel(m: ak.Mesh, cap: CapFrame, el0: float, corners: list[tuple[float, float]], radii: list[float],
+              off: float, thick: float, step: float = 0.002) -> None:
+    """Деталь по куполу на лбу: контур в местных метрах (скругления там же), толщина thick от off."""
+    outline = [CapFrame.xy(*local_ae(cap, el0, u, v)) for u, v in ak.rounded_poly(corners, radii)]
+    ak.padded_panel(m, ak.OffsetFrame(cap, off + thick / 2), outline, thick, bulge=0.0, binding=0.0, step=step)
+
+
+def screw(metal: ak.Mesh, cap: CapFrame, el0: float, u: float, v: float, off: float) -> None:
+    """Винт с низкой шляпкой и шестигранным гнездом (гнездо — кольцо поменьше сверху)."""
+    x, y = CapFrame.xy(*local_ae(cap, el0, u, v))
     n = cap.normal(x, y)
-    p = cap.point(x, y, shell_t + 0.012)
-    side = Vector((1.0, 0.0, 0.0))
-    up = n.cross(side).normalized()
-    ak.rbox(plate, p, side, up, n, (0.026, 0.020, 0.014), 0.004)
-    # винты треугольником: верхний по центру, два нижних по бокам от гнезда
-    for dx, dz in ((0.0, 1.0), (-0.022, -1.0), (0.022, -1.0)):
-        xx, yy = CapFrame.xy(-90.0 + deg_along(0.13, el, dx), el + 6.0 * dz)
-        q = cap.point(xx, yy, shell_t + 0.0055)
-        nn = cap.normal(xx, yy)
-        ak.torus(metal, q, nn, 0.0028, 0.0012, seg=12, sides=6)
-    return p, n
+    q = cap.point(x, y, off)
+    cyl(metal, q, q + n * 0.0016, 0.0034, sides=16)
+    ak.torus(metal, q + n * 0.0016, n, 0.0017, 0.0005, seg=6, sides=4)
+
+
+def nvg_mount(cap: CapFrame, plate: ak.Mesh, metal: ak.Mesh, shell_t: float,
+              el0: float = NVG_EL) -> tuple[tuple[float, float], tuple[float, float]]:
+    """Площадка ПНВ (как у настоящих шлемов): пластина по куполу с крыльями под винты, на ней П-образная рамка
+    приёмника — открыта снизу, внутри выемка, куда снизу задвигается башмак крепления прибора; по краям выемки
+    направляющие с поднутрением; над рамкой — корпус защёлки. Три винта: на корпусе защёлки и на крыльях.
+    Возвращает места крепления резинок (азимут, возвышение) слева и справа."""
+    base = shell_t
+    plate_t = 0.0035
+    cap_panel(plate, cap, el0, [(-0.033, -0.030), (0.033, -0.030), (0.033, -0.010), (0.024, 0.012), (0.014, 0.027),
+                                (-0.014, 0.027), (-0.024, 0.012), (-0.033, -0.010)],
+              [0.004, 0.004, 0.006, 0.010, 0.006, 0.006, 0.010, 0.006], base, plate_t)
+    top = base + plate_t
+    frame_h = 0.0075
+    # рамка приёмника: внешний край ±18 мм, окно ±12 мм, снизу открыта (до низа пластины)
+    cap_panel(plate, cap, el0, [(-0.018, -0.030), (-0.012, -0.030), (-0.012, 0.006), (0.012, 0.006), (0.012, -0.030),
+                                (0.018, -0.030), (0.018, 0.013), (-0.018, 0.013)],
+              [0.0015, 0.0008, 0.0025, 0.0025, 0.0008, 0.0015, 0.004, 0.004], top - 0.0005, frame_h + 0.0005)
+    # направляющие: губы по верху рамки нависают над окном на 1,5 мм (башмак заходит под них)
+    lip_off = top + frame_h - 0.0016
+    for sgn in (-1.0, 1.0):
+        a, b = sorted((sgn * 0.0135, sgn * 0.0105))
+        cap_panel(plate, cap, el0, [(a, -0.030), (b, -0.030), (b, 0.004), (a, 0.004)], [0.0004] * 4, lip_off, 0.0016,
+                  step=0.0012)
+    # дно выемки: упор башмака вверху и прорезь под винт крепления к шлему
+    cap_panel(plate, cap, el0, [(-0.0105, 0.001), (0.0105, 0.001), (0.0105, 0.006), (-0.0105, 0.006)], [0.0008] * 4,
+              top - 0.0003, 0.0028, step=0.0012)
+    screw(metal, cap, el0, 0.0, -0.012, top)
+    # корпус защёлки над рамкой
+    cap_panel(plate, cap, el0, [(-0.011, 0.013), (0.011, 0.013), (0.009, 0.025), (-0.009, 0.025)],
+              [0.003, 0.003, 0.005, 0.005], top - 0.0005, 0.0085, step=0.0015)
+    screw(metal, cap, el0, 0.0, 0.019, top + 0.008)
+    for sgn in (-1.0, 1.0):
+        screw(metal, cap, el0, sgn * 0.026, -0.021, top)
+    return local_ae(cap, el0, 0.029, -0.003), local_ae(cap, el0, -0.029, -0.003)
 
 
 def back_hardware(cap: CapFrame, head: Head, rim, web: ak.Mesh, plastic: ak.Mesh, shell_t: float) -> None:
@@ -528,13 +573,13 @@ def build_top(col, mats, head: Head) -> None:
     ring_tube(trim, rim_curve(cap, rim, t / 2), t / 2 + 0.0022, sides=10)                    # резиновый профиль кромки
     rl = rail(rails, cap, -45.0, 32.0, rim, t)
     rr = rail(rails, cap, 225.0, 148.0, rim, t)
-    for az, el, w, h in ((-90.0, 62.0, 0.07, 0.11), (90.0, 30.0, 0.10, 0.05)):
+    for az, el, w, h in ((-90.0, 67.0, 0.07, 0.09), (90.0, 30.0, 0.10, 0.05)):
         patch(velc, cap, az, el, w, h, 0.010, t + 0.001, 0.003)
-    nvg_mount(cap, plate, metal, t, el=30.0)
+    anchors = nvg_mount(cap, plate, metal, t)
     # резинки-растяжки от верха площадки ПНВ по куполу к задним концам планок
     for az_end in (32.0, 148.0):
         sgn = 1.0 if az_end < 90 else -1.0
-        start = (-90.0 + sgn * deg_along(0.13, 33.0, 0.026), 33.0)
+        start = anchors[0] if sgn > 0 else anchors[1]
         end_az = az_end - sgn * 4.0
         end = (end_az, rim(end_az) + 14.0)                 # над верхним краем планки, к её заднему концу
         if end[0] - start[0] > 180.0:
@@ -652,8 +697,10 @@ def main() -> None:
     if dest:
         import armor_mid as am
         show_only("06_Helmet_Mid")
-        am.deliver(Path(dest), "Шлемы_v01_форма.blend", (
-            "Шлемы трёх уровней — ФОРМА v01 на согласование (нейтральный материал), на мародёре v03.\n"
+        am.deliver(Path(dest), f"Шлемы_{VERSION}_форма.blend", (
+            f"Шлемы трёх уровней — ФОРМА {VERSION} на согласование (нейтральный материал), на мародёре v03.\n"
+            "v02: площадка ПНВ как у настоящих шлемов — П-образная рамка приёмника, открытая снизу (выемка под башмак\n"
+            "крепления, направляющие, упор), корпус защёлки сверху, три винта; ремни подвески обходят ухо.\n"
             "Переключение — галочки (глаз) коллекций в Outliner: 06_Helmet_Simple — простой (стальная каска, без креплений),\n"
             "06_Helmet_Mid — средний (шлем в чехле, площадка ПНВ), 06_Helmet_Top — крутой (высокий срез, планки с фонарём,\n"
             "площадка ПНВ, баллистическое забрало). Включать по одному. Смотреть в Rendered (Cycles).\n"
@@ -670,7 +717,8 @@ def render() -> None:
     out = kc.WORK / "previews"
     views = {"34": ((0.55, -0.75, 1.80), (0.0, -0.05, 1.70)), "side": ((0.85, -0.05, 1.74), (0.0, -0.05, 1.70)),
              "back": ((-0.45, 0.75, 1.82), (0.0, -0.03, 1.70)),
-             "ear": ((0.42, -0.10, 1.68), (EAR_X, EAR_Y, EAR_Z - 0.02))}
+             "ear": ((0.42, -0.10, 1.68), (EAR_X, EAR_Y, EAR_Z - 0.02)),
+             "nvg": ((0.10, -0.52, 1.84), (0.0, -0.17, 1.775))}
     strips = []
     for col_name, _, _ in TIERS:
         show_only(col_name)
@@ -695,7 +743,7 @@ def render() -> None:
     s.file_format = "JPEG"
     s.quality = 90
     s.color_mode = "RGB"
-    res.save_render(str(out / "helmets_v01.jpg"))
+    res.save_render(str(out / f"helmets_{VERSION}.jpg"))
 
 
 if __name__ == "__main__":
