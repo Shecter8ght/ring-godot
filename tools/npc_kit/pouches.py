@@ -535,6 +535,10 @@ def main() -> None:
         for c in list(mg.users_collection):
             c.objects.unlink(mg)
         kc.collection(f"{col.name} · {mg.name}", col).objects.link(mg)
+    for o in bpy.data.objects:                              # ключи формы — выключены (новые создаются со значением 1)
+        if o.type == "MESH" and o.data.shape_keys:
+            for kb in o.data.shape_keys.key_blocks[1:]:
+                kb.value = 0.0
     stage(pc, 0.20)
     stage(bc, 0.42)
     OUT.mkdir(parents=True, exist_ok=True)
