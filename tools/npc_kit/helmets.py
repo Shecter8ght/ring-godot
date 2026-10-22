@@ -259,7 +259,12 @@ def ring_tube(m: ak.Mesh, pts: list[Vector], radius: float, sides: int = 8, mat:
         rows.append([m.v(pts[i] + (nn * math.cos(2 * math.pi * k / sides) + b * math.sin(2 * math.pi * k / sides)) * radius)
                      for k in range(sides)])
     rows.append(rows[0])
-    m.grid(rows, [[(i * 0.01, k / sides) for k in range(sides)] for i in range(len(rows))], mat, closed_u=True)
+    # развёртка в метрах: вдоль — длина по кромке, поперёк — по окружности сечения (ткань и резина в своём масштабе)
+    cum = [0.0]
+    for i in range(1, n + 1):
+        cum.append(cum[-1] + (pts[i % n] - pts[i - 1]).length)
+    circ = 2 * math.pi * radius
+    m.grid(rows, [[(cum[i], circ * k / sides) for k in range(sides)] for i in range(len(rows))], mat, closed_u=True)
 
 
 def patch(m: ak.Mesh, cap: CapFrame, az: float, el: float, w: float, h: float, r: float, off: float, thick: float,
