@@ -13,6 +13,8 @@ static var _mats: Dictionary = {}
 
 static func build(id: String) -> Node3D:
 	var it := ItemDb.item(id)
+	if id == Metka4Model.ID:
+		return Metka4Model.standalone()
 	if WeaponDb.is_weapon(id):
 		return WeaponModels.build(id)
 	if id == "grenade":

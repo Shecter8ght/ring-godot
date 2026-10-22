@@ -2,6 +2,7 @@ extends Node
 ## Два реальных ENet peer: общая модель, полный рюкзак, повторный запрос, вынос и продажа.
 const PORT: int = 17788
 var role: String = "host"
+var test_item: String = "multimeter"
 var fails: int = 0
 var phase: int = 0
 var ack: int = 0
@@ -23,6 +24,8 @@ func _ready() -> void:
 
 func _run() -> void:
 	role = String(OS.get_cmdline_user_args()[0])
+	if OS.get_environment("LOOT_NET_ITEM") != "":
+		test_item = OS.get_environment("LOOT_NET_ITEM")
 	Profile.use_file("user://loot_net_%s.json" % role, true)
 	Profile.backpack = []
 	Profile.equipment = {"backpack": ItemDb.make(Balance.BACKPACK_START, 1)}
@@ -49,28 +52,28 @@ func _run() -> void:
 		await until(func() -> bool: return phase >= 1)
 		var found: LooseLoot = Raid.current.get_node(target) as LooseLoot
 		await until(func() -> bool: return not found.items.is_empty() and me.inventory.items.size() > 2)
-		check("клиент видит модель хоста", found._vis.get_child_count() == 1 and String(found.items[0].id) == "multimeter")
+		check("клиент видит модель хоста", found._vis.get_child_count() == 1 and String(found.items[0].id) == test_item)
 		me.global_position = found.global_position + Vector3(0.5, 0.1, 0)
 		await get_tree().create_timer(0.8).timeout
 		found.request_use()
 		await get_tree().create_timer(0.7).timeout
-		check("полный рюкзак не удалил находку", found.items.size() == 1 and not me.inventory.has("multimeter"))
+		check("полный рюкзак не удалил находку", found.items.size() == 1 and not me.inventory.has(test_item))
 		_ack.rpc_id(1, 1)
 		await until(func() -> bool: return phase >= 2 and me.inventory.items.is_empty())
 		found.request_use()
 		found.request_use()
-		await until(func() -> bool: return found.items.is_empty() and me.inventory.has("multimeter"))
-		check("повторный сетевой запрос даёт ровно одну вещь", me.inventory.count("multimeter") == 1)
+		await until(func() -> bool: return found.items.is_empty() and me.inventory.has(test_item))
+		check("повторный сетевой запрос даёт ровно одну вещь", me.inventory.count(test_item) == 1)
 		check("модель и подсказка исчезли на клиенте", found._vis.get_child_count() == 0 and not found.can_use())
 		_ack.rpc_id(1, 2)
 		await until(func() -> bool: return phase >= 3 and not Raid.current._exit_receipt.is_empty())
-		check("надёжное подтверждение выноса содержит вещь", count_item(Raid.current._exit_receipt.items, "multimeter") == 1)
+		check("надёжное подтверждение выноса содержит вещь", count_item(Raid.current._exit_receipt.items, test_item) == 1)
 		# Надёжное подтверждение и обычная репликация статуса эвакуации могут прийти в разные кадры.
-		await until(func() -> bool: return count_item(Profile.backpack, "multimeter") == 1)
+		await until(func() -> bool: return count_item(Profile.backpack, test_item) == 1)
 		Profile._loaded = false
 		Profile.ensure()
 		var before: int = Profile.money
-		check("клиент сохранил и продал вынесенную вещь", Profile.sell(0, 1, "backpack") and Profile.money - before == Profile.sell_price(ItemDb.make("multimeter", 1)))
+		check("клиент сохранил и продал вынесенную вещь", Profile.sell(0, 1, "backpack") and Profile.money - before == Profile.sell_price(ItemDb.make(test_item, 1)))
 		_result.rpc_id(1, fails)
 		await until(func() -> bool: return result_confirmed)
 		await get_tree().create_timer(0.5).timeout
@@ -84,7 +87,7 @@ func _run() -> void:
 		get_tree().quit(1)
 		return
 	var found: LooseLoot = points[0] as LooseLoot
-	var entry: Dictionary = ItemDb.make("multimeter", 1)
+	var entry: Dictionary = ItemDb.make(test_item, 1)
 	entry["fir"] = true
 	found.items = [entry]
 	found.rolled = true
@@ -102,7 +105,7 @@ func _run() -> void:
 	friend.inventory.items = []
 	_set_phase.rpc(2)
 	await until(func() -> bool: return ack >= 2)
-	check("хост видит тот же единственный экземпляр", friend.inventory.count("multimeter") == 1 and found.items.is_empty() and found._vis.get_child_count() == 0)
+	check("хост видит тот же единственный экземпляр", friend.inventory.count(test_item) == 1 and found.items.is_empty() and found._vis.get_child_count() == 0)
 	var ext: ExtractionPoint = ExtractionPoint.new()
 	ext.display_name = "Проверка выноса"
 	get_tree().current_scene.add_child(ext)

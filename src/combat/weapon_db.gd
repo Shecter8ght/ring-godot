@@ -450,6 +450,7 @@ static func _from_preset(p: Dictionary, rng: RandomNumberGenerator, dur_range: A
 		mods[String(mount)] = {"id": String(p.mods[mount]), "dur": roundf(rng.randf_range(float(dr[0]), float(dr[1])))}
 	e["mods"] = mods
 	# старые пресеты с угловым прицелом — кронштейн на планке
+	e = AttachmentRemote.upgrade(e)[0]
 	e = WeaponBuild.upgrade(e)[0]
 	var ammo_id := pick_ammo(p.get("ammo", []), rng, String(weapon(wid).caliber))
 	var cap := 0
@@ -534,9 +535,16 @@ static func migrate(e: Dictionary) -> Array:
 			else:
 				spill.append({"id": mid, "n": 1})
 		out["mods"] = mods
+		# Некомплектный старый ЛЦУ не должен мешать переносу независимого углового прицела.
+		var before_remotes: Array = AttachmentRemote.upgrade(out)
+		out = before_remotes[0]
+		spill.append_array(before_remotes[1])
 		var upgraded: Array = WeaponBuild.upgrade(out)
 		out = upgraded[0]
 		spill.append_array(upgraded[1])
+		var remotes: Array = AttachmentRemote.upgrade(out)
+		out = remotes[0]
+		spill.append_array(remotes[1])
 		if not out.has("mag") or not (out.mag is Dictionary):
 			var w := weapon(id)
 			var mg := old_mag if old_mag != "" and mag_fits(id, old_mag) else default_mag(id)

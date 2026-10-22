@@ -130,7 +130,7 @@ func _bounds() -> AABB:
 	var first := true
 	for n: Node in _model.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		if mi.mesh == null or not mi.visible:
+		if mi.mesh == null or not mi.visible or bool(mi.get_meta("weapon_clearance_ignore", false)):
 			continue
 		var b: AABB = _relative(mi) * mi.get_aabb()
 		out = b if first else out.merge(b)

@@ -1172,6 +1172,7 @@ func _fit_grid(peer_id: int, src: String, si: int, dst: String, di: int, path: N
 		else:
 			inv._set_list(String(rr), lists[rr])
 	Audio.play(_fit_sound(fitted_id), pl.global_position, -6.0)
+	_warn_sight_fit(peer_id, fitted)
 
 
 ## Внутри ящика — передвинуть запись в клетку (x, y).
@@ -1694,6 +1695,13 @@ func _fit(peer_id: int, where: String, idx: int, src_idx: int, hint: String, pat
 		c.items = list
 		pl.inventory.items = items
 	Audio.play(_fit_sound(String(src.id)), pl.global_position, -6.0)
+	_warn_sight_fit(peer_id, fitted)
+
+
+func _warn_sight_fit(peer_id: int, entry: Dictionary) -> void:
+	var warnings: Array[String] = WeaponBuild.sight_warnings(entry)
+	if not warnings.is_empty():
+		_tell(peer_id, warnings[0])
 
 
 ## Обвес на оружие прямо в рейде: из рюкзака/кармана (src, idx) — на оружие в слоте weapon_slot.
@@ -1730,6 +1738,7 @@ func _install_mod(peer_id: int, weapon_slot: String, src: String, idx: int) -> v
 	var why := pl.inventory.install_mod(weapon_slot, src, idx)
 	if why == "":
 		Audio.play("mod_fit", pl.global_position, -6.0)
+		_warn_sight_fit(peer_id, pl.inventory.equipment.get(weapon_slot, {}))
 	elif peer_id == multiplayer.get_unique_id():
 		notify(why)
 

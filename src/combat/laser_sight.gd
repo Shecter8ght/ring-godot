@@ -54,6 +54,17 @@ func _init() -> void:
 	add_child(_dot)
 
 
+## Собственный цвет блока; общий красный материал других ЛЦУ не меняется.
+func set_color(color: Color) -> void:
+	for mesh: MeshInstance3D in [_beam, _beam.get_node("Line") as MeshInstance3D, _dot]:
+		var mat: StandardMaterial3D = mesh.material_override.duplicate() as StandardMaterial3D
+		var alpha: float = mat.albedo_color.a
+		mat.albedo_color = color
+		mat.albedo_color.a = alpha
+		mat.emission = color
+		mesh.material_override = mat
+
+
 func _process(_delta: float) -> void:
 	if not is_visible_in_tree() or not is_inside_tree():
 		return

@@ -29,7 +29,7 @@ static func capture(name: String) -> Dictionary:
 			mods[String(m)] = WeaponDb.mod_id(e.mods[m])
 			var md: Dictionary = e.mods[m] if e.mods[m] is Dictionary else {}
 			var p := {}
-			for k in ["slot", "flip", "angle"]:
+			for k in ["slot", "flip", "angle", "remote"]:
 				if md.has(k):
 					p[k] = md[k]
 			if not p.is_empty():

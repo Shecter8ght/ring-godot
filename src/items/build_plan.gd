@@ -72,9 +72,9 @@ static func resolve(weapon: Dictionary, draft: Dictionary, draft_mag: Dictionary
 					used_take[whole] = true
 					(out.take as Array).append([list_name, idx])
 		# ресурс и включённость фонаря/лазера — от самой детали; место — из черновика
-		for drop: String in ["x", "y", "r", "n", "rev", "mods", "uid", "src", "slot", "flip", "angle"]:
+		for drop: String in ["x", "y", "r", "n", "rev", "mods", "uid", "src", "slot", "flip", "angle", "remote"]:
 			real.erase(drop)
-		for place: String in ["slot", "flip", "angle", "light", "laser"]:
+		for place: String in ["slot", "flip", "angle", "light", "laser", "remote"]:
 			if rec.has(place):
 				real[place] = rec[place]
 		final_mods[key] = real
@@ -86,12 +86,16 @@ static func resolve(weapon: Dictionary, draft: Dictionary, draft_mag: Dictionary
 			return _fail(out, "%s — только на верстаке в убежище" % String(WeaponDb.MOUNT_NAMES.get(String(locked), locked)).to_lower())
 	# 3. сборка целиком: каждая деталь — по порядку, от родителей к детям
 	var probe: Dictionary = weapon.duplicate(true)
-	probe["mods"] = {}
+	probe["mods"] = final_mods
 	for key: String in WeaponBuild.sorted_keys(final_mods):
 		var why: String = WeaponBuild.block(probe, key, WeaponDb.mod_id(final_mods[key]), int((final_mods[key] as Dictionary).get("slot", -1)))
 		if why != "":
 			return _fail(out, "%s: %s" % [ItemDb.item_name(WeaponDb.mod_id(final_mods[key])), why])
 		(probe.mods as Dictionary)[key] = final_mods[key]
+	var remotes: Dictionary = AttachmentRemote.resolve(wid, probe.mods)
+	if String(remotes.why) != "":
+		return _fail(out, String(remotes.why))
+	probe.mods = remotes.mods
 	# 4. что вернётся: снятое с оружия (переходник — со всем снятым, что было на нём) и остатки взятых
 	var returned: Array = _leftovers(old_mods, func(k: String) -> bool: return used_weapon.has(k))
 	for t: Variant in out.take:
@@ -142,7 +146,7 @@ static func _leftovers(mods: Dictionary, used: Callable) -> Array:
 		if parent != "" and mods.has(parent) and not used.call(parent):
 			continue
 		var item: Dictionary = WeaponCondition.mod_entry(mods[k])
-		for drop: String in ["slot", "flip", "angle"]:
+		for drop: String in ["slot", "flip", "angle", "remote"]:
 			item.erase(drop)
 		var carried: Dictionary = {}
 		for d: String in WeaponBuild.subtree(mods, k):

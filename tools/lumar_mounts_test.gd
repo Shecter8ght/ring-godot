@@ -40,7 +40,9 @@ func _ready() -> void:
 	_check_line(angled)
 	await _capture("veras_lumar_offset")
 	await _middle()
-	_check("повторная СКМ возвращает основной", String(_player.spec().sight) == "primary" and _camera.scope_active)
+	_check("после последнего прицела СКМ выбирает стрельбу с завалом", _player.aim_cant and not _camera.scope_active)
+	await _middle()
+	_check("следующая СКМ возвращает основной", String(_player.spec().sight) == "primary" and _camera.scope_active and not _player.aim_cant)
 	for mount: String in ["side_right", "side_left"]:
 		await _equip({"optic_primary": {"id": "optic_lpvo_01", "dur": 100.0}, mount: {"id": "optic_holo_01", "dur": 100.0}})
 		await _middle()
@@ -97,12 +99,10 @@ func _data_checks() -> void:
 	_check("выбор и ресурс проходят сохранение", String(Profile.equipment.primary.sight) == "side_right" and float(Profile.equipment.primary.mods.side_right.dur) == 20.0)
 	var pair_entry: Dictionary = _legacy_pair("wpn_ar_01", {"optic_primary": {"id": "optic_lpvo_01"}})
 	var pair: Node3D = WeaponModels.build("wpn_ar_01", pair_entry.mods)
-	var lpvo: Node3D = pair.find_child("Attachment_optic_primary", true, false) as Node3D
 	var lumar: Node3D = pair.find_child("Attachment_" + WeaponBuild.node_name(_bracket_sight(pair_entry)), true, false) as Node3D
 	var optic: Node3D = lumar.find_child("LUMAR_H1", true, false) as Node3D
-	var primary_box: AABB = _bounds(lpvo, pair)
-	var lumar_box: AABB = _bounds(optic, pair)
-	_check("крупный ЛУМАР не пересекает основную оптику", not primary_box.intersects(lumar_box), str(primary_box) + " / " + str(lumar_box))
+	var expected_mount: Transform3D = WeaponMods.point_frame(pair, "veras54", pair_entry.mods, _bracket_sight(pair_entry))
+	_check("ЛУМАР без выдуманной проставки, прямо на площадке 45°", optic.position.is_zero_approx() and WeaponModels.between(pair, optic).origin.distance_to(expected_mount.origin) < 0.0001)
 	pair.free()
 	for wid: String in WeaponDb.weapon_ids():
 		for mount: String in ["offset", "side_left", "side_right"]:

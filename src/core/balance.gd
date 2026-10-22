@@ -2137,7 +2137,7 @@ const TV_LIGHT := {"energy": 1.5, "range": 9.0, "attenuation": 1.0, "static_k": 
 ## [предмет, вес] — вес в одном ряду с весами темы. Разгрузки — в спорттоварах, у охраны, на складе, дома.
 const LOOSE_GEAR := {
 	"sport": [["rig_belt", 0.3], ["rig_chest", 0.15]],
-	"security": [["rig_belt", 0.4], ["rig_chest", 0.25]],
+	"security": [["rig_belt", 0.4], ["rig_chest", 0.25], ["tac_laser_01", 0.2]],
 	"storage": [["rig_belt", 0.12]],
 	"home": [["rig_belt", 0.12]],
 }

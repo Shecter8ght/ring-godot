@@ -55,6 +55,8 @@ static func _placement(mods: Dictionary) -> String:
 	for k: String in WeaponBuild.sorted_keys(mods):
 		var rec: Dictionary = mods[k] if mods[k] is Dictionary else {}
 		parts.append("%s@%s%s%s" % [k, str(rec.get("slot", "")), "f" if bool(rec.get("flip", false)) else "", str(rec.get("angle", ""))])
+		if rec.has("remote"):
+			parts.append("remote=" + str(rec.remote))
 	return ",".join(parts)
 
 

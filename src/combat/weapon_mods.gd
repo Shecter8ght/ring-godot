@@ -32,7 +32,7 @@ static func socket(model_key: String, mount: String) -> Dictionary:
 ## планке — со сдвигом по пазу), у точки переходника — от рамки, которую он даёт. Линия каждого
 ## прицела — в meta "sights" {ключ: {x, h, roll}}; основной (WeaponBuild.primary_key) — ещё и
 ## прежними sight_h / ocular / ads_z модели.
-static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0) -> void:
+static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0, weapon_id: String = "") -> void:
 	var rig: WeaponRig = WeaponRig.find_on(root)
 	if rig:
 		rig.set_external_muzzle(false)
@@ -71,6 +71,7 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 			m = socket(model_key, base)
 			if m.is_empty():
 				continue
+			m["native_rail"] = m.has("rail_z") and not bool(m.get("rail", false))
 			var p: Vector3 = m.pos
 			p.z = WeaponBuild.placed_z(model_key, mods, key)
 			# планка, которой у модели нет, рисуется один раз во всю длину — устройства встают на неё
@@ -163,6 +164,8 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0)
 			if material is StandardMaterial3D and (material as StandardMaterial3D).emission_enabled and optic and glow.r >= glow.b:
 				mesh.set_meta("reticle_dot", true)
 				mesh.set_meta("mount", key)
+	root.set_meta("frames", frames)
+	Metka4Model.fit(root, model_key, mods, weapon_id)
 	update_condition(root, mods)
 	if rig and root.get_meta("muzzle", Vector3.ZERO) != bare_muzzle:
 		# Процедурный глушитель или тормоз на модели без своей детали: дульный срез — от насадки,
@@ -562,7 +565,7 @@ static func _offset_optic(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 ## Прицел лежит на боку; камера компенсирует этот крен при выборе по СКМ.
 static func _side_optic(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 	var p: Vector3 = m.pos
-	var outer: float = _rail_side(root, p.x, p.y, p.z, 0.09)
+	var outer: float = p.x if bool(m.get("native_rail", false)) else _rail_side(root, p.x, p.y, p.z, 0.09)
 	var roll: float = -signf(p.x) * PI * 0.5
 	var pivot: Node3D = Node3D.new()
 	pivot.name = "SideOpticMount"
@@ -945,7 +948,7 @@ static func _tac_body(root: Node3D, m: Dictionary) -> Node3D:
 	var t := Node3D.new()
 	root.add_child(t)
 	if bool(m.get("side", false)):
-		var outer := _rail_side(root, p.x, p.y, p.z, 0.05)
+		var outer: float = p.x if bool(m.get("native_rail", false)) else _rail_side(root, p.x, p.y, p.z, 0.05)
 		t.position = Vector3(outer + signf(p.x) * 0.011, p.y, p.z)
 	else:
 		WeaponModels._cbox(root, Vector3(p.x, p.y - 0.004, p.z), Vector3(0.022, 0.008, 0.03), _mat("anodized"), 0.001)

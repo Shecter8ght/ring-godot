@@ -91,7 +91,7 @@ static func model_key(id: String, mods: Dictionary, _dur: float = 100.0, mag: St
 		var rec: Dictionary = mod_entry(mods[mount])
 		parts.append("%s:%s" % [mount, rec.id])
 		# Паз, сторона и поворот меняют геометрию сборки; фонарь, ЛЦУ и кратность — её состояние.
-		for placement: String in ["slot", "flip", "angle"]:
+		for placement: String in ["slot", "flip", "angle", "remote"]:
 			if rec.has(placement):
 				parts.append("%s=%s" % [placement, str(rec[placement])])
 	return "|".join(parts)

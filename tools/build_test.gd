@@ -64,9 +64,10 @@ func _rails() -> void:
 	var r: Array = WeaponBuild.insert(e, "optic_primary", {"id": "optic_lpvo_01", "n": 1, "dur": 100.0}, 2)
 	e = r[0]
 	_check("LPVO в пазу 2: середина на 0.085", is_equal_approx(WeaponBuild.placed_z("veras54", e.mods, "optic_primary"), 0.010 + 0.035 + 0.04))
-	_check("LPVO впереди коллиматора — «мешает прицелу»", WeaponBuild.block(WeaponBuild.insert(_veras({}), "optic_primary", {"id": "optic_lpvo_01"}, 4)[0], "optic_primary#2", "optic_rd_01", 0).begins_with("мешает прицелу"))
+	var front: Dictionary = WeaponBuild.insert(_veras({}), "optic_primary", {"id": "optic_lpvo_01"}, 4)[0]
+	_check("LPVO впереди коллиматора — предупреждение без запрета", WeaponBuild.block(front, "optic_primary#2", "optic_rd_01", 0) == "" and WeaponBuild.sight_warning(front, "optic_primary#2", "optic_rd_01", 0) != "")
 	_check("второй прицел на тот же участок — «занято»", WeaponBuild.block(e, "optic_primary#2", "optic_rd_01", 2).begins_with("занято"))
-	_check("коллиматор перед LPVO — «закроет прицел»", WeaponBuild.block(e, "optic_primary#2", "optic_rd_01", 6).begins_with("закроет прицел"),
+	_check("коллиматор перед LPVO — предупреждение без запрета", WeaponBuild.block(e, "optic_primary#2", "optic_rd_01", 6) == "" and WeaponBuild.sight_warning(e, "optic_primary#2", "optic_rd_01", 6) != "",
 		WeaponBuild.block(e, "optic_primary#2", "optic_rd_01", 6))
 	_check("за край планки — нельзя", WeaponBuild.block(e, "optic_primary#2", "mount_offset45_01", 9) != "")
 	var place: Dictionary = WeaponBuild.free_place(e, "mount_offset45_01")

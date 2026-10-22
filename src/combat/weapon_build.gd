@@ -204,7 +204,11 @@ static func placed_z(model_key: String, mods: Dictionary, key: String) -> float:
 ## Отрезок, который зажим устройства занимает на планке.
 static func span(model_key: String, mods: Dictionary, key: String) -> Vector2:
 	var z: float = placed_z(model_key, mods, key)
-	var c: float = clamp_of(WeaponDb.mod_id(mods.get(key, "")))
+	var att: String = WeaponDb.mod_id(mods.get(key, ""))
+	var footprint: Array = WeaponDb.attachment(att).get("footprint_m", [])
+	if footprint.size() == 2:
+		return Vector2(z + float(footprint[0]), z + float(footprint[1]))
+	var c: float = clamp_of(att)
 	return Vector2(z - c * 0.5, z + c * 0.5)
 
 
@@ -228,7 +232,7 @@ static func point_roll(model_key: String, mods: Dictionary, key: String) -> floa
 
 ## Почему обвес att нельзя поставить в key ("" — можно). slot < 0 — паз записи (или как раньше).
 ## Проверки: точка есть, интерфейс подходит, зажим помещается на планке, не налезает на соседей,
-## не закрывает прицел и сам им не закрыт, старые запреты blocks.
+## старые запреты blocks. Перекрытие линии прицеливания — отдельное предупреждение.
 static func block(entry: Dictionary, key: String, att: String, slot: int = -1) -> String:
 	var a: Dictionary = WeaponDb.attachment(att)
 	if a.is_empty():
@@ -239,6 +243,9 @@ static func block(entry: Dictionary, key: String, att: String, slot: int = -1) -
 	# заменяемое устройство и всё, что на нём, в проверке не участвует
 	var mods: Dictionary = without(entry.get("mods", {}), key)
 	var rec: Dictionary = {"id": att}
+	var old: Variant = (entry.get("mods", {}) as Dictionary).get(key, {})
+	if old is Dictionary and WeaponDb.mod_id(old) == att:
+		rec = (old as Dictionary).duplicate(true)
 	if slot >= 0:
 		rec["slot"] = slot
 	mods[key] = rec
@@ -256,15 +263,13 @@ static func block(entry: Dictionary, key: String, att: String, slot: int = -1) -
 		if slot_count(pt.rail, c) <= 0:
 			return "не хватает длины планки"
 		var mine: Vector2 = span(model_key, mods, key)
-		if mine.x < float(pt.rail[0]) - 0.0001 or mine.y > float(pt.rail[1]) + 0.0001:
+		var z: float = placed_z(model_key, mods, key)
+		if z - c * 0.5 < float(pt.rail[0]) - 0.0001 or z + c * 0.5 > float(pt.rail[1]) + 0.0001:
 			return "не помещается на планке"
 		for other: String in siblings(mods, key):
 			var o: Vector2 = span(model_key, mods, other)
 			if mine.x < o.y - 0.0001 and o.x < mine.y - 0.0001:
 				return "занято: " + ItemDb.item_name(WeaponDb.mod_id(mods[other]))
-		var view: String = view_block(id, mods, key)
-		if view != "":
-			return view
 	for other: Variant in mods:
 		var ok: String = String(other)
 		if ok == key:
@@ -274,11 +279,12 @@ static func block(entry: Dictionary, key: String, att: String, slot: int = -1) -
 			return "мешает: " + ItemDb.item_name(WeaponDb.mod_id(mods[other]))
 		if ok in a.get("blocks", []):
 			return "закроет: " + ItemDb.item_name(WeaponDb.mod_id(mods[other]))
-	return ""
+	# Пульт занимает планку, хотя второго предмета в mods нет.
+	return String(AttachmentRemote.resolve(id, mods).why)
 
 
-## Прицел на верхней планке не должен смотреть в корпус другого устройства перед ним: там стоит
-## что-то высокое — «мешает прицелу». Низкие (кронштейны, у которых всё уходит вбок) не мешают.
+## Подсказка о возможном перекрытии, а не запрет установки (владелец, 2026-10-22).
+## Окончательный обзор игрок проверяет из глаза; низкие кронштейны не учитываем.
 static func view_block(id: String, mods: Dictionary, key: String) -> String:
 	var pt: Dictionary = point(id, mods, key)
 	if String(pt.get("iface", "")) != "RAIL_TOP":
@@ -302,8 +308,29 @@ static func view_block(id: String, mods: Dictionary, key: String) -> String:
 	return ""
 
 
-## Паз, если не задан: у заменяемой записи — её паз; прежнее место точки, если оно на планке;
-## иначе ближайший к нему паз (у ВЕРАСа сокет боковой планки чуть позади самой планки).
+## Предупреждение об обзоре при примерке; установка от него не зависит.
+static func sight_warning(entry: Dictionary, key: String, att: String, slot: int = -1) -> String:
+	var mods: Dictionary = without(entry.get("mods", {}), key)
+	var rec: Dictionary = {"id": att}
+	slot = resolve_slot(entry, key, att, slot)
+	if slot >= 0:
+		rec["slot"] = slot
+	mods[key] = rec
+	var why: String = view_block(String(entry.get("id", "")), mods, key)
+	return "Возможно перекрытие обзора: " + why + ". Установка разрешена — проверь вид из глаза." if why != "" else ""
+
+
+static func sight_warnings(entry: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	var mods: Dictionary = entry.get("mods", {})
+	for key: String in sorted_keys(mods):
+		var warning: String = sight_warning(entry, key, WeaponDb.mod_id(mods[key]))
+		if warning != "" and not warning in out:
+			out.append(warning)
+	return out
+
+
+## Паз, если не задан: у заменяемой записи — её паз; иначе штатное место или ближайший паз.
 static func resolve_slot(entry: Dictionary, key: String, att: String, slot: int) -> int:
 	if slot >= 0:
 		return slot
@@ -447,7 +474,7 @@ static func extract(entry: Dictionary, key: String) -> Array:
 		return [entry, {}]
 	var e: Dictionary = entry.duplicate(true)
 	var item: Dictionary = WeaponCondition.mod_entry(mods[key])
-	for placement: String in ["slot", "flip", "angle"]:
+	for placement: String in ["slot", "flip", "angle", "remote"]:
 		item.erase(placement)
 	var carried: Dictionary = {}
 	for k: String in subtree(mods, key):
@@ -499,6 +526,10 @@ static func insert(entry: Dictionary, key: String, item: Dictionary, slot: int =
 				continue
 		spilled[ck] = crec
 	e["mods"] = mods
+	var resolved: Dictionary = AttachmentRemote.resolve(String(e.id), mods)
+	if String(resolved.why) != "":
+		return [entry, {}, String(resolved.why), {}]
+	e["mods"] = resolved.mods
 	_bump(e)
 	return [e, r[1], "", spilled]
 

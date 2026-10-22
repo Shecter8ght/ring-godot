@@ -579,6 +579,7 @@ func _commit(key: String, part: Dictionary, slot: int, flip: bool, angle: float)
 	if not is_nan(angle):
 		rec["angle"] = angle
 	_draft[key] = rec
+	_bind_remotes()
 	# что ехало на детали: из вещей — её mods; с этого оружия — снятые вместе с ней потомки
 	var src: Dictionary = part.src
 	var children: Dictionary = {}
@@ -631,12 +632,15 @@ func _place_mods() -> Dictionary:
 	if not is_nan(float(_place.angle)):
 		rec["angle"] = float(_place.angle)
 	var old: Dictionary = _draft.get(key, {})
-	for k2: String in ["light", "laser"]:
+	for k2: String in ["light", "laser", "remote"]:
+		if k2 == "remote" and WeaponDb.mod_id(old) != String(_place.part.id):
+			continue
 		if old.has(k2):
 			rec[k2] = old[k2]
 	mods[key] = rec
 	mods.merge(keep)
-	return mods
+	var resolved: Dictionary = AttachmentRemote.resolve(String(_weapon.id), mods)
+	return resolved.mods if String(resolved.why) == "" else mods
 
 
 func _update_place() -> void:
@@ -644,8 +648,7 @@ func _update_place() -> void:
 		return
 	var key: String = String(_place.key)
 	var probe: Dictionary = _draft_entry()
-	for k: String in WeaponBuild.subtree(probe.mods, key):
-		(probe.mods as Dictionary).erase(k)
+	probe.mods = BuildPlan.clean(_place_mods())
 	var why: String = WeaponBuild.block(probe, key, String(_place.part.id), int(_place.slot))
 	_place["ok"] = why == ""
 	_place["why"] = why
@@ -653,6 +656,10 @@ func _update_place() -> void:
 	var node: Node3D = _view.model().find_child("Attachment_" + WeaponBuild.node_name(key), true, false) as Node3D if _view.model() else null
 	_view.tint(node, why == "")
 	_refresh_stats()
+	var warning: String = WeaponBuild.sight_warning(probe, key, String(_place.part.id), int(_place.slot))
+	if why == "" and _status_t <= 0.0:
+		_status.text = warning
+		_status.add_theme_color_override("font_color", C_ACCENT)
 	_overlay.queue_redraw()
 
 
@@ -672,6 +679,7 @@ func _confirm_place() -> void:
 	var key: String = String(_place.key)
 	_push()
 	_draft = mods
+	_bind_remotes()
 	_sel = key
 	_sel_add = false
 	_end_place()
@@ -865,7 +873,15 @@ func _refresh_tree() -> void:
 			if WeaponBuild.top_mount(k) == m:
 				on.append(k)
 		if on.is_empty():
-			_tree_row(m, String(WeaponDb.MOUNT_NAMES.get(m, m)), "пусто", 0, false)
+			var remote_owner: String = ""
+			for owner: String in WeaponBuild.sorted_keys(mods):
+				var rec: Dictionary = mods[owner] if mods[owner] is Dictionary else {}
+				if not AttachmentRemote.spec(WeaponDb.mod_id(rec)).is_empty() and String((rec.get("remote", {}) as Dictionary).get("point", "")) == m:
+					remote_owner = owner
+			if remote_owner != "":
+				_tree_row(remote_owner, "Пульт МЕТКА-4", String(WeaponDb.MOUNT_NAMES.get(m, m)), 0, true)
+			else:
+				_tree_row(m, String(WeaponDb.MOUNT_NAMES.get(m, m)), "пусто", 0, false)
 			continue
 		on.sort_custom(func(a: String, b: String) -> bool: return _tree_order(a) < _tree_order(b))
 		for k: String in on:
@@ -950,6 +966,18 @@ func _refresh_actions() -> void:
 	var id: String = WeaponDb.mod_id(_draft[_sel])
 	var key: String = _sel
 	_actions.add_child(_button("Снять  ПКМ", func() -> void: _remove(key)))
+	if not AttachmentRemote.spec(id).is_empty():
+		_actions.add_child(_label("Пульт: отдельная планка", 12, C_MUTED))
+		var selector: OptionButton = OptionButton.new()
+		var choices: Array[Dictionary] = AttachmentRemote.options(String(_weapon.id), BuildPlan.clean(_draft), key)
+		var current: Dictionary = (_draft[key] as Dictionary).get("remote", {})
+		for i: int in range(choices.size()):
+			var place: Dictionary = choices[i]
+			selector.add_item("%s · паз %d · %s" % [String(WeaponDb.MOUNT_NAMES.get(String(place.point), place.point)), int(place.slot) + 1, "к прикладу" if bool(place.reverse) else "к дулу"])
+			if String(place.point) == String(current.get("point", "")) and int(place.slot) == int(current.get("slot", -1)) and bool(place.reverse) == bool(current.get("reverse", false)):
+				selector.select(i)
+		selector.item_selected.connect(func(i: int) -> void: _move_remote(key, choices[i]))
+		_actions.add_child(selector)
 	var pt: Dictionary = WeaponBuild.point(String(_weapon.id), BuildPlan.clean(_draft), key)
 	if WeaponBuild.is_rail(pt):
 		_actions.add_child(_button("◀ паз", func() -> void: _nudge(-1)))
@@ -963,6 +991,26 @@ func _refresh_actions() -> void:
 	if spec.has("angle"):
 		_actions.add_child(_button("Угол −  Q", func() -> void: _turn(-1)))
 		_actions.add_child(_button("Угол +  E", func() -> void: _turn(1)))
+
+
+func _bind_remotes() -> void:
+	var resolved: Dictionary = AttachmentRemote.resolve(String(_weapon.id), _draft)
+	if String(resolved.why) == "":
+		_draft = resolved.mods
+
+
+func _move_remote(key: String, place: Dictionary) -> void:
+	if not _draft.has(key):
+		return
+	var probe: Dictionary = _draft_entry()
+	(probe.mods[key] as Dictionary)["remote"] = {"point": String(place.point), "slot": int(place.slot), "reverse": bool(place.get("reverse", false))}
+	var why: String = WeaponBuild.block(probe, key, WeaponDb.mod_id(probe.mods[key]))
+	if why != "":
+		_say(why)
+		return
+	_push()
+	(_draft[key] as Dictionary)["remote"] = (probe.mods[key] as Dictionary).remote.duplicate()
+	_refresh()
 
 
 func _refresh_stats(preview: Dictionary = {}) -> void:
@@ -1131,6 +1179,10 @@ func _preview_hover() -> void:
 		rec["slot"] = int(t.slot)
 	mods[String(t.key)] = rec
 	_refresh_stats(_draft_entry(mods))
+	var warning: String = WeaponBuild.sight_warning(_draft_entry(), String(t.key), String(_hover.id), int(t.get("slot", -1)))
+	if warning != "" and _status_t <= 0.0:
+		_status.text = warning
+		_status.add_theme_color_override("font_color", C_ACCENT)
 	_overlay.queue_redraw()
 
 
@@ -1217,8 +1269,10 @@ func _refresh_footer() -> void:
 			why = "не хватает денег (%s ₽)" % InventoryUI.money(Profile.money)
 			_apply_btn.disabled = true
 	if _status_t <= 0.0:
-		_status.text = why
-		_status.add_theme_color_override("font_color", C_BAD)
+		var warnings: Array[String] = WeaponBuild.sight_warnings(_draft_entry())
+		_status.text = why if why != "" else (warnings[0] if not warnings.is_empty() else "")
+		_status.tooltip_text = "\n".join(warnings)
+		_status.add_theme_color_override("font_color", C_BAD if why != "" else C_ACCENT)
 
 
 func _say(text: String, good: bool = false) -> void:
@@ -1316,6 +1370,10 @@ func _layout_spots() -> void:
 	for k: String in WeaponBuild.sorted_keys(mods):
 		var xf: Transform3D = WeaponMods.point_frame(space, model_key, mods, k)
 		_spot(k, xf.origin + xf.basis.y.normalized() * 0.012, ItemDb.item_name(WeaponDb.mod_id(mods[k])), WeaponBuild.label(wid, mods, k), true, false, fits)
+		var rec: Dictionary = mods[k] if mods[k] is Dictionary else {}
+		if not AttachmentRemote.spec(WeaponDb.mod_id(rec)).is_empty() and rec.has("remote"):
+			var rf: Transform3D = AttachmentRemote.remote_frame(model_key, rec)
+			_spot(k, rf.origin + rf.basis.y * 0.012, "Пульт МЕТКА-4", String(WeaponDb.MOUNT_NAMES.get(String(rec.remote.point), rec.remote.point)), true, false, fits)
 	for pk: String in points:
 		var pt: Dictionary = WeaponBuild.point(wid, mods, pk)
 		if pt.is_empty():
@@ -1323,6 +1381,9 @@ func _layout_spots() -> void:
 		var occupied: bool = false
 		for k: Variant in mods:
 			if WeaponBuild.point_key(String(k)) == pk:
+				occupied = true
+			var rec: Dictionary = mods[k] if mods[k] is Dictionary else {}
+			if not AttachmentRemote.spec(WeaponDb.mod_id(rec)).is_empty() and String((rec.get("remote", {}) as Dictionary).get("point", "")) == pk:
 				occupied = true
 		var xf2: Transform3D = WeaponMods.point_frame(space, model_key, mods, pk)
 		var label: String = String(WeaponDb.MOUNT_NAMES.get(WeaponBuild.base_of(pk), WeaponBuild.POINT_NAMES.get(WeaponBuild.base_of(pk), pk)))
@@ -1346,6 +1407,9 @@ func _free_gap(model_key: String, mods: Dictionary, pk: String, pt: Dictionary) 
 		if WeaponBuild.point_key(String(k)) == pk:
 			var s: Vector2 = WeaponBuild.span(model_key, mods, String(k))
 			spans.append(s)
+		var rec: Dictionary = mods[k] if mods[k] is Dictionary else {}
+		if not AttachmentRemote.spec(WeaponDb.mod_id(rec)).is_empty() and String((rec.get("remote", {}) as Dictionary).get("point", "")) == pk:
+			spans.append(AttachmentRemote.remote_span(model_key, rec))
 	spans.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
 	var best: float = NAN
 	var best_len: float = WeaponBuild.SLOT_M
