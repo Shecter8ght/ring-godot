@@ -1,7 +1,7 @@
 """Скачать CC0-текстуры Poly Haven для одежды NPC в _asset_src/npc_kit/tex/<id> (2K: цвет, нормаль GL, шероховатость,
 высота, AO, если есть) + info.json и общий license.txt. Повторный запуск докачивает только недостающее.
 
-python tools/npc_kit/fetch_textures.py [id …]
+python tools/npc_kit/fetch_textures.py [--res 4k] [id …]
 """
 from __future__ import annotations
 
@@ -54,9 +54,14 @@ def fetch(asset: str, res: str = "2k") -> None:
 
 
 def main() -> None:
-    ids = sys.argv[1:] or IDS
-    for a in ids:
-        fetch(a)
+    args = sys.argv[1:]
+    res = "2k"
+    if "--res" in args:                     # --res 4k — крупнее (броня: плетение без «мыла» вблизи)
+        i = args.index("--res")
+        res = args[i + 1]
+        del args[i:i + 2]
+    for a in args or IDS:
+        fetch(a, res)
     lic = OUT / "license.txt"
     lic.write_text("Poly Haven textures: CC0 1.0 (https://polyhaven.com/license). Authors — info.json in each folder.\n",
                    encoding="utf-8", newline="\n")
