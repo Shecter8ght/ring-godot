@@ -21,6 +21,8 @@
 `E:/Models Blender/RING_NPC_Claude_2026-10-21/NPC_Marauder_v03_текстуры.blend` — всё упаковано, студия и камеры,
 вьюпорт в Rendered (Cycles; маски AO в Material Preview не видны). Рабочие: `_asset_src/npc_kit/npc_scav_v03.blend`
 (форма) и `npc_scav_v03_tex.blend` (с текстурами; на него садится броня — `kit_common.npc_file()`).
+Правка 2026-10-22 (при шлемах): край ушной раковины тела прорезал балаклаву тонкой полоской — ухо и висок тела
+под балаклавой убраны (`assemble.under_balaclava_ear`) во всех файлах v03, включая выданный и примерочную.
 
 ## Текстуры (слои UCUPaint)
 

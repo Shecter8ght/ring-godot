@@ -385,8 +385,9 @@ def triangles(col: bpy.types.Collection) -> int:
     return n
 
 
-def deliver(folder: Path, filename: str, readme: str, focus_z: float = 1.28) -> None:
-    """Файл на просмотр формы владельцу: студия, камеры, вьюпорт в Rendered, всё упаковано."""
+def deliver(folder: Path, filename: str, readme: str, focus_z: float = 1.28, near: float = 1.0) -> None:
+    """Файл на просмотр формы владельцу: студия, камеры, вьюпорт в Rendered, всё упаковано.
+    near — доля расстояния камер и вида (шлем смотрят ближе, чем броню)."""
     from mathutils import Quaternion
     scene = bpy.context.scene
     kc.studio()
@@ -395,9 +396,9 @@ def deliver(folder: Path, filename: str, readme: str, focus_z: float = 1.28) -> 
     scene.cycles.use_preview_denoising = True
     for cam in [o for o in bpy.data.objects if o.type == "CAMERA"]:
         bpy.data.objects.remove(cam)
-    scene.camera = kc.camera("Camera_3-4", (1.5, -1.9, focus_z + 0.17), (0.0, 0.0, focus_z), 60)
-    kc.camera("Camera_Front", (0.0, -2.3, focus_z + 0.04), (0.0, 0.0, focus_z + 0.02), 60)
-    kc.camera("Camera_Back", (0.0, 2.3, focus_z + 0.06), (0.0, 0.0, focus_z + 0.02), 60)
+    scene.camera = kc.camera("Camera_3-4", (1.5 * near, -1.9 * near, focus_z + 0.17 * near), (0.0, 0.0, focus_z), 60)
+    kc.camera("Camera_Front", (0.0, -2.3 * near, focus_z + 0.04 * near), (0.0, 0.0, focus_z + 0.02 * near), 60)
+    kc.camera("Camera_Back", (0.0, 2.3 * near, focus_z + 0.06 * near), (0.0, 0.0, focus_z + 0.02 * near), 60)
     for o in bpy.data.objects:
         if o.type == "ARMATURE":
             o.hide_set(True)
@@ -409,7 +410,7 @@ def deliver(folder: Path, filename: str, readme: str, focus_z: float = 1.28) -> 
                 sp.overlay.show_floor = False
                 r3 = sp.region_3d
                 r3.view_location = (0.0, 0.0, focus_z)
-                r3.view_distance = 1.6
+                r3.view_distance = 1.6 * near
                 r3.view_rotation = Quaternion((0.78, 0.47, 0.20, 0.36))
     text = bpy.data.texts.new("00_ПРОЧТИ")
     text.use_fake_user = True

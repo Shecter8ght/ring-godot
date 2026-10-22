@@ -148,6 +148,12 @@ def add_zipper(jacket: bpy.types.Object, col: bpy.types.Collection) -> bpy.types
 
 # ---------- сборка ----------
 
+def under_balaclava_ear(f: bmesh.types.BMFace) -> bool:
+    """Ухо и висок под балаклавой: тонкий край ушной раковины прорезал трикотаж между его вершинами
+    (оранжевая полоска у уха, видна под шлемом высокого среза). Из прорези эти места не видны."""
+    return all(abs(v.co.x) > 0.058 and 1.60 < v.co.z < 1.76 and v.co.y > -0.10 for v in f.verts)
+
+
 def hide_covered_body(body: bpy.types.Object) -> None:
     """Под одеждой тело не рисуется: остаются кисти (с запасом под манжетой) и голова с шеей
     (под балаклавой; кожа видна в прорези)."""
@@ -161,7 +167,7 @@ def hide_covered_body(body: bpy.types.Object) -> None:
         w = sum(wt for gi, wt in v[dl].items() if groups.get(gi, "").startswith(hand_bones))
         if w > 0.05 or v.co.z > 1.50:
             keep_v.add(v)
-    kill = [f for f in bm.faces if not all(v in keep_v for v in f.verts)]
+    kill = [f for f in bm.faces if not all(v in keep_v for v in f.verts) or under_balaclava_ear(f)]
     bmesh.ops.delete(bm, geom=kill, context="FACES")
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
     bm.to_mesh(body.data)
