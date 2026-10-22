@@ -89,7 +89,7 @@ def collar_outline(length: float) -> list[tuple[float, float]]:
 
 def main() -> None:
     args = kc.args_after_dashes()
-    bpy.ops.wm.open_mainfile(filepath=str(kc.WORK / f"npc_scav_{kc.VERSION}.blend"))
+    bpy.ops.wm.open_mainfile(filepath=str(kc.npc_file()))
     f = am.fit()
     col = kc.collection("06_Armor_Top")
     mats = am.materials()
@@ -247,7 +247,7 @@ def main() -> None:
 
     # По бокам — мягкий пояс с двумя рядами MOLLE (между панелью живота и поясницы), на нём висят щитки бёдер.
     for a0, a1 in ((-52.0, 52.0), (128.0, 232.0)):
-        belt = ak.BandFrame(low, 0.962, BELT_H, a0, a1, 0.005)
+        belt = ak.BandFrame(low, 0.962, BELT_H, a0, a1, 0.005, vsmooth=12, press=0.008)
         ak.padded_panel(cordura, ak.OffsetFrame(belt, 0.006), am.rect(0.0, belt.length, 0.0, BELT_H, 0.010), 0.012,
                         bulge=0.0015, binding=0.009)
         ak.webbing_rows(web, ak.OffsetFrame(belt, 0.012), 0.02, belt.length - 0.02, [0.014, 0.014 + am.MOLLE_PITCH], 0.0005)

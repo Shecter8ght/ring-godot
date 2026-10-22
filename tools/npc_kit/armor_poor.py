@@ -59,7 +59,7 @@ def materials() -> dict[str, bpy.types.Material]:
 
 def main() -> None:
     args = kc.args_after_dashes()
-    bpy.ops.wm.open_mainfile(filepath=str(kc.WORK / f"npc_scav_{kc.VERSION}.blend"))
+    bpy.ops.wm.open_mainfile(filepath=str(kc.npc_file()))
     f = am.fit()
     col = kc.collection("06_Armor_Poor")
     mats = materials()

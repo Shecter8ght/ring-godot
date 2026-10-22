@@ -16,7 +16,13 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / "_asset_src" / "npc_kit"
-VERSION = "v02"         # версия мародёра: рабочий файл npc_scav_<версия>.blend, выдача NPC_Marauder_<версия>.blend
+VERSION = "v03"         # версия мародёра: рабочий файл npc_scav_<версия>.blend, выдача NPC_Marauder_<версия>.blend
+
+
+def npc_file() -> Path:
+    """Мародёр, на которого садятся надстройки (броня): с текстурами (npc_texture.py), если они уже сделаны."""
+    tex = WORK / f"npc_scav_{VERSION}_tex.blend"
+    return tex if tex.exists() else WORK / f"npc_scav_{VERSION}.blend"
 MPFB = "bl_ext.blender_org.mpfb"
 
 

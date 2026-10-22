@@ -24,12 +24,15 @@ import bpy
 from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import garment as gm  # noqa: E402
 import kit_common as kc  # noqa: E402
 import materials as mt  # noqa: E402
 import pockets  # noqa: E402
 import wear  # noqa: E402
 
 OUT = kc.WORK / f"npc_scav_{kc.VERSION}.blend"
+ZIP_GROOVE_W = 0.0065     # канавка под молнию: полуширина (кромки кожи у звеньев)
+ZIP_GROOVE_D = 0.0028     # и глубина у оси
 
 
 # ---------- молния ----------
@@ -39,6 +42,17 @@ def add_zipper(jacket: bpy.types.Object, col: bpy.types.Collection) -> bpy.types
     тесьма 2,2 см, зубцы через 3 мм (вперемешку слева и справа), бегунок с язычком у ворота."""
     from mathutils.bvhtree import BVHTree
     me = jacket.data
+    # Тесьма вшита под кромки полочек: кожа у центра переда загибается внутрь канавкой (кромки подходят
+    # к звеньям вплотную), тесьма — на дне канавки, видны только звенья. Раньше молния лежала поверх кожи.
+    me.update()
+    for v in me.vertices:
+        p = v.co
+        if p.y > -0.04 or not 0.90 < p.z < 1.53 or abs(p.x) > ZIP_GROOVE_W:
+            continue
+        ends = gm.smoothstep((p.z - 0.90) / 0.02) * gm.smoothstep((1.53 - p.z) / 0.02)
+        depth = ZIP_GROOVE_D * (1.0 - gm.smoothstep(abs(p.x) / ZIP_GROOVE_W)) * ends
+        v.co = p - v.normal * depth
+    me.update()
     pts = [v.co.copy() for v in me.vertices if abs(v.co.x) < 0.005 and v.co.y < -0.04 and 0.90 < v.co.z < 1.52]
     if len(pts) < 10:
         return None
@@ -75,21 +89,22 @@ def add_zipper(jacket: bpy.types.Object, col: bpy.types.Collection) -> bpy.types
         if nrm.y > 0:
             nrm = -nrm
         side = tan.cross(nrm).normalized()
-        base = (hit[0] if hit[0] is not None else p) + nrm * 0.0012
+        base = (hit[0] if hit[0] is not None else p) + nrm * 0.0006
         row = []
-        for o in (-0.011, -0.004, 0.004, 0.011):
-            # Каждую точку тесьмы — на поверхность кожи (складки не прячут тесьму).
+        for o in (-0.0065, -0.0025, 0.0025, 0.0065):
+            # Тесьма — по дну канавки; края её уходят под загнутые кромки кожи.
             q = base + side * o
             h2 = bvh.find_nearest(q)
             if h2[0] is not None:
                 n2 = h2[1] if h2[1].dot(nrm) > 0 else -h2[1]
-                q = h2[0] + n2 * 0.0014
+                q = h2[0] - n2 * (0.0008 if abs(o) > 0.004 else -0.0006)
             row.append(bm.verts.new(q))
         tape_rows.append(row)
         base = (row[1].co + row[2].co) / 2
-        # Зуб: брусок 3,6 × 2,2 × 1,6 мм, через один — с левой и правой ленты (сцепление).
+        # Зуб: брусок 3,6 × 2,2 × 1,6 мм, через один — с левой и правой ленты (сцепление); верх звеньев
+        # чуть ниже кромок кожи.
         sgn = 1 if k % 2 else -1
-        c = base + side * (0.0012 * sgn) + nrm * 0.0016
+        c = base + side * (0.0012 * sgn) + nrm * 0.0010
         hx, hy, hz = side * 0.0018, tan * 0.0011, nrm * 0.0008
         vs = [bm.verts.new(c + a * hx + b * hy + d * hz) for a in (-1, 1) for b in (-1, 1) for d in (-1, 1)]
         for f in ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)):
