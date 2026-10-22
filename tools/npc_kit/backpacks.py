@@ -512,10 +512,20 @@ def grab_handle(P: Parts, top: ProjFrame, bag: Bag) -> None:
     ak.strap(P.webbing, ak.RibbonFrame(pts, [(q - c0).normalized() for q in pts]), WEB, 0.003, step=0.004)
 
 
-def zip_on(P: Parts, frame, uvs: list[tuple[float, float]], off: float, pull: float | None = 0.08) -> ak.RibbonFrame:
+def zip_on(P: Parts, frame, uvs: list[tuple[float, float]], off: float, pull: float | None = 0.08,
+           press: tuple[ak.Mesh, ...] = ()) -> ak.RibbonFrame:
+    """Молния по стороне мешка; press — мятая ткань под ней: продавлена под лентой (20 мм), как под стропой."""
     rib = rib_on(frame, uvs, off)
     ak.zipper(P.webbing, P.plastic, rib, 0.0, pull_at=None if pull is None else rib.length * pull)
+    press_zip(rib, press)
     return rib
+
+
+def press_zip(rib: ak.RibbonFrame, meshes: tuple[ak.Mesh, ...] | list[ak.Mesh]) -> None:
+    if meshes:
+        path = sg.Path(rib.pts, rib.nrm, 0.010)
+        for m in meshes:
+            sg.press(m, path, rim=0.005)
 
 
 def panel_face(poly: list[tuple[float, float]], half: float, bulge: float) -> Callable[[float, float], float]:
@@ -526,77 +536,194 @@ def panel_face(poly: list[tuple[float, float]], half: float, bulge: float) -> Ca
 
 # ---------- рюкзаки ----------
 
+def rect_out(a: float, b: float, a0: float, a1: float, b0: float, b1: float) -> float:
+    """Насколько точка (a, b) вне прямоугольника [a0, a1] × [b0, b1] (0 — внутри)."""
+    return math.hypot(max(a0 - a, 0.0, a - a1), max(b0 - b, 0.0, b - b1))
+
+
+def smooth_copy(meshes: list[ak.Mesh], smooth: dict) -> ak.Mesh:
+    """Ткань до складок той же топологии, что сшитая из meshes (для ключа формы «Без складок»)."""
+    out = ak.Mesh()
+    for m in meshes:
+        flat = ak.Mesh()
+        flat.verts, flat.faces, flat.uvs, flat.mats = smooth[id(m)], m.faces, m.uvs, m.mats
+        sg.merge(out, flat)
+    return out
+
+
+def report(P: Parts, prefix: str, cloth_meshes: list[ak.Mesh]) -> None:
+    cloth = sg.solid(*cloth_meshes)
+    bw, ww, where_w = sg.check_inside(cloth, P.webbing.verts)
+    bp, wp, where_p = sg.check_inside(cloth, P.plastic.verts + P.molle.verts)
+    kc.log(f"    {prefix}: внутри ткани — стропы {bw} верш. (до {ww * 1000:.1f} мм), "
+           f"фурнитура и MOLLE {bp} (до {wp * 1000:.1f} мм)")
+    for where in (where_w, where_p):
+        for key, cnt in sorted(where.items(), key=lambda kv: -kv[1])[:6]:
+            kc.log(f"      где: {key} — {cnt}")
+
+
 def build_daypack(col, mats, body: Body, prefix: str) -> None:
+    """Городской (понравился владельцу как есть): купол, молния «подковой», карман спереди, сетчатые карманы.
+    Ткань мятая (владелец 2026-10-22: «нужно сделать мятую ткань со складками»), как у рейдового: рюкзак загружен
+    слабо — складки мягче, у молний ткань собрана мелкой волной."""
     z0, H = 1.00, 0.47
     y_back = body.back_line(z0, z0 + H)
     gap = 0.018
-    bag = Bag(z0, H, 0.150, 0.200, 0.165, lambda z: y_back(z) + gap, rb=0.035, rt_w=0.12, rt_d=0.06, bulge=0.014)
+    bag = Bag(z0, H, 0.150, 0.200, 0.165, lambda z: y_back(z) + gap, rb=0.035, rt_w=0.12, rt_d=0.06, bulge=0.014,
+              seg=224, row_step=0.0045)
     P = Parts()
-    bag.build(P.cordura)
-    bvh = bvh_of(bag)
-    out, inner, top = ProjFrame(bvh, "out"), ProjFrame(bvh, "in"), ProjFrame(bvh, "top")
-    side = {1.0: ProjFrame(bvh, "side+"), -1.0: ProjFrame(bvh, "side-")}
-    back_pads(P, inner, bag, gap)
-    # главная молния «подковой» по лицевой стороне у краёв
-    arch = [(-math.cos(math.pi * k / 24) * 0.118, z0 + H - 0.135 + math.sin(math.pi * k / 24) * 0.105) for k in range(25)]
-    zip_on(P, out, [(-0.118, z0 + 0.20)] + arch + [(0.118, z0 + 0.20)], 0.0015, pull=0.42)
-    # передний карман на молнии
+    m_bag = ak.Mesh()
+    bag.build(m_bag)
+    bvh_s = sg.bvh(m_bag)
+    out_s, inner, top_s = ProjFrame(bvh_s, "out"), ProjFrame(bvh_s, "in"), ProjFrame(bvh_s, "top")
+    side_s = {1.0: ProjFrame(bvh_s, "side+"), -1.0: ProjFrame(bvh_s, "side-")}
+    # передний карман (мягкий, на мешке)
     pk = ak.rounded_poly([(-0.110, z0 + 0.035), (0.110, z0 + 0.035), (0.105, z0 + 0.235), (-0.105, z0 + 0.235)],
                          [0.035, 0.035, 0.05, 0.05])
-    ak.padded_panel(P.cordura, ak.OffsetFrame(out, 0.004), pk, 0.006, bulge=0.012, binding=0.007, step=0.006)
-    arch = [(-0.085 + 0.17 * k / 16, z0 + 0.212 + 0.012 * math.sin(math.pi * k / 16)) for k in range(17)]
-    zip_on(P, out, arch, 0.010, pull=0.15)
-    # сетчатые боковые карманы с резинкой
-    for sgn, fr in side.items():
-        yi = bag.y_in(z0 + 0.1) + 0.02
+    m_pk = ak.Mesh()
+    ak.padded_panel(m_pk, ak.OffsetFrame(out_s, 0.004), pk, 0.006, bulge=0.012, binding=0.007, step=0.0045)
+    smooth = {id(m): list(m.verts) for m in (m_bag, m_pk)}
+    # молнии: подкова по мешку и по карману — у них ткань собрана волной
+    arch = [(-math.cos(math.pi * k / 24) * 0.118, z0 + H - 0.135 + math.sin(math.pi * k / 24) * 0.105) for k in range(25)]
+    zip_main = [(-0.118, z0 + 0.20)] + arch + [(0.118, z0 + 0.20)]
+    zip_pk = [(-0.085 + 0.17 * k / 16, z0 + 0.212 + 0.012 * math.sin(math.pi * k / 16)) for k in range(17)]
+    line_main = sg.Line([out_s.point(u, v) for u, v in zip_main])
+    line_pk = sg.Line([sg.surface_point(sg.bvh(m_pk), out_s.point(u, v), out_s.normal(u, v), 0.06) for u, v in zip_pk])
+    puck, calm = sg.pucker([line_main], 0.013, 0.0016)
+    puck_pk, calm_pk = sg.pucker([line_pk], 0.011, 0.0012)
+    lumps = sg.lumps(0.10, 0.006, 31.0)
+    folds = sg.folds(Vector((0, 0, 1)), 0.065, 0.013, 32.0)
+    wr = sg.folds(Vector((0.7, 0.2, 0.7)), 0.03, 0.003, 33.0, cover=0.5)
+    cr = sg.creases(0.06, 0.0065, 34.0, stretch=Vector((0.7, 0.7, 1.3)))
+    yi = bag.y_in(z0 + 0.1) + 0.02
+
+    def bag_field(p: Vector, n: Vector) -> float:
+        free = 1.0 - gm.smoothstep((-n.y - 0.2) / 0.4)              # спинка у спины — гладкая
+        if n.y > 0.3:                                               # под карманом мешок не виден
+            free *= gm.smoothstep(rect_out(p.x, p.z, -0.110, 0.110, z0 + 0.035, z0 + 0.235) / 0.02)
+        if abs(n.x) > 0.3:                                          # под сетчатыми карманами — тоже
+            free *= gm.smoothstep(rect_out(p.y, p.z, yi, yi + 0.15, z0 + 0.025, z0 + 0.165) / 0.02)
+        low = 0.6 + 0.6 * gm.smoothstep((z0 + 0.20 - p.z) / 0.12)    # книзу груз оседает — складки крупнее
+        flat = 1.0 - 0.85 * gm.smoothstep((-n.z - 0.4) / 0.3)       # дно стоит
+        return free * (lumps(p) + flat * calm(p) * (folds(p) * low + wr(p) + cr(p)) + puck(p))
+    sg.displace(m_bag, bag_field)
+    pk_lumps, pk_folds = sg.lumps(0.06, 0.004, 35.0), sg.folds(Vector((0, 0, 1)), 0.045, 0.004, 36.0, cover=0.6)
+    sg.displace(m_pk, lambda p, n: gm.smoothstep((n.y + 0.2) / 0.6)
+                * (pk_lumps(p) + calm_pk(p) * pk_folds(p) + puck_pk(p)))
+    bvh_bag, bvh_pk = sg.bvh(m_bag), sg.bvh(m_pk)
+    out_d, top_d = sg.SurfFrame(out_s, bvh_bag), sg.SurfFrame(top_s, bvh_bag)
+    side_d = {sgn: sg.SurfFrame(fr, bvh_bag) for sgn, fr in side_s.items()}
+    back_pads(P, inner, bag, gap)
+    zip_on(P, out_d, zip_main, 0.0015, pull=0.42, press=(m_bag,))
+    zip_on(P, sg.SurfFrame(out_s, bvh_pk, reach=0.06), zip_pk, 0.0015, pull=0.15, press=(m_pk,))
+    # сетчатые боковые карманы с резинкой (мешок под ними гладкий)
+    for sgn, fr in side_s.items():
         yo = yi + 0.15
         poly = ak.rounded_poly([(yi, z0 + 0.025), (yo, z0 + 0.025), (yo, z0 + 0.165), (yi, z0 + 0.165)], [0.01, 0.01, 0.004, 0.004])
         ak.padded_panel(P.mesh, ak.OffsetFrame(fr, 0.003), poly, 0.003, bulge=0.010, binding=0.0, step=0.006)
         rib = rib_on(fr, [(yi + 0.003, z0 + 0.158), (yo - 0.003, z0 + 0.158)], 0.010)
         ak.strap(P.webbing, rib, 0.012, 0.0025, step=0.004)
-    grab_handle(P, top, bag)
-    shoulder_straps(P, body, bag, inner, side, z0 + H - 0.05, sternum_z=1.37)
+    grab_handle(P, top_d, bag)
+    shoulder_straps(P, body, bag, inner, side_d, z0 + H - 0.05, sternum_z=1.37)
+    for m in (m_bag, m_pk):
+        sg.merge(P.cordura, m)
+    P.smooth = smooth_copy([m_bag, m_pk], smooth)
+    report(P, prefix, [m_bag, m_pk])
     P.build(prefix, col, mats)
 
 
 def build_tourist(col, mats, body: Body, prefix: str) -> None:
-    """По образцу владельца: штурмовой рюкзак с «бобровым хвостом» (скатка под ним убрана владельцем)."""
+    """По образцу владельца: штурмовой рюкзак с «бобровым хвостом» (скатка под ним убрана владельцем). Ткань мятая,
+    как у рейдового (владелец 2026-10-22): мешок и карманы в складках, «хвост» плотнее — складки мельче; стропы
+    «хвоста» натянуты поверх смятой ткани через рёбра мешка, ткань под ними и под пряжками продавлена."""
     z0, H = 0.99, 0.52
     y_back = body.back_line(z0, z0 + H)
     gap = 0.018
     y_in = lambda z: y_back(z) + gap               # noqa: E731
-    bag = Bag(z0, H, 0.150, 0.200, 0.150, y_in, rb=0.04, rt_w=0.07, rt_d=0.05, n_front=3.0, bulge=0.008, hw1=0.118)
+    bag = Bag(z0, H, 0.150, 0.200, 0.150, y_in, rb=0.04, rt_w=0.07, rt_d=0.05, n_front=3.0, bulge=0.008, hw1=0.118,
+              seg=224, row_step=0.0045)
     P = Parts()
-    bag.build(P.cordura)
-    bvh = bvh_of(bag)
-    out, inner, top, bot = ProjFrame(bvh, "out"), ProjFrame(bvh, "in"), ProjFrame(bvh, "top"), ProjFrame(bvh, "bot")
-    side = {1.0: ProjFrame(bvh, "side+"), -1.0: ProjFrame(bvh, "side-")}
-    back_pads(P, inner, bag, gap)
-    grab_handle(P, top, bag)
-    ym = y_in(z0 + H) + 0.065
-    zip_on(P, top, [(-0.09, ym), (0.09, ym)], 0.0015, pull=0.8)          # молния основного отделения сверху
-
-    # скатки под «хвостом» нет (владелец 2026-10-22: «жёлтую фигнюшку сзади полностью убрать») — хвост лежит на мешке
-    bt = out
-
-    # «хвост»: вверху уже, ряд стропы и полоса липучки
+    m_bag = ak.Mesh()
+    bag.build(m_bag)
+    bvh_s = sg.bvh(m_bag)
+    out_s, inner, top_s, bot_s = ProjFrame(bvh_s, "out"), ProjFrame(bvh_s, "in"), ProjFrame(bvh_s, "top"), ProjFrame(bvh_s, "bot")
+    side_s = {1.0: ProjFrame(bvh_s, "side+"), -1.0: ProjFrame(bvh_s, "side-")}
+    # «хвост» (вверху уже), карман на нём, подсумки на молнии по бокам — гладкие формы
     bt_off, bt_t = 0.006, 0.007
-    tail = ak.rounded_poly([(-0.125, z0 + 0.035), (0.125, z0 + 0.035), (0.125, z0 + 0.30), (0.078, z0 + H - 0.05),
-                            (-0.078, z0 + H - 0.05), (-0.125, z0 + 0.30)], [0.03, 0.03, 0.05, 0.02, 0.02, 0.05])
-    ak.padded_panel(P.cordura, ak.OffsetFrame(bt, bt_off), tail, bt_t, bulge=0.0, binding=0.008, step=0.006)
     face0 = bt_off + bt_t / 2
-    ak.webbing_rows(P.molle, ak.OffsetFrame(bt, face0), -0.055, 0.055, [z0 + H - 0.095], 0.0005)
-    ak.padded_panel(P.velcro, ak.OffsetFrame(bt, face0 + 0.0009),
-                    ak.rounded_poly([(-0.07, z0 + H - 0.165), (0.07, z0 + H - 0.165), (0.07, z0 + H - 0.13),
-                                     (-0.07, z0 + H - 0.13)], [0.004] * 4), 0.0016, bulge=0.0, binding=0.0, step=0.004)
-    # карман внизу «хвоста»: на нём квадрат липучки, клапан откинут «козырьком»
+    tail_poly = [(-0.125, z0 + 0.035), (0.125, z0 + 0.035), (0.125, z0 + 0.30), (0.078, z0 + H - 0.05),
+                 (-0.078, z0 + H - 0.05), (-0.125, z0 + 0.30)]
+    m_tail = ak.Mesh()
+    ak.padded_panel(m_tail, ak.OffsetFrame(out_s, bt_off), ak.rounded_poly(tail_poly, [0.03, 0.03, 0.05, 0.02, 0.02, 0.05]),
+                    bt_t, bulge=0.0, binding=0.008, step=0.0045)
     pk_t = 0.040
-    pocket = ak.rounded_poly([(-0.108, z0 + 0.05), (0.108, z0 + 0.05), (0.108, z0 + 0.245), (-0.108, z0 + 0.245)], [0.03] * 4)
-    ak.padded_panel(P.cordura, ak.OffsetFrame(bt, face0 + pk_t / 2), pocket, pk_t, bulge=0.0, binding=0.008, step=0.006)
-    pface = face0 + pk_t
-    ak.padded_panel(P.velcro, ak.OffsetFrame(bt, pface + 0.0009),
-                    ak.rounded_poly([(-0.06, z0 + 0.07), (0.06, z0 + 0.07), (0.06, z0 + 0.19), (-0.06, z0 + 0.19)],
-                                    [0.006] * 4), 0.0016, bulge=0.0, binding=0.0, step=0.004)
+    m_pk = ak.Mesh()
+    ak.padded_panel(m_pk, ak.OffsetFrame(out_s, face0 + pk_t / 2),
+                    ak.rounded_poly([(-0.108, z0 + 0.05), (0.108, z0 + 0.05), (0.108, z0 + 0.245), (-0.108, z0 + 0.245)],
+                                    [0.03] * 4), pk_t, bulge=0.0, binding=0.008, step=0.0045)
+    _, d_p, yi_p = bag.section(0.15)
+    ya, yb = yi_p + 0.022, yi_p + 0.107
+    pz0, pz1 = z0 + 0.05, z0 + 0.31
+    pouches = {}
+    for sgn, fr in side_s.items():
+        pouches[sgn] = ak.Mesh()
+        ak.padded_panel(pouches[sgn], ak.OffsetFrame(fr, 0.025),
+                        ak.rounded_poly([(ya, pz0), (yb, pz0), (yb, pz1), (ya, pz1)], [0.025] * 4),
+                        0.050, bulge=0.006, binding=0.007, step=0.0045)
+    # передний край сетчатого кармана — по глубине мешка вверху кармана (кверху мешок уже); шнур кармана кончается
+    # раньше — у угла мешка его накрывает край «хвоста»
+    _, d_m, yi_m = bag.section(0.30)
+    ma, mb = yb + 0.004, yi_m + d_m - 0.008
+    cord_end = min(mb - 0.003, out_s.point(0.118, z0 + 0.293).y - 0.016)
+    smooth = {id(m): list(m.verts) for m in (m_bag, m_tail, m_pk, *pouches.values())}
+
+    # ---- смятая ткань ----
+    def tail_half(z: float) -> float:
+        return 0.125 if z <= z0 + 0.30 else 0.125 - 0.047 * min(1.0, (z - z0 - 0.30) / 0.17)
+    ym = y_in(z0 + H) + 0.065
+    line_top = sg.Line([top_s.point(x, ym) for x in (-0.05, 0.0, 0.05)])   # молния — между стропами сверху
+    puck, calm = sg.pucker([line_top], 0.013, 0.0015)
+    lumps = sg.lumps(0.10, 0.006, 41.0)
+    folds = sg.folds(Vector((0, 0, 1)), 0.065, 0.009, 42.0)
+    wr = sg.folds(Vector((0.6, 0.3, 0.8)), 0.028, 0.0025, 43.0, cover=0.5)
+    cr = sg.creases(0.065, 0.005, 44.0, stretch=Vector((0.6, 0.6, 1.4)))
+
+    def bag_field(p: Vector, n: Vector) -> float:
+        free = 1.0 - gm.smoothstep((-n.y - 0.2) / 0.4)
+        if n.y > 0.2:                                               # под «хвостом» мешок не виден
+            th = tail_half(p.z)
+            free *= gm.smoothstep(rect_out(p.x, p.z, -th, th, z0 + 0.035, z0 + H - 0.05) / 0.02)
+        if abs(n.x) > 0.3:                                          # под подсумками и сетчатыми карманами
+            free *= gm.smoothstep(min(rect_out(p.y, p.z, ya, yb, pz0, pz1),
+                                      rect_out(p.y, p.z, ma, mb, z0 + 0.03, z0 + 0.30)) / 0.02)
+        flat = 1.0 - 0.85 * gm.smoothstep((-n.z - 0.4) / 0.3)
+        return free * (lumps(p) + flat * calm(p) * (folds(p) + wr(p) + cr(p)) + puck(p))
+    sg.displace(m_bag, bag_field)
+    t_folds = sg.folds(Vector((0.3, 0, 1)), 0.05, 0.003, 45.0, cover=0.5)
+    t_cr = sg.creases(0.05, 0.002, 46.0)
+
+    def tail_field(p: Vector, n: Vector) -> float:
+        face = gm.smoothstep((n.y + 0.2) / 0.6)
+        under_pk = gm.smoothstep(rect_out(p.x, p.z, -0.108, 0.108, z0 + 0.05, z0 + 0.245) / 0.02)   # под карманом ровно
+        return face * under_pk * (t_folds(p) + t_cr(p))
+    sg.displace(m_tail, tail_field)
+    pk_lumps, pk_folds = sg.lumps(0.06, 0.005, 47.0), sg.folds(Vector((0, 0.2, 1)), 0.045, 0.005, 48.0, cover=0.6)
+    sg.displace(m_pk, lambda p, n: gm.smoothstep((n.y + 0.2) / 0.6) * (pk_lumps(p) + pk_folds(p)))
+    for sgn, m in pouches.items():
+        po_l, po_f = sg.lumps(0.05, 0.004, 50.0 + sgn), sg.folds(Vector((0, 1, 0.3)), 0.04, 0.005, 52.0 + sgn, cover=0.6)
+        z_zip = pz1 - 0.013
+
+        def po_field(p: Vector, n: Vector, sgn=sgn, po_l=po_l, po_f=po_f, z_zip=z_zip) -> float:
+            face = gm.smoothstep((n.x * sgn + 0.3) / 0.6)
+            near_zip = 0.3 + 0.7 * gm.smoothstep((abs(p.z - z_zip) - 0.006) / 0.012)       # у молнии ровнее
+            return face * near_zip * (po_l(p) + po_f(p))
+        sg.displace(m, po_field)
+    bvh_bag, bvh_tail, bvh_pk = sg.bvh(m_bag), sg.bvh(m_tail), sg.bvh(m_pk)
+    top_d, bot_d = sg.SurfFrame(top_s, bvh_bag), sg.SurfFrame(bot_s, bvh_bag)
+    side_d = {sgn: sg.SurfFrame(fr, bvh_bag) for sgn, fr in side_s.items()}
+    tail_d = sg.SurfFrame(out_s, bvh_tail, reach=0.06)
+    pk_d = sg.SurfFrame(out_s, bvh_pk, reach=0.1)
+    # клапан-«козырёк» над карманом
     flap_top, flap_bot = z0 + 0.290, z0 + 0.212
 
     class Flap:
@@ -607,55 +734,112 @@ def build_tourist(col, mats, body: Body, prefix: str) -> None:
 
         def normal(self, u: float, v: float) -> Vector:
             t = self._t(v)
-            n = bt.normal(u, v - 0.03 * t * t)
+            n = out_s.normal(u, v - 0.03 * t * t)
             return (n + Vector((0, 0, 0.9 * t))).normalized()
 
         def point(self, u: float, v: float, off: float = 0.0) -> Vector:
             t = self._t(v)
             lift = face0 + 0.003 + (pk_t + 0.022) * math.sin(math.pi / 2 * min(1.0, t * 1.25))
-            return bt.point(u, v - 0.03 * t * t, lift) + self.normal(u, v) * off
-    ak.padded_panel(P.cordura, Flap(),
-                    ak.rounded_poly([(-0.113, flap_bot), (0.113, flap_bot), (0.113, flap_top), (-0.113, flap_top)],
-                                    [0.02, 0.02, 0.005, 0.005]), 0.005, bulge=0.0, binding=0.006, step=0.006)
-    # стропы «хвоста» с фастексами: сверху через верх, по бокам на середине, снизу от дна
-    for sgn in (1.0, -1.0):
-        x = sgn * 0.068
-        y_front_top = out.point(x, z0 + H - 0.035).y
-        r = rib_on(top, [(x, y_in(z0 + H) + 0.025), (x, y_front_top - 0.012)], 0.003, k=14)
-        r = extend(r, bt.point(x, z0 + H - 0.058, face0 + 0.002), bt.normal(x, z0 + H - 0.058))
-        ak.strap(P.webbing, r, 0.020, 0.0016, step=0.004)
-        buckle_on(P.plastic, r, r.length - 0.05, 0.020, "release", 0.004)
-        zs = z0 + 0.30
-        _, d_s, yi_s = bag.section(zs - z0)
-        r = rib_on(side[sgn], [(yi_s + 0.03, zs), (yi_s + d_s - 0.012, zs)], 0.003, k=14)
-        r = extend(r, bt.point(sgn * 0.121, zs, face0 + 0.002), bt.normal(sgn * 0.121, zs))
-        ak.strap(P.webbing, r, 0.020, 0.0016, step=0.004)
-        buckle_on(P.plastic, r, r.length - 0.04, 0.020, "release", 0.004)
-        r = rib_on(bot, [(sgn * 0.10, y_in(z0) + 0.08), (sgn * 0.10, y_in(z0) + 0.14)], 0.003, k=10)
-        r = extend(r, bt.point(sgn * 0.108, z0 + 0.045, face0 + 0.002), bt.normal(sgn * 0.108, z0 + 0.045))
-        ak.strap(P.webbing, r, 0.020, 0.0016, step=0.004)
-        buckle_on(P.plastic, r, r.length - 0.035, 0.020, "release", 0.004)
-    # бока: подсумок на молнии у спинки и сетчатый карман со шнуром впереди
-    for sgn, fr in side.items():
-        _, d_s, yi_s = bag.section(0.15)
-        ya, yb = yi_s + 0.022, yi_s + 0.107
-        pz0, pz1 = z0 + 0.05, z0 + 0.31
-        ak.padded_panel(P.cordura, ak.OffsetFrame(fr, 0.025),
-                        ak.rounded_poly([(ya, pz0), (yb, pz0), (yb, pz1), (ya, pz1)], [0.02, 0.02, 0.025, 0.025]),
-                        0.050, bulge=0.006, binding=0.007, step=0.007)
-        zr = zip_on(P, ak.OffsetFrame(fr, 0.050), [(ya + 0.012, pz1 - 0.013), (yb - 0.012, pz1 - 0.013)], 0.002, pull=0.85)
+            return out_s.point(u, v - 0.03 * t * t, lift) + self.normal(u, v) * off
+    m_flap = ak.Mesh()
+    ak.padded_panel(m_flap, Flap(), ak.rounded_poly([(-0.113, flap_bot), (0.113, flap_bot), (0.113, flap_top),
+                                                     (-0.113, flap_top)], [0.02, 0.02, 0.005, 0.005]),
+                    0.005, bulge=0.0, binding=0.006, step=0.0045)
+    smooth[id(m_flap)] = list(m_flap.verts)
+    fl_f = sg.folds(Vector((1, 0, 0.2)), 0.04, 0.0025, 55.0, cover=0.6)
+    sg.displace(m_flap, lambda p, n: fl_f(p), [Vector((0.0, 1.0, 0.3)).normalized()] * len(m_flap.verts))  # слоем
+
+    # ---- стропы «хвоста»: через рёбра мешка на «хвост», натянуты поверх смятой ткани ----
+    m_side = {sgn: ak.Mesh() for sgn in (1.0, -1.0)}
+    zip_tmp = {}
+    for sgn, fr in side_s.items():                               # молнии подсумков — нужны оболочке стяжек
+        zip_tmp[sgn] = ak.Mesh()
+        zr = rib_on(sg.SurfFrame(fr, sg.bvh(pouches[sgn]), reach=0.1), [(ya + 0.012, pz1 - 0.013), (yb - 0.012, pz1 - 0.013)],
+                    0.002)
+        ak.zipper(zip_tmp[sgn], P.plastic, zr, 0.0, pull_at=zr.length * 0.85)
+        press_zip(zr, [pouches[sgn]])
         p, tan, nn = zr._at(zr.length * 0.85)
         ak.tube(P.webbing, [p + nn * 0.004, p + nn * 0.010 + Vector((0, 0, 0.012)), p + nn * 0.008 + Vector((0, 0, 0.03))],
                 0.0018, sides=6)
-        ma, mb = yb + 0.004, yi_s + d_s - 0.006
+    cloth_all = [m_bag, m_tail, m_pk, *pouches.values()]
+    cloth = sg.bvh(*cloth_all, *zip_tmp.values())
+    pressed: list[tuple[sg.Path, list[ak.Mesh]]] = []
+    boxes: list[tuple[tuple, list[ak.Mesh]]] = []
+    thick_of = {id(m_tail): bt_t}
+
+    def strap_on(path: sg.Path, width: float, at_from_end: float, meshes: list[ak.Mesh], dst: ak.Mesh) -> None:
+        for m in meshes:
+            sg.press(m, path, rim=0.010, bulge=0.0012, thick=thick_of.get(id(m), 0.0))
+        pressed.append((path, meshes))
+        rib = path.rib(0.0003)
+        ak.strap(dst, rib, width, 0.0016, step=0.004)
+        at = rib.length - at_from_end
+        buckle_on(P.plastic, rib, at, width, "release", 0.004)
+        boxes.append((buckle_box(rib, at, width, "release", 0.004), meshes))
+    zc = z0 + H / 2
+    yc = y_in(zc) + 0.08
+    for sgn in (1.0, -1.0):
+        # сверху: от спинки через верх и ребро на верх «хвоста»
+        x = sgn * 0.068
+        c = Vector((x, yc, zc))
+        a = top_d.point(x, y_in(z0 + H) + 0.025)
+        b = tail_d.point(x, z0 + H - 0.058, bt_t)
+        path = sg.wrap_path(cloth, c, Vector((0, 1, 0)), Vector((0, 0, 1)), a, b, 0.010, ccw=False)
+        strap_on(path, 0.020, 0.05, [m_bag, m_tail], m_side[sgn])
+        # по бокам: от бока у спинки через ребро на бок «хвоста» (выше подсумка)
+        zs = z0 + 0.335
+        _, d_s, yi_s = bag.section(zs - z0)
+        c = Vector((0.0, yi_s + d_s * 0.45, zs))
+        a = side_d[sgn].point(yi_s + 0.03, zs)
+        b = tail_d.point(sgn * 0.105, zs, bt_t)
+        path = sg.wrap_path(cloth, c, Vector((0, 1, 0)), Vector((sgn, 0, 0)), a, b, 0.010, ccw=False)
+        strap_on(path, 0.020, 0.04, [m_bag, m_tail], m_side[sgn])
+        # снизу: от дна через нижнее ребро на угол «хвоста»
+        x = sgn * 0.105
+        c = Vector((x, yc, zc))
+        a = bot_d.point(x, y_in(z0) + 0.08)
+        b = tail_d.point(x, z0 + 0.045, bt_t)
+        path = sg.wrap_path(cloth, c, Vector((0, 1, 0)), Vector((0, 0, 1)), a, b, 0.010, ccw=True)
+        strap_on(path, 0.020, 0.075, [m_bag, m_tail, m_pk], m_side[sgn])      # фастекс на дне — не на углу кармана
+    for path, meshes in pressed:                                 # ещё раз без выдавливания
+        for m in meshes:
+            sg.press(m, path, rim=0.010, thick=thick_of.get(id(m), 0.0))
+    for box, meshes in boxes:
+        for m in meshes:
+            sg.press_box(m, *box, thick=thick_of.get(id(m), 0.0))
+    for m in (*m_side.values(), *zip_tmp.values()):
+        sg.merge(P.webbing, m)
+
+    # ---- детали по смятой ткани ----
+    bvh_bag, bvh_tail, bvh_pk = sg.bvh(m_bag), sg.bvh(m_tail), sg.bvh(m_pk)
+    top_d = sg.SurfFrame(top_s, bvh_bag)
+    tail_d = sg.SurfFrame(out_s, bvh_tail, reach=0.06)
+    pk_d = sg.SurfFrame(out_s, bvh_pk, reach=0.1)
+    back_pads(P, inner, bag, gap)
+    grab_handle(P, top_d, bag)
+    zip_on(P, top_d, [(-0.05, ym), (0.05, ym)], 0.0015, pull=0.8, press=(m_bag,))   # молния основного отделения
+    ak.webbing_rows(P.molle, tail_d, -0.055, 0.055, [z0 + H - 0.095], 0.0005)
+    ak.padded_panel(P.velcro, ak.OffsetFrame(tail_d, 0.0009),
+                    ak.rounded_poly([(-0.07, z0 + H - 0.165), (0.07, z0 + H - 0.165), (0.07, z0 + H - 0.13),
+                                     (-0.07, z0 + H - 0.13)], [0.004] * 4), 0.0016, bulge=0.0, binding=0.0, step=0.004)
+    ak.padded_panel(P.velcro, ak.OffsetFrame(pk_d, 0.0009),
+                    ak.rounded_poly([(-0.06, z0 + 0.07), (0.06, z0 + 0.07), (0.06, z0 + 0.19), (-0.06, z0 + 0.19)],
+                                    [0.006] * 4), 0.0016, bulge=0.0, binding=0.0, step=0.004)
+    # сетчатые карманы со шнуром (мешок под ними гладкий)
+    for sgn, fr in side_s.items():
         poly = ak.rounded_poly([(ma, z0 + 0.03), (mb, z0 + 0.03), (mb, z0 + 0.30), (ma, z0 + 0.30)], [0.01, 0.02, 0.005, 0.005])
         ak.padded_panel(P.mesh, ak.OffsetFrame(fr, 0.003), poly, 0.003, bulge=0.022, binding=0.0, step=0.006)
-        cord = rib_on(fr, [(ma + 0.003, z0 + 0.293), (mb - 0.003, z0 + 0.293)], 0.007)
+        cord = rib_on(fr, [(ma + 0.003, z0 + 0.293), (cord_end, z0 + 0.293)], 0.007)
         ak.tube(P.webbing, cord.pts, 0.0022, sides=6)
-        p, tan, nn = cord._at(cord.length * 0.8)
+        p, tan, nn = cord._at(cord.length * 0.6)
         ak.cord_lock(P.plastic, p + nn * 0.006, nn.cross(tan).normalized(), tan, nn)
-    shoulder_straps(P, body, bag, inner, side, z0 + H - 0.05, sternum=False, daisy=True)
+    shoulder_straps(P, body, bag, inner, side_d, z0 + H - 0.05, sternum=False, daisy=True)
     waist_strap(P, body, 1.00)
+    soft = [m_bag, m_tail, m_pk, m_flap, *pouches.values()]
+    for m in soft:
+        sg.merge(P.cordura, m)
+    P.smooth = smooth_copy(soft, smooth)
+    report(P, prefix, soft)
     P.build(prefix, col, mats)
 
 
@@ -711,9 +895,6 @@ def build_raid(col, mats, body: Body, prefix: str) -> None:
 
     # ---- смятая ткань (гладкие формы запомнены — ключ формы «Без складок») ----
     smooth = {id(m): list(m.verts) for m in (m_bag, m_lid, m_fp, *ears.values())}
-
-    def rect_out(a: float, b: float, a0: float, a1: float, b0: float, b1: float) -> float:
-        return math.hypot(max(a0 - a, 0.0, a - a1), max(b0 - b, 0.0, b - b1))
     bag_lumps = sg.lumps(0.11, 0.008, 1.0)
     bag_folds = sg.folds(Vector((0, 0, 1)), 0.07, 0.012, 2.0)
     bag_wr = sg.folds(Vector((0.6, 0.3, 0.8)), 0.028, 0.003, 21.0, cover=0.5)
@@ -853,7 +1034,7 @@ def build_raid(col, mats, body: Body, prefix: str) -> None:
     n_rows = int((fz1 - fz0 - 0.06) / MOLLE_PITCH) + 1
     ak.webbing_rows(P.molle, sg.SurfFrame(out_s, sg.bvh(m_fp), reach=0.1), -0.095, 0.095,
                     [fz0 + 0.03 + k * MOLLE_PITCH for k in range(n_rows)], 0.0005)
-    zip_on(P, out_d, [(-0.112, z0 + 0.155), (0.112, z0 + 0.155)], 0.0015, pull=0.1)
+    zip_on(P, out_d, [(-0.112, z0 + 0.155), (0.112, z0 + 0.155)], 0.0015, pull=0.1, press=(m_bag,))
     for sx in (-0.09, 0.09):
         for dy in (0.07, 0.19):
             r = rib_on(bot_d, [(sx - 0.03, y_in(z0) + dy), (sx + 0.03, y_in(z0) + dy)], 0.002)

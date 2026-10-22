@@ -249,6 +249,108 @@ def planar_path(bvh_: BVHTree, origin: Callable[[float], Vector], axis: Vector, 
     return path
 
 
+def wrap_path(bvh_: BVHTree, c: Vector, e1: Vector, e2: Vector, a: Vector, b: Vector, half: float, ccw: bool,
+              reach: float = 0.8, step: float = 0.002) -> Path:
+    """Стропа в плоскости (c, e1, e2), огибающая вещь через ребро (с верха или дна на лицевую сторону): лучи
+    снаружи к c по дуге от направления на a до направления на b (ccw — по часовой или против в базисе e1, e2),
+    самая дальняя ткань под лентой по её ширине, выпуклая оболочка — лента натянута, перекидывается через гребни
+    и мостом через впадины. Нормаль ленты — наружу от оболочки, «высота» над тканью меряется по ней."""
+    e1, e2 = e1.normalized(), e2.normalized()
+    w = e1.cross(e2).normalized()
+
+    def ang(p: Vector) -> float:
+        d = p - c
+        return math.atan2(d.dot(e2), d.dot(e1))
+    ta, tb = ang(a), ang(b)
+    if ccw and tb < ta:
+        tb += 2 * math.pi
+    if not ccw and tb > ta:
+        tb -= 2 * math.pi
+    r_max = max((a - c).length, (b - c).length) + 0.1
+    n = max(8, int(abs(tb - ta) * r_max / 0.002))
+    prof = []
+    for k in range(n + 1):
+        t = ta + (tb - ta) * k / n
+        d = e1 * math.cos(t) + e2 * math.sin(t)
+        best = None
+        for f in (-1.03, -0.7, -0.35, 0.0, 0.35, 0.7, 1.03):
+            loc, _, _, _ = bvh_.ray_cast(c + d * reach + w * (half * f), -d, reach)
+            if loc is not None:
+                r = (loc - c - w * (half * f)).dot(d)
+                best = r if best is None else max(best, r)
+        if best is not None:
+            prof.append((best * math.cos(t), best * math.sin(t)))
+    pts2 = prof if ccw else prof[::-1]                     # обход против часовой: выпуклая цепь — только левые повороты
+    hull: list[tuple[float, float]] = []
+    for p in pts2:
+        while len(hull) >= 2:
+            (x1, y1), (x2, y2) = hull[-2], hull[-1]
+            if (x2 - x1) * (p[1] - y1) - (y2 - y1) * (p[0] - x1) <= 0:
+                hull.pop()
+            else:
+                break
+        hull.append(p)
+    if not ccw:
+        hull = hull[::-1]
+    # равномерно по длине
+    dense = [Vector(hull[0])]
+    for (x1, y1), (x2, y2) in zip(hull, hull[1:]):
+        seg = math.hypot(x2 - x1, y2 - y1)
+        for k in range(1, max(1, int(seg / step)) + 1):
+            f = k / max(1, int(seg / step))
+            dense.append(Vector((x1 + (x2 - x1) * f, y1 + (y2 - y1) * f)))
+    pts = [c + e1 * q.x + e2 * q.y for q in dense]
+    nrm = []
+    for i in range(len(dense)):
+        t2 = (dense[min(i + 1, len(dense) - 1)] - dense[max(i - 1, 0)]).normalized()
+        o2 = Vector((t2.y, -t2.x)) if ccw else Vector((-t2.y, t2.x))   # наружу — справа по ходу против часовой
+        nrm.append((e1 * o2.x + e2 * o2.y).normalized())
+    path = Path(pts, nrm, half)
+    path.s = list(path.acc)
+    return path
+
+
+class Line:
+    """Линия на ткани (молния, шов): расстояние до неё и длина вдоль неё у ближайшей точки."""
+
+    def __init__(self, pts: list[Vector], step: float = 0.002):
+        dense = [pts[0]]
+        for a, b in zip(pts, pts[1:]):
+            k = max(1, int((b - a).length / step))
+            dense += [a.lerp(b, i / k) for i in range(1, k + 1)]
+        self.pts = dense
+        self.acc = [0.0]
+        for a, b in zip(dense, dense[1:]):
+            self.acc.append(self.acc[-1] + (b - a).length)
+        self.kd = KDTree(len(dense))
+        for i, p in enumerate(dense):
+            self.kd.insert(p, i)
+        self.kd.balance()
+
+    def near(self, p: Vector) -> tuple[float, float]:
+        q, i, d = self.kd.find(p)
+        return d, self.acc[i]
+
+
+def pucker(lines: list[Line], lam: float, amp: float, d0: float = 0.011, d1: float = 0.026
+           ) -> tuple[Callable[[Vector], float], Callable[[Vector], float]]:
+    """Ткань у молнии собирается мелкой волной поперёк неё (шов тянет): смещение у линии на d0…d1 (за краем ленты
+    шириной 20 мм), под самой лентой — ноль. Второе — доля прочих складок у линии (под лентой ткань ровнее)."""
+    def info(p: Vector) -> tuple[float, float]:
+        return min((ln.near(p) for ln in lines), key=lambda t: t[0])
+
+    def disp(p: Vector) -> float:
+        d, s = info(p)
+        if d > d1 + 0.01:
+            return 0.0
+        band = gm.smoothstep((d - d0) / 0.004) * gm.smoothstep((d1 + 0.01 - d) / 0.012)
+        return amp * band * math.sin(2 * math.pi * s / lam + 1.7 * noise.noise(p * 40.0))
+
+    def calm(p: Vector) -> float:
+        return 0.25 + 0.75 * gm.smoothstep((info(p)[0] - d0) / 0.012)
+    return disp, calm
+
+
 def _layer_depth(m: ak.Mesh, thick: float, up: Callable[[int], Vector]) -> list[float]:
     """Тонкий пакет (клапан) давится слоем: у нижней стороны к высоте добавлена толщина, у борта — половина,
     иначе верх уходил под низ и пакет выворачивался."""
