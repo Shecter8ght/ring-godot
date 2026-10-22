@@ -4,8 +4,9 @@
 грязь во впадинах и книзу; стропа, велкро, сетка, фурнитура — рецептами брони со своими цветами.
 Расцветки (решения владельца 2026-10-22):
 - городской — тёмно-серый (графит, чёрные стропа и молнии);
-- туристический — по образцу владельца: рейнджер-грин, сетка темнее, скатка светло-оливковая, пряжки серо-зелёные;
-- рейдовый — по образцу владельца: серо-зелёный, сильно ношеный — застарелая грязь пятнами и выцветание;
+- туристический — по образцу владельца: рейнджер-грин, сетка темнее, пряжки серо-зелёные (скатки нет — убрана владельцем);
+- рейдовый — «как тактические рюкзаки: ярко-зелёные, насыщенные, камуфляжные» (владелец, вместо прежнего серо-зелёного
+  ношеного): свой лесной камуфляж «Чаща» (tools/npc_kit/gen_pack_camo.py), стропа и велкро оливковые, износ обычный;
 - подсумки и пояс — койот.
 Маски «где» — атрибуты брони (ArmorEdge/Up/Low/Under), «брызги спереди» — на лицевой стороне (у рюкзака и подсумка
 это +Y, а не перёд тела); AO — только по своей детали.
@@ -34,13 +35,15 @@ at.PALETTE.update({
             "plastic": srgb(20, 20, 21), "mesh": srgb(26, 27, 30)},
     "tour": {"cordura": srgb(54, 58, 43), "webbing": srgb(51, 55, 41), "velcro": srgb(55, 59, 45),
              "plastic": srgb(86, 94, 88), "mesh": srgb(38, 42, 30)},
-    "raid": {"cordura": srgb(50, 58, 54), "webbing": srgb(46, 54, 50), "velcro": srgb(50, 57, 53),
-             "plastic": srgb(36, 38, 36), "mesh": srgb(62, 47, 36)},
+    "raid": {"cordura": srgb(60, 88, 26), "webbing": srgb(40, 54, 24), "velcro": srgb(42, 56, 26),
+             "plastic": srgb(26, 28, 24), "mesh": srgb(38, 46, 30)},
     "coyote": {"cordura": srgb(114, 96, 70), "webbing": srgb(102, 86, 62), "velcro": srgb(108, 92, 68),
                "plastic": srgb(48, 44, 37), "mesh": srgb(96, 82, 60)},
 })
 TIER_OF = {"Daypack": "day", "Tourist": "tour", "Raid": "raid", "Pouch": "coyote", "Belt": "coyote"}
-BUNDLE = srgb(100, 106, 56)
+TEX_GEN = at.ROOT / "_asset_src" / "npc_kit" / "tex_gen"
+CAMO_RAID = TEX_GEN / "camo_chascha_4k.png"
+MOLLE_PITCH = 0.0381
 
 
 def tree_of(mat: bpy.types.Material):
@@ -56,6 +59,23 @@ def gear_masks(objs: list[bpy.types.Object]) -> None:
             continue
         at.geometry_masks(o, z_lo, z_hi)
         me = o.data
+        key = me.shape_keys.key_blocks.get("Без складок") if me.shape_keys else None
+        if key is not None:
+            # мятая ткань: выпуклость складок — это гребни (лёгкая потёртость), а не кромки; кромки — по гладкой форме
+            nv = len(me.vertices)
+            crest = np.empty(nv * 4, np.float32)
+            me.color_attributes["ArmorEdge"].data.foreach_get("color", crest)
+            co = np.empty(nv * 3, np.float32)
+            key.data.foreach_get("co", co)
+            at.geometry_masks(o, z_lo, z_hi, edge_co=co.reshape(nv, 3))
+            edge = np.empty(nv * 4, np.float32)
+            me.color_attributes["ArmorEdge"].data.foreach_get("color", edge)
+            val = np.clip(crest.reshape(nv, 4)[:, 0] - edge.reshape(nv, 4)[:, 0], 0.0, 1.0)
+            a = me.color_attributes.get("FoldCrest") or me.color_attributes.new(name="FoldCrest", type="BYTE_COLOR",
+                                                                                domain="POINT")
+            rgba = np.ones((nv, 4), np.float32)
+            rgba[:, :3] = val[:, None]
+            a.data.foreach_set("color", rgba.ravel())
         n = len(me.vertices)
         nrm = np.empty(n * 3, np.float32)
         me.vertex_normals.foreach_get("vector", nrm)
@@ -73,32 +93,43 @@ def gear_masks(objs: list[bpy.types.Object]) -> None:
 
 
 def mat_cordura(mat: bpy.types.Material, tier: str) -> None:
-    at.mat_cordura(mat, tier)
     if tier != "raid":
+        at.mat_cordura(mat, tier)
         return
-    t = tree_of(mat)
-    lay = layer(t, "70 • Застарелая грязь пятнами (как у образца)", at.GRIME, None, 0.94, 0.45)
-    owner_mask(lay, "04_Грязь_и_налёт/Грязь_пятнами_01.png", 0.35, 0.35, 0.80)
-    lay = layer(t, "71 • Выцветание до серого", at.FADE, None, 0.92, 0.16)
-    noise(lay, "Пятнами 20–40 см", 3.5, 0.30, 0.85, shift=(0.5, 0.2, 0.1))
-    lay = layer(t, "72 • Грязь по низу гуще", at.DIRT, None, 0.95, 0.45)
-    vmask(lay, "ArmorLow", 0.35, 1.0)
-    owner_mask(lay, "04_Грязь_и_налёт/Грязь_зернистая_плотная_01.png", 0.30, 0.20, 0.75)
+    # рейдовый — сочный лесной камуфляж; износ обычный, без выцветания до серого (владелец: «блеклый»)
+    col = at.PALETTE[tier]["cordura"]
+    t, _ = stack(mat, col, 0.0, 0.86)
+    layer(t, "00 • Ткань", col, 0.0, 0.86)
+    image_layer(t, "01 • Камуфляж «Чаща» (свой, gen_pack_camo.py)", image(CAMO_RAID, True), "Color", 0.8)
+    lay = layer(t, "05 • Неровный прокрас (темнее пятнами)", at.GRIME, None, None, 0.08)
+    noise(lay, "Пятна прокраса 5–15 см", 9.0, 0.35, 0.80)
+    image_layer(t, "10 • Плетение кордуры (Poly Haven book_pattern)",
+                image(at.TEX / "book_pattern" / "book_pattern_nor_gl_4k.png", False), "Normal", 0.30)
+    image_layer(t, "11 • Микрошероховатость плетения", image(at.TEX / "book_pattern" / "book_pattern_rough_4k.png", False),
+                "Roughness", 0.30, amount=0.30)
+    at.wear_fabric(t, 0.86, dirt_amount=0.7, edge_amount=0.12)
+    lay = layer(t, "32 • Потёртость на гребнях складок", at.FADE, None, 0.9, 0.10)
+    vmask(lay, "FoldCrest")
     H.reconnect(U, t)
 
 
-def mat_bundle(mat: bpy.types.Material, tier: str) -> None:
-    """Скатка — светло-оливковый нейлон (куртка), с отливом на складках."""
-    t, _ = stack(mat, BUNDLE, 0.0, 0.62)
-    layer(t, "00 • Нейлон, светлая олива", BUNDLE, 0.0, 0.62)
-    image_layer(t, "10 • Плетение нейлона (Poly Haven stretch_poplin)",
-                image(at.TEX / "stretch_poplin" / "stretch_poplin_nor_gl_2k.png", False), "Normal", 0.12)
-    lay = layer(t, "20 • Отлив на гребнях складок", tuple(min(1.0, c * 1.35) for c in BUNDLE), None, 0.48, 0.45)
-    vmask(lay, "ArmorEdge", 0.1, 0.6)
-    lay = layer(t, "30 • Тень и пыль в складках", at.GRIME, None, 0.8, 0.45)
-    ao_mask(lay, 0.02)
-    lay = layer(t, "40 • Выгорание сверху", at.FADE, None, 0.7, 0.15)
-    vmask(lay, "ArmorUp")
+def mat_molle(mat: bpy.types.Material, tier: str) -> None:
+    """Ряды MOLLE (по фото владельца): плоская тканая стропа 25 мм, у рейдового — с тем же камуфляжем, что ткань
+    (напечатан на стропе), поперёк — закрепки через 38 мм (tools/npc_kit/gen_molle_tack.py), делят её на прямоугольники."""
+    col = at.PALETTE[tier]["cordura" if tier == "raid" else "webbing"]
+    t, _ = stack(mat, col, 0.0, 0.8)
+    layer(t, "00 • Стропа MOLLE, нейлон", col, 0.0, 0.8)
+    if tier == "raid":
+        image_layer(t, "01 • Камуфляж «Чаща» на стропе (свой кусок ткани — рисунок не совпадает)", image(CAMO_RAID, True), "Color", 0.71,
+                    box=True)
+        layer(t, "02 • Стропа плотнее ткани — краска чуть темнее", at.GRIME, None, None, 0.12)
+    image_layer(t, "10 • Саржевое плетение стропы (Poly Haven denim_fabric_05)",
+                image(at.TEX / "denim_fabric_05" / "denim_fabric_05_nor_gl_4k.png", False), "Normal", 0.08)
+    image_layer(t, "20 • Закрепки через 38 мм (рельеф)", image(TEX_GEN / "molle_tack_height.png", False), "Normal",
+                (MOLLE_PITCH, 0.025), bump=0.0007)
+    image_layer(t, "21 • Тень в закрепках", image(TEX_GEN / "molle_tack_shade.png", True), "Color", (MOLLE_PITCH, 0.025),
+                amount=0.7, blend="MULTIPLY")
+    at.wear_fabric(t, 0.8, edge_amount=0.14)
     H.reconnect(U, t)
 
 
@@ -109,7 +140,7 @@ RECIPES = {
     "Mesh": at.mat_mesh,
     "Plastic": at.mat_plastic,
     "Metal": at.mat_metal,
-    "Cloth": mat_bundle,
+    "Molle": mat_molle,
 }
 
 
@@ -143,8 +174,9 @@ def main() -> None:
     args = kc.args_after_dashes()
     what = args[0]
     if what == "packs":
-        src = kc.WORK / "backpacks" / "backpacks.blend"
-        out = kc.WORK / "backpacks" / "backpacks_tex.blend"
+        test = "test" in args                 # проба на backpacks_test.blend (backpacks.py -- only=… fit=…)
+        src = kc.WORK / "backpacks" / ("backpacks_test.blend" if test else "backpacks.blend")
+        out = kc.WORK / "backpacks" / ("backpacks_test_tex.blend" if test else "backpacks_tex.blend")
     elif what == "pouches":
         src = kc.WORK / "pouches" / "pouches.blend"
         out = kc.WORK / "pouches" / "pouches_tex.blend"
@@ -199,9 +231,12 @@ def shots(what: str) -> None:
     if what == "packs":
         import backpacks as bp
         for name in ("Daypack", "Tourist", "Raid"):
+            if f"07_Backpack_{name}" not in bpy.data.collections:
+                continue
             bp.show(name, "none")
             for v, (pos, tgt) in {"back34": ((-0.95, 1.30, 1.50), (0.0, 0.18, 1.22)),
-                                  "macro": ((0.40, 0.85, 1.30), (0.05, 0.25, 1.22))}.items():
+                                  "macro": ((0.40, 0.85, 1.30), (0.05, 0.25, 1.22)),
+                                  "ear": ((-0.80, 0.80, 1.38), (-0.24, 0.26, 1.26))}.items():
                 kc.render(kc.camera("Tex_b_" + v, pos, tgt, 50), prev / f"pack_tex_{name.lower()}_{v}.png", (900, 1000),
                           at.SAMPLES)
         bp.show("Daypack", "none")
@@ -224,7 +259,7 @@ def deliver(what: str, folder: Path) -> None:
         bp.show("Daypack", "none")
         am.deliver(folder, f"Рюкзаки_{bp.VERSION}_текстуры.blend", bp.README.format(ver=bp.VERSION).replace(
             "ФОРМА", "ТЕКСТУРЫ (нативный UCUPaint 2.4.9; городской — тёмно-серый, туристический — рейнджер-грин,\n"
-            "рейдовый — серо-зелёный ношеный, по образцам владельца) на форме"), focus_z=1.25, near=0.75)
+            "рейдовый — свой лесной камуфляж «Чаща», по решениям владельца) на форме"), focus_z=1.25, near=0.75)
     elif what == "pouches":
         import pouches as pu
         pu.README = pu.README.replace("ФОРМА {ver} на согласование (нейтральный материал)",

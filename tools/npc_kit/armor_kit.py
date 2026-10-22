@@ -958,8 +958,8 @@ def webbing_rows(m: Mesh, frame, u0: float, u1: float, v_rows: list[float], base
                 lift = 0.0002 + 0.0013 * loop * edge
                 rt.append(m.v(frame.point(u, v, base_off + thick + lift)))
                 rb.append(m.v(frame.point(u, v, base_off + 0.0002)))
-                ut.append((u, v))
-                ub.append((u, v + 0.05))
+                ut.append((u - u0, v - vr))          # от начала ряда: тайл закрепок (шаг pitch) — на закрепках
+                ub.append((u - u0, v - vr + 0.05))
             top.append(rt)
             bot.append(rb)
             uvt.append(ut)

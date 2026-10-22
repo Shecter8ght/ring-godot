@@ -56,8 +56,9 @@ def smoothstep(x: np.ndarray) -> np.ndarray:
     return x * x * (3 - 2 * x)
 
 
-def geometry_masks(obj: bpy.types.Object, z_lo: float, z_hi: float) -> None:
-    """z_lo…z_hi — высота всей брони: грязь копится книзу самой вещи (у средней низ — пояс, у крутой — колени)."""
+def geometry_masks(obj: bpy.types.Object, z_lo: float, z_hi: float, edge_co: np.ndarray | None = None) -> None:
+    """z_lo…z_hi — высота всей брони: грязь копится книзу самой вещи (у средней низ — пояс, у крутой — колени).
+    edge_co — координаты, по которым считать кромки (у мятой ткани рюкзака — гладкая форма до складок)."""
     me = obj.data
     n = len(me.vertices)
     if n == 0:
@@ -72,14 +73,15 @@ def geometry_masks(obj: bpy.types.Object, z_lo: float, z_hi: float) -> None:
     me.edges.foreach_get("vertices", e)
     e = e.reshape(-1, 2)
     deg = np.bincount(e.ravel(), minlength=n).astype(np.float32)
-    sm = co.copy()
+    src = co if edge_co is None else edge_co
+    sm = src.copy()
     for _ in range(4):                                    # выпуклость: вершина над сглаженной формой (локально — кромки, а не вся лямка)
         acc = np.zeros_like(co)
         np.add.at(acc, e[:, 0], sm[e[:, 1]])
         np.add.at(acc, e[:, 1], sm[e[:, 0]])
         avg = np.where(deg[:, None] > 0, acc / np.maximum(deg, 1)[:, None], sm)
         sm = sm + 0.5 * (avg - sm)
-    fold = ((co - sm) * nrm).sum(1) / 0.0025
+    fold = ((src - sm) * nrm).sum(1) / 0.0025
     mw = np.array(obj.matrix_world, np.float32)
     world = co @ mw[:3, :3].T + mw[:3, 3]
     wn = nrm @ np.linalg.inv(mw[:3, :3])

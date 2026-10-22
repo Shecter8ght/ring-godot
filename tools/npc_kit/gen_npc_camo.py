@@ -42,6 +42,7 @@ def warp_sample(f: np.ndarray, dx: np.ndarray, dy: np.ndarray) -> np.ndarray:
     y = (yy + dy) % n
     x0, y0 = np.floor(x).astype(int), np.floor(y).astype(int)
     tx, ty = x - x0, y - y0
+    x0, y0 = x0 % n, y0 % n                    # −ε % n в float32 округляется до n
     x1, y1 = (x0 + 1) % n, (y0 + 1) % n
     return (f[y0, x0] * (1 - tx) * (1 - ty) + f[y0, x1] * tx * (1 - ty) + f[y1, x0] * (1 - tx) * ty + f[y1, x1] * tx * ty)
 
