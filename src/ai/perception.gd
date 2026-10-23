@@ -33,10 +33,10 @@ static func can_see_body(world: World3D, eye: Vector3, forward: Vector3, body: N
 	# Тот, кто вне поля зрения, не требует расчёта освещения и луча физики.
 	var flat := Vector3(to.x, 0.0, to.z).normalized()
 	var fwd := Vector3(forward.x, 0.0, forward.z).normalized()
-	if dist > 2.0 and fwd.dot(flat) < cos(deg_to_rad(Balance.AI_VIEW_HALF_ANGLE_DEG)):
+	if dist > 2.0 and fwd.dot(flat) < cos(deg_to_rad(Balance.lab_number("perception", "half_angle"))):
 		return false
 	var base: float = _view_range(body, false)
-	if dist > base * view:
+	if dist > base * view * Balance.lab_number("perception", "view"):
 		return false
 	var query := PhysicsRayQueryParameters3D.create(eye, point, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_MARAUDER, exclude)
 	if work_profile_enabled:
@@ -54,11 +54,11 @@ static func can_see(world: World3D, eye: Vector3, forward: Vector3, target: Play
 	var dist := to.length()
 	var flat := Vector3(to.x, 0.0, to.z).normalized()
 	var fwd := Vector3(forward.x, 0.0, forward.z).normalized()
-	if dist > 2.0 and fwd.dot(flat) < cos(deg_to_rad(Balance.AI_VIEW_HALF_ANGLE_DEG)):
+	if dist > 2.0 and fwd.dot(flat) < cos(deg_to_rad(Balance.lab_number("perception", "half_angle"))):
 		return false
 	var light: bool = target.has_light_on()
 	var base: float = _view_range(target, light, _light_view(target) if light else 1.0, target.laser_on)
-	var max_dist: float = base * view * float(Balance.AI_VIEW_STANCE_SCALE[key])
+	var max_dist: float = base * view * float(Balance.AI_VIEW_STANCE_SCALE[key]) * Balance.lab_number("perception", "view")
 	if dist > max_dist:
 		return false
 	var query := PhysicsRayQueryParameters3D.create(eye, point, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_PLAYER, exclude)

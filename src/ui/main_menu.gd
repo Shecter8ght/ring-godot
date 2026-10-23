@@ -69,6 +69,7 @@ func _build() -> void:
 	left.add_child(_big("Настройки", func() -> void: Pause.open_settings()))
 	left.add_child(_big("Настройка положения оружия", func() -> void:
 		Net.change_scene("res://scenes/debug/weapon_pose_lab.tscn", "Стенд настройки оружия")))
+	left.add_child(_big("Отладочные стенды", _show_labs))
 	left.add_child(_big("Выход", func() -> void: get_tree().quit()))
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -266,3 +267,18 @@ class _Glow:
 		draw_circle(c, 5.0, Color(1.0, 0.45, 0.4, 0.9 * k))
 		# горизонт — чуть светлее
 		draw_rect(Rect2(0, size.y * 0.72, size.x, size.y * 0.28), Color(0.05, 0.06, 0.075, 0.6))
+
+
+## Интерактивные стенды открываются отдельно от сохранения игрока.
+func _show_labs() -> void:
+	_clear_side("Отладочные стенды")
+	for entry: Array in [
+		["Свет и атмосфера", "atmosphere_lab", "Часы, погода, солнце, тени, экспозиция и туман."],
+		["Попадания и эффекты", "impact_lab", "Материалы, пыль, обломки, искры и следы попаданий."],
+		["Зрение и слух противников", "perception_lab", "Настоящий мародёр: конус зрения, обнаружение, шум и память."],
+		["Положение оружия", "weapon_pose_lab", "Смещение и поворот каждой модели оружия у камеры."],
+	]:
+		var path: String = "res://scenes/debug/%s.tscn" % String(entry[1])
+		var title: String = String(entry[0])
+		_side.add_child(_big(title, func() -> void: Net.change_scene(path, title)))
+		_side.add_child(_label(String(entry[2]), 16, DIM))

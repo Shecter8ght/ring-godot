@@ -178,7 +178,7 @@ func _apply_static() -> void:
 		if not _fog_ready:
 			_fog_ready = true
 			_fog_base = _fog_target
-			e.fog_density = _fog_base
+			e.fog_density = _fog_base * Balance.lab_number("atmosphere", "fog")
 			e.fog_sky_affect = _fog_sky_target
 			e.fog_enabled = _fog_target > 0.0
 	_update_visibility()
@@ -206,7 +206,7 @@ func _tick_fog(delta: float) -> void:
 	# под крышей ТЦ туман реже (у каждого peer — по своему игроку, это только картинка)
 	var ind: Dictionary = Balance.INDOOR
 	_roof = move_toward(_roof, 0.0 if _outdoor else 1.0, delta / float(ind.sec))
-	e.fog_density = _fog_base * (1.0 if depth else lerpf(1.0, float(ind.fog_k), _roof))
+	e.fog_density = _fog_base * (1.0 if depth else lerpf(1.0, float(ind.fog_k), _roof)) * Balance.lab_number("atmosphere", "fog")
 	e.fog_sky_affect = move_toward(e.fog_sky_affect, _fog_sky_target, 0.5 * delta / sec)
 	e.fog_enabled = e.fog_density > 0.00001
 	_update_visibility()
@@ -218,7 +218,7 @@ func visibility_m() -> float:
 	var e := _env()
 	if e == null:
 		return INF
-	var d := (_fog_base if _fog_ready else 0.0) + (e.volumetric_fog_density if e.volumetric_fog_enabled else 0.0)
+	var d := (_fog_base * Balance.lab_number("atmosphere", "fog") if _fog_ready else 0.0) + (e.volumetric_fog_density if e.volumetric_fog_enabled else 0.0)
 	return 3.912 / d if d > 0.00001 else INF
 
 

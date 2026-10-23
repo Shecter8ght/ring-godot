@@ -29,6 +29,7 @@ const LAYERS: Array[String] = ["spray", "debris", "bits"]
 
 ## Куда полетел каждый слой (для проверок): слой → ось конуса.
 var aims: Dictionary[String, Vector3] = {}
+var _surface_kind: String = "concrete"
 
 static var _meshes: Dictionary[String, Mesh] = {}
 static var _materials: Dictionary[String, Material] = {}
@@ -46,7 +47,8 @@ static var _flipbooks: Dictionary = {}
 ## floor_plane — пол под точкой (нормаль и высота вдоль неё, NO_PLANE — нет); surface_radius — дальше
 ## от точки удара поверхности, в которую попали, нет (маленькая верхняя грань); far — далеко от камеры.
 func setup(kind: String, normal: Vector3, direction: Vector3, seed_value: int, floor_plane: Vector4 = NO_PLANE, surface_radius: float = NO_RADIUS, far: bool = false) -> void:
-	var spec: Dictionary = Balance.IMPACT_SURFACES.get(kind, Balance.IMPACT_SURFACES.concrete)
+	var spec: Dictionary = Balance.lab_impact(kind)
+	_surface_kind = kind
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = seed_value
 	var reflected: Vector3 = direction.bounce(normal).normalized()
@@ -178,7 +180,7 @@ func _emit(particles: GPUParticles3D, layer: String, cfg: Dictionary, count: int
 
 
 func _emit_sparks(count_range: Vector2i, normal: Vector3, reflected: Vector3, planes: Dictionary, rng: RandomNumberGenerator, far: bool) -> float:
-	var cfg: Dictionary = Balance.IMPACT_SPARKS
+	var cfg: Dictionary = Balance.lab_sparks(_surface_kind)
 	var layer: Dictionary = {
 		"spread": cfg.spread, "speed": cfg.speed, "life": cfg.life, "size": cfg.width, "drag": cfg.drag,
 		"bounce": cfg.bounce, "friction": cfg.friction, "stretch": cfg.stretch, "stretch_max": cfg.stretch_max,

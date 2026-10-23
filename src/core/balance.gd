@@ -4260,3 +4260,95 @@ const SONORA_AUDIO: Dictionary = {
  "max_db": 0.0,
  "unfiltered_hz": 20500.0
 }
+
+# --- Интерактивные стенды: нейтральные множители и допустимые пределы ---
+## Подпись, исходное значение, минимум, максимум, шаг. По умолчанию поведение игры прежнее.
+const LAB_RULES: Dictionary = {
+	"atmosphere": {
+		"sun": ["Солнце / Луна · яркость ×", 1.0, 0.0, 4.0, 0.05],
+		"ambient": ["Рассеянный свет · яркость ×", 1.0, 0.0, 4.0, 0.05],
+		"sky": ["Яркость неба ×", 1.0, 0.1, 4.0, 0.05],
+		"exposure": ["Экспозиция ×", 1.0, 0.1, 4.0, 0.05],
+		"fog": ["Плотность тумана ×", 1.0, 0.0, 4.0, 0.05],
+		"volume": ["Объёмная дымка ×", 1.0, 0.0, 4.0, 0.05],
+		"sun_tint": ["Оттенок солнечного / лунного света", Color.WHITE],
+		"fog_tint": ["Оттенок тумана", Color.WHITE],
+	},
+	"impact": {
+		"debris_count": ["Крупные обломки · количество ×", 1.0, 0.0, 3.0, 0.1],
+		"debris_size": ["Размер обломков ×", 1.0, 0.1, 3.0, 0.1],
+		"bits_count": ["Мелкая крошка · количество ×", 1.0, 0.0, 3.0, 0.1],
+		"spray_count": ["Веер материала · количество ×", 1.0, 0.0, 3.0, 0.1],
+		"dust_count": ["Пыль / дым · количество ×", 1.0, 0.0, 3.0, 0.1],
+		"dust_size": ["Размер облака пыли ×", 1.0, 0.1, 3.0, 0.1],
+		"dust_life": ["Длительность облака пыли ×", 1.0, 0.1, 4.0, 0.1],
+		"sparks_count": ["Искры · количество ×", 1.0, 0.0, 3.0, 0.1],
+		"sparks_size": ["Толщина искр ×", 1.0, 0.1, 3.0, 0.1],
+		"sparks_life": ["Длительность искр ×", 1.0, 0.1, 4.0, 0.1],
+		"speed": ["Скорость разлёта ×", 1.0, 0.1, 3.0, 0.1],
+		"life": ["Длительность обломков и веера ×", 1.0, 0.1, 4.0, 0.1],
+		"decal_size": ["Размер следа попадания ×", 1.0, 0.1, 3.0, 0.1],
+		"decal_life": ["След · секунд (0 — обычный лимит)", 0.0, 0.0, 180.0, 1.0],
+	},
+	"perception": {
+		"view": ["Дальность зрения ×", 1.0, 0.1, 3.0, 0.05],
+		"half_angle": ["Половина угла обзора · градусы", AI_VIEW_HALF_ANGLE_DEG, 5.0, 175.0, 1.0],
+		"notice": ["Время обнаружения ×", 1.0, 0.1, 4.0, 0.05],
+		"hearing": ["Дальность слуха ×", 1.0, 0.1, 3.0, 0.05],
+		"memory": ["Время памяти о цели ×", 1.0, 0.1, 4.0, 0.1],
+	},
+}
+
+
+func lab_rules(domain: String) -> Dictionary:
+	return LAB_RULES.get(domain.get_slice(":", 0), {})
+
+
+func lab_number(domain: String, key: String) -> float:
+	return float(LabTuning.value(domain, key))
+
+
+## Нейтральная поправка применяется к заново рассчитанному свету, поэтому не накапливается.
+func lab_atmosphere(sun: DirectionalLight3D, environment: Environment) -> void:
+	if sun:
+		sun.light_energy *= lab_number("atmosphere", "sun")
+		sun.light_color *= LabTuning.value("atmosphere", "sun_tint") as Color
+	if environment:
+		environment.ambient_light_energy *= lab_number("atmosphere", "ambient")
+		environment.background_energy_multiplier *= lab_number("atmosphere", "sky")
+		environment.tonemap_exposure *= lab_number("atmosphere", "exposure")
+		environment.fog_light_color *= LabTuning.value("atmosphere", "fog_tint") as Color
+		environment.volumetric_fog_density *= lab_number("atmosphere", "volume")
+
+
+func lab_impact(kind: String) -> Dictionary:
+	var spec: Dictionary = (IMPACT_SURFACES.get(kind, IMPACT_SURFACES.concrete) as Dictionary).duplicate(true)
+	var domain: String = "impact:" + kind
+	for layer: String in ["debris", "bits", "spray", "dust", "sparks"]:
+		if not spec.has(layer):
+			continue
+		var config: Dictionary = spec[layer]
+		var amount: float = lab_number(domain, layer + "_count")
+		if is_zero_approx(amount):
+			spec.erase(layer)
+			continue
+		if config.count is Vector2i:
+			var count: Vector2i = config.count
+			config.count = Vector2i(maxi(1, roundi(count.x * amount)), maxi(1, roundi(count.y * amount)))
+		else:
+			config.count = maxi(1, roundi(float(config.count) * amount))
+		if config.has("speed"):
+			config.speed = (config.speed as Vector2) * lab_number(domain, "speed")
+		if config.has("life"):
+			config.life = (config.life as Vector2) * lab_number(domain, "dust_life" if layer == "dust" else "life")
+		if config.has("size") and layer in ["debris", "dust"]:
+			config.size = (config.size as Vector2) * lab_number(domain, layer + "_size")
+	return spec
+
+
+func lab_sparks(kind: String) -> Dictionary:
+	var config: Dictionary = IMPACT_SPARKS.duplicate(true)
+	config.width = (config.width as Vector2) * lab_number("impact:" + kind, "sparks_size")
+	config.life = (config.life as Vector2) * lab_number("impact:" + kind, "sparks_life")
+	config.speed = (config.speed as Vector2) * lab_number("impact:" + kind, "speed")
+	return config

@@ -170,6 +170,7 @@ func _particles(parent: Node, kind: String, pos: Vector3, n: Vector3, dir: Vecto
 	var burst: ImpactBurst = BURST_SCENE.instantiate() as ImpactBurst
 	parent.add_child(burst)
 	burst.global_position = pos + n * Balance.IMPACT_OFFSET
+	burst.add_to_group("impact_effects")
 	burst.setup(kind, n, dir.normalized(), _rng.randi(), floor_plane, radius, far)
 	_bursts.append(burst)
 
@@ -421,7 +422,7 @@ func _decal(parent: Node, kind: String, pos: Vector3, n: Vector3) -> void:
 		return
 	var spec: Dictionary = Balance.IMPACT_DECALS.get(kind, Balance.IMPACT_DECALS.concrete)
 	var asset_kind: String = String(spec.asset)
-	var size_range: Vector2 = spec.size
+	var size_range: Vector2 = (spec.size as Vector2) * Balance.lab_number("impact:" + kind, "decal_size")
 	var tint: Color = spec.tint
 	var textures: Array = _decal_textures.get(asset_kind, [])
 	var normals: Array = _decal_normals.get(asset_kind, [])
@@ -433,6 +434,10 @@ func _decal(parent: Node, kind: String, pos: Vector3, n: Vector3) -> void:
 		_place_decal(parent, textures[index] as Texture2D, pos, n, _rng.randf_range(size_range.x, size_range.y), tint, normal_texture, orm_texture)
 	else:
 		_place_decal(parent, _tex_hole, pos, n, _rng.randf_range(size_range.x, size_range.y), tint)
+	var life: float = Balance.lab_number("impact:" + kind, "decal_life")
+	if life > 0.0 and not _decals.is_empty():
+		var decal: Decal = _decals.back()
+		get_tree().create_timer(life).timeout.connect(decal.queue_free)
 
 
 ## Декаль проецируется вдоль своей -Y: ставим Y по нормали, случайный поворот вокруг неё.
@@ -459,6 +464,7 @@ func _place_decal(parent: Node, tex: Texture2D, pos: Vector3, n: Vector3, size: 
 	var basis := Basis(x, up, z).rotated(up, _rng.randf_range(0.0, TAU))
 	parent.add_child(d)
 	d.global_transform = Transform3D(basis, pos + up * 0.01)
+	d.add_to_group("impact_effects")
 	_decals.append(d)
 	while _decals.size() > MAX_DECALS:
 		var old: Decal = _decals.pop_front()

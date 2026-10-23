@@ -532,7 +532,7 @@ func _on_weather() -> void:
 
 ## Память о цели по типу (разведчик забывает быстро, снайпер помнит долго).
 func _mem() -> float:
-	return Balance.AI_MEMORY_SEC * float(_arch.get("memory", 1.0))
+	return Balance.AI_MEMORY_SEC * float(_arch.get("memory", 1.0)) * Balance.lab_number("perception", "memory")
 
 
 ## Мародёр целиком авторитет хоста (умалчиваемый multiplayer authority узла — 1). AI и движение
@@ -829,6 +829,7 @@ func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node)
 
 
 func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
+	radius_m *= Balance.lab_number("perception", "hearing")
 	if state == State.DEAD:
 		return
 	if kind == "shot" and global_position.distance_to(pos) <= radius_m:
@@ -2204,7 +2205,7 @@ func _notice_sec(p: Player, dist: float) -> float:
 		sec *= float(n.sprint)
 	if Time.get_ticks_msec() - p.last_shot_ms < int(float(n.shot_sec) * 1000.0):
 		sec *= float(n.shot)
-	return maxf(sec, 0.05)
+	return maxf(sec * Balance.lab_number("perception", "notice"), 0.05)
 
 
 ## Право на прицельный огонь по своей цели (Balance.AI_FIRE_TOKENS): держит hold_sec, отдаёт и ждёт

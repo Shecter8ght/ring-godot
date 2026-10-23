@@ -140,6 +140,10 @@ static func apply_state(level: Node, c: Dictionary) -> void:
 		sun.light_energy = float(Balance.RAID_TIME.day.sun_energy) * float(oc2.energy_k) * float(oc2.time_k.get(time, 1.0))
 	var fog_k: float = float(w.fog.get(look_key(c), 1.0)) * (float(w.fog_weather_k) if weather == "fog" else 1.0)
 	env.volumetric_fog_density = float(env.get_meta("authored_fog")) * fog_k
+	if not env.has_meta("lab_authored_fog_color"):
+		env.set_meta("lab_authored_fog_color", env.fog_light_color)
+	env.fog_light_color = env.get_meta("lab_authored_fog_color") as Color
+	Balance.lab_atmosphere(sun, env)
 
 
 func _rain_sound(on: bool) -> void:

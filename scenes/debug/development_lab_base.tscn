@@ -1,0 +1,134 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/debug/development_lab.gd" id="1_lab"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="3_rig"]
+[ext_resource type="Script" path="res://src/ui/development_lab_panel.gd" id="4_panel"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_material"]
+sky_top_color = Color(0.32, 0.42, 0.55, 1)
+sky_horizon_color = Color(0.72, 0.76, 0.8, 1)
+ground_horizon_color = Color(0.5, 0.53, 0.55, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_material")
+
+[sub_resource type="Environment" id="environment"]
+resource_local_to_scene = true
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_energy = 0.6
+tonemap_mode = 2
+ssao_enabled = true
+ssao_radius = 0.5
+fog_enabled = true
+fog_density = 0.001
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.001
+
+[sub_resource type="Shader" id="grid_shader"]
+code = "shader_type spatial;
+void fragment() {
+ vec2 grid = UV * vec2(200.0, 240.0);
+ vec2 edge = abs(fract(grid - 0.5) - 0.5) / max(fwidth(grid), vec2(0.001));
+ float line = 1.0 - min(min(edge.x, edge.y), 1.0);
+ float checker = mod(floor(grid.x) + floor(grid.y), 2.0);
+ ALBEDO = mix(mix(vec3(0.25, 0.29, 0.31), vec3(0.31, 0.35, 0.37), checker), vec3(0.5, 0.54, 0.55), line * 0.5);
+ ROUGHNESS = 0.85;
+}"
+
+[sub_resource type="ShaderMaterial" id="floor_material"]
+shader = SubResource("grid_shader")
+
+[sub_resource type="PlaneMesh" id="floor_mesh"]
+size = Vector2(200, 240)
+material = SubResource("floor_material")
+
+[sub_resource type="BoxShape3D" id="floor_shape"]
+size = Vector3(200, 0.5, 240)
+
+[node name="DevelopmentLab" type="Node3D"]
+script = ExtResource("1_lab")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-40, -25, 0)
+light_energy = 1.4
+shadow_enabled = true
+directional_shadow_max_distance = 100.0
+
+[node name="Ground" type="StaticBody3D" parent="."]
+position = Vector3(0, 0, 20)
+metadata/surface = "concrete"
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("floor_mesh")
+
+[node name="Collision" type="CollisionShape3D" parent="Ground"]
+position = Vector3(0, -0.25, 0)
+shape = SubResource("floor_shape")
+
+[node name="Samples" type="Node3D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector3(0, 0.03, -6)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_rig")]
+target_path = NodePath("../Player")
+
+[node name="ObserverCamera" type="Camera3D" parent="."]
+position = Vector3(14, 18, -16)
+rotation_degrees = Vector3(-38, 145, 0)
+fov = 65.0
+far = 400.0
+
+[node name="Interface" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="Panel" type="PanelContainer" parent="Interface"]
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 480.0
+offset_bottom = -20.0
+grow_vertical = 2
+script = ExtResource("4_panel")
+
+[node name="Hint" type="PanelContainer" parent="Interface"]
+anchor_right = 1.0
+offset_left = 500.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 86.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Interface/Hint"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Telemetry" type="PanelContainer" parent="Interface"]
+anchor_right = 1.0
+offset_left = 510.0
+offset_top = 104.0
+offset_right = -30.0
+offset_bottom = 330.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Interface/Telemetry"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.94, 0.88, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 19
+autowrap_mode = 2

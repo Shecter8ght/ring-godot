@@ -80,6 +80,8 @@ func apply() -> void:
 		sun.visible = String(c.weather) != "rain" and not (night and RaidConditions.clouded(String(c.weather)))
 	_apply_power(String(c.power))
 	_day_cycle(String(c.time))
+	if level.get_node_or_null("DayCycle") == null:
+		Balance.lab_atmosphere(sun, we.environment if we else null)
 
 
 ## Смена суток: на карте с панорамами дня и заката (данные "sky_hdri") часы идут — DayCycle

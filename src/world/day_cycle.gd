@@ -354,6 +354,10 @@ func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 			e.glow_bloom = lerpf(float(Balance.DAY_GLOW.bloom), float(Balance.NIGHT_ENV.glow_bloom), float(w.night))
 			e.glow_enabled = bool(day_env.get("glow", true)) and e.glow_intensity > 0.001
 
+	if e:
+		e.background_energy_multiplier = 1.0
+	Balance.lab_atmosphere(sun, e)
+
 
 func _apply_sky(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 	var to_sun := dir_from(sa.x, sa.y)
