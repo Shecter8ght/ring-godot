@@ -1,13 +1,15 @@
 class_name FirstPersonArms
 extends Node3D
-## Настоящие кисти и рукава Persona. Оружие задаёт цель, двухзвенная ИК сгибает локти.
+## Кисти и рукава ВЕРАС-54 для оружия без собственных клипов рук.
+## Отдельный рабочий скелет сохраняет прежние профили хвата и двухзвенную ИК локтей.
 ## Отдельная сцена исключает голову и торс из камеры, сохраняя полный персонаж для теней.
 
-const MODEL: String = "res://assets/models/characters/persona_arms.glb"
+const MODEL: String = "res://assets/models/characters/veras_arms.gltf"
 @export var shoulder_origin: Vector3 = Vector3(0.24, -0.43, 0.08)
 var skeleton: Skeleton3D
 var _rest: Array[Transform3D] = []
 var _frames: Dictionary = {}
+var _palm_offsets: Dictionary = {}
 var _grips: Dictionary = {}
 var _weapon: Node3D
 var _actions: Dictionary = {}
@@ -22,6 +24,8 @@ func _ready() -> void:
 		return
 	var model: Node3D = (load(MODEL) as PackedScene).instantiate() as Node3D
 	add_child(model)
+	var profile: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MODEL.get_basename() + ".json")) as Dictionary
+	_palm_offsets = profile.get("palm_offsets", {}) as Dictionary
 	skeleton = model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	for mesh: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var instance: MeshInstance3D = mesh as MeshInstance3D
@@ -97,7 +101,12 @@ func _solve(side: String, marker: Node3D) -> void:
 			target = target.interpolate_with(action_pose, float(action.weight))
 	# Масштаб оружия меняет расстояния между сокетами, но не размер кистей.
 	target.basis = target.basis.orthonormalized()
-	target.origin -= target.basis * (marker.get_meta("palm_offset") as Vector3)
+	# У перчаток ВЕРАСа длиннее ладонь: контакт на оружии общий, запястье отодвигаем
+	# по размеру новой сетки. Мировой хват Persona и метки самого оружия не меняются.
+	var palm_offset: Vector3 = marker.get_meta("palm_offset") as Vector3
+	if _palm_offsets.has(side):
+		palm_offset = WeaponGrips.vector(_palm_offsets[side] as Array)
+	target.origin -= target.basis * palm_offset
 	var contact_pose: Dictionary = marker.get_meta("contact_pose", {}) as Dictionary
 	if not contact_pose.is_empty():
 		target.origin += skeleton.global_basis.inverse() * _weapon.global_basis.orthonormalized() * WeaponGrips.vector(contact_pose.shift)

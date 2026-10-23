@@ -248,7 +248,12 @@ func _skin_outside() -> bool:
 				if not _point_clear(sk.to_global(posed)):
 					print("SKIN_INTERSECTION ", mesh.name, " vertex=", v, " position=", sk.to_global(posed))
 					return false
-				if sk.to_global(posed).distance_to(_camera._ads_cam.global_position) < _camera._ads_cam.near + float(Balance.WEAPON_CLEARANCE.view_clear):
+				# За краем кадра рукав и пальцы могут подходить к глазу: это не засвет
+				# и не отсечение видимой кисти. Проверяем глубину именно в границах кадра.
+				var world_point: Vector3 = sk.to_global(posed)
+				var camera_depth: float = -_camera._ads_cam.to_local(world_point).z
+				if camera_depth > 0.0 and camera_depth < _camera._ads_cam.near + float(Balance.WEAPON_CLEARANCE.view_clear) \
+					and get_viewport().get_visible_rect().has_point(_camera._ads_cam.unproject_position(world_point)):
 					print("SKIN_IN_EYE ", mesh.name, " vertex=", v)
 					return false
 	return true

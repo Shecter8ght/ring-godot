@@ -1,0 +1,27 @@
+{
+  "source": "E:\\Models Blender\\WEAPONS\\ВЕРАС-54 — модель и обвесы\\ВЕРАС-54\\Игровая версия\\Клипы v13\\VERAS54_Reload_Full_v13.blend",
+  "source_sha256": "9326347cc4f0d59eafb4d1a0889c700992348a34fcf5b86ab1663d3a6c55ab6e",
+  "reference_axes": "assets\\models\\characters\\persona_arms.glb",
+  "reference_sha256": "aab4219480bd2ef4eb59b954768194dda6cf78ff96abacbb19b704d93bbc2554",
+  "vertices": 2384,
+  "triangles": 4760,
+  "bones": 39,
+  "palm_offsets": {
+    "Left": [
+      9.313225746154785e-10,
+      0.13716813921928406,
+      -0.009999999776482582
+    ],
+    "Right": [
+      2.7939677238464355e-09,
+      0.13716810941696167,
+      0.010000001639127731
+    ]
+  },
+  "textures": {
+    "armCcolor.png": "eea1abc707b04d24e8a0ee13f0d27e29210c11f504f7987c26005c83288a35c8",
+    "armCNormal.png": "c95c24addb95f494ddfb2f8cf9fcdebba6188596fba42c123ceec2b3e9967023",
+    "armcRoughness.png": "ada810b9dfe21b98ca7e263032019bbc4f364ff18f60229e7d1d245fdf1f83b1"
+  },
+  "note": "Сетка/UV ВЕРАС-54; отдельный скелет для прежних профилей хвата, без клипов оружия. Исходники не изменены."
+}

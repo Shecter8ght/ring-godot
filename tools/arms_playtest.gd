@@ -20,6 +20,8 @@ var _output: String = "res://docs/screens/arms_audit/"
 func _ready() -> void:
 	if OS.get_environment("ARMS_UNDERBARREL") == "1":
 		_output = "res://docs/screens/arms_audit_underbarrel/"
+	if OS.get_environment("ARMS_OUTPUT") != "":
+		_output = OS.get_environment("ARMS_OUTPUT").trim_suffix("/") + "/"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_output))
 	FileAccess.open(_output + ".gdignore", FileAccess.WRITE).close()
 	var overlay: CanvasLayer = CanvasLayer.new()
@@ -149,7 +151,8 @@ func _run_case(config: Dictionary, index: int) -> void:
 		Input.action_release("toggle_sight")
 		await get_tree().create_timer(Balance.SIGHT_SWITCH_SEC + 0.1).timeout
 		await _capture(id + "_" + String(config.label) + "_offset")
-	var ok: bool = _camera._arms.visible and _case_error < 0.002 and _length_error < 0.002 and _camera._viewmodel_id.begins_with(id)
+	var hands_visible: bool = _camera._viewmodel.visible if _camera._viewmodel is ViewmodelClips else _camera._arms.visible
+	var ok: bool = hands_visible and _case_error < 0.002 and _length_error < 0.002 and _camera._viewmodel_id.begins_with(id)
 	if not ok:
 		_failures += 1
 	_report.append({"id": id, "config": config.label, "mods": config.mods, "stance": _player.stance_key(), "grip_error_m": _case_error, "length_error_m": _length_error, "ok": ok})
