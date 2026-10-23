@@ -67,7 +67,7 @@ func _build() -> void:
 	left.add_child(_big("Загрузить", _show_load))
 	left.add_child(_big("Собрание (кооп)", _show_coop))
 	left.add_child(_big("Настройки", func() -> void: Pause.open_settings()))
-	left.add_child(_big("Настройка положения оружия", func() -> void:
+	left.add_child(_big("Оружие и хват рук", func() -> void:
 		Net.change_scene("res://scenes/debug/weapon_pose_lab.tscn", "Стенд настройки оружия")))
 	left.add_child(_big("Отладочные стенды", _show_labs))
 	left.add_child(_big("Выход", func() -> void: get_tree().quit()))
@@ -276,7 +276,7 @@ func _show_labs() -> void:
 		["Свет и атмосфера", "atmosphere_lab", "Часы, погода, солнце, тени, экспозиция и туман."],
 		["Попадания и эффекты", "impact_lab", "Материалы, пыль, обломки, искры и следы попаданий."],
 		["Зрение и слух противников", "perception_lab", "Настоящий мародёр: конус зрения, обнаружение, шум и память."],
-		["Положение оружия", "weapon_pose_lab", "Смещение и поворот каждой модели оружия у камеры."],
+		["Оружие и хват рук", "weapon_pose_lab", "Положение оружия, обе кисти и пальцы. Осмотр, проверка в движении и сохранение."],
 	]:
 		var path: String = "res://scenes/debug/%s.tscn" % String(entry[1])
 		var title: String = String(entry[0])

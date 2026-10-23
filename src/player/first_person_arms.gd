@@ -17,6 +17,9 @@ var max_grip_error: float = 0.0
 var max_length_error: float = 0.0
 var arms_clear: bool = true
 var collision_exclude: Array[RID] = []
+var grip_preview: bool = false
+var grip_profiles: Dictionary = {}
+var _hand_pose: HandGripPose = HandGripPose.new()
 
 
 func _ready() -> void:
@@ -39,6 +42,7 @@ func _ready() -> void:
 		var across: Vector3 = _rest[_bone(side + "HandIndex1")].origin - _rest[_bone(side + "HandPinky1")].origin
 		across = (across - forward * across.dot(forward)).normalized()
 		_frames[side] = Basis(across, forward, across.cross(forward))
+	_hand_pose.configure(skeleton, false)
 	visible = false
 
 
@@ -110,6 +114,19 @@ func _solve(side: String, marker: Node3D) -> void:
 	var contact_pose: Dictionary = marker.get_meta("contact_pose", {}) as Dictionary
 	if not contact_pose.is_empty():
 		target.origin += skeleton.global_basis.inverse() * _weapon.global_basis.orthonormalized() * WeaponGrips.vector(contact_pose.shift)
+	var frame: Basis = _frames[side]
+	var hand_basis: Basis = target.basis * frame.inverse() * _rest[hand].basis
+	var profiles: Dictionary = grip_profiles if grip_preview else HandGripProfiles.active()
+	var keys: Dictionary = _weapon.get_meta("hand_grip_keys", {}) as Dictionary
+	var key: String = String(keys.get(side, ""))
+	var adjustment: Dictionary = {}
+	var adjustment_weight: float = 1.0 - float((_actions.get(side, {}) as Dictionary).get("weight", 0.0))
+	if (profiles.get(key, {}) as Dictionary).has(side):
+		adjustment = HandGripProfiles.values(profiles, key, side)
+		var weapon_basis: Basis = (skeleton.global_basis.inverse() * _weapon.global_basis).orthonormalized()
+		var adjusted: Transform3D = HandGripPose.wrist_target(Transform3D(hand_basis, target.origin), weapon_basis, adjustment, adjustment_weight)
+		target.origin = adjusted.origin
+		hand_basis = adjusted.basis
 	var sign_x: float = 1.0 if side == "Right" else -1.0
 	var shoulder: Vector3 = shoulder_origin * Vector3(sign_x, 1.0, 1.0)
 	var upper_length: float = _rest[arm].origin.distance_to(_rest[forearm].origin)
@@ -131,8 +148,6 @@ func _solve(side: String, marker: Node3D) -> void:
 	var solved: Dictionary = ArmIKSolver.solve(shoulder, target.origin, upper_length, lower_length, pole, skeleton.global_transform, world, collision_exclude, global_position)
 	var elbow: Vector3 = solved.elbow
 	arms_clear = arms_clear and bool(solved.clear)
-	var frame: Basis = _frames[side]
-	var hand_basis: Basis = target.basis * frame.inverse() * _rest[hand].basis
 	var wrist_rotation: Basis = hand_basis * _rest[hand].basis.inverse()
 	_set_segment(arm, forearm, shoulder, elbow, wrist_rotation, true)
 	_set_segment(forearm, hand, elbow, solved.wrist as Vector3, wrist_rotation)
@@ -144,6 +159,8 @@ func _solve(side: String, marker: Node3D) -> void:
 		for joint: String in contact_pose.joints:
 			var q: Array = contact_pose.joints[joint]
 			skeleton.set_bone_pose_rotation(_bone(side + "Hand" + joint), Quaternion(float(q[0]), float(q[1]), float(q[2]), float(q[3])))
+	if not adjustment.is_empty():
+		_hand_pose.apply_fingers(side, adjustment, adjustment_weight)
 	max_grip_error = maxf(max_grip_error, skeleton.get_bone_global_pose(hand).origin.distance_to(target.origin))
 	var actual_arm: Vector3 = skeleton.get_bone_global_pose(arm).origin
 	var actual_elbow: Vector3 = skeleton.get_bone_global_pose(forearm).origin

@@ -103,6 +103,12 @@ var _mag_set: String = ""
 ## Перезарядка: какой магазин был в оружии и какой вставят (вид как Player.weapon_mag: "*" — штатный).
 var _reload_old: String = "*"
 var _reload_new: String = "*"
+## Ручной хват со стенда поверх стойки; во время действий плавно отдаёт руки клипу.
+var grip_preview: bool = false
+var grip_profiles: Dictionary = {}
+var _hand_keys: Dictionary = {}
+var _hand_pose: HandGripPose = HandGripPose.new()
+var _hand_weight: float = 1.0
 
 
 static func available(id: String) -> bool:
@@ -177,6 +183,8 @@ func _setup(id: String, mods: Dictionary) -> void:
 		if arm.find_bone("hand.L") >= 0 and arm.find_bone("forearm.L") >= 0 and arm.find_bone("upper_arm.L") >= 0:
 			_arm_skel = arm
 			_arm_bones = [arm.find_bone("upper_arm.L"), arm.find_bone("forearm.L"), arm.find_bone("hand.L")]
+	_hand_pose.configure(_arm_skel, true)
+	_hand_keys = HandGripProfiles.keys(id, mods)
 	var model_key: String = String(WeaponDb.weapon(id).get("model", ""))
 	_jam_case = model.find_child("Part_JamCase*", true, false) as Node3D
 	if _jam_case:
@@ -347,8 +355,10 @@ func equip() -> void:
 ## Опрос состояния игрока: перезарядка (начало по фронту таймера, отмена — в стойку), проверка
 ## магазина, выстрелы (затвор), счёт патронов на виду. Затем шаг клипа и затвор/подаватель поверх.
 func update(pl: Player, delta: float) -> void:
+	_hand_pose.restore()
 	if String(config.get("mechanism", "")) == "break_action":
 		_update_signal(pl, delta)
+		_apply_hand_grip(delta)
 		return
 	var reloading: bool = pl.reload_timer > 0.0 and pl._reload_kind != "clear"
 	if _clip == "":
@@ -473,6 +483,35 @@ func update(pl: Player, delta: float) -> void:
 	_inspect_turn(pl, delta)
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
 	_support_hand(_grip_w)
+	_apply_hand_grip(delta)
+
+
+func _apply_hand_grip(delta: float) -> void:
+	_hand_weight = move_toward(_hand_weight, 0.0 if is_busy() else 1.0, delta / BLEND_IN)
+	if _arm_skel == null or frame == null or _hand_weight <= 0.001:
+		return
+	var profiles: Dictionary = grip_profiles if grip_preview else HandGripProfiles.active()
+	if profiles.is_empty():
+		return
+	var relevant: bool = false
+	for side: String in HandGripProfiles.SIDES:
+		relevant = relevant or (profiles.get(String(_hand_keys.get(side, "")), {}) as Dictionary).has(side)
+	if not relevant:
+		return
+	_hand_pose.capture()
+	var weapon_basis: Basis = (_arm_skel.global_basis.inverse() * frame.global_basis).orthonormalized()
+	for side: String in HandGripProfiles.SIDES:
+		var key: String = String(_hand_keys.get(side, ""))
+		if not (profiles.get(key, {}) as Dictionary).has(side) or not _hand_pose.chains.has(side):
+			continue
+		var value: Dictionary = HandGripProfiles.values(profiles, key, side)
+		var bones: Array = _hand_pose.chains[side]
+		var wrist: Transform3D = _arm_skel.get_bone_global_pose(bones[2])
+		var target: Transform3D = HandGripPose.wrist_target(wrist, weapon_basis, value, _hand_weight)
+		# Нулевое смещение не требует пересчёта локтя.
+		if not (value.position as Vector3).is_zero_approx() or not (value.rotation as Vector3).is_zero_approx():
+			_hand_pose.move_arm(side, target)
+		_hand_pose.apply_fingers(side, value, _hand_weight)
 
 
 func weapon_action(action: String, _flag: bool = false, _duration: float = 0.0, _rounds_left: int = -1) -> void:

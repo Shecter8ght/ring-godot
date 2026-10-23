@@ -79,6 +79,7 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, _dur: float =
 	if mag != "*":
 		WeaponMods.set_magazine(root, id, mag, lod < 0)
 	WeaponGrips.fit(root, key, w, mods)
+	root.set_meta("hand_grip_keys", HandGripProfiles.keys(id, mods))
 	WeaponCondition.apply_visual(root)
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		if not child.has_meta("no_shadow"):

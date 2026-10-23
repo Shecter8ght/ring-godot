@@ -20,6 +20,8 @@ var stances: OptionButton
 var compare: CheckButton
 var use_in_game: CheckButton
 var status: Label
+var tabs: TabContainer
+var grip: HandGripPanel
 var _position: Array[SpinBox] = []
 var _rotation: Array[SpinBox] = []
 var _sliders: Array[HSlider] = []
@@ -43,46 +45,67 @@ func _ready() -> void:
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 8)
 	scroll.add_child(body)
-	_label(body, "Положение оружия", 28)
-	_label(body, "Выбери оружие и позу. Изменения видны сразу.", 16)
-	weapons = _options(body, "Оружие")
+	_label(body, "Оружие и хват рук", 24)
+	weapons = _options(body, "")
 	weapons.item_selected.connect(func(index: int) -> void: weapon_selected.emit(index))
-	poses = _options(body, "Настраиваемая поза")
+	var selectors: HBoxContainer = HBoxContainer.new()
+	selectors.add_theme_constant_override("separation", 10)
+	body.add_child(selectors)
+	var pose_body: VBoxContainer = VBoxContainer.new()
+	pose_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	selectors.add_child(pose_body)
+	var stance_body: VBoxContainer = VBoxContainer.new()
+	stance_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	selectors.add_child(stance_body)
+	poses = _options(pose_body, "Поза")
 	for title: String in ["От бедра", "Прицеливание", "Опущенное оружие"]:
 		poses.add_item(title)
 	poses.item_selected.connect(func(index: int) -> void: pose_selected.emit(index))
-	stances = _options(body, "Стойка игрока")
+	stances = _options(stance_body, "Стойка")
 	for title: String in ["Стоя", "Сидя", "Лёжа"]:
 		stances.add_item(title)
 	stances.item_selected.connect(func(index: int) -> void: stance_selected.emit(index))
-	_label(body, "Смещение от исходной позы · см", 19)
+	tabs = TabContainer.new()
+	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(tabs)
+	var weapon_body: VBoxContainer = VBoxContainer.new()
+	weapon_body.name = "Оружие"
+	weapon_body.add_theme_constant_override("separation", 8)
+	tabs.add_child(weapon_body)
+	grip = HandGripPanel.new()
+	grip.name = "Хват рук"
+	tabs.add_child(grip)
+	tabs.current_tab = 1
+	_label(weapon_body, "Смещение от исходной позы · см", 19)
 	for axis: int in range(3):
 		var title: String = ["Влево (−) / вправо (+)", "Ниже (−) / выше (+)", "Дальше (−) / ближе к глазам (+)"][axis]
-		_position.append(_axis(body, title, WeaponPoseProfiles.POSITION_LIMIT[axis] * 100.0, 0.1, " см"))
-	_label(body, "Поворот оружия · градусы", 19)
+		_position.append(_axis(weapon_body, title, WeaponPoseProfiles.POSITION_LIMIT[axis] * 100.0, 0.1, " см"))
+	_label(weapon_body, "Поворот оружия · градусы", 19)
 	for title: String in ["Наклон вверх / вниз", "Поворот в стороны", "Завал в стороны"]:
-		_rotation.append(_axis(body, title, WeaponPoseProfiles.ROTATION_LIMIT, 0.5, "°"))
+		_rotation.append(_axis(weapon_body, title, WeaponPoseProfiles.ROTATION_LIMIT, 0.5, "°"))
 	compare = CheckButton.new()
-	compare.text = "Исходная поза для сравнения · F7"
+	compare.text = "Исходное положение и хват · F7"
 	compare.focus_mode = Control.FOCUS_NONE
 	body.add_child(compare)
 	compare.toggled.connect(func(original: bool) -> void: comparison_changed.emit(original))
 	use_in_game = CheckButton.new()
 	use_in_game.text = "Использовать сохранённые позы в игре"
 	use_in_game.focus_mode = Control.FOCUS_NONE
-	body.add_child(use_in_game)
+	weapon_body.add_child(use_in_game)
 	use_in_game.toggled.connect(func(_on: bool) -> void: set_status("Есть несохранённые изменения"))
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	body.add_child(row)
+	weapon_body.add_child(row)
 	_button(row, "Сбросить эту позу", func() -> void: reset_requested.emit())
-	_button(row, "Загрузить сохранённое", func() -> void: restore_requested.emit())
-	_button(body, "Скопировать значения этой позы", func() -> void: copy_requested.emit())
+	_button(body, "Загрузить все сохранённые настройки", func() -> void: restore_requested.emit())
+	_button(body, "Скопировать значения выбранной вкладки", func() -> void: copy_requested.emit())
 	_button(body, "В главное меню", func() -> void: back_requested.emit())
-	_label(body, "Сохранение — для этого компьютера.\nИсходная поза: 0 см и 0°. У стены оружие отводится автоматически.", 14)
+	_label(body, "Сохранение — для этого компьютера.\nУ стены оружие отводится автоматически.", 14)
 	_button(frame, "Сохранить все настройки · Ctrl+S", func() -> void: save_requested.emit())
 	_button(frame, "Проверить в движении · F6", func() -> void: play_requested.emit())
 	status = _label(frame, "", 15)
+	status.max_lines_visible = 1
+	status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	status.add_theme_color_override("font_color", Color(1.0, 0.82, 0.5))
 
 
@@ -96,8 +119,11 @@ func _label(parent: Node, text: String, font_size: int) -> Label:
 
 
 func _options(parent: Node, title: String) -> OptionButton:
-	_label(parent, title, 15)
+	if not title.is_empty():
+		_label(parent, title, 15)
 	var options: OptionButton = OptionButton.new()
+	options.fit_to_longest_item = false
+	options.clip_text = true
 	options.custom_minimum_size.y = 34
 	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	options.focus_mode = Control.FOCUS_NONE
@@ -169,3 +195,4 @@ func show_values(value: Dictionary) -> void:
 
 func set_status(text: String) -> void:
 	status.text = text
+	status.tooltip_text = text

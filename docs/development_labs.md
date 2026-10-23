@@ -8,6 +8,11 @@
 | Свет и атмосфера | `scenes/debug/atmosphere_lab.tscn` | `LIGHT_LAB.cmd` |
 | Попадания и эффекты | `scenes/debug/impact_lab.tscn` | `IMPACT_LAB.cmd` |
 | Зрение и слух противников | `scenes/debug/perception_lab.tscn` | `PERCEPTION_LAB.cmd` |
+| Оружие и хват рук | `scenes/debug/weapon_pose_lab.tscn` | `HAND_GRIP_LAB.cmd` |
+
+У стенда оружия свои вкладки и камера осмотра кистей; управление и сохранение хвата —
+в [инструкции стенда рук](hand_grip_lab.md). Описанные ниже вкладки «Проверка / Параметры / Варианты»
+относятся к трём стендам света, попаданий и восприятия.
 
 ## Управление
 
