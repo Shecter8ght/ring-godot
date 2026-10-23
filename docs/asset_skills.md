@@ -8,6 +8,7 @@
 | `weapon-asset-texturing` | Общий реалистичный PBR/UCUPaint для предметов и растений; новое оружие и обвесы — одно рабочее состояние 100% |
 | `blender-vegetation-workflow` | Геометрия деревьев, кустов, травы и другой органической растительности |
 | `godot-asset-preparation` | Заказанная игровая подготовка: сетки, bake, LOD, collision, экспорт и проверенный импорт |
+| `npc-character-gear` | Персонажи NPC и снаряжение на теле: тело, одежда симуляцией ткани, броня, шлемы, рюкзаки, подсумки — форма, мятая ткань и стропы, текстуры ткани, игровая версия, подготовка к скелету (добавлен 2026-10-23, Claude) |
 
 ## Решения владельца
 
@@ -54,9 +55,15 @@ python -X utf8 tools/install_asset_skills.py --install --verify-installed
 
 Отдельные актуальные архивы для ручного переноса находятся в `_asset_src/asset_skill_build/weapon_quality_2026-10-15/`: `blender-asset-workflow.zip` (22 файла) и `weapon-asset-texturing.zip` (16 файлов), по одной корневой папке, без метадаты Codex. Общий `RING_Asset_Skills_Codex_Claude_Code.zip` пересобран из актуальных исходников. Упаковка, CRC и хеши проверены; загрузка в аккаунт не выполнялась.
 
+Добавление 2026-10-23: `npc-character-gear` (Claude) — опыт мародёра, брони, шлемов, рюкзаков и подсумков
+(`tools/npc_kit`). Установлен вручную, без `install_asset_skills.py` (в его `NAMES` — четыре прежних): у Claude Code —
+соединение (junction) `~/.claude/skills/npc-character-gear` на папку репозитория, у Codex — копия в `~/.codex/skills`;
+архив для профиля Claude — `Скиллы для Claude — загрузить в профиль/npc-character-gear.zip` (9 файлов, без `agents/`).
+Официальный `quick_validate.py` — проходит.
+
 ## Вызов
 
-Codex: `$blender-asset-workflow`, `$weapon-asset-texturing`, `$blender-vegetation-workflow`, `$godot-asset-preparation`.
+Codex: `$blender-asset-workflow`, `$weapon-asset-texturing`, `$blender-vegetation-workflow`, `$godot-asset-preparation`, `$npc-character-gear`.
 
 Claude Code: `/blender-asset-workflow`, `/weapon-asset-texturing`, `/blender-vegetation-workflow`, `/godot-asset-preparation`.
 
