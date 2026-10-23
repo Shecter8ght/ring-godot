@@ -33,8 +33,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kit_common as kc  # noqa: E402
 
 OUT = kc.WORK / "pouches"
-VERSION = "v01"
-GAP = 0.001                     # задняя сторона подсумка — над самой выступающей точкой брони
+VERSION = "v02"                 # v02 — подсумки v02 (мятая ткань, MOLLE с закрепками, строчки)
+GAP = 0.002                     # задняя сторона подсумка — над самой выступающей точкой брони (v02: мятая стенка)
 WALL_Z = 0.004                  # магазин в подсумке стоит на дне (как в pouches.py: WALL + 1,5 мм)
 
 # место: (имя, вид, параметры) — front: x и низ z; side: угол вокруг торса (0 — левый бок +X, −90 — перёд) и низ z;
@@ -58,10 +58,10 @@ LAYOUT = {
         ("Пояс левый", "side", (-50.0, 0.883)), ("Пояс правый", "side", (-130.0, 0.883))], "pairs": []},
 }
 TIER_RU = {"poor": "бомжовская", "mid": "средняя", "top": "крутая", "belt": "пояс"}
-POUCH_OBJS = {"rifle": ("Pouch_Rifle_Body", "Pouch_Rifle_Webbing", "Pouch_Rifle_Velcro", "Pouch_Rifle_Snaps", "Pouch_Rifle_Tab"),
-              "pistol": ("Pouch_Pistol_Body", "Pouch_Pistol_Webbing", "Pouch_Pistol_Velcro", "Pouch_Pistol_Snaps",
-                         "Pouch_Pistol_Tab"),
-              "big": ("Pouch_Big_Body", "Pouch_Big_Webbing", "Pouch_Big_Velcro", "Pouch_Big_Snaps", "Pouch_Big_Flap")}
+POUCH_PARTS = ("Body", "Molle", "Velcro", "Snaps", "Thread")
+POUCH_OBJS = {"rifle": tuple(f"Pouch_Rifle_{p}" for p in POUCH_PARTS + ("Tab",)),
+              "pistol": tuple(f"Pouch_Pistol_{p}" for p in POUCH_PARTS + ("Tab",)),
+              "big": tuple(f"Pouch_Big_{p}" for p in POUCH_PARTS + ("Flap",))}
 MAGS = ("Mag_VERAS54_30", "Mag_VERAS54_45", "Mag_Glock_17", "Mag_PM_8", "Mag_VERAS54_Drum60")
 
 
@@ -366,7 +366,8 @@ README = (
     "куда дотянется рука), пояс с подсумками вместо брони — 2 (06_Armor_Belt / 09_Pouches_Belt). Во всех местах — автоматный подсумок с магазином ВЕРАС-54 на 30. Места — пустышки\n"
     "<броня>_Место_N (стрелки: y — наружу, z — вверх). Коллекции 09_Pouches_<броня> и 06_Armor_<броня> включать\n"
     "вместе; «· смешанный» — пример: большой подсумок с барабаном на двух соседних местах спереди и два пистолетных\n"
-    "(Глок и ПМ) в одном месте. Смотреть в Rendered (Cycles). Скрипт: tools/npc_kit/pouch_places.py.\n")
+    "(Глок и ПМ) в одном месте. Подсумки — v02 (мятая ткань, MOLLE с закрепками, строчки; с текстурами — свой песочный\n"
+    "камуфляж «Барханы»). Смотреть в Rendered (Cycles). Скрипт: tools/npc_kit/pouch_places.py.\n")
 
 
 if __name__ == "__main__":

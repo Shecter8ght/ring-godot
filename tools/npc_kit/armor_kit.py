@@ -977,11 +977,15 @@ def webbing_rows(m: Mesh, frame, u0: float, u1: float, v_rows: list[float], base
 
 def strap(m: Mesh, frame: RibbonFrame, width: float, thick: float, base_off: float = 0.0, mat: int = 0,
           u0: float = 0.0, u1: float | None = None, step: float = 0.004, round_edges: bool = True,
-          taper: float = 0.0) -> None:
+          taper: float = 0.0, stations: list[float] | None = None, top_div: int = 0,
+          relief: Callable[[float, float], float] | None = None) -> None:
     """Лента (стропа, лямка, накладка): сечение со скруглёнными боками. taper — длина, на которой
-    концы сходят на нет (у мягкой накладки торцы скруглены, а не обрублены)."""
+    концы сходят на нет (у мягкой накладки торцы скруглены, а не обрублены). stations — свои сечения по длине
+    (вместо равного шага), top_div — точек поперёк плоских верха и низа (для продавленных строчек), relief(u, x) —
+    сдвиг верхней грани по высоте (строчка продавливает стропу)."""
     u1 = frame.length if u1 is None else u1
     nu = max(2, int(round((u1 - u0) / step)))
+    us = stations if stations is not None else [u0 + (u1 - u0) * i / nu for i in range(nu + 1)]
     K = 3 if round_edges else 1
     hw = width / 2
     # правая половина сечения: от верха через бок к низу; левая — зеркально
@@ -990,9 +994,13 @@ def strap(m: Mesh, frame: RibbonFrame, width: float, thick: float, base_off: flo
         a = math.pi / 2 - math.pi * k / (2 * K)
         half.append((hw - thick / 2 + thick / 2 * math.cos(a), thick / 2 + thick / 2 * math.sin(a)))
     full = half + [(-x, y) for x, y in half[::-1]]
+    if top_div:
+        xe = hw - thick / 2
+        bottom = [(xe - 2 * xe * k / (top_div + 1), 0.0) for k in range(1, top_div + 1)]
+        top = [(-xe + 2 * xe * k / (top_div + 1), thick) for k in range(1, top_div + 1)]
+        full = half + bottom + [(-x, y) for x, y in half[::-1]] + top
     rows, uvrows = [], []
-    for i in range(nu + 1):
-        u = u0 + (u1 - u0) * i / nu
+    for u in us:
         sc = 1.0
         if taper > 0:
             e = min(u - u0, u1 - u) / taper
@@ -1000,7 +1008,8 @@ def strap(m: Mesh, frame: RibbonFrame, width: float, thick: float, base_off: flo
         row, urow = [], []
         acc = 0.0
         for k, (x, y) in enumerate(full):
-            row.append(m.v(frame.point(u, x * (0.6 + 0.4 * sc), base_off + y * sc)))
+            dy = relief(u, x) if relief is not None and y >= thick * 0.999 else 0.0
+            row.append(m.v(frame.point(u, x * (0.6 + 0.4 * sc), base_off + y * sc + dy)))
             if k:
                 acc += math.dist(full[k], full[k - 1])
             urow.append((u, acc))

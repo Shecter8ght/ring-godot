@@ -455,3 +455,44 @@ def check_inside(cloth: BVHTree, verts: list[Vector], tol: float = 0.0008) -> tu
             key = tuple(round(c * 20) / 20 for c in p)
             where[key] = where.get(key, 0) + 1
     return bad, worst, where
+
+
+def stitch_line(m: ak.Mesh, pts: list[Vector], nrm: list[Vector], count: int | None = None, pitch: float = 0.0042,
+                dash: float = 0.0028, r: float = 0.00055, mat: int = 0) -> int:
+    """Строчка по линии шва: стежки-«черточки» (утолщены к середине, наполовину утоплены в ткань) с шагом pitch.
+    count — число стежков (для ключей формы — одинаковое во всех; положение — по доле длины линии)."""
+    acc = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        acc.append(acc[-1] + (b - a).length)
+    total = acc[-1]
+    if total < dash:
+        return 0
+    n_st = count if count is not None else max(1, int(total / pitch))
+    step = total / n_st
+
+    def at(s: float) -> tuple[Vector, Vector]:
+        s = min(max(s, 0.0), total)
+        i = max(0, min(len(acc) - 2, next((k for k in range(len(acc) - 1) if acc[k + 1] >= s), len(acc) - 2)))
+        t = (s - acc[i]) / max(acc[i + 1] - acc[i], 1e-12)
+        return pts[i].lerp(pts[i + 1], t), nrm[i].lerp(nrm[i + 1], t).normalized()
+    for k in range(n_st):
+        s0 = step * k + (step - dash) / 2
+        ring = []
+        for f, rad in ((0.0, 0.35), (0.5, 1.0), (1.0, 0.35)):
+            p, n = at(s0 + dash * f)
+            q, _ = at(s0 + dash * min(1.0, f + 0.1))
+            t = (q - p).normalized() if (q - p).length > 1e-9 else n.orthogonal().normalized()
+            if f == 1.0:
+                q0, _ = at(s0 + dash * 0.9)
+                t = (p - q0).normalized() if (p - q0).length > 1e-9 else t
+            b = t.cross(n).normalized()
+            c = p + n * (r * 0.35)
+            ring.append([m.v(c + (n * math.cos(2 * math.pi * j / 4) + b * math.sin(2 * math.pi * j / 4)) * r * rad)
+                         for j in range(4)])
+        m.grid(ring, [[(k * 0.01 + i * 0.003, j / 4) for j in range(4)] for i in range(3)], mat, closed_u=True)
+        for row, flip in ((ring[0], True), (ring[-1], False)):
+            c = m.v(sum((m.verts[i] for i in row), Vector()) / 4)
+            for j in range(4):
+                f = [row[j], row[(j + 1) % 4], c]
+                m.f(f[::-1] if flip else f, [(0, 0), (0.001, 0), (0.0005, 0.001)], mat)
+    return n_st

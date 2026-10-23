@@ -1,4 +1,10 @@
-"""NPC и игрок: подсумки для магазинов на броне (решения владельца 2026-10-22, docs/design/gear_v2.md) — форма v01.
+"""NPC и игрок: подсумки для магазинов на броне (решения владельца 2026-10-22, docs/design/gear_v2.md) — форма v02.
+
+v02 (владелец 2026-10-23: «качественную текстуру ткани, со складками, загибами, липучка хорошо прорисована, ремешок —
+подходящая текстура, сейчас слишком лоу-полишные, не детализированные; как у рюкзаков: мятая ткань, MOLLE с
+закрепками»): корпус мнётся (складки, заломы, бугры от магазина; под стропой и липучкой ткань ровнее, у окантовки
+и дна — тоже), стропа спереди и сзади — ряды MOLLE с закрепками, строчка геометрией (окантовка горловины, край
+поля липучки, края язычка, клапан большого), у язычка снизу — липучка-«крючок» своим материалом.
 
 Одинарные, открытые сверху, по образцу владельца (винтовочный подсумок: корпус, поперечная стропа спереди, MOLLE
 сзади); магазин держит не резинка со шнуром, а язычок на липучке с петлёй-тягой (при перезарядке — звук
@@ -21,6 +27,7 @@ from __future__ import annotations
 
 import math
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import bpy
@@ -29,14 +36,25 @@ from mathutils.bvhtree import BVHTree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import armor_kit as ak  # noqa: E402
+import garment as gm  # noqa: E402
 import kit_common as kc  # noqa: E402
+import soft_goods as sg  # noqa: E402
 
 OUT = kc.WORK / "pouches"
-VERSION = "v01"
+VERSION = "v02"
+SMOOTH_KEY = "Без складок"      # корпус до складок (по нему — кромки в текстуре, как у рюкзаков)
 WEAPONS = kc.ROOT / "assets" / "models" / "weapons"
 WALL = 0.0025                   # стенка подсумка (кордура с подкладкой)
 GAP = 0.003                     # зазор магазина до стенки
 TAB_N = 48                      # отрезков вдоль язычка — одинаково во всех ключах формы
+TAB_STITCHES = 44               # стежков по краю язычка — одинаково во всех ключах формы
+# конец язычка: слой липучки-«крючка» снизу пришит строчкой «коробка с крестом» (владелец 2026-10-23: «выстрочка,
+# которая держит дополнительный слой с крючками, должна выделяться») — нитка толще, стропа под стежками продавлена
+HOOK_MAX = 0.040                # слой «крючка» от конца язычка — не длиннее, м (короче — по полю «петли»)
+BOX_END = 0.004                 # коробка строчки — от конца язычка и от начала слоя, м
+BOX_INSET = 0.0035              # коробка от края ленты, м
+BOX_PITCH = 0.0032              # шаг стежка коробки (~8 на дюйм, как у прочной строчки), м
+GROOVE = (0.00035, 0.0005)      # строчка продавливает стропу: глубина, полуширина, м
 
 
 # ---------- магазины ----------
@@ -135,7 +153,7 @@ def round_rect(w: float, t: float, r: float, n: int) -> list[tuple[float, float]
     return out
 
 
-def open_box(m: ak.Mesh, W: float, T: float, Hp: float, r: float, n: int = 72, rb: float = 0.008) -> None:
+def open_box(m: ak.Mesh, W: float, T: float, Hp: float, r: float, n: int = 120, rb: float = 0.008) -> None:
     """Корпус: стенка WALL снаружи и подкладка внутри, низ скруглён радиусом rb, по верху — окантовка валиком."""
     def ring(w: float, t: float, rr: float, z: float) -> list[Vector]:
         return [Vector((x, y, z)) for x, y in round_rect(w, t, rr, n)]
@@ -146,8 +164,9 @@ def open_box(m: ak.Mesh, W: float, T: float, Hp: float, r: float, n: int = 72, r
         z = rb * (1 - math.cos(a))
         rows.append(ring(W - 2 * ins, T - 2 * ins, max(r - ins, 0.002), z))
         zs.append(z)
-    for k in range(1, 13):
-        z = rb + (Hp - rb) * k / 12
+    nh = max(12, int((Hp - rb) / 0.0028))                # шаг ~3 мм по высоте — под складки
+    for k in range(1, nh + 1):
+        z = rb + (Hp - rb) * k / nh
         rows.append(ring(W, T, r, z))
     br = WALL / 2 + 0.0008                               # окантовка: валик поверх стенки
     for k in range(1, 7):
@@ -178,6 +197,68 @@ def open_box(m: ak.Mesh, W: float, T: float, Hp: float, r: float, n: int = 72, r
             m.f(f[::-1] if flip else f, uv[::-1] if flip else uv)
 
 
+def rect_out(a: float, b: float, a0: float, a1: float, b0: float, b1: float) -> float:
+    return math.hypot(max(a0 - a, 0.0, a - a1), max(b0 - b, 0.0, b - b1))
+
+
+def soften(m: ak.Mesh, W: float, T: float, Hp: float, r: float, flat: list[tuple[float, float, float, float]],
+           seed: float) -> None:
+    """Мятая ткань корпуса: складки, заломы и бугры от магазина — смещение по горизонтальной нормали стенки; подкладка
+    смещается вместе со стенкой (поле берётся на наружной стенке — толщина та же). У окантовки и дна ткань ровная,
+    под стропой и липучкой спереди (flat — прямоугольники x0, x1, z0, z1) — тоже, сзади (к броне) — почти ровная."""
+    hx, hy = W / 2 - r, T / 2 - r
+    fold = sg.folds(Vector((0.25, 0.3, 1.0)), 0.034, 0.0024, seed, cover=0.6)
+    low = sg.folds(Vector((0.1, 0.0, 1.0)), 0.016, 0.0010, seed + 1.0, cover=0.55)
+    cr = sg.creases(0.026, 0.0014, seed + 2.0, stretch=Vector((0.8, 0.8, 1.3)))
+    lp = sg.lumps(0.045, 0.0011, seed + 3.0)
+    out = []
+    for p in m.verts:
+        qx, qy = max(-hx, min(hx, p.x)), max(-hy, min(hy, p.y))
+        n = Vector((p.x - qx, p.y - qy, 0.0))
+        if n.length < 1e-9:
+            out.append(p)
+            continue
+        n.normalize()
+        q = Vector((qx, qy, p.z)) + n * r
+        k = gm.smoothstep((Hp - 0.013 - p.z) / 0.010) * gm.smoothstep((p.z - 0.004) / 0.012)
+        if n.y > 0.7 and flat:
+            k *= 0.55 * gm.smoothstep(min(rect_out(q.x, q.z, *z) for z in flat) / 0.006)
+        elif n.y < -0.7:
+            k *= 0.2
+        bottom = gm.smoothstep((0.035 - p.z) / 0.025)
+        h = k * (fold(q) + cr(q) + lp(q) + bottom * low(q))
+        if (p - q).dot(n) < -WALL / 2:                     # подкладка внутрь почти не мнётся — к магазину зазор
+            h = max(h, -0.0005)
+        out.append(p + n * h)
+    m.verts = out
+
+
+def rim_stitch(th: ak.Mesh, W: float, T: float, r: float, z: float) -> None:
+    """Строчка окантовки горловины снаружи (над ней ткань не мнётся)."""
+    ring = [Vector((x, y, z)) for x, y in round_rect(W + 0.0002, T + 0.0002, r, 240)]
+    ring.append(ring[0])
+    hx, hy = W / 2 - r, T / 2 - r
+    nrm = []
+    for pnt in ring:
+        n = Vector((pnt.x - max(-hx, min(hx, pnt.x)), pnt.y - max(-hy, min(hy, pnt.y)), 0.0))
+        nrm.append(n.normalized() if n.length > 1e-9 else Vector((0, 1, 0)))
+    sg.stitch_line(th, ring, nrm)
+
+
+def rect_stitch(th: ak.Mesh, frame, x0: float, x1: float, z0: float, z1: float, off: float, inset: float = 0.0022) -> None:
+    """Строчка по краю прямоугольной нашивки (поле липучки) на плоской стороне."""
+    a, b, c, d = (x0 + inset, z0 + inset), (x1 - inset, z0 + inset), (x1 - inset, z1 - inset), (x0 + inset, z1 - inset)
+    pts, nrm = [], []
+    for (u0, v0), (u1, v1) in ((a, b), (b, c), (c, d), (d, a)):
+        for k in range(24):
+            u, v = u0 + (u1 - u0) * k / 24, v0 + (v1 - v0) * k / 24
+            pts.append(frame.point(u, v, off))
+            nrm.append(frame.normal(u, v))
+    pts.append(pts[0])
+    nrm.append(nrm[0])
+    sg.stitch_line(th, pts, nrm)
+
+
 class Plane:
     """Плоская сторона корпуса: лицевая (+y) или задняя (−y); u — x, v — z."""
 
@@ -195,14 +276,16 @@ def rect(x0: float, x1: float, z0: float, z1: float, r: float) -> list[tuple[flo
     return ak.rounded_poly([(x0, z0), (x1, z0), (x1, z1), (x0, z1)], [r] * 4)
 
 
-def molle_back(web: ak.Mesh, metal: ak.Mesh, T: float, Hp: float, xs: tuple[float, ...]) -> None:
-    """Сзади — вертикальные стропы MOLLE с кнопкой внизу (продеваются в ряды брони)."""
+def molle_back(molle: ak.Mesh, metal: ak.Mesh, th: ak.Mesh, T: float, Hp: float, xs: tuple[float, ...]) -> None:
+    """Сзади — вертикальные стропы MOLLE (плоская тканая стропа с закрепками, продеваются в ряды брони), внизу —
+    кнопка, вверху — пришиты строчкой-«коробкой»."""
     back = Plane(-T / 2, -1.0)
     for x in xs:
-        ak.padded_panel(web, ak.OffsetFrame(back, 0.0011), rect(x - WEB_W / 2, x + WEB_W / 2, 0.006, Hp - 0.006, 0.002),
-                        0.0022, bulge=0.0, binding=0.0, step=0.003)
-        p = back.point(x, 0.016, 0.0024)
+        ak.webbing_rows(molle, ak.RotFrame(back, 90.0, x + WEB_W / 2, 0.0), 0.006, Hp - 0.006, [0.0], 0.0005)
+        p = back.point(x, 0.016, 0.0026)
         ak.torus(metal, p, Vector((0, -1, 0)), 0.0042, 0.0015, seg=16, sides=6)
+        ak.torus(metal, p + Vector((0, -0.0012, 0)), Vector((0, -1, 0)), 0.0022, 0.0013, seg=12, sides=6)
+        rect_stitch(th, back, x - WEB_W / 2, x + WEB_W / 2, Hp - 0.024, Hp - 0.008, 0.0024)
 
 
 WEB_W = 0.025
@@ -314,26 +397,78 @@ def path_normals(pts: list[Vector]) -> list[Vector]:
     return nrm
 
 
-def tab_mesh(path: list[Vector], width: float, mag_center: Vector) -> ak.Mesh:
-    """Язычок (стропа двойная, 2,8 мм) с липучкой-«крючком» снизу на конце и петлёй-тягой."""
+def tab_lines(L: float, width: float, hook_len: float) -> tuple[list, list]:
+    """Строчки язычка в координатах ленты (u — вдоль, v — поперёк): ровные по краям до коробки; коробка с крестом
+    на конце (держит слой «крючка»)."""
+    ve = width / 2 - 0.0023
+    ua, ub = L - hook_len + BOX_END * 0.5, L - BOX_END
+    vb = width / 2 - BOX_INSET
+    edges = [((0.006, -ve), (ua - 0.003, -ve)), ((0.006, ve), (ua - 0.003, ve))]
+    box = [((ua, -vb), (ub, -vb)), ((ub, -vb), (ub, vb)), ((ub, vb), (ua, vb)), ((ua, vb), (ua, -vb)),
+           ((ua, -vb), (ub, vb)), ((ua, vb), (ub, -vb))]
+    return edges, box
+
+
+def groove(lines: list) -> Callable[[float, float], float]:
+    """Продавленность стропы строчками: гаусс по расстоянию до ближайшей линии (u, v)."""
+    depth, w = GROOVE
+
+    def f(u: float, v: float) -> float:
+        d = 1.0
+        for (u0, v0), (u1, v1) in lines:
+            du, dv = u1 - u0, v1 - v0
+            t = max(0.0, min(1.0, ((u - u0) * du + (v - v0) * dv) / max(du * du + dv * dv, 1e-12)))
+            d = min(d, math.hypot(u - u0 - du * t, v - v0 - dv * t))
+        return -depth * math.exp(-(d / w) ** 2)
+    return f
+
+
+def tab_mesh(path: list[Vector], width: float, mag_center: Vector, hook_len: float) -> ak.Mesh:
+    """Язычок (стропа двойная, 2,8 мм) с пришитым снизу на конце слоем липучки-«крючка» и петлёй-тягой."""
     pts = resample(path, TAB_N)
     nrm = path_normals(pts)
     for _ in range(3):
         nrm = [nrm[0]] + [(nrm[i - 1] + nrm[i] * 2 + nrm[i + 1]).normalized() for i in range(1, len(nrm) - 1)] + [nrm[-1]]
     rib = ak.RibbonFrame(pts, nrm)
+    L = rib.length
     m = ak.Mesh()
-    ak.strap(m, rib, width, 0.0028, step=rib.length / TAB_N, taper=0.0)
-    # липучка-«крючок» снизу конца: своя лента по последним 4 см
-    u0 = rib.length - 0.042
-    end = [rib.point(u0 + 0.04 * k / 12, 0.0, 0.0) for k in range(13)]
-    rib2 = ak.RibbonFrame(end, [rib.normal(u0 + 0.04 * k / 12, 0.0) for k in range(13)])
+    edges, box = tab_lines(L, width, hook_len)
+    relief = groove(edges + box)
+    # сечения: по длине равным шагом, у конца — часто (поперечные строчки коробки); поперёк — через ~0,5 мм
+    u_dense = L - hook_len - 0.004
+    st = [u_dense * i / TAB_N for i in range(TAB_N)] + [u_dense + (L - u_dense) * i / 92 for i in range(93)]
+    ak.strap(m, rib, width, 0.0028, taper=0.0, stations=st, top_div=int(width / 0.0005), relief=relief)
+    # слой липучки-«крючка» снизу конца (своя лента)
+    u0 = L - hook_len
+    end = [rib.point(u0 + (hook_len - 0.001) * k / 12, 0.0, 0.0) for k in range(13)]
+    rib2 = ak.RibbonFrame(end, [rib.normal(u0 + (hook_len - 0.001) * k / 12, 0.0) for k in range(13)])
     ak.strap(m, rib2, width - 0.004, 0.0012, base_off=-0.0013, step=rib2.length / 12, mat=1)
-    # петля-тяга на конце
+
+    def sew(line: tuple, count: int, off: float, r: float, dash: float, below: bool = False) -> None:
+        (ua, va), (ub, vb) = line
+        n_pts = 40
+        uv = [(ua + (ub - ua) * k / n_pts, va + (vb - va) * k / n_pts) for k in range(n_pts + 1)]
+        sgn = -1.0 if below else 1.0
+        pts_ = [rib.point(u, v, off + (0.0 if below else relief(u, v))) for u, v in uv]
+        sg.stitch_line(m, pts_, [rib.normal(u, v) * sgn for u, v in uv], count=count, r=r, dash=dash, mat=2)
+    # ровная строчка по краям (двойная стропа прошита) — до коробки
+    for line in edges:
+        sew(line, TAB_STITCHES, 0.0028, 0.00055, 0.0028)
+    # коробка с крестом: нитка толще и стежок длиннее; сверху — по стропе, снизу — по слою «крючка»
+    for line in box:
+        (ua, va), (ub, vb) = line
+        n_st = max(2, round(math.hypot(ub - ua, vb - va) / BOX_PITCH))   # по размерам слоя — одно во всех ключах формы
+        sew(line, n_st, 0.0028, 0.0008, 0.0026)
+        sew(line, n_st, -0.0013, 0.0007, 0.0026, below=True)
+    # петля-тяга: шнур, концы зашиты между слоями двойной стропы у самого конца (их держит коробка строчки)
     p, tan, nn = rib._at(rib.length)
     side = nn.cross(tan).normalized()
-    loop = [p + tan * (0.004 + 0.012 * math.sin(math.pi * k / 12)) + nn * (0.002 + 0.006 * math.sin(math.pi * k / 12))
-            + side * (0.008 * math.cos(math.pi * k / 12)) for k in range(13)]
-    ak.tube(m, loop, 0.0022, sides=6)
+    loop = []
+    for k in range(25):
+        a = math.pi * k / 24
+        ext = -0.007 + 0.021 * math.sin(a)                   # внутри ленты — по середине толщины, снаружи — приподнята
+        loop.append(p + tan * ext + nn * (0.0014 + 0.0045 * max(0.0, ext) / 0.014) + side * (0.0075 * math.cos(a)))
+    ak.tube(m, loop, 0.0015, mat=2, sides=10)                 # шнур кручёный — материал нитки
     return m
 
 
@@ -345,7 +480,20 @@ def materials() -> dict:
         "webbing": kc.clay("Pouch_Webbing", (0.12, 0.12, 0.10), 0.8),
         "velcro": kc.clay("Pouch_Velcro", (0.06, 0.06, 0.05), 0.95),
         "metal": kc.clay("Pouch_Metal", (0.30, 0.30, 0.30), 0.35),
+        "molle": kc.clay("Pouch_Molle", (0.12, 0.12, 0.10), 0.8),
+        "hook": kc.clay("Pouch_Hook", (0.05, 0.05, 0.04), 0.7),
+        "thread": kc.clay("Pouch_Thread", (0.14, 0.13, 0.10), 0.75),
     }
+
+
+def build_body(body: ak.Mesh, col, mats, prefix: str, W: float, T: float, Hp: float, r: float,
+               flat: list[tuple[float, float, float, float]], seed: float) -> None:
+    """Корпус: смятый (soften), гладкая форма — ключом «Без складок»."""
+    smooth = list(body.verts)
+    soften(body, W, T, Hp, r, flat, seed)
+    flat_mesh = ak.Mesh()
+    flat_mesh.verts, flat_mesh.faces, flat_mesh.uvs, flat_mesh.mats = smooth, body.faces, body.uvs, body.mats
+    body.build(f"{prefix}_Body", col, [mats["cordura"]], shape_keys={SMOOTH_KEY: flat_mesh})
 
 
 def cavity(mags: list[bpy.types.Object], Hp: float) -> tuple[float, float]:
@@ -381,32 +529,45 @@ def build_open_pouch(col, mats, prefix: str, mags: dict, Hp: float, keys: dict) 
     for mg in mags.values():
         mg.location.z = WALL + 0.0015
         bpy.context.view_layer.update()
-    body, web, vel, metal = ak.Mesh(), ak.Mesh(), ak.Mesh(), ak.Mesh()
+    body, molle, vel, metal, th = ak.Mesh(), ak.Mesh(), ak.Mesh(), ak.Mesh(), ak.Mesh()
     open_box(body, W, T, Hp, r)
     front = Plane(T / 2, 1.0)
-    # спереди: поперечная стропа внизу и поле липучки-«петли» вверху (на него ложится язычок)
-    ak.padded_panel(web, ak.OffsetFrame(front, 0.0011), rect(-W / 2 + r * 0.7, W / 2 - r * 0.7, Hp * 0.12, Hp * 0.12 + WEB_W,
-                                                             0.002), 0.0022, bulge=0.0, binding=0.0, step=0.003)
-    vz0, vz1 = Hp * 0.12 + WEB_W + 0.008, Hp - 0.010
+    # спереди: ряд MOLLE внизу и поле липучки-«петли» вверху (на него ложится язычок)
+    bx = W / 2 - r * 0.7
+    bz = Hp * 0.12
+    ak.webbing_rows(molle, front, -bx, bx, [bz], 0.0005)
+    small = Hp < 0.08                                     # у пистолетного поле «петли» выше — иначе крючкам мало места
+    vz0, vz1 = bz + WEB_W + (0.005 if small else 0.008), Hp - (0.008 if small else 0.010)
     vw = min(0.030, W / 2 - r * 0.7)
     ak.padded_panel(vel, ak.OffsetFrame(front, 0.0009), rect(-vw, vw, vz0, vz1, 0.003), 0.0016, bulge=0.0, binding=0.0,
-                    step=0.003)
-    molle_back(web, metal, T, Hp, (-W / 4, W / 4) if W > 0.06 else (0.0,))
-    body.build(f"{prefix}_Body", col, [mats["cordura"]])
-    web.build(f"{prefix}_Webbing", col, [mats["webbing"]])
+                    step=0.002)
+    rect_stitch(th, front, -vw, vw, vz0, vz1, 0.0017)
+    rim_stitch(th, W, T, r, Hp - 0.0055)
+    molle_back(molle, metal, th, T, Hp, (-W / 4, W / 4) if W > 0.06 else (0.0,))
+    build_body(body, col, mats, prefix, W, T, Hp, r, [(-bx, bx, bz, bz + WEB_W), (-vw, vw, vz0, vz1)],
+               seed=len(prefix) * 1.7 + Hp * 10.0)
+    molle.build(f"{prefix}_Molle", col, [mats["molle"]])
     vel.build(f"{prefix}_Velcro", col, [mats["velcro"]])
     metal.build(f"{prefix}_Snaps", col, [mats["metal"]])
+    th.build(f"{prefix}_Thread", col, [mats["thread"]])
     # язычок: основа — по первому магазину, ключи — по остальным и «Открыт»
+    # конец язычка — у низа поля «петли» (крючки закрывают поле); под магазин выше основы (на 45) конец на 12 мм выше
     tab_w = min(0.030, W - 0.012)
-    z_end = (vz0 + vz1) / 2 - 0.004
+    z_end = vz0 + 0.002
+
+    def top(mg: bpy.types.Object) -> float:
+        return max((mg.matrix_world @ v.co).z for v in mg.data.vertices)
+    dz = {key: (0.012 if mg is not None and top(mg) > top(first) + 0.002 else 0.0) for key, mg in keys.items()}
+    hook_len = min(HOOK_MAX, vz1 - z_end - max(dz.values(), default=0.0) - 0.002)
     base_path = tab_path(first, T, Hp, 0.0, z_end)
     center = Vector((0.0, 0.0, Hp))
-    base = tab_mesh(base_path, tab_w, center)
+    base = tab_mesh(base_path, tab_w, center, hook_len)
     length = sum((b - a).length for a, b in zip(base_path, base_path[1:]))
     shapes = {}
     for key, mg in keys.items():
-        shapes[key] = tab_mesh(tab_path(mg, T, Hp, 0.0, z_end + (0.012 if mg is not None else 0.0), length), tab_w, center)
-    base.build(f"{prefix}_Tab", col, [mats["webbing"], mats["velcro"]], shape_keys=shapes)
+        shapes[key] = tab_mesh(tab_path(mg, T, Hp, 0.0, z_end + dz[key], length), tab_w, center, hook_len)
+    kc.log(f"  {prefix}: слой «крючка» {hook_len * 1000:.0f} мм, поле «петли» {(vz1 - vz0) * 1000:.0f} мм")
+    base.build(f"{prefix}_Tab", col, [mats["webbing"], mats["hook"], mats["thread"]], shape_keys=shapes)
     rep = {"W": W, "T": T, "H": Hp}
     for name, mg in mags.items():
         rep[f"зазор {name}"] = check(mg, Win, Tin, max(r - WALL, 0.002), WALL, Hp)
@@ -427,19 +588,23 @@ def build_big_pouch(col, mats, prefix: str, drum: bpy.types.Object) -> dict:
     bpy.context.view_layer.update()
     pts = [drum.matrix_world @ v.co for v in drum.data.vertices]
     zt = max(p.z for p in pts)
-    body, web, vel, metal = ak.Mesh(), ak.Mesh(), ak.Mesh(), ak.Mesh()
-    open_box(body, W, T, Hp, r, n=96)
+    body, molle, vel, metal, th = ak.Mesh(), ak.Mesh(), ak.Mesh(), ak.Mesh(), ak.Mesh()
+    open_box(body, W, T, Hp, r, n=160)
     front = Plane(T / 2, 1.0)
-    ak.padded_panel(web, ak.OffsetFrame(front, 0.0011), rect(-W / 2 + r * 0.7, W / 2 - r * 0.7, 0.020, 0.020 + WEB_W, 0.002),
-                    0.0022, bulge=0.0, binding=0.0, step=0.003)
+    bx = W / 2 - r * 0.7
+    ak.webbing_rows(molle, front, -bx, bx, [0.020], 0.0005)
     vz0, vz1 = 0.060, Hp - 0.012
     ak.padded_panel(vel, ak.OffsetFrame(front, 0.0009), rect(-0.045, 0.045, vz0, vz1, 0.003), 0.0016, bulge=0.0,
-                    binding=0.0, step=0.003)
-    molle_back(web, metal, T, Hp, (-W / 3, 0.0, W / 3))
-    body.build(f"{prefix}_Body", col, [mats["cordura"]])
-    web.build(f"{prefix}_Webbing", col, [mats["webbing"]])
+                    binding=0.0, step=0.002)
+    rect_stitch(th, front, -0.045, 0.045, vz0, vz1, 0.0017)
+    rim_stitch(th, W, T, r, Hp - 0.0055)
+    molle_back(molle, metal, th, T, Hp, (-W / 3, 0.0, W / 3))
+    build_body(body, col, mats, prefix, W, T, Hp, r, [(-bx, bx, 0.020, 0.020 + WEB_W), (-0.045, 0.045, vz0, vz1)],
+               seed=9.3)
+    molle.build(f"{prefix}_Molle", col, [mats["molle"]])
     vel.build(f"{prefix}_Velcro", col, [mats["velcro"]])
     metal.build(f"{prefix}_Snaps", col, [mats["metal"]])
+    th.build(f"{prefix}_Thread", col, [mats["thread"]])
 
     # клапан: полоса шириной корпуса по профилю барабана в плоскости x = 0 (через горловину)
     dbvh = mag_bvh(drum)
@@ -482,19 +647,34 @@ def build_big_pouch(col, mats, prefix: str, drum: bpy.types.Object) -> dict:
             nrm = [nrm[0]] + [(nrm[i - 1] + nrm[i] * 2 + nrm[i + 1]).normalized() for i in range(1, len(nrm) - 1)] + [nrm[-1]]
         rib = ak.RibbonFrame(p2, nrm)
         m = ak.Mesh()
-        ak.padded_panel(m, ak.OffsetFrame(NormRib(rib), 0.002),
+        fr = ak.OffsetFrame(NormRib(rib), 0.002)
+        bumps = sg.lumps(0.04, 0.0008, 21.0)
+
+        def relief(u: float, v: float) -> float:          # бугры в координатах клапана — одинаковые в ключах формы
+            return bumps(Vector((u, v, 0.0))) * gm.smoothstep(min(u, L0 - u) / 0.02)
+        ak.padded_panel(m, fr,
                         ak.rounded_poly([(0.0, -W / 2 + 0.004), (L0, -W / 2 + 0.012), (L0, W / 2 - 0.012), (0.0, W / 2 - 0.004)],
-                                        [0.002, 0.012, 0.012, 0.002]), 0.004, bulge=0.0, binding=0.006, step=0.006)
+                                        [0.002, 0.012, 0.012, 0.002]), 0.004, bulge=0.0, binding=0.006, step=0.004,
+                        relief=relief)
+        # строчка: по бокам и по концу клапана, 3 мм от края (число стежков — одно в ключах формы)
+        line = ([(0.03 + (L0 - 0.045) * k / 40, -W / 2 + 0.010 + 0.008 * k / 40) for k in range(41)]
+                + [(L0 - 0.015, -W / 2 + 0.018 + (W - 0.036) * k / 30) for k in range(1, 31)]
+                + [(L0 - 0.015 - (L0 - 0.045) * k / 40, W / 2 - 0.018 + 0.008 * k / 40) for k in range(1, 41)])
+        sg.stitch_line(m, [fr.point(u, v, 0.0021) for u, v in line], [fr.normal(u, v) for u, v in line], count=90, mat=1)
         L = rib.length
         p, tan, nn = rib._at(L)
         side = nn.cross(tan).normalized()
-        loop = [p + tan * (0.004 + 0.014 * math.sin(math.pi * k / 12)) + nn * (0.004 + 0.006 * math.sin(math.pi * k / 12))
-                + side * (0.012 * math.cos(math.pi * k / 12)) for k in range(13)]
-        ak.tube(m, loop, 0.0025, sides=6)
+        loop = []                                           # петля-тяга: концы зашиты в край клапана
+        for k in range(25):
+            a = math.pi * k / 24
+            loop.append(p + tan * (-0.008 + 0.026 * math.sin(a)) + nn * (0.004 + 0.005 * math.sin(a) ** 2)
+                        + side * (0.012 * math.cos(a)))
+        ak.tube(m, loop, 0.0022, sides=10)
         return m
     base = flap(path)
     L = sum((b - a).length for a, b in zip(path, path[1:]))
-    base.build(f"{prefix}_Flap", col, [mats["cordura"]], shape_keys={"Открыт": flap(open_path(path[0], T, Hp, L))})
+    base.build(f"{prefix}_Flap", col, [mats["cordura"], mats["thread"]],
+               shape_keys={"Открыт": flap(open_path(path[0], T, Hp, L))})
     return {"W": W, "T": T, "H": Hp, "зазор барабан": check(drum, Win, Tin, r - WALL, WALL, Hp)}
 
 
