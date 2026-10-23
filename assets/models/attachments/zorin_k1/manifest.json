@@ -1,0 +1,34 @@
+{
+  "source": "E:\\Models Blender\\WEAPONS\\ПМ — модели и текстуры\\21_ПМ_в_манере_ВЕРАС_v01_на_проверку\\03_Коллиматор\\PM_ReflexSight_on_mount_Worn_v01.blend",
+  "triangles": {
+    "Body": 4784,
+    "Body_LOD1": 1195,
+    "Lens": 90,
+    "Reticle": 168
+  },
+  "axis": "X left, Y up, Z forward",
+  "bounds_m": {
+    "min": [
+      -0.0176,
+      -0.0062,
+      -0.0233
+    ],
+    "max": [
+      0.0176,
+      0.0369,
+      0.023
+    ]
+  },
+  "states": [
+    100
+  ],
+  "texture_size": 2048,
+  "origin": "середина башмака на плоскости верха планки (ставится на любую планку Пикатинни)",
+  "lens_center_m": [
+    -0.0,
+    0.02554,
+    0.02035
+  ],
+  "sight_h": 0.02554,
+  "clamp_m": 0.0463
+}

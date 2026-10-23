@@ -21,6 +21,10 @@ static func build(id: String) -> Node3D:
 		return WeaponModels.build("grenade")
 	var att := WeaponDb.attachment(id)
 	if not att.is_empty():
+		# обвес со своей моделью (глушитель ПМ, ЗОРИН К-1) — сама модель
+		var own: Node3D = WeaponMods.standalone(id)
+		if own:
+			return own
 		# на пустом узле — в точке крепления первого ствола, куда он встаёт по интерфейсу
 		var r := Node3D.new()
 		r.name = "Item_" + id

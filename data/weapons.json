@@ -374,7 +374,7 @@
     "SCAV"
    ],
    "code": "PM",
-   "desc": "Надёжный резервный пистолет. Компактный, но слабый патрон и почти нет места для обвеса.",
+   "desc": "Надёжный резервный пистолет. Компактный, но слабый патрон; из обвеса — глушитель на резьбовой хвостовик и коллиматор ЗОРИН К-1 на крепление затвора.",
    "weapon": {
     "slot": "sidearm",
     "class": "PISTOL",
@@ -421,14 +421,15 @@
      "reload_empty": 2.4
     },
     "mounts": {
-     "muzzle": "THREAD_PM"
+     "muzzle": "THREAD_PM",
+     "optic_primary": "PM_SLIDE_K1"
     },
     "mag_if": "MAG_PM",
     "default_mag": "mag_918_8",
     "sound": "shot_hg_01",
     "reload_sound": "reload_pistol",
     "cycle_sound": "",
-    "asset": "res://assets/models/weapons/pm/pm.glb",
+    "asset": "res://assets/models/weapons/pm/pm.gltf",
     "chamber_capacity": 1,
     "rig": {
      "ads_z": 0.36,
@@ -3665,7 +3666,8 @@
     "ergo": 0,
     "reliability": 1
    },
-   "flavor": "Малый запас дисциплинирует: считай выстрелы и держи ещё один магазин рядом."
+   "flavor": "Малый запас дисциплинирует: считай выстрелы и держи ещё один магазин рядом.",
+   "model": "res://assets/models/weapons/pm/pm_mag.gltf"
   },
   "mag_919_17": {
    "name": "Магазин Glock 9×19 на 17",
@@ -4532,6 +4534,99 @@
    },
    "flavor": "Точка экономит доли секунды вблизи — обычно именно их и не хватает в дверях."
   },
+  "optic_zorin_k1": {
+   "name": "Коллиматор ЗОРИН К-1",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 12000,
+   "stack": 1,
+   "weight": 0.09,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "short": "К-1",
+   "attach": {
+    "type": "OPTIC_RED_DOT",
+    "fits": [
+     "RAIL_TOP"
+    ],
+    "look": "red_dot",
+    "model": {
+     "scene": "res://assets/models/attachments/zorin_k1/zorin_k1.glb",
+     "offset": [
+      0,
+      0,
+      0
+     ],
+     "sight_h": 0.02554
+    },
+    "fx": {
+     "ads_spread": 0.72,
+     "ergo": -2
+    },
+    "role": "PRIMARY",
+    "zoom": 0,
+    "aim_k": 1.12,
+    "desc": "Открытый коллиматор с башмаком под планку Пикатинни: на любое оружие с верхней планкой, на ПМ — через крепление к затвору.",
+    "clamp_m": 0.046
+   },
+   "flavor": "Точка над стволом: вблизи вскидываешься быстрее, чем успеваешь найти мушку.",
+   "code": "K1"
+  },
+  "mount_pm_k1": {
+   "name": "Крепление К-1 на ПМ",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 4500,
+   "stack": 1,
+   "weight": 0.05,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "POLICE",
+    "MILITARY"
+   ],
+   "short": "Креп. ПМ",
+   "attach": {
+    "type": "ADAPTER_RAIL",
+    "fits": [
+     "PM_SLIDE_K1"
+    ],
+    "look": "mount_pm",
+    "clamp_m": 0.02,
+    "low": true,
+    "fx": {
+     "ergo": -1
+    },
+    "provides": {
+     "rail": {
+      "if": "RAIL_TOP",
+      "pos": [
+       0.0,
+       0.00689,
+       0.05491
+      ],
+      "rail_z": [
+       -0.0269,
+       0.0269
+      ]
+     }
+    },
+    "asset": "res://assets/models/attachments/mount_pm_k1/mount_pm_k1.glb"
+   },
+   "desc": "Седло с двумя винтами на затвор ПМ и короткая планка Пикатинни над ним: под ЗОРИН К-1 и любой мини-коллиматор с таким башмаком.",
+   "flavor": "Пистолет не рассчитан на оптику; крепление с этим не спорит — просто садится на затвор.",
+   "code": "K1-PM"
+  },
   "optic_offset_rd_01": {
    "name": "Угловой мини-коллиматор 45°",
    "cat": "mod",
@@ -5112,9 +5207,18 @@
     "size_m": [
      0.017,
      0.14
-    ]
+    ],
+    "model": {
+     "scene": "res://assets/models/attachments/supp_pm/supp_pm.glb",
+     "offset": [
+      0,
+      0,
+      0
+     ],
+     "length_m": 0.161
+    }
    },
-   "flavor": "Съёмный глушитель ПМ; модель и движение детали подготовлены для RING.",
+   "flavor": "Съёмный глушитель ПМ: накручивается на резьбовой хвостовик ствола.",
    "code": "PM-SUP"
   },
   "muzzle_supp_545_01": {
@@ -7139,6 +7243,26 @@
   "PM_BASE": {
    "weapon": "wpn_hg_01",
    "mods": {},
+   "ammo": [
+    [
+     "ammo_918_pst",
+     1
+    ]
+   ],
+   "dur": [
+    70,
+    100
+   ],
+   "sight": "primary",
+   "mag": "mag_918_8"
+  },
+  "PM_TAC": {
+   "weapon": "wpn_hg_01",
+   "mods": {
+    "optic_primary": "mount_pm_k1",
+    "optic_primary/rail": "optic_zorin_k1",
+    "muzzle": "muzzle_supp_pm_01"
+   },
    "ammo": [
     [
      "ammo_918_pst",

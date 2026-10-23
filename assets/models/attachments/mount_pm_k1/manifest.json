@@ -1,0 +1,40 @@
+{
+  "source": "E:\\Models Blender\\WEAPONS\\ПМ — модели и текстуры\\21_ПМ_в_манере_ВЕРАС_v01_на_проверку\\03_Коллиматор\\PM_ReflexSight_on_mount_Worn_v01.blend",
+  "triangles": {
+    "Body": 1790
+  },
+  "axis": "X left, Y up, Z forward",
+  "bounds_m": {
+    "min": [
+      -0.0101,
+      -0.0168,
+      0.028
+    ],
+    "max": [
+      0.0164,
+      0.0069,
+      0.0818
+    ]
+  },
+  "states": [
+    100
+  ],
+  "texture_size": 1024,
+  "origin": "сокет optic_primary ПМ (корень крепления сдвинут на k1_mount_game_m − сокет)",
+  "shift_m": [
+    -0.0,
+    -0.00185,
+    0.05491
+  ],
+  "provides_rail": {
+    "pos": [
+      0.0,
+      0.00689,
+      0.05491
+    ],
+    "rail_z": [
+      -0.0269,
+      0.0269
+    ]
+  }
+}

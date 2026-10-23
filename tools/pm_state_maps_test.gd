@@ -1,8 +1,8 @@
 extends Node
 ## Вид оружия один (решение владельца 2026-10-19): при любой прочности модель показывает карты, принятые
 ## в Blender; износ по виду (маски _wear, ручные карты 60/20, налёт) удалён.
-## ПМ: сталь и щёчка — карты 100, магазин — его 60, обычные материалы модели (жировых следов нет — шейдер не
-## нужен). ВЕРАС-54 v13: сталь, полимер и магазин — шейдер жировых следов (_coat). Прежних файлов износа нет.
+## ПМ «пошарпанный» v01 (2026-10-20): сталь, щёчка, магазин, патроны и глушитель — карты pm_<Атлас>_100_* с маской
+## плёнки _coat — шейдер жировых следов. ВЕРАС-54 v13: то же на стали, полимере и магазине. Прежних файлов износа нет.
 
 const PM: String = "wpn_hg_01"
 const VERAS: String = "wpn_ar_01"
@@ -51,14 +51,26 @@ func _ready() -> void:
 		var grip: String = _look(model, "Grip")
 		var mag: String = _look(model, "Magazine")
 		print("PM ", dur, " steel=", steel, " grip=", grip, " mag=", mag)
-		_check("ПМ %d %%: сталь — карты 100" % int(dur), steel == "pm_pm_Steel_100_albedo.png")
-		_check("ПМ %d %%: щёчка — карты 100" % int(dur), grip == "pm_pm_Grip_100_albedo.png")
-		_check("ПМ %d %%: магазин — его карты 60" % int(dur), mag.find("Magazine_60") >= 0)
-		_check("ПМ %d %%: без шейдера следов" % int(dur), not model.get_meta("wear_shader", false))
+		_check("ПМ %d %%: сталь — шейдер следов на картах 100" % int(dur), steel == "shader")
+		_check("ПМ %d %%: щёчка — шейдер следов" % int(dur), grip == "shader")
+		_check("ПМ %d %%: магазин — шейдер следов" % int(dur), mag == "shader")
+		_check("ПМ %d %%: шейдер следов включён" % int(dur), model.get_meta("wear_shader", false))
+		var coated: int = 0
+		for n: Node in model.find_children("*", "MeshInstance3D", true, false):
+			var mi: MeshInstance3D = n as MeshInstance3D
+			for s: int in range(mi.mesh.get_surface_count() if mi.mesh else 0):
+				var sm: ShaderMaterial = mi.get_active_material(s) as ShaderMaterial
+				if sm and sm.shader.resource_path == WeaponCondition.WEAR_SHADER and sm.get_shader_parameter("coat_tex") != null:
+					coated += 1
+		_check("ПМ %d %%: карта следов у шейдерных поверхностей (%d)" % [int(dur), coated], coated >= 4)
 		model.queue_free()
+	for atlas: String in ["Steel", "Grip", "Magazine", "Ammo", "Suppressor"]:
+		for kind: String in ["albedo", "normal", "orm", "coat"]:
+			var path: String = "res://assets/models/weapons/pm/pm_%s_100_%s.png" % [atlas, kind]
+			_check("карта ПМ есть: " + path.get_file(), ResourceLoader.exists(path))
 	_check("ключ модели ПМ не зависит от прочности", WeaponCondition.model_key(PM, {}, 100.0) == WeaponCondition.model_key(PM, {}, 3.0))
 	_check("у ПМ нет ручных карт состояний", not WeaponDb.weapon(PM).has("state_maps"))
-	for path: String in ["res://assets/models/weapons/pm/states/pm_Steel_60_albedo.png",
+	for path: String in ["res://assets/models/weapons/pm/states/pm_Steel_60_albedo.png", "res://assets/models/weapons/pm/pm.glb",
 			"res://assets/models/weapons/pm/pm_pm_Steel_100_wear.png", "res://assets/textures/weapon_wear/wear_detail.png",
 			"res://assets/models/weapons/veras54/veras54_Steel_100_wear.png", "res://assets/models/attachments/lumar_h1/lumar_20_base_color.png"]:
 		_check("файла износа нет: " + path.get_file(), not ResourceLoader.exists(path))

@@ -320,6 +320,12 @@ static func _adapter(pivot: Node3D, m: Dictionary, a: Dictionary) -> void:
 		"mount_rail_ext":
 			var rail2: Array = spec.get("rail_z", [-0.02, 0.1])
 			_rail_z(pivot, top.y - RAIL_H, top.z + (float(rail2[0]) + float(rail2[1])) * 0.5, float(rail2[1]) - float(rail2[0]))
+		"mount_pm":
+			# крепление к затвору ПМ (ЗОРИН К-1): седло на затворе и короткая планка над ним
+			var rail3: Array = spec.get("rail_z", [-0.027, 0.027])
+			var length: float = float(rail3[1]) - float(rail3[0])
+			WeaponModels._cbox(pivot, Vector3(0, top.y * 0.5 - RAIL_H * 0.5, top.z), Vector3(0.026, maxf(top.y - RAIL_H, 0.002), length * 0.4), al, 0.001)
+			_rail_z(pivot, top.y - RAIL_H, top.z + (float(rail3[0]) + float(rail3[1])) * 0.5, length)
 
 
 static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
@@ -365,11 +371,13 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 			_bipod(root, m)
 
 
-## Обвес готовой моделью: a.model = {scene, offset [x, y, z] от точки, length_m — длина дульной насадки}.
+## Обвес готовой моделью: a.model = {scene, offset [x, y, z] от точки, length_m — длина дульной насадки,
+## sight_h — у прицела высота центра линзы над началом модели (линия прицеливания)}.
 ## Сетки Body / Body_LOD1 (вид со стороны), карты лежат рядом с моделью:
 ## <имя>_100_{base_color,roughness,metallic,normal}.png (вид один при любой прочности, решение владельца
 ## 2026-10-19), жировые следы рук — <имя>_100_coat.png, если есть. Начало модели — место посадки:
-## у рукоятки — нижняя плоскость планки, у глушителя — задний торец на оси ствола.
+## у рукоятки — нижняя плоскость планки, у глушителя — задний торец на оси ствола, у ЗОРИН К-1 — корень
+## крепления на затворе ПМ. Остальные сетки модели (Lens — стекло, Reticle — светящаяся метка) — как в файле.
 static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	var spec: Dictionary = a.model
 	var path: String = String(spec.get("scene", ""))
@@ -392,6 +400,9 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		var body: MeshInstance3D = raw as MeshInstance3D
 		body.material_override = material
 		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
+	if spec.has("sight_h"):
+		# прицел-модель (ЗОРИН К-1): линия прицеливания — через центр линзы
+		root.set_meta("sight_h", at.y + float(spec.sight_h))
 	if spec.has("length_m"):
 		# дульная насадка: штатный тормоз снят, срез — на её торце
 		if bool(m.get("replace", false)):
@@ -400,6 +411,24 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		if bool((a.get("fx", {}) as Dictionary).get("suppressed", false)):
 			root.set_meta("suppressed", true)
 	return true
+
+
+## Обвес готовой моделью сам по себе (значок, предмет на полу): середина модели — в начале узла.
+## null — у обвеса нет модели или файла.
+static func standalone(id: String) -> Node3D:
+	var a: Dictionary = WeaponDb.attachment(id)
+	if a.is_empty() or not a.has("model"):
+		return null
+	var root: Node3D = Node3D.new()
+	root.name = "Item_" + id
+	if not _model_part(root, {"pos": Vector3.ZERO, "lod": 0}, a):
+		root.free()
+		return null
+	var center: Vector3 = ItemModels.bounds(root).get_center()
+	for child: Node in root.get_children():
+		if child is Node3D:
+			(child as Node3D).position -= center
+	return root
 
 
 ## Материал модели обвеса по её картам (общий на все экземпляры); нет карт — null.

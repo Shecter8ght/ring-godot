@@ -203,11 +203,18 @@ tools/pm_grip_rebuild.cmd [shots]                             # ПМ, руки �
                                                               # или поз перезарядки (PM_FPS_ReloadPoses_v01.blend): проверка хвата, правая → в файл поз, клипы PM_FPS_Clips_v02.blend
                                                               # (режимы по отдельности — tools/pm_grip_lock.py: build|check|reload|poses_sync_right|poses_stills|stills)
 tools/godot.cmd --headless res://tools/pm_test.tscn           # ПМ: детали, LOD, патронник 8+1/8, прерывания и атомарный глушитель
-tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # вид оружия один (2026-10-19): ПМ при любой прочности — карты 100 из pm.glb, ВЕРАС-54 —
-                                                              # шейдер жировых следов (_coat); файлов прежнего износа (_wear, 60/20, wear_detail) нет
-# ПМ v11 в игру (без прицела): blender … --python tools/pm_v11_build_lp.py (сетка) → tools/pm_v11_build_lp_supp.py (глушитель) →
-#   tools/pm_v11_markers.py → tools/pm_v11_bake.py -- 100|mag|ammo|supp [--channels …] (карты; AO: -- 100 --channels ao --tag _ao) →
-#   python -X utf8 tools/pm_v11_pack_maps.py (→ pm/states — исходники экспорта) → blender … --python tools/export_pm_v11.py → --headless --import
+tools/godot.cmd --headless res://tools/pm_state_maps_test.tscn # вид оружия один (2026-10-19): ПМ при любой прочности — карты «пошарпанный» v01 (pm_<Атлас>_100_*)
+                                                              # с маской плёнки _coat, ВЕРАС-54 — то же; файлов прежнего износа (_wear, 60/20, wear_detail) нет
+# ПМ «пошарпанный» v01 в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/pm_worn/build_lp.py (сетка ~26 тыс. +
+#   обойма с патронами ~5 тыс., глушитель 2 тыс.; хвостовик ствола) → tools/pm_worn/bake.py -- pm|mag|ammo|supp|ao (карты и плёнка со стеков
+#   принятого файла 21_…; глушитель — из сборки) → tools/pm_worn/pack.py (→ assets/models/weapons/pm/pm_<Атлас>_100_*, карты глушителя-обвеса) →
+#   tools/pm_worn/export.py (pm.gltf + LOD1, pm_mag.gltf — обойма, attachments/supp_pm) → tools/pm_worn/sight.py -- geometry|bake|export [zorin_k1|mount_pm_k1]
+#   (ЗОРИН К-1 — прицел на любую планку → attachments/zorin_k1; крепление к затвору ПМ — переходник → attachments/mount_pm_k1) → --import →
+#   python -X utf8 tools/pm_worn/imports.py → --import; сверка со сборкой в студии владельца — tools/pm_worn/compare.py (docs/screens/pm_worn_compare*.png);
+#   описание docs/assets/pm_game_worn_v01.md
+tools/godot.cmd --headless res://tools/pm_worn_check.tscn   # ПМ «пошарпанный» в движке: риг и метки pm.gltf, плёнка, бюджеты (≤ 40 тыс. в руках с К-1 и глушителем),
+                                                              # обойма, К-1, крепление и глушитель как предметы и на полу, К-1 на планке автомата, набор PM_TAC
+                                                              # (метка, линия прицеливания); с окном (--windowed --resolution 1600x900) — снимки pm_worn_*
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
 # ВЕРАС-54 v13 в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/veras54_v13/game_lp.py (сетка ~33 тыс. + патроны ~5 тыс.)

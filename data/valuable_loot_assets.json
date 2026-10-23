@@ -230,35 +230,35 @@
     "print": "COOLING"
   },
   "part_pm_barrel": {
-    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "source": "weapon:assets/models/weapons/pm/pm.gltf",
     "group": "parts",
     "selector": [
       "Barrel_Mesh"
     ]
   },
   "part_pm_slide": {
-    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "source": "weapon:assets/models/weapons/pm/pm.gltf",
     "group": "parts",
     "selector": [
       "Slide_Mesh"
     ]
   },
   "part_pm_hammer": {
-    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "source": "weapon:assets/models/weapons/pm/pm.gltf",
     "group": "parts",
     "selector": [
       "Hammer_Mesh"
     ]
   },
   "part_pm_trigger": {
-    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "source": "weapon:assets/models/weapons/pm/pm.gltf",
     "group": "parts",
     "selector": [
       "Trigger_Mesh"
     ]
   },
   "part_pm_safety": {
-    "source": "weapon:assets/models/weapons/pm/pm.glb",
+    "source": "weapon:assets/models/weapons/pm/pm.gltf",
     "group": "parts",
     "selector": [
       "Safety_Mesh"

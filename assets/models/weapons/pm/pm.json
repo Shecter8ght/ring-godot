@@ -1,16 +1,17 @@
 {
- "schema": "pm_v11_game",
- "source": "E:\\Games\\RING-godot\\_asset_src\\pm_game\\lp\\PM_Game_LP_v01.blend",
+ "schema": "pm_worn_game",
+ "source": "E:\\Games\\RING-godot\\_asset_src\\pm_worn_game\\lp\\PM_Worn_LP.blend",
  "triangles": {
-  "first_person": 23972,
-  "lod1": 5419
+  "first_person": 32931,
+  "lod1": 4890,
+  "pistol": 25896
  },
  "axes": "+Z дуло, +Y верх, −X правая сторона стрелка; начало — рукоятка (как v5)",
  "markers_game_m": {
   "Muzzle": [
    -0.0,
    0.06303,
-   0.13071
+   0.1435
   ],
   "MuzzleSuppressed": [
    -0.0,
@@ -60,11 +61,21 @@
    -0.0227
   ]
  },
+ "k1_mount_game_m": [
+  -0.0,
+  0.07415,
+  0.05891
+ ],
+ "k1_lens_game_m": [
+  -0.0,
+  0.10844,
+  0.08143
+ ],
  "materials": [
   "GAME • Steel • 100",
   "GAME • Grip • 100",
-  "GAME • Magazine • 60",
-  "GAME • Ammo • 60",
-  "GAME • Suppressor • 60"
+  "GAME • Magazine • 100",
+  "GAME • Ammo • 100",
+  "GAME • Suppressor • 100"
  ]
 }

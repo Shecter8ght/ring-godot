@@ -7,6 +7,7 @@ extends Node3D
 ## Витрина → сборка (оружие и обвес по точкам крепления).
 const KITS := {
 	"pistol": "HG_03_TAC",
+	"pm": "PM_TAC",
 	"rifle": "AR_04_TAC",
 	"rifle_b": "AR_06_MARKSMAN",
 	"rifle_c": "AR_06_PATROL",
@@ -16,6 +17,7 @@ const KITS := {
 ## Крупные планы: точка на модели, куда смотреть, и отступ камеры.
 const CLOSEUPS := {
 	"pistol": [["optic", Vector3(0, 0.08, 0.0)], ["muzzle", Vector3(0, 0.06, 0.2)], ["under", Vector3(0, 0.0, 0.1)]],
+	"pm": [["optic", Vector3(0, 0.09, 0.05)], ["muzzle", Vector3(0, 0.063, 0.19)]],
 	"rifle": [["optic", Vector3(0, 0.1, 0.05)], ["muzzle", Vector3(0, 0.052, 0.66)], ["under", Vector3(0, 0.0, 0.36)], ["stock", Vector3(0, 0.03, -0.2)]],
 	"rifle_b": [["optic", Vector3(0, 0.11, 0.05)], ["muzzle", Vector3(0, 0.052, 0.61)], ["under", Vector3(0, 0.0, 0.36)]],
 	"rifle_c": [["optic", Vector3(0, 0.11, 0.05)]],
@@ -53,7 +55,7 @@ func _ready() -> void:
 	add_child(cam)
 	cam.current = true
 	for kit in KITS:
-		var weapon := String(kit).split("_")[0]
+		var weapon := "pistol" if String(kit) == "pm" else String(kit).split("_")[0]
 		var pr := WeaponDb.preset(String(KITS[kit]))
 		var mods: Dictionary = pr.get("mods", {})
 		var w := WeaponModels.build(String(pr.weapon), mods)

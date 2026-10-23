@@ -583,7 +583,7 @@ func _detail_pass() -> void:
 
 
 const VSS_GLB: String = "res://assets/models/weapons/vss_textured/VSS_Vintorez_Picatinny.glb"
-const PM_GLB: String = "res://assets/models/weapons/pm/pm.glb"
+const PM_GLB: String = "res://assets/models/weapons/pm/pm.gltf"
 const GLOCK_GLB: String = "res://assets/models/weapons/glock17/glock17.glb"
 ## Модели оружия: +Z — дуло, +Y — верх, -X — правый бок. Стоя в стойке: дуло вверх, левый бок к зрителю (+Z).
 const RIFLE_STANDING: Basis = Basis(Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0))
