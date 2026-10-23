@@ -481,36 +481,62 @@ def bake_target(m: bpy.types.Material, im: bpy.types.Image) -> None:
     nt.nodes.active = node
 
 
-def stage_bake() -> None:
-    import ucup  # noqa: F401  (стеки UCUPaint исходника)
-    bpy.ops.wm.open_mainfile(filepath=str(GAME))
+def reveal(o: bpy.types.Object) -> None:
+    """Объект видим и выбираем: его коллекции не скрыты и не исключены (в файлах вещей видна одна вещь)."""
+    o.hide_viewport = False
+    o.hide_set(False)
+
+    def walk(lc) -> bool:
+        if o.name in lc.collection.objects:
+            lc.exclude = False
+            lc.hide_viewport = False
+            lc.collection.hide_viewport = False
+            return True
+        hit = False
+        for ch in lc.children:
+            if walk(ch):
+                lc.exclude = False
+                lc.hide_viewport = False
+                lc.collection.hide_viewport = False
+                hit = True
+        return hit
+    walk(bpy.context.view_layer.layer_collection)
+
+
+def bake_set(items: list[tuple[bpy.types.Object, tuple[str, ...], int, float, str]], maps: Path,
+             ao_distance: float = 0.08) -> dict[str, bpy.types.Material]:
+    """Запекание игровых деталей с исходника: items — (игровая деталь, исходники, размер карты, луч м, имя карт).
+    Цвет и металл/шероховатость — EMIT каналов стека (route), нормали — касательные; AO — по самим игровым деталям
+    (касания соседних деталей), исходники в нём не участвуют. Карты: <имя>_{color,normal,orm}.png; материал
+    детали — GAME_<деталь> с этими картами (просмотр как в Godot)."""
+    import numpy as np
     S = bpy.context.scene
     kc.gpu_cycles(16)
     bk = S.render.bake
     bk.margin_type = "EXTEND"
     bk.normal_space = "TANGENT"
-    lows = [bpy.data.objects[n] for n in PARTS]
     for o in bpy.data.objects:
         if o.type == "MESH":
             o.hide_render = False
+    for o, srcs, *_ in items:
+        for so in [o] + [bpy.data.objects[n] for n in srcs]:
+            reveal(so)
     images: dict[tuple[str, str], bpy.types.Image] = {}
-    mats = {o.name: game_material(o) for o in lows}
-    bpy.data.objects["G_Boot_R"].data.materials.clear()
-    bpy.data.objects["G_Boot_R"].data.materials.append(mats["G_Boot"])
+    mats = {o.name: game_material(o) for o, *_ in items}
     saved: dict = {}
     for ch in ("mrh", "color", "normal"):
         route(ch, saved)
-        for o in lows:
-            srcs, size, ray = PARTS[o.name]
+        for o, srcs, size, ray, _ in items:
             im = bpy.data.images.new(f"{o.name}_{ch}", size, size, alpha=False, float_buffer=(ch == "normal"))
             im.colorspace_settings.name = "sRGB" if ch == "color" else "Non-Color"
             images[(o.name, ch)] = im
             bake_target(mats[o.name], im)
             bpy.ops.object.select_all(action="DESELECT")
-            for s in srcs:
-                so = bpy.data.objects[s]
+            for name in srcs:
+                so = bpy.data.objects[name]
                 so.hide_set(False)
                 so.select_set(True)
+            o.hide_set(False)
             o.select_set(True)
             bpy.context.view_layer.objects.active = o
             S.cycles.samples = SAMPLES[ch]
@@ -518,14 +544,13 @@ def stage_bake() -> None:
                                 cage_extrusion=ray * 0.6, max_ray_distance=ray * 1.6, margin=max(4, size // 256))
             kc.log("  запечено", o.name, ch, "←", ", ".join(srcs))
     route("normal", saved)
-    # AO — по самой игровой сетке (касания одежды, тени под воротом и в складках); исходники не участвуют
-    highs = [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("G_")]
-    for o in highs:
+    lows = {o.name for o, *_ in items}
+    hidden = [o for o in bpy.data.objects if o.type == "MESH" and o.name not in lows and not o.hide_render]
+    for o in hidden:
         o.hide_render = True
     S.world = S.world or bpy.data.worlds.new("AO")
-    S.world.light_settings.distance = 0.08
-    for o in lows:
-        size = PARTS[o.name][1]
+    S.world.light_settings.distance = ao_distance
+    for o, _, size, _, _ in items:
         im = bpy.data.images.new(f"{o.name}_ao", size, size, alpha=False)
         im.colorspace_settings.name = "Non-Color"
         images[(o.name, "ao")] = im
@@ -536,15 +561,15 @@ def stage_bake() -> None:
         S.cycles.samples = SAMPLES["ao"]
         bpy.ops.object.bake(type="AO", use_selected_to_active=False, margin=max(4, size // 256))
         kc.log("  AO", o.name)
-    MAPS.mkdir(parents=True, exist_ok=True)
-    import numpy as np
-    for o in lows:
-        size = PARTS[o.name][1]
+    for o in hidden:
+        o.hide_render = False
+    maps.mkdir(parents=True, exist_ok=True)
+    for o, _, size, _, map_name in items:
         px = {}
         for ch in ("color", "normal", "mrh", "ao"):
-            a = np.empty(size * size * 4, np.float32)
-            images[(o.name, ch)].pixels.foreach_get(a)
-            px[ch] = a.reshape(size, size, 4)
+            arr = np.empty(size * size * 4, np.float32)
+            images[(o.name, ch)].pixels.foreach_get(arr)
+            px[ch] = arr.reshape(size, size, 4)
         # нормали «внутрь» (луч попал в изнанку тонкой оболочки — язычок, шнурки, веко): чёрные пятна — ровными
         n = px["normal"][..., :3] * 2.0 - 1.0
         bad = n[..., 2] < 0.25
@@ -561,14 +586,21 @@ def stage_bake() -> None:
         im.pixels.foreach_set(orm.ravel())
         out["orm"] = im
         for ch, img in out.items():
-            path = MAPS / f"{o.name[2:].lower()}_{ch}.png"
-            img.filepath_raw = str(path)
+            img.filepath_raw = str(maps / f"{map_name}_{ch}.png")
             img.file_format = "PNG"
             img.save()
         preview_material(mats[o.name], out)
-        kc.log("  карты", o.name, "→", MAPS)
-    for o in highs:
-        o.hide_render = False
+        kc.log("  карты", o.name, "→", maps)
+    return mats
+
+
+def stage_bake() -> None:
+    import ucup  # noqa: F401  (стеки UCUPaint исходника)
+    bpy.ops.wm.open_mainfile(filepath=str(GAME))
+    items = [(bpy.data.objects[n], srcs, size, ray, n[2:].lower()) for n, (srcs, size, ray) in PARTS.items()]
+    mats = bake_set(items, MAPS)
+    bpy.data.objects["G_Boot_R"].data.materials.clear()
+    bpy.data.objects["G_Boot_R"].data.materials.append(mats["G_Boot"])
     simple_materials()
     kc.save(GAME)
 
@@ -618,6 +650,12 @@ LODS = ((1, 0.40), (2, 0.12))           # решение владельца 2026
 def stage_lods() -> None:
     """LOD1 и LOD2 — упрощение LOD0 с той же развёрткой и картами (у дальних ресницы не нужны)."""
     bpy.ops.wm.open_mainfile(filepath=str(GAME))
+    make_lods(skip_far={"G_Eyelashes"})
+    kc.save(GAME)
+
+
+def make_lods(skip_far: set[str] = frozenset()) -> None:
+    """LOD1 и LOD2 из коллекции GAME_LOD0: упрощение с той же развёрткой и картами; skip_far — нет на LOD2."""
     lod0 = [o for o in bpy.data.collections[COL].objects if o.type == "MESH"]
     for lvl, ratio in LODS:
         col = kc.collection(f"GAME_LOD{lvl}")
@@ -625,7 +663,7 @@ def stage_lods() -> None:
             bpy.data.objects.remove(o)
         total = 0
         for src in lod0:
-            if lvl == 2 and src.name == "G_Eyelashes":
+            if lvl == 2 and src.name in skip_far:
                 continue
             o = src.copy()
             o.data = src.data.copy()
@@ -637,7 +675,6 @@ def stage_lods() -> None:
             apply_mods(o)
             total += tris(o)
         kc.log(f"LOD{lvl}: {total} треугольников")
-    kc.save(GAME)
 
 
 README = (
