@@ -72,6 +72,11 @@ func _apply() -> void:
 		var light: Light3D = node as Light3D
 		if not light or light.name == &"TvGlow" or String(light.name).begins_with("Emergency") or daylight(light):
 			continue
+		# Блики нескольких ламп зала складывались; заполняющая подсветка заменяет только рассеянный свет.
+		if light.name == &"HallFiringArea":
+			light.light_specular = 0.0
+		elif String(light.name).begins_with("Hall") or light.name == &"RangeFloodlight":
+			light.light_specular = minf(light.light_specular, float(Balance.SHELTER_LIGHTING.hall_specular))
 		if not light.has_meta("normal_energy"):
 			light.set_meta("normal_energy", light.light_energy)
 		light.light_energy = float(light.get_meta("normal_energy")) if enabled else 0.0
@@ -104,6 +109,9 @@ func _refresh_reflections() -> void:
 	_refreshing = true
 	# После рубильника обновить отражения один раз; постоянно рендерить шесть cubemap не нужно.
 	for node: Node in probes.get_children():
+		# Зал отражал освещённые поверхности без их теней, в отличие от остальных комнат.
+		if node.name == &"Probe_BoilerHall":
+			(node as ReflectionProbe).enable_shadows = true
 		(node as ReflectionProbe).update_mode = ReflectionProbe.UPDATE_ALWAYS
 	await get_tree().process_frame
 	if is_instance_valid(probes):

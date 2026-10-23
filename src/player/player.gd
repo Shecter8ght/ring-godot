@@ -1572,6 +1572,7 @@ func _start_reload(spec: Dictionary) -> void:
 		# досыпать россыпью в отстёгиваемый магазин — дольше, чем сменить
 		if kind == "topup" and not WeaponDb.weapon(weapon_id).has("internal_mag"):
 			t *= Balance.RELOAD_TOPUP_K
+			_say("Заряженных магазинов нет — снаряжаю магазин патронами")
 		# магазин не в подсумке, а в рюкзаке за спиной — доставать дольше
 		elif kind == "swap" and not inventory.rig_has_mag(weapon_slot):
 			t *= float(Balance.RIG.backpack_reload_k)
