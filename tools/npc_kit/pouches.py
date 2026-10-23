@@ -25,6 +25,7 @@ blender --background --factory-startup --python-exit-code 1 --python tools/npc_k
 """
 from __future__ import annotations
 
+import json
 import math
 import sys
 from collections.abc import Callable
@@ -55,6 +56,8 @@ BOX_END = 0.004                 # коробка строчки — от кон�
 BOX_INSET = 0.0035              # коробка от края ленты, м
 BOX_PITCH = 0.0032              # шаг стежка коробки (~8 на дюйм, как у прочной строчки), м
 GROOVE = (0.00035, 0.0005)      # строчка продавливает стропу: глубина, полуширина, м
+TAB_FRONT = 0.0032              # язычок над лицевой стенкой (м): слой «крючка» лежит на поле «петли», а не в нём
+LP_PROP = "lp"                  # пути язычков и клапана — свойством объекта (игровая версия строит по ним ленту)
 
 
 # ---------- магазины ----------
@@ -324,7 +327,7 @@ def open_path(p0: Vector, T: float, Hp: float, length: float) -> list[Vector]:
 
 
 def tab_path(mag: bpy.types.Object | None, T: float, Hp: float, x_end: float, z_end: float,
-             length: float | None = None) -> list[Vector]:
+             length: float | None = None, width: float = 0.030) -> list[Vector]:
     """Путь язычка: изнутри задней стенки вверх по тыльной стороне магазина, через донце, вниз по лицевой стороне
     магазина, через окантовку и по лицевой стенке подсумка вниз до липучки. Без магазина (mag=None) — «Открыт»:
     стоит вверх и заваливается назад (длина length)."""
@@ -345,19 +348,30 @@ def tab_path(mag: bpy.types.Object | None, T: float, Hp: float, x_end: float, z_
             return x
         return min(max(x, lo.x + 0.012), hi.x - 0.012)
 
+    # лента плоская и широкая: сторону магазина ищем лучами по всей её ширине — берётся самая выступающая точка
+    # (одним лучом по середине край ленты уходил в магазин там, где он по бокам выпуклее)
+    across = [width / 2 * (k / 3 - 1) * 0.9 for k in range(7)]
+
     def side_y(x: float, z: float, back: bool) -> float:
-        """Тыльная / лицевая сторона магазина лучом вдоль y (по сетке, а не по редким вершинам)."""
-        o, d = (Vector((x, -1.0, z)), Vector((0, 1, 0))) if back else (Vector((x, 1.0, z)), Vector((0, -1, 0)))
-        hit = bvh.ray_cast(o, d, 2.0)
-        if hit[0] is None:
+        """Тыльная / лицевая сторона магазина лучами вдоль y (по сетке, а не по редким вершинам). Лента натянута через
+        донце: берётся самое выступающее место от z до донца (пятка магазина шире корпуса — ниже её лучи шли мимо)."""
+        ys = []
+        for zz in [z + (zt - 0.0008 - z) * k / 6 for k in range(7)]:
+            for dx in across:
+                o, d = ((Vector((x + dx, -1.0, zz)), Vector((0, 1, 0))) if back
+                        else (Vector((x + dx, 1.0, zz)), Vector((0, -1, 0))))
+                hit = bvh.ray_cast(o, d, 2.0)
+                if hit[0] is not None:
+                    ys.append(hit[0].y)
+        if not ys:
             sl = [p.y for p in pts if abs(p.z - z) < 0.006]
             return (min(sl) if back else max(sl)) + (-0.0018 if back else 0.0018)
-        return hit[0].y + (-0.0018 if back else 0.0018)
+        return (min(ys) - 0.0018) if back else (max(ys) + 0.0018)
 
     def top_z(y: float) -> float:
-        """Верх донца лучом сверху (по нескольким x вокруг середины донца — берётся высший)."""
+        """Верх донца лучами сверху по ширине ленты — берётся высший."""
         zs = []
-        for dx in (-0.006, 0.0, 0.006):
+        for dx in across:
             hit = bvh.ray_cast(Vector((xf + dx, y, zt + 0.5)), Vector((0, 0, -1)), 1.0)
             if hit[0] is not None:
                 zs.append(hit[0].z)
@@ -368,9 +382,11 @@ def tab_path(mag: bpy.types.Object | None, T: float, Hp: float, x_end: float, z_
         x = x_in(xf * (z - Hp) / max(zt - Hp, 1e-6), z)
         path.append(Vector((x, side_y(x, z, True), z)))
     y0, y1 = path[-1].y, side_y(xf, zt - 0.012, False)
-    for k in range(9):                                    # через донце
-        y = y0 + (y1 - y0) * k / 8
-        path.append(Vector((xf, y, top_z(y))))
+    # через донце — натянуто и ровно по самому высокому месту донца (лучи у скруглённого края давали провал,
+    # и у короткого ПМ лента ныряла в магазин)
+    z_top = max(top_z(y0 + (y1 - y0) * k / 16) for k in range(17))
+    for k in range(9):
+        path.append(Vector((xf, y0 + (y1 - y0) * k / 8, z_top)))
     for k in range(1, 9):                                 # вниз по лицевой стороне магазина
         z = zt - 0.012 - (zt - 0.012 - (Hp + 0.004)) * k / 8
         x = x_in(xf * (z - Hp) / max(zt - Hp, 1e-6), z)
@@ -382,7 +398,7 @@ def tab_path(mag: bpy.types.Object | None, T: float, Hp: float, x_end: float, z_
     path.append(Vector((0.0, T / 2 + 0.0015, Hp + 0.003)))   # через окантовку
     for k in range(1, 7):                                 # по лицевой стенке вниз до липучки
         z = Hp - (Hp - z_end) * k / 6
-        path.append(Vector((x_end * k / 6, T / 2 + 0.0022, z)))
+        path.append(Vector((x_end * k / 6, T / 2 + TAB_FRONT, z)))
     return path
 
 
@@ -395,6 +411,11 @@ def path_normals(pts: list[Vector]) -> list[Vector]:
         n = Vector((1.0, 0.0, 0.0)).cross(tan)
         nrm.append(n.normalized() if n.length > 1e-9 else Vector((0, 0, 1)))
     return nrm
+
+
+def lp_data(paths: dict[str, list[Vector]], **extra: float) -> str:
+    """Пути ленты (основа и ключи формы) и её размеры — JSON для игровой версии (tools/npc_kit/game_pouches.py)."""
+    return json.dumps({"paths": {k: [[round(c, 6) for c in p] for p in v] for k, v in paths.items()}, **extra})
 
 
 def tab_lines(L: float, width: float, hook_len: float) -> tuple[list, list]:
@@ -559,15 +580,17 @@ def build_open_pouch(col, mats, prefix: str, mags: dict, Hp: float, keys: dict) 
         return max((mg.matrix_world @ v.co).z for v in mg.data.vertices)
     dz = {key: (0.012 if mg is not None and top(mg) > top(first) + 0.002 else 0.0) for key, mg in keys.items()}
     hook_len = min(HOOK_MAX, vz1 - z_end - max(dz.values(), default=0.0) - 0.002)
-    base_path = tab_path(first, T, Hp, 0.0, z_end)
+    base_path = tab_path(first, T, Hp, 0.0, z_end, width=tab_w)
     center = Vector((0.0, 0.0, Hp))
     base = tab_mesh(base_path, tab_w, center, hook_len)
     length = sum((b - a).length for a, b in zip(base_path, base_path[1:]))
-    shapes = {}
+    shapes, paths = {}, {"Basis": base_path}
     for key, mg in keys.items():
-        shapes[key] = tab_mesh(tab_path(mg, T, Hp, 0.0, z_end + dz[key], length), tab_w, center, hook_len)
+        paths[key] = tab_path(mg, T, Hp, 0.0, z_end + dz[key], length, width=tab_w)
+        shapes[key] = tab_mesh(paths[key], tab_w, center, hook_len)
     kc.log(f"  {prefix}: слой «крючка» {hook_len * 1000:.0f} мм, поле «петли» {(vz1 - vz0) * 1000:.0f} мм")
-    base.build(f"{prefix}_Tab", col, [mats["webbing"], mats["hook"], mats["thread"]], shape_keys=shapes)
+    o = base.build(f"{prefix}_Tab", col, [mats["webbing"], mats["hook"], mats["thread"]], shape_keys=shapes)
+    o[LP_PROP] = lp_data(paths, width=tab_w, hook_len=hook_len)
     rep = {"W": W, "T": T, "H": Hp}
     for name, mg in mags.items():
         rep[f"зазор {name}"] = check(mg, Win, Tin, max(r - WALL, 0.002), WALL, Hp)
@@ -673,8 +696,9 @@ def build_big_pouch(col, mats, prefix: str, drum: bpy.types.Object) -> dict:
         return m
     base = flap(path)
     L = sum((b - a).length for a, b in zip(path, path[1:]))
-    base.build(f"{prefix}_Flap", col, [mats["cordura"], mats["thread"]],
-               shape_keys={"Открыт": flap(open_path(path[0], T, Hp, L))})
+    opened = open_path(path[0], T, Hp, L)
+    o = base.build(f"{prefix}_Flap", col, [mats["cordura"], mats["thread"]], shape_keys={"Открыт": flap(opened)})
+    o[LP_PROP] = lp_data({"Basis": path, "Открыт": opened}, W=W, L0=L0)
     return {"W": W, "T": T, "H": Hp, "зазор барабан": check(drum, Win, Tin, r - WALL, WALL, Hp)}
 
 

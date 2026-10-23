@@ -571,6 +571,30 @@ class BandFrame:
 
 # ---------- сетка ----------
 
+def weld_in_all_keys(bm: bmesh.types.BMesh, dist: float) -> None:
+    """Сварка совпадающих вершин сетки с ключами формы — только там, где они совпадают во всех ключах: совпавшие
+    в основе, но разные в ключе вершины после сварки тянули грани ключа через полподсумка (язычок под ПМ)."""
+    from mathutils.kdtree import KDTree
+    layers = list(bm.verts.layers.shape.values())
+    bm.verts.ensure_lookup_table()
+    kd = KDTree(len(bm.verts))
+    for v in bm.verts:
+        kd.insert(v.co, v.index)
+    kd.balance()
+    target: dict = {}
+    for v in bm.verts:
+        if v in target:
+            continue
+        for _, idx, _ in kd.find_range(v.co, dist):
+            w = bm.verts[idx]
+            if w is v or w in target or w in target.values():
+                continue
+            if all((v[lay] - w[lay]).length <= dist for lay in layers):
+                target[w] = v
+    if target:
+        bmesh.ops.weld_verts(bm, targetmap=target)
+
+
 class Mesh:
     """Набор вершин, граней, развёртки и материалов → объект."""
 
@@ -632,7 +656,10 @@ class Mesh:
                     kb.data[i].co = p
         bm = bmesh.new()
         bm.from_mesh(me)
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
+        if shape_keys:
+            weld_in_all_keys(bm, 1e-6)
+        else:
+            bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
         bm.to_mesh(me)
         bm.free()
