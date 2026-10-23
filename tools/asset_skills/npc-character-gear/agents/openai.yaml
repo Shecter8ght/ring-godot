@@ -1,0 +1,6 @@
+interface:
+  display_name: "NPC: персонажи и снаряжение"
+  short_description: "Тело, одежда и снаряжение на нём → приёмки → игровая версия"
+  default_prompt: "Используй $npc-character-gear: сделай или исправь NPC, одежду или снаряжение на теле по образцам владельца, проверь посадку и пересечения, предъяви форму до текстур."
+policy:
+  allow_implicit_invocation: true
