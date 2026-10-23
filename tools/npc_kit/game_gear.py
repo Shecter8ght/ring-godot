@@ -14,6 +14,7 @@ blender --background --factory-startup --python-exit-code 1 --python tools/npc_k
 """
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -62,6 +63,31 @@ ITEMS = {
     ], {}, "Пояс"),
 }
 
+# рюкзаки (до 10 тыс. на посадку, карта 2K): у каждой из четырёх посадок своя сетка и карта — мешок между посадками
+# не сводится к сдвигу и наклону (складки и продавливание под стропами свои, у рейдового и число вершин другое)
+PACK_FITS = ("", "_Poor", "_Mid", "_Top")
+PACK_PARTS = {
+    "Daypack": ({"Bag": 3500, "Padding": 1800, "Webbing": 1400, "Hardware": 700, "Mesh": 600}, "Рюкзак_городской"),
+    "Tourist": ({"Bag": 3500, "Padding": 1600, "Webbing": 1800, "Hardware": 2000, "Mesh": 400, "Molle": 100,
+                 "Velcro": 300}, "Рюкзак_туристический"),
+    "Raid": ({"Bag": 3500, "Padding": 1500, "Webbing": 1700, "Hardware": 2000, "Mesh": 300, "Molle": 500},
+             "Рюкзак_рейдовый"),
+}
+# мелкие отдельные кусочки (зубцы молний, ~5 мм) упрощение собирает в шипы — из игровой сетки прочь, они в картах
+SMALL_PART = {"daypack": 0.012, "tourist": 0.012, "raid": 0.012}
+# фурнитура (деталь *_Hardware: фастексы, «лестницы», кольца) — десятки отдельных кусочков; свёртка всей детали до доли
+# бюджета (8 % у рейдового) оставляла от брусков пряжек шипы. Поэтому каждый кусочек отдельно: плоские грани брусков —
+# планарным упрощением (угол 30°: скругления рёбер по 22,5° уходят в карту нормалей, брусок — коробка с фаской),
+# кольца (всё, что после него больше HW_PART_CAP) — свёрткой до потолка; бюджет фурнитуры взят с запасом (2 000 у рейдового
+# и туристического при ~1 900 по кусочкам), чтобы общая свёртка до бюджета бруски не трогала
+HW_PLANAR_DEG = 30.0
+HW_PART_CAP = 64
+PACK_PARTS_LOWER = {k.lower() for k in PACK_PARTS}
+for _pack, (_parts, _folder) in PACK_PARTS.items():
+    ITEMS[_pack.lower()] = ("backpacks/backpacks_tex.blend", [
+        (f"G_{_pack}{fit}", {f"{_pack}{fit}_{k}": v for k, v in _parts.items()}, 2048, 0.010) for fit in PACK_FITS
+    ], {}, _folder)
+
 
 def build(item: str) -> Path:
     src, parts, glass, _ = ITEMS[item]
@@ -76,6 +102,14 @@ def build(item: str) -> Path:
             if o.data.shape_keys:                              # клапан «Открыт» — игровая сетка закрытая
                 o.shape_key_clear()
             gl.apply_mods(o)
+            if item in SMALL_PART:
+                n = drop_small_parts(o, SMALL_PART[item])
+                if n:
+                    kc.log(f"    {name}: мелких кусочков в карты — {n}")
+            if name.endswith("_Hardware") and item in PACK_PARTS_LOWER:
+                before = gl.tris(o)
+                simplify_hardware(o)
+                kc.log(f"    {name}: фурнитура по кусочкам {before} → {gl.tris(o)} треугольников (бюджет {budget})")
             gl.decimate_to(o, budget)
             made.append(o)
         kc.make_active(made[0])
@@ -100,6 +134,58 @@ def build(item: str) -> Path:
     return path
 
 
+def simplify_hardware(o: bpy.types.Object) -> None:
+    """Фурнитура по отдельным кусочкам: планарное упрощение (бруски → коробки с фаской), кривое — свёрткой до потолка."""
+    kc.make_active(o)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.separate(type="LOOSE")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    pieces = [x for x in bpy.context.selected_objects if x.type == "MESH"]
+    for x in pieces:
+        m = x.modifiers.new("Planar", "DECIMATE")
+        m.decimate_type = "DISSOLVE"
+        m.angle_limit = math.radians(HW_PLANAR_DEG)
+        m.delimit = set()
+        gl.apply_mods(x)
+        gl.decimate_to(x, HW_PART_CAP)
+    kc.make_active(o)
+    for x in pieces:
+        x.select_set(True)
+    bpy.ops.object.join()
+
+
+def drop_small_parts(o: bpy.types.Object, diag: float) -> int:
+    """Убрать отдельные кусочки сетки с габаритом меньше diag (м); остаются в исходнике — в картах."""
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bm.verts.ensure_lookup_table()
+    seen, dead = set(), []
+    for v in bm.verts:
+        if v.index in seen:
+            continue
+        stack, part = [v], []
+        seen.add(v.index)
+        while stack:
+            a = stack.pop()
+            part.append(a)
+            for e in a.link_edges:
+                b = e.other_vert(a)
+                if b.index not in seen:
+                    seen.add(b.index)
+                    stack.append(b)
+        lo = [min(p.co[i] for p in part) for i in range(3)]
+        hi = [max(p.co[i] for p in part) for i in range(3)]
+        if sum((h - l) ** 2 for h, l in zip(hi, lo)) ** 0.5 < diag:
+            dead.append(part)
+    for part in dead:
+        bmesh.ops.delete(bm, geom=part, context="VERTS")
+    bm.to_mesh(o.data)
+    bm.free()
+    return len(dead)
+
+
 def smooth(o: bpy.types.Object) -> None:
     o.data.polygons.foreach_set("use_smooth", [True] * len(o.data.polygons))
     if "sharp_face" in o.data.attributes:
@@ -112,7 +198,10 @@ def bake(item: str, path: Path) -> None:
     _, parts, glass, _ = ITEMS[item]
     bpy.ops.wm.open_mainfile(filepath=str(path))
     items = [(bpy.data.objects[g], tuple(pieces), size, ray, g[2:].lower()) for g, pieces, size, ray in parts]
-    gl.bake_set(items, MAPS, ao_distance=0.03)
+    # по одной детали: варианты вещи стоят на одном месте (шлемы на голове, посадки рюкзака), и в AO при общем
+    # запекании каждый затенялся оболочками соседних
+    for it in items:
+        gl.bake_set([it], MAPS, ao_distance=0.03)
     for name, (game_name, _) in glass.items():
         o = bpy.data.objects[game_name]
         o.data.materials.clear()
@@ -141,6 +230,8 @@ def glass_material() -> bpy.types.Material:
 LAYOUT = {"helmets": ({"Simple": 0.0, "Mid": 0.45, "Top": 0.9}, (0.0, -0.40), 1.45, 1.1),
           "armor_poor": ({}, (0.75, 0.0), 1.28, 1.4), "armor_mid": ({}, (0.75, 0.0), 1.28, 1.4),
           "armor_top": ({}, (0.75, 0.0), 1.20, 1.5), "belt": ({}, (0.6, 0.0), 0.95, 1.2)}
+for _pack in PACK_PARTS:                 # посадки рядом по x (без брони, бомжовская, средняя, крутая), LOD — дальше вбок
+    LAYOUT[_pack.lower()] = ({"Poor": 0.6, "Mid": 1.2, "Top": 1.8}, (2.6, 0.0), 1.25, 1.8)
 
 
 def deliver(item: str, path: Path, folder: Path) -> None:
@@ -161,10 +252,12 @@ def deliver(item: str, path: Path, folder: Path) -> None:
             o.location.z += lod_dz * lvl
     bpy.ops.outliner.orphans_purge(do_recursive=True)
     total = {lvl: sum(gl.tris(o) for o in bpy.data.collections[f"GAME_LOD{lvl}"].objects) for lvl in range(3)}
+    fits = ("Посадки рюкзака — слева направо: без брони, бомжовская, средняя, крутая (в игре выбирается по броне).\n"
+            if item in LAYOUT and item.capitalize() in PACK_PARTS else "")
     readme = (f"Снаряжение «{item}» — ИГРОВАЯ ВЕРСИЯ (ретопология), на просмотр. Решения владельца 2026-10-22: бюджет NPC\n"
               "60 тыс. в полном снаряжении (шлем до 5 тыс., броня до 12, рюкзак до 10), три LOD, карта 2K на вещь.\n"
               f"LOD0 / LOD1 / LOD2 — рядом (всего {total[0]} / {total[1]} / {total[2]} треугольников); варианты вещи —\n"
-              "рядом по горизонтали.\n"
+              "рядом по горизонтали.\n" + fits +
               "Тонкое (винты, заклёпки, велкро) — в картах; стекло — полупрозрачное, как будет в Godot.\n"
               "Карты: цвет, нормали, ORM (R — AO, G — шероховатость, B — металл). Смотреть в Rendered (Cycles).\n"
               "Скрипт: tools/npc_kit/game_gear.py.\n")
