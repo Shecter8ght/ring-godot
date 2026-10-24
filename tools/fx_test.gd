@@ -2,7 +2,7 @@ extends Node
 ## Проверка эффектов попаданий: стреляем по витрине, стене, роллете, мародёру и делаем два снимка —
 ## в момент частиц и через секунду (декали). godot --path . res://tools/fx_test.tscn
 
-const LEVEL := "res://scenes/levels/f1_market.tscn"
+const LEVEL := "res://scenes/levels/mall_map.tscn"
 
 
 func _ready() -> void:

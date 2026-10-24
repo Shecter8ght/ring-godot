@@ -93,7 +93,7 @@ func enter_raid() -> Player:
 	Profile.pending_raid = true
 	Profile.save()
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
-	get_tree().change_scene_to_file("res://scenes/levels/f1_market.tscn")
+	get_tree().change_scene_to_file("res://scenes/levels/mall_map.tscn")
 	for frame: int in range(20):
 		await get_tree().process_frame
 	var player: Player = Raid.current.local_player()

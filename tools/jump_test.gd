@@ -10,7 +10,7 @@ func _ready() -> void:
 	get_tree().current_scene = null
 	Profile.use_file("user://jump_test.json", true)
 	RaidEvents.enabled = false
-	for scene: String in [Balance.HIDEOUT_SCENE, "res://scenes/levels/f1_market.tscn"]:
+	for scene: String in [Balance.HIDEOUT_SCENE, "res://scenes/levels/mall_map.tscn"]:
 		get_tree().change_scene_to_file(scene)
 		await _frames(40)
 		for enemy: Node in get_tree().get_nodes_in_group("marauders"):

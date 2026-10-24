@@ -1,15 +1,12 @@
 {
- "_comment": "Задания Михалыча. type: hand_in — сдать предметы из тайника (item, n); kill — убить n мародёров в рейдах; visit — побывать в помещении room (id из data/sectors); extract_via — уйти через точку эвакуации exit (имя узла в сцене уровня); survive — выжить в n рейдах подряд. trust_level — с какого уровня доверия Михалыч его даёт. reward — деньги и очки доверия.",
+ "_comment": "Задания Михалыча. type: hand_in — сдать предметы из тайника (item, n); kill — убить n мародёров в рейдах; visit — побывать в помещении room (id из data/sectors); extract_via — уйти через точку эвакуации exit (имя узла в сцене уровня); survive — выжить в n рейдах подряд. trust_level — с какого уровня доверия Михалыч его даёт. reward — деньги и очки доверия. Убраны 2026-10-24 вместе с картой f1_ring (комната electrical, выходы Dock и GarageExit были только на ней): m_electrical, m_dock, m_garage — вернуть после появления таких мест на карте ТЦ.",
  "missions": [
   {"id": "m_bandages", "name": "Перевязка", "text": "Принеси пять бинтов: у меня люди без перевязки.", "type": "hand_in", "item": "bandage", "n": 5, "trust_level": 1, "reward": {"money": 8000, "trust": 1}},
   {"id": "m_kills3", "name": "Расчистка", "text": "Мародёры обнаглели. Убери троих.", "type": "kill", "n": 3, "trust_level": 1, "reward": {"money": 15000, "trust": 1}},
-  {"id": "m_electrical", "name": "Щитовая", "text": "Найди электрощитовую за гипермаркетом и посмотри, что там.", "type": "visit", "room": "electrical", "trust_level": 1, "reward": {"money": 6000, "trust": 1}},
-  {"id": "m_dock", "name": "Через двор", "text": "Уйди через грузовой двор — проверь, работают ли ворота.", "type": "extract_via", "exit": "Dock", "trust_level": 1, "reward": {"money": 12000, "trust": 1}},
   {"id": "m_laptop", "name": "Ноутбук", "text": "Вынеси ноутбук, любой.", "type": "hand_in", "item": "laptop", "n": 1, "trust_level": 1, "reward": {"money": 20000, "trust": 1}},
   {"id": "m_server", "name": "Серверная", "text": "Принеси диск из серверной. Ключ поищи у охраны.", "type": "hand_in", "item": "server_drive", "n": 1, "trust_level": 2, "reward": {"money": 30000, "trust": 2}},
   {"id": "m_survive3", "name": "Живучий", "text": "Выживи в трёх рейдах подряд.", "type": "survive", "n": 3, "trust_level": 2, "reward": {"money": 25000, "trust": 2}},
   {"id": "m_kills8", "name": "Зачистка", "text": "Восемь мародёров. Можно за несколько ходок.", "type": "kill", "n": 8, "trust_level": 2, "reward": {"money": 40000, "trust": 2}},
-  {"id": "m_jewelry", "name": "Ювелирка", "text": "Вскрой сейфовую ювелирного и принеси два кольца.", "type": "hand_in", "item": "diamond_ring", "n": 2, "trust_level": 2, "reward": {"money": 50000, "trust": 2}},
-  {"id": "m_garage", "name": "Съезд", "text": "Уйди через съезд паркинга — карта охраны тебе в помощь.", "type": "extract_via", "exit": "GarageExit", "trust_level": 3, "reward": {"money": 35000, "trust": 2}}
+  {"id": "m_jewelry", "name": "Ювелирка", "text": "Вскрой сейфовую ювелирного и принеси два кольца.", "type": "hand_in", "item": "diamond_ring", "n": 2, "trust_level": 2, "reward": {"money": 50000, "trust": 2}}
  ]
 }

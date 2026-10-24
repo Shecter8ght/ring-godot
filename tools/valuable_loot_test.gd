@@ -53,7 +53,7 @@ func _run() -> void:
 	Profile.from_hideout = true
 	Profile.save()
 	RaidEvents.enabled = false
-	get_tree().change_scene_to_file("res://scenes/levels/f1_market.tscn")
+	get_tree().change_scene_to_file("res://scenes/levels/mall_map.tscn")
 	for i: int in range(35):
 		await get_tree().process_frame
 	var pl: Player = Raid.current.local_player()

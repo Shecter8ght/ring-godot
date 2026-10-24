@@ -2,7 +2,7 @@ extends Node
 ## Штатная загрузка и кадры в фиксированных точках всех готовых карт. Отдельный APPDATA обязателен.
 ## tools/godot.cmd --windowed --resolution 1280x720 --disable-vsync res://tools/performance_audit.tscn -- hideout high baseline
 
-const MAPS: Dictionary = {"hideout": "res://scenes/levels/hideout.tscn", "f1": "res://scenes/levels/f1_ring.tscn",
+const MAPS: Dictionary = {"hideout": "res://scenes/levels/hideout.tscn", "mall": "res://scenes/levels/mall_map.tscn",
 	"zone01": "res://scenes/levels/zone01_mall.tscn"}
 const SAMPLE_FRAMES: int = 180
 var _result: Dictionary = {}

@@ -42,7 +42,7 @@ func _run() -> void:
 	# игре, где второй рейд за вечер идёт по тем же сетевым путям, что и первый
 	if args.size() > 2 and String(args[2]) == "two":
 		if role == "host":
-			Net.start_level.rpc("res://scenes/levels/f1_market.tscn", {"time": "day", "weather": "clear", "power": "on"})
+			Net.start_level.rpc("res://scenes/levels/mall_map.tscn", {"time": "day", "weather": "clear", "power": "on"})
 		await until(func() -> bool: return Raid.current != null and Raid.current.local_player() != null and get_tree().get_nodes_in_group("players").size() == _want and Raid.current.local_player().inventory.loadout_ready, 240)
 		print("coop_items_%s: первый рейд идёт" % role)
 		await get_tree().create_timer(4.0).timeout

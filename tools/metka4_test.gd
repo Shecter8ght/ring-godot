@@ -225,7 +225,7 @@ func _world() -> void:
 	Profile.pending_raid = true
 	Profile.from_hideout = true
 	Profile.save()
-	get_tree().change_scene_to_file("res://scenes/levels/f1_market.tscn")
+	get_tree().change_scene_to_file("res://scenes/levels/mall_map.tscn")
 	for i: int in range(30):
 		await get_tree().process_frame
 	var player: Player = Raid.current.local_player()

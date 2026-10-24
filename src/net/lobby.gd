@@ -92,7 +92,7 @@ func _refresh() -> void:
 	_start_button.visible = Net.is_host()
 	var block: String = Floors.start_block(Profile.floor) if Profile.from_hideout else ""
 	_start_button.disabled = block != ""
-	_start_button.tooltip_text = block if block != "" else String(Floors.find(Profile.floor if Profile.from_hideout else "f1").get("name", ""))
+	_start_button.tooltip_text = block if block != "" else String(Floors.find(Profile.floor if Profile.from_hideout else "mall").get("name", ""))
 	_admin_button.visible = Net.is_host()
 	if networked:
 		var lines: Array[String] = []

@@ -30,8 +30,8 @@ static var trust: int = 0
 ## Сколько раз выбрался из рейда живым.
 static var extractions: int = 0
 ## Открытые маршруты (id этажей из data/floors.json) и выбранный для следующего рейда.
-static var floors_open: Array = ["f1"]
-static var floor: String = "f1"
+static var floors_open: Array = ["mall"]
+static var floor: String = "mall"
 ## Модули убежища: id -> уровень (см. Upgrades, data/hideout.json).
 static var modules: Dictionary = {}
 ## Сохранённые каналы досуга; старые профили без ключа остаются совместимыми.
@@ -104,13 +104,13 @@ static func ensure() -> void:
 		_migrate_rigs()
 		trust = int(d.get("trust", 0))
 		extractions = int(d.get("extractions", 0))
-		floors_open = d.get("floors_open", ["f1"])
-		if not "f1" in floors_open:
-			floors_open.append("f1")
-		floor = String(d.get("floor", "f1"))
-		# выбранного маршрута больше нет в data/floors.json (так убрали зону 2) — снова первый этаж
+		floors_open = d.get("floors_open", ["mall"])
+		if not "mall" in floors_open:
+			floors_open.append("mall")
+		floor = String(d.get("floor", "mall"))
+		# выбранного маршрута больше нет в data/floors.json (так убрали зону 2 и кольцо f1) — территория ТЦ
 		if not floor in floors_open or Floors.find(floor).is_empty():
-			floor = "f1"
+			floor = "mall"
 		modules = d.get("modules", {})
 		hideout_media = d.get("hideout_media", {})
 		for k in modules:
@@ -171,8 +171,8 @@ static func _starter() -> void:
 	pocket = []
 	trust = 0
 	extractions = 0
-	floors_open = ["f1"]
-	floor = "f1"
+	floors_open = ["mall"]
+	floor = "mall"
 	modules = {}
 	hideout_media = {}
 	missions_active = {}

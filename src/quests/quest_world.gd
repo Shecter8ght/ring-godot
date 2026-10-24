@@ -10,7 +10,7 @@ extends Node
 ## хост (Quests.request_carry); несут его на плече у того, кто поднял, — видно всем. Убийства,
 ## «предмет в рюкзаке» и эвакуацию считает хост за любого участника (extraction_payload).
 
-## Уровень: имя файла сцены без расширения (f1_ring, hideout) — sites.level в данных.
+## Уровень: имя файла сцены без расширения (mall_map, hideout) — sites.level в данных.
 var level: String = ""
 var raid: bool = false
 

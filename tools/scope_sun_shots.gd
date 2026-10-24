@@ -9,7 +9,7 @@ var _rig: CameraRig
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var inst: Node = load("res://scenes/levels/f1_ring.tscn").instantiate()
+	var inst: Node = load("res://scenes/levels/mall_map.tscn").instantiate()
 	get_tree().root.add_child(inst)
 	get_tree().current_scene = inst
 	for i in range(60):

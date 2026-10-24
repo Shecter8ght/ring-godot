@@ -28,7 +28,7 @@ func _ready() -> void:
 	# места этапов в рейде — камера сверху у места
 	for st in [[1, "anton_backpack", "quest_backpack"], [2, "unloading_camp", "quest_unloading"], [3, "p3_meeting", "quest_p3"], [5, "red_gate", "quest_red_gate"]]:
 		Quests.dev_stage(Q, int(st[0]))
-		await _load("res://scenes/levels/f1_ring.tscn")
+		await _load("res://scenes/levels/mall_map.tscn")
 		for m in get_tree().get_nodes_in_group("marauders"):
 			(m as Node).queue_free()
 		var s := _level.find_child("Quest_" + String(st[1]), true, false) as Node3D

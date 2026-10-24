@@ -7,7 +7,7 @@ extends Node
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
-	var scene := args[0] if args.size() > 0 else "res://scenes/levels/f1_ring.tscn"
+	var scene := args[0] if args.size() > 0 else "res://scenes/levels/mall_map.tscn"
 	RaidEvents.enabled = false
 	await get_tree().process_frame
 	var inst: Node = load(scene).instantiate()

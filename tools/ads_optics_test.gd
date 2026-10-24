@@ -27,7 +27,7 @@ func _ready() -> void:
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	_capture = DisplayServer.get_name() != "headless" and OS.get_cmdline_user_args().has("capture")
 	await get_tree().process_frame
-	var level: Node = (load("res://scenes/levels/f1_market.tscn") as PackedScene).instantiate()
+	var level: Node = (load("res://scenes/levels/mall_map.tscn") as PackedScene).instantiate()
 	get_tree().root.add_child(level)
 	get_tree().current_scene = level
 	for i: int in range(60):

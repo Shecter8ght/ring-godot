@@ -18,7 +18,7 @@ const MARAUDER_SCENE := preload("res://scenes/ai/marauder.tscn")
 ## В каких помещениях мародёры появляются и патрулируют.
 const AI_ROOM_TYPES := ["retail", "storage", "corridor", "gallery", "office", "security", "utility", "yard"]
 
-@export_file("*.json") var sector_path: String = "res://data/sectors/f1_market.json":
+@export_file("*.json") var sector_path: String = "res://data/sectors/mall_map.json":
 	set(v):
 		sector_path = v
 		if Engine.is_editor_hint() and is_inside_tree():

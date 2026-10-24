@@ -345,7 +345,7 @@ func build(e: Dictionary) -> Dictionary:
 			var stage := {"id": "s1", "title": String(tpl.title)}
 			for s: Dictionary in chosen:
 				var sid := "%s_%s" % [String(e.id), String(s.key)]
-				var site := {"level": "f1_ring", "anchor": s.anchor, "yaw": rng.randf_range(0.0, 360.0),
+				var site := {"level": "mall_map", "anchor": s.anchor, "yaw": rng.randf_range(0.0, 360.0),
 					"radius": float(tpl.get("radius", 2.2)), "props": tpl.get("props", [])}
 				if String(tpl.kind) == "clear":
 					site["zone"] = float(tpl.get("radius", 8.0))

@@ -4,7 +4,7 @@
 эскалаторы, точки эвакуации и спавна, запертую часть кольца, компас и масштаб. Нужен, чтобы обсуждать планировку до сборки
 в Godot и видеть, что лежит в данных.
 
-    python tools/plan_svg.py data/sectors/f1_ring.json
+    python tools/plan_svg.py data/sectors/mall_1f.json
 Север — это -Z в игре (угол a = -90°), на чертеже вверху.
 """
 import json
@@ -387,4 +387,4 @@ def main(path):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "data/sectors/f1_ring.json")
+    main(sys.argv[1] if len(sys.argv) > 1 else "data/sectors/mall_1f.json")

@@ -43,11 +43,10 @@ r 109–121, служебный коридор r 121–125, снаружи — �
 радиальный проход к выходу (к паркингу / грузовому шлюзу). Открыты 3 сектора a ∈ [-180°, 0°]
 (север = a -90°, вверху плана). Высота 1F — 6 м, здание 4 этажа (22.5 м). Координаты полярные:
 угол a (град, от +X к +Z), радиус r (м); помещение = кольцевой сектор [a0,a1]×[r0,r1] или полоса
-вдоль оси (axis, t, r — см. SectorBuilder). Уровень: `data/sectors/f1_ring.json` (генератор —
-`python tools/gen_f1_ring.py`) + `scenes/levels/f1_ring.tscn`.
-Старый маленький сектор `f1_market` (Ø180) оставлен для тестов (ai_test, fx_test).
+вдоль оси (axis, t, r — см. SectorBuilder). Кольцо Ø250 (`f1_ring`) и старый сектор `f1_market` (Ø180) **удалены 2026-10-24** по решению владельца (в git — до этой даты);
+рейд по умолчанию — `mall_map`.
 **Решение владельца 2026-10-15:** ТЦ — отдельная карта Ø200 с прилегающей территорией
-(`docs/design/mall_map.md`); `f1_ring` Ø250 — прежний серый черновик, будет пересобран; ТЦ с карты
+(`docs/design/mall_map.md`); `f1_ring` Ø250 — прежний серый черновик (удалён 2026-10-24); ТЦ с карты
 зоны 1 уходит. Кольцо на Ø250 больше не развивать.
 Серый черновик 1-го этажа Ø200 — `data/sectors/mall_1f.json` (генератор `tools/gen_mall_1f.py`, план —
 `docs/design/mall_1f_plan.md`) + `scenes/levels/mall_1f.tscn`; отдельно в рейды не подключён — в рейде он часть
@@ -56,8 +55,8 @@ r 109–121, служебный коридор r 121–125, снаружи — �
 
 **Блокаут.** Сейчас уровень — серый блокаут (`"greybox": true`): стены без текстур, толщина по
 классу конструкции (фасад 0.5 / противопожарная 0.3 / несущая 0.3 / перегородка 0.15), нормы и
-источники — `docs/building_standards.md`. Чертёж сверху: `python tools/plan_svg.py data/sectors/f1_ring.json`
-→ `docs/plans/f1_ring.svg` (берёт кольцо из JSON, постройки и точки — из .tscn уровня).
+источники — `docs/building_standards.md`. Чертёж сверху: `python tools/plan_svg.py data/sectors/mall_1f.json`
+→ `docs/plans/mall_1f.svg` (берёт кольцо из JSON, постройки и точки — из .tscn уровня).
 
 Атмосфера базовая: лето, ~20:00, закат, сухо. Низкое тёплое солнце, длинные тени, холодный ambient,
 тёплые лампы внутри, мокрые полы (референсы у владельца). Погода и сезон — модификаторы поверх
@@ -188,7 +187,7 @@ tools/godot.cmd --headless res://tools/car_mall_sites_shots.tscn # места з
                                                               # F засчитан, путь по навигации от заходов; с окном (--windowed --resolution 1600x900) — снимки car_mall_*
 python -X utf8 tools/gen_car_clue_textures.py                 # улики заказа на карте ТЦ → assets/textures/car_clues: пятно антифриза и следы шин по альфа-маскам
                                                               # владельца (Маски_АЛЬФА), номера, накладная, бирка «ЮР / 8»; затем --import
-tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json # сводка сборки сектора (стены, двери, огни):
+tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/mall_map.json # сводка сборки сектора (стены, двери, огни):
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона
 python tools/import_model.py <id>                              # модель из _asset_src/<id> (+license.txt) в assets/models/props, CREDITS

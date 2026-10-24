@@ -92,7 +92,7 @@ func _hideout() -> void:
 
 
 func _raid() -> void:
-	var level: Node = load("res://scenes/levels/f1_market.tscn").instantiate()
+	var level: Node = load("res://scenes/levels/mall_map.tscn").instantiate()
 	get_tree().root.add_child(level)
 	get_tree().current_scene = level
 	while level.get_node("Marauders").get_child_count() == 0:

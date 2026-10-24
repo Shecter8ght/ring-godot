@@ -61,7 +61,7 @@ func _ready() -> void:
 	# рейд со снаряжением: окно рюкзака
 	Profile.pending_raid = true
 	RaidEvents.enabled = false
-	get_tree().change_scene_to_file("res://scenes/levels/f1_market.tscn")
+	get_tree().change_scene_to_file("res://scenes/levels/mall_map.tscn")
 	for i in range(240):
 		await get_tree().process_frame
 	var me: Player = Raid.current.local_player() if Raid.current else null

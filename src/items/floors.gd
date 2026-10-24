@@ -33,7 +33,7 @@ static func find(id: String) -> Dictionary:
 ## Сцена этажа; этаж не собран или не найден — первый этаж.
 static func scene(id: String) -> String:
 	var s := String(find(id).get("scene", ""))
-	return s if s != "" else String(find("f1").get("scene", Balance.RAID_SCENE))
+	return s if s != "" else String(find("mall").get("scene", Balance.RAID_SCENE))
 
 
 static func built(id: String) -> bool:

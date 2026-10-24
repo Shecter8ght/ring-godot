@@ -85,7 +85,7 @@ func _raid(time: String) -> void:
 	Profile.use_file("user://look_shots_raid.json", true)
 	Profile.ensure()
 	RaidConditions.from_host = {"time": time, "weather": "clear", "power": "on"}
-	var level: Node = load("res://scenes/levels/f1_ring.tscn").instantiate()
+	var level: Node = load("res://scenes/levels/mall_map.tscn").instantiate()
 	get_tree().root.add_child(level)
 	get_tree().current_scene = level
 	while level.get_node("Marauders").get_child_count() == 0:

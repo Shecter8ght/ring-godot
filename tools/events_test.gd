@@ -13,7 +13,7 @@ func _ready() -> void:
 	Profile.ensure()
 	await get_tree().process_frame
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
-	_level = load("res://scenes/levels/f1_ring.tscn").instantiate()
+	_level = load("res://scenes/levels/mall_map.tscn").instantiate()
 	get_tree().root.add_child(_level)
 	get_tree().current_scene = _level
 	while _level.get_node("Marauders").get_child_count() == 0:

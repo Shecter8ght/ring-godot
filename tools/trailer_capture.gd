@@ -19,7 +19,7 @@ func _ready() -> void:
 	RaidConditions.from_host = {"time": "dusk", "weather": "clear", "power": "on"}
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	await get_tree().process_frame
-	_level = (load("res://scenes/levels/f1_ring.tscn") as PackedScene).instantiate() as Node3D
+	_level = (load("res://scenes/levels/mall_map.tscn") as PackedScene).instantiate() as Node3D
 	get_tree().root.add_child(_level)
 	get_tree().current_scene = _level
 	while _level.get_node("Marauders").get_child_count() == 0:

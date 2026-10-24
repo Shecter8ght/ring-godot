@@ -8204,3 +8204,18 @@ aliases` (прежние `vest_light` и т. п. перенацелены); со
 - Мародёр с подсумками на броне — в тот же момент своей перезарядки.
 - `reload_fast_test`: из рюкзака — нет, из подсумка — в момент «скрылся» и один раз, быстрая — сразу.
 Описание — `docs/weapon_sounds.md`, «Липучка подсумка».
+
+### 2026-10-24 — уборка карт: удалены f1_ring, f1_market, test_range (Claude)
+По решению владельца оставлены: ТЦ с территорией (`mall_map`), убежище с тиром и двором, Пригород, «Городской пояс», «Проспект»,
+стенды проверок. Удалено: кольцо Ø250 `f1_ring` (сцена, `data/sectors`, `tools/gen_f1_ring.py`, `scenes/world/f1_street`), старый
+сектор `f1_market`, тестовый полигон `test_range` (+ `RANGE.cmd`, `range_test`, `weapons_test`), чертежи в `docs/plans`.
+- Рейд по умолчанию (`Balance.RAID_SCENE`, `Net.LEVEL_SCENE`, `SectorLevel.sector_path`) — `mall_map`; маршрут «f1» из
+  `data/floors.json` убран, у профилей по умолчанию — «mall» (старые сохранения с «f1» переводятся при чтении).
+- **Отключено, так как места были только на f1_ring:** квесты «Не вернулся», «Своя метка», «Фирменный знак» (убраны из
+  `data/quests/index.json`, файлы квестов целы; без них гравировщик и принтер наклеек в убежище не ставятся — флаги
+  `engraver_ready` / `printer_ready` не выставятся, чит «открыть всё» работает); задания Михалыча `m_electrical`, `m_dock`,
+  `m_garage`; шаблоны контрактов с местами (`beacons`, `no_trace`, `quiet`) — в `disabled_templates` файла
+  `data/contracts/templates.json` (остался «Под заказ»).
+- Тесты в `tools/` переведены строкой на `mall_map.tscn`; тесты отключённых квестов (quest_test, coop_quest_*, engraving_*,
+  printer_quest_test, contracts_test, terminal_story_test, cheats_settings_test, quest_shots) и `ai_test` (узел `f1_market/Doors`) —
+  требуют правки или возврата квестов.

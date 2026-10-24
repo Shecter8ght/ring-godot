@@ -3,7 +3,7 @@ extends Node
 ## затем игрок стреляет в мародёра. Печатает состояния и здоровье.
 ## godot --path . res://tools/ai_test.tscn
 
-const LEVEL := "res://scenes/levels/f1_market.tscn"
+const LEVEL := "res://scenes/levels/mall_map.tscn"
 
 
 func _ready() -> void:

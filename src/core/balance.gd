@@ -777,7 +777,7 @@ const HIDEOUT_MODULE_PRICES := {
 }
 ## Наводка на маршрут и плата за выход; текущие карты бесплатны.
 const FLOOR_PRICES := {
-	"f1": {"price": 0, "fee": 0}, "zone01": {"price": 0, "fee": 0},
+	"mall": {"price": 0, "fee": 0}, "zone01": {"price": 0, "fee": 0},
 	"f2": {"price": 200000, "fee": 0},
 	"f3": {"price": 450000, "fee": 0}, "f4": {"price": 900000, "fee": 25000},
 }
@@ -815,7 +815,7 @@ const NET_TIMEOUT := {"factor": 32, "min_ms": 5000, "max_ms": 30000, "loading_ms
 const LOADING_PROGRESS: Dictionary = {"prepare": 2.0, "resources_start": 5.0, "resources_end": 65.0,
 	"scene": 68.0, "geometry": 72.0, "atmosphere": 78.0, "player": 84.0,
 	"equipment": 90.0, "ready": 94.0, "network": 96.0, "image": 98.0}
-const RAID_SCENE := "res://scenes/levels/f1_ring.tscn"
+const RAID_SCENE := "res://scenes/levels/mall_map.tscn"
 ## Камера в убежище ближе — комната тесная.
 const HIDEOUT_CAMERA_DISTANCE := 20.0
 ## Компас вверху экрана: ширина полосы, px, и сколько градусов видно в обе стороны.

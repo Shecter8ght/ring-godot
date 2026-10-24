@@ -40,7 +40,7 @@ func _run() -> void:
 	if role == "host":
 		var level_path: String = OS.get_environment("LOOT_NET_LEVEL")
 		if level_path == "":
-			level_path = "res://scenes/levels/f1_market.tscn"
+			level_path = "res://scenes/levels/mall_map.tscn"
 		Net.start_level.rpc(level_path, {"time": "day", "weather": "clear", "power": "on"})
 	await until(func() -> bool: return Raid.current != null and Raid.current.local_player() != null and get_tree().get_nodes_in_group("players").size() == 2 and Raid.current.local_player().inventory.loadout_ready)
 	var me: Player = Raid.current.local_player()

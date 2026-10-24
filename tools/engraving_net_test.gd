@@ -37,7 +37,7 @@ func _run() -> void:
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	await until(func() -> bool: return get_tree().get_nodes_in_group("players").size() == 2)
 	if role == "host":
-		Net.start_level.rpc("res://scenes/levels/f1_ring.tscn", {"time":"day", "weather":"clear", "power":"on"})
+		Net.start_level.rpc("res://scenes/levels/mall_map.tscn", {"time":"day", "weather":"clear", "power":"on"})
 	await until(func() -> bool: return Raid.current != null and Raid.current.local_player() != null and get_tree().get_nodes_in_group("players").size() == 2 and Raid.current.local_player().inventory.loadout_ready)
 	var me: Player = Raid.current.local_player()
 	if me == null:

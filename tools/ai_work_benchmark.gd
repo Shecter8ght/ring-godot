@@ -39,7 +39,7 @@ func _run() -> void:
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	Settings.set_quality("high")
 	Loading.stage_changed.connect(_stage)
-	var path: String = "res://scenes/levels/f1_ring.tscn" if _map == "f1" else "res://scenes/levels/zone01_mall.tscn"
+	var path: String = "res://scenes/levels/mall_map.tscn" if _map == "f1" else "res://scenes/levels/zone01_mall.tscn"
 	Net.change_scene(path, "Проверка расчётов противников")
 	var began: int = Time.get_ticks_msec()
 	while Loading.active or get_tree().get_nodes_in_group("marauders").size() < Balance.MARAUDER_COUNT:

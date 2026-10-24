@@ -10,7 +10,7 @@ var _fails: int = 0
 func _ready() -> void:
 	Profile.use_file("user://settings_test.json", true)
 	await get_tree().process_frame
-	var inst: Node = load("res://scenes/levels/f1_ring.tscn").instantiate()
+	var inst: Node = load("res://scenes/levels/mall_map.tscn").instantiate()
 	get_tree().root.add_child(inst)
 	get_tree().current_scene = inst
 	await get_tree().process_frame

@@ -7,7 +7,7 @@ extends Node
 
 const PORT := 7777
 const MAX_PLAYERS := 3
-const LEVEL_SCENE := "res://scenes/levels/f1_ring.tscn"
+const LEVEL_SCENE := "res://scenes/levels/mall_map.tscn"
 ## Meta корня сцены-уровня: какая это сцена для синхронизаторов ("hideout", "raid"). Ставит сам
 ## уровень в _enter_tree — раньше, чем его дети создадут свои синхронизаторы.
 const SCENE_META := "net_scene"

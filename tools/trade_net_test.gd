@@ -105,7 +105,7 @@ func _raid_part(mine: String, back: String) -> void:
 	RaidEvents.enabled = false
 	await get_tree().create_timer(1.0).timeout
 	if role == "host":
-		Net.start_level.rpc("res://scenes/levels/f1_market.tscn", {"time": "day", "weather": "clear", "power": "on"})
+		Net.start_level.rpc("res://scenes/levels/mall_map.tscn", {"time": "day", "weather": "clear", "power": "on"})
 	await until(func() -> bool: return Raid.current != null and Raid.current.local_player() != null and get_tree().get_nodes_in_group("players").size() == 2 and Raid.current.local_player().inventory.loadout_ready, 240)
 	var raid: Raid = Raid.current
 	var me: Player = raid.local_player()

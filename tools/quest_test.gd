@@ -199,7 +199,7 @@ func _ready() -> void:
 func _raid() -> void:
 	_free_level()
 	await get_tree().process_frame
-	_level = load("res://scenes/levels/f1_ring.tscn").instantiate()
+	_level = load("res://scenes/levels/mall_map.tscn").instantiate()
 	get_tree().root.add_child(_level)
 	get_tree().current_scene = _level
 	for i in range(10):

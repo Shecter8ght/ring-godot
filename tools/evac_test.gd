@@ -16,7 +16,7 @@ func _ready() -> void:
 	RaidEvents.enabled = false
 	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame
-	var level: Node = load("res://scenes/levels/f1_ring.tscn").instantiate()
+	var level: Node = load("res://scenes/levels/mall_map.tscn").instantiate()
 	get_tree().root.add_child(level)
 	get_tree().current_scene = level
 	while level.get_node("Marauders").get_child_count() == 0:

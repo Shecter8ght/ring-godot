@@ -1,7 +1,7 @@
 extends Node
 ## Сводка собранного сектора: сколько стен, полов, дверей, стёкол, вывесок и огней даёт JSON.
 ## Нужна, чтобы правка SectorBuilder не меняла старые уровни: снять до правки и после — сравнить.
-## godot --headless res://tools/sector_stats.tscn -- res://data/sectors/f1_ring.json [ещё.json …]
+## godot --headless res://tools/sector_stats.tscn -- res://data/sectors/mall_map.json [ещё.json …]
 
 
 func _ready() -> void:
@@ -10,7 +10,7 @@ func _ready() -> void:
 		if a.ends_with(".json"):
 			paths.append(a)
 	if paths.is_empty():
-		paths.append("res://data/sectors/f1_ring.json")
+		paths.append("res://data/sectors/mall_map.json")
 	for path: String in paths:
 		var builder := SectorBuilder.new()
 		var t0 := Time.get_ticks_msec()
