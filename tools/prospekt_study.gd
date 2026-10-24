@@ -418,7 +418,20 @@ func _shots() -> void:
 		{"id": "37_supermarket_checkouts", "at": Vector3(-100, 1.62, 51), "look": Vector3(-138, 2.0, 56)},
 		{"id": "38_pit_rows", "at": Vector3(-190, -1.6, -60.4), "look": Vector3(-150, -2.0, -60.4)},
 		{"id": "39_monument", "at": Vector3(-26, 1.62, 50), "look": Vector3(-10, 3.0, 70)},
-		{"id": "40_bird_bank", "at": Vector3(30, 60, 0), "look": Vector3(-30, 0, -50)}]
+		{"id": "40_bird_bank", "at": Vector3(30, 60, 0), "look": Vector3(-30, 0, -50)},
+		# редакция 5 (замечания владельца 2026-10-25)
+		{"id": "41_tower_front", "at": Vector3(-44, 1.62, 6), "look": Vector3(-5, 8, 30)},
+		{"id": "42_tower_shops_in", "at": Vector3(-32.5, 1.62, 22.5), "look": Vector3(-32.5, 1.4, 34)},
+		{"id": "43_tower_courtyard", "at": Vector3(-36, 1.62, 60), "look": Vector3(4, 10, 32)},
+		{"id": "44_station_front", "at": Vector3(-66, 1.62, 202.5), "look": Vector3(-116, 7, 222)},
+		{"id": "45_station_hall", "at": Vector3(-116, 1.62, 216.5), "look": Vector3(-116, 5, 240)},
+		{"id": "46_station_platform", "at": Vector3(-112, 9.2, 259.5), "look": Vector3(-140, 8.5, 262)},
+		{"id": "47_site_pit", "at": Vector3(-96, 2.5, 160), "look": Vector3(-114, -3, 182)},
+		{"id": "48_perimeter_north", "at": Vector3(-100, 1.62, -100), "look": Vector3(-60, 3, -111)},
+		{"id": "49_parking_wrecks", "at": Vector3(-150, -1.6, -60.4), "look": Vector3(-120, -2.4, -60.4)},
+		{"id": "51_dig_lights", "at": Vector3(-72, -1.6, -40), "look": Vector3(-60, -2.6, -44)},
+		{"id": "52_bird_tower", "at": Vector3(-70, 70, 120), "look": Vector3(-5, 0, 60)},
+		{"id": "53_bird_station", "at": Vector3(-40, 70, 170), "look": Vector3(-115, 0, 225)}]
 	for spec: String in OS.get_environment("PROSPEKT_VIEW").split(";", false):
 		var custom: PackedStringArray = spec.split(":")
 		if custom.size() == 7:

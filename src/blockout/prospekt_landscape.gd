@@ -156,6 +156,25 @@ func _ramps(g: RefCounted) -> void:
 		(g.body as StaticBody3D).add_child(cs)
 
 
+## Граница карты (владелец 2026-10-25: «по периметру — логичные преграды, а не невидимая стена»): видимое — забор
+## района, вышки, насыпь и город за ними (наполнение генератора); здесь только страховка — невидимая стенка по
+## линии границы за забором, без столбиков-меток черновика ТЦ.
+func _boundary(g: RefCounted) -> void:
+	var edge: PackedVector2Array = boundary.duplicate()
+	edge.append(boundary[0])
+	for i: int in range(edge.size() - 1):
+		var a: Vector2 = edge[i]
+		var b: Vector2 = edge[i + 1]
+		var shape: BoxShape3D = BoxShape3D.new()
+		shape.size = Vector3(a.distance_to(b) + 2.0, 40.0, 1.0)
+		var cs: CollisionShape3D = CollisionShape3D.new()
+		cs.shape = shape
+		var mid: Vector2 = (a + b) * 0.5
+		cs.position = Vector3(mid.x, 10.0, mid.y)
+		cs.rotation.y = -atan2((b - a).y, (b - a).x)
+		g.body.add_child(cs)
+
+
 ## Наклонные балки (решётка фасада банка, раскосы): [от, до, ширина, толщина, материал].
 func _beams(g: RefCounted) -> void:
 	for b: Array in plan.get("beams", []):
@@ -186,7 +205,7 @@ func _loot(g: RefCounted) -> void:
 ## Свои цвета карты: маркеры лута по ценности (светятся, чтобы читались в тени), граффити, хаки, стекло.
 const EXTRA_COLORS: Dictionary = {"loot_common": Color("c8b48a"), "loot_med": Color("4fae63"), "loot_good": Color("e3b23c"),
 	"loot_weapon": Color("c4493b"), "graffiti": Color("7a6f8f"), "olive": Color("5b6243"), "glass": Color("5d6f74"),
-	"wood": Color("7a6046"), "paint_blue": Color("24477a")}
+	"wood": Color("7a6046"), "paint_blue": Color("24477a"), "paint_white": Color("d9d9d4"), "black": Color("1a1a1a")}
 
 
 func _palette() -> Dictionary:

@@ -330,6 +330,230 @@ story_height = 3.0
 
 label = ""
 
+[node name="Outside_City_N1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -200.0, 0.0, -138.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(30.0, 14.0)
+
+floors = 9
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_N2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -140.0, 0.0, -140.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(40.0, 14.0)
+
+floors = 12
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_N3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -80.0, 0.0, -138.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(24.0, 16.0)
+
+floors = 5
+
+story_height = 3.2
+
+label = ""
+
+[node name="Outside_City_N4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 110.0, 0.0, -140.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(36.0, 16.0)
+
+floors = 14
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_E1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 186.0, 0.0, -100.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(16.0, 30.0)
+
+floors = 6
+
+story_height = 3.2
+
+label = ""
+
+[node name="Outside_City_E2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 184.0, 0.0, 100.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(14.0, 40.0)
+
+floors = 2
+
+story_height = 4.5
+
+label = ""
+
+[node name="Outside_City_E3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 188.0, 0.0, 240.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(20.0, 36.0)
+
+floors = 10
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_S1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -20.0, 0.0, 306.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(40.0, 14.0)
+
+floors = 9
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_S2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -100.0, 0.0, 304.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(30.0, 16.0)
+
+floors = 3
+
+story_height = 4.5
+
+label = ""
+
+[node name="Outside_City_S3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -150.0, 0.0, 306.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(24.0, 16.0)
+
+floors = 12
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_W1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -180.0, 0.0, 150.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(30.0, 50.0)
+
+floors = 2
+
+story_height = 5.0
+
+label = ""
+
+[node name="Outside_City_W2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -182.0, 0.0, 236.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(26.0, 40.0)
+
+floors = 3
+
+story_height = 4.5
+
+label = ""
+
+[node name="Outside_City_W3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -238.0, 0.0, 140.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(20.0, 30.0)
+
+floors = 14
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_W4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -236.0, 0.0, -130.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(22.0, 16.0)
+
+floors = 16
+
+story_height = 3.0
+
+label = ""
+
 [node name="West" type="Node3D" parent="."]
 
 [node name="Coffee" type="Node3D" parent="West" groups=["mall_study_snap"]]
@@ -694,6 +918,30 @@ story_height = 3.0
 
 label = ""
 
+[node name="Tower_Povorot" type="Node3D" parent="South" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 7.0, 4.65, 36.0)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(22.0, 22.0)
+
+floors = 26
+
+story_height = 3.105
+
+label = "«Проспект, 1» — башня 26 этажей (закрыта)"
+
+open_floors = 0
+
+balconies = true
+
+glass_bands = false
+
+metadata/lift = 4.65
+
 [node name="SquareCafe" type="Node3D" parent="South" groups=["mall_study_snap"]]
 
 transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -38.0, 0.0, 126.0)
@@ -716,6 +964,22 @@ loot_theme = "kiosk"
 
 loot_density = 0.6
 
+[node name="WC_Square" type="Node3D" parent="South" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -14.0, 0.0, 190.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(4.0, 8.0)
+
+floors = 1
+
+story_height = 3.0
+
+label = "туалет (закрыт)"
+
 [node name="Minimarket2" type="Node3D" parent="South" groups=["mall_study_snap"]]
 
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 31.0, 0.0, 128.0)
@@ -737,44 +1001,6 @@ interior = "shop"
 loot_theme = "grocery"
 
 loot_density = 0.5
-
-[node name="FlowerPavilion" type="Node3D" parent="South" groups=["mall_study_snap"]]
-
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 14.0, 0.0, 38.0)
-
-script = ExtResource("build")
-
-kind = "hall"
-
-footprint = Vector2(12.0, 7.0)
-
-floors = 1
-
-story_height = 3.6
-
-label = "павильон «Цветы · шаурма»"
-
-interior = "shop"
-
-loot_theme = "kiosk"
-
-loot_density = 0.6
-
-[node name="WC_Square" type="Node3D" parent="South" groups=["mall_study_snap"]]
-
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -14.0, 0.0, 190.0)
-
-script = ExtResource("build")
-
-kind = "mass"
-
-footprint = Vector2(4.0, 8.0)
-
-floors = 1
-
-story_height = 3.0
-
-label = "туалет (закрыт)"
 
 [node name="East" type="Node3D" parent="."]
 
