@@ -92,6 +92,13 @@ def prepare():
         'Исходный генератор в проекте: `tools/urban_screens/v02/build.py -- --only fence,atm,dumpster,kiosk,car,building` через Blender; `inspect_views.py` и `building_views.py` создают дополнительные Cycles-виды без перезаписи модели.',
         'Копия собственных скриптов — `source/urban_screens/`. Большие .blend и фотографии хранятся локально; в git — рецепты и документация.','']
     (ROOT/'README.md').write_text('\n'.join(readme),encoding='utf-8')
+    # A later texture pass may have received explicit geometry approval for R06.
+    # Preserve that per-asset state when refreshing the original geometry package.
+    pbr_manifest=ROOT/'assets/R06_building/pbr_v01/manifest.json'
+    if pbr_manifest.exists():
+        from building_delivery import update_parent
+        update_parent(ROOT,json.loads(pbr_manifest.read_text(encoding='utf-8')))
+        manifest=json.loads((ROOT/'manifest.json').read_text(encoding='utf-8'))
     return manifest
 
 def deliver():
