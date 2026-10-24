@@ -10506,6 +10506,20 @@
       "files": []
     },
     {
+      "id": "pouch_velcro",
+      "name": "Липучка подсумка — достать магазин",
+      "category": "Оружие — обращение",
+      "group": "Перезарядка",
+      "binding": {
+        "type": "action",
+        "hook": "pouch_velcro"
+      },
+      "type": "one",
+      "profile": "pouch_velcro",
+      "files": [],
+      "custom": true
+    },
+    {
       "id": "charge",
       "name": "Затвор на себя — досыл",
       "category": "Оружие — обращение",
