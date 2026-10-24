@@ -94,10 +94,19 @@ def put(kit: str, x: float, z: float, yaw: float = 0.0, s: float = 1.0, dy: floa
 
 def building(bid: str, label: str, at: tuple, size: tuple, kind: str = "mass", floors: int = 1,
              story: float = STORY_RETAIL, yaw: float = 0.0, lift: float = 0.0, interior: str = "",
-             loot_theme: str = "", loot_density: float = 0.0, region: str = "North") -> None:
+             loot_theme: str = "", loot_density: float = 0.0, region: str = "North", script: str = "build",
+             extra: dict | None = None) -> None:
     B.append({"id": bid, "label": label, "at": [round(at[0], 2), round(at[1], 2)], "size": [size[0], size[1]],
               "floors": floors, "story_height": round(story, 3), "yaw": yaw, "kind": kind, "lift": lift,
-              "interior": interior, "loot_theme": loot_theme, "loot_density": loot_density, "region": region})
+              "interior": interior, "loot_theme": loot_theme, "loot_density": loot_density, "region": region,
+              "script": script, "extra": extra or {}})
+
+
+def flats(bid: str, label: str, at: tuple, size: tuple, floors: int, open_floors: int, story: float = STORY_FLAT,
+          balconies: bool = True, glass: bool = False, lift: float = 0.0, region: str = "North", loot: float = 0.5) -> None:
+    """Секция жилого дома / башня (src/blockout/flat_section.gd): квартиры, ядро, подъездная группа."""
+    building(bid, label, at, size, "flats", floors, story, 0.0, lift, "", "home", loot, region, "flats",
+             {"open_floors": open_floors, "balconies": balconies, "glass_bands": glass})
 
 
 def sign(text: str, x: float, y: float, z: float, size: int = 56) -> None:
@@ -182,7 +191,7 @@ for (x, z, w, d, fl) in [(128, -60, 18, 26, 20), (128, -20, 16, 30, 24), (126, 5
 RETAIL_D = 9.0
 retail_zc = FN - RETAIL_D * 0.5                     # −20.2
 slot = 2.0 * WK                                     # служебный проход за магазинами
-apt_d = 13.0
+apt_d = 26.0                                        # 20 м × 1,3 — глубина секции с угловыми квартирами
 apt_zc = FN - RETAIL_D - slot - apt_d * 0.5         # −33.9
 yard_z0 = apt_zc - apt_d * 0.5                       # −40.4 — начало двора
 YARD_Z1 = -84.0
@@ -195,10 +204,8 @@ for (bid, label, x0, x1, interior, theme) in [("Coffee", "кофейня «Зе�
                                              ("Clothes", "одежда «Modus»", -60, -40, "shop", "shelf")]:
     building(bid, label, ((x0 + x1) * 0.5, retail_zc), (x1 - x0, RETAIL_D), "hall", 1, STORY_RETAIL,
              0.0, 0.0, interior, theme, 0.6)
-building("Corpus1_Flats", "корпус 1 · подъезд, 2–3 этажи", (-70.0, apt_zc), (60.0, apt_d), "apartments", 3,
-         STORY_FLAT, 0.0, 0.0, "", "home", 0.5)
-building("Corpus1_Tower", "ЖК «Панорама», корпус 1 — 17 этажей", (-70.0, apt_zc), (60.0, apt_d), "mass", 14, 3.0,
-         0.0, 0.1 + 3 * STORY_FLAT + 0.3)
+flats("Corpus1_A", "ЖК «Панорама», корпус 1 · подъезд 1 — 17 этажей", (-85.0, apt_zc), (30.0, apt_d), 17, 3)
+flats("Corpus1_B", "ЖК «Панорама», корпус 1 · подъезд 2 — 17 этажей", (-55.0, apt_zc), (30.0, apt_d), 17, 3)
 building("Canopy1", "козырёк", (-76.0, FN + 2.3), (48.0, 4.4), "canopy", 1, 3.6)
 # проезд во двор: асфальт, шлагбаум, пандус в паркинг
 surface("drive", "road", -29.0, yard_z0, -21.0, FN)
@@ -218,9 +225,8 @@ sign("пандус в паркинг −1", -35.0, 2.0, RAMP_Z0 + 2.0, 40)
 # корпус 2: пекарня открыта, витрины закрыты, башня 25 этажей
 building("Bakery", "пекарня", (-3.0, retail_zc), (14.0, RETAIL_D), "hall", 1, STORY_RETAIL, 0.0, 0.0, "shop", "grocery", 0.5)
 building("Corpus2_Retail", "салон связи · ломбард · банк (витрины)", (27.0, retail_zc), (46.0, RETAIL_D), "mass", 1, STORY_RETAIL)
-building("Corpus2_Ground", "корпус 2 · первый этаж", (20.0, apt_zc), (60.0, apt_d), "mass", 1, STORY_RETAIL)
-building("Corpus2_Tower", "ЖК «Панорама», корпус 2 — 25 этажей", (20.0, (FN + yard_z0) * 0.5), (60.0, FN - yard_z0),
-         "mass", 24, 3.0, 0.0, STORY_RETAIL + 0.4)
+flats("Corpus2_A", "ЖК «Панорама», корпус 2 · подъезд 1 — 25 этажей (закрыт)", (5.0, apt_zc), (30.0, apt_d), 25, 0)
+flats("Corpus2_B", "ЖК «Панорама», корпус 2 · подъезд 2 — 25 этажей (закрыт)", (35.0, apt_zc), (30.0, apt_d), 25, 0)
 # инкассаторский броневик у банка — дорогая находка на виду
 put("truck_cab", 40.0, -11.0, 95.0, 1.0, 0.0, 0, 0.0, True)
 sign("броневик у банка", 40.0, 3.4, -11.0, 40)
@@ -228,7 +234,7 @@ sign("броневик у банка", 40.0, 3.4, -11.0, 40)
 # двор ЖК на плите паркинга: плита с вырезами под лестницы и пандус
 PIT_X0, PIT_X1, PIT_Z0, PIT_Z1 = -92.0, 36.0, -78.0, yard_z0
 STAIR_W = 1.2 * WK                                 # 1.56
-stair_a = {"x": -68.0, "z_top": -51.5, "z_bot": -45.5}   # у подъезда корпуса 1 (низ ближе к дому)
+stair_a = {"x": -68.0, "z_top": -62.0, "z_bot": -56.0}   # у подъезда корпуса 1 (низ ближе к дому)
 stair_b = {"x": 20.0, "z_top": -63.5, "z_bot": -69.5}    # восточная, у мусорной площадки
 holes = [[stair_a["x"] - STAIR_W * 0.5 - 0.2, stair_a["z_top"] - 1.0, stair_a["x"] + STAIR_W * 0.5 + 0.2, stair_a["z_bot"] + 0.3],
          [stair_b["x"] - STAIR_W * 0.5 - 0.2, stair_b["z_bot"] - 0.3, stair_b["x"] + STAIR_W * 0.5 + 0.2, stair_b["z_top"] + 1.0],
@@ -247,6 +253,8 @@ plan["stairs"].append({"from": [stair_a["x"], PIT_Y, stair_a["z_bot"]], "to": [s
 plan["stairs"].append({"from": [stair_b["x"], PIT_Y, stair_b["z_bot"]], "to": [stair_b["x"], 0.0, stair_b["z_top"]], "width": STAIR_W, "count": 20, "mat": "concrete"})
 for (x, z) in [(stair_a["x"], stair_a["z_bot"] - 1.0), (stair_b["x"], stair_b["z_bot"] + 1.0), (-35.0, PIT_Z1 - 3.0), (-30.0, -60.0), (10.0, -58.0)]:
     plan["lamps"].append([x, -0.9, z, 0.6, 9.0])
+sign("вход в подъезд 1", -85.0, 3.4, yard_z0 - 0.6, 40)
+sign("вход в подъезд 2", -55.0, 3.4, yard_z0 - 0.6, 40)
 # машины в паркинге и техпомещение
 for i in range(9):
     put("car", PIT_X0 + 8.0 + i * 8.0, PIT_Z0 + 4.0, 0.0, 1.0, PIT_Y, (i * 3) % 8, 0.0, True)
@@ -278,7 +286,6 @@ for i in range(60):
 box(-20.0, 1.2, FENCE_Z, 0.3, 2.4, 0.3, "steel")                                   # створка ворот распахнута
 sign("ворота двора · к насыпи", -20.0, 3.4, FENCE_Z, 44)
 surface("north_lane", "road", -26.0, -100.0, -14.0, FENCE_Z)
-sign("ЖК «Панорама» · корпус 1 · вход", -70.0, 3.6, yard_z0 + 0.3, 40)
 # сквер
 surface("square", "court", 56.0, -64.0, X_EAST, FN, 0.0, 0.12)
 put("monument", 78.0, -40.0, 0.0, 1.0, 0.0, -1, 0.0, True)
@@ -297,11 +304,18 @@ put("lamp_park", 66.0, -40.0, 0.0)
 put("lamp_park", 90.0, -40.0, 0.0)
 
 # ============================================================ юг: бизнес-центр, супермаркет, дом 7
-building("Business", "бизнес-центр «Меридиан», 6 эт. (закрыт)", (-94.0, FS + 18.0), (44.0, 36.0), "mass", 6, 3.3, 0.0, 0.0, "", "", 0.0, "South")
+building("Vershina_Podium", "ЖК «Вершина» · стилобат: банк, офисы, фитнес (закрыт)", (-94.0, FS + 18.0), (44.0, 36.0), "mass", 2, 4.0, 0.0, 0.0, "", "", 0.0, "South")
+flats("Vershina_T1", "ЖК «Вершина», башня 1 — 40 этажей", (-106.0, FS + 10.5), (20.0, 20.0), 40, 0, 3.2, False, True, 8.3, "South", 0.0)
+flats("Vershina_T2", "ЖК «Вершина», башня 2 — 34 этажа", (-82.0, FS + 10.5), (20.0, 20.0), 34, 0, 3.2, False, True, 8.3, "South", 0.0)
+flats("Vershina_T3", "ЖК «Вершина», башня 3 — 46 этажей", (-105.0, 63.0), (22.0, 22.0), 46, 0, 3.2, False, True, 0.0, "South", 0.0)
+flats("Vershina_T4", "ЖК «Вершина», башня 4 — 30 этажей", (-84.0, 92.0), (20.0, 20.0), 30, 0, 3.2, False, True, 0.0, "South", 0.0)
+sign("ЖК «Вершина» · четыре башни на стилобате", -94.0, 10.0, FS + 1.0, 64)
 put("bus_stop", -99.0, FS - 3.0, 180.0, 1.0, 0.0, -1, 0.0, True)
 put("kiosk", -114.0, FS - 3.0, 0.0, 1.0, 0.0, -1, 0.0, True)
 put("kiosk", -110.0, FS - 2.6, 0.0, 1.0, 0.0, -1, 0.0, True)
 sign("ларьки · остановка", -112.0, 3.6, FS - 3.0, 36)
+put("hedge", -116.0, FS + 0.6, 90.0)
+put("hedge", -72.5, FS + 0.6, 90.0)
 # задний двор бизнес-центра — заход «За бизнес-центром»
 surface("bc_yard", "road", -116.0, FS + 36.0, -72.0, 100.0)
 for i in range(3):
@@ -408,7 +422,7 @@ plan["locations"] = [
     {"id": 1, "label": "Кордон", "at": [-104.0, 0.0], "spawn": [-104.0, 0.0], "look": [-80.0, -10.0]},
     {"id": 2, "label": "Кофейня «Зерно»", "at": [-92.0, -20.0], "spawn": [-92.0, -10.0], "look": [-92.0, -20.0]},
     {"id": 3, "label": "Проезд и пандус", "at": [-25.0, -20.0], "spawn": [-25.0, -12.0], "look": [-33.0, -35.0]},
-    {"id": 4, "label": "Двор ЖК", "at": [-50.0, -60.0], "spawn": [-20.0, -50.0], "look": [-60.0, -60.0]},
+    {"id": 4, "label": "Двор ЖК · подъезд 1", "at": [-85.0, -62.0], "spawn": [-20.0, -62.0], "look": [-85.0, -56.0]},
     {"id": 5, "label": "Подземный переход", "at": [-44.0, 0.0], "spawn": [-36.0, -10.0], "look": [-47.0, -13.0]},
     {"id": 6, "label": "Парковка супермаркета", "at": [-20.0, 35.0], "spawn": [-44.0, 18.0], "look": [-20.0, 56.0]},
     {"id": 7, "label": "Супермаркет «Ярус»", "at": [-20.0, 76.0], "spawn": [-20.0, 52.0], "look": [-20.0, 76.0]},
@@ -419,7 +433,7 @@ plan["locations"] = [
 sm_cx = (SM_X0 + SM_X1) * 0.5
 plan["probe_routes"] = [
     {"id": "prologue", "label": "пролог: кордон → кофейня → переход → парковка → «Ярус» → склад → двор → проезд", "max_open_m": 30.0,
-     "points": [[-104, 0], [-100, -11], [-92, -12], [-92, -15], [-91, -18], [-91, -22], [-92, -15], [-92, -12], [-60, -12],
+     "points": [[-104, 0], [-98, -6], [-98, -11], [-92, -12], [-92, -15], [-91, -18], [-91, -22], [-92, -15], [-92, -12], [-60, -12],
                 [-52, -10], [-39.5, -10], [-39.5, -13], [-41.5, -13], [-47.3, -13], [-47.3, -9.5], [-44, 0], [-44, 8], [-47.3, 10], [-47.3, 13], [-41.5, 13], [-39.5, 13], [-34, 18], [-24, 30], [-24, 50],
                 [sm_cx - 6, 54], [sm_cx - 6, 60], [sm_cx - 6, 72], [sm_cx - 6, 86], [sm_cx - 20, 88], [sm_cx - 20, 92.5],
                 [sm_cx, 92.5], [sm_cx, 97.2], [10, 97.2], [18, 98], [27, 100]]},
@@ -432,12 +446,13 @@ plan["probe_routes"] = [
      "points": [[-100, 78], [-80, 79], [-74, 79], [-69, 79], [-66, 70], [-66, 30], [-66, 14], [-77, 0], [-77, -10], [-40, -10], [-25, -12],
                 [-25, -44], [-20, -70], [-20, -86]]},
     {"id": "parking_minus1", "label": "пандус → паркинг −1 → лестница во двор", "max_open_m": 0.0,
-     "points": [[-25, -14], [-35, -18], [-35, -30], [-35, -42], [-35, -45], [-60, -45], [stair_a["x"], stair_a["z_bot"] + 0.8],
-                [stair_a["x"], stair_a["z_top"] - 1.0], [stair_a["x"], -56]]},
-    {"id": "corpus1_floor3", "label": "подъезд корпуса 1: лестница на 3-й этаж", "max_open_m": 0.0,
-     "points": [[-70, -43], [-70, apt_zc], [-94, apt_zc], [-96.05, apt_zc + 2.8], [-96.05, apt_zc - 2.8], [-93.95, apt_zc - 2.8],
-                [-93.95, apt_zc + 2.8], [-96.05, apt_zc + 2.8], [-96.05, apt_zc - 2.8], [-93.95, apt_zc - 2.8], [-93.95, apt_zc + 2.8],
-                [-95, apt_zc + 3.45], [-91, apt_zc + 3.45], [-88, apt_zc]], "min_y": 2 * STORY_FLAT - 0.5},
+     "points": [[-25, -14], [-35, -18], [-35, -30], [-35, -45], [-35, -56], [-60, -58], [stair_a["x"], stair_a["z_bot"] + 0.8],
+                [stair_a["x"], stair_a["z_top"] - 1.0], [stair_a["x"], -66]]},
+    {"id": "corpus1_floor3", "label": "подъезд 1 корпуса 1: тамбур, вестибюль, холл, лестница на 3-й этаж", "max_open_m": 0.0,
+     "points": [[-85, yard_z0 - 3.5], [-85, yard_z0 + 1.0], [-85, apt_zc - 8.5], [-85, apt_zc - 4.0], [-85, apt_zc], [-88.75, apt_zc + 0.5], [-88.75, apt_zc + 1.9],
+                [-88.75, apt_zc + 3.0], [-88, apt_zc + 2.5], [-82, apt_zc + 2.5], [-81.25, apt_zc + 3.5], [-82, apt_zc + 4.5], [-88, apt_zc + 4.5],
+                [-88.75, apt_zc + 3.5], [-88, apt_zc + 2.5], [-82, apt_zc + 2.5], [-81.25, apt_zc + 3.5], [-82, apt_zc + 4.5], [-88, apt_zc + 4.5],
+                [-88.75, apt_zc + 3.5], [-88.75, apt_zc + 1.9], [-88.75, apt_zc + 0.5], [-85, apt_zc]], "min_y": 2 * STORY_FLAT - 0.5},
 ]
 F["stories"] = [{"label": "пост ДПС: машина, конусы, щит «Внимание»", "at": [-66.0, 6.5], "height": 4.0},
                 {"label": "бросили при погрузке: багажник и коробки", "at": [-12.0, 46.0], "height": 4.0},
@@ -454,6 +469,51 @@ for i in range(40):
     x = rng.uniform(X_WEST + 4, X_EAST - 2)
     z = rng.choice([rng.uniform(FN + 0.5, -ROAD_HALF - 0.6), rng.uniform(ROAD_HALF + 0.6, FS - 0.5)])
     put(rng.choice(["suitcase", "bags", "cart"]) if i % 5 == 0 else "bags", x, z, rng.uniform(0, 360), rng.uniform(0.6, 1.0))
+
+# --- мусор: бумага, бутылки, банки, кучи у баков и ларьков (владелец: «нет мусора, клочков бумаги»)
+for i in range(320):
+    x = rng.uniform(X_WEST + 3, X_EAST + 6)
+    r = rng.random()
+    if r < 0.35:
+        z = rng.uniform(FN + 0.3, -ROAD_HALF - 0.3)
+    elif r < 0.7:
+        z = rng.uniform(ROAD_HALF + 0.3, FS - 0.3)
+    else:
+        z = rng.uniform(-ROAD_HALF + 0.3, ROAD_HALF - 0.3)
+    put("paper" if rng.random() < 0.7 else "paper_ball", x, z, rng.uniform(0, 360), rng.uniform(0.7, 1.2))
+for (cx, cz, n) in [(-112, FS - 3, 25), (-99, FS - 3, 20), (40, FS - 3, 20), (52, FS - 3, 25), (-46.4, 0, 18), (90, -52, 20), (-20, 40, 40), (23, -46, 15)]:
+    for i in range(n):
+        put(rng.choice(["bottle", "can", "paper", "paper_ball", "bags"]), cx + rng.uniform(-6, 6), cz + rng.uniform(-4, 4), rng.uniform(0, 360), rng.uniform(0.6, 1.0),
+            TUNNEL_Y if (cx, cz) == (-46.4, 0) else 0.0)
+for (x, z) in [(34.0, -64.0), (-96.0, 60.0), (92.0, 33.0), (6.0, 101.5), (-62.0, 54.0), (58.0, 12.0)]:
+    put("trash_pile", x, z, rng.uniform(0, 360), 1.0, 0.0, -1, 0.0, True)
+    put("bags", x + 1.2, z + 0.8, rng.uniform(0, 360))
+# ограждения: металлические вдоль бордюра у зебр и разделительной, переносные у кордона и въездов, бетон у тумбы
+for xz in (-80.0, 62.0):
+    for k in range(-5, 6):
+        if k in (-1, 0, 1):
+            continue
+        put("ped_fence", xz + k * 2.1, -ROAD_HALF - 0.25, 90.0, 1.0, 0.0, -1, 0.0, k % 3 == 0)
+        put("ped_fence", xz + k * 2.1, ROAD_HALF + 0.25, 90.0, 1.0, 0.0, -1, 0.0, k % 3 == 0)
+for x in range(-60, -32, 2):                                   # до проезда во двор — там разрыв для пешеходов
+    put("ped_fence", x + 1.0, -MEDIAN_HALF - 0.1, 90.0)
+    put("ped_fence", x + 1.0, MEDIAN_HALF + 0.1, 90.0)
+for i in range(7):
+    put("crowd_barrier", -117.5 + (i % 2) * 0.8, -9.0 + i * 3.0, 0.0 + rng.uniform(-20, 20), 1.0, 0.0, -1, 0.0, True)
+for i in range(4):
+    put("crowd_barrier", -66.0 + i * 2.6, 17.0, 0.0 + rng.uniform(-10, 10), 1.0, 0.0, -1, 0.0, True)
+for i in range(3):
+    put("crowd_barrier", -38.5 + i * 2.6, FN - 0.6, 90.0, 1.0, 0.0, -1, 0.0, True)
+    put("crowd_barrier", -18.5 + i * 2.6, FN - 0.6, 90.0, 1.0, 0.0, -1, 0.0, True)
+for (x, z) in [(-15.0, -2.4), (-15.0, 2.4), (-3.0, -2.4), (-3.0, 2.4)]:
+    put("jersey", x, z, 90.0, 1.0, 0.0, -1, 0.0, True)
+for i in range(6):
+    put("fbs", 80.0 + i * 3.0, -8.9 + (i % 2) * 0.8, 90.0, 1.0, 0.0, -1, 0.0, True)
+for i in range(5):
+    put("road_barrier", 60.0 + i * 2.4, 9.3, 90.0)
+put("cone", -82.0, 9.5, 0.0)
+put("cone", -78.5, 9.8, 0.0)
+put("cone", 64.0, -9.6, 0.0)
 
 plan["buildings_count"] = len(B)
 plan["items_count"] = len(F["items"])
@@ -479,24 +539,35 @@ scene = [
     '[ext_resource type="Script" path="res://src/blockout/study_building.gd" id="build"]',
     '[ext_resource type="Script" path="res://src/blockout/prospekt_study_level.gd" id="launch"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]',
-    '[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]',
-    'sky_top_color = Color(0.36, 0.44, 0.52, 1)', 'sky_horizon_color = Color(0.72, 0.66, 0.58, 1)',
-    'ground_bottom_color = Color(0.3, 0.3, 0.27, 1)', 'ground_horizon_color = Color(0.72, 0.66, 0.58, 1)',
+    '[ext_resource type="Script" path="res://src/blockout/flat_section.gd" id="flats"]',
+    # освещение — своё, не из других карт (владелец 2026-10-24): физическое небо, низкое вечернее солнце с
+    # запада-юго-запада, ACES, рассеянный свет неба с ровной подсветкой, SSIL, лёгкий туман
+    '[sub_resource type="PhysicalSkyMaterial" id="SkyMat"]',
+    'rayleigh_coefficient = 2.2', 'rayleigh_color = Color(0.26, 0.41, 0.58, 1)', 'mie_coefficient = 0.006',
+    'mie_eccentricity = 0.82', 'mie_color = Color(0.69, 0.68, 0.62, 1)', 'turbidity = 8.0', 'sun_disk_scale = 2.0',
+    'ground_color = Color(0.3, 0.28, 0.25, 1)', 'energy_multiplier = 1.6',
     '[sub_resource type="Sky" id="Sky"]', 'sky_material = SubResource("SkyMat")',
     '[sub_resource type="Environment" id="Environment"]',
     'background_mode = 2', 'sky = SubResource("Sky")',
-    'ambient_light_source = 3', 'ambient_light_color = Color(0.68, 0.71, 0.75, 1)',
-    'ambient_light_energy = 0.55', 'reflected_light_source = 2',
-    'tonemap_mode = 2', 'tonemap_exposure = 1.0',
-    'fog_enabled = true', 'fog_light_color = Color(0.7, 0.66, 0.6, 1)', 'fog_light_energy = 0.6', 'fog_density = 0.0006',
-    'ssao_enabled = true', 'ssao_radius = 1.5', 'ssao_intensity = 1.3',
+    'ambient_light_source = 3', 'ambient_light_color = Color(0.62, 0.66, 0.74, 1)', 'ambient_light_sky_contribution = 0.5', 'ambient_light_energy = 0.9',
+    'reflected_light_source = 2',
+    'tonemap_mode = 3', 'tonemap_exposure = 1.05', 'tonemap_white = 6.0',
+    'ssao_enabled = true', 'ssao_radius = 1.2', 'ssao_intensity = 1.6',
+    # SDFGI в блокауте выключен: на сером материале он не успевал набрать свет и гасил рассеянный — тени чёрные;
+    # для чистовой карты глобальное освещение подбирать отдельно (AGENTS.md, п. 10)
+    'ssil_enabled = true', 'ssil_radius = 4.0', 'ssil_intensity = 1.0',
+    'glow_enabled = true', 'glow_intensity = 0.25', 'glow_bloom = 0.04', 'glow_hdr_threshold = 1.4',
+    'fog_enabled = true', 'fog_light_color = Color(0.74, 0.72, 0.7, 1)', 'fog_light_energy = 0.7', 'fog_density = 0.00028',
+    'fog_sky_affect = 0.1', 'fog_height = -2.0', 'fog_height_density = 0.0',
+    'adjustment_enabled = true', 'adjustment_contrast = 1.04', 'adjustment_saturation = 0.96',
     '[node name="ProspektStudy" type="Node3D"]',
     'script = ExtResource("launch")',
     'metadata/purpose = "Карта «Проспект» — серый блокаут 232 × 212 м · правило масштаба E (проходы × 1,3, высоты × 1,15, предметы 1:1)"',
     '[node name="WorldEnvironment" type="WorldEnvironment" parent="."]', 'environment = SubResource("Environment")',
     '[node name="EveningSun" type="DirectionalLight3D" parent="."]',
-    'rotation_degrees = Vector3(-24, -112, 0)', 'light_color = Color(1, 0.86, 0.7, 1)', 'light_energy = 1.1',
-    'light_angular_distance = 2.0', 'shadow_enabled = true', 'directional_shadow_max_distance = 220.0',
+    'rotation_degrees = Vector3(-17, -118, 0)', 'light_color = Color(1, 0.8, 0.62, 1)', 'light_energy = 1.7',
+    'light_angular_distance = 0.6', 'shadow_enabled = true', 'shadow_blur = 1.2', 'directional_shadow_max_distance = 260.0',
+    'directional_shadow_split_1 = 0.08', 'directional_shadow_split_2 = 0.25', 'directional_shadow_split_3 = 0.55',
     '[node name="Landscape" type="Node3D" parent="."]', 'script = ExtResource("land")',
     '[node name="Filler" type="Node3D" parent="."]', 'script = ExtResource("fill")',
 ]
@@ -510,9 +581,11 @@ for region in regions:
         if b["region"] != region:
             continue
         lines = [f'[node name="{b["id"]}" type="Node3D" parent="{region}" groups=["mall_study_snap"]]', tf(b),
-                 'script = ExtResource("build")', f'kind = "{b["kind"]}"',
+                 f'script = ExtResource("{b["script"]}")', f'kind = "{b["kind"] if b["script"] == "build" else "mass"}"',
                  f'footprint = Vector2({b["size"][0]}, {b["size"][1]})', f'floors = {b["floors"]}',
                  f'story_height = {b["story_height"]}', f'label = "{b["label"]}"']
+        for key, val in b["extra"].items():
+            lines.append(f'{key} = {str(val).lower() if isinstance(val, bool) else val}')
         if b["interior"]:
             lines += [f'interior = "{b["interior"]}"', f'loot_theme = "{b["loot_theme"]}"', f'loot_density = {b["loot_density"]}']
         if b["lift"]:

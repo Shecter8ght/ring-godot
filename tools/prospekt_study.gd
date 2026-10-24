@@ -214,8 +214,8 @@ func _verify() -> void:
 	_check("Габариты и скорость из Balance", is_equal_approx(((walker.get("capsule") as CollisionShape3D).shape as CapsuleShape3D).height, Balance.STANCE_HEIGHT.stand),
 		{"walk_m_s": Balance.PLAYER_WALK_SPEED, "sprint_m_s": Balance.PLAYER_SPRINT_SPEED})
 	# уровни: паркинг −1 под плитой двора, переход под дорогой
-	var yard_y: float = _ray_y(-60.0, -60.0)
-	var pit_y: float = _ray_y(-60.0, -60.0, -1.0, 6.0)
+	var yard_y: float = _ray_y(-44.0, -70.0)
+	var pit_y: float = _ray_y(-44.0, -70.0, -1.0, 6.0)
 	_check("Паркинг −1: плита двора на нуле, пол на −3,2", absf(yard_y) < 0.2 and absf(pit_y + 3.2) < 0.2, {"yard_y": yard_y, "pit_y": pit_y})
 	var road_y: float = _ray_y(-44.0, 0.0)
 	var tunnel_y: float = _ray_y(-44.0, 0.0, -0.6, 6.0)
@@ -367,7 +367,10 @@ func _shots() -> void:
 		{"id": "13_square", "at": Vector3(60, 1.62, -16), "look": Vector3(85, 2, -45)},
 		{"id": "14_east_jam", "at": Vector3(60, 1.62, -6), "look": Vector3(105, 2, 0)},
 		{"id": "15_towers", "at": Vector3(-20, 1.62, 14), "look": Vector3(-40, 40, -40)},
-		{"id": "16_flat_floor3", "at": Vector3(-80, 6.4, -34), "look": Vector3(-50, 6.0, -34)},
+		{"id": "16_flat_floor3", "at": Vector3(-70.6, 7.8, -41.3), "look": Vector3(-74.0, 7.2, -47.5)},
+		{"id": "18_lobby", "at": Vector3(-87.0, 1.62, -48.5), "look": Vector3(-85.0, 1.4, -40.0)},
+		{"id": "19_vershina", "at": Vector3(-60.0, 1.62, 12.0), "look": Vector3(-100.0, 40.0, 40.0)},
+		{"id": "20_litter", "at": Vector3(-108.0, 1.62, 12.5), "look": Vector3(-100.0, 0.0, 18.0)},
 		{"id": "17_bird_center", "at": Vector3(-30, 90, 60), "look": Vector3(-30, 0, -20)}]
 	for spec: String in OS.get_environment("PROSPEKT_VIEW").split(";", false):
 		var custom: PackedStringArray = spec.split(":")
@@ -378,7 +381,7 @@ func _shots() -> void:
 		camera.global_position = view.at
 		camera.look_at(view.look, Vector3.UP)
 		camera.fov = 62.0 if String(view.id).ends_with("overview") or String(view.id).ends_with("center") else Settings.fps_fov_v()
-		await _frames(20)
+		await _frames(60)
 		await RenderingServer.frame_post_draw
 		var image: Image = get_viewport().get_texture().get_image()
 		var path: String = output_dir.path_join(String(view.id) + ".png")
@@ -391,7 +394,7 @@ func _shots() -> void:
 	map.queue_redraw()
 	await _frames(10)
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(output_dir.path_join("20_map.png"))
+	get_viewport().get_texture().get_image().save_png(output_dir.path_join("30_map.png"))
 	get_tree().quit()
 
 

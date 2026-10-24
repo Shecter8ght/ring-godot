@@ -8,15 +8,27 @@
 
 [ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]
 
-[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+[ext_resource type="Script" path="res://src/blockout/flat_section.gd" id="flats"]
 
-sky_top_color = Color(0.36, 0.44, 0.52, 1)
+[sub_resource type="PhysicalSkyMaterial" id="SkyMat"]
 
-sky_horizon_color = Color(0.72, 0.66, 0.58, 1)
+rayleigh_coefficient = 2.2
 
-ground_bottom_color = Color(0.3, 0.3, 0.27, 1)
+rayleigh_color = Color(0.26, 0.41, 0.58, 1)
 
-ground_horizon_color = Color(0.72, 0.66, 0.58, 1)
+mie_coefficient = 0.006
+
+mie_eccentricity = 0.82
+
+mie_color = Color(0.69, 0.68, 0.62, 1)
+
+turbidity = 8.0
+
+sun_disk_scale = 2.0
+
+ground_color = Color(0.3, 0.28, 0.25, 1)
+
+energy_multiplier = 1.6
 
 [sub_resource type="Sky" id="Sky"]
 
@@ -30,29 +42,59 @@ sky = SubResource("Sky")
 
 ambient_light_source = 3
 
-ambient_light_color = Color(0.68, 0.71, 0.75, 1)
+ambient_light_color = Color(0.62, 0.66, 0.74, 1)
 
-ambient_light_energy = 0.55
+ambient_light_sky_contribution = 0.5
+
+ambient_light_energy = 0.9
 
 reflected_light_source = 2
 
-tonemap_mode = 2
+tonemap_mode = 3
 
-tonemap_exposure = 1.0
+tonemap_exposure = 1.05
 
-fog_enabled = true
-
-fog_light_color = Color(0.7, 0.66, 0.6, 1)
-
-fog_light_energy = 0.6
-
-fog_density = 0.0006
+tonemap_white = 6.0
 
 ssao_enabled = true
 
-ssao_radius = 1.5
+ssao_radius = 1.2
 
-ssao_intensity = 1.3
+ssao_intensity = 1.6
+
+ssil_enabled = true
+
+ssil_radius = 4.0
+
+ssil_intensity = 1.0
+
+glow_enabled = true
+
+glow_intensity = 0.25
+
+glow_bloom = 0.04
+
+glow_hdr_threshold = 1.4
+
+fog_enabled = true
+
+fog_light_color = Color(0.74, 0.72, 0.7, 1)
+
+fog_light_energy = 0.7
+
+fog_density = 0.00028
+
+fog_sky_affect = 0.1
+
+fog_height = -2.0
+
+fog_height_density = 0.0
+
+adjustment_enabled = true
+
+adjustment_contrast = 1.04
+
+adjustment_saturation = 0.96
 
 [node name="ProspektStudy" type="Node3D"]
 
@@ -66,17 +108,25 @@ environment = SubResource("Environment")
 
 [node name="EveningSun" type="DirectionalLight3D" parent="."]
 
-rotation_degrees = Vector3(-24, -112, 0)
+rotation_degrees = Vector3(-17, -118, 0)
 
-light_color = Color(1, 0.86, 0.7, 1)
+light_color = Color(1, 0.8, 0.62, 1)
 
-light_energy = 1.1
+light_energy = 1.7
 
-light_angular_distance = 2.0
+light_angular_distance = 0.6
 
 shadow_enabled = true
 
-directional_shadow_max_distance = 220.0
+shadow_blur = 1.2
+
+directional_shadow_max_distance = 260.0
+
+directional_shadow_split_1 = 0.08
+
+directional_shadow_split_2 = 0.25
+
+directional_shadow_split_3 = 0.55
 
 [node name="Landscape" type="Node3D" parent="."]
 
@@ -306,39 +356,49 @@ loot_theme = "shelf"
 
 loot_density = 0.6
 
-[node name="Corpus1_Flats" type="Node3D" parent="North" groups=["mall_study_snap"]]
+[node name="Corpus1_A" type="Node3D" parent="North" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -70.0, 0.0, -33.75)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -85.0, 0.0, -40.25)
 
-script = ExtResource("build")
-
-kind = "apartments"
-
-footprint = Vector2(60.0, 13.0)
-
-floors = 3
-
-story_height = 3.105
-
-label = "корпус 1 · подъезд, 2–3 этажи"
-
-[node name="Corpus1_Tower" type="Node3D" parent="North" groups=["mall_study_snap"]]
-
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -70.0, 9.715, -33.75)
-
-script = ExtResource("build")
+script = ExtResource("flats")
 
 kind = "mass"
 
-footprint = Vector2(60.0, 13.0)
+footprint = Vector2(30.0, 26.0)
 
-floors = 14
+floors = 17
 
-story_height = 3.0
+story_height = 3.105
 
-label = "ЖК «Панорама», корпус 1 — 17 этажей"
+label = "ЖК «Панорама», корпус 1 · подъезд 1 — 17 этажей"
 
-metadata/lift = 9.715
+open_floors = 3
+
+balconies = true
+
+glass_bands = false
+
+[node name="Corpus1_B" type="Node3D" parent="North" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -55.0, 0.0, -40.25)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(30.0, 26.0)
+
+floors = 17
+
+story_height = 3.105
+
+label = "ЖК «Панорама», корпус 1 · подъезд 2 — 17 этажей"
+
+open_floors = 3
+
+balconies = true
+
+glass_bands = false
 
 [node name="Canopy1" type="Node3D" parent="North" groups=["mall_study_snap"]]
 
@@ -394,43 +454,53 @@ story_height = 4.0
 
 label = "салон связи · ломбард · банк (витрины)"
 
-[node name="Corpus2_Ground" type="Node3D" parent="North" groups=["mall_study_snap"]]
+[node name="Corpus2_A" type="Node3D" parent="North" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 20.0, 0.0, -33.75)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 5.0, 0.0, -40.25)
 
-script = ExtResource("build")
-
-kind = "mass"
-
-footprint = Vector2(60.0, 13.0)
-
-floors = 1
-
-story_height = 4.0
-
-label = "корпус 2 · первый этаж"
-
-[node name="Corpus2_Tower" type="Node3D" parent="North" groups=["mall_study_snap"]]
-
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 20.0, 4.4, -27.95)
-
-script = ExtResource("build")
+script = ExtResource("flats")
 
 kind = "mass"
 
-footprint = Vector2(60.0, 24.6)
+footprint = Vector2(30.0, 26.0)
 
-floors = 24
+floors = 25
 
-story_height = 3.0
+story_height = 3.105
 
-label = "ЖК «Панорама», корпус 2 — 25 этажей"
+label = "ЖК «Панорама», корпус 2 · подъезд 1 — 25 этажей (закрыт)"
 
-metadata/lift = 4.4
+open_floors = 0
+
+balconies = true
+
+glass_bands = false
+
+[node name="Corpus2_B" type="Node3D" parent="North" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 35.0, 0.0, -40.25)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(30.0, 26.0)
+
+floors = 25
+
+story_height = 3.105
+
+label = "ЖК «Панорама», корпус 2 · подъезд 2 — 25 этажей (закрыт)"
+
+open_floors = 0
+
+balconies = true
+
+glass_bands = false
 
 [node name="South" type="Node3D" parent="."]
 
-[node name="Business" type="Node3D" parent="South" groups=["mall_study_snap"]]
+[node name="Vershina_Podium" type="Node3D" parent="South" groups=["mall_study_snap"]]
 
 transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -94.0, 0.0, 33.65)
 
@@ -440,11 +510,103 @@ kind = "mass"
 
 footprint = Vector2(44.0, 36.0)
 
-floors = 6
+floors = 2
 
-story_height = 3.3
+story_height = 4.0
 
-label = "бизнес-центр «Меридиан», 6 эт. (закрыт)"
+label = "ЖК «Вершина» · стилобат: банк, офисы, фитнес (закрыт)"
+
+[node name="Vershina_T1" type="Node3D" parent="South" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -106.0, 8.3, 26.15)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(20.0, 20.0)
+
+floors = 40
+
+story_height = 3.2
+
+label = "ЖК «Вершина», башня 1 — 40 этажей"
+
+open_floors = 0
+
+balconies = false
+
+glass_bands = true
+
+metadata/lift = 8.3
+
+[node name="Vershina_T2" type="Node3D" parent="South" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -82.0, 8.3, 26.15)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(20.0, 20.0)
+
+floors = 34
+
+story_height = 3.2
+
+label = "ЖК «Вершина», башня 2 — 34 этажа"
+
+open_floors = 0
+
+balconies = false
+
+glass_bands = true
+
+metadata/lift = 8.3
+
+[node name="Vershina_T3" type="Node3D" parent="South" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -105.0, 0.0, 63.0)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(22.0, 22.0)
+
+floors = 46
+
+story_height = 3.2
+
+label = "ЖК «Вершина», башня 3 — 46 этажей"
+
+open_floors = 0
+
+balconies = false
+
+glass_bands = true
+
+[node name="Vershina_T4" type="Node3D" parent="South" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -84.0, 0.0, 92.0)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(20.0, 20.0)
+
+floors = 30
+
+story_height = 3.2
+
+label = "ЖК «Вершина», башня 4 — 30 этажей"
+
+open_floors = 0
+
+balconies = false
+
+glass_bands = true
 
 [node name="Supermarket" type="Node3D" parent="South" groups=["mall_study_snap"]]
 
