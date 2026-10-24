@@ -214,11 +214,14 @@ func _verify() -> void:
 	_check("Габариты и скорость из Balance", is_equal_approx(((walker.get("capsule") as CollisionShape3D).shape as CapsuleShape3D).height, Balance.STANCE_HEIGHT.stand),
 		{"walk_m_s": Balance.PLAYER_WALK_SPEED, "sprint_m_s": Balance.PLAYER_SPRINT_SPEED})
 	# уровни: паркинг −1 под плитой двора, переход под дорогой
-	var yard_y: float = _ray_y(-44.0, -70.0)
-	var pit_y: float = _ray_y(-44.0, -70.0, -1.0, 6.0)
+	var checks: Dictionary = plan.get("checks", {}) as Dictionary
+	var pp: Array = checks.get("pit", [-44.0, -70.0])
+	var tp: Array = checks.get("tunnel", [-44.0, 0.0])
+	var yard_y: float = _ray_y(float(pp[0]), float(pp[1]))
+	var pit_y: float = _ray_y(float(pp[0]), float(pp[1]), -1.0, 6.0)
 	_check("Паркинг −1: плита двора на нуле, пол на −3,2", absf(yard_y) < 0.2 and absf(pit_y + 3.2) < 0.2, {"yard_y": yard_y, "pit_y": pit_y})
-	var road_y: float = _ray_y(-44.0, 0.0)
-	var tunnel_y: float = _ray_y(-44.0, 0.0, -0.6, 6.0)
+	var road_y: float = _ray_y(float(tp[0]), float(tp[1]))
+	var tunnel_y: float = _ray_y(float(tp[0]), float(tp[1]), -0.6, 6.0)
 	_check("Подземный переход: дорога сверху, пол на −3,3", absf(road_y) < 0.2 and absf(tunnel_y + 3.3) < 0.2, {"road_y": road_y, "tunnel_y": tunnel_y})
 	# безопасные точки мест
 	for loc: Dictionary in plan.locations:
@@ -248,8 +251,11 @@ func _verify() -> void:
 			_check("Маршрут «%s»: открытый кусок не длиннее %.0f м" % [String(route.label), float(route.max_open_m)],
 				open <= float(route.max_open_m), {"open_m": snappedf(open, 0.5)})
 	# кордон — граница: к воротам подойти можно, пройти нельзя
-	var blocked: bool = not await _walk_path([Vector3(-110.0, 0.1, 0.0), Vector3(-126.0, 0.1, 0.0)], true)
-	_check("Кордон: плиты через проспект не пройти", blocked and walker.global_position.x > -121.5, {"x": walker.global_position.x})
+	var cc: Dictionary = checks.get("cordon", {"from": [-110.0, 0.0], "to": [-126.0, 0.0], "stop_x": -121.5}) as Dictionary
+	var cf: Array = cc.from
+	var ct: Array = cc.to
+	var blocked: bool = not await _walk_path([Vector3(float(cf[0]), 0.1, float(cf[1])), Vector3(float(ct[0]), 0.1, float(ct[1]))], true)
+	_check("Кордон: плиты через проспект не пройти", blocked and walker.global_position.x > float(cc.stop_x), {"x": walker.global_position.x})
 	var fails: int = 0
 	for r: Dictionary in results:
 		if not bool(r.pass):
@@ -352,26 +358,37 @@ func _shots() -> void:
 	DirAccess.make_dir_recursive_absolute(output_dir)
 	var camera: Camera3D = walker.get("camera") as Camera3D
 	var views: Array[Dictionary] = [
-		{"id": "01_overview", "at": Vector3(-10, 300, 170), "look": Vector3(-10, 0, 0)},
-		{"id": "02_cordon_eye", "at": Vector3(-104, 1.62, 0), "look": Vector3(-60, 2, -8)},
-		{"id": "03_coffee_eye", "at": Vector3(-92, 1.62, -11), "look": Vector3(-92, 1.5, -22)},
-		{"id": "04_avenue_east", "at": Vector3(-70, 1.62, -12), "look": Vector3(40, 2, -6)},
-		{"id": "05_underpass", "at": Vector3(-36, 1.62, -9.5), "look": Vector3(-46, -2.5, -13)},
-		{"id": "06_tunnel_eye", "at": Vector3(-44, -1.7, -8), "look": Vector3(-44, -2, 12)},
-		{"id": "07_parking_lot", "at": Vector3(-44, 1.62, 18), "look": Vector3(-20, 2, 56)},
-		{"id": "08_supermarket_hall", "at": Vector3(-26, 1.62, 58), "look": Vector3(-20, 1.5, 90)},
-		{"id": "09_dock_yard", "at": Vector3(-20, 1.62, 97), "look": Vector3(20, 1.5, 99)},
-		{"id": "10_yard_zhk", "at": Vector3(-20, 1.62, -78), "look": Vector3(-70, 2, -42)},
-		{"id": "11_parking_minus1", "at": Vector3(-35, -1.6, -44), "look": Vector3(-60, -2, -70)},
-		{"id": "12_ramp", "at": Vector3(-25, 1.62, -14), "look": Vector3(-35, -1, -38)},
-		{"id": "13_square", "at": Vector3(60, 1.62, -16), "look": Vector3(85, 2, -45)},
-		{"id": "14_east_jam", "at": Vector3(60, 1.62, -6), "look": Vector3(105, 2, 0)},
-		{"id": "15_towers", "at": Vector3(-20, 1.62, 14), "look": Vector3(-40, 40, -40)},
-		{"id": "16_flat_floor3", "at": Vector3(-70.6, 7.8, -41.3), "look": Vector3(-74.0, 7.2, -47.5)},
-		{"id": "18_lobby", "at": Vector3(-87.0, 1.62, -48.5), "look": Vector3(-85.0, 1.4, -40.0)},
-		{"id": "19_vershina", "at": Vector3(-60.0, 1.62, 12.0), "look": Vector3(-100.0, 40.0, 40.0)},
-		{"id": "20_litter", "at": Vector3(-108.0, 1.62, 12.5), "look": Vector3(-100.0, 0.0, 18.0)},
-		{"id": "17_bird_center", "at": Vector3(-30, 90, 60), "look": Vector3(-30, 0, -20)}]
+		{"id": "01_overview", "at": Vector3(-30, 430, 330), "look": Vector3(-30, 0, 60)},
+		{"id": "02_cordon_eye", "at": Vector3(-200, 1.62, 0), "look": Vector3(-150, 2, -8)},
+		{"id": "03_coffee_eye", "at": Vector3(-184, 1.62, -11), "look": Vector3(-184, 1.5, -22)},
+		{"id": "04_avenue_east", "at": Vector3(-170, 1.62, -12), "look": Vector3(-60, 2, -6)},
+		{"id": "05_underpass", "at": Vector3(-148, 1.62, -9.5), "look": Vector3(-158, -2.5, -13)},
+		{"id": "06_tunnel_eye", "at": Vector3(-156, -1.7, -8), "look": Vector3(-156, -2, 12)},
+		{"id": "07_parking_lot", "at": Vector3(-146, 1.62, 17), "look": Vector3(-102, 2, 48)},
+		{"id": "08_supermarket_hall", "at": Vector3(-108, 1.62, 50), "look": Vector3(-102, 1.5, 82)},
+		{"id": "09_dock_yard", "at": Vector3(-102, 1.62, 95), "look": Vector3(-60, 1.5, 97)},
+		{"id": "10_yard_zhk", "at": Vector3(-125, 1.62, -100), "look": Vector3(-175, 2, -82)},
+		{"id": "11_parking_minus1", "at": Vector3(-125, -1.6, -40), "look": Vector3(-170, -2, -48)},
+		{"id": "12_ramp", "at": Vector3(-112, 1.62, -9), "look": Vector3(-118, -0.5, -30)},
+		{"id": "13_curve", "at": Vector3(-40, 1.62, -12), "look": Vector3(40, 3, 30)},
+		{"id": "14_vershina_plaza", "at": Vector3(10, 1.62, 6), "look": Vector3(60, 20, -40)},
+		{"id": "15_south_leg", "at": Vector3(66, 1.62, 70), "look": Vector3(56, 2, 240)},
+		{"id": "16_flat_floor3", "at": Vector3(-171.6, 7.8, -71.4), "look": Vector3(-171.6, 7.2, -77.5)},
+		{"id": "17_bird_curve", "at": Vector3(-60, 120, 140), "look": Vector3(20, 0, 20)},
+		{"id": "18_bank", "at": Vector3(-26, 1.62, -16), "look": Vector3(-26, 1.4, -34)},
+		{"id": "19_evac_point", "at": Vector3(60, 1.62, 40), "look": Vector3(85, 1.5, 18)},
+		{"id": "20_stop_plaza", "at": Vector3(-180, 1.62, 12), "look": Vector3(-195, 2, 40)},
+		{"id": "21_square", "at": Vector3(-35, 1.62, 25), "look": Vector3(-5, 2, 75)},
+		{"id": "22_site", "at": Vector3(36, 1.62, 205), "look": Vector3(-10, 5, 195)},
+		{"id": "23_deadend", "at": Vector3(55, 1.62, 225), "look": Vector3(55, 2, 260)},
+		# сценки с транспортом (разбор Таркова и Ready or Not, prospekt_dressing.md § 7)
+		{"id": "24_cordon_btr", "at": Vector3(-186, 1.62, 3), "look": Vector3(-203, 1.5, -4)},
+		{"id": "25_bus_overturned", "at": Vector3(-96, 1.62, 6), "look": Vector3(-74, 1.5, -4)},
+		{"id": "26_crash_taxi", "at": Vector3(-72, 1.62, 12), "look": Vector3(-58, 1.2, 4)},
+		{"id": "27_bank_cash", "at": Vector3(-6, 1.62, -2), "look": Vector3(-24, 1.2, -8)},
+		{"id": "28_cordon_police", "at": Vector3(40, 1.62, -2), "look": Vector3(62, 2, -18)},
+		{"id": "29_roadworks", "at": Vector3(50, 1.62, 70), "look": Vector3(55, 1.5, 100)},
+		{"id": "30_dps_post", "at": Vector3(46, 1.62, 128), "look": Vector3(56, 1.5, 108)}]
 	for spec: String in OS.get_environment("PROSPEKT_VIEW").split(";", false):
 		var custom: PackedStringArray = spec.split(":")
 		if custom.size() == 7:
@@ -394,7 +411,7 @@ func _shots() -> void:
 	map.queue_redraw()
 	await _frames(10)
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(output_dir.path_join("30_map.png"))
+	get_viewport().get_texture().get_image().save_png(output_dir.path_join("40_map.png"))
 	get_tree().quit()
 
 

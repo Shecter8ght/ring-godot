@@ -71,7 +71,8 @@ func _surfaces_flat(g: RefCounted) -> void:
 		var rect: Rect2 = Rect2(float(r[0]), float(r[1]), float(r[2]) - float(r[0]), float(r[3]) - float(r[1]))
 		var t: float = float(s.get("t", 0.08))
 		var y: float = float(s.get("y", 0.0))
-		var holes: Array = walk_holes if String(s.id).begins_with("walk") else []
+		# свои вырезы покрытия (лестницы паркинга под парковкой) или общие вырезы тротуаров (переход)
+		var holes: Array = s.get("holes", walk_holes if String(s.id).begins_with("walk") else []) as Array
 		for piece: Rect2 in _minus(rect, holes):
 			g.box(Vector3(piece.position.x + piece.size.x * 0.5, y + t * 0.5, piece.position.y + piece.size.y * 0.5),
 				Vector3(piece.size.x, t, piece.size.y), String(s.mat), true)
