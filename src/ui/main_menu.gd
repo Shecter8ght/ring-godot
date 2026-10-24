@@ -56,6 +56,9 @@ func _build() -> void:
 	left.add_child(title)
 	var sub := _label("Сектор 1 · торговый центр «Кольцо»", 16, DIM)
 	left.add_child(sub)
+	# в выпуске для друзей — метка сборки и номер патча: у хоста и гостя они должны совпадать
+	if ReleasePatch.label() != "":
+		left.add_child(_label(ReleasePatch.label(), 13, DIM))
 	var gap := Control.new()
 	gap.custom_minimum_size.y = 36
 	left.add_child(gap)

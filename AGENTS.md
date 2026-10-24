@@ -277,6 +277,10 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/builder_shots.tscn 
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/scope_far_shots.tscn # сильная оптика на планке над цевьём: в прицеле картинка, линза не красная; снимки scope_far_*
 tools/godot.cmd res://tools/scope_sun_shots.tscn             # оптика против солнца (блики, аберрация) и открытые прицельные из глаза
 tools/build_release.cmd                                      # сборка для друзей: export\RING.zip (RING.exe = Godot 4.7.2 + RING.pck, шаблоны не нужны)
+tools/build_patch.cmd                                        # обновление для друзей патчем вместо полного архива: export\patches\RING_patch_<N>_<метка>.pck —
+                                                              # только изменённое с основы (последний build_release, метка — export\RING\patches\base.txt); накопительный,
+                                                              # друзьям — в patches рядом с RING.exe, подключает автозагрузка ReleasePatch (первая). Изменились project.godot
+                                                              # или src/core/release_patch.gd — не соберётся (tools/release_patch.py check), нужен полный выпуск
 tools/godot.cmd res://tools/net_host_test.tscn               # хост + tools/net_client_test.tscn в двух процессах —
                                                               # реальный ENet по 127.0.0.1, проверка репликации
 tools/godot.cmd --headless res://tools/coop_hideout_host.tscn # + coop_hideout_client.tscn через 3 с: собрание в убежище —

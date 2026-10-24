@@ -26,6 +26,7 @@ driver/enable_input=true
 
 [autoload]
 
+ReleasePatch="*res://src/core/release_patch.gd"
 Balance="*res://src/core/balance.gd"
 Settings="*res://src/core/settings.gd"
 NoiseBus="*res://src/core/noise_bus.gd"

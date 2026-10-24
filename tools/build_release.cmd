@@ -11,6 +11,8 @@ call "%~dp0godot.cmd" --headless --export-pack "Windows Desktop" export/RING/RIN
 copy /y "%GODOT_DIR%\Godot_v4.7.2-stable_win64.exe" "%ROOT%\export\RING\RING.exe" >nul || exit /b 1
 copy /y "%~dp0release_readme.txt" "%ROOT%\export\RING\КАК ИГРАТЬ.txt" >nul || exit /b 1
 copy /y "%~dp0release_fast_start.cmd" "%ROOT%\export\RING\RING (если долго запускается).cmd" >nul || exit /b 1
+rem Метка основы для патчей (tools/build_patch.cmd): export\RING\patches\base.txt уходит друзьям в архиве.
+python -X utf8 "%~dp0release_patch.py" base || exit /b 1
 rem ZIP64: потоковая упаковка поддерживает RING.pck больше 2 ГБ; Python нужен только для сборки.
 python "%~dp0zip_release.py" "%ROOT%\export\RING" "%ROOT%\export\RING.zip" || exit /b 1
 echo Готово: export\RING.zip
