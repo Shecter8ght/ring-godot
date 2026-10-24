@@ -21,8 +21,8 @@ func _ready() -> void:
 
 
 ## Описание набора по снаряжению (бота или по тому, что осталось в ящике с тела): броня, шлем, рюкзак,
-## забрало, подсумки — те, что висят на броне (запись `pouches`), по порядку мест: пистолетный — половина
-## места (пока ставится в своё место целиком), большой — два.
+## забрало, подсумки — те, что висят на броне (запись `pouches` с полуслотами): [место, подсумок, половина]
+## — половина -1 / 1 у пистолетного (левая / правая половина места), 0 — во всё место; большой — с первого из пары.
 static func describe(equipment: Dictionary, visor: bool) -> String:
 	var d: Dictionary = {}
 	for slot: String in ["armor", "helmet", "backpack"]:
@@ -33,14 +33,13 @@ static func describe(equipment: Dictionary, visor: bool) -> String:
 	var places: int = int(WeaponDb.vest(String(d.get("armor", ""))).get("places", 0))
 	if places > 0:
 		var pouches: Array = []
-		var n: int = 1
-		for pid: Variant in (equipment.armor as Dictionary).get("pouches", []):
-			var item := String(pid)
-			var cost: int = 2 if ItemDb.pouch_cost(item) >= 2.0 else 1
-			if n + cost - 1 > places:
-				break
-			pouches.append([n, item])
-			n += cost
+		for p: Dictionary in ItemDb.pouch_list(equipment.armor as Dictionary):
+			var item := String(p.id)
+			var at := int(p.at)
+			var side := 0
+			if ItemDb.pouch_half(item) == 1:
+				side = -1 if at % 2 == 1 else 1
+			pouches.append([(at + 1) / 2, item, side])
 		if not pouches.is_empty():
 			d["pouches"] = pouches
 	return JSON.stringify(d)
@@ -89,7 +88,10 @@ func apply(spec: String) -> void:
 			var holder := NpcGear.place(sk, tier, int(rec[0]))
 			if holder:
 				_worn.append(holder.get_parent())
-				NpcGear.attach_pouch(holder, mesh)
+				# пистолетный — на половину места: сдвиг на четверть шага мест поперёк корпуса
+				var side: int = int(rec[2]) if rec.size() > 2 else 0
+				var shift: float = float(side) * NpcGear.place_pitch(tier, int(rec[0])) * 0.25
+				NpcGear.attach_pouch(holder, mesh, shift)
 	lod_ranges(sk)
 
 

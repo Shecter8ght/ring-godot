@@ -11,6 +11,11 @@ signal context(screen_pos: Vector2)
 
 var slot: String = ""
 var entry: Dictionary = {}
+## Всё надетое (EquipDoll.set_equipment): правила слотов по соседям — ПНВ и шлем без площадки (ItemDb.slot_block).
+var eq: Dictionary = {}
+## Подпись мелко внизу пустого слота (почему что-то сюда не встанет).
+var note: String = ""
+var _why: String = ""
 var _font: Font
 var _hover: int = 0   # 1 — подходит, -1 — нет
 
@@ -41,6 +46,9 @@ func _draw() -> void:
 		# пустой слот: только название по центру, приглушённо — не плита с рамкой
 		draw_rect(r, border, false, 1.0)
 		draw_string(_font, Vector2(0, size.y * 0.5 + 4.0), slot_name, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, Color(0.46, 0.48, 0.5))
+		var low := _why if _hover == -1 and _why != "" else note
+		if low != "":
+			draw_string(_font, Vector2(3, size.y - 6.0), low, HORIZONTAL_ALIGNMENT_CENTER, size.x - 6.0, 9, Color(0.95, 0.45, 0.35) if low == _why else Color(0.6, 0.55, 0.45))
 		return
 	var cat := String(ItemDb.item(String(entry.id)).get("cat", "misc"))
 	var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
@@ -57,16 +65,23 @@ func _draw() -> void:
 	var at := Vector2(4, size.y - 5.0)
 	draw_rect(Rect2(0, size.y - float(fs) - 7.0, size.x, float(fs) + 7.0), Color(0, 0, 0, 0.45))
 	draw_string(_font, at, label, HORIZONTAL_ALIGNMENT_LEFT, size.x - 8, fs, Color(0.95, 0.93, 0.88))
+	if _hover == -1 and _why != "":
+		draw_rect(Rect2(0, 14, size.x, 14), Color(0, 0, 0, 0.6))
+		draw_string(_font, Vector2(3, 25), _why, HORIZONTAL_ALIGNMENT_CENTER, size.x - 6.0, 9, Color(0.95, 0.45, 0.35))
 
 
 func _get_tooltip(_at: Vector2) -> String:
 	if entry.is_empty():
-		return String(Inventory.SLOT_NAMES.get(slot, slot))
+		return String(Inventory.SLOT_NAMES.get(slot, slot)) + ("
+" + note if note != "" else "")
 	return "%s\nПродать: %s ₽" % [ItemDb.label(entry), InventoryUI.money(Profile.sell_price(entry))]
 
 
 func _fits(id: String) -> bool:
-	return ItemDb.slot_ok(id, slot)
+	# подсумок, брошенный на броню или пояс, — на первое подходящее место
+	if slot == "armor" and ItemDb.pouch_cost(id) > 0.0 and not entry.is_empty():
+		return ItemDb.pouch_free_at(entry, id) > 0
+	return ItemDb.slot_ok(id, slot) and ItemDb.slot_block(id, slot, eq) == ""
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -114,6 +129,9 @@ func _can_drop_data(_at: Vector2, data: Variant) -> bool:
 		return false
 	var id := String((data as Dictionary).id)
 	var ok := _fits(id) or _mod_fits(id)
+	_why = ItemDb.slot_block(id, slot, eq) if ItemDb.slot_ok(id, slot) else ""
+	if slot == "armor" and ItemDb.pouch_cost(id) > 0.0 and not ok:
+		_why = "нет места под подсумок" if not entry.is_empty() else "сначала надень броню или пояс"
 	_hover = 1 if ok else -1
 	queue_redraw()
 	return ok

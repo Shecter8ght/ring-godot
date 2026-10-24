@@ -107,8 +107,8 @@ static func entry_weight(e: Dictionary) -> float:
 	for s in e.get("plates", {}):
 		w += weight(String(e.plates[s].id))
 	# подсумки на броне, магазины в них и в сбросе
-	for pid: Variant in e.get("pouches", []):
-		w += weight(String(pid))
+	for p: Dictionary in pouch_list(e):
+		w += weight(String(p.id))
 	for part: String in ["mags", "dump"]:
 		for inner: Variant in e.get(part, []):
 			w += entry_weight(inner)
@@ -385,16 +385,244 @@ static func rig_entry(eq: Dictionary) -> Dictionary:
 	return e
 
 
-## Сетки подсумков по надетой броне: part — "rig" (магазины, по ячейке на подсумок) или "dump" (сброс
-## пустых — половина). ZERO — нет.
+## Сетки подсумков по надетой броне: part — "rig" (магазины: колонка на подсумок, у большого две — под барабан)
+## или "dump" (сброс пустых — половина от числа подсумков). ZERO — нет.
 static func rig_grid(eq: Dictionary, part: String = "rig") -> Vector2i:
 	var e := rig_entry(eq)
 	if e.is_empty():
 		return Vector2i.ZERO
-	var n := (e.get("pouches", []) as Array).size()
+	var n := 0
 	if part == "dump":
-		n = ceili(float(n) / 2.0)
+		n = ceili(float(pouch_list(e).size()) / 2.0)
+	else:
+		for col: Dictionary in rig_columns(e):
+			n += int(col.w)
 	return Vector2i(n, int(Balance.RIG.rows)) if n > 0 else Vector2i.ZERO
+
+
+## Подсумки на броне по порядку мест (места считаются половинками: at — номер полуслота с 1; пистолетный
+## занимает 1, автоматный 2, большой 4). Старый формат (список id) переводится: подряд с первого полуслота.
+static func pouch_list(e: Dictionary) -> Array:
+	var raw: Variant = e.get("pouches", [])
+	if not raw is Array or (raw as Array).is_empty():
+		return []
+	var list := raw as Array
+	if list[0] is String:
+		# по порядку на первое подходящее место; не встал по правилам (большой не на свою пару) — на первые
+		# свободные полуслоты подряд, чтобы подсумок не пропал
+		var ids := list.duplicate()
+		var out: Array = []
+		e["pouches"] = out
+		for pid: Variant in ids:
+			var at := pouch_free_at(e, String(pid))
+			if at < 0:
+				at = _free_run(out, pouch_half(String(pid)))
+			out.append({"id": String(pid), "at": at})
+		list = out
+	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.at) < int(b.at))
+	return list
+
+
+## Первый полуслот, с которого свободны half полуслотов подряд (без правил вида; для перевода старых записей).
+static func _free_run(list: Array, half: int) -> int:
+	var at := 1
+	while true:
+		var clash := false
+		for q: Dictionary in list:
+			var qa := int(q.at)
+			var qb := qa + pouch_half(String(q.id)) - 1
+			if at <= qb and at + half - 1 >= qa:
+				clash = true
+				at = qb + 1
+				break
+		if not clash:
+			return at
+	return at
+
+
+static func pouch_ids(e: Dictionary) -> Array:
+	var out: Array = []
+	for p: Dictionary in pouch_list(e):
+		out.append(String(p.id))
+	return out
+
+
+## Сколько полуслотов занимает подсумок (пистолетный 1, автоматный 2, большой 4); 0 — не подсумок.
+static func pouch_half(id: String) -> int:
+	return roundi(pouch_cost(id) * 2.0)
+
+
+## Вид подсумка: pistol / rifle / big.
+static func pouch_kind(id: String) -> String:
+	return String((item(id).get("pouch", {}) as Dictionary).get("mags", ""))
+
+
+## Встанет ли подсумок pid на полуслот at брони e: в пределах мест, автоматный — с целого места, большой —
+## только на пару мест из данных брони (pairs_big), и полуслоты свободны. skip — не считать подсумок с этим номером.
+static func pouch_fits(e: Dictionary, pid: String, at: int, skip: int = -1) -> bool:
+	var v := WeaponDb.vest(String(e.get("id", "")))
+	var places := int(v.get("places", 0))
+	var half := pouch_half(pid)
+	if half <= 0 or at < 1 or at + half - 1 > places * 2:
+		return false
+	var kind := pouch_kind(pid)
+	if kind in ["rifle", "big"] and at % 2 == 0:
+		return false
+	if kind == "big":
+		var p := (at + 1) / 2
+		var ok := false
+		for pair: Variant in v.get("pairs_big", []):
+			if int((pair as Array)[0]) == p and int((pair as Array)[1]) == p + 1:
+				ok = true
+		if not ok:
+			return false
+	var i := 0
+	for q: Dictionary in pouch_list(e):
+		if i != skip:
+			var qa := int(q.at)
+			var qb := qa + pouch_half(String(q.id)) - 1
+			if at <= qb and at + half - 1 >= qa:
+				return false
+		i += 1
+	return true
+
+
+## Первый полуслот, куда встанет подсумок; -1 — некуда.
+static func pouch_free_at(e: Dictionary, pid: String) -> int:
+	var places := int(WeaponDb.vest(String(e.get("id", ""))).get("places", 0))
+	for at in range(1, places * 2 + 1):
+		if pouch_fits(e, pid, at):
+			return at
+	return -1
+
+
+## Колонки сетки магазинов по подсумкам: {kind, w (у большого 2), x0, pouch (номер в pouch_list)}.
+static func rig_columns(e: Dictionary) -> Array:
+	var out: Array = []
+	var x := 0
+	var i := 0
+	for p: Dictionary in pouch_list(e):
+		var kind := pouch_kind(String(p.id))
+		var w := 2 if kind == "big" else 1
+		out.append({"kind": kind, "w": w, "x0": x, "pouch": i})
+		x += w
+		i += 1
+	return out
+
+
+## Подписи колонок сетки магазинов для окна (GridView.column_groups): [[x0, ширина, «пист» / «авт» / «большой»], …].
+static func rig_column_groups(eq: Dictionary) -> Array:
+	var out: Array = []
+	for col: Dictionary in rig_columns(rig_entry(eq)):
+		out.append([int(col.x0), int(col.w), {"pistol": "пист", "rifle": "авт", "big": "большой"}.get(String(col.kind), "")])
+	return out
+
+
+## Вид подсумка под колонкой x сетки магазинов ("" — нет).
+static func rig_kind_at(eq: Dictionary, x: int) -> String:
+	var e := rig_entry(eq)
+	for col: Dictionary in rig_columns(e):
+		if x >= int(col.x0) and x < int(col.x0) + int(col.w):
+			return String(col.kind)
+	return ""
+
+
+## Какой магазин в какой подсумок: пистолетный — только пистолетные (до 20 патронов, 1×1); автоматный — всё,
+## кроме крупных (от 50); большой — любой.
+static func mag_fits_kind(kind: String, id: String) -> bool:
+	var mag := WeaponDb.magazine(id)
+	if mag.is_empty():
+		return false
+	var cap := int(mag.get("capacity", 0))
+	match kind:
+		"pistol":
+			return cap <= 20 and size(id) == Vector2i(1, 1)
+		"rifle":
+			return cap < 50
+		"big":
+			return true
+	return false
+
+
+## Примет ли сетка подсумков запись в клетку (x, y, r): только магазин, и каждая колонка под ним — своего вида.
+static func rig_accepts_at(eq: Dictionary, entry: Dictionary, x: int, y: int, r: bool) -> bool:
+	if not grid_accepts("rig", entry):
+		return false
+	return rig_id_fits_at(eq, String(entry.id), x, r)
+
+
+## То же по id (для подсветки при перетаскивании): каждая колонка под магазином — подсумок его вида.
+static func rig_id_fits_at(eq: Dictionary, id: String, x: int, r: bool) -> bool:
+	var s := size(id)
+	if r:
+		s = Vector2i(s.y, s.x)
+	for dx in range(s.x):
+		if not mag_fits_kind(rig_kind_at(eq, x + dx), id):
+			return false
+	return true
+
+
+## Номер подсумка в pouch_list, который занимает полуслот at; -1 — пусто.
+static func pouch_index_at(e: Dictionary, at: int) -> int:
+	var i := 0
+	for p: Dictionary in pouch_list(e):
+		if at >= int(p.at) and at < int(p.at) + pouch_half(String(p.id)):
+			return i
+		i += 1
+	return -1
+
+
+## Переставить подсумок с полуслота from_at на to_at (магазины переезжают по новым колонкам; не влезшие
+## возвращаются). [] и false в первом — не встаёт.
+static func move_pouch(eq: Dictionary, from_at: int, to_at: int) -> Array:
+	var e := rig_entry(eq)
+	var i := pouch_index_at(e, from_at)
+	if i < 0:
+		return [false, []]
+	var p: Dictionary = pouch_list(e)[i]
+	if not pouch_fits(e, String(p.id), to_at, i):
+		return [false, []]
+	p["at"] = to_at
+	pouch_list(e)
+	return [true, rig_relayout(eq)]
+
+
+## Положить магазин в подсумки брони куда влезет по виду; сколько положил (0 — некуда).
+static func add_to_rig(eq: Dictionary, entry: Dictionary) -> int:
+	return rig_add(eq, rig_list(eq, "rig"), entry)
+
+
+## То же в список list (копию сетки подсумков брони eq — так работает Inventory).
+static func rig_add(eq: Dictionary, list: Array, entry: Dictionary) -> int:
+	var grid := rig_grid(eq, "rig")
+	if grid == Vector2i.ZERO or not grid_accepts("rig", entry):
+		return 0
+	var one := entry.duplicate(true)
+	for key in ["x", "y", "r"]:
+		one.erase(key)
+	for x in range(grid.x):
+		for y in range(grid.y):
+			if rig_accepts_at(eq, one, x, y, false):
+				var k := put_at(list, one, grid, x, y, false)
+				if k > 0:
+					return k
+	return 0
+
+
+## Магазины в подсумках — заново по колонкам (после снятия подсумка колонки сдвинулись); что не влезло — вернуть.
+static func rig_relayout(eq: Dictionary) -> Array:
+	var e := rig_entry(eq)
+	if e.is_empty():
+		return []
+	var mags: Array = (e.get("mags", []) as Array).duplicate(true)
+	e["mags"] = []
+	var out: Array = []
+	for m: Dictionary in mags:
+		for key in ["x", "y", "r"]:
+			m.erase(key)
+		if add_to_rig(eq, m) <= 0:
+			out.append(m)
+	return out
 
 
 ## Что лежит в подсумках надетой брони: part — "rig" (поле mags) или "dump".
@@ -416,27 +644,55 @@ static func pouch_cost(id: String) -> float:
 ## Свободные места на броне записи e (places из данных брони минус надетые подсумки).
 static func places_free(e: Dictionary) -> float:
 	var total := float(WeaponDb.vest(String(e.get("id", ""))).get("places", 0))
-	for pid: Variant in e.get("pouches", []):
-		total -= pouch_cost(String(pid))
+	for p: Dictionary in pouch_list(e):
+		total -= pouch_cost(String(p.id))
 	return total
 
 
-## Повесить подсумок pid на броню e; false — не подсумок, не броня или мест не хватает.
-static func attach_pouch(e: Dictionary, pid: String) -> bool:
-	var cost := pouch_cost(pid)
-	if cost <= 0.0 or places_free(e) + 1e-6 < cost:
+## Повесить подсумок pid на броню e в полуслот at (at < 0 — первый подходящий); false — не встаёт.
+static func attach_pouch(e: Dictionary, pid: String, at: int = -1) -> bool:
+	if at < 0:
+		at = pouch_free_at(e, pid)
+	if at < 0 or not pouch_fits(e, pid, at):
 		return false
+	pouch_list(e)
 	if not e.get("pouches") is Array:
 		e["pouches"] = []
-	(e.pouches as Array).append(pid)
+	(e.pouches as Array).append({"id": pid, "at": at})
+	pouch_list(e)
 	return true
+
+
+## Снять один подсумок (номер в pouch_list): возвращает записи — сам подсумок и магазины, которым не
+## осталось подсумка своего вида; остальные магазины переложены по новым колонкам.
+static func detach_pouch(eq: Dictionary, i: int) -> Array:
+	var e := rig_entry(eq)
+	var list := pouch_list(e)
+	if i < 0 or i >= list.size():
+		return []
+	var out: Array = [make(String((list[i] as Dictionary).id), 1)]
+	list.remove_at(i)
+	e["pouches"] = list
+	out.append_array(rig_relayout(eq))
+	if list.is_empty():
+		for part: String in ["mags", "dump"]:
+			for inner: Variant in e.get(part, []):
+				if inner is Dictionary:
+					var m := (inner as Dictionary).duplicate(true)
+					for key in ["x", "y", "r"]:
+						m.erase(key)
+					out.append(m)
+		e.erase("pouches")
+		e.erase("mags")
+		e.erase("dump")
+	return out
 
 
 ## Снять с брони все подсумки: возвращает записи подсумков, магазинов и сброса — их кладут в сетку.
 static func detach_pouches(e: Dictionary) -> Array:
 	var out: Array = []
-	for pid: Variant in e.get("pouches", []):
-		out.append(make(String(pid), 1))
+	for p: Dictionary in pouch_list(e):
+		out.append(make(String(p.id), 1))
 	for part: String in ["mags", "dump"]:
 		for inner: Variant in e.get(part, []):
 			if inner is Dictionary:
@@ -461,9 +717,36 @@ static func grid_accepts(role: String, entry: Dictionary) -> bool:
 	return true
 
 
+## Крепления надетого шлема (данные helmet.mounts: NVG, HEADSET, LIGHT, VISOR); без шлема — пусто.
+static func helmet_mounts(eq: Dictionary) -> Array:
+	var h: Variant = eq.get("helmet", null)
+	if not h is Dictionary:
+		return []
+	return WeaponDb.helmet(String((h as Dictionary).get("id", ""))).get("mounts", []) as Array
+
+
+## Почему предмет id нельзя надеть в слот при надетом eq ("" — можно; docs/design/equip_doll_v2.md, п. 3):
+## ПНВ носят и без шлема, но под шлем без площадки он не встаёт; и шлем без площадки поверх ПНВ не надеть.
+static func slot_block(id: String, slot: String, eq: Dictionary) -> String:
+	if slot == "eyes" and bool(equip(id).get("nvg", false)) and eq.has("helmet") and not "NVG" in helmet_mounts(eq):
+		return "шлем без крепления ПНВ"
+	if slot == "helmet":
+		var eyes: Variant = eq.get("eyes", null)
+		var nvg_on := eyes is Dictionary and bool(equip(String((eyes as Dictionary).get("id", ""))).get("nvg", false))
+		if nvg_on and not "NVG" in (WeaponDb.helmet(id).get("mounts", []) as Array):
+			return "у шлема нет крепления ПНВ — сначала сними ПНВ"
+	return ""
+
+
 ## Куда надеть предмет: want — слот, на который бросили (если подходит); оружие без указания —
-## в свой слот по данным, если он занят, а другой свободен — в другой.
+## в свой слот по данным, если он занят, а другой свободен — в другой. Слот, закрытый правилом
+## (slot_block), — "".
 static func pick_slot(id: String, eq: Dictionary, want: String = "") -> String:
+	var s0 := _pick_slot(id, eq, want)
+	return s0 if s0 == "" or slot_block(id, s0, eq) == "" else ""
+
+
+static func _pick_slot(id: String, eq: Dictionary, want: String = "") -> String:
 	if want != "" and slot_ok(id, want):
 		return want
 	var s := String(equip(id).get("slot", ""))

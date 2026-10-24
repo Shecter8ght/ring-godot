@@ -81,7 +81,7 @@ static func place(sk: Skeleton3D, tier: String, n: int) -> Node3D:
 ## Подсумок в месте: сетка подсумка (с ключами формы) спиной к броне. В исходнике подсумки разложены рядом
 ## (сдвиг по X), дно на нулевой высоте, наружу — −Z после экспорта: по X — в середину места, дно — в точку
 ## места, задняя стенка (max Z) — к броне.
-static func attach_pouch(holder: Node3D, mesh_name: String) -> MeshInstance3D:
+static func attach_pouch(holder: Node3D, mesh_name: String, shift_x: float = 0.0) -> MeshInstance3D:
 	var rec: Dictionary = library("pouches").get(mesh_name, {})
 	if rec.is_empty():
 		push_error("NpcGear: нет подсумка %s" % mesh_name)
@@ -89,8 +89,22 @@ static func attach_pouch(holder: Node3D, mesh_name: String) -> MeshInstance3D:
 	var mi := _instance(rec, mesh_name)
 	holder.add_child(mi)
 	var aabb: AABB = (rec.mesh as Mesh).get_aabb()
-	mi.position = Vector3(-aabb.get_center().x, 0.0, -aabb.end.z)
+	mi.position = Vector3(shift_x - aabb.get_center().x, 0.0, -aabb.end.z)
 	return mi
+
+
+## Шаг между соседними местами брони tier у места n (по данным places.json; у одиночного места — 0).
+static func place_pitch(tier: String, n: int) -> float:
+	var a := _place_record(tier, n)
+	if a.is_empty():
+		return 0.0
+	for m: int in [n + 1, n - 1]:
+		var b := _place_record(tier, m)
+		if not b.is_empty() and String(b.get("kind", "")) == String(a.get("kind", "")):
+			var pa: Array = a.pos
+			var pb: Array = b.pos
+			return Vector3(float(pa[0]), float(pa[1]), float(pa[2])).distance_to(Vector3(float(pb[0]), float(pb[1]), float(pb[2])))
+	return 0.0
 
 
 static func _instance(rec: Dictionary, mesh_name: String) -> MeshInstance3D:

@@ -202,7 +202,7 @@ func add_entry_in(into: String, entry: Dictionary) -> int:
 	if grid == Vector2i.ZERO or not ItemDb.grid_accepts(into, entry):
 		return 0
 	var list := list_of(into).duplicate(true)
-	var k := ItemDb.add_to(list, entry, grid)
+	var k := ItemDb.rig_add(equipment, list, entry) if into == "rig" else ItemDb.add_to(list, entry, grid)
 	if k > 0:
 		_set_list(into, list)
 	return k
@@ -213,6 +213,9 @@ func add_entry_in(into: String, entry: Dictionary) -> int:
 func put_at(entry: Dictionary, x: int, y: int, r: bool, into: String = "backpack") -> int:
 	var grid := grid_of(into)
 	if grid == Vector2i.ZERO or not ItemDb.grid_accepts(into, entry):
+		return 0
+	# в подсумки — только магазин своего вида (пистолетный / автоматный / большой)
+	if into == "rig" and not ItemDb.rig_accepts_at(equipment, entry, x, y, r):
 		return 0
 	var list := list_of(into).duplicate(true)
 	var k := ItemDb.put_at(list, entry, grid, x, y, r)
@@ -402,7 +405,7 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 			old = {}
 		elif ItemDb.add_to(list, old, ItemDb.bag_grid(eq)) > 0:
 			old = {}
-		elif ItemDb.rig_grid(eq, "rig") != Vector2i.ZERO and ItemDb.add_to(pouches, old, ItemDb.rig_grid(eq, "rig")) > 0:
+		elif ItemDb.rig_add(eq, pouches, old) > 0:
 			old = {}
 	items = list
 	equipment = eq
@@ -520,7 +523,7 @@ func prepare_mags() -> void:
 				var one: Dictionary = it.duplicate(true)
 				for key in ["x", "y", "r"]:
 					one.erase(key)
-				if ItemDb.add_to(pouched, one, rg) > 0:
+				if ItemDb.rig_add(eq, pouched, one) > 0:
 					list.remove_at(i)
 					moved = true
 					continue
@@ -534,6 +537,8 @@ func prepare_mags() -> void:
 func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -> bool:
 	if src == dst:
 		var same := list_of(src).duplicate(true)
+		if src == "rig" and idx >= 0 and idx < same.size() and not ItemDb.rig_accepts_at(equipment, same[idx], x, y, r):
+			return false
 		if not ItemDb.move_in(same, grid_of(src), idx, x, y, r):
 			return false
 		_set_list(src, same)
@@ -547,7 +552,7 @@ func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -
 		for key in ["x", "y", "r"]:
 			one.erase(key)
 		var dl := list_of(dst).duplicate(true)
-		var k2 := ItemDb.add_to(dl, one, grid_of(dst))
+		var k2 := ItemDb.rig_add(equipment, dl, one) if dst == "rig" else ItemDb.add_to(dl, one, grid_of(dst))
 		if k2 <= 0:
 			return false
 		_set_list(dst, dl)
@@ -656,6 +661,8 @@ func sort_grid(where: String = "backpack") -> bool:
 
 ## Снять из слота в рюкзак: в клетку x, y (перетащили в сетку) или куда влезет. Не влезло — false.
 func unequip(slot: String, x: int = -1, y: int = -1, r: bool = false) -> bool:
+	if slot.begins_with("pouch:"):
+		return _pouch_off(int(slot.trim_prefix("pouch:")), x, y, r)
 	if not equipment.has(slot):
 		return false
 	# рюкзак в рейде не снять «внутрь себя» — только бросить (выбросить из слота)
@@ -668,6 +675,45 @@ func unequip(slot: String, x: int = -1, y: int = -1, r: bool = false) -> bool:
 		return false
 	var eq := equipment.duplicate(true)
 	eq.erase(slot)
+	items = list
+	equipment = eq
+	return true
+
+
+## Снять подсумок с полуслота at в рюкзак (в клетку x, y; x < 0 — куда влезет); магазины без подсумка
+## своего вида — туда же, не влезли — в spilled (Raid бросает под ноги) (хост).
+func _pouch_off(at: int, x: int, y: int, r: bool) -> bool:
+	var eq := equipment.duplicate(true)
+	var i := ItemDb.pouch_index_at(ItemDb.rig_entry(eq), at)
+	if i < 0:
+		return false
+	var list := items.duplicate(true)
+	var out := ItemDb.detach_pouch(eq, i)
+	var pouch: Dictionary = out.pop_front()
+	var k := ItemDb.put_at(list, pouch, backpack_grid(), x, y, r) if x >= 0 else ItemDb.add_to(list, pouch, backpack_grid())
+	if k <= 0:
+		return false
+	spilled = []
+	for m: Dictionary in out:
+		if ItemDb.add_to(list, m, backpack_grid()) == 0:
+			spilled.append(m)
+	items = list
+	equipment = eq
+	return true
+
+
+## Переставить подсумок на броне с полуслота from_at на to_at; не влезшие магазины — в рюкзак, дальше —
+## spilled (хост).
+func move_pouch(from_at: int, to_at: int) -> bool:
+	var eq := equipment.duplicate(true)
+	var res := ItemDb.move_pouch(eq, from_at, to_at)
+	if not bool(res[0]):
+		return false
+	var list := items.duplicate(true)
+	spilled = []
+	for m: Dictionary in res[1]:
+		if ItemDb.add_to(list, m, backpack_grid()) == 0:
+			spilled.append(m)
 	items = list
 	equipment = eq
 	return true

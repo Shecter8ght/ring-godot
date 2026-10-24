@@ -215,6 +215,13 @@ func _list(role: String) -> Array:
 	return _offer if role == "offer" else Profile.list_of(role)
 
 
+## Своё надетое (рейд — инвентарь игрока у хоста, убежище — профиль): правила подсумков по виду.
+func _my_equipment() -> Dictionary:
+	if _raid():
+		return _my_inv().equipment if _my_inv() else {}
+	return Profile.equipment
+
+
 func _grid(role: String) -> Vector2i:
 	if role == "offer":
 		return grid()
@@ -362,6 +369,9 @@ func _build() -> void:
 			continue
 		right.add_child(_label(String(part[1]), 15, Color(0.95, 0.82, 0.6)))
 		var gv2 := GridView.new(g2, String(part[0]))
+		if String(part[0]) == "rig":
+			gv2.column_groups = ItemDb.rig_column_groups(_my_equipment())
+			gv2.accept_at = func(id: String, x: int, r: bool) -> bool: return ItemDb.rig_id_fits_at(_my_equipment(), id, x, r)
 		right.add_child(gv2)
 		own.append(gv2)
 		_own_rig_grids[String(part[0])] = gv2

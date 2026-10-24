@@ -1,6 +1,6 @@
 extends Node
-## Ростовая фигура со слотами и разгрузка: окно тайника в убежище (фигура, подсумки, сумка сброса) и
-## окно рюкзака в рейде. Снимки docs/screens/doll_*.png.
+## Окно снаряжения v2: силуэт со слотами, крепления шлема, места брони половинками, подсумки по видам и сброс —
+## окно тайника в убежище и окно рюкзака в рейде. Снимки docs/screens/doll_*.png.
 ## tools/godot.cmd --windowed --resolution 1600x900 res://tools/rig_shots.tscn
 
 var _fails: int = 0
@@ -14,29 +14,30 @@ func _ready() -> void:
 	Profile.trust = 49
 	for id: String in ["wpn_ar_02", "wpn_hg_02", "armor_top", "helmet_mid", "headset_tactical", "bp_tourist", "nvg"]:
 		Profile.buy(id, 1, "stash", true)
-	# подсумки — на надетую броню (вместо прежней разгрузки): три автоматных
-	for k in range(3):
-		Profile.buy("pouch_rifle", 1, "stash", false)
-		Profile.equip_from("stash", _find_stash("pouch_rifle"))
-	_check("три подсумка висят на броне", (Profile.equipment.armor.get("pouches", []) as Array).size() == 3, str(Profile.equipment.armor.get("pouches", [])))
+	# подсумки — на места брони половинками (equip_doll_v2): два пистолетных делят место 1, автоматный — место 2,
+	# большой — 3+4, автоматный — 5
+	for pair: Array in [["pouch_pistol", 1], ["pouch_pistol", 2], ["pouch_rifle", 3], ["pouch_big", 5], ["pouch_rifle", 9]]:
+		Profile.buy(String(pair[0]), 1, "stash", false)
+		Profile.equip_from("stash", _find_stash(String(pair[0])), "pouch:%d" % int(pair[1]))
+	_check("пять подсумков висят на броне по местам", ItemDb.pouch_list(Profile.equipment.armor).size() == 5, str(ItemDb.pouch_list(Profile.equipment.armor)))
+	_check("колонки подсумков: пист, пист, авт, большой, авт", Profile.grid_of("rig").x == 6, str(ItemDb.rig_column_groups(Profile.equipment)))
 	for i: int in range(5):
 		Profile.buy("mag_556_30", 1, "backpack", false)
 	Profile.buy("mag_919_17", 1, "backpack", false)
 	Profile.buy("ammo_556_std", 60, "backpack", false)
 	Profile.buy("bandage", 3, "backpack", false)
-	# три магазина — в подсумки, один пустой — в сумку сброса
+	# автоматные — в автоматный и большой, пистолетный — в пистолетный, один пустой — в сумку сброса
 	var moved := 0
-	var i2 := 0
-	while i2 < Profile.backpack.size() and moved < 3:
-		if String(Profile.backpack[i2].id) == "mag_556_30":
-			(Profile.backpack[i2] as Dictionary)["rounds"] = 30
-			(Profile.backpack[i2] as Dictionary)["ammo"] = "ammo_556_std"
-			if Profile.transfer("backpack", i2, "rig", moved, 0, false):
-				moved += 1
-				continue
-		i2 += 1
+	for x: int in [2, 3, 4]:
+		var i2 := _find("mag_556_30")
+		(Profile.backpack[i2] as Dictionary)["rounds"] = 30
+		(Profile.backpack[i2] as Dictionary)["ammo"] = "ammo_556_std"
+		if Profile.transfer("backpack", i2, "rig", x, 0, false):
+			moved += 1
 	_check("магазины легли в подсумки", moved == 3 and Profile.list_of("rig").size() == 3, str(moved))
-	_check("в подсумки не кладётся бинт", not Profile.transfer("backpack", _find("bandage"), "rig", 4, 0, false))
+	_check("автоматный в пистолетный подсумок не кладётся", not Profile.transfer("backpack", _find("mag_556_30"), "rig", 0, 0, false))
+	_check("пистолетный — в пистолетный", Profile.transfer("backpack", _find("mag_919_17"), "rig", 0, 0, false))
+	_check("в подсумки не кладётся бинт", not Profile.transfer("backpack", _find("bandage"), "rig", 5, 0, false))
 	_check("пустой магазин — в сумку сброса", Profile.transfer("backpack", _find("mag_556_30"), "dump", 0, 0, false))
 	Profile.save()
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
@@ -64,7 +65,7 @@ func _ready() -> void:
 	for i in range(240):
 		await get_tree().process_frame
 	var me: Player = Raid.current.local_player() if Raid.current else null
-	_check("в рейде разгрузка надета, магазины в подсумках", me != null and me.inventory.list_of("rig").size() == 3, str(me.inventory.list_of("rig").size()) if me else "")
+	_check("в рейде разгрузка надета, магазины в подсумках", me != null and me.inventory.list_of("rig").size() == 4, str(me.inventory.list_of("rig").size()) if me else "")
 	if me:
 		for m: Node in get_tree().get_nodes_in_group("marauders"):
 			m.set_physics_process(false)

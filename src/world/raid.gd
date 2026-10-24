@@ -1063,8 +1063,30 @@ func _equip_from(peer_id: int, src: String, idx: int, path: NodePath, want: Stri
 	if idx < 0 or idx >= list.size():
 		return
 	var id := String(list[idx].id)
+	# подсумок — на место брони (want "pouch:<полуслот>", без него — первое подходящее)
+	if ItemDb.pouch_cost(id) > 0.0:
+		var eq_p := inv.equipment.duplicate(true)
+		var at := int(want.trim_prefix("pouch:")) if want.begins_with("pouch:") else -1
+		if not eq_p.has("armor") or not ItemDb.attach_pouch(eq_p.armor as Dictionary, id, at):
+			if peer_id == multiplayer.get_unique_id():
+				notify("Подсумок сюда не встаёт" if eq_p.has("armor") else "Подсумок вешают на броню или пояс — надень их")
+			return
+		ItemDb.remove_at(list, idx, 1)
+		if c:
+			c.items = list
+		else:
+			inv._set_list(src, list)
+		inv.equipment = eq_p
+		Audio.play(_equip_sound(id), pl.global_position, -8.0)
+		return
 	var slot := ItemDb.pick_slot(id, inv.equipment, want)
 	if slot == "":
+		if peer_id == multiplayer.get_unique_id():
+			for s: String in Inventory.SLOTS:
+				var why := ItemDb.slot_block(id, s, inv.equipment) if ItemDb.slot_ok(id, s) else ""
+				if why != "":
+					notify("Не надеть: " + why)
+					break
 		return
 	var one := ItemDb.remove_at(list, idx, 1)
 	for k in ["x", "y", "r", "op"]:
@@ -1231,10 +1253,45 @@ func _unequip(peer_id: int, slot: String, x: int, y: int, r: bool) -> void:
 	var pl := _actor(peer_id, "снять")
 	if pl == null:
 		return
+	pl.inventory.spilled = []
 	if pl.inventory.unequip(slot, x, y, r):
 		Audio.play("item_drop", pl.global_position, -10.0)
+		_spill(pl)
 	elif peer_id == multiplayer.get_unique_id():
 		notify("В рюкзаке нет места — выброси что-нибудь или брось это на землю (ПКМ)")
+
+
+## Переставить подсумок на броне (полуслоты from_at → to_at).
+func request_pouch_move(from_at: int, to_at: int) -> void:
+	if _is_host():
+		_pouch_move(multiplayer.get_unique_id(), from_at, to_at)
+	else:
+		_rpc_pouch_move.rpc_id(1, from_at, to_at)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_pouch_move(from_at: int, to_at: int) -> void:
+	if multiplayer.is_server():
+		_pouch_move(multiplayer.get_remote_sender_id(), from_at, to_at)
+
+
+func _pouch_move(peer_id: int, from_at: int, to_at: int) -> void:
+	_cancel_op(peer_id)
+	var pl := _actor(peer_id, "подсумок")
+	if pl == null:
+		return
+	pl.inventory.spilled = []
+	if pl.inventory.move_pouch(from_at, to_at):
+		_spill(pl)
+	elif peer_id == multiplayer.get_unique_id():
+		notify("Подсумок сюда не встаёт")
+
+
+## Магазины, которым не нашлось места после снятия или перестановки подсумка, — мешком под ноги.
+func _spill(pl: Player) -> void:
+	if not pl.inventory.spilled.is_empty():
+		spawn_drop(pl.global_position, DROP_NAME, pl.inventory.spilled.duplicate(true), LootContainer.Look.BAG)
+		pl.inventory.spilled = []
 
 
 ## Разложить рюкзак (или карман) по порядку — освободить место.

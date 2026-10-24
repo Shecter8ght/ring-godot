@@ -44,6 +44,10 @@ var marks: Dictionary = {}
 var selected: int = -1
 ## Отмеченные записи (индекс → true): светлая рамка и галочка — выбор нескольких (продажа).
 var picked: Dictionary = {}
+## Своё правило клетки (подсумки: магазин своего вида): (id, x, r) -> bool; пусто — любое место.
+var accept_at: Callable
+## Группы колонок с подписью внизу (подсумки по видам): [[x0, ширина, подпись], …].
+var column_groups: Array = []
 
 var _layout: Array = []   # [x, y, r] на запись (при auto_layout — вычисленные)
 var _hover: Vector2i = Vector2i(-1, -1)
@@ -120,6 +124,12 @@ func _draw() -> void:
 		draw_line(Vector2(x * CELL, 0), Vector2(x * CELL, grid.y * CELL), Color(1, 1, 1, 0.07))
 	for y in range(grid.y + 1):
 		draw_line(Vector2(0, y * CELL), Vector2(grid.x * CELL, y * CELL), Color(1, 1, 1, 0.07))
+	for g: Variant in column_groups:
+		var ga: Array = g
+		var gx := float(int(ga[0])) * CELL
+		var gw := float(int(ga[1])) * CELL
+		draw_line(Vector2(gx, 0), Vector2(gx, grid.y * CELL), Color(1.0, 0.86, 0.6, 0.22), 1.5)
+		draw_string(_font, Vector2(gx + 2.0, grid.y * CELL - 4.0), String(ga[2]), HORIZONTAL_ALIGNMENT_CENTER, gw - 4.0, 10, Color(0.95, 0.82, 0.6, 0.45))
 	for i in range(items.size()):
 		if int(_layout[i][0]) < 0:
 			continue
@@ -337,6 +347,8 @@ func _can_drop_data(at: Vector2, data: Variant) -> bool:
 		var skip: int = int(d.idx) if source == self else -1
 		var occ := ItemDb.occupancy(items, grid, skip)
 		_hover_ok = ItemDb.fits_at(occ, grid, c.x, c.y, s)
+		if _hover_ok and accept_at.is_valid():
+			_hover_ok = bool(accept_at.call(String(d.id), c.x, drag_rot))
 		# на такую же неполную стопку — тоже можно; патроны — на магазин (снарядить)
 		if not _hover_ok:
 			var j := index_at(at)

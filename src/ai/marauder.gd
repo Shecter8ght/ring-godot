@@ -425,9 +425,9 @@ func _hang_pouches() -> void:
 		if not e.has("rounds"):
 			continue
 		var cap := int(WeaponDb.magazine(String(e.get("id", ""))).get("capacity", 30))
-		var pid := "pouch_pistol" if pistol else ("pouch_big" if cap >= 50 else "pouch_rifle")
-		if not ItemDb.attach_pouch(a, pid):
-			break
+		var pid := "pouch_pistol" if pistol and ItemDb.mag_fits_kind("pistol", String(e.get("id", ""))) else ("pouch_big" if cap >= 50 else "pouch_rifle")
+		# не встал (мест нет, большой — не на ту пару) — следующий магазин, может, встанет меньший
+		ItemDb.attach_pouch(a, pid)
 
 
 ## Хост, тело: что ещё лежит в ящике с тела — то и надето; сняли шлем — на теле его нет; ящик унесли — тело
@@ -2699,7 +2699,7 @@ func _on_died() -> void:
 			var i := 0
 			while i < spare.size():
 				var m: Dictionary = spare[i]
-				if m.has("rounds") and ItemDb.add_to(ItemDb.rig_list(equipment, "rig"), m, ItemDb.rig_grid(equipment, "rig")) > 0:
+				if m.has("rounds") and ItemDb.add_to_rig(equipment, m) > 0:
 					spare.remove_at(i)
 					continue
 				i += 1

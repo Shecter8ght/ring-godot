@@ -397,7 +397,7 @@ func _refresh_lists(me: Player) -> void:
 func _build_equipment(me: Player) -> void:
 	# Изменение патронов не должно уничтожать источник/приёмник текущего перетаскивания: фигура и сетки
 	# разгрузки живут, пока не сменилась сама разгрузка (другие сетки).
-	var rig_sig := "%s|%s" % [str(me.inventory.grid_of("rig")), str(me.inventory.grid_of("dump"))]
+	var rig_sig := "%s|%s|%s" % [str(me.inventory.grid_of("rig")), str(me.inventory.grid_of("dump")), str(ItemDb.rig_column_groups(me.inventory.equipment))]
 	for child: Node in _eq_list.get_children():
 		if child is EquipDoll and not child.is_queued_for_deletion() and String(child.get_meta("rig_sig", "")) == rig_sig:
 			(child as EquipDoll).set_equipment(me.inventory.equipment)
@@ -434,6 +434,12 @@ func _build_equipment(me: Player) -> void:
 		# двойной клик — снять в рюкзак; ПКМ — снять, выбросить, снять обвес / магазин / плиту
 		sv.unequip_requested.connect(func() -> void: Raid.current.request_unequip(ws))
 		sv.context.connect(func(at: Vector2) -> void: _slot_menu(me, ws, at))
+	doll.set_equipment(me.inventory.equipment)
+	# места брони — просьбами к хосту: подсумок на полуслот, перестановка, снять в рюкзак
+	doll.places.pouch_from.connect(func(src: GridView, idx: int, at: int) -> void:
+		Raid.current.request_equip_from(src.role, idx, _looting if src.role == "loot" else null, "pouch:%d" % at))
+	doll.places.pouch_moved.connect(func(from_at: int, to_at: int) -> void: Raid.current.request_pouch_move(from_at, to_at))
+	doll.places.pouch_off.connect(func(at: int) -> void: Raid.current.request_unequip("pouch:%d" % at))
 	# подсумки на броне: магазины (перезарядка — из них) и сброс пустых
 	if me.inventory.grid_of("rig") != Vector2i.ZERO:
 		var rig_row := HBoxContainer.new()
@@ -452,6 +458,9 @@ func _build_equipment(me: Player) -> void:
 			box.add_child(cap)
 			var gv := GridView.new(pg, role)
 			gv.set_items(me.inventory.list_of(role))
+			if role == "rig":
+				gv.column_groups = ItemDb.rig_column_groups(me.inventory.equipment)
+				gv.accept_at = func(id: String, x: int, r: bool) -> bool: return ItemDb.rig_id_fits_at(me.inventory.equipment, id, x, r)
 			box.add_child(gv)
 			_wire_grid(gv)
 			gv.context.connect(func(idx: int, at: Vector2) -> void: _item_menu(me, role, idx, at))

@@ -43,8 +43,8 @@ static func capture(name: String) -> Dictionary:
 			plates[String(side)] = String((e.plates[side] as Dictionary).id)
 		if not plates.is_empty():
 			rec["plates"] = plates
-		if not (e.get("pouches", []) as Array).is_empty():
-			rec["pouches"] = (e.pouches as Array).duplicate()
+		if not ItemDb.pouch_list(e).is_empty():
+			rec["pouches"] = ItemDb.pouch_list(e).duplicate(true)
 		slots[String(slot)] = rec
 	var counts := {}
 	var order: Array = []
@@ -135,8 +135,9 @@ static func plan(t: Dictionary) -> Dictionary:
 				continue
 			add.call("  " + ItemDb.item_name(pid), pid, 1)
 		# подсумки на броне: что уже висит — засчитано
-		var have_p: Array = (cur.get("pouches", []) as Array).duplicate() if String(cur.get("id", "")) == id else []
-		for pid: Variant in rec.get("pouches", []):
+		var have_p: Array = ItemDb.pouch_ids(cur) if String(cur.get("id", "")) == id else []
+		for p_v: Variant in rec.get("pouches", []):
+			var pid := String((p_v as Dictionary).id) if p_v is Dictionary else String(p_v)
 			var k := have_p.find(pid)
 			if k >= 0:
 				have_p.remove_at(k)
@@ -217,9 +218,11 @@ static func apply(t: Dictionary) -> Array[String]:
 			if i < 0 or not Profile.fit_part("equip:" + String(slot), -1, "stash", i, String(side)):
 				fails.append(ItemDb.item_name(pid))
 		# подсумки — на надетую броню: из тайника, нет — купить
-		var have_p: Array = ((Profile.equipment.get(String(slot), {}) as Dictionary).get("pouches", []) as Array).duplicate()
+		var have_p: Array = ItemDb.pouch_ids(Profile.equipment.get(String(slot), {}) as Dictionary)
 		for pid_v: Variant in rec.get("pouches", []):
-			var pid := String(pid_v)
+			var pid := String((pid_v as Dictionary).id) if pid_v is Dictionary else String(pid_v)
+			# место из шаблона (полуслот), занято — первое свободное
+			var at := int((pid_v as Dictionary).get("at", -1)) if pid_v is Dictionary else -1
 			var k := have_p.find(pid)
 			if k >= 0:
 				have_p.remove_at(k)
@@ -230,7 +233,7 @@ static func apply(t: Dictionary) -> Array[String]:
 					fails.append(ItemDb.item_name(pid))
 					continue
 				i = _from_stash(pid)
-			if i < 0 or not Profile.equip_from("stash", i):
+			if i < 0 or not (Profile.equip_from("stash", i, "pouch:%d" % at) or Profile.equip_from("stash", i)):
 				fails.append(ItemDb.item_name(pid))
 	var in_bp := {}
 	for e in Profile.backpack:

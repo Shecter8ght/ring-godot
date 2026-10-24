@@ -38,7 +38,7 @@ func _ready() -> void:
 		return
 	target.process_mode = Node.PROCESS_MODE_INHERIT
 	var worn0: PackedStringArray = (target.get_node("NpcOutfit") as NpcOutfit).worn_names()
-	var pouches0: int = (target.equipment.armor.get("pouches", []) as Array).size()
+	var pouches0: int = ItemDb.pouch_list(target.equipment.armor).size()
 	var mags0: int = 0
 	for it: Dictionary in target.spare:
 		if it.has("rounds"):
@@ -49,6 +49,13 @@ func _ready() -> void:
 	target._health.take_damage(10000.0, target.global_position + Vector3(2.0, 1.5, 0.0), "head")
 	for i in range(30):
 		await get_tree().process_frame
+	# тяжёлое ранение вместо смерти — добить
+	for k in range(5):
+		if target.state != Marauder.State.DOWNED:
+			break
+		target._health.take_damage(10000.0, target.global_position + Vector3(2.0, 1.5, 0.0), "head")
+		for i in range(30):
+			await get_tree().process_frame
 	_check("убит, ящик с тела есть", target.state == Marauder.State.DEAD and is_instance_valid(target._crate), str(target.state))
 	if not is_instance_valid(target._crate):
 		_finish()
@@ -59,8 +66,8 @@ func _ready() -> void:
 		if not WeaponDb.vest(String(e.get("id", ""))).is_empty():
 			armor_in_crate = e
 	var in_pouches: int = (armor_in_crate.get("mags", []) as Array).size()
-	_check("в ящике броня с подсумками и магазинами в них (%d из %d)" % [in_pouches, mags0], not armor_in_crate.is_empty() and (armor_in_crate.get("pouches", []) as Array).size() == pouches0 and in_pouches == mini(mags0, pouches0),
-		"подсумков %d, магазинов в них %d" % [(armor_in_crate.get("pouches", []) as Array).size(), in_pouches])
+	_check("в ящике броня с подсумками и магазинами в них (%d из %d)" % [in_pouches, mags0], not armor_in_crate.is_empty() and ItemDb.pouch_list(armor_in_crate).size() == pouches0 and in_pouches == mini(mags0, pouches0),
+		"подсумков %d, магазинов в них %d" % [ItemDb.pouch_list(armor_in_crate).size(), in_pouches])
 	await get_tree().create_timer(0.8).timeout
 	var worn_dead: PackedStringArray = (target.get_node("NpcOutfit") as NpcOutfit).worn_names()
 	_check("мёртвый — одет как при жизни", worn_dead.size() == worn0.size(), "%d / %d" % [worn_dead.size(), worn0.size()])

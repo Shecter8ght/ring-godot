@@ -328,6 +328,17 @@ func _build_stash() -> void:
 			else:
 				Profile.fit_part("equip:" + s, -1, src.role, idx, ""))
 		sv.context.connect(func(at: Vector2) -> void: _parts_menu("equip:" + s, -1, Profile.equipment.get(s, {}), at))
+	doll.set_equipment(Profile.equipment)
+	# места брони: подсумок из сетки — на полуслот, с места на место, двойной клик — снять в тайник
+	doll.places.pouch_from.connect(func(src: GridView, idx: int, at: int) -> void:
+		if not Profile.equip_from(src.role, idx, "pouch:%d" % at):
+			toast("Подсумок сюда не встаёт"))
+	doll.places.pouch_moved.connect(func(from_at: int, to_at: int) -> void:
+		if not Profile.move_pouch(from_at, to_at):
+			toast("Подсумок сюда не встаёт"))
+	doll.places.pouch_off.connect(func(at: int) -> void:
+		if not Profile.unequip("pouch:%d" % at):
+			toast("В тайнике нет места"))
 	# разгрузка: подсумки под магазины (перезарядка — из них) и сумка сброса пустых
 	var rig_views: Array[GridView] = []
 	if Profile.grid_of("rig") != Vector2i.ZERO:
@@ -346,6 +357,10 @@ func _build_stash() -> void:
 			box.add_child(cap)
 			var gv := GridView.new(pg2, String(part[0]))
 			gv.set_items(Profile.list_of(String(part[0])))
+			if String(part[0]) == "rig":
+				# в подсумок — магазин его вида: подписи колонок и красная подсветка не на своём
+				gv.column_groups = ItemDb.rig_column_groups(Profile.equipment)
+				gv.accept_at = func(id: String, x: int, r: bool) -> bool: return ItemDb.rig_id_fits_at(Profile.equipment, id, x, r)
 			box.add_child(gv)
 			rig_views.append(gv)
 	else:
@@ -510,7 +525,7 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 		acts.append(func() -> void:
 			if not Profile.equip_from(name, idx):
 				toast("На броне нет места под этот подсумок"))
-	if (list[idx].get("pouches", []) as Array).size() > 0:
+	if ItemDb.pouch_list(list[idx]).size() > 0:
 		menu.add_item("Снять подсумки")
 		acts.append(func() -> void: Profile.strip_pouches(name, idx))
 	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
@@ -645,8 +660,8 @@ func _parts_menu(where: String, idx: int, e: Dictionary, at: Vector2) -> void:
 		var part := String(p[1])
 		menu.add_item(String(p[0]))
 		acts.append(func() -> void: Profile.strip_part(where, idx, part))
-	if (e.get("pouches", []) as Array).size() > 0:
-		menu.add_item("Снять подсумки (%d)" % (e.pouches as Array).size())
+	if ItemDb.pouch_list(e).size() > 0:
+		menu.add_item("Снять подсумки (%d)" % ItemDb.pouch_list(e).size())
 		acts.append(func() -> void: Profile.strip_pouches(where, idx))
 	menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
 	menu.popup_hide.connect(menu.queue_free)
