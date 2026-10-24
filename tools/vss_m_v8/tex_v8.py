@@ -112,7 +112,7 @@ def studio(bright=1.0, bg=(0.62, 0.62, 0.63)):
     out = nt.nodes.new("ShaderNodeOutputWorld")
     env = nt.nodes.new("ShaderNodeTexEnvironment")
     env.image = bpy.data.images.load("E:/Games/RING-godot/_asset_src/vss_m_v8/hdri/photo_studio_loft_hall_2k.hdr", check_existing=True)
-    bg_hdr = nt.nodes.new("ShaderNodeBackground"); bg_hdr.inputs["Strength"].default_value = 0.8 * bright
+    bg_hdr = nt.nodes.new("ShaderNodeBackground"); bg_hdr.inputs["Strength"].default_value = 0.35 * bright
     nt.links.new(env.outputs[0], bg_hdr.inputs[0])
     bg_c = nt.nodes.new("ShaderNodeBackground"); bg_c.inputs[0].default_value = (*bg, 1.0); bg_c.inputs[1].default_value = 1.0
     lp = nt.nodes.new("ShaderNodeLightPath")
@@ -130,10 +130,10 @@ def studio(bright=1.0, bg=(0.62, 0.62, 0.63)):
         lo.location = loc
         lo.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat("-Z", "Y").to_euler()
         return lo
-    area("Key", (0.25, -0.9, 1.0), (1.2, 0.6), 260.0, (1.0, 0.97, 0.92))
-    area("Fill", (0.6, 1.1, 0.5), (1.0, 1.0), 90.0, (0.92, 0.96, 1.0))
-    area("Rim", (1.4, 0.3, 0.9), (0.3, 1.5), 140.0)
-    area("Top_strip", (0.45, -0.2, 1.3), (1.6, 0.25), 110.0)
+    area("Key", (0.25, -0.9, 1.0), (1.2, 0.6), 120.0, (1.0, 0.97, 0.92))
+    area("Fill", (0.6, 1.1, 0.5), (1.0, 1.0), 40.0, (0.92, 0.96, 1.0))
+    area("Rim", (1.4, 0.3, 0.9), (0.3, 1.5), 80.0)
+    area("Top_strip", (0.45, -0.2, 1.3), (1.6, 0.25), 50.0)
 
 
 def main():

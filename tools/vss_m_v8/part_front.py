@@ -143,7 +143,7 @@ def build(ctx):
         boolean(base, prism_xz(f"_rp{s}", fillet([(592.0, 35.5), (622.0, 35.5), (622.0, 31.0 + DZ), (592.0, 31.0 + DZ)], 2.0, 3),
                                s * 4.6, s * 8.0, Cs))
     finish(base, 0.6, 3, 35)
-    pin = cyl("Rear_sight_hinge_pin", -6.6, 6.6, 1.05, Cs, axis="Y", cy=633.0, cz=39.5 + DZ, seg=16)
+    pin = cyl("Rear_sight_hinge_pin", -6.6, 6.6, 1.05, Cs, "Steel_black", axis="Y", cy=633.0, cz=39.5 + DZ, seg=16)
     weld = []
     for s in (-1, 1):
         for k in range(25):

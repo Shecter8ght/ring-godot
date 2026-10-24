@@ -166,9 +166,9 @@ def build_mag(tag, rounds, coll, cart_coll, me_cart):
     # подаватель со ступенькой (уступ — под ряд, из которого подаётся следующий патрон)
     fu = last_u + D_CART / 2 + 0.4
     fol = spine_box(f"Magazine_{tag}_follower", fu, fu + 3.0, -HALF_N + 3.2, HALF_N - 3.2, -W_IN / 2 + 0.4, W_IN / 2 - 0.4, coll, 1)
+    fol.data.materials.append(material("Polymer_magazine"))
     step_side = 1 if rounds % 2 == 0 else -1
     boolean(fol, spine_box("_fs", fu - 2.4, fu + 0.4, -HALF_N + 6.0, HALF_N - 6.0, min(0, step_side * 9.6), max(0, step_side * 9.6), coll, 1), op="UNION")
-    fol.data.materials.append(material("Polymer_magazine"))
     finish(fol, 0.4, 2, 35)
     # пружина: витая из проволоки прямоугольного контура, витки по оси магазина
     loop = rrect(HALF_N - 5.0, W_IN / 2 - 2.0, 3.5, 3)

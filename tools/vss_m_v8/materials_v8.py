@@ -163,7 +163,12 @@ def decal_mask(g, empties):
         val = g.bw(im.outputs["Color"])
         if inv:
             val = g.math("SUBTRACT", 1.0, val)
-        val = g.maprange(val, 0.12, 0.85)
+        val = g.maprange(val, 0.22, 0.85)
+        # мягкий край декали: к границе квадрата маска гаснет (у картинок не везде чёрный фон)
+        sxy = g.n("ShaderNodeSeparateXYZ"); g.L.new(tc.outputs["Object"], sxy.inputs[0])
+        edge_x = g.maprange(g.math("ABSOLUTE", sxy.outputs["X"]), 0.75, 0.98, 1.0, 0.0)
+        edge_y = g.maprange(g.math("ABSOLUTE", sxy.outputs["Y"]), 0.75, 0.98, 1.0, 0.0)
+        val = g.math("MULTIPLY", val, g.math("MULTIPLY", edge_x, edge_y))
         sep = g.n("ShaderNodeSeparateXYZ"); g.L.new(tc.outputs["Object"], sep.inputs[0])
         zf = g.maprange(g.math("ABSOLUTE", sep.outputs["Z"]), 0.6, 1.0, 1.0, 0.0)
         val = g.math("MULTIPLY", val, zf)
@@ -172,6 +177,14 @@ def decal_mask(g, empties):
 
 
 # ---------------- общий слоистый материал ----------------
+
+_DBG = {}
+
+
+def _aov(g, name, val):
+    """Отладка масок: MASK_DEBUG=имя — материал светится значением этой маски (вместо BSDF)."""
+    _DBG[name] = val
+
 
 def layered(name, P, empties=()):
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
@@ -207,9 +220,11 @@ def layered(name, P, empties=()):
         brk = g.noise(obj, E.get("brk_scale", 260.0), 8.0, 0.65, 0.3)
         brk2 = g.noise(obj, E.get("brk_scale", 260.0) * 4.5, 6.0, 0.7)
         brk = g.math("MULTIPLY_ADD", brk, 0.7, g.math("MULTIPLY", brk2, 0.45))
+        # износ рвётся: примерно половина кромок цела, на остальных — прерывистые потёртости
         ew = g.math("SUBTRACT", g.math("MULTIPLY", e, g.math("MULTIPLY", wear_k, E.get("k", 1.6))),
-                    g.maprange(brk, 0.35, 0.85, 0.85, 0.0))
+                    g.maprange(brk, 0.42, 0.72, 1.0, 0.0))
         ewear = g.maprange(ew, 0.05, 0.35)
+        _aov(g, "m_edge", ewear)
         halo = g.maprange(ew, -0.25, 0.1)
         base = g.mix(halo, base, E.get("halo_col", P["base"]))
         rough = g.mix(halo, rough, E.get("halo_r", 0.45), kind="FLOAT")
@@ -226,9 +241,10 @@ def layered(name, P, empties=()):
             v = g.scaled(obj, sc, rot=rot)
             c = g.bw(g.tri(img, v, 0.3))
             acc = c if acc is None else g.math("MAXIMUM", acc, c)
-        zone = g.maprange(g.noise(obj, S.get("zone_scale", 18.0), 2.0, 0.5), 0.42, 0.62)
-        sm = g.math("MULTIPLY", g.maprange(acc, S.get("lo", 0.35), S.get("hi", 0.8)), zone)
+        zone = g.maprange(g.noise(obj, S.get("zone_scale", 14.0), 2.0, 0.5), 0.5, 0.66)
+        sm = g.math("MULTIPLY", g.maprange(acc, S.get("lo", 0.55), S.get("hi", 0.92)), zone)
         sm = g.math("MULTIPLY", sm, g.math("MULTIPLY", wear_k, S.get("k", 1.0)), clamp=True)
+        _aov(g, "m_scratch", sm)
         base = g.mix(sm, base, S["col"])
         rough = g.mix(sm, rough, S["rough"], kind="FLOAT")
         metal = g.mix(sm, metal, S.get("metal", 0.85), kind="FLOAT")
@@ -240,9 +256,12 @@ def layered(name, P, empties=()):
         cav = g.cavity(R.get("dist", 4.0), R.get("lo", 0.2), R.get("hi", 0.8))
         dm = g.bw(g.tri(R["mask"], g.scaled(obj, R.get("scale", 14.0)), 0.3))
         dm = g.maprange(dm, 0.05, 0.6, 0.35, 1.0)
-        gm = g.math("MULTIPLY", g.math("MULTIPLY", cav, dm), g.math("MULTIPLY", grime_k, R.get("k", 1.0)), clamp=True)
-        up = g.math("MULTIPLY", g.facing_up(), g.maprange(g.noise(obj, 90.0, 6.0, 0.6), 0.45, 0.75))
-        dust = g.math("MULTIPLY", up, g.math("MULTIPLY", dust_k, R.get("dust", 0.35)), clamp=True)
+        gm = g.math("MULTIPLY", g.math("MULTIPLY", cav, dm), g.math("MULTIPLY", grime_k, R.get("k", 1.0) * 0.45), clamp=True)
+        dmask = g.bw(g.tri(R.get("dust_mask", R["mask"]), g.scaled(obj, 11.0, rot=(0.5, 0.2, 1.1)), 0.3))
+        up = g.math("MULTIPLY", g.facing_up(0.5, 0.95), g.maprange(dmask, 0.35, 0.85))
+        dust = g.math("MULTIPLY", up, g.math("MULTIPLY", dust_k, R.get("dust", 0.35) * 0.12), clamp=True)
+        _aov(g, "m_grime", gm)
+        _aov(g, "m_dust", dust)
         base = g.mix(gm, base, R["col"])
         rough = g.mix(gm, rough, R.get("rough", 0.9), kind="FLOAT")
         metal = g.mix(gm, metal, 0.0, kind="FLOAT")
@@ -257,23 +276,44 @@ def layered(name, P, empties=()):
         O = P["oil"]
         oil = g.bw(g.tri(O["mask"], g.scaled(obj, O.get("scale", 9.0), rot=(0.3, 0.7, 0.2)), 0.3))
         oil = g.math("MULTIPLY", g.maprange(oil, 0.25, 0.85), g.math("MULTIPLY", oil_k, O.get("k", 0.5)), clamp=True)
-        coat = oil
-        rough = g.mix(g.math("MULTIPLY", oil, 0.6), rough, 0.25, kind="FLOAT")
+        base = g.mix(g.math("MULTIPLY", oil, 0.5), base, (0.004, 0.004, 0.004))
+        rough = g.math("SUBTRACT", rough, g.math("MULTIPLY", oil, 0.08))
     if empties:
         pm = decal_mask(g, empties)
         pm = g.math("MULTIPLY", pm, P.get("print_k", 1.0), clamp=True)
-        coat = pm if coat is None else g.math("MAXIMUM", coat, pm)
-        base = g.mix(g.math("MULTIPLY", pm, 0.35), base, P.get("print_col", (0.09, 0.09, 0.09)))
-        rough = g.mix(g.math("MULTIPLY", pm, 0.5), rough, 0.3, kind="FLOAT")
+        pc = g.math("MULTIPLY", pm, 0.55)
+        coat = pc if coat is None else g.math("MAXIMUM", coat, pc)
+        base = g.mix(g.math("MULTIPLY", pm, 0.14), base, P.get("print_col", (0.09, 0.09, 0.09)))
+        rough = g.mix(g.math("MULTIPLY", pm, 0.35), rough, 0.35, kind="FLOAT")
         height = g.math("ADD", height, g.math("MULTIPLY", pm, 0.05))
 
     # выход
+    if coat is not None:
+        _aov(g, "m_coat", coat)
+    dbg = os.environ.get("MASK_DEBUG")
+    if dbg:
+        em = g.n("ShaderNodeEmission")
+        if dbg == "m_base":
+            g._setc(em.inputs["Color"], base)
+        elif dbg in _DBG:
+            g._in(em.inputs["Strength"], 1.0)
+            cmb = g.n("ShaderNodeCombineXYZ")
+            for i in range(3):
+                g._in(cmb.inputs[i], _DBG[dbg])
+            g.link(cmb.outputs[0], em.inputs["Color"])
+        else:
+            em.inputs["Color"].default_value = (0, 0, 0, 1)
+        _DBG.clear()
+        g.link(em.outputs[0], out.inputs["Surface"])
+        return m
+    _DBG.clear()
     g._setc(bsdf.inputs["Base Color"], base)
+    bsdf.inputs["Specular IOR Level"].default_value = P.get("spec", 0.5)
     g._in(bsdf.inputs["Roughness"], rough)
     g._in(bsdf.inputs["Metallic"], metal)
     if coat is not None:
         g._in(bsdf.inputs["Coat Weight"], coat)
-        bsdf.inputs["Coat Roughness"].default_value = 0.12
+        bsdf.inputs["Coat Roughness"].default_value = 0.22
         bsdf.inputs["Coat IOR"].default_value = 1.47
     if "coat_const" in P:
         cw, cr = P["coat_const"]
@@ -337,21 +377,24 @@ def stipple(z_max_mm):
 
 
 def wood():
-    """Шпон сапели: годичные слои вдоль ствола приклада (X), лак, потёртости лака на кромках."""
-    alb = image(f"{TEX}/sapele_veneer/albedo.jpg", noncolor=False)
-    arm = image(f"{TEX}/sapele_veneer/arm.jpg")
+    """Берёзовая фанера (клеёный приклад, CC0 Poly Haven «Plywood»): волокна вдоль приклада (X), красноватый лак."""
+    alb = image(f"{TEX}/plywood/albedo.jpg", noncolor=False)
+    arm = image(f"{TEX}/plywood/arm.jpg")
 
     def f(g, obj, base, rough, height, metal):
-        v = g.scaled(obj, (2.2, 9.0, 9.0), rot=(0.0, 0.0, 0.0))
+        v = g.scaled(obj, (1.7, 3.6, 3.6), rot=(0.0, 0.0, 0.0))
         col = g.tri(alb, v, 0.35)
         a = g.tri(arm, v, 0.35)
         sepa = g.n("ShaderNodeSeparateColor"); g.L.new(a, sepa.inputs[0])
         hsv = g.n("ShaderNodeHueSaturation")
-        hsv.inputs["Hue"].default_value = 0.49
-        hsv.inputs["Saturation"].default_value = 1.05
-        hsv.inputs["Value"].default_value = 0.62
+        hsv.inputs["Hue"].default_value = 0.47
+        hsv.inputs["Saturation"].default_value = 1.15
+        hsv.inputs["Value"].default_value = 0.46
+        # старение лака: крупные пятна потемнее
+        age = g.maprange(g.noise(obj, 9.0, 3.0, 0.55), 0.35, 0.7)
+        hsv2 = g.mix(age, hsv.outputs[0], (0.07, 0.028, 0.012), blend="MULTIPLY")
         g.L.new(col, hsv.inputs["Color"])
-        base = hsv.outputs[0]
+        base = hsv2
         rough = g.math("MULTIPLY_ADD", sepa.outputs["Green"], 0.35, 0.4)
         height = g.math("ADD", height, g.math("MULTIPLY", g.bw(col), 0.6))
         return base, rough, height, 0.0
@@ -373,8 +416,8 @@ def build_all(prints=None):
     M["Steel_black"] = layered("V8_Steel_Phosphate", {
         "base": (0.0075, 0.0075, 0.008), "base2": (0.012, 0.0115, 0.011), "rough": (0.62, 0.8), "metal": 0.75,
         "micro_scale": 3000.0, "micro_h": 0.12,
-        "edge": {"r": 0.45, "lo": 0.02, "hi": 0.16, "col": (0.30, 0.295, 0.29), "rough": 0.3, "metal": 1.0,
-                 "halo_col": (0.02, 0.02, 0.021), "halo_r": 0.5, "k": 1.5, "brk_scale": 300.0},
+        "edge": {"r": 0.45, "lo": 0.03, "hi": 0.18, "col": (0.22, 0.215, 0.21), "rough": 0.3, "metal": 1.0,
+                 "halo_col": (0.011, 0.011, 0.0115), "halo_r": 0.55, "k": 1.4, "brk_scale": 220.0},
         "scratch": {"maps": scr_maps, "col": (0.05, 0.05, 0.05), "rough": 0.42, "metal": 0.9, "k": 0.9},
         "grime": {"mask": grime, "dist": 3.5, "col": (0.045, 0.04, 0.034), "rough": 0.92, "dust": 0.25,
                   "dust_col": (0.17, 0.16, 0.145)},
@@ -392,8 +435,8 @@ def build_all(prints=None):
     # чернёный анодированный алюминий муфты: кромки рельсов светлые
     M["Alu_anodized"] = layered("V8_Alu_Anodized", {
         "base": (0.009, 0.009, 0.0095), "base2": (0.012, 0.012, 0.013), "rough": (0.42, 0.56), "metal": 0.55,
-        "edge": {"r": 0.5, "lo": 0.02, "hi": 0.14, "col": (0.62, 0.62, 0.63), "rough": 0.3, "metal": 1.0,
-                 "halo_col": (0.02, 0.02, 0.022), "k": 1.8, "brk_scale": 380.0},
+        "edge": {"r": 0.45, "lo": 0.03, "hi": 0.16, "col": (0.42, 0.42, 0.43), "rough": 0.3, "metal": 1.0,
+                 "halo_col": (0.013, 0.013, 0.014), "k": 1.6, "brk_scale": 260.0},
         "scratch": {"maps": scr_maps, "col": (0.2, 0.2, 0.21), "rough": 0.35, "metal": 1.0, "k": 0.7},
         "grime": {"mask": grime, "dist": 4.0, "col": (0.05, 0.045, 0.04), "rough": 0.9, "dust": 0.3,
                   "dust_col": (0.17, 0.16, 0.145)},
@@ -403,7 +446,7 @@ def build_all(prints=None):
     M["Suppressor"] = layered("V8_Suppressor", {
         "base": (0.0085, 0.0085, 0.009), "base2": (0.013, 0.0125, 0.012), "rough": (0.6, 0.78), "metal": 0.72,
         "special": knurl(700.0, 851.0),
-        "edge": {"r": 0.5, "col": (0.28, 0.275, 0.27), "rough": 0.32, "k": 1.2},
+        "edge": {"r": 0.45, "col": (0.2, 0.195, 0.19), "rough": 0.32, "k": 1.1, "halo_col": (0.011, 0.011, 0.0115)},
         "scratch": {"maps": scr_maps, "col": (0.05, 0.05, 0.05), "rough": 0.45, "k": 1.0},
         "grime": {"mask": grime, "dist": 3.0, "col": (0.04, 0.036, 0.03), "rough": 0.92, "dust": 0.3,
                   "dust_col": (0.17, 0.16, 0.145)},
@@ -411,21 +454,22 @@ def build_all(prints=None):
     }, prints.get("Suppressor", ()))
     # полимер цевья: тёмно-коричневый, шагрень по бокам, потёртости светлее и шершавее
     M["Polymer_handguard"] = layered("V8_Polymer_Handguard", {
-        "base": (0.024, 0.017, 0.013), "base2": (0.03, 0.022, 0.017), "rough": (0.55, 0.7), "metal": 0.0,
+        "base": (0.0105, 0.0098, 0.009), "base2": (0.0135, 0.0125, 0.0115), "rough": (0.74, 0.88), "metal": 0.0, "spec": 0.28,
+        "print_k": 0.55,
         "micro_scale": 1800.0, "micro_h": 0.2, "special": stipple(37.0),
-        "edge": {"r": 0.8, "lo": 0.02, "hi": 0.2, "col": (0.075, 0.062, 0.052), "rough": 0.78, "metal": 0.0, "k": 1.2,
-                 "halo_col": (0.03, 0.023, 0.018), "halo_r": 0.6},
+        "edge": {"r": 0.8, "lo": 0.03, "hi": 0.22, "col": (0.05, 0.042, 0.036), "rough": 0.8, "metal": 0.0, "k": 1.0,
+                 "halo_col": (0.02, 0.015, 0.012), "halo_r": 0.8},
         "scratch": {"maps": scr_maps, "col": (0.06, 0.05, 0.043), "rough": 0.75, "metal": 0.0, "k": 0.6},
         "grime": {"mask": grime, "dist": 3.0, "col": (0.075, 0.068, 0.058), "rough": 0.95, "dust": 0.35,
                   "dust_col": (0.2, 0.185, 0.165)},
-        "bump": 0.4, "print_col": (0.05, 0.045, 0.04),
+        "bump": 0.4, "print_col": (0.03, 0.028, 0.026),
     }, prints.get("Polymer_handguard", ()))
     # полимер магазина: почти чёрный, мелкая литьевая фактура
     M["Polymer_magazine"] = layered("V8_Polymer_Magazine", {
-        "base": (0.014, 0.0135, 0.013), "base2": (0.019, 0.018, 0.017), "rough": (0.5, 0.64), "metal": 0.0,
+        "base": (0.008, 0.0078, 0.0075), "base2": (0.011, 0.0107, 0.0104), "rough": (0.66, 0.8), "metal": 0.0, "spec": 0.3,
         "micro_scale": 2200.0, "micro_h": 0.25,
-        "edge": {"r": 0.7, "col": (0.07, 0.068, 0.065), "rough": 0.75, "metal": 0.0, "k": 1.3,
-                 "halo_col": (0.022, 0.021, 0.02)},
+        "edge": {"r": 0.7, "col": (0.045, 0.044, 0.042), "rough": 0.78, "metal": 0.0, "k": 1.0,
+                 "halo_col": (0.011, 0.0105, 0.01)},
         "scratch": {"maps": scr_maps, "col": (0.06, 0.058, 0.055), "rough": 0.72, "metal": 0.0, "k": 0.9},
         "grime": {"mask": grime, "dist": 3.0, "col": (0.08, 0.072, 0.062), "rough": 0.95, "dust": 0.3,
                   "dust_col": (0.2, 0.185, 0.165)},
@@ -439,7 +483,7 @@ def build_all(prints=None):
         "scratch": {"maps": scr_maps, "col": (0.3, 0.17, 0.09), "rough": 0.6, "metal": 0.0, "k": 0.8},
         "grime": {"mask": grime, "dist": 4.0, "col": (0.05, 0.03, 0.02), "rough": 0.8, "dust": 0.25,
                   "dust_col": (0.25, 0.2, 0.16)},
-        "coat_const": (0.55, 0.22), "bump": 0.25, "print_col": (0.1, 0.05, 0.03),
+        "coat_const": (0.3, 0.3), "bump": 0.25, "print_col": (0.1, 0.05, 0.03),
     }, prints.get("Wood_stock", ()))
     M["Rubber"] = layered("V8_Rubber", {
         "base": (0.012, 0.012, 0.012), "rough": (0.78, 0.9), "metal": 0.0, "micro_scale": 1500.0, "micro_h": 0.3,
@@ -450,7 +494,7 @@ def build_all(prints=None):
     })
     # патрон: гильза — лакированная сталь, оболочка пули — томпак, капсюль с красным лаком
     M["Case_steel_lacquer"] = layered("V8_Case", {
-        "base": (0.16, 0.14, 0.075), "base2": (0.13, 0.115, 0.06), "rough": (0.28, 0.4), "metal": 0.75,
+        "base": (0.09, 0.085, 0.045), "base2": (0.075, 0.07, 0.036), "rough": (0.32, 0.45), "metal": 0.7,
         "micro_scale": 4000.0, "micro_h": 0.05,
         "edge": {"r": 0.25, "col": (0.45, 0.43, 0.4), "rough": 0.25, "k": 0.9},
         "grime": {"mask": grime, "dist": 2.0, "col": (0.05, 0.045, 0.03), "rough": 0.7, "dust": 0.1},
@@ -462,7 +506,27 @@ def build_all(prints=None):
         "grime": {"mask": grime, "dist": 2.0, "col": (0.18, 0.1, 0.06), "rough": 0.5, "dust": 0.05},
         "bump": 0.12,
     })
-    M["Glass"] = bpy.data.materials.get("Glass")
+    M["Alu_bare"] = layered("V8_Alu_Machined", {
+        "base": (0.42, 0.42, 0.43), "base2": (0.36, 0.36, 0.37), "rough": (0.28, 0.4), "metal": 1.0,
+        "scratch": {"maps": scr_maps, "col": (0.6, 0.6, 0.61), "rough": 0.2, "metal": 1.0, "k": 0.8},
+        "grime": {"mask": grime, "dist": 2.0, "col": (0.05, 0.045, 0.04), "rough": 0.8, "dust": 0.1},
+        "bump": 0.2,
+    })
+    M["Engraving_fill"] = layered("V8_Engraving_Fill", {
+        "base": (0.55, 0.53, 0.48), "base2": (0.4, 0.38, 0.34), "rough": (0.6, 0.8), "metal": 0.0,
+        "grime": {"mask": grime, "dist": 1.0, "col": (0.1, 0.09, 0.08), "rough": 0.9, "dust": 0.1},
+    })
+    M["Inner_black"] = layered("V8_Inner_Black", {"base": (0.006, 0.006, 0.006), "rough": (0.85, 0.95), "metal": 0.0})
+    g = bpy.data.materials.get("V8_Glass_Coated") or bpy.data.materials.new("V8_Glass_Coated")
+    g.use_nodes = True
+    b = g.node_tree.nodes.get("Principled BSDF")
+    b.inputs["Base Color"].default_value = (0.85, 0.9, 0.88, 1.0)
+    b.inputs["Roughness"].default_value = 0.02
+    b.inputs["Transmission Weight"].default_value = 1.0
+    b.inputs["IOR"].default_value = 1.52
+    b.inputs["Coat Weight"].default_value = 0.6
+    b.inputs["Coat Tint"].default_value = (0.75, 0.6, 1.0, 1.0)
+    M["Glass"] = g
     return M
 
 

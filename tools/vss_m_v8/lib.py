@@ -274,11 +274,31 @@ def boolean(target, cutter, op="DIFFERENCE", remove=True, solver="EXACT", self_x
     if solver == "EXACT" and self_x:
         m.use_self = True
     apply_all(target)
+    _drop_empty_slots(target)
     if remove:
         me = cutter.data
         bpy.data.objects.remove(cutter, do_unlink=True)
         if me.users == 0:
             bpy.data.meshes.remove(me)
+
+
+def _drop_empty_slots(o):
+    """Грани выреза приходят с пустым слотом материала (у резака его нет) — отдаём их материалу детали."""
+    me = o.data
+    mats = list(me.materials)
+    if not any(m is None for m in mats):
+        return
+    keep = [i for i, m in enumerate(mats) if m is not None]
+    if not keep:
+        return
+    remap = {old: new for new, old in enumerate(keep)}
+    idx = [remap.get(p.material_index, 0) for p in me.polygons]
+    new = [mats[i] for i in keep]
+    me.materials.clear()
+    for m in new:
+        me.materials.append(m)
+    for p, i in zip(me.polygons, idx):
+        p.material_index = i
 
 
 def apply_all(o):
