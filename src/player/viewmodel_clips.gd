@@ -370,6 +370,7 @@ func update(pl: Player, delta: float) -> void:
 	if String(config.get("mechanism", "")) == "break_action":
 		_update_signal(pl, delta)
 		_apply_hand_grip(delta)
+		_scale_hands()
 		return
 	var reloading: bool = pl.reload_timer > 0.0 and pl._reload_kind != "clear"
 	if _clip == "":
@@ -495,6 +496,18 @@ func update(pl: Player, delta: float) -> void:
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
 	_support_hand(_grip_w)
 	_apply_hand_grip(delta)
+	_scale_hands()
+
+
+## Размер кистей (Balance.FPS_HAND_SCALE) — последним, поверх клипа и подгонки хвата; поза до него
+## сохраняется, и следующий кадр начинается с неё (у клипов не все кости записывают масштаб).
+func _scale_hands() -> void:
+	var k: float = HandGripPose.hand_scale()
+	if _arm_skel == null or is_equal_approx(k, 1.0):
+		return
+	_hand_pose.capture_once()
+	for side: String in HandGripProfiles.SIDES:
+		_hand_pose.scale_hand(side, k)
 
 
 func _apply_hand_grip(delta: float) -> void:

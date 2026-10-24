@@ -85,6 +85,10 @@ func update_pose() -> void:
 	skeleton.reset_bone_poses()
 	for side: String in ["Right", "Left"]:
 		_solve(side, _grips[side] as Node3D)
+	# Размер кистей — поверх готового хвата, вокруг точки хвата на ладони (Balance.FPS_HAND_SCALE).
+	var k: float = HandGripPose.hand_scale()
+	for side: String in ["Right", "Left"]:
+		_hand_pose.scale_hand(side, k)
 
 
 func _bone(suffix: String) -> int:

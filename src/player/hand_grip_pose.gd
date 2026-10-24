@@ -6,7 +6,21 @@ extends RefCounted
 var skeleton: Skeleton3D
 var chains: Dictionary = {}
 var fingers: Dictionary = {}
+## Точка хвата на ладони в осях кости кисти (rest) — вокруг неё кисть меняет размер.
+var grip_centers: Dictionary = {}
 var _saved: Dictionary = {}
+## Стенд задаёт размер кистей сам (> 0); иначе FPS_HAND_SCALE из окружения или Balance.
+static var scale_override: float = 0.0
+static var _env_scale: float = -1.0
+
+
+static func hand_scale() -> float:
+	if scale_override > 0.0:
+		return scale_override
+	if _env_scale < 0.0:
+		var env: String = OS.get_environment("FPS_HAND_SCALE")
+		_env_scale = clampf(env.to_float(), 0.3, 2.0) if env.is_valid_float() else 0.0
+	return _env_scale if _env_scale > 0.0 else float(Balance.FPS_HAND_SCALE.k)
 
 
 func configure(sk: Skeleton3D, clips: bool) -> void:
@@ -33,6 +47,8 @@ func configure(sk: Skeleton3D, clips: bool) -> void:
 		var across: Vector3 = bases[0] - bases[2]
 		across = (across - forward * across.dot(forward)).normalized()
 		var palm: Vector3 = across.cross(forward) * (1.0 if side == "Right" else -1.0)
+		var center: Vector3 = wrist + (bases[1] - wrist) * float(Balance.FPS_HAND_SCALE.forward) + palm * float(Balance.FPS_HAND_SCALE.palm)
+		grip_centers[side] = sk.get_bone_global_rest(bones[2]).affine_inverse() * center
 		for finger: String in HandGripProfiles.FINGERS:
 			var joints: Array[Dictionary] = []
 			for joint: int in range(1, 4):
@@ -96,6 +112,26 @@ func capture() -> void:
 
 func _save_bone(bone: int) -> void:
 	_saved[bone] = [skeleton.get_bone_pose_position(bone), skeleton.get_bone_pose_rotation(bone), skeleton.get_bone_pose_scale(bone)]
+
+
+## Подгонка хвата могла уже сохранить позу этого кадра — её и оставляем.
+func capture_once() -> void:
+	if _saved.is_empty():
+		capture()
+
+
+## Кисть вместе с пальцами в k раз: точка хвата на ладони остаётся на месте, запястье подаётся
+## к ней, локоть пересчитывается. Уменьшается всё предплечье: у одной кисти манжета перчатки
+## уходила внутрь рукава и из-под неё торчала кожа запястья. Вызывать последним, когда поза кадра готова.
+func scale_hand(side: String, k: float) -> void:
+	if skeleton == null or not chains.has(side) or not grip_centers.has(side) or is_equal_approx(k, 1.0):
+		return
+	var forearm_bone: int = chains[side][1]
+	var hand: Transform3D = skeleton.get_bone_global_pose(chains[side][2])
+	var turn: Basis = hand.basis.orthonormalized()
+	var wrist: Vector3 = hand.origin + turn * (grip_centers[side] as Vector3) * (1.0 - k)
+	skeleton.set_bone_pose_scale(forearm_bone, skeleton.get_bone_pose_scale(forearm_bone) * k)
+	move_arm(side, Transform3D(turn, wrist))
 
 
 func restore() -> void:
