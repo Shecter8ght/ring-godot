@@ -170,6 +170,13 @@ python -X utf8 tools/build_mall_study.py                     # черновик 
                                                               #  tools/mall_study_scenery.py; ж/д ветка — tools/mall_study_railway.py;
                                                               #  сквер-парк — tools/mall_study_park.py → узел Park, src/blockout/mall_park.gd;
                                                               #  разбор игр — docs/design/mall_density_research.md)
+python -X utf8 tools/build_prospekt.py                        # карта «Проспект» (docs/design/prospekt_map.md): серый блокаут 232 × 212 м по правилу масштаба E →
+                                                              # data/blockouts/prospekt.json + scenes/levels/prospekt_study.tscn (StudyBuilding с интерьерами, MallFiller,
+                                                              # ProspektLandscape: переход, паркинг −1, кордон); перезаписывает оба файла
+tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;
+                                                              # --headless res://tools/prospekt_study.tscn -- verify — здания, уровни, 10 мест, 6 маршрутов пешком (пролог целиком,
+                                                              # заходы → выходы, паркинг −1, 3-й этаж подъезда), открытые куски ≤ 30 м, кордон не пройти; -- shots — снимки
+                                                              # docs/screens/prospekt/ (PROSPEKT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, PROSPEKT_OUTPUT — папка)
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
                                                               # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор, пристройка приёмки); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)
