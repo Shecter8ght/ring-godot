@@ -474,6 +474,22 @@
       "supportsObject": false
     },
     {
+      "hook": "climb",
+      "name": "Залезть наверх — подтянуться, колени на край, снаряжение",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "climb",
+      "supportsObject": false
+    },
+    {
+      "hook": "ladder_step",
+      "name": "Лестница — перекладина под ногой и в руке",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "ladder_step",
+      "supportsObject": false
+    },
+    {
       "hook": "dive",
       "name": "Бросок на землю",
       "category": "Шаги и движение",

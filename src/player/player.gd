@@ -210,8 +210,22 @@ var _rest_t: float = 0.0
 var nvg_on: bool = false
 var nvg_charge: float = Balance.NVG_BATTERY_SEC
 ## Перелезает (Пробел у преграды): путь (Vault.find), доля пройденного (-1 — нет), длительность.
+## Тем же ходом — залезть наверх (Climb.find) и шаг на лестницу или с неё (путь с "pts" — Climb.pos_at).
 var _vault: Dictionary = {}
 var _vault_t: float = -1.0
+## Что сделать, когда путь _vault пройден: "ladder" — повис на лестнице, "off" — сошёл с неё наверх.
+var _vault_then: String = ""
+## Лестница (Ladder), на которой висит (null — не на лестнице), и высота ног над её низом, м. on_ladder
+## видят все peer — стук перекладин у каждого (_tick_rung_sound). Оружие на время подъёма убрано:
+## _ladder_slot — какой слот достать, сойдя. Схватиться снова — не раньше _ladder_cd.
+var ladder: Ladder = null
+var on_ladder: bool = false
+var _ladder_y: float = 0.0
+var _ladder_slot: String = ""
+var _ladder_cd: float = 0.0
+var _ladder_noise_y: float = 0.0
+var _rung_sound_y: float = 0.0
+var _ladder_hint_shown: bool = false
 ## Ступеньки и кочки для глаза: тело поднимается/опускается рывком (шаг на ступень, снап к полу),
 ## камера догоняет плавно — смещение глаза по высоте, гаснет за доли секунды.
 var _eye_dy: float = 0.0
@@ -286,7 +300,7 @@ func _ready() -> void:
 	# шаги слышно у всех: и свои, и напарника (по синхронизированной позиции и стойке)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
-	steps.grounded = func() -> bool: return not airborne and _vault_t < 0.0
+	steps.grounded = func() -> bool: return not airborne and _vault_t < 0.0 and not on_ladder
 	# свой — скорость по физике: темп шагов (и покачивания камеры) без ступенек кадра
 	steps.speed_source = func() -> float: return Vector2(velocity.x, velocity.z).length() if is_local() else -1.0
 	steps.loud_db = func() -> float: return float(Balance.STEP_STANCE_DB.get(_stance_key(), 0.0))
@@ -343,7 +357,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:weapon_obstruction", ".:weapon_ready_up", ".:grenade_equipped", ".:throwable_id", ".:grenade_in_hand", ".:grenade_pin", ".:grenade_charge", ".:grenade_underhand"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:on_ladder", ".:weapon_obstruction", ".:weapon_ready_up", ".:grenade_equipped", ".:throwable_id", ".:grenade_in_hand", ".:grenade_pin", ".:grenade_charge", ".:grenade_underhand"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -1017,6 +1031,7 @@ func _process(delta: float) -> void:
 		cancel_weapon_action()
 	_was_downed = health.downed
 	_update_hand()
+	_tick_rung_sound()
 	# смерть видна у всех peer: у хоста — по сигналу, у клиентов — по синхронизированному alive
 	if not health.alive and _ragdoll == null and not _died_shown:
 		_die()
@@ -1043,11 +1058,15 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity = Vector3.ZERO
 			return
-	# перелезает: тело идёт по дуге через преграду, ни стрельбы, ни шагов
+	_ladder_cd = maxf(0.0, _ladder_cd - delta)
+	# перелезает, залезает наверх, шагает на лестницу или с неё: тело идёт по пути, ни стрельбы, ни шагов
 	if _vault_t >= 0.0:
 		_vault_t += delta / _vault_sec
-		global_position = Vault.pos_at(_vault, minf(_vault_t, 1.0))
+		var vt := minf(_vault_t, 1.0)
+		global_position = Climb.pos_at(_vault, vt) if _vault.has("pts") else Vault.pos_at(_vault, vt)
 		velocity = Vector3.ZERO
+		if _vault.has("yaw"):
+			_body.rotation.y = lerp_angle(_body.rotation.y, float(_vault.yaw), minf(1.0, 10.0 * delta))
 		if _vault_t >= 1.0:
 			_vault_t = -1.0
 			if _vault_stumble:
@@ -1058,6 +1077,10 @@ func _physics_process(delta: float) -> void:
 				fire_timer = maxf(fire_timer, 0.8)
 				NoiseBus.emit(global_position, float(Balance.VAULT.noise_m) * 1.5, "step")
 				Audio.play("land", global_position, -6.0)
+			_end_scripted_move()
+		return
+	if ladder != null:
+		_tick_ladder(delta)
 		return
 	_dive_cd = maxf(0.0, _dive_cd - delta)
 	_jump_cd = maxf(0.0, _jump_cd - delta)
@@ -2947,20 +2970,34 @@ func _action_dir() -> Vector3:
 	return Vector3(sin(body_yaw()), 0.0, cos(body_yaw()))
 
 
-## Пробел: перелезть через преграду по пояс впереди (стоя или сидя; не лёжа, не с раненым на руках).
+## Пробел: у низа лестницы — схватиться; перелезть через преграду по пояс впереди или залезть на то,
+## на чём можно стоять (машина, ящик, край платформы — Climb): тонкое — через, толстое — на него
+## (Balance.CLIMB.vault_thick). Стоя или сидя; не лёжа, не с раненым на руках.
 func _try_vault() -> void:
 	var v: Dictionary = Balance.VAULT
-	if stance == Stance.PRONE or is_burdened() or is_downed() or _winded or stamina < float(v.stamina) * 0.5 or not is_on_floor():
+	if stance == Stance.PRONE or is_burdened() or is_downed() or not is_on_floor():
+		return
+	if _try_grab_ladder():
+		return
+	if _winded or stamina < float(v.stamina) * 0.5:
 		return
 	var space := get_world_3d().direct_space_state
-	var path := Vault.find(space, global_position, _action_dir(), [get_rid()])
-	if path.is_empty() and _wish_direction().length_squared() > 0.01:
+	var dir := _action_dir()
+	var path := Vault.find(space, global_position, dir, [get_rid()])
+	var onto := Climb.find(space, global_position, dir, [get_rid()], _climb_max_h())
+	if path.is_empty() and onto.is_empty() and _wish_direction().length_squared() > 0.01:
 		# жмёт вбок, а преграда прямо перед ним
-		path = Vault.find(space, global_position, Vector3(sin(body_yaw()), 0.0, cos(body_yaw())), [get_rid()])
+		dir = Vector3(sin(body_yaw()), 0.0, cos(body_yaw()))
+		path = Vault.find(space, global_position, dir, [get_rid()])
+		onto = Climb.find(space, global_position, dir, [get_rid()], _climb_max_h())
+	if not onto.is_empty() and (path.is_empty() or float(path.thick) > float(Balance.CLIMB.vault_thick)):
+		_start_climb(onto)
+		return
 	if path.is_empty():
 		return
 	_vault = path
 	_vault_t = 0.0
+	_vault_then = ""
 	_vault_sec = float(v.sec) * (1.0 + _over() * float(v.weight_k))
 	# высокая преграда (по грудь) — дольше: подтянуться и перекинуть ноги
 	_vault_sec *= lerpf(1.0, 1.4, clampf((float(path.get("top", 1.0)) - 1.0) / 0.7, 0.0, 1.0))
@@ -2979,6 +3016,230 @@ func _try_vault() -> void:
 		_body.rotation.y = atan2(d.x, d.z)
 	NoiseBus.emit(global_position, float(v.noise_m), "step")
 	Audio.play("vault", global_position + Vector3.UP * 0.8, -14.0)
+
+
+## Залезть на преграду по пути Climb.find: чем выше, тем дольше и тяжелее; наверху место только сидя —
+## сразу в присед.
+func _start_climb(onto: Dictionary) -> void:
+	var c: Dictionary = Balance.CLIMB
+	var top := float(onto.top)
+	if bool(onto.crouch) and stance != Stance.CROUCH:
+		stance = Stance.CROUCH
+		_apply_stance()
+	var d: Vector3 = (onto.land as Vector3) - global_position
+	if not ads:
+		_body.rotation.y = atan2(d.x, d.z)
+	_start_scripted_move(onto, _climb_sec(top), "")
+	stamina = maxf(0.0, stamina - lerpf(float(c.stamina_low), float(c.stamina_high), _climb_k(top)) * carry_stamina_k())
+	_rest_t = Balance.STAMINA_REGEN_DELAY
+	NoiseBus.emit(global_position, float(c.noise_m), "step")
+	Audio.play("climb", global_position + Vector3.UP * 0.8, -14.0)
+
+
+## Насколько высоко залезать: 0 — по колено (VAULT.min_h), 1 — предел CLIMB.max_h.
+func _climb_k(top: float) -> float:
+	var lo := float(Balance.VAULT.min_h)
+	return clampf((top - lo) / (float(Balance.CLIMB.max_h) - lo), 0.0, 1.0)
+
+
+func _climb_sec(top: float) -> float:
+	var c: Dictionary = Balance.CLIMB
+	return lerpf(float(c.sec_low), float(c.sec_high), _climb_k(top)) * (1.0 + _over() * float(Balance.VAULT.weight_k))
+
+
+## С перегрузом высоко не подтянуться.
+func _climb_max_h() -> float:
+	return lerpf(float(Balance.CLIMB.max_h), float(Balance.CLIMB.max_h_loaded), _over())
+
+
+## Тело идёт по пути (Climb.pos_at или Vault.pos_at) sec секунд; then — что сделать в конце (_end_scripted_move).
+func _start_scripted_move(path: Dictionary, sec: float, then: String) -> void:
+	_vault = path
+	_vault_t = 0.0
+	_vault_sec = maxf(sec, 0.05)
+	_vault_then = then
+	_vault_stumble = false
+	_cancel_grenade_prepare()
+
+
+func _end_scripted_move() -> void:
+	var then := _vault_then
+	_vault_then = ""
+	if then == "ladder" and ladder != null:
+		_ladder_y = clampf(ladder.feet_at(global_position), 0.0, ladder.feet_top())
+		_ladder_noise_y = _ladder_y
+	elif then == "off":
+		_draw_after_ladder()
+
+
+## Пробел у низа лестницы, лицом к ней — схватиться.
+func _try_grab_ladder() -> bool:
+	if _ladder_cd > 0.0:
+		return false
+	var look := _action_dir()
+	for n in get_tree().get_nodes_in_group(Ladder.GROUP):
+		var l := n as Ladder
+		if l and l.can_grab(global_position, look) and grab_ladder(l, false):
+			return true
+	return false
+
+
+## Схватиться за лестницу (F у низа или у верха — LadderPoint, Пробел у низа): оружие убрать, шаг на
+## лестницу — снизу к перекладинам, сверху — через край на верхнюю ступень. false — нельзя сейчас.
+func grab_ladder(l: Ladder, from_top: bool) -> bool:
+	var cfg: Dictionary = Balance.LADDER
+	if l == null or ladder != null or _vault_t >= 0.0 or _ladder_cd > 0.0 or not is_alive() or is_downed() \
+		or is_burdened() or seated or _grenade_pending or _dive_t >= 0.0 or Settings.cheat_fly:
+		return false
+	var path: Dictionary
+	var sec := float(cfg.enter_sec)
+	if from_top:
+		var exit := l.top_exit(get_world_3d().direct_space_state, [get_rid()])
+		if exit.is_empty():
+			_say("Отсюда на лестницу не встать")
+			return false
+		var pts := PackedVector3Array([global_position])
+		var back: PackedVector3Array = (exit.pts as PackedVector3Array).duplicate()
+		back.reverse()
+		pts.append_array(back)
+		path = {"pts": pts}
+		sec += _climb_sec(float(exit.top))
+	else:
+		var y := clampf(l.feet_at(global_position), 0.0, l.feet_top())
+		path = {"pts": PackedVector3Array([global_position, l.line_point(y)])}
+	path["yaw"] = l.facing_yaw()
+	_stow_for_ladder()
+	if stance != Stance.STAND:
+		stance = Stance.STAND
+		_apply_stance()
+	lean = 0.0
+	ladder = l
+	on_ladder = true
+	_ladder_y = l.feet_top() if from_top else 0.0
+	_start_scripted_move(path, sec, "ladder")
+	NoiseBus.emit(global_position, float(cfg.noise_m), "step")
+	if not _ladder_hint_shown:
+		_ladder_hint_shown = true
+		_say("%s / %s — вверх и вниз, %s — спрыгнуть" % [PauseMenu.key_name("move_forward"), PauseMenu.key_name("move_back"), PauseMenu.key_name("vault")])
+	return true
+
+
+func is_climbing() -> bool:
+	return ladder != null
+
+
+## На лестнице: W / S — вверх и вниз (Shift — быстрее и громче; выдохся, с перегрузом — медленнее),
+## наверху W — шаг на площадку, внизу S — сойти, Пробел — спрыгнуть. Перекладины слышат мародёры.
+func _tick_ladder(delta: float) -> void:
+	var cfg: Dictionary = Balance.LADDER
+	if is_downed() or not is_instance_valid(ladder):
+		_release_ladder(Vector3.ZERO)
+		return
+	aiming = false
+	lean = move_toward(lean, 0.0, Balance.LEAN_SPEED * delta)
+	var free := not keys_blocked()
+	if free and Input.is_action_just_pressed("vault"):
+		# отпустить: оттолкнуться от лестницы — и вниз
+		_release_ladder(-ladder.facing() * float(cfg.push_mps))
+		return
+	var mv := Input.get_axis("move_back", "move_forward") if free else 0.0
+	var top := ladder.feet_top()
+	if mv > 0.5 and _ladder_y >= top - 0.01 and _leave_ladder_top():
+		return
+	if mv < -0.5 and _ladder_y <= 0.01:
+		_release_ladder(Vector3.ZERO)
+		return
+	var hurry := free and Input.is_action_pressed("sprint") and not _winded
+	var sp := float(cfg.up_mps) if mv > 0.0 else float(cfg.down_mps)
+	if hurry:
+		sp *= float(cfg.hurry_k)
+	if _winded:
+		sp *= float(cfg.winded_k)
+	sp *= lerpf(1.0, float(cfg.loaded_k), _over()) * Settings.cheat_speed
+	var was := _ladder_y
+	_ladder_y = clampf(_ladder_y + mv * sp * delta, 0.0, top)
+	var rise := _ladder_y - was
+	if rise > 0.0:
+		stamina = maxf(0.0, stamina - rise * float(cfg.stamina_per_m) * carry_stamina_k() * (float(cfg.hurry_k) if hurry else 1.0))
+		if stamina <= 0.0 and not _winded:
+			_winded = true
+			if _breath_sound == null:
+				_breath_sound = Audio.start_loop("breath", self, -5.0)
+	if absf(rise) > 0.0:
+		# лезет — не отдыхает
+		_rest_t = Balance.STAMINA_REGEN_DELAY
+	if absf(_ladder_y - _ladder_noise_y) >= float(cfg.rung_m):
+		_ladder_noise_y = _ladder_y
+		NoiseBus.emit(global_position + Vector3.UP, float(cfg.noise_m) * (float(cfg.hurry_k) if hurry else 1.0), "step")
+	global_position = ladder.line_point(_ladder_y)
+	velocity = Vector3.ZERO
+	airborne = false
+	_body.rotation = Vector3(0.0, ladder.facing_yaw(), 0.0)
+	_tick_stamina(delta)
+	_tick_stress(delta)
+	if not ui_blocked():
+		_tick_nvg(delta)
+
+
+## Наверху W: через край на площадку (Climb), как залезть на преграду. false — площадки нет.
+func _leave_ladder_top() -> bool:
+	var exit := ladder.top_exit(get_world_3d().direct_space_state, [get_rid()])
+	if exit.is_empty():
+		return false
+	exit["yaw"] = ladder.facing_yaw()
+	ladder = null
+	on_ladder = false
+	if bool(exit.crouch):
+		stance = Stance.CROUCH
+		_apply_stance()
+	_start_scripted_move(exit, _climb_sec(float(exit.top)), "off")
+	NoiseBus.emit(global_position, float(Balance.LADDER.noise_m), "step")
+	return true
+
+
+## Отпустить лестницу (внизу сошёл, спрыгнул, упал раненым): толчок push, оружие — обратно в руки.
+func _release_ladder(push: Vector3) -> void:
+	ladder = null
+	on_ladder = false
+	_ladder_cd = float(Balance.LADDER.cooldown)
+	velocity = push
+	_draw_after_ladder()
+
+
+## Лезть — обе руки на перекладинах: оружие и бросаемое убрать (слот запомнить).
+func _stow_for_ladder() -> void:
+	_ladder_slot = ""
+	aiming = false
+	aim_cant = false
+	if grenade_equipped:
+		grenade_equipped = false
+		grenade_in_hand = false
+		_cancel_grenade_prepare()
+		_ladder_slot = weapon_slot
+	elif weapon_id != "":
+		_ladder_slot = weapon_slot
+		_holster()
+
+
+## Сошёл с лестницы — убранное на время подъёма оружие снова в руки.
+func _draw_after_ladder() -> void:
+	var slot := _ladder_slot
+	_ladder_slot = ""
+	if slot == "" or weapon_id != "" or grenade_equipped or is_downed() or not slot in allowed_weapons():
+		return
+	if loadout_mode and _base_entry(slot).is_empty():
+		return
+	_switch(slot)
+
+
+## Стук перекладин: у каждого peer по синхронизированной высоте того, кто на лестнице.
+func _tick_rung_sound() -> void:
+	if not on_ladder:
+		_rung_sound_y = global_position.y
+		return
+	if absf(global_position.y - _rung_sound_y) >= float(Balance.LADDER.rung_m):
+		_rung_sound_y = global_position.y
+		Audio.play("ladder_step", global_position + Vector3.UP * 0.9, -4.0)
 
 
 ## Прыжок считает владелец тела. В воздухе повторный пробел не даёт второго импульса.
@@ -3259,6 +3520,9 @@ func _leave_raid() -> void:
 
 func _die() -> void:
 	cancel_weapon_action()
+	# с лестницы — падает
+	ladder = null
+	on_ladder = false
 	if _died_shown:
 		return
 	# модель падает клипом смерти и остаётся лежать (не манекен); без модели — прежний регдолл
@@ -3363,6 +3627,8 @@ func _fly(delta: float) -> void:
 	global_position += velocity * delta
 	airborne = false
 	_vault_t = -1.0
+	if ladder != null:
+		_release_ladder(Vector3.ZERO)
 	if ads:
 		_body.rotation.y = look_yaw
 	else:

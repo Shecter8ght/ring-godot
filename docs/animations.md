@@ -160,7 +160,7 @@ death_crouch / death_crouch_head; в голову — death_head_front / death_h
 - **Переходы стоек:** `Pistol_Handgun Locomotion Pack/pistol stand to kneel`, `… kneel to stand`,
   `Crouch weapons/Crouch To Prone`, `Prone To Crouch Transition`, `Rifle/Rifle Kneel To Prone`,
   `Rifle Prone To Kneel` — сейчас стойка меняется сменой клипа с плавным переходом 0.16 с.
-- **Перелезание и бросок на землю** (механика есть — `Vault`, `_try_dive`, анимации нет):
+- **Перелезание, «залезть наверх» и бросок на землю** (механика есть — `Vault`, `Climb`, `_try_dive`, анимации нет):
   `jump away/Jump low with rifle Forward`, `Jumping Over Into Combat`, `Jump Away`.
 - **Лёжа:** `prone/Prone Left Turn`, `Prone Right Turn`, `Rifle/Rifle Prone Hit Reaction`,
   `prone/Moving Backward In Crawl Position`.
@@ -183,7 +183,8 @@ death_crouch / death_crouch_head; в голову — death_head_front / death_h
 | Обыск ящика / тела | лут | нет (pickup только на поднятие) |
 | Тащить раненого, нести на плече, поднять раненого | downed: тащить / поднять / «несёшь Антона» | поза нокаута у раненого, у тащащего — обычная ходьба |
 | Смерть слева | death_clip | death_right |
-| Лестница, сесть, осмотр оружия, ПНВ на глаза | — | нет |
+| Вертикальная лестница: подъём, спуск, сход наверх и шаг на неё сверху; «залезть наверх» (подтянуться на край) | `Ladder`, `Climb` (механика есть) — видно напарникам и мародёрам | тело стоит в позе покоя и едет по лестнице |
+| Сесть, осмотр оружия, ПНВ на глаза | — | нет |
 
 Mixamo: выбрать персонажа «Y Bot» или загрузить Persona, скачать FBX Binary, **Without Skin**,
 30 fps, для циклов — In Place; положить в `assets/animations/<папка>/`, прописать в

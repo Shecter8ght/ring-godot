@@ -3,7 +3,7 @@ extends RefCounted
 ## Перелезание через низкие преграды — одна проверка для игрока и ИИ.
 ##  find — можно ли от ног p перелезть в сторону dir: преграда по пояс (Balance.VAULT min_h…max_h)
 ##  в пределах reach, над ней свободно, за ней — пол на той же высоте (не обрыв, не помост), место
-##  для тела. Возвращает путь {p, up, over, land, top} или {}.
+##  для тела. Возвращает путь {p, up, over, land, top, thick} или {}. Залезть на преграду — Climb.
 ##  pos_at — точка на этом пути в доле t (0…1): подъём на край, через верх, спуск.
 ##  build_links — связки навигации «перелезть» для мародёров: вдоль краёв навмеша, где за
 ##  преградой по пояс тоже навмеш, а обход долгий (Balance.VAULT_LINKS).
@@ -71,8 +71,9 @@ static func find(space: PhysicsDirectSpaceState3D, p: Vector3, dir: Vector3, exc
 	if not space.intersect_shape(q, 1).is_empty():
 		return {}
 	var top_y := p.y + top + 0.15
+	# thick — толщина преграды: толстую, на которую можно встать, игрок не перелезает, а залезает (Climb)
 	return {"p": p, "up": Vector3(p.x, top_y, p.z) + dir * maxf(0.0, d0 - 0.15), "over": Vector3(p.x, top_y, p.z) + dir * far,
-		"land": land, "top": top}
+		"land": land, "top": top, "thick": far - d0}
 
 
 ## Точка пути перелезания в доле t: плавная дуга (Катмулл — Ром через начало, край, дальний край

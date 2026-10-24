@@ -120,6 +120,13 @@ var _nav_ready: bool = false
 var _vault: Dictionary = {}
 var _vault_t: float = -1.0
 var _vault_done_ms: int = -10000
+## Лезет по лестнице (связка навигации Ladder): шаги пути [{path, sec}] (Ladder.ai_steps), какой идёт
+## (-1 — не лезет) и доля шага. on_ladder видят все peer — стук перекладин у каждого.
+var _climb_steps: Array = []
+var _climb_i: int = -1
+var _climb_t: float = 0.0
+var on_ladder: bool = false
+var _rung_sound_y: float = 0.0
 var _ragdoll: Ragdoll
 var _last_hit_from: Vector3 = Vector3.ZERO
 var _last_damage: float = 0.0
@@ -621,7 +628,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:look_pitch", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq", ".:outfit"]:
+	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:on_ladder", ".:look_pitch", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq", ".:outfit"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -1674,7 +1681,7 @@ func _overwatch_point() -> Vector3:
 ## своих у точки нет. Бросок видят все peer, урон считает хост.
 func _try_grenade(delta: float) -> void:
 	_grenade_t -= delta
-	if _grenades <= 0 or _grenade_t > 0.0 or _health.downed or _seen_now:
+	if _grenades <= 0 or _grenade_t > 0.0 or _health.downed or _seen_now or _climb_i >= 0:
 		return
 	var g: Dictionary = Balance.AI_GRENADE
 	if _unseen_t < float(g.min_unseen) or _unseen_t > 8.0:
@@ -2237,6 +2244,10 @@ func _finish_reload() -> void:
 
 ## Выстрел, если готов: очередь, пауза между очередями, магазин. suppress — по памяти, реже и хуже.
 func _try_fire(suppress: bool = false) -> void:
+	# на лестнице руки на перекладинах
+	if _climb_i >= 0:
+		_drop_fire_token()
+		return
 	if equipment.has(_active) and WeaponCondition.broken(equipment[_active]):
 		_drop_fire_token()
 		return
@@ -2500,15 +2511,22 @@ func _show_say(text: String) -> void:
 
 # ---------------------------------------------------------------- движение
 
-## Связка навигации: «перелезть» — найти путь через преграду и перелезть (шумно).
+## Связка навигации: «перелезть» — найти путь через преграду и перелезть (шумно); «лестница» — лезть по ней.
 func _on_link_reached(details: Dictionary) -> void:
 	var owner_node: Object = details.get("owner")
-	if _vault_t >= 0.0 or not (owner_node is Node and (owner_node as Node).is_in_group(Vault.GROUP)):
+	if _vault_t >= 0.0 or _climb_i >= 0 or not owner_node is Node:
+		return
+	var link_node := owner_node as Node
+	var ladder: Ladder = link_node.get_parent() as Ladder if link_node.is_in_group(Ladder.LINK_GROUP) else null
+	if ladder == null and not link_node.is_in_group(Vault.GROUP):
 		return
 	var from: Vector3 = details.get("link_entry_position", global_position)
 	var to: Vector3 = details.get("link_exit_position", global_position)
 	# сигнал приходит и на выходе связки (уже перелез) — лезть, только если стоим у входа
 	if _flat(global_position - from) > _flat(global_position - to) or Time.get_ticks_msec() < _vault_done_ms + 600:
+		return
+	if ladder != null:
+		_start_ladder(ladder, to.y > from.y)
 		return
 	var dir := to - from
 	dir.y = 0.0
@@ -2527,10 +2545,50 @@ static func _flat(v: Vector3) -> float:
 	return Vector2(v.x, v.z).length()
 
 
+## Лезть по лестнице по шагам Ladder.ai_steps; руки заняты — не стреляет и не бросает (_try_fire).
+func _start_ladder(ladder: Ladder, up: bool) -> void:
+	var steps := ladder.ai_steps(up, global_position, get_world_3d().direct_space_state, [get_rid()])
+	if steps.is_empty():
+		return
+	_climb_steps = steps
+	_climb_i = 0
+	_climb_t = 0.0
+	on_ladder = true
+	crouched = false
+	_facing = ladder.facing_yaw()
+
+
+func _tick_ladder(delta: float) -> void:
+	var step: Dictionary = _climb_steps[_climb_i]
+	_climb_t += delta / maxf(float(step.sec), 0.05)
+	global_position = Climb.pos_at(step.path as Dictionary, minf(_climb_t, 1.0))
+	velocity = Vector3.ZERO
+	_body.rotation.y = _facing
+	if _climb_t < 1.0:
+		return
+	_climb_t = 0.0
+	_climb_i += 1
+	if _climb_i >= _climb_steps.size():
+		_stop_ladder()
+		_vault_done_ms = Time.get_ticks_msec()
+
+
+func _stop_ladder() -> void:
+	_climb_i = -1
+	_climb_steps = []
+	on_ladder = false
+
+
 func _move(delta: float) -> void:
 	if state == State.DOWNED:
 		_vault_t = -1.0
+		if _climb_i >= 0:
+			# ранен на лестнице — сорвался
+			_stop_ladder()
 		_move_downed(delta)
+		return
+	if _climb_i >= 0:
+		_tick_ladder(delta)
 		return
 	if _vault_t >= 0.0:
 		_vault_t += delta / float(Balance.VAULT.sec)
@@ -2744,6 +2802,12 @@ func _on_died() -> void:
 
 ## У клиентов сигнала died нет (урон считает хост) — смерть видна по синхронизированному alive.
 func _process(delta: float) -> void:
+	# стук перекладин — у каждого peer по синхронизированной высоте (Player._tick_rung_sound)
+	if on_ladder and absf(global_position.y - _rung_sound_y) >= float(Balance.LADDER.rung_m):
+		_rung_sound_y = global_position.y
+		Audio.play("ladder_step", global_position + Vector3.UP * 0.9, -4.0)
+	elif not on_ladder:
+		_rung_sound_y = global_position.y
 	# фонарь — раз в секунду: темно ли там, где он стоит
 	_torch_t -= delta
 	if _torch_t <= 0.0 and _torch:
