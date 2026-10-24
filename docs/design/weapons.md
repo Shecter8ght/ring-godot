@@ -173,6 +173,9 @@ Saiga-12, AWM) зафиксированы распространённые шт�
 
 ## 8. Урон и броня
 
+- Брони три (`armor_poor` — мягкая без плит, `armor_mid` — плитоносец, `armor_top` — тяжёлая) и пояс `belt_pouches`
+  без защиты; шлемов три (`helmet_simple`, `helmet_mid`, `helmet_top`). Старые id (`vest_*`, `carrier_*`, `helmet_*`)
+  — псевдонимы (`aliases`), сохранения переводятся при загрузке (2026-10-24, `docs/design/npc_gear_by_type.md`).
 - Пуля несёт `damage, pen, armor_dmg` (патрон) — `Hitscan.fire(..., bullet)` →
   `Health.take_damage(amount, from, zone, at, bullet)` → фильтр брони `Armor.hit` (один путь для
   игрока и ИИ). Зоны: `head`, `thorax` (спереди/сзади — по направлению выстрела относительно

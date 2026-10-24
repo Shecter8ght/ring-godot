@@ -23,15 +23,16 @@ CATALOGS = [
                "optic_rd_01", "optic_rd_dt_01", "muzzle_fh_545_01", "muzzle_fh_556_01", "grip_vertical_01",
                "grip_compact_01", "grip_handstop_01", "stock_fixed_heavy_ak", "stock_fixed_light_ak",
                "stock_fold_ak_01", "tac_flashlight_01", "mount_riser_01", "mount_rail_ext_01",
-               "vest_homemade", "plate_steel_homemade", "helmet_hardhat", "helmet_military_old", "headset_passive",
-               "bandage", "painkillers", "medkit", "water", "canned", "flare", "chemlight", "sunglasses", "bp_daypack", "rig_belt"]},
+               "belt_pouches", "armor_poor", "plate_steel_homemade", "helmet_simple", "headset_passive",
+               "bandage", "painkillers", "medkit", "water", "canned", "flare", "chemlight", "sunglasses", "bp_daypack", "rig_belt",
+               "signal_launcher"]},
     {"n": 2, "step": 10, "name": "Полиция и ЧОП",
      "what": "Служебные пистолеты, пистолеты-пулемёты, АК-12, Сайга. Коллиматоры, компенсаторы, полицейская броня.",
      "items": ["wpn_hg_02", "wpn_hg_03", "wpn_smg_01", "wpn_smg_04", "wpn_ar_01", "wpn_sg_02",
                "optic_rmr_01", "optic_holo_01", "optic_2x_01", "optic_pso_01", "muzzle_comp_545_01",
                "muzzle_brake_762_01", "muzzle_comp_556_01", "muzzle_comp_9_01", "grip_angled_01", "grip_offset_01", "grip_heavy_01",
                "bipod_01", "stock_tele_ak_01", "stock_tele_ar_01", "tac_laser_01", "mount_offset45_01",
-               "vest_old", "vest_police", "carrier_simple", "plate_steel", "helmet_police", "headset_active", "bp_tourist",
+               "armor_mid", "plate_steel", "helmet_mid", "headset_active", "bp_tourist",
                "grenade", "mag_loader", "rig_chest"]},
     {"n": 3, "step": 20, "name": "Армейское",
      "what": "M4A1, Benelli, «Вереск», P90. Оптика 4×, глушители, армейская броня и керамика, ПНВ.",
@@ -39,22 +40,21 @@ CATALOGS = [
                "optic_4x_01", "optic_offset_rd_01", "tac_flashlight_hp_01", "tac_combo_01", "muzzle_supp_9_01",
                "muzzle_supp_pm_01", "muzzle_supp_45_01", "muzzle_supp_545_01", "muzzle_supp_556_01",
                "muzzle_supp_12_01",
-               "vest_army", "carrier_tactical", "plate_composite", "plate_ceramic", "helmet_army", "headset_tactical", "bp_raid",
+               "armor_top", "plate_composite", "plate_ceramic", "helmet_top", "headset_tactical", "bp_raid",
                "nvg", "rig_assault"]},
     {"n": 4, "step": 30, "name": "Спецподразделения",
      "what": "Vector, MCX Virtus, SCAR-L, MK12, бесшумные АС «Вал» и ВСС. LPVO, тяжёлые глушители, армейский композит.",
      "items": ["wpn_smg_03", "wpn_ar_03", "wpn_ar_04", "wpn_dmr_02", "wpn_sp_01", "wpn_sp_02",
                "optic_lpvo_01", "mount_adjustable_01", "muzzle_supp_57_01", "muzzle_supp_300_01", "muzzle_supp_762_01",
-               "plate_military", "helmet_tactical", "rig_heavy"]},
+               "plate_military", "rig_heavy"]},
     {"n": 5, "step": 40, "name": "Тяжёлое и снайперское",
      "what": "MR762, MCX Spear, AWM, Barrett, ПКМ, M249. Оптика 8× и 12×, тормоза и глушители крупных калибров.",
      "items": ["wpn_dmr_01", "wpn_ar_05", "wpn_sr_01", "wpn_sr_02", "wpn_lmg_01", "wpn_lmg_02",
                "optic_8x_01", "optic_12x_01", "muzzle_brake_68_01", "muzzle_supp_68_01", "muzzle_brake_338_01",
                "muzzle_supp_338_01"]},
 ]
-# Только с тел ЧВК «Периметр» — у Михалыча этого нет.
-NEVER = ["carrier_perimeter_std", "carrier_perimeter_assault", "plate_perimeter", "helmet_perimeter_combat",
-         "helmet_perimeter_heavy", "headset_perimeter", "stock_perimeter_01"]
+# Только с тел ЧВК «Периметр» — у Михалыча этого нет; сигнал снабжения (supply_signal) — не продаётся.
+NEVER = ["plate_perimeter", "headset_perimeter", "stock_perimeter_01", "supply_signal"]
 AP_WORDS = ("бронебой", "API", "СП-6")
 
 
@@ -66,9 +66,9 @@ def main() -> None:
             if i in catalog:
                 raise SystemExit(f"{i} уже в каталоге {catalog[i]}")
             catalog[i] = c["n"]
-    weapons = w["weapons"]
+    weapons = {k: v for k, v in w["weapons"].items() if k not in NEVER}
     for wid in weapons:
-        if wid not in catalog:
+        if wid not in catalog and wid not in NEVER:
             raise SystemExit(f"ствол {wid} не попал ни в один каталог")
     # патроны: калибр — с каталога первого ствола под него; бронебойные — на каталог позже
     cal_first: dict[str, int] = {}
@@ -105,7 +105,7 @@ def main() -> None:
         for sec, k in kind_order.items():
             if i in w[sec]:
                 return k
-        return 4 if i.startswith(("vest", "carrier", "plate", "helmet", "headset")) else 5
+        return 4 if i.startswith(("armor_", "belt_", "pouch_", "plate", "helmet", "headset")) else 5
     stock = sorted(catalog, key=lambda i: (catalog[i], kind(i), i))
     old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
     out = {
@@ -117,7 +117,7 @@ def main() -> None:
         "stock": stock,
         "catalog": {i: catalog[i] for i in stock},
     }
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     counts = {c["n"]: sum(1 for i in stock if catalog[i] == c["n"]) for c in CATALOGS}
     print("каталоги:", counts, "всего", len(stock))
 

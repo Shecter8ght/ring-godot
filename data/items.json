@@ -1,5 +1,5 @@
 {
- "_comment": "Предметы. cells — ячеек; size [ш, в]; value — цена, ₽; stack — сколько в одной ячейке; weight — кг (нет — по категории, ItemDb.DEFAULT_WEIGHT); use — лечение (heal: HP, time: с); equip — надевается: slot eyes (ПНВ, очки), slot backpack (рюкзак: grid [ш, в] — его сетка, sprint_k — во сколько раз быстрее тратится выносливость в спринте). Оружие, патроны, магазины, обвес — data/weapons.json; броня, плиты, шлемы, гарнитуры — data/armor.json (ItemDb подмешивает их сюда).",
+ "_comment": "Предметы. cells — ячеек; size [ш, в]; value — цена, ₽; stack — сколько в одной ячейке; weight — кг (нет — по категории, ItemDb.DEFAULT_WEIGHT); use — лечение (heal: HP, time: с); equip — надевается: slot eyes (ПНВ, очки), slot backpack (рюкзак: grid [ш, в] — его сетка, sprint_k — во сколько раз быстрее тратится выносливость в спринте). Оружие, патроны, магазины, обвес — data/weapons.json; броня, плиты, шлемы, гарнитуры — data/armor.json (ItemDb подмешивает их сюда). Подсумки (pouch_*): places — сколько мест на броне занимает, mags — какие магазины держит; данные есть, раскладка магазинов по подсумкам — следующим этапом (docs/design/gear_v2.md).",
  "items": {
   "bandage": {
    "name": "Бинт",
@@ -2557,6 +2557,80 @@
    "no_pocket": true,
    "desc": "Снятый радиатор купе Ильи с патрубками и хомутами, с биркой партии «ЮР / 8». Илья просит вернуть свою деталь — положить в комплект у машины.",
    "model": "res://assets/items/models/car/car_radiator.glb"
+  },
+  "pouch_rifle": {
+   "name": "Подсумок автоматный",
+   "short": "ПОДС. АВТ",
+   "cat": "armor",
+   "size": [
+    1,
+    2
+   ],
+   "value": 2500,
+   "stack": 1,
+   "weight": 0.25,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY",
+    "POLICE"
+   ],
+   "pouch": {
+    "places": 1,
+    "mags": "rifle",
+    "npc_mesh": "G_Pouch_Rifle"
+   },
+   "desc": "Одинарный подсумок под автоматный магазин (и длинный пистолетный), язычок на липучке. Занимает одно место на броне."
+  },
+  "pouch_pistol": {
+   "name": "Подсумок пистолетный",
+   "short": "ПОДС. ПИСТ",
+   "cat": "armor",
+   "size": [
+    1,
+    1
+   ],
+   "value": 1500,
+   "stack": 1,
+   "weight": 0.12,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "SCAV",
+    "POLICE"
+   ],
+   "pouch": {
+    "places": 0.5,
+    "mags": "pistol",
+    "npc_mesh": "G_Pouch_Pistol"
+   },
+   "desc": "Подсумок под пистолетный магазин, язычок на липучке. Половина места на броне — два встают рядом."
+  },
+  "pouch_big": {
+   "name": "Подсумок большой",
+   "short": "ПОДС. БОЛ",
+   "cat": "armor",
+   "size": [
+    2,
+    2
+   ],
+   "value": 4500,
+   "stack": 1,
+   "weight": 0.35,
+   "tier": 2,
+   "rarity": "common",
+   "tags": [
+    "SCAV",
+    "MILITARY"
+   ],
+   "pouch": {
+    "places": 2,
+    "mags": "big",
+    "npc_mesh": "G_Pouch_Big"
+   },
+   "desc": "Большой подсумок с клапаном на липучке под крупный магазин — барабан, четырёхрядный на 60, короб на 100. Два места на броне, на пояс не встаёт."
   }
  }
 }

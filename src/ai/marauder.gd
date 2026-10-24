@@ -250,8 +250,8 @@ func _ready() -> void:
 	# тяжело ранен вместо смерти
 	_health.can_down = true
 	_health.downed_changed.connect(_on_downed_changed)
-	# видно, кто перед тобой: цвет куртки и фигура (тяжёлый шире, разведчик уже)
-	_base_scale = _arch.scale
+	# видно, кто перед тобой: цвет куртки; рост у всех натуральный (масштаба по типу нет с 2026-10-24)
+	_base_scale = _arch.get("scale", Vector3.ONE)
 	_body.scale = _base_scale
 	var torso := _body.get_node("Torso") as MeshInstance3D
 	var coat := (torso.get_surface_override_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D

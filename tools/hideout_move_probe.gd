@@ -5,7 +5,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	get_tree().current_scene = null
 	Profile.use_file("user://profile_probe.json", true)
-	for id in ["wpn_ar_03", "wpn_hg_03", "vest_police", "helmet_military_old"]:
+	for id in ["wpn_ar_03", "wpn_hg_03", "armor_mid", "helmet_simple"]:
 		for i in range(Profile.stash.size()):
 			if String(Profile.stash[i].id) == id:
 				Profile.equip_from_stash(i)

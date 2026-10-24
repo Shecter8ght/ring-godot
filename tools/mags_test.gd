@@ -111,23 +111,23 @@ func _ready() -> void:
 
 	# --- плиты из плитоносца в ящике — по одной, в ящик
 	inv.buffer = []
-	var vest := ItemDb.make("carrier_simple", 1)
+	var vest := ItemDb.make("armor_mid", 1)
 	var pl_id := "plate_steel"
 	vest["plates"] = {"front": {"id": pl_id, "dur": 40.0}, "back": {"id": pl_id, "dur": 35.0}}
 	c.items = [vest]
 	c.place_all()
 	_raid.request_item_op("plates", "loot", 0, c)
 	await _wait(float(Balance.MAG_OPS.plate_sec) * 1.4)
-	var v1: Dictionary = _find(c.items, "carrier_simple")
+	var v1: Dictionary = _find(c.items, "armor_mid")
 	_check("плиты — по одной", (v1.plates as Dictionary).size() == 1 and _count(c.items, pl_id) == 1, "осталось %d, в ящике %d" % [(v1.plates as Dictionary).size(), _count(c.items, pl_id)])
 	await _wait(float(Balance.MAG_OPS.plate_sec) * 1.2)
 	# вторая в ящик не влезла (плитоносец большой) — в буфер
-	_check("обе плиты вынуты: в ящик, не влезло — в буфер", (_find(c.items, "carrier_simple").plates as Dictionary).is_empty() and _count(c.items, pl_id) + _count(inv.buffer, pl_id) == 2,
+	_check("обе плиты вынуты: в ящик, не влезло — в буфер", (_find(c.items, "armor_mid").plates as Dictionary).is_empty() and _count(c.items, pl_id) + _count(inv.buffer, pl_id) == 2,
 		"в ящике %d, в буфере %d" % [_count(c.items, pl_id), _count(inv.buffer, pl_id)])
 	# плиту из ящика — перетащить на плитоносец: встаёт
-	_raid.request_fit_grid("loot", c.items.find(_find(c.items, pl_id)), "loot", c.items.find(_find(c.items, "carrier_simple")), c)
+	_raid.request_fit_grid("loot", c.items.find(_find(c.items, pl_id)), "loot", c.items.find(_find(c.items, "armor_mid")), c)
 	await get_tree().physics_frame
-	_check("плиту — на плитоносец (перетащил)", (_find(c.items, "carrier_simple").plates as Dictionary).size() == 1 and _count(c.items, pl_id) == 0, str(c.items))
+	_check("плиту — на плитоносец (перетащил)", (_find(c.items, "armor_mid").plates as Dictionary).size() == 1 and _count(c.items, pl_id) == 0, str(c.items))
 
 	# --- патроны из ящика — на магазин в рюкзаке: сколько влезет, остаток — в ящике
 	inv.items = []

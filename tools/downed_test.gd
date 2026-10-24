@@ -62,7 +62,7 @@ func _player_rules(me: Player) -> void:
 	var saved := false
 	for i in range(12):
 		_fresh(h)
-		me.inventory.equipment = {"helmet": ItemDb.make("helmet_perimeter_heavy", 1)}
+		me.inventory.equipment = {"helmet": ItemDb.make("helmet_top", 1)}
 		h.take_damage(900.0, Vector3.ZERO, "head", Vector3.INF, {"pen": 2.0, "armor_dmg": 2.0})
 		if h.alive and h.downed:
 			saved = true
@@ -197,7 +197,7 @@ func _marauder_rules() -> void:
 		helm.append(hv)
 		hv.global_position = SectorBuilder.polar(-130.0 - 2.0 * i, 72.0) + Vector3(0, 0.1, 0)
 		await get_tree().physics_frame
-		hv.equipment["helmet"] = ItemDb.make("helmet_perimeter_heavy", 1)
+		hv.equipment["helmet"] = ItemDb.make("helmet_top", 1)
 		(hv.get_node("Health") as Health).take_damage(900.0, Vector3.ZERO, "head", Vector3.INF, {"pen": 2.0, "armor_dmg": 2.0})
 		if (hv.get_node("Health") as Health).downed:
 			saved = true

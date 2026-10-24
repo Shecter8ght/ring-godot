@@ -1,51 +1,23 @@
 {
- "_comment": "Броня (см. docs/design/weapons.md, п.8). Жилет/плитоносец: armor.soft — встроенная мягкая защита (класс, прочность, покрытие груди), armor.plates — гнёзда плит (front/back), blunt — доля урона тупой травмой, если пуля остановлена. Плита: класс, материал, прочность, покрытие, blunt, wear — множитель износа. Шлем: класс, прочность, покрытие головы, mounts — что на нём держится. Гарнитура: дБ своих выстрелов / шагов / мира, hear_k — дальность слуха. Защита класса — Balance.ARMOR_CLASS_PROT.",
+ "_comment": "Броня (см. docs/design/weapons.md, п.8). Жилет/плитоносец: armor.soft — встроенная мягкая защита (класс, прочность, покрытие груди), armor.plates — гнёзда плит (front/back), blunt — доля урона тупой травмой, если пуля остановлена. Плита: класс, материал, прочность, покрытие, blunt, wear — множитель износа. Шлем: класс, прочность, покрытие головы, mounts — что на нём держится. Гарнитура: дБ своих выстрелов / шагов / мира, hear_k — дальность слуха. Защита класса — Balance.ARMOR_CLASS_PROT. Три брони, пояс и три шлема (решение владельца 2026-10-22, схема docs/design/npc_gear_by_type.md): armor.places — места под подсумки, armor.npc / helmet.npc — модель на теле NPC (вещь и сетка в assets/models/characters/npc_gear, fit — посадка рюкзака). Старые id (vest_*, carrier_*, helmet_*) — псевдонимы в data/weapons.json → aliases.",
  "vests": {
-  "vest_homemade": {
-   "name": "Жилет самодельный",
+  "armor_poor": {
+   "name": "Бронежилет бомжовский",
+   "short": "БРОНЯ 1",
    "cat": "armor",
    "size": [
     3,
     3
    ],
-   "value": 6000,
+   "value": 10000,
    "stack": 1,
-   "weight": 3.2,
+   "weight": 4.6,
    "tier": 1,
    "rarity": "common",
    "tags": [
     "CIVILIAN",
-    "SCAV"
-   ],
-   "equip": {
-    "slot": "armor"
-   },
-   "armor": {
-    "soft": {
-     "class": 1,
-     "durability": 30,
-     "coverage": 0.8
-    },
-    "plates": [],
-    "blunt": 0.4,
-    "code": "ARM_01"
-   }
-  },
-  "vest_old": {
-   "name": "Бронежилет старый",
-   "cat": "armor",
-   "size": [
-    3,
-    3
-   ],
-   "value": 12000,
-   "stack": 1,
-   "weight": 6.2,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
     "SCAV",
-    "MILITARY"
+    "POLICE"
    ],
    "equip": {
     "slot": "armor"
@@ -58,99 +30,19 @@
     },
     "plates": [],
     "blunt": 0.35,
-    "code": "ARM_02"
-   }
-  },
-  "vest_police": {
-   "name": "Бронежилет полицейский (кл. 2)",
-   "cat": "armor",
-   "size": [
-    3,
-    3
-   ],
-   "value": 15000,
-   "stack": 1,
-   "weight": 4.2,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
-    "POLICE",
-    "SCAV"
-   ],
-   "equip": {
-    "slot": "armor"
+    "code": "ARM_02",
+    "places": 3,
+    "npc": {
+     "item": "armor_poor",
+     "mesh": "G_Armor_Poor",
+     "fit": "Poor"
+    }
    },
-   "armor": {
-    "soft": {
-     "class": 2,
-     "durability": 50,
-     "coverage": 0.85
-    },
-    "plates": [],
-    "blunt": 0.3,
-    "code": "ARM_03"
-   }
+   "desc": "Мягкий жилет без плит, сшитый из чего было: кевларовые пакеты в чехле и три места под подсумки на поясе. От пистолетной пули спасёт, от автоматной — нет."
   },
-  "vest_army": {
-   "name": "Бронежилет армейский (кл. 3)",
-   "cat": "armor",
-   "size": [
-    3,
-    4
-   ],
-   "value": 38000,
-   "stack": 1,
-   "weight": 8.0,
-   "tier": 3,
-   "rarity": "uncommon",
-   "tags": [
-    "MILITARY"
-   ],
-   "equip": {
-    "slot": "armor"
-   },
-   "armor": {
-    "soft": {
-     "class": 3,
-     "durability": 60,
-     "coverage": 0.9
-    },
-    "plates": [],
-    "blunt": 0.25,
-    "code": "ARM_04"
-   }
-  },
-  "carrier_simple": {
-   "name": "Плитоносец простой",
-   "cat": "armor",
-   "size": [
-    3,
-    3
-   ],
-   "value": 9000,
-   "stack": 1,
-   "weight": 1.2,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
-    "SCAV",
-    "MILITARY"
-   ],
-   "equip": {
-    "slot": "armor"
-   },
-   "armor": {
-    "soft": null,
-    "plates": [
-     "front",
-     "back"
-    ],
-    "blunt": 0.3,
-    "code": "CAR_01"
-   }
-  },
-  "carrier_tactical": {
-   "name": "Плитоносец тактический",
+  "armor_mid": {
+   "name": "Плитоносец средний",
+   "short": "БРОНЯ 2",
    "cat": "armor",
    "size": [
     3,
@@ -158,12 +50,13 @@
    ],
    "value": 22000,
    "stack": 1,
-   "weight": 1.6,
-   "tier": 3,
-   "rarity": "uncommon",
+   "weight": 2.0,
+   "tier": 2,
+   "rarity": "common",
    "tags": [
-    "MILITARY",
-    "POLICE"
+    "SCAV",
+    "POLICE",
+    "MILITARY"
    ],
    "equip": {
     "slot": "armor"
@@ -171,65 +64,40 @@
    "armor": {
     "soft": {
      "class": 1,
-     "durability": 30,
+     "durability": 35,
      "coverage": 0.9
     },
     "plates": [
      "front",
      "back"
     ],
-    "blunt": 0.25,
-    "code": "CAR_02"
-   }
-  },
-  "carrier_perimeter_std": {
-   "name": "Плитоносец «Периметр» стандартный",
-   "cat": "armor",
-   "size": [
-    3,
-    3
-   ],
-   "value": 48000,
-   "stack": 1,
-   "weight": 1.8,
-   "tier": 4,
-   "rarity": "rare",
-   "tags": [
-    "PERIMETER",
-    "RARE"
-   ],
-   "equip": {
-    "slot": "armor"
+    "blunt": 0.28,
+    "code": "CAR_02",
+    "places": 5,
+    "npc": {
+     "item": "armor_mid",
+     "mesh": "G_Armor_Mid",
+     "fit": "Mid"
+    }
    },
-   "armor": {
-    "soft": {
-     "class": 2,
-     "durability": 40,
-     "coverage": 0.9
-    },
-    "plates": [
-     "front",
-     "back"
-    ],
-    "blunt": 0.2,
-    "code": "CAR_03"
-   }
+   "desc": "Плитоносец с карманами под плиты спереди и сзади, камербанд, пять мест под подсумки. Защита — та, что вставишь: без плит это просто ткань."
   },
-  "carrier_perimeter_assault": {
-   "name": "Плитоносец «Периметр» штурмовой",
+  "armor_top": {
+   "name": "Броня тяжёлая",
+   "short": "БРОНЯ 3",
    "cat": "armor",
    "size": [
     3,
     4
    ],
-   "value": 62000,
+   "value": 56000,
    "stack": 1,
-   "weight": 2.4,
-   "tier": 4,
-   "rarity": "rare",
+   "weight": 3.2,
+   "tier": 3,
+   "rarity": "uncommon",
    "tags": [
-    "PERIMETER",
-    "RARE"
+    "MILITARY",
+    "PERIMETER"
    ],
    "equip": {
     "slot": "armor"
@@ -245,8 +113,49 @@
      "back"
     ],
     "blunt": 0.18,
-    "code": "CAR_04"
-   }
+    "code": "CAR_04",
+    "places": 8,
+    "npc": {
+     "item": "armor_top",
+     "mesh": "G_Armor_Top",
+     "fit": "Top"
+    }
+   },
+   "desc": "Тяжёлая броня: плиты, воротник, наплечники, пах и щитки бёдер; восемь мест под подсумки. В такой ходит «Периметр» и те, кто снял её с «Периметра»."
+  },
+  "belt_pouches": {
+   "name": "Пояс с подсумками",
+   "short": "ПОЯС",
+   "cat": "armor",
+   "size": [
+    2,
+    1
+   ],
+   "value": 3500,
+   "stack": 1,
+   "weight": 0.5,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "SCAV"
+   ],
+   "equip": {
+    "slot": "armor"
+   },
+   "armor": {
+    "soft": null,
+    "plates": [],
+    "blunt": 1.0,
+    "code": "BELT_01",
+    "places": 2,
+    "npc": {
+     "item": "belt",
+     "mesh": "G_Armor_Belt",
+     "fit": ""
+    }
+   },
+   "desc": "Ремень с двумя местами под подсумки спереди-сбоку. Защиты никакой — занимает слот брони, когда брони нет."
   }
  },
  "plates": {
@@ -407,47 +316,21 @@
   }
  },
  "helmets": {
-  "helmet_hardhat": {
-   "name": "Каска строительная",
+  "helmet_simple": {
+   "name": "Шлем простой",
+   "short": "ШЛЕМ 1",
    "cat": "armor",
    "size": [
     2,
     2
    ],
-   "value": 2000,
+   "value": 7000,
    "stack": 1,
-   "weight": 0.4,
+   "weight": 1.4,
    "tier": 1,
    "rarity": "common",
    "tags": [
     "CIVILIAN",
-    "SCAV"
-   ],
-   "equip": {
-    "slot": "helmet"
-   },
-   "helmet": {
-    "code": "HEL_01",
-    "class": 1,
-    "durability": 20,
-    "coverage": 0.6,
-    "blunt": 0.5,
-    "mounts": []
-   }
-  },
-  "helmet_military_old": {
-   "name": "Шлем стальной старый (кл. 2)",
-   "cat": "armor",
-   "size": [
-    2,
-    2
-   ],
-   "value": 9000,
-   "stack": 1,
-   "weight": 1.5,
-   "tier": 1,
-   "rarity": "common",
-   "tags": [
     "SCAV",
     "MILITARY"
    ],
@@ -458,53 +341,32 @@
     "code": "HEL_02",
     "class": 2,
     "durability": 35,
-    "coverage": 0.65,
+    "coverage": 0.68,
     "blunt": 0.4,
-    "mounts": []
-   }
+    "mounts": [],
+    "npc": {
+     "item": "helmets",
+     "mesh": "G_Helmet_Simple"
+    }
+   },
+   "desc": "Старая стальная каска в зелёной краске. Пистолетную пулю и осколок держит, автоматную — как повезёт."
   },
-  "helmet_police": {
-   "name": "Шлем полицейский (кл. 2)",
+  "helmet_mid": {
+   "name": "Шлем средний",
+   "short": "ШЛЕМ 2",
    "cat": "armor",
    "size": [
     2,
     2
    ],
-   "value": 12000,
+   "value": 24000,
    "stack": 1,
-   "weight": 1.2,
+   "weight": 1.3,
    "tier": 2,
    "rarity": "common",
    "tags": [
-    "POLICE"
-   ],
-   "equip": {
-    "slot": "helmet"
-   },
-   "helmet": {
-    "code": "HEL_03",
-    "class": 2,
-    "durability": 40,
-    "coverage": 0.7,
-    "blunt": 0.35,
-    "mounts": [
-     "VISOR"
-    ]
-   }
-  },
-  "helmet_army": {
-   "name": "Шлем армейский (кл. 3)",
-   "cat": "armor",
-   "size": [
-    2,
-    2
-   ],
-   "value": 26000,
-   "stack": 1,
-   "weight": 1.3,
-   "tier": 3,
-   "rarity": "uncommon",
-   "tags": [
+    "SCAV",
+    "POLICE",
     "MILITARY"
    ],
    "equip": {
@@ -514,93 +376,35 @@
     "code": "HEL_04",
     "class": 3,
     "durability": 45,
-    "coverage": 0.7,
+    "coverage": 0.72,
     "blunt": 0.3,
     "mounts": [
      "NVG",
      "HEADSET"
-    ]
-   }
+    ],
+    "npc": {
+     "item": "helmets",
+     "mesh": "G_Helmet_Mid"
+    }
+   },
+   "desc": "Современный армейский шлем с площадкой под ПНВ спереди. Класс 3."
   },
-  "helmet_tactical": {
-   "name": "Шлем тактический (кл. 3)",
+  "helmet_top": {
+   "name": "Шлем тяжёлый",
+   "short": "ШЛЕМ 3",
    "cat": "armor",
    "size": [
     2,
     2
    ],
-   "value": 34000,
+   "value": 60000,
    "stack": 1,
-   "weight": 1.1,
+   "weight": 2.4,
    "tier": 3,
    "rarity": "uncommon",
    "tags": [
     "MILITARY",
-    "POLICE"
-   ],
-   "equip": {
-    "slot": "helmet"
-   },
-   "helmet": {
-    "code": "HEL_05",
-    "class": 3,
-    "durability": 45,
-    "coverage": 0.72,
-    "blunt": 0.28,
-    "mounts": [
-     "NVG",
-     "HEADSET",
-     "LIGHT"
-    ]
-   }
-  },
-  "helmet_perimeter_combat": {
-   "name": "Шлем «Периметр» боевой (кл. 4)",
-   "cat": "armor",
-   "size": [
-    2,
-    2
-   ],
-   "value": 64000,
-   "stack": 1,
-   "weight": 1.2,
-   "tier": 4,
-   "rarity": "rare",
-   "tags": [
-    "PERIMETER",
-    "RARE"
-   ],
-   "equip": {
-    "slot": "helmet"
-   },
-   "helmet": {
-    "code": "HEL_06",
-    "class": 4,
-    "durability": 50,
-    "coverage": 0.74,
-    "blunt": 0.22,
-    "mounts": [
-     "NVG",
-     "HEADSET",
-     "LIGHT"
-    ]
-   }
-  },
-  "helmet_perimeter_heavy": {
-   "name": "Шлем «Периметр» тяжёлый с забралом (кл. 4)",
-   "cat": "armor",
-   "size": [
-    2,
-    2
-   ],
-   "value": 88000,
-   "stack": 1,
-   "weight": 2.6,
-   "tier": 4,
-   "rarity": "rare",
-   "tags": [
-    "PERIMETER",
-    "RARE"
+    "PERIMETER"
    ],
    "equip": {
     "slot": "helmet"
@@ -608,15 +412,22 @@
    "helmet": {
     "code": "HEL_07",
     "class": 4,
-    "durability": 70,
-    "coverage": 0.92,
+    "durability": 65,
+    "coverage": 0.9,
     "blunt": 0.2,
     "mounts": [
      "NVG",
      "HEADSET",
+     "LIGHT",
      "VISOR"
-    ]
-   }
+    ],
+    "npc": {
+     "item": "helmets",
+     "mesh": "G_Helmet_Top",
+     "visor_mesh": "G_Helmet_Top_Visor"
+    }
+   },
+   "desc": "Тяжёлый шлем с площадкой ПНВ, боковой планкой под фонарь и бронезабралом. Класс 4 — таких у мародёров не бывает, у «Периметра» — у каждого."
   }
  },
  "headsets": {

@@ -12,7 +12,7 @@ func _ready() -> void:
 	Profile.use_file("user://rig_shots.json", true)
 	Profile.money = 900000
 	Profile.trust = 49
-	for id: String in ["wpn_ar_02", "wpn_hg_02", "carrier_tactical", "helmet_army", "headset_tactical", "bp_tourist", "rig_assault", "nvg"]:
+	for id: String in ["wpn_ar_02", "wpn_hg_02", "armor_top", "helmet_mid", "headset_tactical", "bp_tourist", "rig_assault", "nvg"]:
 		Profile.buy(id, 1, "stash", true)
 	for i: int in range(5):
 		Profile.buy("mag_556_30", 1, "backpack", false)

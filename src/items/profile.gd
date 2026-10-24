@@ -95,6 +95,12 @@ static func ensure() -> void:
 		equipment = d.get("equipment", {})
 		backpack = d.get("backpack", [])
 		pocket = d.get("pocket", [])
+		# старые id брони и шлемов (до сведения к трём, 2026-10-24) и прежние псевдонимы — в нынешние
+		for l in [stash, backpack, pocket]:
+			ItemDb.canon_list(l)
+		for slot in equipment:
+			if equipment[slot] is Dictionary:
+				ItemDb.canon_entry(equipment[slot] as Dictionary)
 		trust = int(d.get("trust", 0))
 		extractions = int(d.get("extractions", 0))
 		floors_open = d.get("floors_open", ["f1"])
@@ -121,6 +127,9 @@ static func ensure() -> void:
 		if profile_id == "":
 			profile_id = WeaponMark.new_id()
 		loadout_templates = d.get("loadout_templates", [])
+		for t: Variant in loadout_templates:
+			if t is Dictionary:
+				ItemDb.canon_template(t as Dictionary)
 		# обмен оборвался (вылет, выход) — вещи из буфера обмена обратно в тайник
 		trade_hold = []
 		for held: Variant in d.get("trade_hold", []):

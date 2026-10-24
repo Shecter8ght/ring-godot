@@ -48,8 +48,8 @@ BASIC_MEDICINE = {"bandage": 600, "medkit": 3000, "painkillers": 1200}
 PRACTICAL_PRECISION_KIT = {
     "name": "Практичная стрелковая · MK12",
     "lines": [["wpn_dmr_02", 1], ["optic_4x_01", 1], ["bipod_01", 1],
-              ["carrier_simple", 1], ["plate_steel", 2], ["rig_chest", 1],
-              ["helmet_police", 1], ["headset_active", 1], ["bp_tourist", 1],
+              ["armor_mid", 1], ["plate_steel", 2], ["rig_chest", 1],
+              ["helmet_mid", 1], ["headset_active", 1], ["bp_tourist", 1],
               ["mag_556_30", 3], ["ammo_556_std", 90], ["bandage", 3],
               ["medkit", 2], ["painkillers", 1], ["water", 1]],
 }
@@ -62,12 +62,12 @@ OVERRIDES = {
     "nvg": 300000, "mag_loader": 35000,
     "bp_daypack": 12000, "bp_tourist": 35000, "bp_raid": 180000,
     "rig_belt": 4500, "rig_chest": 20000, "rig_assault": 75000, "rig_heavy": 180000,
-    "carrier_simple": 20000, "plate_steel": 35000,
-    "helmet_police": 25000, "headset_active": 30000,
+    "armor_mid": 20000, "plate_steel": 35000,
+    "helmet_mid": 25000, "headset_active": 30000,
     "grenade": 10000,
     # Рейдовые эксклюзивы сохраняют доступность. Это цена только в тестовом магазине.
-    "carrier_perimeter_std": 400000, "carrier_perimeter_assault": 500000,
-    "plate_perimeter": 350000, "helmet_perimeter_combat": 240000,
+    "armor_top": 400000, "armor_top": 500000,
+    "plate_perimeter": 350000, "helmet_top": 240000,
     "helmet_perimeter_heavy": 350000, "headset_perimeter": 200000,
     "stock_perimeter_01": 200000,
     "supply_signal": 450000, "signal_launcher": 150000, "laser_head": 60000,

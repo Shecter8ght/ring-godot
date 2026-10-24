@@ -881,3 +881,46 @@ static func value_of(list: Array) -> int:
 	for it in list:
 		v += entry_value(it)
 	return v
+
+
+## Старые id из сохранений (псевдонимы data/weapons.json → aliases: vest_*, carrier_*, helmet_* и прежние) — в нынешние:
+## сам предмет, плиты, магазин в стволе, магазины в подсумках и сумке сброса разгрузки.
+static func canon_entry(e: Dictionary) -> void:
+	if e.has("id"):
+		e.id = WeaponDb.canonical(String(e.id))
+	for s in e.get("plates", {}):
+		var pl: Variant = (e.plates as Dictionary)[s]
+		if pl is Dictionary and (pl as Dictionary).has("id"):
+			(pl as Dictionary).id = WeaponDb.canonical(String((pl as Dictionary).id))
+	if e.get("mag", null) is Dictionary and (e.mag as Dictionary).has("id"):
+		(e.mag as Dictionary).id = WeaponDb.canonical(String((e.mag as Dictionary).id))
+	for part: String in ["mags", "dump"]:
+		for inner: Variant in e.get(part, []):
+			if inner is Dictionary:
+				canon_entry(inner as Dictionary)
+
+
+static func canon_list(list: Array) -> void:
+	for e: Variant in list:
+		if e is Dictionary:
+			canon_entry(e as Dictionary)
+
+
+## Шаблон снаряжения (LoadoutTemplates / Balance.TRADER_KITS): slots — {слот: {id, plates: {гнездо: id}}},
+## backpack — [[id, штук]].
+static func canon_template(t: Dictionary) -> void:
+	for slot in t.get("slots", {}):
+		var e: Variant = (t.slots as Dictionary)[slot]
+		if not e is Dictionary:
+			continue
+		if (e as Dictionary).has("id"):
+			(e as Dictionary).id = WeaponDb.canonical(String((e as Dictionary).id))
+		var plates: Variant = (e as Dictionary).get("plates", null)
+		if plates is Dictionary:
+			for g in plates:
+				if (plates as Dictionary)[g] is String:
+					(plates as Dictionary)[g] = WeaponDb.canonical(String((plates as Dictionary)[g]))
+	for pair: Variant in t.get("backpack", []):
+		if pair is Array and (pair as Array).size() > 0 and (pair as Array)[0] is String:
+			(pair as Array)[0] = WeaponDb.canonical(String((pair as Array)[0]))
+

@@ -341,7 +341,7 @@ const STASH_GRID := Vector2i(10, 30)
 ## Новый профиль: деньги и что лежит в тайнике ([id, штук]).
 const START_MONEY := 60000
 const START_STASH := [["wpn_hg_02", 1], ["wpn_ar_01", 1], ["ammo_919_fmj", 100], ["ammo_545_std", 120],
-	["mag_545_30", 1], ["mag_919_17", 1], ["bandage", 4], ["painkillers", 2], ["vest_police", 1], ["helmet_military_old", 1], ["grenade", 2]]
+	["mag_545_30", 1], ["mag_919_17", 1], ["bandage", 4], ["painkillers", 2], ["armor_mid", 1], ["helmet_simple", 1], ["grenade", 2]]
 ## Выручка Михалыча: остался без огнестрела и без денег на самый дешёвый ствол — бесплатный
 ## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
 const RESCUE_KIT := [["wpn_hg_01", 1], ["ammo_918_pst", 48], ["bandage", 2]]
@@ -355,9 +355,9 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_sg_03", "mods": {"optic_primary": "optic_rd_01"}},
 			"sidearm": {"id": "wpn_hg_01"},
-			"armor": {"id": "vest_homemade"},
+			"armor": {"id": "armor_poor"},
 			"rig": {"id": "rig_belt"},
-			"helmet": {"id": "helmet_military_old"},
+			"helmet": {"id": "helmet_simple"},
 			"ears": {"id": "headset_passive"},
 			"backpack": {"id": "bp_daypack"}},
 		"backpack": [["ammo_12_buck", 30], ["ammo_12_slug", 10], ["mag_918_8", 2], ["ammo_918_pst", 32], ["bandage", 3], ["medkit", 1], ["water", 1]]},
@@ -365,9 +365,9 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_holo_01", "muzzle": "muzzle_comp_545_01", "underbarrel": "grip_vertical_01", "side_right": "tac_flashlight_01"}},
 			"sidearm": {"id": "wpn_hg_02"},
-			"armor": {"id": "carrier_simple", "plates": {"front": "plate_steel", "back": "plate_steel"}},
+			"armor": {"id": "armor_mid", "plates": {"front": "plate_steel", "back": "plate_steel"}},
 			"rig": {"id": "rig_chest"},
-			"helmet": {"id": "helmet_police"},
+			"helmet": {"id": "helmet_mid"},
 			"ears": {"id": "headset_active"},
 			"backpack": {"id": "bp_tourist"}},
 		"backpack": [["mag_545_30", 4], ["ammo_545_std", 150], ["mag_919_17", 2], ["ammo_919_fmj", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 1], ["grenade", 2]]},
@@ -375,9 +375,9 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_ar_02", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_556_01", "underbarrel": "grip_angled_01", "side_right": "tac_combo_01"}},
 			"sidearm": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01", "underbarrel": "tac_flashlight_01"}},
-			"armor": {"id": "carrier_tactical", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}},
+			"armor": {"id": "armor_top", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}},
 			"rig": {"id": "rig_assault"},
-			"helmet": {"id": "helmet_army"},
+			"helmet": {"id": "helmet_mid"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
 			"backpack": {"id": "bp_raid"}},
@@ -386,9 +386,9 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_dmr_01", "mods": {"optic_primary": "optic_8x_01", "muzzle": "muzzle_supp_762_01", "underbarrel": "bipod_01"}},
 			"secondary": {"id": "wpn_smg_03", "mods": {"optic_primary": "optic_holo_01", "underbarrel": "grip_angled_01"}},
-			"armor": {"id": "carrier_tactical", "plates": {"front": "plate_military", "back": "plate_military"}},
+			"armor": {"id": "armor_top", "plates": {"front": "plate_military", "back": "plate_military"}},
 			"rig": {"id": "rig_heavy"},
-			"helmet": {"id": "helmet_tactical"},
+			"helmet": {"id": "helmet_top"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
 			"backpack": {"id": "bp_raid"}},
@@ -455,10 +455,10 @@ const TRADER_BUY_PRICES := {
 	"car_ecu": 25000,
 	"car_rim": 7200,
 	"car_tire": 9800,
-	"carrier_perimeter_assault": 500000,
-	"carrier_perimeter_std": 400000,
-	"carrier_simple": 20000,
-	"carrier_tactical": 77000,
+	"armor_poor": 14000,
+	"armor_mid": 46000,
+	"armor_top": 160000,
+	"belt_pouches": 5000,
 	"cash": 6500,
 	"cassette_player": 4200,
 	"cctv_bullet": 19000,
@@ -501,13 +501,9 @@ const TRADER_BUY_PRICES := {
 	"headset_passive": 3900,
 	"headset_perimeter": 200000,
 	"headset_tactical": 92000,
-	"helmet_army": 92000,
-	"helmet_hardhat": 2600,
-	"helmet_military_old": 12000,
-	"helmet_perimeter_combat": 240000,
-	"helmet_perimeter_heavy": 350000,
-	"helmet_police": 25000,
-	"helmet_tactical": 152000,
+	"helmet_simple": 12000,
+	"helmet_mid": 60000,
+	"helmet_top": 190000,
 	"hemostat_kit": 12000,
 	"hemostatic_pack": 20000,
 	"injector_set": 32000,
@@ -703,10 +699,9 @@ const TRADER_BUY_PRICES := {
 	"timing_kit": 16000,
 	"tire_pump": 5500,
 	"toolset": 7800,
-	"vest_army": 134000,
-	"vest_homemade": 7800,
-	"vest_old": 26000,
-	"vest_police": 32000,
+	"pouch_rifle": 4000,
+	"pouch_pistol": 2500,
+	"pouch_big": 7500,
 	"video_camera": 15000,
 	"wall_clock": 2300,
 	"watch": 16000,
@@ -919,6 +914,13 @@ const WEAPON_BOB := {
 	"idle_rate": 1.5, "horizontal": 0.006, "idle_vertical": 0.002,
 	"walk_vertical": 0.01, "walk_side": 0.004, "sprint_vertical": 0.013, "sprint_side": 0.007, "lag": 0.12,
 }
+## Руки в прицеле на ходу: оружие у глаза не каменное, а ходит ходуном относительно головы в темп шагов
+## (владелец 2026-10-22). Размах, м: вверх-вниз и вбок (за пару шагов) на ходьбе и беге; roll_deg — лёгкий
+## завал ствола; lag — запаздывание рук за головой, доля шага. Стоя на месте не работает (там дыхание и сway).
+const WEAPON_BOB_ADS := {
+	"walk_vertical": 0.012, "walk_side": 0.008, "sprint_vertical": 0.018, "sprint_side": 0.013,
+	"roll_deg": 1.2, "lag": 0.15,
+}
 ## Движение камеры от первого лица (CameraMotion) — вес тела, как в Tarkov: шаг тяжёлый и неторопливый,
 ## бег — размашистей и чаще. Своей частоты у покачивания нет: его темп — темп шагов (Footsteps,
 ## STEP_STRIDE / скорость), поэтому камера проседает ровно тогда, когда слышен шаг.
@@ -948,8 +950,8 @@ const CAMERA_MOTION := {
 	"land_m": 0.006, "land_max_m": 0.04, "land_nod_deg_cm": 0.3,
 	# как быстро размах следует за скоростью (шаг ↔ бег, остановка), 1/с; подстройка фазы к шагам, 1/с
 	"amp_rate": 6.0, "lock_rate": 8.0,
-	# в прицеле — доля сдвигов и поворотов: точка прицеливания почти стоит
-	"ads_pos_k": 0.3, "ads_rot_k": 0.12,
+	# в прицеле — доля сдвигов (в т.ч. высоты глаз) и поворотов; на ходу прицел заметно «дышит» шагом
+	"ads_pos_k": 1.0, "ads_rot_k": 0.8,
 	# по стойке: вприсядку мягче, ползком почти нет
 	"stance": {"stand": 1.0, "crouch": 0.7, "prone": 0.35},
 }
@@ -1802,32 +1804,34 @@ const AI_RELOAD_K := 1.1
 ## здоровье ×, память ×, дальность зрения ×, цвет куртки, фигура (масштаб), holds — держит
 ## позицию: не сближается, патруль у своего поста, ищет глазами, а не ногами (снайпер ходит один);
 ## ambush — склонность к засаде (× AI_AMBUSH.chance; нет — 1): разведчик рвётся вперёд, бывалый и ЧВК ждут.
+## Рост и сложение у всех ботов натуральные — масштаба по типу нет (решение владельца 2026-10-24: разные
+## сложения — разными телами, docs/design/npc_appearance_catalog.md).
 const AI_ARCHETYPES := {
 	"scout": {"name": "Разведчик", "weight": 0.4, "loadout": "scav_poor", "speed": 1.3, "hp": 0.85,
-		"memory": 0.5, "view": 1.1, "color": Color(0.46, 0.4, 0.28), "scale": Vector3(0.9, 1.0, 0.9), "holds": false, "ambush": 0.5},
+		"memory": 0.5, "view": 1.1, "color": Color(0.46, 0.4, 0.28), "holds": false, "ambush": 0.5},
 	"gunner": {"name": "Штурмовик", "weight": 0.42, "loadout": "scav_standard", "leader": {"chance": 0.1, "loadout": "scav_leader"}, "speed": 1.0, "hp": 1.0,
-		"memory": 1.0, "view": 1.0, "color": Color(0.36, 0.2, 0.16), "scale": Vector3(1.0, 1.0, 1.0), "holds": false},
+		"memory": 1.0, "view": 1.0, "color": Color(0.36, 0.2, 0.16), "holds": false},
 	"heavy": {"name": "Бывалый", "weight": 0.1, "loadout": "scav_veteran", "speed": 0.85, "hp": 1.2,
-		"memory": 1.3, "view": 0.95, "color": Color(0.18, 0.22, 0.2), "scale": Vector3(1.18, 1.03, 1.18), "holds": false, "ambush": 1.5},
+		"memory": 1.3, "view": 0.95, "color": Color(0.18, 0.22, 0.2), "holds": false, "ambush": 1.5},
 	"sniper": {"name": "Снайпер", "weight": 0.08, "loadout": "scav_sniper", "speed": 0.9, "hp": 0.9,
-		"memory": 1.5, "view": 2.2, "color": Color(0.3, 0.33, 0.24), "scale": Vector3(0.95, 1.0, 0.95), "holds": true},
+		"memory": 1.5, "view": 2.2, "color": Color(0.3, 0.33, 0.24), "holds": true},
 	# третья сторона — не выпадают случайно (weight 0): ставят события и уровень
 	# «Периметр» — не толще людей: опасны снаряжением (броня, патроны), меткостью и слаженностью
 	"pmc": {"name": "ЧВК «Периметр»", "weight": 0.0, "loadout": "perimeter_rifleman", "speed": 1.05, "hp": 1.0,
-		"memory": 1.4, "view": 1.2, "color": Color(0.1, 0.12, 0.15), "scale": Vector3(1.08, 1.02, 1.08), "holds": false,
+		"memory": 1.4, "view": 1.2, "color": Color(0.1, 0.12, 0.15), "holds": false,
 		"faction": "pmc", "loots": false, "ambush": 1.4},
 	"resident": {"name": "Жилец", "weight": 0.0, "loadout": "civilian", "speed": 0.95, "hp": 1.0,
-		"memory": 1.0, "view": 0.9, "color": Color(0.55, 0.48, 0.38), "scale": Vector3(0.96, 0.98, 0.96), "holds": false,
+		"memory": 1.0, "view": 0.9, "color": Color(0.55, 0.48, 0.38), "holds": false,
 		"faction": "resident", "loots": false, "ambush": 0.4},
 	# чужие отряды (RivalRaids): пришли за добычей, как и игроки, — обыскивают, уносят, воюют со всеми
 	"rival": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_veteran", "leader": {"chance": 0.0, "loadout": "scav_leader"},
 		"speed": 1.08, "hp": 1.0, "memory": 1.3, "view": 1.15, "color": Color(0.2, 0.24, 0.3),
 		"scale": Vector3(1.02, 1.0, 1.02), "holds": false, "faction": "rival", "ambush": 1.2},
 	"rival_scout": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_standard", "speed": 1.25, "hp": 0.9,
-		"memory": 0.9, "view": 1.2, "color": Color(0.26, 0.28, 0.22), "scale": Vector3(0.94, 1.0, 0.94), "holds": false,
+		"memory": 0.9, "view": 1.2, "color": Color(0.26, 0.28, 0.22), "holds": false,
 		"faction": "rival", "ambush": 0.6},
 	"rival_sniper": {"name": "Чужой отряд", "weight": 0.0, "loadout": "scav_sniper", "speed": 0.95, "hp": 0.9,
-		"memory": 1.5, "view": 2.0, "color": Color(0.24, 0.27, 0.2), "scale": Vector3(0.96, 1.0, 0.96), "holds": false,
+		"memory": 1.5, "view": 2.0, "color": Color(0.24, 0.27, 0.2), "holds": false,
 		"faction": "rival"},
 }
 ## Кто кому враг (фракции ИИ). Игрок — враг мародёрам и ЧВК; жильцам — только если к ним полез

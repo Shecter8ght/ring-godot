@@ -24,8 +24,8 @@ func _ready() -> void:
 	# плитоносец с плитами спереди и сзади
 	var w := WeaponDb.make_weapon("AR_06_MARKSMAN", rng, [100, 100])
 	w = Gear.fit(w, ItemDb.make("tac_flashlight_01", 1), "side_left")[0]
-	Profile.equipment = {"primary": w, "armor": WeaponDb.make_vest("carrier_tactical", {"front": "plate_ceramic", "back": "plate_steel"}),
-		"helmet": ItemDb.make("helmet_army", 1), "ears": ItemDb.make("headset_active", 1),
+	Profile.equipment = {"primary": w, "armor": WeaponDb.make_vest("armor_top", {"front": "plate_ceramic", "back": "plate_steel"}),
+		"helmet": ItemDb.make("helmet_mid", 1), "ears": ItemDb.make("headset_active", 1),
 		"backpack": ItemDb.make(Balance.BACKPACK_START, 1)}
 	Profile.backpack = []
 	ItemDb.add_to(Profile.backpack, ItemDb.make("ammo_545_std", 60), Balance.BACKPACK_GRID)
@@ -303,7 +303,7 @@ func _data_cases(rng: RandomNumberGenerator) -> void:
 		and dm_ap > dm_fmj * 2.0, "шанс %.2f, в среднем прошло %.1f из %d" % [Armor.pen_chance(float(ap.pen), int(pd["class"])), dm_ap, int(ap.damage)])
 	# CASE 15/16: попадания спереди бьют переднюю плиту, сзади — заднюю (плита закрывает не всю
 	# грудь — серия из 10)
-	var eq := {"armor": WeaponDb.make_vest("carrier_tactical", {"front": "plate_ceramic", "back": "plate_ceramic"})}
+	var eq := {"armor": WeaponDb.make_vest("armor_top", {"front": "plate_ceramic", "back": "plate_ceramic"})}
 	var at := Vector3(0, 1.3, 0)
 	var fwd := Vector3(0, 0, 1)
 	var f0 := float(eq.armor.plates.front.dur)
@@ -325,7 +325,7 @@ func _data_cases(rng: RandomNumberGenerator) -> void:
 func _mean_through(plate_id: String, a: Dictionary, rng: RandomNumberGenerator) -> float:
 	var sum := 0.0
 	for i in range(200):
-		var eq := {"armor": WeaponDb.make_vest("carrier_tactical", {"front": plate_id})}
+		var eq := {"armor": WeaponDb.make_vest("armor_top", {"front": plate_id})}
 		var h := Armor.hit(eq, float(a.damage), "thorax", Vector3(0, 1.3, 10), Vector3(0, 1.3, 0), Vector3(0, 0, 1), {"pen": float(a.pen), "armor_dmg": float(a.armor_dmg)}, rng)
 		sum += float(h.damage)
 	return sum / 200.0

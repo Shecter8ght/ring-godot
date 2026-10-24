@@ -16,7 +16,7 @@ func _ready() -> void:
 	layer.add_child(bg)
 	# ствол и прицел — изношенные экземпляры: состояние процентом и что оно меняет (вид оружия от него не зависит)
 	var worn := {"wpn_ar_01": 47.0, "optic_offset_rd_01": 30.0}
-	for id in ["ammo_545_ap", "wpn_ar_01" if ItemDb.exists("wpn_ar_01") else String(WeaponDb.ids("weapons")[8]), "carrier_tactical", "mag_545_30", "optic_offset_rd_01", "bandage"]:
+	for id in ["ammo_545_ap", "wpn_ar_01" if ItemDb.exists("wpn_ar_01") else String(WeaponDb.ids("weapons")[8]), "armor_top", "mag_545_30", "optic_offset_rd_01", "bandage"]:
 		var entry := {"id": id, "n": 1}
 		if worn.has(id):
 			entry["dur"] = worn[id]
