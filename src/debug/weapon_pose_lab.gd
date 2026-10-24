@@ -11,6 +11,8 @@ var _editing: bool = true
 var _dirty: bool = false
 var _hand_draft: Dictionary = {}
 var _inspector: HandGripInspector
+## Снимок выбранных настроек; смена ствола и дальнейшая правка источника его не меняют.
+var _hand_buffer: Dictionary = {}
 
 @onready var _player: Player = $Player
 @onready var _rig: CameraRig = $CameraRig
@@ -47,6 +49,8 @@ func _ready() -> void:
 	_panel.grip.values_changed.connect(_change_hand)
 	_panel.grip.side_selected.connect(func(_index: int) -> void: _refresh_hand_values())
 	_panel.grip.reset_requested.connect(_reset_hand)
+	_panel.grip.grip_copy_requested.connect(_copy_hand_grip)
+	_panel.grip.grip_paste_requested.connect(_paste_hand_grip)
 	_panel.grip.use_in_game.toggled.connect(func(_on: bool) -> void:
 		_dirty = true
 		_panel.set_status("Есть несохранённые изменения · Ctrl+S"))
@@ -187,6 +191,51 @@ func _refresh_hand_values() -> void:
 	if _player.weapon_id == "signal_launcher":
 		_panel.grip.context.text += " Ракетницу держат одной рукой; левая помогает только при перезарядке."
 	_panel.grip.context.visible = (_hand_side() == "Left" and attachment != "") or _player.weapon_id == "signal_launcher"
+	_panel.grip.transfer_scope.set_item_disabled(1, _player.weapon_id == "signal_launcher")
+	if _player.weapon_id == "signal_launcher" and _panel.grip.transfer_scope.selected == 1:
+		_panel.grip.transfer_scope.select(2)
+
+
+func _copy_hand_grip(sides: Array[String]) -> bool:
+	var keys: Dictionary = HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods)
+	var hands: Dictionary = {}
+	var copied: Array[String] = []
+	for side: String in sides:
+		if not side in HandGripProfiles.SIDES or (side == "Left" and _player.weapon_id == "signal_launcher"):
+			continue
+		hands[side] = HandGripProfiles.values(_hand_draft, String(keys[side]), side)
+		copied.append(side)
+	if hands.is_empty():
+		return false
+	var source: String = String(_catalog[_weapon_index].name)
+	_hand_buffer = {"source": source, "hands": hands}
+	_panel.grip.show_grip_buffer(source, copied)
+	_panel.set_status("Хват скопирован. Выбери другое оружие и нажми «Вставить хват».")
+	return true
+
+
+func _paste_hand_grip() -> bool:
+	if _hand_buffer.is_empty():
+		return false
+	var keys: Dictionary = HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods)
+	var hands: Dictionary = _hand_buffer.hands as Dictionary
+	var applied: Array[String] = []
+	for side: String in hands:
+		if side == "Left" and _player.weapon_id == "signal_launcher":
+			continue
+		HandGripProfiles.put(_hand_draft, String(keys[side]), side, hands[side] as Dictionary)
+		applied.append(side)
+	if applied.is_empty():
+		_panel.set_status("На этом оружии нет кисти из скопированного хвата.")
+		return false
+	if applied.size() == 1:
+		_panel.grip.sides.select(HandGripProfiles.SIDES.find(applied[0]))
+	_panel.compare.set_pressed_no_signal(false)
+	_dirty = true
+	_refresh_hand_values()
+	_sync_preview()
+	_panel.set_status("Хват из «%s» вставлен · Ctrl+S — сохранить." % String(_hand_buffer.source))
+	return true
 
 
 func _change_hand(value: Dictionary) -> void:

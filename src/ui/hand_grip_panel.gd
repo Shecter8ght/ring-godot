@@ -6,12 +6,18 @@ signal values_changed(value: Dictionary)
 signal side_selected(index: int)
 signal view_selected(index: int)
 signal reset_requested
+signal grip_copy_requested(sides: Array[String])
+signal grip_paste_requested
 
 var sides: OptionButton
 var views: OptionButton
 var fingers: OptionButton
 var use_in_game: CheckButton
 var context: Label
+var transfer_scope: OptionButton
+var copy_grip: Button
+var paste_grip: Button
+var transfer_info: Label
 var _position: Array[SpinBox] = []
 var _rotation: Array[SpinBox] = []
 var _bend: Array[SpinBox] = []
@@ -58,6 +64,10 @@ func _ready() -> void:
 	digit.name = "Пальцы"
 	digit.add_theme_constant_override("separation", 6)
 	tabs.add_child(digit)
+	var transfer: VBoxContainer = VBoxContainer.new()
+	transfer.name = "Перенос"
+	transfer.add_theme_constant_override("separation", 8)
+	tabs.add_child(transfer)
 	_body = palm
 	_label("Положение кисти на оружии · см", 19)
 	for title: String in ["К правому (−) / левому (+) боку", "Ниже (−) / выше (+)", "К прикладу (−) / к дулу (+)"]:
@@ -74,6 +84,14 @@ func _ready() -> void:
 		_bend.append(_axis(title, HandGripProfiles.BEND_LIMIT, 1.0, "°"))
 	_spread = _axis("Разведение пальца", HandGripProfiles.SPREAD_LIMIT, 1.0, "°")
 	_twist = _axis("Поворот пальца вокруг своей оси", HandGripProfiles.TWIST_LIMIT, 1.0, "°")
+	_body = transfer
+	_label("Настрой хват, скопируй его, выбери другое оружие и нажми «Вставить хват».", 16)
+	transfer_scope = _options("Что скопировать", ["Обе кисти", "Левую кисть", "Правую кисть"])
+	copy_grip = _transfer_button("Скопировать хват", _request_grip_copy)
+	paste_grip = _transfer_button("Вставить хват", func() -> void: grip_paste_requested.emit())
+	transfer_info = _label("", 14)
+	_label("Переносятся положение и поворот кистей и все настройки пальцев. После вставки можно поправить хват и сохранить · Ctrl+S.", 14)
+	show_grip_buffer("", [])
 	_body = self
 	use_in_game = CheckButton.new()
 	use_in_game.text = "Использовать сохранённый хват в игре"
@@ -87,6 +105,34 @@ func _ready() -> void:
 	add_child(reset)
 	_label("Нули возвращают исходный хват. В перезарядке руки следуют анимации; поправка возвращается в стойке.", 14)
 	show_values(_value)
+
+
+func _transfer_button(text: String, action: Callable) -> Button:
+	var button: Button = Button.new()
+	button.text = text
+	button.custom_minimum_size.y = 36
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(action)
+	_body.add_child(button)
+	return button
+
+
+func _request_grip_copy() -> void:
+	var selected: Array[String] = []
+	if transfer_scope.selected == 0:
+		selected.assign(HandGripProfiles.SIDES)
+	else:
+		selected.append(HandGripProfiles.SIDES[transfer_scope.selected - 1])
+	grip_copy_requested.emit(selected)
+
+
+func show_grip_buffer(source: String, sides: Array[String]) -> void:
+	paste_grip.disabled = source.is_empty() or sides.is_empty()
+	if paste_grip.disabled:
+		transfer_info.text = "Хват ещё не скопирован."
+		return
+	var scope: String = "обе кисти" if sides.size() == 2 else ("левая кисть" if sides[0] == "Left" else "правая кисть")
+	transfer_info.text = "Скопировано: %s · %s.\nВыбери другое оружие и вставь хват. Его можно вставлять несколько раз до закрытия стенда." % [source, scope]
 
 
 func _label(text: String, font_size: int) -> Label:

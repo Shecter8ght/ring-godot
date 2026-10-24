@@ -139,6 +139,7 @@ func _ready() -> void:
 	_check("flare grip moves relative to weapon", absf((_relative_wrist(signal_vm._arm_skel, signal_wrist).origin - signal_before.origin).x + 0.02) < 0.002)
 	await _shot("05_flare_right")
 	_test_storage()
+	await _test_transfer()
 	DirAccess.remove_absolute(HandGripProfiles.storage_path)
 	DirAccess.remove_absolute(WeaponPoseProfiles.storage_path)
 	print("HAND_GRIP_TEST checks=%d failures=%d" % [_checks, _fails])
@@ -223,6 +224,136 @@ func _test_storage() -> void:
 		"fingers": {"Index": {"bend": Vector3(1000, -1000, NAN), "spread": "invalid", "twist": INF}}})
 	_check("invalid data bounded and finite", (malformed.position as Vector3).is_zero_approx() and (malformed.rotation as Vector3).y == HandGripProfiles.ROTATION_LIMIT
 		and (malformed.fingers.Index.bend as Vector3).is_zero_approx() and malformed.fingers.Index.spread == 0.0 and malformed.fingers.Index.twist == 0.0)
+
+
+func _test_transfer() -> void:
+	var unchanged: Dictionary = _lab._hand_draft.duplicate(true)
+	var dirty_before: bool = _lab._dirty
+	_check("empty transfer buffer disables paste without editing", _lab._panel.grip.paste_grip.disabled and not _lab._paste_hand_grip()
+		and _lab._hand_draft == unchanged and _lab._dirty == dirty_before)
+	var pm: int = _index("wpn_hg_01")
+	var glock: int = _index("wpn_hg_02")
+	var third_pistol: int = _index("wpn_hg_03")
+	_check("PM and two target pistols exist", pm >= 0 and glock >= 0 and third_pistol >= 0)
+	if pm < 0 or glock < 0 or third_pistol < 0:
+		return
+	_lab._select_weapon(pm)
+	await _frames(45)
+	var expected: Dictionary = {}
+	for side_index: int in range(2):
+		_set_transfer_hand(side_index)
+		var side: String = HandGripProfiles.SIDES[side_index]
+		expected[side] = HandGripProfiles.values(_lab._hand_draft, "wpn_hg_01", side)
+	_lab._panel.grip.tabs.current_tab = 3
+	_lab._panel.grip.transfer_scope.select(0)
+	unchanged = _lab._hand_draft.duplicate(true)
+	dirty_before = _lab._dirty
+	await _press_transfer_button(_lab._panel.grip.copy_grip)
+	_check("copy both hands includes unsaved settings and all fingers", _lab._hand_buffer.hands == expected and not _lab._panel.grip.paste_grip.disabled)
+	_check("copy is read only", _lab._hand_draft == unchanged and _lab._dirty == dirty_before)
+	_check("transfer identifies PM source", _lab._panel.grip.transfer_info.text.contains("ПМ"))
+	_lab._panel.grip._position[0].value = 0.9
+	var latest_source: Dictionary = HandGripProfiles.values(_lab._hand_draft, "wpn_hg_01", "Right")
+	_check("source edits do not change copied snapshot", latest_source != expected.Right and _lab._hand_buffer.hands == expected)
+	_lab._select_weapon(glock)
+	await _frames(40)
+	var wrist: int = _lab._rig._arms._hand_pose.chains.Left[2]
+	var before: Transform3D = _relative_wrist(_lab._rig._arms.skeleton, wrist)
+	WeaponPoseProfiles.put(_lab._draft, "wpn_hg_02", "hip", Vector3(0.04, 0, 0), Vector3.ZERO)
+	var weapon_poses: Dictionary = _lab._draft.duplicate(true)
+	_lab._panel.compare.button_pressed = true
+	await _press_transfer_button(_lab._panel.grip.paste_grip)
+	await _frames(35)
+	_check("PM to Glock copies both wrists and complete finger data", HandGripProfiles.values(_lab._hand_draft, "wpn_hg_02", "Left") == expected.Left
+		and HandGripProfiles.values(_lab._hand_draft, "wpn_hg_02", "Right") == expected.Right)
+	_check("paste updates live hands and exits comparison", not _lab._panel.compare.button_pressed and _lab._dirty
+		and _relative_wrist(_lab._rig._arms.skeleton, wrist).origin.distance_to(before.origin) > 0.005)
+	_check("paste keeps source and weapon framing", HandGripProfiles.values(_lab._hand_draft, "wpn_hg_01", "Right") == latest_source and _lab._draft == weapon_poses)
+	_check("pasted settings are not saved implicitly", HandGripProfiles.values(HandGripProfiles.snapshot(), "wpn_hg_02", "Right") != expected.Right)
+	_check("save pasted grip", _lab._save())
+	HandGripProfiles.reload()
+	_check("pasted grip survives reload", HandGripProfiles.values(HandGripProfiles.active(), "wpn_hg_02", "Left") == expected.Left
+		and HandGripProfiles.values(HandGripProfiles.active(), "wpn_hg_02", "Right") == expected.Right)
+	_lab._panel.grip._position[0].value = 2.6
+	_lab._select_weapon(third_pistol)
+	await _frames(35)
+	_lab._panel.grip.paste_grip.pressed.emit()
+	_check("reuse buffer on third pistol without linked edits", HandGripProfiles.values(_lab._hand_draft, "wpn_hg_03", "Left") == expected.Left
+		and HandGripProfiles.values(_lab._hand_draft, "wpn_hg_03", "Right") == expected.Right and _lab._hand_buffer.hands == expected)
+	_lab._select_weapon(pm)
+	_lab._panel.grip.transfer_scope.select(2)
+	_lab._panel.grip.copy_grip.pressed.emit()
+	_check("copy right wrist only", _lab._hand_buffer.hands.size() == 1 and _lab._hand_buffer.hands.has("Right"))
+	_lab._select_weapon(glock)
+	var left_before: Dictionary = HandGripProfiles.values(_lab._hand_draft, "wpn_hg_02", "Left")
+	_lab._panel.grip.paste_grip.pressed.emit()
+	_check("right only paste leaves left untouched", HandGripProfiles.values(_lab._hand_draft, "wpn_hg_02", "Left") == left_before
+		and HandGripProfiles.values(_lab._hand_draft, "wpn_hg_02", "Right") == latest_source and _lab._panel.grip.sides.selected == 1)
+	_lab._select_weapon(pm)
+	_lab._panel.grip.sides.select(0)
+	_lab._refresh_hand_values()
+	_lab._panel.grip._position[0].value = 2.8
+	var left_source: Dictionary = HandGripProfiles.values(_lab._hand_draft, "wpn_hg_01", "Left")
+	_lab._panel.grip.transfer_scope.select(1)
+	_lab._panel.grip.copy_grip.pressed.emit()
+	_lab._select_weapon(glock)
+	_lab._panel.grip.paste_grip.pressed.emit()
+	_check("left only paste leaves right untouched", _lab._hand_buffer.hands.size() == 1 and HandGripProfiles.values(_lab._hand_draft, "wpn_hg_02", "Left") == left_source
+		and HandGripProfiles.values(_lab._hand_draft, "wpn_hg_02", "Right") == latest_source and _lab._panel.grip.sides.selected == 0)
+	_lab._select_weapon(_index("signal_launcher"))
+	unchanged = _lab._hand_draft.duplicate(true)
+	_check("left only buffer cannot alter one handed flare gun", not _lab._paste_hand_grip() and _lab._hand_draft == unchanged)
+	_lab._select_weapon(pm)
+	_lab._panel.grip.transfer_scope.select(0)
+	_lab._panel.grip.copy_grip.pressed.emit()
+	_lab._select_weapon(glock)
+	_lab._panel.grip.paste_grip.pressed.emit()
+	await _frames(45)
+	await _shot("06_pistol_grip_transfer")
+
+
+func _set_transfer_hand(side_index: int) -> void:
+	_lab._panel.grip.sides.select(side_index)
+	_lab._refresh_hand_values()
+	var position: Vector3 = Vector3(1.3, -0.8, 2.1) if side_index == 0 else Vector3(-0.7, 1.1, -0.4)
+	var rotation: Vector3 = Vector3(7, -5, 3) if side_index == 0 else Vector3(-3, 4, -2)
+	for axis: int in range(3):
+		_lab._panel.grip._position[axis].value = position[axis]
+		_lab._panel.grip._rotation[axis].value = rotation[axis]
+	for finger: int in range(5):
+		_lab._panel.grip.fingers.select(finger)
+		_lab._panel.grip._show_finger()
+		_lab._panel.grip._bend[0].value = 6 + finger * 2 + side_index
+		_lab._panel.grip._bend[1].value = 11 + finger + side_index
+		_lab._panel.grip._bend[2].value = -9 + finger * 2 - side_index
+		_lab._panel.grip._spread.value = 4 + finger + side_index
+		_lab._panel.grip._twist.value = -3 - finger - side_index
+
+
+func _press_transfer_button(button: Button) -> void:
+	if DisplayServer.get_name() == "headless":
+		button.pressed.emit()
+		return
+	for scroll: Node in _lab._panel.find_children("*", "ScrollContainer", true, false):
+		if scroll.is_ancestor_of(button):
+			(scroll as ScrollContainer).ensure_control_visible(button)
+	await _frames(3)
+	var point: Vector2 = button.get_global_rect().get_center()
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.position = point
+	Input.parse_input_event(motion)
+	await _frames(2)
+	var press: InputEventMouseButton = InputEventMouseButton.new()
+	press.position = point
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	Input.parse_input_event(press)
+	await _frames(2)
+	press = InputEventMouseButton.new()
+	press.position = point
+	press.button_index = MOUSE_BUTTON_LEFT
+	Input.parse_input_event(press)
+	await _frames(3)
 
 
 func _relative_wrist(sk: Skeleton3D, bone: int) -> Transform3D:

@@ -98,7 +98,7 @@ func _ready() -> void:
 	weapon_body.add_child(row)
 	_button(row, "Сбросить эту позу", func() -> void: reset_requested.emit())
 	_button(body, "Загрузить все сохранённые настройки", func() -> void: restore_requested.emit())
-	_button(body, "Скопировать значения выбранной вкладки", func() -> void: copy_requested.emit())
+	_button(body, "Скопировать значения как текст", func() -> void: copy_requested.emit())
 	_button(body, "В главное меню", func() -> void: back_requested.emit())
 	_label(body, "Сохранение — для этого компьютера.\nУ стены оружие отводится автоматически.", 14)
 	_button(frame, "Сохранить все настройки · Ctrl+S", func() -> void: save_requested.emit())
