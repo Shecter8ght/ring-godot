@@ -53,7 +53,24 @@ LOD2 (на 2 м), карты упакованы; Rendered (Cycles), сетка �
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/npc_kit/game_lp.py -- [lp] [uv] [bake] [lods] [deliver=<папка>]
 ```
 
+## Скелет и Godot (2026-10-24, `tools/npc_kit/game_rig.py`)
+
+Скелет `mixamorig_*` (52 кости) с ориентациями Persona один в один и суставами мародёра: сетки поставлены в rest-позу
+Persona (предплечья согнуты вперёд), веса — с исходника и переносом с полного тела, брюки оставлены целиком, AO брюк
+без куртки, модель поднята на 4,9 см (низ подошвы на полу). В Godot: `assets/models/characters/npc_marauder/npc_marauder.gltf`
+(карты рядом, настройки импорта — `tools/npc_kit/game_imports.py`), узел скелета «Human.rig» — как у Persona, иначе
+клипы не находят кости. Рост другой — модификатор `HipsHeight` (src/player/hips_height.gd) ставит таз из клипов под
+рост. Снаряжение на том же скелете — `assets/models/characters/npc_gear/<вещь>/` (`NpcGear`, места подсумков —
+`places.json`). Проверка — `tools/npc_rig_test.tscn` (без окна — проверки, с окном — снимки `docs/screens/npc_rig_*`,
+`-- gear` — снаряжение, `npc_gear_*`). Приём и грабли подробно — справка навыка `npc-character-gear`,
+«Скелет и Godot». Выдано: `Игровые/NPC_Marauder_v03_риг.blend`.
+
+```
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/npc_kit/game_rig.py -- character [export] [deliver=<папка>]
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/npc_kit/game_rig.py -- helmets armor_poor armor_mid armor_top belt daypack tourist raid pouches export
+```
+
 ## Дальше
 
-Ретопология снаряжения (тот же приём); затем скелет `mixamorig_*` с весами (перенос с MPFB по именам костей,
-проверка на клипах), экспорт и импорт в Godot, сцена NPC со сменной экипировкой (`docs/design/npc_modular_kit.md`).
+Сцена NPC со сменной экипировкой по типу врага и данные вещей (`docs/design/npc_modular_kit.md` — предложение),
+мародёр в `scenes/ai/marauder.tscn` вместо Persona, переключение LOD по дальности.

@@ -333,6 +333,14 @@ tools/godot.cmd --headless res://tools/shot_layers_test.tscn  # слои дис�
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/npc_kit/<этап>.py [-- render]
                                                               # NPC «мародёр» одеждой симуляцией ткани (docs/assets/npc_marauder_v01.md): body → boots → pants →
                                                               # jacket → balaclava → assemble → details → deliver -- <папка>; схема сменной экипировки — docs/design/npc_modular_kit.md
+# Игровая версия NPC и снаряжения (blender … --python): tools/npc_kit/game_lp.py -- lp uv bake lods (мародёр: ретопология, карты, LOD),
+#   game_gear.py -- <вещь> (шлемы, брони, пояс, рюкзаки), game_pouches.py; затем скелет mixamorig_* как у Persona и экспорт в Godot:
+#   game_rig.py -- character export [deliver=<папка>] → assets/models/characters/npc_marauder; game_rig.py -- helmets armor_poor armor_mid
+#   armor_top belt daypack tourist raid pouches export → assets/models/characters/npc_gear (места подсумков — places.json);
+#   --import, python -X utf8 tools/npc_kit/game_imports.py, --import. Справка — навык npc-character-gear («Скелет и Godot»).
+tools/godot.cmd --headless res://tools/npc_rig_test.tscn    # мародёр v03 на скелете Persona: кости и rest как у Persona, те же клипы — та же поза, таз под рост (HipsHeight),
+                                                              # ступни на полу, лёжа у земли; -- gear — снаряжение и подсумки надеваются (NpcGear);
+                                                              # с окном (--windowed --resolution 1600x900) -- shots — снимки npc_rig_* (Persona слева, мародёр справа), -- gear shots — npc_gear_*
 ```
 
 Перед сетевыми тестами — убить висящие процессы Godot: старый хост держит порт 7777, и клиент

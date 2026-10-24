@@ -49,6 +49,7 @@ var _model: Node3D
 var _tree: AnimationTree
 var _skeleton: Skeleton3D
 var _motion: BodyMotion
+var _hips_height: HipsHeight
 var _last_position: Vector3
 ## Скорость движения (_physics_process), сглаженная по времени. Работает и для чужих тел.
 var _vel: Vector3 = Vector3.ZERO
@@ -154,6 +155,11 @@ func _ready() -> void:
 	_motion.model = _model
 	_skeleton.add_child(_motion)
 	_skeleton.move_child(_motion, 0)
+	# высота таза под рост этого тела (другое тело на скелете Persona) — первым, до живости и ИК
+	_hips_height = HipsHeight.new()
+	_hips_height.name = "HipsHeight"
+	_skeleton.add_child(_hips_height)
+	_skeleton.move_child(_hips_height, 0)
 	_last_position = _actor.global_position
 	_torso_yaw = _body.global_rotation.y
 	_legs_yaw = _torso_yaw

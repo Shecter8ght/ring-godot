@@ -76,8 +76,13 @@ const PROGRAMS := {
 	],
 }
 
+const PERSONA_MODEL := "res://assets/models/characters/persona_animated.glb"
+
 var program: String = "circle"
 var legacy: bool = false
+## Модель фигуры: Persona или другое тело на том же скелете mixamorig_* (мародёр v03 —
+## res://assets/models/characters/npc_marauder/npc_marauder.gltf); ставится до добавления в дерево.
+var model: String = PERSONA_MODEL
 ## Время программы с запуска, с (по шагам физики: при тормозах первых кадров идёт медленнее часов).
 var clock: float = 0.0
 var weapon_id: String = "wpn_ar_01"
@@ -102,14 +107,19 @@ func _init() -> void:
 	_body = Node3D.new()
 	_body.name = "Body"
 	add_child(_body)
-	var persona: Node3D = (load("res://assets/models/characters/persona_animated.glb") as PackedScene).instantiate() as Node3D
-	persona.name = "Persona"
-	_body.add_child(persona)
 	_animator = CharacterAnimator.new()
 	_animator.name = "CharacterAnimator"
 	add_child(_animator)
 	collision_layer = 0
 	collision_mask = 0
+
+
+func _enter_tree() -> void:
+	# модель — до _ready аниматора (он ищет Body/Persona), а сама фигура может быть создана до выбора модели
+	if _body.get_node_or_null("Persona") == null:
+		var persona: Node3D = (load(model) as PackedScene).instantiate() as Node3D
+		persona.name = "Persona"
+		_body.add_child(persona)
 
 
 func _ready() -> void:

@@ -2,7 +2,11 @@
 
 Аудит 2026-09-30, дерево анимации и живость поверх клипов — 2026-10-19. Один персонаж на всех: игрок,
 напарники и мародёры — модель Persona (`assets/models/characters/persona_animated.glb`, скелет Mixamo
-`mixamorig_*`, 52 кости).
+`mixamorig_*`, 52 кости). С 2026-10-24 на том же скелете есть второе тело — мародёр v03
+(`assets/models/characters/npc_marauder/npc_marauder.gltf`, `tools/npc_kit/game_rig.py`): те же кости с теми же
+rest-ориентациями, свой рост (таз из клипов под рост ставит модификатор `HipsHeight`, первый на скелете), узел
+скелета тоже «Human.rig» — дорожки клипов адресуют кости этим путём. Снаряжение на него — `NpcGear`
+(src/ai/npc_gear.gd), проверка и снимки — `tools/npc_rig_test.tscn`; в `scenes/ai/marauder.tscn` пока Persona.
 
 ## Схема
 

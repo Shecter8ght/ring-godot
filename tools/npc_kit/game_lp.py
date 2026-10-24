@@ -267,9 +267,11 @@ def stage_lp() -> None:
     snap_to(pt, pt_base)
     hem = min((src["Jacket"].matrix_world @ v.co).z for v in src["Jacket"].data.vertices)
     boot_top = max((src["Boots_L"].matrix_world @ v.co).z for v in src["Boots_L"].data.vertices)
-    cut_hi, cut_lo = hem + 0.08, boot_top - 0.06
-    gone = delete_faces(pt, lambda f, mw: all((mw @ v.co).z > cut_hi or (mw @ v.co).z < cut_lo for v in f.verts))
-    kc.log(f"  брюки: низ куртки {hem:.3f}, верх ботинка {boot_top:.3f} — убрано {gone} граней")
+    # верх брюк под курткой остаётся: в наклоне и приседе подол поднимается, и обрезанные брюки давали дыру
+    # (проверка на клипах 2026-10-24, tools/npc_rig_test); убирается только скрытое в ботинках
+    cut_lo = boot_top - 0.06
+    gone = delete_faces(pt, lambda f, mw: all((mw @ v.co).z < cut_lo for v in f.verts))
+    kc.log(f"  брюки: низ куртки {hem:.3f} (верх брюк оставлен), верх ботинка {boot_top:.3f} — убрано {gone} граней")
     for side in ("L", "R"):
         pk = dup(src[f"Pants_Pocket_{side}"], f"W_Pocket_{side}", col, keep_mods=True)
         apply_mods(pk)
@@ -504,10 +506,10 @@ def reveal(o: bpy.types.Object) -> None:
 
 
 def bake_set(items: list[tuple[bpy.types.Object, tuple[str, ...], int, float, str]], maps: Path,
-             ao_distance: float = 0.08) -> dict[str, bpy.types.Material]:
+             ao_distance: float = 0.08, ao_hide: dict[str, tuple[str, ...]] | None = None) -> dict[str, bpy.types.Material]:
     """Запекание игровых деталей с исходника: items — (игровая деталь, исходники, размер карты, луч м, имя карт).
     Цвет и металл/шероховатость — EMIT каналов стека (route), нормали — касательные; AO — по самим игровым деталям
-    (касания соседних деталей), исходники в нём не участвуют. Карты: <имя>_{color,normal,orm}.png; материал
+    (касания соседних деталей, кроме ao_hide[деталь]), исходники в нём не участвуют. Карты: <имя>_{color,normal,orm}.png; материал
     детали — GAME_<деталь> с этими картами (просмотр как в Godot)."""
     import numpy as np
     S = bpy.context.scene
@@ -559,8 +561,15 @@ def bake_set(items: list[tuple[bpy.types.Object, tuple[str, ...], int, float, st
         o.select_set(True)
         bpy.context.view_layer.objects.active = o
         S.cycles.samples = SAMPLES["ao"]
+        # соседи, которых в AO этой детали не должно быть: куртка над брюками — на анимации подол поднимается,
+        # и затенённый под ним верх брюк выглядел дырой
+        skip = [bpy.data.objects[n] for n in (ao_hide or {}).get(o.name, ()) if n in bpy.data.objects]
+        for s in skip:
+            s.hide_render = True
         bpy.ops.object.bake(type="AO", use_selected_to_active=False, margin=max(4, size // 256))
-        kc.log("  AO", o.name)
+        for s in skip:
+            s.hide_render = False
+        kc.log("  AO", o.name, ("без " + ", ".join(s.name for s in skip)) if skip else "")
     for o in hidden:
         o.hide_render = False
     maps.mkdir(parents=True, exist_ok=True)
@@ -598,7 +607,7 @@ def stage_bake() -> None:
     import ucup  # noqa: F401  (стеки UCUPaint исходника)
     bpy.ops.wm.open_mainfile(filepath=str(GAME))
     items = [(bpy.data.objects[n], srcs, size, ray, n[2:].lower()) for n, (srcs, size, ray) in PARTS.items()]
-    mats = bake_set(items, MAPS)
+    mats = bake_set(items, MAPS, ao_hide={"G_Pants": ("G_Jacket",)})
     bpy.data.objects["G_Boot_R"].data.materials.clear()
     bpy.data.objects["G_Boot_R"].data.materials.append(mats["G_Boot"])
     simple_materials()
