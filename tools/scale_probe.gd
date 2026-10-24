@@ -1,11 +1,13 @@
 extends Node3D
 ## Стенд масштаба (вопрос владельца 2026-10-24: «реальные размеры в игре выглядят мелкими»).
-## Три одинаковых набора рядом: A — всё 1:1; B — предметы 1:1, проходы и помещения × 1,2 (ширина и высота
-## проёмов, комнат, коридора, прохода между стеллажами, тротуара); C — всё × 1,3. В каждом: кусок улицы
+## Пять одинаковых наборов рядом: A — всё 1:1; B — предметы 1:1, проходы и помещения × 1,2 (ширина проёмов,
+## комнат, коридора, прохода между стеллажами, тротуара; высоты × 1,1); C — всё × 1,3; D — проходы и помещения
+## × 1,3 (как в C, высоты тоже), предметы 1:1 (владелец 2026-10-24 склоняется к этому); E — как D, но высоты
+## (потолок, проём) × 1,15 — предложение агента. В каждом: кусок улицы
 ## (тротуар с бордюром, фонарь, ларёк, остановка, лавка, бетонный барьер, конус, машина), комната с дверью,
 ## коридор, два стеллажа супермаркета, лестница и фигура ростом 1,75 м для сравнения.
 ## Клавиши: F1 / F2 / F3 — поле зрения 75 / 80 / 90° по горизонтали (не сохраняется в настройки),
-## F5 / F6 / F7 — перенестись к набору A / B / C. Настоящий игрок, камера и скорость игры.
+## F5 … F9 — перенестись к набору A … E. Настоящий игрок, камера и скорость игры.
 ## godot --windowed --resolution 1600x900 res://tools/scale_probe.tscn
 ## SCALE_PROBE_SHOTS=1 — снимки каждого набора при 75 и 90° → docs/screens/scale_probe_*.png, выход.
 
@@ -30,10 +32,13 @@ func _ready() -> void:
 		"jersey": _mat(Color(0.7, 0.68, 0.62)), "cone": _mat(Color(0.95, 0.45, 0.15)), "man": _mat(Color(0.25, 0.45, 0.7)),
 		"sign": _mat(Color(0.9, 0.85, 0.3)), "bench": _mat(Color(0.4, 0.3, 0.2)),
 	}
-	# A: всё 1:1; B: предметы 1:1, проходы × 1,2; C: всё × 1,3
-	_station(Vector3(-PITCH, 0, 0), 1.0, 1.0, "A — всё 1:1 (реальные размеры)")
-	_station(Vector3(0, 0, 0), 1.0, 1.2, "B — предметы 1:1, проходы и помещения × 1,2")
-	_station(Vector3(PITCH, 0, 0), 1.3, 1.3, "C — всё × 1,3")
+	# A: всё 1:1; B: предметы 1:1, проходы × 1,2 (высоты × 1,1); C: всё × 1,3; D: проходы × 1,3, предметы 1:1;
+	# E: проходы × 1,3, высоты × 1,15, предметы 1:1
+	_station(Vector3(-2.0 * PITCH, 0, 0), 1.0, 1.0, 1.0, "A — всё 1:1 (реальные размеры)")
+	_station(Vector3(-1.0 * PITCH, 0, 0), 1.0, 1.2, 1.1, "B — предметы 1:1, проходы × 1,2, высоты × 1,1")
+	_station(Vector3(0.0, 0, 0), 1.3, 1.3, 1.3, "C — всё × 1,3")
+	_station(Vector3(1.0 * PITCH, 0, 0), 1.0, 1.3, 1.3, "D — предметы 1:1, проходы и помещения × 1,3")
+	_station(Vector3(2.0 * PITCH, 0, 0), 1.0, 1.3, 1.15, "E — предметы 1:1, проходы × 1,3, высоты × 1,15")
 	_hud()
 	_set_fov(90.0)
 	if OS.get_environment("SCALE_PROBE_SHOTS") == "1":
@@ -44,8 +49,8 @@ func _exit_tree() -> void:
 	Settings.fov_h = _fov_saved
 
 
-## Один набор. ok — множитель предметов, sp — множитель проходов и помещений.
-func _station(o: Vector3, ok: float, sp: float, title: String) -> void:
+## Один набор. ok — множитель предметов, sp — ширина проходов и помещений, hk — их высота (потолок, проём).
+func _station(o: Vector3, ok: float, sp: float, hk: float, title: String) -> void:
 	_stations.append(o + Vector3(0, 0, 6.0))
 	_origins.append(o)
 	# --- улица (z от 0 к −8): проезжая часть, бордюр, тротуар
@@ -68,9 +73,7 @@ func _station(o: Vector3, ok: float, sp: float, title: String) -> void:
 	# --- комната 4×5, потолок 2,7, дверь 0,9×2,1 в стене к улице (z 4…9)
 	var rw := 4.0 * sp
 	var rd := 5.0 * sp
-	var rh := 2.7 * (sp if sp < 1.25 else 1.3) if sp > 1.0 else 2.7
-	if sp > 1.0 and ok == 1.0:
-		rh = 2.7 * 1.1          # у B потолок × 1,1, не × 1,2
+	var rh := 2.7 * hk
 	var rc := o + Vector3(-6, 0, 4.0 * sp + rd * 0.5)
 	var t := 0.15
 	_box("floor", rc + Vector3(0, -0.02, 0), Vector3(rw + 2 * t, 0.04, rd + 2 * t))
@@ -78,11 +81,9 @@ func _station(o: Vector3, ok: float, sp: float, title: String) -> void:
 	_box("wall", rc + Vector3(-rw * 0.5 - t * 0.5, rh * 0.5, 0), Vector3(t, rh, rd + 2 * t))
 	_box("wall", rc + Vector3(rw * 0.5 + t * 0.5, rh * 0.5, 0), Vector3(t, rh, rd + 2 * t))
 	_box("wall", rc + Vector3(0, rh * 0.5, rd * 0.5 + t * 0.5), Vector3(rw + 2 * t, rh, t))
-	# стена к улице с дверью: ширина 0,9 × высота 2,1 (у B × 1,2 — 1,08 × 2,3; у C — 1,17 × 2,73)
+	# стена к улице с дверью: ширина 0,9 × sp, высота 2,1 × hk (B — 1,08 × 2,31; C и D — 1,17 × 2,73; E — 1,17 × 2,42)
 	var dw := 0.9 * sp
-	var dh := 2.1 * (sp if sp > 1.0 else 1.0)
-	if sp > 1.0 and ok == 1.0:
-		dh = 2.3
+	var dh := 2.1 * hk
 	_wall_with_door(rc + Vector3(0, 0, -rd * 0.5 - t * 0.5), rw + 2 * t, rh, t, dw, dh)
 	_lamp(rc + Vector3(0, rh - 0.3, 0))
 	# внутри: стол и шкаф в реальных размерах
@@ -96,8 +97,8 @@ func _station(o: Vector3, ok: float, sp: float, title: String) -> void:
 	_box("wall", cc + Vector3(cw * 0.5 + t * 0.5, rh * 0.5, 0), Vector3(t, rh, 6.0))
 	_box("wall", cc + Vector3(0, rh + t * 0.5, 0), Vector3(cw + 2 * t, t, 6.0))
 	_lamp(cc + Vector3(0, rh - 0.3, 0))
-	# --- стеллажи супермаркета: 0,6 × 4 × 1,8 (у B проход 1,6 × 1,3 = 2,1 — как в магазинах с широкими рядами)
-	var aisle := 1.6 * (1.3 if sp > 1.0 and ok == 1.0 else sp)
+	# --- стеллажи супермаркета: 0,6 × 4 × 1,8 (× ok), проход 1,6 × sp
+	var aisle := 1.6 * sp
 	var sc := o + Vector3(5, 0, 7.0 * sp)
 	_box("shelf", sc + Vector3(-aisle * 0.5 - 0.3 * ok, 0.9 * ok, 0), Vector3(0.6 * ok, 1.8 * ok, 4.0 * ok))
 	_box("shelf", sc + Vector3(aisle * 0.5 + 0.3 * ok, 0.9 * ok, 0), Vector3(0.6 * ok, 1.8 * ok, 4.0 * ok))
@@ -205,7 +206,7 @@ func _set_fov(h: float) -> void:
 func _update_label() -> void:
 	if _label:
 		_label.text = ("Стенд масштаба · поле зрения %d° по горизонтали (F1 — 75°, F2 — 80°, F3 — 90°)\n"
-			+ "F5 / F6 / F7 — к набору A / B / C · A — всё 1:1 · B — предметы 1:1, проходы × 1,2 · C — всё × 1,3\n"
+			+ "F5 … F9 — к набору A … E · A всё 1:1 · B предметы 1:1, проходы × 1,2 · C всё × 1,3 · D предметы 1:1, проходы × 1,3 · E как D, высоты × 1,15\n"
 			+ "глаз %.2f м, шаг %.2f м/с, бег %.1f м/с") % [int(Settings.fov_h), Balance.ADS_EYE["stand"],
 			Balance.PLAYER_WALK_SPEED, Balance.PLAYER_SPRINT_SPEED]
 
@@ -226,6 +227,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_teleport(1)
 		KEY_F7:
 			_teleport(2)
+		KEY_F8:
+			_teleport(3)
+		KEY_F9:
+			_teleport(4)
 
 
 func _teleport(i: int) -> void:
@@ -239,8 +244,8 @@ func _shots() -> void:
 		await get_tree().process_frame
 	var pl := get_tree().get_first_node_in_group("players") as Player
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
-	for i in range(3):
-		var tag: String = ["a", "b", "c"][i]
+	for i in range(5):
+		var tag: String = ["a", "b", "c", "d", "e"][i]
 		var o := _origins[i]
 		for fov: float in [75.0, 90.0]:
 			_set_fov(fov)

@@ -52,12 +52,12 @@ albedo_color = Color(0.42, 0.41, 0.39, 1)
 roughness = 0.95
 
 [sub_resource type="PlaneMesh" id="mesh_ground"]
-size = Vector2(160, 80)
+size = Vector2(240, 80)
 subdivide_width = 4
 subdivide_depth = 4
 
 [sub_resource type="BoxShape3D" id="shape_ground"]
-size = Vector3(160, 1, 80)
+size = Vector3(240, 1, 80)
 
 [node name="ScaleProbe" type="Node3D"]
 script = ExtResource("3_range")
@@ -87,7 +87,7 @@ shape = SubResource("shape_ground")
 [node name="Props" type="Node3D" parent="."]
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.05, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0.05, -4)
 
 [node name="CameraRig" parent="." instance=ExtResource("2_rig")]
 target_path = NodePath("../Player")
