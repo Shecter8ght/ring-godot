@@ -61,6 +61,14 @@ var weapon: String = ""
 ## шлем, гарнитура; запасные магазины (россыпь — для встроенных) и аптечки. Выпадает при смерти
 ## тем, что осталось (патроны тратятся по-настоящему).
 var equipment: Dictionary = {}
+## Внешность по снаряжению (NpcOutfit.describe, JSON): броня, шлем, рюкзак, подсумки. Считает хост после
+## выкладки и синхронизирует; узел NpcOutfit одевает модель у всех peer одинаково.
+var outfit: String = "":
+	set(value):
+		outfit = value
+		var o := get_node_or_null("NpcOutfit") as NpcOutfit
+		if o:
+			o.apply(value)
 var spare: Array = []
 var meds: Array = []
 ## Какое оружие в руках: primary / secondary.
@@ -235,6 +243,8 @@ func _ready() -> void:
 	if loadout_id == "":
 		loadout_id = loadout_for(archetype, _rng)
 	_equip_loadout()
+	if is_multiplayer_authority():
+		_refresh_outfit()
 	_use("primary" if equipment.has("primary") else "secondary")
 	_grenades = int(Balance.AI_GRENADE.count)
 	_health.max_hp = Balance.MARAUDER_HP * float(_arch.hp)
@@ -395,6 +405,28 @@ func _equip_loadout() -> void:
 			meds.append({"id": String(m[0]), "n": _rng.randi_range(int(m[2][0]), int(m[2][1]))})
 
 
+## Хост: описать внешность по снаряжению (забрало — по выкладке, data/loadouts.json "visor").
+func _refresh_outfit() -> void:
+	outfit = NpcOutfit.describe(equipment, spare, bool(WeaponDb.loadout(loadout_id).get("visor", false)))
+
+
+## Чужой отряд одет в едином стиле (схема npc_gear_by_type.md п. 3): броня, шлем и рюкзак — как у ведущего,
+## если такая вещь вообще бывает в своей выкладке; нет у ведущего — нет и у бойца. Хост, при сборе отряда.
+func adopt_outfit(leader: Marauder) -> void:
+	var lo := WeaponDb.loadout(loadout_id)
+	for slot: String in ["armor", "helmet", "backpack"]:
+		var allowed: Array = []
+		for pair: Variant in lo.get(slot, []):
+			allowed.append(String((pair as Array)[0]))
+		if leader.equipment.has(slot):
+			var id := String((leader.equipment[slot] as Dictionary).get("id", ""))
+			if allowed.has(id):
+				equipment[slot] = (leader.equipment[slot] as Dictionary).duplicate(true)
+		elif allowed.has(""):
+			equipment.erase(slot)
+	_refresh_outfit()
+
+
 ## Взвешенный выбор из [[id, вес], …]; "" — ничего.
 func _pick(list: Array) -> String:
 	var total := 0.0
@@ -543,7 +575,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:look_pitch", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq"]:
+	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:look_pitch", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq", ".:outfit"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)

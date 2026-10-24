@@ -346,6 +346,9 @@ tools/godot.cmd --headless res://tools/shot_layers_test.tscn  # слои дис�
 tools/godot.cmd --headless res://tools/npc_rig_test.tscn    # мародёр v03 на скелете Persona: кости и rest как у Persona, те же клипы — та же поза, таз под рост (HipsHeight),
                                                               # ступни на полу, лёжа у земли; -- gear — снаряжение и подсумки надеваются (NpcGear);
                                                               # с окном (--windowed --resolution 1600x900) -- shots — снимки npc_rig_* (Persona слева, мародёр справа), -- gear shots — npc_gear_*
+tools/godot.cmd --headless res://tools/npc_outfit_test.tscn # внешность ботов по снаряжению (NpcOutfit): ряд типов на новом теле — броня, шлем, рюкзак по посадке,
+                                                              # забрало у штурмовика «Периметра», подсумки по магазинам, LOD по дальности, чужой отряд в одном стиле;
+                                                              # с окном -- shots — снимки npc_outfit_* (ряд спереди и сзади, крупно, чужой отряд)
 ```
 
 Перед сетевыми тестами — убить висящие процессы Godot: старый хост держит порт 7777, и клиент

@@ -6,7 +6,9 @@
 (`assets/models/characters/npc_marauder/npc_marauder.gltf`, `tools/npc_kit/game_rig.py`): те же кости с теми же
 rest-ориентациями, свой рост (таз из клипов под рост ставит модификатор `HipsHeight`, первый на скелете), узел
 скелета тоже «Human.rig» — дорожки клипов адресуют кости этим путём. Снаряжение на него — `NpcGear`
-(src/ai/npc_gear.gd), проверка и снимки — `tools/npc_rig_test.tscn`; в `scenes/ai/marauder.tscn` пока Persona.
+(src/ai/npc_gear.gd), узел внешности по снаряжению — `NpcOutfit` (src/ai/npc_outfit.gd, LOD сеток по дальности —
+`CHARACTER_LOD.mesh_m`), проверка и снимки — `tools/npc_rig_test.tscn`, `tools/npc_outfit_test.tscn`. С 2026-10-24
+**мародёры (`scenes/ai/marauder.tscn`) ходят на новом теле**; игрок и напарники — на Persona.
 
 ## Схема
 

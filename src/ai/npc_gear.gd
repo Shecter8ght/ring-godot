@@ -4,34 +4,52 @@ class_name NpcGear
 ## переносится под Skeleton3D персонажа (кости те же — по именам и по порядку), её собственный скелет
 ## выбрасывается. Подсумки — без скелета: BoneAttachment3D в месте брони (places.json: кость, положение и
 ## поворот в пространстве скелета; у места +X — поперёк, −Z — наружу от брони, +Y — вверх).
+## Сцена каждой вещи раскрывается один раз (library): два десятка ботов не грузят glTF заново.
 
 const GEAR_DIR := "res://assets/models/characters/npc_gear/"
 const PLACES := GEAR_DIR + "places.json"
 
 static var _places: Dictionary = {}
+## Вещь → {имя сетки: {mesh, skin, materials}}.
+static var _lib: Dictionary = {}
+
+
+## Разобранный glTF вещи: сетки, скины и материалы по именам узлов.
+static func library(item: String) -> Dictionary:
+	if _lib.has(item):
+		return _lib[item]
+	var out: Dictionary = {}
+	var scene := load(GEAR_DIR + item + "/" + item + ".gltf") as PackedScene
+	if scene == null:
+		push_error("NpcGear: нет вещи %s" % item)
+		_lib[item] = out
+		return out
+	var root: Node = scene.instantiate()
+	for n: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var m := n as MeshInstance3D
+		var mats: Array = []
+		for i in range(m.get_surface_override_material_count()):
+			mats.append(m.get_surface_override_material(i))
+		out[m.name] = {"mesh": m.mesh, "skin": m.skin, "materials": mats}
+	root.free()
+	_lib[item] = out
+	return out
+
+
+static func has_mesh(item: String, mesh_name: String) -> bool:
+	return library(item).has(mesh_name)
 
 
 ## Сетка вещи со скином — под скелет персонажа. mesh_name — имя узла в glTF (G_Helmet_Mid, G_Raid_Poor…).
 static func attach_skinned(sk: Skeleton3D, item: String, mesh_name: String) -> MeshInstance3D:
-	var scene := load(GEAR_DIR + item + "/" + item + ".gltf") as PackedScene
-	if scene == null:
-		push_error("NpcGear: нет вещи %s" % item)
-		return null
-	var root: Node = scene.instantiate()
-	var src := root.find_child(mesh_name, true, false) as MeshInstance3D
-	if src == null:
+	var rec: Dictionary = library(item).get(mesh_name, {})
+	if rec.is_empty():
 		push_error("NpcGear: в %s нет сетки %s" % [item, mesh_name])
-		root.free()
 		return null
-	var mi := MeshInstance3D.new()
-	mi.name = mesh_name
-	mi.mesh = src.mesh
-	mi.skin = src.skin
-	for i in range(src.get_surface_override_material_count()):
-		mi.set_surface_override_material(i, src.get_surface_override_material(i))
+	var mi := _instance(rec, mesh_name)
+	mi.skin = rec.skin
 	sk.add_child(mi)
 	mi.skeleton = NodePath("..")
-	root.free()
 	return mi
 
 
@@ -64,25 +82,24 @@ static func place(sk: Skeleton3D, tier: String, n: int) -> Node3D:
 ## (сдвиг по X), дно на нулевой высоте, наружу — −Z после экспорта: по X — в середину места, дно — в точку
 ## места, задняя стенка (max Z) — к броне.
 static func attach_pouch(holder: Node3D, mesh_name: String) -> MeshInstance3D:
-	var scene := load(GEAR_DIR + "pouches/pouches.gltf") as PackedScene
-	if scene == null:
-		push_error("NpcGear: нет подсумков")
-		return null
-	var root: Node = scene.instantiate()
-	var src := root.find_child(mesh_name, true, false) as MeshInstance3D
-	if src == null:
+	var rec: Dictionary = library("pouches").get(mesh_name, {})
+	if rec.is_empty():
 		push_error("NpcGear: нет подсумка %s" % mesh_name)
-		root.free()
 		return null
+	var mi := _instance(rec, mesh_name)
+	holder.add_child(mi)
+	var aabb: AABB = (rec.mesh as Mesh).get_aabb()
+	mi.position = Vector3(-aabb.get_center().x, 0.0, -aabb.end.z)
+	return mi
+
+
+static func _instance(rec: Dictionary, mesh_name: String) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.name = mesh_name
-	mi.mesh = src.mesh
-	for i in range(src.get_surface_override_material_count()):
-		mi.set_surface_override_material(i, src.get_surface_override_material(i))
-	holder.add_child(mi)
-	var aabb: AABB = src.mesh.get_aabb()
-	mi.position = Vector3(-aabb.get_center().x, 0.0, -aabb.end.z)
-	root.free()
+	mi.mesh = rec.mesh
+	var mats: Array = rec.materials
+	for i in range(mats.size()):
+		mi.set_surface_override_material(i, mats[i])
 	return mi
 
 
@@ -98,3 +115,9 @@ static func _place_record(tier: String, n: int) -> Dictionary:
 		if int(rec.n) == n:
 			return rec
 	return {}
+
+
+## Сколько мест у брони по places.json (0 — нет мест).
+static func places_count(tier: String) -> int:
+	_place_record(tier, 1)
+	return ((_places.get(tier, {}) as Dictionary).get("places", []) as Array).size()

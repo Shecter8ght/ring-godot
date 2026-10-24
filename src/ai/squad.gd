@@ -22,6 +22,9 @@ var _calm_since: int = 0
 func add(m: Marauder) -> void:
 	members.append(m)
 	m.squad = self
+	# чужой отряд — команда: броня, шлем и рюкзак как у ведущего (мародёры одеты вразнобой)
+	if m.faction == "rival" and members.size() > 1 and is_instance_valid(members[0]) and m.is_inside_tree():
+		m.adopt_outfit(members[0])
 
 
 func alive() -> Array[Marauder]:
