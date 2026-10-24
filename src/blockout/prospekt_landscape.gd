@@ -46,7 +46,9 @@ func rebuild() -> void:
 	_columns(g)
 	_stairs(g)
 	_ramps(g)
+	_beams(g)
 	_markers(g)
+	_loot(g)
 	_boundary(g)
 	g.finish()
 	_lamps()
@@ -152,6 +154,52 @@ func _ramps(g: RefCounted) -> void:
 		var cs: CollisionShape3D = CollisionShape3D.new()
 		cs.shape = shape
 		(g.body as StaticBody3D).add_child(cs)
+
+
+## Наклонные балки (решётка фасада банка, раскосы): [от, до, ширина, толщина, материал].
+func _beams(g: RefCounted) -> void:
+	for b: Array in plan.get("beams", []):
+		var a: Array = b[0]
+		var c: Array = b[1]
+		g.beam(Vector3(float(a[0]), float(a[1]), float(a[2])), Vector3(float(c[0]), float(c[1]), float(c[2])),
+			float(b[2]), float(b[3]), String(b[4]))
+
+
+## Места лута (замечание владельца 2026-10-24, п. 8): маркер по виду места, цвет — по ценности. Это схема для
+## левел-дизайна — настоящие контейнеры ставит рейдовая сборка; в залах StudyBuilding свои места лута.
+const LOOT_SIZE: Dictionary = {
+	"crate": Vector3(0.8, 0.5, 0.6), "backpack": Vector3(0.4, 0.5, 0.3), "suitcase": Vector3(0.6, 0.22, 0.42),
+	"body": Vector3(0.55, 0.3, 1.8), "car": Vector3(0.35, 0.35, 0.35), "register": Vector3(0.5, 0.35, 0.4),
+	"safe": Vector3(0.7, 0.9, 0.6), "cabinet": Vector3(0.9, 1.6, 0.45), "loose": Vector3(0.25, 0.12, 0.25),
+	"cells": Vector3(1.2, 0.5, 0.3), "weapon": Vector3(1.2, 0.35, 0.45), "med": Vector3(0.5, 0.3, 0.35)}
+const LOOT_TIER: Dictionary = {"common": "loot_common", "med": "loot_med", "good": "loot_good", "weapon": "loot_weapon", "quest": "spawn"}
+
+
+func _loot(g: RefCounted) -> void:
+	for l: Dictionary in plan.get("loot", []):
+		var at: Array = l.at
+		var size: Vector3 = LOOT_SIZE.get(String(l.kind), Vector3(0.4, 0.4, 0.4)) as Vector3
+		g.box(Vector3(float(at[0]), float(at[1]) + size.y * 0.5, float(at[2])), size,
+			String(LOOT_TIER.get(String(l.get("tier", "common")), "loot_common")), false, deg_to_rad(float(l.get("yaw", 0.0))))
+
+
+## Свои цвета карты: маркеры лута по ценности (светятся, чтобы читались в тени), граффити, хаки, стекло.
+const EXTRA_COLORS: Dictionary = {"loot_common": Color("c8b48a"), "loot_med": Color("4fae63"), "loot_good": Color("e3b23c"),
+	"loot_weapon": Color("c4493b"), "graffiti": Color("7a6f8f"), "olive": Color("5b6243"), "glass": Color("5d6f74"),
+	"wood": Color("7a6046"), "paint_blue": Color("24477a")}
+
+
+func _palette() -> Dictionary:
+	var result: Dictionary = super()
+	for key: String in EXTRA_COLORS:
+		var m: StandardMaterial3D = StandardMaterial3D.new()
+		m.albedo_color = EXTRA_COLORS[key]
+		m.roughness = 0.6
+		if key.begins_with("loot"):
+			m.emission_enabled = true
+			m.emission = m.albedo_color * 0.35
+		result[key] = m
+	return result
 
 
 ## Аварийный свет паркинга и перехода (вне игры питания нет — просто лампы).

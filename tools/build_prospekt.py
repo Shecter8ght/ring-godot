@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Серый блокаут карты «Проспект» (docs/design/prospekt_map.md), редакция 3 — улица с поворотом.
+"""Серый блокаут карты «Проспект» (docs/design/prospekt_map.md), редакция 4 — улица с поворотом.
 
     python -X utf8 tools/build_prospekt.py
       → data/blockouts/prospekt.json и scenes/levels/prospekt_study.tscn (перезаписываются целиком)
@@ -12,6 +12,14 @@
 настоящим въездом; карту увеличить и сделать «кишкообразной» — проспект идёт прямо и плавно поворачивает на 90°
 направо; добавить окружение по Ready or Not и Escape from Tarkov («Эпицентр»); модели комплекта RING_Urban_95
 владелец снял с блокаута (не текстурированы и не готовы как лоу-поли) — на их местах серые формы MallFiller и коробки.
+
+Замечания владельца 2026-10-24 к блокауту 3 (редакция 4): банк — отдельное трёхэтажное здание по мотивам кинотеатра
+«Родина» (Streets of Tarkov) с хранилищем на −1, подкопом из паркинга и металлическим забором; сквер — до края карты,
+разнообразный (площадь с памятником, подпорные стенки, площадка, баскетбол, лиственные деревья); стройку — за «Ярус»,
+каркас 9 этажей с краном; выход — тоннель на месте южного тупика, над ним железная дорога с упавшим составом (вагоны
+и в сквере); пункт эвакуации у «Вершины» — до края карты с армейскими палатками; жилые дома глухие, магазины в два
+этажа, у некоторых выход на крышу с лутом; обзор каждые 50–90 м чем-то перебит; места лута; грузовые контейнеры;
+наполнить «Ярус» и банк; паркинг −1 — по нормам (ряды мест, проезды, лестницы и колонны не мешают движению).
 
 Координаты игровые: x — восток, z — юг (север = −z). Проспект: западное плечо по z = 0 от кордона (x = −210)
 до x = 0, поворот направо радиусом 55 вокруг (0, 55), южное плечо по x = 55 от z = 55 до тупика у z = 275.
@@ -47,19 +55,22 @@ CR = 55.0                      # радиус поворота
 CX, CZ = 0.0, 55.0             # центр поворота
 XS = CX + CR                   # ось южного плеча x = 55
 ZS_END = 275.0
+EMB_Z0, EMB_Z1 = 248.0, 258.0  # насыпь железной дороги на юге: подошва откоса и бровка
 
 rng = random.Random(24)
 
 plan: dict = {
-    "version": 3,
+    "version": 4,
     "purpose": "Карта «Проспект»: серый блокаут — проспект с поворотом на 90° направо, пролог и короткие рейды",
     "north": "-Z",
     "scale": {"width_k": WK, "height_k": HK, "story_flat": STORY_FLAT, "door_h": DOOR_H},
     "bounds": [-232.0, -126.0, 176.0, 290.0],
-    "boundary": [[XW, -112.0], [160.0, -112.0], [160.0, ZS_END], [-55.0, ZS_END], [-55.0, 112.0], [XW, 112.0]],
+    # Г с карманом стройки за «Ярусом» (x −152…−62, z 112…200); сквер — до насыпи на юге
+    "boundary": [[XW, -112.0], [160.0, -112.0], [160.0, ZS_END], [-62.0, ZS_END], [-62.0, 200.0], [-152.0, 200.0],
+                 [-152.0, 112.0], [XW, 112.0]],
     "surfaces": [], "ground_holes": [], "slabs": [], "walls": [], "boxes": [], "columns": [],
     "stairs": [], "ramps": [], "lamps": [], "signs": [], "buildings": [], "spawns": [], "exits": [],
-    "locations": [], "probe_routes": [], "checks": {},
+    "locations": [], "probe_routes": [], "checks": {}, "beams": [], "loot": [],
     "filler": {"tints": ["6a6f75", "3a2a22", "b8b4a8", "2f6fa8", "9b7a2c", "5a5f66", "8a8070", "c9c3b2", "d6a21e", "dcdcd6", "a5281f", "4f5a3b"],
                "items": [], "cover": [], "stories": []},
 }
@@ -146,6 +157,59 @@ def u(aid: str, x: float, z: float, yaw: float = 0.0, s: float = 1.0, y: float =
             FI["cover"].append([round(x, 1), round(z, 1)])
 
 
+def upper_floor(title: str, cx: float, cz: float, w: float, d: float, yaw: float = 0.0, h1: float = STORY_RETAIL,
+                roof: bool = False) -> None:
+    """Второй этаж магазина над залом StudyBuilding (владелец 2026-10-24: «магазины сделать двухэтажными, на некоторых —
+    выход на крышу с полезным лутом»): наружная стальная лестница вдоль задней стены, дверь, окна; склад или контора.
+    roof — изнутри марш на крышу у фасада, на крыше парапет и место лута. Местные координаты: +z — фасад зала."""
+    fr = Frame(cx, cz, yaw)
+    y0 = h1 + 0.175                     # верх плиты крыши зала
+    h2 = 3.6
+    hx, hz = w * 0.5, d * 0.5
+    door = -hx + 7.5
+    sz = -hz - 0.85
+    a, b = fr.p(-hx + 0.3, sz), fr.p(-hx + 6.7, sz)
+    stair((a[0], 0.0, a[1]), (b[0], y0, b[1]), 1.3, "steel")
+    lc = fr.p(door, sz - 0.05)
+    box(lc[0], y0 - 0.12, lc[1], 1.9, 0.24, 1.6, "steel", yaw)
+    seg(fr, door - 0.95, sz - 0.85, door + 0.95, sz - 0.75, y0, y0 + 1.0, "steel")
+    wall_x(hz, -hx, hx, y0, h2, windows(-hx, hx, 3.0, 1.6, 0.9, 2.4), 0.25, "wall", fr)
+    wall_x(-hz, -hx, hx, y0, h2, [(door, 1.17, 2.42)] + windows(-hx, hx, 4.0, 1.2, 1.0, 2.2, [(door, 1.17)]), 0.25, "wall", fr)
+    for xs in (-hx, hx):
+        wall_z(xs, -hz, hz, y0, h2, [(0.0, 1.4, 2.3, 0.9)], 0.25, "wall", fr)
+    if w >= 14.0:
+        wall_z(0.0, -hz, hz, y0, h2, [(-hz + 1.6, 1.17, 2.42)], 0.15, "wall", fr)
+    holes = []
+    if roof:
+        holes = [fr.rect(hx - 6.8, hz - 1.65, hx - 0.8, hz - 0.15)]
+        a, b = fr.p(hx - 1.0, hz - 0.9), fr.p(hx - 6.6, hz - 0.9)
+        stair((a[0], y0, a[1]), (b[0], y0 + h2 + 0.25, b[1]), 1.1)
+    slab("roof_" + title, fr.rect(-hx - 0.2, -hz - 0.2, hx + 0.2, hz + 0.2), y0 + h2 + 0.25, 0.25, "slab", holes)
+    yr = y0 + h2 + 0.25
+    for (lx0, lz0, lx1, lz1) in [(-hx - 0.2, -hz - 0.2, hx + 0.2, -hz), (-hx - 0.2, hz, hx + 0.2, hz + 0.2),
+                                 (-hx - 0.2, -hz, -hx, hz), (hx, -hz, hx + 0.2, hz)]:
+        seg(fr, lx0, lz0, lx1, lz1, yr, yr + 1.0, "concrete")
+    # контора и склад второго этажа: шкаф, ящики, стол
+    for (lx, lz, kind, tier, note) in [(-hx + 1.2, hz - 1.0, "cabinet", "common", "шкаф конторы"),
+                                       (hx - 1.5, -hz + 1.2, "crate", "common", "склад магазина"),
+                                       (-hx + 3.5, 0.0, "loose", "common", "на столе")]:
+        x, z = fr.p(lx, lz)
+        loot(x, y0, z, kind, tier, title + ": " + note)
+    x, z = fr.p(-hx + 3.5, 0.0)
+    box(x, y0 + 0.38, z, 1.4, 0.75, 0.8, "accent", yaw)
+    x, z = fr.p(0.0, 0.0)
+    plan["lamps"].append([round(x, 2), y0 + h2 - 0.4, round(z, 2), 0.6, 8.0])
+    if roof:
+        x, z = fr.p(-hx + 2.0, -hz + 1.5)
+        put("sandbags", x, z, yaw + 90.0, 1.0, yr, -1, 0.0, True)
+        x, z = fr.p(-hx + 2.0, 0.5)
+        loot(x, yr, z, "crate", "good", title + ": тайник на крыше")
+        x, z = fr.p(0.0, -hz + 1.2)
+        loot(x, yr, z, "backpack", "med", title + ": рюкзак на крыше")
+        x, z = fr.p(hx - 2.0, -hz + 1.5)
+        put("ac_unit", x, z, yaw, 1.0, yr + 0.3)
+
+
 def face(fx: float, fz: float) -> float:
     """Угол поворота, при котором лицевая сторона (+Z модели) смотрит в направлении (fx, fz)."""
     return math.degrees(math.atan2(fx, fz))
@@ -216,6 +280,103 @@ def along(step: float, d: float, s0: float = 0.0, skip=None):
 
 def in_rect(x: float, z: float, r: list) -> bool:
     return r[0] <= x <= r[2] and r[1] <= z <= r[3]
+
+
+class Frame:
+    """Местные координаты постройки (x — вдоль фасада, z — вглубь, +z — лицо) в мировые; поворот кратен 90°."""
+
+    def __init__(self, cx: float, cz: float, yaw: float = 0.0):
+        self.cx, self.cz, self.yaw = cx, cz, yaw
+        self.c, self.s = round(math.cos(math.radians(yaw))), round(math.sin(math.radians(yaw)))
+
+    def p(self, lx: float, lz: float) -> tuple[float, float]:
+        return self.cx + lx * self.c + lz * self.s, self.cz - lx * self.s + lz * self.c
+
+    def rect(self, lx0: float, lz0: float, lx1: float, lz1: float) -> list:
+        a, b = self.p(lx0, lz0), self.p(lx1, lz1)
+        return [min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1])]
+
+
+WORLD = Frame(0.0, 0.0, 0.0)
+
+
+def seg(fr: Frame, lx0: float, lz0: float, lx1: float, lz1: float, y0: float, y1: float, mat: str = "wall") -> None:
+    r = fr.rect(lx0, lz0, lx1, lz1)
+    wall(r[0], r[1], r[2], r[3], y0, y1, mat)
+
+
+def wall_x(z: float, x0: float, x1: float, y0: float, h: float, gaps=(), t: float = 0.25, mat: str = "wall",
+           fr: Frame = WORLD) -> None:
+    """Стена вдоль x (z = const) с проёмами (x, ширина, верх[, низ]); низ > 0 — окно с подоконником."""
+    x = x0
+    for c in sorted(gaps, key=lambda g: g[0]):
+        a, b = c[0] - c[1] * 0.5, c[0] + c[1] * 0.5
+        top = min(c[2], h)
+        low = c[3] if len(c) > 3 else 0.0
+        if a - x > 0.01:
+            seg(fr, x, z - t * 0.5, a, z + t * 0.5, y0, y0 + h, mat)
+        if h - top > 0.01:
+            seg(fr, a, z - t * 0.5, b, z + t * 0.5, y0 + top, y0 + h, mat)
+        if low > 0.01:
+            seg(fr, a, z - t * 0.5, b, z + t * 0.5, y0, y0 + low, mat)
+        x = b
+    if x1 - x > 0.01:
+        seg(fr, x, z - t * 0.5, x1, z + t * 0.5, y0, y0 + h, mat)
+
+
+def wall_z(x: float, z0: float, z1: float, y0: float, h: float, gaps=(), t: float = 0.25, mat: str = "wall",
+           fr: Frame = WORLD) -> None:
+    """То же вдоль z (x = const); проёмы (z, ширина, верх[, низ])."""
+    z = z0
+    for c in sorted(gaps, key=lambda g: g[0]):
+        a, b = c[0] - c[1] * 0.5, c[0] + c[1] * 0.5
+        top = min(c[2], h)
+        low = c[3] if len(c) > 3 else 0.0
+        if a - z > 0.01:
+            seg(fr, x - t * 0.5, z, x + t * 0.5, a, y0, y0 + h, mat)
+        if h - top > 0.01:
+            seg(fr, x - t * 0.5, a, x + t * 0.5, b, y0 + top, y0 + h, mat)
+        if low > 0.01:
+            seg(fr, x - t * 0.5, a, x + t * 0.5, b, y0, y0 + low, mat)
+        z = b
+    if z1 - z > 0.01:
+        seg(fr, x - t * 0.5, z, x + t * 0.5, z1, y0, y0 + h, mat)
+
+
+def windows(a0: float, a1: float, step: float, w: float, low: float, top: float, doors=()) -> list:
+    """Окна через шаг по стене от a0 до a1 мимо дверей [(центр, ширина)]."""
+    out = []
+    a = a0 + step * 0.5
+    while a < a1 - w * 0.5:
+        if all(abs(a - d[0]) > (w + d[1]) * 0.5 + 0.6 for d in doors) and a - w * 0.5 > a0 + 0.4:
+            out.append((a, w, top, low))
+        a += step
+    return out
+
+
+def slab(sid: str, rect: list, y_top: float, t: float = 0.3, mat: str = "slab", holes=()) -> None:
+    plan["slabs"].append({"id": sid, "rect": [round(v, 3) for v in rect], "y_top": y_top, "t": t, "mat": mat,
+                          "holes": [[round(v, 3) for v in h] for h in holes]})
+
+
+def stair(a: tuple, b: tuple, width: float, mat: str = "concrete") -> None:
+    """Марш от a до b (x, y, z): ступени по 17 см."""
+    plan["stairs"].append({"from": [round(v, 3) for v in a], "to": [round(v, 3) for v in b], "width": width,
+                           "count": max(6, int(abs(b[1] - a[1]) / 0.17 + 0.5)), "mat": mat})
+
+
+def beam(a: tuple, b: tuple, w: float, d: float, mat: str = "concrete") -> None:
+    plan["beams"].append([[round(v, 3) for v in a], [round(v, 3) for v in b], w, d, mat])
+
+
+LOOT_KINDS = ("crate", "backpack", "suitcase", "body", "car", "register", "safe", "cabinet", "loose", "cells", "weapon", "med")
+
+
+def loot(x: float, y: float, z: float, kind: str, tier: str = "common", note: str = "", yaw: float = 0.0) -> None:
+    """Место лута для левел-дизайна: вид места (контейнер или свободно) и ценность — common, med, good, weapon, quest."""
+    assert kind in LOOT_KINDS, kind
+    plan["loot"].append({"at": [round(x, 2), round(y, 2), round(z, 2)], "kind": kind, "tier": tier, "note": note,
+                         "yaw": round(yaw, 1)})
 
 
 # ================================================================== проспект
@@ -335,7 +496,7 @@ for i in range(10):
     u("U06_03_guardrail", x, z, -math.degrees(phi), 1.0, 0.0, False)
 
 # ------------------------------------------------------------------ машины на проезжей части и разрывы обзора
-ROAD_CARS = [(-170, 6.0, 87, 1), (-140, -6.0, 95, 0), (-104, 6.0, 90, 1), (-12, 5.5, 88, 1)]
+ROAD_CARS = [(-170, 6.0, 87, 1), (-140, -6.0, 95, 0), (-12, 5.5, 88, 1)]
 for (x, z, yaw, k) in ROAD_CARS:
     u("R04_car" if k else "U14_01_hatchback", x, z, yaw, 1.0, 0.0, True)
 put("bus_city", -142.0, -1.0, 62.0, 1.0, 0.0, 8, 0.0, True)       # жёлтый автобус поперёк у перехода
@@ -379,7 +540,7 @@ put("truck_cab", x, z, -20.0, 1.0, 0.0, 6, 85.0, True)
 x, z = curve_point(1.25, 3.0)
 put("billboard_fallen", x, z, 40.0, 1.0, 0.0, -1, 0.0, True)
 # южное плечо: машины, пост ДПС с конусами
-for (z, dx, yaw, k) in [(80, -5.5, 2, 1), (102, 6.0, 178, 0), (128, -6.0, -3, 0), (175, 5.5, 183, 1), (196, -5.8, 0, 0), (222, 6.0, 176, 1)]:
+for (z, dx, yaw, k) in [(80, -5.5, 2, 1), (102, 6.0, 178, 0), (128, -6.0, -3, 0), (196, -5.8, 0, 0), (222, 6.0, 176, 1)]:
     u("R04_car" if k else "U14_01_hatchback", XS + dx, z, yaw, 1.0, 0.0, True)
 put("police_car", XS - 6.0, 110.0, 8.0, 1.0, 0.0, -1, 0.0, True)
 put("paz_police", XS + 5.8, 117.0, 182.0, 1.0, 0.0, -1, 0.0, True)
@@ -440,15 +601,19 @@ for (bid, label, x0, x1, interior, theme) in [("Coffee", "кофейня «Зе�
                                              ("Bakery", "пекарня", -108, -94, "shop", "grocery")]:
     building(bid, label, ((x0 + x1) * 0.5, (PAV_Z0 + PAV_Z1) * 0.5), (x1 - x0, PAV_Z1 - PAV_Z0), "hall", 1, STORY_RETAIL,
              0.0, 0.0, interior, theme, 0.6)
+    upper_floor(label, (x0 + x1) * 0.5, (PAV_Z0 + PAV_Z1) * 0.5, x1 - x0, PAV_Z1 - PAV_Z0, 0.0,
+                roof=bid in ("Pharmacy", "Clothes", "Bakery"))
     u("U02_02_planter", (x0 + x1) * 0.5 - (x1 - x0) * 0.3, PAV_Z1 + 1.0, 0.0, 1.0, 0.0, True)
     u("U05_03_warning_a", (x0 + x1) * 0.5 + 2.0, PAV_Z1 + 1.2, rng.uniform(-30, 30))
-building("Pavilion_Shut", "салон связи · ломбард (закрыты)", (-76.0, (PAV_Z0 + PAV_Z1) * 0.5), (32.0, 11.0), "mass", 1, STORY_RETAIL)
+building("Pavilion_Shut", "салон связи · ломбард (закрыты)", (-76.0, (PAV_Z0 + PAV_Z1) * 0.5), (32.0, 11.0), "mass", 2, STORY_RETAIL)
 u("U03_01_lightbox", -184.0, PAV_Z1 + 1.3, 0.0)
 u("U05_02_coffee_kiosk", -168.5, PAV_Z1 + 1.6, 180.0, 1.0, 0.0, True)
 FI["stories"].append({"label": "кофейня «Зерно» — закладка пролога в подсобке", "at": [-184.0, -22.0], "height": 6.0})
 # парковка за павильонами (над паркингом −1): ряды машин, островки, знаки, фонари
-LOT_W = [-196.0, -55.0, -121.0, -30.0]
-LOT_E = [-106.0, -55.0, -46.0, -30.0]
+LOT_W = [-196.0, -55.0, -121.7, -30.0]
+LOT_E = [-108.2, -55.0, -46.0, -30.0]
+PIT_STAIRS_S = [-176.0, -136.0, -84.0]                          # лестницы паркинга на парковку (x)
+PIT_STAIRS_N = [-165.0, -100.0]                                 # лестницы во двор
 surface("lot_w", "parking", LOT_W[0], LOT_W[1], LOT_W[2], LOT_W[3], 0.0, 0.05)
 surface("lot_e", "parking", LOT_E[0], LOT_E[1], LOT_E[2], LOT_E[3], 0.0, 0.05)
 for (x0, x1) in [(-194.0, -124.0), (-104.0, -48.0)]:
@@ -456,7 +621,7 @@ for (x0, x1) in [(-194.0, -124.0), (-104.0, -48.0)]:
     k = 0
     while x < x1:
         for zrow, yaw in ((-33.0, 180.0), (-52.0, 0.0)):
-            near_stair = any(abs(x - sx) < 3.0 for (sx, _zb, _zt) in [(-188.0, 0, 0), (-130.0, 0, 0)]) and zrow < -45.0
+            near_stair = any(abs(x - sx) < 5.0 for sx in PIT_STAIRS_S) and zrow > -40.0
             if rng.random() < 0.62 and not near_stair:
                 u("R04_car" if (k + int(zrow)) % 3 else "U14_01_hatchback", x, zrow, yaw + rng.uniform(-4, 4), 1.0, 0.0, True)
         x += 2.7 * WK
@@ -468,11 +633,12 @@ for x in (-176.0, -150.0, -86.0, -62.0):
     u("U02_02_planter", x + 2.5, -42.5, 90.0, 1.0, 0.0, True)
 for x in (-182.0, -134.0, -98.0, -70.0):
     u("U06_01_speed_bump", x, -42.5, 90.0)
-# ЖК «Панорама»: корпус 1 (два подъезда по 17 эт., три этажа открыты) и корпус 2 (25 эт., закрыт)
+# ЖК «Панорама»: корпус 1 (два подъезда по 17 эт.) и корпус 2 (25 эт.) — глухие (владелец 2026-10-24: жилые дома без
+# планировок; вместо них — вторые этажи и крыши магазинов)
 HZ0, HZ1 = -82.0, -56.0
 HCZ = (HZ0 + HZ1) * 0.5
-flats("Corpus1_A", "ЖК «Панорама», корпус 1 · подъезд 1 — 17 этажей", (-175.0, HCZ), 17, 3)
-flats("Corpus1_B", "ЖК «Панорама», корпус 1 · подъезд 2 — 17 этажей", (-145.0, HCZ), 17, 3)
+flats("Corpus1_A", "ЖК «Панорама», корпус 1 · подъезд 1 — 17 этажей (закрыт)", (-175.0, HCZ), 17, 0)
+flats("Corpus1_B", "ЖК «Панорама», корпус 1 · подъезд 2 — 17 этажей (закрыт)", (-145.0, HCZ), 17, 0)
 flats("Corpus2_A", "ЖК «Панорама», корпус 2 · подъезд 1 — 25 этажей (закрыт)", (-89.0, HCZ), 25, 0)
 flats("Corpus2_B", "ЖК «Панорама», корпус 2 · подъезд 2 — 25 этажей (закрыт)", (-59.0, HCZ), 25, 0)
 for x in (-175.0, -145.0, -89.0, -59.0):
@@ -504,98 +670,382 @@ for x in (-190.0, -140.0, -110.0, -70.0):
 sign("ворота двора · к насыпи", -145.0, 3.4, -108.5, 44)
 
 # ------------------------------------------------------------------ проезд во двор и въезд в паркинг −1 (крытый)
-DRV = [-121.0, -110.0]                                          # проезд между корпусами (x)
-surface("drive_e", "road", -115.2, -84.0, DRV[1], -F)            # восточная полоса вдоль траншеи пандуса
-surface("drive_w", "road", DRV[0], -84.0, -115.2, -35.6)          # севернее траншеи — над плитой паркинга
-RAMP_X0, RAMP_X1 = -120.5, -115.5
-RAMP_TOP, RAMP_BOT = -18.0, -37.0                               # верх у проспекта, низ в паркинге
-PIT = [-196.0, -55.0, -114.0, -35.0]                            # паркинг −1 под парковкой и двором
+# Паркинг −1 по нормам (СП 113.13330; замечание владельца 2026-10-24 «должно быть место для движения автомобилей и для
+# людей, несколько рядов, лестницы и столбы — не мешать движению»): места 2,5 × 5,3 (машина — предмет, 1:1), проезды
+# 6,0 × 1,3 = 7,8 м между рядами, поперечные проезды у торцов той же ширины, колонны только по линиям «спина к спине»
+# и через три места (шаг 8 м), лестницы — в рядах мест вдоль стен, рампа двухполосная 7,8 м с уклоном 14 %.
+DRIVE = [-113.0, -108.2]                                        # проезд во двор (x) — восточнее траншеи рампы
+surface("drive_e", "road", DRIVE[0], -84.0, DRIVE[1], -F)
+RAMP_X0, RAMP_X1 = -121.4, -113.6
+RAMP_TOP, RAMP_BOT = -18.0, -40.5                               # верх у проспекта, низ — в проезде 3 паркинга
+PIT = [-196.0, -88.0, -60.0, -33.0]                             # паркинг −1 под парковкой, двором и домами
+RAMP_SLAB_Z = -36.5                                             # отсюда над рампой плита: просвет ≥ 2,2 м
+surface("drive_w", "walk", RAMP_X0 - 0.3, -84.0, DRIVE[0], RAMP_SLAB_Z)
 plan["ramps"].append({"x0": RAMP_X0, "x1": RAMP_X1, "z0": RAMP_TOP, "z1": RAMP_BOT, "y0": 0.0, "y1": PIT_Y, "mat": "concrete"})
 plan["ground_holes"].append([RAMP_X0, PIT[3], RAMP_X1, RAMP_TOP])
-# стенки траншеи от дна до парапета 1,1 м над землёй, торец у проспекта — парапет, навес над всей траншеей
+# стенки траншеи от дна до парапета 1,1 м над землёй; в паркинге — отбойники вдоль рампы до низа
 for x0 in (RAMP_X0 - 0.3, RAMP_X1):
-    wall(x0, PIT[3], x0 + 0.3, RAMP_TOP, PIT_Y - 0.4, 1.1, "concrete")
-box((RAMP_X0 + RAMP_X1) * 0.5, 2.95, (RAMP_TOP + PIT[3]) * 0.5, RAMP_X1 - RAMP_X0 + 1.0, 0.3, RAMP_TOP - PIT[3], "slab")
+    wall(x0, RAMP_SLAB_Z, x0 + 0.3, RAMP_TOP, PIT_Y - 0.4, 1.1, "concrete")
+    wall(x0, RAMP_BOT, x0 + 0.3, RAMP_SLAB_Z, PIT_Y, -1.6, "concrete")
+box((RAMP_X0 + RAMP_X1) * 0.5, 2.95, (RAMP_TOP + RAMP_SLAB_Z) * 0.5, RAMP_X1 - RAMP_X0 + 1.0, 0.3, RAMP_TOP - RAMP_SLAB_Z, "slab")
 for px in (RAMP_X0 - 0.5, RAMP_X1 + 0.5):                         # портал въезда: опоры и перемычка над траншеей
     box(px, 1.9, RAMP_TOP - 0.3, 0.7, 3.8, 0.8, "concrete")
 box((RAMP_X0 + RAMP_X1) * 0.5, 3.55, RAMP_TOP - 0.3, RAMP_X1 - RAMP_X0 + 1.7, 0.7, 0.8, "concrete")
 box((RAMP_X0 + RAMP_X1) * 0.5, 3.0, RAMP_TOP - 0.75, RAMP_X1 - RAMP_X0, 0.35, 0.06, "stripe", 0.0, False)   # ограничитель высоты
-u("U07_05_lane_island", RAMP_X1 + 1.6, RAMP_TOP + 1.0, 0.0)
-u("U07_01_ticket_machine", RAMP_X1 + 1.4, RAMP_TOP + 0.8, -90.0, 1.0, 0.0, True)
-u("U07_02_barrier_arm", RAMP_X1 + 0.9, RAMP_TOP + 1.8, 90.0)
-u("U07_03_guide_board", RAMP_X0 - 0.9, RAMP_TOP + 1.2, 0.0, 1.0, 0.0, True)
-u("U07_03_guide_board", RAMP_X1 + 2.6, RAMP_TOP + 2.6, 0.0, 1.0, 0.0, True)
+box((RAMP_X0 + RAMP_X1) * 0.5, 0.06, (RAMP_TOP + RAMP_BOT) * 0.5, 0.15, 0.02, 2.0, "stripe", 0.0, False)
+u("U07_01_ticket_machine", DRIVE[0] + 0.6, RAMP_TOP + 0.8, -90.0, 1.0, 0.0, True)
+u("U07_02_barrier_arm", RAMP_X1 + 0.2, RAMP_TOP + 1.8, 90.0)
 u("U07_04_tire_delineator", RAMP_X0 - 1.2, RAMP_TOP + 3.0, 0.0, 1.0, 0.0, True)
-u("U03_03_parking_sign", RAMP_X1 + 3.4, RAMP_TOP + 1.0, 0.0)
-sign("паркинг −1 · въезд", (RAMP_X0 + RAMP_X1) * 0.5, 5.4, RAMP_TOP + 0.4, 44)
-put("speed_bump", (RAMP_X0 + RAMP_X1) * 0.5, RAMP_TOP + 1.6, 90.0)
-for (x, z, kit) in [(RAMP_X0 - 2.0, RAMP_TOP + 2.2, "water_barrier"), (RAMP_X0 - 3.3, RAMP_TOP + 2.4, "water_barrier_w"),
-                    (RAMP_X0 - 4.6, RAMP_TOP + 4.0, "half_sphere")]:
-    put(kit, x, z, 90.0, 1.0, 0.0, -1, 0.0, True)
-# паркинг −1: пол, стены, колонны, плита сверху с вырезами под лестницы и пандус
-stairs_pit = [(-188.0, -40.0, -50.0), (-130.0, -40.0, -50.0)]   # x, низ z, верх z
-SW_ = 1.2 * WK
-holes = [[RAMP_X0, PIT[3] - 0.5, RAMP_X1, PIT[3] + 0.01]]
-for (sx, zb, zt) in stairs_pit:
-    holes.append([sx - SW_ * 0.5 - 0.2, zt - 1.0, sx + SW_ * 0.5 + 0.2, zb + 0.3])
+u("U03_03_parking_sign", DRIVE[1] + 0.6, RAMP_TOP + 1.0, 0.0)
+sign("паркинг −1 · въезд / выезд", (RAMP_X0 + RAMP_X1) * 0.5, 5.4, RAMP_TOP + 0.4, 44)
+# ряды: места 5,3 в глубину, проезды 7,8; с севера на юг — A | проезд 1 | B C | проезд 2 | D E | проезд 3 | F
+STALL_D, AISLE = 5.3, 7.8
+ROWS = []                                                       # (имя, z0, z1, курс машины носом к «спине» ряда)
+z = PIT[1]
+ROWS.append(("A", z, z + STALL_D, 180.0)); z += STALL_D
+AISLES = [(z, z + AISLE)]; z += AISLE
+ROWS.append(("B", z, z + STALL_D, 0.0)); z += STALL_D
+COL_Z = [z]
+ROWS.append(("C", z, z + STALL_D, 180.0)); z += STALL_D
+AISLES.append((z, z + AISLE)); z += AISLE
+ROWS.append(("D", z, z + STALL_D, 0.0)); z += STALL_D
+COL_Z.append(z)
+ROWS.append(("E", z, z + STALL_D, 180.0)); z += STALL_D
+AISLES.append((z, z + AISLE)); z += AISLE
+ROWS.append(("F", z, PIT[3], 0.0))
+X_ROW0, X_ROW1 = PIT[0] + AISLE, PIT[2] - AISLE                  # места между поперечными проездами
+BAY = 8.0                                                       # колонна 0,5 + три места по 2,5
+TUNNEL_Z = (-44.0, -42.0)                                       # подкоп из хранилища банка — в восточную стену у проезда 3
+SW_ = 1.8
+pit_holes = [[RAMP_X0, RAMP_SLAB_Z, RAMP_X1, PIT[3] + 0.41]]
+for sx in PIT_STAIRS_S:
+    pit_holes.append([sx - 2.8, -36.4, sx + 3.0, -34.4])
+for sx in PIT_STAIRS_N:
+    pit_holes.append([sx - 3.0, -86.4, sx + 2.8, -84.4])
 for srf in plan["surfaces"]:
-    if srf["id"] in ("lot_w", "drive_w"):
-        srf["holes"] = [h for h in holes[1:]]
-plan["slabs"].append({"id": "lot_slab", "rect": [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], "y_top": 0.0, "t": 0.4, "mat": "walk", "holes": holes})
+    if srf["id"] in ("lot_w", "lot_e", "drive_w", "yard_n"):
+        srf["holes"] = [h for h in pit_holes if h[0] < srf["rect"][2] and h[2] > srf["rect"][0]
+                        and h[1] < srf["rect"][3] and h[3] > srf["rect"][1]]
+slab("lot_slab", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], 0.0, 0.4, "walk", pit_holes)
 plan["ground_holes"].append([PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4])
-plan["slabs"].append({"id": "pit_floor", "rect": [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], "y_top": PIT_Y, "t": 0.4, "mat": "concrete", "holes": []})
+slab("pit_floor", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], PIT_Y, 0.4, "concrete")
 wall(PIT[0] - 0.4, PIT[1] - 0.4, PIT[0], PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
-wall(PIT[2], PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
+wall(PIT[2], PIT[1] - 0.4, PIT[2] + 0.4, TUNNEL_Z[0], PIT_Y, -0.4, "concrete")
+wall(PIT[2], TUNNEL_Z[1], PIT[2] + 0.4, PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
+wall(PIT[2], TUNNEL_Z[0], PIT[2] + 0.4, TUNNEL_Z[1], -1.0, -0.4, "concrete")
 wall(PIT[0], PIT[1] - 0.4, PIT[2], PIT[1], PIT_Y, -0.4, "concrete")
-wall(PIT[0], PIT[3], RAMP_X0, PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
-wall(RAMP_X1, PIT[3], PIT[2], PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
-plan["columns"].append({"rect": [PIT[0] + 4.0, PIT[1] + 4.0, PIT[2] - 4.0, PIT[3] - 4.0], "y0": PIT_Y, "y1": -0.4, "grid": 8.0, "size": 0.5, "mat": "concrete"})
-for (sx, zb, zt) in stairs_pit:
-    plan["stairs"].append({"from": [sx, PIT_Y, zb], "to": [sx, 0.0, zt], "width": SW_, "count": 20, "mat": "concrete"})
-    # парапеты вокруг выреза лестницы: по бокам и у нижнего края; выход — у верхнего
-    x0, x1 = sx - SW_ * 0.5 - 0.2, sx + SW_ * 0.5 + 0.2
-    wall(x0 - 0.15, zt - 1.0, x0, zb + 0.3, 0.0, 1.1, "concrete")
-    wall(x1, zt - 1.0, x1 + 0.15, zb + 0.3, 0.0, 1.1, "concrete")
-    wall(x0 - 0.15, zb + 0.3, x1 + 0.15, zb + 0.45, 0.0, 1.1, "concrete")
-    box(sx, 2.5, (zb + zt) * 0.5, SW_ + 1.2, 0.2, zb - zt + 1.6, "slab", 0.0, False)   # навес над спуском
-    sign("паркинг −1 · лестница", sx, 3.0, zt - 1.2, 32)
-for (x, z) in [(-188.0, -38.5), (-130.0, -38.5), (RAMP_X0 - 3.0, -38.0), (-160.0, -45.0), (-140.0, -50.0)]:
-    plan["lamps"].append([x, -0.9, z, 0.6, 9.0])
-for x in range(-190, -118, 10):
-    u("U18_03_industrial_light", x + 3.0, -45.0, 90.0, 1.0, -0.7)
-for i in range(8):
-    u("R04_car" if i % 3 else "U14_01_hatchback", PIT[0] + 8.0 + i * 8.0, PIT[1] + 3.2, 180.0 + rng.uniform(-3, 3), 1.0, PIT_Y, True)
-for i in range(5):
-    u("R04_car" if i % 2 else "U14_01_hatchback", -176.0 + i * 8.0, PIT[3] - 3.2, rng.uniform(-3, 3), 1.0, PIT_Y, True)
-u("U18_04_service_cage", -192.0, -50.0, 90.0, 1.0, PIT_Y, True)
-wall(-125.0, PIT[1], -114.0, PIT[1] + 6.0, PIT_Y, -0.4, "wall")    # техпомещение (закрыто)
-sign("паркинг −1 · техпомещение", -119.5, -1.2, PIT[1] + 7.0, 32)
+wall(PIT[0], PIT[3], RAMP_X0 - 0.3, PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
+wall(RAMP_X1 + 0.3, PIT[3], PIT[2], PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
+# колонны — по линиям «спина к спине» через три места; в проездах колонн нет
+for cz in COL_Z:
+    plan["columns"].append({"rect": [X_ROW0, cz, X_ROW1, cz], "y0": PIT_Y, "y1": -0.4, "grid": BAY, "size": 0.5, "mat": "concrete"})
 
-# ------------------------------------------------------------------ банк на углу перед поворотом (открытый зал)
-BANK = (-26.0, -27.5, 28.0, 21.0)                               # центр x, z, длина, глубина
-building("Bank", "банк «Капитал» (разграблен)", (BANK[0], BANK[1]), (BANK[2], BANK[3]), "hall", 1, 4.6, 0.0, 0.0, "", "office", 0.5)
-bx, bz = BANK[0], BANK[1]
-for k in (-1, 0, 1):
-    u("U16_05_teller_desk", bx + k * 3.6, bz - 6.0, 0.0, 1.0, 0.0, True)
-    u("U17_03_monitor", bx + k * 3.6, bz - 6.1, 0.0, 1.0, 1.25)
-for k in (-1, 1):
-    u("U16_01_atm", bx + k * 11.5, bz + 9.6, 180.0, 1.0, 0.0, True)
-u("R03_atm", bx - 9.0, BANK[1] + BANK[3] * 0.5 + 0.35, 0.0, 1.0, 0.0, True)        # банкомат на фасаде
-u("U16_02_bank_kiosk", bx + 9.0, BANK[1] + BANK[3] * 0.5 + 0.6, 0.0, 1.0, 0.0, True)
-for k in range(6):
-    u("U19_05_belt_post", bx - 5.0 + k * 2.0, bz + 1.0, 0.0, 1.0, 0.0, True)
-for (x, z, yaw) in [(bx - 10, bz + 3, 90), (bx - 10, bz + 5, 90), (bx + 10, bz + 3, -90)]:
-    u("U16_03_armchair", x, z, yaw, 1.0, 0.0, True)
-u("U04_04_coffee_table", bx - 8.0, bz + 4.0, 0.0)
-u("U17_02_ring_chandelier", bx, bz, 0.0, 1.0, 3.1)
-u("U16_04_breached_wall", bx + 5.0, bz - 9.2, 0.0, 1.0, 0.0, True)
-u("U17_04_credenza", bx - 6.0, bz - 9.8, 0.0, 1.0, 0.0, True)
-u("U17_05_water_bottle", bx - 12.0, bz - 9.0, 0.0)
-u("U04_01_turnstile", bx - 2.2, bz - 2.0, 0.0, 1.0, 0.0, True)
-u("U04_01_turnstile", bx + 2.2, bz - 2.0, 0.0, 1.0, 0.0, True)
-sign("банк «Капитал»", bx, 5.6, BANK[1] + BANK[3] * 0.5 + 0.4, 48)
-put("inkassator", bx + 4.0, -6.6, 95.0, 1.0, 0.0, 5, 0.0, True)    # инкассаторский броневик у бордюра, задние двери открыты
-FI["stories"].append({"label": "инкассаторы бросили броневик у банка: кейс с деньгами", "at": [bx + 4.0, -6.6], "height": 3.4})
+
+def stall_free(x: float, row: str) -> bool:
+    """Место не занято лестницей, рампой, техпомещением."""
+    if row == "F" and (RAMP_X0 - 1.2 <= x <= RAMP_X1 + 1.2 or any(sx - 4.0 <= x <= sx + 4.2 for sx in PIT_STAIRS_S)):
+        return False
+    if row == "A" and (any(sx - 4.2 <= x <= sx + 6.6 for sx in PIT_STAIRS_N) or x < X_ROW0 + 12.0 or x > X_ROW1 - 12.0):
+        return False
+    return True
+
+
+# разметка мест, машины (половина мест), открытые багажники — места лута
+for (row, z0, z1, yaw) in ROWS:
+    zc = (z0 + z1) * 0.5
+    k = 0
+    xk = X_ROW0
+    while xk + BAY <= X_ROW1 + 0.01:
+        for j in range(3):
+            x = xk + 0.25 + 1.25 + j * 2.5
+            if not stall_free(x, row):
+                continue
+            box(x - 1.25, PIT_Y + 0.01, zc, 0.1, 0.02, z1 - z0 - 0.4, "stripe", 0.0, False)
+            if rng.random() < 0.5:
+                pick = rng.random()
+                if pick < 0.1:
+                    put("suv_open", x, zc, yaw + rng.uniform(-3, 3), 1.0, PIT_Y, rng.choice(CAR_TINTS), 0.0, True)
+                    loot(x, PIT_Y, zc + (2.9 if yaw == 180.0 else -2.9), "car", "common", "открытый багажник")
+                else:
+                    put("car", x, zc, yaw + rng.uniform(-3, 3), 1.0, PIT_Y, 1 if pick < 0.14 else rng.choice(CAR_TINTS), 0.0, True)
+        xk += BAY
+        k += 1
+# проезды: свет по оси, «зебры» у лестниц, пешеходные дорожки вдоль торцевых проездов
+for (a0, a1) in AISLES:
+    for x in range(int(X_ROW0) + 8, int(X_ROW1), 16):
+        plan["lamps"].append([x, -0.9, (a0 + a1) * 0.5, 0.5, 9.0])
+    box((X_ROW0 + X_ROW1) * 0.5, PIT_Y + 0.01, (a0 + a1) * 0.5, X_ROW1 - X_ROW0, 0.02, 0.12, "stripe", 0.0, False)
+for x in (PIT[0] + 1.0, PIT[2] - 1.0):
+    box(x, PIT_Y + 0.01, (PIT[1] + PIT[3]) * 0.5, 1.3, 0.02, PIT[3] - PIT[1] - 1.0, "marker", 0.0, False)
+    for z in range(int(PIT[1]) + 6, int(PIT[3]), 14):
+        plan["lamps"].append([x + (3.0 if x < -100 else -3.0), -0.9, z, 0.5, 9.0])
+for sx in PIT_STAIRS_S:
+    for i in range(4):
+        box(sx + 2.0, PIT_Y + 0.01, AISLES[2][0] + 0.9 + i * 2.0, 3.0, 0.02, 0.9, "stripe", 0.0, False)
+for sx in PIT_STAIRS_N:
+    for i in range(4):
+        box(sx - 2.0, PIT_Y + 0.01, AISLES[0][0] + 0.9 + i * 2.0, 3.0, 0.02, 0.9, "stripe", 0.0, False)
+for (row, z0, z1, _yaw) in ROWS:
+    sign("ряд " + row, PIT[0] + 4.0, -1.0, (z0 + z1) * 0.5, 30)
+    sign("ряд " + row, PIT[2] - 4.0, -1.0, (z0 + z1) * 0.5, 30)
+# лестницы на парковку (ряд F) и во двор (ряд A): марш вдоль ряда, перила снизу, парапет и навес наверху
+for sx in PIT_STAIRS_S:
+    stair((sx + 2.8, PIT_Y, -35.4), (sx - 2.8, 0.0, -35.4), SW_)
+    wall(sx - 2.8, -36.55, sx + 3.0, -36.4, 0.0, 1.1, "concrete")
+    wall(sx - 2.8, -34.4, sx + 3.0, -34.25, 0.0, 1.1, "concrete")
+    wall(sx + 3.0, -36.55, sx + 3.15, -34.25, 0.0, 1.1, "concrete")
+    wall(sx - 1.5, -36.6, sx + 3.0, -36.45, PIT_Y, PIT_Y + 1.1, "steel")
+    box(sx, 2.5, -35.4, 6.4, 0.2, 2.8, "slab", 0.0, False)
+    sign("паркинг −1 · лестница", sx, 3.0, -37.0, 30)
+for sx in PIT_STAIRS_N:
+    stair((sx - 2.8, PIT_Y, -85.4), (sx + 2.8, 0.0, -85.4), SW_)
+    wall(sx - 3.0, -86.55, sx + 2.8, -86.4, 0.0, 1.1, "concrete")
+    wall(sx - 3.0, -84.4, sx + 2.8, -84.25, 0.0, 1.1, "concrete")
+    wall(sx - 3.15, -86.55, sx - 3.0, -84.25, 0.0, 1.1, "concrete")
+    wall(sx - 3.0, -84.35, sx + 1.5, -84.2, PIT_Y, PIT_Y + 1.1, "steel")
+    box(sx, 2.5, -85.4, 6.4, 0.2, 2.8, "slab", 0.0, False)
+    box(sx + 5.2, (PIT_Y + 2.8) * 0.5, -85.6, 2.4, 2.8 - PIT_Y, 2.4, "concrete")   # лифт (закрыт)
+    sign("паркинг −1 · лестница и лифт", sx, 3.0, -87.5, 30)
+# техпомещения в торцах ряда A: насосная и электрощитовая (закрыты), будка охраны у низа рампы
+for (x0, x1, title) in [(X_ROW0, X_ROW0 + 12.0, "насосная"), (X_ROW1 - 12.0, X_ROW1, "электрощитовая")]:
+    wall(x0, ROWS[0][2] - 0.2, x1, ROWS[0][2], PIT_Y, -0.4, "wall")
+    wall(x0, PIT[1], x0 + 0.2, ROWS[0][2], PIT_Y, -0.4, "wall")
+    wall(x1 - 0.2, PIT[1], x1, ROWS[0][2], PIT_Y, -0.4, "wall")
+    sign("паркинг −1 · " + title, (x0 + x1) * 0.5, -1.2, ROWS[0][2] + 1.0, 30)
+put("booth", RAMP_X1 + 2.0, AISLES[2][1] - 0.8, 0.0, 1.0, PIT_Y, -1, 0.0, True)
+put("barrier_arm_up", RAMP_X1 + 0.6, AISLES[2][1] - 0.4, 90.0, 1.0, PIT_Y)
+sign("въезд / выезд ↑", (RAMP_X0 + RAMP_X1) * 0.5, -1.0, AISLES[2][1] - 1.0, 34)
+loot(RAMP_X1 + 2.0, PIT_Y, AISLES[2][1] - 2.0, "cabinet", "common", "будка охраны паркинга")
+for (x, z, kind, tier, note) in [(X_ROW0 + 3.0, AISLES[1][0] + 2.0, "body", "good", "тело ЧВК в проезде 2"),
+                                 (-150.0, AISLES[0][1] - 1.0, "crate", "common", "ящики жильцов"),
+                                 (X_ROW1 - 4.0, AISLES[2][0] + 2.0, "loose", "common", "инструмент у подкопа")]:
+    loot(x, PIT_Y, z, kind, tier, note)
+
+# ------------------------------------------------------------------ банк «Капитал»: три этажа, хранилище на −1
+# Владелец 2026-10-24: «банк слишком плюгавый — отдельное трёхэтажное здание с логичным наполнением, хранилище на −1,
+# соединить с подземным паркингом ходом (кто-то делал подкоп), обнести металлическим забором; архитектура — как у
+# кинотеатра «Родина» (Streets of Tarkov)»: первый этаж утоплен за опорами, второй и третий нависают коробом с ромбической
+# решёткой, наружная лестница на второй этаж. Внутри: операционный зал со стойкой, касса, охрана, кабинет управляющего;
+# 2-й — офис, архив, переговорная, бухгалтерия; 3-й — кабинет директора, серверная, зал; крыша с будкой выхода;
+# −1 — коридоры, пост охраны, хранилище с круглой дверью, депозитарий, пересчёт; подкоп из хранилища в паркинг −1.
+BX0, BX1, BZ0, BZ1 = -38.0, -4.0, -62.0, -34.0                  # первый этаж и −1
+UX0, UX1, UZ0, UZ1 = -40.0, -2.0, -64.0, -30.0                  # нависающие 2-й и 3-й
+BY = [0.0, 4.5, 8.4, 12.3]                                      # полы этажей и крыша
+BASE_Y = PIT_Y                                                  # пол −1 на уровне паркинга: подкоп без уклона
+BFX0, BFX1, BFZ0, BFZ1 = -43.0, 6.0, -68.0, -21.0               # забор
+building_rect_bank = [UX0, UZ0, UX1, UZ1]
+plan["ground_holes"].append([BX0 - 0.4, BZ0 - 0.4, BX1 + 0.4, BZ1 + 0.4])
+surface("bank_yard", "walk", BFX0, BFZ0, BFX1, BFZ1, 0.0, 0.06)
+plan["surfaces"][-1]["holes"] = [[BX0, BZ0, BX1, BZ1]]                  # пол банка — свои плиты (над −1)
+# марши: главный (запад, ядро x −38…−28) — 1→2 по z −59, 2→3 по z −61, 3→крыша по z −59; служебный на −1 (восток)
+RUN = (-37.2, -29.2)
+stair((RUN[1], BY[0], -59.0), (RUN[0], BY[1], -59.0), 1.6)
+stair((RUN[0], BY[1], -61.0), (RUN[1], BY[2], -61.0), 1.6)
+stair((RUN[1], BY[2], -59.0), (RUN[0], BY[3], -59.0), 1.6)
+stair((-6.8, BY[0], -60.0), (-14.8, BASE_Y, -60.0), 1.6)
+H1 = [RUN[0] - 0.2, -59.85, RUN[1], -58.15]
+H2 = [RUN[0], -61.85, RUN[1] + 0.2, -60.15]
+slab("bank_f1", [BX0, BZ0, BX1, BZ1], BY[0], 0.4, "walk", [[-14.8, -61.2, -6.6, -58.8]])
+slab("bank_f2", [UX0, UZ0, UX1, UZ1], BY[1], 0.3, "slab", [H1])
+slab("bank_f3", [UX0, UZ0, UX1, UZ1], BY[2], 0.3, "slab", [H2])
+slab("bank_roof", [UX0, UZ0, UX1, UZ1], BY[3], 0.35, "slab", [H1])
+slab("bank_base", [BX0 - 0.4, BZ0 - 0.4, BX1 + 0.4, BZ1 + 0.4], BASE_Y, 0.4, "concrete")
+# ---- первый этаж: витражи к проспекту, главный вход, служебные двери; опоры под нависанием
+H = BY[1] - BY[0] - 0.3
+wall_x(BZ1, BX0, BX1, 0.0, H, [(-21.0, 2.4, 2.6)] + windows(BX0, BX1, 3.0, 2.4, 0.4, 3.6, [(-21.0, 2.4)]))
+wall_x(BZ0, BX0, BX1, 0.0, H, [(-20.0, 1.2, 2.42)])
+wall_z(BX0, BZ0, BZ1, 0.0, H, windows(BZ0, BZ1, 4.0, 1.6, 2.2, 3.6))
+wall_z(BX1, BZ0, BZ1, 0.0, H, [(-40.0, 1.2, 2.42)] + windows(BZ0, BZ1, 4.0, 1.6, 2.2, 3.6, [(-40.0, 1.2)]))
+for x in (UX0 + 0.6, -31.0, -21.0, -11.0, UX1 - 0.6):
+    box(x, H * 0.5, UZ1 - 0.6, 0.7, H, 0.7, "concrete")
+for z in (-38.0, -46.0, -54.0, -60.0):
+    for x in (UX0 + 0.6, UX1 - 0.6):
+        box(x, H * 0.5, z, 0.7, H, 0.7, "concrete")
+# ядро лестницы, охрана, касса, кабинет управляющего, лестница на −1
+wall_x(-57.8, BX0, -28.0, 0.0, H, [(-28.7, 1.17, 2.42)], 0.2)
+wall_z(-28.0, BZ0, -57.8, 0.0, BY[3] - 0.3, (), 0.25)
+wall_x(-57.8, -28.0, -16.0, 0.0, H, [(-22.0, 1.17, 2.42)], 0.15)
+wall_z(-16.0, BZ0, -57.8, 0.0, H, (), 0.15)
+wall_x(-58.6, -16.0, BX1, 0.0, H, [(-5.4, 1.17, 2.42)], 0.2)
+wall_x(-52.0, -24.0, -16.0, 0.0, H, [(-20.0, 1.0, 2.2)], 0.12)                 # касса за стеклом
+wall_z(-24.0, -57.8, -52.0, 0.0, H, (), 0.12)
+wall_z(-16.0, -57.8, -52.0, 0.0, H, (), 0.12)
+wall_x(-50.0, -10.0, BX1, 0.0, H, [(-7.0, 1.17, 2.42)], 0.12)                  # кабинет управляющего
+wall_z(-10.0, -50.0, -40.0, 0.0, H, [(-45.0, 1.17, 2.42)], 0.12)
+wall_x(-40.0, -10.0, BX1, 0.0, H, (), 0.12)
+# стойка операционистов с калиткой, рабочие места за ней, зал ожидания, банкоматы, турникеты
+for (x0, x1) in [(-36.0, -15.5), (-13.8, -10.2)]:
+    box((x0 + x1) * 0.5, 0.55, -48.0, x1 - x0, 1.1, 0.8, "accent")
+for x in (-33.0, -23.0, -18.0):
+    box(x, 1.25, -47.7, 1.6, 0.5, 0.04, "dark", 0.0, False)                    # стёкла окон кассиров
+    box(x, 0.38, -50.5, 1.4, 0.75, 0.8, "accent")
+    loot(x, 0.0, -49.4, "register", "good", "окно операциониста")
+for x in (-34.0, -30.0, -26.0):
+    box(x, 0.23, -41.5, 2.6, 0.45, 0.6, "accent")
+for x in (-37.2, -36.0):
+    box(x, 0.75, -36.0 if x < -36.5 else -38.0, 0.7, 1.5, 0.7, "steel")         # банкоматы у входа
+loot(-37.0, 0.0, -37.0, "safe", "good", "кассета банкомата")
+for k in range(5):
+    put("bollard", -27.0 + k * 1.6, -44.0, 0.0)
+box(-20.0, 0.38, -55.0, 1.6, 0.75, 0.8, "accent")
+loot(-18.5, 0.0, -55.5, "safe", "good", "сейф кассы")
+box(-22.0, 0.38, -60.5, 3.0, 0.75, 0.8, "accent")
+box(-22.0, 1.1, -61.6, 3.0, 0.7, 0.1, "dark", 0.0, False)                      # мониторы охраны
+loot(-25.5, 0.0, -60.0, "weapon", "weapon", "оружейный шкаф охраны")
+box(-7.0, 0.38, -45.0, 1.8, 0.75, 0.9, "accent")
+loot(-5.0, 0.0, -48.5, "safe", "good", "сейф управляющего")
+loot(-30.0, 0.0, -42.5, "loose", "common", "зал ожидания")
+loot(-12.0, 0.0, -36.0, "body", "good", "тело мародёра у входа")
+plan["lamps"] += [[-30.0, 4.0, -44.0, 0.6, 10.0], [-14.0, 4.0, -44.0, 0.6, 10.0], [-22.0, 4.0, -56.0, 0.5, 8.0]]
+# ---- 2-й этаж: офис, архив, переговорная, бухгалтерия; дверь на наружную лестницу с запада
+for (y0, side_door) in [(BY[1], True), (BY[2], False)]:
+    h = BY[1] - BY[0] - 0.3 if y0 == BY[1] else BY[3] - BY[2] - 0.35
+    wall_x(UZ1, UX0, UX1, y0, h, windows(UX0, UX1, 3.0, 2.2, 0.9, 2.7))
+    wall_x(UZ0, UX0, UX1, y0, h, windows(UX0, UX1, 3.0, 2.2, 0.9, 2.7))
+    wall_z(UX0, UZ0, UZ1, y0, h, ([(-44.0, 1.17, 2.42)] if side_door else []) + windows(UZ0, UZ1, 3.0, 2.0, 0.9, 2.7, [(-44.0, 1.17)]))
+    wall_z(UX1, UZ0, UZ1, y0, h, windows(UZ0, UZ1, 3.0, 2.0, 0.9, 2.7))
+    wall_x(-57.8, UX0, -28.0, y0, h, [(-38.6 if y0 == BY[1] else -28.7, 1.17, 2.42)], 0.2)
+    wall_x(-52.0, -28.0, UX1, y0, h, [(-22.0, 1.17, 2.42), (-9.0, 1.17, 2.42)], 0.15)
+    wall_x(-44.0, UX0, UX1, y0, h, [(-30.0, 1.6, 2.42), (-8.0, 1.17, 2.42)], 0.15)
+    wall_z(-16.0, UZ0, -52.0, y0, h, (), 0.15)
+    wall_z(-14.0, -44.0, UZ1, y0, h, (), 0.15)
+    plan["lamps"] += [[-30.0, y0 + h - 0.4, -48.0, 0.5, 9.0], [-10.0, y0 + h - 0.4, -48.0, 0.5, 9.0], [-22.0, y0 + h - 0.4, -37.0, 0.5, 9.0]]
+y0 = BY[1]
+for x in range(-37, -16, 4):                                                   # открытый офис
+    for z in (-41.0, -36.0, -32.5):
+        box(x, y0 + 0.38, z, 1.6, 0.75, 0.8, "accent")
+loot(-25.0, y0, -36.0, "loose", "common", "офис 2-го этажа")
+for x in (-26.5, -21.5, -18.0):                                                # архив
+    box(x, y0 + 1.1, -58.0, 0.6, 2.2, 8.0, "steel")
+loot(-24.0, y0, -55.0, "cabinet", "common", "архив")
+box(-9.0, y0 + 0.38, -58.0, 6.0, 0.75, 2.0, "accent")                         # переговорная
+box(-8.0, y0 + 0.38, -37.0, 3.0, 0.75, 1.0, "accent")                          # бухгалтерия
+loot(-6.0, y0, -34.0, "safe", "good", "сейф бухгалтерии")
+# ---- 3-й этаж: директор, серверная, зал
+y0 = BY[2]
+box(-9.0, y0 + 0.38, -58.0, 2.4, 0.75, 1.1, "accent")
+loot(-4.0, y0, -61.0, "safe", "good", "сейф директора (ключ)")
+for z in (-62.0, -59.0, -56.0):
+    box(-22.0, y0 + 1.0, z, 8.0, 2.0, 0.8, "dark")                            # стойки серверной
+loot(-26.0, y0, -54.0, "crate", "good", "серверная: жёсткие диски")
+box(-22.0, y0 + 0.38, -37.0, 8.0, 0.75, 2.4, "accent")
+loot(-34.0, y0, -34.0, "backpack", "med", "зал 3-го этажа")
+# ---- крыша: будка выхода, парапет, кондиционеры, антенна, лёжка снайпера к проспекту
+yr = BY[3]
+for (x0, z0, x1, z1) in [(UX0, UZ0, UX1, UZ0 + 0.25), (UX0, UZ1 - 0.25, UX1, UZ1), (UX0, UZ0, UX0 + 0.25, UZ1), (UX1 - 0.25, UZ0, UX1, UZ1)]:
+    wall(x0, z0, x1, z1, yr, yr + 1.0, "concrete")
+wall_x(-57.8, -38.2, -28.0, yr, 2.6, [(-36.4, 1.2, 2.3)], 0.2)
+wall_x(UZ0 + 0.25, -38.2, -28.0, yr, 2.6, (), 0.2)
+wall_z(-38.2, UZ0 + 0.25, -57.8, yr, 2.6, (), 0.2)
+wall_z(-28.0, UZ0 + 0.25, -57.8, yr, 2.6, (), 0.2)
+slab("bank_booth", [-38.4, UZ0, -27.8, -57.6], yr + 2.8, 0.2)
+for x in (-22.0, -16.0, -10.0):
+    put("ac_unit", x, -60.0, 0.0, 1.6, yr + 0.45)
+box(-6.0, yr + 4.0, -58.0, 0.15, 8.0, 0.15, "steel")
+put("sandbags", -20.0, -31.5, 90.0, 1.0, yr, -1, 0.0, True)
+loot(-22.0, yr, -33.0, "weapon", "weapon", "лёжка на крыше банка")
+loot(-12.0, yr, -50.0, "crate", "good", "тайник у кондиционеров")
+# ---- решётка фасада: ромбы раскосами на 2-м и 3-м этажах (лицо и торцы)
+def lattice(axis: str, c: float, a0: float, a1: float, y0: float, y1: float, step: float) -> None:
+    a = a0
+    while a < a1 - 0.1:
+        b = min(a + step, a1)
+        for (u0, v0, u1, v1) in [(a, y0, b, y1), (b, y0, a, y1)]:
+            if axis == "x":
+                beam((u0, v0, c), (u1, v1, c), 0.22, 0.3)
+            else:
+                beam((c, v0, u0), (c, v1, u1), 0.22, 0.3)
+        a = b
+lattice("x", UZ1 + 0.25, UX0, UX1, BY[1], BY[3] + 1.0, 3.8)
+lattice("z", UX0 - 0.25, UZ0, UZ1, BY[1], BY[3] + 1.0, 3.4)
+lattice("z", UX1 + 0.25, UZ0, UZ1, BY[1], BY[3] + 1.0, 3.4)
+box((UX0 + UX1) * 0.5, BY[1] - 0.25, UZ1 + 0.25, UX1 - UX0 + 0.6, 0.5, 0.5, "concrete")
+box((UX0 + UX1) * 0.5, BY[3] + 1.0, UZ1 + 0.25, UX1 - UX0 + 0.6, 0.3, 0.5, "concrete", 0.0, False)
+sign("банк «Капитал»", -21.0, BY[3] + 2.4, UZ1 + 0.6, 64)
+# наружная лестница на 2-й этаж с запада и площадка у двери
+stair((-41.6, 0.0, -31.5), (-41.6, BY[1], -40.5), 1.6, "concrete")
+box(-41.4, BY[1] - 0.12, -43.2, 2.6, 0.24, 5.6, "concrete")
+wall(-42.75, -46.0, -42.6, -31.5, 0.0, 1.0, "steel")
+wall(-42.75, -46.0, -40.0, -45.85, BY[1], BY[1] + 1.0, "steel")
+# ---- −1: коридоры, охрана, хранилище, депозитарий, пересчёт; подкоп в паркинг
+y0, hb = BASE_Y, -BASE_Y - 0.4
+wall(BX0 - 0.4, BZ0 - 0.4, BX0, -44.0, y0, -0.4, "concrete")
+wall(BX0 - 0.4, -42.0, BX0, BZ1 + 0.4, y0, -0.4, "concrete")
+wall(BX0 - 0.4, -44.0, BX0, -42.0, -1.0, -0.4, "concrete")
+wall(BX1, BZ0 - 0.4, BX1 + 0.4, BZ1 + 0.4, y0, -0.4, "concrete")
+wall(BX0, BZ0 - 0.4, BX1, BZ0, y0, -0.4, "concrete")
+wall(BX0, BZ1, BX1, BZ1 + 0.4, y0, -0.4, "concrete")
+wall_x(-58.6, -16.0, BX1, y0, hb, (), 0.2)                                   # лестничная клетка
+wall_z(-16.0, -62.0, -58.6, y0, hb, [(-60.3, 1.17, 2.42)], 0.2)
+wall_x(-58.0, BX0, -24.0, y0, hb, (), 0.2)                                    # коридор вдоль z −60
+wall_x(-58.0, -21.0, -16.0, y0, hb, (), 0.2)
+wall_z(-24.0, -58.0, BZ1, y0, hb, [(-46.0, 2.6, 2.6)], 0.8)                   # толстая стена хранилища
+wall_x(-36.0, BX0, -24.0, y0, hb, (), 0.8)
+wall_z(-21.0, -58.0, BZ1, y0, hb, [(-52.0, 1.17, 2.42), (-38.0, 1.17, 2.42)], 0.2)
+wall_x(-48.0, -21.0, BX1, y0, hb, (), 0.2)
+wall_z(-12.0, -48.0, BZ1, y0, hb, [(-42.0, 1.17, 2.42)], 0.15)
+put("vault_door", -25.5, -43.0, 90.0, 1.0, y0, -1, 0.0, True)                 # круглая дверь распахнута внутрь
+for (x, z, yaw) in [(-31.0, -56.6, 0.0), (-37.0, -50.0, 90.0), (-37.0, -40.0, 90.0), (-31.0, -37.0, 180.0)]:
+    put("deposit_wall", x, z, yaw, 1.0, y0, -1, 0.0, True)
+for (x, z) in [(-33.0, -46.0), (-28.0, -50.0), (-28.0, -41.0)]:
+    box(x, y0 + 0.6, z, 1.2, 1.2, 1.0, "steel")
+    loot(x, y0, z + 0.9, "safe", "good", "хранилище: кассеты и слитки")
+for (x, z, yaw) in [(-16.5, -47.4, 0.0), (-20.4, -43.0, 90.0), (-16.5, -36.6, 180.0)]:
+    put("deposit_wall", x, z, yaw, 1.0, y0, -1, 0.0, True)
+loot(-17.0, y0, -42.0, "cells", "good", "депозитарные ячейки")
+box(-8.0, y0 + 0.38, -42.0, 4.0, 0.75, 1.4, "accent")                         # пересчёт
+loot(-8.0, y0, -44.0, "loose", "good", "пересчёт: пачки денег")
+box(-19.0, y0 + 0.38, -54.0, 2.0, 0.75, 0.8, "accent")                        # пост охраны −1
+loot(-19.0, y0, -55.4, "weapon", "weapon", "пост охраны хранилища")
+loot(-30.0, y0, -61.0, "body", "good", "тело копателя в коридоре")
+plan["lamps"] += [[-30.0, -0.9, -46.0, 0.5, 8.0], [-23.0, -0.9, -50.0, 0.4, 7.0], [-12.0, -0.9, -42.0, 0.4, 7.0], [-26.0, -0.9, -60.0, 0.4, 7.0]]
+# подкоп: от пролома в западной стене хранилища до стены паркинга −1 — грунт, крепь из досок, гирлянда
+wall(PIT[2] + 0.4, TUNNEL_Z[0] - 0.3, BX0 - 0.4, TUNNEL_Z[0], BASE_Y, -0.6, "mud")
+wall(PIT[2] + 0.4, TUNNEL_Z[1], BX0 - 0.4, TUNNEL_Z[1] + 0.3, BASE_Y, -0.6, "mud")
+slab("dig_floor", [PIT[2] + 0.4, TUNNEL_Z[0] - 0.3, BX0 - 0.4, TUNNEL_Z[1] + 0.3], BASE_Y, 0.3, "mud")
+slab("dig_roof", [PIT[2] + 0.4, TUNNEL_Z[0] - 0.3, BX0 - 0.4, TUNNEL_Z[1] + 0.3], -0.6, 0.3, "mud")
+x = PIT[2] + 1.5
+while x < BX0 - 1.0:
+    for z in (TUNNEL_Z[0] + 0.1, TUNNEL_Z[1] - 0.1):
+        box(x, BASE_Y + 1.1, z, 0.15, 2.2, 0.15, "wood", 0.0, False)
+    box(x, -0.97, (TUNNEL_Z[0] + TUNNEL_Z[1]) * 0.5, 0.15, 0.12, 2.0, "wood", 0.0, False)
+    x += 2.2
+for x in (PIT[2] + 6.0, PIT[2] + 14.0):
+    plan["lamps"].append([x, -1.4, (TUNNEL_Z[0] + TUNNEL_Z[1]) * 0.5, 0.3, 5.0])
+put("trash_pile", PIT[2] - 2.0, -40.5, 0.0, 0.8, PIT_Y)
+for k in range(3):
+    put("bags", PIT[2] - 2.5 + k * 0.6, -44.8 - k * 0.4, k * 40.0, 1.0, PIT_Y)
+sign("подкоп в банк", PIT[2] - 1.0, -1.2, -43.0, 30)
+FI["stories"].append({"label": "подкоп из паркинга в хранилище банка", "at": [PIT[2] + 6.0, -43.0], "height": -1.6})
+# ---- забор из прутьев: калитка к входу, ворота для инкассаторов, пролом у подкопа (сзади)
+def fence_line(axis: str, c: float, a0: float, a1: float, gaps=()) -> None:
+    a = a0 + 1.25
+    while a < a1:
+        if all(abs(a - g[0]) > g[1] * 0.5 + 1.2 for g in gaps):
+            if axis == "x":
+                put("bar_fence", a, c, 90.0, 1.0, 0.0, -1, 0.0, False)
+            else:
+                put("bar_fence", c, a, 0.0, 1.0, 0.0, -1, 0.0, False)
+        a += 2.5
+fence_line("x", BFZ1, BFX0, BFX1, [(-21.0, 3.0), (1.5, 5.0)])
+fence_line("x", BFZ0, BFX0, BFX1, [(-30.0, 2.5)])
+fence_line("z", BFX0, BFZ0, BFZ1)
+fence_line("z", BFX1, BFZ0, BFZ1, [(-45.0, 4.0)])
+for x in (-35.0, -32.0, -29.0):
+    put("flagpole", x, -23.5, 0.0, 1.0, 0.0, -1, 0.0, True)
+for x in (-14.0, -8.0):
+    put("planter", x, -24.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+put("booth", 3.5, -24.0, 0.0, 1.0, 0.0, -1, 0.0, True)                      # пост охраны у ворот
+put("barrier_arm", 4.6, -21.6, -90.0)
+put("inkassator", -17.0, -6.6, 95.0, 1.0, 0.0, 5, 0.0, True)                 # броневик у бордюра, задние двери открыты
+loot(-14.0, 0.0, -6.8, "car", "good", "инкассаторский броневик: мешки с деньгами")
+loot(-12.6, 0.0, -9.0, "body", "weapon", "тело инкассатора")
+FI["stories"].append({"label": "инкассаторы бросили броневик у банка: кейс с деньгами", "at": [-17.0, -6.6], "height": 3.4})
+# автомойка за банком (перебивает обзор от «Вершины» на парковку) и контейнеры на её задах
+building("CarWash", "автомойка «Блеск» (закрыта)", (12.0, -56.0), (10.0, 20.0), "mass", 1, 4.2, 0.0, 0.0, "", "", 0.0, "West")
+put("container20", 12.0, -71.0, 90.0, 1.0, 0.0, -1, 0.0, True)
+put("container20", 12.2, -71.0, 92.0, 1.0, 2.62, -1, 0.0, False)
+sign("автомойка «Блеск»", 12.0, 5.0, -45.6, 40)
 
 # ================================================================== западное плечо, юг: остановка с площадкой, дом 7, «Ярус»
 # остановка и ларьки на тротуаре, за ними — площадка 18 м до дома (замечание владельца)
@@ -603,7 +1053,7 @@ u("U03_01_lightbox", -186.0, F - 1.0, 180.0)
 put("bus_stop", -192.0, F - 3.0, 180.0, 1.0, 0.0, -1, 0.0, True)
 u("R05_kiosk", -200.0, F + 2.2, 180.0, 1.0, 0.0, True)
 u("U05_02_coffee_kiosk", -205.0, F + 2.0, 180.0, 1.0, 0.0, True)
-surface("plaza_stop", "court", -210.0, F, -166.0, 34.0, 0.0, 0.1)
+surface("plaza_stop", "walk", -210.0, F, -166.0, 34.0, 0.0, 0.1)
 for (x, z) in [(-196, 24), (-182, 24), (-172, 26)]:
     u("U10_04_bench_stone", x, z, 0.0, 1.0, 0.0, True)
     u("U02_02_planter", x, z + 3.5, 0.0, 1.0, 0.0, True)
@@ -612,6 +1062,7 @@ for (x, z) in [(-204, 28), (-176, 30), (-188, 31)]:
 u("U19_04_square_light", -190.0, 27.0, 0.0)
 u("U10_03_wayfinding", -168.0, 19.0, 180.0)
 building("Minimarket", "минимаркет «Весна»", (-170.0, 22.0), (12.0, 10.0), "hall", 1, STORY_RETAIL, 180.0, 0.0, "shop", "grocery", 0.5, "South")
+upper_floor("минимаркет «Весна»", -170.0, 22.0, 12.0, 10.0, 180.0, roof=True)
 flats("House7", "дом 7 — 12 этажей (закрыт)", (-188.0, 51.0), 12, 0, 180.0, (36.0, 26.0), region="South", loot=0.0)
 for i in range(6):
     put("garage", -205.0 + i * 3.4, 74.0, 0.0, 1.0, 0.0, -1, 0.0, True)
@@ -665,8 +1116,40 @@ for i in range(4):
 for i in range(2):
     u("R02_dumpster", -70.0, 92.0 + i * 3.0, 90.0, 1.0, 0.0, True)
 put("pallets", -96.0, 104.0, 20.0)
+# зал «Яруса» (владелец 2026-10-24: «не хватает наполненности гипермаркета»): ряды стеллажей на всю ширину, линия касс с
+# номерами на подвесах, ограждения очередей, тележки, кафе, мешки и колючка у входа, высокие стеллажи склада
+for x in (-137.0, -131.0, -125.0, -79.0, -73.0, -67.0):
+    box(x, 0.95, 69.0, 1.0, 1.9, 18.0, "accent")
+    for dz in (-5.0, 5.0):
+        loot(x + 0.9, 0.0, 69.0 + dz, "loose", "common", "стеллаж «Яруса»")
+for k, x in enumerate([-138.0, -134.0, -130.0, -126.0, -122.0, -82.0, -78.0, -74.0, -70.0, -66.0]):
+    box(x, 0.5, 53.0, 0.7, 1.0, 2.6, "accent")
+    box(x, 4.4, 53.0, 0.9, 1.1, 0.06, "paint_blue", 0.0, False)
+    box(x, 5.4, 53.0, 0.04, 1.0, 0.04, "steel", 0.0, False)
+    sign(str(k + 1), x, 4.4, 52.9, 30)
+    if k % 3 == 0:
+        loot(x + 0.6, 0.0, 53.0, "register", "common", "касса")
+for x in range(-138, -120, 4):
+    put("ped_fence", x + 2.0, 51.2, 90.0)
+for x in (-104.0, -100.0, -98.5):
+    put("cart_row", x, 50.6, 90.0)
+for x in (-111.5, -92.5):
+    put("sandbags", x, 50.8, 90.0, 1.0, 0.0, -1, 0.0, True)
+    box(x + (-2.4 if x < -100 else 2.4), 0.3, 49.6, 3.0, 0.6, 0.6, "steel", 0.0, False)
+for (x, z) in [(-136.0, 56.8), (-132.0, 57.0), (-128.0, 56.6)]:
+    put("cafe_table", x, z, rng.uniform(0, 90))
+sign("кафе", -132.0, 4.4, 55.5, 36)
+for x in (-112.0, -92.0):
+    put("rack_high", x, 83.15, 90.0, 1.0, 0.0, -1, 0.0, True)
+    loot(x, 0.0, 84.0, "crate", "common", "склад «Яруса»")
+loot(-140.0, 0.0, 75.0, "med", "med", "аптечный уголок «Яруса»")
+loot(-90.0, 0.0, 86.0, "safe", "good", "кабинет администратора: сейф")
+loot(-112.0, 0.0, 60.0, "body", "common", "тело мародёра в зале")
 for i in range(32):
-    put("po2", -142.0 + 1.25 + i * 2.5, 108.5, 90.0)
+    x = -142.0 + 1.25 + i * 2.5
+    if -104.0 < x < -96.0:                                      # ворота к стройке
+        continue
+    put("po2", x, 108.5, 90.0)
 for i in range(22):
     z = smz1 - 40.0 + 1.25 + i * 2.5
     if z < smz1 or 95.0 < z < 100.5:
@@ -674,26 +1157,174 @@ for i in range(22):
     put("po2", -61.6, z, 0.0)
 sign("калитка в служебный проезд", -61.6, 3.2, 97.5, 40)
 surface("service_lane", "road", -60.0, F, -50.0, 112.0)
-sign("служебный проезд · к насыпи", -55.0, 4.0, 104.0, 44)
+sign("служебный проезд · к скверу", -55.0, 4.0, 104.0, 44)
 
-# ================================================================== внутренний угол поворота: сквер
-surface("square_a", "court", -46.0, 18.0, -2.0, 108.0, 0.0, 0.1)
-surface("square_b", "court", -2.0, 55.0, 37.0, 108.0, 0.0, 0.1)
-curve_strip(-38.0, -16.6, "court", 0.1, 0.0, 16)
+# ------------------------------------------------------------------ стройка за «Ярусом»
+# Владелец 2026-10-24: «стройку передвинуть за ТЦ «Ярус», по размерам как на кадре» (Streets: каркас 9–10 этажей Г-образно,
+# кран, синий профнастил, бытовки). Участок x −152…−62, z 112…200: ворота из разгрузки «Яруса», ворота в сквер, пролом
+# в южном заборе — выход «Пролом в заборе стройки».
+SITE = [-152.0, 112.0, -62.0, 200.0]
+surface("site", "mud", SITE[0], SITE[1], SITE[2], SITE[3], 0.0, 0.05)
+building("Site_Skeleton", "недострой ЖК, 9 эт.", (-108.0, 150.0), (64.0, 16.0), "skeleton", 9, 3.1, 0.0, 0.0, "", "", 0.0, "South")
+building("Site_Skeleton_W", "недострой ЖК, крыло 7 эт.", (-84.0, 174.0), (16.0, 28.0), "skeleton", 7, 3.1, 0.0, 0.0, "", "", 0.0, "South")
+building("Site_Crane", "", (-128.0, 176.0), (6.0, 6.0), "crane", 1, 3.0, 0.0, 0.0, "", "", 0.0, "South")
+
+
+def site_fence(axis: str, c: float, a0: float, a1: float, gaps=()) -> None:
+    a = a0 + 1.5
+    while a < a1:
+        if all(abs(a - g[0]) > g[1] * 0.5 + 1.5 for g in gaps):
+            put("fence", a if axis == "x" else c, c if axis == "x" else a, 90.0 if axis == "x" else 0.0, 1.0, 0.0, 3, 0.0, False)
+        a += 3.0
+
+
+site_fence("x", SITE[1] + 0.6, SITE[0], SITE[2], [(-100.0, 6.0)])
+site_fence("x", SITE[3] - 0.6, SITE[0], SITE[2], [(-140.0, 3.0)])
+site_fence("z", SITE[0] + 0.6, SITE[1], SITE[3])
+site_fence("z", SITE[2] - 0.6, SITE[1], SITE[3], [(150.0, 5.0), (184.0, 2.5)])
+sign("стройка · ворота", -100.0, 3.5, SITE[1] + 0.6, 40)
+sign("стройка · ворота в сквер", SITE[2] - 0.6, 3.5, 150.0, 40)
+sign("пролом в заборе", -140.0, 3.0, SITE[3] - 1.0, 40)
+# бытовки в два яруса, туалеты, контейнеры, материалы, техника, прожекторы
+for i in range(3):
+    put("cabin", -146.0, 120.0 + i * 6.4, 90.0, 1.0, 0.0, -1, 0.0, True)
+    put("cabin", -146.0, 120.0 + i * 6.4, 90.0, 1.0, 2.64, -1, 0.0, False)
+for i in range(3):
+    put("outhouse", -146.5, 141.0 + i * 1.4, 90.0)
+for (x, z, yaw) in [(-72.0, 120.0, 0.0), (-132.0, 192.0, 90.0), (-112.0, 192.0, 90.0)]:
+    put("container20", x, z, yaw, 1.0, 0.0, -1, 0.0, True)
+put("container20", -72.2, 120.3, 2.0, 1.0, 2.62, -1, 0.0, False)
+for (kit, x, z, yaw) in [("rebar", -120.0, 120.0, 10.0), ("pipes", -96.0, 121.0, 90.0), ("reel", -84.0, 128.0, 0.0),
+                         ("pallets", -110.0, 126.0, 30.0), ("pallets", -108.5, 126.4, -20.0), ("slab", -128.0, 130.0, 85.0),
+                         ("slab", -128.2, 130.1, 82.0), ("dump_truck", -98.0, 186.0, 70.0), ("tractor", -140.0, 168.0, 20.0),
+                         ("trash_pile", -68.0, 168.0, 0.0), ("bags", -70.0, 172.0, 30.0)]:
+    put(kit, x, z, yaw, 1.0, 0.2 if kit == "slab" and x < -128.1 else 0.0, -1, 0.0, kit in ("pipes", "reel", "pallets", "dump_truck", "tractor", "slab"))
+for (x, z) in [(-118.0, 168.0), (-66.0, 140.0)]:
+    put("mast", x, z, 0.0)
+# леса на южном фасаде каркаса: стойки, настилы, перила — вертикаль с ограниченным обзором
+for k in range(18):
+    x = -138.0 + k * 2.4
+    box(x, 10.0, 158.8, 0.06, 20.0, 0.06, "steel", 0.0, False)
+    box(x, 10.0, 160.0, 0.06, 20.0, 0.06, "steel", 0.0, False)
+for lvl in range(1, 7):
+    box(-117.6, lvl * 3.1 - 0.05, 159.4, 41.0, 0.06, 1.3, "rust", 0.0, lvl * 3.1 < 4.0)
+    box(-117.6, lvl * 3.1 + 1.0, 160.05, 41.0, 0.05, 0.05, "steel", 0.0, False)
+for (x, y, z, kind, tier, note) in [(-146.0, 0.0, 117.0, "cabinet", "common", "бытовка прораба"),
+                                    (-146.0, 2.64, 127.0, "safe", "good", "бытовка: сейф с зарплатой"),
+                                    (-100.0, 0.0, 124.0, "crate", "common", "инструмент"),
+                                    (-80.0, 3.1 * 4 + 0.1, 150.0, "weapon", "weapon", "лёжка на 5-м этаже каркаса"),
+                                    (-130.0, 3.1 * 8 + 0.1, 146.0, "body", "good", "тело снайпера ЧВК на 9-м этаже"),
+                                    (-90.0, 0.0, 184.0, "car", "common", "кабина самосвала"),
+                                    (-120.0, 0.0, 196.0, "loose", "common", "у пролома")]:
+    loot(x, y, z, kind, tier, note)
+FI["stories"].append({"label": "стройка за «Ярусом»: каркас, кран, бытовки", "at": [-108.0, 170.0], "height": 6.0})
+
+# ================================================================== внутренний угол поворота: сквер до насыпи
+# Владелец 2026-10-24: «сквер слишком лысый… протащить до самого края карты, убрав стройку» — по кадрам Streets of Tarkov:
+# площадь с памятником, фонарями-канделябрами, ограждениями и телами под простынями; приподнятые газоны в подпорных
+# стенках с граффити; кафе; детская площадка и баскетбол у забора стройки; роща у насыпи, куда упали вагоны.
+surface("square_a", "walk", -50.0, 18.0, -2.0, 108.0, 0.0, 0.1)
+surface("square_b", "walk", -2.0, 55.0, XS - F, 108.0, 0.0, 0.1)
+surface("square_c", "walk", -50.0, 108.0, XS - F, 248.0, 0.0, 0.1)
+curve_strip(-38.0, -16.6, "walk", 0.1, 0.0, 16)
+# площадь с памятником: круг брусчатки, канделябры кольцом, ограждения, тела под простынями, клумбы
 put("monument", -10.0, 70.0, 0.0, 1.0, 0.0, -1, 0.0, True)
-sign("сквер · сухой фонтан", -10.0, 5.0, 70.0, 44)
-for (x, z) in [(-40, 28), (-40, 60), (-40, 95), (-20, 100), (10, 100), (25, 75), (-25, 40), (5, 40)]:
-    put("tree_birch", x, z, rng.uniform(0, 360), 1.2)
-for (x, z, yaw) in [(-18, 66, 90), (-18, 74, 90), (-2, 66, -90), (-2, 74, -90), (-10, 58, 0), (-10, 82, 180)]:
+sign("сквер · памятник", -10.0, 6.0, 70.0, 44)
+for k in range(8):
+    a = k * math.pi / 4.0
+    put("ornate_lamp", -10.0 + 11.0 * math.cos(a), 70.0 + 11.0 * math.sin(a), math.degrees(a), 1.0, 0.0, -1, 0.0, True)
+for k in range(9):
+    a = 0.4 + k * 0.42
+    put("crowd_barrier", -10.0 + 7.0 * math.cos(a), 70.0 + 7.0 * math.sin(a), -math.degrees(a), 1.0, 0.0, -1, 0.0, True)
+for (x, z, yaw) in [(-19.0, 62.0, 20.0), (-21.0, 64.5, 15.0), (-18.5, 59.0, 30.0), (0.5, 79.0, 110.0)]:
+    put("body_sheet", x, z, yaw)
+loot(-17.0, 0.0, 61.0, "body", "med", "тела под простынями: санитары не успели")
+for (x, z) in [(-28.0, 58.0), (8.0, 58.0), (-28.0, 84.0), (8.0, 84.0)]:
+    put("flowerbed", x, z, 0.0)
+for (x, z, yaw) in [(-18, 82, 90), (-2, 82, -90), (-10, 52, 0), (-10, 90, 180)]:
     u("U10_04_bench_stone", x, z, yaw, 1.0, 0.0, True)
-for (x, z) in [(-28, 50), (8, 52), (-28, 88), (14, 88)]:
-    u("U19_04_square_light", x, z, 0.0)
-    u("U09_04_plaza_seat", x + 3.0, z, 90.0, 1.0, 0.0, True)
+for (x, z) in [(-40, 28), (-44, 60), (-44, 96), (-20, 102), (16, 100), (28, 70), (-25, 40), (5, 40)]:
+    put("tree_round", x, z, rng.uniform(0, 360), rng.uniform(0.9, 1.2))
+for (x, z) in [(-30, 44), (16, 46), (-40, 70), (24, 86), (-32, 100)]:
+    put("bush_big", x, z, rng.uniform(0, 360), rng.uniform(0.9, 1.2))
 u("U05_02_coffee_kiosk", 20.0, 95.0, -90.0, 1.0, 0.0, True)
 put("food_kiosk", -38.0, 78.0, 90.0, 1.0, 0.0, -1, 0.0, True)
 put("tent", -24.0, 84.0, 20.0)
 put("tent", -30.0, 90.0, -30.0)
+loot(-26.0, 0.0, 86.5, "backpack", "common", "палатка в сквере")
 u("U10_03_wayfinding", -44.0, 20.0, 180.0)
+
+
+def raised_lawn(x0: float, z0: float, x1: float, z1: float, trees: int, bushes: int, graffiti_side: str = "") -> None:
+    """Приподнятый газон в подпорной стенке 0,7 м: деревья и большие кусты на нём (кадр сквера Streets)."""
+    for (a0, b0, a1, b1) in [(x0, z0, x1, z0 + 0.3), (x0, z1 - 0.3, x1, z1), (x0, z0, x0 + 0.3, z1), (x1 - 0.3, z0, x1, z1)]:
+        wall(a0, b0, a1, b1, 0.0, 0.75, "concrete")
+    box((x0 + x1) * 0.5, 0.35, (z0 + z1) * 0.5, x1 - x0 - 0.6, 0.7, z1 - z0 - 0.6, "grass")
+    for (cx, cz) in [(x0, z0), (x1, z0), (x0, z1), (x1, z1), ((x0 + x1) * 0.5, z0), ((x0 + x1) * 0.5, z1)]:
+        FI["cover"].append([round(cx, 1), round(cz, 1)])
+    for _ in range(trees):
+        put("tree_round", rng.uniform(x0 + 2, x1 - 2), rng.uniform(z0 + 2, z1 - 2), rng.uniform(0, 360), rng.uniform(0.9, 1.25), 0.7)
+    for _ in range(bushes):
+        put("bush_big", rng.uniform(x0 + 1.5, x1 - 1.5), rng.uniform(z0 + 1.5, z1 - 1.5), rng.uniform(0, 360), rng.uniform(0.8, 1.2), 0.7)
+    if graffiti_side == "w":
+        box(x0 - 0.02, 0.4, (z0 + z1) * 0.5, 0.04, 0.5, (z1 - z0) * 0.6, "graffiti", 0.0, False)
+    elif graffiti_side == "s":
+        box((x0 + x1) * 0.5, 0.4, z1 + 0.02, (x1 - x0) * 0.6, 0.5, 0.04, "graffiti", 0.0, False)
+
+
+# газоны в подпорных стенках с граффити, кафе «Сквер» в два этажа
+raised_lawn(-22.0, 112.0, -4.0, 138.0, 3, 5, "w")
+raised_lawn(2.0, 108.0, 22.0, 128.0, 3, 4, "s")
+raised_lawn(14.0, 150.0, 34.0, 176.0, 2, 6, "w")
+building("SquareCafe", "кафе «Сквер»", (-38.0, 126.0), (14.0, 9.0), "hall", 1, STORY_RETAIL, 0.0, 0.0, "shop", "kiosk", 0.6, "South")
+upper_floor("кафе «Сквер»", -38.0, 126.0, 14.0, 9.0, 0.0, roof=True)
+for (x, z) in [(-30.0, 134.0), (-34.0, 135.5), (-41.0, 134.5)]:
+    put("cafe_table", x, z, rng.uniform(0, 90))
+# детская площадка (кадр Streets: качели, деревянный комплекс с крышей, резиновое покрытие) у забора стройки
+surface("playground_sq", "walk", -49.0, 150.0, -24.0, 178.0, 0.0, 0.12)
+put("swing", -44.0, 156.0, 90.0)
+put("swing", -44.0, 162.0, 90.0)
+put("slide", -30.0, 156.0, 0.0)
+put("sandbox", -36.0, 172.0, 0.0)
+put("seesaw", -28.0, 170.0, 30.0)
+put("climber", -40.0, 170.0, 0.0, 1.4)
+for (x, z) in [(-33.0, 163.0)]:                                     # деревянный комплекс с крышей-шатром
+    for dx in (-1.2, 1.2):
+        for dz in (-1.2, 1.2):
+            box(x + dx, 1.4, z + dz, 0.14, 2.8, 0.14, "wood")
+    box(x, 1.2, z, 2.6, 0.1, 2.6, "wood")
+    box(x, 3.3, z, 3.0, 1.0, 3.0, "accent", 45.0, False)
+for x in (-47.0, -26.0):
+    u("U02_03_bench_tube", x, 176.0, 180.0, 1.0, 0.0, True)
+loot(-46.0, 0.0, 176.5, "backpack", "common", "детская площадка: брошенный рюкзак")
+# баскетбол: сетка, кольца, разметка
+surface("court_bb", "court", -18.0, 152.0, 8.0, 180.0, 0.0, 0.12)
+for (x0, z0, x1, z1) in [(-18.0, 152.0, 8.0, 152.0), (-18.0, 180.0, 8.0, 180.0)]:
+    for k in range(int((x1 - x0) / 2.5)):
+        put("chainlink", x0 + 1.25 + k * 2.5, z0, 90.0)
+for x in (-18.0, 8.0):
+    for k in range(int(28 / 2.5)):
+        if 164.0 < 152.0 + 1.25 + k * 2.5 < 168.0:
+            continue
+        put("chainlink", x, 152.0 + 1.25 + k * 2.5, 0.0)
+put("hoop", -5.0, 154.0, 0.0)
+put("hoop", -5.0, 178.0, 180.0)
+box(-5.0, 0.13, 166.0, 22.0, 0.01, 0.1, "stripe", 0.0, False)
+# роща у насыпи: лиственные деревья, кусты, гаражи, трансформаторная, баки
+surface("grove_lawn", "grass", -50.0, 184.0, XS - F, 248.0, 0.0, 0.12)
+for (x0, z0, x1, z1) in [(-50.0, 18.0, -34.0, 48.0), (16.0, 44.0, 34.0, 56.0), (-50.0, 88.0, -34.0, 100.0)]:
+    surface("lawn_%d_%d" % (x0, z0), "grass", x0, z0, x1, z1, 0.0, 0.12)
+for _ in range(26):
+    x, z = rng.uniform(-48.0, 34.0), rng.uniform(186.0, 226.0)
+    if -50.0 < x < -26.0 and 192.0 < z < 200.0:
+        continue
+    put("tree_round" if rng.random() < 0.6 else "bush_big", x, z, rng.uniform(0, 360), rng.uniform(0.85, 1.25))
+for i in range(5):
+    put("garage", -46.0 + i * 3.4, 196.0, 180.0, 1.0, 0.0, -1, 0.0, True)
+put("ktp", 22.0, 196.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+for i in range(2):
+    u("R02_dumpster", 26.0, 202.0 + i * 3.0, 90.0, 1.0, 0.0, True)
+loot(-30.0, 0.0, 194.0, "crate", "common", "открытый гараж")
 
 # ================================================================== внешний угол поворота: ЖК «Вершина» (Москва-Сити) и площадь
 STY = [18.0, -88.0, 96.0, -28.0]                                 # стилобат
@@ -719,8 +1350,8 @@ u("U12_05_triangle_panel", STY[0] - 0.2, -60.0, -90.0, 1.0, 1.5)
 u("U12_05_triangle_panel", STY[0] - 0.2, -50.0, -90.0, 1.0, 1.5)
 sign("ЖК «Вершина» · четыре башни", 57.0, 11.0, STY[3] + 0.8, 64)
 # площадь перед стилобатом до поворота: террасы, пилон, сиденья, светильники, стеклянные навесы, баррикада и пункт эвакуации
-surface("plaza_v", "court", 0.0, -28.0, 110.0, -6.0, 0.0, 0.1)
-surface("plaza_v2", "court", 60.0, -6.0, 110.0, 50.0, 0.0, 0.1)
+surface("plaza_v", "walk", 0.0, -28.0, 110.0, -6.0, 0.0, 0.1)
+surface("plaza_v2", "walk", 60.0, -6.0, 110.0, 50.0, 0.0, 0.1)
 u("U19_02_terrace_stairs", 100.0, -18.0, -90.0, 1.0, 0.0, False)
 u("U09_03_logo_pylon", 8.0, -24.0, face(-1.0, 1.0), 1.0, 0.0, True)
 for (x, z) in [(20, -16), (34, -12), (90, -10), (96, 8)]:
@@ -769,6 +1400,33 @@ for k in range(5):
 u("U15_04_detour_board", 68.0, 30.0, -60.0, 1.0, 0.0, True)
 put("bus_wreck", 104.0, 42.0, 20.0, 1.0, 0.0, 4, 0.0, True)
 FI["stories"].append({"label": "пункт эвакуации жителей: палатка, носилки, коляски", "at": [82.0, 20.0], "height": 6.0})
+# владелец 2026-10-24: «пункт эвакуации возле «Вершины» — до самого края карты, несколько больших крытых армейских палаток»
+surface("evac_field", "walk", 110.0, -16.0, 158.0, 58.0, 0.0, 0.06)
+for (x, z, yaw, sc) in [(114.0, 2.0, 0.0, 1.0), (126.0, 2.0, 0.0, 1.0), (138.0, 2.0, 0.0, 1.0), (150.0, 2.0, 0.0, 1.0),
+                        (118.0, 30.0, 0.0, 1.25), (134.0, 30.0, 0.0, 1.25), (150.0, 30.0, 0.0, 1.25), (132.0, 50.0, 90.0, 1.4)]:
+    put("army_tent", x, z, yaw, sc, 0.0, -1, 0.0, True)
+for (x, z, kind, tier, note) in [(114.0, 0.0, "med", "med", "палатка медпункта"), (126.0, 4.0, "crate", "common", "вещи эвакуированных"),
+                                 (138.0, 0.0, "suitcase", "common", "чемоданы"), (150.0, 4.0, "weapon", "weapon", "оружейка ЧВК"),
+                                 (118.0, 28.0, "med", "med", "госпиталь"), (134.0, 32.0, "crate", "good", "склад гуманитарки"),
+                                 (150.0, 30.0, "body", "weapon", "тело бойца ЧВК"), (132.0, 50.0, "safe", "good", "штаб: сейф с документами")]:
+    loot(x, 0.0, z, kind, tier, note)
+put("truck", 104.0, 47.0, 30.0, 1.0, 0.0, -1, 0.0, True)
+put("truck", 155.5, 16.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+put("armored_truck", 113.0, 49.0, 75.0, 1.0, 0.0, -1, 0.0, True)
+for (x, z) in [(144.0, 16.0), (108.0, 16.0)]:
+    put("pallets", x, z, 15.0)
+    put("pallets", x + 1.4, z + 0.3, -10.0)
+for (x, z) in [(120.0, 16.0), (146.0, 44.0)]:
+    put("mast", x, z, 0.0)
+for (x, z) in [(156.0, -10.0), (102.0, -12.0)]:
+    put("sandbag_post", x, z, 180.0, 1.0, 0.0, -1, 0.0, True)
+for k in range(6):
+    u("U09_01_hedgehog", 112.0 + k * 7.0, -14.0, rng.uniform(0, 90), 1.0, 0.0, True)
+for k in range(6):
+    put("barrel", 140.0 + (k % 3) * 0.7, 46.0 + (k // 3) * 0.7, 0.0)
+put("flagpole", 124.0, 16.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+sign("пункт эвакуации · штаб ЧВК", 132.0, 6.0, 50.0, 44)
+FI["stories"].append({"label": "армейские палатки: эвакуация жителей, потом штаб ЧВК", "at": [132.0, 20.0], "height": 5.0})
 
 # ================================================================== южное плечо, восток: парковка, корпус 3, «Меридиан», тупик
 surface("lot_e3", "parking", XS + F + 2.0, 60.0, 98.0, 232.0, 0.0, 0.05)
@@ -796,70 +1454,97 @@ u("U09_03_logo_pylon", 92.0, 166.0, -90.0, 1.0, 0.0, True)
 for z in (160.0, 163.0):
     put("flagpole", 94.0, z, 0.0, 1.0, 0.0, -1, 0.0, True)
 u("U14_04_entry_steps", 104.0, 30.0, 180.0, 1.0)                 # ступени к террасе площади «Вершины»
+# владелец 2026-10-24: «по правой стороне карта просматривается насквозь — пусть обзору что-то мешает через 50–90 м»:
+# контейнеры и ларьки в проезде парковки, гаражи между корпусом 3 и «Меридианом», гаражи вдоль двора корпуса 3
+put("container40", 86.5, 140.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+put("container40", 86.6, 139.6, 1.5, 1.0, 2.62, -1, 0.0, False)
+put("container20", 86.5, 200.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+put("container20", 86.4, 200.3, -2.0, 1.0, 2.62, -1, 0.0, False)
+for z in (92.0, 176.0, 222.0):
+    put("kiosk", 86.5, z, 90.0, 1.0, 0.0, -1, 0.0, True)
+for i in range(8):
+    put("garage", 128.0 + i * 3.4, 158.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+for i in range(10):
+    put("garage", 154.0, 78.0 + i * 3.4, -90.0, 1.0, 0.0, -1, 0.0, True)
+put("ktp", 106.0, 160.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+loot(140.0, 0.0, 156.0, "crate", "common", "гараж открыт")
+loot(86.5, 0.0, 145.5, "crate", "common", "контейнер на парковке")
 u("U08_02_glass_doors", 120.0, 172.8, 180.0, 1.0, 0.0, True)
-# тупик: шумозащитный экран поперёк, самосвалы, блоки, объезд (кадр 11)
-for k in range(10):
-    u("U11_01_sound_fence", XS - 15.0 + k * 3.2, 262.0, 0.0, 1.0, 0.0, True)
-put("truck", XS - 4.0, 252.0, 80.0, 1.0, 0.0, -1, 0.0, True)
-put("truck", XS + 6.0, 256.0, 100.0, 1.0, 0.0, -1, 0.0, True)
-u("U11_03_dump_bed", XS - 8.0, 248.0, 90.0, 1.0, 0.0, True)
-for (x, z) in [(XS - 12, 244), (XS + 12, 246), (XS, 242)]:
-    u("U11_05_water_barrier", x, z, 90.0 + rng.uniform(-20, 20), 1.0, 0.0, True)
-for k in range(4):
-    u("U07_03_guide_board", XS - 6.0 + k * 4.0, 240.0, 0.0, 1.0, 0.0, True)
-u("U15_04_detour_board", XS + 2.0, 238.0, 0.0, 1.0, 0.0, True)
-for k in range(6):
-    u("U01_04_cone", XS - 8.0 + k * 3.0, 236.5, rng.uniform(0, 360))
-# выезд к тупику с востока: брошенный автобус, фургон, красно-белые блоки — укрытия на подходе от южного появления
-put("bus_city", 128.0, 259.0, 18.0, 1.0, 0.0, 9, 0.0, True)
-put("van", 101.0, 243.0, -32.0, 1.0, 0.0, 6, 0.0, True)
+# ---- насыпь железной дороги на южном краю и тоннель под ней — выход в следующую локацию (владелец 2026-10-24:
+# «выход на месте тупика на юге, там начинается тоннель в следующую локацию, сверху — железная дорога с упавшим по
+# склону составом, некоторые вагоны упали даже в сквер»). Откос 10 м под 31°, верх на 6 м, путь в два направления.
+TUN_X0, TUN_X1 = XS - 10.5, XS + 10.5
+EMB_H = 6.0
+for (x0, x1) in [(-62.0, TUN_X0), (TUN_X1, 160.0)]:
+    plan["ramps"].append({"x0": x0, "x1": x1, "z0": EMB_Z0, "z1": EMB_Z1, "y0": 0.0, "y1": EMB_H, "mat": "ground"})
+    wall(x0, EMB_Z1, x1, ZS_END + 15.0, 0.0, EMB_H, "ground")
+    box((x0 + x1) * 0.5, EMB_H + 0.2, 266.5, x1 - x0, 0.4, 9.0, "rock")
+slab("tunnel_roof", [TUN_X0, EMB_Z1, TUN_X1, ZS_END + 15.0], EMB_H, 1.0, "concrete")
+for x in (TUN_X0 - 0.6, TUN_X1 + 0.6):
+    box(x, 3.4, EMB_Z1 - 0.4, 1.2, 6.8, 0.8, "concrete")
+box(XS, 5.6, EMB_Z1 - 0.4, TUN_X1 - TUN_X0 + 2.4, 1.6, 0.8, "concrete")
+sign("тоннель · выезд из района", XS, 7.4, EMB_Z1 - 1.0, 56)
+surface("tunnel_road", "road", XS - RH, ZS_END, XS + RH, ZS_END + 15.0)
+box(XS, 3.0, ZS_END + 15.2, TUN_X1 - TUN_X0, 6.0, 0.4, "dark")
+for z in range(262, 290, 7):
+    plan["lamps"].append([XS, 4.6, float(z), 0.35, 9.0])
+for z in (EMB_Z1 + 6.0, EMB_Z1 + 11.0):                           # рельсы двух путей поверх балласта
+    for dz in (-0.76, 0.76):
+        box(-0.0 + 49.0, EMB_H + 0.5, z + dz, 222.0, 0.15, 0.08, "steel", 0.0, False)
+for x in range(-56, 160, 30):
+    if TUN_X0 - 2 < x < TUN_X1 + 2:
+        continue
+    box(float(x), EMB_H + 4.2, EMB_Z1 + 2.0, 0.3, 8.0, 0.3, "steel")   # опоры контактной сети
+# очередь машин в тоннель по западной полосе: восточная свободна к выходу
+put("bus_city", XS - 4.8, 268.0, 182.0, 1.0, 0.0, 8, 0.0, True)
+put("car", XS - 5.0, 257.0, 176.0, 1.0, 0.0, 2, 0.0, True)
+put("van", XS - 4.6, 250.5, 172.0, 1.0, 0.0, 9, 0.0, True)
+for (x, z) in [(XS + 3.0, 246.0), (XS + 6.0, 247.0)]:
+    put("water_barrier", x, z, 80.0, 1.0, 0.0, -1, 0.0, True)
+loot(XS - 1.5, 0.0, 262.0, "body", "good", "тело ЧВК у въезда в тоннель")
+# состав: восточная часть ещё на путях, над порталом вагон повис, западная — по откосу и в сквер
+for (kit, x, z, yaw, dy, roll) in [("loco_tem", 150.0, 264.0, 88.0, EMB_H, 0.0), ("wagon_box", 132.5, 264.3, 91.0, EMB_H, 0.0),
+                                   ("wagon_box", 117.5, 264.8, 93.0, EMB_H, 6.0), ("wagon_box", 102.0, 265.5, 96.0, EMB_H - 0.1, 14.0),
+                                   ("wagon_box", 87.0, 266.0, 99.0, EMB_H - 0.3, 25.0), ("wagon_box", 72.0, 263.0, 70.0, EMB_H - 0.2, 18.0),
+                                   ("wagon_box", XS, 260.5, 78.0, EMB_H, 32.0), ("wagon_box", 34.0, 258.5, 62.0, EMB_H - 1.2, 40.0),
+                                   ("wagon_box", 20.0, 252.0, 45.0, 2.6, 65.0), ("wagon_box", 6.0, 240.0, 30.0, 0.0, 90.0),
+                                   ("wagon_pass", -14.0, 236.0, 110.0, 0.0, 90.0), ("wagon_box", -34.0, 242.0, 70.0, 0.0, 95.0)]:
+    put(kit, x, z, yaw, 1.0, dy, -1, roll, True)
+for (kit, x, z, yaw, roll) in [("container20", -2.0, 227.0, 35.0, 90.0), ("container20", 12.0, 231.0, 70.0, 0.0), ("pallets", -24.0, 229.0, 20.0, 0.0),
+                               ("pallets", -22.5, 230.0, 60.0, 0.0), ("boxes", 2.0, 233.0, 0.0, 0.0), ("log_pile", -40.0, 234.0, 30.0, 0.0)]:
+    put(kit, x, z, yaw, 1.0, 0.0, -1, roll, kit in ("container20", "pallets"))
+for (x, z, kind, tier, note) in [(8.0, 236.0, "crate", "good", "груз из вагона"), (-12.0, 232.0, "suitcase", "common", "пассажирский вагон"),
+                                 (-30.0, 238.0, "crate", "common", "груз из вагона"), (14.0, 229.0, "crate", "good", "контейнер вскрыт"),
+                                 (-6.0, 241.0, "body", "common", "тело мародёра у вагона")]:
+    loot(x, 0.0, z, kind, tier, note)
+FI["stories"].append({"label": "состав сошёл с насыпи: вагоны в сквере", "at": [0.0, 236.0], "height": 6.0})
+# выезд к тоннелю с востока: брошенный автобус, фургон, красно-белые блоки — укрытия на подходе от южного появления
+put("bus_city", 128.0, 236.0, 18.0, 1.0, 0.0, 9, 0.0, True)
+put("van", 101.0, 240.0, -32.0, 1.0, 0.0, 6, 0.0, True)
 for k in range(3):
-    put("jersey_rw", 114.0 + k * 3.2, 252.5 - k * 0.9, 74.0, 1.0, 0.0, -1, 0.0, True)
-put("ad_column", 140.0, 247.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+    put("jersey_rw", 112.0 + k * 3.2, 228.0 - k * 0.9, 74.0, 1.0, 0.0, -1, 0.0, True)
+put("ad_column", 146.0, 226.0, 0.0, 1.0, 0.0, -1, 0.0, True)
 for (x, z, w, d, fl) in [(40, 300, 30, 18, 20), (90, 302, 24, 20, 26), (140, 300, 26, 18, 16)]:
-    building("Outside_S%d" % x, "", (x, z), (w, d), "mass", fl, 3.0, 0.0, 0.0, "", "", 0.0, "Outside")
+    building("Outside_S%d" % x, "", (x, z + 8.0), (w, d), "mass", fl, 3.0, 0.0, 0.0, "", "", 0.0, "Outside")
 for (x, z, w, d, fl) in [(196, -60, 20, 26, 22), (198, 40, 18, 24, 18), (196, 150, 22, 26, 25), (-20, -150, 24, 18, 21), (60, -152, 30, 20, 16)]:
     building("Outside_E%d_%d" % (abs(x), abs(z)), "", (x, z), (w, d), "mass", fl, 3.0, 0.0, 0.0, "", "", 0.0, "Outside")
 
 # ================================================================== южное плечо, запад: минимаркет, стройка
 building("Minimarket2", "продукты «24 часа»", (31.0, 128.0), (16.0, 10.0), "hall", 1, STORY_RETAIL, 90.0, 0.0, "shop", "grocery", 0.5, "South")
+upper_floor("продукты «24 часа»", 31.0, 128.0, 16.0, 10.0, 90.0, roof=True)
 u("U05_03_warning_a", 37.5, 121.0, 90.0)
 u("R05_kiosk", 33.0, 112.0, 90.0, 1.0, 0.0, True)
-SITE = [-50.0, 150.0, 30.0, 250.0]
-surface("site", "walk", SITE[0], SITE[1], SITE[2], SITE[3], 0.0, 0.05)
-building("Site_Skeleton", "недострой, 6 эт.", (-10.0, 195.0), (36.0, 22.0), "skeleton", 6, 3.1, 0.0, 0.0, "", "", 0.0, "South")
-for k in range(int((SITE[3] - SITE[1]) / 2.5)):
-    z = SITE[1] + 1.25 + k * 2.5
-    if 196.0 < z < 204.0:
-        continue
-    u("U11_02_site_fence", SITE[2] + 0.4, z, 90.0, 1.0, 0.0, k % 3 == 0)
-for k in range(int((SITE[2] - SITE[0]) / 2.5)):
-    x = SITE[0] + 1.25 + k * 2.5
-    u("U11_02_site_fence", x, SITE[1] - 0.4, 0.0, 1.0, 0.0, True)
-for k in range(4):
-    u("U11_04_privacy_screen", SITE[2] + 1.4, 160.0 + k * 9.0, 90.0, 1.0, 0.0, True)
-put("cabin", -40.0, 160.0, 0.0, 1.0, 0.0, -1, 0.0, True)
-put("cabin", -34.0, 160.0, 0.0, 1.0, 0.0, -1, 0.0, True)
-put("rebar", -30.0, 225.0, 20.0)
-put("pipes", -20.0, 232.0, 80.0, 1.0, 0.0, -1, 0.0, True)
-put("reel", 5.0, 228.0, 0.0, 1.0, 0.0, -1, 0.0, True)
-put("pallets", 12.0, 222.0, 30.0)
-for (x, z, yaw) in [(15, 170, 10), (-38, 215, 60), (18, 240, 100)]:
-    u("U09_05_damaged_slab", x, z, yaw)
-for k in range(4):
-    u("U01_03_crate", 22.0 + (k % 2) * 1.4, 182.0 + (k // 2) * 1.1, rng.uniform(-10, 10), 1.0, 0.0, True)
-u("U11_03_dump_bed", -40.0, 240.0, 0.0, 1.0, 0.0, True)
-u("U01_05_mesh_barrier", 26.0, 200.0, 90.0, 1.0, 0.0, True)
-put("van", -28.0, 168.0, 30.0, 1.0, 0.0, 11, 0.0, True)
-# южный край стройки вдоль пути к пролому: бытовка, контейнер, плиты штабелем
-put("cabin", 2.0, 244.0, 90.0, 1.0, 0.0, -1, 0.0, True)
-put("container20", -21.0, 245.0, 8.0, 1.0, 0.0, -1, 0.0, True)
-put("slab", 16.0, 245.0, 85.0, 1.0, 0.0, -1, 0.0, True)
-put("slab", 16.2, 245.1, 83.0, 1.0, 0.2, -1, 0.0, False)
-for k in range(4):
-    put("hazard_fence", 24.0, 186.0 + k * 2.5, 0.0, 1.0, 0.0, -1, 0.0, True)
-sign("стройка · ворота", SITE[2] + 1.0, 3.5, 200.0, 40)
-put("crane", -40.0, 190.0, 0.0) if False else None
+# улица южного плеча: контейнеры поперёк западной полосы, автобус, ларьки и остановка — обзор вдоль улицы рвётся
+put("container40", XS - 4.5, 168.0, 88.0, 1.0, 0.0, -1, 0.0, True)
+put("container20", XS + 5.0, 178.0, 78.0, 1.0, 0.0, -1, 0.0, True)
+for k in range(3):
+    put("jersey_rw", XS - 1.0 + k * 0.4, 172.0 + k * 3.1, 2.0, 1.0, 0.0, -1, 0.0, True)
+put("bus_city", XS + 3.5, 210.0, 162.0, 1.0, 0.0, 8, 0.0, True)
+for z in (164.0, 226.0):
+    put("kiosk", XS - F + 2.2, z, 90.0, 1.0, 0.0, -1, 0.0, True)
+put("bus_stop", XS + F - 2.8, 186.0, -90.0, 1.0, 0.0, -1, 0.0, True)
+loot(XS - 4.5, 0.0, 172.5, "body", "common", "тело у контейнера")
+loot(XS + 3.5, 0.0, 214.0, "suitcase", "common", "автобус: багаж")
 
 # ================================================================== приёмы из разбора Ready or Not / Ground Zero
 # решётки вентиляции паркинга −1 на парковке: сверху видно, что внизу есть ход, снизу слышно шаги
@@ -876,14 +1561,6 @@ for (cx, cz, yaw, length, floors) in [(-175.0, HCZ, 0.0, 30.0, 17), (-145.0, HCZ
                 y = fl * STORY_FLAT + 0.5
                 zf = cz + 13.0 + 0.2 if yaw == 0.0 else cz - 13.0 - 0.2
                 put("ac_unit", x, zf, yaw, 1.0, y)
-# строительные леса на фасаде недостроя: стойки, ригели, настилы — вертикаль и проход с ограниченным обзором
-for k in range(16):
-    x = -28.0 + k * 2.4
-    box(x, 9.0, 206.8, 0.06, 18.0, 0.06, "steel", 0.0, False)
-    box(x, 9.0, 208.0, 0.06, 18.0, 0.06, "steel", 0.0, False)
-for lvl in range(1, 7):
-    box(-10.0, lvl * 3.1 - 0.05, 207.4, 38.0, 0.06, 1.3, "rust", 0.0, lvl * 3.1 < 4.0)
-    box(-10.0, lvl * 3.1 + 1.0, 208.05, 38.0, 0.05, 0.05, "steel", 0.0, False)
 # наружная пожарная лестница у «Меридиана»: марши по торцу до крыши — второй путь наверх (на этапе блокаута — вид)
 for fl in range(8):
     y0 = fl * 3.6
@@ -929,60 +1606,185 @@ for (x, z) in [(-60.0, -11.0), (XS - 11.0, 190.0)]:
 for (x, z) in [(-178.0, -11.2), (-134.0, 11.2), (XS + 11.2, 96.0)]:
     u("U10_05_billboard", x, z + (-1.0 if z < 0 else 1.0), 0.0 if z < 50 else -90.0, 1.0, 0.0, True)
 
+# ================================================================== перебивки обзора (владелец 2026-10-24, п. 7)
+# Замер tools/prospekt_ld_plan.py: лучи на высоте глаз длиннее 90 м — красным на docs/design/prospekt_level_design.png.
+# Каждые 50–90 м по линии взгляда — что-то выше роста: сцена, рыночные палатки, стенки кустов, ларьки, гаражи,
+# трансформаторные, контейнеры, грузовики. Машины, блоки и мешки взгляд стоя не закрывают — они укрытия, не перебивки.
+# сквер у поворота: сцена, рынок, кусты стенками, ремонт фонтана за профнастилом
+put("stage", -32.0, 38.0, 60.0, 1.0, 0.0, -1, 0.0, True)
+for k in range(5):
+    put("stall", -44.0 + k * 3.3, 102.0, 180.0, 1.0, 0.0, -1, 0.0, True)
+for k in range(3):
+    put("stall", -6.0 + k * 3.3, 36.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+building("FlowerPavilion", "павильон «Цветы · шаурма»", (14.0, 38.0), (12.0, 7.0), "hall", 1, 3.6, 0.0, 0.0, "shop", "kiosk", 0.6, "South")
+building("WC_Square", "туалет (закрыт)", (-14.0, 190.0), (4.0, 8.0), "mass", 1, 3.0, 0.0, 0.0, "", "", 0.0, "South")
+wall(-36.2, 60.0, -35.8, 72.0, 0.0, 3.0, "concrete")                          # доска почёта у памятника
+box(-35.7, 1.8, 66.0, 0.04, 1.6, 10.0, "graffiti", 0.0, False)
+loot(-40.0, 0.0, 101.0, "register", "common", "рынок в сквере: касса палатки")
+for (x0, z0, x1, z1, n) in [(-48.0, 50.0, -40.0, 66.0, 4), (14.0, 60.0, 30.0, 64.0, 5), (-2.0, 96.0, 14.0, 100.0, 4),
+                            (26.0, 26.0, 34.0, 32.0, 3), (-14.0, 26.0, -8.0, 30.0, 3)]:
+    for k in range(n):
+        t = (k + 0.5) / n
+        put("bush_big", x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, rng.uniform(0, 360), rng.uniform(1.0, 1.25))
+for k in range(5):
+    put("fence", 26.0, 72.0 + k * 3.0, 0.0, 1.0, 0.0, 3, 0.0, False)
+for k in range(3):
+    put("fence", 27.5 + k * 3.0, 70.5, 90.0, 1.0, 0.0, 3, 0.0, False)
+# поворот: автобус поперёк внешней полосы, ларьки на внешнем тротуаре
+x, z = curve_point(0.32, 5.0)
+put("bus_city", x, z, 60.0, 1.0, 0.0, 9, 0.0, True)
+for phi in (0.75, 1.35):
+    x, z = curve_point(phi, F - 2.2)
+    put("kiosk", x, z, -math.degrees(phi), 1.0, 0.0, -1, 0.0, True)
+# площадь «Вершины»: второй пост ЧВК из контейнеров перед эвакуацией, ларьки у стилобата, грузовики
+for (x, z, yaw, dy) in [(48.0, 26.0, 20.0, 0.0), (48.2, 26.1, 21.0, 2.62), (40.0, 40.0, 70.0, 0.0)]:
+    put("container40", x, z, yaw, 1.0, dy, -1, 0.0, dy == 0.0)
+put("sandbag_post", 54.0, 34.0, 200.0, 1.0, 0.0, -1, 0.0, True)
+loot(55.0, 0.0, 33.0, "weapon", "weapon", "пост ЧВК у контейнеров")
+for (x, z) in [(30.0, -14.0), (90.0, -13.0)]:
+    put("food_kiosk", x, z, 0.0, 1.0, 0.0, -1, 0.0, True)
+put("truck", 62.0, 44.0, 120.0, 1.0, 0.0, -1, 0.0, True)
+put("truck", 20.0, 10.0, 35.0, 1.0, 0.0, 11, 0.0, True)
+# двор ЖК на севере: гаражи, трансформаторные, контейнеры, машина — вперемешку то у забора, то у домов
+for (kit, x, z, yaw) in [("ktp", -156.0, -90.0, 0.0), ("container20", -82.0, -106.0, 0.0), ("garage", -60.0, -89.5, 0.0),
+                         ("garage", -56.8, -89.5, 0.0), ("container20", -28.0, -106.0, 0.0), ("truck", 2.0, -91.0, 5.0),
+                         ("garage", 32.0, -106.0, 0.0), ("garage", 35.2, -106.0, 0.0), ("ktp", 62.0, -91.0, 0.0),
+                         ("container20", 100.0, -108.0, 0.0), ("garage", 140.0, -91.0, 0.0), ("garage", 143.2, -91.0, 0.0),
+                         ("kiosk", -205.0, -91.0, 90.0)]:
+    put(kit, x, z, yaw, 1.0, 0.0, -1, 0.0, True)
+# проспект: ларьки на тротуарах, контейнер на южной полосе
+for (x, z, yaw) in [(-90.0, -13.9, 180.0), (-45.0, -13.9, 180.0), (-135.0, 13.9, 0.0), (-85.0, 13.9, 0.0), (-35.0, 13.9, 0.0)]:
+    put("kiosk", x, z, yaw, 1.0, 0.0, -1, 0.0, True)
+# фильтр ЧВК поперёк проспекта: контейнеры через обе проезжие части, проход по тротуарам
+put("container40", -106.0, -2.6, 0.0, 1.0, 0.0, -1, 0.0, True)
+put("container20", -105.5, 7.5, 2.0, 1.0, 0.0, -1, 0.0, True)
+put("sandbags", -108.5, -9.6, 0.0, 1.0, 0.0, -1, 0.0, True)
+loot(-104.0, 0.0, 9.5, "body", "weapon", "фильтр ЧВК: тело у контейнера")
+# площадь «Вершины» и поле эвакуации: грузовик, полевая кухня, генераторный контейнер — поперёк длинных линий
+put("truck", 96.0, -9.0, 0.0, 1.0, 0.0, 11, 0.0, True)
+building("MetroPavilion", "вход в метро «Проспект» (закрыт)", (100.0, 26.0), (12.0, 18.0), "mass", 1, 4.5, 0.0, 0.0, "", "", 0.0, "East")
+put("container20", 142.0, 15.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+# линия z ≈ 105 (двор дома 7 → разгрузка → сквер → парковка корпуса 3) и западный край сквера вдоль служебного проезда
+for (kit, x, z, yaw) in [("garage", -190.0, 103.0, 0.0), ("garage", -186.8, 103.0, 0.0), ("container20", -118.0, 102.0, 0.0),
+                         ("kiosk", 25.0, 104.0, 0.0), ("container20", 86.5, 108.0, 0.0), ("booth", -49.0, 60.0, 0.0),
+                         ("kiosk", -47.5, 145.0, 90.0), ("container20", -47.0, 214.0, 0.0), ("stall", -24.0, 30.0, 90.0),
+                         ("stall", -24.0, 33.3, 90.0), ("kiosk", -24.0, 186.0, 90.0)]:
+    put(kit, x, z, yaw, 1.0, 0.0, -1, 0.0, True)
+loot(-118.0, 0.0, 98.5, "crate", "common", "контейнер на разгрузке")
+# южное плечо и середина сквера: грузовик на восточной полосе, кусты вдоль тротуара, живые изгороди у баскетбола,
+# ларьки на внутреннем тротуаре поворота
+put("truck", XS + 5.2, 136.0, 172.0, 1.0, 0.0, 6, 0.0, True)
+put("paz", XS - 5.0, 232.0, 4.0, 1.0, 0.0, 8, 0.0, True)
+for z in (70.0, 112.0, 145.0, 190.0, 238.0):
+    put("bush_big", XS - F - 1.4, z, rng.uniform(0, 360), 1.15)
+for (x0, z0, x1, z1, n) in [(-18.0, 149.0, -8.0, 149.0, 4), (-2.0, 183.0, 8.0, 183.0, 4), (-22.0, 142.0, -22.0, 150.0, 3),
+                            (10.0, 186.0, 10.0, 192.0, 2), (-40.0, 182.0, -30.0, 182.0, 4)]:
+    for k in range(n):
+        t = (k + 0.5) / n
+        put("bush_big", x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, rng.uniform(0, 360), rng.uniform(1.0, 1.25))
+for phi in (0.45, 1.1):
+    x, z = curve_point(phi, -(F - 2.2))
+    put("kiosk", x, z, 180.0 - math.degrees(phi), 1.0, 0.0, -1, 0.0, True)
+# южное плечо: ларьки на тротуарах
+for (x, z) in [(XS - F + 2.2, 100.0), (XS + F - 2.2, 130.0), (XS + F - 2.2, 202.0)]:
+    put("kiosk", x, z, 90.0, 1.0, 0.0, -1, 0.0, True)
+
+# ================================================================== места лута на улицах и в сценках
+# Владелец 2026-10-24, п. 8: «предметы — и в контейнерах (ящики, рюкзаки, чемоданы, трупы мародёров и ЧВК, машины), и
+# свободно». Ценность: common — бытовое, med — медицина, good — ценное, weapon — оружие и патроны. В залах StudyBuilding
+# свои места лута (полки, кассы, шкафы) — здесь улица, машины, тела, посты, крыши; маркеры видны на блокауте и на плане.
+STREET_LOOT = [
+    # кордон и пункт эвакуации у него
+    (-197.0, -12.0, "med", "med", "палатка у кордона: аптечка"), (-196.0, -10.6, "suitcase", "common", "чемоданы эвакуации"),
+    (-192.0, -7.4, "car", "med", "скорая: укладка"), (-205.5, 9.5, "weapon", "weapon", "пост ЧВК: ящик с патронами"),
+    (-199.0, -12.4, "car", "weapon", "БТР ЧВК: десантный отсек"),
+    # проспект: остановка, переход, перевёрнутый автобус, авария, пожарная, затор
+    (-192.0, 11.0, "backpack", "common", "остановка: рюкзак"), (-155.0, 4.0, "loose", "common", "переход: ларёк"),
+    (-142.0, 2.5, "suitcase", "common", "жёлтый автобус: багаж"), (-73.0, -6.8, "suitcase", "common", "перевёрнутый автобус"),
+    (-80.0, -1.0, "body", "common", "тело у перевёрнутого автобуса"), (-63.5, 2.6, "car", "common", "такси: багажник"),
+    (-58.8, 3.8, "car", "common", "маршрутка: сумки пассажиров"), (-91.0, -8.2, "car", "common", "пожарная: инструмент"),
+    (-46.0, -3.0, "car", "common", "затор: багажник"), (-34.0, -8.0, "loose", "common", "затор: на асфальте"),
+    # поворот, площадь «Вершины», оцепление, колонна
+    (46.0, -16.0, "car", "weapon", "полицейская: дробовик в салоне"), (62.0, -11.0, "car", "weapon", "автозак: оружейный ящик"),
+    (40.0, -6.0, "body", "weapon", "тело бойца у баррикады"), (70.0, 10.5, "crate", "weapon", "БТР колонны: ящик с патронами"),
+    (56.0, -20.0, "loose", "common", "оцепление: брошенное"), (84.0, 22.0, "med", "med", "медпалатка эвакуации"),
+    # сквер у памятника
+    (-38.0, 80.5, "register", "common", "фудтрак: касса"), (20.0, 97.5, "loose", "common", "кофейный ларёк"),
+    (-2.0, 74.0, "backpack", "med", "рюкзак у памятника"),
+    # южное плечо: пост ДПС, дорожные работы, корпус 3, «Меридиан», тоннель
+    (XS - 6.0, 107.4, "car", "weapon", "пост ДПС: автомат в машине"), (XS + 5.8, 121.0, "car", "common", "ПАЗ полиции"),
+    (XS - 5.0, 100.0, "car", "common", "самосвал дорожников"), (80.0, 104.0, "car", "common", "парковка корпуса 3: багажник"),
+    (93.0, 118.0, "car", "common", "парковка корпуса 3: салон"), (86.5, 94.6, "register", "common", "ларёк на парковке"),
+    (150.0, 131.0, "loose", "common", "у мусорных баков"), (92.0, 174.0, "cabinet", "common", "будка охраны «Меридиана»"),
+    (XS - 4.8, 263.0, "suitcase", "common", "автобус в тоннеле: багаж"), (XS - 5.0, 254.4, "car", "common", "машина в тоннеле"),
+    (XS + 6.5, 249.0, "backpack", "med", "у барьеров перед тоннелем"),
+    # двор ЖК, гаражи, дом 7, «Ярус» снаружи
+    (-190.0, -101.5, "crate", "common", "гараж двора"), (-98.0, -97.0, "loose", "common", "мусорная площадка"),
+    (-200.0, 76.5, "crate", "common", "гараж дома 7"), (-90.0, 44.0, "car", "common", "фургон у «Яруса»"),
+    (-128.0, 24.0, "car", "common", "внедорожник: коробки"), (-103.0, 39.6, "car", "weapon", "полицейская у «Яруса»"),
+    (-132.0, 100.5, "car", "common", "фура на разгрузке"), (-112.0, 95.0, "crate", "common", "ящики на разгрузке"),
+]
+for (x, z, kind, tier, note) in STREET_LOOT:
+    loot(x, 0.0, z, kind, tier, note)
+
 # ================================================================== появление, выходы, места, подходы, проверки
 plan["spawns"] = [{"id": "cordon", "label": "Кордон (старт пролога)", "at": [-200.0, 0.0]},
                   {"id": "yards", "label": "Дворы ЖК", "at": [-125.0, -104.0]},
                   {"id": "vershina", "label": "За «Вершиной»", "at": [150.0, -104.0]},
-                  {"id": "south", "label": "Юг, у тупика", "at": [150.0, 268.0]},
-                  {"id": "site", "label": "Стройка", "at": [-45.0, 268.0]}]
-plan["exits"] = [{"label": "Дворами к насыпи", "at": [-145.0, -110.0], "always": True},
-                 {"label": "Служебный проезд", "at": [-55.0, 108.0], "always": True},
-                 {"label": "Пролом у стройки", "at": [-52.0, 242.0], "always": True},
-                 {"label": "Паркинг −1, въезд", "at": [-118.0, -15.0], "always": False}]
+                  {"id": "south", "label": "Юг, у насыпи", "at": [150.0, 236.0]},
+                  {"id": "site", "label": "Стройка за «Ярусом»", "at": [-140.0, 186.0]}]
+plan["exits"] = [{"label": "Тоннель на юг — в следующий район", "at": [XS + 3.0, 270.0], "always": True},
+                 {"label": "Дворами к насыпи", "at": [-145.0, -110.0], "always": True},
+                 {"label": "Пролом в заборе стройки", "at": [-140.0, 198.5], "always": True},
+                 {"label": "Паркинг −1, въезд", "at": [-117.5, -15.0], "always": False}]
 plan["locations"] = [
     {"id": 1, "label": "Кордон", "at": [-200.0, 0.0], "spawn": [-200.0, 0.0], "look": [-160.0, -6.0]},
     {"id": 2, "label": "Кофейня «Зерно»", "at": [-184.0, -22.0], "spawn": [-184.0, -12.0], "look": [-184.0, -22.0]},
-    {"id": 3, "label": "Въезд в паркинг −1", "at": [-118.0, -20.0], "spawn": [-112.0, -11.0], "look": [-118.0, -26.0]},
-    {"id": 4, "label": "Двор ЖК · подъезд 1", "at": [-175.0, -90.0], "spawn": [-175.0, -95.0], "look": [-175.0, -82.0]},
+    {"id": 3, "label": "Паркинг −1", "at": [-128.0, -60.0], "spawn": [-110.6, -11.0], "look": [-117.5, -26.0]},
+    {"id": 4, "label": "Двор ЖК", "at": [-175.0, -95.0], "spawn": [-175.0, -95.0], "look": [-175.0, -82.0]},
     {"id": 5, "label": "Подземный переход", "at": [-156.0, 0.0], "spawn": [-148.0, -10.0], "look": [-158.0, -13.0]},
     {"id": 6, "label": "Парковка «Яруса»", "at": [-102.0, 30.0], "spawn": [-112.0, 17.0], "look": [-102.0, 48.0]},
     {"id": 7, "label": "Супермаркет «Ярус»", "at": [-102.0, 68.0], "spawn": [-108.0, 44.0], "look": [-108.0, 68.0]},
-    {"id": 8, "label": "Разгрузка «Яруса»", "at": [-102.0, 98.0], "spawn": [-96.0, 95.0], "look": [-60.0, 97.0]},
+    {"id": 8, "label": "Стройка за «Ярусом»", "at": [-108.0, 165.0], "spawn": [-100.0, 116.0], "look": [-108.0, 150.0]},
     {"id": 9, "label": "Площадь «Вершины»", "at": [50.0, -10.0], "spawn": [12.0, -6.0], "look": [57.0, -28.0]},
-    {"id": 10, "label": "Сквер в повороте", "at": [-10.0, 70.0], "spawn": [-30.0, 30.0], "look": [-10.0, 70.0]},
-    {"id": 11, "label": "Банк «Капитал»", "at": [-26.0, -27.5], "spawn": [-26.0, -13.0], "look": [-26.0, -27.5]},
-    {"id": 12, "label": "Стройка", "at": [-10.0, 195.0], "spawn": [36.0, 200.0], "look": [-10.0, 195.0]},
-    {"id": 13, "label": "Тупик на юге", "at": [XS, 250.0], "spawn": [XS + 12.0, 225.0], "look": [XS, 255.0]},
+    {"id": 10, "label": "Сквер · памятник", "at": [-10.0, 70.0], "spawn": [-30.0, 30.0], "look": [-10.0, 70.0]},
+    {"id": 11, "label": "Банк «Капитал»", "at": [-21.0, -48.0], "spawn": [-21.0, -18.0], "look": [-21.0, -40.0]},
+    {"id": 12, "label": "Сквер · площадка и баскетбол", "at": [-20.0, 165.0], "spawn": [-8.0, 146.0], "look": [-30.0, 165.0]},
+    {"id": 13, "label": "Тоннель на юге", "at": [XS, 262.0], "spawn": [XS + 4.0, 236.0], "look": [XS, 262.0]},
     {"id": 14, "label": "Корпус 3 и парковка", "at": [90.0, 110.0], "spawn": [XS + 11.0, 110.0], "look": [113.0, 110.0]},
+    {"id": 15, "label": "Пункт эвакуации · палатки", "at": [132.0, 20.0], "spawn": [104.0, 18.0], "look": [132.0, 20.0]},
+    {"id": 16, "label": "Упавший состав", "at": [0.0, 238.0], "spawn": [12.0, 214.0], "look": [0.0, 238.0]},
 ]
 sm_cx = SM[0]
-cx1, cz1 = -175.0, HCZ
 plan["probe_routes"] = [
-    {"id": "prologue", "label": "пролог: кордон → кофейня → переход → парковка → «Ярус» → склад → двор → проезд", "max_open_m": 30.0,
+    {"id": "prologue", "label": "пролог: кордон → кофейня → переход → «Ярус» → склад → разгрузка → сквер → вагоны → тоннель",
+     "max_open_m": 30.0,
      "points": [[-200, 0], [-193, -4], [-193, -12], [-184, -12], [-184, -16], [-184, -21], [-184, -16], [-184, -12], [-166, -12],
                 [-150, -10], [-150, -13], [-152.5, -13], [-158.6, -13], [-158.6, -9.5], [-156, -8], [-156, 0], [-156, 8], [-158.6, 9.5], [-158.6, 13],
                 [-152.5, 13], [-149, 13], [-146, 17], [-130, 18], [-112, 18], [-108, 26], [-108, 46], [-108, 52], [-108, 64],
-                [-108, 78], [-122, 80], [-122, 84.5], [sm_cx, 84.5], [sm_cx, 90], [sm_cx, 95.5], [-66, 96.5], [-60, 97.5],
-                [-55, 100], [-55, 106]]},
-    {"id": "yards_to_south", "label": "дворы ЖК → проезд → зебра → служебный проезд", "max_open_m": 30.0,
-     "points": [[-125, -104], [-112.5, -96], [-112.5, -60], [-112.5, -20], [-112.5, -12], [CROSS_W + 1.5, -10], [CROSS_W + 1.5, 10],
-                [-112, 18], [-90, 18], [-63, 18], [-55, 20], [-55, 60], [-55, 106]]},
+                [-108, 78], [-108, 80.6], [-122, 80.6], [-122, 84.5], [sm_cx, 84.5], [sm_cx, 90], [sm_cx, 95.5], [-66, 96.5], [-60, 97.5],
+                [-55, 100], [-55, 112], [-52, 140], [-30, 146], [-10, 146], [10, 146], [11, 182], [36, 186], [37, 222],
+                [41, 238], [XS + 3.0, 244], [XS + 3.0, 256], [XS + 3.0, 268]]},
+    {"id": "yards_to_south", "label": "дворы ЖК → проезд → зебра → служебный проезд → сквер", "max_open_m": 30.0,
+     "points": [[-125, -104], [-110.6, -96], [-110.6, -60], [-110.6, -20], [-110.6, -12], [CROSS_W + 1.5, -10], [CROSS_W + 1.5, 10],
+                [-112, 18], [-90, 18], [-63, 18], [-55, 20], [-55, 60], [-55, 106], [-55, 112]]},
     {"id": "vershina_to_north", "label": "за «Вершиной» → вдоль стилобата → дворы → к насыпи", "max_open_m": 30.0,
-     "points": [[150, -104], [100, -100], [10, -98], [-40, -96], [-112.5, -96], [-140, -98], [-145, -104], [-145, -109]]},
-    {"id": "south_to_site", "label": "юг → парковка корпуса 3 → зебра → вдоль стройки → пролом", "max_open_m": 30.0,
-     "points": [[150, 268], [110, 250], [74, 230], [72, 156], [XS + 1.5, 152], [XS - 1.5, 152], [37, 152], [36, 246], [-20, 254],
-                [-50, 254], [-52, 242]]},
-    {"id": "parking_minus1", "label": "въезд → пандус → паркинг −1 → лестница наверх", "max_open_m": 0.0,
-     "points": [[-112, -11], [-118, -16], [-118, -24], [-118, -36], [-120, -40], [-130, -38.6], [-130, -39.6], [-130, -50.2],
-                [-130, -51.5]]},
-    {"id": "corpus1_floor3", "label": "подъезд 1 корпуса 1: тамбур, вестибюль, холл, лестница на 3-й этаж", "max_open_m": 0.0,
-     "points": [[cx1, cz1 - 13.0 - 4.5], [cx1, cz1 - 13.0 + 1.0], [cx1, cz1 - 8.5], [cx1, cz1 - 4.0], [cx1, cz1], [cx1 - 3.75, cz1 + 0.5],
-                [cx1 - 3.75, cz1 + 1.9], [cx1 - 3.75, cz1 + 3.0], [cx1 - 3, cz1 + 2.5], [cx1 + 3, cz1 + 2.5], [cx1 + 3.75, cz1 + 3.5],
-                [cx1 + 3, cz1 + 4.5], [cx1 - 3, cz1 + 4.5], [cx1 - 3.75, cz1 + 3.5], [cx1 - 3, cz1 + 2.5], [cx1 + 3, cz1 + 2.5],
-                [cx1 + 3.75, cz1 + 3.5], [cx1 + 3, cz1 + 4.5], [cx1 - 3, cz1 + 4.5], [cx1 - 3.75, cz1 + 3.5], [cx1 - 3.75, cz1 + 1.9],
-                [cx1 - 3.75, cz1 + 0.5], [cx1, cz1]], "min_y": 2 * STORY_FLAT - 0.5},
+     "points": [[150, -104], [100, -100], [10, -98], [-40, -96], [-110.6, -96], [-140, -98], [-145, -104], [-145, -109]]},
+    {"id": "south_to_site", "label": "юг → парковка корпуса 3 → зебра → сквер → стройка → пролом", "max_open_m": 30.0,
+     "points": [[150, 236], [140, 226], [110, 224], [74, 230], [72, 156], [XS + 1.5, 152], [XS - 1.5, 152], [37, 148], [12, 146], [-8, 146],
+                [-52, 146], [-58, 150], [-68, 150], [-70, 192], [-138, 194], [-140, 197]]},
+    {"id": "parking_minus1", "label": "въезд → рампа → паркинг −1 → проезд 3 → лестница на парковку", "max_open_m": 0.0,
+     "points": [[-110.6, -11], [-117.5, -16], [-117.5, -24], [-117.5, -36], [-117.5, -42], [-131.5, -42], [-132.6, -37.6],
+                [-132.6, -35.4], [-139.4, -35.4], [-141.5, -35.4]], "min_y": -0.3},
+    {"id": "bank_roof", "label": "банк: калитка → зал → за стойку → ядро → три марша → крыша", "max_open_m": 0.0,
+     "points": [[-21, -19], [-21, -33], [-21, -44], [-14.65, -46.5], [-14.65, -49.3], [-28.7, -49.3], [-28.7, -57.3],
+                [-28.7, -58.6], [-28.6, -59.0], [-37.8, -59.0], [-38.0, -61.0], [-28.6, -61.0], [-28.6, -59.2], [-37.8, -59.2],
+                [-37.6, -57.2], [-30.0, -50.0]], "min_y": BY[3] - 0.3},
+    {"id": "dig_to_vault", "label": "въезд → паркинг −1 → подкоп → хранилище → коридор → лестница в зал банка", "max_open_m": 0.0,
+     "points": [[-110.6, -11], [-117.5, -16], [-117.5, -24], [-117.5, -36], [-117.5, -42], [-66.0, -42.0], [-62.0, -43.0], [-50.0, -43.0], [-37.0, -43.0], [-30.0, -45.5], [-22.5, -46.0], [-22.4, -60.2],
+                [-16.6, -60.3], [-15.0, -60.0], [-6.4, -60.0], [-5.4, -58.0], [-5.4, -55.0]], "min_y": -0.3},
 ]
-plan["checks"] = {"pit": [-156.0, -39.0], "yard": [-156.0, -39.0], "tunnel": [-156.0, 0.0],
+plan["checks"] = {"pit": [-156.0, -42.0], "yard": [-156.0, -42.0], "tunnel": [-156.0, 0.0],
                   "cordon": {"from": [-203.0, 0.5], "to": [-226.0, 0.5], "stop_x": XC - 0.6}}
 
 plan["buildings_count"] = len(B)

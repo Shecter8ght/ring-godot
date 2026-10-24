@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b68y28fmb73u5"
-path="res://.godot/imported/16_flat_floor3.png-db2ab937f61902d7612c22712df53274.ctex"
+uid="uid://bh07k8c2amlyg"
+path="res://.godot/imported/17_bird_curve.png-1bdb10dbdc1277f8d63b3a5bb11805ac.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/screens/prospekt/16_flat_floor3.png"
-dest_files=["res://.godot/imported/16_flat_floor3.png-db2ab937f61902d7612c22712df53274.ctex"]
+source_file="res://docs/screens/prospekt/17_bird_curve.png"
+dest_files=["res://.godot/imported/17_bird_curve.png-1bdb10dbdc1277f8d63b3a5bb11805ac.ctex"]
 
 [params]
 

@@ -169,6 +169,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_jump_to(key.physical_keycode - KEY_1 + 1)
 		KEY_0:
 			_jump_to(10)
+		KEY_MINUS:
+			_jump_to(mini(11, plan.locations.size()))
 
 
 func _jump_to(index: int) -> void:
@@ -206,8 +208,25 @@ func _verify() -> void:
 		if bool(node.get_meta("enterable", false)) and not String(node.name).begins_with("Outside"):
 			halls += 1
 			open_kinds.append(node.name)
-	_check("Открытые здания собраны: кофейня, цветы, аптека, одежда, пекарня, подъезд, «Ярус», минимаркет",
-		halls >= 8, {"enterable": open_kinds})
+	_check("Открытые здания собраны: магазины в два этажа, «Ярус», минимаркеты, кафе, каркасы стройки",
+		halls >= 10, {"enterable": open_kinds})
+	# места лута (владелец 2026-10-24, п. 8): контейнеры и свободно; у каждого места карты — не меньше трёх в 45 м
+	var loot: Array = plan.get("loot", []) as Array
+	var poor: Array = []
+	for loc: Dictionary in plan.locations:
+		var at: Array = loc.at
+		var near: int = 0
+		for l: Dictionary in loot:
+			var p: Array = l.at
+			if Vector2(float(p[0]), float(p[2])).distance_to(Vector2(float(at[0]), float(at[1]))) < 45.0:
+				near += 1
+		if near < 3:
+			poor.append(String(loc.label))
+	var kinds: Dictionary = {}
+	for l: Dictionary in loot:
+		kinds[String(l.kind)] = int(kinds.get(String(l.kind), 0)) + 1
+	_check("Места лута: больше 120, у каждого места карты не меньше трёх", loot.size() > 120 and poor.is_empty(),
+		{"count": loot.size(), "kinds": kinds, "poor": poor})
 	var filler: Node = world.get_node_or_null("Filler")
 	var stats: Dictionary = filler.get_meta("stats", {}) if filler else {}
 	_check("Наполнение: машины, ларьки, ограждения, фонари — больше 300 экземпляров", int(stats.get("instances", 0)) > 300, stats)
@@ -368,27 +387,38 @@ func _shots() -> void:
 		{"id": "08_supermarket_hall", "at": Vector3(-108, 1.62, 50), "look": Vector3(-102, 1.5, 82)},
 		{"id": "09_dock_yard", "at": Vector3(-102, 1.62, 95), "look": Vector3(-60, 1.5, 97)},
 		{"id": "10_yard_zhk", "at": Vector3(-125, 1.62, -100), "look": Vector3(-175, 2, -82)},
-		{"id": "11_parking_minus1", "at": Vector3(-125, -1.6, -40), "look": Vector3(-170, -2, -48)},
-		{"id": "12_ramp", "at": Vector3(-112, 1.62, -9), "look": Vector3(-118, -0.5, -30)},
+		{"id": "11_parking_minus1", "at": Vector3(-110, -1.6, -42), "look": Vector3(-170, -2.2, -42)},
+		{"id": "12_ramp", "at": Vector3(-110.6, 1.62, -9), "look": Vector3(-117.5, -0.5, -30)},
 		{"id": "13_curve", "at": Vector3(-40, 1.62, -12), "look": Vector3(40, 3, 30)},
 		{"id": "14_vershina_plaza", "at": Vector3(10, 1.62, 6), "look": Vector3(60, 20, -40)},
 		{"id": "15_south_leg", "at": Vector3(66, 1.62, 70), "look": Vector3(56, 2, 240)},
-		{"id": "16_flat_floor3", "at": Vector3(-171.6, 7.8, -71.4), "look": Vector3(-171.6, 7.2, -77.5)},
+		{"id": "16_shop_roof", "at": Vector3(-150, 10.0, -26), "look": Vector3(-130, 8.0, -10)},
 		{"id": "17_bird_curve", "at": Vector3(-60, 120, 140), "look": Vector3(20, 0, 20)},
-		{"id": "18_bank", "at": Vector3(-26, 1.62, -16), "look": Vector3(-26, 1.4, -34)},
-		{"id": "19_evac_point", "at": Vector3(60, 1.62, 40), "look": Vector3(85, 1.5, 18)},
+		{"id": "18_bank", "at": Vector3(-8, 1.62, -3), "look": Vector3(-22, 7.0, -44)},
+		{"id": "19_evac_point", "at": Vector3(108, 1.62, 60), "look": Vector3(138, 2.0, 12)},
 		{"id": "20_stop_plaza", "at": Vector3(-180, 1.62, 12), "look": Vector3(-195, 2, 40)},
 		{"id": "21_square", "at": Vector3(-35, 1.62, 25), "look": Vector3(-5, 2, 75)},
-		{"id": "22_site", "at": Vector3(36, 1.62, 205), "look": Vector3(-10, 5, 195)},
-		{"id": "23_deadend", "at": Vector3(55, 1.62, 225), "look": Vector3(55, 2, 260)},
+		{"id": "22_site", "at": Vector3(-66, 1.62, 128), "look": Vector3(-110, 9, 160)},
+		{"id": "23_tunnel", "at": Vector3(58, 1.62, 214), "look": Vector3(52, 4, 262)},
 		# сценки с транспортом (разбор Таркова и Ready or Not, prospekt_dressing.md § 7)
 		{"id": "24_cordon_btr", "at": Vector3(-186, 1.62, 3), "look": Vector3(-203, 1.5, -4)},
 		{"id": "25_bus_overturned", "at": Vector3(-96, 1.62, 6), "look": Vector3(-74, 1.5, -4)},
 		{"id": "26_crash_taxi", "at": Vector3(-72, 1.62, 12), "look": Vector3(-58, 1.2, 4)},
-		{"id": "27_bank_cash", "at": Vector3(-6, 1.62, -2), "look": Vector3(-24, 1.2, -8)},
+		{"id": "27_bank_cash", "at": Vector3(-30, 1.62, -36), "look": Vector3(-20, 1.2, -52)},
 		{"id": "28_cordon_police", "at": Vector3(40, 1.62, -2), "look": Vector3(62, 2, -18)},
 		{"id": "29_roadworks", "at": Vector3(50, 1.62, 70), "look": Vector3(55, 1.5, 100)},
-		{"id": "30_dps_post", "at": Vector3(46, 1.62, 128), "look": Vector3(56, 1.5, 108)}]
+		{"id": "30_dps_post", "at": Vector3(46, 1.62, 128), "look": Vector3(56, 1.5, 108)},
+		# редакция 4 (замечания владельца 2026-10-24)
+		{"id": "31_bank_vault", "at": Vector3(-26.5, -1.6, -50), "look": Vector3(-34, -2.2, -42)},
+		{"id": "32_dig_tunnel", "at": Vector3(-63, -1.6, -43), "look": Vector3(-38, -2.2, -43)},
+		{"id": "33_bank_roof", "at": Vector3(-8, 13.9, -36), "look": Vector3(-30, 13.0, -58)},
+		{"id": "34_square_playground", "at": Vector3(-2, 1.62, 143), "look": Vector3(-36, 1.5, 168)},
+		{"id": "35_train_square", "at": Vector3(16, 1.62, 205), "look": Vector3(-6, 3.0, 240)},
+		{"id": "36_bird_south", "at": Vector3(110, 110, 150), "look": Vector3(-20, 0, 200)},
+		{"id": "37_supermarket_checkouts", "at": Vector3(-100, 1.62, 51), "look": Vector3(-138, 2.0, 56)},
+		{"id": "38_pit_rows", "at": Vector3(-190, -1.6, -60.4), "look": Vector3(-150, -2.0, -60.4)},
+		{"id": "39_monument", "at": Vector3(-26, 1.62, 50), "look": Vector3(-10, 3.0, 70)},
+		{"id": "40_bird_bank", "at": Vector3(30, 60, 0), "look": Vector3(-30, 0, -50)}]
 	for spec: String in OS.get_environment("PROSPEKT_VIEW").split(";", false):
 		var custom: PackedStringArray = spec.split(":")
 		if custom.size() == 7:
@@ -411,7 +441,7 @@ func _shots() -> void:
 	map.queue_redraw()
 	await _frames(10)
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(output_dir.path_join("40_map.png"))
+	get_viewport().get_texture().get_image().save_png(output_dir.path_join("50_map.png"))
 	get_tree().quit()
 
 
