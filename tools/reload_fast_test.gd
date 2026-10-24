@@ -38,6 +38,7 @@ func _ready() -> void:
 	_arm(12, [30])
 	await _tap()
 	_check("одно R — обычная перезарядка", _me.reload_timer > 0.0 and not _me._reload_fast and absf(_me.reload_timer - spec_reload) < 0.25, "%.2f" % _me.reload_timer)
+	_check("магазин из рюкзака — липучки нет", _me._velcro_at < 0.0, "%.2f" % _me._velcro_at)
 	await _until_done()
 	_check("обычная: в оружии полный магазин", _me.ammo == 30, str(_me.ammo))
 	_check("обычная: старый магазин (12) в рюкзаке", _mag_rounds().has(12), str(_mag_rounds()))
@@ -131,7 +132,18 @@ func _ready() -> void:
 	_wear_rig("armor_mid", 4, [30, 30])
 	await _tap()
 	_check("разгрузка: перезарядка из подсумка — по паспорту ствола", _me.reload_timer > 0.0 and absf(_me.reload_timer - base_reload) < 0.25, "%.2f при %.2f" % [_me.reload_timer, base_reload])
+	# липучка — когда старый магазин скрылся из вида (доля перезарядки velcro_fraction), не при нажатии
+	var whole: float = _me.reload_timer + _me._reload_age
+	var cue: float = _me._velcro_at
+	var played0: int = _me.velcro_count
+	_check("из подсумка: липучка запланирована на момент «магазин скрылся» (%.2f с из %.2f, доля %.2f)" % [cue, whole, _me.velcro_fraction()],
+		cue > 0.2 and absf(cue - whole * _me.velcro_fraction()) < 0.1 and played0 == 0)
+	await get_tree().create_timer(maxf(0.0, cue - _me._reload_age - 0.15)).timeout
+	_check("до этого момента — тишина", _me.velcro_count == played0)
+	await get_tree().create_timer(0.3).timeout
+	_check("в этот момент — липучка, один раз", _me.velcro_count == played0 + 1, str(_me.velcro_count - played0))
 	await _until_done()
+	_check("за перезарядку липучка прозвучала один раз", _me.velcro_count == played0 + 1)
 	_check("разгрузка: в оружии полный магазин, в подсумках остался один", _me.ammo == 30 and _rounds_in("rig") == [30], "%d, %s" % [_me.ammo, str(_rounds_in("rig"))])
 	_check("разгрузка: старый магазин (12) — в сумке сброса, не в рюкзаке", _rounds_in("dump") == [12] and _mag_rounds().is_empty(), "%s / %s" % [str(_rounds_in("dump")), str(_mag_rounds())])
 	_check("разгрузка: счётчик запасных магазинов видит подсумки", _me.spare_mags() == 1, str(_me.spare_mags()))
@@ -143,9 +155,12 @@ func _ready() -> void:
 	_me.weapon_slot = ""
 	_me._switch("primary", false)
 	await get_tree().create_timer(0.3).timeout
+	var played1: int = _me.velcro_count
 	await _tap()
 	await _tap()
+	_check("быстрая из подсумка: липучка сразу (новый магазин берут первым)", _me._reload_fast and _me.velcro_count == played1 + 1 and _me._velcro_at < 0.0, str(_me.velcro_count - played1))
 	await _until_done()
+	_check("быстрая: липучка один раз за перезарядку", _me.velcro_count == played1 + 1)
 	await get_tree().create_timer(0.3).timeout
 	_check("разгрузка, быстрая: старый магазин (7) лежит на земле, в сумке сброса — только прежний", _dropped().has(7) and _rounds_in("dump") == [12], "%s / %s" % [str(_dropped()), str(_rounds_in("dump"))])
 	# в подсумки — только магазины; сумка сброса полна — старый магазин уходит в рюкзак

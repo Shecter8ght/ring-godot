@@ -1120,6 +1120,13 @@ static func cant_ads(primary: Transform3D, primary_h: float, line: Vector3) -> T
 	return Transform3D(turn * primary.basis, turn * (primary.origin - offset))
 
 
+## Доля перезарядки, где у клипа рук старый магазин скрылся и сменился новым (−1 — клипов нет).
+func reload_swap_fraction(empty: bool) -> float:
+	if _viewmodel is ViewmodelClips:
+		return (_viewmodel as ViewmodelClips).swap_fraction("reload_empty" if empty else "reload")
+	return -1.0
+
+
 ## Действия деталей одинаковы у модели перед глазами и у модели в руке персонажа.
 func weapon_action(action: String, flag: bool = false, duration: float = 0.0, rounds: int = -1) -> void:
 	if _viewmodel is ViewmodelClips:

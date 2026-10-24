@@ -91,6 +91,11 @@ var _reload_fast: bool = false
 ## Подсказка «магазин из рюкзака — дольше» — один раз за рейд.
 var _rig_hint_shown: bool = false
 var _reload_age: float = 0.0
+## Липучка подсумка: через сколько секунд от начала перезарядки звучит (−1 — нет: магазин не из подсумка
+## или уже прозвучала). Balance.POUCH_VELCRO.
+var _velcro_at: float = -1.0
+## Сколько раз прозвучала липучка (для проверок).
+var velcro_count: int = 0
 var _reload_old_mag: Dictionary = {}
 ## Магазин был вынут: перезарядка — только вставить новый (короче: Balance.RELOAD_INSERT.time_k);
 ## быстрой (двойное R) у неё нет — выбивать нечего.
@@ -1431,6 +1436,9 @@ func _combat(delta: float) -> void:
 		# второе быстрое R — быстрая перезарядка: старый магазин на землю
 		if Input.is_action_just_pressed("reload"):
 			_try_fast_reload()
+		if _velcro_at >= 0.0 and _reload_age >= _velcro_at:
+			_velcro_at = -1.0
+			_play_velcro()
 		reload_timer -= delta
 		if _reload_kind == "clear" and not _clear_released and reload_timer <= float(Balance.WEAPON_WEAR.clear_sec) * (1.0 - float(Balance.WEAPON_WEAR.clear_release_at)):
 			_clear_released = true
@@ -1532,6 +1540,8 @@ func _start_reload(spec: Dictionary) -> void:
 	_reload_fast = false
 	_reload_age = 0.0
 	_reload_old_mag = {}
+	_velcro_at = -1.0
+	var from_pouch: bool = false
 	_reload_insert = mag_out()
 	var t: float = float(spec.get("reload_empty", spec.reload)) if _reload_empty else float(spec.reload)
 	var chambered: bool = _has_chamber(weapon_id)
@@ -1551,6 +1561,8 @@ func _start_reload(spec: Dictionary) -> void:
 			return
 		_reload_kind = kind
 		_reload_rev = int(e.get("rev", 0))
+		# новый магазин — из подсумка на броне (тогда звучит липучка), а не из рюкзака
+		from_pouch = kind == "swap" and inventory.rig_has_mag(weapon_slot)
 		var standing: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 		if kind == "swap" and String(standing.get("id", "")) != "":
 			_reload_old_mag = {"id": String(standing.id), "rounds": ammo}
@@ -1581,6 +1593,7 @@ func _start_reload(spec: Dictionary) -> void:
 				_say("Магазин из рюкзака — дольше. Держи магазины в подсумках разгрузки")
 	# руки дрожат — дольше
 	reload_timer = t * (1.0 + float(Balance.STRESS.reload_k) * stress_k())
+	_plan_velcro(from_pouch)
 	_animation_event("pistol_reload" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_reload")
 	if chambered:
 		_pm_action_seq += 1
@@ -1610,7 +1623,49 @@ func _try_fast_reload() -> void:
 		return
 	_reload_fast = true
 	reload_timer = maxf(0.2, (reload_timer + _reload_age) * float(cfg.time_k) - _reload_age)
+	# быстрая: сначала берут новый магазин из подсумка (им же выбивают старый) — липучка сразу
+	if _velcro_at >= 0.0:
+		_velcro_at = -1.0
+		_play_velcro()
 	_say("Быстрая перезарядка — старый магазин на землю")
+
+
+## Когда звучит липучка подсумка (from_pouch — новый магазин из подсумка): вставить в пустую шахту — сразу
+## (вынимать нечего), иначе — когда старый магазин скрылся из вида: кадр подмены клипа рук (ВЕРАС), фаза
+## mag_hidden ствола с механикой (ПМ, Glock), у остальных — Balance.POUCH_VELCRO.hidden_k.
+func _plan_velcro(from_pouch: bool) -> void:
+	_velcro_at = -1.0
+	if not from_pouch:
+		return
+	if _reload_insert:
+		_velcro_at = 0.0
+		return
+	_velcro_at = reload_timer * velcro_fraction()
+
+
+## Доля перезарядки до момента, когда старый магазин скрылся из вида (см. _plan_velcro).
+func velcro_fraction() -> float:
+	if is_local() and _camera_rig is CameraRig:
+		var f: float = (_camera_rig as CameraRig).reload_swap_fraction(_reload_empty)
+		if f >= 0.0:
+			return f
+	var phases: Dictionary = (WeaponDb.weapon(weapon_id).get("rig", {}) as Dictionary).get("reload", {}) as Dictionary
+	if phases.has("mag_hidden"):
+		return float(phases.mag_hidden)
+	return float(Balance.POUCH_VELCRO.hidden_k)
+
+
+## Отрыв липучки подсумка — у себя и у напарников (звук pouch_velcro, запись назначает владелец в Sonora).
+func _play_velcro() -> void:
+	velcro_count += 1
+	Audio.play("pouch_velcro", global_position + Vector3.UP * float(Balance.POUCH_VELCRO.height_m))
+	if Net.is_networked() and is_multiplayer_authority():
+		Net.broadcast_scene(self, &"_rpc_velcro", [], false)
+
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _rpc_velcro() -> void:
+	Audio.play("pouch_velcro", global_position + Vector3.UP * float(Balance.POUCH_VELCRO.height_m))
 
 
 ## Быстрая перезарядка закончена: старый магазин (хост уже положил его в рюкзак) — на землю,

@@ -127,6 +127,8 @@ var _spec: Dictionary = {}
 ## Доступный боезапас: у ПМ магазин плюс патронник, у остальных — прежний счёт магазина.
 var _mag: int = 0
 var _reload_t: float = 0.0
+## Липучка подсумка: при каком остатке _reload_t звучит (−1 — нет).
+var _velcro_left: float = -1.0
 var _shot_t: float = 0.0
 var _burst_left: int = 0
 ## Прицел «садится»: 1 — точно, AI_AIM_COLD — только что заметил.
@@ -2116,6 +2118,9 @@ func _tick_weapon(delta: float) -> void:
 	_shot_t -= delta
 	if _reload_t > 0.0:
 		_reload_t -= delta
+		if _velcro_left >= 0.0 and _reload_t <= _velcro_left:
+			_velcro_left = -1.0
+			Audio.play("pouch_velcro", global_position + Vector3.UP * float(Balance.POUCH_VELCRO.height_m))
 		if _reload_t <= 0.0:
 			_finish_reload()
 
@@ -2140,6 +2145,12 @@ func _start_reload() -> void:
 		return
 	_reload_t = float(_spec.reload)
 	_burst_left = 0
+	# магазин из подсумка на броне — липучка в тот же момент, что у игрока (Balance.POUCH_VELCRO)
+	_velcro_left = -1.0
+	var w_id: String = String((equipment.get(_active, {}) as Dictionary).get("id", ""))
+	if equipment.has("armor") and not ItemDb.pouch_list(equipment.armor as Dictionary).is_empty() and not WeaponDb.weapon(w_id).has("internal_mag"):
+		var phases: Dictionary = (WeaponDb.weapon(w_id).get("rig", {}) as Dictionary).get("reload", {}) as Dictionary
+		_velcro_left = _reload_t * (1.0 - float(phases.get("mag_hidden", Balance.POUCH_VELCRO.hidden_k)))
 	if String(_spec.get("class", "")) != "PISTOL":
 		_animation_event("rifle_reload")
 	Audio.play(String(_spec.get("reload_sound", "reload_rifle")), global_position)

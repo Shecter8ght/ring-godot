@@ -325,6 +325,17 @@ func _mag_look(mid: String, mark: Node3D) -> Dictionary:
 	return look
 
 
+## Доля клипа перезарядки kind ("reload" / "reload_empty"), где старый магазин скрылся и в руке новый
+## (config.swap_frame); −1 — у клипа нет кадра подмены.
+func swap_fraction(kind: String) -> float:
+	var frame: int = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(kind), -1))
+	var clip: String = _clip_name(kind)
+	if frame < 0 or clip == "" or _anim == null or not _anim.has_animation(clip):
+		return -1.0
+	var length: float = _anim.get_animation(clip).length
+	return clampf(float(frame) / float(config.get("fps", 30)) / maxf(length, 0.01), 0.0, 1.0)
+
+
 func _base_clip(kind: String) -> String:
 	return String((config.get("clips", {}) as Dictionary).get(kind, ""))
 

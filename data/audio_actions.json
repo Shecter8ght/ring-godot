@@ -50,6 +50,14 @@
       "supportsObject": false
     },
     {
+      "hook": "pouch_velcro",
+      "name": "Липучка подсумка — достать магазин",
+      "category": "Оружие — обращение",
+      "type": "one",
+      "profile": "pouch_velcro",
+      "supportsObject": false
+    },
+    {
       "hook": "fire_mode",
       "name": "Переводчик режимов огня",
       "category": "Оружие — обращение",
