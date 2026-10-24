@@ -90,6 +90,10 @@ tools/godot.cmd --headless res://tools/steps_test.tscn      # шаги: пове
 tools/godot.cmd --headless res://tools/camera_motion_test.tscn # движение камеры (CameraMotion, Balance.CAMERA_MOTION) при 144 к/с: покачивание в фазе шагов, бег сильнее,
                                                               # остановка досаживается и не копится, вбок крен, прицел почти стоит, присед плавно, приземление,
                                                               # ползунок 0, вид сверху и обратно, без ступенек между тиками физики
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/scale_probe.tscn # стенд масштаба (вопрос владельца 2026-10-24 «реальные размеры мелкие»):
+                                                              # три набора рядом — A всё 1:1, B предметы 1:1 / проходы × 1,2, C всё × 1,3 (улица, комната с дверью,
+                                                              # коридор, стеллажи, лестница, фигура 1,75); F1/F2/F3 — поле зрения 75/80/90°, F5/F6/F7 — к набору;
+                                                              # SCALE_PROBE_SHOTS=1 — снимки scale_probe_* и выход
 tools/godot.cmd --headless res://tools/carry_test.tscn       # стойка «наискосок» (Balance.WEAPON_CARRY): по умолчанию опущено, колесо вверх — от бедра, вниз — наискосок,
                                                               # бегом всегда наискосок, огонь поднимает и стреляет (клик не теряется), ПКМ — и обратно, лёжа и перезарядка
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/carry_shots.tscn # снимки стойки: от бедра и наискосок у стволов песочницы → docs/screens/carry_*;
