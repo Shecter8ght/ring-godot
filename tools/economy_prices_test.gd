@@ -71,10 +71,12 @@ func _ready() -> void:
 	gun["chamber"] = 1
 	gun["chamber_ammo"] = "ammo_545_ap"
 	_check("износ тела не удешевляет исправный магазин и патроны; разбор эквивалентен", absi(Profile.sell_price(gun) - _parts_sale(gun)) <= 1, "%d/%d" % [Profile.sell_price(gun), _parts_sale(gun)])
-	var rig: Dictionary = ItemDb.make("rig_chest", 1)
+	var rig: Dictionary = ItemDb.make("armor_mid", 1)
+	ItemDb.attach_pouch(rig, "pouch_rifle")
+	ItemDb.attach_pouch(rig, "pouch_rifle")
 	rig["mags"] = [loaded]
 	rig["dump"] = [ItemDb.make("mag_545_60", 1)]
-	_check("магазины в подсумках и сумке сброса переоценены", absi(Profile.sell_price(rig) - _parts_sale(rig)) <= 1, "%d/%d" % [Profile.sell_price(rig), _parts_sale(rig)])
+	_check("магазины в подсумках на броне и в сбросе переоценены", absi(Profile.sell_price(rig) - _parts_sale(rig)) <= 1, "%d/%d" % [Profile.sell_price(rig), _parts_sale(rig)])
 	var old_values: bool = true
 	for row: Dictionary in snapshot.items:
 		if ItemDb.value(String(row.id)) != int(row.definition.value):
@@ -128,7 +130,8 @@ func _ready() -> void:
 	_check("рейдовые ценности остаются вне обычной продажи", not Profile.buy("laser_head", 1) and not Profile.buy("supply_signal", 1), "")
 	_check("описание рейдового эксклюзива не обещает покупку", not ItemInfo.facts_line("laser_head").contains("купить"), "")
 	Settings.unlock_all = true
-	var expected: Array[int] = [128440, 647680, 2112190, 3824700]
+	# 2026-10-24: три брони и три шлема вместо 8+7, подсумки на броне вместо разгрузок — суммы комплектов пересчитаны
+	var expected: Array[int] = [135140, 704680, 2112190, 3797700]
 	for i: int in range(Balance.TRADER_KITS.size()):
 		Profile.stash.clear()
 		Profile.backpack.clear()

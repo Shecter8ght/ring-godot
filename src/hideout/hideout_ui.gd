@@ -503,6 +503,16 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 	if not ItemDb.equip(id).is_empty():
 		menu.add_item("Надеть" if not ItemDb.equip(id).has("weapon") else "Взять (слот оружия)")
 		acts.append(func() -> void: Profile.equip_from(name, idx))
+	if ItemDb.pouch_cost(id) > 0.0:
+		var armor: Dictionary = Profile.equipment.get("armor", {})
+		var free := ItemDb.places_free(armor) if not armor.is_empty() else 0.0
+		menu.add_item("На броню (мест свободно: %s)" % str(free).replace(".5", "½").replace(".0", "") if not armor.is_empty() else "На броню — броня не надета")
+		acts.append(func() -> void:
+			if not Profile.equip_from(name, idx):
+				toast("На броне нет места под этот подсумок"))
+	if (list[idx].get("pouches", []) as Array).size() > 0:
+		menu.add_item("Снять подсумки")
+		acts.append(func() -> void: Profile.strip_pouches(name, idx))
 	menu.add_item("В рюкзак" if name == "stash" else "В тайник")
 	acts.append(func() -> void: _quick(name, idx))
 	if WeaponDb.is_weapon(id):
@@ -635,6 +645,9 @@ func _parts_menu(where: String, idx: int, e: Dictionary, at: Vector2) -> void:
 		var part := String(p[1])
 		menu.add_item(String(p[0]))
 		acts.append(func() -> void: Profile.strip_part(where, idx, part))
+	if (e.get("pouches", []) as Array).size() > 0:
+		menu.add_item("Снять подсумки (%d)" % (e.pouches as Array).size())
+		acts.append(func() -> void: Profile.strip_pouches(where, idx))
 	menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
 	menu.popup_hide.connect(menu.queue_free)
 	_root.add_child(menu)
@@ -1108,9 +1121,12 @@ func _kit_card(kit: Dictionary, own_idx: int = -1) -> Control:
 		v.add_child(about)
 	# состав одной строкой: стволы, броня, шлем, рюкзак, сколько всего в рюкзаке
 	var parts: Array[String] = []
-	for slot in ["primary", "secondary", "sidearm", "launcher", "armor", "rig", "helmet", "backpack"]:
+	for slot in ["primary", "secondary", "sidearm", "launcher", "armor", "helmet", "backpack"]:
 		if slots.has(slot):
 			parts.append(ItemDb.item_name(String((slots[slot] as Dictionary).id)))
+			var pouches: Array = (slots[slot] as Dictionary).get("pouches", [])
+			if not pouches.is_empty():
+				parts.append("подсумков %d" % pouches.size())
 	var bp_n := (kit.get("backpack", []) as Array).size()
 	if bp_n > 0:
 		parts.append("в рюкзаке %d поз." % bp_n)
@@ -1188,8 +1204,8 @@ func _subgroup(id: String) -> Array:
 		return [2, "Бронеплиты"]
 	if not WeaponDb.headset(id).is_empty():
 		return [3, "Гарнитуры"]
-	if ItemDb.item(id).has("rig"):
-		return [4, "Разгрузки"]
+	if ItemDb.item(id).has("pouch") or ItemDb.item(id).has("rig"):
+		return [4, "Подсумки"]
 	var cat := String(ItemDb.item(id).get("cat", "misc"))
 	if cat == "backpack":
 		return [5, "Рюкзаки"]
@@ -1303,10 +1319,14 @@ func _sub_of(id: String) -> String:
 			return "класс %d" % int(d["class"])
 	var v := WeaponDb.vest(id)
 	if not v.is_empty():
-		return "плиты: " + ("спереди и сзади" if not (v.get("plates", []) as Array).is_empty() else "нет")
+		return "плиты: %s · мест под подсумки %d" % ["спереди и сзади" if not (v.get("plates", []) as Array).is_empty() else "нет", int(v.get("places", 0))]
+	var pouch: Dictionary = ItemDb.item(id).get("pouch", {})
+	if not pouch.is_empty():
+		var kinds := {"rifle": "автоматные", "pistol": "пистолетные", "big": "крупные"}
+		return "мест %s · магазины %s" % [str(float(pouch.places)).replace(".5", "½").replace(".0", ""), String(kinds.get(String(pouch.mags), ""))]
 	var rig: Dictionary = ItemDb.item(id).get("rig", {})
 	if not rig.is_empty():
-		return "подсумков %d · сброс %d" % [int(rig.pouches), int(rig.dump)]
+		return "старая разгрузка: станет подсумками (%d)" % int(rig.pouches)
 	# остальное — вид предмета; подробно — по «i»
 	return String(ItemInfo.CAT_NAMES.get(String(ItemDb.item(id).get("cat", "misc")), ""))
 

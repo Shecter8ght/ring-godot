@@ -69,6 +69,8 @@ var outfit: String = "":
 		var o := get_node_or_null("NpcOutfit") as NpcOutfit
 		if o:
 			o.apply(value)
+## Ящик с тела (хост): пока он лежит, на теле надето то, что в нём осталось.
+var _crate: LootContainer = null
 var spare: Array = []
 var meds: Array = []
 ## Какое оружие в руках: primary / secondary.
@@ -403,11 +405,53 @@ func _equip_loadout() -> void:
 	for m in lo.get("meds", []):
 		if _rng.randf() < float(m[1]):
 			meds.append({"id": String(m[0]), "n": _rng.randi_range(int(m[2][0]), int(m[2][1]))})
+	_hang_pouches()
 
 
 ## Хост: описать внешность по снаряжению (забрало — по выкладке, data/loadouts.json "visor").
 func _refresh_outfit() -> void:
-	outfit = NpcOutfit.describe(equipment, spare, bool(WeaponDb.loadout(loadout_id).get("visor", false)))
+	outfit = NpcOutfit.describe(equipment, bool(WeaponDb.loadout(loadout_id).get("visor", false)))
+
+
+## Подсумки на броне — по запасным магазинам (видно на теле и снимается с него): пистолетные под пистолет,
+## большой от 50 патронов, остальные автоматные; сколько влезет по местам брони.
+func _hang_pouches() -> void:
+	if not equipment.has("armor"):
+		return
+	var a: Dictionary = equipment.armor
+	var pistol := String(WeaponDb.weapon(String((equipment.get("primary", {}) as Dictionary).get("id", ""))).get("class", "")) == "PISTOL"
+	for it: Variant in spare:
+		var e := it as Dictionary
+		if not e.has("rounds"):
+			continue
+		var cap := int(WeaponDb.magazine(String(e.get("id", ""))).get("capacity", 30))
+		var pid := "pouch_pistol" if pistol else ("pouch_big" if cap >= 50 else "pouch_rifle")
+		if not ItemDb.attach_pouch(a, pid):
+			break
+
+
+## Хост, тело: что ещё лежит в ящике с тела — то и надето; сняли шлем — на теле его нет; ящик унесли — тело
+## голое. Ящик — свой (`_crate`), опрос раз в полсекунды.
+func _watch_crate() -> void:
+	while is_instance_valid(_crate) and is_inside_tree():
+		await get_tree().create_timer(0.5).timeout
+		if not is_instance_valid(_crate):
+			break
+		var left: Dictionary = {}
+		for it: Variant in _crate.items:
+			var e := it as Dictionary
+			var id := String(e.get("id", ""))
+			if not left.has("armor") and not WeaponDb.vest(id).is_empty():
+				left["armor"] = e
+			elif not left.has("helmet") and not WeaponDb.helmet(id).is_empty():
+				left["helmet"] = e
+			elif not left.has("backpack") and String(ItemDb.item(id).get("cat", "")) == "backpack":
+				left["backpack"] = e
+		var spec := NpcOutfit.describe(left, bool(WeaponDb.loadout(loadout_id).get("visor", false)))
+		if spec != outfit:
+			outfit = spec
+	if is_inside_tree() and outfit != "{}":
+		outfit = "{}"
 
 
 ## Чужой отряд одет в едином стиле (схема npc_gear_by_type.md п. 3): броня, шлем и рюкзак — как у ведущего,
@@ -2650,6 +2694,15 @@ func _on_died() -> void:
 		# магазины (сколько не расстрелял), броня с плитами (как её побили), шлем, аптечки
 		if equipment.has(_active):
 			_store_mag_rounds()
+		# магазины — в подсумки на броне (сколько подсумков), остальные россыпью
+		if not ItemDb.rig_entry(equipment).is_empty():
+			var i := 0
+			while i < spare.size():
+				var m: Dictionary = spare[i]
+				if m.has("rounds") and ItemDb.add_to(ItemDb.rig_list(equipment, "rig"), m, ItemDb.rig_grid(equipment, "rig")) > 0:
+					spare.remove_at(i)
+					continue
+				i += 1
 		var drop: Array = []
 		for slot in ["primary", "secondary", "armor", "helmet", "ears", "backpack"]:
 			if equipment.has(slot):
@@ -2668,8 +2721,10 @@ func _on_died() -> void:
 		# награбленное — тоже здесь
 		drop.append_array(pack)
 		pack = []
-		Raid.current.spawn_drop(rest, "Ящик мародёра", drop, LootContainer.Look.CRATE,
+		_crate = Raid.current.spawn_drop(rest, "Ящик мародёра", drop, LootContainer.Look.CRATE,
 			global_position + Vector3.UP * 1.1 - rest)
+		if _crate:
+			_watch_crate()
 	collision_layer = 0
 	collision_mask = 0
 	set_physics_process(false)

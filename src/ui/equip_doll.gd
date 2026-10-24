@@ -15,7 +15,6 @@ const LAYOUT := {
 	"ears": Rect2(0, 86, 92, 80),
 	"eyes": Rect2(0, 172, 92, 80),
 	"armor": Rect2(348, 0, 92, 80),
-	"rig": Rect2(348, 86, 92, 80),
 	"backpack": Rect2(348, 172, 92, 80),
 	"primary": Rect2(0, 262, 217, 82),
 	"secondary": Rect2(223, 262, 217, 82),

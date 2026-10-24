@@ -2216,16 +2216,18 @@ func _rpc_story_death(cause: Dictionary) -> void:
 	analytics.on_death(cause)
 
 
-func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look, toss: Vector3 = Vector3.ZERO) -> void:
+## Возвращает ящик (null — слилось с лежащим рядом мешком): тело мародёра следит за своим ящиком.
+func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.Look, toss: Vector3 = Vector3.ZERO) -> LootContainer:
 	# выброшенное из рюкзака — в тот же мешок, что уже лежит рядом (не россыпь мешков по полу)
 	if display == DROP_NAME and _merge_drop(pos, list):
-		return
+		return null
 	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": display, "items": list, "look": int(look), "toss": toss, "fall_sec": float(Balance.SUPPLY_SIGNAL.fall_sec) if display == SUPPLY_DROP_NAME else 0.0}
 	_drop_count += 1
 	if _drop_spawner:
-		_drop_spawner.spawn(data)
-	else:
-		_drops.add_child(_make_drop(data))
+		return _drop_spawner.spawn(data) as LootContainer
+	var c := _make_drop(data)
+	_drops.add_child(c)
+	return c as LootContainer
 
 
 ## Хост: вещь упала под ноги игроку и лежит сама по себе (сброшенный магазин) — рядом с ногами, на

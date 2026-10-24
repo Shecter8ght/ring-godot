@@ -101,6 +101,7 @@ static func ensure() -> void:
 		for slot in equipment:
 			if equipment[slot] is Dictionary:
 				ItemDb.canon_entry(equipment[slot] as Dictionary)
+		_migrate_rigs()
 		trust = int(d.get("trust", 0))
 		extractions = int(d.get("extractions", 0))
 		floors_open = d.get("floors_open", ["f1"])
@@ -487,6 +488,45 @@ static func equip_from_stash(idx: int) -> bool:
 	return equip_from("stash", idx)
 
 
+## Разгрузки (rig_*) из старых сохранений — в подсумки (gear_v2, 2026-10-24): надетая — автоматные подсумки на
+## надетую броню, сколько влезет, и её магазины в них; остальное и разгрузки из сеток — подсумками, магазинами
+## и сбросом в тайник.
+static func _migrate_rigs() -> void:
+	var loose: Array = []
+	if equipment.has("rig"):
+		var rig: Dictionary = equipment.rig if equipment.rig is Dictionary else {}
+		equipment.erase("rig")
+		var n := int((ItemDb.item(String(rig.get("id", ""))).get("rig", {}) as Dictionary).get("pouches", 0))
+		var armor: Dictionary = equipment.get("armor", {})
+		for i in range(n):
+			if armor.is_empty() or not ItemDb.attach_pouch(armor, "pouch_rifle"):
+				loose.append(ItemDb.make("pouch_rifle", 1))
+		for part: String in ["mags", "dump"]:
+			for inner: Variant in rig.get(part, []):
+				if not inner is Dictionary:
+					continue
+				var m := (inner as Dictionary).duplicate(true)
+				for key in ["x", "y", "r"]:
+					m.erase(key)
+				if armor.is_empty() or ItemDb.add_to(ItemDb.rig_list(equipment, part), m, ItemDb.rig_grid(equipment, part)) == 0:
+					loose.append(m)
+	for l: Array in [stash, backpack, pocket]:
+		var i := 0
+		while i < l.size():
+			var e: Dictionary = l[i]
+			if ItemDb.item(String(e.get("id", ""))).has("rig"):
+				var n := int((ItemDb.item(String(e.id)).get("rig", {}) as Dictionary).get("pouches", 0))
+				for k in range(n):
+					loose.append(ItemDb.make("pouch_rifle", 1))
+				loose.append_array(ItemDb.detach_pouches(e))
+				l.remove_at(i)
+				continue
+			i += 1
+	for e: Dictionary in loose:
+		if ItemDb.add_to(stash, e, stash_grid()) == 0:
+			ItemDb.add_to(stash, e, Vector2i.ZERO)
+
+
 ## Надеть предмет из тайника или рюкзака; то, что было в слоте, — туда же (не влезло — в тайник).
 static func equip_from(from: String, idx: int, want: String = "") -> bool:
 	var src := list_of(from)
@@ -494,6 +534,13 @@ static func equip_from(from: String, idx: int, want: String = "") -> bool:
 	if idx < 0 or idx >= src.size():
 		return false
 	var id := String(src[idx].id)
+	# подсумок — на надетую броню или пояс (пока есть места), своего слота у него нет
+	if ItemDb.pouch_cost(id) > 0.0:
+		if not equipment.has("armor") or not ItemDb.attach_pouch(equipment.armor as Dictionary, id):
+			return false
+		ItemDb.remove_at(src, idx, 1)
+		save()
+		return true
 	var slot := ItemDb.pick_slot(id, equipment, want)
 	if slot == "":
 		return false
@@ -707,6 +754,20 @@ static func _set_entry(where: String, idx: int, e: Dictionary) -> void:
 
 ## Снять часть с предмета (обвес "mod:<точка>", плиту "plate:<сторона>", магазин "mag"): с надетого
 ## и из рюкзака — в рюкзак (не влезло — в тайник), из тайника — в тайник.
+## Снять с брони все подсумки (и магазины в них): из тайника — в тайник, иначе в рюкзак, не влезло — в тайник.
+static func strip_pouches(where: String, idx: int) -> bool:
+	var e := _entry_at(where, idx)
+	if e.is_empty() or (e.get("pouches", []) as Array).is_empty():
+		return false
+	var to_stash := where == "stash"
+	for part: Dictionary in ItemDb.detach_pouches(e):
+		if to_stash or ItemDb.add_to(backpack, part, grid_of("backpack")) == 0:
+			if ItemDb.add_to(stash, part, stash_grid()) == 0:
+				ItemDb.add_to(stash, part, Vector2i.ZERO)
+	save()
+	return true
+
+
 static func strip_part(where: String, idx: int, part: String) -> bool:
 	var e := _entry_at(where, idx)
 	if e.is_empty():

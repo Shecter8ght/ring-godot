@@ -434,7 +434,7 @@ func _build_equipment(me: Player) -> void:
 		# двойной клик — снять в рюкзак; ПКМ — снять, выбросить, снять обвес / магазин / плиту
 		sv.unequip_requested.connect(func() -> void: Raid.current.request_unequip(ws))
 		sv.context.connect(func(at: Vector2) -> void: _slot_menu(me, ws, at))
-	# разгрузка: подсумки под магазины (перезарядка — из них) и сумка сброса пустых
+	# подсумки на броне: магазины (перезарядка — из них) и сброс пустых
 	if me.inventory.grid_of("rig") != Vector2i.ZERO:
 		var rig_row := HBoxContainer.new()
 		rig_row.add_theme_constant_override("separation", 14)
@@ -459,7 +459,7 @@ func _build_equipment(me: Player) -> void:
 			gv.activated.connect(func(idx: int) -> void: Raid.current.request_grid_move(role, idx, "backpack", -1, -1, false))
 			gv.quick_move.connect(func(idx: int) -> void: Raid.current.request_grid_move(role, idx, "backpack", -1, -1, false))
 	else:
-		var no_rig := _row_label("Разгрузки нет: магазины достаются из рюкзака — перезарядка дольше.", Color(0.6, 0.6, 0.56))
+		var no_rig := _row_label("Подсумков на броне нет: магазины достаются из рюкзака — перезарядка дольше. Подсумок — перетащи на броню.", Color(0.6, 0.6, 0.56))
 		no_rig.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		no_rig.add_theme_font_size_override("font_size", 13)
 		_eq_list.add_child(no_rig)

@@ -130,7 +130,8 @@ tools/godot.cmd --headless res://tools/coupe_ilya_shots.tscn -- check # купе
 tools/godot.cmd res://tools/conditions_test.tscn            # условия рейда: зрение мародёров днём/ночью, свет ТЦ по питанию; с окном — снимки cond_*
 tools/godot.cmd res://tools/weather_test.tscn               # погода: дождь (в т.ч. начинается в рейде), пасмурно (сыро без капель, потом дождь), туман и снайпер, жара и очки, выносливость
 tools/godot.cmd --headless res://tools/events_test.tscn     # события и фракции: жильцы, сигнализация, свет погас, генератор, сброс, ЧВК против мародёров, рация
-tools/godot.cmd --headless res://tools/reload_fast_test.tscn # ВЕРАС со снаряжением: одно R — обычная перезарядка, два быстрых — быстрая (−28 %, старый магазин на землю), держать R — магазин в руке
+tools/godot.cmd --headless res://tools/reload_fast_test.tscn # ВЕРАС со снаряжением: одно R — обычная перезарядка, два быстрых — быстрая (−28 %, старый магазин на землю), держать R — магазин в руке;
+                                                              # магазины из подсумков на броне без надбавки, старый — в сброс пустых, пояс с подсумками весит с магазинами
 tools/godot.cmd --headless res://tools/fire_mode_test.tscn  # режимы огня (X, ВЕРАС-54: АВ → 2 → ОД → АВ): очередь по 2 на нажатие, ОД — один, пока переводчик щёлкает — не стреляет,
                                                               # режим на экземпляре ствола (хосту, после перезарядки и смены ствола), у пистолета X ничего не делает
 tools/godot.cmd --headless res://tools/light_keys_test.tscn # свет в руку: Y — химсвет, бросок как граната (ЛКМ/ПКМ); G — ракетница из слота (в руках — тип патрона),
@@ -288,7 +289,7 @@ tools/godot.cmd --headless res://tools/coop_items_test.tscn -- host [сцена]
 tools/godot.cmd --disable-vsync res://tools/cpu_probe.tscn  # во что упирается процессор на уровне: выключает системы по очереди
 python -X utf8 tools/hang_stacks.py [pid] [--all]            # игра зависла: стеки потоков живого процесса Godot — чего ждёт главный поток (без отладчика; не закрывать игру до снятия)
 tools/godot.cmd --headless res://tools/mesh_census.tscn     # какие модели дают треугольники на уровне
-tools/godot.cmd --windowed --resolution 1600x900 res://tools/rig_shots.tscn # ростовая фигура со слотами и разгрузка (подсумки, сумка сброса): тайник и окно рюкзака в рейде; снимки doll_*
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/rig_shots.tscn # ростовая фигура со слотами и подсумки на броне (магазины, сброс пустых): тайник и окно рюкзака в рейде; снимки doll_*
 tools/godot.cmd --headless res://tools/engraver_head_test.tscn # головка гравировщика в станке: вставить, нанести (размер, слева), вынуть; с окном — снимок окна станка
 tools/godot.cmd --headless res://tools/trade_net_test.tscn -- host # + «-- client» через 3 с (порт 17793): обмен вещами в убежище и в рейде — отмена, обмен, рюкзак напарника виден, разошлись — отмена
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/workbench_repair_test.tscn # верстак, ремонт: изношенное плашками без прокрутки, починить одно и всё разом, нет денег — кнопки выключены; снимок workbench_repair
@@ -349,6 +350,8 @@ tools/godot.cmd --headless res://tools/npc_rig_test.tscn    # мародёр v03
 tools/godot.cmd --headless res://tools/npc_outfit_test.tscn # внешность ботов по снаряжению (NpcOutfit): ряд типов на новом теле — броня, шлем, рюкзак по посадке,
                                                               # забрало у штурмовика «Периметра», подсумки по магазинам, LOD по дальности, чужой отряд в одном стиле;
                                                               # с окном -- shots — снимки npc_outfit_* (ряд спереди и сзади, крупно, чужой отряд)
+tools/godot.cmd --headless res://tools/npc_loot_test.tscn   # лут с тела по видимому: убит — в ящике броня с подсумками и магазинами бота; забрали броню — на теле
+                                                              # нет ни брони, ни подсумков; ящик унесли — тело голое
 ```
 
 Перед сетевыми тестами — убить висящие процессы Godot: старый хост держит порт 7777, и клиент

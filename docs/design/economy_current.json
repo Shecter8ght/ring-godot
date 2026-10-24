@@ -1794,6 +1794,161 @@
 			"weight": 0.3
 		},
 		{
+			"buy": 46000,
+			"catalog": 2,
+			"cells": 9,
+			"definition": {
+				"armor": {
+					"blunt": 0.28,
+					"code": "CAR_02",
+					"npc": {
+						"fit": "Mid",
+						"item": "armor_mid",
+						"mesh": "G_Armor_Mid"
+					},
+					"places": 5.0,
+					"plates": [
+						"front",
+						"back"
+					],
+					"soft": {
+						"class": 1.0,
+						"coverage": 0.9,
+						"durability": 35.0
+					}
+				},
+				"cat": "armor",
+				"desc": "Плитоносец с карманами под плиты спереди и сзади, камербанд, пять мест под подсумки. Защита — та, что вставишь: без плит это просто ткань.",
+				"equip": {
+					"slot": "armor"
+				},
+				"name": "Плитоносец средний",
+				"rarity": "common",
+				"short": "БРОНЯ 2",
+				"size": [
+					3.0,
+					3.0
+				],
+				"stack": 1.0,
+				"tags": [
+					"SCAV",
+					"POLICE",
+					"MILITARY"
+				],
+				"tier": 2.0,
+				"value": 22000.0,
+				"weight": 2.0
+			},
+			"id": "armor_mid",
+			"loot_only": false,
+			"sell_new": 12100,
+			"shop": true,
+			"stack": 1,
+			"weight": 2.0
+		},
+		{
+			"buy": 14000,
+			"catalog": 1,
+			"cells": 9,
+			"definition": {
+				"armor": {
+					"blunt": 0.35,
+					"code": "ARM_02",
+					"npc": {
+						"fit": "Poor",
+						"item": "armor_poor",
+						"mesh": "G_Armor_Poor"
+					},
+					"places": 3.0,
+					"plates": [],
+					"soft": {
+						"class": 2.0,
+						"coverage": 0.85,
+						"durability": 45.0
+					}
+				},
+				"cat": "armor",
+				"desc": "Мягкий жилет без плит, сшитый из чего было: кевларовые пакеты в чехле и три места под подсумки на поясе. От пистолетной пули спасёт, от автоматной — нет.",
+				"equip": {
+					"slot": "armor"
+				},
+				"name": "Бронежилет бомжовский",
+				"rarity": "common",
+				"short": "БРОНЯ 1",
+				"size": [
+					3.0,
+					3.0
+				],
+				"stack": 1.0,
+				"tags": [
+					"CIVILIAN",
+					"SCAV",
+					"POLICE"
+				],
+				"tier": 1.0,
+				"value": 10000.0,
+				"weight": 4.6
+			},
+			"id": "armor_poor",
+			"loot_only": false,
+			"sell_new": 5500,
+			"shop": true,
+			"stack": 1,
+			"weight": 4.6
+		},
+		{
+			"buy": 160000,
+			"catalog": 3,
+			"cells": 12,
+			"definition": {
+				"armor": {
+					"blunt": 0.18,
+					"code": "CAR_04",
+					"npc": {
+						"fit": "Top",
+						"item": "armor_top",
+						"mesh": "G_Armor_Top"
+					},
+					"places": 8.0,
+					"plates": [
+						"front",
+						"back"
+					],
+					"soft": {
+						"class": 2.0,
+						"coverage": 0.95,
+						"durability": 55.0
+					}
+				},
+				"cat": "armor",
+				"desc": "Тяжёлая броня: плиты, воротник, наплечники, пах и щитки бёдер; восемь мест под подсумки. В такой ходит «Периметр» и те, кто снял её с «Периметра».",
+				"equip": {
+					"slot": "armor"
+				},
+				"name": "Броня тяжёлая",
+				"rarity": "uncommon",
+				"short": "БРОНЯ 3",
+				"size": [
+					3.0,
+					4.0
+				],
+				"stack": 1.0,
+				"tags": [
+					"MILITARY",
+					"PERIMETER"
+				],
+				"tier": 3.0,
+				"value": 56000.0,
+				"weight": 3.2
+			},
+			"id": "armor_top",
+			"loot_only": false,
+			"sell_new": 30800,
+			"shop": true,
+			"stack": 1,
+			"weight": 3.2
+		},
+		{
 			"buy": 2860,
 			"catalog": 0,
 			"cells": 2,
@@ -1893,6 +2048,51 @@
 			"shop": true,
 			"stack": 1,
 			"weight": 1.2
+		},
+		{
+			"buy": 5000,
+			"catalog": 1,
+			"cells": 2,
+			"definition": {
+				"armor": {
+					"blunt": 1.0,
+					"code": "BELT_01",
+					"npc": {
+						"fit": "",
+						"item": "belt",
+						"mesh": "G_Armor_Belt"
+					},
+					"places": 2.0,
+					"plates": [],
+					"soft": null
+				},
+				"cat": "armor",
+				"desc": "Ремень с двумя местами под подсумки спереди-сбоку. Защиты никакой — занимает слот брони, когда брони нет.",
+				"equip": {
+					"slot": "armor"
+				},
+				"name": "Пояс с подсумками",
+				"rarity": "common",
+				"short": "ПОЯС",
+				"size": [
+					2.0,
+					1.0
+				],
+				"stack": 1.0,
+				"tags": [
+					"CIVILIAN",
+					"SCAV"
+				],
+				"tier": 1.0,
+				"value": 3500.0,
+				"weight": 0.5
+			},
+			"id": "belt_pouches",
+			"loot_only": false,
+			"sell_new": 1925,
+			"shop": true,
+			"stack": 1,
+			"weight": 0.5
 		},
 		{
 			"buy": 4680,
@@ -2234,178 +2434,6 @@
 			"shop": true,
 			"stack": 1,
 			"weight": 7.4
-		},
-		{
-			"buy": 80600,
-			"catalog": 0,
-			"cells": 12,
-			"definition": {
-				"armor": {
-					"blunt": 0.18,
-					"code": "CAR_04",
-					"plates": [
-						"front",
-						"back"
-					],
-					"soft": {
-						"class": 2.0,
-						"coverage": 0.95,
-						"durability": 55.0
-					}
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Плитоносец «Периметр» штурмовой",
-				"rarity": "rare",
-				"size": [
-					3.0,
-					4.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"PERIMETER",
-					"RARE"
-				],
-				"tier": 4.0,
-				"value": 62000.0,
-				"weight": 2.4
-			},
-			"id": "carrier_perimeter_assault",
-			"loot_only": false,
-			"sell_new": 34100,
-			"shop": true,
-			"stack": 1,
-			"weight": 2.4
-		},
-		{
-			"buy": 62400,
-			"catalog": 0,
-			"cells": 9,
-			"definition": {
-				"armor": {
-					"blunt": 0.2,
-					"code": "CAR_03",
-					"plates": [
-						"front",
-						"back"
-					],
-					"soft": {
-						"class": 2.0,
-						"coverage": 0.9,
-						"durability": 40.0
-					}
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Плитоносец «Периметр» стандартный",
-				"rarity": "rare",
-				"size": [
-					3.0,
-					3.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"PERIMETER",
-					"RARE"
-				],
-				"tier": 4.0,
-				"value": 48000.0,
-				"weight": 1.8
-			},
-			"id": "carrier_perimeter_std",
-			"loot_only": false,
-			"sell_new": 26400,
-			"shop": true,
-			"stack": 1,
-			"weight": 1.8
-		},
-		{
-			"buy": 15300,
-			"catalog": 2,
-			"cells": 9,
-			"definition": {
-				"armor": {
-					"blunt": 0.3,
-					"code": "CAR_01",
-					"plates": [
-						"front",
-						"back"
-					],
-					"soft": null
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Плитоносец простой",
-				"rarity": "common",
-				"size": [
-					3.0,
-					3.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"SCAV",
-					"MILITARY"
-				],
-				"tier": 2.0,
-				"value": 9000.0,
-				"weight": 1.2
-			},
-			"id": "carrier_simple",
-			"loot_only": false,
-			"sell_new": 4950,
-			"shop": true,
-			"stack": 1,
-			"weight": 1.2
-		},
-		{
-			"buy": 48401,
-			"catalog": 3,
-			"cells": 9,
-			"definition": {
-				"armor": {
-					"blunt": 0.25,
-					"code": "CAR_02",
-					"plates": [
-						"front",
-						"back"
-					],
-					"soft": {
-						"class": 1.0,
-						"coverage": 0.9,
-						"durability": 30.0
-					}
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Плитоносец тактический",
-				"rarity": "uncommon",
-				"size": [
-					3.0,
-					3.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"MILITARY",
-					"POLICE"
-				],
-				"tier": 3.0,
-				"value": 22000.0,
-				"weight": 1.6
-			},
-			"id": "carrier_tactical",
-			"loot_only": false,
-			"sell_new": 12100,
-			"shop": true,
-			"stack": 1,
-			"weight": 1.6
 		},
 		{
 			"buy": 6500,
@@ -3683,11 +3711,12 @@
 			"weight": 0.35
 		},
 		{
-			"buy": 57201,
-			"catalog": 3,
+			"buy": 60000,
+			"catalog": 2,
 			"cells": 4,
 			"definition": {
 				"cat": "armor",
+				"desc": "Современный армейский шлем с площадкой под ПНВ спереди. Класс 3.",
 				"equip": {
 					"slot": "helmet"
 				},
@@ -3695,92 +3724,20 @@
 					"blunt": 0.3,
 					"class": 3.0,
 					"code": "HEL_04",
-					"coverage": 0.7,
+					"coverage": 0.72,
 					"durability": 45.0,
 					"mounts": [
 						"NVG",
 						"HEADSET"
-					]
+					],
+					"npc": {
+						"item": "helmets",
+						"mesh": "G_Helmet_Mid"
+					}
 				},
-				"name": "Шлем армейский (кл. 3)",
-				"rarity": "uncommon",
-				"size": [
-					2.0,
-					2.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"MILITARY"
-				],
-				"tier": 3.0,
-				"value": 26000.0,
-				"weight": 1.3
-			},
-			"id": "helmet_army",
-			"loot_only": false,
-			"sell_new": 14300,
-			"shop": true,
-			"stack": 1,
-			"weight": 1.3
-		},
-		{
-			"buy": 2600,
-			"catalog": 1,
-			"cells": 4,
-			"definition": {
-				"cat": "armor",
-				"equip": {
-					"slot": "helmet"
-				},
-				"helmet": {
-					"blunt": 0.5,
-					"class": 1.0,
-					"code": "HEL_01",
-					"coverage": 0.6,
-					"durability": 20.0,
-					"mounts": []
-				},
-				"name": "Каска строительная",
+				"name": "Шлем средний",
 				"rarity": "common",
-				"size": [
-					2.0,
-					2.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"CIVILIAN",
-					"SCAV"
-				],
-				"tier": 1.0,
-				"value": 2000.0,
-				"weight": 0.4
-			},
-			"id": "helmet_hardhat",
-			"loot_only": false,
-			"sell_new": 1100,
-			"shop": true,
-			"stack": 1,
-			"weight": 0.4
-		},
-		{
-			"buy": 11700,
-			"catalog": 1,
-			"cells": 4,
-			"definition": {
-				"cat": "armor",
-				"equip": {
-					"slot": "helmet"
-				},
-				"helmet": {
-					"blunt": 0.4,
-					"class": 2.0,
-					"code": "HEL_02",
-					"coverage": 0.65,
-					"durability": 35.0,
-					"mounts": []
-				},
-				"name": "Шлем стальной старый (кл. 2)",
-				"rarity": "common",
+				"short": "ШЛЕМ 2",
 				"size": [
 					2.0,
 					2.0
@@ -3788,68 +3745,73 @@
 				"stack": 1.0,
 				"tags": [
 					"SCAV",
+					"POLICE",
 					"MILITARY"
 				],
-				"tier": 1.0,
-				"value": 9000.0,
-				"weight": 1.5
+				"tier": 2.0,
+				"value": 24000.0,
+				"weight": 1.3
 			},
-			"id": "helmet_military_old",
+			"id": "helmet_mid",
 			"loot_only": false,
-			"sell_new": 4950,
+			"sell_new": 13200,
 			"shop": true,
 			"stack": 1,
-			"weight": 1.5
+			"weight": 1.3
 		},
 		{
-			"buy": 83200,
-			"catalog": 0,
+			"buy": 12000,
+			"catalog": 1,
 			"cells": 4,
 			"definition": {
 				"cat": "armor",
+				"desc": "Старая стальная каска в зелёной краске. Пистолетную пулю и осколок держит, автоматную — как повезёт.",
 				"equip": {
 					"slot": "helmet"
 				},
 				"helmet": {
-					"blunt": 0.22,
-					"class": 4.0,
-					"code": "HEL_06",
-					"coverage": 0.74,
-					"durability": 50.0,
-					"mounts": [
-						"NVG",
-						"HEADSET",
-						"LIGHT"
-					]
+					"blunt": 0.4,
+					"class": 2.0,
+					"code": "HEL_02",
+					"coverage": 0.68,
+					"durability": 35.0,
+					"mounts": [],
+					"npc": {
+						"item": "helmets",
+						"mesh": "G_Helmet_Simple"
+					}
 				},
-				"name": "Шлем «Периметр» боевой (кл. 4)",
-				"rarity": "rare",
+				"name": "Шлем простой",
+				"rarity": "common",
+				"short": "ШЛЕМ 1",
 				"size": [
 					2.0,
 					2.0
 				],
 				"stack": 1.0,
 				"tags": [
-					"PERIMETER",
-					"RARE"
+					"CIVILIAN",
+					"SCAV",
+					"MILITARY"
 				],
-				"tier": 4.0,
-				"value": 64000.0,
-				"weight": 1.2
+				"tier": 1.0,
+				"value": 7000.0,
+				"weight": 1.4
 			},
-			"id": "helmet_perimeter_combat",
+			"id": "helmet_simple",
 			"loot_only": false,
-			"sell_new": 35200,
+			"sell_new": 3850,
 			"shop": true,
 			"stack": 1,
-			"weight": 1.2
+			"weight": 1.4
 		},
 		{
-			"buy": 114400,
-			"catalog": 0,
+			"buy": 190000,
+			"catalog": 3,
 			"cells": 4,
 			"definition": {
 				"cat": "armor",
+				"desc": "Тяжёлый шлем с площадкой ПНВ, боковой планкой под фонарь и бронезабралом. Класс 4 — таких у мародёров не бывает, у «Периметра» — у каждого.",
 				"equip": {
 					"slot": "helmet"
 				},
@@ -3857,99 +3819,23 @@
 					"blunt": 0.2,
 					"class": 4.0,
 					"code": "HEL_07",
-					"coverage": 0.92,
-					"durability": 70.0,
+					"coverage": 0.9,
+					"durability": 65.0,
 					"mounts": [
 						"NVG",
 						"HEADSET",
+						"LIGHT",
 						"VISOR"
-					]
+					],
+					"npc": {
+						"item": "helmets",
+						"mesh": "G_Helmet_Top",
+						"visor_mesh": "G_Helmet_Top_Visor"
+					}
 				},
-				"name": "Шлем «Периметр» тяжёлый с забралом (кл. 4)",
-				"rarity": "rare",
-				"size": [
-					2.0,
-					2.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"PERIMETER",
-					"RARE"
-				],
-				"tier": 4.0,
-				"value": 88000.0,
-				"weight": 2.6
-			},
-			"id": "helmet_perimeter_heavy",
-			"loot_only": false,
-			"sell_new": 48400,
-			"shop": true,
-			"stack": 1,
-			"weight": 2.6
-		},
-		{
-			"buy": 20400,
-			"catalog": 2,
-			"cells": 4,
-			"definition": {
-				"cat": "armor",
-				"equip": {
-					"slot": "helmet"
-				},
-				"helmet": {
-					"blunt": 0.35,
-					"class": 2.0,
-					"code": "HEL_03",
-					"coverage": 0.7,
-					"durability": 40.0,
-					"mounts": [
-						"VISOR"
-					]
-				},
-				"name": "Шлем полицейский (кл. 2)",
-				"rarity": "common",
-				"size": [
-					2.0,
-					2.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"POLICE"
-				],
-				"tier": 2.0,
-				"value": 12000.0,
-				"weight": 1.2
-			},
-			"id": "helmet_police",
-			"loot_only": false,
-			"sell_new": 6600,
-			"shop": true,
-			"stack": 1,
-			"weight": 1.2
-		},
-		{
-			"buy": 95200,
-			"catalog": 4,
-			"cells": 4,
-			"definition": {
-				"cat": "armor",
-				"equip": {
-					"slot": "helmet"
-				},
-				"helmet": {
-					"blunt": 0.28,
-					"class": 3.0,
-					"code": "HEL_05",
-					"coverage": 0.72,
-					"durability": 45.0,
-					"mounts": [
-						"NVG",
-						"HEADSET",
-						"LIGHT"
-					]
-				},
-				"name": "Шлем тактический (кл. 3)",
+				"name": "Шлем тяжёлый",
 				"rarity": "uncommon",
+				"short": "ШЛЕМ 3",
 				"size": [
 					2.0,
 					2.0
@@ -3957,18 +3843,18 @@
 				"stack": 1.0,
 				"tags": [
 					"MILITARY",
-					"POLICE"
+					"PERIMETER"
 				],
 				"tier": 3.0,
-				"value": 34000.0,
-				"weight": 1.1
+				"value": 60000.0,
+				"weight": 2.4
 			},
-			"id": "helmet_tactical",
+			"id": "helmet_top",
 			"loot_only": false,
-			"sell_new": 18700,
+			"sell_new": 33000,
 			"shop": true,
 			"stack": 1,
-			"weight": 1.1
+			"weight": 2.4
 		},
 		{
 			"buy": 11761,
@@ -8789,6 +8675,113 @@
 			"weight": 0.28
 		},
 		{
+			"buy": 7500,
+			"catalog": 2,
+			"cells": 4,
+			"definition": {
+				"cat": "armor",
+				"desc": "Большой подсумок с клапаном на липучке под крупный магазин — барабан, четырёхрядный на 60, короб на 100. Два места на броне, на пояс не встаёт.",
+				"name": "Подсумок большой",
+				"pouch": {
+					"mags": "big",
+					"npc_mesh": "G_Pouch_Big",
+					"places": 2.0
+				},
+				"rarity": "common",
+				"short": "ПОДС. БОЛ",
+				"size": [
+					2.0,
+					2.0
+				],
+				"stack": 1.0,
+				"tags": [
+					"SCAV",
+					"MILITARY"
+				],
+				"tier": 2.0,
+				"value": 4500.0,
+				"weight": 0.35
+			},
+			"id": "pouch_big",
+			"loot_only": false,
+			"sell_new": 2475,
+			"shop": true,
+			"stack": 1,
+			"weight": 0.35
+		},
+		{
+			"buy": 2500,
+			"catalog": 1,
+			"cells": 1,
+			"definition": {
+				"cat": "armor",
+				"desc": "Подсумок под пистолетный магазин, язычок на липучке. Половина места на броне — два встают рядом.",
+				"name": "Подсумок пистолетный",
+				"pouch": {
+					"mags": "pistol",
+					"npc_mesh": "G_Pouch_Pistol",
+					"places": 0.5
+				},
+				"rarity": "common",
+				"short": "ПОДС. ПИСТ",
+				"size": [
+					1.0,
+					1.0
+				],
+				"stack": 1.0,
+				"tags": [
+					"CIVILIAN",
+					"SCAV",
+					"POLICE"
+				],
+				"tier": 1.0,
+				"value": 1500.0,
+				"weight": 0.12
+			},
+			"id": "pouch_pistol",
+			"loot_only": false,
+			"sell_new": 825,
+			"shop": true,
+			"stack": 1,
+			"weight": 0.12
+		},
+		{
+			"buy": 4000,
+			"catalog": 1,
+			"cells": 2,
+			"definition": {
+				"cat": "armor",
+				"desc": "Одинарный подсумок под автоматный магазин (и длинный пистолетный), язычок на липучке. Занимает одно место на броне.",
+				"name": "Подсумок автоматный",
+				"pouch": {
+					"mags": "rifle",
+					"npc_mesh": "G_Pouch_Rifle",
+					"places": 1.0
+				},
+				"rarity": "common",
+				"short": "ПОДС. АВТ",
+				"size": [
+					1.0,
+					2.0
+				],
+				"stack": 1.0,
+				"tags": [
+					"SCAV",
+					"MILITARY",
+					"POLICE"
+				],
+				"tier": 1.0,
+				"value": 2500.0,
+				"weight": 0.25
+			},
+			"id": "pouch_rifle",
+			"loot_only": false,
+			"sell_new": 1375,
+			"shop": true,
+			"stack": 1,
+			"weight": 0.25
+		},
+		{
 			"buy": 8320,
 			"catalog": 0,
 			"cells": 9,
@@ -9165,130 +9158,6 @@
 			"weight": 0.9
 		},
 		{
-			"buy": 46201,
-			"catalog": 3,
-			"cells": 6,
-			"definition": {
-				"cat": "armor",
-				"desc": "Шесть подсумков и сумка сброса на три магазина. Запас на долгий бой: перезарядка из подсумков быстрая, пустые магазины не теряются.",
-				"equip": {
-					"slot": "rig"
-				},
-				"name": "Штурмовая разгрузка",
-				"rig": {
-					"dump": 3.0,
-					"pouches": 6.0
-				},
-				"short": "ШТУРМ",
-				"size": [
-					3.0,
-					2.0
-				],
-				"stack": 1.0,
-				"value": 21000.0,
-				"weight": 1.4
-			},
-			"id": "rig_assault",
-			"loot_only": false,
-			"sell_new": 11550,
-			"shop": true,
-			"stack": 1,
-			"weight": 1.4
-		},
-		{
-			"buy": 4550,
-			"catalog": 1,
-			"cells": 2,
-			"definition": {
-				"cat": "armor",
-				"desc": "Два подсумка на ремне и карман для пустых. Два автоматных магазина под рукой — перезарядка идёт из них, а не из рюкзака. Пустой магазин падает в карман сброса.",
-				"equip": {
-					"slot": "rig"
-				},
-				"name": "Поясные подсумки",
-				"rig": {
-					"dump": 1.0,
-					"pouches": 2.0
-				},
-				"short": "ПОЯС",
-				"size": [
-					2.0,
-					1.0
-				],
-				"stack": 1.0,
-				"value": 3500.0,
-				"weight": 0.5
-			},
-			"id": "rig_belt",
-			"loot_only": false,
-			"sell_new": 1925,
-			"shop": true,
-			"stack": 1,
-			"weight": 0.5
-		},
-		{
-			"buy": 15300,
-			"catalog": 2,
-			"cells": 4,
-			"definition": {
-				"cat": "armor",
-				"desc": "Нагрудная разгрузка: четыре подсумка под автоматные магазины (или восемь пистолетных) и сумка сброса на два пустых. Надевается поверх бронежилета.",
-				"equip": {
-					"slot": "rig"
-				},
-				"name": "Нагрудник на четыре магазина",
-				"rig": {
-					"dump": 2.0,
-					"pouches": 4.0
-				},
-				"short": "НАГРУДНИК",
-				"size": [
-					2.0,
-					2.0
-				],
-				"stack": 1.0,
-				"value": 9000.0,
-				"weight": 0.9
-			},
-			"id": "rig_chest",
-			"loot_only": false,
-			"sell_new": 4950,
-			"shop": true,
-			"stack": 1,
-			"weight": 0.9
-		},
-		{
-			"buy": 106400,
-			"catalog": 4,
-			"cells": 9,
-			"definition": {
-				"cat": "armor",
-				"desc": "Восемь подсумков — магазины, барабаны, короба — и большая сумка сброса. Тяжёлая, зато весь боезапас спереди.",
-				"equip": {
-					"slot": "rig"
-				},
-				"name": "Разгрузка пулемётчика",
-				"rig": {
-					"dump": 4.0,
-					"pouches": 8.0
-				},
-				"short": "ПУЛЕМЁТ",
-				"size": [
-					3.0,
-					3.0
-				],
-				"stack": 1.0,
-				"value": 38000.0,
-				"weight": 2.1
-			},
-			"id": "rig_heavy",
-			"loot_only": false,
-			"sell_new": 20900,
-			"shop": true,
-			"stack": 1,
-			"weight": 2.1
-		},
-		{
 			"buy": 27950,
 			"catalog": 0,
 			"cells": 4,
@@ -9414,26 +9283,255 @@
 			"weight": 0.6
 		},
 		{
-			"buy": 49400,
-			"catalog": 0,
+			"buy": 150000,
+			"catalog": 1,
 			"cells": 2,
 			"definition": {
-				"cat": "tools",
-				"desc": "Многоразовая сигнальная ракетница. Через меню рюкзака вызывает самолёт с редким грузом под открытым небом; нужен отдельный сигнальный патрон снабжения. Громкий сигнал привлекает внимание.",
-				"model": "res://assets/items/models/valuable/signal_launcher.glb",
-				"name": "Сигнальный пистолет снабжения",
-				"short": "СИГНАЛЬН",
+				"cat": "weapon",
+				"desc": "Однозарядная переломная ракетница. Красный патрон освещает местность, зелёный вызывает снабжение. Носится в своём слоте «Ракетница» (клавиша 5, или G): с ракетницей в руках G выбирает тип следующего патрона, R раскрывает ствол, заряжает и взводит курок. ЛКМ — выстрел. Тип также выбирается через меню патрона в рюкзаке. Зелёный сигнал требует открытого неба и свободной площадки.",
+				"equip": {
+					"slot": "launcher",
+					"weapon": "signal_launcher"
+				},
+				"model": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex.glb",
+				"name": "Компактная сигнальная ракетница",
+				"raid_only": true,
+				"short": "РАКЕТНИЦА",
 				"size": [
 					1.0,
 					2.0
 				],
 				"stack": 1.0,
 				"value": 38000,
+				"weapon": {
+					"asset": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex.glb",
+					"caliber": "signal_26",
+					"class": "PISTOL",
+					"cycle_sound": "",
+					"hand_grips": {
+						"left": {
+							"curl": [
+								50.0,
+								70.0,
+								40.0
+							],
+							"fingers": [
+								0.0,
+								1.0,
+								0.1
+							],
+							"pos": [
+								0.02,
+								-0.029,
+								-0.006
+							],
+							"thumb": [
+								1.0,
+								0.0,
+								0.0
+							]
+						},
+						"right": {
+							"curl": [
+								55.0,
+								75.0,
+								45.0
+							],
+							"fingers": [
+								0.0,
+								1.0,
+								0.12
+							],
+							"pos": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"thumb": [
+								-1.0,
+								0.0,
+								0.0
+							]
+						}
+					},
+					"internal_mag": 1.0,
+					"length": 0.1981,
+					"mechanism": "break_action",
+					"model": "flare_pistol_codex",
+					"mounts": {},
+					"reload_sound": "reload_pistol",
+					"rig": {
+						"ads_z": 0.32,
+						"barrel_open_deg": 48.0,
+						"hammer_cocked_deg": -19.480565,
+						"mechanism": "break_action",
+						"reload": {
+							"close_end": 0.819354838709677,
+							"close_start": 0.761290322580645,
+							"cock_end": 0.92258064516129,
+							"cock_start": 0.838709677419355,
+							"insert_end": 0.703225806451613,
+							"insert_start": 0.580645161290323,
+							"open_end": 0.187096774193548,
+							"open_start": 0.0967741935483871
+						},
+						"shot_duration": 0.766666666666667,
+						"trigger_angle_deg": -9.740283
+					},
+					"scale": 1.0,
+					"slot": "launcher",
+					"sound": "shot_pistol",
+					"stats": {
+						"ads_fov": 65.0,
+						"ads_spread": 0.5,
+						"auto": false,
+						"ergo": 75.0,
+						"kick": 0.011,
+						"kick_bias": 0.1,
+						"kick_h": 0.004,
+						"noise": 60.0,
+						"range": 80.0,
+						"recover": 0.4,
+						"reliability": 1.0,
+						"reload": 5.16666666666667,
+						"reload_empty": 5.16666666666667,
+						"rpm": 60.0,
+						"shake": 0.055,
+						"spread": 1.0,
+						"wear": 0.012
+					},
+					"viewmodel": {
+						"ads_z": 0.32,
+						"clearance_parts": {
+							"Barrel": {
+								"max": [
+									0.0164070086401541,
+									0.0353958894049326,
+									0.0397990522204734
+								],
+								"min": [
+									-0.0164079261191288,
+									-0.00871869333132696,
+									-0.0525904672504133
+								]
+							},
+							"FiringPin": {
+								"max": [
+									0.00290415580549491,
+									0.00274959533991014,
+									0.00465004628501197
+								],
+								"min": [
+									-0.00266101045708405,
+									-0.00278088123977954,
+									-0.0130999492313018
+								]
+							},
+							"Frame": {
+								"max": [
+									0.0131821436524158,
+									0.0695850018424657,
+									0.123987311212451
+								],
+								"min": [
+									-0.0130970225185331,
+									-0.0599689248830143,
+									-0.0442896156697044
+								]
+							},
+							"Hammer": {
+								"max": [
+									0.00419961758597267,
+									0.0187899120985846,
+									0.0128974509890149
+								],
+								"min": [
+									-0.00419969268326395,
+									-0.0069966049683393,
+									-0.0372972879458143
+								]
+							},
+							"Latch": {
+								"max": [
+									0.0153955380784712,
+									0.0040768755085712,
+									0.00270094278117921
+								],
+								"min": [
+									-0.0153982705309013,
+									-0.0054806141374366,
+									-0.00271029464319233
+								]
+							},
+							"Trigger": {
+								"max": [
+									0.00329996924854958,
+									0.00234237690998868,
+									0.00875577279141404
+								],
+								"min": [
+									-0.00329996366046225,
+									-0.0288037910487527,
+									-0.00327801904520053
+								]
+							}
+						},
+						"clips": {
+							"draw": "draw",
+							"holster": "holster",
+							"idle": "idle",
+							"idle_empty": "idle_empty",
+							"reload": "reload_live",
+							"reload_empty": "reload_empty",
+							"shot": "fire"
+						},
+						"events": {
+							"case_free": 58.0,
+							"chamber_down": 42.0,
+							"close": 128.0,
+							"cock": 144.0,
+							"insert": 110.0,
+							"open": 30.0,
+							"shake_1": 48.0,
+							"shake_2": 56.0,
+							"snap": 123.0,
+							"upright": 70.0
+						},
+						"fps": 30.0,
+						"hip_offset": [
+							0.0,
+							0.0,
+							0.015
+						],
+						"left_hand_windows": [
+							[
+								1.0,
+								36.0
+							],
+							[
+								70.0,
+								117.0
+							]
+						],
+						"mechanism": "break_action",
+						"round_windows": {
+							"new": [
+								73.0,
+								156.0
+							],
+							"old": [
+								1.0,
+								65.0
+							]
+						},
+						"scene": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex_viewmodel.glb"
+					}
+				},
 				"weight": 0.65
 			},
 			"id": "signal_launcher",
 			"loot_only": true,
-			"sell_new": 20900,
+			"sell_new": 21780,
 			"shop": true,
 			"stack": 1,
 			"weight": 0.65
@@ -10441,169 +10539,6 @@
 			"shop": true,
 			"stack": 1,
 			"weight": 0.5
-		},
-		{
-			"buy": 83600,
-			"catalog": 3,
-			"cells": 12,
-			"definition": {
-				"armor": {
-					"blunt": 0.25,
-					"code": "ARM_04",
-					"plates": [],
-					"soft": {
-						"class": 3.0,
-						"coverage": 0.9,
-						"durability": 60.0
-					}
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Бронежилет армейский (кл. 3)",
-				"rarity": "uncommon",
-				"size": [
-					3.0,
-					4.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"MILITARY"
-				],
-				"tier": 3.0,
-				"value": 38000.0,
-				"weight": 8.0
-			},
-			"id": "vest_army",
-			"loot_only": false,
-			"sell_new": 20900,
-			"shop": true,
-			"stack": 1,
-			"weight": 8.0
-		},
-		{
-			"buy": 7800,
-			"catalog": 1,
-			"cells": 9,
-			"definition": {
-				"armor": {
-					"blunt": 0.4,
-					"code": "ARM_01",
-					"plates": [],
-					"soft": {
-						"class": 1.0,
-						"coverage": 0.8,
-						"durability": 30.0
-					}
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Жилет самодельный",
-				"rarity": "common",
-				"size": [
-					3.0,
-					3.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"CIVILIAN",
-					"SCAV"
-				],
-				"tier": 1.0,
-				"value": 6000.0,
-				"weight": 3.2
-			},
-			"id": "vest_homemade",
-			"loot_only": false,
-			"sell_new": 3300,
-			"shop": true,
-			"stack": 1,
-			"weight": 3.2
-		},
-		{
-			"buy": 20400,
-			"catalog": 2,
-			"cells": 9,
-			"definition": {
-				"armor": {
-					"blunt": 0.35,
-					"code": "ARM_02",
-					"plates": [],
-					"soft": {
-						"class": 2.0,
-						"coverage": 0.85,
-						"durability": 45.0
-					}
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Бронежилет старый",
-				"rarity": "common",
-				"size": [
-					3.0,
-					3.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"SCAV",
-					"MILITARY"
-				],
-				"tier": 2.0,
-				"value": 12000.0,
-				"weight": 6.2
-			},
-			"id": "vest_old",
-			"loot_only": false,
-			"sell_new": 6600,
-			"shop": true,
-			"stack": 1,
-			"weight": 6.2
-		},
-		{
-			"buy": 25500,
-			"catalog": 2,
-			"cells": 9,
-			"definition": {
-				"armor": {
-					"blunt": 0.3,
-					"code": "ARM_03",
-					"plates": [],
-					"soft": {
-						"class": 2.0,
-						"coverage": 0.85,
-						"durability": 50.0
-					}
-				},
-				"cat": "armor",
-				"equip": {
-					"slot": "armor"
-				},
-				"name": "Бронежилет полицейский (кл. 2)",
-				"rarity": "common",
-				"size": [
-					3.0,
-					3.0
-				],
-				"stack": 1.0,
-				"tags": [
-					"POLICE",
-					"SCAV"
-				],
-				"tier": 2.0,
-				"value": 15000.0,
-				"weight": 4.2
-			},
-			"id": "vest_police",
-			"loot_only": false,
-			"sell_new": 8250,
-			"shop": true,
-			"stack": 1,
-			"weight": 4.2
 		},
 		{
 			"buy": 14950,
@@ -13007,37 +12942,32 @@
 	],
 	"kits": [
 		{
-			"buy_from_empty": 122675,
+			"buy_from_empty": 130140,
 			"lines": [
 				{
-					"cost": 41600,
+					"cost": 35000,
 					"count": 1,
 					"id": "wpn_sg_03"
 				},
 				{
-					"cost": 15211,
+					"cost": 30000,
 					"count": 1,
 					"id": "optic_rd_01"
 				},
 				{
-					"cost": 10400,
+					"cost": 10000,
 					"count": 1,
 					"id": "wpn_hg_01"
 				},
 				{
-					"cost": 7800,
+					"cost": 14000,
 					"count": 1,
-					"id": "vest_homemade"
+					"id": "armor_poor"
 				},
 				{
-					"cost": 4550,
+					"cost": 12000,
 					"count": 1,
-					"id": "rig_belt"
-				},
-				{
-					"cost": 11700,
-					"count": 1,
-					"id": "helmet_military_old"
+					"id": "helmet_simple"
 				},
 				{
 					"cost": 3900,
@@ -13045,42 +12975,42 @@
 					"id": "headset_passive"
 				},
 				{
-					"cost": 11700,
+					"cost": 12000,
 					"count": 1,
 					"id": "bp_daypack"
 				},
 				{
-					"cost": 3030,
+					"cost": 3000,
 					"count": 30,
 					"id": "ammo_12_buck"
 				},
 				{
-					"cost": 1850,
+					"cost": 1900,
 					"count": 10,
 					"id": "ammo_12_slug"
 				},
 				{
-					"cost": 1794,
+					"cost": 1600,
 					"count": 2,
 					"id": "mag_918_8"
 				},
 				{
-					"cost": 1632,
+					"cost": 1600,
 					"count": 32,
 					"id": "ammo_918_pst"
 				},
 				{
-					"cost": 2691,
+					"cost": 1800,
 					"count": 3,
 					"id": "bandage"
 				},
 				{
-					"cost": 4480,
+					"cost": 3000,
 					"count": 1,
 					"id": "medkit"
 				},
 				{
-					"cost": 337,
+					"cost": 340,
 					"count": 1,
 					"id": "water"
 				}
@@ -13088,110 +13018,105 @@
 			"name": "Дворовый"
 		},
 		{
-			"buy_from_empty": 484261,
+			"buy_from_empty": 688680,
 			"lines": [
 				{
-					"cost": 127500,
+					"cost": 180000,
 					"count": 1,
 					"id": "wpn_ar_01"
 				},
 				{
-					"cost": 44200,
+					"cost": 80000,
 					"count": 1,
 					"id": "optic_holo_01"
 				},
 				{
-					"cost": 15470,
+					"cost": 30000,
 					"count": 1,
 					"id": "muzzle_comp_545_01"
 				},
 				{
-					"cost": 10141,
+					"cost": 20000,
 					"count": 1,
 					"id": "grip_vertical_01"
 				},
 				{
-					"cost": 8450,
+					"cost": 15000,
 					"count": 1,
 					"id": "tac_flashlight_01"
 				},
 				{
-					"cost": 47600,
+					"cost": 60000,
 					"count": 1,
 					"id": "wpn_hg_02"
 				},
 				{
-					"cost": 15300,
+					"cost": 46000,
 					"count": 1,
-					"id": "carrier_simple"
+					"id": "armor_mid"
 				},
 				{
-					"cost": 27200,
-					"count": 1,
-					"id": "plate_steel"
-				},
-				{
-					"cost": 27200,
+					"cost": 35000,
 					"count": 1,
 					"id": "plate_steel"
 				},
 				{
-					"cost": 15300,
+					"cost": 35000,
 					"count": 1,
-					"id": "rig_chest"
+					"id": "plate_steel"
 				},
 				{
-					"cost": 20400,
+					"cost": 60000,
 					"count": 1,
-					"id": "helmet_police"
+					"id": "helmet_mid"
 				},
 				{
-					"cost": 23800,
+					"cost": 30000,
 					"count": 1,
 					"id": "headset_active"
 				},
 				{
-					"cost": 40800,
+					"cost": 35000,
 					"count": 1,
 					"id": "bp_tourist"
 				},
 				{
-					"cost": 10240,
+					"cost": 8000,
 					"count": 4,
 					"id": "mag_545_30"
 				},
 				{
-					"cost": 17400,
+					"cost": 18000,
 					"count": 150,
 					"id": "ammo_545_std"
 				},
 				{
-					"cost": 3584,
+					"cost": 3000,
 					"count": 2,
 					"id": "mag_919_17"
 				},
 				{
-					"cost": 3927,
+					"cost": 4080,
 					"count": 51,
 					"id": "ammo_919_fmj"
 				},
 				{
-					"cost": 3588,
+					"cost": 2400,
 					"count": 4,
 					"id": "bandage"
 				},
 				{
-					"cost": 8960,
+					"cost": 6000,
 					"count": 2,
 					"id": "medkit"
 				},
 				{
-					"cost": 1681,
+					"cost": 1200,
 					"count": 1,
 					"id": "painkillers"
 				},
 				{
-					"cost": 11520,
+					"cost": 20000,
 					"count": 2,
 					"id": "grenade"
 				}
@@ -13199,130 +13124,125 @@
 			"name": "Патрульный"
 		},
 		{
-			"buy_from_empty": 1177684,
+			"buy_from_empty": 2088190,
 			"lines": [
 				{
-					"cost": 198001,
+					"cost": 300000,
 					"count": 1,
 					"id": "wpn_ar_02"
 				},
 				{
-					"cost": 74361,
+					"cost": 150000,
 					"count": 1,
 					"id": "optic_4x_01"
 				},
 				{
-					"cost": 74361,
+					"cost": 186000,
 					"count": 1,
 					"id": "muzzle_supp_556_01"
 				},
 				{
-					"cost": 17680,
+					"cost": 35000,
 					"count": 1,
 					"id": "grip_angled_01"
 				},
 				{
-					"cost": 62921,
+					"cost": 126000,
 					"count": 1,
 					"id": "tac_combo_01"
 				},
 				{
-					"cost": 47600,
+					"cost": 60000,
 					"count": 1,
 					"id": "wpn_hg_02"
 				},
 				{
-					"cost": 24310,
+					"cost": 55000,
 					"count": 1,
 					"id": "optic_rmr_01"
 				},
 				{
-					"cost": 8450,
+					"cost": 15000,
 					"count": 1,
 					"id": "tac_flashlight_01"
 				},
 				{
-					"cost": 48401,
+					"cost": 160000,
 					"count": 1,
-					"id": "carrier_tactical"
+					"id": "armor_top"
 				},
 				{
-					"cost": 79200,
-					"count": 1,
-					"id": "plate_ceramic"
-				},
-				{
-					"cost": 79200,
+					"cost": 127000,
 					"count": 1,
 					"id": "plate_ceramic"
 				},
 				{
-					"cost": 46201,
+					"cost": 127000,
 					"count": 1,
-					"id": "rig_assault"
+					"id": "plate_ceramic"
 				},
 				{
-					"cost": 57201,
+					"cost": 60000,
 					"count": 1,
-					"id": "helmet_army"
+					"id": "helmet_mid"
 				},
 				{
-					"cost": 57201,
+					"cost": 92000,
 					"count": 1,
 					"id": "headset_tactical"
 				},
 				{
-					"cost": 92401,
+					"cost": 300000,
 					"count": 1,
 					"id": "nvg"
 				},
 				{
-					"cost": 114401,
+					"cost": 180000,
 					"count": 1,
 					"id": "bp_raid"
 				},
 				{
-					"cost": 18500,
+					"cost": 12500,
 					"count": 5,
 					"id": "mag_556_30"
 				},
 				{
-					"cost": 26640,
+					"cost": 27000,
 					"count": 180,
 					"id": "ammo_556_std"
 				},
 				{
-					"cost": 3584,
+					"cost": 3000,
 					"count": 2,
 					"id": "mag_919_17"
 				},
 				{
-					"cost": 12087,
+					"cost": 30090,
 					"count": 51,
 					"id": "ammo_919_ap"
 				},
 				{
-					"cost": 3588,
+					"cost": 2400,
 					"count": 4,
 					"id": "bandage"
 				},
 				{
-					"cost": 8960,
+					"cost": 6000,
 					"count": 2,
 					"id": "medkit"
 				},
 				{
-					"cost": 3362,
+					"cost": 2400,
 					"count": 2,
 					"id": "painkillers"
 				},
 				{
-					"cost": 17280,
+					"cost": 30000,
 					"count": 3,
 					"id": "grenade"
 				},
 				{
-					"cost": 1793,
+					"cost": 1800,
 					"count": 1,
 					"id": "flare"
 				}
@@ -13330,85 +13250,80 @@
 			"name": "Штурмовик"
 		},
 		{
-			"buy_from_empty": 2356817,
+			"buy_from_empty": 3765700,
 			"lines": [
 				{
-					"cost": 542500,
+					"cost": 850000,
 					"count": 1,
 					"id": "wpn_dmr_01"
 				},
 				{
-					"cost": 291200,
+					"cost": 450000,
 					"count": 1,
 					"id": "optic_8x_01"
 				},
 				{
-					"cost": 109200,
+					"cost": 273000,
 					"count": 1,
 					"id": "muzzle_supp_762_01"
 				},
 				{
-					"cost": 19890,
+					"cost": 40000,
 					"count": 1,
 					"id": "bipod_01"
 				},
 				{
-					"cost": 322000,
+					"cost": 450000,
 					"count": 1,
 					"id": "wpn_smg_03"
 				},
 				{
-					"cost": 44200,
+					"cost": 80000,
 					"count": 1,
 					"id": "optic_holo_01"
 				},
 				{
-					"cost": 17680,
+					"cost": 35000,
 					"count": 1,
 					"id": "grip_angled_01"
 				},
 				{
-					"cost": 48401,
+					"cost": 160000,
 					"count": 1,
-					"id": "carrier_tactical"
+					"id": "armor_top"
 				},
 				{
-					"cost": 145600,
-					"count": 1,
-					"id": "plate_military"
-				},
-				{
-					"cost": 145600,
+					"cost": 233000,
 					"count": 1,
 					"id": "plate_military"
 				},
 				{
-					"cost": 106400,
+					"cost": 233000,
 					"count": 1,
-					"id": "rig_heavy"
+					"id": "plate_military"
 				},
 				{
-					"cost": 95200,
+					"cost": 190000,
 					"count": 1,
-					"id": "helmet_tactical"
+					"id": "helmet_top"
 				},
 				{
-					"cost": 57201,
+					"cost": 92000,
 					"count": 1,
 					"id": "headset_tactical"
 				},
 				{
-					"cost": 92401,
+					"cost": 300000,
 					"count": 1,
 					"id": "nvg"
 				},
 				{
-					"cost": 114401,
+					"cost": 180000,
 					"count": 1,
 					"id": "bp_raid"
 				},
 				{
-					"cost": 56000,
+					"cost": 22000,
 					"count": 4,
 					"id": "mag_76251_20"
 				},
@@ -13418,37 +13333,37 @@
 					"id": "ammo_76251_match"
 				},
 				{
-					"cost": 31200,
+					"cost": 10000,
 					"count": 2,
 					"id": "mag_45_vector30"
 				},
 				{
-					"cost": 32040,
+					"cost": 80100,
 					"count": 90,
 					"id": "ammo_45_ap"
 				},
 				{
-					"cost": 3588,
+					"cost": 2400,
 					"count": 4,
 					"id": "bandage"
 				},
 				{
-					"cost": 13440,
+					"cost": 9000,
 					"count": 3,
 					"id": "medkit"
 				},
 				{
-					"cost": 3362,
+					"cost": 2400,
 					"count": 2,
 					"id": "painkillers"
 				},
 				{
-					"cost": 11520,
+					"cost": 20000,
 					"count": 2,
 					"id": "grenade"
 				},
 				{
-					"cost": 1793,
+					"cost": 1800,
 					"count": 1,
 					"id": "flare"
 				}

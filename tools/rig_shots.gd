@@ -12,8 +12,13 @@ func _ready() -> void:
 	Profile.use_file("user://rig_shots.json", true)
 	Profile.money = 900000
 	Profile.trust = 49
-	for id: String in ["wpn_ar_02", "wpn_hg_02", "armor_top", "helmet_mid", "headset_tactical", "bp_tourist", "rig_assault", "nvg"]:
+	for id: String in ["wpn_ar_02", "wpn_hg_02", "armor_top", "helmet_mid", "headset_tactical", "bp_tourist", "nvg"]:
 		Profile.buy(id, 1, "stash", true)
+	# подсумки — на надетую броню (вместо прежней разгрузки): три автоматных
+	for k in range(3):
+		Profile.buy("pouch_rifle", 1, "stash", false)
+		Profile.equip_from("stash", _find_stash("pouch_rifle"))
+	_check("три подсумка висят на броне", (Profile.equipment.armor.get("pouches", []) as Array).size() == 3, str(Profile.equipment.armor.get("pouches", [])))
 	for i: int in range(5):
 		Profile.buy("mag_556_30", 1, "backpack", false)
 	Profile.buy("mag_919_17", 1, "backpack", false)
@@ -77,6 +82,13 @@ func _ready() -> void:
 func _find(id: String) -> int:
 	for i: int in range(Profile.backpack.size()):
 		if String(Profile.backpack[i].id) == id:
+			return i
+	return -1
+
+
+func _find_stash(id: String) -> int:
+	for i: int in range(Profile.stash.size()):
+		if String(Profile.stash[i].id) == id:
 			return i
 	return -1
 

@@ -40,6 +40,8 @@ func _ready() -> void:
 				cost += _line(lines, WeaponDb.mod_id(spec.mods[mount]), 1)
 			for place: String in spec.get("plates", {}):
 				cost += _line(lines, String(spec.plates[place]), 1)
+			for pid: Variant in spec.get("pouches", []):
+				cost += _line(lines, String(pid), 1)
 		for pair: Array in kit.backpack:
 			cost += _line(lines, String(pair[0]), int(pair[1]))
 		kits.append({"name": kit.name, "buy_from_empty": cost, "lines": lines})

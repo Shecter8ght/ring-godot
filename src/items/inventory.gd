@@ -5,9 +5,10 @@ extends Node
 ## экземпляр предмета. Меняет только хост (авторитет узла — 1, как у Health); у всех peer
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
-const SLOTS := ["primary", "secondary", "sidearm", "launcher", "armor", "rig", "helmet", "ears", "eyes", "backpack"]
+## Слота «Разгрузка» больше нет (gear_v2, 2026-10-24): подсумки с магазинами висят на броне или поясе в слоте брони.
+const SLOTS := ["primary", "secondary", "sidearm", "launcher", "armor", "helmet", "ears", "eyes", "backpack"]
 const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "sidearm": "Пистолет", "launcher": "Ракетница", "armor": "Броня",
-	"rig": "Разгрузка", "helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
+	"helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
 
 var items: Array = []
 ## Ревизия слота не забывается, когда оружие вынуто: поздний пакет не попадёт в новый экземпляр.
@@ -187,9 +188,9 @@ func _set_list(role: String, list: Array) -> void:
 		"trade":
 			trade = list
 		"rig", "dump":
-			if equipment.has("rig"):
+			if not ItemDb.rig_entry(equipment).is_empty():
 				var eq := equipment.duplicate(true)
-				(eq.rig as Dictionary)["dump" if role == "dump" else "mags"] = list
+				(eq.armor as Dictionary)["dump" if role == "dump" else "mags"] = list
 				equipment = eq
 		_:
 			items = list
@@ -613,6 +614,15 @@ func equip_from_items(idx: int) -> Dictionary:
 	if idx < 0 or idx >= items.size():
 		return {}
 	var id := String(items[idx].id)
+	# подсумок — на броню (есть свободные места), сам в слот не встаёт
+	if ItemDb.pouch_cost(id) > 0.0:
+		var eq_p := equipment.duplicate(true)
+		if eq_p.has("armor") and ItemDb.attach_pouch(eq_p.armor as Dictionary, id):
+			var lst := items.duplicate(true)
+			ItemDb.remove_at(lst, idx, 1)
+			items = lst
+			equipment = eq_p
+		return {}
 	var slot := ItemDb.pick_slot(id, equipment)
 	if slot == "":
 		return {}

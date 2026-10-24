@@ -48,7 +48,7 @@ BASIC_MEDICINE = {"bandage": 600, "medkit": 3000, "painkillers": 1200}
 PRACTICAL_PRECISION_KIT = {
     "name": "Практичная стрелковая · MK12",
     "lines": [["wpn_dmr_02", 1], ["optic_4x_01", 1], ["bipod_01", 1],
-              ["armor_mid", 1], ["plate_steel", 2], ["rig_chest", 1],
+              ["armor_mid", 1], ["plate_steel", 2], ["pouch_rifle", 4],
               ["helmet_mid", 1], ["headset_active", 1], ["bp_tourist", 1],
               ["mag_556_30", 3], ["ammo_556_std", 90], ["bandage", 3],
               ["medkit", 2], ["painkillers", 1], ["water", 1]],

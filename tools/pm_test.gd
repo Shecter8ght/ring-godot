@@ -19,8 +19,9 @@ class AILootCapture extends Raid:
 	func credit_kill(_peer_id: int, _arch: String = "", _info: Dictionary = {}) -> void:
 		pass
 
-	func spawn_drop(_pos: Vector3, _display: String, list: Array, _look: LootContainer.Look, _toss: Vector3 = Vector3.ZERO) -> void:
+	func spawn_drop(_pos: Vector3, _display: String, list: Array, _look: LootContainer.Look, _toss: Vector3 = Vector3.ZERO) -> LootContainer:
 		dropped = list.duplicate(true)
+		return null
 
 
 func _ready() -> void:

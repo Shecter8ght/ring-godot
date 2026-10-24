@@ -652,8 +652,8 @@ func _process(_delta: float) -> void:
 		var inv := _my_inv()
 		var other := _mate_inv()
 		var sig := "%s|%s|%s|%s|%s" % [str(inv.items) if inv else "", str(inv.trade) if inv else "", str(other.items) if other else "", str(other.trade) if other else "", str(raid.trades)]
-		# разгрузки обоих — в снаряжении
-		sig += "|%s|%s" % [str(inv.equipment.get("rig", {})) if inv else "", str(other.equipment.get("rig", {})) if other else ""]
+		# подсумки обоих — на броне в снаряжении
+		sig += "|%s|%s" % [str(inv.equipment.get("armor", {})) if inv else "", str(other.equipment.get("armor", {})) if other else ""]
 		if sig != _sig:
 			_sig = sig
 			_refresh()

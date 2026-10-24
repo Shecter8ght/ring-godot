@@ -20,9 +20,10 @@ func _ready() -> void:
 		apply(_spec)
 
 
-## Описание набора по снаряжению бота: броня, шлем, рюкзак, забрало, подсумки по запасным магазинам
-## (пистолетные — пистолетные, крупные от 50 патронов — большой на два места, остальные — автоматные).
-static func describe(equipment: Dictionary, spare: Array, visor: bool) -> String:
+## Описание набора по снаряжению (бота или по тому, что осталось в ящике с тела): броня, шлем, рюкзак,
+## забрало, подсумки — те, что висят на броне (запись `pouches`), по порядку мест: пистолетный — половина
+## места (пока ставится в своё место целиком), большой — два.
+static func describe(equipment: Dictionary, visor: bool) -> String:
 	var d: Dictionary = {}
 	for slot: String in ["armor", "helmet", "backpack"]:
 		if equipment.has(slot):
@@ -31,21 +32,13 @@ static func describe(equipment: Dictionary, spare: Array, visor: bool) -> String
 		d["visor"] = true
 	var places: int = int(WeaponDb.vest(String(d.get("armor", ""))).get("places", 0))
 	if places > 0:
-		var pistol: bool = String(WeaponDb.weapon(String((equipment.get("primary", {}) as Dictionary).get("id", ""))).get("class", "")) == "PISTOL"
 		var pouches: Array = []
 		var n: int = 1
-		for it: Variant in spare:
-			if n > places:
-				break
-			var e := it as Dictionary
-			var mag: Dictionary = (WeaponDb.items().get(String(e.get("id", "")), {}) as Dictionary).get("mag", {})
-			if mag.is_empty():
-				continue                                    # патроны россыпью — не магазин
-			var cap: int = int(mag.get("capacity", 30))
-			var item: String = "pouch_pistol" if pistol else ("pouch_big" if cap >= 50 else "pouch_rifle")
-			var cost: int = 2 if item == "pouch_big" else 1
+		for pid: Variant in (equipment.armor as Dictionary).get("pouches", []):
+			var item := String(pid)
+			var cost: int = 2 if ItemDb.pouch_cost(item) >= 2.0 else 1
 			if n + cost - 1 > places:
-				continue
+				break
 			pouches.append([n, item])
 			n += cost
 		if not pouches.is_empty():

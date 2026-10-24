@@ -24,11 +24,12 @@ func _ready() -> void:
 func _run() -> void:
 	role = String(OS.get_cmdline_user_args()[0])
 	Profile.use_file("user://trade_net_%s.json" % role, true)
-	# у обоих надета разгрузка с пистолетным магазином в подсумке — его отдают прямо из подсумка
-	var rig: Dictionary = ItemDb.make("rig_belt", 1)
-	(rig.mags as Array).append(WeaponDb.make_mag("mag_919_17", "ammo_919_fmj", 17))
+	# у обоих надет пояс с пистолетным подсумком и магазином в нём — его отдают прямо из подсумка
+	var rig: Dictionary = ItemDb.make("belt_pouches", 1)
+	ItemDb.attach_pouch(rig, "pouch_pistol")
+	rig["mags"] = [WeaponDb.make_mag("mag_919_17", "ammo_919_fmj", 17)]
 	((rig.mags as Array)[0] as Dictionary).merge({"x": 0, "y": 0, "r": false})
-	Profile.equipment = {"backpack": ItemDb.make("bp_tourist", 1), "rig": rig}
+	Profile.equipment = {"backpack": ItemDb.make("bp_tourist", 1), "armor": rig}
 	Profile.backpack = []
 	Profile.stash = []
 	# хост отдаёт магазин с патронами, гость — бинты

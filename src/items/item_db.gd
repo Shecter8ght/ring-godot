@@ -106,7 +106,9 @@ static func entry_weight(e: Dictionary) -> float:
 		w += weight(String(e.get("chamber_ammo", mag.get("ammo", "")))) * int(e.chamber)
 	for s in e.get("plates", {}):
 		w += weight(String(e.plates[s].id))
-	# разгрузка: магазины в подсумках и в сумке сброса
+	# подсумки на броне, магазины в них и в сбросе
+	for pid: Variant in e.get("pouches", []):
+		w += weight(String(pid))
 	for part: String in ["mags", "dump"]:
 		for inner: Variant in e.get(part, []):
 			w += entry_weight(inner)
@@ -373,25 +375,79 @@ static func remap_weapon_slots(eq: Dictionary) -> Dictionary:
 	return eq
 
 
-## Сетки разгрузки по надетому: part — "rig" (подсумки) или "dump" (сумка сброса). ZERO — нет.
+## Подсумки живут на броне или поясе в слоте брони (gear_v2, 2026-10-24): в записи — pouches (id подсумков
+## по порядку мест), mags (магазины в них, сетка "rig") и dump (сброс пустых — только логика, модели нет).
+## Запись снаряжения, которая несёт подсумки; {} — брони с местами нет.
+static func rig_entry(eq: Dictionary) -> Dictionary:
+	var e: Dictionary = eq.get("armor", {})
+	if e.is_empty() or int(WeaponDb.vest(String(e.get("id", ""))).get("places", 0)) <= 0:
+		return {}
+	return e
+
+
+## Сетки подсумков по надетой броне: part — "rig" (магазины, по ячейке на подсумок) или "dump" (сброс
+## пустых — половина). ZERO — нет.
 static func rig_grid(eq: Dictionary, part: String = "rig") -> Vector2i:
-	var e: Dictionary = eq.get("rig", {})
+	var e := rig_entry(eq)
 	if e.is_empty():
 		return Vector2i.ZERO
-	var spec: Dictionary = item(String(e.get("id", ""))).get("rig", {})
-	var n := int(spec.get("dump" if part == "dump" else "pouches", 0))
+	var n := (e.get("pouches", []) as Array).size()
+	if part == "dump":
+		n = ceili(float(n) / 2.0)
 	return Vector2i(n, int(Balance.RIG.rows)) if n > 0 else Vector2i.ZERO
 
 
-## Что лежит в разгрузке записи снаряжения: part — "rig" (подсумки, поле mags) или "dump".
+## Что лежит в подсумках надетой брони: part — "rig" (поле mags) или "dump".
 static func rig_list(eq: Dictionary, part: String = "rig") -> Array:
-	var e: Dictionary = eq.get("rig", {})
+	var e := rig_entry(eq)
 	if e.is_empty():
 		return []
 	var key := "dump" if part == "dump" else "mags"
 	if not e.get(key) is Array:
 		e[key] = []
 	return e[key]
+
+
+## Сколько мест на броне занимает подсумок (автоматный 1, пистолетный 0,5, большой 2); 0 — не подсумок.
+static func pouch_cost(id: String) -> float:
+	return float((item(id).get("pouch", {}) as Dictionary).get("places", 0.0))
+
+
+## Свободные места на броне записи e (places из данных брони минус надетые подсумки).
+static func places_free(e: Dictionary) -> float:
+	var total := float(WeaponDb.vest(String(e.get("id", ""))).get("places", 0))
+	for pid: Variant in e.get("pouches", []):
+		total -= pouch_cost(String(pid))
+	return total
+
+
+## Повесить подсумок pid на броню e; false — не подсумок, не броня или мест не хватает.
+static func attach_pouch(e: Dictionary, pid: String) -> bool:
+	var cost := pouch_cost(pid)
+	if cost <= 0.0 or places_free(e) + 1e-6 < cost:
+		return false
+	if not e.get("pouches") is Array:
+		e["pouches"] = []
+	(e.pouches as Array).append(pid)
+	return true
+
+
+## Снять с брони все подсумки: возвращает записи подсумков, магазинов и сброса — их кладут в сетку.
+static func detach_pouches(e: Dictionary) -> Array:
+	var out: Array = []
+	for pid: Variant in e.get("pouches", []):
+		out.append(make(String(pid), 1))
+	for part: String in ["mags", "dump"]:
+		for inner: Variant in e.get(part, []):
+			if inner is Dictionary:
+				var m := (inner as Dictionary).duplicate(true)
+				for key in ["x", "y", "r"]:
+					m.erase(key)
+				out.append(m)
+	e.erase("pouches")
+	e.erase("mags")
+	e.erase("dump")
+	return out
 
 
 ## Можно ли положить запись в сетку role: в подсумки и сумку сброса — только магазины, в защищённый
@@ -906,9 +962,20 @@ static func canon_list(list: Array) -> void:
 			canon_entry(e as Dictionary)
 
 
-## Шаблон снаряжения (LoadoutTemplates / Balance.TRADER_KITS): slots — {слот: {id, plates: {гнездо: id}}},
-## backpack — [[id, штук]].
+## Шаблон снаряжения (LoadoutTemplates / Balance.TRADER_KITS): slots — {слот: {id, plates: {гнездо: id},
+## pouches: [id]}}, backpack — [[id, штук]]. Прежний слот "rig" — подсумки на броне (автоматные по числу
+## подсумков разгрузки).
 static func canon_template(t: Dictionary) -> void:
+	var slots_d: Dictionary = t.get("slots", {})
+	if slots_d.has("rig"):
+		var rig: Dictionary = slots_d.rig if slots_d.rig is Dictionary else {}
+		var n := int((item(String(rig.get("id", ""))).get("rig", {}) as Dictionary).get("pouches", 0))
+		slots_d.erase("rig")
+		if n > 0 and slots_d.get("armor") is Dictionary and not (slots_d.armor as Dictionary).has("pouches"):
+			var pouches: Array = []
+			for i in range(n):
+				pouches.append("pouch_rifle")
+			(slots_d.armor as Dictionary)["pouches"] = pouches
 	for slot in t.get("slots", {}):
 		var e: Variant = (t.slots as Dictionary)[slot]
 		if not e is Dictionary:

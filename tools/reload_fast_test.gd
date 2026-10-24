@@ -126,9 +126,9 @@ func _ready() -> void:
 	await _tap()
 	await _until_done()
 	_check("без магазина: вставляется и пустой магазин", not _me.mag_out() and _me.ammo == 0 and _mag_rounds().is_empty(), "%s %s" % [_me.weapon_mag, str(_mag_rounds())])
-	# --- разгрузка: магазин из подсумка — без надбавки, старый — в сумку сброса
+	# --- подсумки на броне: магазин из подсумка — без надбавки, старый — в сброс пустых
 	_arm(12, [])
-	_wear_rig("rig_chest", [30, 30])
+	_wear_rig("armor_mid", 4, [30, 30])
 	await _tap()
 	_check("разгрузка: перезарядка из подсумка — по паспорту ствола", _me.reload_timer > 0.0 and absf(_me.reload_timer - base_reload) < 0.25, "%.2f при %.2f" % [_me.reload_timer, base_reload])
 	await _until_done()
@@ -152,16 +152,17 @@ func _ready() -> void:
 	_check("в подсумки кладутся только магазины", _me.inventory.add_entry_in("rig", ItemDb.make("bandage", 1)) == 0
 		and _me.inventory.add_entry_in("rig", WeaponDb.make_mag(WeaponDb.default_mag(ID), "ammo_545_std", 30)) == 1)
 	_arm(5, [])
-	_wear_rig("rig_belt", [30])
+	_wear_rig("belt_pouches", 2, [30])
 	_me.inventory.add_entry_in("dump", WeaponDb.make_mag(WeaponDb.default_mag(ID), "", 0))
 	_me.inventory.add_entry_in("dump", WeaponDb.make_mag(WeaponDb.default_mag(ID), "", 0))
 	var dump_before: int = _me.inventory.list_of("dump").size()
 	await _tap()
 	await _until_done()
-	_check("сумка сброса полна — старый магазин (5) в рюкзаке", _me.inventory.list_of("dump").size() == dump_before and _mag_rounds().has(5), "%s / %s" % [str(_rounds_in("dump")), str(_mag_rounds())])
-	# вес и цена разгрузки — с магазинами внутри; снял разгрузку — магазины едут с ней
-	var rig_entry: Dictionary = _me.inventory.equipment.rig
-	_check("вес разгрузки — с магазинами внутри", ItemDb.entry_weight(rig_entry) > ItemDb.weight("rig_belt") + 0.1, "%.2f" % ItemDb.entry_weight(rig_entry))
+	_check("сброс пустых полон — старый магазин (5) в рюкзаке", _me.inventory.list_of("dump").size() == dump_before and _mag_rounds().has(5), "%s / %s" % [str(_rounds_in("dump")), str(_mag_rounds())])
+	# вес и цена пояса — с подсумками и магазинами внутри; снял пояс — всё едет с ним
+	var rig_entry: Dictionary = _me.inventory.equipment.armor
+	_check("вес пояса — с подсумками и магазинами внутри", ItemDb.entry_weight(rig_entry) > ItemDb.weight("belt_pouches") + 2.0 * ItemDb.weight("pouch_rifle") + 0.1, "%.2f" % ItemDb.entry_weight(rig_entry))
+	_check("мест на поясе больше нет, третий подсумок не вешается", not ItemDb.attach_pouch(rig_entry, "pouch_rifle") and is_equal_approx(ItemDb.places_free(rig_entry), 0.0), "свободно %.1f" % ItemDb.places_free(rig_entry))
 	print("reload_fast_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails else 0)
 
@@ -209,10 +210,13 @@ func _until_done() -> void:
 	await get_tree().create_timer(0.2).timeout
 
 
-## Надеть разгрузку id с магазинами (патронов в каждом — по списку) в подсумках.
-func _wear_rig(id: String, mags: Array) -> void:
+## Надеть броню id с pouches автоматными подсумками и магазинами (патронов в каждом — по списку) в них.
+func _wear_rig(id: String, pouches: int, mags: Array) -> void:
 	var eq: Dictionary = _me.inventory.equipment.duplicate(true)
-	eq["rig"] = ItemDb.make(id, 1)
+	var armor := ItemDb.make(id, 1)
+	for i in range(pouches):
+		ItemDb.attach_pouch(armor, "pouch_rifle")
+	eq["armor"] = armor
 	_me.inventory.equipment = eq
 	for n: int in mags:
 		_me.inventory.add_entry_in("rig", WeaponDb.make_mag(WeaponDb.default_mag(ID), WeaponDb.default_ammo("545x39"), n))

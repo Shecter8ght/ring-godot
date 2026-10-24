@@ -347,7 +347,7 @@ const START_STASH := [["wpn_hg_02", 1], ["wpn_ar_01", 1], ["ammo_919_fmj", 100],
 ## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
 const RESCUE_KIT := [["wpn_hg_01", 1], ["ammo_918_pst", 48], ["bandage", 2]]
 ## Готовые комплекты у Михалыча (правая колонка окна): полный набор одной кнопкой — стволы с обвесом,
-## броня с плитами, разгрузка, шлем, гарнитура, рюкзак, в рюкзаке магазины, патроны, медицина, гранаты
+## броня с плитами и подсумками, шлем, гарнитура, рюкзак, в рюкзаке магазины, патроны, медицина, гранаты
 ## (снаряжённые магазины на входе в рейд сами переезжают в пустые подсумки — Inventory.prepare_mags). Формат —
 ## как у своих шаблонов (LoadoutTemplates): что есть в тайнике — берётся оттуда, остальное докупается.
 ## По одному на ступень снабжения: каталог 1, 2, 3 и 5.
@@ -356,8 +356,7 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_sg_03", "mods": {"optic_primary": "optic_rd_01"}},
 			"sidearm": {"id": "wpn_hg_01"},
-			"armor": {"id": "armor_poor"},
-			"rig": {"id": "rig_belt"},
+			"armor": {"id": "armor_poor", "pouches": ["pouch_pistol", "pouch_pistol"]},
 			"helmet": {"id": "helmet_simple"},
 			"ears": {"id": "headset_passive"},
 			"backpack": {"id": "bp_daypack"}},
@@ -366,8 +365,7 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_holo_01", "muzzle": "muzzle_comp_545_01", "underbarrel": "grip_vertical_01", "side_right": "tac_flashlight_01"}},
 			"sidearm": {"id": "wpn_hg_02"},
-			"armor": {"id": "armor_mid", "plates": {"front": "plate_steel", "back": "plate_steel"}},
-			"rig": {"id": "rig_chest"},
+			"armor": {"id": "armor_mid", "plates": {"front": "plate_steel", "back": "plate_steel"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
 			"ears": {"id": "headset_active"},
 			"backpack": {"id": "bp_tourist"}},
@@ -376,8 +374,7 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_ar_02", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_556_01", "underbarrel": "grip_angled_01", "side_right": "tac_combo_01"}},
 			"sidearm": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01", "underbarrel": "tac_flashlight_01"}},
-			"armor": {"id": "armor_top", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}},
-			"rig": {"id": "rig_assault"},
+			"armor": {"id": "armor_top", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
@@ -387,8 +384,7 @@ const TRADER_KITS := [
 		"slots": {
 			"primary": {"id": "wpn_dmr_01", "mods": {"optic_primary": "optic_8x_01", "muzzle": "muzzle_supp_762_01", "underbarrel": "bipod_01"}},
 			"secondary": {"id": "wpn_smg_03", "mods": {"optic_primary": "optic_holo_01", "underbarrel": "grip_angled_01"}},
-			"armor": {"id": "armor_top", "plates": {"front": "plate_military", "back": "plate_military"}},
-			"rig": {"id": "rig_heavy"},
+			"armor": {"id": "armor_top", "plates": {"front": "plate_military", "back": "plate_military"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_top"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
@@ -659,10 +655,6 @@ const TRADER_BUY_PRICES := {
 	"ration_daily": 7300,
 	"ration_emergency": 5800,
 	"ration_patrol": 4700,
-	"rig_assault": 75000,
-	"rig_belt": 4500,
-	"rig_chest": 20000,
-	"rig_heavy": 180000,
 	"router_industrial": 28000,
 	"satellite_modem": 62000,
 	"scalpel_kit": 14000,
@@ -2091,7 +2083,7 @@ const CIVILIAN_LOOT := {
 		["water", 3, [1, 1]], ["canned", 3, [1, 1]], ["wires", 2, [1, 2]], ["battery", 1, [1, 1]],
 		["cigarettes", 1, [1, 2]], ["work_gloves", 1.5, [1, 1]], ["oil_tin", 1, [1, 1]], ["metal_toolbox", 0.6, [1, 1]],
 		["empty_jerrycan", 0.6, [1, 1]], ["junction_box", 0.7, [1, 1]], ["screwdriver", 1, [1, 1]], ["nothing", 6, [0, 0]],
-		["spray_paint", 0.8, [1, 1]], ["sticker_film", 0.7, [1, 2]], ["printer_body", 0.12, [1, 1]], ["rig_belt", 0.3, [1, 1]]
+		["spray_paint", 0.8, [1, 1]], ["sticker_film", 0.7, [1, 2]], ["printer_body", 0.12, [1, 1]], ["pouch_pistol", 0.3, [1, 1]]
 	]},
 	"office": {"rolls": [1, 2], "entries": [
 		["documents", 1, [1, 1]], ["cash", 2, [1, 1]], ["phone", 1, [1, 1]], ["powerbank", 2, [1, 1]],
@@ -2117,12 +2109,12 @@ const CIVILIAN_LOOT := {
 	"sport": {"rolls": [1, 1], "entries": [
 		["ammo_12_buck", 2, [5, 15]], ["ammo_12_slug", 1, [5, 10]], ["ammo_556_civ", 0.5, [10, 20]], ["headset_passive", 0.5, [1, 1]],
 		["bipod_01", 0.2, [1, 1]], ["water", 2, [1, 1]], ["binoculars", 0.6, [1, 1]], ["thermos", 1, [1, 1]],
-		["work_gloves", 1, [1, 1]], ["nothing", 4, [0, 0]], ["rig_belt", 0.6, [1, 1]], ["rig_chest", 0.3, [1, 1]]
+		["work_gloves", 1, [1, 1]], ["nothing", 4, [0, 0]], ["pouch_pistol", 0.6, [1, 1]], ["pouch_rifle", 0.3, [1, 1]]
 	]},
 	"home": {"rolls": [1, 2], "entries": [
 		["thermos", 2, [1, 1]], ["kettle", 2, [1, 1]], ["wall_clock", 2, [1, 1]], ["cassette_player", 1.5, [1, 1]],
 		["work_gloves", 1, [1, 1]], ["desk_lamp", 1.5, [1, 1]], ["video_camera", 0.3, [1, 1]], ["binoculars", 0.4, [1, 1]],
-		["nothing", 4, [1, 1]], ["rig_belt", 0.25, [1, 1]]
+		["nothing", 4, [1, 1]], ["pouch_pistol", 0.25, [1, 1]]
 	]},
 	"components": {"rolls": [1, 2], "entries": [
 		["wires", 4, [1, 1]], ["battery", 2, [1, 1]], ["junction_box", 3, [1, 1]], ["power_unit", 1.5, [1, 1]],
@@ -2143,10 +2135,10 @@ const TV_LIGHT := {"energy": 1.5, "range": 9.0, "attenuation": 1.0, "static_k": 
 ## Снаряжение, которое может лежать на виду (точки LooseLoot) в теме, кроме гражданских находок:
 ## [предмет, вес] — вес в одном ряду с весами темы. Разгрузки — в спорттоварах, у охраны, на складе, дома.
 const LOOSE_GEAR := {
-	"sport": [["rig_belt", 0.3], ["rig_chest", 0.15]],
-	"security": [["rig_belt", 0.4], ["rig_chest", 0.25], ["tac_laser_01", 0.2]],
-	"storage": [["rig_belt", 0.12]],
-	"home": [["rig_belt", 0.12]],
+	"sport": [["pouch_pistol", 0.3], ["pouch_rifle", 0.15]],
+	"security": [["pouch_pistol", 0.4], ["pouch_rifle", 0.25], ["tac_laser_01", 0.2]],
+	"storage": [["pouch_pistol", 0.12]],
+	"home": [["pouch_pistol", 0.12]],
 }
 ## Отдельный предмет на опоре: шанс на точку, отсечение вдали, зазор от поверхности.
 const LOOSE_LOOT := {"chance": 0.42, "distance": 65.0, "surface_gap": 0.002, "floor_points": 0.16}
@@ -4169,7 +4161,7 @@ const SUPPLY_SIGNAL := {"delay": 45.0, "altitude": 170.0, "speed": 70.0, "flight
 ## патронов ещё на ammo_mags магазинов (лучший по пробитию патрон калибра), mods деталей обвеса тира
 ## mod_tier и выше, которые на него встают; броня и шлем тира armor_tier и выше; extras — [id, от, до].
 const SUPPLY_LOOT := {"weapons": [1, 2], "weapon_tier": 3, "dur": [85, 100], "mags": 3, "ammo_mags": 3, "mods": 2, "mod_tier": 2,
-	"armor_tier": 3, "extras": [["medkit", 1, 2], ["painkillers", 1, 2], ["grenade", 2, 3], ["rig_assault", 0, 1]]}
+	"armor_tier": 3, "extras": [["medkit", 1, 2], ["painkillers", 1, 2], ["grenade", 2, 3], ["pouch_rifle", 0, 1]]}
 const SUPPLY_PLANE_SOUND := {"db": 12.0, "unit": 60.0, "max": 600.0}
 
 ## Свет в зданиях блокаутов Пригорода (левел-дизайн 2026-10-19): в залах — вдоль оси (по одной на 14 м, не больше
