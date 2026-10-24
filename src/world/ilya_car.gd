@@ -8,6 +8,10 @@ extends Node3D
 ## Battery_Missing; в каждом — сетки <узел>_LOD0/1/2, дальности — Balance.VEHICLE_LOD.
 
 const INFO: String = "res://assets/models/props/coupe_ilya/coupe_ilya.json"
+## Низ шин в модели — плоское пятно контакта ровно на уровне земли (y = 0, 12 вершин на каждом колесе):
+## на любом ровном полу оно мерцает с поверхностью (z-fighting «под всеми машинами», владелец 2026-10-24).
+## Модель опускается на сантиметр — шина чуть «вдавлена» в землю, пятно под полом. Геометрия, не баланс.
+const GROUND_SINK_M: float = 0.01
 
 ## Переднее левое колесо на месте (иначе — кирпичи и поворотный кулак).
 @export var wheel_fitted: bool = false:
@@ -29,6 +33,9 @@ var _hood_open_rad: float = 0.0
 
 
 func _ready() -> void:
+	var model: Node3D = get_node_or_null("Model") as Node3D
+	if model != null:
+		model.position.y = -GROUND_SINK_M
 	var info: Variant = JSON.parse_string(FileAccess.get_file_as_string(INFO))
 	if info is Dictionary:
 		_hood_open_rad = float(((info as Dictionary).get("hood", {}) as Dictionary).get("open_rad", 0.0))
