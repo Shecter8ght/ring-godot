@@ -195,7 +195,10 @@ for atlas, keys in C.ATLAS.items():
     mat.use_nodes = True
     for ob in objs:
         ob.data.materials.append(mat)
-    log('atlas', atlas, 'px/mm', C.texel_report(objs, C.SIZE[atlas]))
+    fill = C.uv_fill(objs)
+    log('atlas', atlas, 'px/mm', C.texel_report(objs, C.SIZE[atlas]), 'uv area', round(fill, 3))
+    if fill < C.UV_FILL_MIN:
+        log('UV_FILL_LOW', atlas, f'{fill:.0%} < {C.UV_FILL_MIN:.0%}')
 
 # Узлы игры: пустышки с осями поворота, детали — дочерние.
 PM = C.empty('PM', lp)

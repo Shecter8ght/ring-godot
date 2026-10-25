@@ -37,6 +37,7 @@ HIDDEN_UV_SCALE = 0.1
 HIDDEN_ROOMY_SCALE = 0.5
 HARD_ON_SEAM = math.radians(30)
 UV_MARGIN_PX = 12
+UV_FILL_MIN = 0.80              # норма заполнения атласа островами (навык godot-asset-preparation, 2026-10-25)
 log = lambda *a: print('MAGS_LP', MID, *a, flush=True)
 
 
@@ -486,6 +487,8 @@ mat.use_nodes = True
 for o in objs:
     o.data.materials.append(mat)
 log('atlas', M['atlas'], M['size'], 'px/mm, uv area', tex)
+if tex[1] < UV_FILL_MIN:
+    log('UV_FILL_LOW', M['atlas'], f'{tex[1]:.0%} < {UV_FILL_MIN:.0%}')
 
 # ---------------------------------------------------------------- узлы
 pivots = {'Magazine': Vector((0, 0, 0))}

@@ -35,6 +35,7 @@ SHARP = math.radians(60)
 SUPP_SEAT = Matrix.Translation((-0.07922, 0.0, 0.11253)) @ Matrix.Rotation(math.radians(90), 4, 'Z')
 # Атласы и их размер (пикселей): сталь — основа вида в руках.
 SIZE = {'Steel': 4096, 'Grip': 2048, 'Magazine': 2048, 'Ammo': 512, 'Suppressor': 4096}
+UV_FILL_MIN = 0.80  # норма заполнения атласа островами (навык godot-asset-preparation, 2026-10-25)
 ATLAS = {'Steel': ('Slide', 'Frame', 'Barrel', 'Hammer', 'Trigger', 'Safety', 'SlideStop', 'MagCatch'),
          'Grip': ('Grip',), 'Magazine': ('MagBody', 'Follower', 'Spring'), 'Ammo': ('Case', 'Jacket', 'Primer'),
          'Suppressor': ('Suppressor',)}
@@ -203,6 +204,21 @@ def texel_report(objs, size: int) -> dict:
         bm.free()
         out[o.name] = round(math.sqrt(a2 * size * size / max(a3, 1e-9)), 2)
     return out
+
+
+def uv_fill(objs) -> float:
+    """Доля площади атласа под островами GameUV."""
+    a2 = 0.0
+    for o in objs:
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        uvl = bm.loops.layers.uv['GameUV']
+        for f in bm.faces:
+            uv = [l[uvl].uv for l in f.loops]
+            for i in range(1, len(uv) - 1):
+                a2 += abs((uv[i].x - uv[0].x) * (uv[i + 1].y - uv[0].y) - (uv[i + 1].x - uv[0].x) * (uv[i].y - uv[0].y)) / 2
+        bm.free()
+    return a2
 
 
 def empty(name: str, coll, parent=None, world=None):

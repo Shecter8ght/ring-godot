@@ -103,7 +103,11 @@ def geometry(aid: str) -> None:
     work.mkdir(parents=True, exist_ok=True)
     body['origin_file'] = [round(v, 6) for v in origin.translation]
     bpy.ops.wm.save_as_mainfile(filepath=str(work / f'{aid}_low.blend'))
-    log('GEOMETRY_OK', aid, 'Body', C.obj_tris(body), 'Lens', C.obj_tris(lens) if lens else 0, 'px/mm', C.texel_report([body], spec['res']))
+    fill = C.uv_fill([body])
+    log('GEOMETRY_OK', aid, 'Body', C.obj_tris(body), 'Lens', C.obj_tris(lens) if lens else 0, 'px/mm', C.texel_report([body], spec['res']),
+        'uv area', round(fill, 3))
+    if fill < C.UV_FILL_MIN:
+        log('UV_FILL_LOW', aid, f'{fill:.0%} < {C.UV_FILL_MIN:.0%}')
 
 
 INPUT = {'base_color': 'Base Color', 'metallic': 'Metallic', 'roughness': 'Roughness', 'coat': 'Coat Weight'}

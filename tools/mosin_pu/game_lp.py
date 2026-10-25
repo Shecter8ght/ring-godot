@@ -157,6 +157,7 @@ HIDDEN_UV_SCALE = 0.1                           # скрытые грани — 
 UV_SLAB = 0.15                                  # длина полосы развёртки вдоль оси, м
 # поля островов развёртки, пикселей атласа: в fp побольше — на mip-уровнях швы не плывут
 UV_MARGIN_PX = 12 if VARIANT == 'fp' else 8
+UV_FILL_MIN = 0.80                              # норма заполнения атласа островами (навык godot-asset-preparation, 2026-10-25)
 UV_ATLAS = {'Lens': 'Optic'}                    # стёкла — в атласе прицела, но свой материал
 MATNAME = {'Wood': 'GAME • Wood • 20', 'Steel': 'GAME • Steel • 20', 'Optic': 'GAME • Optic • 20',
            'Lens': 'GAME • Lens • 20', 'Ammo': 'GAME • Ammo'}
@@ -926,6 +927,8 @@ for atlas, size in ATLAS_SIZE.items():
     unwrap(objs, UV_MARGIN_PX / size, hidden, eye=atlas != 'Ammo', roomy=roomy)   # патрон не на винтовке — без прибавки у глаза
     texels[atlas] = texel(objs, size)
     log('atlas', atlas, size, 'px/mm, uv area', texels[atlas])
+    if texels[atlas][1] < UV_FILL_MIN:
+        log('UV_FILL_LOW', atlas, f'{texels[atlas][1]:.0%} < {UV_FILL_MIN:.0%}')
 for gname, (atlas, node, names) in GROUPS.items():
     mat = bpy.data.materials.get(MATNAME[atlas]) or bpy.data.materials.new(MATNAME[atlas])
     mat.use_nodes = True

@@ -107,6 +107,7 @@ HIDDEN_UV_SCALE = 0.1
 HIDDEN_ROOMY_SCALE = 0.5
 HARD_ON_SEAM = math.radians(30)
 UV_MARGIN_PX = 12
+UV_FILL_MIN = 0.80              # норма заполнения атласа островами (навык godot-asset-preparation, 2026-10-25)
 ATLAS_SIZE = {'Steel': 4096, 'Polymer': 4096, 'Magazine': 2048, 'Ammo': 1024}
 MATNAME = {a: f'GAME • {a} • 100' for a in ATLAS_SIZE}
 MATNAME['Ammo'] = 'GAME • Ammo'
@@ -689,6 +690,8 @@ for atlas, size in ATLAS_SIZE.items():
     for o in objs:
         o.data.materials.append(mat)
     log('atlas', atlas, size, 'px/mm, uv area', texels[atlas])
+    if texels[atlas][1] < UV_FILL_MIN:
+        log('UV_FILL_LOW', atlas, f'{texels[atlas][1]:.0%} < {UV_FILL_MIN:.0%}')
 
 # ---------------------------------------------------------------- узлы-пустышки и патроны
 dg = bpy.context.evaluated_depsgraph_get()
