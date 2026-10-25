@@ -211,42 +211,49 @@ def bare_steel(st):
     return n
 
 
-def polymer(st, base=(0.032, 0.032, 0.034), rough=0.3, stipple=0.025, stipple_scale=34.0, pores=0.4):
-    """Полиамид (цевьё, магазины), образец владельца: лакированный пластик с шагренью — глянец сдержанный, бугорки
-    шагрени ловят блики; в порах шагрени пыль (обратная той же маске), на выступах и кромках затёрто до блеска,
-    местами матовее; редкие царапины, грязь и пыль в углах, отпечатки (на глянце — мутные)."""
+def polymer(st, base=(0.03, 0.03, 0.032), rough=0.3, stipple=0.038, stipple_scale=32.0, pores=0.2,
+            spots="noise_cells_1/cells_1", matte=0.2):
+    """Полиамид (цевьё, магазины), образец владельца: лакированный пластик с шагренью. Лак глянцевый (0.2), бугорки
+    шагрени ещё глаже (0.1) — ловят блики искрами, в порах лак тусклее (0.55) и пыль; поэтому в полосе блика шагрень
+    искрит, а вне её цевьё чёрное (при шероховатости ~0.4 отражение софтбокса растекалось по всей грани — «серое»).
+    Местами лак матовее, на выступах и кромках затёрт до блеска; редкие царапины, грязь и пыль в углах, отпечатки
+    (на глянце — мутные). Шагрень цевья — купола ячеистого шума (noise_cells_1): у пятнистых шумов половина площади
+    уходила в «поры» с тусклым лаком и пылью, и цевьё читалось серым (подбор вариантов 25.10)."""
     top = L.InsertPosition.from_textureset_stack(st)
     n = fill("01 Полимер", top, color=base, rough=rough, metal=0.0)
-    spots = "noise_bnw_spots_2/bnw_spots_2"
-    s_ = fill("02 Шагрень", _above(n), height=spots, rough=spots)
+    s_ = fill("02 Шагрень", _above(n), height=spots)
     triplanar(s_, stipple_scale)
     s_.set_opacity(stipple, sp_lib.CH.Height)
-    s_.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.SpecularRoughness)
-    s_.set_opacity(0.25, sp_lib.CH.SpecularRoughness)
-    gl = fill("02б Блеск бугорков", _above(s_), rough=max(0.12, rough - 0.14))
+    gl = fill("02б Блеск бугорков", _above(s_), rough=0.1)
     gl.add_mask(L.MaskBackground.Black)
     gm_ = L.insert_fill(L.InsertPosition.inside_node(gl, L.NodeStack.Mask))
     gm_.set_source(None, sp_lib.rid(spots, "u:procedural"))
     triplanar(gm_, stipple_scale)
-    sp_lib.lop(gl, 0.7)
-    pr = fill("03 Пыль в порах шагрени", _above(gl), color=(0.13, 0.125, 0.12), rough=0.85)
-    pr.add_mask(L.MaskBackground.White)
-    m = L.insert_fill(L.InsertPosition.inside_node(pr, L.NodeStack.Mask))
-    m.set_source(None, sp_lib.rid(spots, "u:procedural"))
-    triplanar(m, stipple_scale)
-    m.set_blending_mode(L.BlendingMode.Subtract)
+    sp_lib.lop(gl, 0.9)
+
+    def pores_mask(layer):
+        layer.add_mask(L.MaskBackground.White)
+        m = L.insert_fill(L.InsertPosition.inside_node(layer, L.NodeStack.Mask))
+        m.set_source(None, sp_lib.rid(spots, "u:procedural"))
+        triplanar(m, stipple_scale)
+        m.set_blending_mode(L.BlendingMode.Subtract)
+    pt = fill("03 Лак тусклее в порах", _above(gl), rough=0.55)
+    pores_mask(pt)
+    sp_lib.lop(pt, 0.8)
+    pr = fill("03б Пыль в порах шагрени", _above(pt), color=(0.13, 0.125, 0.12), rough=0.8)
+    pores_mask(pr)
     sp_lib.lop(pr, pores)
-    n = _proc_layer("04 Матовее пятнами", _above(pr), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, 0.3,
-                    {"Balance": 0.55, "Contrast": 0.3}, rough=rough + 0.2)
+    n = _proc_layer("04 Матовее пятнами", _above(pr), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, matte,
+                    {"Balance": 0.55, "Contrast": 0.3}, rough=rough + 0.18)
     n = _proc_layer("05 Затёрто до блеска", _above(n), "grunge_wipe_directional_heavy/grunge_wipe_directional_heavy", 1.8,
-                    0.3, rough=max(0.12, rough - 0.14))
+                    0.35, rough=0.08)
     n = _proc_layer("06 Царапины", _above(n), _gm(12), 2.5, 0.35, {"invert": 1, "balance": 0.74, "contrast": 0.55},
-                    color=(0.1, 0.1, 0.105), rough=rough + 0.1)
-    n = _edge("07 Затёртые кромки", _above(n), (0.07, 0.07, 0.075), max(0.12, rough - 0.16), 0.3, contrast=0.8, metal=0.0)
+                    color=(0.1, 0.1, 0.105), rough=rough + 0.2)
+    n = _edge("07 Затёртые кромки", _above(n), (0.07, 0.07, 0.075), 0.08, 0.3, contrast=0.8, metal=0.0)
     n = _dirt(_above(n), color=(0.03, 0.027, 0.024), level=0.38, opacity=0.85, name="08 Грязь в углах")
     n = _dirt(_above(n), color=(0.3, 0.28, 0.25), rough=0.95, level=0.24, opacity=0.4, name="09 Пыль в углах", contrast=0.9)
     n = _proc_layer("10 Отпечатки жирные", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 3.0, 0.45,
-                    {"Balance": 0.45, "Contrast": 0.35}, color=(0.07, 0.068, 0.065), rough=rough + 0.2)
+                    {"Balance": 0.45, "Contrast": 0.35}, color=(0.07, 0.068, 0.065), rough=rough + 0.22)
     return n
 
 
