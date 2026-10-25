@@ -46,7 +46,7 @@ class Mesh:
         p["col"].extend([col] * len(pts))
 
     def tube(self, mat: str, pts: list, radii: list, sides: int, v_scale: float = 1.0, u_reps: float = 1.0,
-             col=(1, 1, 1, 1), shape: Callable | None = None, cap: bool = True) -> None:
+             col=(1, 1, 1, 1), shape: Callable | None = None, cap: bool = True, col_fn: Callable | None = None) -> None:
         """Труба по ломаной с переносом рамки без закрутки. shape(i, a) — множитель радиуса (наплывы, неровность сечения).
         UV: u — по окружности (u_reps повторов), v — длина в метрах × v_scale. cap — закрыть конец конусом."""
         n = len(pts)
@@ -73,8 +73,9 @@ class Mesh:
             for k in range(sides + 1):
                 a = 2 * math.pi * k / sides
                 r = radii[i] * (shape(i, a) if shape else 1.0)
-                p["v"].append(pts[i] + (s * math.cos(a) + b * math.sin(a)) * r)
-                p["col"].append(col)
+                v = pts[i] + (s * math.cos(a) + b * math.sin(a)) * r
+                p["v"].append(v)
+                p["col"].append(col_fn(v) if col_fn else col)
         ring = sides + 1
         for i in range(n - 1):
             for k in range(sides):
@@ -86,7 +87,7 @@ class Mesh:
         if cap and radii[-1] > 0.0015:
             tip = len(p["v"])
             p["v"].append(pts[-1] + frames[-1][0] * radii[-1] * 0.8)
-            p["col"].append(col)
+            p["col"].append(col_fn(p["v"][-1]) if col_fn else col)
             last = base + (n - 1) * ring
             for k in range(sides):
                 p["f"].append([last + k, last + k + 1, tip])
@@ -151,7 +152,8 @@ class LeafShape:
 def leaf(m: Mesh, rng: random.Random, attach: Vector, grow: Vector, normal: Vector, length: float, shape: LeafShape,
          mat: str = "leaf", stalk_mat: str = "twig", stalk_r: float = 0.0012, col=(1, 1, 1, 1)) -> None:
     """Лист на черешке. attach — точка на побеге, grow — куда растёт черешок/лист, normal — куда смотрит лицо листа.
-    UV — плоская развёртка листа (x + 0.5, y) в [0, 1]: для фотолиста на этапе PBR."""
+    UV — ячейка листа текстуры (2 × 2 разных листа, tools/prospekt_plants/textures.py): v — от низа лопастей (0) до
+    кончика (1), x — в тех же долях от средней жилки. Ячейка — по счётчику листьев (без случайных чисел: форма та же)."""
     y_ax = (grow - normal * grow.dot(normal))
     if y_ax.length < 1e-6:
         y_ax = normal.orthogonal()
@@ -176,6 +178,14 @@ def leaf(m: Mesh, rng: random.Random, attach: Vector, grow: Vector, normal: Vect
         return base + x_ax * (x * length) + y_ax * (y * length) + n * (z * length)
 
     half = shape.half
+    y_lo = min(0.0, min(y for _, y in half))
+    span = 1.0 - y_lo
+    cell = (m.leaves * 7 + 3) % 4
+    cu, cv = 0.5 * (cell % 2), 0.5 * (cell // 2)
+
+    def luv(x: float, y: float) -> tuple:
+        return (cu + (0.5 + x / span) * 0.5, cv + ((y - y_lo) / span) * 0.5)
+
     rows = []
     for (hx, hy) in half:
         yr = min(max(hy, 0.0), 1.0)
@@ -187,8 +197,8 @@ def leaf(m: Mesh, rng: random.Random, attach: Vector, grow: Vector, normal: Vect
             x1, y1, m1 = rows[i + 1]
             pa, pb = place(sgn * x0 * k, y0), place(sgn * x1 * k, y1)
             ma, mb = place(0.0, m0), place(0.0, m1)
-            ua, ub = (0.5 + sgn * x0 * k, y0), (0.5 + sgn * x1 * k, y1)
-            uma, umb = (0.5, m0), (0.5, m1)
+            ua, ub = luv(sgn * x0, y0), luv(sgn * x1, y1)
+            uma, umb = luv(0.0, m0), luv(0.0, m1)
             if abs(m1 - m0) < 1e-6:
                 tri = [ma, pa, pb] if sgn > 0 else [ma, pb, pa]
                 tuv = [uma, ua, ub] if sgn > 0 else [uma, ub, ua]
@@ -358,6 +368,39 @@ def child_dir(tan: Vector, angle: float, roll: float) -> Vector:
     return (tan * math.cos(angle) + perp * math.sin(angle)).normalized()
 
 
+# Кора: плитка текстуры в метрах (u — по окружности, v — вдоль). Толстым — целое число повторов по окружности (без шва),
+# тонким — доля плитки (узор не сжимается в нитку; шов на ветке толщиной в палец не виден).
+BARK = {"tile_u": 1.0, "tile_v": 1.0}
+# Упрощение для игры (None — форма как есть): min_r — тоньше не строить, side_div — делитель числа граней,
+# seg — шаг точек вдоль ветви, м; col — цвет вершин по точке (ветер, затенение).
+LOD: dict | None = None
+
+
+def bark_uv(r: float) -> tuple:
+    c = 2 * math.pi * r / BARK["tile_u"]
+    return (max(1.0, round(c)) if c >= 1.5 else max(c, 0.05)), 1.0 / BARK["tile_v"]
+
+
+def lod_sides(n: int) -> int:
+    return n if LOD is None else max(3, int(round(n / LOD.get("side_div", 1.0))))
+
+
+def lod_path(pts: list, radii: list) -> tuple:
+    """Реже точки вдоль ветви: первую, последнюю и через шаг LOD["seg"]."""
+    if LOD is None or len(pts) <= 2:
+        return pts, radii
+    seg = LOD.get("seg", 0.0)
+    keep = [0]
+    acc = 0.0
+    for i in range(1, len(pts) - 1):
+        acc += (pts[i] - pts[i - 1]).length
+        if acc >= seg or i <= 1:
+            keep.append(i)
+            acc = 0.0
+    keep.append(len(pts) - 1)
+    return [pts[i] for i in keep], [radii[i] for i in keep]
+
+
 def sides_for(r: float) -> int:
     return 16 if r > 0.14 else 12 if r > 0.07 else 8 if r > 0.03 else 6 if r > 0.012 else 4
 
@@ -420,8 +463,12 @@ def emit_branches(m: Mesh, root: Branch, mat_of: Callable[[Branch], str], skip_r
         if skip_root and br is root:
             continue
         r0 = br.radii[min(1, len(br.radii) - 1)]
-        m.tube(mat_of(br), br.pts, br.radii, sides_for(r0), v_scale=0.5,
-               u_reps=max(1.0, round(2 * math.pi * r0 / 0.6)) if r0 > 0.05 else 1.0)
+        if LOD is not None and r0 < LOD.get("min_r", 0.0):
+            continue
+        pts, radii = lod_path(br.pts, br.radii)
+        u, v = bark_uv(r0)
+        m.tube(mat_of(br), pts, radii, lod_sides(sides_for(r0)), v_scale=v, u_reps=u,
+               col_fn=LOD.get("col") if LOD else None)
 
 
 # ------------------------------------------------------------------ ствол

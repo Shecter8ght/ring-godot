@@ -34246,6 +34246,26 @@
    "minibus": {
     "model": "PV_minibus",
     "yaw": 0.0
+   },
+   "tree_birch": {
+    "model": "P_birch",
+    "yaw": 0.0
+   },
+   "tree_round": {
+    "model": "P_linden",
+    "yaw": 0.0
+   },
+   "tree_poplar": {
+    "model": "P_poplar",
+    "yaw": 0.0
+   },
+   "bush_big": {
+    "model": "P_lilac",
+    "yaw": 0.0
+   },
+   "hedge": {
+    "model": "P_hedge",
+    "yaw": 90.0
    }
   },
   "models_nosolid": [

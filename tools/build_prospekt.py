@@ -170,6 +170,9 @@ KIT_MODELS = {
     "car": ("PV_car", 0.0), "car_open": ("PV_car_open", 0.0), "car_wreck": ("PV_car_wreck", 0.0),
     "suv_open": ("PV_suv_open", 0.0), "m:U14_01": ("PV_car_street", 0.0), "bus_city": ("PV_bus_city", 0.0),
     "paz": ("PV_paz_any", 0.0), "minibus": ("PV_minibus", 0.0),
+    # свои растения (tools/prospekt_plants/game.py): группы P_* — экземпляры вперемешку по позиции, у каждого LOD и ствол
+    "tree_birch": ("P_birch", 0.0), "tree_round": ("P_linden", 0.0), "tree_poplar": ("P_poplar", 0.0),
+    "bush_big": ("P_lilac", 0.0), "hedge": ("P_hedge", 90.0),
 }
 MODELS_NOSOLID = ["U19_02", "U16_04", "U15_05", "U10_01", "U19_01", "U14_04", "U10_05", "U02_01", "U14_03", "U08_03"]
 MODELS_POLES = ["U15_02", "U10_02", "U12_03", "U03_03", "U06_02", "U07_02", "U10_03", "U19_05"]

@@ -325,8 +325,17 @@ def make_trunk(rng: random.Random, P: dict, base: Vector = None, lean_dir: Vecto
 def emit_trunk(m: Mesh, rng: random.Random, tr: Branch, P: dict, mat: str = "bark") -> None:
     shape = plib.trunk_shape(tr.pts, rng, P["flare"], P["flare_h"], P["lobes"], P.get("ovality", 0.05))
     r0 = tr.radii[min(3, len(tr.radii) - 1)]
-    m.tube(mat, tr.pts, tr.radii, plib.sides_for(r0) + (4 if r0 > 0.2 else 0), v_scale=0.5,
-           u_reps=max(1.0, round(2 * math.pi * r0 / 0.6)), shape=shape)
+    u, v = plib.bark_uv(r0)
+    col_fn = plib.LOD.get("col") if plib.LOD else None
+    if plib.LOD is None:
+        m.tube(mat, tr.pts, tr.radii, plib.sides_for(r0) + (4 if r0 > 0.2 else 0), v_scale=v, u_reps=u, shape=shape)
+    else:
+        # в игре ствол реже по высоте выше комля (наплывы — как в форме)
+        keep = [i for i, p in enumerate(tr.pts) if p.z < 1.2 or i % 2 == 0 or i == len(tr.pts) - 1]
+        sub = [tr.pts[i] for i in keep]
+        shape2 = lambda i, a: shape(keep[i], a)
+        m.tube(mat, sub, [tr.radii[i] for i in keep], plib.lod_sides(plib.sides_for(r0) + (4 if r0 > 0.2 else 0)),
+               v_scale=v, u_reps=u, shape=shape2, col_fn=col_fn)
     # корневые лапы: от наплывов наружу, уходят под землю
     base = tr.pts[0] + Vector((0, 0, -tr.pts[0].z))
     r = P["r1"]
@@ -337,8 +346,11 @@ def emit_trunk(m: Mesh, rng: random.Random, tr: Branch, P: dict, mat: str = "bar
         L = r * rng.uniform(1.4, 2.6)
         pts = [base + Vector((0, 0, 0.45)), base + o * r * 0.75 + Vector((0, 0, 0.12)), base + o * (r * 1.1 + L * 0.4) + Vector((0, 0, -0.02)),
                base + o * (r * 1.1 + L) + Vector((0, 0, -0.3))]
-        m.tube(mat, pts, [r * 0.5, r * 0.45, r * 0.3, r * 0.14], max(8, plib.sides_for(r * 0.4)), v_scale=0.5,
-               shape=lambda i, a: 1.0 - 0.3 * abs(math.sin(a)) * (i / 3))
+        if plib.LOD is not None and plib.LOD.get("no_roots"):
+            continue
+        u, v = plib.bark_uv(r * 0.45)
+        m.tube(mat, pts, [r * 0.5, r * 0.45, r * 0.3, r * 0.14], plib.lod_sides(max(8, plib.sides_for(r * 0.4))), v_scale=v,
+               u_reps=u, shape=lambda i, a: 1.0 - 0.3 * abs(math.sin(a)) * (i / 3), col_fn=col_fn)
 
 
 # ---------------------------------------------------------------- берёза
@@ -525,7 +537,9 @@ def build_poplar(pl: Plant) -> tuple:
         radii = [rc * 1.05, rc * 1.2] + [rc * (1 - 0.15 * i / n) for i in range(2, n + 1)]
         radii[-1] *= 1.35        # наплыв на срезе (культя)
         br = Branch(pts, radii, 1, plib.path_len(pts))
-        m.tube("bark", pts, radii, plib.sides_for(rc), v_scale=0.5, u_reps=max(1.0, round(2 * math.pi * rc / 0.6)))
+        u, v = plib.bark_uv(rc)
+        m.tube("bark", pts, radii, plib.lod_sides(plib.sides_for(rc)), v_scale=v, u_reps=u,
+               col_fn=plib.LOD.get("col") if plib.LOD else None)
         limbs.append((br, a))
     shoot_lv = Level(spacing=0.1, s0=0.0, s1=1.0, angle=(4, 30), roll="spiral", length=lambda s, L, r: 0.0,
                      tropism=lambda t: 0.1, wiggle=0.05, seg=0.35, tip=0.35, env_tol=1.15)
@@ -740,7 +754,10 @@ def build_hedge(pl: Plant) -> tuple:
             # пролом: сломанный сухой пенёк-куст
             base = Vector((x, rng.uniform(-0.1, 0.1), -0.05))
             pts = plib.grow(base, (Z * 2 + plib.rand_unit(rng)).normalized(), rng.uniform(0.25, 0.5), stem_lv, rng, None)
-            m.tube("branch", pts, [0.012 * (1 - 0.5 * i / max(len(pts) - 1, 1)) for i in range(len(pts))], 5)
+            if plib.LOD is None or plib.LOD.get("min_r", 0.0) <= 0.012:
+                u, v = plib.bark_uv(0.012)
+                m.tube("branch", pts, [0.012 * (1 - 0.5 * i / max(len(pts) - 1, 1)) for i in range(len(pts))],
+                       plib.lod_sides(5), v_scale=v, u_reps=u, col_fn=plib.LOD.get("col") if plib.LOD else None)
             tw.add(pts[-1], (Z + plib.rand_unit(rng) * 0.6).normalized(), X, rng.uniform(0.8, 1.2), 4)
         x += rng.uniform(0.22, 0.32)
         row += 1

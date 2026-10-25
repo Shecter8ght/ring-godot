@@ -194,6 +194,13 @@ bash tools/prospekt_vehicles/sp_family.sh <папка> <Имя> <класс> <с
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/game_export.py -- [класс …]
                                                               # транспорт в игру: assets/models/prospekt_vehicles/PV_*.gltf, карты WebP ≤ 2K, записи PV_* и группы вперемешку
                                                               # в data/urban95_models.json; --import, python -X utf8 tools/prospekt_vehicles/game_imports.py, --import
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_plants/<этап>.py -- [вид …] [preview]
+                                                              # растения «Проспекта» (берёза, липа, тополь, сирень, изгородь): build_forms (форма) → python -X utf8
+                                                              # tools/prospekt_plants/textures.py (листья, гладкая кора) → build_pbr (UCUPaint) → game.py -- atlas|meshes|preview
+                                                              # (атлас веточек, LOD0/LOD1/дальний) → python -X utf8 tools/prospekt_plants/godot_assets.py (WebP, материалы,
+                                                              # индекс P_*) → --import; исходники — E:/Models Blender/ENVIRONMENT/RING_Prospekt_Plants
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_plants_perf.tscn [-- off] # кадры в секунду у растений «Проспекта»
+                                                              # (сквер, берёзы, тополя, сверху); «off» — растения скрыты, сравнение в одной сборке
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
                                                               # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор, пристройка приёмки); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)

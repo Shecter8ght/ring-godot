@@ -954,6 +954,8 @@ var _water: StandardMaterial3D
 var _model_index: Dictionary = {}
 var _kit_models: Dictionary = {}
 var _model_meshes: Dictionary = {}
+## Сетки по файлу (уровни детализации растений), уже с материалами из materials_dir.
+var _file_meshes: Dictionary = {}
 ## Модели без коллизии по габариту: лестницы, пролом, кабель, рельсы — коробка закрыла бы проход.
 var _model_nosolid: Array = []
 ## Столбы с вылетом (светофор на консоли, фонари, знаки): коллизия — только стойка 0,3 м у начала координат модели,
@@ -1077,6 +1079,8 @@ func _items(filler: Dictionary) -> void:
 func _group(groups: Dictionary, kit_id: String, xform: Transform3D, color: Color) -> void:
 	var reach: float = _model_reach(kit_id.substr(6)) if kit_id.begins_with("model:") else float((KITS[kit_id] as Dictionary).get("range", 260.0))
 	var cell: float = clampf(reach * 0.5, 32.0, 160.0)
+	if kit_id.begins_with("model:") and (_model_index[kit_id.substr(6)] as Dictionary).has("cell"):
+		cell = float((_model_index[kit_id.substr(6)] as Dictionary).cell)
 	var key: String = kit_id
 	if reach > 0.0:
 		key += "|%d|%d" % [floori(xform.origin.x / cell), floori(xform.origin.z / cell)]
@@ -1221,6 +1225,9 @@ func _model_aabb(model_id: String) -> AABB:
 
 ## Дальность видимости по размеру: крупное — издалека, мелочь — вблизи.
 func _model_reach(model_id: String) -> float:
+	var lods: Array = (_model_index[model_id] as Dictionary).get("lods", []) as Array
+	if not lods.is_empty():
+		return float((lods[lods.size() - 1] as Dictionary).end)
 	var size: Vector3 = _model_aabb(model_id).size
 	var big: float = maxf(size.x, maxf(size.y, size.z))
 	return 520.0 if big > 4.0 else (300.0 if big > 1.2 else 170.0)
@@ -1230,16 +1237,8 @@ func _model_reach(model_id: String) -> float:
 func _model_mesh(model_id: String) -> Mesh:
 	if _model_meshes.has(model_id):
 		return _model_meshes[model_id] as Mesh
-	var mesh: Mesh = null
-	var file: String = String((_model_index[model_id] as Dictionary).get("file", ""))
-	if file != "" and ResourceLoader.exists(file):
-		var scene: PackedScene = load(file) as PackedScene
-		if scene:
-			var root: Node = scene.instantiate()
-			var found: Array[Node] = root.find_children("*", "MeshInstance3D", true, false)
-			if not found.is_empty():
-				mesh = (found[0] as MeshInstance3D).mesh
-			root.free()
+	var entry: Dictionary = _model_index[model_id]
+	var mesh: Mesh = _file_mesh(String(entry.get("file", "")), String(entry.get("materials_dir", "")))
 	if mesh == null:
 		var aabb: AABB = _model_aabb(model_id)
 		var st: SurfaceTool = SurfaceTool.new()
@@ -1255,6 +1254,31 @@ func _model_mesh(model_id: String) -> Mesh:
 		box.set_meta("fallback", true)
 		mesh = box
 	_model_meshes[model_id] = mesh
+	return mesh
+
+
+## Первая сетка сцены файла; materials_dir — материалы поверхностей по имени (<папка>/<имя материала>.tres): у растений
+## шейдеры ветра и листвы, glTF их не несёт. Нет файла — null.
+func _file_mesh(file: String, materials_dir: String) -> Mesh:
+	if _file_meshes.has(file):
+		return _file_meshes[file] as Mesh
+	var mesh: Mesh = null
+	if file != "" and ResourceLoader.exists(file):
+		var scene: PackedScene = load(file) as PackedScene
+		if scene:
+			var root: Node = scene.instantiate()
+			var found: Array[Node] = root.find_children("*", "MeshInstance3D", true, false)
+			if not found.is_empty():
+				mesh = (found[0] as MeshInstance3D).mesh
+			root.free()
+	if mesh != null and materials_dir != "":
+		mesh = mesh.duplicate()
+		for i: int in range(mesh.get_surface_count()):
+			var material: Material = mesh.surface_get_material(i)
+			var path: String = "%s/%s.tres" % [materials_dir, material.resource_name if material else ""]
+			if material and ResourceLoader.exists(path):
+				mesh.surface_set_material(i, load(path) as Material)
+	_file_meshes[file] = mesh
 	return mesh
 
 
@@ -1276,14 +1300,23 @@ func _place_model(groups: Dictionary, model_id: String, item: Array, yaw_offset:
 		lift = -low
 	var xform: Transform3D = Transform3D(basis.scaled(Vector3.ONE * s), Vector3(x, landscape.ground(x, z) + dy + lift * s, z))
 	_group(groups, "model:" + model_id, xform, Color.WHITE)
-	# коллизия — по габариту, если предмет выше щиколотки (плиты и решётки под ногами — нет)
-	if _model_poles.has(model_id):
+	# коллизия — по габариту, если предмет выше щиколотки (плиты и решётки под ногами — нет); solids в индексе —
+	# свой список коробок [центр, размер] в осях модели (дерево — ствол, куст — без коллизии)
+	var solids: Array = (_model_index[model_id] as Dictionary).get("solids", [null]) as Array
+	if solids.is_empty() or solids[0] != null:
+		for solid: Array in solids:
+			_solid(xform, Vector3(float(solid[0][0]), float(solid[0][1]), float(solid[0][2])),
+				Vector3(float(solid[1][0]), float(solid[1][1]), float(solid[1][2])), s)
+	elif _model_poles.has(model_id):
 		_solid(xform, Vector3(0.0, aabb.size.y * 0.5, 0.0), Vector3(0.3, aabb.size.y, 0.3), s)
 	elif aabb.size.y * s > 0.3 and not _model_nosolid.has(model_id):
 		_solid(xform, aabb.get_center(), aabb.size, s)
 
 
 func _batch_model(model_id: String, transforms: Array) -> void:
+	if (_model_index[model_id] as Dictionary).has("lods"):
+		_batch_model_lods(model_id, transforms)
+		return
 	var mesh: Mesh = _model_mesh(model_id)
 	var center: Vector3 = Vector3.ZERO
 	for t: Transform3D in transforms:
@@ -1311,6 +1344,54 @@ func _batch_model(model_id: String, transforms: Array) -> void:
 	generated.add_child(visual)
 	stats.instances = int(stats.instances) + transforms.size()
 	stats.batches = int(stats.batches) + 1
+	stats["models"] = int(stats.get("models", 0)) + transforms.size()
+
+
+## Модель с уровнями детализации (lods: [{file, end}] от ближнего к дальнему): на каждый — свой MultiMesh пачки,
+## видимый от конца предыдущего до своего конца (по центру клетки, края с переходом). Нет файла уровня — уровень
+## пропускается; нет ни одного — серая коробка по габариту.
+func _batch_model_lods(model_id: String, transforms: Array) -> void:
+	var entry: Dictionary = _model_index[model_id]
+	var center: Vector3 = Vector3.ZERO
+	for t: Transform3D in transforms:
+		center += t.origin
+	center /= float(transforms.size())
+	var begin: float = 0.0
+	var placed: bool = false
+	for lod: Dictionary in entry.lods:
+		var end: float = float(lod.end)
+		var mesh: Mesh = _file_mesh(String(lod.file), String(entry.get("materials_dir", "")))
+		if mesh == null:
+			begin = end
+			continue
+		var multi: MultiMesh = MultiMesh.new()
+		multi.transform_format = MultiMesh.TRANSFORM_3D
+		multi.mesh = mesh
+		multi.instance_count = transforms.size()
+		for i: int in range(transforms.size()):
+			var t: Transform3D = transforms[i]
+			multi.set_instance_transform(i, Transform3D(t.basis, t.origin - center))
+		var visual: MultiMeshInstance3D = MultiMeshInstance3D.new()
+		visual.name = "model_%s_lod%d_%d" % [model_id, entry.lods.find(lod), int(stats.batches)]
+		visual.multimesh = multi
+		visual.position = center
+		visual.visibility_range_begin = begin
+		visual.visibility_range_begin_margin = 4.0 if begin > 0.0 else 0.0
+		visual.visibility_range_end = end
+		visual.visibility_range_end_margin = 4.0
+		visual.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		generated.add_child(visual)
+		stats.batches = int(stats.batches) + 1
+		begin = end
+		placed = true
+	if not placed:
+		var fallback: Dictionary = entry.duplicate()
+		fallback.erase("lods")
+		_model_index[model_id] = fallback
+		_batch_model(model_id, transforms)
+		_model_index[model_id] = entry
+		return
+	stats.instances = int(stats.instances) + transforms.size()
 	stats["models"] = int(stats.get("models", 0)) + transforms.size()
 
 

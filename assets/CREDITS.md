@@ -538,3 +538,16 @@ plywood, natural_walnut_veneer, painted_plaster_wall, tarred_gravel, mud_forest,
 blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс CC0-карты granite_tile и marble_01 и
 маски владельца (пыль, плёнка, грязь, царапины, отпечатки, брызги — переданы владельцем для проекта, не CC0).
 Перечень с суммами файлов — `retopology_v01/sources.json` библиотеки.
+
+## «Проспект» · растения (`assets/models/plants`)
+
+- Берёза повислая, липа мелколистная, тополь берлинский, сирень, живая изгородь из кизильника — собственные модели проекта
+  (генератор `tools/prospekt_plants/`, форма и PBR приняты владельцем 2026-10-25; исходники —
+  `E:\Models Blender\ENVIRONMENT\RING_Prospekt_Plants`). Атласы веточек и дальние силуэты — рендер своих моделей.
+- Листья липы и сирени — скан ambientCG LeafSet023 (CC0, Lennart Demes, https://ambientcg.com/view?id=LeafSet023), берёзы,
+  тополя и кизильника — ambientCG LeafSet024 (CC0, https://ambientcg.com/view?id=LeafSet024); переформованы под контур листа
+  вида (`tools/prospekt_plants/textures.py`).
+- Кора липы — Poly Haven «Bark Brown 02» (CC0, Rob Tuytel, https://polyhaven.com/a/bark_brown_02), `assets/textures/bark_brown_02`;
+  старая кора тополя и тёмный низ берёзы — ambientCG Bark001 (CC0), `assets/textures/bark001`; береста — собственная текстура
+  зоны 1 (`assets/zone01/textures/birch_bark_*`); гладкая кора тополя, сирени и кизильника — собственная процедурная
+  (`assets/models/plants/textures/poplar_bark_young_*`, `shrub_bark_*`, с фактурой Bark001 в трещинах).

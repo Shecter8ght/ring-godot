@@ -1,0 +1,20 @@
+[gd_resource type="ShaderMaterial" load_steps=8 format=3]
+
+[ext_resource type="Shader" path="res://src/world/birch_bark.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/zone01/textures/birch_bark_albedo.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/zone01/textures/birch_bark_normal.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/zone01/textures/birch_bark_arm.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/textures/bark001/albedo.jpg" id="5"]
+[ext_resource type="Texture2D" path="res://assets/textures/bark001/normal.jpg" id="6"]
+[ext_resource type="Texture2D" path="res://assets/terrain/zone01_noise.png" id="7"]
+
+[resource]
+resource_name = "PlantBirchBark_b"
+shader = ExtResource("1")
+shader_parameter/birch_albedo = ExtResource("2")
+shader_parameter/birch_normal = ExtResource("3")
+shader_parameter/birch_arm = ExtResource("4")
+shader_parameter/dark_albedo = ExtResource("5")
+shader_parameter/dark_normal = ExtResource("6")
+shader_parameter/noise_tex = ExtResource("7")
+shader_parameter/dark_height = 1.3

@@ -3168,6 +3168,909 @@
     0,
     0
    ]
+  },
+  "P_birch_a": {
+   "id": "P_birch_a",
+   "name": "Берёза повислая, взрослая, 16 м",
+   "file": "res://assets/models/plants/birch_a_lod0.glb",
+   "triangles": 17997,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.1388,
+     8.1589,
+     0.2523
+    ],
+    "size": [
+     8.535,
+     17.0215,
+     8.028
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/birch_a_lod0.glb",
+     "end": 40,
+     "triangles": 17997
+    },
+    {
+     "file": "res://assets/models/plants/birch_a_lod1.glb",
+     "end": 140,
+     "triangles": 2993
+    },
+    {
+     "file": "res://assets/models/plants/birch_a_far.glb",
+     "end": 700,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      2.0,
+      0.0
+     ],
+     [
+      0.289,
+      4.0,
+      0.289
+     ]
+    ]
+   ]
+  },
+  "P_birch_b": {
+   "id": "P_birch_b",
+   "name": "Берёза повислая, двуствольная, 14 м",
+   "file": "res://assets/models/plants/birch_b_lod0.glb",
+   "triangles": 17199,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -0.5002,
+     6.8848,
+     -0.0712
+    ],
+    "size": [
+     7.9573,
+     14.4736,
+     6.8954
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/birch_b_lod0.glb",
+     "end": 40,
+     "triangles": 17199
+    },
+    {
+     "file": "res://assets/models/plants/birch_b_lod1.glb",
+     "end": 140,
+     "triangles": 3359
+    },
+    {
+     "file": "res://assets/models/plants/birch_b_far.glb",
+     "end": 700,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      2.0,
+      0.0
+     ],
+     [
+      0.376,
+      4.0,
+      0.376
+     ]
+    ]
+   ]
+  },
+  "P_birch_c": {
+   "id": "P_birch_c",
+   "name": "Берёза повислая, молодая, 8 м",
+   "file": "res://assets/models/plants/birch_c_lod0.glb",
+   "triangles": 2146,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.138,
+     4.0904,
+     -0.1998
+    ],
+    "size": [
+     3.8666,
+     8.882,
+     3.8809
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/birch_c_lod0.glb",
+     "end": 40,
+     "triangles": 2146
+    },
+    {
+     "file": "res://assets/models/plants/birch_c_lod1.glb",
+     "end": 140,
+     "triangles": 503
+    },
+    {
+     "file": "res://assets/models/plants/birch_c_far.glb",
+     "end": 700,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      1.25,
+      0.0
+     ],
+     [
+      0.111,
+      2.5,
+      0.111
+     ]
+    ]
+   ]
+  },
+  "P_birch": {
+   "id": "P_birch",
+   "name": "Берёза повислая — экземпляры вперемешку",
+   "file": "",
+   "triangles": 0,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     -0.0363,
+     8.1588,
+     0.2523
+    ],
+    "size": [
+     8.8852,
+     17.0216,
+     8.028
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "variants": [
+    "P_birch_a",
+    "P_birch_b",
+    "P_birch_c"
+   ]
+  },
+  "P_linden_a": {
+   "id": "P_linden_a",
+   "name": "Липа мелколистная, взрослая, 15 м",
+   "file": "res://assets/models/plants/linden_a_lod0.glb",
+   "triangles": 26235,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -0.0816,
+     7.6959,
+     0.1991
+    ],
+    "size": [
+     10.9826,
+     16.1027,
+     12.2436
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/linden_a_lod0.glb",
+     "end": 40,
+     "triangles": 26235
+    },
+    {
+     "file": "res://assets/models/plants/linden_a_lod1.glb",
+     "end": 140,
+     "triangles": 8790
+    },
+    {
+     "file": "res://assets/models/plants/linden_a_far.glb",
+     "end": 700,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      1.65,
+      0.0
+     ],
+     [
+      0.404,
+      3.3,
+      0.404
+     ]
+    ]
+   ]
+  },
+  "P_linden_b": {
+   "id": "P_linden_b",
+   "name": "Липа мелколистная, средняя, 11 м",
+   "file": "res://assets/models/plants/linden_b_lod0.glb",
+   "triangles": 11658,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -0.2507,
+     5.5349,
+     -0.0427
+    ],
+    "size": [
+     9.0937,
+     11.7716,
+     8.4073
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/linden_b_lod0.glb",
+     "end": 40,
+     "triangles": 11658
+    },
+    {
+     "file": "res://assets/models/plants/linden_b_lod1.glb",
+     "end": 140,
+     "triangles": 4322
+    },
+    {
+     "file": "res://assets/models/plants/linden_b_far.glb",
+     "end": 700,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      1.3,
+      0.0
+     ],
+     [
+      0.258,
+      2.6,
+      0.258
+     ]
+    ]
+   ]
+  },
+  "P_linden_c": {
+   "id": "P_linden_c",
+   "name": "Липа мелколистная, молодая уличная, 7 м",
+   "file": "res://assets/models/plants/linden_c_lod0.glb",
+   "triangles": 3038,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -0.1675,
+     3.4753,
+     0.1461
+    ],
+    "size": [
+     4.8271,
+     7.6512,
+     5.0197
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/linden_c_lod0.glb",
+     "end": 40,
+     "triangles": 3038
+    },
+    {
+     "file": "res://assets/models/plants/linden_c_lod1.glb",
+     "end": 140,
+     "triangles": 1405
+    },
+    {
+     "file": "res://assets/models/plants/linden_c_far.glb",
+     "end": 700,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      1.25,
+      0.0
+     ],
+     [
+      0.128,
+      2.5,
+      0.128
+     ]
+    ]
+   ]
+  },
+  "P_linden": {
+   "id": "P_linden",
+   "name": "Липа мелколистная — экземпляры вперемешку",
+   "file": "",
+   "triangles": 0,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     -0.0816,
+     7.6959,
+     0.1991
+    ],
+    "size": [
+     10.9826,
+     16.1027,
+     12.2436
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "variants": [
+    "P_linden_a",
+    "P_linden_b",
+    "P_linden_c"
+   ]
+  },
+  "P_poplar_a": {
+   "id": "P_poplar_a",
+   "name": "Тополь берлинский, взрослый, 21 м",
+   "file": "res://assets/models/plants/poplar_a_lod0.glb",
+   "triangles": 24892,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.3809,
+     10.5559,
+     0.2016
+    ],
+    "size": [
+     6.6895,
+     21.8253,
+     6.8594
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/poplar_a_lod0.glb",
+     "end": 45,
+     "triangles": 24892
+    },
+    {
+     "file": "res://assets/models/plants/poplar_a_lod1.glb",
+     "end": 150,
+     "triangles": 6334
+    },
+    {
+     "file": "res://assets/models/plants/poplar_a_far.glb",
+     "end": 750,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      2.0,
+      0.0
+     ],
+     [
+      0.581,
+      4.0,
+      0.581
+     ]
+    ]
+   ]
+  },
+  "P_poplar_b": {
+   "id": "P_poplar_b",
+   "name": "Тополь берлинский, кронированный, 15 м",
+   "file": "res://assets/models/plants/poplar_b_lod0.glb",
+   "triangles": 15333,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -0.1081,
+     7.6206,
+     -0.3519
+    ],
+    "size": [
+     4.5145,
+     15.9466,
+     4.6424
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/poplar_b_lod0.glb",
+     "end": 45,
+     "triangles": 15333
+    },
+    {
+     "file": "res://assets/models/plants/poplar_b_lod1.glb",
+     "end": 150,
+     "triangles": 4011
+    },
+    {
+     "file": "res://assets/models/plants/poplar_b_far.glb",
+     "end": 750,
+     "triangles": 4
+    }
+   ],
+   "cell": 24.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      2.0,
+      0.0
+     ],
+     [
+      0.614,
+      4.0,
+      0.614
+     ]
+    ]
+   ]
+  },
+  "P_poplar": {
+   "id": "P_poplar",
+   "name": "Тополь берлинский — экземпляры вперемешку",
+   "file": "",
+   "triangles": 0,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     0.3809,
+     10.5559,
+     0.2016
+    ],
+    "size": [
+     6.6895,
+     21.8253,
+     6.8594
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "variants": [
+    "P_poplar_a",
+    "P_poplar_b"
+   ]
+  },
+  "P_lilac_a": {
+   "id": "P_lilac_a",
+   "name": "Сирень обыкновенная, старая, 3,2 м",
+   "file": "res://assets/models/plants/lilac_a_lod0.glb",
+   "triangles": 8979,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -0.0617,
+     1.5485,
+     -0.0249
+    ],
+    "size": [
+     4.2736,
+     3.3756,
+     4.3303
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/lilac_a_lod0.glb",
+     "end": 35,
+     "triangles": 8979
+    },
+    {
+     "file": "res://assets/models/plants/lilac_a_lod1.glb",
+     "end": 140,
+     "triangles": 1695
+    },
+    {
+     "file": "res://assets/models/plants/lilac_a_far.glb",
+     "end": 320,
+     "triangles": 4
+    }
+   ],
+   "cell": 16.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": []
+  },
+  "P_lilac_b": {
+   "id": "P_lilac_b",
+   "name": "Сирень обыкновенная, средняя, 2,6 м",
+   "file": "res://assets/models/plants/lilac_b_lod0.glb",
+   "triangles": 3869,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.008,
+     1.2751,
+     -0.0536
+    ],
+    "size": [
+     3.1447,
+     2.8151,
+     3.0748
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/lilac_b_lod0.glb",
+     "end": 35,
+     "triangles": 3869
+    },
+    {
+     "file": "res://assets/models/plants/lilac_b_lod1.glb",
+     "end": 140,
+     "triangles": 686
+    },
+    {
+     "file": "res://assets/models/plants/lilac_b_far.glb",
+     "end": 320,
+     "triangles": 4
+    }
+   ],
+   "cell": 16.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": []
+  },
+  "P_lilac_c": {
+   "id": "P_lilac_c",
+   "name": "Сирень обыкновенная, молодая, 2,1 м",
+   "file": "res://assets/models/plants/lilac_c_lod0.glb",
+   "triangles": 1427,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.2546,
+     1.0196,
+     -0.0475
+    ],
+    "size": [
+     2.3077,
+     2.298,
+     2.3524
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/lilac_c_lod0.glb",
+     "end": 35,
+     "triangles": 1427
+    },
+    {
+     "file": "res://assets/models/plants/lilac_c_lod1.glb",
+     "end": 140,
+     "triangles": 266
+    },
+    {
+     "file": "res://assets/models/plants/lilac_c_far.glb",
+     "end": 320,
+     "triangles": 4
+    }
+   ],
+   "cell": 16.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": []
+  },
+  "P_lilac": {
+   "id": "P_lilac",
+   "name": "Сирень обыкновенная — экземпляры вперемешку",
+   "file": "",
+   "triangles": 0,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     -0.0617,
+     1.5485,
+     -0.0249
+    ],
+    "size": [
+     4.2736,
+     3.3756,
+     4.3303
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "variants": [
+    "P_lilac_a",
+    "P_lilac_b",
+    "P_lilac_c"
+   ]
+  },
+  "P_hedge_a": {
+   "id": "P_hedge_a",
+   "name": "Живая изгородь (кизильник), 4,2 м",
+   "file": "res://assets/models/plants/hedge_a_lod0.glb",
+   "triangles": 6455,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.0387,
+     0.6448,
+     0.0315
+    ],
+    "size": [
+     5.072,
+     1.8579,
+     1.6392
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/hedge_a_lod0.glb",
+     "end": 35,
+     "triangles": 6455
+    },
+    {
+     "file": "res://assets/models/plants/hedge_a_lod1.glb",
+     "end": 140,
+     "triangles": 2638
+    },
+    {
+     "file": "res://assets/models/plants/hedge_a_far.glb",
+     "end": 320,
+     "triangles": 4
+    }
+   ],
+   "cell": 16.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      0.504,
+      0.0
+     ],
+     [
+      4.2,
+      1.008,
+      0.765
+     ]
+    ]
+   ]
+  },
+  "P_hedge_b": {
+   "id": "P_hedge_b",
+   "name": "Живая изгородь (кизильник), 2,1 м, торец",
+   "file": "res://assets/models/plants/hedge_b_lod0.glb",
+   "triangles": 3088,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.0363,
+     0.6982,
+     0.005
+    ],
+    "size": [
+     2.8823,
+     1.7912,
+     1.6582
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/hedge_b_lod0.glb",
+     "end": 35,
+     "triangles": 3088
+    },
+    {
+     "file": "res://assets/models/plants/hedge_b_lod1.glb",
+     "end": 140,
+     "triangles": 1304
+    },
+    {
+     "file": "res://assets/models/plants/hedge_b_far.glb",
+     "end": 320,
+     "triangles": 4
+    }
+   ],
+   "cell": 16.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      0.48,
+      0.0
+     ],
+     [
+      2.1,
+      0.96,
+      0.765
+     ]
+    ]
+   ]
+  },
+  "P_hedge_c": {
+   "id": "P_hedge_c",
+   "name": "Живая изгородь (кизильник), 4,2 м, пролом",
+   "file": "res://assets/models/plants/hedge_c_lod0.glb",
+   "triangles": 6683,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.0004,
+     0.6057,
+     0.0006
+    ],
+    "size": [
+     5.079,
+     1.8279,
+     1.6846
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/plants/hedge_c_lod0.glb",
+     "end": 35,
+     "triangles": 6683
+    },
+    {
+     "file": "res://assets/models/plants/hedge_c_lod1.glb",
+     "end": 140,
+     "triangles": 2524
+    },
+    {
+     "file": "res://assets/models/plants/hedge_c_far.glb",
+     "end": 320,
+     "triangles": 4
+    }
+   ],
+   "cell": 16.0,
+   "materials_dir": "res://assets/models/plants/materials",
+   "solids": [
+    [
+     [
+      0.0,
+      0.504,
+      0.0
+     ],
+     [
+      4.2,
+      1.008,
+      0.765
+     ]
+    ]
+   ]
+  },
+  "P_hedge": {
+   "id": "P_hedge",
+   "name": "Живая изгородь (кизильник) — экземпляры вперемешку",
+   "file": "",
+   "triangles": 0,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     0.0178,
+     0.6428,
+     0.0047
+    ],
+    "size": [
+     5.1138,
+     1.9021,
+     1.6928
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "variants": [
+    "P_hedge_a",
+    "P_hedge_b",
+    "P_hedge_c"
+   ]
   }
  }
 }

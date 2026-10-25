@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -21,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import plib  # noqa: E402
 import species as S  # noqa: E402
 
-LIB = Path("E:/Models Blender/ENVIRONMENT/RING_Prospekt_Plants")
+LIB = Path(os.environ.get("PLANTS_LIB", "E:/Models Blender/ENVIRONMENT/RING_Prospekt_Plants"))
 VERSION = "v01"
 ORDER = ["birch", "linden", "poplar", "lilac", "hedge"]
 GAP = {"birch": 3.0, "linden": 3.0, "poplar": 3.0, "lilac": 1.5, "hedge": 1.5}
@@ -184,4 +185,5 @@ def main() -> None:
         report_path.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
 
 
-main()
+if __name__ == "__main__":
+    main()
