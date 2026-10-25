@@ -443,12 +443,25 @@ func _shots() -> void:
 		{"id": "57_yard_ramp_e", "at": Vector3(-64, 1.62, -119), "look": Vector3(-47, 0, -100)},
 		{"id": "58_yard_lines", "at": Vector3(-130, 1.62, -98), "look": Vector3(-160, 7, -121)},
 		{"id": "59_bird_rails", "at": Vector3(-40, 60, 220), "look": Vector3(40, 6, 275)},
-		{"id": "60_bird_yard", "at": Vector3(-130, 70, -50), "look": Vector3(-130, 0, -105)}]
+		{"id": "60_bird_yard", "at": Vector3(-130, 70, -50), "look": Vector3(-130, 0, -105)},
+		# модели Urban 95 вместо серых форм (2026-10-25)
+		{"id": "61_models_cordon", "at": Vector3(-190, 1.62, 6), "look": Vector3(-206, 1.0, -8)},
+		{"id": "62_models_lot", "at": Vector3(-150, 1.62, -38), "look": Vector3(-120, 0.8, -45)},
+		{"id": "63_models_plaza", "at": Vector3(70, 1.62, 50), "look": Vector3(90, 2.0, 15)},
+		{"id": "64_models_crossing", "at": Vector3(-140, 1.62, 16), "look": Vector3(-126, 2.5, 0)}]
+	# свои кадры (несколько — через «;») или имена готовых кадров вместо всего списка
+	var picked: Array[Dictionary] = []
 	for spec: String in OS.get_environment("PROSPEKT_VIEW").split(";", false):
 		var custom: PackedStringArray = spec.split(":")
 		if custom.size() == 7:
-			views = [{"id": custom[0], "at": Vector3(custom[1].to_float(), custom[2].to_float(), custom[3].to_float()),
-				"look": Vector3(custom[4].to_float(), custom[5].to_float(), custom[6].to_float())}]
+			picked.append({"id": custom[0], "at": Vector3(custom[1].to_float(), custom[2].to_float(), custom[3].to_float()),
+				"look": Vector3(custom[4].to_float(), custom[5].to_float(), custom[6].to_float())})
+		else:
+			for view: Dictionary in views:
+				if String(view.id) == spec:
+					picked.append(view)
+	if not picked.is_empty():
+		views = picked
 	for view: Dictionary in views:
 		camera.global_position = view.at
 		camera.look_at(view.look, Vector3.UP)

@@ -20,7 +20,7 @@ const SOURCES := {
 		"res://src/blockout/study_building.gd", "res://src/blockout/study_geometry.gd"],
 	# «Проспект» — серый блокаут (tools/build_prospekt.py) внутри рейдового уровня
 	"prospekt": ["res://data/sectors/prospekt.json", "res://scenes/levels/prospekt.tscn",
-		"res://scenes/levels/prospekt_study.tscn", "res://data/blockouts/prospekt.json",
+		"res://scenes/levels/prospekt_study.tscn", "res://data/blockouts/prospekt.json", "res://data/urban95_models.json",
 		"res://src/blockout/prospekt_landscape.gd", "res://src/blockout/mall_landscape.gd", "res://src/blockout/mall_filler.gd",
 		"res://src/blockout/flat_section.gd", "res://src/blockout/study_building.gd", "res://src/blockout/study_geometry.gd"],
 }

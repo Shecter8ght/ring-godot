@@ -1,0 +1,2429 @@
+{
+ "_comment": "Модели городской библиотеки RING_Urban_95 (ретопология v01) в игре: tools/urban95_export.py. aabb — габарит в игровых осях (м, Y вверх, лицо +Z) для коллизии; triangles — треугольников LOD0.",
+ "models": {
+  "U01_01": {
+   "id": "U01_01",
+   "name": "Бетонный блок Джерси",
+   "file": "res://assets/models/urban95/U01_01.gltf",
+   "triangles": 722,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4751,
+     0.0
+    ],
+    "size": [
+     2.0,
+     0.9486,
+     0.62
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U14_01": {
+   "id": "U14_01",
+   "name": "Брошенный хэтчбек с открытым багажником",
+   "file": "res://assets/models/urban95/U14_01.gltf",
+   "triangles": 34682,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     1.0762,
+     0.0
+    ],
+    "size": [
+     2.1797,
+     2.1524,
+     4.2957
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "R04": {
+   "id": "R04",
+   "name": "Статичный трёхдверный хэтчбек",
+   "file": "res://assets/models/urban95/R04.gltf",
+   "triangles": 161456,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     1.4546,
+     -0.7366
+    ],
+    "size": [
+     2.1217,
+     2.9093,
+     5.7103
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U01_02": {
+   "id": "U01_02",
+   "name": "Трубчатое переносное ограждение",
+   "file": "res://assets/models/urban95/U01_02.gltf",
+   "triangles": 2630,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5695,
+     0.0
+    ],
+    "size": [
+     2.449,
+     1.139,
+     0.66
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U01_03": {
+   "id": "U01_03",
+   "name": "Дощатый грузовой ящик",
+   "file": "res://assets/models/urban95/U01_03.gltf",
+   "triangles": 7356,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.43,
+     0.0
+    ],
+    "size": [
+     1.217,
+     0.8596,
+     0.904
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U01_04": {
+   "id": "U01_04",
+   "name": "Полый дорожный конус",
+   "file": "res://assets/models/urban95/U01_04.gltf",
+   "triangles": 1404,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.3725,
+     0.0
+    ],
+    "size": [
+     0.4191,
+     0.745,
+     0.4191
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U01_05": {
+   "id": "U01_05",
+   "name": "Сварная решётчатая баррикада",
+   "file": "res://assets/models/urban95/U01_05.gltf",
+   "triangles": 3224,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.9065,
+     0.0
+    ],
+    "size": [
+     2.045,
+     1.8121,
+     0.7793
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U02_01": {
+   "id": "U02_01",
+   "name": "Консольный стеклянный навес",
+   "file": "res://assets/models/urban95/U02_01.gltf",
+   "triangles": 6662,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.6549,
+     0.0001
+    ],
+    "size": [
+     3.2,
+     3.3098,
+     2.8772
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U02_02": {
+   "id": "U02_02",
+   "name": "Прямоугольная уличная кадка",
+   "file": "res://assets/models/urban95/U02_02.gltf",
+   "triangles": 1214,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.325,
+     0.0
+    ],
+    "size": [
+     3.0396,
+     0.6496,
+     0.8245
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U02_03": {
+   "id": "U02_03",
+   "name": "Скамья на гнутой металлической раме",
+   "file": "res://assets/models/urban95/U02_03.gltf",
+   "triangles": 7940,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4125,
+     0.0
+    ],
+    "size": [
+     1.8,
+     0.825,
+     0.641
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U02_04": {
+   "id": "U02_04",
+   "name": "Стальной тротуарный столбик",
+   "file": "res://assets/models/urban95/U02_04.gltf",
+   "triangles": 1752,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.475,
+     0.0
+    ],
+    "size": [
+     0.1901,
+     0.95,
+     0.1901
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U02_05": {
+   "id": "U02_05",
+   "name": "Гранёная урна с боковой дверцей",
+   "file": "res://assets/models/urban95/U02_05.gltf",
+   "triangles": 560,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.45,
+     0.0
+    ],
+    "size": [
+     0.44,
+     0.9,
+     0.4495
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U03_01": {
+   "id": "U03_01",
+   "name": "Рекламный световой пилон",
+   "file": "res://assets/models/urban95/U03_01.gltf",
+   "triangles": 3740,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.0372,
+     0.0
+    ],
+    "size": [
+     1.1581,
+     2.0739,
+     0.3
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U03_02": {
+   "id": "U03_02",
+   "name": "Низкое укрытие из мешков",
+   "file": "res://assets/models/urban95/U03_02.gltf",
+   "triangles": 16412,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0001,
+     0.355,
+     0.0001
+    ],
+    "size": [
+     1.9548,
+     0.71,
+     0.6484
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U03_03": {
+   "id": "U03_03",
+   "name": "Знак парковки на стойке",
+   "file": "res://assets/models/urban95/U03_03.gltf",
+   "triangles": 2372,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0001,
+     1.35,
+     0.0
+    ],
+    "size": [
+     0.4993,
+     2.7,
+     0.26
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U03_04": {
+   "id": "U03_04",
+   "name": "Перила спуска с промежуточной стойкой",
+   "file": "res://assets/models/urban95/U03_04.gltf",
+   "triangles": 2086,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.6976,
+     0.0
+    ],
+    "size": [
+     2.84,
+     1.3948,
+     0.1296
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U03_05": {
+   "id": "U03_05",
+   "name": "Уличный распределительный шкаф",
+   "file": "res://assets/models/urban95/U03_05.gltf",
+   "triangles": 1332,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.7838,
+     -0.0
+    ],
+    "size": [
+     0.8992,
+     1.5665,
+     0.4593
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U04_01": {
+   "id": "U04_01",
+   "name": "Стеклянный створчатый турникет",
+   "file": "res://assets/models/urban95/U04_01.gltf",
+   "triangles": 740,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0003,
+     0.5413,
+     -0.0
+    ],
+    "size": [
+     0.8393,
+     1.0812,
+     1.028
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U04_02": {
+   "id": "U04_02",
+   "name": "Каменная угловая стойка",
+   "file": "res://assets/models/urban95/U04_02.gltf",
+   "triangles": 1838,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5849,
+     -0.0
+    ],
+    "size": [
+     3.6394,
+     1.1697,
+     1.6494
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U04_03": {
+   "id": "U04_03",
+   "name": "Двухместный диван в холл",
+   "file": "res://assets/models/urban95/U04_03.gltf",
+   "triangles": 8534,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4207,
+     0.0057
+    ],
+    "size": [
+     2.0694,
+     0.8413,
+     0.8932
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U04_04": {
+   "id": "U04_04",
+   "name": "Круглый журнальный столик",
+   "file": "res://assets/models/urban95/U04_04.gltf",
+   "triangles": 2034,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.2125,
+     0.0
+    ],
+    "size": [
+     0.8798,
+     0.425,
+     0.8798
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U04_05": {
+   "id": "U04_05",
+   "name": "Врезной настенный светильник",
+   "file": "res://assets/models/urban95/U04_05.gltf",
+   "triangles": 1606,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.45,
+     0.0001
+    ],
+    "size": [
+     0.4797,
+     0.8997,
+     0.1403
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U05_01": {
+   "id": "U05_01",
+   "name": "Пост охраны с трёхсторонним остеклением",
+   "file": "res://assets/models/urban95/U05_01.gltf",
+   "triangles": 2070,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.3125,
+     0.0
+    ],
+    "size": [
+     2.2198,
+     2.6239,
+     2.0248
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U05_02": {
+   "id": "U05_02",
+   "name": "Кофейный киоск с роллетой",
+   "file": "res://assets/models/urban95/U05_02.gltf",
+   "triangles": 9887,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.3247,
+     0.0001
+    ],
+    "size": [
+     2.8486,
+     2.6494,
+     2.1139
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U05_03": {
+   "id": "U05_03",
+   "name": "Складная предупреждающая табличка",
+   "file": "res://assets/models/urban95/U05_03.gltf",
+   "triangles": 7242,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5716,
+     -0.0
+    ],
+    "size": [
+     0.78,
+     1.1398,
+     0.505
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U05_04": {
+   "id": "U05_04",
+   "name": "Цилиндрическая реечная урна",
+   "file": "res://assets/models/urban95/U05_04.gltf",
+   "triangles": 7816,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.3865,
+     0.0
+    ],
+    "size": [
+     0.446,
+     0.773,
+     0.446
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U05_05": {
+   "id": "U05_05",
+   "name": "Плита тактильного покрытия",
+   "file": "res://assets/models/urban95/U05_05.gltf",
+   "triangles": 538,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.0266,
+     0.0
+    ],
+    "size": [
+     0.5997,
+     0.0528,
+     0.5997
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U06_01": {
+   "id": "U06_01",
+   "name": "Секция лежачего полицейского",
+   "file": "res://assets/models/urban95/U06_01.gltf",
+   "triangles": 2262,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.029,
+     0.0005
+    ],
+    "size": [
+     1.0001,
+     0.0579,
+     0.5014
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U06_02": {
+   "id": "U06_02",
+   "name": "Знак перехода в защитной рамке",
+   "file": "res://assets/models/urban95/U06_02.gltf",
+   "triangles": 2696,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.4,
+     0.0
+    ],
+    "size": [
+     0.8,
+     2.8,
+     0.26
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U06_03": {
+   "id": "U06_03",
+   "name": "Гнутое дорожное отбойное ограждение",
+   "file": "res://assets/models/urban95/U06_03.gltf",
+   "triangles": 3638,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.37,
+     0.0002
+    ],
+    "size": [
+     3.4005,
+     0.74,
+     0.3266
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U06_04": {
+   "id": "U06_04",
+   "name": "Радиусный борт приподнятого островка",
+   "file": "res://assets/models/urban95/U06_04.gltf",
+   "triangles": 624,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0001,
+     0.12,
+     -0.0002
+    ],
+    "size": [
+     1.9876,
+     0.2392,
+     1.9984
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U06_05": {
+   "id": "U06_05",
+   "name": "Дождеприёмник с решёткой",
+   "file": "res://assets/models/urban95/U06_05.gltf",
+   "triangles": 1326,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.06,
+     0.0
+    ],
+    "size": [
+     0.6047,
+     0.1197,
+     0.4047
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U07_01": {
+   "id": "U07_01",
+   "name": "Терминал выдачи парковочного билета",
+   "file": "res://assets/models/urban95/U07_01.gltf",
+   "triangles": 1786,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.6325,
+     0.0001
+    ],
+    "size": [
+     0.4494,
+     1.2644,
+     0.4156
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U07_02": {
+   "id": "U07_02",
+   "name": "Шлагбаум со стойкой привода",
+   "file": "res://assets/models/urban95/U07_02.gltf",
+   "triangles": 3566,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0002,
+     0.5138,
+     0.0
+    ],
+    "size": [
+     4.0497,
+     1.027,
+     0.4794
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U07_03": {
+   "id": "U07_03",
+   "name": "Полосатая направляющая тумба со знаком",
+   "file": "res://assets/models/urban95/U07_03.gltf",
+   "triangles": 3744,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.25,
+     0.0
+    ],
+    "size": [
+     0.4793,
+     2.5,
+     0.26
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U07_04": {
+   "id": "U07_04",
+   "name": "Дорожная веха в старой шине",
+   "file": "res://assets/models/urban95/U07_04.gltf",
+   "triangles": 2488,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4948,
+     0.0
+    ],
+    "size": [
+     0.6282,
+     0.9895,
+     0.6273
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U07_05": {
+   "id": "U07_05",
+   "name": "Пандусный островок въездного оборудования",
+   "file": "res://assets/models/urban95/U07_05.gltf",
+   "triangles": 3290,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.0951,
+     0.0
+    ],
+    "size": [
+     4.7992,
+     0.1897,
+     1.0079
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U08_01": {
+   "id": "U08_01",
+   "name": "Карусельная стеклянная дверь",
+   "file": "res://assets/models/urban95/U08_01.gltf",
+   "triangles": 3786,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.4,
+     0.0
+    ],
+    "size": [
+     2.5996,
+     2.8,
+     2.5996
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U08_02": {
+   "id": "U08_02",
+   "name": "Двустворчатая входная дверь с фрамугой",
+   "file": "res://assets/models/urban95/U08_02.gltf",
+   "triangles": 1616,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.3775,
+     0.0002
+    ],
+    "size": [
+     2.62,
+     2.755,
+     0.1632
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U08_03": {
+   "id": "U08_03",
+   "name": "Треугольная консоль входного навеса",
+   "file": "res://assets/models/urban95/U08_03.gltf",
+   "triangles": 3336,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0003,
+     0.5094,
+     0.0
+    ],
+    "size": [
+     2.5683,
+     1.0175,
+     0.2495
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U08_04": {
+   "id": "U08_04",
+   "name": "Криволинейный модуль стеклянного фасада",
+   "file": "res://assets/models/urban95/U08_04.gltf",
+   "triangles": 1822,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.55,
+     0.0
+    ],
+    "size": [
+     4.0444,
+     3.1,
+     0.2503
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U08_05": {
+   "id": "U08_05",
+   "name": "Ограждение площадки со стеклом",
+   "file": "res://assets/models/urban95/U08_05.gltf",
+   "triangles": 6980,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5225,
+     0.0
+    ],
+    "size": [
+     2.5,
+     1.0451,
+     0.12
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U09_01": {
+   "id": "U09_01",
+   "name": "Стальной противотранспортный ёж",
+   "file": "res://assets/models/urban95/U09_01.gltf",
+   "triangles": 2042,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.7354,
+     0.0
+    ],
+    "size": [
+     1.4686,
+     1.4686,
+     1.9
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U09_02": {
+   "id": "U09_02",
+   "name": "Железобетонная надолба",
+   "file": "res://assets/models/urban95/U09_02.gltf",
+   "triangles": 694,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4332,
+     0.0
+    ],
+    "size": [
+     1.2,
+     0.8664,
+     0.85
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U09_03": {
+   "id": "U09_03",
+   "name": "Архитектурная навигационная стела",
+   "file": "res://assets/models/urban95/U09_03.gltf",
+   "triangles": 1166,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.4002,
+     0.0
+    ],
+    "size": [
+     0.999,
+     2.7995,
+     0.4189
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U09_04": {
+   "id": "U09_04",
+   "name": "Каменная скамья вокруг клумбы",
+   "file": "res://assets/models/urban95/U09_04.gltf",
+   "triangles": 420,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.275,
+     0.0
+    ],
+    "size": [
+     2.1994,
+     0.55,
+     0.7
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U09_05": {
+   "id": "U09_05",
+   "name": "Разрушенный край перекрытия",
+   "file": "res://assets/models/urban95/U09_05.gltf",
+   "triangles": 32748,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.1543,
+     -0.0002
+    ],
+    "size": [
+     3.9962,
+     0.3087,
+     2.2778
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U10_01": {
+   "id": "U10_01",
+   "name": "Фрагмент утопленного трамвайного пути",
+   "file": "res://assets/models/urban95/U10_01.gltf",
+   "triangles": 9288,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.0925,
+     0.0
+    ],
+    "size": [
+     2.18,
+     0.185,
+     6.0
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U10_02": {
+   "id": "U10_02",
+   "name": "Двухрожковый городской фонарь",
+   "file": "res://assets/models/urban95/U10_02.gltf",
+   "triangles": 4644,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     3.5162,
+     0.0
+    ],
+    "size": [
+     4.05,
+     7.0324,
+     0.24
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U10_03": {
+   "id": "U10_03",
+   "name": "Номерная навигационная стела",
+   "file": "res://assets/models/urban95/U10_03.gltf",
+   "triangles": 2582,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2251,
+     0.0
+    ],
+    "size": [
+     0.6391,
+     2.4493,
+     0.2591
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U10_04": {
+   "id": "U10_04",
+   "name": "Реечная лавка с бетонными опорами",
+   "file": "res://assets/models/urban95/U10_04.gltf",
+   "triangles": 3490,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.244,
+     0.0
+    ],
+    "size": [
+     2.0,
+     0.4869,
+     0.5566
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U10_05": {
+   "id": "U10_05",
+   "name": "Рекламный щит на двух стойках",
+   "file": "res://assets/models/urban95/U10_05.gltf",
+   "triangles": 2740,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     1.7496,
+     0.0001
+    ],
+    "size": [
+     2.9986,
+     3.4992,
+     0.6488
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U11_01": {
+   "id": "U11_01",
+   "name": "Секция акустического дорожного экрана",
+   "file": "res://assets/models/urban95/U11_01.gltf",
+   "triangles": 4834,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     1.7,
+     0.0
+    ],
+    "size": [
+     3.1994,
+     3.4,
+     0.2793
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U11_02": {
+   "id": "U11_02",
+   "name": "Секция глухого строительного забора",
+   "file": "res://assets/models/urban95/U11_02.gltf",
+   "triangles": 4090,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.9953,
+     0.0
+    ],
+    "size": [
+     2.495,
+     1.9894,
+     0.6489
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U11_03": {
+   "id": "U11_03",
+   "name": "Открытый кузов самосвала как декор",
+   "file": "res://assets/models/urban95/U11_03.gltf",
+   "triangles": 1178,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.8,
+     -0.0
+    ],
+    "size": [
+     2.66,
+     1.6,
+     4.495
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U11_04": {
+   "id": "U11_04",
+   "name": "Переносной непрозрачный экран",
+   "file": "res://assets/models/urban95/U11_04.gltf",
+   "triangles": 9656,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.9236,
+     0.0
+    ],
+    "size": [
+     1.788,
+     1.8467,
+     0.7
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U11_05": {
+   "id": "U11_05",
+   "name": "Полый водоналивной дорожный барьер",
+   "file": "res://assets/models/urban95/U11_05.gltf",
+   "triangles": 1540,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4161,
+     0.0
+    ],
+    "size": [
+     1.6,
+     0.83,
+     0.48
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U12_01": {
+   "id": "U12_01",
+   "name": "Волнообразная полоса парковочного фасада",
+   "file": "res://assets/models/urban95/U12_01.gltf",
+   "triangles": 6666,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.7,
+     0.0
+    ],
+    "size": [
+     7.0038,
+     1.4,
+     0.9522
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U12_02": {
+   "id": "U12_02",
+   "name": "Силовой шкаф кордона с верхним щитком",
+   "file": "res://assets/models/urban95/U12_02.gltf",
+   "triangles": 1984,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.6993,
+     0.0003
+    ],
+    "size": [
+     0.7288,
+     1.3984,
+     0.5533
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U12_03": {
+   "id": "U12_03",
+   "name": "Прямой светодиодный уличный фонарь",
+   "file": "res://assets/models/urban95/U12_03.gltf",
+   "triangles": 2986,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     2.8062,
+     -0.0
+    ],
+    "size": [
+     0.24,
+     5.6124,
+     1.12
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U12_04": {
+   "id": "U12_04",
+   "name": "Каменный парапет со световой щелью",
+   "file": "res://assets/models/urban95/U12_04.gltf",
+   "triangles": 500,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.375,
+     0.0
+    ],
+    "size": [
+     2.5,
+     0.75,
+     0.425
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U12_05": {
+   "id": "U12_05",
+   "name": "Панель из треугольных фасадных кассет",
+   "file": "res://assets/models/urban95/U12_05.gltf",
+   "triangles": 1484,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2,
+     -0.0003
+    ],
+    "size": [
+     2.4,
+     2.4,
+     0.3028
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U13_01": {
+   "id": "U13_01",
+   "name": "Каркасная медицинская палатка",
+   "file": "res://assets/models/urban95/U13_01.gltf",
+   "triangles": 38364,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.5628,
+     0.0001
+    ],
+    "size": [
+     4.528,
+     3.1257,
+     6.9459
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U13_02": {
+   "id": "U13_02",
+   "name": "Трёхстворчатая медицинская ширма",
+   "file": "res://assets/models/urban95/U13_02.gltf",
+   "triangles": 21936,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0023,
+     0.894,
+     0.0033
+    ],
+    "size": [
+     1.7466,
+     1.7877,
+     0.2792
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U13_03": {
+   "id": "U13_03",
+   "name": "Медицинское кресло-каталка",
+   "file": "res://assets/models/urban95/U13_03.gltf",
+   "triangles": 13592,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4713,
+     -0.0001
+    ],
+    "size": [
+     0.77,
+     0.9428,
+     1.1287
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U13_04": {
+   "id": "U13_04",
+   "name": "Складные носилки на опорах",
+   "file": "res://assets/models/urban95/U13_04.gltf",
+   "triangles": 3186,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.3386,
+     0.0
+    ],
+    "size": [
+     0.6483,
+     0.6762,
+     2.06
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U13_05": {
+   "id": "U13_05",
+   "name": "Медицинский столик на колёсах",
+   "file": "res://assets/models/urban95/U13_05.gltf",
+   "triangles": 3760,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4471,
+     0.0
+    ],
+    "size": [
+     0.7,
+     0.8942,
+     0.4634
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U14_02": {
+   "id": "U14_02",
+   "name": "Фанерный транспортный ящик с уголками",
+   "file": "res://assets/models/urban95/U14_02.gltf",
+   "triangles": 4946,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.3162,
+     0.0
+    ],
+    "size": [
+     0.85,
+     0.6324,
+     0.65
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U14_03": {
+   "id": "U14_03",
+   "name": "Пространственный треугольный козырёк",
+   "file": "res://assets/models/urban95/U14_03.gltf",
+   "triangles": 9032,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.26,
+     0.0
+    ],
+    "size": [
+     5.238,
+     0.5201,
+     2.6381
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U14_04": {
+   "id": "U14_04",
+   "name": "Широкая входная лестница",
+   "file": "res://assets/models/urban95/U14_04.gltf",
+   "triangles": 1316,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4991,
+     0.0
+    ],
+    "size": [
+     4.92,
+     0.9981,
+     2.7275
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U14_05": {
+   "id": "U14_05",
+   "name": "Раскладное решётчатое ограждение",
+   "file": "res://assets/models/urban95/U14_05.gltf",
+   "triangles": 3542,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5159,
+     0.0
+    ],
+    "size": [
+     2.4046,
+     1.0318,
+     0.6
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U15_01": {
+   "id": "U15_01",
+   "name": "Сварная клетка поста досмотра",
+   "file": "res://assets/models/urban95/U15_01.gltf",
+   "triangles": 9830,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.1,
+     0.0
+    ],
+    "size": [
+     2.13,
+     2.2,
+     2.13
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U15_02": {
+   "id": "U15_02",
+   "name": "Уличный светофор на гнутой опоре",
+   "file": "res://assets/models/urban95/U15_02.gltf",
+   "triangles": 3806,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0001,
+     2.3975,
+     0.0002
+    ],
+    "size": [
+     2.6679,
+     4.795,
+     0.4397
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U15_03": {
+   "id": "U15_03",
+   "name": "Передвижной дизельный генератор",
+   "file": "res://assets/models/urban95/U15_03.gltf",
+   "triangles": 5982,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.6348,
+     -0.0002
+    ],
+    "size": [
+     1.645,
+     1.2697,
+     1.0327
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U15_04": {
+   "id": "U15_04",
+   "name": "Щит временного объезда на раскосах",
+   "file": "res://assets/models/urban95/U15_04.gltf",
+   "triangles": 874,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5851,
+     0.0
+    ],
+    "size": [
+     1.5992,
+     1.169,
+     0.7324
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U15_05": {
+   "id": "U15_05",
+   "name": "Бухта силового кабеля с разъёмами",
+   "file": "res://assets/models/urban95/U15_05.gltf",
+   "triangles": 4332,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0003,
+     0.059,
+     -0.0001
+    ],
+    "size": [
+     0.8314,
+     0.1181,
+     0.7085
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U16_01": {
+   "id": "U16_01",
+   "name": "Банкомат с утопленной панелью",
+   "file": "res://assets/models/urban95/U16_01.gltf",
+   "triangles": 3052,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.7536,
+     -0.0001
+    ],
+    "size": [
+     0.7346,
+     1.5068,
+     0.7218
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U16_02": {
+   "id": "U16_02",
+   "name": "Напольный банковский инфокиоск",
+   "file": "res://assets/models/urban95/U16_02.gltf",
+   "triangles": 646,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0001,
+     0.8239,
+     0.0002
+    ],
+    "size": [
+     0.5854,
+     1.6464,
+     0.5988
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U16_03": {
+   "id": "U16_03",
+   "name": "Мягкое банковское кресло",
+   "file": "res://assets/models/urban95/U16_03.gltf",
+   "triangles": 3108,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0001,
+     0.4225,
+     0.0
+    ],
+    "size": [
+     0.7359,
+     0.845,
+     0.715
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U16_04": {
+   "id": "U16_04",
+   "name": "Пролом в железобетонной стене",
+   "file": "res://assets/models/urban95/U16_04.gltf",
+   "triangles": 1138,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.55,
+     0.0
+    ],
+    "size": [
+     3.4,
+     3.1,
+     0.3
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U16_05": {
+   "id": "U16_05",
+   "name": "Рабочее место операциониста",
+   "file": "res://assets/models/urban95/U16_05.gltf",
+   "triangles": 1448,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.6261,
+     -0.0
+    ],
+    "size": [
+     1.5992,
+     1.2521,
+     0.8644
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U17_01": {
+   "id": "U17_01",
+   "name": "Стойка ресепшена со световым фасадом",
+   "file": "res://assets/models/urban95/U17_01.gltf",
+   "triangles": 2530,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5786,
+     -0.0002
+    ],
+    "size": [
+     4.2,
+     1.1572,
+     1.1147
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U17_02": {
+   "id": "U17_02",
+   "name": "Кольцевая подвесная люстра",
+   "file": "res://assets/models/urban95/U17_02.gltf",
+   "triangles": 7644,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.6407,
+     0.0
+    ],
+    "size": [
+     2.21,
+     1.2815,
+     2.21
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U17_03": {
+   "id": "U17_03",
+   "name": "Настольный тонкий монитор",
+   "file": "res://assets/models/urban95/U17_03.gltf",
+   "triangles": 1368,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.2275,
+     0.0
+    ],
+    "size": [
+     0.5594,
+     0.4544,
+     0.2095
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U17_04": {
+   "id": "U17_04",
+   "name": "Низкая офисная тумба с открытыми полками",
+   "file": "res://assets/models/urban95/U17_04.gltf",
+   "triangles": 1554,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.4262,
+     0.0
+    ],
+    "size": [
+     2.3997,
+     0.8523,
+     0.4588
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U17_05": {
+   "id": "U17_05",
+   "name": "Большая бутыль для кулера",
+   "file": "res://assets/models/urban95/U17_05.gltf",
+   "triangles": 4882,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.26,
+     0.0
+    ],
+    "size": [
+     0.29,
+     0.52,
+     0.29
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U18_01": {
+   "id": "U18_01",
+   "name": "Цистерна на опорных ложементах",
+   "file": "res://assets/models/urban95/U18_01.gltf",
+   "triangles": 13978,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0002,
+     1.206,
+     0.0
+    ],
+    "size": [
+     2.1813,
+     2.411,
+     5.6
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U18_02": {
+   "id": "U18_02",
+   "name": "Грузовая роллета с рамой",
+   "file": "res://assets/models/urban95/U18_02.gltf",
+   "triangles": 2018,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.6,
+     0.0
+    ],
+    "size": [
+     3.91,
+     3.2,
+     0.28
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U18_03": {
+   "id": "U18_03",
+   "name": "Промышленный подвесной светильник",
+   "file": "res://assets/models/urban95/U18_03.gltf",
+   "triangles": 590,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.1314,
+     0.0
+    ],
+    "size": [
+     1.25,
+     0.2627,
+     0.1968
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U18_04": {
+   "id": "U18_04",
+   "name": "Техническая клетка с вентиляторами",
+   "file": "res://assets/models/urban95/U18_04.gltf",
+   "triangles": 14400,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.8675,
+     0.0
+    ],
+    "size": [
+     1.735,
+     1.735,
+     0.8775
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U18_05": {
+   "id": "U18_05",
+   "name": "Опорный бетонный узел проезда",
+   "file": "res://assets/models/urban95/U18_05.gltf",
+   "triangles": 1412,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0001,
+     1.7493,
+     0.0
+    ],
+    "size": [
+     4.0304,
+     3.4985,
+     1.0
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U19_01": {
+   "id": "U19_01",
+   "name": "Остановленный эскалатор",
+   "file": "res://assets/models/urban95/U19_01.gltf",
+   "triangles": 107392,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     2.0125,
+     -0.0
+    ],
+    "size": [
+     1.56,
+     4.025,
+     7.235
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U19_02": {
+   "id": "U19_02",
+   "name": "Лестница с промежуточной террасой",
+   "file": "res://assets/models/urban95/U19_02.gltf",
+   "triangles": 3698,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.7098,
+     0.0
+    ],
+    "size": [
+     4.2,
+     3.4196,
+     5.7099
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U19_03": {
+   "id": "U19_03",
+   "name": "Стена с выступающими прямоугольными панелями",
+   "file": "res://assets/models/urban95/U19_03.gltf",
+   "triangles": 704,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.55,
+     0.0
+    ],
+    "size": [
+     3.0,
+     3.1,
+     0.315
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U19_04": {
+   "id": "U19_04",
+   "name": "Квадратный подвесной светильник",
+   "file": "res://assets/models/urban95/U19_04.gltf",
+   "triangles": 1156,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.255,
+     0.0
+    ],
+    "size": [
+     1.1995,
+     0.51,
+     1.1995
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "U19_05": {
+   "id": "U19_05",
+   "name": "Стойка ограждения с вытяжной лентой",
+   "file": "res://assets/models/urban95/U19_05.gltf",
+   "triangles": 1606,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.5,
+     0.0
+    ],
+    "size": [
+     0.3599,
+     1.0,
+     0.376
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "R01": {
+   "id": "R01",
+   "name": "Высокий секционный бетонный забор",
+   "file": "res://assets/models/urban95/R01.gltf",
+   "triangles": 2436,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.5988,
+     0.0
+    ],
+    "size": [
+     3.2456,
+     3.1945,
+     0.9455
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "R02": {
+   "id": "R02",
+   "name": "Большой мусорный бункер",
+   "file": "res://assets/models/urban95/R02.gltf",
+   "triangles": 3122,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.7097,
+     0.0
+    ],
+    "size": [
+     3.324,
+     1.4195,
+     2.1134
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "R03": {
+   "id": "R03",
+   "name": "Банкомат",
+   "file": "res://assets/models/urban95/R03.gltf",
+   "triangles": 9114,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     -0.0,
+     0.706,
+     0.0
+    ],
+    "size": [
+     0.45,
+     1.412,
+     0.795
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "R05": {
+   "id": "R05",
+   "name": "Ларёк с фастфудом",
+   "file": "res://assets/models/urban95/R05.gltf",
+   "triangles": 9944,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.6398,
+     0.0001
+    ],
+    "size": [
+     3.0198,
+     3.2797,
+     2.9954
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "R06": {
+   "id": "R06",
+   "name": "Двухэтажный корпус по фотографиям владельца",
+   "file": "res://assets/models/urban95/R06.gltf",
+   "triangles": 91835,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     3.3788,
+     -0.0001
+    ],
+    "size": [
+     35.374,
+     6.7575,
+     11.9843
+    ]
+   },
+   "root_offset": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ }
+}

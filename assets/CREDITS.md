@@ -527,3 +527,14 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 Источники масок и их производных сохранены в библиотечных `sources.md`,
 `Проверки/Текстуры_v03/mask-sources.json`, `dust-detail.json`.
 Студийная HDRI Poly Haven в игру не экспортируется. Подробности — `docs/assets/metka4_game.md`.
+
+## Urban 95 — городские модели «Проспекта» (`assets/models/urban95`)
+
+Геометрия — оригинальная работа для RING (Blender, библиотека `E:/Models Blender/ENVIRONMENT/RING_Urban_95`,
+ретопология `retopology_v01`), игровая выгрузка — `tools/urban95_export.py`. Скриншоты Escape from Tarkov владельца —
+только визуальные референсы, их пиксели в карты не переносились. Отделка UCUPaint запечена в атласы с фототекстур
+Poly Haven (CC0): rough_concrete, concrete_wall_007, rusty_metal_sheet, green_metal_rust, metal_plate, wood_planks_grey,
+plywood, natural_walnut_veneer, painted_plaster_wall, tarred_gravel, mud_forest, denim_fabric_06, brown_leather,
+blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс CC0-карты granite_tile и marble_01 и
+маски владельца (пыль, плёнка, грязь, царапины, отпечатки, брызги — переданы владельцем для проекта, не CC0).
+Перечень с суммами файлов — `retopology_v01/sources.json` библиотеки.

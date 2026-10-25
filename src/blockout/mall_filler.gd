@@ -947,6 +947,17 @@ var _meshes: Dictionary = {}
 var _shapes: Dictionary = {}
 var _matte: StandardMaterial3D
 var _water: StandardMaterial3D
+## Модели вместо серых форм (данные filler.models_index и filler.kit_models; «Проспект», владелец 2026-10-25):
+## запись индекса модели по id, набор → {model, yaw}, загруженные сетки моделей. Нет файла модели — серая коробка
+## по габариту из индекса (проект запускается без assets/models).
+var _model_index: Dictionary = {}
+var _kit_models: Dictionary = {}
+var _model_meshes: Dictionary = {}
+## Модели без коллизии по габариту: лестницы, пролом, кабель, рельсы — коробка закрыла бы проход.
+var _model_nosolid: Array = []
+## Столбы с вылетом (светофор на консоли, фонари, знаки): коллизия — только стойка 0,3 м у начала координат модели,
+## иначе габарит консоли перекрыл бы тротуар.
+var _model_poles: Array = []
 
 
 func _ready() -> void:
@@ -977,6 +988,7 @@ func rebuild() -> void:
 	_water.roughness = 0.12
 	_water.metallic = 0.15
 	stats = {"instances": 0, "batches": 0, "collision_shapes": 0}
+	_load_models(filler)
 	_items(filler)
 	# колеи грунтовок — грязью покрытий (MallGround), остальное — серые формы
 	var palette: Dictionary = Geometry.materials()
@@ -1002,6 +1014,14 @@ func _items(filler: Dictionary) -> void:
 	var groups: Dictionary = {}
 	for item: Array in filler.get("items", []):
 		var kit_id: String = String(item[0])
+		var model_id: String = kit_id.substr(2) if kit_id.begins_with("m:") else ""
+		var yaw_offset: float = 0.0
+		if model_id == "" and _kit_models.has(kit_id):
+			model_id = String((_kit_models[kit_id] as Dictionary).model)
+			yaw_offset = float((_kit_models[kit_id] as Dictionary).get("yaw", 0.0))
+		if model_id != "" and _model_index.has(model_id):
+			_place_model(groups, model_id, item, yaw_offset)
+			continue
 		if not KITS.has(kit_id):
 			push_warning("Наполнение: нет набора " + kit_id)
 			continue
@@ -1046,12 +1066,14 @@ func _items(filler: Dictionary) -> void:
 			_group(groups, "weed", t, Color(rng.randf_range(0.85, 1.1), rng.randf_range(0.9, 1.1), rng.randf_range(0.8, 1.0)))
 	for key: String in groups:
 		var group: Dictionary = groups[key]
-		_batch(String(group.kit), group.transforms as Array, group.colors as Array)
+		if String(group.kit).begins_with("model:"):
+			_batch_model(String(group.kit).substr(6), group.transforms as Array)
+		else:
+			_batch(String(group.kit), group.transforms as Array, group.colors as Array)
 
 
 func _group(groups: Dictionary, kit_id: String, xform: Transform3D, color: Color) -> void:
-	var kit: Dictionary = KITS[kit_id]
-	var reach: float = float(kit.get("range", 260.0))
+	var reach: float = _model_reach(kit_id.substr(6)) if kit_id.begins_with("model:") else float((KITS[kit_id] as Dictionary).get("range", 260.0))
 	var cell: float = clampf(reach * 0.5, 32.0, 160.0)
 	var key: String = kit_id
 	if reach > 0.0:
@@ -1159,6 +1181,125 @@ func _solid(xform: Transform3D, center: Vector3, size: Vector3, s: float) -> voi
 	shape.shape = _shapes[key] as BoxShape3D
 	shape.transform = Transform3D(xform.basis.orthonormalized(), xform.origin + xform.basis * center)
 	body.add_child(shape)
+
+
+# ---------------------------------------------------------------- модели вместо серых форм
+
+func _load_models(filler: Dictionary) -> void:
+	_model_index.clear()
+	_kit_models = filler.get("kit_models", {}) as Dictionary
+	_model_nosolid = filler.get("models_nosolid", []) as Array
+	_model_poles = filler.get("models_poles", []) as Array
+	var path: String = String(filler.get("models_index", ""))
+	if path == "" or not FileAccess.file_exists(path):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if parsed is Dictionary:
+		_model_index = (parsed as Dictionary).get("models", {}) as Dictionary
+
+
+## Габарит модели в её осях (из индекса).
+func _model_aabb(model_id: String) -> AABB:
+	var a: Dictionary = (_model_index[model_id] as Dictionary).aabb
+	var c: Array = a.center
+	var z: Array = a.size
+	var size: Vector3 = Vector3(float(z[0]), float(z[1]), float(z[2]))
+	return AABB(Vector3(float(c[0]), float(c[1]), float(c[2])) - size * 0.5, size)
+
+
+## Дальность видимости по размеру: крупное — издалека, мелочь — вблизи.
+func _model_reach(model_id: String) -> float:
+	var size: Vector3 = _model_aabb(model_id).size
+	var big: float = maxf(size.x, maxf(size.y, size.z))
+	return 520.0 if big > 4.0 else (300.0 if big > 1.2 else 170.0)
+
+
+## Сетка модели (первая MeshInstance3D её сцены); нет файла — серая коробка по габариту.
+func _model_mesh(model_id: String) -> Mesh:
+	if _model_meshes.has(model_id):
+		return _model_meshes[model_id] as Mesh
+	var mesh: Mesh = null
+	var file: String = String((_model_index[model_id] as Dictionary).get("file", ""))
+	if file != "" and ResourceLoader.exists(file):
+		var scene: PackedScene = load(file) as PackedScene
+		if scene:
+			var root: Node = scene.instantiate()
+			var found: Array[Node] = root.find_children("*", "MeshInstance3D", true, false)
+			if not found.is_empty():
+				mesh = (found[0] as MeshInstance3D).mesh
+			root.free()
+	if mesh == null:
+		var aabb: AABB = _model_aabb(model_id)
+		var st: SurfaceTool = SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var cube: Array = BoxMesh.new().get_mesh_arrays()
+		var vertices: PackedVector3Array = cube[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = cube[Mesh.ARRAY_NORMAL]
+		for index: int in cube[Mesh.ARRAY_INDEX] as PackedInt32Array:
+			st.set_color(COLORS.concrete)
+			st.set_normal(normals[index])
+			st.add_vertex(aabb.get_center() + vertices[index] * aabb.size)
+		var box: ArrayMesh = st.commit()
+		box.set_meta("fallback", true)
+		mesh = box
+	_model_meshes[model_id] = mesh
+	return mesh
+
+
+## Предмет моделью: поворот набора + поправка, на боку — подъём по габариту, коллизия — габарит модели.
+func _place_model(groups: Dictionary, model_id: String, item: Array, yaw_offset: float) -> void:
+	var x: float = float(item[1])
+	var z: float = float(item[2])
+	var yaw: float = deg_to_rad(float(item[3]) + yaw_offset)
+	var s: float = float(item[4]) if item.size() > 4 else 1.0
+	var dy: float = float(item[5]) if item.size() > 5 else 0.0
+	var roll: float = deg_to_rad(float(item[7])) if item.size() > 7 else 0.0
+	var basis: Basis = Basis(Vector3.UP, yaw) * Basis(Vector3.BACK, roll)
+	var aabb: AABB = _model_aabb(model_id)
+	var lift: float = 0.0
+	if roll != 0.0:
+		var low: float = INF
+		for k: int in range(8):
+			low = minf(low, (basis * aabb.get_endpoint(k)).y)
+		lift = -low
+	var xform: Transform3D = Transform3D(basis.scaled(Vector3.ONE * s), Vector3(x, landscape.ground(x, z) + dy + lift * s, z))
+	_group(groups, "model:" + model_id, xform, Color.WHITE)
+	# коллизия — по габариту, если предмет выше щиколотки (плиты и решётки под ногами — нет)
+	if _model_poles.has(model_id):
+		_solid(xform, Vector3(0.0, aabb.size.y * 0.5, 0.0), Vector3(0.3, aabb.size.y, 0.3), s)
+	elif aabb.size.y * s > 0.3 and not _model_nosolid.has(model_id):
+		_solid(xform, aabb.get_center(), aabb.size, s)
+
+
+func _batch_model(model_id: String, transforms: Array) -> void:
+	var mesh: Mesh = _model_mesh(model_id)
+	var center: Vector3 = Vector3.ZERO
+	for t: Transform3D in transforms:
+		center += t.origin
+	center /= float(transforms.size())
+	var multi: MultiMesh = MultiMesh.new()
+	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.mesh = mesh
+	multi.instance_count = transforms.size()
+	for i: int in range(transforms.size()):
+		var t: Transform3D = transforms[i]
+		multi.set_instance_transform(i, Transform3D(t.basis, t.origin - center))
+	var visual: MultiMeshInstance3D = MultiMeshInstance3D.new()
+	visual.name = "model_%s_%d" % [model_id, int(stats.batches)]
+	visual.multimesh = multi
+	visual.position = center
+	if mesh.has_meta("fallback"):
+		visual.material_override = _matte
+	var aabb: AABB = _model_aabb(model_id)
+	visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if aabb.size.y > 0.5 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var reach: float = _model_reach(model_id)
+	visual.visibility_range_end = reach
+	visual.visibility_range_end_margin = reach * 0.1
+	visual.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	generated.add_child(visual)
+	stats.instances = int(stats.instances) + transforms.size()
+	stats.batches = int(stats.batches) + 1
+	stats["models"] = int(stats.get("models", 0)) + transforms.size()
 
 
 # ---------------------------------------------------------------- ЛЭП
