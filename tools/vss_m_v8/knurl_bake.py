@@ -13,6 +13,19 @@ RADIUS = 20.2
 PITCH = 1.3
 
 
+def build_area_material():
+    """Белая заливка — где сетка накатки лежит в развёртке (маска области для слоёв канавок)."""
+    m = bpy.data.materials.new("_knurl_area")
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    emit = nt.nodes.new("ShaderNodeEmission")
+    emit.inputs["Color"].default_value = (1, 1, 1, 1)
+    nt.links.new(emit.outputs[0], out.inputs["Surface"])
+    return m
+
+
 def build_material():
     m = bpy.data.materials.new("_knurl_bake")
     m.use_nodes = True
@@ -61,6 +74,22 @@ def build_material():
     return m
 
 
+def bake_one(o, mat, path, size):
+    img = bpy.data.images.new("knurl_" + mat.name, size, size, alpha=False)
+    img.colorspace_settings.name = "Non-Color"
+    img.generated_color = (0, 0, 0, 1)
+    tex = mat.node_tree.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    mat.node_tree.nodes.active = tex
+    o.data.materials.clear()
+    o.data.materials.append(mat)
+    bpy.ops.object.bake(type="EMIT")
+    img.filepath_raw = path
+    img.file_format = "PNG"
+    img.save()
+    print("BAKED", path)
+
+
 def main():
     a = sys.argv[sys.argv.index("--") + 1:]
     out = a[0]
@@ -68,25 +97,13 @@ def main():
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     sc.cycles.samples = 4
-    img = bpy.data.images.new("knurl_height", size, size, alpha=False)
-    img.colorspace_settings.name = "Non-Color"
-    img.generated_color = (0, 0, 0, 1)
+    sc.render.bake.margin = 8
     o = bpy.data.objects["Suppressor_knurl"]
-    mat = build_material()
-    tex = mat.node_tree.nodes.new("ShaderNodeTexImage")
-    tex.image = img
-    mat.node_tree.nodes.active = tex
-    o.data.materials.clear()
-    o.data.materials.append(mat)
     bpy.ops.object.select_all(action="DESELECT")
     o.select_set(True)
     bpy.context.view_layer.objects.active = o
-    sc.render.bake.margin = 8
-    bpy.ops.object.bake(type="EMIT")
-    img.filepath_raw = out
-    img.file_format = "PNG"
-    img.save()
-    print("BAKED", out)
+    bake_one(o, build_material(), out, size)
+    bake_one(o, build_area_material(), out.replace("_height", "_area"), size)
 
 
 main()

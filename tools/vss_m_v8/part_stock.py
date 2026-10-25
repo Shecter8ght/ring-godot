@@ -210,7 +210,11 @@ def build(ctx):
         sc.location = (300.0 * MM, s * 18.05 * MM, -36.0 * MM)
         apply_transform(sc)
         from lib import box
-        boolean(sc, box("_slot", 299.6, 300.4, -30, 30, -40.5, -31.5, C))
+        # шлиц глубиной 0.6 мм от верха шляпки (1.3 мм): шляпка остаётся цельной (замечание владельца 25.10 — шлиц
+        # насквозь делил её на две половинки, между ними было видно дерево)
+        y_top = s * (18.05 + 1.3)
+        y0, y1 = sorted((y_top - s * 0.6, y_top + s * 5.0))
+        boolean(sc, box("_slot", 299.6, 300.4, y0, y1, -40.5, -31.5, C))
         auto_sharp(sc, 35)
         hw.append(sc)
     from lib import prism_xz, finish

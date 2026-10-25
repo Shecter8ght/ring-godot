@@ -82,6 +82,10 @@ def fill(name, pos, **ch):
             f.set_source(CHAN[k], rid(v, "u:procedural"))
         else:
             f.set_source(CHAN[k], _val(v, data=(k != "color")))
+    if "height" in ch and not isinstance(ch["height"], str):
+        # высота числом — уровень поверхности, а не прибавка: по умолчанию канал высоты складывается (Linear Dodge),
+        # и слой «0.499» по маске поднимал поверхность почти на полединицы — рельеф «корой»
+        f.set_blending_mode(L.BlendingMode.Normal, CH.Height)
     return f
 
 

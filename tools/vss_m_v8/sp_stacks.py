@@ -20,6 +20,7 @@ PARTS = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_parts"
 WOOD_BASE = PARTS + "/wood_laminate_v5.png"              # wood_laminate_bake.py: шпон и полосы слоёв фанеры
 WOOD_HEIGHT = PARTS + "/wood_height_v5.png"              # там же: рельеф волокна и клеевых швов
 KNURL = PARTS + "/suppressor_knurl_height.png"        # knurl_bake.py: накатка рифлёной части глушителя
+KNURL_AREA = PARTS + "/suppressor_knurl_area.png"     # там же: где лежит накатка (маска области)
 
 
 def _grain(pos, rough_op=0.35, height_op=0.0025):
@@ -82,56 +83,66 @@ def _mix(a, b, t):
     return tuple(x + (y - x) * t for x, y in zip(a, b))
 
 
-def coated(st, coat, bare, wear=0.3, patches=0.4, thin=0.3, scratches=0.2, prints=1.0, rail_meshes=None):
+def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, prints=1.0, rail_meshes=None):
     """Изделие с заводским покрытием (воронение / анодирование): coat и bare — (цвет, шероховатость, металл)
-    покрытия и металла под ним. Покрытие со сдержанным глянцем и неровным блеском (протирки), местами истончилось,
-    на кромках и выступах и пятнами на плоскостях вытерто до матового металла, по самым острым кромкам металл
-    заполирован до блеска; редкие царапины, грязь и пыль в углах, тонкий налёт грязи, масло, отпечатки."""
+    покрытия и металла под ним. Износ читается блеском и рельефом (замечание владельца 25.10: у пятен был тот же
+    блеск, что у покрытия): покрытие глянцевое с лёгкими пятнами блеска и протирками; вокруг вытертых мест — рваная
+    полоса истончившегося, полуматового покрытия; вытертое до металла — полностью матовое (площадь задаёт порог маски
+    patch_bal — яркость обратной фото-маски: у grunge map обращение идёт после яркости, поэтому чем БОЛЬШЕ patch_bal,
+    тем МЕНЬШЕ вытертых пятен (замер на steel_parts: 0.6 → 31 %, 0.78 → 12 %, 0.85 → 8 %); wear — уровень генератора
+    износа кромок (0.08 → 17 % площади развёртки мелких деталей, 0.2 → 30 %), а не прозрачность — частичная прозрачность смешивала шероховатость и съедала разницу) и ниже покрытия на
+    его толщину (ступенька по краю ловит свет; высоты в долях тысячной — единица высоты Painter огромна, ступенька
+    0.007 по шумной маске дала «кору»); острые кромки заполированы до блеска; царапины — бороздки; грязь и пыль
+    в углах, масло, отпечатки."""
     top = L.InsertPosition.from_textureset_stack(st)
-    n = fill("01 Покрытие", top, color=coat[0], rough=coat[1], metal=coat[2])
-    n = _grain(_above(n), 0.18, 0.0008)
+    n = fill("01 Покрытие", top, color=coat[0], rough=coat[1], metal=coat[2], height=0.5)
+    n = _grain(_above(n), 0.12, 0.0006)
     n.set_name("02 Зерно")
-    n = _proc_layer("03 Глянец неровный", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, 0.6,
-                    {"Balance": 0.55, "Contrast": 0.3}, rough=coat[1] + 0.16)
+    n = _proc_layer("03 Блеск пятнами", _above(n), _gm(13), 1.2, 0.5, {"balance": 0.5, "contrast": 0.2},
+                    rough=coat[1] + 0.07)
     n = _proc_layer("04 Протёрто до блеска", _above(n), "grunge_wipe_directional_heavy/grunge_wipe_directional_heavy", 1.8,
-                    0.35, rough=max(0.12, coat[1] - 0.12))
-    mid = _mix(coat[0], bare[0], 0.35)
-    n = _proc_layer("05 Покрытие истончилось", _above(n), _gm(13), 1.4, thin, {"invert": 1, "balance": 0.35, "contrast": 0.5},
-                    color=mid, rough=(coat[1] + bare[1]) / 2, metal=(coat[2] + bare[2]) / 2)
-    w = fill("06 Вытерто до металла", _above(n), color=bare[0], rough=bare[1], metal=bare[2])
-    g = mask_generator(w, EDGE, {"Wear_Level": wear, "Wear_Contrast": 0.55, "Grunge_Amount": 0.75, "grunge_scale": 6,
-                                 "Use_Triplanar": 1, "Edges_Smoothness": 0.45, "Ambient_Occlusion_Masking": 0.6,
-                                 "Curvature_Weight": 1.0})
-    mask_proc(w, _gm(8), {"invert": 1, "balance": 0.32, "contrast": 0.6}, scale=1.5, above=g,
-              blend=L.BlendingMode.Lighten, opacity=patches)
-    n = _edge("07 Кромки до блеска", _above(w), _mix(bare[0], (0.75, 0.75, 0.76), 0.5), 0.24, wear * 0.55,
+                    0.35, rough=max(0.12, coat[1] - 0.08))
+    edge_p = {"Wear_Contrast": 0.6, "Grunge_Amount": 0.75, "grunge_scale": 6, "Use_Triplanar": 1, "Edges_Smoothness": 0.45,
+              "Ambient_Occlusion_Masking": 0.6, "Curvature_Weight": 1.0}
+    t = fill("05 Покрытие истончилось", _above(n), color=_mix(coat[0], bare[0], 0.4), rough=(coat[1] + bare[1]) / 2,
+             metal=(coat[2] + bare[2]) / 2, height=0.4995)
+    g = mask_generator(t, EDGE, dict(edge_p, Wear_Level=min(0.95, wear * 1.8), Wear_Contrast=0.35, Grunge_Amount=0.85))
+    pm = mask_proc(t, _gm(8), {"invert": 1, "balance": patch_bal - 0.08, "contrast": 0.35}, scale=1.5, above=g,
+                   blend=L.BlendingMode.Lighten)
+    mask_proc(t, _gm(13), {"balance": 0.6, "contrast": 0.3}, scale=2.2, above=pm, blend=L.BlendingMode.Multiply)
+    sp_lib.lop(t, thin)
+    w = fill("06 Вытерто до металла", _above(t), color=bare[0], rough=bare[1], metal=bare[2], height=0.499)
+    g = mask_generator(w, EDGE, dict(edge_p, Wear_Level=wear))
+    mask_proc(w, _gm(8), {"invert": 1, "balance": patch_bal, "contrast": 0.75}, scale=1.5, above=g,
+              blend=L.BlendingMode.Lighten)
+    n = _grain(_above(w), 0.16, 0.0)
+    n.set_name("07 Неровная матовость")
+    n = _edge("08 Кромки до блеска", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.5), 0.24, wear * 0.6,
               contrast=0.85, grunge=0.6)
     if rail_meshes:
-        n = _edge("08 Износ планки", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.4), 0.26, 0.5, contrast=0.8,
+        n = _edge("09 Износ планки", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.4), 0.26, 0.5, contrast=0.8,
                   grunge=0.4, meshes=rail_meshes)
-    n = _proc_layer("09 Царапины", _above(n), _gm(12), 2.5, scratches, {"invert": 1, "balance": 0.32, "contrast": 0.55},
-                    color=_mix(coat[0], bare[0], 0.6), rough=0.3, metal=1.0)
-    n = _dirt(_above(n), color=(0.035, 0.03, 0.026), level=0.38, opacity=0.9, name="10 Грязь в углах")
-    n = _dirt(_above(n), color=(0.3, 0.28, 0.25), rough=0.95, level=0.24, opacity=0.4, name="11 Пыль в углах", contrast=0.9)
-    n = _proc_layer("12 Налёт грязи", _above(n), "grunge_dirt_thin/grunge_dirt_thin", 2.0, 0.3,
-                    color=(0.07, 0.064, 0.058), rough=0.62, metal=0.0)
-    n = _proc_layer("13 Масло", _above(n), _gm(15), 1.8, 0.25, {"invert": 1, "balance": 0.4, "contrast": 0.4},
-                    color=_mix(coat[0], (0.0, 0.0, 0.0), 0.3), rough=0.16)
+    n = _proc_layer("10 Царапины", _above(n), _gm(12), 2.5, scratches, {"invert": 1, "balance": 0.74, "contrast": 0.55},
+                    color=_mix(coat[0], bare[0], 0.6), rough=0.42, metal=1.0, height=0.4993)
+    n = _dirt(_above(n), color=(0.035, 0.03, 0.026), level=0.38, opacity=0.9, name="11 Грязь в углах")
+    n = _dirt(_above(n), color=(0.3, 0.28, 0.25), rough=0.95, level=0.24, opacity=0.4, name="12 Пыль в углах", contrast=0.9)
+    n = _proc_layer("13 Масло", _above(n), _gm(15), 1.8, 0.3, {"invert": 1, "balance": 0.72, "contrast": 0.4},
+                    color=_mix(coat[0], (0.0, 0.0, 0.0), 0.3), rough=0.18)
     n = _proc_layer("14 Отпечатки жирные", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 3.0,
-                    0.45 * prints, {"Balance": 0.45, "Contrast": 0.35}, color=_mix(coat[0], (0.2, 0.19, 0.18), 0.4), rough=0.5)
+                    0.4 * prints, {"Balance": 0.45, "Contrast": 0.35}, color=_mix(coat[0], (0.2, 0.19, 0.18), 0.4), rough=0.45)
     n = _proc_layer("15 Отпечатки пыльные", _above(n), "grunge_fingerprints_dusty/grunge_fingerprints_dusty", 3.0,
-                    0.3 * prints, {"Balance": 0.45, "Contrast": 0.35}, color=(0.24, 0.23, 0.21), rough=0.7, metal=0.0)
+                    0.25 * prints, {"Balance": 0.45, "Contrast": 0.35}, color=(0.24, 0.23, 0.21), rough=0.7, metal=0.0)
     return n
 
 
-# воронёная сталь: покрытие тёмное со сдержанным глянцем, под ним серая сталь с тёплым оттенком
-STEEL_COAT = ((0.085, 0.085, 0.09), 0.3, 0.75)
-STEEL_BARE = ((0.17, 0.165, 0.16), 0.58, 1.0)
+# воронёная сталь: глянцевое тёмное покрытие, под ним матовая серая сталь с тёплым оттенком
+STEEL_COAT = ((0.085, 0.085, 0.09), 0.22, 0.75)
+STEEL_BARE = ((0.17, 0.165, 0.16), 0.62, 1.0)
 
 
-def steel(st, rail_meshes=None, wear=0.3, patches=0.4, scratches=0.2):
+def steel(st, rail_meshes=None, wear=0.1, patch_bal=0.8, scratches=0.35):
     """Сталь коробки, рамы, органов управления, прицельных: воронение, местами вытертое (см. coated)."""
-    return coated(st, STEEL_COAT, STEEL_BARE, wear=wear, patches=patches, scratches=scratches, rail_meshes=rail_meshes)
+    return coated(st, STEEL_COAT, STEEL_BARE, wear=wear, patch_bal=patch_bal, scratches=scratches, rail_meshes=rail_meshes)
 
 
 def phosphate(st, rail_meshes=None, **kw):
@@ -142,7 +153,7 @@ def phosphate(st, rail_meshes=None, **kw):
 def suppressor(st):
     """Глушитель: то же покрытие чуть матовее; рифлёная часть — накатка картой высот: в канавках грязь и пыль
     (пятнами), вершины ромбов затёрты до металла; масло и отпечатки там, где за него берутся."""
-    n = coated(st, ((0.08, 0.08, 0.085), 0.36, 0.7), STEEL_BARE, wear=0.3, patches=0.4, scratches=0.18, prints=1.3)
+    n = coated(st, ((0.08, 0.08, 0.085), 0.28, 0.7), STEEL_BARE, wear=0.1, patch_bal=0.78, scratches=0.3, prints=1.3)
     k = L.insert_fill(_above(n))
     k.set_name("16 Накатка")
     k.active_channels = {sp_lib.CH.Height}
@@ -152,12 +163,16 @@ def suppressor(st):
     only_meshes(k, ["Suppressor_knurl__sp"])
 
     def knurl_mask(layer, grooves):
-        """Маска по накатке: grooves — в канавках (обратная карта высот), иначе — по вершинам."""
-        layer.add_mask(L.MaskBackground.White if grooves else L.MaskBackground.Black)
+        """Маска по накатке: grooves — в канавках (область накатки минус карта высот), иначе — по вершинам.
+        Область — отдельной картой: маска «белое минус высота» без неё заливала весь глушитель."""
+        layer.add_mask(L.MaskBackground.Black)
         m = L.insert_fill(L.InsertPosition.inside_node(layer, L.NodeStack.Mask))
-        m.set_source(None, _bitmap(KNURL))
+        m.set_source(None, _bitmap(KNURL_AREA if grooves else KNURL))
         _uv(m)
         if grooves:
+            m = L.insert_fill(L.InsertPosition.above_node(m))
+            m.set_source(None, _bitmap(KNURL))
+            _uv(m)
             m.set_blending_mode(L.BlendingMode.Subtract)
         return m
     d = fill("17 Грязь в канавках накатки", _above(k), color=(0.03, 0.027, 0.024), rough=0.85, metal=0.0)
@@ -170,7 +185,7 @@ def suppressor(st):
     patch.set_source(None, sp_lib.rid(_gm(13), "u:procedural"))
     triplanar(patch, 1.4)
     patch.set_blending_mode(L.BlendingMode.Multiply)
-    sp_lib.lop(u, 0.5)
+    sp_lib.lop(u, 0.3)
     only_meshes(u, ["Suppressor_knurl__sp"])
     w = fill("19 Затёртые вершины накатки", _above(u), color=(0.2, 0.195, 0.19), rough=0.34, metal=1.0)
     knurl_mask(w, False)
@@ -196,7 +211,7 @@ def bare_steel(st):
     return n
 
 
-def polymer(st, base=(0.032, 0.032, 0.034), rough=0.36, stipple=0.06, stipple_scale=50.0, pores=0.4):
+def polymer(st, base=(0.032, 0.032, 0.034), rough=0.3, stipple=0.025, stipple_scale=34.0, pores=0.4):
     """Полиамид (цевьё, магазины), образец владельца: лакированный пластик с шагренью — глянец сдержанный, бугорки
     шагрени ловят блики; в порах шагрени пыль (обратная той же маске), на выступах и кромках затёрто до блеска,
     местами матовее; редкие царапины, грязь и пыль в углах, отпечатки (на глянце — мутные)."""
@@ -208,18 +223,24 @@ def polymer(st, base=(0.032, 0.032, 0.034), rough=0.36, stipple=0.06, stipple_sc
     s_.set_opacity(stipple, sp_lib.CH.Height)
     s_.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.SpecularRoughness)
     s_.set_opacity(0.25, sp_lib.CH.SpecularRoughness)
-    pr = fill("03 Пыль в порах шагрени", _above(s_), color=(0.13, 0.125, 0.12), rough=0.85)
+    gl = fill("02б Блеск бугорков", _above(s_), rough=max(0.12, rough - 0.14))
+    gl.add_mask(L.MaskBackground.Black)
+    gm_ = L.insert_fill(L.InsertPosition.inside_node(gl, L.NodeStack.Mask))
+    gm_.set_source(None, sp_lib.rid(spots, "u:procedural"))
+    triplanar(gm_, stipple_scale)
+    sp_lib.lop(gl, 0.7)
+    pr = fill("03 Пыль в порах шагрени", _above(gl), color=(0.13, 0.125, 0.12), rough=0.85)
     pr.add_mask(L.MaskBackground.White)
     m = L.insert_fill(L.InsertPosition.inside_node(pr, L.NodeStack.Mask))
     m.set_source(None, sp_lib.rid(spots, "u:procedural"))
     triplanar(m, stipple_scale)
     m.set_blending_mode(L.BlendingMode.Subtract)
     sp_lib.lop(pr, pores)
-    n = _proc_layer("04 Матовее пятнами", _above(pr), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, 0.5,
+    n = _proc_layer("04 Матовее пятнами", _above(pr), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, 0.3,
                     {"Balance": 0.55, "Contrast": 0.3}, rough=rough + 0.2)
     n = _proc_layer("05 Затёрто до блеска", _above(n), "grunge_wipe_directional_heavy/grunge_wipe_directional_heavy", 1.8,
                     0.3, rough=max(0.12, rough - 0.14))
-    n = _proc_layer("06 Царапины", _above(n), _gm(12), 2.5, 0.35, {"invert": 1, "balance": 0.42, "contrast": 0.55},
+    n = _proc_layer("06 Царапины", _above(n), _gm(12), 2.5, 0.35, {"invert": 1, "balance": 0.74, "contrast": 0.55},
                     color=(0.1, 0.1, 0.105), rough=rough + 0.1)
     n = _edge("07 Затёртые кромки", _above(n), (0.07, 0.07, 0.075), max(0.12, rough - 0.16), 0.3, contrast=0.8, metal=0.0)
     n = _dirt(_above(n), color=(0.03, 0.027, 0.024), level=0.38, opacity=0.85, name="08 Грязь в углах")
@@ -231,8 +252,8 @@ def polymer(st, base=(0.032, 0.032, 0.034), rough=0.36, stipple=0.06, stipple_sc
 
 def anodized(st):
     """Муфта: чёрное анодирование со сдержанным глянцем поверх алюминия, вытертое на кромках и пятнами (coated)."""
-    return coated(st, ((0.07, 0.07, 0.075), 0.36, 0.6), ((0.55, 0.55, 0.57), 0.38, 1.0), wear=0.26, patches=0.2,
-                  thin=0.18, scratches=0.15)
+    return coated(st, ((0.07, 0.07, 0.075), 0.3, 0.6), ((0.55, 0.55, 0.57), 0.5, 1.0), wear=0.06, patch_bal=0.9,
+                  thin=0.3, scratches=0.15)
 
 
 def rubber(st):
@@ -293,7 +314,7 @@ def wood(st):
     top = L.InsertPosition.from_textureset_stack(st)
     n = _uv_bitmap_fill("01 Фанера", top, color=WOOD_BASE, rough=0.32, metal=0.0)
     h = _uv_bitmap_fill("02 Рельеф волокна", _above(n), height=WOOD_HEIGHT, rough=WOOD_HEIGHT)
-    h.set_opacity(0.11, sp_lib.CH.Height)
+    h.set_opacity(0.02, sp_lib.CH.Height)
     h.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.SpecularRoughness)
     h.set_opacity(0.3, sp_lib.CH.SpecularRoughness)
     pores = fill("03 Грязь в порах волокна", _above(h), color=(0.16, 0.11, 0.07), rough=0.7)
@@ -320,7 +341,7 @@ def wood(st):
                     "grunge_fingerprints_smeared_wide/grunge_fingerprints_smeared_wide", 1.6, 0.35,
                     color=(0.78, 0.66, 0.5), rough=0.6)
     n.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.BaseColor)
-    n = _proc_layer("10 Царапины лака", _above(n), _gm(12), 2.5, 0.4, {"invert": 1, "balance": 0.34, "contrast": 0.55},
+    n = _proc_layer("10 Царапины лака", _above(n), _gm(12), 2.5, 0.4, {"invert": 1, "balance": 0.74, "contrast": 0.55},
                     color=(0.86, 0.76, 0.6), rough=0.6)
     n.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.BaseColor)
     n = _dirt(_above(n), color=(0.14, 0.08, 0.045), rough=0.8, level=0.35, opacity=0.6, name="11 Грязь в углах")
@@ -328,3 +349,48 @@ def wood(st):
                     {"Balance": 0.45, "Contrast": 0.35}, color=(0.7, 0.58, 0.46), rough=0.36)
     n.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
     return n
+
+
+MARKS_DIR = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_marks"     # contact_marks.py: следы рук и жизни по местам
+MARK_BASE_ROUGH = {"receiver": 0.22, "steel_parts": 0.22, "suppressor": 0.28, "sleeve": 0.3, "handguard": 0.36,
+                   "magazine": 0.5, "wood": 0.32, "bare_steel": 0.34, "rubber": 0.86}
+
+
+def _mark_layer(name, pos, path, opacity, **ch):
+    lay = fill(name, pos, **ch)
+    lay.add_mask(L.MaskBackground.Black)
+    m = L.insert_fill(L.InsertPosition.inside_node(lay, L.NodeStack.Mask))
+    m.set_source(None, _bitmap(path))
+    _uv(m)
+    sp_lib.lop(lay, opacity)
+    return lay
+
+
+def contact_marks(st, set_name):
+    """Следы по местам поверх стека набора (маски владельца, запечённые contact_marks.py): протирки — полосы блеска,
+    копоть — матовая чёрная, масло — тёмное и глянцевое, ладони и пальцы — жир: на глянце мутные пятна, на матовом —
+    блестящие."""
+    import os
+
+    def path(kind):
+        return f"{MARKS_DIR}/{set_name}_{kind}.png"
+    r = MARK_BASE_ROUGH.get(set_name, 0.3)
+    greasy = r + 0.18 if r < 0.4 else r - 0.16
+    pos = _above(L.get_root_layer_nodes(st)[0])
+    if os.path.exists(path("wipe")):
+        n = _mark_layer("М1 Протирки", pos, path("wipe"), 0.5, rough=max(0.1, r - 0.1))
+        pos = _above(n)
+    if os.path.exists(path("soot")):
+        n = _mark_layer("М2 Копоть", pos, path("soot"), 0.85, color=(0.03, 0.028, 0.026), rough=0.8, metal=0.0)
+        pos = _above(n)
+    if os.path.exists(path("oil")):
+        n = _mark_layer("М3 Масло", pos, path("oil"), 0.85, color=(0.5, 0.46, 0.4), rough=0.12)
+        n.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
+        pos = _above(n)
+    if os.path.exists(path("palms")):
+        n = _mark_layer("М4 Ладони", pos, path("palms"), 0.55, color=(0.82, 0.8, 0.78), rough=greasy)
+        n.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
+        pos = _above(n)
+    if os.path.exists(path("prints")):
+        n = _mark_layer("М5 Отпечатки пальцев", pos, path("prints"), 0.75, color=(0.78, 0.76, 0.74), rough=greasy)
+        n.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)

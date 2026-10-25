@@ -25,6 +25,8 @@ VIEWS = {
     "slope_top": ((250, -120, 95), (300, 0, 28), 45),
     "stock_rear": ((40, -150, 40), (90, 0, -30), 45),
     "comb_top": ((180, -90, 130), (230, 0, 0), 45),
+    "screw": ((300, -75, -20), (300, -18, -36), 60),
+    "cover_hdri": ((330, -230, 140), (390, 0, 20), 40),
 }
 
 
@@ -40,6 +42,19 @@ def main():
             k, v = kv.split("=")
             ctrl[k] = float(v)
         ctrl.update_tag()
+    if os.environ.get("LOOK_HDRI"):
+        # осмотр при свете окружения (как во вьюпорте владельца): панорама вместо студии, свет студии выключен
+        wd = bpy.data.worlds.new("LookHDRI"); sc.world = wd; wd.use_nodes = True
+        nt = wd.node_tree; nt.nodes.clear()
+        env = nt.nodes.new("ShaderNodeTexEnvironment")
+        env.image = bpy.data.images.load(os.environ["LOOK_HDRI"], check_existing=True)
+        bg = nt.nodes.new("ShaderNodeBackground"); bg.inputs["Strength"].default_value = 1.0
+        o = nt.nodes.new("ShaderNodeOutputWorld")
+        nt.links.new(env.outputs[0], bg.inputs[0]); nt.links.new(bg.outputs[0], o.inputs[0])
+        for ob in bpy.data.objects:
+            if ob.type == "LIGHT":
+                ob.hide_render = True
+        sc.view_settings.exposure = 0.0
     sc.cycles.samples = spp
     sc.cycles.denoising_use_gpu = False      # видеопамять может держать Substance Painter
     sc.render.resolution_x = w; sc.render.resolution_y = int(w * 0.5625)

@@ -31,6 +31,7 @@ for name in only:
     st = sp_lib.stack_by_name(name)
     sp_lib.clear(st)
     BUILD[name](st)
+    sp_stacks.contact_marks(st, name)
     print(name, [n.get_name() for n in L.get_root_layer_nodes(st)])
 sp_lib.P.save_as(OUT + "/parts.spp")
 for name in only:
