@@ -18,6 +18,9 @@ extends Marker3D
 @export_range(4.0, 60.0, 0.5) var radius: float = 14.0
 ## Свой размер группы [от, до]; (0, 0) — по Balance.AI_POPULATION.post_group.
 @export var group_size: Vector2i = Vector2i.ZERO
+## Кто держит пост: тип из Balance.AI_ARCHETYPES для всей группы (кордон ЧВК — «pmc»); пусто — мародёры,
+## ведущий и состав случайные, как у всех постов.
+@export var arch: String = ""
 
 
 func _ready() -> void:

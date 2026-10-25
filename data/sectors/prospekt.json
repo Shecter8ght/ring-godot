@@ -1,0 +1,79 @@
+{
+ "id": "prospekt",
+ "name": "Проспект",
+ "_comment": "Рейдовая карта «Проспект» (docs/design/prospekt_map.md): геометрия — серый блокаут scenes/levels/prospekt_study.tscn (tools/build_prospekt.py) внутри scenes/levels/prospekt.tscn (tools/build_prospekt_raid.py); заходы, выходы, посты, патрули, гнёзда и подход — узлы сцены уровня. Свет свой (AGENTS.md п. 10). Навигация — кэш data/navigation/prospekt (tools/bake_prospekt_nav.tscn после правки блокаута).",
+ "layout": "cartesian_scene",
+ "greybox": true,
+ "bounds": [
+  -250.0,
+  -150.0,
+  200.0,
+  318.0
+ ],
+ "boundary": [
+  [
+   -218.0,
+   -124.0
+  ],
+  [
+   160.0,
+   -124.0
+  ],
+  [
+   160.0,
+   290.0
+  ],
+  [
+   -152.0,
+   290.0
+  ],
+  [
+   -152.0,
+   112.0
+  ],
+  [
+   -218.0,
+   112.0
+  ]
+ ],
+ "units": "metres",
+ "north": "-Z",
+ "spawn": [
+  -125.0,
+  0.08,
+  -104.0
+ ],
+ "camera_yaw": 0,
+ "nav_cache": "res://data/navigation/prospekt",
+ "light": {
+  "ambient_k": 1.25,
+  "sun_k": 0.9,
+  "ambient_k_night": 1.6,
+  "ambient_k_day_rain": 1.8,
+  "ambient_k_dusk_rain": 1.8,
+  "ambient_k_night_rain": 3.2,
+  "ambient_k_day_overcast": 1.6,
+  "ambient_k_dusk_overcast": 1.6,
+  "ambient_k_night_overcast": 2.6
+ },
+ "events": {
+  "off": [
+   "power"
+  ],
+  "at": {
+   "drop": [
+    -14.0,
+    0.1,
+    100.0
+   ],
+   "pmc": [
+    -60.0,
+    0.1,
+    205.0
+   ]
+  },
+  "drop_text": "Вертолёт над сквером — что-то сбросили",
+  "pmc_text": "У вокзала заглушили мотор. Хлопнули двери."
+ },
+ "rooms": []
+}

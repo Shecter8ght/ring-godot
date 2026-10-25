@@ -1,0 +1,36 @@
+{
+	"files": {
+		"res://data/blockouts/prospekt.json": "6f5af945d657b0c52c0fee5cecbc4b1476ab20faf73937d0ed722b8baeb7bbab",
+		"res://data/sectors/prospekt.json": "e31dced53260885b2fc6639d5a52ea38f491e7e9ba3f89499f92e15af5bd423c",
+		"res://scenes/levels/prospekt.tscn": "1b6ca61b3e4eef4c2f557bb43d891ceeae6246fedd79ca615976458d300f6da8",
+		"res://scenes/levels/prospekt_study.tscn": "9c1d5ac9ff86bc24a2fb5bd06e4b191f338dd164d9cec76180747e5cdd163cbf",
+		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
+		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
+		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",
+		"res://scenes/world/urban_road.tscn": "111466f763d0dcbe5c96b9a2df37493b286cee5325cfcfd8f601752d4fd87563",
+		"res://src/blockout/flat_section.gd": "f8c52ebeed5e3b1e82053962d645cb013b43d35ad40896cb2f79f979be09d2b4",
+		"res://src/blockout/mall_filler.gd": "468554949708b80b53543e94be4ac9edfa8925bf059f02ebc708173750e95395",
+		"res://src/blockout/mall_landscape.gd": "a88a7438c463c44589438ea76d3eef2c7158cec913d3134e03406ea4a9c480d4",
+		"res://src/blockout/prospekt_landscape.gd": "ca1c2e127ffb4e7cda8b86e038755028791244bf9819ad7e200ed46ce4fdc01b",
+		"res://src/blockout/study_building.gd": "e96ac0821820ee59db18c6e75303097a845a0b8dfb0bed7e1c97239940bca270",
+		"res://src/blockout/study_geometry.gd": "0acb957b7400b483708f5de0d280fe44de7673c589259447668d4a547bafbc1d",
+		"res://src/world/blockout_building.gd": "7ad9d854dc416f779d7ca25fa8e1f23d151b24a5b1be65b87a12b6289dd43892",
+		"res://src/world/blockout_mesh.gd": "a7e5dfcc5fb8ce1c27c229ab5629e3525495a10c88e73d554fa7a3ae0124bc40",
+		"res://src/world/blockout_opening.gd": "063660bf3bf804e031428db167352fee000c98f2795b32136787ab6395cd27f9",
+		"res://src/world/urban_navigation.gd": "56e84afcd0b53cec5ce96bc50b2e597c3367d4a27b3886580abcf2f8973380e2",
+		"res://src/world/urban_props.gd": "8893c14356c82bcb31fb6b0cfb81777266c3cb794442a57cf32022345c1e2adf",
+		"res://src/world/urban_road.gd": "38cde9cfa97e3ff7c9d10ca910abd1b2ad60ccaee9a76fa54e218caf20b63918"
+	},
+	"settings": {
+		"nav_agent_height": 1.8,
+		"nav_border": 2.0,
+		"nav_cell": 0.5,
+		"nav_climb": 0.4,
+		"nav_detail_error": 2.0,
+		"nav_height": 0.25,
+		"nav_merge_scale": 0.125,
+		"nav_radius": 0.5,
+		"nav_slope": 40.0,
+		"nav_tile": 250.0
+	}
+}

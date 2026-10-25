@@ -85,13 +85,15 @@ func _setup_host() -> void:
 		alarms.append([_room_center(r), _room_half(r)])
 	var sched: Array = []
 	var power := String(RaidConditions.current.power)
-	if power == "on" and _rng.randf() < float(ev.outage_chance):
+	if _off("power"):
+		pass
+	elif power == "on" and _rng.randf() < float(ev.outage_chance):
 		sched.append(["outage", _rng.randf_range(float(ev.outage_at[0]), float(ev.outage_at[1]))])
 	elif power == "on" and _rng.randf() < float(ev.generator_chance):
 		sched.append(["generator", _rng.randf_range(float(ev.generator_at[0]), float(ev.generator_at[1]))])
-	if _rng.randf() < float(ev.drop_chance):
+	if _rng.randf() < float(ev.drop_chance) and not _off("drop"):
 		sched.append(["drop", _rng.randf_range(float(ev.drop_at[0]), float(ev.drop_at[1]))])
-	if _rng.randf() < float(ev.pmc_chance):
+	if _rng.randf() < float(ev.pmc_chance) and not _off("pmc"):
 		sched.append(["pmc", _rng.randf_range(float(ev.pmc_at[0]), float(ev.pmc_at[1]))])
 	if Net.is_networked():
 		await get_tree().create_timer(2.0).timeout
@@ -258,7 +260,7 @@ func generator() -> MallGenerator:
 		_generator.name = "Generator"
 		_generator.where = "у технического комплекса"
 		level.add_child(_generator)
-		_generator.global_position = tech.global_position if tech else SectorBuilder.polar(-10.0, 170.0)
+		_generator.global_position = tech.global_position if tech else _place("generator", SectorBuilder.polar(-10.0, 170.0))
 	return _generator
 
 
@@ -274,9 +276,9 @@ func generator_fixed() -> void:
 # ---------------------------------------------------------------- сброс припасов
 
 func _supply_drop() -> void:
-	_drop_pos = SectorBuilder.polar(-90.0, 10.0)
+	_drop_pos = _place("drop", SectorBuilder.polar(-90.0, 10.0))
 	Audio.play("heli", _drop_pos + Vector3(0, 40, 0))
-	_notify("Вертолёт над атриумом — что-то сбросили")
+	_notify(String(_events_def().get("drop_text", "Вертолёт над атриумом — что-то сбросили")))
 	# красный дым у груза
 	var smoke := _smoke(Color(0.8, 0.15, 0.1, 0.5))
 	level.add_child(smoke)
@@ -305,10 +307,10 @@ func _pmc_arrive() -> void:
 	if _pmc_spawned:
 		return
 	_pmc_spawned = true
-	var at := SectorBuilder.polar(-169.0, 160.0)
+	var at := _place("pmc", SectorBuilder.polar(-169.0, 160.0))
 	Audio.play("engine", at, 4.0)
 	Audio.play("truck_doors", at)
-	_notify("На парковке заглушили мотор. Хлопнули двери.")
+	_notify(String(_events_def().get("pmc_text", "На парковке заглушили мотор. Хлопнули двери.")))
 	if _is_host() and level.has_method("spawn_squad"):
 		# сколько их — под число игроков (Balance.AI_POPULATION.pmc)
 		var n := AIPopulation.pmc_size()
@@ -402,6 +404,24 @@ func on_local_extracted(me: Player) -> void:
 
 
 # ---------------------------------------------------------------- помощники
+
+## События карты (данные сектора "events"): "off" — каких на этой карте нет, "at" — где они случаются
+## ([x, y, z]); без данных — места кольца ТЦ, как раньше.
+func _events_def() -> Dictionary:
+	var def: Variant = level.get("_sector_def") if level else null
+	return (def as Dictionary).get("events", {}) as Dictionary if def is Dictionary else {}
+
+
+func _off(kind: String) -> bool:
+	return (_events_def().get("off", []) as Array).has(kind)
+
+
+func _place(kind: String, fallback: Vector3) -> Vector3:
+	var at: Variant = (_events_def().get("at", {}) as Dictionary).get(kind)
+	if at is Array and (at as Array).size() == 3:
+		return Vector3(float(at[0]), float(at[1]), float(at[2]))
+	return fallback
+
 
 func _room_center(r: Dictionary) -> Vector3:
 	if r.has("rect"):

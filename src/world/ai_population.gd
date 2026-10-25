@@ -178,7 +178,10 @@ func _spawn_posts(want: int) -> int:
 			size = Vector2i(int(c.post_group[0]), int(c.post_group[1]))
 		var at := _ground(p.global_position)
 		var points := _post_points(p)
-		var squad := _spawn_group(at, _rng.randi_range(size.x, size.y), {"home": at, "home_r": p.radius})
+		var opts := {"home": at, "home_r": p.radius}
+		if p.arch != "":
+			opts["arch"] = p.arch
+		var squad := _spawn_group(at, _rng.randi_range(size.x, size.y), opts)
 		for m in squad.members:
 			m.home_points = points
 		count += squad.members.size()
@@ -353,7 +356,9 @@ func _spawn_group(at: Vector3, n: int, opts: Dictionary) -> Squad:
 			var a := _rng.randf() * TAU
 			p = NavigationServer3D.map_get_closest_point(map, at + Vector3(cos(a), 0.0, sin(a)) * (1.2 + k))
 		var arch := lead
-		while k > 0 and (arch == lead and _rng.randf() < 0.4 or bool(Balance.AI_ARCHETYPES[arch].holds)):
+		if opts.has("arch"):
+			arch = String(opts.arch)                            # пост одного типа (кордон ЧВК)
+		while not opts.has("arch") and k > 0 and (arch == lead and _rng.randf() < 0.4 or bool(Balance.AI_ARCHETYPES[arch].holds)):
 			arch = Marauder.pick_archetype(_rng)
 		var m: Marauder = level.call("spawn_marauder", p, arch, opts) as Marauder
 		if m:

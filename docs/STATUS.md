@@ -8507,3 +8507,15 @@ aliases` (прежние `vest_light` и т. п. перенацелены); со
   Выдача: `E:/Models Blender/WEAPONS/ВСС Винторез — полный комплект/01_ВСС-М_v8/ВСС-М_v8_Painter_коробка_студия.blend`.
 - Дальше: остальные детали в Painter (затворная группа, органы управления, цевьё, глушитель с муфтой, приклад,
   магазины, прицелы), затем сцена на столе.
+
+### 2026-10-25 — «Проспект»: рейдовая карта
+
+- `scenes/levels/prospekt.tscn` + `data/sectors/prospekt.json` (генератор `tools/build_prospekt_raid.py`): 5 заходов,
+  4 выхода, население слоями (16 постов, кордон — ЧВК всегда, 5 патрулей, 4 гнезда, 5 точек подхода), 289 мест лута
+  контейнерами, своё освещение, маршрут «Проспект» в `data/floors.json`. Подробно — `docs/design/prospekt_map.md` § 15.
+- Общий код: `AIPost.arch` — пост одного типа бойцов (`src/ai/ai_post.gd`, `src/world/ai_population.gd`); места и тексты
+  событий рейда из данных сектора `events` (`src/world/raid_events.gd`; у ТЦ без изменений); навигация «Проспекта» в
+  `UrbanNavigation.SOURCES`. Откос насыпи — сплошной клин (`prospekt_landscape.gd`, `fill`).
+- Навигация: `tools/bake_prospekt_nav.tscn` → `data/navigation/prospekt`. Проверка `tools/prospekt_raid_check.tscn` —
+  6 из 6; блокаут `-- verify` — 39 из 39; `compile_check` — 0 ошибок.
+- Дальше: модели вместо серых форм (Urban 95 после ретопологии, недостающее — своё в Blender).

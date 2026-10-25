@@ -154,6 +154,21 @@ func _ramps(g: RefCounted) -> void:
 		var cs: CollisionShape3D = CollisionShape3D.new()
 		cs.shape = shape
 		(g.body as StaticBody3D).add_child(cs)
+		# откос насыпи — сплошной клин, а не плита над пустотой: под ним не ходят ни люди, ни навигация
+		if bool(r.get("fill", false)):
+			var low: float = minf(y0, y1)
+			var wedge: ConvexPolygonShape3D = ConvexPolygonShape3D.new()
+			wedge.points = PackedVector3Array([
+				Vector3(x0, low, z0), Vector3(x1, low, z0), Vector3(x0, low, z1), Vector3(x1, low, z1),
+				Vector3(x0, y0, z0), Vector3(x1, y0, z0), Vector3(x0, y1, z1), Vector3(x1, y1, z1)])
+			var ws: CollisionShape3D = CollisionShape3D.new()
+			ws.shape = wedge
+			(g.body as StaticBody3D).add_child(ws)
+			for x: float in [x0, x1]:
+				g.tri(Vector3(x, low, z0), Vector3(x, y0, z0), Vector3(x, y1, z1), key)
+				g.tri(Vector3(x, low, z0), Vector3(x, y1, z1), Vector3(x, low, z1), key)
+				g.tri(Vector3(x, low, z0), Vector3(x, y1, z1), Vector3(x, y0, z0), key)
+				g.tri(Vector3(x, low, z0), Vector3(x, low, z1), Vector3(x, y1, z1), key)
 
 
 ## Граница карты (владелец 2026-10-25: «по периметру — логичные преграды, а не невидимая стена»): видимое — забор

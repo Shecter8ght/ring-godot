@@ -1,0 +1,47 @@
+[gd_resource type="Environment" load_steps=3 format=3]
+
+[sub_resource type="PhysicalSkyMaterial" id="SkyMat"]
+rayleigh_coefficient = 2.2
+rayleigh_color = Color(0.26, 0.41, 0.58, 1)
+mie_coefficient = 0.006
+mie_eccentricity = 0.82
+mie_color = Color(0.69, 0.68, 0.62, 1)
+turbidity = 8.0
+sun_disk_scale = 2.0
+ground_color = Color(0.3, 0.28, 0.25, 1)
+energy_multiplier = 1.6
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMat")
+
+[resource]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.62, 0.66, 0.74, 1)
+ambient_light_sky_contribution = 0.5
+ambient_light_energy = 0.9
+reflected_light_source = 2
+tonemap_mode = 3
+tonemap_exposure = 1.05
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_intensity = 1.6
+ssil_enabled = true
+ssil_radius = 4.0
+ssil_intensity = 1.0
+glow_enabled = true
+glow_intensity = 0.25
+glow_bloom = 0.04
+glow_hdr_threshold = 1.4
+fog_enabled = true
+fog_light_color = Color(0.74, 0.72, 0.7, 1)
+fog_light_energy = 0.7
+fog_density = 0.00028
+fog_sky_affect = 0.1
+fog_height = -2.0
+fog_height_density = 0.0
+adjustment_enabled = true
+adjustment_contrast = 1.04
+adjustment_saturation = 0.96

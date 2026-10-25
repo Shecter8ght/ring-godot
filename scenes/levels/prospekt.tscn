@@ -1,0 +1,2415 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/world/sector_level.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/levels/prospekt_study.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="5"]
+[ext_resource type="Environment" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_post.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_route.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_nest.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://scenes/world/ai_arrival.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="12"]
+
+[node name="Prospekt" type="Node3D"]
+script = ExtResource("1")
+sector_path = "res://data/sectors/prospekt.json"
+metadata/purpose = "Рейдовая карта «Проспект»: серый блокаут, заходы, выходы, население — tools/build_prospekt_raid.py"
+
+[node name="World" parent="." groups=["nav_source"] instance=ExtResource("2")]
+
+[node name="WorldEnvironment" parent="World" index="0"]
+environment = ExtResource("6")
+
+[node name="EveningSun" parent="World" index="1"]
+visible = false
+
+[node name="Gameplay" type="Node3D" parent="."]
+
+[node name="Entry_0" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(-125, 0.08, -104)
+display_name = "Дворы ЖК"
+entry = true
+
+[node name="Entry_1" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(150, 0.08, -104)
+display_name = "За «Вершиной»"
+entry = true
+
+[node name="Entry_2" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(150, 0.08, 236)
+display_name = "Юг, у насыпи"
+entry = true
+
+[node name="Entry_3" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(-140, 0.08, 192)
+display_name = "Стройка за «Ярусом»"
+entry = true
+
+[node name="Entry_4" parent="Gameplay" instance=ExtResource("4")]
+position = Vector3(-100, 0.12, 205)
+display_name = "Вокзал"
+entry = true
+
+[node name="Extraction_0" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(58, 0.08, 270)
+display_name = "Тоннель на юг — в следующий район"
+radius = 6
+
+[node name="Extraction_1" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-145, 0.08, -122.5)
+display_name = "Дворами к насыпи"
+radius = 4.5
+
+[node name="Extraction_2" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-148.5, 0.08, 186)
+display_name = "Пролом в заборе стройки"
+radius = 4.5
+
+[node name="Extraction_3" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-147, 6.3, 268.7)
+display_name = "По путям на запад"
+radius = 4.5
+
+[node name="Population" type="Node3D" parent="Gameplay"]
+
+[node name="Posts" type="Node3D" parent="Gameplay/Population"]
+
+[node name="Cordon_PMC" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-203, 0.08, 0)
+radius = 10
+group_size = Vector2i(3, 4)
+weight = 1
+arch = "pmc"
+always_from = 1
+
+[node name="Camp_PMC" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(128, 0.06, 26)
+radius = 16
+group_size = Vector2i(3, 4)
+weight = 3
+arch = "pmc"
+
+[node name="Bank_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-21, 0.12, -44)
+radius = 12
+group_size = Vector2i(2, 3)
+weight = 3
+exclusive = "bank"
+
+[node name="Bank_Vault" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-30, -3.2, -46)
+radius = 8
+group_size = Vector2i(1, 2)
+weight = 2
+exclusive = "bank"
+
+[node name="Yarus_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-102, 0.05, 66)
+radius = 18
+group_size = Vector2i(2, 4)
+weight = 3
+
+[node name="Yarus_Dock" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-100, 0.02, 96)
+radius = 12
+group_size = Vector2i(2, 3)
+weight = 1.5
+
+[node name="Station_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-116, 0.12, 226)
+radius = 14
+group_size = Vector2i(2, 3)
+weight = 2
+
+[node name="Tower_Court" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-14, 0.1, 45)
+radius = 14
+group_size = Vector2i(2, 3)
+weight = 1.5
+
+[node name="Square" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-14, 0.1, 82)
+radius = 16
+group_size = Vector2i(2, 3)
+weight = 1.5
+
+[node name="Train_Wreck" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-6, 0.12, 222)
+radius = 14
+group_size = Vector2i(2, 3)
+weight = 2
+
+[node name="Parking" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-128, -3.2, -60)
+radius = 20
+group_size = Vector2i(2, 3)
+weight = 2
+
+[node name="Site" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-108, 0.05, 132)
+radius = 16
+group_size = Vector2i(2, 3)
+weight = 1.5
+
+[node name="Corpus3_Lot" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(86, 0.05, 150)
+radius = 16
+group_size = Vector2i(2, 3)
+weight = 1
+
+[node name="Vershina_Plaza" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(50, 0.1, -12)
+radius = 16
+group_size = Vector2i(2, 3)
+weight = 1.5
+
+[node name="Yard_ZhK" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-150, 0.05, -100)
+radius = 16
+group_size = Vector2i(2, 3)
+weight = 1
+
+[node name="House7_Yard" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-190, 0.05, 85)
+radius = 14
+group_size = Vector2i(2, 3)
+weight = 1
+
+[node name="Routes" type="Node3D" parent="Gameplay/Population"]
+
+[node name="Route_Avenue" parent="Gameplay/Population/Routes" instance=ExtResource("9")]
+title = "Проспект: тротуары от перехода до поворота"
+
+[node name="P01" type="Marker3D" parent="Gameplay/Population/Routes/Route_Avenue"]
+position = Vector3(-140, 0.15, 13)
+
+[node name="P02" type="Marker3D" parent="Gameplay/Population/Routes/Route_Avenue"]
+position = Vector3(-100, 0.15, 13)
+
+[node name="P03" type="Marker3D" parent="Gameplay/Population/Routes/Route_Avenue"]
+position = Vector3(-60, 0.15, 13.5)
+
+[node name="P04" type="Marker3D" parent="Gameplay/Population/Routes/Route_Avenue"]
+position = Vector3(-30, 0.15, -13)
+
+[node name="P05" type="Marker3D" parent="Gameplay/Population/Routes/Route_Avenue"]
+position = Vector3(10, 0.15, -14)
+
+[node name="Route_South" parent="Gameplay/Population/Routes" instance=ExtResource("9")]
+title = "Южное плечо: вдоль парковки корпуса 3 к тоннелю"
+
+[node name="P01" type="Marker3D" parent="Gameplay/Population/Routes/Route_South"]
+position = Vector3(66, 0.15, 80)
+
+[node name="P02" type="Marker3D" parent="Gameplay/Population/Routes/Route_South"]
+position = Vector3(66, 0.15, 140)
+
+[node name="P03" type="Marker3D" parent="Gameplay/Population/Routes/Route_South"]
+position = Vector3(66, 0.15, 200)
+
+[node name="P04" type="Marker3D" parent="Gameplay/Population/Routes/Route_South"]
+position = Vector3(44, 0.15, 230)
+
+[node name="P05" type="Marker3D" parent="Gameplay/Population/Routes/Route_South"]
+position = Vector3(44, 0.15, 160)
+
+[node name="P06" type="Marker3D" parent="Gameplay/Population/Routes/Route_South"]
+position = Vector3(44, 0.15, 100)
+
+[node name="Route_Yard" parent="Gameplay/Population/Routes" instance=ExtResource("9")]
+title = "Хозяйственный проезд двора вдоль забора"
+
+[node name="P01" type="Marker3D" parent="Gameplay/Population/Routes/Route_Yard"]
+position = Vector3(-200, 0.08, -117)
+
+[node name="P02" type="Marker3D" parent="Gameplay/Population/Routes/Route_Yard"]
+position = Vector3(-150, 0.08, -117)
+
+[node name="P03" type="Marker3D" parent="Gameplay/Population/Routes/Route_Yard"]
+position = Vector3(-110, 0.08, -117)
+
+[node name="P04" type="Marker3D" parent="Gameplay/Population/Routes/Route_Yard"]
+position = Vector3(-55, 0.08, -117)
+
+[node name="Route_Square" parent="Gameplay/Population/Routes" instance=ExtResource("9")]
+title = "Сквер: от дома на повороте к вагонам"
+
+[node name="P01" type="Marker3D" parent="Gameplay/Population/Routes/Route_Square"]
+position = Vector3(-40, 0.1, 60)
+
+[node name="P02" type="Marker3D" parent="Gameplay/Population/Routes/Route_Square"]
+position = Vector3(10, 0.1, 62)
+
+[node name="P03" type="Marker3D" parent="Gameplay/Population/Routes/Route_Square"]
+position = Vector3(12, 0.1, 140)
+
+[node name="P04" type="Marker3D" parent="Gameplay/Population/Routes/Route_Square"]
+position = Vector3(-40, 0.1, 146)
+
+[node name="P05" type="Marker3D" parent="Gameplay/Population/Routes/Route_Square"]
+position = Vector3(-30, 0.1, 186)
+
+[node name="P06" type="Marker3D" parent="Gameplay/Population/Routes/Route_Square"]
+position = Vector3(10, 0.1, 206)
+
+[node name="Route_Station" parent="Gameplay/Population/Routes" instance=ExtResource("9")]
+title = "Привокзальная площадь"
+
+[node name="P01" type="Marker3D" parent="Gameplay/Population/Routes/Route_Station"]
+position = Vector3(-60, 0.12, 206)
+
+[node name="P02" type="Marker3D" parent="Gameplay/Population/Routes/Route_Station"]
+position = Vector3(-100, 0.12, 207)
+
+[node name="P03" type="Marker3D" parent="Gameplay/Population/Routes/Route_Station"]
+position = Vector3(-140, 0.12, 206)
+
+[node name="Nests" type="Node3D" parent="Gameplay/Population"]
+
+[node name="Nest_BankRoof" parent="Gameplay/Population/Nests" instance=ExtResource("10")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, -0, 0, -1, -20, 12.3, -32.5)
+sector_deg = 90
+
+[node name="Nest_SiteTop" parent="Gameplay/Population/Nests" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, -130, 25, 146)
+sector_deg = 80
+
+[node name="Nest_StationRoof" parent="Gameplay/Population/Nests" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, -120, 13, 232)
+sector_deg = 80
+
+[node name="Nest_PodiumRoof" parent="Gameplay/Population/Nests" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, -30, 4.65, 22.5)
+sector_deg = 90
+
+[node name="Arrivals" type="Node3D" parent="Gameplay/Population"]
+
+[node name="Arrive_YardGap" parent="Gameplay/Population/Arrivals" instance=ExtResource("11")]
+position = Vector3(-145, 0.08, -119)
+
+[node name="Arrive_StationWest" parent="Gameplay/Population/Arrivals" instance=ExtResource("11")]
+position = Vector3(-146, 0.12, 205)
+
+[node name="Arrive_East" parent="Gameplay/Population/Arrivals" instance=ExtResource("11")]
+position = Vector3(154, 0.08, 100)
+
+[node name="Arrive_NorthEast" parent="Gameplay/Population/Arrivals" instance=ExtResource("11")]
+position = Vector3(150, 0.08, -118)
+
+[node name="Arrive_RailsWest" parent="Gameplay/Population/Arrivals" instance=ExtResource("11")]
+position = Vector3(-146, 6.3, 272.8)
+
+[node name="Loot" type="Node3D" parent="Gameplay"]
+
+[node name="Loot_0" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-190.8, 4.77, -18)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_1" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-177.5, 4.77, -26.8)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_2" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-188.5, 4.77, -22.5)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_3" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-171.8, 4.77, -18)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_4" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-164.5, 4.77, -26.8)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_5" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-169.5, 4.77, -22.5)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_6" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-158.8, 4.77, -18)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_7" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-147.5, 4.77, -26.8)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_8" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-156.5, 4.77, -22.5)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_9" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-158, 8.63, -22)
+display_name = "Тайник на крыше"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_10" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-153, 8.63, -26.8)
+display_name = "Рюкзак на крыше"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_11" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-141.8, 4.77, -18)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_12" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-124.5, 4.77, -26.8)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_13" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-139.5, 4.77, -22.5)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_14" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-141, 8.63, -22)
+display_name = "Тайник на крыше"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_15" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-133, 8.63, -26.8)
+display_name = "Рюкзак на крыше"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_16" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-106.8, 4.77, -18)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_17" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-95.5, 4.77, -26.8)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_18" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-104.5, 4.77, -22.5)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_19" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-106, 8.63, -22)
+display_name = "Тайник на крыше"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_20" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-101, 8.63, -26.8)
+display_name = "Рюкзак на крыше"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_21" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-190.2, -2.6, -82)
+display_name = "Будка охраны паркинга"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_22" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-192.47, -2.6, -82.65)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_23" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-189.99, -2.6, -82.75)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_24" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-181.74, -2.6, -82.68)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_25" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-178.58, -2.6, -82.61)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_26" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-160.38, -2.6, -82.88)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_27" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-152.36, -2.6, -82.65)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_28" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-149.61, -2.6, -82.04)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_29" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-128.54, -2.6, -82.66)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_30" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-109.59, -2.6, -82.41)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_31" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-98.62, -2.6, -82.07)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_32" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-87.88, -2.6, -82.6)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_33" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-77.41, -2.6, -82.27)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_34" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-69.37, -2.6, -82.32)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_35" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-63.89, -2.6, -82.54)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_36" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-203.02, -2.6, -75.49)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_37" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-197.98, -2.6, -74.94)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_38" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-194.75, -2.6, -75.01)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_39" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-184.24, -2.6, -75.52)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_40" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-182.02, -2.6, -75.54)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_41" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-178.63, -2.6, -75.37)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_42" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-173.47, -2.6, -74.91)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_43" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-152.21, -2.6, -75.58)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_44" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-146.86, -2.6, -75.29)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_45" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-130.36, -2.6, -74.74)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_46" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-114.66, -2.6, -74.76)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_47" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-104, -2.6, -75.37)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_48" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-85.83, -2.6, -74.76)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_49" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-82.47, -2.6, -74.98)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_50" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-58.99, -2.6, -75.46)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_51" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-197.38, -2.6, -64.08)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_52" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-187.02, -2.6, -64.44)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_53" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-157.53, -2.6, -64.07)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_54" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-154.82, -2.6, -63.81)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_55" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-152.09, -2.6, -64.03)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_56" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-130.66, -2.6, -64.42)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_57" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-120.18, -2.6, -63.73)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_58" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-72.24, -2.6, -64.07)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_59" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-69.83, -2.6, -64.25)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_60" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-61.81, -2.6, -64.36)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_61" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-53.65, -2.6, -64.4)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_62" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-202.52, -2.6, -56.72)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_63" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-181.55, -2.6, -56.7)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_64" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-170.55, -2.6, -56.31)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_65" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-144.55, -2.6, -56.71)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_66" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-130.87, -2.6, -56.61)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_67" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-128.43, -2.6, -56.86)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_68" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-118, -2.6, -56.42)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_69" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-112.22, -2.6, -57.11)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_70" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-109.52, -2.6, -56.98)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_71" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-98.38, -2.6, -56.9)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_72" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-85.45, -2.6, -56.48)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_73" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-64.18, -2.6, -56.81)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_74" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-53.76, -2.6, -56.78)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_75" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-197.95, -2.6, -45.58)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_76" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-186.87, -2.6, -45.35)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_77" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-176.18, -2.6, -45.5)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_78" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-160.43, -2.6, -45.39)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_79" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-157.78, -2.6, -45.2)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_80" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-134.01, -2.6, -45.56)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_81" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-130.94, -2.6, -45.48)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_82" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-125.52, -2.6, -45.89)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_83" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-117.65, -2.6, -45.58)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_84" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-106.94, -2.6, -45.43)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_85" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-104.37, -2.6, -45.5)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_86" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-96.38, -2.6, -45.36)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_87" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-80.37, -2.6, -45.22)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_88" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-74.71, -2.6, -45.27)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_89" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-69.67, -2.6, -45.63)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_90" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-202.46, -2.6, -38.77)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_91" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-195.03, -2.6, -38.49)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_92" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-183.87, -2.6, -38.07)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_93" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-160.4, -2.6, -38.88)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_94" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-125.42, -2.6, -38.5)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_95" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-122.7, -2.6, -38.64)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_96" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-117.81, -2.6, -38.03)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_97" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-112.38, -2.6, -38.41)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_98" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-104.31, -2.6, -38.82)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_99" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-80.3, -2.6, -38.72)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_100" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-77.83, -2.6, -38.38)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_101" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-74.67, -2.6, -38.05)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_102" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-69.78, -2.6, -38.47)
+display_name = "Открытые двери и багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_103" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-201.2, -2.6, -62.3)
+display_name = "Тело ЧВК в проезде 2"
+table = "pmc"
+search_s = 4
+look = 3
+
+[node name="Loot_104" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-150, -2.6, -75.9)
+display_name = "Ящики жильцов"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_105" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-55, -2.6, -43.9)
+display_name = "Инструмент у подкопа"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_106" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-33, 0.6, -49.4)
+display_name = "Окно операциониста"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_107" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-23, 0.6, -49.4)
+display_name = "Окно операциониста"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_108" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-18, 0.6, -49.4)
+display_name = "Окно операциониста"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_109" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-37, 0.6, -37)
+display_name = "Кассета банкомата"
+table = "bank"
+search_s = 6
+look = 1
+
+[node name="Loot_110" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-18.5, 0.6, -55.5)
+display_name = "Сейф кассы"
+table = "bank"
+search_s = 6
+look = 1
+
+[node name="Loot_111" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-25.5, 0.6, -60)
+display_name = "Оружейный шкаф охраны"
+table = "security"
+search_s = 3
+look = 2
+
+[node name="Loot_112" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-5, 0.6, -48.5)
+display_name = "Сейф управляющего"
+table = "office"
+search_s = 6
+look = 1
+
+[node name="Loot_113" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-30, 0.6, -42.5)
+display_name = "Зал ожидания"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_114" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-12, 0.6, -36)
+display_name = "Тело мародёра у входа"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_115" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-25, 5.1, -36)
+display_name = "Офис 2-го этажа"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_116" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-24, 5.1, -55)
+display_name = "Архив"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_117" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-6, 5.1, -34)
+display_name = "Сейф бухгалтерии"
+table = "office"
+search_s = 6
+look = 1
+
+[node name="Loot_118" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-4, 9, -61)
+display_name = "Сейф директора (ключ)"
+table = "office"
+search_s = 6
+look = 1
+
+[node name="Loot_119" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-26, 9, -54)
+display_name = "Жёсткие диски"
+table = "server_rack"
+search_s = 3
+look = 5
+
+[node name="Loot_120" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-34, 9, -34)
+display_name = "Зал 3-го этажа"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_121" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-22, 12.9, -33)
+display_name = "Лёжка на крыше банка"
+table = "security"
+search_s = 3
+look = 2
+
+[node name="Loot_122" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-12, 12.9, -50)
+display_name = "Тайник у кондиционеров"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_123" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-33, -2.6, -45.1)
+display_name = "Кассеты и слитки"
+table = "bank"
+search_s = 6
+look = 1
+
+[node name="Loot_124" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-28, -2.6, -49.1)
+display_name = "Кассеты и слитки"
+table = "bank"
+search_s = 6
+look = 1
+
+[node name="Loot_125" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-28, -2.6, -40.1)
+display_name = "Кассеты и слитки"
+table = "bank"
+search_s = 6
+look = 1
+
+[node name="Loot_126" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-17, -2.6, -42)
+display_name = "Депозитарные ячейки"
+table = "bank"
+search_s = 5
+look = 2
+
+[node name="Loot_127" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-8, -2.6, -44)
+display_name = "Пачки денег"
+table = "electronics"
+search_s = 1.5
+look = 0
+
+[node name="Loot_128" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-19, -2.6, -55.4)
+display_name = "Пост охраны хранилища"
+table = "security"
+search_s = 3
+look = 2
+
+[node name="Loot_129" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-30, -2.6, -61)
+display_name = "Тело копателя в коридоре"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_130" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-14, 0.6, -6.8)
+display_name = "Мешки с деньгами"
+table = "bank"
+search_s = 3.5
+look = 0
+
+[node name="Loot_131" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-12.6, 0.6, -9)
+display_name = "Тело инкассатора"
+table = "security"
+search_s = 4
+look = 3
+
+[node name="Loot_132" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-165.2, 4.77, 18)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_133" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-174.5, 4.77, 25.8)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_134" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-167.5, 4.77, 22)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_135" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-166, 8.63, 21.5)
+display_name = "Тайник на крыше"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_136" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-170, 8.63, 25.8)
+display_name = "Рюкзак на крыше"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_137" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-136.1, 0.6, 64)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_138" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-136.1, 0.6, 74)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_139" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-130.1, 0.6, 64)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_140" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-130.1, 0.6, 74)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_141" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-124.1, 0.6, 64)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_142" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-124.1, 0.6, 74)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_143" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-78.1, 0.6, 64)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_144" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-78.1, 0.6, 74)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_145" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-72.1, 0.6, 64)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_146" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-72.1, 0.6, 74)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_147" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-66.1, 0.6, 64)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_148" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-66.1, 0.6, 74)
+display_name = "Стеллаж «Яруса»"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_149" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-137.4, 0.6, 53)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_150" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-125.4, 0.6, 53)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_151" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-77.4, 0.6, 53)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_152" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-65.4, 0.6, 53)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_153" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-112, 0.6, 84)
+display_name = "Склад «Яруса»"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_154" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-92, 0.6, 84)
+display_name = "Склад «Яруса»"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_155" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-140, 0.6, 75)
+display_name = "Аптечный уголок «Яруса»"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_156" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-90, 0.6, 86)
+display_name = "Сейф"
+table = "office"
+search_s = 6
+look = 1
+
+[node name="Loot_157" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-112, 0.6, 60)
+display_name = "Тело мародёра в зале"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_158" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-146, 0.6, 117)
+display_name = "Бытовка прораба"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_159" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-146, 3.24, 127)
+display_name = "Сейф с зарплатой"
+table = "office"
+search_s = 6
+look = 1
+
+[node name="Loot_160" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-100, 0.6, 124)
+display_name = "Инструмент"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_161" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-80, 13.1, 150)
+display_name = "Лёжка на 5-м этаже каркаса"
+table = "security"
+search_s = 3
+look = 2
+
+[node name="Loot_162" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-130, 25.5, 146)
+display_name = "Тело снайпера ЧВК на 9-м этаже"
+table = "pmc"
+search_s = 4
+look = 3
+
+[node name="Loot_163" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-140, 0.6, 186.5)
+display_name = "Кабина самосвала"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_164" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-120, 0.6, 196)
+display_name = "У пролома"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_165" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-113, -3.4, 181)
+display_name = "Утонувший мародёр"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_166" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-104, -3.4, 186)
+display_name = "Ящик с инструментом"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_167" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-91, 0.72, 220)
+display_name = "Ячейки"
+table = "bank"
+search_s = 5
+look = 2
+
+[node name="Loot_168" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-91, 0.72, 226)
+display_name = "Ячейки"
+table = "bank"
+search_s = 5
+look = 2
+
+[node name="Loot_169" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-100, 0.72, 216)
+display_name = "Сейф с выручкой"
+table = "bank"
+search_s = 6
+look = 1
+
+[node name="Loot_170" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-88.5, 0.72, 240)
+display_name = "Оружейный шкаф"
+table = "security"
+search_s = 3
+look = 2
+
+[node name="Loot_171" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-102, 0.72, 237.2)
+display_name = "Стол дежурного"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_172" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-129.5, 0.72, 234)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_173" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-134, 0.72, 223)
+display_name = "Рюкзак"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_174" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-140, 0.72, 218)
+display_name = "Чемодан"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_175" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-116, 0.72, 227.6)
+display_name = "Справочная"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_176" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-92, 8.2, 221)
+display_name = "Сейф"
+table = "office"
+search_s = 6
+look = 1
+
+[node name="Loot_177" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-100, 8.2, 237)
+display_name = "Шкаф"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_178" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-120, 13.6, 230)
+display_name = "Тайник"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_179" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-125, 8.2, 260.5)
+display_name = "Тело бойца ЧВК"
+table = "pmc"
+search_s = 4
+look = 3
+
+[node name="Loot_180" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-112, 8.2, 261.6)
+display_name = "Багаж из вагона"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_181" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-93, 6.6, 263)
+display_name = "Груз из вагона"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_182" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-4.88, 0.72, 26.5)
+display_name = "Телефоны и платы"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_183" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-10.88, 0.72, 32)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_184" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-16.12, 0.72, 28)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_185" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-18.88, 0.72, 25.8)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_186" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-30.57, 0.72, 28)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_187" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-28.85, 0.72, 33.5)
+display_name = "Кеги и ящики"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_188" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-38.88, 0.72, 29)
+display_name = "Посылки"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_189" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-44.12, 0.72, 31)
+display_name = "Посылки"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_190" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(19.62, 0.72, 38.2)
+display_name = "Полки"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_191" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(15.38, 0.72, 33.25)
+display_name = "Полки"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_192" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(15.38, 0.72, 26.2)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_193" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(9.12, 0.72, 29.2)
+display_name = "Стойка консьержа"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_194" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(5.38, 0.72, 37.6)
+display_name = "Полки"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_195" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-1.38, 0.72, 33.6)
+display_name = "Полки"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_196" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-1.38, 0.72, 45.8)
+display_name = "Склад рецептурного"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_197" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(23, 0.72, 85.25)
+display_name = "Шкафчики"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_198" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(22.6, 0.72, 83.15)
+display_name = "Сейф с золотом"
+table = "jewelry_safe"
+search_s = 6
+look = 1
+
+[node name="Loot_199" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(27, 0.72, 77.62)
+display_name = "Охотничье ружьё в залоге"
+table = "security"
+search_s = 3
+look = 2
+
+[node name="Loot_200" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(31, 0.72, 74.88)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_201" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(26.8, 0.72, 65.12)
+display_name = "Касса"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_202" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(26.8, 0.72, 57.62)
+display_name = "Витрина телефонов"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_203" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(32, 0.72, 45.62)
+display_name = "Касса и инструмент"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_204" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-32, 5.25, 23)
+display_name = "Тайник у лёжки на проспект"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_205" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(32, 5.25, 62)
+display_name = "Лёжка на южное плечо"
+table = "security"
+search_s = 3
+look = 2
+
+[node name="Loot_206" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-28, 0.6, 51.5)
+display_name = "Машина жильца во дворе"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_207" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-22, 0.6, 67)
+display_name = "Санитары не успели"
+table = "pharmacy"
+search_s = 4
+look = 3
+
+[node name="Loot_208" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-30, 0.6, 93)
+display_name = "Палатка в сквере"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_209" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-42, 0.6, 100)
+display_name = "Касса палатки"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_210" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-43.8, 4.77, 129.5)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_211" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-32.5, 4.77, 122.7)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_212" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-41.5, 4.77, 126)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_213" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-43, 8.63, 126.5)
+display_name = "Тайник на крыше"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_214" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-38, 8.63, 122.7)
+display_name = "Рюкзак на крыше"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_215" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-46, 0.6, 176.5)
+display_name = "Брошенный рюкзак"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_216" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-30, 0.6, 194)
+display_name = "Открытый гараж"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_217" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-8, 0.6, 230.5)
+display_name = "Тело мародёра под вагоном"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_218" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-14, 0.6, 231)
+display_name = "Вещи пассажиров вагона"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_219" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(4, 0.6, 238)
+display_name = "Раздавленный ларёк"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_220" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(114, 0.6, 0)
+display_name = "Палатка медпункта"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_221" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(126, 0.6, 4)
+display_name = "Вещи эвакуированных"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_222" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(138, 0.6, 0)
+display_name = "Чемоданы"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_223" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(150, 0.6, 4)
+display_name = "Оружейка ЧВК"
+table = "pmc"
+search_s = 3
+look = 2
+
+[node name="Loot_224" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(118, 0.6, 28)
+display_name = "Госпиталь"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_225" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(134, 0.6, 32)
+display_name = "Склад гуманитарки"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_226" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(150, 0.6, 30)
+display_name = "Тело бойца ЧВК"
+table = "pmc"
+search_s = 4
+look = 3
+
+[node name="Loot_227" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(132, 0.6, 50)
+display_name = "Сейф с документами"
+table = "office"
+search_s = 6
+look = 1
+
+[node name="Loot_228" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(140, 0.6, 156)
+display_name = "Гараж открыт"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_229" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(86.5, 0.6, 145.5)
+display_name = "Контейнер на парковке"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_230" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(53.5, 0.6, 262)
+display_name = "Тело ЧВК у въезда в тоннель"
+table = "pmc"
+search_s = 4
+look = 3
+
+[node name="Loot_231" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(8, 0.6, 236)
+display_name = "Груз из вагона"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_232" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-12, 0.6, 232)
+display_name = "Пассажирский вагон"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_233" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-30, 0.6, 238)
+display_name = "Груз из вагона"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_234" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(14, 0.6, 229)
+display_name = "Контейнер вскрыт"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_235" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-6, 0.6, 241)
+display_name = "Тело мародёра у вагона"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_236" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(35, 4.77, 134.8)
+display_name = "Шкаф конторы"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_237" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(27.2, 4.77, 121.5)
+display_name = "Склад магазина"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_238" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(31, 4.77, 132.5)
+display_name = "На столе"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_239" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(31.5, 8.63, 134)
+display_name = "Тайник на крыше"
+table = "electronics"
+search_s = 3
+look = 5
+
+[node name="Loot_240" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(27.2, 8.63, 128)
+display_name = "Рюкзак на крыше"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_241" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(50.5, 0.6, 172.5)
+display_name = "Тело у контейнера"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_242" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(58.5, 0.6, 214)
+display_name = "Багаж"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_243" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(55, 0.6, 33)
+display_name = "Пост ЧВК у контейнеров"
+table = "pmc"
+search_s = 3
+look = 2
+
+[node name="Loot_244" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-104, 0.6, 9.5)
+display_name = "Тело у контейнера"
+table = "pmc"
+search_s = 4
+look = 3
+
+[node name="Loot_245" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-118, 0.6, 98.5)
+display_name = "Контейнер на разгрузке"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_246" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-197, 0.6, -12)
+display_name = "Аптечка"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_247" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-196, 0.6, -10.6)
+display_name = "Чемоданы эвакуации"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_248" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-192, 0.6, -7.4)
+display_name = "Укладка"
+table = "pharmacy"
+search_s = 3.5
+look = 0
+
+[node name="Loot_249" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-205.5, 0.6, 9.5)
+display_name = "Ящик с патронами"
+table = "pmc"
+search_s = 3
+look = 2
+
+[node name="Loot_250" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-199, 0.6, -12.4)
+display_name = "Десантный отсек"
+table = "pmc"
+search_s = 3.5
+look = 0
+
+[node name="Loot_251" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-192, 0.6, 11)
+display_name = "Рюкзак"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_252" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-155, 0.6, 4)
+display_name = "Ларёк"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_253" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-142, 0.6, 2.5)
+display_name = "Багаж"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_254" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-73, 0.6, -6.8)
+display_name = "Перевёрнутый автобус"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_255" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-80, 0.6, -1)
+display_name = "Тело у перевёрнутого автобуса"
+table = "marauder"
+search_s = 4
+look = 3
+
+[node name="Loot_256" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-63.5, 0.6, 2.6)
+display_name = "Багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_257" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-58.8, 0.6, 3.8)
+display_name = "Сумки пассажиров"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_258" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-91, 0.6, -8.2)
+display_name = "Инструмент"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_259" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-46, 0.6, -3)
+display_name = "Багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_260" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-34, 0.6, -8)
+display_name = "На асфальте"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_261" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(46, 0.6, -16)
+display_name = "Дробовик в салоне"
+table = "security"
+search_s = 3.5
+look = 0
+
+[node name="Loot_262" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(62, 0.6, -11)
+display_name = "Оружейный ящик"
+table = "security"
+search_s = 3.5
+look = 0
+
+[node name="Loot_263" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(40, 0.6, -6)
+display_name = "Тело бойца у баррикады"
+table = "pmc"
+search_s = 4
+look = 3
+
+[node name="Loot_264" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(70, 0.6, 10.5)
+display_name = "Ящик с патронами"
+table = "security"
+search_s = 3
+look = 5
+
+[node name="Loot_265" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(56, 0.6, -20)
+display_name = "Брошенное"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_266" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(84, 0.6, 22)
+display_name = "Медпалатка эвакуации"
+table = "pharmacy"
+search_s = 2
+look = 4
+
+[node name="Loot_267" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-44, 0.6, 92)
+display_name = "Касса"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_268" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(10.4, 0.6, 62)
+display_name = "Кофейный ларёк"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_269" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-6, 0.6, 76)
+display_name = "Рюкзак у памятника"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_270" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(49, 0.6, 107.4)
+display_name = "Автомат в машине"
+table = "security"
+search_s = 3.5
+look = 0
+
+[node name="Loot_271" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(60.8, 0.6, 121)
+display_name = "ПАЗ полиции"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_272" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(50, 0.6, 100)
+display_name = "Самосвал дорожников"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_273" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(80, 0.6, 104)
+display_name = "Багажник"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_274" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(93, 0.6, 118)
+display_name = "Салон"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_275" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(86.5, 0.6, 94.6)
+display_name = "Ларёк на парковке"
+table = "register"
+search_s = 2
+look = 0
+
+[node name="Loot_276" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(150, 0.6, 131)
+display_name = "У мусорных баков"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_277" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(92, 0.6, 174)
+display_name = "Будка охраны «Меридиана»"
+table = "office"
+search_s = 2.5
+look = 0
+
+[node name="Loot_278" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(50.2, 0.6, 263)
+display_name = "Багаж"
+table = "home"
+search_s = 2.5
+look = 4
+
+[node name="Loot_279" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(50, 0.6, 254.4)
+display_name = "Машина в тоннеле"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_280" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(61.5, 0.6, 249)
+display_name = "У барьеров перед тоннелем"
+table = "pharmacy"
+search_s = 2.5
+look = 4
+
+[node name="Loot_281" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-190, 0.6, -101.5)
+display_name = "Гараж двора"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_282" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-98, 0.6, -97)
+display_name = "Мусорная площадка"
+table = "shelf"
+search_s = 1.5
+look = 0
+
+[node name="Loot_283" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-200, 0.6, 76.5)
+display_name = "Гараж дома 7"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="Loot_284" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-90, 0.6, 44)
+display_name = "Фургон у «Яруса»"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_285" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-128, 0.6, 24)
+display_name = "Коробки"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_286" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-103, 0.6, 39.6)
+display_name = "Полицейская у «Яруса»"
+table = "security"
+search_s = 3.5
+look = 0
+
+[node name="Loot_287" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-132, 0.6, 100.5)
+display_name = "Фура на разгрузке"
+table = "home"
+search_s = 3.5
+look = 0
+
+[node name="Loot_288" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-112, 0.6, 95)
+display_name = "Ящики на разгрузке"
+table = "storage"
+search_s = 3
+look = 5
+
+[node name="AI_Spawns" type="Node3D" parent="Gameplay"]
+
+[node name="AI_Bank_Hall" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-21, 0.12, -44)
+
+[node name="AI_Bank_Vault" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-30, -3.2, -46)
+
+[node name="AI_Yarus_Hall" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-102, 0.05, 66)
+
+[node name="AI_Yarus_Dock" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-100, 0.02, 96)
+
+[node name="AI_Station_Hall" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-116, 0.12, 226)
+
+[node name="AI_Tower_Court" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-14, 0.1, 45)
+
+[node name="AI_Square" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-14, 0.1, 82)
+
+[node name="AI_Train_Wreck" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-6, 0.12, 222)
+
+[node name="AI_Parking" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-128, -3.2, -60)
+
+[node name="AI_Site" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-108, 0.05, 132)
+
+[node name="AI_Corpus3_Lot" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(86, 0.05, 150)
+
+[node name="AI_Vershina_Plaza" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(50, 0.1, -12)
+
+[node name="AI_Yard_ZhK" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-150, 0.05, -100)
+
+[node name="AI_House7_Yard" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-190, 0.05, 85)
+
+[node name="Navigation" type="Node3D" parent="."]
+
+[node name="Audio" type="Node3D" parent="."]
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("6")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-17, -118, 0)
+light_color = Color(1, 0.8, 0.62, 1)
+light_energy = 1.7
+light_angular_distance = 0.6
+shadow_enabled = true
+shadow_blur = 1.2
+directional_shadow_max_distance = 260.0
+directional_shadow_split_1 = 0.08
+directional_shadow_split_2 = 0.25
+directional_shadow_split_3 = 0.55
+
+[node name="CameraRig" parent="." instance=ExtResource("7")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="HUD/Root"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 700.0
+offset_bottom = 48.0
+text = "HP 100"
+
+[node name="Dead" type="Label" parent="HUD/Root"]
+visible = false
