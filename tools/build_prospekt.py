@@ -164,7 +164,12 @@ KIT_MODELS = {
     "sandbags": ("U03_02", 90.0), "sign_parking": ("U03_03", 0.0), "kiosk": ("U05_02", 0.0), "food_kiosk": ("R05", 0.0),
     "sign_crossing": ("U06_02", 0.0), "delineator": ("U07_03", 0.0), "billboard": ("U10_05", 0.0), "fence": ("U11_02", 90.0),
     "water_barrier": ("U11_05", 90.0), "water_barrier_w": ("U11_05", 90.0), "lamp": ("U12_03", 0.0), "tent": ("U13_01", 0.0),
-    "car": ("U14_01", 0.0), "traffic_light": ("U15_02", 0.0), "road_barrier": ("U15_04", 0.0), "dumpster": ("R02", 0.0),
+    "traffic_light": ("U15_02", 0.0), "road_barrier": ("U15_04", 0.0), "dumpster": ("R02", 0.0),
+    # свой транспорт (tools/prospekt_vehicles/game_export.py): группы PV_* — модели вперемешку по позиции (MallFiller);
+    # «m:U14_01» — брошенные машины улиц, хэтчбек Urban 95 остаётся среди них
+    "car": ("PV_car", 0.0), "car_open": ("PV_car_open", 0.0), "car_wreck": ("PV_car_wreck", 0.0),
+    "suv_open": ("PV_suv_open", 0.0), "m:U14_01": ("PV_car_street", 0.0), "bus_city": ("PV_bus_city", 0.0),
+    "paz": ("PV_paz_any", 0.0), "minibus": ("PV_minibus", 0.0),
 }
 MODELS_NOSOLID = ["U19_02", "U16_04", "U15_05", "U10_01", "U19_01", "U14_04", "U10_05", "U02_01", "U14_03", "U08_03"]
 MODELS_POLES = ["U15_02", "U10_02", "U12_03", "U03_03", "U06_02", "U07_02", "U10_03", "U19_05"]

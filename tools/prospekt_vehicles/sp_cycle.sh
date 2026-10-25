@@ -8,7 +8,7 @@ cd "$(dirname "$0")/../.."
 BL="/d/ПРОГРАММЫ/Blender 5/blender.exe"
 R="E:/Models Blender/VEHICLES/Город_партия1/$1"
 NAME="$2"; FAM="$3"; JOB="$4"; shift 4
-SC="${REVIEW_DIR:-C:/Users/SCHECT~1/AppData/Local/Temp/claude/E--Games-RING-godot/0675bf33-c4bb-4530-bb33-afabf20e15db/scratchpad/v}"
+SC="${REVIEW_DIR:-$PWD/_asset_src/prospekt_vehicles/review}"     # проверочные снимки (не в git)
 python -X utf8 tools/prospekt_vehicles/sp_run.py "tools/prospekt_vehicles/$JOB" 600 -- "$@" | head -3
 python -X utf8 tools/prospekt_vehicles/sp_run.py tools/prospekt_vehicles/sp/export.py 900 -- "out=$R/textures/$FAM" \
   "spp=$R/textures/painter/${NAME}_${FAM}_v01.spp" | head -8

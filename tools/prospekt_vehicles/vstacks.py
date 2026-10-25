@@ -307,6 +307,24 @@ def under_clean(st, have):
         plastic(st, m("liner"), color=(0.03, 0.03, 0.03), rough=0.8, name="Подкрылки", fade=0.1)
     if m("steel_dark", "rust"):
         rusty_steel(st, m("steel_dark", "rust"), "Низ — сталь", rust=0.8)
+    if m("rubber"):
+        rubber(st, m("rubber"), dust=0.8)
+    if m("trim_black", "bumper_plastic", "mesh_black"):
+        plastic(st, m("trim_black", "bumper_plastic", "mesh_black"), color=(0.03, 0.03, 0.03), rough=0.75,
+                name="Пластик низа", fade=0.2)
+    if m("chrome"):
+        chrome(st, m("chrome"))
+
+
+def uncovered(st, have):
+    """Сетки набора, которых не коснулся ни один слой (в Painter остались бы белыми): список имён."""
+    done = set()
+    for n in L.get_root_layer_nodes(st):
+        try:
+            done |= set(n.get_geometry_mask_enabled_meshes())
+        except Exception:
+            pass
+    return sorted(have - done)
 
 
 # --- битая: удар спереди слева ---------------------------------------------------------------------

@@ -34203,10 +34203,6 @@
     "model": "U13_01",
     "yaw": 0.0
    },
-   "car": {
-    "model": "U14_01",
-    "yaw": 0.0
-   },
    "traffic_light": {
     "model": "U15_02",
     "yaw": 0.0
@@ -34217,6 +34213,38 @@
    },
    "dumpster": {
     "model": "R02",
+    "yaw": 0.0
+   },
+   "car": {
+    "model": "PV_car",
+    "yaw": 0.0
+   },
+   "car_open": {
+    "model": "PV_car_open",
+    "yaw": 0.0
+   },
+   "car_wreck": {
+    "model": "PV_car_wreck",
+    "yaw": 0.0
+   },
+   "suv_open": {
+    "model": "PV_suv_open",
+    "yaw": 0.0
+   },
+   "m:U14_01": {
+    "model": "PV_car_street",
+    "yaw": 0.0
+   },
+   "bus_city": {
+    "model": "PV_bus_city",
+    "yaw": 0.0
+   },
+   "paz": {
+    "model": "PV_paz_any",
+    "yaw": 0.0
+   },
+   "minibus": {
+    "model": "PV_minibus",
     "yaw": 0.0
    }
   },

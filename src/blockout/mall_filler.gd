@@ -948,8 +948,9 @@ var _shapes: Dictionary = {}
 var _matte: StandardMaterial3D
 var _water: StandardMaterial3D
 ## Модели вместо серых форм (данные filler.models_index и filler.kit_models; «Проспект», владелец 2026-10-25):
-## запись индекса модели по id, набор → {model, yaw}, загруженные сетки моделей. Нет файла модели — серая коробка
-## по габариту из индекса (проект запускается без assets/models).
+## запись индекса модели по id, набор (или «m:ID» — замена модели) → {model, yaw}, загруженные сетки моделей. Модель
+## может быть группой (variants) — тогда своя у каждого экземпляра. Нет файла модели — серая коробка по габариту из индекса
+## (проект запускается без assets/models).
 var _model_index: Dictionary = {}
 var _kit_models: Dictionary = {}
 var _model_meshes: Dictionary = {}
@@ -1016,11 +1017,12 @@ func _items(filler: Dictionary) -> void:
 		var kit_id: String = String(item[0])
 		var model_id: String = kit_id.substr(2) if kit_id.begins_with("m:") else ""
 		var yaw_offset: float = 0.0
-		if model_id == "" and _kit_models.has(kit_id):
+		# набор с моделью (и «m:ID», которой назначена замена) — модель из kit_models
+		if _kit_models.has(kit_id):
 			model_id = String((_kit_models[kit_id] as Dictionary).model)
 			yaw_offset = float((_kit_models[kit_id] as Dictionary).get("yaw", 0.0))
 		if model_id != "" and _model_index.has(model_id):
-			_place_model(groups, model_id, item, yaw_offset)
+			_place_model(groups, _variant(model_id, float(item[1]), float(item[2])), item, yaw_offset)
 			continue
 		if not KITS.has(kit_id):
 			push_warning("Наполнение: нет набора " + kit_id)
@@ -1196,6 +1198,16 @@ func _load_models(filler: Dictionary) -> void:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if parsed is Dictionary:
 		_model_index = (parsed as Dictionary).get("models", {}) as Dictionary
+
+
+## Группа «вперемешку» (запись индекса с variants, транспорт «Проспекта»): модель группы — по позиции экземпляра,
+## одна и та же при каждой сборке; не группа — сама модель.
+func _variant(model_id: String, x: float, z: float) -> String:
+	var variants: Array = (_model_index[model_id] as Dictionary).get("variants", []) as Array
+	if variants.is_empty():
+		return model_id
+	var pick: String = String(variants[absi(hash(Vector2i(roundi(x * 10.0), roundi(z * 10.0)))) % variants.size()])
+	return pick if _model_index.has(pick) else model_id
 
 
 ## Габарит модели в её осях (из индекса).

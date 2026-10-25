@@ -25,4 +25,8 @@ for t in TS.all_texture_sets():
         vstacks.wheel_clean(st, have)
     elif name == "Under":
         vstacks.under_clean(st, have)
+    rest = vstacks.uncovered(st, have)
+    if rest:                                     # новый материал без стека — тёмным пластиком, и сказать об этом
+        print("  без своего слоя:", rest)
+        vstacks.plastic(st, rest, name="Прочее (без своего стека)")
     print(name, "слоёв:", len(L.get_root_layer_nodes(st)), sorted(have))

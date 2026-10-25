@@ -186,6 +186,14 @@ tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn # рейд «П�
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/urban95_export.py -- [ID …]
                                                               # библиотека RING_Urban_95 (retopology_v01, 101 модель) в игру: assets/models/urban95/<ID>.gltf,
                                                               # карты WebP ≤ 2K, индекс с габаритами data/urban95_models.json; на карте их ставит MallFiller (filler.kit_models)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/game_kit.py -- <класс> <папка FBX> <игровой .blend>
+                                                              # транспорт «Проспекта»: игровая сетка LOD0 тем же генератором (vq.py) и FBX для Painter (sedan…suv, bus12, paz, gazel)
+bash tools/prospekt_vehicles/sp_family.sh <папка> <Имя> <класс> <семья> sp/stack_car.py color=r,g,b # отделка в Substance Painter (мост sp_bridge, Painter запущен):
+                                                              # проект, запекание, стек vstacks.py, карты, варианты в Blender (apply_maps.py → <папка>/game/<Имя>_textured_v01.blend
+                                                              # в E:/Models Blender/VEHICLES/Город_партия1); правка стека без запекания — sp_redo.sh
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/game_export.py -- [класс …]
+                                                              # транспорт в игру: assets/models/prospekt_vehicles/PV_*.gltf, карты WebP ≤ 2K, записи PV_* и группы вперемешку
+                                                              # в data/urban95_models.json; --import, python -X utf8 tools/prospekt_vehicles/game_imports.py, --import
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
                                                               # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор, пристройка приёмки); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)
