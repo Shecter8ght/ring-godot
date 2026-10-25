@@ -106,7 +106,7 @@ def build(ctx):
     # --- перед: цевьё и ствол неподвижны, глушитель с муфтой и прицелами снимается вперёд ---
     f = P["front"]
     set_parent(f["handguard"], root); set_parent(f["barrel"], root); set_parent(f["swivel_lug"], root)
-    sw_p = empty("Front_swivel_pivot", (560.5, 25.6, 7.0), R, root, size=0.004)
+    sw_p = empty("Front_swivel_pivot", (560.5, 23.4, 7.0), R, root, size=0.004)
     set_parent(f["swivel"], sw_p)
     sup = empty("Suppressor_mount", (567.3, 0, BORE_Z), R, root, size=0.012)
     for o in bpy.data.collections["Suppressor"].objects:

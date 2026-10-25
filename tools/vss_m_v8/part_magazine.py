@@ -1,7 +1,7 @@
-# ВСС-М v8: магазины 9×39 на 10 и 20 патронов — полимерный корпус с «лабиринтными» рёбрами (как у магазинов ВСС-М
-# на фото), двухрядная шахматная укладка с подачей поочерёдно из двух рядов, губки по форме патрона, подаватель,
-# съёмная крышка с кнопкой, передний зацеп и задний упор под защёлку. Патрон СП-5: гильза 39 мм, длина 56 мм.
-# Ось магазина изогнута дугой (низ уходит вперёд); каждый патрон перпендикулярен оси.
+# ВСС-М v8: магазины 9×39 на 10, 20 и 30 патронов — полиамидный корпус с рёбрами, двухрядная шахматная укладка
+# с однорядным выходом (журнал «Братишка» 2000/2): у горловины ряды сходятся к середине, верхний патрон — по центру
+# под обеими губками. Габарит по магазинам ТОЗ: 70×33×108 (10), 70×33×160 (20). Патрон СП-5: длина 56, донце 11.35;
+# гильза почти без конусности, поэтому магазин почти прямой. Каждый патрон перпендикулярен оси магазина.
 import math
 import bmesh
 import bpy
@@ -10,14 +10,47 @@ from lib import (MM, auto_sharp, boolean, fillet, finish, join, lathe, material,
 
 P0 = Vector((446.4, -2.6))     # центр верхнего патрона (x, z) в посаженном магазине
 THETA0 = math.radians(5.0)     # наклон оси у верха (низ вперёд)
-R_CURVE = 420.0                # радиус изгиба оси магазина
+R_CURVE = 1300.0               # радиус изгиба оси магазина (почти прямой)
 D_CART = 11.35                 # диаметр донца гильзы
-W_IN = 20.0                    # внутренняя ширина
+W_IN = 21.45                   # внутренняя ширина в двухрядной части: шаг 5.18 мм на патрон, как у магазинов ТОЗ
 Y_OFF = (W_IN - D_CART) / 2.0
 PITCH = math.sqrt(D_CART ** 2 - (2 * Y_OFF) ** 2)
-HALF_N = 30.9                  # половина длины корпуса (вперёд-назад)
-HALF_Y = 12.2                  # половина ширины корпуса (стенка 2.2)
+HALF_N = 33.0                  # задняя полудлина корпуса (вперёд-назад от оси патрона)
+HALF_NF = 31.6                 # передняя полудлина (передняя стенка у патронника)
+HALF_Y = 15.25                 # половина ширины корпуса (с рёбрами ~33 мм)
 U_TOP = 1.9
+SPRING_SPACE = 34.0            # сжатая пружина и ход подавателя (по высоте магазинов ТОЗ)
+NECK_W = D_CART / 2 + 0.2      # полуширина горловины у верхнего патрона
+
+
+def round_positions(n):
+    """(u, y) центров патронов сверху вниз: верхний по центру, второй смещён, дальше — шахматные ряды."""
+    pos = [(0.0, 0.0)]
+    if n > 1:
+        y1 = 2.6
+        pos.append((math.sqrt(D_CART ** 2 - y1 ** 2), y1))
+    if n > 2:
+        dy = Y_OFF + 2.6
+        pos.append((pos[1][0] + math.sqrt(D_CART ** 2 - dy ** 2), -Y_OFF))
+    k = 3
+    while len(pos) < n:
+        pos.append((pos[-1][0] + PITCH, Y_OFF if k % 2 == 1 else -Y_OFF))
+        k += 1
+    return pos
+
+
+def inner_half_width(u):
+    """Внутренняя полуширина вдоль оси: горловина у верха, расширение к двухрядной части."""
+    a, b, c = 1.0, 11.0, 17.0
+    w_b = 2.6 + D_CART / 2 + 0.15
+    if u <= a:
+        return NECK_W
+    if u <= b:
+        return NECK_W + (w_b - NECK_W) * (u - a) / (b - a)
+    if u <= c:
+        t = (u - b) / (c - b)
+        return w_b + (W_IN / 2 - w_b) * (t * t * (3 - 2 * t))
+    return W_IN / 2
 
 
 def frame(u):
@@ -70,8 +103,33 @@ def spine_box(name, u0, u1, n0, n1, y0, y1, coll, steps=1):
     return spine_loft(name, u0, u1, steps, sec, coll)
 
 
-def rrect(hn, hy, r, seg=4):
-    return fillet([(-hn, -hy), (hn, -hy), (hn, hy), (-hn, hy)], r, seg)
+def rrect(hn, hy, r, seg=4, hnf=None):
+    hnf = hn if hnf is None else hnf
+    return fillet([(-hn, -hy), (hnf, -hy), (hnf, hy), (-hn, hy)], r, seg)
+
+
+def funnel_loft(name, u0, u1, coll):
+    """Полость магазина: сечение сужается к горловине (однорядный выход)."""
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    us = [u0, -1.0, 1.0] + [1.0 + k * 1.0 for k in range(1, 18)] + [u1]
+    rings = []
+    for u in us:
+        w = inner_half_width(max(u, 0.0))
+        sec = rrect(HALF_N - 2.4, w, 1.2, 4, HALF_NF - 2.4)
+        rings.append([bm.verts.new(to_world(u, n, y)) for n, y in sec])
+    m = len(rings[0])
+    for r0, r1 in zip(rings, rings[1:]):
+        for i in range(m):
+            j = (i + 1) % m
+            bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    return o
 
 
 def cartridge_mesh():
@@ -106,15 +164,15 @@ def cartridge(name, base_world, axis_world, coll, me=None):
     return o
 
 
-LIP_T = 1.7          # толщина губки
-LIP_GAP = 4.6        # половина просвета между губками над верхним патроном
+LIP_T = 1.8          # толщина губки
+LIP_GAP = 4.2        # половина просвета между губками над верхним патроном (сзади)
 LIP_FRONT = 3.0      # губки кончаются чуть впереди середины гильзы; дальше — окно выхода патрона
 
 
 def _lip_section(side, y_edge, steps=10):
     """Сечение губки (y, h): h — высота над осью верхнего патрона вдоль оси магазина. Губка — продолжение стенки,
     загнута внутрь над патроном своего ряда; нижняя поверхность повторяет патрон с зазором 0.15 мм."""
-    yc = side * Y_OFF
+    yc = 0.0                                                       # однорядный выход: верхний патрон по центру
     ri = D_CART / 2 + 0.15
     ro = ri + LIP_T
     # угол кромки на окружности ri (от оси +y, против часовой) — где y = y_edge
@@ -122,7 +180,7 @@ def _lip_section(side, y_edge, steps=10):
     a_edge = math.degrees(math.acos(ce))
     a_wall = 180.0 if side < 0 else 0.0
     pts = []
-    pts.append((side * (W_IN / 2), -4.5))                         # низ внутренней стенки (уходит в корпус)
+    pts.append((side * NECK_W, -4.5))                             # низ внутренней стенки (уходит в корпус)
     for k in range(steps + 1):                                     # внутренняя дуга: от стенки к кромке
         a = math.radians(a_wall + (a_edge - a_wall) * k / steps)
         pts.append((yc + ri * math.cos(a), ri * math.sin(a)))
@@ -145,7 +203,7 @@ def lips(name, coll):
         rings = []
         for n in ns:
             t = max(0.0, min(1.0, (n + 9.0) / (LIP_FRONT + 9.0)))
-            y_edge = side * (LIP_GAP + 4.3 * t * t)                # к выходу губки расходятся
+            y_edge = side * (LIP_GAP + 3.4 * t * t)                # к выходу губки расходятся
             sec = _lip_section(side, y_edge)
             rings.append([bm.verts.new(to_world(-h, n, y)) for y, h in sec])
         m = len(rings[0])
@@ -185,23 +243,24 @@ def labyrinth(name, u0, u1, coll, side):
 
 
 def build_mag(tag, rounds, coll, cart_coll, me_cart):
-    last_u = (rounds - 1) * PITCH
-    u_bot = last_u + D_CART / 2 + 4.0 + 14.0 + (6.0 if rounds > 10 else 0.0)
+    rpos = round_positions(rounds)
+    last_u = rpos[-1][0]
+    u_bot = last_u + D_CART / 2 + 3.0 + SPRING_SPACE
     steps = max(8, int((u_bot - U_TOP) / 4))
-    body = spine_loft(f"Magazine_{tag}", U_TOP, u_bot, steps, rrect(HALF_N, HALF_Y, 3.0), coll, "Polymer_magazine")
-    cav = spine_loft("_cav", U_TOP - 3.0, u_bot - 2.4, steps, rrect(HALF_N - 2.4, W_IN / 2, 1.2), coll)
+    body = spine_loft(f"Magazine_{tag}", U_TOP, u_bot, steps, rrect(HALF_N, HALF_Y, 3.0, 4, HALF_NF), coll, "Polymer_magazine")
+    cav = funnel_loft("_cav", U_TOP - 3.0, u_bot - 2.4, coll)
     boolean(body, cav)
     # губки: загнуты над патронами своих рядов; задняя стенка над губками закрыта
     boolean(body, lips("_lips", coll), op="UNION", self_x=True)
     boolean(body, spine_box("_rwall", -3.0, U_TOP + 1.0, -HALF_N, -HALF_N + 2.4, -HALF_Y, HALF_Y, coll, 1), op="UNION")
     # передний зацеп и задний упор
-    boolean(body, spine_box("_flug", 3.0, 8.0, HALF_N - 0.5, HALF_N + 0.6, -9.0, 9.0, coll, 1), op="UNION")
+    boolean(body, spine_box("_flug", 3.0, 8.0, HALF_NF - 0.5, HALF_NF + 0.6, -9.0, 9.0, coll, 1), op="UNION")
     boolean(body, spine_box("_rlug", 23.0, 25.9, -HALF_N - 1.6, -HALF_N + 0.5, -6.0, 6.0, coll, 1), op="UNION")
     for s in (-1, 1):
         boolean(body, labyrinth(f"_lab{s}", 14.0, u_bot - 9.0, coll, s), op="UNION", self_x=True)
     finish(body, 1.0, 3, 35)
     # крышка
-    plate = spine_loft(f"Magazine_{tag}_floorplate", u_bot - 0.4, u_bot + 3.2, 2, rrect(HALF_N + 1.3, HALF_Y + 1.1, 3.6), coll, "Polymer_magazine")
+    plate = spine_loft(f"Magazine_{tag}_floorplate", u_bot - 0.4, u_bot + 3.2, 2, rrect(HALF_N + 1.3, HALF_Y + 1.1, 3.6, 4, HALF_NF + 1.3), coll, "Polymer_magazine")
     btn_c = to_world(u_bot + 3.2, -10.0, 0.0)
     _, d, _, th = frame(u_bot + 3.2)
     btn = lathe(f"Magazine_{tag}_plate_button", [(0, 0), (0, 3.4), (0.6, 3.4), (0.9, 3.0), (0.9, 0)], coll, "Polymer_magazine", 24, 0, 0)
@@ -211,13 +270,13 @@ def build_mag(tag, rounds, coll, cart_coll, me_cart):
     auto_sharp(btn, 35)
     # подаватель со ступенькой (уступ — под ряд, из которого подаётся следующий патрон)
     fu = last_u + D_CART / 2 + 0.4
-    fol = spine_box(f"Magazine_{tag}_follower", fu, fu + 3.0, -HALF_N + 3.2, HALF_N - 3.2, -W_IN / 2 + 0.4, W_IN / 2 - 0.4, coll, 1)
+    fol = spine_box(f"Magazine_{tag}_follower", fu, fu + 3.0, -HALF_N + 3.2, HALF_NF - 3.2, -W_IN / 2 + 0.4, W_IN / 2 - 0.4, coll, 1)
     fol.data.materials.append(material("Polymer_magazine"))
-    step_side = 1 if rounds % 2 == 0 else -1
-    boolean(fol, spine_box("_fs", fu - 2.4, fu + 0.4, -HALF_N + 6.0, HALF_N - 6.0, min(0, step_side * 9.6), max(0, step_side * 9.6), coll, 1), op="UNION")
+    step_side = 1 if rpos[-1][1] < 0 else -1                     # ступенька под ряд, противоположный последнему патрону
+    boolean(fol, spine_box("_fs", fu - 2.4, fu + 0.4, -HALF_N + 6.0, HALF_NF - 6.0, min(0, step_side * 10.2), max(0, step_side * 10.2), coll, 1), op="UNION")
     finish(fol, 0.4, 2, 35)
     # пружина: витая из проволоки прямоугольного контура, витки по оси магазина
-    loop = rrect(HALF_N - 5.0, W_IN / 2 - 2.0, 3.5, 3)
+    loop = rrect(HALF_N - 5.0, W_IN / 2 - 2.0, 3.5, 3, HALF_NF - 5.0)
     turns = max(3, int((u_bot - fu - 6.0) // 6.5))
     pts = []
     for t_ in range(turns):
@@ -237,11 +296,9 @@ def build_mag(tag, rounds, coll, cart_coll, me_cart):
     me_s.materials.append(material("Spring_steel"))
     for p_ in me_s.polygons:
         p_.use_smooth = True
-    # патроны: поочерёдно справа и слева, верхний — справа
+    # патроны: верхний по центру под губками, ниже — шахматные ряды
     carts = []
-    for i in range(rounds):
-        u = i * PITCH
-        y = -Y_OFF if i % 2 == 0 else Y_OFF
+    for i, (u, y) in enumerate(rpos):
         p, d, f, th = frame(u)
         base = to_world(u, -28.0, y)
         ax = Vector((f.x, 0, f.y))

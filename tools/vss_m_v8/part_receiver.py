@@ -11,8 +11,8 @@ COVER_REAR_Z = 11.3                      # низ крышки сзади — н
 COVER_SLOPE_X0, COVER_SLOPE_X1 = 272.0, 298.0   # скос заднего торца крышки (замечание владельца 25.10)
 WIN_X0, WIN_X1 = 405.0, 475.5   # окно затворной рамы справа
 WIN_Z0, WIN_Z1 = 2.0, 30.0
-WELL_X0, WELL_X1 = 413.5, 478.5  # шахта магазина
-WELL_W = 13.4
+WELL_X0, WELL_X1 = 412.5, 478.5  # шахта магазина
+WELL_W = 16.5
 
 
 def picatinny(name, x0, x1, base_z, coll, mat, n_slots=None, pitch=10.01, slot_w=5.23):

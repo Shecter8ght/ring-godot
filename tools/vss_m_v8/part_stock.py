@@ -180,11 +180,11 @@ def build(ctx):
         return u * u * (3.0 - 2.0 * u)
     def width(x, z):
         # плавные переходы ширины: затыльник 19.6 → тело 18.0 → у коробки 17.6 → низ рукоятки 15.4
-        w = 16.2 + (18.0 - 16.2) * (1.0 - sstep(17.0, 45.0, x))
+        w = 17.0 + (18.8 - 17.0) * (1.0 - sstep(17.0, 45.0, x))
         a = sstep(250.0, 278.0, x) * sstep(-44.0, -26.0, z)
-        w = w + (16.6 - w) * a
+        w = w + (18.2 - w) * a
         g = sstep(282.0, 305.0, x)
-        wg = 16.6 - 2.4 * min(1.0, max(0.0, (-30.0 - z) / 85.0))
+        wg = 18.2 - 2.4 * min(1.0, max(0.0, (-30.0 - z) / 85.0))
         w = w + (wg - w) * g
         return w
     # равномерная сетка перед сужением: длинные треугольники боковых граней после неравномерной ширины давали
@@ -207,7 +207,7 @@ def build(ctx):
     for s in (-1, 1):
         sc = lathe(f"Stock_screw_{'R' if s < 0 else 'L'}", [(0, 0), (0, 3.4), (0.5, 3.3), (1.1, 2.6), (1.3, 0)], C, "Steel_black", 32, 0, 0)
         sc.rotation_euler = (0, 0, math.pi / 2 * s)
-        sc.location = (300.0 * MM, s * 16.45 * MM, -36.0 * MM)
+        sc.location = (300.0 * MM, s * 18.05 * MM, -36.0 * MM)
         apply_transform(sc)
         from lib import box
         boolean(sc, box("_slot", 299.6, 300.4, -30, 30, -40.5, -31.5, C))
@@ -215,18 +215,18 @@ def build(ctx):
         hw.append(sc)
     from lib import prism_xz, finish
     plate = prism_xz("Stock_sling_plate", fillet([(24.0, -106.0), (40.0, -106.0), (40.0, -92.0), (24.0, -92.0)], 3.0, 4),
-                     17.4, 19.0, C, "Steel_black")
+                     17.8, 19.4, C, "Steel_black")
     finish(plate, 0.5, 2, 35)
     for i, (x, z) in enumerate(((27.5, -102.5), (36.5, -95.5))):
         r = lathe(f"Stock_sling_rivet_{i}", [(0, 0), (0, 1.4), (0.4, 1.3), (0.7, 0.8), (0.8, 0)], C, "Steel_black", 16, 0, 0)
-        r.rotation_euler = (0, 0, math.pi / 2); r.location = (x * MM, 19.0 * MM, z * MM)
+        r.rotation_euler = (0, 0, math.pi / 2); r.location = (x * MM, 19.4 * MM, z * MM)
         apply_transform(r); auto_sharp(r, 40)
     import bpy as _b
     cu = _b.data.curves.new("Stock_sling_swivel", "CURVE"); cu.dimensions = "3D"
     loop_pts = fillet([(25.0, -122.0), (39.0, -122.0), (39.0, -104.0), (25.0, -104.0)], 5.0, 6)
     sp = cu.splines.new("POLY"); sp.points.add(len(loop_pts) - 1)
     for k, (x, z) in enumerate(loop_pts):
-        sp.points[k].co = (x * MM, 20.8 * MM, z * MM, 1.0)
+        sp.points[k].co = (x * MM, 21.2 * MM, z * MM, 1.0)
     sp.use_cyclic_u = True
     cu.bevel_depth = 1.3 * MM; cu.bevel_resolution = 3
     so = _b.data.objects.new("_sws", cu); C.objects.link(so)
@@ -242,7 +242,7 @@ def build(ctx):
     pad_loops.sort(key=lambda l: -len(l))
     pl = smooth(resample(pad_loops[0], 1.0), 1)
     bm = bmesh.new()
-    ring_slab(bm, pl, 18.2, lambda x, z: 1.0 if x > 24.5 else 3.2, steps=6)
+    ring_slab(bm, pl, 18.9, lambda x, z: 1.0 if x > 24.5 else 3.2, steps=6)
     caps = [f for f in bm.faces if len(f.verts) > 4]
     bmesh.ops.triangulate(bm, faces=caps, quad_method="BEAUTY", ngon_method="BEAUTY")
     pme = bpy.data.meshes.new("Rubber_butt_pad"); bm.to_mesh(pme); bm.free()

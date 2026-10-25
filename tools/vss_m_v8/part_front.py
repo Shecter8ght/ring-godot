@@ -38,15 +38,15 @@ def build(ctx):
             s = 0.965
         elif x > 560:
             s = 1.0 - ((x - 560.0) / 7.0) ** 2 * 0.07
-        sec = rounded_section(48.0, bot, 18.5, 23.0, 14.5, 16.0)
+        sec = rounded_section(48.0, bot, 16.5, 20.0, 13.5, 16.0)
         cz = 16.0
         secs.append((x, [(y * s, cz + (z - cz) * s) for y, z in sec]))
     hg = loft_yz("Handguard", secs, Cf, "Polymer_handguard")
     boolean(hg, cyl("_hgb", 560, 580, 9.6, Cf, seg=48))                               # проход ствола
-    boolean(hg, cyl("_hgr", 565.8, 580, 22.6, Cf, seg=64))                            # гнездо задней муфты глушителя
+    boolean(hg, cyl("_hgr", 565.8, 580, 20.7, Cf, seg=64))                            # гнездо задней муфты глушителя
     # поперечные рёбра по верху (ВСС-М): мелкие, часто
     ribs = []
-    top_pts = [p for p in rounded_section(48.0, -20.0, 18.5, 23.0, 14.5, 16.0) if p[1] > 37.0]
+    top_pts = [p for p in rounded_section(48.0, -20.0, 16.5, 20.0, 13.5, 16.0) if p[1] > 37.0]
     top_pts.sort(key=lambda p: math.atan2(p[1] - 16.0, p[0]))
     for i in range(18):
         xc = 485.0 + i * 4.2
@@ -58,7 +58,7 @@ def build(ctx):
     finish(hg, 1.4, 3, 35)
     out["handguard"] = hg
     # передний антабок слева: проушина на цевье и поворотная скоба
-    lug = prism_xz("Front_sling_bracket", fillet([(556.0, 2.0), (565.0, 2.0), (565.0, 12.0), (556.0, 12.0)], 2.0, 3), 21.0, 24.6, Cf, "Steel_black")
+    lug = prism_xz("Front_sling_bracket", fillet([(556.0, 2.0), (565.0, 2.0), (565.0, 12.0), (556.0, 12.0)], 2.0, 3), 18.8, 22.4, Cf, "Steel_black")
     boolean(lug, cyl("_slh", 20, 28, 1.6, Cf, axis="Y", cy=560.5, cz=7.0, seg=20))
     finish(lug, 0.4, 2, 35)
     loop_pts = fillet([(553.0, -12.0), (568.0, -12.0), (568.0, 6.5), (553.0, 6.5)], 5.0, 6)
@@ -67,7 +67,7 @@ def build(ctx):
     cu = _b.data.curves.new("Front_sling_swivel", "CURVE"); cu.dimensions = "3D"
     sp = cu.splines.new("POLY"); sp.points.add(len(ring_o) - 1)
     for k, (x, z) in enumerate(ring_o):
-        sp.points[k].co = (x * MM, 25.6 * MM, z * MM, 1.0)
+        sp.points[k].co = (x * MM, 23.4 * MM, z * MM, 1.0)
     sp.use_cyclic_u = True
     cu.bevel_depth = 1.3 * MM; cu.bevel_resolution = 3
     so = _b.data.objects.new("_swc", cu); Cf.objects.link(so)
@@ -100,7 +100,7 @@ def build(ctx):
     out["barrel"] = barrel
 
     # --- глушитель (съёмный) ---
-    prof = [(SUP_X0, 9.05), (SUP_X0, 21.4), (568.1, 22.0), (581.0, 22.0), (581.8, 21.3), (582.6, 19.6),
+    prof = [(SUP_X0, 9.05), (SUP_X0, 19.8), (568.1, 20.4), (581.0, 20.4), (581.8, 20.0), (582.6, 19.6),
             (649.2, 19.6), (650.0, 20.3), (667.0, 20.3), (667.8, 19.6), (699.2, 19.6), (700.0, 20.0),
             (851.0, 20.0), (851.8, 20.6), (857.0, 20.6), (857.2, 20.1), (858.8, 20.1), (859.0, 20.6),
             (866.0, 20.6), (866.2, 20.1), (867.8, 20.1), (868.0, 20.6), (892.6, 20.6), (894.0, 19.4),
@@ -214,7 +214,7 @@ def build(ctx):
                                     [0, 0, 2.5, 3.0, 3.0, 2.5], 4), SLEEVE_X0, SLEEVE_X1, Cr)
     boolean(sl, hump, op="UNION")
     boolean(sl, cyl("_sb", SLEEVE_X0 - 1, SLEEVE_X1 + 1, 19.85, Cr, seg=72))
-    boolean(sl, cyl("_sbc", SLEEVE_X0 - 1, 582.6, 22.25, Cr, seg=72))
+    boolean(sl, cyl("_sbc", SLEEVE_X0 - 1, 582.6, 20.7, Cr, seg=72))
     boolean(sl, box("_stop", 583.5, 648.5, -7.2, 7.2, 20.0, 50.0, Cr))               # окно под прицел
     # облегчающие отверстия на скосах
     hs = []
