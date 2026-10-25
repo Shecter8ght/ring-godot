@@ -2,8 +2,9 @@
 # Размеры сняты с профильного фото ВСС (масштаб по длине 894 мм) и с фото ВСС-М (В. Кузьмин, CC BY-SA 4.0);
 # ось канала z=10, торец затыльника x=0, правая сторона −Y.
 import math
-from lib import (BORE_Z, LOWER_W, COVER_W, CAV_W, box, boolean, cyl, fillet, finish, join, lathe, loft_yz, prism_xz, prism_yz, prism_xy, set_origin,
-                 auto_sharp, material, apply_all, bevel_edges)
+from lib import (BORE_Z, LOWER_W, COVER_W, CAV_W, SAFETY_PIVOT, SAFETY_TRAVEL_DEG, SEL_X0, SEL_X1, SEL_Z0, SEL_Z1,
+                 box, boolean, cyl, fillet, finish, join, lathe, loft_yz, prism_xz, prism_yz, prism_xy, set_origin,
+                 auto_sharp, material, apply_all, bevel_edges, renormal)
 
 TOP_Z = 8.0             # плоскость разъёма коробка/крышка
 COVER_TOP = 42.0
@@ -53,34 +54,59 @@ def _rsec(top, bottom, w, rt, rb, seg=8):
 
 def cover_loft(C):
     """Крышка лофтом: задний торец скошен (~50°) и скруглён, рёбра скоса со сторонами — радиусом верхних углов
-    сечения (замечание владельца 25.10: «скошенной и с более круглыми углами»)."""
+    сечения (замечание владельца 25.10: «скошенной и с более круглыми углами»). Острый клин внизу скоса (там, где
+    скос сходится с низом над гребнем приклада) скруглён в профиле дугой R4 — без «носа» (замечание 25.10)."""
     line = fillet([(240.0, COVER_REAR_Z), (COVER_SLOPE_X0, COVER_REAR_Z), (COVER_SLOPE_X1, COVER_TOP), (340.0, COVER_TOP)],
-                  [0, 3.0, 16.0, 0], 14)
+                  [0, 0.0, 18.0, 0], 16)
 
-    def top(x):
+    def top_line(x):
         for (x0, z0), (x1, z1) in zip(line, line[1:]):
             if x0 <= x <= x1 and x1 > x0:
                 return z0 + (z1 - z0) * (x - x0) / (x1 - x0)
         return COVER_TOP if x > line[-1][0] else COVER_REAR_Z
-    xs = []
-    x = COVER_SLOPE_X0
-    while top(x) - COVER_REAR_Z < 1.0:
-        x += 0.2
+    # дуга, вписанная в клин между низом (z = COVER_REAR_Z) и скосом
+    a = math.atan2(COVER_TOP - COVER_REAR_Z, COVER_SLOPE_X1 - COVER_SLOPE_X0)
+    R = 4.0
+    cx, cz = COVER_SLOPE_X0 + R / math.tan(a / 2), COVER_REAR_Z + R
+
+    def arc(x):
+        dx = x - cx
+        return math.sqrt(max(0.0, R * R - dx * dx))
+
+    def top(x):
+        if cx - R <= x <= cx:
+            return min(top_line(x), cz + arc(x))
+        return top_line(x)
+
+    def bottom(x):
+        t = min(1.0, max(0.0, (x - 280.8) / 3.6))
+        b = COVER_REAR_Z + (TOP_Z - 1.0 - COVER_REAR_Z) * (0.5 - 0.5 * math.cos(math.pi * t))
+        if cx - R <= x <= cx:
+            b = max(b, cz - arc(x))
+        return b
+    x0 = cx - R + 0.15
+    xs = [round(x0 + 0.25 * k, 3) for k in range(int((cx + 0.5 - x0) / 0.25) + 1)]
+    x = xs[-1] + 0.5
     while x < 312.0:
         xs.append(round(x, 3))
         x += 0.8 if x < 300.0 else 1.6
     xs += [478.0]
-    secs = []
-    for x in xs:
-        b = COVER_REAR_Z if x < 282.6 else TOP_Z - 1.0
-        if 282.0 < x < 283.3:
-            continue
-        secs.append((x, _rsec(top(x), b, COVER_W, 6.5, 0.6)))
-    # ступенька низа у заднего торца коробки: два сечения рядом
-    secs.append((282.55, _rsec(top(282.55), COVER_REAR_Z, COVER_W, 6.5, 0.6)))
-    secs.append((282.65, _rsec(top(282.65), TOP_Z - 1.0, COVER_W, 6.5, 0.6)))
-    secs.sort(key=lambda t: t[0])
+    # низ крышки у заднего торца коробки опускается плавно (скругление вместо ступеньки)
+    xs = sorted(set([x for x in xs if not (280.8 < x < 284.4)] + [round(280.8 + 0.3 * k, 3) for k in range(13)]))
+    secs = [(x, _rsec(top(x), bottom(x), COVER_W, 8.0, 1.6)) for x in xs]
     return loft_yz("Receiver_cover", secs, C, "Steel_black", cap=True, smooth=True)
+
+
+def safety_visor(C):
+    """Козырёк-ограничитель: отогнутая наружу полка над пазом рукоятки взведения (верхняя кромка паза, низ 10 мм —
+    над рукояткой, 4.6…9.7). В положении «предохранитель» передняя площадка рычага входит в паз, перекрывает ход
+    рукоятки и упирается в козырёк снизу (зазор ~0.3 мм) — выше не уходит. Задний конец опущен к оси рычага
+    наклонно (образец владельца) и везде выше рычага с запасом ≥ 0.9 мм."""
+    pts = fillet([(350.0, -0.6), (372.0, 10.0), (403.5, 10.0), (404.6, 10.75), (403.5, 11.5), (371.4, 11.5), (349.3, 0.9),
+                  (348.9, 0.15)], [0.6, 5.0, 0.5, 0.6, 0.5, 6.5, 0.6, 0.6], 5)
+    visor = prism_xz("Safety_visor", pts, -(LOWER_W + 6.8), -(LOWER_W - 0.4), C, "Steel_black")
+    finish(visor, 0.45, 3, 30)
+    return visor
 
 
 def build(ctx):
@@ -91,12 +117,30 @@ def build(ctx):
     prof = [
         (282.0, TOP_Z), (478.0, TOP_Z), (478.0, -17.0),      # передний торец
         (413.0, -44.5), (406.5, -44.5),                      # скошенный низ шахты
-        (404.0, -14.0), (358.0, -14.0),                      # верх окна под спуск
-        (357.5, -36.0), (347.0, -36.0),                      # прилив переводчика за спуском
-        (346.0, -25.2), (282.0, -25.2),                      # опора на приклад
+        (404.0, -14.0), (358.7, -14.0),                      # верх окна под спуск
+        (358.7, -48.6), (345.2, -48.6),                      # задняя стенка скобы до её низа: в ней паз переводчика
+        (345.2, -25.2), (282.0, -25.2),                      # опора на приклад (рукоятка вплотную, x≈345)
     ]
-    r = [0.8, 1.2, 3.0, 4.0, 2.0, 1.0, 1.5, 1.5, 1.5, 1.0, 0.8]
-    lower = prism_xz("Receiver_lower", fillet(prof, r, 4), -LOWER_W, LOWER_W, C, "Steel_black")
+    # вогнутые углы (верх окна под спуск) — радиусом больше скругления рёбер, иначе боковина сама себя пересекает
+    r = [0.8, 1.5, 4.0, 5.0, 3.0, 4.0, 4.0, 2.0, 1.2, 1.5, 0.8]
+    lower = prism_xz("Receiver_lower", fillet(prof, r, 5), -LOWER_W, LOWER_W, C, "Steel_black")
+
+    # наружные рёбра скругляем крупно (замечание владельца 25.10: «скруглить ещё сильнее»), кроме плоскости
+    # разъёма с крышкой, опоры на приклад и тонких стенок шахты — у них остаётся общая фаска
+    def outer_edge(mid):
+        x, z = mid.x, mid.z
+        if z > TOP_Z - 0.01:
+            return False
+        if x < 347.0:                      # опора на приклад и задняя стенка у рукоятки — вплотную к дереву
+            return False
+        if x > 404.0 and z < -10.0:
+            return False
+        if x > 474.0:                      # передний торец: справа от окна остаётся стойка 2.5 мм — крупное скругление её съедает
+            return False
+        if x < 360.0 and z < -44.0:        # низ задней стенки скобы: там паз переводчика с дном 1.2 мм
+            return False
+        return True
+    bevel_edges(lower, lambda a, b: abs(a.y) > 0.9 and abs(b.y) < 0.2, w=2.4, seg=6, profile=0.5, where=outer_edge)
     # полость затворной рамы (открыта сверху), шахта, окно справа, отверстие под ствол
     boolean(lower, box("_cav", 285.0, 468.0, -CAV_W, CAV_W, -12.0, 20.0, C))
     boolean(lower, box("_well", WELL_X0, WELL_X1, -WELL_W, WELL_W, -60.0, -7.0, C))
@@ -106,10 +150,10 @@ def build(ctx):
     # шов «коробка — корпус УСМ» и фрезерованные выборки по бокам
     for s in (-1, 1):
         y_out = s * (LOWER_W + 1.0)
-        seam = prism_xz(f"_seam{s}", [(284.0, -13.6), (357.0, -13.6), (357.0, -13.0), (284.0, -13.0)],
+        seam = prism_xz(f"_seam{s}", [(286.5, -13.6), (357.0, -13.6), (357.0, -13.0), (286.5, -13.0)],
                         s * (LOWER_W - 0.35), y_out, C)
         boolean(lower, seam)
-        pocket = prism_xz(f"_pock{s}", fillet([(292.0, -22.0), (340.0, -22.0), (340.0, -15.5), (292.0, -15.5)], 2.0, 3),
+        pocket = prism_xz(f"_pock{s}", fillet([(292.0, -22.0), (340.0, -22.0), (340.0, -16.2), (292.0, -16.2)], 2.0, 3),
                           s * (LOWER_W - 0.6), y_out, C)
         boolean(lower, pocket)
         wellp = prism_xz(f"_wellp{s}", fillet([(418.0, -38.0), (472.0, -17.0), (472.0, -3.0), (418.0, -3.0)], [3, 3, 3, 3], 3),
@@ -123,12 +167,14 @@ def build(ctx):
     # канал подачи патрона к патроннику и гнездо переднего зацепа магазина
     boolean(lower, box("_feed", 466.0, 479.0, -6.6, 6.6, -8.0, 9.0, C))
     boolean(lower, box("_flugr", 475.5, 479.0, -9.4, 9.4, -11.5, -4.5, C))
-    # отверстие под переводчик (поперечное) и под ось защёлки
-    boolean(lower, cyl("_selh", -30, 30, 3.0, C, axis="Y", cy=352.0, cz=-29.5, seg=24))
+    # поперечный паз переводчика внизу задней стенки скобы, открыт вперёд
+    boolean(lower, box("_selch", SEL_X0 - 0.15, 362.0, -30, 30, SEL_Z0 - 0.15, SEL_Z1 + 0.15, C))
+    finish(lower, 0.9, 3, 35)
+    # клейма — после фаски: мелкие буквы фаской 0.9 мм не скругляются, а рвут сетку
     from part_stamps import stamp, SERIAL, SUB
     stamp(lower, SERIAL, 3.6, (446.0, -(LOWER_W - 0.5), -8.6), (0, -1, 0), (0, 0, 1), 0.15, C)
     stamp(lower, "2019", 2.6, (446.0, LOWER_W - 0.5, -8.6), (0, 1, 0), (0, 0, 1), 0.12, C)
-    finish(lower, 0.9, 3, 35)
+    renormal(lower)
     out["lower"] = lower
 
     # --- вкладыш ствола (казённик): видно в окне при отведённой раме ---
@@ -169,6 +215,9 @@ def build(ctx):
     stamp(cover, SUB, 2.4, (318.0, -COVER_W, 21.0), (0, -1, 0), (0, 0, 1), 0.12, C)
     auto_sharp(cover, 40)
     finish(cover, 0.8, 3, 40)
+    from part_stamps import nameplate
+    nameplate(cover, C, (356.0, -COVER_W, 19.4))
+    renormal(cover)
     rail, slots = picatinny("Cover_picatinny", 307.0, 472.5, COVER_TOP - 0.2, C, "Steel_black")
     out["cover"] = cover
     out["rail"] = rail
@@ -181,13 +230,13 @@ def build(ctx):
     out["latch"] = latch
 
     # --- боковая планка «ласточкин хвост» под ПСО (слева, +Y) ---
-    plate = prism_xz("Side_mount_plate", fillet([(307.0, -10.0), (415.0, -10.0), (415.0, 3.0), (307.0, 3.0)], 1.5, 3),
+    plate = prism_xz("Side_mount_plate", fillet([(307.0, -10.0), (415.0, -10.0), (415.0, 3.0), (307.0, 3.0)], 3.0, 4),
                      LOWER_W - 0.2, LOWER_W + 2.2, C, "Steel_black")
-    finish(plate, 0.7, 3, 35)
+    finish(plate, 1.0, 3, 35)
     dov = prism_yz("Side_mount_dovetail", [(LOWER_W + 2.1, -6.8), (LOWER_W + 2.1, -0.4), (LOWER_W + 5.6, 1.2), (LOWER_W + 5.6, -8.4)],
                    310.0, 412.0, C, "Steel_black")
     boolean(dov, box("_stop", 357.0, 360.5, LOWER_W + 3.8, 30, -10, 5, C))
-    finish(dov, 0.5, 2, 35)
+    finish(dov, 0.6, 3, 35)
     out["mount"] = join([plate, dov], "Side_mount_dovetail")
     for i, x in enumerate((316.0, 361.0, 406.0)):
         rv = lathe(f"Side_mount_rivet_{i}", [(0, 0), (0, 2.1), (0.5, 2.0), (0.9, 1.4), (1.1, 0.0)], C, "Steel_black", 24, 0, 0)
@@ -205,9 +254,11 @@ def build(ctx):
     inner = fillet([(358.5, -10.0), (401.8, -10.0), (401.8, -48.2), (358.5, -48.2)], [0, 0, 6.0, 7.0], 6)
     # прилив переводчика остаётся в коробке — внутренний вырез скобы перед ним
     boolean(guard, prism_xz("_gin", inner, -8, 8, C))
-    boolean(guard, cyl("_gsel", -30, 30, 3.1, C, axis="Y", cy=352.0, cz=-29.5, seg=24))
-    finish(guard, 1.1, 3, 35)
+    boolean(guard, box("_gselch", SEL_X0 - 0.15, 362.0, -30, 30, SEL_Z0 - 0.15, SEL_Z1 + 0.15, C))
+    finish(guard, 1.6, 4, 35)
     out["guard"] = guard
+
+    out["visor"] = safety_visor(C)
 
     # заклёпки и штифты коробки (головки с обеих сторон)
     pins = [(300.0, -18.0, 2.1), (330.0, -18.0, 2.1), (372.0, -9.0, 2.4), (440.0, -6.0, 2.0),

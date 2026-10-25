@@ -6,25 +6,30 @@ from mathutils import Matrix, Vector
 from lib import MM, boolean
 
 FONT = "C:/Windows/Fonts/arialbd.ttf"
+NAME_FONT = "C:/Windows/Fonts/ARIALNB.TTF"      # узкий жирный без перекрытых контуров (у Bahnschrift буквы теряются)
 SERIAL = "РН-0731"
 SUB = "731-1"
+# игровое название винтовки и подпись автора — выштамповка на правой стороне крышки
+GAME_NAME = "ШОРОХ-9"
+AUTHOR = "by Shecter8ght"
 
 
-def _font():
-    f = bpy.data.fonts.get("StampFont")
+def _font(path=FONT):
+    key = "StampFont" if path == FONT else "StampFont_" + path.rsplit("/", 1)[-1]
+    f = bpy.data.fonts.get(key)
     if f is None:
         try:
-            f = bpy.data.fonts.load(FONT)
-            f.name = "StampFont"
+            f = bpy.data.fonts.load(path)
+            f.name = key
         except Exception:
             f = None
     return f
 
 
-def text_cutter(text, size_mm, depth_mm, coll):
+def text_cutter(text, size_mm, depth_mm, coll, font=FONT):
     cu = bpy.data.curves.new("_stamp", "FONT")
     cu.body = text
-    f = _font()
+    f = _font(font)
     if f:
         cu.font = f
     cu.size = size_mm * MM
@@ -52,6 +57,35 @@ def stamp(target, text, size, center, normal, up, depth, coll):
     m.translation = Vector(center) * MM + n * (0.6 * MM)
     cut.data.transform(m)
     boolean(target, cut)
+
+
+def _place(ob, center, normal, up, lift):
+    n = Vector(normal).normalized(); u = Vector(up).normalized(); r = u.cross(n)
+    m = Matrix((r, u, n)).transposed().to_4x4()
+    m.translation = Vector(center) * MM + n * (lift * MM)
+    ob.data.transform(m)
+
+
+def nameplate(target, coll, center, normal=(0, -1, 0), up=(0, 0, 1)):
+    """Выштамповка: углублённое на 0.6 мм поле со скруглёнными углами, в нём выпуклые название (0.5 мм над дном)
+    и под ним мелкая подпись автора (0.4 мм). center — середина поля на поверхности детали (мм)."""
+    name = text_cutter(GAME_NAME, 8.4, 0.35, coll, NAME_FONT)
+    bb = [Vector(c) for c in name.bound_box]
+    w = (max(v.x for v in bb) - min(v.x for v in bb)) / MM
+    half_w, z0, z1 = w / 2 + 4.0, -8.2, 8.2
+    cx, cy, cz = center
+    n = Vector(normal).normalized()
+    from lib import fillet, prism_xz
+    panel = prism_xz("_plate", fillet([(cx - half_w, cz + z0), (cx + half_w, cz + z0), (cx + half_w, cz + z1), (cx - half_w, cz + z1)],
+                                      2.4, 4), cy + n.y * 10.0, cy - n.y * 0.6, coll)
+    boolean(target, panel)
+    floor = (cx, cy - n.y * 0.6, cz)
+    _place(name, (floor[0], floor[1], cz + 2.6), normal, up, 0.15)
+    boolean(target, name, op="UNION")
+    author = text_cutter(AUTHOR, 2.9, 0.3, coll, NAME_FONT)
+    _place(author, (floor[0], floor[1], cz - 5.0), normal, up, 0.1)
+    boolean(target, author, op="UNION")
+    return w
 
 
 def build(ctx):

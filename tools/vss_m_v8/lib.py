@@ -12,6 +12,14 @@ LOWER_W = 18.2       # полуширина ствольной коробки
 COVER_W = 19.0       # полуширина крышки
 CAV_W = 14.4         # полуширина полости затворной рамы
 CARRIER_W = 13.4     # полуширина затворной рамы
+# правый рычаг (предохранитель) и переводчик огня — общие для коробки (козырёк, паз) и органов управления
+SAFETY_PIVOT = (347.0, -9.0)
+SAFETY_FIRE_DEG = 4.0                    # «огонь»: рычаг чуть приподнят передом, площадка ниже паза рукоятки
+SAFETY_TRAVEL_DEG = 10.1                 # «предохранитель»: площадка входит в паз рукоятки (отвод рамы упирается
+                                         # в неё на 58 мм) и упирается сверху в козырёк над пазом
+SEL_X0, SEL_X1 = 355.45, 361.0           # ползун переводчика в пазу задней стенки скобы (сечение x, z)
+SEL_Z0, SEL_Z1 = -47.25, -40.15
+SEL_TRAVEL = 4.0
 
 
 def v(x, y, z):
@@ -334,8 +342,9 @@ def bevel(o, w=0.5, seg=2, angle=30.0, harden=True, profile=0.6, clamp=True):
     return m
 
 
-def bevel_edges(o, pick, w=4.0, seg=6, profile=0.5, clamp=False):
-    """Скругление выбранных рёбер радиусом ~w мм: pick(n1, n2) по нормалям двух граней ребра; применяется сразу."""
+def bevel_edges(o, pick, w=4.0, seg=6, profile=0.5, clamp=False, where=None):
+    """Скругление выбранных рёбер радиусом ~w мм: pick(n1, n2) по нормалям двух граней ребра,
+    where(середина ребра в мм) — дополнительный отбор по месту; применяется сразу."""
     me = o.data
     bm = bmesh.new(); bm.from_mesh(me)
     bm.normal_update()
@@ -343,8 +352,11 @@ def bevel_edges(o, pick, w=4.0, seg=6, profile=0.5, clamp=False):
     for e in bm.edges:
         if len(e.link_faces) == 2:
             n1, n2 = e.link_faces[0].normal, e.link_faces[1].normal
-            if pick(n1, n2) or pick(n2, n1):
-                sel.add(e.index)
+            if not (pick(n1, n2) or pick(n2, n1)):
+                continue
+            if where is not None and not where((e.verts[0].co + e.verts[1].co) * (0.5 / MM)):
+                continue
+            sel.add(e.index)
     bm.free()
     attr = me.attributes.get("bevel_weight_edge") or me.attributes.new("bevel_weight_edge", "FLOAT", "EDGE")
     for i in range(len(me.edges)):
@@ -358,7 +370,18 @@ def bevel_edges(o, pick, w=4.0, seg=6, profile=0.5, clamp=False):
     m.miter_outer = "MITER_ARC"
     m.harden_normals = False
     apply_all(o)
+    a = o.data.attributes.get("bevel_weight_edge")
+    if a is not None:
+        o.data.attributes.remove(a)
     return len(sel)
+
+
+def renormal(o):
+    """Нормали заново по площадям граней — после булевых по уже готовой (с фаской) сетке: клейма, выштамповка.
+    Рёбра круче 40° (буквы, стенки углублений) — жёсткие, полосы фасок остаются гладкими."""
+    auto_sharp(o, 40)
+    weighted(o)
+    apply_all(o)
 
 
 def weighted(o):
@@ -376,6 +399,16 @@ def clean(o, dist=0.002):
     bm.to_mesh(o.data); bm.free()
 
 
+def _drop_loose(o):
+    """Фаска иногда оставляет вершины без граней (в начале координат) — убираем, чтобы не ломать габарит."""
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    loose = [v for v in bm.verts if not v.link_faces]
+    if loose:
+        bmesh.ops.delete(bm, geom=loose, context="VERTS")
+        bm.to_mesh(o.data)
+    bm.free()
+
+
 def _bbox(o):
     xs = [v.co for v in o.data.vertices]
     if not xs:
@@ -384,26 +417,70 @@ def _bbox(o):
             Vector((max(c.x for c in xs), max(c.y for c in xs), max(c.z for c in xs))))
 
 
+def _spots(o, lo, hi):
+    """Где фаска разнесла сетку: вершины на месте у граней с улетевшими вершинами (мм, |y| > 15)."""
+    bmd = bmesh.new(); bmd.from_mesh(o.data)
+    spots = set()
+    for vv in bmd.verts:
+        if any(c < l - 0.002 or c > h + 0.002 for c, l, h in zip(vv.co, lo, hi)):
+            for f in vv.link_faces:
+                for q in f.verts:
+                    if all(l - 1e-5 <= c <= h + 1e-5 for c, l, h in zip(q.co, lo, hi)) and abs(q.co.y) > 0.015:
+                        spots.add(tuple(round(c / MM) for c in q.co))
+    bmd.free()
+    return sorted(spots)[:16]
+
+
 def finish(o, w=0.5, seg=2, angle=30.0, apply=True):
+    """Общая фаска по углу; если на вырожденных рёбрах фаска разносит сетку — повтор с меньшей шириной,
+    в крайнем случае сетка без фаски с жёсткими рёбрами по углу."""
     clean(o)
     before = _bbox(o)
     keep = o.data.copy()
-    bevel(o, w, seg, angle)
-    weighted(o)
-    if apply:
-        apply_all(o)
-        after = _bbox(o)
-        if before and after and ((after[0] - before[0]).length > 0.002 or (after[1] - before[1]).length > 0.002):
-            # фаска разнесла вырожденные рёбра — возвращаем сетку и ставим фаску с ограничением по весам нормалей
-            print("BEVEL_FALLBACK", o.name)
+    if not apply:
+        bevel(o, w, seg, angle)
+        weighted(o)
+        bpy.data.meshes.remove(keep)
+        return o
+    for k, (ww, tri) in enumerate(((w, False), (w, True), (w * 0.6, True), (w * 0.35, True))):
+        if k:
             old = o.data
-            o.data = keep
+            o.data = keep.copy()
             bpy.data.meshes.remove(old)
+        if tri:
+            # большие многоугольники боковин после булевых фаска разносит — режем их на треугольники
+            bm = bmesh.new(); bm.from_mesh(o.data)
+            big = [f for f in bm.faces if len(f.verts) > 12]
+            bmesh.ops.triangulate(bm, faces=big, quad_method="BEAUTY", ngon_method="BEAUTY")
+            bm.to_mesh(o.data); bm.free()
+            bevel(o, ww, seg, angle)
+            apply_all(o)
+            # после фаски плоские треугольники снова сливаем в многоугольники — иначе тонкие клинья портят затенение
+            bm = bmesh.new(); bm.from_mesh(o.data)
+            bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(0.05), verts=bm.verts, edges=bm.edges,
+                                     delimit={"NORMAL"})
+            bm.to_mesh(o.data); bm.free()
             for p in o.data.polygons:
                 p.use_smooth = True
-            auto_sharp(o, angle)
+        else:
+            bevel(o, ww, seg, angle)
+        weighted(o)
+        apply_all(o)
+        _drop_loose(o)
+        after = _bbox(o)
+        if not (before and after and ((after[0] - before[0]).length > 0.002 or (after[1] - before[1]).length > 0.002)):
+            if k:
+                print("BEVEL_RETRY", o.name, round(ww, 2), "треугольники" if tri else "")
+            bpy.data.meshes.remove(keep)
             return o
-    bpy.data.meshes.remove(keep)
+        print("BEVEL_FAIL", o.name, round(ww, 2), "места:", _spots(o, *before))
+    old = o.data
+    o.data = keep
+    bpy.data.meshes.remove(old)
+    for p in o.data.polygons:
+        p.use_smooth = True
+    auto_sharp(o, angle)
+    print("BEVEL_FALLBACK", o.name)
     return o
 
 

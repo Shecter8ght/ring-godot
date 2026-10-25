@@ -1,16 +1,29 @@
-# ВСС-М v8: органы управления — спусковой крючок, предохранитель (рычаг справа, как у АК), переводчик огня
-# (поперечная кнопка позади спуска внутри скобы), защёлка магазина (лопатка перед скобой).
-# Все детали строятся в исходном положении; оси вращения — пустышки в part_rig.
+# ВСС-М v8: органы управления — спусковой крючок, предохранитель (штампованный рычаг справа под козырьком),
+# переводчик огня (поперечный ползун у задней стенки скобы, как на фото ВСС-М В. Кузьмина), защёлка магазина.
+# Все детали строятся в исходном положении («огонь», одиночный); оси вращения — пустышки в part_rig.
 import math
 from mathutils import Matrix, Vector
-from lib import (LOWER_W, MM, apply_transform, auto_sharp, box, boolean, cyl, fillet, finish, join, lathe, prism_xz, set_origin)
+from lib import (LOWER_W, MM, SAFETY_FIRE_DEG, SAFETY_PIVOT, SEL_X0, SEL_X1, SEL_Z0, SEL_Z1, apply_transform, auto_sharp, box, boolean, cyl,
+                 fillet, finish, join, lathe, prism_xy, prism_xz)
 
 TRIGGER_PIVOT = (372.0, -9.0)
-SAFETY_PIVOT = (347.0, -11.0)
-SAFETY_FIRE_DEG = 6.5          # рычаг поднят над горизонталью в положении «огонь»
-SAFETY_SAFE_DEG = 16.0         # «предохранитель»: выступ рычага встаёт на пути рукоятки взведения
-SELECTOR_C = (352.0, -29.5)
+SAFETY_R = 6.2                 # пластина рычага вокруг оси
 CATCH_PIVOT = (408.2, -38.0)
+
+
+def safety_outline():
+    """Контур пластины предохранителя в осях рычага (u вперёд от оси, v вверх), положение «огонь»:
+    верхняя кромка поднимается к ~17 мм и плавно опускается к выемке под зуб козырька, впереди — площадка
+    под палец с отогнутыми наружу полками (образец владельца с Fab)."""
+    pts, rad = [], []
+    for k in range(14):
+        a = math.radians(75.0 + 195.0 * k / 13)
+        pts.append((SAFETY_R * math.cos(a), SAFETY_R * math.sin(a)))
+        rad.append(0.0)
+    rad[0] = 3.0
+    pts += [(12.0, -6.0), (57.2, -5.7), (59.5, -3.6), (59.5, 4.0), (58.4, 4.5), (47.8, 4.5), (46.2, 2.8), (44.6, 4.7), (17.0, 8.6)]
+    rad += [2.0, 1.2, 1.0, 1.0, 0.6, 0.5, 0.4, 0.5, 7.0]
+    return pts, rad
 
 
 def strip(center, widths, tip_r=None):
@@ -49,25 +62,35 @@ def build(ctx):
     finish(trig, 0.9, 3, 30)
     out["trigger"] = trig
 
-    # --- предохранитель: ступица на оси, плечо вперёд, на конце отогнутый наружу выступ с насечкой ---
+    # --- предохранитель: штампованная пластина 2 мм с выдавленным ребром жёсткости «с изломом»,
+    # впереди площадка с отогнутыми наружу верхней (под палец) и нижней полками; ось — кольцевая головка ---
     px, pz = SAFETY_PIVOT
-    arm = fillet([(px - 7.0, pz - 1.5), (px - 4.0, pz - 6.6), (px + 6.0, pz - 5.6), (px + 52.0, pz - 3.1), (px + 58.5, pz - 2.4),
-                  (px + 59.5, pz + 2.6), (px + 52.0, pz + 3.1), (px + 8.0, pz + 5.4), (px - 4.0, pz + 6.6)],
-                 [3.0, 3.5, 6.0, 2.0, 1.4, 1.4, 2.0, 6.0, 3.5], 5)
-    lever = prism_xz("Safety_lever", arm, -(LOWER_W + 2.2), -(LOWER_W + 0.15), C, "Steel_black")
-    tab = prism_xz("_stab", fillet([(px + 50.5, pz - 3.0), (px + 59.5, pz - 2.4), (px + 59.5, pz + 2.6), (px + 50.5, pz + 3.1)], [0.8, 1.2, 1.2, 0.8], 3),
-                   -(LOWER_W + 7.3), -(LOWER_W + 1.5), C)
-    boolean(lever, tab, op="UNION")
-    ser = [box(f"_ss{i}", px + 51.4 + 1.25 * i, px + 51.9 + 1.25 * i, -(LOWER_W + 8.5), -(LOWER_W + 6.4), pz - 5, pz + 5, C) for i in range(7)]
-    boolean(lever, join(ser, "_sser"))
-    finish(lever, 0.7, 3, 30)
-    head = lathe("Safety_axis_head", [(0, 0), (0, 5.2), (0.6, 5.0), (1.4, 4.2), (1.7, 0)], C, "Steel_black", 32, 0, 0)
+    # рычаг отстоит от боковины на 0.85 мм (под ним головки штифтов), к оси прижат шайбой-ступицей
+    y_in, y_out = -(LOWER_W + 0.85), -(LOWER_W + 2.9)
+    uv, rad = safety_outline()
+    lever = prism_xz("Safety_lever", [(px + u, pz + w) for u, w in fillet(uv, rad, 5)], y_out, y_in, C, "Steel_black")
+    rib_c = [(px + 5.0, pz + 0.6), (px + 16.5, pz + 4.4), (px + 41.5, pz + 1.3)]
+    rib = strip(rib_c, [4.6, 5.0, 4.4])
+    rib = prism_xz("_srib", fillet(rib, [2.0, 3.5, 2.0, 2.0, 1.5, 2.0], 5), y_out - 0.85, y_out + 0.2, C)
+    boolean(lever, rib, op="UNION")
+    top_flange = prism_xy("_sfl_t", fillet([(px + 47.9, y_in - 1.0), (px + 58.6, y_in - 1.0), (px + 59.5, y_out - 4.0),
+                                            (px + 48.6, y_out - 4.4)], [0.3, 0.3, 1.8, 1.8], 4), pz + 3.0, pz + 4.5, C)
+    boolean(lever, top_flange, op="UNION")
+    low_flange = prism_xy("_sfl_b", fillet([(px + 46.0, y_in - 1.0), (px + 57.0, y_in - 1.0), (px + 56.6, y_out - 2.6),
+                                            (px + 46.6, y_out - 2.8)], [0.3, 0.3, 1.4, 1.4], 4), pz - 5.95, pz - 4.6, C)
+    boolean(lever, low_flange, op="UNION")
+    # керн на площадке (как на образце)
+    boolean(lever, cyl("_sdim", y_out - 1.0, y_out + 0.35, 0.8, C, axis="Y", cy=px + 50.6, cz=pz - 0.6, seg=16))
+    boolean(lever, cyl("_shub", -(LOWER_W - 0.05), y_in + 0.3, 4.2, C, axis="Y", cy=px, cz=pz, seg=32), op="UNION")
+    finish(lever, 0.55, 3, 30)
+    # головка оси: кольцо, канавка, выпуклая середина
+    head = lathe("Safety_axis_head", [(0, 0), (0, 4.5), (0.55, 4.45), (0.95, 4.1), (1.0, 3.5), (0.75, 3.2), (0.75, 2.9),
+                                      (1.25, 2.75), (1.55, 2.3), (1.65, 0)], C, "Steel_black", 40, 0, 0)
     head.rotation_euler = (0, 0, -math.pi / 2)
-    head.location = (px * MM, -(LOWER_W + 2.1) * MM, pz * MM)
+    head.location = (px * MM, (y_out + 0.1) * MM, pz * MM)
     apply_transform(head)
-    boolean(head, box("_hsl", px - 0.4, px + 0.4, -30, -(LOWER_W + 3.1), pz - 6, pz + 6, C))
     auto_sharp(head, 35)
-    # исходное положение «огонь»: рычаг повернут вверх на SAFETY_FIRE_DEG вокруг оси
+    # положение «огонь»: контур повернут передом вверх на SAFETY_FIRE_DEG вокруг оси
     for o in (lever, head):
         o.data.transform(Matrix.Translation((-px * MM, 0, -pz * MM)))
         o.data.transform(Matrix.Rotation(math.radians(-SAFETY_FIRE_DEG), 4, "Y"))
@@ -81,16 +104,19 @@ def build(ctx):
     auto_sharp(lpin, 40)
     out["safety_axis_L"] = lpin
 
-    # --- переводчик огня: поперечная кнопка; в положении «одиночный» выступает справа ---
-    sx, sz = SELECTOR_C
-    e_r, e_l = -(LOWER_W + 3.1), LOWER_W - 1.7
-    sel = lathe("Fire_selector", [(e_r, 0.0), (e_r, 2.3), (e_r + 0.4, 2.75), (-12.4, 2.75), (-12.0, 2.45), (-11.4, 2.45),
-                                  (-11.0, 2.75), (e_l - 0.4, 2.75), (e_l, 2.3), (e_l, 0.0)], C, "Steel_bare", 32, 0, 0)
-    sel.rotation_euler = (0, 0, math.pi / 2)
-    sel.location = (sx * MM, 0, sz * MM)
-    apply_transform(sel)
-    # торец кнопки справа (−Y) — с выпуклой шляпкой, слева — плоский
-    auto_sharp(sel, 30)
+    # --- переводчик огня: поперечный ползун прямоугольного сечения в пазу низа задней стенки скобы;
+    # передняя грань выступает в скобу, концы с поперечным рифлением; «одиночный» — выступает справа на 3 мм ---
+    e_r, e_l = -(LOWER_W + 3.0), LOWER_W - 1.0
+    sec = fillet([(SEL_X0, SEL_Z0), (SEL_X1, SEL_Z0), (SEL_X1, SEL_Z1), (SEL_X0, SEL_Z1)], [0.4, 1.4, 1.4, 0.4], 4)
+    sel = prism_xz("Fire_selector", sec, e_r, e_l, C, "Steel_black")
+    grooves = []
+    for e, s in ((e_r, 1.0), (e_l, -1.0)):
+        for k in range(5):
+            z = SEL_Z0 + 1.15 + 1.2 * k
+            ya, yb = sorted((e - s * 1.0, e + s * 0.45))
+            grooves.append(box(f"_selg{e:.0f}_{k}", SEL_X0 - 1, SEL_X1 + 1, ya, yb, z, z + 0.5, C))
+    boolean(sel, join(grooves, "_selg"))
+    finish(sel, 0.45, 3, 30)
     out["selector"] = sel
 
     # --- защёлка магазина: верхнее плечо с зубом в шахте, лопатка вниз перед скобой ---

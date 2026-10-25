@@ -1,8 +1,8 @@
 # ВСС-М v8: иерархия, оси и управление. Пустышка VSS_Controls — свойства 0…1:
 #   bolt_pull   — отвод затворной рамы (74 мм; при включённом предохранителе — упор у его выступа, 58 мм)
 #   trigger     — выжим спуска (12°; при предохранителе не идёт)
-#   safety      — предохранитель (0 «огонь», 1 «предохранитель»)
-#   selector    — переводчик (0 одиночный — кнопка выступает справа, 1 автоматический — слева)
+#   safety      — предохранитель (0 «огонь», 1 «предохранитель» — рычаг вверх на 5° до зуба козырька)
+#   selector    — переводчик-ползун за спуском (0 одиночный — выступает справа, 1 автоматический — слева)
 #   mag_catch   — нажатие защёлки (8°)
 #   mag_out     — снятие магазина: поворот вокруг переднего зацепа (0…0.5), затем вниз (0.5…1)
 #   sight_range — секторный прицел: хомутик вперёд, лист вверх
@@ -10,7 +10,7 @@
 # Затвор: свободный ход рамы 6 мм, поворот −30° на участке 6…14 мм, дальше идёт с рамой (постановочно).
 import math
 import bpy
-from lib import MM, BORE_Z, empty, set_parent, set_origin
+from lib import MM, BORE_Z, SAFETY_PIVOT, SAFETY_TRAVEL_DEG, SEL_TRAVEL, SEL_X0, SEL_X1, SEL_Z0, SEL_Z1, empty, set_parent, set_origin
 
 TRAVEL = 74.0
 TRAVEL_SAFE = 58.0
@@ -78,13 +78,13 @@ def build(ctx):
     trig_p = empty("Trigger_pivot", (372.0, 0, -9.0), R, root, size=0.006)
     set_parent(c["trigger"], trig_p)
     add_driver(trig_p, "rotation_euler", 1, "radians(12.0)*trigger*(1.0-safety)", ctrl, ["trigger", "safety"])
-    saf_p = empty("Safety_pivot", (347.0, 0, -11.0), R, root, size=0.006)
+    saf_p = empty("Safety_pivot", (SAFETY_PIVOT[0], 0, SAFETY_PIVOT[1]), R, root, size=0.006)
     set_parent(c["safety"], saf_p)
-    add_driver(saf_p, "rotation_euler", 1, f"-radians({16.0 - 6.5})*safety", ctrl, ["safety"])
+    add_driver(saf_p, "rotation_euler", 1, f"-radians({SAFETY_TRAVEL_DEG})*safety", ctrl, ["safety"])
     set_parent(c["safety_axis_L"], root)
-    sel_p = empty("Selector_mover", (352.0, 0, -29.5), R, root, size=0.005)
+    sel_p = empty("Selector_mover", ((SEL_X0 + SEL_X1) / 2, 0, (SEL_Z0 + SEL_Z1) / 2), R, root, size=0.005)
     set_parent(c["selector"], sel_p)
-    add_driver(sel_p, "location", 1, f"4.0*selector*{MM}", ctrl, ["selector"])
+    add_driver(sel_p, "location", 1, f"{SEL_TRAVEL}*selector*{MM}", ctrl, ["selector"])
     cat_p = empty("Magazine_catch_pivot", (408.2, 0, -38.0), R, root, size=0.006)
     set_parent(c["catch"], cat_p)
     add_driver(cat_p, "rotation_euler", 1, "-radians(8.0)*mag_catch", ctrl, ["mag_catch"])
