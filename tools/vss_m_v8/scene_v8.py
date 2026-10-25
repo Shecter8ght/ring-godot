@@ -1,7 +1,9 @@
 # ВСС-М v8: сцена «винтовка на столе и обвесы рядом». Открывает геометрию v8, накладывает материалы,
 # добавляет прицелы (ПСО и 4×32 из исходников комплекта), стол, свет, камеры; каждый предмет кладётся на грань своей
 # выпуклой оболочки, над которой лежит его центр масс (устойчивая поза, без висения).
-# blender --background --factory-startup <VSS_M_v8_geometry.blend> --python-exit-code 1 --python tools/vss_m_v8/scene_v8.py -- <out.blend> [studio]
+# blender --background --factory-startup <VSS_M_v8_geometry.blend> --python-exit-code 1 --python tools/vss_m_v8/scene_v8.py -- <out.blend> [table|studio] [painter]
+# painter — поверх процедурных материалов карты Substance Painter (запускать на _asset_src/vss_m_v8/VSS_M_v8_sp.blend:
+# там развёртки деталей, по которым запечены карты; см. sp_export.py, sp_apply.py)
 import math
 import os
 import random
@@ -301,6 +303,9 @@ def main():
     prints = tex_v8.make_decals()
     M = MV.build_all(prints)
     MV.assign(M, tex_v8.TUNE)
+    if "painter" in a[2:]:
+        import sp_apply
+        sp_apply.apply_all()
     sc = bpy.context.scene
     if mode == "studio":
         tex_v8.studio()

@@ -28,6 +28,13 @@ def stack(i=0):
     return TS.all_texture_sets()[i].get_stack()
 
 
+def stack_by_name(name):
+    for t in TS.all_texture_sets():
+        if t.name() == name:
+            return t.get_stack()
+    raise RuntimeError("нет набора текстур " + name)
+
+
 def clear(st):
     for n in L.get_root_layer_nodes(st):
         L.delete_node(n)

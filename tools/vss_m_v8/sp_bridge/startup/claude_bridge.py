@@ -31,6 +31,9 @@ def _poll():
             continue
         job = os.path.join(d, name)
         try:
+            # файл может ещё дописываться (перенаправление вывода в оболочке) — берём только «остывшие»
+            if time.time() - os.path.getmtime(job) < 1.0:
+                continue
             with open(job, encoding="utf-8") as f:
                 code = f.read()
         except OSError:

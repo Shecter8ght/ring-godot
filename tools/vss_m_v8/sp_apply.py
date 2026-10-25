@@ -1,5 +1,6 @@
 # Карты из Substance Painter → материал группы деталей в Blender (развёртка уже в деталях, см. sp_export.py).
-# blender --background <файл с развёрткой> --python tools/vss_m_v8/sp_apply.py -- <группа> <папка экспорта> [out.blend]
+# blender --background <файл с развёрткой> --python tools/vss_m_v8/sp_apply.py -- <группа|all> [<папка экспорта>] [out.blend]
+# all — коробка (sp_receiver/export) и все наборы проекта «parts» (sp_parts/export).
 import os
 import sys
 
@@ -39,18 +40,34 @@ def material(group, folder):
     return m
 
 
+ROOT = "E:/Games/RING-godot/_asset_src/vss_m_v8"
+
+
 def apply(group, folder):
     m = material(group, folder)
     objs = sp_export.group_objects(group)
     for o in objs:
+        n = max(1, len(o.data.materials))          # у патрона два слота (гильза, пуля) — оба на один материал
         o.data.materials.clear()
-        o.data.materials.append(m)
+        for _ in range(n):
+            o.data.materials.append(m)
     print("APPLIED", group, len(objs))
+
+
+def apply_all():
+    apply("receiver", ROOT + "/sp_receiver/export")
+    for g in sp_export.PARTS:
+        apply(g, ROOT + "/sp_parts/export")
 
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
-    apply(a[0], a[1])
-    if len(a) > 2:
-        bpy.ops.wm.save_as_mainfile(filepath=a[2], compress=True)
-        print("SAVED", a[2])
+    if a[0] == "all":
+        apply_all()
+        out = a[1] if len(a) > 1 else None
+    else:
+        apply(a[0], a[1])
+        out = a[2] if len(a) > 2 else None
+    if out:
+        bpy.ops.wm.save_as_mainfile(filepath=out, compress=True)
+        print("SAVED", out)
