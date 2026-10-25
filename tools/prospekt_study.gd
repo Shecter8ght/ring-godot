@@ -259,7 +259,11 @@ func _verify() -> void:
 			path.append(Vector3(float(p[0]), 0.1, float(p[1])))
 		var ok: bool = await _walk_path(path, true)
 		var details: Dictionary = {"end": str(walker.global_position)}
-		if route.has("min_y"):
+		if route.has("max_y"):
+			var low: bool = walker.global_position.y <= float(route.max_y)
+			details["y"] = walker.global_position.y
+			_check("Маршрут «%s»: пройден и спустился под землю" % String(route.label), ok and low, details)
+		elif route.has("min_y"):
 			var high: bool = walker.global_position.y >= float(route.min_y)
 			details["y"] = walker.global_position.y
 			_check("Маршрут «%s»: пройден и поднялся на этаж" % String(route.label), ok and high, details)
@@ -431,7 +435,15 @@ func _shots() -> void:
 		{"id": "49_parking_wrecks", "at": Vector3(-150, -1.6, -60.4), "look": Vector3(-120, -2.4, -60.4)},
 		{"id": "51_dig_lights", "at": Vector3(-72, -1.6, -40), "look": Vector3(-60, -2.6, -44)},
 		{"id": "52_bird_tower", "at": Vector3(-70, 70, 120), "look": Vector3(-5, 0, 60)},
-		{"id": "53_bird_station", "at": Vector3(-40, 70, 170), "look": Vector3(-115, 0, 225)}]
+		{"id": "53_bird_station", "at": Vector3(-40, 70, 170), "look": Vector3(-115, 0, 225)},
+		# редакция 6 (владелец 2026-10-25): шесть путей и контактная сеть, провода в городе, спуски в паркинг в углах двора
+		{"id": "54_rail_tracks", "at": Vector3(10, 8.3, 266), "look": Vector3(110, 10, 276)},
+		{"id": "55_avenue_trolley", "at": Vector3(-185, 1.62, -13), "look": Vector3(-120, 6, -2)},
+		{"id": "56_yard_ramp_w", "at": Vector3(-190, 1.62, -112), "look": Vector3(-208, 0, -100)},
+		{"id": "57_yard_ramp_e", "at": Vector3(-64, 1.62, -119), "look": Vector3(-47, 0, -100)},
+		{"id": "58_yard_lines", "at": Vector3(-130, 1.62, -98), "look": Vector3(-160, 7, -121)},
+		{"id": "59_bird_rails", "at": Vector3(-40, 60, 220), "look": Vector3(40, 6, 275)},
+		{"id": "60_bird_yard", "at": Vector3(-130, 70, -50), "look": Vector3(-130, 0, -105)}]
 	for spec: String in OS.get_environment("PROSPEKT_VIEW").split(";", false):
 		var custom: PackedStringArray = spec.split(":")
 		if custom.size() == 7:

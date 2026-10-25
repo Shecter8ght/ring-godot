@@ -914,7 +914,30 @@ const KITS: Dictionary = {
 		["cyl", Vector3(0, 1.5, 0), Vector3(0.05, 0.4, 0.05), "black"],
 		["box", Vector3(0, 1.75, 0.08), Vector3(0.55, 0.4, 0.22), "black", Vector3(-20, 0, 0)],
 		["box", Vector3(0, 1.76, 0.2), Vector3(0.48, 0.32, 0.02), "lamp_head", Vector3(-20, 0, 0)],
-		["box", Vector3(0, 0.02, -1.4), Vector3(0.04, 0.04, 2.6), "black"]], "range": 160}}
+		["box", Vector3(0, 0.02, -1.4), Vector3(0.04, 0.04, 2.6), "black"]], "range": 160},
+	# ---- «Проспект», редакция 6: пути, городская ЛЭП, троллейбус (владелец 2026-10-25)
+	"track_3m": {"parts": [["box", Vector3(-0.76, 0.24, 0), Vector3(0.07, 0.16, 3), "steel"],
+		["box", Vector3(0.76, 0.24, 0), Vector3(0.07, 0.16, 3), "steel"],
+		["box", Vector3(0, 0.08, -1.2), Vector3(2.6, 0.16, 0.26), "concrete"],
+		["box", Vector3(0, 0.08, -0.6), Vector3(2.6, 0.16, 0.26), "concrete"],
+		["box", Vector3(0, 0.08, 0), Vector3(2.6, 0.16, 0.26), "concrete"],
+		["box", Vector3(0, 0.08, 0.6), Vector3(2.6, 0.16, 0.26), "concrete"],
+		["box", Vector3(0, 0.08, 1.2), Vector3(2.6, 0.16, 0.26), "concrete"]], "range": 220, "shadow": false},
+	"pole_conc": {"parts": [["box", Vector3(0, 4.75, 0), Vector3(0.22, 9.5, 0.26), "concrete"],
+		["box", Vector3(0, 9, 0), Vector3(0.08, 0.1, 1.6), "steel"],
+		["cyl", Vector3(0, 9.12, -0.7), Vector3(0.08, 0.16, 0.08), "paint_white"],
+		["cyl", Vector3(0, 9.12, -0.25), Vector3(0.08, 0.16, 0.08), "paint_white"],
+		["cyl", Vector3(0, 9.12, 0.25), Vector3(0.08, 0.16, 0.08), "paint_white"],
+		["cyl", Vector3(0, 9.12, 0.7), Vector3(0.08, 0.16, 0.08), "paint_white"],
+		["box", Vector3(0, 8.3, 0), Vector3(0.05, 0.05, 1.3), "steel", Vector3(40, 0, 0)],
+		["box", Vector3(0.14, 2.6, 0), Vector3(0.02, 0.3, 0.2), "paint_red"]],
+		"solid": [[Vector3(0, 4.75, 0), Vector3(0.26, 9.5, 0.3)]], "range": 520},
+	"pole_trolley": {"parts": [["cyl", Vector3(0, 4.5, 0), Vector3(0.28, 9, 0.28), "galv"],
+		["cyl", Vector3(0, 0.4, 0), Vector3(0.42, 0.8, 0.42), "galv"],
+		["box", Vector3(0, 7.4, 0.9), Vector3(0.06, 0.06, 1.8), "galv"],
+		["cyl", Vector3(0, 7.4, 1.8), Vector3(0.1, 0.25, 0.1), "black", Vector3(90, 0, 0)],
+		["box", Vector3(0, 8.9, 0), Vector3(0.12, 0.12, 0.3), "black"]],
+		"solid": [[Vector3(0, 4.5, 0), Vector3(0.3, 9, 0.3)]], "range": 520}}
 
 var landscape: MallLandscape
 var generated: Node3D
