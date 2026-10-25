@@ -182,7 +182,7 @@ HATCH = dict(
 # --- Универсал C-класса ---------------------------------------------------------------------------
 # Прообраз размеров: универсал C-класса (4690 × 1810 × 1470, база 2690, шины 205/55 R16).
 WAGON = dict(
-    name="wagon", title="Универсал",
+    name="wagon", title="Универсал", lod_h=6.8,
     length=4.69, width=1.81, height=1.47, wheelbase=2.69,
     wheel_y=_wheels(2.69), wheel_z=0.305, tire_r=0.316, tire_w=0.205, rim_d_in=16, track=1.54,
     wheel_style="steel_cap", cap_spokes=10,
@@ -266,7 +266,7 @@ WAGON = dict(
 # Прообраз размеров: среднеразмерный рамный внедорожник (4780 с запаской × 1885 × 1840, база 2790,
 # шины 265/65 R17); задняя дверь распашная на петлях справа, запаска на двери.
 SUV = dict(
-    name="suv", title="Внедорожник",
+    name="suv", title="Внедорожник", lod_h=7.2,
     length=4.78, width=1.885, height=1.84, wheelbase=2.79,
     wheel_y=_wheels(2.79), wheel_z=0.380, tire_r=0.388, tire_w=0.265, rim_d_in=17, track=1.58,
     wheel_style="alloy", spokes=6, split_spokes=False,

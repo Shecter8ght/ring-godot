@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 LIAZ = dict(
-    name="bus12", title="Автобус городской 12 м", kind="bus",
+    name="bus12", title="Автобус городской 12 м", kind="bus", lod_strip=0.12,
     length=12.41, width=2.50, height=2.88, wheelbase=5.96,
     wheel_y=[-2.98, 2.98], wheel_z=0.470, tire_r=0.478, tire_w=0.276, rim_d_in=22.5,
     track_f=2.10, track_r=1.84, dual_rear=True, dual_gap=0.315, studs=10,
@@ -61,7 +61,7 @@ LIAZ = dict(
 )
 
 PAZ = dict(
-    name="paz", title="ПАЗ", kind="paz",
+    name="paz", title="ПАЗ", kind="paz", lod_strip=0.12,
     length=7.00, width=2.48, height=2.96, wheelbase=3.60,
     wheel_y=[-1.80, 1.80], wheel_z=0.470, tire_r=0.487, tire_w=0.240, rim_d_in=20,
     track_f=1.94, track_r=1.69, dual_rear=True, dual_gap=0.275, studs=8,
@@ -106,7 +106,7 @@ PAZ = dict(
 )
 
 GAZEL = dict(
-    name="gazel", title="ГАЗель-маршрутка", kind="gazel",
+    name="gazel", title="ГАЗель-маршрутка", kind="gazel", lod_strip=0.12,
     length=5.50, width=2.04, height=2.20, wheelbase=2.90,
     wheel_y=[-1.45, 1.45], wheel_z=0.335, tire_r=0.342, tire_w=0.185, rim_d_in=16,
     track_f=1.70, track_r=1.56, dual_rear=True, dual_gap=0.205, studs=6,

@@ -150,14 +150,26 @@ def build(surf, f, s: dict, views: dict) -> tuple[list, dict]:
         out.append((name, mat, V, F, group))
 
     def panel(name, mat, view, loop3, holes=(), group="body", **kw):
+        import vq
         V = None
-        h0 = kw.pop("h", 0.03)
-        for k in range(4):                           # совпадение узлов сетки с контуром — другой шаг
-            try:
-                V, F = domain_panel(surf, views[view], loop3, holes=holes, h=h0 * (1 + 0.07 * k), **kw)
+        h0 = kw.pop("h", 0.03) * min(vq.Q["h"], 2.5)
+        kw.setdefault("roll_steps", vq.Q["roll"])
+        steps = [h0]
+        if vq.low():
+            # игровая сетка: у больших плоских панелей (крыша, борта 12 м) шаг растёт с размером; не собралась — прежний
+            ext = float(np.ptp(views[view].to_uv(loop3), axis=0).max())
+            big = h0 * float(np.clip(ext / 2.0, 1.0, 2.6))
+            if big > h0 * 1.05:
+                steps = [big, h0]
+        for hh in steps:
+            for k in range(4):                       # совпадение узлов сетки с контуром — другой шаг
+                try:
+                    V, F = domain_panel(surf, views[view], loop3, holes=holes, h=hh * (1 + 0.07 * k), **kw)
+                    break
+                except Exception as e:
+                    err = e
+            if V is not None:
                 break
-            except Exception as e:
-                err = e
         if V is None:                                # отладка раскладки
             print(f"!! панель {name}: {err}")
             DEBUG.append((name, view, views[view].to_uv(loop3), [views[view].to_uv(h) for h in holes]))
@@ -255,8 +267,8 @@ def _hole_part(surf, views, band, h, H, add, panel, S, s):
         add("Grille_Back_" + nm, "mesh_black", *pt.backing(surf, views[view], H, 0.06))
         u0, u1, v0, v1, r = h["rect"]
         zs = list(np.linspace(v0 + 0.03, v1 - 0.03, h["grille"]))
-        add("Grille_Bars_" + nm, "trim_black", *pt.fins_in_loop(surf, views[view], H, zs, t=0.014, depth=0.04,
-                                                                 recess=0.012, margin=0.01))
+        add("Grille_Bars_" + nm, "trim_black", *_fins()(surf, views[view], H, zs, t=0.014, depth=0.04,
+                                                         recess=0.012, margin=0.01))
     elif h.get("hatch"):
         # люк двигателя: крышка в проёме с жалюзи
         from vlib import loop_on_surface
@@ -265,9 +277,10 @@ def _hole_part(surf, views, band, h, H, add, panel, S, s):
         u0, u1, v0, v1, r = h["rect"]
         lv = rect_loop(u0 + 0.12, u1 - 0.12, v0 + 0.55, v1 - 0.10, 0.03)
         LV = lift_poly(surf, views[view], np.vstack([lv, lv[:1]]), 0.004)[:-1]
-        zs = list(np.arange(v0 + 0.60, v1 - 0.12, 0.045))
-        add("Engine_Louvers", "trim_black", *pt.fins_in_loop(surf, views[view], LV, zs, t=0.010, depth=0.03, recess=-0.004,
-                                                            margin=0.004), "hatch")
+        import vq
+        zs = list(np.arange(v0 + 0.60, v1 - 0.12, 0.09 if vq.low() else 0.045))     # в игровой — через одну, рельеф в картах
+        add("Engine_Louvers", "trim_black", *_fins()(surf, views[view], LV, zs, t=0.010, depth=0.03, recess=-0.004,
+                                                    margin=0.004), "hatch")
         add("Engine_Louver_Back", "mesh_black", *pt.backing(surf, views[view], LV, 0.03), "hatch")
     elif h.get("doors") == "swing2":
         # задние распашные двери: две створки с окнами
@@ -350,6 +363,15 @@ def _side_door(surf, views, s, d, side, sgn, vname, j, add, panel, S):
 
 # =============================================================================== колёса грузового типа
 
+def _fins():
+    """Планки решёток: в игровой сетке — вариант легковой (меньше точек вдоль планки)."""
+    import vq
+    if vq.low():
+        from carparts import fins_in_loop
+        return fins_in_loop
+    return pt.fins_in_loop
+
+
 def truck_wheel(spec: dict, inner: bool = False):
     """Колесо: шина, штампованный диск с вентиляционными окнами, ступица, гайки по окружности; inner —
     внутреннее колесо пары (лицом внутрь)."""
@@ -394,10 +416,11 @@ def truck_wheel(spec: dict, inner: bool = False):
 
 def _arm(p0, p1, p2, r: float):
     """Кронштейн зеркала: труба по квадратичной кривой Безье p0 → p2 с контрольной точкой p1."""
-    t = np.linspace(0, 1, 24)[:, None]
+    import vq
+    t = np.linspace(0, 1, 24 if not vq.low() else 6)[:, None]
     P = (1 - t) ** 2 * np.asarray(p0) + 2 * (1 - t) * t * np.asarray(p1) + t ** 2 * np.asarray(p2)
     T, N, B = pt.frames(P, np.array([0, 0, 1.0]) if abs(P[-1, 2] - P[0, 2]) < 0.5 else np.array([1.0, 0, 0]))
-    ang = np.linspace(0, 2 * math.pi, 10, endpoint=False)
+    ang = np.linspace(0, 2 * math.pi, 10 if not vq.low() else 6, endpoint=False)
     return pt.loft(P, N, B, np.c_[np.cos(ang), np.sin(ang)] * r, cap=True)
 
 
@@ -514,16 +537,27 @@ def details(surf, f, s: dict, views: dict, S: dict) -> list:
 
 # =============================================================================== салон
 
+def _box(c, sx: float, sy: float, sz: float):
+    """Прямоугольный блок для игровой сетки (скругления — в карте нормалей)."""
+    path = np.array([[c[0], c[1], c[2] - sz / 2], [c[0], c[1], c[2] + sz / 2]])
+    sec = np.array([(sx / 2, sy / 2), (-sx / 2, sy / 2), (-sx / 2, -sy / 2), (sx / 2, -sy / 2)])
+    return pt.loft(path, np.broadcast_to(np.array([1.0, 0, 0]), path.shape), np.broadcast_to(np.array([0, 1.0, 0]), path.shape),
+                   sec, cap=True)
+
+
 def seat_bus(x: float, y: float, z_floor: float, width: float = 0.44, facing: float = -1.0):
     """Сиденье автобуса: пластиковая чаша (подушка и спинка), рамка на стойке, поручень на спинке."""
+    import vq
     from interior import rot
+    blk = (lambda c, sx, sy, sz, r: _box(c, sx, sy, sz)) if vq.low() else rounded_block
+    ns, nt = (4, 2) if vq.low() else (8, 3)
     zc = z_floor + 0.45
-    cush = rounded_block((x, y, zc), width, 0.42, 0.07, 0.025)
+    cush = blk((x, y, zc), width, 0.42, 0.07, 0.025)
     yb = y + 0.21 * -facing
-    back = rounded_block((x, yb, zc + 0.36), width, 0.06, 0.66, 0.025)
+    back = blk((x, yb, zc + 0.36), width, 0.06, 0.66, 0.025)
     back = (rot(back[0], rx=0.10 * facing, about=(x, yb, zc)), back[1])
-    leg = tube([(x, y, z_floor), (x, y, zc - 0.04)], 0.02, 8, 3)
-    grip = tube([(x - width / 2 + 0.05, yb, zc + 0.70), (x + width / 2 - 0.05, yb, zc + 0.70)], 0.012, 8, 3)
+    leg = tube([(x, y, z_floor), (x, y, zc - 0.04)], 0.02, ns, nt)
+    grip = tube([(x - width / 2 + 0.05, yb, zc + 0.70), (x + width / 2 - 0.05, yb, zc + 0.70)], 0.012, ns, nt)
     return pt.merge([cush, back]), pt.merge([leg, grip])
 
 

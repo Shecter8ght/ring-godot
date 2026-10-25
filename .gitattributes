@@ -30,3 +30,4 @@ levels/shelter/**/*.res filter=lfs diff=lfs merge=lfs -text
 assets/models/characters/**/*.bin filter=lfs diff=lfs merge=lfs -text
 *.webp filter=lfs diff=lfs merge=lfs -text
 assets/models/urban95/*.bin filter=lfs diff=lfs merge=lfs -text
+assets/models/prospekt_vehicles/*.bin filter=lfs diff=lfs merge=lfs -text

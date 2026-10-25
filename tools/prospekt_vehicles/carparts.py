@@ -19,10 +19,18 @@ from wheel import revolve
 SEG = 96
 
 
+def _rect(w: float, h: float) -> np.ndarray:
+    """Прямоугольное сечение для игровой сетки (скругления — в карте нормалей)."""
+    return np.array([(w / 2, h / 2), (-w / 2, h / 2), (-w / 2, -h / 2), (w / 2, -h / 2)])
+
+
 # =============================================================================== колёса
 
 def tire(R: float, W: float, rim_r: float, seg: int = SEG):
     """Шина: боковины с выпуклостью, плечи, протектор с четырьмя продольными канавками. Ось +X."""
+    import vq
+    if vq.low():
+        return revolve(vq.tire_profile_low(R, W, rim_r), seg, closed=True)
     H = R - rim_r
     hw = W / 2
     side = [(0.80, 0.03), (0.90, 0.13), (0.97, 0.30), (1.00, 0.50), (0.985, 0.68), (0.94, 0.82), (0.87, 0.92)]
@@ -46,7 +54,12 @@ def tire(R: float, W: float, rim_r: float, seg: int = SEG):
 
 def rim_barrel(rim_r: float, W: float, seg: int = SEG):
     """Обод: закраины, полки, ручей — тонкая стенка, видна изнутри арки."""
+    import vq
     hw = W / 2 * 0.86
+    if vq.low():
+        prof = [(-hw - 0.006, rim_r + 0.012), (-hw + 0.02, rim_r), (0.0, rim_r - 0.022), (hw - 0.03, rim_r),
+                (hw + 0.006, rim_r + 0.012), (hw + 0.004, rim_r + 0.006), (0.0, rim_r - 0.028), (-hw - 0.004, rim_r + 0.006)]
+        return revolve(prof, seg, closed=True)
     outer = [(-hw - 0.006, rim_r + 0.012), (-hw, rim_r + 0.003), (-hw + 0.02, rim_r), (-0.02, rim_r - 0.022),
              (0.02, rim_r - 0.022), (hw - 0.03, rim_r), (hw, rim_r + 0.003), (hw + 0.006, rim_r + 0.012)]
     inner = [(hw + 0.004, rim_r + 0.006), (hw - 0.03, rim_r - 0.006), (0.02, rim_r - 0.028),
@@ -58,21 +71,25 @@ def hubcap(rim_r: float, W: float, n: int = 8):
     """Пластиковый колпак на штампованном диске: чаша, рёбра-спицы, тёмные прорези между ними."""
     x0 = W / 2 * 0.86 + 0.004
     R = rim_r + 0.012
+    import vq
     dish = [(x0 - 0.004, R), (x0 + 0.006, R - 0.004), (x0 + 0.012, R - 0.020), (x0 + 0.018, R * 0.72),
             (x0 + 0.024, R * 0.45), (x0 + 0.030, R * 0.30), (x0 + 0.032, R * 0.20), (x0 + 0.036, R * 0.12),
             (x0 + 0.038, 0.0)]
+    if vq.low():
+        dish = [dish[0], dish[2], dish[3], dish[5], dish[8]]
     dV, dF = revolve(dish, SEG, closed=False)
     ribs, slots = [], []
     for i in range(n):
         a = i * 2 * math.pi / n
-        t = np.linspace(0.30, 0.86, 10)
+        import vq
+        t = np.linspace(0.30, 0.86, 10 if not vq.low() else 3)
         r = R * t
         x = x0 + 0.030 - 0.018 * (t - 0.30) / 0.56 + 0.005
         P = np.c_[x, r * math.cos(a), r * math.sin(a)]
         rad = np.array([0.0, math.cos(a), math.sin(a)])
         tang = np.cross(np.array([1.0, 0, 0]), rad)
-        ribs.append(pt.loft(P, np.broadcast_to(tang, P.shape), np.broadcast_to(np.array([1.0, 0, 0]), P.shape),
-                            pt.rounded_rect(0.026, 0.008, 0.003, 2)))
+        sec = _rect(0.026, 0.008) if vq.low() else pt.rounded_rect(0.026, 0.008, 0.003, 2)
+        ribs.append(pt.loft(P, np.broadcast_to(tang, P.shape), np.broadcast_to(np.array([1.0, 0, 0]), P.shape), sec))
         # прорезь между рёбрами: тёмная трапеция чуть глубже чаши
         b = a + math.pi / n
         poly = []
@@ -88,9 +105,12 @@ def hubcap(rim_r: float, W: float, n: int = 8):
 def steel_face(rim_r: float, W: float, n_holes: int = 8):
     """Штампованный диск под колпаком: чаша с выштамповкой, вентиляционные окна (тёмные), ступица, гайки."""
     x0 = W / 2 * 0.86
+    import vq
     prof = [(x0 - 0.002, rim_r + 0.004), (x0 - 0.010, rim_r - 0.010), (x0 - 0.020, rim_r * 0.80),
             (x0 - 0.018, rim_r * 0.62), (x0 - 0.008, rim_r * 0.50), (x0 - 0.006, rim_r * 0.40),
             (x0 - 0.012, rim_r * 0.30), (x0 - 0.012, 0.03), (x0 - 0.008, 0.0)]
+    if vq.low():
+        prof = [prof[0], prof[2], prof[4], prof[6], prof[8]]
     dish = revolve(prof, SEG)
     holes = []
     for i in range(n_holes):
@@ -128,7 +148,8 @@ def alloy_face(rim_r: float, W: float, n_spokes: int = 5, split: bool = False):
     for p in range(n_spokes):
         base = p * 2 * math.pi / n_spokes
         for side in pairs[0]:
-            t = np.linspace(0, 1, 18)
+            import vq
+            t = np.linspace(0, 1, 18 if not vq.low() else 3)
             r = 0.060 + (rim_r + 0.004 - 0.060) * t
             x = x0 - 0.006 - 0.030 * (1 - t) ** 1.5 + 0.004
             spread = (math.radians(4.5) * side * (0.4 + t)) if split else 0.0
@@ -140,8 +161,15 @@ def alloy_face(rim_r: float, W: float, n_spokes: int = 5, split: bool = False):
 
             def sec(i, t=t, w0=w0, w1=w1):
                 w = w0 + (w1 - w0) * t[i]
-                return pt.rounded_rect(w, 0.026, 0.008, 3)
+                return _rect(w, 0.026) if vq.low() else pt.rounded_rect(w, 0.026, 0.008, 3)
             out.append(pt.loft(P, tang, np.broadcast_to(np.array([1.0, 0, 0]), P.shape), sec, cap=True))
+    import vq
+    if vq.low():
+        # игровая сетка: ступица — четыре пояса, закраина — треугольник, гайки — в картах
+        hub = revolve([(x0 - 0.035, 0.0), (x0 - 0.035, 0.075), (x0 - 0.002, 0.072), (x0 + 0.009, 0.0)], 16)
+        lip = revolve([(x0 - 0.010, rim_r + 0.002), (x0 + 0.008, rim_r + 0.012), (x0 - 0.012, rim_r + 0.014)], SEG,
+                      closed=True)
+        return pt.merge(out), pt.merge([hub, lip]), (np.zeros((0, 3)), [])
     hub = revolve([(x0 - 0.035, 0.0), (x0 - 0.035, 0.075), (x0 - 0.010, 0.078), (x0 - 0.002, 0.070),
                    (x0 + 0.004, 0.052), (x0 + 0.008, 0.032), (x0 + 0.009, 0.0)], 64)
     lip = revolve([(x0 - 0.010, rim_r + 0.002), (x0 + 0.004, rim_r + 0.004), (x0 + 0.008, rim_r + 0.014),
@@ -160,6 +188,16 @@ def alloy_face(rim_r: float, W: float, n_spokes: int = 5, split: bool = False):
 def brake(rim_r: float):
     """Тормозной диск с колоколом и суппорт — видны сквозь спицы."""
     rd = rim_r * 0.70
+    import vq
+    if vq.low():
+        disc = revolve([(-0.044, rd * 0.45), (-0.044, rd), (-0.022, rd), (-0.022, rd * 0.45)], 14, closed=True)
+        hat = revolve([(-0.022, rd * 0.45), (0.010, rd * 0.42), (0.010, 0.04)], 12)
+        t = np.linspace(-0.45, 0.45, 4)
+        ang = math.radians(150.0) + t
+        P = np.c_[np.full_like(t, -0.033), rd * 0.86 * np.cos(ang), rd * 0.86 * np.sin(ang)]
+        radial = np.c_[np.zeros_like(t), np.cos(ang), np.sin(ang)]
+        cal = pt.loft(P, np.broadcast_to(np.array([1.0, 0, 0]), P.shape), radial, pt.rounded_rect(0.06, 0.045, 0.012, 1))
+        return pt.merge([disc, hat]), cal
     disc = revolve([(-0.044, rd * 0.45), (-0.044, rd), (-0.022, rd), (-0.022, rd * 0.45)], 64, closed=True)
     hat = revolve([(-0.022, rd * 0.48), (0.0, rd * 0.45), (0.010, rd * 0.42), (0.010, 0.04), (0.004, 0.04),
                    (0.004, rd * 0.40), (-0.018, rd * 0.44)], 48, closed=True)
@@ -175,11 +213,20 @@ def wheel_parts(spec: dict) -> list[tuple[str, str, np.ndarray, list]]:
     R, W = spec["tire_r"], spec["tire_w"]
     rim_r = spec["rim_d_in"] * 0.0127
     style = spec.get("wheel_style", "steel_cap")
-    out = [("Tire", "rubber", *tire(R, W, rim_r)), ("Rim_Barrel", "rim_steel" if style == "steel_cap" else "rim_alloy",
-                                                    *rim_barrel(rim_r, W))]
+    import vq
+    # игровая сетка легковой: шина 20 граней по кругу, обод (виден только в арке) — 16
+    ts, bs = (20, 16) if vq.low() else (SEG, SEG)
+    out = [("Tire", "rubber", *tire(R, W, rim_r, ts)), ("Rim_Barrel", "rim_steel" if style == "steel_cap" else "rim_alloy",
+                                                        *rim_barrel(rim_r, W, bs))]
     disc, cal = brake(rim_r)
     out += [("Brake_Disc", "brake", *disc), ("Caliper", "steel_dark", *cal)]
-    if style == "steel_cap":
+    import vq
+    if style == "steel_cap" and vq.low():
+        face, holes, nuts = steel_face(rim_r, W)
+        out += [("Rim_Face", "rim_steel", *face)]
+        dish, ribs, slots, cap = hubcap(rim_r, W, spec.get("cap_spokes", 8))
+        out += [("Hubcap", "hubcap", *dish), ("Hubcap_Ribs", "hubcap", *ribs), ("Hubcap_Slots", "mesh_black", *slots)]
+    elif style == "steel_cap":
         face, holes, nuts = steel_face(rim_r, W)
         out += [("Rim_Face", "rim_steel", *face), ("Rim_Holes", "mesh_black", *holes), ("Lug_Nuts", "steel_dark", *nuts)]
         dish, ribs, slots, cap = hubcap(rim_r, W, spec.get("cap_spokes", 8))
@@ -187,7 +234,9 @@ def wheel_parts(spec: dict) -> list[tuple[str, str, np.ndarray, list]]:
                 ("Hubcap_Center", "hubcap", *cap)]
     else:
         spokes, hub, nuts = alloy_face(rim_r, W, spec.get("spokes", 5), spec.get("split_spokes", False))
-        out += [("Rim_Spokes", "rim_alloy", *spokes), ("Rim_Hub", "rim_alloy", *hub), ("Lug_Nuts", "steel_dark", *nuts)]
+        out += [("Rim_Spokes", "rim_alloy", *spokes), ("Rim_Hub", "rim_alloy", *hub)]
+        if len(nuts[0]):
+            out.append(("Lug_Nuts", "steel_dark", *nuts))
     return out
 
 
@@ -264,7 +313,8 @@ def headlamp_inner(surf, views, lamp_loop: np.ndarray):
     low = L[L[:, 2] < np.quantile(L[:, 2], 0.30)]
     low = low[np.argsort(low[:, 0])]
     if len(low) > 6:
-        strip = resample(low, 40)[4:-4]
+        import vq
+        strip = resample(low, 40 if not vq.low() else 12)[1:-1] if vq.low() else resample(low, 40)[4:-4]
         strip = surf.project(strip + 0.25 * (c - strip)) - surf.normal(strip) * 0.012
         T2, N2, B2 = pt.frames(strip, np.array([0, 0, 1.0]))
         amber = pt.loft(strip, N2, B2, pt.rounded_rect(0.010, 0.016, 0.004, 3))
@@ -278,11 +328,48 @@ def taillamp_inner(surf, views, tl_loop: np.ndarray):
     view = views["rr"]
     back = pt.backing(surf, view, tl_loop, 0.04)
     inner = loop_on_surface(surf, view, tl_loop, 0.01, 0.022, False)
-    ring = resample(np.vstack([inner, inner[:1]]), 160)
+    import vq
+    ring = resample(np.vstack([inner, inner[:1]]), 160 if not vq.low() else 20)
     ring = ring - surf.normal(ring) * 0.010
     T, N, B = pt.frames(ring, np.array([0, 0, 1.0]))
     divider = pt.loft(ring, N, B, pt.rounded_rect(0.006, 0.014, 0.002, 2), cap=False)
     return back, divider
+
+
+def fins_in_loop(surf, view: View, loop3: np.ndarray, zs: list, t: float = 0.009, depth: float = 0.06,
+                 recess: float = 0.010, margin: float = 0.014):
+    """Горизонтальные планки строго внутри проёма (как в купе), число точек вдоль планки — по качеству сборки."""
+    import vq
+    uv = view.to_uv(loop3)
+    out = []
+    n_s = 80 if not vq.low() else 10
+    for z in zs:
+        us = []
+        n = len(uv)
+        for i in range(n):
+            (u0, v0), (u1, v1) = uv[i], uv[(i + 1) % n]
+            if (v0 - z) * (v1 - z) <= 0 and v0 != v1:
+                us.append(u0 + (z - v0) * (u1 - u0) / (v1 - v0))
+        if len(us) < 2:
+            continue
+        uu = np.linspace(min(us), max(us), n_s * 3)
+        Sx = view.lift(surf, np.c_[uu, np.full(len(uu), z)])
+        d = np.r_[0, np.cumsum(np.linalg.norm(np.diff(Sx, axis=0), axis=1))]
+        keep = (d > margin) & (d < d[-1] - margin)
+        Sx = Sx[keep]
+        if len(Sx) < 3:
+            continue
+        Sx = resample(Sx, n_s)
+        nrm = surf.normal(Sx)
+        P = Sx - nrm * recess
+        T = np.gradient(P, axis=0)
+        T /= np.linalg.norm(T, axis=1, keepdims=True)
+        U = np.cross(nrm, T)
+        U /= np.linalg.norm(U, axis=1, keepdims=True)
+        sec = pt.rounded_rect(t, depth, t * 0.48, 4)[:, ::-1].copy()
+        sec[:, 0] += depth / 2
+        out.append(pt.loft(P, -nrm, U, sec[:, [0, 1]]))
+    return pt.merge(out)
 
 
 def grille_parts(surf, views, S: dict, lay: dict):
@@ -294,16 +381,17 @@ def grille_parts(surf, views, S: dict, lay: dict):
         g = holes["grille"]
         out.append(("Grille_Back", "mesh_black", *pt.backing(surf, rf, g, 0.07), "body"))
         zs = np.linspace(lay["grille"][-1][1] + 0.018, lay["grille"][0][1] - 0.018, lay.get("grille_bars", 4))
-        out.append(("Grille_Bars", "trim_gloss_black", *pt.fins_in_loop(surf, rf, g, list(zs), t=0.010, depth=0.045,
+        out.append(("Grille_Bars", "trim_gloss_black", *fins_in_loop(surf, rf, g, list(zs), t=0.010, depth=0.045,
                                                                          recess=0.012, margin=0.010), "body"))
-        surround = resample(np.vstack([g, g[:1]]), 300)
+        import vq
+        surround = resample(np.vstack([g, g[:1]]), 300 if not vq.low() else 48)
         out.append(("Grille_Surround", "chrome", *pt.loft(surround, *pt.frames(surround, np.array([0, -1.0, 0]))[1:],
                                                           pt.rounded_rect(0.009, 0.007, 0.003, 2), cap=False), "body"))
     if "intake" in holes:
         g = holes["intake"]
         out.append(("Intake_Back", "mesh_black", *pt.backing(surf, rf, g, 0.06), "body"))
         zc = (lay["intake"][0][1] + lay["intake"][-1][1]) / 2
-        out.append(("Intake_Bar", "trim_black", *pt.fins_in_loop(surf, rf, g, [zc], t=0.014, depth=0.05, recess=0.008,
+        out.append(("Intake_Bar", "trim_black", *fins_in_loop(surf, rf, g, [zc], t=0.014, depth=0.05, recess=0.008,
                                                                   margin=0.004), "body"))
     for key in ("fog_l", "fog_r"):
         if key not in holes:
@@ -343,7 +431,8 @@ def mirror(surf, views, base_yz: tuple, spec: dict):
     base = side.lift(surf, np.array([base_yz]))[0]
     L, Hh, D = spec.get("mirror_size", (0.20, 0.125, 0.095))
     x0 = base[0] + 0.035
-    xs = np.linspace(x0, x0 + L, 24)
+    import vq
+    xs = np.linspace(x0, x0 + L, 24 if not vq.low() else 7)
     t = (xs - x0) / L
     yc = base[1] + 0.02 + 0.015 * t
     zc = base[2] + 0.055 + 0.02 * t
@@ -353,7 +442,7 @@ def mirror(surf, views, base_yz: tuple, spec: dict):
 
     def sec(i):
         k = 1.0 - 0.25 * t[i] ** 3
-        return pt.d_section(D * (0.85 + 0.15 * k), Hh * k, min(D, Hh) * 0.45, 0.012)
+        return pt.d_section(D * (0.85 + 0.15 * k), Hh * k, min(D, Hh) * 0.45, 0.012, 6 if not vq.low() else 2)
     housing = pt.loft(path, U, Vv, sec, cap=True)
     # стекло на заднем плоском торце: тонкая пластина чуть позади
     gx = np.linspace(xs[2], xs[-3], 10)
@@ -428,8 +517,9 @@ def interior(f, spec: dict, S: dict):
                      (y_ws + 0.40, belt0 + 0.035), (y_ws + 0.44, belt0 - 0.02), (y_ws + 0.43, belt0 - 0.12),
                      (y_ws + 0.38, belt0 - 0.25), (y_ws + 0.34, belt0 - 0.32), (y_ws + 0.20, belt0 - 0.34),
                      (y_ws + 0.05, belt0 - 0.30)])
-    prof = spline2d(prof, 40)
-    xs = np.linspace(-half_in, half_in, 44)
+    import vq
+    prof = spline2d(prof, 40 if not vq.low() else 12)
+    xs = np.linspace(-half_in, half_in, 44 if not vq.low() else 10)
     V, F = [], []
     n = len(prof)
     for i, x in enumerate(xs):
@@ -449,7 +539,8 @@ def interior(f, spec: dict, S: dict):
     sw_c = np.array([drv_x, face_y + 0.20, belt0 - 0.02])
     tilt = math.radians(cab.get("wheel_tilt_deg", 24))
     Rw, rw = 0.185, 0.016
-    ang = np.linspace(0, 2 * math.pi, 14, endpoint=False)
+    import vq
+    ang = np.linspace(0, 2 * math.pi, 14 if not vq.low() else 6, endpoint=False)
     rim = revolve([(rw * math.cos(a), Rw + rw * math.sin(a)) for a in ang], 56, closed=True)
     hub = rounded_block((0, 0, -0.02), 0.06, 0.12, 0.10, 0.03)
     spokes = [rounded_block((0, 0, -0.10), 0.03, 0.05, 0.15, 0.012), rounded_block((0, -0.10, -0.01), 0.03, 0.17, 0.04, 0.012),
@@ -531,7 +622,8 @@ def door_jambs(surf, views, S: dict, spec: dict):
     edge = np.vstack([S["door_bot_f"].reversed(), S["door_bot_r"].reversed()[1:], S["door_rear"].reversed()[1:],
                       S["frame_c"].reversed()[1:], S["door_top_r"].reversed()[1:], S["door_top_f"].reversed()[1:],
                       S["frame_a"].reversed()[1:], S["door_belt_f"].reversed()[1:], S["door_front"].reversed()[1:]])
-    edge = resample(edge, 500)
+    import vq
+    edge = resample(edge, 500 if not vq.low() else 140)
     nrm = surf.normal(edge)
     depth = lay["door_depth"] + 0.02
     rings = [edge - nrm * 0.006, edge - nrm * depth]
@@ -540,8 +632,9 @@ def door_jambs(surf, views, S: dict, spec: dict):
     F = [(i, (i + 1) % n, n + (i + 1) % n, n + i) for i in range(n - 1)]
     out.append(("Door_Jamb", "paint_inner", V, F, "body"))
     # стойка B: от порога до рейлинга крыши, за стыком дверей
+    import vq
     b = S["b_line"].P
-    b = resample(b, 30)
+    b = resample(b, 30 if not vq.low() else 8)
     bn = surf.normal(b)
     post_line = b - bn * 0.045
     T, N, B = pt.frames(post_line, np.array([1.0, 0, 0]))
@@ -612,7 +705,8 @@ def _poly_tube(pts, r: float, closed: bool = False):
     if closed:
         P = P + [P[0]]
     parts = []
-    ang = np.linspace(0, 2 * math.pi, 8, endpoint=False)
+    import vq
+    ang = np.linspace(0, 2 * math.pi, 8 if not vq.low() else 4, endpoint=False)
     circ = np.c_[np.cos(ang), np.sin(ang)] * r
     for a, b in zip(P[:-1], P[1:]):
         seg = np.linspace(a, b, 2)
@@ -721,11 +815,12 @@ def spoiler(surf, views, S: dict):
     """Козырёк над стеклом пятой двери: крыло по верхней кромке двери, сечение капля."""
     top = S["bl_top"].P
     edge = np.vstack([top[::-1], (top * [-1, 1, 1])[1:]])
-    edge = resample(edge, 120)[4:-4]
+    import vq
+    edge = resample(edge, 120 if not vq.low() else 30)[1:-1]
     nrm = surf.normal(edge)
     path = edge + nrm * 0.012 + np.array([0, 0.035, 0])
     T, N, B = pt.frames(path, np.array([0, 0, 1.0]))
-    sec = pt.d_section(0.11, 0.022, 0.010, 0.004)
+    sec = pt.d_section(0.11, 0.022, 0.010, 0.004, 1 if vq.low() else 6)
     return pt.loft(path, np.broadcast_to(np.array([0, 1.0, 0]), path.shape), np.broadcast_to(np.array([0, 0, 1.0]), path.shape),
                    sec, cap=True)
 
@@ -746,8 +841,9 @@ def rear_wiper(surf, views, S: dict, spec: dict):
 
 def roof_rail(surf, views, S: dict, spec: dict):
     """Рейлинг на крыше (левый): труба-дуга над краем крыши на трёх опорах."""
+    import vq
     edge = S["roof_side"].P
-    edge = resample(edge, 60)
+    edge = resample(edge, 60 if not vq.low() else 16)
     inward = np.array([-0.035, 0, 0])
     base = surf.project(edge + inward)
     nrm = surf.normal(base)
@@ -805,7 +901,11 @@ def chassis(spec: dict, f):
     diff = rounded_block((0.10, yr, wz), 0.26, 0.30, 0.26, 0.10)
     tank = rounded_block((-0.20, yr + 0.55, z + 0.02), 0.70, 0.45, 0.20, 0.05)
     springs = []
+    import vq
     for sx in (1, -1):
+        if vq.low():
+            springs.append(tube([(sx * 0.48, yr, z + 0.08), (sx * 0.48, yr, z + 0.36)], 0.075, 8, 2))
+            continue
         for k in range(5):
             zz = z + 0.10 + k * 0.05
             springs.append(tube([(sx * 0.48 + 0.07 * np.cos(a), yr + 0.07 * np.sin(a), zz + a * 0.008) for a in np.linspace(0, 2 * np.pi, 9)],

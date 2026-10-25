@@ -67,8 +67,10 @@ def build(surf, f, s: dict, views: dict) -> tuple[list, dict]:
         return S[name]
 
     def panel(name, mat, view, outer, group="body", holes=(), mirror=True, **kw):
+        import vq
         V = None
-        h0 = kw.pop("h", 0.014)
+        h0 = kw.pop("h", 0.014) * vq.Q["h"]
+        kw.setdefault("roll_steps", vq.Q["roll"])
         for k in range(4):                          # совпадение узлов сетки с контуром — другой шаг
             try:
                 V, F = domain_panel(surf, views[view], outer, holes=holes, h=h0 * (1 + 0.07 * k), **kw)
