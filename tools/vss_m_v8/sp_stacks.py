@@ -17,8 +17,9 @@ EDGE = "mg_metal_edge_wear/mg_metal_edge_wear"
 SCR = {"invert": 0, "balance": 0.36, "contrast": 0.55}
 DIRT = "mg_dirt/mg_dirt"
 PARTS = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_parts"
-WOOD_BASE = PARTS + "/wood_laminate_v5.png"              # wood_laminate_bake.py: шпон и полосы слоёв фанеры
-WOOD_HEIGHT = PARTS + "/wood_height_v5.png"              # там же: рельеф волокна и клеевых швов
+WOOD_V6 = PARTS + "/wood_v6"                             # wood_veneer_bake.py: основа из фото шпона и маски
+WOOD_BASE = WOOD_V6 + "/C_krasnyi_dub_color.png"         # вариант C — красный дуб (выбор владельца 26.10)
+WOOD_HEIGHT = WOOD_V6 + "/C_krasnyi_dub_height.png"      # там же: поры и волокно, швы слоёв
 KNURL = PARTS + "/suppressor_knurl_height.png"        # knurl_bake.py: накатка рифлёной части глушителя
 KNURL_AREA = PARTS + "/suppressor_knurl_area.png"     # там же: где лежит накатка (маска области)
 
@@ -293,6 +294,10 @@ def rounds(st):
     return n
 
 
+def _wmask(kind):
+    return f"{WOOD_V6}/mask_{kind}.png"
+
+
 def _uv_bitmap_fill(name, pos, color=None, height=None, rough=None, metal=None):
     """Заливка с картами из файлов по развёртке (цвет/высота) и числами для остальных каналов."""
     f = L.insert_fill(pos)
@@ -313,48 +318,137 @@ def _uv_bitmap_fill(name, pos, color=None, height=None, rough=None, metal=None):
     return f
 
 
-def wood(st):
-    """Приклад — клеёная фанера под лаком, состаренная (образцы владельца: «как настоящее, с рельефом»): основа —
-    запечённые шпон и полосы слоёв (wood_laminate_bake.py) с рельефом волокна; в порах волокна грязь, лак потемнел
-    пятнами, в углублениях — наплывы (толще, темнее, глянцевее), блеск неровный; на кромках и в местах хвата лак
-    протёрт до матового дерева (светлее), мелкие царапины лака, грязь в углах, засаленность."""
-    top = L.InsertPosition.from_textureset_stack(st)
-    n = _uv_bitmap_fill("01 Фанера", top, color=WOOD_BASE, rough=0.32, metal=0.0)
-    h = _uv_bitmap_fill("02 Рельеф волокна", _above(n), height=WOOD_HEIGHT, rough=WOOD_HEIGHT)
-    h.set_opacity(0.02, sp_lib.CH.Height)
-    h.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.SpecularRoughness)
-    h.set_opacity(0.3, sp_lib.CH.SpecularRoughness)
-    pores = fill("03 Грязь в порах волокна", _above(h), color=(0.16, 0.11, 0.07), rough=0.7)
-    pores.add_mask(L.MaskBackground.White)
-    m = L.insert_fill(L.InsertPosition.inside_node(pores, L.NodeStack.Mask))
-    m.set_source(None, _bitmap(WOOD_HEIGHT))
+def _bmask(layer, path, blend=None, above=None, opacity=1.0, background=None):
+    """Запечённая ч/б карта (по развёртке) в маске слоя или группы; blend — смешение с тем, что ниже в маске."""
+    if not layer.has_mask():
+        layer.add_mask(background or L.MaskBackground.Black)
+    pos = L.InsertPosition.above_node(above) if above else L.InsertPosition.inside_node(layer, L.NodeStack.Mask)
+    m = L.insert_fill(pos)
+    m.set_source(None, _bitmap(path))
     _uv(m)
-    m.set_blending_mode(L.BlendingMode.Subtract)
-    sp_lib.lop(pores, 0.35)
-    t = fill("04 Лак потемнел", _above(pores), color=(0.92, 0.85, 0.66))
-    t.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
-    n = _proc_layer("05 Пятна тона лака", _above(t), _gm(13), 1.5, 0.45, {"balance": 0.5, "contrast": 0.3},
-                    color=(0.82, 0.72, 0.52))
-    n.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
-    n = _dirt(_above(n), color=(0.62, 0.46, 0.22), rough=0.14, level=0.45, opacity=0.6, name="06 Наплывы лака",
-              contrast=0.6)
-    n.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
-    n = _proc_layer("07 Неровный блеск лака", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, 0.5,
+    if blend is not None:
+        m.set_blending_mode(blend)
+    m.set_opacity(opacity)
+    return m
+
+
+def _mfilter(above, name, params):
+    """Фильтр в маске над узлом: histogram_scan — порог и контраст (читается издали), warp — рваный край, blur."""
+    e = L.insert_filter_effect(L.InsertPosition.above_node(above), sp_lib.rid(name + "/" + name, "u:filter"))
+    e.get_source().set_parameters(params)
+    return e
+
+
+def _raw_wood(name, pos, rough=0.82, lift=0.0006):
+    """Группа «лак снят до сырой древесины»: светлее (Screen — волокно основы остаётся), бледнее (Saturation),
+    самое матовое и ниже лака на его толщину. Маску задаёт вызывающий."""
+    g = L.insert_group(pos)
+    g.set_name(name)
+    a = fill("Светлее", L.InsertPosition.inside_node(g, L.NodeStack.Substack), color=(0.42, 0.36, 0.27))
+    a.set_blending_mode(L.BlendingMode.Screen, sp_lib.CH.BaseColor)
+    b = fill("Бледнее", _above(a), color=(0.5, 0.5, 0.5))
+    b.set_blending_mode(L.BlendingMode.Saturation, sp_lib.CH.BaseColor)
+    sp_lib.lop(b, 0.25)
+    c = fill("Матовое, без лака", _above(b), rough=rough, height=lift)
+    c.set_blending_mode(L.BlendingMode.Subtract, sp_lib.CH.Height)
+    return g
+
+
+def wood(st):
+    """Приклад — клеёная фанера под лаком (26.10: «скучная и ненастоящая»; разбор по справке навыка
+    wood-and-paint-layers.md и образцам владельца с Fab). Порядок: дерево → рельеф → крупные пятна → лак → тона →
+    повреждения → резкость → грязь, пыль, следы рук. Основа — фото шпона, вариант C (wood_veneer_bake.py): само дерево
+    матовое, блеск даёт лак. Три тона: средний — древесина; тёмный — стыки и поры по AO и к концам приклада (чуть
+    глянцевее, как лак); светлый — лак протёрт до сырой древесины на кромках и в местах хвата (светлее, бледнее, самый
+    матовый). Крупные пятна света и тени — Soft Light (Normal съел бы волокно). Повреждения «крупное — среднее —
+    мелкое»: сколы лака по кромкам, редкие вмятины, царапины. Слабая резкость — эффектом на группу дерева и лака
+    (поверх слоёв фильтр Painter API не вставляет), грязь и пыль — после неё. Маски мест — wood_veneer_bake.py masks."""
+    CH = sp_lib.CH
+    grp = L.insert_group(L.InsertPosition.from_textureset_stack(st))
+    grp.set_name("Дерево и лак")
+    n = _uv_bitmap_fill("01 Дерево", L.InsertPosition.inside_node(grp, L.NodeStack.Substack), color=WOOD_BASE,
+                        rough=0.78, metal=0.0)
+    h = _uv_bitmap_fill("02 Поры и волокно", _above(n), height=WOOD_HEIGHT)
+    h.set_opacity(0.045, CH.Height)
+    n = fill("03 Пятна светлее", _above(h), color=(0.78, 0.75, 0.7))
+    n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
+    _bmask(n, _wmask("patches"))
+    sp_lib.lop(n, 0.3)
+    n = fill("04 Пятна темнее", _above(n), color=(0.3, 0.24, 0.19))
+    n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
+    _bmask(n, _wmask("patches"), blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
+    sp_lib.lop(n, 0.12)
+    n = fill("05 Темнее к концам", _above(n), color=(0.3, 0.25, 0.2))
+    n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
+    _bmask(n, _wmask("ends"))
+    sp_lib.lop(n, 0.5)
+    # лак: тёплый тон тонким слоем и полуматовый блеск; в порах проседает и тусклее
+    n = fill("06 Лак", _above(n), color=(0.95, 0.9, 0.8), rough=0.4)
+    n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
+    n.set_opacity(0.3, CH.BaseColor)
+    n = fill("07 Лак в порах тусклее", _above(n), rough=0.56)
+    m = _bmask(n, WOOD_HEIGHT, blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
+    _mfilter(m, "histogram_scan", {"Position": 0.42, "Contrast": 0.55})
+    sp_lib.lop(n, 0.6)
+    n = fill("08 Апельсиновая корка", _above(n), rough="noise_clouds_2/clouds_2", height="noise_clouds_2/clouds_2")
+    triplanar(n, 60.0)
+    n.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
+    n.set_opacity(0.12, CH.SpecularRoughness)
+    n.set_opacity(0.0012, CH.Height)
+    n = _proc_layer("09 Неровный блеск лака", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, 0.5,
                     {"Balance": 0.55, "Contrast": 0.3}, rough=0.5)
-    n = _edge("08 Лак протёрт на кромках", _above(n), (0.84, 0.72, 0.54), 0.68, 0.4, metal=0.0, grunge=0.8)
-    n.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.BaseColor)
-    sp_lib.lop(n, 0.45)
-    n = _proc_layer("09 Протёрто в местах хвата", _above(n),
-                    "grunge_fingerprints_smeared_wide/grunge_fingerprints_smeared_wide", 1.6, 0.35,
-                    color=(0.78, 0.66, 0.5), rough=0.6)
-    n.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.BaseColor)
-    n = _proc_layer("10 Царапины лака", _above(n), _gm(12), 2.5, 0.4, {"invert": 1, "balance": 0.74, "contrast": 0.55},
-                    color=(0.86, 0.76, 0.6), rough=0.6)
-    n.set_blending_mode(L.BlendingMode.Overlay, sp_lib.CH.BaseColor)
-    n = _dirt(_above(n), color=(0.14, 0.08, 0.045), rough=0.8, level=0.35, opacity=0.6, name="11 Грязь в углах")
-    n = _proc_layer("12 Засаленность", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 2.5, 0.3,
-                    {"Balance": 0.45, "Contrast": 0.35}, color=(0.7, 0.58, 0.46), rough=0.36)
-    n.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
+    n = fill("10 Натёрто руками до блеска", _above(n), color=(0.9, 0.86, 0.8), rough=0.27)
+    n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
+    m = _bmask(n, _wmask("hold"))
+    mask_proc(n, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", {"Balance": 0.62, "Contrast": 0.3}, scale=1.6,
+              blend=L.BlendingMode.Multiply, above=m)
+    sp_lib.lop(n, 0.8)
+    # тёмный тон: стыки и поры по AO и к концам — темнее и чуть глянцевее, рельеф волокна не трогает
+    n = fill("11 Тёмный тон: стыки, поры, концы", _above(n), color=(0.62, 0.55, 0.48), rough=0.36)
+    n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
+    g = mask_generator(n, DIRT, {"dirt_level": 0.35, "dirt_contrast": 0.6, "grunge_amount": 0.3, "Grunge_Scale": 5,
+                                 "Use_Triplanar": 1, "edges_masking": 0.8})
+    _bmask(n, _wmask("ends"), blend=L.BlendingMode.Lighten, above=g, opacity=0.4)
+    sp_lib.lop(n, 0.38)
+    # светлый тон: лак протёрт до дерева — по кромкам (рвёт grunge) и в местах хвата, порог контрастный
+    w = _raw_wood("12 Светлый тон: протёрто до дерева", _above(n))
+    m = _bmask(w, _wmask("hold"))
+    m = mask_proc(w, "grunge_wipe_brushed/grunge_wipe_brushed", None, scale=1.4, blend=L.BlendingMode.Multiply, above=m)
+    g = mask_generator(w, EDGE, {"Wear_Level": 0.2, "Wear_Contrast": 0.7, "Grunge_Amount": 0.85, "grunge_scale": 4,
+                                 "Use_Triplanar": 1, "Edges_Smoothness": 0.5, "Ambient_Occlusion_Masking": 0.6,
+                                 "Curvature_Weight": 1.0}, above=m)
+    g.set_blending_mode(L.BlendingMode.Lighten)
+    _mfilter(g, "histogram_scan", {"Position": 0.5, "Contrast": 0.35})
+    # сколы лака: редкие, крупнее и резче протёртого — по кромкам окон, затыльника и низа
+    c = _raw_wood("13 Сколы лака", _above(w), rough=0.86, lift=0.0012)
+    g = mask_generator(c, EDGE, {"Wear_Level": 0.07, "Wear_Contrast": 0.95, "Grunge_Amount": 0.95, "grunge_scale": 2,
+                                 "Use_Triplanar": 1, "Edges_Smoothness": 0.2, "Ambient_Occlusion_Masking": 0.4,
+                                 "Curvature_Weight": 1.0})
+    m = mask_proc(c, "grunge_paint_scraped/grunge_paint_scraped", None, scale=1.2, blend=L.BlendingMode.Multiply, above=g)
+    _mfilter(m, "histogram_scan", {"Position": 0.62, "Contrast": 0.8})
+    # вмятины: редкие, с примятым и потемневшим волокном
+    n = fill("14 Вмятины", _above(c), color=(0.8, 0.74, 0.68), rough=0.55, height=0.0009)
+    n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
+    n.set_blending_mode(L.BlendingMode.Subtract, CH.Height)
+    m = mask_proc(n, "noise_gaussian_spots_1/gaussian_spots_1", None, scale=1.3)
+    _mfilter(m, "histogram_scan", {"Position": 0.82, "Contrast": 0.6})
+    n = fill("15 Царапины лака", _above(n), color=(0.3, 0.28, 0.26), rough=0.62)
+    n.set_blending_mode(L.BlendingMode.Screen, CH.BaseColor)
+    mask_proc(n, _gm(12), {"invert": 1, "balance": 0.76, "contrast": 0.55}, scale=2.5)
+    sp_lib.lop(n, 0.5)
+    sh = L.insert_filter_effect(L.InsertPosition.inside_node(grp, L.NodeStack.Content),
+                                sp_lib.rid("sharpen/sharpen", "u:filter"))
+    sh.get_source().set_parameters({"intensity": 0.35})
+    # после резкости: грязь в углах, пыль (где руками не трут), засаленность
+    n = _dirt(_above(grp), color=(0.14, 0.09, 0.055), rough=0.8, level=0.32, opacity=0.35, name="16 Грязь в углах")
+    n = fill("17 Пыль", _above(n), color=(0.55, 0.52, 0.47), rough=0.92)
+    g = mask_generator(n, DIRT, {"dirt_level": 0.22, "dirt_contrast": 0.85, "grunge_amount": 0.6, "Grunge_Scale": 8,
+                                 "Use_Triplanar": 1, "edges_masking": 0.9})
+    _bmask(n, _wmask("hold"), blend=L.BlendingMode.Subtract, above=g)
+    sp_lib.lop(n, 0.35)
+    n = _proc_layer("18 Засаленность", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 2.5, 0.2,
+                    {"Balance": 0.45, "Contrast": 0.35}, color=(0.8, 0.72, 0.62), rough=0.36)
+    n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
     return n
 
 

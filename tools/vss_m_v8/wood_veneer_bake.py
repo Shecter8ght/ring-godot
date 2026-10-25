@@ -6,9 +6,11 @@
 # швы тонкие. Строго плоские боковины — лицевой шпон из отдельного фото, слева и справа — разные места листа.
 # Фото — Poly Haven, CC0 (_asset_src/vss_m_v8/wood_photos/<id>/license.txt), масштаб 1:1 (образец 1000 × 1000 мм).
 # Карты запекаются излучением в развёртку приклада: <вариант>_color.png (sRGB), <вариант>_height.png (рельеф для
-# Painter), ids.png (R — лицевой шпон, G — тёмный слой, B — клеевой шов: маски для стека).
+# Painter), ids.png (R — лицевой шпон, G — тёмный слой, B — клеевой шов) и маски стека «masks» отдельными ч/б картами:
+# mask_face / mask_dark / mask_glue (то же, что ids), mask_ends (к концам и нижней кромке темнее), mask_patches (крупные
+# пятна тона), mask_hold (места хвата: шейка под коробкой и щека на гребне).
 # blender --background --factory-startup _asset_src/vss_m_v8/VSS_M_v8_sp.blend --python-exit-code 1 \
-#   --python tools/vss_m_v8/wood_veneer_bake.py -- <папка> <вариант,вариант|ids> [размер]
+#   --python tools/vss_m_v8/wood_veneer_bake.py -- <папка> <вариант,вариант|ids|masks> [размер]
 import sys
 import bpy
 
@@ -177,6 +179,44 @@ def build(mode, face):
         g.L.new(g.op("MULTIPLY", glue, nf), c.inputs[2])
         g.L.new(c.outputs[0], emit.inputs["Color"])
         return g.m
+    if mode.startswith("mask_"):
+        def noise(scale, det=2.0):
+            nz = g.n("ShaderNodeTexNoise")
+            nz.inputs["Scale"].default_value = scale
+            nz.inputs["Detail"].default_value = det
+            g.L.new(pm.outputs[0], nz.inputs["Vector"])
+            return nz.outputs["Fac"]
+
+        def blob(c, r):
+            # мягкое пятно-эллипсоид (центр и полуоси в мм), край рвёт шум
+            d = g.n("ShaderNodeVectorMath", operation="SUBTRACT")
+            g.L.new(pm.outputs[0], d.inputs[0])
+            d.inputs[1].default_value = c
+            s = g.n("ShaderNodeVectorMath", operation="DIVIDE")
+            g.L.new(d.outputs[0], s.inputs[0])
+            s.inputs[1].default_value = r
+            ln = g.n("ShaderNodeVectorMath", operation="LENGTH")
+            g.L.new(s.outputs[0], ln.inputs[0])
+            dist = g.op("ADD", ln.outputs["Value"], g.op("MULTIPLY", g.op("SUBTRACT", noise(0.08, 4.0), 0.5), 0.6))
+            return g.rng(dist, 1.0, 0.45, 0.0, 1.0, smooth=True)
+        if mode == "mask_ends":
+            # к концам темнее: у затыльника, у ствольной коробки и по нижней кромке (грязь, руки)
+            e = g.op("MAXIMUM", g.rng(x, 115.0, 22.0, 0.0, 1.0, smooth=True), g.rng(x, 250.0, 345.0, 0.0, 1.0, smooth=True))
+            e = g.op("MAXIMUM", e, g.op("MULTIPLY", g.rng(z, -100.0, -126.0, 0.0, 1.0, smooth=True), 0.6))
+            v = g.op("MULTIPLY", e, g.rng(noise(0.035), 0.3, 0.7, 0.55, 1.0))
+        elif mode == "mask_patches":
+            v = g.rng(noise(0.022, 2.0), 0.36, 0.64, 0.0, 1.0, smooth=True)
+        elif mode == "mask_hold":
+            # хват за шейку под коробкой (обе стороны и передняя кромка окна) и щека слева на гребне
+            v = g.op("MAXIMUM", blob((322.0, 0.0, -76.0), (30.0, 40.0, 40.0)), blob((195.0, 14.0, -26.0), (62.0, 12.0, 15.0)))
+        else:
+            v = {"mask_face": facem, "mask_dark": g.op("MULTIPLY", dark, g.op("SUBTRACT", 1.0, facem)),
+                 "mask_glue": g.op("MULTIPLY", glue, g.op("SUBTRACT", 1.0, facem))}[mode]
+        c = g.n("ShaderNodeCombineColor")
+        for i in range(3):
+            g.L.new(v, c.inputs[i])
+        g.L.new(c.outputs[0], emit.inputs["Color"])
+        return g.m
     if mode == "height":
         # тёмное волокно — поры и бороздки; на срезе рельеф слабее, у тёмных (торцевых) слоёв — пористее,
         # клеевой шов — чуть утоплен
@@ -191,7 +231,7 @@ def build(mode, face):
         return g.m
     c_och = g.grade(g_och, OCHRE[1], OCHRE[2], OCHRE[3])
     c_drk = g.grade(g_drk, DARK[1], DARK[2], DARK[3])
-    tk =g.rng(tone, 0.0, 1.0, 0.8, 1.15)
+    tk = g.rng(tone, 0.0, 1.0, 0.8, 1.15)
     tkv = g.n("ShaderNodeCombineColor")
     for i in range(3):
         g.L.new(tk, tkv.inputs[i])
@@ -252,6 +292,10 @@ def main():
     for w in which:
         if w == "ids":
             bake(o, "ids", None, f"{out}/ids.png", size)
+            continue
+        if w == "masks":
+            for k in ("face", "dark", "glue", "ends", "patches", "hold"):
+                bake(o, "mask_" + k, None, f"{out}/mask_{k}.png", size)
             continue
         bake(o, "color", w, f"{out}/{w}_color.png", size)
         bake(o, "height", w, f"{out}/{w}_height.png", size)
