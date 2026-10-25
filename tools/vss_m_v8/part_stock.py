@@ -266,4 +266,29 @@ def build(ctx):
     for p in pad.data.polygons:
         p.use_smooth = True
     auto_sharp(pad, 40)
-    return {"stock": stock, "swivel": sw, "pad": pad}
+    btn = stock_release_button(C)
+    return {"stock": stock, "swivel": sw, "pad": pad, "release": btn}
+
+
+STOCK_BTN_TRAVEL = 2.5                   # ход кнопки снятия приклада вниз при нажатии
+
+
+def stock_release_button(C):
+    """Кнопка снятия приклада (образец владельца): на гребне приклада сразу за коробкой, плоский перед упирается
+    в задний торец крышки, зад скруглён (в плане — «D»), сверху поперечное рифление; выходит из дерева, при нажатии
+    утапливается вниз на STOCK_BTN_TRAVEL (риг: stock_release)."""
+    import math as _m
+    from lib import box, boolean, fillet, finish, join, prism_xy
+    xf, xr, half = 276.4, 265.0, 7.4
+    xc = xr + half
+    pts = [(xf, -half), (xf, half), (xc, half)]
+    for k in range(1, 12):
+        t = _m.radians(90.0 + 180.0 * k / 12)
+        pts.append((xc + half * _m.cos(t), half * _m.sin(t)))
+    pts.append((xc, -half))
+    o = prism_xy("Stock_release_button", fillet(pts, [0.8, 0.8] + [0.0] * (len(pts) - 2), 3), 3.5, 16.0, C, "Steel_black")
+    grooves = [box(f"_sbg{k}", x - 0.3, x + 0.3, -half - 1, half + 1, 15.45, 17.0, C)
+               for k, x in enumerate([266.6 + 1.25 * i for i in range(8)])]
+    boolean(o, join(grooves, "_sbg"))
+    finish(o, 0.5, 3, 35)
+    return o

@@ -7,6 +7,8 @@
 #   mag_out     — снятие магазина: поворот вокруг переднего зацепа (0…0.5), затем вниз (0.5…1)
 #   sight_range — секторный прицел: хомутик вперёд, лист вверх
 #   suppressor_off — глушитель вместе с муфтой снимается вперёд
+#   cover_latch — фиксатор крышки нажат (вперёд вдоль оси на 4 мм)
+#   stock_release — кнопка снятия приклада нажата (вниз на 2.5 мм)
 # Затвор: свободный ход рамы 6 мм, поворот −30° на участке 6…14 мм, дальше идёт с рамой (постановочно).
 import math
 import bpy
@@ -36,6 +38,7 @@ def build(ctx):
     root = empty("VSS_M_v8", (0, 0, 0), R, size=0.05, kind="ARROWS")
     ctrl = empty("VSS_Controls", (400.0, 0, 80.0), R, root, size=0.02, kind="CIRCLE")
     props = {"bolt_pull": 0.0, "trigger": 0.0, "safety": 0.0, "selector": 0.0, "mag_catch": 0.0, "mag_out": 0.0,
+             "cover_latch": 0.0, "stock_release": 0.0,
              "sight_range": 0.0, "suppressor_off": 0.0}
     for k, v in props.items():
         ctrl[k] = v
@@ -51,6 +54,17 @@ def build(ctx):
     receiver_static = [o for o in bpy.data.collections["Receiver"].objects]
     static(receiver_static, root)
     static(list(bpy.data.collections["Stock"].objects), root)
+    # фиксатор крышки: нажатие — вперёд вдоль оси; кнопка снятия приклада — вниз
+    from part_receiver import LATCH_TRAVEL, LATCH_Z
+    from part_stock import STOCK_BTN_TRAVEL
+    lt = bpy.data.objects["Cover_latch_button"]
+    lat_p = empty("Cover_latch_mover", (286.0, 0, LATCH_Z), R, root, size=0.005)
+    set_parent(lt, lat_p)
+    add_driver(lat_p, "location", 0, f"(286.0+{LATCH_TRAVEL}*cover_latch)*{MM}", ctrl, ["cover_latch"])
+    sb = bpy.data.objects["Stock_release_button"]
+    sb_p = empty("Stock_release_mover", (271.0, 0, 12.0), R, root, size=0.005)
+    set_parent(sb, sb_p)
+    add_driver(sb_p, "location", 2, f"(12.0-{STOCK_BTN_TRAVEL}*stock_release)*{MM}", ctrl, ["stock_release"])
 
     # --- затворная группа ---
     b = P["bolt"]

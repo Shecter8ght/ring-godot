@@ -1,4 +1,4 @@
-# Набор текстур «receiver» (коробка с крышкой) в Substance Painter: фосфатированная сталь ВСС-М (sp_stacks.phosphate).
+# Набор текстур «receiver» (коробка с крышкой) в Substance Painter: сталь ВСС-М (sp_stacks.steel).
 # Выполняется как задание моста в открытом проекте receiver.spp: exec(open(...).read()). Стек перестраивается целиком.
 import importlib
 import sys
@@ -15,7 +15,7 @@ from sp_lib import L  # noqa: E402
 OUT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_receiver"
 st = sp_lib.stack_by_name("receiver")
 sp_lib.clear(st)
-sp_stacks.phosphate(st, rail_meshes=["Cover_picatinny__sp"])
+sp_stacks.steel(st, rail_meshes=["Cover_picatinny__sp"])
 print("stack:", [n.get_name() for n in L.get_root_layer_nodes(st)])
 sp_lib.P.save_as(OUT + "/receiver.spp")
 status, tex = sp_lib.export(OUT + "/export", "receiver")

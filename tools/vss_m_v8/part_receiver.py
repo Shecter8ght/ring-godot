@@ -2,7 +2,8 @@
 # Размеры сняты с профильного фото ВСС (масштаб по длине 894 мм) и с фото ВСС-М (В. Кузьмин, CC BY-SA 4.0);
 # ось канала z=10, торец затыльника x=0, правая сторона −Y.
 import math
-from lib import (BORE_Z, LOWER_W, COVER_W, CAV_W, SAFETY_PIVOT, SAFETY_TRAVEL_DEG, SEL_X0, SEL_X1, SEL_Z0, SEL_Z1,
+import bpy
+from lib import (BORE_Z, LOWER_W, COVER_W, CAV_W, SAFETY_PIVOT, SAFETY_TRAVEL_DEG, SEL_HALF_T, SEL_TRAVEL, SEL_X0, SEL_X1, SEL_Z0, SEL_Z1,
                  box, boolean, cyl, fillet, finish, join, lathe, loft_yz, prism_xz, prism_yz, prism_xy, set_origin,
                  auto_sharp, material, apply_all, bevel_edges, renormal)
 
@@ -97,6 +98,73 @@ def cover_loft(C):
     return loft_yz("Receiver_cover", secs, C, "Steel_black", cap=True, smooth=True)
 
 
+LATCH_Z = 27.0                           # середина фиксатора крышки на прямом участке заднего скоса
+LATCH_TRAVEL = 4.0                       # ход фиксатора крышки вперёд вдоль оси при нажатии
+
+
+def latch_shape(C, name, u_rng, v_rng, w_rng, mat=None):
+    """Брусок в осях заднего скоса крышки: u — поперёк (Y), v — вверх по скосу, w — наружу по нормали скоса (мм)."""
+    from mathutils import Matrix, Vector
+    from lib import MM
+    a = math.atan2(COVER_TOP - COVER_REAR_Z, COVER_SLOPE_X1 - COVER_SLOPE_X0)
+    p = Vector((COVER_SLOPE_X0 + (LATCH_Z - COVER_REAR_Z) / math.tan(a), 0.0, LATCH_Z))
+    d = Vector((math.cos(a), 0.0, math.sin(a)))
+    n = Vector((-math.sin(a), 0.0, math.cos(a)))
+    o = box(name, w_rng[0], w_rng[1], u_rng[0], u_rng[1], v_rng[0], v_rng[1], C, mat)
+    m = Matrix((n, Vector((0, 1, 0)), d)).transposed().to_4x4()      # локальные (w, u, v) → мировые
+    m.translation = p * MM
+    o.data.transform(m)
+    if m.determinant() < 0:            # оси (n, Y, d) — левая тройка: без переворота нормали бруска смотрят внутрь
+        o.data.flip_normals()
+    return o
+
+
+RIB_X = (318.0, 352.0, 386.0, 420.0, 454.0)
+
+
+def cover_ribs(C):
+    """Рёбра жёсткости крышки ВСС-М (образец владельца с Fab): выдавленные наплывы поперёк крышки — от планки через
+    скруглённый угол вниз по боковине на 2/3 высоты, низ отклонён назад; концы сходят на нет. Трубка R2.3, ось
+    утоплена на 1.3 мм — над поверхностью выступает 1 мм."""
+    from lib import MM
+    R, inset, lean = 2.3, 1.3, 3.5
+    cy, cz, rc = COVER_W - 8.0, COVER_TOP - 8.0, 8.0 - inset
+    pieces = []
+    for xt in RIB_X:
+        for sgn in (-1, 1):
+            path = [(sgn * 9.6, COVER_TOP - inset), (sgn * cy, COVER_TOP - inset)]
+            for k in range(1, 9):
+                t = math.radians(90.0 - 90.0 * k / 8)
+                path.append((sgn * (cy + rc * math.cos(t)), cz + rc * math.sin(t)))
+            for z in (30.0, 26.0, 23.5, 22.0):
+                path.append((sgn * (COVER_W - inset), z))
+            L = [0.0]
+            for (y0, z0), (y1, z1) in zip(path, path[1:]):
+                L.append(L[-1] + math.hypot(y1 - y0, z1 - z0))
+            cu = bpy.data.curves.new("_rib", "CURVE")
+            cu.dimensions = "3D"
+            sp = cu.splines.new("POLY")
+            sp.points.add(len(path) - 1)
+            for i, (y, z) in enumerate(path):
+                t = L[i] / L[-1]
+                sp.points[i].co = ((xt - lean * t) * MM, y * MM, z * MM, 1.0)
+                end = min(L[i] / 2.5, (L[-1] - L[i]) / 6.0, 1.0)          # к концам радиус до 1.3 — наплыв сходит на нет
+                sp.points[i].radius = (inset + (R - inset) * max(0.0, end)) / R
+            cu.bevel_depth = R * MM
+            cu.bevel_resolution = 4
+            cu.use_fill_caps = True
+            ob = bpy.data.objects.new("_ribc", cu)
+            C.objects.link(ob)
+            dg = bpy.context.evaluated_depsgraph_get()
+            me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg), depsgraph=dg)
+            bpy.data.objects.remove(ob, do_unlink=True)
+            bpy.data.curves.remove(cu)
+            m = bpy.data.objects.new("_ribm", me)
+            C.objects.link(m)
+            pieces.append(m)
+    return join(pieces, "_ribs")
+
+
 def safety_visor(C):
     """Козырёк-ограничитель: отогнутая наружу полка над пазом рукоятки взведения (верхняя кромка паза, низ 10 мм —
     над рукояткой, 4.6…9.7). В положении «предохранитель» передняя площадка рычага входит в паз, перекрывает ход
@@ -168,7 +236,8 @@ def build(ctx):
     boolean(lower, box("_feed", 466.0, 479.0, -6.6, 6.6, -8.0, 9.0, C))
     boolean(lower, box("_flugr", 475.5, 479.0, -9.4, 9.4, -11.5, -4.5, C))
     # поперечный паз переводчика внизу задней стенки скобы, открыт вперёд
-    boolean(lower, box("_selch", SEL_X0 - 0.15, 362.0, -30, 30, SEL_Z0 - 0.15, SEL_Z1 + 0.15, C))
+    boolean(lower, box("_selch", SEL_X0 - 0.15, 359.5, -(SEL_HALF_T + SEL_TRAVEL / 2 + 0.35), SEL_HALF_T + SEL_TRAVEL / 2 + 0.35,
+                       SEL_Z0 - 0.15, SEL_Z1 + 0.15, C))
     finish(lower, 0.9, 3, 35)
     # клейма — после фаски: мелкие буквы фаской 0.9 мм не скругляются, а рвут сетку
     from part_stamps import stamp, SERIAL, SUB
@@ -201,32 +270,40 @@ def build(ctx):
 
     # --- крышка ствольной коробки ВСС-М ---
     cover = cover_loft(C)
+    # окно фиксатора в скосе: сквозь стенку в полость; вверх по скосу запас под ход (площадка уходит вперёд-вверх).
+    # Режется до рёбер: после объединения с трубками рёбер точная булева операция оставляла поверхность скоса целой
+    boolean(cover, latch_shape(C, "_lrec", (-5.0, 5.0), (-4.8, 7.6), (-7.0, 5.0)))
     # внутренняя полость повторяет скос со стенкой ~2.5 мм; рама при полном отводе (торец x=286) проходит под ним
     inner = fillet([(480.0, TOP_Z - 1.5), (284.6, TOP_Z - 1.5), (284.6, 22.4), (298.8, COVER_TOP - 3.0), (480.0, COVER_TOP - 3.0)],
                    [0, 0, 1.0, 11.5, 0], 8)
     boolean(cover, prism_xz("_cin", inner, -(COVER_W - 2.2), COVER_W - 2.2, C))
+    # рёбра жёсткости — до выреза окна: справа над окном они обрываются по его кромке
+    boolean(cover, cover_ribs(C), op="UNION")
     boolean(cover, box("_cwin", WIN_X0, 480.0, -30.0, -(COVER_W - 3.0), TOP_Z - 1.0, WIN_Z1, C))
-    for s in (-1, 1):
-        band = prism_yz(f"_band{s}", [(s * (COVER_W - 0.7), 30.0), (s * 30, 30.0), (s * 30, 39.0), (s * (COVER_W - 0.7), 39.0)],
-                        304.0, 472.0, C)
-        boolean(cover, band)
     boolean(cover, box("_chs", 385.0, WIN_X0 + 1.0, -30.0, -(COVER_W - 3.0), TOP_Z - 1.0, 10.5, C))
-    boolean(cover, cyl("_lh", 270, 296, 3.6, C, cz=28.0, seg=32))
-    stamp(cover, SUB, 2.4, (318.0, -COVER_W, 21.0), (0, -1, 0), (0, 0, 1), 0.12, C)
+    stamp(cover, SUB, 2.4, (304.0, -COVER_W, 12.0), (0, -1, 0), (0, 0, 1), 0.12, C)
     auto_sharp(cover, 40)
     finish(cover, 0.8, 3, 40)
     from part_stamps import nameplate
-    nameplate(cover, C, (356.0, -COVER_W, 19.4))
+    nameplate(cover, C, (350.0, -COVER_W, 15.0))
     renormal(cover)
     rail, slots = picatinny("Cover_picatinny", 307.0, 472.5, COVER_TOP - 0.2, C, "Steel_black")
     out["cover"] = cover
     out["rail"] = rail
     out["rail_slots"] = slots
 
-    # фиксатор крышки — задний упор направляющей возвратной пружины
-    latch = lathe("Cover_latch_button", [(281.4, 0.0), (281.4, 2.5), (282.2, 3.2), (290.0, 3.2), (290.0, 4.6), (292.0, 4.6), (292.0, 0.0)],
-                  C, "Steel_black", 32, 0.0, 28.0)
-    auto_sharp(latch, 30)
+    # фиксатор крышки — задний конец направляющей возвратной пружины: рифлёная площадка в окне заднего скоса
+    # (стоит над скосом на 2 мм), шток уходит в полость. Ход честный: нажимают — уходит вперёд вдоль оси на
+    # LATCH_TRAVEL (риг: cover_latch), площадка утапливается в окно (замечание владельца 25.10)
+    from lib import MM
+    latch = latch_shape(C, "Cover_latch_button", (-4.4, 4.4), (-4.2, 4.2), (-4.5, 2.0), "Steel_black")
+    ribs = [latch_shape(C, f"_lr{k}", (-4.0, 4.0), (v - 0.45, v + 0.45), (1.6, 2.6)) for k, v in enumerate((-3.0, -1.5, 0.0, 1.5, 3.0))]
+    boolean(latch, join(ribs, "_lribs"), op="UNION")
+    a_ = math.atan2(COVER_TOP - COVER_REAR_Z, COVER_SLOPE_X1 - COVER_SLOPE_X0)
+    xc = COVER_SLOPE_X0 + (LATCH_Z - COVER_REAR_Z) / math.tan(a_)
+    rod = cyl("_lrod", xc - 1.0, xc + 14.0, 2.3, C, cz=LATCH_Z, seg=24)
+    boolean(latch, rod, op="UNION")
+    finish(latch, 0.3, 2, 35)
     out["latch"] = latch
 
     # --- боковая планка «ласточкин хвост» под ПСО (слева, +Y) ---
@@ -254,7 +331,8 @@ def build(ctx):
     inner = fillet([(358.5, -10.0), (401.8, -10.0), (401.8, -48.2), (358.5, -48.2)], [0, 0, 6.0, 7.0], 6)
     # прилив переводчика остаётся в коробке — внутренний вырез скобы перед ним
     boolean(guard, prism_xz("_gin", inner, -8, 8, C))
-    boolean(guard, box("_gselch", SEL_X0 - 0.15, 362.0, -30, 30, SEL_Z0 - 0.15, SEL_Z1 + 0.15, C))
+    boolean(guard, box("_gselch", SEL_X0 - 0.15, 359.5, -(SEL_HALF_T + SEL_TRAVEL / 2 + 0.35), SEL_HALF_T + SEL_TRAVEL / 2 + 0.35,
+                       SEL_Z0 - 0.15, SEL_Z1 + 0.15, C))
     finish(guard, 1.6, 4, 35)
     out["guard"] = guard
 

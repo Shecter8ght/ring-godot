@@ -85,7 +85,11 @@ def make_decals():
     return out
 
 
-def studio(bright=1.0, bg=(0.62, 0.62, 0.63)):
+def studio(bright=1.0, bg=(0.62, 0.62, 0.63), dark=False):
+    """Студия осмотра. dark — тёмная съёмка, как на рендерах-образцах (Fab, Sketchfab): чёрный фон, большой софтбокс
+    сверху спереди даёт блик по металлу и лаку, контровые полосы сзади обводят силуэт; окружение слабое."""
+    if dark:
+        bright, bg = 1.0, (0.008, 0.008, 0.009)
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     prefs = bpy.context.preferences.addons["cycles"].preferences
@@ -112,7 +116,7 @@ def studio(bright=1.0, bg=(0.62, 0.62, 0.63)):
     out = nt.nodes.new("ShaderNodeOutputWorld")
     env = nt.nodes.new("ShaderNodeTexEnvironment")
     env.image = bpy.data.images.load("E:/Games/RING-godot/_asset_src/vss_m_v8/hdri/photo_studio_loft_hall_2k.hdr", check_existing=True)
-    bg_hdr = nt.nodes.new("ShaderNodeBackground"); bg_hdr.inputs["Strength"].default_value = 0.35 * bright
+    bg_hdr = nt.nodes.new("ShaderNodeBackground"); bg_hdr.inputs["Strength"].default_value = (0.12 if dark else 0.35) * bright
     nt.links.new(env.outputs[0], bg_hdr.inputs[0])
     bg_c = nt.nodes.new("ShaderNodeBackground"); bg_c.inputs[0].default_value = (*bg, 1.0); bg_c.inputs[1].default_value = 1.0
     lp = nt.nodes.new("ShaderNodeLightPath")
@@ -130,6 +134,15 @@ def studio(bright=1.0, bg=(0.62, 0.62, 0.63)):
         lo.location = loc
         lo.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat("-Z", "Y").to_euler()
         return lo
+    if dark:
+        # верхний софтбокс чуть за предметом: блики по верхним граням и кромкам; спереди слабая заливка —
+        # чёрный пластик остаётся чёрным, металл и лак читаются бликами (как на образцах)
+        sc.view_settings.exposure = -0.7          # 4 % блика на чёрном пластике не уходят в серый
+        area("Key", (0.45, 0.2, 1.0), (1.6, 0.6), 130.0, (1.0, 0.97, 0.93))
+        area("Rim_back", (0.45, 0.95, 0.3), (2.2, 0.22), 180.0, (0.92, 0.96, 1.0))
+        area("Front_fill", (0.45, -0.9, -0.25), (1.2, 0.6), 18.0, (1.0, 0.98, 0.95))
+        area("Kicker", (1.25, -0.45, -0.15), (0.4, 0.4), 20.0, (1.0, 0.9, 0.8))
+        return
     area("Key", (0.25, -0.9, 1.0), (1.2, 0.6), 120.0, (1.0, 0.97, 0.92))
     area("Fill", (0.6, 1.1, 0.5), (1.0, 1.0), 40.0, (0.92, 0.96, 1.0))
     area("Rim", (1.4, 0.3, 0.9), (0.3, 1.5), 80.0)

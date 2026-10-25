@@ -308,7 +308,7 @@ def main():
         sp_apply.apply_all()
     sc = bpy.context.scene
     if mode == "studio":
-        tex_v8.studio()
+        tex_v8.studio(dark=True)
         viewport_rendered(None)
         render_settings(128)
         bpy.ops.file.pack_all()

@@ -1,9 +1,10 @@
 # ВСС-М v8: органы управления — спусковой крючок, предохранитель (штампованный рычаг справа под козырьком),
-# переводчик огня (поперечный ползун у задней стенки скобы, как на фото ВСС-М В. Кузьмина), защёлка магазина.
+# переводчик огня (флажок из задней стенки скобы, образец владельца с Fab), защёлка магазина.
 # Все детали строятся в исходном положении («огонь», одиночный); оси вращения — пустышки в part_rig.
 import math
 from mathutils import Matrix, Vector
-from lib import (LOWER_W, MM, SAFETY_FIRE_DEG, SAFETY_PIVOT, SEL_X0, SEL_X1, SEL_Z0, SEL_Z1, apply_transform, auto_sharp, box, boolean, cyl,
+from lib import (LOWER_W, MM, SAFETY_FIRE_DEG, SAFETY_PIVOT, SEL_HALF_T, SEL_X0, SEL_X1, SEL_Y0, SEL_Z0, SEL_Z1, apply_transform,
+                 auto_sharp, box, boolean, cyl,
                  fillet, finish, join, lathe, prism_xy, prism_xz)
 
 TRIGGER_PIVOT = (372.0, -9.0)
@@ -104,19 +105,20 @@ def build(ctx):
     auto_sharp(lpin, 40)
     out["safety_axis_L"] = lpin
 
-    # --- переводчик огня: поперечный ползун прямоугольного сечения в пазу низа задней стенки скобы;
-    # передняя грань выступает в скобу, концы с поперечным рифлением; «одиночный» — выступает справа на 3 мм ---
-    e_r, e_l = -(LOWER_W + 3.0), LOWER_W - 1.0
-    sec = fillet([(SEL_X0, SEL_Z0), (SEL_X1, SEL_Z0), (SEL_X1, SEL_Z1), (SEL_X0, SEL_Z1)], [0.4, 1.4, 1.4, 0.4], 4)
-    sel = prism_xz("Fire_selector", sec, e_r, e_l, C, "Steel_black")
+    # --- переводчик огня: флажок в скобе (образец владельца), хвостовик в пазу задней стенки; на боках флажка —
+    # вертикальная насечка под палец (его сдвигают вбок) ---
+    prof = fillet([(SEL_X0, SEL_Z0 + 0.6), (SEL_X1 - 1.6, SEL_Z0), (SEL_X1, SEL_Z0 + 1.8), (SEL_X1, SEL_Z1 - 1.2),
+                   (SEL_X1 - 1.2, SEL_Z1), (SEL_X0, SEL_Z1)], [0.4, 1.0, 1.0, 1.0, 0.8, 0.4], 4)
+    sel = prism_xz("Fire_selector", prof, SEL_Y0 - SEL_HALF_T, SEL_Y0 + SEL_HALF_T, C, "Steel_black")
     grooves = []
-    for e, s in ((e_r, 1.0), (e_l, -1.0)):
-        for k in range(5):
-            z = SEL_Z0 + 1.15 + 1.2 * k
-            ya, yb = sorted((e - s * 1.0, e + s * 0.45))
-            grooves.append(box(f"_selg{e:.0f}_{k}", SEL_X0 - 1, SEL_X1 + 1, ya, yb, z, z + 0.5, C))
+    for s_ in (-1, 1):
+        y_face = SEL_Y0 + s_ * SEL_HALF_T
+        for k in range(4):
+            x = SEL_X1 - 1.9 - 1.25 * k
+            ya, yb = sorted((y_face - s_ * 0.3, y_face + s_ * 1.0))
+            grooves.append(box(f"_selg{s_}_{k}", x - 0.3, x + 0.3, ya, yb, SEL_Z0 + 1.6, SEL_Z1 - 1.4, C))
     boolean(sel, join(grooves, "_selg"))
-    finish(sel, 0.45, 3, 30)
+    finish(sel, 0.35, 3, 30)
     out["selector"] = sel
 
     # --- защёлка магазина: верхнее плечо с зубом в шахте, лопатка вниз перед скобой ---

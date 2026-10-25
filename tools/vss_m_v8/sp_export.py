@@ -16,8 +16,9 @@ GROUPS = {
                     "Fire_selector", "Magazine_catch", "Safety_lever", "Trigger", "Front_sling_bracket", "Front_sling_swivel",
                     "Rail_sleeve_screws", "Stock_screw_L", "Stock_screw_R", "Stock_sling_plate", "Stock_sling_rivet_0",
                     "Stock_sling_rivet_1", "Stock_sling_swivel", "Rear_sight_base", "Rear_sight_hinge_pin", "Rear_sight_leaf",
-                    "Rear_sight_slider", "Rear_sight_weld", "Front_sight_base", "Front_sight_post"],
-    "suppressor": ["Suppressor_body", "Suppressor_baffles", "Barrel"],
+                    "Rear_sight_slider", "Rear_sight_weld", "Front_sight_base", "Front_sight_post", "Front_sight_weld",
+                    "Stock_release_button"],
+    "suppressor": ["Suppressor_body", "Suppressor_baffles", "Barrel", "Suppressor_knurl"],
     "bare_steel": ["Bolt", "Bolt_extractor", "Bolt_firing_pin_tip", "Ejector_blade", "Recoil_spring_guide", "Recoil_spring",
                    "Magazine_10_spring", "Magazine_20_spring", "Magazine_30_spring"],
     "handguard": ["Handguard"],
@@ -57,6 +58,18 @@ def unwrap(objs, margin=0.0025):
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
+def triangulate_ngons(o):
+    """Многоугольники больше четырёх вершин — на треугольники в Blender: Painter режет их по-своему, и вокруг вырезанных
+    букв (сторона с «дырами», сведёнными перемычками) получались перекрытые треугольники и мусор в запекании."""
+    import bmesh
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    big = [f for f in bm.faces if len(f.verts) > 4]
+    if big:
+        bmesh.ops.triangulate(bm, faces=big, quad_method="BEAUTY", ngon_method="EAR_CLIP")
+        bm.to_mesh(o.data)
+    bm.free()
+
+
 def export(objs, group, path):
     mat = bpy.data.materials.get(group) or bpy.data.materials.new(group)
     copies = []
@@ -71,6 +84,7 @@ def export(objs, group, path):
         c.data.materials.append(mat)
         c.name = o.name + "__sp"
         bpy.context.scene.collection.objects.link(c)
+        triangulate_ngons(c)
         c.select_set(True)
         copies.append(c)
     bpy.context.view_layer.update()
@@ -123,6 +137,7 @@ def export_parts(path, sets=PARTS, gap=12.0, row_w=520.0):
                 parts = split_by_material(c, ["Round_case__sp", "Round_bullet__sp"])
             for q in parts:
                 q.data.materials.clear(); q.data.materials.append(mat)
+                triangulate_ngons(q)
             vs = [v.co for q in parts for v in q.data.vertices]
             lo = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
             hi = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))

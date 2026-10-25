@@ -15,12 +15,11 @@ from sp_lib import L  # noqa: E402
 
 OUT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_parts"
 BUILD = {
-    "steel_parts": lambda st: sp_stacks.phosphate(st),
-    # глушитель ВСС-М — тёмное матовое покрытие, ближе к краске: меньше металла, больше шероховатость
-    "suppressor": lambda st: sp_stacks.phosphate(st, dust=0.12, base=((0.065, 0.065, 0.068), 0.72, 0.35)),
+    "steel_parts": lambda st: sp_stacks.steel(st),
+    "suppressor": sp_stacks.suppressor,
     "bare_steel": sp_stacks.bare_steel,
-    "handguard": lambda st: sp_stacks.polymer(st, (0.05, 0.048, 0.046)),
-    "magazine": lambda st: sp_stacks.polymer(st, (0.045, 0.045, 0.047)),
+    "handguard": lambda st: sp_stacks.polymer(st),
+    "magazine": lambda st: sp_stacks.polymer(st, (0.035, 0.035, 0.037), rough=0.58, stipple=0.008, stipple_scale=60.0),
     "sleeve": sp_stacks.anodized,
     "wood": sp_stacks.wood,
     "rubber": sp_stacks.rubber,
