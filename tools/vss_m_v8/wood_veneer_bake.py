@@ -7,10 +7,11 @@
 # Фото — Poly Haven, CC0 (_asset_src/vss_m_v8/wood_photos/<id>/license.txt), масштаб 1:1 (образец 1000 × 1000 мм).
 # Карты запекаются излучением в развёртку приклада: <вариант>_color.png (sRGB), <вариант>_height.png (рельеф для
 # Painter), ids.png (R — лицевой шпон, G — тёмный слой, B — клеевой шов) и маски стека «masks» отдельными ч/б картами:
-# mask_face / mask_dark / mask_glue (то же, что ids), mask_ends (к концам и нижней кромке темнее), mask_patches (крупные
-# пятна тона), mask_hold (места хвата: шейка под коробкой и щека на гребне).
+# mask_face / mask_dark / mask_glue (то же, что ids), mask_ends (к концам и нижней кромке темнее), mask_streaks (тон
+# полосами вдоль волокна), mask_hold (места хвата: шейка под коробкой и щека на гребне), mask_dents (вмятины по месту).
 # blender --background --factory-startup _asset_src/vss_m_v8/VSS_M_v8_sp.blend --python-exit-code 1 \
 #   --python tools/vss_m_v8/wood_veneer_bake.py -- <папка> <вариант,вариант|ids|masks> [размер]
+import os
 import sys
 import bpy
 
@@ -31,6 +32,12 @@ DARK = ("black_oak_veneer", (0.05, 0.03, 0.018), (0.2, 0.12, 0.07), 1.0)
 C_GLUE = (0.03, 0.017, 0.009)
 # места листа для боковин (доли образца): слева и справа — разные
 SIDE_OFF = ((0.12, 0.18), (0.52, 0.61))
+# вмятины: точка на поверхности (мм) и радиус — одна крупная у затыльника снизу, три средних, мелкие по кромкам
+DENTS = (((70.3, -12.6, -113.8), 6.0),
+         ((150.3, -16.0, -96.1), 3.5), ((250.0, 13.2, -42.7), 3.0), ((20.0, 0.0, -107.3), 3.5),
+         ((110.0, 11.7, -114.0), 1.6), ((174.9, -14.1, -111.1), 1.4), ((214.9, 10.0, -111.0), 1.8),
+         ((95.0, -14.0, -41.4), 1.3), ((130.4, 12.9, -96.0), 1.5), ((59.6, 16.0, -44.2), 1.2),
+         ((329.3, -10.0, -125.3), 1.8), ((160.0, -11.6, -17.1), 1.2))
 
 
 class G:
@@ -187,7 +194,7 @@ def build(mode, face):
             g.L.new(pm.outputs[0], nz.inputs["Vector"])
             return nz.outputs["Fac"]
 
-        def blob(c, r):
+        def blob(c, r, rag=0.6, rag_scale=0.08):
             # мягкое пятно-эллипсоид (центр и полуоси в мм), край рвёт шум
             d = g.n("ShaderNodeVectorMath", operation="SUBTRACT")
             g.L.new(pm.outputs[0], d.inputs[0])
@@ -197,15 +204,28 @@ def build(mode, face):
             s.inputs[1].default_value = r
             ln = g.n("ShaderNodeVectorMath", operation="LENGTH")
             g.L.new(s.outputs[0], ln.inputs[0])
-            dist = g.op("ADD", ln.outputs["Value"], g.op("MULTIPLY", g.op("SUBTRACT", noise(0.08, 4.0), 0.5), 0.6))
+            dist = g.op("ADD", ln.outputs["Value"], g.op("MULTIPLY", g.op("SUBTRACT", noise(rag_scale, 4.0), 0.5), rag))
             return g.rng(dist, 1.0, 0.45, 0.0, 1.0, smooth=True)
         if mode == "mask_ends":
-            # к концам темнее: у затыльника, у ствольной коробки и по нижней кромке (грязь, руки)
+            # к концам темнее: у затыльника, у ствольной коробки и по нижней кромке (грязь, руки) — плавно, без шума:
+            # шумовые пятна читались нарочитыми (замечание владельца 26.10)
             e = g.op("MAXIMUM", g.rng(x, 115.0, 22.0, 0.0, 1.0, smooth=True), g.rng(x, 250.0, 345.0, 0.0, 1.0, smooth=True))
-            e = g.op("MAXIMUM", e, g.op("MULTIPLY", g.rng(z, -100.0, -126.0, 0.0, 1.0, smooth=True), 0.6))
-            v = g.op("MULTIPLY", e, g.rng(noise(0.035), 0.3, 0.7, 0.55, 1.0))
-        elif mode == "mask_patches":
-            v = g.rng(noise(0.022, 2.0), 0.36, 0.64, 0.0, 1.0, smooth=True)
+            v = g.op("MAXIMUM", e, g.op("MULTIPLY", g.rng(z, -100.0, -126.0, 0.0, 1.0, smooth=True), 0.6))
+        elif mode == "mask_streaks":
+            # тон гуляет полосами вдоль волокна (как у настоящей древесины), а не круглыми пятнами
+            sv = g.n("ShaderNodeVectorMath", operation="MULTIPLY")
+            g.L.new(pm.outputs[0], sv.inputs[0])
+            sv.inputs[1].default_value = (0.012, 0.25, 0.25)
+            nz = g.n("ShaderNodeTexNoise")
+            nz.inputs["Scale"].default_value = 1.0
+            nz.inputs["Detail"].default_value = 3.0
+            g.L.new(sv.outputs[0], nz.inputs["Vector"])
+            v = g.rng(nz.outputs["Fac"], 0.35, 0.65, 0.0, 1.0, smooth=True)
+        elif mode == "mask_dents":
+            # вмятины по месту, «крупное — среднее — мелкое»: точки на поверхности (ближайшие к намеченным местам)
+            v = 0.0
+            for c, r in DENTS:
+                v = g.op("MAXIMUM", v, blob(c, (r, r, r), rag=0.35, rag_scale=0.4))
         elif mode == "mask_hold":
             # хват за шейку под коробкой (обе стороны и передняя кромка окна) и щека слева на гребне
             v = g.op("MAXIMUM", blob((322.0, 0.0, -76.0), (30.0, 40.0, 40.0)), blob((195.0, 14.0, -26.0), (62.0, 12.0, 15.0)))
@@ -272,7 +292,8 @@ def main():
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     prefs = bpy.context.preferences.addons["cycles"].preferences
-    for dev in ("OPTIX", "CUDA"):
+    # WOOD_BAKE_CPU=1 — печь процессором: открытые экземпляры Painter держат видеопамять, Cycles на GPU падает
+    for dev in () if os.environ.get("WOOD_BAKE_CPU") else ("OPTIX", "CUDA"):
         try:
             prefs.compute_device_type = dev
             prefs.get_devices()
@@ -294,7 +315,7 @@ def main():
             bake(o, "ids", None, f"{out}/ids.png", size)
             continue
         if w == "masks":
-            for k in ("face", "dark", "glue", "ends", "patches", "hold"):
+            for k in ("face", "dark", "glue", "ends", "streaks", "hold", "dents"):
                 bake(o, "mask_" + k, None, f"{out}/mask_{k}.png", size)
             continue
         bake(o, "color", w, f"{out}/{w}_color.png", size)

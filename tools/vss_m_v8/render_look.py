@@ -59,6 +59,8 @@ def main():
         sc.view_settings.exposure = 0.0
     sc.cycles.samples = spp
     sc.cycles.denoising_use_gpu = False      # видеопамять может держать Substance Painter
+    if os.environ.get("LOOK_CPU"):
+        sc.cycles.device = "CPU"             # видеопамять занята целиком (несколько Painter и Blender других сессий)
     sc.render.resolution_x = w; sc.render.resolution_y = int(w * 0.5625)
     cd = bpy.data.cameras.new("LookCam"); cam = bpy.data.objects.new("LookCam", cd)
     sc.collection.objects.link(cam); sc.camera = cam

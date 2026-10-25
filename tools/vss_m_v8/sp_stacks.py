@@ -360,7 +360,7 @@ def wood(st):
     повреждения → резкость → грязь, пыль, следы рук. Основа — фото шпона, вариант C (wood_veneer_bake.py): само дерево
     матовое, блеск даёт лак. Три тона: средний — древесина; тёмный — стыки и поры по AO и к концам приклада (чуть
     глянцевее, как лак); светлый — лак протёрт до сырой древесины на кромках и в местах хвата (светлее, бледнее, самый
-    матовый). Крупные пятна света и тени — Soft Light (Normal съел бы волокно). Повреждения «крупное — среднее —
+    матовый). Крупные пятна света и тени — Soft Light (Normal съел бы волокно), полосами вдоль волокна. Повреждения «крупное — среднее —
     мелкое»: сколы лака по кромкам, редкие вмятины, царапины. Слабая резкость — эффектом на группу дерева и лака
     (поверх слоёв фильтр Painter API не вставляет), грязь и пыль — после неё. Маски мест — wood_veneer_bake.py masks."""
     CH = sp_lib.CH
@@ -370,18 +370,19 @@ def wood(st):
                         rough=0.78, metal=0.0)
     h = _uv_bitmap_fill("02 Поры и волокно", _above(n), height=WOOD_HEIGHT)
     h.set_opacity(0.045, CH.Height)
-    n = fill("03 Пятна светлее", _above(h), color=(0.78, 0.75, 0.7))
+    # тон гуляет полосами вдоль волокна, как у настоящей древесины (круглые пятна шума читались плесенью — владелец 26.10)
+    n = fill("03 Тон вдоль волокна светлее", _above(h), color=(0.78, 0.75, 0.7))
     n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
-    _bmask(n, _wmask("patches"))
-    sp_lib.lop(n, 0.3)
-    n = fill("04 Пятна темнее", _above(n), color=(0.3, 0.24, 0.19))
+    _bmask(n, _wmask("streaks"))
+    sp_lib.lop(n, 0.22)
+    n = fill("04 Тон вдоль волокна темнее", _above(n), color=(0.3, 0.24, 0.19))
     n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
-    _bmask(n, _wmask("patches"), blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
-    sp_lib.lop(n, 0.12)
+    _bmask(n, _wmask("streaks"), blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
+    sp_lib.lop(n, 0.15)
     n = fill("05 Темнее к концам", _above(n), color=(0.3, 0.25, 0.2))
     n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
     _bmask(n, _wmask("ends"))
-    sp_lib.lop(n, 0.5)
+    sp_lib.lop(n, 0.35)
     # лак: тёплый тон тонким слоем и полуматовый блеск; в порах проседает и тусклее
     n = fill("06 Лак", _above(n), color=(0.95, 0.9, 0.8), rough=0.4)
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
@@ -406,7 +407,7 @@ def wood(st):
     # тёмный тон: стыки и поры по AO и к концам — темнее и чуть глянцевее, рельеф волокна не трогает
     n = fill("11 Тёмный тон: стыки, поры, концы", _above(n), color=(0.62, 0.55, 0.48), rough=0.36)
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
-    g = mask_generator(n, DIRT, {"dirt_level": 0.35, "dirt_contrast": 0.6, "grunge_amount": 0.3, "Grunge_Scale": 5,
+    g = mask_generator(n, DIRT, {"dirt_level": 0.35, "dirt_contrast": 0.6, "grunge_amount": 0.0, "Grunge_Scale": 5,
                                  "Use_Triplanar": 1, "edges_masking": 0.8})
     _bmask(n, _wmask("ends"), blend=L.BlendingMode.Lighten, above=g, opacity=0.4)
     sp_lib.lop(n, 0.38)
@@ -426,12 +427,12 @@ def wood(st):
                                  "Curvature_Weight": 1.0})
     m = mask_proc(c, "grunge_paint_scraped/grunge_paint_scraped", None, scale=1.2, blend=L.BlendingMode.Multiply, above=g)
     _mfilter(m, "histogram_scan", {"Position": 0.62, "Contrast": 0.8})
-    # вмятины: редкие, с примятым и потемневшим волокном
-    n = fill("14 Вмятины", _above(c), color=(0.8, 0.74, 0.68), rough=0.55, height=0.0009)
+    # вмятины по месту (wood_veneer_bake.py DENTS): одна крупная, три средних, мелкие по кромкам — примятое волокно
+    # темнее; процедурные пятна закрывали четверть приклада и читались плесенью
+    n = fill("14 Вмятины", _above(c), color=(0.82, 0.76, 0.7), rough=0.55, height=0.0009)
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
     n.set_blending_mode(L.BlendingMode.Subtract, CH.Height)
-    m = mask_proc(n, "noise_gaussian_spots_1/gaussian_spots_1", None, scale=1.3)
-    _mfilter(m, "histogram_scan", {"Position": 0.82, "Contrast": 0.6})
+    _bmask(n, _wmask("dents"))
     n = fill("15 Царапины лака", _above(n), color=(0.3, 0.28, 0.26), rough=0.62)
     n.set_blending_mode(L.BlendingMode.Screen, CH.BaseColor)
     mask_proc(n, _gm(12), {"invert": 1, "balance": 0.76, "contrast": 0.55}, scale=2.5)
