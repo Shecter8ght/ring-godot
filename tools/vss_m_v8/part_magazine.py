@@ -166,46 +166,56 @@ def cartridge(name, base_world, axis_world, coll, me=None):
     return o
 
 
-LIP_T = 1.8          # толщина губки
+LIP_TOP = 7.6        # верх губок над осью верхнего патрона (толщина над патроном у кромки ~1.9 мм)
+LIP_HALF_W = 12.4    # горловина с губками уже корпуса (заплечик на корпусе — фото владельца 26.10), влезает в приёмник
 LIP_GAP = 4.2        # половина просвета между губками над верхним патроном (сзади)
-LIP_FRONT = 3.0      # губки кончаются чуть впереди середины гильзы; дальше — окно выхода патрона
+LIP_R_IN = 2.0       # скругление внутренней кромки губки
+LIP_R_OUT = 3.6      # скругление наружного угла (губка — толстый скруглённый борт, а не тонкий отгиб)
+LIP_CHEEK = 6.4      # спереди губки расходятся до прямых щёк: пуля проходит между ними
+# вырез U в губках перед передним упором (фото владельца 26.10: сзади губки, ближе к переду вырез, впереди упор)
+NOTCH_N, NOTCH_RN, NOTCH_RH, NOTCH_BOTTOM = 9.0, 9.5, 6.0, 1.8   # пологий: эллипс, а не полукруг
+FRONT_SLOT = 4.8     # половина ширины прорези в переднем упоре — под пулю
 
 
 def _lip_section(side, y_edge, steps=10):
-    """Сечение губки (y, h): h — высота над осью верхнего патрона вдоль оси магазина. Губка — продолжение стенки,
-    загнута внутрь над патроном своего ряда; нижняя поверхность повторяет патрон с зазором 0.15 мм."""
-    yc = 0.0                                                       # однорядный выход: верхний патрон по центру
+    """Сечение губки (y, h): h — высота над осью верхнего патрона вдоль оси магазина. Губка — толстый борт поверх
+    стенки (фото владельца 26.10): снизу повторяет патрон с зазором 0.15 мм до кромки, кромка — отвесная со
+    скруглением, верх плоский до наружного скругления, дальше — наружная стенка. Если кромка дальше от оси, чем
+    патрон (спереди), губка — прямая щека."""
     ri = D_CART / 2 + 0.15
-    ro = ri + LIP_T
-    # угол кромки на окружности ri (от оси +y, против часовой) — где y = y_edge
-    ce = max(-1.0, min(1.0, (y_edge - yc) / ri))
-    a_edge = math.degrees(math.acos(ce))
-    a_wall = 180.0 if side < 0 else 0.0
-    pts = []
-    pts.append((side * NECK_W, -4.5))                             # низ внутренней стенки (уходит в корпус)
-    for k in range(steps + 1):                                     # внутренняя дуга: от стенки к кромке
-        a = math.radians(a_wall + (a_edge - a_wall) * k / steps)
-        pts.append((yc + ri * math.cos(a), ri * math.sin(a)))
-    for k in range(steps + 1):                                     # наружная дуга: от кромки обратно к стенке
-        a = math.radians(a_edge + (a_wall - a_edge) * k / steps * 0.72)
-        pts.append((yc + ro * math.cos(a), ro * math.sin(a)))
-    pts.append((side * HALF_Y, 1.5))
-    pts.append((side * HALF_Y, -4.5))
+    ye = abs(y_edge)
+    pts = [(NECK_W, -4.5)]                                         # низ внутренней стенки (уходит в корпус)
+    # дуга по патрону — не выше начала скругления кромки, иначе контур складывается сам на себя (дыры в сетке)
+    a_max = math.degrees(math.asin(min(1.0, (LIP_TOP - LIP_R_IN - 0.1) / ri)))
+    for k in range(steps + 1):                                     # по патрону до кромки, дальше отвесно
+        a = math.radians(a_max * k / steps)
+        pts.append((max(ri * math.cos(a), ye), ri * math.sin(a)))
+    pts.append((ye, LIP_TOP - LIP_R_IN))
+    for k in range(1, 5):                                          # скругление кромки
+        a = math.radians(180.0 - 90.0 * k / 4)
+        pts.append((ye + LIP_R_IN + LIP_R_IN * math.cos(a), LIP_TOP - LIP_R_IN + LIP_R_IN * math.sin(a)))
+    for k in range(0, 7):                                          # наружный угол
+        a = math.radians(90.0 - 90.0 * k / 6)
+        pts.append((LIP_HALF_W - LIP_R_OUT + LIP_R_OUT * math.cos(a), LIP_TOP - LIP_R_OUT + LIP_R_OUT * math.sin(a)))
+    pts.append((LIP_HALF_W, -4.5))
+    pts = [(side * y, h) for y, h in pts]
     if side > 0:
         pts.reverse()
     return pts
 
 
 def lips(name, coll):
-    """Обе губки: сечение протянуто вдоль n от задней стенки до LIP_FRONT; спереди кромка расходится наружу."""
+    """Обе губки: сечение протянуто вдоль n от задней стенки до передней; к переду кромки расходятся в щёки,
+    вырез U режется в build_mag."""
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
+    n_end = HALF_NF - 0.35
     for side in (-1, 1):
-        ns = [-HALF_N + 0.2 + k * 1.6 for k in range(int((LIP_FRONT + HALF_N - 0.2) / 1.6) + 1)]
+        ns = [-HALF_N + 0.35 + k * 1.6 for k in range(int((n_end + HALF_N - 0.35) / 1.6) + 1)] + [n_end]
         rings = []
         for n in ns:
-            t = max(0.0, min(1.0, (n + 9.0) / (LIP_FRONT + 9.0)))
-            y_edge = side * (LIP_GAP + 3.4 * t * t)                # к выходу губки расходятся
+            t = max(0.0, min(1.0, (n + 9.0) / 13.0))
+            y_edge = side * (LIP_GAP + (LIP_CHEEK - LIP_GAP) * t * t * (3 - 2 * t))   # к выходу губки расходятся
             sec = _lip_section(side, y_edge)
             rings.append([bm.verts.new(to_world(-h, n, y)) for y, h in sec])
         m = len(rings[0])
@@ -215,6 +225,31 @@ def lips(name, coll):
                 bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
         bm.faces.new(list(reversed(rings[0])))
         bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    return o
+
+
+def notch_cutter(name, coll, seg=40):
+    """Эллиптический цилиндр поперёк магазина (по y): пологий вырез U в губках — дно на NOTCH_BOTTOM над осью
+    верхнего патрона."""
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    hc = NOTCH_BOTTOM + NOTCH_RH
+    rings = []
+    for y in (-HALF_Y - 3.0, HALF_Y + 3.0):
+        ring = []
+        for k in range(seg):
+            a = 2 * math.pi * k / seg
+            ring.append(bm.verts.new(to_world(-(hc + NOTCH_RH * math.sin(a)), NOTCH_N + NOTCH_RN * math.cos(a), y)))
+        rings.append(ring)
+    for i in range(seg):
+        j = (i + 1) % seg
+        bm.faces.new((rings[0][i], rings[0][j], rings[1][j], rings[1][i]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[1])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(name, me)
@@ -252,9 +287,15 @@ def build_mag(tag, rounds, coll, cart_coll, me_cart):
     body = spine_loft(f"Magazine_{tag}", U_TOP, u_bot, steps, rrect(HALF_N, HALF_Y, 3.0, 4, HALF_NF), coll, "Polymer_magazine")
     cav = funnel_loft("_cav", U_TOP - 3.0, u_bot - 2.4, coll)
     boolean(body, cav)
-    # губки: загнуты над патронами своих рядов; задняя стенка над губками закрыта
+    # губки: толстые борта над верхним патроном, горловина уже корпуса; задняя стенка над губками закрыта
     boolean(body, lips("_lips", coll), op="UNION", self_x=True)
-    boolean(body, spine_box("_rwall", -3.0, U_TOP + 1.0, -HALF_N, -HALF_N + 2.4, -HALF_Y, HALF_Y, coll, 1), op="UNION")
+    # передний упор поверх горловины с прорезью под пулю; перед ним в губках вырез U (фото владельца 26.10)
+    fw = spine_box("_fwall", -LIP_TOP, U_TOP + 1.0, HALF_NF - 2.4, HALF_NF - 0.25, -LIP_HALF_W, LIP_HALF_W, coll, 2)
+    boolean(fw, spine_box("_fslot", -LIP_TOP - 1.0, -NOTCH_BOTTOM, HALF_NF - 3.0, HALF_NF + 1.0, -FRONT_SLOT, FRONT_SLOT,
+                          coll, 1))
+    boolean(body, fw, op="UNION")
+    boolean(body, notch_cutter("_notch", coll))
+    boolean(body, spine_box("_rwall", -LIP_TOP, U_TOP + 1.0, -HALF_N + 0.25, -HALF_N + 2.4, -LIP_HALF_W, LIP_HALF_W, coll, 1), op="UNION")
     # передний зацеп и задний упор
     boolean(body, spine_box("_flug", 3.0, 8.0, HALF_NF - 0.5, HALF_NF + 0.6, -9.0, 9.0, coll, 1), op="UNION")
     boolean(body, spine_box("_rlug", 23.0, 25.9, -HALF_N - 1.6, -HALF_N + 0.5, -6.0, 6.0, coll, 1), op="UNION")

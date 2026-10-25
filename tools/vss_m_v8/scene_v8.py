@@ -20,6 +20,8 @@ import tex_v8  # noqa: E402
 KIT = "E:/Models Blender/WEAPONS/ВСС Винторез — полный комплект/01_Blender/02_Оптика"
 PSO_SRC = f"{KIT}/01_ПСО_4x24/ПСО_4x24_Исходник_геометрии.blend"
 SCOPE_SRC = f"{KIT}/02_Прицел_4x32/Прицел_4x32_Исходник_геометрии.blend"
+SIGHTS_SP = "E:/Games/RING-godot/_asset_src/vss_m_v8/sights_sp.blend"          # sights_sp.py: прицелы с развёрткой
+SIGHTS_EXPORT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_sights/export"     # карты Painter (sp_sights_stack.py)
 TABLE = "E:/Games/RING-godot/_asset_src/vss_m_v8/table_brown_planks_09"
 HDRI = "E:/Games/RING-godot/_asset_src/vss_m_v8/hdri/artist_workshop_2k.hdr"
 
@@ -51,6 +53,17 @@ def append_root(path, root_name, coll):
     return root, keep
 
 
+def sp_optic_materials(objs):
+    """Наборы optic_* (sights_sp.py) → материалы с картами Painter из sp_sights/export."""
+    import sp_apply
+    for o in objs:
+        if o.type != "MESH":
+            continue
+        for s in o.material_slots:
+            if s.material is not None and s.material.name.split(".")[0].startswith("optic_"):
+                s.material = sp_apply.material(s.material.name.split(".")[0], SIGHTS_EXPORT)
+
+
 def remap_optic_materials(objs, M):
     table = {"Coated aluminium": M["Alu_anodized"], "Machined rim": M["Alu_bare"], "Engraving": M["Engraving_fill"],
              "Inner black": M["Inner_black"], "Rubber": M["Rubber"]}
@@ -65,7 +78,9 @@ def remap_optic_materials(objs, M):
                 continue
             nm = s.material.name.split(".")[0]
             low = nm.lower()
-            if nm in table:
+            if nm.startswith("SP_"):
+                pass                                   # карты Painter (sp_optic_materials)
+            elif nm in table:
                 s.material = table[nm]
             elif "glass" in low or "lens" in low or "стекл" in low:
                 s.material = M["Glass"]
@@ -344,11 +359,16 @@ def main():
             c[k] = v
         bpy.context.view_layer.update()
         place(c, [c], (-1, 0, 0), xy, rnd.uniform(0, 360))
-    # прицелы
-    pso_root, pso_objs = append_root(PSO_SRC, "PSO_VSS_4x24", att)
+    # прицелы: с картами Painter — из sights_sp.py (детали по наборам, развёртка), иначе — исходники комплекта
+    painter_optics = "painter" in a[2:] and os.path.exists(SIGHTS_SP) and os.path.isdir(SIGHTS_EXPORT)
+    pso_root, pso_objs = append_root(SIGHTS_SP if painter_optics else PSO_SRC, "PSO_VSS_4x24", att)
+    if painter_optics:
+        sp_optic_materials(pso_objs)
     remap_optic_materials(pso_objs, M)
     place(pso_root, [o for o in pso_objs if o.type == "MESH"], (0, 1, 0), (-0.17, 0.27), -8.0, step=2)
-    sc_root, sc_objs = append_root(SCOPE_SRC, "Rail_4x32", att)
+    sc_root, sc_objs = append_root(SIGHTS_SP if painter_optics else SCOPE_SRC, "Rail_4x32", att)
+    if painter_optics:
+        sp_optic_materials(sc_objs)
     remap_optic_materials(sc_objs, M)
     place(sc_root, [o for o in sc_objs if o.type == "MESH"], (0, 1, 0), (0.23, 0.27), 6.0, step=2)
     table(env)

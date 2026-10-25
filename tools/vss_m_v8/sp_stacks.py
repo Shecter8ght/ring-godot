@@ -258,10 +258,107 @@ def polymer(st, base=(0.03, 0.03, 0.032), rough=0.3, stipple=0.038, stipple_scal
     return n
 
 
+MAG_LIPS = PARTS + "/mag_lips.png"      # mag_masks_bake.py: губки и передний упор (затвор трёт до блеска)
+
+
+def magazine(st):
+    """Магазин — литой полиамид ТОЗ (фото владельца 26.10): тёмно-графитовый, матовый, без лака, литьё слегка
+    пятнистое; губки и передний упор затвор затёр до блеска; на кромках белёсые потёртости пластика (не краска — светлее
+    и матовее), редкие светлые царапины, засаленные места, грязь в углах и пыль в рёбрах. Порядок по справке навыка:
+    основа → рельеф → блеск → повреждения → резкость (эффект группы) → грязь и пыль."""
+    CH = sp_lib.CH
+    grp = L.insert_group(L.InsertPosition.from_textureset_stack(st))
+    grp.set_name("Полиамид")
+    ins = L.InsertPosition.inside_node(grp, L.NodeStack.Substack)
+    n = fill("01 Полиамид", ins, color=(0.07, 0.07, 0.074), rough=0.55, metal=0.0)
+    n = fill("02 Литьё: зерно", _above(n), rough="noise_gaussian_noise/gaussian_noise",
+             height="noise_gaussian_noise/gaussian_noise")
+    triplanar(n, 120.0)
+    n.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
+    n.set_opacity(0.2, CH.SpecularRoughness)
+    n.set_opacity(0.0008, CH.Height)
+    n = fill("03 Литьё: пятна тона", _above(n), color=(0.7, 0.7, 0.7))
+    n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
+    mask_proc(n, "noise_clouds_2/clouds_2", None, scale=1.2)
+    sp_lib.lop(n, 0.25)
+    n = _proc_layer("04 Засаленные места — глаже", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6,
+                    0.45, {"Balance": 0.55, "Contrast": 0.3}, rough=0.42)
+    n = fill("05 Губки и упор затёрты до блеска", _above(n), color=(0.2, 0.2, 0.205), rough=0.26)
+    g = mask_generator(n, EDGE, {"Wear_Level": 0.45, "Wear_Contrast": 0.6, "Grunge_Amount": 0.5, "grunge_scale": 4,
+                                 "Use_Triplanar": 1, "Edges_Smoothness": 0.6, "Ambient_Occlusion_Masking": 0.5,
+                                 "Curvature_Weight": 1.0})
+    _bmask(n, MAG_LIPS, blend=L.BlendingMode.Multiply, above=g)
+    n = fill("06 Белёсые потёртости кромок", _above(n), color=(0.36, 0.355, 0.35), rough=0.78)
+    # узко по кромкам: с histogram scan и уровнем 0.16 потёртости ложились на большую часть магазина (замер 26.10)
+    mask_generator(n, EDGE, {"Wear_Level": 0.06, "Wear_Contrast": 0.9, "Grunge_Amount": 0.85, "grunge_scale": 3,
+                             "Use_Triplanar": 1, "Edges_Smoothness": 0.3, "Ambient_Occlusion_Masking": 0.5,
+                             "Curvature_Weight": 1.0})
+    sp_lib.lop(n, 0.5)
+    n = fill("07 Царапины", _above(n), color=(0.24, 0.24, 0.24), rough=0.66)
+    mask_proc(n, _gm(12), {"invert": 1, "balance": 0.78, "contrast": 0.55}, scale=2.5)
+    sp_lib.lop(n, 0.3)
+    sh = L.insert_filter_effect(L.InsertPosition.inside_node(grp, L.NodeStack.Content),
+                                sp_lib.rid("sharpen/sharpen", "u:filter"))
+    sh.get_source().set_parameters({"intensity": 0.3})
+    n = _dirt(_above(grp), color=(0.035, 0.032, 0.03), level=0.36, opacity=0.8, name="08 Грязь в углах")
+    n = _dirt(_above(n), color=(0.42, 0.4, 0.37), rough=0.95, level=0.12, opacity=0.3, name="09 Пыль в рёбрах",
+              contrast=0.9)
+    return n
+
+
 def anodized(st):
     """Муфта: чёрное анодирование со сдержанным глянцем поверх алюминия, вытертое на кромках и пятнами (coated)."""
     return coated(st, ((0.07, 0.07, 0.075), 0.3, 0.6), ((0.55, 0.55, 0.57), 0.5, 1.0), wear=0.06, patch_bal=0.9,
                   thin=0.3, scratches=0.15)
+
+
+def optic_body(st):
+    """Корпус прицела: чёрное анодирование, матовее муфты; вытерто до алюминия только узко по острым кромкам (стек
+    coated с пятнами на мелких круглых деталях прицелов уводил до алюминия 17–20 % площади — белые проплешины),
+    редкие царапины, грязь в углах, отпечатки."""
+    top = L.InsertPosition.from_textureset_stack(st)
+    n = fill("01 Анодирование", top, color=(0.07, 0.07, 0.075), rough=0.42, metal=0.4)
+    n = _grain(_above(n), 0.15, 0.0005)
+    n = _proc_layer("03 Блеск пятнами", _above(n), _gm(13), 1.2, 0.4, {"balance": 0.5, "contrast": 0.2}, rough=0.5)
+    n = _edge("04 Кромки до алюминия", _above(n), (0.55, 0.55, 0.57), 0.4, 0.035, contrast=0.92, grunge=0.7)
+    n = _proc_layer("05 Царапины", _above(n), _gm(12), 2.5, 0.25, {"invert": 1, "balance": 0.8, "contrast": 0.55},
+                    color=(0.3, 0.3, 0.31), rough=0.45, metal=1.0)
+    n = _dirt(_above(n), color=(0.035, 0.03, 0.026), level=0.38, opacity=0.8, name="06 Грязь в углах")
+    n = _dirt(_above(n), color=(0.3, 0.28, 0.25), rough=0.95, level=0.22, opacity=0.3, name="07 Пыль в углах", contrast=0.9)
+    n = _proc_layer("08 Отпечатки", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 3.0, 0.3,
+                    {"Balance": 0.45, "Contrast": 0.35}, color=(0.11, 0.105, 0.1), rough=0.55)
+    return n
+
+
+def optic_rim(st):
+    """Ободки и проточки: точёный алюминий — светлый, сдержанный блеск, тонкое зерно; грязь в углах, налёт пятнами."""
+    top = L.InsertPosition.from_textureset_stack(st)
+    n = fill("01 Точёный алюминий", top, color=(0.62, 0.62, 0.64), rough=0.32, metal=1.0)
+    n = _grain(_above(n), 0.25, 0.0)
+    n = _proc_layer("03 Налёт пятнами", _above(n), _gm(13), 1.4, 0.35, {"balance": 0.5, "contrast": 0.25},
+                    color=(0.45, 0.45, 0.46), rough=0.45)
+    n = _dirt(_above(n), color=(0.05, 0.045, 0.04), level=0.4, opacity=0.8, name="04 Грязь в углах")
+    n = _proc_layer("05 Отпечатки", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 3.0, 0.3,
+                    {"Balance": 0.45, "Contrast": 0.35}, color=(0.5, 0.5, 0.5), rough=0.5)
+    return n
+
+
+def optic_engraving(st):
+    """Гравировка: заливка краской (светлая, матовая), в углублениях потемнела от грязи, местами выкрошилась."""
+    top = L.InsertPosition.from_textureset_stack(st)
+    n = fill("01 Краска гравировки", top, color=(0.84, 0.82, 0.74), rough=0.72, metal=0.0)
+    n = _proc_layer("02 Выкрошилась", _above(n), _gm(8), 1.5, 1.0, {"invert": 1, "balance": 0.82, "contrast": 0.6},
+                    color=(0.07, 0.07, 0.075), rough=0.42, metal=0.5)
+    n = _dirt(_above(n), color=(0.35, 0.32, 0.27), level=0.45, opacity=0.6, name="03 Грязь в краске")
+    return n
+
+
+def optic_inner(st):
+    """Внутренняя чернь (бленды, оправы стёкол): матовая чёрная краска, пыль."""
+    top = L.InsertPosition.from_textureset_stack(st)
+    n = fill("01 Чернь", top, color=(0.035, 0.035, 0.037), rough=0.9, metal=0.0)
+    n = _dirt(_above(n), color=(0.25, 0.24, 0.22), rough=0.95, level=0.3, opacity=0.35, name="02 Пыль")
+    return n
 
 
 def rubber(st):
