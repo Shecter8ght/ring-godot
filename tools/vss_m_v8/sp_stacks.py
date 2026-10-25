@@ -51,7 +51,7 @@ def _above(n):
     return L.InsertPosition.above_node(n)
 
 
-def phosphate(st, rail_meshes=None, dust=0.08, base=((0.085, 0.085, 0.09), 0.6, 0.7)):
+def phosphate(st, rail_meshes=None, dust=0.08, base=((0.08, 0.08, 0.085), 0.62, 0.45)):
     """Фосфатированная сталь (коробка, рама, органы управления, глушитель): тёмная матовая основа с мелким зерном
     и пятнами, протирки, царапины и потёртости до металла, износ кромок, грязь в углах, пыль, отпечатки (блеск)."""
     top = L.InsertPosition.from_textureset_stack(st)
@@ -62,7 +62,7 @@ def phosphate(st, rail_meshes=None, dust=0.08, base=((0.085, 0.085, 0.09), 0.6, 
                     color=(0.125, 0.123, 0.12), rough=0.7)
     n = _proc_layer("03б Пятна шероховатости", _above(n), "grunge_rough_dirty/grunge_rough_dirty", 3.0, 0.3, rough=0.48)
     n = _proc_layer("04 Протирки", _above(n), "grunge_wipe_directional/grunge_wipe_directional", 4.0, 0.3, rough=0.5)
-    n = _proc_layer("05 Мелкие царапины", _above(n), "grunge_scratches_fine/grunge_scratches_fine", 5.0, 0.7,
+    n = _proc_layer("05 Мелкие царапины", _above(n), "grunge_scratches_fine/grunge_scratches_fine", 5.0, 0.55,
                     dict(SCR, scratches_amount=0.6), color=(0.34, 0.34, 0.35), rough=0.3, metal=1.0)
     n = _proc_layer("05б Потёртости", _above(n), "grunge_scratches_rough/grunge_scratches_rough", 3.0, 0.5,
                     color=(0.24, 0.24, 0.245), rough=0.38, metal=0.92)
