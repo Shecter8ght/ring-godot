@@ -23,6 +23,7 @@ for dev_type in ("OPTIX", "CUDA"):
 sc.render.resolution_x = w
 sc.render.resolution_y = int(w * 9 / 16)
 sc.cycles.samples = spp
+sc.cycles.denoising_use_gpu = False      # видеопамять может держать Substance Painter
 os.makedirs(out, exist_ok=True)
 for c in cams:
     sc.camera = bpy.data.objects[c]

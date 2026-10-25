@@ -20,6 +20,11 @@ VIEWS = {
     "latch": ((228, -95, 85), (286, 0, 27), 55),
     "handguard": ((540, -190, 70), (525, 0, 12), 55),
     "left34": ((260, 520, 230), (470, 0, -5), 40),
+    "cover_rear_r": ((320, -150, 75), (305, 0, 22), 45),
+    "sleeve_low": ((780, -170, -45), (610, 0, 10), 40),
+    "slope_top": ((250, -120, 95), (300, 0, 28), 45),
+    "stock_rear": ((40, -150, 40), (90, 0, -30), 45),
+    "comb_top": ((180, -90, 130), (230, 0, 0), 45),
 }
 
 
@@ -36,6 +41,7 @@ def main():
             ctrl[k] = float(v)
         ctrl.update_tag()
     sc.cycles.samples = spp
+    sc.cycles.denoising_use_gpu = False      # видеопамять может держать Substance Painter
     sc.render.resolution_x = w; sc.render.resolution_y = int(w * 0.5625)
     cd = bpy.data.cameras.new("LookCam"); cam = bpy.data.objects.new("LookCam", cd)
     sc.collection.objects.link(cam); sc.camera = cam

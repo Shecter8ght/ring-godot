@@ -58,9 +58,11 @@ def build(ctx):
     from part_receiver import LATCH_TRAVEL, LATCH_Z
     from part_stock import STOCK_BTN_TRAVEL
     lt = bpy.data.objects["Cover_latch_button"]
-    lat_p = empty("Cover_latch_mover", (286.0, 0, LATCH_Z), R, root, size=0.005)
+    from part_receiver import slope_x
+    xs = slope_x(LATCH_Z)
+    lat_p = empty("Cover_latch_mover", (xs, 0, LATCH_Z), R, root, size=0.005)
     set_parent(lt, lat_p)
-    add_driver(lat_p, "location", 0, f"(286.0+{LATCH_TRAVEL}*cover_latch)*{MM}", ctrl, ["cover_latch"])
+    add_driver(lat_p, "location", 0, f"({xs}+{LATCH_TRAVEL}*cover_latch)*{MM}", ctrl, ["cover_latch"])
     sb = bpy.data.objects["Stock_release_button"]
     sb_p = empty("Stock_release_mover", (271.0, 0, 12.0), R, root, size=0.005)
     set_parent(sb, sb_p)

@@ -19,7 +19,7 @@ BUILD = {
     "suppressor": sp_stacks.suppressor,
     "bare_steel": sp_stacks.bare_steel,
     "handguard": lambda st: sp_stacks.polymer(st),
-    "magazine": lambda st: sp_stacks.polymer(st, (0.035, 0.035, 0.037), rough=0.58, stipple=0.008, stipple_scale=60.0),
+    "magazine": lambda st: sp_stacks.polymer(st, (0.035, 0.035, 0.037), rough=0.5, stipple=0.012, stipple_scale=60.0, pores=0.15),
     "sleeve": sp_stacks.anodized,
     "wood": sp_stacks.wood,
     "rubber": sp_stacks.rubber,

@@ -100,6 +100,45 @@ def cover_loft(C):
 
 LATCH_Z = 27.0                           # середина фиксатора крышки на прямом участке заднего скоса
 LATCH_TRAVEL = 4.0                       # ход фиксатора крышки вперёд вдоль оси при нажатии
+LATCH_HW, LATCH_HH = 6.0, 4.4            # окно фиксатора: полуширина (Y) и полувысота (Z) сечения поперёк оси
+LATCH_GAP = 0.25
+
+
+def slope_x(z):
+    """X заднего скоса крышки на высоте z (прямой участок)."""
+    a = math.atan2(COVER_TOP - COVER_REAR_Z, COVER_SLOPE_X1 - COVER_SLOPE_X0)
+    return COVER_SLOPE_X0 + (z - COVER_REAR_Z) / math.tan(a)
+
+
+def latch_section(C, name, hw, hh, r, x0, x1, mat=None):
+    """Призма вдоль оси ствола (X) со скруглённым прямоугольным сечением ±hw × LATCH_Z±hh: и окно в скосе, и сама
+    кнопка — одного сечения с зазором, поэтому кнопка заполняет окно (держит крышку) и при нажатии едет вдоль оси."""
+    return prism_yz(name, fillet([(-hw, LATCH_Z - hh), (hw, LATCH_Z - hh), (hw, LATCH_Z + hh), (-hw, LATCH_Z + hh)], r, 4),
+                    x0, x1, C, mat)
+
+
+def slope_matrix():
+    """Матрица осей заднего скоса: локальные (w — наружу по нормали, u — поперёк, v — вверх по скосу) → мировые."""
+    from mathutils import Matrix, Vector
+    from lib import MM
+    a = math.atan2(COVER_TOP - COVER_REAR_Z, COVER_SLOPE_X1 - COVER_SLOPE_X0)
+    p = Vector((slope_x(LATCH_Z), 0.0, LATCH_Z))
+    d = Vector((math.cos(a), 0.0, math.sin(a)))
+    n = Vector((-math.sin(a), 0.0, math.cos(a)))
+    m = Matrix((n, Vector((0, 1, 0)), d)).transposed().to_4x4()
+    m.translation = p * MM
+    return m
+
+
+def to_slope(o, w, v):
+    """Объект, построенный у начала координат (x — нормаль скоса, y — поперёк, z — вдоль скоса), — на скос в (w, v)."""
+    from mathutils import Matrix
+    from lib import MM
+    m = slope_matrix() @ Matrix.Translation((w * MM, 0, v * MM))
+    o.data.transform(m)
+    if m.determinant() < 0:
+        o.data.flip_normals()
+    return o
 
 
 def latch_shape(C, name, u_rng, v_rng, w_rng, mat=None):
@@ -272,7 +311,8 @@ def build(ctx):
     cover = cover_loft(C)
     # окно фиксатора в скосе: сквозь стенку в полость; вверх по скосу запас под ход (площадка уходит вперёд-вверх).
     # Режется до рёбер: после объединения с трубками рёбер точная булева операция оставляла поверхность скоса целой
-    boolean(cover, latch_shape(C, "_lrec", (-5.0, 5.0), (-4.8, 7.6), (-7.0, 5.0)))
+    xs = slope_x(LATCH_Z)
+    boolean(cover, latch_section(C, "_lrec", LATCH_HW, LATCH_HH, 1.6, xs - 15.0, xs + 15.0))
     # внутренняя полость повторяет скос со стенкой ~2.5 мм; рама при полном отводе (торец x=286) проходит под ним
     inner = fillet([(480.0, TOP_Z - 1.5), (284.6, TOP_Z - 1.5), (284.6, 22.4), (298.8, COVER_TOP - 3.0), (480.0, COVER_TOP - 3.0)],
                    [0, 0, 1.0, 11.5, 0], 8)
@@ -292,18 +332,28 @@ def build(ctx):
     out["rail"] = rail
     out["rail_slots"] = slots
 
-    # фиксатор крышки — задний конец направляющей возвратной пружины: рифлёная площадка в окне заднего скоса
-    # (стоит над скосом на 2 мм), шток уходит в полость. Ход честный: нажимают — уходит вперёд вдоль оси на
-    # LATCH_TRAVEL (риг: cover_latch), площадка утапливается в окно (замечание владельца 25.10)
-    from lib import MM
-    latch = latch_shape(C, "Cover_latch_button", (-4.4, 4.4), (-4.2, 4.2), (-4.5, 2.0), "Steel_black")
-    ribs = [latch_shape(C, f"_lr{k}", (-4.0, 4.0), (v - 0.45, v + 0.45), (1.6, 2.6)) for k, v in enumerate((-3.0, -1.5, 0.0, 1.5, 3.0))]
-    boolean(latch, join(ribs, "_lribs"), op="UNION")
-    a_ = math.atan2(COVER_TOP - COVER_REAR_Z, COVER_SLOPE_X1 - COVER_SLOPE_X0)
-    xc = COVER_SLOPE_X0 + (LATCH_Z - COVER_REAR_Z) / math.tan(a_)
-    rod = cyl("_lrod", xc - 1.0, xc + 14.0, 2.3, C, cz=LATCH_Z, seg=24)
+    # фиксатор крышки (образец владельца с Fab) — задний конец направляющей возвратной пружины: кнопка того же сечения,
+    # что окно в скосе (зазор 0.25 мм), заполняет окно и запирает крышку. Лицо — по плоскости скоса: средний язычок
+    # выступает на 2 мм, боковые щёки — на 0.8 мм; по обеим горизонтальные скруглённые канавки, верх язычка гладкий.
+    # Нажатие — вдоль оси вперёд на LATCH_TRAVEL (риг cover_latch): кнопка уходит в окно, крышку можно снять
+    hw, hh = LATCH_HW - LATCH_GAP, LATCH_HH - LATCH_GAP
+    latch = latch_section(C, "Cover_latch_button", hw, hh, 1.35, xs - 6.0, xs + 6.0, "Steel_black")
+    boolean(latch, latch_shape(C, "_lcut", (-20, 20), (-20, 20), (0.8, 30.0)))
+    tongue = latch_section(C, "_ltong", 2.7, hh, 1.0, xs - 6.0, xs + 4.0)
+    boolean(tongue, latch_shape(C, "_ltcut", (-20, 20), (-20, 20), (2.0, 30.0)))
+    boolean(latch, tongue, op="UNION")
+    rod = cyl("_lrod", xs - 1.0, xs + 14.0, 2.3, C, cz=LATCH_Z, seg=24)
     boolean(latch, rod, op="UNION")
-    finish(latch, 0.3, 2, 35)
+    finish(latch, 0.45, 3, 35)
+    grooves = []
+    for k, v in enumerate((-4.0, -2.6, -1.2, 0.2, 1.6)):
+        # на щеках — отрезками до язычка (иначе канавка прошла бы его насквозь ниже лица), на язычке — по нему
+        for j, (u0, u1, wf) in enumerate(((-10.0, -2.75, 0.8), (2.75, 10.0, 0.8), (-3.0, 3.0, 2.0))):
+            g = cyl(f"_lg{k}_{j}", u0, u1, 0.42, C, axis="Y", cy=0.0, cz=0.0, seg=12)
+            to_slope(g, wf + 0.12, v)
+            grooves.append(g)
+    boolean(latch, join(grooves, "_lgr"))
+    renormal(latch)
     out["latch"] = latch
 
     # --- боковая планка «ласточкин хвост» под ПСО (слева, +Y) ---

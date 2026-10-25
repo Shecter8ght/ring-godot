@@ -286,9 +286,12 @@ def stock_release_button(C):
         t = _m.radians(90.0 + 180.0 * k / 12)
         pts.append((xc + half * _m.cos(t), half * _m.sin(t)))
     pts.append((xc, -half))
-    o = prism_xy("Stock_release_button", fillet(pts, [0.8, 0.8] + [0.0] * (len(pts) - 2), 3), 3.5, 16.0, C, "Steel_black")
-    grooves = [box(f"_sbg{k}", x - 0.3, x + 0.3, -half - 1, half + 1, 15.45, 17.0, C)
-               for k, x in enumerate([266.6 + 1.25 * i for i in range(8)])]
+    from lib import cyl, renormal
+    o = prism_xy("Stock_release_button", fillet(pts, [1.2, 1.2] + [0.0] * (len(pts) - 2), 3), 3.5, 16.0, C, "Steel_black")
+    finish(o, 1.1, 4, 35)                    # грани скруглены (замечание владельца 25.10: «очень острые»)
+    # поперечное рифление — скруглённые канавки
+    grooves = [cyl(f"_sbg{k}", -half - 1, half + 1, 0.42, C, axis="Y", cy=x, cz=16.12, seg=12)
+               for k, x in enumerate([267.4 + 1.25 * i for i in range(7)])]
     boolean(o, join(grooves, "_sbg"))
-    finish(o, 0.5, 3, 35)
+    renormal(o)
     return o
