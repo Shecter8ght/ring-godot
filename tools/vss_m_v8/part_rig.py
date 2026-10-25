@@ -69,9 +69,9 @@ def build(ctx):
     add_driver(bolt, "rotation_euler", 0, f"-radians(30.0)*min(1.0,max(0.0,({t}-6.0)/8.0))", ctrl, ["bolt_pull", "safety"])
     # пружина сжимается от переднего конца: начало координат пружины — у заднего упора
     spr = b["spring"]
-    set_origin(spr, (287.0, 0, 28.0))
+    set_origin(spr, (292.5, 0, 28.0))
     set_parent(spr, root)
-    add_driver(spr, "scale", 0, f"(79.0-{t})/79.0", ctrl, ["bolt_pull", "safety"])
+    add_driver(spr, "scale", 0, f"(101.5-{t})/101.5", ctrl, ["bolt_pull", "safety"])
 
     # --- органы управления ---
     c = P["controls"]
@@ -99,11 +99,14 @@ def build(ctx):
     m20 = P["magazine"]["20"]["body"]
     set_parent(m20, root)
     m20.location.y += 0.16          # для осмотра — рядом с оружием; на столе раскладывается сценой
+    m30 = P["magazine"]["30"]["body"]
+    set_parent(m30, root)
+    m30.location.y += 0.30
 
     # --- перед: цевьё и ствол неподвижны, глушитель с муфтой и прицелами снимается вперёд ---
     f = P["front"]
     set_parent(f["handguard"], root); set_parent(f["barrel"], root); set_parent(f["swivel_lug"], root)
-    sw_p = empty("Front_swivel_pivot", (560.5, 26.6, 7.0), R, root, size=0.004)
+    sw_p = empty("Front_swivel_pivot", (560.5, 25.6, 7.0), R, root, size=0.004)
     set_parent(f["swivel"], sw_p)
     sup = empty("Suppressor_mount", (567.3, 0, BORE_Z), R, root, size=0.012)
     for o in bpy.data.collections["Suppressor"].objects:

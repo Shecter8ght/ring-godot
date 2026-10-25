@@ -2,17 +2,17 @@
 # Размеры сняты с профильного фото ВСС (масштаб по длине 894 мм) и с фото ВСС-М (В. Кузьмин, CC BY-SA 4.0);
 # ось канала z=10, торец затыльника x=0, правая сторона −Y.
 import math
-from lib import (BORE_Z, box, boolean, cyl, fillet, finish, join, lathe, prism_xz, prism_yz, prism_xy, set_origin,
-                 auto_sharp, material, apply_all)
+from lib import (BORE_Z, LOWER_W, COVER_W, CAV_W, box, boolean, cyl, fillet, finish, join, lathe, loft_yz, prism_xz, prism_yz, prism_xy, set_origin,
+                 auto_sharp, material, apply_all, bevel_edges)
 
-LOWER_W = 18.5          # полуширина коробки
-COVER_W = 19.5          # полуширина крышки (свес 1 мм над коробкой)
 TOP_Z = 8.0             # плоскость разъёма коробка/крышка
 COVER_TOP = 42.0
+COVER_REAR_Z = 11.3                      # низ крышки сзади — над гребнем приклада
+COVER_SLOPE_X0, COVER_SLOPE_X1 = 272.0, 298.0   # скос заднего торца крышки (замечание владельца 25.10)
 WIN_X0, WIN_X1 = 405.0, 475.5   # окно затворной рамы справа
 WIN_Z0, WIN_Z1 = 2.0, 30.0
 WELL_X0, WELL_X1 = 413.5, 478.5  # шахта магазина
-WELL_W = 14.6
+WELL_W = 13.4
 
 
 def picatinny(name, x0, x1, base_z, coll, mat, n_slots=None, pitch=10.01, slot_w=5.23):
@@ -37,6 +37,52 @@ def picatinny(name, x0, x1, base_z, coll, mat, n_slots=None, pitch=10.01, slot_w
     return rail, [start + i * pitch for i in range(n_slots)]
 
 
+def _rsec(top, bottom, w, rt, rb, seg=8):
+    """Сечение крышки: прямоугольник ±w × [bottom, top], верхние углы радиуса rt, нижние rb; число точек постоянно."""
+    h = top - bottom
+    rt = max(0.05, min(rt, h * 0.48, w * 0.9))
+    rb = max(0.05, min(rb, h * 0.3))
+    pts = []
+    for cx, cz, r, a0 in ((w - rb, bottom + rb, rb, -90.0), (w - rt, top - rt, rt, 0.0),
+                          (-w + rt, top - rt, rt, 90.0), (-w + rb, bottom + rb, rb, 180.0)):
+        for k in range(seg + 1):
+            a = math.radians(a0 + 90.0 * k / seg)
+            pts.append((cx + r * math.cos(a), cz + r * math.sin(a)))
+    return pts
+
+
+def cover_loft(C):
+    """Крышка лофтом: задний торец скошен (~50°) и скруглён, рёбра скоса со сторонами — радиусом верхних углов
+    сечения (замечание владельца 25.10: «скошенной и с более круглыми углами»)."""
+    line = fillet([(240.0, COVER_REAR_Z), (COVER_SLOPE_X0, COVER_REAR_Z), (COVER_SLOPE_X1, COVER_TOP), (340.0, COVER_TOP)],
+                  [0, 3.0, 16.0, 0], 14)
+
+    def top(x):
+        for (x0, z0), (x1, z1) in zip(line, line[1:]):
+            if x0 <= x <= x1 and x1 > x0:
+                return z0 + (z1 - z0) * (x - x0) / (x1 - x0)
+        return COVER_TOP if x > line[-1][0] else COVER_REAR_Z
+    xs = []
+    x = COVER_SLOPE_X0
+    while top(x) - COVER_REAR_Z < 1.0:
+        x += 0.2
+    while x < 312.0:
+        xs.append(round(x, 3))
+        x += 0.8 if x < 300.0 else 1.6
+    xs += [478.0]
+    secs = []
+    for x in xs:
+        b = COVER_REAR_Z if x < 282.6 else TOP_Z - 1.0
+        if 282.0 < x < 283.3:
+            continue
+        secs.append((x, _rsec(top(x), b, COVER_W, 6.5, 0.6)))
+    # ступенька низа у заднего торца коробки: два сечения рядом
+    secs.append((282.55, _rsec(top(282.55), COVER_REAR_Z, COVER_W, 6.5, 0.6)))
+    secs.append((282.65, _rsec(top(282.65), TOP_Z - 1.0, COVER_W, 6.5, 0.6)))
+    secs.sort(key=lambda t: t[0])
+    return loft_yz("Receiver_cover", secs, C, "Steel_black", cap=True, smooth=True)
+
+
 def build(ctx):
     C = ctx["coll"]["Receiver"]
     out = {}
@@ -52,7 +98,7 @@ def build(ctx):
     r = [0.8, 1.2, 3.0, 4.0, 2.0, 1.0, 1.5, 1.5, 1.5, 1.0, 0.8]
     lower = prism_xz("Receiver_lower", fillet(prof, r, 4), -LOWER_W, LOWER_W, C, "Steel_black")
     # полость затворной рамы (открыта сверху), шахта, окно справа, отверстие под ствол
-    boolean(lower, box("_cav", 287.0, 468.0, -14.6, 14.6, -12.0, 20.0, C))
+    boolean(lower, box("_cav", 285.0, 468.0, -CAV_W, CAV_W, -12.0, 20.0, C))
     boolean(lower, box("_well", WELL_X0, WELL_X1, -WELL_W, WELL_W, -60.0, -7.0, C))
     boolean(lower, box("_win", WIN_X0, WIN_X1, -30.0, -13.5, WIN_Z0, 20.0, C))
     # паз хода рукоятки взведения вдоль окна (рукоятка идёт назад до 74 мм)
@@ -80,15 +126,15 @@ def build(ctx):
     # отверстие под переводчик (поперечное) и под ось защёлки
     boolean(lower, cyl("_selh", -30, 30, 3.0, C, axis="Y", cy=352.0, cz=-29.5, seg=24))
     from part_stamps import stamp, SERIAL, SUB
-    stamp(lower, SERIAL, 3.6, (446.0, -18.0, -8.6), (0, -1, 0), (0, 0, 1), 0.15, C)
-    stamp(lower, "2019", 2.6, (446.0, 18.0, -8.6), (0, 1, 0), (0, 0, 1), 0.12, C)
+    stamp(lower, SERIAL, 3.6, (446.0, -(LOWER_W - 0.5), -8.6), (0, -1, 0), (0, 0, 1), 0.15, C)
+    stamp(lower, "2019", 2.6, (446.0, LOWER_W - 0.5, -8.6), (0, 1, 0), (0, 0, 1), 0.12, C)
     finish(lower, 0.9, 3, 35)
     out["lower"] = lower
 
     # --- вкладыш ствола (казённик): видно в окне при отведённой раме ---
     # сзади шесть каналов под упоры (в отпертом положении упоры на 30°+60°k), за ними кольцевая выточка запирания,
     # впереди патронник; зеркало затвора в запертом положении x=474.5
-    trun = prism_yz("Receiver_trunnion", fillet([(-14.6, -6.0), (14.6, -6.0), (14.6, 20.0), (-14.6, 20.0)], 1.0, 2),
+    trun = prism_yz("Receiver_trunnion", fillet([(-CAV_W, -6.0), (CAV_W, -6.0), (CAV_W, 20.0), (-CAV_W, 20.0)], 1.0, 2),
                     465.5, 478.0, C, "Steel_black")
     boolean(trun, cyl("_tb", 460, 474.6, 7.05, C, seg=48))
     boolean(trun, cyl("_ch", 474.0, 480, 5.95, C, seg=48))
@@ -108,25 +154,28 @@ def build(ctx):
     out["trunnion"] = trun
 
     # --- крышка ствольной коробки ВСС-М ---
-    sec = fillet([(-COVER_W, TOP_Z), (COVER_W, TOP_Z), (COVER_W, COVER_TOP), (-COVER_W, COVER_TOP)], [0, 0, 4.5, 4.5], 6)
-    cover = prism_yz("Receiver_cover", sec, 282.6, 478.0, C, "Steel_black")
-    boolean(cover, box("_cin", 286.0, 480.0, -(COVER_W - 2.2), COVER_W - 2.2, TOP_Z - 1.0, COVER_TOP - 3.0, C))
+    cover = cover_loft(C)
+    # внутренняя полость повторяет скос со стенкой ~2.5 мм; рама при полном отводе (торец x=286) проходит под ним
+    inner = fillet([(480.0, TOP_Z - 1.5), (284.6, TOP_Z - 1.5), (284.6, 22.4), (298.8, COVER_TOP - 3.0), (480.0, COVER_TOP - 3.0)],
+                   [0, 0, 1.0, 11.5, 0], 8)
+    boolean(cover, prism_xz("_cin", inner, -(COVER_W - 2.2), COVER_W - 2.2, C))
     boolean(cover, box("_cwin", WIN_X0, 480.0, -30.0, -(COVER_W - 3.0), TOP_Z - 1.0, WIN_Z1, C))
     for s in (-1, 1):
         band = prism_yz(f"_band{s}", [(s * (COVER_W - 0.7), 30.0), (s * 30, 30.0), (s * 30, 39.0), (s * (COVER_W - 0.7), 39.0)],
-                        288.0, 472.0, C)
+                        304.0, 472.0, C)
         boolean(cover, band)
     boolean(cover, box("_chs", 385.0, WIN_X0 + 1.0, -30.0, -(COVER_W - 3.0), TOP_Z - 1.0, 10.5, C))
-    boolean(cover, cyl("_lh", 278, 290, 3.6, C, cz=28.0, seg=32))
-    stamp(cover, SUB, 2.4, (306.0, -19.5, 21.0), (0, -1, 0), (0, 0, 1), 0.12, C)
-    finish(cover, 1.0, 3, 35)
-    rail, slots = picatinny("Cover_picatinny", 287.5, 472.5, COVER_TOP - 0.2, C, "Steel_black")
+    boolean(cover, cyl("_lh", 270, 296, 3.6, C, cz=28.0, seg=32))
+    stamp(cover, SUB, 2.4, (318.0, -COVER_W, 21.0), (0, -1, 0), (0, 0, 1), 0.12, C)
+    auto_sharp(cover, 40)
+    finish(cover, 0.8, 3, 40)
+    rail, slots = picatinny("Cover_picatinny", 307.0, 472.5, COVER_TOP - 0.2, C, "Steel_black")
     out["cover"] = cover
     out["rail"] = rail
     out["rail_slots"] = slots
 
     # фиксатор крышки — задний упор направляющей возвратной пружины
-    latch = lathe("Cover_latch_button", [(277.6, 0.0), (277.6, 2.6), (278.2, 3.2), (284.0, 3.2), (284.0, 4.6), (285.5, 4.6), (285.5, 0.0)],
+    latch = lathe("Cover_latch_button", [(281.4, 0.0), (281.4, 2.5), (282.2, 3.2), (290.0, 3.2), (290.0, 4.6), (292.0, 4.6), (292.0, 0.0)],
                   C, "Steel_black", 32, 0.0, 28.0)
     auto_sharp(latch, 30)
     out["latch"] = latch

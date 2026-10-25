@@ -23,12 +23,15 @@ def build(ctx):
 
     # --- затворная рама ---
     # сечение: верх скруглён под крышку, низ — полки направляющих; канал затвора снизу
-    sec = fillet([(-13.8, 3.6), (13.8, 3.6), (13.8, 30.5), (8.0, 37.5), (-8.0, 37.5), (-13.8, 30.5)],
+    from lib import CARRIER_W, CAV_W
+    sec = fillet([(-CARRIER_W, 3.6), (CARRIER_W, 3.6), (CARRIER_W, 30.5), (7.2, 37.5), (-7.2, 37.5), (-CARRIER_W, 30.5)],
                  [1.0, 1.0, 3.0, 3.0, 3.0, 3.0], 4)
     car = prism_yz("Bolt_carrier", sec, CARRIER_X0, CARRIER_X1, C, "Steel_black")
     boolean(car, cyl("_bb", 350, 470, 7.25, C, seg=48))                              # канал затвора
-    boolean(car, cyl("_gr", 340, 380, 4.6, C, cz=28.0, seg=32))                       # гнездо направляющей пружины
-    boolean(car, box("_ejg", 350.0, 470.0, 6.3, 13.5, 2.0, 6.6, C))                    # продольный паз под отражатель
+    boolean(car, cyl("_gr", 340, 400, 4.6, C, cz=28.0, seg=32))                       # гнездо направляющей пружины
+    # задний верх рамы скошен: при полном отводе рама проходит под скосом крышки
+    boolean(car, prism_xz("_rch", [(350.0, 22.0), (360.0, 22.0), (380.0, 37.6), (380.0, 45.0), (350.0, 45.0)], -20.0, 20.0, C))
+    boolean(car, box("_ejg", 350.0, 470.0, 6.3, 12.8, 2.0, 6.6, C))                    # продольный паз под отражатель
     # фигурный паз (кулачок) поворота затвора — справа сверху: прямой участок и наклон
     cam = prism_xz("_cam", [(404.0, 12.5), (411.0, 12.5), (420.0, 19.5), (426.0, 19.5), (426.0, 23.5), (418.0, 23.5),
                             (409.0, 16.5), (404.0, 16.5)], -20.0, -4.0, C)
@@ -36,7 +39,7 @@ def build(ctx):
     # облегчающие выборки по бокам рамы
     for s in (-1, 1):
         boolean(car, prism_xz(f"_rl{s}", fillet([(368.0, 16.0), (398.0, 16.0), (398.0, 27.0), (368.0, 27.0)], 2.0, 3),
-                              s * 13.0, s * 20.0, C))
+                              s * (CARRIER_W - 0.5), s * 20.0, C))
     finish(car, 0.7, 3, 35)
     # пылезащитная плита справа: закрывает окно, на ней клеймо номера
     plate = prism_xz("Bolt_carrier_plate", fillet([(405.6, 3.9), (475.0, 3.9), (475.0, 29.4), (405.6, 29.4)], [1.2, 1.2, 1.2, 1.2], 3),
@@ -49,16 +52,41 @@ def build(ctx):
     web = box("Bolt_carrier_web", 405.6, 455.0, -12.5, -11.5, 6.0, 26.0, C, "Steel_black")
     finish(web, 0.25, 1, 35)
     # рукоятка взведения: стержень через паз справа, крюк с пологим изгибом вперёд
-    hook_xy = [(462.6, -12.3), (470.4, -12.3), (470.4, -20.2), (472.2, -22.6), (475.2, -25.4), (476.2, -27.8),
-               (475.0, -30.0), (472.4, -30.3), (469.8, -28.4), (466.8, -25.8), (463.2, -23.6), (462.6, -21.0)]
-    handle = prism_xy("Charging_handle", fillet(hook_xy, [0.8, 0.8, 4.0, 3.0, 2.5, 2.0, 2.0, 2.0, 2.5, 3.0, 2.0, 1.5], 5),
-                      4.7, 9.6, C, "Steel_black")
-    # насечка на торце крюка
-    cuts = [box(f"_hs{i}", 466.0, 478.0, -31.0, -26.0, 4.0 + 1.2 * i, 4.55 + 1.2 * i, C) for i in range(1, 5)]
-    for c in cuts:
-        c.data.transform(Matrix.Translation((-472.0 * MM, 28.2 * MM, 0)))
-        c.data.transform(Matrix.Rotation(math.radians(-38), 4, "Z"))
-        c.data.transform(Matrix.Translation((472.0 * MM, -28.2 * MM, 0)))
+    # рукоятка взведения — изогнутое перо, как спусковой крючок: выходит из паза наружу и загибается вперёд,
+    # вогнутая передняя грань с поперечной насечкой под палец (замечание владельца 25.10)
+    from mathutils import Vector as _V
+    n_c = 16
+    cl, wd = [], []
+    for i in range(n_c + 1):
+        t = i / n_c
+        cl.append((466.5 + 15.0 * t ** 2.2, -12.0 - 29.0 * t + 2.0 * t ** 3))
+        wd.append(7.8 - 3.2 * t)
+    left, right = [], []
+    for i in range(n_c + 1):
+        a = _V(cl[max(i - 1, 0)]); b = _V(cl[min(i + 1, n_c)])
+        tg = (b - a).normalized()
+        nrm = _V((tg.y, -tg.x))                       # назад (−X) от осевой линии
+        left.append(tuple(_V(cl[i]) + nrm * wd[i] / 2))
+        right.append(tuple(_V(cl[i]) - nrm * wd[i] / 2))
+    outline = left + list(reversed(right))
+    rad = [0.6] + [0.0] * (n_c - 1) + [2.2, 2.2] + [0.0] * (n_c - 1) + [0.6]
+    handle = prism_xy("Charging_handle", fillet(outline, rad, 5), 4.6, 9.7, C, "Steel_black")
+    # насечка: поперечные риски на вогнутой передней грани, вдоль высоты
+    cuts = []
+    for k in range(9):
+        t = 0.38 + 0.065 * k
+        i = min(int(t * n_c), n_c - 1)
+        f = t * n_c - i
+        p = _V(cl[i]).lerp(_V(cl[i + 1]), f)
+        tg = (_V(cl[i + 1]) - _V(cl[i])).normalized()
+        nrm = _V((tg.y, -tg.x))
+        w = 7.8 - 3.2 * t
+        c = p - nrm * (w / 2)                          # передняя (вогнутая) грань
+        g = box(f"_hs{k}", -0.32, 0.32, -0.7, 0.7, 3.0, 11.0, C)
+        ang = math.atan2(tg.y, tg.x)
+        g.data.transform(Matrix.Rotation(ang, 4, "Z"))
+        g.data.transform(Matrix.Translation((c.x * MM, c.y * MM, 0)))
+        cuts.append(g)
     boolean(handle, join(cuts, "_hsc"))
     finish(handle, 0.8, 3, 30)
     out["carrier"] = car
@@ -108,18 +136,19 @@ def build(ctx):
     out["firing_pin"] = fpin
 
     # --- возвратный механизм: направляющая и пружина (под крышкой) ---
-    guide = lathe("Recoil_spring_guide", [(286.0, 0.0), (286.0, 2.0), (370.0, 2.0), (370.5, 1.5), (370.5, 0.0)], C, "Steel_bare", 20, 0, 28.0)
+    guide = lathe("Recoil_spring_guide", [(291.5, 0.0), (291.5, 2.0), (396.0, 2.0), (396.5, 1.5), (396.5, 0.0)], C, "Steel_bare", 20, 0, 28.0)
     auto_sharp(guide, 30)
     out["guide"] = guide
-    out["spring"] = spring("Recoil_spring", 287.0, 366.0, 3.6, 0.6, 22, C, cz=28.0)
+    out["spring"] = spring("Recoil_spring", 292.5, 394.0, 3.6, 0.6, 26, C, cz=28.0)
     # отражатель на левой направляющей коробки (неподвижный)
     ej = prism_xz("Ejector_blade", fillet([(419.0, 2.0), (440.0, 2.0), (440.0, 3.4), (424.0, 3.4), (424.0, 6.0), (419.0, 6.0)], [0.5, 0.5, 0.5, 0.5, 0.8, 0.8], 2),
-                  6.6, 13.2, C, "Steel_bare")
+                  6.6, 12.4, C, "Steel_bare")
     out["ejector"] = ej
     # направляющие рамы на внутренних стенках коробки
     rails = []
     for s in (-1, 1):
-        rails.append(box(f"Carrier_rail_{s}", 290.0, 466.0, s * 14.6 - s * 1.4, s * 14.6, 1.6, 3.6, C, "Steel_black"))
+        from lib import CAV_W as _CW
+        rails.append(box(f"Carrier_rail_{s}", 290.0, 466.0, s * _CW - s * 0.9, s * _CW, 1.6, 3.6, C, "Steel_black"))
     out["rails"] = join(rails, "Receiver_inner_rails")
     return out
 

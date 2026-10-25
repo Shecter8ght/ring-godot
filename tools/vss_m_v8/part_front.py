@@ -38,7 +38,7 @@ def build(ctx):
             s = 0.965
         elif x > 560:
             s = 1.0 - ((x - 560.0) / 7.0) ** 2 * 0.07
-        sec = rounded_section(48.0, bot, 19.5, 24.2, 15.5, 16.0)
+        sec = rounded_section(48.0, bot, 18.5, 23.0, 14.5, 16.0)
         cz = 16.0
         secs.append((x, [(y * s, cz + (z - cz) * s) for y, z in sec]))
     hg = loft_yz("Handguard", secs, Cf, "Polymer_handguard")
@@ -46,7 +46,7 @@ def build(ctx):
     boolean(hg, cyl("_hgr", 565.8, 580, 22.6, Cf, seg=64))                            # гнездо задней муфты глушителя
     # поперечные рёбра по верху (ВСС-М): мелкие, часто
     ribs = []
-    top_pts = [p for p in rounded_section(48.0, -20.0, 19.5, 24.2, 15.5, 16.0) if p[1] > 37.0]
+    top_pts = [p for p in rounded_section(48.0, -20.0, 18.5, 23.0, 14.5, 16.0) if p[1] > 37.0]
     top_pts.sort(key=lambda p: math.atan2(p[1] - 16.0, p[0]))
     for i in range(18):
         xc = 485.0 + i * 4.2
@@ -58,7 +58,7 @@ def build(ctx):
     finish(hg, 1.4, 3, 35)
     out["handguard"] = hg
     # передний антабок слева: проушина на цевье и поворотная скоба
-    lug = prism_xz("Front_sling_bracket", fillet([(556.0, 2.0), (565.0, 2.0), (565.0, 12.0), (556.0, 12.0)], 2.0, 3), 22.0, 25.6, Cf, "Steel_black")
+    lug = prism_xz("Front_sling_bracket", fillet([(556.0, 2.0), (565.0, 2.0), (565.0, 12.0), (556.0, 12.0)], 2.0, 3), 21.0, 24.6, Cf, "Steel_black")
     boolean(lug, cyl("_slh", 20, 28, 1.6, Cf, axis="Y", cy=560.5, cz=7.0, seg=20))
     finish(lug, 0.4, 2, 35)
     loop_pts = fillet([(553.0, -12.0), (568.0, -12.0), (568.0, 6.5), (553.0, 6.5)], 5.0, 6)
@@ -67,7 +67,7 @@ def build(ctx):
     cu = _b.data.curves.new("Front_sling_swivel", "CURVE"); cu.dimensions = "3D"
     sp = cu.splines.new("POLY"); sp.points.add(len(ring_o) - 1)
     for k, (x, z) in enumerate(ring_o):
-        sp.points[k].co = (x * MM, 26.6 * MM, z * MM, 1.0)
+        sp.points[k].co = (x * MM, 25.6 * MM, z * MM, 1.0)
     sp.use_cyclic_u = True
     cu.bevel_depth = 1.3 * MM; cu.bevel_resolution = 3
     so = _b.data.objects.new("_swc", cu); Cf.objects.link(so)
@@ -209,9 +209,13 @@ def build(ctx):
     octo = [(-half + c, -half + BORE_Z), (half - c, -half + BORE_Z), (half, -half + c + BORE_Z), (half, half - c + BORE_Z),
             (half - c, half + BORE_Z), (-half + c, half + BORE_Z), (-half, half - c + BORE_Z), (-half, -half + c + BORE_Z)]
     sl = prism_yz("Rail_sleeve", fillet(octo, 1.2, 2), SLEEVE_X0, SLEEVE_X1, Cr, "Alu_anodized")
+    # верх муфты поднят до 43 мм (замечание владельца: площадка целика торчала над муфтой)
+    hump = prism_yz("_hump", fillet([(-11.5, 24.0), (11.5, 24.0), (11.5, 39.5), (8.0, 43.0), (-8.0, 43.0), (-11.5, 39.5)],
+                                    [0, 0, 2.5, 3.0, 3.0, 2.5], 4), SLEEVE_X0, SLEEVE_X1, Cr)
+    boolean(sl, hump, op="UNION")
     boolean(sl, cyl("_sb", SLEEVE_X0 - 1, SLEEVE_X1 + 1, 19.85, Cr, seg=72))
     boolean(sl, cyl("_sbc", SLEEVE_X0 - 1, 582.6, 22.25, Cr, seg=72))
-    boolean(sl, box("_stop", 583.5, 648.5, -7.2, 7.2, 20.0, 40.0, Cr))               # окно под прицел
+    boolean(sl, box("_stop", 583.5, 648.5, -7.2, 7.2, 20.0, 50.0, Cr))               # окно под прицел
     # облегчающие отверстия на скосах
     hs = []
     for q in range(4):

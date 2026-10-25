@@ -7,6 +7,11 @@ from mathutils import Matrix, Vector
 
 MM = 0.001
 BORE_Z = 10.0
+# поперечные размеры (замечание владельца 25.10 «толстовато»; ширина коробки ≈ магазин + стенки)
+LOWER_W = 16.6       # полуширина ствольной коробки
+COVER_W = 17.5       # полуширина крышки
+CAV_W = 13.3         # полуширина полости затворной рамы
+CARRIER_W = 12.5     # полуширина затворной рамы
 
 
 def v(x, y, z):
@@ -327,6 +332,33 @@ def bevel(o, w=0.5, seg=2, angle=30.0, harden=True, profile=0.6, clamp=True):
     for p in o.data.polygons:
         p.use_smooth = True
     return m
+
+
+def bevel_edges(o, pick, w=4.0, seg=6, profile=0.5, clamp=False):
+    """Скругление выбранных рёбер радиусом ~w мм: pick(n1, n2) по нормалям двух граней ребра; применяется сразу."""
+    me = o.data
+    bm = bmesh.new(); bm.from_mesh(me)
+    bm.normal_update()
+    sel = set()
+    for e in bm.edges:
+        if len(e.link_faces) == 2:
+            n1, n2 = e.link_faces[0].normal, e.link_faces[1].normal
+            if pick(n1, n2) or pick(n2, n1):
+                sel.add(e.index)
+    bm.free()
+    attr = me.attributes.get("bevel_weight_edge") or me.attributes.new("bevel_weight_edge", "FLOAT", "EDGE")
+    for i in range(len(me.edges)):
+        attr.data[i].value = 1.0 if i in sel else 0.0
+    m = o.modifiers.new("bevel_w", "BEVEL")
+    m.limit_method = "WEIGHT"
+    m.width = w * MM
+    m.segments = seg
+    m.profile = profile
+    m.use_clamp_overlap = clamp          # ограничение по соседним коротким рёбрам скруглений сводило ширину почти к нулю
+    m.miter_outer = "MITER_ARC"
+    m.harden_normals = False
+    apply_all(o)
+    return len(sel)
 
 
 def weighted(o):

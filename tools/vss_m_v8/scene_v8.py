@@ -314,13 +314,15 @@ def main():
     att = bpy.data.collections.new("Attachments_on_table"); sc.collection.children.link(att)
     env = bpy.data.collections.new("Table_scene"); sc.collection.children.link(env)
     root = bpy.data.objects["VSS_M_v8"]
-    mag20 = bpy.data.objects["Magazine_20"]
-    # магазин на 20 — отдельно от винтовки
-    mw = mag20.matrix_world.copy(); mag20.parent = None; mag20.matrix_world = mw
+    spare = [bpy.data.objects["Magazine_20"], bpy.data.objects["Magazine_30"]]
+    # магазины на 20 и 30 — отдельно от винтовки
+    for m_ in spare:
+        mw = m_.matrix_world.copy(); m_.parent = None; m_.matrix_world = mw
     # винтовка: правой стороной вверх — вниз левая сторона (+Y)
-    rifle_objs = [o for o in descendants(root) if o.type == "MESH" and not o.name.startswith("Magazine_20")]
+    rifle_objs = [o for o in descendants(root) if o.type == "MESH" and not o.name.startswith(("Magazine_20", "Magazine_30"))]
     place(root, rifle_objs, (0, 1, 0), (0.02, 0.06), 0.0, step=7)
-    place(mag20, descendants(mag20), (0, 1, 0), (0.07, -0.21), 14.0, step=3)
+    place(spare[0], descendants(spare[0]), (0, 1, 0), (0.0, -0.2), 14.0, step=3)
+    place(spare[1], descendants(spare[1]), (0, 1, 0), (-0.22, -0.2), -10.0, step=3)
     # патроны россыпью: копии меша патрона
     me = bpy.data.meshes.get("Cartridge_SP5_mesh")
     rnd = random.Random(7)

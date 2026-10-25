@@ -16,7 +16,7 @@ W_IN = 20.0                    # внутренняя ширина
 Y_OFF = (W_IN - D_CART) / 2.0
 PITCH = math.sqrt(D_CART ** 2 - (2 * Y_OFF) ** 2)
 HALF_N = 30.9                  # половина длины корпуса (вперёд-назад)
-HALF_Y = 13.9                  # половина ширины корпуса
+HALF_Y = 12.2                  # половина ширины корпуса (стенка 2.2)
 U_TOP = 1.9
 
 
@@ -106,10 +106,66 @@ def cartridge(name, base_world, axis_world, coll, me=None):
     return o
 
 
+LIP_T = 1.7          # толщина губки
+LIP_GAP = 4.6        # половина просвета между губками над верхним патроном
+LIP_FRONT = 3.0      # губки кончаются чуть впереди середины гильзы; дальше — окно выхода патрона
+
+
+def _lip_section(side, y_edge, steps=10):
+    """Сечение губки (y, h): h — высота над осью верхнего патрона вдоль оси магазина. Губка — продолжение стенки,
+    загнута внутрь над патроном своего ряда; нижняя поверхность повторяет патрон с зазором 0.15 мм."""
+    yc = side * Y_OFF
+    ri = D_CART / 2 + 0.15
+    ro = ri + LIP_T
+    # угол кромки на окружности ri (от оси +y, против часовой) — где y = y_edge
+    ce = max(-1.0, min(1.0, (y_edge - yc) / ri))
+    a_edge = math.degrees(math.acos(ce))
+    a_wall = 180.0 if side < 0 else 0.0
+    pts = []
+    pts.append((side * (W_IN / 2), -4.5))                         # низ внутренней стенки (уходит в корпус)
+    for k in range(steps + 1):                                     # внутренняя дуга: от стенки к кромке
+        a = math.radians(a_wall + (a_edge - a_wall) * k / steps)
+        pts.append((yc + ri * math.cos(a), ri * math.sin(a)))
+    for k in range(steps + 1):                                     # наружная дуга: от кромки обратно к стенке
+        a = math.radians(a_edge + (a_wall - a_edge) * k / steps * 0.72)
+        pts.append((yc + ro * math.cos(a), ro * math.sin(a)))
+    pts.append((side * HALF_Y, 1.5))
+    pts.append((side * HALF_Y, -4.5))
+    if side > 0:
+        pts.reverse()
+    return pts
+
+
+def lips(name, coll):
+    """Обе губки: сечение протянуто вдоль n от задней стенки до LIP_FRONT; спереди кромка расходится наружу."""
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    for side in (-1, 1):
+        ns = [-HALF_N + 0.2 + k * 1.6 for k in range(int((LIP_FRONT + HALF_N - 0.2) / 1.6) + 1)]
+        rings = []
+        for n in ns:
+            t = max(0.0, min(1.0, (n + 9.0) / (LIP_FRONT + 9.0)))
+            y_edge = side * (LIP_GAP + 4.3 * t * t)                # к выходу губки расходятся
+            sec = _lip_section(side, y_edge)
+            rings.append([bm.verts.new(to_world(-h, n, y)) for y, h in sec])
+        m = len(rings[0])
+        for r0, r1 in zip(rings, rings[1:]):
+            for i in range(m):
+                j = (i + 1) % m
+                bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
+        bm.faces.new(list(reversed(rings[0])))
+        bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    return o
+
+
 def labyrinth(name, u0, u1, coll, side):
     """Рёбра-лабиринт на боковине: горизонтальные бруски поочерёдно от передней и задней кромки, связки между ними."""
     parts = []
-    y_in, y_out = side * (HALF_Y - 0.3), side * (HALF_Y + 1.3)
+    y_in, y_out = side * (HALF_Y - 0.3), side * (HALF_Y + 0.9)
     y0, y1 = min(y_in, y_out), max(y_in, y_out)
     k = 0
     u = u0
@@ -135,19 +191,9 @@ def build_mag(tag, rounds, coll, cart_coll, me_cart):
     body = spine_loft(f"Magazine_{tag}", U_TOP, u_bot, steps, rrect(HALF_N, HALF_Y, 3.0), coll, "Polymer_magazine")
     cav = spine_loft("_cav", U_TOP - 3.0, u_bot - 2.4, steps, rrect(HALF_N - 2.4, W_IN / 2, 1.2), coll)
     boolean(body, cav)
-    # губки: две полосы над корпусом, внутренняя кромка по форме патрона
-    lips = []
-    for s in (-1, 1):
-        lips.append(spine_box(f"_lip{s}", -4.2, U_TOP + 0.5, -26.5, 23.0, s * 5.2, s * HALF_Y, coll, 2))
-    lip = join(lips, "_lips")
-    for s in (-1, 1):
-        cutp = lathe(f"_lc{s}", [(0, 0), (0, 5.85), (60, 5.85), (60, 0)], coll, None, 40, 0, 0)
-        base = to_world(0.0, -28.0, s * Y_OFF)
-        cutp.matrix_world = Matrix.Translation(base) @ Vector((1, 0, 0)).rotation_difference(Vector((frame(0)[2].x, 0, frame(0)[2].y))).to_matrix().to_4x4()
-        from lib import apply_all
-        cutp.data.transform(cutp.matrix_world); cutp.matrix_world = Matrix.Identity(4)
-        boolean(lip, cutp)
-    boolean(body, lip, op="UNION")
+    # губки: загнуты над патронами своих рядов; задняя стенка над губками закрыта
+    boolean(body, lips("_lips", coll), op="UNION", self_x=True)
+    boolean(body, spine_box("_rwall", -3.0, U_TOP + 1.0, -HALF_N, -HALF_N + 2.4, -HALF_Y, HALF_Y, coll, 1), op="UNION")
     # передний зацеп и задний упор
     boolean(body, spine_box("_flug", 3.0, 8.0, HALF_N - 0.5, HALF_N + 0.6, -9.0, 9.0, coll, 1), op="UNION")
     boolean(body, spine_box("_rlug", 23.0, 25.9, -HALF_N - 1.6, -HALF_N + 0.5, -6.0, 6.0, coll, 1), op="UNION")
@@ -208,7 +254,7 @@ def build(ctx):
     from lib import collection
     me_cart = cartridge_mesh()
     out = {}
-    for tag, n in (("10", 10), ("20", 20)):
+    for tag, n in (("10", 10), ("20", 20), ("30", 30)):
         sub = collection(f"Magazine_{tag}", C)
         body, plate, btn, fol, spr, carts = build_mag(tag, n, sub, sub, me_cart)
         for o in [plate, btn, fol, spr] + carts:

@@ -3,7 +3,7 @@
 # Все детали строятся в исходном положении; оси вращения — пустышки в part_rig.
 import math
 from mathutils import Matrix, Vector
-from lib import (MM, apply_transform, auto_sharp, box, boolean, cyl, fillet, finish, join, lathe, prism_xz, set_origin)
+from lib import (LOWER_W, MM, apply_transform, auto_sharp, box, boolean, cyl, fillet, finish, join, lathe, prism_xz, set_origin)
 
 TRIGGER_PIVOT = (372.0, -9.0)
 SAFETY_PIVOT = (347.0, -11.0)
@@ -54,18 +54,18 @@ def build(ctx):
     arm = fillet([(px - 7.0, pz - 1.5), (px - 4.0, pz - 6.6), (px + 6.0, pz - 5.6), (px + 52.0, pz - 3.1), (px + 58.5, pz - 2.4),
                   (px + 59.5, pz + 2.6), (px + 52.0, pz + 3.1), (px + 8.0, pz + 5.4), (px - 4.0, pz + 6.6)],
                  [3.0, 3.5, 6.0, 2.0, 1.4, 1.4, 2.0, 6.0, 3.5], 5)
-    lever = prism_xz("Safety_lever", arm, -20.7, -18.65, C, "Steel_black")
+    lever = prism_xz("Safety_lever", arm, -(LOWER_W + 2.2), -(LOWER_W + 0.15), C, "Steel_black")
     tab = prism_xz("_stab", fillet([(px + 50.5, pz - 3.0), (px + 59.5, pz - 2.4), (px + 59.5, pz + 2.6), (px + 50.5, pz + 3.1)], [0.8, 1.2, 1.2, 0.8], 3),
-                   -25.8, -20.0, C)
+                   -(LOWER_W + 7.3), -(LOWER_W + 1.5), C)
     boolean(lever, tab, op="UNION")
-    ser = [box(f"_ss{i}", px + 51.4 + 1.25 * i, px + 51.9 + 1.25 * i, -27.0, -24.9, pz - 5, pz + 5, C) for i in range(7)]
+    ser = [box(f"_ss{i}", px + 51.4 + 1.25 * i, px + 51.9 + 1.25 * i, -(LOWER_W + 8.5), -(LOWER_W + 6.4), pz - 5, pz + 5, C) for i in range(7)]
     boolean(lever, join(ser, "_sser"))
     finish(lever, 0.7, 3, 30)
     head = lathe("Safety_axis_head", [(0, 0), (0, 5.2), (0.6, 5.0), (1.4, 4.2), (1.7, 0)], C, "Steel_black", 32, 0, 0)
     head.rotation_euler = (0, 0, -math.pi / 2)
-    head.location = (px * MM, -20.6 * MM, pz * MM)
+    head.location = (px * MM, -(LOWER_W + 2.1) * MM, pz * MM)
     apply_transform(head)
-    boolean(head, box("_hsl", px - 0.4, px + 0.4, -30, -21.6, pz - 6, pz + 6, C))
+    boolean(head, box("_hsl", px - 0.4, px + 0.4, -30, -(LOWER_W + 3.1), pz - 6, pz + 6, C))
     auto_sharp(head, 35)
     # исходное положение «огонь»: рычаг повернут вверх на SAFETY_FIRE_DEG вокруг оси
     for o in (lever, head):
@@ -76,15 +76,16 @@ def build(ctx):
     # ось предохранителя: торец слева
     lpin = lathe("Safety_axis_end_L", [(0, 0), (0, 3.0), (0.4, 2.8), (0.7, 2.2), (0.8, 0)], C, "Steel_black", 24, 0, 0)
     lpin.rotation_euler = (0, 0, math.pi / 2)
-    lpin.location = (px * MM, 18.45 * MM, pz * MM)
+    lpin.location = (px * MM, (LOWER_W - 0.05) * MM, pz * MM)
     apply_transform(lpin)
     auto_sharp(lpin, 40)
     out["safety_axis_L"] = lpin
 
     # --- переводчик огня: поперечная кнопка; в положении «одиночный» выступает справа ---
     sx, sz = SELECTOR_C
-    sel = lathe("Fire_selector", [(-21.6, 0.0), (-21.6, 2.3), (-21.2, 2.75), (-14.0, 2.75), (-13.6, 2.45), (-13.0, 2.45),
-                                  (-12.6, 2.75), (16.4, 2.75), (16.8, 2.3), (16.8, 0.0)], C, "Steel_bare", 32, 0, 0)
+    e_r, e_l = -(LOWER_W + 3.1), LOWER_W - 1.7
+    sel = lathe("Fire_selector", [(e_r, 0.0), (e_r, 2.3), (e_r + 0.4, 2.75), (-12.4, 2.75), (-12.0, 2.45), (-11.4, 2.45),
+                                  (-11.0, 2.75), (e_l - 0.4, 2.75), (e_l, 2.3), (e_l, 0.0)], C, "Steel_bare", 32, 0, 0)
     sel.rotation_euler = (0, 0, math.pi / 2)
     sel.location = (sx * MM, 0, sz * MM)
     apply_transform(sel)
