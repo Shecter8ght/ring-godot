@@ -10,8 +10,14 @@ import bpy  # noqa: E402
 import sp_export  # noqa: E402  (GROUPS, group_objects; main() не вызывается при импорте ниже)
 
 
-def material(group, folder):
-    name = f"SP_{group}"
+# Cerakote (муфта, задний прицел) — отражение неметалла приглушено: при обычных 4 % чёрное покрытие на гранях к свету
+# читалось графитово-серым, владелец 26.10 — «темнее, как крышка ствольной коробки» (не совсем физично)
+CERAKOTE_SPEC = 0.1
+REAR_SIGHT = ("Rear_sight_base", "Rear_sight_leaf", "Rear_sight_slider", "Rear_sight_weld")   # = sp_stacks.REAR_SIGHT
+
+
+def material(group, folder, name=None, spec=None):
+    name = name or f"SP_{group}"
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -37,6 +43,8 @@ def material(group, folder):
     nmap = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(nm.outputs[0], nmap.inputs["Color"])
     nt.links.new(nmap.outputs[0], b.inputs["Normal"])
+    if spec is not None:
+        b.inputs["Specular IOR Level"].default_value = spec
     return m
 
 
@@ -44,13 +52,14 @@ ROOT = "E:/Games/RING-godot/_asset_src/vss_m_v8"
 
 
 def apply(group, folder):
-    m = material(group, folder)
+    m = material(group, folder, spec=CERAKOTE_SPEC if group == "sleeve" else None)
+    ck = material(group, folder, f"SP_{group}_cerakote", CERAKOTE_SPEC) if group == "steel_parts" else None
     objs = sp_export.group_objects(group)
     for o in objs:
         n = max(1, len(o.data.materials))          # у патрона два слота (гильза, пуля) — оба на один материал
         o.data.materials.clear()
         for _ in range(n):
-            o.data.materials.append(m)
+            o.data.materials.append(ck if ck and o.name in REAR_SIGHT else m)
     print("APPLIED", group, len(objs))
 
 
