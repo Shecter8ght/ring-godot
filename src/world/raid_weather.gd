@@ -166,8 +166,13 @@ func _apply_static() -> void:
 		_fog_sky_target = minf(_fog_sky_target, float(Balance.NIGHT_ENV.fog_sky))
 	var e := _env()
 	if e and e.fog_mode == Environment.FOG_MODE_DEPTH:
-		# туман по расстоянию: плотность — доля дымки на дальней границе, а не «дым» по всему объёму
+		# туман по расстоянию: плотность — доля дымки на дальней границе, а не «дым» по всему объёму;
+		# своя дымка карты на эту погоду — данные сектора "depth_fog" (у «Проспекта» — в ясную)
 		var df: Dictionary = Balance.DEPTH_FOG.get(w, Balance.DEPTH_FOG["clear"])
+		var path: Variant = get_parent().get("sector_path")
+		if path != null and String(path) != "":
+			df = (SectorBuilder.load_def(String(path)).get("depth_fog", {}) as Dictionary).get(w, df) as Dictionary
+		_fog_sky_target = float(df.get("sky", _fog_sky_target))
 		_fog_target = float(df.density)
 		e.fog_depth_begin = float(df.begin)
 		e.fog_depth_end = float(df.end)

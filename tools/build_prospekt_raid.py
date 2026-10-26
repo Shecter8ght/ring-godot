@@ -3,14 +3,13 @@
 
     python -X utf8 tools/build_prospekt.py          — сначала блокаут (data/blockouts/prospekt.json, prospekt_study.tscn)
     python -X utf8 tools/build_prospekt_raid.py     — затем рейд: data/sectors/prospekt.json, scenes/levels/prospekt.tscn,
-                                                       scenes/levels/prospekt/prospekt_environment.tres
     tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn   — кэш навигации data/navigation/prospekt
     tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn — проверка рейда
 
 Заходы и выходы — из плана блокаута (spawns, exits; кордон — только старт пролога, в обычный рейд не заходят).
 Население слоями (docs/design/enemy_population.md): посты у мест добычи, кордон и штаб у палаток держат ЧВК
 «Периметр» (AIPost.arch = "pmc"), патрули по улицам, снайперы на крышах и каркасе, подход с краёв карты.
-Свет — свой (AGENTS.md п. 10): физическое небо и низкое солнце блокаута, время суток и погода — RaidAtmosphere.
+Свет — tools/prospekt_light.py (окружение пишет build_prospekt.py), поправки к времени суток и дымка — в данных сектора.
 """
 from __future__ import annotations
 
@@ -18,11 +17,12 @@ import json
 import math
 from pathlib import Path
 
+import prospekt_light as LIGHT
+
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "data" / "blockouts" / "prospekt.json"
 SECTOR = ROOT / "data" / "sectors" / "prospekt.json"
 SCENE = ROOT / "scenes" / "levels" / "prospekt.tscn"
-ENV = ROOT / "scenes" / "levels" / "prospekt" / "prospekt_environment.tres"
 
 plan = json.loads(PLAN.read_text(encoding="utf-8"))
 EMB_TOP = 6.3                                                   # верх балласта на насыпи
@@ -97,27 +97,15 @@ sector = {
     "spawn": [entries[0][1], entries[0][2], entries[0][3]],
     "camera_yaw": 0,
     "nav_cache": "res://data/navigation/prospekt",
+    # свет карты в рейде (tools/prospekt_light.py): поправки к времени суток и своя дымка в ясную погоду
+    "light": LIGHT.LIGHT_KEYS,
+    "depth_fog": LIGHT.DEPTH_FOG,
     "events": {"off": ["power"], "at": {"drop": [-14.0, 0.1, 100.0], "pmc": [-60.0, 0.1, 205.0]},
                "drop_text": "Вертолёт над сквером — что-то сбросили",
                "pmc_text": "У вокзала заглушили мотор. Хлопнули двери."},
     "rooms": [],
 }
 SECTOR.write_text(json.dumps(sector, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
-
-# ---------------------------------------------------------------- окружение: умолчания Godot (владелец 2026-10-26 —
-# «вернуть к самым дефолтным значениям, от которых дальше будем танцевать»); время суток и погода рейда — поверх
-# (RaidAtmosphere, общие для всех карт), своих множителей света ("light" сектора) у карты нет
-ENV.parent.mkdir(parents=True, exist_ok=True)
-ENV.write_text("\n".join([
-    '[gd_resource type="Environment" load_steps=3 format=3]',
-    '',
-    '[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]',
-    '',
-    '[sub_resource type="Sky" id="Sky"]', 'sky_material = SubResource("SkyMat")',
-    '',
-    '[resource]',
-    'background_mode = 2', 'sky = SubResource("Sky")', 'tonemap_mode = 2', 'glow_enabled = true',
-    '']), encoding="utf-8", newline="\n")
 
 # ---------------------------------------------------------------- сцена уровня
 def v3(x: float, y: float, z: float) -> str:
@@ -131,7 +119,7 @@ lines = [
     '[ext_resource type="PackedScene" path="res://scenes/levels/prospekt_study.tscn" id="2"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="4"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="5"]',
-    '[ext_resource type="Environment" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="6"]',
+    f'[ext_resource type="Environment" path="{LIGHT.ENV_PATH}" id="6"]',
     '[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="7"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/ai_post.tscn" id="8"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/ai_route.tscn" id="9"]',
@@ -245,8 +233,7 @@ lines += [
     '', '[node name="Audio" type="Node3D" parent="."]',
     '', '[node name="Lighting" type="Node3D" parent="."]',
     '', '[node name="WorldEnvironment" type="WorldEnvironment" parent="."]', 'environment = ExtResource("6")',
-    '', '[node name="Sun" type="DirectionalLight3D" parent="."]',
-    'transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.75, -0.43301, 0, 0, 0)', 'shadow_enabled = true',
+    '', '[node name="Sun" type="DirectionalLight3D" parent="."]', *LIGHT.SUN_PROPS,
     '', '[node name="CameraRig" parent="." instance=ExtResource("7")]',
     '', '[node name="HUD" type="CanvasLayer" parent="."]',
     '', '[node name="Root" type="Control" parent="HUD"]',

@@ -3,12 +3,13 @@ extends RefCounted
 ## от умолчаний Godot по одной черте освещения EFT и всё вместе. Черты — из разбора скриншотов Ground Zero
 ## (референсы/prospekt_ground_zero): перепад света, бирюзовый холод, дымка вдали, глубокие тени в углах, тёмные
 ## помещения, резкость. Снимает tools/prospekt_study.gd: PROSPEKT_LIGHT=all_variants (или имена через «,») -- shots.
-## Числа подобраны замером кадров против скриншотов EFT, это стенд, а не настройка карты.
+## Числа подобраны замером кадров против скриншотов EFT. Владелец выбрал «всё вместе» — с 2026-10-26 это свет карты
+## (tools/prospekt_light.py), и стенд снимает варианты уже поверх него; кадры от умолчаний Godot — light_stand_*.jpg.
 
 const ORDER: Array[String] = ["default", "contrast", "teal", "haze", "ao", "gi", "sharp", "eft"]
 
 const NAMES: Dictionary = {
-	"default": "Умолчания Godot",
+	"default": "Свет карты",
 	"contrast": "1 · Перепад: солнце сильнее, рассеянный слабее, небо ярче",
 	"teal": "2 · Бирюзовый холод: небо и тени в холодную зелень, солнце тёплое",
 	"haze": "3 · Дымка: дальнее светлеет и тонет в воздухе",
@@ -30,19 +31,7 @@ const PARTS: Dictionary = {
 	"eft": ["contrast", "teal", "haze", "ao", "gi", "sharp"],
 }
 
-const SHARPEN_SHADER: String = """
-shader_type canvas_item;
-// Нерезкая маска: картинка плюс её разница с размытой — как резкость поверх кадра в EFT.
-uniform sampler2D screen: hint_screen_texture, filter_linear;
-uniform float amount = 1.8;
-void fragment() {
-	vec2 px = SCREEN_PIXEL_SIZE;
-	vec3 c = texture(screen, SCREEN_UV).rgb;
-	vec3 blur = (texture(screen, SCREEN_UV + vec2(px.x, 0.0)).rgb + texture(screen, SCREEN_UV - vec2(px.x, 0.0)).rgb
-		+ texture(screen, SCREEN_UV + vec2(0.0, px.y)).rgb + texture(screen, SCREEN_UV - vec2(0.0, px.y)).rgb) * 0.25;
-	COLOR = vec4(max(c + (c - blur) * amount, vec3(0.0)), 1.0);
-}
-"""
+const SHARPEN_SHADER: String = "res://src/world/screen_sharpen.gdshader"
 
 
 ## Сколько кадров ждать перед снимком: SDFGI набирает свет дольше.
@@ -104,10 +93,8 @@ static func apply(variant: String, env: Environment, sun: DirectionalLight3D, ho
 		var rect: ColorRect = ColorRect.new()
 		rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var shader: Shader = Shader.new()
-		shader.code = SHARPEN_SHADER
 		var mat: ShaderMaterial = ShaderMaterial.new()
-		mat.shader = shader
+		mat.shader = load(SHARPEN_SHADER) as Shader
 		rect.material = mat
 		layer.add_child(rect)
 		host.add_child(layer)

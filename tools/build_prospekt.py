@@ -39,6 +39,10 @@ import random
 import re
 from pathlib import Path
 
+import prospekt_light as LIGHT
+
+import prospekt_light as LIGHT
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT_JSON = ROOT / "data" / "blockouts" / "prospekt.json"
 OUT_SCENE = ROOT / "scenes" / "levels" / "prospekt_study.tscn"
@@ -2397,6 +2401,16 @@ def tf(b: dict) -> str:
             f"{b['at'][0]}, {b['lift']}, {b['at'][1]})")
 
 
+# окружение — одно на блокаут и рейд
+ENV_FILE = ROOT / "scenes" / "levels" / "prospekt" / "prospekt_environment.tres"
+ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
+ENV_FILE.write_text(LIGHT.ENV_TRES, encoding="utf-8", newline="\n")
+SHARPEN_EXT, SHARPEN_MAT = LIGHT.sharpen_resources("sharpen", "SharpenMat")
+# окружение — одно на блокаут и рейд
+ENV_FILE = ROOT / "scenes" / "levels" / "prospekt" / "prospekt_environment.tres"
+ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
+ENV_FILE.write_text(LIGHT.ENV_TRES, encoding="utf-8", newline="\n")
+SHARPEN_EXT, SHARPEN_MAT = LIGHT.sharpen_resources("sharpen", "SharpenMat")
 scene = [
     '[gd_scene format=3]',
     '[ext_resource type="Script" path="res://src/blockout/prospekt_landscape.gd" id="land"]',
@@ -2404,19 +2418,15 @@ scene = [
     '[ext_resource type="Script" path="res://src/blockout/prospekt_study_level.gd" id="launch"]',
     '[ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]',
     '[ext_resource type="Script" path="res://src/blockout/flat_section.gd" id="flats"]',
-    # освещение — умолчания Godot, как кнопки редактора «Добавить окружение / солнце в сцену»: процедурное небо,
-    # рассеянный свет и отражения от неба, Filmic, свечение; SSAO, SSIL, туман и коррекция выключены. Владелец
-    # 2026-10-26: «вернуть к самым дефолтным значениям, от которых дальше будем танцевать» (AGENTS.md п. 10)
-    '[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]',
-    '[sub_resource type="Sky" id="Sky"]', 'sky_material = SubResource("SkyMat")',
-    '[sub_resource type="Environment" id="Environment"]',
-    'background_mode = 2', 'sky = SubResource("Sky")', 'tonemap_mode = 2', 'glow_enabled = true',
+    # свет — tools/prospekt_light.py (владелец 2026-10-26: вариант стенда «всё вместе», черты освещения EFT)
+    f'[ext_resource type="Environment" path="{LIGHT.ENV_PATH}" id="env"]',
+    SHARPEN_EXT, *SHARPEN_MAT,
     '[node name="ProspektStudy" type="Node3D"]',
     'script = ExtResource("launch")',
     'metadata/purpose = "Карта «Проспект» — серый блокаут, редакция 3: проспект с поворотом на 90° · правило масштаба E"',
-    '[node name="WorldEnvironment" type="WorldEnvironment" parent="."]', 'environment = SubResource("Environment")',
-    '[node name="EveningSun" type="DirectionalLight3D" parent="."]',
-    'transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.75, -0.43301, 0, 0, 0)', 'shadow_enabled = true',
+    '[node name="WorldEnvironment" type="WorldEnvironment" parent="."]', 'environment = ExtResource("env")',
+    '[node name="EveningSun" type="DirectionalLight3D" parent="."]', *LIGHT.SUN_PROPS,
+    *LIGHT.sharpen_nodes(".", "sharpen", "SharpenMat"),
     '[node name="Landscape" type="Node3D" parent="."]', 'script = ExtResource("land")',
     '[node name="Filler" type="Node3D" parent="."]', 'script = ExtResource("fill")',
 ]

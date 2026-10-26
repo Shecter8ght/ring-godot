@@ -10,21 +10,15 @@
 
 [ext_resource type="Script" path="res://src/blockout/flat_section.gd" id="flats"]
 
-[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+[ext_resource type="Environment" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="env"]
 
-[sub_resource type="Sky" id="Sky"]
+[ext_resource type="Shader" path="res://src/world/screen_sharpen.gdshader" id="sharpen"]
 
-sky_material = SubResource("SkyMat")
+[sub_resource type="ShaderMaterial" id="SharpenMat"]
 
-[sub_resource type="Environment" id="Environment"]
+shader = ExtResource("sharpen")
 
-background_mode = 2
-
-sky = SubResource("Sky")
-
-tonemap_mode = 2
-
-glow_enabled = true
+shader_parameter/amount = 1.8
 
 [node name="ProspektStudy" type="Node3D"]
 
@@ -34,13 +28,37 @@ metadata/purpose = "Карта «Проспект» — серый блокау�
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 
-environment = SubResource("Environment")
+environment = ExtResource("env")
 
 [node name="EveningSun" type="DirectionalLight3D" parent="."]
 
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.75, -0.43301, 0, 0, 0)
 
+light_color = Color(1, 0.9, 0.76, 1)
+
+light_energy = 2.0
+
 shadow_enabled = true
+
+[node name="Sharpen" type="CanvasLayer" parent="."]
+
+layer = -1
+
+[node name="Mask" type="ColorRect" parent="Sharpen"]
+
+material = SubResource("SharpenMat")
+
+anchors_preset = 15
+
+anchor_right = 1.0
+
+anchor_bottom = 1.0
+
+grow_horizontal = 2
+
+grow_vertical = 2
+
+mouse_filter = 2
 
 [node name="Landscape" type="Node3D" parent="."]
 

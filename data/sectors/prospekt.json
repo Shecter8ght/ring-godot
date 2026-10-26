@@ -45,6 +45,26 @@
  ],
  "camera_yaw": 0,
  "nav_cache": "res://data/navigation/prospekt",
+ "light": {
+  "sun_k": 0.81,
+  "ambient_k": 0.28,
+  "ambient_k_night": 1.8,
+  "ambient_k_day_rain": 0.8,
+  "ambient_k_dusk_rain": 0.8,
+  "ambient_k_night_rain": 3.2,
+  "ambient_k_day_overcast": 0.5,
+  "ambient_k_dusk_overcast": 0.5,
+  "ambient_k_night_overcast": 2.6
+ },
+ "depth_fog": {
+  "clear": {
+   "begin": 50.0,
+   "end": 900.0,
+   "density": 0.55,
+   "curve": 0.6,
+   "sky": 0.1
+  }
+ },
  "events": {
   "off": [
    "power"

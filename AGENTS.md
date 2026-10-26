@@ -185,6 +185,8 @@ python -X utf8 tools/build_prospekt_raid.py                   # рейдовая
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
 tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn # рейд «Проспекта»: навигация, население слоями, кордон ЧВК, точки на навигации,
                                                               # от каждого захода до всех выходов, места лута
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn # свет «Проспекта» в рейде: день, закат, ночь, пасмурно, дождь
+                                                              # с трёх точек → user://prospekt_raid_shots (PROSPEKT_OUTPUT, PROSPEKT_CASES=day,night)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/urban95_export.py -- [ID …]
                                                               # библиотека RING_Urban_95 (retopology_v01, 101 модель) в игру: assets/models/urban95/<ID>.gltf,
                                                               # карты WebP ≤ 2K, индекс с габаритами data/urban95_models.json; на карте их ставит MallFiller (filler.kit_models)
@@ -538,10 +540,11 @@ docs/          STATUS.md (что сделано / что дальше), реше
    размерах в игре всё выглядит мелким (нет периферийного зрения и тела), а общий множитель ломает пропорции.
 10. **Освещение новой карты настраивается заново** (владелец 2026-10-24: освещение основных карт ему не нравится,
    «не перетаскиваем»): небо, солнце, окружение, туман, тонмаппинг — свои для карты, не копия `zone01_environment`
-   или черновика ТЦ. Свет «Проспекта» (блокаут и рейд) сброшен к умолчаниям Godot — точка отсчёта для настройки
-   (владелец 2026-10-26: «вернуть к самым дефолтным значениям, от которых дальше будем танцевать»): процедурное небо,
-   солнце редактора (60°, сила 1, тени), Filmic, свечение; SSAO, SSIL, SDFGI, туман и коррекция выключены
-   (`tools/build_prospekt.py`, `tools/build_prospekt_raid.py`). В рейде поверх — общие время суток и погода (`RaidAtmosphere`).
+   или черновика ТЦ. Свет «Проспекта» (блокаут и рейд) — `tools/prospekt_light.py`: владелец 2026-10-26 выбрал на стенде
+   (`tools/prospekt_light_variants.gd`) «всё вместе» — черты освещения EFT поверх умолчаний Godot: солнце сильнее и
+   рассеянный слабее, голубое небо и бирюзовая коррекция при тёплом солнце, дымка по расстоянию, SSAO, SDFGI (тёмные
+   помещения), резкость поверх кадра (`src/world/screen_sharpen.gdshader`). В рейде время суток и погода — поверх
+   (`RaidAtmosphere`, `RaidWeather`); поправки карты — `light` и `depth_fog` в `data/sectors/prospekt.json`.
    без `assets/models` и `assets/textures`.
 7. **Нет `any`-стиля.** Типизированный GDScript: аннотации у всех переменных, аргументов, возвратов.
 8. **Комментарии — по-русски, о смысле, не о синтаксисе.** Имена — по-английски.
