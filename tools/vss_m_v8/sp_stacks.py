@@ -155,20 +155,20 @@ def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, p
                    blend=L.BlendingMode.Lighten)
     mask_proc(t, _gm(13), {"balance": 0.6, "contrast": 0.3}, scale=2.2, above=pm, blend=L.BlendingMode.Multiply)
     sp_lib.lop(t, thin)
-    w = fill("06 Вытерто до металла", _above(t), color=bare[0], rough=bare[1], metal=bare[2], height=0.488)  # ступенька 0.012
+    w = fill("06 Вытерто до металла", _above(t), color=bare[0], rough=bare[1], metal=bare[2], height=0.475)  # ступенька 0.025
     g = mask_generator(w, EDGE, dict(edge_p, Wear_Level=wear))
     mask_proc(w, _gm(8), {"invert": 1, "balance": patch_bal, "contrast": 0.75}, scale=1.5, above=g,
               blend=L.BlendingMode.Lighten)
     n = _grain(_above(w), 0.16, 0.0)
     n.set_name("07 Неровная матовость")
     n = _edge("08 Кромки до блеска", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.5), 0.24, wear * 0.6,
-              contrast=0.85, grunge=0.6, step=0.01)
+              contrast=0.85, grunge=0.6, step=0.025)
     if rail_meshes:
         # заметно, но не обширно (замечание владельца 26.10: уровень 0.5 давал «потрёпанную» планку)
         n = _edge("09 Износ планки", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.4), 0.26, 0.18, contrast=0.88,
-                  grunge=0.6, meshes=rail_meshes, step=0.008)
+                  grunge=0.6, meshes=rail_meshes, step=0.02)
     n = _proc_layer("10 Царапины", _above(n), _gm(12), 2.5, scratches, {"invert": 1, "balance": 0.74, "contrast": 0.55},
-                    color=_mix(coat[0], bare[0], 0.6), rough=0.42, metal=1.0, height=0.494)
+                    color=_mix(coat[0], bare[0], 0.8), rough=0.28, metal=1.0, height=0.49)
     _sharpen(grp, 0.3)
     n = _dirt(_above(grp), color=(0.035, 0.03, 0.026), level=0.38, opacity=0.9, name="11 Грязь в углах")
     n = _dirt(_above(n), color=(0.3, 0.28, 0.25), rough=0.95, level=0.24, opacity=0.4, name="12 Пыль в углах", contrast=0.9)
@@ -183,7 +183,7 @@ def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, p
 
 # воронёная сталь: глянцевое тёмное покрытие, под ним матовая серая сталь с тёплым оттенком
 STEEL_COAT = ((0.085, 0.085, 0.09), 0.22, 0.75)
-STEEL_BARE = ((0.17, 0.165, 0.16), 0.62, 1.0)
+STEEL_BARE = ((0.42, 0.415, 0.41), 0.3, 1.0)   # стёртое до металла блестит (0.17 / 0.62 читалось матовой краской, 26.10)
 # свои основы деталей (справка навыка: 4–5 основ на предмет; тёмные — с лёгким оттенком, крепёж — светлее)
 RECEIVER_PARTS = [
     ("крышка", ["Receiver_cover"], (0.095, 0.092, 0.092), 0.18, 0.78),
@@ -374,7 +374,7 @@ def magazine(st, lips=MAG_LIPS):
     return n
 
 
-def anodized(st, rail=True, tile=1.0, rough=0.5):
+def anodized(st, rail=True, tile=1.0, rough=0.42):
     """Твёрдое анодирование алюминия (муфта с планками, корпуса прицелов) — по справке навыка (painter-workflow.md,
     26.10): не краска, а оксид — тёмно-серый с лёгкой синевой, не чёрный, матово-полуглянцевый (шероховатость ~0.6),
     с мелким зерном. Цвет почти ровный — главный канал блеск: мягкие вариации блеска (глаже — темнее), затем мелкие
@@ -395,25 +395,30 @@ def anodized(st, rail=True, tile=1.0, rough=0.5):
              rough=rough, metal=0.85)
     n = fill("02 Зерно оксида", _above(n), color="noise_gaussian_noise/gaussian_noise",
              rough="noise_gaussian_noise/gaussian_noise", height="noise_gaussian_noise/gaussian_noise")
-    triplanar(n, 200.0)
+    # шум в развёртке на два текселя: «блестящая шершавость» — искры в блике (трипланар 200 давал шум мельче пикселя,
+    # он усреднялся в гладкое «мыло», владелец 26.10)
+    sp_lib.uvscale(n, 0.5)
     n.set_blending_mode(L.BlendingMode.Overlay, CH.BaseColor)
-    n.set_opacity(0.06, CH.BaseColor)
+    n.set_opacity(0.05, CH.BaseColor)
     n.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
-    n.set_opacity(0.25, CH.SpecularRoughness)
-    n.set_opacity(0.0006, CH.Height)
+    n.set_opacity(0.4, CH.SpecularRoughness)
+    n.set_opacity(0.012, CH.Height)
     # мельче и слабее: крупные мягкие разводы на мелких деталях прицелов читались «мылом» (владелец 26.10)
     n = _proc_layer("03 Мягкие вариации блеска", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 3.0 * tile,
-                    0.3, {"Balance": 0.5, "Contrast": 0.3}, color=_mix(base, (0.0, 0.0, 0.0), 0.15), rough=rough - 0.08)
-    n = _proc_layer("04 Пятна глянца", _above(n), "grunge_spots/grunge_spots", 4.0 * tile, 0.4, None,
+                    0.15, {"Balance": 0.5, "Contrast": 0.3}, color=_mix(base, (0.0, 0.0, 0.0), 0.15), rough=rough - 0.08)
+    n = _proc_layer("04 Пятна глянца", _above(n), "grunge_spots/grunge_spots", 4.0 * tile, 0.25, None,
                     color=_mix(base, (0.0, 0.0, 0.0), 0.2), rough=rough - 0.12)
-    n = _proc_layer("05 Пятна матовые", _above(n), "noise_bnw_spots_1/bnw_spots_1", 5.0 * tile, 0.3, None,
+    n = _proc_layer("05 Пятна матовые", _above(n), "noise_bnw_spots_1/bnw_spots_1", 5.0 * tile, 0.15, None,
                     color=_mix(base, (0.3, 0.3, 0.32), 0.1), rough=rough + 0.16)
-    n = _edge("06 Светлые глянцевые кромки", _above(n), _mix(base, (0.5, 0.5, 0.52), 0.35), rough - 0.12, 0.05, contrast=0.85,
-              grunge=0.7, metal=0.6, step=0.008)
+    # стёрто до алюминия: светлый металл с бликом (серый при металле 0.6 читался белёсой краской, владелец 26.10)
+    n = _edge("06 Кромки до алюминия", _above(n), (0.78, 0.785, 0.8), 0.2, 0.05, contrast=0.85,
+              grunge=0.7, metal=1.0, step=0.025)
     if rail:
         n = _proc_layer("07 Износ от обвеса", _above(n), "grunge_wipe_directional_heavy/grunge_wipe_directional_heavy",
-                        2.0, 0.3, None, color=_mix(base, (0.3, 0.3, 0.32), 0.2), rough=rough - 0.05)
-    n = fill("08 Царапины в блеске", _above(n), rough=rough - 0.08)
+                        2.0, 0.3, None, color=_mix(base, (0.3, 0.3, 0.32), 0.2), rough=rough - 0.06)
+    # царапины — только блеск: маска покрывает много площади, светлым металлом она ложилась широкими полосами (26.10);
+    # до алюминия стёрты кромки (06)
+    n = fill("08 Царапины в блеске", _above(n), rough=rough - 0.12)
     mask_proc(n, _gm(12), {"invert": 1, "balance": 0.8, "contrast": 0.55}, scale=2.5 * tile)
     sp_lib.lop(n, 0.5)
     _sharpen(grp, 0.3)
