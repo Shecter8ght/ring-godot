@@ -10,6 +10,7 @@ extends Node3D
 
 const LEVEL: String = "res://scenes/levels/prospekt_study.tscn"
 const Walker = preload("res://src/blockout/study_walker.gd")
+const LightVariants = preload("res://tools/prospekt_light_variants.gd")
 const START: int = 1
 
 var world: Node3D
@@ -462,6 +463,10 @@ func _shots() -> void:
 					picked.append(view)
 	if not picked.is_empty():
 		views = picked
+	if OS.get_environment("PROSPEKT_LIGHT") != "":
+		await _light_stand(camera, views)
+		get_tree().quit()
+		return
 	for view: Dictionary in views:
 		camera.global_position = view.at
 		camera.look_at(view.look, Vector3.UP)
@@ -481,6 +486,36 @@ func _shots() -> void:
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(output_dir.path_join("50_map.png"))
 	get_tree().quit()
+
+
+## Стенд света (tools/prospekt_light_variants.gd): те же кадры в каждом варианте → <вариант>__<кадр>.png.
+## PROSPEKT_LIGHT=all_variants — все по порядку, иначе имена через «,». Подписи мест на карте скрыты.
+func _light_stand(camera: Camera3D, views: Array[Dictionary]) -> void:
+	var variants: Array[String] = LightVariants.ORDER.duplicate()
+	if OS.get_environment("PROSPEKT_LIGHT") != "all_variants":
+		variants.assign(Array(OS.get_environment("PROSPEKT_LIGHT").split(",", false)))
+	for label: Node in world.find_children("*", "Label3D", true, false):
+		(label as Label3D).hide()
+	var we: WorldEnvironment = world.get_node("WorldEnvironment") as WorldEnvironment
+	var sun: DirectionalLight3D = world.get_node("EveningSun") as DirectionalLight3D
+	var base_env: Environment = we.environment.duplicate(true) as Environment
+	var base_sun: Array = [sun.light_energy, sun.light_color]
+	for variant: String in variants:
+		we.environment = base_env.duplicate(true) as Environment
+		sun.light_energy = float(base_sun[0])
+		sun.light_color = base_sun[1] as Color
+		var overlay: CanvasLayer = LightVariants.apply(variant, we.environment, sun, self)
+		var settle: int = LightVariants.settle_frames(variant)
+		for view: Dictionary in views:
+			camera.global_position = view.at
+			camera.look_at(view.look, Vector3.UP)
+			camera.fov = 62.0 if String(view.id).ends_with("overview") else Settings.fps_fov_v()
+			await _frames(settle)
+			await RenderingServer.frame_post_draw
+			var path: String = output_dir.path_join("%s__%s.png" % [variant, String(view.id)])
+			print("prospekt_study: свет ", variant, " снимок ", path, " ошибка=", get_viewport().get_texture().get_image().save_png(path))
+		if overlay:
+			overlay.queue_free()
 
 
 ## План (M): покрытия, постройки, укрытия, появления, выходы, пешеход.
