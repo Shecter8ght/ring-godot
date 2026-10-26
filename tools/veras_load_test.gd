@@ -5,7 +5,7 @@ extends "res://tools/weapon_ik_test.gd"
 const LOADED: Dictionary = {
 	"optic_primary": {"id": "optic_lpvo_01", "slot": 1},
 	"optic_primary#2": {"id": "mount_offset45_01", "slot": 7},
-	"optic_primary#2/rail": {"id": "optic_rmr_01"},
+	"optic_primary#2/rail": {"id": "optic_holo_01"},
 	"underbarrel": {"id": "grip_vertical_01", "slot": 3},
 	"side_left": {"id": "tac_combo_01"},
 	"side_right": {"id": "tac_flashlight_01"},

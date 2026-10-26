@@ -20,7 +20,7 @@ func _ready() -> void:
 	Profile.money = 60000
 	Profile.modules["workbench"] = 2
 	Profile.stash.clear()
-	for e: Dictionary in [{"id": "mount_offset45_01", "n": 1, "dur": 92.0}, {"id": "optic_rmr_01", "n": 1, "dur": 80.0},
+	for e: Dictionary in [{"id": "mount_offset45_01", "n": 1, "dur": 92.0}, {"id": "optic_holo_01", "n": 1, "dur": 80.0},
 			{"id": "grip_vertical_01", "n": 1, "dur": 100.0}, {"id": "muzzle_supp_545_01", "n": 1, "dur": 70.0}, {"id": "mag_545_60", "n": 1, "rounds": 60, "ammo": "ammo_545_std"}]:
 		ItemDb.add_to(Profile.stash, e, Profile.stash_grid())
 	Profile.equipment["primary"] = {"id": "wpn_ar_01", "n": 1, "dur": 94.0, "sight": "primary",
@@ -48,7 +48,7 @@ func _ready() -> void:
 	_b._confirm_place()
 	_b._select("optic_primary#2/rail")
 	for p2: Dictionary in _b._pool():
-		if String(p2.id) == "optic_rmr_01":
+		if String(p2.id) == "optic_holo_01":
 			_b._choose(p2)
 			break
 	await _shot("5_bracket_optic")

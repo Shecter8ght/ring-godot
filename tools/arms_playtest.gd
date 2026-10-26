@@ -85,7 +85,7 @@ func _cases() -> Array[Dictionary]:
 		result.append({"id": id, "label": "base", "mods": {}})
 		var entry: Dictionary = {"id": id, "mods": {}}
 		for attachment: String in data.attachments:
-			if quick and not attachment in ["grip_vertical_01", "grip_angled_01", "grip_compact_01", "optic_offset_rd_01"]:
+			if quick and not attachment in ["grip_vertical_01", "grip_angled_01", "grip_compact_01", "optic_holo_01"]:
 				continue
 			for mount: String in WeaponDb.MOUNTS:
 				if WeaponDb.attach_block(entry, mount, attachment) == "":

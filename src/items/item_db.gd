@@ -728,7 +728,8 @@ static func helmet_mounts(eq: Dictionary) -> Array:
 ## Почему предмет id нельзя надеть в слот при надетом eq ("" — можно; docs/design/equip_doll_v2.md, п. 3):
 ## ПНВ носят и без шлема, но под шлем без площадки он не встаёт; и шлем без площадки поверх ПНВ не надеть.
 static func slot_block(id: String, slot: String, eq: Dictionary) -> String:
-	if slot == "eyes" and bool(equip(id).get("nvg", false)) and eq.has("helmet") and not "NVG" in helmet_mounts(eq):
+	var helmet: Variant = eq.get("helmet")
+	if slot == "eyes" and bool(equip(id).get("nvg", false)) and helmet is Dictionary and not (helmet as Dictionary).is_empty() and not "NVG" in helmet_mounts(eq):
 		return "шлем без крепления ПНВ"
 	if slot == "helmet":
 		var eyes: Variant = eq.get("eyes", null)
@@ -753,7 +754,7 @@ static func _pick_slot(id: String, eq: Dictionary, want: String = "") -> String:
 	if s != "" and equip(id).has("weapon"):
 		var fits: Array = weapon_slots_for(id)
 		for o in fits:
-			if not eq.has(o):
+			if not eq.get(o) is Dictionary or (eq[o] as Dictionary).is_empty():
 				return String(o)
 		return String(fits[0])
 	return s
@@ -1227,6 +1228,12 @@ static func value_of(list: Array) -> int:
 static func canon_entry(e: Dictionary) -> void:
 	if e.has("id"):
 		e.id = WeaponDb.canonical(String(e.id))
+	for mount: String in e.get("mods", {}):
+		var mod: Variant = e.mods[mount]
+		if mod is Dictionary:
+			canon_entry(mod as Dictionary)
+		elif mod is String:
+			e.mods[mount] = WeaponDb.canonical(String(mod))
 	for s in e.get("plates", {}):
 		var pl: Variant = (e.plates as Dictionary)[s]
 		if pl is Dictionary and (pl as Dictionary).has("id"):
@@ -1263,8 +1270,7 @@ static func canon_template(t: Dictionary) -> void:
 		var e: Variant = (t.slots as Dictionary)[slot]
 		if not e is Dictionary:
 			continue
-		if (e as Dictionary).has("id"):
-			(e as Dictionary).id = WeaponDb.canonical(String((e as Dictionary).id))
+		canon_entry(e as Dictionary)
 		var plates: Variant = (e as Dictionary).get("plates", null)
 		if plates is Dictionary:
 			for g in plates:

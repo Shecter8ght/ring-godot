@@ -989,13 +989,15 @@ func _shop_card(sid: String) -> ItemCard:
 	else:
 		var b := _button("Купить", func() -> void:
 			var q := _qty_of(sid) if ItemDb.stack(sid) > 1 else 1
+			var stash_before: int = Profile.stash_count(sid)
 			if not Profile.buy(sid, q, _buy_to):
 				if Profile.buy_price(sid) * q > Profile.money:
 					toast("Не хватает денег")
 				else:
-					toast("Не купил: не влезает в %s — освободи место или выбери «%s»" % ["рюкзак" if _buy_to == "backpack" else "тайник",
-						"В тайник" if _buy_to == "backpack" else "В рюкзак"])
+					toast("Нет места ни в рюкзаке, ни в тайнике" if _buy_to == "backpack" else "В тайнике нет места")
 				return
+			if _buy_to == "backpack" and Profile.stash_count(sid) > stash_before:
+				toast("Покупка отправлена в тайник: в рюкзаке нет места")
 			# купил — количество снова по умолчанию
 			_qty.erase(sid)
 			if WeaponDb.is_weapon(sid):

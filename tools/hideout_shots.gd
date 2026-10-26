@@ -20,7 +20,7 @@ func _ready() -> void:
 	Upgrades.build("generator")
 	Upgrades.build("workbench")
 	for id in ["optic_rd_01", "muzzle_supp_545_01", "grip_vertical_01", "stock_tele_ak_01", "tac_flashlight_01", "tac_laser_01",
-			"optic_holo_01", "optic_4x_01", "muzzle_comp_545_01", "optic_rmr_01", "mag_545_45", "plate_steel"]:
+			"optic_holo_01", "optic_4x_01", "muzzle_comp_545_01", "optic_zorin_k1", "mag_545_45", "plate_steel"]:
 		Profile.buy(id, 1)
 	for id in ["optic_rd_01", "muzzle_supp_545_01", "grip_vertical_01", "stock_tele_ak_01", "tac_flashlight_01"]:
 		Profile.install_mod("primary", _idx(id))

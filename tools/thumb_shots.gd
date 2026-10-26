@@ -11,7 +11,7 @@ func _ready() -> void:
 	var full: Dictionary = {"id": "mag_545_30", "ammo": "ammo_545_std", "rounds": 30}
 	var entries: Array = [
 		_veras({"optic_primary": {"id": "optic_lpvo_01", "slot": 1}, "optic_primary#2": {"id": "mount_offset45_01", "slot": 7},
-			"optic_primary#2/rail": {"id": "optic_rmr_01"}, "underbarrel": {"id": "grip_vertical_01", "slot": 3}, "muzzle": {"id": "muzzle_supp_545_01"}}, full),
+			"optic_primary#2/rail": {"id": "optic_holo_01"}, "underbarrel": {"id": "grip_vertical_01", "slot": 3}, "muzzle": {"id": "muzzle_supp_545_01"}}, full),
 		_veras({"optic_primary": {"id": "optic_rd_01", "slot": 3}, "side_right": {"id": "tac_flashlight_01"}}, {"id": "", "ammo": "", "rounds": 0}),
 		_veras({"optic_primary": {"id": "mount_riser_01", "slot": 2}, "optic_primary/rail": {"id": "optic_4x_01"}}, {"id": "mag_545_60", "ammo": "ammo_545_std", "rounds": 60}),
 		_veras({}, {"id": "mag_545_30", "ammo": "ammo_545_std", "rounds": 0}),

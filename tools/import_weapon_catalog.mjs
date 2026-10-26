@@ -409,6 +409,8 @@ function modItem(name, value, tier, tags, attach, size = [1, 1], weight = 0.2) {
 }
 
 const attachments = structuredClone(old.attachments);
+delete attachments.optic_rmr_01;
+delete attachments.optic_offset_rd_01;
 attachments.muzzle_comp_9_01 = modItem("Компенсатор 9 мм", 6500, 2, ["POLICE", "MILITARY"], {
   type: "COMPENSATOR", fits: ["THREAD_9"], look: "compensator",
   fx: { kick: 0.78, kick_h: 0.86, shake: 0.84, noise: 1.1, ergo: -2 },
@@ -546,7 +548,16 @@ const aliases = {
   ammo_76239_std: "ammo_545_old", ammo_76239_hvy: "ammo_545_std", ammo_76239_ap: "ammo_545_ap",
   mag_762_30: "mag_545_30", mag_762_40: "mag_545_45", mag_smg9_30: "mag_919_vityaz30",
   mag_smg9_50: "mag_919_vityaz30", mag_svd_10: "mag_pkm_100",
+  mod_rmr: "optic_zorin_k1", optic_rmr_01: "optic_zorin_k1", optic_offset_rd_01: "optic_zorin_k1",
 };
+
+// Убранные прицелы не возвращаются в новые сборки при повторном импорте каталога.
+for (const preset of Object.values(presets)) {
+  for (const [mount, rec] of Object.entries(preset.mods ?? {})) {
+    const id = typeof rec === "string" ? rec : rec.id;
+    if (["optic_rmr_01", "optic_offset_rd_01"].includes(id)) delete preset.mods[mount];
+  }
+}
 
 for (const [groupName, group] of Object.entries({ weapons, ammo, magazines, attachments })) {
   for (const [id, item] of Object.entries(group)) {

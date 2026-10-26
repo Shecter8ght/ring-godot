@@ -31,7 +31,7 @@ func _veras(mods: Dictionary) -> Dictionary:
 
 ## Старый «угловой прицел» становится кронштейном на верхней планке с прицелом на нём.
 func _legacy() -> void:
-	var old: Dictionary = _veras({"optic_primary": {"id": "optic_lpvo_01", "dur": 100.0}, "optic_offset": {"id": "optic_offset_rd_01", "dur": 70.0}})
+	var old: Dictionary = _veras({"optic_primary": {"id": "optic_lpvo_01", "dur": 100.0}, "optic_offset": {"id": "optic_holo_01", "dur": 70.0}})
 	old.sight = "offset"
 	var r: Array = WeaponBuild.upgrade(old)
 	var e: Dictionary = r[0]
@@ -46,8 +46,8 @@ func _legacy() -> void:
 	_check("выбранный «угловой» — прицел на кронштейне", String(e.sight) == bracket + "/rail", String(e.sight))
 	_check("кронштейн не налезает на LPVO", WeaponBuild.block(e, bracket, WeaponBuild.LEGACY_BRACKET) == "")
 	var preset: Dictionary = WeaponDb.make_weapon("AR_07_LEADER", RandomNumberGenerator.new())
-	_check("пресет со старым угловым собирается деревом", not (preset.get("mods", {}) as Dictionary).has("optic_offset")
-		and WeaponStats.sights_of(preset).size() == 2, JSON.stringify(preset.get("mods", {})))
+	_check("пресет без убранного углового сохраняет основной прицел", not (preset.get("mods", {}) as Dictionary).has("optic_offset")
+		and WeaponStats.sights_of(preset).size() == 1, JSON.stringify(preset.get("mods", {})))
 	var mig: Array = WeaponDb.migrate(old)
 	_check("миграция сохранения тоже переводит", not ((mig[0] as Dictionary).mods as Dictionary).has("optic_offset") and (mig[1] as Array).is_empty())
 	var again: Array = WeaponDb.migrate(mig[0])
@@ -87,9 +87,9 @@ func _adapters() -> void:
 	var r: Array = WeaponBuild.insert(e, "optic_primary#2", {"id": "mount_offset45_01", "n": 1, "dur": 90.0}, 6, true)
 	_check("кронштейн встал перевёрнутым", String(r[2]) == "" and bool(((r[0] as Dictionary).mods["optic_primary#2"] as Dictionary).get("flip", false)), String(r[2]))
 	e = r[0]
-	_check("кронштейн дал точку под мини-коллиматор", WeaponBuild.candidate_keys(e, "optic_rmr_01").has("optic_primary#2/rail"))
+	_check("кронштейн дал точку под мини-коллиматор", WeaponBuild.candidate_keys(e, "optic_holo_01").has("optic_primary#2/rail"))
 	_check("крен перевёрнутого кронштейна −45°", is_equal_approx(WeaponBuild.point_roll("veras54", e.mods, "optic_primary#2/rail"), -45.0))
-	r = WeaponBuild.insert(e, "optic_primary#2/rail", {"id": "optic_rmr_01", "n": 1, "dur": 80.0})
+	r = WeaponBuild.insert(e, "optic_primary#2/rail", {"id": "optic_holo_01", "n": 1, "dur": 80.0})
 	e = r[0]
 	_check("коллиматор на кронштейне", String(r[2]) == "" and (e.mods as Dictionary).has("optic_primary#2/rail"))
 	_check("прицелы: основной и угловой", WeaponStats.sights_of(e) == ["primary", "optic_primary#2/rail"], str(WeaponStats.sights_of(e)))
@@ -122,7 +122,7 @@ func _adapters() -> void:
 func _model() -> void:
 	var mods: Dictionary = {"optic_primary": {"id": "optic_lpvo_01", "dur": 100.0, "slot": 0},
 		"optic_primary#2": {"id": "mount_offset45_01", "dur": 100.0, "slot": 6},
-		"optic_primary#2/rail": {"id": "optic_rmr_01", "dur": 100.0},
+		"optic_primary#2/rail": {"id": "optic_holo_01", "dur": 100.0},
 		"underbarrel": {"id": "grip_vertical_01", "dur": 100.0, "slot": 3}}
 	var m0: Node3D = WeaponModels.build("wpn_ar_01", mods, 0, 100.0)
 	add_child(m0)
@@ -168,7 +168,7 @@ func _model() -> void:
 func _stats() -> void:
 	var e: Dictionary = _veras({"optic_primary": {"id": "optic_lpvo_01", "dur": 100.0, "slot": 0},
 		"optic_primary#2": {"id": "mount_offset45_01", "dur": 100.0, "slot": 6},
-		"optic_primary#2/rail": {"id": "optic_rmr_01", "dur": 100.0}})
+		"optic_primary#2/rail": {"id": "optic_holo_01", "dur": 100.0}})
 	var main: Dictionary = WeaponStats.compute(e)
 	e.sight = "optic_primary#2/rail"
 	var side: Dictionary = WeaponStats.compute(e)
@@ -186,7 +186,7 @@ func _plan() -> void:
 	Profile.modules["workbench"] = 2
 	Profile.stash.clear()
 	Profile.backpack.clear()
-	var bracket: Dictionary = {"id": "mount_offset45_01", "n": 1, "dur": 77.0, "mods": {"rail": {"id": "optic_rmr_01", "dur": 66.0}}}
+	var bracket: Dictionary = {"id": "mount_offset45_01", "n": 1, "dur": 77.0, "mods": {"rail": {"id": "optic_holo_01", "dur": 66.0}}}
 	ItemDb.add_to(Profile.stash, bracket, Profile.stash_grid())
 	Profile.equipment["primary"] = {"id": "wpn_ar_01", "n": 1, "dur": 100.0, "sight": "primary",
 		"mods": {"optic_primary": {"id": "optic_lpvo_01", "dur": 90.0, "slot": 0}, "stock": {"id": "stock_tele_ak_01", "dur": 100.0}},
@@ -198,7 +198,7 @@ func _plan() -> void:
 		if String(Profile.stash[i].id) == "mount_offset45_01":
 			bi = i
 	draft["optic_primary#2"] = {"id": "mount_offset45_01", "slot": 6, "src": {"from": "stash", "idx": bi, "sub": ""}}
-	draft["optic_primary#2/rail"] = {"id": "optic_rmr_01", "src": {"from": "stash", "idx": bi, "sub": "rail"}}
+	draft["optic_primary#2/rail"] = {"id": "optic_holo_01", "src": {"from": "stash", "idx": bi, "sub": "rail"}}
 	draft["underbarrel"] = {"id": "grip_vertical_01", "slot": 2, "src": {"from": "shop"}}
 	var money_before: int = Profile.money
 	var r: Dictionary = BuildPlan.resolve(weapon, draft, {}, {"stash": Profile.stash, "backpack": Profile.backpack}, {"shop": true})
@@ -247,7 +247,7 @@ func _template() -> void:
 	Profile.equipment["primary"] = {"id": "wpn_ar_01", "n": 1, "dur": 100.0, "sight": "primary",
 		"mods": {"optic_primary": {"id": "optic_rd_01", "dur": 100.0, "slot": 0},
 			"optic_primary#2": {"id": "mount_offset45_01", "dur": 100.0, "slot": 6, "flip": true},
-			"optic_primary#2/rail": {"id": "optic_rmr_01", "dur": 100.0},
+			"optic_primary#2/rail": {"id": "optic_holo_01", "dur": 100.0},
 			"underbarrel": {"id": "grip_vertical_01", "dur": 100.0, "slot": 3}},
 		"mag": {"id": "mag_545_30", "ammo": "ammo_545_std", "rounds": 30}}
 	var t: Dictionary = LoadoutTemplates.capture("тест сборки")

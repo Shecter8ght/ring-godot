@@ -115,7 +115,7 @@ func _ready() -> void:
 		str((pl.inventory.equipment.armor.plates as Dictionary).keys()))
 
 	# консоль разработчика — команды буквально как в ТЗ
-	var codes := {"VERAS54": "wpn_ar_01", "AK12": "wpn_ar_01", "545_AP": "ammo_545_ap", "LPVO_01": "optic_lpvo_01", "OFFSET_RED_DOT_01": "optic_offset_rd_01",
+	var codes := {"VERAS54": "wpn_ar_01", "AK12": "wpn_ar_01", "545_AP": "ammo_545_ap", "LPVO_01": "optic_lpvo_01", "OFFSET_RED_DOT_01": "optic_zorin_k1",
 		"FLASHLIGHT_01": "tac_flashlight_01", "LASER_01": "tac_laser_01", "AR_06_PATROL": "preset:AR_06_PATROL"}
 	var bad := []
 	for c in codes:

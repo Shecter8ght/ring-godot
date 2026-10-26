@@ -1338,7 +1338,11 @@
      "muzzle": "THREAD_545",
      "stock": "STOCK_AK"
     },
-    "fire_modes": ["auto", "burst", "semi"],
+    "fire_modes": [
+     "auto",
+     "burst",
+     "semi"
+    ],
     "mag_if": "MAG_AK545",
     "default_mag": "mag_545_30",
     "sound": "shot_rifle",
@@ -4615,43 +4619,6 @@
   }
  },
  "attachments": {
-  "optic_rmr_01": {
-   "name": "Мини-коллиматор",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 11000,
-   "stack": 1,
-   "weight": 0.05,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "short": "RMR",
-   "attach": {
-    "type": "OPTIC_RED_DOT",
-    "fits": [
-     "SLIDE_RMR",
-     "OFFSET_45",
-     "RAIL_TOP"
-    ],
-    "look": "rmr",
-    "fx": {
-     "ads_spread": 0.7,
-     "ergo": -1
-    },
-    "role": "BOTH",
-    "zoom": 0,
-    "aim_k": 1.12,
-    "desc": "Маленький: на затвор пистолета, на планку или на угловой кронштейн.",
-    "clamp_m": 0.025
-   },
-   "flavor": "Точка экономит доли секунды вблизи — обычно именно их и не хватает в дверях."
-  },
   "optic_zorin_k1": {
    "name": "Коллиматор ЗОРИН К-1",
    "cat": "mod",
@@ -4744,41 +4711,6 @@
    "desc": "Седло с двумя винтами на затвор ПМ и короткая планка Пикатинни над ним: под ЗОРИН К-1 и любой мини-коллиматор с таким башмаком.",
    "flavor": "Пистолет не рассчитан на оптику; крепление с этим не спорит — просто садится на затвор.",
    "code": "K1-PM"
-  },
-  "optic_offset_rd_01": {
-   "name": "Угловой мини-коллиматор 45°",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 16000,
-   "stack": 1,
-   "weight": 0.09,
-   "tier": 3,
-   "rarity": "uncommon",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": "Угл.",
-   "attach": {
-    "type": "OFFSET_RED_DOT",
-    "fits": [
-     "OFFSET_45"
-    ],
-    "look": "rmr",
-    "fx": {
-     "ads_spread": 0.8,
-     "ergo": -2
-    },
-    "role": "SECONDARY",
-    "zoom": 0,
-    "aim_k": 1.25,
-    "desc": "Ставится на угловой кронштейн (продаётся отдельно): наклонил ствол — и работаешь вблизи, не снимая дальнюю оптику.",
-    "clamp_m": 0.025
-   },
-   "flavor": "Наклони оружие вместо смены прицела: дальняя оптика останется на месте, а ближняя цель — нет."
   },
   "optic_rd_01": {
    "name": "Коллиматор-трубка",
@@ -6698,7 +6630,6 @@
   "HG_03_TAC": {
    "weapon": "wpn_hg_03",
    "mods": {
-    "optic_primary": "optic_rmr_01",
     "underbarrel": "tac_flashlight_01"
    },
    "ammo": [
@@ -6717,7 +6648,6 @@
   "HG_04_BASE": {
    "weapon": "wpn_hg_02",
    "mods": {
-    "optic_primary": "optic_rmr_01",
     "underbarrel": "tac_flashlight_01"
    },
    "ammo": [
@@ -7161,7 +7091,6 @@
    "weapon": "wpn_ar_01",
    "mods": {
     "optic_primary": "optic_lpvo_01",
-    "optic_offset": "optic_offset_rd_01",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_vertical_01",
     "muzzle": "muzzle_comp_545_01"
@@ -7214,7 +7143,6 @@
    "weapon": "wpn_ar_02",
    "mods": {
     "optic_primary": "optic_lpvo_01",
-    "optic_offset": "optic_offset_rd_01",
     "side_left": "tac_flashlight_hp_01",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_angled_01",
@@ -7242,7 +7170,6 @@
    "weapon": "wpn_ar_05",
    "mods": {
     "optic_primary": "optic_4x_01",
-    "optic_offset": "optic_offset_rd_01",
     "underbarrel": "grip_heavy_01",
     "stock": "stock_perimeter_01"
    },
@@ -7299,7 +7226,6 @@
    "weapon": "wpn_dmr_01",
    "mods": {
     "optic_primary": "optic_lpvo_01",
-    "optic_offset": "optic_offset_rd_01",
     "side_right": "tac_laser_01",
     "underbarrel": "bipod_01",
     "muzzle": "muzzle_supp_762_01",
@@ -7817,7 +7743,7 @@
   "ammo_545": "ammo_545_std",
   "ammo_12": "ammo_12_buck",
   "ammo_762r": "ammo_76254_std",
-  "mod_rmr": "optic_rmr_01",
+  "mod_rmr": "optic_zorin_k1",
   "mod_red_dot": "optic_rd_01",
   "mod_holo": "optic_holo_01",
   "mod_scope4x": "optic_4x_01",
@@ -7866,6 +7792,8 @@
   "helmet_perimeter_heavy": "helmet_top",
   "vest_light": "armor_mid",
   "vest_heavy": "armor_mid",
-  "helmet": "helmet_simple"
+  "helmet": "helmet_simple",
+  "optic_offset_rd_01": "optic_zorin_k1",
+  "optic_rmr_01": "optic_zorin_k1"
  }
 }

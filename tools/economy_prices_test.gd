@@ -3,6 +3,7 @@ extends Node
 ## цены улучшений и сохранение старого имущества. Только отдельный тестовый профиль.
 
 var _fails: int = 0
+const RETIRED_OPTICS: Array[String] = ["optic_rmr_01", "optic_offset_rd_01"]
 
 
 func _ready() -> void:
@@ -20,6 +21,8 @@ func _ready() -> void:
 		if row.size() < 9:
 			continue
 		var id: String = row[0].trim_prefix("\ufeff")
+		if id in RETIRED_OPTICS:
+			continue
 		var purchase: int = int(row[6])
 		var sale: int = int(row[8])
 		Profile.stash.clear()
@@ -36,7 +39,23 @@ func _ready() -> void:
 		if not Profile.sell(0, 1) or Profile.money != whole or not Profile.stash.is_empty():
 			bad.append(id + ": продажа")
 		count += 1
-	_check("все товары куплены и проданы по v0, целиком и частями без прибыли", count == Balance.TRADER_BUY_PRICES.size() and bad.is_empty(), "%d товаров; %s" % [count, str(bad)])
+	# Дополнения после снимка v0: ЗОРИН, крепление ПМ и магазин «Шороха-9» на 30.
+	for row: Array in [["optic_zorin_k1", 55000, 6600], ["mount_pm_k1", 15000, 2475], ["mag_939_30", 7000, 2800]]:
+		var id: String = String(row[0])
+		var purchase: int = int(row[1])
+		var sale: int = int(row[2])
+		Profile.stash.clear()
+		Profile.money = purchase
+		if not Profile.buy(id, 1, "stash", false) or Profile.money != 0 or Profile.stash.is_empty():
+			bad.append(id + ": покупка")
+			continue
+		var entry: Dictionary = Profile.stash[0]
+		if Profile.buy_price(id) != purchase or Profile.sell_price(entry) != sale or _parts_sale(entry) > purchase:
+			bad.append(id + ": цена покупки/продажи")
+		if not Profile.sell(0, 1) or Profile.money != sale or not Profile.stash.is_empty():
+			bad.append(id + ": продажа")
+		count += 1
+	_check("актуальные товары куплены и проданы целиком и частями без прибыли", count == Balance.TRADER_BUY_PRICES.size() and bad.is_empty(), "%d товаров; %s" % [count, str(bad)])
 	var missing: Array[String] = []
 	for raw: Variant in ItemDb.all_ids():
 		var id: String = String(raw)
@@ -79,6 +98,8 @@ func _ready() -> void:
 	_check("магазины в подсумках на броне и в сбросе переоценены", absi(Profile.sell_price(rig) - _parts_sale(rig)) <= 1, "%d/%d" % [Profile.sell_price(rig), _parts_sale(rig)])
 	var old_values: bool = true
 	for row: Dictionary in snapshot.items:
+		if String(row.id) in RETIRED_OPTICS:
+			continue
 		if ItemDb.value(String(row.id)) != int(row.definition.value):
 			old_values = false
 	_check("оценки находок для ремонта и аналитики сохранены", old_values, "")
@@ -131,7 +152,8 @@ func _ready() -> void:
 	_check("описание рейдового эксклюзива не обещает покупку", not ItemInfo.facts_line("laser_head").contains("купить"), "")
 	Settings.unlock_all = true
 	# 2026-10-24: три брони и три шлема вместо 8+7, подсумки на броне вместо разгрузок — суммы комплектов пересчитаны
-	var expected: Array[int] = [135140, 704680, 2112190, 3797700]
+	# «Штурмовик» без удалённого мини-коллиматора на пистолете (−55 000).
+	var expected: Array[int] = [135140, 704680, 2057190, 3797700]
 	for i: int in range(Balance.TRADER_KITS.size()):
 		Profile.stash.clear()
 		Profile.backpack.clear()

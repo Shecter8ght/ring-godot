@@ -76,15 +76,15 @@ func _ready() -> void:
 	# в карман — бинт: он поедет в рейд и вернётся
 	Profile.buy("bandage", 1)
 	Profile.transfer("stash", _idx("bandage"), "pocket", 0, 0, false)
-	# обвес из рюкзака: коллиматор на пистолет, потом снять (ляжет в тайник)
+	# обвес из рюкзака: ЗОРИН на верхнюю планку автомата, потом снять (ляжет в тайник)
 	Profile.stash_to_backpack(_idx("mod_rmr"), 1)
 	var bi := -1
 	for i in range(Profile.backpack.size()):
 		if String(Profile.backpack[i].id) == WeaponDb.canonical("mod_rmr"):
 			bi = i
-	Profile.install_mod("sidearm", bi, true)
-	_check("верстак: обвес из рюкзака (мини-коллиматор на затвор)", WeaponDb.mod_id(Profile.weapon_mods("sidearm").get("optic_primary", "")) == "optic_rmr_01" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("sidearm")))
-	Profile.remove_mod("sidearm", "optic_primary")
+	Profile.install_mod("primary", bi, true)
+	_check("верстак: ЗОРИН из рюкзака на верхнюю планку", WeaponDb.mod_id(Profile.weapon_mods("primary").get("optic_primary", "")) == "optic_zorin_k1" and _ids(Profile.backpack) == 4, str(Profile.weapon_mods("sidearm")))
+	Profile.remove_mod("primary", "optic_primary")
 	# задания: без рации — одно; убил троих — сдал за деньги и доверие
 	_check("задание взято, второе — нет (слот один без рации)", Missions.take("m_kills3") and not Missions.take("m_dock"), str(Profile.missions_active))
 	for i in range(3):

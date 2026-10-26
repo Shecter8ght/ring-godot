@@ -179,7 +179,7 @@ func _wheel_cases() -> void:
 	await _frames(40)
 	await _wheel(MOUSE_BUTTON_WHEEL_UP)
 	_check("фиксированные 4× колесом не меняются", is_equal_approx(float(_player.spec().zoom), 4.0))
-	await _equip("optic_lpvo_01", "top_front", {"optic_offset": "optic_offset_rd_01"})
+	await _equip("optic_lpvo_01", "top_front", {"optic_offset": "optic_holo_01"})
 	Input.action_press("aim")
 	await _frames(40)
 	_player._toggle_sight()

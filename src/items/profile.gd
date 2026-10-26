@@ -975,53 +975,78 @@ static func _sale_unit_adjustment(id: String) -> float:
 	return float(Balance.TRADER_SELL_PRICES[canonical]) - ItemDb.value(canonical) * Balance.TRADER_SELL_MULT
 
 
-## Купить n штук в тайник (to = "stash") или сразу в рюкзак ("backpack"); wear — одну вещь со слотом
-## снаряжения (оружие, броня, рюкзак…) сразу надеть, если слот свободен.
+## Купить: надеть в свободные совместимые слоты; остальное — в выбранную сетку.
+## Если вся оставшаяся покупка не помещается в рюкзак, она целиком уходит в тайник.
+## wear=false используется сборщиком шаблонов: он сам распределяет купленные вещи.
 static func buy(id: String, n: int, to: String = "stash", wear: bool = true) -> bool:
-	# то, что бывает только в рейде (головка станка гравировки, сигнал самолёта, ценности), продаётся
-	# лишь с читом «лут в продаже»
+	ensure()
+	id = WeaponDb.canonical(id)
 	if ItemDb.loot_only(id) and not Settings.shop_loot:
 		return false
 	var unit: int = buy_price(id)
-	if unit <= 0 or n <= 0:
+	if unit <= 0 or n <= 0 or unit * n > money:
 		return false
-	var cost := unit * n
-	var dst := list_of(to)
-	var grid := grid_of(to)
-	var bought := ItemDb.make(id, n)
-	# оружие у Михалыча — со снаряжённым штатным магазином (отдельные магазины — пустые)
-	if WeaponDb.is_weapon(String(bought.id)) and bought.get("mag") is Dictionary:
-		(bought.mag as Dictionary)["rounds"] = WeaponDb.capacity(bought)
-	# снаряжение (оружие, броня, шлем, очки, наушники, рюкзак) — сразу на себя, если слот свободен
-	# (оружию — любой свободный из двух)
-	# подсумок — сразу на надетую броню или пояс, если есть место (иначе — в тайник, как всё)
-	if wear and n == 1 and ItemDb.pouch_cost(id) > 0.0 and equipment.has("armor") and cost <= money:
-		if ItemDb.attach_pouch(equipment.armor as Dictionary, id):
-			money -= cost
-			save()
-			Audio.play_ui("cash")
-			return true
-	var slot := ItemDb.pick_slot(id, equipment)
-	if wear and n == 1 and slot != "" and not equipment.has(slot):
-		if cost > money:
-			return false
-		money -= cost
-		if not bought.has("dur") and ItemDb.equip(id).has("durability"):
-			bought.dur = float(ItemDb.equip(id).durability)
-		for key in ["x", "y", "r"]:
-			bought.erase(key)
-		equipment[slot] = bought
-		if slot == "backpack":
-			_refit_backpack()
-		save()
-		Audio.play_ui("cash")
-		return true
-	if cost > money or ItemDb.room_in(dst, bought, grid) < n:
+	var cost: int = unit * n
+	# Сначала проверяем покупку на копиях: отказ не меняет ни деньги, ни экипировку.
+	var next_equipment: Dictionary = equipment.duplicate(true)
+	var remaining: Array[Dictionary] = []
+	var left: int = n
+	while left > 0:
+		var bought: Dictionary = ItemDb.make(id, left if ItemDb.stack(id) > 1 else 1)
+		var count: int = int(bought.n)
+		if WeaponDb.is_weapon(id) and bought.get("mag") is Dictionary:
+			(bought.mag as Dictionary)["rounds"] = WeaponDb.capacity(bought)
+		if wear and _buy_wear(bought, next_equipment):
+			bought.n = count - 1
+		if int(bought.n) > 0:
+			remaining.append(bought)
+		left -= count
+	var destination: String = to
+	var dst: Array = list_of(destination).duplicate(true)
+	var grid: Vector2i = ItemDb.bag_grid(next_equipment) if destination == "backpack" else grid_of(destination)
+	var fits: bool = _buy_place(dst, remaining, grid)
+	if not fits and destination == "backpack":
+		destination = "stash"
+		dst = stash.duplicate(true)
+		fits = _buy_place(dst, remaining, stash_grid())
+	if not fits:
 		return false
+	var new_backpack: bool = next_equipment.get("backpack") != equipment.get("backpack")
+	equipment = next_equipment
+	var actual_dst: Array = list_of(destination)
+	actual_dst.clear()
+	actual_dst.append_array(dst)
+	if new_backpack:
+		_refit_backpack()
 	money -= cost
-	ItemDb.add_to(dst, bought, grid)
 	save()
 	Audio.play_ui("cash")
+	return true
+
+
+## Купленная вещь надевается без замены занятого слота; подсумок — на свободное место брони.
+static func _buy_wear(entry: Dictionary, eq: Dictionary) -> bool:
+	var id: String = String(entry.id)
+	if ItemDb.pouch_cost(id) > 0.0 and eq.get("armor") is Dictionary and not (eq.armor as Dictionary).is_empty():
+		return ItemDb.attach_pouch(eq.armor as Dictionary, id)
+	var slot: String = ItemDb.pick_slot(id, eq)
+	if slot == "" or (eq.get(slot) is Dictionary and not (eq[slot] as Dictionary).is_empty()):
+		return false
+	var worn: Dictionary = entry.duplicate(true)
+	worn.n = 1
+	if not worn.has("dur") and ItemDb.equip(id).has("durability"):
+		worn.dur = float(ItemDb.equip(id).durability)
+	for key: String in ["x", "y", "r"]:
+		worn.erase(key)
+	eq[slot] = worn
+	return true
+
+
+## Проверка всей оставшейся покупки в копии сетки; частичный результат при отказе отбрасывается.
+static func _buy_place(dst: Array, items: Array[Dictionary], grid: Vector2i) -> bool:
+	for entry: Dictionary in items:
+		if ItemDb.add_to(dst, entry, grid) < int(entry.n):
+			return false
 	return true
 
 

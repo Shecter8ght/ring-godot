@@ -91,6 +91,10 @@ static func resolve(code: String) -> String:
 		if _code_of(items[id]) == up or String((items[id] as Dictionary).get("old_code", "")) == up:
 			return String(id)
 	var low := code.to_lower().replace("red_dot", "rd")
+	var old_optic: String = "optic_" + low
+	var replacement: String = WeaponDb.canonical(old_optic)
+	if replacement != old_optic and ItemDb.exists(replacement):
+		return replacement
 	var best := ""
 	for id in items:
 		var s := String(id)

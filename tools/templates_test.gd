@@ -40,13 +40,13 @@ func _ready() -> void:
 	fails = LoadoutTemplates.apply(t)
 	_check("собрано с покупкой: автомат надет, деньги списаны", fails.is_empty() and String(Profile.equipment.primary.id) == "wpn_ar_01" and Profile.money == m0 - price, str(fails))
 	# закрытый каталог и обвес не по верстаку
-	var t2 := {"name": "Мечта", "slots": {"primary": {"id": "wpn_sp_02"}, "sidearm": {"id": "wpn_hg_02", "mods": {"optic_primary": "optic_rmr_01"}}}, "backpack": []}
+	var t2 := {"name": "Мечта", "slots": {"primary": {"id": "wpn_sp_02"}, "secondary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_zorin_k1"}}}, "backpack": []}
 	p = LoadoutTemplates.plan(t2)
 	var why: Array = []
 	for r in p.rows:
 		if String(r.how) == "нет":
 			why.append(String(r.why))
-	_check("ВСС — нужна ступень доверия, коллиматор — нужен верстак", int(p.missing) == 2 and "ступень" in str(why) and "верстак" in str(why), str(why))
+	_check("Шорох-9 — нужна ступень доверия, коллиматор — нужен верстак", int(p.missing) == 2 and "ступень" in str(why) and "верстак" in str(why), str(why))
 	print("templates_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
 

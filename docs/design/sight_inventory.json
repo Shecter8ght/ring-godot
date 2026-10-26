@@ -8,16 +8,6 @@
 					"first_slot": -1,
 					"key": "optic_primary/rail",
 					"slot_count": 1
-				},
-				"optic_offset_rd_01": {
-					"first_slot": -1,
-					"key": "optic_primary/rail",
-					"slot_count": 1
-				},
-				"optic_rmr_01": {
-					"first_slot": -1,
-					"key": "optic_primary/rail",
-					"slot_count": 1
 				}
 			},
 			"host": "wpn_ar_01",
@@ -50,16 +40,6 @@
 					"first_slot": -1,
 					"key": "optic_primary/rail",
 					"slot_count": 1
-				},
-				"optic_offset_rd_01": {
-					"first_slot": -1,
-					"key": "optic_primary/rail",
-					"slot_count": 1
-				},
-				"optic_rmr_01": {
-					"first_slot": -1,
-					"key": "optic_primary/rail",
-					"slot_count": 1
 				}
 			},
 			"host": "wpn_ar_01",
@@ -86,7 +66,7 @@
 		},
 		"mount_pm_k1": {
 			"asset": "res://assets/models/attachments/mount_pm_k1/mount_pm_k1.glb",
-			"catalog": 0,
+			"catalog": 2.0,
 			"children": {
 				"optic_2x_01": {
 					"first_slot": 0,
@@ -108,11 +88,6 @@
 					"key": "optic_primary/rail",
 					"slot_count": 2
 				},
-				"optic_rmr_01": {
-					"first_slot": 0,
-					"key": "optic_primary/rail",
-					"slot_count": 2
-				},
 				"optic_zorin_k1": {
 					"first_slot": 0,
 					"key": "optic_primary/rail",
@@ -120,13 +95,12 @@
 				}
 			},
 			"host": "wpn_hg_01",
-			"in_stock": false,
+			"in_stock": true,
 			"name": "Крепление К-1 на ПМ",
 			"rejected": {
 				"optic_12x_01": "не хватает длины планки",
 				"optic_8x_01": "не хватает длины планки",
 				"optic_lpvo_01": "не хватает длины планки",
-				"optic_offset_rd_01": "не подходит крепление (RAIL_TOP)",
 				"optic_pso_01": "не подходит крепление (RAIL_TOP)",
 				"optic_rd_dt_01": "не подходит крепление (RAIL_TOP)",
 				"tac_combo_01": "не подходит крепление (RAIL_TOP)",
@@ -177,11 +151,6 @@
 					"key": "optic_primary/rail",
 					"slot_count": 5
 				},
-				"optic_rmr_01": {
-					"first_slot": 0,
-					"key": "optic_primary/rail",
-					"slot_count": 5
-				},
 				"optic_zorin_k1": {
 					"first_slot": 0,
 					"key": "optic_primary/rail",
@@ -197,7 +166,6 @@
 			"in_stock": true,
 			"name": "Планка-удлинитель 120 мм",
 			"rejected": {
-				"optic_offset_rd_01": "не подходит крепление (RAIL_TOP)",
 				"optic_pso_01": "не подходит крепление (RAIL_TOP)",
 				"optic_rd_dt_01": "не подходит крепление (RAIL_TOP)",
 				"tac_combo_01": "не подходит крепление (RAIL_TOP)"
@@ -232,11 +200,6 @@
 					"key": "optic_primary/rail",
 					"slot_count": 1
 				},
-				"optic_rmr_01": {
-					"first_slot": 0,
-					"key": "optic_primary/rail",
-					"slot_count": 1
-				},
 				"tac_laser_01": {
 					"first_slot": 0,
 					"key": "optic_primary/rail",
@@ -250,7 +213,6 @@
 				"optic_12x_01": "не хватает длины планки",
 				"optic_8x_01": "не хватает длины планки",
 				"optic_lpvo_01": "не хватает длины планки",
-				"optic_offset_rd_01": "не подходит крепление (RAIL_TOP)",
 				"optic_pso_01": "не подходит крепление (RAIL_TOP)",
 				"optic_rd_dt_01": "не подходит крепление (RAIL_TOP)",
 				"optic_zorin_k1": "не хватает длины планки",
@@ -1588,62 +1550,6 @@
 			"zoom_max": 6.0,
 			"zoom_min": 1.0
 		},
-		"optic_offset_rd_01": {
-			"aim_k": 1.25,
-			"asset": "",
-			"blocks": [],
-			"buy_price": 85000,
-			"catalog": 3.0,
-			"clamp_m": 0.025,
-			"direct": {},
-			"effects": {
-				"ads_spread": 0.8,
-				"ergo": -2.0
-			},
-			"example": {
-				"mesh_count": 22,
-				"mods": {
-					"optic_primary": {
-						"dur": 100.0,
-						"id": "mount_offset45_01"
-					},
-					"optic_primary/rail": {
-						"dur": 100.0,
-						"id": "optic_offset_rd_01"
-					}
-				},
-				"ocular": false,
-				"reticle": "",
-				"scoped": false,
-				"sight_line": true,
-				"weapon": "wpn_ar_01",
-				"zoom": 0.0
-			},
-			"fits": [
-				"OFFSET_45"
-			],
-			"icon_exists": true,
-			"illumination": false,
-			"in_stock": true,
-			"laser": {},
-			"loot": [
-				"pmc",
-				"supply_drop"
-			],
-			"name": "Угловой мини-коллиматор 45°",
-			"resource": {
-				"kind": "procedural"
-			},
-			"reticle": "",
-			"reticle_exists": false,
-			"role": "SECONDARY",
-			"tier": 3.0,
-			"type": "OFFSET_RED_DOT",
-			"weight_kg": 0.09,
-			"zoom": 0.0,
-			"zoom_max": 0.0,
-			"zoom_min": 0.0
-		},
 		"optic_pso_01": {
 			"aim_k": 0.8,
 			"asset": "res://assets/models/attachments/pso_vss/pso_vss.gltf",
@@ -1959,219 +1865,12 @@
 			"zoom_max": 0.0,
 			"zoom_min": 0.0
 		},
-		"optic_rmr_01": {
-			"aim_k": 1.12,
-			"asset": "",
-			"blocks": [],
-			"buy_price": 55000,
-			"catalog": 2.0,
-			"clamp_m": 0.025,
-			"direct": {
-				"wpn_ar_01": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 8
-					},
-					{
-						"first_slot": 0,
-						"key": "top_front",
-						"slot_count": 7
-					}
-				],
-				"wpn_ar_02": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_ar_03": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_ar_04": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_ar_05": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_dmr_01": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_dmr_02": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_hg_02": [
-					{
-						"first_slot": -1,
-						"key": "optic_primary",
-						"slot_count": 1
-					}
-				],
-				"wpn_hg_03": [
-					{
-						"first_slot": -1,
-						"key": "optic_primary",
-						"slot_count": 1
-					}
-				],
-				"wpn_lmg_01": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_lmg_02": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_sg_01": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 7
-					}
-				],
-				"wpn_sg_02": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 7
-					}
-				],
-				"wpn_sg_03": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 7
-					}
-				],
-				"wpn_smg_01": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_smg_02": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_smg_03": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_smg_04": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_smg_05": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_sp_01": [
-					{
-						"first_slot": 0,
-						"key": "optic_primary",
-						"slot_count": 5
-					}
-				],
-				"wpn_sp_02": [
-					{
-						"first_slot": 0,
-						"key": "top_front",
-						"slot_count": 8
-					}
-				]
-			},
-			"effects": {
-				"ads_spread": 0.7,
-				"ergo": -1.0
-			},
-			"example": {
-				"mesh_count": 72,
-				"mods": {
-					"optic_primary": {
-						"dur": 100.0,
-						"id": "optic_rmr_01"
-					}
-				},
-				"ocular": false,
-				"reticle": "",
-				"scoped": false,
-				"sight_line": true,
-				"weapon": "wpn_hg_02",
-				"zoom": 0.0
-			},
-			"fits": [
-				"SLIDE_RMR",
-				"OFFSET_45",
-				"RAIL_TOP"
-			],
-			"icon_exists": true,
-			"illumination": false,
-			"in_stock": true,
-			"laser": {},
-			"loot": [
-				"security",
-				"supply_drop"
-			],
-			"name": "Мини-коллиматор",
-			"resource": {
-				"kind": "procedural"
-			},
-			"reticle": "",
-			"reticle_exists": false,
-			"role": "BOTH",
-			"tier": 2.0,
-			"type": "OPTIC_RED_DOT",
-			"weight_kg": 0.05,
-			"zoom": 0.0,
-			"zoom_max": 0.0,
-			"zoom_min": 0.0
-		},
 		"optic_zorin_k1": {
 			"aim_k": 1.12,
 			"asset": "res://assets/models/attachments/zorin_k1/zorin_k1.glb",
 			"blocks": [],
-			"buy_price": 0,
-			"catalog": 0,
+			"buy_price": 55000,
+			"catalog": 2.0,
 			"clamp_m": 0.046,
 			"direct": {
 				"wpn_ar_01": [
@@ -2338,7 +2037,7 @@
 			],
 			"icon_exists": true,
 			"illumination": false,
-			"in_stock": false,
+			"in_stock": true,
 			"laser": {},
 			"loot": [
 				"security",

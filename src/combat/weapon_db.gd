@@ -574,4 +574,24 @@ static func migrate(e: Dictionary) -> Array:
 	elif not plate(id).is_empty():
 		if not out.has("dur"):
 			out["dur"] = float(plate(id).durability)
-	return [WeaponCondition.normalize(out), spill]
+	out = WeaponCondition.normalize(out)
+	# Убранные мини-коллиматоры заменяются на ЗОРИН. Его башмак Пикатинни не подходит
+	# к посадке RMR на затворе или угловой площадке: несовместимый прицел возвращается владельцу.
+	if is_weapon(id):
+		for key: String in WeaponBuild.sorted_keys(out.get("mods", {})):
+			if mod_id(out.mods.get(key, {})) != "optic_zorin_k1":
+				continue
+			if WeaponBuild.block(out, key, "optic_zorin_k1") != "":
+				var removed: Array = WeaponBuild.extract(out, key)
+				out = removed[0]
+				spill.append(removed[1])
+	elif not attachment(id).is_empty() and out.get("mods") is Dictionary:
+		var provided: Dictionary = attachment(id).get("provides", {})
+		for key: String in (out.mods as Dictionary).keys():
+			if mod_id(out.mods[key]) != "optic_zorin_k1":
+				continue
+			var child: Dictionary = provided.get(key, {})
+			if child.get("if", "SAME") != "SAME" and not String(child.if) in attachment("optic_zorin_k1").fits:
+				spill.append(WeaponCondition.mod_entry(out.mods[key]))
+				out.mods.erase(key)
+	return [out, spill]
