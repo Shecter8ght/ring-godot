@@ -15,13 +15,16 @@ from sp_lib import L  # noqa: E402
 
 OUT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_parts"
 BUILD = {
-    "steel_parts": lambda st: sp_stacks.steel(st, parts=sp_stacks.STEEL_PARTS_PARTS),
+    # задний прицел — Cerakote, как муфта, без продольных сколов (только углы)
+    "steel_parts": lambda st: (sp_stacks.steel(st, parts=sp_stacks.STEEL_PARTS_PARTS),
+                               sp_stacks.exclude(st, sp_stacks.REAR_SIGHT_IDS),
+                               sp_stacks.cerakote(st, rails=False, mask=sp_stacks.REAR_SIGHT_IDS, chip_scale=15.0)),
     "suppressor": sp_stacks.suppressor,
     "bare_steel": sp_stacks.bare_steel,
     "handguard": lambda st: sp_stacks.polymer(st),
     "magazine": sp_stacks.magazine,
     "magazine_30": lambda st: sp_stacks.magazine(st, sp_stacks.MAG_LIPS_30),
-    "sleeve": sp_stacks.anodized,
+    "sleeve": sp_stacks.cerakote,               # Cerakote H-146 (владелец 26.10; прежде — анодирование)
     "wood": sp_stacks.wood,
     "rubber": sp_stacks.rubber,
     "rounds": sp_stacks.rounds,

@@ -23,6 +23,10 @@ WOOD_BASE = WOOD_V6 + "/C_krasnyi_dub_color.png"         # вариант C — 
 WOOD_HEIGHT = WOOD_V6 + "/C_krasnyi_dub_height.png"      # там же: поры и волокно, швы слоёв
 KNURL = PARTS + "/suppressor_knurl_height.png"        # knurl_bake.py: накатка рифлёной части глушителя
 KNURL_AREA = PARTS + "/suppressor_knurl_area.png"     # там же: где лежит накатка (маска области)
+SLEEVE_RAIL = PARTS + "/sleeve_rail.png"          # sleeve_masks_bake.py: планки муфты (1) и корпус (0)
+SLEEVE_STREAKS = PARTS + "/sleeve_streaks.png"    # там же: шум, вытянутый вдоль оси, — продольные сколы на планках
+REAR_SIGHT = ["Rear_sight_base", "Rear_sight_leaf", "Rear_sight_slider", "Rear_sight_weld"]   # Cerakote, как муфта
+REAR_SIGHT_IDS = PARTS + "/rear_sight_ids.png"   # sleeve_masks_bake.py: острова прицела с полями в развёртке мелкой стали
 
 
 def _grain(pos, rough_op=0.35, height_op=0.0025):
@@ -109,6 +113,13 @@ def _sharpen(grp, amount=0.3):
     sh = L.insert_filter_effect(L.InsertPosition.inside_node(grp, L.NodeStack.Content),
                                 sp_lib.rid("sharpen/sharpen", "u:filter"))
     sh.get_source().set_parameters({"intensity": amount})
+    # только цвет и блеск: по высоте резкость «звенела» на краях островов развёртки (поля рядом другие) — рваная
+    # кайма рельефа вдоль каждого ребра, не зависящая от износа (найдено на заднем прицеле 26.10)
+    try:
+        sh.active_channels = {sp_lib.CH.BaseColor, sp_lib.CH.SpecularRoughness}
+        print("sharpen channels", grp.get_name(), sorted(str(c) for c in sh.active_channels))
+    except Exception as e:
+        print("sharpen channels FAILED", grp.get_name(), e)
     return sh
 
 
@@ -204,10 +215,12 @@ STEEL_PARTS_PARTS = [
 ]
 
 
-def steel(st, rail_meshes=None, wear=0.1, patch_bal=0.8, scratches=0.35, parts=None):
-    """Сталь коробки, рамы, органов управления, прицельных: воронение, местами вытертое (см. coated)."""
-    return coated(st, STEEL_COAT, STEEL_BARE, wear=wear, patch_bal=patch_bal, scratches=scratches, rail_meshes=rail_meshes,
-                  parts=parts)
+def steel(st, rail_meshes=None, wear=0.06, patch_bal=0.9, scratches=0.16, parts=None):
+    """Сталь коробки, рамы, органов управления, прицельных: воронение, местами вытертое (см. coated). Износа меньше
+    прежнего (0.1 / 0.8 / 0.35): стёртое до металла стало светлым и блестящим, и каждое повреждение читается
+    (владелец 26.10 — «количество повреждений уменьшить»)."""
+    return coated(st, STEEL_COAT, STEEL_BARE, wear=wear, patch_bal=patch_bal, thin=0.3, scratches=scratches,
+                  rail_meshes=rail_meshes, parts=parts)
 
 
 def phosphate(st, rail_meshes=None, **kw):
@@ -219,7 +232,8 @@ def suppressor(st):
     """Глушитель: то же покрытие чуть матовее; рифлёная часть — накатка картой высот: в канавках грязь и пыль
     (пятнами), вершины ромбов затёрты до металла; масло и отпечатки там, где за него берутся."""
     # пыльные отпечатки (prints) давали на торце светлые точки — слабее
-    n = coated(st, ((0.08, 0.08, 0.085), 0.28, 0.7), STEEL_BARE, wear=0.08, patch_bal=0.88, scratches=0.18, prints=0.6)
+    n = coated(st, ((0.08, 0.08, 0.085), 0.28, 0.7), STEEL_BARE, wear=0.05, patch_bal=0.93, thin=0.3, scratches=0.1,
+               prints=0.6)
     k = L.insert_fill(_above(n))
     k.set_name("16 Накатка")
     k.active_channels = {sp_lib.CH.Height}
@@ -434,6 +448,84 @@ def anodized(st, rail=True, tile=1.0, rough=0.42):
                     color=_mix(base, (0.03, 0.03, 0.032), 0.5), rough=0.75, metal=0.0)
     n = _proc_layer("12 Точки пыли", _above(n), "noise_bnw_spots_3/bnw_spots_3", 6.0 * tile, 0.05, None,
                     color=(0.4, 0.4, 0.41), rough=0.85, metal=0.0)
+    return n
+
+
+def exclude(st, path):
+    """Вырезать области карты path (белое) из всех слоёв стека, собранных до этого: под группой Cerakote прицела
+    рельеф износа стали (ступеньки 0.025) проступал сквозь неё рваной каймой вдоль рёбер (26.10)."""
+    for n in L.get_root_layer_nodes(st):
+        _bmask(n, path, blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
+
+
+CK_COLOR = (0.033, 0.034, 0.039)        # Cerakote H-146 чёрный: керамический полимер, не металл, чуть холодный (фото владельца)
+CK_INTER = (0.085, 0.083, 0.08)         # промежуточный слой: истёртое до грунта/оксида покрытие
+CK_BARE = (0.62, 0.62, 0.64)            # голый металл — светлый, с бликом
+
+
+def _ck_wear(name, pos, color, rough, metal, height, level, chips, scale=1.5):
+    """Износ покрытия по углам: генератор кромок × гранж (порог chips) — отдельные сколы, а не кайма вдоль каждого
+    ребра (так шло без гранжа, 26.10). Тот же генератор и гранж с меньшими уровнем и порогом дают вложенное пятно."""
+    n = fill(name, pos, color=color, rough=rough, metal=metal, height=height)
+    g = mask_generator(n, EDGE, {"Wear_Level": level, "Wear_Contrast": 0.8, "Grunge_Amount": 0.6, "grunge_scale": 4,
+                                 "Use_Triplanar": 1, "Edges_Smoothness": 0.35, "Ambient_Occlusion_Masking": 0.6,
+                                 "Curvature_Weight": 1.0})
+    mask_proc(n, _gm(8), {"balance": chips, "contrast": 0.85}, scale=scale, above=g, blend=L.BlendingMode.Multiply)
+    return n
+
+
+def _ck_rail(name, pos, color, rough, metal, height, edge_level, position):
+    """Продольные сколы на планках: кромки зубьев и боков планки × полосы вдоль оси (порог position) × область планок."""
+    n = fill(name, pos, color=color, rough=rough, metal=metal, height=height)
+    g = mask_generator(n, EDGE, {"Wear_Level": edge_level, "Wear_Contrast": 0.55, "Grunge_Amount": 0.5,
+                                 "grunge_scale": 4, "Use_Triplanar": 1, "Edges_Smoothness": 0.3,
+                                 "Ambient_Occlusion_Masking": 0.4, "Curvature_Weight": 1.0})
+    m = _bmask(n, SLEEVE_STREAKS, blend=L.BlendingMode.Multiply, above=g)
+    f = _mfilter(m, "histogram_scan", {"Position": position, "Contrast": 0.8})
+    _bmask(n, SLEEVE_RAIL, blend=L.BlendingMode.Multiply, above=f)
+    return n
+
+
+def cerakote(st, rails=True, mask=None, chip_scale=1.5):
+    """Cerakote H-146 (чёрный) на муфте с планками и заднем прицеле (владелец 26.10): керамическое покрытие — шершавое,
+    ровный атласный блеск (0.52, не металл), в блике мелкое искристое зерно, без пятен (фото владельца 26.10). Износ в три уровня высоты: покрытие (0.5) →
+    промежуточный слой (тёмно-серый, 0.488) → голый металл (светлый, блестящий, 0.472); промежуточный всегда окаймляет
+    металл — тем же генератором с большим уровнем. На планках — сдержанные продольные сколы (обвесы ездят вперёд-назад:
+    кромки × полосы вдоль оси, маски sleeve_masks_bake.py), на прицеле (rails=False) — только углы. mask — группа
+    только по этой карте островов (прицел внутри набора мелкой стали; по сеткам не закрывались края островов). chip_scale — масштаб гранжа сколов: трипланар
+    считается по габариту набора, у мелкой стали он с винтовку (~1 м против 0.1 м муфты) — нужен в ~10 раз мельче."""
+    CH = sp_lib.CH
+    grp = L.insert_group(L.InsertPosition.from_textureset_stack(st))
+    grp.set_name("Cerakote H-146")
+    if mask:
+        _bmask(grp, mask)
+    n = fill("01 Cerakote", L.InsertPosition.inside_node(grp, L.NodeStack.Substack), color=CK_COLOR, rough=0.52,
+             metal=0.0, height=0.5)
+    # шершавость: шум в развёртке на два текселя — в рельефе и блеске
+    n = fill("02 Шершавость", _above(n), color="noise_gaussian_noise/gaussian_noise",
+             rough="noise_gaussian_noise/gaussian_noise", height="noise_gaussian_noise/gaussian_noise")
+    sp_lib.uvscale(n, 0.5)
+    n.set_blending_mode(L.BlendingMode.Overlay, CH.BaseColor)
+    n.set_opacity(0.04, CH.BaseColor)
+    n.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
+    n.set_opacity(0.3, CH.SpecularRoughness)
+    n.set_opacity(0.012, CH.Height)
+    n = _proc_layer("04 Блеск чуть неровно", _above(n), "grunge_spots/grunge_spots", 3.0, 0.1, None, rough=0.47)
+    lv = 0.03 if rails else 0.015          # прицел — только углы: самые выпуклые места (0.032 шёл вдоль длинных кромок)          # на зубьях планок много выпуклых кромок — уровень ниже (0.06 давал скол у каждого зуба)
+    n = _ck_wear("05 Промежуточный слой: углы", _above(n), CK_INTER, 0.42, 0.5, 0.488, lv, 0.45 if rails else 0.38, chip_scale)
+    if rails:
+        n = _ck_rail("05б Промежуточный слой: планки вдоль", _above(n), CK_INTER, 0.42, 0.5, 0.488, 0.22, 0.3)
+    n = _ck_wear("06 До металла: углы", _above(n), CK_BARE, 0.18, 1.0, 0.472, lv * 0.5, 0.36 if rails else 0.3, chip_scale)
+    if rails:
+        n = _ck_rail("06б До металла: планки вдоль", _above(n), CK_BARE, 0.18, 1.0, 0.472, 0.22, 0.23)
+    _sharpen(grp, 0.3)
+    # керамика держит пыль в шершавости; немного засохшего масла
+    d = _dirt(_above(grp), color=(0.3, 0.3, 0.3), rough=0.92, level=0.18, opacity=0.2, name="07 Пыль в углах")
+    n = _proc_layer("08 Засохшее масло", _above(d), _gm(15), 1.8, 0.12, {"invert": 1, "balance": 0.76, "contrast": 0.4},
+                    color=(0.025, 0.025, 0.026), rough=0.45, metal=0.0)
+    if mask:
+        for x in (d, n):
+            _bmask(x, mask, blend=L.BlendingMode.Multiply)
     return n
 
 
