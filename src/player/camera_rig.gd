@@ -26,6 +26,11 @@ var _carry_v: float = 0.0
 var _carry_specs: Dictionary = {}
 ## Правая кисть на процедурном стволе (RightGrip): вокруг неё ствол поворачивается, руки дотягиваются ИК.
 var _carry_grip: Node3D
+# механика затвора статичной модели в руках: рама (узел с meta action) и затвор — отходят на выстреле
+var _carrier: Node3D
+var _bolt: Node3D
+var _bolt_kick: float = 0.0
+var _bolt_ammo: int = -1
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
@@ -818,6 +823,20 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			_arms.bind_weapon(_viewmodel)
 		weapon_clearance.bind(_viewmodel)
 		_carry_grip = null if _viewmodel is ViewmodelClips else _viewmodel.find_child("RightGrip", true, false) as Node3D
+		_carrier = null
+		_bolt = null
+		if not _viewmodel is ViewmodelClips:
+			for raw: Node in _viewmodel.find_children("*", "Node3D", true, false):
+				if raw.has_meta("action"):
+					_carrier = raw as Node3D
+					break
+		if _carrier:
+			_carrier.transform = _carrier.get_meta("rest")
+			_bolt = _viewmodel.find_child(String((_carrier.get_meta("action") as Dictionary).get("bolt", "")), true, false) as Node3D
+			if _bolt:
+				_bolt.transform = _bolt.get_meta("rest")
+		_bolt_ammo = -1
+		_bolt_kick = 0.0
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
 		if _viewmodel_rig:
 			_viewmodel_rig.set_ammo_state(pl.ammo)
@@ -893,6 +912,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		elif not _viewmodel_rig.is_busy():
 			_viewmodel_rig.set_ammo_state(pl.ammo)
 	weapon_clearance.refresh_action(_viewmodel, _viewmodel_rig)
+	_tick_action(pl, delta)
 	if wid != "":
 		# Лёжа отводим ствол вбок: вертикальная поза упирала приклад в пол.
 		weapon_clearance.sideways = pl.stance == Player.Stance.PRONE
@@ -1228,6 +1248,33 @@ func _set_scope(on: bool) -> void:
 	scope_active = on
 	_scope_view.visible = on
 	_scope_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+
+
+## Механика затвора статичной модели (models.<ключ>.action, как драйверы исходника): выстрел — патронов стало меньше;
+## рама отходит на свой ход и возвращается тем же темпом, что у ВЕРАСа с клипами (ViewmodelClips.BOLT_KICK_SEC);
+## затвор трогается, когда рама прошла bolt_lag, и на участке unlock проворачивается на unlock_deg (отпирание).
+func _tick_action(pl: Player, delta: float) -> void:
+	if _carrier == null or not is_instance_valid(_carrier):
+		return
+	if _bolt_ammo >= 0 and pl.ammo < _bolt_ammo:
+		_bolt_kick = ViewmodelClips.BOLT_KICK_SEC
+	_bolt_ammo = pl.ammo
+	var open: float = 0.0
+	if _bolt_kick > 0.0:
+		_bolt_kick = maxf(0.0, _bolt_kick - delta)
+		open = sin(PI * (1.0 - _bolt_kick / ViewmodelClips.BOLT_KICK_SEC))
+	var act: Dictionary = _carrier.get_meta("action")
+	# дуло модели — по +Z: рама и затвор уходят назад, к прикладу; поворот затвора — вокруг оси канала (Z)
+	var s: float = float(act.get("travel", 0.0)) * open
+	var rest: Transform3D = _carrier.get_meta("rest")
+	_carrier.transform = Transform3D(rest.basis, rest.origin - Vector3(0.0, 0.0, s))
+	if _bolt and is_instance_valid(_bolt):
+		var unlock: Array = act.get("unlock", [0.0, 0.0])
+		var turn: float = clampf((s - float(unlock[0])) / maxf(0.0001, float(unlock[1]) - float(unlock[0])), 0.0, 1.0)
+		var back: float = maxf(0.0, s - float(act.get("bolt_lag", 0.0)))
+		var brest: Transform3D = _bolt.get_meta("rest")
+		_bolt.transform = Transform3D(brest.basis * Basis(Vector3.BACK, deg_to_rad(float(act.get("unlock_deg", 0.0))) * turn),
+			brest.origin - Vector3(0.0, 0.0, back))
 
 
 ## Наглазник у глаза: ближняя точка его рамки глубже ближней плоскости камеры (с запасом) — виден, иначе спрятан.

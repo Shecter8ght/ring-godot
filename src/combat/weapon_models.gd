@@ -140,6 +140,17 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 	# штатный приклад — тоже отдельная деталь: поставили другой — этот прячется
 	for node2: Node in model.find_children("Stock*", "MeshInstance3D", true, false):
 		node2.set_meta("part", "stock")
+	# механика затвора (models.<ключ>.action): затворная рама и затвор — свои узлы модели, на выстреле их двигает
+	# CameraRig._tick_action. Данные и положение покоя — на узлах: meta корня масштаб основы пересчитывает, узлы — внутри
+	var action: Dictionary = WeaponDb.model(String(weapon.get("model", ""))).get("action", {})
+	if not action.is_empty():
+		var carrier: Node3D = model.find_child(String(action.get("carrier", "")), true, false) as Node3D
+		if carrier:
+			carrier.set_meta("action", action)
+			carrier.set_meta("rest", carrier.transform)
+			var bolt: Node3D = model.find_child(String(action.get("bolt", "")), true, false) as Node3D
+			if bolt:
+				bolt.set_meta("rest", bolt.transform)
 	# отражение неметалла по материалу (weapon.material_specular {имя материала: 0…1}): у Cerakote ВСС-М — 0.1,
 	# как в сценах Blender (в glTF его нет; при обычных 0.5 чёрное покрытие на свету читалось серым, владелец 2026-10-26)
 	var spec: Dictionary = weapon.get("material_specular", {})

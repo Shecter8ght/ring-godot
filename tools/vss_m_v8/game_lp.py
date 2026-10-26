@@ -41,8 +41,29 @@ OUT.mkdir(parents=True, exist_ok=True)
 SHARP = math.radians(60)
 ATLAS_SIZE = {'Steel': 4096, 'Wood': 4096, 'Polymer': 2048, 'Cerakote': 2048, 'Mags': 4096}
 MATNAME = {a: f'VSS • {a}' for a in ATLAS_SIZE}
+# подвижные и съёмные детали — свои узлы игры (навык godot-asset-preparation, «Подвижные и съёмные детали»): узел —
+# по ближайшему «моверу» исходника над деталью (пустышка с драйвером от VSS_Controls или сама деталь с драйвером).
+# Начало узла — в мовере (ось вращения / точка крепления), см. pivot в parts.json. Глушитель с муфтой, мушкой и
+# целиком у ВСС съёмный — тоже свой узел (в игре не снимается, позы «снят» нет).
+MOVERS = {
+    'Bolt_carrier_mover': 'BoltCarrier', 'Bolt_mover': 'Bolt', 'Trigger_pivot': 'Trigger', 'Safety_pivot': 'Safety',
+    'Selector_mover': 'Selector', 'Magazine_catch_pivot': 'MagCatch', 'Cover_latch_mover': 'CoverLatch',
+    'Stock_release_mover': 'StockRelease', 'Front_swivel_pivot': 'FrontSwivel', 'Rear_sight_slider': 'SightSlider',
+    'Rear_sight_leaf_pivot': 'SightLeaf', 'Suppressor_mount': 'Suppressor',
+}
+CONTROLS = 'VSS_Controls'
+# видимость граней — в покое и в крайних положениях механики (драйверы исходника): иначе прижатые в покое грани
+# удаляются, скрытые ужимаются в развёртке, а при отходе рамы или нажатом спуске выходят на свет. «Всё нажато» — одной
+# позой (детали не заслоняют друг друга); предохранитель — отдельной: включённый, он блокирует спуск и ход рамы
+POSE_PROPS = {
+    'moved': {'bolt_pull': 1.0, 'trigger': 1.0, 'selector': 1.0, 'mag_catch': 1.0, 'cover_latch': 1.0,
+              'stock_release': 1.0, 'sight_range': 1.0},
+    'safety': {'safety': 1.0},
+}
+MAG_NODES = ('Mag10', 'Mag20', 'Mag30')
 
-# деталь исходника → (узел игры, атлас, бюджет треугольников). Нет в списке — в игру не идёт.
+# деталь исходника → (узел игры, атлас, бюджет треугольников). Нет в списке — в игру не идёт. Деталь под мовером
+# исходника (MOVERS) уходит в узел мовера, какой бы узел здесь ни стоял.
 PARTS = {
     # коробка и крышка
     'Receiver_cover': ('Body', 'Steel', 3400), 'Receiver_lower': ('Body', 'Steel', 1800),
@@ -114,6 +135,52 @@ def append_source(coll):
         coll.objects.link(o)
         out[o.name] = o
     return out
+
+
+def mover_node(o):
+    """Узел игры по ближайшему моверу над деталью (сама деталь с драйвером — тоже мовер); нет — None."""
+    while o is not None:
+        if o.name in MOVERS:
+            return MOVERS[o.name]
+        o = o.parent
+    return None
+
+
+def refresh():
+    for o in bpy.data.objects:
+        o.update_tag()
+    sc = bpy.context.scene
+    sc.frame_set(sc.frame_current)
+    bpy.context.view_layer.update()
+    return bpy.context.evaluated_depsgraph_get()
+
+
+def control_poses(hp):
+    """Позы видимости из органов управления исходника: {поза: {узел: мировая дельта}} и начала узлов (м)."""
+    ctl = hp.get(CONTROLS)
+    movers = {n: hp[n] for n in MOVERS if n in hp}
+    dg = refresh()
+    rest = {n: o.evaluated_get(dg).matrix_world.copy() for n, o in movers.items()}
+    pivots = {MOVERS[n]: [round(v, 6) for v in m.translation] for n, m in rest.items()}
+    poses = {'rest': {}}
+    if ctl is None:
+        log('нет органов управления', CONTROLS)
+        return poses, pivots
+    for pose, props in POSE_PROPS.items():
+        for k, v in props.items():
+            ctl[k] = v
+        dg = refresh()
+        moved = {}
+        for n, o in movers.items():
+            d = o.evaluated_get(dg).matrix_world @ rest[n].inverted()
+            if (d.translation.length > 1e-5 or abs(d.to_quaternion().angle) > 1e-4):
+                moved[MOVERS[n]] = d
+        poses[pose] = moved
+        log('поза', pose, {k: (round(v.translation.length * 1000, 1), round(math.degrees(v.to_quaternion().angle), 1)) for k, v in moved.items()})
+        for k in props:
+            ctl[k] = 0.0
+    refresh()
+    return poses, pivots
 
 
 def evaluated_copy(o, name, coll, shift=None):
@@ -215,6 +282,7 @@ def main():
     lp_coll = bpy.data.collections.new('LP')
     bpy.context.scene.collection.children.link(lp_coll)
     hp = append_source(hp_coll)
+    poses, pivots = control_poses(hp)
     rec = {'source': str(SRC), 'grip_m': list(GRIP), 'marks_m': MARKS, 'parts': {}, 'nodes': {}, 'atlases': {},
            'mag_aside_m': MAG_ASIDE}
     pieces = {}                                   # (узел, атлас) → [игровые куски]
@@ -224,6 +292,7 @@ def main():
         if name not in hp:
             log('нет детали', name)
             continue
+        node = mover_node(hp[name]) or node
         o = evaluated_copy(hp[name], 'lp_' + name, lp_coll)
         n0 = tris(o.data)
         n = simplify(o, min(budget, n0), organic=name == 'Wood_stock_v8')
@@ -261,7 +330,7 @@ def main():
     # узлы игры: по куску на (узел, атлас), материал атласа
     game = []
     for (node, atlas), objs in pieces.items():
-        nm = f'{node}_{atlas}' if node in ('Body', 'Stock') else node
+        nm = node if node in MAG_NODES else f'{node}_{atlas}'
         hp_list = sum((sources.get(o.name, []) for o in objs), [])
         j = join(objs, nm, lp_coll) if len(objs) > 1 else objs[0]
         j.name = nm
@@ -275,13 +344,15 @@ def main():
         j['hp'] = hp_list
         game.append(j)
         rec['nodes'][nm] = {'node': node, 'atlas': atlas, 'tris': tris(j.data), 'hp': list(j['hp'])}
+        if node in pivots:
+            rec['nodes'][nm]['pivot'] = pivots[node]
     # развёртка по атласам
     for atlas, size in ATLAS_SIZE.items():
         objs = [o for o in game if o['atlas'] == atlas]
         if not objs:
             continue
         kit_uv.smart_unwrap(objs)
-        cls = kit_uv.visibility(objs)
+        cls = kit_uv.visibility(objs, poses, lambda o: o['node'])
         # прижатые грани (во всех лучах ближе 4 мм к соседней детали) не видны — удаляются
         for o, c in zip(objs, cls):
             drop = [i for i, k in enumerate(c) if k == kit_uv.CONTACT]
@@ -292,7 +363,7 @@ def main():
                 bmesh.ops.delete(bm, geom=[bm.faces[i] for i in drop], context='FACES')
                 bm.to_mesh(o.data)
                 bm.free()
-        cls = kit_uv.visibility(objs)
+        cls = kit_uv.visibility(objs, poses, lambda o: o['node'])
         eyes = EYES if atlas != 'Mags' else []
         rep = kit_uv.layout(objs, size, classes=cls, eyes=eyes, log=log)
         kit_uv.harden_on_seams(objs)

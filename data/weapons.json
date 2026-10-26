@@ -270,6 +270,17 @@
   },
   "vss_m": {
    "anim": "rifle",
+   "action": {
+    "carrier": "BoltCarrier_Steel",
+    "bolt": "Bolt_Steel",
+    "travel": 0.074,
+    "bolt_lag": 0.014,
+    "unlock": [
+     0.006,
+     0.014
+    ],
+    "unlock_deg": -30.0
+   },
    "sockets": {
     "optic_primary": {
      "pos": [

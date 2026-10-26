@@ -2,7 +2,7 @@ extends Node
 ## ВСС-М v8 в руках днём под небом (Пригород, ясно): игровая модель (assets/models/weapons/vss_m, общие руки по меткам
 ## хвата), прицелы-модели и обвесы на планках муфты и крышки. Наборы: iron — механический прицел, магазин на 10;
 ## pso — ПСО на «ласточкином хвосте», фонарь на левой планке муфты, магазин на 20; rail — 4×32 на крышке, фонарь справа, рукоятка снизу, магазин на 30.
-## Каждый — от бедра, в прицеливании, на отдаче после выстрела (_ads_recoil; у оптики с наглазником — виден ли он),
+## Каждый — от бедра (у механического — ещё на выстреле, рама отошла: _hip_fire), в прицеливании, на отдаче после выстрела (_ads_recoil; у оптики с наглазником — виден ли он),
 ## у оптики с подсветкой — ещё с горящей сеткой (_ads_lit), и модель сбоку
 ## справа и слева (vss_<набор>_side_r / _l).
 ## tools/godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn → docs/screens/vss_*.png
@@ -66,6 +66,25 @@ func _ready() -> void:
 		await get_tree().create_timer(1.2).timeout
 		await _shot(String(set[0]) + "_hip")
 		_eyecup_log(String(set[0]) + " от бедра")
+		if String(set[0]) == "iron":
+			# выстрел от бедра — кадр, когда рама отошла (узлы BoltCarrier_Steel и Bolt_Steel, ход 74 мм)
+			# от бедра выстрел — после вскидки: ждём, пока уйдёт патрон, и снимаем при наибольшем отходе рамы
+			var before: int = _player.ammo
+			Input.action_press("fire")
+			var best: float = 0.0
+			for _f in range(90):
+				await get_tree().process_frame
+				var c: Node3D = _camera._vm_frame().find_child("BoltCarrier_Steel", true, false) as Node3D
+				var off: float = (c.get_meta("rest") as Transform3D).origin.z - c.position.z if c and c.has_meta("rest") else 0.0
+				best = maxf(best, off)
+				if _player.ammo < before and off > 0.05:
+					break
+			Input.action_release("fire")
+			print("vss_shots: патронов было ", before, ", стало ", _player.ammo, ", наибольший отход рамы ", snappedf(best, 0.001), " м")
+			_bolt_log("на выстреле")
+			await _shot("iron_hip_fire")
+			await get_tree().create_timer(0.6).timeout
+			_bolt_log("после выстрела")
 		Input.action_press("aim")
 		await get_tree().create_timer(float(_player.spec().aim_time) + 0.6).timeout
 		await _shot(String(set[0]) + "_ads")
@@ -123,9 +142,41 @@ func _side(label: String, mods: Dictionary) -> void:
 		cam.current = true
 		await get_tree().create_timer(0.3).timeout
 		await _shot("%s_side_%s" % [label, side[0]])
+		if label == "iron" and side[0] == "r":
+			# рама отведена до упора (как на выстреле): рукоятка взведения в конце паза, затвор провёрнут
+			var c: Node3D = gun.find_child("BoltCarrier_Steel", true, false) as Node3D
+			var b: Node3D = gun.find_child("Bolt_Steel", true, false) as Node3D
+			if c and b and c.has_meta("action"):
+				var act: Dictionary = c.get_meta("action")
+				var rc: Transform3D = c.get_meta("rest")
+				var rb: Transform3D = b.get_meta("rest")
+				var s: float = float(act.travel)
+				c.transform = Transform3D(rc.basis, rc.origin - Vector3(0, 0, s))
+				b.transform = Transform3D(rb.basis * Basis(Vector3.BACK, deg_to_rad(float(act.unlock_deg))),
+					rb.origin - Vector3(0, 0, s - float(act.bolt_lag)))
+				await get_tree().create_timer(0.2).timeout
+				await _shot("iron_side_r_bolt_open")
+				c.transform = rc
+				b.transform = rb
 	# вид — снова камере игрока (иначе следующий набор снимается чужой камерой уровня)
 	player_cam.current = true
 	holder.queue_free()
+
+
+## Рама и затвор модели в руках (узлы BoltCarrier_Steel, Bolt_Steel): насколько отошли от места, м, и поворот затвора.
+func _bolt_log(label: String) -> void:
+	var frame: Node3D = _camera._vm_frame()
+	for node_name: String in ["BoltCarrier_Steel", "Bolt_Steel"]:
+		var n: Node3D = frame.find_child(node_name, true, false) as Node3D
+		if n == null or not n.has_meta("rest"):
+			var seen: Array = []
+			for raw: Node in frame.find_children("*Bolt*", "Node3D", true, false):
+				seen.append("%s(%s, action=%s, rest=%s)" % [raw.name, raw.get_class(), raw.has_meta("action"), raw.has_meta("rest")])
+			print("vss_shots: ", node_name, " ", label, ": узла нет; есть ", seen)
+			continue
+		var rest: Transform3D = n.get_meta("rest")
+		print("vss_shots: ", node_name, " ", label, ": отход ", snappedf(rest.origin.z - n.position.z, 0.001), " м, поворот ",
+			snappedf(rad_to_deg(n.basis.get_euler().z - rest.basis.get_euler().z), 0.1), "°")
 
 
 ## Наглазник оптики (meta near_hide): виден ли и на какой глубине его ближняя точка перед камерой, м.

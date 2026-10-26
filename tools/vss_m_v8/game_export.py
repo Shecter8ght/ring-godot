@@ -133,15 +133,24 @@ def main():
     for n in ('Mag20', 'Mag30'):
         bpy.data.objects.remove(bpy.data.objects[n], do_unlink=True)
     rifle = [o for o in bpy.data.objects if o.type == 'MESH']
+    pivots = {}
     for o in rifle:
         o.data.transform(TO_GAME)
         o.matrix_world = Matrix.Identity(4)
         rep['nodes'][o.name] = tris(o)
+        # подвижная / съёмная деталь: начало узла — в мовере исходника (ось вращения, точка крепления)
+        piv = REC['nodes'].get(o.name, {}).get('pivot')
+        if piv:
+            pg = TO_GAME @ Vector(piv)
+            o.data.transform(Matrix.Translation(-pg))
+            o.location = pg
+            pivots[o.name] = game_point(piv)
+    rep['pivots_game_m'] = pivots
     marks = {k: game_point(v) for k, v in REC['marks_m'].items()}
     for name in ('Muzzle', 'SightRear', 'SightFront'):
         rifle.append(empty(name, marks[name]))
     export(OUT / 'vss_m.gltf', rifle)
-    pts = [v.co for o in rifle if o.type == 'MESH' for v in o.data.vertices]
+    pts = [o.matrix_world @ v.co for o in rifle if o.type == 'MESH' for v in o.data.vertices]   # узлы со своим началом — в осях модели
     # габарит в осях игры [ширина x, высота y, длина z]: в Blender после TO_GAME высота — Z, длина — Y (glTF: Y вверх)
     rep['size_game_m'] = [round(max(p[i] for p in pts) - min(p[i] for p in pts), 4) for i in (0, 2, 1)]
     rep['tris_in_hands'] = sum(rep['nodes'].values())
