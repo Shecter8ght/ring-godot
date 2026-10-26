@@ -34,8 +34,12 @@ def _grain(pos, rough_op=0.35, height_op=0.0025):
     return g
 
 
-def _edge(name, pos, color, rough, level, contrast=0.65, grunge=0.6, metal=1.0, meshes=None):
-    e = fill(name, pos, color=color, rough=rough, metal=metal)
+def _edge(name, pos, color, rough, level, contrast=0.65, grunge=0.6, metal=1.0, meshes=None, step=0.0):
+    """Износ по кромкам. step — покрытие стёрто: место ниже на толщину слоя, у границы ступенька в рельефе (без неё
+    потёртости читались нарисованными, владелец 26.10 — «как у замка: слои при перепадах краски»)."""
+    e = fill(name, pos, color=color, rough=rough, metal=metal, **({"height": step} if step else {}))
+    if step:
+        e.set_blending_mode(L.BlendingMode.Subtract, sp_lib.CH.Height)
     mask_generator(e, EDGE, {"Wear_Level": level, "Wear_Contrast": contrast, "Grunge_Amount": grunge, "grunge_scale": 4,
                              "Use_Triplanar": 1, "Edges_Smoothness": 0.6, "Ambient_Occlusion_Masking": 0.6,
                              "Curvature_Weight": 1.0})
@@ -145,26 +149,26 @@ def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, p
     edge_p = {"Wear_Contrast": 0.6, "Grunge_Amount": 0.75, "grunge_scale": 6, "Use_Triplanar": 1, "Edges_Smoothness": 0.45,
               "Ambient_Occlusion_Masking": 0.6, "Curvature_Weight": 1.0}
     t = fill("05 Покрытие истончилось", _above(n), color=_mix(coat[0], bare[0], 0.4), rough=(coat[1] + bare[1]) / 2,
-             metal=(coat[2] + bare[2]) / 2, height=0.4995)
+             metal=(coat[2] + bare[2]) / 2, height=0.497)
     g = mask_generator(t, EDGE, dict(edge_p, Wear_Level=min(0.95, wear * 1.8), Wear_Contrast=0.35, Grunge_Amount=0.85))
     pm = mask_proc(t, _gm(8), {"invert": 1, "balance": patch_bal - 0.08, "contrast": 0.35}, scale=1.5, above=g,
                    blend=L.BlendingMode.Lighten)
     mask_proc(t, _gm(13), {"balance": 0.6, "contrast": 0.3}, scale=2.2, above=pm, blend=L.BlendingMode.Multiply)
     sp_lib.lop(t, thin)
-    w = fill("06 Вытерто до металла", _above(t), color=bare[0], rough=bare[1], metal=bare[2], height=0.499)
+    w = fill("06 Вытерто до металла", _above(t), color=bare[0], rough=bare[1], metal=bare[2], height=0.488)  # ступенька 0.012
     g = mask_generator(w, EDGE, dict(edge_p, Wear_Level=wear))
     mask_proc(w, _gm(8), {"invert": 1, "balance": patch_bal, "contrast": 0.75}, scale=1.5, above=g,
               blend=L.BlendingMode.Lighten)
     n = _grain(_above(w), 0.16, 0.0)
     n.set_name("07 Неровная матовость")
     n = _edge("08 Кромки до блеска", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.5), 0.24, wear * 0.6,
-              contrast=0.85, grunge=0.6)
+              contrast=0.85, grunge=0.6, step=0.01)
     if rail_meshes:
         # заметно, но не обширно (замечание владельца 26.10: уровень 0.5 давал «потрёпанную» планку)
         n = _edge("09 Износ планки", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.4), 0.26, 0.18, contrast=0.88,
-                  grunge=0.6, meshes=rail_meshes)
+                  grunge=0.6, meshes=rail_meshes, step=0.008)
     n = _proc_layer("10 Царапины", _above(n), _gm(12), 2.5, scratches, {"invert": 1, "balance": 0.74, "contrast": 0.55},
-                    color=_mix(coat[0], bare[0], 0.6), rough=0.42, metal=1.0, height=0.4993)
+                    color=_mix(coat[0], bare[0], 0.6), rough=0.42, metal=1.0, height=0.494)
     _sharpen(grp, 0.3)
     n = _dirt(_above(grp), color=(0.035, 0.03, 0.026), level=0.38, opacity=0.9, name="11 Грязь в углах")
     n = _dirt(_above(n), color=(0.3, 0.28, 0.25), rough=0.95, level=0.24, opacity=0.4, name="12 Пыль в углах", contrast=0.9)
@@ -405,7 +409,7 @@ def anodized(st, rail=True, tile=1.0, rough=0.5):
     n = _proc_layer("05 Пятна матовые", _above(n), "noise_bnw_spots_1/bnw_spots_1", 5.0 * tile, 0.3, None,
                     color=_mix(base, (0.3, 0.3, 0.32), 0.1), rough=rough + 0.16)
     n = _edge("06 Светлые глянцевые кромки", _above(n), _mix(base, (0.5, 0.5, 0.52), 0.35), rough - 0.12, 0.05, contrast=0.85,
-              grunge=0.7, metal=0.6)
+              grunge=0.7, metal=0.6, step=0.008)
     if rail:
         n = _proc_layer("07 Износ от обвеса", _above(n), "grunge_wipe_directional_heavy/grunge_wipe_directional_heavy",
                         2.0, 0.3, None, color=_mix(base, (0.3, 0.3, 0.32), 0.2), rough=rough - 0.05)
@@ -472,7 +476,9 @@ def rubber(st):
     n = _grain(_above(n), 0.25, 0.003)
     n = _proc_layer("03 Потёртости", _above(n), "grunge_scratches_rough/grunge_scratches_rough", 3.0, 0.35,
                     color=(0.09, 0.09, 0.09), rough=0.7)
-    n = _edge("04 Затёртые кромки", _above(n), (0.085, 0.085, 0.085), 0.62, 0.38, metal=0.0)
+    # резина не скалывается, как краска: кромки слегка светлее и залоснены, переход плавный, без рваного края
+    # (рваные светлые полосы на наглазнике ПСО читались облезшей краской, владелец 26.10)
+    n = _edge("04 Залоснённые кромки", _above(n), (0.07, 0.07, 0.07), 0.5, 0.26, contrast=0.35, grunge=0.15, metal=0.0)
     n = _dirt(_above(n), color=(0.2, 0.19, 0.17), rough=0.95, level=0.4, opacity=0.5, name="05 Пыль в углублениях")
     return n
 
@@ -589,10 +595,12 @@ def wood(st):
     n = fill("06 Лак", _above(n), color=(0.8, 0.5, 0.32), rough=0.4)       # янтарно-красный, потемневший от времени
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
     n.set_opacity(0.55, CH.BaseColor)
-    n = fill("07 Лак в порах тусклее", _above(n), rough=0.56)
+    # в углублениях волокна лака почти нет — матово (владелец 26.10); маска — нижняя пятая часть высоты (поры),
+    # прежняя (порог 0.42, 0.56 на 60 %) задевала половину поверхности и почти не отличалась от лака
+    n = fill("07 Лак в порах тусклее", _above(n), rough=0.85)
     m = _bmask(n, WOOD_HEIGHT, blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
-    _mfilter(m, "histogram_scan", {"Position": 0.42, "Contrast": 0.55})
-    sp_lib.lop(n, 0.6)
+    _mfilter(m, "histogram_scan", {"Position": 0.36, "Contrast": 0.75})
+    sp_lib.lop(n, 1.0)
     n = fill("08 Апельсиновая корка", _above(n), rough="noise_clouds_2/clouds_2", height="noise_clouds_2/clouds_2")
     triplanar(n, 60.0)
     n.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
