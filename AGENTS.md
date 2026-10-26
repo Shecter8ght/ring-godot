@@ -254,6 +254,10 @@ tools/godot.cmd --headless res://tools/pm_worn_check.tscn   # ПМ «пошар�
                                                               # (метка, линия прицеливания); с окном (--windowed --resolution 1600x900) — снимки pm_worn_*
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/asset_kit/uv_check.py -- [veras|mosin|pm] [атлас] [вариант]
+                                                              # общий модуль игровой развёртки оружия (tools/asset_kit/uv.py, укладка uv_pack.py) на копиях готовых сеток:
+                                                              # заполнение, плотность видимого / у глаза / вдали, отступы проверены растром; слои KitUV* —
+                                                              # в _asset_src/<ствол>/uv_kit/*_UVKit.blend, игровые файлы и карты не меняются
 # ВЕРАС-54 v13 в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/veras54_v13/game_lp.py (сетка ~33 тыс. + патроны ~5 тыс.)
 #   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски жировой плёнки _coat в assets) → game_finish.py (матовый корпус: ORM)
 #   → game_rig.py (риг рук v13 в библиотеке)
