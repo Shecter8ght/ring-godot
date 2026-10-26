@@ -75,6 +75,10 @@ var _ctx_t: float = 0.0
 ## Свой свет рук и оружия (CameraRig, ViewmodelFill): в темноте сильнее, внутри здания — слабее во
 ## столько, во сколько глаз там привыкает сильнее (иначе ствол «светится» в тёмной квартире).
 var _fill: DirectionalLight3D
+## Своё привыкание глаза у карты рейда — данные сектора "look" (ключи — как в Balance.LOOK: exposure_scale_raid,
+## adapt_up, adapt_up_indoor); у какого уровня (id) прочитано. Нет ключа — общее из Balance.LOOK.
+var _map_look: Dictionary = {}
+var _map_look_level: int = 0
 
 
 ## Основная камера — главная: по ней размытие в движении; остальные (оптика) получают ту же экспозицию.
@@ -137,10 +141,11 @@ func apply_settings() -> void:
 ## в [down, up]. Убежище — как настроено; в рейде своя цель (светлее) и свой предел на улице и в здании.
 func _apply_exposure() -> void:
 	var L: Dictionary = Balance.LOOK
-	var scale: float = float(L.exposure_scale_raid if _raid else L.exposure_scale)
+	_refresh_map_look()
+	var scale: float = _look("exposure_scale_raid") if _raid else float(L.exposure_scale)
 	var up: float = float(L.adapt_up_shelter)
 	if _raid:
-		up = float(L.adapt_up_indoor if _indoor else L.adapt_up)
+		up = _look("adapt_up_indoor") if _indoor else _look("adapt_up")
 	_attr.auto_exposure_scale = scale
 	_attr.auto_exposure_min_sensitivity = _iso(scale / up)
 	_attr.auto_exposure_max_sensitivity = _iso(scale / float(L.adapt_down))
@@ -156,8 +161,25 @@ func _update_fill() -> void:
 	var L: Dictionary = Balance.LOOK
 	var k: float = lerpf(float(vf.day_k), 1.0, _dark_k)
 	if _raid and Settings.lens_fx:
-		k *= float(L.adapt_up) / float(L.adapt_up_indoor if _indoor else L.adapt_up)
+		k *= _look("adapt_up") / (_look("adapt_up_indoor") if _indoor else _look("adapt_up"))
 	_fill.light_energy = float(vf.energy) * k
+
+
+func _look(key: String) -> float:
+	return float(_map_look.get(key, Balance.LOOK[key]))
+
+
+## Данные "look" карты рейда — раз на уровень (уровень меняется — читаются заново).
+func _refresh_map_look() -> void:
+	var level: Node = RaidAtmosphere.current.get_parent() if _raid and RaidAtmosphere.current else null
+	var level_id: int = level.get_instance_id() if level else 0
+	if level_id == _map_look_level:
+		return
+	_map_look_level = level_id
+	_map_look = {}
+	var path: Variant = level.get("sector_path") if level else null
+	if path != null and String(path) != "":
+		_map_look = SectorBuilder.load_def(String(path)).get("look", {}) as Dictionary
 
 
 ## Светимость (как её меряет движок) → «чувствительность ISO» CameraAttributesPractical (12.5 ед. = ISO 100).
@@ -176,6 +198,9 @@ func _process(delta: float) -> void:
 		_ctx_t -= delta
 		if _ctx_t <= 0.0 and RaidAtmosphere.current:
 			_ctx_t = float(L.context_sec)
+			# уровень рейда появился позже Raid.current — его привыкание глаза ещё не прочитано
+			if RaidAtmosphere.current.get_parent().get_instance_id() != _map_look_level:
+				_apply_exposure()
 			var feet: Vector3 = _cams[0].global_position + Vector3.DOWN * 1.6
 			var indoor: bool = RaidAtmosphere.current.is_indoor(feet)
 			if indoor != _indoor:

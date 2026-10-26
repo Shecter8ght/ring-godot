@@ -1,7 +1,8 @@
 extends Node
-## Свет «Проспекта» в рейде (tools/prospekt_light.py): та же карта по условиям — день, закат, ночь, дождь, —
+## Свет «Проспекта» в рейде (tools/prospekt_light.py): та же карта по условиям — день, закат, ночь, пасмурно, дождь, —
 ## с одних точек (проспект, площадь, зал супермаркета). Уровень грузится заново на каждое условие, мародёры убраны,
-## интерфейс скрыт (резкость карты — нет).
+## интерфейс скрыт. По умолчанию — глазами игрока: его камера с привыканием глаза и «объективом» (CameraLook),
+## как видит игрок; PROSPEKT_CLEAN=1 — своей камерой без них (чистый свет сцены).
 ##   tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn
 ## → PROSPEKT_OUTPUT (по умолчанию user://prospekt_raid_shots)/<условие>__<кадр>.png; PROSPEKT_CASES=day,night — выборочно.
 
@@ -10,21 +11,25 @@ const CASES: Array[Dictionary] = [
 	{"id": "day", "time": "day", "weather": "clear"},
 	{"id": "dusk", "time": "dusk", "weather": "clear"},
 	{"id": "night", "time": "night", "weather": "clear"},
-	{"id": "day_rain", "time": "day", "weather": "rain"},
 	{"id": "day_overcast", "time": "day", "weather": "overcast"},
+	{"id": "day_rain", "time": "day", "weather": "rain"},
 ]
 const VIEWS: Array[Dictionary] = [
 	{"id": "avenue", "at": Vector3(-170, 1.62, -12), "look": Vector3(-60, 2, -6)},
 	{"id": "plaza", "at": Vector3(70, 1.62, 50), "look": Vector3(90, 2, 15)},
 	{"id": "hall", "at": Vector3(-108, 1.62, 50), "look": Vector3(-102, 1.5, 82)},
 ]
-## SDFGI набирает отражённый свет не сразу
+## SDFGI набирает отражённый свет и глаз привыкает не сразу
 const SETTLE_FRAMES: int = 240
+## Слои, которые остаются: резкость карты, капли на линзе, «объектив» камеры игрока
+const KEEP_LAYERS: Array[String] = ["Sharpen", "LensLayer"]
 
 
 func _ready() -> void:
 	RaidEvents.enabled = false
-	Settings.lens_fx = false
+	var clean: bool = OS.get_environment("PROSPEKT_CLEAN") != ""
+	if clean:
+		Settings.lens_fx = false
 	var out_dir: String = OS.get_environment("PROSPEKT_OUTPUT")
 	if out_dir.is_empty():
 		out_dir = ProjectSettings.globalize_path("user://prospekt_raid_shots")
@@ -44,33 +49,49 @@ func _ready() -> void:
 		if marauders:
 			for m: Node in marauders.get_children():
 				m.queue_free()
-		# прячем интерфейс (HUD уровня и игрока); слои погоды (капли на линзе) и резкость карты остаются
+		# прячем интерфейс (HUD уровня и игрока); погода (капли на линзе), резкость и «объектив» остаются
 		for layer: Node in get_tree().root.find_children("*", "CanvasLayer", true, false):
-			if layer.name == "Sharpen" or layer is RainLens:
-				layer.set("visible", OS.get_environment("PROSPEKT_NO_SHARPEN") == "" or layer.name != "Sharpen")
-				continue
-			(layer as CanvasLayer).visible = false
-		var camera: Camera3D = Camera3D.new()
-		# слои — как у камеры игрока: служебные (карта дождя «что над головой») ей не видны
-		var player_cam: Camera3D = get_viewport().get_camera_3d()
-		if player_cam:
-			camera.cull_mask = player_cam.cull_mask
-		camera.fov = Settings.fps_fov_v()
-		camera.far = 2000.0
-		level.add_child(camera)
-		camera.make_current()
+			if not (String(layer.name) in KEEP_LAYERS or layer is RainLens):
+				(layer as CanvasLayer).visible = false
+		var me: Player = Raid.current.local_player() if Raid.current else null
+		var rig: CameraRig = get_tree().get_first_node_in_group("camera_rig") as CameraRig
+		var camera: Camera3D = null
+		if clean or me == null or rig == null:
+			camera = Camera3D.new()
+			# слои — как у камеры игрока: служебные (карта дождя «что над головой») ей не видны
+			var player_cam: Camera3D = get_viewport().get_camera_3d()
+			if player_cam:
+				camera.cull_mask = player_cam.cull_mask
+			camera.fov = Settings.fps_fov_v()
+			camera.far = 2000.0
+			level.add_child(camera)
+			camera.make_current()
+		else:
+			me.health.hp = 1e9
+			me.health.max_hp = 1e9
+			CameraRig.first_person_mode = true
 		var sun: DirectionalLight3D = level.get_node_or_null("Sun") as DirectionalLight3D
 		var we: WorldEnvironment = level.find_child("WorldEnvironment", false, false) as WorldEnvironment
-		# для поиска причин: PROSPEKT_ENV_OFF=sdfgi,ssao,fog,adjust — выключить части окружения
+		# для поиска причин: PROSPEKT_ENV_OFF=sdfgi,ssao,fog,adjustment — выключить части окружения
 		for part: String in OS.get_environment("PROSPEKT_ENV_OFF").split(",", false):
 			we.environment.set(part + "_enabled", false)
-		print("prospekt_raid_shots: %s — солнце %.2f (%s), рассеянный %.2f, выдержка %.2f, дымка %s %.2f" % [c.id,
+		print("prospekt_raid_shots: %s — солнце %.2f (%s), рассеянный %.2f, выдержка %.2f, дымка %s %.2f, %s" % [c.id,
 			sun.light_energy if sun else 0.0, "видно" if sun and sun.visible else "нет",
 			we.environment.ambient_light_energy, we.environment.tonemap_exposure,
-			"вкл" if we.environment.fog_enabled else "выкл", we.environment.fog_density])
+			"вкл" if we.environment.fog_enabled else "выкл", we.environment.fog_density,
+			"своя камера" if camera else "глазами игрока"])
 		for view: Dictionary in VIEWS:
-			camera.global_position = view.at
-			camera.look_at(view.look, Vector3.UP)
+			var at: Vector3 = view.at
+			var look: Vector3 = view.look
+			if camera:
+				camera.global_position = at
+				camera.look_at(look, Vector3.UP)
+			else:
+				me.global_position = Vector3(at.x, at.y - float(Balance.ADS_EYE.stand), at.z)
+				me.velocity = Vector3.ZERO
+				var d: Vector3 = look - at
+				rig._look_yaw = atan2(d.x, d.z)
+				rig._look_pitch = atan2(d.y, Vector2(d.x, d.z).length())
 			await _frames(SETTLE_FRAMES)
 			await RenderingServer.frame_post_draw
 			var path: String = out_dir.path_join("%s__%s.png" % [c.id, view.id])

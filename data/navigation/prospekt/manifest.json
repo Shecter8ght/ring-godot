@@ -1,7 +1,7 @@
 {
 	"files": {
 		"res://data/blockouts/prospekt.json": "d890dee09a4e43d460e2c7f3e2aaa08ff75efd192136dc07e3549bd2fee0ccdd",
-		"res://data/sectors/prospekt.json": "a1aa743d6328fda9e2462129c01c3442056a97b76a93028bc6d0bb3724f25458",
+		"res://data/sectors/prospekt.json": "d786d30452d4c94217ee179d7fb922386bd9c725679ec543180a0b332a883b2d",
 		"res://data/urban95_models.json": "05d53d32470eb421270e3e0ef0dc372c054ecf7788b0f410c3d7984e0a607779",
 		"res://scenes/levels/prospekt.tscn": "23dd9488daa42af6cfe45086a7bb461dc642197535e175db7b44df2428f810b6",
 		"res://scenes/levels/prospekt_study.tscn": "bc66e8239d96edae4786a09ccfb7f179be6111deeb2c0834f1fa59da304ecca2",

@@ -185,8 +185,9 @@ python -X utf8 tools/build_prospekt_raid.py                   # рейдовая
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
 tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn # рейд «Проспекта»: навигация, население слоями, кордон ЧВК, точки на навигации,
                                                               # от каждого захода до всех выходов, места лута
-tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn # свет «Проспекта» в рейде: день, закат, ночь, пасмурно, дождь
-                                                              # с трёх точек → user://prospekt_raid_shots (PROSPEKT_OUTPUT, PROSPEKT_CASES=day,night)
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn # свет «Проспекта» в рейде глазами игрока (привыкание глаза,
+                                                              # «объектив»): день, закат, ночь, пасмурно, дождь с трёх точек → user://prospekt_raid_shots
+                                                              # (PROSPEKT_OUTPUT, PROSPEKT_CASES=day,night; PROSPEKT_CLEAN=1 — своей камерой, чистый свет сцены)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/urban95_export.py -- [ID …]
                                                               # библиотека RING_Urban_95 (retopology_v01, 101 модель) в игру: assets/models/urban95/<ID>.gltf,
                                                               # карты WebP ≤ 2K, индекс с габаритами data/urban95_models.json; на карте их ставит MallFiller (filler.kit_models)
@@ -550,7 +551,8 @@ docs/          STATUS.md (что сделано / что дальше), реше
    (`tools/prospekt_light_variants.gd`) «всё вместе» — черты освещения EFT поверх умолчаний Godot: солнце сильнее и
    рассеянный слабее, голубое небо и бирюзовая коррекция при тёплом солнце, дымка по расстоянию, SSAO, SDFGI (тёмные
    помещения), резкость поверх кадра (`src/world/screen_sharpen.gdshader`). В рейде время суток и погода — поверх
-   (`RaidAtmosphere`, `RaidWeather`); поправки карты — `light` и `depth_fog` в `data/sectors/prospekt.json`.
+   (`RaidAtmosphere`, `RaidWeather`); поправки карты — `light`, `depth_fog` и `look` (своё привыкание глаза камеры
+   игрока, `CameraLook`) в `data/sectors/prospekt.json`.
    без `assets/models` и `assets/textures`.
 7. **Нет `any`-стиля.** Типизированный GDScript: аннотации у всех переменных, аргументов, возвратов.
 8. **Комментарии — по-русски, о смысле, не о синтаксисе.** Имена — по-английски.

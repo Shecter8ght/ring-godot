@@ -76,5 +76,9 @@ def sharpen_resources(shader_id: str, mat_id: str) -> tuple[str, list[str]]:
 LIGHT_KEYS = {"sun_k": 0.81, "ambient_k": 0.28, "ambient_k_night": 1.8,
               "ambient_k_day_rain": 0.8, "ambient_k_dusk_rain": 0.8, "ambient_k_night_rain": 3.2,
               "ambient_k_day_overcast": 0.5, "ambient_k_dusk_overcast": 0.5, "ambient_k_night_overcast": 2.6}
+# привыкание глаза камеры игрока (CameraLook, общее — Balance.LOOK: цель 0,9, светлее до ×5 на улице и ×12 в здании)
+# вытягивало тёмный свет карты почти до белого и высветляло помещения в 3 раза (владелец 2026-10-26: «слишком
+# выбелено»). Своё у карты: цель ниже, на улице светлее не больше ×2, в здании ×2,5 — помещения остаются тёмными.
+LOOK = {"exposure_scale_raid": 0.35, "adapt_up": 2.0, "adapt_up_indoor": 2.5}
 # дымка карты в ясную погоду (RaidWeather: иначе — общая Balance.DEPTH_FOG): чисто до 50 м, к 900 м — 0,55
 DEPTH_FOG = {"clear": {"begin": 50.0, "end": 900.0, "density": 0.55, "curve": 0.6, "sky": 0.1}}

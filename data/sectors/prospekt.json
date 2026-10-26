@@ -65,6 +65,11 @@
    "sky": 0.1
   }
  },
+ "look": {
+  "exposure_scale_raid": 0.35,
+  "adapt_up": 2.0,
+  "adapt_up_indoor": 2.5
+ },
  "events": {
   "off": [
    "power"

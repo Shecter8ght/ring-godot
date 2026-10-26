@@ -100,6 +100,7 @@ sector = {
     # свет карты в рейде (tools/prospekt_light.py): поправки к времени суток и своя дымка в ясную погоду
     "light": LIGHT.LIGHT_KEYS,
     "depth_fog": LIGHT.DEPTH_FOG,
+    "look": LIGHT.LOOK,
     "events": {"off": ["power"], "at": {"drop": [-14.0, 0.1, 100.0], "pmc": [-60.0, 0.1, 205.0]},
                "drop_text": "Вертолёт над сквером — что-то сбросили",
                "pmc_text": "У вокзала заглушили мотор. Хлопнули двери."},
