@@ -45,17 +45,6 @@
  ],
  "camera_yaw": 0,
  "nav_cache": "res://data/navigation/prospekt",
- "light": {
-  "ambient_k": 1.25,
-  "sun_k": 0.9,
-  "ambient_k_night": 1.6,
-  "ambient_k_day_rain": 1.8,
-  "ambient_k_dusk_rain": 1.8,
-  "ambient_k_night_rain": 3.2,
-  "ambient_k_day_overcast": 1.6,
-  "ambient_k_dusk_overcast": 1.6,
-  "ambient_k_night_overcast": 2.6
- },
  "events": {
   "off": [
    "power"

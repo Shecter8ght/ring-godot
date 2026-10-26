@@ -2380,16 +2380,8 @@ position = Vector3(-190, 0.05, 85)
 environment = ExtResource("6")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-17, -118, 0)
-light_color = Color(1, 0.8, 0.62, 1)
-light_energy = 1.7
-light_angular_distance = 0.6
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.75, -0.43301, 0, 0, 0)
 shadow_enabled = true
-shadow_blur = 1.2
-directional_shadow_max_distance = 260.0
-directional_shadow_split_1 = 0.08
-directional_shadow_split_2 = 0.25
-directional_shadow_split_3 = 0.55
 
 [node name="CameraRig" parent="." instance=ExtResource("7")]
 

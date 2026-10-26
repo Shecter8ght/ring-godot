@@ -97,8 +97,6 @@ sector = {
     "spawn": [entries[0][1], entries[0][2], entries[0][3]],
     "camera_yaw": 0,
     "nav_cache": "res://data/navigation/prospekt",
-    "light": {"ambient_k": 1.25, "sun_k": 0.9, "ambient_k_night": 1.6, "ambient_k_day_rain": 1.8, "ambient_k_dusk_rain": 1.8,
-              "ambient_k_night_rain": 3.2, "ambient_k_day_overcast": 1.6, "ambient_k_dusk_overcast": 1.6, "ambient_k_night_overcast": 2.6},
     "events": {"off": ["power"], "at": {"drop": [-14.0, 0.1, 100.0], "pmc": [-60.0, 0.1, 205.0]},
                "drop_text": "Вертолёт над сквером — что-то сбросили",
                "pmc_text": "У вокзала заглушили мотор. Хлопнули двери."},
@@ -106,29 +104,19 @@ sector = {
 }
 SECTOR.write_text(json.dumps(sector, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
 
-# ---------------------------------------------------------------- окружение (своё, не из других карт)
+# ---------------------------------------------------------------- окружение: умолчания Godot (владелец 2026-10-26 —
+# «вернуть к самым дефолтным значениям, от которых дальше будем танцевать»); время суток и погода рейда — поверх
+# (RaidAtmosphere, общие для всех карт), своих множителей света ("light" сектора) у карты нет
 ENV.parent.mkdir(parents=True, exist_ok=True)
 ENV.write_text("\n".join([
     '[gd_resource type="Environment" load_steps=3 format=3]',
     '',
-    '[sub_resource type="PhysicalSkyMaterial" id="SkyMat"]',
-    'rayleigh_coefficient = 2.2', 'rayleigh_color = Color(0.26, 0.41, 0.58, 1)', 'mie_coefficient = 0.006',
-    'mie_eccentricity = 0.82', 'mie_color = Color(0.69, 0.68, 0.62, 1)', 'turbidity = 8.0', 'sun_disk_scale = 2.0',
-    'ground_color = Color(0.3, 0.28, 0.25, 1)', 'energy_multiplier = 1.6',
+    '[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]',
     '',
     '[sub_resource type="Sky" id="Sky"]', 'sky_material = SubResource("SkyMat")',
     '',
     '[resource]',
-    'background_mode = 2', 'sky = SubResource("Sky")',
-    'ambient_light_source = 3', 'ambient_light_color = Color(0.62, 0.66, 0.74, 1)', 'ambient_light_sky_contribution = 0.5',
-    'ambient_light_energy = 0.9', 'reflected_light_source = 2',
-    'tonemap_mode = 3', 'tonemap_exposure = 1.05', 'tonemap_white = 6.0',
-    'ssao_enabled = true', 'ssao_radius = 1.2', 'ssao_intensity = 1.6',
-    'ssil_enabled = true', 'ssil_radius = 4.0', 'ssil_intensity = 1.0',
-    'glow_enabled = true', 'glow_intensity = 0.25', 'glow_bloom = 0.04', 'glow_hdr_threshold = 1.4',
-    'fog_enabled = true', 'fog_light_color = Color(0.74, 0.72, 0.7, 1)', 'fog_light_energy = 0.7', 'fog_density = 0.00028',
-    'fog_sky_affect = 0.1', 'fog_height = -2.0', 'fog_height_density = 0.0',
-    'adjustment_enabled = true', 'adjustment_contrast = 1.04', 'adjustment_saturation = 0.96',
+    'background_mode = 2', 'sky = SubResource("Sky")', 'tonemap_mode = 2', 'glow_enabled = true',
     '']), encoding="utf-8", newline="\n")
 
 # ---------------------------------------------------------------- сцена уровня
@@ -258,9 +246,7 @@ lines += [
     '', '[node name="Lighting" type="Node3D" parent="."]',
     '', '[node name="WorldEnvironment" type="WorldEnvironment" parent="."]', 'environment = ExtResource("6")',
     '', '[node name="Sun" type="DirectionalLight3D" parent="."]',
-    'rotation_degrees = Vector3(-17, -118, 0)', 'light_color = Color(1, 0.8, 0.62, 1)', 'light_energy = 1.7',
-    'light_angular_distance = 0.6', 'shadow_enabled = true', 'shadow_blur = 1.2', 'directional_shadow_max_distance = 260.0',
-    'directional_shadow_split_1 = 0.08', 'directional_shadow_split_2 = 0.25', 'directional_shadow_split_3 = 0.55',
+    'transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.75, -0.43301, 0, 0, 0)', 'shadow_enabled = true',
     '', '[node name="CameraRig" parent="." instance=ExtResource("7")]',
     '', '[node name="HUD" type="CanvasLayer" parent="."]',
     '', '[node name="Root" type="Control" parent="HUD"]',
