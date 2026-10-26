@@ -10,8 +10,12 @@ R="E:/Models Blender/VEHICLES/Город_партия1/$1"
 NAME="$2"; FAM="$3"; JOB="$4"; shift 4
 SC="${REVIEW_DIR:-$PWD/_asset_src/prospekt_vehicles/review}"     # проверочные снимки (не в git)
 python -X utf8 tools/prospekt_vehicles/sp_run.py "tools/prospekt_vehicles/$JOB" 600 -- "$@" | head -3
+J=_asset_src/prospekt_vehicles/sp_jobs
+MARK="_export_${NAME}_${FAM}.txt"
 python -X utf8 tools/prospekt_vehicles/sp_run.py tools/prospekt_vehicles/sp/export.py 900 -- "out=$R/textures/$FAM" \
-  "spp=$R/textures/painter/${NAME}_${FAM}_v01.spp" | head -8
+  "spp=$R/textures/painter/${NAME}_${FAM}_v01.spp" "mark=$MARK" | head -3
+for _ in $(seq 1 1200); do [ -f "$J/$MARK" ] && break; sleep 1; done      # Painter досчитывает стек и выгружает
+cat "$J/$MARK" 2>/dev/null || echo "нет метки выгрузки $MARK"; echo
 rm -f "$R/textures/$FAM/Untitled.bin" "$R/textures/$FAM/Untitled.glb" "$R/textures/$FAM/Untitled.gltf"
 "$BL" --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/apply_maps.py -- \
   "$R/game/${NAME}_lod0_v01.blend" "$R/textures" "$R/game/${NAME}_textured_v01.blend" 2>&1 | grep -i "error\|сохранено" || true

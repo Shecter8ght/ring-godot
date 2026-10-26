@@ -2,6 +2,7 @@
 
     blender --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/game_kit.py -- \
         <класс> <папка Painter> <игровой .blend> [семьи через запятую]
+    … game_kit.py -- fbx <папка Painter> <игровой .blend>      — только FBX игровой сетки из готового .blend
 
 Классы: легковые specs.CLASSES (sedan, hatch, wagon, suv) и «коробчатые» specs_bus.BOXES (bus12, paz, gazel). У коробчатых
 одна семья clean (целый и с открытыми дверями); кузов длиннее LONG_BODY делится на два набора BodyA / BodyB (левый борт
@@ -31,6 +32,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import vlib  # noqa: E402,F401
 import vq  # noqa: E402
+import vuv  # noqa: E402
 from specs import CLASSES  # noqa: E402
 from specs_bus import BOXES  # noqa: E402
 
@@ -40,6 +42,17 @@ INTERIOR = ("Dashboard", "Instrument_Hood", "Center_Stack", "Center_Screen", "St
 UNDER = ("Liner_", "Under_Tray", "Exhaust", "Frame", "Rear_Axle", "Fuel_Tank", "Rear_Springs", "Mudflap")
 GLASS_MATS = ("glass", "lamp_glass", "lamp_red", "glass_broken", "display")
 SET_RES = {"Body": 11, "Interior": 10, "Wheel": 10, "Under": 9}
+
+
+def set_res(cls: str, ts: str) -> int:
+    """Размер карты набора, пикс (как RES в sp_family.sh): у автобуса салон 2K, у коробчатых низ 1K."""
+    if ts.startswith("Body"):
+        return 2048
+    if ts == "Interior":
+        return 2048 if cls == "bus12" else 1024
+    if ts == "Under":
+        return 1024 if cls in BOXES else 512
+    return 1024
 LONG_BODY = 6.5          # м: длиннее — два набора кузова
 
 
@@ -119,23 +132,6 @@ def triangulate(ob) -> None:
     bm.free()
 
 
-def unwrap(objs, margin: float = 0.003) -> None:
-    """Общая развёртка набора: умная проекция, одинаковая плотность, плотная упаковка."""
-    bpy.ops.object.select_all(action="DESELECT")
-    for o in objs:
-        o.select_set(True)
-        if not o.data.uv_layers:
-            o.data.uv_layers.new(name="UVMap")
-    bpy.context.view_layer.objects.active = objs[0]
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(55.0), island_margin=margin, area_weight=0.0,
-                             correct_aspect=True, scale_to_bounds=False)
-    bpy.ops.uv.average_islands_scale()
-    bpy.ops.uv.pack_islands(margin=margin, rotate=True, shape_method="CONCAVE")
-    bpy.ops.object.mode_set(mode="OBJECT")
-
-
 def material(name: str, rgb=(0.5, 0.5, 0.5)) -> bpy.types.Material:
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     m.diffuse_color = (*rgb, 1.0)
@@ -205,8 +201,47 @@ def smooth_normals(ob, angle: float = 50.0) -> None:
     ob.data.set_sharp_from_angle(angle=math.radians(angle))
 
 
+def export_low(sets: dict, path: Path, scratch) -> list:
+    """FBX игровой сетки для Painter: слитые копии по (набор, материал детали) — по имени сетки Painter маскирует слои;
+    краска кузова — по панелям («Body__paint__Hood»): панели разводятся оттенком и блеском (справка навыка)."""
+    low_objs = []
+    for ts, objs in sets.items():
+        if ts == "Glass":
+            continue
+        bymat: dict = {}
+        for o in objs:
+            key = o["mat"]
+            if ts.startswith("Body") and key == "paint":
+                key = "paint__" + o.name.split(":", 1)[1]
+            bymat.setdefault(key, []).append(o)
+        for mat, group in bymat.items():
+            low_objs.append(merged_copy(group, f"{ts}__{mat}", ts, scratch))
+    for o in low_objs:
+        smooth_normals(o)                         # слитые копии — заново (bmesh теряет пометки)
+    export_fbx(low_objs, path)
+    return low_objs
+
+
+def fbx_only(sp_dir: Path, game_blend: Path) -> None:
+    """Режим «fbx»: только перевыгрузка игровой сетки для Painter из готового .blend (развёртка и сетка не меняются)."""
+    bpy.ops.wm.open_mainfile(filepath=str(game_blend))
+    scratch = bpy.data.collections.new("_painter")
+    bpy.context.scene.collection.children.link(scratch)
+    for col in [c for c in bpy.data.collections if c.name.startswith("LOD0_")]:
+        sets: dict = {}
+        for o in col.objects:
+            sets.setdefault(o["tex_set"], []).append(o)
+        export_low(sets, sp_dir / f"{col.name[5:]}_low.fbx", scratch)
+        print("FBX", col.name[5:], "сеток", sum(1 for _ in scratch.objects))
+        for o in list(scratch.objects):
+            bpy.data.objects.remove(o)
+
+
 def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1:]
+    if argv[0] == "fbx":                          # game_kit.py -- fbx <папка Painter> <игровой .blend>
+        fbx_only(Path(argv[1]), Path(argv[2]))
+        return
     cls, sp_dir, game_blend = argv[0], Path(argv[1]), Path(argv[2])
     box = cls in BOXES
     spec = BOXES[cls] if box else CLASSES[cls]
@@ -225,14 +260,16 @@ def main() -> None:
     scratch = bpy.data.collections.new("_painter")
     bpy.context.scene.collection.children.link(scratch)
     report = {}
+    uv_report: dict = {}
     for fam in only:
         col = bpy.data.collections.new(f"LOD0_{fam}")
         bpy.context.scene.collection.children.link(col)
         sets = build_family(fam, lo[fam][0], lo[fam][1], col, wheel_x, split)
+        fam_objs = [o for objs in sets.values() for o in objs]
         for ts, objs in sets.items():
             if ts == "Glass":
                 continue
-            unwrap(objs)
+            uv_report[f"{fam}:{ts}"] = vuv.unwrap_set(ts, objs, fam_objs, set_res(cls, ts), sp_dir / "uv", f"{fam}_{ts}")
         n_wheels = (6 if spec.get("dual_rear") else 4) if box else 4
         tris = sum(len(o.data.polygons) for objs in sets.values() for o in objs if o["group"] != "wheel") + \
             n_wheels * sum(len(o.data.polygons) for o in sets.get("Wheel", []))
@@ -240,19 +277,7 @@ def main() -> None:
         print(f"LOD0 {fam}: треугольников {tris:,} (с колёсами: {n_wheels})")
         top = sorted(((len(o.data.polygons), o.name) for objs in sets.values() for o in objs), reverse=True)[:30]
         print("  самые тяжёлые:", ", ".join(f"{n.split(':', 1)[1]} {c}" for c, n in top))
-        # FBX низкой: слить по (набор, материал детали)
-        low_objs = []
-        for ts, objs in sets.items():
-            if ts == "Glass":
-                continue
-            bymat: dict = {}
-            for o in objs:
-                bymat.setdefault(o["mat"], []).append(o)
-            for mat, group in bymat.items():
-                low_objs.append(merged_copy(group, f"{ts}__{mat}", ts, scratch))
-        for o in low_objs:
-            smooth_normals(o)                     # слитые копии — заново (bmesh теряет пометки)
-        export_fbx(low_objs, sp_dir / f"{fam}_low.fbx")
+        low_objs = export_low(sets, sp_dir / f"{fam}_low.fbx", scratch)
         # FBX высокой: подробная форма тех же деталей (без стёкол), колесо в той же стороне
         hcol = bpy.data.collections.new(f"_high_{fam}")
         bpy.context.scene.collection.children.link(hcol)
@@ -276,6 +301,7 @@ def main() -> None:
     scn["burnt_dz"] = float(dz)
     scn["lod0_tris"] = report
     scn["vehicle_class"] = cls
+    scn["uv_report"] = json.dumps(uv_report, ensure_ascii=False)
     scn["wheel_x"] = float(wheel_x)
     game_blend.parent.mkdir(parents=True, exist_ok=True)
     bpy.context.preferences.filepaths.save_version = 0

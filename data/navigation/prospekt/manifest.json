@@ -2,7 +2,7 @@
 	"files": {
 		"res://data/blockouts/prospekt.json": "d890dee09a4e43d460e2c7f3e2aaa08ff75efd192136dc07e3549bd2fee0ccdd",
 		"res://data/sectors/prospekt.json": "e31dced53260885b2fc6639d5a52ea38f491e7e9ba3f89499f92e15af5bd423c",
-		"res://data/urban95_models.json": "2f74699492a544a6448be0a63f55bf124c94cc27878c207e114b5bd43c60c7d4",
+		"res://data/urban95_models.json": "be276553f73fb189471d874be0f051e0435315c102473f6b3b13bd47a67af77f",
 		"res://scenes/levels/prospekt.tscn": "45dc5f0fa1cfcbf01baf65b54ffa4303b2f29fb105a503f0eddec80229ae5edc",
 		"res://scenes/levels/prospekt_study.tscn": "9c1d5ac9ff86bc24a2fb5bd06e4b191f338dd164d9cec76180747e5cdd163cbf",
 		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",

@@ -12,6 +12,7 @@ TAG="${CLS}_${FAM}"
 case $CLS in
   bus12) RES="BodyA:11,BodyB:11,Interior:11,Wheel:10,Under:10" ;;
   paz) RES="BodyA:11,BodyB:11,Interior:10,Wheel:10,Under:10" ;;
+  gazel) RES="Body:11,Interior:10,Wheel:10,Under:10" ;;
   *) RES="Body:11,BodyA:11,BodyB:11,Interior:10,Wheel:10,Under:9" ;;
 esac
 

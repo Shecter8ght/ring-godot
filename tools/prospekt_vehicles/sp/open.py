@@ -1,6 +1,11 @@
 # Задание Painter: открыть сохранённый проект (ARGS: spp, tag); текущий сохраняется и закрывается.
+import os
+
 import substance_painter.event as E
 import substance_painter.project as P
+
+# проекты созданы с конфигом OCIO Painter (create.py) — без него при открытии висит окно цветового управления
+os.environ["OCIO"] = "D:/ПРОГРАММЫ/Substance Painter/Adobe Substance 3D Painter/resources/ocio/substance/config.ocio"
 
 vsp.unmark("_proj_" + ARGS["tag"] + ".txt")
 if P.is_open():

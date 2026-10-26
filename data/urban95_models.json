@@ -2429,7 +2429,7 @@
    "id": "PV_sedan_wreck",
    "name": "Седан, битый",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck.gltf",
-   "triangles": 36249,
+   "triangles": 34201,
    "materials": 9,
    "aabb": {
     "center": [
@@ -2447,13 +2447,14 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_sedan_open": {
    "id": "PV_sedan_open",
    "name": "Седан, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan_open.gltf",
-   "triangles": 36940,
+   "triangles": 34892,
    "materials": 7,
    "aabb": {
     "center": [
@@ -2471,13 +2472,28 @@
     0,
     0,
     0
-   ]
+   ],
+   "solids": [
+    [
+     [
+      0.0,
+      0.8141,
+      -0.0828
+     ],
+     [
+      1.9549,
+      1.6501,
+      4.4188
+     ]
+    ]
+   ],
+   "cell": 24.0
   },
   "PV_sedan_burnt": {
    "id": "PV_sedan_burnt",
    "name": "Седан, сгоревший",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt.gltf",
-   "triangles": 21844,
+   "triangles": 21076,
    "materials": 4,
    "aabb": {
     "center": [
@@ -2495,13 +2511,14 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_sedan": {
    "id": "PV_sedan",
    "name": "Седан, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan.gltf",
-   "triangles": 36940,
+   "triangles": 34892,
    "materials": 7,
    "aabb": {
     "center": [
@@ -2519,7 +2536,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_car": {
    "id": "PV_car",
@@ -2675,7 +2693,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_hatch_open": {
    "id": "PV_hatch_open",
@@ -2699,7 +2718,22 @@
     0,
     0,
     0
-   ]
+   ],
+   "solids": [
+    [
+     [
+      0.0,
+      0.7914,
+      0.0694
+     ],
+     [
+      1.9961,
+      1.6047,
+      4.2891
+     ]
+    ]
+   ],
+   "cell": 24.0
   },
   "PV_hatch_burnt": {
    "id": "PV_hatch_burnt",
@@ -2723,7 +2757,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_hatch": {
    "id": "PV_hatch",
@@ -2747,7 +2782,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_wagon_wreck": {
    "id": "PV_wagon_wreck",
@@ -2771,7 +2807,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_wagon_open": {
    "id": "PV_wagon_open",
@@ -2795,7 +2832,22 @@
     0,
     0,
     0
-   ]
+   ],
+   "solids": [
+    [
+     [
+      0.0,
+      0.8171,
+      -0.0787
+     ],
+     [
+      1.9893,
+      1.6562,
+      4.7058
+     ]
+    ]
+   ],
+   "cell": 24.0
   },
   "PV_wagon_burnt": {
    "id": "PV_wagon_burnt",
@@ -2819,7 +2871,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_wagon": {
    "id": "PV_wagon",
@@ -2843,7 +2896,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_suv_wreck": {
    "id": "PV_suv_wreck",
@@ -2867,7 +2921,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_suv_open": {
    "id": "PV_suv_open",
@@ -2891,7 +2946,22 @@
     0,
     0,
     0
-   ]
+   ],
+   "solids": [
+    [
+     [
+      0.0,
+      0.9918,
+      -0.1137
+     ],
+     [
+      2.2104,
+      1.9997,
+      4.8943
+     ]
+    ]
+   ],
+   "cell": 24.0
   },
   "PV_suv_burnt": {
    "id": "PV_suv_burnt",
@@ -2915,7 +2985,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_suv": {
    "id": "PV_suv",
@@ -2939,7 +3010,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_gazel_open": {
    "id": "PV_gazel_open",
@@ -2963,6 +3035,21 @@
     0,
     0,
     0
+   ],
+   "cell": 24.0,
+   "solids": [
+    [
+     [
+      0.0,
+      1.0965,
+      -0.25
+     ],
+     [
+      2.6801,
+      2.2071,
+      5.704
+     ]
+    ]
    ]
   },
   "PV_gazel": {
@@ -2987,7 +3074,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_paz_open": {
    "id": "PV_paz_open",
@@ -3011,6 +3099,21 @@
     0,
     0,
     0
+   ],
+   "cell": 24.0,
+   "solids": [
+    [
+     [
+      0.0,
+      1.499,
+      0.161
+     ],
+     [
+      2.88,
+      3.032,
+      7.518
+     ]
+    ]
    ]
   },
   "PV_paz": {
@@ -3035,7 +3138,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_bus12_open": {
    "id": "PV_bus12_open",
@@ -3059,6 +3163,21 @@
     0,
     0,
     0
+   ],
+   "cell": 24.0,
+   "solids": [
+    [
+     [
+      0.0,
+      1.541,
+      -0.3673
+     ],
+     [
+      2.9,
+      3.098,
+      12.9282
+     ]
+    ]
    ]
   },
   "PV_bus12": {
@@ -3083,7 +3202,8 @@
     0,
     0,
     0
-   ]
+   ],
+   "cell": 24.0
   },
   "PV_bus_city": {
    "id": "PV_bus_city",
