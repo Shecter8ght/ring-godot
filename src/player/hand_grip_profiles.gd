@@ -11,6 +11,7 @@ const ROTATION_LIMIT: float = 120.0
 const BEND_LIMIT: float = 100.0
 const SPREAD_LIMIT: float = 45.0
 const TWIST_LIMIT: float = 90.0
+const JOINT_ROTATION_LIMIT: float = 180.0
 
 static var storage_path: String = PATH
 static var _loaded: bool = false
@@ -85,9 +86,13 @@ static func sanitize(value: Dictionary) -> Dictionary:
 	var source: Dictionary = value.get("fingers", {}) if value.get("fingers", {}) is Dictionary else {}
 	for finger: String in FINGERS:
 		var entry: Dictionary = source.get(finger, {}) if source.get(finger, {}) is Dictionary else {}
+		var raw_turns: Array = entry.get("rotation", []) if entry.get("rotation", []) is Array else []
+		var turns: Array[Vector3] = []
+		for joint: int in range(3):
+			turns.append(_vector(raw_turns[joint] if joint < raw_turns.size() else Vector3.ZERO, JOINT_ROTATION_LIMIT))
 		fingers[finger] = {"bend": _vector(entry.get("bend"), BEND_LIMIT),
 			"spread": _number(entry.get("spread"), SPREAD_LIMIT),
-			"twist": _number(entry.get("twist"), TWIST_LIMIT)}
+			"twist": _number(entry.get("twist"), TWIST_LIMIT), "rotation": turns}
 	return {"position": _vector(value.get("position"), POSITION_LIMIT),
 		"rotation": _vector(value.get("rotation"), ROTATION_LIMIT), "fingers": fingers}
 

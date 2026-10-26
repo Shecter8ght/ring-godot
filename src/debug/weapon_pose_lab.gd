@@ -13,6 +13,14 @@ var _hand_draft: Dictionary = {}
 var _inspector: HandGripInspector
 ## Снимок выбранных настроек; смена ствола и дальнейшая правка источника его не меняют.
 var _hand_buffer: Dictionary = {}
+var _finger_fit = preload("res://src/debug/hand_finger_ik.gd").new()
+var _finger_undo: Dictionary = {}
+var _drag_target: Vector3 = Vector3.INF
+var _drag_depth: float = 0.5
+var _drag_pointer: Vector2
+var _drag_offset: Vector3
+var _drag_animation: AnimationPlayer
+var _drag_speed: float = 1.0
 
 @onready var _player: Player = $Player
 @onready var _rig: CameraRig = $CameraRig
@@ -51,6 +59,12 @@ func _ready() -> void:
 	_panel.grip.reset_requested.connect(_reset_hand)
 	_panel.grip.grip_copy_requested.connect(_copy_hand_grip)
 	_panel.grip.grip_paste_requested.connect(_paste_hand_grip)
+	_panel.grip.undo_finger.pressed.connect(_undo_finger_fit)
+	_panel.grip.drag_tips.toggled.connect(func(on: bool) -> void:
+		if on and _panel.grip.views.selected == 0:
+			_panel.grip.views.select(1)
+		elif not on and _inspector:
+			_inspector.finish_drag(false))
 	_panel.grip.use_in_game.toggled.connect(func(_on: bool) -> void:
 		_dirty = true
 		_panel.set_status("Есть несохранённые изменения · Ctrl+S"))
@@ -101,6 +115,10 @@ func _build_catalog() -> void:
 func _select_weapon(index: int) -> void:
 	if index < 0 or index >= _catalog.size():
 		return
+	if _inspector:
+		_inspector.finish_drag(false)
+	_finger_undo.clear()
+	_panel.grip.undo_finger.disabled = true
 	_weapon_index = index
 	_panel.weapons.select(index)
 	var entry: Dictionary = _catalog[index]
@@ -298,7 +316,10 @@ func _copy() -> void:
 		for finger: String in HandGripProfiles.FINGERS:
 			var entry: Dictionary = hand.fingers[finger]
 			var bend: Vector3 = entry.bend as Vector3
-			fingers[finger] = {"bend_deg": [bend.x, bend.y, bend.z], "spread_deg": entry.spread, "twist_deg": entry.twist}
+			var turns: Array = []
+			for turn: Vector3 in entry.rotation:
+				turns.append([turn.x, turn.y, turn.z])
+			fingers[finger] = {"bend_deg": [bend.x, bend.y, bend.z], "spread_deg": entry.spread, "twist_deg": entry.twist, "joint_rotation_deg": turns}
 		var shift: Vector3 = (hand.position as Vector3) * 100.0
 		var turn: Vector3 = hand.rotation as Vector3
 		DisplayServer.clipboard_set(JSON.stringify({"weapon": _player.weapon_id, "profile": _hand_key(), "side": _hand_side(),
@@ -315,6 +336,8 @@ func _copy() -> void:
 
 
 func _set_editing(editing: bool) -> void:
+	if not editing and _inspector:
+		_inspector.finish_drag(false)
 	_editing = editing
 	_panel.visible = editing
 	_player.set_physics_process(not editing)
@@ -330,6 +353,8 @@ func _process(delta: float) -> void:
 	if _editing:
 		_player._tick_stance_eye(delta)
 	_sync_preview()
+	if _inspector.dragging:
+		_update_finger_fit()
 	_update_inspector()
 	_update_hint()
 
@@ -345,6 +370,10 @@ func _input(event: InputEvent) -> void:
 	if PauseMenu.shown or not event is InputEventKey or event.is_echo() or not event.is_pressed():
 		return
 	var key: InputEventKey = event as InputEventKey
+	if _inspector.dragging and (key.keycode == KEY_ESCAPE or key.physical_keycode == KEY_ESCAPE):
+		_inspector.finish_drag(true)
+		get_viewport().set_input_as_handled()
+		return
 	if key.keycode == KEY_F6 or key.physical_keycode == KEY_F6:
 		_set_editing(not _editing)
 		get_viewport().set_input_as_handled()
@@ -391,12 +420,19 @@ func _create_inspector() -> void:
 	_inspector.offset_right = -20.0
 	_inspector.offset_bottom = -30.0
 	$Interface.add_child(_inspector)
+	_inspector.tip_drag_started.connect(_begin_finger_fit)
+	_inspector.tip_dragged.connect(_move_finger_target)
+	_inspector.tip_depth_changed.connect(func(amount: float) -> void:
+		_drag_depth = clampf(_drag_depth + amount, 0.02, 4.0)
+		_move_finger_target(_drag_pointer))
+	_inspector.tip_drag_finished.connect(_finish_finger_fit)
 
 
 func _update_inspector() -> void:
 	var mode: int = _panel.grip.views.selected
 	_inspector.visible = _editing and _panel.tabs.current_tab == 1 and mode != 0
 	if not _inspector.visible or not is_instance_valid(_rig._viewmodel):
+		_inspector.show_fingers({}, "", false)
 		return
 	var sk: Skeleton3D = _rig._arms.skeleton
 	var clip: ViewmodelClips = _rig._viewmodel as ViewmodelClips
@@ -420,3 +456,82 @@ func _update_inspector() -> void:
 		if middle >= 0:
 			at = at.lerp(sk.to_global(sk.get_bone_global_pose(middle).origin), 0.6)
 	_inspector.focus_on(at, weapon_basis, mode, side)
+	var overlay: HandGripPose = clip._hand_pose if clip else _rig._arms._hand_pose
+	var chains: Dictionary = {}
+	var enabled: bool = _panel.grip.drag_tips.button_pressed and not _panel.compare.button_pressed
+	if enabled:
+		for finger: String in HandGripProfiles.FINGERS:
+			chains[finger] = overlay.finger_points(side, finger)
+	_inspector.show_fingers(chains, HandGripProfiles.FINGERS[_panel.grip.fingers.selected], enabled, _drag_target if _inspector.dragging else Vector3.INF)
+
+
+func _begin_finger_fit(finger: String, point: Vector2) -> void:
+	var clips: ViewmodelClips = _rig._viewmodel as ViewmodelClips
+	var overlay: HandGripPose = clips._hand_pose if clips else _rig._arms._hand_pose
+	var value: Dictionary = HandGripProfiles.values(_hand_draft, _hand_key(), _hand_side())
+	if not _finger_fit.begin(overlay, _hand_side(), finger, value.fingers[finger] as Dictionary):
+		_inspector.finish_drag(false)
+		return
+	_finger_undo = {"key": _hand_key(), "side": _hand_side(), "finger": finger, "value": (value.fingers[finger] as Dictionary).duplicate(true)}
+	_panel.grip.undo_finger.disabled = false
+	_panel.grip.fingers.select(HandGripProfiles.FINGERS.find(finger))
+	_panel.grip._show_finger()
+	if clips:
+		_drag_animation = clips._anim
+		_drag_speed = _drag_animation.speed_scale
+		_drag_animation.speed_scale = 0.0
+	var count: int = _finger_fit.rebuild_colliders(_rig._viewmodel, overlay.skeleton)
+	var chain: PackedVector3Array = overlay.finger_points(_hand_side(), finger)
+	_drag_target = chain[3]
+	_drag_pointer = point
+	_drag_depth = maxf(0.02, -_inspector.camera.to_local(_drag_target).z)
+	_drag_offset = _drag_target - _inspector.camera.project_position(point, _drag_depth)
+	_panel.grip.ik_info.text = "Веди кончик; колесо меняет глубину. %d деталей оружия учитываются для контакта." % count
+
+
+func _move_finger_target(point: Vector2) -> void:
+	_drag_pointer = point
+	_drag_target = _inspector.camera.project_position(point, _drag_depth) + _drag_offset
+
+
+func _update_finger_fit() -> void:
+	if _finger_undo.is_empty() or _finger_undo.key != _hand_key() or _finger_undo.side != _hand_side():
+		_inspector.finish_drag(false)
+		return
+	var radius: float = float(_panel.grip.finger_radius.value) / 100.0 if _panel.grip.collision.button_pressed else 0.0
+	var result: Dictionary = _finger_fit.solve(_drag_target, radius)
+	var value: Dictionary = HandGripProfiles.values(_hand_draft, _hand_key(), _hand_side())
+	value.fingers[_finger_fit.finger].rotation = result.rotation
+	_change_hand(value)
+	_panel.grip.show_values(value)
+	var state: String = "Отпусти ЛКМ, затем Ctrl+S — сохранить хват."
+	if result.contact:
+		state = "Есть контакт / пересечение — поверни осмотр, проверь фаланги."
+	elif float(result.error) > 0.008:
+		state = "Цель пока не достигнута: приблизь её или поправь суставы вручную."
+	_panel.grip.ik_info.text = "До цели: %.1f мм. %s" % [float(result.error) * 1000.0, state]
+
+
+func _finish_finger_fit(cancelled: bool) -> void:
+	if is_instance_valid(_drag_animation):
+		_drag_animation.speed_scale = _drag_speed
+	_drag_animation = null
+	_drag_target = Vector3.INF
+	if cancelled:
+		_undo_finger_fit()
+	else:
+		_panel.grip.ik_info.text = "Поза записана в черновик. Ctrl+S — сохранить; кнопка отмены возвращает предыдущую подгонку."
+
+
+func _undo_finger_fit() -> void:
+	if _finger_undo.is_empty():
+		return
+	var value: Dictionary = HandGripProfiles.values(_hand_draft, String(_finger_undo.key), String(_finger_undo.side))
+	value.fingers[String(_finger_undo.finger)] = (_finger_undo.value as Dictionary).duplicate(true)
+	HandGripProfiles.put(_hand_draft, String(_finger_undo.key), String(_finger_undo.side), value)
+	_finger_undo.clear()
+	_panel.grip.undo_finger.disabled = true
+	_dirty = true
+	_sync_preview()
+	_refresh_hand_values()
+	_panel.grip.ik_info.text = "Последняя подгонка пальца отменена."

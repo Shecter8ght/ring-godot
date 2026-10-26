@@ -18,11 +18,18 @@ var transfer_scope: OptionButton
 var copy_grip: Button
 var paste_grip: Button
 var transfer_info: Label
+var joints: OptionButton
+var drag_tips: CheckButton
+var collision: CheckButton
+var finger_radius: SpinBox
+var undo_finger: Button
+var ik_info: Label
 var _position: Array[SpinBox] = []
 var _rotation: Array[SpinBox] = []
 var _bend: Array[SpinBox] = []
 var _spread: SpinBox
 var _twist: SpinBox
+var _joint_rotation: Array[SpinBox] = []
 var _sliders: Array[HSlider] = []
 var _value: Dictionary = HandGripProfiles.sanitize({})
 var _body: VBoxContainer
@@ -68,6 +75,10 @@ func _ready() -> void:
 	transfer.name = "Перенос"
 	transfer.add_theme_constant_override("separation", 8)
 	tabs.add_child(transfer)
+	var fit: VBoxContainer = VBoxContainer.new()
+	fit.name = "Подгонка"
+	fit.add_theme_constant_override("separation", 8)
+	tabs.add_child(fit)
 	_body = palm
 	_label("Положение кисти на оружии · см", 19)
 	for title: String in ["К правому (−) / левому (+) боку", "Ниже (−) / выше (+)", "К прикладу (−) / к дулу (+)"]:
@@ -84,6 +95,39 @@ func _ready() -> void:
 		_bend.append(_axis(title, HandGripProfiles.BEND_LIMIT, 1.0, "°"))
 	_spread = _axis("Разведение пальца", HandGripProfiles.SPREAD_LIMIT, 1.0, "°")
 	_twist = _axis("Поворот пальца вокруг своей оси", HandGripProfiles.TWIST_LIMIT, 1.0, "°")
+	var exact: VBoxContainer = VBoxContainer.new()
+	exact.add_theme_constant_override("separation", 4)
+	digit.add_child(exact)
+	digit.move_child(exact, 2)
+	_body = exact
+	joints = _options("Точный поворот фаланги · местные оси", ["У ладони", "Средняя", "Концевая"])
+	joints.item_selected.connect(func(_index: int) -> void: _show_joint())
+	for title: String in ["Поворот X", "Поворот Y", "Поворот Z"]:
+		_joint_rotation.append(_axis(title, HandGripProfiles.JOINT_ROTATION_LIMIT, 0.5, "°"))
+	_body = fit
+	_label("Подгонка кончика · эксперимент", 19)
+	drag_tips = CheckButton.new()
+	drag_tips.text = "Перетаскивать кончики пальцев"
+	drag_tips.focus_mode = Control.FOCUS_NONE
+	_body.add_child(drag_tips)
+	collision = CheckButton.new()
+	collision.text = "Учитывать поверхность оружия"
+	collision.button_pressed = true
+	collision.focus_mode = Control.FOCUS_NONE
+	_body.add_child(collision)
+	_label("Радиус пальца для контакта · см", 14)
+	finger_radius = SpinBox.new()
+	finger_radius.min_value = 0.2
+	finger_radius.max_value = 1.4
+	finger_radius.step = 0.05
+	finger_radius.value = 0.65
+	finger_radius.suffix = " см"
+	_body.add_child(finger_radius)
+	undo_finger = _transfer_button("Отменить последнюю подгонку пальца", func() -> void: pass)
+	undo_finger.disabled = true
+	ik_info = _label("Включи перетаскивание и возьми цветную точку на кончике пальца в осмотре. Повороты фаланг запишутся в черновик.", 14)
+	_label("ЛКМ на точке — вести палец; колесо при перетаскивании — глубина. ЛКМ на пустом месте / ПКМ — вращать осмотр. Esc — отменить текущее перетаскивание. Ctrl+S — сохранить хват.", 14)
+	_label("Суставы сгибаются без изменения длины костей. Контакт приближённый: сложные зазоры и уже пересекающий оружие хват могут потребовать ручной правки.", 14)
 	_body = transfer
 	_label("Настрой хват, скопируй его, выбери другое оружие и нажми «Вставить хват».", 16)
 	transfer_scope = _options("Что скопировать", ["Обе кисти", "Левую кисть", "Правую кисть"])
@@ -194,7 +238,12 @@ func _emit_values() -> void:
 	_value.position = Vector3(_position[0].value, _position[1].value, _position[2].value) / 100.0
 	_value.rotation = Vector3(_rotation[0].value, _rotation[1].value, _rotation[2].value)
 	var finger: String = HandGripProfiles.FINGERS[fingers.selected]
-	_value.fingers[finger] = {"bend": Vector3(_bend[0].value, _bend[1].value, _bend[2].value), "spread": _spread.value, "twist": _twist.value}
+	var entry: Dictionary = _value.fingers[finger]
+	entry.bend = Vector3(_bend[0].value, _bend[1].value, _bend[2].value)
+	entry.spread = _spread.value
+	entry.twist = _twist.value
+	if joints != null and _joint_rotation.size() == 3:
+		entry.rotation[joints.selected] = Vector3(_joint_rotation[0].value, _joint_rotation[1].value, _joint_rotation[2].value)
 	values_changed.emit(_value.duplicate(true))
 
 
@@ -217,3 +266,13 @@ func _show_finger() -> void:
 	_twist.set_value_no_signal(float(finger.twist))
 	_sliders[9].set_value_no_signal(_spread.value)
 	_sliders[10].set_value_no_signal(_twist.value)
+	_show_joint()
+
+
+func _show_joint() -> void:
+	if joints == null or _joint_rotation.size() != 3:
+		return
+	var turn: Vector3 = _value.fingers[HandGripProfiles.FINGERS[fingers.selected]].rotation[joints.selected] as Vector3
+	for axis: int in range(3):
+		_joint_rotation[axis].set_value_no_signal(turn[axis])
+		_sliders[11 + axis].set_value_no_signal(turn[axis])

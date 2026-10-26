@@ -8,6 +8,7 @@ var chains: Dictionary = {}
 var fingers: Dictionary = {}
 ## Точка хвата на ладони в осях кости кисти (rest) — вокруг неё кисть меняет размер.
 var grip_centers: Dictionary = {}
+var _tips: Dictionary = {}
 var _saved: Dictionary = {}
 ## Стенд задаёт размер кистей сам (> 0); иначе FPS_HAND_SCALE из окружения или Balance.
 static var scale_override: float = 0.0
@@ -27,6 +28,7 @@ func configure(sk: Skeleton3D, clips: bool) -> void:
 	skeleton = sk
 	chains.clear()
 	fingers.clear()
+	_tips.clear()
 	if sk == null:
 		return
 	for side: String in HandGripProfiles.SIDES:
@@ -85,15 +87,78 @@ func apply_fingers(side: String, value: Dictionary, weight: float) -> void:
 		var bend: Vector3 = entry.bend as Vector3
 		var joints: Array = fingers.get(side + finger, [])
 		for index: int in range(joints.size()):
-			if is_zero_approx(bend[index]) and (index != 0 or (is_zero_approx(float(entry.spread)) and is_zero_approx(float(entry.twist)))):
+			var turn: Vector3 = (entry.rotation as Array)[index] as Vector3
+			if turn.is_zero_approx() and is_zero_approx(bend[index]) and (index != 0 or (is_zero_approx(float(entry.spread)) and is_zero_approx(float(entry.twist)))):
 				continue
 			var joint: Dictionary = joints[index]
 			var q: Quaternion = Quaternion(joint.curl as Vector3, deg_to_rad(bend[index]) * weight)
 			if index == 0:
 				q *= Quaternion(joint.spread as Vector3, deg_to_rad(float(entry.spread)) * weight)
 				q *= Quaternion(Vector3.UP, deg_to_rad(float(entry.twist)) * weight)
+			q *= Quaternion.IDENTITY.slerp(Basis.from_euler(turn * (PI / 180.0)).get_rotation_quaternion(), weight)
 			var bone: int = int(joint.bone)
 			skeleton.set_bone_pose_rotation(bone, (skeleton.get_bone_pose_rotation(bone) * q).normalized())
+
+
+## Конец перчатки из весов последней фаланги; исходная сетка и риг не изменяются.
+func finger_tip_offset(side: String, finger: String) -> Vector3:
+	var key: String = side + finger
+	if _tips.has(key):
+		return _tips[key] as Vector3
+	var joints: Array = fingers.get(key, [])
+	if joints.size() != 3:
+		return Vector3.ZERO
+	var bone: int = int(joints[2].bone)
+	var length: float = skeleton.get_bone_global_rest(bone).origin.distance_to(skeleton.get_bone_global_rest(int(joints[1].bone)).origin) * 0.8
+	var samples: Array[Vector3] = []
+	for node: Node in skeleton.find_children("*", "MeshInstance3D", true, false):
+		var instance: MeshInstance3D = node as MeshInstance3D
+		if instance.mesh == null or instance.skin == null:
+			continue
+		var bind: int = -1
+		for index: int in range(instance.skin.get_bind_count()):
+			if instance.skin.get_bind_bone(index) == bone or instance.skin.get_bind_name(index) == skeleton.get_bone_name(bone):
+				bind = index
+				break
+		if bind < 0:
+			continue
+		for surface: int in range(instance.mesh.get_surface_count()):
+			var arrays: Array = instance.mesh.surface_get_arrays(surface)
+			if arrays[Mesh.ARRAY_BONES] == null or arrays[Mesh.ARRAY_WEIGHTS] == null:
+				continue
+			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+			var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+			var stride: int = bones.size() / vertices.size()
+			for vertex: int in range(vertices.size()):
+				for slot: int in range(stride):
+					if bones[vertex * stride + slot] == bind and weights[vertex * stride + slot] >= 0.3:
+						samples.append(instance.skin.get_bind_pose(bind) * vertices[vertex])
+	var furthest: float = 0.0
+	for point: Vector3 in samples:
+		furthest = maxf(furthest, point.y)
+	var tip: Vector3 = Vector3(0.0, length, 0.0)
+	if furthest > 0.004 and furthest < 0.09:
+		var center: Vector3 = Vector3.ZERO
+		var count: int = 0
+		for point: Vector3 in samples:
+			if point.y >= furthest * 0.9:
+				center += point
+				count += 1
+		tip = center / float(maxi(count, 1))
+		tip.y = furthest
+	_tips[key] = tip
+	return tip
+
+
+func finger_points(side: String, finger: String) -> PackedVector3Array:
+	var points: PackedVector3Array = []
+	var joints: Array = fingers.get(side + finger, [])
+	for joint: Dictionary in joints:
+		points.append(skeleton.to_global(skeleton.get_bone_global_pose(int(joint.bone)).origin))
+	if joints.size() == 3:
+		points.append(skeleton.global_transform * skeleton.get_bone_global_pose(int(joints[2].bone)) * finger_tip_offset(side, finger))
+	return points
 
 
 ## У клипов сохраняем все затронутые кости и возвращаем их ДО следующего шага

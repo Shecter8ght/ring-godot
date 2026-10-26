@@ -198,6 +198,15 @@ func _exercise(label: String, clips: bool) -> void:
 			_lab._panel.grip._bend[joint].value = 18.0
 			await _frames(3)
 			_check("%s %s joint %d responds" % [label, finger, joint + 1], original.angle_to(sk.get_bone_pose_rotation(bone)) > deg_to_rad(16.0))
+			_lab._panel.grip.joints.select(joint)
+			_lab._panel.grip._show_joint()
+			for axis: int in range(3):
+				var initial: Quaternion = sk.get_bone_pose_rotation(bone)
+				_lab._panel.grip._joint_rotation[axis].value = 14.0
+				await _frames(2)
+				_check("%s %s phalanx %d local axis %d" % [label, finger, joint + 1, axis], initial.angle_to(sk.get_bone_pose_rotation(bone)) > deg_to_rad(12.0))
+				_lab._panel.grip._joint_rotation[axis].value = 0.0
+				await _frames(2)
 		var first: int = int((overlay.fingers["Left" + finger] as Array)[0].bone)
 		var original: Quaternion = sk.get_bone_pose_rotation(first)
 		_lab._panel.grip._spread.value = 10.0
@@ -240,6 +249,9 @@ func _test_storage() -> void:
 		"fingers": {"Index": {"bend": Vector3(1000, -1000, NAN), "spread": "invalid", "twist": INF}}})
 	_check("invalid data bounded and finite", (malformed.position as Vector3).is_zero_approx() and (malformed.rotation as Vector3).y == HandGripProfiles.ROTATION_LIMIT
 		and (malformed.fingers.Index.bend as Vector3).is_zero_approx() and malformed.fingers.Index.spread == 0.0 and malformed.fingers.Index.twist == 0.0)
+	_check("legacy finger values receive zero local rotations", malformed.fingers.Index.rotation == [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO])
+	var extra: Dictionary = HandGripProfiles.sanitize({"fingers": {"Thumb": {"rotation": [Vector3(999, -999, 20), Vector3(NAN, 0, 0)]}}})
+	_check("local rotations finite bounded and padded", extra.fingers.Thumb.rotation == [Vector3(180, -180, 20), Vector3.ZERO, Vector3.ZERO])
 
 
 func _test_transfer() -> void:
@@ -344,6 +356,11 @@ func _set_transfer_hand(side_index: int) -> void:
 		_lab._panel.grip._bend[2].value = -9 + finger * 2 - side_index
 		_lab._panel.grip._spread.value = 4 + finger + side_index
 		_lab._panel.grip._twist.value = -3 - finger - side_index
+		for joint: int in range(3):
+			_lab._panel.grip.joints.select(joint)
+			_lab._panel.grip._show_joint()
+			for axis: int in range(3):
+				_lab._panel.grip._joint_rotation[axis].value = (finger + 1) * (axis + 1) + joint + side_index
 
 
 func _press_transfer_button(button: Button) -> void:
