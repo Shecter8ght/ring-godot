@@ -43,7 +43,7 @@ CATALOGS = [
                "armor_top", "plate_composite", "plate_ceramic", "helmet_top", "headset_tactical", "bp_raid",
                "nvg"]},
     {"n": 4, "step": 30, "name": "Спецподразделения",
-     "what": "Vector, MCX Virtus, SCAR-L, MK12, бесшумные АС «Вал» и ВСС. LPVO, тяжёлые глушители, армейский композит.",
+     "what": "Vector, MCX Virtus, SCAR-L, MK12, бесшумные АС «Вал» и «Шорох-9». LPVO, тяжёлые глушители, армейский композит.",
      "items": ["wpn_smg_03", "wpn_ar_03", "wpn_ar_04", "wpn_dmr_02", "wpn_sp_01", "wpn_sp_02",
                "optic_lpvo_01", "mount_adjustable_01", "muzzle_supp_57_01", "muzzle_supp_300_01", "muzzle_supp_762_01",
                "plate_military"]},

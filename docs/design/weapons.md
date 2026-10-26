@@ -45,17 +45,22 @@
 - `Gear` (`src/items/gear.gd`) — операции над экземплярами: снять/поставить часть (`strip`,
   `fit`), перезарядка, снарядить магазины. `Armor` — пробитие. `WeaponStats` — характеристики.
 
+Инвентаризация прицелов, ЛЦУ и креплений (2026-10-26): [перечень и найденные пробелы](sight_inventory.md),
+машинная совместимость — `sight_inventory.json`, повторный сбор — `tools/sight_inventory.tscn`.
+
 ### ID
 Основные 23 позиции оружейной линейки взяты из `docs/RING_weapon_design_doc_v9_final_cut.html`; их
 встроенные PNG извлекает `node tools/import_weapon_catalog.mjs`. По отдельному решению владельца к ним
-добавлен VSS Vintorez из полного дизайн-документа; его собственная иконка хранится в проекте. Коды и ID:
+добавлена винтовка «Шорох-9» (прототип VSS Vintorez) из полного дизайн-документа; её собственная иконка хранится
+в проекте. Игровое название утверждено владельцем 2026-10-26; ID `wpn_sp_02`, пресет `VSS_BASE` и пути моделей
+сохранены для совместимости. Коды и ID:
 
 | Класс | Оружие |
 |---|---|
 | Пистолеты | `wpn_hg_01` ПМ; `wpn_hg_02` Glock 17 Gen5; `wpn_hg_03` HK USP .45 |
 | SMG / PDW | `wpn_smg_01` HK UMP45; `wpn_smg_02` FN P90; `wpn_smg_03` KRISS Vector; `wpn_smg_04` PP-19-01 Vityaz; `wpn_smg_05` SR-2M Veresk |
 | Автоматы | `wpn_ar_01` AK-12; `wpn_ar_02` M4A1; `wpn_ar_03` SIG MCX Virtus; `wpn_ar_04` FN SCAR-L; `wpn_ar_05` SIG MCX Spear; `wpn_sp_01` AS VAL |
-| Точные | `wpn_sp_02` VSS Vintorez; `wpn_dmr_01` HK MR762; `wpn_dmr_02` BCM MK12; `wpn_sr_01` Accuracy International AWM; `wpn_sr_02` Barrett M82A1 |
+| Точные | `wpn_sp_02` Шорох-9; `wpn_dmr_01` HK MR762; `wpn_dmr_02` BCM MK12; `wpn_sr_01` Accuracy International AWM; `wpn_sr_02` Barrett M82A1 |
 | Дробовики | `wpn_sg_01` Benelli M4; `wpn_sg_02` Saiga-12K; `wpn_sg_03` Mossberg 590A1 |
 | Пулемёты | `wpn_lmg_01` PKM; `wpn_lmg_02` M249 SAW |
 

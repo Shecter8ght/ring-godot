@@ -121,7 +121,7 @@ const weapons = {
       { spread: 1.9, ads_spread: 0.34, kick: 0.024, kick_h: 0.012, recover: 0.42, shake: 0.08, ergo: 58, rpm: 800, auto: true, reload: 2.2, range: 75, noise: 28, reliability: 0.975 },
       { optic_primary: "RAIL_TOP", side_left: "RAIL_SIDE", side_right: "RAIL_SIDE", underbarrel: "RAIL_BOTTOM" },
       { mag_if: "MAG_VSS", default_mag: "mag_939_20" }, { sound: "shot_sup939", integral: { suppressed: true, db: -14 } })),
-  wpn_sp_02: weaponItem("VSS Vintorez", "VSS", 175000, 2.6, 4, ["MILITARY", "PERIMETER", "RARE", "PRECISION"],
+  wpn_sp_02: weaponItem("Шорох-9", "Шорох-9", 175000, 2.6, 4, ["MILITARY", "PERIMETER", "RARE", "PRECISION"],
     "Бесшумная снайперская винтовка под 9×39. Точная и скрытная на средних дистанциях, но требовательна к выбору позиции.",
     weaponSpec("primary", "DMR", "9x39", "rifle", 0.894,
       { spread: 1.35, ads_spread: 0.16, ads_fov: 45, kick: 0.027, kick_h: 0.01, recover: 0.5, shake: 0.11, ergo: 49, rpm: 600, auto: true, reload: 2.35, range: 95, noise: 25, reliability: 0.98 },
@@ -222,7 +222,7 @@ const weaponFlavor = {
   wpn_smg_05: "Лёгкий, злой и быстрый: хорош для первого номера, которому нельзя задерживаться на углу.",
   wpn_ar_01: "Ствол на каждый день: не лучший ни в одной крайности, зато почти везде уместен.",
   wpn_sp_01: "Если всё сделано правильно, соседний отряд поймёт, что бой начался, только по телам.",
-  wpn_sp_02: "Выбирай голову и дистанцию: тихая точность ВСС важнее возможности удерживать спуск.",
+  wpn_sp_02: "Выбирай голову и дистанцию: тихая точность винтовки «Шорох-9» важнее возможности удерживать спуск.",
   wpn_ar_02: "Лёгкость и обвесы поощряют движение; стоять с ним на месте — терять главное преимущество.",
   wpn_ar_03: "С дозвуком и глушителем превращает короткие дистанции в очень тихую одностороннюю беседу.",
   wpn_ar_04: "Тяжелее карабина, зато длинная очередь меньше спорит с тем, куда смотрит прицел.",
@@ -371,8 +371,8 @@ const magazines = {
   mag_545_30: magItem("Магазин 5.45×39 на 30", "30", "MAG_AK545", 30, 2000, 0.23, 1, ["SCAV", "MILITARY", "PERIMETER"]),
   mag_545_45: magItem("Магазин 5.45×39 на 45", "45", "MAG_AK545", 45, 9000, 0.36, 2, ["SCAV", "MILITARY"], [1, 2], 1.15, -7, 0.98, "mag_ak45"),
   mag_545_60: magItem("Магазин 5.45×39 на 60", "60", "MAG_AK545", 60, 16000, 0.52, 3, ["MILITARY"], [1, 2], 1.3, -11, 0.95, "mag_ak45"),
-  mag_939_10: magItem("Магазин ВСС / АС ВАЛ на 10", "10", "MAG_VSS", 10, 5000, 0.12, 3, ["MILITARY", "PERIMETER"], [1, 1]),
-  mag_939_20: magItem("Магазин ВСС / АС ВАЛ на 20", "20", "MAG_VSS", 20, 9000, 0.2, 3, ["MILITARY", "PERIMETER"], [1, 2], 1.1, -3),
+  mag_939_10: magItem("Магазин «Шорох-9» / АС ВАЛ на 10", "10", "MAG_VSS", 10, 5000, 0.12, 3, ["MILITARY", "PERIMETER"], [1, 1]),
+  mag_939_20: magItem("Магазин «Шорох-9» / АС ВАЛ на 20", "20", "MAG_VSS", 20, 9000, 0.2, 3, ["MILITARY", "PERIMETER"], [1, 2], 1.1, -3),
   mag_556_20: magItem("Магазин STANAG 5.56 на 20", "20", "MAG_STANAG", 20, 2200, 0.13, 2, ["MILITARY", "POLICE"], [1, 1]),
   mag_556_30: magItem("Магазин STANAG 5.56 на 30", "30", "MAG_STANAG", 30, 2500, 0.16, 2, ["MILITARY", "PERIMETER", "POLICE"]),
   mag_556_40: magItem("Магазин STANAG 5.56 на 40", "40", "MAG_STANAG", 40, 8000, 0.23, 3, ["MILITARY", "PERIMETER"], [1, 2], 1.12, -5, 0.98, "mag_ak45"),
@@ -555,7 +555,7 @@ for (const [groupName, group] of Object.entries({ weapons, ammo, magazines, atta
 }
 
 const result = {
-  _comment: "Арсенал из docs/RING_weapon_design_doc_v9_final_cut.html: 23 реальные платформы плюс отдельно добавленный владельцем VSS Vintorez. Иконки основной линейки извлекаются tools/import_weapon_catalog.mjs; собственная иконка ВСС хранится в проекте. Процедурные 3D-основы временно сохранены. Вместимости магазинов и ключевые параметры сверены с материалами производителей; игровой баланс намеренно не является симулятором.",
+  _comment: "Арсенал из docs/RING_weapon_design_doc_v9_final_cut.html: 23 реальные платформы плюс отдельно добавленная владельцем винтовка «Шорох-9» (прототип VSS Vintorez). Иконки основной линейки извлекаются tools/import_weapon_catalog.mjs; собственная иконка винтовки хранится в проекте. Процедурные 3D-основы временно сохранены. Вместимости магазинов и ключевые параметры сверены с материалами производителей; игровой баланс намеренно не является симулятором.",
   calibers, models: old.models, weapons, ammo, magazines, attachments, presets,
   // Горячие клавиши песочницы рассчитаны на четыре слота; полный каталог доступен через консоль и админ-магазин.
   sandbox: ["GLOCK17_BASE", "AK12_BASE", "SAIGA12_BASE", "AWM_BASE"], aliases,
@@ -571,7 +571,7 @@ const regularWeapons = Object.keys(weapons).filter((id) => weapons[id].tier <= 3
 const regularAmmo = Object.keys(ammo).filter((id) => ammo[id].tier <= 3);
 const regularMags = Object.keys(magazines).filter((id) => magazines[id].tier <= 3);
 const regularAttachments = Object.keys(attachments).filter((id) => attachments[id].tier <= 3);
-trader._comment = "Михалыч продаёт 23 платформы из финального дизайн-документа и отдельно добавленный ВСС: T1 сразу, T2 с доверием 2, T3 с доверием 3. T4 появляется только при админском чите «Любое оружие».";
+trader._comment = "Михалыч продаёт 23 платформы из финального дизайн-документа и отдельно добавленный «Шорох-9»: T1 сразу, T2 с доверием 2, T3 с доверием 3. T4 появляется только при админском чите «Любое оружие».";
 trader.stock = [...regularWeapons, ...regularAmmo, ...regularMags, ...regularAttachments, ...nonArsenalStock];
 const trust = {};
 for (const [id, level] of Object.entries(trader.trust)) {
@@ -605,6 +605,6 @@ for (const [name, id] of Object.entries(iconNames)) {
 }
 
 const vssIconPath = path.join(iconsDir, "wpn_sp_02.png");
-if (!fs.existsSync(vssIconPath)) throw new Error("Нет собственной иконки VSS Vintorez: assets/icons/wpn_sp_02.png");
+if (!fs.existsSync(vssIconPath)) throw new Error("Нет собственной иконки «Шорох-9»: assets/icons/wpn_sp_02.png");
 
 console.log(`Готово: ${Object.keys(weapons).length} оружия, ${Object.keys(calibers).length} калибров, ${Object.keys(magazines).length} магазинов, ${Object.keys(iconNames).length + 1} PNG.`);

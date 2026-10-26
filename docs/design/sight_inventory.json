@@ -1,0 +1,3221 @@
+{
+	"adapters": {
+		"mount_adjustable_01": {
+			"asset": "res://assets/models/attachments/adapters/mount_adjustable_01.glb",
+			"catalog": 4.0,
+			"children": {
+				"optic_holo_01": {
+					"first_slot": -1,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_offset_rd_01": {
+					"first_slot": -1,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_rmr_01": {
+					"first_slot": -1,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				}
+			},
+			"host": "wpn_ar_01",
+			"in_stock": true,
+			"name": "Поворотный кронштейн 0–90°",
+			"rejected": {
+				"optic_12x_01": "не подходит крепление (OFFSET_45)",
+				"optic_2x_01": "не подходит крепление (OFFSET_45)",
+				"optic_4x_01": "не подходит крепление (OFFSET_45)",
+				"optic_8x_01": "не подходит крепление (OFFSET_45)",
+				"optic_lpvo_01": "не подходит крепление (OFFSET_45)",
+				"optic_pso_01": "не подходит крепление (OFFSET_45)",
+				"optic_rd_01": "не подходит крепление (OFFSET_45)",
+				"optic_rd_dt_01": "не подходит крепление (OFFSET_45)",
+				"optic_zorin_k1": "не подходит крепление (OFFSET_45)",
+				"tac_combo_01": "не подходит крепление (OFFSET_45)",
+				"tac_laser_01": "не подходит крепление (OFFSET_45)"
+			},
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			}
+		},
+		"mount_offset45_01": {
+			"asset": "res://assets/models/attachments/adapters/mount_offset45_01.glb",
+			"catalog": 2.0,
+			"children": {
+				"optic_holo_01": {
+					"first_slot": -1,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_offset_rd_01": {
+					"first_slot": -1,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_rmr_01": {
+					"first_slot": -1,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				}
+			},
+			"host": "wpn_ar_01",
+			"in_stock": true,
+			"name": "Кронштейн 45° под мини-коллиматор",
+			"rejected": {
+				"optic_12x_01": "не подходит крепление (OFFSET_45)",
+				"optic_2x_01": "не подходит крепление (OFFSET_45)",
+				"optic_4x_01": "не подходит крепление (OFFSET_45)",
+				"optic_8x_01": "не подходит крепление (OFFSET_45)",
+				"optic_lpvo_01": "не подходит крепление (OFFSET_45)",
+				"optic_pso_01": "не подходит крепление (OFFSET_45)",
+				"optic_rd_01": "не подходит крепление (OFFSET_45)",
+				"optic_rd_dt_01": "не подходит крепление (OFFSET_45)",
+				"optic_zorin_k1": "не подходит крепление (OFFSET_45)",
+				"tac_combo_01": "не подходит крепление (OFFSET_45)",
+				"tac_laser_01": "не подходит крепление (OFFSET_45)"
+			},
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			}
+		},
+		"mount_pm_k1": {
+			"asset": "res://assets/models/attachments/mount_pm_k1/mount_pm_k1.glb",
+			"catalog": 0,
+			"children": {
+				"optic_2x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_4x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_holo_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_rd_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 2
+				},
+				"optic_rmr_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 2
+				},
+				"optic_zorin_k1": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				}
+			},
+			"host": "wpn_hg_01",
+			"in_stock": false,
+			"name": "Крепление К-1 на ПМ",
+			"rejected": {
+				"optic_12x_01": "не хватает длины планки",
+				"optic_8x_01": "не хватает длины планки",
+				"optic_lpvo_01": "не хватает длины планки",
+				"optic_offset_rd_01": "не подходит крепление (RAIL_TOP)",
+				"optic_pso_01": "не подходит крепление (RAIL_TOP)",
+				"optic_rd_dt_01": "не подходит крепление (RAIL_TOP)",
+				"tac_combo_01": "не подходит крепление (RAIL_TOP)",
+				"tac_laser_01": "МЕТКА-4 слишком велика для пистолета"
+			},
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			}
+		},
+		"mount_rail_ext_01": {
+			"asset": "res://assets/models/attachments/adapters/mount_rail_ext_01.glb",
+			"catalog": 1.0,
+			"children": {
+				"optic_12x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 3
+				},
+				"optic_2x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 5
+				},
+				"optic_4x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 5
+				},
+				"optic_8x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 3
+				},
+				"optic_holo_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 5
+				},
+				"optic_lpvo_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 3
+				},
+				"optic_rd_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 5
+				},
+				"optic_rmr_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 5
+				},
+				"optic_zorin_k1": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 4
+				},
+				"tac_laser_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 5
+				}
+			},
+			"host": "wpn_ar_01",
+			"in_stock": true,
+			"name": "Планка-удлинитель 120 мм",
+			"rejected": {
+				"optic_offset_rd_01": "не подходит крепление (RAIL_TOP)",
+				"optic_pso_01": "не подходит крепление (RAIL_TOP)",
+				"optic_rd_dt_01": "не подходит крепление (RAIL_TOP)",
+				"tac_combo_01": "не подходит крепление (RAIL_TOP)"
+			},
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			}
+		},
+		"mount_riser_01": {
+			"asset": "res://assets/models/attachments/adapters/mount_riser_01.glb",
+			"catalog": 1.0,
+			"children": {
+				"optic_2x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_4x_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_holo_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_rd_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"optic_rmr_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				},
+				"tac_laser_01": {
+					"first_slot": 0,
+					"key": "optic_primary/rail",
+					"slot_count": 1
+				}
+			},
+			"host": "wpn_ar_01",
+			"in_stock": true,
+			"name": "Проставка 1″ (Пикатинни)",
+			"rejected": {
+				"optic_12x_01": "не хватает длины планки",
+				"optic_8x_01": "не хватает длины планки",
+				"optic_lpvo_01": "не хватает длины планки",
+				"optic_offset_rd_01": "не подходит крепление (RAIL_TOP)",
+				"optic_pso_01": "не подходит крепление (RAIL_TOP)",
+				"optic_rd_dt_01": "не подходит крепление (RAIL_TOP)",
+				"optic_zorin_k1": "не хватает длины планки",
+				"tac_combo_01": "не подходит крепление (RAIL_TOP)"
+			},
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			}
+		}
+	},
+	"devices": {
+		"optic_12x_01": {
+			"aim_k": 0.65,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 650000,
+			"catalog": 5.0,
+			"clamp_m": 0.08,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 5
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.25,
+				"ergo": -14.0
+			},
+			"example": {
+				"mesh_count": 59,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_12x_01",
+						"slot": 0
+					}
+				},
+				"ocular": true,
+				"reticle": "",
+				"scoped": true,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 12.0
+			},
+			"fits": [
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"pmc"
+			],
+			"name": "Оптика 12×",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "PRIMARY",
+			"tier": 4.0,
+			"type": "OPTIC_12X",
+			"weight_kg": 0.95,
+			"zoom": 12.0,
+			"zoom_max": 12.0,
+			"zoom_min": 12.0
+		},
+		"optic_2x_01": {
+			"aim_k": 0.95,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 80000,
+			"catalog": 2.0,
+			"clamp_m": 0.04,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 6
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 7
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.5,
+				"ergo": -6.0
+			},
+			"example": {
+				"mesh_count": 59,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_2x_01",
+						"slot": 0
+					}
+				},
+				"ocular": true,
+				"reticle": "",
+				"scoped": true,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 2.0
+			},
+			"fits": [
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"supply_drop"
+			],
+			"name": "Прицел 2×",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "PRIMARY",
+			"tier": 2.0,
+			"type": "OPTIC_2X",
+			"weight_kg": 0.35,
+			"zoom": 2.0,
+			"zoom_max": 2.0,
+			"zoom_min": 2.0
+		},
+		"optic_4x_01": {
+			"aim_k": 0.85,
+			"asset": "res://assets/models/attachments/scope_4x32/scope_4x32.gltf",
+			"blocks": [],
+			"buy_price": 150000,
+			"catalog": 3.0,
+			"clamp_m": 0.04,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 6
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 7
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.4,
+				"ergo": -8.0
+			},
+			"example": {
+				"mesh_count": 51,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_4x_01",
+						"slot": 0
+					}
+				},
+				"ocular": true,
+				"reticle": "res://assets/models/attachments/scope_4x32/scope_4x32_reticle.png",
+				"scoped": true,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 4.0
+			},
+			"fits": [
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": true,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"pmc",
+				"supply_drop"
+			],
+			"name": "Оптика 4×32",
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			},
+			"reticle": "res://assets/models/attachments/scope_4x32/scope_4x32_reticle.png",
+			"reticle_exists": true,
+			"role": "PRIMARY",
+			"tier": 3.0,
+			"type": "OPTIC_4X",
+			"weight_kg": 0.45,
+			"zoom": 4.0,
+			"zoom_max": 4.0,
+			"zoom_min": 4.0
+		},
+		"optic_8x_01": {
+			"aim_k": 0.72,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 450000,
+			"catalog": 5.0,
+			"clamp_m": 0.08,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 2
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 5
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.3,
+				"ergo": -12.0
+			},
+			"example": {
+				"mesh_count": 59,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_8x_01",
+						"slot": 0
+					}
+				},
+				"ocular": true,
+				"reticle": "",
+				"scoped": true,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 8.0
+			},
+			"fits": [
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"pmc"
+			],
+			"name": "Оптика 8×",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "PRIMARY",
+			"tier": 4.0,
+			"type": "OPTIC_8X",
+			"weight_kg": 0.8,
+			"zoom": 8.0,
+			"zoom_max": 8.0,
+			"zoom_min": 8.0
+		},
+		"optic_holo_01": {
+			"aim_k": 1.1,
+			"asset": "res://assets/models/attachments/lumar_h1/lumar_h1.tscn",
+			"blocks": [],
+			"buy_price": 80000,
+			"catalog": 2.0,
+			"clamp_m": 0.04,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 6
+					},
+					{
+						"first_slot": 0,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": 0,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 7
+					},
+					{
+						"first_slot": 0,
+						"key": "side_left",
+						"slot_count": 3
+					},
+					{
+						"first_slot": 0,
+						"key": "side_right",
+						"slot_count": 3
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.58,
+				"ergo": -4.0
+			},
+			"example": {
+				"mesh_count": 53,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_holo_01",
+						"slot": 0
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 0.0
+			},
+			"fits": [
+				"RAIL_TOP",
+				"OFFSET_45",
+				"RAIL_SIDE"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"pmc",
+				"supply_drop"
+			],
+			"name": "ЛУМАР H1",
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "BOTH",
+			"tier": 2.0,
+			"type": "OPTIC_HOLOGRAPHIC",
+			"weight_kg": 0.33,
+			"zoom": 0.0,
+			"zoom_max": 0.0,
+			"zoom_min": 0.0
+		},
+		"optic_lpvo_01": {
+			"aim_k": 0.85,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 350000,
+			"catalog": 4.0,
+			"clamp_m": 0.07,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 5
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 3
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 5
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.36,
+				"ergo": -9.0
+			},
+			"example": {
+				"mesh_count": 59,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_lpvo_01",
+						"slot": 0
+					}
+				},
+				"ocular": true,
+				"reticle": "",
+				"scoped": true,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 5.0
+			},
+			"fits": [
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"pmc"
+			],
+			"name": "LPVO 1–6×",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "PRIMARY",
+			"tier": 4.0,
+			"type": "OPTIC_LPVO",
+			"weight_kg": 0.62,
+			"zoom": 5.0,
+			"zoom_max": 6.0,
+			"zoom_min": 1.0
+		},
+		"optic_offset_rd_01": {
+			"aim_k": 1.25,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 85000,
+			"catalog": 3.0,
+			"clamp_m": 0.025,
+			"direct": {},
+			"effects": {
+				"ads_spread": 0.8,
+				"ergo": -2.0
+			},
+			"example": {
+				"mesh_count": 22,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "mount_offset45_01"
+					},
+					"optic_primary/rail": {
+						"dur": 100.0,
+						"id": "optic_offset_rd_01"
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_ar_01",
+				"zoom": 0.0
+			},
+			"fits": [
+				"OFFSET_45"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"pmc",
+				"supply_drop"
+			],
+			"name": "Угловой мини-коллиматор 45°",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "SECONDARY",
+			"tier": 3.0,
+			"type": "OFFSET_RED_DOT",
+			"weight_kg": 0.09,
+			"zoom": 0.0,
+			"zoom_max": 0.0,
+			"zoom_min": 0.0
+		},
+		"optic_pso_01": {
+			"aim_k": 0.8,
+			"asset": "res://assets/models/attachments/pso_vss/pso_vss.gltf",
+			"blocks": [
+				"top_front"
+			],
+			"buy_price": 100000,
+			"catalog": 2.0,
+			"clamp_m": 0.04,
+			"direct": {
+				"wpn_sp_02": [
+					{
+						"first_slot": -1,
+						"key": "optic_primary",
+						"slot_count": 1
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.42,
+				"ergo": -10.0
+			},
+			"example": {
+				"mesh_count": 10,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_pso_01"
+					}
+				},
+				"ocular": true,
+				"reticle": "res://assets/models/attachments/pso_vss/pso_vss_reticle.png",
+				"scoped": true,
+				"sight_line": true,
+				"weapon": "wpn_sp_02",
+				"zoom": 4.0
+			},
+			"fits": [
+				"DOVETAIL"
+			],
+			"icon_exists": true,
+			"illumination": true,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"marauder",
+				"supply_drop"
+			],
+			"name": "Оптика 4× на «ласточкин хвост»",
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			},
+			"reticle": "res://assets/models/attachments/pso_vss/pso_vss_reticle.png",
+			"reticle_exists": true,
+			"role": "PRIMARY",
+			"tier": 2.0,
+			"type": "OPTIC_4X",
+			"weight_kg": 0.6,
+			"zoom": 4.0,
+			"zoom_max": 4.0,
+			"zoom_min": 4.0
+		},
+		"optic_rd_01": {
+			"aim_k": 1.08,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 30000,
+			"catalog": 1.0,
+			"clamp_m": 0.03,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 7
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 7
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.65,
+				"ergo": -3.0
+			},
+			"example": {
+				"mesh_count": 62,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_rd_01",
+						"slot": 0
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 0.0
+			},
+			"fits": [
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"security",
+				"marauder"
+			],
+			"name": "Коллиматор-трубка",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "PRIMARY",
+			"tier": 1.0,
+			"type": "OPTIC_RED_DOT",
+			"weight_kg": 0.2,
+			"zoom": 0.0,
+			"zoom_max": 0.0,
+			"zoom_min": 0.0
+		},
+		"optic_rd_dt_01": {
+			"aim_k": 1.05,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 28000,
+			"catalog": 1.0,
+			"clamp_m": 0.03,
+			"direct": {
+				"wpn_sp_02": [
+					{
+						"first_slot": -1,
+						"key": "optic_primary",
+						"slot_count": 1
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.68,
+				"ergo": -4.0
+			},
+			"example": {
+				"mesh_count": 20,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_rd_dt_01"
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_sp_02",
+				"zoom": 0.0
+			},
+			"fits": [
+				"DOVETAIL"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"marauder"
+			],
+			"name": "Коллиматор на «ласточкин хвост»",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "PRIMARY",
+			"tier": 1.0,
+			"type": "OPTIC_RED_DOT",
+			"weight_kg": 0.3,
+			"zoom": 0.0,
+			"zoom_max": 0.0,
+			"zoom_min": 0.0
+		},
+		"optic_rmr_01": {
+			"aim_k": 1.12,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 55000,
+			"catalog": 2.0,
+			"clamp_m": 0.025,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 8
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 7
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_hg_02": [
+					{
+						"first_slot": -1,
+						"key": "optic_primary",
+						"slot_count": 1
+					}
+				],
+				"wpn_hg_03": [
+					{
+						"first_slot": -1,
+						"key": "optic_primary",
+						"slot_count": 1
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 5
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 8
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.7,
+				"ergo": -1.0
+			},
+			"example": {
+				"mesh_count": 72,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_rmr_01"
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_hg_02",
+				"zoom": 0.0
+			},
+			"fits": [
+				"SLIDE_RMR",
+				"OFFSET_45",
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {},
+			"loot": [
+				"security",
+				"supply_drop"
+			],
+			"name": "Мини-коллиматор",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "BOTH",
+			"tier": 2.0,
+			"type": "OPTIC_RED_DOT",
+			"weight_kg": 0.05,
+			"zoom": 0.0,
+			"zoom_max": 0.0,
+			"zoom_min": 0.0
+		},
+		"optic_zorin_k1": {
+			"aim_k": 1.12,
+			"asset": "res://assets/models/attachments/zorin_k1/zorin_k1.glb",
+			"blocks": [],
+			"buy_price": 0,
+			"catalog": 0,
+			"clamp_m": 0.046,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 7
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 6
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 6
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 6
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 6
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": 0,
+						"key": "optic_primary",
+						"slot_count": 4
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 6
+					}
+				]
+			},
+			"effects": {
+				"ads_spread": 0.72,
+				"ergo": -2.0
+			},
+			"example": {
+				"mesh_count": 53,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "optic_zorin_k1",
+						"slot": 0
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_smg_01",
+				"zoom": 0.0
+			},
+			"fits": [
+				"RAIL_TOP"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": false,
+			"laser": {},
+			"loot": [
+				"security",
+				"supply_drop"
+			],
+			"name": "Коллиматор ЗОРИН К-1",
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "PRIMARY",
+			"tier": 2.0,
+			"type": "OPTIC_RED_DOT",
+			"weight_kg": 0.09,
+			"zoom": 0.0,
+			"zoom_max": 0.0,
+			"zoom_min": 0.0
+		},
+		"tac_combo_01": {
+			"aim_k": 1.0,
+			"asset": "",
+			"blocks": [],
+			"buy_price": 126000,
+			"catalog": 3.0,
+			"clamp_m": 0.035,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 0,
+						"key": "underbarrel",
+						"slot_count": 5
+					},
+					{
+						"first_slot": 0,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": 0,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_02": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_03": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_04": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_ar_05": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_dmr_01": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_dmr_02": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_hg_02": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					}
+				],
+				"wpn_hg_03": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					}
+				],
+				"wpn_lmg_01": [
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_lmg_02": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sg_01": [
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sg_02": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sg_03": [
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_01": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_02": [
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_03": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_04": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_smg_05": [
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sp_01": [
+					{
+						"first_slot": -1,
+						"key": "underbarrel",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": -1,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "underbarrel",
+						"slot_count": 3
+					},
+					{
+						"first_slot": 0,
+						"key": "side_left",
+						"slot_count": 3
+					},
+					{
+						"first_slot": 0,
+						"key": "side_right",
+						"slot_count": 3
+					}
+				]
+			},
+			"effects": {
+				"ergo": -2.0
+			},
+			"example": {
+				"mesh_count": 73,
+				"mods": {
+					"underbarrel": {
+						"dur": 100.0,
+						"id": "tac_combo_01"
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_hg_02",
+				"zoom": 0.0
+			},
+			"fits": [
+				"RAIL_SIDE",
+				"PISTOL_RAIL",
+				"RAIL_BOTTOM"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {
+				"hip_spread": 0.75,
+				"iso_aim": 1.15
+			},
+			"loot": [
+				"pmc",
+				"supply_drop"
+			],
+			"name": "Фонарь + ЛЦУ (блок)",
+			"resource": {
+				"kind": "procedural"
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "",
+			"tier": 3.0,
+			"type": "FLASHLIGHT_LASER_COMBO",
+			"weight_kg": 0.18,
+			"zoom": 0,
+			"zoom_max": 0,
+			"zoom_min": 0
+		},
+		"tac_laser_01": {
+			"aim_k": 1.0,
+			"asset": "res://assets/models/attachments/metka4/metka4.glb",
+			"blocks": [],
+			"buy_price": 35000,
+			"catalog": 2.0,
+			"clamp_m": 0.034,
+			"direct": {
+				"wpn_ar_01": [
+					{
+						"first_slot": 3,
+						"key": "optic_primary",
+						"slot_count": 4
+					},
+					{
+						"first_slot": 0,
+						"key": "top_front",
+						"slot_count": 7
+					},
+					{
+						"first_slot": 0,
+						"key": "underbarrel",
+						"slot_count": 5
+					},
+					{
+						"first_slot": 0,
+						"key": "side_left",
+						"slot_count": 1
+					},
+					{
+						"first_slot": 0,
+						"key": "side_right",
+						"slot_count": 1
+					}
+				],
+				"wpn_sp_02": [
+					{
+						"first_slot": 0,
+						"key": "underbarrel",
+						"slot_count": 3
+					},
+					{
+						"first_slot": 0,
+						"key": "side_left",
+						"slot_count": 3
+					},
+					{
+						"first_slot": 0,
+						"key": "side_right",
+						"slot_count": 3
+					}
+				]
+			},
+			"effects": {
+				"ergo": -1.0
+			},
+			"example": {
+				"mesh_count": 13,
+				"mods": {
+					"optic_primary": {
+						"dur": 100.0,
+						"id": "tac_laser_01",
+						"remote": {
+							"point": "top_front",
+							"reverse": false,
+							"slot": 0
+						},
+						"slot": 3
+					}
+				},
+				"ocular": false,
+				"reticle": "",
+				"scoped": false,
+				"sight_line": true,
+				"weapon": "wpn_ar_01",
+				"zoom": 0.0
+			},
+			"fits": [
+				"RAIL_TOP",
+				"RAIL_SIDE",
+				"RAIL_BOTTOM"
+			],
+			"icon_exists": true,
+			"illumination": false,
+			"in_stock": true,
+			"laser": {
+				"hip_spread": 0.75,
+				"iso_aim": 1.15
+			},
+			"loot": [
+				"security",
+				"supply_drop"
+			],
+			"name": "ВЕЙР «МЕТКА-4»",
+			"resource": {
+				"exists": true,
+				"kind": "asset",
+				"loadable": true
+			},
+			"reticle": "",
+			"reticle_exists": false,
+			"role": "",
+			"tier": 2.0,
+			"type": "LASER",
+			"weight_kg": 0.08,
+			"zoom": 0,
+			"zoom_max": 0,
+			"zoom_min": 0
+		}
+	},
+	"issues": [],
+	"schema": 1,
+	"weapons": {
+		"signal_launcher": {
+			"asset": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex.glb",
+			"asset_loaded": true,
+			"integral": {},
+			"model": "flare_pistol_codex",
+			"mounts": {},
+			"name": "Компактная сигнальная ракетница",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_ar_01": {
+			"asset": "res://assets/models/weapons/veras54/veras54.gltf",
+			"asset_loaded": true,
+			"integral": {},
+			"model": "veras54",
+			"mounts": {
+				"muzzle": "THREAD_545",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_AK",
+				"top_front": "RAIL_TOP",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "ВЕРАС-54",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_ar_02": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_556",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_AR",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "M4A1",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_ar_03": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_300",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_MCX",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "SIG MCX Virtus",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_ar_04": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_556",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_SCAR",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "FN SCAR-L",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_ar_05": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_68",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_MCX",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "SIG MCX Spear",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_dmr_01": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_762",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_AR",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "HK MR762",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_dmr_02": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_556",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_AR",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "BCM MK12",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_hg_01": {
+			"asset": "res://assets/models/weapons/pm/pm.gltf",
+			"asset_loaded": true,
+			"integral": {},
+			"model": "pistol",
+			"mounts": {
+				"muzzle": "THREAD_PM",
+				"optic_primary": "PM_SLIDE_K1"
+			},
+			"name": "ПМ",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_hg_02": {
+			"asset": "res://assets/models/weapons/glock17/glock17.glb",
+			"asset_loaded": true,
+			"integral": {},
+			"model": "pistol",
+			"mounts": {
+				"muzzle": "THREAD_9",
+				"optic_primary": "SLIDE_RMR",
+				"underbarrel": "PISTOL_RAIL"
+			},
+			"name": "Glock 17 Gen5",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_hg_03": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "pistol",
+			"mounts": {
+				"muzzle": "THREAD_45",
+				"optic_primary": "SLIDE_RMR",
+				"underbarrel": "PISTOL_RAIL"
+			},
+			"name": "HK USP .45",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_lmg_01": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"optic_primary": "RAIL_TOP",
+				"side_right": "RAIL_SIDE",
+				"underbarrel": "BIPOD_CLAMP"
+			},
+			"name": "PKM",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_lmg_02": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_556",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_LMG",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "M249 SAW",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_sg_01": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "shotgun",
+			"mounts": {
+				"muzzle": "THREAD_12",
+				"optic_primary": "RAIL_TOP",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_SG"
+			},
+			"name": "Benelli M4",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_sg_02": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "shotgun",
+			"mounts": {
+				"muzzle": "THREAD_12",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_AK",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "Saiga-12K",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_sg_03": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "shotgun",
+			"mounts": {
+				"muzzle": "THREAD_12",
+				"optic_primary": "RAIL_TOP",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_SG"
+			},
+			"name": "Mossberg 590A1",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_smg_01": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_45",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_SMG",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "HK UMP45",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_smg_02": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_57",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE"
+			},
+			"name": "FN P90",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_smg_03": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_45",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_SMG",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "KRISS Vector",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_smg_04": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_9",
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"stock": "STOCK_AK",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "PP-19-01 Vityaz",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_smg_05": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {},
+			"model": "rifle",
+			"mounts": {
+				"muzzle": "THREAD_9",
+				"optic_primary": "RAIL_TOP",
+				"side_right": "RAIL_SIDE"
+			},
+			"name": "SR-2M Veresk",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_sp_01": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {
+				"db": -14.0,
+				"suppressed": true
+			},
+			"model": "rifle",
+			"mounts": {
+				"optic_primary": "RAIL_TOP",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "AS VAL",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_sp_02": {
+			"asset": "res://assets/models/weapons/vss_m/vss_m.gltf",
+			"asset_loaded": true,
+			"integral": {
+				"db": -15.0,
+				"suppressed": true
+			},
+			"model": "vss_m",
+			"mounts": {
+				"optic_primary": "DOVETAIL",
+				"side_left": "RAIL_SIDE",
+				"side_right": "RAIL_SIDE",
+				"top_front": "RAIL_TOP",
+				"underbarrel": "RAIL_BOTTOM"
+			},
+			"name": "Шорох-9",
+			"ocular": false,
+			"sight_line": true
+		},
+		"wpn_sr_01": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {
+				"zoom": 8.0
+			},
+			"model": "bolt",
+			"mounts": {
+				"muzzle": "THREAD_338",
+				"underbarrel": "BIPOD_CLAMP"
+			},
+			"name": "Accuracy International AWM",
+			"ocular": true,
+			"sight_line": true
+		},
+		"wpn_sr_02": {
+			"asset": "",
+			"asset_loaded": false,
+			"integral": {
+				"zoom": 10.0
+			},
+			"model": "bolt",
+			"mounts": {
+				"underbarrel": "BIPOD_CLAMP"
+			},
+			"name": "Barrett M82A1",
+			"ocular": true,
+			"sight_line": true
+		}
+	}
+}
