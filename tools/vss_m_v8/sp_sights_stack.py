@@ -26,7 +26,11 @@ for name, fn in BUILD.items():
     sp_lib.clear(st)
     fn(st)
     print(name, [n.get_name() for n in L.get_root_layer_nodes(st)])
-sp_lib.P.save_as(OUT + "/sights.spp")
-for name in BUILD:
-    status, tex = sp_lib.export(OUT + "/export", name)
-    print("export", name, status)
+
+
+def _finish():
+    sp_lib.P.save_as(OUT + "/sights.spp")
+    return [(n, str(sp_lib.export(OUT + "/export", n)[0])) for n in BUILD]
+
+
+sp_lib.when_idle(_finish)               # сохранить и выгрузить, когда Painter досчитает стек (метка _stack_done.txt)

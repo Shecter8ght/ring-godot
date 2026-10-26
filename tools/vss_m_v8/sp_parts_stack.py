@@ -15,11 +15,12 @@ from sp_lib import L  # noqa: E402
 
 OUT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_parts"
 BUILD = {
-    "steel_parts": lambda st: sp_stacks.steel(st),
+    "steel_parts": lambda st: sp_stacks.steel(st, parts=sp_stacks.STEEL_PARTS_PARTS),
     "suppressor": sp_stacks.suppressor,
     "bare_steel": sp_stacks.bare_steel,
     "handguard": lambda st: sp_stacks.polymer(st),
     "magazine": sp_stacks.magazine,
+    "magazine_30": lambda st: sp_stacks.magazine(st, sp_stacks.MAG_LIPS_30),
     "sleeve": sp_stacks.anodized,
     "wood": sp_stacks.wood,
     "rubber": sp_stacks.rubber,
@@ -33,7 +34,11 @@ for name in only:
     BUILD[name](st)
     sp_stacks.contact_marks(st, name)
     print(name, [n.get_name() for n in L.get_root_layer_nodes(st)])
-sp_lib.P.save_as(OUT + "/parts.spp")
-for name in only:
-    status, tex = sp_lib.export(OUT + "/export", name)
-    print("export", name, status)
+
+
+def _finish(names=tuple(only)):
+    sp_lib.P.save_as(OUT + "/parts.spp")
+    return [(n, str(sp_lib.export(OUT + "/export", n)[0])) for n in names]
+
+
+sp_lib.when_idle(_finish)               # сохранить и выгрузить, когда Painter досчитает стек (метка _stack_done.txt)

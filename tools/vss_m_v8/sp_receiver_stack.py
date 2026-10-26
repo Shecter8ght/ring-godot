@@ -15,9 +15,14 @@ from sp_lib import L  # noqa: E402
 OUT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_receiver"
 st = sp_lib.stack_by_name("receiver")
 sp_lib.clear(st)
-sp_stacks.steel(st, rail_meshes=["Cover_picatinny__sp"])
+sp_stacks.steel(st, rail_meshes=["Cover_picatinny__sp"], parts=sp_stacks.RECEIVER_PARTS)
 sp_stacks.contact_marks(st, "receiver")
 print("stack:", [n.get_name() for n in L.get_root_layer_nodes(st)])
-sp_lib.P.save_as(OUT + "/receiver.spp")
-status, tex = sp_lib.export(OUT + "/export", "receiver")
-print("export", status, tex)
+
+
+def _finish():
+    sp_lib.P.save_as(OUT + "/receiver.spp")
+    return str(sp_lib.export(OUT + "/export", "receiver")[0])
+
+
+sp_lib.when_idle(_finish)               # сохранить и выгрузить, когда Painter досчитает стек (метка _stack_done.txt)

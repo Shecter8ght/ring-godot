@@ -3,7 +3,7 @@
 # магазина в одной плоскости XZ, сдвинуты только по Y): выше заплечика — 1, ниже на 4 мм — 0. Запекается излучением
 # в общую развёртку набора (sp_export.py), детали, кроме корпусов, — чёрные.
 # blender --background --factory-startup _asset_src/vss_m_v8/VSS_M_v8_sp.blend --python-exit-code 1 \
-#   --python tools/vss_m_v8/mag_masks_bake.py -- <mag_lips.png> [размер]
+#   --python tools/vss_m_v8/mag_masks_bake.py -- <mag_lips.png> [размер] [набор: magazine|magazine_30]
 import math
 import os
 import sys
@@ -61,6 +61,7 @@ def main():
     a = sys.argv[sys.argv.index("--") + 1:]
     path = a[0]
     size = int(a[1]) if len(a) > 1 else 4096
+    group = a[2] if len(a) > 2 else "magazine"
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     sc.cycles.samples = 4
@@ -69,7 +70,7 @@ def main():
     img.colorspace_settings.name = "Non-Color"
     img.generated_color = (0, 0, 0, 1)
     bpy.ops.object.select_all(action="DESELECT")
-    objs = [bpy.data.objects[n] for n in sp_export.GROUPS["magazine"] if n in bpy.data.objects]
+    objs = [bpy.data.objects[n] for n in sp_export.GROUPS[group] if n in bpy.data.objects]
     for o in objs:
         mat = build_material(o.name in BODIES)
         tex = mat.node_tree.nodes.new("ShaderNodeTexImage")

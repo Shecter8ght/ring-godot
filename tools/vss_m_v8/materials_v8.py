@@ -524,8 +524,14 @@ def build_all(prints=None):
     b.inputs["Roughness"].default_value = 0.02
     b.inputs["Transmission Weight"].default_value = 1.0
     b.inputs["IOR"].default_value = 1.52
-    b.inputs["Coat Weight"].default_value = 0.6
-    b.inputs["Coat Tint"].default_value = (0.75, 0.6, 1.0, 1.0)
+    if "Thin Film Thickness" in b.inputs:
+        # просветление оптики — тонкая плёнка: в бликах линз зелёно-фиолетовые переливы, как у настоящих прицелов
+        b.inputs["Coat Weight"].default_value = 0.0
+        b.inputs["Thin Film Thickness"].default_value = 420.0
+        b.inputs["Thin Film IOR"].default_value = 1.38
+    else:
+        b.inputs["Coat Weight"].default_value = 0.6
+        b.inputs["Coat Tint"].default_value = (0.75, 0.6, 1.0, 1.0)
     M["Glass"] = g
     return M
 

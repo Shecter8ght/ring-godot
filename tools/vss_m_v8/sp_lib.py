@@ -143,6 +143,23 @@ def only_meshes(layer, names):
     layer.set_geometry_mask_enabled_meshes(names)
 
 
+def when_idle(fn, marker="_stack_done.txt"):
+    """Сохранение и выгрузка — когда Painter досчитает стек: сразу после сборки слоёв save_as давал «Painter is busy»,
+    а следующее задание поверх занятого Painter роняло его (2026-10-26). Итог — в файл-метку в папке заданий."""
+    import os
+    import traceback
+    path = os.path.join(os.environ.get("SP_BRIDGE_DIR", ""), marker)
+
+    def run():
+        try:
+            text = "OK " + str(fn())
+        except Exception:
+            text = "ERROR " + traceback.format_exc()
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
+    P.execute_when_not_busy(run)
+
+
 def export(out_dir, texset):
     pr = [p for p in X.list_predefined_export_presets() if p.name == "glTF PBR Metal Roughness"][0]
     cfg = {"exportShaderParams": False, "exportPath": out_dir, "defaultExportPreset": pr.url,

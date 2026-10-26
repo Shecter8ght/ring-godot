@@ -22,7 +22,12 @@ def _write(path, text):
         f.write(text)
 
 
+_STARTED = time.time()
+
+
 def _poll():
+    if time.time() - _STARTED < 120.0:            # только стартовые окна: перебор окон во время работы проекта рискован
+        _dismiss_popups()
     d = _jobs_dir()
     if not d or not os.path.isdir(d):
         return
@@ -50,6 +55,24 @@ def _poll():
             buf.write(traceback.format_exc())
         _write(job[:-3] + ".out", f"{status} {time.time() - t0:.2f}s\n" + buf.getvalue())
         break                              # одно задание за тик: Painter успевает обработать события
+
+
+_POPUPS = ("Home screen", "What's new")
+
+
+def _dismiss_popups():
+    """Стартовые окна Painter («Home screen» после перезагрузки, «What's new») модальные — с ними задания не идут
+    (2026-10-26 цепочка встала на создании проекта); закрываем их сами."""
+    from PySide6 import QtWidgets
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        return
+    for w in app.topLevelWidgets():
+        try:
+            if w.isVisible() and w.windowTitle() in _POPUPS:
+                w.close()
+        except RuntimeError:
+            continue
 
 
 def start_plugin():

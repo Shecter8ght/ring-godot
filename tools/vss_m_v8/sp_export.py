@@ -23,15 +23,17 @@ GROUPS = {
                    "Magazine_10_spring", "Magazine_20_spring", "Magazine_30_spring"],
     "handguard": ["Handguard"],
     "sleeve": ["Rail_sleeve"],
+    # магазины — два атласа (26.10): втроём в одном было 6,3 пикс/мм, самая низкая плотность в модели
     "magazine": ["Magazine_10", "Magazine_10_floorplate", "Magazine_10_follower", "Magazine_10_plate_button",
-                 "Magazine_20", "Magazine_20_floorplate", "Magazine_20_follower", "Magazine_20_plate_button",
-                 "Magazine_30", "Magazine_30_floorplate", "Magazine_30_follower", "Magazine_30_plate_button"],
+                 "Magazine_20", "Magazine_20_floorplate", "Magazine_20_follower", "Magazine_20_plate_button"],
+    "magazine_30": ["Magazine_30", "Magazine_30_floorplate", "Magazine_30_follower", "Magazine_30_plate_button"],
     "wood": ["Wood_stock_v8"],
     "rubber": ["Rubber_butt_pad"],
     # все 60 патронов — одна сетка: в Painter один патрон, гильза и пуля — отдельными сетками (маски по имени)
     "rounds": ["Magazine_30_round_01"],
 }
-PARTS = ["steel_parts", "suppressor", "bare_steel", "handguard", "sleeve", "magazine", "wood", "rubber", "rounds"]
+PARTS = ["steel_parts", "suppressor", "bare_steel", "handguard", "sleeve", "magazine", "magazine_30", "wood", "rubber",
+         "rounds"]
 
 
 def group_objects(name):
