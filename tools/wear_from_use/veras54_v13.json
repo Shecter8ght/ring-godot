@@ -1,0 +1,161 @@
+{
+ "_comment": "ВЕРАС-54 v13: что и как часто делают с оружием — веса клипов на один «цикл пользования», планки обвесов, точки ремня. Оси — VERAS54 (дуло +X, +Y влево стрелка, +Z вверх, м). Считает tools/wear_from_use/wear_masks.py.",
+ "sets": [
+  "Steel",
+  "Polymer",
+  "Magazine"
+ ],
+ "hold": {
+  "clip": "tactical",
+  "frame": 0,
+  "dwell_s": 60.0,
+  "grabs": 2.0,
+  "slip_mm": 3.0,
+  "_comment": "стойка в игре — первый кадр тактической перезарядки (export_veras54.py, IDLES); dwell_s — сколько держат за цикл, grabs — сколько раз берут в руки, slip_mm — сдвиг рук от отдачи и перехвата"
+ },
+ "clips": {
+  "tactical": 1.0,
+  "full": 0.7,
+  "fast": 0.4,
+  "fastfull": 0.3,
+  "check": 0.5,
+  "jam": 0.1,
+  "fm_auto_burst": 0.5,
+  "fm_burst_semi": 0.5,
+  "fm_semi_auto": 0.5
+ },
+ "contact": {
+  "r_in_mm": 0.6,
+  "r_out_mm": 2.5,
+  "inside_max_mm": 10.0,
+  "sample_mm": 1.5,
+  "substep_mm": 2.5,
+  "_comment": "касание кисти: полный вес ближе r_in, ноль дальше r_out; точка внутри перчатки (перчатка вдавлена в деталь) — касание; sample_mm — шаг точек на перчатке, substep_mm — промежуточные шаги при быстром движении, hand_texels — доля текселей в расчёте (остальные — по ближайшему)",
+  "hand_texels": 0.3
+ },
+ "magazine": {
+  "bones": [
+   "Magazine",
+   "SpareMag"
+  ],
+  "zone_mm": 30.0,
+  "jitter": 8,
+  "jitter_deg": 1.5,
+  "jitter_mm": 1.2,
+  "free_mm": 30.0,
+  "contact_mm": 1.5,
+  "_comment": "магазин в шахте: разброс захода (jitter копий движения, наклон и сдвиг), к посадке сходит на нет за free_mm"
+ },
+ "rails": [
+  {
+   "name": "optic_primary",
+   "objects": [
+    "Receiver top rail"
+   ],
+   "out": [
+    0,
+    0,
+    1
+   ],
+   "socket_x": 0.167,
+   "foot_m": 0.055,
+   "spread_m": 0.018,
+   "weight": 1.0
+  },
+  {
+   "name": "top_front",
+   "objects": [
+    "Handguard upper rail"
+   ],
+   "out": [
+    0,
+    0,
+    1
+   ],
+   "socket_x": 0.335,
+   "foot_m": 0.035,
+   "spread_m": 0.02,
+   "weight": 0.35
+  },
+  {
+   "name": "underbarrel",
+   "objects": [
+    "Handguard lower rail"
+   ],
+   "out": [
+    0,
+    0,
+    -1
+   ],
+   "socket_x": 0.3385,
+   "foot_m": 0.04,
+   "spread_m": 0.02,
+   "weight": 0.7
+  },
+  {
+   "name": "side_left",
+   "objects": [
+    "Side rail • integral front mounting 1"
+   ],
+   "out": [
+    0,
+    1,
+    0
+   ],
+   "socket_x": 0.395,
+   "foot_m": 0.03,
+   "spread_m": 0.006,
+   "weight": 0.45
+  },
+  {
+   "name": "side_right",
+   "objects": [
+    "Side rail • integral front mounting -1"
+   ],
+   "out": [
+    0,
+    -1,
+    0
+   ],
+   "socket_x": 0.395,
+   "foot_m": 0.03,
+   "spread_m": 0.006,
+   "weight": 0.45
+  }
+ ],
+ "_rails_comment": "socket_x = z точки data/weapons.json → models.veras54.sockets + 0,062 (дульный срез: метка Muzzle 0,606 против сокета muzzle 0,544)",
+ "sling": [
+  {
+   "object": "Gas block • front sling loop",
+   "partner": "Rear sling plate 1",
+   "weight": 1.0
+  },
+  {
+   "object": "Rear sling plate 1",
+   "partner": "Gas block • front sling loop",
+   "weight": 0.8
+  },
+  {
+   "object": "Rear sling plate -1",
+   "partner": "Gas block • front sling loop",
+   "weight": 0.35
+  },
+  {
+   "object": "Stock • QD metal socket 1",
+   "partner": "Gas block • front sling loop",
+   "weight": 0.4
+  },
+  {
+   "object": "Stock • QD metal socket -1",
+   "partner": "Gas block • front sling loop",
+   "weight": 0.25
+  }
+ ],
+ "strap": {
+  "width_mm": 25.0,
+  "length_mm": 120.0,
+  "dirs": 160,
+  "falloff_mm": 30.0,
+  "strap_gain": 0.6
+ }
+}
