@@ -9,12 +9,12 @@ parser=argparse.ArgumentParser();parser.add_argument('--save',action='store_true
 parser.add_argument('--save-only',action='store_true')
 parser.add_argument('--views',default='front_34,rear_34');parser.add_argument('--size',type=int,default=900)
 parser.add_argument('--lighting',choices=['studio','side','gloss'],default='studio')
-parser.add_argument('--revision',choices=['v02','v03'],default='v02')
+parser.add_argument('--revision',choices=['v02','v03','v04'],default='v02')
 args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 bpy.ops.wm.open_mainfile(filepath=str(WORK/'models'/'padlock_v02_texture_source.blend'))
-files=list((WORK/'textures'/('export' if args.revision=='v02' else 'export_v03')).glob('*.png'))
+files=list((WORK/'textures'/('export' if args.revision=='v02' else 'export_'+args.revision)).glob('*.png'))
 def find(token):
-    found=[p for p in files if token in p.stem.lower()]
+    found=[p for p in files if p.stem.lower()=='padlock_'+token]
     if len(found)!=1:raise RuntimeError('Expected one '+token+' map: '+str(found))
     return found[0]
 mat=bpy.data.materials.new('Padlock_PBR_from_Painter');mat.use_nodes=True
@@ -35,6 +35,15 @@ split=nodes.new('ShaderNodeSeparateColor');split.mode='RGB';split.location=(-420
 links.new(orm.outputs['Color'],split.inputs[0]);links.new(split.outputs[1],bsdf.inputs['Roughness']);links.new(split.outputs[2],bsdf.inputs['Metallic'])
 nm=nodes.new('ShaderNodeNormalMap');nm.location=(-400,-300)
 links.new(normal.outputs['Color'],nm.inputs['Color']);links.new(nm.outputs[0],bsdf.inputs['Normal'])
+if args.revision=='v04':
+    coat=texture(find('coat'),True,-950,-650)
+    separate=nodes.new('ShaderNodeSeparateColor');separate.mode='RGB';separate.location=(-650,-650)
+    links.new(coat.outputs['Color'],separate.inputs[0])
+    links.new(separate.outputs[0],bsdf.inputs['Coat Weight']);links.new(separate.outputs[1],bsdf.inputs['Coat Roughness'])
+    bsdf.inputs['Coat IOR'].default_value=1.6
+    coat_normal=texture(find('coatnormal'),True,-950,-950)
+    coat_nm=nodes.new('ShaderNodeNormalMap');coat_nm.location=(-650,-950)
+    links.new(coat_normal.outputs['Color'],coat_nm.inputs['Color']);links.new(coat_nm.outputs[0],bsdf.inputs['Coat Normal'])
 for obj in bpy.data.objects:
     if obj.get('stage')=='accepted_shape_highpoly_texture_copy':
         obj.data.materials.clear();obj.data.materials.append(mat);obj['stage']='textured_highpoly_candidate'
@@ -49,7 +58,7 @@ background=next(n for n in bpy.context.scene.world.node_tree.nodes if n.type=='B
 background.inputs['Strength'].default_value=.6
 bpy.data.objects['Padlock_ROOT']['paint_source']='../painter/padlock_'+args.revision+'_textured.spp'
 bpy.data.objects['Padlock_ROOT']['status']='Shape accepted 2026-10-26; Painter texture candidate '+args.revision+', awaiting visual review'
-if args.revision=='v03':
+if args.revision!='v02':
     from mathutils import Vector
     for name,location,target,scale in (
         ('shackle_contact',(.10,-.24,.15),(.024,0,.074),.045),

@@ -17,8 +17,10 @@ parser.add_argument('--samples',type=int,default=128)
 parser.add_argument('--eevee-check',action='store_true')
 parser.add_argument('--root',default=str(WORK))
 parser.add_argument('--report-name',default='studio_v03.json')
+parser.add_argument('--revision',choices=['v03','v04'],default='v03')
 args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
-root=Path(args.root);path=root/'models'/'padlock_v03_studio.blend'
+root=Path(args.root);path=root/'models'/('padlock_'+args.revision+'_studio.blend')
+if args.revision=='v04' and args.report_name=='studio_v03.json':args.report_name='studio_v04.json'
 
 def aim(obj,target):obj.rotation_euler=(Vector(target)-obj.location).to_track_quat('-Z','Y').to_euler()
 
@@ -49,7 +51,7 @@ def surface(name,color,roughness,grain):
     return mat
 
 def build():
-    source=root/'models'/'padlock_v03_textured.blend'
+    source=root/'models'/('padlock_'+args.revision+'_textured.blend')
     bpy.ops.wm.open_mainfile(filepath=str(source))
     scene=bpy.context.scene
     for obj in list(bpy.data.objects):
@@ -119,17 +121,17 @@ def build():
                 space.overlay.show_overlays=False
     bpy.ops.object.select_all(action='DESELECT');pivot.select_set(True);bpy.context.view_layer.objects.active=pivot
     text=bpy.data.texts.new('НАЧНИ ЗДЕСЬ · свет и просмотр')
-    text.write('Замок v03 · студия\n\nПробел — запустить/остановить проход блика (кадры 1–240).\n'
+    text.write('Замок '+args.revision+' · студия\n\nПробел — запустить/остановить проход блика (кадры 1–240).\n'
                'Таймлайн можно двигать мышью. Анимируется только источник света.\n'
                'Ноль на цифровой клавиатуре — вид через активную камеру.\n'
                'В Outliner коллекция КАМЕРЫ содержит общий вид, краску/скважину, дужку и тыл.\n'
                'Для камеры: выбрать её и Ctrl+Num0.\n\n'
                'Для живого просмотра сохранён EEVEE с освещением сцены.\n'
                'Статичный PNG сделан в Cycles; глубина резкости и шумоподавление выключены, детали не размыты.\n'
-               'Материал и геометрия замка совпадают с padlock_v03_textured.blend.\n'
+               'Материал и геометрия замка совпадают с отдельным текстурным исходником.\n'
                'Поворот пустышки БЛИК вручную меняет положение полосы, её ключи видны на таймлайне.\n')
     scene['purpose']='Owner-requested lighting studio; light sweep only, no object animation or material change'
-    scene['material_source']='padlock_v03_textured.blend'
+    scene['material_source']='padlock_'+args.revision+'_textured.blend'
     bpy.ops.wm.save_as_mainfile(filepath=str(path),relative_remap=False)
     print('STUDIO_SAVED',path,'realtime_engine',scene.render.engine,flush=True)
 
@@ -154,7 +156,7 @@ def verify():
             settings.append({'name':node.name,'type':node.type,'inputs':inputs,
                              'image':node.image.filepath if node.type=='TEX_IMAGE' else None})
         return result,json.dumps(settings,sort_keys=True)
-    bpy.ops.wm.open_mainfile(filepath=str(root/'models'/'padlock_v03_textured.blend'))
+    bpy.ops.wm.open_mainfile(filepath=str(root/'models'/('padlock_'+args.revision+'_textured.blend')))
     source_signature=asset_signature()
     bpy.ops.wm.open_mainfile(filepath=str(path))
     assert asset_signature()==source_signature,'Studio changed the reviewed geometry or material'
@@ -178,7 +180,7 @@ def verify():
         'light_positions':positions,'asset_parts':len(asset),'light_only_animation':True,
         'frames':[1,240],'fps':scene.render.fps,'viewport_engine':scene.render.engine,
         'dof':scene.camera.data.dof.use_dof,'packed_relative_dependencies':True,
-        'geometry_and_material_match_v03':True},ensure_ascii=False,indent=2),encoding='utf-8')
+        'geometry_and_material_match_textured_source':True,'revision':args.revision},ensure_ascii=False,indent=2),encoding='utf-8')
     print('STUDIO_VERIFIED',len(asset),'parts; lighting sweep 1–240; packed relative images',flush=True)
 
 if args.mode=='build':build()
@@ -191,6 +193,6 @@ else:
         scene.cycles.samples=args.samples;scene.cycles.use_denoising=False
         scene.render.resolution_x=args.size;scene.render.resolution_y=round(args.size*1100/1500)
         scene.render.filepath=str(root/('checks' if args.eevee_check else 'previews')/
-                                  (('studio_eevee_' if args.eevee_check else 'studio_v03_')+str(args.frame).zfill(3)+'.png'))
+                                  (('studio_eevee_'+args.revision+'_' if args.eevee_check else 'studio_'+args.revision+'_')+str(args.frame).zfill(3)+'.png'))
         bpy.ops.render.render(write_still=True)
         print('STUDIO_STILL',scene.render.filepath,flush=True)

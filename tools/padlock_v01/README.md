@@ -46,3 +46,35 @@ The saved file uses EEVEE/Rendered view and a light-only sweep on frames 1–240
 `studio.py -- render --frame 74` renders the hero still with Cycles; `--eevee-check` verifies live-view rendering.
 `studio.py -- verify` compares the prop geometry/material with v03 and checks light motion and dependencies.
 Four cameras and a Russian embedded Text note are included. No video is produced.
+
+## Varnish and mixed contact wear v04
+
+- `masks_v04_png.py prepare` records v03/master hashes and copies the owner's chip/dust alphas.
+- Run `masks_v04.py` in Blender, then `masks_v04_png.py png` in dependency Python.
+  The shared `uv_mask_raster.py` evaluates millimetre positions on existing UV triangles;
+  it rejects nonfinite fields and does not edit geometry. Contacts include interrupted axial
+  steel among blue paint/rust, roughness and fine scoring, larger edge chips, irregular key
+  impacts/scratches, and sheltered rivet/seam/socket deposits.
+- Launch the isolated Painter and open with `--revision v04`; a missing v04 starts from v03.
+  Wait for `_reopened_v04.txt` before modifying the stack. `painter.py` gives only this child
+  process an E: temporary directory, avoiding the nearly-full C: cache warning.
+- Run `sp_refine_v04.py` with `--revision v04 --wait-for _v04_saved.txt`.
+  It preserves the original 25 layers, hides the five replaced v03 finish/contact layers,
+  and adds 12 editable fills (37 total). V03 shackle oxide detail remains enabled.
+  OpenPBR Coat is enabled: coat weight/roughness and a separate neutral tangent normal
+  let the surviving varnish reflect without inheriting all of the oxide's gritty normal.
+  Close/reopen the saved SPP, then run `sp_export_v04.py` with `--wait-for _v04_ready.txt`.
+  Export is separate from stack rebuilding; a successful staged set is published together.
+  This avoids delivering partial maps if Painter crashes during export.
+- Export five 4K PNGs: baseColor, ORM, Normal_OpenGL, coat (R weight / G roughness),
+  coatNormal. Both normal maps are 16 bit. `sp_verify.py --revision v04` checks an actual
+  reopened SPP, including the enabled shader and coat channels, then closes without saving.
+- Save with `preview_textured.py -- --revision v04 --save-only`; reopen/check with
+  `verify_textured.py -- --revision v04`. `check_refinement_v04.py` checks preserved sources,
+  protected rust color and nonuniform coat/contact roughness in the exported maps.
+- Build/render/verify the same studio with `studio.py -- <mode> --revision v04`.
+  Lights, cameras and exposure match v03; only the source material changes.
+- Deliver with `deliver.py --revision v04`; all earlier source revisions remain intact.
+
+`sp_probe_coat.py` / `sp_ui_probe.py` are read-only native API/modal diagnostics.
+`probe_gloss.py` is an unsaved look-development probe; its PNG is excluded from delivery.

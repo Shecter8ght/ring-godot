@@ -16,7 +16,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("command")
     parser.add_argument("--timeout",type=float,default=45)
-    parser.add_argument("--revision",choices=['v02','v03'],default='v02')
+    parser.add_argument("--revision",choices=['v02','v03','v04'],default='v02')
     parser.add_argument("--wait-for",default=None)
     args=parser.parse_args()
     JOBS.mkdir(parents=True,exist_ok=True)
@@ -27,6 +27,11 @@ def main():
         env["SUBSTANCE_PAINTER_PLUGINS_PATH"]=str(ROOT/"tools"/"vss_m_v8"/"sp_bridge")
         env["SP_BRIDGE_DIR"]=str(JOBS)
         env["OCIO"]=str(EXE.parent/"resources"/"ocio"/"substance"/"config.ocio")
+        # Keep this task's disposable cache off the almost-full system disk.
+        cache=JOBS.parent/"tmp"
+        cache.mkdir(exist_ok=True)
+        env["TEMP"]=str(cache)
+        env["TMP"]=str(cache)
         startup=subprocess.STARTUPINFO()
         startup.dwFlags|=subprocess.STARTF_USESHOWWINDOW
         startup.wShowWindow=0

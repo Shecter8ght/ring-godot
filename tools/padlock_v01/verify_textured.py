@@ -18,9 +18,9 @@ parser.add_argument('--size',type=int,default=1000)
 parser.add_argument('--side-light',action='store_true')
 parser.add_argument('--audit-only',action='store_true')
 parser.add_argument('--report-name',default=None)
-parser.add_argument('--revision',choices=['v02','v03'],default='v02')
+parser.add_argument('--revision',choices=['v02','v03','v04'],default='v02')
 args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
-if args.report_name is None:args.report_name='texture_verification'+('' if args.revision=='v02' else '_v03')+'.json'
+if args.report_name is None:args.report_name='texture_verification'+('' if args.revision=='v02' else '_'+args.revision)+'.json'
 root=Path(args.root)
 master=root/'models'/'padlock_v01_geometry.blend'
 expected_hash='5BE1E2579133AAC5C8B20ADA9228DD2D31875781B51928EE4CDAC2F1E335CA1C'
@@ -74,15 +74,18 @@ for img in bpy.data.images:
         assert header[:8]==b'\x89PNG\r\n\x1a\n'
         row['png_bit_depth']=header[24]
         assert tuple(img.size)==(4096,4096)
-        assert img.colorspace_settings.name==('sRGB' if 'baseColor' in img.name else 'Non-Color')
-        assert row['png_bit_depth']==(16 if 'normal' in img.name else 8)
+        assert img.colorspace_settings.name==('sRGB' if 'basecolor' in img.name.lower() else 'Non-Color')
+        assert row['png_bit_depth']==(16 if 'normal' in img.name.lower() else 8)
     images.append(row)
-assert len(images)==9,len(images)
+assert len(images)==(11 if args.revision=='v04' else 9),len(images)
 material=parts[0].active_material
 assert all(o.active_material==material for o in parts)
 bsdf=next(n for n in material.node_tree.nodes if n.type=='BSDF_PRINCIPLED')
 assert bsdf.inputs['Base Color'].links[0].from_node.type=='TEX_IMAGE'
 assert bsdf.inputs['Normal'].links[0].from_node.type=='NORMAL_MAP'
+if args.revision=='v04':
+    assert bsdf.inputs['Coat Weight'].is_linked and bsdf.inputs['Coat Roughness'].is_linked
+    assert bsdf.inputs['Coat Normal'].links[0].from_node.type=='NORMAL_MAP'
 bounds=[(max(p[i] for p in all_points)-min(p[i] for p in all_points))*1000 for i in range(3)]
 report={'status':'PASS','file':str(target),'master_sha256':expected_hash,
         'bounds_mm':bounds,'parts':checks,'images':images,
