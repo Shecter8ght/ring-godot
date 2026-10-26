@@ -23,6 +23,13 @@ for d in DIRS:
     for f in sorted((ROOT / d).glob('*.png.import')):
         base = f.name[:-len('.import')]
         t = f.read_text(encoding='utf-8')
+        if base.endswith('_reticle.png'):
+            # сетка окуляра (reticles.py): тонкие нити — без сжатия, с mip-уровнями (сглаживание в маленьком окне)
+            t = setp(t, 'compress/mode', '0')
+            t = setp(t, 'mipmaps/generate', 'true')
+            f.write_text(t, encoding='utf-8', newline='\n')
+            print('VSS_IMPORTS', d, f.name)
+            continue
         t = setp(t, 'compress/mode', '2')
         t = setp(t, 'mipmaps/generate', 'true')
         t = setp(t, 'detect_3d/compress_to', '0')

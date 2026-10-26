@@ -563,3 +563,5 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
   «Black Oak Veneer» (https://polyhaven.com/a/black_oak_veneer); перекрашено и запечено в карты игры
   (`tools/vss_m_v8/wood_veneer_bake.py`, лицензии — `_asset_src/vss_m_v8/wood_photos/<id>/license.txt`).
 - Иконки `assets/icons/mag_939_10/20/30.png`, `optic_pso_01.png`, `optic_4x_01.png` — снимки этих моделей (`tools/icon_bake.tscn`).
+- Сетки окуляра `pso_vss/pso_vss_reticle.png` (ПСО-1) и `scope_4x32/scope_4x32_reticle.png` — нарисованы скриптом
+  `tools/vss_m_v8/reticles.py` для проекта RING; цифры — штриховой шрифт Hershey из OpenCV (общественное достояние).

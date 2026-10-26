@@ -4966,7 +4966,9 @@
       -0.088
      ],
      "ocular_r": 0.0158,
-     "eye_relief": 0.075
+     "eye_relief": 0.075,
+     "reticle": "res://assets/models/attachments/scope_4x32/scope_4x32_reticle.png",
+     "illum": true
     }
    },
    "flavor": "На открытой галерее даёт преимущество; в тесной подсобке просит запасной прицел."
@@ -5017,7 +5019,9 @@
       -0.135
      ],
      "ocular_r": 0.0127,
-     "eye_relief": 0.068
+     "eye_relief": 0.068,
+     "reticle": "res://assets/models/attachments/pso_vss/pso_vss_reticle.png",
+     "illum": true
     },
     "blocks": [
      "top_front"

@@ -244,7 +244,7 @@ static func _pivot(part: Node3D, xf: Transform3D) -> Node3D:
 ## Основной прицел над проставкой: его линия, окуляр и вынос глаза — в осях модели.
 static func _primary_from_pivot(root: Node3D, pivot: Node3D, line_point: Vector3) -> void:
 	root.set_meta("sight_h", line_point.y)
-	for flag: StringName in [&"scoped", &"ocular_r", &"lumar_reticle"]:
+	for flag: StringName in [&"scoped", &"ocular_r", &"lumar_reticle", &"reticle_tex", &"reticle_illum"]:
 		if pivot.has_meta(flag):
 			root.set_meta(flag, pivot.get_meta(flag))
 	if pivot.has_meta("ocular"):
@@ -415,6 +415,11 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		root.set_meta("ocular", ocular)
 		root.set_meta("ocular_r", float(spec.get("ocular_r", 0.0148)))
 		root.set_meta("ads_z", maxf(float(spec.get("eye_relief", 0.075)) - ocular.z, Balance.SCOPE_ADS_Z_MIN))
+		# своя сетка в окуляре (текстура: R — нити, G — подсветка) и подсветка клавишей фонаря
+		if spec.has("reticle"):
+			root.set_meta("reticle_tex", String(spec.reticle))
+		if bool(spec.get("illum", false)):
+			root.set_meta("reticle_illum", true)
 	if spec.has("length_m"):
 		# дульная насадка: штатный тормоз снят, срез — на её торце
 		if bool(m.get("replace", false)):

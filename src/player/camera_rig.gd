@@ -109,6 +109,8 @@ var _scope_vp: SubViewport
 var _look: CameraLook
 var _scope_cam: Camera3D
 var _scope_view: TextureRect
+# своя сетка оптики-модели (meta reticle_tex у модели в руках); пусто — общая сетка шейдера
+var _scope_reticle: String = ""
 var _sway_t: float = 0.0
 var _scope_zoom: float = 1.0
 ## Солнце сцены — для бликов в оптике (ищется один раз).
@@ -1228,6 +1230,13 @@ func _update_scope(zoom: float, illum: bool = false) -> void:
 	_scope_zoom = zoom
 	var scope_mat := _scope_view.material as ShaderMaterial
 	scope_mat.set_shader_parameter("illum", 1.0 if illum else 0.0)
+	# сетка оптики-модели (attach.model.reticle): R — нити, G — что светится с подсветкой; нет — общая
+	var reticle_path: String = String(_vm_frame().get_meta("reticle_tex", ""))
+	if reticle_path != _scope_reticle:
+		_scope_reticle = reticle_path
+		var reticle: Texture2D = load(reticle_path) as Texture2D if reticle_path != "" and ResourceLoader.exists(reticle_path) else null
+		scope_mat.set_shader_parameter("reticle_tex", reticle)
+		scope_mat.set_shader_parameter("reticle_custom", 1.0 if reticle else 0.0)
 	# люфт оружия → глаз сошёл с оси прицела: сдвиг картинки, тень с края, искажение
 	var lag_cfg: Dictionary = Balance.AIM_LAG
 	var lag_euler: Vector3 = Basis(_lag_q).get_euler()
@@ -1321,6 +1330,9 @@ uniform vec2 sun_dir = vec2(0.0, -1.0);
 // подсветка центра сетки: 0 — выкл, 1 — горит красным
 uniform float illum = 0.0;
 uniform vec3 illum_color = vec3(1.0, 0.12, 0.06);
+// своя сетка прицела (ПСО, 4×32): квадрат текстуры — окно окуляра, R — нити, G — светится с подсветкой
+uniform sampler2D reticle_tex : filter_linear_mipmap, repeat_disable;
+uniform float reticle_custom = 0.0;
 // люфт: глаз ушёл с оси прицела (−1…1 по осям окна): картинка сдвигается, с края наползает тень,
 // искажение растёт («жидкое стекло»)
 uniform vec2 lag = vec2(0.0);
@@ -1380,11 +1392,17 @@ void fragment() {
 	float thin = step(ax, line_w) + step(ay, line_w);
 	float post = step(ax, line_w * 4.0) * step(0.2, ay) + step(ay, line_w * 4.0) * step(0.2, ax);
 	// центр перекрестия (нити ближе 0.16 от центра и точка) с подсветкой светится, дальше — чёрные
-	float centre = step(r, 0.32);
+	float glow = step(r, 0.32);
 	float reticle = clamp(thin + post, 0.0, 1.0);
-	vec3 ink = mix(vec3(0.01), illum_color * 2.2, illum * centre);
-	col = mix(col, ink, reticle);
 	float dot_c = step(length(c), line_w * 2.2);
+	if (reticle_custom > 0.5) {
+		vec4 rt = texture(reticle_tex, UV);
+		reticle = rt.r;
+		glow = rt.g;
+		dot_c = 0.0;
+	}
+	vec3 ink = mix(vec3(0.01), illum_color * 2.2, illum * glow);
+	col = mix(col, ink, reticle);
 	col = mix(col, illum_color * 2.6, illum * dot_c);
 	col += illum_color * illum * 0.35 * exp(-length(c) * 60.0);
 	col *= smoothstep(1.0, 0.72, r);

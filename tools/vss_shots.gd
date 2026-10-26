@@ -1,8 +1,9 @@
 extends Node
 ## ВСС-М v8 в руках днём под небом (Пригород, ясно): игровая модель (assets/models/weapons/vss_m, общие руки по меткам
 ## хвата), прицелы-модели и обвесы на планках муфты и крышки. Наборы: iron — механический прицел, магазин на 10;
-## pso — ПСО на «ласточкином хвосте», магазин на 20; rail — 4×32 на крышке, фонарь справа, рукоятка снизу, магазин на 30.
-## Каждый — от бедра, в прицеливании и модель сбоку справа и слева (vss_<набор>_side_r / _l).
+## pso — ПСО на «ласточкином хвосте», фонарь на левой планке муфты, магазин на 20; rail — 4×32 на крышке, фонарь справа, рукоятка снизу, магазин на 30.
+## Каждый — от бедра, в прицеливании (у оптики с подсветкой — ещё с горящей сеткой, _ads_lit) и модель сбоку
+## справа и слева (vss_<набор>_side_r / _l).
 ## tools/godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn → docs/screens/vss_*.png
 ## (VSS_ONLY=iron,pso — выборочно; VSS_POS=x,y,z — место, по умолчанию открытая поляна у тропы)
 
@@ -10,7 +11,8 @@ const ID := "wpn_sp_02"
 const OUT := "res://docs/screens/"
 const SETS: Array = [
 	["iron", {}, "mag_939_10"],
-	["pso", {"optic_primary": {"id": "optic_pso_01", "dur": 100.0}}, "mag_939_20"],
+	["pso", {"optic_primary": {"id": "optic_pso_01", "dur": 100.0},
+		"side_left": {"id": "tac_flashlight_01", "dur": 100.0, "slot": 1}}, "mag_939_20"],
 	["rail", {"top_front": {"id": "optic_4x_01", "dur": 100.0, "slot": 0},
 		"side_right": {"id": "tac_flashlight_01", "dur": 100.0, "slot": 1},
 		"underbarrel": {"id": "grip_vertical_01", "dur": 100.0, "slot": 1}}, "mag_939_30"],
@@ -66,6 +68,14 @@ func _ready() -> void:
 		await get_tree().create_timer(float(_player.spec().aim_time) + 0.6).timeout
 		await _shot(String(set[0]) + "_ads")
 		var fr: Node3D = _camera._vm_frame()
+		if fr and fr.has_meta("reticle_illum"):
+			# подсветка сетки горит вместе с фонарём на оружии (T)
+			_player._toggle_tac("light")
+			await get_tree().create_timer(0.4).timeout
+			if _player.light_on:
+				await _shot(String(set[0]) + "_ads_lit")
+				_player._toggle_tac("light")
+				await get_tree().create_timer(0.3).timeout
 		if fr and fr.has_meta("ocular"):
 			var oc: Vector3 = fr.to_global(fr.get_meta("ocular"))
 			print("vss_shots: окуляр ", fr.get_meta("ocular"), " r ", fr.get_meta("ocular_r"), " ads_z ", fr.get_meta("ads_z", -1.0),
@@ -85,6 +95,7 @@ func _side(label: String, mods: Dictionary) -> void:
 	holder.add_child(gun)
 	var eye: Vector3 = _player.global_position + Vector3(0, 1.6, 0)
 	holder.global_position = eye + Vector3(0, 0, -3.0)
+	var player_cam: Camera3D = get_viewport().get_camera_3d()
 	var cam := Camera3D.new()
 	cam.fov = 30.0
 	holder.add_child(cam)
@@ -101,7 +112,8 @@ func _side(label: String, mods: Dictionary) -> void:
 		cam.current = true
 		await get_tree().create_timer(0.3).timeout
 		await _shot("%s_side_%s" % [label, side[0]])
-	cam.current = false
+	# вид — снова камере игрока (иначе следующий набор снимается чужой камерой уровня)
+	player_cam.current = true
 	holder.queue_free()
 
 
