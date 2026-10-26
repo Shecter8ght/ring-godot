@@ -91,7 +91,7 @@ func _row(id: String, pose: String) -> void:
 		await _frames(20)
 		print("hand_scale_shots: %s %s k=%.2f кисть ×%.3f" % [id, pose, k, _hand_scale_now()])
 		await _shot("hand_%s_%s_%03d" % [id, pose, roundi(k * 100.0)])
-	HandGripPose.scale_override = 1.0
+	HandGripPose.scale_override = 0.0
 
 
 ## Масштаб правой кисти относительно плеча — проверка, что проба дошла до скелета и не копится.

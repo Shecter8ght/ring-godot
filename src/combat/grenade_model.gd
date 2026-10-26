@@ -9,6 +9,7 @@ var hands_model: Node3D
 var hands_skeleton: Skeleton3D
 var _hands_animation: AnimationPlayer
 var _hands_progress: float = -1.0
+var _hand_pose: HandGripPose = HandGripPose.new()
 var _pin: Node3D
 var _lever: Node3D
 var _pin_home: Vector3 = Vector3.ZERO
@@ -59,6 +60,7 @@ func _attach_hands() -> void:
 	var skeletons: Array[Node] = hands_model.find_children("*", "Skeleton3D", true, false)
 	if not skeletons.is_empty():
 		hands_skeleton = skeletons[0] as Skeleton3D
+		_hand_pose.configure(hands_skeleton, true)
 	var animations: Array[Node] = hands_model.find_children("*", "AnimationPlayer", true, false)
 	if not animations.is_empty():
 		_hands_animation = animations[0] as AnimationPlayer
@@ -90,6 +92,8 @@ static func _material(atlas: String) -> StandardMaterial3D:
 
 
 func prepare(progress: float) -> void:
+	# Возвращаем позу до уменьшения даже при неподвижной чеке: иначе масштаб копится.
+	_hand_pose.restore()
 	var amount: float = clampf(progress, 0.0, 1.0)
 	if _hands_animation and _hands_animation.has_animation("pin_pull") and not is_equal_approx(_hands_progress, amount):
 		_hands_progress = amount
@@ -113,6 +117,12 @@ func prepare(progress: float) -> void:
 			left.set_meta("curl", [20, 80, 65])
 		else:
 			left.set_meta("curl", [25, 45, 30])
+	if is_inside_tree() and hands_skeleton:
+		var k: float = HandGripPose.hand_scale()
+		if not is_equal_approx(k, 1.0):
+			_hand_pose.capture_once()
+			for side: String in HandGripProfiles.SIDES:
+				_hand_pose.scale_hand(side, k)
 
 
 func release() -> void:

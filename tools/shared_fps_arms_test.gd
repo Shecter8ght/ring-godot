@@ -15,6 +15,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(_output)
 	FileAccess.open(_output + ".gdignore", FileAccess.WRITE).close()
 	_stage()
+	_check("обычная сцена использует кисти 80% без пробного override", HandGripPose.scale_override == 0.0 and is_equal_approx(HandGripPose.hand_scale(), 0.8))
 	_arms = (load("res://scenes/player/first_person_arms.tscn") as PackedScene).instantiate() as FirstPersonArms
 	add_child(_arms)
 	_check("общие руки загружены", _arms.skeleton != null)
@@ -31,6 +32,18 @@ func _ready() -> void:
 	grenade.position = Vector3(0.13, -0.10, -0.38)
 	_check("граната использует руки ВЕРАСа", grenade.hands_skeleton != null)
 	grenade.prepare(0.0)
+	_check_hand_scale("граната", grenade._hand_pose)
+	for phase: float in [0.0, 0.35, 0.7, 1.0]:
+		HandGripPose.scale_override = 1.0
+		grenade.prepare(phase)
+		var contacts: Dictionary = _palm_contacts(grenade._hand_pose)
+		HandGripPose.scale_override = 0.0
+		for frame: int in range(120):
+			grenade.prepare(phase)
+		_check_hand_scale("граната · чека %.2f, 120 кадров" % phase, grenade._hand_pose)
+		var scaled: Dictionary = _palm_contacts(grenade._hand_pose)
+		for side: String in contacts:
+			_check("граната %.2f · контакт ладони %s сохранён" % [phase, side], (contacts[side] as Vector3).distance_to(scaled[side] as Vector3) < 0.0001)
 	await _capture("grenade")
 	grenade.free()
 	FileAccess.open(_output + "report.json", FileAccess.WRITE).store_string(JSON.stringify({"failures": _failures, "cases": _records}, "\t"))
@@ -75,8 +88,10 @@ func _weapon(id: String, mods: Dictionary) -> void:
 		var idle: String = String((vm.config.get("clips", {}) as Dictionary).get("idle", "idle"))
 		vm._anim.play(idle)
 		vm._anim.seek(0.0, true)
+		vm._scale_hands()
 		var hand: Node3D = model.find_child("FPS_Arms*", true, false) as Node3D
 		_check(tag + " имеет собственные руки", hand != null)
+		_check_hand_scale(tag, vm._hand_pose)
 	else:
 		model.rotation.y = PI
 		model.position = Balance.FPS_HIP_POSE
@@ -85,6 +100,7 @@ func _weapon(id: String, mods: Dictionary) -> void:
 		_check(tag + " руки видимы", _arms.visible)
 		_check(tag + " запястья достигают хвата", _arms.max_grip_error < 0.001)
 		_check(tag + " кости не растянуты", _arms.max_length_error < 0.001)
+		_check_hand_scale(tag, _arms._hand_pose)
 		entry["grip_error"] = _arms.max_grip_error
 		entry["length_error"] = _arms.max_length_error
 		if id == "wpn_hg_02":
@@ -117,6 +133,25 @@ func _independent_hands(model: Node3D) -> void:
 	_arms.set_hand_target("Left", null, 0.0)
 	_arms.update_pose()
 	target.free()
+
+
+func _check_hand_scale(label: String, pose: HandGripPose) -> void:
+	for side: String in HandGripProfiles.SIDES:
+		if not pose.chains.has(side):
+			_check(label + " · есть цепь " + side, false)
+			continue
+		var bones: Array = pose.chains[side]
+		var upper: Vector3 = pose.skeleton.get_bone_global_pose(bones[0]).basis.get_scale()
+		var wrist: Vector3 = pose.skeleton.get_bone_global_pose(bones[2]).basis.get_scale()
+		_check(label + " · кисть " + side + " 80%", (wrist / upper).distance_to(Vector3.ONE * 0.8) < 0.0001)
+
+
+func _palm_contacts(pose: HandGripPose) -> Dictionary:
+	var result: Dictionary = {}
+	for side: String in pose.chains:
+		var wrist: Transform3D = pose.skeleton.get_bone_global_pose(pose.chains[side][2])
+		result[side] = wrist * (pose.grip_centers[side] as Vector3)
+	return result
 
 
 func _capture(tag: String) -> void:

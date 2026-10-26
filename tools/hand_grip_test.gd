@@ -11,8 +11,9 @@ var _size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
 	Engine.max_fps = 90
-	HandGripProfiles.storage_path = "user://hand_grip_test.cfg"
-	WeaponPoseProfiles.storage_path = "user://hand_grip_weapon_pose_test.cfg"
+	# Параллельные прогоны не должны читать сохранения друг друга.
+	HandGripProfiles.storage_path = "user://hand_grip_test_%d.cfg" % OS.get_process_id()
+	WeaponPoseProfiles.storage_path = "user://hand_grip_weapon_pose_test_%d.cfg" % OS.get_process_id()
 	DirAccess.remove_absolute(HandGripProfiles.storage_path)
 	DirAccess.remove_absolute(WeaponPoseProfiles.storage_path)
 	HandGripProfiles.reload()
@@ -38,6 +39,7 @@ func _ready() -> void:
 	_check("open at hands tab; gameplay blocked", _lab._panel.tabs.current_tab == 1 and _lab._player.ui_blocked())
 	_check("inspector shares live world", _lab._inspector.view.world_3d == _lab.get_world_3d() and _lab._inspector.visible)
 	_check("panel does not overlap inspection area", _lab._panel.get_global_rect().end.x <= _lab._inspector.get_global_rect().position.x)
+	_check("grip lab uses default eighty percent hands", is_equal_approx(HandGripPose.hand_scale(), 0.8))
 	await _shot("01_grip_veras")
 	await _test_orbit()
 	var rifle_index: int = _lab._weapon_index
@@ -63,14 +65,19 @@ func _ready() -> void:
 	clip.grip_profiles = {}
 	var player: Player = _lab._player
 	clip.update(player, 0.02)
-	_check("saved profile is consumed by normal clips", clip._hand_pose._saved.size() > 0)
+	var edited_finger: int = int((clip._hand_pose.fingers.LeftIndex as Array)[1].bone)
+	_check("saved profile is consumed by normal clips", clip._arm_skel.get_bone_pose_rotation(edited_finger).angle_to((clip._hand_pose._saved[edited_finger] as Array)[1]) > 0.1)
 	# Настоящая анимация отпускает ручную подгонку и затем возвращает её в стойку.
+	# Продвигаем её на известное время: долгий кадр от видеокарты не должен завершить клип до проверки.
+	_lab._rig.set_process(false)
 	clip._play(clip._clip_name("reload"), 0.0, 1.0)
-	await _frames(22)
-	_check("reload animation owns hands", clip.is_busy() and clip._hand_weight < 0.05 and clip._hand_pose._saved.is_empty())
+	clip.update(player, 0.2)
+	_check("reload animation owns fingers while scaling remains", clip.is_busy() and clip._hand_weight < 0.05
+		and clip._arm_skel.get_bone_pose_rotation(edited_finger).angle_to((clip._hand_pose._saved[edited_finger] as Array)[1]) < 0.001)
 	clip._play(clip._clip_name("idle"), 0.0)
-	await _frames(24)
+	clip.update(player, 0.2)
 	_check("manual grip returns after action", clip._hand_weight > 0.99 and clip._hand_pose._saved.size() > 0)
+	_lab._rig.set_process(true)
 	_lab._panel.grip.use_in_game.button_pressed = false
 	_lab._save()
 	_check("disable preserves data and returns game to source grip", HandGripProfiles.active().is_empty() and not HandGripProfiles.snapshot().is_empty())
@@ -91,7 +98,7 @@ func _ready() -> void:
 		var hand: int = gripped._hand_pose.chains.Left[2]
 		var before_grip: Transform3D = _relative_wrist(gripped._arm_skel, hand)
 		_lab._panel.grip._position[2].value = 2.0
-		await _frames(130)
+		await _repeat_pose_frames(130)
 		_check("custom hand layers over existing rail IK without drift", absf((_relative_wrist(gripped._arm_skel, hand).origin - before_grip.origin).z - 0.02) < 0.002)
 		await _shot("04_veras_vertical_grip")
 	var pistol_index: int = _index("wpn_hg_02")
@@ -125,6 +132,11 @@ func _ready() -> void:
 	_lab._select_weapon(rifle_index)
 	await _frames(45)
 	_check("weapon switch retains independent draft", is_equal_approx(_lab._panel.grip._position[2].value, 3.0))
+	var cached: ViewmodelClips = _lab._rig._viewmodel as ViewmodelClips
+	for side: String in HandGripProfiles.SIDES:
+		var bones: Array = cached._hand_pose.chains[side]
+		var ratio: Vector3 = cached._arm_skel.get_bone_global_pose(bones[2]).basis.get_scale() / cached._arm_skel.get_bone_global_pose(bones[0]).basis.get_scale()
+		_check("cached rifle " + side + " keeps eighty percent hands", ratio.distance_to(Vector3.ONE * 0.8) < 0.0001)
 	_lab._reset_hand()
 	_check("reset only chosen hand", (_lab._panel.grip._value.position as Vector3).is_zero_approx())
 	_lab._select_weapon(_index("signal_launcher"))
@@ -160,13 +172,17 @@ func _exercise(label: String, clips: bool) -> void:
 	var base_left: Transform3D = _relative_wrist(sk, left)
 	var base_right: Transform3D = _relative_wrist(sk, right)
 	var lengths: Vector2 = _lengths(sk, overlay.chains.Left)
+	for side: String in HandGripProfiles.SIDES:
+		var bones: Array = overlay.chains[side]
+		var ratio: Vector3 = sk.get_bone_global_pose(bones[2]).basis.get_scale() / sk.get_bone_global_pose(bones[0]).basis.get_scale()
+		_check(label + " " + side + " actual hand size is eighty percent", ratio.distance_to(Vector3.ONE * 0.8) < 0.0001)
 	_lab._panel.grip._position[2].value = 3.0
 	await _frames(30)
 	var shifted: Transform3D = _relative_wrist(sk, left)
 	_check(label + " left follows three centimeter control", absf((shifted.origin - base_left.origin).z - 0.03) < 0.002)
 	_check(label + " other hand stays in place", _relative_wrist(sk, right).origin.distance_to(base_right.origin) < 0.002)
 	_check(label + " arm lengths unchanged", _lengths(sk, overlay.chains.Left).distance_to(lengths) < 0.001)
-	await _frames(140)
+	await _repeat_pose_frames(140)
 	_check(label + " wrist offset does not accumulate", _relative_wrist(sk, left).origin.distance_to(shifted.origin) < 0.002)
 	_lab._panel.grip._rotation[1].value = 12.0
 	await _frames(15)
@@ -190,7 +206,7 @@ func _exercise(label: String, clips: bool) -> void:
 		_check(label + " " + finger + " spread and twist respond", original.angle_to(sk.get_bone_pose_rotation(first)) > 0.1)
 	var finger_bone: int = int((overlay.fingers.LeftIndex as Array)[0].bone)
 	var stable: Quaternion = sk.get_bone_pose_rotation(finger_bone)
-	await _frames(130)
+	await _repeat_pose_frames(130)
 	_check(label + " finger edits do not accumulate", stable.angle_to(sk.get_bone_pose_rotation(finger_bone)) < 0.001)
 	_lab._panel.grip.tabs.current_tab = 2
 	await _frames(5)
@@ -435,6 +451,12 @@ func _shot(name: String) -> void:
 func _frames(count: int) -> void:
 	for frame: int in range(count):
 		await get_tree().process_frame
+
+
+func _repeat_pose_frames(count: int) -> void:
+	# Полный длинный прогон — без видеокарты; в окне проверяем повторение на 16 настоящих кадрах.
+	# Ошибочное повторное применение ×0,8 заметно уже на втором кадре.
+	await _frames(count if DisplayServer.get_name() == "headless" else 16)
 
 
 func _check(label: String, result: bool) -> void:
