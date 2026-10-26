@@ -16,6 +16,7 @@ import math
 import numpy as np
 
 import clib as C
+from bus_stop import _r, pbox, ring_uv   # развёртка полосами по кольцам (общие для павильона и КТП)
 
 W, D = 2.40, 1.90                  # корпус
 X0, X1 = -W / 2, W / 2
@@ -364,6 +365,12 @@ META = {
         "open": [["3/4 спереди", [3.2, -4.6, 2.3], [0.0, 0.0, 1.2], 32], ["нутро: трансформатор", [-0.9, -2.6, 2.0], [-0.55, 0.1, 1.1], 30],
                  ["нутро: щит РУНН", [1.1, -2.3, 1.6], [0.65, -0.3, 1.2], 30]],
     },
+    "game_shots": [["3/4 спереди", [3.4, -4.4, 2.4], [0.0, 0.0, 1.2], 32], ["3/4 сзади", [-3.6, 4.2, 2.6], [0.0, 0.0, 1.2], 32],
+                   ["торец: знак и номер", [3.2, -1.2, 1.7], [1.2, 0.3, 1.4], 32]],
+    "game_shots_by": {
+        "open": [["3/4 спереди", [3.2, -4.6, 2.3], [0.0, 0.0, 1.2], 32], ["нутро: трансформатор", [-0.9, -2.6, 2.0], [-0.55, 0.1, 1.1], 30],
+                 ["нутро: щит РУНН", [1.1, -2.3, 1.6], [0.65, -0.3, 1.2], 30]],
+    },
 }
 
 
@@ -376,3 +383,233 @@ def build(keys: list[str]) -> dict:
         kiosk(col, r, k == "open")
         out[k] = name
     return out
+
+
+# ================================================================ игровая версия (LOD0)
+# Наборы Painter: KTP (2K) — цоколь, рама, корпус с полом, крыша, створки, знаки, таблички и надписи (их же берёт
+# открытая: створки — те же сетки на повёрнутых шарнирах); KTPInside (2K) — нутро открытой: трансформатор (бак, блоки
+# гофр — рёбра из запекания), вводы, шины, щит РУНН (ряды автоматов — блоками), выключатель ВН, кабели. Жалюзи, рёбра
+# жёсткости, отбортовки, петли, уплотнитель, проушины, заземление — только в запекании. Стекло счётчика — Glass.
+# Коллизия открытой: стены, простенки, перемычка, крыша, цоколь, трансформатор, щит; закрытой — габарит.
+GAME = {
+    "ids": {"closed": "PC07_KTP", "open": "PC07_KTP_OPEN"},
+    "bake": ["closed", "open"],
+    "skip_high": [],
+    "res": {"KTP": 11, "KTPInside": 11},
+    "solids": {
+        "open": [[[0.0, 0.935, 1.10], [2.40, 0.03, 2.20]], [[-1.185, 0.0, 1.10], [0.03, 1.90, 2.20]],
+                 [[1.185, 0.0, 1.10], [0.03, 1.90, 2.20]], [[-1.165, -0.935, 1.10], [0.07, 0.03, 2.20]],
+                 [[0.11, -0.935, 1.10], [0.10, 0.03, 2.20]], [[1.165, -0.935, 1.10], [0.07, 0.03, 2.20]],
+                 [[0.0, -0.935, 2.16], [2.40, 0.03, 0.08]], [[0.0, 0.0, 2.42], [2.64, 2.14, 0.44]],
+                 [[0.0, 0.0, 0.14], [2.56, 2.06, 0.28]], [[-0.535, 0.10, 0.86], [1.02, 0.74, 0.92]],
+                 [[0.645, -0.45, 1.205], [0.91, 0.40, 1.75]]],
+    },
+}
+
+
+def _leaf_low(mb: C.MB, w: float, h: float, side: int) -> None:
+    """Полотно створки для игры в координатах шарнира: коробка 40 мм (рёбра, жалюзи, петли — из запекания);
+    развёртка — одной полосой (лицо, кромка, изнанка, кромка)."""
+    t = 0.04
+    x0, x1 = (0.008, w) if side > 0 else (-w, -0.008)
+    pbox(mb, ((x0 + x1) / 2, 0.0, Z_D0 + h / 2), (x1 - x0, t, h), axis=2)
+
+
+def _leaf_sign(sg: C.MB, bt: C.MB, w: float, h: float, side: int, louvres: bool) -> None:
+    t = 0.04
+    x0, x1 = (0.008, w) if side > 0 else (-w, -0.008)
+    xc = (x0 + x1) / 2
+    zs = Z_D0 + h * (0.47 if louvres else 0.80)
+    tri = np.array([(-0.14, 0.0), (0.14, 0.0), (0.0, 0.24)])
+    _r(sg, C.prism(tri, 0.0, 0.0015, origin=(xc, -t / 2 - 0.0005, zs), ex=(1, 0, 0), ey=(0, 0, 1), ez=(0, -1, 0)), 0)
+    bolt = np.array([(-0.006, 0.17), (0.03, 0.10), (0.005, 0.10), (0.02, 0.03), (-0.03, 0.12), (-0.005, 0.12),
+                     (-0.02, 0.19)])
+    _r(bt, C.prism(bolt, 0.0015, 0.0025, origin=(xc, -t / 2 - 0.0005, zs), ex=(1, 0, 0), ey=(0, 0, 1), ez=(0, -1, 0)), 0)
+
+
+def _lock_low(mb: C.MB, w: float, h: float, side: int) -> None:
+    t = 0.04
+    x0, x1 = (0.008, w) if side > 0 else (-w, -0.008)
+    xl = x1 - 0.07 if side > 0 else x0 + 0.07
+    zl = Z_D0 + h * 0.5
+    pbox(mb, (xl, -t / 2 - 0.006, zl), (0.05, 0.012, 0.16))
+    pbox(mb, (xl, -t / 2 - 0.022, zl + 0.03), (0.022, 0.03, 0.10))
+
+
+def _inside_low(parts: dict) -> None:
+    """Нутро открытой подстанции простыми объёмами: parts[материал] = MB (развёртка полосами по кольцам)."""
+    P = parts
+    xc, yc = (BAYS[0][0] + BAYS[0][1]) / 2, 0.10
+    z0, bw, bd, bh = Z_FR + 0.12, 0.82, 0.48, 0.92
+    pbox(P["paint"], (xc, yc, z0 + bh / 2), (bw, bd, bh), axis=2)
+    for s in (-1, 1):                                                   # блоки гофр: рёбра — из запекания
+        pbox(P["paint"], (xc + 0.005, yc + s * (bd / 2 + 0.065), z0 + bh / 2 - 0.02), (bw - 0.07, 0.13, bh - 0.12), axis=2)
+        pbox(P["paint"], (xc + s * (bw / 2 + 0.05), yc, z0 + bh / 2 - 0.02), (0.10, bd - 0.09, bh - 0.12), axis=2)
+    pbox(P["paint"], (xc, yc, z0 + bh + 0.02), (bw + 0.24, bd + 0.30, 0.04), axis=0)
+    for y in (yc - 0.22, yc + 0.22):
+        pbox(P["steel"], (xc, y, z0 - 0.06), (bw + 0.1, 0.08, 0.10))
+        for x in (xc - 0.38, xc + 0.38):
+            _r(P["steel"], C.cyl((x, y, Z_FR + 0.055), 0.055, 0.05, 8, "y"), 8)
+    zt = z0 + bh + 0.04
+    prof_hv = [(0.05, 0.0), (0.05, 0.03), (0.065, 0.05), (0.035, 0.09), (0.06, 0.13), (0.03, 0.18), (0.05, 0.22),
+               (0.025, 0.25), (0.025, 0.30), (0.008, 0.30), (0.008, 0.36)]
+    for k in (-1, 0, 1):
+        _r(P["porcelain"], C.lathe(prof_hv, 8, center=(xc + k * 0.22, yc + 0.14, zt)), 8)
+    prof_lv = [(0.035, 0.0), (0.035, 0.03), (0.05, 0.05), (0.03, 0.08), (0.045, 0.10), (0.025, 0.13),
+               (0.012, 0.14), (0.012, 0.22)]
+    for k in range(4):
+        _r(P["porcelain"], C.lathe(prof_lv, 8, center=(xc - 0.27 + k * 0.18, yc - 0.17, zt)), 8)
+        x = xc - 0.27 + k * 0.18
+        pts = np.array([(x, yc - 0.17, zt + 0.21), (x, yc - 0.17, zt + 0.33), (BAYS[0][1] - 0.05, yc - 0.17 + k * 0.03,
+                                                                                zt + 0.33)])
+        _r(P["copper"], C.sweep(C.rect_profile(0.04, 0.005), pts, up=(0, 0, 1)), 4)
+    # щит РУНН
+    a, b = BAYS[1]
+    xb = (a + b) / 2
+    yf = YF + 0.30
+    w = b - a - 0.06
+    zb0, zb1 = Z_FR + 0.05, Z_EAVE - 0.12
+    pbox(P["paint"], (xb, yf + 0.20, (zb0 + zb1) / 2), (w, 0.40, zb1 - zb0), axis=2)
+    pbox(P["galv"], (BAYS[0][1] + 0.05, 0.0, (Z_FR + Z_EAVE) / 2), (0.02, D - 0.06, Z_EAVE - Z_FR), axis=2)
+    for k in range(3):
+        x = a + 0.18 + k * 0.30
+        pbox(P["plastic"], (x, yf - 0.015, 1.72), (0.18, 0.03, 0.24))
+        _r(P["steel"], C.tube(np.array([(x, yf - 0.03, 1.66), (x, yf - 0.20, 1.78)]), 0.012, 6), 6)
+        _r(P["red"], C.cyl((x, yf - 0.22, 1.795), 0.022, 0.07, 8, "x"), 8)
+    for zr in (1.30, 1.05):
+        pbox(P["steel"], (xb, yf - 0.006, zr), (w - 0.1, 0.012, 0.035))
+        pbox(P["white"], (a + 0.12 + 3.5 * 0.095, yf - 0.04, zr), (8 * 0.095 - 0.02, 0.07, 0.17))
+    pbox(P["white"], (xb + 0.22, yf - 0.05, 0.72), (0.18, 0.10, 0.28))
+    for k in range(3):
+        _r(P["plastic"], C.cyl((a + 0.18 + k * 0.16, yf - 0.06, 0.70), 0.06, 0.06, 8, "y"), 8)
+        pts = np.array([(a + 0.2 + k * 0.25, yf - 0.05, 0.55), (a + 0.2 + k * 0.25, yf - 0.05, Z_FR + 0.10),
+                        (a + 0.2 + k * 0.25, yf + 0.15, Z_FR - 0.02)])
+        _r(P["rubber"], C.tube(pts, 0.025, 6), 6)
+    for k in range(4):
+        pbox(P["copper"], (xb, yf + 0.02 + k * 0.05, zb1 - 0.07), (w - 0.04, 0.006, 0.05))
+    # выключатель ВН с приводом и кабельные муфты
+    x = BAYS[0][0] + 0.12
+    pbox(P["paint"], (x, 0.55, 1.40), (0.16, 0.50, 0.90), axis=2)
+    pbox(P["steel"], (x + 0.085, 0.45, 1.25), (0.01, 0.10, 0.18))
+    _r(P["steel"], C.tube(np.array([(x + 0.09, 0.45, 1.22), (x + 0.30, 0.45, 1.10)]), 0.012, 6), 6)
+    for k in range(3):
+        _r(P["rubber"], C.cyl((x, 0.38 + k * 0.17, 0.80), 0.04, 0.40, 8), 8)
+
+
+def _kpart(G, mb: C.MB, name: str, ts: str, mat: str, col, parent, sharp: float = 30, smooth: bool = True):
+    """Деталь набора с развёрткой полосами по кольцам (помощники — из bus_stop.py)."""
+    ob = G.part(mb, name, ts, mat, col, parent, sharp=sharp, smooth=smooth)
+    ring_uv(ob, mb)
+    ob["uv_half"] = mat != "lettering"                  # полосы листов и рам одного покрытия — половинный отступ
+    return ob
+
+
+def game(col, parent, key: str, ctx: dict) -> None:
+    """Игровые детали варианта (game.py): «Закрыта» строит всё, «Двери открыты» — её сетки, створки повёрнуты, нутро.
+    Развёртка по нормам навыка: стены, створки, рамы — полосами (лицо, кромка, изнанка — одним островом), цоколь —
+    только надземная часть, буквы — крошечными островами."""
+    import game_lib as G
+    from bus_stop import lettering
+    h = Z_D1 - Z_D0 - 0.01
+    yh = YF - 0.026
+    leaves = []
+    for bi, (a, b) in enumerate(BAYS):
+        w = (b - a) / 2 - 0.004
+        for side, xh, ang in ((1, a, -100.0 if bi == 0 else -96.0), (-1, b, 104.0 if bi == 0 else 92.0)):
+            leaves.append((f"{'T' if bi == 0 else 'N'}{'L' if side > 0 else 'R'}", bi, side, xh, ang, w))
+    if "shell" not in ctx:
+        m = C.MB()
+        pbox(m, (0, 0, (Z_PL - 0.05) / 2), (W + 0.16, D + 0.16, Z_PL + 0.05), axis=2)   # цоколь: надземная часть
+        ctx["plinth"] = _kpart(G, m, "plinth", "KTP", "concrete", col, parent)
+        m = C.MB()
+        zc = (Z_PL + Z_FR) / 2
+        for y in (YF + 0.032, YB - 0.032):
+            pbox(m, (0, y, zc), (W, 0.064, Z_FR - Z_PL))
+        for x in (X0 + 0.032, X1 - 0.032):
+            pbox(m, (x, 0, zc), (0.064, D - 0.13, Z_FR - Z_PL))
+        ctx["frame"] = _kpart(G, m, "frame", "KTP", "frame", col, parent)
+        m = C.MB()
+        t = T_WALL
+        zc, hh = (Z_FR + Z_EAVE) / 2, Z_EAVE - Z_FR
+        # стены — полосами: лицо, кромка, изнанка одним островом (порознь большие листы ложатся с дырами: 54 %)
+        pbox(m, (0, YB - t / 2, zc), (W, t, hh), axis=2)
+        for x in (X0 + t / 2, X1 - t / 2):
+            pbox(m, (x, 0, zc), (t, D - 2 * t, hh), axis=2)
+        edges = [X0] + [v for bb in BAYS for v in bb] + [X1]
+        for k in range(0, len(edges), 2):
+            pbox(m, ((edges[k] + edges[k + 1]) / 2, YF + t / 2, zc), (edges[k + 1] - edges[k], t, hh), axis=2)
+        pbox(m, (0, YF + t / 2, (Z_D1 + Z_EAVE) / 2), (W, t, Z_EAVE - Z_D1), axis=2)
+        pbox(m, (0, YF + t / 2, (Z_FR + Z_D0) / 2), (W, t, Z_D0 - Z_FR), axis=2)
+        for (x, y) in ((X0, YF), (X1, YF), (X1, YB), (X0, YB)):                  # уголки по рёбрам — брусками
+            pbox(m, (x + (0.023 if x < 0 else -0.023), y + (0.023 if y < 0 else -0.023), (Z_FR + Z_EAVE + 0.02) / 2),
+                 (0.054, 0.054, Z_EAVE + 0.02 - Z_FR), axis=2)
+        pbox(m, (0, 0, Z_FR - 0.004), (W - 2 * t, D - 2 * t, 0.008), axis=0)
+        # крыша: скаты, капельники, конёк, щипцы
+        ye, zs = D / 2 + OVH, Z_EAVE - 0.02
+        for s in (-1, 1):
+            Pq = np.array([(X0 - OVH, s * ye, zs), (X1 + OVH, s * ye, zs), (X1 + OVH, 0.0, Z_RIDGE), (X0 - OVH, 0.0, Z_RIDGE)])
+            _r(m, (np.vstack([Pq, Pq + np.array([0, 0, 0.05])]),
+                   [(0, 1, 2, 3), (4, 7, 6, 5), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]), 0)
+            pbox(m, (0, s * (ye + 0.005), zs - 0.02), (W + 2 * OVH, 0.01, 0.06))
+        _r(m, C.sweep(np.array([(-0.09, -0.02), (0.0, 0.035), (0.09, -0.02), (0.0, 0.0)]),
+                      np.array([(X0 - OVH - 0.01, 0, Z_RIDGE + 0.055), (X1 + OVH + 0.01, 0, Z_RIDGE + 0.055)]),
+                      up=(0, 0, 1)), 4)
+        for x in (X0 + 0.01, X1 - 0.01):
+            _r(m, C.prism([(YF, Z_EAVE), (YB, Z_EAVE), (0.0, Z_RIDGE - 0.02)], x - 0.01, x + 0.01, ex=(0, 1, 0),
+                          ey=(0, 0, 1), ez=(1, 0, 0)), 0)
+        ctx["shell"] = _kpart(G, m, "shell", "KTP", "galv", col, parent)
+        # знаки, таблички, надписи, кабельные трубы
+        sg, bt, pl = C.MB(), C.MB(), C.MB()
+        tri = np.array([(-0.16, 0.0), (0.16, 0.0), (0.0, 0.28)])
+        _r(sg, C.prism(tri, 0.0, 0.0015, origin=(X1 + 0.002, 0.35, 1.18), ex=(0, -1, 0), ey=(0, 0, 1), ez=(1, 0, 0)), 0)
+        bolt = np.array([(-0.006, 0.17), (0.03, 0.10), (0.005, 0.10), (0.02, 0.03), (-0.03, 0.12), (-0.005, 0.12),
+                         (-0.02, 0.19)]) * 1.15
+        _r(bt, C.prism(bolt, 0.0015, 0.0025, origin=(X1 + 0.002, 0.35, 1.18), ex=(0, -1, 0), ey=(0, 0, 1), ez=(1, 0, 0)), 0)
+        pbox(pl, (X1 + 0.004, 0.35, 1.65), (0.003, 0.42, 0.22), axis=1)
+        pbox(pl, ((BAYS[1][0] + BAYS[1][1]) / 2, YF - 0.004, Z_D1 + 0.035), (0.36, 0.003, 0.05), axis=0)
+        ctx["sign"] = _kpart(G, sg, "sign", "KTP", "sign", col, parent, smooth=False)
+        ctx["bolt"] = _kpart(G, bt, "bolt", "KTP", "bolt", col, parent, smooth=False)
+        ctx["plate"] = _kpart(G, pl, "plate", "KTP", "plate", col, parent)
+        tx = C.MB()
+        tx.add(*lettering("ТП-2714", 0.085, (X1 + 0.0062, 0.35, 1.65), (1, 0, 0)), "paint_black")
+        tx.add(*lettering("РУНН 0,4 кВ", 0.032, ((BAYS[1][0] + BAYS[1][1]) / 2, YF - 0.0062, Z_D1 + 0.035), (0, -1, 0)),
+               "paint_black")
+        ctx["text"] = ob = G.part(tx, "lettering", "KTP", "lettering", col, parent, sharp=30, smooth=False)
+        ob["uv"], ob["uv_scale"] = 66.0, 0.12             # буквы одного чёрного цвета — крошечными островами
+        cb = C.MB()
+        for k, x in enumerate((-0.55, -0.25, 0.45)):
+            r = 0.055 if k < 2 else 0.065
+            _r(cb, C.cyl((x, YB - 0.25, Z_PL - 0.06), r, 0.36, 8), 8)
+        ctx["cables"] = _kpart(G, cb, "cables", "KTP", "rubber", col, parent, sharp=50)
+        # створки (на шарнирах-пустышках, как в форме)
+        for (nm, bi, side, xh, ang, w) in leaves:
+            pv = C.pivot(f"Hinge_{nm}", col, parent, (xh, yh, 0.0))
+            m = C.MB()
+            _leaf_low(m, w, h, side)
+            ctx[f"leaf{nm}"] = _kpart(G, m, f"leaf{nm}", "KTP", "galv", col, pv)
+            if side < 0:
+                m = C.MB()
+                _lock_low(m, w, h, side)
+                ctx[f"lock{nm}"] = _kpart(G, m, f"lock{nm}", "KTP", "handle", col, pv)
+            if bi == 0 or side < 0:
+                sg, bt = C.MB(), C.MB()
+                _leaf_sign(sg, bt, w, h, side, bi == 0)
+                ctx[f"lsign{nm}"] = _kpart(G, sg, f"sign{nm}", "KTP", "sign", col, pv, smooth=False)
+                ctx[f"lbolt{nm}"] = _kpart(G, bt, f"bolt{nm}", "KTP", "bolt", col, pv, smooth=False)
+    if key == "closed":
+        return
+    # «Двери открыты»: те же сетки, створки на повёрнутых шарнирах, нутро — свой набор
+    for k in ("plinth", "frame", "shell", "sign", "bolt", "plate", "text", "cables"):
+        G.instance(ctx[k], col, parent)
+    for (nm, bi, side, xh, ang, w) in leaves:
+        pv = C.pivot(f"Hinge_{nm}", col, parent, (xh, yh, 0.0), (0, 0, math.radians(ang)))
+        for pre in ("leaf", "lock", "lsign", "lbolt"):
+            if f"{pre}{nm}" in ctx:
+                G.instance(ctx[f"{pre}{nm}"], col, pv)
+    parts = {k: C.MB() for k in ("paint", "steel", "porcelain", "copper", "galv", "plastic", "red", "white", "rubber")}
+    _inside_low(parts)
+    for k, mb in parts.items():
+        _kpart(G, mb, f"inside_{k}", "KTPInside", k, col, parent, sharp=35 if k != "porcelain" else 60)
+    m = C.MB()
+    m.extend(C.box(((BAYS[1][0] + BAYS[1][1]) / 2 + 0.22, YF + 0.30 - 0.101, 0.76), (0.12, 0.002, 0.06)), "glass")
+    G.part(m, "meter_glass", "Glass", "glass", col, parent, sharp=30, smooth=False)

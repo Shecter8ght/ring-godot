@@ -4071,6 +4071,1485 @@
     "P_hedge_b",
     "P_hedge_c"
    ]
+  },
+  "PC01_PO2": {
+   "id": "PC01_PO2",
+   "name": "Секция забора из плиты ПО-2 с колючкой · Секция",
+   "file": "res://assets/models/prospekt_city/PC01_PO2.gltf",
+   "triangles": 852,
+   "materials": 4,
+   "aabb": {
+    "center": [
+     -0.095,
+     1.515,
+     0.1381
+    ],
+    "size": [
+     0.66,
+     3.77,
+     2.8238
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_city/PC01_PO2.gltf",
+     "end": 150.0
+    },
+    {
+     "file": "res://assets/models/prospekt_city/PC01_PO2_BARE.gltf",
+     "end": 520.0
+    }
+   ],
+   "cell": 32.0
+  },
+  "PC01_PO2_BREACH": {
+   "id": "PC01_PO2_BREACH",
+   "name": "Секция забора из плиты ПО-2 с колючкой · Пролом",
+   "file": "res://assets/models/prospekt_city/PC01_PO2_BREACH.gltf",
+   "triangles": 3442,
+   "materials": 6,
+   "aabb": {
+    "center": [
+     -0.6001,
+     1.515,
+     0.006
+    ],
+    "size": [
+     1.6701,
+     3.77,
+     3.0879
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      -0.1,
+      1.3,
+      0.93
+     ],
+     [
+      0.65,
+      2.6,
+      0.63
+     ]
+    ],
+    [
+     [
+      -0.1,
+      1.3,
+      -1.03
+     ],
+     [
+      0.65,
+      2.6,
+      0.43
+     ]
+    ],
+    [
+     [
+      -0.1,
+      2.7,
+      -0.1
+     ],
+     [
+      0.65,
+      1.4,
+      1.5
+     ]
+    ]
+   ]
+  },
+  "PC01_PO2_FALLEN": {
+   "id": "PC01_PO2_FALLEN",
+   "name": "Секция забора из плиты ПО-2 с колючкой · Повалена",
+   "file": "res://assets/models/prospekt_city/PC01_PO2_FALLEN.gltf",
+   "triangles": 728,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -1.6075,
+     0.1448,
+     -0.0002
+    ],
+    "size": [
+     3.6948,
+     0.6594,
+     3.1005
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      -1.3,
+      0.17,
+      -0.0
+     ],
+     [
+      3.1,
+      0.34,
+      2.5
+     ]
+    ]
+   ]
+  },
+  "PC01_PO2_BARE": {
+   "id": "PC01_PO2_BARE",
+   "name": "Секция забора из плиты ПО-2 с колючкой · Без колючки",
+   "file": "res://assets/models/prospekt_city/PC01_PO2_BARE.gltf",
+   "triangles": 512,
+   "materials": 2,
+   "aabb": {
+    "center": [
+     0.0,
+     1.1576,
+     0.1525
+    ],
+    "size": [
+     0.45,
+     3.0552,
+     2.795
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC02_GARAGE": {
+   "id": "PC02_GARAGE",
+   "name": "Гаражи: кирпичный ГСК и ракушка · Кирпичный · закрыт",
+   "file": "res://assets/models/prospekt_city/PC02_GARAGE.gltf",
+   "triangles": 574,
+   "materials": 2,
+   "aabb": {
+    "center": [
+     0.0,
+     1.285,
+     0.322
+    ],
+    "size": [
+     3.45,
+     2.77,
+     6.756
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      0.0,
+      1.21,
+      -0.0
+     ],
+     [
+      3.4,
+      2.42,
+      6.08
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.53,
+      0.13
+     ],
+     [
+      3.4,
+      0.3,
+      6.45
+     ]
+    ]
+   ]
+  },
+  "PC02_GARAGE_OPEN": {
+   "id": "PC02_GARAGE_OPEN",
+   "name": "Гаражи: кирпичный ГСК и ракушка · Кирпичный · открыт",
+   "file": "res://assets/models/prospekt_city/PC02_GARAGE_OPEN.gltf",
+   "triangles": 1900,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.0,
+     1.285,
+     0.6236
+    ],
+    "size": [
+     3.45,
+     2.77,
+     7.3592
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      -1.575,
+      1.21,
+      -0.0
+     ],
+     [
+      0.25,
+      2.42,
+      6.0
+     ]
+    ],
+    [
+     [
+      1.575,
+      1.21,
+      -0.0
+     ],
+     [
+      0.25,
+      2.42,
+      6.0
+     ]
+    ],
+    [
+     [
+      0.0,
+      1.21,
+      -2.875
+     ],
+     [
+      2.9,
+      2.42,
+      0.25
+     ]
+    ],
+    [
+     [
+      -1.35,
+      1.21,
+      2.875
+     ],
+     [
+      0.2,
+      2.42,
+      0.25
+     ]
+    ],
+    [
+     [
+      1.35,
+      1.21,
+      2.875
+     ],
+     [
+      0.2,
+      2.42,
+      0.25
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.31,
+      2.875
+     ],
+     [
+      2.5,
+      0.22,
+      0.25
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.53,
+      0.13
+     ],
+     [
+      3.4,
+      0.3,
+      6.45
+     ]
+    ]
+   ]
+  },
+  "PC02_SHELL": {
+   "id": "PC02_SHELL",
+   "name": "Гаражи: кирпичный ГСК и ракушка · Ракушка · закрыта",
+   "file": "res://assets/models/prospekt_city/PC02_SHELL.gltf",
+   "triangles": 860,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     0.938,
+     0.099
+    ],
+    "size": [
+     2.242,
+     1.876,
+     4.938
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      0.0,
+      0.93,
+      -0.0
+     ],
+     [
+      2.24,
+      1.86,
+      4.7
+     ]
+    ]
+   ]
+  },
+  "PC02_SHELL_OPEN": {
+   "id": "PC02_SHELL_OPEN",
+   "name": "Гаражи: кирпичный ГСК и ракушка · Ракушка · открыта",
+   "file": "res://assets/models/prospekt_city/PC02_SHELL_OPEN.gltf",
+   "triangles": 964,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     2.1885,
+     0.099
+    ],
+    "size": [
+     2.3,
+     4.377,
+     4.938
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      0.0,
+      0.93,
+      -1.575
+     ],
+     [
+      2.24,
+      1.86,
+      1.55
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.8,
+      0.55
+     ],
+     [
+      2.3,
+      3.2,
+      2.7
+     ]
+    ]
+   ]
+  },
+  "PC07_KTP": {
+   "id": "PC07_KTP",
+   "name": "Трансформаторная подстанция киоскового типа · Закрыта",
+   "file": "res://assets/models/prospekt_city/PC07_KTP.gltf",
+   "triangles": 871,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.29,
+     0.0
+    ],
+    "size": [
+     2.66,
+     2.76,
+     2.16
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC07_KTP_OPEN": {
+   "id": "PC07_KTP_OPEN",
+   "name": "Трансформаторная подстанция киоскового типа · Двери открыты",
+   "file": "res://assets/models/prospekt_city/PC07_KTP_OPEN.gltf",
+   "triangles": 2803,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.0,
+     1.29,
+     0.2407
+    ],
+    "size": [
+     2.66,
+     2.76,
+     2.6415
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      0.0,
+      1.1,
+      -0.935
+     ],
+     [
+      2.4,
+      2.2,
+      0.03
+     ]
+    ],
+    [
+     [
+      -1.185,
+      1.1,
+      -0.0
+     ],
+     [
+      0.03,
+      2.2,
+      1.9
+     ]
+    ],
+    [
+     [
+      1.185,
+      1.1,
+      -0.0
+     ],
+     [
+      0.03,
+      2.2,
+      1.9
+     ]
+    ],
+    [
+     [
+      -1.165,
+      1.1,
+      0.935
+     ],
+     [
+      0.07,
+      2.2,
+      0.03
+     ]
+    ],
+    [
+     [
+      0.11,
+      1.1,
+      0.935
+     ],
+     [
+      0.1,
+      2.2,
+      0.03
+     ]
+    ],
+    [
+     [
+      1.165,
+      1.1,
+      0.935
+     ],
+     [
+      0.07,
+      2.2,
+      0.03
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.16,
+      0.935
+     ],
+     [
+      2.4,
+      0.08,
+      0.03
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.42,
+      -0.0
+     ],
+     [
+      2.64,
+      0.44,
+      2.14
+     ]
+    ],
+    [
+     [
+      0.0,
+      0.14,
+      -0.0
+     ],
+     [
+      2.56,
+      0.28,
+      2.06
+     ]
+    ],
+    [
+     [
+      -0.535,
+      0.86,
+      -0.1
+     ],
+     [
+      1.02,
+      0.92,
+      0.74
+     ]
+    ],
+    [
+     [
+      0.645,
+      1.205,
+      0.45
+     ],
+     [
+      0.91,
+      1.75,
+      0.4
+     ]
+    ]
+   ]
+  },
+  "PC06_BUSSTOP": {
+   "id": "PC06_BUSSTOP",
+   "name": "Остановочный павильон · Целый",
+   "file": "res://assets/models/prospekt_city/PC06_BUSSTOP.gltf",
+   "triangles": 1259,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.0,
+     1.3673,
+     -0.1577
+    ],
+    "size": [
+     6.44,
+     2.7354,
+     2.5545
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      0.0,
+      1.25,
+      -1.0
+     ],
+     [
+      6.08,
+      2.5,
+      0.1
+     ]
+    ],
+    [
+     [
+      -3.0,
+      1.25,
+      -0.19
+     ],
+     [
+      0.1,
+      2.5,
+      1.7
+     ]
+    ],
+    [
+     [
+      3.0,
+      1.25,
+      -0.19
+     ],
+     [
+      0.18,
+      2.5,
+      1.7
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.66,
+      -0.1
+     ],
+     [
+      6.4,
+      0.22,
+      2.4
+     ]
+    ],
+    [
+     [
+      -0.4,
+      0.23,
+      -0.62
+     ],
+     [
+      3.6,
+      0.46,
+      0.45
+     ]
+    ]
+   ]
+  },
+  "PC06_BUSSTOP_BROKEN": {
+   "id": "PC06_BUSSTOP_BROKEN",
+   "name": "Остановочный павильон · Разбит",
+   "file": "res://assets/models/prospekt_city/PC06_BUSSTOP_BROKEN.gltf",
+   "triangles": 1429,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     -0.1199,
+     1.365,
+     -0.1876
+    ],
+    "size": [
+     6.6799,
+     2.74,
+     2.6142
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      -2.0,
+      1.25,
+      -1.0
+     ],
+     [
+      2.08,
+      2.5,
+      0.1
+     ]
+    ],
+    [
+     [
+      2.0,
+      1.25,
+      -1.0
+     ],
+     [
+      2.08,
+      2.5,
+      0.1
+     ]
+    ],
+    [
+     [
+      -1.0,
+      1.25,
+      -1.0
+     ],
+     [
+      0.1,
+      2.5,
+      0.1
+     ]
+    ],
+    [
+     [
+      1.0,
+      1.25,
+      -1.0
+     ],
+     [
+      0.1,
+      2.5,
+      0.1
+     ]
+    ],
+    [
+     [
+      -3.0,
+      1.25,
+      0.62
+     ],
+     [
+      0.1,
+      2.5,
+      0.1
+     ]
+    ],
+    [
+     [
+      3.0,
+      1.25,
+      -0.19
+     ],
+     [
+      0.18,
+      2.5,
+      1.7
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.66,
+      -0.1
+     ],
+     [
+      6.4,
+      0.22,
+      2.4
+     ]
+    ],
+    [
+     [
+      -0.4,
+      0.23,
+      -0.62
+     ],
+     [
+      3.6,
+      0.46,
+      0.45
+     ]
+    ]
+   ]
+  },
+  "PC04_POLE04": {
+   "id": "PC04_POLE04",
+   "name": "Опоры: ЛЭП 0,4 кВ (СВ-110) и контактной сети троллейбуса · Опора 0,4 кВ",
+   "file": "res://assets/models/prospekt_city/PC04_POLE04.gltf",
+   "triangles": 964,
+   "materials": 2,
+   "aabb": {
+    "center": [
+     0.007,
+     4.6248,
+     0.0
+    ],
+    "size": [
+     0.311,
+     9.7504,
+     1.76
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC04_POLE04_LAMP": {
+   "id": "PC04_POLE04_LAMP",
+   "name": "Опоры: ЛЭП 0,4 кВ (СВ-110) и контактной сети троллейбуса · Опора 0,4 кВ с фонарём",
+   "file": "res://assets/models/prospekt_city/PC04_POLE04_LAMP.gltf",
+   "triangles": 1484,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.9297,
+     4.6248,
+     0.0
+    ],
+    "size": [
+     2.1563,
+     9.7504,
+     1.76
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC04_TROLLEY": {
+   "id": "PC04_TROLLEY",
+   "name": "Опоры: ЛЭП 0,4 кВ (СВ-110) и контактной сети троллейбуса · Опора троллейбусной сети",
+   "file": "res://assets/models/prospekt_city/PC04_TROLLEY.gltf",
+   "triangles": 1440,
+   "materials": 3,
+   "aabb": {
+    "center": [
+     0.0,
+     4.8983,
+     1.0368
+    ],
+    "size": [
+     0.65,
+     9.9166,
+     2.7236
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C20": {
+   "id": "PC03_C20",
+   "name": "Морские контейнеры 20 и 40 футов · 20 футов · закрыт",
+   "file": "res://assets/models/prospekt_city/PC03_C20.gltf",
+   "triangles": 2268,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     6.058
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C20_OPEN": {
+   "id": "PC03_C20_OPEN",
+   "name": "Морские контейнеры 20 и 40 футов · 20 футов · открыт",
+   "file": "res://assets/models/prospekt_city/PC03_C20_OPEN.gltf",
+   "triangles": 2756,
+   "materials": 2,
+   "aabb": {
+    "center": [
+     -0.0262,
+     1.2955,
+     0.5799
+    ],
+    "size": [
+     3.2024,
+     2.591,
+     7.2179
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      1.169,
+      1.2955,
+      -0.0
+     ],
+     [
+      0.1,
+      2.591,
+      6.058
+     ]
+    ],
+    [
+     [
+      -1.169,
+      1.2955,
+      -0.0
+     ],
+     [
+      0.1,
+      2.591,
+      6.058
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.541,
+      -0.0
+     ],
+     [
+      2.438,
+      0.1,
+      6.058
+     ]
+    ],
+    [
+     [
+      0.0,
+      1.2955,
+      -2.979
+     ],
+     [
+      2.438,
+      2.591,
+      0.1
+     ]
+    ],
+    [
+     [
+      0.0,
+      0.085,
+      -0.0
+     ],
+     [
+      2.438,
+      0.17,
+      6.058
+     ]
+    ],
+    [
+     [
+      1.34,
+      1.3,
+      2.43
+     ],
+     [
+      0.25,
+      2.4,
+      1.15
+     ]
+    ],
+    [
+     [
+      -1.38,
+      1.3,
+      3.54
+     ],
+     [
+      0.45,
+      2.4,
+      1.12
+     ]
+    ]
+   ]
+  },
+  "PC03_C40": {
+   "id": "PC03_C40",
+   "name": "Морские контейнеры 20 и 40 футов · 40 футов · закрыт",
+   "file": "res://assets/models/prospekt_city/PC03_C40.gltf",
+   "triangles": 2948,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     12.192
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C40_OPEN": {
+   "id": "PC03_C40_OPEN",
+   "name": "Морские контейнеры 20 и 40 футов · 40 футов · открыт",
+   "file": "res://assets/models/prospekt_city/PC03_C40_OPEN.gltf",
+   "triangles": 3894,
+   "materials": 2,
+   "aabb": {
+    "center": [
+     -0.0262,
+     1.2955,
+     0.5799
+    ],
+    "size": [
+     3.2024,
+     2.591,
+     13.3519
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      1.169,
+      1.2955,
+      -0.0
+     ],
+     [
+      0.1,
+      2.591,
+      12.192
+     ]
+    ],
+    [
+     [
+      -1.169,
+      1.2955,
+      -0.0
+     ],
+     [
+      0.1,
+      2.591,
+      12.192
+     ]
+    ],
+    [
+     [
+      0.0,
+      2.541,
+      -0.0
+     ],
+     [
+      2.438,
+      0.1,
+      12.192
+     ]
+    ],
+    [
+     [
+      0.0,
+      1.2955,
+      -6.046
+     ],
+     [
+      2.438,
+      2.591,
+      0.1
+     ]
+    ],
+    [
+     [
+      0.0,
+      0.085,
+      -0.0
+     ],
+     [
+      2.438,
+      0.17,
+      12.192
+     ]
+    ],
+    [
+     [
+      1.34,
+      1.3,
+      5.5
+     ],
+     [
+      0.25,
+      2.4,
+      1.15
+     ]
+    ],
+    [
+     [
+      -1.38,
+      1.3,
+      6.61
+     ],
+     [
+      0.45,
+      2.4,
+      1.12
+     ]
+    ]
+   ]
+  },
+  "PC03_C20_BLUE": {
+   "id": "PC03_C20_BLUE",
+   "name": "Морские контейнеры 20 и 40 футов · 20 футов · закрыт · синий",
+   "file": "res://assets/models/prospekt_city/PC03_C20_BLUE.gltf",
+   "triangles": 2268,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     6.058
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C20_GREEN": {
+   "id": "PC03_C20_GREEN",
+   "name": "Морские контейнеры 20 и 40 футов · 20 футов · закрыт · зелёный",
+   "file": "res://assets/models/prospekt_city/PC03_C20_GREEN.gltf",
+   "triangles": 2268,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     6.058
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C20_BEIGE": {
+   "id": "PC03_C20_BEIGE",
+   "name": "Морские контейнеры 20 и 40 футов · 20 футов · закрыт · бежевый",
+   "file": "res://assets/models/prospekt_city/PC03_C20_BEIGE.gltf",
+   "triangles": 2268,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     6.058
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C40_BLUE": {
+   "id": "PC03_C40_BLUE",
+   "name": "Морские контейнеры 20 и 40 футов · 40 футов · закрыт · синий",
+   "file": "res://assets/models/prospekt_city/PC03_C40_BLUE.gltf",
+   "triangles": 2948,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     12.192
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C40_GREEN": {
+   "id": "PC03_C40_GREEN",
+   "name": "Морские контейнеры 20 и 40 футов · 40 футов · закрыт · зелёный",
+   "file": "res://assets/models/prospekt_city/PC03_C40_GREEN.gltf",
+   "triangles": 2948,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     12.192
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC03_C40_BEIGE": {
+   "id": "PC03_C40_BEIGE",
+   "name": "Морские контейнеры 20 и 40 футов · 40 футов · закрыт · бежевый",
+   "file": "res://assets/models/prospekt_city/PC03_C40_BEIGE.gltf",
+   "triangles": 2948,
+   "materials": 1,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     12.192
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC_pole04_any": {
+   "id": "PC_pole04_any",
+   "name": "Опоры 0,4 кВ вперемешку (с фонарём — каждая третья)",
+   "file": "",
+   "variants": [
+    "PC04_POLE04",
+    "PC04_POLE04",
+    "PC04_POLE04_LAMP"
+   ],
+   "triangles": 1484,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     0.9297,
+     4.6248,
+     0.0
+    ],
+    "size": [
+     2.1563,
+     9.7504,
+     1.76
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC_busstop_any": {
+   "id": "PC_busstop_any",
+   "name": "Остановочные павильоны вперемешку (целые и разбитые)",
+   "file": "",
+   "variants": [
+    "PC06_BUSSTOP",
+    "PC06_BUSSTOP",
+    "PC06_BUSSTOP_BROKEN"
+   ],
+   "triangles": 1429,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     -0.1199,
+     1.365,
+     -0.1876
+    ],
+    "size": [
+     6.6799,
+     2.74,
+     2.6143
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC_container20_any": {
+   "id": "PC_container20_any",
+   "name": "Контейнеры 20 футов вперемешку по цвету",
+   "file": "",
+   "variants": [
+    "PC03_C20",
+    "PC03_C20_BLUE",
+    "PC03_C20_GREEN",
+    "PC03_C20_BEIGE"
+   ],
+   "triangles": 2268,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     6.058
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC_container40_any": {
+   "id": "PC_container40_any",
+   "name": "Контейнеры 40 футов вперемешку по цвету",
+   "file": "",
+   "variants": [
+    "PC03_C40",
+    "PC03_C40_BLUE",
+    "PC03_C40_GREEN",
+    "PC03_C40_BEIGE"
+   ],
+   "triangles": 2948,
+   "materials": 0,
+   "aabb": {
+    "center": [
+     0.0,
+     1.2955,
+     0.0
+    ],
+    "size": [
+     2.438,
+     2.591,
+     12.192
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city"
+  },
+  "PC05_CROSSSPAN": {
+   "id": "PC05_CROSSSPAN",
+   "name": "Жёсткая поперечина контактной сети над 6 путями · Жёсткая поперечина · 6 путей",
+   "file": "res://assets/models/prospekt_city/PC05_CROSSSPAN.gltf",
+   "triangles": 14836,
+   "materials": 2,
+   "aabb": {
+    "center": [
+     0.015,
+     4.5997,
+     0.0
+    ],
+    "size": [
+     1.03,
+     9.5046,
+     26.7
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "source": "tools/prospekt_city",
+   "solids": [
+    [
+     [
+      0.0,
+      4.2,
+      12.85
+     ],
+     [
+      0.7,
+      8.4,
+      0.7
+     ]
+    ],
+    [
+     [
+      0.0,
+      4.2,
+      -12.85
+     ],
+     [
+      0.7,
+      8.4,
+      0.7
+     ]
+    ]
+   ]
   }
  }
 }

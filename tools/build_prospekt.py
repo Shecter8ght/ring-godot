@@ -173,9 +173,17 @@ KIT_MODELS = {
     # свои растения (tools/prospekt_plants/game.py): группы P_* — экземпляры вперемешку по позиции, у каждого LOD и ствол
     "tree_birch": ("P_birch", 0.0), "tree_round": ("P_linden", 0.0), "tree_poplar": ("P_poplar", 0.0),
     "bush_big": ("P_lilac", 0.0), "hedge": ("P_hedge", 90.0),
+    # свои ограждения и город (tools/prospekt_city/game_export.py): забор района из плит ПО-2 со спиралью, без колючки — «po2»;
+    # группы PC_* (tools/prospekt_city/index_groups.py) — контейнеры по цвету, опоры с фонарём через две, остановки и разбитые
+    "district_fence": ("PC01_PO2", 0.0), "po2": ("PC01_PO2_BARE", 0.0),
+    "garage": ("PC02_GARAGE", 0.0), "garage_open": ("PC02_GARAGE_OPEN", 0.0),
+    "container20": ("PC_container20_any", 0.0), "container40": ("PC_container40_any", 0.0),
+    "pole_conc": ("PC_pole04_any", 0.0), "pole_trolley": ("PC04_TROLLEY", 0.0),
+    "bus_stop": ("PC_busstop_any", 0.0), "ktp": ("PC07_KTP", 0.0),
 }
 MODELS_NOSOLID = ["U19_02", "U16_04", "U15_05", "U10_01", "U19_01", "U14_04", "U10_05", "U02_01", "U14_03", "U08_03"]
-MODELS_POLES = ["U15_02", "U10_02", "U12_03", "U03_03", "U06_02", "U07_02", "U10_03", "U19_05"]
+MODELS_POLES = ["U15_02", "U10_02", "U12_03", "U03_03", "U06_02", "U07_02", "U10_03", "U19_05",
+                "PC04_POLE04", "PC04_POLE04_LAMP", "PC04_TROLLEY"]
 
 
 def u(aid: str, x: float, z: float, yaw: float = 0.0, s: float = 1.0, y: float = 0.0, cover: bool = False) -> None:

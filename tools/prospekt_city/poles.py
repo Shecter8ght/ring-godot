@@ -216,12 +216,11 @@ def danger_plate(mb: C.MB, z: float = 2.6) -> None:
 
 # ---------------------------------------------------------------- светильник
 def luminaire(mb: C.MB, glass: C.MB, p, d, length: float = 0.68, width: float = 0.30, height: float = 0.17,
-              tilt: float = 8.0) -> None:
+              tilt: float = 8.0, n: int = 28, k: int = 12, neck: int = 16) -> None:
     """Консольный светильник (свой, без марки): литой корпус «капля», крышка-навес, рассеиватель снизу,
     патрубок под трубу консоли сзади. p — точка крепления (конец трубы), d — направление вылета (в плане)."""
     d = np.asarray(d, float)
     d = d / np.linalg.norm(d)
-    n = 28
     t = np.linspace(0, 1, n)
     # продольный профиль: ширина, высота крышки, глубина низа (м) по длине
     wid = width * (0.42 + 0.58 * np.sin(np.clip(t * 1.08, 0, 1) * math.pi * 0.62) ** 0.7)
@@ -229,7 +228,6 @@ def luminaire(mb: C.MB, glass: C.MB, p, d, length: float = 0.68, width: float = 
     top = height * (0.55 + 0.45 * np.sin(np.clip(t, 0, 1) * math.pi * 0.75) ** 0.8) * (1 - 0.5 * t ** 6)
     bot = height * 0.35 * np.sin(np.clip(t, 0.02, 0.98) * math.pi) ** 0.5
     rings = []
-    k = 12
     for i in range(n):
         ring = []
         for j in range(k):
@@ -264,7 +262,7 @@ def luminaire(mb: C.MB, glass: C.MB, p, d, length: float = 0.68, width: float = 
     mb.add(np.array(V), F, "paint_grey", smooth=True)
     # рассеиватель: вдавленная чаша по низу средней части
     gs = []
-    for i in range(6, n - 5):
+    for i in range(max(1, n * 6 // 28), n - max(1, n * 5 // 28)):
         c = np.asarray(p, float) + fwd * (length * t[i])
         ring = []
         for j in range(k):
@@ -274,7 +272,7 @@ def luminaire(mb: C.MB, glass: C.MB, p, d, length: float = 0.68, width: float = 
     Vg, Fg = C.loft([np.array(r) for r in gs], closed=False)
     glass.add(Vg, Fg, "lamp", smooth=True)
     # патрубок
-    mb.extend(C.cyl_between(np.asarray(p) - fwd * 0.10, np.asarray(p) + fwd * 0.06, 0.032, 16), "paint_grey")
+    mb.extend(C.cyl_between(np.asarray(p) - fwd * 0.10, np.asarray(p) + fwd * 0.06, 0.032, neck), "paint_grey")
 
 
 def lamp_bracket_sv(mb: C.MB, glass: C.MB) -> None:
@@ -549,6 +547,14 @@ META = {
                     ["поперечина и светильник", [3.6, -4.0, 9.2], [0.0, -1.0, 8.4], 30],
                     ["основание крупно", [1.3, -1.5, 1.1], [0.0, 0.0, 0.4], 30]],
     },
+    "game_shots_by": {
+        "pole04_lamp": [["во весь рост", [10.0, -12.0, 5.0], [0.6, 0.0, 4.9], 30],
+                        ["верх и светильник", [3.2, -3.0, 9.6], [0.7, 0.0, 8.5], 32],
+                        ["низ и табличка", [2.4, -1.7, 2.3], [0.1, 0.0, 1.9], 28]],
+        "trolley": [["во весь рост", [10.0, -11.0, 5.2], [0.0, -0.8, 5.0], 30],
+                    ["поперечина и светильник", [3.6, -4.0, 9.2], [0.0, -1.0, 8.4], 30],
+                    ["основание крупно", [1.3, -1.5, 1.1], [0.0, 0.0, 0.4], 30]],
+    },
 }
 
 
@@ -564,3 +570,454 @@ def build(keys: list[str]) -> dict:
             pole04(col, r, lamp=(k == "pole04_lamp"))
         out[k] = name
     return out
+
+
+# ================================================================ игровая версия (LOD0)
+# Опор на карте сотни — LOD0 ≤ 1–1,5 тыс. треугольников. Наборы Painter: Pole04 — стойка СВ, траверса, изоляторы,
+# спуск, табличка, консоль, кабель и корпус светильника (2K); Trolley — труба, фундамент, фланец, узел поперечины,
+# консоль (2K). Рассеиватель — Lamp (простой полупрозрачный материал без Painter). Отверстия стойки, бандажи, гайки, хомуты, лючок — запеканием.
+# Коллизия — тонкая стойка (MODELS_POLES в tools/build_prospekt.py), своих ящиков нет.
+GAME = {
+    "ids": {"pole04": "PC04_POLE04", "pole04_lamp": "PC04_POLE04_LAMP", "trolley": "PC04_TROLLEY"},
+    "bake": ["pole04", "pole04_lamp", "trolley"],
+    "skip_high": [],
+    "res": {"Pole04": 11, "Trolley": 11},        # светильник — в наборе Pole04 (отдельный 512 заполнялся на 53 %)
+}
+SV_CH = 0.015                     # фаска углов стойки
+
+
+def stand_low(mb: C.MB, pieces: int = 7) -> None:
+    """Стойка СВ для игры: восьмигранник (прямоугольник с фасками), конусность по Y, от −0,08 до верха — отдельные
+    куски по ~1,4 м: каждый — свой остров развёртки (10-метровая полоса легла бы по диагонали атласа, а куски по 2,5 м
+    не давали уложить атлас плотнее 74 %)."""
+    zs = np.linspace(-0.08, SV_TOP, pieces + 1)            # под землёй — только 8 см (неровный грунт), не 0,3 м
+    for z0, z1 in zip(zs[:-1], zs[1:]):
+        rings = []
+        for z in (z0, z1):
+            w, d, c = SV_W / 2, sv_depth(z) / 2, SV_CH
+            pts = [(-w + c, -d), (w - c, -d), (w, -d + c), (w, d - c), (w - c, d), (-w + c, d), (-w, d - c), (-w, -d + c)]
+            rings.append(np.array([(x, y, z) for x, y in pts]))
+        V, F = C.loft(rings, closed=True, cap0=True, cap1=True)
+        mb.add(V, F, "concrete")
+
+
+def split_tubes(mb: C.MB, P_, r: float, n: int, max_len: float, m: str) -> None:
+    """Трубка по ломаной кусками не длиннее max_len (свои острова развёртки), без торцов."""
+    P_ = np.asarray(P_, float)
+    seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(P_, axis=0), axis=1))]
+    cuts = np.linspace(0, seg[-1], max(1, int(np.ceil(seg[-1] / max_len))) + 1)
+    for a, b in zip(cuts[:-1], cuts[1:]):
+        inner = [P_[i] for i in range(len(P_)) if a < seg[i] < b]
+        pa = np.array([np.interp(a, seg, P_[:, k]) for k in range(3)])
+        pb = np.array([np.interp(b, seg, P_[:, k]) for k in range(3)])
+        mb.extend(C.tube(np.array([pa] + inner + [pb]), r, n, caps=False), m)
+
+
+def insulator_low(mb: C.MB, base) -> None:
+    prof = [(0.010, 0.0), (0.034, 0.0), (0.033, 0.014), (0.023, 0.034), (0.026, 0.050), (0.019, 0.058),
+            (0.027, 0.070), (0.0, 0.083)]
+    V, F = C.lathe(prof, 8, center=base)
+    mb.add(V, F, "porcelain")
+
+
+def crossarm_low(steel: C.MB, ins: C.MB) -> None:
+    x_face = SV_W / 2
+    prof = np.array([(0, 0), (0.006, 0), (0.006, 0.069), (0.075, 0.069), (0.075, 0.075), (0, 0.075)], float)
+    V, F = C.prism(prof, -0.88, 0.88, origin=(x_face, 0, CROSS_Z - 0.075), ex=(1, 0, 0), ey=(0, 0, 1), ez=(0, 1, 0))
+    steel.add(V, F, "galv")
+    steel.extend(C.box((-x_face - 0.004, 0.0, CROSS_Z - 0.04), (0.008, 0.12, 0.05)), "galv")
+    for s in (-1, 1):
+        a = np.array([x_face + 0.03, s * 0.72, CROSS_Z - 0.075])
+        b = np.array([x_face + 0.005, s * 0.06, CROSS_Z - 0.62])
+        angle_beam(steel, b, a, 0.05, 0.005, up=(1, 0, 0), flip=(1, -s))
+    for y in WIRE_Y:
+        p = np.array([x_face + 0.045, y, CROSS_Z])
+        steel.extend(C.cyl_between(p + (0, 0, -0.03), p + (0, 0, 0.085), 0.009, 6), "galv")
+        insulator_low(ins, p + (0, 0, 0.095))
+
+
+def ground_lead_low(mb: C.MB, top_z: float = CROSS_Z - 0.05) -> None:
+    xs = -SV_W / 2 - 0.012
+    P_ = [(SV_W / 2 + 0.03, 0.05, top_z), (SV_W / 2 + 0.01, sv_depth(top_z) / 2 + 0.012, top_z - 0.08),
+          (xs, sv_depth(top_z - 0.3) / 2 * 0.3, top_z - 0.35), (xs, 0.0, top_z - 1.0), (xs, 0.0, 0.25),
+          (xs - 0.02, 0.0, 0.05), (xs - 0.05, 0.0, -0.25)]
+    split_tubes(mb, P_, 0.004, 4, 3.0, "steel")
+
+
+def plate_low(sign: C.MB, red: C.MB, z: float = 2.6) -> None:
+    x = SV_W / 2 + 0.004
+    V, F = C.prism(C.rect_profile(0.28, 0.21), 0.0, 0.0025, origin=(x, 0.0, z), ex=(0, 1, 0), ey=(0, 0, 1), ez=(1, 0, 0))
+    sign.add(V, F, "paint_white")
+    bolt = np.array([(0.012, 0.075), (-0.028, -0.004), (-0.002, -0.004), (-0.016, -0.075), (0.030, 0.012), (0.004, 0.012)])
+    V, F = C.prism(bolt, 0.0025, 0.0035, origin=(x, 0.0, z), ex=(0, 1, 0), ey=(0, 0, 1), ez=(1, 0, 0))
+    red.add(V, F, "paint_red")
+
+
+def _bent(P_, split: int) -> np.ndarray:
+    out = []
+    for k in range(len(P_) - 1):
+        a, b = np.array(P_[k], float), np.array(P_[k + 1], float)
+        for u in np.linspace(0, 1, split, endpoint=False):
+            out.append(a + (b - a) * u)
+    out.append(np.array(P_[-1], float))
+    return np.array(out)
+
+
+def lamp_bracket_low(mb: C.MB) -> None:
+    z_low, z_up = 7.45, 7.95
+    x0 = SV_W / 2 + 0.03
+    P_ = [(x0, 0.0, z_low - 0.1), (x0, 0.0, z_up), (x0 + 0.05, 0.0, z_up + 0.12), (x0 + 0.25, 0.0, z_up + 0.24),
+          (x0 + 0.7, 0.0, z_up + 0.30), (x0 + 1.25, 0.0, z_up + 0.30)]
+    mb.extend(C.tube(_bent(P_, 2), 0.024, 8), "galv")
+    mb.extend(C.cyl_between((x0, 0.0, z_low + 0.05), (x0 + 0.55, 0.0, z_up + 0.27), 0.012, 6), "galv")
+
+
+def cable_low(mb: C.MB) -> None:
+    y = sv_depth(8.5) / 2 + 0.012
+    P_ = [(SV_W / 2 + 0.07, 0.25, CROSS_Z + 0.02), (SV_W / 2 + 0.02, y + 0.02, CROSS_Z - 0.1), (0.03, y, CROSS_Z - 0.35),
+          (0.03, sv_depth(8.2) / 2 + 0.012, 8.2), (0.04, sv_depth(8.0) / 2 + 0.014, 8.0), (SV_W / 2 + 0.03, 0.05, 7.98)]
+    mb.extend(C.tube(np.array(P_), 0.007, 4), "plastic_dark")
+
+
+def _mat4(R=None, t=(0.0, 0.0, 0.0)) -> np.ndarray:
+    M = np.eye(4)
+    if R is not None:
+        M[:3, :3] = R
+    M[:3, 3] = t
+    return M
+
+
+def trolley_tube_low(mb: C.MB) -> None:
+    """Труба по секциям (3 м) — отдельные куски: свои острова развёртки; переход-конус — в начале верхней секции."""
+    r_top = TR_SEC[-1][2]
+    for k, (z0, z1, r) in enumerate(TR_SEC):
+        prof = [(r, 0.025)] if k == 0 else [(TR_SEC[k - 1][2], z0 - 0.08)]
+        prof.append((r, z0 + 0.08) if k else (r, 0.08))
+        if k < len(TR_SEC) - 1:
+            prof.append((r, z1 - 0.08))
+        else:
+            prof += [(r, z1), (r_top + 0.006, TR_TOP), (r_top + 0.006, TR_TOP + 0.02), (r_top * 0.5, TR_TOP + 0.08),
+                     (0.0, TR_TOP + 0.09)]
+        V, F = C.lathe(prof, 12)
+        mb.add(V, F, "paint_grey")
+
+
+def trolley_base_low(conc: C.MB, paint: C.MB, galv: C.MB) -> None:
+    V, F = C.lathe([(0.30, -0.40), (0.325, -0.05), (0.325, 0.07), (0.31, 0.10), (0.0, 0.10)], 12)
+    conc.add(V, F, "concrete_old")
+    V, F = C.prism(C.rect_profile(0.45, 0.45), 0.10, 0.125)
+    paint.add(V, F, "paint_grey")
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p = np.array([sx * 0.17, sy * 0.17, 0.125])
+            V, F = C.lathe([(0.021, 0.0), (0.021, 0.048)], 6, center=p)        # гайки; шпилька — запеканием
+            galv.add(V, F, "galv")
+    r0 = TR_SEC[0][2]
+    for k in range(4):
+        a = math.radians(45 + 90 * k)
+        d = np.array([math.cos(a), math.sin(a), 0.0])
+        n = np.array([-d[1], d[0], 0.0])
+        V, F = C.prism([(0.0, 0.0), (0.12, 0.0), (0.0, 0.26)], -0.006, 0.006, origin=d * r0 + (0, 0, 0.125), ex=d,
+                       ey=(0, 0, 1), ez=n)
+        paint.add(V, F, "paint_grey")
+
+
+def span_fitting_low(galv: C.MB, poly: C.MB, rope: C.MB) -> None:
+    r = TR_SEC[1][2] if SPAN_Z < TR_SEC[1][1] else TR_SEC[2][2]
+    rr, z, h = r + 0.008, SPAN_Z, 0.06
+    V, F = C.lathe([(r + 0.001, z - h / 2), (rr, z - h / 2), (rr, z + h / 2), (r + 0.001, z + h / 2)], 10)
+    galv.add(V, F, "galv")
+    ear, side = np.array([0.0, -1.0, 0.0]), np.array([1.0, 0.0, 0.0])
+    for s in (-1, 1):
+        c = side * s * (rr + 0.025)
+        galv.extend(C.box(c + (0, 0, z), (0.05, 0.012, h)), "galv")
+        c = ear * (rr + 0.05) + side * s * 0.014 + (0, 0, z)
+        V, F = C.prism(C.rect_profile(0.10, 0.07), -0.004, 0.004, origin=c, ex=ear, ey=(0, 0, 1), ez=side)
+        galv.add(V, F, "galv")
+    hole = ear * (rr + 0.075) + (0, 0, z)
+    galv.extend(C.cyl_between(hole - side * 0.024, hole + side * 0.024, 0.008, 6), "galv")
+    s0 = hole + (0, -0.06, 0)
+    galv.extend(C.tube(np.array([hole + (0, 0.0, 0.012), s0 + (0, 0, 0.012), s0 + (0, -0.01, 0), s0 + (0, 0, -0.012),
+                                 hole + (0, 0, -0.012)]), 0.006, 4), "galv")
+    i0 = s0 + (0, -0.01, 0)
+    i1 = i0 + (0, -0.42, 0)
+    rod_insulator_low(poly, i0, i1, 3, sides=6)
+    t1 = i1 + (0, -0.30, 0)
+    galv.extend(C.cyl_between(i1, t1, 0.008, 6), "galv")
+    galv.extend(C.box((i1 + t1) / 2, (0.04, 0.12, 0.012)), "galv")
+    th = [t1, t1 + (0, -0.04, 0.015), t1 + (0, -0.09, 0.0), t1 + (0, -0.04, -0.015), t1]
+    galv.extend(C.tube(np.array(th), 0.006, 4), "galv")
+    rope.extend(C.tube(np.array([t1 + (0, -0.09, 0.0), t1 + (0, -0.6, -0.01)]), 0.007, 4), "steel")
+    galv.extend(C.box(t1 + (0, -0.21, 0.006), (0.03, 0.14, 0.035)), "galv")
+
+
+def rod_insulator_low(mb: C.MB, a, b, sheds: int = 3, sides: int = 8) -> None:
+    """Стержневой изолятор для игры: стержень и sheds рёбер (тела вращения без лишних колец)."""
+    a, b = np.asarray(a, float), np.asarray(b, float)
+    d = b - a
+    ln = float(np.linalg.norm(d))
+    R = C.frame_from(d / ln).T
+    prof = [(0.017, 0.0), (0.017, 0.065)]
+    pitch = (ln - 0.15) / sheds
+    for k in range(sheds):
+        z0 = 0.075 + k * pitch
+        prof += [(0.014, z0), (0.046, z0 + pitch * 0.28), (0.014, z0 + pitch * 0.45)]
+    prof += [(0.017, ln - 0.065), (0.017, ln)]
+    V, F = C.lathe(prof, sides)
+    mb.add(C.xf(V, R, a), F, "plastic_dark")
+
+
+def lamp_console_low(mb: C.MB) -> None:
+    zc = TR_TOP + 0.02
+    P_ = [(0, 0, zc - 0.25), (0, 0, zc + 0.15), (0, -0.06, zc + 0.32), (0, -0.25, zc + 0.48), (0, -0.7, zc + 0.6),
+          (0, -1.3, zc + 0.64), (0, -1.75, zc + 0.64)]
+    Pd = _bent(P_, 2)
+    for _ in range(3):
+        Pd[1:-1] = (Pd[:-2] + 2 * Pd[1:-1] + Pd[2:]) / 4
+    mb.extend(C.tube(Pd, 0.030, 6), "paint_grey")
+    V, F = C.lathe([(TR_SEC[-1][2] + 0.012, TR_TOP - 0.18), (TR_SEC[-1][2] + 0.012, TR_TOP + 0.05),
+                    (0.045, TR_TOP + 0.09), (0.034, TR_TOP + 0.12)], 12)
+    mb.add(V, F, "paint_grey")
+
+
+# ---------------------------------------------------------------- развёртка игровых деталей (нормы навыка)
+def cyl_unwrap(ob, cut: float = 0.0) -> None:
+    """Цилиндрическая развёртка тела вращения вокруг вертикали (труба опоры, фундамент, хомут): U — дуга (угол ×
+    радиус вершины), V — высота; шов — сзади (−X, от дороги и таблички). Горизонтальные грани (|n_z| > 0,7) — плоской
+    проекцией своими островами. cut > 0 — полоса режется по высоте на куски (длинный остров иначе упирается в край)."""
+    import game_lib as G
+    me = ob.data
+    if not me.uv_layers:
+        me.uv_layers.new(name="UVMap")
+    uv = me.uv_layers[0].data
+    for p in me.polygons:
+        cos = [me.vertices[me.loops[li].vertex_index].co for li in p.loop_indices]
+        if abs(p.normal.z) > 0.7:
+            off = 50.0 if p.normal.z > 0 else 60.0
+            for li, co in zip(p.loop_indices, cos):
+                uv[li].uv = (co.x + off, co.y)
+            continue
+        angs = [math.atan2(co.y, co.x) for co in cos]
+        if max(angs) - min(angs) > math.pi:
+            angs = [a_ + 2 * math.pi if a_ < 0 else a_ for a_ in angs]
+        for li, co, a_ in zip(p.loop_indices, cos, angs):
+            uv[li].uv = (a_ * math.hypot(co.x, co.y), co.z)
+    ob["uv"] = "keep"
+    if cut > 0:
+        G.split_islands(ob, lambda c: int(c[2] // cut))
+
+
+def tube_uv(ob, chunks: list, sides: list, radii: list) -> None:
+    """Выпрямленная развёртка трубок C.tube подряд (вершины кольцами по sides): U — по окружности (2πr, шов — по
+    первой образующей), V — длина по оси; торцы — кружками своими островами. Без сварки вершин (порядок колец)."""
+    me = ob.data
+    if not me.uv_layers:
+        me.uv_layers.new(name="UVMap")
+    uv = me.uv_layers[0].data
+    co = np.array([v.co[:] for v in me.vertices])
+    u_of, v_of, circ, ang = (np.zeros(len(co)) for _ in range(4))
+    k = 0
+    for n, sd, r in zip(chunks, sides, radii):
+        rings = n // sd
+        cen = co[k:k + n].reshape(rings, sd, 3).mean(axis=1)
+        sl = np.r_[0, np.cumsum(np.linalg.norm(np.diff(cen, axis=0), axis=1))]
+        v_of[k:k + n] = np.repeat(sl, sd)
+        u_of[k:k + n] = np.tile(np.arange(sd) / sd * 2 * math.pi * r, rings)
+        ang[k:k + n] = np.tile(np.arange(sd) / sd * 2 * math.pi, rings)
+        circ[k:k + n] = 2 * math.pi * r
+        k += n
+    for p in me.polygons:
+        idx = [me.loops[li].vertex_index for li in p.loop_indices]
+        if len(idx) > 4 or len({round(v_of[i], 6) for i in idx}) == 1:      # торец (все вершины одного кольца) — кружок
+            for li, i in zip(p.loop_indices, idx):
+                rr = circ[i] / (2 * math.pi)
+                uv[li].uv = (100.0 + math.cos(ang[i]) * rr, math.sin(ang[i]) * rr + 5.0 * v_of[i])
+            continue
+        us = [u_of[i] for i in idx]
+        wrap = max(us) - min(us) > circ[idx[0]] * 0.5
+        for li, i in zip(p.loop_indices, idx):
+            uv[li].uv = (u_of[i] + (circ[i] if wrap and u_of[i] < circ[i] * 0.5 else 0.0), v_of[i])
+    ob["uv"] = "keep"
+
+
+def _chunks(mb: C.MB) -> list:
+    return [len(v) for v in mb.V]
+
+
+def split_v(ob, piece: float) -> None:
+    """Длинная выпрямленная полоса (V — длина) режется на куски не длиннее piece: грани с серединой развёртки в куске k
+    сдвигаются по U на k·1000 — свои острова, укладка не упирается в край атласа."""
+    me = ob.data
+    uv = me.uv_layers.active.data
+    for p in me.polygons:
+        vs = [uv[li].uv[1] for li in p.loop_indices]
+        k = int((sum(vs) / len(vs)) // piece)
+        if k:
+            for li in p.loop_indices:
+                uv[li].uv = (uv[li].uv[0] + 1000.0 * k, uv[li].uv[1])
+
+
+def crossarm_low2(arm: C.MB, small: C.MB, pin: C.MB, ins: C.MB) -> None:
+    """Траверса (как crossarm_low): уголок и подкосы — призмами (выпрямленные полосы), накладка и штыри — мелочью."""
+    x_face = SV_W / 2
+    prof = np.array([(0, 0), (0.006, 0), (0.006, 0.069), (0.075, 0.069), (0.075, 0.075), (0, 0.075)], float)
+    for y0, y1 in ((-0.88, -0.29), (-0.29, 0.29), (0.29, 0.88)):          # тремя кусками — короче полосы
+        V, F = C.prism(prof, y0, y1, origin=(x_face, 0, CROSS_Z - 0.075), ex=(1, 0, 0), ey=(0, 0, 1), ez=(0, 1, 0))
+        arm.add(V, F, "galv")
+    for s_ in (-1, 1):
+        a_ = np.array([x_face + 0.03, s_ * 0.72, CROSS_Z - 0.075])
+        b_ = np.array([x_face + 0.005, s_ * 0.06, CROSS_Z - 0.62])
+        angle_beam(arm, b_, a_, 0.05, 0.005, up=(1, 0, 0), flip=(1, -s_))
+    small.extend(C.box((-x_face - 0.004, 0.0, CROSS_Z - 0.04), (0.008, 0.12, 0.05)), "galv")
+    # штырь и изолятор — один раз (у первого провода); остальные три — копии той же сетки внахлёст (game)
+    p_ = np.array([x_face + 0.045, WIRE_Y[0], CROSS_Z])
+    pin.extend(C.cyl_between(p_ + (0, 0, -0.03), p_ + (0, 0, 0.085), 0.009, 6), "galv")
+    insulator_low(ins, p_ + (0, 0, 0.095))
+
+
+def lamp_bracket_low2(mb: C.MB) -> tuple:
+    """Консоль фонаря 0,4 кВ (как lamp_bracket_low) — с раскладкой трубок для развёртки."""
+    lamp_bracket_low(mb)
+    return [8, 6], [0.024, 0.012]
+
+
+def trolley_console_low(tube: C.MB, collar: C.MB) -> None:
+    """Консоль светильника троллейбусной опоры (как lamp_console_low): изогнутая труба и хомут-оголовок отдельно —
+    у трубы выпрямленная полоса, у хомута — цилиндрическая развёртка."""
+    zc = TR_TOP + 0.02
+    P_ = [(0, 0, zc - 0.25), (0, 0, zc + 0.15), (0, -0.06, zc + 0.32), (0, -0.25, zc + 0.48), (0, -0.7, zc + 0.6),
+          (0, -1.3, zc + 0.64), (0, -1.75, zc + 0.64)]
+    Pd = _bent(P_, 2)
+    for _ in range(3):
+        Pd[1:-1] = (Pd[:-2] + 2 * Pd[1:-1] + Pd[2:]) / 4
+    tube.extend(C.tube(Pd, 0.030, 6), "paint_grey")
+    V, F = C.lathe([(TR_SEC[-1][2] + 0.012, TR_TOP - 0.18), (TR_SEC[-1][2] + 0.012, TR_TOP + 0.05),
+                    (0.045, TR_TOP + 0.09), (0.034, TR_TOP + 0.12)], 12)
+    collar.add(V, F, "paint_grey")
+
+
+def trolley_base_low2(conc: C.MB, paint: C.MB, galv: C.MB) -> None:
+    """Основание троллейбусной (как trolley_base_low), фундамент — только верх над землёй (под землёй не виден и
+    в развёртке не нужен)."""
+    V, F = C.lathe([(0.32, -0.06), (0.325, -0.05), (0.325, 0.07), (0.31, 0.10), (0.0, 0.10)], 12)
+    conc.add(V, F, "concrete_old")
+    V, F = C.prism(C.rect_profile(0.45, 0.45), 0.10, 0.125)
+    paint.add(V, F, "paint_grey")
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p_ = np.array([sx * 0.17, sy * 0.17, 0.125])
+            V, F = C.lathe([(0.021, 0.0), (0.021, 0.048)], 6, center=p_)
+            galv.add(V, F, "galv")
+    r0 = TR_SEC[0][2]
+    for k in range(4):
+        a_ = math.radians(45 + 90 * k)
+        d = np.array([math.cos(a_), math.sin(a_), 0.0])
+        nn = np.array([-d[1], d[0], 0.0])
+        V, F = C.prism([(0.0, 0.0), (0.12, 0.0), (0.0, 0.26)], -0.006, 0.006, origin=d * r0 + (0, 0, 0.125), ex=d,
+                       ey=(0, 0, 1), ez=nn)
+        paint.add(V, F, "paint_grey")
+
+
+def game(col, parent, key: str, ctx: dict) -> None:
+    """Игровые детали варианта (game.py): опора 0,4 кВ — первая; с фонарём берёт её сетки; светильник — одна сетка."""
+    import game_lib as G
+    if key in ("pole04", "pole04_lamp") and "stand" not in ctx:
+        mb = C.MB()
+        stand_low(mb)
+        # стойка: четыре куска по 2,5 м — выпрямленные полосы (обвод сечения × высота), без сварки (порядок колец)
+        ctx["stand"] = G.part(mb, "stand", "Pole04", "concrete", col, parent, sharp=30)
+        G.prism_strip_uv(ctx["stand"], _chunks(mb))
+        split_v(ctx["stand"], 1.3)                         # куски по 1,3 м — ровнее укладываются рядом с мелочью
+        ctx["stand"]["uv_half"] = True                     # куски одной стойки — отступ вполовину
+        arm, small, pin, ins = C.MB(), C.MB(), C.MB(), C.MB()
+        crossarm_low2(arm, small, pin, ins)
+        ctx["crossarm"] = G.part(arm, "crossarm", "Pole04", "galv", col, parent, sharp=35)
+        G.prism_strip_uv(ctx["crossarm"], _chunks(arm))   # уголки — выпрямленными полосами, по 0,6 м
+        split_v(ctx["crossarm"], 0.6)
+        ctx["crossarm"]["uv_half"] = True
+        ctx["crossarm"]["uv_scale"] = 0.7                  # на 9 м — видна снизу, издали
+        ctx["arm_small"] = G.part(small, "crossarm_small", "Pole04", "galv", col, parent, sharp=35)
+        ctx["arm_small"]["uv_scale"] = 0.6
+        ctx["pin"] = G.part(pin, "pin", "Pole04", "galv", col, parent, sharp=35)
+        ctx["pin"]["uv_scale"] = 0.6
+        ctx["insulators"] = G.part(ins, "insulators", "Pole04", "porcelain", col, parent, sharp=60)
+        ctx["insulators"]["uv_scale"] = 0.5                # на 9 м, мелкие — видны снизу издали
+        ctx["copies"] = []
+        for y in WIRE_Y[1:]:                               # три других штыря с изоляторами — та же развёртка
+            M = _mat4(None, (0.0, y - WIRE_Y[0], 0.0))
+            ctx["copies"].append(G.instance(ctx["insulators"], col, parent, M))
+            ctx["copies"].append(G.instance(ctx["pin"], col, parent, M))
+        mb = C.MB()
+        ground_lead_low(mb)
+        # спуск — ржавый пруток: плиточный Rebar (wire_textures.py), не атлас
+        ctx["lead"] = G.part(mb, "ground_lead", "Rebar", "rebar", col, parent, sharp=80)
+        G.tubes_uv(ctx["lead"], _chunks(mb), 4, 0.08)
+        sign, red = C.MB(), C.MB()
+        plate_low(sign, red)
+        ctx["plate"] = G.part(sign, "plate", "Pole04", "sign", col, parent, sharp=30)
+        ctx["plate_red"] = G.part(red, "plate_bolt", "Pole04", "signred", col, parent, sharp=30)
+        if key == "pole04":
+            return
+    if key == "pole04_lamp":
+        for k in ("stand", "crossarm", "arm_small", "pin", "insulators", "lead", "plate", "plate_red"):
+            G.instance(ctx[k], col, parent)
+        for c in ctx["copies"]:
+            G.instance(c, col, parent)
+        mb = C.MB()
+        sides, radii = lamp_bracket_low2(mb)
+        ob = G.part(mb, "lamp_bracket", "Pole04", "galv", col, parent, sharp=45)
+        tube_uv(ob, _chunks(mb), sides, radii)
+        split_v(ob, 0.5)
+        ob["uv_half"] = True
+        mb = C.MB()
+        cable_low(mb)
+        ob = G.part(mb, "cable", "Pole04", "cable", col, parent, sharp=80)
+        tube_uv(ob, _chunks(mb), [4], [0.007])
+        split_v(ob, 0.5)
+        ob["uv_scale"], ob["uv_half"] = 0.6, True
+        from mathutils import Matrix
+        body, glass = C.MB(), C.MB()
+        luminaire(body, glass, (0.0, 0.0, 0.0), (1, 0, 0), tilt=0.0, n=10, k=6, neck=8)
+        ctx["lamp"] = G.part(body, "luminaire", "Pole04", "lumpaint", col, parent, sharp=50)
+        ctx["lamp"]["uv_scale"] = 0.6                      # на 8 м, виден снизу и издали
+        ctx["diffuser"] = G.part(glass, "diffuser", "Lamp", "lamp", col, parent, sharp=70)   # без Painter
+        M = _mat4(C.rot("y", -8.0), (SV_W / 2 + 0.03 + 1.22, 0.0, 7.95 + 0.30))
+        for k in ("lamp", "diffuser"):
+            ctx[k].matrix_basis = Matrix(M.tolist())
+        return
+    if key == "trolley":
+        mb = C.MB()
+        trolley_tube_low(mb)
+        ob = G.part(mb, "tube", "Trolley", "paint", col, parent, sharp=35, weld=1e-6)
+        cyl_unwrap(ob, cut=3.05)                           # труба — цилиндром, шов сзади; секции по 3 м — свои острова
+        ob["uv_half"] = True
+        conc, paint, galv = C.MB(), C.MB(), C.MB()
+        trolley_base_low2(conc, paint, galv)
+        ob = G.part(conc, "foundation", "Trolley", "concrete", col, parent, sharp=35, weld=1e-6)
+        cyl_unwrap(ob)
+        G.part(paint, "base", "Trolley", "paint", col, parent, sharp=35)
+        tube, collar = C.MB(), C.MB()
+        trolley_console_low(tube, collar)
+        ob = G.part(tube, "console", "Trolley", "paint", col, parent, sharp=50)
+        tube_uv(ob, _chunks(tube), [6], [0.030])
+        split_v(ob, 0.7)
+        ob["uv_half"] = True
+        ob = G.part(collar, "collar", "Trolley", "paint", col, parent, sharp=35)
+        cyl_unwrap(ob)
+        poly, rope = C.MB(), C.MB()
+        span_fitting_low(galv, poly, rope)
+        G.part(galv, "hardware", "Trolley", "galv", col, parent, sharp=35)["uv_scale"] = 0.7
+        G.part(poly, "rod_insulator", "Trolley", "polymer", col, parent, sharp=60)["uv_scale"] = 0.6
+        ob = G.part(rope, "rope", "Trolley", "rope", col, parent, sharp=80)
+        tube_uv(ob, _chunks(rope), [4], [0.007])
+        ob["uv_scale"] = 0.6
+        sign = C.MB()
+        r = TR_SEC[0][2]
+        V, F = C.prism(C.rect_profile(0.16, 0.10), 0.0, 0.002, origin=(r + 0.004, 0.0, 2.40), ex=(0, 1, 0), ey=(0, 0, 1),
+                       ez=(1, 0, 0))
+        sign.add(V, F, "paint_white")
+        G.part(sign, "number_plate", "Trolley", "sign", col, parent, sharp=30)
+        zc = TR_TOP + 0.02
+        M = _mat4(C.rot("z", -90.0) @ C.rot("y", -5.0), (0.0, -1.72, zc + 0.64))
+        G.instance(ctx["lamp"], col, parent, M)
+        G.instance(ctx["diffuser"], col, parent, M)

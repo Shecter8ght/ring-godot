@@ -34266,6 +34266,46 @@
    "hedge": {
     "model": "P_hedge",
     "yaw": 90.0
+   },
+   "district_fence": {
+    "model": "PC01_PO2",
+    "yaw": 0.0
+   },
+   "po2": {
+    "model": "PC01_PO2_BARE",
+    "yaw": 0.0
+   },
+   "garage": {
+    "model": "PC02_GARAGE",
+    "yaw": 0.0
+   },
+   "garage_open": {
+    "model": "PC02_GARAGE_OPEN",
+    "yaw": 0.0
+   },
+   "container20": {
+    "model": "PC_container20_any",
+    "yaw": 0.0
+   },
+   "container40": {
+    "model": "PC_container40_any",
+    "yaw": 0.0
+   },
+   "pole_conc": {
+    "model": "PC_pole04_any",
+    "yaw": 0.0
+   },
+   "pole_trolley": {
+    "model": "PC04_TROLLEY",
+    "yaw": 0.0
+   },
+   "bus_stop": {
+    "model": "PC_busstop_any",
+    "yaw": 0.0
+   },
+   "ktp": {
+    "model": "PC07_KTP",
+    "yaw": 0.0
    }
   },
   "models_nosolid": [
@@ -34288,7 +34328,10 @@
    "U06_02",
    "U07_02",
    "U10_03",
-   "U19_05"
+   "U19_05",
+   "PC04_POLE04",
+   "PC04_POLE04_LAMP",
+   "PC04_TROLLEY"
   ]
  },
  "walk_holes": [

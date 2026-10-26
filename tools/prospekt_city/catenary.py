@@ -326,3 +326,466 @@ def build(keys: list[str]) -> dict:
         crossspan(col, r)
         out[k] = name
     return out
+
+
+# ================================================================ игровая версия (LOD0)
+# Поперечин на карте шесть — LOD0 ≤ 15 тыс. треугольников. Одинаковые элементы (раскосы, стойки, распорки, связи
+# фермы и мачт, фасонки, гайки, гирлянды, седла, фиксаторы) — одна сетка с одной развёрткой на все места («шаблон»:
+# первый экземпляр стоит на месте подробного и запекается с него, остальные — та же сетка, повёрнутая и чуть растянутая
+# по длине): плотность текстуры как у отдельного предмета. Пояса — тоже шаблоны (куски по 2,1–2,2 м). Уголки —
+# выпрямленными полосами, коробки и пластины — сеткой (fold_uv), один набор Painter Cat (2K): решётка, фундаменты,
+# плиты, оголовки, подвесы, изоляторы, табличка; тросы и спуски — плиточный пруток Rebar. Коллизия — только мачты
+# (ригель высоко над путями).
+GAME = {
+    "ids": {"crossspan6": "PC05_CROSSSPAN"},
+    "bake": ["crossspan6"],
+    "skip_high": [],
+    "res": {"Cat": 11},                                # решётка и мелочь — один атлас (порознь 22 % и 43 %)
+    "ray": 0.002,                                      # сцена ≈ 28 м: 0,006 — 17 см, луч ловит соседние уголки
+    "solids": {"crossspan6": [[[0.0, -12.85, 4.2], [0.7, 0.7, 8.4]], [[0.0, 12.85, 4.2], [0.7, 0.7, 8.4]]]},
+}
+
+
+def _m4(cols, t) -> np.ndarray:
+    """4×4 из столбцов (ex, ey, ez) и сдвига."""
+    M = np.eye(4)
+    M[:3, 0], M[:3, 1], M[:3, 2] = cols
+    M[:3, 3] = t
+    return M
+
+
+def fold_uv(ob, angle: float = 66.0, down: bool = False) -> None:
+    """Коробки и пластины детали — сеткой в один остров: большая грань, вокруг неё откинуты боковые (кайма у тонкой
+    пластины, «крест» у кубика), противоположная грань — свой остров. Мелочь иначе дробится на шесть островов
+    с отступом у каждого. Прочие куски (трубки, тела вращения) — умная проекция с порогом angle. down — большой
+    гранью брать нижнюю (деталь высоко, видна снизу)."""
+    import bmesh
+    import bpy
+    import game_lib as G
+    me = ob.data
+    if not me.uv_layers:
+        me.uv_layers.new(name="UVMap")
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    seen, comps = set(), []
+    for f in bm.faces:
+        if f.index in seen:
+            continue
+        stack, comp = [f], []
+        seen.add(f.index)
+        while stack:
+            g = stack.pop()
+            comp.append(g)
+            for e in g.edges:
+                for h in e.link_faces:
+                    if h.index not in seen:
+                        seen.add(h.index)
+                        stack.append(h)
+        comps.append(comp)
+    fold, rest = {}, []
+    for k, comp in enumerate(comps):
+        amax = max(f.calc_area() for f in comp)
+        cands = [f for f in comp if f.calc_area() > 0.98 * amax]
+        f0 = min(cands, key=lambda f: f.normal.z) if down else max(cands, key=lambda f: f.normal.z)
+        e0 = set(f0.edges)
+        sides, opp, ok = [], [], True
+        for g in comp:
+            if g is f0:
+                continue
+            sh = e0 & set(g.edges)
+            if len(sh) == 1:
+                sides.append((g, sh.pop()))
+            elif not sh and g.normal.dot(f0.normal) < -0.9:
+                opp.append(g)
+            else:
+                ok = False
+                break
+        if not ok or len(opp) > 1:
+            rest.extend(f.index for f in comp)
+            continue
+        c = f0.calc_center_median()
+        n = f0.normal
+        e1 = (f0.verts[1].co - f0.verts[0].co).normalized()
+        e2 = n.cross(e1)
+
+        def flat(v, c=c, e1=e1, e2=e2):
+            d = v - c
+            return np.array([d.dot(e1), d.dot(e2)])
+        base = {v.index: flat(v.co) for v in f0.verts}
+        fold[f0.index] = [base[lp.vert.index] + (1000.0 * k, 0.0) for lp in f0.loops]
+        for g, e in sides:
+            a_, b_ = e.verts
+            ua, ub = base[a_.index], base[b_.index]
+            u = (b_.co - a_.co).normalized()
+            du = (ub - ua) / np.linalg.norm(ub - ua)
+            out = np.array([-du[1], du[0]])
+            if out.dot((ua + ub) / 2) < 0:
+                out = -out
+            uvs = []
+            for lp in g.loops:
+                v = lp.vert
+                if v.index in (a_.index, b_.index):
+                    q = base[v.index]
+                else:
+                    d = v.co - a_.co
+                    t = d.dot(u)
+                    q = ua + du * t + out * (d - u * t).length
+                uvs.append(q + (1000.0 * k, 0.0))
+            fold[g.index] = uvs
+        for g in opp:
+            cg, ng = g.calc_center_median(), g.normal
+            f1 = (g.verts[1].co - g.verts[0].co).normalized()
+            f2 = ng.cross(f1)
+            fold[g.index] = [np.array([(lp.vert.co - cg).dot(f1), (lp.vert.co - cg).dot(f2)]) + (1000.0 * k, 500.0)
+                             for lp in g.loops]
+    bm.free()
+    if rest:
+        G._select([ob])
+        bpy.ops.object.mode_set(mode="EDIT")
+        bme = bmesh.from_edit_mesh(me)
+        keep = set(rest)
+        for f in bme.faces:
+            f.select_set(f.index in keep)
+        bmesh.update_edit_mesh(me)
+        bpy.ops.uv.smart_project(angle_limit=math.radians(angle), island_margin=0.0, area_weight=0.0,
+                                 correct_aspect=True, scale_to_bounds=False)
+        bpy.ops.object.mode_set(mode="OBJECT")
+    uv = me.uv_layers.active.data
+    for fi, uvs in fold.items():
+        for li, q in zip(me.polygons[fi].loop_indices, uvs):
+            uv[li].uv = (float(q[0]), float(q[1]))
+    ob["uv"] = "keep"
+
+
+class Tpl:
+    """Шаблоны игровых деталей: первая деталь класса строится и ставится на место, следующие — та же сетка."""
+
+    def __init__(self, col, parent) -> None:
+        import game_lib as G
+        self.G, self.col, self.parent, self.lib = G, col, parent, {}
+
+    def place(self, cls: str, build, M, ts: str, mat: str, sharp: float = 30.0, L: float = 1.0, post=None) -> None:
+        """build(mb) — сетка в своих осях; M — куда поставить (4×4); L — длина (растяжение по своей оси Z);
+        post(ob, mb) — развёртка шаблона (выпрямленные полосы и т. п.), копии берут её же."""
+        from mathutils import Matrix
+        if cls not in self.lib:
+            mb = C.MB()
+            build(mb)
+            ob = self.G.part(mb, cls, ts, mat, self.col, self.parent, sharp=sharp)
+            if post is not None:
+                post(ob, mb)
+            ob.matrix_basis = Matrix(np.asarray(M).tolist())
+            self.lib[cls] = (ob, L)
+            return
+        src, L0 = self.lib[cls]
+        M = np.array(M, float)
+        M[:3, 2] *= L / L0
+        self.G.instance(src, self.col, self.parent, M)
+
+    def member(self, cls: str, a, b, w: float, t: float, up=(0, 0, 1), caps: bool = False, ts: str = "Cat") -> None:
+        """Уголок как в member() подробной формы: тот же кадр, та же длина — шаблон класса или своя сетка."""
+        a, b = np.asarray(a, float), np.asarray(b, float)
+        d = b - a
+        ln = float(np.linalg.norm(d))
+        if ln < 1e-4:
+            return
+        Fr = C.frame_from(d, up)
+        prof = C.angle_profile(w, t) - w * 0.3
+
+        def build(mb: C.MB, ln=ln) -> None:
+            V, F = C.prism(prof, 0.0, ln, caps=caps)      # одна призма: полоса шаблона умещается в атлас целиком,
+            mb.add(V, F, "galv")                           # а куски множили бы треугольники у всех копий
+
+        def post(ob, mb) -> None:
+            self.G.prism_strip_uv(ob, [len(v) for v in mb.V])
+        self.place(cls, build, _m4((Fr[0], Fr[1], Fr[2]), a), ts, "galv", 30.0, ln, post)
+
+
+def _mast_low(T: Tpl, y0: float, side: int) -> None:
+    H = MAST_TOP
+
+    def half(z: float) -> float:
+        return (MAST_B0 + (MAST_B1 - MAST_B0) * z / H) / 2
+    corners = [(1, 1), (-1, 1), (-1, -1), (1, -1)]
+    for k, (sx, sy) in enumerate(corners):                         # пояса — четырьмя одинаковыми кусками (шаблон)
+        a = np.array([sx * half(0.0), y0 + sy * half(0.0), 0.15])
+        b = np.array([sx * half(H), y0 + sy * half(H), H])
+        for u0, u1 in ((0.0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0)):
+            T.member("mchord", a + (b - a) * u0, a + (b - a) * u1, 0.075, 0.006, up=(sx, sy, 0))
+    n_pan = 16
+    zs = np.linspace(0.35, H - 0.1, n_pan + 1)
+    for f in range(4):
+        (ax, ay), (bx, by) = corners[f], corners[(f + 1) % 4]
+        nrm = np.array([ax + bx, ay + by, 0.0]) / 2
+        for k in range(n_pan):
+            z0, z1 = zs[k], zs[k + 1]
+            pa = np.array([ax * half(z0), y0 + ay * half(z0), z0]) if k % 2 == 0 else np.array([bx * half(z0), y0 + by * half(z0), z0])
+            pb = np.array([bx * half(z1), y0 + by * half(z1), z1]) if k % 2 == 0 else np.array([ax * half(z1), y0 + ay * half(z1), z1])
+            T.member("mdiag", pa, pb, 0.05, 0.005, up=nrm)
+        for k in range(0, n_pan + 1, 4):
+            z = zs[k]
+            T.member("mstrut", (ax * half(z), y0 + ay * half(z), z), (bx * half(z), y0 + by * half(z), z), 0.05, 0.005,
+                     up=(0, 0, 1))
+    I3 = np.eye(3)
+
+    def plate(mb: C.MB) -> None:                        # низ плиты и гаек лежит на бетоне и плите — без граней
+        V, F = C.prism(C.rect_profile(0.78, 0.78), 0.12, 0.15)
+        mb.add(V, F[:-2] + F[-1:], "galv")
+        for sx_, sy_ in corners:
+            V, F = C.lathe([(0.026, 0.15), (0.026, 0.176)], 6, center=(sx_ * 0.33, sy_ * 0.33, 0.0), cap_bottom=False)
+            mb.add(V, F, "galv")
+    T.place("mplate", plate, _m4((I3[0], I3[1], I3[2]), (0, y0, 0)), "Cat", "galv")
+    for sx, sy in corners:
+        for dd in ((sx, 0), (0, sy)):
+            dd3 = np.array([dd[0], dd[1], 0.0])
+            nn = np.array([-dd3[1], dd3[0], 0.0])
+            c = np.array([sx * half(0.15), y0 + sy * half(0.15), 0.15])
+
+            def gus(mb: C.MB) -> None:
+                V, F = C.prism([(0.0, 0.0), (0.12, 0.0), (0.0, 0.22)], -0.004, 0.004)
+                mb.add(V, F, "galv")
+            T.place("mgusset", gus, _m4((dd3, np.array([0.0, 0.0, 1.0]), nn), c), "Cat", "galv")
+
+    def found(mb: C.MB) -> None:                        # над землёй — один блок; глубина — 10 см под грунт, дна нет
+        V, F = C.box((0, 0, 0.01), (1.0, 1.0, 0.22))
+        mb.add(V, F[1:], "concrete_old")
+
+    def found_uv(ob, mb) -> None:                       # верх почти весь под опорной плитой мачты — реже
+        ob["uv_rules"] = '[["z", 1, 0.9, 0.4]]'
+    T.place("mfound", found, _m4((I3[0], I3[1], I3[2]), (0, y0, 0)), "Cat", "concrete", sharp=30, post=found_uv)
+    h = half(H)
+
+    def head(mb: C.MB) -> None:                         # оголовок: два швеллера — выпрямленными полосами
+        for s_ in (-1, 1):
+            V, F = C.prism(C.channel_profile(0.12, 0.05, 0.006), -h - 0.06, h + 0.06, origin=(s_ * h, 0.0, H - 0.06),
+                           ex=(s_, 0, 0), ey=(0, 0, 1), ez=(0, 1, 0))
+            mb.add(V, F, "galv")
+
+    def head_plate(mb: C.MB) -> None:
+        mb.extend(C.box((0, 0, H + 0.006), (RIG_W + 0.12, 0.42, 0.012)), "galv")
+    def head_plate_uv(ob, mb) -> None:                 # плита на 8,4 м: видна снизу, верх — нет
+        fold_uv(ob, 45.0, down=True)
+        ob["uv_rules"] = '[["z", -1, 0.7, 1.0], ["z", 1, 0.7, 0.3]]'
+    T.place("mhead", head, _m4((I3[0], I3[1], I3[2]), (0, y0, 0)), "Cat", "galv",
+            post=lambda ob, mb: T.G.prism_strip_uv(ob, [len(v) for v in mb.V]))
+    T.place("mheadplate", head_plate, _m4((I3[0], I3[1], I3[2]), (0, y0, 0)), "Cat", "galv", post=head_plate_uv)
+    # заземляющий спуск и табличка — у каждой мачты свои (сторона)
+    sx, sy = 1, side
+    P_ = np.array([(sx * half(z) + 0.05, y0 + sy * half(z) + 0.02 * sy, z) for z in np.linspace(H - 0.3, 0.3, 4)])
+    P_ = np.vstack([P_, [P_[-1] + (0.08, 0, -0.25), P_[-1] + (0.2, 0, -0.45)]])
+    mb = C.MB()
+    P.split_tubes(mb, P_, 0.005, 4, 3.0, "steel")
+    ob = T.G.part(mb, f"mlead_{side}", "Rebar", "rebar", T.col, T.parent, sharp=80)     # ржавый пруток, не атлас
+    T.G.tubes_uv(ob, [len(v) for v in mb.V], 4, 0.08)
+    def sign(mb: C.MB) -> None:                         # табличка лицом к +Y; у мачты −Y — та же, повёрнутая
+        V, F = C.prism(C.rect_profile(0.24, 0.30), 0.0, 0.002, ex=(1, 0, 0), ey=(0, 0, 1), ez=(0, 1, 0))
+        mb.add(V, F, "paint_white")
+    R = np.eye(3) if side > 0 else C.rot("z", 180.0)
+    T.place("msign", sign, _m4((R[:, 0], R[:, 1], R[:, 2]), (0, y0 + side * (half(2.6) + 0.04), 2.6)), "Cat", "sign")
+
+
+def _girder_low(T: Tpl) -> None:
+    y0, y1 = -MAST_Y - 0.35, MAST_Y + 0.35
+    hw, hh = RIG_W / 2, RIG_H / 2
+    zc = RIG_Z
+    chords = [(hw, zc + hh), (-hw, zc + hh), (-hw, zc - hh), (hw, zc - hh)]
+    for k, (x, z) in enumerate(chords):     # пояса — 12 одинаковыми кусками по 2,2 м: полоса шаблона короче, атлас плотнее
+        cuts = np.linspace(y0, y1, 13)
+        for ya, yb in zip(cuts[:-1], cuts[1:]):
+            T.member("gchord", (x, ya, z), (x, yb, z), 0.075, 0.006, up=(np.sign(x), 0, np.sign(z - zc)))
+    n = 44
+    ys = np.linspace(y0 + 0.05, y1 - 0.05, n + 1)
+    for k in range(n + 1):
+        y = ys[k]
+        for x in (hw, -hw):
+            T.member("gpost", (x, y, zc - hh + 0.04), (x, y, zc + hh - 0.04), 0.05, 0.005, up=(np.sign(x), 0, 0))
+        if k % 2 == 0:
+            for z in (zc + hh - 0.02, zc - hh + 0.02):
+                T.member("gstrut", (-hw + 0.04, y, z), (hw - 0.04, y, z), 0.05, 0.005, up=(0, 0, np.sign(z - zc)))
+    for k in range(n):
+        ya, yb = ys[k], ys[k + 1]
+        up_first = k % 2 == 0
+        for x in (hw, -hw):
+            za, zb = (zc - hh + 0.04, zc + hh - 0.04) if up_first else (zc + hh - 0.04, zc - hh + 0.04)
+            T.member("gdiag", (x, ya, za), (x, yb, zb), 0.05, 0.005, up=(np.sign(x), 0, 0))
+        if k % 2 == 0 and k + 2 <= n:
+            yc = ys[k + 2]
+            for z in (zc + hh - 0.02, zc - hh + 0.02):
+                T.member("gbrace", (-hw + 0.04, ya, z), (hw - 0.04, yc, z), 0.05, 0.005, up=(0, 0, np.sign(z - zc)))
+    I3 = np.eye(3)
+    for yj in (-MAST_Y / 3 * 1.4, MAST_Y / 3 * 1.4):
+        for x, z in chords:
+            def splice(mb: C.MB) -> None:
+                mb.extend(C.box((0, 0, 0), (0.012, 0.36, 0.09)), "galv")
+            T.place("gsplice", splice, _m4((I3[0], I3[1], I3[2]), (x + np.sign(x) * 0.03, yj, z)), "Cat", "galv")
+    for y in TRACKS:
+        for x in (hw, -hw):
+            for dy in (-0.45, 0.45):
+                def gus(mb: C.MB) -> None:
+                    Fr = C.frame_from(np.array([1.0, 0.0, 0.0]))
+                    V, F = C.prism(C.rect_profile(0.16, 0.128), -0.004, 0.004, ex=Fr[0], ey=Fr[1], ez=Fr[2])
+                    mb.add(V, F, "galv")
+                T.place("ggusset", gus, _m4((I3[0], I3[1], I3[2]), (x + np.sign(x) * 0.012, y + dy, zc - hh + 0.09)),
+                        "Cat", "galv")
+
+
+def _string_parts(discs: int = 4) -> tuple:
+    """Гирлянда в своих осях: z вниз по гирлянде от точки подвеса. Металл (серьга, шапки, стержни) и тарелки."""
+    metal = [(0.008, 0.0), (0.008, 0.08)]
+    sheds = []
+    z = 0.08
+    for _ in range(discs):
+        metal += [(0.036, z + 0.005), (0.036, z + 0.055), (0.009, z + 0.062)]        # шапка и стержень до следующей
+        sheds.append([(0.034, z + 0.040), (0.1275, z + 0.075), (0.122, z + 0.086), (0.034, z + 0.080)])
+        z += 0.127
+    return metal, sheds, z
+
+
+def _saddle_low(T: Tpl, y: float) -> None:
+    seat = np.array([0.0, y, MESS_Z + 0.03])
+    zb = RIG_Z - RIG_H / 2
+    I3 = np.eye(3)
+    for s in (-1, 1):
+        yt = y + s * 0.45
+        T.member("sbeam", (-RIG_W / 2 - 0.04, yt, zb - 0.04), (RIG_W / 2 + 0.04, yt, zb - 0.04), 0.063, 0.006,
+                 up=(0, 0, -1), ts="Cat")
+
+        def lug(mb: C.MB) -> None:
+            mb.extend(C.box((0, 0, 0), (0.012, 0.08, 0.06)), "galv")
+        T.place("slug", lug, _m4((I3[0], I3[1], I3[2]), (0.0, yt, zb - 0.075)), "Cat", "galv")
+        top = np.array([0.0, yt, zb - 0.10])
+        bot = seat + (0, s * 0.04, 0.05)
+        u = (bot - top) / np.linalg.norm(bot - top)
+        Fr = C.frame_from(u)
+        metal, sheds, ln_ = _string_parts(4)
+
+        def s_metal(mb: C.MB) -> None:
+            V, F = C.lathe(metal + [(0.007, float(np.linalg.norm(bot - top)))], 6)
+            mb.add(V, F, "galv")
+
+        def s_glass(mb: C.MB) -> None:
+            for sh in sheds:                           # верхний срез тарелки — внутри шапки, не нужен
+                V, F = C.lathe(sh, 8, cap_bottom=False)
+                mb.add(V, F, "glass")
+        M = _m4((Fr[0], Fr[1], Fr[2]), top)
+        T.place("string_metal", s_metal, M, "Cat", "galv", sharp=60)
+        T.place("string_glass", s_glass, M, "Cat", "glass", sharp=60)
+
+    def seat_b(mb: C.MB) -> None:
+        V, F = C.prism(C.rect_profile(0.32, 0.05), -0.012, 0.012, origin=(0, 0, 0.02), ex=(1, 0, 0), ey=(0, 0, 1),
+                       ez=(0, 1, 0))
+        mb.add(V, F, "galv")
+        for dx in (-0.1, 0.1):
+            mb.extend(C.box((dx, 0, -0.012), (0.05, 0.035, 0.02)), "galv")
+    T.place("seat", seat_b, _m4((I3[0], I3[1], I3[2]), seat), "Cat", "galv")
+
+
+def _registration_low(T: Tpl) -> None:
+    import poles as P_
+    I3 = np.eye(3)
+    ends = []
+    galv, poly = C.MB(), C.MB()
+    for s in (-1, 1):
+        anchor = np.array([0.0, s * (MAST_Y - mast_half(FT_Z) - 0.02), FT_Z + 0.02])
+        galv.extend(C.box(anchor + (0, s * 0.02, 0), (0.2, 0.04, 0.12)), "galv")
+        a = anchor - np.array([0, s * 0.06, 0])
+        b = a - np.array([0, s * 0.40, 0.0])
+        P_.rod_insulator_low(poly, a, b, 3, sides=6)
+        c = b - np.array([0, s * 0.28, 0.0])
+        galv.extend(C.cyl_between(b, c, 0.008, 6), "galv")
+        galv.extend(C.box((b + c) / 2, (0.04, 0.12, 0.012)), "galv")
+        ends.append(c)
+    y_a, y_b = ends[0][1], ends[1][1]
+    span = y_b - y_a
+    ys = np.linspace(y_a, y_b, 24)
+    zs = FT_Z - 0.06 * (1 - ((ys - (y_a + y_b) / 2) / (span / 2)) ** 2)
+    rope, drop = C.MB(), C.MB()
+    P_.split_tubes(rope, np.c_[np.zeros_like(ys), ys, zs], 0.0055, 4, 3.5, "steel")
+    for y in TRACKS:
+        z_ft = FT_Z - 0.06 * (1 - (y / (span / 2)) ** 2)
+        for dy in (-0.9, 0.9):
+            zb_ = FT_Z - 0.06 * (1 - ((y + dy) / (span / 2)) ** 2)
+            drop.extend(C.tube(np.array([(0.0, y + dy, RIG_Z - RIG_H / 2 + 0.02), (0.0, y + dy, zb_ + 0.01)]), 0.003, 3,
+                               caps=False), "steel")
+
+            def clamp(mb: C.MB) -> None:
+                mb.extend(C.box((0, 0, 0), (0.03, 0.03, 0.04)), "galv")
+            T.place("dclamp", clamp, _m4((I3[0], I3[1], I3[2]), (0.0, y + dy, zb_ + 0.015)), "Cat", "galv")
+        f0 = np.array([0.0, y - 0.55, z_ft - 0.02])
+
+        def fix(mb: C.MB) -> None:
+            mb.extend(C.box((0, 0, 0.02), (0.05, 0.06, 0.06)), "galv")
+        T.place("fbox", fix, _m4((I3[0], I3[1], I3[2]), f0), "Cat", "galv")
+
+        def fins(mb: C.MB) -> None:
+            P_.rod_insulator_low(mb, (0, 0, 0), (0.0, 0.18, -0.10), 2, sides=6)
+        T.place("fins", fins, _m4((I3[0], I3[1], I3[2]), f0), "Cat", "polymer", sharp=60)
+        f1 = f0 + (0.0, 0.18, -0.10)
+        f2 = np.array([0.0, y + 0.05, CONT_Z + 0.16])
+        galv.extend(C.tube(np.array([f1, f1 + (f2 - f1) * 0.5 + (0, 0, 0.02), f2]), 0.013, 6), "galv")
+        f3 = np.array([0.0, y + 0.45, CONT_Z + 0.03])
+        galv.extend(C.tube(np.array([f2, f2 + (0, 0.2, -0.07), f3]), 0.009, 6), "galv")
+
+        def cclamp(mb: C.MB) -> None:
+            mb.extend(C.box((0, 0, 0), (0.07, 0.03, 0.035)), "galv")
+        T.place("cclamp", cclamp, _m4((I3[0], I3[1], I3[2]), (0.0, y, CONT_Z + 0.02)), "Cat", "galv")
+        galv.extend(C.tube(np.array([f3, (0.0, y + 0.02, CONT_Z + 0.04)]), 0.006, 4), "galv")
+    T.G.part(galv, "reg_hardware", "Cat", "galv", T.col, T.parent, sharp=35)
+    T.G.part(poly, "reg_insulators", "Cat", "polymer", T.col, T.parent, sharp=60)
+    ob = T.G.part(rope, "reg_rope", "Rebar", "rebar", T.col, T.parent, sharp=80)
+    T.G.tubes_uv(ob, [len(v) for v in rope.V], 4, 0.08)
+    ob = T.G.part(drop, "reg_droppers", "Rebar", "rebar", T.col, T.parent, sharp=80)
+    T.G.tubes_uv(ob, [len(v) for v in drop.V], 3, 0.08)
+
+
+def _feeder_low(T: Tpl, y0: float) -> None:
+    base = np.array([0.0, y0, MAST_TOP + 0.012])
+    top_z = FEED_Z - 0.20
+    for dx in (-0.08, 0.08):
+        T.member(f"fpost_{dx > 0}", base + (dx, 0, 0), (dx, y0, top_z), 0.063, 0.006, up=(np.sign(dx), 0, 0),
+                 caps=True, ts="Cat")
+    T.member("fstrut", (-0.10, y0, top_z - 0.25), (0.10, y0, top_z - 0.25), 0.05, 0.005, ts="Cat")
+    mb, ins = C.MB(), C.MB()
+    V, F = C.prism(C.angle_profile(0.075, 0.006)[::-1] * (1, -1), y0 - 0.45, y0 + 0.45, origin=(-0.04, 0, top_z),
+                   ex=(1, 0, 0), ey=(0, 0, 1), ez=(0, 1, 0))
+    mb.add(V, F, "galv")
+    for dy in (-0.3, 0.3):
+        p = np.array([0.0, y0 + dy, top_z])
+        mb.extend(C.cyl_between(p - (0, 0, 0.02), p + (0, 0, 0.09), 0.011, 6), "galv")
+        prof = [(0.016, 0.0), (0.058, 0.006), (0.036, 0.035), (0.052, 0.074), (0.030, 0.100), (0.036, 0.115),
+                (0.012, 0.132), (0.0, 0.132)]
+        V, F = C.lathe(prof, 8, center=p + (0, 0, 0.07))
+        ins.add(V, F, "porcelain_white")
+    T.G.part(mb, "feeder_bracket", "Cat", "galv", T.col, T.parent, sharp=35)
+    T.G.part(ins, "feeder_insulators", "Cat", "porcelain", T.col, T.parent, sharp=60)
+
+
+def game(col, parent, key: str, ctx: dict) -> None:
+    """Игровые детали поперечины (game.py): мачты, ригель, подвесы, фиксирующий трос, кронштейн фидеров."""
+    T = Tpl(col, parent)
+    for side in (-1, 1):
+        _mast_low(T, side * MAST_Y, side)
+    _girder_low(T)
+    for y in TRACKS:
+        _saddle_low(T, y)
+    _registration_low(T)
+    _feeder_low(T, -MAST_Y)
+    SMALL = ("reg_hardware", "reg_insulators", "string_glass", "string_metal", "fins", "feeder_insulators", "seat",
+             "dclamp", "cclamp", "fbox", "slug", "gsplice", "ggusset", "mgusset", "feeder_bracket")
+    FOLD = ("reg_hardware", "seat", "dclamp", "cclamp", "fbox", "slug", "gsplice", "ggusset", "mgusset",
+            "feeder_bracket", "mplate", "msign")                   # коробки и пластины — сеткой, не шестью островами
+    done = set()
+    for o in col.objects:
+        if o.type != "MESH" or o.data.name in done:
+            continue
+        done.add(o.data.name)
+        small = o.get("part") in SMALL
+        if o.get("part") in FOLD:
+            fold_uv(o, 66.0 if small else 45.0)
+        elif small and o.get("uv") != "keep":
+            o["uv"] = 66.0
+        if small:
+            o["uv_scale"] = 0.4
+        if o.get("tex_set") == "Cat" and o.get("part") not in ("mfound", "msign"):
+            o["uv_half"] = True                                   # одна сталь (стекло, полимер) — отступ вполовину
