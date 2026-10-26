@@ -1,0 +1,31 @@
+{
+ "id": "scope_4x32",
+ "source": "E:\\Games\\RING-godot\\_asset_src\\vss_m_v8\\sights_sp.blend",
+ "root": "Rail_4x32",
+ "tris": 10130,
+ "tris_lens": 2112,
+ "ocular": [
+  0.0,
+  0.032,
+  -0.088
+ ],
+ "ocular_r": 0.0158,
+ "sight_h": 0.032,
+ "sight_x": 0.0,
+ "eye_relief": 0.075,
+ "uv": {
+  "fill": 0.5997,
+  "fill_with_copies": 0.6492,
+  "islands": 600,
+  "islands_small": 374,
+  "stacked_copies": 410,
+  "px_mm": 5.83,
+  "px_mm_visible": 6.26,
+  "px_mm_eye": null,
+  "px_mm_far": null,
+  "px_mm_hidden": 1.83,
+  "stretch_share": 4e-05,
+  "flipped_share": 0.0003,
+  "islands_with_flips": 5
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "version": "v8 (2026-10-26)",
+ "source": "E:\\Games\\RING-godot\\_asset_src\\vss_m_v8\\VSS_M_v8_sp.blend",
+ "grip_source_m": [
+  0.3199999928474426,
+  0.0,
+  -0.07199999690055847
+ ],
+ "nodes": {
+  "Body_Cerakote": 5495,
+  "Body_Polymer": 3175,
+  "Body_Steel": 17196,
+  "Magazine": 2308,
+  "Stock_Polymer": 1100,
+  "Stock_Steel": 728,
+  "Stock_Wood": 6800
+ },
+ "mags": {
+  "vss_mag10": {
+   "tris": 2308
+  },
+  "vss_mag20": {
+   "tris": 2700
+  },
+  "vss_mag30": {
+   "tris": 3113
+  }
+ },
+ "size_game_m": [
+  0.0728,
+  0.189,
+  0.8936
+ ],
+ "tris_in_hands": 36802,
+ "marks_game_m": {
+  "Muzzle": [
+   0.0,
+   0.082,
+   0.574
+  ],
+  "SightRear": [
+   0.0,
+   0.1273,
+   0.287
+  ],
+  "SightFront": [
+   0.0,
+   0.1283,
+   0.5595
+  ],
+  "MagMount": [
+   0.0,
+   0.0795,
+   0.1385
+  ]
+ }
+}

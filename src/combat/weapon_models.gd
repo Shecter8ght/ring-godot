@@ -61,8 +61,8 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, _dur: float =
 		match key:
 			"pistol":
 				_pistol(root)
-			# основа из ассета без файла (ВЕРАС-54) — запасной процедурный автомат
-			"rifle", "veras54":
+			# основа из ассета без файла (ВЕРАС-54, ВСС-М) — запасной процедурный автомат
+			"rifle", "veras54", "vss_m":
 				_rifle(root)
 			"shotgun":
 				_shotgun(root)
@@ -140,6 +140,18 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 	# штатный приклад — тоже отдельная деталь: поставили другой — этот прячется
 	for node2: Node in model.find_children("Stock*", "MeshInstance3D", true, false):
 		node2.set_meta("part", "stock")
+	# отражение неметалла по материалу (weapon.material_specular {имя материала: 0…1}): у Cerakote ВСС-М — 0.1,
+	# как в сценах Blender (в glTF его нет; при обычных 0.5 чёрное покрытие на свету читалось серым, владелец 2026-10-26)
+	var spec: Dictionary = weapon.get("material_specular", {})
+	if not spec.is_empty():
+		for raw: Node in model.find_children("*", "MeshInstance3D", true, false):
+			var mi: MeshInstance3D = raw as MeshInstance3D
+			for i: int in range(mi.get_surface_override_material_count()):
+				var mat: BaseMaterial3D = mi.get_active_material(i) as BaseMaterial3D
+				if mat and spec.has(mat.resource_name):
+					var tuned: BaseMaterial3D = mat.duplicate() as BaseMaterial3D
+					tuned.metallic_specular = float(spec[mat.resource_name])
+					mi.set_surface_override_material(i, tuned)
 	return true
 
 

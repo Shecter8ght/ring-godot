@@ -172,7 +172,8 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0,
 		# риг не возвращает его на голый ствол при каждой позе.
 		rig.set_external_muzzle(true)
 	# основная линия прицеливания и остальные — для камеры (CameraRig выбирает по прицелу)
-	var primary_line: Dictionary = {"x": 0.0, "h": float(root.get_meta("sight_h", 0.0)), "roll": 0.0}
+	# ось основного прицела вбок (ПСО на боковом креплении) — sight_x; у прочих прицелов 0
+	var primary_line: Dictionary = {"x": float(root.get_meta("sight_x", 0.0)), "h": float(root.get_meta("sight_h", 0.0)), "roll": 0.0}
 	root.set_meta("sight_primary", primary_line)
 	sights["primary"] = primary_line
 	root.set_meta("sights", sights)
@@ -372,7 +373,9 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 
 
 ## Обвес готовой моделью: a.model = {scene, offset [x, y, z] от точки, length_m — длина дульной насадки,
-## sight_h — у прицела высота центра линзы над началом модели (линия прицеливания)}.
+## sight_h — у прицела высота центра линзы над началом модели (линия прицеливания); у оптики ещё ocular [x, y, z] —
+## центр задней линзы в осях модели, ocular_r — её радиус, eye_relief — вынос глаза, м, sight_x — ось вбок от начала
+## (ПСО на боковом «ласточкином хвосте» ВСС-М: ось левее ствола) — по ним камера показывает картинку в окуляре}.
 ## Сетки Body / Body_LOD1 (вид со стороны), карты лежат рядом с моделью:
 ## <имя>_100_{base_color,roughness,metallic,normal}.png (вид один при любой прочности, решение владельца
 ## 2026-10-19), жировые следы рук — <имя>_100_coat.png, если есть. Начало модели — место посадки:
@@ -403,6 +406,15 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	if spec.has("sight_h"):
 		# прицел-модель (ЗОРИН К-1): линия прицеливания — через центр линзы
 		root.set_meta("sight_h", at.y + float(spec.sight_h))
+		root.set_meta("sight_x", at.x + float(spec.get("sight_x", 0.0)))
+	if spec.has("ocular"):
+		# оптика-модель: как у процедурной (_scope4x) — окуляр, его радиус и вынос глаза
+		var oc: Array = spec.ocular
+		var ocular: Vector3 = at + Vector3(float(oc[0]), float(oc[1]), float(oc[2]))
+		root.set_meta("scoped", true)
+		root.set_meta("ocular", ocular)
+		root.set_meta("ocular_r", float(spec.get("ocular_r", 0.0148)))
+		root.set_meta("ads_z", maxf(float(spec.get("eye_relief", 0.075)) - ocular.z, Balance.SCOPE_ADS_Z_MIN))
 	if spec.has("length_m"):
 		# дульная насадка: штатный тормоз снят, срез — на её торце
 		if bool(m.get("replace", false)):

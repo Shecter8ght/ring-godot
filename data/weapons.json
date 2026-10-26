@@ -268,6 +268,77 @@
     }
    }
   },
+  "vss_m": {
+   "anim": "rifle",
+   "sockets": {
+    "optic_primary": {
+     "pos": [
+      0.022,
+      0.07025,
+      0.041
+     ]
+    },
+    "top_front": {
+     "pos": [
+      0,
+      0.1232,
+      0.0698
+     ],
+     "rail": false,
+     "rail_z": [
+      -0.013,
+      0.1525
+     ]
+    },
+    "side_left": {
+     "pos": [
+      0.0324,
+      0.082,
+      0.2963
+     ],
+     "side": true,
+     "rail_z": [
+      0.254,
+      0.3385
+     ]
+    },
+    "side_right": {
+     "pos": [
+      -0.0324,
+      0.082,
+      0.2963
+     ],
+     "side": true,
+     "rail_z": [
+      0.254,
+      0.3385
+     ]
+    },
+    "underbarrel": {
+     "pos": [
+      0,
+      0.0496,
+      0.2963
+     ],
+     "rail_z": [
+      0.254,
+      0.3385
+     ]
+    },
+    "mag": {
+     "pos": [
+      0,
+      0.0795,
+      0.1385
+     ],
+     "asset_pos": [
+      0,
+      0.0795,
+      0.1385
+     ]
+    }
+   }
+  },
   "shotgun": {
    "anim": "shotgun",
    "sockets": {
@@ -1389,8 +1460,8 @@
     "slot": "primary",
     "class": "DMR",
     "caliber": "9x39",
-    "model": "rifle",
-    "scale": 0.9933333333333333,
+    "model": "vss_m",
+    "scale": 1.0,
     "length": 0.894,
     "stats": {
      "spread": 1.35,
@@ -1411,7 +1482,11 @@
      "wear": 0.02
     },
     "mounts": {
-     "optic_primary": "DOVETAIL"
+     "optic_primary": "DOVETAIL",
+     "top_front": "RAIL_TOP",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM"
     },
     "mag_if": "MAG_VSS",
     "default_mag": "mag_939_10",
@@ -1421,6 +1496,14 @@
     "integral": {
      "suppressed": true,
      "db": -15
+    },
+    "asset": "res://assets/models/weapons/vss_m/vss_m.gltf",
+    "asset_kind": "static",
+    "material_specular": {
+     "VSS_Cerakote": 0.1
+    },
+    "viewmodel": {
+     "ads_z": 0.19
     }
    },
    "flavor": "Выбирай голову и дистанцию: тихая точность ВСС важнее возможности удерживать спуск."
@@ -4046,7 +4129,8 @@
     "ergo": 0,
     "reliability": 1
    },
-   "flavor": "Малый запас дисциплинирует: считай выстрелы и держи ещё один магазин рядом."
+   "flavor": "Малый запас дисциплинирует: считай выстрелы и держи ещё один магазин рядом.",
+   "model": "res://assets/models/weapons/vss_m/vss_mag10.gltf"
   },
   "mag_939_20": {
    "name": "Магазин ВСС / АС ВАЛ на 20",
@@ -4070,9 +4154,43 @@
     "capacity": 20,
     "reload_k": 1.1,
     "ergo": -3,
-    "reliability": 1
+    "reliability": 1,
+    "look": "asset",
+    "asset": "res://assets/models/weapons/vss_m/vss_mag20.gltf",
+    "asset_detail": "res://assets/models/weapons/vss_m/vss_mag20.gltf"
    },
-   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться."
+   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться.",
+   "model": "res://assets/models/weapons/vss_m/vss_mag20.gltf"
+  },
+  "mag_939_30": {
+   "name": "Магазин ВСС / АС ВАЛ на 30",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 13000,
+   "stack": 1,
+   "weight": 0.28,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "30",
+   "mag": {
+    "if": "MAG_VSS",
+    "capacity": 30,
+    "reload_k": 1.15,
+    "ergo": -5,
+    "reliability": 0.99,
+    "look": "asset",
+    "asset": "res://assets/models/weapons/vss_m/vss_mag30.gltf",
+    "asset_detail": "res://assets/models/weapons/vss_m/vss_mag30.gltf"
+   },
+   "model": "res://assets/models/weapons/vss_m/vss_mag30.gltf",
+   "flavor": "Длинный магазин под 9×39: меньше перезарядок в затяжном бою, но ниже лечь с ним труднее."
   },
   "mag_556_20": {
    "name": "Магазин STANAG 5.56 на 20",
@@ -4832,7 +4950,24 @@
     "role": "PRIMARY",
     "zoom": 4,
     "aim_k": 0.85,
-    "clamp_m": 0.04
+    "clamp_m": 0.04,
+    "model": {
+     "scene": "res://assets/models/attachments/scope_4x32/scope_4x32.gltf",
+     "offset": [
+      0,
+      0,
+      0
+     ],
+     "sight_h": 0.032,
+     "sight_x": 0.0,
+     "ocular": [
+      0.0,
+      0.032,
+      -0.088
+     ],
+     "ocular_r": 0.0158,
+     "eye_relief": 0.075
+    }
    },
    "flavor": "На открытой галерее даёт преимущество; в тесной подсобке просит запасной прицел."
   },
@@ -4866,7 +5001,27 @@
     "role": "PRIMARY",
     "zoom": 4,
     "aim_k": 0.8,
-    "clamp_m": 0.04
+    "clamp_m": 0.04,
+    "model": {
+     "scene": "res://assets/models/attachments/pso_vss/pso_vss.gltf",
+     "offset": [
+      0,
+      0,
+      0
+     ],
+     "sight_h": 0.09,
+     "sight_x": -0.0155,
+     "ocular": [
+      -0.0155,
+      0.09,
+      -0.135
+     ],
+     "ocular_r": 0.0127,
+     "eye_relief": 0.068
+    },
+    "blocks": [
+     "top_front"
+    ]
    },
    "flavor": "На открытой галерее даёт преимущество; в тесной подсобке просит запасной прицел."
   },

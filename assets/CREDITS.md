@@ -97,7 +97,7 @@
 ## Иконки оружия
 
 - `assets/icons/wpn_*.png` — 23 изображения из `docs/RING_weapon_design_doc_v9_final_cut.html`, предоставленного владельцем проекта; собственные материалы проекта RING.
-- `assets/icons/wpn_sp_02.png` — VSS Vintorez, собственная генерация для проекта RING по решению владельца; OpenAI ImageGen, 2026-09-28.
+- `assets/icons/wpn_sp_02.png` — снимок собственной игровой модели ВСС-М v8 (`tools/icon_bake.tscn`), 2026-10-26; прежняя генерация OpenAI ImageGen (2026-09-28) заменена.
 
 ## Звук (assets/audio — `tools/import_audio.py`, обработка — `tools/build_audio.py` прежнего RING)
 
@@ -551,3 +551,15 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
   старая кора тополя и тёмный низ берёзы — ambientCG Bark001 (CC0), `assets/textures/bark001`; береста — собственная текстура
   зоны 1 (`assets/zone01/textures/birch_bark_*`); гладкая кора тополя, сирени и кизильника — собственная процедурная
   (`assets/models/plants/textures/poplar_bark_young_*`, `shrub_bark_*`, с фактурой Bark001 в трещинах).
+
+## ВСС-М v8 — игровая модель, магазины, ПСО и 4×32 (2026-10-26)
+
+- `assets/models/weapons/vss_m/` (`vss_m.gltf`, `vss_mag10/20/30.gltf`, карты `vss_m_<Атлас>_100_*`) и
+  `assets/models/attachments/pso_vss/`, `assets/models/attachments/scope_4x32/` — собственные модели проекта RING (Blender,
+  `tools/vss_m_v8`), отделка в Substance Painter собственными стеками (`tools/vss_m_v8/sp_*.py`), карты запечены с
+  собственного high-poly. Форма — по фотографиям и описаниям ВСС-М, обмерной копией не является; марок производителей нет.
+- Дерево приклада: основа из фото шпона Poly Haven (CC0, автор Jenelle van Heerden) — «Red Oak Veneer»
+  (https://polyhaven.com/a/red_oak_veneer), «Silver Oak Veneer 01» (https://polyhaven.com/a/silver_oak_veneer_01),
+  «Black Oak Veneer» (https://polyhaven.com/a/black_oak_veneer); перекрашено и запечено в карты игры
+  (`tools/vss_m_v8/wood_veneer_bake.py`, лицензии — `_asset_src/vss_m_v8/wood_photos/<id>/license.txt`).
+- Иконки `assets/icons/mag_939_10/20/30.png`, `optic_pso_01.png`, `optic_4x_01.png` — снимки этих моделей (`tools/icon_bake.tscn`).

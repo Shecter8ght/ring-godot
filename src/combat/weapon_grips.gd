@@ -49,6 +49,11 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 	if model == "pistol":
 		contact_attachment = ""
 	var contact_key: String = "%s_%.3f_%s" % [model, float(weapon.get("scale", 1.0)), contact_attachment]
+	if not _contacts.has(contact_key):
+		# своей калибровки фаланг у модели нет — берём её класса (anim: «rifle» и т. п.) при том же масштабе
+		var anim: String = String(WeaponDb.model(model).get("anim", ""))
+		if anim != "" and anim != model:
+			contact_key = "%s_%.3f_%s" % [anim, float(weapon.get("scale", 1.0)), contact_attachment]
 	if _profiles.has(grip):
 		if not under_socket.is_empty():
 			profile.left = (_profiles[grip] as Dictionary).duplicate(true)

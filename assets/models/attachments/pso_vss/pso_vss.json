@@ -1,0 +1,31 @@
+{
+ "id": "pso_vss",
+ "source": "E:\\Games\\RING-godot\\_asset_src\\vss_m_v8\\sights_sp.blend",
+ "root": "PSO_VSS_4x24",
+ "tris": 8812,
+ "tris_lens": 2112,
+ "ocular": [
+  -0.0155,
+  0.09,
+  -0.135
+ ],
+ "ocular_r": 0.0127,
+ "sight_h": 0.09,
+ "sight_x": -0.0155,
+ "eye_relief": 0.068,
+ "uv": {
+  "fill": 0.5883,
+  "fill_with_copies": 0.5946,
+  "islands": 502,
+  "islands_small": 290,
+  "stacked_copies": 257,
+  "px_mm": 4.48,
+  "px_mm_visible": 4.62,
+  "px_mm_eye": null,
+  "px_mm_far": null,
+  "px_mm_hidden": 0.56,
+  "stretch_share": 0.0,
+  "flipped_share": 0.00079,
+  "islands_with_flips": 5
+ }
+}
