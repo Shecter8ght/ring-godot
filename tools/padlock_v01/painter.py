@@ -16,7 +16,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("command")
     parser.add_argument("--timeout",type=float,default=45)
-    parser.add_argument("--revision",choices=['v02','v03','v04'],default='v02')
+    parser.add_argument("--revision",choices=['v02','v03','v04','v05'],default='v02')
     parser.add_argument("--wait-for",default=None)
     args=parser.parse_args()
     JOBS.mkdir(parents=True,exist_ok=True)

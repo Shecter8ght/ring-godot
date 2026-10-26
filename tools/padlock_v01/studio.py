@@ -17,10 +17,10 @@ parser.add_argument('--samples',type=int,default=128)
 parser.add_argument('--eevee-check',action='store_true')
 parser.add_argument('--root',default=str(WORK))
 parser.add_argument('--report-name',default='studio_v03.json')
-parser.add_argument('--revision',choices=['v03','v04'],default='v03')
+parser.add_argument('--revision',choices=['v03','v04','v05'],default='v03')
 args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 root=Path(args.root);path=root/'models'/('padlock_'+args.revision+'_studio.blend')
-if args.revision=='v04' and args.report_name=='studio_v03.json':args.report_name='studio_v04.json'
+if args.revision!='v03' and args.report_name=='studio_v03.json':args.report_name='studio_'+args.revision+'.json'
 
 def aim(obj,target):obj.rotation_euler=(Vector(target)-obj.location).to_track_quat('-Z','Y').to_euler()
 
@@ -144,6 +144,11 @@ def verify():
             for vertex in obj.data.vertices:digest.update(struct.pack('<fff',*(obj.matrix_world@vertex.co)))
             result[obj.name]={'geometry':digest.hexdigest(),'vertices':len(obj.data.vertices),
                               'faces':len(obj.data.polygons),'material':obj.active_material.name}
+        for obj in bpy.data.objects:
+            if obj.get('stage')!='surface_deposit_fibers':continue
+            result[obj.name]={'type':obj.type,'radius':obj.data.bevel_depth,
+                'splines':[[[float(c) for c in point.co] for point in spline.bezier_points] for spline in obj.data.splines],
+                'material':obj.active_material.name,'matrix':[list(row) for row in obj.matrix_world]}
         material=bpy.data.materials.get('Padlock_PBR_from_Painter')
         settings=[]
         for node in material.node_tree.nodes:

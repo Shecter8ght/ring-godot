@@ -1,6 +1,6 @@
 # Padlock source workflow
 
-Geometry was accepted on 2026-10-26; the Painter texture candidate is ready for visual review.
+Geometry was accepted on 2026-10-26; v05 is the current Painter texture candidate for visual review.
 Do not regenerate or replace the accepted geometry master to make texture changes.
 User deliverables: `E:/Models Blender/PROPS/Padlock_01/`.
 Working source: `_asset_src/padlock_v01/` (ignored by Git).
@@ -78,3 +78,50 @@ Four cameras and a Russian embedded Text note are included. No video is produced
 
 `sp_probe_coat.py` / `sp_ui_probe.py` are read-only native API/modal diagnostics.
 `probe_gloss.py` is an unsaved look-development probe; its PNG is excluded from delivery.
+
+## Skills-based finish revision v05
+
+The accepted 24 meshes and all v04 sources/maps remain unchanged. Authoring continues in the
+existing native Painter project; this is not a UCUPaint conversion or a claim of mouse-painted masks.
+The original paint coverage/oxide foundation is retained and refined with placed stencils,
+owner alphas and nonperiodic fields. `author_v05.py` records baseline hashes, stencil layout,
+SVG sources and provenance. `fields_v05.py` projects physical placement onto the existing UV;
+`fields_v05_png.py` writes 16-bit masks and a separate, subtle varnish normal.
+Use `D:/ПРОГРАММЫ/python/python.exe` for these image scripts (NumPy/Pillow/OpenCV/SciPy).
+
+- Open the isolated Painter with `painter.py launch --revision v05`, then queue `sp_open.py`
+  with `--revision v05 --wait-for _reopened_v05.txt`. A missing v05 starts from v04.
+- Queue `sp_refine_v05.py --revision v05 --wait-for _v05_saved.txt`: all 37 earlier fills are
+  retained, with 11 oxide foundation fills active. The new root contains 23 fills, three groups
+  and one actual Passthrough Paint layer: 64 hierarchical nodes overall, 38 root entries.
+- Four anchors connect 11 references: enamel lips/oxide borders and pit lips use High Pass,
+  Levels and restrained Warp; grime reads the final micro-height. A weak Color/Roughness
+  Sharpen runs on a real Passthrough Paint layer. Painter 12.1 discarded folder content effects
+  and anchors on reopen, so folder-only finishing is deliberately not used.
+- Height is L32F with midpoint 0.5. Export uses Painter's native Height-to-Normal conversion;
+  an extra physical conversion filter is not applied. Height values are not calibrated as micrometres.
+  OpenPBR Coat uses IOR 1.5, patchy weight/roughness and a separate smooth normal with
+  slopes bounded at ±0.025 per axis (combined deflection below 2.1 degrees).
+- Close with `sp_suspend.py`, reopen the saved v05, then queue `sp_export_v05.py`
+  with `--wait-for _v05_ready.txt`. Five 4K maps are staged and published only as a complete set.
+  `sp_verify_v05.py` verifies a real reopened SPP: anchors/references, channels, resolution and
+  original layers; it closes without resaving. `sp_quit.py` quits the empty isolated instance.
+- `preview_textured.py -- --revision v05 --save-only` connects/embeds exported maps and adds
+  eight sparse Curve fibers from `fibers_v05.py`, per the owner's additional request for old
+  dusty cobweb remnants. They are a separate removable collection; the 24 accepted meshes stay intact.
+- `verify_textured.py -- --revision v05` reopens and checks the saved model, then renders
+  review views. `studio.py -- <build|render|verify> --revision v05` uses the same studio setup.
+  Studio verification compares both the base meshes and the separate fibers.
+- Run `tools/asset_kit/review.py preset padlock_v05 --samples 64 --channels --out ABSOLUTE_PATH`.
+  Check nonempty map/render reports and all seven actual frames. Absolute output is required:
+  opening a blend can change Blender's working directory.
+- `reference_view.py -- --revision v05`, then host `compare_reference.py`, creates a side-by-side
+  view against the owner's photo; only the transparent render's background is composited.
+- `deliver.py --revision v05` verifies unchanged older sources, copies a whitelist and hashes
+  every file. Reopen the actual library model/studio with unique `--report-name` values, then
+  run `deliver.py --revision v05 --verify-only`.
+
+UV remains the accepted dense source layout: one 4K atlas, 61.37% area, 12 px margin,
+about 210 px/cm. Game topology/UV packing, LOD, collisions and Godot import are separate work.
+`sp_probe_v05.py`, `sp_filters_v05.py` and `sp_anchor_diagnostics.py` are native API diagnostics,
+not additional production stages or visual deliverables.

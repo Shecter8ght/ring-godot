@@ -12,6 +12,24 @@
   "asset": "assets/models/weapons/pm/pm.gltf",
   "hide": "(?i)(_LOD[1-9]|Suppressor)"
  },
+ "padlock_v04_baseline": {
+  "about": "Навесной замок: исходная v04 перед доводкой по обновлённой методике, геометрия принята",
+  "maps": ["_asset_src/padlock_v01/textures/export_v04"],
+  "mesh": ["_asset_src/padlock_v01/painter/padlock_highpoly_uv.fbx"],
+  "asset": "_asset_src/padlock_v01/models/padlock_v04_textured.blend",
+  "hide": "^Studio_ground$",
+  "views": "r34,l34,fps,close_mid,macro_mid,rake_f,rake_b",
+  "frame": {"forward": "+Y", "up": "+Z"}
+ },
+ "padlock_v05": {
+  "about": "Навесной замок: новая отделка, те же поверхность/UV, единая студия самопроверки",
+  "maps": ["_asset_src/padlock_v01/textures/export_v05"],
+  "mesh": ["_asset_src/padlock_v01/painter/padlock_highpoly_uv.fbx"],
+  "asset": "_asset_src/padlock_v01/models/padlock_v05_textured.blend",
+  "hide": "^Studio_ground$",
+  "views": "r34,l34,fps,close_mid,macro_mid,rake_f,rake_b",
+  "frame": {"forward": "+Y", "up": "+Z"}
+ },
  "vss_m_v8": {
   "about": "ВСС-М v8, выгрузка Painter (glTF PBR Metal Roughness); развёртка — FBX проектов Painter; рендер — студия из папки сдачи (только чтение)",
   "maps": ["_asset_src/vss_m_v8/sp_receiver/export", "_asset_src/vss_m_v8/sp_parts/export", "_asset_src/vss_m_v8/sp_sights/export"],

@@ -9,7 +9,7 @@ parser=argparse.ArgumentParser();parser.add_argument('--save',action='store_true
 parser.add_argument('--save-only',action='store_true')
 parser.add_argument('--views',default='front_34,rear_34');parser.add_argument('--size',type=int,default=900)
 parser.add_argument('--lighting',choices=['studio','side','gloss'],default='studio')
-parser.add_argument('--revision',choices=['v02','v03','v04'],default='v02')
+parser.add_argument('--revision',choices=['v02','v03','v04','v05'],default='v02')
 args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 bpy.ops.wm.open_mainfile(filepath=str(WORK/'models'/'padlock_v02_texture_source.blend'))
 files=list((WORK/'textures'/('export' if args.revision=='v02' else 'export_'+args.revision)).glob('*.png'))
@@ -35,12 +35,12 @@ split=nodes.new('ShaderNodeSeparateColor');split.mode='RGB';split.location=(-420
 links.new(orm.outputs['Color'],split.inputs[0]);links.new(split.outputs[1],bsdf.inputs['Roughness']);links.new(split.outputs[2],bsdf.inputs['Metallic'])
 nm=nodes.new('ShaderNodeNormalMap');nm.location=(-400,-300)
 links.new(normal.outputs['Color'],nm.inputs['Color']);links.new(nm.outputs[0],bsdf.inputs['Normal'])
-if args.revision=='v04':
+if args.revision in {'v04','v05'}:
     coat=texture(find('coat'),True,-950,-650)
     separate=nodes.new('ShaderNodeSeparateColor');separate.mode='RGB';separate.location=(-650,-650)
     links.new(coat.outputs['Color'],separate.inputs[0])
     links.new(separate.outputs[0],bsdf.inputs['Coat Weight']);links.new(separate.outputs[1],bsdf.inputs['Coat Roughness'])
-    bsdf.inputs['Coat IOR'].default_value=1.6
+    bsdf.inputs['Coat IOR'].default_value=1.5 if args.revision=='v05' else 1.6
     coat_normal=texture(find('coatnormal'),True,-950,-950)
     coat_nm=nodes.new('ShaderNodeNormalMap');coat_nm.location=(-650,-950)
     links.new(coat_normal.outputs['Color'],coat_nm.inputs['Color']);links.new(coat_nm.outputs[0],bsdf.inputs['Coat Normal'])
@@ -68,6 +68,10 @@ if args.revision!='v02':
         bpy.context.scene.collection.objects.link(cam);cam.location=location
         cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler()
         data.type='ORTHO';data.ortho_scale=scale;data.clip_start=.001;data.clip_end=10
+if args.revision=='v05':
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('padlock_fibers',Path(__file__).with_name('fibers_v05.py'))
+    fibers=importlib.util.module_from_spec(spec);spec.loader.exec_module(fibers);fibers.apply()
 scene=bpy.context.scene;scene.view_settings.exposure=-1.0
 scene.render.resolution_x=scene.render.resolution_y=args.size;scene.cycles.samples=64
 scene.cycles.use_denoising=False
