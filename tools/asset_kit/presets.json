@@ -1,0 +1,23 @@
+{
+ "veras54": {
+  "about": "ВЕРАС-54 в игре (принят владельцем 2026-10-19): эталон — проходит без «исправить»",
+  "maps": ["assets/models/weapons/veras54"],
+  "mesh": ["assets/models/weapons/veras54/veras54.gltf"],
+  "asset": "assets/models/weapons/veras54/veras54.gltf"
+ },
+ "pm": {
+  "about": "ПМ «пошарпанный» v01 в игре (принят 2026-10-20): эталон; LOD1 в той же развёртке не берётся",
+  "maps": ["assets/models/weapons/pm"],
+  "mesh": ["assets/models/weapons/pm/pm.gltf"],
+  "asset": "assets/models/weapons/pm/pm.gltf",
+  "hide": "(?i)(_LOD[1-9]|Suppressor)"
+ },
+ "vss_m_v8": {
+  "about": "ВСС-М v8, выгрузка Painter (glTF PBR Metal Roughness); развёртка — FBX проектов Painter; рендер — студия из папки сдачи (только чтение)",
+  "maps": ["_asset_src/vss_m_v8/sp_receiver/export", "_asset_src/vss_m_v8/sp_parts/export", "_asset_src/vss_m_v8/sp_sights/export"],
+  "mesh": ["_asset_src/vss_m_v8/sp_receiver/receiver.fbx", "_asset_src/vss_m_v8/sp_parts/parts.fbx", "_asset_src/vss_m_v8/sp_sights/sights.fbx"],
+  "asset": "E:/Models Blender/WEAPONS/ВСС Винторез — полный комплект/01_ВСС-М_v8/ВСС-М_v8_студия.blend",
+  "hide": "(?i)^(Magazine_20|Magazine_30)",
+  "frame": {"forward": "+X", "up": "+Z", "sight": 0.0563, "sight_t": 0.12}
+ }
+}
