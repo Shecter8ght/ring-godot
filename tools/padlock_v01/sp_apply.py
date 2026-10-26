@@ -10,7 +10,7 @@ import sp_lib
 WORK=Path('E:/Games/RING-godot/_asset_src/padlock_v01')
 sys.path.insert(0,'E:/Games/RING-godot/tools/padlock_v01')
 if not P.is_open():raise RuntimeError('Padlock project is not open')
-if P.file_path() and not P.file_path().replace('\\','/').casefold().startswith((WORK/'painter').as_posix().casefold()):
+if P.file_path() and P.file_path().replace('\\','/').casefold()!=(WORK/'painter'/'padlock_v02_textured.spp').as_posix().casefold():
     raise RuntimeError('Refusing to edit a different project: '+P.file_path())
 sets=T.all_texture_sets()
 if [t.name() for t in sets]!=['Padlock']:raise RuntimeError('Unexpected texture sets')

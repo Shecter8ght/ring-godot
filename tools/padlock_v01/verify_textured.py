@@ -17,8 +17,10 @@ parser.add_argument('--views',default='front_34,rear_34,side,top_joint,keyhole_c
 parser.add_argument('--size',type=int,default=1000)
 parser.add_argument('--side-light',action='store_true')
 parser.add_argument('--audit-only',action='store_true')
-parser.add_argument('--report-name',default='texture_verification.json')
+parser.add_argument('--report-name',default=None)
+parser.add_argument('--revision',choices=['v02','v03'],default='v02')
 args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+if args.report_name is None:args.report_name='texture_verification'+('' if args.revision=='v02' else '_v03')+'.json'
 root=Path(args.root)
 master=root/'models'/'padlock_v01_geometry.blend'
 expected_hash='5BE1E2579133AAC5C8B20ADA9228DD2D31875781B51928EE4CDAC2F1E335CA1C'
@@ -32,7 +34,7 @@ for obj in bpy.data.objects:
     original[obj.name]=([tuple(evaluated.matrix_world@v.co) for v in mesh.vertices],len(mesh.polygons))
     evaluated.to_mesh_clear()
 
-target=root/'models'/'padlock_v02_textured.blend'
+target=root/'models'/('padlock_'+args.revision+'_textured.blend')
 bpy.ops.wm.open_mainfile(filepath=str(target))
 parts=[o for o in bpy.data.objects if o.get('stage')=='textured_highpoly_candidate']
 assert {o.name for o in parts}==set(original)
@@ -100,6 +102,7 @@ if args.side_light:
     for name in ('Broad_fill','Rear_fill'):bpy.data.objects[name].data.energy*=.22
     next(n for n in scene.world.node_tree.nodes if n.type=='BACKGROUND').inputs['Strength'].default_value=.20
 suffix='_side_light' if args.side_light else '_textured'
+if args.revision!='v02':suffix+='_'+args.revision
 for name in ([] if args.audit_only else filter(None,args.views.split(','))):
     scene.camera=bpy.data.objects[name]
     scene.render.filepath=str(root/'previews'/(name+suffix+'.png'))

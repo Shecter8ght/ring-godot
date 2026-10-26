@@ -16,6 +16,8 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("command")
     parser.add_argument("--timeout",type=float,default=45)
+    parser.add_argument("--revision",choices=['v02','v03'],default='v02')
+    parser.add_argument("--wait-for",default=None)
     args=parser.parse_args()
     JOBS.mkdir(parents=True,exist_ok=True)
     if args.command=="launch":
@@ -35,7 +37,7 @@ def main():
         source=Path(args.command)
         stamp=str(time.time_ns())+"_"+source.stem
         temporary=JOBS/(stamp+".tmp")
-        header="import sys\n_p=r'E:/Games/RING-godot/tools/vss_m_v8'\nif _p not in sys.path: sys.path.insert(0,_p)\n"
+        header="import sys\nPADLOCK_REVISION="+repr(args.revision)+"\n_p=r'E:/Games/RING-godot/tools/vss_m_v8'\nif _p not in sys.path: sys.path.insert(0,_p)\n"
         temporary.write_text(header+source.read_text(encoding="utf-8"),encoding="utf-8")
         temporary.rename(JOBS/(stamp+".py"))
         target=JOBS/(stamp+".out")
@@ -46,6 +48,14 @@ def main():
     result=target.read_text(encoding="utf-8")
     print(result)
     if result.startswith("ERROR"):raise SystemExit(1)
+    if args.wait_for:
+        if Path(args.wait_for).name!=args.wait_for:raise ValueError('Marker must be a task-local filename')
+        marker=JOBS/args.wait_for
+        while not marker.exists():
+            if time.monotonic()>deadline:raise SystemExit('COMPLETION_PENDING '+str(marker))
+            time.sleep(.3)
+        result=marker.read_text(encoding='utf-8');print(result)
+        if result.startswith('ERROR'):raise SystemExit(1)
 
 
 if __name__=="__main__":main()

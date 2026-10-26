@@ -14,6 +14,7 @@ def digest(path):
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--verify-only',action='store_true')
+    parser.add_argument('--revision',choices=['v02','v03'],default='v02')
     args=parser.parse_args()
     assert LIBRARY.resolve().parent==Path('E:/Models Blender/PROPS').resolve()
     master=Path('models/padlock_v01_geometry.blend')
@@ -28,6 +29,21 @@ def main():
         'checks/delivery-audit-report.json','checks/skill-audit-unscaled.json','checks/geometry_audit.json',
         'checks/painter_channels.json','checks/painter_reopen.json','checks/texture_verification.json',
         'checks/uv_stats.json','checks/uv_layout.png')]
+    if args.revision=='v03':
+        paths.extend(Path(s) for s in (
+            'models/padlock_v03_textured.blend','painter/padlock_v03_textured.spp',
+            'checks/contacts_v03.json','checks/v03_baseline.json','checks/refinement_v03.json',
+            'checks/painter_reopen_v03.json','checks/texture_verification_v03.json',
+            'textures/sources/contact_edge.png'))
+        paths.extend(p.relative_to(WORK) for p in (WORK/'textures'/'export_v03').glob('*.png'))
+        paths.extend(p.relative_to(WORK) for p in (WORK/'textures'/'contact_v03').glob('*.png'))
+        paths.append(Path('textures/contact_v03/sources.json'))
+        if (WORK/'models'/'padlock_v03_studio.blend').exists():
+            paths.extend((Path('models/padlock_v03_studio.blend'),Path('checks/studio_v03.json')))
+        baseline=json.loads((WORK/'checks'/'v03_baseline.json').read_text(encoding='utf-8'))
+        for rel,checksum in baseline.items():
+            assert digest(WORK/rel).lower()==checksum
+            if (LIBRARY/rel).exists():assert digest(LIBRARY/rel).lower()==checksum,'Previous library version changed: '+rel
     for folder,pattern in (('references','*.png'),('previews','*.png'),('textures/export','*.png'),
                            ('textures/sources','*.png'),('textures/sources','*.json')):
         paths.extend(p.relative_to(WORK) for p in (WORK/folder).glob(pattern))
@@ -44,12 +60,13 @@ def main():
         assert target.is_file() and digest(target)==source_hash,str(target)
         rows.append({'path':rel.as_posix(),'bytes':target.stat().st_size,'sha256':source_hash})
     report={'status':'PASS','library':str(LIBRARY),'files':rows,
-            'accepted_geometry_unchanged':True,'native_painter_layers':18,
+            'accepted_geometry_unchanged':True,'native_painter_layers':18 if args.revision=='v02' else 25,
             'review_status':'Texture candidate; shape already accepted; game preparation separate'}
     if not args.verify_only:
         data=json.dumps(report,ensure_ascii=False,indent=2)+'\n'
-        (WORK/'checks'/'delivery_manifest.json').write_text(data,encoding='utf-8')
-        (LIBRARY/'checks'/'delivery_manifest.json').write_text(data,encoding='utf-8')
+        manifest='delivery_manifest.json' if args.revision=='v02' else 'delivery_manifest_v03.json'
+        (WORK/'checks'/manifest).write_text(data,encoding='utf-8')
+        (LIBRARY/'checks'/manifest).write_text(data,encoding='utf-8')
     print('PADLOCK_DELIVERY_VERIFIED',len(rows),'files;',round(sum(r['bytes'] for r in rows)/1024**2,1),'MiB;',LIBRARY)
 
 if __name__=='__main__':main()

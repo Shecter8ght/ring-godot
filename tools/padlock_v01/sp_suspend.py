@@ -2,7 +2,8 @@
 from pathlib import Path
 import substance_painter.project as P
 
-target = Path('E:/Games/RING-godot/_asset_src/padlock_v01/painter/padlock_v02_textured.spp')
+revision=globals().get('PADLOCK_REVISION','v02')
+target = Path('E:/Games/RING-godot/_asset_src/padlock_v01/painter')/('padlock_'+revision+'_textured.spp')
 if P.is_open():
     current = P.file_path().replace('\\', '/').casefold()
     if current != target.as_posix().casefold():

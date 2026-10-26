@@ -25,3 +25,24 @@ Use sequential Painter, bake and render phases to avoid exhausting RAM/VRAM in a
 
 The dense UV copy is not a low-poly game export. Texture appearance is a review candidate;
 the stamp is an intentionally non-verbal approximation of an illegible reference.
+
+## Contact/finish revision v03
+
+- `contact_masks_png.py prepare` preserves baseline hashes and copies the owner's edge alpha.
+- Run `contact_masks.py` in Blender, then `contact_masks_png.py png` in NumPy/Pillow Python.
+- Open the project with `painter.py .../sp_open.py --revision v03`; a missing v03 starts from v02.
+- Run `sp_refine_v03.py` through the bridge with `--revision v03 --wait-for _v03_ready.txt`.
+  It preserves the 18 original layers, replaces only its own seven additions and saves a separate SPP/maps.
+- Reopen and verify with `sp_verify.py --revision v03`, then quit the task instance before rendering.
+- `preview_textured.py -- --revision v03 --save-only` saves the candidate; `verify_textured.py -- --revision v03` checks/renders it.
+- `--lighting gloss` on the preview script supplies a strip light for checking the paint finish.
+- `sp_roundtrip_v02.py` is a read-only color baseline export, and `check_refinement.py` reports preservation and roughness.
+- Deliver with `deliver.py --revision v03`. The prior .blend/SPP/maps remain intact.
+
+## Owner-requested studio
+
+Run `studio.py -- build` in Blender to create `models/padlock_v03_studio.blend`.
+The saved file uses EEVEE/Rendered view and a light-only sweep on frames 1–240 (24 fps).
+`studio.py -- render --frame 74` renders the hero still with Cycles; `--eevee-check` verifies live-view rendering.
+`studio.py -- verify` compares the prop geometry/material with v03 and checks light motion and dependencies.
+Four cameras and a Russian embedded Text note are included. No video is produced.
