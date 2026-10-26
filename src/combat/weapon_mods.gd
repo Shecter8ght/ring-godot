@@ -403,6 +403,9 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 		var body: MeshInstance3D = raw as MeshInstance3D
 		body.material_override = material
 		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
+		if String(body.name).contains("Eyecup"):
+			# наглазник оптики: у глаза заходит за ближнюю плоскость камеры — CameraRig его прячет
+			body.set_meta("near_hide", true)
 	if spec.has("sight_h"):
 		# прицел-модель (ЗОРИН К-1): линия прицеливания — через центр линзы
 		root.set_meta("sight_h", at.y + float(spec.sight_h))

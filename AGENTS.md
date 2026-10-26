@@ -298,7 +298,8 @@ tools/godot.cmd --windowed --resolution 1920x1080 res://tools/veras_outdoor_shot
 #   assets/models/attachments/pso_vss, scope_4x32; их сетки окуляра — python -X utf8 tools/vss_m_v8/reticles.py) → --import →
 #   python -X utf8 tools/vss_m_v8/game_imports.py → --import
 tools/godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn # ВСС-М в руках днём (Пригород): механический, ПСО, 4×32 с фонарём и рукояткой на планках муфты —
-                                                              # от бедра, в прицел (и с подсветкой сетки — _ads_lit), модель сбоку; снимки vss_* (VSS_ONLY=iron,pso,rail; VSS_POS=x,y,z)
+                                                              # от бедра, в прицел, на отдаче (_ads_recoil; наглазник ПСО — виден ли), с подсветкой сетки (_ads_lit), модель сбоку;
+                                                              # снимки vss_* (VSS_ONLY=iron,pso,rail; VSS_POS=x,y,z)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader

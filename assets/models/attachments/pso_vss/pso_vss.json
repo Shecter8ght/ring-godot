@@ -4,6 +4,7 @@
  "root": "PSO_VSS_4x24",
  "tris": 8812,
  "tris_lens": 2112,
+ "eyecup": true,
  "ocular": [
   -0.0155,
   0.09,

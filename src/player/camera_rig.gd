@@ -89,6 +89,8 @@ var _aim_pose_weapon: String = ""
 var weapon_clearance: WeaponClearance = WeaponClearance.new()
 ## Приклад и затыльник модели в руках: у бедра видны, в прицеле (под щекой) — прячутся.
 var _cheek_parts: Array[GeometryInstance3D] = []
+# наглазники оптики (meta near_hide): прячутся, когда подходят к глазу ближе ближней плоскости камеры
+var _near_parts: Array[GeometryInstance3D] = []
 ## Оптика: своя камера в своей текстуре и окно на экране поверх окуляра.
 var scope_active: bool = false
 ## Ночной режим окна голографа ЛУМАР (кнопка NV, включается в окне настройки прицела — SightMenu).
@@ -804,9 +806,12 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		if _viewmodel is ViewmodelClips:
 			(_viewmodel as ViewmodelClips).equip()
 		_cheek_parts.clear()
+		_near_parts.clear()
 		for mi in _viewmodel.find_children("*", "GeometryInstance3D", true, false):
 			if (mi as GeometryInstance3D).has_meta("hide_ads"):
 				_cheek_parts.append(mi as GeometryInstance3D)
+			if (mi as GeometryInstance3D).has_meta("near_hide"):
+				_near_parts.append(mi as GeometryInstance3D)
 		if pl.grenade_equipped:
 			_arms.unbind_weapon()
 		elif not _viewmodel is ViewmodelClips:
@@ -914,6 +919,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			pl.weapon_obstruction = 1.0
 		_arms.visible = _arms.visible and _viewmodel.visible
 	_straighten_lights()
+	_hide_near_parts()
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and absf(sroll) < 0.05 and pl.weapon_obstruction <= float(Balance.WEAPON_CLEARANCE.fire_threshold))
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
@@ -1222,6 +1228,22 @@ func _set_scope(on: bool) -> void:
 	scope_active = on
 	_scope_view.visible = on
 	_scope_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+
+
+## Наглазник у глаза: ближняя точка его рамки глубже ближней плоскости камеры (с запасом) — виден, иначе спрятан.
+## В прицеливании глаз «в» резине, и её не видно; при отдаче и подъёме оружия она не режется камерой.
+func _hide_near_parts() -> void:
+	if _near_parts.is_empty():
+		return
+	var to_view: Transform3D = _ads_cam.global_transform.affine_inverse()
+	var limit: float = _ads_cam.near + Balance.SCOPE_EYECUP_MARGIN
+	for gi in _near_parts:
+		var box: AABB = gi.get_aabb()
+		var local: Transform3D = to_view * gi.global_transform
+		var depth: float = INF
+		for i in range(8):
+			depth = minf(depth, -(local * box.get_endpoint(i)).z)
+		gi.visible = depth > limit
 
 
 ## Камера оптики — там же, где глаз, по той же оси; её поле зрения — чтобы в окуляре было

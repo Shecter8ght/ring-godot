@@ -36,6 +36,9 @@ SCOPES = {
     'pso_vss': ('PSO_VSS_4x24', 8000, {'Rubber_eyecup': 900}, 68.0),
     'scope_4x32': ('Rail_4x32', 7000, {}, 75.0),
 }
+# резиновый наглазник — отдельной сеткой BodyEyecup (тот же атлас): в прицеливании он у самого глаза, ближе ближней
+# плоскости камеры, и CameraRig его прячет (иначе камера режет резину и она «проходит в голову»)
+EYECUP = {'pso_vss': ('Rubber_eyecup',)}
 log = lambda *a: print('VSS_OPTICS', *a, flush=True)
 
 
@@ -80,7 +83,7 @@ def build(sid):
         else:
             bpy.data.objects.remove(o, do_unlink=True)
     dg = bpy.context.evaluated_depsgraph_get()
-    body, lens, sources = [], [], []
+    body, lens, sources, eyecup = [], [], [], []
     for o in hp:
         if o.type != 'MESH':
             continue
@@ -96,6 +99,8 @@ def build(sid):
         key = o.name.replace(root_name + '_', '')
         if key in special:
             decimate(c, special[key])
+        if key in EYECUP.get(sid, ()):
+            eyecup.append(c)
         body.append(c)
         sources.append(o)
     total = sum(tris(o.data) for o in body)
@@ -104,6 +109,10 @@ def build(sid):
             n = tris(o.data)
             if n > 400:
                 decimate(o, int(n * budget / total))
+    # метка граней наглазника — переживает объединение и развёртку, по ней сетка потом делится
+    for o in eyecup:
+        a = o.data.attributes.new('eyecup', 'INT', 'FACE')
+        a.data.foreach_set('value', [1] * len(o.data.polygons))
     for o in body + lens:
         for uv in list(o.data.uv_layers):
             o.data.uv_layers.remove(uv)
@@ -233,6 +242,25 @@ def build(sid):
     lm.surface_render_method = 'BLENDED'
     ln.data.materials.clear()
     ln.data.materials.append(lm)
+    parts = [b, ln]
+    if 'eyecup' in b.data.attributes:
+        flags = [0] * len(b.data.polygons)
+        b.data.attributes['eyecup'].data.foreach_get('value', flags)
+        select_only(b)
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
+        for p, f in zip(b.data.polygons, flags):
+            p.select = bool(f)
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.separate(type='SELECTED')
+        bpy.ops.object.mode_set(mode='OBJECT')
+        eye = next(o for o in bpy.context.selected_objects if o is not b)
+        eye.name = 'BodyEyecup'
+        eye.data.name = 'BodyEyecup'
+        for o in (b, eye):
+            o.data.attributes.remove(o.data.attributes['eyecup'])
+        parts.append(eye)
     # метки оптики (оси исходника, м): окуляр — центр задней линзы; ось — середина главной трубы
     tube = [o for o in hp if o.type == 'MESH' and o.name.endswith('Main_tube')][0]
     tp = [tube.matrix_world @ Vector(c) for c in tube.bound_box]
@@ -243,15 +271,17 @@ def build(sid):
     oc_x = (min(p.x for p in op) + max(p.x for p in op)) / 2
     oc_r = (max(p.y for p in op) - min(p.y for p in op)) / 2
     to_game = Matrix.Rotation(math.radians(-90), 4, 'Z')
-    for o in (b, ln):
+    for o in parts:
         o.data.transform(to_game)
         o.matrix_world = Matrix.Identity(4)
     g = lambda p: [round(p[1], 5), round(p[2], 5), round(p[0], 5)]          # (x, y, z)_исх → оси игры
-    info = {'id': sid, 'source': str(SRC), 'root': root_name, 'tris': tris(b.data), 'tris_lens': tris(ln.data),
+    info = {'id': sid, 'source': str(SRC), 'root': root_name, 'tris': sum(tris(o.data) for o in parts if o is not ln),
+            'tris_lens': tris(ln.data), 'eyecup': len(parts) > 2,
             'ocular': g((oc_x, axis_y, axis_z)), 'ocular_r': round(oc_r, 5), 'sight_h': round(axis_z, 5),
             'sight_x': round(axis_y, 5), 'eye_relief': eye_relief / 1000.0, 'uv': rep['report']}
     select_only(b)
-    ln.select_set(True)
+    for o in parts:
+        o.select_set(True)
     bpy.ops.export_scene.gltf(filepath=str(out_dir / f'{sid}.gltf'), export_format='GLTF_SEPARATE', use_selection=True,
                               export_apply=True, export_yup=True, export_animations=False, export_image_format='AUTO',
                               export_texture_dir='')

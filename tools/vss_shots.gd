@@ -2,7 +2,8 @@ extends Node
 ## ВСС-М v8 в руках днём под небом (Пригород, ясно): игровая модель (assets/models/weapons/vss_m, общие руки по меткам
 ## хвата), прицелы-модели и обвесы на планках муфты и крышки. Наборы: iron — механический прицел, магазин на 10;
 ## pso — ПСО на «ласточкином хвосте», фонарь на левой планке муфты, магазин на 20; rail — 4×32 на крышке, фонарь справа, рукоятка снизу, магазин на 30.
-## Каждый — от бедра, в прицеливании (у оптики с подсветкой — ещё с горящей сеткой, _ads_lit) и модель сбоку
+## Каждый — от бедра, в прицеливании, на отдаче после выстрела (_ads_recoil; у оптики с наглазником — виден ли он),
+## у оптики с подсветкой — ещё с горящей сеткой (_ads_lit), и модель сбоку
 ## справа и слева (vss_<набор>_side_r / _l).
 ## tools/godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn → docs/screens/vss_*.png
 ## (VSS_ONLY=iron,pso — выборочно; VSS_POS=x,y,z — место, по умолчанию открытая поляна у тропы)
@@ -64,10 +65,20 @@ func _ready() -> void:
 		_camera._look_pitch = 0.05
 		await get_tree().create_timer(1.2).timeout
 		await _shot(String(set[0]) + "_hip")
+		_eyecup_log(String(set[0]) + " от бедра")
 		Input.action_press("aim")
 		await get_tree().create_timer(float(_player.spec().aim_time) + 0.6).timeout
 		await _shot(String(set[0]) + "_ads")
 		var fr: Node3D = _camera._vm_frame()
+		_eyecup_log(String(set[0]) + " в прицеле")
+		# выстрел — кадр на отдаче: оружие уходит назад к лицу, наглазник не должен резаться камерой
+		Input.action_press("fire")
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await _shot(String(set[0]) + "_ads_recoil")
+		_eyecup_log(String(set[0]) + " на отдаче")
+		Input.action_release("fire")
+		await get_tree().create_timer(0.8).timeout
 		if fr and fr.has_meta("reticle_illum"):
 			# подсветка сетки горит вместе с фонарём на оружии (T)
 			_player._toggle_tac("light")
@@ -115,6 +126,19 @@ func _side(label: String, mods: Dictionary) -> void:
 	# вид — снова камере игрока (иначе следующий набор снимается чужой камерой уровня)
 	player_cam.current = true
 	holder.queue_free()
+
+
+## Наглазник оптики (meta near_hide): виден ли и на какой глубине его ближняя точка перед камерой, м.
+func _eyecup_log(label: String) -> void:
+	for raw: Node in _camera._vm_frame().find_children("*", "GeometryInstance3D", true, false):
+		var gi: GeometryInstance3D = raw as GeometryInstance3D
+		if not gi.has_meta("near_hide"):
+			continue
+		var local: Transform3D = _camera._ads_cam.global_transform.affine_inverse() * gi.global_transform
+		var depth: float = INF
+		for i in range(8):
+			depth = minf(depth, -(local * gi.get_aabb().get_endpoint(i)).z)
+		print("vss_shots: наглазник ", label, ": виден ", gi.visible, ", ближе всего ", snappedf(depth, 0.001), " м")
 
 
 func _equip(mods: Dictionary, mag: String) -> void:
