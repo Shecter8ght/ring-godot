@@ -7,6 +7,7 @@
 # глянца и вытертых мест, а не шумовые пятна (объёмный шум и широкая пыль читались «мылом»). Маски износа — фото-маски
 # Painter grunge map 008/012/013, протирки wipe smudgy/directional, отпечатки fingerprints dirty/dusty (подбор
 # превью масок на глушителе 25.10). Полимер цевья — лакированный, шагрень бликует.
+import os
 import substance_painter.layerstack as L
 import sp_lib
 from sp_lib import fill, mask_generator, mask_proc, only_meshes, triplanar
@@ -64,12 +65,15 @@ def _above(n):
 
 
 def _bitmap(path):
+    """Карта из файла ресурсом проекта. Имя — с отметкой времени файла: по одному имени файла перепечённая карта
+    бралась из проекта прежней (основа приклада 26.10 оставалась светлой после перепекания)."""
     import substance_painter.resource as R
     stem = path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    name = f"{stem}_{int(os.path.getmtime(path))}"
     for r in R.search("u:texture"):
-        if r.identifier().name == stem:
+        if r.identifier().name == name:
             return r.identifier()
-    return R.import_project_resource(path, R.Usage.TEXTURE).identifier()
+    return R.import_project_resource(path, R.Usage.TEXTURE, name=name).identifier()
 
 
 def _uv(layer):
@@ -366,13 +370,15 @@ def magazine(st, lips=MAG_LIPS):
     return n
 
 
-def anodized(st, rail=True):
+def anodized(st, rail=True, tile=1.0, rough=0.5):
     """Твёрдое анодирование алюминия (муфта с планками, корпуса прицелов) — по справке навыка (painter-workflow.md,
     26.10): не краска, а оксид — тёмно-серый с лёгкой синевой, не чёрный, матово-полуглянцевый (шероховатость ~0.6),
     с мелким зерном. Цвет почти ровный — главный канал блеск: мягкие вариации блеска (глаже — темнее), затем мелкие
     контрастные глянцевые и матовые пятна; светлые глянцевые кромки, износ планки от обвеса (rail), царапины только
     в блеске; слабая резкость на группу. После: пыль в углах, ровная лёгкая пыль (вычищена с выступов), засохшее
-    масло (матовое, тёмное), мелкие точки пыли."""
+    масло (матовое, тёмное), мелкие точки пыли.
+    tile — множитель масштаба процедур: они в координатах развёртки, и при меньшей плотности текселей (прицелы) пятна
+    физически крупнее, чем на муфте; rough — шероховатость основы, пятна и кромки — от неё."""
     CH = sp_lib.CH
     # основа 0.13 при металличности 0.35 и пыли сверху рендерилась светло-серой, как сырой алюминий (замер 26.10:
     # медиана 59 из 255 против 28 у воронёной стали) — темнее, почти без металла, пыли втрое меньше
@@ -382,7 +388,7 @@ def anodized(st, rail=True):
     grp = L.insert_group(L.InsertPosition.from_textureset_stack(st))
     grp.set_name("Анодирование")
     n = fill("01 Анодированный алюминий", L.InsertPosition.inside_node(grp, L.NodeStack.Substack), color=base,
-             rough=0.5, metal=0.85)
+             rough=rough, metal=0.85)
     n = fill("02 Зерно оксида", _above(n), color="noise_gaussian_noise/gaussian_noise",
              rough="noise_gaussian_noise/gaussian_noise", height="noise_gaussian_noise/gaussian_noise")
     triplanar(n, 200.0)
@@ -392,19 +398,19 @@ def anodized(st, rail=True):
     n.set_opacity(0.25, CH.SpecularRoughness)
     n.set_opacity(0.0006, CH.Height)
     # мельче и слабее: крупные мягкие разводы на мелких деталях прицелов читались «мылом» (владелец 26.10)
-    n = _proc_layer("03 Мягкие вариации блеска", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 3.0, 0.3,
-                    {"Balance": 0.5, "Contrast": 0.3}, color=_mix(base, (0.0, 0.0, 0.0), 0.15), rough=0.42)
-    n = _proc_layer("04 Пятна глянца", _above(n), "grunge_spots/grunge_spots", 4.0, 0.4, None,
-                    color=_mix(base, (0.0, 0.0, 0.0), 0.2), rough=0.38)
-    n = _proc_layer("05 Пятна матовые", _above(n), "noise_bnw_spots_1/bnw_spots_1", 5.0, 0.3, None,
-                    color=_mix(base, (0.3, 0.3, 0.32), 0.1), rough=0.66)
-    n = _edge("06 Светлые глянцевые кромки", _above(n), _mix(base, (0.5, 0.5, 0.52), 0.35), 0.38, 0.05, contrast=0.85,
+    n = _proc_layer("03 Мягкие вариации блеска", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 3.0 * tile,
+                    0.3, {"Balance": 0.5, "Contrast": 0.3}, color=_mix(base, (0.0, 0.0, 0.0), 0.15), rough=rough - 0.08)
+    n = _proc_layer("04 Пятна глянца", _above(n), "grunge_spots/grunge_spots", 4.0 * tile, 0.4, None,
+                    color=_mix(base, (0.0, 0.0, 0.0), 0.2), rough=rough - 0.12)
+    n = _proc_layer("05 Пятна матовые", _above(n), "noise_bnw_spots_1/bnw_spots_1", 5.0 * tile, 0.3, None,
+                    color=_mix(base, (0.3, 0.3, 0.32), 0.1), rough=rough + 0.16)
+    n = _edge("06 Светлые глянцевые кромки", _above(n), _mix(base, (0.5, 0.5, 0.52), 0.35), rough - 0.12, 0.05, contrast=0.85,
               grunge=0.7, metal=0.6)
     if rail:
         n = _proc_layer("07 Износ от обвеса", _above(n), "grunge_wipe_directional_heavy/grunge_wipe_directional_heavy",
-                        2.0, 0.3, None, color=_mix(base, (0.3, 0.3, 0.32), 0.2), rough=0.45)
-    n = fill("08 Царапины в блеске", _above(n), rough=0.42)
-    mask_proc(n, _gm(12), {"invert": 1, "balance": 0.8, "contrast": 0.55}, scale=2.5)
+                        2.0, 0.3, None, color=_mix(base, (0.3, 0.3, 0.32), 0.2), rough=rough - 0.05)
+    n = fill("08 Царапины в блеске", _above(n), rough=rough - 0.08)
+    mask_proc(n, _gm(12), {"invert": 1, "balance": 0.8, "contrast": 0.55}, scale=2.5 * tile)
     sp_lib.lop(n, 0.5)
     _sharpen(grp, 0.3)
     n = _dirt(_above(grp), color=(0.3, 0.3, 0.31), rough=0.92, level=0.15, opacity=0.15, name="09 Пыль в углах",
@@ -415,17 +421,18 @@ def anodized(st, rail=True):
     sp_lib.lop(n, 0.0)
     # тёплая пыль и масло на мелких деталях прицела ложились широко — корпус выходил оливково-коричневым (26.10);
     # пыль и масло на анодировании — нейтральные: тёплый тон в цвете металла даёт бронзовый отлив
-    n = _proc_layer("11 Засохшее масло", _above(n), _gm(15), 1.8, 0.15, {"invert": 1, "balance": 0.76, "contrast": 0.4},
+    n = _proc_layer("11 Засохшее масло", _above(n), _gm(15), 1.8 * tile, 0.15, {"invert": 1, "balance": 0.76, "contrast": 0.4},
                     color=_mix(base, (0.03, 0.03, 0.032), 0.5), rough=0.75, metal=0.0)
-    n = _proc_layer("12 Точки пыли", _above(n), "noise_bnw_spots_3/bnw_spots_3", 6.0, 0.05, None,
+    n = _proc_layer("12 Точки пыли", _above(n), "noise_bnw_spots_3/bnw_spots_3", 6.0 * tile, 0.05, None,
                     color=(0.4, 0.4, 0.41), rough=0.85, metal=0.0)
     return n
 
 
-def optic_body(st):
+def optic_body(st, tile=1.0):
     """Корпус прицела — твёрдое анодирование (anodized): вытерто только узко по кромкам (прежний стек coated с пятнами
-    на мелких круглых деталях прицела уводил до алюминия 17–20 % площади — белые проплешины)."""
-    return anodized(st, rail=False)
+    на мелких круглых деталях прицела уводил до алюминия 17–20 % площади — белые проплешины). Атласный глянец 0.32:
+    при 0.5 корпус на трубе читался матовым и «мыльным» рядом с муфтой (владелец 26.10)."""
+    return anodized(st, rail=False, tile=tile, rough=0.32)
 
 
 def optic_rim(st):
@@ -579,9 +586,9 @@ def wood(st):
     _bmask(n, _wmask("ends"))
     sp_lib.lop(n, 0.35)
     # лак: тёплый тон тонким слоем и полуматовый блеск; в порах проседает и тусклее
-    n = fill("06 Лак", _above(n), color=(0.95, 0.9, 0.8), rough=0.4)
+    n = fill("06 Лак", _above(n), color=(0.8, 0.5, 0.32), rough=0.4)       # янтарно-красный, потемневший от времени
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
-    n.set_opacity(0.3, CH.BaseColor)
+    n.set_opacity(0.55, CH.BaseColor)
     n = fill("07 Лак в порах тусклее", _above(n), rough=0.56)
     m = _bmask(n, WOOD_HEIGHT, blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
     _mfilter(m, "histogram_scan", {"Position": 0.42, "Contrast": 0.55})
@@ -628,20 +635,20 @@ def wood(st):
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
     n.set_blending_mode(L.BlendingMode.Subtract, CH.Height)
     _bmask(n, _wmask("dents"))
-    n = fill("15 Царапины лака", _above(n), color=(0.3, 0.28, 0.26), rough=0.62)
+    n = fill("15 Царапины лака", _above(n), color=(0.16, 0.09, 0.055), rough=0.62)   # тёплые: серые на тёмном дереве — мелом
     n.set_blending_mode(L.BlendingMode.Screen, CH.BaseColor)
     mask_proc(n, _gm(12), {"invert": 1, "balance": 0.76, "contrast": 0.55}, scale=2.5)
-    sp_lib.lop(n, 0.5)
+    sp_lib.lop(n, 0.3)
     sh = L.insert_filter_effect(L.InsertPosition.inside_node(grp, L.NodeStack.Content),
                                 sp_lib.rid("sharpen/sharpen", "u:filter"))
     sh.get_source().set_parameters({"intensity": 0.35})
     # после резкости: грязь в углах, пыль (где руками не трут), засаленность
     n = _dirt(_above(grp), color=(0.14, 0.09, 0.055), rough=0.8, level=0.32, opacity=0.35, name="16 Грязь в углах")
-    n = fill("17 Пыль", _above(n), color=(0.55, 0.52, 0.47), rough=0.92)
+    n = fill("17 Пыль", _above(n), color=(0.4, 0.3, 0.22), rough=0.92)
     g = mask_generator(n, DIRT, {"dirt_level": 0.22, "dirt_contrast": 0.85, "grunge_amount": 0.6, "Grunge_Scale": 8,
                                  "Use_Triplanar": 1, "edges_masking": 0.9})
     _bmask(n, _wmask("hold"), blend=L.BlendingMode.Subtract, above=g)
-    sp_lib.lop(n, 0.35)
+    sp_lib.lop(n, 0.22)
     n = _proc_layer("18 Засаленность", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 2.5, 0.2,
                     {"Balance": 0.45, "Contrast": 0.35}, color=(0.8, 0.72, 0.62), rough=0.36)
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)

@@ -17,7 +17,7 @@ SOURCES = ((f"{KIT}/01_ПСО_4x24/ПСО_4x24_Исходник_геометри
            (f"{KIT}/02_Прицел_4x32/Прицел_4x32_Исходник_геометрии.blend", "Rail_4x32"))
 SETS = {"Coated aluminium": "optic_body", "Machined rim": "optic_rim", "Engraving": "optic_engraving",
         "Inner black": "optic_inner", "Rubber": "optic_rubber"}
-SET_NAMES = ("optic_body", "optic_rim", "optic_engraving", "optic_inner", "optic_rubber")
+SET_NAMES = ("optic_body", "optic_body_432", "optic_rim", "optic_engraving", "optic_inner", "optic_rubber")
 FBX_SHIFT = Vector((0.0, 0.25, 0.0))     # 4×32 в FBX сдвинут вбок от ПСО — запекание не путает прицелы
 
 
@@ -110,6 +110,9 @@ def main():
                 o.data = o.data.copy()
             for p in split(o):
                 k = p.data.materials[0].name.split(".")[0] if p.data.materials else None
+                if k == "optic_body" and rn == "Rail_4x32":   # у каждого корпуса своя карта 4K (на двоих 2K — 3,3 пикс/мм, «мыло»)
+                    k = "optic_body_432"
+                    p.data.materials[0] = bpy.data.materials.get(k) or bpy.data.materials.new(k)
                 if k in by_set:
                     by_set[k].append((rn, p))
     for k, items in by_set.items():

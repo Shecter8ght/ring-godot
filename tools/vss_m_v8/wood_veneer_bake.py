@@ -17,6 +17,9 @@ import bpy
 
 PHOTOS = "E:/Games/RING-godot/_asset_src/vss_m_v8/wood_photos"
 LAYER_MM = 1.8
+# сторона образца фото на приклад, мм: снимок 1000 мм, положенный на 600 мм, — волокно гуще и чётче (8K → 13,6 пикс/мм),
+# владелец 26.10: «повысить плотность волокон»
+PHOTO_MM = 600.0
 # яркость фото (1-й и 99-й процентили, значения файла): растягивается до 0…1 — тёмное волокно к 0
 LUM = {"oak_veneer_03": (0.732, 0.852), "ash_veneer": (0.505, 0.66), "red_oak_veneer": (0.602, 0.751),
        "silver_oak_veneer_01": (0.715, 0.816), "black_oak_veneer": (0.338, 0.474)}
@@ -24,11 +27,11 @@ LUM = {"oak_veneer_03": (0.732, 0.852), "ash_veneer": (0.505, 0.66), "red_oak_ve
 FACES = {
     "A_dub_volnistyi": ("oak_veneer_03", (0.15, 0.092, 0.042), (0.58, 0.46, 0.27), 1.0),
     "B_yasen": ("ash_veneer", (0.15, 0.095, 0.045), (0.57, 0.45, 0.27), 1.0),
-    "C_krasnyi_dub": ("red_oak_veneer", (0.15, 0.09, 0.04), (0.57, 0.44, 0.25), 1.0),
+    "C_krasnyi_dub": ("red_oak_veneer", (0.045, 0.016, 0.006), (0.26, 0.1, 0.04), 1.0),   # красно-коричневый, чуть состаренный (26.10)
 }
 # слои на срезах: охристый (волокно вдоль) и тёмный (волокно поперёк)
-OCHRE = ("silver_oak_veneer_01", (0.26, 0.17, 0.06), (0.52, 0.37, 0.12), 0.7)
-DARK = ("black_oak_veneer", (0.05, 0.03, 0.018), (0.2, 0.12, 0.07), 1.0)
+OCHRE = ("silver_oak_veneer_01", (0.14, 0.055, 0.018), (0.34, 0.15, 0.05), 0.7)
+DARK = ("black_oak_veneer", (0.03, 0.011, 0.005), (0.12, 0.045, 0.02), 1.0)
 C_GLUE = (0.03, 0.017, 0.009)
 # места листа для боковин (доли образца): слева и справа — разные
 SIDE_OFF = ((0.12, 0.18), (0.52, 0.61))
@@ -166,7 +169,7 @@ def build(mode, face):
         g.L.new(g.op("ADD", idx, seed), w.inputs["W"])
         return w.outputs["Value"]
     ou, ov, tone = hsh(0.0), hsh(37.13), hsh(71.7)
-    xm, zm = g.op("MULTIPLY", x, 0.001), g.op("MULTIPLY", z, 0.001)
+    xm, zm = g.op("MULTIPLY", x, 1.0 / PHOTO_MM), g.op("MULTIPLY", z, 1.0 / PHOTO_MM)
     # охристые — волокно вдоль приклада (u = x), тёмные — поперёк (u = z)
     g_och = g.photo(OCHRE[0], g.vec(g.op("ADD", xm, ou), g.op("ADD", zm, ov)))
     g_drk = g.photo(DARK[0], g.vec(g.op("ADD", zm, ou), g.op("ADD", xm, ov)))

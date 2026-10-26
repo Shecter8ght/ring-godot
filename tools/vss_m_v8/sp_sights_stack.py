@@ -15,7 +15,9 @@ from sp_lib import L  # noqa: E402
 
 OUT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_sights"
 BUILD = {
-    "optic_body": sp_stacks.optic_body,
+    # процедуры в координатах развёртки: у муфты 1 = 263 мм, у ПСО 430, у 4×32 343 мм — мельче на столько же
+    "optic_body": lambda st: sp_stacks.optic_body(st, tile=1.6),
+    "optic_body_432": lambda st: sp_stacks.optic_body(st, tile=1.3),
     "optic_rim": sp_stacks.optic_rim,
     "optic_engraving": sp_stacks.optic_engraving,
     "optic_inner": sp_stacks.optic_inner,
