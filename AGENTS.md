@@ -265,6 +265,9 @@ tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же с
                                                               # общий модуль игровой развёртки оружия (tools/asset_kit/uv.py, укладка uv_pack.py) на копиях готовых сеток:
                                                               # заполнение, плотность видимого / у глаза / вдали, отступы проверены растром; слои KitUV* —
                                                               # в _asset_src/<ствол>/uv_kit/*_UVKit.blend, игровые файлы и карты не меняются
+"D:/ПРОГРАММЫ/RizomUV 2024.1/rizomuv.exe"                      # RizomUV (владелец, 2026-10-27): развёртка и упаковка UV — для норм заполнения 80 % (кузова машин,
+                                                              # новые стволы); управляется скриптами — Lua из командной строки или Python через RizomUVLink
+                                                              # (папка программы); в конвейер ещё не подключён
 # ВЕРАС-54 v13 в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/veras54_v13/game_lp.py (сетка ~33 тыс. + патроны ~5 тыс.)
 #   → game_bake.py -- gun|ammo|ao → game_pack.py (карты; маски жировой плёнки _coat в assets) → game_finish.py (матовый корпус: ORM)
 #   → game_rig.py (риг рук v13 в библиотеке)
