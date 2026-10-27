@@ -132,9 +132,41 @@ def table():
     camera("HQ_Cam_Table", eye, tgt, 38.0, 8.0, rc)
 
 
+def swap_maps(dirs):
+    """Проба отделки: карты Painter из других папок (те же имена файлов, например receiver_baseColor.png) вместо
+    упакованных в сцену — HQ_MAPS=<папка>[;<папка>]."""
+    import os
+    files = {}
+    for d in dirs.split(";"):
+        for f in os.listdir(d):
+            if f.endswith(".png"):
+                files[f] = os.path.join(d, f)
+    loaded = {}
+    n = 0
+    for m in bpy.data.materials:
+        if not m.node_tree:
+            continue
+        for node in m.node_tree.nodes:
+            if node.bl_idname != "ShaderNodeTexImage" or node.image is None:
+                continue
+            base = os.path.basename(node.image.filepath.replace("\\", "/"))
+            if base not in files:
+                continue
+            if base not in loaded:
+                im = bpy.data.images.load(files[base])
+                im.colorspace_settings.name = node.image.colorspace_settings.name
+                loaded[base] = im
+            node.image = loaded[base]
+            n += 1
+    print("HQ maps swapped", n, sorted(loaded))
+
+
 def main():
+    import os
     mode, out, w, h, spp = args()
     sc = bpy.context.scene
+    if os.environ.get("HQ_MAPS"):
+        swap_maps(os.environ["HQ_MAPS"])
     {"studio": studio, "table": table}[mode]()
     sc.render.engine = "CYCLES"
     prefs = bpy.context.preferences.addons["cycles"].preferences
