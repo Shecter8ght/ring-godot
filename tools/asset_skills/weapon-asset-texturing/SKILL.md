@@ -28,7 +28,7 @@ description: "Реалистичный PBR в нативном UCUPaint для �
 | Чугун, сталь, покрытия, латунь и другие металлы | [Металлы](references/materials-metals.md) |
 | Дерево, пластик, резина, камень и ткань | [Другие материалы](references/materials-nonmetals.md) |
 | Порядок слоёв дерева и крашеного металла (Painter / UCUPaint), блеск против матовости, резкость | [Дерево и крашеный металл](references/wood-and-paint-layers.md) |
-| Substance Painter: образец, запекание карт, порядок слоёв, связь каналов, якоря, анодированный алюминий | [Painter: порядок работы](references/painter-workflow.md) |
+| Substance Painter: образец, запекание карт, порядок слоёв, папки материалов и каналы, вариации цвета, полосы, якоря, анодированный алюминий | [Painter: порядок работы](references/painter-workflow.md) |
 | Литьё, наплывы, раковины и видимые частицы | [Литьё и осадок](references/cast-metal-deposits.md) |
 | Кора, листва и тонкие органические поверхности | [Растительность](references/vegetation-materials.md) |
 | UCUPaint API, RNA/group inputs, локальные пороги | [API и маски](references/ucupaint-api.md) |
