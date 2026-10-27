@@ -35,7 +35,16 @@ def stack_by_name(name):
     raise RuntimeError("нет набора текстур " + name)
 
 
-def clear(st):
+def clear(st, force=False):
+    """Стек набора — целиком под пересборку. Набор с ручной работой владельца (слои рисования «РУКАМИ» в масках,
+    sp_manual_prep.py, метаданные ring / manual_sets) не трогается: пересборка стёрла бы нарисованное. Пересобрать всё
+    же — только с согласия владельца: force (в задании перед exec — FORCE_CLEAR = True)."""
+    import substance_painter.project as P
+    md = P.Metadata("ring")
+    manual = md.get("manual_sets") if "manual_sets" in md.list() else []
+    name = st.material().name()
+    if name in (manual or []) and not force:
+        raise RuntimeError(f"набор «{name}» — ручная работа владельца (слои «РУКАМИ»): пересборка её сотрёт")
     for n in L.get_root_layer_nodes(st):
         L.delete_node(n)
 

@@ -30,10 +30,11 @@ BUILD = {
     "rounds": sp_stacks.rounds,
 }
 only = globals().get("ONLY") or list(BUILD)
-ONLY = None                      # глобальные переменные моста общие для заданий — сбрасываем выбор
+force = bool(globals().get("FORCE_CLEAR"))
+ONLY = FORCE_CLEAR = None        # глобальные переменные моста общие для заданий — сбрасываем выбор
 for name in only:
     st = sp_lib.stack_by_name(name)
-    sp_lib.clear(st)
+    sp_lib.clear(st, force)      # набор с ручной работой владельца без force не пересобирается
     BUILD[name](st)
     sp_stacks.contact_marks(st, name)
     print(name, [n.get_name() for n in L.get_root_layer_nodes(st)])

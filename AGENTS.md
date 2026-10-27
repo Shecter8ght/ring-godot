@@ -304,6 +304,9 @@ tools/godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn # �
                                                               # один кадр 4K: VSS_HERO=1 VSS_ONLY=iron VSS_RES=3840x2160 VSS_TIME=dusk VSS_OUT=<папка> (VSS_LOOK=курс,наклон;…)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<папка сдачи>/ВСС-М_v8_студия.blend" --python tools/vss_m_v8/render_hq.py -- studio <png>
                                                               # рендеры 4K для владельца: в воздухе (своя студия) и на столе (ВСС-М_v8_на_столе.blend -- table <png>)
+tools/vss_m_v8/painter_open.cmd [receiver|parts]                 # ВСС-М: Painter для ручного износа (OCIO проектов + мост; путь проекта — полный)
+bash tools/vss_m_v8/painter_to_game.sh [набор …] [--scenes] [--shots] # карты, выгруженные владельцем из Painter → запекание, экспорт, импорт;
+                                                              # инструкция — docs/assets/vss_m_painter_manual_wear.md; наборы с «РУКАМИ» скриптом не пересобираются
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
