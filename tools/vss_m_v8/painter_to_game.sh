@@ -50,5 +50,5 @@ fi
 if [ "$shots" = 1 ]; then
     step "снимки в игре" env VSS_ONLY=iron MSYS_NO_PATHCONV=1 cmd /c "tools\\godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn"
 fi
-git status --short assets/models/weapons/vss_m
+git --no-optional-locks status --short assets/models/weapons/vss_m   # без блокировки индекса: рядом работают другие сессии
 echo "готово"
