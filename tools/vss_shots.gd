@@ -7,6 +7,9 @@ extends Node
 ## справа и слева (vss_<набор>_side_r / _l).
 ## tools/godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn → docs/screens/vss_*.png
 ## (VSS_ONLY=iron,pso — выборочно; VSS_POS=x,y,z — место, по умолчанию открытая поляна у тропы)
+## Один кадр владельцу: VSS_HERO=1 — только «от бедра» набора, VSS_LOOK=курс,наклон (рад), VSS_RES=3840x2160 — кадр больше
+## экрана (вьюпорт рисуется в этом размере и ужимается в окно, снимок — полный), VSS_OUT=<папка> — куда писать,
+## VSS_TIME=day|dusk|… — время суток (по умолчанию день), VSS_POS=spawn — остаться на точке появления.
 
 const ID := "wpn_sp_02"
 const OUT := "res://docs/screens/"
@@ -24,8 +27,13 @@ var _camera: CameraRig
 
 
 func _ready() -> void:
+	var res: PackedStringArray = OS.get_environment("VSS_RES").split("x", false)
+	if res.size() == 2:
+		get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+		get_window().content_scale_size = Vector2i(int(res[0]), int(res[1]))
 	RaidEvents.enabled = false
-	RaidConditions.from_host = {"time": "day", "weather": "clear", "power": "on"}
+	var hour: String = OS.get_environment("VSS_TIME")
+	RaidConditions.from_host = {"time": hour if hour != "" else "day", "weather": "clear", "power": "on"}
 	await get_tree().process_frame
 	var level: Node = load("res://scenes/levels/zone01_mall.tscn").instantiate()
 	get_tree().root.add_child(level)
@@ -47,7 +55,9 @@ func _ready() -> void:
 			(enemy as Node3D).visible = false
 	_player.health.hp = 100000.0
 	var pos: PackedStringArray = OS.get_environment("VSS_POS").split(",", false)
-	_player.global_position = Vector3(float(pos[0]), float(pos[1]), float(pos[2])) if pos.size() == 3 else Vector3(-95.0, 0.45, 294.0)
+	if OS.get_environment("VSS_POS") != "spawn":
+		_player.global_position = Vector3(float(pos[0]), float(pos[1]), float(pos[2])) if pos.size() == 3 else Vector3(-95.0, 0.45, 294.0)
+	print("vss_shots: игрок ", _player.global_position)
 	CameraRig.load_settings()
 	CameraRig.first_person_mode = true
 	await get_tree().create_timer(2.0).timeout
@@ -61,11 +71,22 @@ func _ready() -> void:
 			continue
 		await _equip(set[1] as Dictionary, String(set[2]))
 		_player.carry_low = false
-		_camera._look_yaw = 0.0
-		_camera._look_pitch = 0.05
+		var looks: PackedStringArray = OS.get_environment("VSS_LOOK").split(";", false)
+		var look: PackedStringArray = looks[0].split(",", false) if not looks.is_empty() else PackedStringArray()
+		_camera._look_yaw = float(look[0]) if look.size() == 2 else 0.0
+		_camera._look_pitch = float(look[1]) if look.size() == 2 else 0.05
 		await get_tree().create_timer(1.2).timeout
 		await _shot(String(set[0]) + "_hip")
 		_eyecup_log(String(set[0]) + " от бедра")
+		if OS.get_environment("VSS_HERO") == "1":
+			# ещё направления взгляда (курс,наклон;…) — выбрать, где солнце ложится на оружие
+			for i in range(1, looks.size()):
+				look = looks[i].split(",", false)
+				_camera._look_yaw = float(look[0])
+				_camera._look_pitch = float(look[1])
+				await get_tree().create_timer(1.0).timeout
+				await _shot("%s_hip_%d" % [set[0], i])
+			continue
 		if String(set[0]) == "iron":
 			# выстрел от бедра — кадр, когда рама отошла (узлы BoltCarrier_Steel и Bolt_Steel, ход 74 мм)
 			# от бедра выстрел — после вскидки: ждём, пока уйдёт патрон, и снимаем при наибольшем отходе рамы
@@ -205,5 +226,7 @@ func _equip(mods: Dictionary, mag: String) -> void:
 func _shot(label: String) -> void:
 	await RenderingServer.frame_post_draw
 	var name: String = "vss_%s.png" % label
-	get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path(OUT + name))
+	var dir: String = OS.get_environment("VSS_OUT")
+	var path: String = dir.path_join(name) if dir != "" else ProjectSettings.globalize_path(OUT + name)
+	get_viewport().get_texture().get_image().save_png(path)
 	print("vss_shots: ", name, " в руках ", _player.weapon_id)

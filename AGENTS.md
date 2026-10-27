@@ -301,6 +301,9 @@ tools/godot.cmd --windowed --resolution 1920x1080 res://tools/vss_shots.tscn # �
                                                               # от бедра, в прицел, на отдаче (_ads_recoil; наглазник ПСО — виден ли), с подсветкой сетки (_ads_lit), модель сбоку;
                                                               # механический — выстрел от бедра (_hip_fire: ход рамы и затвора в лог) и рама отведена (_side_r_bolt_open);
                                                               # снимки vss_* (VSS_ONLY=iron,pso,rail; VSS_POS=x,y,z)
+                                                              # один кадр 4K: VSS_HERO=1 VSS_ONLY=iron VSS_RES=3840x2160 VSS_TIME=dusk VSS_OUT=<папка> (VSS_LOOK=курс,наклон;…)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<папка сдачи>/ВСС-М_v8_студия.blend" --python tools/vss_m_v8/render_hq.py -- studio <png>
+                                                              # рендеры 4K для владельца: в воздухе (своя студия) и на столе (ВСС-М_v8_на_столе.blend -- table <png>)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
