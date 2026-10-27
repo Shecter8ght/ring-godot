@@ -8,7 +8,10 @@
 # Карты запекаются излучением в развёртку приклада: <вариант>_color.png (sRGB), <вариант>_height.png (рельеф для
 # Painter), ids.png (R — лицевой шпон, G — тёмный слой, B — клеевой шов) и маски стека «masks» отдельными ч/б картами:
 # mask_face / mask_dark / mask_glue (то же, что ids), mask_ends (к концам и нижней кромке темнее), mask_streaks (тон
-# полосами вдоль волокна), mask_hold (места хвата: шейка под коробкой и щека на гребне), mask_dents (вмятины по месту).
+# полосами вдоль волокна), mask_hold (места хвата: шейка под коробкой и щека на гребне), mask_dents (вмятины по месту),
+# mask_tone (крупные места темнее и светлее — лак лёг неровно).
+# 27.10 (владелец: «полосы фанеры спокойнее»): слои на срезах ближе друг к другу по тону и рельефу — у берёзовой фанеры
+# слои одного дерева, поперечные лишь чуть темнее (торцы волокна); клеевые швы тоньше по цвету.
 # blender --background --factory-startup _asset_src/vss_m_v8/VSS_M_v8_sp.blend --python-exit-code 1 \
 #   --python tools/vss_m_v8/wood_veneer_bake.py -- <папка> <вариант,вариант|ids|masks> [размер]
 import os
@@ -29,10 +32,12 @@ FACES = {
     "B_yasen": ("ash_veneer", (0.15, 0.095, 0.045), (0.57, 0.45, 0.27), 1.0),
     "C_krasnyi_dub": ("red_oak_veneer", (0.045, 0.016, 0.006), (0.26, 0.1, 0.04), 1.0),   # красно-коричневый, чуть состаренный (26.10)
 }
-# слои на срезах: охристый (волокно вдоль) и тёмный (волокно поперёк)
-OCHRE = ("silver_oak_veneer_01", (0.14, 0.055, 0.018), (0.34, 0.15, 0.05), 0.7)
-DARK = ("black_oak_veneer", (0.03, 0.011, 0.005), (0.12, 0.045, 0.02), 1.0)
-C_GLUE = (0.03, 0.017, 0.009)
+# слои на срезах: охристый (волокно вдоль) и чуть темнее (волокно поперёк); прежде тёмный был втрое темнее — «зебра»
+OCHRE = ("silver_oak_veneer_01", (0.12, 0.05, 0.017), (0.29, 0.125, 0.044), 0.8)
+DARK = ("black_oak_veneer", (0.075, 0.03, 0.012), (0.21, 0.088, 0.032), 1.0)
+C_GLUE = (0.035, 0.019, 0.01)
+GLUE_OP = 0.45                   # клеевой шов поверх слоя (было 0.7 — шов читался чёрной линией)
+TONE_K = (0.88, 1.1)             # тон слоя от листа к листу (было 0.8–1.15)
 # места листа для боковин (доли образца): слева и справа — разные
 SIDE_OFF = ((0.12, 0.18), (0.52, 0.61))
 # вмятины: точка на поверхности (мм) и радиус — одна крупная у затыльника снизу, три средних, мелкие по кромкам
@@ -224,6 +229,17 @@ def build(mode, face):
             nz.inputs["Detail"].default_value = 3.0
             g.L.new(sv.outputs[0], nz.inputs["Vector"])
             v = g.rng(nz.outputs["Fac"], 0.35, 0.65, 0.0, 1.0, smooth=True)
+        elif mode == "mask_tone":
+            # крупные места темнее (1) и светлее (0): лак лёг неровно, вытянуто вдоль приклада, без мелкого шума
+            sv = g.n("ShaderNodeVectorMath", operation="MULTIPLY")
+            g.L.new(pm.outputs[0], sv.inputs[0])
+            sv.inputs[1].default_value = (0.006, 0.02, 0.022)
+            nz = g.n("ShaderNodeTexNoise")
+            nz.inputs["Scale"].default_value = 1.0
+            nz.inputs["Detail"].default_value = 1.5
+            nz.inputs["Roughness"].default_value = 0.4
+            g.L.new(sv.outputs[0], nz.inputs["Vector"])
+            v = g.rng(nz.outputs["Fac"], 0.36, 0.64, 0.0, 1.0, smooth=True)
         elif mode == "mask_dents":
             # вмятины по месту, «крупное — среднее — мелкое»: точки на поверхности (ближайшие к намеченным местам)
             v = 0.0
@@ -244,8 +260,9 @@ def build(mode, face):
         # тёмное волокно — поры и бороздки; на срезе рельеф слабее, у тёмных (торцевых) слоёв — пористее,
         # клеевой шов — чуть утоплен
         h_face = g.rng(g_face, 0.0, 1.0, 0.18, 0.72)
-        h_cut = g.mix(dark, g.rng(g_och, 0.0, 1.0, 0.36, 0.62), g.rng(g_drk, 0.0, 1.0, 0.3, 0.58), "FLOAT")
-        h_cut = g.op("SUBTRACT", h_cut, g.op("MULTIPLY", glue, 0.14))
+        # на срезе ступенька между слоями невелика (было 0.36–0.62 / 0.3–0.58: полосы рельефом)
+        h_cut = g.mix(dark, g.rng(g_och, 0.0, 1.0, 0.42, 0.58), g.rng(g_drk, 0.0, 1.0, 0.4, 0.56), "FLOAT")
+        h_cut = g.op("SUBTRACT", h_cut, g.op("MULTIPLY", glue, 0.08))
         h = g.mix(facem, h_cut, h_face, "FLOAT")
         c = g.n("ShaderNodeCombineColor")
         for i in range(3):
@@ -254,7 +271,7 @@ def build(mode, face):
         return g.m
     c_och = g.grade(g_och, OCHRE[1], OCHRE[2], OCHRE[3])
     c_drk = g.grade(g_drk, DARK[1], DARK[2], DARK[3])
-    tk = g.rng(tone, 0.0, 1.0, 0.8, 1.15)
+    tk = g.rng(tone, 0.0, 1.0, TONE_K[0], TONE_K[1])
     tkv = g.n("ShaderNodeCombineColor")
     for i in range(3):
         g.L.new(tk, tkv.inputs[i])
@@ -262,7 +279,7 @@ def build(mode, face):
     cut.inputs["Factor"].default_value = 1.0
     g.L.new(g.mix(dark, c_och, c_drk), cut.inputs[6])
     g.L.new(tkv.outputs[0], cut.inputs[7])
-    cut = g.mix(g.op("MULTIPLY", glue, 0.7), cut.outputs[2], C_GLUE)
+    cut = g.mix(g.op("MULTIPLY", glue, GLUE_OP), cut.outputs[2], C_GLUE)
     c_face = g.grade(g_face, f_lo, f_hi, f_gam)
     # на скруглении у боковины сначала виден срез самого лицевого шпона — его тон, а не охристый слой
     # (иначе окна и контур обведены жёлтой линией)
@@ -317,8 +334,11 @@ def main():
         if w == "ids":
             bake(o, "ids", None, f"{out}/ids.png", size)
             continue
+        if w.startswith("mask_"):
+            bake(o, w, None, f"{out}/{w}.png", size)
+            continue
         if w == "masks":
-            for k in ("face", "dark", "glue", "ends", "streaks", "hold", "dents"):
+            for k in ("face", "dark", "glue", "ends", "streaks", "hold", "dents", "tone"):
                 bake(o, "mask_" + k, None, f"{out}/mask_{k}.png", size)
             continue
         bake(o, "color", w, f"{out}/{w}_color.png", size)

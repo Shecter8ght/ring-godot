@@ -15,7 +15,8 @@ from sp_lib import L  # noqa: E402
 OUT = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_receiver"
 st = sp_lib.stack_by_name("receiver")
 sp_lib.clear(st)
-sp_stacks.steel(st, rail_meshes=["Cover_picatinny__sp"], parts=sp_stacks.RECEIVER_PARTS)
+# износ — только у кромок и по местам трения (contact_marks.py wear/rub), протирки до блеска слабее (27.10)
+sp_stacks.steel(st, rail_meshes=["Cover_picatinny__sp"], parts=sp_stacks.RECEIVER_PARTS, zones="receiver", wiped=0.2)
 sp_stacks.contact_marks(st, "receiver")
 print("stack:", [n.get_name() for n in L.get_root_layer_nodes(st)])
 

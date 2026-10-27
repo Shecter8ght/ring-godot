@@ -124,7 +124,7 @@ def _sharpen(grp, amount=0.3):
 
 
 def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, prints=1.0, rail_meshes=None,
-           parts=None):
+           parts=None, zones=None, wiped=0.35):
     """Изделие с заводским покрытием (воронение / анодирование): coat и bare — (цвет, шероховатость, металл)
     покрытия и металла под ним. Износ читается блеском и рельефом (замечание владельца 25.10: у пятен был тот же
     блеск, что у покрытия): покрытие глянцевое с лёгкими пятнами блеска и протирками; вокруг вытертых мест — рваная
@@ -138,7 +138,16 @@ def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, p
     По справке навыка (painter-workflow.md, 26.10): у деталей свои основы — parts = [(имя, [детали или начала
     имён], цвет, шероховатость, металл)], маской по сеткам: одна заливка на всё читается пластмассой; крупные пятна
     тона идут парой с пятнами блеска (каналы связаны); слои покрытия и износа — в группе со слабой резкостью на выходе,
-    грязь, пыль, масло и отпечатки — после неё."""
+    грязь, пыль, масло и отпечатки — после неё.
+    zones — имя набора с картами мест износа (contact_marks.py: <набор>_wear — до металла, <набор>_rub — истончилось):
+    тогда пятна износа только там и у кромок, фото-маски пятен по всей площади не кладутся (владелец 27.10: «с продольных
+    боков убрать сильный износ пятнами до металла»). wiped — сила протирок до блеска."""
+    wear_map = rub_map = None
+    if zones:
+        wear_map, rub_map = (f"{MARKS_DIR}/{zones}_{k}.png" for k in ("wear", "rub"))
+        if not (os.path.exists(wear_map) and os.path.exists(rub_map)):
+            print("NO WEAR ZONES", zones)
+            wear_map = rub_map = None
     grp = L.insert_group(L.InsertPosition.from_textureset_stack(st))
     grp.set_name("Покрытие и износ")
     n = fill("01 Покрытие", L.InsertPosition.inside_node(grp, L.NodeStack.Substack), color=coat[0], rough=coat[1],
@@ -156,20 +165,36 @@ def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, p
     n = _proc_layer("03 Блеск пятнами", _above(n), _gm(13), 1.2, 0.5, {"balance": 0.5, "contrast": 0.2},
                     rough=coat[1] + 0.07)
     n = _proc_layer("04 Протёрто до блеска", _above(n), "grunge_wipe_directional_heavy/grunge_wipe_directional_heavy", 1.8,
-                    0.35, rough=max(0.12, coat[1] - 0.08))
+                    wiped, rough=max(0.12, coat[1] - 0.08))
     edge_p = {"Wear_Contrast": 0.6, "Grunge_Amount": 0.75, "grunge_scale": 6, "Use_Triplanar": 1, "Edges_Smoothness": 0.45,
               "Ambient_Occlusion_Masking": 0.6, "Curvature_Weight": 1.0}
     t = fill("05 Покрытие истончилось", _above(n), color=_mix(coat[0], bare[0], 0.4), rough=(coat[1] + bare[1]) / 2,
              metal=(coat[2] + bare[2]) / 2, height=0.497)
-    g = mask_generator(t, EDGE, dict(edge_p, Wear_Level=min(0.95, wear * 1.8), Wear_Contrast=0.35, Grunge_Amount=0.85))
-    pm = mask_proc(t, _gm(8), {"invert": 1, "balance": patch_bal - 0.08, "contrast": 0.35}, scale=1.5, above=g,
-                   blend=L.BlendingMode.Lighten)
+    t_edge = dict(edge_p, Wear_Level=min(0.95, wear * 1.8), Wear_Contrast=0.35, Grunge_Amount=0.85)
+    if rub_map:
+        # места трения (истончилось) и вытертое до металла (вокруг него тоже истончилось) + кромки
+        m = _bmask(t, rub_map)
+        m = _bmask(t, wear_map, blend=L.BlendingMode.Lighten, above=m)
+        g = mask_generator(t, EDGE, t_edge, above=m)
+        g.set_blending_mode(L.BlendingMode.Lighten)
+        pm = g
+    else:
+        g = mask_generator(t, EDGE, t_edge)
+        pm = mask_proc(t, _gm(8), {"invert": 1, "balance": patch_bal - 0.08, "contrast": 0.35}, scale=1.5, above=g,
+                       blend=L.BlendingMode.Lighten)
     mask_proc(t, _gm(13), {"balance": 0.6, "contrast": 0.3}, scale=2.2, above=pm, blend=L.BlendingMode.Multiply)
     sp_lib.lop(t, thin)
     w = fill("06 Вытерто до металла", _above(t), color=bare[0], rough=bare[1], metal=bare[2], height=0.475)  # ступенька 0.025
-    g = mask_generator(w, EDGE, dict(edge_p, Wear_Level=wear))
-    mask_proc(w, _gm(8), {"invert": 1, "balance": patch_bal, "contrast": 0.75}, scale=1.5, above=g,
-              blend=L.BlendingMode.Lighten)
+    if wear_map:
+        # до металла — только кромки, о которые трутся детали; порог делает край рваным и резким
+        m = _bmask(w, wear_map)
+        m = _mfilter(m, "histogram_scan", {"Position": 0.45, "Contrast": 0.6})
+        g = mask_generator(w, EDGE, dict(edge_p, Wear_Level=wear), above=m)
+        g.set_blending_mode(L.BlendingMode.Lighten)
+    else:
+        g = mask_generator(w, EDGE, dict(edge_p, Wear_Level=wear))
+        mask_proc(w, _gm(8), {"invert": 1, "balance": patch_bal, "contrast": 0.75}, scale=1.5, above=g,
+                  blend=L.BlendingMode.Lighten)
     n = _grain(_above(w), 0.16, 0.0)
     n.set_name("07 Неровная матовость")
     n = _edge("08 Кромки до блеска", _above(n), _mix(bare[0], (0.75, 0.75, 0.76), 0.5), 0.24, wear * 0.6,
@@ -192,35 +217,36 @@ def coated(st, coat, bare, wear=0.1, patch_bal=0.8, thin=0.45, scratches=0.35, p
     return n
 
 
-# воронёная сталь: глянцевое тёмное покрытие, под ним матовая серая сталь с тёплым оттенком
-STEEL_COAT = ((0.085, 0.085, 0.09), 0.22, 0.75)
+# воронёная сталь: тёмное покрытие с сатиновым блеском (27.10, владелец: «глянец потише»; было 0.22 — лаковый блеск),
+# под ним матовая серая сталь с тёплым оттенком
+STEEL_COAT = ((0.085, 0.085, 0.09), 0.32, 0.75)
 STEEL_BARE = ((0.42, 0.415, 0.41), 0.3, 1.0)   # стёртое до металла блестит (0.17 / 0.62 читалось матовой краской, 26.10)
 # свои основы деталей (справка навыка: 4–5 основ на предмет; тёмные — с лёгким оттенком, крепёж — светлее)
 RECEIVER_PARTS = [
-    ("крышка", ["Receiver_cover"], (0.095, 0.092, 0.092), 0.18, 0.78),
+    ("крышка", ["Receiver_cover"], (0.095, 0.092, 0.092), 0.3, 0.78),
     ("планка Пикатинни", ["Cover_picatinny"], (0.11, 0.11, 0.12), 0.42, 0.45),
-    ("спусковая скоба", ["Trigger_guard"], (0.075, 0.074, 0.075), 0.3, 0.7),
-    ("боковой кронштейн", ["Side_mount_dovetail"], (0.075, 0.08, 0.095), 0.24, 0.8),
-    ("ствольная накладка", ["Receiver_trunnion"], (0.07, 0.07, 0.072), 0.26, 0.75),
-    ("штифты и заклёпки", ["Receiver_pin_", "Side_mount_rivet_", "Safety_axis_end_L"], (0.14, 0.135, 0.13), 0.34, 0.9),
+    ("спусковая скоба", ["Trigger_guard"], (0.075, 0.074, 0.075), 0.36, 0.7),
+    ("боковой кронштейн", ["Side_mount_dovetail"], (0.075, 0.08, 0.095), 0.34, 0.8),
+    ("ствольная накладка", ["Receiver_trunnion"], (0.07, 0.07, 0.072), 0.34, 0.75),
+    ("штифты и заклёпки", ["Receiver_pin_", "Side_mount_rivet_", "Safety_axis_end_L"], (0.14, 0.135, 0.13), 0.38, 0.9),
 ]
 STEEL_PARTS_PARTS = [
     ("рама и рукоятка", ["Bolt_carrier", "Bolt_carrier_plate", "Bolt_carrier_web", "Charging_handle"],
-     (0.09, 0.088, 0.088), 0.26, 0.8),
-    ("спуск", ["Trigger"], (0.12, 0.118, 0.115), 0.3, 0.85),
+     (0.09, 0.088, 0.088), 0.32, 0.8),
+    ("спуск", ["Trigger"], (0.12, 0.118, 0.115), 0.34, 0.85),
     ("прицельные", ["Rear_sight_base", "Rear_sight_leaf", "Rear_sight_slider", "Front_sight_base", "Front_sight_post"],
-     (0.08, 0.08, 0.085), 0.3, 0.75),
+     (0.08, 0.08, 0.085), 0.34, 0.75),
     ("антабки, винты, заклёпки", ["Front_sling_swivel", "Stock_sling_swivel", "Stock_sling_rivet_0", "Stock_sling_rivet_1",
-                                  "Stock_screw_L", "Stock_screw_R", "Rail_sleeve_screws"], (0.13, 0.128, 0.125), 0.34, 0.9),
+                                  "Stock_screw_L", "Stock_screw_R", "Rail_sleeve_screws"], (0.13, 0.128, 0.125), 0.38, 0.9),
 ]
 
 
-def steel(st, rail_meshes=None, wear=0.06, patch_bal=0.9, scratches=0.16, parts=None):
+def steel(st, rail_meshes=None, wear=0.06, patch_bal=0.9, scratches=0.16, parts=None, zones=None, wiped=0.35):
     """Сталь коробки, рамы, органов управления, прицельных: воронение, местами вытертое (см. coated). Износа меньше
     прежнего (0.1 / 0.8 / 0.35): стёртое до металла стало светлым и блестящим, и каждое повреждение читается
-    (владелец 26.10 — «количество повреждений уменьшить»)."""
+    (владелец 26.10 — «количество повреждений уменьшить»). zones — износ только по местам (коробка, 27.10)."""
     return coated(st, STEEL_COAT, STEEL_BARE, wear=wear, patch_bal=patch_bal, thin=0.3, scratches=scratches,
-                  rail_meshes=rail_meshes, parts=parts)
+                  rail_meshes=rail_meshes, parts=parts, zones=zones, wiped=wiped)
 
 
 def phosphate(st, rail_meshes=None, **kw):
@@ -644,16 +670,21 @@ def _mfilter(above, name, params):
     return e
 
 
-def _raw_wood(name, pos, rough=0.82, lift=0.0006):
-    """Группа «лак снят до сырой древесины»: светлее (Screen — волокно основы остаётся), бледнее (Saturation),
-    самое матовое и ниже лака на его толщину. Маску задаёт вызывающий."""
+RAW_WOOD = (0.5, 0.38, 0.23)     # древесина фанеры без лака: жёлто-охристая (27.10; прежде Screen — белёсые сколы)
+
+
+def _raw_wood(name, pos, rough=0.82, lift=0.0006, show=0.8, dirt=0.35):
+    """Группа «лак снят до сырой древесины»: жёлто-охристая древесина (show — насколько закрывает лак; волокно основы
+    проступает сквозь остаток), в сколе въелась грязь (dirt), самое матовое и ниже лака на его толщину. Маску задаёт
+    вызывающий. Прежде было Screen + обесцвечивание — сколы и протёртости читались белыми (владелец 27.10)."""
     g = L.insert_group(pos)
     g.set_name(name)
-    a = fill("Светлее", L.InsertPosition.inside_node(g, L.NodeStack.Substack), color=(0.42, 0.36, 0.27))
-    a.set_blending_mode(L.BlendingMode.Screen, sp_lib.CH.BaseColor)
-    b = fill("Бледнее", _above(a), color=(0.5, 0.5, 0.5))
-    b.set_blending_mode(L.BlendingMode.Saturation, sp_lib.CH.BaseColor)
-    sp_lib.lop(b, 0.25)
+    a = fill("Сырая древесина", L.InsertPosition.inside_node(g, L.NodeStack.Substack), color=RAW_WOOD)
+    a.set_opacity(show, sp_lib.CH.BaseColor)
+    b = fill("Въелась грязь", _above(a), color=(0.7, 0.6, 0.5))
+    b.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
+    mask_proc(b, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", {"Balance": 0.5, "Contrast": 0.3}, scale=3.0)
+    sp_lib.lop(b, dirt)
     c = fill("Матовое, без лака", _above(b), rough=rough, height=lift)
     c.set_blending_mode(L.BlendingMode.Subtract, sp_lib.CH.Height)
     return g
@@ -664,8 +695,8 @@ def wood(st):
     wood-and-paint-layers.md и образцам владельца с Fab). Порядок: дерево → рельеф → крупные пятна → лак → тона →
     повреждения → резкость → грязь, пыль, следы рук. Основа — фото шпона, вариант C (wood_veneer_bake.py): само дерево
     матовое, блеск даёт лак. Три тона: средний — древесина; тёмный — стыки и поры по AO и к концам приклада (чуть
-    глянцевее, как лак); светлый — лак протёрт до сырой древесины на кромках и в местах хвата (светлее, бледнее, самый
-    матовый). Крупные пятна света и тени — Soft Light (Normal съел бы волокно), полосами вдоль волокна. Повреждения «крупное — среднее —
+    глянцевее, как лак); светлый — лак истёрт на кромках, сквозь него жёлтая древесина (27.10: в местах хвата руки
+    темнят — засаленность, сколы — жёлтая древесина с грязью, не белые). Крупные пятна света и тени — Soft Light (Normal съел бы волокно), полосами вдоль волокна. Повреждения «крупное — среднее —
     мелкое»: сколы лака по кромкам, редкие вмятины, царапины. Слабая резкость — эффектом на группу дерева и лака
     (поверх слоёв фильтр Painter API не вставляет), грязь и пыль — после неё. Маски мест — wood_veneer_bake.py masks."""
     CH = sp_lib.CH
@@ -688,16 +719,36 @@ def wood(st):
     n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
     _bmask(n, _wmask("ends"))
     sp_lib.lop(n, 0.35)
-    # лак: тёплый тон тонким слоем и полуматовый блеск; в порах проседает и тусклее
-    n = fill("06 Лак", _above(n), color=(0.8, 0.5, 0.32), rough=0.4)       # янтарно-красный, потемневший от времени
+    # тон гуляет крупно (27.10, владелец: «тон»): лак лёг неровно — широкие места темнее и светлее вдоль приклада,
+    # чтобы приклад не был ровно-рыжим (маска tone — wood_veneer_bake.py)
+    n = fill("05б Тон крупно темнее", _above(n), color=(0.55, 0.45, 0.38))
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
-    n.set_opacity(0.55, CH.BaseColor)
+    _bmask(n, _wmask("tone"))
+    sp_lib.lop(n, 0.75)
+    n = fill("05в Тон крупно светлее", _above(n), color=(0.72, 0.62, 0.5))
+    n.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
+    _bmask(n, _wmask("tone"), blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
+    sp_lib.lop(n, 0.4)
+    # морилка: коричневее и темнее в целом — приклад читался рыже-оранжевым
+    n = fill("05г Морилка", _above(n), color=(0.64, 0.54, 0.47))
+    n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
+    sp_lib.lop(n, 0.6)
+    # лак: тёплый тон тонким слоем и полуматовый блеск; в порах проседает и тусклее. Янтарь бледнее прежнего
+    # (0.8 / 0.5 / 0.32 на 55 % — приклад выходил оранжевым)
+    n = fill("06 Лак", _above(n), color=(0.8, 0.6, 0.45), rough=0.42)
+    n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
+    n.set_opacity(0.5, CH.BaseColor)
     # в углублениях волокна лака почти нет — матово (владелец 26.10); маска — нижняя пятая часть высоты (поры),
-    # прежняя (порог 0.42, 0.56 на 60 %) задевала половину поверхности и почти не отличалась от лака
+    # только на лицевом шпоне: на срезах фанеры тёмные слои ниже по высоте и шли матовыми полосами — под верхним
+    # светом срезы белели «инеем» (27.10)
     n = fill("07 Лак в порах тусклее", _above(n), rough=0.85)
     m = _bmask(n, WOOD_HEIGHT, blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
-    _mfilter(m, "histogram_scan", {"Position": 0.36, "Contrast": 0.75})
+    m = _mfilter(m, "histogram_scan", {"Position": 0.36, "Contrast": 0.75})
+    _bmask(n, _wmask("face"), blend=L.BlendingMode.Multiply, above=m)
     sp_lib.lop(n, 1.0)
+    # срезы фанеры: лак впитался в торцы ровно — полуматово, без полос
+    n = fill("07б Лак на срезах", _above(n), rough=0.62)
+    _bmask(n, _wmask("face"), blend=L.BlendingMode.Subtract, background=L.MaskBackground.White)
     n = fill("08 Апельсиновая корка", _above(n), rough="noise_clouds_2/clouds_2", height="noise_clouds_2/clouds_2")
     triplanar(n, 60.0)
     n.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
@@ -705,12 +756,14 @@ def wood(st):
     n.set_opacity(0.0012, CH.Height)
     n = _proc_layer("09 Неровный блеск лака", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.6, 0.5,
                     {"Balance": 0.55, "Contrast": 0.3}, rough=0.5)
-    n = fill("10 Натёрто руками до блеска", _above(n), color=(0.9, 0.86, 0.8), rough=0.27)
+    # места хвата (шейка, щека на гребне): руки не светлят, а темнят — жир и грязь въедаются в лак, он лоснится
+    # (27.10, владелец: «грязь от рук»)
+    n = fill("10 Засалено руками", _above(n), color=(0.6, 0.5, 0.42), rough=0.3)
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
     m = _bmask(n, _wmask("hold"))
-    mask_proc(n, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", {"Balance": 0.62, "Contrast": 0.3}, scale=1.6,
+    mask_proc(n, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", {"Balance": 0.55, "Contrast": 0.3}, scale=1.6,
               blend=L.BlendingMode.Multiply, above=m)
-    sp_lib.lop(n, 0.8)
+    sp_lib.lop(n, 0.85)
     # тёмный тон: стыки и поры по AO и к концам — темнее и чуть глянцевее, рельеф волокна не трогает
     n = fill("11 Тёмный тон: стыки, поры, концы", _above(n), color=(0.62, 0.55, 0.48), rough=0.36)
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
@@ -718,17 +771,17 @@ def wood(st):
                                  "Use_Triplanar": 1, "edges_masking": 0.8})
     _bmask(n, _wmask("ends"), blend=L.BlendingMode.Lighten, above=g, opacity=0.4)
     sp_lib.lop(n, 0.38)
-    # светлый тон: лак протёрт до дерева — по кромкам (рвёт grunge) и в местах хвата, порог контрастный
-    w = _raw_wood("12 Светлый тон: протёрто до дерева", _above(n))
-    m = _bmask(w, _wmask("hold"))
-    m = mask_proc(w, "grunge_wipe_brushed/grunge_wipe_brushed", None, scale=1.4, blend=L.BlendingMode.Multiply, above=m)
-    g = mask_generator(w, EDGE, {"Wear_Level": 0.2, "Wear_Contrast": 0.7, "Grunge_Amount": 0.85, "grunge_scale": 4,
+    # лак истёрт на кромках: сквозь остаток проступает древесина (не белое — show 0.35), только по кромкам; в местах
+    # хвата — засаленность (слой 10), а не светлое
+    w = _raw_wood("12 Лак истёрт на кромках", _above(n), rough=0.7, lift=0.0004, show=0.35, dirt=0.25)
+    g = mask_generator(w, EDGE, {"Wear_Level": 0.14, "Wear_Contrast": 0.7, "Grunge_Amount": 0.85, "grunge_scale": 4,
                                  "Use_Triplanar": 1, "Edges_Smoothness": 0.5, "Ambient_Occlusion_Masking": 0.6,
-                                 "Curvature_Weight": 1.0}, above=m)
-    g.set_blending_mode(L.BlendingMode.Lighten)
-    _mfilter(g, "histogram_scan", {"Position": 0.5, "Contrast": 0.35})
-    # сколы лака: редкие, крупнее и резче протёртого — по кромкам окон, затыльника и низа
-    c = _raw_wood("13 Сколы лака", _above(w), rough=0.86, lift=0.0012)
+                                 "Curvature_Weight": 1.0})
+    m = mask_proc(w, "grunge_wipe_brushed/grunge_wipe_brushed", None, scale=1.4, blend=L.BlendingMode.Multiply, above=g)
+    _mfilter(m, "histogram_scan", {"Position": 0.5, "Contrast": 0.35})
+    # сколы лака: редкие, крупнее и резче протёртого — по кромкам окон, затыльника и низа; в сколе — жёлтая
+    # древесина с въевшейся грязью
+    c = _raw_wood("13 Сколы лака", _above(w), rough=0.86, lift=0.0012, show=0.85, dirt=0.45)
     g = mask_generator(c, EDGE, {"Wear_Level": 0.07, "Wear_Contrast": 0.95, "Grunge_Amount": 0.95, "grunge_scale": 2,
                                  "Use_Triplanar": 1, "Edges_Smoothness": 0.2, "Ambient_Occlusion_Masking": 0.4,
                                  "Curvature_Weight": 1.0})
@@ -740,20 +793,20 @@ def wood(st):
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
     n.set_blending_mode(L.BlendingMode.Subtract, CH.Height)
     _bmask(n, _wmask("dents"))
-    n = fill("15 Царапины лака", _above(n), color=(0.16, 0.09, 0.055), rough=0.62)   # тёплые: серые на тёмном дереве — мелом
+    n = fill("15 Царапины лака", _above(n), color=(0.12, 0.07, 0.035), rough=0.62)   # тёплые: серые на тёмном дереве — мелом
     n.set_blending_mode(L.BlendingMode.Screen, CH.BaseColor)
-    mask_proc(n, _gm(12), {"invert": 1, "balance": 0.76, "contrast": 0.55}, scale=2.5)
-    sp_lib.lop(n, 0.3)
+    mask_proc(n, _gm(12), {"invert": 1, "balance": 0.78, "contrast": 0.55}, scale=2.5)
+    sp_lib.lop(n, 0.22)
     sh = L.insert_filter_effect(L.InsertPosition.inside_node(grp, L.NodeStack.Content),
                                 sp_lib.rid("sharpen/sharpen", "u:filter"))
     sh.get_source().set_parameters({"intensity": 0.35})
     # после резкости: грязь в углах, пыль (где руками не трут), засаленность
-    n = _dirt(_above(grp), color=(0.14, 0.09, 0.055), rough=0.8, level=0.32, opacity=0.35, name="16 Грязь в углах")
-    n = fill("17 Пыль", _above(n), color=(0.4, 0.3, 0.22), rough=0.92)
+    n = _dirt(_above(grp), color=(0.12, 0.08, 0.05), rough=0.8, level=0.34, opacity=0.42, name="16 Грязь в углах")
+    n = fill("17 Пыль", _above(n), color=(0.34, 0.27, 0.2), rough=0.92)
     g = mask_generator(n, DIRT, {"dirt_level": 0.22, "dirt_contrast": 0.85, "grunge_amount": 0.6, "Grunge_Scale": 8,
                                  "Use_Triplanar": 1, "edges_masking": 0.9})
     _bmask(n, _wmask("hold"), blend=L.BlendingMode.Subtract, above=g)
-    sp_lib.lop(n, 0.22)
+    sp_lib.lop(n, 0.16)
     n = _proc_layer("18 Засаленность", _above(n), "grunge_fingerprints_dirty/grunge_fingerprints_dirty", 2.5, 0.2,
                     {"Balance": 0.45, "Contrast": 0.35}, color=(0.8, 0.72, 0.62), rough=0.36)
     n.set_blending_mode(L.BlendingMode.Multiply, CH.BaseColor)
@@ -761,7 +814,7 @@ def wood(st):
 
 
 MARKS_DIR = "E:/Games/RING-godot/_asset_src/vss_m_v8/sp_marks"     # contact_marks.py: следы рук и жизни по местам
-MARK_BASE_ROUGH = {"receiver": 0.22, "steel_parts": 0.22, "suppressor": 0.28, "sleeve": 0.3, "handguard": 0.36,
+MARK_BASE_ROUGH = {"receiver": 0.32, "steel_parts": 0.32, "suppressor": 0.28, "sleeve": 0.3, "handguard": 0.36,
                    "magazine": 0.5, "magazine_30": 0.5, "wood": 0.32, "bare_steel": 0.34, "rubber": 0.86}
 
 
