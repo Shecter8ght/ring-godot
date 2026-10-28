@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Общежитие, этап 1, редакция 2 по замечаниям владельца 2026-10-28.
+"""Общежитие, этап 1, редакция 3: уточнение пропорций после прогулки 2026-10-28.
 
 python -X utf8 tools/build_dorm.py -> JSON, сцена и поэтажный PNG.
 Только план, габариты мебели и базовые цвета. Чистовые модули ещё не делаются.
@@ -12,9 +12,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PART, LOAD, EXT, SLAB = .15, .38, .64, .24
-HALF, ROOM_D, BASE = 1.8, 7.8, .48
+HALF, ROOM_D, BASE = 1.7, 6.8, .48
 ROOM_EDGE, FACADE = HALF + LOAD, HALF + LOAD + ROOM_D
-HEIGHTS = [3.7, 2.7, 2.7, 2.7, 2.7]
+HEIGHTS = [3.7, 3.0, 3.0, 3.0, 3.0]
 LEVELS = [BASE]
 for height in HEIGHTS[:-1]:
     LEVELS.append(round(LEVELS[-1] + height + SLAB, 4))
@@ -32,6 +32,7 @@ ANNEX_CORRIDOR = LENGTH - HALF * 2
 ANNEX_WALL = ANNEX_CORRIDOR - LOAD / 2
 TURN_X = (ANNEX_CORRIDOR + LENGTH) / 2
 ENTRY_X, LANE_X = WIDTHS[0] / 2, 2.65
+PORCH_END = FACADE + EXT + 2.58
 DOOR_W, DOOR_H = 1.17, 2.415
 WINDOW_W = 2 * .82 * 1.15 + .21
 STATES = ["жилая", "разграбленная", "сгоревшая", "баррикада у окна", "пустая с матрасами"]
@@ -48,7 +49,7 @@ def rounded(v):
 
 
 def make_plan():
-    p = {"version": 2, "stage": 1, "greybox": True, "north": "-Z",
+    p = {"version": 3, "stage": 1, "greybox": True, "north": "-Z",
          "purpose": "Общежитие: проверка планировки, масштаба, центральной лестницы и базовой раскраски",
          "bounds": [-11, -46, LENGTH + 13, 24],
          "main_rect": [0,-FACADE,LENGTH,FACADE],
@@ -186,9 +187,9 @@ def make_plan():
     box("Site","ground",[-14,-49,LENGTH+15,26],-.3,0,"ground")
     box("Site","main_plinth",[-EXT,-FACADE-EXT,LENGTH+EXT,FACADE+EXT],0,BASE-SLAB,"slab")
     box("Site","front_apron",[-1,FACADE+EXT,LENGTH+1,FACADE+EXT+1.2],-.04,.025,"paving")
-    box("Site","entry_porch",[-.35,FACADE+EXT,4.25,13.2],0,BASE,"floor")
+    box("Site","entry_porch",[-.35,FACADE+EXT,4.25,PORCH_END],0,BASE,"floor")
     for i in range(3):
-        box("Site","entry_step",[-.1,13.2+i*.3,4,13.5+i*.3],0,BASE-i*.16,"floor")
+        box("Site","entry_step",[-.1,PORCH_END+i*.3,4,PORCH_END+(i+1)*.3],0,BASE-i*.16,"floor")
     box("Site","rear_porch",[LENGTH+EXT,-1.7,LENGTH+2.2,1.7],0,BASE,"floor")
     for i in range(3):
         box("Site","rear_step",[LENGTH+2.2+i*.3,-1.5,LENGTH+2.5+i*.3,1.5],0,BASE-i*.16,"floor")
@@ -269,7 +270,7 @@ def make_plan():
                     bunks(key,rect,y)
                 if kind=="toilets":
                     bathroom(key,rect,f,dx)
-                    s["probe_points"]=[[cx,y,-7.4],[cx,y,-3.3]]
+                    s["probe_points"]=[[cx,y,-FACADE+2.5],[cx,y,-3.3]]
                     # Пока только габариты кабин и чаш; центр остаётся проходом к умывальникам.
                     for k in range(3):
                         xx=x0+.7+k*1.15
@@ -303,22 +304,22 @@ def make_plan():
         poly=[[a,ROOM_EDGE],[c,ROOM_EDGE],[c,FACADE],[b,FACADE],[b,5.6],[a,5.6]]
         space(f"f{f+1}_lounge","ГОСТИНАЯ","lounge",f,[a,ROOM_EDGE,c,FACADE],
               [[SCX,y,0],[SCX,y,3.8],[b+1.4,y,3.8],[b+1.4,y,7.1]],
-              [[c-1.4,y,8.5],[b+1.4,y,8.5],[b+1.4,y,3.8],[a+1.0,y,3.8]],poly)
+              [[c-1.4,y,FACADE-1.0],[b+1.4,y,FACADE-1.0],[b+1.4,y,3.8],[a+1.0,y,3.8]],poly)
         wall(key,"lounge_store",a,SC1,5.675,PART,y,h,[(SCX,DOOR_W,0,DOOR_H)])
         door(key,"КЛАДОВАЯ",SCX,5.675,y,1,opened=f<3)
         # Кладовка ограничена только шириной своего модуля.
         box(key,"lounge_store_side",[SC1,5.6,b,FACADE],y,y+h+SLAB)
         space(f"f{f+1}_lounge_store","КЛАДОВАЯ ПРИ ГОСТИНОЙ","storage",f,[a,5.75,SC1,FACADE],
-              [[SCX,y,0],[SCX,y,3.8],[SCX,y,7.4]],[[SCX,y,8.8]])
+              [[SCX,y,0],[SCX,y,3.8],[SCX,y,7.4]],[[SCX,y,FACADE-.8]])
         for xx in [b+.7,c-.7]:
-            box(key,"seat_scale",[xx-.25,6.2,xx+.25,8.0],y,y+.45,"wood")
-        box(key,"lounge_table",[b+2.0,5.5,c-2.0,6.4],y,y+.55,"wood")
+            box(key,"seat_scale",[xx-.25,FACADE-3.78,xx+.25,FACADE-1.98],y,y+.45,"wood")
+        box(key,"lounge_table",[b+2.0,FACADE-4.48,c-2.0,FACADE-3.58],y,y+.55,"wood")
         # Входной контроль оставлен открытым; новые игровые правила турникета не вводятся.
         if f==0:
             wall(key,"vestibule",0,WIDTHS[0],7.075,PART,y,h,[(ENTRY_X,2.4,0,2.7)])
             door(key,"ТАМБУР",ENTRY_X,7.075,y,1,w=2.4,dh=2.7)
             space("f1_vestibule","ТАМБУР","vestibule",f,[0,7.15,WIDTHS[0],FACADE],
-                  [[ENTRY_X,y,0],[ENTRY_X,y,3.2],[LANE_X,y,5.4],[LANE_X,y,6.4],[ENTRY_X,y,8.5]],[[ENTRY_X,y,9.0]])
+                  [[ENTRY_X,y,0],[ENTRY_X,y,3.2],[LANE_X,y,5.4],[LANE_X,y,6.4],[ENTRY_X,y,(7.15+FACADE)/2]],[[ENTRY_X,y,FACADE-.6]])
             box(key,"guard_desk",[.18,4.0,1.55,4.7],y,y+.9,"wood")
             box(key,"guard_screen",[.45,4.2,1.05,4.33],y+1.0,y+1.36,"frame",False)
             box(key,"turnstile_body",[1.5,5.0,1.9,5.8],y,y+1.0,"rail")
@@ -368,7 +369,7 @@ def make_plan():
         if f==4:
             continue
         yy=LEVELS[f+1]
-        count=12 if f==0 else 9
+        count=12 if f==0 else 10
         run=count*.3
         zm=SZ-run
         ym=(y+yy)/2
@@ -446,7 +447,7 @@ def make_plan():
                                   [LENGTH+3.8,0,0],[LENGTH+5,0,4]]})
     p["routes"].append({"id":"back_to_entry","label":"Чёрный выход → турникет → главный вход",
                         "points":list(reversed(p["routes"][-1]["points"]))})
-    # Редакция камер 2: для чистовой отделки сравнивать с этими сохранёнными позициями.
+    # Редакция камер 3: ракурсы сохранены, позиции лестницы и крыла следуют за их геометрией.
     wide=BAYS[2]
     narrow=BAYS[7]
     kitchen_z=-FACADE-EXT-.2-4.15/2
@@ -525,7 +526,7 @@ def main():
             path.write_text(text,encoding="utf-8",newline="\n")
     from dorm_plan import draw_plan
     draw_plan(plan,ROOT/"docs/plans/dorm.png")
-    print(f"dorm v2: {sum(s['open'] for s in plan['spaces'])} помещений; лестница x={SCX:.2f}, корпус {LENGTH:.2f} м; комнаты {plan['scale']['room_widths']}")
+    print(f"dorm v{plan['version']}: {sum(s['open'] for s in plan['spaces'])} помещений; лестница x={SCX:.2f}, корпус {LENGTH:.2f} м; комнаты {plan['scale']['room_widths']}")
 
 
 if __name__=="__main__":

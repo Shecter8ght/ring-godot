@@ -29,7 +29,6 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	started_ms = Time.get_ticks_msec()
-	DisplayServer.window_set_title("RING · Общежитие · этап 1: планировка 2")
 	get_node("/root/Pause").set_process_input(false)
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
@@ -45,6 +44,7 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	plan = parsed as Dictionary
+	DisplayServer.window_set_title("RING · Общежитие · этап 1: планировка %d" % int(plan.version))
 	world = (load(LEVEL) as PackedScene).instantiate() as Node3D
 	add_child(world)
 	walker = Walker.new() as CharacterBody3D
@@ -206,7 +206,8 @@ func _verify() -> void:
 		var left: Dictionary = _ray(Vector3(probe_x,y+1.3,0),Vector3(probe_x,y+1.3,-4))
 		var right: Dictionary = _ray(Vector3(probe_x,y+1.3,0),Vector3(probe_x,y+1.3,4))
 		var width_m: float = (right.position as Vector3).z-(left.position as Vector3).z if not left.is_empty() and not right.is_empty() else INF
-		_check("Коридор %d-го этажа расширен до 3,6 м" % (f+1),absf(width_m-3.6)<0.02,{"clear_m":width_m})
+		var expected_width: float = float(plan.scale.corridor_clear)
+		_check("Коридор %d-го этажа: %.1f м в свету" % [f+1,expected_width],absf(width_m-expected_width)<0.02,{"clear_m":width_m})
 	var core: Dictionary = plan.stair_core
 	var core_rect: Array = core.rect
 	var core_width: float = float(core_rect[2])-float(core_rect[0])
@@ -274,7 +275,7 @@ func _verify() -> void:
 			fails += 1
 	DirAccess.make_dir_recursive_absolute(output_dir)
 	var report: FileAccess = FileAccess.open(output_dir.path_join("validation.json"),FileAccess.WRITE)
-	report.store_string(JSON.stringify({"stage":1,"checks":results,"fails":fails,"walked_m":route_distance,
+	report.store_string(JSON.stringify({"stage":1,"revision":plan.version,"checks":results,"fails":fails,"walked_m":route_distance,
 		"scale":plan.scale,"engine":Engine.get_version_info().string,"duration_sec":(Time.get_ticks_msec()-started_ms)/1000.0},"\t"))
 	report.close()
 	print("dorm: проверок %d, провалов %d, пройдено %.1f м" % [results.size(),fails,route_distance])

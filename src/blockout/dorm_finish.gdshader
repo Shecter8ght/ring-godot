@@ -4,12 +4,12 @@ uniform int finish_mode = 0;
 uniform vec4 green : source_color = vec4(0.349, 0.396, 0.298, 1.0);
 uniform vec4 white : source_color = vec4(0.875, 0.882, 0.851, 1.0);
 uniform vec4 tile_color : source_color = vec4(0.73, 0.78, 0.74, 1.0);
-uniform vec4 floors = vec4(0.48, 4.42, 7.36, 10.30);
-uniform float fifth_floor = 13.24;
-uniform vec4 heights = vec4(3.7, 2.7, 2.7, 2.7);
+uniform vec4 floors = vec4(0.48, 4.42, 7.66, 10.90);
+uniform float fifth_floor = 14.14;
+uniform vec4 heights = vec4(3.7, 3.0, 3.0, 3.0);
 uniform float tile_size = 0.2;
-uniform vec4 main_bounds = vec4(0.0, -9.98, 43.41, 9.98);
-uniform vec4 annex_bounds = vec4(33.9, -39.0, 43.41, -10.62);
+uniform vec4 main_bounds = vec4(0.0, -8.88, 43.41, 8.88);
+uniform vec4 annex_bounds = vec4(33.9, -39.0, 43.41, -9.52);
 varying vec3 world_at;
 varying vec3 world_normal;
 
