@@ -1,0 +1,8 @@
+{
+  "metadata_format_version": "1",
+  "name": "Claude bridge",
+  "version": "1.0.0",
+  "author": "RING",
+  "min_designer_version": "14.1.0",
+  "platform": "any"
+}
