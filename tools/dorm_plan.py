@@ -2,6 +2,7 @@
 """Поэтажные срезы общежития: фактические стены и центральная лестница."""
 from __future__ import annotations
 from pathlib import Path
+import math
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -46,16 +47,27 @@ def draw_plan(plan: dict, path: Path) -> None:
         for key,section in plan["sections"].items():
             if key in ["Site","Roof"]:
                 continue
-            for box in section["boxes"]:
-                x,y,z=box["at"]
-                sx,sy,sz=box["size"]
-                if not y-sy/2<=fy+1.4<=y+sy/2:
-                    continue
-                mat=box["mat"]
-                color={"glass":"#a9cbd3","mattress":"#c4bba7","wood":"#918375","tile":"#a8bbb4","mirror":"#83b7c4"}.get(mat,"#465158")
-                if mat=="sealed" or "_bar" in box["id"]:
-                    color="#a15745"
-                rect([x-sx/2,z-sz/2,x+sx/2,z+sz/2],color)
+            for geometry in [section,*section.get("groups",{}).values()]:
+                for box in geometry["boxes"]:
+                    x,y,z=box["at"]
+                    sx,sy,sz=box["size"]
+                    if not y-sy/2<=fy+1.4<=y+sy/2:
+                        continue
+                    mat=box["mat"]
+                    color={"glass":"#a9cbd3","mattress":"#c4bba7","wood":"#918375","tile":"#a8bbb4","mirror":"#83b7c4"}.get(mat,"#465158")
+                    if mat=="sealed" or "_bar" in box["id"]:
+                        color="#a15745"
+                    rect([x-sx/2,z-sz/2,x+sx/2,z+sz/2],color)
+                for leaf in geometry.get("doors",[]):
+                    x,y,z=leaf["at"]
+                    if abs(y-fy)>.1:
+                        continue
+                    yaw=math.radians(leaf["yaw_closed"]+leaf["swing_sign"]*leaf["angle"])
+                    def corner(a,b):
+                        return pt(x+math.cos(yaw)*a+math.sin(yaw)*b,z-math.sin(yaw)*a+math.cos(yaw)*b)
+                    points=[corner(0,-.02),corner(leaf["width"],-.02),corner(leaf["width"],.02),corner(0,.02)]
+                    d.polygon(points,fill="#596350" if leaf["mat"]=="door_green" else "#75634f")
+                    d.line([corner(0,0),corner(leaf["width"],0)],fill="#7d453c" if leaf["grille"] else "#75634f",width=2)
         for s in plan["spaces"]:
             if s["floor"]!=f+1 or not s["open"]:
                 continue
@@ -101,7 +113,7 @@ def draw_plan(plan: dict, path: Path) -> None:
         if f==2:
             text(ox,1350,"Подъём на 4–5 этажи перекрыт.\nФинальная отделка ещё не начата.",22,"#994e3a",True)
     text(50,1510,"Белое — жилые комнаты; зелёное — гостиная; голубое — службы; песочное — комендант; красное — преграды.",24)
-    text(50,1560,f"Этап 1, редакция {plan['version']} по замечаниям владельца от 28.10.2026. Плитка, зеркала, кровати и входной контроль — предварительные.",23)
+    text(50,1560,f"Этап 1, редакция {plan['version']}. Масштаб прежний; порталы, двери на петлях, подоконники, батареи. Всё новое — отдельными группами.",23)
     d.line([(55,1640),(225,1640)],fill="#30383d",width=3)
     text(245,1622,"10 м · одинаковый масштаб трёх этажей",22)
     path.parent.mkdir(parents=True,exist_ok=True)

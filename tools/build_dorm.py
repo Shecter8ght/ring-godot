@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Общежитие, этап 1, редакция 3: уточнение пропорций после прогулки 2026-10-28.
+"""Общежитие, этап 1, редакция 4: конструктивные детали, масштаб редакции 3.
 
 python -X utf8 tools/build_dorm.py -> JSON, сцена и поэтажный PNG.
 Только план, габариты мебели и базовые цвета. Чистовые модули ещё не делаются.
@@ -35,6 +35,7 @@ ENTRY_X, LANE_X = WIDTHS[0] / 2, 2.65
 PORCH_END = FACADE + EXT + 2.58
 DOOR_W, DOOR_H = 1.17, 2.415
 WINDOW_W = 2 * .82 * 1.15 + .21
+SILL = .85
 STATES = ["жилая", "разграбленная", "сгоревшая", "баррикада у окна", "пустая с матрасами"]
 
 
@@ -49,7 +50,7 @@ def rounded(v):
 
 
 def make_plan():
-    p = {"version": 3, "stage": 1, "greybox": True, "north": "-Z",
+    p = {"version": 4, "stage": 1, "greybox": True, "north": "-Z",
          "purpose": "Общежитие: проверка планировки, масштаба, центральной лестницы и базовой раскраски",
          "bounds": [-11, -46, LENGTH + 13, 24],
          "main_rect": [0,-FACADE,LENGTH,FACADE],
@@ -61,60 +62,68 @@ def make_plan():
                    "stair_width": 1.5, "stair_gap": .3, "stair_core_width": SC1 - SC0,
                    "tread": .3, "eye": 1.62, "fov_h": 80., "window_width": WINDOW_W, "window_leaf_scale": 1.15},
          "finish": {"paint_lower_fraction": 2 / 3, "green": "59654c", "white": "dfe1d9", "tile_m": .2},
-         "reference": {"owner_images": "референсы/dorm/01.png … 20.png", "passport": "https://files.stroyinf.ru/Data2/2/4294852/4294852709.pdf"},
+         "reference": {"owner_images": "референсы/dorm/01.png … 20.png; eft_dorm_21.webp … eft_dorm_28.webp", "passport": "https://files.stroyinf.ru/Data2/2/4294852/4294852709.pdf"},
          "sections": {}, "spaces": [], "doors": [], "windows": [], "stairs": [], "barriers": [],
+         "portals": [], "niches": [],
+         "details": {"beam_drop": .4, "beam_width": .4, "pilaster_width": .45, "pilaster_projection": .18,
+                     "casing_width": .08, "casing_projection": .025, "leaf_thickness": .04,
+                     "sill_height": SILL, "sill_projection": .28, "radiator_size": [1.0,.55,.1],
+                     "skirting_height": .08, "skirting_projection": .02},
          "locations": [], "shots": [], "routes": [], "floor_routes": [], "circulation": [],
          "stair_core": {"rect": [SC0, -FACADE, SC1, -ROOM_EDGE], "front_z": SZ, "center_x": SCX},
          "outline": [[-EXT,-FACADE-EXT],[ANNEX_X-EXT,-FACADE-EXT],[ANNEX_X-EXT,ANNEX_END-EXT],
                      [LENGTH+EXT,ANNEX_END-EXT],[LENGTH+EXT,FACADE+EXT],[-EXT,FACADE+EXT]],
          "checks": {"ceiling_probe_x": (BAYS[1]["x0"] + BAYS[1]["x1"]) / 2}}
 
-    def section(key):
-        return p["sections"].setdefault(key, {"boxes": [], "beams": [], "stairs": [], "labels": [], "lights": [], "probes": []})
+    def section(key, group=None):
+        s=p["sections"].setdefault(key, {"boxes": [], "beams": [], "stairs": [], "labels": [], "lights": [], "probes": [], "groups": {}})
+        if group:
+            return s["groups"].setdefault(group, {"boxes": [], "beams": [], "labels": [], "doors": [], "modules": []})
+        return s
 
-    def box(key, name, rect, y0, y1, mat="wall", solid=True):
+    def box(key, name, rect, y0, y1, mat="wall", solid=True, group=None):
         x0,z0,x1,z1 = rect
         if min(x1-x0,z1-z0,y1-y0) <= .0005:
             return
-        section(key)["boxes"].append({"id": name, "at": [(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],
+        section(key,group)["boxes"].append({"id": name, "at": [(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],
                                       "size": [x1-x0,y1-y0,z1-z0], "mat": mat, "solid": solid, "yaw": 0})
 
     def beam(key, a, b, w=.06, depth=.06, mat="rail", solid=True):
         section(key)["beams"].append({"start": a, "end": b, "width": w, "depth": depth, "mat": mat, "solid": solid})
 
-    def label(key, text, at, yaw=0):
-        section(key)["labels"].append({"text": text, "at": at, "yaw": yaw})
+    def label(key, text, at, yaw=0, group=None, permanent=False):
+        section(key,group)["labels"].append({"text": text, "at": at, "yaw": yaw, "permanent": permanent})
 
-    def wall(key, name, a0, a1, center, thick, y, h, holes=(), axis="z", mat="wall", solid=True):
-        def piece(lo,hi,bottom,top):
+    def wall(key, name, a0, a1, center, thick, y, h, holes=(), axis="z", mat="wall", solid=True, group=None, portal_centers=()):
+        def piece(lo,hi,bottom,top,lintel=False):
             r = [lo,center-thick/2,hi,center+thick/2] if axis=="z" else [center-thick/2,lo,center+thick/2,hi]
-            box(key,name,r,bottom,top,mat,solid)
+            box(key,name,r,bottom,top,"ceiling" if lintel else mat,solid,"beams" if lintel else group)
         pos = a0
         for c,w,sill,dh in sorted(holes):
             lo,hi = c-w/2,c+w/2
             assert lo>=pos-.001 and hi<=a1+.001, (name,axis,a0,a1,lo,hi,pos)
             piece(pos,lo,y,y+h)
             piece(lo,hi,y,y+sill)
-            piece(lo,hi,y+sill+dh,y+h)
+            piece(lo,hi,y+sill+dh,y+h,any(abs(c-pc)<.001 for pc in portal_centers))
             pos = hi
         piece(pos,a1,y,y+h)
 
-    def door(key, name, along, constant, y, side=1, w=DOOR_W, dh=DOOR_H, axis="z", opened=True):
+    def door(key, name, along, constant, y, side=1, w=DOOR_W, dh=DOOR_H, axis="z", opened=True,
+             leaf=True, pose="wide", grille=False, thick=LOAD, inward=None, wide_angle=None):
         x,z = (along,constant) if axis=="z" else (constant,along)
-        p["doors"].append({"id": name, "at": [x,y,z], "width": w, "height": dh, "axis": axis, "open": opened})
-        for a in [along-w/2-.025,along+w/2+.025]:
-            r = [a-.025,constant-.22,a+.025,constant+.22] if axis=="z" else [constant-.22,a-.025,constant+.22,a+.025]
-            box(key,name+"_jamb",r,y,y+dh,"frame")
-        r = [along-w/2-.05,constant-.22,along+w/2+.05,constant+.22] if axis=="z" else [constant-.22,along-w/2-.05,constant+.22,along+w/2+.05]
-        box(key,name+"_header",r,y+dh,y+dh+.05,"frame")
+        item={"id": name, "uid":f"door_{len(p['doors']):03d}", "section":key, "at": [x,y,z],
+              "width":w, "height":dh, "axis":axis, "open":opened, "leaf":leaf, "pose":pose,
+              "grille":grille, "thickness":thick, "inward":side if inward is None else inward, "wide_angle":wide_angle}
+        p["doors"].append(item)
         if not opened:
             r = [along-w/2,constant-.06,along+w/2,constant+.06] if axis=="z" else [constant-.06,along-w/2,constant+.06,along+w/2]
             box(key,name+"_sealed",r,y,y+dh,"sealed")
-        at = [x,y+dh+.12,z-side*.25] if axis=="z" else [x+side*.25,y+dh+.12,z]
-        label(key,name,at,(180 if side>0 else 0) if axis=="z" else 90)
+        at = [x,y+dh+.12,z-side*(thick/2+.035)] if axis=="z" else [x+side*(thick/2+.035),y+dh+.12,z]
+        label(key,name,at,(180 if side>0 else 0) if axis=="z" else (90 if side>0 else -90),"door_frames",name.isdigit())
 
     def window(key, x, z, bottom, floor, axis="z", width=WINDOW_W, height=1.65):
-        p["windows"].append({"at": [x,bottom,z], "width": width, "height": height, "floor": floor, "leaf_scale": 1.15})
+        p["windows"].append({"at": [x,bottom,z], "width": width, "height": height, "floor": floor,
+                             "axis":axis, "section":key, "leaf_scale": 1.15})
         r = [x-width/2,z-.02,x+width/2,z+.02] if axis=="z" else [x-.02,z-width/2,x+.02,z+width/2]
         box(key,"window_glass",r,bottom,bottom+height,"glass")
         for off in [-width/2+.035,0,width/2-.035]:
@@ -183,6 +192,163 @@ def make_plan():
         p["barriers"].append({"id":sid,"label":label_text,"from":[(x0+x1)/2,y,center+.85],
                               "to":[(x0+x1)/2,y,center-.85],"point":[(x0+x1)/2,y,center],"normal":[0,0,1]})
 
+    def add_details():
+        # Все новые категории отделены от несущей коробки. На этапе 2 их заменят модули Blender.
+        def strip(key,name,lo,hi,constant,depth,y0,y1,axis,mat,group):
+            rect=[lo,constant-depth/2,hi,constant+depth/2] if axis=="z" else [constant-depth/2,lo,constant+depth/2,hi]
+            box(key,name,rect,y0,y1,mat,True,group)
+
+        def skirt(key,lo,hi,constant,inward,y,axis="z",holes=()):
+            cursor=lo
+            for center,width in sorted(holes):
+                a,b=max(lo,center-width/2),min(hi,center+width/2)
+                if b<=lo or a>=hi:
+                    continue
+                if a>cursor:
+                    strip(key,"skirting",cursor,a,constant+inward*.01,.02,y+.003,y+.08,axis,"skirting","baseboards")
+                cursor=max(cursor,b)
+            if cursor<hi:
+                strip(key,"skirting",cursor,hi,constant+inward*.01,.02,y+.003,y+.08,axis,"skirting","baseboards")
+
+        # Шаг следует существующим межкомнатным стенам. У лестницы и гостиной порталы стоят ближе.
+        stations=[(BAYS[1]["x1"]+BAYS[2]["x0"])/2,
+                  (BAYS[2]["x1"]+BAYS[3]["x0"])/2,
+                  (BAYS[3]["x1"]+SC0)/2,
+                  (SC1+BAYS[5]["x0"])/2,
+                  (BAYS[5]["x1"]+BAYS[6]["x0"])/2,
+                  (BAYS[6]["x1"]+BAYS[7]["x0"])/2]
+        for f,(y,h) in enumerate(zip(LEVELS,HEIGHTS)):
+            key=f"Floor{f+1}"
+            for i,xx in enumerate(stations):
+                uid=f"f{f+1}_portal_{i}"
+                box(key,uid,[xx-.2,-HALF-LOAD,xx+.2,HALF+LOAD],y+h-.4,y+h,"ceiling",True,"beams")
+                for side in [-1,1]:
+                    za,zb=sorted([side*HALF,side*(HALF-.18)])
+                    box(key,uid+"_pilaster",[xx-.225,za,xx+.225,zb],y,y+h-.4,"wall",True,"pilasters")
+                    skirt(key,xx-.225,xx+.225,side*(HALF-.18),-side,y)
+                p["portals"].append({"id":uid,"floor":f+1,"at":[xx,y,0],"ceiling":h,
+                                     "clear_height":h-.4,"clear_width":HALF*2-.4,"kind":"transverse"})
+            # Перемычки широких проёмов уже лежат в группе beams, внутри стены коридора.
+            for name,along,side,width in [("stair",SCX,-1,2.4),
+                                         ("lounge",(SC0+BAYS[5]["x1"])/2,1,BAYS[5]["x1"]-SC0-.24)]:
+                p["portals"].append({"id":f"f{f+1}_{name}_lintel","floor":f+1,
+                                     "at":[along,y,side*(HALF+LOAD/2)],"clear_height":h-.4,
+                                     "clear_width":width,"kind":"side_opening"})
+            # Перегородка стоит между дверями комнат: распахнутые створки не заслоняют соседний вход.
+            wall(key,"service_partition",-HALF,HALF,36.7,PART,y,h,[(0,2.4,0,2.7)],"x",group="portals")
+            door(key,"ХОЗКРЫЛО",0,36.7,y,-1,w=2.4,dh=2.7,axis="x",opened=f<3,thick=PART,inward=1)
+            p["portals"].append({"id":f"f{f+1}_service_door","floor":f+1,"at":[36.7,y,0],
+                                 "clear_height":2.7,"clear_width":2.4,"kind":"double_door"})
+            for side in [-1,1]:
+                openings=[]
+                for item in p["doors"]:
+                    if abs(item["at"][1]-y)<.01 and item["axis"]=="z" and abs(item["at"][2]-side*(HALF+LOAD/2))<.01:
+                        openings.append((item["at"][0],item["width"]+.02))
+                if side>0:
+                    openings.append(((SC0+BAYS[5]["x1"])/2,BAYS[5]["x1"]-SC0-.24))
+                openings += [(xx,.45) for xx in stations]
+                skirt(key,0,LENGTH,side*HALF,-side,y,holes=openings)
+            for xx,kind in [(12.6,"fire"),(26.0,"electric"),(39.8,"fire")]:
+                # В стене настоящий карман 0,25 м, за ним остаётся 0,13 м несущей стены.
+                uid=f"f{f+1}_{kind}_{xx}"
+                box(key,uid+"_back",[xx-.3,-ROOM_EDGE,xx+.3,-HALF-.25],y+.9,y+1.8,"wall",True,"wall_niches")
+                for dx in [-.3,.3]:
+                    box(key,uid+"_side",[xx+dx-.018,-HALF-.25,xx+dx+.018,-HALF+.015],y+.9,y+1.8,"frame",True,"wall_niches")
+                for yy in [.9,1.8]:
+                    box(key,uid+"_edge",[xx-.32,-HALF-.25,xx+.32,-HALF+.015],y+yy-.018,y+yy+.018,"frame",True,"wall_niches")
+                box(key,uid+"_cabinet",[xx-.26,-HALF-.23,xx+.26,-HALF-.20],y+.94,y+1.76,
+                    "fire_cabinet" if kind=="fire" else "panel",True,"wall_niches")
+                box(key,uid+"_handle",[xx+.18,-HALF-.20,xx+.20,-HALF-.16],y+1.2,y+1.4,"rail",False,"wall_niches")
+                p["niches"].append({"id":uid,"floor":f+1,"at":[xx,y+1.35,-HALF],"depth":.25,"back_wall":LOAD-.25,"kind":kind})
+
+        # Наличники не уменьшают чистый проём. Полотно и вся фурнитура вращаются одним узлом на петле.
+        for item in p["doors"]:
+            if not item["leaf"]:
+                continue
+            key=item["section"]
+            x,y,z=item["at"]
+            axis=item["axis"]
+            along,constant=(x,z) if axis=="z" else (z,x)
+            w,dh,thick=item["width"],item["height"],item["thickness"]
+            lo,hi=along-w/2,along+w/2
+            uid=item["uid"]
+            for aa in [lo-.0125,hi+.0125]:
+                strip(key,uid+"_lining",aa-.0125,aa+.0125,constant,thick,y,y+dh,axis,"frame","door_frames")
+            for face in [-1,1]:
+                depth=constant+face*(thick/2+.0125)
+                for a,b in [(lo-.08,lo),(hi,hi+.08)]:
+                    strip(key,uid+"_casing",a,b,depth,.025,y,y+dh+.08,axis,"frame","door_frames")
+                strip(key,uid+"_casing_top",lo,hi,depth,.025,y+dh,y+dh+.08,axis,"frame","door_frames")
+            if not item["open"]:
+                continue
+            double=w>=2.0
+            leaf_mat="door_green" if int(uid.rsplit("_",1)[1])%3==0 else "door_wood"
+            for leaf_index in range(2 if double else 1):
+                hand=1 if leaf_index==0 else -1
+                pivot=lo+.008 if hand>0 else hi-.008
+                face=constant+item["inward"]*(thick/2+.022)
+                at=[pivot,y,face] if axis=="z" else [face,y,pivot]
+                open_angle=item["wide_angle"] or (90.0 if double or w>1.3 else 112.0)
+                angle={"wide":open_angle,"ajar":25.0,"closed":0.0}[item["pose"]]
+                section(key,"door_leaves")["doors"].append({"id":uid+f"_{leaf_index}","door_uid":uid,
+                    "label":item["id"],"at":at,"width":w/(2 if double else 1)-.016,"height":dh-.024,
+                    "thickness":.04,"yaw_closed":(0 if axis=="z" else -90)+(180 if hand<0 else 0),
+                    "swing_sign":hand*item["inward"]*(-1 if axis=="z" else 1),"angle":angle,
+                    "open_angle":open_angle,"pose":item["pose"],"grille":item["grille"],
+                    "front":hand*item["inward"]*(-1 if axis=="z" else 1),
+                    "mat":leaf_mat})
+
+        for i,item in enumerate(p["windows"]):
+            key=item["section"]
+            x,bottom,z=item["at"]
+            axis=item["axis"]
+            along,constant=(x,z) if axis=="z" else (z,x)
+            inward=(-1 if z>0 else 1) if axis=="z" else (-1 if x>LENGTH else 1)
+            inside=constant+inward*EXT/2
+            w,h=item["width"],item["height"]
+            uid=f"window_{i:03d}"
+            # Откос от рамы в середине кладки до её внутренней грани.
+            for a in [along-w/2+.009,along+w/2-.009]:
+                strip(key,uid+"_reveal",a-.009,a+.009,(constant+inside)/2,EXT/2,bottom,bottom+h,axis,"reveal","window_reveals")
+            strip(key,uid+"_reveal_top",along-w/2,along+w/2,(constant+inside)/2,EXT/2,bottom+h-.018,bottom+h,axis,"reveal","window_reveals")
+            edge=inside+inward*.28
+            strip(key,uid+"_sill",along-w/2-.08,along+w/2+.08,(constant+edge)/2,abs(edge-constant),bottom-.04,bottom,axis,"reveal","window_sills")
+            base=bottom-SILL
+            for rib in range(10):
+                cc=along-.45+rib*.1
+                strip(key,uid+"_radiator",cc-.039,cc+.039,inside+inward*.12,.1,base+.20,base+.75,axis,"radiator","radiators")
+            for yy in [.27,.68]:
+                strip(key,uid+"_radiator_link",along-.50,along+.50,inside+inward*.12,.06,base+yy-.025,base+yy+.025,axis,"radiator","radiators")
+            section(key,"radiators")["modules"].append({"id":uid,"at":[x,base,z],"size":[1.0,.55,.1],"axis":axis,"inward":inward})
+            section(key,"window_sills")["modules"].append({"id":uid,"width":w+.16,"height":bottom,"projection":.28})
+
+        for s in p["spaces"]:
+            if s["kind"] in ["watch","stairs"]:
+                continue
+            key=f"Floor{s['floor']}" if "_annex_" not in s["id"] else "NorthAnnex"
+            y=s["y"]
+            r=s["rect"]
+            poly=s.get("polygon",[[r[0],r[1]],[r[2],r[1]],[r[2],r[3]],[r[0],r[3]]])
+            for a,b in zip(poly,poly[1:]+poly[:1]):
+                axis="z" if abs(a[1]-b[1])<.001 else "x"
+                lo,hi=sorted([a[0],b[0]] if axis=="z" else [a[1],b[1]])
+                const=a[1] if axis=="z" else a[0]
+                direction=1 if (b[0]>a[0] if axis=="z" else b[1]<a[1]) else -1
+                holes=[]
+                for d in p["doors"]:
+                    if abs(d["at"][1]-y)>.01 or d["axis"]!=axis:
+                        continue
+                    dc=d["at"][2] if axis=="z" else d["at"][0]
+                    if abs(dc-const)<=d["thickness"]/2+.02:
+                        holes.append((d["at"][0] if axis=="z" else d["at"][2],d["width"]+.02))
+                if s["kind"]=="lounge" and abs(const-ROOM_EDGE)<.01 and axis=="z":
+                    holes.append(((SC0+BAYS[5]["x1"])/2,BAYS[5]["x1"]-SC0-.24))
+                skirt(key,lo,hi,const,direction,y,axis,holes)
+        for y in LEVELS:
+            for x,inward in [(ANNEX_CORRIDOR,1),(LENGTH,-1)]:
+                holes=[(d["at"][2],d["width"]+.02) for d in p["doors"] if d["axis"]=="x" and abs(d["at"][1]-y)<.01 and abs(d["at"][0]-x)<LOAD/2+.02]
+                skirt("NorthAnnex",ANNEX_END,-FACADE-EXT,x,inward,y,"x",holes)
+
     # Двор и оба входа. Въездов, транспорта и новых игровых механик здесь нет.
     box("Site","ground",[-14,-49,LENGTH+15,26],-.3,0,"ground")
     box("Site","main_plinth",[-EXT,-FACADE-EXT,LENGTH+EXT,FACADE+EXT],0,BASE-SLAB,"slab")
@@ -212,8 +378,8 @@ def make_plan():
             cx = (x0+x1)/2
             for side in [-1,1]:
                 if side==-1 and b==4:
-                    corridor_holes[side].append((SCX,1.8,0,DOOR_H))
-                    door(key,"ЛЕСТНИЦА",SCX,-HALF-LOAD/2,y,-1,w=1.8,opened=f<3)
+                    corridor_holes[side].append((SCX,2.4,0,h-.4))
+                    door(key,"ЛЕСТНИЦА",SCX,-HALF-LOAD/2,y,-1,w=2.4,dh=h-.4,opened=f<3,leaf=False)
                     continue
                 # Примыкание крыла: наружная стена становится внутренней, окон между комнатами нет.
                 if side==-1 and b>=7:
@@ -223,16 +389,16 @@ def make_plan():
                 else:
                     entrance = f==0 and side==1 and b==0
                     offset=SLAB if f==0 else 0
-                    wh = [(cx,2.4,offset,2.7)] if entrance else [(cx,WINDOW_W,.95+offset,1.65)]
+                    wh = [(cx,2.4,offset,2.7)] if entrance else [(cx,WINDOW_W,SILL+offset,1.65)]
                     wall(key,"facade",x0,x1,side*(FACADE+EXT/2),EXT,y-offset,h+SLAB+offset,wh)
                     if entrance:
-                        door(key,"ВХОД",cx,side*(FACADE+EXT/2),y,1,w=2.4,dh=2.7)
+                        door(key,"ВХОД",cx,side*(FACADE+EXT/2),y,1,w=2.4,dh=2.7,thick=EXT,inward=-1)
                     else:
-                        window(key,cx,side*(FACADE+EXT/2),y+.95,f+1)
+                        window(key,cx,side*(FACADE+EXT/2),y+SILL,f+1)
                 if side==1 and b in [4,5]:
                     if b==4:
                         a,big = BAYS[4]["x0"]+.12,BAYS[5]["x1"]-.12
-                        corridor_holes[side].append(((a+big)/2,big-a,0,DOOR_H))
+                        corridor_holes[side].append(((a+big)/2,big-a,0,h-.4))
                     continue
                 if side==-1 and b==0:
                     kind,name = "toilets","ТУАЛЕТ"
@@ -252,7 +418,10 @@ def make_plan():
                 dw = 2.4 if kind in ["hall","turn"] else DOOR_W
                 dh = 2.7 if kind=="hall" else DOOR_H
                 corridor_holes[side].append((dx,dw,0,dh))
-                door(key,name,dx,side*(HALF+LOAD/2),y,side,w=dw,dh=dh,opened=f<3)
+                room_state=STATES[(b+f+(1 if side>0 else 0))%len(STATES)] if kind=="room" else ""
+                pose=("wide","ajar","closed")[(b+f+(1 if side>0 else 0))%3] if kind=="room" else "wide"
+                door(key,name,dx,side*(HALF+LOAD/2),y,side,w=dw,dh=dh,opened=f<3,
+                     leaf=kind!="turn",pose=pose,grille="баррикада" in room_state,wide_angle=112.0 if kind=="hall" else None)
                 z0,z1 = sorted([side*ROOM_EDGE,side*FACADE])
                 rect=[x0,z0,x1,z1]
                 path=[[dx,y,0],[dx,y,side*(ROOM_EDGE+1.0)],[cx,y,side*5.7]]
@@ -264,7 +433,7 @@ def make_plan():
                 s=space(f"f{f+1}_{kind}_{side}_{b}",name,kind,f,rect,path,probes)
                 if kind=="room":
                     s["width_scale"]=w/3.9
-                    s["state"]=STATES[(b+f+(1 if side>0 else 0))%len(STATES)]
+                    s["state"]=room_state
                     s["probe_points"]=[[cx,y,side*(FACADE-.95)],[cx,y,side*5.9],
                                        [x0+.8,y,side*(ROOM_EDGE+1.0)],[x1-.8,y,side*(ROOM_EDGE+1.0)]]
                     bunks(key,rect,y)
@@ -289,16 +458,18 @@ def make_plan():
                     za,zb=sorted([side*ROOM_EDGE,side*FACADE])
                     box(key,"partition",[x1,za,next_x,zb],y,y+h+SLAB)
         for side in [-1,1]:
-            wall(key,"corridor_load",0,LENGTH,side*(HALF+LOAD/2),LOAD,y,h+SLAB,corridor_holes[side])
+            niches=[(xx,.6,.9,.9) for xx in [12.6,26.0,39.8]] if side<0 else []
+            centers=[SCX] if side<0 else [(BAYS[4]["x0"]+.12+BAYS[5]["x1"]-.12)/2]
+            wall(key,"corridor_load",0,LENGTH,side*(HALF+LOAD/2),LOAD,y,h+SLAB,corridor_holes[side]+niches,portal_centers=centers)
         # Торцы корпуса: чёрный выход только на первом, выше — дневное окно в конце коридора.
         offset=SLAB if f==0 else 0
         wall(key,"west_end",-FACADE,FACADE,-EXT/2,EXT,y-offset,h+SLAB+offset,axis="x")
-        east_holes=[(0,1.8,offset,DOOR_H)] if f==0 else [(0,1.8,.95+offset,1.65)]
+        east_holes=[(0,1.8,offset,DOOR_H)] if f==0 else [(0,1.8,SILL+offset,1.65)]
         wall(key,"east_end",-FACADE,FACADE,LENGTH+EXT/2,EXT,y-offset,h+SLAB+offset,east_holes,axis="x")
         if f==0:
-            door(key,"ЧЁРНЫЙ ВЫХОД",0,LENGTH+EXT/2,y,w=1.8,axis="x")
+            door(key,"ЧЁРНЫЙ ВЫХОД",0,LENGTH+EXT/2,y,w=1.8,axis="x",thick=EXT,inward=1)
         else:
-            window(key,LENGTH+EXT/2,0,y+.95,f+1,"x",1.8)
+            window(key,LENGTH+EXT/2,0,y+SILL,f+1,"x",1.8)
         # Общая зона напротив лестницы: окно в широком объёме и неглубокая боковая ниша.
         a,b,c=BAYS[4]["x0"],BAYS[5]["x0"],BAYS[5]["x1"]
         poly=[[a,ROOM_EDGE],[c,ROOM_EDGE],[c,FACADE],[b,FACADE],[b,5.6],[a,5.6]]
@@ -306,7 +477,7 @@ def make_plan():
               [[SCX,y,0],[SCX,y,3.8],[b+1.4,y,3.8],[b+1.4,y,7.1]],
               [[c-1.4,y,FACADE-1.0],[b+1.4,y,FACADE-1.0],[b+1.4,y,3.8],[a+1.0,y,3.8]],poly)
         wall(key,"lounge_store",a,SC1,5.675,PART,y,h,[(SCX,DOOR_W,0,DOOR_H)])
-        door(key,"КЛАДОВАЯ",SCX,5.675,y,1,opened=f<3)
+        door(key,"КЛАДОВАЯ",SCX,5.675,y,1,opened=f<3,thick=PART)
         # Кладовка ограничена только шириной своего модуля.
         box(key,"lounge_store_side",[SC1,5.6,b,FACADE],y,y+h+SLAB)
         space(f"f{f+1}_lounge_store","КЛАДОВАЯ ПРИ ГОСТИНОЙ","storage",f,[a,5.75,SC1,FACADE],
@@ -317,7 +488,7 @@ def make_plan():
         # Входной контроль оставлен открытым; новые игровые правила турникета не вводятся.
         if f==0:
             wall(key,"vestibule",0,WIDTHS[0],7.075,PART,y,h,[(ENTRY_X,2.4,0,2.7)])
-            door(key,"ТАМБУР",ENTRY_X,7.075,y,1,w=2.4,dh=2.7)
+            door(key,"ТАМБУР",ENTRY_X,7.075,y,1,w=2.4,dh=2.7,thick=PART,inward=-1)
             space("f1_vestibule","ТАМБУР","vestibule",f,[0,7.15,WIDTHS[0],FACADE],
                   [[ENTRY_X,y,0],[ENTRY_X,y,3.2],[LANE_X,y,5.4],[LANE_X,y,6.4],[ENTRY_X,y,(7.15+FACADE)/2]],[[ENTRY_X,y,FACADE-.6]])
             box(key,"guard_desk",[.18,4.0,1.55,4.7],y,y+.9,"wood")
@@ -330,9 +501,7 @@ def make_plan():
             label(key,"ВАХТА · ПРОХОД",[.9,y+1.9,4.05],180)
             space("f1_watch","ВАХТА / СТОЛ","watch",f,[.1,2.3,1.6,3.9],
                   [[ENTRY_X,y,0],[ENTRY_X,y,3.0],[.9,y,3.0]],[[.9,y,3.3]])
-        for bay in BAYS[1:8:2]:
-            xx=bay["x1"]+.07
-            box(key,"corridor_rib",[xx-.12,-HALF,xx+.12,HALF],y+h-.15,y+h,"slab")
+        # Вместо рёбер 0,15 м — настоящие пары пилястр и балки (см. add_details ниже).
         if f<3:
             for xx in [2.5,11,SCX,31,LENGTH-2]:
                 section(key)["lights"].append({"at":[xx,y+h-.25,0],"energy":.72,"range":7.3})
@@ -351,9 +520,9 @@ def make_plan():
     for f,y in enumerate(LEVELS):
         if f<4:
             ym=(y+LEVELS[f+1])/2
-            holes.append((ym+.55,1.65))
+            holes.append((ym+SILL,1.65))
         else:
-            holes.append((y+.8,1.65))
+            holes.append((y+SILL,1.65))
     wz=-FACADE-EXT/2
     wx=WINDOW_W
     wall(key,"stair_window_left",SC0,SCX-wx/2,wz,EXT,BASE-SLAB,LEVELS[-1]+HEIGHTS[-1]+SLAB-BASE+SLAB)
@@ -408,13 +577,13 @@ def make_plan():
             z1=-FACADE-EXT-.2-i*4.3
             z0=z1-4.15
             zc=(z0+z1)/2
-            wh.append((zc,WINDOW_W,.95,1.65))
+            wh.append((zc,WINDOW_W,SILL,1.65))
             dh.append((zc,DOOR_W,0,DOOR_H))
             box(key,"service_partition",[ANNEX_X,z0-PART,ANNEX_CORRIDOR-LOAD,z0],y,y+h+SLAB)
             if i==0:
                 box(key,"service_partition",[ANNEX_X,z1,ANNEX_CORRIDOR-LOAD,z1+PART],y,y+h+SLAB)
-            window(key,ANNEX_X-EXT/2,zc,y+.95,f+1,"x")
-            door(key,name,zc,ANNEX_WALL,y,axis="x",opened=f<3)
+            window(key,ANNEX_X-EXT/2,zc,y+SILL,f+1,"x")
+            door(key,name,zc,ANNEX_WALL,y,axis="x",opened=f<3,inward=-1)
             rect=[ANNEX_X,z0,ANNEX_CORRIDOR-LOAD,z1]
             cc=(rect[0]+rect[2])/2
             space(f"f{f+1}_annex_{kind}",name,kind,f,rect,
@@ -447,7 +616,8 @@ def make_plan():
                                   [LENGTH+3.8,0,0],[LENGTH+5,0,4]]})
     p["routes"].append({"id":"back_to_entry","label":"Чёрный выход → турникет → главный вход",
                         "points":list(reversed(p["routes"][-1]["points"]))})
-    # Редакция камер 3: ракурсы сохранены, позиции лестницы и крыла следуют за их геометрией.
+    add_details()
+    # Камеры редакции 3 сохранены без изменений; FOV по умолчанию остаётся 80°.
     wide=BAYS[2]
     narrow=BAYS[7]
     kitchen_z=-FACADE-EXT-.2-4.15/2

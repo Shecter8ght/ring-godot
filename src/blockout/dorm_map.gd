@@ -49,14 +49,26 @@ func _draw() -> void:
 		if key in ["Site","Roof"]:
 			continue
 		var section: Dictionary = sections[key]
-		for item: Dictionary in section.boxes:
-			var at: Array = item.at
-			var span: Array = item.size
-			if absf(float(at[1])-floor_y-1.4)>float(span[1])*0.5 or String(item.mat)=="glass":
-				continue
-			var xz: Vector2 = Vector2(float(at[0]),float(at[2]))
-			var dimensions: Vector2 = Vector2(float(span[0]),float(span[2]))
-			draw_rect(Rect2(origin+(xz-dimensions*0.5-base)*k,dimensions*k),Color("c8cbc8"))
+		var parts: Array[Dictionary] = [section]
+		for group: Dictionary in (section.get("groups",{}) as Dictionary).values():
+			parts.append(group)
+		for part: Dictionary in parts:
+			for item: Dictionary in part.boxes:
+				var at: Array = item.at
+				var span: Array = item.size
+				if absf(float(at[1])-floor_y-1.4)>float(span[1])*0.5 or String(item.mat)=="glass":
+					continue
+				var xz: Vector2 = Vector2(float(at[0]),float(at[2]))
+				var dimensions: Vector2 = Vector2(float(span[0]),float(span[2]))
+				draw_rect(Rect2(origin+(xz-dimensions*0.5-base)*k,dimensions*k),Color("c8cbc8"))
+	for leaf: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
+		var door: Node3D = leaf as Node3D
+		if absf(door.global_position.y-floor_y)>0.1:
+			continue
+		var data: Dictionary = door.get("data") as Dictionary
+		var a: Vector3 = door.global_position
+		var b: Vector3 = door.to_global(Vector3(float(data.width),0,0))
+		draw_line(origin+(Vector2(a.x,a.z)-base)*k,origin+(Vector2(b.x,b.z)-base)*k,Color("b89c71"),2)
 	var p: Vector2 = origin+(Vector2(walker.position.x,walker.position.z)-base)*k
 	draw_circle(p,6,Color("e9bd64"))
 	draw_line(p,p+Vector2(-sin(walker.rotation.y),-cos(walker.rotation.y))*20,Color("e9bd64"),3)

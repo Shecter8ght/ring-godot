@@ -4,6 +4,7 @@ extends Node3D
 ## Предпросмотр не сохраняет созданные меши в tscn; этап 2 заменит их модулями Blender.
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
+const StudyDoor = preload("res://src/blockout/dorm_study_door.gd")
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
@@ -29,45 +30,13 @@ func rebuild() -> void:
 	if section.is_empty():
 		return
 	var palette: Dictionary = _palette(plan)
-	var builder: RefCounted = Geometry.new(self, palette)
-	for item: Dictionary in section.get("boxes", []):
-		if String(item.mat)=="mirror":
-			# Локальная поверхность зеркала получает пробу своей комнаты, а не всего этажа.
-			var surface: MeshInstance3D = MeshInstance3D.new()
-			surface.name = "StudyMirror"
-			var shape: BoxMesh = BoxMesh.new()
-			shape.size = _vec(item.size)
-			surface.mesh = shape
-			surface.material_override = palette["mirror"] as Material
-			surface.position = _vec(item.at)
-			add_child(surface)
-			continue
-		builder.call("box", _vec(item.at), _vec(item.size), String(item.mat), bool(item.solid), deg_to_rad(float(item.yaw)))
-	for item: Dictionary in section.get("beams", []):
-		var start: Vector3 = _vec(item.start)
-		var end: Vector3 = _vec(item.end)
-		if absf(start.x-end.x)<0.001 and absf(start.z-end.z)<0.001:
-			# Вертикальной стойке не нужен поворот looking_at вдоль собственного up.
-			builder.call("box", (start+end)*0.5, Vector3(float(item.width),absf(end.y-start.y),float(item.depth)), String(item.mat), bool(item.solid))
-		else:
-			builder.call("beam", start, end, float(item.width), float(item.depth), String(item.mat), bool(item.solid))
-	for item: Dictionary in section.get("stairs", []):
-		builder.call("stairs", _vec(item.start), _vec(item.end), float(item.width), int(item.count), String(item.mat))
-	builder.call("finish")
-	for item: Dictionary in section.get("labels", []):
-		var plaque: Label3D = Label3D.new()
-		plaque.name = "StudyLabel"
-		plaque.text = String(item.text)
-		plaque.position = _vec(item.at)
-		plaque.rotation_degrees.y = float(item.yaw)
-		plaque.font_size = 36
-		plaque.pixel_size = 0.005
-		plaque.modulate = Color("24282b")
-		plaque.outline_size = 2
-		plaque.outline_modulate = Color("c9cdd0")
-		plaque.no_depth_test = false
-		plaque.add_to_group("dorm_study_labels")
-		add_child(plaque)
+	_build_geometry(self,section,palette)
+	for group_name: String in section.get("groups",{}):
+		var group: Node3D = Node3D.new()
+		group.name = group_name
+		group.add_to_group("dorm_detail_"+group_name)
+		add_child(group)
+		_build_geometry(group,section.groups[group_name],palette)
 	for item: Dictionary in section.get("lights", []):
 		var lamp: OmniLight3D = OmniLight3D.new()
 		lamp.name = "StudyFill"
@@ -91,6 +60,53 @@ func rebuild() -> void:
 		add_child(probe)
 
 
+func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> void:
+	var builder: RefCounted = Geometry.new(target,palette)
+	for item: Dictionary in data.get("boxes",[]):
+		if String(item.mat)=="mirror":
+			# Отдельная поверхность получает пробу своей комнаты, а не всего этажа.
+			var surface: MeshInstance3D = MeshInstance3D.new()
+			surface.name = "StudyMirror"
+			var shape: BoxMesh = BoxMesh.new()
+			shape.size = _vec(item.size)
+			surface.mesh = shape
+			surface.material_override = palette["mirror"] as Material
+			surface.position = _vec(item.at)
+			target.add_child(surface)
+		else:
+			builder.call("box",_vec(item.at),_vec(item.size),String(item.mat),bool(item.solid),deg_to_rad(float(item.yaw)))
+	for item: Dictionary in data.get("beams",[]):
+		var start: Vector3 = _vec(item.start)
+		var end: Vector3 = _vec(item.end)
+		if absf(start.x-end.x)<0.001 and absf(start.z-end.z)<0.001:
+			builder.call("box",(start+end)*0.5,Vector3(float(item.width),absf(end.y-start.y),float(item.depth)),String(item.mat),bool(item.solid))
+		else:
+			builder.call("beam",start,end,float(item.width),float(item.depth),String(item.mat),bool(item.solid))
+	for item: Dictionary in data.get("stairs",[]):
+		builder.call("stairs",_vec(item.start),_vec(item.end),float(item.width),int(item.count),String(item.mat))
+	builder.call("finish")
+	for item: Dictionary in data.get("labels",[]):
+		var plaque: Label3D = Label3D.new()
+		plaque.name = "RoomNumber" if bool(item.get("permanent",false)) else "StudyLabel"
+		plaque.text = String(item.text)
+		plaque.position = _vec(item.at)
+		plaque.rotation_degrees.y = float(item.yaw)
+		plaque.font_size = 36
+		plaque.pixel_size = 0.005
+		plaque.modulate = Color("24282b")
+		plaque.outline_size = 2
+		plaque.outline_modulate = Color("c9cdd0")
+		plaque.no_depth_test = false
+		plaque.add_to_group("dorm_door_numbers" if bool(item.get("permanent",false)) else "dorm_study_labels")
+		target.add_child(plaque)
+	for item: Dictionary in data.get("doors",[]):
+		var leaf: Node3D = StudyDoor.new() as Node3D
+		leaf.name = String(item.id)
+		leaf.set("data",item)
+		leaf.set("materials",palette)
+		target.add_child(leaf)
+
+
 static func _vec(values: Array) -> Vector3:
 	return Vector3(float(values[0]), float(values[1]), float(values[2]))
 
@@ -99,7 +115,9 @@ static func _palette(plan: Dictionary) -> Dictionary:
 	var result: Dictionary = {}
 	var colors: Dictionary = {"wall": "a9adb0", "floor": "777d83", "slab": "8c9195", "frame": "626970",
 		"rail": "444a50", "sealed": "555b60", "ground": "656b66", "paving": "85898b", "tree": "646b67", "glass": "88969e",
-		"mattress": "a39d89", "wood": "766449", "ceramic": "d5d9ce", "basin": "8d9996", "mirror": "f0f0ed"}
+		"mattress": "a39d89", "wood": "766449", "ceramic": "d5d9ce", "basin": "8d9996", "mirror": "f0f0ed",
+		"ceiling":"777d83", "skirting":"4d554d", "reveal":"dfe1d9", "radiator":"c0c6bc",
+		"door_green":"596350", "door_wood":"75634f", "panel":"656a65", "fire_cabinet":"824b43"}
 	for key: String in colors:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = Color(String(colors[key]))

@@ -21,6 +21,9 @@ var results: Array[Dictionary] = []
 var route_distance: float = 0.0
 var route_detail: Dictionary = {}
 var started_ms: int = 0
+var fov_h: float = 80.0
+var fov_slider: HSlider
+var fov_label: Label
 
 
 func _enter_tree() -> void:
@@ -51,13 +54,15 @@ func _ready() -> void:
 	walker.name = "StudyWalker"
 	add_child(walker)
 	camera = walker.get("camera") as Camera3D
-	camera.fov = Settings.fov_v_from_h(float(plan.scale.fov_h))
+	fov_h = float(plan.scale.fov_h)
 	_ui()
+	_set_fov(fov_h)
+	get_viewport().size_changed.connect(_refresh_fov)
 	await _frames(4)
 	_jump_to(current)
 	if mode == "walk":
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		print("dorm: прогулка · WASD, Shift, C, Space · M план · 1–9/0 и N/B места · F полёт · H подписи · Esc мышь")
+		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · Esc мышь / FOV 60–110°")
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		walker.set("is_probe", true)
@@ -79,7 +84,7 @@ func _ui() -> void:
 	var shade: ColorRect = ColorRect.new()
 	shade.color = Color(0.03, 0.04, 0.05, 0.8)
 	shade.position = Vector2(18, 18)
-	shade.size = Vector2(980, 80)
+	shade.size = Vector2(980, 126)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(shade)
 	title = Label.new()
@@ -90,10 +95,33 @@ func _ui() -> void:
 	status.position = Vector2(30, 60)
 	status.add_theme_font_size_override("font_size", 17)
 	root.add_child(status)
+	fov_label = Label.new()
+	fov_label.position = Vector2(30, 105)
+	fov_label.add_theme_font_size_override("font_size", 17)
+	root.add_child(fov_label)
+	fov_slider = HSlider.new()
+	fov_slider.position = Vector2(245, 104)
+	fov_slider.size = Vector2(360, 26)
+	fov_slider.min_value = 60.0
+	fov_slider.max_value = 110.0
+	fov_slider.step = 1.0
+	fov_slider.focus_mode = Control.FOCUS_NONE
+	fov_slider.value = fov_h
+	fov_slider.tooltip_text = "Поле зрения по горизонтали. Esc — освободить мышь для настройки."
+	fov_slider.value_changed.connect(_set_fov)
+	root.add_child(fov_slider)
+	for preset: int in [80,95,110]:
+		var button: Button = Button.new()
+		button.text = "%d°" % preset
+		button.focus_mode = Control.FOCUS_NONE
+		button.position = Vector2(625+[80,95,110].find(preset)*75, 100)
+		button.size = Vector2(65, 32)
+		button.pressed.connect(_set_fov.bind(float(preset)))
+		root.add_child(button)
 	var help: Label = Label.new()
 	help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	help.position = Vector2(28, -85)
-	help.text = "WASD · Shift бег · C присесть · Space прыжок · F полёт (Space вверх / Ctrl вниз)\nM план этажа · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь"
+	help.text = "WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения"
 	help.add_theme_font_size_override("font_size", 18)
 	help.add_theme_color_override("font_shadow_color", Color.BLACK)
 	help.add_theme_constant_override("shadow_offset_x", 1)
@@ -111,11 +139,26 @@ func _process(_delta: float) -> void:
 	if not is_instance_valid(walker) or not is_instance_valid(status):
 		return
 	title.text = "Общежитие · этап 1 · %d: %s" % [current, String(plan.locations[current-1].label)]
-	status.text = "x %.2f · y %.2f · z %.2f · глаз 1,62 м · поле зрения 80° · %d к/с%s" % [
-		walker.position.x,walker.position.y,walker.position.z,Engine.get_frames_per_second(),
+	status.text = "x %.2f · y %.2f · z %.2f · глаз 1,62 м · поле зрения %.0f° · %d к/с%s" % [
+		walker.position.x,walker.position.y,walker.position.z,fov_h,Engine.get_frames_per_second(),
 		" · полёт" if bool(walker.get("flight")) else ""]
 	if map.visible:
 		map.queue_redraw()
+
+
+func _set_fov(value: float) -> void:
+	fov_h = clampf(value,60.0,110.0)
+	if is_instance_valid(fov_slider):
+		fov_slider.set_value_no_signal(fov_h)
+	if is_instance_valid(fov_label):
+		fov_label.text = "Угол по горизонтали: %.0f°" % fov_h
+	_refresh_fov()
+
+
+func _refresh_fov() -> void:
+	if is_instance_valid(camera):
+		var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+		camera.fov = Settings.fov_v_from_h(fov_h,viewport_size.x/maxf(viewport_size.y,1.0))
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -127,6 +170,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var key: InputEventKey = event as InputEventKey
 	match key.physical_keycode:
+		KEY_E:
+			var hit: Dictionary = _ray(camera.global_position,camera.global_position-camera.global_basis.z*3.0)
+			if not hit.is_empty():
+				var leaf: Node = (hit.collider as Node).get_parent()
+				if leaf.is_in_group("dorm_study_doors"):
+					# Обе створки одной двери переключаются вместе.
+					var uid: String = String((leaf.get("data") as Dictionary).door_uid)
+					var open_door: bool = not bool(leaf.get("is_open"))
+					for other: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
+						if String((other.get("data") as Dictionary).door_uid)==uid:
+							other.call("set_open",open_door)
 		KEY_ESCAPE:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		KEY_M:
@@ -213,6 +267,7 @@ func _verify() -> void:
 	var core_width: float = float(core_rect[2])-float(core_rect[0])
 	_check("Лестница в середине корпуса, марши от стены до стены",absf(core_width-3.3)<0.01 and float(core.center_x)>float(plan.checks.ceiling_probe_x)*2.0,
 		{"clear_width_m":core_width,"marches_m":[1.5,1.5],"middle_gap_m":0.3,"side_gaps_m":0.0,"center_x":core.center_x})
+	await _verify_details()
 	for location: Dictionary in plan.locations:
 		_jump_to(int(location.id))
 		await _frames(12)
@@ -282,6 +337,86 @@ func _verify() -> void:
 	get_tree().quit(mini(fails,255))
 
 
+func _verify_details() -> void:
+	var portal_errors: Array[String] = []
+	var min_height: float = INF
+	var min_width: float = INF
+	for portal: Dictionary in plan.portals:
+		if int(portal.floor)>3 or String(portal.kind)!="transverse":
+			continue
+		var foot: Vector3 = _vec(portal.at)
+		var top: Dictionary = _ray(foot+Vector3.UP*0.12,foot+Vector3.UP*4.5)
+		var left: Dictionary = _ray(foot+Vector3(0,0.04,0),foot+Vector3(0,0.04,-3))
+		var right: Dictionary = _ray(foot+Vector3(0,0.04,0),foot+Vector3(0,0.04,3))
+		var height: float = (top.position as Vector3).y-foot.y if not top.is_empty() else 0.0
+		var width: float = (right.position as Vector3).z-(left.position as Vector3).z if not left.is_empty() and not right.is_empty() else 0.0
+		min_height = minf(min_height,height)
+		min_width = minf(min_width,width)
+		if height<2.599 or width<2.999:
+			portal_errors.append(String(portal.id))
+	_check("Порталы: от 2,6 м под балкой и 3,0 м между пилястрами с плинтусами",portal_errors.is_empty(),
+		{"minimum_height_m":min_height,"minimum_width_m":min_width,"failed":portal_errors})
+	var bad_leaves: Array[String] = []
+	var poses: Dictionary = {}
+	var grilles: int = 0
+	var leaves: Array[Node] = get_tree().get_nodes_in_group("dorm_study_doors")
+	for leaf: Node in leaves:
+		var data: Dictionary = leaf.get("data") as Dictionary
+		poses[String(data.pose)] = int(poses.get(String(data.pose),0))+1
+		grilles += 1 if bool(data.grille) else 0
+		leaf.call("set_open",false,false)
+		await _frames(2)
+		var at: Vector3 = Vector3(float(data.width)/2,1.2,0)
+		var a: Vector3 = (leaf as Node3D).to_global(at+Vector3(0,0,0.4))
+		var b: Vector3 = (leaf as Node3D).to_global(at-Vector3(0,0,0.4))
+		var hit: Dictionary = _ray(a,b)
+		var closed_solid: bool = not hit.is_empty() and (hit.collider as Node).get_parent()==leaf
+		leaf.call("set_open",true,false)
+		await _frames(2)
+		if not closed_solid or not _ray(a,b).is_empty():
+			bad_leaves.append(String(data.id))
+		leaf.call("reset_pose")
+	_check("Полотна 40 мм блокируют проход закрытыми и освобождают его на петлях",bad_leaves.is_empty() and poses.size()==3 and grilles>0,
+		{"leaves":leaves.size(),"poses":poses,"with_grille":grilles,"failed":bad_leaves})
+	var bad_windows: Array[int] = []
+	for i: int in range(plan.windows.size()):
+		var window: Dictionary = plan.windows[i]
+		var at: Vector3 = _vec(window.at)
+		var inward: Vector3
+		if String(window.axis)=="z":
+			inward = Vector3(0,0,-1 if at.z>0 else 1)
+		else:
+			inward = Vector3(-1 if at.x>float(plan.main_rect[2]) else 1,0,0)
+		var inside: Vector3 = at+inward*float(plan.scale.walls.facade)/2
+		var sill: Dictionary = _ray(inside+inward*0.15+Vector3.UP*0.08,inside+inward*0.15-Vector3.UP*0.12)
+		var rib_offset: Vector3 = Vector3(0.05,0,0) if String(window.axis)=="z" else Vector3(0,0,0.05)
+		var radiator: Dictionary = _ray(inside+rib_offset+inward*0.7-Vector3.UP*0.35,inside+rib_offset+inward*0.02-Vector3.UP*0.35)
+		if sill.is_empty() or radiator.is_empty() or String((sill.collider as Node).get_parent().name)!="window_sills" or String((radiator.collider as Node).get_parent().name)!="radiators":
+			bad_windows.append(i)
+	_check("Под каждым окном есть выступающий подоконник и батарея 1:1",bad_windows.is_empty(),{"windows":plan.windows.size(),"failed":bad_windows})
+	var bad_niches: Array[String] = []
+	for niche: Dictionary in plan.niches:
+		var at: Vector3 = _vec(niche.at)
+		var hit: Dictionary = _ray(at+Vector3(0,0,0.45),at-Vector3(0,0,0.3))
+		var depth: float = at.z-(hit.position as Vector3).z if not hit.is_empty() else 0.0
+		if depth<0.19 or depth>0.26:
+			bad_niches.append(String(niche.id))
+	_check("Ниши утоплены в стену; за карманом остаётся 0,13 м кладки",bad_niches.is_empty(),{"niches":plan.niches.size(),"failed":bad_niches})
+	_set_fov(110.0)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var measured_h: float = rad_to_deg(2.0*atan(tan(deg_to_rad(camera.fov)/2.0)*viewport_size.x/viewport_size.y))
+	_check("Ползунок FOV до 110° по горизонтали",is_equal_approx(fov_slider.max_value,110.0) and absf(measured_h-110.0)<0.01,{"min":fov_slider.min_value,"max":fov_slider.max_value,"measured_h":measured_h})
+	_set_fov(float(plan.scale.fov_h))
+
+
+func _open_nearby_doors() -> void:
+	# Проверка пользуется теми же петлями, что клавиша E; коллизии не отключаются.
+	for leaf: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
+		var delta: Vector3 = (leaf as Node3D).global_position-walker.position
+		if absf(delta.y)<0.3 and Vector2(delta.x,delta.z).length()<2.2 and not bool(leaf.get("is_open")):
+			leaf.call("set_open",true,false)
+
+
 func _walk_path(points: Array[Vector3]) -> bool:
 	walker.set("probe_direction",Vector3.ZERO)
 	walker.set("probe_sprint",false)
@@ -296,6 +431,7 @@ func _walk_path(points: Array[Vector3]) -> bool:
 		var previous: Vector3 = walker.position
 		var budget: int = maxi(240,int(previous.distance_to(target)/Balance.PLAYER_WALK_SPEED*Engine.physics_ticks_per_second)+180)
 		for frame: int in range(budget):
+			_open_nearby_doors()
 			var delta: Vector3 = target-walker.position
 			var height_error: float = absf(delta.y)
 			delta.y = 0
@@ -333,24 +469,33 @@ func _shots() -> void:
 	for node: Node in get_tree().get_nodes_in_group("dorm_study_labels"):
 		(node as Node3D).hide()
 	DirAccess.make_dir_recursive_absolute(output_dir)
-	var manifest: Array[Dictionary] = []
 	var fails: int = 0
-	for view: Dictionary in plan.shots:
-		var foot: Vector3 = _vec(view.foot)
-		camera.global_position = foot+Vector3.UP*float(view.eye_height)
-		camera.look_at(_vec(view.look),Vector3.UP)
-		await _frames(24)
-		await RenderingServer.frame_post_draw
-		var filename: String = "stage1_%s.png" % String(view.id)
-		var error: Error = get_viewport().get_texture().get_image().save_png(output_dir.path_join(filename))
-		if error!=OK:
-			fails += 1
-		manifest.append({"id":view.id,"revision":plan.version,"label":view.label,"file":filename,"foot":view.foot,"camera":[camera.global_position.x,camera.global_position.y,camera.global_position.z],
-			"look":view.look,"eye_height":view.eye_height,"fov_h":plan.scale.fov_h,"fov_v":camera.fov,"viewport":get_viewport().get_visible_rect().size,"stage":1})
-		print("dorm: снимок ",filename," ошибка=",error)
-	var report: FileAccess = FileAccess.open(output_dir.path_join("stage1_views.json"),FileAccess.WRITE)
-	report.store_string(JSON.stringify(manifest,"\t"))
-	report.close()
+	for angle: float in [float(plan.scale.fov_h),95.0]:
+		var manifest: Array[Dictionary] = []
+		_set_fov(angle)
+		var prefix: String = "stage1_" if angle==float(plan.scale.fov_h) else "stage1_fov95_"
+		for leaf: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
+			leaf.call("reset_pose")
+		for view: Dictionary in plan.shots:
+			if angle==95.0 and String(view.id) not in ["01_corridor","02_room","05_stairs_bottom"]:
+				continue
+			var foot: Vector3 = _vec(view.foot)
+			camera.global_position = foot+Vector3.UP*float(view.eye_height)
+			camera.look_at(_vec(view.look),Vector3.UP)
+			await _frames(24)
+			await RenderingServer.frame_post_draw
+			var filename: String = prefix+String(view.id)+".png"
+			var error: Error = get_viewport().get_texture().get_image().save_png(output_dir.path_join(filename))
+			if error!=OK:
+				fails += 1
+			manifest.append({"id":view.id,"revision":plan.version,"label":view.label,"file":filename,"foot":view.foot,"camera":[camera.global_position.x,camera.global_position.y,camera.global_position.z],
+				"look":view.look,"eye_height":view.eye_height,"fov_h":angle,"fov_v":camera.fov,"viewport":get_viewport().get_visible_rect().size,"stage":1})
+			print("dorm: снимок ",filename," ошибка=",error)
+		var report_name: String = "stage1_views.json" if angle==float(plan.scale.fov_h) else "stage1_fov95_views.json"
+		var report: FileAccess = FileAccess.open(output_dir.path_join(report_name),FileAccess.WRITE)
+		report.store_string(JSON.stringify(manifest,"\t"))
+		report.close()
+	_set_fov(float(plan.scale.fov_h))
 	world.queue_free()
 	await _frames(3)
 	get_tree().quit(fails)
