@@ -18,11 +18,15 @@ func _draw() -> void:
 		if walker.position.y >= float(levels[i]) - 0.2:
 			floor_index = i
 	var floor_y: float = float(levels[floor_index])
-	var extent: Vector2 = Vector2(53.0, 55.0)
+	var extent: Vector2 = Vector2(float(plan.bounds[2])-float(plan.bounds[0]),float(plan.bounds[3])-float(plan.bounds[1]))
 	var k: float = minf((size.x - 120.0) / extent.x, (size.y - 180.0) / extent.y)
 	var origin: Vector2 = (size - extent * k) * 0.5
-	var base: Vector2 = Vector2(-10.0, -42.0)
+	var base: Vector2 = Vector2(float(plan.bounds[0]),float(plan.bounds[1]))
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.05, 0.065, 0.08, 0.97))
+	for area: Dictionary in plan.get("circulation",[]):
+		if int(area.floor)==floor_index+1:
+			var r: Array = area.rect
+			draw_rect(Rect2(origin+(Vector2(float(r[0]),float(r[1]))-base)*k,Vector2(float(r[2])-float(r[0]),float(r[3])-float(r[1]))*k),Color("675f4b"))
 	for space: Dictionary in plan.spaces:
 		if int(space.floor) != floor_index + 1 or not bool(space.open):
 			continue
@@ -36,9 +40,14 @@ func _draw() -> void:
 			draw_colored_polygon(polygon,Color("405d65"))
 		else:
 			draw_rect(Rect2(a,span), Color("5c6870") if String(space.kind)=="room" else Color("405d65"))
-		draw_string(ThemeDB.fallback_font,a+Vector2(5,span.y*0.5),String(space.label),HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("ecf0eb"))
+		var short_name: String = String(space.label)
+		if short_name.length()>10:
+			short_name = short_name.left(8)+"…"
+		draw_string(ThemeDB.fallback_font,a+Vector2(3,span.y*0.5),short_name,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("ecf0eb"))
 	var sections: Dictionary = plan.sections
-	for key: String in ["Floor%d" % (floor_index+1), "WestStair", "EastStair", "NorthAnnex"]:
+	for key: String in sections:
+		if key in ["Site","Roof"]:
+			continue
 		var section: Dictionary = sections[key]
 		for item: Dictionary in section.boxes:
 			var at: Array = item.at

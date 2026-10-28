@@ -29,7 +29,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	started_ms = Time.get_ticks_msec()
-	DisplayServer.window_set_title("RING · Общежитие · этап 1: серый план")
+	DisplayServer.window_set_title("RING · Общежитие · этап 1: планировка 2")
 	get_node("/root/Pause").set_process_input(false)
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
@@ -199,9 +199,19 @@ func _verify() -> void:
 		{"capsule_height":Balance.STANCE_HEIGHT.stand,"capsule_radius":Balance.CAPSULE_RADIUS,"eye":camera.position.y,"walk_m_s":Balance.PLAYER_WALK_SPEED,"jump":false,"flight":false})
 	for f: int in range(3):
 		var y: float = float(plan.scale.floor_y[f])
-		var ceiling_hit: Dictionary = _ray(Vector3(4.5,y+0.1,0),Vector3(4.5,y+8,0))
+		var probe_x: float = float(plan.checks.ceiling_probe_x)
+		var ceiling_hit: Dictionary = _ray(Vector3(probe_x,y+0.1,0),Vector3(probe_x,y+8,0))
 		var clearance: float = (ceiling_hit.position as Vector3).y-y if not ceiling_hit.is_empty() else INF
 		_check("Высота потолка %d-го этажа" % (f+1),absf(clearance-float(plan.scale.ceiling_clear[f]))<0.03,{"clear_m":clearance})
+		var left: Dictionary = _ray(Vector3(probe_x,y+1.3,0),Vector3(probe_x,y+1.3,-4))
+		var right: Dictionary = _ray(Vector3(probe_x,y+1.3,0),Vector3(probe_x,y+1.3,4))
+		var width_m: float = (right.position as Vector3).z-(left.position as Vector3).z if not left.is_empty() and not right.is_empty() else INF
+		_check("Коридор %d-го этажа расширен до 3,6 м" % (f+1),absf(width_m-3.6)<0.02,{"clear_m":width_m})
+	var core: Dictionary = plan.stair_core
+	var core_rect: Array = core.rect
+	var core_width: float = float(core_rect[2])-float(core_rect[0])
+	_check("Лестница в середине корпуса, марши от стены до стены",absf(core_width-3.3)<0.01 and float(core.center_x)>float(plan.checks.ceiling_probe_x)*2.0,
+		{"clear_width_m":core_width,"marches_m":[1.5,1.5],"middle_gap_m":0.3,"side_gaps_m":0.0,"center_x":core.center_x})
 	for location: Dictionary in plan.locations:
 		_jump_to(int(location.id))
 		await _frames(12)
@@ -217,9 +227,7 @@ func _verify() -> void:
 		if not bool(space.open):
 			continue
 		var y: float = float(space.y)
-		var points: Array[Vector3] = [Vector3(-0.9,y,0)]
-		if String(space.kind)=="vestibule":
-			points.append(Vector3(2.1,y,0))
+		var points: Array[Vector3] = [_vec(plan.floor_routes[int(space.floor)-1].start)]
 		for at: Array in space.path:
 			points.append(_vec(at))
 		if space.has("probe_points"):
@@ -236,11 +244,8 @@ func _verify() -> void:
 		_check("Весь открытый коридор, %d этаж" % int(floor_route.floor),passed,route_detail.duplicate())
 	for barrier: Dictionary in plan.barriers:
 		var reached: bool = await _walk_path([_vec(barrier.from),_vec(barrier.to)])
-		var before: bool = walker.position.x>float(barrier.stop)+0.15
-		if String(barrier.axis)=="z_min":
-			before = walker.position.z>float(barrier.stop)+0.15
-		elif String(barrier.axis)=="x_max":
-			before = walker.position.x<float(barrier.stop)-0.15
+		var normal: Vector3 = _vec(barrier.normal)
+		var before: bool = (walker.position-_vec(barrier.point)).dot(normal)>0.15
 		_check("Нельзя пройти: "+String(barrier.label),not reached and before,route_detail.duplicate())
 	var bad_doors: Array[String] = []
 	var sealed: int = 0
@@ -249,7 +254,8 @@ func _verify() -> void:
 			continue
 		sealed += 1
 		var at: Vector3 = _vec(door.at)+Vector3.UP*1.2
-		var hit: Dictionary = _ray(at+Vector3.BACK*0.6,at+Vector3.FORWARD*0.6)
+		var normal: Vector3 = Vector3.RIGHT if String(door.get("axis","z"))=="x" else Vector3.BACK
+		var hit: Dictionary = _ray(at+normal*0.6,at-normal*0.6)
 		if hit.is_empty():
 			bad_doors.append(String(door.id)+str(door.at))
 	_check("Заваренные двери имеют настоящую коллизию",bad_doors.is_empty(),{"count":sealed,"missing":bad_doors})
@@ -257,6 +263,11 @@ func _verify() -> void:
 	for stair: Dictionary in plan.stairs:
 		stair_ok = stair_ok and float(stair.riser)>=0.15 and float(stair.riser)<=0.17 and is_equal_approx(float(stair.tread),0.3)
 	_check("Ступени 1:1, марш 1,5 м",stair_ok,{"tread":0.3,"riser_ground":plan.stairs[0].riser,"riser_upper":plan.stairs[2].riser})
+	var room_widths: Dictionary = {}
+	for space: Dictionary in plan.spaces:
+		if String(space.kind)=="room" and bool(space.open):
+			room_widths[str(space.get("width_scale",1.0))] = true
+	_check("Жилые комнаты разной ширины: ×1 / ×1,3 / ×1,4 / ×1,5",room_widths.size()==4,{"multipliers":room_widths.keys(),"widths_m":plan.scale.room_widths,"window_leaf_scale":plan.scale.window_leaf_scale})
 	var fails: int = 0
 	for result: Dictionary in results:
 		if not bool(result.pass):
@@ -333,10 +344,12 @@ func _shots() -> void:
 		var error: Error = get_viewport().get_texture().get_image().save_png(output_dir.path_join(filename))
 		if error!=OK:
 			fails += 1
-		manifest.append({"id":view.id,"label":view.label,"file":filename,"foot":view.foot,"camera":[camera.global_position.x,camera.global_position.y,camera.global_position.z],
+		manifest.append({"id":view.id,"revision":plan.version,"label":view.label,"file":filename,"foot":view.foot,"camera":[camera.global_position.x,camera.global_position.y,camera.global_position.z],
 			"look":view.look,"eye_height":view.eye_height,"fov_h":plan.scale.fov_h,"fov_v":camera.fov,"viewport":get_viewport().get_visible_rect().size,"stage":1})
 		print("dorm: снимок ",filename," ошибка=",error)
 	var report: FileAccess = FileAccess.open(output_dir.path_join("stage1_views.json"),FileAccess.WRITE)
 	report.store_string(JSON.stringify(manifest,"\t"))
 	report.close()
+	world.queue_free()
+	await _frames(3)
 	get_tree().quit(fails)

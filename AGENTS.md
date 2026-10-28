@@ -172,11 +172,11 @@ python -X utf8 tools/build_mall_study.py                     # черновик 
 python -X utf8 tools/build_prospekt.py                        # карта «Проспект» (docs/design/prospekt_map.md): серый блокаут 232 × 212 м по правилу масштаба E →
                                                               # data/blockouts/prospekt.json + scenes/levels/prospekt_study.tscn (StudyBuilding с интерьерами, MallFiller,
                                                               # ProspektLandscape: переход, паркинг −1, кордон); перезаписывает оба файла
-python -X utf8 tools/build_dorm.py                            # общежитие, этап 1: серый Г-образный корпус, гостиная с нишей, хозкрыло → data/blockouts/dorm.json,
-                                                              # scenes/levels/dorm_study.tscn, docs/plans/dorm.png; далее — только после проверки геометрии владельцем
-tools/dorm_study.cmd                                         # прогулка: M — план этажа, 1–9/0 — места, 5/6 — лестница, 9 — гостиная, 0 — поворот, F — полёт
-tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # общежитие: все открытые помещения пешком, подъём/спуск, закрытые крылья и верхние этажи
-tools/godot.cmd --windowed --resolution 1600x900 res://tools/dorm_study.tscn -- shots # 10 кадров с глаза 1,62 м → docs/screens/dorm/stage1_*; позиции для этапа 5 сохранены
+python -X utf8 tools/build_dorm.py                            # общежитие, этап 1, редакция 2: центральная лестница, комнаты разной ширины, вахта и чёрный выход →
+                                                              # data/blockouts/dorm.json, scenes/levels/dorm_study.tscn, docs/plans/dorm.png; базовые цвета разрешены, чистовая отделка ждёт владельца
+tools/dorm_study.cmd                                         # прогулка: M — план этажа, 1–9/0 — места, 5/6 — лестница, 7 — вахта, 9 — гостиная, 0 — поворот; N/B — также выход, комендант, узкая комната, туалет
+tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # общежитие: 68 помещений пешком, лестница, вход через турникет, чёрный выход в обе стороны, габариты и преграды
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/dorm_study.tscn -- shots # 14 кадров с глаза 1,62 м → docs/screens/dorm/stage1_*; камеры редакции 2 сохранены для этапа 5
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;
                                                               # --headless res://tools/prospekt_study.tscn -- verify — здания, места лута, уровни, 16 мест, 7 маршрутов пешком (пролог
                                                               # до тоннеля, заходы → выходы, паркинг −1, банк до крыши, подкоп в хранилище), открытые куски ≤ 30 м, кордон

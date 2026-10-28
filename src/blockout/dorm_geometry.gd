@@ -28,8 +28,20 @@ func rebuild() -> void:
 	var section: Dictionary = (plan.get("sections", {}) as Dictionary).get(section_id, {})
 	if section.is_empty():
 		return
-	var builder: RefCounted = Geometry.new(self, _palette())
+	var palette: Dictionary = _palette(plan)
+	var builder: RefCounted = Geometry.new(self, palette)
 	for item: Dictionary in section.get("boxes", []):
+		if String(item.mat)=="mirror":
+			# Локальная поверхность зеркала получает пробу своей комнаты, а не всего этажа.
+			var surface: MeshInstance3D = MeshInstance3D.new()
+			surface.name = "StudyMirror"
+			var shape: BoxMesh = BoxMesh.new()
+			shape.size = _vec(item.size)
+			surface.mesh = shape
+			surface.material_override = palette["mirror"] as Material
+			surface.position = _vec(item.at)
+			add_child(surface)
+			continue
 		builder.call("box", _vec(item.at), _vec(item.size), String(item.mat), bool(item.solid), deg_to_rad(float(item.yaw)))
 	for item: Dictionary in section.get("beams", []):
 		var start: Vector3 = _vec(item.start)
@@ -66,16 +78,28 @@ func rebuild() -> void:
 		lamp.shadow_enabled = true
 		lamp.omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
 		add_child(lamp)
+	for item: Dictionary in section.get("probes", []):
+		var probe: ReflectionProbe = ReflectionProbe.new()
+		probe.name = "BathroomReflection"
+		probe.position = _vec(item.at)
+		probe.size = _vec(item.size)+Vector3(0.6,0.4,0.6)
+		probe.blend_distance = 0.05
+		probe.interior = true
+		probe.box_projection = true
+		probe.update_mode = ReflectionProbe.UPDATE_ONCE
+		probe.max_distance = 12.0
+		add_child(probe)
 
 
 static func _vec(values: Array) -> Vector3:
 	return Vector3(float(values[0]), float(values[1]), float(values[2]))
 
 
-static func _palette() -> Dictionary:
+static func _palette(plan: Dictionary) -> Dictionary:
 	var result: Dictionary = {}
 	var colors: Dictionary = {"wall": "a9adb0", "floor": "777d83", "slab": "8c9195", "frame": "626970",
-		"rail": "444a50", "sealed": "555b60", "ground": "656b66", "paving": "85898b", "tree": "646b67", "glass": "88969e"}
+		"rail": "444a50", "sealed": "555b60", "ground": "656b66", "paving": "85898b", "tree": "646b67", "glass": "88969e",
+		"mattress": "a39d89", "wood": "766449", "ceramic": "d5d9ce", "basin": "8d9996", "mirror": "f0f0ed"}
 	for key: String in colors:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = Color(String(colors[key]))
@@ -85,5 +109,26 @@ static func _palette() -> Dictionary:
 			material.albedo_color.a = 0.07
 			material.cull_mode = BaseMaterial3D.CULL_DISABLED
 			material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		if key == "mirror":
+			material.metallic = 1.0
+			material.roughness = 0.025
 		result[key] = material
+	var levels: Array = plan.scale.floor_y
+	var heights: Array = plan.scale.ceiling_clear
+	for key: String in ["wall", "tile", "tile_floor"]:
+		var finish: ShaderMaterial = ShaderMaterial.new()
+		finish.shader = preload("res://src/blockout/dorm_finish.gdshader")
+		finish.set_shader_parameter("finish_mode", 0 if key=="wall" else 1)
+		finish.set_shader_parameter("floors", Vector4(float(levels[0]),float(levels[1]),float(levels[2]),float(levels[3])))
+		finish.set_shader_parameter("fifth_floor", float(levels[4]))
+		finish.set_shader_parameter("heights", Vector4(float(heights[0]),float(heights[1]),float(heights[2]),float(heights[3])))
+		finish.set_shader_parameter("green", Color(String(plan.finish.green)))
+		finish.set_shader_parameter("white", Color(String(plan.finish.white)))
+		var main_rect: Array = plan.main_rect
+		var annex_rect: Array = plan.annex_rect
+		finish.set_shader_parameter("main_bounds",Vector4(float(main_rect[0]),float(main_rect[1]),float(main_rect[2]),float(main_rect[3])))
+		finish.set_shader_parameter("annex_bounds",Vector4(float(annex_rect[0]),float(annex_rect[1]),float(annex_rect[2]),float(annex_rect[3])))
+		if key=="tile_floor":
+			finish.set_shader_parameter("tile_color",Color("939d94"))
+		result[key] = finish
 	return result
