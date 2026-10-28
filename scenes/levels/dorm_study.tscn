@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/blockout/dorm_geometry.gd" id="1"]
+[ext_resource type="Script" path="res://src/blockout/dorm_lighting.gd" id="2"]
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
 sky_top_color = Color(0.38, 0.48, 0.62, 1)
 sky_horizon_color = Color(0.73, 0.77, 0.8, 1)
@@ -69,3 +70,6 @@ section_id = "NorthAnnex"
 [node name="Roof" type="Node3D" parent="."]
 script = ExtResource("1")
 section_id = "Roof"
+
+[node name="Lighting" type="Node3D" parent="."]
+script = ExtResource("2")

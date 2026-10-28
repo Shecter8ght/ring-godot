@@ -1,0 +1,233 @@
+{
+	"bake": {
+		"engine": "4.7.2-stable (steam)",
+		"floors": [
+			{
+				"bytes": 1469286,
+				"data_bytes": 4784720,
+				"id": "floor_1",
+				"octree_size": "(256.0, 32.0, 256.0)",
+				"path": "res://data/blockouts/dorm_voxel/floor_1.res",
+				"seconds": 0.984,
+				"size": "(46.0, 4.3, 51.0)",
+				"subdiv": 2
+			},
+			{
+				"bytes": 1471434,
+				"data_bytes": 4724640,
+				"id": "floor_2",
+				"octree_size": "(256.0, 32.0, 256.0)",
+				"path": "res://data/blockouts/dorm_voxel/floor_2.res",
+				"seconds": 0.987,
+				"size": "(46.0, 3.6, 51.0)",
+				"subdiv": 2
+			},
+			{
+				"bytes": 1488497,
+				"data_bytes": 4775280,
+				"id": "floor_3",
+				"octree_size": "(256.0, 32.0, 256.0)",
+				"path": "res://data/blockouts/dorm_voxel/floor_3.res",
+				"seconds": 0.967,
+				"size": "(46.0, 3.6, 51.0)",
+				"subdiv": 2
+			}
+		],
+		"geometry_sha256": "f73088a5d2e4955cd5ca35f75287df609e2e45054e584e8f754aac03220f489d",
+		"lighting": "BAKE_DYNAMIC; no LightmapGI",
+		"total_sec": 2.938
+	},
+	"cpu": "AMD Ryzen 7 7700 8-Core Processor",
+	"engine": "4.7.2-stable (steam)",
+	"gpu": "NVIDIA GeForce RTX 5070 Ti",
+	"gpu_method": "RenderingDevice timestamps from frame_pre_draw to viewport end, nanoseconds / 1e6; viewport-only time also retained",
+	"samples": [
+		{
+			"case": "evening_A",
+			"cpu_render_ms": 1.01460161019619,
+			"cpu_setup_ms": 0.0168651911468813,
+			"draw_calls": 862,
+			"fps": 248.328777308046,
+			"frames": 497,
+			"gpu_frame_ms": 3.99076916129032,
+			"gpu_frame_p95_ms": 6.994496,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 3.99618109419072,
+			"gpu_viewport_p95_ms": 7.15199995040894,
+			"seconds": 2.001379,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 21,
+			"shadow_sources_frustum": 43,
+			"shadow_windows_frustum": 22,
+			"view": "01_corridor"
+		},
+		{
+			"case": "evening_A",
+			"cpu_render_ms": 0.762095890905215,
+			"cpu_setup_ms": 0.0179543378995434,
+			"draw_calls": 387,
+			"fps": 218.707151124644,
+			"frames": 438,
+			"gpu_frame_ms": 4.5252337208238,
+			"gpu_frame_p95_ms": 6.374656,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 4.51890639518494,
+			"gpu_viewport_p95_ms": 6.37200021743774,
+			"seconds": 2.002678,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_sources_frustum": 14,
+			"shadow_windows_frustum": 7,
+			"view": "09_lounge"
+		},
+		{
+			"case": "evening_B",
+			"cpu_render_ms": 2.16907490289163,
+			"cpu_setup_ms": 0.014080971659919,
+			"draw_calls": 3955,
+			"fps": 246.792570844205,
+			"frames": 494,
+			"gpu_frame_ms": 3.77785009330629,
+			"gpu_frame_p95_ms": 5.540736,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 3.77424898659169,
+			"gpu_viewport_p95_ms": 5.53700017929077,
+			"seconds": 2.001681,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 21,
+			"shadow_sources_frustum": 43,
+			"shadow_windows_frustum": 22,
+			"view": "01_corridor"
+		},
+		{
+			"case": "evening_B",
+			"cpu_render_ms": 0.656775432104341,
+			"cpu_setup_ms": 0.0167274472168906,
+			"draw_calls": 387,
+			"fps": 260.315956618671,
+			"frames": 521,
+			"gpu_frame_ms": 3.80458984615384,
+			"gpu_frame_p95_ms": 5.728064,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 3.79756046027918,
+			"gpu_viewport_p95_ms": 5.72399997711182,
+			"seconds": 2.001414,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_sources_frustum": 14,
+			"shadow_windows_frustum": 7,
+			"view": "09_lounge"
+		},
+		{
+			"case": "night_A",
+			"cpu_render_ms": 1.10009279443708,
+			"cpu_setup_ms": 0.010032751091703,
+			"draw_calls": 1359,
+			"fps": 457.680538983789,
+			"frames": 916,
+			"gpu_frame_ms": 2.08269191693989,
+			"gpu_frame_p95_ms": 2.554848,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 2.08005021649157,
+			"gpu_viewport_p95_ms": 2.55200004577637,
+			"seconds": 2.001396,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 21,
+			"shadow_sources_frustum": 21,
+			"shadow_windows_frustum": 0,
+			"view": "01_corridor"
+		},
+		{
+			"case": "night_A",
+			"cpu_render_ms": 0.420479748320944,
+			"cpu_setup_ms": 0.0119117911791179,
+			"draw_calls": 76,
+			"fps": 555.257352536941,
+			"frames": 1111,
+			"gpu_frame_ms": 1.75436753873874,
+			"gpu_frame_p95_ms": 2.202592,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 1.7501170089071,
+			"gpu_viewport_p95_ms": 2.20000004768372,
+			"seconds": 2.000874,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_sources_frustum": 7,
+			"shadow_windows_frustum": 0,
+			"view": "09_lounge"
+		},
+		{
+			"case": "overcast_A",
+			"cpu_render_ms": 1.83133767946907,
+			"cpu_setup_ms": 0.0104028985507246,
+			"draw_calls": 3711,
+			"fps": 344.643466334077,
+			"frames": 690,
+			"gpu_frame_ms": 2.71153337590711,
+			"gpu_frame_p95_ms": 3.113824,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 2.70884492777396,
+			"gpu_viewport_p95_ms": 3.11100006103516,
+			"seconds": 2.002069,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 21,
+			"shadow_sources_frustum": 43,
+			"shadow_windows_frustum": 22,
+			"view": "01_corridor"
+		},
+		{
+			"case": "overcast_A",
+			"cpu_render_ms": 0.461112038313419,
+			"cpu_setup_ms": 0.0132002383790226,
+			"draw_calls": 76,
+			"fps": 419.335410851241,
+			"frames": 839,
+			"gpu_frame_ms": 2.33996559427208,
+			"gpu_frame_p95_ms": 2.861888,
+			"gpu_timestamp_names": [
+				"dorm_frame_start",
+				"vp_begin_3689376907264",
+				"vp_end_3689376907264"
+			],
+			"gpu_viewport_ms": 2.33533849534318,
+			"gpu_viewport_p95_ms": 2.81100010871887,
+			"seconds": 2.000785,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_sources_frustum": 14,
+			"shadow_windows_frustum": 7,
+			"view": "09_lounge"
+		}
+	],
+	"shadow_count_method": "Light influence sphere vs camera frustum; conservative upper bound, no occlusion",
+	"viewport": "(1920.0, 1080.0)",
+	"vsync": 0
+}

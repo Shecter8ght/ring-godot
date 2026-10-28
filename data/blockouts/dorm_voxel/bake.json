@@ -1,0 +1,38 @@
+{
+	"engine": "4.7.2-stable (steam)",
+	"floors": [
+		{
+			"bytes": 1469286,
+			"data_bytes": 4784720,
+			"id": "floor_1",
+			"octree_size": "(256.0, 32.0, 256.0)",
+			"path": "res://data/blockouts/dorm_voxel/floor_1.res",
+			"seconds": 0.984,
+			"size": "(46.0, 4.3, 51.0)",
+			"subdiv": 2
+		},
+		{
+			"bytes": 1471434,
+			"data_bytes": 4724640,
+			"id": "floor_2",
+			"octree_size": "(256.0, 32.0, 256.0)",
+			"path": "res://data/blockouts/dorm_voxel/floor_2.res",
+			"seconds": 0.987,
+			"size": "(46.0, 3.6, 51.0)",
+			"subdiv": 2
+		},
+		{
+			"bytes": 1488497,
+			"data_bytes": 4775280,
+			"id": "floor_3",
+			"octree_size": "(256.0, 32.0, 256.0)",
+			"path": "res://data/blockouts/dorm_voxel/floor_3.res",
+			"seconds": 0.967,
+			"size": "(46.0, 3.6, 51.0)",
+			"subdiv": 2
+		}
+	],
+	"geometry_sha256": "f73088a5d2e4955cd5ca35f75287df609e2e45054e584e8f754aac03220f489d",
+	"lighting": "BAKE_DYNAMIC; no LightmapGI",
+	"total_sec": 2.938
+}

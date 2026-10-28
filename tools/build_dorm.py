@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Общежитие, этап 1, редакция 4: конструктивные детали, масштаб редакции 3.
+"""Общежитие, редакция 5: принятая геометрия r4 и отдельный пробный свет.
 
 python -X utf8 tools/build_dorm.py -> JSON, сцена и поэтажный PNG.
 Только план, габариты мебели и базовые цвета. Чистовые модули ещё не делаются.
@@ -50,7 +50,7 @@ def rounded(v):
 
 
 def make_plan():
-    p = {"version": 4, "stage": 1, "greybox": True, "north": "-Z",
+    p = {"version": 5, "stage": 1, "greybox": True, "north": "-Z",
          "purpose": "Общежитие: проверка планировки, масштаба, центральной лестницы и базовой раскраски",
          "bounds": [-11, -46, LENGTH + 13, 24],
          "main_rect": [0,-FACADE,LENGTH,FACADE],
@@ -85,6 +85,10 @@ def make_plan():
         x0,z0,x1,z1 = rect
         if min(x1-x0,z1-z0,y1-y0) <= .0005:
             return
+        # Верх стены нижнего этажа не совпадает с полом следующего: краска проступала у порогов.
+        # Только скрытый торец уходит на 5 мм внутрь плиты; чистые размеры и проёмы прежние.
+        if mat=="wall" and any(abs(y1-floor)<.00001 for floor in LEVELS):
+            y1-=.005
         section(key,group)["boxes"].append({"id": name, "at": [(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],
                                       "size": [x1-x0,y1-y0,z1-z0], "mat": mat, "solid": solid, "yaw": 0})
 
@@ -344,9 +348,22 @@ def make_plan():
                 if s["kind"]=="lounge" and abs(const-ROOM_EDGE)<.01 and axis=="z":
                     holes.append(((SC0+BAYS[5]["x1"])/2,BAYS[5]["x1"]-SC0-.24))
                 skirt(key,lo,hi,const,direction,y,axis,holes)
+        # Хозкрыло: порталы по стенам между службами, через два модуля (8,6 м).
+        annex_stations=[-FACADE-EXT-.2-4.15-.075,-FACADE-EXT-.2-4.15-.075-8.6]
+        for f,(y,h) in enumerate(zip(LEVELS,HEIGHTS)):
+            for i,zz in enumerate(annex_stations):
+                uid=f"f{f+1}_annex_portal_{i}"
+                box("NorthAnnex",uid,[ANNEX_CORRIDOR-LOAD,zz-.2,LENGTH+EXT,zz+.2],y+h-.4,y+h,"ceiling",True,"beams")
+                for xx,inward in [(ANNEX_CORRIDOR,1),(LENGTH,-1)]:
+                    a,b=sorted([xx,xx+inward*.18])
+                    box("NorthAnnex",uid+"_pilaster",[a,zz-.225,b,zz+.225],y,y+h-.4,"wall",True,"pilasters")
+                    skirt("NorthAnnex",zz-.225,zz+.225,xx+inward*.18,inward,y,"x")
+                p["portals"].append({"id":uid,"floor":f+1,"at":[TURN_X,y,zz],"ceiling":h,
+                                     "clear_height":h-.4,"clear_width":3.0,"kind":"transverse","travel_axis":"z"})
         for y in LEVELS:
             for x,inward in [(ANNEX_CORRIDOR,1),(LENGTH,-1)]:
                 holes=[(d["at"][2],d["width"]+.02) for d in p["doors"] if d["axis"]=="x" and abs(d["at"][1]-y)<.01 and abs(d["at"][0]-x)<LOAD/2+.02]
+                holes += [(zz,.45) for zz in annex_stations]
                 skirt("NorthAnnex",ANNEX_END,-FACADE-EXT,x,inward,y,"x",holes)
 
     # Двор и оба входа. Въездов, транспорта и новых игровых механик здесь нет.
@@ -641,13 +658,16 @@ def make_plan():
     for i,(sid,name,foot,look) in enumerate(views,1):
         p["locations"].append({"id":i,"label":name,"foot":foot,"look":look})
         p["shots"].append({"id":sid,"label":name,"foot":foot,"look":look,"eye_height":1.62})
+    from dorm_lighting_data import add_lighting
+    add_lighting(p)
     return rounded(p)
 
 
 def scene_text(plan):
-    text='''[gd_scene load_steps=6 format=3]
+    text='''[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/blockout/dorm_geometry.gd" id="1"]
+[ext_resource type="Script" path="res://src/blockout/dorm_lighting.gd" id="2"]
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
 sky_top_color = Color(0.38, 0.48, 0.62, 1)
 sky_horizon_color = Color(0.73, 0.77, 0.8, 1)
@@ -683,6 +703,7 @@ directional_shadow_max_distance = 150.0
 '''
     for key in plan["sections"]:
         text+=f'\n[node name="{key}" type="Node3D" parent="."]\nscript = ExtResource("1")\nsection_id = "{key}"\n'
+    text+='\n[node name="Lighting" type="Node3D" parent="."]\nscript = ExtResource("2")\n'
     return text
 
 

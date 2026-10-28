@@ -5,6 +5,7 @@ extends Node3D
 const Walker = preload("res://src/blockout/study_walker.gd")
 const PlanMap = preload("res://src/blockout/dorm_map.gd")
 const LEVEL: String = "res://scenes/levels/dorm_study.tscn"
+const LightCapture = preload("res://tools/dorm_light_capture.gd")
 
 var plan: Dictionary = {}
 var world: Node3D
@@ -24,6 +25,7 @@ var started_ms: int = 0
 var fov_h: float = 80.0
 var fov_slider: HSlider
 var fov_label: Label
+var lighting: Node3D
 
 
 func _enter_tree() -> void:
@@ -36,7 +38,7 @@ func _ready() -> void:
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
-		if arg in ["verify", "shots"]:
+		if arg in ["verify", "shots", "bake"]:
 			mode = arg
 	output_dir = OS.get_environment("DORM_OUTPUT")
 	if output_dir.is_empty():
@@ -47,13 +49,16 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	plan = parsed as Dictionary
-	DisplayServer.window_set_title("RING · Общежитие · этап 1: планировка %d" % int(plan.version))
+	DisplayServer.window_set_title("RING · Общежитие · пробный свет · редакция %d" % int(plan.version))
 	world = (load(LEVEL) as PackedScene).instantiate() as Node3D
 	add_child(world)
 	walker = Walker.new() as CharacterBody3D
 	walker.name = "StudyWalker"
 	add_child(walker)
 	camera = walker.get("camera") as Camera3D
+	lighting = world.get_node_or_null("Lighting") as Node3D
+	if lighting!=null and mode!="verify":
+		lighting.call("attach_camera",camera)
 	fov_h = float(plan.scale.fov_h)
 	_ui()
 	_set_fov(fov_h)
@@ -69,6 +74,9 @@ func _ready() -> void:
 		await _frames(4)
 		if mode == "verify":
 			await _verify()
+		elif mode == "bake":
+			var success: bool = await lighting.call("ensure_baked",true)
+			get_tree().quit(0 if success else 1)
 		else:
 			await _shots()
 
@@ -122,6 +130,7 @@ func _ui() -> void:
 	help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	help.position = Vector2(28, -85)
 	help.text = "WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения"
+	help.text += " · F1–F4 свет"
 	help.add_theme_font_size_override("font_size", 18)
 	help.add_theme_color_override("font_shadow_color", Color.BLACK)
 	help.add_theme_constant_override("shadow_offset_x", 1)
@@ -133,6 +142,8 @@ func _ui() -> void:
 	map.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	map.hide()
 	root.add_child(map)
+	if lighting!=null and mode!="verify":
+		lighting.call("create_controls",root)
 
 
 func _process(_delta: float) -> void:
@@ -170,6 +181,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var key: InputEventKey = event as InputEventKey
 	match key.physical_keycode:
+		KEY_F1, KEY_F2, KEY_F3, KEY_F4:
+			lighting.call("set_case",key.physical_keycode-KEY_F1)
 		KEY_E:
 			var hit: Dictionary = _ray(camera.global_position,camera.global_position-camera.global_basis.z*3.0)
 			if not hit.is_empty():
@@ -241,6 +254,8 @@ func _standing_clear(foot: Vector3) -> bool:
 func _verify() -> void:
 	# При --fixed-fps 60 движок считает обычные шаги физики без ожидания реального времени.
 	# Размер капсулы, ходьба, снап и подъём на ступень — из настоящего StudyWalker / Balance.
+	_check("Собственный свет редакции 5 загружен, четыре варианта",lighting!=null and lighting.get("environment") is Environment and plan.environment.cases.size()==4,
+		{"default":plan.environment.default,"author":plan.environment.author})
 	var rooms: Array[int] = [0,0,0]
 	var spaces: int = 0
 	for space: Dictionary in plan.spaces:
@@ -330,6 +345,10 @@ func _verify() -> void:
 			fails += 1
 	DirAccess.make_dir_recursive_absolute(output_dir)
 	var report: FileAccess = FileAccess.open(output_dir.path_join("validation.json"),FileAccess.WRITE)
+	if report==null:
+		push_error("dorm: не записан отчёт "+output_dir+" · "+str(FileAccess.get_open_error()))
+		get_tree().quit(1)
+		return
 	report.store_string(JSON.stringify({"stage":1,"revision":plan.version,"checks":results,"fails":fails,"walked_m":route_distance,
 		"scale":plan.scale,"engine":Engine.get_version_info().string,"duration_sec":(Time.get_ticks_msec()-started_ms)/1000.0},"\t"))
 	report.close()
@@ -341,21 +360,25 @@ func _verify_details() -> void:
 	var portal_errors: Array[String] = []
 	var min_height: float = INF
 	var min_width: float = INF
+	var annex_portals: int = 0
 	for portal: Dictionary in plan.portals:
 		if int(portal.floor)>3 or String(portal.kind)!="transverse":
 			continue
 		var foot: Vector3 = _vec(portal.at)
+		annex_portals += 1 if String(portal.get("travel_axis","x"))=="z" else 0
 		var top: Dictionary = _ray(foot+Vector3.UP*0.12,foot+Vector3.UP*4.5)
-		var left: Dictionary = _ray(foot+Vector3(0,0.04,0),foot+Vector3(0,0.04,-3))
-		var right: Dictionary = _ray(foot+Vector3(0,0.04,0),foot+Vector3(0,0.04,3))
+		var across: Vector3 = Vector3.RIGHT if String(portal.get("travel_axis","x"))=="z" else Vector3.BACK
+		var left: Dictionary = _ray(foot+Vector3.UP*0.04,foot+Vector3.UP*0.04-across*3)
+		var right: Dictionary = _ray(foot+Vector3.UP*0.04,foot+Vector3.UP*0.04+across*3)
 		var height: float = (top.position as Vector3).y-foot.y if not top.is_empty() else 0.0
-		var width: float = (right.position as Vector3).z-(left.position as Vector3).z if not left.is_empty() and not right.is_empty() else 0.0
+		var width: float = ((right.position as Vector3)-(left.position as Vector3)).dot(across) if not left.is_empty() and not right.is_empty() else 0.0
 		min_height = minf(min_height,height)
 		min_width = minf(min_width,width)
 		if height<2.599 or width<2.999:
 			portal_errors.append(String(portal.id))
 	_check("Порталы: от 2,6 м под балкой и 3,0 м между пилястрами с плинтусами",portal_errors.is_empty(),
 		{"minimum_height_m":min_height,"minimum_width_m":min_width,"failed":portal_errors})
+	_check("В хозкрыле по два портала на каждом открытом этаже",annex_portals==6,{"annex_portals":annex_portals})
 	var bad_leaves: Array[String] = []
 	var poses: Dictionary = {}
 	var grilles: int = 0
@@ -460,6 +483,10 @@ func _walk_path(points: Array[Vector3]) -> bool:
 
 
 func _shots() -> void:
+	if lighting!=null:
+		var capture: RefCounted = LightCapture.new()
+		await capture.call("run",self)
+		return
 	if DisplayServer.get_name()=="headless":
 		push_error("dorm: снимки требуют оконного запуска")
 		get_tree().quit(1)

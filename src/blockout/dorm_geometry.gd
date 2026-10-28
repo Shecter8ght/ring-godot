@@ -38,25 +38,47 @@ func rebuild() -> void:
 		add_child(group)
 		_build_geometry(group,section.groups[group_name],palette)
 	for item: Dictionary in section.get("lights", []):
-		var lamp: OmniLight3D = OmniLight3D.new()
-		lamp.name = "StudyFill"
+		var lamp: Light3D = SpotLight3D.new() if String(item.get("type","omni"))=="spot" else OmniLight3D.new()
+		lamp.name = String(item.get("id","StudyFill"))
 		lamp.position = _vec(item.at)
-		lamp.light_color = Color(0.94, 0.96, 1.0)
+		lamp.light_color = Color(String(item.get("color","eef5ff")))
 		lamp.light_energy = float(item.energy)
-		lamp.omni_range = float(item.range)
-		lamp.shadow_enabled = true
-		lamp.omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
+		lamp.light_bake_mode = Light3D.BAKE_DYNAMIC
+		lamp.shadow_enabled = bool(item.get("shadow",true))
+		lamp.visible = bool(item.get("on",true))
+		lamp.shadow_bias = 0.025
+		lamp.set_meta("light_group",String(item.get("group","legacy")))
+		lamp.add_to_group("dorm_lamps")
+		if bool(item.get("sky_fill",false)):
+			lamp.add_to_group("dorm_window_sky")
+			lamp.shadow_blur = 2.0
+		if lamp is SpotLight3D:
+			var spot: SpotLight3D = lamp as SpotLight3D
+			spot.rotation_degrees.x = -90.0
+			if item.has("rotation"):
+				spot.rotation_degrees = _vec(item.rotation)
+			spot.spot_range = float(item.range)
+			spot.spot_angle = float(item.get("angle",68.0))
+			spot.spot_attenuation = float(item.get("attenuation",1.7))
+		else:
+			var omni: OmniLight3D = lamp as OmniLight3D
+			omni.omni_range = float(item.range)
+			omni.omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
 		add_child(lamp)
 	for item: Dictionary in section.get("probes", []):
 		var probe: ReflectionProbe = ReflectionProbe.new()
-		probe.name = "BathroomReflection"
+		probe.name = String(item.get("id","BathroomReflection"))
 		probe.position = _vec(item.at)
-		probe.size = _vec(item.size)+Vector3(0.6,0.4,0.6)
-		probe.blend_distance = 0.05
+		probe.size = _vec(item.size)+Vector3(0.1,0.1,0.1)
+		probe.blend_distance = float(item.get("blend",0.05))
 		probe.interior = true
 		probe.box_projection = true
 		probe.update_mode = ReflectionProbe.UPDATE_ONCE
-		probe.max_distance = 12.0
+		probe.max_distance = float(item.get("max_distance",12.0))
+		probe.intensity = float(item.get("intensity",1.0))
+		probe.enable_shadows = bool(item.get("shadows",true))
+		probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
+		probe.add_to_group("dorm_reflections")
 		add_child(probe)
 
 

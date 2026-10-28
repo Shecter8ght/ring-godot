@@ -1,0 +1,348 @@
+@tool
+extends Node3D
+## Собственный пробный свет общежития из dorm.json. Вокселизуется геометрия, источники динамические.
+
+var plan: Dictionary = {}
+var config: Dictionary = {}
+var environment: Environment
+var sun: DirectionalLight3D
+var camera: Camera3D
+var case_index: int = 0
+var ssil: bool = false
+var fog: bool = true
+var post: bool = true
+var voxels: Array[VoxelGI] = []
+var layers: Array[CanvasLayer] = []
+var busy: bool = false
+var bake_report: Dictionary = {}
+var state_label: Label
+var probe_timer: float = 0.0
+
+
+func _ready() -> void:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/blockouts/dorm.json"))
+	if not parsed is Dictionary or not (parsed as Dictionary).has("environment"):
+		return
+	plan = parsed as Dictionary
+	config = plan.environment
+	environment = Environment.new()
+	environment.set_meta("authored_lighting",true)
+	(get_parent().get_node("WorldEnvironment") as WorldEnvironment).environment = environment
+	sun = get_parent().get_node("StudySun") as DirectionalLight3D
+	sun.light_bake_mode = Light3D.BAKE_DYNAMIC
+	sun.light_angular_distance = 0.65
+	sun.directional_shadow_max_distance = 90.0
+	sun.shadow_bias = 0.025
+	sun.shadow_normal_bias = 0.5
+	ssil = bool(config.effects.ssil)
+	fog = bool(config.effects.fog)
+	post = bool(config.effects.post)
+	_configure_meshes(get_parent())
+	for probe: Node in get_tree().get_nodes_in_group("dorm_reflections"):
+		(probe as ReflectionProbe).hide()
+	for item: Dictionary in config.voxel.volumes:
+		var voxel: VoxelGI = VoxelGI.new()
+		voxel.name = String(item.id)
+		voxel.position = _vec(item.at)
+		voxel.size = _vec(item.size)
+		voxel.subdiv = int(config.voxel.subdiv)
+		voxel.hide()
+		add_child(voxel)
+		voxels.append(voxel)
+	_apply()
+	if not Engine.is_editor_hint():
+		get_viewport().positional_shadow_atlas_size = int(config.shadow_atlas)
+
+
+func _configure_meshes(root: Node) -> void:
+	for child: Node in root.get_children():
+		if child is GeometryInstance3D:
+			var mesh: GeometryInstance3D = child as GeometryInstance3D
+			var ancestor: Node = child.get_parent()
+			var door: bool = false
+			while ancestor != null and ancestor != get_parent():
+				door = door or ancestor.is_in_group("dorm_study_doors")
+				ancestor = ancestor.get_parent()
+			# Двери не входят в неподвижную сетку GI; прямые тени остаются подвижными.
+			mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED if door else GeometryInstance3D.GI_MODE_STATIC
+			if child is Label3D or String(child.name) in ["Mesh_glass","StudyMirror"]:
+				mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+				mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_configure_meshes(child)
+
+
+func attach_camera(value: Camera3D) -> void:
+	camera = value
+	update_active_probes()
+	var attributes: CameraAttributesPractical = CameraAttributesPractical.new()
+	attributes.auto_exposure_enabled = false
+	camera.attributes = attributes
+	for shader_path: String in ["res://src/blockout/dorm_post.gdshader","res://src/world/screen_sharpen.gdshader"]:
+		var layer: CanvasLayer = CanvasLayer.new()
+		layer.name = "DormPost" if layers.is_empty() else "DormSharpen"
+		layer.layer = -3+layers.size()
+		var copy: BackBufferCopy = BackBufferCopy.new()
+		copy.copy_mode = BackBufferCopy.COPY_MODE_VIEWPORT
+		layer.add_child(copy)
+		var rect: ColorRect = ColorRect.new()
+		rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var material: ShaderMaterial = ShaderMaterial.new()
+		material.shader = load(shader_path) as Shader
+		if layers.is_empty():
+			material.set_shader_parameter("grain",float(config.effects.grain))
+			material.set_shader_parameter("vignette",float(config.effects.vignette))
+		else:
+			material.set_shader_parameter("amount",float(config.effects.sharpen))
+		rect.material = material
+		layer.add_child(rect)
+		add_child(layer)
+		layers.append(layer)
+	_apply()
+
+
+func _process(delta: float) -> void:
+	if not is_instance_valid(camera):
+		return
+	probe_timer += delta
+	if probe_timer>0.25:
+		probe_timer = 0.0
+		update_active_probes()
+
+
+func update_active_probes() -> void:
+	if not is_instance_valid(camera):
+		return
+	var time: Dictionary = config.times[String(config.cases[case_index].time)]
+	for node: Node in get_tree().get_nodes_in_group("dorm_window_sky"):
+		var window: Light3D = node as Light3D
+		window.visible = float(time.window_energy)>0 and absf(window.global_position.y-camera.global_position.y)<2.2
+	var nearby: Array[ReflectionProbe] = []
+	for node: Node in get_tree().get_nodes_in_group("dorm_reflections"):
+		var probe: ReflectionProbe = node as ReflectionProbe
+		var offset: Vector3 = probe.global_position-camera.global_position
+		if absf(offset.y)<2.2 and Vector2(offset.x,offset.z).length()<25.0:
+			nearby.append(probe)
+		else:
+			probe.hide()
+	nearby.sort_custom(func(a: ReflectionProbe,b: ReflectionProbe) -> bool: return a.global_position.distance_squared_to(camera.global_position)<b.global_position.distance_squared_to(camera.global_position))
+	for i: int in range(nearby.size()):
+		nearby[i].visible = i<int(config.active_reflection_limit)
+
+
+func create_controls(parent: Control) -> void:
+	var panel: ColorRect = ColorRect.new()
+	panel.color = Color(0.03,0.04,0.05,0.86)
+	panel.position = Vector2(18,146)
+	panel.size = Vector2(1180,100)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(panel)
+	for i: int in range(config.cases.size()):
+		var button: Button = Button.new()
+		button.text = String(config.cases[i].label)
+		button.position = Vector2(30+i*235,153)
+		button.size = Vector2(226,32)
+		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(set_case.bind(i))
+		parent.add_child(button)
+	for i: int in range(3):
+		var toggle: CheckButton = CheckButton.new()
+		toggle.text = ["SSIL","Пыль в лучах","Обработка кадра"][i]
+		toggle.position = Vector2(30+i*230,193)
+		toggle.focus_mode = Control.FOCUS_NONE
+		toggle.button_pressed = [ssil,fog,post][i]
+		toggle.toggled.connect(set_effect.bind(["ssil","fog","post"][i]))
+		parent.add_child(toggle)
+	state_label = Label.new()
+	state_label.position = Vector2(730,201)
+	state_label.add_theme_font_size_override("font_size",15)
+	parent.add_child(state_label)
+	_update_label()
+
+
+func set_effect(enabled: bool, effect: String) -> void:
+	match effect:
+		"ssil": ssil = enabled
+		"fog": fog = enabled
+		"post": post = enabled
+	_apply()
+
+
+func set_case(index: int) -> void:
+	if busy:
+		return
+	busy = true
+	if String(config.cases[index].gi)=="B" and not await ensure_baked():
+		busy = false
+		return
+	busy = true
+	environment.sdfgi_enabled = false
+	await get_tree().process_frame
+	case_index = index
+	_apply()
+	await refresh_reflections()
+	busy = false
+	_update_label()
+
+
+func _apply() -> void:
+	if config.is_empty():
+		return
+	var choice: Dictionary = config.cases[case_index]
+	var time: Dictionary = config.times[String(choice.time)]
+	var sky_material: ProceduralSkyMaterial = ProceduralSkyMaterial.new()
+	sky_material.sky_top_color = Color(String(time.sky_top))
+	sky_material.sky_horizon_color = Color(String(time.sky_horizon))
+	sky_material.ground_bottom_color = Color("141a20") if String(choice.time)!="night" else Color.BLACK
+	sky_material.ground_horizon_color = Color(String(time.sky_horizon))*0.45
+	sky_material.sun_angle_max = 12.0
+	var sky: Sky = Sky.new()
+	sky.sky_material = sky_material
+	environment.background_mode = Environment.BG_SKY
+	environment.sky = sky
+	environment.background_energy_multiplier = float(time.background_energy)
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	environment.ambient_light_color = Color("718aa2")
+	environment.ambient_light_energy = float(time.ambient)
+	environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	environment.tonemap_mode = int(config.effects.tonemap_mode) if post else 0
+	environment.tonemap_exposure = float(time.exposure) if post else 1.0
+	environment.ssao_enabled = true
+	environment.ssao_radius = float(config.effects.ssao_radius)
+	environment.ssao_intensity = float(config.effects.ssao_intensity)
+	environment.ssil_enabled = ssil
+	environment.ssil_radius = float(config.effects.ssil_radius)
+	environment.ssil_intensity = float(config.effects.ssil_intensity)
+	environment.ssr_enabled = true
+	environment.ssr_max_steps = 96
+	environment.sdfgi_enabled = String(choice.gi)=="A"
+	environment.sdfgi_use_occlusion = true
+	environment.sdfgi_read_sky_light = String(choice.time)!="night"
+	environment.sdfgi_min_cell_size = float(config.sdfgi.min_cell_size)
+	environment.sdfgi_cascades = int(config.sdfgi.cascades)
+	environment.sdfgi_energy = float(config.sdfgi.energy)
+	environment.sdfgi_bounce_feedback = float(config.sdfgi.bounce_feedback)
+	environment.sdfgi_normal_bias = float(config.sdfgi.normal_bias)
+	environment.sdfgi_probe_bias = float(config.sdfgi.probe_bias)
+	environment.volumetric_fog_enabled = fog
+	environment.volumetric_fog_density = float(config.effects.fog_density)
+	environment.volumetric_fog_length = float(config.effects.fog_length)
+	environment.volumetric_fog_albedo = Color("a4adb5")
+	environment.volumetric_fog_ambient_inject = 0.0
+	environment.volumetric_fog_sky_affect = 0.0
+	environment.glow_enabled = post
+	environment.glow_intensity = .12
+	environment.glow_hdr_threshold = 2.0
+	environment.adjustment_enabled = post
+	environment.adjustment_saturation = float(config.effects.saturation)
+	var gradient: Gradient = Gradient.new()
+	gradient.offsets = PackedFloat32Array([0,.25,.5,.75,1])
+	var colors: PackedColorArray = PackedColorArray()
+	for rgb: Array in config.effects.lut:
+		colors.append(Color(float(rgb[0]),float(rgb[1]),float(rgb[2])))
+	gradient.colors = colors
+	var table: GradientTexture1D = GradientTexture1D.new()
+	table.gradient = gradient
+	table.width = 256
+	environment.adjustment_color_correction = table
+	sun.rotation_degrees = _vec(time.sun_rotation)
+	sun.light_energy = float(time.sun_energy)
+	sun.visible = float(time.sun_energy)>0
+	sun.light_color = Color(String(time.sun_color))
+	sun.shadow_enabled = true
+	sun.light_bake_mode = Light3D.BAKE_DYNAMIC
+	for node: Node in get_tree().get_nodes_in_group("dorm_lamps"):
+		(node as Light3D).light_bake_mode = sun.light_bake_mode
+		if node.is_in_group("dorm_window_sky"):
+			(node as Light3D).light_energy = float(time.window_energy)
+			(node as Light3D).visible = float(time.window_energy)>0
+	for voxel: VoxelGI in voxels:
+		voxel.visible = String(choice.gi)=="B" and voxel.data!=null
+	for layer: CanvasLayer in layers:
+		layer.visible = post
+	update_active_probes()
+	_update_label()
+
+
+func _update_label() -> void:
+	if is_instance_valid(state_label):
+		state_label.text = "Обновляется освещение…" if busy else "%s · %s · атлас %d" % [String(config.cases[case_index].label),"Filmic" if post else "без обработки",int(config.shadow_atlas)]
+
+
+func refresh_reflections() -> void:
+	if DisplayServer.get_name()=="headless":
+		return
+	for probe: Node in get_tree().get_nodes_in_group("dorm_reflections"):
+		# Смена времени должна обновить и комнаты, в которые камера зайдёт позже.
+		var shift: float = -.0001 if bool(probe.get_meta("refresh_shift",false)) else .0001
+		(probe as ReflectionProbe).position.x += shift
+		probe.set_meta("refresh_shift",shift>0)
+		if (probe as ReflectionProbe).is_visible_in_tree():
+			(probe as ReflectionProbe).update_mode = ReflectionProbe.UPDATE_ALWAYS
+	for i: int in range(12):
+		await get_tree().process_frame
+	for probe: Node in get_tree().get_nodes_in_group("dorm_reflections"):
+		(probe as ReflectionProbe).update_mode = ReflectionProbe.UPDATE_ONCE
+
+
+func ensure_baked(force: bool = false) -> bool:
+	if DisplayServer.get_name()=="headless":
+		push_error("dorm: VoxelGI запекается оконным запуском -- bake")
+		return false
+	var manifest_path: String = "res://data/blockouts/dorm_voxel/bake.json"
+	if not force and FileAccess.file_exists(manifest_path):
+		var cached: Variant = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
+		if cached is Dictionary and String((cached as Dictionary).get("geometry_sha256",""))==String(config.geometry_sha256):
+			var valid: bool = true
+			for i: int in range(voxels.size()):
+				var path: String = String(config.voxel.volumes[i].cache)
+				if not FileAccess.file_exists(path):
+					valid = false
+					break
+				voxels[i].data = load(path) as VoxelGIData
+				valid = valid and voxels[i].data!=null
+			if valid:
+				bake_report = cached as Dictionary
+				return true
+	busy = true
+	_update_label()
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://data/blockouts/dorm_voxel"))
+	bake_report = {"geometry_sha256":config.geometry_sha256,"engine":Engine.get_version_info().string,"floors":[],"total_sec":0.0,"lighting":"BAKE_DYNAMIC; no LightmapGI"}
+	for i: int in range(voxels.size()):
+		var voxel: VoxelGI = voxels[i]
+		voxel.show()
+		await get_tree().process_frame
+		var started: int = Time.get_ticks_msec()
+		print("dorm: VoxelGI bake start ",voxel.name)
+		voxel.bake(get_parent())
+		var seconds: float = (Time.get_ticks_msec()-started)/1000.0
+		if voxel.data==null:
+			push_error("dorm: VoxelGI bake не создал данные")
+			busy = false
+			return false
+		voxel.data.energy = float(config.voxel.energy)
+		voxel.data.bias = float(config.voxel.bias)
+		voxel.data.normal_bias = float(config.voxel.normal_bias)
+		voxel.data.interior = false
+		var path: String = String(config.voxel.volumes[i].cache)
+		var error: Error = ResourceSaver.save(voxel.data,path,ResourceSaver.FLAG_COMPRESS)
+		if error!=OK:
+			push_error("dorm: не сохранён "+path)
+			busy = false
+			return false
+		var file: FileAccess = FileAccess.open(path,FileAccess.READ)
+		(bake_report.floors as Array).append({"id":voxel.name,"seconds":seconds,"bytes":file.get_length(),"path":path,"size":str(voxel.size),"subdiv":voxel.subdiv,"octree_size":str(voxel.data.get_octree_size()),"data_bytes":voxel.data.get_data_cells().size()})
+		file.close()
+		bake_report.total_sec = float(bake_report.total_sec)+seconds
+		print("dorm: VoxelGI bake done ",voxel.name," ",seconds," sec")
+		voxel.hide()
+	var manifest: FileAccess = FileAccess.open(manifest_path,FileAccess.WRITE)
+	manifest.store_string(JSON.stringify(bake_report,"\t"))
+	manifest.close()
+	busy = false
+	_update_label()
+	return true
+
+
+static func _vec(at: Array) -> Vector3:
+	return Vector3(float(at[0]),float(at[1]),float(at[2]))
