@@ -1,6 +1,7 @@
 @tool
 extends Node3D
 ## Собственный пробный свет общежития из dorm.json. Вокселизуется геометрия, источники динамические.
+const VoxelBake = preload("res://src/blockout/dorm_voxel_bake.gd")
 
 var plan: Dictionary = {}
 var config: Dictionary = {}
@@ -17,6 +18,9 @@ var busy: bool = false
 var bake_report: Dictionary = {}
 var state_label: Label
 var probe_timer: float = 0.0
+var cool_corridors: bool = false
+var cool_toggle: CheckButton
+var dust: Array[FogVolume] = []
 
 
 func _ready() -> void:
@@ -30,7 +34,9 @@ func _ready() -> void:
 	(get_parent().get_node("WorldEnvironment") as WorldEnvironment).environment = environment
 	sun = get_parent().get_node("StudySun") as DirectionalLight3D
 	sun.light_bake_mode = Light3D.BAKE_DYNAMIC
-	sun.light_angular_distance = 0.65
+	# PCSS at this low sun leaked through closed rooms onto the corridor floor.
+	# Keep the same solar direction/color/energy; filtered hard shadows respect the roof.
+	sun.light_angular_distance = 0.0
 	sun.directional_shadow_max_distance = 90.0
 	sun.shadow_bias = 0.025
 	sun.shadow_normal_bias = 0.5
@@ -49,9 +55,16 @@ func _ready() -> void:
 		voxel.hide()
 		add_child(voxel)
 		voxels.append(voxel)
+	_create_dust()
 	_apply()
 	if not Engine.is_editor_hint():
 		get_viewport().positional_shadow_atlas_size = int(config.shadow_atlas)
+		# 43 influence spheres can enter the corridor frustum. The default atlas has
+		# only 16 medium tiles and thrashes after view changes. 64 equal tiles retain
+		# these static shadows; both GI methods use the same 4096 atlas and 512 tiles.
+		var subdivisions: Dictionary = {0:0,1:1,4:2,16:3,64:4,256:5,1024:6}
+		for i: int in range(4):
+			get_viewport().set("positional_shadow_atlas_quad_"+str(i),subdivisions[int(config.shadow_quadrants[i])])
 
 
 func _configure_meshes(root: Node) -> void:
@@ -65,7 +78,7 @@ func _configure_meshes(root: Node) -> void:
 				ancestor = ancestor.get_parent()
 			# Двери не входят в неподвижную сетку GI; прямые тени остаются подвижными.
 			mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED if door else GeometryInstance3D.GI_MODE_STATIC
-			if child is Label3D or String(child.name) in ["Mesh_glass","StudyMirror"]:
+			if child is Label3D or String(child.name).begins_with("Mesh_glass") or child.is_in_group("dorm_mirrors"):
 				mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 				mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_configure_meshes(child)
@@ -114,9 +127,10 @@ func update_active_probes() -> void:
 	if not is_instance_valid(camera):
 		return
 	var time: Dictionary = config.times[String(config.cases[case_index].time)]
+	var windows_enabled: bool = bool(config.cases[case_index].get("windows",true))
 	for node: Node in get_tree().get_nodes_in_group("dorm_window_sky"):
 		var window: Light3D = node as Light3D
-		window.visible = float(time.window_energy)>0 and absf(window.global_position.y-camera.global_position.y)<2.2
+		window.visible = windows_enabled and float(time.window_energy)>0 and absf(window.global_position.y-camera.global_position.y)<2.2
 	var nearby: Array[ReflectionProbe] = []
 	for node: Node in get_tree().get_nodes_in_group("dorm_reflections"):
 		var probe: ReflectionProbe = node as ReflectionProbe
@@ -134,27 +148,33 @@ func create_controls(parent: Control) -> void:
 	var panel: ColorRect = ColorRect.new()
 	panel.color = Color(0.03,0.04,0.05,0.86)
 	panel.position = Vector2(18,146)
-	panel.size = Vector2(1180,100)
+	panel.size = Vector2(1180,154)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(panel)
 	for i: int in range(config.cases.size()):
 		var button: Button = Button.new()
 		button.text = String(config.cases[i].label)
-		button.position = Vector2(30+i*235,153)
-		button.size = Vector2(226,32)
+		button.position = Vector2(30+(i%3)*380,153+(i/3)*38)
+		button.size = Vector2(366,32)
 		button.focus_mode = Control.FOCUS_NONE
 		button.pressed.connect(set_case.bind(i))
 		parent.add_child(button)
 	for i: int in range(3):
 		var toggle: CheckButton = CheckButton.new()
 		toggle.text = ["SSIL","Пыль в лучах","Обработка кадра"][i]
-		toggle.position = Vector2(30+i*230,193)
+		toggle.position = Vector2(30+i*230,234)
 		toggle.focus_mode = Control.FOCUS_NONE
 		toggle.button_pressed = [ssil,fog,post][i]
 		toggle.toggled.connect(set_effect.bind(["ssil","fog","post"][i]))
 		parent.add_child(toggle)
+	cool_toggle = CheckButton.new()
+	cool_toggle.text = "F5 · Холодные коридоры · 4400 K"
+	cool_toggle.position = Vector2(730,234)
+	cool_toggle.focus_mode = Control.FOCUS_NONE
+	cool_toggle.toggled.connect(set_cool_corridors)
+	parent.add_child(cool_toggle)
 	state_label = Label.new()
-	state_label.position = Vector2(730,201)
+	state_label.position = Vector2(30,275)
 	state_label.add_theme_font_size_override("font_size",15)
 	parent.add_child(state_label)
 	_update_label()
@@ -166,6 +186,23 @@ func set_effect(enabled: bool, effect: String) -> void:
 		"fog": fog = enabled
 		"post": post = enabled
 	_apply()
+
+func set_cool_corridors(enabled: bool) -> void:
+	if cool_corridors==enabled:return
+	cool_corridors = enabled
+	if is_instance_valid(cool_toggle):cool_toggle.set_pressed_no_signal(enabled)
+	_apply_lamp_colors()
+	await refresh_reflections()
+	_update_label()
+
+func _apply_lamp_colors() -> void:
+	for node: Node in get_tree().get_nodes_in_group("dorm_lamps"):
+		var lamp: Light3D = node as Light3D
+		if not lamp.has_meta("warm_color"):lamp.set_meta("warm_color",lamp.light_color)
+		var group: String = String(lamp.get_meta("light_group",""))
+		var cool: bool = cool_corridors and group in ["main_corridor","annex_corridor","stairs","services"]
+		lamp.light_color = Color(String(config.cool_corridors.color)) if cool else lamp.get_meta("warm_color") as Color
+		lamp.set_meta("selected_kelvin",int(config.cool_corridors.kelvin) if cool else (4500 if group in ["wet_rooms","window_sky"] else 2850))
 
 
 func set_case(index: int) -> void:
@@ -205,8 +242,9 @@ func _apply() -> void:
 	environment.ambient_light_color = Color("718aa2")
 	environment.ambient_light_energy = float(time.ambient)
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
-	environment.tonemap_mode = int(config.effects.tonemap_mode) if post else 0
-	environment.tonemap_exposure = float(time.exposure) if post else 1.0
+	# The grading switch must not also change camera exposure or the highlight curve.
+	environment.tonemap_mode = int(config.effects.tonemap_mode)
+	environment.tonemap_exposure = float(time.exposure)
 	environment.ssao_enabled = true
 	environment.ssao_radius = float(config.effects.ssao_radius)
 	environment.ssao_intensity = float(config.effects.ssao_intensity)
@@ -230,6 +268,8 @@ func _apply() -> void:
 	environment.volumetric_fog_albedo = Color("a4adb5")
 	environment.volumetric_fog_ambient_inject = 0.0
 	environment.volumetric_fog_sky_affect = 0.0
+	environment.volumetric_fog_anisotropy = float(config.effects.get("fog_anisotropy",.15))
+	for volume: FogVolume in dust:volume.visible = fog
 	environment.glow_enabled = post
 	environment.glow_intensity = .12
 	environment.glow_hdr_threshold = 2.0
@@ -251,12 +291,20 @@ func _apply() -> void:
 	sun.light_color = Color(String(time.sun_color))
 	sun.shadow_enabled = true
 	sun.light_bake_mode = Light3D.BAKE_DYNAMIC
+	sun.light_volumetric_fog_energy = float(config.effects.get("sun_fog_energy",1.0))
 	for node: Node in get_tree().get_nodes_in_group("dorm_lamps"):
-		(node as Light3D).light_bake_mode = sun.light_bake_mode
+		var local: Light3D = node as Light3D
+		# Direct sky stand-ins must not double-inject sky into GI. Unshadowed fills
+		# must not bounce through walls. Same rule in A/B, and <32 lights per VoxelGI
+		# leaves room for the sun (Godot appends directionals after local lights).
+		local.light_bake_mode = Light3D.BAKE_DYNAMIC if local.shadow_enabled and not node.is_in_group("dorm_window_sky") else Light3D.BAKE_DISABLED
 		if node.is_in_group("dorm_window_sky"):
 			(node as Light3D).light_energy = float(time.window_energy)
 			(node as Light3D).visible = float(time.window_energy)>0
+		(node as Light3D).light_volumetric_fog_energy = 0.0 if node.is_in_group("dorm_window_sky") else .25
+	_apply_lamp_colors()
 	for voxel: VoxelGI in voxels:
+		_apply_voxel_data(voxel)
 		voxel.visible = String(choice.gi)=="B" and voxel.data!=null
 	for layer: CanvasLayer in layers:
 		layer.visible = post
@@ -277,12 +325,10 @@ func refresh_reflections() -> void:
 		var shift: float = -.0001 if bool(probe.get_meta("refresh_shift",false)) else .0001
 		(probe as ReflectionProbe).position.x += shift
 		probe.set_meta("refresh_shift",shift>0)
-		if (probe as ReflectionProbe).is_visible_in_tree():
-			(probe as ReflectionProbe).update_mode = ReflectionProbe.UPDATE_ALWAYS
-	for i: int in range(12):
-		await get_tree().process_frame
-	for probe: Node in get_tree().get_nodes_in_group("dorm_reflections"):
 		(probe as ReflectionProbe).update_mode = ReflectionProbe.UPDATE_ONCE
+	# No 12-frame UPDATE_ALWAYS burst (six scene renders per probe per frame).
+	# Hidden rooms are invalidated too and recapture once when they become visible.
+	await get_tree().process_frame
 
 
 func ensure_baked(force: bool = false) -> bool:
@@ -292,7 +338,7 @@ func ensure_baked(force: bool = false) -> bool:
 	var manifest_path: String = "res://data/blockouts/dorm_voxel/bake.json"
 	if not force and FileAccess.file_exists(manifest_path):
 		var cached: Variant = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
-		if cached is Dictionary and String((cached as Dictionary).get("geometry_sha256",""))==String(config.geometry_sha256):
+		if cached is Dictionary and String((cached as Dictionary).get("bake_sha256",""))==_bake_signature():
 			var valid: bool = true
 			for i: int in range(voxels.size()):
 				var path: String = String(config.voxel.volumes[i].cache)
@@ -300,6 +346,7 @@ func ensure_baked(force: bool = false) -> bool:
 					valid = false
 					break
 				voxels[i].data = load(path) as VoxelGIData
+				_apply_voxel_data(voxels[i])
 				valid = valid and voxels[i].data!=null
 			if valid:
 				bake_report = cached as Dictionary
@@ -307,23 +354,24 @@ func ensure_baked(force: bool = false) -> bool:
 	busy = true
 	_update_label()
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://data/blockouts/dorm_voxel"))
-	bake_report = {"geometry_sha256":config.geometry_sha256,"engine":Engine.get_version_info().string,"floors":[],"total_sec":0.0,"lighting":"BAKE_DYNAMIC; no LightmapGI"}
+	bake_report = {"geometry_sha256":config.geometry_sha256,"bake_sha256":_bake_signature(),"diffuse_proxy":VoxelBake.VERSION,
+		"engine":Engine.get_version_info().string,"floors":[],"total_sec":0.0,"lighting":"BAKE_DYNAMIC; no LightmapGI"}
 	for i: int in range(voxels.size()):
 		var voxel: VoxelGI = voxels[i]
 		voxel.show()
 		await get_tree().process_frame
 		var started: int = Time.get_ticks_msec()
 		print("dorm: VoxelGI bake start ",voxel.name)
+		var proxy: RefCounted = VoxelBake.new(plan)
+		if bool(config.voxel.get("diffuse_proxy",true)):proxy.call("begin",get_parent())
 		voxel.bake(get_parent())
+		proxy.call("restore")
 		var seconds: float = (Time.get_ticks_msec()-started)/1000.0
 		if voxel.data==null:
 			push_error("dorm: VoxelGI bake не создал данные")
 			busy = false
 			return false
-		voxel.data.energy = float(config.voxel.energy)
-		voxel.data.bias = float(config.voxel.bias)
-		voxel.data.normal_bias = float(config.voxel.normal_bias)
-		voxel.data.interior = false
+		_apply_voxel_data(voxel)
 		var path: String = String(config.voxel.volumes[i].cache)
 		var error: Error = ResourceSaver.save(voxel.data,path,ResourceSaver.FLAG_COMPRESS)
 		if error!=OK:
@@ -336,12 +384,44 @@ func ensure_baked(force: bool = false) -> bool:
 		bake_report.total_sec = float(bake_report.total_sec)+seconds
 		print("dorm: VoxelGI bake done ",voxel.name," ",seconds," sec")
 		voxel.hide()
-	var manifest: FileAccess = FileAccess.open(manifest_path,FileAccess.WRITE)
+	var manifest: FileAccess
+	for attempt: int in range(3):
+		manifest = FileAccess.open(manifest_path,FileAccess.WRITE)
+		if manifest!=null:break
+		await get_tree().create_timer(.1).timeout
+	if manifest==null:
+		push_error("dorm: не сохранён манифест "+manifest_path+"; "+error_string(FileAccess.get_open_error()))
+		busy = false
+		return false
 	manifest.store_string(JSON.stringify(bake_report,"\t"))
 	manifest.close()
 	busy = false
 	_update_label()
 	return true
+
+func _apply_voxel_data(voxel: VoxelGI) -> void:
+	if voxel.data==null:return
+	voxel.data.energy = float(config.voxel.energy)
+	voxel.data.bias = float(config.voxel.bias)
+	voxel.data.normal_bias = float(config.voxel.normal_bias)
+	voxel.data.interior = bool(config.voxel.get("interior",false))
+
+func _bake_signature() -> String:
+	return JSON.stringify({"geometry":config.geometry_sha256,"volumes":config.voxel.volumes,"subdiv":config.voxel.subdiv,
+		"gi_batches":"floor_and_exterior_packets_exclude_all_mirrors_2",
+		"diffuse_proxy":VoxelBake.VERSION if bool(config.voxel.get("diffuse_proxy",true)) else "none","finish":plan.finish,
+		"finish_shader":FileAccess.get_sha256("res://src/blockout/dorm_finish.gdshader")}).sha256_text()
+
+func _create_dust() -> void:
+	for item: Dictionary in config.effects.get("dust_volumes",[]):
+		var volume: FogVolume = FogVolume.new()
+		volume.name = String(item.id)
+		volume.position = _vec(item.at);volume.size = _vec(item.size)
+		var material: FogMaterial = FogMaterial.new()
+		material.density = float(item.get("density",config.effects.get("dust_density",.025)))
+		material.albedo = Color("e6e3db");material.edge_fade = .2
+		volume.material = material
+		add_child(volume);dust.append(volume)
 
 
 static func _vec(at: Array) -> Vector3:

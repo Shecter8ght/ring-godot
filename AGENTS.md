@@ -172,12 +172,16 @@ python -X utf8 tools/build_mall_study.py                     # черновик 
 python -X utf8 tools/build_prospekt.py                        # карта «Проспект» (docs/design/prospekt_map.md): серый блокаут 232 × 212 м по правилу масштаба E →
                                                               # data/blockouts/prospekt.json + scenes/levels/prospekt_study.tscn (StudyBuilding с интерьерами, MallFiller,
                                                               # ProspektLandscape: переход, паркинг −1, кордон); перезаписывает оба файла
-python -X utf8 tools/build_dorm.py                            # общежитие, редакция 5: принятая геометрия r4, порталы хозкрыла и свой пробный свет →
+python -X utf8 tools/build_dorm.py                            # общежитие, пробный свет r6 на принятой геометрии r4, пороги и порталы r5 сохранены →
                                                               # data/blockouts/dorm.json, scenes/levels/dorm_study.tscn, docs/plans/dorm.png; режимы и замеры — docs/design/dorm_light_test.md
-tools/dorm_study.cmd                                         # прогулка: F1–F4 — вечер А / Б, ночь, пасмурно; Esc — мышь / FOV 60–110° / SSIL, пыль, обработка; E — дверь, M — план, 1–9/0 и N/B — места
+tools/dorm_study.cmd                                         # F1–F4 — вечер А / Б, ночь А, пасмурно А; F5 — холодные коридоры 4400 K, F6 — ночь Б, F7 — Б без оконных источников;
+                                                              # Esc — мышь / FOV 60–110° / SSIL, пыль, обработка; E — дверь, M — план, 1–9/0 и N/B — места
 tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # 117 проверок: 68 помещений пешком, лестница, двери, оба выхода и новые порталы хозкрыла
-tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- shots # четыре режима × (14 камер 80° + 3 при 95°), эффекты и FPS/GPU → light_*; до света — stage1r4_*
-tools/godot.cmd --windowed --resolution 1600x900 res://tools/dorm_study.tscn -- bake # только сетка VoxelGI трёх этажей (~3 с); свет динамический, LightmapGI нет; А без кэша
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- shots # шесть режимов × (14 прежних камер 80° + 3 при 95°), холодный цвет и эффекты, серии FPS/GPU и видимость источников → light_*; «до» — light5_*, stage1r4_*
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/dorm_study.tscn -- bake # шесть объёмов VoxelGI трёх этажей (~4 с), цвета шейдера учтены; источники динамические, LightmapGI нет
+python -X utf8 tools/dorm_light_archive.py --verify           # r6: хеши архива light5_* и неизменность геометрии, масштаба, базовых цветов и 14 камер
+tools/godot.cmd --headless --script res://tools/dorm_light_geometry_check.gd # r6: те же треугольники / нормали / UV / коллизии при группировке по этажам и наружным граням
+python -X utf8 tools/dorm_light_report.py                      # r6: проверка 143 кадров / 69 серий замеров, позиции камер и листы сравнения → light_r6_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;
                                                               # --headless res://tools/prospekt_study.tscn -- verify — здания, места лута, уровни, 16 мест, 7 маршрутов пешком (пролог
                                                               # до тоннеля, заходы → выходы, паркинг −1, банк до крыши, подкоп в хранилище), открытые куски ≤ 30 м, кордон

@@ -130,7 +130,7 @@ func _ui() -> void:
 	help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	help.position = Vector2(28, -85)
 	help.text = "WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения"
-	help.text += " · F1–F4 свет"
+	help.text += " · F1–F4 свет · F5 холодные коридоры · F6 ночь Б · F7 Б без оконных источников"
 	help.add_theme_font_size_override("font_size", 18)
 	help.add_theme_color_override("font_shadow_color", Color.BLACK)
 	help.add_theme_constant_override("shadow_offset_x", 1)
@@ -183,6 +183,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	match key.physical_keycode:
 		KEY_F1, KEY_F2, KEY_F3, KEY_F4:
 			lighting.call("set_case",key.physical_keycode-KEY_F1)
+		KEY_F5:
+			lighting.call("set_cool_corridors",not bool(lighting.get("cool_corridors")))
+		KEY_F6, KEY_F7:
+			lighting.call("set_case",4+key.physical_keycode-KEY_F6)
 		KEY_E:
 			var hit: Dictionary = _ray(camera.global_position,camera.global_position-camera.global_basis.z*3.0)
 			if not hit.is_empty():
@@ -254,7 +258,7 @@ func _standing_clear(foot: Vector3) -> bool:
 func _verify() -> void:
 	# При --fixed-fps 60 движок считает обычные шаги физики без ожидания реального времени.
 	# Размер капсулы, ходьба, снап и подъём на ступень — из настоящего StudyWalker / Balance.
-	_check("Собственный свет редакции 5 загружен, четыре варианта",lighting!=null and lighting.get("environment") is Environment and plan.environment.cases.size()==4,
+	_check("Собственный свет редакции 6 загружен, шесть вариантов",lighting!=null and lighting.get("environment") is Environment and plan.environment.cases.size()==6,
 		{"default":plan.environment.default,"author":plan.environment.author})
 	var rooms: Array[int] = [0,0,0]
 	var spaces: int = 0
@@ -344,7 +348,9 @@ func _verify() -> void:
 		if not bool(result.pass):
 			fails += 1
 	DirAccess.make_dir_recursive_absolute(output_dir)
-	var report: FileAccess = FileAccess.open(output_dir.path_join("validation.json"),FileAccess.WRITE)
+	var report_path: String = output_dir.path_join("validation.json")
+	var temporary: String = report_path+".r6.tmp"
+	var report: FileAccess = FileAccess.open(temporary,FileAccess.WRITE)
 	if report==null:
 		push_error("dorm: не записан отчёт "+output_dir+" · "+str(FileAccess.get_open_error()))
 		get_tree().quit(1)
@@ -352,6 +358,16 @@ func _verify() -> void:
 	report.store_string(JSON.stringify({"stage":1,"revision":plan.version,"checks":results,"fails":fails,"walked_m":route_distance,
 		"scale":plan.scale,"engine":Engine.get_version_info().string,"duration_sec":(Time.get_ticks_msec()-started_ms)/1000.0},"\t"))
 	report.close()
+	var saved: bool = false
+	for attempt: int in range(10):
+		if DirAccess.rename_absolute(temporary,report_path)==OK:
+			saved = true
+			break
+		await get_tree().create_timer(.1).timeout
+	if not saved:
+		push_error("dorm: итоговый отчёт заблокирован; сохранён полный "+temporary)
+		get_tree().quit(1)
+		return
 	print("dorm: проверок %d, провалов %d, пройдено %.1f м" % [results.size(),fails,route_distance])
 	get_tree().quit(mini(fails,255))
 

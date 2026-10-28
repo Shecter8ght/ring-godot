@@ -1,0 +1,1877 @@
+[
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_03_kitchen.png",
+		"fog": true,
+		"foot": [
+			37.765,
+			4.42,
+			-11.795
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "03_kitchen",
+		"look": [
+			33.9,
+			6.04,
+			-11.795
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_07_hall.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			0.48,
+			6.6
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "07_hall",
+		"look": [
+			1.8,
+			1.78,
+			3.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_11_back_exit.png",
+		"fog": true,
+		"foot": [
+			39.41,
+			0.48,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "11_back_exit",
+		"look": [
+			47.41,
+			2.1,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_12_commandant.png",
+		"fog": true,
+		"foot": [
+			31.28,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "12_commandant",
+		"look": [
+			29.68,
+			2.1,
+			-8.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_13_narrow_room.png",
+		"fog": true,
+		"foot": [
+			35.85,
+			4.42,
+			3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "13_narrow_room",
+		"look": [
+			35.85,
+			6.04,
+			8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A",
+		"eye_height": 1.62,
+		"file": "light_evening_A_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_evening_A_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_evening_A_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_evening_A_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_ssil_on",
+		"eye_height": 1.62,
+		"file": "light_evening_A_ssil_on_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": true,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_fog_off",
+		"eye_height": 1.62,
+		"file": "light_evening_A_fog_off_01_corridor.png",
+		"fog": false,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_post_off",
+		"eye_height": 1.62,
+		"file": "light_evening_A_post_off_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": false,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Linear"
+	},
+	{
+		"case": "evening_A_ssil_on",
+		"eye_height": 1.62,
+		"file": "light_evening_A_ssil_on_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": true,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_fog_off",
+		"eye_height": 1.62,
+		"file": "light_evening_A_fog_off_02_room.png",
+		"fog": false,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_A_post_off",
+		"eye_height": 1.62,
+		"file": "light_evening_A_post_off_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": false,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Linear"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_03_kitchen.png",
+		"fog": true,
+		"foot": [
+			37.765,
+			4.42,
+			-11.795
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "03_kitchen",
+		"look": [
+			33.9,
+			6.04,
+			-11.795
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_07_hall.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			0.48,
+			6.6
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "07_hall",
+		"look": [
+			1.8,
+			1.78,
+			3.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_11_back_exit.png",
+		"fog": true,
+		"foot": [
+			39.41,
+			0.48,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "11_back_exit",
+		"look": [
+			47.41,
+			2.1,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_12_commandant.png",
+		"fog": true,
+		"foot": [
+			31.28,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "12_commandant",
+		"look": [
+			29.68,
+			2.1,
+			-8.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_13_narrow_room.png",
+		"fog": true,
+		"foot": [
+			35.85,
+			4.42,
+			3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "13_narrow_room",
+		"look": [
+			35.85,
+			6.04,
+			8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B",
+		"eye_height": 1.62,
+		"file": "light_evening_B_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B_fov95",
+		"eye_height": 1.62,
+		"file": "light_evening_B_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B_fov95",
+		"eye_height": 1.62,
+		"file": "light_evening_B_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B_fov95",
+		"eye_height": 1.62,
+		"file": "light_evening_B_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "evening_B_unbaked",
+		"eye_height": 1.62,
+		"file": "light_evening_B_unbaked_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": false,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_03_kitchen.png",
+		"fog": true,
+		"foot": [
+			37.765,
+			4.42,
+			-11.795
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "03_kitchen",
+		"look": [
+			33.9,
+			6.04,
+			-11.795
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_07_hall.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			0.48,
+			6.6
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "07_hall",
+		"look": [
+			1.8,
+			1.78,
+			3.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_11_back_exit.png",
+		"fog": true,
+		"foot": [
+			39.41,
+			0.48,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "11_back_exit",
+		"look": [
+			47.41,
+			2.1,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_12_commandant.png",
+		"fog": true,
+		"foot": [
+			31.28,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "12_commandant",
+		"look": [
+			29.68,
+			2.1,
+			-8.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_13_narrow_room.png",
+		"fog": true,
+		"foot": [
+			35.85,
+			4.42,
+			3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "13_narrow_room",
+		"look": [
+			35.85,
+			6.04,
+			8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A",
+		"eye_height": 1.62,
+		"file": "light_night_A_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_night_A_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_night_A_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "night_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_night_A_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_03_kitchen.png",
+		"fog": true,
+		"foot": [
+			37.765,
+			4.42,
+			-11.795
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "03_kitchen",
+		"look": [
+			33.9,
+			6.04,
+			-11.795
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_07_hall.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			0.48,
+			6.6
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "07_hall",
+		"look": [
+			1.8,
+			1.78,
+			3.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_11_back_exit.png",
+		"fog": true,
+		"foot": [
+			39.41,
+			0.48,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "11_back_exit",
+		"look": [
+			47.41,
+			2.1,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_12_commandant.png",
+		"fog": true,
+		"foot": [
+			31.28,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "12_commandant",
+		"look": [
+			29.68,
+			2.1,
+			-8.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_13_narrow_room.png",
+		"fog": true,
+		"foot": [
+			35.85,
+			4.42,
+			3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "13_narrow_room",
+		"look": [
+			35.85,
+			6.04,
+			8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	},
+	{
+		"case": "overcast_A_fov95",
+		"eye_height": 1.62,
+		"file": "light_overcast_A_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 5,
+		"sdfgi_actual": true,
+		"ssil": false,
+		"tonemap": "Filmic"
+	}
+]

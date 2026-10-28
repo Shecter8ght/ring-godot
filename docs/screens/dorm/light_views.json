@@ -1,6 +1,7 @@
 [
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_01_corridor.png",
 		"fog": true,
@@ -19,13 +20,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_02_room.png",
 		"fog": true,
@@ -44,13 +60,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_03_kitchen.png",
 		"fog": true,
@@ -69,13 +100,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_04_wash.png",
 		"fog": true,
@@ -94,13 +140,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_05_stairs_bottom.png",
 		"fog": true,
@@ -119,13 +180,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_06_stairs_top.png",
 		"fog": true,
@@ -144,13 +220,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_07_hall.png",
 		"fog": true,
@@ -169,13 +260,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_08_street.png",
 		"fog": true,
@@ -194,13 +300,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_09_lounge.png",
 		"fog": true,
@@ -219,13 +340,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_10_turn.png",
 		"fog": true,
@@ -244,13 +380,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_11_back_exit.png",
 		"fog": true,
@@ -269,13 +420,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_12_commandant.png",
 		"fog": true,
@@ -294,13 +460,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_13_narrow_room.png",
 		"fog": true,
@@ -319,13 +500,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_14_toilets.png",
 		"fog": true,
@@ -344,13 +540,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_fov95_01_corridor.png",
 		"fog": true,
@@ -369,13 +580,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_fov95_02_room.png",
 		"fog": true,
@@ -394,13 +620,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_fov95_05_stairs_bottom.png",
 		"fog": true,
@@ -419,13 +660,228 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_A_cool_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_A_cool_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_A_cool_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_A_cool_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_effects_control",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_effects_control_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_ssil_on",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_ssil_on_01_corridor.png",
 		"fog": true,
@@ -444,13 +900,68 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": true,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_ssil_strong",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_ssil_strong_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": true,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_fog_off",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_fog_off_01_corridor.png",
 		"fog": false,
@@ -469,13 +980,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_post_off",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_post_off_01_corridor.png",
 		"fog": true,
@@ -494,13 +1020,108 @@
 		],
 		"post": false,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Linear"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_effects_repeat",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_effects_repeat_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_effects_control",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_effects_control_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_ssil_on",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_ssil_on_02_room.png",
 		"fog": true,
@@ -519,13 +1140,68 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": true,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_ssil_strong",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_ssil_strong_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": true,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_fog_off",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_fog_off_02_room.png",
 		"fog": false,
@@ -544,13 +1220,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_A_post_off",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_A_post_off_02_room.png",
 		"fog": true,
@@ -569,13 +1260,68 @@
 		],
 		"post": false,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Linear"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
+	},
+	{
+		"case": "evening_A_effects_repeat",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_effects_repeat_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_01_corridor.png",
 		"fog": true,
@@ -594,13 +1340,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_02_room.png",
 		"fog": true,
@@ -619,13 +1417,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_03_kitchen.png",
 		"fog": true,
@@ -644,13 +1494,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_04_wash.png",
 		"fog": true,
@@ -669,13 +1571,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_05_stairs_bottom.png",
 		"fog": true,
@@ -694,13 +1648,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_06_stairs_top.png",
 		"fog": true,
@@ -719,13 +1725,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_07_hall.png",
 		"fog": true,
@@ -744,13 +1802,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_08_street.png",
 		"fog": true,
@@ -769,13 +1879,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_09_lounge.png",
 		"fog": true,
@@ -794,13 +1956,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_10_turn.png",
 		"fog": true,
@@ -819,13 +2033,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_11_back_exit.png",
 		"fog": true,
@@ -844,13 +2110,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_12_commandant.png",
 		"fog": true,
@@ -869,13 +2187,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_13_narrow_room.png",
 		"fog": true,
@@ -894,13 +2264,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_14_toilets.png",
 		"fog": true,
@@ -919,13 +2341,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_fov95_01_corridor.png",
 		"fog": true,
@@ -944,13 +2418,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_fov95_02_room.png",
 		"fog": true,
@@ -969,13 +2495,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_fov95_05_stairs_bottom.png",
 		"fog": true,
@@ -994,13 +2572,1297 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_B_cool_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_B_cool_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_B_cool_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_evening_B_cool_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_effects_control",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_effects_control_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_ssil_on",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_ssil_on_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": true,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_ssil_strong",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_ssil_strong_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": true,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_fog_off",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_fog_off_01_corridor.png",
+		"fog": false,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_post_off",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_post_off_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": false,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_effects_repeat",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_effects_repeat_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_effects_control",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_effects_control_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_ssil_on",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_ssil_on_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": true,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_ssil_strong",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_ssil_strong_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": true,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_fog_off",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_fog_off_02_room.png",
+		"fog": false,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_post_off",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_post_off_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": false,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_effects_repeat",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_effects_repeat_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	},
 	{
 		"case": "evening_B_unbaked",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_evening_B_unbaked_01_corridor.png",
 		"fog": true,
@@ -1019,13 +3881,28 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": []
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_01_corridor.png",
 		"fog": true,
@@ -1044,13 +3921,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_02_room.png",
 		"fog": true,
@@ -1069,13 +3998,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_03_kitchen.png",
 		"fog": true,
@@ -1094,13 +4075,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_04_wash.png",
 		"fog": true,
@@ -1119,13 +4152,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_05_stairs_bottom.png",
 		"fog": true,
@@ -1144,13 +4229,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_06_stairs_top.png",
 		"fog": true,
@@ -1169,13 +4306,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_07_hall.png",
 		"fog": true,
@@ -1194,13 +4383,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_08_street.png",
 		"fog": true,
@@ -1219,13 +4460,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_09_lounge.png",
 		"fog": true,
@@ -1244,13 +4537,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_10_turn.png",
 		"fog": true,
@@ -1269,13 +4614,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_11_back_exit.png",
 		"fog": true,
@@ -1294,13 +4691,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_12_commandant.png",
 		"fog": true,
@@ -1319,13 +4768,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_13_narrow_room.png",
 		"fog": true,
@@ -1344,13 +4845,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_14_toilets.png",
 		"fog": true,
@@ -1369,13 +4922,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_fov95_01_corridor.png",
 		"fog": true,
@@ -1394,13 +4999,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_fov95_02_room.png",
 		"fog": true,
@@ -1419,13 +5076,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "night_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_night_A_fov95_05_stairs_bottom.png",
 		"fog": true,
@@ -1444,13 +5153,373 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
+	},
+	{
+		"case": "night_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_A_cool_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
+	},
+	{
+		"case": "night_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_A_cool_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
+	},
+	{
+		"case": "night_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_A_cool_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
+	},
+	{
+		"case": "night_A_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_A_cool_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_01_corridor.png",
 		"fog": true,
@@ -1469,13 +5538,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_02_room.png",
 		"fog": true,
@@ -1494,13 +5615,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_03_kitchen.png",
 		"fog": true,
@@ -1519,13 +5692,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_04_wash.png",
 		"fog": true,
@@ -1544,13 +5769,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_05_stairs_bottom.png",
 		"fog": true,
@@ -1569,13 +5846,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_06_stairs_top.png",
 		"fog": true,
@@ -1594,13 +5923,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_07_hall.png",
 		"fog": true,
@@ -1619,13 +6000,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_08_street.png",
 		"fog": true,
@@ -1644,13 +6077,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_09_lounge.png",
 		"fog": true,
@@ -1669,13 +6154,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_10_turn.png",
 		"fog": true,
@@ -1694,13 +6231,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_11_back_exit.png",
 		"fog": true,
@@ -1719,13 +6308,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_12_commandant.png",
 		"fog": true,
@@ -1744,13 +6385,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_13_narrow_room.png",
 		"fog": true,
@@ -1769,13 +6462,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_14_toilets.png",
 		"fog": true,
@@ -1794,13 +6539,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_fov95_01_corridor.png",
 		"fog": true,
@@ -1819,13 +6616,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_fov95_02_room.png",
 		"fog": true,
@@ -1844,13 +6693,65 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
 	},
 	{
 		"case": "overcast_A_fov95",
+		"cool_corridors": false,
 		"eye_height": 1.62,
 		"file": "light_overcast_A_fov95_05_stairs_bottom.png",
 		"fog": true,
@@ -1869,9 +6770,2986 @@
 		],
 		"post": true,
 		"quality_setting": "high",
-		"revision": 5,
+		"revision": 6,
 		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
 		"ssil": false,
-		"tonemap": "Filmic"
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_03_kitchen.png",
+		"fog": true,
+		"foot": [
+			37.765,
+			4.42,
+			-11.795
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "03_kitchen",
+		"look": [
+			33.9,
+			6.04,
+			-11.795
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_07_hall.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			0.48,
+			6.6
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "07_hall",
+		"look": [
+			1.8,
+			1.78,
+			3.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_11_back_exit.png",
+		"fog": true,
+		"foot": [
+			39.41,
+			0.48,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "11_back_exit",
+		"look": [
+			47.41,
+			2.1,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_12_commandant.png",
+		"fog": true,
+		"foot": [
+			31.28,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "12_commandant",
+		"look": [
+			29.68,
+			2.1,
+			-8.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_13_narrow_room.png",
+		"fog": true,
+		"foot": [
+			35.85,
+			4.42,
+			3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "13_narrow_room",
+		"look": [
+			35.85,
+			6.04,
+			8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_B_cool_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_B_cool_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_B_cool_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "night_B_cool",
+		"cool_corridors": true,
+		"eye_height": 1.62,
+		"file": "light_night_B_cool_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_03_kitchen.png",
+		"fog": true,
+		"foot": [
+			37.765,
+			4.42,
+			-11.795
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "03_kitchen",
+		"look": [
+			33.9,
+			6.04,
+			-11.795
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_07_hall.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			0.48,
+			6.6
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "07_hall",
+		"look": [
+			1.8,
+			1.78,
+			3.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_10_turn.png",
+		"fog": true,
+		"foot": [
+			41.71,
+			4.42,
+			-4.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "10_turn",
+		"look": [
+			41.71,
+			6.04,
+			-27.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_11_back_exit.png",
+		"fog": true,
+		"foot": [
+			39.41,
+			0.48,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "11_back_exit",
+		"look": [
+			47.41,
+			2.1,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_12_commandant.png",
+		"fog": true,
+		"foot": [
+			31.28,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "12_commandant",
+		"look": [
+			29.68,
+			2.1,
+			-8.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_13_narrow_room.png",
+		"fog": true,
+		"foot": [
+			35.85,
+			4.42,
+			3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "13_narrow_room",
+		"look": [
+			35.85,
+			6.04,
+			8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)"
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		]
 	}
 ]

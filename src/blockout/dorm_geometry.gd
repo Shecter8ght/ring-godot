@@ -5,10 +5,14 @@ extends Node3D
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
 const StudyDoor = preload("res://src/blockout/dorm_study_door.gd")
+const ExteriorBatches = preload("res://src/blockout/dorm_exterior_batches.gd")
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
 @export_tool_button("Пересобрать из JSON") var rebuild_action: Callable = rebuild
+var split_gi_batches: bool = true
+var floor_levels: Array = []
+var gi_footprints: Array[Rect2] = []
 
 
 func _ready() -> void:
@@ -26,6 +30,11 @@ func rebuild() -> void:
 		push_error("dorm: не прочитан " + plan_path)
 		return
 	var plan: Dictionary = parsed as Dictionary
+	floor_levels = plan.scale.floor_y
+	gi_footprints.clear()
+	for volume: Dictionary in plan.environment.voxel.volumes:
+		var footprint: Rect2 = Rect2(float(volume.at[0])-float(volume.size[0])*.5,float(volume.at[2])-float(volume.size[2])*.5,float(volume.size[0]),float(volume.size[2]))
+		if footprint not in gi_footprints:gi_footprints.append(footprint)
 	var section: Dictionary = (plan.get("sections", {}) as Dictionary).get(section_id, {})
 	if section.is_empty():
 		return
@@ -46,7 +55,9 @@ func rebuild() -> void:
 		lamp.light_bake_mode = Light3D.BAKE_DYNAMIC
 		lamp.shadow_enabled = bool(item.get("shadow",true))
 		lamp.visible = bool(item.get("on",true))
-		lamp.shadow_bias = 0.025
+		lamp.shadow_bias = float(item.get("shadow_bias",.025))
+		lamp.light_size = float(item.get("source_size",0.0))
+		lamp.shadow_blur = float(item.get("shadow_blur",1.0))
 		lamp.set_meta("light_group",String(item.get("group","legacy")))
 		lamp.add_to_group("dorm_lamps")
 		if bool(item.get("sky_fill",false)):
@@ -63,8 +74,11 @@ func rebuild() -> void:
 		else:
 			var omni: OmniLight3D = lamp as OmniLight3D
 			omni.omni_range = float(item.range)
+			omni.omni_attenuation = float(item.get("falloff",1.0))
 			omni.omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
 		add_child(lamp)
+		# Settings.soften runs on node_added; the authored window bias must survive it.
+		lamp.shadow_bias = float(item.get("shadow_bias",.025))
 	for item: Dictionary in section.get("probes", []):
 		var probe: ReflectionProbe = ReflectionProbe.new()
 		probe.name = String(item.get("id","BathroomReflection"))
@@ -89,6 +103,7 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 			# Отдельная поверхность получает пробу своей комнаты, а не всего этажа.
 			var surface: MeshInstance3D = MeshInstance3D.new()
 			surface.name = "StudyMirror"
+			surface.add_to_group("dorm_mirrors")
 			var shape: BoxMesh = BoxMesh.new()
 			shape.size = _vec(item.size)
 			surface.mesh = shape
@@ -96,17 +111,22 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 			surface.position = _vec(item.at)
 			target.add_child(surface)
 		else:
-			builder.call("box",_vec(item.at),_vec(item.size),String(item.mat),bool(item.solid),deg_to_rad(float(item.yaw)))
+			builder.call("box",_vec(item.at),_vec(item.size),_batch_material(String(item.mat),float(item.at[1]),palette),bool(item.solid),deg_to_rad(float(item.yaw)))
+			if String(item.mat)=="glass" and bool(item.solid):
+				# Glass blocks walking but transmits light; visibility probes must skip it.
+				var body: StaticBody3D = builder.get("body") as StaticBody3D
+				body.get_child(body.get_child_count()-1).set_meta("dorm_light_transparent",true)
 	for item: Dictionary in data.get("beams",[]):
 		var start: Vector3 = _vec(item.start)
 		var end: Vector3 = _vec(item.end)
 		if absf(start.x-end.x)<0.001 and absf(start.z-end.z)<0.001:
-			builder.call("box",(start+end)*0.5,Vector3(float(item.width),absf(end.y-start.y),float(item.depth)),String(item.mat),bool(item.solid))
+			builder.call("box",(start+end)*0.5,Vector3(float(item.width),absf(end.y-start.y),float(item.depth)),_batch_material(String(item.mat),(start.y+end.y)*.5,palette),bool(item.solid))
 		else:
-			builder.call("beam",start,end,float(item.width),float(item.depth),String(item.mat),bool(item.solid))
+			builder.call("beam",start,end,float(item.width),float(item.depth),_batch_material(String(item.mat),(start.y+end.y)*.5,palette),bool(item.solid))
 	for item: Dictionary in data.get("stairs",[]):
-		builder.call("stairs",_vec(item.start),_vec(item.end),float(item.width),int(item.count),String(item.mat))
+		builder.call("stairs",_vec(item.start),_vec(item.end),float(item.width),int(item.count),_batch_material(String(item.mat),(float(item.start[1])+float(item.end[1]))*.5,palette))
 	builder.call("finish")
+	if split_gi_batches:ExteriorBatches.separate(target,gi_footprints)
 	for item: Dictionary in data.get("labels",[]):
 		var plaque: Label3D = Label3D.new()
 		plaque.name = "RoomNumber" if bool(item.get("permanent",false)) else "StudyLabel"
@@ -128,6 +148,17 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 		leaf.set("materials",palette)
 		target.add_child(leaf)
 
+func _batch_material(key: String, height: float, palette: Dictionary) -> String:
+	# Only regroup existing triangles. No changed vertices, UVs, materials or collisions.
+	# A single annex mesh spanning three floors can only receive the first two GI probes.
+	if not split_gi_batches or section_id not in ["NorthAnnex","CentralStair"]:return key
+	var floor_index: int = 0
+	for i: int in range(floor_levels.size()):
+		if height>=float(floor_levels[i])-.001:floor_index = i
+	var alias: String = key+"__floor_"+str(floor_index+1)
+	palette[alias] = palette[key]
+	return alias
+
 
 static func _vec(values: Array) -> Vector3:
 	return Vector3(float(values[0]), float(values[1]), float(values[2]))
@@ -148,7 +179,7 @@ static func _palette(plan: Dictionary) -> Dictionary:
 			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			material.albedo_color.a = 0.07
 			material.cull_mode = BaseMaterial3D.CULL_DISABLED
-			material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
 		if key == "mirror":
 			material.metallic = 1.0
 			material.roughness = 0.025
