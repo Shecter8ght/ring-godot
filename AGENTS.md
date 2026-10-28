@@ -174,7 +174,7 @@ python -X utf8 tools/build_prospekt.py                        # карта «П�
                                                               # ProspektLandscape: переход, паркинг −1, кордон); перезаписывает оба файла
 python -X utf8 tools/build_dorm.py                            # общежитие, пробный свет r6 на принятой геометрии r4, пороги и порталы r5 сохранены →
                                                               # data/blockouts/dorm.json, scenes/levels/dorm_study.tscn, docs/plans/dorm.png; режимы и замеры — docs/design/dorm_light_test.md
-tools/dorm_study.cmd                                         # F1–F4 — вечер А / Б, ночь А, пасмурно А; F5 — холодные коридоры 4400 K, F6 — ночь Б, F7 — Б без оконных источников;
+tools/dorm_study.cmd                                         # старт — выбранный владельцем вечер Б (VoxelGI); F1–F4 — вечер А / Б, ночь А, пасмурно А; F5 — холодные коридоры 4400 K, F6 — ночь Б, F7 — Б без оконных источников;
                                                               # Esc — мышь / FOV 60–110° / SSIL, пыль, обработка; E — дверь, M — план, 1–9/0 и N/B — места
 tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # 117 проверок: 68 помещений пешком, лестница, двери, оба выхода и новые порталы хозкрыла
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- shots # шесть режимов × (14 прежних камер 80° + 3 при 95°), холодный цвет и эффекты, серии FPS/GPU и видимость источников → light_*; «до» — light5_*, stage1r4_*

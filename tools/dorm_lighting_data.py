@@ -103,7 +103,7 @@ def add_lighting(p):
               for k,v in p["sections"].items()}
     digest=hashlib.sha256(json.dumps(geometry,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     p["environment"]={
-        "author":"dorm_r6_independent","default":"evening_A","geometry_sha256":digest,
+        "author":"dorm_r6_independent","default":"evening_B","geometry_sha256":digest,
         "cases":[{"id":"evening_A","time":"evening","gi":"A","label":"Вечер А · SDFGI"},
                  {"id":"evening_B","time":"evening","gi":"B","label":"Вечер Б · VoxelGI"},
                  {"id":"night_A","time":"night","gi":"A","label":"Ночь А · SDFGI"},

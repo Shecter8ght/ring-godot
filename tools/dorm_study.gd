@@ -66,6 +66,12 @@ func _ready() -> void:
 	await _frames(4)
 	_jump_to(current)
 	if mode == "walk":
+		if lighting!=null:
+			for index: int in range(plan.environment.cases.size()):
+				if String(plan.environment.cases[index].id)==String(plan.environment.default):
+					await lighting.call("set_case",index)
+					break
+			print("dorm: стартовый свет · ",plan.environment.cases[int(lighting.get("case_index"))].label)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · Esc мышь / FOV 60–110°")
 	else:
