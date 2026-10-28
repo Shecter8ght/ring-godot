@@ -1,0 +1,899 @@
+{
+	"checks": [
+		{
+			"check": "Пять этажей, открыты три; по 8–10 жилых комнат",
+			"details": {
+				"open_spaces": 61,
+				"rooms": [
+					9,
+					10,
+					10
+				]
+			},
+			"pass": true
+		},
+		{
+			"check": "Капсула, глаз и скорость соответствуют игроку",
+			"details": {
+				"capsule_height": 1.8,
+				"capsule_radius": 0.35,
+				"eye": 1.62000000476837,
+				"flight": false,
+				"jump": false,
+				"walk_m_s": 1.82
+			},
+			"pass": true
+		},
+		{
+			"check": "Высота потолка 1-го этажа",
+			"details": {
+				"clear_m": 4.20000030517578
+			},
+			"pass": true
+		},
+		{
+			"check": "Высота потолка 2-го этажа",
+			"details": {
+				"clear_m": 3.19999988555908
+			},
+			"pass": true
+		},
+		{
+			"check": "Высота потолка 3-го этажа",
+			"details": {
+				"clear_m": 3.2000004196167
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Коридор 2-го этажа",
+			"details": {
+				"foot": "(1.8, 4.920234, 0.0)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Комната от двери",
+			"details": {
+				"foot": "(5.3, 4.920234, -2.85)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Кухня в хозкрыле",
+			"details": {
+				"foot": "(28.0, 4.920234, -12.5)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Умывальня в хозкрыле",
+			"details": {
+				"foot": "(28.0, 4.920234, -16.8)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Лестница снизу",
+			"details": {
+				"foot": "(-1.3, 0.480234, -1.0)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Лестница сверху",
+			"details": {
+				"foot": "(-1.3, 4.920234, 1.0)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Холл и тамбур",
+			"details": {
+				"foot": "(2.1, 0.480234, 5.7)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Вход с улицы",
+			"details": {
+				"foot": "(-13.0, 0.000234, 23.0)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Общая гостиная с нишей",
+			"details": {
+				"foot": "(10.2, 4.92, 3.4)"
+			},
+			"pass": true
+		},
+		{
+			"check": "Точка осмотра: Поворот в хозкрыло",
+			"details": {
+				"foot": "(30.9, 4.919611, -3.8)"
+			},
+			"pass": true
+		},
+		{
+			"check": "1 этаж: комнаты → гостиная → поворот Г → хозкрыло — пешком",
+			"details": {
+				"distance_m": 63.36,
+				"end": "(30.9, 0.480234, -27.1642)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "2 этаж: комнаты → гостиная → поворот Г → хозкрыло — пешком",
+			"details": {
+				"distance_m": 63.36,
+				"end": "(30.9, 4.920234, -27.16419)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "3 этаж: комнаты → гостиная → поворот Г → хозкрыло — пешком",
+			"details": {
+				"distance_m": 63.36,
+				"end": "(30.9, 8.360234, -27.16419)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Лестница 1 → 2 — пешком",
+			"details": {
+				"distance_m": 15.85,
+				"end": "(-0.995756, 4.920613, 0.125768)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Лестница 2 → 1 — пешком",
+			"details": {
+				"distance_m": 15.84,
+				"end": "(-0.983585, 0.480705, -0.107317)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Лестница 2 → 3 — пешком",
+			"details": {
+				"distance_m": 13.8,
+				"end": "(-0.980968, 8.360872, 0.104932)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Лестница 3 → 2 — пешком",
+			"details": {
+				"distance_m": 13.8,
+				"end": "(-0.98072, 4.920917, -0.104703)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Улица → крыльцо → тамбур → холл → лестница — пешком",
+			"details": {
+				"distance_m": 20.17,
+				"end": "(-0.751752, 0.480469, 0.006095)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ВАХТА",
+			"details": {
+				"distance_m": 17.55,
+				"end": "(3.199627, 0.480405, -2.96864)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 103",
+			"details": {
+				"distance_m": 21.62,
+				"end": "(7.249444, 0.480405, -2.969144)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 105",
+			"details": {
+				"distance_m": 25.65,
+				"end": "(11.29964, 0.480405, -2.968615)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 107",
+			"details": {
+				"distance_m": 29.72,
+				"end": "(15.34947, 0.480405, -2.969088)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 109",
+			"details": {
+				"distance_m": 33.75,
+				"end": "(19.39966, 0.480405, -2.968564)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 111",
+			"details": {
+				"distance_m": 37.82,
+				"end": "(23.44949, 0.480405, -2.96904)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ПОСТИРОЧНАЯ",
+			"details": {
+				"distance_m": 41.85,
+				"end": "(27.49967, 0.480405, -2.968519)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, К ХОЗБЛОКУ",
+			"details": {
+				"distance_m": 47.18,
+				"end": "(31.55379, 0.480405, -2.957282)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ХОЛЛ",
+			"details": {
+				"distance_m": 12.19,
+				"end": "(3.158659, 0.480405, 5.584929)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 104",
+			"details": {
+				"distance_m": 22.07,
+				"end": "(7.251528, 0.480405, 8.897067)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 112",
+			"details": {
+				"distance_m": 38.27,
+				"end": "(23.45149, 0.480405, 8.896986)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 114",
+			"details": {
+				"distance_m": 42.3,
+				"end": "(27.50126, 0.480405, 8.896351)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, 116",
+			"details": {
+				"distance_m": 46.36,
+				"end": "(31.55148, 0.480405, 8.896946)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ОБЩАЯ ГОСТИНАЯ",
+			"details": {
+				"distance_m": 60.8,
+				"end": "(19.05755, 0.480405, 4.005575)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, КЛАДОВАЯ",
+			"details": {
+				"distance_m": 30.93,
+				"end": "(19.35863, 0.480405, 8.929432)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ТАМБУР",
+			"details": {
+				"distance_m": 14.94,
+				"end": "(3.133949, 0.480405, 8.951999)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 201",
+			"details": {
+				"distance_m": 17.54,
+				"end": "(3.199577, 4.920234, -2.968776)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 203",
+			"details": {
+				"distance_m": 21.57,
+				"end": "(7.249776, 4.920234, -2.968224)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 205",
+			"details": {
+				"distance_m": 25.64,
+				"end": "(11.2996, 4.920234, -2.968728)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 207",
+			"details": {
+				"distance_m": 29.67,
+				"end": "(15.34979, 4.920234, -2.968188)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 209",
+			"details": {
+				"distance_m": 33.74,
+				"end": "(19.39961, 4.920234, -2.968696)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 211",
+			"details": {
+				"distance_m": 37.77,
+				"end": "(23.44981, 4.920234, -2.968129)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, ПОСТИРОЧНАЯ",
+			"details": {
+				"distance_m": 41.84,
+				"end": "(27.49963, 4.920234, -2.968646)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, К ХОЗБЛОКУ",
+			"details": {
+				"distance_m": 47.16,
+				"end": "(31.55376, 4.920234, -2.957348)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, БЕЛЬЕВАЯ",
+			"details": {
+				"distance_m": 17.99,
+				"end": "(3.201362, 4.920234, 8.896615)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 204",
+			"details": {
+				"distance_m": 22.02,
+				"end": "(7.251112, 4.920234, 8.895927)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 212",
+			"details": {
+				"distance_m": 38.22,
+				"end": "(23.45108, 4.920234, 8.895839)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 214",
+			"details": {
+				"distance_m": 42.29,
+				"end": "(27.50131, 4.920234, 8.896473)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, 216",
+			"details": {
+				"distance_m": 46.35,
+				"end": "(31.55153, 4.920234, 8.89708)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, ОБЩАЯ ГОСТИНАЯ",
+			"details": {
+				"distance_m": 60.78,
+				"end": "(19.05755, 4.920234, 4.005575)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, КЛАДОВАЯ",
+			"details": {
+				"distance_m": 30.92,
+				"end": "(19.35868, 4.920234, 8.929495)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 301",
+			"details": {
+				"distance_m": 17.54,
+				"end": "(3.199577, 8.360234, -2.968776)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 303",
+			"details": {
+				"distance_m": 21.57,
+				"end": "(7.249776, 8.360234, -2.968224)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 305",
+			"details": {
+				"distance_m": 25.64,
+				"end": "(11.2996, 8.360234, -2.968728)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 307",
+			"details": {
+				"distance_m": 29.67,
+				"end": "(15.34979, 8.360234, -2.968188)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 309",
+			"details": {
+				"distance_m": 33.74,
+				"end": "(19.39961, 8.360234, -2.968696)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 311",
+			"details": {
+				"distance_m": 37.77,
+				"end": "(23.44981, 8.360234, -2.968129)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, ПОСТИРОЧНАЯ",
+			"details": {
+				"distance_m": 41.84,
+				"end": "(27.49963, 8.360234, -2.968646)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, К ХОЗБЛОКУ",
+			"details": {
+				"distance_m": 47.16,
+				"end": "(31.55376, 8.360234, -2.957348)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, БЕЛЬЕВАЯ",
+			"details": {
+				"distance_m": 17.99,
+				"end": "(3.201362, 8.360234, 8.896615)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 304",
+			"details": {
+				"distance_m": 22.02,
+				"end": "(7.251112, 8.360234, 8.895927)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 312",
+			"details": {
+				"distance_m": 38.22,
+				"end": "(23.45108, 8.360234, 8.895839)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 314",
+			"details": {
+				"distance_m": 42.29,
+				"end": "(27.50131, 8.360234, 8.896473)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, 316",
+			"details": {
+				"distance_m": 46.35,
+				"end": "(31.55153, 8.360234, 8.89708)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, ОБЩАЯ ГОСТИНАЯ",
+			"details": {
+				"distance_m": 60.78,
+				"end": "(19.05755, 8.360234, 4.005575)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, КЛАДОВАЯ",
+			"details": {
+				"distance_m": 30.92,
+				"end": "(19.35868, 8.360234, 8.929495)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, КУХНЯ",
+			"details": {
+				"distance_m": 53.97,
+				"end": "(27.95454, 0.480405, -11.5487)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, УМЫВАЛЬНЯ",
+			"details": {
+				"distance_m": 58.28,
+				"end": "(27.95447, 0.480405, -15.84876)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ДУШЕВЫЕ",
+			"details": {
+				"distance_m": 62.58,
+				"end": "(27.95431, 0.480405, -20.1489)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ТУАЛЕТЫ",
+			"details": {
+				"distance_m": 66.89,
+				"end": "(27.95407, 0.480405, -24.4491)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, КУХНЯ",
+			"details": {
+				"distance_m": 53.95,
+				"end": "(27.95456, 4.920234, -11.54869)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, УМЫВАЛЬНЯ",
+			"details": {
+				"distance_m": 58.26,
+				"end": "(27.95447, 4.920234, -15.84876)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, ДУШЕВЫЕ",
+			"details": {
+				"distance_m": 62.57,
+				"end": "(27.95431, 4.920234, -20.1489)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, ТУАЛЕТЫ",
+			"details": {
+				"distance_m": 66.88,
+				"end": "(27.95407, 4.920234, -24.4491)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, КУХНЯ",
+			"details": {
+				"distance_m": 53.95,
+				"end": "(27.95456, 8.360234, -11.54869)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, УМЫВАЛЬНЯ",
+			"details": {
+				"distance_m": 58.26,
+				"end": "(27.95447, 8.360234, -15.84876)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, ДУШЕВЫЕ",
+			"details": {
+				"distance_m": 62.57,
+				"end": "(27.95431, 8.360234, -20.1489)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, ТУАЛЕТЫ",
+			"details": {
+				"distance_m": 66.88,
+				"end": "(27.95407, 8.360234, -24.4491)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 1 этаж, ЛЕСТНИЦА",
+			"details": {
+				"distance_m": 3.41,
+				"end": "(-0.746936, 0.480114, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 2 этаж, ЛЕСТНИЦА",
+			"details": {
+				"distance_m": 3.38,
+				"end": "(-0.748339, 4.920234, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Доступно: 3 этаж, ЛЕСТНИЦА",
+			"details": {
+				"distance_m": 3.38,
+				"end": "(-0.748339, 8.360234, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Весь открытый коридор, 1 этаж",
+			"details": {
+				"distance_m": 31.66,
+				"end": "(30.74068, 0.480405, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Весь открытый коридор, 2 этаж",
+			"details": {
+				"distance_m": 31.64,
+				"end": "(30.74377, 4.920234, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Весь открытый коридор, 3 этаж",
+			"details": {
+				"distance_m": 31.64,
+				"end": "(30.74377, 8.360234, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Нельзя пройти: Закрытая часть хозкрыла, 1 этаж",
+			"details": {
+				"distance_m": 0.63,
+				"end": "(30.9, 0.48, -27.92974)",
+				"missed": "(30.9, 0.48, -30.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Нельзя пройти: Закрытая часть хозкрыла, 2 этаж",
+			"details": {
+				"distance_m": 0.63,
+				"end": "(30.9, 4.92, -27.92974)",
+				"missed": "(30.9, 4.92, -30.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Нельзя пройти: Закрытая часть хозкрыла, 3 этаж",
+			"details": {
+				"distance_m": 0.63,
+				"end": "(30.9, 8.36, -27.92974)",
+				"missed": "(30.9, 8.36, -30.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Нельзя пройти: Подъём на 4–5 этажи",
+			"details": {
+				"distance_m": 0.29,
+				"end": "(-1.719833, 8.360621, -0.915)",
+				"missed": "(-3.03, 8.86, -0.915)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Нельзя пройти: Заваренная восточная лестница, 1 этаж",
+			"details": {
+				"distance_m": 0.67,
+				"end": "(32.3199, 0.480234, 0.0)",
+				"missed": "(33.25, 0.48, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Нельзя пройти: Заваренная восточная лестница, 2 этаж",
+			"details": {
+				"distance_m": 0.67,
+				"end": "(32.3199, 4.920234, 0.0)",
+				"missed": "(33.25, 4.92, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Нельзя пройти: Заваренная восточная лестница, 3 этаж",
+			"details": {
+				"distance_m": 0.67,
+				"end": "(32.32008, 8.360234, 0.0)",
+				"missed": "(33.25, 8.36, 0.0)",
+				"on_floor": true
+			},
+			"pass": true
+		},
+		{
+			"check": "Заваренные двери имеют настоящую коллизию",
+			"details": {
+				"count": 28,
+				"missing": []
+			},
+			"pass": true
+		},
+		{
+			"check": "Ступени 1:1, марш 1,5 м",
+			"details": {
+				"riser_ground": 0.1586,
+				"riser_upper": 0.1564,
+				"tread": 0.3
+			},
+			"pass": true
+		}
+	],
+	"duration_sec": 17.852,
+	"engine": "4.7.2-stable (steam)",
+	"fails": 0,
+	"scale": {
+		"ceiling_clear": [
+			4.2,
+			3.2,
+			3.2,
+			3.2,
+			3.2
+		],
+		"corridor_clear": 3.3,
+		"door_clear": [
+			1.17,
+			2.415
+		],
+		"entrance_clear": [
+			2.4,
+			2.7
+		],
+		"eye": 1.62,
+		"floor_y": [
+			0.48,
+			4.92,
+			8.36,
+			11.8,
+			15.24
+		],
+		"fov_h": 80.0,
+		"height_k": 1.15,
+		"room_clear": [
+			3.9,
+			7.8
+		],
+		"stair_width": 1.5,
+		"tread": 0.3,
+		"walls": {
+			"facade": 0.64,
+			"load": 0.38,
+			"partition": 0.15
+		},
+		"width_k": 1.3
+	},
+	"stage": 1,
+	"walked_m": 2653.88070819038
+}

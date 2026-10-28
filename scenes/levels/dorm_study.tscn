@@ -1,0 +1,76 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/blockout/dorm_geometry.gd" id="1"]
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
+sky_top_color = Color(0.38, 0.48, 0.62, 1)
+sky_horizon_color = Color(0.73, 0.77, 0.8, 1)
+ground_bottom_color = Color(0.24, 0.25, 0.27, 1)
+ground_horizon_color = Color(0.73, 0.77, 0.8, 1)
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMaterial")
+[sub_resource type="Environment" id="Environment"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.8, 0.84, 0.92, 1)
+ambient_light_energy = 0.42
+reflected_light_source = 2
+tonemap_mode = 0
+ssao_enabled = true
+ssao_radius = 1.0
+ssao_intensity = 1.25
+[sub_resource type="CameraAttributesPractical" id="Attributes"]
+auto_exposure_enabled = false
+
+[node name="DormStudy" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+camera_attributes = SubResource("Attributes")
+
+[node name="StudySun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-35, -32, 0)
+light_color = Color(1, 0.94, 0.86, 1)
+light_energy = 1.15
+shadow_enabled = true
+directional_shadow_max_distance = 150.0
+
+[node name="Site" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Site"
+
+[node name="Floor1" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Floor1"
+
+[node name="Floor2" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Floor2"
+
+[node name="Floor3" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Floor3"
+
+[node name="Floor4" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Floor4"
+
+[node name="Floor5" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Floor5"
+
+[node name="NorthAnnex" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "NorthAnnex"
+
+[node name="Roof" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Roof"
+
+[node name="WestStair" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "WestStair"
+
+[node name="EastStair" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "EastStair"
